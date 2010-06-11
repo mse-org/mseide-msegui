@@ -287,16 +287,19 @@ type
    property datafield: ififieldnamety read fdatafield write setdatafield;
  end;
  
+ tifimsestringdatalist = class;
+  
  tstringclientcontroller = class(tvalueclientcontroller)
   private
    fvalue: msestring;
+   fvaluedefault: msestring;
    fonclientsetvalue: setstringeventty;
    procedure setvalue1(const avalue: msestring);
 //   function getgridvalues: msestringarty;
 //   procedure setgridvalues(const avalue: msestringarty);
 //   function getgridvalue(const index: integer): msestring;
 //   procedure setgridvalue(const index: integer; const avalue: msestring);
-   function getgriddata: tmsestringdatalist;
+   function getgriddata: tifimsestringdatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
@@ -307,12 +310,13 @@ type
    procedure statwritevalue(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
-   property griddata: tmsestringdatalist read getgriddata;
+   property griddata: tifimsestringdatalist read getgriddata;
 //   property gridvalues: msestringarty read getgridvalues write setgridvalues;
 //   property gridvalue[const index: integer]: msestring read getgridvalue 
 //                                                             write setgridvalue;
   published
    property value: msestring read fvalue write setvalue1;
+   property valuedefault: msestring read fvaluedefault write fvaluedefault;
    property onclientsetvalue: setstringeventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
@@ -383,6 +387,8 @@ type
    property dropdown: tifidropdownlistcontroller read fdropdown write setdropdown;
  end;
  
+ tifiintegerdatalist = class;
+ 
  tintegerclientcontroller = class(tvalueclientcontroller)
   private
    fvalue: integer;
@@ -397,7 +403,7 @@ type
 //   procedure setgridvalues(const avalue: integerarty);
 //   function getgridvalue(const index: integer): integer;
 //   procedure setgridvalue(const index: integer; const avalue: integer);
-   function getgriddata: tintegerdatalist;
+   function getgriddata: tifiintegerdatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
@@ -411,7 +417,7 @@ type
    procedure statwritevalue(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
-   property griddata: tintegerdatalist read getgriddata;
+   property griddata: tifiintegerdatalist read getgriddata;
 //   property gridvalues: integerarty read getgridvalues write setgridvalues;
 //   property gridvalue[const index: integer]: integer read getgridvalue 
 //                                                             write setgridvalue;
@@ -441,40 +447,52 @@ type
    property valuedefault default -1;
    property min default -1;
  end;
- 
+
+ tifibooleandatalist = class;
+  
  tbooleanclientcontroller = class(tvalueclientcontroller)
   private
-   fvalue: boolean;
+   fvalue: longbool;
+   fvaluedefault: longbool;
    fonclientsetvalue: setbooleaneventty;
+   function getvalue: boolean;
    procedure setvalue1(const avalue: boolean);
+   function getvaluedefault: boolean;
+   procedure setvaluedefault(const avalue: boolean);
 //   function getgridvalues: longboolarty;
 //   procedure setgridvalues(const avalue: longboolarty);
 //   function getgridvalue(const index: integer): boolean;
 //   procedure setgridvalue(const index: integer; const avalue: boolean);
-   function getgriddata: tintegerdatalist;
+   function getgriddata: tifibooleandatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
                               var avalue; var accept: boolean); override;
+   function createdatalist: tdatalist; override;
     //istatfile
    procedure statreadvalue(const reader: tstatreader); override;
    procedure statwritevalue(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
-   property griddata: tintegerdatalist read getgriddata;
+   property griddata: tifibooleandatalist read getgriddata;
 //   property gridvalues: longboolarty read getgridvalues write setgridvalues;
 //   property gridvalue[const index: integer]: boolean read getgridvalue 
 //                                                             write setgridvalue;
   published
-   property value: boolean read fvalue write setvalue1 default false;
+   property value: boolean read getvalue write setvalue1 default false;
+   property valuedefault: boolean read getvaluedefault write setvaluedefault 
+                                                                default false;
    property onclientsetvalue: setbooleaneventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
+ tifirealdatalist = class;
+ 
  trealclientcontroller = class(tvalueclientcontroller)
   private
    fvalue: realty;
+   fvaluedefault: realty;
    fmin: realty;
    fmax: realty;
    fonclientsetvalue: setrealeventty;
@@ -487,37 +505,45 @@ type
    procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
    procedure writemax(writer: twriter);
+   procedure readvaluedefault(reader: treader);
+   procedure writevaluedefault(writer: twriter);
 //   function getgridvalues: realarty;
 //   procedure setgridvalues(const avalue: realarty);
 //   function getgridvalue(const index: integer): real;
 //   procedure setgridvalue(const index: integer; const avalue: real);
-   function getgriddata: trealdatalist;
+   function getgriddata: tifirealdatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
                               var avalue; var accept: boolean); override;
+   function createdatalist: tdatalist; override;
    procedure defineproperties(filer: tfiler); override;
     //istatfile
    procedure statreadvalue(const reader: tstatreader); override;
    procedure statwritevalue(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
-   property griddata: trealdatalist read getgriddata;
+   property griddata: tifirealdatalist read getgriddata;
 //   property gridvalues: realarty read getgridvalues write setgridvalues;
 //   property gridvalue[const index: integer]: real read getgridvalue 
 //                                                             write setgridvalue;
   published
    property value: realty read fvalue write setvalue1 stored false;
+   property valuedefault: realty read fvaluedefault 
+                                          write fvaluedefault stored false;
    property min: realty read fmin write setmin stored false;
    property max: realty read fmax write setmax stored false;
    property onclientsetvalue: setrealeventty 
                        read fonclientsetvalue write fonclientsetvalue;
  end;
 
+ tifidatetimedatalist = class;
+
  tdatetimeclientcontroller = class(tvalueclientcontroller)
   private
    fvalue: tdatetime;
+   fvaluedefault: tdatetime;
    fmin: tdatetime;
    fmax: tdatetime;
    fonclientsetvalue: setrealeventty;
@@ -530,28 +556,33 @@ type
    procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
    procedure writemax(writer: twriter);
+   procedure readvaluedefault(reader: treader);
+   procedure writevaluedefault(writer: twriter);
 //   function getgridvalues: datetimearty;
 //   procedure setgridvalues(const avalue: datetimearty);
 //   function getgridvalue(const index: integer): tdatetime;
 //   procedure setgridvalue(const index: integer; const avalue: tdatetime);
-   function getgriddata: tdatetimedatalist;
+   function getgriddata: tifidatetimedatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
                               var avalue; var accept: boolean); override;
+   function createdatalist: tdatalist; override;
    procedure defineproperties(filer: tfiler); override;
     //istatfile
    procedure statreadvalue(const reader: tstatreader); override;
    procedure statwritevalue(const writer: tstatwriter); override;
   public
    constructor create(const aowner: tmsecomponent); override;
-   property griddata: tdatetimedatalist read getgriddata;
+   property griddata: tifidatetimedatalist read getgriddata;
 //   property gridvalues: datetimearty read getgridvalues write setgridvalues;
 //   property gridvalue[const index: integer]: tdatetime read getgridvalue 
 //                                                             write setgridvalue;
   published
    property value: tdatetime read fvalue write setvalue1 stored false;
+   property valuedefault: tdatetime read fvaluedefault 
+                                             write fvaluedefault stored false;
    property min: tdatetime read fmin write setmin stored false;
    property max: tdatetime read fmax write setmax stored false;
    property onclientsetvalue: setrealeventty 
@@ -878,7 +909,39 @@ end;
   public
    constructor create(const aowner: tintegerclientcontroller);
  end;
-  
+
+ tifibooleandatalist = class(tintegerdatalist)
+  protected
+   fowner: tbooleanclientcontroller;
+   function getdefault: pointer; override;
+  public
+   constructor create(const aowner: tbooleanclientcontroller);
+ end;
+   
+ tifirealdatalist = class(trealdatalist)
+  protected
+   fowner: trealclientcontroller;
+   function getdefault: pointer; override;
+  public
+   constructor create(const aowner: trealclientcontroller);
+ end;
+
+ tifidatetimedatalist = class(tdatetimedatalist)
+  protected
+   fowner: tdatetimeclientcontroller;
+   function getdefault: pointer; override;
+  public
+   constructor create(const aowner: tdatetimeclientcontroller);
+ end;
+
+ tifimsestringdatalist = class(tmsestringdatalist)
+  protected
+   fowner: tstringclientcontroller;
+   function getdefault: pointer; override;
+  public
+   constructor create(const aowner: tstringclientcontroller);
+ end;
+
 procedure setifilinkcomp(const alink: iifilink;
                const alinkcomp: tifilinkcomp; var dest: tifilinkcomp);
 procedure setifidatasource(const aintf: iifidatasourceclient;
@@ -916,7 +979,7 @@ begin
   alink.setifiserverintf(iifiserver(dest.fcontroller));
   if (alinkcomp is tifivaluelinkcomp) and 
                         not (csloading in alinkcomp.componentstate) then begin
-   iifidatalink(alink).updateifigriddata(
+   iifidatalink(alink).updateifigriddata(alinkcomp,
         tifivaluelinkcomp(alinkcomp).controller.fdatalist);
   end;
   dest.fcontroller.change(alink);
@@ -1914,7 +1977,7 @@ end;
 
 procedure tvalueclientcontroller.linkdatalist1(const alink: pointer);
 begin
- iifidatalink(alink).updateifigriddata(fdatalist);
+ iifidatalink(alink).updateifigriddata(fowner,fdatalist);
 end;
 
 procedure tvalueclientcontroller.linkdatalist;
@@ -2085,9 +2148,9 @@ begin
  setitem(index,@setmsestringitem,avalue);
 end;
 }
-function tstringclientcontroller.getgriddata: tmsestringdatalist;
+function tstringclientcontroller.getgriddata: tifimsestringdatalist;
 begin
- result:= tmsestringdatalist(ifigriddata);
+ result:= tifimsestringdatalist(ifigriddata);
 end;
 
 procedure tstringclientcontroller.statreadvalue(const reader: tstatreader);
@@ -2174,9 +2237,9 @@ begin
  setitem(index,@setintegeritem,avalue);
 end;
 }
-function tintegerclientcontroller.getgriddata: tintegerdatalist;
+function tintegerclientcontroller.getgriddata: tifiintegerdatalist;
 begin
- result:= tintegerdatalist(ifigriddata);
+ result:= tifiintegerdatalist(ifigriddata);
 end;
 
 procedure tintegerclientcontroller.statreadvalue(const reader: tstatreader);
@@ -2221,9 +2284,13 @@ begin
 end;
 
 procedure tbooleanclientcontroller.clienttovalues(const alink: pointer);
+var
+ bo1: boolean;
 begin
  inherited;
- getbooleanval(iificlient(alink),'value',fvalue);
+ bo1:= fvalue;
+ getbooleanval(iificlient(alink),'value',bo1);
+ fvalue:= bo1;
 end;
 
 procedure tbooleanclientcontroller.setvalue(const sender: iificlient;
@@ -2234,6 +2301,12 @@ begin
  end;
  inherited;
 end;
+
+function tbooleanclientcontroller.createdatalist: tdatalist;
+begin
+ result:= tifibooleandatalist.create(self);
+end;
+
 {
 function tbooleanclientcontroller.getgridvalues: longboolarty;
 begin
@@ -2258,9 +2331,9 @@ begin
  setitem(index,@setbooleanitem,avalue);
 end;
 }
-function tbooleanclientcontroller.getgriddata: tintegerdatalist;
+function tbooleanclientcontroller.getgriddata: tifibooleandatalist;
 begin
- result:= tintegerdatalist(ifigriddata);
+ result:= tifibooleandatalist(ifigriddata);
 end;
 
 procedure tbooleanclientcontroller.statreadvalue(const reader: tstatreader);
@@ -2275,11 +2348,27 @@ begin
  writer.writeboolean(valuevarname,value);
 end;
 
+function tbooleanclientcontroller.getvalue: boolean;
+begin
+ result:= fvalue;
+end;
+
+function tbooleanclientcontroller.getvaluedefault: boolean;
+begin
+ result:= fvaluedefault;
+end;
+
+procedure tbooleanclientcontroller.setvaluedefault(const avalue: boolean);
+begin
+ fvaluedefault:= avalue;
+end;
+
 { trealclientcontroller }
 
 constructor trealclientcontroller.create(const aowner: tmsecomponent);
 begin
  fvalue:= emptyreal;
+ fvaluedefault:= emptyreal;
  fmin:= emptyreal;
  fmax:= bigreal;
  inherited create(aowner,tkfloat);
@@ -2312,6 +2401,11 @@ begin
   fonclientsetvalue(self,realty(avalue),accept);
  end;
  inherited;
+end;
+
+function trealclientcontroller.createdatalist: tdatalist;
+begin
+ result:= tifirealdatalist.create(self);
 end;
 
 procedure trealclientcontroller.setmin(const avalue: realty);
@@ -2356,9 +2450,19 @@ begin
  writerealty(writer,fmax);
 end;
 
+procedure trealclientcontroller.readvaluedefault(reader: treader);
+begin
+ valuedefault:= readrealty(reader);
+end;
+
+procedure trealclientcontroller.writevaluedefault(writer: twriter);
+begin
+ writerealty(writer,fvaluedefault);
+end;
+
 procedure trealclientcontroller.defineproperties(filer: tfiler);
 var
- bo1,bo2,bo3: boolean;
+ bo1,bo2,bo3,bo4: boolean;
 begin
  inherited;
  if filer.ancestor <> nil then begin
@@ -2366,12 +2470,14 @@ begin
    bo1:= self.fvalue <> fvalue;
    bo2:= self.fmin <> fmin;
    bo3:= self.fmax <> fmax;
+   bo4:= self.fvaluedefault <> fvaluedefault;
   end;
  end
  else begin
   bo1:= not isemptyreal(fvalue);
   bo2:= not isemptyreal(fmin);
   bo3:= cmprealty(fmax,bigreal) <> 0;
+  bo4:= not isemptyreal(fvaluedefault);
 //  bo3:= cmprealty(fmax,0.99*bigreal) < 0;
  end;
  
@@ -2382,6 +2488,8 @@ begin
           {$ifdef FPC}@{$endif}writemin,bo2);
  filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
           {$ifdef FPC}@{$endif}writemax,bo3);
+ filer.DefineProperty('def',{$ifdef FPC}@{$endif}readvaluedefault,
+          {$ifdef FPC}@{$endif}writevaluedefault,bo4);
 end;
 {
 function trealclientcontroller.getgridvalues: realarty;
@@ -2407,9 +2515,9 @@ begin
  setitem(index,@setrealtyitem,avalue);
 end;
 }
-function trealclientcontroller.getgriddata: trealdatalist;
+function trealclientcontroller.getgriddata: tifirealdatalist;
 begin
- result:= trealdatalist(ifigriddata);
+ result:= tifirealdatalist(ifigriddata);
 end;
 
 procedure trealclientcontroller.statreadvalue(const reader: tstatreader);
@@ -2429,6 +2537,7 @@ end;
 constructor tdatetimeclientcontroller.create(const aowner: tmsecomponent);
 begin
  fvalue:= emptydatetime;
+ fvaluedefault:= emptydatetime;
  fmin:= emptydatetime;
  fmax:= bigdatetime;
  inherited create(aowner,tkfloat);
@@ -2461,6 +2570,11 @@ begin
   fonclientsetvalue(self,tdatetime(avalue),accept);
  end;
  inherited;
+end;
+
+function tdatetimeclientcontroller.createdatalist: tdatalist;
+begin
+ result:= tifidatetimedatalist.create(self);
 end;
 
 procedure tdatetimeclientcontroller.setmin(const avalue: tdatetime);
@@ -2505,9 +2619,19 @@ begin
  writerealty(writer,fmax);
 end;
 
+procedure tdatetimeclientcontroller.readvaluedefault(reader: treader);
+begin
+ valuedefault:= readrealty(reader);
+end;
+
+procedure tdatetimeclientcontroller.writevaluedefault(writer: twriter);
+begin
+ writerealty(writer,fvaluedefault);
+end;
+
 procedure tdatetimeclientcontroller.defineproperties(filer: tfiler);
 var
- bo1,bo2,bo3: boolean;
+ bo1,bo2,bo3,bo4: boolean;
 begin
  inherited;
  if filer.ancestor <> nil then begin
@@ -2515,12 +2639,14 @@ begin
    bo1:= self.fvalue <> fvalue;
    bo2:= self.fmin <> fmin;
    bo3:= self.fmax <> fmax;
+   bo4:= self.fvaluedefault <> fvaluedefault;
   end;
  end
  else begin
   bo1:= not isemptydatetime(fvalue);
   bo2:= not isemptydatetime(fmin);
   bo3:= cmprealty(fmax,bigdatetime) <> 0;
+  bo4:= not isemptyreal(fvaluedefault);
 //  bo3:= cmpdatetime(fmax,0.99*bigdatetime) < 0;
  end;
  
@@ -2531,6 +2657,8 @@ begin
           {$ifdef FPC}@{$endif}writemin,bo2);
  filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
           {$ifdef FPC}@{$endif}writemax,bo3);
+ filer.DefineProperty('def',{$ifdef FPC}@{$endif}readvaluedefault,
+          {$ifdef FPC}@{$endif}writevaluedefault,bo4);
 end;
 {
 function tdatetimeclientcontroller.getgridvalues: datetimearty;
@@ -2556,9 +2684,9 @@ begin
  setitem(index,@setdatetimeitem,avalue);
 end;
 }
-function tdatetimeclientcontroller.getgriddata: tdatetimedatalist;
+function tdatetimeclientcontroller.getgriddata: tifidatetimedatalist;
 begin
- result:= tdatetimedatalist(ifigriddata);
+ result:= tifidatetimedatalist(ifigriddata);
 end;
 
 procedure tdatetimeclientcontroller.statreadvalue(const reader: tstatreader);
@@ -3487,6 +3615,58 @@ end;
 function tifiintegerdatalist.getdefault: pointer;
 begin
  result:= @fowner.valuedefault;
+end;
+
+{ tifibooleandatalist }
+
+constructor tifibooleandatalist.create(const aowner: tbooleanclientcontroller);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+function tifibooleandatalist.getdefault: pointer;
+begin
+ result:= @fowner.fvaluedefault;
+end;
+
+{ tifirealdatalist }
+
+constructor tifirealdatalist.create(const aowner: trealclientcontroller);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+function tifirealdatalist.getdefault: pointer;
+begin
+ result:= @fowner.fvaluedefault;
+end;
+
+{ tifidatetimedatalist }
+
+constructor tifidatetimedatalist.create(const aowner: tdatetimeclientcontroller);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+function tifidatetimedatalist.getdefault: pointer;
+begin
+ result:= @fowner.fvaluedefault;
+end;
+
+{ tifimsestringdatalist }
+
+constructor tifimsestringdatalist.create(const aowner: tstringclientcontroller);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+function tifimsestringdatalist.getdefault: pointer;
+begin
+ result:= @fowner.fvaluedefault;
 end;
 
 end.

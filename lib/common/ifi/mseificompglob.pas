@@ -39,7 +39,7 @@ type
 
  iifidatalink = interface(iifilink)
 //  function ifigriddata: tdatalist;
-  procedure updateifigriddata(const alist: tdatalist);
+  procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
  end;
  
  iifigridlink = interface(iifilink)

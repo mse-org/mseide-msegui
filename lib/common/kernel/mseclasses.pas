@@ -336,7 +336,7 @@ type
    fifiserverintf: iifiserver;
   //iificlient
    procedure setifiserverintf(const aintf: iifiserver);
-   function getifiserverintf: iifiserver;
+//   function getifiserverintf: iifiserver;
    //iificommand
    procedure executeificommand(var acommand: ificommandcodety); virtual;
 {$endif}   
@@ -694,6 +694,7 @@ procedure checkcorbainterface(const sender: tcomponent;
                            const avalue: tcomponent;
                            const ainterface: ptypeinfo; out obj);
 function isinterface(const actual: ptypeinfo; const wanted: ptypeinfo): boolean;
+function isinterfaceornil(const actual: ptypeinfo; const wanted: ptypeinfo): boolean;
 
 function checkcanevent(const acomponent: tcomponent; const event: tmethod): boolean;
 
@@ -3306,6 +3307,11 @@ begin
 {$endif}
 end;
 
+function isinterfaceornil(const actual: ptypeinfo; const wanted: ptypeinfo): boolean;
+begin
+ result:= (actual = nil) or isinterface(actual,wanted);
+end;
+
 procedure tmsecomponent.link(const source,dest: iobjectlink; valuepo: pointer = nil;
                             ainterfacetype: pointer = nil; once: boolean = false);
 begin
@@ -3652,12 +3658,12 @@ procedure tmsecomponent.setifiserverintf(const aintf: iifiserver);
 begin
  fifiserverintf:= aintf;
 end;
-
+{
 function tmsecomponent.getifiserverintf: iifiserver;
 begin
  result:= fifiserverintf;
 end;
-
+}
 procedure tmsecomponent.executeificommand(var acommand: ificommandcodety);
 begin
  //dummy

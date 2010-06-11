@@ -36,7 +36,7 @@ type
  
  iificlient = interface(iobjectlink)['{E3523E5B-604C-46CE-88D4-55C9970BCF9A}']
   procedure setifiserverintf(const aintf: iifiserver);
-  function getifiserverintf: iifiserver;
+//  function getifiserverintf: iifiserver;
  end;
  ificommandcodety = (icc_none,icc_close,icc_release);
  iificommand = interface(inullinterface)

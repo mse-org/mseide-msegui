@@ -1185,7 +1185,8 @@ type
              //index in grid.rowfonts
  end;
 
- trowstatelist = class(tcustomrowstatelist)
+ trowstatelist = class(tcustomrowstatelist
+                         {$ifdef mse_with_ifi},iifidatalink{$endif})
   private
    fdirtyvisible: integer;
    fdirtyrow: integer;
@@ -1202,6 +1203,10 @@ type
    flinkissum: listlinkinfoty;
    ffoldlevelsourcelock: integer;
    fissumsourcelock: integer;
+  {$ifdef mse_with_ifi}
+   fifilinkfoldlevel: tifiintegerlinkcomp;
+   fifilinkissum: tifibooleanlinkcomp;
+  {$endif}
    procedure cleanfolding(arow: integer; visibleindex: integer);
    function isvisible(const arow: integer): boolean;
    procedure counthidden(var aindex: integer);
@@ -1212,9 +1217,25 @@ type
    procedure setheight(const index: integer; const avalue: integer);
    procedure setlinewidth(const index: integer; const avalue: integer);
    function getrowypos(const index: integer): integer;
+   procedure setsourcefoldlevel1(const avalue: string);
    procedure setsourcefoldlevel(const avalue: string);
+   procedure setsourceissum1(const avalue: string);
    procedure setsourceissum(const avalue: string);
    procedure sourcenamechanged(const atag: integer);
+  {$ifdef mse_with_ifi}
+   procedure setifilinkfoldlevel1(const avalue: tifiintegerlinkcomp);
+   procedure setifilinkissum1(const avalue: tifibooleanlinkcomp);
+   procedure setifilinkfoldlevel(const avalue: tifiintegerlinkcomp);
+   procedure setifilinkissum(const avalue: tifibooleanlinkcomp);
+    //iifilink
+   function getifilinkkind: ptypeinfo;
+    //iificlient
+   procedure setifiserverintf(const aintf: iifiserver);
+//   function getifiserverintf: iifiserver;
+    //iifidatalink
+   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
+   procedure ifisetvalue(var avalue; var accept: boolean);   
+  {$endif}
   protected
    function getlinkdatatypes(const atag: integer): listdatatypesty; override;
    procedure sourcechange(const sender: tdatalist; 
@@ -1305,6 +1326,12 @@ type
                                             write setsourcefoldlevel;
    property sourceissum: string read flinkissum.name 
                                             write setsourceissum;
+  {$ifdef mse_with_ifi}
+   property ifilinkfoldlevel: tifiintegerlinkcomp read fifilinkfoldlevel 
+                                           write setifilinkfoldlevel;
+   property ifilinkissum: tifibooleanlinkcomp read fifilinkissum
+                                           write setifilinkissum;
+  {$endif} 
  end;
 
  tdatacols = class(tcols)
@@ -6889,6 +6916,14 @@ begin
    updatedeletedrows(newcount,count-newcount);   
   end;
   count:= newcount;
+ {$ifdef mse_with_ifi}
+  if (fifilinkfoldlevel <> nil) and (flinkfoldlevel.source <> nil) then begin
+   flinkfoldlevel.source.count:= newcount;
+  end;
+  if (fifilinkissum <> nil) and (flinkissum.source <> nil) then begin
+   flinkissum.source.count:= newcount;
+  end;
+ {$endif}
   if fvisiblerowmap <> nil then begin
    fvisiblerowmap.count:= newcount;
    checkdirty(newcount);
@@ -6969,6 +7004,14 @@ begin
 // roworderinvalid;
  with frowstate do begin
   blockmovedata(fromindex,toindex,acount);
+ {$ifdef mse_with_ifi}
+  if (fifilinkfoldlevel <> nil) and (flinkfoldlevel.source <> nil) then begin
+   flinkfoldlevel.source.blockmovedata(fromindex,toindex,acount);
+  end;
+  if (fifilinkissum <> nil) and (flinkissum.source <> nil) then begin
+   flinkissum.source.blockmovedata(fromindex,toindex,acount);
+  end;
+ {$endif}
   if fvisiblerowmap <> nil then begin
    fvisiblerowmap.blockmovedata(fromindex,toindex,acount);
    checkdirty(fromindex);
@@ -6983,6 +7026,14 @@ begin
 // roworderinvalid;
  with frowstate do begin
   insertitems(index,acount);
+ {$ifdef mse_with_ifi}
+  if (fifilinkfoldlevel <> nil) and (flinkfoldlevel.source <> nil) then begin
+   flinkfoldlevel.source.insertitems(index,acount);
+  end;
+  if (fifilinkissum <> nil) and (flinkissum.source <> nil) then begin
+   flinkissum.source.insertitems(index,acount);
+  end;
+ {$endif}
   if fvisiblerowmap <> nil then begin
    fvisiblerowmap.insertitems(index,acount);
    checkdirty(index);
@@ -6999,6 +7050,14 @@ begin
   if fvisiblerowmap <> nil then begin
    updatedeletedrows(index,acount);
    fvisiblerowmap.deleteitems(index,acount);
+  {$ifdef mse_with_ifi}
+   if (fifilinkfoldlevel <> nil) and (flinkfoldlevel.source <> nil) then begin
+    flinkfoldlevel.source.deleteitems(index,acount);
+   end;
+   if (fifilinkissum <> nil) and (flinkissum.source <> nil) then begin
+    flinkissum.source.deleteitems(index,acount);
+   end;
+  {$endif}
   end;
   deleteitems(index,acount);
  end;
@@ -14518,6 +14577,8 @@ end;
 
 destructor trowstatelist.destroy;
 begin
+ unlinksource(flinkfoldlevel);
+ unlinksource(flinkissum);
  inherited;
  fvisiblerowmap.free;
 end;
@@ -14806,8 +14867,7 @@ begin
  end;
 end;
 
-procedure trowstatelist.setfoldlevel(const index: integer;
-               avalue: byte);
+procedure trowstatelist.setfoldlevel(const index: integer; avalue: byte);
 var
  po1,po2: prowstatety;
  by1,by2: byte;
@@ -14832,7 +14892,7 @@ begin
     bo1:= false;
    end;
   end;
- end;
+ end;  //bo1 -> avalue modified
  
  if of_shiftchildren in fgrid.foptionsfold then begin
   normalizering;
@@ -14863,13 +14923,13 @@ begin
   po1:= getitempo(index);
   if replacebits1(byte(po1^.fold),byte(avalue),byte(foldlevelmask)) then begin
    checkdirty(index);
-   change(index);
-   if bo1 then begin
+//   change(index);
+//   if bo1 then begin
     checksyncfoldlevelsource(index,1);
-   end
-   else begin
-    fgrid.rowstatechanged(index);
-   end;
+//   end
+//   else begin
+//    fgrid.rowstatechanged(index);
+//   end;
   end
   else begin
    if bo1 then begin
@@ -15962,6 +16022,22 @@ begin
   else begin
    for int1:= 0 to getsourcecount-1 do begin
     str1:= getsourcename(int1);  //link all source lists
+  {$ifdef mse_with_ifi}
+    if str1 = '' then begin
+     case int1 of
+      rowstatefoldleveltag: begin
+       if fifilinkfoldlevel <> nil then begin
+        continue;
+       end;
+      end;
+      rowstateissumtag: begin
+       if fifilinkissum <> nil then begin
+        continue;
+       end;
+      end;
+     end;
+    end;
+  {$endif}
     datalist1:= nil;
     if str1 <> '' then begin
      datalist1:= fgrid.datacols.datalistbyname(str1);
@@ -15972,16 +16048,32 @@ begin
  end;
 end;
 
-procedure trowstatelist.setsourcefoldlevel(const avalue: string);
+procedure trowstatelist.setsourcefoldlevel1(const avalue: string);
 begin
  flinkfoldlevel.name:= avalue;
  sourcenamechanged(rowstatefoldleveltag);
 end;
 
-procedure trowstatelist.setsourceissum(const avalue: string);
+procedure trowstatelist.setsourcefoldlevel(const avalue: string);
+begin
+ {$ifdef mse_with_ifi}
+ setifilinkfoldlevel1(nil);
+ {$endif}
+ setsourcefoldlevel1(avalue);
+end;
+
+procedure trowstatelist.setsourceissum1(const avalue: string);
 begin
  flinkissum.name:= avalue;
  sourcenamechanged(rowstateissumtag);
+end;
+
+procedure trowstatelist.setsourceissum(const avalue: string);
+begin
+ {$ifdef mse_with_ifi}
+ setifilinkissum1(nil);
+ {$endif}
+ setsourceissum1(avalue);
 end;
 
 procedure trowstatelist.sourcechange(const sender: tdatalist;
@@ -16054,6 +16146,61 @@ begin
   end;
  end;
 end;
+
+{$ifdef mse_with_ifi}
+procedure trowstatelist.setifilinkfoldlevel1(const avalue: tifiintegerlinkcomp);
+begin
+ mseificomp.setifilinkcomp(iifidatalink(self),avalue,fifilinkfoldlevel);
+end;
+
+procedure trowstatelist.setifilinkfoldlevel(const avalue: tifiintegerlinkcomp);
+begin
+ setsourcefoldlevel1(''); 
+ setifilinkfoldlevel1(avalue);
+end;
+
+procedure trowstatelist.setifilinkissum1(const avalue: tifibooleanlinkcomp);
+begin
+ mseificomp.setifilinkcomp(iifidatalink(self),avalue,fifilinkissum);
+end;
+
+procedure trowstatelist.setifilinkissum(const avalue: tifibooleanlinkcomp);
+begin
+ setsourceissum1(''); 
+ setifilinkissum1(avalue);
+end;
+
+function trowstatelist.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifidatalink);
+end;
+
+procedure trowstatelist.setifiserverintf(const aintf: iifiserver);
+begin
+ //dummy
+end;
+{
+function trowstatelist.getifiserverintf: iifiserver;
+begin
+ result:= nil;
+end;
+}
+procedure trowstatelist.updateifigriddata(const sender: tobject;
+               const alist: tdatalist);
+begin
+ if sender = fifilinkfoldlevel then begin
+  linksource(alist,rowstatefoldleveltag);
+ end;
+ if sender = fifilinkissum then begin
+  linksource(alist,rowstateissumtag);
+ end;
+end;
+
+procedure trowstatelist.ifisetvalue(var avalue; var accept: boolean);
+begin
+ //dummy
+end;
+{$endif}
 
 end.
 

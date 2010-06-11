@@ -111,7 +111,7 @@ type
    procedure setifilink(const avalue: tifilinkcomp);
    function getifilink: tifilinkcomp;
    function ifigriddata: tdatalist;
-   procedure updateifigriddata(const alist: tdatalist);
+   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
 {$endif}
    procedure setcolorglyph(const Value: colorty);
    procedure setstatfile(const Value: tstatfile);
@@ -1872,7 +1872,8 @@ begin
  end;
 end;
 
-procedure tgraphdataedit.updateifigriddata(const alist: tdatalist);
+procedure tgraphdataedit.updateifigriddata(const sender: tobject; 
+                                                    const alist: tdatalist);
 begin
  if fgridintf <> nil then begin
   fgridintf.updateifigriddata(alist);

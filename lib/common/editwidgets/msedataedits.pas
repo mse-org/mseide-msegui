@@ -82,8 +82,8 @@ type
    procedure ifisetvalue(var avalue; var accept: boolean);
    function getifilinkkind: ptypeinfo; virtual;
    procedure setifilink(const avalue: tifilinkcomp);
-   function ifigriddata: tdatalist;
-   procedure updateifigriddata(const alist: tdatalist);
+//   function ifigriddata: tdatalist;
+   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
 {$endif}
 //   procedure fontemptychanged(const sender: tobject);
    procedure emptychanged;
@@ -2465,13 +2465,14 @@ procedure tcustomdataedit.setifilink(const avalue: tifilinkcomp);
 begin
  setifilink0(avalue);
 end;
-
+{
 function tcustomdataedit.ifigriddata: tdatalist;
 begin
  result:= fdatalist;
 end;
-
-procedure tcustomdataedit.updateifigriddata(const alist: tdatalist);
+}
+procedure tcustomdataedit.updateifigriddata(const sender: tobject; 
+                                                      const alist: tdatalist);
 begin
  if fgridintf <> nil then begin
   fgridintf.updateifigriddata(alist);

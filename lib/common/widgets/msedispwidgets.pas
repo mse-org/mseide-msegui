@@ -123,7 +123,7 @@ type
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
    function ifigriddata: tdatalist;
-   procedure updateifigriddata(const alist: tdatalist);
+   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
 {$endif}
    procedure updatetextflags;
    procedure settextflags(const value: textflagsty);
@@ -457,7 +457,8 @@ begin
  result:= nil;
 end;
 
-procedure tdispwidget.updateifigriddata(const alist: tdatalist);
+procedure tdispwidget.updateifigriddata(const sender: tobject; 
+                                                const alist: tdatalist);
 begin
  //dummy
 end;

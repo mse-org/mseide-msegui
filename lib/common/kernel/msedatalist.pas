@@ -183,6 +183,7 @@ type
    procedure removesource(var asource: listlinkinfoty);
    procedure checklistdestroyed(var ainfo: listlinkinfoty;
                                                 const sender: tdatalist);
+   procedure unlinksource(var alink: listlinkinfoty);
    function internallinksource(const source: tdatalist;
                  const atag: integer; var variable: tdatalist): boolean;
    function checksourcechange(var ainfo: listlinkinfoty; 
@@ -2908,6 +2909,14 @@ begin
  dest.flinksource:= nil;
 end;
 }
+
+procedure tdatalist.unlinksource(var alink: listlinkinfoty);
+begin
+ if alink.source <> nil then begin
+  removeitem(pointerarty(alink.source.flinkdest),self);
+  alink.source:= nil;
+ end;
+end;
 
 function tdatalist.internallinksource(const source: tdatalist;
                  const atag: integer; var variable: tdatalist): boolean;
