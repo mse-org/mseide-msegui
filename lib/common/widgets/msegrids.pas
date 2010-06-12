@@ -14552,7 +14552,8 @@ begin
  result:= tfont;
 end;
 
-procedure trowfontarrayprop.createitem(const index: integer; var item: tpersistent);
+procedure trowfontarrayprop.createitem(const index: integer;
+                                                      var item: tpersistent);
 begin
  item:= tfont.create;
  item.Assign(stockobjects.fonts[stf_default]);
@@ -16100,7 +16101,7 @@ begin
      change(index);
      fgrid.rowstatechanged(index);
     end;
-   end
+   end;
   end;
  end;
 end;

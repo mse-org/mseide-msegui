@@ -78,7 +78,7 @@ type
    function errorname(const ainstance: tobject): string;
    procedure interfaceerror;
    function getifilinkkind: ptypeinfo; virtual;
-   function checkcomponent(const aintf: iifilink): pointer;
+   function checkcomponent(const aintf: iifilink): pointer; virtual;
               //returns interface info, exception if link invalid
    procedure valuestootherclient(const alink: pointer); 
    procedure valuestoclient(const alink: pointer); virtual; 
@@ -608,20 +608,60 @@ type
    class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tificolitem read getitems; default;
  end;
+ 
+ tgridclientcontroller = class;
+ 
+ trowstatehandler = class(tdatalist,iifidatalink)
+  private
+   fifilink: tifivaluelinkcomp;
+   flistlink: listlinkinfoty;
+   procedure setifilink(const avalue: tifivaluelinkcomp);
+  protected
+   fowner: tgridclientcontroller;
+   procedure listdestroyed(const sender: tdatalist); override;
+   procedure sourcechange(const sender: tdatalist; 
+                                         const index: integer); override;
+   function canlink(const asource: tdatalist;
+                                     const atag: integer): boolean; override;
+    //iifidatalink
+   procedure setifiserverintf(const aintf: iifiserver);
+   procedure ifisetvalue(var avalue; var accept: boolean);
+   function getifilinkkind: ptypeinfo;
+   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
+   property ifilink: tifivaluelinkcomp read fifilink write setifilink;
+  public
+   constructor create(const aowner: tgridclientcontroller);
+   destructor destroy; override;
+ end;
 
- tgridclientcontroller = class(tificlientcontroller)
+ tifiintegerlinkcomp = class;
+
+ trowstatecolorhandler = class(trowstatehandler)
+  private
+   function getifilink: tifiintegerlinkcomp;
+   procedure setifilink(const avalue: tifiintegerlinkcomp);
+  protected
+  public
+   property ifilink: tifiintegerlinkcomp read getifilink write setifilink;
+ end;
+  
+ tgridclientcontroller = class(tificlientcontroller,idatalistclient)
   private
    frowcount: integer;
    foncellevent: ificelleventty;
    fdatacols: tifilinkcomparrayprop;
    fcheckautoappend: boolean;
    fitempo: pointer;
+   frowstatecolor: trowstatecolorhandler;
    procedure setrowcount(const avalue: integer);
    procedure setdatacols(const avalue: tifilinkcomparrayprop);
    function getrowstate: tcustomrowstatelist;
    procedure statreadrowstate(const alink: pointer);
    procedure statwriterowstate(const alink: pointer; var handled: boolean);
+   function getrowstate_color: tifiintegerlinkcomp;
+   procedure setrowstate_color(const avalue: tifiintegerlinkcomp);
   protected
+   procedure itemchanged(const sender: tdatalist; const aindex: integer);
    function getifilinkkind: ptypeinfo; override;
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
@@ -630,6 +670,7 @@ type
 
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
+   function checkcomponent(const aintf: iifilink): pointer; override;
   public
    constructor create(const aowner: tmsecomponent); override;
    destructor destroy; override;
@@ -643,6 +684,10 @@ type
 //  property onclientcellevent: celleventty read fclientcellevent 
 //                                                 write fclientcellevent;
    property datacols: tifilinkcomparrayprop read fdatacols write setdatacols;
+//   property rowstate_font: tintegerlinkcomp read frowstate_font 
+//                                                    write setrowstate_font;
+   property rowstate_color: tifiintegerlinkcomp read getrowstate_color 
+                                                    write setrowstate_color;
  end;
  
  tifilinkcomp = class(tmsecomponent)
@@ -907,7 +952,7 @@ end;
    fowner: tintegerclientcontroller;
    function getdefault: pointer; override;
   public
-   constructor create(const aowner: tintegerclientcontroller);
+   constructor create(const aowner: tintegerclientcontroller); reintroduce;
  end;
 
  tifibooleandatalist = class(tintegerdatalist)
@@ -2881,12 +2926,14 @@ end;
 constructor tgridclientcontroller.create(const aowner: tmsecomponent);
 begin
  fdatacols:= tifilinkcomparrayprop.create;
+ frowstatecolor:= trowstatecolorhandler.create(self);
  inherited;
 end;
 
 destructor tgridclientcontroller.destroy;
 begin
  fdatacols.free;
+ frowstatecolor.free;
  inherited;
 end;
 
@@ -3136,6 +3183,27 @@ begin
    end;
   end;
  end;
+end;
+
+function tgridclientcontroller.getrowstate_color: tifiintegerlinkcomp;
+begin
+ result:= frowstatecolor.ifilink;
+end;
+
+procedure tgridclientcontroller.setrowstate_color(const avalue: tifiintegerlinkcomp);
+begin
+ frowstatecolor.ifilink:= avalue;
+end;
+
+function tgridclientcontroller.checkcomponent(const aintf: iifilink): pointer;
+begin
+ result:= inherited checkcomponent(aintf);
+ iifigridlink(aintf).getrowstate.linkclient(idatalistclient(self));
+end;
+
+procedure tgridclientcontroller.itemchanged(const sender: tdatalist;
+               const aindex: integer);
+begin
 end;
 
 { tifivaluelinkcomp }
@@ -3667,6 +3735,80 @@ end;
 function tifimsestringdatalist.getdefault: pointer;
 begin
  result:= @fowner.fvaluedefault;
+end;
+
+{ trowstatehandler }
+
+constructor trowstatehandler.create(const aowner: tgridclientcontroller);
+begin
+ fowner:= aowner;
+ initsource(flistlink);
+ inherited create;
+end;
+
+destructor trowstatehandler.destroy;
+begin
+ removesource(flistlink);
+ inherited;
+end;
+
+procedure trowstatehandler.setifilink(const avalue: tifivaluelinkcomp);
+begin
+ setifilinkcomp(iifidatalink(self),avalue,fifilink);
+end;
+
+procedure trowstatehandler.setifiserverintf(const aintf: iifiserver);
+begin
+ //dummy
+end;
+
+procedure trowstatehandler.ifisetvalue(var avalue; var accept: boolean);
+begin
+ //dummy
+end;
+
+function trowstatehandler.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifidatalink);
+end;
+
+procedure trowstatehandler.updateifigriddata(const sender: tobject;
+               const alist: tdatalist);
+begin
+ internallinksource(alist,0,flistlink.source);
+end;
+
+procedure trowstatehandler.sourcechange(const sender: tdatalist;
+               const index: integer);
+begin
+ if checksourcechange(flistlink,sender,index) then begin
+ end;
+end;
+
+function trowstatehandler.canlink(const asource: tdatalist;
+               const atag: integer): boolean;
+begin
+ result:= true; //datalist type defined by ifidatalink kind
+end;
+
+procedure trowstatehandler.listdestroyed(const sender: tdatalist);
+begin
+ if sender = flistlink.source then begin
+  flistlink.source:= nil;
+ end;
+ inherited;
+end;
+
+{ trowstatecolorhandler }
+
+function trowstatecolorhandler.getifilink: tifiintegerlinkcomp;
+begin
+ result:= tifiintegerlinkcomp(fifilink);
+end;
+
+procedure trowstatecolorhandler.setifilink(const avalue: tifiintegerlinkcomp);
+begin
+ inherited;
 end;
 
 end.

@@ -206,6 +206,9 @@ type
    procedure listdestroyed(const sender: tdatalist); virtual;
    procedure sourcechange(const sender: tdatalist; const index: integer); virtual;
 
+   procedure linkclient(const aclient: idatalistclient);
+   procedure unlinkclient(const aclient: idatalistclient);
+   
    function getsourcecount: integer; virtual;
    function getsourceinfo(const atag: integer): plistlinkinfoty; virtual;
    function getsourcename(const atag: integer): string;
@@ -4433,6 +4436,19 @@ begin
    fcheckeditem:= -1;
   end;
  end;
+end;
+
+procedure tdatalist.linkclient(const aclient: idatalistclient);
+begin
+ aclient.getobjectlinker.link(aclient,iobjectlink(self),nil,
+                                                   typeinfo(idatalistclient));
+ include(fstate,dls_remote);
+ aclient.itemchanged(self,-1);
+end;
+
+procedure tdatalist.unlinkclient(const aclient: idatalistclient);
+begin
+ aclient.getobjectlinker.unlink(aclient,iobjectlink(self),nil);
 end;
 
 { tintegerdatalist }
