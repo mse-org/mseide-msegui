@@ -44,7 +44,8 @@ type
                                const aedit: boolean) of object;
  settexteventty = procedure(const sender: tcustomdataedit;
                            var atext: msestring; var accept: boolean) of object;
- dataeditstatety = (des_edited,des_emptytext,des_grayed,des_isdb,des_dbnull);
+ dataeditstatety = (des_edited,des_emptytext,des_grayed,des_isdb,des_dbnull,
+                    des_actualcursor,des_updating);
  dataeditstatesty = set of dataeditstatety;
 {
  teditemptyfont = class(tparentfont)
@@ -60,7 +61,6 @@ type
   private
    fondataentered: notifyeventty;
    foncheckvalue: checkvalueeventty;
-   fstate: dataeditstatesty;
    fnullchecking: integer;
    fvaluechecking: integer;
    fstatfile: tstatfile;
@@ -101,6 +101,7 @@ type
    procedure setempty_fontstyle(const avalue: fontstylesty);
    procedure setempty_color(const avalue: colorty);
   protected
+   fstate: dataeditstatesty;
    fgridintf: iwidgetgrid;
    fdatalist: tdatalist;
    fcontrollerintf: idataeditcontroller;
@@ -115,6 +116,7 @@ type
    procedure internalfillcol(const value);
    procedure internalassigncol(const value);
    function getinnerframe: framety; override;
+   function actualcursor(const apos: pointty): cursorshapety; override;
    procedure valuechanged; virtual;
    procedure modified; virtual; //for dbedits
    procedure checktext(var atext: msestring; var accept: boolean);
@@ -166,8 +168,10 @@ type
    function getrowdatapo(const info: cellinfoty): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid); virtual;
    function getcellframe: framety; virtual;
-   function getcellcursor(const arow: integer; const acellzone: cellzonety): cursorshapety; virtual;
-   procedure updatecellzone(const row: integer; const apos: pointty; var result: cellzonety); virtual;
+   function getcellcursor(const arow: integer;
+                      const acellzone: cellzonety): cursorshapety; virtual;
+   procedure updatecellzone(const row: integer; const apos: pointty;
+                                           var result: cellzonety); virtual;
    function getnulltext: msestring; virtual;
    procedure drawcell(const canvas: tcanvas); virtual;
    procedure updateautocellsize(const canvas: tcanvas); virtual;
@@ -2327,10 +2331,39 @@ begin
  end;
 end;
 
+function tcustomdataedit.actualcursor(const apos: pointty): cursorshapety;
+var
+ zone1: cellzonety;
+ int1: integer;
+begin
+ if (fgridintf <> nil) and not (des_actualcursor in fstate) then begin 
+  include(fstate,des_actualcursor);
+  try
+   zone1:= cz_default;
+   int1:= fgridintf.grid.row;
+   if int1 >= 0 then begin
+    updatecellzone(int1,widgetpostoclientpos(apos),zone1);
+    result:= getcellcursor(int1,zone1);
+    exit;
+   end;
+  finally
+   exclude(fstate,des_actualcursor);
+  end;
+ end;
+ result:= inherited actualcursor(apos);
+end;
+
 function tcustomdataedit.getcellcursor(const arow: integer; 
                                  const acellzone: cellzonety): cursorshapety;
+var
+ bo1: boolean;
 begin
+ bo1:= des_actualcursor in fstate;
+ include(fstate,des_actualcursor);
  result:= actualcursor(nullpoint);
+ if not bo1 then begin
+  exclude(fstate,des_actualcursor);
+ end;
 end;
 
 procedure tcustomdataedit.updatecellzone(const row: integer; const apos: pointty;

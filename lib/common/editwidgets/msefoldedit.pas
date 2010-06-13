@@ -89,8 +89,12 @@ type
    procedure clientmouseevent(var ainfo: mouseeventinfoty); override;
    procedure docellevent(const ownedcol: boolean;
                                          var info: celleventinfoty); override;
-   procedure updatecellzone(const alevel: integer; const apos: pointty;
+   procedure updatecellzone(const row: integer; const apos: pointty;
+                                           var result: cellzonety); override;
+   procedure updatelevelcellzone(const alevel: integer; const apos: pointty;
                                          var azone: cellzonety); virtual;
+   function getcellcursor(const arow: integer;
+                      const acellzone: cellzonety): cursorshapety; override;
    procedure doonpaint(const acanvas: tcanvas); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdefaultvalue: pointer; override;
@@ -413,7 +417,7 @@ begin
      if row1 >= 0 then begin //no csdesigning
       getfoldstate(row1,isvisible1,foldlevel1,haschildren1,isopen1);
       zone1:= cz_default;
-      updatecellzone(foldlevel1,ainfo.pos,zone1);
+      updatelevelcellzone(foldlevel1,ainfo.pos,zone1);
       if (zone1 = cz_default) and 
                          (ainfo.pos.x >= foldlevel1 * flevelstep) then begin
        if isopen1 then begin
@@ -439,7 +443,7 @@ begin
  with info do begin
   if ownedcol then begin
    if (eventkind in mousecellevents) and (info.cell.row >= 0) then begin
-    updatecellzone(fgridintf.getcol.grid.rowfoldlevel[info.cell.row],
+    updatelevelcellzone(fgridintf.getcol.grid.rowfoldlevel[info.cell.row],
                     info.mouseeventinfopo^.pos,info.zone);
    end
    else begin
@@ -471,7 +475,7 @@ begin
  inherited;
 end;
 
-procedure tfoldedit.updatecellzone(const alevel: integer; const apos: pointty;
+procedure tfoldedit.updatelevelcellzone(const alevel: integer; const apos: pointty;
                                                          var azone: cellzonety);
 var
  int1: integer;
@@ -484,6 +488,14 @@ begin
   if apos.x >= int1 then begin
    azone:= cz_image;
   end;
+ end;
+end;
+
+procedure tfoldedit.updatecellzone(const row: integer; const apos: pointty;
+                                           var result: cellzonety);
+begin
+ if row >= 0 then begin
+  updatelevelcellzone(fgridintf.getcol.grid.rowfoldlevel[row],apos,result);
  end;
 end;
 
@@ -814,6 +826,17 @@ begin
    tpopupmenu.additems(amenu,self,mouseinfo,['Issum'],
               [[mao_checkbox]],[state1],[{$ifdef FPC}@{$endif}doissum],false);
   end;
+ end;
+end;
+
+function tfoldedit.getcellcursor(const arow: integer;
+               const acellzone: cellzonety): cursorshapety;
+begin
+ if acellzone = cz_caption then begin
+  result:= inherited getcellcursor(arow,acellzone);
+ end
+ else begin
+  result:= cr_arrow;
  end;
 end;
 

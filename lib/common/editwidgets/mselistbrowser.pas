@@ -427,8 +427,8 @@ type
  itemindexeventty = procedure(const sender: tobject; const aindex: integer;
                      const aitem: tlistitem) of object;
 
- itemeditstatety = (ies_updating);
- itemeditstatesty = set of itemeditstatety;
+// itemeditstatety = (ies_updating);
+// itemeditstatesty = set of itemeditstatety;
 
  titemedit = class(tdataedit,iitemlist,ibutton)
   private
@@ -440,7 +440,7 @@ type
    foncellevent: celleventty;
    factiverow: integer;
 //   ffiltertext: msestring;
-   fstate: itemeditstatesty;
+//   fstate: itemeditstatesty;
 
    fediting: boolean;
    function getitemlist: titemeditlist;
@@ -459,7 +459,7 @@ type
                          const acellzone: cellzonety): cursorshapety; override;
    procedure updatecellzone(const row: integer; const apos: pointty;
                             var result: cellzonety); override;
-   function actualcursor(const apos: pointty): cursorshapety; override;
+//   function actualcursor(const apos: pointty): cursorshapety; override;
   //iedit
    function locatecount: integer; override;        //number of locate values
    function getkeystring(const index: integer): msestring; override;
@@ -667,7 +667,8 @@ type
    procedure collapseall;
    procedure moverow(const source,dest: integer);
     //source and dest must belong to the same parent, ignored otherwise
-   property itemclass: treelistedititemclassty read getitemclass write setitemclass;
+   property itemclass: treelistedititemclassty read getitemclass 
+                                                          write setitemclass;
    property items[const index: integer]: ttreelistedititem read getitems1
                                           write setitems; default;
   published
@@ -2410,7 +2411,7 @@ begin
  end
  else begin
   fvalue:= fitemlist[int1];
-  if not (ies_updating in fstate) then begin
+  if not (des_updating in fstate) then begin
    fitemlist.incupdate;
    try
     updateitemvalues(int1,1);
@@ -2930,6 +2931,9 @@ begin
 //   result:= cr_default;
   end;
  end;
+ if result = cr_default then begin
+  result:= cr_ibeam;
+ end;
 end;
 
 procedure titemedit.updatecellzone(const row: integer; const apos: pointty;
@@ -2940,7 +2944,7 @@ begin
   fitemlist[row].updatecellzone(apos,result);
  end;
 end;
-
+{
 function titemedit.actualcursor(const apos: pointty): cursorshapety;
 var
  zone1: cellzonety;
@@ -2957,7 +2961,7 @@ begin
  end;
  result:= inherited actualcursor(apos);
 end;
-
+}
 {
 procedure titemedit.dostatwrite(const writer: tstatwriter);
 begin
@@ -3465,12 +3469,12 @@ procedure ttreeitemeditlist.nodenotification(const sender: tlistitem;
     finsertindex:= 0;
     int1:= ttreelistitem(sender).treeheight;
     try
-     include(fstate,ies_updating);
+     include(fstate,des_updating);
      grid1:= fgridintf.getcol.grid;
      incupdate;
      grid1.insertrow(finsertcount,int1);      
      decupdate;
-     exclude(fstate,ies_updating);
+     exclude(fstate,des_updating);
      fintf.updateitemvalues(int2,int1);
      int1:= int2+int1;
      if int2 < fcount then begin
@@ -3480,7 +3484,7 @@ procedure ttreeitemeditlist.nodenotification(const sender: tlistitem;
       end;
      end;
     finally
-     exclude(fstate,ies_updating);
+     exclude(fstate,des_updating);
      fchangingnode:= nil;
     end;
     if fvalue = sender then begin

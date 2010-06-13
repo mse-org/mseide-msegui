@@ -2165,7 +2165,7 @@ type
    function grabpointer(const aid: winidty): boolean;
    function ungrabpointer: boolean;
    procedure setmousewidget(const widget: twidget);
-   procedure setclientmousewidget(const widget: twidget);
+   procedure setclientmousewidget(const widget: twidget; const apos: pointty);
    procedure capturemouse(sender: twidget; grab: boolean);
                //sender = nil for release
    procedure activatehint;
@@ -8511,7 +8511,7 @@ begin
    if [ws_mouseinclient,ws_clientmousecaptured] * fwidgetstate <> [] then begin
     if (appinst.fclientmousewidget <> self) and not (es_child in eventstate) then begin
                        //call updaterootwidget
-     appinst.setclientmousewidget(self);
+     appinst.setclientmousewidget(self,info.pos);
     end;
     result:= true;
     if fframe <> nil then begin
@@ -8519,7 +8519,7 @@ begin
     end;
    end
    else begin
-    appinst.setclientmousewidget(nil);
+    appinst.setclientmousewidget(nil,nullpoint);
     result:= false;
    end;
   end
@@ -13640,7 +13640,7 @@ begin
  else begin
   if (fclientmousewidget <> nil) and
      not (ws_clientmousecaptured in fclientmousewidget.fwidgetstate) then begin
-   setclientmousewidget(nil);
+   setclientmousewidget(nil,nullpoint);
   end;
  end;
  fmousewinid:= 0;
@@ -15004,7 +15004,8 @@ begin
  end;
 end;
 
-procedure tguiapplication.setclientmousewidget(const widget: twidget);
+procedure tguiapplication.setclientmousewidget(const widget: twidget;
+                                                         const apos: pointty);
 var
  info: mouseeventinfoty;
 begin
@@ -15019,6 +15020,7 @@ begin
   fclientmousewidget:= widget;
   if widget <> nil then begin
    info.eventkind:= ek_clientmouseenter;
+   info.pos:= apos;
    widget.mouseevent(info);
   end;
  end;
@@ -15032,7 +15034,7 @@ begin
  widget1:= fmousewidget;
  fmousewidget:= widget;
  if (fclientmousewidget <> nil) and (fclientmousewidget <> widget) then begin
-  setclientmousewidget(nil);
+  setclientmousewidget(nil,nullpoint);
  end;
  if widget1 <> widget then begin
   if (widget1 <> nil) and
