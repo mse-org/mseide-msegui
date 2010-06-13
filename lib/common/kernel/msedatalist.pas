@@ -80,7 +80,8 @@ type
                     dls_propertystreaming,
                     dls_sorted,dls_sortio,
                     dls_forcenew, //used in tundolist
-                    dls_remote    //used in ificomp datalist
+                    dls_remote,   //used in ificomp datalist
+                    dls_remotelock
                     );
  dataliststatesty = set of dataliststatety;
   

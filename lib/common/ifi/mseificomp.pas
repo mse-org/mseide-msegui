@@ -618,6 +618,8 @@ type
    procedure setifilink(const avalue: tifivaluelinkcomp);
   protected
    fowner: tgridclientcontroller;
+   procedure itemchanged(const sender: tcustomrowstatelist; 
+                                            const aindex: integer);
    procedure listdestroyed(const sender: tdatalist); override;
    procedure sourcechange(const sender: tdatalist; 
                                          const index: integer); override;
@@ -644,7 +646,10 @@ type
   public
    property ifilink: tifiintegerlinkcomp read getifilink write setifilink;
  end;
-  
+
+ gridclientstatety = (gcs_itemchangelock);
+ gridclientstatesty = set of gridclientstatety;
+ 
  tgridclientcontroller = class(tificlientcontroller,idatalistclient)
   private
    frowcount: integer;
@@ -661,6 +666,7 @@ type
    function getrowstate_color: tifiintegerlinkcomp;
    procedure setrowstate_color(const avalue: tifiintegerlinkcomp);
   protected
+   fgridstate: gridclientstatesty;
    procedure itemchanged(const sender: tdatalist; const aindex: integer);
    function getifilinkkind: ptypeinfo; override;
    procedure valuestoclient(const alink: pointer); override;
@@ -3204,6 +3210,14 @@ end;
 procedure tgridclientcontroller.itemchanged(const sender: tdatalist;
                const aindex: integer);
 begin
+ if not (gcs_itemchangelock in fgridstate) then begin
+  include(fgridstate,gcs_itemchangelock);
+  try
+   frowstatecolor.itemchanged(tcustomrowstatelist(sender),aindex);
+  finally
+   exclude(fgridstate,gcs_itemchangelock);
+  end;
+ end;
 end;
 
 { tifivaluelinkcomp }
@@ -3780,8 +3794,19 @@ end;
 
 procedure trowstatehandler.sourcechange(const sender: tdatalist;
                const index: integer);
-begin
+begin //todo: optimize
  if checksourcechange(flistlink,sender,index) then begin
+  if not (dls_remotelock in fstate) then begin
+   include(fstate,dls_remotelock);
+   try
+    if index < 0 then begin
+     fowner.rowcount:= sender.count;
+     //.....
+    end;
+   finally
+    exclude(fstate,dls_remotelock);
+   end;
+  end;
  end;
 end;
 
@@ -3797,6 +3822,22 @@ begin
   flistlink.source:= nil;
  end;
  inherited;
+end;
+
+procedure trowstatehandler.itemchanged(const sender: tcustomrowstatelist;
+               const aindex: integer);
+begin //todo: optimize
+ if (flistlink.source <> nil) and not (dls_remotelock in fstate) then begin
+  include(fstate,dls_remotelock);
+  try
+   if aindex < 0 then begin
+    flistlink.source.count:= sender.count;
+    //.....
+   end;
+  finally
+   exclude(fstate,dls_remotelock);
+  end;
+ end;
 end;
 
 { trowstatecolorhandler }
