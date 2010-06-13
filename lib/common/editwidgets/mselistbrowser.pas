@@ -2881,7 +2881,9 @@ begin
   else begin
    fediting:= false;
   end;
+  cursorchanged;
  end;
+{
  if application.clientmousewidget = self then begin
   if not fediting then begin
    application.widgetcursorshape:= cursorreadonly;
@@ -2890,6 +2892,7 @@ begin
    application.widgetcursorshape:= cursor;
   end;
  end;
+}
 end;
 
 function titemedit.getoptionsedit: optionseditty;
