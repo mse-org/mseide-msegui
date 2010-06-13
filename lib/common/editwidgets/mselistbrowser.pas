@@ -2920,19 +2920,22 @@ begin
                        ((foptionsedit * [oe_locate,oe_readonly] = []) or
                        (arow < 0) and (editing)) then begin
   result:= cursor;
+  if result = cr_default then begin
+   result:= cr_ibeam;
+  end;
  end
  else begin
   if (acellzone = cz_caption) and 
                        (foptionsedit * [oe_locate,oe_readonly] <> []) then begin
    result:= cursorreadonly;
+   if result = cr_default then begin
+    result:= cr_arrow;
+   end;
   end
   else begin
    result:= cr_arrow;
 //   result:= cr_default;
   end;
- end;
- if result = cr_default then begin
-  result:= cr_ibeam;
  end;
 end;
 

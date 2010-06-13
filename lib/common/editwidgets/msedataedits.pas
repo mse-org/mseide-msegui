@@ -2343,7 +2343,8 @@ begin
    int1:= fgridintf.grid.row;
    if int1 >= 0 then begin
     updatecellzone(int1,widgetpostoclientpos(apos),zone1);
-    result:= getcellcursor(int1,zone1);
+//    result:= getcellcursor(int1,zone1);
+    result:= getcellcursor(-1,zone1);
     exit;
    end;
   finally
