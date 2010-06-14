@@ -610,19 +610,21 @@ type
  end;
  
  tgridclientcontroller = class;
- 
+
  trowstatehandler = class(tdatalist,iifidatalink)
   private
    fifilink: tifivaluelinkcomp;
    flistlink: listlinkinfoty;
+   findexpar: integer;
    procedure setifilink(const avalue: tifivaluelinkcomp);
   protected
    fowner: tgridclientcontroller;
+   procedure updateclient(const alink: pointer); virtual; abstract;
    procedure itemchanged(const sender: tcustomrowstatelist; 
                                             const aindex: integer);
    procedure listdestroyed(const sender: tdatalist); override;
    procedure sourcechange(const sender: tdatalist; 
-                                         const index: integer); override;
+                                         const aindex: integer); override;
    function canlink(const asource: tdatalist;
                                      const atag: integer): boolean; override;
     //iifidatalink
@@ -643,6 +645,7 @@ type
    function getifilink: tifiintegerlinkcomp;
    procedure setifilink(const avalue: tifiintegerlinkcomp);
   protected
+   procedure updateclient(const alink: pointer); override;
   public
    property ifilink: tifiintegerlinkcomp read getifilink write setifilink;
  end;
@@ -3793,16 +3796,19 @@ begin
 end;
 
 procedure trowstatehandler.sourcechange(const sender: tdatalist;
-               const index: integer);
+               const aindex: integer);
 begin //todo: optimize
- if checksourcechange(flistlink,sender,index) then begin
+ if checksourcechange(flistlink,sender,aindex) then begin
   if not (dls_remotelock in fstate) then begin
    include(fstate,dls_remotelock);
    try
-    if index < 0 then begin
+    if aindex < 0 then begin
      fowner.rowcount:= sender.count;
-     //.....
     end;
+    findexpar:= aindex;
+    tmsecomponent1(fowner.fowner).getobjectlinker.forall(@updateclient,
+                                                                      fowner);
+    //...
    finally
     exclude(fstate,dls_remotelock);
    end;
@@ -3832,8 +3838,8 @@ begin //todo: optimize
   try
    if aindex < 0 then begin
     flistlink.source.count:= sender.count;
-    //.....
    end;
+   //...
   finally
    exclude(fstate,dls_remotelock);
   end;
@@ -3850,6 +3856,21 @@ end;
 procedure trowstatecolorhandler.setifilink(const avalue: tifiintegerlinkcomp);
 begin
  inherited;
+end;
+
+procedure trowstatecolorhandler.updateclient(const alink: pointer);
+begin
+ with iifigridlink(alink) do begin
+  with getrowstate do begin
+   if findexpar < 0 then begin
+    colorar:= tintegerdatalist(flistlink.source).asarray;
+   end
+   else begin
+    color[findexpar]:= tintegerdatalist(flistlink.source)[findexpar];
+   end;
+   rowchanged(findexpar);
+  end;
+ end;
 end;
 
 end.

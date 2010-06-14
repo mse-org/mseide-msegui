@@ -188,7 +188,7 @@ type
    function internallinksource(const source: tdatalist;
                  const atag: integer; var variable: tdatalist): boolean;
    function checksourcechange(var ainfo: listlinkinfoty; 
-                        const sender: tdatalist; const index: integer): boolean;
+                        const sender: tdatalist; const aindex: integer): boolean;
    function checksourcecopy(var ainfo: listlinkinfoty;
                                      const copyproc: copyprocty): boolean;
    function checksourcecopy2(var ainfo: listlinkinfoty;
@@ -205,7 +205,8 @@ type
 
    //idatalist
    procedure listdestroyed(const sender: tdatalist); virtual;
-   procedure sourcechange(const sender: tdatalist; const index: integer); virtual;
+   procedure sourcechange(const sender: tdatalist;
+                                         const aindex: integer); virtual;
 
    procedure linkclient(const aclient: idatalistclient);
    procedure unlinkclient(const aclient: idatalistclient);
@@ -850,6 +851,8 @@ type
    procedure setlinecolor(const index: integer; const avalue: rowstatenumty);
    function getlinecolorfix(const index: integer): rowstatenumty;
    procedure setlinecolorfix(const index: integer; const avalue: rowstatenumty);
+   function getcolorar: integerarty;
+   procedure setcolorar(const avalue: integerarty);
   protected
    finfolevel: rowinfolevelty;
    function checkwritedata(const filer: tfiler): boolean; override;
@@ -891,6 +894,7 @@ type
 
    property color[const index: integer]: rowstatenumty read getcolor
                                                             write setcolor;
+   property colorar: integerarty read getcolorar write setcolorar;
    property font[const index: integer]: rowstatenumty read getfont
                                                             write setfont;
    property readonly[const index: integer]: boolean read getreadonly
@@ -2773,28 +2777,28 @@ begin
 end;
 
 function tdatalist.checksourcechange(var ainfo: listlinkinfoty;
-                const sender: tdatalist; const index: integer): boolean;
+                const sender: tdatalist; const aindex: integer): boolean;
 begin
  with ainfo do begin
   result:= (source = sender) and (sender <> nil);
   if result then begin
-   if index < 0 then begin
+   if aindex < 0 then begin
     dirtystart:= 0;
     dirtystop:= sender.count-1;
    end
    else begin
-    if index < dirtystart then begin
-     dirtystart:= index;
+    if aindex < dirtystart then begin
+     dirtystart:= aindex;
     end;
-    if index > ainfo.dirtystop then begin
-     dirtystop:= index;
+    if aindex > ainfo.dirtystop then begin
+     dirtystop:= aindex;
     end;
    end;
   end;
  end;
 end;
 
-procedure tdatalist.sourcechange(const sender: tdatalist; const index: integer);
+procedure tdatalist.sourcechange(const sender: tdatalist; const aindex: integer);
 begin
  //dummy
 // checksourcechange(flinksource,sender,index,fsourcedirtystart,fsourcedirtystop);
@@ -7553,6 +7557,34 @@ end;
 function tcustomrowstatelist.checkwritedata(const filer: tfiler): boolean;
 begin
  result:= false;
+end;
+
+function tcustomrowstatelist.getcolorar: integerarty;
+var
+ po1: prowstatety;
+ int1: integer;
+begin
+ setlength(result,count);
+ po1:= datapo;
+ for int1:= 0 to high(result) do begin
+  result[int1]:= (po1^.color and rowstatemask) - 1;
+  inc(pchar(po1),fsize);
+ end;
+end;
+
+procedure tcustomrowstatelist.setcolorar(const avalue: integerarty);
+var
+ po1: prowstatety;
+ int1: integer;
+begin
+// beginupdate;
+ count:= length(avalue);
+ po1:= datapo;
+ for int1:= 0 to high(avalue) do begin
+  po1^.color:= replacebits(avalue[int1] + 1,po1^.color,rowstatemask);
+  inc(pchar(po1),fsize);
+ end;
+// endupdate;
 end;
 
 { tlinindexmse }
