@@ -608,10 +608,10 @@ begin
       Buf:= GetMem(StrLen+sizeof(sqlinteger));
       Move(StrVal[1],(buf+sizeof(sqlinteger))^,StrLen);
       if strlen > maxstrlen then begin
-       bindstr(i,SQL_C_CHAR,SQL_CHAR,buf,strlen,strlen)
+       bindstr(i,SQL_C_CHAR,SQL_LONGVARCHAR,buf,strlen,strlen)
       end
       else begin
-       bindstr(i,SQL_C_CHAR,SQL_LONGVARCHAR,buf,strlen,strlen)
+       bindstr(i,SQL_C_CHAR,SQL_CHAR,buf,strlen,strlen)
       end;
      end;
     end;
