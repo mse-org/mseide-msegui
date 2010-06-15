@@ -640,14 +640,27 @@ type
 
  tifiintegerlinkcomp = class;
 
- trowstatecolorhandler = class(trowstatehandler)
+ trowstateintegerhandler = class(trowstatehandler)
   private
    function getifilink: tifiintegerlinkcomp;
    procedure setifilink(const avalue: tifiintegerlinkcomp);
-  protected
-   procedure updateclient(const alink: pointer); override;
   public
    property ifilink: tifiintegerlinkcomp read getifilink write setifilink;
+ end;
+ 
+ trowstatecolorhandler = class(trowstateintegerhandler)
+  protected
+   procedure updateclient(const alink: pointer); override;
+ end;
+
+ trowstatefonthandler = class(trowstateintegerhandler)
+  protected
+   procedure updateclient(const alink: pointer); override;
+ end;
+
+ trowstatefoldlevelhandler = class(trowstateintegerhandler)
+  protected
+   procedure updateclient(const alink: pointer); override;
  end;
 
  gridclientstatety = (gcs_itemchangelock);
@@ -661,6 +674,8 @@ type
    fcheckautoappend: boolean;
    fitempo: pointer;
    frowstatecolor: trowstatecolorhandler;
+   frowstatefont: trowstatefonthandler;
+   frowstatefoldlevel: trowstatefoldlevelhandler;
    procedure setrowcount(const avalue: integer);
    procedure setdatacols(const avalue: tifilinkcomparrayprop);
    function getrowstate: tcustomrowstatelist;
@@ -668,6 +683,10 @@ type
    procedure statwriterowstate(const alink: pointer; var handled: boolean);
    function getrowstate_color: tifiintegerlinkcomp;
    procedure setrowstate_color(const avalue: tifiintegerlinkcomp);
+   function getrowstate_font: tifiintegerlinkcomp;
+   procedure setrowstate_font(const avalue: tifiintegerlinkcomp);
+   function getrowstate_foldlevel: tifiintegerlinkcomp;
+   procedure setrowstate_foldlevel(const avalue: tifiintegerlinkcomp);
   protected
    fgridstate: gridclientstatesty;
    procedure itemchanged(const sender: tdatalist; const aindex: integer);
@@ -697,6 +716,10 @@ type
 //                                                    write setrowstate_font;
    property rowstate_color: tifiintegerlinkcomp read getrowstate_color 
                                                     write setrowstate_color;
+   property rowstate_font: tifiintegerlinkcomp read getrowstate_font 
+                                                    write setrowstate_font;
+   property rowstate_foldlevel: tifiintegerlinkcomp read getrowstate_foldlevel 
+                                                    write setrowstate_foldlevel;
  end;
  
  tifilinkcomp = class(tmsecomponent)
@@ -2930,299 +2953,6 @@ begin
  result:= tificolitem(inherited getitems(index));
 end;
 
-{ tgridclientcontroller }
-
-constructor tgridclientcontroller.create(const aowner: tmsecomponent);
-begin
- fdatacols:= tifilinkcomparrayprop.create;
- frowstatecolor:= trowstatecolorhandler.create(self);
- inherited;
-end;
-
-destructor tgridclientcontroller.destroy;
-begin
- fdatacols.free;
- frowstatecolor.free;
- inherited;
-end;
-
-procedure tgridclientcontroller.statreadrowstate(const alink: pointer);
-var
- list1: tcustomrowstatelist;
-begin
- list1:= iifigridlink(alink).getrowstate;
- if list1 <> nil then begin
-  tstatreader(fitempo).readdatalist(rowstatevarname,list1);
- end;
-end;
-
-procedure tgridclientcontroller.dostatread(const reader: tstatreader);
-var
- int1: integer;
- lico: tifivaluelinkcomp;
-begin
- inherited;
- fitempo:= reader;
- tmsecomponent1(fowner).getobjectlinker.forall(@statreadrowstate,self);
- for int1:= 0 to datacols.count - 1 do begin
-  lico:= datacols[int1].link;
-  if lico <> nil then begin
-   with lico.controller do begin
-    if fstatfile = nil then begin
-     dostatread(reader);
-//     fitempo:= reader;
-//     tmsecomponent1(fowner).getobjectlinker.forall(@statreadlist,lico.controller); 
-    end;
-   end;
-  end;
- end;
-end;
-
-procedure tgridclientcontroller.statwriterowstate(const alink: pointer;
-                                           var handled: boolean);
-var
- list1: tcustomrowstatelist;
-begin
- list1:= iifigridlink(alink).getrowstate;
- if list1 <> nil then begin
-  tstatwriter(fitempo).writedatalist(rowstatevarname,list1);
-  handled:= true;
- end;
-end;
-
-procedure tgridclientcontroller.dostatwrite(const writer: tstatwriter);
-var
- int1: integer;
- lico: tifivaluelinkcomp;
-begin
- inherited;
- fitempo:= writer;
- tmsecomponent1(fowner).getobjectlinker.forfirst(@statwriterowstate,self);
- for int1:= 0 to datacols.count - 1 do begin
-  lico:= datacols[int1].link;
-  if lico <> nil then begin
-   with lico.controller do begin
-    if fstatfile = nil then begin
-     dostatwrite(writer);
-//     fitempo:= writer;
-//     tmsecomponent1(fowner).getobjectlinker.forfirst(
-//                                        @statwritelist,lico.controller); 
-    end;
-   end;
-  end;
- end;
-end;
-
-procedure tgridclientcontroller.setrowcount(const avalue: integer);
-begin
- frowcount:= avalue;
- change;
-end;
-
-procedure tgridclientcontroller.valuestoclient(const alink: pointer);
-begin
- setintegerval(iifigridlink(alink),'rowcount',frowcount);
- inherited;
-end;
-
-procedure tgridclientcontroller.clienttovalues(const alink: pointer);
-begin
- inherited;
- getintegerval(iifigridlink(alink),'rowcount',frowcount);
-end;
-
-procedure tgridclientcontroller.docellevent(var info: ificelleventinfoty);
-begin
- if fowner.canevent(tmethod(foncellevent)) then begin
-  foncellevent(self,info);
- end;
-end;
-
-function tgridclientcontroller.getifilinkkind: ptypeinfo;
-begin
- result:= typeinfo(iifigridlink);
-end;
-
-procedure tgridclientcontroller.setdatacols(const avalue: tifilinkcomparrayprop);
-begin
- fdatacols.assign(avalue);
-end;
-
-procedure tgridclientcontroller.itemappendrow(const alink: pointer);
-begin
- iifigridlink(alink).appendrow(fcheckautoappend);
-end;
-
-procedure tgridclientcontroller.getrowstate1(const alink: pointer;
-                                                  var handled: boolean);
-var
- list1: tcustomrowstatelist;
-begin
- list1:= iifigridlink(alink).getrowstate;
- if list1 <> nil then begin
-  handled:= true;
-  pdatalist(fitempo)^:= list1;
- end;
-end;
-
-function tgridclientcontroller.getrowstate: tcustomrowstatelist;
-begin
- result:= nil;
- fitempo:= @result;
- tmsecomponent1(fowner).getobjectlinker.forfirst(@getrowstate1,self);
-end;
-
-procedure tgridclientcontroller.appendrow(const avalues: array of const;
-                                        const checkautoappend: boolean = false);
-var
- int1,int2: integer;
- comp1: tifilinkcomp;
-begin
- fcheckautoappend:= checkautoappend;
- tmsecomponent1(fowner).getobjectlinker.forall(@itemappendrow,self);
- int2:= high(avalues);
- if int2 >= datacols.count then begin
-  int2:= datacols.count;
- end;
- for int1:= 0 to int2 do begin
-  comp1:= tificolitem(fdatacols.fitems[int1]).link;
-  if comp1 <> nil then begin
-   with avalues[int1] do begin
-    case vtype of
-     vtstring: begin
-      if comp1 is tifistringlinkcomp then begin
-       with tifistringlinkcomp(comp1).controller do begin
-        if fdatalist <> nil then begin
-         griddata[fdatalist.count-1]:= vstring^;
-        end;
-       end;
-      end;
-     end;
-     vtansistring: begin
-      if comp1 is tifistringlinkcomp then begin
-       with tifistringlinkcomp(comp1).controller do begin
-        if fdatalist <> nil then begin
-         griddata[fdatalist.count-1]:= ansistring(vansistring);
-        end;
-       end;
-      end;
-     end;
-     vtwidestring: begin
-      if comp1 is tifistringlinkcomp then begin
-       with tifistringlinkcomp(comp1).controller do begin
-        if fdatalist <> nil then begin
-         griddata[fdatalist.count-1]:= widestring(vwidestring);
-        end;
-       end;
-      end;
-     end;
-     vtpchar: begin
-      if comp1 is tifistringlinkcomp then begin
-       with tifistringlinkcomp(comp1).controller do begin
-        if fdatalist <> nil then begin
-         griddata[fdatalist.count-1]:= msestring(ansistring(vpchar));
-        end;
-       end;
-      end;
-     end;
-     vtpwidechar: begin
-      if comp1 is tifistringlinkcomp then begin
-       with tifistringlinkcomp(comp1).controller do begin
-        if fdatalist <> nil then begin
-         griddata[fdatalist.count-1]:= msestring(vpwidechar);
-        end;
-       end;
-      end;
-     end;
-     vtchar: begin
-      if comp1 is tifistringlinkcomp then begin
-       with tifistringlinkcomp(comp1).controller do begin
-        if fdatalist <> nil then begin
-         griddata[fdatalist.count-1]:= vchar;
-        end;
-       end;
-      end;
-     end;
-     vtwidechar: begin
-      if comp1 is tifistringlinkcomp then begin
-       with tifistringlinkcomp(comp1).controller do begin
-        if fdatalist <> nil then begin
-         griddata[fdatalist.count-1]:= vwidechar;
-        end;
-       end;
-      end;
-     end;
-     vtboolean: begin
-      if comp1 is tifibooleanlinkcomp then begin
-       with tifibooleanlinkcomp(comp1).controller do begin
-        if fdatalist <> nil then begin
-         griddata[fdatalist.count-1]:= longint(longbool(vboolean));
-        end;
-       end;
-      end;
-     end;
-     vtinteger: begin
-      if comp1 is tifiintegerlinkcomp then begin
-       with tifiintegerlinkcomp(comp1).controller do begin
-        if fdatalist <> nil then begin
-         griddata[fdatalist.count-1]:= vinteger;
-        end;
-       end;
-      end;
-     end;
-     vtextended: begin
-      if comp1 is tifireallinkcomp then begin
-       with tifireallinkcomp(comp1).controller do begin
-        if fdatalist <> nil then begin
-         griddata[fdatalist.count-1]:= vextended^;
-        end;
-       end;
-      end
-      else begin
-       if comp1 is tifidatetimelinkcomp then begin
-        with tifidatetimelinkcomp(comp1).controller do begin
-         if fdatalist <> nil then begin
-          griddata[fdatalist.count-1]:= vextended^;
-         end;
-        end;
-       end;
-      end;
-     end;
-    end;
-   end;
-  end;
- end;
-end;
-
-function tgridclientcontroller.getrowstate_color: tifiintegerlinkcomp;
-begin
- result:= frowstatecolor.ifilink;
-end;
-
-procedure tgridclientcontroller.setrowstate_color(const avalue: tifiintegerlinkcomp);
-begin
- frowstatecolor.ifilink:= avalue;
-end;
-
-function tgridclientcontroller.checkcomponent(const aintf: iifilink): pointer;
-begin
- result:= inherited checkcomponent(aintf);
- iifigridlink(aintf).getrowstate.linkclient(idatalistclient(self));
-end;
-
-procedure tgridclientcontroller.itemchanged(const sender: tdatalist;
-               const aindex: integer);
-begin
- if not (gcs_itemchangelock in fgridstate) then begin
-  include(fgridstate,gcs_itemchangelock);
-  try
-   frowstatecolor.itemchanged(tcustomrowstatelist(sender),aindex);
-  finally
-   exclude(fgridstate,gcs_itemchangelock);
-  end;
- end;
-end;
-
 { tifivaluelinkcomp }
 
 function tifivaluelinkcomp.getcontroller: tvalueclientcontroller;
@@ -3846,17 +3576,19 @@ begin //todo: optimize
  end;
 end;
 
-{ trowstatecolorhandler }
+{ trowstateintegerhandler }
 
-function trowstatecolorhandler.getifilink: tifiintegerlinkcomp;
+function trowstateintegerhandler.getifilink: tifiintegerlinkcomp;
 begin
  result:= tifiintegerlinkcomp(fifilink);
 end;
 
-procedure trowstatecolorhandler.setifilink(const avalue: tifiintegerlinkcomp);
+procedure trowstateintegerhandler.setifilink(const avalue: tifiintegerlinkcomp);
 begin
  inherited;
 end;
+
+{ trowstatecolorhandler }
 
 procedure trowstatecolorhandler.updateclient(const alink: pointer);
 begin
@@ -3869,6 +3601,360 @@ begin
     color[findexpar]:= tintegerdatalist(flistlink.source)[findexpar];
    end;
    rowchanged(findexpar);
+  end;
+ end;
+end;
+
+{ trowstatefonthandler }
+
+procedure trowstatefonthandler.updateclient(const alink: pointer);
+begin
+ with iifigridlink(alink) do begin
+  with getrowstate do begin
+   if findexpar < 0 then begin
+    fontar:= tintegerdatalist(flistlink.source).asarray;
+   end
+   else begin
+    font[findexpar]:= tintegerdatalist(flistlink.source)[findexpar];
+   end;
+   rowchanged(findexpar);
+  end;
+ end;
+end;
+
+{ trowstatefoldlevelhandler }
+
+procedure trowstatefoldlevelhandler.updateclient(const alink: pointer);
+begin
+ with iifigridlink(alink) do begin
+  with getrowstate do begin
+   if findexpar < 0 then begin
+    foldlevelar:= tintegerdatalist(flistlink.source).asarray;
+   end
+   else begin
+    foldlevel[findexpar]:= tintegerdatalist(flistlink.source)[findexpar];
+   end;
+   rowchanged(findexpar);
+   rowstatechanged(findexpar);
+  end;
+ end;
+end;
+
+{ tgridclientcontroller }
+
+constructor tgridclientcontroller.create(const aowner: tmsecomponent);
+begin
+ fdatacols:= tifilinkcomparrayprop.create;
+ frowstatecolor:= trowstatecolorhandler.create(self);
+ frowstatefont:= trowstatefonthandler.create(self);
+ frowstatefoldlevel:= trowstatefoldlevelhandler.create(self);
+ inherited;
+end;
+
+destructor tgridclientcontroller.destroy;
+begin
+ fdatacols.free;
+ frowstatecolor.free;
+ frowstatefont.free;
+ frowstatefoldlevel.free;
+ inherited;
+end;
+
+procedure tgridclientcontroller.statreadrowstate(const alink: pointer);
+var
+ list1: tcustomrowstatelist;
+begin
+ list1:= iifigridlink(alink).getrowstate;
+ if list1 <> nil then begin
+  tstatreader(fitempo).readdatalist(rowstatevarname,list1);
+ end;
+end;
+
+procedure tgridclientcontroller.dostatread(const reader: tstatreader);
+var
+ int1: integer;
+ lico: tifivaluelinkcomp;
+begin
+ inherited;
+ fitempo:= reader;
+ tmsecomponent1(fowner).getobjectlinker.forall(@statreadrowstate,self);
+ for int1:= 0 to datacols.count - 1 do begin
+  lico:= datacols[int1].link;
+  if lico <> nil then begin
+   with lico.controller do begin
+    if fstatfile = nil then begin
+     dostatread(reader);
+//     fitempo:= reader;
+//     tmsecomponent1(fowner).getobjectlinker.forall(@statreadlist,lico.controller); 
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tgridclientcontroller.statwriterowstate(const alink: pointer;
+                                           var handled: boolean);
+var
+ list1: tcustomrowstatelist;
+begin
+ list1:= iifigridlink(alink).getrowstate;
+ if list1 <> nil then begin
+  tstatwriter(fitempo).writedatalist(rowstatevarname,list1);
+  handled:= true;
+ end;
+end;
+
+procedure tgridclientcontroller.dostatwrite(const writer: tstatwriter);
+var
+ int1: integer;
+ lico: tifivaluelinkcomp;
+begin
+ inherited;
+ fitempo:= writer;
+ tmsecomponent1(fowner).getobjectlinker.forfirst(@statwriterowstate,self);
+ for int1:= 0 to datacols.count - 1 do begin
+  lico:= datacols[int1].link;
+  if lico <> nil then begin
+   with lico.controller do begin
+    if fstatfile = nil then begin
+     dostatwrite(writer);
+//     fitempo:= writer;
+//     tmsecomponent1(fowner).getobjectlinker.forfirst(
+//                                        @statwritelist,lico.controller); 
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tgridclientcontroller.setrowcount(const avalue: integer);
+begin
+ frowcount:= avalue;
+ change;
+end;
+
+procedure tgridclientcontroller.valuestoclient(const alink: pointer);
+begin
+ setintegerval(iifigridlink(alink),'rowcount',frowcount);
+ inherited;
+end;
+
+procedure tgridclientcontroller.clienttovalues(const alink: pointer);
+begin
+ inherited;
+ getintegerval(iifigridlink(alink),'rowcount',frowcount);
+end;
+
+procedure tgridclientcontroller.docellevent(var info: ificelleventinfoty);
+begin
+ if fowner.canevent(tmethod(foncellevent)) then begin
+  foncellevent(self,info);
+ end;
+end;
+
+function tgridclientcontroller.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifigridlink);
+end;
+
+procedure tgridclientcontroller.setdatacols(const avalue: tifilinkcomparrayprop);
+begin
+ fdatacols.assign(avalue);
+end;
+
+procedure tgridclientcontroller.itemappendrow(const alink: pointer);
+begin
+ iifigridlink(alink).appendrow(fcheckautoappend);
+end;
+
+procedure tgridclientcontroller.getrowstate1(const alink: pointer;
+                                                  var handled: boolean);
+var
+ list1: tcustomrowstatelist;
+begin
+ list1:= iifigridlink(alink).getrowstate;
+ if list1 <> nil then begin
+  handled:= true;
+  pdatalist(fitempo)^:= list1;
+ end;
+end;
+
+function tgridclientcontroller.getrowstate: tcustomrowstatelist;
+begin
+ result:= nil;
+ fitempo:= @result;
+ tmsecomponent1(fowner).getobjectlinker.forfirst(@getrowstate1,self);
+end;
+
+procedure tgridclientcontroller.appendrow(const avalues: array of const;
+                                        const checkautoappend: boolean = false);
+var
+ int1,int2: integer;
+ comp1: tifilinkcomp;
+begin
+ fcheckautoappend:= checkautoappend;
+ tmsecomponent1(fowner).getobjectlinker.forall(@itemappendrow,self);
+ int2:= high(avalues);
+ if int2 >= datacols.count then begin
+  int2:= datacols.count;
+ end;
+ for int1:= 0 to int2 do begin
+  comp1:= tificolitem(fdatacols.fitems[int1]).link;
+  if comp1 <> nil then begin
+   with avalues[int1] do begin
+    case vtype of
+     vtstring: begin
+      if comp1 is tifistringlinkcomp then begin
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= vstring^;
+        end;
+       end;
+      end;
+     end;
+     vtansistring: begin
+      if comp1 is tifistringlinkcomp then begin
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= ansistring(vansistring);
+        end;
+       end;
+      end;
+     end;
+     vtwidestring: begin
+      if comp1 is tifistringlinkcomp then begin
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= widestring(vwidestring);
+        end;
+       end;
+      end;
+     end;
+     vtpchar: begin
+      if comp1 is tifistringlinkcomp then begin
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= msestring(ansistring(vpchar));
+        end;
+       end;
+      end;
+     end;
+     vtpwidechar: begin
+      if comp1 is tifistringlinkcomp then begin
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= msestring(vpwidechar);
+        end;
+       end;
+      end;
+     end;
+     vtchar: begin
+      if comp1 is tifistringlinkcomp then begin
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= vchar;
+        end;
+       end;
+      end;
+     end;
+     vtwidechar: begin
+      if comp1 is tifistringlinkcomp then begin
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= vwidechar;
+        end;
+       end;
+      end;
+     end;
+     vtboolean: begin
+      if comp1 is tifibooleanlinkcomp then begin
+       with tifibooleanlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= longint(longbool(vboolean));
+        end;
+       end;
+      end;
+     end;
+     vtinteger: begin
+      if comp1 is tifiintegerlinkcomp then begin
+       with tifiintegerlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= vinteger;
+        end;
+       end;
+      end;
+     end;
+     vtextended: begin
+      if comp1 is tifireallinkcomp then begin
+       with tifireallinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= vextended^;
+        end;
+       end;
+      end
+      else begin
+       if comp1 is tifidatetimelinkcomp then begin
+        with tifidatetimelinkcomp(comp1).controller do begin
+         if fdatalist <> nil then begin
+          griddata[fdatalist.count-1]:= vextended^;
+         end;
+        end;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tgridclientcontroller.getrowstate_color: tifiintegerlinkcomp;
+begin
+ result:= frowstatecolor.ifilink;
+end;
+
+procedure tgridclientcontroller.setrowstate_color(const avalue: tifiintegerlinkcomp);
+begin
+ frowstatecolor.ifilink:= avalue;
+end;
+
+function tgridclientcontroller.getrowstate_font: tifiintegerlinkcomp;
+begin
+ result:= frowstatefont.ifilink;
+end;
+
+procedure tgridclientcontroller.setrowstate_font(const avalue: tifiintegerlinkcomp);
+begin
+ frowstatefont.ifilink:= avalue;
+end;
+
+function tgridclientcontroller.getrowstate_foldlevel: tifiintegerlinkcomp;
+begin
+ result:= frowstatefoldlevel.ifilink;
+end;
+
+procedure tgridclientcontroller.setrowstate_foldlevel(const avalue: tifiintegerlinkcomp);
+begin
+ frowstatefoldlevel.ifilink:= avalue;
+end;
+
+function tgridclientcontroller.checkcomponent(const aintf: iifilink): pointer;
+begin
+ result:= inherited checkcomponent(aintf);
+ iifigridlink(aintf).getrowstate.linkclient(idatalistclient(self));
+end;
+
+procedure tgridclientcontroller.itemchanged(const sender: tdatalist;
+               const aindex: integer);
+begin
+ if not (gcs_itemchangelock in fgridstate) then begin
+  include(fgridstate,gcs_itemchangelock);
+  try
+   frowstatecolor.itemchanged(tcustomrowstatelist(sender),aindex);
+   frowstatefont.itemchanged(tcustomrowstatelist(sender),aindex);
+   frowstatefoldlevel.itemchanged(tcustomrowstatelist(sender),aindex);
+  finally
+   exclude(fgridstate,gcs_itemchangelock);
   end;
  end;
 end;

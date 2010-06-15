@@ -12649,6 +12649,7 @@ begin
  end
  else begin
   if tws_globalshortcuts in fstate then begin
+   fcaller:= nil;
    fowner.doshortcut(info,nil);
   end;
  end;

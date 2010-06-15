@@ -486,6 +486,7 @@ type
    procedure unregisterchildwidget(const child: twidget); override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure dofocus; override;
+   procedure doexit; override;
   public
    constructor create(aowner: tcustomwidgetgrid); reintroduce;
  end;
@@ -2210,6 +2211,14 @@ begin
  else begin
   inherited;
  end;
+end;
+
+procedure tcontainer.doexit;
+begin
+ if fgrid.factivewidget <> nil then begin
+  fgrid.factivewidget.visible:= false;
+ end;
+ inherited;
 end;
 
 { tcustomwidgetgrid }

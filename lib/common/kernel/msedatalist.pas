@@ -853,8 +853,14 @@ type
    procedure setlinecolorfix(const index: integer; const avalue: rowstatenumty);
    function getcolorar: integerarty;
    procedure setcolorar(const avalue: integerarty);
+   function getfontar: integerarty;
+   procedure setfontar(const avalue: integerarty);
+   function getfoldlevelar: integerarty;
+   procedure setfoldlevelar(const avalue: integerarty);
+   procedure setfoldlevel(const index: integer; const avalue: byte);
   protected
    finfolevel: rowinfolevelty;
+   procedure checkdirty(const arow: integer); virtual;
    function checkwritedata(const filer: tfiler): boolean; override;
    function gethidden(const index: integer): boolean;
    function getfoldlevel(const index: integer): byte;
@@ -897,12 +903,15 @@ type
    property colorar: integerarty read getcolorar write setcolorar;
    property font[const index: integer]: rowstatenumty read getfont
                                                             write setfont;
+   property fontar: integerarty read getfontar write setfontar;
    property readonly[const index: integer]: boolean read getreadonly
                                                             write setreadonly;
    property selected[const index: integer]: longword read getselected 
                                                             write setselected;
    property hidden[const index: integer]: boolean read gethidden;
-   property foldlevel[const index: integer]: byte read getfoldlevel; //0..127
+   property foldlevel[const index: integer]: byte read getfoldlevel 
+                                                 write setfoldlevel; //0..64
+   property foldlevelar: integerarty read getfoldlevelar write setfoldlevelar;
    property foldissum[const index: integer]: boolean read getfoldissum;
    property height[const index: integer]: integer read getheight;
    property merged[const index: integer]: longword read getmerged 
@@ -7319,7 +7328,7 @@ end;
 
 function tcustomrowstatelist.gethidden(const index: integer): boolean;
 begin
- result:= items[index].fold and foldhiddenmask <> 0;
+ result:= getitempo(index)^.fold and foldhiddenmask <> 0;
 end;
 
 function tcustomrowstatelist.getfoldinfoar: bytearty;
@@ -7338,12 +7347,21 @@ end;
 
 function tcustomrowstatelist.getfoldlevel(const index: integer): byte;
 begin
- result:= items[index].fold and foldlevelmask;
+ result:= getitempo(index)^.fold and foldlevelmask;
+end;
+
+procedure tcustomrowstatelist.setfoldlevel(const index: integer;
+                                            const avalue: byte);
+begin
+ with getitempo(index)^ do begin
+  fold:= replacebits(avalue,fold,foldlevelmask);
+ end;
+ checkdirty(index);
 end;
 
 function tcustomrowstatelist.getfoldissum(const index: integer): boolean;
 begin
- result:= items[index].flags and foldissummask <> 0;
+ result:= getitempo(index)^.flags and foldissummask <> 0;
 end;
 
 {
@@ -7585,6 +7603,70 @@ begin
   inc(pchar(po1),fsize);
  end;
 // endupdate;
+end;
+
+function tcustomrowstatelist.getfontar: integerarty;
+var
+ po1: prowstatety;
+ int1: integer;
+begin
+ setlength(result,count);
+ po1:= datapo;
+ for int1:= 0 to high(result) do begin
+  result[int1]:= (po1^.font and rowstatemask) - 1;
+  inc(pchar(po1),fsize);
+ end;
+end;
+
+procedure tcustomrowstatelist.setfontar(const avalue: integerarty);
+var
+ po1: prowstatety;
+ int1: integer;
+begin
+// beginupdate;
+ count:= length(avalue);
+ po1:= datapo;
+ for int1:= 0 to high(avalue) do begin
+  po1^.font:= replacebits(avalue[int1] + 1,po1^.font,rowstatemask);
+  inc(pchar(po1),fsize);
+ end;
+// endupdate;
+end;
+
+function tcustomrowstatelist.getfoldlevelar: integerarty;
+var
+ po1: prowstatety;
+ int1: integer;
+begin
+ setlength(result,count);
+ po1:= datapo;
+ for int1:= 0 to high(result) do begin
+  result[int1]:= (po1^.fold and foldlevelmask);
+  inc(pchar(po1),fsize);
+ end;
+end;
+
+procedure tcustomrowstatelist.setfoldlevelar(const avalue: integerarty);
+var
+ po1: prowstatety;
+ int1: integer;
+begin
+// beginupdate;
+ count:= length(avalue);
+ po1:= datapo;
+ for int1:= 0 to high(avalue) do begin
+  po1^.fold:= replacebits(avalue[int1] + 1,po1^.fold,foldlevelmask);
+  inc(pchar(po1),fsize);
+ end;
+ if avalue <> nil then begin
+  checkdirty(0);
+ end;
+// endupdate;
+end;
+
+procedure tcustomrowstatelist.checkdirty(const arow: integer);
+begin
+ //dummy
 end;
 
 { tlinindexmse }

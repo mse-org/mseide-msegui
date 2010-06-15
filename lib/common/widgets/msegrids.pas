@@ -1262,7 +1262,7 @@ type
    procedure cleanvisible(visibleindex: integer);
    procedure clean(arow: integer);
    procedure cleanrowheight(const aindex: integer);
-   procedure checkdirty(const arow: integer);
+   procedure checkdirty(const arow: integer); override;
    procedure checkdirtyautorowheight(const arow: integer);
    procedure recalchidden; override;
    function getstatdata(const index: integer): msestring; override;
