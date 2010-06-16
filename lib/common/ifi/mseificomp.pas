@@ -647,7 +647,17 @@ type
   public
    property ifilink: tifiintegerlinkcomp read getifilink write setifilink;
  end;
+
+ tifibooleanlinkcomp = class;
  
+ trowstatebooleanhandler = class(trowstatehandler)
+  private
+   function getifilink: tifibooleanlinkcomp;
+   procedure setifilink(const avalue: tifibooleanlinkcomp);
+  public
+   property ifilink: tifibooleanlinkcomp read getifilink write setifilink;
+ end;
+  
  trowstatecolorhandler = class(trowstateintegerhandler)
   protected
    procedure updateclient(const alink: pointer); override;
@@ -663,9 +673,14 @@ type
    procedure updateclient(const alink: pointer); override;
  end;
 
+ trowstatehiddenhandler = class(trowstatebooleanhandler)
+  protected
+   procedure updateclient(const alink: pointer); override;
+ end;
+ 
  gridclientstatety = (gcs_itemchangelock);
  gridclientstatesty = set of gridclientstatety;
- 
+  
  tgridclientcontroller = class(tificlientcontroller,idatalistclient)
   private
    frowcount: integer;
@@ -676,6 +691,7 @@ type
    frowstatecolor: trowstatecolorhandler;
    frowstatefont: trowstatefonthandler;
    frowstatefoldlevel: trowstatefoldlevelhandler;
+   frowstatehidden: trowstatehiddenhandler;
    procedure setrowcount(const avalue: integer);
    procedure setdatacols(const avalue: tifilinkcomparrayprop);
    function getrowstate: tcustomrowstatelist;
@@ -687,6 +703,8 @@ type
    procedure setrowstate_font(const avalue: tifiintegerlinkcomp);
    function getrowstate_foldlevel: tifiintegerlinkcomp;
    procedure setrowstate_foldlevel(const avalue: tifiintegerlinkcomp);
+   function getrowstate_hidden: tifibooleanlinkcomp;
+   procedure setrowstate_hidden(const avalue: tifibooleanlinkcomp);
   protected
    fgridstate: gridclientstatesty;
    procedure itemchanged(const sender: tdatalist; const aindex: integer);
@@ -720,6 +738,8 @@ type
                                                     write setrowstate_font;
    property rowstate_foldlevel: tifiintegerlinkcomp read getrowstate_foldlevel 
                                                     write setrowstate_foldlevel;
+   property rowstate_hidden: tifibooleanlinkcomp read getrowstate_hidden 
+                                                    write setrowstate_hidden;
  end;
  
  tifilinkcomp = class(tmsecomponent)
@@ -987,7 +1007,8 @@ end;
    constructor create(const aowner: tintegerclientcontroller); reintroduce;
  end;
 
- tifibooleandatalist = class(tintegerdatalist)
+ tifibooleandatalist = class(tbooleandatalist)
+  private
   protected
    fowner: tbooleanclientcontroller;
    function getdefault: pointer; override;
@@ -3588,6 +3609,18 @@ begin
  inherited;
 end;
 
+{ trowstatebooleanhandler }
+
+function trowstatebooleanhandler.getifilink: tifibooleanlinkcomp;
+begin
+ result:= tifibooleanlinkcomp(fifilink);
+end;
+
+procedure trowstatebooleanhandler.setifilink(const avalue: tifibooleanlinkcomp);
+begin
+ inherited;
+end;
+
 { trowstatecolorhandler }
 
 procedure trowstatecolorhandler.updateclient(const alink: pointer);
@@ -3640,6 +3673,25 @@ begin
  end;
 end;
 
+{ trowstatehiddenhandler }
+
+procedure trowstatehiddenhandler.updateclient(const alink: pointer);
+begin
+ with iifigridlink(alink) do begin
+  with getrowstate do begin
+   if findexpar < 0 then begin
+    hiddenar:= tbooleandatalist(flistlink.source).asarray;
+   end
+   else begin
+    hidden[findexpar]:= tbooleandatalist(flistlink.source)[findexpar];
+   end;
+   rowchanged(findexpar);
+   rowstatechanged(findexpar);
+   layoutchanged;
+  end;
+ end;
+end;
+
 { tgridclientcontroller }
 
 constructor tgridclientcontroller.create(const aowner: tmsecomponent);
@@ -3648,6 +3700,7 @@ begin
  frowstatecolor:= trowstatecolorhandler.create(self);
  frowstatefont:= trowstatefonthandler.create(self);
  frowstatefoldlevel:= trowstatefoldlevelhandler.create(self);
+ frowstatehidden:= trowstatehiddenhandler.create(self);
  inherited;
 end;
 
@@ -3657,6 +3710,7 @@ begin
  frowstatecolor.free;
  frowstatefont.free;
  frowstatefoldlevel.free;
+ frowstatehidden.free;
  inherited;
 end;
 
@@ -3870,7 +3924,7 @@ begin
       if comp1 is tifibooleanlinkcomp then begin
        with tifibooleanlinkcomp(comp1).controller do begin
         if fdatalist <> nil then begin
-         griddata[fdatalist.count-1]:= longint(longbool(vboolean));
+         griddata[fdatalist.count-1]:= longbool(vboolean);
         end;
        end;
       end;
@@ -3923,7 +3977,8 @@ begin
  result:= frowstatefont.ifilink;
 end;
 
-procedure tgridclientcontroller.setrowstate_font(const avalue: tifiintegerlinkcomp);
+procedure tgridclientcontroller.setrowstate_font(
+                                            const avalue: tifiintegerlinkcomp);
 begin
  frowstatefont.ifilink:= avalue;
 end;
@@ -3933,9 +3988,21 @@ begin
  result:= frowstatefoldlevel.ifilink;
 end;
 
-procedure tgridclientcontroller.setrowstate_foldlevel(const avalue: tifiintegerlinkcomp);
+procedure tgridclientcontroller.setrowstate_foldlevel(
+                                            const avalue: tifiintegerlinkcomp);
 begin
  frowstatefoldlevel.ifilink:= avalue;
+end;
+
+function tgridclientcontroller.getrowstate_hidden: tifibooleanlinkcomp;
+begin
+ result:= frowstatehidden.ifilink;
+end;
+
+procedure tgridclientcontroller.setrowstate_hidden(
+                                           const avalue: tifibooleanlinkcomp);
+begin
+ frowstatehidden.ifilink:= avalue;
 end;
 
 function tgridclientcontroller.checkcomponent(const aintf: iifilink): pointer;
@@ -3953,6 +4020,7 @@ begin
    frowstatecolor.itemchanged(tcustomrowstatelist(sender),aindex);
    frowstatefont.itemchanged(tcustomrowstatelist(sender),aindex);
    frowstatefoldlevel.itemchanged(tcustomrowstatelist(sender),aindex);
+   frowstatehidden.itemchanged(tcustomrowstatelist(sender),aindex);
   finally
    exclude(fgridstate,gcs_itemchangelock);
   end;

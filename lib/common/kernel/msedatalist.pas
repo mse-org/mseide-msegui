@@ -295,7 +295,7 @@ type
   private
    function Getitems(const index: integer): integer;
    procedure Setitems(const index: integer; const Value: integer);
-   procedure setasarray(const value: integerarty);
+   procedure setasarray(const avalue: integerarty);
    function getasarray: integerarty;
   protected
    function checkassigncompatibility(
@@ -324,6 +324,18 @@ type
    property items[const index: integer]: integer read Getitems write Setitems; default;
  end;
 
+ tbooleandatalist = class(tintegerdatalist)
+  private
+   procedure setasarray(const avalue: longboolarty);
+   function getasarray: longboolarty;
+   function getitems(const index: integer): boolean;
+   procedure setitems(const index: integer; const avalue: boolean);
+  public
+   property asarray: longboolarty read getasarray 
+                                                  write setasarray;
+   property items[const index: integer]: boolean read Getitems write Setitems; default;
+ end;
+ 
  tint64datalist = class(tdatalist)
   private
    function Getitems(index: integer): int64;
@@ -858,8 +870,11 @@ type
    function getfoldlevelar: integerarty;
    procedure setfoldlevelar(const avalue: integerarty);
    procedure setfoldlevel(const index: integer; const avalue: byte);
+   function gethiddenar: longboolarty;
+   procedure sethiddenar(const avalue: longboolarty);
   protected
    finfolevel: rowinfolevelty;
+   procedure sethidden(const index: integer; const avalue: boolean); virtual;
    procedure checkdirty(const arow: integer); virtual;
    function checkwritedata(const filer: tfiler): boolean; override;
    function gethidden(const index: integer): boolean;
@@ -908,7 +923,8 @@ type
                                                             write setreadonly;
    property selected[const index: integer]: longword read getselected 
                                                             write setselected;
-   property hidden[const index: integer]: boolean read gethidden;
+   property hidden[const index: integer]: boolean read gethidden write sethidden;
+   property hiddenar: longboolarty read gethiddenar write sethiddenar;
    property foldlevel[const index: integer]: byte read getfoldlevel 
                                                  write setfoldlevel; //0..64
    property foldlevelar: integerarty read getfoldlevelar write setfoldlevelar;
@@ -4566,9 +4582,9 @@ begin
  internalgetasarray(pointer(result),sizeof(integer));
 end;
 
-procedure tintegerdatalist.setasarray(const value: integerarty);
+procedure tintegerdatalist.setasarray(const avalue: integerarty);
 begin
- internalsetasarray(pointer(value),sizeof(integer),length(value));
+ internalsetasarray(pointer(avalue),sizeof(integer),length(avalue));
 end;
 
 function tintegerdatalist.getstatdata(const index: integer): msestring;
@@ -4619,6 +4635,29 @@ end;
 function tintegerdatalist.checkassigncompatibility(const source: tpersistent): boolean;
 begin
  result:= source.inheritsfrom(tintegerdatalist);
+end;
+
+{ tbooleandatalist }
+
+procedure tbooleandatalist.setasarray(const avalue: longboolarty);
+begin
+ inherited asarray:= integerarty(avalue);
+end;
+
+function tbooleandatalist.getasarray: longboolarty;
+begin
+ result:= longboolarty(inherited asarray);
+end;
+
+function tbooleandatalist.getitems(const index: integer): boolean;
+begin
+ result:= inherited items[index] <> 0;
+end;
+
+procedure tbooleandatalist.setitems(const index: integer;
+               const avalue: boolean);
+begin
+ inherited items[index]:= longint(longbool(avalue));
 end;
 
 { tint64datalist }
@@ -7359,6 +7398,15 @@ begin
  checkdirty(index);
 end;
 
+procedure tcustomrowstatelist.sethidden(const index: integer;
+                                                     const avalue: boolean);
+begin
+ with getitempo(index)^ do begin
+  updatebit(fold,foldhiddenbit,avalue);
+ end;
+ checkdirty(index);
+end;
+
 function tcustomrowstatelist.getfoldissum(const index: integer): boolean;
 begin
  result:= getitempo(index)^.flags and foldissummask <> 0;
@@ -7656,6 +7704,37 @@ begin
  po1:= datapo;
  for int1:= 0 to high(avalue) do begin
   po1^.fold:= replacebits(avalue[int1] + 1,po1^.fold,foldlevelmask);
+  inc(pchar(po1),fsize);
+ end;
+ if avalue <> nil then begin
+  checkdirty(0);
+ end;
+// endupdate;
+end;
+
+function tcustomrowstatelist.gethiddenar: longboolarty;
+var
+ po1: prowstatety;
+ int1: integer;
+begin
+ setlength(result,count);
+ po1:= datapo;
+ for int1:= 0 to high(result) do begin
+  result[int1]:= (po1^.fold and foldhiddenmask) <> 0;
+  inc(pchar(po1),fsize);
+ end;
+end;
+
+procedure tcustomrowstatelist.sethiddenar(const avalue: longboolarty);
+var
+ po1: prowstatety;
+ int1: integer;
+begin
+// beginupdate;
+ count:= length(avalue);
+ po1:= datapo;
+ for int1:= 0 to high(avalue) do begin
+  updatebit(po1^.fold,foldhiddenbit,avalue[int1]);
   inc(pchar(po1),fsize);
  end;
  if avalue <> nil then begin

@@ -47,6 +47,7 @@ type
   function getrowstate: tcustomrowstatelist;
   procedure rowchanged(const arow: integer);
   procedure rowstatechanged(const arow: integer);
+  procedure layoutchanged;
  end;
 
  iifigridserver = interface(iifiserver)
