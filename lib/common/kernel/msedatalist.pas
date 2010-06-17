@@ -872,9 +872,12 @@ type
    procedure setfoldlevel(const index: integer; const avalue: byte);
    function gethiddenar: longboolarty;
    procedure sethiddenar(const avalue: longboolarty);
+   function getfoldissumar: longboolarty;
+   procedure setfoldissumar(const avalue: longboolarty);
   protected
    finfolevel: rowinfolevelty;
    procedure sethidden(const index: integer; const avalue: boolean); virtual;
+   procedure setfoldissum(const index: integer; const avalue: boolean); virtual;
    procedure checkdirty(const arow: integer); virtual;
    function checkwritedata(const filer: tfiler): boolean; override;
    function gethidden(const index: integer): boolean;
@@ -928,7 +931,10 @@ type
    property foldlevel[const index: integer]: byte read getfoldlevel 
                                                  write setfoldlevel; //0..64
    property foldlevelar: integerarty read getfoldlevelar write setfoldlevelar;
-   property foldissum[const index: integer]: boolean read getfoldissum;
+   property foldissum[const index: integer]: boolean read getfoldissum 
+                                                 write setfoldissum;
+   property foldissumar: longboolarty read getfoldissumar write setfoldissumar;
+
    property height[const index: integer]: integer read getheight;
    property merged[const index: integer]: longword read getmerged 
                                                             write setmerged;
@@ -7407,6 +7413,15 @@ begin
  checkdirty(index);
 end;
 
+procedure tcustomrowstatelist.setfoldissum(const index: integer;
+                                                     const avalue: boolean);
+begin
+ with getitempo(index)^ do begin
+  updatebit(fold,foldissumbit,avalue);
+ end;
+ checkdirty(index);
+end;
+
 function tcustomrowstatelist.getfoldissum(const index: integer): boolean;
 begin
  result:= getitempo(index)^.flags and foldissummask <> 0;
@@ -7735,6 +7750,37 @@ begin
  po1:= datapo;
  for int1:= 0 to high(avalue) do begin
   updatebit(po1^.fold,foldhiddenbit,avalue[int1]);
+  inc(pchar(po1),fsize);
+ end;
+ if avalue <> nil then begin
+  checkdirty(0);
+ end;
+// endupdate;
+end;
+
+function tcustomrowstatelist.getfoldissumar: longboolarty;
+var
+ po1: prowstatety;
+ int1: integer;
+begin
+ setlength(result,count);
+ po1:= datapo;
+ for int1:= 0 to high(result) do begin
+  result[int1]:= (po1^.fold and foldissummask) <> 0;
+  inc(pchar(po1),fsize);
+ end;
+end;
+
+procedure tcustomrowstatelist.setfoldissumar(const avalue: longboolarty);
+var
+ po1: prowstatety;
+ int1: integer;
+begin
+// beginupdate;
+ count:= length(avalue);
+ po1:= datapo;
+ for int1:= 0 to high(avalue) do begin
+  updatebit(po1^.fold,foldissumbit,avalue[int1]);
   inc(pchar(po1),fsize);
  end;
  if avalue <> nil then begin

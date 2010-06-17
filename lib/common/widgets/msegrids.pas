@@ -1211,7 +1211,6 @@ type
    function isvisible(const arow: integer): boolean;
    procedure counthidden(var aindex: integer);
    procedure setfoldlevel(const index: integer; avalue: byte);
-   procedure setfoldissum(const index: integer; const avalue: boolean);
    procedure setfolded(const avalue: boolean);
    procedure setheight(const index: integer; const avalue: integer);
    procedure setlinewidth(const index: integer; const avalue: integer);
@@ -1237,6 +1236,7 @@ type
   {$endif}
   protected
    procedure sethidden(const index: integer; const avalue: boolean); override;
+   procedure setfoldissum(const index: integer; const avalue: boolean); override;
    function getlinkdatatypes(const atag: integer): listdatatypesty; override;
    procedure sourcechange(const sender: tdatalist; 
                                          const index: integer); override;

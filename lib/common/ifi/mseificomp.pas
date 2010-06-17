@@ -678,6 +678,11 @@ type
    procedure updateclient(const alink: pointer); override;
  end;
  
+ trowstatefoldissumhandler = class(trowstatebooleanhandler)
+  protected
+   procedure updateclient(const alink: pointer); override;
+ end;
+ 
  gridclientstatety = (gcs_itemchangelock);
  gridclientstatesty = set of gridclientstatety;
   
@@ -692,6 +697,7 @@ type
    frowstatefont: trowstatefonthandler;
    frowstatefoldlevel: trowstatefoldlevelhandler;
    frowstatehidden: trowstatehiddenhandler;
+   frowstatefoldissum: trowstatefoldissumhandler;
    procedure setrowcount(const avalue: integer);
    procedure setdatacols(const avalue: tifilinkcomparrayprop);
    function getrowstate: tcustomrowstatelist;
@@ -705,6 +711,8 @@ type
    procedure setrowstate_foldlevel(const avalue: tifiintegerlinkcomp);
    function getrowstate_hidden: tifibooleanlinkcomp;
    procedure setrowstate_hidden(const avalue: tifibooleanlinkcomp);
+   function getrowstate_foldissum: tifibooleanlinkcomp;
+   procedure setrowstate_foldissum(const avalue: tifibooleanlinkcomp);
   protected
    fgridstate: gridclientstatesty;
    procedure itemchanged(const sender: tdatalist; const aindex: integer);
@@ -740,6 +748,8 @@ type
                                                     write setrowstate_foldlevel;
    property rowstate_hidden: tifibooleanlinkcomp read getrowstate_hidden 
                                                     write setrowstate_hidden;
+   property rowstate_foldissum: tifibooleanlinkcomp read getrowstate_foldissum 
+                                                    write setrowstate_foldissum;
  end;
  
  tifilinkcomp = class(tmsecomponent)
@@ -3685,9 +3695,28 @@ begin
    else begin
     hidden[findexpar]:= tbooleandatalist(flistlink.source)[findexpar];
    end;
-   rowchanged(findexpar);
-   rowstatechanged(findexpar);
-   layoutchanged;
+//   rowchanged(findexpar);
+//   rowstatechanged(findexpar);
+//   layoutchanged;
+  end;
+ end;
+end;
+
+{ trowstatehiddenhandler }
+
+procedure trowstatefoldissumhandler.updateclient(const alink: pointer);
+begin
+ with iifigridlink(alink) do begin
+  with getrowstate do begin
+   if findexpar < 0 then begin
+    foldissumar:= tbooleandatalist(flistlink.source).asarray;
+   end
+   else begin
+    foldissum[findexpar]:= tbooleandatalist(flistlink.source)[findexpar];
+   end;
+//   rowchanged(findexpar);
+//   rowstatechanged(findexpar);
+//   layoutchanged;
   end;
  end;
 end;
@@ -3701,6 +3730,7 @@ begin
  frowstatefont:= trowstatefonthandler.create(self);
  frowstatefoldlevel:= trowstatefoldlevelhandler.create(self);
  frowstatehidden:= trowstatehiddenhandler.create(self);
+ frowstatefoldissum:= trowstatefoldissumhandler.create(self);
  inherited;
 end;
 
@@ -3711,6 +3741,7 @@ begin
  frowstatefont.free;
  frowstatefoldlevel.free;
  frowstatehidden.free;
+ frowstatefoldissum.free;
  inherited;
 end;
 
@@ -4005,6 +4036,17 @@ begin
  frowstatehidden.ifilink:= avalue;
 end;
 
+function tgridclientcontroller.getrowstate_foldissum: tifibooleanlinkcomp;
+begin
+ result:= frowstatefoldissum.ifilink;
+end;
+
+procedure tgridclientcontroller.setrowstate_foldissum(
+                                           const avalue: tifibooleanlinkcomp);
+begin
+ frowstatefoldissum.ifilink:= avalue;
+end;
+
 function tgridclientcontroller.checkcomponent(const aintf: iifilink): pointer;
 begin
  result:= inherited checkcomponent(aintf);
@@ -4021,6 +4063,7 @@ begin
    frowstatefont.itemchanged(tcustomrowstatelist(sender),aindex);
    frowstatefoldlevel.itemchanged(tcustomrowstatelist(sender),aindex);
    frowstatehidden.itemchanged(tcustomrowstatelist(sender),aindex);
+   frowstatefoldissum.itemchanged(tcustomrowstatelist(sender),aindex);
   finally
    exclude(fgridstate,gcs_itemchangelock);
   end;
