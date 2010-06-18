@@ -1203,10 +1203,10 @@ type
    flinkissum: listlinkinfoty;
    ffoldlevelsourcelock: integer;
    fissumsourcelock: integer;
-  {$ifdef mse_with_ifi}
-   fifilinkfoldlevel: tifiintegerlinkcomp;
-   fifilinkissum: tifibooleanlinkcomp;
-  {$endif}
+//  {$ifdef mse_with_ifi}
+//   fifilinkfoldlevel: tifiintegerlinkcomp;
+//   fifilinkissum: tifibooleanlinkcomp;
+//  {$endif}
    procedure cleanfolding(arow: integer; visibleindex: integer);
    function isvisible(const arow: integer): boolean;
    procedure counthidden(var aindex: integer);
@@ -1221,10 +1221,10 @@ type
    procedure setsourceissum(const avalue: string);
    procedure sourcenamechanged(const atag: integer);
   {$ifdef mse_with_ifi}
-   procedure setifilinkfoldlevel1(const avalue: tifiintegerlinkcomp);
-   procedure setifilinkissum1(const avalue: tifibooleanlinkcomp);
-   procedure setifilinkfoldlevel(const avalue: tifiintegerlinkcomp);
-   procedure setifilinkissum(const avalue: tifibooleanlinkcomp);
+//   procedure setifilinkfoldlevel1(const avalue: tifiintegerlinkcomp);
+//   procedure setifilinkissum1(const avalue: tifibooleanlinkcomp);
+//   procedure setifilinkfoldlevel(const avalue: tifiintegerlinkcomp);
+//   procedure setifilinkissum(const avalue: tifibooleanlinkcomp);
     //iifilink
    function getifilinkkind: ptypeinfo;
     //iificlient
@@ -1327,10 +1327,10 @@ type
    property sourceissum: string read flinkissum.name 
                                             write setsourceissum;
   {$ifdef mse_with_ifi}
-   property ifilinkfoldlevel: tifiintegerlinkcomp read fifilinkfoldlevel 
-                                           write setifilinkfoldlevel;
-   property ifilinkissum: tifibooleanlinkcomp read fifilinkissum
-                                           write setifilinkissum;
+//   property ifilinkfoldlevel: tifiintegerlinkcomp read fifilinkfoldlevel 
+//                                           write setifilinkfoldlevel;
+//   property ifilinkissum: tifibooleanlinkcomp read fifilinkissum
+//                                           write setifilinkissum;
   {$endif} 
  end;
 
@@ -6917,12 +6917,12 @@ begin
   end;
   count:= newcount;
  {$ifdef mse_with_ifi}
-  if (fifilinkfoldlevel <> nil) and (flinkfoldlevel.source <> nil) then begin
-   flinkfoldlevel.source.count:= newcount;
-  end;
-  if (fifilinkissum <> nil) and (flinkissum.source <> nil) then begin
-   flinkissum.source.count:= newcount;
-  end;
+//  if (fifilinkfoldlevel <> nil) and (flinkfoldlevel.source <> nil) then begin
+//   flinkfoldlevel.source.count:= newcount;
+//  end;
+//  if (fifilinkissum <> nil) and (flinkissum.source <> nil) then begin
+//   flinkissum.source.count:= newcount;
+//  end;
  {$endif}
   if fvisiblerowmap <> nil then begin
    fvisiblerowmap.count:= newcount;
@@ -7005,12 +7005,12 @@ begin
  with frowstate do begin
   blockmovedata(fromindex,toindex,acount);
  {$ifdef mse_with_ifi}
-  if (fifilinkfoldlevel <> nil) and (flinkfoldlevel.source <> nil) then begin
-   flinkfoldlevel.source.blockmovedata(fromindex,toindex,acount);
-  end;
-  if (fifilinkissum <> nil) and (flinkissum.source <> nil) then begin
-   flinkissum.source.blockmovedata(fromindex,toindex,acount);
-  end;
+//  if (fifilinkfoldlevel <> nil) and (flinkfoldlevel.source <> nil) then begin
+//   flinkfoldlevel.source.blockmovedata(fromindex,toindex,acount);
+//  end;
+//  if (fifilinkissum <> nil) and (flinkissum.source <> nil) then begin
+//   flinkissum.source.blockmovedata(fromindex,toindex,acount);
+//  end;
  {$endif}
   if fvisiblerowmap <> nil then begin
    fvisiblerowmap.blockmovedata(fromindex,toindex,acount);
@@ -7027,12 +7027,12 @@ begin
  with frowstate do begin
   insertitems(index,acount);
  {$ifdef mse_with_ifi}
-  if (fifilinkfoldlevel <> nil) and (flinkfoldlevel.source <> nil) then begin
-   flinkfoldlevel.source.insertitems(index,acount);
-  end;
-  if (fifilinkissum <> nil) and (flinkissum.source <> nil) then begin
-   flinkissum.source.insertitems(index,acount);
-  end;
+//  if (fifilinkfoldlevel <> nil) and (flinkfoldlevel.source <> nil) then begin
+//   flinkfoldlevel.source.insertitems(index,acount);
+//  end;
+//  if (fifilinkissum <> nil) and (flinkissum.source <> nil) then begin
+//   flinkissum.source.insertitems(index,acount);
+//  end;
  {$endif}
   if fvisiblerowmap <> nil then begin
    fvisiblerowmap.insertitems(index,acount);
@@ -7051,12 +7051,12 @@ begin
    updatedeletedrows(index,acount);
    fvisiblerowmap.deleteitems(index,acount);
   {$ifdef mse_with_ifi}
-   if (fifilinkfoldlevel <> nil) and (flinkfoldlevel.source <> nil) then begin
-    flinkfoldlevel.source.deleteitems(index,acount);
-   end;
-   if (fifilinkissum <> nil) and (flinkissum.source <> nil) then begin
-    flinkissum.source.deleteitems(index,acount);
-   end;
+//   if (fifilinkfoldlevel <> nil) and (flinkfoldlevel.source <> nil) then begin
+//    flinkfoldlevel.source.deleteitems(index,acount);
+//   end;
+//   if (fifilinkissum <> nil) and (flinkissum.source <> nil) then begin
+//    flinkissum.source.deleteitems(index,acount);
+//   end;
   {$endif}
   end;
   deleteitems(index,acount);
@@ -16024,20 +16024,20 @@ begin
    for int1:= 0 to getsourcecount-1 do begin
     str1:= getsourcename(int1);  //link all source lists
   {$ifdef mse_with_ifi}
-    if str1 = '' then begin
-     case int1 of
-      rowstatefoldleveltag: begin
-       if fifilinkfoldlevel <> nil then begin
-        continue;
-       end;
-      end;
-      rowstateissumtag: begin
-       if fifilinkissum <> nil then begin
-        continue;
-       end;
-      end;
-     end;
-    end;
+//    if str1 = '' then begin
+//     case int1 of
+//      rowstatefoldleveltag: begin
+//       if fifilinkfoldlevel <> nil then begin
+//        continue;
+//       end;
+//      end;
+//      rowstateissumtag: begin
+//       if fifilinkissum <> nil then begin
+//        continue;
+//       end;
+//      end;
+//     end;
+//    end;
   {$endif}
     datalist1:= nil;
     if str1 <> '' then begin
@@ -16058,7 +16058,7 @@ end;
 procedure trowstatelist.setsourcefoldlevel(const avalue: string);
 begin
  {$ifdef mse_with_ifi}
- setifilinkfoldlevel1(nil);
+// setifilinkfoldlevel1(nil);
  {$endif}
  setsourcefoldlevel1(avalue);
 end;
@@ -16072,7 +16072,7 @@ end;
 procedure trowstatelist.setsourceissum(const avalue: string);
 begin
  {$ifdef mse_with_ifi}
- setifilinkissum1(nil);
+// setifilinkissum1(nil);
  {$endif}
  setsourceissum1(avalue);
 end;
@@ -16149,6 +16149,7 @@ begin
 end;
 
 {$ifdef mse_with_ifi}
+{
 procedure trowstatelist.setifilinkfoldlevel1(const avalue: tifiintegerlinkcomp);
 begin
  mseificomp.setifilinkcomp(iifidatalink(self),avalue,fifilinkfoldlevel);
@@ -16170,7 +16171,7 @@ begin
  setsourceissum1(''); 
  setifilinkissum1(avalue);
 end;
-
+}
 function trowstatelist.getifilinkkind: ptypeinfo;
 begin
  result:= typeinfo(iifidatalink);
@@ -16189,12 +16190,13 @@ end;
 procedure trowstatelist.updateifigriddata(const sender: tobject;
                const alist: tdatalist);
 begin
- if sender = fifilinkfoldlevel then begin
-  linksource(alist,rowstatefoldleveltag);
- end;
- if sender = fifilinkissum then begin
-  linksource(alist,rowstateissumtag);
- end;
+ //dummy
+// if sender = fifilinkfoldlevel then begin
+//  linksource(alist,rowstatefoldleveltag);
+// end;
+// if sender = fifilinkissum then begin
+//  linksource(alist,rowstateissumtag);
+// end;
 end;
 
 procedure trowstatelist.ifisetvalue(var avalue; var accept: boolean);

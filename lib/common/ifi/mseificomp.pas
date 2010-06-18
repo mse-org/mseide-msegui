@@ -620,6 +620,8 @@ type
   protected
    fowner: tgridclientcontroller;
    procedure updateclient(const alink: pointer); virtual; abstract;
+   procedure updateremote(const sender: tcustomrowstatelist; 
+                                    const aindex: integer); virtual; abstract;
    procedure itemchanged(const sender: tcustomrowstatelist; 
                                             const aindex: integer);
    procedure listdestroyed(const sender: tdatalist); override;
@@ -661,26 +663,36 @@ type
  trowstatecolorhandler = class(trowstateintegerhandler)
   protected
    procedure updateclient(const alink: pointer); override;
+   procedure updateremote(const sender: tcustomrowstatelist; 
+                                    const aindex: integer); override;
  end;
 
  trowstatefonthandler = class(trowstateintegerhandler)
   protected
    procedure updateclient(const alink: pointer); override;
+   procedure updateremote(const sender: tcustomrowstatelist; 
+                                    const aindex: integer); override;
  end;
 
  trowstatefoldlevelhandler = class(trowstateintegerhandler)
   protected
    procedure updateclient(const alink: pointer); override;
+   procedure updateremote(const sender: tcustomrowstatelist; 
+                                    const aindex: integer); override;
  end;
 
  trowstatehiddenhandler = class(trowstatebooleanhandler)
   protected
    procedure updateclient(const alink: pointer); override;
+   procedure updateremote(const sender: tcustomrowstatelist; 
+                                    const aindex: integer); override;
  end;
  
  trowstatefoldissumhandler = class(trowstatebooleanhandler)
   protected
    procedure updateclient(const alink: pointer); override;
+   procedure updateremote(const sender: tcustomrowstatelist; 
+                                    const aindex: integer); override;
  end;
  
  gridclientstatety = (gcs_itemchangelock);
@@ -3600,7 +3612,7 @@ begin //todo: optimize
    if aindex < 0 then begin
     flistlink.source.count:= sender.count;
    end;
-   //...
+   updateremote(sender,aindex);
   finally
    exclude(fstate,dls_remotelock);
   end;
@@ -3648,6 +3660,17 @@ begin
  end;
 end;
 
+procedure trowstatecolorhandler.updateremote(const sender: tcustomrowstatelist;
+               const aindex: integer);
+begin
+ if aindex < 0 then begin
+  tintegerdatalist(flistlink.source).asarray:= sender.colorar;
+ end
+ else begin
+  tintegerdatalist(flistlink.source)[aindex]:= sender.color[aindex];
+ end;
+end;
+
 { trowstatefonthandler }
 
 procedure trowstatefonthandler.updateclient(const alink: pointer);
@@ -3662,6 +3685,17 @@ begin
    end;
    rowchanged(findexpar);
   end;
+ end;
+end;
+
+procedure trowstatefonthandler.updateremote(const sender: tcustomrowstatelist;
+               const aindex: integer);
+begin
+ if aindex < 0 then begin
+  tintegerdatalist(flistlink.source).asarray:= sender.fontar;
+ end
+ else begin
+  tintegerdatalist(flistlink.source)[aindex]:= sender.font[aindex];
  end;
 end;
 
@@ -3680,6 +3714,17 @@ begin
    rowchanged(findexpar);
    rowstatechanged(findexpar);
   end;
+ end;
+end;
+
+procedure trowstatefoldlevelhandler.updateremote(const sender: tcustomrowstatelist;
+               const aindex: integer);
+begin
+ if aindex < 0 then begin
+  tintegerdatalist(flistlink.source).asarray:= sender.foldlevelar;
+ end
+ else begin
+  tintegerdatalist(flistlink.source)[aindex]:= sender.foldlevel[aindex];
  end;
 end;
 
@@ -3702,6 +3747,17 @@ begin
  end;
 end;
 
+procedure trowstatehiddenhandler.updateremote(const sender: tcustomrowstatelist;
+               const aindex: integer);
+begin
+ if aindex < 0 then begin
+  tbooleandatalist(flistlink.source).asarray:= sender.hiddenar;
+ end
+ else begin
+  tbooleandatalist(flistlink.source)[aindex]:= sender.hidden[aindex];
+ end;
+end;
+
 { trowstatehiddenhandler }
 
 procedure trowstatefoldissumhandler.updateclient(const alink: pointer);
@@ -3718,6 +3774,17 @@ begin
 //   rowstatechanged(findexpar);
 //   layoutchanged;
   end;
+ end;
+end;
+
+procedure trowstatefoldissumhandler.updateremote(const sender: tcustomrowstatelist;
+               const aindex: integer);
+begin
+ if aindex < 0 then begin
+  tbooleandatalist(flistlink.source).asarray:= sender.foldissumar;
+ end
+ else begin
+  tbooleandatalist(flistlink.source)[aindex]:= sender.foldissum[aindex];
  end;
 end;
 

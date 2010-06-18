@@ -1255,8 +1255,8 @@ begin
                                      (ifilink1 is tifivaluelinkcomp) then begin
     if fdata = dl1 then begin
      dl1:= nil; //no double free
-     updateifigriddata(tifivaluelinkcomp(ifilink1).controller.datalist);
     end;
+    updateifigriddata(tifivaluelinkcomp(ifilink1).controller.datalist);
    end
    else begin
   {$endif}
