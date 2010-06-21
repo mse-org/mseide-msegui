@@ -70,9 +70,9 @@ const
   '&Copiar',                    //sc_Copy   // hotkeys       //
   'C&ortar',                    //sc_Cut    //               //
   '&Pegar',                     //sc_Paste ///               // hotkeys
-  '&Insert Row',                //sc_insert_row ///          //
-  '&Append Row',                //sc_append_row  // hotkeys  //
-  '&Delete Row',                //sc_delete_row ///         ///
+  '&Insertar fila',                //sc_insert_row ///          //
+  '&A'#241'adir fila',                //sc_append_row  // hotkeys  //
+  '&Borrar fila',                //sc_delete_row ///         ///
 
   '&Directorio',                //sc_Dir               /// 
   '&Subir',                     //sc_Up                 //
