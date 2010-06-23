@@ -279,7 +279,7 @@ procedure handleerror(const e: exception; const text: string);
 implementation
 uses
  mseparser,msesysintf,memoryform,
- regwidgets,regeditwidgets,regkernel,regdialogs,regprinter,
+ regwidgets,regeditwidgets,regkernel,regdialogs,regprinter,regmath,
  {$ifdef FPC}{$ifndef mse_withoutdb}regdb,regreport,{$endif}{$endif}
 {$ifdef mse_with_ifi}
  regifi,{$ifdef mse_with_ifirem}regifirem,{$endif}

@@ -446,6 +446,7 @@ type
    procedure insert(index: integer; const item: realty);
    procedure number(start,step: real);
    procedure fill(acount: integer; const defaultvalue: realty);
+   procedure minmax(out minval,maxval: realty);
 
    property asarray: realarty read getasarray write setasarray;
    property items[index: integer]: realty read Getitems write Setitems; default;
@@ -1005,6 +1006,8 @@ procedure additem(var dest: lmsestringarty; const value: lmsestringty;
                              var count: integer; step: integer = 32); overload;
 procedure additem(var dest: integerarty; const value: integer;
                              var count: integer; step: integer = 32); overload;
+procedure additem(var dest: realarty; const value: real;
+                             var count: integer; step: integer = 32); overload;
 procedure additem(var dest: pointerarty; const value: pointer;
                              var count: integer; step: integer = 32); overload;
 procedure additem(var dest: winidarty; const value: winidty;
@@ -1086,6 +1089,7 @@ procedure moveitem(var dest: integerarty; const sourceindex: integer;
 function adduniqueitem(var dest: pointerarty; const value: pointer): integer;
                         //returns index
 
+procedure minmax(const ar: realarty; out minval,maxval: realty);
 
 function stackarfunc(const ar1,ar2: integerarty): integerarty;
 procedure stackarray(const source: stringarty; var dest: stringarty); overload;
@@ -1594,6 +1598,16 @@ begin
  inc(count);
 end;
 
+procedure additem(var dest: realarty; const value: real;
+                             var count: integer; step: integer = 32);
+begin
+ if length(dest) <= count then begin
+  setlength(dest,count+step+2*length(dest));
+ end;
+ dest[count]:= value;
+ inc(count);
+end;
+
 procedure additem(var dest: pointerarty; const value: pointer;
                              var count: integer; step: integer = 32);
 begin
@@ -1949,6 +1963,30 @@ begin
  result:= high(dest) + 1;
  setlength(dest,result+1);
  dest[result]:= value;
+end;
+
+procedure minmax(const ar: realarty; out minval,maxval: realty);
+var
+ int1: integer;
+ min1,max1: realty;
+begin
+ min1:= bigreal;
+ max1:= emptyreal;
+ for int1:= high(ar) downto 0 do begin
+  if isemptyreal(ar[int1]) then begin
+   min1:= ar[int1];
+  end
+  else begin
+   if isemptyreal(max1) or (ar[int1] > max1) then begin
+    max1:= ar[int1];
+   end;
+   if not isemptyreal(min1) and (min1 > ar[int1]) then begin
+    min1:= ar[int1];
+   end;
+  end;
+ end;
+ minval:= min1;
+ maxval:= max1;
 end;
 
 function stackarfunc(const ar1,ar2: integerarty): integerarty;
@@ -5068,6 +5106,33 @@ end;
 procedure trealdatalist.fill(acount: integer; const defaultvalue: realty);
 begin
  internalfill(count,defaultvalue);
+end;
+
+procedure trealdatalist.minmax(out minval,maxval: realty);
+var
+ int1: integer;
+ po1: prealty;
+ min1,max1: realty;
+begin
+ min1:= bigreal;
+ max1:= emptyreal;
+ po1:= datapo;
+ for int1:= count-1 downto 0 do begin
+  if isemptyreal(po1^) then begin
+   min1:= po1^;
+  end
+  else begin
+   if isemptyreal(max1) or (po1^ > max1) then begin
+    max1:= po1^;
+   end;
+   if not isemptyreal(min1) and (min1 > po1^) then begin
+    min1:= po1^;
+   end;
+  end;
+  inc(pchar(po1),fsize);
+ end;
+ minval:= min1;
+ maxval:= max1;
 end;
 
 function trealdatalist.getstatdata(const index: integer): msestring;

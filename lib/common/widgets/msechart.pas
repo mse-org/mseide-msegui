@@ -12,7 +12,8 @@ unit msechart;
 interface
 
 uses
- classes,msegui,mseguiglob,mseclasses,msearrayprops,msetypes,msegraphics,msegraphutils,
+ classes,msegui,mseguiglob,mseclasses,msearrayprops,msetypes,msegraphics,
+ msegraphutils,
  msewidgets,msesimplewidgets,msedial,msebitmap,msemenus,mseevent,
  msedatalist;
  
@@ -252,7 +253,8 @@ type
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
    class function getitemclasstype: persistentclassty; override;
-   property items[const aindex: integer]: tchartdialvert read getitems write setitems; default;
+   property items[const aindex: integer]: tchartdialvert read getitems
+                                                      write setitems; default;
  end;
 
  tchartframe = class(tscrollboxframe)
@@ -407,13 +409,50 @@ type
    property onpaint;
    property onafterpaint;
  end;
- 
+
+function autointerval(const arange: real; const aintervalcount: real): real;
+                   //returns apropropriate 1/2/5 value
+                   
 implementation
 uses
- sysutils;
+ sysutils,math;
 
 type
  tcustomdialcontroller1 = class(tcustomdialcontroller);
+
+function autointerval(const arange: real; const aintervalcount: real): real;
+                   //returns apropropriate 1/2/5 value
+var
+ rea1: real;
+ rea2: real;
+ int1: integer;
+ scale: real;
+begin
+ rea1:= abs(arange/aintervalcount);
+ int1:= ceil(log10(rea1));
+ scale:= intpower(10,int1-1);
+ rea2:= 0.9*rea1/scale; //1..10, 10% overrange
+ if rea2 < 1 then begin
+  rea2:= 1;
+ end
+ else begin
+  if rea2 < 2 then begin
+   rea2:= 2;
+  end
+  else begin
+   if rea2 < 5 then begin
+    rea2:= 5;
+   end
+   else begin
+    rea2:= 10;
+   end;
+  end;
+ end;
+ result:= rea2 * scale;
+ if arange < 0 then begin
+  result:= -result;
+ end;
+end;
   
 { ttrace }
 
@@ -527,12 +566,15 @@ var
  ar1: datapointarty;
  dpcountx,dpcounty,dpcountxy: integer;
  xbottom,xtop: integer;
+ isxseries: boolean;
+ dpcounty1: integer;
  
 begin
  if not (trs_datapointsvalid in finfo.state) then begin
   dpcountx:= 0;
   dpcounty:= 0;
   with finfo do begin
+   isxseries:= (kind = trk_xseries);
    bottommargin:= 0;
    topmargin:= 0;
    if xydata <> nil then begin
@@ -567,24 +609,52 @@ begin
    end;
   end;
   dpcountxy:= dpcountx;
-  if dpcounty < dpcountxy then begin
+  if isxseries or (dpcounty < dpcountxy) then begin
    dpcountxy:= dpcounty;
   end;
   yo:= -finfo.ystart - finfo.yrange;
   ys:= -tchart(fowner).traces.fscaley / finfo.yrange;
   case finfo.kind of
-   trk_xy: begin     
-    xo:= -finfo.xstart;
-    xs:= tchart(fowner).traces.fscalex / finfo.xrange;
+   trk_xy,trk_xseries: begin     
+    if isxseries then begin
+     dpcounty1:= dpcounty-1;
+     rea1:= 0;
+     if maxcount > 1 then begin
+      int2:= maxcount - 1;
+      if (int2 > dpcounty1) and 
+                       (cto_adddataright in finfo.options) then begin
+       rea1:= {$ifdef FPC}real({$endif}1.0{$ifdef FPC}){$endif} - 
+                                                dpcounty1 / int2;
+      end;
+     end
+     else begin
+      int2:= dpcounty1;
+     end;
+     xo:= (rea1 - finfo.xstart) * int2;
+     xs:= tchart(fowner).traces.fscalex;
+     if int2 > 0 then begin
+      xs:= xs / (finfo.xrange * int2);
+     end;
+     xo:= xo + 1/xs;
+    end
+    else begin
+     xo:= -finfo.xstart;
+     xs:= tchart(fowner).traces.fscalex / finfo.xrange;
+    end;
     checkrange(dpcountxy);
-    if cto_xordered in finfo.options then begin
+    if (cto_xordered in finfo.options) or isxseries then begin
      int4:= tchart(fowner).traces.fsize.cx+2;
      setlength(ar1,int4);
      dec(int4);
      xbottom:= minint;
      xtop:= maxint;
      for int1:= 0 to dpcountxy - 1 do begin
-      int2:= pkround((preal(pox)^ + xo)* xs) + 1;
+      if isxseries then begin
+       int2:= round((int1 + xo)* xs);
+      end
+      else begin
+       int2:= pkround((preal(pox)^ + xo)* xs) + 1;
+      end;
       int3:= pkround((preal(poy)^ + yo)* ys);
       if int2 < 0 then begin
        if int2 > xbottom then begin
@@ -656,18 +726,19 @@ begin
       end;
      end;
      setlength(finfo.datapoints,int2);
-     with finfo do begin
+     with finfo do begin //adjust boundary values 
+                         //todo: extend window for image size
       if int2 > 1 then begin
        if ar1[0].used then begin
         bottommargin:= 1;
-        finfo.datapoints[0].y:= pkround(datapoints[0].y + 
+        datapoints[0].y:= pkround(datapoints[0].y + 
               (datapoints[1].y - datapoints[0].y) * 
                 (-1-xbottom)/
                 (datapoints[1].x-xbottom));
        end;
        if ar1[high(ar1)].used then begin
         topmargin:= 1;
-        finfo.datapoints[int2-1].y:= pkround(datapoints[int2-1].y + 
+        datapoints[int2-1].y:= pkround(datapoints[int2-1].y + 
               (datapoints[int2-2].y - datapoints[int2-1].y) * 
                 (length(ar1)-xtop)/
                 (datapoints[int2-2].x-xtop));
@@ -685,6 +756,7 @@ begin
      end;
     end;
    end;
+(*
    else begin //trk_xseries
     checkrange(dpcounty);
     setlength(finfo.datapoints,dpcounty);
@@ -713,6 +785,7 @@ begin
      end;
     end;
    end;
+*)
   end;
   include(finfo.state,trs_datapointsvalid);
  end;

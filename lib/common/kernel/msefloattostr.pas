@@ -343,7 +343,11 @@ begin
      if mode1 = fsm_fix then begin
       if (int1 <= 0) then begin    //999.99-> 1000.00 -> 1000 (trimmed trailing 0) 
        if (mode >= fsm_engfix) then begin
-        if length(result) > 3 then begin
+        int4:= 3;
+        if result[1] = '-' then begin
+         inc(int4);
+        end;
+        if length(result) > int4 then begin
          setlength(result,length(result)-3);
          int3:= int3 + 3; //correct carry, 999.99-> 1000 -> 1
         end;

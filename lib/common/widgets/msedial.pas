@@ -1107,7 +1107,7 @@ begin
   transform(pos);
  end;
 end;
-
+var testvar: dialtickinfoty;
 procedure tcustomdialcontroller.checklayout;
 var
  rect1: rectty;
@@ -1343,6 +1343,7 @@ begin
     finfo.afont:= font;
     linestart:= 0; //compiler warning
     lineend:= 0; //compiler warning
+testvar:= finfo;
     with finfo,fli do begin
      if intervalcount <= 0 then begin
       ticks:= nil;
@@ -1444,7 +1445,11 @@ begin
        end;
        int2:= -int2 div 2;
        for int1:= 0 to high(captions) do begin
-        captions[int1].caption:= getactcaption(int1*valstep+first,caption);
+        rea1:= int1*valstep+first;
+        if abs(rea1/valstep) < 1e-6 then begin
+         rea1:= 0;
+        end;
+        captions[int1].caption:= getactcaption(rea1,caption);
         with captions[int1] do begin
          pos:= ticks[int1].a;
          adjustcaption(dir1,dto_rotatetext in options,fli,afont,
