@@ -1107,7 +1107,7 @@ begin
   transform(pos);
  end;
 end;
-var testvar: dialtickinfoty;
+
 procedure tcustomdialcontroller.checklayout;
 var
  rect1: rectty;
@@ -1121,7 +1121,7 @@ var
  dir1: graphicdirectionty;
  boxlines: array[0..1] of segmentty;
  bo1: boolean;
- rea1: real;
+ rea1,rea2: real;
  po1,po2: prectty;
  po3: psegmentty;
  horz1: boolean;
@@ -1343,7 +1343,6 @@ begin
     finfo.afont:= font;
     linestart:= 0; //compiler warning
     lineend:= 0; //compiler warning
-testvar:= finfo;
     with finfo,fli do begin
      if intervalcount <= 0 then begin
       ticks:= nil;
@@ -1439,9 +1438,9 @@ testvar:= finfo;
       else begin
        system.setlength(captions,system.length(ticks));
        int2:= high(captions) * 2; //2* interval count
-       rea1:= -(angle*2*pi);
+       rea2:= -(angle*2*pi);
        if int2 <> 0 then begin
-        rea1:= rea1 / int2;
+        rea2:= rea2 / int2;
        end;
        int2:= -int2 div 2;
        for int1:= 0 to high(captions) do begin
@@ -1455,7 +1454,7 @@ testvar:= finfo;
          adjustcaption(dir1,dto_rotatetext in options,fli,afont,
                canvas1.getstringwidth(caption,afont),pos);
          if dto_rotatetext in options then begin
-          angle:= int2 * rea1;
+          angle:= int2 * rea2;
           int2:= int2 + 2;
          end
          else begin
