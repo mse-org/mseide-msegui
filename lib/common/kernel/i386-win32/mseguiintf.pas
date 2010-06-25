@@ -379,6 +379,10 @@ function DispatchMessage(const lpMsg: TMsg): Longint; stdcall;
 {$endif}
 
 type
+{$ifndef FPC}
+ POINT = tpoint;
+ RECT = trect;
+ {$endif}
  HIMC = DWORD;
  tagCOMPOSITIONFORM = record
   dwStyle: DWORD;
@@ -5232,9 +5236,9 @@ begin
  ['ImmGetContext',
   'ImmReleaseContext',
   'ImmSetCompositionWindow'],
- [@ImmGetContext,
-  @ImmReleaseContext,
-  @ImmSetCompositionWindow]);
+ [{$ifndef FPC}@{$endif}@ImmGetContext,
+  {$ifndef FPC}@{$endif}@ImmReleaseContext,
+  {$ifndef FPC}@{$endif}@ImmSetCompositionWindow]);
 end;
 
 initialization
