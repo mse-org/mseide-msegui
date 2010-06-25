@@ -377,6 +377,34 @@ function TranslateMessage(const lpMsg: TMsg): BOOL; stdcall;
 function DispatchMessage(const lpMsg: TMsg): Longint; stdcall;
              external user32 name 'DispatchMessageA';
 {$endif}
+
+type
+ HIMC = DWORD;
+ tagCOMPOSITIONFORM = record
+  dwStyle: DWORD;
+  ptCurrentPos: POINT;
+  rcArea: RECT;
+ end;
+ COMPOSITIONFORM = tagCOMPOSITIONFORM;
+ PCOMPOSITIONFORM = ^COMPOSITIONFORM;
+ NPCOMPOSITIONFORM = ^COMPOSITIONFORM;
+ LPCOMPOSITIONFORM = ^COMPOSITIONFORM;
+
+const
+// bit field for IMC_SETCOMPOSITIONWINDOW, IMC_SETCANDIDATEWINDOW
+      CFS_DEFAULT                     = $0000;
+      CFS_RECT                        = $0001;
+      CFS_POINT                       = $0002;
+      CFS_FORCE_POSITION              = $0020;
+      CFS_CANDIDATEPOS                = $0040;
+      CFS_EXCLUDE                     = $0080;
+      
+var
+ hasimm32: boolean;
+ ImmGetContext: function(_hwnd: HWND): HIMC; stdcall;
+ ImmReleaseContext: function(_hwnd: HWND; _himc: HIMC): BOOL; stdcall;
+ ImmSetCompositionWindow: function(_himc: HIMC; 
+                          lpCompForm: LPCOMPOSITIONFORM): BOOL; stdcall;
              
 function getapplicationwindow: hwnd;
 begin
@@ -4249,6 +4277,9 @@ var
  bo1: boolean;
  sysevent: syseventty;
  shiftstate1: uint;
+ imc: himc;
+ imminfo: compositionform;
+ 
 begin
  if application.ismainthread then begin
   sysevent.hwnd:= ahwnd;
@@ -4457,6 +4488,20 @@ begin
     charbuffer:= '';
    end;
    eventlist.add(tkeyevent.create(ahwnd,true,key1,key1,shiftstate,'',timestamp));
+  end;
+  wm_ime_startcomposition: begin
+   if hasimm32 and (application.activewidget <> nil) and 
+                            application.activewidget.hascaret then begin
+    imc:= immgetcontext(ahwnd);
+    fillchar(imminfo,sizeof(imminfo),0);
+    with imminfo,application do begin
+     dwstyle:= cfs_point;
+     ptcurrentpos.x:= caret.pos.x + activewidget.bounds_x;
+     ptcurrentpos.y:= activewidget.bounds_y + activewidget.bounds_cy;
+     immsetcompositionwindow(imc,@imminfo);
+    end;
+    immreleasecontext(ahwnd,imc);
+   end;
   end;
  end;
  if iswin95 then begin
@@ -5181,6 +5226,18 @@ procedure GUI_DEBUGEND;
 begin
 end;
 
+procedure initlibs;
+begin
+ hasimm32:= checkprocaddresses(['Imm32.dll'],
+ ['ImmGetContext',
+  'ImmReleaseContext',
+  'ImmSetCompositionWindow'],
+ [@ImmGetContext,
+  @ImmReleaseContext,
+  @ImmSetCompositionWindow]);
+end;
+
 initialization
+ initlibs;
  initdefaultfont;
 end.
