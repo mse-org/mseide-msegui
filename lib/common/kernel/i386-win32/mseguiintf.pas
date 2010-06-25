@@ -4500,8 +4500,10 @@ begin
     fillchar(imminfo,sizeof(imminfo),0);
     with imminfo,application do begin
      dwstyle:= cfs_point;
-     ptcurrentpos.x:= caret.pos.x + activewidget.bounds_x;
-     ptcurrentpos.y:= activewidget.bounds_y + activewidget.bounds_cy;
+     ptcurrentpos.x:= caret.pos.x + caret.origin.x;
+     ptcurrentpos.y:= caret.pos.y + caret.origin.y{ + caret.size.cy};
+//     ptcurrentpos.x:= caret.pos.x + activewidget.rootpos.x;
+//     ptcurrentpos.y:= activewidget.rootpos.y + activewidget.bounds_cy;
      immsetcompositionwindow(imc,@imminfo);
     end;
     immreleasecontext(ahwnd,imc);
