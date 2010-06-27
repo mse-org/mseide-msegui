@@ -1209,6 +1209,7 @@ var
  islog: boolean;
  logstartn,intervalcount1: integer;
  ar1: realarty;
+ ar2: booleanarty;
  
 begin
  if not (dis_layoutvalid in fstate) then begin
@@ -1521,6 +1522,8 @@ begin
         end;
        end;
       end;
+      ar2:= nil;
+      system.setlength(ar2,system.length(ticks));
       for int1:= 0 to high(ticks) do begin //snap to existing ticks
        po3:= nil;
        rea1:= ticksreal[int1];
@@ -1529,11 +1532,12 @@ begin
          for int3:= 0 to high(ticks) do begin
           if abs(rea1-ticksreal[int3]) < 0.1 then begin
            po3:= @ticks[int3];
+           ar2[int1]:= captions <> nil;
            break;
           end;
          end;
         end;
-        if po3 <> nil then begin
+        if (po3 <> nil) and ar2[int1] then begin //else check more captions
          break;
         end;
        end;
@@ -1573,19 +1577,24 @@ begin
           rea1:= 0;
          end;
         end;
-        captions[int1].caption:= getactcaption(rea1,caption);
-        with captions[int1] do begin
-         pos:= ticks[int1].a;
-         adjustcaption(dir1,dto_rotatetext in options,fli,afont,
-               canvas1.getstringwidth(caption,afont),pos);
-         if dto_rotatetext in options then begin
-          angle:= int2 * rea2;
-          int2:= int2 + 2;
-         end
-         else begin
-          angle:= 0;
+        if ar2[int1] then begin
+         captions[int1].caption:= '';
+        end
+        else begin
+         captions[int1].caption:= getactcaption(rea1,caption);
+         with captions[int1] do begin
+          pos:= ticks[int1].a;
+          adjustcaption(dir1,dto_rotatetext in options,fli,afont,
+                canvas1.getstringwidth(caption,afont),pos);
+          if dto_rotatetext in options then begin
+           angle:= int2 * rea2;
+           int2:= int2 + 2;
+          end
+          else begin
+           angle:= 0;
+          end;
+          angle:= angle + escapement * 2*pi;
          end;
-         angle:= angle + escapement * 2*pi;
         end;
        end;
       end;
