@@ -1440,6 +1440,9 @@ begin
        step:= 1/(chartln(fstart+frange) + offs); //used for scaling
        offs:= offs * step;
        intervalcount1:= round(intervalcount);
+       if interval <= 0 then begin
+        interval:= 10;
+       end;
        logstartn:= getlogn(fstart,interval,intervalcount1);
        rea1:= getlogval(logstartn,interval,intervalcount1);
        if (fstart-rea1)/fstart > tolerance then begin
