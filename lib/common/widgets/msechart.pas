@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -24,7 +24,8 @@ type
  tracekindty = (trk_xseries,trk_xy);
 
  charttraceoptionty = (cto_adddataright,
-                       cto_xordered //optimize for big data quantity
+                       cto_xordered, //optimize for big data quantity
+                       cto_logx,cto_logy
                        );
  charttraceoptionsty = set of charttraceoptionty;
 
@@ -99,6 +100,8 @@ type
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tobject); override;
+   procedure clear;
+   procedure addxydata(const x: real; const y: real);
    procedure addxseriesdata(const avalue: real);
    procedure assign(source: tpersistent); override;
    property xdata: realarty read finfo.ydata write setxdata;
@@ -191,6 +194,7 @@ type
   public
    constructor create(const aintf: idialcontroller); override;
   published
+   property options; //first!
    property color;
    property widthmm;
    property direction default gd_up;
@@ -201,7 +205,6 @@ type
    property kind;
    property markers;
    property ticks;
-   property options;
  end;
  
  tchartdialhorz = class(tcustomdialcontroller)
@@ -210,6 +213,7 @@ type
   public
    constructor create(const aintf: idialcontroller); override;
   published
+   property options; //first!
    property color;
    property widthmm;
    property direction default gd_right;
@@ -220,7 +224,6 @@ type
    property kind;
    property markers;
    property ticks;
-   property options;
  end;
 
  tchartdials = class(tcustomdialcontrollers)
@@ -521,12 +524,12 @@ procedure ttrace.checkgraphic;
 
  function pkround(const avalue: real): integer;
  begin
-  if avalue > $7fff then begin
-   result:= $7fff;
+  if avalue > $3fff then begin //X11 range is 16bit
+   result:= $3fff;
   end
   else begin
-   if avalue < -$8000 then begin
-    result:= -$8000;
+   if avalue < -$4000 then begin
+    result:= -$4000;
    end
    else begin
     result:= round(avalue);
@@ -568,13 +571,18 @@ var
  xbottom,xtop: integer;
  isxseries: boolean;
  dpcounty1: integer;
+ islogx,islogy: boolean;
  
 begin
  if not (trs_datapointsvalid in finfo.state) then begin
+  finfo.datapoints:= nil;
+  include(finfo.state,trs_datapointsvalid);
   dpcountx:= 0;
   dpcounty:= 0;
   with finfo do begin
    isxseries:= (kind = trk_xseries);
+   islogx:= cto_logx in options;
+   islogy:= cto_logy in options;
    bottommargin:= 0;
    topmargin:= 0;
    if xydata <> nil then begin
@@ -612,8 +620,14 @@ begin
   if isxseries or (dpcounty < dpcountxy) then begin
    dpcountxy:= dpcounty;
   end;
-  yo:= -finfo.ystart - finfo.yrange;
-  ys:= -tchart(fowner).traces.fscaley / finfo.yrange;
+  if islogy then begin
+   yo:= -(chartln(finfo.ystart + finfo.yrange));
+   ys:= -tchart(fowner).traces.fscaley / (-chartln(finfo.ystart) - yo);
+  end
+  else begin
+   yo:= -finfo.ystart - finfo.yrange;
+   ys:= -tchart(fowner).traces.fscaley / finfo.yrange;
+  end;
   case finfo.kind of
    trk_xy,trk_xseries: begin     
     if isxseries then begin
@@ -630,16 +644,33 @@ begin
      else begin
       int2:= dpcounty1;
      end;
-     xo:= (rea1 - finfo.xstart) * int2;
-     xs:= tchart(fowner).traces.fscalex;
-     if int2 > 0 then begin
-      xs:= xs / (finfo.xrange * int2);
+     if cto_logx in options then begin
+      xo:= -chartln(-(rea1 - finfo.xstart) * int2);
+      xs:= tchart(fowner).traces.fscalex;
+      if int2 > 0 then begin
+       xs:= xs / (chartln((finfo.xstart+finfo.xrange) * int2)+xo);
+      end;
+      xo:= xo + 1/xs;
+     end
+     else begin
+      xo:= (rea1 - finfo.xstart) * int2;
+      xs:= tchart(fowner).traces.fscalex;
+      if int2 > 0 then begin
+       xs:= xs / (finfo.xrange * int2);
+      end;
+      xo:= xo + 1/xs;
      end;
-     xo:= xo + 1/xs;
     end
     else begin
-     xo:= -finfo.xstart;
-     xs:= tchart(fowner).traces.fscalex / finfo.xrange;
+     if cto_logx in options then begin
+      xo:= -chartln(finfo.xstart);
+      xs:= tchart(fowner).traces.fscalex / 
+                                     (chartln(finfo.xrange+finfo.xstart)+xo);
+     end
+     else begin
+      xo:= -finfo.xstart;
+      xs:= tchart(fowner).traces.fscalex / finfo.xrange;
+     end;
     end;
     checkrange(dpcountxy);
     if (cto_xordered in finfo.options) or isxseries then begin
@@ -650,12 +681,27 @@ begin
      xtop:= maxint;
      for int1:= 0 to dpcountxy - 1 do begin
       if isxseries then begin
-       int2:= round((int1 + xo)* xs);
+       if islogx then begin
+        int2:= round((chartln(int1) + xo) * xs);
+       end
+       else begin
+        int2:= round((int1 + xo) * xs);
+       end;
       end
       else begin
-       int2:= pkround((preal(pox)^ + xo)* xs) + 1;
+       if islogx then begin
+        int2:= pkround((chartln(preal(pox)^) + xo) * xs) + 1;
+       end
+       else begin
+        int2:= pkround((preal(pox)^ + xo) * xs) + 1;
+       end;
       end;
-      int3:= pkround((preal(poy)^ + yo)* ys);
+      if islogy then begin
+       int3:= pkround((chartln(preal(poy)^) + yo) * ys);
+      end
+      else begin
+       int3:= pkround((preal(poy)^ + yo) * ys);
+      end;
       if int2 < 0 then begin
        if int2 > xbottom then begin
         xbottom:= int2;
@@ -749,8 +795,18 @@ begin
     else begin
      setlength(finfo.datapoints,dpcountxy);
      for int1:= 0 to high(finfo.datapoints) do begin
-      finfo.datapoints[int1].x:= pkround((preal(pox)^ + xo)* xs);
-      finfo.datapoints[int1].y:= pkround((preal(poy)^ + yo)* ys);
+      if islogx then begin
+       finfo.datapoints[int1].x:= pkround((chartln(preal(pox)^) + xo)* xs);
+      end
+      else begin
+       finfo.datapoints[int1].x:= pkround((preal(pox)^ + xo)* xs);
+      end;
+      if islogy then begin
+       finfo.datapoints[int1].y:= pkround((chartln(preal(poy)^) + yo)* ys);
+      end
+      else begin
+       finfo.datapoints[int1].y:= pkround((preal(poy)^ + yo)* ys);
+      end;
       inc(pox,intx);
       inc(poy,inty);
      end;
@@ -787,7 +843,6 @@ begin
    end;
 *)
   end;
-  include(finfo.state,trs_datapointsvalid);
  end;
 end;
 
@@ -1038,6 +1093,50 @@ begin
  else begin
   inherited;
  end;
+end;
+
+procedure ttrace.clear;
+begin
+ xydata:= nil;
+end;
+
+procedure ttrace.addxydata(const x: real; const y: real);
+begin
+ with finfo do begin
+  xdatalist:= nil;
+  ydatalist:= nil;
+  if xydata <> nil then begin
+   setlength(xydata,high(xydata)+2);
+   with xydata[high(xydata)] do begin
+    re:= x;
+    im:= y;
+   end;   
+  end
+  else begin
+   if (xdata <> nil) then begin   
+    setlength(xdata,high(xdata)+2);
+    setlength(ydata,length(xdata));
+    xdata[high(xdata)]:= x;
+    ydata[high(xdata)]:= y;
+   end
+   else begin
+    if (ydata <> nil) then begin   
+     setlength(ydata,high(ydata)+2);
+     setlength(xdata,length(ydata));
+     xdata[high(xdata)]:= x;
+     ydata[high(xdata)]:= y;
+    end
+    else begin
+     setlength(xydata,1);
+     with xydata[0] do begin
+      re:= x;
+      im:= y;
+     end;
+    end;
+   end;
+  end; 
+ end;
+ datachange;
 end;
 
 { ttraces }

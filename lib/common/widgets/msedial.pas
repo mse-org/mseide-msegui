@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2009 by Martin Schreiber
+{ MSEgui Copyright (c) 2009-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -192,13 +192,14 @@ type
    function getitems(const aindex: integer): tdialtick;
   protected
    procedure dosizechanged; override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aowner: tcustomdialcontroller); reintroduce;
    class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tdialtick read getitems; default;
  end;
  
- dialoptionty = (do_opposite,do_sideline,do_boxline);
+ dialoptionty = (do_opposite,do_sideline,do_boxline,do_log);
  dialoptionsty = set of dialoptionty;  
 
  idialcontroller = interface(inullinterface)
@@ -273,6 +274,8 @@ type
    destructor destroy; override;
    procedure paint(const acanvas: tcanvas);
    procedure afterpaint(const acanvas: tcanvas);
+   property options: dialoptionsty read foptions write setoptions default []; 
+                //first!
    property direction: graphicdirectionty read fdirection write setdirection
                                        default gd_right;
    property indent1: integer read findent1 write setindent1 default 0;
@@ -285,7 +288,6 @@ type
    property color: colorty read fcolor write setcolor default defaultdialcolor;
    property widthmm: real read fwidthmm write setwidthmm; 
                 //linewidth, default 0.3
-   property options: dialoptionsty read foptions write setoptions default [];
    property font: tdialfont read getfont write setfont stored isfontstored;
    property angle: real read fangle write setangle; //0 -linear, 1 -> 360 grad
  end;
@@ -317,6 +319,7 @@ type
   public
    constructor create(const aintf: idialcontroller); override;
   published
+   property options default defaultdialcontrolleroptions; //first!
    property color;
    property widthmm;
    property direction;
@@ -327,7 +330,6 @@ type
    property kind;
    property markers;
    property ticks;
-   property options default defaultdialcontrolleroptions;
    property font;
    property angle;
  end;
@@ -359,10 +361,12 @@ type
  end;
 
 procedure checknullrange(const avalue: real);
+function chartln(const avalue: real): real;
+                //big neg value for avalue <= 0
  
 implementation
 uses
- sysutils,msereal,msestreaming,mseformatstr;
+ sysutils,msereal,msestreaming,mseformatstr,math;
 type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
@@ -371,6 +375,16 @@ procedure checknullrange(const avalue: real);
 begin
  if avalue = 0 then begin
   raise exception.create('Range can not be 0.0.');
+ end;
+end;
+
+function chartln(const avalue: real): real;
+begin
+ if avalue <= 0 then begin
+  result:= -100000;
+ end
+ else begin
+  result:= ln(avalue);
  end;
 end;
 
@@ -666,7 +680,12 @@ begin
   end
   else begin
    calclineend(fli,dmo_opposite in options,rect1,linestart,lineend,dir1);
-   rea1:= (value - fstart)/frange;
+   if do_log in foptions then begin
+    rea1:= (chartln(value)-chartln(fstart))/chartln(fstart+frange);
+   end
+   else begin
+    rea1:= (value - fstart)/frange;
+   end;
    case fdirection of
     gd_right: begin
      start1:= -rect1.x / rect1.cx;
@@ -808,12 +827,13 @@ end;
 
 function tdialtick.getintervalcount: real;
 begin
- if finfo.intervalco <> 0 then begin
+ if (finfo.intervalco <> 0) or 
+            (do_log in tcustomdialcontroller(fowner).foptions) then begin
   result:= finfo.intervalco;
  end
  else begin
   if finfo.interval <> 0 then begin
-   result:= tdialcontroller(fowner).range/finfo.interval;
+   result:= tcustomdialcontroller(fowner).range/finfo.interval;
   end
   else begin
    result:= 0;
@@ -825,19 +845,22 @@ procedure tdialtick.setintervalcount(const avalue: real);
 begin
  if finfo.intervalco <> avalue then begin
   finfo.intervalco:= avalue;
-  finfo.interval:= 0;
+  if not (do_log in tcustomdialcontroller(fowner).foptions) then begin
+   finfo.interval:= 0;
+  end;
   changed;
  end;
 end;
 
 function tdialtick.getinterval: real;
 begin
- if finfo.interval <> 0 then begin
+ if (finfo.interval <> 0) or 
+            (do_log in tcustomdialcontroller(fowner).foptions) then begin
   result:= finfo.interval;
  end
  else begin
   if finfo.intervalco <> 0 then begin
-   result:= tdialcontroller(fowner).range/finfo.intervalco;
+   result:= tcustomdialcontroller(fowner).range/finfo.intervalco;
   end
   else begin
    result:= 0;
@@ -849,19 +872,23 @@ procedure tdialtick.setinterval(const avalue: real);
 begin
  if avalue <> finfo.interval then begin
   finfo.interval:= avalue;
-  finfo.intervalco:= 0;
+  if not (do_log in tcustomdialcontroller(fowner).foptions) then begin
+   finfo.intervalco:= 0;
+  end;
   changed;
  end;
 end;
 
 function tdialtick.isintervalcountstored: boolean;
 begin
- result:= finfo.intervalco <> 0;
+ result:= (do_log in tcustomdialcontroller(fowner).foptions) or 
+                           (finfo.intervalco <> 0);
 end;
 
 function tdialtick.isintervalstored: boolean;
 begin
- result:= finfo.interval <> 0;
+ result:= (do_log in tcustomdialcontroller(fowner).foptions) or
+                           (finfo.interval <> 0);
 end;
 
 { tdialticks }
@@ -885,6 +912,14 @@ procedure tdialticks.dosizechanged;
 begin
  inherited;
  tcustomdialcontroller(fowner).changed;
+end;
+
+procedure tdialticks.createitem(const index: integer; var item: tpersistent);
+begin
+ inherited;
+ if do_log in tcustomdialcontroller(fowner).foptions then begin
+  tdialtick(item).interval:= 10;
+ end;
 end;
 
 { tcustomdialcontroller }
@@ -1107,8 +1142,54 @@ begin
   transform(pos);
  end;
 end;
-
+var testvar: real;
 procedure tcustomdialcontroller.checklayout;
+
+const
+ tolerance = 0.000001;
+ 
+ function getico(const interval: real; const intervalcount: integer): integer;
+ var
+  int1: integer;
+ begin
+  result:= intervalcount - 
+         floor((1/interval) * intervalcount * (1 + tolerance)); 
+                      //ticks below decade
+ end;
+ 
+ function getlogval(const avalue: integer; const interval: real;
+                            const intervalcount: integer): real;
+ var
+  ico: integer;
+  int1: integer;
+ begin
+  ico:= getico(interval,intervalcount);
+  result:= power(interval,avalue div ico);
+  int1:= avalue mod ico;
+  if int1 <> 0 then begin
+   if int1 < 0 then begin
+    int1:= int1+ico;
+    result:= result * ((int1+intervalcount-ico)/intervalcount);
+   end
+   else begin
+    result:= result * interval * ((int1+intervalcount-ico)/intervalcount);
+   end;
+  end;
+ end;
+ 
+ function getlogn(const avalue: real; const interval: real;
+                            const intervalcount: integer): integer;
+ var
+  rea1,rea2: real;
+  ico: integer;
+ begin
+  result:= floor(logn(interval,avalue) + tolerance);
+  rea1:= intpower(interval,result+1);
+  ico:= getico(interval,intervalcount);
+  result:= floor(result * ico + (avalue/rea1)*intervalcount+tolerance) -
+                                                          intervalcount + ico;
+ end;
+  
 var
  rect1: rectty;
  canvas1: tcanvas;
@@ -1125,6 +1206,10 @@ var
  po1,po2: prectty;
  po3: psegmentty;
  horz1: boolean;
+ islog: boolean;
+ logstartn,intervalcount1: integer;
+ ar1: realarty;
+ 
 begin
  if not (dis_layoutvalid in fstate) then begin
   canvas1:= fintf.getwidget.getcanvas;
@@ -1338,6 +1423,7 @@ begin
     fboxlines[high(fboxlines)]:= boxlines[1];
    end;
   end;
+  islog:= do_log in foptions;
   for int4:= 0 to high(fticks.fitems) do begin
    with tdialtick(fticks.fitems[int4]) do begin
     finfo.afont:= font;
@@ -1349,24 +1435,39 @@ begin
      end
      else begin
       calclineend(fli,dto_opposite in options,rect1,linestart,lineend,dir1);
-      step:= 1/intervalcount;
-      valstep:= step * frange;
-      first:= (start*intervalcount)/range;
-      offs:= frac(first)/intervalcount; //scaled to 1.0
-      first:= int(first);
-      if offs > 0.0001 then begin
-       offs:= offs - 1.0/intervalcount;
-       first:= first + 1;
+      if islog then begin
+       offs:= -chartln(fstart);
+       step:= 1/(chartln(fstart+frange) + offs); //used for scaling
+       offs:= offs * step;
+       intervalcount1:= round(intervalcount);
+       logstartn:= getlogn(fstart,interval,intervalcount1);
+       rea1:= fstart + frange;
+       int1:= getlogn(rea1,interval,intervalcount1);
+       int1:= int1 - logstartn;
+      end
+      else begin
+       step:= 1/intervalcount;
+       valstep:= step * frange;
+       first:= (start*intervalcount)/range;
+       offs:= frac(first)/intervalcount; //scaled to 1.0
+       first:= int(first);
+       if offs > 0.0001 then begin
+        offs:= offs - 1.0/intervalcount;
+        first:= first + 1;
+       end;
+       int1:= round(intervalcount);
+       offs:= -offs;
+       if int1/intervalcount + offs > 1.0001 then begin
+        dec(int1);
+       end;
+       first:= (first * frange) / intervalcount; //real value
       end;
-      int1:= round(intervalcount);
-      offs:= -offs;
-      if int1/intervalcount + offs > 1.0001 then begin
-       dec(int1);
-      end;
-      first:= (first * frange) / intervalcount; //real value
       inc(int1);
       system.setlength(ticks,int1);
       system.setlength(ticksreal,int1);
+      if islog then begin
+       system.setlength(ar1,int1);
+      end;
       if horz1 then begin
        step:= rect1.cx * step;
        offs:= rect1.cx * offs;
@@ -1376,7 +1477,13 @@ begin
        end;
        for int1:= 0 to high(ticks) do begin
         with ticks[int1] do begin
-         ticksreal[int1]:= int1*step+offs;
+         if islog then begin
+          ar1[int1]:= getlogval(int1 + logstartn,interval,intervalcount1);
+          ticksreal[int1]:= chartln(ar1[int1])*step + offs;
+         end
+         else begin
+          ticksreal[int1]:= int1*step + offs;
+         end;
          a.x:= rect1.x + round(ticksreal[int1]);
          b.x:= a.x;
          a.y:= linestart;
@@ -1393,7 +1500,13 @@ begin
        end;
        for int1:= 0 to high(ticks) do begin
         with ticks[int1] do begin
-         ticksreal[int1]:= int1*step+offs;
+         if islog then begin
+          ar1[int1]:= getlogval(int1 + logstartn,interval,intervalcount1);
+          ticksreal[int1]:= chartln(ar1[int1]) * step + offs;
+         end
+         else begin
+          ticksreal[int1]:= int1*step + offs;
+         end;
          a.y:= rect1.y + round(ticksreal[int1]);
          b.y:= a.y;
          a.x:= linestart;
@@ -1444,9 +1557,14 @@ begin
        end;
        int2:= -int2 div 2;
        for int1:= 0 to high(captions) do begin
-        rea1:= int1*valstep+first;
-        if abs(rea1/valstep) < 1e-6 then begin
-         rea1:= 0;
+        if islog then begin
+         rea1:= ar1[int1];
+        end
+        else begin
+         rea1:= int1*valstep+first;
+         if abs(rea1/valstep) < 1e-6 then begin
+          rea1:= 0;
+         end;
         end;
         captions[int1].caption:= getactcaption(rea1,caption);
         with captions[int1] do begin
