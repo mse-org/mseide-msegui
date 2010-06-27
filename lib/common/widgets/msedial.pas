@@ -1441,6 +1441,10 @@ begin
        offs:= offs * step;
        intervalcount1:= round(intervalcount);
        logstartn:= getlogn(fstart,interval,intervalcount1);
+       rea1:= getlogval(logstartn,interval,intervalcount1);
+       if (fstart-rea1)/fstart > tolerance then begin
+        inc(logstartn);
+       end;
        rea1:= fstart + frange;
        int1:= getlogn(rea1,interval,intervalcount1);
        int1:= int1 - logstartn;
