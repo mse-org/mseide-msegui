@@ -54,7 +54,10 @@ type
 //  kind: dialdatakindty;
  end;
 
- dialtickoptionty =  (dto_opposite,dto_rotatetext);
+ dialtickoptionty =  (dto_opposite,dto_rotatetext,
+                      dto_multiplecaptions); 
+                      //allow captions of different ticks at same position
+                                    
  dialtickoptionsty = set of dialtickoptionty;
 
  dialtickinfoty = record
@@ -191,7 +194,7 @@ type
   private
    function getitems(const aindex: integer): tdialtick;
   protected
-   procedure dosizechanged; override;
+   procedure change(const index: integer); override;
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aowner: tcustomdialcontroller); reintroduce;
@@ -908,10 +911,12 @@ begin
  result:= tdialtick(inherited items[aindex]);
 end;
 
-procedure tdialticks.dosizechanged;
+procedure tdialticks.change(const index: integer);
 begin
  inherited;
- tcustomdialcontroller(fowner).changed;
+ if not (aps_destroying in fstate) then begin
+  tcustomdialcontroller(fowner).changed;
+ end;
 end;
 
 procedure tdialticks.createitem(const index: integer; var item: tpersistent);
@@ -1524,6 +1529,7 @@ begin
       end;
       ar2:= nil;
       system.setlength(ar2,system.length(ticks));
+      bo1:= not (dto_multiplecaptions in options);
       for int1:= 0 to high(ticks) do begin //snap to existing ticks
        po3:= nil;
        rea1:= ticksreal[int1];
@@ -1532,12 +1538,13 @@ begin
          for int3:= 0 to high(ticks) do begin
           if abs(rea1-ticksreal[int3]) < 0.1 then begin
            po3:= @ticks[int3];
-           ar2[int1]:= captions <> nil;
+           ar2[int1]:= bo1 and (captions <> nil);
            break;
           end;
          end;
         end;
-        if (po3 <> nil) and ar2[int1] then begin //else check more captions
+        if (po3 <> nil) and (not bo1 or ar2[int1]) then begin 
+                                              //else check more captions
          break;
         end;
        end;
@@ -1582,31 +1589,35 @@ begin
         end
         else begin
          captions[int1].caption:= getactcaption(rea1,caption);
-         with captions[int1] do begin
-          pos:= ticks[int1].a;
-          adjustcaption(dir1,dto_rotatetext in options,fli,afont,
-                canvas1.getstringwidth(caption,afont),pos);
-          if dto_rotatetext in options then begin
-           angle:= int2 * rea2;
-           int2:= int2 + 2;
-          end
-          else begin
-           angle:= 0;
-          end;
-          angle:= angle + escapement * 2*pi;
-         end;
         end;
-       end;
-      end;
-      if dis_needstransform in fstate then begin
-       for int1:= 0 to high(ticks) do begin
-        with ticks[int1] do begin
-         transform(a);
-         transform(b);
+        with captions[int1] do begin
+         pos:= ticks[int1].a;
+         adjustcaption(dir1,dto_rotatetext in options,fli,afont,
+               canvas1.getstringwidth(caption,afont),pos);
+         if dto_rotatetext in options then begin
+          angle:= int2 * rea2;
+          int2:= int2 + 2;
+         end
+         else begin
+          angle:= 0;
+         end;
+         angle:= angle + escapement * 2*pi;
         end;
        end;
       end;
      end;  
+    end;
+   end;
+  end;
+  if dis_needstransform in fstate then begin
+   for int4:= 0 to high(fticks.fitems) do begin
+    with tdialtick(fticks.fitems[int4]).finfo do begin
+     for int1:= 0 to high(ticks) do begin
+      with ticks[int1] do begin
+       transform(a);
+       transform(b);
+      end;
+     end;
     end;
    end;
   end;
