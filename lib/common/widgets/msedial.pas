@@ -1207,7 +1207,7 @@ var
  dir1: graphicdirectionty;
  boxlines: array[0..1] of segmentty;
  bo1: boolean;
- rea1,rea2: real;
+ rea1,rea2,rea3: real;
  po1,po2: prectty;
  po3: psegmentty;
  horz1: boolean;
@@ -1568,12 +1568,30 @@ begin
       end
       else begin
        system.setlength(captions,system.length(ticks));
-       int2:= high(captions) * 2; //2* interval count
-       rea2:= -(angle*2*pi);
-       if int2 <> 0 then begin
-        rea2:= rea2 / int2;
+       rea3:= 0; //offset
+       rea2:= 0; //scale
+       if dto_rotatetext in options then begin
+        rea3:= angle*pi; //offset
+        if horz1 then begin
+         if rect1.cx <> 0 then begin
+          rea2:= -angle*2*pi/rect1.cx;
+          if direction = gd_left then begin
+           rea2:= -rea2;
+           rea3:= -rea3;
+          end;
+         end;
+        end
+        else begin
+         if rect1.cy <> 0 then begin
+          rea2:= -angle*2*pi/rect1.cy;
+          if direction = gd_up then begin
+           rea2:= -rea2;
+           rea3:= -rea3;
+          end;
+         end;
+        end;
        end;
-       int2:= -int2 div 2;
+       rea3:= rea3+escapement * 2 * pi;
        for int1:= 0 to high(captions) do begin
         if islog then begin
          rea1:= ar1[int1];
@@ -1594,14 +1612,7 @@ begin
          pos:= ticks[int1].a;
          adjustcaption(dir1,dto_rotatetext in options,fli,afont,
                canvas1.getstringwidth(caption,afont),pos);
-         if dto_rotatetext in options then begin
-          angle:= int2 * rea2;
-          int2:= int2 + 2;
-         end
-         else begin
-          angle:= 0;
-         end;
-         angle:= angle + escapement * 2*pi;
+         angle:= ticksreal[int1] * rea2 + rea3;
         end;
        end;
       end;
