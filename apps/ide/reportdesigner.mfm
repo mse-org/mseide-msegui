@@ -1,12 +1,18 @@
 inherited reportdesignerfo: treportdesignerfo
-  bounds_x = 417
-  bounds_y = 127
+  bounds_x = 336
+  bounds_y = 137
   bounds_cx = 205
   bounds_cy = 459
   container.color = -1879048185
   container.onchildscaled = repchildscaled
   container.oncalcminscrollsize = nil
   container.onchildmouseevent = reportchildmouseevent
+  container.bounds = (
+    0
+    0
+    205
+    459
+  )
   onclose = nil
   onresize = formresized
   onchildscaled = repchildscaled
@@ -18,9 +24,10 @@ inherited reportdesignerfo: treportdesignerfo
     taborder = 4
     bounds_x = 7
     bounds_y = 18
-    bounds_cx = 194
+    bounds_cx = 200
     bounds_cy = 7
     anchors = [an_left, an_top, an_right]
+    dial.options = []
     dial.widthmm =  2.9999999999999999E-0001
     dial.start =  0.0000000000000000E+0000
     dial.range =  1.0000000000000000E+0002
@@ -56,7 +63,6 @@ inherited reportdesignerfo: treportdesignerfo
         escapement =  0.0000000000000000E+0000
         intervalcount =  1.0000000000000000E+0002
       end>
-    dial.options = []
     dial.angle =  0.0000000000000000E+0000
   end
   object tabbar: ttabbar[1]
@@ -64,7 +70,7 @@ inherited reportdesignerfo: treportdesignerfo
     color = -1879048187
     bounds_x = 120
     bounds_y = 0
-    bounds_cx = 83
+    bounds_cx = 1
     bounds_cy = 18
     anchors = [an_left, an_top, an_right]
     onactivetabchange = tabcha
@@ -103,7 +109,7 @@ inherited reportdesignerfo: treportdesignerfo
     bounds_x = 0
     bounds_y = 25
     bounds_cx = 7
-    bounds_cy = 431
+    bounds_cy = 590
     anchors = [an_left, an_top, an_bottom]
     dial.widthmm =  2.9999999999999999E-0001
     dial.direction = gd_down
@@ -172,7 +178,7 @@ inherited reportdesignerfo: treportdesignerfo
     bounds_cx = 68
     bounds_cy = 18
     textflags = [tf_ycentered]
-    valuescale =  1.0000000000000000E+0000
+    valuerange =  1.0000000000000000E+0000
     format = '0.0mm'
     reffontheight = 14
   end
@@ -184,7 +190,7 @@ inherited reportdesignerfo: treportdesignerfo
     bounds_y = 0
     bounds_cx = 52
     bounds_cy = 18
-    valuescale =  1.0000000000000000E+0000
+    valuerange =  1.0000000000000000E+0000
     format = '0.0'
     reffontheight = 14
   end
