@@ -1,21 +1,14 @@
 object mainfo: tmainfo
+  visible = False
   bounds_x = 91
   bounds_y = 53
   bounds_cx = 638
   bounds_cy = 286
-  taborder = 1
-  visible = False
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 30
-  container.bounds_cx = 638
-  container.bounds_cy = 256
   container.frame.levelo = -1
   container.frame.leveli = 1
   container.frame.framewidth = 1
   container.frame.colorframe = 13092491
   container.frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe]
-  container.frame.dummy = 0
   container.face.image.alignment = [al_tiled]
   container.face.image.transparency = 8421504
   container.face.image.image = {
@@ -2154,8 +2147,8 @@ object mainfo: tmainfo
   }
   container.face.fade_pos.count = 2
   container.face.fade_pos.items = (
-    0.00000000000000000
-    1.00000000000000000
+     0.0000000000000000E+0000
+     1.0000000000000000E+0000
   )
   container.face.fade_color.count = 2
   container.face.fade_color.items = (
@@ -2165,6 +2158,12 @@ object mainfo: tmainfo
   container.face.localprops = [fal_fatransparency]
   container.face.dummy = 0
   container.taborder = 1
+  container.bounds = (
+    0
+    30
+    638
+    256
+  )
   optionswindow = [wo_groupleader]
   mainmenu = mainmenu1
   options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
@@ -2172,20 +2171,17 @@ object mainfo: tmainfo
   caption = 'MSEide + MSEgui'
   moduleclassname = 'tmseform'
   object tstringedit1: tstringedit
-    bounds_x = 107
-    bounds_y = 39
-    bounds_cx = 100
-    bounds_cy = 43
     color = -2147483645
     frame.leveli = 1
     frame.framewidth = 2
+    frame.colorframe = -2147483645
     frame.colorclient = -2147483645
     frame.caption = 'Caption &topleft'
     frame.font.color = 29539
     frame.font.name = 'stf_default'
-    frame.font.xscale = 1.00000000000000000
+    frame.font.xscale =  1.0000000000000000E+0000
     frame.font.dummy = 0
-    frame.localprops = [frl_leveli, frl_framewidth, frl_colorclient]
+    frame.localprops = [frl_leveli, frl_framewidth, frl_colorframe, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
       0
@@ -2193,26 +2189,27 @@ object mainfo: tmainfo
       0
       0
     )
+    bounds_x = 107
+    bounds_y = 39
+    bounds_cx = 100
+    bounds_cy = 43
     statfile = tstatfile1
     reffontheight = 14
   end
   object tstringedit2: tstringedit
-    bounds_x = 262
-    bounds_y = 39
-    bounds_cx = 100
-    bounds_cy = 43
     color = -2147483645
     frame.leveli = 1
     frame.framewidth = 2
+    frame.colorframe = -2147483645
     frame.colorclient = -2147483645
     frame.caption = 'Caption &top'
     frame.captionpos = cp_top
     frame.font.color = 37241
     frame.font.style = [fs_bold]
     frame.font.name = 'stf_default'
-    frame.font.xscale = 1.00000000000000000
+    frame.font.xscale =  1.0000000000000000E+0000
     frame.font.dummy = 0
-    frame.localprops = [frl_leveli, frl_framewidth, frl_colorclient]
+    frame.localprops = [frl_leveli, frl_framewidth, frl_colorframe, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
       0
@@ -2222,8 +2219,8 @@ object mainfo: tmainfo
     )
     face.fade_pos.count = 2
     face.fade_pos.items = (
-      0.00000000000000000
-      1.00000000000000000
+       0.0000000000000000E+0000
+       1.0000000000000000E+0000
     )
     face.fade_color.count = 2
     face.fade_color.items = (
@@ -2234,27 +2231,28 @@ object mainfo: tmainfo
     face.localprops = [fal_fatransparency]
     face.dummy = 0
     taborder = 1
+    bounds_x = 262
+    bounds_y = 39
+    bounds_cx = 100
+    bounds_cy = 43
     statfile = tstatfile1
     reffontheight = 14
   end
   object tstringedit3: tstringedit
-    bounds_x = 36
-    bounds_y = 112
-    bounds_cx = 168
-    bounds_cy = 32
     color = -2147483645
     frame.levelo = 3
     frame.leveli = -1
     frame.framewidth = 2
+    frame.colorframe = -2147483645
     frame.colorclient = -2147483645
     frame.caption = 'Caption &left'
     frame.captionpos = cp_left
     frame.font.color = -1610612730
     frame.font.style = [fs_bold, fs_italic]
     frame.font.name = 'stf_default'
-    frame.font.xscale = 1.00000000000000000
+    frame.font.xscale =  1.0000000000000000E+0000
     frame.font.dummy = 0
-    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorclient]
+    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
       68
@@ -2264,8 +2262,8 @@ object mainfo: tmainfo
     )
     face.fade_pos.count = 2
     face.fade_pos.items = (
-      0.00000000000000000
-      1.00000000000000000
+       0.0000000000000000E+0000
+       1.0000000000000000E+0000
     )
     face.fade_color.count = 2
     face.fade_color.items = (
@@ -2277,14 +2275,14 @@ object mainfo: tmainfo
     face.localprops = [fal_fadirection, fal_fatransparency]
     face.dummy = 0
     taborder = 3
+    bounds_x = 36
+    bounds_y = 112
+    bounds_cx = 168
+    bounds_cy = 32
     statfile = tstatfile1
     reffontheight = 14
   end
   object tstringedit4: tstringedit
-    bounds_x = 261
-    bounds_y = 177
-    bounds_cx = 100
-    bounds_cy = 49
     color = -2147483645
     frame.levelo = 0
     frame.frameimage_list = imli
@@ -2294,7 +2292,7 @@ object mainfo: tmainfo
     frame.captionpos = cp_bottom
     frame.font.color = 12419927
     frame.font.name = 'stf_default'
-    frame.font.xscale = 1.00000000000000000
+    frame.font.xscale =  1.0000000000000000E+0000
     frame.font.dummy = 0
     frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_frameimagelist, frl_frameimageoffset, frl_colorclient]
     frame.dummy = 0
@@ -2305,27 +2303,28 @@ object mainfo: tmainfo
       17
     )
     taborder = 6
+    bounds_x = 261
+    bounds_y = 177
+    bounds_cx = 100
+    bounds_cy = 49
     statfile = tstatfile1
     reffontheight = 14
   end
   object tstringedit5: tstringedit
-    bounds_x = 94
-    bounds_y = 176
-    bounds_cx = 110
-    bounds_cy = 49
     color = -2147483645
     frame.levelo = 3
     frame.leveli = -1
     frame.framewidth = 2
+    frame.colorframe = -2147483645
     frame.colorclient = -2147483645
     frame.caption = 'Caption botto&mright'
     frame.captionpos = cp_bottomright
     frame.font.color = 8876645
     frame.font.colorbackground = 13418736
     frame.font.name = 'stf_default'
-    frame.font.xscale = 1.00000000000000000
+    frame.font.xscale =  1.0000000000000000E+0000
     frame.font.dummy = 0
-    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorclient]
+    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
       10
@@ -2334,14 +2333,14 @@ object mainfo: tmainfo
       17
     )
     taborder = 5
+    bounds_x = 94
+    bounds_y = 176
+    bounds_cx = 110
+    bounds_cy = 49
     statfile = tstatfile1
     reffontheight = 14
   end
   object tstringedit6: tstringedit
-    bounds_x = 261
-    bounds_y = 113
-    bounds_cx = 173
-    bounds_cy = 32
     color = -2147483645
     frame.levelo = 0
     frame.frameimage_list = imli
@@ -2352,7 +2351,7 @@ object mainfo: tmainfo
     frame.font.color = 11372216
     frame.font.style = [fs_italic]
     frame.font.name = 'stf_default'
-    frame.font.xscale = 1.00000000000000000
+    frame.font.xscale =  1.0000000000000000E+0000
     frame.font.dummy = 0
     frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_frameimagelist, frl_frameimageoffset, frl_colorclient]
     frame.dummy = 0
@@ -2364,8 +2363,8 @@ object mainfo: tmainfo
     )
     face.fade_pos.count = 2
     face.fade_pos.items = (
-      0.00000000000000000
-      1.00000000000000000
+       0.0000000000000000E+0000
+       1.0000000000000000E+0000
     )
     face.fade_color.count = 2
     face.fade_color.items = (
@@ -2377,22 +2376,23 @@ object mainfo: tmainfo
     face.localprops = [fal_fadirection, fal_fatransparency]
     face.dummy = 0
     taborder = 4
+    bounds_x = 261
+    bounds_y = 113
+    bounds_cx = 173
+    bounds_cy = 32
     statfile = tstatfile1
     reffontheight = 14
   end
   object tstringedit7: tstringedit
-    bounds_x = 400
-    bounds_y = 40
-    bounds_cx = 132
-    bounds_cy = 52
     color = -2147483645
     frame.levelo = -1
     frame.leveli = 1
     frame.framewidth = 2
+    frame.colorframe = -2147483645
     frame.framei_left = 4
     frame.framei_right = 4
     frame.colorclient = -2147483645
-    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_fileft, frl_firight, frl_colorclient]
+    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_fileft, frl_firight, frl_colorclient]
     frame.dummy = 0
     face.options = [fao_alphafadeimage]
     face.image.transparentcolor = -2147483642
@@ -3109,65 +3109,65 @@ object mainfo: tmainfo
       29391601BCEACC01B6F5E401F3FEF43FD2FADA014060420178B08B0161B88F01
       0B9664010BB18201087442015BA47F01C7E4D101E6EDDB01B7B09C019C927401
       837654017C724C017A6D440A72663C047A6D440283765401887D580190866401
-      7C724C012E492A01D2FADA01F3FEF41E0F000000F8FFFFFF1FF07F00FCFEF400
-      3F010000F8FFFFFF1FFCFFA1FFFEF400FF000000F0FFFFFF1FFEFFC3FFFEF400
-      FF030000E8FFFFFF8FFFFFEFFFFEF400FF070000C0FFFFFF8FFFFFFFFFFEF400
-      FF0F000080FFFFFFE7FFFFFFFFFEF400FF3F000000FEFFFFC3FFFFFFFFFEF400
-      FF7F000000FCFFFFE1FFFFFFFFFEF400FF7F01000080FFFFE0FFFFFFBFEACC00
-      FFFF00000000FC7FE8FFFFFF0FB18200FFFF01000000E01FF0FFFFFFEBEDDB00
-      FFFF050000000007F0FFFDFF87765400FEFF030000000000F07FFFFF7F724C00
-      FFFF030000000000E0DFFFFF7F724C00F7FF030000000000E0FFFFFF7F6D4400
-      9FFF030000000000E0FFFFFF6F603400FFEB030000000000C0FFFFFF5F542900
-      FFFF01000000000080FFFFFFFFFEF400FFFF03000000000000FFFFFFFFFEF400
-      FFFF01000000000080FEFFFFFFFEF400FFFF01000000000000FEFFFFFFFEF400
-      FFFF03000020000000FEFFFFFFFEF400FFFF03000000000000FCFFFFFFFEF400
-      FFFF07000000000000FCFFFFFFFEF400FFFF0F000000000000FCFFFFFFFEF400
-      FFFF07000700000000FCFFFFFFFEF400FFFF07F07F00000000FCFFFFFFFEF400
-      FFFF07F8FF01000000FDFFFFFFFEF400FFFF07FEFF01000000FCFFFFFFFEF400
-      FFFF03FFFF03000000FCCFFFFFFEF400FFFF07FFFF07000000FCFFFEFFFEF400
-      FFFF01FFBF07000000F8FFF7FFFEF400FFFF81FFDF07000000F8FFEFFFFEF400
-      FFFF80FFFF07000000F0FFFF9FC09B00FF7F80FFFF0F000000E0FF7F1FC39500
-      FF7F80BFFF5F000000C0FFFFEEEDDB00FF3F80FFFF3F000000C0FFFF8D765400
-      FF1F80FFFF7F010000F4FFFF7D724C00FF0F00FFFFFF000000FEFFFF7F724C00
-      FF0700FFFFFF000090FFFFFF7F6D4400FF0000FFFFFF0000E0FFFFFF61603400
-      000000FFFFFF0000F8FFFF0760603400000000FFFFDF0100FCFFFF0FF0FEF400
-      020000FFFFFF0040FFFFFF2FF4FEF400030000FFFFFF0080FFFFFFFFFFFEF400
-      070080FFFF7F00E0FFFFFFFFFFFEF4000F0000FFFFEF00F8FFFFFBFFF7FEF400
-      1F0000FFFF3F00FFFFFFFFFFFFFEF4003F0000FEFF3FF0FFFF7FFFFFFFFEF400
-      FF0000FCFF5FFDFFFFFFFFFFFFFEF400FF0000F8FF0FFFFFFFEFFFFFFFFEF400
-      FF0000F0FFEFFFFFFFFBFFFFFFFEF400FF0100C0FFF1FFFFFFFEFFFFFBFEF400
-      FF01000000F8FFFFBFFFFFFFFFFEF400FF07000000FCFFFFF7FFFFFFFFFEF400
-      FF03000000FFFFFFFCFFFFFFF7FEF400FF07000080FFFFCFFFFFFFFFFFFEF400
-      FE0F0000E0FFFFFEFFFFFFFFFFFEF400FF1F0000F0FFEFFFFFFFFFFF3F6A4900
-      FD1F0000FAFFFFFFFFFFFFFF2FB78000FF1F0000FCFFFFFFFFFFFFFFEFEDDB00
-      FF3F0000FFFFFFFFFFFFFFFF8F765400FFFF0180FFFFFFFFFFFFFFFF7F724C00
-      FFFFAFEAFFFFFFFFFFFFFFFF7F6D4400FFFFFFF1FFFFFFFFFFFFFFFF7F663C00
-      7FFFFFFFFFFBFFFFFFFFFFFF7F663C00FFFDFFFFFFFFFFFFC7FFFFFF1F820E08
-      FFFFFFFFFFFDFFFFFFFEFFFFDF7BB9B7FFBFFFFFFFFFFF7FFFFBFFFF0F000000
-      FFFFFEFFFFFFFFFFFFFFFFFF0F000000FFFFFFFF7FFFFFFFFFFFFFFF0F000000
-      FFFFDFFFFFFFFFFFFFFFFFFF0F000000FFFF7FFFFFFFFFDFFFFFFFFF0F000000
-      FFFFFFFFFFFFFFFFFFFFFFFF0F000000C5FFFFEFF7FFFFFFFFFFEF7F00000000
-      FFFEFFFFFFFFFFFFFFFFFFFF0F000000FFFFFFFFFFFFFFFFFFFFFFFF8F8FB8BF
-      FFF7FFFFFFFFFFDFFFFDFFFFAF501C08FFEFFFFFFFFFFFFFFF81FFFF4F432008
-      FFDFFFFFFFFFFFFFFF01F4FF4FCEE447FFFFFFFFFFFFFFFFFF0100FC9FDB1B08
-      F0FFFFFFFFFFFF7FFF010000A09F1508C0FFFFFFFFFFFFFFFF000000F0FEF400
-      00DFFFFFBFFFFFFFFF0000003000000000FCFFFFFFFFFFFFFB00000000B18200
-      00F8FFFFFFFEFFFFFF000000F08F1E0800848FFFFFFDFFFF7F000000203B0908
-      000000FAFFFFFFFF3F00000000000000000000F0FFFBFFFF3F000000F08F1E08
-      000000E0FFFBFFFF5F000000D0390908000000C0FFFBFFFF1F000000907E1508
+      7C724C012E492A01D2FADA01F3FEF41E0F000000F8FFFFFF1FF07F000C000000
+      3F010000F8FFFFFF1FFCFFA10F000000FF000000F0FFFFFF1FFEFFC30F000000
+      FF030000E8FFFFFF8FFFFFEFFFF6C536FF070000C0FFFFFF8FFFFFFF0F00FFFF
+      FF0F000080FFFFFFE7FFFFFF5FD50000FF3F000000FEFFFFC3FFFFFF0F000000
+      FF7F000000FCFFFFE1FFFFFF0F0059E4FF7F01000080FFFFE0FFFFFF0F000000
+      FFFF00000000FC7FE8FFFFFF0F000000FFFF01000000E01FF0FFFFFF0B000000
+      FFFF050000000007F0FFFDFF07000000FEFF030000000000F07FFFFFFFFFFF77
+      FFFF030000000000E0DFFFFF0FFFFF00F7FF030000000000E0FFFFFF0F000000
+      9FFF030000000000E0FFFFFF0F000000FFEB030000000000C0FFFFFF0F000000
+      FFFF01000000000080FFFFFF1F050000FFFF03000000000000FFFFFF0F000000
+      FFFF01000000000080FEFFFF0F000000FFFF01000000000000FEFFFF0F000000
+      FFFF03000020000000FEFFFF0F000000FFFF03000000000000FCFFFF0FBBD9FF
+      FFFF07000000000000FCFFFF0F0000FFFFFF0F000000000000FCFFFFFFAE1900
+      FFFF07000700000000FCFFFF8FADF6E5FFFF07F07F00000000FCFFFFFFAE1900
+      FFFF07F8FF01000000FDFFFFFFE75B00FFFF07FEFF01000000FCFFFF0F25CDF7
+      FFFF03FFFF03000000FCCFFFFFCBFAEDFFFF07FFFF07000000FCFFFE0F000000
+      FFFF01FFBF07000000F8FFF7FFFF0045FFFF81FFDF07000000F8FFEFFF007BFF
+      FFFF80FFFF07000000F0FFFFFF00BDFFFF7F80FFFF0F000000E0FF7F0F0000D2
+      FF7F80BFFF5F000000C0FFFFEE00EFFFFF3F80FFFF3F000000C0FFFF0D000000
+      FF1F80FFFF7F010000F4FFFFBDFF47FFFF0F00FFFFFF000000FEFFFF5FFFFF00
+      FF0700FFFFFF000090FFFFFFFF5B2DFFFF0000FFFFFF0000E0FFFFFFF1FF5B58
+      000000FFFFFF0000F8FFFF07F0CDFF00000000FFFFDF0100FCFFFF0FA0F4FE79
+      020000FFFFFF0040FFFFFF2F0408FFFF030000FFFFFF0080FFFFFFFFFF0500FF
+      070080FFFF7F00E0FFFFFFFFFFB96A130F0000FFFFEF00F8FFFFFBFF0700FFFF
+      1F0000FFFF3F00FFFFFFFFFF0F00F2FF3F0000FEFF3FF0FFFF7FFFFFFFFFFFFF
+      FF0000FCFF5FFDFFFFFFFFFFFF00F1FFFF0000F8FF0FFFFFFFEFFFFFFFF600FF
+      FF0000F0FFEFFFFFFFFBFFFFFFFF0EFBFF0100C0FFF1FFFFFFFEFFFF0BFFFF00
+      FF01000000F8FFFFBFFFFFFF0FF4FF0EFF07000000FCFFFFF7FFFFFFFF0000FF
+      FF03000000FFFFFFFCFFFFFF07F4FF0EFF07000080FFFFCFFFFFFFFF0F00D5FF
+      FE0F0000E0FFFFFEFFFFFFFF0F000000FF1F0000F0FFEFFFFFFFFFFF0F0000FF
+      FD1F0000FAFFFFFFFFFFFFFF0F0CFFF0FF1F0000FCFFFFFFFFFFFFFFFF000000
+      FF3F0000FFFFFFFFFFFFFFFFFFC300FFFFFF0180FFFFFFFFFFFFFFFF0F0000FF
+      FFFFAFEAFFFFFFFFFFFFFFFF3FFFC000FFFFFFF1FFFFFFFFFFFFFFFFFF0000FF
+      7FFFFFFFFFFBFFFFFFFFFFFF3FFFC000FFFDFFFFFFFFFFFFC7FFFFFF3FFFFF00
+      FFFFFFFFFFFDFFFFFFFEFFFF0FB7FF56FFBFFFFFFFFFFF7FFFFBFFFFFF0000FF
+      FFFFFEFFFFFFFFFFFFFFFFFF0FFFFF00FFFFFFFF7FFFFFFFFFFFFFFFFFFF001C
+      FFFFDFFFFFFFFFFFFFFFFFFFFF0032C4FFFF7FFFFFFFFFDFFFFFFFFFFF0022CE
+      FFFFFFFFFFFFFFFFFFFFFFFF0F00007BC5FFFFEFF7FFFFFFFFFFEF7FF0001FB6
+      FFFEFFFFFFFFFFFFFFFFFFFF0F000000FFFFFFFFFFFFFFFFFFFFFFFF1FC5FBD5
+      FFF7FFFFFFFFFFDFFFFDFFFF9FFFFF00FFEFFFFFFFFFFFFFFF81FFFFFF0000FF
+      FFDFFFFFFFFFFFFFFF01F4FFFFFF96F7FFFFFFFFFFFFFFFFFF0100FCFF780000
+      F0FFFFFFFFFFFF7FFF01000000000000C0FFFFFFFFFFFFFFFF00000000000000
+      00DFFFFFBFFFFFFFFF000000E097000000FCFFFFFFFFFFFFFB00000000000000
+      00F8FFFFFFFEFFFFFF0000000000000000848FFFFFFDFFFF7F00000000000000
+      000000FAFFFFFFFF3F00000000000000000000F0FFFBFFFF3F00000000000000
+      000000E0FFFBFFFF5F00000000000000000000C0FFFBFFFF1F00000000000000
       000000A0FFFFFFFF1F0000000000000000000080FFFFFFFF1F00000000000000
-      00000000FFFFFFFF1F000000F08F1E0800000000FFFFFFFF3F00000060850708
-      00000000FEFFFFFF3F000000000000C000000000FEFFFFFF3F000000F08F1E08
-      00000000FEFFFFFF3F000000F0D0080800000000FCFFFFFF7F00000000000000
-      00000000FCFFFFFF3F00000000000000
+      00000000FFFFFFFF1F0000000000000000000000FFFFFFFF3F00000000000000
+      00000000FEFFFFFF3F0000000000000000000000FEFFFFFF3F00000000000000
+      00000000FEFFFFFF3F0000000000000000000000FCFFFFFF7F00000000000000
+      00000000FCFFFFFF3F000000000000BD
     }
     face.fade_pos.count = 5
     face.fade_pos.items = (
-      0.00000000000000000
-      0.20000000000000001
-      0.50000000000000000
-      0.80000000000000004
-      1.00000000000000000
+       0.0000000000000000E+0000
+       2.0000000000000001E-0001
+       5.0000000000000000E-0001
+       8.0000000000000004E-0001
+       1.0000000000000000E+0000
     )
     face.fade_color.count = 5
     face.fade_color.items = (
@@ -3181,14 +3181,14 @@ object mainfo: tmainfo
     face.localprops = [fal_options, fal_fadirection, fal_fatransparency]
     face.dummy = 0
     taborder = 2
+    bounds_x = 400
+    bounds_y = 40
+    bounds_cx = 132
+    bounds_cy = 52
     statfile = tstatfile1
     reffontheight = 14
   end
   object tstringedit8: tstringedit
-    bounds_x = 400
-    bounds_y = 168
-    bounds_cx = 132
-    bounds_cy = 52
     color = -2147483645
     frame.levelo = 0
     frame.framei_left = 4
@@ -3300,9 +3300,9 @@ object mainfo: tmainfo
     }
     face.fade_pos.count = 3
     face.fade_pos.items = (
-      0.00000000000000000
-      0.50000000000000000
-      1.00000000000000000
+       0.0000000000000000E+0000
+       5.0000000000000000E-0001
+       1.0000000000000000E+0000
     )
     face.fade_color.count = 3
     face.fade_color.items = (
@@ -3313,14 +3313,18 @@ object mainfo: tmainfo
     face.localprops = [fal_options, fal_fatransparency]
     face.dummy = 0
     taborder = 7
+    bounds_x = 400
+    bounds_y = 168
+    bounds_cx = 132
+    bounds_cy = 52
     statfile = tstatfile1
     reffontheight = 14
   end
   object buttonface1: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-      0.00000000000000000
-      1.00000000000000000
+       0.0000000000000000E+0000
+       1.0000000000000000E+0000
     )
     template.fade_color.count = 2
     template.fade_color.items = (
@@ -3417,6 +3421,7 @@ object mainfo: tmainfo
     template.levelo = -1
     template.leveli = 1
     template.framewidth = 2
+    template.colorframe = -2147483645
     template.framei_left = 2
     template.framei_top = 2
     template.framei_right = 2
@@ -3427,8 +3432,8 @@ object mainfo: tmainfo
   object buttonface2: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-      0.00000000000000000
-      1.00000000000000000
+       0.0000000000000000E+0000
+       1.0000000000000000E+0000
     )
     template.fade_color.count = 2
     template.fade_color.items = (
