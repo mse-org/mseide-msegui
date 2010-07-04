@@ -3544,7 +3544,7 @@ end;
 
 procedure trowstatehandler.setifilink(const avalue: tifivaluelinkcomp);
 begin
- setifilinkcomp(iifidatalink(self),avalue,fifilink);
+ setifilinkcomp(iifidatalink(self),avalue,tifilinkcomp(fifilink));
 end;
 
 procedure trowstatehandler.setifiserverintf(const aintf: iifiserver);

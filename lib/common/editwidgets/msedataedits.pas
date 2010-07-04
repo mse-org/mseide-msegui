@@ -2492,7 +2492,7 @@ end;
 
 procedure tcustomdataedit.setifilink0(const avalue: tifilinkcomp);
 begin
- mseificomp.setifilinkcomp(getifidatalinkintf,avalue,fifilink);
+ mseificomp.setifilinkcomp(getifidatalinkintf,avalue,tifilinkcomp(fifilink));
 end;
 
 procedure tcustomdataedit.setifilink(const avalue: tifilinkcomp);

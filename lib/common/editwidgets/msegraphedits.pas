@@ -1854,7 +1854,7 @@ end;
 
 procedure tgraphdataedit.setifilink(const avalue: tifilinkcomp);
 begin
- mseificomp.setifilinkcomp(iifidatalink(self),avalue,fifilink);
+ mseificomp.setifilinkcomp(iifidatalink(self),avalue,tifilinkcomp(fifilink));
 end;
 
 procedure tgraphdataedit.ifisetvalue(var avalue; var accept: boolean);
