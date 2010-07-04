@@ -213,6 +213,20 @@ const
   //stf_helvetica stf_roman          stf_courier
     'Arial',     'Times New Roman', 'Courier New');
 
+ MONITOR_DEFAULTTONULL = 0;
+ MONITOR_DEFAULTTOPRIMARY = 1;
+ MONITOR_DEFAULTTONEAREST = 2;
+ 
+type
+ hmonitor = thandle;
+ tMONITORINFO = record
+  cbSize: DWORD ;
+  rcMonitor: tRECT  ;
+  rcWork: tRECT;
+  dwFlags: DWORD;
+ end;
+ pmonitorinfo = ^tmonitorinfo;
+ 
 {$ifdef FPC}
 type
   TKeyboardState = array[0..255] of Byte;
@@ -377,6 +391,11 @@ function TranslateMessage(const lpMsg: TMsg): BOOL; stdcall;
 function DispatchMessage(const lpMsg: TMsg): Longint; stdcall;
              external user32 name 'DispatchMessageA';
 {$endif}
+
+function GetMonitorInfo(hmomitor: hmonitor; lpmu: pmonitorinfo): BOOL; stdcall;
+             external user32 name 'GetMonitorInfoA';
+function MonitorFromWindow(hwnd: HWND; dwFlags: DWORD): HMONITOR; stdcall;
+             external user32 name 'MonitorFromWindow';
 
 type
 {$ifndef FPC}
@@ -4861,8 +4880,14 @@ begin
 end;
 
 function gui_getworkarea(id: winidty): rectty;
+var
+ info: tmonitorinfo;
 begin
- if systemparametersinfo(spi_getworkarea,0,@result,0) then begin
+// if systemparametersinfo(spi_getworkarea,0,@result,0) then begin
+ info.cbsize:= sizeof(info);
+ if getmonitorinfo(monitorfromwindow(id,monitor_defaulttonearest),
+                                                       @info) then begin
+  result:= rectty(info.rcwork);
   winrecttorect(result);
  end
  else begin
