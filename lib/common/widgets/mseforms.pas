@@ -1242,7 +1242,9 @@ begin
    cx:= reader.readinteger('cx',cx,0);
    cy:= reader.readinteger('cy',cy,0);
   end;
-  setclippedwidgetrect(rect1);
+//  setclippedwidgetrect(rect1);
+  rect1:= clipinrect(rect1,application.screenrect); //shift into screen
+  widgetrect:= rect1;
  end;
  if fo_savezorder in foptions then begin
   str1:= '~';

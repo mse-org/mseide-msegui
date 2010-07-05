@@ -70,6 +70,7 @@ type
    flayout: menulayoutinfoty;
    flocalframeandface: boolean;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   function transientforwindoworwindow: twindow;
    function translatetoscreen(const value: pointty): pointty; virtual;
    procedure updatelayout; virtual;
    procedure nextpopupshowing; virtual;
@@ -944,6 +945,14 @@ begin
  result:= translateclientpoint(value,self,nil);
 end;
 
+function tpopupmenuwidget.transientforwindoworwindow: twindow;
+begin
+ result:= window.transientfor;
+ if result = nil then begin
+  result:= self.window;
+ end;
+end;
+
 procedure tpopupmenuwidget.updatepos;
 var
  rect1: rectty;
@@ -951,7 +960,7 @@ var
  int1: integer;
 begin
  rect1.size:= addsize(flayout.sizerect.size,innerclientframewidth);
- workarea:= application.workarea(self.window);
+ workarea:= application.workarea(transientforwindoworwindow);
  factposition:= fposition;
  int1:= 0;
  with fposrect do begin
@@ -1017,7 +1026,9 @@ end;
 procedure tpopupmenuwidget.updatelayout;
 begin
  flayout.popupdirection:= gd_right;
- calcmenulayout(flayout,getcanvas,application.screensize.cy-innerclientframewidth.cy);
+ calcmenulayout(flayout,getcanvas,
+          application.screenrect(transientforwindoworwindow).cy -
+          innerclientframewidth.cy);
  movemenulayout(flayout,innerclientrect.pos);            
  updatepos;
 end;

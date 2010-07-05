@@ -93,7 +93,7 @@ function gui_settransientfor(id: winidty; transientfor: winidty): guierrorty;
 function gui_movewindowrect(id: winidty; const dist: pointty; 
                                          const rect: rectty): guierrorty;
 function gui_windowatpos(const pos: pointty): winidty;
-function gui_getscreensize: sizety;
+function gui_getscreenrect(const id: winidty): rectty; //0 -> virtual screen
 function gui_getworkarea(id: winidty): rectty;
 function gui_getwindowsize(id: winidty): windowsizety;
 function gui_windowvisible(id: winidty): boolean;

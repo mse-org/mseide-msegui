@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2010-06-5
+ application.screensize -> application.screenrect.
+ 
 Version 2.4rc1
 2010-06-03
 2010-05-21

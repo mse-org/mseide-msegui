@@ -1806,8 +1806,9 @@ begin
  result:= stackwindow(id,predecessor,above);
 end;
 
-function gui_getscreensize: sizety;
+function gui_getscreenrect(const id: winidty): rectty; //0 -> virtual screen
 begin
+ result.pos:= nullpoint; //todo: multimonitor
 {$ifdef FPC} {$checkpointer off} {$endif}
  result.cx:= defscreen^.width;
  result.cy:= defscreen^ .height;
@@ -1823,7 +1824,8 @@ begin
   bo1:= readcardinalproperty(mserootwindow(id),netatoms[net_workarea],4,result);
  end;
  if not bo1 then begin
-  result:= makerect(nullpoint,gui_getscreensize);
+//  result:= makerect(nullpoint,gui_getscreensize);
+  result:= gui_getscreenrect(id);
  end;
 end;
 

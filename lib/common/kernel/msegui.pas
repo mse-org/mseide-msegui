@@ -1704,7 +1704,7 @@ type
    property height: integer read fwidgetrect.cy write setbounds_cy;
 
    procedure setclippedwidgetrect(arect: rectty);
-                //clips into parentwidget
+                //clips into parentwidget or workarea if no parentwidget
    
    property anchors: anchorsty read fanchors write setanchors default defaultanchors;
    property defaultfocuschild: twidget read getdefaultfocuschild write setdefaultfocuschild;
@@ -2256,7 +2256,8 @@ type
                 //returns helpcontext of mouse widget, '' if none;
 
    function active: boolean;
-   function screensize: sizety;
+   function screenrect(const awindow: twindow = nil): rectty;
+                          //nil -> virtualscreeen
    function workarea(const awindow: twindow = nil): rectty;
                           //nil -> current active window
    property activewindow: twindow read factivewindow;
@@ -11603,8 +11604,9 @@ var
  rect1: rectty;
 begin
  if parentwidget = nil then begin
-  if not rectinrect(inflaterect(arect,2),application.workarea) then begin 
-   clipinrect1(arect,application.workarea);
+  rect1:= application.workarea(window);
+  if not rectinrect(inflaterect(arect,2),rect1) then begin 
+   clipinrect1(arect,rect1);
    gui_setdecoratedwindowrect(window.winid,arect,rect1);
    widgetrect:= rect1;
   end
@@ -15211,9 +15213,12 @@ begin
  window:= nil;
 end;
 
-function tguiapplication.screensize: sizety;
+function tguiapplication.screenrect(const awindow: twindow = nil): rectty;
+var
+ id: winidty;
 begin
- result:= gui_getscreensize;
+ id:= 0;
+ result:= gui_getscreenrect(id);
 end;
 
 function tguiapplication.workarea(const awindow: twindow = nil): rectty;

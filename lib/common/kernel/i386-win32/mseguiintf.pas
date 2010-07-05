@@ -216,6 +216,10 @@ const
  MONITOR_DEFAULTTONULL = 0;
  MONITOR_DEFAULTTOPRIMARY = 1;
  MONITOR_DEFAULTTONEAREST = 2;
+ SM_XVIRTUALSCREEN = 76;
+ SM_YVIRTUALSCREEN = 77;
+ SM_CXVIRTUALSCREEN = 78;
+ SM_CYVIRTUALSCREEN = 79;
  
 type
  hmonitor = thandle;
@@ -4873,10 +4877,28 @@ begin
  result:= gue_ok;
 end;
 
-function gui_getscreensize: sizety;
+function gui_getscreenrect(const id: winidty): rectty; //0 -> virtual screen
+var
+ info: tmonitorinfo;
 begin
- result.cx:= getsystemmetrics(sm_cxscreen);
- result.cy:= getsystemmetrics(sm_cyscreen);
+ info.cbsize:= sizeof(info);
+ if (id = 0) or not getmonitorinfo(monitorfromwindow(id,monitor_defaulttonearest),
+                                                       @info) then begin
+  result.x:= getsystemmetrics(sm_xvirtualscreen);
+  result.y:= getsystemmetrics(sm_yvirtualscreen);
+  result.cx:= getsystemmetrics(sm_cxvirtualscreen);
+  result.cy:= getsystemmetrics(sm_cyvirtualscreen);
+  if result.cx = 0 then begin
+   result.cx:= getsystemmetrics(sm_cxscreen)
+  end;
+  if result.cy = 0 then begin
+   result.cy:= getsystemmetrics(sm_cyscreen)
+  end;
+ end
+ else begin
+  result:= rectty(info.rcmonitor);
+  winrecttorect(result);
+ end;
 end;
 
 function gui_getworkarea(id: winidty): rectty;

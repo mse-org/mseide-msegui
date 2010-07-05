@@ -2438,8 +2438,9 @@ begin
  with fintf.getwidget do begin
   w1:= findwidget(na);
   if w1 <> nil then begin
-   rect2.pos:= nullpoint;
-   rect2.size:= application.screensize;
+//   rect2.pos:= nullpoint;
+//   rect2.size:= application.screensize;
+   rect2:= application.screenrect(window);
    shiftinrect(rect1,rect2);
    clipinrect(rect1,rect2);
    w1.widgetrect:= rect1;
@@ -2503,7 +2504,9 @@ begin
     widgetrect:= rect1;
    end
    else begin
-    setclippedwidgetrect(rect1); //shift into screen
+    rect1:= clipinrect(rect1,application.screenrect); //shift into screen
+    widgetrect:= rect1;
+//    setclippedwidgetrect(rect1); //shift into screen
    end;
    visible:= bo1;
   end;
