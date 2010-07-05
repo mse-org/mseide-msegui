@@ -187,7 +187,7 @@ begin
   end;
  except
   on e: exception do begin
-   e.message:= 'Can not load Firebird library. '+e.message;
+   e.message:= 'Can not load FFTW library. '+e.message;
    raise;
   end;  
  end;
