@@ -19,9 +19,11 @@ unit msefftw;
 }
 
 interface
-
+{$ifdef FPC}
+{$mode objfpc}{$h+}{$interfaces corba}
 {$MACRO on}
 {$INLINE on}
+{$endif}
 uses
  msetypes,msestrings;
  
