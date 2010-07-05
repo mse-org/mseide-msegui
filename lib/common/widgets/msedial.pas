@@ -1147,7 +1147,7 @@ begin
   transform(pos);
  end;
 end;
-var testvar: real;
+
 procedure tcustomdialcontroller.checklayout;
 
 const
