@@ -1383,15 +1383,15 @@ begin
  end;
  workarea:= application.workarea(parent.window);
  inc(rect.pos.y,size1.cy);
- if rect.y + rect.cy > workarea.cy then begin
+ if rect.y + rect.cy > (workarea.y + workarea.cy) then begin
   dec(rect.y,size1.cy + rect.cy);
  end;
- int1:= workarea.cx - (rect.x + rect.cx);
+ int1:= (workarea.x + workarea.cx) - (rect.x + rect.cx);
  if int1 < 0 then begin
   inc(rect.x,int1);
  end;
- if rect.x < 0 then begin
-  rect.x:= 0;
+ if rect.x < workarea.x then begin
+  rect.x:= workarea.x;
  end;
 end;
 
@@ -1419,9 +1419,9 @@ begin
    int1:= (rect1.x + rect1.cx) - (x + cx);
    if int1 < 0 then begin
     inc(x,int1);
-    if x < rect1.x then begin
-     x:= rect1.x;
-    end;
+   end;
+   if x < rect1.x then begin
+    x:= rect1.x;
    end;
    if y + cy > rect1.y + rect1.cy then begin
     if placement = cp_bottomleft then begin
