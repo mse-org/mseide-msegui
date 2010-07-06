@@ -1057,7 +1057,10 @@ var
    inc(apo);
   end;
  end;
- 
+
+var
+ po3: pmsechar;
+  
 begin
  result:= nil;
  po1:= pmsechar(asql);
@@ -1076,7 +1079,6 @@ begin
      inc(po1);
      while (po1^ <> '''') and (po1^ <> #0) do begin
       checkescape(po1);
-//      inc(po1);
      end;
      if po1^ = '''' then begin
       inc(po1);
@@ -1086,7 +1088,6 @@ begin
      inc(po1);
      while (po1^ <> '"') and (po1^ <> #0) do begin
       checkescape(po1);
-//      inc(po1);
      end;
      if po1^ = '"' then begin
       inc(po1);
@@ -1125,7 +1126,16 @@ begin
  end;
  {
  if po1 <> po2 then begin //no terminating ';'
-  addstatement;
+  po3:= po1;
+  while po3 > po2 do begin //remove trailing space //////what about newline?
+   dec(po3);
+   if po3^ <> ' ' then begin
+    break;
+   end;
+  end;
+  if po3 <> po2 then begin //not empty
+   addstatement;
+  end;
  end;
  }
 end;
