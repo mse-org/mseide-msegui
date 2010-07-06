@@ -158,9 +158,15 @@ Type
                   const asql: msestring; const aparams : tmseparams); override;
     procedure UnPrepareStatement(cursor:TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
+    procedure doexecuteunprepared(const c: tmysqlcursor;
+                   const atransaction: tsqltransaction; const asql: string);
     procedure internalExecute(const cursor: TSQLCursor;
        const atransaction:tSQLtransaction;
        const AParams: TmseParams; const autf8: boolean); override;
+    procedure internalexecuteunprepared(const cursor: tsqlcursor;
+               const atransaction: tsqltransaction;
+               const asql: string); override;
+
     procedure AddFieldDefs(const cursor: TSQLCursor; 
                    const FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
@@ -877,6 +883,32 @@ begin
   freebindingbuffers(c.fresultbuf);
 end;
 
+procedure tmysqlconnection.doexecuteunprepared(const c: tmysqlcursor;
+                   const atransaction: tsqltransaction; const asql: string);
+begin
+ with tmysqltrans(atransaction.trans) do begin
+  if mysql_query(fconn,Pchar(asql)) <> 0 then begin
+   checkerror(SErrExecuting,fconn);
+  end
+  else begin
+   C.fRowsAffected := mysql_affected_rows(fconn);
+   C.LastInsertID := mysql_insert_id(fconn);
+   if C.FNeedData then begin
+    if myo_storeresult in foptions then begin
+     C.FRes:= mysql_store_result(fconn);
+    end
+    else begin
+     C.FRes:= mysql_use_result(fconn); 
+      //needs to call mysql_fetch_row() until all data has been fetched
+    end;
+    if myo_storeresult in foptions then begin
+     c.frowsreturned:= mysql_num_rows(c.fres);
+    end;
+   end;
+  end;
+ end;
+end;
+
 procedure tmysqlconnection.internalExecute(const  cursor: TSQLCursor;
                const atransaction: tSQLtransaction; const AParams : TmseParams;
                const autf8: boolean);
@@ -897,6 +929,9 @@ begin
  C:= tmysqlcursor(cursor);
  c.frowsaffected:= -1;
  c.frowsreturned:= -1;
+ if not C.FNeedData then begin
+  c.frowsreturned:= 0;
+ end;
  freeresultbuffer(c);
  if c.fprepstatement <> nil then begin
   paramdata:= nil;
@@ -1011,31 +1046,27 @@ begin
   else begin
    str1:= mstr1;
   end;
-  with tmysqltrans(atransaction.trans) do begin
-   if mysql_query(fconn,Pchar(str1))<>0 then begin
-    checkerror(SErrExecuting,fconn);
-   end
-   else begin
-    C.fRowsAffected := mysql_affected_rows(fconn);
-    C.LastInsertID := mysql_insert_id(fconn);
-    if C.FNeedData then begin
-     if myo_storeresult in foptions then begin
-      C.FRes:= mysql_store_result(fconn);
-     end
-     else begin
-      C.FRes:= mysql_use_result(fconn); 
-       //needs to call mysql_fetch_row() until all data has been fetched
-     end;
-     if myo_storeresult in foptions then begin
-      c.frowsreturned:= mysql_num_rows(c.fres);
-     end;
-    end;
-   end;
-  end;
+  doexecuteunprepared(c,atransaction,str1);
  end;
+// if not C.FNeedData then begin
+//  c.frowsreturned:= 0;
+// end;
+end;
+
+procedure tmysqlconnection.internalexecuteunprepared(const cursor: tsqlcursor;
+               const atransaction: tsqltransaction;
+               const asql: string);
+var
+ C: tmysqlcursor;
+begin
+ C:= tmysqlcursor(cursor);
+ c.frowsaffected:= -1;
+ c.frowsreturned:= -1;
  if not C.FNeedData then begin
   c.frowsreturned:= 0;
  end;
+ freeresultbuffer(c);
+ doexecuteunprepared(c,atransaction,asql);
 end;
 
 //function tmysqlconnection.MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer;
