@@ -93,7 +93,8 @@ type
 
 
 const
- StatementTokens : Array[TStatementType] of string = ('(none)', 'select',
+ StatementTokens : Array[TStatementType] of msestring = 
+                 ('(none)', 'select',
                   'insert', 'update', 'delete',
                   'create', 'get', 'put', 'execute',
                   'start','commit','rollback', '?'
@@ -165,7 +166,7 @@ type
 //   procedure setconnected(const avalue: boolean);
    procedure notification(acomponent: tcomponent; operation: toperation); override;
    
-    function StrToStatementType(s : string) : TStatementType; virtual;
+    function StrToStatementType(s : msestring) : TStatementType; virtual;
     procedure DoInternalConnect; override;
     procedure doafterinternalconnect; override;
     procedure dobeforeinternaldisconnect; override;
@@ -1379,12 +1380,13 @@ begin
  updateutf8(result);
 end;
 
-function tcustomsqlconnection.StrToStatementType(s : string) : TStatementType;
+function tcustomsqlconnection.StrToStatementType(s: msestring) : TStatementType;
 
 var T : TStatementType;
 
 begin
-  S:=Lowercase(s);
+ result:= stnone;
+  S:= mseLowercase(s);
   For t:= stselect to strollback do
     if (S=StatementTokens[t]) then
       Exit(t);
@@ -2923,7 +2925,7 @@ begin
  if not streamloading then begin  
   try
    Prepare;
-   if FCursor.FStatementType in datareturningtypes then begin
+   if not parsesql or (FCursor.FStatementType in datareturningtypes) then begin
     indexfields:= nil;
     if FUpdateable then begin
      if FusePrimaryKeyAsKey and not (bs_refreshing in fbstate) then begin

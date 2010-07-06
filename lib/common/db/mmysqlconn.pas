@@ -128,7 +128,7 @@ Type
    Procedure checkstmterror(const Msg: String; const astmt: pmysql_stmt);
 
 //   function stringtosqltext(const afeildtype: tfieldtype; const avalue: string): string;
-    function StrToStatementType(s : string) : TStatementType; override;
+    function StrToStatementType(s : msestring) : TStatementType; override;
 //    Procedure ConnectToServer; virtual;
 //    Procedure SelectDatabase; virtual;
 //    function MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer; var NewType: TFieldType; var NewSize: Integer): Boolean;
@@ -554,7 +554,7 @@ begin
                       flasterror,flastsqlcode);
 end;
 
-function tmysqlconnection.StrToStatementType(s : string) : TStatementType;
+function tmysqlconnection.StrToStatementType(s : msestring) : TStatementType;
 
 begin
   S:=Lowercase(s);

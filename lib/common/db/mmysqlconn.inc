@@ -113,7 +113,7 @@ Type
     Procedure checkerror(const Msg: String);
 
 //   function stringtosqltext(const afeildtype: tfieldtype; const avalue: string): string;
-    function StrToStatementType(s : string) : TStatementType; override;
+    function StrToStatementType(s : msestring) : TStatementType; override;
     Procedure ConnectToServer; virtual;
     Procedure SelectDatabase; virtual;
 //    function MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer; var NewType: TFieldType; var NewSize: Integer): Boolean;
@@ -237,7 +237,7 @@ begin
                       flasterror,flastsqlcode);
 end;
 
-function TConnectionName.StrToStatementType(s : string) : TStatementType;
+function TConnectionName.StrToStatementType(s : msestring) : TStatementType;
 
 begin
   S:=Lowercase(s);
