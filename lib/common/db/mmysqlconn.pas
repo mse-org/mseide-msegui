@@ -72,7 +72,7 @@ Type
  bindinginfoarty = array of bindinginfoty;
  
   tmysqlcursor = class(TSQLCursor)
-  protected
+   protected
 //    FQMySQL : PMySQL;
     FRes: PMYSQL_RES;                   { Record pointer }
     FNeedData : Boolean;
@@ -92,7 +92,8 @@ Type
     fresultbindinginfo: bindinginfoarty;
     fresultbindings: pointer;
     fresultbuf: pointer;
-   procedure freeprepstatement;
+    procedure freeprepstatement;
+   public
   end;
 
   mysqloptionty = (myo_nopreparedstatements,myo_storeresult,myo_ssl);
@@ -744,8 +745,16 @@ end;
 
 Procedure tmysqlconnection.DeAllocateCursorHandle(var cursor : TSQLCursor);
 
+Var
+  C : tmysqlcursor;
+
 begin
+ if cursor <> nil then begin
+  C:= tmysqlcursor(cursor);
+  freeresultbuffer(c);
+  freebindingbuffers(c.fresultbuf);
   FreeAndNil(cursor);
+ end;
 end;
 
 function tmysqlconnection.AllocateTransactionHandle: TSQLHandle;

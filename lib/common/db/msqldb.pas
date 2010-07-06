@@ -2701,7 +2701,7 @@ begin
   end;
   freequery;
   if not (bs_refreshing in fbstate) then begin
-   freefldbuffers;
+//   freefldbuffers;
    database.deallocatecursorhandle(fcursor);
   end;
   exclude(fbstate,bs_connected);
