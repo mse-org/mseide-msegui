@@ -181,8 +181,16 @@ type
 
     procedure internalexecute(const cursor: tsqlcursor; const atransaction: tsqltransaction;
                const aparams : tmseparams; const autf8: boolean); virtual; abstract;
+    procedure internalexecuteunprepared(const cursor: tsqlcursor;
+               const atransaction: tsqltransaction;
+               const asql: string); virtual;
+
     procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                const AParams : TmseParams; const autf8: boolean);
+    procedure Executeunprepared(const cursor: TSQLCursor;
+                               const atransaction: tsqltransaction;
+                               const AParams : TmseParams;
+                               const asql: msestring; const autf8: boolean);
     function GetTransactionHandle(trans : TSQLHandle): pointer; virtual; abstract;
     function Commit(trans : TSQLHandle) : boolean; virtual; abstract;
     function RollBack(trans : TSQLHandle) : boolean; virtual; abstract;
@@ -215,7 +223,7 @@ type
     function internalExecuteDirect(const aSQL: mseString;
           ATransaction: TSQLTransaction;
           const aparams: tmseparams; aparamvars: array of variant;
-          aisutf8: boolean): integer;
+          aisutf8: boolean; const noprepare: boolean): integer;
    //idbcontroller
    procedure setinheritedconnected(const avalue: boolean);
    function readsequence(const sequencename: string): string; virtual;
@@ -265,11 +273,13 @@ type
    function executedirect(const asql: msestring;
         atransaction: tsqltransaction;
         const aparams: tmseparams = nil;
-        const aisutf8: boolean = false): integer; overload;
+        const aisutf8: boolean = false;
+        const anoprepare: boolean = false): integer; overload;
    function ExecuteDirect(const aSQL: mseString;
          ATransaction: TSQLTransaction;
          const aparams: array of variant;
-         const aisutf8: boolean = false): integer; overload;
+         const aisutf8: boolean = false;
+         const anoprepare: boolean = false): integer; overload;
    procedure GetTableNames(List : TStrings; SystemTables : Boolean = false); virtual;
    procedure GetProcedureNames(List : TStrings); virtual;
    procedure GetFieldNames(const TableName : string; List :  TStrings); virtual;
@@ -405,7 +415,8 @@ type
              const atransaction: tsqltransaction; const e: exception;
              var handled: boolean) of object;
 
- sqlstatementoptionty = (sso_utf8,sso_autocommit,sso_autocommitret);
+ sqlstatementoptionty = (sso_utf8,sso_autocommit,sso_autocommitret,
+                                                          sso_noprepare);
  sqlstatementoptionsty = set of sqlstatementoptionty;
 
  tcustomsqlstatement = class(tmsecomponent,itransactionclient,idatabaseclient)
@@ -575,6 +586,7 @@ type
    fupdaterowsaffected: integer;
    fblobintf: iblobconnection;   
    fbeforeexecute: tmsesqlscript;
+   faftercursorclose: tmsesqlscript;
    procedure FreeFldBuffers;
    function GetIndexDefs : TIndexDefs;
    function GetStatementType : TStatementType;
@@ -599,6 +611,7 @@ type
    procedure setFSQLInsert(const avalue: tsqlstringlist);
    procedure setFSQLDelete(const avalue: tsqlstringlist);
    procedure setbeforeexecute(const avalue: tmsesqlscript);
+   procedure setaftercursorclose(const avalue: tmsesqlscript);
    function getsqltransaction: tsqltransaction;
    procedure setsqltransaction(const avalue: tsqltransaction);
    function getsqltransactionwrite: tsqltransaction;
@@ -636,7 +649,7 @@ type
    procedure connect(const aexecute: boolean);
    procedure freemodifyqueries;
    procedure freequery;
-   procedure disconnect;
+   procedure disconnect{(const aexecute: boolean)};
    procedure InternalOpen; override;
 //   function closetransactiononrefresh: boolean; virtual;
 //   function cantransactionrefresh: boolean; virtual;
@@ -693,6 +706,8 @@ type
     property SQLInsert : tsqlstringlist read FSQLInsert write setFSQLInsert;
     property SQLDelete : tsqlstringlist read FSQLDelete write setFSQLDelete;
     property beforeexecute: tmsesqlscript read fbeforeexecute write setbeforeexecute;
+    property aftercursorclose: tmsesqlscript read faftercursorclose 
+                                                 write setaftercursorclose;
     property IndexDefs : TIndexDefs read GetIndexDefs;
     property UpdateMode : TUpdateMode read FUpdateMode write SetUpdateMode;
     property UsePrimaryKeyAsKey : boolean read FUsePrimaryKeyAsKey write SetUsePrimaryKeyAsKey;
@@ -1472,12 +1487,13 @@ end;
 function tcustomsqlconnection.internalExecuteDirect(const aSQL: mseString;
           ATransaction: TSQLTransaction;
           const aparams: tmseparams; aparamvars: array of variant;
-          aisutf8: boolean): integer;
+          aisutf8: boolean; const noprepare: boolean): integer;
 var 
  Cursor: TSQLCursor;
  params1: tmseparams;
  bo1: boolean; 
  int1: integer;
+ str1: ansistring;
 begin
  if atransaction = nil then begin
   atransaction:= ftransaction;
@@ -1508,11 +1524,18 @@ begin
     DatabaseError(SErrNoStatement);
    end;   
    Cursor.FStatementType := stNone;
-   PrepareStatement(cursor,ATransaction,aSQL,params1);
+   if not noprepare then begin
+    PrepareStatement(cursor,ATransaction,aSQL,params1);
+   end;
    cursor.ftrans:= atransaction.handle;
    updateutf8(aisutf8);
-   try    
-    execute(cursor,atransaction,params1,aisutf8);
+   try
+    if noprepare then begin
+     executeunprepared(cursor,atransaction,params1,asql,aisutf8);
+    end
+    else begin
+     execute(cursor,atransaction,params1,aisutf8);
+    end;
     result:= cursor.frowsaffected;
    finally
     UnPrepareStatement(Cursor);
@@ -1529,16 +1552,20 @@ end;
 
 function tcustomsqlconnection.ExecuteDirect(const aSQL: mseString;
           ATransaction: TSQLTransaction;
-          const aparams: tmseparams = nil; const aisutf8: boolean = false): integer;
+          const aparams: tmseparams = nil;
+          const aisutf8: boolean = false;
+          const anoprepare: boolean = false): integer;
 begin
- result:= internalexecutedirect(asql,atransaction,aparams,[],aisutf8);
+ result:= internalexecutedirect(asql,atransaction,aparams,[],aisutf8,anoprepare);
 end;
 
 function tcustomsqlconnection.ExecuteDirect(const aSQL: mseString;
           ATransaction: TSQLTransaction;
-          const aparams: array of variant; const aisutf8: boolean = false): integer;
+          const aparams: array of variant;
+          const aisutf8: boolean = false;
+          const anoprepare: boolean = false): integer;
 begin
- result:= internalexecutedirect(asql,atransaction,nil,aparams,aisutf8);
+ result:= internalexecutedirect(asql,atransaction,nil,aparams,aisutf8,anoprepare);
 end;
 
 procedure tcustomsqlconnection.GetDBInfo(const SchemaType : TSchemaType; 
@@ -1612,6 +1639,41 @@ begin
  end;
 end;
 
+procedure tcustomsqlconnection.internalexecuteunprepared(const cursor: tsqlcursor;
+               const atransaction: tsqltransaction;
+               const asql: string);
+begin
+ raise edatabaseerror.create(name+': executeunprepared not supported.');
+end;
+
+procedure tcustomsqlconnection.Executeunprepared(const cursor: TSQLCursor;
+                               const atransaction: tsqltransaction;
+                               const AParams : TmseParams;
+                               const asql: msestring; const autf8: boolean);
+var
+ mstr1: msestring;
+ str1: ansistring;
+begin
+ beforeaction;
+ try
+  if (aparams <> nil) and (aparams.count > 0) then begin
+   mstr1:= aparams.expandvalues(asql);
+  end
+  else begin
+   mstr1:= asql;
+  end;
+  if autf8 then begin
+   str1:= stringtoutf8(mstr1);
+  end
+  else begin
+   str1:= mstr1;
+  end;
+  internalexecuteunprepared(cursor,atransaction,str1);
+ finally
+  afteraction;
+ end;
+end;
+     
 function tcustomsqlconnection.GetSchemaInfoSQL( SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string;
 
 begin
@@ -2631,7 +2693,7 @@ begin
  end;
 end;
 
-procedure TSQLQuery.disconnect;
+procedure TSQLQuery.disconnect{(const aexecute: boolean)};
 begin
  if bs_connected in fbstate then begin
   if fcursor <> nil then begin
@@ -2642,6 +2704,11 @@ begin
    database.deallocatecursorhandle(fcursor);
   end;
   exclude(fbstate,bs_connected);
+//  if aexecute then begin
+   if faftercursorclose <> nil then begin
+    faftercursorclose.execute(database,tsqltransaction(transaction));
+   end;
+//  end;
  end;
 end;
 
@@ -2649,19 +2716,22 @@ procedure TSQLQuery.InternalClose;
 begin
 // Database and FCursor could be nil, for example if the database is not
 // assigned, and .open is called
- disconnect;
- if not (bs_refreshing in fbstate) then begin
-  freemodifyqueries;
-  fprimarykeyfield:= nil;
-  if DefaultFields then begin
-   DestroyFields;
+ try
+  disconnect{(true)};
+ finally
+  if not (bs_refreshing in fbstate) then begin
+   freemodifyqueries;
+   fprimarykeyfield:= nil;
+   if DefaultFields then begin
+    DestroyFields;
+   end;
   end;
+  fupdaterowsaffected:= 0;
+  fblobintf:= nil;
+  if StatementType in datareturningtypes then FreeFldBuffers;
+  FIsEOF := False;
+  inherited internalclose;
  end;
- fupdaterowsaffected:= 0;
- fblobintf:= nil;
- if StatementType in datareturningtypes then FreeFldBuffers;
- FIsEOF := False;
- inherited internalclose;
 end;
 
 procedure TSQLQuery.InternalInitFieldDefs;
@@ -3578,6 +3648,9 @@ begin
   if acomponent = fbeforeexecute then begin
    fbeforeexecute:= nil;
   end;
+  if acomponent = faftercursorclose then begin
+   faftercursorclose:= nil;
+  end;
  end;
 end;
 
@@ -3645,7 +3718,7 @@ begin         //todo: check connect disconnect sequence
    if transaction.active then begin
     fetchallblobs;
     tsqltransaction(transaction).disconnect(self);
-    disconnect;
+    disconnect{(false)};
     unprepare;
     tcustomsqlconnection(database).DeAllocateCursorHandle(FCursor);
     startlogger;
@@ -3684,17 +3757,18 @@ begin
   fbeforeexecute.freenotification(self);
  end;
 end;
-{
-function TSQLQuery.closetransactiononrefresh: boolean;
+
+procedure TSQLQuery.setaftercursorclose(const avalue: tmsesqlscript);
 begin
- result:= false;
+ if faftercursorclose <> nil then begin
+  faftercursorclose.removefreenotification(self);
+ end;
+ faftercursorclose:= avalue;
+ if faftercursorclose <> nil then begin
+  faftercursorclose.freenotification(self);
+ end;
 end;
 
-function tsqlquery.cantransactionrefresh: boolean;
-begin
- result:= true;
-end;
-}
 function TSQLQuery.getnumboolean: boolean;
 begin
  result:= tcustomsqlconnection(database).getnumboolean;
@@ -4124,7 +4198,8 @@ begin
    fonbeforestatement(self);
   end;
   try
-   adatabase.executedirect(ar1[int1],atransaction,fparams,isutf8);
+   adatabase.executedirect(ar1[int1],atransaction,fparams,isutf8,
+                          sso_noprepare in foptions);
   except
    on e: exception do begin  
     bo1:= false;
@@ -4169,8 +4244,6 @@ begin
 end;
 
 procedure tsqlstatement.prepare;
-//var
-// str1: string;
 begin
  if (fcursor = nil) or not fcursor.fprepared then begin
   checkdatabase(name,fdatabase);
@@ -4186,14 +4259,9 @@ begin
   end;
   fcursor.ftrans:= ftransaction.handle;
   fcursor.fstatementtype:= fstatementtype;
-  {
-  str1:= TrimRight(FSQL.dbText);
-  if str1 = '' then begin
-    DatabaseError(SErrNoStatement);
+  if not (sso_noprepare in foptions) then begin
+   fdatabase.PrepareStatement(Fcursor,ftransaction,fsql.text,FParams);
   end;
-  fdatabase.PrepareStatement(Fcursor,ftransaction,str1,FParams);
-  }
-  fdatabase.PrepareStatement(Fcursor,ftransaction,fsql.text,FParams);
  end;
 end;
 
@@ -4213,8 +4281,14 @@ begin
  updateparams(fparams,isutf8);
  fcursor.ftrans:= tsqltransaction(ftransaction).handle;
  try
-  tcustomsqlconnection(fdatabase).execute(fcursor,tsqltransaction(ftransaction),
+  if sso_noprepare in foptions then begin
+   tcustomsqlconnection(fdatabase).executeunprepared(fcursor,
+            tsqltransaction(ftransaction),fparams,fsql.text,isutf8);
+  end
+  else begin
+   tcustomsqlconnection(fdatabase).execute(fcursor,tsqltransaction(ftransaction),
                              fparams,isutf8);
+  end;
 //  fcursor.close;
   if sso_autocommit in foptions then begin
    ftransaction.commit;

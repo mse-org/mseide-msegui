@@ -101,6 +101,11 @@ type
     procedure internalExecute(const cursor:TSQLCursor; 
              const ATransaction:TSQLTransaction; const AParams:TmseParams;
              const autf8: boolean); override;
+    procedure internalexecuteunprepared(const cursor: tsqlcursor;
+               const atransaction: tsqltransaction;
+               const asql: string); override;
+
+
     // - Result retrieving
     procedure AddFieldDefs(const cursor:TSQLCursor; 
                               const FieldDefs:TFieldDefs); override;
@@ -853,6 +858,20 @@ begin
 
   // free parameter buffers
   FreeParamBuffers(ODBCCursor);
+end;
+
+procedure todbcconnection.internalexecuteunprepared(const cursor: tsqlcursor;
+               const atransaction: tsqltransaction;
+               const asql: string);
+var
+  ODBCCursor:TODBCCursor;
+  Res: SQLRETURN;
+begin
+  ODBCCursor:= TODBCCursor(cursor);
+  res:= SQLExecdirect(ODBCCursor.FSTMTHandle,pchar(asql),length(asql));
+  ODBCCheckResult(res,
+    SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle, 'Could not execute statement.'
+  );
 end;
 
 function TODBCConnection.Fetch(cursor: TSQLCursor): boolean;
