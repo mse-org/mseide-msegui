@@ -2701,6 +2701,7 @@ begin
   end;
   freequery;
   if not (bs_refreshing in fbstate) then begin
+   freefldbuffers;
    database.deallocatecursorhandle(fcursor);
   end;
   exclude(fbstate,bs_connected);
@@ -2728,7 +2729,7 @@ begin
   end;
   fupdaterowsaffected:= 0;
   fblobintf:= nil;
-  if StatementType in datareturningtypes then FreeFldBuffers;
+//  if StatementType in datareturningtypes then FreeFldBuffers;
   FIsEOF := False;
   inherited internalclose;
  end;
