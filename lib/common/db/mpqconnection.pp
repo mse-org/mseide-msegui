@@ -115,6 +115,9 @@ type
    procedure FreeFldBuffers(cursor : TSQLCursor); override;
    procedure internalExecute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                      const AParams : TmseParams; const autf8: boolean); override;
+   procedure internalexecuteunprepared(const cursor: tsqlcursor;
+               const atransaction: tsqltransaction;
+               const asql: string); override;
    procedure AddFieldDefs(const cursor: TSQLCursor;
                   const FieldDefs : TfieldDefs); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
@@ -851,6 +854,23 @@ begin
    end;
    res:= pqexec(tr.fconn,pchar(s));
   end;
+  frowsaffected:= strtointdef(pqcmdtuples(res),-1);
+  checkerror(tr.fconn,res,'Execution of query failed');
+  frowsreturned:= pqntuples(res);
+  fopen:= true;
+ end;
+end;
+
+procedure tpqconnection.internalexecuteunprepared(const cursor: tsqlcursor;
+               const atransaction: tsqltransaction;
+               const asql: string);
+begin
+ with TPQCursor(cursor) do begin
+  frowsreturned:= -1;
+  frowsaffected:= -1;
+  curtuple:= -1;
+  res:= pqexec(tr.fconn,pchar(asql));
+  
   frowsaffected:= strtointdef(pqcmdtuples(res),-1);
   checkerror(tr.fconn,res,'Execution of query failed');
   frowsreturned:= pqntuples(res);
