@@ -577,6 +577,7 @@ type
    FParams: TmseParams;
    FusePrimaryKeyAsKey: Boolean;
    FSQLBuf: mseString;
+   FSQLprepbuf: mseString;
    FFromPart: mseString;
    FWhereStartPos: integer;
    FWhereStopPos: integer;
@@ -833,7 +834,7 @@ begin
  updateparams(aparams,autf8);
  acursor.ftrans:= tsqltransaction(atransaction).handle;
  tcustomsqlconnection(adatabase).execute(acursor,tsqltransaction(atransaction),
-               aParams,autf8);
+                         aParams,autf8);
 end;
 
 procedure checksqlconnection(const aname: ansistring; const avalue: tmdatabase);
@@ -2515,12 +2516,16 @@ begin
  tcustomsqlconnection(database).unpreparestatement(fcursor);
  fiseof := false;
  inherited internalclose;
- s:= fsqlbuf;
  if filtered and (filter <> '') then begin
-  s:= addfilter(s);
+  fsqlprepbuf:= addfilter(fsqlbuf);
+ end
+ else begin
+  fsqlprepbuf:= fsqlbuf;
  end;
- tcustomsqlconnection(database).preparestatement(fcursor,
-                                  tsqltransaction(transaction),s,fparams);
+ if not (dso_noprepare in getdsoptions) then begin
+  tcustomsqlconnection(database).preparestatement(fcursor,
+                             tsqltransaction(transaction),fsqlprepbuf,fparams);
+ end;
  execute;
  inherited internalopen;
  first;
@@ -2596,10 +2601,13 @@ begin
   SQLParser(FSQLBuf);
 
   if filtered and (filter <> '') then begin
-   Db.PrepareStatement(Fcursor,sqltr,AddFilter(FSQLBuf),FParams)
+   fsqlprepbuf:= AddFilter(FSQLBuf);
   end
   else begin
-   Db.PrepareStatement(Fcursor,sqltr,FSQLBuf,FParams);
+   fsqlprepbuf:= fsqlbuf;
+  end;
+  if not (dso_noprepare in getdsoptions) then begin
+   Db.PrepareStatement(Fcursor,sqltr,fsqlprepBuf,FParams);
   end;
   ftablename:= '';
   if FCursor.FStatementType in datareturningtypes then begin
@@ -2652,12 +2660,24 @@ end;
 
 procedure TSQLQuery.Execute;
 var
- int1: integer;
+// int1: integer;
+ bo1: boolean;
 begin
  If (FParams.Count>0) and Assigned(FMasterLink) then begin
   FMasterLink.CopyParamsFromMaster(False);
  end;
- doexecute(fparams,ftransaction,fcursor,fdatabase,isutf8);
+ bo1:= isutf8;
+ updateparams(fparams,bo1);
+ fcursor.ftrans:= tsqltransaction(ftransaction).handle;
+ if dso_noprepare in getdsoptions then begin
+  tcustomsqlconnection(fdatabase).executeunprepared(fcursor,
+               tsqltransaction(ftransaction),fParams,fsqlprepbuf,bo1);
+ end
+ else begin
+  tcustomsqlconnection(fdatabase).execute(fcursor,
+              tsqltransaction(ftransaction),fParams,bo1);
+ end;
+// doexecute(fparams,ftransaction,fcursor,fdatabase,isutf8);
 end;
 
 function tsqlquery.loadfield(const afieldno: integer;

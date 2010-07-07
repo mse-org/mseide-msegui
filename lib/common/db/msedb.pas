@@ -1010,6 +1010,7 @@ type
                          dso_refreshafterapply,dso_recnoapplyrefresh,
                          dso_refreshtransaction,
                          dso_notransactionrefresh,dso_recnotransactionrefresh,
+                         dso_noprepare,
                          dso_cacheblobs,
                          dso_offline, //disconnect database after open
                          dso_local,   //do not connect database on open
