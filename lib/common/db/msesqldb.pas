@@ -60,8 +60,8 @@ type
    function getcontroller: tdscontroller;
    function getindexdefs: TIndexDefs;
    procedure setindexdefs(const avalue: TIndexDefs);
-   function getetstatementtype: TStatementType;
-   procedure setstatementtype(const avalue: TStatementType);
+//   function getetstatementtype: TStatementType;
+//   procedure setstatementtype(const avalue: TStatementType);
    procedure checkcanupdate;
   protected
    procedure checkpendingupdates; override;
@@ -124,8 +124,8 @@ type
    property UsePrimaryKeyAsKey default true;
    property IndexDefs : TIndexDefs read getindexdefs write setindexdefs;
                //must be writable because it is streamed
-   property StatementType : TStatementType read getetstatementtype 
-                                  write setstatementtype default stnone;
+//   property StatementType : TStatementType read getetstatementtype 
+//                                  write setstatementtype default stnone;
                //must be writable because it was streamed in FPC 2.0.4
  end;
 
@@ -644,7 +644,7 @@ begin
   applyupdates;
  end;
 end;
-
+{
 function tmsesqlquery.getetstatementtype: TStatementType;
 begin
  result:= inherited statementtype;
@@ -654,7 +654,7 @@ procedure tmsesqlquery.setstatementtype(const avalue: TStatementType);
 begin
  //dummy
 end;
-
+}
 procedure tmsesqlquery.inheritedpost;
 begin
  inherited post;

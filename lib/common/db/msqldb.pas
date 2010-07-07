@@ -582,6 +582,7 @@ type
    FWhereStartPos: integer;
    FWhereStopPos: integer;
    FParseSQL: boolean;
+   fstatementtype: tstatementtype;
    FMasterLink: TsqlMasterParamsDatalink;
    FUpdateQry,FDeleteQry,FInsertQry: TSQLQuery;
    fupdaterowsaffected: integer;
@@ -590,7 +591,7 @@ type
    faftercursorclose: tmsesqlscript;
    procedure FreeFldBuffers;
    function GetIndexDefs : TIndexDefs;
-   function GetStatementType : TStatementType;
+//   function GetStatementType : TStatementType;
    procedure SetIndexDefs(AValue : TIndexDefs);
    procedure SetReadOnly(AValue : Boolean);
    procedure SetParseSQL(AValue : Boolean);
@@ -712,7 +713,8 @@ type
     property IndexDefs : TIndexDefs read GetIndexDefs;
     property UpdateMode : TUpdateMode read FUpdateMode write SetUpdateMode;
     property UsePrimaryKeyAsKey : boolean read FUsePrimaryKeyAsKey write SetUsePrimaryKeyAsKey;
-    property StatementType : TStatementType read GetStatementType default stnone;
+    property StatementType : TStatementType read fstatementtype 
+                           write fstatementtype default stnone;
     Property DataSource : TDatasource Read GetDataSource Write SetDatasource;
     property database: tcustomsqlconnection read getdatabase1 write setdatabase1;
     
@@ -2410,6 +2412,7 @@ begin
   FIndexDefs := TIndexDefs.Create(Self);
   FReadOnly := false;
   FParseSQL := True;
+  fstatementtype:= stnone;
 // Delphi has upWhereAll as default, but since strings and oldvalue's don't work yet
 // (variants) set it to upWhereKeyOnly
   FUpdateMode := upWhereKeyOnly;
@@ -2610,7 +2613,7 @@ begin
    Db.PrepareStatement(Fcursor,sqltr,fsqlprepBuf,FParams);
   end;
   ftablename:= '';
-  if FCursor.FStatementType in datareturningtypes then begin
+  if (FCursor.FStatementType in datareturningtypes) then begin
    FCursor.FInitFieldDef := True;
    fupdateable:= not readonly and 
          (fsqlupdate.count > 0) and (fsqlinsert.count > 0) and 
@@ -2810,7 +2813,8 @@ begin
 
 		case ParsePart of
 		    ppStart  : begin
-			FCursor.FStatementType := (Database as tcustomsqlconnection).StrToStatementType(s);
+			FCursor.FStatementType := 
+			 (Database as tcustomsqlconnection).StrToStatementType(s);
 		
 			if FCursor.FStatementType = stSelect then 
 			    ParsePart := ppSelect
@@ -2877,6 +2881,9 @@ begin
  	system.insert('(',ASQL,FWhereStartPos+1);
  	inc(FWhereStopPos);
  	system.insert(')',ASQL,FWhereStopPos);
+ end;
+ if not fparsesql and (fstatementtype <> stnone) then begin
+  fCursor.FStatementType := fstatementtype;
  end;
 //writeln(ASQL);
 end;
@@ -3026,7 +3033,7 @@ begin
  if not streamloading then begin  
   try
    Prepare;
-   if not parsesql or (FCursor.FStatementType in datareturningtypes) then begin
+   if FCursor.FStatementType in datareturningtypes then begin
     indexfields:= nil;
     if FUpdateable then begin
      if FusePrimaryKeyAsKey and not (bs_refreshing in fbstate) then begin
@@ -3622,14 +3629,14 @@ begin
   end;
  end;
 end;
-
+{
 function TSQLQuery.GetStatementType : TStatementType;
 
 begin
   if assigned(FCursor) then Result := FCursor.FStatementType
     else Result := stNone;
 end;
-
+}
 Procedure TSQLQuery.SetDataSource(AVAlue : TDatasource);
 Var
  DS : TDatasource;
