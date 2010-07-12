@@ -374,6 +374,7 @@ type
   private
    function geteorchar: char;
    procedure seteorchar(const avalue: char);
+   function getthread: tasciicommthread;
   protected
    function geteventclass: asciicommeventclassty; virtual;
   public
@@ -382,6 +383,7 @@ type
             atimeout: integer = 0): integer; overload;
    function send(const commandstrings: array of string): integer; overload;
                             //reads no answer
+   property thread: tasciicommthread read getthread;
   published
    property halfduplex;
    property eorchar: char read geteorchar write seteorchar default defaulteorchar;
@@ -1507,6 +1509,7 @@ begin
   end;
   if laenge >= asciipufferlaenge then begin
    dat:= dat + puffer;
+   uniquestring(puffer);
    laenge:= 0;
   {
    laenge:= 0; //platz fuer naechstes telegramm
@@ -1877,6 +1880,11 @@ begin
    break;
   end;
  end;
+end;
+
+function tasciicommport.getthread: tasciicommthread;
+begin
+ result:= tasciicommthread(fthread);
 end;
 
 { tasciicomevent }
