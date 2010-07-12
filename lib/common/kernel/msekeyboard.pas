@@ -217,6 +217,7 @@ type
         key_CapsLock =           $0124,
         key_NumLock =            $0125,
         key_ScrollLock =         $0126,
+        key_AltGr =              $0127,
         key_F1 =                 $0130,                // function keys
         key_F2 =                 $0131,
         key_F3 =                 $0132,

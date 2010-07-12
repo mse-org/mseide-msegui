@@ -2919,6 +2919,10 @@ begin
     include(shiftstate,ss_second);
    end;
 
+   xk_iso_level3_shift: begin
+    result:= key_altgr;
+   end;
+
    else result:= keyty(key and not modmask);
   end;
  end;
