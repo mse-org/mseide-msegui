@@ -364,7 +364,9 @@ type
    function readln(timeout: integer; out dat: string): integer;
                        //cpf_io wenn gelungen
    function sendstring(const data: string; out antwort: string;
-      timeout: integer): integer;
+      timeout: integer): integer; overload;
+   function sendstring(const data: string): integer; overload;
+                              //no answer reading
    property eorchar: char read feorchar write feorchar default defaulteorchar;
  end;
 
@@ -377,7 +379,9 @@ type
   public
    constructor create(aowner: tcomponent); override;
    function send(const commandstring: string; out answer: string;
-            atimeout: integer = 0): integer;
+            atimeout: integer = 0): integer; overload;
+   function send(const commandstrings: array of string): integer; overload;
+                            //reads no answer
   published
    property halfduplex;
    property eorchar: char read geteorchar write seteorchar default defaulteorchar;
@@ -1475,7 +1479,7 @@ begin
 end;
 
 function tasciicommthread.readln(timeout: integer;
-  out dat: string): integer;
+  out dat: string): integer;  //todo: optimize
 var
  po,po1: pchar;
  laenge: integer; //longword;
@@ -1495,16 +1499,20 @@ begin
  while not bo1 do begin
   po1:= strlscan(po1,feorchar,laenge-(po1-po));
   if po1 <> nil then begin
-   dat:= copy(puffer,1,po1-po);
+   dat:= dat + copy(puffer,1,po1-po);
    move(po1[1],po^,laenge-(po1-po));
    laenge:= laenge-(po1-po)-1;
    result:= cpf_ok;
    break;
   end;
   if laenge >= asciipufferlaenge then begin
+   dat:= dat + puffer;
+   laenge:= 0;
+  {
    laenge:= 0; //platz fuer naechstes telegramm
    result:= cpf_bufferoverflow;
    break;     //puffer voll
+  }
   end;
   po1:= po+laenge;
   lwo1:= fport.readbuffer(asciipufferlaenge-laenge,po1[0],fport.uebertragungszeit(2));
@@ -1522,6 +1530,18 @@ begin
  inherited;
 end;
 
+function tasciicommthread.sendstring(const data: string): integer;
+begin
+ if not fport.opened then begin
+  result:= cpf_notopen;
+  exit;
+ end;
+ result:= cpf_timeout;
+ if fport.writestring(data+feorchar,0) then begin
+  result:= cpf_ok;
+ end;
+end;
+
 function tasciicommthread.sendstring(const data: string;
   out antwort: string; timeout: integer): integer;
 var
@@ -1534,10 +1554,13 @@ begin
   exit;
  end;
  int1:= fsendretrys;
- result:= cpf_timeout;
- while (result <> cpf_ok) and (int1 >= 0) do begin
+ repeat
+// while (result <> cpf_ok) and (int1 >= 0) do begin
   reset;     // puffer loeschen
-  if fport.writestring(data+feorchar,0) then begin
+  result:= sendstring(data);
+  if result = cpf_ok then begin
+   result:= cpf_timeout;
+//  if fport.writestring(data+feorchar,0) then begin
    if fport.fhalfduplex then begin
 //    sleep(20);
     bo1:= fport.readstring(length(data)+1,antwort,0); //eigene zeichen
@@ -1549,8 +1572,8 @@ begin
     result:= readln(timeout,antwort);
    end;
   end;
-  int1:= int1-1;
- end;
+  dec(int1);
+ until (result = cpf_ok) or (int1 < 0);
 end;
 
 { tcommport }
@@ -1838,6 +1861,22 @@ end;
 function tasciicommport.geteventclass: asciicommeventclassty;
 begin
  result:= tasciicommevent;
+end;
+
+function tasciicommport.send(const commandstrings: array of string): integer;
+var
+ int1: integer;
+ str1: string;
+begin
+ result:= cpf_none;
+ str1:= '';
+ for int1:= 0 to high(commandstrings) do begin
+  str1:= str1 + commandstrings[int1] + eorchar;
+  result:= tasciicommthread(fthread).sendstring(commandstrings[int1]);
+  if result <> cpf_ok then begin
+   break;
+  end;
+ end;
 end;
 
 { tasciicomevent }

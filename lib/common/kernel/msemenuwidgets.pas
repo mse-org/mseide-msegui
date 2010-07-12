@@ -1468,7 +1468,7 @@ begin
          if mlo_main in flayout.options then begin
           exclude(eventstate,es_processed);
           swapkeys;
-          dokeydown(info);
+          dokeydown1(info);
           swapkeys;
           include(eventstate,es_processed);
          end;
@@ -1501,7 +1501,7 @@ begin
    end;
   end;
   if not (es_processed in eventstate) and (fprevpopup <> nil) then begin
-   fprevpopup.dokeydown(info);
+   fprevpopup.dokeydown1(info);
   end;
  end;
 end;
@@ -1728,7 +1728,7 @@ begin
  if not (csdesigning in componentstate) then begin
   if not (es_processed in info.eventstate) and (info.shiftstate = [ss_alt]) and
                    not (es_modal in info.eventstate) then begin
-   dokeydown(info);
+   dokeydown1(info);
   end;
   if not (es_processed in info.eventstate) and (fmenucomp <> nil) then begin
    fmenucomp.menu.doshortcut(info);

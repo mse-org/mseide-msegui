@@ -95,7 +95,8 @@ const
                        oe_autoselectonfirstclick,
                        oe_resetselectonexit,
                        oe_autopopupmenu,oe_keyexecute,
-                       oe_savevalue,oe_savestate,oe_checkmrcancel];
+                       oe_checkvaluepaststatread,oe_savevalue,oe_savestate,
+                       oe_checkmrcancel];
 
  nullcoord: gridcoordty = (col: 0; row: 0);
  invalidcell: gridcoordty = (col: invalidaxis; row: invalidaxis);

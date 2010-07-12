@@ -1451,7 +1451,9 @@ type
                               var info: mouseeventinfoty); virtual;
    procedure mousewheelevent(var info: mousewheeleventinfoty); virtual;
 
+   procedure dokeydown1(var info: keyeventinfoty); //updates flags, calls dokeydown
    procedure dokeydown(var info: keyeventinfoty); virtual;
+                                       //do not call dokeydown, call dokeydown1
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); virtual;
                     //called twice, first before dokeydown with 
    function checkfocusshortcut(var info: keyeventinfoty): boolean; virtual;
@@ -9648,7 +9650,7 @@ begin
     if (fparentwidget <> nil) then begin
      bo1:= es_child in eventstate;
      include(eventstate,es_child);
-     fparentwidget.dokeydown(info);
+     fparentwidget.dokeydown1(info);
      if not bo1 then begin
       exclude(eventstate,es_child);
      end;
@@ -9727,6 +9729,12 @@ begin
  end;
 end;
 
+procedure twidget.dokeydown1(var info: keyeventinfoty);
+begin
+ exclude(fwidgetstate1,ws1_onkeydowncalled);
+ dokeydown(info);
+end;
+
 procedure twidget.internalkeydown(var info: keyeventinfoty);
 begin
  if not (es_processed in info.eventstate) then begin
@@ -9741,8 +9749,7 @@ begin
   end;
  end;
  if not (es_processed in info.eventstate) then begin
-  exclude(fwidgetstate1,ws1_onkeydowncalled);
-  dokeydown(info);
+  dokeydown1(info);
  end;
  if not (es_processed in info.eventstate) then begin
   include(appinst.fstate,aps_shortcutting);
