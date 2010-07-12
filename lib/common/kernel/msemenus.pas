@@ -1781,6 +1781,7 @@ begin
  try
   doupdate;
   result:= showpopupmenu(fmenu,ftransientfor,mouseinfo.pos,self);
+  include(mouseinfo.eventstate,es_processed);
   checkexec;
  finally
   ftransientfor:= nil;

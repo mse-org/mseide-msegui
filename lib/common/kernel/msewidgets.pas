@@ -4380,6 +4380,9 @@ begin
    end;
    dummy:= nil;
    dopopup(dummy,mouseinfo);
+   if not (es_processed in mouseinfo.eventstate) then begin
+    inherited;
+   end;
   end
   else begin
    inherited;
