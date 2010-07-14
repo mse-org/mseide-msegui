@@ -876,6 +876,16 @@ procedure tprojecttreefo.addfileonexecute(const sender: TObject);
 var
  int1: integer;
 begin
+ with mainfo.openfile do begin
+  if execute = mr_ok then begin
+   with controller do begin
+    for int1:= 0 to high(filenames) do begin
+     projecttree.files.addfile(filenames[int1]);
+    end;
+   end;
+  end;
+ end;
+{
  if filedialog.execute = mr_ok then begin
   with filedialog.controller do begin
    for int1:= 0 to high(filenames) do begin
@@ -884,6 +894,7 @@ begin
    end;
   end;
  end;
+}
 end;
 
 procedure tprojecttreefo.removefileonexecute(const sender: TObject);
