@@ -273,7 +273,7 @@ type
    procedure defineproperties(filer: tfiler); override;
    function getactdialrect(out arect: rectty): boolean;
   public
-   constructor create(const aintf: idialcontroller); virtual;
+   constructor create(const aintf: idialcontroller); virtual; reintroduce;
    destructor destroy; override;
    procedure paint(const acanvas: tcanvas);
    procedure afterpaint(const acanvas: tcanvas);

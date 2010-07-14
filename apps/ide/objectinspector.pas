@@ -48,7 +48,7 @@ type
    fname: msestring;
    procedure doexpand(const aitem: tpropertyitem);
   public
-   constructor create(const aprop: tpropertyitem);
+   constructor create(const aprop: tpropertyitem); reintroduce;
    procedure save(const aprops: ttreeitemeditlist);
    procedure restore(const aprops: ttreeitemeditlist);
  end;

@@ -432,6 +432,9 @@ var
  scale: real;
 begin
  rea1:= abs(arange/aintervalcount);
+ if rea1 < 1e-99 then begin
+  rea1:= 1e-99;
+ end;
  int1:= ceil(log10(rea1));
  scale:= intpower(10,int1-1);
  rea2:= 0.9*rea1/scale; //1..10, 10% overrange
