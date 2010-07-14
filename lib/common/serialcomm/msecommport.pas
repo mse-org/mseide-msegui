@@ -1872,9 +1872,7 @@ var
  str1: string;
 begin
  result:= cpf_none;
- str1:= '';
  for int1:= 0 to high(commandstrings) do begin
-  str1:= str1 + commandstrings[int1] + eorchar;
   result:= tasciicommthread(fthread).sendstring(commandstrings[int1]);
   if result <> cpf_ok then begin
    break;

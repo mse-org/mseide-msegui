@@ -32,23 +32,25 @@ object projecttreefo: tprojecttreefo
     bounds_cx = 276
     bounds_cy = 201
     anchors = []
-    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup]
+    optionsgrid = [og_colsizing, og_focuscellonenter, og_savestate, og_colchangeontabkey, og_wrapcol, og_autopopup]
     datacols.count = 2
+    datacols.options = [co_savestate, co_mousescrollrow]
     datacols.items = <    
       item
         linecolorfix = -1610612733
         width = 141
-        options = [co_readonly, co_savevalue, co_mousescrollrow]
+        options = [co_readonly, co_savestate, co_mousescrollrow]
         oncellevent = projecteditoncellevent
         widgetname = 'projectedit'
       end    
       item
         linecolorfix = -1610612733
         width = 129
-        options = [co_fill, co_savevalue, co_savestate, co_mousescrollrow]
+        options = [co_fill, co_savestate, co_mousescrollrow]
         widgetname = 'edit'
       end>
     datarowheight = 16
+    statfile = mainfo.projectstatfile
     reffontheight = 14
     object projectedit: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -63,7 +65,7 @@ object projecttreefo: tprojecttreefo
       bounds_y = 0
       bounds_cx = 141
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_locate, oe_savevalue, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_locate, oe_savestate]
       onchange = projecteditonchange
       itemlist.onstatreaditem = projecteditonstatreaditem
       itemlist.ondragbegin = editdragbegin
@@ -87,7 +89,7 @@ object projecttreefo: tprojecttreefo
       bounds_y = 0
       bounds_cx = 129
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       textflags = [tf_ycentered, tf_clipo, tf_noselect, tf_ellipseleft]
       oncellevent = editoncellevent
       reffontheight = 14
