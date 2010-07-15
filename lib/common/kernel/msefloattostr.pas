@@ -316,9 +316,9 @@ begin
       end
      end;
     end;
-    if neg then begin
-     do1:= -do1;
-    end;      
+//    if neg then begin
+//     do1:= -do1;
+//    end;      
     if mode in [fsm_engflo,fsm_engsymflo] then begin
      if (intdigits = 0) and (int3 < 0)then begin
       dec(intdigits);   //trunc -> floor
@@ -343,12 +343,18 @@ begin
      if mode1 = fsm_fix then begin
       if (int1 <= 0) then begin    //999.99-> 1000.00 -> 1000 (trimmed trailing 0) 
        if (mode >= fsm_engfix) then begin
-        int4:= 3;
-        if result[1] = '-' then begin
-         inc(int4);
-        end;
-        if length(result) > int4 then begin
-         setlength(result,length(result)-3);
+//        int4:= 3;
+//        if result[1] = '-' then begin
+//         inc(int4);
+//        end;
+        if length(result) > 3{int4} then begin
+         if precision > 0 then begin
+          setlength(result,length(result)-3+precision+1);
+          result[length(result)-precision]:= decimalsep;
+         end
+         else begin
+          setlength(result,length(result)-3);
+         end;
          int3:= int3 + 3; //correct carry, 999.99-> 1000 -> 1
         end;
        end
@@ -360,10 +366,10 @@ begin
       else begin
        if mode >= fsm_engfix then begin
         if (length(result) >= 5) and (result[5] = decimalsep) then begin
-         result[5]:= result[4];
-         result[4]:= result[3];
-         result[3]:= result[2];
-         result[2]:= decimalsep;
+         pmsecharaty(result)^[4]:= result[4];
+         pmsecharaty(result)^[3]:= result[3];
+         pmsecharaty(result)^[2]:= result[2];
+         pmsecharaty(result)^[1]:= decimalsep;
          if (mode = fsm_engfix) or (mode = fsm_engsymfix) then begin
           setlength(result,length(result)-3); //correct carry, 999.999-> 1000.000 -> 1.000
          end
@@ -374,18 +380,25 @@ begin
         end
         else begin
          if (mode = fsm_engflo) or (mode = fsm_engsymflo) then begin
-          setlength(result,length(result)-1); //correct carry, 99.999-> 100.000 -> 100.00
+          if length(result) > precision + 2 then begin
+           setlength(result,length(result)-1); //correct carry, 99.999-> 100.000 -> 100.00
+          end;
          end
         end;
        end
        else begin
-        result[3]:= result[2];
-        result[2]:= decimalsep;
-        setlength(result,length(result)-1);   //correct carry, 9.999 ->10.000 -> 1.000
-        inc(int3);
+        if length(result) > precision + 2 then begin
+         pmsecharaty(result)^[2]:= result[2];
+         pmsecharaty(result)^[1]:= decimalsep;
+         setlength(result,length(result)-1);   //correct carry, 9.999 ->10.000 -> 1.000
+         inc(int3);
+        end;
        end;
       end;
      end;
+    end;
+    if neg then begin
+     result:= '-'+result;
     end;
     int1:= int3 div 3;
     if (mode >= fsm_engsymfix) and (int1 >= ord(low(expsymty))) and 
