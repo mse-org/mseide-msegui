@@ -1062,6 +1062,7 @@ begin
  C:= tmysqlcursor(cursor);
  c.frowsaffected:= -1;
  c.frowsreturned:= -1;
+ c.fneeddata:= c.FStatementType in datareturningtypes;
  if not C.FNeedData then begin
   c.frowsreturned:= 0;
  end;
