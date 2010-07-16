@@ -54,7 +54,17 @@ type
   public
    property text: msestring read gettext write settext;
  end;
-  
+
+ updatesqloptionty = (uso_refresh);
+ updatesqloptionsty = set of updatesqloptionty;
+ 
+ tupdatesqlstringlist = class(tsqlstringlist)
+  private
+   foptions: updatesqloptionsty;
+  published
+   property options: updatesqloptionsty read foptions write foptions default [];
+ end;
+   
   TSQLHandle = Class(TObject)
   end;
   
@@ -569,7 +579,8 @@ type
    FCursor: TSQLCursor;
    FUpdateable: boolean;
    FSQL: tsqlstringlist;
-   FSQLUpdate,FSQLInsert,FSQLDelete: tsqlstringlist;
+   FSQLUpdate,FSQLInsert: tupdatesqlstringlist;
+   FSQLDelete: tsqlstringlist;
    FIsEOF: boolean;
    FLoadingFieldDefs: boolean;
    FIndexDefs: TIndexDefs;
@@ -609,8 +620,8 @@ type
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
    procedure setFSQL(const avalue: tsqlstringlist);
-   procedure setFSQLUpdate(const avalue: tsqlstringlist);
-   procedure setFSQLInsert(const avalue: tsqlstringlist);
+   procedure setFSQLUpdate(const avalue: tupdatesqlstringlist);
+   procedure setFSQLInsert(const avalue: tupdatesqlstringlist);
    procedure setFSQLDelete(const avalue: tsqlstringlist);
    procedure setbeforeexecute(const avalue: tmsesqlscript);
    procedure setaftercursorclose(const avalue: tmsesqlscript);
@@ -680,8 +691,9 @@ type
     procedure applyupdate(const cancelonerror: boolean); override;
     procedure applyupdates(const maxerrors: integer;
                    const cancelonerror: boolean); override;
-    function updaterecquery : string;
-    function insertrecquery : string;
+    function refreshrecquery: string;
+    function updaterecquery(const refreshfieldvalues: boolean) : string;
+    function insertrecquery(const refreshfieldvalues: boolean) : string;
     function deleterecquery : string;
     function writetransaction: tsqltransaction;
                    //self.transaction if self.transactionwrite = nil
@@ -704,8 +716,10 @@ type
     property params : tmseparams read fparams write setparams;
                        //before SQL
     property SQL : tsqlstringlist read FSQL write setFSQL;
-    property SQLUpdate : tsqlstringlist read FSQLUpdate write setFSQLUpdate;
-    property SQLInsert : tsqlstringlist read FSQLInsert write setFSQLInsert;
+    property SQLUpdate : tupdatesqlstringlist read FSQLUpdate 
+                                                         write setFSQLUpdate;
+    property SQLInsert : tupdatesqlstringlist read FSQLInsert 
+                                                         write setFSQLInsert;
     property SQLDelete : tsqlstringlist read FSQLDelete write setFSQLDelete;
     property beforeexecute: tmsesqlscript read fbeforeexecute write setbeforeexecute;
     property aftercursorclose: tmsesqlscript read faftercursorclose 
@@ -2402,9 +2416,9 @@ begin
   FSQL := TsqlStringList.Create;
   FSQL.OnChange := @OnChangeSQL;
 
-  FSQLUpdate := TsqlStringList.Create;
+  FSQLUpdate := TupdatesqlStringList.Create;
   FSQLUpdate.OnChange := @OnChangeModifySQL;
-  FSQLInsert := TsqlStringList.Create;
+  FSQLInsert := TupdatesqlStringList.Create;
   FSQLInsert.OnChange := @OnChangeModifySQL;
   FSQLDelete := TsqlStringList.Create;
   FSQLDelete.OnChange := @OnChangeModifySQL;
@@ -3243,7 +3257,7 @@ begin
  end;
 end;
 
-function tsqlquery.updaterecquery : string;
+function tsqlquery.updaterecquery(const refreshfieldvalues: boolean) : string;
 var 
  x: integer;
  sql_set: string;
@@ -3274,9 +3288,27 @@ begin
  setlength(sql_set,length(sql_set)-1);
  setlength(sql_where,length(sql_where)-5);
  result := 'update ' + FTableName + ' set ' + sql_set + ' where ' + sql_where;
+ if refreshfieldvalues then begin
+  result:= result + refreshrecquery;
+ end;
 end;
 
-function tsqlquery.insertrecquery : string;
+function tsqlquery.refreshrecquery: string;
+var
+ int1: integer;
+begin
+ result:= 'returning ';
+ for int1:= 0 to fields.count - 1 do begin
+  with fields[int1] do begin
+   if (fieldkind = fkdata) then begin
+    result:= result + fieldname + ',';
+   end;
+  end;
+ end;
+ setlength(result,length(result)-1);
+end;
+
+function tsqlquery.insertrecquery(const refreshfieldvalues: boolean) : string;
 var 
  x: integer;
  sql_fields: string;
@@ -3302,6 +3334,9 @@ begin
  setlength(sql_values,length(sql_values)-1);
  result := 'insert into ' + FTableName + ' (' + sql_fields + ') values (' +
                      sql_values + ')';
+ if refreshfieldvalues then begin
+  result:= result + ' '+refreshrecquery;
+ end;
 end;
 
 function tsqlquery.deleterecquery : string;
@@ -3339,23 +3374,27 @@ var
  str1: string;
  bo1: boolean;
  freeblobar: pointerarty;
+ refreshfieldvalues: boolean;
     
 begin
  blobspo:= getintblobpo;
  case UpdateKind of
   ukModify: begin
+   refreshfieldvalues:= uso_refresh in fsqlupdate.options;
    qry:= FUpdateQry;
    if qry.sql.count = 0 then begin
-    qry.SQL.Add(updateRecQuery);
+    qry.SQL.Add(updateRecQuery(refreshfieldvalues));
    end;
   end;
   ukInsert: begin
+   refreshfieldvalues:= uso_refresh in fsqlinsert.options;
    qry:= FInsertQry;
    if qry.sql.count = 0 then begin
-    qry.SQL.Add(InsertRecQuery);
+    qry.SQL.Add(InsertRecQuery(refreshfieldvalues));
    end;
-  end;
-  ukDelete : begin
+  end
+  else begin               //ukDelete
+   refreshfieldvalues:= false;
    qry := FDeleteQry;
    if qry.sql.count = 0 then begin
     qry.SQL.Add(DeleteRecQuery);
@@ -3419,13 +3458,31 @@ begin
      end;
     end;
    end;
-   execsql;
-   if (updatekind = ukinsert) and (self.fprimarykeyfield <> nil) then begin
+   if refreshfieldvalues then begin
+    parsesql:= false;
+    statementtype:= stselect;
+    active:= true;
+    if not eof then begin
+     try
+      for int1:= 0 to qry.fieldcount - 1 do begin
+       with fields[int1] do begin
+        self.fields.fieldbyname(fieldname).value:= value;
+       end;
+      end;
+     finally
+      active:= false;
+     end;
+    end;
+   end
+   else begin
+    execsql;
+   end;
+   if not refreshfieldvalues and (updatekind = ukinsert) and (self.fprimarykeyfield <> nil) then begin
     tcustomsqlconnection(database).updateprimarykeyfield(
                    self.fprimarykeyfield,qry.transaction);
    end;
    if self.fupdaterowsaffected >= 0 then begin
-    if fcursor.frowsaffected < 0 then begin
+    if self.fcursor.frowsaffected < 0 then begin
      self.fupdaterowsaffected:= -1;
     end
     else begin
@@ -3760,12 +3817,12 @@ begin
  fsql.assign(avalue);
 end;
 
-procedure TSQLQuery.setFSQLUpdate(const avalue: TsqlStringlist);
+procedure TSQLQuery.setFSQLUpdate(const avalue: TupdatesqlStringlist);
 begin
  fsqlupdate.assign(avalue);
 end;
 
-procedure TSQLQuery.setFSQLInsert(const avalue: TsqlStringlist);
+procedure TSQLQuery.setFSQLInsert(const avalue: TupdatesqlStringlist);
 begin
  fsqlinsert.assign(avalue);
 end;
