@@ -3466,7 +3466,10 @@ begin
      try
       for int1:= 0 to qry.fieldcount - 1 do begin
        with fields[int1] do begin
-        self.fields.fieldbyname(fieldname).value:= value;
+        fld:= self.fields.fieldbyname(fieldname);
+        if not(fld is tblobfield) then begin
+         fld.value:= value;
+        end;
        end;
       end;
      finally
