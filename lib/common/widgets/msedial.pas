@@ -12,7 +12,7 @@ unit msedial;
 interface
 uses
  classes,msewidgets,msegraphutils,msegraphics,msegui,msearrayprops,mseclasses,
- msetypes,mseglob,mseguiglob,msestrings,msemenus,mseevent;
+ msetypes,mseglob,mseguiglob,msestrings,msemenus,mseevent,msestat;
 
 const
  defaultdialcolor = cl_dkgray;
@@ -309,6 +309,8 @@ type
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aintf: idialcontroller);
+   procedure dostatread(const reader: tstatreader);
+   procedure dostatwrite(const writer: tstatwriter);
   published
    property start: real read fstart write setstart;
    property range: real read frange write setrange;
@@ -1948,6 +1950,34 @@ begin
  frange:= avalue;
  for int1:= 0 to high(fitems) do begin
   tcustomdialcontroller(fitems[int1]).range:= avalue;
+ end;
+end;
+
+procedure tcustomdialcontrollers.dostatread(const reader: tstatreader);
+var
+ int1: integer;
+ mstr1: msestring;
+begin
+ for int1:= 0 to count - 1 do begin
+  mstr1:= inttostr(int1);
+  with tcustomdialcontroller(fitems[int1]) do begin
+   start:= reader.readreal('start'+mstr1,start);
+   range:= reader.readreal('range'+mstr1,range);
+  end;
+ end;
+end;
+
+procedure tcustomdialcontrollers.dostatwrite(const writer: tstatwriter);
+var
+ int1: integer;
+ mstr1: msestring;
+begin
+ for int1:= 0 to count - 1 do begin
+  mstr1:= inttostr(int1);
+  with tcustomdialcontroller(fitems[int1]) do begin
+   writer.writereal('start'+mstr1,start);
+   writer.writereal('range'+mstr1,range);
+  end;
  end;
 end;
 

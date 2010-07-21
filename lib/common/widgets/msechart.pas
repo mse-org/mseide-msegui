@@ -15,7 +15,7 @@ uses
  classes,msegui,mseguiglob,mseclasses,msearrayprops,msetypes,msegraphics,
  msegraphutils,
  msewidgets,msesimplewidgets,msedial,msebitmap,msemenus,mseevent,
- msedatalist;
+ msedatalist,msestatfile,msestat,msestrings;
  
 type
  tcustomchart = class;
@@ -169,6 +169,8 @@ type
    class function getitemclasstype: persistentclassty; override;
    function itembyname(const aname: string): ttrace;
    procedure assign(source: tpersistent); override;
+   procedure dostatread(const reader: tstatreader);
+   procedure dostatwrite(const writer: tstatwriter);
    property items[const index: integer]: ttrace read getitems write setitems; default;
   published
    property xstart: real read fxstart write setxstart;
@@ -274,7 +276,7 @@ type
  chartstatety = (chs_nocolorchart);
  chartstatesty = set of chartstatety;
  
- tcustomchart = class(tscrollbox,ichartdialcontroller)
+ tcustomchart = class(tscrollbox,ichartdialcontroller,istatfile)
   private
    fxdials: tchartdialshorz;
    fydials: tchartdialsvert;
@@ -282,6 +284,8 @@ type
    fystart: real;
    fxrange: real;
    fyrange: real;
+   fstatfile: tstatfile;
+   fstatvarname: msestring;
    procedure setxdials(const avalue: tchartdialshorz);
    procedure setydials(const avalue: tchartdialsvert);
    procedure setcolorchart(const avalue: colorty);
@@ -293,6 +297,7 @@ type
    procedure setxrange(const avalue: real); virtual;
    function getyrange: real;
    procedure setyrange(const avalue: real); virtual;
+   procedure setstatfile(const avalue: tstatfile);
   protected
    fcolorchart: colorty;
    fstate: chartstatesty;
@@ -306,6 +311,12 @@ type
    function getdialsize: sizety;
    procedure internalcreateframe; override;
    procedure defineproperties(filer: tfiler); override;
+    //istatfile
+   procedure dostatread(const reader: tstatreader); virtual;
+   procedure dostatwrite(const writer: tstatwriter); virtual;
+   procedure statreading;
+   procedure statread;
+   function getstatvarname: msestring;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -318,6 +329,8 @@ type
       
    property xdials: tchartdialshorz read fxdials write setxdials;
    property ydials: tchartdialsvert read fydials write setydials;
+   property statfile: tstatfile read fstatfile write setstatfile;
+   property statvarname: msestring read getstatvarname write fstatvarname;
  end;
 
  tchart = class(tcustomchart)
@@ -331,6 +344,8 @@ type
   protected
    procedure clientrectchanged; override;
    procedure dopaint(const acanvas: tcanvas); override;
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -343,6 +358,8 @@ type
    property yrange;
    property xdials;
    property ydials;
+   property statfile;
+   property statvarname;
    property onbeforepaint;
    property onpaintbackground;
    property onpaint;
@@ -1330,6 +1347,38 @@ begin
  change;
 end;
 
+procedure ttraces.dostatread(const reader: tstatreader);
+var
+ int1: integer;
+ mstr1: msestring;
+begin
+ for int1:= 0 to count - 1 do begin
+  mstr1:= inttostr(int1);
+  with ttrace(fitems[int1]) do begin
+   xstart:= reader.readreal('xstart'+mstr1,xstart);
+   xrange:= reader.readreal('xrange'+mstr1,xrange);
+   ystart:= reader.readreal('ystart'+mstr1,ystart);
+   yrange:= reader.readreal('yrange'+mstr1,yrange);
+  end;
+ end;
+end;
+
+procedure ttraces.dostatwrite(const writer: tstatwriter);
+var
+ int1: integer;
+ mstr1: msestring;
+begin
+ for int1:= 0 to count - 1 do begin
+  mstr1:= inttostr(int1);
+  with ttrace(fitems[int1]) do begin
+   writer.writereal('xstart'+mstr1,xstart);
+   writer.writereal('xrange'+mstr1,xrange);
+   writer.writereal('ystart'+mstr1,ystart);
+   writer.writereal('yrange'+mstr1,yrange);
+  end;
+ end;
+end;
+
 { tchartdialvert }
 
 constructor tchartdialvert.create(const aintf: idialcontroller);
@@ -1565,6 +1614,38 @@ begin
  fydials.range:= avalue;
 end;
 
+procedure tcustomchart.setstatfile(const avalue: tstatfile);
+begin
+ setstatfilevar(istatfile(self),avalue,fstatfile);
+end;
+
+procedure tcustomchart.dostatread(const reader: tstatreader);
+begin
+ fxdials.dostatread(reader);
+ fydials.dostatread(reader);
+end;
+
+procedure tcustomchart.dostatwrite(const writer: tstatwriter);
+begin
+ fxdials.dostatwrite(writer);
+ fydials.dostatwrite(writer);
+end;
+
+procedure tcustomchart.statreading;
+begin
+ //dummy
+end;
+
+procedure tcustomchart.statread;
+begin
+ //dummy
+end;
+
+function tcustomchart.getstatvarname: msestring;
+begin
+ result:= fstatvarname;
+end;
+
 { tchart }
 
 constructor tchart.create(aowner: tcomponent);
@@ -1627,6 +1708,18 @@ begin
  inherited;
  ftraces.yrange:= avalue;
  fydials.range:= avalue;
+end;
+
+procedure tchart.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ ftraces.dostatread(reader);
+end;
+
+procedure tchart.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ ftraces.dostatwrite(writer);
 end;
 
 { trecordertraces }
