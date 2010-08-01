@@ -414,7 +414,8 @@ type
                       bs_editing,bs_append,bs_internalcalc,bs_startedit,
                       bs_utf8,
                       bs_hasfilter,bs_visiblerecordcountvalid,
-                      bs_refreshing,bs_restorerecno,bs_idle        //used by tsqlquery
+                      bs_refreshing,bs_restorerecno,bs_idle,bs_refreshfieldvalues
+                                            //used by tsqlquery
                       );
  bufdatasetstatesty = set of bufdatasetstatety;
 

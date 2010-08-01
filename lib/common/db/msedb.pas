@@ -141,16 +141,27 @@ type
   procedure fielddestroyed(const sender: ifieldcomponent);
  end;
  
- ifieldcomponent = interface(inullinterface)['{81BB6312-74BA-4B50-963D-F1DB908F7FB7}']
+ ifieldcomponent = interface(inullinterface)
+                               ['{81BB6312-74BA-4B50-963D-F1DB908F7FB7}']
   procedure setdsintf(const avalue: idsfieldcontroller);
   function getinstance: tfield;
  end;
-  
- tmsefield = class(tfield)
+
+ providerflag1ty = (pf1_refresh);
+ providerflags1ty = set of providerflag1ty;
+ 
+ imsefield = interface(inullinterface)['{259AB385-E638-49D6-8C0E-688BE164D130}']
+  function getproviderflags1: providerflags1ty;
+ end;
+   
+ tmsefield = class(tfield,imsefield)
   private
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader); 
          //workaround for breaking fix of FPC Mantis 12809
@@ -165,6 +176,8 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
@@ -181,7 +194,7 @@ type
  setmsestringdataty = procedure(const sender: tmsestringfield;
                           const avalue: msestring) of object;
  
- tmsestringfield = class(tstringfield,ifieldcomponent)
+ tmsestringfield = class(tstringfield,ifieldcomponent,imsefield)
   private
    fdsintf: idsfieldcontroller;
    fgetmsestringdata: getmsestringdataty;
@@ -194,6 +207,7 @@ type
    fdefaultexpression: msestring;
    fdefaultexpressionbefore: string; 
                   //synchronize with TField.DefaultExpression
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   //ifieldcomponent
@@ -201,6 +215,8 @@ type
    function getinstance: tfield;
    function getdefaultexpression: msestring;
    procedure setdefaultexpression(const avalue: msestring);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -213,7 +229,6 @@ type
                             const setter: setmsestringdataty;
                             const acharacterlength: integer;
                             const aisftwidestring: boolean);
-   function HasParent: Boolean; override;
    {$ifdef integergetdatasize}
    function GetDataSize: integer; override;
    {$else}
@@ -225,6 +240,7 @@ type
    procedure SetVarValue(const AValue: Variant); override;
   public
    destructor destroy; override;
+   function HasParent: Boolean; override;
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
@@ -236,6 +252,8 @@ type
   published
    property defaultexpression: msestring read getdefaultexpression 
                                                 write setdefaultexpression;
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
@@ -246,11 +264,14 @@ type
    property Transliterate default false;
  end;
 
- tmsenumericfield = class(tnumericfield)
+ tmsenumericfield = class(tnumericfield,imsefield)
   private
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -267,6 +288,8 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
@@ -275,12 +298,15 @@ type
    property ReadOnly default false;
    property Required default false;
  end;
- tmselongintfield = class(tlongintfield)
+ tmselongintfield = class(tlongintfield,imsefield)
   private
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    procedure setasenum(const avalue: integer);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -304,6 +330,8 @@ type
    property asenum: integer read getaslongint write setasenum;
    property tagpo: pointer read ftagpo write ftagpo;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
@@ -313,11 +341,14 @@ type
    property Required default false;
    property DisplayWidth default 10;
  end;
- tmselargeintfield = class(tlargeintfield)
+ tmselargeintfield = class(tlargeintfield,imsefield)
   private
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -339,6 +370,8 @@ type
    property Value: Largeint read GetAsLargeint write SetAsLargeint;
    property tagpo: pointer read ftagpo write ftagpo;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
@@ -348,11 +381,14 @@ type
    property Required default false;
    property DisplayWidth default 10;
  end;
- tmsesmallintfield = class(tsmallintfield)
+ tmsesmallintfield = class(tsmallintfield,imsefield)
   private
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -373,6 +409,8 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
@@ -382,11 +420,14 @@ type
    property Required default false;
    property DisplayWidth default 10;
  end;
- tmsewordfield = class(twordfield)
+ tmsewordfield = class(twordfield,imsefield)
   private
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -407,6 +448,8 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
@@ -416,11 +459,14 @@ type
    property Required default false;
    property DisplayWidth default 10;
  end;
- tmseautoincfield = class(tautoincfield)
+ tmseautoincfield = class(tautoincfield,imsefield)
   private
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -437,6 +483,8 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
@@ -446,11 +494,14 @@ type
    property Required default false;
    property DisplayWidth default 10;
  end;
- tmsefloatfield = class(tfloatfield)
+ tmsefloatfield = class(tfloatfield,imsefield)
   private
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -474,6 +525,8 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
@@ -487,14 +540,17 @@ type
   public
    constructor create(aowner: tcomponent); override;
  end;
- tmsebooleanfield = class(tbooleanfield)
+ tmsebooleanfield = class(tbooleanfield,imsefield)
   private
    fdisplayvalues: msestring;
    fdisplays : array[boolean,boolean] of msestring;
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    procedure setdisplayvalues(const avalue: msestring);
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -526,6 +582,8 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property displayvalues: msestring read fdisplayvalues write setdisplayvalues;
@@ -541,13 +599,16 @@ type
  datetimefieldoptionty = (dtfo_utc,dtfo_local); //DB time format
  datetimefieldoptionsty = set of datetimefieldoptionty;
                        
- tmsedatetimefield = class(tdatetimefield)
+ tmsedatetimefield = class(tdatetimefield,imsefield)
   private
    foptions: datetimefieldoptionsty;
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    procedure setoptions(const avalue: datetimefieldoptionsty);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -568,6 +629,8 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property options: datetimefieldoptionsty read foptions write setoptions default [];
@@ -587,11 +650,14 @@ type
    constructor create(aowner: tcomponent); override;
  end;
  
- tmsebinaryfield = class(tbinaryfield)
+ tmsebinaryfield = class(tbinaryfield,imsefield)
   private
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -608,6 +674,8 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
@@ -616,11 +684,14 @@ type
    property ReadOnly default false;
    property Required default false;
  end;
- tmsebytesfield = class(tbytesfield)
+ tmsebytesfield = class(tbytesfield,imsefield)
   private
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -640,6 +711,8 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
@@ -648,11 +721,14 @@ type
    property ReadOnly default false;
    property Required default false;
  end;
- tmsevarbytesfield = class(tvarbytesfield)
+ tmsevarbytesfield = class(tvarbytesfield,imsefield)
   private
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -672,6 +748,8 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
@@ -680,11 +758,14 @@ type
    property ReadOnly default false;
    property Required default false;
  end;
- tmsebcdfield = class(tbcdfield)
+ tmsebcdfield = class(tbcdfield,imsefield)
   private
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -706,6 +787,8 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property Value: Currency read GetAsCurrency write SetAsCurrency;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
@@ -745,12 +828,15 @@ type
                            out anode: tblobcachenode): boolean; overload;
  end;
  
- tmseblobfield = class(tblobfield)
+ tmseblobfield = class(tblobfield,imsefield)
   private
    fcache: tblobcache;
    ftagpo: pointer;
+   fproviderflags1: providerflags1ty;
    procedure setcachekb(const avalue: integer);
    function getcachekb: integer;
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    fgetblobid: getblobidfuncty;
    function getasmsestring: msestring; virtual;
@@ -779,6 +865,8 @@ type
    procedure SaveToFile(const FileName: filenamety);
    property tagpo: pointer read ftagpo write ftagpo;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property cachekb: integer read getcachekb write setcachekb;
@@ -825,10 +913,13 @@ type
                           const avalue: variant) of object;
  getvardataty = function(const sender: tmsevariantfield;
                           out avalue: variant): boolean of object;
- tmsevariantfield = class(tvariantfield)
+ tmsevariantfield = class(tvariantfield,imsefield)
   private
+   fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+    //imsefield
+   function getproviderflags1: providerflags1ty;
   protected
    fgetvardata: getvardataty;
    fsetvardata: setvardataty;
@@ -854,6 +945,8 @@ type
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
+   property providerflags1: providerflags1ty read fproviderflags1 
+                        write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property FieldKind default fkData;
@@ -2524,6 +2617,11 @@ begin
  filer.defineproperty('Lookup',@readlookup,nil,false);
 end;
 
+function tmsefield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
+end;
+
 { tmsestringfield }
 
 destructor tmsestringfield.destroy;
@@ -2747,6 +2845,11 @@ begin
  end;
 end;
 
+function tmsestringfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
+end;
+
 { tmsememofield }
 
 constructor tmsememofield.create(aowner: tcomponent);
@@ -2881,6 +2984,11 @@ end;
 function tmsenumericfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
+end;
+
+function tmsenumericfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
 end;
 
 { tmselongintfield }
@@ -3019,6 +3127,11 @@ begin
  end;
 end;
 
+function tmselongintfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
+end;
+
 { tmselargeintfield }
 
 function tmselargeintfield.HasParent: Boolean;
@@ -3132,6 +3245,11 @@ begin
  end;
 end;
 
+function tmselargeintfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
+end;
+
 { tmsesmallintfield }
 
 function tmsesmallintfield.HasParent: Boolean;
@@ -3213,6 +3331,11 @@ end;
 function tmsesmallintfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
+end;
+
+function tmsesmallintfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
 end;
 
 { tmsewordfield }
@@ -3298,6 +3421,11 @@ begin
  result:= fieldtooldsql(self);
 end;
 
+function tmsewordfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
+end;
+
 { tmseautoincfield }
 
 function tmseautoincfield.HasParent: Boolean;
@@ -3351,6 +3479,11 @@ end;
 function tmseautoincfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
+end;
+
+function tmseautoincfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
 end;
 
 { tmsefloatfield }
@@ -3482,6 +3615,11 @@ begin
    end;
   end;
  end;
+end;
+
+function tmsefloatfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
 end;
 
 { tmsecurrencyfield }
@@ -3774,6 +3912,11 @@ begin
  end;
 end;
 
+function tmsebooleanfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
+end;
+
 { tmsedatetimefield }
 
 function tmsedatetimefield.HasParent: Boolean;
@@ -3895,6 +4038,11 @@ begin
   end;
   thetext:= formatdatetimemse(msestring(f),r);
  end;
+end;
+
+function tmsedatetimefield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
 end;
 
 { tmsedatefield }
@@ -4072,6 +4220,11 @@ begin
  result:= fieldtooldsql(self);
 end;
 
+function tmsebinaryfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
+end;
+
 { tmsebytesfield }
 
 function tmsebytesfield.HasParent: Boolean;
@@ -4156,6 +4309,11 @@ begin
  if not getdata(pointer(result)) then begin
   result:= '';
  end;
+end;
+
+function tmsebytesfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
 end;
 
 { tmsevarbytesfield }
@@ -4247,6 +4405,11 @@ begin
   move((pchar(pointer(result))+2)^,pchar(pointer(result))^,wo1);
   setlength(result,wo1);
  end
+end;
+
+function tmsevarbytesfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
 end;
 
 { tmsebcdfield }
@@ -4362,6 +4525,11 @@ begin
    end;
   end;
  end;
+end;
+
+function tmsebcdfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
 end;
 
 
@@ -4567,6 +4735,11 @@ begin
  setasmsestring(avalue);
 end;
 
+function tmseblobfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
+end;
+
 { tmsevariantfield }
 
 function tmsevariantfield.getdatasize: integer;
@@ -4719,6 +4892,11 @@ end;
 function tmsevariantfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
+end;
+
+function tmsevariantfield.getproviderflags1: providerflags1ty;
+begin
+ result:= fproviderflags1;
 end;
 
 { tdbfieldnamearrayprop }

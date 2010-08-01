@@ -55,14 +55,14 @@ type
    property text: msestring read gettext write settext;
  end;
 
- updatesqloptionty = (uso_refresh);
- updatesqloptionsty = set of updatesqloptionty;
- 
+// updatesqloptionty = (uso_refresh);
+// updatesqloptionsty = set of updatesqloptionty;
+          //moved to field providerflags pf1_refresh 
  tupdatesqlstringlist = class(tsqlstringlist)
   private
-   foptions: updatesqloptionsty;
+//   foptions: updatesqloptionsty;
   published
-   property options: updatesqloptionsty read foptions write foptions default [];
+//   property options: updatesqloptionsty read foptions write foptions default [];
  end;
    
   TSQLHandle = Class(TObject)
@@ -692,8 +692,8 @@ type
     procedure applyupdates(const maxerrors: integer;
                    const cancelonerror: boolean); override;
     function refreshrecquery: string;
-    function updaterecquery(const refreshfieldvalues: boolean) : string;
-    function insertrecquery(const refreshfieldvalues: boolean) : string;
+    function updaterecquery{(const refreshfieldvalues: boolean)} : string;
+    function insertrecquery{(const refreshfieldvalues: boolean)} : string;
     function deleterecquery : string;
     function writetransaction: tsqltransaction;
                    //self.transaction if self.transactionwrite = nil
@@ -2713,6 +2713,7 @@ end;
 
 procedure tsqlquery.freemodifyqueries;
 begin
+ exclude(fbstate,bs_refreshfieldvalues);
  FreeAndNil(FUpdateQry);
  FreeAndNil(FInsertQry);
  FreeAndNil(FDeleteQry);
@@ -3257,7 +3258,7 @@ begin
  end;
 end;
 
-function tsqlquery.updaterecquery(const refreshfieldvalues: boolean) : string;
+function tsqlquery.updaterecquery{(const refreshfieldvalues: boolean)} : string;
 var 
  x: integer;
  sql_set: string;
@@ -3288,27 +3289,40 @@ begin
  setlength(sql_set,length(sql_set)-1);
  setlength(sql_where,length(sql_where)-5);
  result := 'update ' + FTableName + ' set ' + sql_set + ' where ' + sql_where;
- if refreshfieldvalues then begin
+// if refreshfieldvalues then begin
   result:= result + refreshrecquery;
- end;
+// end;
 end;
 
 function tsqlquery.refreshrecquery: string;
 var
- int1: integer;
+ int1,int2: integer;
+ intf1: imsefield;
+ field1: tfield;
 begin
- result:= 'returning ';
+ result:= '';
+ int2:= 0;
  for int1:= 0 to fields.count - 1 do begin
-  with fields[int1] do begin
-   if (fieldkind = fkdata) then begin
-    result:= result + fieldname + ',';
+  field1:= fields[int1];
+  if (field1.fieldkind = fkdata) and 
+         getcorbainterface(field1,typeinfo(imsefield),intf1) and 
+         (pf1_refresh in intf1.getproviderflags1) then begin
+   if int2 = 0 then begin
+    result:= 'returning ';
    end;
+   result:= result + field1.fieldname + ',';
+   inc(int2);
   end;
  end;
- setlength(result,length(result)-1);
+ if int2 > 0 then begin
+  include(fbstate,bs_refreshfieldvalues);
+  setlength(result,length(result)-1);
+ end
+ else begin
+ end;
 end;
 
-function tsqlquery.insertrecquery(const refreshfieldvalues: boolean) : string;
+function tsqlquery.insertrecquery{(const refreshfieldvalues: boolean)} : string;
 var 
  x: integer;
  sql_fields: string;
@@ -3334,9 +3348,9 @@ begin
  setlength(sql_values,length(sql_values)-1);
  result := 'insert into ' + FTableName + ' (' + sql_fields + ') values (' +
                      sql_values + ')';
- if refreshfieldvalues then begin
+// if refreshfieldvalues then begin
   result:= result + ' '+refreshrecquery;
- end;
+// end;
 end;
 
 function tsqlquery.deleterecquery : string;
@@ -3374,27 +3388,27 @@ var
  str1: string;
  bo1: boolean;
  freeblobar: pointerarty;
- refreshfieldvalues: boolean;
+// refreshfieldvalues: boolean;
     
 begin
  blobspo:= getintblobpo;
  case UpdateKind of
   ukModify: begin
-   refreshfieldvalues:= uso_refresh in fsqlupdate.options;
+//   refreshfieldvalues:= uso_refresh in fsqlupdate.options;
    qry:= FUpdateQry;
    if qry.sql.count = 0 then begin
-    qry.SQL.Add(updateRecQuery(refreshfieldvalues));
+    qry.SQL.Add(updateRecQuery{(refreshfieldvalues)});
    end;
   end;
   ukInsert: begin
-   refreshfieldvalues:= uso_refresh in fsqlinsert.options;
+//   refreshfieldvalues:= uso_refresh in fsqlinsert.options;
    qry:= FInsertQry;
    if qry.sql.count = 0 then begin
-    qry.SQL.Add(InsertRecQuery(refreshfieldvalues));
+    qry.SQL.Add(InsertRecQuery{(refreshfieldvalues)});
    end;
   end
   else begin               //ukDelete
-   refreshfieldvalues:= false;
+//   refreshfieldvalues:= false;
    qry := FDeleteQry;
    if qry.sql.count = 0 then begin
     qry.SQL.Add(DeleteRecQuery);
@@ -3458,7 +3472,8 @@ begin
      end;
     end;
    end;
-   if refreshfieldvalues then begin
+   if (updatekind in [ukmodify,ukinsert]) and 
+                          (bs_refreshfieldvalues in self.fbstate) then begin
     parsesql:= false;
     statementtype:= stselect;
     active:= true;
@@ -3467,9 +3482,9 @@ begin
       for int1:= 0 to qry.fieldcount - 1 do begin
        with fields[int1] do begin
         fld:= self.fields.fieldbyname(fieldname);
-        if not(fld is tblobfield) then begin
+//        if not(fld is tblobfield) then begin
          fld.value:= value;
-        end;
+//        end;
        end;
       end;
      finally
@@ -3480,7 +3495,8 @@ begin
    else begin
     execsql;
    end;
-   if not refreshfieldvalues and (updatekind = ukinsert) and (self.fprimarykeyfield <> nil) then begin
+   if not (bs_refreshfieldvalues in fbstate) and (updatekind = ukinsert) and 
+                                        (self.fprimarykeyfield <> nil) then begin
     tcustomsqlconnection(database).updateprimarykeyfield(
                    self.fprimarykeyfield,qry.transaction);
    end;
