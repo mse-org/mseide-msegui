@@ -245,7 +245,13 @@ type
    property extraspace: integer read fextraspace write fextraspace default 0;
    property style: fontstylesty read fstyle write fstyle default [];
  end;
-    
+
+ groupinfoty = record
+                min: integer;
+                max: integer;
+               end;
+ groupinfoarty = array of groupinfoty;
+                    
  tcustomskincontroller = class(tmsecomponent)
   private
    fonbeforeupdate: beforeskinupdateeventty;
@@ -259,6 +265,9 @@ type
    factivedesign: boolean;
    fisactive: boolean;
    fskinfonts: array[stockfontty] of tskinfont;
+   fgroupinfo: groupinfoarty;
+   fgroups: string;
+   forder: integer;
    procedure setactive(const avalue: boolean);
    procedure setcolors(const avalue: tskincolors);
    procedure setfontalias(const avalue: tskinfontaliass);
@@ -270,6 +279,7 @@ type
    procedure checkactive;
    function getskinfont(const aindex: integer): tskinfont;
    procedure setskinfont(const aindex: integer; const avalue: tskinfont);
+   procedure setgroups(const avalue: string);
   protected
    fextendernames: stringarty;
    fextenders: skinextenderarty;
@@ -346,11 +356,16 @@ type
    destructor destroy; override;
    procedure updateskin(const ainfo: skininfoty);
   published
+   property order: integer read forder write forder default 0; //first!
+              //higher order executed first
    property active: boolean read factive write setactive default false;
    property activedesign: boolean read factivedesign 
                                          write setactivedesign default false;
    property extenders: integer read getextenders write setextenders; 
                                   //hook for object inspector
+   property groups: string read fgroups write setgroups;
+              //format [<group>[..<groupmax>]{,<group>[..<groupmax>]}]
+              //empty -> all
    property onbeforeupdate: beforeskinupdateeventty read fonbeforeupdate
                                  write fonbeforeupdate;
    property onafterupdate: skincontrollereventty read fonafterupdate
@@ -737,26 +752,35 @@ type
                                  write setmainmenu_popupitemframeactive;
  end;
 
-function activeskincontroller: tcustomskincontroller;
-function activeskincontrollerdesign: tcustomskincontroller;
+ skincontrollerarty = array of tcustomskincontroller;
+ 
+function activeskincontroller: skincontrollerarty;
+function activeskincontrollerdesign: skincontrollerarty;
   
 implementation
 uses
  msetabsglob,sysutils,mseapplication,msedatalist,msestockobjects;
 type
+ tskinhandler = class
+  protected
+   procedure updateactive(const sender: tcustomskincontroller);
+   procedure updateskin(const ainfo: skininfoty);
+ end;
+ 
  twidget1 = class(twidget);
  tcustomframe1 = class(tcustomframe);
  ttabs1 = class(ttabs);
 var
- factiveskincontroller: tcustomskincontroller;
- factiveskincontrollerdesign: tcustomskincontroller;
+ factiveskincontroller: skincontrollerarty;
+ factiveskincontrollerdesign: skincontrollerarty;
+ fhandler: tskinhandler;
 
-function activeskincontroller: tcustomskincontroller;
+function activeskincontroller: skincontrollerarty;
 begin
  result:= factiveskincontroller;
 end;
    
-function activeskincontrollerdesign: tcustomskincontroller;
+function activeskincontrollerdesign: skincontrollerarty;
 begin
  result:= factiveskincontrollerdesign;
 end;
@@ -945,34 +969,12 @@ end;
 procedure tcustomskincontroller.checkactive;
 var
  bo1: boolean;
- meth1: skineventty;
- methodpo: ^skineventty;
- controllerpo: ^tcustomskincontroller;
 begin
  factivedesign:= factivedesign and factive;
  bo1:= factive and (factivedesign or not (csdesigning in componentstate));
  if fisactive <> bo1 then begin
   fisactive:= bo1;
-  if not (csdesigning in componentstate) then begin
-   methodpo:= {$ifndef FPC}@{$endif}@oninitskinobject;
-   controllerpo:= @factiveskincontroller;
-  end
-  else begin
-   methodpo:= {$ifndef FPC}@{$endif}@oninitskinobjectdesign;
-   controllerpo:= @factiveskincontrollerdesign;
-  end;
-  if fisactive then begin
-   methodpo^:= {$ifdef FPC}@{$endif}updateskin;
-   controllerpo^:= self;
-  end
-  else begin
-   meth1:= {$ifdef FPC}@{$endif}updateskin;
-   if (tmethod(methodpo^).code = tmethod(meth1).code) and
-                 (tmethod(methodpo^).data = tmethod(meth1).data) then begin
-    methodpo^:= nil;
-    controllerpo^:= nil;
-   end;
-  end;
+  fhandler.updateactive(self);
   if not (csloading in componentstate) then begin
    if fisactive then begin
     doactivate;
@@ -1626,6 +1628,37 @@ procedure tcustomskincontroller.setskinfont(const aindex: integer;
                const avalue: tskinfont);
 begin
  fskinfonts[stockfontty(aindex)].assign(avalue);
+end;
+
+procedure tcustomskincontroller.setgroups(const avalue: string);
+var
+ ar1: stringarty;
+ ar2: groupinfoarty;
+ int1,int2: integer;
+begin
+ if avalue = '' then begin
+  fgroupinfo:= nil;
+ end
+ else begin
+  ar1:= splitstring(avalue,',');
+  setlength(ar2,length(ar1));
+  for int1:= 0 to high(ar1) do begin
+   int2:= msestrings.strscan(ar1[int1],'.');
+   if int2 > 0 then begin
+    ar2[int1].min:= strtoint(copy(ar1[int1],1,int2-1));
+    if ar1[int1][int2+1] <> '.' then begin
+     raise exception.create('Invalid groups format');
+    end;
+    ar2[int1].max:= strtoint(copy(ar1[int1],int2+2,bigint));
+   end
+   else begin
+    ar2[int1].min:= strtoint(ar1[int1]);
+    ar2[int1].max:= ar2[int1].min;
+   end;
+  end;
+  fgroupinfo:= ar2;
+ end;
+ fgroups:= avalue;
 end;
 
 { tskincontroller }
@@ -2330,4 +2363,78 @@ begin
  end;
 end;
 
+{ tskinhandler }
+
+procedure tskinhandler.updateskin(const ainfo: skininfoty);
+var
+ int1,int2: integer;
+ controllerpo: ^skincontrollerarty;
+begin
+ if not (csdesigning in ainfo.instance.componentstate) then begin
+  controllerpo:= @factiveskincontroller;
+ end
+ else begin
+  controllerpo:= @factiveskincontrollerdesign;
+ end;
+ for int1:= 0 to high(controllerpo^) do begin
+  if controllerpo^[int1].fgroupinfo = nil then begin
+   controllerpo^[int1].updateskin(ainfo);
+  end
+  else begin
+   for int2:= 0 to high(controllerpo^[int1].fgroupinfo) do begin
+    with controllerpo^[int1].fgroupinfo[int2] do begin
+     if (ainfo.group >= min) and (ainfo.group <= max) then begin
+      controllerpo^[int1].updateskin(ainfo);
+      break;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function comparecontroller(const l,r): integer;
+begin
+ result:= tcustomskincontroller(r).order-tcustomskincontroller(l).order;
+end;
+
+procedure tskinhandler.updateactive(const sender: tcustomskincontroller);
+var
+ meth1: skineventty;
+ methodpo: ^skineventty;
+ controllerpo: ^skincontrollerarty;
+begin
+ with sender do begin
+  if not (csdesigning in componentstate) then begin
+   methodpo:= {$ifndef FPC}@{$endif}@oninitskinobject;
+   controllerpo:= @factiveskincontroller;
+  end
+  else begin
+   methodpo:= {$ifndef FPC}@{$endif}@oninitskinobjectdesign;
+   controllerpo:= @factiveskincontrollerdesign;
+  end;
+  if fisactive then begin
+   adduniqueitem(pointerarty(controllerpo^),sender);
+   sortarray(pointerarty(controllerpo^),@comparecontroller)
+  end
+  else begin
+   removeitem(pointerarty(controllerpo^),sender);
+  end;
+  if controllerpo^ <> nil then begin
+   methodpo^:= {$ifdef FPC}@{$endif}self.updateskin;
+  end
+  else begin
+   meth1:= {$ifdef FPC}@{$endif}updateskin;
+   if (tmethod(methodpo^).code = tmethod(meth1).code) and
+                 (tmethod(methodpo^).data = tmethod(meth1).data) then begin
+    methodpo^:= nil;
+   end;
+  end;  
+ end;
+end;
+
+initialization
+ fhandler:= tskinhandler.create;
+finalization
+ fhandler.free;
 end.

@@ -309,11 +309,13 @@ type
                      sok_grid,
                      sok_mainmenu,sok_popupmenu,
                      sok_user); 
+
  skininfoty = record
-  objectkind: skinobjectkindty;
+  instance: tcomponent;//tobject;
   userkind: integer;
+  group: integer;
+  objectkind: skinobjectkindty;
   options: skinoptionsty;
-  instance: tobject;
  end;
 
  tmsecomponent = class(tcomponent,ievent

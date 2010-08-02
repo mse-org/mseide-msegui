@@ -750,6 +750,7 @@ type
    procedure docellevent(const ownedcol: boolean; 
                        var info: celleventinfoty); override;
    
+   procedure setcolor(const avalue: colorty); override;
    //iactionlink
    function getactioninfopo: pactioninfoty;
    function shortcutseparator: msechar;
@@ -3234,6 +3235,7 @@ end;
 
 procedure tcustomdatabutton.actionchanged;
 begin
+ finfo.color:= fcolor;
  actioninfotoshapeinfo(self,factioninfo,finfo);
  inherited setcolor(finfo.color); 
  finfo.color:= cl_transparent;
@@ -3380,6 +3382,14 @@ begin
  if atag = 0 then begin
   doexecute;
  end;
+end;
+
+procedure tcustomdatabutton.setcolor(const avalue: colorty);
+begin
+ if csloading in componentstate then begin
+  inherited;      //no actionchanged
+ end;
+ setactioncolor(iactionlink(self),avalue);
 end;
 
 { tstockglyphdatabutton }

@@ -857,6 +857,9 @@ end;
 
 procedure tcustombutton.setcolor(const avalue: colorty);
 begin
+ if csloading in componentstate then begin
+  inherited;      //no actionchanged
+ end;
  setactioncolor(iactionlink(self),avalue);
 end;
 

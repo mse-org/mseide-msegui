@@ -1203,6 +1203,7 @@ type
    fsetwidgetrectcount: integer; //for recursive setpos
 
    foptionsskin: optionsskinty;
+   fskingroup: integer;
    fonnavigrequest: navigrequesteventty;
    procedure invalidateparentminclientsize;
    function minclientsize: sizety;
@@ -1812,6 +1813,7 @@ type
   published
    property onnavigrequest: navigrequesteventty read fonnavigrequest
                                                    write fonnavigrequest;
+   property skingroup: integer read fskingroup write fskingroup default 0;
    property onbeforeupdateskin;
    property onafterupdateskin;
  end;
@@ -2657,9 +2659,6 @@ type
    procedure processwindowcrossingevent(event: twindowevent);
 
    function getmousewinid: winidty; //for  tmouse.setshape
-   function getevents: integer; override;
-    //application must be locked
-    //returns count of queued events
    procedure waitevent;         
     //application must be locked
    procedure checkactivewindow;
@@ -2681,6 +2680,9 @@ type
 
    procedure mouseparktimer(const sender: tobject);
   protected
+   function getevents: integer; override;
+    //application must be locked
+    //returns count of queued events
    procedure dopostevent(const aevent: tmseevent); override;
    procedure flushmousemove;
    procedure doterminate(const shutdown: boolean);
@@ -11569,11 +11571,21 @@ begin
 end;
 
 function twidget.skininfo: skininfoty;
+var
+ widget1: twidget;
 begin
  result:= inherited skininfo;
  if osk_container in foptionsskin then begin
   include(result.options,sko_container);
  end;
+ widget1:= self;
+ repeat
+  result.group:= widget1.fskingroup;
+  if result.group <> 0 then begin
+   break;
+  end;
+  widget1:= widget1.parentwidget;
+ until widget1 = nil;
 end;
 
 function twidget.hasskin: boolean;
