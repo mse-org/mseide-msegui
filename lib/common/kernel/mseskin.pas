@@ -2515,7 +2515,8 @@ end;
 
 procedure tskinhandler.updateactive(const sender: tcustomskincontroller);
 begin
- setactive(sender,factiveskincontroller,@updateskin,oninitskinobject{,
+ setactive(sender,factiveskincontroller,
+             {$ifdef FPC}@{$endif}updateskin,oninitskinobject{,
                                         @removeskin,onremoveskinobject});
 end;
 
