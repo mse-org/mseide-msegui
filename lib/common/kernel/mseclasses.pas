@@ -293,8 +293,8 @@ type
  msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc,
                         cs_noload,cs_tmpmodule,
                         cs_parentwidgetrect //info for designer, example ttabpage
-                        {,}
-                        {cs_hasskin,}{cs_noskin}{,cs_updateskinproc});
+//                        cs_skinloaded
+                        {cs_hasskin,cs_noskin}{,cs_updateskinproc});
  msecomponentstatesty = set of msecomponentstatety;
 
  createprocty = procedure of object;
@@ -311,7 +311,7 @@ type
                      sok_user); 
 
  skininfoty = record
-  instance: tcomponent;//tobject;
+  instance: tobject;
   userkind: integer;
   group: integer;
   objectkind: skinobjectkindty;
@@ -392,6 +392,7 @@ type
   public
    destructor destroy; override;
    procedure updateskin(const recursive: boolean = false); virtual;
+//   procedure removeskin(const recursive: boolean = false); virtual;
    function loading: boolean; reintroduce;
        //this hides FPC tcomponent.loading which is not Delphi compatible
    {$ifdef FPC}
@@ -721,7 +722,9 @@ type
  skineventty = procedure(const ainfo: skininfoty) of object;
 var
  oninitskinobject: skineventty;
- oninitskinobjectdesign: skineventty;
+// oninitskinobjectdesign: skineventty;
+// onremoveskinobject: skineventty;
+// onremoveskinobjectdesign: skineventty;
  
 function getcomponentlist(const acomponent: tcomponent): tlist;
                     //uses tcomponentcracker;
@@ -3609,7 +3612,8 @@ begin
   methodpo:= {$ifndef FPC}@{$endif}@oninitskinobject;
  end
  else begin
-  methodpo:= {$ifndef FPC}@{$endif}@oninitskinobjectdesign;
+//  methodpo:= {$ifndef FPC}@{$endif}@oninitskinobjectdesign;
+  exit; //do nothing
  end;
  if assigned(methodpo^) then begin
   if recursive then begin
@@ -3621,17 +3625,49 @@ begin
    end;
   end;
   if hasskin then begin
+//   if cs_skinloaded in fmsecomponentstate then begin
+//    removeskin;
+//   end;
    if assigned(fonbeforeupdateskin) then begin
     fonbeforeupdateskin(tobject(tmethod(methodpo^).data));
    end;
    methodpo^(skininfo);
+//   include(fmsecomponentstate,cs_skinloaded);
    if assigned(fonbeforeupdateskin) then begin
     fonafterupdateskin(tobject(tmethod(methodpo^).data));
    end;   
   end;
  end;
 end;
-
+(*
+procedure tmsecomponent.removeskin(const recursive: boolean = false);
+var
+ int1: integer;
+ comp1: tcomponent;
+ methodpo: ^skineventty;
+begin
+ if componentstate*[csdesigning] = [] then begin
+  methodpo:= {$ifndef FPC}@{$endif}@onremoveskinobject;
+ end
+ else begin
+  methodpo:= {$ifndef FPC}@{$endif}@onremoveskinobjectdesign;
+ end;
+ if assigned(methodpo^) then begin
+  if recursive then begin
+   for int1:= 0 to componentcount - 1 do begin
+    comp1:= components[int1];
+    if comp1 is tmsecomponent then begin
+     tmsecomponent(comp1).removeskin(true);
+    end;
+   end;
+  end;
+  if hasskin and (cs_skinloaded in fmsecomponentstate) then begin
+   methodpo^(skininfo);
+   exclude(fmsecomponentstate,cs_skinloaded);
+  end;
+ end;
+end;
+*)
 function tmsecomponent.getmsecomponentstate: msecomponentstatesty;
 begin
  result:= fmsecomponentstate;

@@ -25,6 +25,7 @@ uses
 {$ifdef FPC}{$ifdef linux}
   cthreads,
 {$endif}{$endif}
+  mseskindesign,
   msegui,msegraphics,actionsmodule,sourceform,debuggerform,
   componentpaletteform,componentstore,
   messageform,watchform,objectinspector,breakpointsform,watchpointsform,

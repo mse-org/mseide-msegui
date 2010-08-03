@@ -12,7 +12,8 @@ unit mseskin;
 interface
 uses
  classes,mseclasses,msegui,msescrollbar,mseedit,msegraphics,msegraphutils,
- msetabs,msetoolbar,msedataedits,msemenus,msearrayprops,msegraphedits,msesimplewidgets,
+ msetabs,msetoolbar,msedataedits,msemenus,msearrayprops,msegraphedits,
+ msesimplewidgets,
  msegrids,msewidgets,msetypes,mseglob,msestrings,msedrawtext,mseguiglob;
  
 type
@@ -204,6 +205,7 @@ type
   public
    destructor  destroy; override;
    procedure updateskin(const ainfo: skininfoty; var handled: boolean); virtual;
+   procedure removeskin(const ainfo: skininfoty; var handled: boolean); virtual;
   published
    property master: tcustomskincontroller read fmaster write setmaster;
  end;
@@ -264,6 +266,7 @@ type
    factive: boolean;
    factivedesign: boolean;
    fisactive: boolean;
+//   fremoving: boolean;
    fskinfonts: array[stockfontty] of tskinfont;
    fgroupinfo: groupinfoarty;
    fgroups: string;
@@ -275,11 +278,12 @@ type
    procedure setextenders(const avalue: integer);
    procedure readextendernames(reader: treader);
    procedure writeextendernames(writer: twriter);
-   procedure setactivedesign(const avalue: boolean);
-   procedure checkactive;
+   procedure readactivedesign(reader: treader);
+//   procedure setactivedesign(const avalue: boolean);
    function getskinfont(const aindex: integer): tskinfont;
    procedure setskinfont(const aindex: integer; const avalue: tskinfont);
    procedure setgroups(const avalue: string);
+   procedure checkactive;
   protected
    fextendernames: stringarty;
    fextenders: skinextenderarty;
@@ -351,16 +355,20 @@ type
    procedure handlemainmenu(const ainfo: skininfoty); virtual;
    procedure handlepopupmenu(const ainfo: skininfoty); virtual;
    procedure handlegrid(const ainfo: skininfoty); virtual;
+   procedure updateskin1(const ainfo: skininfoty; const remove: boolean);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure updateskin(const ainfo: skininfoty);
+ //  procedure removeskin(const ainfo: skininfoty);
+//   property removing: boolean read fremoving;
   published
    property order: integer read forder write forder default 0; //first!
               //higher order executed first
    property active: boolean read factive write setactive default false;
-   property activedesign: boolean read factivedesign 
-                                         write setactivedesign default false;
+//   property activedesign: boolean read factivedesign 
+//                                         write setactivedesign default false;
+         //removed, too dangerous
    property extenders: integer read getextenders write setextenders; 
                                   //hook for object inspector
    property groups: string read fgroups write setgroups;
@@ -753,28 +761,45 @@ type
  end;
 
  skincontrollerarty = array of tcustomskincontroller;
- 
-function activeskincontroller: skincontrollerarty;
-function activeskincontrollerdesign: skincontrollerarty;
+
+ tskinhandler = class
+  protected
+   factiveskincontroller: skincontrollerarty;
+   procedure setactive(const sender: tcustomskincontroller;
+          var controllerar: skincontrollerarty;
+          const handleproc: skineventty; var handlevar: skineventty{;
+          const removeproc: skineventty; var removevar: skineventty});
+   procedure updateactive(const sender: tcustomskincontroller); virtual;
+   procedure doactivate(const sender: tcustomskincontroller); virtual;
+   procedure dodeactivate(const sender: tcustomskincontroller); virtual;
+   procedure updateskin1(const ainfo: skininfoty;
+                                  const controllerar: skincontrollerarty);
+//   procedure removeskin1(const ainfo: skininfoty;
+//                                  const controllerar: skincontrollerarty);
+   procedure updateskin(const ainfo: skininfoty);
+//   procedure removeskin(const ainfo: skininfoty);
+ end;
   
+//function activeskincontroller: skincontrollerarty;
+//function activeskincontrollerdesign: skincontrollerarty;
+procedure setskinhandler(const avalue: tskinhandler);
+
 implementation
 uses
  msetabsglob,sysutils,mseapplication,msedatalist,msestockobjects;
 type
- tskinhandler = class
-  protected
-   procedure updateactive(const sender: tcustomskincontroller);
-   procedure updateskin(const ainfo: skininfoty);
- end;
- 
  twidget1 = class(twidget);
  tcustomframe1 = class(tcustomframe);
  ttabs1 = class(ttabs);
 var
- factiveskincontroller: skincontrollerarty;
- factiveskincontrollerdesign: skincontrollerarty;
  fhandler: tskinhandler;
 
+procedure setskinhandler(const avalue: tskinhandler);
+begin
+ fhandler.free;
+ fhandler:= avalue;
+end;
+{
 function activeskincontroller: skincontrollerarty;
 begin
  result:= factiveskincontroller;
@@ -784,7 +809,7 @@ function activeskincontrollerdesign: skincontrollerarty;
 begin
  result:= factiveskincontrollerdesign;
 end;
-   
+}  
 { tskincolor }
 
 constructor tskincolor.create;
@@ -974,14 +999,14 @@ begin
  bo1:= factive and (factivedesign or not (csdesigning in componentstate));
  if fisactive <> bo1 then begin
   fisactive:= bo1;
+  if not (csloading in componentstate) and not fisactive then begin
+   dodeactivate;
+   fhandler.dodeactivate(self);
+  end;
   fhandler.updateactive(self);
-  if not (csloading in componentstate) then begin
-   if fisactive then begin
-    doactivate;
-   end
-   else begin
-    dodeactivate;
-   end;
+  if not (csloading in componentstate) and fisactive then begin
+   doactivate;
+   fhandler.doactivate(self);
   end;
  end;
 end;
@@ -991,14 +1016,15 @@ begin
  factive:= avalue;
  checkactive; 
 end;
-
+{
 procedure tcustomskincontroller.setactivedesign(const avalue: boolean);
 begin
  factivedesign:= avalue;
  checkactive; 
 end;
-
-procedure tcustomskincontroller.updateskin(const ainfo: skininfoty);
+}
+procedure tcustomskincontroller.updateskin1(const ainfo: skininfoty;
+             const remove: boolean);
 label
  endlab;
 var
@@ -1006,6 +1032,7 @@ var
  int1: integer;
 begin
  if factive then begin
+//  fremoving:= remove;
   bo1:= false;
   if assigned(fonbeforeupdate) then begin
    fonbeforeupdate(self,ainfo,bo1);
@@ -1084,6 +1111,16 @@ endlab:
  end;
 end;
 
+procedure tcustomskincontroller.updateskin(const ainfo: skininfoty);
+begin
+ updateskin1(ainfo,false);
+end;
+{
+procedure tcustomskincontroller.removeskin(const ainfo: skininfoty);
+begin
+ updateskin1(ainfo,true);
+end;
+}
 procedure tcustomskincontroller.handlewidget(const ainfo: skininfoty);
 begin
  //dummy
@@ -1287,9 +1324,24 @@ end;
 procedure tcustomskincontroller.setwidgetcolor(const instance: twidget;
                const acolor: colorty);
 begin
+{
+ if (acolor <> cl_default) and 
+       not (osk_framebuttononly in instance.optionsskin) then begin
+  if removing then begin
+   if instance.color = acolor then begin 
+    instance.color:= cl_default;
+   end;
+  end
+  else begin
+   if instance.color = cl_default then begin 
+    instance.color:= acolor;
+   end;
+  end;
+ end;
+}
  if (acolor <> cl_default) and 
        not (osk_framebuttononly in instance.optionsskin) and
-           (instance.color = cl_default) then begin
+           (instance.color = cl_default) then begin 
   instance.color:= acolor;
  end;
 end;
@@ -1593,11 +1645,18 @@ begin
  writestringar(writer,getextendernames);
 end;
 
+procedure tcustomskincontroller.readactivedesign(reader: treader);
+begin
+ reader.readboolean; //dummy
+end;
+
 procedure tcustomskincontroller.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('extendernames',{$ifdef FPC}@{$endif}readextendernames,
             {$ifdef FPC}@{$endif}writeextendernames,high(fextenders) >= 0);
+ filer.defineproperty('activedesign',{$ifdef FPC}@{$endif}readactivedesign,nil,
+                                                false);
 end;
 
 procedure tcustomskincontroller.registerextender(const aextender: tskinextender);
@@ -2313,6 +2372,12 @@ begin
  //dummy
 end;
 
+procedure tskinextender.removeskin(const ainfo: skininfoty;
+                                             var handled: boolean);
+begin
+ //dummy
+end;
+
 { tskinfont }
 
 constructor tskinfont.create;
@@ -2365,26 +2430,20 @@ end;
 
 { tskinhandler }
 
-procedure tskinhandler.updateskin(const ainfo: skininfoty);
+procedure tskinhandler.updateskin1(const ainfo: skininfoty;
+                                            const controllerar: skincontrollerarty);
 var
  int1,int2: integer;
- controllerpo: ^skincontrollerarty;
 begin
- if not (csdesigning in ainfo.instance.componentstate) then begin
-  controllerpo:= @factiveskincontroller;
- end
- else begin
-  controllerpo:= @factiveskincontrollerdesign;
- end;
- for int1:= 0 to high(controllerpo^) do begin
-  if controllerpo^[int1].fgroupinfo = nil then begin
-   controllerpo^[int1].updateskin(ainfo);
+ for int1:= 0 to high(controllerar) do begin
+  if controllerar[int1].fgroupinfo = nil then begin
+   controllerar[int1].updateskin(ainfo);
   end
   else begin
-   for int2:= 0 to high(controllerpo^[int1].fgroupinfo) do begin
-    with controllerpo^[int1].fgroupinfo[int2] do begin
+   for int2:= 0 to high(controllerar[int1].fgroupinfo) do begin
+    with controllerar[int1].fgroupinfo[int2] do begin
      if (ainfo.group >= min) and (ainfo.group <= max) then begin
-      controllerpo^[int1].updateskin(ainfo);
+      controllerar[int1].updateskin(ainfo);
       break;
      end;
     end;
@@ -2392,49 +2451,86 @@ begin
   end;
  end;
 end;
-
+{
+procedure tskinhandler.removeskin1(const ainfo: skininfoty;
+                                            const controllerar: skincontrollerarty);
+var
+ int1,int2: integer;
+begin
+ for int1:= 0 to high(controllerar) do begin
+  if controllerar[int1].fgroupinfo = nil then begin
+   controllerar[int1].removeskin(ainfo);
+  end
+  else begin
+   for int2:= 0 to high(controllerar[int1].fgroupinfo) do begin
+    with controllerar[int1].fgroupinfo[int2] do begin
+     if (ainfo.group >= min) and (ainfo.group <= max) then begin
+      controllerar[int1].removeskin(ainfo);
+      break;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+}
+procedure tskinhandler.updateskin(const ainfo: skininfoty);
+begin
+ updateskin1(ainfo,factiveskincontroller);
+end;
+{
+procedure tskinhandler.removeskin(const ainfo: skininfoty);
+begin
+ removeskin1(ainfo,factiveskincontroller);
+end;
+}
 function comparecontroller(const l,r): integer;
 begin
  result:= tcustomskincontroller(r).order-tcustomskincontroller(l).order;
 end;
 
-procedure tskinhandler.updateactive(const sender: tcustomskincontroller);
-var
- meth1: skineventty;
- methodpo: ^skineventty;
- controllerpo: ^skincontrollerarty;
+procedure tskinhandler.setactive(const sender: tcustomskincontroller;
+          var controllerar: skincontrollerarty;
+          const handleproc: skineventty; var handlevar: skineventty{;
+          const removeproc: skineventty; var removevar: skineventty});
 begin
  with sender do begin
-  if not (csdesigning in componentstate) then begin
-   methodpo:= {$ifndef FPC}@{$endif}@oninitskinobject;
-   controllerpo:= @factiveskincontroller;
-  end
-  else begin
-   methodpo:= {$ifndef FPC}@{$endif}@oninitskinobjectdesign;
-   controllerpo:= @factiveskincontrollerdesign;
-  end;
   if fisactive then begin
-   adduniqueitem(pointerarty(controllerpo^),sender);
-   sortarray(pointerarty(controllerpo^),@comparecontroller)
+   adduniqueitem(pointerarty(controllerar),sender);
+   sortarray(pointerarty(controllerar),@comparecontroller)
   end
   else begin
-   removeitem(pointerarty(controllerpo^),sender);
+   removeitem(pointerarty(controllerar),sender);
   end;
-  if controllerpo^ <> nil then begin
-   methodpo^:= {$ifdef FPC}@{$endif}self.updateskin;
+  if controllerar <> nil then begin
+   handlevar:= handleproc;
+//   removevar:= removeproc;
   end
   else begin
-   meth1:= {$ifdef FPC}@{$endif}updateskin;
-   if (tmethod(methodpo^).code = tmethod(meth1).code) and
-                 (tmethod(methodpo^).data = tmethod(meth1).data) then begin
-    methodpo^:= nil;
-   end;
+   handlevar:= nil;
+//   removevar:= nil;
   end;  
  end;
 end;
 
+procedure tskinhandler.updateactive(const sender: tcustomskincontroller);
+begin
+ setactive(sender,factiveskincontroller,@updateskin,oninitskinobject{,
+                                        @removeskin,onremoveskinobject});
+end;
+
+procedure tskinhandler.doactivate(const sender: tcustomskincontroller);
+begin
+ //dummy
+end;
+
+procedure tskinhandler.dodeactivate(const sender: tcustomskincontroller);
+begin
+ //dummy
+end;
+
 initialization
- fhandler:= tskinhandler.create;
+ setskinhandler(tskinhandler.create);
 finalization
  fhandler.free;
 end.
