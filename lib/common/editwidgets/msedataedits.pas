@@ -4643,7 +4643,12 @@ var
  mstr1: msestring;
 begin
  try
-  mstr1:= feditor.text;
+  if focused then begin
+   mstr1:= feditor.text;
+  end
+  else begin
+   mstr1:= realtytostrrange(fvalue,fformatedit,fvaluerange)
+  end;
   checktext(mstr1,accept);
   if not accept then begin
    result:= emptyreal; //compiler warning
