@@ -224,16 +224,41 @@ begin
  end;
 end;
 
+const
+ expos: array[ord('A')..ord('z')] of shortint =
+ //    A    B    C    D    E    F    G    H    I    J    K    L    M  
+  (    0,   0,   0,   0, 6*3,   0, 3*3,   0,   0,   0,   0,   0, 2*3,
+ //    N    O    P    Q    R    S    T    U    V    W    X    Y    Z  
+       0,   0, 5*3,   0,   0,   0, 4*3,   0,   0,   0,   0, 8*3, 7*3,
+ //[ \ ] ^ _ '
+   0,0,0,0,0,0,
+ //   a    b    c    d    e    f    g    h    i    j    k    l    m  
+   -6*3,   0,   0,   0,   0,-5*3,   0,   0,   0,   0, 1*3,   0,-1*3,
+ //   n    o    p    q    r    s    t    u    v    w    x    y    z  
+   -3*3,   0,-4*3,   0,   0,   0,   0,-2*3,   0,   0,   0,-8*3,-7*3);
+ 
 function strtorealty(const ein: string; forcevalue: boolean = false): realty;
 var
  str1: string;
+ ch1: char;
+ sint1: shortint;
 begin
- if not forcevalue and (trim(ein) = emptyrealstring) then begin
+ str1:= trim(ein);
+ if not forcevalue and (str1 = emptyrealstring) then begin
   result:= emptyreal;
  end
  else begin
-  str1:= ein;
   removechar(str1,thousandseparator);
+  if length(str1) > 0 then begin
+   ch1:= str1[length(str1)];
+   if (ch1 >= 'A') and (ch1 <= 'z') then begin
+    sint1:= expos[ord(ch1)];
+    if sint1 <> 0 then begin
+     setlength(str1,length(str1)-1);
+     str1:= str1 + 'E'+inttostr(sint1);
+    end;
+   end;
+  end;
   result:= strtofloat(str1);
  end;
 end;
