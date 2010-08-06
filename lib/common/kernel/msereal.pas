@@ -263,7 +263,7 @@ begin
     end;
    end;
   end;
-  result:= trystrtofloat(str1,value);
+  result:= trystrtofloat(str1,double(value));
  end;
 end;
 
