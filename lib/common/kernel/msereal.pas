@@ -24,6 +24,8 @@ function emptyreal: realty;
 function isemptyreal(const val: realty): boolean; //true if empty
 function candiv(const val: realty): boolean; //true if not 0.0 or empty:
 
+function trystrtorealty(const ein: string; out value: realty;
+                             forcevalue: boolean = false): boolean;
 function strtorealty(const ein: string; forcevalue: boolean = false): realty;
 function strtorealtydot(const ein: string): realty;
 //function realtytostr(const val: realty; const format: msestring = ''): msestring;
@@ -43,7 +45,7 @@ function valuescaletorange(const reader: treader): real;
 
 implementation
 uses
- sysutils,msesys;
+ sysutils,msesys,sysconst;
 
 const
 {$ifdef FPC_DOUBLE_HILO_SWAPPED}
@@ -237,15 +239,17 @@ const
  //   n    o    p    q    r    s    t    u    v    w    x    y    z  
    -3*3,   0,-4*3,   0,   0,   0,   0,-2*3,   0,   0,   0,-8*3,-7*3);
  
-function strtorealty(const ein: string; forcevalue: boolean = false): realty;
+function trystrtorealty(const ein: string; out value: realty;
+                             forcevalue: boolean = false): boolean;
 var
  str1: string;
  ch1: char;
  sint1: shortint;
 begin
  str1:= trim(ein);
+ result:= true;
  if not forcevalue and (str1 = emptyrealstring) then begin
-  result:= emptyreal;
+  value:= emptyreal;
  end
  else begin
   removechar(str1,thousandseparator);
@@ -259,7 +263,14 @@ begin
     end;
    end;
   end;
-  result:= strtofloat(str1);
+  result:= trystrtofloat(str1,value);
+ end;
+end;
+
+function strtorealty(const ein: string; forcevalue: boolean = false): realty;
+begin
+ if not trystrtorealty(ein,result,forcevalue) then begin
+  raise EConvertError.CreateFmt(SInvalidFloat,[ein]);
  end;
 end;
 

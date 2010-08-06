@@ -673,7 +673,7 @@ var
 var
  linestart,lineend: integer;
  dir1: graphicdirectionty;
- rea1: real;
+ rea1,rea2: real;
  start1,stop1: real;
  size1: sizety;
 begin
@@ -686,7 +686,9 @@ begin
   else begin
    calclineend(fli,dmo_opposite in options,rect1,linestart,lineend,dir1);
    if do_log in foptions then begin
-    rea1:= (chartln(value)-chartln(fstart))/chartln(fstart+frange);
+    rea2:= chartln(fstart);
+    rea1:= (chartln(value) - rea2)/(chartln(frange+fstart)-rea2);
+//    rea1:= (chartln(value)-chartln(fstart))/chartln({fstart+}frange);
    end
    else begin
     rea1:= (value - fstart)/frange;
@@ -839,6 +841,9 @@ begin
  else begin
   if finfo.interval <> 0 then begin
    result:= tcustomdialcontroller(fowner).range/finfo.interval;
+   if result > 1000 then begin
+    result:= 1000;
+   end;
   end
   else begin
    result:= 0;
@@ -1470,11 +1475,12 @@ begin
         offs:= offs - 1.0/intervalcount;
         first:= first + 1;
        end;
-       int1:= round(intervalcount);
        offs:= -offs;
-       if int1/intervalcount + offs > 1.0001 then begin
-        dec(int1);
-       end;
+//       int1:= round(intervalcount);
+//       if int1/intervalcount + offs > 1.0001 then begin
+//        dec(int1);
+//       end;
+       int1:= trunc((1.0001-offs)*intervalcount);
        first:= (first * frange) / intervalcount; //real value
       end;
       inc(int1);

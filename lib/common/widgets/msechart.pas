@@ -46,6 +46,8 @@ type
   bottommargin,topmargin: integer;
   color: colorty;
   colorimage: colorty;
+  xserrange: real;
+  xserstart: real;
   xrange: real;
   xstart: real;
   yrange: real;
@@ -69,6 +71,8 @@ type
    procedure datachange;
    procedure setcolor(const avalue: colorty);
    procedure setcolorimage(const avalue: colorty);
+   procedure setxserrange(const avalue: real);
+   procedure setxserstart(const avalue: real);
    procedure setxrange(const avalue: real);
    procedure setxstart(const avalue: real);
    procedure setyrange(const avalue: real);
@@ -116,6 +120,9 @@ type
                       write setcolorimage default cl_default;
    property widthmm: real read finfo.widthmm write setwidthmm;   //default 0.3
    property dashes: string read finfo.dashes write setdashes;
+   property xserrange: real read finfo.xserrange write setxserrange;
+                                                                 //default 1.0
+   property xserstart: real read finfo.xserstart write setxserstart;
    property xrange: real read finfo.xrange write setxrange;      //default 1.0
    property xstart: real read finfo.xstart write setxstart;
    property yrange: real read finfo.yrange write setyrange;      //default 1.0
@@ -139,8 +146,10 @@ type
  ttraces = class(townedeventpersistentarrayprop)
   private
    ftracestate: tracesstatesty;
+   fxserstart: real;
    fxstart: real;
    fystart: real;
+   fxserrange: real;
    fxrange: real;
    fyrange: real;
    fimage_list: timagelist;
@@ -148,8 +157,10 @@ type
    fimage_heightmm: real;
    procedure setitems(const index: integer; const avalue: ttrace);
    function getitems(const index: integer): ttrace;
+   procedure setxserstart(const avalue: real);
    procedure setxstart(const avalue: real);
    procedure setystart(const avalue: real);
+   procedure setxserrange(const avalue: real);
    procedure setxrange(const avalue: real);
    procedure setyrange(const avalue: real);
    procedure setimage_list(const avalue: timagelist);
@@ -173,9 +184,11 @@ type
    procedure dostatwrite(const writer: tstatwriter);
    property items[const index: integer]: ttrace read getitems write setitems; default;
   published
+   property xserstart: real read fxserstart write setxserstart;
    property xstart: real read fxstart write setxstart;
    property ystart: real read fystart write setystart;
    property xrange: real read fxrange write setxrange;
+   property xserrange: real read fxserrange write setxserrange;
    property yrange: real read fyrange write setyrange;
      //properties not used in asssign below
    property image_list: timagelist read fimage_list write setimage_list;
@@ -485,6 +498,7 @@ begin
  finfo.color:= cl_black;
  finfo.colorimage:= cl_default;
  finfo.widthmm:= 0.3;
+ finfo.xserrange:= 1.0;
  finfo.xrange:= 1.0;
  finfo.yrange:= 1.0;
  finfo.imagenr:= -1;
@@ -584,7 +598,7 @@ var
 
 var
  int1,int2,int3,int4: integer;
- xo,xs,yo,ys: real;
+ xo,xs,yo,ys,lxo,lxs: real;
  rea1: real;
  ar1: datapointarty;
  dpcountx,dpcounty,dpcountxy: integer;
@@ -650,6 +664,8 @@ begin
   end;
   case finfo.kind of
    trk_xy,trk_xseries: begin     
+    lxo:= 0;
+    lxs:= 1;
     if isxseries then begin
      dpcounty1:= dpcounty-1;
      rea1:= 0;
@@ -665,6 +681,8 @@ begin
       int2:= dpcounty1;
      end;
      if cto_logx in options then begin
+      lxo:= int2 * (finfo.xserstart/finfo.xserrange);
+      lxs:= finfo.xserrange;
       xo:= -chartln(-(rea1 - finfo.xstart) * int2);
       xs:= tchart(fowner).traces.fscalex;
       if int2 > 0 then begin
@@ -679,6 +697,8 @@ begin
        xs:= xs / (finfo.xrange * int2);
       end;
       xo:= xo + 1/xs;
+      xo:= (finfo.xserstart*int2+xo)/(finfo.xserrange);
+      xs:= xs*finfo.xserrange;
      end;
     end
     else begin
@@ -694,7 +714,7 @@ begin
     end;
     checkrange(dpcountxy);
     if (cto_xordered in finfo.options) or isxseries then begin
-     int4:= tchart(fowner).traces.fsize.cx+2;
+     int4:= tchart(fowner).traces.fsize.cx+3;//2; //cx + 1
      setlength(ar1,int4);
      dec(int4);
      xbottom:= minint;
@@ -702,7 +722,7 @@ begin
      for int1:= 0 to dpcountxy - 1 do begin
       if isxseries then begin
        if islogx then begin
-        int2:= round((chartln(int1) + xo) * xs);
+        int2:= round((chartln((int1+lxo)*lxs) + xo) * xs);
        end
        else begin
         int2:= round((int1 + xo) * xs);
@@ -832,36 +852,6 @@ begin
      end;
     end;
    end;
-(*
-   else begin //trk_xseries
-    checkrange(dpcounty);
-    setlength(finfo.datapoints,dpcounty);
-    if high(finfo.datapoints) >= 0 then begin
-     rea1:= 0;
-     if maxcount > 1 then begin
-      int2:= maxcount - 1;
-      if (int2 > high(finfo.datapoints)) and 
-                       (cto_adddataright in finfo.options) then begin
-       rea1:= {$ifdef FPC}real({$endif}1.0{$ifdef FPC}){$endif} - 
-                                                high(finfo.datapoints) / int2;
-      end;
-     end
-     else begin
-      int2:= high(finfo.datapoints);
-     end;
-     xo:= (rea1 + finfo.xstart) * int2;
-     xs:= tchart(fowner).traces.fscalex;
-     if int2 > 0 then begin
-      xs:= xs / (finfo.xrange * int2);
-     end;
-     for int1:= 0 to high(finfo.datapoints) do begin
-      finfo.datapoints[int1].x:= round((int1 + xo)* xs);
-      finfo.datapoints[int1].y:= round((preal(poy)^ + yo)* ys);
-      inc(poy,inty);
-     end;
-    end;
-   end;
-*)
   end;
  end;
 end;
@@ -968,6 +958,15 @@ begin
  tchart(fowner).traces.change;
 end;
 
+procedure ttrace.setxserrange(const avalue: real);
+begin
+ if avalue = 0 then begin
+  scaleerror;
+ end;
+ finfo.xserrange:= avalue;
+ datachange;
+end;
+
 procedure ttrace.setxrange(const avalue: real);
 begin
  if avalue = 0 then begin
@@ -983,6 +982,12 @@ begin
   finfo.options:= avalue;
   datachange;
  end;
+end;
+
+procedure ttrace.setxserstart(const avalue: real);
+begin
+ finfo.xserstart:= avalue;
+ datachange;
 end;
 
 procedure ttrace.setxstart(const avalue: real);
@@ -1163,6 +1168,7 @@ end;
 
 constructor ttraces.create(const aowner: tcustomchart);
 begin
+ fxserrange:= 1;
  fxrange:= 1;
  fyrange:= 1;
  inherited create(aowner,ttrace);
@@ -1257,6 +1263,18 @@ begin
  end;
 end;
 
+procedure ttraces.setxserstart(const avalue: real);
+var
+ int1: integer;
+begin
+ fxserstart:= avalue;
+ if not (csloading in tcustomchart(fowner).componentstate) then begin
+  for int1:= 0 to high(fitems) do begin
+   ttrace(fitems[int1]).xserstart:= avalue;
+  end;
+ end;
+end;
+
 procedure ttraces.setxstart(const avalue: real);
 var
  int1: integer;
@@ -1277,6 +1295,18 @@ begin
  if not (csloading in tcustomchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).ystart:= avalue;
+  end;
+ end;
+end;
+
+procedure ttraces.setxserrange(const avalue: real);
+var
+ int1: integer;
+begin
+ fxserrange:= avalue;
+ if not (csloading in tcustomchart(fowner).componentstate) then begin
+  for int1:= 0 to high(fitems) do begin
+   ttrace(fitems[int1]).xserrange:= avalue;
   end;
  end;
 end;
@@ -1309,8 +1339,10 @@ procedure ttraces.createitem(const index: integer; var item: tpersistent);
 begin
  inherited;
  with ttrace(item) do begin
+  xserstart:= self.fxserstart;
   xstart:= self.fxstart;
   ystart:= self.fystart;
+  xserrange:= self.fxserrange;
   xrange:= self.fxrange;
   yrange:= self.fyrange;
  end;
@@ -1320,8 +1352,10 @@ procedure ttraces.assign(source: tpersistent);
 begin
  if source is ttraces then begin
   with ttraces(source) do begin
+   self.fxserstart:= fxserstart;
    self.fxstart:= fxstart;
    self.fystart:= fystart;
+   self.fxserrange:= fxserrange;
    self.fxrange:= fxrange;
    self.fyrange:= fyrange;
   end;
@@ -1672,10 +1706,15 @@ begin
 end;
 
 procedure tchart.dopaint(const acanvas: tcanvas);
+var
+ rect1: rectty;
 begin
  inherited;
  acanvas.save;
- acanvas.intersectcliprect(innerclientrect);
+ rect1:= innerclientrect;
+ inc(rect1.cx);
+ inc(rect1.cy);
+ acanvas.intersectcliprect(rect1);
  acanvas.move(innerclientpos);
  ftraces.paint(acanvas);
  acanvas.restore;

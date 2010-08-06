@@ -23,8 +23,10 @@ uses
  
 type
 
- fftstatety = (ffs_inited);
+ fftstatety = (ffs_inited,ffs_windowvalid);
  fftstatesty = set of fftstatety;
+
+ windowfuncty = (wf_rectangular,wf_hann,wf_hamming); 
  
  tfft = class(tmsecomponent)
   private
@@ -37,13 +39,22 @@ type
    finpcomplexar: complexarty;
    fn: integer;
    fnout: integer;
+   fwindowdata: doublearty;
+   fwindowfunc: windowfuncty;
+   fwindowfuncpar0: double;
+   fwindowfuncpar1: double;
    procedure setinpreal(const avalue: realarty);
    procedure setinpcomplex(const avalue: complexarty);
    function getoutreal: realarty;
    function getoutcomplex: complexarty;
+   procedure setwindowfunc(const avalue: windowfuncty);
+   procedure setwindowfuncpar0(const avalue: double);
+   procedure setwindowfuncpar1(const avalue: double);
   protected
    fstate: fftstatesty;
+   procedure checkwindowfunc;
    procedure checkinit;
+   procedure resetwindowdata;
   public
    destructor destroy; override;
    procedure clear;
@@ -51,6 +62,13 @@ type
    property inpcomplex: complexarty write setinpcomplex;
    property outreal: realarty read getoutreal;
    property outcomplex: complexarty read getoutcomplex;
+  published
+   property windowfunc: windowfuncty read fwindowfunc 
+                write setwindowfunc default wf_rectangular;
+   property windowfuncpar0: double read fwindowfuncpar0 
+                                          write setwindowfuncpar0;   
+   property windowfuncpar1: double read fwindowfuncpar1 
+                                          write setwindowfuncpar1;   
  end;
 
 implementation
@@ -78,6 +96,36 @@ begin
   fftw_freemem(foutreal);
   fftw_freemem(foutcomplex);
   fn:= 0;
+  resetwindowdata;
+ end;
+end;
+
+procedure tfft.checkwindowfunc;
+var
+ nminus1: double;
+ int1: integer;
+begin
+ if not (ffs_windowvalid in fstate) then begin
+  nminus1:= fn-1;
+  setlength(fwindowdata,fn);
+  case fwindowfunc of
+   wf_hann: begin
+    for int1:= 0 to high(fwindowdata) do begin
+     fwindowdata[int1]:= 0.5 * (1-cos((2*pi*int1)/nminus1));
+    end;    
+   end;
+   wf_hamming: begin
+    for int1:= 0 to high(fwindowdata) do begin
+     fwindowdata[int1]:= 0.54 - 0.46 * cos((2*pi*int1)/nminus1);
+    end;    
+   end;
+   else begin
+    for int1:= 0 to high(fwindowdata) do begin
+     fwindowdata[int1]:= 1;
+    end;
+   end;
+  end;
+  include(fstate,ffs_windowvalid);
  end;
 end;
 
@@ -86,6 +134,7 @@ var
  po1: pcomplexty;
  int1: integer;
  do1: double;
+ po2: pdouble;
 begin
  checkinit;
  if (finpcomplexar <> nil) then begin
@@ -122,6 +171,14 @@ begin
     fplan:= fftw_plan_dft_r2c_1d(fn,finpreal,foutcomplex,[fftw_estimate]);
    end;
    move(pointer(finprealar)^,finpreal^,fn*sizeof(double));
+   if fwindowfunc <> wf_rectangular then begin
+    checkwindowfunc;
+    po2:= finpreal;
+    for int1:= 0 to high(fwindowdata) do begin
+     po2^:= po2^ * fwindowdata[int1];
+     inc(po2);
+    end;
+   end;
    fftw_execute(fplan);
    setlength(result,fn div 2 + 1);
    po1:= foutcomplex;
@@ -178,6 +235,36 @@ begin
   initializefftw([]);
   include(fstate,ffs_inited);
  end;
+end;
+
+procedure tfft.setwindowfunc(const avalue: windowfuncty);
+begin
+ if avalue <> fwindowfunc then begin
+  fwindowfunc:= avalue;
+  resetwindowdata;
+ end;
+end;
+
+procedure tfft.setwindowfuncpar0(const avalue: double);
+begin
+ if avalue <> fwindowfuncpar0 then begin
+  fwindowfuncpar0:= avalue;
+  resetwindowdata;
+ end;
+end;
+
+procedure tfft.setwindowfuncpar1(const avalue: double);
+begin
+ if avalue <> fwindowfuncpar1 then begin
+  fwindowfuncpar1:= avalue;
+  resetwindowdata;
+ end;
+end;
+
+procedure tfft.resetwindowdata;
+begin
+ fwindowdata:= nil;
+ exclude(fstate,ffs_windowvalid);
 end;
 
 end.

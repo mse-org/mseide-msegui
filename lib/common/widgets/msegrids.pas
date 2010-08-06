@@ -11472,7 +11472,7 @@ begin
       end;
      end;
      key_tab,key_backtab: begin
-      if not (og_colchangeontabkey in foptionsgrid) then begin
+      if not (og_colchangeontabkey in foptionsgrid) or (rowcount = 0) then begin
        exclude(info.eventstate,es_processed);
        dokeydownaftershortcut(info);
       end

@@ -99,6 +99,8 @@ type
  pclassarty = ^classarty;
  realarty = array of realty;
  prealarty = ^realarty;
+ doublearty = array of double;
+ pdoublearty = ^doublearty;
  currencyarty = array of currency;
  pcurrencyarty = ^currencyarty;
  datetimearty = array of tdatetime;
