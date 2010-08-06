@@ -29,7 +29,7 @@ uses
  
 const
 {$ifdef mswindows}
- fftwlib: array[0..0] of filenamety = ('fftw3.dll');
+ fftwlib: array[0..1] of filenamety = ('fftw3.dll','libfftw3-3.dll');
 {$else}
  fftwlib: array[0..1] of filenamety = ('libfftw3.so.3','libfftw3.so');
 {$endif}
