@@ -20,7 +20,8 @@ type
 
  splitteroptionty = (spo_hmove,spo_hprop,spo_hsizeprop,
                      spo_vmove,spo_vprop,spo_vsizeprop,
-                     spo_dockleft,spo_docktop,spo_dockright,spo_dockbottom);
+                     spo_dockleft,spo_docktop,spo_dockright,spo_dockbottom,
+                     spo_shrinkhzero,spo_shrinkvzero);
  splitteroptionsty = set of splitteroptionty;
 
 const
@@ -65,8 +66,11 @@ type
    procedure setgrip(const avalue: stockbitmapty);
    procedure setoptions(const avalue: splitteroptionsty);
   protected
-   function getmintopleft: pointty; override;
    function clippoint(const aoffset: pointty): pointty;
+   procedure calcoffset(const refsize: sizety; 
+                      out offset,clippedoffset: pointty; out newsize: sizety);
+   procedure setpropoffset(const aoffset: pointty; const asize: sizety);
+   function getminshrinkpos: pointty; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure poschanged; override;
    procedure sizechanged; override;
@@ -74,6 +78,7 @@ type
    procedure doasyncevent(var atag: integer); override;
    procedure dopaint(const acanvas: tcanvas); override;
    procedure parentwidgetregionchanged(const sender: twidget); override;
+   procedure tryshrink(const aclientsize: sizety); override;
    procedure loaded; override;
    procedure updatedock;
    procedure updatelinkedwidgets(const delta: pointty);
@@ -290,6 +295,7 @@ type
 
 constructor tsplitter.create(aowner: tcomponent);
 begin
+ include(fwidgetstate1,ws1_tryshrink);
  foptions:= defaultsplitteroptions;
  fcolorgrip:= defaultsplittercolorgrip;
  fgrip:= defaultsplittergrip;
@@ -578,6 +584,9 @@ end;
 
 procedure tsplitter.setlinkbottom(const avalue: twidget);
 begin
+// if flinkbottom <> nil then begin
+//  twidget1(flinkbottom).fminshrinkposoffset.y:= 0;
+// end;
  setlinkedvar(avalue,tmsecomponent(flinkbottom));
  updatedock;
 end;
@@ -590,6 +599,9 @@ end;
 
 procedure tsplitter.setlinkright(const avalue: twidget);
 begin
+// if flinkright <> nil then begin
+//  twidget1(flinkright).fminshrinkposoffset.x:= 0;
+// end;
  setlinkedvar(avalue,tmsecomponent(flinkright));
  updatedock;
 end;
@@ -654,40 +666,53 @@ begin
  end;
 end;
 
+procedure tsplitter.calcoffset(const refsize: sizety;
+            out offset,clippedoffset: pointty; out newsize: sizety);
+//var
+// size1: sizety;
+begin
+// size1:= fparentwidget.clientsize;
+ offset:= nullpoint;
+ newsize:= size;
+ if spo_hsizeprop in foptions then begin
+  newsize.cx:= round(refsize.cx * fhsizeprop);
+  if an_right in fanchors then begin
+   offset.x:= bounds_cx - newsize.cx;
+  end;
+ end;
+ if spo_vsizeprop in foptions then begin
+  newsize.cy:= round(refsize.cy * fvsizeprop);
+  if an_bottom in fanchors then begin
+   offset.y:= bounds_cy - newsize.cy;
+  end;
+ end;
+ if spo_hprop in foptions then begin
+  offset.x:= offset.x + round(fhprop * refsize.cx) - parentclientpos.x;
+ end;
+ if spo_vprop in foptions then begin
+  offset.y:= offset.y + round(fvprop * refsize.cy) - parentclientpos.y;
+ end;
+ clippedoffset:= clippoint(offset);
+//  pt2:= pt1;
+end;
+
+procedure tsplitter.setpropoffset(const aoffset: pointty; const asize: sizety);
+begin      
+ inc(fpropsetting);
+ try
+  size:= asize;
+  setclippedpickoffset(aoffset);
+  frefrect:= fwidgetrect;
+ finally
+  dec(fpropsetting);
+ end;
+end;
+
 procedure tsplitter.doasyncevent(var atag: integer);
 var
  pt1,pt2: pointty;
  size2: sizety;
- 
- procedure calcoffset;
- var
-  size1: sizety;
- begin
-  size1:= fparentwidget.clientsize;
-  pt1:= nullpoint;
-  size2:= size;
-  if spo_hsizeprop in foptions then begin
-   size2.cx:= round(size1.cx * fhsizeprop);
-   if an_right in fanchors then begin
-    pt1.x:= bounds_cx - size2.cx;
-   end;
-  end;
-  if spo_vsizeprop in foptions then begin
-   size2.cy:= round(size1.cy * fvsizeprop);
-   if an_bottom in fanchors then begin
-    pt1.y:= bounds_cy - size2.cy;
-   end;
-  end;
-  if spo_hprop in foptions then begin
-   pt1.x:= pt1.x + round(fhprop * size1.cx) - parentclientpos.x;
-  end;
-  if spo_vprop in foptions then begin
-   pt1.y:= pt1.y + round(fvprop * size1.cy) - parentclientpos.y;
-  end;
-  pt2:= clippoint(pt1);
-//  pt2:= pt1;
- end;
-  
+   
 begin //doasyncevent
  inherited;
  case atag of
@@ -697,23 +722,16 @@ begin //doasyncevent
    end;
    try
     if fparentwidget <> nil then begin
-     calcoffset;
+     calcoffset(fparentwidget.clientsize,pt1,pt2,size2);
      if (([spo_hmove,spo_hprop] * foptions <> []) and (pt1.x <> pt2.x) or 
          ([spo_vmove,spo_vprop] * foptions <> []) and (pt1.y <> pt2.y)) and
         (fregionchangedmark <> fregionchangedcount) then begin
       fregionchangedmark:= fregionchangedcount;
       inc(fupdating);
-      asyncevent(retrypropeventtag);
+      asyncevent(retrypropeventtag,true);
      end
      else begin
-      inc(fpropsetting);
-      try
-       size:= size2;
-       setclippedpickoffset(pt2);
-       frefrect:= fwidgetrect;
-      finally
-       dec(fpropsetting);
-      end;
+      setpropoffset(pt2,size2);
      end;
     end;
    finally
@@ -728,13 +746,45 @@ begin //doasyncevent
  end;
 end;
 
+procedure tsplitter.tryshrink(const aclientsize: sizety);
+var
+ pt1,pt2: pointty;
+ size1,size2: sizety;
+begin
+ if fupdating = 0 then begin
+  if spo_shrinkhzero in foptions then begin
+   size1.cx:= 0;
+  end
+  else begin
+   size1:= fparentwidget.clientsize;
+   if size1.cx > aclientsize.cx then begin
+    size1.cx:= aclientsize.cx;
+   end;
+  end;
+  if spo_shrinkvzero in foptions then begin
+   size1.cy:= 0;
+  end
+  else begin
+   if size1.cy > aclientsize.cy then begin
+    size1.cy:= aclientsize.cy;
+   end;
+  end;
+  calcoffset(size1,pt1,pt2,size2);
+  try
+   setpropoffset(pt2,size2);
+  finally
+   updatedock;
+  end;
+ end;
+end;
+
 procedure tsplitter.parentclientrectchanged;
 begin
  inherited;
  if (componentstate * [csloading,csdesigning] = []) and
               (fparentwidget <> nil) and (fnotified = 0) then begin
   inc(fnotified);
-  asyncevent(updatepropeventtag);
+  asyncevent(updatepropeventtag,true);
  end;
 end;
 
@@ -785,15 +835,25 @@ end;
 
 procedure tsplitter.updatedock;
 var
- po1: pointty;
+ pt1: pointty;
  rect1: rectty;
 begin
  if (componentstate * [csloading,csdestroying] = []) and 
              (foptions * docksplitteroptions <> []) and
              (fparentwidget <> nil) and (fupdating = 0) then begin
   inc(fupdating);
-  po1:= addpoint(pos,pointty(size));
-  try  
+  pt1:= addpoint(pos,pointty(size));
+  try
+   if flinkright <> nil then begin
+    with twidget1(flinkright) do begin
+//     fminshrinkposoffset.x:= - fwidgetrect.x;
+    end;
+   end;
+   if flinkbottom <> nil then begin
+    with twidget1(flinkbottom) do begin
+//     fminshrinkposoffset.y:= - fwidgetrect.y;
+    end;
+   end;
    if (flinkleft = flinkright) and 
         (foptions * [spo_dockleft,spo_dockright] = 
                            [spo_dockleft,spo_dockright])then begin
@@ -808,8 +868,8 @@ begin
     end;
     if (flinkright <> nil) and (spo_dockright in foptions) then begin
      rect1:= flinkright.widgetrect;
-     rect1.cx:= rect1.cx + (rect1.x - po1.x);
-     rect1.pos.x:= po1.x;
+     rect1.cx:= rect1.cx + (rect1.x - pt1.x);
+     rect1.pos.x:= pt1.x;
      flinkright.widgetrect:= rect1;
     end;
    end;
@@ -827,8 +887,8 @@ begin
     end;
     if (flinkbottom <> nil)  and (spo_dockbottom in foptions) then begin
      rect1:= flinkbottom.widgetrect;
-     rect1.cy:= rect1.cy + (rect1.y - po1.y);
-     rect1.pos.y:= po1.y;
+     rect1.cy:= rect1.cy + (rect1.y - pt1.y);
+     rect1.pos.y:= pt1.y;
      flinkbottom.widgetrect:= rect1;
     end;
    end;
@@ -838,7 +898,7 @@ begin
  end;
 end;
 
-function tsplitter.getmintopleft: pointty;
+function tsplitter.getminshrinkpos: pointty;
 var
  int1: integer;
 begin

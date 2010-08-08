@@ -120,13 +120,14 @@ type
                   ws_isvisible
                  );
  widgetstatesty = set of widgetstatety;
- widgetstate1ty = (ws1_childscaled,{ws1_fontheightlock,}ws1_scaling,
+ widgetstate1ty = (ws1_childscaled,ws1_childrectchanged,
+                   {ws1_fontheightlock,}ws1_scaling,
                    ws1_widgetregionvalid,ws1_rootvalid,
                    ws1_anchorsizing,ws1_anchorsetting,ws1_parentclientsizeinited,
                    ws1_parentupdating, //set while setparentwidget
                    ws1_isstreamed,     //used by ttabwidget
                    ws1_scaled,         //used in tcustomscalingwidget
-                   ws1_noclipchildren,
+                   ws1_noclipchildren,ws1_tryshrink,
                    ws1_nodesignvisible,ws1_nodesignframe,ws1_nodesignhandles,
                    ws1_nodesigndelete,ws1_designactive,
                    ws1_fakevisible,ws1_nominsize,
@@ -1284,6 +1285,7 @@ type
    fwindow: twindow;
    fwidgetrect: rectty;
    fparentclientsize: sizety;
+//   fminshrinkposoffset: pointty;
    fframe: tcustomframe;
    fface: tcustomface;
    ffont: twidgetfont;
@@ -1487,9 +1489,10 @@ type
    function getdisprect: rectty; virtual; 
                 //origin pos, clamped in view by activate
 
-   function getmintopleft: pointty; virtual;
+   procedure tryshrink(const aclientsize: sizety); virtual;
    function calcminscrollsize: sizety; virtual;
    function minscrollsize: sizety; //uses cache
+   function getminshrinkpos: pointty; virtual;
    function getminshrinksize: sizety; virtual;
    function getcontainer: twidget; virtual;
    function getchildwidgets(const index: integer): twidget; virtual;
@@ -6741,7 +6744,8 @@ begin
  result:= fminsize;
 end;
 
-procedure twidget.internalsetwidgetrect(Value: rectty; const windowevent: boolean);
+procedure twidget.internalsetwidgetrect(Value: rectty; 
+                                                  const windowevent: boolean);
 
  procedure checkwidgetregionchanged(var achanged: boolean);
  begin
@@ -6755,8 +6759,9 @@ procedure twidget.internalsetwidgetrect(Value: rectty; const windowevent: boolea
  
 var
  bo1,bo2,poscha,sizecha: boolean;
- int1: integer;
+ int1,int2,int3: integer;
  size1,size2: sizety;
+ ar1: widgetarty;
 begin
  if ([ow1_autowidth,ow1_autoheight]*foptionswidget1 <> []) and not (csloading in componentstate) then begin
   if not windowevent then begin
@@ -6809,6 +6814,10 @@ begin
   invalidatewidget; //old position
  end;
  if poscha then begin
+  if (fparentwidget <> nil) and ((fwidgetrect.x <> value.x) or 
+                                 (fwidgetrect.y <> value.y)) then begin
+   include(fparentwidget.fwidgetstate1,ws1_childrectchanged);
+  end;
   fwidgetrect.x:= value.x;
   fwidgetrect.y:= value.y;
   rootchanged;
@@ -6816,6 +6825,42 @@ begin
  if sizecha then begin
   inc(fsetwidgetrectcount);
   int1:= fsetwidgetrectcount;
+  if not (csloading in componentstate) and 
+        ((value.cx < fwidgetrect.cx) or (value.cy < fwidgetrect.cy)) then begin
+   int2:= 0;
+   setlength(ar1,length(fwidgets));
+   for int1:= 0 to high(ar1) do begin
+    if ws1_tryshrink in fwidgets[int1].fwidgetstate1 then begin
+     ar1[int2]:= fwidgets[int1];
+     inc(int2);
+    end;
+   end;
+   if int2 > 0 then begin
+    size1:= value.size;
+    if fframe <> nil then begin
+     subsize1(size1,fframe.paintframewidth);
+    end;
+    if fframe <> nil then begin
+     fframe.checkminscrollsize(size1);
+    end;
+    size2:= clientsize;
+    if (size2.cx > size1.cx) or (size2.cy > size1.cy) then begin
+     int3:= 0;
+     repeat
+      exclude(fwidgetstate1,ws1_childrectchanged);
+      for int1:= 0 to int2-1 do begin
+       ar1[int1].tryshrink(size1);
+      end;
+      inc(int3);
+     until not(ws1_childrectchanged in fwidgetstate1) or (int3 >= 16);
+                                                        //emergency brake
+    end;
+   end;
+  end;
+  if (fparentwidget <> nil) and ((fwidgetrect.cx <> value.cx) or 
+                                 (fwidgetrect.cy <> value.cy)) then begin
+   include(fparentwidget.fwidgetstate1,ws1_childrectchanged);
+  end;
   fwidgetrect.cx:= value.cx;
   fwidgetrect.cy:= value.cy;
   invalidateparentminclientsize;
@@ -7226,9 +7271,15 @@ begin
  end;
 end;
 
-function twidget.getmintopleft: pointty;
+function twidget.getminshrinkpos: pointty;
 begin
  result:= fwidgetrect.pos;
+// addpoint1(result,fminshrinkposoffset);
+end;
+
+procedure twidget.tryshrink(const aclientsize: sizety);
+begin
+ //dummy
 end;
 
 function twidget.calcminscrollsize: sizety;
@@ -7254,11 +7305,12 @@ begin
   with fwidgets[int1],fwidgetrect do begin
    if visible and not(ws1_nominsize in fwidgetstate1) or 
                                   (csdesigning in componentstate) then begin
-    pt1:= getmintopleft;
+    pt1:= getminshrinkpos;
     anch:= fanchors * [an_left,an_right];
     minsi:= getminshrinksize;
     if anch = [an_right] then begin
-     int2:= fparentclientsize.cx - fwidgetrect.x + indent.left + clientorig.x;
+//     int2:= fparentclientsize.cx - pt1.x + indent.left + clientorig.x;
+     int2:= fparentclientsize.cx - x + indent.left + clientorig.x;
     end
     else begin
      if anch = [] then begin
@@ -7279,7 +7331,7 @@ begin
 
     anch:= fanchors * [an_top,an_bottom];
     if anch = [an_bottom] then begin
-     int2:= fparentclientsize.cy - fwidgetrect.y + indent.top + clientorig.y;
+     int2:= fparentclientsize.cy - y + indent.top + clientorig.y;
     end
     else begin
      if anch = [] then begin
@@ -10833,7 +10885,7 @@ procedure twidget.postchildscaled;
 begin
  if not (ws1_childscaled in fwidgetstate1) then begin
   include(fwidgetstate1,ws1_childscaled);
-  appinst.postevent(tobjectevent.create(ek_childscaled,ievent(self)));
+  appinst.postevent(tobjectevent.create(ek_childscaled,ievent(self)),true);
  end;
 end;
 

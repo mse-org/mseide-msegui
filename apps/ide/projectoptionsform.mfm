@@ -3632,7 +3632,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cx = 640
           bounds_cy = 3
           anchors = [an_top]
-          options = [spo_vmove, spo_vprop]
+          options = [spo_vmove, spo_vprop, spo_shrinkvzero]
           linktop = selectactivegroupgrid
           linkbottom = macrogrid
           statfile = statfile1

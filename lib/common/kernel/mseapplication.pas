@@ -192,6 +192,7 @@ type
    feventlist: teventlist;
    feventlock: mutexty;
    fpostedevents: eventarty;
+   fpostedeventslocal: eventarty;
    fidlecount: integer;
    fcheckoverloadlock: integer;
    fexceptionactive: integer;
@@ -243,7 +244,8 @@ type
    function idle: boolean; virtual;
    property applicationname: msestring read fapplicationname write fapplicationname;
    
-   procedure postevent(event: tmseevent);
+   procedure postevent(event: tmseevent; const alocal: boolean = false);
+                            //local -> direcly to the internal queue
    function checkoverload(const asleepus: integer = 100000): boolean;
               //true if never idle since last call,
               // unlocks application and calls sleep if not mainthread and asleepus >= 0
@@ -1143,6 +1145,11 @@ begin
  sys_mutexlock(feventlock);
  if not (aps_eventflushing in fstate) then begin
   include(fstate,aps_eventflushing);
+  for int1:= 0 to high(fpostedeventslocal) do begin
+   feventlist.add(fpostedeventslocal[int1]);
+   dopostevent(fpostedeventslocal[int1]);
+  end;
+  fpostedeventslocal:= nil;
   for int1:= 0 to high(fpostedevents) do begin
    dopostevent(fpostedevents[int1]);
   end;
@@ -1152,7 +1159,7 @@ begin
  sys_mutexunlock(feventlock);
 end;
 
-procedure tcustomapplication.postevent(event: tmseevent);
+procedure tcustomapplication.postevent(event: tmseevent; const alocal: boolean = false);
 begin
  if csdestroying in componentstate then begin
   event.free1;
@@ -1161,7 +1168,12 @@ begin
   if trylock then begin
    try
     flusheventbuffer;
-    dopostevent(event);
+    if alocal then begin
+     eventlist.add(event);
+    end
+    else begin
+     dopostevent(event);
+    end;
    except
     event.free1;
     unlock;
@@ -1171,8 +1183,14 @@ begin
   end
   else begin
    sys_mutexlock(feventlock);
-   setlength(fpostedevents,high(fpostedevents) + 2);
-   fpostedevents[high(fpostedevents)]:= event;
+   if alocal then begin
+    setlength(fpostedeventslocal,high(fpostedeventslocal) + 2);
+    fpostedevents[high(fpostedeventslocal)]:= event;
+   end
+   else begin
+    setlength(fpostedevents,high(fpostedevents) + 2);
+    fpostedevents[high(fpostedevents)]:= event;
+   end;
    sys_mutexunlock(feventlock);
   end;
  end;
@@ -1384,7 +1402,8 @@ end;
 
 function tcustomapplication.idle: boolean;
 begin
- result:= (high(fpostedevents) < 0) and (feventlist.count = 0);
+ result:= (high(fpostedevents) < 0) and (high(fpostedeventslocal) < 0) and
+                                                       (feventlist.count = 0);
 end;
 
 function tcustomapplication.candefocus: boolean;

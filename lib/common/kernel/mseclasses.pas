@@ -421,9 +421,9 @@ type
    procedure sendrootcomponentevent(const event: tcomponentevent;
                                         const destroyevent: boolean = true);
                   //event will be destroyed if not async
-   procedure asyncevent(atag: integer = 0);
+   procedure asyncevent(atag: integer = 0; const alocal: boolean = false);
                           //posts event for doasyncevent to self
-   procedure postcomponentevent(const event: tcomponentevent);
+   procedure postcomponentevent(const event: tcomponentevent; const alocal: boolean = false);
 
    property moduleclassname: string read getmoduleclassname;
    property actualclassname: string read getactualclassname;
@@ -3155,9 +3155,10 @@ begin
  end;
 end;
 
-procedure tmsecomponent.asyncevent(atag: integer = 0);
+procedure tmsecomponent.asyncevent(atag: integer = 0;
+                                             const alocal: boolean = false);
 begin
- application.postevent(tasyncevent.create(ievent(self),atag));
+ application.postevent(tasyncevent.create(ievent(self),atag),alocal);
 end;
 
 procedure tmsecomponent.doasyncevent(var atag: integer);
@@ -3165,10 +3166,11 @@ begin
  //dummy
 end;
 
-procedure tmsecomponent.postcomponentevent(const event: tcomponentevent);
+procedure tmsecomponent.postcomponentevent(const event: tcomponentevent;
+                                                  const alocal: boolean = false);
 begin
  event.create(event.kind,ievent(self));
- application.postevent(event);
+ application.postevent(event,alocal);
 end;
 
 {$ifdef FPC}
