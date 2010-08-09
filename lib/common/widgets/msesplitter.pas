@@ -297,6 +297,8 @@ uses
 type
  twidget1 = class(twidget);
 
+{$define useround}
+
 { tsplitter }
 
 constructor tsplitter.create(aowner: tcomponent);
@@ -701,13 +703,13 @@ begin
  offset:= nullpoint;
  newsize:= size;
  if spo_hsizeprop in foptions then begin
-  newsize.cx:= floor{round}(refsize.cx * fhsizeprop);
+  newsize.cx:= {$ifdef useround}round{$else}floor{$endif}(refsize.cx * fhsizeprop);
   if not(an_right in fanchors) xor (spo_hrefstart in foptions) then begin
    offset.x:= bounds_cx - newsize.cx;
   end;
  end;
  if spo_vsizeprop in foptions then begin
-  newsize.cy:= floor{round}(refsize.cy * fvsizeprop);
+  newsize.cy:= {$ifdef useround}round{$else}floor{$endif}(refsize.cy * fvsizeprop);
   if not(an_bottom in fanchors) xor (spo_vrefstart in foptions) then begin
    offset.y:= bounds_cy - newsize.cy;
   end;
@@ -717,7 +719,7 @@ begin
   if not (spo_hrefstart in foptions) then begin
    int1:= bounds_cx;
   end;
-  offset.x:= offset.x + floor{round}(fhprop * refsize.cx) - parentclientpos.x -
+  offset.x:= offset.x + {$ifdef useround}round{$else}floor{$endif}(fhprop * refsize.cx) - parentclientpos.x -
                                                                      int1;
  end;
  if (spo_vprop in foptions) then begin
@@ -725,7 +727,7 @@ begin
   if not (spo_vrefstart in foptions) then begin
    int1:= bounds_cy;
   end;
-  offset.y:= offset.y + floor{round}(fvprop * refsize.cy) - parentclientpos.y -
+  offset.y:= offset.y + {$ifdef useround}round{$else}floor{$endif}(fvprop * refsize.cy) - parentclientpos.y -
                                                                      int1;
  end;
  clippedoffset:= clippoint(offset);

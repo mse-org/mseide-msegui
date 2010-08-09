@@ -688,7 +688,9 @@ begin
       if int2 > 0 then begin
        xs:= xs / (chartln((finfo.xstart+finfo.xrange) * int2)+xo);
       end;
-      xo:= xo + 1/xs;
+      if xs <> 0 then begin
+       xo:= xo + 1/xs;
+      end;
      end
      else begin
       xo:= (rea1 - finfo.xstart) * int2;
@@ -696,7 +698,9 @@ begin
       if int2 > 0 then begin
        xs:= xs / (finfo.xrange * int2);
       end;
-      xo:= xo + 1/xs;
+      if xs <> 0 then begin
+       xo:= xo + 1/xs;
+      end;
       xo:= (finfo.xserstart*int2+xo)/(finfo.xserrange);
       xs:= xs*finfo.xserrange;
      end;
@@ -1231,6 +1235,12 @@ var
 begin
  if not (trss_graphicvalid in ftracestate) then begin
   fsize:= twidget(fowner).innerclientsize;
+  if fsize.cx < 0 then begin
+   fsize.cx:= 0;
+  end;
+  if fsize.cy < 0 then begin
+   fsize.cy:= 0;
+  end;
   fscalex:= fsize.cx;
   fscaley:= fsize.cy;
   for int1:= 0 to high(fitems) do begin
