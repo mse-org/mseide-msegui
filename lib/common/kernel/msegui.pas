@@ -1489,6 +1489,7 @@ type
    function getdisprect: rectty; virtual; 
                 //origin pos, clamped in view by activate
 
+   function getshrinkpriority: integer; virtual; //default 0
    procedure tryshrink(const aclientsize: sizety); virtual;
    function calcminscrollsize: sizety; virtual;
    function minscrollsize: sizety; //uses cache
@@ -1687,6 +1688,8 @@ type
    property pos: pointty read fwidgetrect.pos write setpos;
    property size: sizety read fwidgetrect.size write setsize;
    property minsize: sizety read fminsize write setminsize;
+   function widgetminsize: sizety; 
+           //calls checkwidgetsize and frame.checkwidgetsize
    property maxsize: sizety read fmaxsize write setmaxsize;
    function maxclientsize: sizety; virtual;
    property bounds_x: integer read fwidgetrect.x write setbounds_x nodefault;
@@ -6762,6 +6765,7 @@ var
  int1,int2,int3: integer;
  size1,size2: sizety;
  ar1: widgetarty;
+ ar2,ar3: integerarty;
 begin
  if ([ow1_autowidth,ow1_autoheight]*foptionswidget1 <> []) and not (csloading in componentstate) then begin
   if not windowevent then begin
@@ -6825,7 +6829,7 @@ begin
  if sizecha then begin
   inc(fsetwidgetrectcount);
   int1:= fsetwidgetrectcount;
-  if not (csloading in componentstate) and 
+  if (componentstate * [csloading,csdesigning] = []) and 
         ((value.cx < fwidgetrect.cx) or (value.cy < fwidgetrect.cy)) then begin
    int2:= 0;
    setlength(ar1,length(fwidgets));
@@ -6836,6 +6840,13 @@ begin
     end;
    end;
    if int2 > 0 then begin
+    setlength(ar1,int2);
+    setlength(ar2,int2);
+    for int1:= 0 to int2-1 do begin
+     ar2[int1]:= ar1[int1].getshrinkpriority;
+    end;
+    sortarray(ar2,ar3);
+    orderarray(ar3,pointerarty(ar1));
     size1:= value.size;
     if fframe <> nil then begin
      subsize1(size1,fframe.paintframewidth);
@@ -6848,11 +6859,11 @@ begin
      int3:= 0;
      repeat
       exclude(fwidgetstate1,ws1_childrectchanged);
-      for int1:= 0 to int2-1 do begin
+      for int1:= int2-1 downto 0 do begin
        ar1[int1].tryshrink(size1);
       end;
       inc(int3);
-     until not(ws1_childrectchanged in fwidgetstate1) or (int3 >= 16);
+     until not(ws1_childrectchanged in fwidgetstate1) or (int3 >= 4);
                                                         //emergency brake
     end;
    end;
@@ -7275,6 +7286,11 @@ function twidget.getminshrinkpos: pointty;
 begin
  result:= fwidgetrect.pos;
 // addpoint1(result,fminshrinkposoffset);
+end;
+
+function twidget.getshrinkpriority: integer;
+begin
+ result:= 0;
 end;
 
 procedure twidget.tryshrink(const aclientsize: sizety);
@@ -11561,6 +11577,15 @@ begin
   widgetrect:= rect1;
  finally
   exclude(fwidgetstate1,ws1_scaling);
+ end;
+end;
+
+function twidget.widgetminsize: sizety; 
+begin
+ result:= nullsize;
+ checkwidgetsize(result);
+ if fframe <> nil then begin
+  fframe.checkwidgetsize(result);
  end;
 end;
 
