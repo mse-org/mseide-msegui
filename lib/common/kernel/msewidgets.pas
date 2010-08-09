@@ -2305,31 +2305,33 @@ procedure tcustomcaptionframe.checkwidgetsize(var asize: sizety);
 var
  size1: sizety;
 begin
- checkstate;
- size1:= finfo.dest.size;
- size1.cx:= size1.cx + 2*captionmargin;
- size1.cy:= size1.cy + 2*captionmargin;
- case fcaptionpos of
-  cp_lefttop,cp_left,cp_leftbottom,
-  cp_righttop,cp_right,cp_rightbottom: begin
-   if fcaptiondist > 0 then begin
-    size1.cx:= size1.cx + fcaptiondist;
+ if finfo.text.text <> '' then begin
+  checkstate;
+  size1:= finfo.dest.size;
+  size1.cx:= size1.cx + 2*captionmargin;
+  size1.cy:= size1.cy + 2*captionmargin;
+  case fcaptionpos of
+   cp_lefttop,cp_left,cp_leftbottom,
+   cp_righttop,cp_right,cp_rightbottom: begin
+    if fcaptiondist > 0 then begin
+     size1.cx:= size1.cx + fcaptiondist;
+    end;
+    size1.cy:= size1.cy + abs(fcaptionoffset);
    end;
-   size1.cy:= size1.cy + abs(fcaptionoffset);
-  end;
-  cp_topleft,cp_top,cp_topright,
-  cp_bottomleft,cp_bottom,cp_bottomright: begin
-   if fcaptiondist > 0 then begin
-    size1.cy:= size1.cy + fcaptiondist;
+   cp_topleft,cp_top,cp_topright,
+   cp_bottomleft,cp_bottom,cp_bottomright: begin
+    if fcaptiondist > 0 then begin
+     size1.cy:= size1.cy + fcaptiondist;
+    end;
+    size1.cx:= size1.cx + abs(fcaptionoffset);
    end;
-   size1.cx:= size1.cx + abs(fcaptionoffset);
   end;
- end;
- if asize.cx < size1.cx then begin
-  asize.cx:= size1.cx;
- end;
- if asize.cy < size1.cy then begin
-  asize.cy:= size1.cy;
+  if asize.cx < size1.cx then begin
+   asize.cx:= size1.cx;
+  end;
+  if asize.cy < size1.cy then begin
+   asize.cy:= size1.cy;
+  end;
  end;
 end;
 
