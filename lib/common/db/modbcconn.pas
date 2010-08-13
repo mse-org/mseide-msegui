@@ -276,7 +276,8 @@ const
 
 function ODBCSucces(const Res:SQLRETURN):boolean;
 begin
-  Result:=(Res=SQL_SUCCESS) or (Res=SQL_SUCCESS_WITH_INFO);
+  Result:=(Res=SQL_SUCCESS) or (Res=SQL_SUCCESS_WITH_INFO) or 
+             (res = SQL_NO_DATA);
 end;
 
 function ODBCResultToStr(Res:SQLRETURN):string;
