@@ -136,19 +136,19 @@ object breakpointsfo: tbreakpointsfo
             textflags = []
           end>
       end>
-    datacols.count = 12
+    datacols.count = 13
     datacols.items = <    
       item
         linecolorfix = -1610612733
         width = 16
-        options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_drawfocus, co_savestate]
         widgetname = 'bkpton'
         dataclass = tgridintegerdatalist
       end    
       item
         linecolorfix = -1610612733
         width = 158
-        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_savevalue, co_savestate]
         widgetname = 'filename'
         dataclass = tgridmsestringdatalist
       end    
@@ -160,7 +160,7 @@ object breakpointsfo: tbreakpointsfo
       end    
       item
         linecolorfix = -1610612733
-        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_savevalue, co_savestate]
         widgetname = 'line'
         dataclass = tgridintegerdatalist
       end    
@@ -172,7 +172,7 @@ object breakpointsfo: tbreakpointsfo
       end    
       item
         width = 6
-        options = [co_invisible, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        options = [co_invisible, co_drawfocus, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'addressbkpt'
         dataclass = tgridintegerdatalist
       end    
@@ -194,7 +194,7 @@ object breakpointsfo: tbreakpointsfo
       item
         linecolorfix = -1610612733
         width = 30
-        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_savevalue, co_savestate]
         widgetname = 'ignore'
         dataclass = tgridintegerdatalist
       end    
@@ -202,6 +202,7 @@ object breakpointsfo: tbreakpointsfo
         linecolorfix = -1610612733
         width = 7
         options = [co_readonly, co_nofocus, co_fixwidth, co_savestate]
+        onshowhint = errhint
         widgetname = 'conderr'
         dataclass = tgridintegerdatalist
       end    
@@ -214,7 +215,14 @@ object breakpointsfo: tbreakpointsfo
         dataclass = tgridmsestringdatalist
       end    
       item
-        options = [co_invisible, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        width = 19
+        options = [co_invisible, co_mousescrollrow]
+        widgetname = 'errormessage'
+        dataclass = tgridmsestringdatalist
+      end    
+      item
+        width = 17
+        options = [co_invisible, co_savevalue, co_savestate]
         widgetname = 'flags'
         dataclass = tgridintegerdatalist
       end>
@@ -226,11 +234,11 @@ object breakpointsfo: tbreakpointsfo
     object bkpton: tbooleanedit
       optionsskin = [osk_framebuttononly]
       taborder = 1
-      bounds_x = 0
+      bounds_x = -55
       bounds_y = 0
       bounds_cx = 16
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       ondataentered = ondataentered
       visible = False
       onsetvalue = ononsetvalue
@@ -241,7 +249,7 @@ object breakpointsfo: tbreakpointsfo
       optionsskin = [osk_framebuttononly]
       taborder = 2
       visible = False
-      bounds_x = 17
+      bounds_x = -38
       bounds_y = 0
       bounds_cx = 158
       bounds_cy = 16
@@ -254,7 +262,7 @@ object breakpointsfo: tbreakpointsfo
       optionsskin = [osk_framebuttononly]
       taborder = 3
       visible = False
-      bounds_x = 176
+      bounds_x = 121
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
@@ -265,7 +273,7 @@ object breakpointsfo: tbreakpointsfo
       optionsskin = [osk_framebuttononly]
       taborder = 4
       visible = False
-      bounds_x = 227
+      bounds_x = 172
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
@@ -283,7 +291,7 @@ object breakpointsfo: tbreakpointsfo
       frame.dummy = 0
       taborder = 5
       visible = False
-      bounds_x = 278
+      bounds_x = 223
       bounds_y = 0
       bounds_cx = 61
       bounds_cy = 16
@@ -303,7 +311,7 @@ object breakpointsfo: tbreakpointsfo
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.dummy = 0
       taborder = 6
-      bounds_x = 340
+      bounds_x = 285
       bounds_y = 0
       bounds_cx = 6
       bounds_cy = 16
@@ -314,7 +322,7 @@ object breakpointsfo: tbreakpointsfo
       optionsskin = [osk_framebuttononly]
       taborder = 7
       visible = False
-      bounds_x = 347
+      bounds_x = 292
       bounds_y = 0
       bounds_cx = 19
       bounds_cy = 16
@@ -325,11 +333,11 @@ object breakpointsfo: tbreakpointsfo
       optionsskin = [osk_framebuttononly]
       taborder = 8
       visible = False
-      bounds_x = 367
+      bounds_x = 312
       bounds_y = 0
       bounds_cx = 31
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
       reffontheight = 14
     end
     object ignore: tintegeredit
@@ -337,11 +345,11 @@ object breakpointsfo: tbreakpointsfo
       optionsskin = [osk_framebuttononly]
       taborder = 9
       visible = False
-      bounds_x = 399
+      bounds_x = 344
       bounds_y = 0
       bounds_cx = 30
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       ondataentered = ondataentered
       onsetvalue = ignoreonsetvalue
       reffontheight = 14
@@ -349,11 +357,11 @@ object breakpointsfo: tbreakpointsfo
     object conderr: tdataicon
       optionsskin = [osk_framebuttononly]
       taborder = 10
-      bounds_x = 430
+      bounds_x = 375
       bounds_y = 0
       bounds_cx = 7
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       visible = False
       imagelist = actionsmo.buttonicons
       imageoffset = 10
@@ -363,11 +371,11 @@ object breakpointsfo: tbreakpointsfo
       optionsskin = [osk_framebuttononly]
       taborder = 11
       visible = False
-      bounds_x = 438
+      bounds_x = 383
       bounds_y = 0
       bounds_cx = 200
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft, oe_autopopupmenu, oe_savevalue, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft, oe_autopopupmenu, oe_savevalue, oe_savestate]
       ondataentered = ondataentered
       onsetvalue = conditiononsetvalue
       reffontheight = 14
@@ -377,10 +385,22 @@ object breakpointsfo: tbreakpointsfo
       optionsskin = [osk_framebuttononly]
       taborder = 12
       visible = False
-      bounds_x = 639
+      bounds_x = 604
       bounds_y = 0
-      bounds_cx = 50
+      bounds_cx = 17
       bounds_cy = 16
+      reffontheight = 14
+    end
+    object errormessage: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 13
+      visible = False
+      bounds_x = 584
+      bounds_y = 0
+      bounds_cx = 19
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
     end
   end
@@ -398,7 +418,7 @@ object breakpointsfo: tbreakpointsfo
     bounds_cx = 99
     bounds_cy = 16
     statfile = mainfo.projectstatfile
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
     onchange = bkptsononchange
     onsetvalue = bkptsononsetvalue
     value = True

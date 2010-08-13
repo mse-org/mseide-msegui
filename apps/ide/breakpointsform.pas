@@ -22,7 +22,7 @@ interface
 uses
  mseforms,msewidgetgrid,msedataedits,msegdbutils,msetypes,msegrids,
  msegraphedits,msestat,msemenuwidgets,msemenus,msestrings,mseedit,mseevent,
- msegui,msegraphics;
+ msegui,msegraphics,mseguiglob;
 
 type
  bkptstatety = (bkpts_none,bkpts_normal,bkpts_disabled,bkpts_error);
@@ -49,6 +49,7 @@ type
    flags: tintegeredit;
    address: tint64edit;
    addressbkpt: tbooleanedit;
+   errormessage: tstringedit;
    procedure bkptsononchange(const sender: TObject);
    procedure bkptsononsetvalue(const sender: TObject; var avalue: boolean;
                                             var accept: Boolean);
@@ -73,10 +74,13 @@ type
    procedure addressentered(const sender: TObject);
    procedure adbefdrawcell(const sender: tcol; const canvas: tcanvas;
                    var cellinfo: cellinfoty; var processed: Boolean);
+   procedure errhint(const sender: tdatacol; const arow: Integer;
+                   var info: hintinfoty);
   private
    fbreakpointsvalid: boolean;
    function infotolineinfo(const info: breakpointinfoty): bkptlineinfoty;
-   function breakpointerror(const error: gdbresultty): boolean;
+   function breakpointerror(const error: gdbresultty;
+                                            out errme: msestring): boolean;
    procedure removeactbreakpoint;
    function findbreakpointrow(const anum: integer): integer;
    procedure newbkpt(const addressbp: boolean);
@@ -322,11 +326,13 @@ begin
  setlength(result,int2);
 end;
 
-function tbreakpointsfo.breakpointerror(const error: gdbresultty): boolean;
+function tbreakpointsfo.breakpointerror(const error: gdbresultty;
+                                            out errme: msestring): boolean;
 var
  str1: string;
 begin
  result:= error <> gdb_ok;
+ errme:= '';
  if result then begin
   if error = gdb_message then begin
    str1:= gdb.errormessage;
@@ -334,6 +340,7 @@ begin
   else begin
    str1:= 'Breakpoint error.';
   end;
+  errme:= str1;
   showmessage(str1,'BREAKPOINT ERROR');
  end;
 end;
@@ -343,6 +350,7 @@ procedure tbreakpointsfo.insertbkpt(index: integer;
 var
  info: breakpointinfoty;
  str1: string;
+ mstr1: msestring;
 begin
  fillchar(info,sizeof(info),0);
  listtoinfo(index,info);
@@ -352,7 +360,9 @@ begin
  end;
  if gdb.execloaded then begin
   if witherrormessage then begin
-   breakpointerror(gdb.breakinsert(info));
+   if breakpointerror(gdb.breakinsert(info),mstr1) then begin
+    errormessage[index]:= mstr1;
+   end;
   end
   else begin
    gdb.breakinsert(info);
@@ -426,6 +436,7 @@ var
  str1,str2: string;
  ptrint1: ptruint;
  inf1: breakpointinfoty;
+ mstr1: msestring;
 begin
  result:= false;
  if (stopinfo.reason = sr_breakpoint_hit) then begin
@@ -434,8 +445,9 @@ begin
    if (condition[int1] <> '') and (flags[int1] = 0) then begin
     flags[int1]:= 1;
     str1:= condition[int1];
-    if breakpointerror(gdb.breakcondition(stopinfo.bkptno,str1)) then begin
+    if breakpointerror(gdb.breakcondition(stopinfo.bkptno,str1),mstr1) then begin
      conderr[int1]:= 0;
+     errormessage[int1]:= mstr1;
     end
     else begin
      conderr[int1]:= -1;
@@ -540,10 +552,13 @@ end;
 
 procedure tbreakpointsfo.conditiononsetvalue(const sender: TObject;
                        var avalue: mseString; var accept: Boolean);
+var
+ mstr1: msestring;
 begin
  if gdb.execloaded then begin
-  if breakpointerror(gdb.breakcondition(bkptno.value,avalue)) then begin
+  if breakpointerror(gdb.breakcondition(bkptno.value,avalue),mstr1) then begin
    conderr.value:= 0;
+   errormessage.value:= mstr1;
   end
   else begin
    conderr.value:= -1;
@@ -715,6 +730,14 @@ begin
   if not addressbkpt[cell.row] then begin
    color:= cl_active;
   end;
+ end;
+end;
+
+procedure tbreakpointsfo.errhint(const sender: tdatacol; const arow: Integer;
+               var info: hintinfoty);
+begin
+ if conderr[arow] >= 0 then begin
+  info.caption:= errormessage[arow];
  end;
 end;
 
