@@ -376,6 +376,9 @@ begin
   end;
   stream1.encoding:= fencoding;
  end;
+ if stream1 = nil then begin
+  exit;
+ end;
  try
   awriter:= tstatwriter.create(stream1);
   bo1:= false;

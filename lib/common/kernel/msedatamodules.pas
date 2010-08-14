@@ -55,6 +55,7 @@ type
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;
    destructor destroy; override;
+   procedure reload;
    procedure beforedestruction; override;
    property size: sizety read fsize write fsize;
   published
@@ -125,6 +126,16 @@ begin
  if not bo1 and candestroyevent(tmethod(fondestroyed)) then begin
   fondestroyed(self);
  end;
+end;
+
+procedure tmsedatamodule.reload;
+begin
+ name:= '';
+ reloadmsecomponent(self);
+ if (fstatfile <> nil) and (dmo_autoreadstat in foptions) then begin
+  fstatfile.readstat;
+ end;
+ doonloaded;
 end;
 
 procedure tmsedatamodule.doonloaded;

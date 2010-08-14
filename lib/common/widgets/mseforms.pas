@@ -135,6 +135,7 @@ type
    procedure seticon(const avalue: tmaskedbitmap);
    procedure iconchanged(const sender: tobject);
    procedure registerhandlers;
+   procedure unregisterhandlers;
    procedure setsyseventty(const avalue: syseventeventty);
    procedure setsyswindoweventty(const avalue: syseventeventty);
   protected
@@ -209,6 +210,8 @@ type
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;  virtual;
    destructor destroy; override;
+   procedure reload;
+   
    procedure insertwidget(const widget: twidget; const apos: pointty); override;
    procedure dochildscaled(const sender: twidget); override;
    function childrencount: integer; override;
@@ -818,17 +821,7 @@ var
 begin
  bo1:= csdesigning in componentstate;
  include(fwidgetstate,ws_destroying);
- application.unregisteronterminated({$ifdef FPC}@{$endif}doterminated);
- application.unregisteronterminate({$ifdef FPC}@{$endif}doterminatequery);
- application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
- application.unregisteronactivechanged({$ifdef FPC}@{$endif}dowindowactivechanged);
- application.unregisteronwindowdestroyed({$ifdef FPC}@{$endif}dowindowdestroyed);
- application.unregisteronapplicationactivechanged(
-       {$ifdef FPC}@{$endif}doapplicationactivechanged);
- if not (csdesigning in componentstate) and 
-            (assigned(fonsysevent) or assigned(fonsyswindowevent)) then begin
-  application.unregistersyseventhandler({$ifdef FPC}@{$endif}dosysevent);
- end;
+ unregisterhandlers;
  mainmenu:= nil;
  ficon.free;
  fscrollbox.free;
@@ -847,6 +840,21 @@ begin
  end;
 end;
 
+procedure tcustommseform.unregisterhandlers;
+begin
+ application.unregisteronterminated({$ifdef FPC}@{$endif}doterminated);
+ application.unregisteronterminate({$ifdef FPC}@{$endif}doterminatequery);
+ application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
+ application.unregisteronactivechanged({$ifdef FPC}@{$endif}dowindowactivechanged);
+ application.unregisteronwindowdestroyed({$ifdef FPC}@{$endif}dowindowdestroyed);
+ application.unregisteronapplicationactivechanged(
+       {$ifdef FPC}@{$endif}doapplicationactivechanged);
+ if not (csdesigning in componentstate) and 
+            (assigned(fonsysevent) or assigned(fonsyswindowevent)) then begin
+  application.unregistersyseventhandler({$ifdef FPC}@{$endif}dosysevent);
+ end;
+end;
+
 procedure tcustommseform.registerhandlers;
 begin
  application.registeronterminated({$ifdef FPC}@{$endif}doterminated);
@@ -858,6 +866,13 @@ begin
        {$ifdef FPC}@{$endif}doapplicationactivechanged);
 end;
  
+procedure tcustommseform.reload;
+begin
+ name:= '';
+ unregisterhandlers;
+ reloadmsecomponent(self);
+ doafterload;
+end;
 
 procedure tcustommseform.doafterload;
 begin

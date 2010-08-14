@@ -1029,6 +1029,8 @@ var
  int1,int3{,int4}: integer;
  lastover: boolean;
  textbackup: msestring;
+ formatbackup: formatinfoarty;
+ 
 label
  endlab;
 
@@ -1053,6 +1055,10 @@ begin                  //drawtext
   if tf_tabtospace in flags then begin
    textbackup:= text.text; //backup
    replacechar1(text.text,msechar(c_tab),msechar(' '));
+  end;
+  if flags * ellipsemask <> [] then begin
+   formatbackup:= text.format;
+   text.format:= nil;          //no format handling with ellipse
   end;
   try
    if cs_internaldrawtext in fstate then begin
@@ -1193,6 +1199,9 @@ endlab:
   finally
    if tf_tabtospace in flags then begin
     text.text:= textbackup;
+   end;
+   if flags * ellipsemask <> [] then begin
+    text.format:= formatbackup;
    end;
   end;
  end;

@@ -774,6 +774,7 @@ begin
   finfo.flags:= ftextflags;
  end;
  if finfo.flags <> textflagsbefore then begin
+  resetoffset;
   invalidatetext(false,false);
  end;
 end;

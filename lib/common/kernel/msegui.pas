@@ -76,6 +76,7 @@ type
  optionwidget1ty = (ow1_noautosizing,
                     ow1_autowidth,ow1_autoheight,
                     ow1_autosizeanright,ow1_autosizeanbottom,
+                    ow1_noparentwidthextend,ow1_noparentheightextend,
                     ow1_canclosenil, //call canclose(nil) on exit
                     ow1_nocancloseifhidden);
                                          
@@ -7322,48 +7323,51 @@ begin
    if visible and not(ws1_nominsize in fwidgetstate1) or 
                                   (csdesigning in componentstate) then begin
     pt1:= getminshrinkpos;
-    anch:= fanchors * [an_left,an_right];
     minsi:= getminshrinksize;
-    if anch = [an_right] then begin
-//     int2:= fparentclientsize.cx - pt1.x + indent.left + clientorig.x;
-     int2:= fparentclientsize.cx - x + indent.left + clientorig.x;
-    end
-    else begin
-     if anch = [] then begin
-      int2:= minsi.cx;
+    if not (ow1_noparentwidthextend in foptionswidget1) then begin
+     anch:= fanchors * [an_left,an_right];
+     if anch = [an_right] then begin
+      int2:= fparentclientsize.cx - x + indent.left + clientorig.x;
      end
      else begin
-      if anch = [an_left,an_right] then begin
-       int2:= fparentclientsize.cx - cx + minsi.cx;
+      if anch = [] then begin
+       int2:= minsi.cx;
       end
-      else begin //[an_left]
-       int2:= clientorig.x + pt1.x + cx + indent.right;
+      else begin
+       if anch = [an_left,an_right] then begin
+        int2:= fparentclientsize.cx - cx + minsi.cx;
+       end
+       else begin //[an_left]
+        int2:= clientorig.x + pt1.x + cx + indent.right;
+       end;
       end;
      end;
-    end;
-    if int2 > result.cx then begin
-     result.cx:= int2;
+     if int2 > result.cx then begin
+      result.cx:= int2;
+     end;
     end;
 
-    anch:= fanchors * [an_top,an_bottom];
-    if anch = [an_bottom] then begin
-     int2:= fparentclientsize.cy - y + indent.top + clientorig.y;
-    end
-    else begin
-     if anch = [] then begin
-      int2:= minsi.cy;
+    if not (ow1_noparentheightextend in foptionswidget1) then begin
+     anch:= fanchors * [an_top,an_bottom];
+     if anch = [an_bottom] then begin
+      int2:= fparentclientsize.cy - y + indent.top + clientorig.y;
      end
      else begin
-      if anch = [an_top,an_bottom] then begin
-       int2:= fparentclientsize.cy - cy + minsi.cy;
+      if anch = [] then begin
+       int2:= minsi.cy;
       end
-      else begin //[an_top]
-       int2:= clientorig.y + pt1.y + cy + indent.bottom;
+      else begin
+       if anch = [an_top,an_bottom] then begin
+        int2:= fparentclientsize.cy - cy + minsi.cy;
+       end
+       else begin //[an_top]
+        int2:= clientorig.y + pt1.y + cy + indent.bottom;
+       end;
       end;
      end;
-    end;
-    if int2 > result.cy then begin
-     result.cy:= int2;
+     if int2 > result.cy then begin
+      result.cy:= int2;
+     end;
     end;
    end;
   end;

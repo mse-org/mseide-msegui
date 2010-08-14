@@ -1656,12 +1656,6 @@ begin
    reader := treader.create(stream, 4096);
   end;
   try
-  {
-   if fmodules <> nil then begin
-//      reader.onfindmethod:= fmodules.findmethod;
-       //does not work because method.data is not writable
-   end;
-   }
    reader.onancestornotfound:= {$ifdef FPC}@{$endif}modules.ancestornotfound;
    reader.readrootcomponent(instance);
   finally
