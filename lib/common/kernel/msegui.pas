@@ -9169,7 +9169,8 @@ var
  int1: integer;
 begin
  result:= nil;
- if fparentwidget <> nil then begin
+ if (fparentwidget <> nil) and 
+           not (csdestroying in fparentwidget.componentstate) then begin
   int1:= ftaborder;
   if down then begin
    repeat
