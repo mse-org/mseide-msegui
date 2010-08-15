@@ -1113,6 +1113,22 @@ var
  itembefore: integer;
  int1: integer;
  pt1,pt2: pointty;
+
+ procedure resetmouseflag;
+ begin
+  with flayout do begin
+   if (fmouseitem >= 0) and (fmouseitem <= high(cells)) then begin
+    with cells[fmouseitem],buttoninfo do begin
+     if state * [shs_clicked,shs_mouse] <> [] then begin
+      state:= state - [shs_clicked,shs_mouse];
+      invalidaterect(dimouter);      
+     end;
+    end;
+    fmouseitem:= -1;
+   end;
+  end;
+ end;
+ 
 begin
  with info,flayout do begin
   itembefore:= activeitem;
@@ -1148,9 +1164,13 @@ begin
                 tmenuitem1(menu.items[activeitem]).canshowhint then begin
        application.restarthint(self);
       end;
+     end
+     else begin
+      resetmouseflag;
      end;
     end
     else begin
+     resetmouseflag;
      if eventkind = ek_buttonpress then begin
       closepopupstack(nil);
       exit;
@@ -1207,14 +1227,7 @@ begin
     end;
    end;
    ek_clientmouseleave: begin
-    if (fmouseitem >= 0) and (fmouseitem <= high(cells)) then begin
-     with cells[fmouseitem],buttoninfo do begin
-      if state * [shs_clicked,shs_mouse] <> [] then begin
-       state:= state - [shs_clicked,shs_mouse];
-       invalidaterect(dimouter);      
-      end;
-     end;
-    end;
+    resetmouseflag;
     if (fnextpopup = nil) then begin
 //     if itembefore >= 0 then begin
 //      subpoint1(info.pos,clientpos);
