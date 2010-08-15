@@ -1185,13 +1185,13 @@ begin
       invalidaterect(dimouter);
       if bo1 then begin
        include(info.eventstate,es_processed);
-       int1:= activeitem;
+//       int1:= activeitem;
        selectmenu(false);
-       include(state,shs_mouse);
-       if (activeitem < 0) and (application.mousecapturewidget = nil) and 
-                 (int1 <= high(cells)) then begin
-        activeitem:= int1; //restore mouseactivating
-       end;
+//       include(state,shs_mouse);
+//       if (activeitem < 0) and (application.mousecapturewidget = nil) and 
+//                 (int1 <= high(cells)) then begin
+//        activeitem:= int1; //restore mouseactivating
+//       end;
        if (mlo_main in options) and (fclickeditem = activeitem) then begin
         fclickeditem:= -1;
         closepopupstack(nil);
@@ -1206,12 +1206,15 @@ begin
    ek_clientmouseleave: begin
     if (fnextpopup = nil) then begin
      setactiveitem(-1);
+     if itembefore >= 0 then begin
+      subpoint1(info.pos,clientpos);
+      updatemouseshapestate(cells[itembefore].buttoninfo,info,self,nil);
+     end;
     end
     else begin
      if activeitem >= 0 then begin
       subpoint1(info.pos,clientpos);
       updatemouseshapestate(cells[activeitem].buttoninfo,info,self,nil);
-//      include (cells[activeitem].buttoninfo.state,shs_mouse);
      end;
     end;
    end;
