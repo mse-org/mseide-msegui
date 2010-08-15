@@ -1691,7 +1691,7 @@ begin
  end;
 end;
 
-function tdockcontroller.getparentcontroller: tdockcontroller; overload;
+function tdockcontroller.getparentcontroller: tdockcontroller;
 var
  widget1: twidget;
  intf1: idocktarget;

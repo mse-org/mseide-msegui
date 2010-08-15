@@ -10765,8 +10765,8 @@ procedure twidget.setoptionswidget1(const avalue: optionswidget1ty);
 var
  delta: optionswidget1ty;
 begin
- delta:= optionswidget1ty({$ifdef FPC}longword{$else}byte{$endif}(avalue) xor
-                    {$ifdef FPC}longword{$else}byte{$endif}(foptionswidget1));
+ delta:= optionswidget1ty({$ifdef FPC}longword{$else}word{$endif}(avalue) xor
+                    {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1));
  if delta <> [] then begin
   foptionswidget1:= avalue;
   if delta * avalue * [ow1_autowidth,ow1_autoheight] <> [] then begin
