@@ -51,6 +51,7 @@ type
   escapement: real;
   font: tdialpropfont;
   caption: msestring;
+  captionunit: msestring;
 //  kind: dialdatakindty;
  end;
 
@@ -79,6 +80,7 @@ type
    procedure setindent(const avalue: integer);
    procedure setlength(const avalue: integer);
    procedure setcaption(const avalue: msestring);
+   procedure setcaptionunit(const avalue: msestring);
    procedure setcaptiondist(const avalue: integer);
    procedure setcaptionoffset(const avalue: integer);
    function getfont: tdialpropfont;
@@ -109,6 +111,7 @@ type
                      write setlength default 0;
                       //0 -> whole innerclientrect
    property caption: msestring read fli.caption write setcaption;
+   property captionunit: msestring read fli.captionunit write setcaptionunit;
    property captiondist: integer read fli.captiondist write setcaptiondist
                                        default 2;
    property captionoffset: integer read fli.captionoffset write setcaptionoffset
@@ -468,6 +471,12 @@ end;
 procedure tdialprop.setcaption(const avalue: msestring);
 begin
  fli.caption:= avalue;
+ changed;
+end;
+
+procedure tdialprop.setcaptionunit(const avalue: msestring);
+begin
+ fli.captionunit:= avalue;
  changed;
 end;
 
@@ -1571,7 +1580,7 @@ begin
         end;
        end;
       end;
-      if caption = '' then begin
+      if (caption = '') and (captionunit = '') then begin
        captions:= nil;
       end
       else begin
@@ -1614,7 +1623,13 @@ begin
          captions[int1].caption:= '';
         end
         else begin
-         captions[int1].caption:= getactcaption(rea1,caption);
+         if (captionunit <> '') and (int1 = high(captions) - 1) and 
+                                                        (int1 > 0) then begin
+          captions[int1].caption:= captionunit;
+         end
+         else begin
+          captions[int1].caption:= getactcaption(rea1,caption);
+         end;
         end;
         with captions[int1] do begin
          pos:= ticks[int1].a;

@@ -61,6 +61,7 @@ type
    ftemplates: menutemplatety;
    fmenucomp: tcustommenu;
    fclickeditem: integer;
+   fmouseitem: integer;
    procedure internalsetactiveitem(const avalue: integer;
            const aclicked: boolean; const force: boolean;
            const nochildreninactive: boolean); virtual;
@@ -818,6 +819,7 @@ constructor tpopupmenuwidget.create(instance: ppopupmenuwidget; const amenu: tme
          const aowner: tcomponent = nil; const menucomp: tcustommenu = nil);
 begin
  fclickeditem:= -1;
+ fmouseitem:= -1;
  finstancepo:= pobject(instance);
  fmenucomp:= menucomp;
  if finstancepo <> nil then begin
@@ -1141,6 +1143,7 @@ begin
                            false,pointinrect(pt2,sizerect));
      if activeitem >= 0 then begin
       include(cells[activeitem].buttoninfo.state,shs_mouse);
+      fmouseitem:= activeitem;
       if (itembefore <> activeitem) and 
                 tmenuitem1(menu.items[activeitem]).canshowhint then begin
        application.restarthint(self);
@@ -1195,7 +1198,7 @@ begin
        if (mlo_main in options) and (fclickeditem = activeitem) then begin
         fclickeditem:= -1;
         closepopupstack(nil);
-        include(state,shs_mouse);
+//        include(state,shs_mouse);
         exit;
        end;
        fclickeditem:= activeitem;
@@ -1204,19 +1207,31 @@ begin
     end;
    end;
    ek_clientmouseleave: begin
-    if (fnextpopup = nil) then begin
-     setactiveitem(-1);
-     if itembefore >= 0 then begin
-      subpoint1(info.pos,clientpos);
-      updatemouseshapestate(cells[itembefore].buttoninfo,info,self,nil);
-     end;
-    end
-    else begin
-     if activeitem >= 0 then begin
-      subpoint1(info.pos,clientpos);
-      updatemouseshapestate(cells[activeitem].buttoninfo,info,self,nil);
+    if (fmouseitem >= 0) and (fmouseitem <= high(cells)) then begin
+     with cells[fmouseitem],buttoninfo do begin
+      if state * [shs_clicked,shs_mouse] <> [] then begin
+       state:= state - [shs_clicked,shs_mouse];
+       invalidaterect(dimouter);      
+      end;
      end;
     end;
+    if (fnextpopup = nil) then begin
+//     if itembefore >= 0 then begin
+//      subpoint1(info.pos,clientpos);
+//      updatemouseshapestate(cells[itembefore].buttoninfo,info,self,nil);
+//     end;
+     setactiveitem(-1);
+//     if itembefore >= 0 then begin
+//      subpoint1(info.pos,clientpos);
+//      updatemouseshapestate(cells[itembefore].buttoninfo,info,self,nil);
+//     end;
+    end
+//    else begin
+//     if activeitem >= 0 then begin
+//      subpoint1(info.pos,clientpos);
+//      updatemouseshapestate(cells[activeitem].buttoninfo,info,self,nil);
+//     end;
+//    end;
    end;
   end;
  end;
@@ -1224,7 +1239,7 @@ begin
   inherited;
  end;
 end;
-
+var testvar: pointer;
 procedure tpopupmenuwidget.internalsetactiveitem(const avalue: integer;
           const aclicked: boolean; const force: boolean;
           const nochildreninactive: boolean);
@@ -1243,7 +1258,11 @@ begin
      fnextpopup.release;
     end;
     with cells[activeitem],buttoninfo do begin
-     state:= state - [shs_clicked,shs_mouse,shs_active,shs_focused];
+testvar:= @state;
+     state:= state - [shs_clicked,{shs_mouse,}shs_active,shs_focused];
+     if value1 <> -1 then begin
+      state:= state - [shs_mouse];
+     end;
      invalidaterect(dimouter);
     end;
    end;
