@@ -399,7 +399,7 @@ begin
     fonstatafterwrite(self);
    end;
   finally
-   awriter.free;
+   freeandnil(awriter);
    if bo1 then begin
     stream1.usewritebuffer:= false;
    end;

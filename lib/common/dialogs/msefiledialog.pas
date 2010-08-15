@@ -105,7 +105,7 @@ type
 const
  defaultfiledialogoptions = [fdo_savelastdir];
 type
- filedialogkindty = (fdk_none,fdk_open,fdk_save);
+ filedialogkindty = (fdk_none,fdk_open,fdk_save,fdk_new);
 
  tfiledialogcontroller = class;
 
@@ -128,6 +128,7 @@ type
    fhistory: msestringarty;
    fcaptionopen: msestring;
    fcaptionsave: msestring;
+   fcaptionnew: msestring;
    finclude: fileattributesty;
    fexclude: fileattributesty;
    fonbeforeexecute: filedialogbeforeexecuteeventty;
@@ -159,6 +160,7 @@ type
    procedure writestatvalue(const writer: tstatwriter);
    procedure writestatstate(const writer: tstatwriter);
    procedure writestatoptions(const writer: tstatwriter);
+   function actcaption(const dialogkind: filedialogkindty): msestring;
    function execute(dialogkind: filedialogkindty = fdk_none): modalresultty; overload;
                            //fdk_none -> use options fdo_save
    function execute(dialogkind: filedialogkindty; const acaption: msestring;
@@ -191,6 +193,7 @@ type
                           write sethistorymaxcount default defaulthistorymaxcount;
    property captionopen: msestring read fcaptionopen write fcaptionopen;
    property captionsave: msestring read fcaptionsave write fcaptionsave;
+   property captionnew: msestring read fcaptionnew write fcaptionnew;
    property group: integer read fgroup write fgroup default 0;
    property imagelist: timagelist read fimagelist write setimagelist;
    property ongetfilename: setstringeventty read fongetfilename write fongetfilename;
@@ -232,7 +235,6 @@ type
    function execute(const akind: filedialogkindty;
                    const aoptions: filedialogoptionsty): modalresultty;
                                                     reintroduce; overload;
-   function executenew: modalresultty;
    procedure componentevent(const event: tcomponentevent); override;
   published
    property statfile: tstatfile read fstatfile write setstatfile;
@@ -1423,7 +1425,7 @@ begin
   ara:= ffilterlist.asarraya;
   arb:= ffilterlist.asarrayb;
   if dialogkind <> fdk_none then begin
-   if dialogkind = fdk_save then begin
+   if dialogkind in [fdk_save,fdk_new] then begin
     system.include(aoptions,fdo_save);
    end
    else begin
@@ -1463,24 +1465,30 @@ begin
  result:= execute(dialogkind,acaption,foptions);
 end;
 
+function tfiledialogcontroller.actcaption(
+                            const dialogkind: filedialogkindty): msestring;
+begin
+ case dialogkind of
+  fdk_save: begin
+   result:= fcaptionsave;
+  end;
+  fdk_new: begin
+   result:= fcaptionnew;
+  end;
+  else begin
+   result:= fcaptionopen;
+  end;
+ end;
+end;
+
 function tfiledialogcontroller.execute(const dialogkind: filedialogkindty;
                          const aoptions: filedialogoptionsty): modalresultty;
-var
- str1: msestring;
 begin
- if dialogkind = fdk_save then begin
-  str1:= fcaptionsave;
- end
- else begin
-  str1:= fcaptionopen;
- end;
- result:= execute(dialogkind,str1,aoptions);
+ result:= execute(dialogkind,actcaption(dialogkind),aoptions);
 end;
 
 function tfiledialogcontroller.execute(
                 dialogkind: filedialogkindty = fdk_none): modalresultty;
-var
- str1: msestring;
 begin
  if dialogkind = fdk_none then begin
   if fdo_save in foptions then begin
@@ -1490,19 +1498,11 @@ begin
    dialogkind:= fdk_open;
   end;
  end; 
- if dialogkind = fdk_save then begin
-  str1:= fcaptionsave;
- end
- else begin
-  str1:= fcaptionopen;
- end;
- result:= execute(dialogkind,str1);
+ result:= execute(dialogkind,actcaption(dialogkind));
 end;
 
 function tfiledialogcontroller.execute(var avalue: filenamety;
                    dialogkind: filedialogkindty = fdk_none): boolean;
-var
- str1: msestring;
 begin
  if dialogkind = fdk_none then begin
   if fdo_save in foptions then begin
@@ -1512,13 +1512,7 @@ begin
    dialogkind:= fdk_open;
   end;
  end; 
- if dialogkind = fdk_save then begin
-  str1:= fcaptionsave;
- end
- else begin
-  str1:= fcaptionopen;
- end;
- result:= execute(avalue,dialogkind,str1);
+ result:= execute(avalue,dialogkind,actcaption(dialogkind));
 end;
 
 function tfiledialogcontroller.execute(var avalue: filenamety;
@@ -1695,11 +1689,6 @@ function tfiledialog.execute(const akind: filedialogkindty;
                    const aoptions: filedialogoptionsty): modalresultty;
 begin
  result:= fcontroller.execute(akind,aoptions);
-end;
-
-function tfiledialog.executenew: modalresultty;
-begin
- result:= fcontroller.execute(fdk_open,fcontroller.options - [fdo_checkexist]);
 end;
 
 procedure tfiledialog.setcontroller(const value: tfiledialogcontroller);
