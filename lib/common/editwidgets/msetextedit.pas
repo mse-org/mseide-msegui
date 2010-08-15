@@ -98,6 +98,10 @@ type
    function gettabulators: ttabulators;
    procedure settabulators(const Value: ttabulators);
    procedure setreadonly(const avalue: boolean);
+   function getrow: integer;
+   procedure setrow(const avalue: integer);
+   function getcol: integer;
+   procedure setcol(const avalue: integer);
   protected
    fgridintf: iwidgetgrid;
    fupdating: integer;
@@ -250,6 +254,8 @@ type
                                      const screenorg: boolean = false): rectty;
                      //y:= top of character cell cx = 0 cy = linespacing
    property editpos: gridcoordty read geteditpos write seteditpos1;
+   property row: integer read getrow write setrow;
+   property col: integer read getcol write setcol;
    property modified: boolean read fmodified write setmodified;
 
    property encoding: charencodingty read fencoding write fencoding;
@@ -1093,7 +1099,7 @@ var
  end;
 
 var
- col: twidgetcol;
+ col1: twidgetcol;
  grid: twidgetgrid;
  cell: gridcoordty;
 
@@ -1135,9 +1141,9 @@ begin
   seteditpos(stop,true);
  end
  else begin
-  col:= fgridintf.getcol;
-  grid:= twidgetgrid(col.grid);
-  cell.col:= col.colindex;
+  col1:= fgridintf.getcol;
+  grid:= twidgetgrid(col1.grid);
+  cell.col:= col1.colindex;
 
   normalizetextrect(start,stop,new1,new2);
   int1:= grid.row;
@@ -1581,11 +1587,6 @@ begin
  inherited;
 end;
 
-function tcustomtextedit.geteditpos: gridcoordty;
-begin
- result:= makegridcoord(feditor.curindex,fgridintf.getrow);
-end;
-
 procedure tcustomtextedit.internalclearselection;
 begin
  setselection(editpos,editpos);
@@ -1629,6 +1630,31 @@ end;
 procedure tcustomtextedit.seteditpos1(const Value: gridcoordty);
 begin
  seteditpos(value,false);
+end;
+
+function tcustomtextedit.geteditpos: gridcoordty;
+begin
+ result:= makegridcoord(feditor.curindex,fgridintf.getrow);
+end;
+
+function tcustomtextedit.getrow: integer;
+begin
+ result:= fgridintf.getrow;
+end;
+
+procedure tcustomtextedit.setrow(const avalue: integer);
+begin
+ editpos:= makegridcoord(col,avalue);
+end;
+
+function tcustomtextedit.getcol: integer;
+begin
+ result:= feditor.curindex;
+end;
+
+procedure tcustomtextedit.setcol(const avalue: integer);
+begin
+ editpos:= makegridcoord(avalue,row);
 end;
 
 procedure tcustomtextedit.normalizeselectedrows(var start,stop: integer);

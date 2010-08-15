@@ -41,14 +41,16 @@ type
  mousebuttonty = (mb_none,mb_left,mb_right,mb_middle);
  mousewheelty = (mw_none,mw_up,mw_down);
 
- shiftstatety = (ss_shift,ss_alt,ss_ctrl,ss_left,ss_right,ss_middle,ss_double,
+ shiftstatety = (ss_shift,ss_alt,ss_ctrl,ss_left,ss_right,ss_middle,
+                 ss_double,ss_triple,
                  ss_repeat,    //repeat keydown
                  ss_second);   //right modifier keys, numpad
  shiftstatesty = set of shiftstatety;
 
 const
  keyshiftstatesmask: shiftstatesty = [ss_shift,ss_alt,ss_ctrl];
- buttonshiftstatesmask: shiftstatesty = [ss_left,ss_right,ss_middle,ss_double];
+ buttonshiftstatesmask: shiftstatesty = 
+                         [ss_left,ss_right,ss_middle,ss_double,ss_triple];
  shiftstatesmask = [ss_shift,ss_alt,ss_ctrl,ss_left,ss_right,ss_middle];
 
 type

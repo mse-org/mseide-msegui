@@ -1046,10 +1046,16 @@ begin
      end;
     end
     else begin
-     if edit.isdblclicked(info.mouseeventinfopo^) and 
-                (info.mouseeventinfopo^.shiftstate = 
-                                [ss_double,ss_shift,ss_left]) then begin
-      edit.selectword(info.pos,pascaldelims+'.[]');
+     if edit.isdblclicked(info.mouseeventinfopo^) and
+       (info.mouseeventinfopo^.shiftstate*[ss_double,ss_shift,ss_left] = 
+                             [ss_double,ss_shift,ss_left]) then begin
+      if ss_triple in info.mouseeventinfopo^.shiftstate then begin
+       edit.setselection(makegridcoord(0,edit.row),
+                            makegridcoord(bigint,edit.row),true)
+      end
+      else begin
+       edit.selectword(info.pos,pascaldelims+'.[]');
+      end;
       include(info.mouseeventinfopo^.eventstate,es_processed);
      end;
     end;

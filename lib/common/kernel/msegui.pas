@@ -2646,6 +2646,7 @@ type
    flastbuttonpresstimestamp: longword;
    flastbuttonrelease: mousebuttonty;
    flastbuttonreleasetimestamp: longword;
+   fdoublemousepress,fdoublemouserelease: boolean;
    fwindowstack: windowstackinfoarty;
    ftimertick: boolean;
 
@@ -13902,6 +13903,22 @@ begin
       end;
       if (int1 >= 0) and (int1 < fdblclicktime) then begin
        include(info.mouse.shiftstate,ss_double);
+       if (kind = ek_buttonpress) then begin
+        if fdoublemousepress then begin
+         include(info.mouse.shiftstate,ss_triple);
+        end;
+        fdoublemousepress:= true;
+       end
+       else begin
+        if fdoublemouserelease then begin
+         include(info.mouse.shiftstate,ss_triple);
+        end;
+        fdoublemouserelease:= true;
+       end;
+      end
+      else begin
+       fdoublemousepress:= false;
+       fdoublemouserelease:= false;
       end;
       flastbutton:= fbutton;
      end;

@@ -585,7 +585,7 @@ procedure tsyntaxedit.dokeydown(var info: keyeventinfoty);
 
  function isstopchar(const avalue: msechar): boolean;
  begin
-  result:= (avalue < #$100) and (char(avalue) in stopchars)
+  result:= (word(avalue) < $100) and (char(byte(avalue)) in stopchars)
  end;
  
 var
@@ -597,6 +597,77 @@ begin
   shiftstate1:= shiftstate * shiftstatesmask;
   if (shiftstate1 = [ss_ctrl]) or (shiftstate1 = [ss_ctrl,ss_shift]) then begin
    case key of
+    key_left: begin
+     repeat //skip stopchars
+      int2:= 0;
+      for int1:= feditor.curindex downto 1 do begin
+       if not isstopchar(feditor.text[int1]) then begin
+        int2:= int1;
+        break;
+       end;
+      end;
+      if int2 = 0 then begin
+       if editpos.row > 0 then begin
+        co1.row:= editpos.row - 1;
+        co1.col:= bigint;
+        seteditpos(co1,ss_shift in shiftstate1);
+       end
+       else begin
+        break;
+       end;
+      end;
+     until (int2 > 0);
+     co1.row:= editpos.row;
+     co1.col:= int2;
+     seteditpos(co1,ss_shift in shiftstate1);
+     int2:= 0; //skip normal chars
+     for int1:= feditor.curindex downto 1 do begin
+      if isstopchar(feditor.text[int1]) then begin
+       int2:= int1;
+       break;
+      end;
+     end;
+     co1.row:= editpos.row;
+     co1.col:= int2;
+     seteditpos(co1,ss_shift in shiftstate1);
+     include(eventstate,es_processed);
+    end;
+    key_right: begin
+     repeat //skip stopchars
+      int2:= bigint;
+      for int1:= feditor.curindex + 1 to length(feditor.text) do begin
+       if not isstopchar(feditor.text[int1]) then begin
+        int2:= int1;
+        break;
+       end;
+      end;
+      if int2 = bigint then begin
+       if editpos.row < linecount - 1 then begin
+        co1.row:= editpos.row + 1;
+        co1.col:= 0;
+        seteditpos(co1,ss_shift in shiftstate1);
+       end
+       else begin
+        break;
+       end;
+      end;
+     until (int2 < bigint);
+     co1.row:= editpos.row;
+     co1.col:= int2;
+     seteditpos(co1,ss_shift in shiftstate1);
+     int2:= bigint; //skip normal chars
+     for int1:= feditor.curindex + 1 to length(feditor.text) do begin
+      if isstopchar(feditor.text[int1]) then begin
+       int2:= int1;
+       break;
+      end;
+     end;
+     co1.row:= editpos.row;
+     co1.col:= int2-1;
+     seteditpos(co1,ss_shift in shiftstate1);
+     include(eventstate,es_processed);
+    end;
+(*
     key_left: begin
      repeat
       int2:= 0;
@@ -691,6 +762,7 @@ begin
      end;
      include(eventstate,es_processed);
     end;
+*)
    end;
   end;
   if not (es_processed in eventstate) then begin
