@@ -44,6 +44,7 @@ type
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
+   procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure openlocal;
    procedure internalopen; override;
    procedure internalinsert; override;
@@ -287,6 +288,11 @@ end;
 function tmsememdataset.islastrecord: boolean;
 begin
  result:= eof or (recno = recordcount);
+end;
+
+procedure tmsememdataset.dataevent(event: tdataevent; info: ptrint);
+begin
+ fcontroller.dataevent(event,info);
 end;
 
 end.

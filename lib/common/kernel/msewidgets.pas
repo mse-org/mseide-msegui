@@ -1094,7 +1094,8 @@ type
                    bo_focusonshortcut, //for tcustombutton
                    bo_shortcutcaption,bo_altshortcut,
                    {bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect,}
-                   bo_nodefaultframeactive,bo_nocandefocus,
+                   bo_nodefaultframeactive,
+                   bo_nocandefocus,bo_candefocuswindow, //check own window only
                    bo_radioitemcol,bo_resetcheckedonrowexit
                                  //used in tdatabutton
                    );

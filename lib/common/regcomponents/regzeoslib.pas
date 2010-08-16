@@ -47,7 +47,7 @@ begin
  registercomponents('Zeos',[TZConnection, tmsezreadonlyquery, tmsezquery,
          tmseztable,
          TZUpdateSQL, tmsezstoredproc, TZSQLMetadata, TZSQLProcessor,
-         TZSQLMonitor, TZSequence]);
+         TZSQLMonitor, TZSequence, tmsezgraphicfield]);
  registercomponenttabhints(['Zeos'],['ZeosLib Database Components']);
  registerpropertyeditor(typeinfo(string),TZConnection,'Protocol',
                       tzprotocolpropertyeditor);

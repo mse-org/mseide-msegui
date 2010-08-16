@@ -9,6 +9,12 @@ object filedialogfo: Tfiledialogfo
   bounds_cymin = 150
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.onchildscaled = foonchildscaled
+  container.bounds = (
+    0
+    0
+    588
+    307
+  )
   options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
   oneventloopstart = formoncreate
   onkeydown = listviewonkeydown
@@ -73,6 +79,7 @@ object filedialogfo: Tfiledialogfo
       state = [as_localcaption]
       caption = '&Cancel'
       modalresult = mr_cancel
+      options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_candefocuswindow]
       reffontheight = 14
     end
     object ok: tbutton
@@ -88,6 +95,7 @@ object filedialogfo: Tfiledialogfo
       anchors = [an_left, an_bottom]
       state = [as_default, as_localdefault, as_localcaption, as_localonexecute]
       caption = '&Ok'
+      options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_candefocuswindow]
       onexecute = okonexecute
       reffontheight = 14
     end
@@ -129,6 +137,7 @@ object filedialogfo: Tfiledialogfo
     anchors = [an_top, an_right]
     state = [as_localcaption, as_localonexecute]
     caption = '&New dir'
+    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_candefocuswindow]
     onexecute = createdironexecute
     reffontheight = 14
   end
@@ -144,6 +153,7 @@ object filedialogfo: Tfiledialogfo
     anchors = [an_top, an_right]
     state = [as_localcaption, as_localonexecute]
     caption = '&Up'
+    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_candefocuswindow]
     onexecute = upaction
     reffontheight = 14
   end
@@ -166,7 +176,7 @@ object filedialogfo: Tfiledialogfo
     anchors = [an_left, an_right, an_bottom]
     oncopytoclipboard = copytolip
     onpastefromclipboard = pastefromclip
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
     onsetvalue = filenamesetvalue
     dropdown.options = [deo_keydropdown]
     dropdown.dropdownrowcount = 10

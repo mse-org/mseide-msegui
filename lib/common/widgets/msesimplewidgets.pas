@@ -680,8 +680,12 @@ end;
 
 procedure tcustombutton.doexecute;
 begin
- doactionexecute(self,factioninfo,false,(fmodalresult <> mr_none) or 
-                     (bo_nocandefocus in options));
+ if (fmodalresult <> mr_none) or 
+      (options * [bo_nocandefocus,bo_candefocuswindow] <> [bo_candefocuswindow]) or
+      rootwidget.canparentclose then begin
+  doactionexecute(self,factioninfo,false,(fmodalresult <> mr_none) or 
+                     (options * [bo_nocandefocus,bo_candefocuswindow] <> []));
+ end;
  if fmodalresult <> mr_none then begin
   window.modalresult:= fmodalresult;
  end;

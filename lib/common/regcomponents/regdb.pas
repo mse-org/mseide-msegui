@@ -260,7 +260,7 @@ begin
       tmsemysql40connection,tmsemysql41connection,tmsemysql50connection,
       tmsemysqlconnection
       {$ifdef mse_with_sqlite}
-       ,tmsesqlite3dataset
+       ,tmsesqlite3dataset 
       {$endif}
       ]);
  registercomponenttabhints(['DB'],['Database Components']);

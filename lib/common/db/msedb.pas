@@ -869,7 +869,7 @@ type
                         write fproviderflags1 default [];
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
-   property cachekb: integer read getcachekb write setcachekb;
+   property cachekb: integer read getcachekb write setcachekb default 0;
                 //cachesize in kilo bytes, 0 -> no cache
    property FieldKind default fkData;
    property HasConstraints default false;

@@ -78,6 +78,7 @@ type
    procedure applyrecupdate(updatekind: tupdatekind); override;
    function  getcanmodify: boolean; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
+   procedure dataevent(event: tdataevent; info: ptrint); override;
    function islocal: boolean; override;
   //icursorclient
    function stringmemo: boolean; override;
@@ -93,7 +94,6 @@ type
    procedure inheritedinternalclose;
    procedure doidleapplyupdates;
 
-   procedure dataevent(event: tdataevent; info: ptrint); override;
 //   function wantblobfetch: boolean; override;
    function getdsoptions: datasetoptionsty; override;
 //   function cantransactionrefresh: boolean; override;

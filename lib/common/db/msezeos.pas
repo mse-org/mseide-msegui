@@ -2,8 +2,13 @@ unit msezeos;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,db,ZDataset,msedb,ZStoredProcedure,msestrings;
+ classes,db,ZDataset,msedb,ZStoredProcedure,msestrings,msedbgraphics;
 type
+ tmsezgraphicfield = class(tmsegraphicfield)
+  public
+   constructor create(aowner: tcomponent); override;
+ end;
+ 
  tmsezreadonlyquery = class(tzreadonlyquery,imselocate,idscontroller,
                                igetdscontroller,isqlpropertyeditor)
    private
@@ -37,6 +42,7 @@ type
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
+   procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure openlocal;
    procedure internalopen; override;
    procedure internalinsert; override;
@@ -96,6 +102,7 @@ type
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
+   procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure openlocal;
    procedure internalopen; override;
    procedure internalinsert; override;
@@ -153,6 +160,7 @@ type
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
+   procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure openlocal;
    procedure internalopen; override;
    procedure internalinsert; override;
@@ -210,6 +218,7 @@ type
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
+   procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure openlocal;
    procedure internalopen; override;
    procedure internalinsert; override;
@@ -458,6 +467,11 @@ begin
  result:= eof or (recno = recordcount);
 end;
 
+procedure tmsezreadonlyquery.dataevent(event: tdataevent; info: ptrint);
+begin
+ fcontroller.dataevent(event,info);
+end;
+
 { tmsezquery }
 
 constructor tmsezquery.create(aowner: tcomponent);
@@ -678,6 +692,11 @@ begin
  result:= eof or (recno = recordcount);
 end;
 
+procedure tmsezquery.dataevent(event: tdataevent; info: ptrint);
+begin
+ fcontroller.dataevent(event,info);
+end;
+
 { tmseztable }
 
 constructor tmseztable.create(aowner: tcomponent);
@@ -893,6 +912,11 @@ begin
  result:= eof or (recno = recordcount);
 end;
 
+procedure tmseztable.dataevent(event: tdataevent; info: ptrint);
+begin
+ fcontroller.dataevent(event,info);
+end;
+
 { tmsezstoredproc }
 
 constructor tmsezstoredproc.create(aowner: tcomponent);
@@ -1106,6 +1130,19 @@ end;
 function tmsezstoredproc.islastrecord: boolean;
 begin
  result:= eof or (recno = recordcount);
+end;
+
+procedure tmsezstoredproc.dataevent(event: tdataevent; info: ptrint);
+begin
+ fcontroller.dataevent(event,info);
+end;
+
+{ tmsezgraphicfield }
+
+constructor tmsezgraphicfield.create(aowner: tcomponent);
+begin
+ inherited;
+ setdatatype(ftblob);
 end;
 
 end.

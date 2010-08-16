@@ -50,11 +50,13 @@ type
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
+   procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure openlocal;
    procedure internalopen; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
    procedure internalclose; override;
+   function  getcanmodify: boolean; override; 
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function islastrecord: boolean;
 
@@ -312,6 +314,16 @@ end;
 function tmsesqlite3dataset.islastrecord: boolean;
 begin
  result:= eof or (recno = recordcount);
+end;
+
+procedure tmsesqlite3dataset.dataevent(event: tdataevent; info: ptrint);
+begin
+ fcontroller.dataevent(event,info);
+end;
+
+function tmsesqlite3dataset.getcanmodify: boolean;
+begin
+ result:= fcontroller.getcanmodify and inherited getcanmodify;
 end;
 
 end.

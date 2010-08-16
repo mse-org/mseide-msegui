@@ -2840,10 +2840,12 @@ end;
 }
 procedure tcustomdatabutton.doexecute;
 begin
- doactionexecute(self,factioninfo);
-// if canevent(tmethod(fonexecute)) then begin
-//  fonexecute(self);
-// end;
+ if (options * [bo_nocandefocus,bo_candefocuswindow] <> [bo_candefocuswindow]) or
+      rootwidget.canparentclose then begin
+  doactionexecute(self,factioninfo,false,
+             (options * [bo_nocandefocus,bo_candefocuswindow] <> []));
+ end;
+// doactionexecute(self,factioninfo);
 end;
 
 procedure tcustomdatabutton.mouseevent(var info: mouseeventinfoty);
