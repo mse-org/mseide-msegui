@@ -26,7 +26,6 @@ type
    fonchange: notifyeventty;
    fformat: string;
    fgridsetting: integer;
-   procedure setvalue(const avalue: string);
    procedure setformat(const avalue: string);
    procedure checkgrid;
    function getgridvalue(index: integer): string;
@@ -39,6 +38,7 @@ type
    procedure setisdb;
    function getgridintf: iwidgetgrid;
    procedure defineproperties(filer: tfiler); override;
+   procedure setvalue(const avalue: string); virtual;
 
   //igridwidget
    procedure initgridwidget; virtual;
@@ -79,6 +79,8 @@ type
    function seteditfocus: boolean;
    procedure changed; override;
    function actualcolor: colorty; override;
+   procedure loadfromstream(const astream: tstream);
+   procedure loadfromfile(const afilename: filenamety);
    property value: string write setvalue stored false;
    property gridvalue[index: integer]: string read getgridvalue
                              write setgridvalue;
@@ -420,6 +422,25 @@ begin
  else begin
   result:= inherited actualcolor;
  end;
+end;
+
+procedure tcustomdataimage.loadfromstream(const astream: tstream);
+var
+ str1: string;
+begin
+ value:= readstreamdatastring(astream);
+end;
+
+procedure tcustomdataimage.loadfromfile(const afilename: filenamety);
+var
+ stream1: tmsefilestream;
+begin
+ stream1:= tmsefilestream.create(afilename);
+ try
+  loadfromstream(stream1);
+ finally
+  stream1.free;
+ end; 
 end;
 
 end.

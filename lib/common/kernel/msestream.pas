@@ -302,7 +302,9 @@ function decoderecord(const value: msestring;
                 // s -> ansistring
                 // S -> msestring
                 // r -> real
-               
+
+function readstreamdatastring(const astream: tstream): string; 
+               //reads from current pos to eof               
 function readfiledatastring(const afilename: filenamety): string;
 procedure writefiledatastring(const afilename: filenamety; const adata: string);
 
@@ -402,6 +404,32 @@ begin
   stream1.writedatastring(adata);
  finally
   stream1.free;
+ end;
+end;
+
+function readstreamdatastring(const astream: tstream): string; 
+               //reads from current pos to eof               
+var
+ size1: ptrint;
+ pos1: ptrint;
+ lint1,lint2: ptrint;
+begin
+ size1:= astream.size-astream.position;
+ if size1 < 256 then begin
+  size1:= 256;
+ end;
+ setlength(result,size1+1);
+ pos1:= 0;
+ while true do begin 
+  lint1:= size1-pos1;
+  lint2:= astream.read((pchar(pointer(result))+pos1)^,lint1+1);
+  pos1:= pos1+lint2;
+  if lint2 <= lint1 then begin
+   setlength(result,pos1);
+   break;
+  end; 
+  size1:= size1 * 2;
+  setlength(result,size1+1);
  end;
 end;
 

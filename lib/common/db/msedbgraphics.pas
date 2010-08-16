@@ -84,6 +84,7 @@ type
  tdbdataimage = class(tcustomdataimage,idbgraphicfieldlink,ireccontrol)
   private
    fdatalink: tgraphicdatalink;
+   fvaluebuffer: string;
    procedure griddatasourcechanged; override;
    procedure loadcellbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap); override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
@@ -104,6 +105,7 @@ type
    procedure setdatalink(const avalue: tgraphicdatalink);
   protected   
    procedure defineproperties(filer: tfiler); override;
+   procedure setvalue(const avalue: string); override;
    procedure gridtovalue(row: integer); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -184,7 +186,12 @@ end;
 
 procedure tdbdataimage.valuetofield;
 begin
- //dumy
+ if fvaluebuffer = '' then begin
+  fdatalink.clear;
+ end
+ else begin
+  fdatalink.asstring:= fvaluebuffer;
+ end;
 end;
 
 procedure tdbdataimage.updatereadonlystate;
@@ -248,6 +255,20 @@ end;
 procedure tdbdataimage.gridtovalue(row: integer);
 begin
  //dummy
+end;
+
+procedure tdbdataimage.setvalue(const avalue: string);
+var
+ bufferbefore: string;
+begin
+ bufferbefore:= fvaluebuffer;
+ fvaluebuffer:= avalue;
+ try
+  fdatalink.modified;
+  fdatalink.dataentered;
+ finally
+  fvaluebuffer:= bufferbefore;
+ end; 
 end;
 
 { tmsegraphicfield }

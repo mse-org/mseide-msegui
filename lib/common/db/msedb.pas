@@ -1037,6 +1037,7 @@ type
   public
    function assql: string;
    function fieldactive: boolean;
+   procedure clear;
    property field: tfield read ffield;
    property fieldname: string read ffieldname write setfieldname;
    property state: fielddatalinkstatesty read fstate;
@@ -5225,6 +5226,12 @@ begin
  if ffield = nil then begin
   raise exception.create('Field is nil.');
  end;
+end;
+
+procedure tfielddatalink.clear;
+begin
+ checkfield;
+ field.clear;
 end;
 
 function tfielddatalink.GetAsBoolean: Boolean;
