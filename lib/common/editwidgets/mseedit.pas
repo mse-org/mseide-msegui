@@ -1524,7 +1524,7 @@ procedure tcustomedit.updatepopupmenu(var amenu: tpopupmenu;
                                         var mouseinfo: mouseeventinfoty);
 begin
  if oe_autopopupmenu in foptionsedit then begin
-  feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,hasselection,cangridcopy);
+  feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,hasselection{,cangridcopy});
  end;
  inherited;
 end;

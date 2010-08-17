@@ -1388,6 +1388,9 @@ type
 
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
+   
+   function cancopy: boolean;
+   function canpaste: boolean;
 
   public
    constructor create(aowner: tcustomgrid; aclasstype: gridpropclassty);
@@ -1806,6 +1809,8 @@ type
    procedure dodeleterow(const sender: tobject); virtual;
    procedure dodeleteselectedrows(const sender: tobject); virtual;
    procedure dodeleterows(const sender: tobject);
+   procedure docopycells(const sender: tobject);
+   procedure dopastecells(const sender: tobject);
 
    procedure initeventinfo(const cell: gridcoordty; eventkind: celleventkindty;
                  out info: celleventinfoty);
@@ -7609,6 +7614,36 @@ begin
  end;
 end;
 
+function tdatacols.cancopy: boolean;
+var
+ int1: integer;
+begin
+ result:= false;
+ for int1:= 0 to count-1 do begin
+  with tdatacol(fitems[int1]) do begin
+   if co_cancopy in foptions then begin
+    result:= true;
+    break;
+   end;
+  end;
+ end;
+end;
+
+function tdatacols.canpaste: boolean;
+var
+ int1: integer;
+begin
+ result:= false;
+ for int1:= 0 to count-1 do begin
+  with tdatacol(fitems[int1]) do begin
+   if co_canpaste in foptions then begin
+    result:= true;
+    break;
+   end;
+  end;
+ end;
+end;
+
 function tdatacols.rowempty(const arow: integer): boolean;
 var
  int1: integer;
@@ -9038,14 +9073,36 @@ begin
   else begin
    sepchar:= tcustommenu.getshortcutseparator(amenu);
   end;
-  bo1:= og_rowinserting in foptionsgrid;
-  if bo1 then begin
+  bo1:= false;
+  if fdatacols.cancopy then begin
+   if fdatacols.hasselection then begin
+    state1:= [];
+   end
+   else begin
+    state1:= [as_disabled];
+   end;
+   tpopupmenu.additems(amenu,self,mouseinfo,[
+         stockobjects.captions[sc_copy_cells]+sepchar+
+       '('+encodeshortcutname(sysshortcuts[sho_copycells])+')'],
+                  [],[state1],[{$ifdef FPC}@{$endif}docopycells],not bo1);
+   bo1:= true;
+  end;
+  if fdatacols.canpaste then begin
+   tpopupmenu.additems(amenu,self,mouseinfo,[
+        stockobjects.captions[sc_paste_cells]+sepchar+
+      '('+encodeshortcutname(sysshortcuts[sho_pastecells])+')'],
+                 [],[],[{$ifdef FPC}@{$endif}dopastecells],not bo1);
+   bo1:= true;
+  end;
+  if og_rowinserting in foptionsgrid then begin
    tpopupmenu.additems(amenu,self,mouseinfo,[
               stockobjects.captions[sc_insert_row]+sepchar+
          '('+encodeshortcutname(sysshortcuts[sho_rowinsert])+')',
               stockobjects.captions[sc_append_row]+sepchar+
        '('+encodeshortcutname(sysshortcuts[sho_rowappend])+')'],[],[],
-        [{$ifdef FPC}@{$endif}doinsertrow,{$ifdef FPC}@{$endif}doappendrow]);
+        [{$ifdef FPC}@{$endif}doinsertrow,{$ifdef FPC}@{$endif}doappendrow],
+                                                                     not bo1);
+   bo1:= true;
   end;
   if og_rowdeleting in foptionsgrid then begin
    if ffocusedcell.row >= 0 then begin
@@ -9058,6 +9115,7 @@ begin
          stockobjects.captions[sc_delete_row]+sepchar+
        '('+encodeshortcutname(sysshortcuts[sho_rowdelete])+')'],
                   [],[state1],[{$ifdef FPC}@{$endif}dodeleterows],not bo1);
+   bo1:= true;
   end;
  end;
  inherited;
@@ -11554,13 +11612,14 @@ begin
    end;
   end;
   if not (es_processed in info.eventstate) then begin
-   if issysshortcut(sho_copy,info) then begin
-    if copyselection then begin
-     include(info.eventstate,es_processed);
-    end;
+   if {issysshortcut(sho_copy,info) or} 
+        issysshortcut(sho_copycells,info) and fdatacols.cancopy and
+                                                    copyselection then begin
+    include(info.eventstate,es_processed);
    end
    else begin
-    if issysshortcut(sho_paste,info) and pasteselection then begin
+    if issysshortcut(sho_pastecells,info) and fdatacols.canpaste and
+                                                    pasteselection then begin
      include(info.eventstate,es_processed);
     end;
    end;    
@@ -13718,6 +13777,16 @@ begin
  end;
 end;
 
+procedure tcustomgrid.docopycells(const sender: tobject);
+begin
+ copyselection;
+end;
+
+procedure tcustomgrid.dopastecells(const sender: tobject);
+begin
+ pasteselection;
+end;
+
 function tcustomgrid.endanchor: gridcoordty;
 begin
  result:= fendanchor;
@@ -14007,7 +14076,8 @@ procedure tcustomstringgrid.updatepopupmenu(var amenu: tpopupmenu;
                          var mouseinfo: mouseeventinfoty);
 begin
  if isdatacell(ffocusedcell) then begin
-  feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,false,fdatacols.hasselection);
+  feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,false{,
+                                            fdatacols.hasselection});
  end;
  inherited;
 end;
@@ -14154,7 +14224,7 @@ var
 begin
  result:= false;
  ar1:= nil; //compiler waring
- if feditor.sellength = 0 then begin
+// if feditor.sellength = 0 then begin
   ar1:= datacols.selectedcells;
   if ar1 <> nil then begin
    wstr1:= '';
@@ -14174,7 +14244,7 @@ begin
    msewidgets.copytoclipboard(wstr1);
    result:= true;
   end;
- end;
+// end;
 end;
 
 function tcustomstringgrid.pasteselection: boolean;
@@ -14182,19 +14252,21 @@ var
  wstr1: msestring;
  int1,int2,int3,int5: integer;
  ar4,ar5: msestringarty;
- bo1,bo2: boolean;
+ {bo1,}bo2: boolean;
 begin
  result:= false;
- bo1:= false;
+// bo1:= false;
  ar4:= nil; //compiler warning
  ar5:= nil; //compiler warning
+{ 
  for int1:= 0 to datacols.count - 1 do begin
   if co_canpaste in datacols[int1].options then begin
    bo1:= true;
    break;
   end;
  end;
- if bo1 and pastefromclipboard(wstr1) then begin
+ }
+ if fdatacols.canpaste{bo1} and pastefromclipboard(wstr1) then begin
   ar4:= breaklines(wstr1);
   if high(ar4) > 0 then begin
    if ar4[high(ar4)] = '' then begin
@@ -14284,6 +14356,7 @@ begin
      addpoint1(info.caretrect.pos,
           showcaretrect(info.caretrect,frame1));
     end;
+    {
     ea_copyselection: begin
      if copyselection then begin
       info.action:= ea_none;
@@ -14294,6 +14367,7 @@ begin
       info.action:= ea_none;
      end;
     end;
+    }
    end;
   end;
  end;

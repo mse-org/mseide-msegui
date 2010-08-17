@@ -149,7 +149,7 @@ type
    procedure mouseevent(var minfo: mouseeventinfoty);
    procedure updatepopupmenu(var amenu: tpopupmenu; const popupmenu: tpopupmenu;
                      var mouseinfo: mouseeventinfoty; 
-                     const hasselection, cangridcopy: boolean);
+                     const hasselection{, cangridcopy}: boolean);
    procedure setfirstclick;
    procedure doactivate;
    procedure dodeactivate;
@@ -372,7 +372,7 @@ end;
 
 procedure tinplaceedit.updatepopupmenu(var amenu: tpopupmenu; 
                 const popupmenu: tpopupmenu; var mouseinfo: mouseeventinfoty;
-                const hasselection, cangridcopy: boolean);
+                const hasselection{, cangridcopy}: boolean);
 var
  states: array[0..3] of actionstatesty;
  sepchar: msechar;
@@ -385,7 +385,7 @@ begin
   states[0]:= [as_disabled];
  end;
  bo1:= cancopy or hasselection;
- if bo1 or cangridcopy then begin
+ if bo1 {or cangridcopy} then begin
   states[1]:= []; //copy
   if bo1 and canedit then begin
    states[2]:= [];

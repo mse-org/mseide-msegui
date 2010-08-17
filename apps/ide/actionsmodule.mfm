@@ -1506,7 +1506,7 @@ object actionsmo: tactionsmo
         dispname = 'Complete Class'
         sc = (
           1
-          24643
+          24641
         )
       end    
       item

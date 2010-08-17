@@ -121,7 +121,9 @@ const
   'Querformat',               //sc_landscape print orientation
   'Zeile l'#246'schen?',      //sc_Delete_row_question
   'gew'#228'hlte Zeilen',      //sc_selected_rows
-  'Nur Einzeleintrag erlaubt'  //sc_Single_item_only 
+  'Nur Einzeleintrag erlaubt', //sc_Single_item_only 
+  'Zellen kopieren',           //sc_Copy_Cells
+  'Zellen einfügen'            //sc_Paste_Cells
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;

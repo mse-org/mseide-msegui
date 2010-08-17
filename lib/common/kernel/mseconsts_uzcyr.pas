@@ -129,8 +129,10 @@ const
   'Landscape',          //sc_landscape print orientation
   'Delete row?',        //sc_Delete_row_question
   'selected rows?',     //sc_selected_rows
-  'Single item only'    //sc_Single_item_only 
-  );
+  'Single item only',    //sc_Single_item_only 
+  'Copy Cells',          //sc_Copy_Cells
+  'Paste Cells'          //sc_Paste_Cells
+);
     
 function delete_n_selected_rows(const params: array of const): msestring;
 begin

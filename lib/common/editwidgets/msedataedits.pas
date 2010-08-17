@@ -2458,6 +2458,7 @@ begin
     fgridintf.showcaretrect(info.caretrect,fframe);
    end;
   end;
+  {
   ea_copyselection: begin
    if (fgridintf <> nil) and (feditor.sellength = 0) then begin
     if fgridintf.getcol.grid.copyselection then begin
@@ -2472,6 +2473,7 @@ begin
     end;
    end;
   end;
+  }
  end;
 end;
 
