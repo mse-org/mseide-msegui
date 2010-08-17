@@ -225,6 +225,9 @@ type
    function datahighpo: pointer; //points to last item
    function getitempo(index: integer): pointer;
              //invalid after capacity change
+   function getastext(const index: integer): msestring; virtual;
+   procedure setastext(const index: integer; const avalue: msestring); virtual;
+
    procedure assign(sender: tpersistent); override;
    procedure assignb(const source: tdatalist); virtual;
              //assign with second value if possible, exception otherwise
@@ -312,13 +315,14 @@ type
    max: integer;
    constructor create; override;
    function datatype: listdatatypety; override;
-//   procedure assign(source: tpersistent); override;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function add(const value: integer): integer;
    procedure insert(const index: integer; const item: integer);
    procedure number(const start,step: integer); //numeriert daten
    function find(value: integer): integer;  //bringt index, -1 wenn nicht gefunden
    procedure fill(acount: integer; const defaultvalue: integer);
+   function getastext(const index: integer): msestring; override;
+   procedure setastext(const index: integer; const avalue: msestring); override;
 
    property asarray: integerarty read getasarray write setasarray;
    property items[const index: integer]: integer read Getitems write Setitems; default;
@@ -359,6 +363,8 @@ type
    procedure insert(const index: integer; const avalue: int64);
    function find(const avalue: int64): integer;  //bringt index, -1 wenn nicht gefunden
    procedure fill(const acount: integer; const defaultvalue: int64);
+   function getastext(const index: integer): msestring; virtual;
+   procedure setastext(const index: integer; const avalue: msestring); virtual;
 
    property asarray: int64arty read getasarray write setasarray;
    property items[index: integer]: int64 read Getitems write Setitems; default;
@@ -387,6 +393,8 @@ type
    procedure insert(const index: integer; const avalue: currency);
    function find(const avalue: currency): integer;  //bringt index, -1 wenn nicht gefunden
    procedure fill(const acount: integer; const defaultvalue: currency);
+   function getastext(const index: integer): msestring; virtual;
+   procedure setastext(const index: integer; const avalue: msestring); virtual;
 
    property asarray: currencyarty read getasarray write setasarray;
    property items[index: integer]: currency read Getitems write Setitems; default;
@@ -447,6 +455,8 @@ type
    procedure number(start,step: real);
    procedure fill(acount: integer; const defaultvalue: realty);
    procedure minmax(out minval,maxval: realty);
+   function getastext(const index: integer): msestring; virtual;
+   procedure setastext(const index: integer; const avalue: msestring); virtual;
 
    property asarray: realarty read getasarray write setasarray;
    property items[index: integer]: realty read Getitems write Setitems; default;
@@ -603,6 +613,9 @@ type
                 //returns added linecount
    function empty(const index: integer): boolean; override;   //true wenn leer
    procedure fill(acount: integer; const defaultvalue: ansistring);
+   function getastext(const index: integer): msestring; virtual;
+   procedure setastext(const index: integer; const avalue: msestring); virtual;
+
    property items[index: integer]: ansistring read Getitems write 
                         setitems; default;
    property asarray: stringarty read getasarray write setasarray;
@@ -648,6 +661,8 @@ type
                             const maxchars: integer = 0): integer;
           //adds characters to last row, returns index
           //maxchars = 0 -> no limitation, inserts line breaks otherwise
+   function getastext(const index: integer): msestring; virtual;
+   procedure setastext(const index: integer; const avalue: msestring); virtual;
    function indexof(const value: msestring): integer;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function concatstring(const delim: msestring = '';
@@ -1226,7 +1241,7 @@ procedure setremotedatalist(const aintf: idatalistclient;
 
 implementation
 uses
- rtlconsts,msestreaming,msesys,msestat,msebits{,mseeditglob};
+ rtlconsts,msestreaming,msesys,msestat,msebits,msefloattostr;
  
 var
  datalistclasses: array[listdatatypety] of datalistclassty = 
@@ -4525,6 +4540,16 @@ begin
  aclient.getobjectlinker.unlink(aclient,iobjectlink(self),nil);
 end;
 
+function tdatalist.getastext(const index: integer): msestring;
+begin
+ result:= '';
+end;
+
+procedure tdatalist.setastext(const index: integer; const avalue: msestring);
+begin
+ //dummy
+end;
+
 { tintegerdatalist }
 
 constructor tintegerdatalist.create;
@@ -4681,6 +4706,21 @@ begin
  result:= source.inheritsfrom(tintegerdatalist);
 end;
 
+function tintegerdatalist.getastext(const index: integer): msestring;
+begin
+ result:= inttostr(items[index]);
+end;
+
+procedure tintegerdatalist.setastext(const index: integer;
+               const avalue: msestring);
+var
+ int1: integer;
+begin
+ if trystrtoint(avalue,int1) then begin
+  items[index]:= int1;
+ end;
+end;
+
 { tbooleandatalist }
 
 procedure tbooleandatalist.setasarray(const avalue: longboolarty);
@@ -4822,6 +4862,21 @@ begin
  result:= source.inheritsfrom(tint64datalist);
 end;
 
+function tint64datalist.getastext(const index: integer): msestring;
+begin
+ result:= inttostr(items[index]);
+end;
+
+procedure tint64datalist.setastext(const index: integer;
+               const avalue: msestring);
+var
+ int1: int64;
+begin
+ if trystrtoint64(avalue,int1) then begin
+  items[index]:= int1;
+ end;
+end;
+
 { tcurrencydatalist }
 
 constructor tcurrencydatalist.create;
@@ -4949,6 +5004,21 @@ end;
 function tcurrencydatalist.checkassigncompatibility(const source: tpersistent): boolean;
 begin
  result:= source.inheritsfrom(tcurrencydatalist);
+end;
+
+function tcurrencydatalist.getastext(const index: integer): msestring;
+begin
+ result:= currtostr(items[index]);
+end;
+
+procedure tcurrencydatalist.setastext(const index: integer;
+               const avalue: msestring);
+var
+ cu1: currency;
+begin
+ if trystrtocurr(avalue,cu1) then begin
+  items[index]:= cu1;
+ end;
 end;
 
 { tenumdatalist }
@@ -5169,6 +5239,33 @@ end;
 function trealdatalist.checkassigncompatibility(const source: tpersistent): boolean;
 begin
  result:= source.inheritsfrom(trealdatalist);
+end;
+
+function trealdatalist.getastext(const index: integer): msestring;
+var
+ rea1: realty;
+begin
+ result:= '';
+ rea1:= items[index];
+ if not isemptyreal(rea1) then begin
+  result:= doubletostring(rea1,0,fsm_default,
+                              defaultformatsettingsmse.decimalseparator);
+ end;
+end;
+
+procedure trealdatalist.setastext(const index: integer;
+               const avalue: msestring);
+var
+ rea1: realty;
+begin
+ if avalue = '' then begin
+  items[index]:= emptyreal;
+ end
+ else begin
+  if trystrtofloat(avalue,rea1) then begin
+   items[index]:= rea1;
+  end;
+ end;
 end;
 
 { tdatetimedatalist }
@@ -5791,6 +5888,17 @@ begin
  result:= source.inheritsfrom(tansistringdatalist);
 end;
 
+function tansistringdatalist.getastext(const index: integer): msestring;
+begin
+ result:= items[index];
+end;
+
+procedure tansistringdatalist.setastext(const index: integer;
+               const avalue: msestring);
+begin
+ items[index]:= avalue;
+end;
+
 { tpoorstringdatalist }
 
 function tpoorstringdatalist.add(const value: tmsestringdatalist): integer;
@@ -6389,6 +6497,17 @@ end;
 function tpoorstringdatalist.getnoparagraphs(index: integer): boolean;
 begin
  result:= false;
+end;
+
+function tpoorstringdatalist.getastext(const index: integer): msestring;
+begin
+ result:= items[index];
+end;
+
+procedure tpoorstringdatalist.setastext(const index: integer;
+               const avalue: msestring);
+begin
+ items[index]:= avalue;
 end;
 
 { tmsestringdatalist }

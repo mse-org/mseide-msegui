@@ -217,6 +217,7 @@ type
    function isempty (const atext: msestring): boolean; virtual;
    procedure setnullvalue; virtual; //for dbedits
    function nullcheckneeded(const newfocus: twidget): boolean; virtual;
+   function textcellcopy: boolean; virtual;
   public
    constructor create(aowner: tcomponent); override;
 //   destructor destroy; override;
@@ -826,6 +827,7 @@ type
    procedure internalsort(const acol: integer; const sortlist: tintegerdatalist); override;
 
    function getvalueempty: integer; override;
+   function textcellcopy: boolean; override;
   public
    enums: integerarty; //nil -> enum = item rowindex + valueoffset
    constructor create(aowner: tcomponent); override;
@@ -2484,6 +2486,11 @@ begin
                //restore default options
  end;
  inherited;
+end;
+
+function tcustomdataedit.textcellcopy: boolean;
+begin
+ result:= true;
 end;
 
 {$ifdef mse_with_ifi}
@@ -4431,6 +4438,12 @@ function tcustomenuedit.getvalueempty: integer;
 begin
  result:= fvalueempty;
 end;
+
+function tcustomenuedit.textcellcopy: boolean;
+begin
+ result:= false;
+end;
+
 {$ifdef mse_with_ifi}
 function tcustomenuedit.getifilink: tifienumlinkcomp;
 begin

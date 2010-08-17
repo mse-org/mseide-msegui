@@ -2733,7 +2733,8 @@ begin
  end;
 end;
 
-procedure tcustomwidgetgrid.initcopyars(out dataedits: widgetarty; out datalists: datalistarty);
+procedure tcustomwidgetgrid.initcopyars(out dataedits: widgetarty;
+                                              out datalists: datalistarty);
 var
  int1: integer;
 begin
@@ -2742,7 +2743,8 @@ begin
  for int1:= 0 to high(dataedits) do begin
   dataedits[int1]:= datacols[int1].editwidget;
   datalists[int1]:= datacols[int1].datalist;
-  if not (dataedits[int1] is tdataedit) then begin
+  if not (dataedits[int1] is tcustomdataedit) or 
+        not tdataedit1(dataedits[int1]).textcellcopy then begin
    dataedits[int1]:= nil;
   end;
  end;
@@ -2779,9 +2781,12 @@ begin
      end
      else begin
       if ar3[col] <> nil then begin
+       wstr2:= ar3[col].getastext(row);
+       {
        case ar3[col].datatype of
         dl_integer: wstr2:= inttostr(tintegerdatalist(ar3[col]).items[row]);
        end;
+       }
       end;
      end;
      wstr1:= wstr1 + wstr2 + c_tab;
@@ -2865,11 +2870,14 @@ begin
        end
        else begin
         if ar3[int3] <> nil then begin
+         ar3[int3].setastext(int5,ar5[int2]);
+         {
          case ar3[int3].datatype of
           dl_integer: begin
            tintegerdatalist(ar3[int3]).items[int5]:= strtoint(ar5[int2]);
           end;
          end;
+         }
         end;
        end;
       except
