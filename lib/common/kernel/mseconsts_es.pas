@@ -125,8 +125,8 @@ const
   #191'Borrar fila?',                       //sc_Delete_row_question
   'filas seleccionadas?',                    //sc_selected_rows
   'un elemento solamente',                   //sc_Single_item_only 
-  'Copy Cells',          //sc_Copy_Cells
-  'Paste Cells'          //sc_Paste_Cells
+  'Copiar Celdas',          //sc_Copy_Cells
+  'Pegar Celdas'          //sc_Paste_Cells
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;
