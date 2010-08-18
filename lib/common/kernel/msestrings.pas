@@ -3960,13 +3960,13 @@ begin
 {$ifdef FPC}
  {$ifdef mswindows}
  if iswin95 then begin
-  result:= uppercase(s);
+  result:= ansiuppercase(s);
  end
  else begin
-  result:= wideuppercase(s);    
+  result:= unicodeuppercase(s);    
  end;
  {$else}
- result:= wideuppercase(s);    
+ result:= unicodeuppercase(s);    
  {$endif}
 {$else}
  result:= wideuppercase(s);    

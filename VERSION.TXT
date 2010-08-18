@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2010-08-18
+ DB single key locate() replaced by multi key version.
 2010-06-5
  application.screensize -> application.screenrect.
  

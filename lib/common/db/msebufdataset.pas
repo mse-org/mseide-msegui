@@ -764,10 +764,15 @@ type
    function fieldfiltervalue(const afield: tfield): variant;
    function fieldfiltervalueisnull(const afield: tfield): boolean;
    procedure filterchanged;
+   function locate(const akeys: array of const; const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+                   {
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
    function locate(const key: msestring; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
+                 }
    function locaterecno(const arecno: integer): boolean;
         //moves to next valid recno, //returns true if resulting recno = arecno
    
@@ -4315,6 +4320,14 @@ begin
  end;
 end;
 
+function tmsebufdataset.locate(const akeys: array of const;
+                   const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+begin
+ result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+end;
+{
 function tmsebufdataset.locate(const key: integer; const field: tfield;
                       const options: locateoptionsty = []): locateresultty;
 begin
@@ -4326,7 +4339,7 @@ function tmsebufdataset.locate(const key: msestring; const field: tfield;
 begin
  result:= locaterecord(self,isutf8,key,field,options);
 end;
-
+}
 function tmsebufdataset.locaterecno(const arecno: integer): boolean;
         //moves to next valid recno, //returns true if resulting recno = arecno
 var

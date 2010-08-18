@@ -68,11 +68,16 @@ type
 
  filtereditkindty = (fek_filter,fek_filtermin,fek_filtermax,fek_find);
  locateresultty = (loc_timeout,loc_notfound,loc_ok); 
- locateoptionty = (loo_caseinsensitive,loo_partialkey,loo_posinsensitive,
-                        loo_noforeward,loo_nobackward);
- locateoptionsty = set of locateoptionty;
+// locateoptionty = (loo_caseinsensitive,loo_partialkey,loo_posinsensitive,
+//                        loo_noforeward,loo_nobackward);
+// locateoptionsty = set of locateoptionty;
  recnosearchoptionty = (rso_backward);
  recnosearchoptionsty = set of recnosearchoptionty;
+
+ locatekeyoptionty = (lko_caseinsensitive,lko_partialkey,lko_posinsensitive);
+ locatekeyoptionsty = set of locatekeyoptionty;
+ locaterecordoptionty = (lro_noforeward,lro_nobackward,lro_utf8);
+ locaterecordoptionsty = set of locaterecordoptionty;
  
  fieldarty = array of tfield;
 
@@ -85,10 +90,15 @@ type
  end;
  
  imselocate = interface(inullinterface)['{2680958F-F954-DA11-9015-00C0CA1308FF}']
+   function locate(const akeys: array of const; const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+{
    function locate(const key: integer; const field: tfield;
                      const options: locateoptionsty = []): locateresultty;
    function locate(const key: msestring; const field: tfield;
                  const options: locateoptionsty = []): locateresultty;
+}
  end;
   
  idbeditinfo = interface(inullinterface)['{E63A9950-BFAE-DA11-83DF-00C0CA1308FF}']
@@ -1217,6 +1227,10 @@ type
    function filtereditkind: filtereditkindty;
    procedure beginupdate; //calls diablecontrols, stores bookmark
    procedure endupdate;   //restores bookmark, calls enablecontrols
+   function locate(const akeys: array of const; const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+{
    function locate(const key: integer; const field: tfield;
                        const options: locateoptionsty = []): locateresultty;
                        overload;
@@ -1225,6 +1239,7 @@ type
                        overload;
    function locate(const key: msestring; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty; overload;
+}
    procedure appendrecord(const values: array of const);
    procedure getfieldclass(const fieldtype: tfieldtype; out result: tfieldclass);
    procedure beginfilteredit(const akind: filtereditkindty);
@@ -1476,13 +1491,20 @@ function checkfieldcompatibility(const afield: tfield;
                      const adatatype: tfieldtype): boolean;
            //true if ok
 function vartorealty(const avalue: variant): realty;
+{
 function locaterecord(const adataset: tdataset; const autf8: boolean; 
                          const key: msestring; const field: tfield;
                          const options: locateoptionsty = []): locateresultty;
 function locaterecord(const adataset: tdataset; const key: integer;
                        const field: tfield;
                        const options: locateoptionsty = []): locateresultty;
-
+}
+function locaterecord(const adataset: tdataset; 
+                      const keys: array of const; const fields: array of tfield;
+                      const keyoptions: array of locatekeyoptionsty;
+                      const options: locaterecordoptionsty): locateresultty;
+                             //nil as key denotes empty field
+                             
 function encodesqlstring(const avalue: msestring): msestring;
 function encodesqlcstring(const avalue: msestring): msestring;
 function encodesqlblob(const avalue: string): msestring;
@@ -2314,7 +2336,7 @@ begin
   {$endif}
  end;
 end;
-
+{
 function locaterecord(const adataset: tdataset; const key: integer;
                        const field: tfield;
                        const options: locateoptionsty = []): locateresultty;
@@ -2559,6 +2581,308 @@ begin
       end;
       prior;
      end;
+    end;
+   end;
+  finally
+   try
+    if result <> loc_ok then begin
+     bookmark:= bm;
+    end;
+   finally
+    enablecontrols;
+   end;
+  end;
+ end;
+end;
+}
+type
+ locatefuncty = function (const key; const afield: tfield): boolean;
+
+function locatenull(const key; const afield: tfield): boolean;
+begin
+ result:= afield.isnull;
+end;
+
+function locateinteger(const key; const afield: tfield): boolean;
+begin
+ result:= tvarrec(key).vinteger = afield.asinteger;
+end;
+
+function locateint64(const key; const afield: tfield): boolean;
+begin
+ result:= tvarrec(key).vint64^ = afield.aslargeint;
+end;
+
+function locateboolean(const key; const afield: tfield): boolean;
+begin
+ result:= tvarrec(key).vboolean = afield.asboolean;
+end;
+
+function locateextended(const key; const afield: tfield): boolean;
+begin
+ result:= tvarrec(key).vextended^ = afield.asfloat;
+end;
+
+function locatecurrency(const key; const afield: tfield): boolean;
+begin
+ result:= tvarrec(key).vcurrency^ = afield.ascurrency;
+end;
+
+function locatevariant(const key; const afield: tfield): boolean;
+begin
+ result:= tvarrec(key).vvariant^ = afield.asvariant;
+end;
+
+function locateansistring(const key; const afield: tfield): boolean;
+begin
+ result:= ansistring(tvarrec(key).vansistring) = afield.asstring;
+end;
+
+function locatemsestring(const key; const afield: tfield): boolean;
+begin
+ result:= msestring(tvarrec(key).vwidestring) = 
+                                tmsestringfield(afield).asmsestring;
+end;
+
+function locateansistringupper(const key; const afield: tfield): boolean;
+begin
+ result:= ansistring(tvarrec(key).vansistring) = ansiuppercase(afield.asstring);
+end;
+
+function locatemsestringupper(const key; const afield: tfield): boolean;
+begin
+ result:= msestring(tvarrec(key).vwidestring) = 
+                                mseuppercase(tmsestringfield(afield).asmsestring);
+end;
+
+function locateansistringpartial(const key; const afield: tfield): boolean;
+begin
+ result:= ansistring(tvarrec(key).vansistring) = copy(afield.asstring,1,
+                   length(ansistring(tvarrec(key).vansistring)));
+end;
+
+function locatemsestringpartial(const key; const afield: tfield): boolean;
+begin
+ result:= msestring(tvarrec(key).vwidestring) = 
+                     copy(tmsestringfield(afield).asmsestring,1,
+                                  length(msestring(tvarrec(key).vwidestring)));
+end;
+
+function locateansistringupperpartial(const key; const afield: tfield): boolean;
+begin
+ result:= ansistring(tvarrec(key).vansistring) = ansiuppercase(copy(afield.asstring,1,
+                   length(ansistring(tvarrec(key).vansistring))));
+end;
+
+function locatemsestringupperpartial(const key; const afield: tfield): boolean;
+begin
+ result:= msestring(tvarrec(key).vwidestring) = 
+                 mseuppercase(copy(tmsestringfield(afield).asmsestring,1,
+                                  length(msestring(tvarrec(key).vwidestring))));
+end;
+                              
+function locateansistringposins(const key; const afield: tfield): boolean;
+begin
+ result:= pos(ansistring(tvarrec(key).vansistring),afield.asstring) > 0;
+end;
+
+function locatemsestringposins(const key; const afield: tfield): boolean;
+begin
+ result:= pos(msestring(tvarrec(key).vwidestring),
+                                tmsestringfield(afield).asmsestring) > 0;
+end;
+
+function locateansistringupperposins(const key; const afield: tfield): boolean;
+begin
+ result:= pos(ansistring(tvarrec(key).vansistring),
+                             ansiuppercase(afield.asstring)) > 0;
+end;
+
+function locatemsestringupperposins(const key; const afield: tfield): boolean;
+begin
+ result:= pos(msestring(tvarrec(key).vwidestring),
+                       mseuppercase(tmsestringfield(afield).asmsestring)) > 0;
+end;
+
+const
+ ansistringcomp: array[0..7] of locatefuncty = 
+          (@locateansistring,@locateansistringupper,
+           @locateansistringpartial,@locateansistringupperpartial,
+           @locateansistringposins,@locateansistringupperposins,
+           @locateansistringposins,@locateansistringupperposins);
+ msestringcomp: array[0..7] of locatefuncty = 
+          (@locatemsestring,@locatemsestringupper,
+           @locatemsestringpartial,@locatemsestringupperpartial,
+           @locatemsestringposins,@locatemsestringupperposins,
+           @locatemsestringposins,@locatemsestringupperposins);
+           
+function locaterecord(const adataset: tdataset;
+                      const keys: array of const; const fields: array of tfield;
+                      const keyoptions: array of locatekeyoptionsty;
+                      const options: locaterecordoptionsty): locateresultty;
+var
+ comparefuncar: array of locatefuncty;
+ 
+ function check: boolean;
+ var 
+  int1: integer;
+ begin
+  result:= true;
+  for int1:= 0 to high(comparefuncar) do begin
+   result:= comparefuncar[int1](keys[int1],fields[int1]);
+   if not result then begin
+    break;
+   end;
+  end;
+ end;
+ 
+var
+ keymsestrings: msestringarty; 
+ keyansistrings: stringarty;
+ int1: integer;
+ bm: string;
+ opt1: locatekeyoptionsty;
+begin
+ int1:= high(keys);
+ if high(fields) < int1 then begin
+  int1:= high(fields);
+ end;
+ inc(int1);
+ setlength(comparefuncar,int1);
+ setlength(keymsestrings,int1);
+ setlength(keyansistrings,int1);
+ 
+ for int1:= 0 to high(comparefuncar) do begin
+  opt1:= [];
+  if int1 <= high(keyoptions) then begin
+   opt1:= keyoptions[int1];
+  end;
+  with tvarrec(keys[int1]) do begin
+   case vtype of
+    vtpointer: begin
+     comparefuncar[int1]:= @locatenull;
+    end;
+    vtinteger: begin
+     comparefuncar[int1]:= @locateinteger;
+    end;
+    vtint64: begin
+     comparefuncar[int1]:= @locateint64;
+    end;
+    vtboolean: begin
+     comparefuncar[int1]:= @locateboolean;
+    end;
+    vtextended: begin
+     comparefuncar[int1]:= @locateextended;
+    end;
+    vtcurrency: begin
+     comparefuncar[int1]:= @locatecurrency;
+    end;
+    vtwidestring: begin
+     if fields[int1] is tmsestringfield then begin
+      comparefuncar[int1]:= msestringcomp[longword(opt1)];
+      if lko_caseinsensitive in keyoptions[int1] then begin
+       keymsestrings[int1]:= 
+                 mseuppercase(msestring(tvarrec(keys[int1]).vwidestring));
+       pvarrec(@keys[int1])^.vwidestring:= pointer(keymsestrings[int1]);
+      end
+     end
+     else begin
+      if lro_utf8 in options then begin
+       if lko_caseinsensitive in keyoptions[int1] then begin
+        keyansistrings[int1]:= stringtoutf8(mseuppercase(
+                                 msestring(tvarrec(keys[int1]).vwidestring)));
+       end
+       else begin
+        keyansistrings[int1]:= 
+         stringtoutf8(msestring(tvarrec(keys[int1]).vwidestring));
+       end;
+      end
+      else begin
+       if lko_caseinsensitive in keyoptions[int1] then begin
+        keyansistrings[int1]:= 
+                      mseuppercase(msestring(tvarrec(keys[int1]).vwidestring));
+       end
+       else begin
+        keyansistrings[int1]:= 
+                      msestring(tvarrec(keys[int1]).vwidestring);
+       end;
+      end;
+      pvarrec(@keys[int1])^.vansistring:= pointer(keyansistrings[int1]);
+      comparefuncar[int1]:= ansistringcomp[longword(opt1)];
+     end;
+    end;
+    vtansistring: begin
+     if fields[int1] is tmsestringfield then begin
+      comparefuncar[int1]:= msestringcomp[longword(opt1)];
+      if lko_caseinsensitive in opt1 then begin
+       keymsestrings[int1]:= 
+                 mseuppercase(ansistring(tvarrec(keys[int1]).vansistring));
+      end
+      else begin
+       keymsestrings[int1]:= ansistring(tvarrec(keys[int1]).vansistring);
+      end;
+      pvarrec(@keys[int1])^.vwidestring:= pointer(keymsestrings[int1]);
+     end
+     else begin
+      if lko_caseinsensitive in opt1 then begin
+       keyansistrings[int1]:= 
+                     ansiuppercase(ansistring(tvarrec(keys[int1]).vansistring));
+       pvarrec(@keys[int1])^.vansistring:= pointer(keyansistrings[int1]);
+      end
+      else begin
+       keyansistrings[int1]:= 
+                     msestring(tvarrec(keys[int1]).vwidestring);
+      end;
+      comparefuncar[int1]:= ansistringcomp[longword(opt1)];
+     end;
+    end;
+    vtvariant: begin
+     comparefuncar[int1]:= @locatevariant;
+    end;
+    else begin
+     raise exception.create('Invalid locate field type.');
+    end;
+   end;
+  end;
+ end;
+ with adataset do begin
+  checkbrowsemode;
+  result:= loc_notfound;
+  bm:= bookmark;
+  disablecontrols;
+  try
+   if not (lro_noforeward in options) then begin
+    while not eof do begin
+     if check then begin
+      result:= loc_ok;
+      exit;
+     end;
+     next;
+    end;
+    bookmark:= bm;
+   end;
+   if not (lro_nobackward in options) then begin
+    while true do begin
+     if check then begin
+      result:= loc_ok;
+      exit;
+     end;
+     if bof then begin
+      break;
+     end;
+     prior;
+    end;
+   end;
+   if not (lro_nobackward in options) then begin
+    while true do begin
+     if check then begin
+      result:= loc_ok;
+      exit;
+     end;
+     if bof then begin
+      break;
+     end;
+     prior;
     end;
    end;
   finally
@@ -5529,6 +5853,14 @@ begin
  tdataset(fowner).active:= avalue;
 end;
 
+function tdscontroller.locate(
+                      const akeys: array of const; const afields: array of tfield;
+                      const akeyoptions: array of locatekeyoptionsty;
+                      const aoptions: locaterecordoptionsty = []): locateresultty;
+begin
+ result:= locaterecord(tdataset(fowner),akeys,afields,akeyoptions,aoptions);
+end;
+{
 function tdscontroller.locate(const key: integer; const field: tfield;
                               const options: locateoptionsty = []): locateresultty;
 begin
@@ -5546,7 +5878,7 @@ function tdscontroller.locate(const key: msestring; const field: tfield;
 begin
  result:= locaterecord(tdataset(fowner),dso_utf8 in foptions,key,field,options);
 end;
-
+}
 procedure tdscontroller.appendrecord(const values: array of const);
 var
  int1: integer;

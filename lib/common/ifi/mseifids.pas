@@ -328,10 +328,16 @@ type
    procedure endupdate;
    
    procedure Append;
+   function locate(const akeys: array of const;
+                   const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+{
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
    function locate(const key: string; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
+}
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
    procedure post; override;
@@ -2046,6 +2052,14 @@ begin
  fcalcrecordsize:= frecordsize; //no calcfields
 end;
 
+function tifidataset.locate(const akeys: array of const;
+                   const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+begin
+ result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+end;
+{
 function tifidataset.locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
 begin
@@ -2057,7 +2071,7 @@ function tifidataset.locate(const key: string;
 begin
  result:= fcontroller.locate(key,field,options);
 end;
-
+}
 procedure tifidataset.AppendRecord(const Values: array of const);
 begin
  fcontroller.appendrecord(values);

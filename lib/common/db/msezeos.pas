@@ -54,10 +54,16 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function locate(const akeys: array of const;
+                   const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+{
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
    function locate(const key: msestring; const field: tfield; 
                  const aoptions: locateoptionsty = []): locateresultty;
+}
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
    procedure post; override;
@@ -114,10 +120,16 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function locate(const akeys: array of const;
+                   const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+{
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
    function locate(const key: msestring; const field: tfield; 
                  const aoptions: locateoptionsty = []): locateresultty;
+}
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
    procedure post; override;
@@ -172,10 +184,16 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function locate(const akeys: array of const;
+                   const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+{
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
    function locate(const key: msestring; const field: tfield; 
                  const aoptions: locateoptionsty = []): locateresultty;
+}
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
    procedure post; override;
@@ -230,10 +248,16 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function locate(const akeys: array of const;
+                   const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+{
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
    function locate(const key: msestring; const field: tfield; 
                  const aoptions: locateoptionsty = []): locateresultty;
+}
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
    procedure post; override;
@@ -261,6 +285,14 @@ begin
  inherited;
 end;
 
+function tmsezreadonlyquery.locate(const akeys: array of const;
+                   const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+begin
+ result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+end;
+{
 function tmsezreadonlyquery.locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
 begin
@@ -272,7 +304,7 @@ function tmsezreadonlyquery.locate(const key: msestring;
 begin
  result:= fcontroller.locate(key,field,aoptions);
 end;
-
+}
 procedure tmsezreadonlyquery.AppendRecord(const Values: array of const);
 begin
  fcontroller.appendrecord(values);
@@ -486,6 +518,14 @@ begin
  inherited;
 end;
 
+function tmsezquery.locate(const akeys: array of const;
+                   const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+begin
+ result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+end;
+{
 function tmsezquery.locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
 begin
@@ -497,7 +537,7 @@ function tmsezquery.locate(const key: msestring;
 begin
  result:= fcontroller.locate(key,field,aoptions);
 end;
-
+}
 procedure tmsezquery.AppendRecord(const Values: array of const);
 begin
  fcontroller.appendrecord(values);
@@ -711,6 +751,14 @@ begin
  inherited;
 end;
 
+function tmseztable.locate(const akeys: array of const;
+                   const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+begin
+ result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+end;
+{
 function tmseztable.locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
 begin
@@ -722,7 +770,7 @@ function tmseztable.locate(const key: msestring;
 begin
  result:= fcontroller.locate(key,field,aoptions);
 end;
-
+}
 procedure tmseztable.AppendRecord(const Values: array of const);
 begin
  fcontroller.appendrecord(values);
@@ -931,6 +979,14 @@ begin
  inherited;
 end;
 
+function tmsezstoredproc.locate(const akeys: array of const;
+                   const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+begin
+ result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+end;
+{
 function tmsezstoredproc.locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
 begin
@@ -942,7 +998,7 @@ function tmsezstoredproc.locate(const key: msestring;
 begin
  result:= fcontroller.locate(key,field,aoptions);
 end;
-
+}
 procedure tmsezstoredproc.AppendRecord(const Values: array of const);
 begin
  fcontroller.appendrecord(values);

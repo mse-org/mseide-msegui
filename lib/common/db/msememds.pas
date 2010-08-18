@@ -56,10 +56,16 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function locate(const akeys: array of const;
+                   const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+{
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
    function locate(const key: msestring; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
+}
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
    procedure post; override;
@@ -86,6 +92,14 @@ begin
  inherited;
 end;
 
+function tmsememdataset.locate(const akeys: array of const;
+                   const afields: array of tfield;
+                   const akeyoptions: array of locatekeyoptionsty;
+                   const aoptions: locaterecordoptionsty = []): locateresultty;
+begin
+ result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+end;
+{
 function tmsememdataset.locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
 begin
@@ -97,7 +111,7 @@ function tmsememdataset.locate(const key: msestring;
 begin
  result:= fcontroller.locate(key,field,options);
 end;
-
+}
 procedure tmsememdataset.AppendRecord(const Values: array of const);
 begin
  fcontroller.appendrecord(values);
