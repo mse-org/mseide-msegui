@@ -606,7 +606,9 @@ begin
       else begin
        case key of
         key_space: begin
-//         showsourceitems(edit.editpos); removed until finished
+         {$ifdef mse_with_showsourceitems}
+         showsourceitems(edit.editpos);
+         {$endif}
         end
         else begin
          exclude(eventstate,es_processed);
