@@ -2088,19 +2088,23 @@ type
    property datacols: tdatacols read fdatacols write setdatacols;
    property fixcols: tfixcols read ffixcols write setfixcols;
    property fixrows: tfixrows read ffixrows write setfixrows;
+
    property rowcount: integer read frowcount write setrowcount default 0;
    function rowhigh: integer; //rowcount - 1
    property rowcountmax: integer read frowcountmax
                          write setrowcountmax default bigint;
-   property focusedcell: gridcoordty read ffocusedcell;
-                              //col,row = invalidaxis if none
-   property col: integer read ffocusedcell.col write setcol;
-   property row: integer read ffocusedcell.row write setrow;
    function visiblerow(const arow: integer): integer;
                  //returns index in visible rows, invaidaxis if not visible
    property firstvisiblerow: integer read ffirstvisiblerow;
    property lastvisiblerow: integer read flastvisiblerow;
    property visiblerows: integerarty read fvisiblerows;
+   
+
+   property focusedcell: gridcoordty read ffocusedcell;
+                              //col,row = invalidaxis if none
+   property col: integer read ffocusedcell.col write setcol;
+   property row: integer read ffocusedcell.row write setrow;
+   property mousecell: gridcoordty read fmousecell;
    
    property gridframewidth: integer read fgridframewidth 
                         write setgridframewidth default 0;
