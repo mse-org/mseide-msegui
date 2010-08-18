@@ -1252,7 +1252,7 @@ begin
   inherited;
  end;
 end;
-var testvar: pointer;
+
 procedure tpopupmenuwidget.internalsetactiveitem(const avalue: integer;
           const aclicked: boolean; const force: boolean;
           const nochildreninactive: boolean);
@@ -1271,7 +1271,6 @@ begin
      fnextpopup.release;
     end;
     with cells[activeitem],buttoninfo do begin
-testvar:= @state;
      state:= state - [shs_clicked,{shs_mouse,}shs_active,shs_focused];
      if value1 <> -1 then begin
       state:= state - [shs_mouse];

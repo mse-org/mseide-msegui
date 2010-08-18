@@ -1054,7 +1054,8 @@ begin
  end;
  updateoptions;
  updatemainmenutemplates;
- application.postevent(tobjectevent.create(ek_loaded,ievent(self)));
+ application.postevent(tobjectevent.create(ek_loaded,ievent(self)){,true});
+                        //to the OS queue
 end;
 
 procedure tcustommseform.setoptionswidget(const avalue: optionswidgetty);
