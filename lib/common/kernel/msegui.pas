@@ -112,7 +112,8 @@ type
 //                  ws_wantmousewheel,
                   ws_wantmousefocus,ws_iswidget,
                   ws_opaque,ws_nopaint,
-                  ws_clicked,ws_mousecaptured,ws_clientmousecaptured,
+                  ws_lclicked,ws_mclicked,ws_rclicked,
+                  ws_mousecaptured,ws_clientmousecaptured,
                   ws_loadlock,ws_loadedproc,ws_showproc,
                   ws_minclientsizevalid,
 //                  ws_showed,ws_hidden, //used in tcustomeventwidget
@@ -8615,6 +8616,7 @@ begin
 end;
        
 procedure twidget.mouseevent(var info: mouseeventinfoty);
+
  procedure doclientmouseevent;
  begin
   include(info.eventstate,es_client);
@@ -8623,7 +8625,7 @@ procedure twidget.mouseevent(var info: mouseeventinfoty);
   finally
    exclude(info.eventstate,es_client);
   end;    
- end;
+ end; //doclientmouseevent
  
 var
  clientoffset: pointty;
@@ -8637,10 +8639,19 @@ begin
   end;
  end;
  with info do begin
-  if not (eventkind in mouseregionevents) and
-      not (ss_left in shiftstate) and
+  if not (eventkind in mouseregionevents) then begin
+   if not (ss_left in shiftstate) and
       not((eventkind = ek_buttonrelease) and (button = mb_left)) then begin
-   exclude(fwidgetstate,ws_clicked);
+    exclude(fwidgetstate,ws_lclicked);
+   end;
+   if not (ss_middle in shiftstate) and
+      not((eventkind = ek_buttonrelease) and (button = mb_middle)) then begin
+    exclude(fwidgetstate,ws_mclicked);
+   end;
+   if not (ss_right in shiftstate) and
+      not((eventkind = ek_buttonrelease) and (button = mb_right)) then begin
+    exclude(fwidgetstate,ws_rclicked);
+   end;
   end;
   if not (es_processed in info.eventstate) then begin
    clientoffset:= nullpoint;
@@ -8698,7 +8709,7 @@ begin
     end;
     ek_buttonpress: begin
      if button = mb_left then begin
-      include(fwidgetstate,ws_clicked);
+      include(fwidgetstate,ws_lclicked);
       if (fframe <> nil) then begin
        with fframe.fi do begin
         if ((frameimage_list <> nil) and 
@@ -8711,6 +8722,12 @@ begin
         end;
        end;
       end;
+     end;
+     if button = mb_middle then begin
+      include(fwidgetstate,ws_mclicked);
+     end;
+     if button = mb_right then begin
+      include(fwidgetstate,ws_rclicked);
      end;
      appinst.capturemouse(self,true);
      if isclientmouseevent(info) then begin
@@ -8745,7 +8762,13 @@ begin
   end;
   if eventkind = ek_buttonrelease then begin
    if button = mb_left then begin
-    exclude(fwidgetstate,ws_clicked);
+    exclude(fwidgetstate,ws_lclicked);
+   end;
+   if button = mb_middle then begin
+    exclude(fwidgetstate,ws_mclicked);
+   end;
+   if button = mb_right then begin
+    exclude(fwidgetstate,ws_rclicked);
    end;
    if (appinst <> nil) and ((shiftstate - mousebuttontoshiftstate(button)) *
                             mousebuttons = []) and
@@ -8798,7 +8821,7 @@ end;
 procedure twidget.setclientclick;
 begin
  appinst.capturemouse(self,true);
- fwidgetstate:= fwidgetstate + [ws_clicked,ws_clientmousecaptured];
+ fwidgetstate:= fwidgetstate + [ws_lclicked,ws_clientmousecaptured];
 end;
 
 procedure twidget.clientmouseevent(var info: mouseeventinfoty);
@@ -9916,7 +9939,7 @@ function twidget.iswidgetclick(const info: mouseeventinfoty;
    //or in frame.caption if caption = true
 begin
  with info do begin
-  result:= (button = mb_left) and (ws_clicked in fwidgetstate) and
+  result:= (button = mb_left) and (ws_lclicked in fwidgetstate) and
            (eventkind = ek_buttonrelease) and
       (pointinrect(pos,paintrect) or
            caption and (fframe <> nil) and fframe.pointincaption(info.pos));
@@ -9927,7 +9950,7 @@ function twidget.isclick(const info: mouseeventinfoty): boolean;
    //true if eventtype = et_butonrelease, button is mb_left, clicked and pos in clientrect
 begin
  with info do begin
-  result:= (ws_clicked in fwidgetstate) and (eventkind = ek_buttonrelease) and
+  result:= (ws_lclicked in fwidgetstate) and (eventkind = ek_buttonrelease) and
               (button = mb_left) and pointinrect(pos,clientrect);
  end;
 end;
@@ -10113,7 +10136,7 @@ end;
 
 function twidget.clicked: boolean;
 begin
- result:= ws_clicked in fwidgetstate;
+ result:= ws_lclicked in fwidgetstate;
 end;
 
 function twidget.isvisible: boolean;
@@ -11313,7 +11336,7 @@ end;
 function twidget.getframestateflags: framestateflagsty;
 begin
  result:= combineframestateflags(not isenabled,ws_active in fwidgetstate,
-             appinst.clientmousewidget = self,ws_clicked in fwidgetstate);
+             appinst.clientmousewidget = self,ws_lclicked in fwidgetstate);
 end;
 
 procedure twidget.setframeinstance(instance: tcustomframe);
@@ -15228,7 +15251,11 @@ begin
     exit;
    end;
    widget.fwidgetstate:= widget.fwidgetstate -
-          [ws_clicked,ws_mousecaptured,ws_clientmousecaptured];
+          [ws_lclicked,ws_mclicked,ws_rclicked,
+           ws_mousecaptured,ws_clientmousecaptured];
+   if sender <> nil then begin
+    fwidgetcursorshape:= cr_default; //give up cursor shape
+   end;
   end
   else begin
    fmousecapturewidget:= sender;

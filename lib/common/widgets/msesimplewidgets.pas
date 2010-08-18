@@ -1357,7 +1357,7 @@ begin
    end;
   end
   else begin
-   if (ws_clicked in fwidgetstate) and (ffaceclicked <> nil) then begin
+   if (ws_lclicked in fwidgetstate) and (ffaceclicked <> nil) then begin
     result:= ffaceclicked;
    end
    else begin

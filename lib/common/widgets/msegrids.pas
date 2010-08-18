@@ -9780,7 +9780,7 @@ begin
         end;
        end;
        if (info.shiftstate * [ss_left,ss_middle,ss_right] = [ss_left]) and
-          (ws_clicked in fwidgetstate) then begin
+          (ws_lclicked in fwidgetstate) then begin
         checkfocuscell;
        end
        else begin
