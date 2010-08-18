@@ -5262,7 +5262,7 @@ begin
   items[index]:= emptyreal;
  end
  else begin
-  if trystrtofloat(avalue,rea1) then begin
+  if trystrtofloat(avalue,double(rea1)) then begin
    items[index]:= rea1;
   end;
  end;
