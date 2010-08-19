@@ -282,7 +282,8 @@ type
                                     write setoptions default [];
  end;
 
- localindexoptionty = (lio_desc);
+ localindexoptionty = (lio_desc,lio_quicksort); //default is mergesort
+ 
  localindexoptionsty = set of localindexoptionty;
 
  tlocalindex = class;  
@@ -317,12 +318,13 @@ type
    fsortarray: pintrecordpoaty;
    findexfieldinfos: indexfieldinfoarty;
    finvalid: boolean;
-   procedure change;
    procedure setoptions(const avalue: localindexoptionsty);
    procedure setfields(const avalue: tindexfields);
    function compare(l,r: pintrecordty; const alastindex: integer;
-                                  const apartialstring: boolean): integer;
+                    const apartialstring: boolean): integer; overload;
+   function compare(l,r: pintrecordty): integer; overload;
    procedure quicksort(l,r: integer);
+   procedure mergesort(var adata: pointerarty);
    procedure sort(var adata: pointerarty);
    function getactive: boolean;
    procedure setactive(const avalue: boolean);
@@ -334,6 +336,8 @@ type
                          //returns index, -1 if not found
    function getdesc: boolean;
    procedure setdesc(const avalue: boolean);
+  protected
+   procedure change;
   public
    constructor create(aowner: tobject); override;
    destructor destroy; override;
@@ -6059,25 +6063,58 @@ begin
  end;
 end;
 
+function tlocalindex.compare(l,r: pintrecordty): integer;
+var
+ int1: integer;
+begin
+ result:= 0;
+ for int1:= 0 to high(findexfieldinfos) do begin
+  with findexfieldinfos[int1] do begin
+   if not getfieldflag(@l^.header.fielddata.nullmask,fieldindex) then begin
+    if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
+     continue;
+    end
+    else begin
+     dec(result);
+    end;
+   end
+   else begin
+    if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
+     inc(result);
+    end
+    else begin    
+     result:= comparefunc((pointer(l)+recoffset)^,(pointer(r)+recoffset)^);
+    end;
+   end;
+   if desc then begin
+    result:= -result;
+   end;
+   if result <> 0 then begin
+    break;
+   end;
+  end;
+ end;
+ if lio_desc in foptions then begin
+  result:= -result;
+ end;
+end;
+
 procedure tlocalindex.quicksort(l,r: integer);
-           //todo: use position safe merge sort
 var
   i,j: integer;
   p: integer;
   int1: integer;
   po1: pintrecordty;
-  lastind: integer;
 begin
- lastind:= high(findexfieldinfos);
  repeat
   i:= l;
   j:= r;
   p:= (l + r) shr 1;
   repeat
-   while compare(fsortarray^[i],fsortarray^[p],lastind,false) < 0 do begin
+   while compare(fsortarray^[i],fsortarray^[p]) < 0 do begin
     inc(i);
    end;
-   while compare(fsortarray^[j],fsortarray^[p],lastind,false) > 0 do begin
+   while compare(fsortarray^[j],fsortarray^[p]) > 0 do begin
     dec(j);
    end;
    if i <= j then begin
@@ -6101,6 +6138,108 @@ begin
   end;
   l:= i;
  until i >= r;
+end;
+
+procedure tlocalindex.mergesort(var adata: pointerarty);
+        //todo: optimize
+var
+ ar1: pointerarty;
+ step: integer;
+ acount: integer;
+ l,r,d: ppointer;
+ stopl,stopr,stops: ppointer;
+ source,dest: ppointer;
+label
+ endstep;
+begin
+ acount:= tmsebufdataset(fowner).fbrecordcount;
+ allocuninitedarray(length(adata),sizeof(pointer),ar1);
+ source:= pointer(adata);
+ dest:= pointer(ar1);
+ step:= 1;
+ while step < acount do begin
+  d:= dest;
+  l:= source;
+  r:= source + step;
+  stopl:= r;
+  stopr:= r+step;
+  stops:= source + acount;
+  if stopr > stops then begin
+   stopr:= stops;
+  end;
+  while true do begin //runs
+   while true do begin //steps
+    while compare(l^,r^) <= 0 do begin //merge from left
+     d^:= l^;
+     inc(l);
+     inc(d);
+     if l = stopl then begin
+      while r <> stopr do begin
+       d^:= r^;   //copy rest
+       inc(d);
+       inc(r);
+      end;
+      goto endstep;
+     end;
+    end;
+    while compare(l^,r^) > 0 do begin //merge from right;
+     d^:= r^;
+     inc(r);
+     inc(d);
+     if r = stopr then begin
+      while l <> stopl do begin
+       d^:= l^;   //copy rest
+       inc(d);
+       inc(l);
+      end;
+      goto endstep;
+     end; 
+    end;
+   end;
+endstep:
+   if stopr = stops then begin
+    break;  //run finished
+   end;
+   l:= stopr; //next step
+   r:= l + step;
+   if r >= stops then begin
+    r:= stops-1;
+   end;
+   if r = l then begin
+    d^:= l^;
+    break;
+   end;
+   stopl:= r;
+   stopr:= r + step;
+   if stopr > stops then begin
+    stopr:= stops;
+   end;
+  end;
+  d:= source;     //swap buffer
+  source:= dest;
+  dest:= d;
+  step:= step*2;
+ end;
+
+ if source <> pointer(adata) then begin
+  adata:= ar1;
+ end
+ else begin
+  freemem(dest);
+ end;
+end;
+
+procedure tlocalindex.sort(var adata: pointerarty);
+begin
+ if adata <> nil then begin
+  if lio_quicksort in foptions then begin
+   fsortarray:= @adata[0];
+   quicksort(0,tmsebufdataset(fowner).fbrecordcount - 1);
+  end
+  else begin
+   mergesort(adata);
+  end;
+ end;
 end;
 
 function tlocalindex.findboundary(const arecord: pintrecordty;
@@ -6168,14 +6307,6 @@ begin
    result:= int1;
    break;
   end;
- end;
-end;
-
-procedure tlocalindex.sort(var adata: pointerarty);
-begin
- if adata <> nil then begin
-  fsortarray:= @adata[0];
-  quicksort(0,tmsebufdataset(fowner).fbrecordcount - 1);
  end;
 end;
 
