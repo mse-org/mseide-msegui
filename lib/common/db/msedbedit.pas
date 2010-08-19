@@ -4812,7 +4812,7 @@ begin
   dataset.disablecontrols;
   try
    str1:= dataset.bookmark;
-   if fdscontroller.locate([key],[fvaluefield],[]) = loc_ok then begin
+   if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
     result:= getasmsestring(ftextfield,utf8);
    end;
    dataset.bookmark:= str1;
@@ -4832,7 +4832,7 @@ begin
   dataset.disablecontrols;
   try
    str1:= dataset.bookmark;
-   if fdscontroller.locate([key],[fvaluefield],[]) = loc_ok then begin
+   if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
     result:= getasmsestring(ftextfield,utf8);
    end;
    dataset.bookmark:= str1;
@@ -4852,7 +4852,7 @@ begin
   dataset.disablecontrols;
   try
    str1:= dataset.bookmark;
-   if fdscontroller.locate([key],[fvaluefield],[]) = loc_ok then begin
+   if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
     result:= getasmsestring(ftextfield,utf8);
    end;
    dataset.bookmark:= str1;
@@ -5011,9 +5011,10 @@ begin
  if (datacols.count > 0) then begin
   with tdbdropdownstringcol(datacols[0]).fdatalink do begin
    if (dscontroller <> nil) and (field <> nil) then begin
-    result:= dscontroller.locate([filter],[field],[[lko_caseinsensitive]]) = loc_ok;
+    result:= dscontroller.locate([field],[filter],[],
+                                   [[lko_caseinsensitive]]) = loc_ok;
     if not result then begin
-     result:= dscontroller.locate([filter],[field],
+     result:= dscontroller.locate([field],[filter],[],
                         [[lko_caseinsensitive,lko_partialkey]]) = loc_ok;
     end;
     if result then begin

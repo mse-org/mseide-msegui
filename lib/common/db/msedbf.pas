@@ -59,7 +59,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function locate(const akeys: array of const; const afields: array of tfield;
+   function locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
    {
@@ -111,12 +112,12 @@ begin
  result:= fcontroller.locate(key,field,options);
 end;
 }
-function tmsedbf.locate(const akeys: array of const;
-                   const afields: array of tfield;
+function tmsedbf.locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 begin
- result:= msedb.locaterecord(self,akeys,afields,akeyoptions,aoptions);
+ result:= msedb.locaterecord(self,afields,akeys,aisnull,akeyoptions,aoptions);
 end;
 
 procedure tmsedbf.AppendRecord(const Values: array of const);

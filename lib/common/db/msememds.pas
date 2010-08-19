@@ -56,8 +56,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function locate(const akeys: array of const;
-                   const afields: array of tfield;
+   function locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 {
@@ -92,12 +92,12 @@ begin
  inherited;
 end;
 
-function tmsememdataset.locate(const akeys: array of const;
-                   const afields: array of tfield;
+function tmsememdataset.locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 begin
- result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+ result:= locaterecord(self,afields,akeys,aisnull,akeyoptions,aoptions);
 end;
 {
 function tmsememdataset.locate(const key: integer; const field: tfield;

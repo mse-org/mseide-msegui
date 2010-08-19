@@ -54,8 +54,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function locate(const akeys: array of const;
-                   const afields: array of tfield;
+   function locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 {
@@ -120,8 +120,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function locate(const akeys: array of const;
-                   const afields: array of tfield;
+   function locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 {
@@ -184,8 +184,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function locate(const akeys: array of const;
-                   const afields: array of tfield;
+   function locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 {
@@ -248,8 +248,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function locate(const akeys: array of const;
-                   const afields: array of tfield;
+   function locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 {
@@ -285,12 +285,12 @@ begin
  inherited;
 end;
 
-function tmsezreadonlyquery.locate(const akeys: array of const;
-                   const afields: array of tfield;
+function tmsezreadonlyquery.locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 begin
- result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+ result:= locaterecord(self,afields,akeys,aisnull,akeyoptions,aoptions);
 end;
 {
 function tmsezreadonlyquery.locate(const key: integer; const field: tfield;
@@ -518,12 +518,12 @@ begin
  inherited;
 end;
 
-function tmsezquery.locate(const akeys: array of const;
-                   const afields: array of tfield;
+function tmsezquery.locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 begin
- result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+ result:= locaterecord(self,afields,akeys,aisnull,akeyoptions,aoptions);
 end;
 {
 function tmsezquery.locate(const key: integer; const field: tfield;
@@ -751,12 +751,12 @@ begin
  inherited;
 end;
 
-function tmseztable.locate(const akeys: array of const;
-                   const afields: array of tfield;
+function tmseztable.locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 begin
- result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+ result:= locaterecord(self,afields,akeys,aisnull,akeyoptions,aoptions);
 end;
 {
 function tmseztable.locate(const key: integer; const field: tfield;
@@ -979,12 +979,12 @@ begin
  inherited;
 end;
 
-function tmsezstoredproc.locate(const akeys: array of const;
-                   const afields: array of tfield;
+function tmsezstoredproc.locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 begin
- result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+ result:= locaterecord(self,afields,akeys,aisnull,akeyoptions,aoptions);
 end;
 {
 function tmsezstoredproc.locate(const key: integer; const field: tfield;

@@ -337,8 +337,12 @@ type
   public
    constructor create(aowner: tobject); override;
    destructor destroy; override;
-   function find(const avalues: array of const; const aisnull: array of boolean;
-                 //itemcount of avalues can be smaller than fields count in index
+   function find(const avalues: array of const;
+                 //nil -> NULL field
+               const aisnull: array of boolean;
+                 //itemcount of avalues and aisnull
+                 //can be smaller than fields count in index
+                 //itemcount of aisnull can be smaller than itemcount of avalues
                out abookmark: bookmarkdataty;
                const abigger: boolean = false;
                const partialstring: boolean = false;
@@ -346,8 +350,12 @@ type
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
-   function find(const avalues: array of const; const aisnull: array of boolean;
-                 //itemcount of avalues can be smaller than fields count in index
+   function find(const avalues: array of const;
+                 //nil -> NULL field
+               const aisnull: array of boolean;
+                 //itemcount of avalues and aisnull
+                 //can be smaller than fields count in index
+                 //itemcount of aisnull can be smaller than itemcount of avalues
                out abookmark: string;
                const abigger: boolean = false;
                const partialstring: boolean = false;
@@ -355,8 +363,12 @@ type
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
-   function find(const avalues: array of const; const aisnull: array of boolean;
-                 //itemcount of avalues can be smaller than fields count in index   
+   function find(const avalues: array of const;
+                 //nil -> NULL field
+                const aisnull: array of boolean;
+                 //itemcount of avalues and aisnull
+                 //can be smaller than fields count in index
+                 //itemcount of aisnull can be smaller than itemcount of avalues
                 const alast: boolean = false;
                 const partialstring: boolean = false;
                 const nocheckbrowsemode: boolean = false): boolean; overload;
@@ -764,7 +776,8 @@ type
    function fieldfiltervalue(const afield: tfield): variant;
    function fieldfiltervalueisnull(const afield: tfield): boolean;
    procedure filterchanged;
-   function locate(const akeys: array of const; const afields: array of tfield;
+   function locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
                    {
@@ -4320,12 +4333,12 @@ begin
  end;
 end;
 
-function tmsebufdataset.locate(const akeys: array of const;
-                   const afields: array of tfield;
+function tmsebufdataset.locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 begin
- result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+ result:= locaterecord(self,afields,akeys,aisnull,akeyoptions,aoptions);
 end;
 {
 function tmsebufdataset.locate(const key: integer; const field: tfield;
@@ -6047,10 +6060,11 @@ begin
 end;
 
 procedure tlocalindex.quicksort(l,r: integer);
+           //todo: use position safe merge sort
 var
   i,j: integer;
   p: integer;
-  int: integer;
+  int1: integer;
   po1: pintrecordty;
   lastind: integer;
 begin
@@ -6270,94 +6284,106 @@ begin
   paramerror;
  end;
  for int1:= lastind downto 0 do begin
-  if avalues[int1].vtype <> findexfieldinfos[int1].vtype then begin
+  if (avalues[int1].vtype <> vtpointer) and 
+              (avalues[int1].vtype <> findexfieldinfos[int1].vtype) then begin
    paramerror;
   end;
  end;
  po1:= tmsebufdataset(fowner).intallocrecord;
- for int1:= lastind downto 0 do begin
-  with findexfieldinfos[int1],avalues[int1] do begin
-   po2:= pointer(po1) + recoffset;
-   bo1:= false;
-   case vtype of
-    vtinteger: begin
-     pinteger(po2)^:= vinteger;
-    end;
-    vtwidestring: begin
-     ppointer(po2)^:= vwidestring;
-     bo1:= vwidestring = nil;
-    end;
-    vtextended: begin
-     pdouble(po2)^:= vextended^;
-     bo1:= isemptyreal(pdouble(po2)^);
-    end;
-    vtcurrency: begin
-     pcurrency(po2)^:= vcurrency^;
-    end;
-    vtboolean: begin
-     pwordbool(po2)^:= vboolean;
-    end;
-    vtint64: begin
-     pint64(po2)^:= vint64^;
-    end;
-   end;
-   if int1 <= high(aisnull) then begin
-    bo1:= aisnull[int1];
-   end;
-   if not bo1 then begin
-    setfieldflag(@po1^.header.fielddata.nullmask,fieldindex);
-   end; 
-  end;
- end;
- int1:= findboundary(po1,lastind,abigger);
- result:= false;
- abookmark.recordpo:= nil;
- abookmark.recno:= -1;
-// abookmark:= '';
- with tmsebufdataset(fowner) do begin
-  with findexes[findexlocal.indexof(self) + 1] do begin
-   if abigger then begin
-    if int1 <= 0 then begin
-     goto endlab;
-    end;
-    if compare(po1,ind[int1-1],lastind,false) = 0 then begin
-     result:= true;
-     dec(int1);
-    end;
-   end
-   else begin
-    if int1 >= fbrecordcount - 1 then begin
-     if partialstring and (int1 > 0) and (int1 = fbrecordcount - 1) then begin
-      result:= compare(po1,ind[int1],lastind,true) = 0;
+ try
+  for int1:= lastind downto 0 do begin
+   with findexfieldinfos[int1],avalues[int1] do begin
+    po2:= pointer(po1) + recoffset;
+    bo1:= false;
+    case vtype of
+     vtinteger: begin
+      pinteger(po2)^:= vinteger;
      end;
-     if not result then begin
+     vtwidestring: begin
+      ppointer(po2)^:= vwidestring;
+ //     bo1:= vwidestring = nil;
+     end;
+     vtextended: begin
+      pdouble(po2)^:= vextended^;
+      bo1:= isemptyreal(pdouble(po2)^);
+     end;
+     vtcurrency: begin
+      pcurrency(po2)^:= vcurrency^;
+     end;
+     vtboolean: begin
+      pwordbool(po2)^:= vboolean;
+     end;
+     vtint64: begin
+      pint64(po2)^:= vint64^;
+     end;
+     vtpointer: begin
+      bo1:= true;
+     end;
+     else begin
+      paramerror;
+     end;
+    end;
+    if int1 <= high(aisnull) then begin
+     bo1:= bo1 or aisnull[int1];
+    end;
+    if not bo1 then begin
+     setfieldflag(@po1^.header.fielddata.nullmask,fieldindex);
+    end; 
+   end;
+  end;
+  int1:= findboundary(po1,lastind,abigger);
+  result:= false;
+  abookmark.recordpo:= nil;
+  abookmark.recno:= -1;
+ // abookmark:= '';
+  with tmsebufdataset(fowner) do begin
+   with findexes[findexlocal.indexof(self) + 1] do begin
+    if abigger then begin
+     if int1 <= 0 then begin
       goto endlab;
      end;
-    end;     
-    if not result then begin
-     if compare(po1,ind[int1+1],lastind,false) = 0 then begin
+     if compare(po1,ind[int1-1],lastind,false) = 0 then begin
       result:= true;
-      inc(int1);
+      dec(int1);
      end;
-    end;
-   end;
-   if (int1 >= -1) and (int1 < fbrecordcount) then begin
-    if not result then begin
-     if partialstring then begin
-      if int1 >= 0 then begin
+    end
+    else begin
+     if int1 >= fbrecordcount - 1 then begin
+      if partialstring and (int1 > 0) and (int1 = fbrecordcount - 1) then begin
        result:= compare(po1,ind[int1],lastind,true) = 0;
       end;
       if not result then begin
+       goto endlab;
+      end;
+     end;     
+     if not result then begin
+      if compare(po1,ind[int1+1],lastind,false) = 0 then begin
+       result:= true;
        inc(int1);
-       if (int1 >= fbrecordcount) or 
-                      (compare(po1,ind[int1],lastind,true) <> 0) then begin
-        dec(int1,2);         //for reversed order
-        if (int1 < 0) or 
-                      (compare(po1,ind[int1],lastind,true) <> 0) then begin
-         dec(int1);
+      end;
+     end;
+    end;
+    if (int1 >= -1) and (int1 < fbrecordcount) then begin
+     if not result then begin
+      if partialstring then begin
+       if int1 >= 0 then begin
+        result:= compare(po1,ind[int1],lastind,true) = 0;
+       end;
+       if not result then begin
+        inc(int1);
+        if (int1 >= fbrecordcount) or 
+                       (compare(po1,ind[int1],lastind,true) <> 0) then begin
+         dec(int1,2);         //for reversed order
          if (int1 < 0) or 
-                      (compare(po1,ind[int1],lastind,true) <> 0) then begin
-          inc(int1,2);
+                       (compare(po1,ind[int1],lastind,true) <> 0) then begin
+          dec(int1);
+          if (int1 < 0) or 
+                       (compare(po1,ind[int1],lastind,true) <> 0) then begin
+           inc(int1,2);
+          end
+          else begin
+           result:= true;
+          end;
          end
          else begin
           result:= true;
@@ -6366,26 +6392,24 @@ begin
         else begin
          result:= true;
         end;
-       end
-       else begin
-        result:= true;
+       end;         
+      end
+      else begin
+       if int1 < 0 then begin
+        goto endlab;
        end;
-      end;         
-     end
-     else begin
-      if int1 < 0 then begin
-       goto endlab;
       end;
-     end;
-    end;          
-    abookmark.recno:= int1;
-    abookmark.recordpo:= ind[int1];
-//    abookmark:= bookmarktostring(bm1);
+     end;          
+     abookmark.recno:= int1;
+     abookmark.recordpo:= ind[int1];
+ //    abookmark:= bookmarktostring(bm1);
+    end;
    end;
   end;
- end;
 endlab:
- freemem(po1);
+ finally
+  freemem(po1);
+ end;
 end;
 
 function tlocalindex.find(const avalues: array of const; const aisnull: array of boolean;

@@ -171,7 +171,7 @@ type
    property optionsdb: ifioptionsdbty read foptionsdb write foptionsdb;
  end;
 
- tifidataset = class(tdataset,idscontroller,igetdscontroller,
+ tifidataset = class(tdataset,idscontroller,igetdscontroller,imselocate,
                      iifidscontroller,iifimodulelink)
   private
 //   fifimodulelink: iifimodulelink;
@@ -328,8 +328,8 @@ type
    procedure endupdate;
    
    procedure Append;
-   function locate(const akeys: array of const;
-                   const afields: array of tfield;
+   function locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 {
@@ -2052,12 +2052,12 @@ begin
  fcalcrecordsize:= frecordsize; //no calcfields
 end;
 
-function tifidataset.locate(const akeys: array of const;
-                   const afields: array of tfield;
+function tifidataset.locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 begin
- result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+ result:= locaterecord(self,afields,akeys,aisnull,akeyoptions,aoptions);
 end;
 {
 function tifidataset.locate(const key: integer; const field: tfield;

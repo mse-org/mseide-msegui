@@ -59,8 +59,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function locate(const akeys: array of const;
-                   const afields: array of tfield;
+   function locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
    {
@@ -128,8 +128,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function locate(const akeys: array of const;
-                   const afields: array of tfield;
+   function locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 {
@@ -171,12 +171,12 @@ begin
  inherited;
 end;
 
-function tmsefixedformatdataset.locate(const akeys: array of const;
-                   const afields: array of tfield;
+function tmsefixedformatdataset.locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 begin
- result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+ result:= locaterecord(self,afields,akeys,aisnull,akeyoptions,aoptions);
 end;
 {
 function tmsefixedformatdataset.locate(const key: integer; const field: tfield;
@@ -411,12 +411,12 @@ begin
  inherited;
 end;
 
-function tmsesdfdataset.locate(const akeys: array of const;
-                   const afields: array of tfield;
+function tmsesdfdataset.locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 begin
- result:= locaterecord(self,akeys,afields,akeyoptions,aoptions);
+ result:= locaterecord(self,afields,akeys,aisnull,akeyoptions,aoptions);
 end;
 {
 function tmsesdfdataset.locate(const key: integer; const field: tfield;

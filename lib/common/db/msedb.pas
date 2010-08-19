@@ -90,7 +90,8 @@ type
  end;
  
  imselocate = interface(inullinterface)['{2680958F-F954-DA11-9015-00C0CA1308FF}']
-   function locate(const akeys: array of const; const afields: array of tfield;
+   function locate(const afields: array of tfield; 
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 {
@@ -1227,7 +1228,8 @@ type
    function filtereditkind: filtereditkindty;
    procedure beginupdate; //calls diablecontrols, stores bookmark
    procedure endupdate;   //restores bookmark, calls enablecontrols
-   function locate(const akeys: array of const; const afields: array of tfield;
+   function locate(const afields: array of tfield;
+                   const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
 {
@@ -1499,11 +1501,11 @@ function locaterecord(const adataset: tdataset; const key: integer;
                        const field: tfield;
                        const options: locateoptionsty = []): locateresultty;
 }
-function locaterecord(const adataset: tdataset; 
-                      const keys: array of const; const fields: array of tfield;
-                      const keyoptions: array of locatekeyoptionsty;
-                      const options: locaterecordoptionsty): locateresultty;
-                             //nil as key denotes empty field
+function locaterecord(const adataset: tdataset; const fields: array of tfield;
+                     const keys: array of const; //nil -> NULL field
+                     const isnull: array of boolean;
+                     const keyoptions: array of locatekeyoptionsty;
+                     const options: locaterecordoptionsty): locateresultty;
                              
 function encodesqlstring(const avalue: msestring): msestring;
 function encodesqlcstring(const avalue: msestring): msestring;
@@ -2717,7 +2719,9 @@ const
            @locatemsestringposins,@locatemsestringupperposins);
            
 function locaterecord(const adataset: tdataset;
-                      const keys: array of const; const fields: array of tfield;
+                      const fields: array of tfield;
+                      const keys: array of const; //nil -> NULL field
+                      const isnull: array of boolean;
                       const keyoptions: array of locatekeyoptionsty;
                       const options: locaterecordoptionsty): locateresultty;
 var
@@ -2757,90 +2761,100 @@ begin
   if int1 <= high(keyoptions) then begin
    opt1:= keyoptions[int1];
   end;
-  with tvarrec(keys[int1]) do begin
-   case vtype of
-    vtpointer: begin
-     comparefuncar[int1]:= @locatenull;
-    end;
-    vtinteger: begin
-     comparefuncar[int1]:= @locateinteger;
-    end;
-    vtint64: begin
-     comparefuncar[int1]:= @locateint64;
-    end;
-    vtboolean: begin
-     comparefuncar[int1]:= @locateboolean;
-    end;
-    vtextended: begin
-     comparefuncar[int1]:= @locateextended;
-    end;
-    vtcurrency: begin
-     comparefuncar[int1]:= @locatecurrency;
-    end;
-    vtwidestring: begin
-     if fields[int1] is tmsestringfield then begin
-      comparefuncar[int1]:= msestringcomp[longword(opt1)];
-      if lko_caseinsensitive in keyoptions[int1] then begin
-       keymsestrings[int1]:= 
-                 mseuppercase(msestring(tvarrec(keys[int1]).vwidestring));
-       pvarrec(@keys[int1])^.vwidestring:= pointer(keymsestrings[int1]);
-      end
-     end
-     else begin
-      if lro_utf8 in options then begin
-       if lko_caseinsensitive in keyoptions[int1] then begin
-        keyansistrings[int1]:= stringtoutf8(mseuppercase(
-                                 msestring(tvarrec(keys[int1]).vwidestring)));
-       end
-       else begin
-        keyansistrings[int1]:= 
-         stringtoutf8(msestring(tvarrec(keys[int1]).vwidestring));
-       end;
+  if (int1 <= high(isnull)) and isnull[int1] then begin
+   comparefuncar[int1]:= @locatenull;
+  end
+  else begin
+   with tvarrec(keys[int1]) do begin
+    case vtype of
+     vtpointer: begin
+      comparefuncar[int1]:= @locatenull;
+     end;
+     vtinteger: begin
+      comparefuncar[int1]:= @locateinteger;
+     end;
+     vtint64: begin
+      comparefuncar[int1]:= @locateint64;
+     end;
+     vtboolean: begin
+      comparefuncar[int1]:= @locateboolean;
+     end;
+     vtextended: begin
+      if isemptyreal(vextended^) then begin
+       comparefuncar[int1]:= @locatenull;
       end
       else begin
+       comparefuncar[int1]:= @locateextended;
+      end;
+     end;
+     vtcurrency: begin
+      comparefuncar[int1]:= @locatecurrency;
+     end;
+     vtwidestring: begin
+      if fields[int1] is tmsestringfield then begin
+       comparefuncar[int1]:= msestringcomp[longword(opt1)];
        if lko_caseinsensitive in keyoptions[int1] then begin
+        keymsestrings[int1]:= 
+                  mseuppercase(msestring(tvarrec(keys[int1]).vwidestring));
+        pvarrec(@keys[int1])^.vwidestring:= pointer(keymsestrings[int1]);
+       end
+      end
+      else begin
+       if lro_utf8 in options then begin
+        if lko_caseinsensitive in keyoptions[int1] then begin
+         keyansistrings[int1]:= stringtoutf8(mseuppercase(
+                                  msestring(tvarrec(keys[int1]).vwidestring)));
+        end
+        else begin
+         keyansistrings[int1]:= 
+          stringtoutf8(msestring(tvarrec(keys[int1]).vwidestring));
+        end;
+       end
+       else begin
+        if lko_caseinsensitive in keyoptions[int1] then begin
+         keyansistrings[int1]:= 
+                       mseuppercase(msestring(tvarrec(keys[int1]).vwidestring));
+        end
+        else begin
+         keyansistrings[int1]:= 
+                       msestring(tvarrec(keys[int1]).vwidestring);
+        end;
+       end;
+       pvarrec(@keys[int1])^.vansistring:= pointer(keyansistrings[int1]);
+       comparefuncar[int1]:= ansistringcomp[longword(opt1)];
+      end;
+     end;
+     vtansistring: begin
+      if fields[int1] is tmsestringfield then begin
+       comparefuncar[int1]:= msestringcomp[longword(opt1)];
+       if lko_caseinsensitive in opt1 then begin
+        keymsestrings[int1]:= 
+                  mseuppercase(ansistring(tvarrec(keys[int1]).vansistring));
+       end
+       else begin
+        keymsestrings[int1]:= ansistring(tvarrec(keys[int1]).vansistring);
+       end;
+       pvarrec(@keys[int1])^.vwidestring:= pointer(keymsestrings[int1]);
+      end
+      else begin
+       if lko_caseinsensitive in opt1 then begin
         keyansistrings[int1]:= 
-                      mseuppercase(msestring(tvarrec(keys[int1]).vwidestring));
+                      ansiuppercase(ansistring(tvarrec(keys[int1]).vansistring));
+        pvarrec(@keys[int1])^.vansistring:= pointer(keyansistrings[int1]);
        end
        else begin
         keyansistrings[int1]:= 
                       msestring(tvarrec(keys[int1]).vwidestring);
        end;
+       comparefuncar[int1]:= ansistringcomp[longword(opt1)];
       end;
-      pvarrec(@keys[int1])^.vansistring:= pointer(keyansistrings[int1]);
-      comparefuncar[int1]:= ansistringcomp[longword(opt1)];
      end;
-    end;
-    vtansistring: begin
-     if fields[int1] is tmsestringfield then begin
-      comparefuncar[int1]:= msestringcomp[longword(opt1)];
-      if lko_caseinsensitive in opt1 then begin
-       keymsestrings[int1]:= 
-                 mseuppercase(ansistring(tvarrec(keys[int1]).vansistring));
-      end
-      else begin
-       keymsestrings[int1]:= ansistring(tvarrec(keys[int1]).vansistring);
-      end;
-      pvarrec(@keys[int1])^.vwidestring:= pointer(keymsestrings[int1]);
-     end
+     vtvariant: begin
+      comparefuncar[int1]:= @locatevariant;
+     end;
      else begin
-      if lko_caseinsensitive in opt1 then begin
-       keyansistrings[int1]:= 
-                     ansiuppercase(ansistring(tvarrec(keys[int1]).vansistring));
-       pvarrec(@keys[int1])^.vansistring:= pointer(keyansistrings[int1]);
-      end
-      else begin
-       keyansistrings[int1]:= 
-                     msestring(tvarrec(keys[int1]).vwidestring);
-      end;
-      comparefuncar[int1]:= ansistringcomp[longword(opt1)];
+      raise exception.create('Invalid locate data type.');
      end;
-    end;
-    vtvariant: begin
-     comparefuncar[int1]:= @locatevariant;
-    end;
-    else begin
-     raise exception.create('Invalid locate field type.');
     end;
    end;
   end;
@@ -5853,12 +5867,13 @@ begin
  tdataset(fowner).active:= avalue;
 end;
 
-function tdscontroller.locate(
-                      const akeys: array of const; const afields: array of tfield;
+function tdscontroller.locate(const afields: array of tfield;
+                      const akeys: array of const;
+                      const aisnull: array of boolean;
                       const akeyoptions: array of locatekeyoptionsty;
                       const aoptions: locaterecordoptionsty = []): locateresultty;
 begin
- result:= locaterecord(tdataset(fowner),akeys,afields,akeyoptions,aoptions);
+ result:= locaterecord(tdataset(fowner),afields,akeys,aisnull,akeyoptions,aoptions);
 end;
 {
 function tdscontroller.locate(const key: integer; const field: tfield;
