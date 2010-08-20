@@ -54,8 +54,9 @@ type
                     oe_checkvaluepaststatread,
                     oe_savevalue,oe_savestate,oe_saveoptions
                     );
-
  optionseditty = set of optioneditty;
+ optionedit1ty = (oe1_noselectall);
+ optionsedit1ty = set of optionedit1ty;
 
  editactionty = (ea_none,ea_beforechange,ea_textchanged,ea_textedited,
                  ea_textentered,ea_undo,
@@ -97,7 +98,8 @@ const
                        oe_autopopupmenu,oe_keyexecute,
                        oe_checkvaluepaststatread,oe_savevalue,oe_savestate,
                        oe_checkmrcancel];
-
+ defaultoptionsedit1 = [];
+ 
  nullcoord: gridcoordty = (col: 0; row: 0);
  invalidcell: gridcoordty = (col: invalidaxis; row: invalidaxis);
  bigcoord: gridcoordty = (col: bigint; row: bigint);

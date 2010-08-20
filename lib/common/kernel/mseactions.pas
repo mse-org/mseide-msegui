@@ -20,7 +20,7 @@ uses
  msekeyboard,msetypes,msestrings,msearrayprops,msestatfile,msestat;
 
 type
- sysshortcutty = (sho_copy,sho_paste,sho_cut,
+ sysshortcutty = (sho_copy,sho_paste,sho_cut,sho_selectall,
                   sho_rowinsert,sho_rowappend,sho_rowdelete,
                   sho_copycells,sho_pastecells);
  sysshortcutaty = array[sysshortcutty] of shortcutty;
@@ -296,8 +296,10 @@ const
  modmask = shift or ctrl or alt or $1000 or pad;
 
  defaultsysshortcuts: sysshortcutaty = 
-//sho_copy,            sho_paste,                 sho_cut,   
+//sho_copy,            sho_paste,                 sho_cut,         
  (ctrl+ord(key_c),     ctrl+ord(key_v),           ctrl+ord(key_x),
+//sho_selectall
+  ctrl+ord(key_a),
 //sho_rowinsert,       sho_rowappend,             sho_rowdelete
   ctrl+ord(key_insert),shift+ctrl+ord(key_insert),ctrl+ord(key_delete),
 //sho_copycells        sho_pastecells
@@ -306,6 +308,8 @@ const
  defaultsysshortcuts1: sysshortcutaty = 
 //sho_copy,            sho_paste,                 sho_cut,   
  (ord(key_none),       shift+ord(key_insert),     shift+ord(key_delete),
+//sho_selectall
+  ord(key_none),
 //sho_rowinsert,       sho_rowappend,             sho_rowdelete
   ord(key_none),       ord(key_none),             ord(key_none),
 //sho_copycells        sho_pastecells
@@ -491,7 +495,8 @@ end;
 function getsysshortcutdispname(const aitem: sysshortcutty): msestring;
 const
  list: array[sysshortcutty] of msestring = (
-        'Copy','Paste','Cut','Row insert','Row append','Row delete',
+        'Copy','Paste','Cut','Select all',
+        'Row insert','Row append','Row delete',
         'Copy cells','Paste cells');
 begin
  result:= list[aitem];

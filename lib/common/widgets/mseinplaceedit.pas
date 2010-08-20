@@ -69,6 +69,7 @@ type
    fmousemovepos: pointty;
    frepeater: tsimpletimer;
    ffiltertext: msestring;
+   foptionsedit1: optionsedit1ty;
    procedure resetoffset;
    function getinsertstate: boolean;
    procedure setinsertstate(const Value: boolean);
@@ -191,6 +192,7 @@ type
    function mousepostotextindex(const apos: pointty): integer;
    function textindextomousepos(const aindex: integer): pointty;
 
+   property optionsedit1: optionsedit1ty read foptionsedit1 write foptionsedit1;
    property textflags: textflagsty read ftextflags write settextflags;
    property textflagsactive: textflagsty read ftextflagsactive write settextflagsactive;
    property passwordchar: msechar read fpasswordchar write setpasswordchar default #0;
@@ -982,35 +984,41 @@ begin
   opt1:= iedit(fintf).getoptionsedit;
   locating1:= opt1 * [oe_locate,oe_readonly] = [oe_locate,oe_readonly];
   include(eventstate,es_processed);
-  nochars:= true;
-  finished:= true;
   actioninfo:= initactioninfo(ea_exit);
   if ss_shift in shiftstate1 then begin
    include(actioninfo.state,eas_shift);
   end;
-  if issysshortcut(sho_copy,kinfo) then begin
-   finished:= copytoclipboard;
+  nochars:= true;
+  finished:= true;
+  if not(oe1_noselectall in foptionsedit1) and 
+                               issysshortcut(sho_selectall,kinfo) then begin
+   selectall;
   end
   else begin
-   if issysshortcut(sho_paste,kinfo) then begin
-    if canedit then begin
-     finished:= pastefromclipboard;
-    end
-    else begin
-     finished:= false;
-    end;
+   if issysshortcut(sho_copy,kinfo) then begin
+    finished:= copytoclipboard;
    end
    else begin
-    if issysshortcut(sho_cut,kinfo) then begin
+    if issysshortcut(sho_paste,kinfo) then begin
      if canedit then begin
-      finished:= cuttoclipboard;
+      finished:= pastefromclipboard;
      end
      else begin
       finished:= false;
      end;
     end
     else begin
-     finished:= false;
+     if issysshortcut(sho_cut,kinfo) then begin
+      if canedit then begin
+       finished:= cuttoclipboard;
+      end
+      else begin
+       finished:= false;
+      end;
+     end
+     else begin
+      finished:= false;
+     end;
     end;
    end;
   end;

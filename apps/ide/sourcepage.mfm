@@ -44,14 +44,14 @@ object sourcepage: tsourcepage
       item
         linecolor = -1610612732
         width = 15
-        options = [co_nofocus, co_nohscroll, co_rowcolor]
+        options = [co_nofocus, co_nohscroll]
         oncellevent = icononcellevent
         widgetname = 'dataicon'
         dataclass = tgridintegerdatalist
       end    
       item
         width = 2000
-        options = [co_leftbuttonfocusonly, co_savestate, co_rowcolor, co_mousescrollrow]
+        options = [co_leftbuttonfocusonly, co_savestate, co_mousescrollrow]
         onchange = textchanged
         widgetname = 'edit'
         dataclass = tgridrichstringdatalist
@@ -106,6 +106,7 @@ object sourcepage: tsourcepage
       font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_keyexecute, oe_savestate]
+      optionsedit1 = [oe1_noselectall]
       encoding = ce_locale
       onkeydown = editonkeydown
       tabulators.ppmm =  3.0000000000000000E+0000

@@ -1504,6 +1504,7 @@ type
    property textflags;
    property textflagsactive;
    property optionsedit;
+   property optionsedit1;
    property font;
    property colorselect;
    property fontselect;

@@ -523,6 +523,7 @@ type
    property onclientmouseevent: mouseeventty read fonclientmouseevent 
                            write fonclientmouseevent;
    property optionsedit;
+   property optionsedit1;
    property font;
    property passwordchar;
    property maxlength;

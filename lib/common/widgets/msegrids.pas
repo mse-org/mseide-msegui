@@ -712,6 +712,7 @@ type
   protected
    ftextinfo: drawtextinfoty;
    foptionsedit: stringcoleditoptionsty;
+   foptionsedit1: optionsedit1ty;
    procedure setisdb;
    function getoptionsedit: optionseditty;
    function getitems(aindex: integer): msestring; virtual;
@@ -745,6 +746,8 @@ type
              write settextflagsactive default defaultactivecoltextflags;
    property optionsedit: stringcoleditoptionsty read foptionsedit 
                write foptionsedit default defaultstringcoleditoptions;
+   property optionsedit1: optionsedit1ty read foptionsedit1
+                             write foptionsedit1 default defaultoptionsedit1;
    property font;
    property datalist: tstringcoldatalist read getdatalist write setdatalist;
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
@@ -762,6 +765,7 @@ type
    property textflags;
    property textflagsactive;
    property optionsedit;
+   property optionsedit1;
    property font;
    property datalist;
    property fontselect;
@@ -1459,12 +1463,14 @@ type
  tstringcols = class(tdatacols)
   private
    foptionsedit: stringcoleditoptionsty;
+   foptionsedit1: optionsedit1ty;
    ftextflags: textflagsty;
    ftextflagsactive: textflagsty;
    function getcols(const index: integer): tstringcol;
    procedure settextflags(avalue: textflagsty);
    procedure settextflagsactive(avalue: textflagsty);
    procedure setoptionsedit(avalue: stringcoleditoptionsty);
+   procedure setoptionsedit1(avalue: optionsedit1ty);
   protected
    function getcolclass: stringcolclassty; virtual;
    procedure updatedatastate(var accepted: boolean); override;
@@ -1480,6 +1486,8 @@ type
              write settextflagsactive default defaultactivecoltextflags;
    property optionsedit: stringcoleditoptionsty read foptionsedit
           write setoptionsedit default defaultstringcoleditoptions;
+   property optionsedit1: optionsedit1ty read foptionsedit1
+          write setoptionsedit1 default defaultoptionsedit1;
  end;
 
  tfixcols = class(tcols)
@@ -6075,6 +6083,7 @@ constructor tcustomstringcol.create(const agrid: tcustomgrid;
                        const aowner: tgridarrayprop);
 begin
  foptionsedit:= tstringcols(aowner).foptionsedit;
+ foptionsedit1:= tstringcols(aowner).foptionsedit1;
  ftextinfo.flags:= tstringcols(aowner).ftextflags;
  ftextflagsactive:= tstringcols(aowner).ftextflagsactive;
  inherited;
@@ -7816,6 +7825,7 @@ begin
  ftextflags:= defaultcoltextflags;
  ftextflagsactive:= defaultactivecoltextflags;
  foptionsedit:= defaultstringcoleditoptions;
+ foptionsedit1:= defaultoptionsedit1;
  inherited create(aowner,getcolclass);
 end;
 
@@ -7892,6 +7902,27 @@ begin
                    replacebits({$ifdef FPC}longword{$else}longword{$endif}(avalue),
     {$ifdef FPC}longword{$else}longword{$endif}
                                (tstringcol(items[int1]).optionsedit),mask));
+   end;
+  end;
+ end;
+end;
+
+procedure tstringcols.setoptionsedit1(avalue: optionsedit1ty);
+var
+ int1: integer;
+ mask: {$ifdef FPC}longword{$else}byte{$endif};
+begin
+// exclude(avalue,scoe_autopost);
+ if foptionsedit1 <> avalue then begin
+  mask:= {$ifdef FPC}longword{$else}byte{$endif}(avalue) xor
+  {$ifdef FPC}longword{$else}byte{$endif}(foptionsedit1);
+  foptionsedit1:= avalue;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tstringcol(items[int1]).optionsedit1:= optionsedit1ty(
+                   replacebits({$ifdef FPC}longword{$else}byte{$endif}(avalue),
+    {$ifdef FPC}longword{$else}byte{$endif}
+                               (tstringcol(items[int1]).optionsedit1),mask));
    end;
   end;
  end;
@@ -14100,6 +14131,7 @@ begin
  if not focusin then begin
   int1:= feditor.curindex;
  end;
+ feditor.optionsedit1:= col1.foptionsedit1;
  feditor.setup(mstr1,int1,not focusin,cellrect(acell,cil_inner),
                     cellrect(acell,cil_paint),nil,nil,
                     fdatacols[acell.col].rowfont(acell.row));

@@ -329,6 +329,8 @@ type
    function getcaretwidth: integer;
    procedure setcaretwidth(const Value: integer);   
    procedure setcursorreadonly(const avalue: cursorshapety);
+   function getoptionsedit1: optionsedit1ty;
+   procedure setoptionsedit1(const avalue: optionsedit1ty);
   protected
    feditor: tinplaceedit;
    foptionsedit: optionseditty;
@@ -393,6 +395,8 @@ type
    property editor: tinplaceedit read feditor;
    property optionsedit: optionseditty read getoptionsedit write setoptionsedit
                    default defaultoptionsedit;
+   property optionsedit1: optionsedit1ty read getoptionsedit1 
+                             write setoptionsedit1 default defaultoptionsedit1;
    property passwordchar: msechar read getpasswordchar
                      write setpasswordchar stored false default #0;
            //FPC and Delphi bug: widechars are not streamed
@@ -426,6 +430,7 @@ type
  tedit = class(tcustomedit)
   published
    property optionsedit;
+   property optionsedit1;
    property font;
    property passwordchar;
    property maxlength;
@@ -1223,6 +1228,16 @@ begin
   foptionsedit:= avalue {- [oe_autopost]};
   updatereadonlystate;
  end;
+end;
+
+function tcustomedit.getoptionsedit1: optionsedit1ty;
+begin
+ result:= feditor.optionsedit1;
+end;
+
+procedure tcustomedit.setoptionsedit1(const avalue: optionsedit1ty);
+begin
+ feditor.optionsedit1:= avalue;
 end;
 
 function tcustomedit.geteditfont: tfont;

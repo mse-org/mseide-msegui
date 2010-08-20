@@ -227,6 +227,7 @@ type
    function canpaste: boolean;
    procedure paste;
    procedure deleteselection;
+   procedure selectall;
 
    function find(const atext: msestring; options: searchoptionsty;
               var textpos: gridcoordty; const endpos: gridcoordty; 
@@ -282,6 +283,7 @@ type
    property font;
    property caretwidth;
    property optionsedit;
+   property optionsedit1;
    property encoding;
    property textflags;
    property textflagsactive;
@@ -1213,6 +1215,12 @@ begin
  end;
 end;
 
+procedure tcustomtextedit.selectall;
+begin
+ setselection(makegridcoord(0,0),
+               makegridcoord(bigint,fgridintf.grid.rowhigh),true);
+end;
+
 procedure tcustomtextedit.setfontstyle(const start,stop: gridcoordty;
                                const astyle: fontstylety; const aset: boolean);
 var
@@ -1302,15 +1310,6 @@ begin
       end;
      end;
     end;
-    {
-    ea_textentered: begin
-     if foptionsedit * [oe_readonly,oe_linebreak,oe_shiftreturn] = 
-                                [oe_linebreak] then begin
-      insertlinebreak;
-      action:= ea_none;
-     end;
-    end;
-    }
     ea_indexmoved: begin
      fcolindex:= feditor.curindex;
      updateindex(eas_shift in state);
@@ -1330,6 +1329,10 @@ begin
       deleteselection;
       action:= ea_none;
      end;
+    end;
+    ea_selectall: begin
+     selectall;
+     action:= ea_none;
     end;
     ea_deleteselection: begin
      deleteselection;
@@ -1394,14 +1397,6 @@ begin
      if focused then begin
       fgridintf.showcaretrect(info.caretrect,fframe);
      end;
-      {
-     rect1:= info.caretrect;
-     if fframe <> nil then begin
-      inflaterect1(rect1,fframe.innerframe);
-     end;
-     translateclientpoint1(rect1.pos,self,grid);
-     grid.showrect(rect1,cep_nearest,grid.noscrollingcol);
-     }
     end;
    end;
   end;
