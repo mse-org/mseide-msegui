@@ -6223,9 +6223,6 @@ endstep:
 
  if source <> pointer(adata) then begin
   adata:= ar1;
- end
- else begin
-  freemem(dest);
  end;
 end;
 
