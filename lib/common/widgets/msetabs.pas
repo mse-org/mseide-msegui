@@ -3556,7 +3556,7 @@ begin
       else begin
        if (activepage <> nil) and not activepage.entered and 
         (entered or ((fwindow <> nil) and 
-                 (fwindow.focusedwidget = nil))) then begin
+        (fwindow.focusedwidget = nil))) and activepage.canfocus then begin
                  //probably page destroyed
         activepage.setfocus(active);
        end;

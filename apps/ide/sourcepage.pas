@@ -834,7 +834,9 @@ end;
 
 function tsourcepage.modified: boolean;
 begin
- result:= edit.modified;
+ if edit <> nil then begin
+  result:= edit.modified;
+ end;
 end;
 
 procedure tsourcepage.textnotfound;
