@@ -3998,7 +3998,12 @@ end;
 procedure tcustomkeystringedit.setvalue(const avalue: msestring);
 begin
  with tkeystringdropdowncontroller(fdropdown) do begin
-  tdropdowncols1(cols).fitemindex:= getindex(avalue);
+  with tdropdowncols1(cols) do begin
+   fitemindex:= getindex(avalue);
+   if fitemindex >= 0 then begin
+    fkeyvalue:= avalue;
+   end;
+  end;
  end;
  fvalue1:= avalue;
  valuechanged;
