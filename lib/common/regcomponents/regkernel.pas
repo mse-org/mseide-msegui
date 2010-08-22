@@ -23,7 +23,7 @@ uses
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
  mseapplication,mseglob,mseguiglob,mseskin,msedesigner,typinfo,
  mseguithreadcomp,mseprocmonitorcomp,imageselectorform,msefadeedit,
- msearrayprops,msesumlist;
+ msearrayprops,msesumlist,mserttistat;
 
 type
  twidget1 = class(twidget);
@@ -152,7 +152,7 @@ const
 procedure Register;
 begin
  registerclass(tmsedatamodule);
- registercomponents('NoGui',[tstatfile,tnoguiaction,tactivator,
+ registercomponents('NoGui',[tstatfile,trttistat,tnoguiaction,tactivator,
                              ttimer,tthreadcomp,tpipereadercomp,tprocessmonitor]);
  registercomponenttabhints(['NoGui'],['Components without GUI Dependence']);
  registercomponents('Gui',[tmainmenu,tpopupmenu,

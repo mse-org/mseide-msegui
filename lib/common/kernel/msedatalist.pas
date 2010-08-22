@@ -1038,7 +1038,8 @@ procedure deleteitem(var value; const typeinfo: pdynarraytypeinfo;
                           const aindex: integer); overload;
   //value = array of type which needs no finalize
 procedure arrayaddref(var dynamicarray);
-procedure arraydecref(var dynamicarray);
+procedure arraydecref(var dynamicarray); 
+                 //no finalize and freemem if refcount = 0
 procedure allocuninitedarray(count,itemsize: integer; out dynamicarray);
                  //does not init memory, dynamicarray has to be nil!
 

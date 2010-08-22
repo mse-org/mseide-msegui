@@ -124,6 +124,8 @@ type
    procedure setifilink(const avalue: tifilinkcomp);
    function ifigriddata: tdatalist;
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
+   function getgriddata: tdatalist;
+   function getvalueprop: ppropinfo;
 {$endif}
    procedure updatetextflags;
    procedure settextflags(const value: textflagsty);
@@ -461,6 +463,16 @@ procedure tdispwidget.updateifigriddata(const sender: tobject;
                                                 const alist: tdatalist);
 begin
  //dummy
+end;
+
+function tdispwidget.getgriddata: tdatalist;
+begin
+ result:= nil;
+end;
+
+function tdispwidget.getvalueprop: ppropinfo;
+begin
+ result:= nil;
 end;
 
 {$endif}

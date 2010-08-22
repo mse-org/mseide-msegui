@@ -112,6 +112,8 @@ type
    function getifilink: tifilinkcomp;
    function ifigriddata: tdatalist;
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
+   function getgriddata: tdatalist;
+   function getvalueprop: ppropinfo;
 {$endif}
    procedure setcolorglyph(const Value: colorty);
    procedure setstatfile(const Value: tstatfile);
@@ -1879,6 +1881,19 @@ begin
  if fgridintf <> nil then begin
   fgridintf.updateifigriddata(alist);
  end;
+end;
+
+function tgraphdataedit.getgriddata: tdatalist;
+begin
+ result:= nil;
+ if fgridintf <> nil then begin
+  result:= fgridintf.getcol.datalist;
+ end;
+end;
+
+function tgraphdataedit.getvalueprop: ppropinfo;
+begin
+  result:= findpropinfo(self,'value');
 end;
 
 {$endif mse_with_ifi}

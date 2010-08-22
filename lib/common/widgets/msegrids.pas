@@ -1237,6 +1237,8 @@ type
     //iifidatalink
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    procedure ifisetvalue(var avalue; var accept: boolean);   
+   function getgriddata: tdatalist;
+   function getvalueprop: ppropinfo;
   {$endif}
   protected
    procedure sethidden(const index: integer; const avalue: boolean); override;
@@ -16313,6 +16315,17 @@ procedure trowstatelist.ifisetvalue(var avalue; var accept: boolean);
 begin
  //dummy
 end;
+
+function trowstatelist.getgriddata: tdatalist;
+begin
+ result:= self;
+end;
+
+function trowstatelist.getvalueprop: ppropinfo;
+begin
+ result:= nil;
+end;
+
 {$endif}
 
 end.

@@ -634,6 +634,8 @@ type
    procedure ifisetvalue(var avalue; var accept: boolean);
    function getifilinkkind: ptypeinfo;
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
+   function getgriddata: tdatalist;
+   function getvalueprop: ppropinfo;
    property ifilink: tifivaluelinkcomp read fifilink write setifilink;
   public
    constructor create(const aowner: tgridclientcontroller);
@@ -3566,6 +3568,16 @@ procedure trowstatehandler.updateifigriddata(const sender: tobject;
                const alist: tdatalist);
 begin
  internallinksource(alist,0,flistlink.source);
+end;
+
+function trowstatehandler.getgriddata: tdatalist;
+begin
+ result:= nil;
+end;
+
+function trowstatehandler.getvalueprop: ppropinfo;
+begin
+ result:= nil;
 end;
 
 procedure trowstatehandler.sourcechange(const sender: tdatalist;

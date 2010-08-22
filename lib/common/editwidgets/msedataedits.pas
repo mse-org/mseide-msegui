@@ -84,6 +84,8 @@ type
    procedure setifilink(const avalue: tifilinkcomp);
 //   function ifigriddata: tdatalist;
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
+   function getgriddata: tdatalist;
+   function getvalueprop: ppropinfo;
 {$endif}
 //   procedure fontemptychanged(const sender: tobject);
    procedure emptychanged;
@@ -2522,6 +2524,16 @@ begin
   fgridintf.updateifigriddata(alist);
   fdatalist:= alist;
  end;
+end;
+
+function tcustomdataedit.getgriddata: tdatalist;
+begin
+ result:= fdatalist;
+end;
+
+function tcustomdataedit.getvalueprop: ppropinfo;
+begin
+ result:= findpropinfo(self,'value');
 end;
 
 function tcustomdataedit.getifidatalinkintf: iifidatalink;
