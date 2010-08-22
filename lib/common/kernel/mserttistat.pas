@@ -157,6 +157,20 @@ begin
  ar1:= nil; //finalize
 end;
 
+function getint64ar(const aobj: tobject; const aprop: ppropinfo): int64arty;
+begin
+ result:= int64arty(getdynarray(aobj,aprop));
+end;
+
+procedure setint64ar(const aobj: tobject; const aprop: ppropinfo;
+                                                  const avalue: int64arty);
+var
+ ar1: int64arty;
+begin
+ pointer(ar1):= setdynarray(aobj,aprop,pointer(avalue));
+ ar1:= nil; //finalize
+end;
+
 function getrealar(const aobj: tobject; const aprop: ppropinfo): realarty;
 begin
  result:= realarty(getdynarray(aobj,aprop));
@@ -242,6 +256,10 @@ begin
     tkfloat: begin
      setfloatprop(aobj,po1,reader.readreal(name,getfloatprop(aobj,po1)));
     end;
+    tkbool: begin
+     setordprop(aobj,po1,
+        ord(longbool(reader.readboolean(name,getordprop(aobj,po1) <> 0))));
+    end;
     tkwstring: begin
      setwidestrprop(aobj,po1,reader.readmsestring(
                                          name,getwidestrprop(aobj,po1)));
@@ -261,6 +279,9 @@ begin
      case po2^.kind of
       tkinteger: begin
        setintegerar(aobj,po1,reader.readarray(name,getintegerar(aobj,po1)));
+      end;
+      tkint64: begin
+       setint64ar(aobj,po1,reader.readarray(name,getint64ar(aobj,po1)));
       end;
       tkfloat: begin
        if po3^.floattype = ftdouble then begin
@@ -305,7 +326,7 @@ begin
   po1:= ar1[int1];
   with po1^ do begin
    case proptype^.kind of
-    tkInteger,tkChar,tkEnumeration,tkWChar,tkSet,tkbool: begin
+    tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
      writer.writeinteger(name,getordprop(aobj,po1));
     end;
     tkint64: begin
@@ -313,6 +334,9 @@ begin
     end;
     tkfloat: begin
      writer.writereal(name,getfloatprop(aobj,po1));
+    end;
+    tkbool: begin
+     writer.writeboolean(name,getordprop(aobj,po1) <> 0);
     end;
     tkustring: begin
      writer.writemsestring(name,getunicodestrprop(aobj,po1));
@@ -330,6 +354,9 @@ begin
      case po2^.kind of
       tkinteger: begin
        writer.writearray(name,getintegerar(aobj,po1));
+      end;
+      tkint64: begin
+       writer.writearray(name,getint64ar(aobj,po1));
       end;
       tkfloat: begin
        if po3^.floattype = ftdouble then begin
@@ -383,9 +410,9 @@ begin
     po4:= intf1.getvalueprop;
     if po4 <> nil then begin
      case proptype^.kind of
-      tkInteger,tkChar,tkEnumeration,tkWChar,tkSet,tkbool: begin
+      tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
        if po4^.proptype^.kind in 
-             [tkInteger,tkChar,tkEnumeration,tkWChar,tkSet,tkbool] then begin
+             [tkInteger,tkChar,tkEnumeration,tkWChar,tkSet] then begin
         setordprop(dest,po1,getordprop(comp1,po4));
        end;
       end;
@@ -399,6 +426,12 @@ begin
        if po4^.proptype^.kind in 
              [tkfloat] then begin
         setfloatprop(dest,po1,getfloatprop(comp1,po4));
+       end;
+      end;
+      tkbool: begin
+       if po4^.proptype^.kind in 
+             [tkbool] then begin
+        setordprop(dest,po1,getordprop(comp1,po4));
        end;
       end;
       tkustring: begin
@@ -491,9 +524,9 @@ begin
     po4:= intf1.getvalueprop;
     if po4 <> nil then begin
      case proptype^.kind of
-      tkInteger,tkChar,tkEnumeration,tkWChar,tkSet,tkbool: begin
+      tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
        if po4^.proptype^.kind in 
-             [tkInteger,tkChar,tkEnumeration,tkWChar,tkSet,tkbool] then begin
+             [tkInteger,tkChar,tkEnumeration,tkWChar,tkSet] then begin
         setordprop(comp1,po4,getordprop(source,po1));
        end;
       end;
@@ -507,6 +540,12 @@ begin
        if po4^.proptype^.kind in 
              [tkfloat] then begin
         setfloatprop(comp1,po4,getfloatprop(source,po1));
+       end;
+      end;
+      tkbool: begin
+       if po4^.proptype^.kind in 
+             [tkbool] then begin
+        setordprop(comp1,po4,getordprop(source,po1));
        end;
       end;
       tkustring: begin
