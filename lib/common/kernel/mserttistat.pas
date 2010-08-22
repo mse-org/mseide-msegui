@@ -510,11 +510,5 @@ end;
 {$endif}
 
 { trttistat }
-{
-function trttistat.firstsavedproperty: integer;
-begin
- result:= inherited firstsavedproperty + 7; 
-                     //remove own published properties
-end;
-}
+
 end.
