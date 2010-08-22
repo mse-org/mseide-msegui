@@ -494,7 +494,7 @@ var
  obj1: tobject;
 begin
  if getobj(obj1) then begin
-  objecttovalues(obj1,sourceroot);
+  valuestoobject(sourceroot,obj1);
  end;
 end;
 
@@ -503,7 +503,7 @@ var
  obj1: tobject;
 begin
  if getobj(obj1) then begin
-  valuestoobject(destroot,obj1);
+  objecttovalues(obj1,destroot);
  end;
 end;
 
