@@ -300,6 +300,8 @@ type
    procedure Setitems(const index: integer; const Value: integer);
    procedure setasarray(const avalue: integerarty);
    function getasarray: integerarty;
+   procedure setasbooleanarray(const avalue: booleanarty);
+   function getasbooleanarray: booleanarty;
   protected
    function checkassigncompatibility(
                             const source: tpersistent): boolean; override;
@@ -325,6 +327,7 @@ type
    procedure setastext(const index: integer; const avalue: msestring); override;
 
    property asarray: integerarty read getasarray write setasarray;
+   property asbooleanarray: booleanarty read getasbooleanarray write setasbooleanarray;
    property items[const index: integer]: integer read Getitems write Setitems; default;
  end;
 
@@ -1509,7 +1512,7 @@ begin
  if pointer(dynamicarray) <> nil then begin
   refpo:= psizeint(pchar(dynamicarray)-2*sizeof(sizeint));
   if refpo^ >= 0 then begin
-   inc(refpo^);
+   interlockedincrement(refpo^);
   end;
  end;
 end;
@@ -1521,7 +1524,7 @@ begin
  if pointer(dynamicarray) <> nil then begin
   refpo:= psizeint(pchar(dynamicarray)-2*sizeof(sizeint));
   if refpo^ > 0 then begin
-   dec(refpo^);
+   interlockeddecrement(refpo^);
   end;
  end;
 end;
@@ -4655,6 +4658,33 @@ end;
 procedure tintegerdatalist.setasarray(const avalue: integerarty);
 begin
  internalsetasarray(pointer(avalue),sizeof(integer),length(avalue));
+end;
+
+function tintegerdatalist.getasbooleanarray: booleanarty;
+var
+ po1: pinteger;
+ int1: integer;
+begin
+ setlength(result,fcount);
+ po1:= datapo;
+ for int1:= 0 to high(result) do begin
+  result[int1]:= po1^ <> 0;
+  inc(pchar(po1),fsize);
+ end;
+end;
+
+procedure tintegerdatalist.setasbooleanarray(const avalue: booleanarty);
+var
+ int1: integer;
+ po1: plongbool;
+begin
+ newbuffer(length(avalue),true,size > sizeof(integer));
+ po1:= pointer(fdatapo);
+ for int1:= 0 to high(avalue) do begin
+  po1^:= avalue[int1];
+  inc(pchar(po1),fsize);
+ end;
+ change(-1); 
 end;
 
 function tintegerdatalist.getstatdata(const index: integer): msestring;

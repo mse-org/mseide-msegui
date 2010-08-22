@@ -23,6 +23,9 @@ uses
 type
  getobjecteventty = procedure(const sender: tobject;
                                    var avalue: tobject) of object;
+
+// setter procedures for dynymic array properties must have  ???
+// const param modifier!                                     ???
                                    
  tcustomrttistat = class(tmsecomponent,istatfile)
   private
@@ -81,11 +84,68 @@ type
 implementation
 uses
  {$ifdef mse_with_ifi}mseificompglob,{$endif}msedatalist;
- 
+
+type
+ dynarraysetter = procedure(const avalue: pointerarty) of object;
+                                     //dummy type
+ dynarraygetter = function: pointerarty of object;
+                                     //dummy type
+
+function getdynarray(const aobj: tobject; const aprop: ppropinfo): pointer;
+var
+ getterkind: integer;
+ meth1: tmethod;
+begin
+ getterkind:= (aprop^.propprocs) and 3;
+ case getterkind of
+  ptfield: begin
+   result:= ppointer(pointer(aobj) + ptruint(aprop^.getproc))^;
+  end;
+  ptstatic: begin
+   meth1.code:= aprop^.getproc;
+  end
+  else begin //ptvirtual
+   meth1.code:= ppointer(pointer(aobj.classtype) + 
+                                 ptruint(aprop^.getproc))^;
+  end;
+ end;
+ if getterkind <> ptfield then begin
+  meth1.data:= aobj;
+  result:= pointer(dynarraygetter(meth1)());
+ end;
+end;
+
+function setdynarray(const aobj: tobject; const aprop: ppropinfo;
+             const avalue: pointer): pointer; 
+                   // returns valuebefore for finalize
+var
+ setterkind: integer;
+ meth1: tmethod;
+begin
+ setterkind:= (aprop^.propprocs shr 2) and 3;
+ result:= nil;
+ case setterkind of
+  ptfield: begin
+   arrayaddref((@avalue)^);
+   result:= getdynarray(aobj,aprop);
+   ppointer(pointer(aobj) + ptruint(aprop^.setproc))^:= avalue;
+   exit;
+  end;
+  ptstatic: begin
+   meth1.code:= aprop^.setproc;
+  end
+  else begin //ptvirtual
+   meth1.code:= ppointer(pointer(aobj.classtype) + 
+                                 ptruint(aprop^.setproc))^;
+  end;
+ end;
+ meth1.data:= aobj;
+ dynarraysetter(meth1)(avalue);
+end;
+
 function getintegerar(const aobj: tobject; const aprop: ppropinfo): integerarty;
 begin
- result:= integerarty(ptruint(getordprop(aobj,aprop)));
-                          //todo: check getter/setter for incref/decref
+ result:= integerarty(getdynarray(aobj,aprop));
 end;
 
 procedure setintegerar(const aobj: tobject; const aprop: ppropinfo;
@@ -93,19 +153,67 @@ procedure setintegerar(const aobj: tobject; const aprop: ppropinfo;
 var
  ar1: integerarty;
 begin
- arrayaddref((@avalue)^); //todo: check getter/setter for incref/decref
- pointer(ar1):= pointer(ptruint(getordprop(aobj,aprop)));
- ar1:= nil; //decref
- setordprop(aobj,aprop,ptruint(pointer(avalue))); 
+ pointer(ar1):= setdynarray(aobj,aprop,pointer(avalue));
+ ar1:= nil; //finalize
 end;
 
 function getrealar(const aobj: tobject; const aprop: ppropinfo): realarty;
 begin
+ result:= realarty(getdynarray(aobj,aprop));
 end;
 
 procedure setrealar(const aobj: tobject; const aprop: ppropinfo;
                                                  const avalue: realarty);
+var
+ ar1: realarty;
 begin
+ pointer(ar1):= setdynarray(aobj,aprop,pointer(avalue));
+ ar1:= nil; //finalize
+end;
+
+function getmsestringar(const aobj: tobject;
+                           const aprop: ppropinfo): msestringarty;
+begin
+ result:= msestringarty(getdynarray(aobj,aprop));
+end;
+
+procedure setmsestringar(const aobj: tobject; const aprop: ppropinfo;
+                                                 const avalue: msestringarty);
+var
+ ar1: msestringarty;
+begin
+ pointer(ar1):= setdynarray(aobj,aprop,pointer(avalue));
+ ar1:= nil; //finalize
+end;
+
+function getstringar(const aobj: tobject;
+                           const aprop: ppropinfo): stringarty;
+begin
+ result:= stringarty(getdynarray(aobj,aprop));
+end;
+
+procedure setstringar(const aobj: tobject; const aprop: ppropinfo;
+                                                 const avalue: stringarty);
+var
+ ar1: stringarty;
+begin
+ pointer(ar1):= setdynarray(aobj,aprop,pointer(avalue));
+ ar1:= nil; //finalize
+end;
+
+function getbooleanar(const aobj: tobject;
+                           const aprop: ppropinfo): booleanarty;
+begin
+ result:= booleanarty(getdynarray(aobj,aprop));
+end;
+
+procedure setbooleanar(const aobj: tobject; const aprop: ppropinfo;
+                                                 const avalue: booleanarty);
+var
+ ar1: booleanarty;
+begin
+ pointer(ar1):= setdynarray(aobj,aprop,pointer(avalue));
+ ar1:= nil; //finalize
 end;
 
 procedure readobjectstat(const reader: tstatreader; const aobj: tobject);
@@ -158,6 +266,15 @@ begin
        if po3^.floattype = ftdouble then begin
         setrealar(aobj,po1,reader.readarray(name,getrealar(aobj,po1)));
        end;
+      end;
+      tkustring: begin
+       setmsestringar(aobj,po1,reader.readarray(name,getmsestringar(aobj,po1)));
+      end;
+      tkastring: begin
+       setstringar(aobj,po1,reader.readarray(name,getstringar(aobj,po1)));
+      end;
+      tkbool: begin
+       setbooleanar(aobj,po1,reader.readarray(name,getbooleanar(aobj,po1)));
       end;
      end;
     end;
@@ -218,6 +335,15 @@ begin
        if po3^.floattype = ftdouble then begin
         writer.writearray(name,getrealar(aobj,po1));
        end;
+      end;
+      tkustring: begin
+       writer.writearray(name,getmsestringar(aobj,po1));
+      end;
+      tkastring: begin
+       writer.writearray(name,getstringar(aobj,po1));
+      end;
+      tkbool: begin
+       writer.writearray(name,getbooleanar(aobj,po1));
       end;
      end;
     end;
@@ -317,6 +443,21 @@ begin
            setrealar(dest,po1,trealdatalist(list1).asarray);
           end;
          end;
+         tkustring: begin
+          if list1 is tpoorstringdatalist then begin
+           setmsestringar(dest,po1,tpoorstringdatalist(list1).asarray);
+          end;
+         end;
+         tkastring: begin
+          if list1 is tansistringdatalist then begin
+           setstringar(dest,po1,tansistringdatalist(list1).asarray);
+          end;
+         end;
+         tkbool: begin
+          if list1 is tintegerdatalist then begin
+           setbooleanar(dest,po1,tintegerdatalist(list1).asbooleanarray);
+          end;
+         end;
         end;
        end;
       end;
@@ -398,6 +539,21 @@ begin
          tkfloat: begin
           if (po3^.floattype = ftdouble) and (list1 is trealdatalist) then begin
            trealdatalist(list1).asarray:=  getrealar(source,po1);
+          end;
+         end;
+         tkustring: begin
+          if list1 is tpoorstringdatalist then begin
+           tpoorstringdatalist(list1).asarray:= getmsestringar(source,po1);
+          end;
+         end;
+         tkastring: begin
+          if list1 is tansistringdatalist then begin
+           tansistringdatalist(list1).asarray:= getstringar(source,po1);
+          end;
+         end;
+         tkbool: begin
+          if list1 is tintegerdatalist then begin
+           tintegerdatalist(list1).asbooleanarray:= getbooleanar(source,po1);
           end;
          end;
         end;

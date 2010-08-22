@@ -35,8 +35,6 @@ type
   procedure statwritevalue(const aname: msestring; const writer: tstatwriter);
  end;
 
-// tstatfile = class;
-
  tstatfiler = class
   private
    fstream: ttextstream;
@@ -72,7 +70,6 @@ type
    procedure updatevalue(const name: msestring; const intf: istatupdatevalue); overload;
    procedure updatestat(const intf: istatfile);
    procedure updatememorystatstream(const name: msestring; const streamname: msestring);
-//   procedure updatestatfile(const name: msestring; const statfile: tstatfile);
    function beginlist(const name: msestring = ''): boolean;  virtual; abstract;
    function endlist: boolean;  virtual; abstract;
  end;
@@ -134,6 +131,7 @@ type
    function readarray(const name: msestring; const default: msestringarty): msestringarty; overload;
    function readarray(const name: msestring; const default: integerarty): integerarty; overload;
    function readarray(const name: msestring; const default: int64arty): int64arty; overload;
+   function readarray(const name: msestring; const default: booleanarty): booleanarty; overload;
    function readarray(const name: msestring; const default: longboolarty): longboolarty; overload;
    function readarray(const name: msestring; const default: realarty): realarty; overload;
    function readlistitem: msestring;
@@ -151,7 +149,6 @@ type
    procedure readvalue(const name: msestring; const intf: istatupdatevalue);
    procedure readstat(const intf: istatfile);
    procedure readmemorystatstream(const name: msestring; const streamname: msestring);
-//   procedure readstatfile(const name: msestring; const statfile: tstatfile);
  end;
 
  recgetrecordeventty = function(const index: integer): msestring of object;
@@ -182,6 +179,7 @@ type
    procedure writearray(const name: msestring; const value: msestringarty); overload;
    procedure writearray(const name: msestring; const value: integerarty); overload;
    procedure writearray(const name: msestring; const value: int64arty); overload;
+   procedure writearray(const name: msestring; const value: booleanarty); overload;
    procedure writearray(const name: msestring; const value: longboolarty); overload;
    procedure writearray(const name: msestring; const value: realarty); overload;
  
@@ -199,9 +197,8 @@ type
  
    procedure writevalue(const name: msestring; const intf: istatupdatevalue);
    procedure writestat(const intf: istatfile);
-   procedure writememorystatstream(const name: msestring; const streamname: msestring);
-//   procedure writestatfile(const name: msestring; const statfile: tstatfile);
-
+   procedure writememorystatstream(const name: msestring;
+                                                 const streamname: msestring);
  end;
 
  tmemorytextstream = class;
@@ -985,6 +982,28 @@ begin
 end;
 
 function tstatreader.readarray(const name: msestring;
+            const default: booleanarty): booleanarty;
+var
+ str1: msestring;
+ int1,int2: integer;
+begin
+ if findvar(name,str1) then begin
+  int2:= strtoint(str1);
+  setlength(result,int2);
+  for int1:= 0 to int2-1 do begin
+   try
+    result[int1]:= boolean(strtoint(readlistitem));
+   except
+    break;
+   end;
+  end;
+ end
+ else begin
+  result:= default;
+ end;
+end;
+
+function tstatreader.readarray(const name: msestring;
   const default: realarty): realarty;
 var
  str1: msestring;
@@ -1359,6 +1378,16 @@ begin
 end;
 
 procedure tstatwriter.writearray(const name: msestring; const value: longboolarty);
+var
+ int1: integer;
+begin
+ writeinteger(name,length(value));
+ for int1:= 0 to high(value) do begin
+  writelistitem(integer(value[int1]));
+ end;
+end;
+
+procedure tstatwriter.writearray(const name: msestring; const value: booleanarty);
 var
  int1: integer;
 begin

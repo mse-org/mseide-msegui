@@ -519,6 +519,8 @@ type
    procedure setgridvalue(const index: integer; const Value: longbool); virtual;
    function getgridvalues: longboolarty;
    procedure setgridvalues(const Value: longboolarty);
+   function getgridbooleanvalues: booleanarty;
+   procedure setgridbooleanvalues(const Value: booleanarty);
    function getvalue: boolean;
    function getvaluedefault: boolean;
    procedure setvaluedefault(const Value: boolean);
@@ -555,10 +557,11 @@ type
    procedure togglegridvalue(const index: integer); override;
    
    property value: boolean read getvalue write setvalue default false;
-   property valuedefault: boolean read getvaluedefault write setvaluedefault default false;
+   property valuedefault: boolean read getvaluedefault 
+                                       write setvaluedefault default false;
                       //streaming of longbool does not work on kylix and fpc
    property gridvalue[const index: integer]: longbool
-        read getgridvalue write setgridvalue; default;
+                          read getgridvalue write setgridvalue; default;
    function valuetag(const falsevalue: integer): integer;
    function valuetagbit: longword;
                   //if value -> bits[tag] else -> 0
@@ -566,16 +569,19 @@ type
                   //if value -> bits[tag] else -> 0
    property valuebitmask: longword read getvaluebitmask write setvaluebitmask;
                   //ored valuetagbit of all edits in group
-   property gridvaluebitmask[const index: integer]: longword read getgridvaluebitmask
-                        write setgridvaluebitmask;
+   property gridvaluebitmask[const index: integer]: longword 
+                           read getgridvaluebitmask write setgridvaluebitmask;
                   //ored valuetagbit of all edits in group
 
-   function gridvaluetag(const index: integer; const falsevalue: integer): integer;
+   function gridvaluetag(const index: integer; 
+                                         const falsevalue: integer): integer;
            //if value = true -> tag, falsevalue otherwise
    procedure updatetagvalue(const bitset: integer);
            //value -> true if bitset and tag <> 0
    procedure gridupdatetagvalue(const index: integer; const bitset: integer);
    property gridvalues: longboolarty read getgridvalues write setgridvalues;
+   property gridbooleanvalues: booleanarty read getgridbooleanvalues 
+                                                 write setgridbooleanvalues;
    function groupmembers: booleaneditarty;
    function tagitem(const atag: integer): tcustombooleanedit; //nil if none
 
@@ -2220,6 +2226,16 @@ end;
 procedure tcustombooleanedit.setgridvalues(const Value: longboolarty);
 begin
  tintegerdatalist(fgridintf.getcol.datalist).asarray:= integerarty(value);
+end;
+
+function tcustombooleanedit.getgridbooleanvalues: booleanarty;
+begin
+ result:= tintegerdatalist(fgridintf.getcol.datalist).asbooleanarray;
+end;
+
+procedure tcustombooleanedit.setgridbooleanvalues(const Value: booleanarty);
+begin
+ tintegerdatalist(fgridintf.getcol.datalist).asbooleanarray:= value;
 end;
 
 function tcustombooleanedit.valuetag(const falsevalue: integer): integer;
