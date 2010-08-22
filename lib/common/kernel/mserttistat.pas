@@ -80,7 +80,7 @@ type
 
 implementation
 uses
- {$ifdef mse_with_ifi}mseificompglob{$endif},msedatalist;
+ {$ifdef mse_with_ifi}mseificompglob,{$endif}msedatalist;
  
 function getintegerar(const aobj: tobject; const aprop: ppropinfo): integerarty;
 begin
