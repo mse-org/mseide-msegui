@@ -2529,11 +2529,15 @@ begin
    bo1:= visible;
    if application.findwidget(str1,widget1) then begin
     visible:= false;
+    if (widget1 <> nil) and 
+                 widget1.getcorbainterface(typeinfo(idocktarget),intf1) then begin
+     intf1.getdockcontroller.frefsize:= 0; //invalid
+    end;
     parentwidget:= widget1;
    end;
    bo1:= reader.readboolean('visible',bo1);
    if (parentwidget <> nil) then begin
-    if not parentwidget.getcorbainterface(typeinfo(idocktarget),intf1)then begin
+    if not parentwidget.getcorbainterface(typeinfo(idocktarget),intf1) then begin
      rect1:= clipinrect(rect1,parentwidget.paintrect); //shift into widget
     end;
     widgetrect:= rect1;
