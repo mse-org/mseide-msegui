@@ -21,17 +21,23 @@ uses
  classes,mseclasses,msestat,msestatfile,msestrings,typinfo,msetypes;
  
 type
+ objectinfoty = record
+  obj: tobject;
+  prefix: string;
+ end;
+ objectinfoarty = array of objectinfoty;
+ 
  getobjecteventty = procedure(const sender: tobject;
-                                   var avalue: tobject) of object;
+                                   var aobject: tobject) of object;
+ getobjectseventty = procedure(const sender: tobject;
+                                   var aobjects: objectinfoarty) of object;
 
-// setter procedures for dynymic array properties must have  ???
-// const param modifier!                                     ???
-                                   
  tcustomrttistat = class(tmsecomponent,istatfile)
   private
    fstatfile: tstatfile;
    fstatvarname: msestring;
    fongetobject: getobjecteventty;
+   fongetobjects: getobjectseventty;
    fonstatupdate: statupdateeventty;
    fonstatread: statreadeventty;
    fonstatwrite: statwriteeventty;
@@ -45,7 +51,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
-   function getobj(out aobj: tobject): boolean;
+   function getobj(out aobj: objectinfoarty): boolean;
   public
   {$ifdef mse_with_ifi}
    procedure valuestoobj(const sourceroot: tcomponent);
@@ -56,6 +62,7 @@ type
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
    property ongetobject: getobjecteventty read fongetobject write fongetobject;
+   property ongetobjects: getobjectseventty read fongetobjects write fongetobjects;
    property onstatupdate: statupdateeventty read fonstatupdate 
                                                         write fonstatupdate;
    property onstatread: statreadeventty read fonstatread 
@@ -74,6 +81,7 @@ type
    property statfile;
    property statvarname;
    property ongetobject;
+   property ongetobjects;
    property onstatupdate;
    property onstatread;
    property onstatwrite;
@@ -81,6 +89,9 @@ type
    property onstatafterread;   
  end;
 
+function opentodynarray(const objs: array of tobject;
+                     const prefixes: array of string): objectinfoarty;
+                     
 implementation
 uses
  {$ifdef mse_with_ifi}mseificompglob,{$endif}msedatalist;
@@ -90,6 +101,22 @@ type
                                      //dummy type
  dynarraygetter = function: pointerarty of object;
                                      //dummy type
+
+function opentodynarray(const objs: array of tobject;
+                     const prefixes: array of string): objectinfoarty;
+var
+ int1: integer;
+begin
+ setlength(result,length(objs));
+ for int1:= 0 to high(result) do begin
+  with result[int1] do begin
+   obj:= objs[int1];
+   if int1 <= high(prefixes) then begin
+    prefix:= prefixes[int1];
+   end;
+  end;
+ end;
+end;
 
 function getdynarray(const aobj: tobject; const aprop: ppropinfo): pointer;
 var
@@ -230,7 +257,7 @@ begin
  ar1:= nil; //finalize
 end;
 
-procedure readobjectstat(const reader: tstatreader; const aobj: tobject);
+procedure readobjectstat(const reader: tstatreader; const aobj: objectinfoty);
 var
  ar1: propinfopoarty; 
  po1: ppropinfo;
@@ -241,68 +268,72 @@ var
  intf1: istatfile;
  intar: integerarty;
  realar: realarty;
+ str1: string;
 begin
- ar1:= getpropinfoar(aobj);
- for int1 := 0 to high(ar1) do begin
-  po1:= ar1[int1];
-  with po1^ do begin
-   case proptype^.kind of
-    tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
-     setordprop(aobj,po1,reader.readinteger(name,getordprop(aobj,po1)));
-    end;
-    tkint64: begin
-     setordprop(aobj,po1,reader.readint64(name,getordprop(aobj,po1)));
-    end;
-    tkfloat: begin
-     setfloatprop(aobj,po1,reader.readreal(name,getfloatprop(aobj,po1)));
-    end;
-    tkbool: begin
-     setordprop(aobj,po1,
-        ord(longbool(reader.readboolean(name,getordprop(aobj,po1) <> 0))));
-    end;
-    tkwstring: begin
-     setwidestrprop(aobj,po1,reader.readmsestring(
-                                         name,getwidestrprop(aobj,po1)));
-    end;
-    tkustring: begin
-     setunicodestrprop(aobj,po1,reader.readmsestring(
-                                         name,getunicodestrprop(aobj,po1)));
-    end;
-    tkastring,tklstring,tkstring: begin
-     setstrprop(aobj,po1,reader.readstring(name,getstrprop(aobj,po1)));
-    end;
-     //how to reach fpc_DecRef?
-    tkdynarray: begin
-     po2:= pointer(gettypedata(proptype)^.eltype2); 
-                         //wrong define in ttypedata
-     po3:= gettypedata(po2);
-     case po2^.kind of
-      tkinteger: begin
-       setintegerar(aobj,po1,reader.readarray(name,getintegerar(aobj,po1)));
-      end;
-      tkint64: begin
-       setint64ar(aobj,po1,reader.readarray(name,getint64ar(aobj,po1)));
-      end;
-      tkfloat: begin
-       if po3^.floattype = ftdouble then begin
-        setrealar(aobj,po1,reader.readarray(name,getrealar(aobj,po1)));
+ with aobj do begin
+  ar1:= getpropinfoar(obj);
+  for int1 := 0 to high(ar1) do begin
+   po1:= ar1[int1];
+   with po1^ do begin
+    str1:= prefix+name;
+    case proptype^.kind of
+     tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
+      setordprop(obj,po1,reader.readinteger(str1,getordprop(obj,po1)));
+     end;
+     tkint64: begin
+      setordprop(obj,po1,reader.readint64(str1,getordprop(obj,po1)));
+     end;
+     tkfloat: begin
+      setfloatprop(obj,po1,reader.readreal(str1,getfloatprop(obj,po1)));
+     end;
+     tkbool: begin
+      setordprop(obj,po1,
+         ord(longbool(reader.readboolean(str1,getordprop(obj,po1) <> 0))));
+     end;
+     tkwstring: begin
+      setwidestrprop(obj,po1,reader.readmsestring(
+                                          str1,getwidestrprop(obj,po1)));
+     end;
+     tkustring: begin
+      setunicodestrprop(obj,po1,reader.readmsestring(
+                                          str1,getunicodestrprop(obj,po1)));
+     end;
+     tkastring,tklstring,tkstring: begin
+      setstrprop(obj,po1,reader.readstring(str1,getstrprop(obj,po1)));
+     end;
+      //how to reach fpc_DecRef?
+     tkdynarray: begin
+      po2:= pointer(gettypedata(proptype)^.eltype2); 
+                          //wrong define in ttypedata
+      po3:= gettypedata(po2);
+      case po2^.kind of
+       tkinteger: begin
+        setintegerar(obj,po1,reader.readarray(str1,getintegerar(obj,po1)));
+       end;
+       tkint64: begin
+        setint64ar(obj,po1,reader.readarray(str1,getint64ar(obj,po1)));
+       end;
+       tkfloat: begin
+        if po3^.floattype = ftdouble then begin
+         setrealar(obj,po1,reader.readarray(str1,getrealar(obj,po1)));
+        end;
+       end;
+       tkustring: begin
+        setmsestringar(obj,po1,reader.readarray(str1,getmsestringar(obj,po1)));
+       end;
+       tkastring: begin
+        setstringar(obj,po1,reader.readarray(str1,getstringar(obj,po1)));
+       end;
+       tkbool: begin
+        setbooleanar(obj,po1,reader.readarray(str1,getbooleanar(obj,po1)));
        end;
       end;
-      tkustring: begin
-       setmsestringar(aobj,po1,reader.readarray(name,getmsestringar(aobj,po1)));
-      end;
-      tkastring: begin
-       setstringar(aobj,po1,reader.readarray(name,getstringar(aobj,po1)));
-      end;
-      tkbool: begin
-       setbooleanar(aobj,po1,reader.readarray(name,getbooleanar(aobj,po1)));
-      end;
      end;
-    end;
-    tkclass: begin
-     obj1:= tobject(ptruint(getordprop(aobj,po1)));
-     if obj1 is tdatalist then begin
-      reader.readdatalist(name,tdatalist(obj1));
+     tkclass: begin
+      obj1:= tobject(ptruint(getordprop(obj,po1)));
+      if obj1 is tdatalist then begin
+       reader.readdatalist(str1,tdatalist(obj1));
+      end;
      end;
     end;
    end;
@@ -310,7 +341,7 @@ begin
  end;
 end;
 
-procedure writeobjectstat(const writer: tstatwriter; const aobj: tobject);
+procedure writeobjectstat(const writer: tstatwriter; const aobj: objectinfoty);
 var
  ar1: propinfopoarty; 
 // ar2: array of istatfile;
@@ -320,64 +351,68 @@ var
  int1: integer;
  obj1: tobject;
  intf1: istatfile;
+ str1: string;
 begin
- ar1:= getpropinfoar(aobj);
- for int1 := 0 to high(ar1) do begin
-  po1:= ar1[int1];
-  with po1^ do begin
-   case proptype^.kind of
-    tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
-     writer.writeinteger(name,getordprop(aobj,po1));
-    end;
-    tkint64: begin
-     writer.writeint64(name,getordprop(aobj,po1));
-    end;
-    tkfloat: begin
-     writer.writereal(name,getfloatprop(aobj,po1));
-    end;
-    tkbool: begin
-     writer.writeboolean(name,getordprop(aobj,po1) <> 0);
-    end;
-    tkustring: begin
-     writer.writemsestring(name,getunicodestrprop(aobj,po1));
-    end;
-    tkwstring: begin
-     writer.writemsestring(name,getwidestrprop(aobj,po1));
-    end;
-    tkastring,tklstring,tkstring: begin
-     writer.writestring(name,getstrprop(aobj,po1));
-    end;
-    tkdynarray: begin
-     po2:= pointer(gettypedata(proptype)^.eltype2); 
-                         //wrong define in ttypedata
-     po3:= gettypedata(po2);
-     case po2^.kind of
-      tkinteger: begin
-       writer.writearray(name,getintegerar(aobj,po1));
-      end;
-      tkint64: begin
-       writer.writearray(name,getint64ar(aobj,po1));
-      end;
-      tkfloat: begin
-       if po3^.floattype = ftdouble then begin
-        writer.writearray(name,getrealar(aobj,po1));
+ with aobj do begin
+  ar1:= getpropinfoar(obj);
+  for int1 := 0 to high(ar1) do begin
+   po1:= ar1[int1];
+   with po1^ do begin
+    str1:= prefix+name;
+    case proptype^.kind of
+     tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
+      writer.writeinteger(str1,getordprop(obj,po1));
+     end;
+     tkint64: begin
+      writer.writeint64(str1,getordprop(obj,po1));
+     end;
+     tkfloat: begin
+      writer.writereal(str1,getfloatprop(obj,po1));
+     end;
+     tkbool: begin
+      writer.writeboolean(str1,getordprop(obj,po1) <> 0);
+     end;
+     tkustring: begin
+      writer.writemsestring(str1,getunicodestrprop(obj,po1));
+     end;
+     tkwstring: begin
+      writer.writemsestring(str1,getwidestrprop(obj,po1));
+     end;
+     tkastring,tklstring,tkstring: begin
+      writer.writestring(str1,getstrprop(obj,po1));
+     end;
+     tkdynarray: begin
+      po2:= pointer(gettypedata(proptype)^.eltype2); 
+                          //wrong define in ttypedata
+      po3:= gettypedata(po2);
+      case po2^.kind of
+       tkinteger: begin
+        writer.writearray(str1,getintegerar(obj,po1));
+       end;
+       tkint64: begin
+        writer.writearray(str1,getint64ar(obj,po1));
+       end;
+       tkfloat: begin
+        if po3^.floattype = ftdouble then begin
+         writer.writearray(str1,getrealar(obj,po1));
+        end;
+       end;
+       tkustring: begin
+        writer.writearray(str1,getmsestringar(obj,po1));
+       end;
+       tkastring: begin
+        writer.writearray(str1,getstringar(obj,po1));
+       end;
+       tkbool: begin
+        writer.writearray(str1,getbooleanar(obj,po1));
        end;
       end;
-      tkustring: begin
-       writer.writearray(name,getmsestringar(aobj,po1));
-      end;
-      tkastring: begin
-       writer.writearray(name,getstringar(aobj,po1));
-      end;
-      tkbool: begin
-       writer.writearray(name,getbooleanar(aobj,po1));
-      end;
      end;
-    end;
-    tkclass: begin
-     obj1:= tobject(ptruint(getordprop(aobj,po1)));
-     if obj1 is tdatalist then begin
-      writer.writedatalist(name,tdatalist(obj1));
+     tkclass: begin
+      obj1:= tobject(ptruint(getordprop(obj,po1)));
+      if obj1 is tdatalist then begin
+       writer.writedatalist(str1,tdatalist(obj1));
+      end;
      end;
     end;
    end;
@@ -386,7 +421,7 @@ begin
 end;
 
 {$ifdef mse_with_ifi}
-procedure valuestoobject(const sourceroot: tcomponent; const dest: tobject);
+procedure valuestoobject(const sourceroot: tcomponent; const dest: objectinfoty);
 var
  comp1: tcomponent;
  ar1: propinfopoarty; 
@@ -399,11 +434,11 @@ var
  list1: tdatalist;
  arpo: pointer;
 begin
- ar1:= getpropinfoar(dest);
+ ar1:= getpropinfoar(dest.obj);
  for int1 := 0 to high(ar1) do begin
   po1:= ar1[int1];
   with po1^ do begin
-   comp1:= sourceroot.findcomponent(name);
+   comp1:= sourceroot.findcomponent(dest.prefix+name);
    if (comp1 <> nil) and 
      mseclasses.getcorbainterface(comp1,typeinfo(iifidatalink),
                                                       intf1)  then begin
@@ -413,44 +448,44 @@ begin
       tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
        if po4^.proptype^.kind in 
              [tkInteger,tkChar,tkEnumeration,tkWChar,tkSet] then begin
-        setordprop(dest,po1,getordprop(comp1,po4));
+        setordprop(dest.obj,po1,getordprop(comp1,po4));
        end;
       end;
       tkint64: begin
        if po4^.proptype^.kind in 
              [tkint64] then begin
-        setordprop(dest,po1,getordprop(comp1,po4));
+        setordprop(dest.obj,po1,getordprop(comp1,po4));
        end;
       end;
       tkfloat: begin
        if po4^.proptype^.kind in 
              [tkfloat] then begin
-        setfloatprop(dest,po1,getfloatprop(comp1,po4));
+        setfloatprop(dest.obj,po1,getfloatprop(comp1,po4));
        end;
       end;
       tkbool: begin
        if po4^.proptype^.kind in 
              [tkbool] then begin
-        setordprop(dest,po1,getordprop(comp1,po4));
+        setordprop(dest.obj,po1,getordprop(comp1,po4));
        end;
       end;
       tkustring: begin
        if po4^.proptype^.kind in [tkustring] then begin
-        setunicodestrprop(dest,po1,getunicodestrprop(comp1,po4));
+        setunicodestrprop(dest.obj,po1,getunicodestrprop(comp1,po4));
        end;
       end;
       tkwstring: begin
        if po4^.proptype^.kind in [tkustring] then begin
-        setwidestrprop(dest,po1,getunicodestrprop(comp1,po4));
+        setwidestrprop(dest.obj,po1,getunicodestrprop(comp1,po4));
        end;
       end;
       tkastring,tklstring,tkstring: begin
        if po4^.proptype^.kind in [tkustring] then begin
-        setstrprop(dest,po1,getunicodestrprop(comp1,po4));
+        setstrprop(dest.obj,po1,getunicodestrprop(comp1,po4));
        end;
       end;
       tkclass: begin
-       obj1:= tobject(ptruint(getordprop(dest,po1)));
+       obj1:= tobject(ptruint(getordprop(dest.obj,po1)));
        if (obj1 is tdatalist) then begin
         list1:= intf1.getgriddata;
         if list1 <> nil then begin
@@ -461,34 +496,34 @@ begin
       tkdynarray: begin
        list1:= intf1.getgriddata;
        if list1 <> nil then begin
-        arpo:= pointer(ptruint(getordprop(dest,po1)));
+        arpo:= pointer(ptruint(getordprop(dest.obj,po1)));
         po2:= pointer(gettypedata(proptype)^.eltype2); 
                             //wrong define in ttypedata
         po3:= gettypedata(po2);
         case po2^.kind of
          tkinteger: begin
           if list1 is tintegerdatalist then begin
-           setintegerar(dest,po1,tintegerdatalist(list1).asarray);
+           setintegerar(dest.obj,po1,tintegerdatalist(list1).asarray);
           end;
          end;
          tkfloat: begin
           if list1 is trealdatalist then begin
-           setrealar(dest,po1,trealdatalist(list1).asarray);
+           setrealar(dest.obj,po1,trealdatalist(list1).asarray);
           end;
          end;
          tkustring: begin
           if list1 is tpoorstringdatalist then begin
-           setmsestringar(dest,po1,tpoorstringdatalist(list1).asarray);
+           setmsestringar(dest.obj,po1,tpoorstringdatalist(list1).asarray);
           end;
          end;
          tkastring: begin
           if list1 is tansistringdatalist then begin
-           setstringar(dest,po1,tansistringdatalist(list1).asarray);
+           setstringar(dest.obj,po1,tansistringdatalist(list1).asarray);
           end;
          end;
          tkbool: begin
           if list1 is tintegerdatalist then begin
-           setbooleanar(dest,po1,tintegerdatalist(list1).asbooleanarray);
+           setbooleanar(dest.obj,po1,tintegerdatalist(list1).asbooleanarray);
           end;
          end;
         end;
@@ -501,7 +536,8 @@ begin
  end;
 end;
 
-procedure objecttovalues(const source: tobject; const destroot: tcomponent);
+procedure objecttovalues(const source: objectinfoty; 
+                                                  const destroot: tcomponent);
 var
  comp1: tcomponent;
  ar1: propinfopoarty; 
@@ -513,11 +549,11 @@ var
  obj1: tobject;
  list1: tdatalist;
 begin
- ar1:= getpropinfoar(source);
+ ar1:= getpropinfoar(source.obj);
  for int1 := 0 to high(ar1) do begin
   po1:= ar1[int1];
   with po1^ do begin
-   comp1:= destroot.findcomponent(name);
+   comp1:= destroot.findcomponent(source.prefix+name);
    if (comp1 <> nil) and 
      mseclasses.getcorbainterface(comp1,typeinfo(iifidatalink),
                                                       intf1)  then begin
@@ -527,40 +563,40 @@ begin
       tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
        if po4^.proptype^.kind in 
              [tkInteger,tkChar,tkEnumeration,tkWChar,tkSet] then begin
-        setordprop(comp1,po4,getordprop(source,po1));
+        setordprop(comp1,po4,getordprop(source.obj,po1));
        end;
       end;
       tkint64: begin
        if po4^.proptype^.kind in 
              [tkint64] then begin
-        setordprop(comp1,po4,getordprop(source,po1));
+        setordprop(comp1,po4,getordprop(source.obj,po1));
        end;
       end;
       tkfloat: begin
        if po4^.proptype^.kind in 
              [tkfloat] then begin
-        setfloatprop(comp1,po4,getfloatprop(source,po1));
+        setfloatprop(comp1,po4,getfloatprop(source.obj,po1));
        end;
       end;
       tkbool: begin
        if po4^.proptype^.kind in 
              [tkbool] then begin
-        setordprop(comp1,po4,getordprop(source,po1));
+        setordprop(comp1,po4,getordprop(source.obj,po1));
        end;
       end;
       tkustring: begin
        if po4^.proptype^.kind in [tkustring] then begin
-        setunicodestrprop(comp1,po4,getunicodestrprop(source,po1));
+        setunicodestrprop(comp1,po4,getunicodestrprop(source.obj,po1));
        end;
       end;
       tkwstring: begin
        if po4^.proptype^.kind in [tkustring] then begin
-        setunicodestrprop(comp1,po4,getwidestrprop(source,po1));
+        setunicodestrprop(comp1,po4,getwidestrprop(source.obj,po1));
        end;
       end;
       tkastring,tklstring,tkstring: begin
        if po4^.proptype^.kind in [tkustring] then begin
-        setunicodestrprop(comp1,po4,getstrprop(source,po1));
+        setunicodestrprop(comp1,po4,getstrprop(source.obj,po1));
        end;
       end;
       tkdynarray: begin
@@ -572,34 +608,34 @@ begin
         case po2^.kind of
          tkinteger: begin
           if list1 is tintegerdatalist then begin
-           tintegerdatalist(list1).asarray:= getintegerar(source,po1);
+           tintegerdatalist(list1).asarray:= getintegerar(source.obj,po1);
           end;
          end;
          tkfloat: begin
           if (po3^.floattype = ftdouble) and (list1 is trealdatalist) then begin
-           trealdatalist(list1).asarray:=  getrealar(source,po1);
+           trealdatalist(list1).asarray:=  getrealar(source.obj,po1);
           end;
          end;
          tkustring: begin
           if list1 is tpoorstringdatalist then begin
-           tpoorstringdatalist(list1).asarray:= getmsestringar(source,po1);
+           tpoorstringdatalist(list1).asarray:= getmsestringar(source.obj,po1);
           end;
          end;
          tkastring: begin
           if list1 is tansistringdatalist then begin
-           tansistringdatalist(list1).asarray:= getstringar(source,po1);
+           tansistringdatalist(list1).asarray:= getstringar(source.obj,po1);
           end;
          end;
          tkbool: begin
           if list1 is tintegerdatalist then begin
-           tintegerdatalist(list1).asbooleanarray:= getbooleanar(source,po1);
+           tintegerdatalist(list1).asbooleanarray:= getbooleanar(source.obj,po1);
           end;
          end;
         end;
        end;
       end;
       tkclass: begin
-       obj1:= tobject(ptruint(getordprop(source,po1)));
+       obj1:= tobject(ptruint(getordprop(source.obj,po1)));
        if (obj1 is tdatalist) then begin
         list1:= intf1.getgriddata;
         if list1 <> nil then begin
@@ -637,11 +673,21 @@ begin
  result:= fstatvarname;
 end;
 
-function tcustomrttistat.getobj(out aobj: tobject): boolean;
+function tcustomrttistat.getobj(out aobj: objectinfoarty): boolean;
+var
+ obj1: tobject;
 begin
+ obj1:= nil;
  aobj:= nil;
  if assigned(fongetobject) then begin
-  fongetobject(self,aobj);
+  fongetobject(self,obj1);
+ end;
+ if assigned(fongetobjects) then begin
+  fongetobjects(self,aobj);
+ end;
+ if obj1 <> nil then begin
+  setlength(aobj,high(aobj)+2);
+  aobj[high(aobj)].obj:= obj1;
  end;
  result:= aobj <> nil; 
 end;
@@ -653,10 +699,13 @@ end;
 
 procedure tcustomrttistat.dostatread(const reader: tstatreader);
 var
- obj1: tobject;
+ obj1: objectinfoarty;
+ int1: integer;
 begin
  if getobj(obj1) then begin
-  readobjectstat(reader,obj1);
+  for int1:= 0 to high(obj1) do begin
+   readobjectstat(reader,obj1[int1]);
+  end;
  end;
  if assigned(fonstatupdate) then begin
   fonstatupdate(self,reader);
@@ -668,10 +717,13 @@ end;
 
 procedure tcustomrttistat.dostatwrite(const writer: tstatwriter);
 var
- obj1: tobject;
+ obj1: objectinfoarty;
+ int1: integer;
 begin
  if getobj(obj1) then begin
-  writeobjectstat(writer,obj1);
+  for int1:= 0 to high(obj1) do begin
+   writeobjectstat(writer,obj1[int1]);
+  end;
  end;
  if assigned(fonstatupdate) then begin
   fonstatupdate(self,writer);
@@ -686,19 +738,25 @@ end;
 
 procedure tcustomrttistat.valuestoobj(const sourceroot: tcomponent);
 var
- obj1: tobject;
+ obj1: objectinfoarty;
+ int1: integer;
 begin
  if getobj(obj1) then begin
-  valuestoobject(sourceroot,obj1);
+  for int1:= 0 to high(obj1) do begin
+   valuestoobject(sourceroot,obj1[int1]);
+  end;
  end;
 end;
 
 procedure tcustomrttistat.objtovalues(const destroot: tcomponent);
 var
- obj1: tobject;
+ obj1: objectinfoarty;
+ int1: integer;
 begin
  if getobj(obj1) then begin
-  objecttovalues(obj1,destroot);
+  for int1:= 0 to high(obj1) do begin
+   objecttovalues(obj1[int1],destroot);
+  end;
  end;
 end;
 
