@@ -1512,7 +1512,11 @@ begin
  if pointer(dynamicarray) <> nil then begin
   refpo:= psizeint(pchar(dynamicarray)-2*sizeof(sizeint));
   if refpo^ >= 0 then begin
+   {$ifdef CPU64}
+   interlockedincrement64(refpo^);
+   {$else}
    interlockedincrement(refpo^);
+   {$endif}
   end;
  end;
 end;
@@ -1524,7 +1528,11 @@ begin
  if pointer(dynamicarray) <> nil then begin
   refpo:= psizeint(pchar(dynamicarray)-2*sizeof(sizeint));
   if refpo^ > 0 then begin
+  {$ifdef CPU64}
+   interlockeddecrement64(refpo^);
+  {$else}
    interlockeddecrement(refpo^);
+  {$endif}
   end;
  end;
 end;
