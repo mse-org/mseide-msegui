@@ -62,8 +62,10 @@ type
   {$ifdef mse_with_ifi}
    procedure valuestoobj(const sourceroot: tcomponent);
      //reads values from components with matching property-component names
+     //or statvarnames
    procedure objtovalues(const destroot: tcomponent);
      //writes values to components with matching property-component names
+     //or statvarnames
   {$endif}   
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
@@ -676,16 +678,40 @@ end;
 { tcustomrttistat }
 
 procedure tcustomrttistat.statreading;
+var
+ ar1: objectinfoarty;
+ intf1: istatfile;
+ int1: integer;
 begin
  if assigned(fonstatbeforeread) then begin
   fonstatbeforeread(self);
  end;
+ if getobj(ar1) then begin
+  for int1:= 0 to high(ar1) do begin
+   if mseclasses.getcorbainterface(ar1[int1].obj,typeinfo(istatfile),
+                                                          intf1) then begin
+    intf1.statreading;
+   end;
+  end;
+ end;
 end;
 
 procedure tcustomrttistat.statread;
+var
+ ar1: objectinfoarty;
+ intf1: istatfile;
+ int1: integer;
 begin
  if assigned(fonstatafterread) then begin
   fonstatafterread(self);
+ end;
+ if getobj(ar1) then begin
+  for int1:= 0 to high(ar1) do begin
+   if mseclasses.getcorbainterface(ar1[int1].obj,typeinfo(istatfile),
+                                                            intf1) then begin
+    intf1.statread;
+   end;
+  end;
  end;
 end;
 
@@ -726,11 +752,16 @@ end;
 procedure tcustomrttistat.dostatread(const reader: tstatreader);
 var
  obj1: objectinfoarty;
+ intf1: istatfile;
  int1: integer;
 begin
  if getobj(obj1) then begin
   for int1:= 0 to high(obj1) do begin
    readobjectstat(reader,obj1[int1]);
+   if mseclasses.getcorbainterface(obj1[int1].obj,typeinfo(istatfile),
+                                                           intf1) then begin
+    intf1.dostatread(reader);
+   end;
   end;
  end;
  if assigned(fonstatupdate) then begin
@@ -745,10 +776,15 @@ procedure tcustomrttistat.dostatwrite(const writer: tstatwriter);
 var
  obj1: objectinfoarty;
  int1: integer;
+ intf1: istatfile;
 begin
  if getobj(obj1) then begin
   for int1:= 0 to high(obj1) do begin
    writeobjectstat(writer,obj1[int1]);
+   if mseclasses.getcorbainterface(obj1[int1].obj,typeinfo(istatfile),
+                                                             intf1) then begin
+    intf1.dostatwrite(writer);
+   end;
   end;
  end;
  if assigned(fonstatupdate) then begin
