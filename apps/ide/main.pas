@@ -829,7 +829,7 @@ begin
   if reason in [sr_exited,sr_exited_normally,sr_detached] then begin
    programfinished;
   end;
-  if projectoptions.activateonbreak then begin
+  if projectoptions.o.activateonbreak then begin
    if flastform <> nil then begin
     flastform.activate;
    end
@@ -933,7 +933,7 @@ begin
   if mstr1 <> '' then begin
    fgdbserverprocid:= execmse1(mstr1);
    if fgdbserverprocid <> invalidprochandle then begin
-    fgdbservertimeout:= timestep(round(1000000*gdbserverwait));
+    fgdbservertimeout:= timestep(round(1000000*o.gdbserverwait));
     if application.waitdialog(nil,'Start gdb server command "'+
                            mstr1+'" running.','Start gdb Server',
               {$ifdef FPC}@{$endif}gdbservercancel,nil,
@@ -990,7 +990,7 @@ begin
    gdb.interrupttarget;
   end;
   gdb.ignoreexceptionclasses:= projectoptions.ignoreexceptionclasses;
-  gdb.stoponexception:= projectoptions.stoponexception;
+  gdb.stoponexception:= projectoptions.o.stoponexception;
   str1:= '';
   {$ifndef mswindows}
   for int1:= sigrtmin to sigrtmax do begin
@@ -1036,7 +1036,7 @@ end;
 
 function tmainfo.needsdownload: boolean;
 begin
- result:= ftargetfilemodified or projectoptions.downloadalways;
+ result:= ftargetfilemodified or projectoptions.o.downloadalways;
 end;
 
 function tmainfo.candebug: boolean; //run command empty or process attached
@@ -1094,7 +1094,7 @@ begin
 //    else begin
 //     str1:= makedir+targetfile;
 //    end; 
-    if not gdbdownload and not gdbsimulator and (uploadcommand <> '') and 
+    if not o.gdbdownload and not o.gdbsimulator and (uploadcommand <> '') and 
                    (needsdownload or force) then begin
      dodownload;
      if application.waitdialog(nil,'Uploadcommand "'+uploadcommand+'" running.',
@@ -1107,7 +1107,7 @@ begin
       else begin
        setstattext('Download finished.',mtk_finished);
        downloaded;
-       if projectoptions.closemessages then begin
+       if projectoptions.o.closemessages then begin
         messagefo.hide;
        end;
       end;
@@ -1146,10 +1146,10 @@ begin
   updatetargetenvironment;
   watchpointsfo.clear;
   targetconsolefo.clear;
-  if projectoptions.showconsole then begin
+  if projectoptions.o.showconsole then begin
    targetconsolefo.activate;
   end;
-  if force and projectoptions.gdbdownload then begin
+  if force and projectoptions.o.gdbdownload then begin
    if startgdbconnection(false) then begin
     gdb.download(false);
    end;
@@ -1170,14 +1170,14 @@ procedure tmainfo.startgdbonexecute(const sender: tobject);
 begin
  with projectoptions,texp do begin
   gdb.remoteconnection:= remoteconnection;
-  gdb.gdbdownload:= gdbdownload;
-  gdb.simulator:= gdbsimulator;
+  gdb.gdbdownload:= o.gdbdownload;
+  gdb.simulator:= o.gdbsimulator;
   gdb.processorname:= gdbprocessor;
   gdb.beforeload:= beforeload;  
   gdb.beforerun:= beforerun;
   gdb.afterload:= afterload;
-  gdb.startupbkpt:= startupbkpt;
-  gdb.startupbkpton:= startupbkpton;
+  gdb.startupbkpt:= o.startupbkpt;
+  gdb.startupbkpton:= o.startupbkpton;
   gdb.startgdb(tosysfilepath(quotefilename(debugcommand))+ ' ' + debugoptions);
  end;
  updatesigsettings;
@@ -1257,7 +1257,7 @@ begin
  with projectoptions,texp,actionsmo do begin
   detachtarget.enabled:= gdb.execloaded;
   download.enabled:= not gdb.started and not gdb.downloading and 
-               ((uploadcommand <> '') or gdbdownload);
+               ((uploadcommand <> '') or o.gdbdownload);
   attachprocess.enabled:= not (gdb.execloaded or gdb.attached);
   attachtarget.enabled:= attachprocess.enabled;
   run.enabled:= not gdb.running and not gdb.downloading;
@@ -2356,8 +2356,8 @@ var
 begin
  if projectoptions.texp.runcommand = '' then begin
   if startgdbconnection(false) then begin
-   gdb.gdbdownload:= projectoptions.gdbdownload and 
-                         (needsdownload or projectoptions.downloadalways);
+   gdb.gdbdownload:= projectoptions.o.gdbdownload and 
+                         (needsdownload or projectoptions.o.downloadalways);
    checkgdberror(gdb.run);
   end;
  end
@@ -2477,7 +2477,7 @@ begin
   fcurrent:= true;
   fnoremakecheck:= false;
   messagefo.messages.lastrow;
-  if projectoptions.closemessages then begin
+  if projectoptions.o.closemessages then begin
    messagefo.hide;
   end;
   if fstartcommand <> sc_none then begin

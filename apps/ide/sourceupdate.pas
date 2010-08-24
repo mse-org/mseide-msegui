@@ -297,7 +297,7 @@ end;
 procedure init(const adesigner: tdesigner);
 begin
  sourceupdater:= tsourceupdater.Create(adesigner);
- sourceupdater.maxlinelength:= projectoptions.rightmarginchars;
+ sourceupdater.maxlinelength:= projectoptions.o.rightmarginchars;
 end;
 
 procedure deinit(const adesigner: tdesigner);

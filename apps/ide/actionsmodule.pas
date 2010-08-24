@@ -333,13 +333,13 @@ end;
 
 procedure tactionsmo.indentonexecute(const sender: TObject);
 begin
- sourcefo.activepage.edit.indent(projectoptions.blockindent,
-                                            projectoptions.tabindent);
+ sourcefo.activepage.edit.indent(projectoptions.o.blockindent,
+                                            projectoptions.o.tabindent);
 end;
 
 procedure tactionsmo.unindentonexecute(const sender: TObject);
 begin
- sourcefo.activepage.edit.unindent(projectoptions.blockindent);
+ sourcefo.activepage.edit.unindent(projectoptions.o.blockindent);
 end;
 
 procedure tactionsmo.lowercaseexecute(const sender: TObject);

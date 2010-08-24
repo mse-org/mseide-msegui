@@ -145,7 +145,7 @@ begin
  designnotifications.beforemake(idesigner(designer),atag,bo1);
  if not bo1 then begin
   maker:= tmaker.Create(atag);
-  if projectoptions.closemessages then begin
+  if projectoptions.o.closemessages then begin
    messagefo.messages.show;
   end;
  end;
@@ -221,7 +221,7 @@ end;
 procedure dodownload;
 begin
  killload;
- if projectoptions.closemessages then begin
+ if projectoptions.o.closemessages then begin
   messagefo.messages.show;
  end;
  loader:= tloader.create(nil);

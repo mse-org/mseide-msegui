@@ -3844,14 +3844,15 @@ var
  stream2: tmsefilestream;
  
 begin
- if createdatafile and projectoptions.checkmethods 
+ if createdatafile and projectoptions.o.checkmethods 
                        and not checkmethodtypes(modulepo,false{,nil}) then begin
   result:= false;
   exit;
  end;
  result:= true;
  with modulepo^ do begin
-  createbackupfile(afilename,filename,backupcreated,projectoptions.backupfilecount);
+  createbackupfile(afilename,filename,
+                          backupcreated,projectoptions.o.backupfilecount);
   stream1:= tmemorystream.Create;
   try
    writemodule(modulepo,stream1);
@@ -3888,7 +3889,7 @@ begin
  for int1:= 0 to modules.count - 1 do begin
   po1:= modules[int1];
   with po1^ do begin
-   if not modified and projectoptions.checkmethods then begin
+   if not modified and projectoptions.o.checkmethods then begin
     if not checkmethodtypes(po1,false{,nil}) then begin
      result:= mr_cancel;
      exit;

@@ -150,7 +150,7 @@ procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
   str1: string;
  begin
 //        stream.buflen:= 1024;
-  case projectoptions.encoding of
+  case projectoptions.o.encoding of
    1: begin
     stream.encoding:= ce_utf8n;
    end;

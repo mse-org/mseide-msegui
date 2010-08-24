@@ -118,10 +118,109 @@ type
  tprojectoptions = class
   private
    fcopymessages: boolean;
+   fcheckmethods: boolean;
+   fshowgrid: boolean;
+   fsnaptogrid: boolean;
+   fmoveonfirstclick: boolean;
+   fgridsizex: integer;
+   fgridsizey: integer;
+   fautoindent: boolean;
+   fblockindent: integer;
+   frightmarginon: boolean;
+   frightmarginchars: integer;
+   fscrollheight: integer;
+   ftabstops: integer;
+   fspacetabs: boolean;
+   ftabindent: boolean;
+   feditfontname: string;
+   feditfontheight: integer;
+   feditfontwidth: integer;
+   feditfontextraspace: integer;
+   feditfontcolor: integer;
+   feditbkcolor: integer;
+   fstatementcolor: integer;
+   feditfontantialiased: boolean;
+   feditmarkbrackets: boolean;
+   fbackupfilecount: integer;
+   fencoding: integer;
+   fclosemessages: boolean;
+   fusercolors: colorarty;
+   fusercolorcomment: msestringarty;
+   fstoponexception: boolean;
+   fvaluehints: boolean;
+   factivateonbreak: boolean;
+   fshowconsole: boolean;
+   fexternalconsole: boolean;
+   fgdbdownload: boolean;
+   fdownloadalways: boolean;
+   fstartupbkpt: integer;
+   fstartupbkpton: boolean;
+   fgdbsimulator: boolean;
+   fgdbserverwait: real;
+   fexceptclassnames: msestringarty;
+   fexceptignore: booleanarty;
+   function limitgridsize(const avalue: integer): integer;
+   procedure setgridsizex(const avalue: integer);
+   procedure setgridsizey(const avalue: integer);
   public
    constructor create;
   published
    property copymessages: boolean read fcopymessages write fcopymessages;
+   property closemessages: boolean read fclosemessages write fclosemessages;
+   property checkmethods: boolean read fcheckmethods write fcheckmethods;
+
+   property showgrid: boolean read fshowgrid write fshowgrid;
+   property snaptogrid: boolean read fsnaptogrid write fsnaptogrid;
+   property moveonfirstclick: boolean read fmoveonfirstclick 
+                                         write fmoveonfirstclick;
+   property gridsizex: integer read fgridsizex write setgridsizex;
+   property gridsizey: integer read fgridsizey write setgridsizey;
+   property autoindent: boolean read fautoindent write fautoindent;
+   property blockindent: integer read fblockindent write fblockindent;
+   property rightmarginon: boolean read frightmarginon write frightmarginon;
+   property rightmarginchars: integer read frightmarginchars 
+                                                    write frightmarginchars;
+   property scrollheight: integer read fscrollheight write fscrollheight;
+   property tabstops: integer read ftabstops write ftabstops;
+   property spacetabs: boolean read fspacetabs write fspacetabs;
+   property tabindent: boolean read ftabindent write ftabindent;
+   property editfontname: string read feditfontname write feditfontname;
+   property editfontheight: integer read feditfontheight write feditfontheight;
+   property editfontwidth: integer read feditfontwidth write feditfontwidth;
+   property editfontextraspace: integer read feditfontextraspace 
+                                                      write feditfontextraspace;
+   property editfontcolor: integer read feditfontcolor write feditfontcolor;
+   property editbkcolor: integer read feditbkcolor write feditbkcolor;
+   property statementcolor: integer read fstatementcolor write fstatementcolor;
+   
+   property editfontantialiased: boolean read feditfontantialiased 
+                                              write feditfontantialiased;
+   property editmarkbrackets: boolean read feditmarkbrackets 
+                                              write feditmarkbrackets;
+   property backupfilecount: integer read fbackupfilecount 
+                                              write fbackupfilecount;
+   property encoding: integer read fencoding write fencoding;
+
+   property usercolors: colorarty read fusercolors write fusercolors;
+   property usercolorcomment: msestringarty read fusercolorcomment 
+                                                 write fusercolorcomment;
+
+   property stoponexception: boolean read fstoponexception write fstoponexception;
+   property valuehints: boolean read fvaluehints write fvaluehints;
+   property activateonbreak: boolean read factivateonbreak write factivateonbreak;
+   property showconsole: boolean read fshowconsole write fshowconsole;
+   property externalconsole: boolean read fexternalconsole write fexternalconsole;
+   property gdbdownload: boolean read fgdbdownload write fgdbdownload;
+   property downloadalways: boolean read fdownloadalways write fdownloadalways;
+   property startupbkpt: integer read fstartupbkpt write fstartupbkpt;
+   property startupbkpton: boolean read fstartupbkpton write fstartupbkpton;
+   property gdbsimulator: boolean read fgdbsimulator write fgdbsimulator;
+   property gdbserverwait: real read fgdbserverwait write fgdbserverwait;
+
+   property exceptclassnames: msestringarty read fexceptclassnames 
+                                                 write fexceptclassnames;
+   property exceptignore: booleanarty read fexceptignore 
+                                                 write fexceptignore;
  end;
  
  projectoptionsty = record
@@ -141,38 +240,38 @@ type
   fontxscales: realarty;
   
 //  copymessages: boolean;
-  closemessages: boolean;
-  checkmethods: boolean;
+//  closemessages: boolean;
+//  checkmethods: boolean;
 
-  showgrid: boolean;
-  snaptogrid: boolean;
-  moveonfirstclick: boolean;
-  gridsizex: integer;
-  gridsizey: integer;
-  autoindent: boolean;
-  blockindent: integer;
-  rightmarginon: boolean;
-  rightmarginchars: integer;
-  scrollheight: integer;
-  tabstops: integer;
-  spacetabs: boolean;
-  tabindent: boolean;
-  editfontname: string;
-  editfontheight: integer;
-  editfontwidth: integer;
-  editfontextraspace: integer;
-  editfontcolor: integer;
-  editbkcolor: integer;
-  statementcolor: integer;
+//  showgrid: boolean;
+//  snaptogrid: boolean;
+//  moveonfirstclick: boolean;
+//  gridsizex: integer;
+//  gridsizey: integer;
+//  autoindent: boolean;
+//  blockindent: integer;
+//  rightmarginon: boolean;
+//  rightmarginchars: integer;
+//  scrollheight: integer;
+//  tabstops: integer;
+//  spacetabs: boolean;
+//  tabindent: boolean;
+//  editfontname: string;
+//  editfontheight: integer;
+//  editfontwidth: integer;
+//  editfontextraspace: integer;
+//  editfontcolor: integer;
+//  editbkcolor: integer;
+//  statementcolor: integer;
   
-  editfontantialiased: boolean;
-  editmarkbrackets: boolean;
-  backupfilecount: integer;
-  encoding: integer;
+//  editfontantialiased: boolean;
+//  editmarkbrackets: boolean;
+//  backupfilecount: integer;
+//  encoding: integer;
 
   defineson: longboolarty;
-  exceptclassnames: msestringarty;
-  exceptignore: longboolarty;
+//  exceptclassnames: msestringarty;
+//  exceptignore: longboolarty;
   
   modulenames: msestringarty;
   moduletypes: msestringarty;
@@ -197,21 +296,21 @@ type
   breakpointignore: integerarty;
   breakpointconditions: msestringarty;
 
-  stoponexception: boolean;
-  valuehints: boolean;
-  activateonbreak: boolean;
-  showconsole: boolean;
-  externalconsole: boolean;
+//  stoponexception: boolean;
+//  valuehints: boolean;
+//  activateonbreak: boolean;
+//  showconsole: boolean;
+//  externalconsole: boolean;
   sigsettings: sigsetinfoarty;
-  gdbdownload: boolean;
-  downloadalways: boolean;
-  startupbkpt: integer;
-  startupbkpton: boolean;
-  gdbsimulator: boolean;
-  gdbserverwait: real;
+//  gdbdownload: boolean;
+//  downloadalways: boolean;
+//  startupbkpt: integer;
+//  startupbkpton: boolean;
+//  gdbsimulator: boolean;
+//  gdbserverwait: real;
   
-  usercolors: colorarty;
-  usercolorcomment: msestringarty;
+//  usercolors: colorarty;
+//  usercolorcomment: msestringarty;
 
   //programparameters
   propgparamhistory: msestringarty;
@@ -666,17 +765,17 @@ end;
 procedure projectoptionstofont(const afont: tfont);
 begin
  with projectoptions,afont do begin
-  name:= editfontname;
-  height:= editfontheight;
-  width:= editfontwidth;
-  extraspace:= editfontextraspace;
-  if editfontantialiased then begin
+  name:= o.editfontname;
+  height:= o.editfontheight;
+  width:= o.editfontwidth;
+  extraspace:= o.editfontextraspace;
+  if o.editfontantialiased then begin
    options:= options + [foo_antialiased];
   end
   else begin
    options:= options + [foo_nonantialiased];
   end;
-  color:= editfontcolor;
+  color:= o.editfontcolor;
  end;
 end;
 
@@ -887,7 +986,7 @@ begin
     end;
    end;
    if sourceupdater <> nil then begin
-    sourceupdater.maxlinelength:= rightmarginchars;
+    sourceupdater.maxlinelength:= o.rightmarginchars;
    end;
 //   for int1:= 0 to sourcefo.count - 1 do begin
 //    sourcefo.items[int1].updatestatvalues;
@@ -977,19 +1076,19 @@ begin
    end;
   end;
   ignoreexceptionclasses:= nil;
-  for int1:= 0 to high(exceptignore) do begin
-   if int1 > high(exceptclassnames) then begin
+  for int1:= 0 to high(o.exceptignore) do begin
+   if int1 > high(o.exceptclassnames) then begin
     break;
    end;
-   if exceptignore[int1] then begin
-    additem(ignoreexceptionclasses,exceptclassnames[int1]);
+   if o.exceptignore[int1] then begin
+    additem(ignoreexceptionclasses,o.exceptclassnames[int1]);
    end;
   end;
   for int1:= 0 to usercolorcount - 1 do begin
-   if int1 > high(usercolors) then begin
+   if int1 > high(o.usercolors) then begin
     break;
    end;
-   setcolormapvalue(cl_user + longword(int1),usercolors[int1]);
+   setcolormapvalue(cl_user + longword(int1),o.usercolors[int1]);
   end;
  end;
  li.free;
@@ -1048,10 +1147,10 @@ begin
   modified:= false;
   savechecked:= false;
   sigsettings:= defaultsigsettings;
-  exceptclassnames:= nil;
-  exceptignore:= nil;
-  additem(exceptclassnames,'EconvertError');
-  additem(exceptignore,false);
+//  exceptclassnames:= nil;
+//  exceptignore:= nil;
+//  additem(exceptclassnames,'EconvertError');
+//  additem(exceptignore,false);
   ignoreexceptionclasses:= nil;
 
   befcommand:= nil;
@@ -1077,37 +1176,37 @@ begin
   macronames:= nil;
   macrovalues:= nil;
 //  copymessages:= false;
-  closemessages:= true;
-  checkmethods:= true;
-  showgrid:= true;
-  snaptogrid:= true;
-  moveonfirstclick:= true;
-  gridsizex:= defaultgridsizex;
-  gridsizey:= defaultgridsizey;
+//  closemessages:= true;
+//  checkmethods:= true;
+//  showgrid:= true;
+//  snaptogrid:= true;
+//  moveonfirstclick:= true;
+//  gridsizex:= defaultgridsizex;
+//  gridsizey:= defaultgridsizey;
   findreplaceinfo.find.options:= [so_caseinsensitive];
-  autoindent:= true;
-  blockindent:= 1;
-  rightmarginon:= true;
-  rightmarginchars:= 80;
-  scrollheight:= 0;
-  tabstops:= 4;
-  spacetabs:= false;
-  tabindent:= false;
-  editfontname:= 'mseide_source';
-  editfontheight:= 0;
-  editfontwidth:= 0;
-  editfontextraspace:= 0;
-  editfontcolor:= cl_text;
-  editbkcolor:= cl_foreground;
-  statementcolor:= $E0FFFF;
-  editfontantialiased:= true;
-  editmarkbrackets:= true;
-  backupfilecount:= 2;
-  encoding:= 0;
-  valuehints:= true;
-  activateonbreak:= true;
-  showconsole:= false;
-  externalconsole:= false;
+//  autoindent:= true;
+//  blockindent:= 1;
+//  rightmarginon:= true;
+//  rightmarginchars:= 80;
+//  scrollheight:= 0;
+//  tabstops:= 4;
+//  spacetabs:= false;
+//  tabindent:= false;
+//  editfontname:= 'mseide_source';
+//  editfontheight:= 0;
+//  editfontwidth:= 0;
+//  editfontextraspace:= 0;
+//  editfontcolor:= cl_text;
+//  editbkcolor:= cl_foreground;
+//  statementcolor:= $E0FFFF;
+//  editfontantialiased:= true;
+//  editmarkbrackets:= true;
+//  backupfilecount:= 2;
+//  encoding:= 0;
+//  valuehints:= true;
+//  activateonbreak:= true;
+//  showconsole:= false;
+//  externalconsole:= false;
   mainfile:= '';
   targetfile:= '';
   messageoutputfile:= '';
@@ -1143,15 +1242,15 @@ begin
   runcommand:= '';
   remoteconnection:= '';
   uploadcommand:= '';
-  gdbdownload:= false;
-  downloadalways:= false;
-  startupbkpt:= 0;
-  startupbkpton:= false;
-  gdbsimulator:= false;
+//  gdbdownload:= false;
+//  downloadalways:= false;
+//  startupbkpt:= 0;
+//  startupbkpton:= false;
+//  gdbsimulator:= false;
   gdbprocessor:= 'auto';
   gdbservercommand:= '';
   gdbservercommandattach:= '';
-  gdbserverwait:= 0;
+//  gdbserverwait:= 0;
   beforeload:= '';
   afterload:= '';
   beforerun:= '';
@@ -1172,8 +1271,8 @@ begin
   fontwidths:= nil;
   fontoptions:= nil;
   fontxscales:= nil;
-  usercolors:= nil;
-  usercolorcomment:= nil;
+//  usercolors:= nil;
+//  usercolorcomment:= nil;
   additem(sourcefilemasks,'"*.pas" "*.dpr" "*.pp" "*.inc"');
   additem(syntaxdeffiles,'${SYNTAXDEFDIR}pascal.sdef');
   additem(sourcefilemasks,'"*.c" "*.cc" "*.h"');
@@ -1382,8 +1481,8 @@ begin
    with tstatwriter(statfiler) do begin
     writerecordarray('sigsettings',length(sigsettings),
                      {$ifdef FPC}@{$endif}getsignalinforec);
-    writeinteger('gridsizex',gridsizex);
-    writeinteger('gridsizey',gridsizey);
+//    writeinteger('gridsizex',gridsizex);
+//    writeinteger('gridsizey',gridsizey);
    end;
   end
   else begin
@@ -1391,12 +1490,12 @@ begin
    with tstatreader(statfiler) do begin
     readrecordarray('sigsettings',{$ifdef FPC}@{$endif}setsignalinfocount,
              {$ifdef FPC}@{$endif}storesignalinforec);
-    gridsizex:= readinteger('gridsizex',gridsizex,1,1000);
-    gridsizey:= readinteger('gridsizey',gridsizey,1,1000);
+//    gridsizex:= readinteger('gridsizex',gridsizex,1,1000);
+//    gridsizey:= readinteger('gridsizey',gridsizey,1,1000);
    end;
   end;
-  updatevalue('exceptclassnames',exceptclassnames);
-  updatevalue('exceptignore',exceptignore);
+//  updatevalue('exceptclassnames',exceptclassnames);
+//  updatevalue('exceptignore',exceptignore);
   updatevalue('modulenames',modulenames);
   updatevalue('moduletypes',moduletypes);
   updatevalue('modulefiles',modulefilenames);
@@ -1404,8 +1503,8 @@ begin
   updatevalue('targetfile',targetfile);
   updatevalue('messageoutputfile',messageoutputfile);
 //  updatevalue('copymessages',copymessages);
-  updatevalue('closemessages',closemessages);
-  updatevalue('checkmethods',checkmethods);
+//  updatevalue('closemessages',closemessages);
+//  updatevalue('checkmethods',checkmethods);
   updatevalue('makecommand',makecommand);
   updatevalue('makedir',makedir);
   updatevalue('debugcommand',debugcommand);
@@ -1414,15 +1513,15 @@ begin
   updatevalue('runcommand',runcommand);
   updatevalue('remoteconnection',remoteconnection);
   updatevalue('uploadcommand',uploadcommand);
-  updatevalue('gdbdownload',gdbdownload);
-  updatevalue('downloadalways',downloadalways);
-  updatevalue('startupbkpt',startupbkpt);
-  updatevalue('startupbkpton',startupbkpton);
-  updatevalue('gdbsimulator',gdbsimulator);
+//  updatevalue('gdbdownload',gdbdownload);
+//  updatevalue('downloadalways',downloadalways);
+//  updatevalue('startupbkpt',startupbkpt);
+//  updatevalue('startupbkpton',startupbkpton);
+//  updatevalue('gdbsimulator',gdbsimulator);
   updatevalue('gdbprocessor',gdbprocessor);
   updatevalue('gdbservercommand',gdbservercommand);
   updatevalue('gdbservercommandattach',gdbservercommandattach);
-  updatevalue('gdbserverwait',gdbserverwait);
+//  updatevalue('gdbserverwait',gdbserverwait);
   updatevalue('beforeload',beforeload);
   updatevalue('afterload',afterload);
   updatevalue('beforerun',beforerun);
@@ -1465,30 +1564,30 @@ begin
   updatevalue('fontwidths',fontwidths);
   updatevalue('fontoptions',fontoptions);
   updatevalue('fontxscales',fontxscales);
-  updatevalue('usercolors',integerarty(usercolors));
-  updatevalue('usercolorcomment',usercolorcomment);
-  updatevalue('showgrid',showgrid);
-  updatevalue('snaptogrid',snaptogrid);
-  updatevalue('moveonfirstclick',moveonfirstclick);
-  updatevalue('autoindent',autoindent);
-  updatevalue('blockindent',blockindent);
-  updatevalue('rightmarginon',rightmarginon);
-  updatevalue('rightmarginchars',rightmarginchars);
-  updatevalue('scrollheight',scrollheight);
-  updatevalue('tabstops',tabstops);
-  updatevalue('spacetabs',spacetabs);
-  updatevalue('tabindent',tabindent);
-  updatevalue('editfontname',editfontname);
-  updatevalue('editfontheight',editfontheight);
-  updatevalue('editfontwidth',editfontwidth);
-  updatevalue('editfontextraspace',editfontextraspace);
-  updatevalue('editfontcolor',editfontcolor);
-  updatevalue('editbkcolor',editbkcolor);
-  updatevalue('statementcolor',statementcolor);
-  updatevalue('editfontantialiased',editfontantialiased);
-  updatevalue('editmarkbrackets',editmarkbrackets);
-  updatevalue('backupfilecount',backupfilecount,0,10);
-  updatevalue('encoding',encoding,0,1);
+//  updatevalue('usercolors',integerarty(usercolors));
+//  updatevalue('usercolorcomment',usercolorcomment);
+//  updatevalue('showgrid',showgrid);
+//  updatevalue('snaptogrid',snaptogrid);
+//  updatevalue('moveonfirstclick',moveonfirstclick);
+//  updatevalue('autoindent',autoindent);
+//  updatevalue('blockindent',blockindent);
+//  updatevalue('rightmarginon',rightmarginon);
+//  updatevalue('rightmarginchars',rightmarginchars);
+//  updatevalue('scrollheight',scrollheight);
+//  updatevalue('tabstops',tabstops);
+//  updatevalue('spacetabs',spacetabs);
+//  updatevalue('tabindent',tabindent);
+//  updatevalue('editfontname',editfontname);
+//  updatevalue('editfontheight',editfontheight);
+//  updatevalue('editfontwidth',editfontwidth);
+//  updatevalue('editfontextraspace',editfontextraspace);
+//  updatevalue('editfontcolor',editfontcolor);
+//  updatevalue('editbkcolor',editbkcolor);
+//  updatevalue('statementcolor',statementcolor);
+//  updatevalue('editfontantialiased',editfontantialiased);
+//  updatevalue('editmarkbrackets',editmarkbrackets);
+//  updatevalue('backupfilecount',backupfilecount,0,10);
+//  updatevalue('encoding',encoding,0,1);
   
   updatevalue('scriptbeforecopy',scriptbeforecopy);
   updatevalue('scriptaftercopy',scriptaftercopy);
@@ -1569,11 +1668,11 @@ begin
    end;
    expandprojectmacros;
   end;
-  updatevalue('stoponexception',stoponexception);
-  updatevalue('valuehints',valuehints);
-  updatevalue('activateonbreak',activateonbreak);
-  updatevalue('showconsole',showconsole);
-  updatevalue('externalconsole',externalconsole);
+//  updatevalue('stoponexception',stoponexception);
+//  updatevalue('valuehints',valuehints);
+//  updatevalue('activateonbreak',activateonbreak);
+//  updatevalue('showconsole',showconsole);
+//  updatevalue('externalconsole',externalconsole);
   breakpointsfo.updatestat(statfiler);
   panelform.updatestat(statfiler);
   projecttree.updatestat(statfiler);
@@ -1596,8 +1695,8 @@ var
  int1,int2: integer;
 begin
  mainfo.statoptions.objtovalues(fo);
- fo.usercolors.gridvalues:= integerarty(projectoptions.usercolors);
- fo.usercolorcomment.gridvalues:= projectoptions.usercolorcomment;
+// fo.usercolors.gridvalues:= integerarty(projectoptions.usercolors);
+// fo.usercolorcomment.gridvalues:= projectoptions.usercolorcomment;
  fo.colgrid.rowcount:= usercolorcount;
  fo.colgrid.fixcols[-1].captions.count:= usercolorcount;
  with fo,projectoptions do begin
@@ -1636,38 +1735,38 @@ begin
     fo.sighandle[int1]:= sfl_handle in flags;
    end;
   end;
-  fo.exceptignore.gridvalues:= exceptignore;
-  fo.exceptclassnames.gridvalues:= exceptclassnames;
+//  fo.exceptignore.gridvalues:= exceptignore;
+//  fo.exceptclassnames.gridvalues:= exceptclassnames;
   fo.mainfile.value:= mainfile;
   fo.targetfile.value:= targetfile;
   fo.messageoutputfile.value:= messageoutputfile;
 //  fo.copymessages.value:= copymessages;
-  fo.closemessages.value:= closemessages;
-  fo.checkmethods.value:= checkmethods;
-  fo.showgrid.value:= showgrid;
-  fo.snaptogrid.value:= snaptogrid;
-  fo.moveonfirstclick.value:= moveonfirstclick;
-  fo.gridsizex.value:= gridsizex;
-  fo.gridsizey.value:= gridsizey;
-  fo.autoindent.value:= autoindent;
-  fo.blockindent.value:= blockindent;
-  fo.tabstops.value:= tabstops;
-  fo.spacetabs.value:= spacetabs;
-  fo.tabindent.value:= tabindent;
-  fo.rightmarginon.value:= rightmarginon;
-  fo.rightmarginchars.value:= rightmarginchars;
-  fo.scrollheight.value:= scrollheight;
-  fo.editfontname.value:= editfontname;
-  fo.editfontheight.value:= editfontheight;
-  fo.editfontwidth.value:= editfontwidth;
-  fo.editfontextraspace.value:= editfontextraspace;
-  fo.editfontcolor.value:= editfontcolor;
-  fo.editbkcolor.value:= editbkcolor;
-  fo.statementcolor.value:= statementcolor;
-  fo.editfontantialiased.value:= editfontantialiased;
-  fo.editmarkbrackets.value:= editmarkbrackets;
-  fo.backupfilecount.value:= backupfilecount;
-  fo.encoding.value:= encoding;
+//  fo.closemessages.value:= closemessages;
+//  fo.checkmethods.value:= checkmethods;
+//  fo.showgrid.value:= showgrid;
+//  fo.snaptogrid.value:= snaptogrid;
+//  fo.moveonfirstclick.value:= moveonfirstclick;
+//  fo.gridsizex.value:= gridsizex;
+//  fo.gridsizey.value:= gridsizey;
+//  fo.autoindent.value:= autoindent;
+//  fo.blockindent.value:= blockindent;
+//  fo.tabstops.value:= tabstops;
+//  fo.spacetabs.value:= spacetabs;
+//  fo.tabindent.value:= tabindent;
+//  fo.rightmarginon.value:= rightmarginon;
+//  fo.rightmarginchars.value:= rightmarginchars;
+//  fo.scrollheight.value:= scrollheight;
+//  fo.editfontname.value:= editfontname;
+//  fo.editfontheight.value:= editfontheight;
+//  fo.editfontwidth.value:= editfontwidth;
+//  fo.editfontextraspace.value:= editfontextraspace;
+//  fo.editfontcolor.value:= editfontcolor;
+//  fo.editbkcolor.value:= editbkcolor;
+//  fo.statementcolor.value:= statementcolor;
+//  fo.editfontantialiased.value:= editfontantialiased;
+//  fo.editmarkbrackets.value:= editmarkbrackets;
+//  fo.backupfilecount.value:= backupfilecount;
+//  fo.encoding.value:= encoding;
   fo.fontalias.gridvalues:= fontalias;
   fo.fontancestors.gridvalues:= fontancestors;
   fo.fontname.gridvalues:= fontnames;
@@ -1723,15 +1822,15 @@ begin
   fo.runcommand.value:= runcommand;
   fo.remoteconnection.value:= remoteconnection;
   fo.uploadcommand.value:= uploadcommand;
-  fo.gdbdownload.value:= gdbdownload;
-  fo.downloadalways.value:= downloadalways;
-  fo.startupbkpt.value:= startupbkpt;
-  fo.startupbkpton.value:= startupbkpton;
-  fo.gdbsimulator.value:= gdbsimulator;
+//  fo.gdbdownload.value:= gdbdownload;
+//  fo.downloadalways.value:= downloadalways;
+//  fo.startupbkpt.value:= startupbkpt;
+//  fo.startupbkpton.value:= startupbkpton;
+//  fo.gdbsimulator.value:= gdbsimulator;
   fo.gdbprocessor.value:= gdbprocessor;
   fo.gdbservercommand.value:= gdbservercommand;
   fo.gdbservercommandattach.value:= gdbservercommandattach;
-  fo.gdbserverwait.value:= gdbserverwait;
+//  fo.gdbserverwait.value:= gdbserverwait;
   fo.gdbbeforeload.value:= beforeload;
   fo.gdbafterload.value:= afterload;
   fo.gdbbeforerun.value:= beforerun;
@@ -1830,11 +1929,11 @@ begin
   fo.toolparam.gridvalues:= toolparams;
   fo.def.gridvalues:= defines;
   fo.defon.gridvalues:= defineson;
-  fo.stoponexception.value:= stoponexception;
-  fo.valuehints.value:= valuehints;
-  fo.activateonbreak.value:= activateonbreak;
-  fo.showconsole.value:= showconsole;
-  fo.externalconsole.value:= externalconsole;
+//  fo.stoponexception.value:= stoponexception;
+//  fo.valuehints.value:= valuehints;
+//  fo.activateonbreak.value:= activateonbreak;
+//  fo.showconsole.value:= showconsole;
+//  fo.externalconsole.value:= externalconsole;
  end;
 end;
 
@@ -1873,41 +1972,41 @@ begin
                                 fo.sighandle[int1]);
    end;
   end;
-  exceptignore:= fo.exceptignore.gridvalues;
-  exceptclassnames:= fo.exceptclassnames.gridvalues;
+//  exceptignore:= fo.exceptignore.gridvalues;
+//  exceptclassnames:= fo.exceptclassnames.gridvalues;
   
   mainfile:= fo.mainfile.value;
   targetfile:= fo.targetfile.value;
   messageoutputfile:= fo.messageoutputfile.value;
 
 //  copymessages:= fo.copymessages.value;
-  closemessages:= fo.closemessages.value;
-  checkmethods:= fo.checkmethods.value;
-  showgrid:= fo.showgrid.value;
-  snaptogrid:= fo.snaptogrid.value;
-  moveonfirstclick:= fo.moveonfirstclick.value;
-  gridsizex:= fo.gridsizex.value;
-  gridsizey:= fo.gridsizey.value;
+//  closemessages:= fo.closemessages.value;
+//  checkmethods:= fo.checkmethods.value;
+//  showgrid:= fo.showgrid.value;
+//  snaptogrid:= fo.snaptogrid.value;
+//  moveonfirstclick:= fo.moveonfirstclick.value;
+//  gridsizex:= fo.gridsizex.value;
+//  gridsizey:= fo.gridsizey.value;
   
-  autoindent:= fo.autoindent.value;
-  blockindent:= fo.blockindent.value;
-  tabstops:= fo.tabstops.value;
-  spacetabs:= fo.spacetabs.value;
-  tabindent:= fo.tabindent.value;
-  rightmarginon:= fo.rightmarginon.value;
-  rightmarginchars:= fo.rightmarginchars.value;
-  scrollheight:= fo.scrollheight.value;
-  editfontname:= fo.editfontname.value;
-  editfontheight:= fo.editfontheight.value;
-  editfontwidth:= fo.editfontwidth.value;
-  editfontextraspace:= fo.editfontextraspace.value;
-  editfontcolor:= fo.editfontcolor.value;
-  editbkcolor:= fo.editbkcolor.value;
-  statementcolor:= fo.statementcolor.value;
-  editfontantialiased:= fo.editfontantialiased.value;
-  editmarkbrackets:= fo.editmarkbrackets.value;
-  backupfilecount:= fo.backupfilecount.value;
-  encoding:= fo.encoding.value;
+//  autoindent:= fo.autoindent.value;
+//  blockindent:= fo.blockindent.value;
+//  tabstops:= fo.tabstops.value;
+//  spacetabs:= fo.spacetabs.value;
+//  tabindent:= fo.tabindent.value;
+//  rightmarginon:= fo.rightmarginon.value;
+//  rightmarginchars:= fo.rightmarginchars.value;
+//  scrollheight:= fo.scrollheight.value;
+//  editfontname:= fo.editfontname.value;
+//  editfontheight:= fo.editfontheight.value;
+//  editfontwidth:= fo.editfontwidth.value;
+//  editfontextraspace:= fo.editfontextraspace.value;
+//  editfontcolor:= fo.editfontcolor.value;
+//  editbkcolor:= fo.editbkcolor.value;
+//  statementcolor:= fo.statementcolor.value;
+//  editfontantialiased:= fo.editfontantialiased.value;
+//  editmarkbrackets:= fo.editmarkbrackets.value;
+//  backupfilecount:= fo.backupfilecount.value;
+//  encoding:= fo.encoding.value;
   fontalias:= fo.fontalias.gridvalues;
   fontancestors:= fo.fontancestors.gridvalues;
   fontnames:= fo.fontname.gridvalues;
@@ -1920,8 +2019,8 @@ begin
     fontxscales[int1]:= 1.0;
    end;   
   end;
-  usercolors:= colorarty(fo.usercolors.gridvalues);
-  usercolorcomment:= fo.usercolorcomment.gridvalues;
+//  usercolors:= colorarty(fo.usercolors.gridvalues);
+//  usercolorcomment:= fo.usercolorcomment.gridvalues;
 
   scriptbeforecopy:= fo.scriptbeforecopy.value;
   scriptaftercopy:= fo.scriptaftercopy.value;
@@ -1968,15 +2067,15 @@ begin
   runcommand:= fo.runcommand.value;
   remoteconnection:= fo.remoteconnection.value;
   uploadcommand:= fo.uploadcommand.value;
-  gdbdownload:= fo.gdbdownload.value;
-  downloadalways:= fo.downloadalways.value;
-  startupbkpt:= fo.startupbkpt.value;
-  startupbkpton:= fo.startupbkpton.value;
-  gdbsimulator:= fo.gdbsimulator.value;
+//  gdbdownload:= fo.gdbdownload.value;
+//  downloadalways:= fo.downloadalways.value;
+//  startupbkpt:= fo.startupbkpt.value;
+//  startupbkpton:= fo.startupbkpton.value;
+//  gdbsimulator:= fo.gdbsimulator.value;
   gdbprocessor:= fo.gdbprocessor.value;
   gdbservercommand:= fo.gdbservercommand.value;
   gdbservercommandattach:= fo.gdbservercommandattach.value;
-  gdbserverwait:= fo.gdbserverwait.value;
+//  gdbserverwait:= fo.gdbserverwait.value;
   beforeload:= fo.gdbbeforeload.value;
   afterload:= fo.gdbafterload.value;
   beforerun:= fo.gdbbeforerun.value;
@@ -2036,11 +2135,11 @@ begin
   toolmenus:= fo.toolmenu.gridvalues;
   toolfiles:= fo.toolfile.gridvalues;
   toolparams:= fo.toolparam.gridvalues;  
-  stoponexception:= fo.stoponexception.value;
-  valuehints:= fo.valuehints.value;
-  activateonbreak:= fo.activateonbreak.value;
-  showconsole:= fo.showconsole.value;
-  externalconsole:= fo.externalconsole.value;
+//  stoponexception:= fo.stoponexception.value;
+//  valuehints:= fo.valuehints.value;
+//  activateonbreak:= fo.activateonbreak.value;
+//  showconsole:= fo.showconsole.value;
+//  externalconsole:= fo.externalconsole.value;
  end;
  expandprojectmacros;
 end;
@@ -2428,6 +2527,50 @@ end;
 
 constructor tprojectoptions.create;
 begin
+ closemessages:= true;
+ checkmethods:= true;
+ showgrid:= true;
+ snaptogrid:= true;
+ moveonfirstclick:= true;
+ gridsizex:= defaultgridsizex;
+ gridsizey:= defaultgridsizey;
+ autoindent:= true;
+ blockindent:= 1;
+ rightmarginon:= true;
+ rightmarginchars:= 80;
+ tabstops:= 4;
+ editfontname:= 'mseide_source';
+ editfontcolor:= integer(cl_text);
+ editbkcolor:= integer(cl_foreground);
+ statementcolor:= $E0FFFF;
+ editfontantialiased:= true;
+ editmarkbrackets:= true;
+ backupfilecount:= 2;
+ valuehints:= true;
+ activateonbreak:= true;
+ additem(fexceptclassnames,'EconvertError');
+ additem(fexceptignore,false);
+end;
+
+function tprojectoptions.limitgridsize(const avalue: integer): integer;
+begin
+ result:= avalue;
+ if result < 1 then begin
+  result:= 1;
+ end;
+ if result > 1000 then begin
+  result:= 1000;
+ end;
+end;
+
+procedure tprojectoptions.setgridsizex(const avalue: integer);
+begin
+ fgridsizex:= limitgridsize(avalue);
+end;
+
+procedure tprojectoptions.setgridsizey(const avalue: integer);
+begin
+ fgridsizey:= limitgridsize(avalue);
 end;
 
 finalization

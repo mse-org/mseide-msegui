@@ -85,7 +85,7 @@ begin
        drawtext(inttostr(linenumber+1),makerect(0,liney,round(3*fontsize.value),0),
                              [tf_right],font1);
       end;
-      writeln(expandtabs(richlines[rowindex],projectoptions.tabstops));
+      writeln(expandtabs(richlines[rowindex],projectoptions.o.tabstops));
       inc(rowindex);
       again:= true;
      end;

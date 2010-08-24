@@ -517,6 +517,11 @@ begin
            setintegerar(dest.obj,po1,tintegerdatalist(list1).asarray);
           end;
          end;
+         tkint64: begin
+          if list1 is tint64datalist then begin
+           setint64ar(dest.obj,po1,tint64datalist(list1).asarray);
+          end;
+         end;
          tkfloat: begin
           if list1 is trealdatalist then begin
            setrealar(dest.obj,po1,trealdatalist(list1).asarray);
@@ -620,6 +625,11 @@ begin
          tkinteger: begin
           if list1 is tintegerdatalist then begin
            tintegerdatalist(list1).asarray:= getintegerar(source.obj,po1);
+          end;
+         end;
+         tkint64: begin
+          if list1 is tint64datalist then begin
+           tint64datalist(list1).asarray:= getint64ar(source.obj,po1);
           end;
          end;
          tkfloat: begin

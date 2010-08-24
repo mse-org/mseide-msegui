@@ -817,7 +817,7 @@ begin
   end;
  end;
  createbackupfile(newname,edit.filename,fbackupcreated,
-                            projectoptions.backupfilecount);
+                            projectoptions.o.backupfilecount);
  finitialfilepath:= newname;
  try
   designnotifications.beforefilesave(idesigner(designer),newname);
@@ -1005,7 +1005,7 @@ var
  shiftstate1: shiftstatesty;
 begin
  shiftstate1:= info.mouseeventinfopo^.shiftstate * shiftstatesmask;
- if mainfo.gdb.started and projectoptions.valuehints then begin
+ if mainfo.gdb.started and projectoptions.o.valuehints then begin
   if info.eventkind = cek_mousepark then begin
    str1:= getpascalvarname(edit,info.pos,po1);
    if (po1.row <> flasthint.row) or (po1.col <> flasthint.col) or
@@ -1123,25 +1123,25 @@ begin
  if edit <> nil then begin
   projectoptionstofont(edit.font);
   with projectoptions do begin
-   grid.frame.colorclient:= editbkcolor;
-   grid.rowcolors[0]:= statementcolor;
+   grid.frame.colorclient:= o.editbkcolor;
+   grid.rowcolors[0]:= o.statementcolor;
    grid.datarowheight:= edit.font.lineheight;
    int1:= edit.getcanvas.getstringwidth('oo') div 2;
-   if rightmarginon then begin
+   if o.rightmarginon then begin
     edit.marginlinecolor:= cl_gray;
-    edit.marginlinepos:= int1 * rightmarginchars;
+    edit.marginlinepos:= int1 * o.rightmarginchars;
    end
    else begin
     edit.marginlinecolor:= cl_none;
    end;
-   if tabstops < 1 then begin
-    tabstops:= 1;
+   if o.tabstops < 1 then begin
+    o.tabstops:= 1;
    end;
    edit.tabulators.clear;
-   edit.tabulators.defaultdist:= int1 * tabstops / edit.tabulators.ppmm;
+   edit.tabulators.defaultdist:= int1 * o.tabstops / edit.tabulators.ppmm;
 //   edit.tabulators.setdefaulttabs(int1 * tabstops / edit.tabulators.ppmm);
-   edit.autoindent:= autoindent;
-   case encoding of
+   edit.autoindent:= o.autoindent;
+   case o.encoding of
     1: begin
      edit.encoding:= ce_utf8n;
     end;
@@ -1152,7 +1152,7 @@ begin
      edit.encoding:= ce_locale;
     end;
    end;
-   grid.wheelscrollheight:= scrollheight;
+   grid.wheelscrollheight:= o.scrollheight;
    if edit.syntaxpainterhandle >= 0 then begin
     colors:= edit.syntaxpainter.colors[edit.syntaxpainterhandle];
     with colors do begin
@@ -1311,9 +1311,9 @@ procedure tsourcepage.editonkeydown(const sender: twidget;
                                                    var info: keyeventinfoty);
 begin
  with info,tsyntaxedit(sender).editor,projectoptions do begin
-  if spacetabs and (tabstops > 0) and (shiftstate = []) and 
+  if o.spacetabs and (o.tabstops > 0) and (shiftstate = []) and 
                                              (key = key_tab) then begin
-   chars:= charstring(' ',(curindex div tabstops + 1) * tabstops - curindex);
+   chars:= charstring(' ',(curindex div o.tabstops + 1) * o.tabstops - curindex);
   end;
  end;
 end;
@@ -1401,7 +1401,7 @@ end;
 
 procedure tsourcepage.callcheckbrackets;
 begin
- if (fbracketchecking = 0) and (projectoptions.editmarkbrackets) then begin
+ if (fbracketchecking = 0) and (projectoptions.o.editmarkbrackets) then begin
   inc(fbracketchecking);
   asyncevent(ord(spat_checkbracket));
  end;

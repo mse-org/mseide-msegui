@@ -375,11 +375,11 @@ begin
   updatevalue('hintwidth',hintsize.cx);
   updatevalue('hintheight',hintsize.cy);
   with projectoptions do begin
-   updatevalue('autoindent',autoindent);
-   updatevalue('blockindent',blockindent);
-   updatevalue('rightmarginon',rightmarginon);
-   updatevalue('rightmarginchars',rightmarginchars);
-   updatevalue('tabstops',tabstops);
+//   updatevalue('autoindent',autoindent);
+//   updatevalue('blockindent',blockindent);
+//   updatevalue('rightmarginon',rightmarginon);
+//   updatevalue('rightmarginchars',rightmarginchars);
+//   updatevalue('tabstops',tabstops);
    with findreplaceinfo do begin
     updatevalue('finddtext',find.text);
     updatevalue('findhistory',find.history);
