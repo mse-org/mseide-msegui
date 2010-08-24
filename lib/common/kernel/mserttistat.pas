@@ -44,7 +44,9 @@ type
    fonstatwrite: statwriteeventty;
    fonstatbeforeread: notifyeventty;
    fonstatafterread: notifyeventty;
+  {$ifdef mse_with_ifi}   
    ftargets: tpointeransistringhashdatalist;
+  {$endif}
    procedure setstatfile(const avalue: tstatfile);
   protected
     //istatfile
@@ -54,8 +56,10 @@ type
    procedure statread;
    function getstatvarname: msestring;
    function getobj(out aobj: objectinfoarty): boolean;
+  {$ifdef mse_with_ifi}
    function findtarget(const aname: string): tobject;
    procedure scantargets(const aroot: tcomponent);
+  {$endif}
   public
    procedure readstat(const areader: tstatreader);
    procedure writestat(const awriter: tstatwriter);
@@ -739,11 +743,6 @@ begin
  result:= aobj <> nil; 
 end;
 
-function tcustomrttistat.findtarget(const aname: string): tobject;
-begin
- ftargets.find(aname,pointer(result));
-end;
-
 procedure tcustomrttistat.setstatfile(const avalue: tstatfile);
 begin
  setstatfilevar(istatfile(self),avalue,fstatfile);
@@ -795,7 +794,22 @@ begin
  end;
 end;
 
+procedure tcustomrttistat.readstat(const areader: tstatreader);
+begin
+ dostatread(areader);
+end;
+
+procedure tcustomrttistat.writestat(const awriter: tstatwriter);
+begin
+ dostatwrite(awriter);
+end;
+
 {$ifdef mse_with_ifi}
+
+function tcustomrttistat.findtarget(const aname: string): tobject;
+begin
+ ftargets.find(aname,pointer(result));
+end;
 
 procedure tcustomrttistat.scantargets(const aroot: tcomponent);
  procedure addcomps(const acomp: tcomponent; prefix: string);
@@ -860,16 +874,6 @@ begin
    freeandnil(ftargets);
   end;
  end;
-end;
-
-procedure tcustomrttistat.readstat(const areader: tstatreader);
-begin
- dostatread(areader);
-end;
-
-procedure tcustomrttistat.writestat(const awriter: tstatwriter);
-begin
- dostatwrite(awriter);
 end;
 
 {$endif}
