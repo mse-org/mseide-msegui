@@ -115,7 +115,17 @@ type
   envvarvalues: msestringarty;
  end;
 
+ tprojectoptions = class
+  private
+   fcopymessages: boolean;
+  public
+   constructor create;
+  published
+   property copymessages: boolean read fcopymessages write fcopymessages;
+ end;
+ 
  projectoptionsty = record
+  o: tprojectoptions;
   modified: boolean;
   savechecked: boolean;
   ignoreexceptionclasses: stringarty;
@@ -130,7 +140,7 @@ type
   fontoptions: msestringarty;
   fontxscales: realarty;
   
-  copymessages: boolean;
+//  copymessages: boolean;
   closemessages: boolean;
   checkmethods: boolean;
 
@@ -1013,8 +1023,10 @@ const
 var
  int1: integer;
 begin
+ projectoptions.o.free;
  finalize(projectoptions);
  fillchar(projectoptions,sizeof(projectoptions),0);
+ projectoptions.o:= tprojectoptions.create;
  with projectoptions,t do begin
   deletememorystatstream(findinfiledialogstatname);
   deletememorystatstream(finddialogstatname);
@@ -1064,7 +1076,7 @@ begin
   macroon:= nil;
   macronames:= nil;
   macrovalues:= nil;
-  copymessages:= false;
+//  copymessages:= false;
   closemessages:= true;
   checkmethods:= true;
   showgrid:= true;
@@ -1366,6 +1378,7 @@ begin
   updatememorystatstream('dbfieldeditor',dbfieldeditorstatname);
 {$endif}{$endif}
   if iswriter then begin
+   mainfo.statoptions.writestat(tstatwriter(statfiler));
    with tstatwriter(statfiler) do begin
     writerecordarray('sigsettings',length(sigsettings),
                      {$ifdef FPC}@{$endif}getsignalinforec);
@@ -1374,6 +1387,7 @@ begin
    end;
   end
   else begin
+   mainfo.statoptions.readstat(tstatreader(statfiler));
    with tstatreader(statfiler) do begin
     readrecordarray('sigsettings',{$ifdef FPC}@{$endif}setsignalinfocount,
              {$ifdef FPC}@{$endif}storesignalinforec);
@@ -1389,7 +1403,7 @@ begin
   updatevalue('mainfile',mainfile);
   updatevalue('targetfile',targetfile);
   updatevalue('messageoutputfile',messageoutputfile);
-  updatevalue('copymessages',copymessages);
+//  updatevalue('copymessages',copymessages);
   updatevalue('closemessages',closemessages);
   updatevalue('checkmethods',checkmethods);
   updatevalue('makecommand',makecommand);
@@ -1581,6 +1595,7 @@ procedure projectoptionstoform(fo: tprojectoptionsfo);
 var
  int1,int2: integer;
 begin
+ mainfo.statoptions.objtovalues(fo);
  fo.usercolors.gridvalues:= integerarty(projectoptions.usercolors);
  fo.usercolorcomment.gridvalues:= projectoptions.usercolorcomment;
  fo.colgrid.rowcount:= usercolorcount;
@@ -1626,7 +1641,7 @@ begin
   fo.mainfile.value:= mainfile;
   fo.targetfile.value:= targetfile;
   fo.messageoutputfile.value:= messageoutputfile;
-  fo.copymessages.value:= copymessages;
+//  fo.copymessages.value:= copymessages;
   fo.closemessages.value:= closemessages;
   fo.checkmethods.value:= checkmethods;
   fo.showgrid.value:= showgrid;
@@ -1845,6 +1860,7 @@ procedure formtoprojectoptions(fo: tprojectoptionsfo);
 var
  int1: integer;
 begin
+ mainfo.statoptions.valuestoobj(fo);
  with projectoptions,t do begin
   setlength(sigsettings,fo.signalgrid.rowcount);
   for int1:= 0 to high(sigsettings) do begin
@@ -1864,7 +1880,7 @@ begin
   targetfile:= fo.targetfile.value;
   messageoutputfile:= fo.messageoutputfile.value;
 
-  copymessages:= fo.copymessages.value;
+//  copymessages:= fo.copymessages.value;
   closemessages:= fo.closemessages.value;
   checkmethods:= fo.checkmethods.value;
   showgrid:= fo.showgrid.value;
@@ -2407,4 +2423,13 @@ begin
          sender.widgets[1].name+':',sender.widgets[1].bounds_y);
 end;
 }
+
+{ tprojectoptions }
+
+constructor tprojectoptions.create;
+begin
+end;
+
+finalization
+ projectoptions.o.free;
 end.

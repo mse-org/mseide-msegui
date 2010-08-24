@@ -30,7 +30,7 @@ uses
  msedispwidgets,msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,
  msegrids,msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,
  classes,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
- msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,msesys;
+ msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,msesys,mserttistat;
 const
  versiontext = '2.5 unstable';
 {$ifdef linux}
@@ -75,6 +75,7 @@ type
 
    viewmenu: tframecomp;
    runprocmon: tprocessmonitor;
+   statoptions: trttistat;
    procedure newfileonexecute(const sender: tobject);
    procedure newformonexecute(const sender: TObject);
 
@@ -138,6 +139,7 @@ type
    procedure runprocdied(const sender: TObject; const prochandle: prochandlety;
                    const execresult: Integer; const data: Pointer);
    procedure statbefread(const sender: TObject);
+   procedure getstatobj(const sender: TObject; var aobject: TObject);
   private
    fstartcommand: startcommandty;
    fnoremakecheck: boolean;
@@ -2689,6 +2691,11 @@ end;
 procedure tmainfo.statbefread(const sender: TObject);
 begin
  createcpufo;
+end;
+
+procedure tmainfo.getstatobj(const sender: TObject; var aobject: TObject);
+begin
+ aobject:= projectoptions.o;
 end;
 
 end.

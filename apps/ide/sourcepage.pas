@@ -450,7 +450,7 @@ function tsourcepage.canchangenotify(const info: filechangeinfoty): boolean;
 begin
  result:= info.info.extinfo1.modtime - fsavetime > 5.0/(24.0*3600); //> 5 sec
  with projectoptions,texp do begin
-  if result and making and copymessages and
+  if result and making and o.copymessages and
           (filepath = msefileutils.filepath(messageoutputfile)) then begin
    result:= false;
   end;

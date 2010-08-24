@@ -18,7 +18,8 @@ unit mserttistat;
 
 interface
 uses
- classes,mseclasses,msestat,msestatfile,msestrings,typinfo,msetypes;
+ classes,mseclasses,msestat,msestatfile,msestrings,typinfo,msetypes,
+ msehash;
  
 type
  objectinfoty = record
@@ -43,6 +44,7 @@ type
    fonstatwrite: statwriteeventty;
    fonstatbeforeread: notifyeventty;
    fonstatafterread: notifyeventty;
+   ftargets: tpointeransistringhashdatalist;
    procedure setstatfile(const avalue: tstatfile);
   protected
     //istatfile
@@ -52,7 +54,11 @@ type
    procedure statread;
    function getstatvarname: msestring;
    function getobj(out aobj: objectinfoarty): boolean;
+   function findtarget(const aname: string): tobject;
+   procedure scantargets(const aroot: tcomponent);
   public
+   procedure readstat(const areader: tstatreader);
+   procedure writestat(const awriter: tstatwriter);
   {$ifdef mse_with_ifi}
    procedure valuestoobj(const sourceroot: tcomponent);
      //reads values from components with matching property-component names
@@ -62,7 +68,8 @@ type
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
    property ongetobject: getobjecteventty read fongetobject write fongetobject;
-   property ongetobjects: getobjectseventty read fongetobjects write fongetobjects;
+   property ongetobjects: getobjectseventty read fongetobjects 
+                                                        write fongetobjects;
    property onstatupdate: statupdateeventty read fonstatupdate 
                                                         write fonstatupdate;
    property onstatread: statreadeventty read fonstatread 
@@ -94,7 +101,7 @@ function opentodynarray(const objs: array of tobject;
                      
 implementation
 uses
- {$ifdef mse_with_ifi}mseificompglob,{$endif}msedatalist;
+ {$ifdef mse_with_ifi}mseificompglob,{$endif}msedatalist,sysutils;
 
 type
  dynarraysetter = procedure(const avalue: pointerarty) of object;
@@ -350,7 +357,7 @@ var
  po3: ptypedata;
  int1: integer;
  obj1: tobject;
- intf1: istatfile;
+// intf1: istatfile;
  str1: string;
 begin
  with aobj do begin
@@ -421,9 +428,13 @@ begin
 end;
 
 {$ifdef mse_with_ifi}
-procedure valuestoobject(const sourceroot: tcomponent; const dest: objectinfoty);
+type
+ findtargetty = function(const aname: string): tobject of object;
+
+procedure valuestoobject(const dest: objectinfoty;
+                                        const findtarget: findtargetty);
 var
- comp1: tcomponent;
+ comp1: tobject;
  ar1: propinfopoarty; 
  po1,po4: ppropinfo;
  po2: ptypeinfo;
@@ -438,7 +449,7 @@ begin
  for int1 := 0 to high(ar1) do begin
   po1:= ar1[int1];
   with po1^ do begin
-   comp1:= sourceroot.findcomponent(dest.prefix+name);
+   comp1:= findtarget(dest.prefix+name);
    if (comp1 <> nil) and 
      mseclasses.getcorbainterface(comp1,typeinfo(iifidatalink),
                                                       intf1)  then begin
@@ -537,9 +548,9 @@ begin
 end;
 
 procedure objecttovalues(const source: objectinfoty; 
-                                                  const destroot: tcomponent);
+                                  const findtarget: findtargetty);
 var
- comp1: tcomponent;
+ comp1: tobject;
  ar1: propinfopoarty; 
  po1,po4: ppropinfo;
  po2: ptypeinfo;
@@ -553,7 +564,7 @@ begin
  for int1 := 0 to high(ar1) do begin
   po1:= ar1[int1];
   with po1^ do begin
-   comp1:= destroot.findcomponent(source.prefix+name);
+   comp1:= findtarget(source.prefix+name);
    if (comp1 <> nil) and 
      mseclasses.getcorbainterface(comp1,typeinfo(iifidatalink),
                                                       intf1)  then begin
@@ -692,6 +703,11 @@ begin
  result:= aobj <> nil; 
 end;
 
+function tcustomrttistat.findtarget(const aname: string): tobject;
+begin
+ ftargets.find(aname,pointer(result));
+end;
+
 procedure tcustomrttistat.setstatfile(const avalue: tstatfile);
 begin
  setstatfilevar(istatfile(self),avalue,fstatfile);
@@ -733,8 +749,38 @@ begin
  end;
 end;
 
-
 {$ifdef mse_with_ifi}
+
+procedure tcustomrttistat.scantargets(const aroot: tcomponent);
+ procedure addcomps(const acomp: tcomponent; prefix: string);
+ var
+  intf1: istatfile;
+  str1: string;
+  int1: integer;
+ begin
+  if acomp <> aroot then begin
+   if prefix <> '' then begin
+    prefix:= prefix + '_';
+   end;
+   prefix:= prefix + acomp.name;
+  end;
+  for int1:= 0 to acomp.componentcount - 1 do begin
+   addcomps(acomp.components[int1],prefix);
+  end;
+  if (acomp <> aroot) and mseclasses.getcorbainterface(acomp,
+                                        typeinfo(istatfile),intf1) then begin
+   str1:= intf1.getstatvarname;
+   if str1 = '' then begin
+    str1:= prefix;
+   end;    
+   ftargets.add(str1,acomp);
+  end;
+ end; //addcomps
+
+begin
+ ftargets:= tpointeransistringhashdatalist.create;
+ addcomps(aroot,'');
+end;
 
 procedure tcustomrttistat.valuestoobj(const sourceroot: tcomponent);
 var
@@ -742,8 +788,13 @@ var
  int1: integer;
 begin
  if getobj(obj1) then begin
-  for int1:= 0 to high(obj1) do begin
-   valuestoobject(sourceroot,obj1[int1]);
+  scantargets(sourceroot);
+  try
+   for int1:= 0 to high(obj1) do begin
+    valuestoobject(obj1[int1],{$ifdef FPC}@{$endif}findtarget);
+   end;
+  finally
+   freeandnil(ftargets);
   end;
  end;
 end;
@@ -754,10 +805,25 @@ var
  int1: integer;
 begin
  if getobj(obj1) then begin
-  for int1:= 0 to high(obj1) do begin
-   objecttovalues(obj1[int1],destroot);
+  scantargets(destroot);
+  try
+   for int1:= 0 to high(obj1) do begin
+    objecttovalues(obj1[int1],{$ifdef FPC}@{$endif}findtarget);
+   end;
+  finally
+   freeandnil(ftargets);
   end;
  end;
+end;
+
+procedure tcustomrttistat.readstat(const areader: tstatreader);
+begin
+ dostatread(areader);
+end;
+
+procedure tcustomrttistat.writestat(const awriter: tstatwriter);
+begin
+ dostatwrite(awriter);
 end;
 
 {$endif}

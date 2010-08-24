@@ -14,6 +14,12 @@ object mainfo: tmainfo
   container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
   container.frame.sbvert.options = [sbo_moveauto, sbo_showauto]
   container.onchildscaled = onscale
+  container.bounds = (
+    0
+    16
+    429
+    122
+  )
   optionswindow = [wo_groupleader]
   mainmenu = mainmenu1
   options = [fo_main, fo_terminateonclose, fo_globalshortcuts, fo_savepos, fo_savezorder, fo_savestate]
@@ -34,7 +40,7 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 21
     bounds_cx = 429
-    bounds_cy = 148
+    bounds_cy = 164
     anchors = [an_left, an_top, an_right, an_bottom]
     dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_fixsize, od_background]
     statfile = projectstatfile
@@ -62,14 +68,14 @@ object mainfo: tmainfo
     startupbkpton = False
     onevent = gdbonevent
     overloadsleepus = 10000
-    left = 232
-    top = 32
+    left = 224
+    top = 24
   end
   object mainstatfile: tstatfile
     filename = 'mseide.sta'
     filedir = '"~/.mseide"'
     onstatupdate = mainstatfileonupdatestat
-    left = 32
+    left = 16
     top = 24
   end
   object mainmenu1: tmainmenu
@@ -659,17 +665,16 @@ object mainfo: tmainfo
         onexecute = aboutonexecute
       end>
     menu.coloractive = -1879048187
-    left = 247
-    top = 60
+    left = 127
+    top = 88
   end
   object openfile: tfiledialog
     statfile = projectstatfile
     controller.options = [fdo_checkexist]
     controller.captionopen = 'Open file'
     controller.captionsave = 'Save file as'
-    dialogkind = fdk_none
-    left = 144
-    top = 28
+    left = 128
+    top = 25
   end
   object projectstatfile: tstatfile
     filename = 'status.sta'
@@ -682,8 +687,8 @@ object mainfo: tmainfo
     height = 18
     colormask = True
     count = 18
-    left = 287
-    top = 28
+    left = 309
+    top = 88
     image = {
       00000000060000005A0000005A0000008C3D0000000000000000000000000000
       0000000000000000000000000000000000000000FFFFFF06CB582601C5440B01
@@ -1383,14 +1388,19 @@ object mainfo: tmainfo
   object dummyimagelist: timagelist
     width = 24
     left = 128
-    top = 72
+    top = 56
   end
   object viewmenu: tframecomp
-    left = 248
+    left = 224
     top = 88
   end
   object runprocmon: tprocessmonitor
     onchilddied = runprocdied
+    left = 288
+    top = 24
+  end
+  object statoptions: trttistat
+    ongetobject = getstatobj
     left = 16
     top = 88
   end

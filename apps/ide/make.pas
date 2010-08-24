@@ -250,7 +250,7 @@ constructor tprogrunner.create(const aowner: tcomponent;
 begin
  inherited create(aowner);
  with projectoptions,texp do begin
-  if copymessages and (messageoutputfile <> '') and not fnofilecopy then begin
+  if o.copymessages and (messageoutputfile <> '') and not fnofilecopy then begin
    fmessagefile:= ttextstream.create(messageoutputfile,fm_create);
   end;
   messagepipe:= tpipereader.create;
