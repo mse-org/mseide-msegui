@@ -1801,7 +1801,8 @@ begin
     end
     else begin
 //     if activateoptionset then begin
-      window.stackover(nil);
+//      window.stackover(nil);
+     window.sendtobacklocal;
 //     end;
     end;
    end;
@@ -1824,7 +1825,7 @@ begin
  if not (mws_firstactivated in fstate) or force then begin
   if not (mws_firstactivated in fstate) then begin
    include(fstate,mws_firstactivated);
-   setlinkedvar(fwindow.stackedover,tlinkedobject(fstackedoverbefore));
+   setlinkedvar(fwindow.stackedover(true),tlinkedobject(fstackedoverbefore));
   end;
   if (force or activateoptionset) then begin
    capturekeyboard;
@@ -1834,7 +1835,7 @@ begin
   end;
   if force or activateoptionset then begin
    if application.active and (fmenucomp <> nil) then begin
-    window.bringtofront;
+    window.bringtofrontlocal;
     include(fstate,mws_raised);
    end;
   end;

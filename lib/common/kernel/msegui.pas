@@ -1832,7 +1832,8 @@ type
                   tws_globalshortcuts,tws_localshortcuts,
                   tws_buttonendmodal,tws_grouphidden,tws_groupminimized,
                   tws_grab,tws_activatelocked,
-                  tws_canvasoverride,tws_destroying);
+                  tws_canvasoverride,tws_destroying,
+                  tws_raise,tws_lower);
  windowstatesty = set of windowstatety;
 
  pmodalinfoty = ^modalinfoty;
@@ -1975,13 +1976,15 @@ type
    procedure beginmoving; //lock window rect modification
    procedure endmoving;
    procedure bringtofront;
+   procedure bringtofrontlocal;
    procedure sendtoback;
+   procedure sendtobacklocal;
    procedure stackunder(const predecessor: twindow);
        //stacking is performed in mainloop idle, nil means top
    procedure stackover(const predecessor: twindow);
        //stacking is performed in mainloop idle, nil means bottom
-   function stackedunder: twindow; //nil if top
-   function stackedover: twindow;  //nil if bottom
+   function stackedunder(const avisible: boolean = false): twindow; //nil if top
+   function stackedover(const avisible: boolean = false): twindow;  //nil if bottom
    function hastransientfor: boolean;
 //   procedure removefocuslock;
 
@@ -12846,12 +12849,38 @@ procedure twindow.bringtofront;
 begin
  gui_raisewindow(winid);
  include(appinst.fstate,aps_needsupdatewindowstack);
+{$ifdef mse_debugzorder}
+ debugwriteln('****bringtofront**** "'+fowner.name+'"');
+{$endif}
 end;
 
 procedure twindow.sendtoback;
 begin
  gui_lowerwindow(winid);
  include(appinst.fstate,aps_needsupdatewindowstack);
+{$ifdef mse_debugzorder}
+ debugwriteln('****sendtoback**** "'+fowner.name+'"');
+{$endif}
+end;
+
+procedure twindow.bringtofrontlocal;
+begin
+ include(fstate,tws_raise);
+ exclude(fstate,tws_lower);
+ include(appinst.fstate,aps_needsupdatewindowstack);
+{$ifdef mse_debugzorder}
+ debugwriteln('****bringtofrontlocal**** "'+fowner.name+'"');
+{$endif}
+end;
+
+procedure twindow.sendtobacklocal;
+begin
+ include(fstate,tws_lower);
+ exclude(fstate,tws_raise);
+ include(appinst.fstate,aps_needsupdatewindowstack);
+{$ifdef mse_debugzorder}
+ debugwriteln('****sendtobacklocal**** "'+fowner.name+'"');
+{$endif}
 end;
 
 procedure twindow.stackunder(const predecessor: twindow);
@@ -12882,36 +12911,63 @@ begin
  end;
 end;
 
-function twindow.stackedover: twindow; //nil if top
+function twindow.stackedover(const avisible: boolean = false): twindow; //nil if top
 var
  ar1: windowarty;
- int1: integer;
-
+ int1,int2: integer;
 begin
  appinst.sortzorder;
  ar1:= appinst.windowar;
  result:= nil;
+ int2:= -1;
  for int1:= high(ar1) downto 1 do begin
   if ar1[int1] = self then begin
-   result:= ar1[int1-1];
+   int2:= int1-1;
    break;
+  end;
+ end;
+ if int2 >= 0 then begin
+  if avisible then begin
+   for int1:= int2 downto 0 do begin
+    if ar1[int1].visible then begin
+     result:= ar1[int1];
+     break;
+    end;
+   end;
+  end
+  else begin
+   result:= ar1[int2];
   end;
  end;
 end;
 
-function twindow.stackedunder: twindow;  //nil if bottom
+function twindow.stackedunder(const avisible: boolean = false): twindow;
+                                            //nil if bottom
 var
  ar1: windowarty;
- int1: integer;
-
+ int1,int2: integer;
 begin
  appinst.sortzorder;
  ar1:= appinst.windowar;
  result:= nil;
+ int2:= -1;
  for int1:= 0 to high(ar1)-1 do begin
   if ar1[int1] = self then begin
-   result:= ar1[int1+1];
+   int2:= int1+1;
    break;
+  end;
+ end;
+ if int2 >= 0 then begin
+  if avisible then begin
+   for int1:= int2 to high(ar1) do begin
+    if ar1[int1].visible then begin
+     result:= ar1[int1];
+     break;
+    end;
+   end;
+  end
+  else begin
+   result:= ar1[int2];
   end;
  end;
 end;
@@ -14843,6 +14899,9 @@ var
 begin
  if fwindowstack <> nil then begin
   if not nozorderhandling then begin
+ {$ifdef mse_debugzorder}
+   debugwriteln('****checkwindowstack****');
+ {$endif}
    for int1:= 0 to high(fwindowstack) do begin
     findlevel(fwindowstack[int1]);
    end;
@@ -14889,13 +14948,16 @@ end;
 
 function compwindowzorder(const l,r): integer;
 const
- backgroundweight = 1;
- topweight = 1;
- modalweight = 8;
- transientforcountweight = 16;
- transientfornotnilweight = 32;
- transientforweight = 64;
- invisibleweight = 128;
+ raiseweight =              1;
+ lowerweight =              1;
+ backgroundweight =         1 shl 2;
+ topweight =                1 shl 2;
+ popupweight =              1 shl 4;
+ modalweight =              1 shl 5;
+ transientforcountweight =  1 shl 6;
+ transientfornotnilweight = 1 shl 7;
+ transientforweight =       1 shl 8;
+ invisibleweight =          1 shl 9;
 var
  window1: twindow;
 begin
@@ -14913,6 +14975,18 @@ begin
    exit; //both invisible -> no change in order
   end;
  end;
+ if tws_raise in  twindow(l).fstate then begin
+  inc(result,raiseweight);
+ end;
+ if tws_raise in  twindow(r).fstate then begin
+  dec(result,raiseweight);
+ end;
+ if tws_lower in  twindow(l).fstate then begin
+  dec(result,lowerweight);
+ end;
+ if tws_lower in  twindow(r).fstate then begin
+  inc(result,lowerweight);
+ end;
  if ow_background in twindow(l).fowner.foptionswidget then begin
   dec(result,backgroundweight);
  end;
@@ -14924,6 +14998,12 @@ begin
  end;
  if ow_top in twindow(r).fowner.foptionswidget then begin
   dec(result,topweight);
+ end;
+ if wo_popup in  twindow(l).foptions then begin
+  inc(result,popupweight);
+ end;
+ if wo_popup in  twindow(r).foptions then begin
+  dec(result,popupweight);
  end;
  if tws_modal in twindow(l).fstate then begin
   inc(result,modalweight);
@@ -14973,12 +15053,12 @@ begin
   else begin
    debugwrite('- ');
   end;
-  debugwrite(ar3[int1].fowner.name+' ');
+  debugwrite('"'+ar3[int1].fowner.name+'" ');
   if ar3[int1].ftransientfor = nil then begin
    debugwriteln('nil');
   end
   else begin
-   debugwriteln(ar3[int1].ftransientfor.fowner.name);
+   debugwriteln('"'+ar3[int1].ftransientfor.fowner.name+'"');
   end;
  end;
 end;
@@ -14998,6 +15078,12 @@ begin
 {$endif}
  ar4:= copy(ar3);
  sortarray(ar3,{$ifdef FPC}@{$endif}compwindowzorder,sizeof(ar3[0]));
+ for int1:= 0 to high(ar3) do begin
+  with ar3[int1] do begin
+   fstate:= fstate - [tws_raise,tws_lower]; 
+           //reset bringtofrontlocal/sendtobacklocal
+  end;
+ end;
  int2:= -1;
 {$ifdef mse_debugzorder}
  debugwriteln('++++');
@@ -15567,12 +15653,11 @@ var
 begin
  fhintforwidget:= sender;
  with tinternalapplication(self),fhintinfo do begin
-//  if sender <> nil then begin
-//   window1:= sender.window;
-//  end
-//  else begin
-   window1:= activewindow;
-//  end;
+  window1:= nil;
+  if (sender <> nil) and ((activewindow = nil) or 
+              (activewindow = sender.window) and activewindow.modal) then begin
+   window1:= sender.window;
+  end;
   fhintwidget:= thintwidget.create(nil,window1,fhintinfo);
   fhintwidget.show;
   if showtime <> 0 then begin
