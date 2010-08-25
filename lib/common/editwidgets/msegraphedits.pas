@@ -10,10 +10,10 @@
 unit msegraphedits;
 
 {$ifdef FPC}
- {$ifndef mse_no_ifi}
-  {$define mse_with_ifi}
- {$endif}
  {$mode objfpc}{$h+}
+{$endif}
+{$ifndef mse_no_ifi}
+ {$define mse_with_ifi}
 {$endif}
 
 interface
@@ -24,7 +24,7 @@ uses
  mseclasses,msesimplewidgets,msemenus,mseact,typinfo,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,
  msedrawtext,mseshapes
- {$ifdef mse_with_ifi},mseifi,mseifiglob,mseificomp,mseificompglob{$endif},
+ {$ifdef mse_with_ifi}{,mseifi},mseifiglob,mseificomp,mseificompglob{$endif},
  msepointer,msegridsglob;
 
 const
@@ -1899,7 +1899,7 @@ end;
 
 function tgraphdataedit.getvalueprop: ppropinfo;
 begin
-  result:= findpropinfo(self,'value');
+  result:= getpropinfo(self,'value');
 end;
 
 {$endif mse_with_ifi}
@@ -2429,7 +2429,7 @@ end;
 
 procedure tcustombooleanedit.setifilink(const avalue: tifibooleanlinkcomp);
 begin
- inherited;
+ inherited setifilink(avalue);
 end;
 
 {$endif}

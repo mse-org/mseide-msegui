@@ -129,6 +129,7 @@ type
    procedure readdatalist(const name: msestring; const value: tdatalist);
    function readarray(const name: msestring; const default: stringarty): stringarty; overload;
    function readarray(const name: msestring; const default: msestringarty): msestringarty; overload;
+   function readarray(const name: msestring; const default: widestringarty): widestringarty; overload;
    function readarray(const name: msestring; const default: integerarty): integerarty; overload;
    function readarray(const name: msestring; const default: int64arty): int64arty; overload;
    function readarray(const name: msestring; const default: booleanarty): booleanarty; overload;
@@ -880,6 +881,25 @@ end;
 
 function tstatreader.readarray(const name: msestring;
                      const default: msestringarty): msestringarty;
+var
+ str1: msestring;
+ int1,int2: integer;
+begin
+ if findvar(name,str1) then begin
+  int2:= strtoint(str1);
+  setlength(result,int2);
+  for int1:= 0 to int2-1 do begin
+   result[int1]:= readlistitem;
+  end;
+ end
+ else begin
+  result:= default;
+  setlength(result,length(result));
+ end;
+end;
+
+function tstatreader.readarray(const name: msestring;
+                     const default: widestringarty): widestringarty;
 var
  str1: msestring;
  int1,int2: integer;

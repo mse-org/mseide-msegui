@@ -120,7 +120,7 @@ type
    procedure addnode(const anode: tcachenode);   
    function find(const akey: tcachenode; out anode: tcachenode): boolean; overload;
   public
-   procedure clear; override; overload;
+   procedure clear; overload; override;
    procedure removenode(const anode: tcachenode); //does not free node
    property maxsize: integer read fmaxsize write setmaxsize; //0 -> no limit
    property size: integer read fsize;
@@ -673,7 +673,7 @@ end;
 
 procedure tintegeravltree.addnode(const anode: tintegeravlnode);
 begin
- inherited;
+ inherited addnode(anode);
 end;
 
 { tint64avlnode }
@@ -827,7 +827,7 @@ begin
  end;
  anode.fprev:= nil;
  anode.fnext:= nil;
- inherited;
+ inherited removenode(anode);
 end;
 
 procedure tcacheavltree.setmaxsize(const avalue: integer);

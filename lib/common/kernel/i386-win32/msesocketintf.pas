@@ -13,7 +13,7 @@ unit msesocketintf;
 interface
 uses
  msesys;
-{$include ..\msesocketintf}
+{$include ..\msesocketintf.inc}
 
 implementation
 uses

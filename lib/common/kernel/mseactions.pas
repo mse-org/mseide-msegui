@@ -9,10 +9,10 @@
 }
 unit mseactions;
 {$ifdef FPC}
- {$ifndef mse_no_ifi}
-  {$define mse_with_ifi}
- {$endif}
  {$mode objfpc}{$h+}
+{$endif}
+{$ifndef mse_no_ifi}
+ {$define mse_with_ifi}
 {$endif}
 interface
 uses

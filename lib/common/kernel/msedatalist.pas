@@ -30,7 +30,7 @@ type
  end;
  pdoublestringty = ^doublestringty;
  doublestringarty = array of doublestringty;
- 
+
  doublemsestringty = record
   a,b: msestring;
  end;
@@ -622,7 +622,7 @@ type
    property items[index: integer]: ansistring read Getitems write 
                         setitems; default;
    property asarray: stringarty read getasarray write setasarray;
-   property asmsestringarray: msestringarty read getasmsestringarray 
+   property asmsestringarray: msestringarty read getasmsestringarray
                               write setasmsestringarray;
  end;
 
@@ -1070,7 +1070,7 @@ procedure insertitem(var dest: msestringarty; index: integer; value: msestring);
 procedure removeitems(var dest: pointerarty; const aitem: pointer);
                             //removes all matching items
 function removeitem(var dest: pointerarty; const aitem: pointer): integer;
-                                                overload;    
+                                                overload;
                         //returns removed index, -1 if none
 function finditem(const ar: pointerarty; const aitem: pointer): integer;
                                                 overload;
@@ -1184,7 +1184,7 @@ procedure sortarray(var dest: msestringarty; compare: arraysortcomparety;
 procedure sortarray(var dest: stringarty; compare: arraysortcomparety); overload;
 procedure sortarray(var dest: stringarty; compare: arraysortcomparety;
                     out indexlist: integerarty); overload;
-                    
+
 procedure sortarray(var dest: msestringarty; sortmode: stringsortmodety = sms_up); overload;
 procedure sortarray(var dest: msestringarty;
          sortmode: stringsortmodety; out indexlist: integerarty); overload;
@@ -1198,9 +1198,9 @@ procedure orderarray(const sourceorderlist: integerarty;
                              var sortlist: pointerarty); overload;
 procedure orderarray(const sourceorderlist: integerarty; 
                              var sortlist: integerarty); overload;
-procedure orderarray(const sourceorderlist: integerarty; 
+procedure orderarray(const sourceorderlist: integerarty;
                              var sortlist: msestringarty); overload;
-procedure orderarray(const sourceorderlist: integerarty; 
+procedure orderarray(const sourceorderlist: integerarty;
                              var sortlist: stringarty); overload;
                              
 procedure reorderarray(const destorderlist: integerarty; 
@@ -1214,7 +1214,7 @@ procedure reorderarray(const destorderlist: integerarty;
                              var sortlist: msestringarty); overload;
 procedure reorderarray(const destorderlist: integerarty; 
                              var sortlist: stringarty); overload;
-                             
+
 function cmparray(const a,b: msestringarty): boolean;
                //true if equal
 
@@ -1232,7 +1232,7 @@ procedure writestringar(const writer: twriter; const avalue: stringarty);
 
 type
  getintegeritemfuncty = function(const index: integer): integer of object;
- 
+
 function newidentnum(const count: integer;
                                   getfunc: getintegeritemfuncty): integer;
                         //returns lowest not used value
@@ -1246,9 +1246,9 @@ procedure setremotedatalist(const aintf: idatalistclient;
 implementation
 uses
  rtlconsts,msestreaming,msesys,msestat,msebits,msefloattostr;
- 
+
 var
- datalistclasses: array[listdatatypety] of datalistclassty = 
+ datalistclasses: array[listdatatypety] of datalistclassty =
 //dl_none,dl_integer,  dl_int64,      dl_currency,
  (nil,tintegerdatalist,tint64datalist,tcurrencydatalist,
 //dl_real,     dl_realint,      dl_realsum

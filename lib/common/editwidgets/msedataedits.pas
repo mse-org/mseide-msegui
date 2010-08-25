@@ -10,10 +10,10 @@
 unit msedataedits;
 
 {$ifdef FPC}
- {$ifndef mse_no_ifi}
-  {$define mse_with_ifi}
- {$endif}
  {$mode objfpc}{$h+}{$goto on}
+{$endif}
+{$ifndef mse_no_ifi}
+ {$define mse_with_ifi}
 {$endif}
 
 interface
@@ -2533,7 +2533,7 @@ end;
 
 function tcustomdataedit.getvalueprop: ppropinfo;
 begin
- result:= findpropinfo(self,'value');
+ result:= getpropinfo(self,'value');
 end;
 
 function tcustomdataedit.getifidatalinkintf: iifidatalink;
@@ -2770,7 +2770,7 @@ end;
 
 procedure tcustomstringedit.setifilink(const avalue: tifistringlinkcomp);
 begin
- inherited;
+ inherited setifilink(avalue);
 end;
 
 {$endif}
@@ -3769,7 +3769,7 @@ end;
 
 procedure tcustomintegeredit.setifilink(const avalue: tifiintegerlinkcomp);
 begin
- inherited;
+ inherited setifilink(avalue);
 end;
 
 {$endif}
@@ -4972,7 +4972,7 @@ end;
 
 procedure tcustomrealedit.setifilink(const avalue: tifireallinkcomp);
 begin
- inherited;
+ inherited setifilink(avalue);
 end;
 
 {$endif}
@@ -5488,7 +5488,7 @@ end;
 
 procedure tcustomdatetimeedit.setifilink(const avalue: tifidatetimelinkcomp);
 begin
- inherited;
+ inherited setifilink(avalue);
 end;
 {$endif}
 

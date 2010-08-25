@@ -40,6 +40,7 @@ type
   psizeint = ^sizeint;
   SizeUInt = DWord;
   psizeuint = ^sizeuint;
+  plongbool = ^longbool;
 
   PtrInt = Longint;
   PPtrInt = ^PtrInt;

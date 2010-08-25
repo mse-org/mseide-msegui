@@ -11,10 +11,15 @@ unit mseifiglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseglob;
+ mseglob,typinfo;
 const
  ifiwidgetstatename = '#widgestate#';
  ifiwidgetmodalresultname = '#modalres#';
+{$ifdef FPC}
+ boolprops = [tkbool,tkinteger,tkenumeration];
+{$else}
+ boolprops = [tkinteger,tkenumeration];
+{$endif}
  
 type
  ifiwidgetstatety = ({iws_closed,}iws_visible,iws_focused,iws_active); 

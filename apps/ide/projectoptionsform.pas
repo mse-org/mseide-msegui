@@ -2574,6 +2574,7 @@ begin
  fgridsizey:= limitgridsize(avalue);
 end;
 
+initialization
 finalization
  projectoptions.o.free;
 end.

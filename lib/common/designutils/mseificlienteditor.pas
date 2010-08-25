@@ -98,7 +98,7 @@ begin
   end;
   po1:=  getpropinfo(acomponent,'ifilink');
   result:= (po1 <> nil) and (po1^.proptype^.kind = tkclass) and
-               (fcomp is gettypedata(po1^.proptype)^.classtype);
+               (fcomp is gettypedata(po1^.proptype{$ifndef FPC}^{$endif})^.classtype);
  end; 
 end;
  

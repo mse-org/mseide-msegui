@@ -10,10 +10,10 @@
 unit msedispwidgets;
 
 {$ifdef FPC}
- {$ifndef mse_no_ifi}
-  {$define mse_with_ifi}
- {$endif}
  {$mode objfpc}{$h+}
+{$endif}
+{$ifndef mse_no_ifi}
+ {$define mse_with_ifi}
 {$endif}
 
 interface
@@ -549,7 +549,7 @@ end;
 
 procedure tcustomstringdisp.setifilink(const avalue: tifistringlinkcomp);
 begin
- inherited;
+ inherited setifilink(avalue);
 end;
 {$endif}
 
@@ -638,7 +638,7 @@ end;
 
 procedure tcustomintegerdisp.setifilink(const avalue: tifiintegerlinkcomp);
 begin
- inherited;
+ inherited setifilink(avalue);
 end;
 {$endif}
 
@@ -741,7 +741,7 @@ end;
 
 procedure tcustomrealdisp.setifilink(const avalue: tifireallinkcomp);
 begin
- inherited;
+ inherited setifilink(avalue);
 end;
 {$endif}
 
@@ -795,7 +795,7 @@ end;
 
 procedure tcustomdatetimedisp.setifilink(const avalue: tifidatetimelinkcomp);
 begin
- inherited;
+ inherited setifilink(avalue);
 end;
 {$endif}
 

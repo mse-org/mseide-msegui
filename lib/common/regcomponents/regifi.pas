@@ -4,7 +4,8 @@ interface
 implementation
 uses
  classes,mseificomp,msedesignintf,regifi_bmp,msepropertyeditors,mseclasses,
- msecomponenteditors,mseificomponenteditors,msestrings,msedatalist,mseifidbcomp,
+ msecomponenteditors,mseificomponenteditors,msestrings,msedatalist,
+ {$ifdef FPC}mseifidbcomp,{$endif}
  typinfo; 
     
 type
@@ -53,7 +54,8 @@ begin
        tifireallinkcomp,tifidatetimelinkcomp,tifistringlinkcomp,
        tifidropdownlistlinkcomp,tifienumlinkcomp,
        tifigridlinkcomp,
-       tconnectedifidatasource,{tifisqldatasource,}tifisqlresult]); 
+       tconnectedifidatasource{,tifisqldatasource,}
+       {$ifdef FPC},tifisqlresult{$endif}]);
  registercomponenttabhints(['Ifi'],
    ['MSEifi Components (experimental).'+lineend+
    'Compile MSEide with -dmse_with_ifirem '+

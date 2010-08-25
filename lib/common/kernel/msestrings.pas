@@ -85,6 +85,7 @@ type
  msestringaty = array[0..0] of msestring;
  pmsestringaty = ^msestringaty;
  msestringararty = array of msestringarty;
+ widestringarty = array of widestring;
  charaty = array[0..maxdatasize-1] of char;
  pcharaty = ^charaty;
  msecharaty = array[0..maxdatasize div sizeof(msechar)-1] of msechar;

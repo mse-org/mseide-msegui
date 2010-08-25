@@ -82,7 +82,7 @@ type
               //returns interface info, exception if link invalid
    procedure valuestootherclient(const alink: pointer); 
    procedure valuestoclient(const alink: pointer); virtual; 
-   procedure clienttovalues(const alink: pointer); virtual; 
+   procedure clienttovalues(const alink: pointer); virtual;
    procedure change(const alink: iificlient = nil);
    
    function setmsestringval(const alink: iificlient; const aname: string;
@@ -140,7 +140,7 @@ type
                                                        write setintegerpro;
    property booleanprop[const aname: string]: boolean read getbooleanpro 
                                                        write setbooleanpro;
-   property realtyprop[const aname: string]: realty read getrealtypro 
+   property realtyprop[const aname: string]: realty read getrealtypro
                                                        write setrealtypro;
    property datetimeprop[const aname: string]: tdatetime read getdatetimepro 
                                                        write setdatetimepro;
@@ -158,7 +158,7 @@ type
 
  tificlientcontroller = class(tcustomificlientcontroller)
   public
-   constructor create(const aowner: tmsecomponent); virtual; overload;
+   constructor create(const aowner: tmsecomponent); overload; virtual;
   published
    property statfile;
    property statvarname;
@@ -244,7 +244,7 @@ type
    procedure optionsvaluechanged; virtual;
    function createdatalist: tdatalist; virtual; abstract;
    function getlistdatatypes: listdatatypesty; virtual; abstract;
-{      
+{
    procedure setmsestringvalar(const alink: pointer; var handled: boolean);
    procedure getmsestringvalar(const alink: pointer; var handled: boolean);
    procedure setintegervalar(const alink: pointer; var handled: boolean);
@@ -388,7 +388,7 @@ type
  end;
  
  tifiintegerdatalist = class;
- 
+
  tintegerclientcontroller = class(tvalueclientcontroller)
   private
    fvalue: integer;
@@ -530,7 +530,7 @@ type
 //                                                             write setgridvalue;
   published
    property value: realty read fvalue write setvalue1 stored false;
-   property valuedefault: realty read fvaluedefault 
+   property valuedefault: realty read fvaluedefault
                                           write fvaluedefault stored false;
    property min: realty read fmin write setmin stored false;
    property max: realty read fmax write setmax stored false;
@@ -608,7 +608,7 @@ type
    class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tificolitem read getitems; default;
  end;
- 
+
  tgridclientcontroller = class;
 
  trowstatehandler = class(tdatalist,iifidatalink)
@@ -622,7 +622,7 @@ type
    procedure updateclient(const alink: pointer); virtual; abstract;
    procedure updateremote(const sender: tcustomrowstatelist; 
                                     const aindex: integer); virtual; abstract;
-   procedure itemchanged(const sender: tcustomrowstatelist; 
+   procedure itemchanged(const sender: tcustomrowstatelist;
                                             const aindex: integer);
    procedure listdestroyed(const sender: tdatalist); override;
    procedure sourcechange(const sender: tdatalist; 
@@ -686,7 +686,7 @@ type
  trowstatehiddenhandler = class(trowstatebooleanhandler)
   protected
    procedure updateclient(const alink: pointer); override;
-   procedure updateremote(const sender: tcustomrowstatelist; 
+   procedure updateremote(const sender: tcustomrowstatelist;
                                     const aindex: integer); override;
  end;
  
@@ -752,7 +752,7 @@ type
 //  property onclientcellevent: celleventty read fclientcellevent 
 //                                                 write fclientcellevent;
    property datacols: tifilinkcomparrayprop read fdatacols write setdatacols;
-//   property rowstate_font: tintegerlinkcomp read frowstate_font 
+//   property rowstate_font: tintegerlinkcomp read frowstate_font
 //                                                    write setrowstate_font;
    property rowstate_color: tifiintegerlinkcomp read getrowstate_color 
                                                     write setrowstate_color;
@@ -927,16 +927,21 @@ type
    fowner: tififieldlinks;
    function getfieldnames(
                   const appropname: ifisourcefieldnamety): msestringarty;
+  {$ifndef FPC}
+   function _addref: integer; stdcall;
+   function _release: integer; stdcall;
+   function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+  {$endif}
   public
   published
-   property sourcefieldname: ifisourcefieldnamety read fsourcefieldname 
+   property sourcefieldname: ifisourcefieldnamety read fsourcefieldname
                          write fsourcefieldname;
  end;
  ififieldlinkclassty = class of tififieldlink;
  
  tififieldlinks = class(tififields)
   protected
-   function getififieldclass: ififieldlinkclassty; virtual; reintroduce;
+   function getififieldclass: ififieldlinkclassty; reintroduce; virtual;
    procedure createitem(const index: integer; var item: tpersistent); override;
    function getfieldnames(const adatatype: listdatatypety): msestringarty; virtual;
   public
@@ -1078,7 +1083,7 @@ const
  listvarname = '_list';
 // arvaluevarname = 'arvalue';
  rowstatevarname = '_rowstate';
-  
+
 type
  tmsecomponent1 = class(tmsecomponent);
  tdatalist1 = class(tdatalist);
@@ -1198,9 +1203,10 @@ begin
                not(csloading in fowner.componentstate) then begin
   include(fstate,ivs_valuesetting);
   try
-   clienttovalues(sender);
-   fchangedclient:= sender;
-   tmsecomponent1(fowner).getobjectlinker.forall(@valuestootherclient,self);
+   clienttovalues(pointer(sender));
+   fchangedclient:= pointer(sender);
+   tmsecomponent1(fowner).getobjectlinker.forall(
+                          {$ifdef FPC}@{$endif}valuestootherclient,self);
   finally
    exclude(fstate,ivs_valuesetting);
   end;
@@ -1215,8 +1221,9 @@ procedure tcustomificlientcontroller.statechanged(const sender: iificlient;
 begin
  fwidgetstate:= astate;
  if fowner.canevent(tmethod(fonclientstatechanged)) then begin
-  fonclientstatechanged(self,sender,astate,ifiwidgetstatesty(longword(astate) xor
-                                             longword(fwidgetstatebefore)));
+  fonclientstatechanged(self,sender,astate,
+    ifiwidgetstatesty({$ifdef FPC}longword{$else}byte{$endif}(astate) xor
+                 {$ifdef FPC}longword{$else}byte{$endif}(fwidgetstatebefore)));
   fwidgetstatebefore:= astate;
  end;
 end;
@@ -1295,10 +1302,11 @@ begin
   include(fstate,ivs_valuesetting);
   try
    if alink <> nil then begin
-    valuestoclient(alink);
+    valuestoclient(pointer(alink));
    end
    else begin
-    tmsecomponent1(fowner).getobjectlinker.forall(@valuestoclient,self);
+    tmsecomponent1(fowner).getobjectlinker.forall(
+                          {$ifdef FPC}@{$endif}valuestoclient,self);
    end;
 //   valuetowidget;
   finally
@@ -1315,7 +1323,7 @@ end;
 procedure tcustomificlientcontroller.finalizelinks;
 begin
  if tmsecomponent1(fowner).fobjectlinker <> nil then begin
-  tmsecomponent1(fowner).fobjectlinker.forall(@finalizelink,self);
+  tmsecomponent1(fowner).fobjectlinker.forall({$ifdef FPC}@{$endif}finalizelink,self);
  end;
 end;
 
@@ -1420,7 +1428,7 @@ var
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
- result:= (prop <> nil) and (prop^.proptype^.kind = tkbool);
+ result:= (prop <> nil) and (prop^.proptype^.kind in boolprops);
  if result then begin
   setordprop(inst,prop,ord(avalue));
  end; 
@@ -1437,7 +1445,7 @@ var
 begin
  inst:= alink.getinstance;
  prop:= getpropinfo(inst,aname);
- result:= (prop <> nil) and (prop^.proptype^.kind = tkbool);
+ result:= (prop <> nil) and (prop^.proptype^.kind in boolprops);
  if result then begin
   avalue:= getordprop(inst,prop) <> 0;
  end; 
@@ -1524,7 +1532,7 @@ begin
   tkinteger: begin
    getintegerval(iificlient(alink),fapropname,pinteger(fapropvalue)^);
   end;
-  tkbool: begin
+  {$ifdef FPC}tkbool{$else}tkenumeration{$endif}: begin
    getbooleanval(iificlient(alink),fapropname,pboolean(fapropvalue)^);
   end;
   tkfloat: begin
@@ -1542,7 +1550,7 @@ begin
  fapropname:= aname;
  fapropkind:= akind;
  fapropvalue:= avaluepo;
- tmsecomponent1(fowner).getobjectlinker.forall(@dogetprop,self);
+ tmsecomponent1(fowner).getobjectlinker.forall({$ifdef FPC}@{$endif}dogetprop,self);
 end;
 
 procedure tcustomificlientcontroller.dosetprop(const alink: pointer);
@@ -1560,7 +1568,7 @@ begin
  fapropname:= aname;
  fapropkind:= akind;
  fapropvalue:= avaluepo;
- tmsecomponent1(fowner).getobjectlinker.forall(@dosetprop,self);
+ tmsecomponent1(fowner).getobjectlinker.forall({$ifdef FPC}@{$endif}dosetprop,self);
 end;
 
 function tcustomificlientcontroller.getintegerpro(const aname: string): integer;
@@ -1590,13 +1598,13 @@ end;
 function tcustomificlientcontroller.getbooleanpro(const aname: string): boolean;
 begin
  result:= false;
- getprop(aname,tkbool,@result);
+ getprop(aname,{$ifdef FPC}tkbool{$else}tkenumeration{$endif},@result);
 end;
 
 procedure tcustomificlientcontroller.setbooleanpro(const aname: string;
                const avalue: boolean);
 begin
- setprop(aname,tkbool,@avalue);
+ setprop(aname,{$ifdef FPC}tkbool{$else}tkenumeration{$endif},@avalue);
 end;
 
 function tcustomificlientcontroller.getrealtypro(const aname: string): realty;
@@ -2106,7 +2114,7 @@ procedure tvalueclientcontroller.linkdatalist;
 begin
  with tmsecomponent1(fowner) do begin
   if fobjectlinker <> nil then begin
-   fobjectlinker.forall(@self.linkdatalist1,self);
+   fobjectlinker.forall({$ifdef FPC}@{$endif}self.linkdatalist1,self);
   end;
  end;
 end;
@@ -2390,7 +2398,7 @@ end;
 
 constructor tbooleanclientcontroller.create(const aowner: tmsecomponent);
 begin
- inherited create(aowner,tkbool);
+ inherited create(aowner,{$ifdef FPC}tkbool{$else}tkenumeration{$endif});
 end;
 
 procedure tbooleanclientcontroller.setvalue1(const avalue: boolean);
@@ -2689,7 +2697,7 @@ procedure tdatetimeclientcontroller.setvalue(const sender: iificlient;
                                          var avalue; var accept: boolean);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,tdatetime(avalue),accept);
+  fonclientsetvalue(self,realty(tdatetime(avalue)),accept);
  end;
  inherited;
 end;
@@ -3033,7 +3041,7 @@ procedure tifidropdowncols.createitem(const index: integer;
                var item: tpersistent);
 begin
  item:= tifidropdowncol.create;
- tifidropdowncol(item).onchange:= @colchanged;
+ tifidropdowncol(item).onchange:= {$ifdef FPC}@{$endif}colchanged;
 end;
 
 function tifidropdowncols.getitems(const index: integer): tifidropdowncol;
@@ -3310,7 +3318,7 @@ begin
   setlength(fnamear,count);
   setlength(flistar,count);
   findex:= 0;
-  forall(@getbindinginfo,typeinfo(iifidatasourceclient));
+  forall({$ifdef FPC}@{$endif}getbindinginfo,typeinfo(iifidatasourceclient));
  end;
  with ffields do begin 
   result:= nil;
@@ -3369,6 +3377,27 @@ begin
  result:= fowner.getfieldnames(datatype);
 end;
 
+{$ifndef FPC}
+function tififieldlink._addref: integer;
+begin
+ result:= -1;
+end;
+
+function tififieldlink._release: integer;
+begin
+ result:= -1;
+end;
+
+function tififieldlink.QueryInterface(const IID: TGUID; out Obj): HResult;
+begin
+ if GetInterface(IID, Obj) then begin
+   Result:=0
+ end
+ else begin
+  result:= integer(e_nointerface);
+ end;
+end;
+{$endif}
 { tififieldlinks }
 
 function tififieldlinks.getififieldclass: ififieldlinkclassty;
@@ -3435,7 +3464,7 @@ end;
 
 procedure tconnectedifidatasource.setfields(const avalue: tificonnectedfields);
 begin
- inherited;
+ inherited setfields(avalue);
 end;
 
 function tconnectedifidatasource.getfieldnames(const adatatype: listdatatypety): msestringarty;
@@ -3591,8 +3620,8 @@ begin //todo: optimize
      fowner.rowcount:= sender.count;
     end;
     findexpar:= aindex;
-    tmsecomponent1(fowner.fowner).getobjectlinker.forall(@updateclient,
-                                                                      fowner);
+    tmsecomponent1(fowner.fowner).getobjectlinker.forall(
+                             {$ifdef FPC}@{$endif}updateclient,fowner);
     //...
    finally
     exclude(fstate,dls_remotelock);
@@ -3640,7 +3669,7 @@ end;
 
 procedure trowstateintegerhandler.setifilink(const avalue: tifiintegerlinkcomp);
 begin
- inherited;
+ inherited setifilink(avalue);
 end;
 
 { trowstatebooleanhandler }
@@ -3652,7 +3681,7 @@ end;
 
 procedure trowstatebooleanhandler.setifilink(const avalue: tifibooleanlinkcomp);
 begin
- inherited;
+ inherited setifilink(avalue);
 end;
 
 { trowstatecolorhandler }
@@ -3841,7 +3870,7 @@ var
 begin
  inherited;
  fitempo:= reader;
- tmsecomponent1(fowner).getobjectlinker.forall(@statreadrowstate,self);
+ tmsecomponent1(fowner).getobjectlinker.forall({$ifdef FPC}@{$endif}statreadrowstate,self);
  for int1:= 0 to datacols.count - 1 do begin
   lico:= datacols[int1].link;
   if lico <> nil then begin
@@ -3875,7 +3904,7 @@ var
 begin
  inherited;
  fitempo:= writer;
- tmsecomponent1(fowner).getobjectlinker.forfirst(@statwriterowstate,self);
+ tmsecomponent1(fowner).getobjectlinker.forfirst({$ifdef FPC}@{$endif}statwriterowstate,self);
  for int1:= 0 to datacols.count - 1 do begin
   lico:= datacols[int1].link;
   if lico <> nil then begin
@@ -3947,7 +3976,7 @@ function tgridclientcontroller.getrowstate: tcustomrowstatelist;
 begin
  result:= nil;
  fitempo:= @result;
- tmsecomponent1(fowner).getobjectlinker.forfirst(@getrowstate1,self);
+ tmsecomponent1(fowner).getobjectlinker.forfirst({$ifdef FPC}@{$endif}getrowstate1,self);
 end;
 
 procedure tgridclientcontroller.appendrow(const avalues: array of const;
@@ -3957,7 +3986,7 @@ var
  comp1: tifilinkcomp;
 begin
  fcheckautoappend:= checkautoappend;
- tmsecomponent1(fowner).getobjectlinker.forall(@itemappendrow,self);
+ tmsecomponent1(fowner).getobjectlinker.forall({$ifdef FPC}@{$endif}itemappendrow,self);
  int2:= high(avalues);
  if int2 >= datacols.count then begin
   int2:= datacols.count;
