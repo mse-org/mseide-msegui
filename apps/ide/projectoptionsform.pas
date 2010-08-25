@@ -114,7 +114,8 @@ type
   envvarnames: msestringarty;
   envvarvalues: msestringarty;
  end;
-
+ 
+{$M+} //tprojectoptions needs RTTI
  tprojectoptions = class
   private
    fcopymessages: boolean;
