@@ -6765,10 +6765,11 @@ procedure twidget.internalsetwidgetrect(Value: rectty;
    end;
   end;
  end;
- 
+
 var
  bo1,bo2,poscha,sizecha: boolean;
  int1,int2,int3: integer;
+ setcountbefore: integer;
  size1,size2: sizety;
  ar1: widgetarty;
  ar2,ar3: integerarty;
@@ -6834,7 +6835,7 @@ begin
  end;
  if sizecha then begin
   inc(fsetwidgetrectcount);
-  int1:= fsetwidgetrectcount;
+  setcountbefore:= fsetwidgetrectcount;
   if (componentstate * [csloading,csdesigning] = []) and 
         ((value.cx < fwidgetrect.cx) or (value.cy < fwidgetrect.cy)) then begin
    int2:= 0;
@@ -6885,7 +6886,7 @@ begin
   if not (csloading in componentstate) then begin
    checkwidgetregionchanged(bo1);
    sizechanged;
-   if fsetwidgetrectcount <> int1 then begin
+   if fsetwidgetrectcount <> setcountbefore then begin
     if poscha and not (csloading in componentstate) then begin
      poschanged;
     end;
