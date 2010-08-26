@@ -54,7 +54,6 @@ type
    ffontstyle: fontstylesty;
    ffontcolor: colorty;
    ffontcolorbackground: colorty;
-   fbackup: msestring;
    foldtext: msestring;
    fselstart: integer;
    fsellength: halfinteger;
@@ -110,6 +109,7 @@ type
    fstate: inplaceeditstatesty;
    fcaretwidth: integer;
    frow: integer;
+   fbackup: msestring;
    function initactioninfo(aaction: editactionty): editnotificationinfoty;
    procedure setcurindex(const Value: integer);
    procedure deletechar; virtual;
