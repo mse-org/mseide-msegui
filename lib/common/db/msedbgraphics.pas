@@ -59,12 +59,11 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure loadbitmap(const abitmap: tmaskedbitmap;
-                             aformat: string = '');
-   procedure storebitmap(const abitmap: tmaskedbitmap;
+   procedure loadbitmap(const asource: tmaskedbitmap; aformat: string = '');
+   procedure storebitmap(const adest: tmaskedbitmap;
               aformat: string = ''); overload;
-   procedure storebitmap(const abitmap: tmaskedbitmap;
-              aformat: string; const params: array of const); overload;
+   procedure storebitmap(const adest: tmaskedbitmap; aformat: string;
+                                   const params: array of const); overload;
    procedure clearcache; override;
   published
    property format: string read fformat write fformat;
@@ -78,7 +77,7 @@ type
    procedure setfield(const value: tfield); override;
   public
    constructor create(const intf: idbgraphicfieldlink);
-   procedure loadbitmap(const abitmap: tmaskedbitmap; const aformat: string);
+   procedure loadbitmap(const adest: tmaskedbitmap; const aformat: string);
  end;
 
  tdbdataimage = class(tcustomdataimage,idbgraphicfieldlink,ireccontrol)
@@ -285,7 +284,7 @@ begin
  inherited;
 end;
 
-procedure tmsegraphicfield.loadbitmap(const abitmap: tmaskedbitmap; 
+procedure tmsegraphicfield.loadbitmap(const asource: tmaskedbitmap; 
                                             aformat: string = '');
 var
  stream1: tstringcopystream;
@@ -294,14 +293,14 @@ var
  n1: timagecachenode;
 begin
  if isnull then begin
-  abitmap.clear;
+  asource.clear;
  end
  else begin
   if (fimagecache = nil) or not assigned(fgetblobid) or not fgetblobid(self,id1) or
                not fimagecache.find(id1,n1) then begin
    str1:= asstring;
    if str1 = '' then begin
-    abitmap.clear;
+    asource.clear;
    end
    else begin
     if aformat = '' then begin
@@ -309,27 +308,27 @@ begin
     end;
     stream1:= tstringcopystream.create(str1);
     try
-     abitmap.loadfromstream(stream1,aformat);
+     asource.loadfromstream(stream1,aformat);
     except
-     abitmap.clear;
+     asource.clear;
     end;
     stream1.free;
    end;
    if (fimagecache <> nil) and assigned(fgetblobid) then begin
     n1:= timagecachenode.create(id1);
-    abitmap.savetoimagebuffer(n1.fimage);
+    asource.savetoimagebuffer(n1.fimage);
     n1.fsize:= (n1.fimage.image.length + n1.fimage.mask.length) *
                                        sizeof(longword);
     fimagecache.addnode(n1);
    end;
   end
   else begin
-   abitmap.loadfromimagebuffer(n1.fimage);
+   asource.loadfromimagebuffer(n1.fimage);
   end;
  end;
 end;
 
-procedure tmsegraphicfield.storebitmap(const abitmap: tmaskedbitmap; 
+procedure tmsegraphicfield.storebitmap(const adest: tmaskedbitmap; 
                          aformat: string; const params: array of const);
 var
  stream1: tmsefilestream;
@@ -339,7 +338,7 @@ begin
  end;
  stream1:= tmsefilestream.create;
  try
-  writegraphic(stream1,abitmap,aformat,params);
+  writegraphic(stream1,adest,aformat,params);
   stream1.position:= 0;
   loadfromstream(stream1);
  finally
@@ -347,10 +346,10 @@ begin
  end;
 end;
 
-procedure tmsegraphicfield.storebitmap(const abitmap: tmaskedbitmap; 
+procedure tmsegraphicfield.storebitmap(const adest: tmaskedbitmap; 
                          aformat: string = '');
 begin
- storebitmap(abitmap,aformat,[]); 
+ storebitmap(adest,aformat,[]); 
 end;
 
 function tmsegraphicfield.getimagecachekb: integer;
@@ -412,7 +411,7 @@ begin
  inherited;
 end;
 
-procedure tgraphicdatalink.loadbitmap(const abitmap: tmaskedbitmap;
+procedure tgraphicdatalink.loadbitmap(const adest: tmaskedbitmap;
                                                 const aformat: string);
 var
  stream1: tstringcopystream;
@@ -420,20 +419,20 @@ var
 begin
  if field is tmsegraphicfield then begin
   with tmsegraphicfield(field) do begin
-   loadbitmap(abitmap,aformat);
+   loadbitmap(adest,aformat);
   end;
  end
  else begin
   str1:= field.asstring;
   if str1 = '' then begin
-   abitmap.clear;
+   adest.clear;
   end
   else begin
    stream1:= tstringcopystream.create(str1);
    try
-    abitmap.loadfromstream(stream1,aformat);
+    adest.loadfromstream(stream1,aformat);
    except
-    abitmap.clear;
+    adest.clear;
    end;
    stream1.free;
   end;

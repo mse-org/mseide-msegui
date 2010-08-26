@@ -102,6 +102,7 @@ type
  prealarty = ^realarty;
  doublearty = array of double;
  pdoublearty = ^doublearty;
+ doubleararty = array of doublearty;
  currencyarty = array of currency;
  pcurrencyarty = ^currencyarty;
  datetimearty = array of tdatetime;

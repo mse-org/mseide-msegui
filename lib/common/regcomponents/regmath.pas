@@ -15,12 +15,12 @@ interface
 
 implementation
 uses
- {$ifdef FPC}msefft,{$endif}msedesignintf;
+ {$ifdef FPC}msefft,{$endif}msedesignintf,msefilter;
 
 procedure register;
 begin
 {$ifdef FPC}
- registercomponents('Math',[tfft]);
+ registercomponents('Math',[tfft,tfirfilter,tiirfilter]);
  registercomponenttabhints(['Math'],['Experimental Mathematical Components']);
 {$endif}
 end;

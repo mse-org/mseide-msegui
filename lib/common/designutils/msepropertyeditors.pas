@@ -500,7 +500,7 @@ type
  end;
 
  listeditformkindty = (lfk_none,lfk_msestring,lfk_real,lfk_integer,
-                       lfk_msestringint);
+                       lfk_msestringint,lfk_complex);
  
  tdatalistpropertyeditor = class(tdialogclasspropertyeditor)
   protected
@@ -850,7 +850,7 @@ uses
  msefiledialog,mseimagelisteditor,msereal,msewidgets,
  mseactions,msehash,msegraphutils,
  msestringlisteditor,msedoublestringlisteditor,msestringintlisteditor,
- msereallisteditor,
+ msereallisteditor,msedoublereallisteditor,
  mseintegerlisteditor,mseact,
  msecolordialog,msememodialog,
  mseshapes,msestockobjects,msetexteditor,
@@ -4716,6 +4716,11 @@ begin
    else begin
     if datalist1 is tmsestringintdatalist then begin
      formkind:= lfk_msestringint;
+    end
+    else begin
+     if datalist1 is tcomplexdatalist then begin
+      formkind:= lfk_complex;
+     end
     end;
    end;
   end;
@@ -4740,6 +4745,9 @@ begin
   lfk_msestringint: begin
    editform:= tmsestringintlisteditor.create({$ifdef FPC}@{$endif}closequery);
   end;
+  lfk_complex: begin
+   editform:= tdoublereallisteditor.create({$ifdef FPC}@{$endif}closequery);
+  end;
   else begin
    editform:= nil;
   end;
@@ -4763,6 +4771,12 @@ begin
      with tmsestringintlisteditor(editform) do begin
       texta.assigncol(tmsestringdatalist(getpointervalue));
       tmsestringintdatalist(getpointervalue).assigntob(textb.griddata);
+     end;
+    end;
+    lfk_complex: begin
+     with tdoublereallisteditor(editform) do begin
+      vala.assigncol(trealdatalist(getpointervalue));
+      tcomplexdatalist(getpointervalue).assigntob(valb.griddata);
      end;
     end;
    end;
@@ -4818,6 +4832,12 @@ begin
       with tmsestringintlisteditor(sender) do begin
        tmsestringintdatalist(datalist1).assign(texta.griddata);
        tmsestringintdatalist(datalist1).assignb(textb.griddata);
+      end;
+     end;
+     lfk_complex: begin
+      with tdoublereallisteditor(sender) do begin
+       tcomplexdatalist(datalist1).assign(vala.griddata);
+       tcomplexdatalist(datalist1).assignb(valb.griddata);
       end;
      end;
     end;

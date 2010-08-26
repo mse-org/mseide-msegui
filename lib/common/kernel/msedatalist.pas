@@ -1044,7 +1044,7 @@ procedure arrayaddref(var dynamicarray);
 procedure arraydecref(var dynamicarray); 
                  //no finalize and freemem if refcount = 0
 procedure allocuninitedarray(count,itemsize: integer; out dynamicarray);
-                 //does not init memory, dynamicarray has to be nil!
+                 //does not init memory, dynamicarray must be nil!
 
 procedure additem(var dest: stringarty; const value: string); overload;
 procedure additem(var dest: msestringarty; const value: msestring); overload;
@@ -5383,8 +5383,10 @@ begin
  else begin
   if source is trealdatalist then begin
    assignim(trealdatalist(source));
+  end
+  else begin
+   inherited;
   end;
-  inherited;
  end;
 end;
 
