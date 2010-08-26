@@ -589,12 +589,6 @@ type
    procedure downloadchange(const sender: TObject);
    procedure processorchange(const sender: TObject);
    procedure copymessagechanged(const sender: TObject);
-   {
-   procedure befla(const sender: tlayouter);
-   procedure afterla(const sender: tlayouter);
-   procedure bef1(const sender: tlayouter);
-   procedure aft1(const sender: tlayouter);
-   }
    procedure runcommandchange(const sender: TObject);
    procedure newprojectchildscaled(const sender: TObject);
   private
@@ -787,7 +781,6 @@ begin
   if showmessage(exception(exceptobject).Message,'ERROR',[mr_ok,mr_cancel]) <> 
                                mr_ok then begin
    result:= true;
-//   raise exception.Create(exception(exceptobject).Message);
   end;
  end
  else begin
@@ -850,7 +843,6 @@ end;
 function projecttemplatedir: filenamety;
 begin
  result:= expandprmacros('${TEMPLATEDIR}');
-// result:= expandmacros(settings.macros[sma_templatedir],getsettingsmacros);
 end;
 
 function expandprmacros(const atext: msestring): msestring;
@@ -919,32 +911,10 @@ begin
    li.expandmacros(newfiexts);
    li.expandmacros(newfisources);
   
-//   li.expandmacros(newprogramfile);
-//   li.expandmacros(newunitfile);
-//   li.expandmacros(newtextfile);
-
    li.expandmacros(newfonames);
    li.expandmacros(newfonamebases);
    li.expandmacros(newfosources);
    li.expandmacros(newfoforms);
-{   
-   li.expandmacros(newmainfosource);
-   li.expandmacros(newmainfoform);
-   li.expandmacros(newsimplefosource);
-   li.expandmacros(newsimplefoform);
-   li.expandmacros(newdockingfosource);
-   li.expandmacros(newdockingfoform);
-   li.expandmacros(newdatamodsource);
-   li.expandmacros(newdatamodform);
-   li.expandmacros(newsubfosource);
-   li.expandmacros(newsubfoform);
-   li.expandmacros(newreportsource);
-   li.expandmacros(newreportform);
-   li.expandmacros(newinheritedsource);
-   li.expandmacros(newinheritedform);
-   li.expandmacros(newpascsource);
-   li.expandmacros(newpascform);
-}
    li.expandmacros(progparameters);
    li.expandmacros(progworkingdirectory);
    li.expandmacros(envvarnames);
@@ -989,9 +959,6 @@ begin
    if sourceupdater <> nil then begin
     sourceupdater.maxlinelength:= o.rightmarginchars;
    end;
-//   for int1:= 0 to sourcefo.count - 1 do begin
-//    sourcefo.items[int1].updatestatvalues;
-//   end;
    fontaliasnames:= fontalias;
    with sourcefo.syntaxpainter do begin
     bo1:= not cmparray(defdefs.asarraya,texp.sourcefilemasks) or
@@ -1148,10 +1115,6 @@ begin
   modified:= false;
   savechecked:= false;
   sigsettings:= defaultsigsettings;
-//  exceptclassnames:= nil;
-//  exceptignore:= nil;
-//  additem(exceptclassnames,'EconvertError');
-//  additem(exceptignore,false);
   ignoreexceptionclasses:= nil;
 
   befcommand:= nil;
@@ -1176,38 +1139,7 @@ begin
   macroon:= nil;
   macronames:= nil;
   macrovalues:= nil;
-//  copymessages:= false;
-//  closemessages:= true;
-//  checkmethods:= true;
-//  showgrid:= true;
-//  snaptogrid:= true;
-//  moveonfirstclick:= true;
-//  gridsizex:= defaultgridsizex;
-//  gridsizey:= defaultgridsizey;
   findreplaceinfo.find.options:= [so_caseinsensitive];
-//  autoindent:= true;
-//  blockindent:= 1;
-//  rightmarginon:= true;
-//  rightmarginchars:= 80;
-//  scrollheight:= 0;
-//  tabstops:= 4;
-//  spacetabs:= false;
-//  tabindent:= false;
-//  editfontname:= 'mseide_source';
-//  editfontheight:= 0;
-//  editfontwidth:= 0;
-//  editfontextraspace:= 0;
-//  editfontcolor:= cl_text;
-//  editbkcolor:= cl_foreground;
-//  statementcolor:= $E0FFFF;
-//  editfontantialiased:= true;
-//  editmarkbrackets:= true;
-//  backupfilecount:= 2;
-//  encoding:= 0;
-//  valuehints:= true;
-//  activateonbreak:= true;
-//  showconsole:= false;
-//  externalconsole:= false;
   mainfile:= '';
   targetfile:= '';
   messageoutputfile:= '';
@@ -1243,15 +1175,9 @@ begin
   runcommand:= '';
   remoteconnection:= '';
   uploadcommand:= '';
-//  gdbdownload:= false;
-//  downloadalways:= false;
-//  startupbkpt:= 0;
-//  startupbkpton:= false;
-//  gdbsimulator:= false;
   gdbprocessor:= 'auto';
   gdbservercommand:= '';
   gdbservercommandattach:= '';
-//  gdbserverwait:= 0;
   beforeload:= '';
   afterload:= '';
   beforerun:= '';
@@ -1272,8 +1198,6 @@ begin
   fontwidths:= nil;
   fontoptions:= nil;
   fontxscales:= nil;
-//  usercolors:= nil;
-//  usercolorcomment:= nil;
   additem(sourcefilemasks,'"*.pas" "*.dpr" "*.pp" "*.inc"');
   additem(syntaxdeffiles,'${SYNTAXDEFDIR}pascal.sdef');
   additem(sourcefilemasks,'"*.c" "*.cc" "*.h"');
@@ -1291,9 +1215,6 @@ begin
   scriptbeforecopy:= '';
   scriptaftercopy:= '';  
   newprojectfiles:= nil;
-//  additem(newprojectfiles,'${TEMPLATEDIR}project1.pas');
-//  additem(newprojectfiles,'${TEMPLATEDIR}main.pas');
-//  additem(newprojectfiles,'${TEMPLATEDIR}main_mfm.pas');
   newprojectfilesdest:= nil;
   expandprojectfilemacros:= nil;
   loadprojectfile:= nil;
@@ -1317,10 +1238,6 @@ begin
   newfiexts[2]:= '';
   newfisources[2]:= '';
   
-//  newprogramfile:= '${TEMPLATEDIR}default/program.pas';
-//  newunitfile:= '${TEMPLATEDIR}default/unit.pas';
-//  newtextfile:= '';
-
   setlength(newfonames,10);
   setlength(newfonamebases,10);
   setlength(newinheritedforms,10);
@@ -1482,8 +1399,6 @@ begin
    with tstatwriter(statfiler) do begin
     writerecordarray('sigsettings',length(sigsettings),
                      {$ifdef FPC}@{$endif}getsignalinforec);
-//    writeinteger('gridsizex',gridsizex);
-//    writeinteger('gridsizey',gridsizey);
    end;
   end
   else begin
@@ -1491,21 +1406,14 @@ begin
    with tstatreader(statfiler) do begin
     readrecordarray('sigsettings',{$ifdef FPC}@{$endif}setsignalinfocount,
              {$ifdef FPC}@{$endif}storesignalinforec);
-//    gridsizex:= readinteger('gridsizex',gridsizex,1,1000);
-//    gridsizey:= readinteger('gridsizey',gridsizey,1,1000);
    end;
   end;
-//  updatevalue('exceptclassnames',exceptclassnames);
-//  updatevalue('exceptignore',exceptignore);
   updatevalue('modulenames',modulenames);
   updatevalue('moduletypes',moduletypes);
   updatevalue('modulefiles',modulefilenames);
   updatevalue('mainfile',mainfile);
   updatevalue('targetfile',targetfile);
   updatevalue('messageoutputfile',messageoutputfile);
-//  updatevalue('copymessages',copymessages);
-//  updatevalue('closemessages',closemessages);
-//  updatevalue('checkmethods',checkmethods);
   updatevalue('makecommand',makecommand);
   updatevalue('makedir',makedir);
   updatevalue('debugcommand',debugcommand);
@@ -1514,15 +1422,9 @@ begin
   updatevalue('runcommand',runcommand);
   updatevalue('remoteconnection',remoteconnection);
   updatevalue('uploadcommand',uploadcommand);
-//  updatevalue('gdbdownload',gdbdownload);
-//  updatevalue('downloadalways',downloadalways);
-//  updatevalue('startupbkpt',startupbkpt);
-//  updatevalue('startupbkpton',startupbkpton);
-//  updatevalue('gdbsimulator',gdbsimulator);
   updatevalue('gdbprocessor',gdbprocessor);
   updatevalue('gdbservercommand',gdbservercommand);
   updatevalue('gdbservercommandattach',gdbservercommandattach);
-//  updatevalue('gdbserverwait',gdbserverwait);
   updatevalue('beforeload',beforeload);
   updatevalue('afterload',afterload);
   updatevalue('beforerun',beforerun);
@@ -1565,30 +1467,6 @@ begin
   updatevalue('fontwidths',fontwidths);
   updatevalue('fontoptions',fontoptions);
   updatevalue('fontxscales',fontxscales);
-//  updatevalue('usercolors',integerarty(usercolors));
-//  updatevalue('usercolorcomment',usercolorcomment);
-//  updatevalue('showgrid',showgrid);
-//  updatevalue('snaptogrid',snaptogrid);
-//  updatevalue('moveonfirstclick',moveonfirstclick);
-//  updatevalue('autoindent',autoindent);
-//  updatevalue('blockindent',blockindent);
-//  updatevalue('rightmarginon',rightmarginon);
-//  updatevalue('rightmarginchars',rightmarginchars);
-//  updatevalue('scrollheight',scrollheight);
-//  updatevalue('tabstops',tabstops);
-//  updatevalue('spacetabs',spacetabs);
-//  updatevalue('tabindent',tabindent);
-//  updatevalue('editfontname',editfontname);
-//  updatevalue('editfontheight',editfontheight);
-//  updatevalue('editfontwidth',editfontwidth);
-//  updatevalue('editfontextraspace',editfontextraspace);
-//  updatevalue('editfontcolor',editfontcolor);
-//  updatevalue('editbkcolor',editbkcolor);
-//  updatevalue('statementcolor',statementcolor);
-//  updatevalue('editfontantialiased',editfontantialiased);
-//  updatevalue('editmarkbrackets',editmarkbrackets);
-//  updatevalue('backupfilecount',backupfilecount,0,10);
-//  updatevalue('encoding',encoding,0,1);
   
   updatevalue('scriptbeforecopy',scriptbeforecopy);
   updatevalue('scriptaftercopy',scriptaftercopy);
@@ -1597,8 +1475,6 @@ begin
   updatevalue('expandprojectfilemacros',expandprojectfilemacros);
   updatevalue('loadprojectfile',loadprojectfile);
   
-//  updatevalue('newprogramfile',newprogramfile);
-//  updatevalue('newunitfile',newunitfile);
   updatevalue('newfinames',newfinames);
   updatevalue('newfinfilters',newfifilters);
   updatevalue('newfiexts',newfiexts);
@@ -1645,35 +1521,12 @@ begin
    setlength(newfosources,int1);
    setlength(newfoforms,int1);
   end;
-{
-  updatevalue('newmainfosource',newmainfosource);
-  updatevalue('newmainfoform',newmainfoform);
-  updatevalue('newsimplefosource',newsimplefosource);
-  updatevalue('newsimplefoform',newsimplefoform);
-  updatevalue('newdockingfosource',newdockingfosource);
-  updatevalue('newdockingfoform',newdockingfoform);
-  updatevalue('newdatamodsource',newdatamodsource);
-  updatevalue('newdatamodform',newdatamodform);
-  updatevalue('newsubfosource',newsubfosource);
-  updatevalue('newsubfoform',newsubfoform);
-  updatevalue('newreportsource',newreportsource);
-  updatevalue('newreportform',newreportform);
-  updatevalue('newinheritedsource',newinheritedsource);
-  updatevalue('newinheritedform',newinheritedform);
-  updatevalue('newpascsource',newpascsource);
-  updatevalue('newpascform',newpascform);
-} 
   if not iswriter then begin
    if guitemplatesmo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
     macrogroup:= int1-1;
    end;
    expandprojectmacros;
   end;
-//  updatevalue('stoponexception',stoponexception);
-//  updatevalue('valuehints',valuehints);
-//  updatevalue('activateonbreak',activateonbreak);
-//  updatevalue('showconsole',showconsole);
-//  updatevalue('externalconsole',externalconsole);
   breakpointsfo.updatestat(statfiler);
   panelform.updatestat(statfiler);
   projecttree.updatestat(statfiler);
@@ -1696,8 +1549,6 @@ var
  int1,int2: integer;
 begin
  mainfo.statoptions.objtovalues(fo);
-// fo.usercolors.gridvalues:= integerarty(projectoptions.usercolors);
-// fo.usercolorcomment.gridvalues:= projectoptions.usercolorcomment;
  fo.colgrid.rowcount:= usercolorcount;
  fo.colgrid.fixcols[-1].captions.count:= usercolorcount;
  with fo,projectoptions do begin
@@ -1736,38 +1587,9 @@ begin
     fo.sighandle[int1]:= sfl_handle in flags;
    end;
   end;
-//  fo.exceptignore.gridvalues:= exceptignore;
-//  fo.exceptclassnames.gridvalues:= exceptclassnames;
   fo.mainfile.value:= mainfile;
   fo.targetfile.value:= targetfile;
   fo.messageoutputfile.value:= messageoutputfile;
-//  fo.copymessages.value:= copymessages;
-//  fo.closemessages.value:= closemessages;
-//  fo.checkmethods.value:= checkmethods;
-//  fo.showgrid.value:= showgrid;
-//  fo.snaptogrid.value:= snaptogrid;
-//  fo.moveonfirstclick.value:= moveonfirstclick;
-//  fo.gridsizex.value:= gridsizex;
-//  fo.gridsizey.value:= gridsizey;
-//  fo.autoindent.value:= autoindent;
-//  fo.blockindent.value:= blockindent;
-//  fo.tabstops.value:= tabstops;
-//  fo.spacetabs.value:= spacetabs;
-//  fo.tabindent.value:= tabindent;
-//  fo.rightmarginon.value:= rightmarginon;
-//  fo.rightmarginchars.value:= rightmarginchars;
-//  fo.scrollheight.value:= scrollheight;
-//  fo.editfontname.value:= editfontname;
-//  fo.editfontheight.value:= editfontheight;
-//  fo.editfontwidth.value:= editfontwidth;
-//  fo.editfontextraspace.value:= editfontextraspace;
-//  fo.editfontcolor.value:= editfontcolor;
-//  fo.editbkcolor.value:= editbkcolor;
-//  fo.statementcolor.value:= statementcolor;
-//  fo.editfontantialiased.value:= editfontantialiased;
-//  fo.editmarkbrackets.value:= editmarkbrackets;
-//  fo.backupfilecount.value:= backupfilecount;
-//  fo.encoding.value:= encoding;
   fo.fontalias.gridvalues:= fontalias;
   fo.fontancestors.gridvalues:= fontancestors;
   fo.fontname.gridvalues:= fontnames;
@@ -1784,37 +1606,16 @@ begin
   fo.expandprojectfilemacros.gridvalues:= expandprojectfilemacros;
   fo.loadprojectfile.gridvalues:= loadprojectfile;
   
-//  fo.newprogf.value:= newprogramfile;
-//  fo.newunitf.value:= newunitfile;
   fo.newfiname.gridvalues:= newfinames;
   fo.newfifilter.gridvalues:= newfifilters;
   fo.newfiext.gridvalues:= newfiexts;
   fo.newfisource.gridvalues:= newfisources;
   
-//  fo.newtextf.value:= newtextfile;
   fo.newformname.gridvalues:= newfonames;
   fo.newinheritedform.gridvalues:= newinheritedforms;
   fo.newformnamebase.gridvalues:= newfonamebases;
   fo.newformsourcefile.gridvalues:= newfosources;
   fo.newformformfile.gridvalues:= newfoforms;
-{
-  fo.newformsourcefile.gridvalue[0]:= newmainfosource;
-  fo.newformformfile.gridvalue[0]:= newmainfoform;
-  fo.newformsourcefile.gridvalue[1]:= newsimplefosource;
-  fo.newformformfile.gridvalue[1]:= newsimplefoform;
-  fo.newformsourcefile.gridvalue[2]:= newdockingfosource;
-  fo.newformformfile.gridvalue[2]:= newdockingfoform;
-  fo.newformsourcefile.gridvalue[3]:= newdatamodsource;
-  fo.newformformfile.gridvalue[3]:= newdatamodform;
-  fo.newformsourcefile.gridvalue[4]:= newsubfosource;
-  fo.newformformfile.gridvalue[4]:= newsubfoform;
-  fo.newformsourcefile.gridvalue[5]:= newreportsource;
-  fo.newformformfile.gridvalue[5]:= newreportform;
-  fo.newformsourcefile.gridvalue[6]:= newinheritedsource;
-  fo.newformformfile.gridvalue[6]:= newinheritedform;
-  fo.newformsourcefile.gridvalue[7]:= newpascsource;
-  fo.newformformfile.gridvalue[7]:= newpascform;
-}
   fo.makecommand.value:= makecommand;
   fo.makedir.value:= makedir;
   fo.debugcommand.value:= debugcommand;
@@ -1823,15 +1624,9 @@ begin
   fo.runcommand.value:= runcommand;
   fo.remoteconnection.value:= remoteconnection;
   fo.uploadcommand.value:= uploadcommand;
-//  fo.gdbdownload.value:= gdbdownload;
-//  fo.downloadalways.value:= downloadalways;
-//  fo.startupbkpt.value:= startupbkpt;
-//  fo.startupbkpton.value:= startupbkpton;
-//  fo.gdbsimulator.value:= gdbsimulator;
   fo.gdbprocessor.value:= gdbprocessor;
   fo.gdbservercommand.value:= gdbservercommand;
   fo.gdbservercommandattach.value:= gdbservercommandattach;
-//  fo.gdbserverwait.value:= gdbserverwait;
   fo.gdbbeforeload.value:= beforeload;
   fo.gdbafterload.value:= afterload;
   fo.gdbbeforerun.value:= beforerun;
@@ -1930,11 +1725,6 @@ begin
   fo.toolparam.gridvalues:= toolparams;
   fo.def.gridvalues:= defines;
   fo.defon.gridvalues:= defineson;
-//  fo.stoponexception.value:= stoponexception;
-//  fo.valuehints.value:= valuehints;
-//  fo.activateonbreak.value:= activateonbreak;
-//  fo.showconsole.value:= showconsole;
-//  fo.externalconsole.value:= externalconsole;
  end;
 end;
 
@@ -1943,7 +1733,6 @@ var
  int1: integer;
 begin
  with projectoptions,t do begin
-//  macrogroup:= fo.activeenv.value;
   macronames:= fo.macronames.gridvalues;
   macrovalues:= fo.macrovalues.gridvalues;
   setlength(macroon,fo.macrogrid.rowcount);
@@ -1973,41 +1762,11 @@ begin
                                 fo.sighandle[int1]);
    end;
   end;
-//  exceptignore:= fo.exceptignore.gridvalues;
-//  exceptclassnames:= fo.exceptclassnames.gridvalues;
   
   mainfile:= fo.mainfile.value;
   targetfile:= fo.targetfile.value;
   messageoutputfile:= fo.messageoutputfile.value;
 
-//  copymessages:= fo.copymessages.value;
-//  closemessages:= fo.closemessages.value;
-//  checkmethods:= fo.checkmethods.value;
-//  showgrid:= fo.showgrid.value;
-//  snaptogrid:= fo.snaptogrid.value;
-//  moveonfirstclick:= fo.moveonfirstclick.value;
-//  gridsizex:= fo.gridsizex.value;
-//  gridsizey:= fo.gridsizey.value;
-  
-//  autoindent:= fo.autoindent.value;
-//  blockindent:= fo.blockindent.value;
-//  tabstops:= fo.tabstops.value;
-//  spacetabs:= fo.spacetabs.value;
-//  tabindent:= fo.tabindent.value;
-//  rightmarginon:= fo.rightmarginon.value;
-//  rightmarginchars:= fo.rightmarginchars.value;
-//  scrollheight:= fo.scrollheight.value;
-//  editfontname:= fo.editfontname.value;
-//  editfontheight:= fo.editfontheight.value;
-//  editfontwidth:= fo.editfontwidth.value;
-//  editfontextraspace:= fo.editfontextraspace.value;
-//  editfontcolor:= fo.editfontcolor.value;
-//  editbkcolor:= fo.editbkcolor.value;
-//  statementcolor:= fo.statementcolor.value;
-//  editfontantialiased:= fo.editfontantialiased.value;
-//  editmarkbrackets:= fo.editmarkbrackets.value;
-//  backupfilecount:= fo.backupfilecount.value;
-//  encoding:= fo.encoding.value;
   fontalias:= fo.fontalias.gridvalues;
   fontancestors:= fo.fontancestors.gridvalues;
   fontnames:= fo.fontname.gridvalues;
@@ -2020,8 +1779,6 @@ begin
     fontxscales[int1]:= 1.0;
    end;   
   end;
-//  usercolors:= colorarty(fo.usercolors.gridvalues);
-//  usercolorcomment:= fo.usercolorcomment.gridvalues;
 
   scriptbeforecopy:= fo.scriptbeforecopy.value;
   scriptaftercopy:= fo.scriptaftercopy.value;
@@ -2029,37 +1786,16 @@ begin
   newprojectfilesdest:= fo.newprojectfilesdest.gridvalues;
   expandprojectfilemacros:= fo.expandprojectfilemacros.gridvalues;
   loadprojectfile:= fo.loadprojectfile.gridvalues;
-//  newprogramfile:= fo.newprogf.value;
-//  newunitfile:= fo.newunitf.value;
   newfinames:= fo.newfiname.gridvalues;
   newfifilters:= fo.newfifilter.gridvalues;
   newfiexts:= fo.newfiext.gridvalues;
   newfisources:= fo.newfisource.gridvalues;
-//  newtextfile:= fo.newtextf.value;
 
   newfonames:= fo.newformname.gridvalues;
   newinheritedforms:= fo.newinheritedform.gridvalues;
   newfonamebases:= fo.newformnamebase.gridvalues;
   newfosources:= fo.newformsourcefile.gridvalues;
   newfoforms:= fo.newformformfile.gridvalues;
-{
-  newmainfosource:= fo.newformsourcefile.gridvalue[0];
-  newmainfoform:= fo.newformformfile.gridvalue[0];
-  newsimplefosource:= fo.newformsourcefile.gridvalue[1];
-  newsimplefoform:= fo.newformformfile.gridvalue[1];
-  newdockingfosource:= fo.newformsourcefile.gridvalue[2];
-  newdockingfoform:= fo.newformformfile.gridvalue[2];
-  newdatamodsource:= fo.newformsourcefile.gridvalue[3];
-  newdatamodform:= fo.newformformfile.gridvalue[3];
-  newsubfosource:= fo.newformsourcefile.gridvalue[4];
-  newsubfoform:= fo.newformformfile.gridvalue[4];
-  newreportsource:= fo.newformsourcefile.gridvalue[5];
-  newreportform:= fo.newformformfile.gridvalue[5];
-  newinheritedsource:= fo.newformsourcefile.gridvalue[6];
-  newinheritedform:= fo.newformformfile.gridvalue[6];
-  newpascsource:= fo.newformsourcefile.gridvalue[7];
-  newpascform:= fo.newformformfile.gridvalue[7];
-} 
   makecommand:= fo.makecommand.value;
   makedir:= fo.makedir.value;
   debugcommand:= fo.debugcommand.value;
@@ -2068,15 +1804,9 @@ begin
   runcommand:= fo.runcommand.value;
   remoteconnection:= fo.remoteconnection.value;
   uploadcommand:= fo.uploadcommand.value;
-//  gdbdownload:= fo.gdbdownload.value;
-//  downloadalways:= fo.downloadalways.value;
-//  startupbkpt:= fo.startupbkpt.value;
-//  startupbkpton:= fo.startupbkpton.value;
-//  gdbsimulator:= fo.gdbsimulator.value;
   gdbprocessor:= fo.gdbprocessor.value;
   gdbservercommand:= fo.gdbservercommand.value;
   gdbservercommandattach:= fo.gdbservercommandattach.value;
-//  gdbserverwait:= fo.gdbserverwait.value;
   beforeload:= fo.gdbbeforeload.value;
   afterload:= fo.gdbafterload.value;
   beforerun:= fo.gdbbeforerun.value;
@@ -2136,11 +1866,6 @@ begin
   toolmenus:= fo.toolmenu.gridvalues;
   toolfiles:= fo.toolfile.gridvalues;
   toolparams:= fo.toolparam.gridvalues;  
-//  stoponexception:= fo.stoponexception.value;
-//  valuehints:= fo.valuehints.value;
-//  activateonbreak:= fo.activateonbreak.value;
-//  showconsole:= fo.showconsole.value;
-//  externalconsole:= fo.externalconsole.value;
  end;
  expandprojectmacros;
 end;
@@ -2166,7 +1891,6 @@ begin
   try
    application.beginwait;
    updateprojectoptions(statreader,filename);
-//   projectoptions.projectfilename:= filename;
   finally
    statreader.free;
    application.endwait;
@@ -2190,7 +1914,6 @@ begin
  statwriter:= tstatwriter.create(filename,ce_utf8n);
  try
   updateprojectoptions(statwriter,filename);
-//  projectoptions.projectfilename:= filename;
  finally
   statwriter.free;
  end;
@@ -2201,7 +1924,6 @@ var
  fo: tprojectoptionsfo;
 begin
  fo:= tprojectoptionsfo.create(nil);
-// fo.debuggerpage.enabled:= not mainfo.gdb.running;
  projectoptionstoform(fo);
  try
   projectoptionsfo:= fo;
@@ -2497,32 +2219,6 @@ procedure tprojectoptionsfo.newprojectchildscaled(const sender: TObject);
 begin
  placeyorder(4,[4,4],[scriptbeforecopy,scriptaftercopy,copygrid],0);
 end;
-
-{
-procedure tprojectoptionsfo.befla(const sender: tlayouter);
-begin
- writeln('before '+sender.widgets[0].name+':',sender.widgets[0].bounds_x,' '+
-         sender.widgets[1].name+':',sender.widgets[1].bounds_x);
-end;
-
-procedure tprojectoptionsfo.afterla(const sender: tlayouter);
-begin
- writeln('after '+sender.widgets[0].name+':',sender.widgets[0].bounds_x,' '+
-         sender.widgets[1].name+':',sender.widgets[1].bounds_x);
-end;
-
-procedure tprojectoptionsfo.bef1(const sender: tlayouter);
-begin
- writeln('before1 '+sender.widgets[0].name+':',sender.widgets[0].bounds_y,' '+
-         sender.widgets[1].name+':',sender.widgets[1].bounds_y);
-end;
-
-procedure tprojectoptionsfo.aft1(const sender: tlayouter);
-begin
- writeln('after1 '+sender.widgets[0].name+':',sender.widgets[0].bounds_y,' '+
-         sender.widgets[1].name+':',sender.widgets[1].bounds_y);
-end;
-}
 
 { tprojectoptions }
 
