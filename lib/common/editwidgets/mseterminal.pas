@@ -85,10 +85,20 @@ type
    procedure beginupdate; override;
    procedure endupdate;  override;
   published
-   property tabulators;
-   property font;
    property optionsedit default defaultterminaleditoptions;
+   property optionsedit1;
+   property font;
+   property cursorreadonly;
    property maxchars: integer read fmaxchars write fmaxchars default 0;
+   property tabulators;
+
+   property onchange;
+   property ontextedited;
+   property onkeydown;
+   property onkeyup;
+   property oncopytoclipboard;
+   property onpastefromclipboard;
+
    property oninputpipebroken: notifyeventty read foninputpipebroken 
                                                    write foninputpipebroken;
    property onerrorpipebroken: notifyeventty read fonerrorpipebroken 

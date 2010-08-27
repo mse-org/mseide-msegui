@@ -796,8 +796,6 @@ begin
  end;
  if fcurindex > length(finfo.text.text) then begin
   fcurindex:= length(finfo.text.text);
-//  moveindex(fcurindex,
-//   (fcurindex <= fselstart) and (fcurindex < fselstart + fsellength),false);
  end;
 end;
 

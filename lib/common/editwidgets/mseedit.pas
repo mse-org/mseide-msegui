@@ -303,7 +303,7 @@ type
  
  tcustomedit = class;
  texteditedeventty = procedure(const sender: tcustomedit;
-                        var atext: msestring) of object;
+                                      var atext: msestring) of object;
                       
  
  tcustomedit = class(tpublishedwidget,iedit)
@@ -366,7 +366,6 @@ type
 
                //interface to inplaceedit
    procedure dokeydown(var info: keyeventinfoty); override;
-//   procedure dokeyup(var info: keyeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure updatepopupmenu(var amenu: tpopupmenu;
                                       var mouseinfo: mouseeventinfoty); override;
@@ -400,10 +399,10 @@ type
    property passwordchar: msechar read getpasswordchar
                      write setpasswordchar stored false default #0;
            //FPC and Delphi bug: widechars are not streamed
+   property cursorreadonly: cursorshapety read fcursorreadonly 
+                                write setcursorreadonly default cr_default;
    property maxlength: integer read getmaxlength write setmaxlength
                      default -1;
-   property bounds_cx default defaulteditwidgetwidth;
-   property bounds_cy default defaulteditwidgetheight;
    property text: msestring read gettext write settext;
    property oldtext: msestring read getoldtext;
    property textflags: textflagsty read ftextflags write settextflags
@@ -414,17 +413,14 @@ type
    property caretwidth: integer read getcaretwidth write setcaretwidth default defaultcaretwidth;
    property onchange: notifyeventty read fonchange write fonchange;
    property ontextedited: texteditedeventty read fontextedited write fontextedited;
-//   property onkeydown: keyeventty read fonkeydown write fonkeydown;
-//   property onkeyup: keyeventty read fonkeyup write fonkeyup;
-  published
-   property optionswidget default defaulteditwidgetoptions; //first!
-//   property cursor default cr_ibeam;
-   property cursorreadonly: cursorshapety read fcursorreadonly 
-                                write setcursorreadonly default cr_default;
    property oncopytoclipboard: updatestringeventty read foncopytoclipboard 
                   write foncopytoclipboard;
    property onpastefromclipboard: updatestringeventty read fonpastefromclipboard 
                   write fonpastefromclipboard;
+  published
+   property optionswidget default defaulteditwidgetoptions; //first!
+   property bounds_cx default defaulteditwidgetwidth;
+   property bounds_cy default defaulteditwidgetheight;
  end;
 
  tedit = class(tcustomedit)
@@ -432,16 +428,19 @@ type
    property optionsedit;
    property optionsedit1;
    property font;
-   property passwordchar;
-   property maxlength;
-   property text;
    property textflags;
    property textflagsactive;
+   property passwordchar;
+   property maxlength;
    property caretwidth;
+   property cursorreadonly;
+   property text;
    property onchange;
    property ontextedited;
    property onkeydown;
    property onkeyup;
+   property oncopytoclipboard;
+   property onpastefromclipboard;
  end;
 
 implementation

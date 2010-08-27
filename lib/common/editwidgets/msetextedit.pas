@@ -259,7 +259,8 @@ type
    property col: integer read getcol write setcol;
    property modified: boolean read fmodified write setmodified;
 
-   property encoding: charencodingty read fencoding write fencoding;
+   property encoding: charencodingty read fencoding write fencoding 
+                                                        default ce_locale;
    property textflags default defaulttextflags - [tf_noselect];
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
@@ -282,19 +283,27 @@ type
   published
    property font;
    property caretwidth;
+   property cursorreadonly;
    property optionsedit;
    property optionsedit1;
-   property encoding;
    property textflags;
    property textflagsactive;
-   property onkeydown;
-   property onkeyup;
-   property statfile;
+
+   property statfile;   
    property statvarname;
+   property encoding;
    property marginlinepos;
                      //offset to innerclientrect.x
    property marginlinecolor;
    property tabulators;
+
+   property onchange;
+   property ontextedited;
+   property onkeydown;
+   property onkeyup;
+   property oncopytoclipboard;
+   property onpastefromclipboard;
+
    property onfontchanged;
    property onmodifiedchanged;
    property ontextmouseevent;

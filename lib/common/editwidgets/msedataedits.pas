@@ -44,21 +44,19 @@ type
                                const aedit: boolean) of object;
  settexteventty = procedure(const sender: tcustomdataedit;
                            var atext: msestring; var accept: boolean) of object;
+ textchangeeventty = procedure(const sender: tcustomdataedit;
+                                      const atext: msestring) of object;
  dataeditstatety = (des_edited,des_emptytext,des_grayed,des_isdb,des_dbnull,
                     des_actualcursor,des_updating);
  dataeditstatesty = set of dataeditstatety;
-{
- teditemptyfont = class(tparentfont)
-  public
-   class function getinstancepo(owner: tobject): pfont; override;
- end;
-}
+
  emptyoptionty = (eo_defaulttext); //use text of tfacecontroller
  emptyoptionsty = set of emptyoptionty;
 
  tcustomdataedit = class(tcustomedit,igridwidget,istatfile,idragcontroller
                          {$ifdef mse_with_ifi},iifidatalink{$endif})
   private
+   fontextchange: textchangeeventty;
    fondataentered: notifyeventty;
    foncheckvalue: checkvalueeventty;
    fnullchecking: integer;
@@ -68,7 +66,6 @@ type
    fongettext: gettexteventty;
    fonsettext: settexteventty;
    fempty_text: msestring;
-//   fempty_font: teditemptyfont;
    fempty_textflags: textflagsty;
    fempty_textcolor: colorty;
    fempty_textcolorbackground: colorty;
@@ -82,21 +79,16 @@ type
    procedure ifisetvalue(var avalue; var accept: boolean);
    function getifilinkkind: ptypeinfo; virtual;
    procedure setifilink(const avalue: tifilinkcomp);
-//   function ifigriddata: tdatalist;
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    function getgriddata: tdatalist;
    function getvalueprop: ppropinfo;
 {$endif}
-//   procedure fontemptychanged(const sender: tobject);
    procedure emptychanged;
    
    procedure setstatfile(const Value: tstatfile);
    function getreadonly: boolean;
    procedure setreadonly(const avalue: boolean);
    procedure setempty_text(const avalue: msestring);
-//   function getempty_font: teditemptyfont;
-//   procedure setempty_font(const avalue: teditemptyfont);
-//   function isempty_fontstored: boolean;
    procedure setempty_textflags(const avalue: textflagsty);
    procedure setempty_textcolor(const avalue: colorty);
    procedure setempty_textcolorbackground(const avalue: colorty);
@@ -120,6 +112,7 @@ type
    function getinnerframe: framety; override;
    function actualcursor(const apos: pointty): cursorshapety; override;
    procedure valuechanged; virtual;
+   procedure dotextchange; virtual;
    procedure modified; virtual; //for dbedits
    procedure checktext(var atext: msestring; var accept: boolean);
    procedure texttovalue(var accept: boolean; const quiet: boolean); virtual; abstract;
@@ -222,8 +215,6 @@ type
    function textcellcopy: boolean; virtual;
   public
    constructor create(aowner: tcomponent); override;
-//   destructor destroy; override;
-//   procedure createfontempty;
    
    procedure initgridwidget; virtual;
    procedure synctofontheight; override;
@@ -263,6 +254,8 @@ type
    property ondataentered: notifyeventty read fondataentered write fondataentered;
    property ongettext: gettexteventty read fongettext write fongettext;
    property onsettext: settexteventty read fonsettext write fonsettext;
+   property ontextchange: textchangeeventty read fontextchange 
+                                                     write fontextchange;
  end;
 
  tdataedit = class(tcustomdataedit)
@@ -277,20 +270,26 @@ type
    property empty_options;
    property empty_textcolor;
    property empty_textcolorbackground;
+
    property optionsedit;
    property optionsedit1;
    property font;
    property textflags;
    property textflagsactive;
    property caretwidth;
+   property cursorreadonly;
    property onchange;
+   property ontextchange;
+   property onkeydown;
+   property onkeyup;
+   property oncopytoclipboard;
+   property onpastefromclipboard;
+   
    property ontextedited;
    property oncheckvalue;
    property ondataentered;
    property ongettext;
    property onsettext;
-   property onkeydown;
-   property onkeyup;
  end;
  
  tcustomstringedit = class(tdataedit)
@@ -1778,6 +1777,13 @@ begin
  end;
 end;
 
+procedure tcustomdataedit.dotextchange;
+begin
+ if canevent(tmethod(fontextchange)) then begin
+  fontextchange(self,text);
+ end;
+end;
+
 procedure tcustomdataedit.checktext(var atext: msestring; var accept: boolean);
 begin
  if canevent(tmethod(fonsettext)) then begin
@@ -2455,6 +2461,9 @@ begin
    modified;
    inherited;
   end;
+  ea_textchanged: begin
+   dotextchange;
+  end;
   ea_undo: begin
    exclude(fstate,des_edited);
   end;
@@ -2463,22 +2472,6 @@ begin
     fgridintf.showcaretrect(info.caretrect,fframe);
    end;
   end;
-  {
-  ea_copyselection: begin
-   if (fgridintf <> nil) and (feditor.sellength = 0) then begin
-    if fgridintf.getcol.grid.copyselection then begin
-     info.action:= ea_none;
-    end;
-   end;
-  end;
-  ea_pasteselection: begin
-   if fgridintf <> nil then begin
-    if fgridintf.getcol.grid.pasteselection then begin
-     info.action:= ea_none;
-    end;
-   end;
-  end;
-  }
  end;
 end;
 
