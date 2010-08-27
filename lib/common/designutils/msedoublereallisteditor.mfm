@@ -2,14 +2,14 @@ object doublereallisteditor: tdoublereallisteditor
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 130
   bounds_y = 203
-  bounds_cx = 338
-  bounds_cy = 194
+  bounds_cx = 279
+  bounds_cy = 211
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds = (
     0
     0
-    338
-    194
+    279
+    211
   )
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat]
   caption = 'Doublereallisteditor'
@@ -17,10 +17,11 @@ object doublereallisteditor: tdoublereallisteditor
   object ok: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     taborder = 3
-    bounds_x = 212
-    bounds_y = 160
+    bounds_x = 153
+    bounds_y = 177
     bounds_cx = 50
     bounds_cy = 20
+    anchors = [an_right, an_bottom]
     state = [as_default, as_localdefault, as_localcaption]
     caption = '&OK'
     modalresult = mr_ok
@@ -28,10 +29,11 @@ object doublereallisteditor: tdoublereallisteditor
   end
   object cancel: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 276
-    bounds_y = 160
+    bounds_x = 217
+    bounds_y = 177
     bounds_cx = 50
     bounds_cy = 20
+    anchors = [an_right, an_bottom]
     state = [as_localcaption]
     caption = '&Cancel'
     modalresult = mr_cancel
@@ -41,8 +43,9 @@ object doublereallisteditor: tdoublereallisteditor
     taborder = 2
     bounds_x = 8
     bounds_y = 8
-    bounds_cx = 320
-    bounds_cy = 140
+    bounds_cx = 261
+    bounds_cy = 157
+    bounds_cxmin = 240
     anchors = [an_left, an_top, an_right, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol]
     fixcols.count = 1
@@ -59,23 +62,23 @@ object doublereallisteditor: tdoublereallisteditor
         captions.items = <        
           item
             caption = 'a'
-            textflags = []
           end        
           item
             caption = 'b'
-            textflags = []
           end>
       end>
     datacols.count = 2
+    datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
     datacols.items = <    
       item
-        width = 142
+        width = 113
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
         widgetname = 'vala'
         dataclass = tgridrealdatalist
       end    
       item
-        width = 140
-        options = [co_fill, co_savevalue]
+        width = 110
+        options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_cancopy, co_canpaste]
         widgetname = 'valb'
         dataclass = tgridrealdatalist
       end>
@@ -93,7 +96,7 @@ object doublereallisteditor: tdoublereallisteditor
       visible = False
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 142
+      bounds_cx = 113
       bounds_cy = 16
       valuerange =  1.0000000000000000E+0000
       reffontheight = 14
@@ -108,9 +111,9 @@ object doublereallisteditor: tdoublereallisteditor
       frame.dummy = 0
       taborder = 2
       visible = False
-      bounds_x = 143
+      bounds_x = 114
       bounds_y = 0
-      bounds_cx = 140
+      bounds_cx = 110
       bounds_cy = 16
       valuerange =  1.0000000000000000E+0000
       reffontheight = 14
@@ -128,10 +131,11 @@ object doublereallisteditor: tdoublereallisteditor
       0
     )
     taborder = 1
-    bounds_x = 36
-    bounds_y = 160
+    bounds_x = 8
+    bounds_y = 177
     bounds_cx = 108
     bounds_cy = 20
+    anchors = [an_left, an_bottom]
     onsetvalue = rowcountonsetvalue
     reffontheight = 14
   end

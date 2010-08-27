@@ -449,7 +449,6 @@ type
    max: realty;
    constructor create; override;
    function datatype: listdatatypety; override;
-//   procedure assign(source: tpersistent); override;
    procedure assignre(source: tcomplexdatalist);
    procedure assignim(source: tcomplexdatalist);
    function empty(const index: integer): boolean; override;
@@ -491,12 +490,16 @@ type
    function getdefault: pointer; override;
    procedure assignto(dest: tpersistent); override;
   public
-   function datatype: listdatatypety; override;
+   min: realty;      //for property editor
+   max: realty;
+   
    constructor create; override;
+   function datatype: listdatatypety; override;
    procedure assign(source: tpersistent); override;
    procedure assignb(const source: tdatalist); override;
    procedure assignre(const source: trealdatalist);
    procedure assignim(const source: trealdatalist);
+   procedure assigntoa(const dest: tdatalist);
    procedure assigntob(const dest: tdatalist); override;
    function add(const value: complexty): integer;
    procedure insert(const index: integer; const item: complexty);
@@ -5334,6 +5337,8 @@ end;
 
 constructor tcomplexdatalist.create;
 begin
+ min:= emptyreal;
+ max:= bigreal;
  fdefaultval.re:= emptyreal;
  fdefaultval.im:= emptyreal;
  inherited;
@@ -5414,6 +5419,11 @@ begin
   inc(pchar(po2),s2);
  end;
  endupdate;
+end;
+
+procedure tcomplexdatalist.assigntoa(const dest: tdatalist);
+begin
+ dest.assign(self);
 end;
 
 procedure tcomplexdatalist.assigntob(const dest: tdatalist);

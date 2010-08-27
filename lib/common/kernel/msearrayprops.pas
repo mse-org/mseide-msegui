@@ -39,7 +39,6 @@ type
    linkedarrays: arrayproparrayty;
    fonchange: arraychangeeventty;
    ffixcount: integer;
-//   fonsizechanged: arraysizechangeeventty;
    procedure internalinsert(const index: integer; const init: boolean);
   protected
    fstate: arraypropsstatesty;

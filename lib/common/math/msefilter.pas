@@ -16,19 +16,33 @@ unit msefilter;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseclasses,msedatalist,classes,msetypes,msesignal;
+ mseclasses,msedatalist,classes,msetypes,msesignal,msearrayprops,msereal;
 type
 
+ tdoublesignalcomp = class;
+ 
+ tsections = class(tintegerarrayprop)
+  protected
+   fowner: tdoublesignalcomp;
+   function calccoeffcount: integer;
+   procedure dochange(const aindex: integer); override;
+   procedure updatecoeffcount;
+  public
+   constructor create(const aowner: tdoublesignalcomp);
+ end;
+ 
  tdoublesignalcomp = class(tsignalcomp)
   private
    fdoublez: doublearty;
    fzindex: integer;
    finputindex: integer;
    fdoubleinputdata: doubleararty;
-   forder: integer;
-   forderhigh: integer;
+   fcoeffcount: integer;
+   fcoeffhigh: integer;
+   fsections: tsections;
    procedure setcoeff(const avalue: tdatalist);
-   procedure setorder(const avalue: integer);
+   procedure setcoeffcount(const avalue: integer);
+   procedure setsections(const avalue: tsections);
   protected
    fcoeff: tdatalist;
    procedure coeffchanged(const sender: tdatalist;
@@ -44,8 +58,10 @@ type
    procedure output1(var adata: doublearty);
    function output: doublearty;
    procedure update(var inout: doublearty);
+   property coeffcount: integer read fcoeffcount default 0;
   published
-   property order: integer read forder write setorder default 0;
+   property sections: tsections read fsections write setsections;
+            //array of coeffcount
  end;
 
 // >---+-->(z)---+-->(z)---+-->(z)---+
@@ -101,7 +117,8 @@ end;
 
 constructor tdoublesignalcomp.create(aowner: tcomponent);
 begin
- forderhigh:= -1;
+ fsections:= tsections.create(self);
+ fcoeffhigh:= -1;
  createcoeff;
  inherited; 
 end;
@@ -111,6 +128,7 @@ begin
  clear;
  inherited;
  fcoeff.free;
+ fsections.free;
 end;
 
 procedure tdoublesignalcomp.setcoeff(const avalue: tdatalist);
@@ -118,15 +136,15 @@ begin
  fcoeff.assign(avalue);
 end;
 
-procedure tdoublesignalcomp.setorder(const avalue: integer);
+procedure tdoublesignalcomp.setcoeffcount(const avalue: integer);
 begin
- if forder <> avalue then begin
-  if order < 0 then begin
-   raise exception.create('Invalid order value.');
+ if fcoeffcount <> avalue then begin
+  if avalue < 0 then begin
+   raise exception.create('Invalid coeffcount.');
   end;
   clear;
-  forder:= avalue;
-  forderhigh:= avalue - 1;
+  fcoeffcount:= avalue;
+  fcoeffhigh:= avalue - 1;
   fcoeff.count:= avalue;
   setlength(fdoublez,avalue);
  end;
@@ -136,7 +154,7 @@ procedure tdoublesignalcomp.clear;
 begin
  fdoubleinputdata:= nil;
  finputindex:= 0;
- fillchar(pointer(fdoublez)^,forder*sizeof(double),0);
+ fillchar(pointer(fdoublez)^,fcoeffcount*sizeof(double),0);
  fzindex:= 0; 
 end;
 
@@ -189,8 +207,14 @@ procedure tdoublesignalcomp.coeffchanged(const sender: tdatalist;
                const aindex: integer);
 begin
  if aindex < 0 then begin
-  order:= sender.count;
+  setcoeffcount(sender.count);
+  fsections.updatecoeffcount;
  end;
+end;
+
+procedure tdoublesignalcomp.setsections(const avalue: tsections);
+begin
+ fsections.assign(avalue);
 end;
 
 { tfirfilter }
@@ -198,6 +222,8 @@ end;
 procedure tfirfilter.createcoeff;
 begin
  fcoeff:= trealcoeff.create(self);
+ trealcoeff(fcoeff).defaultzero:= true;
+ trealcoeff(fcoeff).min:= -bigreal;
 end;
 
 function tfirfilter.getcoeff: trealcoeff;
@@ -211,37 +237,62 @@ begin
 end;
 
 procedure tfirfilter .process(const acount: integer; var ainp, aoutp: pdouble);
-var
- int1,int2: integer;
+var                             //todo: optimize
+ int1,int2,int3: integer;
  ar1: doublearty;
- do1,sum: double;
+ i,o: double;
  po1: pdouble;
  inp1,outp1: pdouble;
+ startindex1,endindex1,endindex2: integer;
 begin
- inp1:= ainp;
- outp1:= aoutp;
- for int1:= acount-1 downto 0 do begin
-  sum:= 0;
-  po1:= fcoeff.datapo;
-  fdoublez[fzindex]:= inp1^;
-  for int2:= fzindex to forderhigh do begin
-   sum:= sum + fdoublez[int2] * po1^;
-   inc(po1);
+ if fcoeffcount > 0 then begin
+  inp1:= ainp;
+  outp1:= aoutp;
+  for int1:= acount-1 downto 0 do begin
+   po1:= fcoeff.datapo;
+   i:= ainp^;
+   startindex1:= fzindex;
+   for int3:= 0 to high(fsections.fitems) do begin
+    endindex1:= startindex1 + fsections.fitems[int3] - 1;
+    if endindex1 > fcoeffhigh then begin
+     endindex2:= endindex1-fcoeffhigh-1;
+     endindex1:= fcoeffhigh;
+    end
+    else begin
+     endindex2:= -1;
+    end;
+    
+    fdoublez[startindex1]:= i;
+    o:= 0;
+    for int2:= startindex1 to endindex1 do begin
+     o:= o + fdoublez[int2] * po1^;
+     inc(po1);
+    end;
+    for int2:= 0 to endindex2 do begin
+     o:= o + fdoublez[int2] * po1^;
+     inc(po1);
+    end;
+    startindex1:= startindex1 + fsections.fitems[int3];
+    if startindex1 >= fcoeffcount then begin
+     startindex1:= startindex1 - fcoeffcount;
+    end;
+    i:= o;
+   end;
+   outp1^:= o;
+   dec(fzindex);
+   if fzindex < 0 then begin
+    fzindex:= fcoeffhigh;
+   end;
+   inc(outp1);
+   inc(inp1);
   end;
-  for int2:= 0 to fzindex-1 do begin
-   sum:= sum + fdoublez[int2] * po1^;
-   inc(po1);
-  end;
-  inc(fzindex);
-  if fzindex >= forder then begin
-   fzindex:= 0;
-  end;
-  outp1^:= sum;
-  inc(outp1);
-  inc(inp1);
+  ainp:= inp1;
+  aoutp:= outp1;
+ end
+ else begin
+  inc(ainp,acount);
+  inc(aoutp,acount);
  end;
- ainp:= inp1;
- aoutp:= outp1;
 end;
 
 { tiirfilter }
@@ -249,6 +300,8 @@ end;
 procedure tiirfilter.createcoeff;
 begin
  fcoeff:= tcomplexcoeff.create(self);
+ tcomplexcoeff(fcoeff).defaultzero:= true;
+ tcomplexcoeff(fcoeff).min:= -bigreal;
 end;
 
 function tiirfilter.getcoeff: tcomplexcoeff;
@@ -264,13 +317,13 @@ end;
 procedure tiirfilter.process(const acount: integer; var ainp: pdouble;
                var aoutp: pdouble);
 var 
- int1,int2: integer;
+ int1,int2,int3: integer;
  inp1,outp1: pdouble;
  i,o: double;
  po0: pcomplexty;
  po1: pcomplexty;          //todo: optimize
 begin
- if forder > 0 then begin
+ if fcoeffcount > 0 then begin
   inp1:= ainp;
   outp1:= aoutp;
   po0:= fcoeff.datapo;
@@ -278,12 +331,19 @@ begin
    po1:= po0;
    i:= inp1^;
    o:= i*po1^.im+fdoublez[0];
-   for int2:= 0 to forderhigh - 2 do begin
+   int3:= 0;
+   for int2:= 1 to fcoeffhigh do begin
     inc(po1);
-    fdoublez[int2]:= fdoublez[int2+1] + i*po1^.im - o*po1^.re;
+    if int2 = fsections.fitems[int3] then begin
+     i:= o;
+     o:= i*po1^.im+fdoublez[int2];
+    end
+    else begin
+     fdoublez[int2-1]:= fdoublez[int2] + i*po1^.im - o*po1^.re;
+    end;
    end;
-   inc(po1);
-   fdoublez[forderhigh-1]:=             i*po1^.im - o*po1^.re;
+//   inc(po1);
+//   fdoublez[fcoeffhigh-1]:=             i*po1^.im - o*po1^.re;
    outp1^:= o;
    inc(outp1);
    inc(inp1);
@@ -294,6 +354,61 @@ begin
  else begin
   inc(ainp,acount);
   inc(aoutp,acount);
+ end;
+end;
+
+{ tsections }
+
+constructor tsections.create(const aowner: tdoublesignalcomp);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+function tsections.calccoeffcount: integer;
+var
+ int1: integer;
+begin
+ result:= 0;
+ for int1:= 0 to high(fitems) do begin
+  result:= result + fitems[int1];
+ end;
+end;
+
+procedure tsections.dochange(const aindex: integer);
+begin
+ fowner.setcoeffcount(calccoeffcount);
+end;
+
+procedure tsections.updatecoeffcount;
+var
+ int1: integer;
+begin
+ if not (csloading in fowner.componentstate) then begin
+  int1:= fowner.coeffcount-calccoeffcount;
+  if int1 <> 0 then begin
+   beginupdate;
+   try
+    if int1 > 0 then begin
+     if fitems = nil then begin
+      setlength(fitems,1);
+     end;
+     fitems[high(fitems)]:= fitems[high(fitems)] + int1;
+    end
+    else begin
+     while int1 < 0 do begin
+      fitems[high(fitems)]:= fitems[high(fitems)] + int1;
+      if fitems[high(fitems)] > 0 then begin
+       break;
+      end;
+      int1:= fitems[high(fitems)];
+      setlength(fitems,high(fitems));
+     end;
+    end;
+   finally
+    endupdate;
+   end;
+  end;
  end;
 end;
 

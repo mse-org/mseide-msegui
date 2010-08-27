@@ -4730,6 +4730,8 @@ end;
 procedure tdatalistpropertyeditor.edit;
 var
  editform: tcustommseform;
+ realdata: trealdatalist;
+ complexdata: tcomplexdatalist;
 begin
  checkformkind;
  case formkind of
@@ -4760,8 +4762,15 @@ begin
                                           tmsestringdatalist(getpointervalue));
     end;
     lfk_real: begin
-     treallisteditor(editform).valueedit.griddata.assign(
-                                          trealdatalist(getpointervalue));
+     realdata:= trealdatalist(getpointervalue);
+     with treallisteditor(editform).valueedit do begin
+      griddata.assign(realdata);
+      if realdata.defaultzero then begin
+       valuedefault:= 0;
+      end;
+      min:= realdata.min;
+      max:= realdata.max;
+     end;
     end;
     lfk_integer: begin
      tintegerlisteditor(editform).valueedit.griddata.assign(
@@ -4774,9 +4783,18 @@ begin
      end;
     end;
     lfk_complex: begin
+     complexdata:= tcomplexdatalist(getpointervalue);
      with tdoublereallisteditor(editform) do begin
-      vala.assigncol(trealdatalist(getpointervalue));
-      tcomplexdatalist(getpointervalue).assigntob(valb.griddata);
+      complexdata.assigntoa(vala.griddata);
+      complexdata.assigntob(valb.griddata);
+      if complexdata.defaultzero then begin
+       vala.valuedefault:= 0;
+       valb.valuedefault:= 0;
+      end;
+      vala.min:= complexdata.min;
+      vala.max:= complexdata.max;
+      valb.min:= vala.min;
+      valb.max:= vala.max;
      end;
     end;
    end;
