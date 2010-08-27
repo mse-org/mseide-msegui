@@ -855,8 +855,9 @@ uses
  msecolordialog,msememodialog,
  mseshapes,msestockobjects,msetexteditor,
  msegraphicstream,
- mseformatbmpico{$ifdef FPC},mseformatjpg,mseformatpng,
- mseformatpnm,mseformattga,mseformatxpm{$endif},msestat,msestatfile,msefileutils,
+ mseformatbmpicoread{$ifdef FPC},mseformatjpgread,mseformatpngread,
+ mseformatpnmread,mseformattgaread,mseformatxpmread{$endif},
+ msestat,msestatfile,msefileutils,
  msedesigner;
 
 const

@@ -19,8 +19,9 @@ uses
  msemenus,mseevent,msegui;
 
 { add the needed graphic format units to your project:
- mseformatbmpico,mseformatjpg,mseformatpng,
- mseformatpnm,mseformattga,mseformatxpm
+ mseformatbmpicoread,
+ mseformatjpgwrite,mseformatpngwrite,
+ mseformatpnmread,mseformattgaread,mseformatxpmread,
 }
 
 type

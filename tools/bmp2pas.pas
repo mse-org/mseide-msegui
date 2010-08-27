@@ -35,7 +35,9 @@ uses
   msesysutils,
   msebitmap,
   mseclasses,
-  mseformdatatools,mseguiintf,mseformatpng,mseformatbmpico,msegraphutils;
+  mseformdatatools,mseguiintf,
+  mseformatpngread,mseformatbmpicoread,
+  msegraphutils;
 
 type
  argty = (arg_dest,arg_names);

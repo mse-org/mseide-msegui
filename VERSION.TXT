@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2010-08-27
+ Read versions of image format units have suffix "read", 
+ example mseformatpng -> mseformatpngread.
 2010-08-18
  DB single key locate() replaced by multi key version.
 2010-06-5
