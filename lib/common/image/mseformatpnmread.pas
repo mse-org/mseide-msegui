@@ -1,4 +1,4 @@
-unit mseformatpnm;
+unit mseformatpnmread;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 const

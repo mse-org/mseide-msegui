@@ -1,4 +1,4 @@
-unit mseformatbmpico;
+unit mseformatbmpicoread;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 const

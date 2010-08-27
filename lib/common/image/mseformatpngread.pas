@@ -1,4 +1,4 @@
-unit mseformatpng;
+unit mseformatpngread;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 const
