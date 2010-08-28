@@ -44,15 +44,17 @@ type
                                const source: tobject;
                                const params: array of const);
 
-procedure readgraphic(const source: tstream; const dest: tbitmap;
+function readgraphic(const source: tstream; const dest: tbitmap;
                            const aformatname: string = '';
-                           const index: integer = -1); overload;
+                           const index: integer = -1): string; overload;
+                           //returns formatname
                            //index = select image in ico format
-procedure readgraphic(const source: tstream; const dest: tmaskedbitmap;
+function readgraphic(const source: tstream; const dest: tmaskedbitmap;
                            const aformatname: string = '';
-                           const index: integer = -1); overload;
+                           const index: integer = -1): string; overload;
                            //index = select image in ico format
-procedure readgraphic(const source: tstream; const dest: timagelist); overload;
+function readgraphic(const source: tstream;
+                                 const dest: timagelist): string; overload;
                            //only for ico format
                            
 procedure writegraphic(const dest: tstream; const source: tbitmap;
@@ -239,14 +241,15 @@ begin
  end;
 end;
 
-procedure readgraphic1(const source: tstream; const index: integer;
-                const adest: tobject; const aformatlabel: string);
+function readgraphic1(const source: tstream; const index: integer;
+                const adest: tobject; const aformatlabel: string): string;
                 //index = select image in ico format
 var
  int1,int3: integer;
  ar1: stringarty;
  found: boolean;
 begin
+ result:= '';
  ar1:= nil; //compiler warning
  if aformatlabel = '' then begin
   found:= true;
@@ -254,6 +257,7 @@ begin
    with formats[int1] do begin
     if assigned(readproc) then begin
      if readproc(source,index,adest) then begin
+      result:= formats[int1].formatlabel;
       exit;
      end;
      source.position:= 0;
@@ -271,6 +275,7 @@ begin
       found:= true;
       if assigned(readproc) then begin
        if readproc(source,index,adest) then begin
+        result:= formats[int1].formatlabel;
         exit;
        end;
       end;
@@ -312,26 +317,27 @@ begin
  end;
 end;
 
-procedure readgraphic(const source: tstream; const dest: tbitmap;
+function readgraphic(const source: tstream; const dest: tbitmap;
                            const aformatname: string = '';
-                           const index: integer = -1); overload;
+                           const index: integer = -1): string; overload;
                            //index = select image in ico format
 begin
- readgraphic1(source,index,dest,aformatname);
+ result:= readgraphic1(source,index,dest,aformatname);
 end;
 
-procedure readgraphic(const source: tstream; const dest: tmaskedbitmap;
+function readgraphic(const source: tstream; const dest: tmaskedbitmap;
                            const aformatname: string = '';
-                           const index: integer = -1); overload;
+                           const index: integer = -1): string; overload;
                            //index = select image in ico format
 begin
- readgraphic1(source,index,dest,aformatname);
+ result:= readgraphic1(source,index,dest,aformatname);
 end;
 
-procedure readgraphic(const source: tstream; const dest: timagelist); overload;
+function readgraphic(const source: tstream;
+                            const dest: timagelist): string; overload;
                            //index = select image in ico format
 begin
- readgraphic1(source,-1,dest,'ico');
+ result:= readgraphic1(source,-1,dest,'ico');
 end;
                            
 procedure writegraphic(const dest: tstream; const source: tbitmap;

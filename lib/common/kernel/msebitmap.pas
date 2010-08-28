@@ -194,14 +194,19 @@ type
    procedure stretch(const dest: tmaskedbitmap);
    procedure remask; //recalc mask
    procedure automask; //transparentcolor is bottomright pixel
-   procedure loadfromstring(const avalue: string; const format: string = '';
-                               const index: integer = -1);
-   procedure loadfromstream(const stream: tstream; const format: string = '';
-                               const index: integer = -1); //index in ico
-   procedure loadfromfile(const filename: filenamety; const format: string = '';
-                               const index: integer = -1); //index in ico
+   function loadfromstring(const avalue: string; const format: string = '';
+                               const index: integer = -1): string;
+                                         //returns format
+   function loadfromstream(const stream: tstream; const format: string = '';
+                               const index: integer = -1): string;
+                                         //index in ico
+   function loadfromfile(const filename: filenamety; const format: string = '';
+                               const index: integer = -1): string;
+                                                          //index in ico
    procedure writetostring(out avalue: string; const format: string;
-                                  const params: array of const);
+                                  const params: array of const); overload;
+   function writetostring(const format: string;
+                           const params: array of const): string; overload;
    procedure writetostream(const stream: tstream; const format: string;
                                const params: array of const); //index in ico
    procedure writetofile(const filename: filenamety; const format: string;
@@ -1803,37 +1808,38 @@ begin
  end;
 end;
 
-procedure tmaskedbitmap.loadfromstream(const stream: tstream;
-                      const format: string = ''; const index: integer = -1);
+function tmaskedbitmap.loadfromstream(const stream: tstream;
+           const format: string = ''; const index: integer = -1): string;
 begin
- readgraphic(stream,self,format,index);
+ result:= readgraphic(stream,self,format,index);
 end;
 
-procedure tmaskedbitmap.loadfromfile(const filename: filenamety;
-                      const format: string = ''; const index: integer = -1);
+function tmaskedbitmap.loadfromfile(const filename: filenamety;
+             const format: string = ''; const index: integer = -1): string;
 var
  stream: tmsefilestream;
 begin
  stream:= tmsefilestream.create(filename,fm_read);
  try
-  loadfromstream(stream,format,index);
+  result:= loadfromstream(stream,format,index);
  finally
   stream.free;
  end;
 end;
 
-procedure tmaskedbitmap.loadfromstring(const avalue: string;
-               const format: string = ''; const index: integer = -1);
+function tmaskedbitmap.loadfromstring(const avalue: string;
+               const format: string = ''; const index: integer = -1): string;
 var
  stream1: tstringcopystream;
 begin
+ result:= '';
  if avalue = '' then begin
   clear;
  end
  else begin
   stream1:= tstringcopystream.create(avalue);
   try
-   loadfromstream(stream1,format);
+   result:= loadfromstream(stream1,format);
   finally
    stream1.free;
   end;
@@ -1852,6 +1858,12 @@ begin
  finally
   stream1.free;
  end;
+end;
+
+function tmaskedbitmap.writetostring(const format: string;
+                                  const params: array of const): string;
+begin
+ writetostring(result,format,params);
 end;
 
 procedure tmaskedbitmap.writetostream(const stream: tstream; const format: string;

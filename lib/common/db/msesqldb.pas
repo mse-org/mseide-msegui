@@ -145,7 +145,7 @@ type
    fchangelock: integer;
    frefreshlock: integer;
   protected
-   procedure checkrefresh;
+//   procedure checkrefresh;
    procedure recordchanged(afield: tfield); override;
    procedure DataEvent(Event: TDataEvent; Info: Ptrint); override;
    procedure CheckBrowseMode; override;
@@ -172,8 +172,8 @@ type
    fonsetparam: setparameventty;
    fonaftersetparam: notifyeventty;
    foptions: fieldparamlinkoptionsty;
-//   ftimer: tsimpletimer;
    fdelayus: integer;
+   fnodelay: integer;
    fonupdatemasteredit: masterdataseteventty;
    fonupdatemasterinsert: masterdataseteventty;
    function getdatafield: string;
@@ -194,12 +194,15 @@ type
 //   procedure dotimer(const sender: tobject);
    procedure notification(acomponent: tcomponent;
                                 operation: toperation); override;
-
+   function truedelayus: integer;
+   procedure checkrefresh;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function param: tparam;
    function field: tfield;
+   procedure delayoff;
+   procedure delayon;
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -720,23 +723,31 @@ begin
  fowner:= aowner;
  inherited create;
 end;
-
+{
 procedure tparamsourcedatalink.checkrefresh;
 begin
  with fowner do begin
   if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
-//                       destdataset.active then begin
                         (destdataset.state = dsbrowse) then begin
-   if fdestcontroller <> nil then begin
-    fdestcontroller.refresh(fplo_restorerecno in foptions);
-   end
-   else begin
-    fdestdataset.refresh;
+   if fplo_waitcursor in fowner.foptions then begin
+    application.beginwait;
+   end;
+   try
+    if fdestcontroller <> nil then begin
+     fdestcontroller.refresh(fplo_restorerecno in foptions);
+    end
+    else begin
+     fdestdataset.refresh;
+    end;
+   finally
+    if fplo_waitcursor in fowner.foptions then begin
+     application.endwait;
+    end;
    end;
   end;
  end;
 end;
-
+}
 procedure tparamsourcedatalink.recordchanged(afield: tfield);
 var
  bo1: boolean;
@@ -765,10 +776,9 @@ begin
         fonaftersetparam(fowner);
        end;
        if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
-     //                       destdataset.active then begin
                              (destdataset.state = dsbrowse) then begin
         if fdestcontroller <> nil then begin
-         fdestcontroller.refresh(fplo_restorerecno in foptions,fdelayus);
+         fdestcontroller.refresh(fplo_restorerecno in foptions,truedelayus);
         end
         else begin
          fdestdataset.refresh;
@@ -1008,22 +1018,38 @@ end;
 procedure tfieldparamlink.setdelayus(const avalue: integer);
 begin
  fdelayus:= avalue;
- if fdelayus < -1 then begin
+ if fdelayus < 0 then begin
   fdelayus:= -1;
+  checkrefresh;
  end;
- {
- if avalue = -1 then begin
-  freeandnil(ftimer);
- end
- else begin
-  if ftimer = nil then begin
-   ftimer:= tsimpletimer.create(-fdelayus,@dotimer,false);
-  end
-  else begin
-   ftimer.interval:= -fdelayus; //single shot
-  end;
+end;
+
+function tfieldparamlink.truedelayus: integer;
+begin
+ result:= fdelayus;
+ if fnodelay > 0 then begin
+  result:= -1;
  end;
- }
+end;
+
+procedure tfieldparamlink.checkrefresh;
+begin
+ if fdestcontroller <> nil then begin
+  fdestcontroller.checkrefresh;
+ end;
+end;
+
+procedure tfieldparamlink.delayoff;
+begin
+ inc(fnodelay);
+ if fnodelay = 1 then begin
+  checkrefresh;
+ end;
+end;
+
+procedure tfieldparamlink.delayon;
+begin
+ dec(fnodelay);
 end;
 
 { tsequencedatalink }

@@ -100,7 +100,8 @@ begin
  acanvas.color:= fcolorforeground;
  acanvas.colorbackground:= fcolorbackground;
 // abmp.paint(acanvas,makerect(nullpoint,clientsize));
- abmp.paint(acanvas,innerclientrect);
+// abmp.paint(acanvas,innerclientrect);
+ abmp.paint(acanvas,dest);
  acanvas.color:= col1;
  acanvas.colorbackground:= col2;
 end;
@@ -108,7 +109,8 @@ end;
 procedure timage.dopaint(const canvas: tcanvas);
 begin
  inherited;
- paintbmp(canvas,fbitmap,makerect(nullpoint,clientsize));
+// paintbmp(canvas,fbitmap,makerect(nullpoint,clientsize));
+ paintbmp(canvas,fbitmap,innerclientrect); 
 end;
 
 procedure timage.setbitmap(const Value: tmaskedbitmap);

@@ -21,6 +21,7 @@ type
    fenabled: boolean;
    finterval: integer;
    fontimer: notifyeventty;
+   fpending: boolean;
    procedure setenabled(const Value: boolean);
    procedure setinterval(const Value: integer);
   protected
@@ -29,6 +30,7 @@ type
    constructor create(interval: integer; ontimer: notifyeventty; active: boolean);
              //activates timer
    destructor destroy; override;
+   procedure firependingandstop;
    property interval: integer read finterval write setinterval;
              //in microseconds, <= 0 -> single shot, max +-2000 seconds
              //restarts timer if active
@@ -53,6 +55,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure restart;
+   procedure firependingandstop;
   published
    property interval: integer read getinterval write setinterval default 1000000;
              //in microseconds, <= 0 -> single shot, max +-2000 seconds
@@ -322,7 +325,7 @@ procedure tsimpletimer.setenabled(const Value: boolean);
 begin
  if fenabled <> value then begin
   sys_mutexlock(mutex);
-  fenabled := Value;
+  fenabled:= Value;
   if not value then begin
    killtimertick({$ifdef FPC}@{$endif}dotimer);
   end
@@ -344,6 +347,14 @@ begin
   killtimertick({$ifdef FPC}@{$endif}dotimer);
   settimertick(finterval,{$ifdef FPC}@{$endif}dotimer);
   sys_mutexunlock(mutex);
+ end;
+end;
+
+procedure tsimpletimer.firependingandstop;
+begin
+ if fenabled then begin
+  enabled:= false;
+  dotimer;
  end;
 end;
 
@@ -433,6 +444,11 @@ procedure ttimer.restart;
 begin
  interval:= ftimer.interval;
  enabled:= true;
+end;
+
+procedure ttimer.firependingandstop;
+begin
+ ftimer.firependingandstop;
 end;
 
 initialization

@@ -1342,6 +1342,7 @@ begin
   fhistory:= reader.readarray('filehistory',fhistory);
  end;
  ffilterindex:= reader.readinteger('filefilterindex',ffilterindex);
+ ffilter:= reader.readstring('filefilter',ffilter);
  fcolwidth:= reader.readinteger('filecolwidth',fcolwidth);
  if fdo_chdir in foptions then begin
   try
@@ -1369,6 +1370,7 @@ begin
   writer.writearray('filehistory',fhistory);
  end;
  writer.writeinteger('filefilterindex',ffilterindex);
+ writer.writestring('filefilter',ffilter);
  writer.writeinteger('filecolwidth',fcolwidth);
 end;
 

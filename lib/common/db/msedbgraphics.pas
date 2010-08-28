@@ -32,11 +32,13 @@ type
  timagecachenode = class(tcachenode)
   private
    fimage: imagebufferinfoty;
+   fformat: string;
   protected
    flocal: boolean;
   public
    constructor create(const aid: blobidty); overload;
    destructor destroy; override;
+   property format: string read fformat write fformat;
  end;
  
  timagecache = class(tcacheavltree)
@@ -60,10 +62,11 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure loadbitmap(const asource: tmaskedbitmap; aformat: string = '');
-   procedure storebitmap(const adest: tmaskedbitmap;
+   function loadbitmap(const adest: tmaskedbitmap;
+                        aformat: string = ''): string; //returns format
+   procedure storebitmap(const asource: tmaskedbitmap;
               aformat: string = ''); overload;
-   procedure storebitmap(const adest: tmaskedbitmap; aformat: string;
+   procedure storebitmap(const asource: tmaskedbitmap; aformat: string;
                                    const params: array of const); overload;
    procedure clearcache; override;
   published
@@ -78,7 +81,8 @@ type
    procedure setfield(const value: tfield); override;
   public
    constructor create(const intf: idbgraphicfieldlink);
-   procedure loadbitmap(const adest: tmaskedbitmap; const aformat: string);
+   function loadbitmap(const adest: tmaskedbitmap;
+                         const aformat: string): string; //returns format
  end;
 
  tdbdataimage = class(tcustomdataimage,idbgraphicfieldlink,ireccontrol)
@@ -145,7 +149,7 @@ end;
 
 procedure tdbdataimage.fieldtovalue;
 begin
- datalink.loadbitmap(bitmap,format);
+ fcurformat:= datalink.loadbitmap(bitmap,format);
 end;
 
 procedure tdbdataimage.setnullvalue;
@@ -285,23 +289,24 @@ begin
  inherited;
 end;
 
-procedure tmsegraphicfield.loadbitmap(const asource: tmaskedbitmap; 
-                                            aformat: string = '');
+function tmsegraphicfield.loadbitmap(const adest: tmaskedbitmap; 
+                                            aformat: string = ''): string;
 var
  stream1: tstringcopystream;
  str1: string;
  id1: blobidty;
  n1: timagecachenode;
 begin
+ result:= '';
  if isnull then begin
-  asource.clear;
+  adest.clear;
  end
  else begin
   if (fimagecache = nil) or not assigned(fgetblobid) or not fgetblobid(self,id1) or
                not fimagecache.find(id1,n1) then begin
    str1:= asstring;
    if str1 = '' then begin
-    asource.clear;
+    adest.clear;
    end
    else begin
     if aformat = '' then begin
@@ -309,27 +314,30 @@ begin
     end;
     stream1:= tstringcopystream.create(str1);
     try
-     asource.loadfromstream(stream1,aformat);
+     result:= adest.loadfromstream(stream1,aformat);
     except
-     asource.clear;
+     result:= '';
+     adest.clear;
     end;
     stream1.free;
    end;
    if (fimagecache <> nil) and assigned(fgetblobid) then begin
     n1:= timagecachenode.create(id1);
-    asource.savetoimagebuffer(n1.fimage);
+    n1.format:= result;
+    adest.savetoimagebuffer(n1.fimage);
     n1.fsize:= (n1.fimage.image.length + n1.fimage.mask.length) *
                                        sizeof(longword);
     fimagecache.addnode(n1);
    end;
   end
   else begin
-   asource.loadfromimagebuffer(n1.fimage);
+   adest.loadfromimagebuffer(n1.fimage);
+   result:= n1.format;
   end;
  end;
 end;
 
-procedure tmsegraphicfield.storebitmap(const adest: tmaskedbitmap; 
+procedure tmsegraphicfield.storebitmap(const asource: tmaskedbitmap; 
                          aformat: string; const params: array of const);
 var
  stream1: tmsefilestream;
@@ -339,7 +347,7 @@ begin
  end;
  stream1:= tmsefilestream.create;
  try
-  writegraphic(stream1,adest,aformat,params);
+  writegraphic(stream1,asource,aformat,params);
   stream1.position:= 0;
   loadfromstream(stream1);
  finally
@@ -347,10 +355,10 @@ begin
  end;
 end;
 
-procedure tmsegraphicfield.storebitmap(const adest: tmaskedbitmap; 
+procedure tmsegraphicfield.storebitmap(const asource: tmaskedbitmap; 
                          aformat: string = '');
 begin
- storebitmap(adest,aformat,[]); 
+ storebitmap(asource,aformat,[]); 
 end;
 
 function tmsegraphicfield.getimagecachekb: integer;
@@ -412,15 +420,15 @@ begin
  inherited;
 end;
 
-procedure tgraphicdatalink.loadbitmap(const adest: tmaskedbitmap;
-                                                const aformat: string);
+function tgraphicdatalink.loadbitmap(const adest: tmaskedbitmap;
+                                                const aformat: string): string;
 var
  stream1: tstringcopystream;
  str1: string;
 begin
  if field is tmsegraphicfield then begin
   with tmsegraphicfield(field) do begin
-   loadbitmap(adest,aformat);
+   result:= loadbitmap(adest,aformat);
   end;
  end
  else begin
@@ -431,8 +439,9 @@ begin
   else begin
    stream1:= tstringcopystream.create(str1);
    try
-    adest.loadfromstream(stream1,aformat);
+    result:= adest.loadfromstream(stream1,aformat);
    except
+    result:= '';
     adest.clear;
    end;
    stream1.free;

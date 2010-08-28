@@ -35,6 +35,7 @@ type
   protected
    fgridintf: iwidgetgrid;
    fvalue: string;   //in design mode only
+   fcurformat: string;
    procedure setisdb;
    function getgridintf: iwidgetgrid;
    procedure defineproperties(filer: tfiler); override;
@@ -79,8 +80,10 @@ type
    function seteditfocus: boolean;
    procedure changed; override;
    function actualcolor: colorty; override;
-   procedure loadfromstream(const astream: tstream);
-   procedure loadfromfile(const afilename: filenamety);
+   function loadfromstream(const astream: tstream): string;    //returns format
+   function loadfromfile(const afilename: filenamety): string; //returns format
+   procedure storeimage(const aformat: string;
+                                          const params: array of const);
    property value: string write setvalue stored false;
    property gridvalue[index: integer]: string read getgridvalue
                              write setgridvalue;
@@ -122,8 +125,9 @@ begin
   end;
  end;
  try
-  bitmap.loadfromstring(avalue,fformat);
+  fcurformat:= bitmap.loadfromstring(avalue,fformat);
  except
+  fcurformat:= '';
   bitmap.clear;
  end;
  if csdesigning in componentstate then begin
@@ -424,23 +428,39 @@ begin
  end;
 end;
 
-procedure tcustomdataimage.loadfromstream(const astream: tstream);
+function tcustomdataimage.loadfromstream(const astream: tstream): string;
 var
  str1: string;
 begin
+ fcurformat:= '';
  value:= readstreamdatastring(astream);
+ result:= fcurformat;
 end;
 
-procedure tcustomdataimage.loadfromfile(const afilename: filenamety);
+function tcustomdataimage.loadfromfile(const afilename: filenamety): string;
 var
  stream1: tmsefilestream;
 begin
  stream1:= tmsefilestream.create(afilename);
  try
-  loadfromstream(stream1);
+  result:= loadfromstream(stream1);
  finally
   stream1.free;
  end; 
+end;
+
+procedure tcustomdataimage.storeimage(const aformat: string;
+                                          const params: array of const);
+var
+ str1: string;
+begin
+ if aformat <> '' then begin
+  str1:= aformat;
+ end
+ else begin
+  str1:= format;
+ end;
+ value:= bitmap.writetostring(str1,params);
 end;
 
 end.

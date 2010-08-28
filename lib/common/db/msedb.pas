@@ -1113,7 +1113,7 @@ type
                          dso_autoapply,
                          dso_autocommitret,dso_autocommit,
                          dso_refreshafterapply,dso_recnoapplyrefresh,
-                         dso_refreshtransaction,
+                         dso_refreshtransaction,dso_refreshwaitcursor,
                          dso_notransactionrefresh,dso_recnotransactionrefresh,
                          dso_noprepare,
                          dso_cacheblobs,
@@ -1232,16 +1232,6 @@ type
                    const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
-{
-   function locate(const key: integer; const field: tfield;
-                       const options: locateoptionsty = []): locateresultty;
-                       overload;
-   function locate(const key: int64; const field: tfield;
-                       const options: locateoptionsty = []): locateresultty;
-                       overload;
-   function locate(const key: msestring; const field: tfield; 
-                 const options: locateoptionsty = []): locateresultty; overload;
-}
    procedure appendrecord(const values: array of const);
    procedure getfieldclass(const fieldtype: tfieldtype; out result: tfieldclass);
    procedure beginfilteredit(const akind: filtereditkindty);
@@ -1273,9 +1263,9 @@ type
    procedure cancel;
    function canceling: boolean;
    function emptyinsert: boolean;
-   procedure refresh(const restorerecno: boolean;
-               const delayus: integer = -1);
-               //-1 -> no delay, 0 -> in onidle
+   procedure refresh(const restorerecno: boolean; const delayus: integer = -1);
+                           //-1 -> no delay, 0 -> in onidle
+   procedure checkrefresh; //makes pending delayed refresh
    function assql(const avalue: boolean): string; overload;
    function assql(const avalue: msestring): string; overload;
    function assql(const avalue: integer): string; overload;
@@ -6596,22 +6586,32 @@ end;
 
 procedure tdscontroller.dorefresh(const sender: tobject);
 var
- bo1: boolean;
+ bo1,bo2: boolean;
 begin
- if dscs_restorerecno in fstate then begin
-  exclude(fstate,dscs_restorerecno);
-  bo1:= fintf.restorerecno;
-  fintf.restorerecno:= true;
-  try
-   tdataset(fowner).refresh;
-  finally
-   if not bo1 then begin
-    fintf.restorerecno:= false;
+ bo2:= dso_refreshwaitcursor in foptions;
+ if bo2 then begin
+  application.beginwait;
+ end;
+ try
+  if dscs_restorerecno in fstate then begin
+   exclude(fstate,dscs_restorerecno);
+   bo1:= fintf.restorerecno;
+   fintf.restorerecno:= true;
+   try
+    tdataset(fowner).refresh;
+   finally
+    if not bo1 then begin
+     fintf.restorerecno:= false;
+    end;
    end;
+  end
+  else begin
+   tdataset(fowner).refresh;
   end;
- end
- else begin
-  tdataset(fowner).refresh;
+ finally
+  if bo2 then begin
+   application.endwait;
+  end; 
  end;
 end;
 
@@ -6633,6 +6633,13 @@ begin
    ftimer.interval:= -delayus; //single shot
    ftimer.enabled:= true;
   end;
+ end;
+end;
+
+procedure tdscontroller.checkrefresh; //makes pending delayed refresh
+begin
+ if ftimer <> nil then begin
+  ftimer.firependingandstop; //cancel wait
  end;
 end;
 

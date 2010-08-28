@@ -489,6 +489,8 @@ procedure addsize1(var dest: sizety; const size: sizety);
 function subsize(const a,b: sizety): sizety; //result:= a-b
 procedure subsize1(var dest: sizety; const size: sizety);
 
+function fitsize(const asize: sizety; const maxsize: sizety): sizety;
+
 function rectcenter(const arect: rectty): pointty;
 procedure centerrect(apos: pointty; asize: integer; out rect: rectty);
 function excenterrect(const arect: rectty): rectty;
@@ -1080,6 +1082,23 @@ function pointinrect(const point: pointty; const rect: rectty): boolean;
 begin
  result:= (point.x >= rect.x) and (point.x < rect.x + rect.cx) and
           (point.y >= rect.y) and (point.y < rect.y + rect.cy);
+end;
+
+function fitsize(const asize: sizety; const maxsize: sizety): sizety;
+begin
+ result:= nullsize;
+ if asize.cx*maxsize.cy > maxsize.cx*asize.cy then begin //fit horz
+  result.cx:= maxsize.cx;
+  if asize.cx <> 0 then begin
+   result.cy:= (asize.cy*maxsize.cx) div asize.cx;
+  end;
+ end
+ else begin                                  //fit vert
+  result.cy:= maxsize.cy;
+  if asize.cy <> 0 then begin
+   result.cx:= (asize.cx*maxsize.cy) div asize.cy;
+  end;
+ end;
 end;
 
 function rectcenter(const arect: rectty): pointty;
