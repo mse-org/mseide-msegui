@@ -15,7 +15,8 @@ interface
 uses
  {$ifdef FPC}classes{$else}Classes{$endif},msegraphics,msegraphutils,msewidgets,
   msebitmap,msegui,msemenus,mseevent,mseguiglob;
-
+const
+ defaultimageoptionswidget = defaultoptionswidgetnofocus + [ow_mousewheel];
 type
  timageframe = class(tscrollboxframe)
   protected
@@ -53,7 +54,7 @@ type
                   write setcolorforeground default cl_black;
    property colorbackground: colorty read fcolorbackground //for monochrome bitmaps
                   write setcolorbackground default cl_white;
-   property optionswidget default defaultoptionswidgetnofocus;
+   property optionswidget default defaultimageoptionswidget;
    property onmouseevent;
    property onclientmouseevent;
    property onchildmouseevent;
@@ -75,7 +76,7 @@ begin
  fbitmap:= tmaskedbitmap.create(false);
  fbitmap.onchange:= {$ifdef FPC}@{$endif}bitmapchanged;
  inherited;
- optionswidget:= defaultoptionswidgetnofocus;
+ optionswidget:= defaultimageoptionswidget;
 end;
 
 destructor timage.destroy;
