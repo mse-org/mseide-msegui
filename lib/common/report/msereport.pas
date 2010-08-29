@@ -8016,7 +8016,7 @@ end;
 
 procedure tcustomtilearea.dopaintoverlay(const canvas: tcanvas);
 begin
- if not rendering then begin
+ if not rendering and (freportpage <> nil) then begin
   drawlines(canvas);
  end;
  inherited;
