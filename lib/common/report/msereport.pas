@@ -7496,12 +7496,12 @@ end;
 
 function tcustomtilearea.cellwidthmm: real;
 begin
- result:= innerclientsize.cx / (freportpage.ppmm * fcolcount);
+ result:= innerclientsize.cx / (getppmm * fcolcount);
 end;
 
 function tcustomtilearea.cellheightmm: real;
 begin
- result:= innerclientsize.cy / (freportpage.ppmm * frowcount);
+ result:= innerclientsize.cy / (getppmm * frowcount);
 end;
 
 function tcustomtilearea.render(const acanvas: tcanvas): boolean;
@@ -7527,8 +7527,8 @@ begin
   dobeforerender;
   isfinished:= true;
   repeat
-   fcellorigin.x:= round(col*cellwidthmm1*freportpage.ppmm);
-   fcellorigin.y:= round(row*cellheightmm1*freportpage.ppmm);
+   fcellorigin.x:= round(col*cellwidthmm1*getppmm);
+   fcellorigin.y:= round(row*cellheightmm1*getppmm);
    isfinished:= true;
    for int1:= 0 to high(fareabands) do begin
     with fareabands[int1] do begin
@@ -7975,8 +7975,8 @@ begin
  acanvas.addcliprect(inflaterect(widgetsizerect,1000));
  rect1:= innerwidgetrect;
  with rect1 do begin
-  cellh:= cellwidthmm * freportpage.ppmm;
-  cellv:= cellheightmm * freportpage.ppmm;
+  cellh:= cellwidthmm * getppmm;
+  cellv:= cellheightmm * getppmm;
 
   pt1.y:= y - flitop.dist;
   pt2.y:= y + cy + flibottom.dist;
@@ -8016,7 +8016,7 @@ end;
 
 procedure tcustomtilearea.dopaintoverlay(const canvas: tcanvas);
 begin
- if not rendering and (freportpage <> nil) then begin
+ if not rendering then begin
   drawlines(canvas);
  end;
  inherited;
