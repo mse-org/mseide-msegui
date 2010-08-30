@@ -718,6 +718,9 @@ function readsplitset(const reader: treader; const info: setsplitinfoty;
                                   //true if splitted
 function setloading(const acomponent: tcomponent; const avalue: boolean): boolean;
            //returns old value
+
+procedure componentexception(const acomponent: tcomponent;
+                                   const atext: msestring);
 type
  skineventty = procedure(const ainfo: skininfoty) of object;
 var
@@ -857,6 +860,12 @@ var
  fmodules: tmodulelist;
  floadedlist: tloadedlist;
  fmodulestoregister: msecomponentarty;
+
+procedure componentexception(const acomponent: tcomponent;
+                                   const atext: msestring);
+begin
+ raise exception.create(acomponent.classname+','+acomponent.name+': '+atext);
+end;
 
 function getfproppath(const writer:twriter): string;
 begin

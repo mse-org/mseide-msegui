@@ -325,6 +325,10 @@ end;
 function tterminal.execprog(const acommandline: string): integer;
 begin
  with fprocess do begin
+  active:= false;
+//  if active then begin
+//   componentexception(self,'Process already active.');
+//  end;
   commandline:= acommandline;
   active:= true;
   result:= prochandle;
