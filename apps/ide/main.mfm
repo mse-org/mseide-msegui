@@ -431,6 +431,13 @@ object mainfo: tmainfo
             onexecute = viewdebuggertoolbaronexecute
           end        
           item
+            caption = 'Symbo&ls'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            imagelist = vievmenuicons
+            imagenr = 18
+            onexecute = viewsymbolsonexecute
+          end        
+          item
             caption = '&Watches'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             options = [mao_shortcutcaption, mao_asyncexecute]
@@ -480,13 +487,6 @@ object mainfo: tmainfo
             imagelist = vievmenuicons
             imagenr = 13
             onexecute = viewconsoleonexecute
-          end        
-          item
-            caption = 'Symbo&ls'
-            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
-            imagelist = vievmenuicons
-            imagenr = 18
-            onexecute = viewsymbolsonexecute
           end        
           item
             options = [mao_separator, mao_shortcutcaption]
