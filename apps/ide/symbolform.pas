@@ -50,7 +50,7 @@ uses
 
 procedure tsymbolfo.checksymbol(const aindex: integer);
 var
- str1,str2: string;
+ str1,str2: msestring;
  err: gdbresultty;
  mstr1: msestring;
  int1: integer;

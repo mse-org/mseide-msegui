@@ -507,10 +507,6 @@ type
                 var aresult: string): gdbresultty;
    function evaluateexpression(const expression: string;
                                            out aresult: string): gdbresultty;
-   function infosymbol(const symbol: string;
-                                     out aresult: ansistring): gdbresultty;
-   function infoaddress(const symbol: string;
-                                     out aresult: ansistring): gdbresultty;
    function symboltype(const symbol: string;
                                      out aresult: ansistring): gdbresultty;
    function symboladdress(const symbol: string;
@@ -543,6 +539,8 @@ type
                          out start,stop: qword): gdbresultty; overload;
    function infosymbol(const symbol: msestring;
                          out info: msestring): gdbresultty;
+   function infoaddress(const symbol: msestring;
+                                     out aresult: msestring): gdbresultty;
    function disassemble(out aresult: asmlinearty; const filename: filenamety;
               const line: integer; const count: integer): gdbresultty; overload;
    function disassemble(out aresult: asmlinearty;
@@ -2996,7 +2994,7 @@ begin
  end;
 end;
 }
-function tgdbmi.evaluateexpression(const expression: string; 
+function tgdbmi.evaluateexpression(const expression: string;
                                           out aresult: string): gdbresultty;
 begin
  aresult:= '';
@@ -3013,53 +3011,6 @@ begin
   end;
   else begin
    aresult:= gdberrortexts[result];
-  end;
- end;
-end;
-
-function tgdbmi.infoaddress(const symbol: string;
-                                    out aresult: string): gdbresultty;
-var
- ar1: stringarty;
- str1: string;
-begin
- result:= clicommand('info address '+symbol);
- case result of
-  gdb_ok: begin
-   aresult:= trim(removelinebreaks(fclivalues));
-   ar1:= splitstring(aresult,' ');
-   if (high(ar1) >= 0) then begin
-    str1:= ar1[high(ar1)];
-    if startsstr('0x',str1) then begin
-     if str1[length(str1)] = '.' then begin
-      setlength(str1,length(str1)-1);
-     end;
-     aresult:= str1;
-    end;
-   end;
-  end;
-  gdb_message: begin
-   aresult:= errormessage;
-  end;
-  else begin
-   aresult:= '';
-  end;
- end;
-end;
-
-function tgdbmi.infosymbol(const symbol: string;
-                                    out aresult: string): gdbresultty;
-begin
- result:= clicommand('info symbol '+symbol);
- case result of
-  gdb_ok: begin
-   aresult:= fclivalues;
-  end;
-  gdb_message: begin
-   aresult:= errormessage;
-  end;
-  else begin
-   aresult:= '';
   end;
  end;
 end;
@@ -3393,15 +3344,53 @@ begin
  end;
 end;
 
-function tgdbmi.infosymbol(const symbol: msestring; out info: msestring): gdbresultty;
+function tgdbmi.infoaddress(const symbol: msestring;
+                                    out aresult: msestring): gdbresultty;
 var
- str1: string;
+ ar1: msestringarty;
+ mstr1: msestring;
 begin
- result:= getcliresultstring('info symbol '+symbol,str1);
- if result = gdb_ok then begin
-  info:= str1;
+ result:= clicommand('info address '+symbol);
+ case result of
+  gdb_ok: begin
+   aresult:= trim(removelinebreaks(fclivalues));
+   ar1:= splitstring(aresult,msechar(' '));
+   if (high(ar1) >= 0) then begin
+    mstr1:= ar1[high(ar1)];
+    if startsstr('0x',mstr1) then begin
+     if mstr1[length(mstr1)] = '.' then begin
+      setlength(mstr1,length(mstr1)-1);
+     end;
+     aresult:= mstr1;
+    end;
+   end;
+  end;
+  gdb_message: begin
+   aresult:= errormessage;
+  end;
+  else begin
+   aresult:= '';
+  end;
  end;
 end;
+
+function tgdbmi.infosymbol(const symbol: msestring;
+                              out info: msestring): gdbresultty;
+begin
+ result:= clicommand('info symbol '+symbol);
+ case result of
+  gdb_ok: begin
+   info:= fclivalues;
+  end;
+  gdb_message: begin
+   info:= errormessage;
+  end;
+  else begin
+   info:= '';
+  end;
+ end;
+end;
+
 
 function tgdbmi.internaldisassemble(out aresult: disassarty; command: string;
                  const mixed: boolean): gdbresultty;

@@ -271,6 +271,7 @@ procedure debugwritestack(const acount: integer = 30);
 var
  int1: integer;
 begin
+{$ifdef FPC}
  int1:= raisemaxframecount;
  raisemaxframecount:= acount;
  try
@@ -280,6 +281,7 @@ begin
                            exceptaddr,exceptframecount,exceptframes));
  end;
  raisemaxframecount:= int1;
+{$endif}
 end;
 
 procedure debugout(const sender: tcomponent; const atext: ansistring);
