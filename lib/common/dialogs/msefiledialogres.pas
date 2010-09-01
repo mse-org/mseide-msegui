@@ -50,8 +50,12 @@ begin
 end;
 
 initialization
- application; //create application instance
- createmodule(nil,tfiledialogres,ffiledialogres);
+ application.lock; //create application instance
+ try
+  createmodule(nil,tfiledialogres,ffiledialogres);
+ finally
+  application.unlock;
+ end;
 finalization
  freeandnil(ffiledialogres);
 end.

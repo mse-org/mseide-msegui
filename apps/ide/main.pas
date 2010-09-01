@@ -140,6 +140,7 @@ type
                    const execresult: Integer; const data: Pointer);
    procedure statbefread(const sender: TObject);
    procedure getstatobj(const sender: TObject; var aobject: TObject);
+   procedure viewsymbolsonexecute(const sender: TObject);
   private
    fstartcommand: startcommandty;
    fnoremakecheck: boolean;
@@ -300,7 +301,7 @@ uses
  objectinspector,msesysutils,msestream,cpuform,disassform,
  panelform,watchpointsform,threadsform,targetconsole,
  debuggerform,componentpaletteform,componentstore,
- messageform,msesettings,mseintegerenter
+ messageform,msesettings,mseintegerenter,symbolform
  {$ifdef linux} ,mselibc {$endif},
  mseprocutils
  {$ifdef mse_dumpunitgroups},dumpunitgroups{$endif};
@@ -896,6 +897,9 @@ begin
                      mtk_finished);      
     sender.abort;
    end;
+  end;
+  gek_loaded: begin
+   symbolfo.updatesymbols;
   end;
  end;
 end;
@@ -2560,6 +2564,11 @@ end;
 procedure tmainfo.viewwatchpointsonexecute(const sender: TObject);
 begin
  watchpointsfo.activate;
+end;
+
+procedure tmainfo.viewsymbolsonexecute(const sender: TObject);
+begin
+ symbolfo.activate;
 end;
 
 procedure tmainfo.viewprojectsourceonexecute(const sender: TObject);

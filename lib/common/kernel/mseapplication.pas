@@ -14,6 +14,13 @@ unit mseapplication;
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
 {$endif}
+
+{$ifdef mse_debuglock}
+ {$define mse_debugmutex}
+{$endif}
+{$ifdef mse_debuggdisync}
+ {$define mse_debugmutex}
+{$endif}
 interface
 uses
  classes,mseclasses,mseevent,mseglob,sysutils,msetypes,mselist,
@@ -225,11 +232,11 @@ type
    procedure internalinitialize; virtual;
    procedure internaldeinitialize;  virtual;
   public
-   {$ifdef mse_debug_mutex}
+  {$ifdef mse_debugmutex}
    function getmutexaddr: pointer;
    function getmutexcount: integer;
    procedure checklockcount;
-   {$endif}
+  {$endif}
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    
@@ -268,6 +275,7 @@ type
    procedure registeronidle(const method: idleeventty);
    procedure unregisteronidle(const method: idleeventty);
    procedure settimer(const us: integer); virtual; abstract;
+   function locked: boolean; //true if calling thread holds the lock
    function trylock: boolean;
    function lock: boolean;
     //synchronizes calling thread with main event loop (mutex),
@@ -300,6 +308,9 @@ type
                        //calls unlockall-relockall
    function candefocus: boolean; virtual;
    property terminated: boolean read getterminated write setterminated;
+   property mainthread: threadty read fthread;
+   property lockthread: threadty read flockthread;
+   property lockcount: integer read flockcount;
    property exceptioncount: longword read fexceptioncount;
    property onexception: exceptioneventty read fonexception write fonexception;
  end;
@@ -335,7 +346,8 @@ var
  
 implementation
 uses
- msebits,msesysintf,msesysutils,msefileutils,msedatalist;
+ msebits,msesysintf,msesysutils,msefileutils,msedatalist
+ {$ifdef mse_debuggdisync},msegraphics{$endif};
 
 type
  tappsynchronizeevent = class(tsynchronizeevent)
@@ -883,7 +895,7 @@ end;
 
 { tcustomapplication }
 
-{$ifdef mse_debug_mutex}
+{$ifdef mse_debugmutex}
 function tcustomapplication.getmutexaddr: pointer;
 begin
  result:= @fmutex;
@@ -893,10 +905,15 @@ begin
  result:= flockcount;
 end;
 procedure tcustomapplication.checklockcount;
+var
+ str1: string;
 begin
  if appmutexcount <> flockcount then begin
-  debugout(self,'appmutexerror, lockcount: '+inttostr(flockcount)+
-                ' mutexcount: '+inttostr(appmutexcount));
+  str1:= 'appmutexerror, lockcount: '+inttostr(flockcount)+
+                ' mutexcount: '+inttostr(appmutexcount);
+  debugwriteln(str1);
+  debugwritestack;
+  raise exception.create(str1);
  end;
 end;
 {$endif}
@@ -916,6 +933,7 @@ begin
  sys_mutexcreate(fmutex);
  sys_mutexcreate(feventlock);
  classes.wakemainthread:= {$ifdef FPC}@{$endif}dowakeup;
+ lock;
  initialize;
 end;
 
@@ -974,9 +992,11 @@ begin
  else begin
   result:= false;
  end;
- {$ifdef mse_debug_lock}
+ {$ifdef mse_debuglock}
  debugout(self,'lock, count: '+inttostr(flockcount) + ' thread: '+
                     inttostr(flockthread));
+ {$endif}
+ {$ifdef mse_debugmutex}
  checklockcount;
  {$endif}
 end;
@@ -987,10 +1007,16 @@ begin
  result:= dolock;
 end;
 
+function tcustomapplication.locked: boolean; 
+                       //true if calling thread holds the lock
+begin
+ result:= flockthread = sys_getcurrentthread;
+end;
+
 function tcustomapplication.trylock: boolean;
 begin
  result:= sys_mutextrylock(fmutex) = sye_ok;
- {$ifdef mse_debug_lock}
+ {$ifdef mse_debuglock}
  debugout(self,'trylock, result: '+booltostr(result)+' count: '+
                   inttostr(flockcount) + ' thread: '+
                     inttostr(flockthread));
@@ -1009,6 +1035,9 @@ begin
   end;
   flusheventbuffer;
   while count > 0 do begin
+  {$ifdef mse_debugmutex}
+   checklockcount;
+  {$endif}
    dec(count);
    dec(flockcount);
    if flockcount = 0 then begin
@@ -1016,10 +1045,12 @@ begin
    end;
    sys_mutexunlock(fmutex);
   end;
-  {$ifdef mse_debug_lock}
+  {$ifdef mse_debuglock}
   debugout(self,'unlock, result: '+booltostr(result)+
                      ' count: '+inttostr(flockcount) + ' thread: '+
                      inttostr(flockthread));
+  {$endif}
+  {$ifdef mse_debugmutex}
   checklockcount;
   {$endif}
  end;

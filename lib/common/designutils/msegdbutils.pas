@@ -68,7 +68,7 @@ const
 type
  valuekindty = (vk_value,vk_tuple,vk_list);
  gdbeventkindty = (gek_done,gek_error,gek_connected,gek_running,
-                   gek_stopped,gek_download,
+                   gek_stopped,gek_download,gek_loaded,
                    gek_targetoutput,gek_writeerror,gek_startup);
 
  resultinfoty = record
@@ -313,6 +313,7 @@ type
    procedure targetoutput(const text: string);
    procedure logoutput(const text: string);
    procedure sequenceend;
+   procedure initstopinfo(var ainfo: stopinfoty);
    procedure receiveevent(const event: tobjectevent); override;
    procedure doevent(const token: longword; const eventkind: gdbeventkindty;
                        const values: resultinfoarty);
@@ -506,8 +507,14 @@ type
                 var aresult: string): gdbresultty;
    function evaluateexpression(const expression: string;
                                            out aresult: string): gdbresultty;
-   function symboltype(const symbol: string; out aresult: ansistring): gdbresultty;
-   function symboladdress(const symbol: string; out aresult: ansistring): gdbresultty;
+   function infosymbol(const symbol: string;
+                                     out aresult: ansistring): gdbresultty;
+   function infoaddress(const symbol: string;
+                                     out aresult: ansistring): gdbresultty;
+   function symboltype(const symbol: string;
+                                     out aresult: ansistring): gdbresultty;
+   function symboladdress(const symbol: string;
+                                     out aresult: ansistring): gdbresultty;
    function stacklistframes(out list: frameinfoarty; first: integer = 0;
                     last: integer = 100): gdbresultty;
    function selectstackframe(const aframe: integer): gdbresultty;
@@ -1081,6 +1088,13 @@ begin
  end;
 end;
 
+procedure tgdbmi.initstopinfo(var ainfo: stopinfoty);
+begin
+ finalize(ainfo);
+ fillchar(ainfo,sizeof(ainfo),0);
+ ainfo.time:= now;
+end;
+
 procedure tgdbmi.receiveevent(const event: tobjectevent);
 var
  stopinfo: stopinfoty;
@@ -1095,9 +1109,7 @@ var
 
 begin
  if event is tgdbevent then begin
-  finalize(stopinfo);
-  fillchar(stopinfo,sizeof(stopinfo),0);
-  stopinfo.time:= now;
+  initstopinfo(stopinfo);
   with tgdbevent(event) do begin
    case eventkind of
     gek_startup: begin
@@ -1282,13 +1294,6 @@ begin
    gek_error: begin
     exclude(fstate,gs_downloading);
    end;
-   {
-   gek_done: begin
-    if gs_downloading in fstate then begin
-     initproginfo;
-    end;
-   end;
-   }
   end;
   if (eventkind = gek_error) and (token <> 0) and (token = frunsequence) then begin
    doevent(token,gek_stopped,values);
@@ -2147,10 +2152,18 @@ begin
 end;
 
 procedure tgdbmi.initproginfo;
+var
+ info1: stopinfoty;
+ ek1: gdbeventkindty;
 begin
  checkpointersize;
  getprocaddress('MSEGUIINTF_GUI_DEBUGBEGIN',ftargetdebugbegin);
  getprocaddress('MSEGUIINTF_GUI_DEBUGEND',ftargetdebugend);
+ if assigned(fonevent) then begin
+  initstopinfo(info1);
+  ek1:= gek_loaded;
+  fonevent(self,ek1,nil,info1);
+ end;
 end;
 
 function tgdbmi.getbkptid: integer;
@@ -3004,7 +3017,55 @@ begin
  end;
 end;
 
-function tgdbmi.symboltype(const symbol: string; out aresult: string): gdbresultty;
+function tgdbmi.infoaddress(const symbol: string;
+                                    out aresult: string): gdbresultty;
+var
+ ar1: stringarty;
+ str1: string;
+begin
+ result:= clicommand('info address '+symbol);
+ case result of
+  gdb_ok: begin
+   aresult:= trim(removelinebreaks(fclivalues));
+   ar1:= splitstring(aresult,' ');
+   if (high(ar1) >= 0) then begin
+    str1:= ar1[high(ar1)];
+    if startsstr('0x',str1) then begin
+     if str1[length(str1)] = '.' then begin
+      setlength(str1,length(str1)-1);
+     end;
+     aresult:= str1;
+    end;
+   end;
+  end;
+  gdb_message: begin
+   aresult:= errormessage;
+  end;
+  else begin
+   aresult:= '';
+  end;
+ end;
+end;
+
+function tgdbmi.infosymbol(const symbol: string;
+                                    out aresult: string): gdbresultty;
+begin
+ result:= clicommand('info symbol '+symbol);
+ case result of
+  gdb_ok: begin
+   aresult:= fclivalues;
+  end;
+  gdb_message: begin
+   aresult:= errormessage;
+  end;
+  else begin
+   aresult:= '';
+  end;
+ end;
+end;
+
+function tgdbmi.symboltype(const symbol: string;
+                                    out aresult: string): gdbresultty;
 begin
  result:= clicommand('ptype '+symbol);
  case result of

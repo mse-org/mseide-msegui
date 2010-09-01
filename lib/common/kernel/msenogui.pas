@@ -94,8 +94,8 @@ procedure tnoguiapplication.doeventloop(const once: boolean);
 var
  event1: tmseevent;
 begin
- lock;
- try
+// lock;
+// try
   while not terminated do begin
    if eventlist.count = 0 then begin
     try
@@ -132,9 +132,9 @@ begin
    end;
    event1.free1; //do not destroy synchronizeevent
   end;
- finally
-  unlock;
- end;
+// finally
+//  unlock;
+// end;
 end;
 
 function tnoguiapplication.nextevent: tmseevent;

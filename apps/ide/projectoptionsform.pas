@@ -240,39 +240,7 @@ type
   fontoptions: msestringarty;
   fontxscales: realarty;
   
-//  copymessages: boolean;
-//  closemessages: boolean;
-//  checkmethods: boolean;
-
-//  showgrid: boolean;
-//  snaptogrid: boolean;
-//  moveonfirstclick: boolean;
-//  gridsizex: integer;
-//  gridsizey: integer;
-//  autoindent: boolean;
-//  blockindent: integer;
-//  rightmarginon: boolean;
-//  rightmarginchars: integer;
-//  scrollheight: integer;
-//  tabstops: integer;
-//  spacetabs: boolean;
-//  tabindent: boolean;
-//  editfontname: string;
-//  editfontheight: integer;
-//  editfontwidth: integer;
-//  editfontextraspace: integer;
-//  editfontcolor: integer;
-//  editbkcolor: integer;
-//  statementcolor: integer;
-  
-//  editfontantialiased: boolean;
-//  editmarkbrackets: boolean;
-//  backupfilecount: integer;
-//  encoding: integer;
-
   defineson: longboolarty;
-//  exceptclassnames: msestringarty;
-//  exceptignore: longboolarty;
   
   modulenames: msestringarty;
   moduletypes: msestringarty;
@@ -297,22 +265,7 @@ type
   breakpointignore: integerarty;
   breakpointconditions: msestringarty;
 
-//  stoponexception: boolean;
-//  valuehints: boolean;
-//  activateonbreak: boolean;
-//  showconsole: boolean;
-//  externalconsole: boolean;
   sigsettings: sigsetinfoarty;
-//  gdbdownload: boolean;
-//  downloadalways: boolean;
-//  startupbkpt: integer;
-//  startupbkpton: boolean;
-//  gdbsimulator: boolean;
-//  gdbserverwait: real;
-  
-//  usercolors: colorarty;
-//  usercolorcomment: msestringarty;
-
   //programparameters
   propgparamhistory: msestringarty;
   envvarons: longboolarty;

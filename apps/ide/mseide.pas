@@ -30,7 +30,7 @@ uses
   componentpaletteform,componentstore,
   messageform,watchform,objectinspector,breakpointsform,watchpointsform,
   stackform,projecttreeform,findinfileform,cpuform,disassform,memoryform,
-  threadsform,mseguiglob,
+  threadsform,mseguiglob,symbolform,
   targetconsole,main,mseguiintf,msestockobjects,regunitgroups,guitemplates,
   msegraphutils;
 begin
@@ -44,6 +44,7 @@ begin
  application.createform(tcomponentstorefo,componentstorefo);
  application.createform(tmessagefo,messagefo);
  application.createform(twatchfo, watchfo);
+ application.createform(tsymbolfo, symbolfo);
  application.createform(tobjectinspectorfo, objectinspectorfo);
  application.createform(tbreakpointsfo, breakpointsfo);
  application.createform(twatchpointsfo, watchpointsfo);

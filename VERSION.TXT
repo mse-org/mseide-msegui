@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2010-09-01
+ tapplication.create() calls lock().
 2010-08-27
  Read versions of image format units have suffix "read", 
  example mseformatpng -> mseformatpngread.

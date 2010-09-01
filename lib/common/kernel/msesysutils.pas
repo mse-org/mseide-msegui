@@ -42,6 +42,7 @@ procedure writestderr(value: string; newline: boolean = false);
 procedure errorhalt(errortext: string; exitcode: integer = 1);
 procedure debugwrite(const value: string);
 procedure debugwriteln(const value: string);
+procedure debugwritestack(const acount: integer = 30);
 procedure debugout(const sender: tcomponent; const atext: ansistring); overload;
 procedure debugout(const sender: tobject; const atext: ansistring); overload;
 
@@ -67,7 +68,7 @@ uses
 {$else}
  mselibc,
 {$endif}
- msesysintf,msestrings,mseformatstr,msetypes;
+ msesysintf,msestrings,mseformatstr,msetypes,msesys;
 
 function createguidstring: string;
 var
@@ -264,6 +265,21 @@ end;
 procedure debugwriteln(const value: string);
 begin
  writestderr(value,true);
+end;
+
+procedure debugwritestack(const acount: integer = 30);
+var
+ int1: integer;
+begin
+ int1:= raisemaxframecount;
+ raisemaxframecount:= acount;
+ try
+  raise exception.create('');
+ except
+  debugwriteln(getexceptiontext(exceptobject,
+                           exceptaddr,exceptframecount,exceptframes));
+ end;
+ raisemaxframecount:= int1;
 end;
 
 procedure debugout(const sender: tcomponent; const atext: ansistring);

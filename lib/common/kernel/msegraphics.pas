@@ -14,7 +14,7 @@ unit msegraphics;
 interface
 uses
  {$ifdef FPC}classes{$else}Classes{$endif},msetypes,msestrings,mseerr,
- msegraphutils,mseguiglob,mseclasses,mseglob;
+ msegraphutils,mseguiglob,mseclasses,mseglob,msesys;
 
 const
 
@@ -1010,11 +1010,15 @@ procedure drawdottedlinesegments(const acanvas: tcanvas; const lines: segmentart
 
 var
  flushgdi: boolean;
+{$ifdef mse_debuggdisync}
+procedure checkgdilock;
+procedure checkgdiunlocked;
+{$endif}
 
 implementation
 uses
  SysUtils,msegui,mseguiintf,msestreaming,mseformatstr,msestockobjects,
- msedatalist,mselist,msesys,msebits,msewidgets,msesysintf;
+ msedatalist,mselist,msebits,msewidgets,msesysintf,msesysutils;
 const
  maxfontcount = 64;
 
@@ -1056,19 +1060,63 @@ type
               //true if registering ok
  end;
 
+var
+ gdilockcount: integer;
+ gdilocked: boolean;
+ 
+{$ifdef mse_debuggdisync}
+procedure gdilockerror(const text: string);
+var
+ str1: string;
+begin
+ str1:= text+lineend+
+      'currentth:'+inttostr(sys_getcurrentthread)+
+      ' mainth:'+inttostr(application.mainthread)+
+      ' applockth:'+inttostr(application.lockthread)+
+      ' applockc:'+inttostr(application.lockcount)+lineend+
+      ' gdilockc:'+inttostr(gdilockcount)+lineend+
+      'appmutexlockth:'+inttostr(appmutexlockth)+
+      ' appmutexunlockth:'+inttostr(appmutexunlockth)+
+      ' appmutexlockc:'+inttostr(appmutexlockc)+
+      ' appmutexunlockc:'+inttostr(appmutexunlockc)+
+      ' appmutexlocks:'+inttostr(appmutexlocks)+
+      ' appmutexunlocks:'+inttostr(appmutexunlocks);
+ debugwriteln(str1);
+ debugwritestack;
+end;
+
+procedure checkgdilock;
+begin
+ if not application.locked then begin
+  gdilockerror('GDI lock error.');
+ end;
+end;
+
+procedure checkgdiunlocked;
+begin
+ if gdilockcount <> 0 then begin
+  gdilockerror('GDI unlock error.');
+ end;
+end;
+{$endif}
+
 procedure gdi_lock;
 begin
  with application do begin
-  if not ismainthread then begin
+  if not locked then begin
    lock;
+   gdilocked:= true;
   end;
+  inc(gdilockcount);
  end;
 end;
 
 procedure gdi_unlock;
 begin
  with application do begin
-  if not ismainthread then begin
+  dec(gdilockcount);
+  if gdilocked and (gdilockcount = 0) then begin
+   gdilocked:= false;
    unlock;
   end;
  end;
@@ -1077,7 +1125,7 @@ end;
 procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty);
 begin
  with application do begin
-  if not ismainthread then begin
+  if not locked then begin
    lock;
    try
     gui_getgdifuncs^[func](drawinfo);
@@ -1752,12 +1800,17 @@ procedure init;
 var
  icon,mask: pixmapty;
 begin
- initfontalias;
- initcolormap;
- msestockobjects.init;
- inited:= true;
- getwindowicon(nil,icon,mask);
- gui_setapplicationicon(icon,mask);
+ gdi_lock;
+ try
+  initfontalias;
+  initcolormap;
+  msestockobjects.init;
+  inited:= true;
+  getwindowicon(nil,icon,mask);
+  gui_setapplicationicon(icon,mask);
+ finally
+  gdi_unlock;
+ end;
 end;
 
 procedure deinit;
@@ -3077,7 +3130,7 @@ end;
 procedure tcanvas.gdi(const func: gdifuncty);
 begin
  with application do begin
-  if not ismainthread then begin
+  if not locked then begin
    lock;
    try
     fgdifuncs^[func](fdrawinfo);

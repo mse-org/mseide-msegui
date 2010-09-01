@@ -3282,8 +3282,7 @@ var
 begin
  if region <> 0 then begin
   info.regionoperation.source:= region;
-  gui_getgdifuncs^[gdi_destroyregion](info);
-//  gui_gdifunc(gdi_destroyregion,info);
+  gdi_call(gdi_destroyregion,info);
   region:= 0;
  end;
 end;
@@ -3293,8 +3292,7 @@ var
  info: drawinfoty;
 begin
  with info.regionoperation do begin
-  gui_getgdifuncs^[gdi_createemptyregion](info);
-//  gui_gdifunc(gdi_createemptyregion,info);
+  gdi_call(gdi_createemptyregion,info);
   result:= dest;
  end;
 end;
@@ -3305,8 +3303,7 @@ var
 begin
  with info.regionoperation do begin
   rect:= arect;
-  gui_getgdifuncs^[gdi_createrectregion](info);
-//  gui_gdifunc(gdi_createrectregion,info);
+  gdi_call(gdi_createrectregion,info);
   result:= dest;
  end;
 end;
@@ -3319,8 +3316,7 @@ begin
   rectscount:= length(rects);
   if rectscount > 0 then begin
    rectspo:= @rects[0];
-   gui_getgdifuncs^[gdi_createrectsregion](info);
-//   gui_gdifunc(gdi_createrectsregion,info);
+   gdi_call(gdi_createrectsregion,info);
    result:= dest;
   end
   else begin
@@ -3336,8 +3332,7 @@ begin
  with info.regionoperation do begin
   dest:= region;
   rect:= arect;
-  gui_getgdifuncs^[gdi_regintersectrect](info);
-//  gui_gdifunc(gdi_regintersectrect,info);
+  gdi_call(gdi_regintersectrect,info);
  end;
 end;
 
@@ -3348,8 +3343,7 @@ begin
  with info.regionoperation do begin
   dest:= region;
   rect:= arect;
-  gui_getgdifuncs^[gdi_regaddrect](info);
-//  gui_gdifunc(gdi_regaddrect,info);
+  gdi_call(gdi_regaddrect,info);
  end;
 end;
 
@@ -14172,14 +14166,19 @@ end;
 
 function tinternalapplication.getevents: integer;
 begin
+ gdi_lock;
  while gui_hasevent do begin
   eventlist.add(gui_getevent);
  end;
  result:= eventlist.count;
+ gdi_unlock;
 end;
 
 procedure tinternalapplication.waitevent;
 begin
+{$ifdef mse_debuggdisync}
+ checkgdiunlocked;
+{$endif}
  while gui_hasevent do begin
   eventlist.add(gui_getevent);
  end;
@@ -14498,8 +14497,8 @@ var
  ar1: integerarty;
  
 begin       //eventloop
- lock;
- try
+// lock;
+// try
   result:= false;
   ftimertick:= false;
   fillchar(modalinfo,sizeof(modalinfo),0);
@@ -14785,15 +14784,15 @@ sys_schedyield;
    mouse.shape:= cr_wait;
   end;
   checkcursorshape;
- finally
-  unlock;
- end;
+// finally
+//  unlock;
+// end;
 end;
 
 function tinternalapplication.beginmodal(const sender: twindow): boolean;
                  //true if modalwindow destroyed
 var
- bo1: boolean;
+// bo1: boolean;
  window1: twindow;
 begin
  window1:= nil;
@@ -14806,17 +14805,18 @@ begin
   end;
   include(fstate,tws_modal);
  end;
+ sender.activate;  
  exclude(fstate,aps_cancelloop);
- bo1:= ismainthread and unlock;
+// bo1:= ismainthread and unlock;
  try
-  sender.activate;  
+//  sender.activate;  
   inc(fmodallevel);
   result:= eventloop(sender);
  finally
   dec(fmodallevel);
-  if bo1 then begin
-   lock;
-  end;
+//  if bo1 then begin
+//   lock;
+//  end;
   if (window1 <> nil) and not (aps_cancelloop in fstate) then begin
    if appinst.active then begin
     window1.activate;

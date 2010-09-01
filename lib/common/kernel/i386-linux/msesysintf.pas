@@ -11,6 +11,12 @@ unit msesysintf; //i386-linux
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
+{$ifdef mse_debuglock}
+ {$define mse_debugmutex}
+{$endif}
+{$ifdef mse_debuggdisync}
+ {$define mse_debugmutex}
+{$endif}
 interface
 uses
  msesys,msesetlocale,{$ifdef FPC}cthreads,cwstring,{$endif}msetypes,
@@ -27,10 +33,17 @@ var                         //!!!!todo: link with correct location
  __malloc_initialized : longint;cvar;
  h_errno : longint;cvar;
 {$endif}
-{$ifdef mse_debug_mutex}
+{$ifdef mse_debugmutex}
 var
+ mutexsequ: integer;
  mutexcount: integer;
  appmutexcount: integer;
+ appmutexlockth: threadty;
+ appmutexlockc: integer;
+ appmutexlocks: integer;
+ appmutexunlockth: threadty;
+ appmutexunlockc: integer;
+ appmutexunlocks: integer;
 {$endif}
 
 {$include ../msesysintf.inc}
@@ -59,7 +72,7 @@ procedure setcloexec(const fd: integer);
 implementation
 uses
  sysutils,msesysutils,msefileutils{$ifdef FPC},dateutils{$else},DateUtils{$endif}
- {$ifdef mse_debug_mutex},mseapplication{$endif};
+ {$ifdef mse_debugmutex},mseapplication{$endif};
  
 function sigactionex(SigNum: Integer; var Action: TSigActionex;
                               OldAction: PSigAction): Integer;
@@ -326,12 +339,10 @@ procedure destroymutex(var mutex: pthread_mutex_t);
 begin
  while pthread_mutex_destroy(mutex) = ebusy do begin
   pthread_mutex_unlock(mutex);
-  {$ifdef mse_debug_mutex}
+  {$ifdef mse_debugmutex}
   interlockeddecrement(mutexcount);
   if application.getmutexaddr = @mutex then begin
    interlockeddecrement(appmutexcount);
-//   debugwriteln('sys_destroymutex count: '+inttostr(application.getmutexcount)+
-//              ' mutexcount: '+inttostr(appmutexcount));
   end;
   {$endif}
  end;
@@ -522,12 +533,14 @@ function sys_mutexlock(var mutex: mutexty): syserrorty;
 begin
  if pthread_mutex_lock(linuxmutexty(mutex).mutex) = 0 then begin
   result:= sye_ok;
-  {$ifdef mse_debug_mutex}
+  {$ifdef mse_debugmutex}
+  interlockedincrement(mutexsequ);
   interlockedincrement(mutexcount);
   if application.getmutexaddr = @mutex then begin
    interlockedincrement(appmutexcount);
-//   debugwriteln('sys_mutexlock count: '+inttostr(application.getmutexcount)+
-//              ' mutexcount: '+inttostr(appmutexcount));
+   appmutexlockth:= sys_getcurrentthread;
+   appmutexlockc:= appmutexcount;
+   appmutexlocks:= mutexsequ;
   end;
   {$endif}
  end
@@ -541,11 +554,15 @@ var
  int1: integer;
 begin
  int1:= pthread_mutex_trylock(linuxmutexty(mutex).mutex);
- {$ifdef mse_debug_mutex}
+ {$ifdef mse_debugmutex}
  if int1 = 0 then begin
+  interlockedincrement(mutexsequ);
   interlockedincrement(mutexcount);
   if application.getmutexaddr = @mutex then begin
    interlockedincrement(appmutexcount);
+   appmutexlockth:= sys_getcurrentthread;
+   appmutexlockc:= appmutexcount;
+   appmutexlocks:= mutexsequ;
   end;
  end;
  {$endif}
@@ -558,13 +575,17 @@ end;
 
 function sys_mutexunlock(var mutex: mutexty): syserrorty;
 begin
+ {$ifdef mse_debugmutex}
+ interlockedincrement(mutexsequ);
+ interlockeddecrement(mutexcount);
+ if application.getmutexaddr = @mutex then begin
+  interlockeddecrement(appmutexcount);
+  appmutexunlockth:= sys_getcurrentthread;
+  appmutexunlockc:= appmutexcount;
+  appmutexunlocks:= mutexsequ;
+ end;
+ {$endif}
  if pthread_mutex_unlock(linuxmutexty(mutex).mutex) = 0 then begin
-  {$ifdef mse_debug_mutex}
-  interlockeddecrement(mutexcount);
-  if application.getmutexaddr = @mutex then begin
-   interlockeddecrement(appmutexcount);
-  end;
-  {$endif}
   result:= sye_ok;
  end
  else begin

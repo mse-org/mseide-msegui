@@ -1,0 +1,212 @@
+object symbolfo: tsymbolfo
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton, go_lockbutton]
+  frame.dummy = 0
+  visible = False
+  bounds_x = 142
+  bounds_y = 257
+  bounds_cx = 361
+  bounds_cy = 137
+  container.bounds = (
+    0
+    0
+    351
+    137
+  )
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_savechildren, od_canmove, od_cansize, od_canfloat, od_candock, od_propsize]
+  statfile = mainfo.projectstatfile
+  caption = 'Symbols'
+  icon.options = [bmo_masked]
+  icon.image = {
+    00000000020000001800000018000000A8030000000000000000000000000000
+    0000000000000000000000000000000000000000D0D0D0607C7C7C19D9D9D916
+    FFFFFF017C7C7C01D9D9D903B6B6B60199999901D5D5D501D9D9D901C2C2C201
+    BCBCBC01D9D9D903C8C8C801BBBBBB01C2C2C201B2B2B201D9D9D903CCCCCC01
+    AEAEAE01D9D9D901FFFFFF017C7C7C01D9D9D902555555010202020109090901
+    16161601BFBFBF019090900112121201D5D5D501D9D9D9023535350165656501
+    4F4F4F0103030301CCCCCC01D9D9D9026363630102020201D9D9D901FFFFFF01
+    7C7C7C01D9D9D901C7C7C7010B0B0B01B6B6B601D2D2D2013E3E3E014C4C4C01
+    D9D9D901242424016F6F6F01D9D9D901AEAEAE0113131301D2D2D2014F4F4F01
+    0707070189898901D9D9D9023333330107070701D9D9D901FFFFFF017C7C7C01
+    D9D9D901A4A4A4011F1F1F01D9D9D902A8A8A80165656501D9D9D90189898901
+    18181801D9D9D9013F3F3F0163636301D9D9D9014F4F4F012A2A2A0151515101
+    D9D9D902262626010F0F0F01D9D9D901FFFFFF017C7C7C01D9D9D901D5D5D501
+    121212013030300195959501D9D9D9041F1F1F017171710116161601D2D2D201
+    D9D9D9014F4F4F015656560126262601D9D9D901A7A7A7013E3E3E010F0F0F01
+    D9D9D901FFFFFF017C7C7C01D9D9D902A6A6A6012C2C2C01010101011C1C1C01
+    B8B8B801D9D9D902808080010404040163636301D9D9D9024F4F4F016C6C6C01
+    1A1A1A01D5D5D50165656501737373010F0F0F01D9D9D901FFFFFF017C7C7C01
+    D9D9D904B4B4B4013B3B3B012B2B2B01D9D9D9030A0A0A01CFCFCF01D9D9D902
+    4F4F4F016C6C6C01393939019595950133333301BCBCBC010F0F0F01D9D9D901
+    FFFFFF017C7C7C01D9D9D9017B7B7B015F5F5F01D9D9D902D2D2D20110101001
+    D9D9D9030D0D0D01D5D5D501D9D9D9024F4F4F016C6C6C025858580128282801
+    D9D9D9010F0F0F01D9D9D901FFFFFF017C7C7C01D9D9D9019B9B9B0116161601
+    C4C4C401D9D9D9019292920122222201D9D9D9030D0D0D01D5D5D501D9D9D902
+    4F4F4F016C6C6C01B2B2B201191919013E3E3E01D9D9D9010F0F0F01D9D9D901
+    FFFFFF017C7C7C01D9D9D9023C3C3C010909090121212101090909018A8A8A01
+    D9D9D9030D0D0D01D5D5D501D9D9D9024F4F4F016C6C6C01D9D9D90111111101
+    73737301D9D9D9010F0F0F01D9D9D901FFFFFF017C7C7C01D9D9D9039B9B9B01
+    71717101B5B5B501D9D9D9048D8D8D01D9D9D903AEAEAE01B9B9B901D9D9D901
+    9C9C9C01C8C8C801D9D9D90190909001D9D9D901FFFFFF017C7C7C01D9D9D916
+    FFFFFF017C7C7C01D9D9D916FFFFFF017C7C7C01FFFFFF17D0D0D06000000000
+    000000000000000000000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    FFFFFF00FFFFFF00FFFFFF0000000000000000000000000000000000
+  }
+  onshow = showex
+  moduleclassname = 'tdockform'
+  object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_fontglyphheight, ow_autoscale]
+    frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
+    popupmenu = tpopupmenu1
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 351
+    bounds_cy = 137
+    anchors = []
+    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        width = 18
+        numstart = 1
+        numstep = 1
+      end>
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+        captions.count = 3
+        captions.items = <        
+          item
+            caption = 'Symbol'
+          end        
+          item
+            caption = 'Address'
+          end        
+          item
+            caption = 'Info'
+          end>
+      end>
+    rowfonts.count = 1
+    rowfonts.items = <    
+      item
+        color = -1610612729
+        name = 'stf_default'
+        xscale =  1.0000000000000000E+0000
+        dummy = 0
+      end>
+    datacols.count = 5
+    datacols.options = [co_savevalue, co_savestate, co_cancopy, co_mousescrollrow]
+    datacols.items = <    
+      item
+        width = 111
+        options = [co_savevalue, co_savestate, co_cancopy, co_canpaste]
+        options1 = [co1_rowfont, co1_zebracolor]
+        onchange = symbolcha
+        widgetname = 'symbol'
+        dataclass = tgridmsestringdatalist
+      end    
+      item
+        width = 107
+        options = [co_readonly, co_drawfocus, co_fill, co_savestate, co_cancopy, co_mousescrollrow]
+        widgetname = 'symaddr'
+        dataclass = tgridmsestringdatalist
+      end    
+      item
+        width = 79
+        options = [co_readonly, co_drawfocus, co_proportional, co_cancopy]
+        widthmin = 0
+        widgetname = 'syminfo'
+        dataclass = tgridmsestringdatalist
+      end    
+      item
+        width = 15
+        options = [co_invisible, co_cancopy, co_mousescrollrow]
+        widgetname = 'path'
+        dataclass = tgridmsestringdatalist
+      end    
+      item
+        width = 11
+        options = [co_invisible, co_cancopy, co_mousescrollrow]
+        widgetname = 'line'
+        dataclass = tgridintegerdatalist
+      end>
+    datarowheight = 16
+    statfile = mainfo.projectstatfile
+    oncellevent = cellev
+    reffontheight = 14
+    object symbol: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionsskin = [osk_framebuttononly]
+      taborder = 1
+      visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 111
+      bounds_cy = 16
+      statfile = mainfo.projectstatfile
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      ondataentered = symboldataent
+      reffontheight = 14
+    end
+    object symaddr: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
+      optionsskin = [osk_framebuttononly]
+      taborder = 2
+      visible = False
+      bounds_x = 112
+      bounds_y = 0
+      bounds_cx = 107
+      bounds_cy = 16
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
+    end
+    object syminfo: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_autoscale]
+      optionsskin = [osk_framebuttononly]
+      taborder = 3
+      visible = False
+      bounds_x = 220
+      bounds_y = 0
+      bounds_cx = 79
+      bounds_cy = 16
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+    end
+    object path: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 4
+      visible = False
+      bounds_x = 300
+      bounds_y = 0
+      bounds_cx = 15
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
+      reffontheight = 14
+    end
+    object line: tintegeredit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 5
+      visible = False
+      bounds_x = 316
+      bounds_y = 0
+      bounds_cx = 11
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
+      reffontheight = 14
+    end
+  end
+  object tpopupmenu1: tpopupmenu
+    menu.submenu.count = 1
+    menu.submenu.items = <    
+      item
+        caption = 'Delete all'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = deleteallex
+      end>
+    left = 80
+    top = 72
+  end
+end
