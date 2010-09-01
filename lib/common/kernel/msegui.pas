@@ -7623,13 +7623,15 @@ begin
  result:= 
  (ws_iswidget in fwidgetstate) and
    not (ws1_nodesignframe in fwidgetstate1) and
+   (owner <> nil) and //no frame for toplevel
    (
      ((fwidgetrect.cx = 0) or (fwidgetrect.cy = 0)) or
      (
        ( 
          (fcolor = cl_transparent) or 
            (fparentwidget <> nil) and 
-           (colortopixel(actualcolor) = colortopixel(fparentwidget.backgroundcolor))
+           (colortopixel(actualopaquecolor) = 
+                          colortopixel(fparentwidget.backgroundcolor))
        ) and
        ((fframe = nil) or (fframe.fi.leveli = 0) and (fframe.fi.levelo = 0) and
                           (fframe.fi.framewidth = 0)
@@ -7689,18 +7691,19 @@ begin
   canvas.restore(saveindex);
   if bo1 then begin
    face1:= getactface;
-//   dopaintoverlay(canvas);
    if (face1 <> nil) and (fao_alphafadenochildren in face1.fi.options) then begin
     canvas.move(paintpos);
     face1.doalphablend(canvas);
     canvas.remove(paintpos);
    end;
   end;
+  {
   if (csdesigning in componentstate) and needsdesignframe then begin
    canvas.dashes:= #2#3;
    canvas.drawrect(makerect(0,0,rect1.cx-1,rect1.cy-1),cl_black);
    canvas.dashes:= '';
   end;
+  }
  end
  else begin
   updatewidgetregion;
@@ -7749,6 +7752,11 @@ begin
   canvas.remove(paintpos);
  end;
  dopaintoverlay(canvas);
+ if (csdesigning in componentstate) and needsdesignframe then begin
+  canvas.dashes:= #2#3;
+  canvas.drawrect(makerect(0,0,rect1.cx-1,rect1.cy-1),cl_black);
+  canvas.dashes:= '';
+ end;
  doafterpaint(canvas);
 endlab:
  canvas.restore;
@@ -10286,10 +10294,11 @@ function twidget.backgroundcolor: colorty;
 begin
  if (fframe = nil) or (fframe.fi.colorclient = cl_transparent) then begin
   if fparentwidget = nil then begin
-   result:= actualcolor;
+   result:= actualopaquecolor;
   end
   else begin
-   if (fcolor <> cl_parent) and (fcolor <> cl_default) then begin
+   if (fcolor <> cl_parent) and (fcolor <> cl_default) and 
+                                       (fcolor <> cl_transparent) then begin
     result:= fcolor;
    end
    else begin

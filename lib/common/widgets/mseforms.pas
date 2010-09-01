@@ -224,7 +224,7 @@ type
    property optionswidget default defaultformwidgetoptions;
    property optionswindow: windowoptionsty read foptionswindow write setoptionswindow default [];
    property mainmenu: tmainmenu read fmainmenu write setmainmenu;
-   property color default cl_background;
+//   property color default cl_background;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property fontempty: twidgetfontempty read getfontempty 
                   write setfontempty stored isfontemptystored;
@@ -799,7 +799,7 @@ begin
   fscrollbox:= tformscrollbox.create(self);
  end;
  optionswidget:= defaultformwidgetoptions;
- color:= cl_background;
+// color:= cl_background;
  if load and not (csdesigning in componentstate) and
           (cs_ismodule in fmsecomponentstate) then begin
   loadmsemodule(self,tcustommseform);

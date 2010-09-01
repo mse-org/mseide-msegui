@@ -1,5 +1,6 @@
 object formdesignerfo: tformdesignerfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionsskin = [osk_noskin]
   visible = False
   bounds_x = 196
   bounds_y = 202
