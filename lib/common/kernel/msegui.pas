@@ -7631,10 +7631,11 @@ begin
          (fcolor = cl_transparent) or 
            (fparentwidget <> nil) and 
            (colortopixel(actualopaquecolor) = 
-                          colortopixel(fparentwidget.backgroundcolor))
+              colortopixel(fparentwidget.actualopaquecolor{backgroundcolor}))
        ) and
-       ((fframe = nil) or (fframe.fi.leveli = 0) and (fframe.fi.levelo = 0) and
-                          (fframe.fi.framewidth = 0)
+       ((fframe = nil) or 
+          (fframe.fi.leveli = 0) and (fframe.fi.levelo = 0) and
+          ((fframe.fi.framewidth = 0) or (frame.fi.colorframe = cl_transparent))
        )
      )     
    );
