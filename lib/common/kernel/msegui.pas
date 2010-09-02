@@ -7754,7 +7754,7 @@ begin
  dopaintoverlay(canvas);
  if (csdesigning in componentstate) and needsdesignframe then begin
   canvas.dashes:= #2#3;
-  canvas.drawrect(makerect(0,0,rect1.cx-1,rect1.cy-1),cl_black);
+  canvas.drawrect(makerect(0,0,fwidgetrect.cx-1,fwidgetrect.cy-1),cl_black);
   canvas.dashes:= '';
  end;
  doafterpaint(canvas);
