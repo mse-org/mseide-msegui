@@ -4728,7 +4728,7 @@ begin
   windowstyleex:= 0;
   if wo_popup in options then begin
    windowstyle:= ws_popup;
-//   windowstyleex:= 0{ws_ex_topmost};
+//   windowstyleex:= windowstyleex or ws_ex_toolwindow;
   end
   else begin
    if wo_message in options then begin
@@ -4757,9 +4757,12 @@ begin
    rect1:= rect;
   end;
   windowstyle:= windowstyle or ws_clipchildren;
-  if (transientfor <> 0) or (options * [wo_popup,wo_message] <> []) then begin
+  if (transientfor <> 0) or (options * [wo_popup,wo_message,wo_notaskbar] <> []) then begin
+   if transientfor <> 0 then begin
+    ownerwindow:= transientfor;
+   end;
    id:= windows.CreateWindowex(windowstyleex,widgetclassname,nil,windowstyle,
-         rect1.x,rect1.y,rect1.cx,rect1.cy,transientfor,0,hinstance,nil);
+         rect1.x,rect1.y,rect1.cx,rect1.cy,ownerwindow{transientfor},0,hinstance,nil);
    if transientfor = 0 then begin
     setwindowpos(id,hwnd_top,0,0,0,0,swp_noactivate or swp_nomove or swp_nosize);
    end;
@@ -4774,13 +4777,6 @@ begin
     ca2:= ownerwindow;
     classname:= widgetclassname;
    end;
-   {
-   if setgroup and (groupleader = 0) or (wo_groupleader in options) then begin
-//    windowstyleex:= ws_ex_appwindow; //create a groupleader
-         ////disturbs application taskbar icon.
-//    ca2:= 0;
-   end;
-   }
    id:= windows.CreateWindowex(windowstyleex,pchar(classname),nil,
          windowstyle,rect1.x,rect1.y,rect1.cx,rect1.cy,ca2,0,hinstance,nil);
    if setgroup and (groupleader = 0) or (wo_groupleader in options) then begin
