@@ -658,7 +658,7 @@ begin
   if d.destroyed <> 0 then begin
    exit;
   end;
-  if timeoutusec = 0 then begin
+  if timeoutusec <= 0 then begin
    while sem_wait(d.sema) <> 0 do begin
     if sys_getlasterror <> eintr then begin
      exit;

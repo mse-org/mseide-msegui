@@ -37,7 +37,7 @@ function sys_semdestroy(var sem: semty): syserrorty;
 //function sys_semreset(var sem: semty): syserrorty; //call from single thread!
 function sys_sempost(var sem: semty): syserrorty;
 function sys_semwait(var sem: semty;  timeoutusec: integer): syserrorty;
-          //timeoutusec = 0 -> no timeout
+          //timeoutusec <= 0 -> no timeout
           //sye_ok -> semaphore signaled
           //sye_timeout -> timeout
           //sye_semaphore -> error

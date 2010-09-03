@@ -14,8 +14,10 @@ object symbolfo: tsymbolfo
     137
   )
   dragdock.optionsdock = [od_savepos, od_savezorder, od_savechildren, od_canmove, od_cansize, od_canfloat, od_candock, od_propsize]
+  options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Symbols'
+  icon.transparentcolor = -2147483642
   icon.options = [bmo_masked]
   icon.image = {
     00000000020000001800000018000000A8030000000000000000000000000000

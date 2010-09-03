@@ -8,10 +8,10 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit mseprocmonitorcomp;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseclasses,msesys,mseevent;
+ mseclasses,msesys,mseevent,mseprocmonitor;
  
 type
  proclisteninfoty = record
@@ -24,7 +24,7 @@ type
                      const prochandle: prochandlety; const execresult: integer;
                      const data: pointer) of object;
                                
- tprocessmonitor = class(tmsecomponent)
+ tprocessmonitor = class(tmsecomponent,iprocmonitor)
   private
    fonchilddied: childdiedeventty;
    finfos: proclisteninfoarty;
@@ -32,19 +32,27 @@ type
    procedure receiveevent(const event: tobjectevent); override;
    procedure internalunlistentoprocess(const aprochandle: prochandlety;
                                        const internal: boolean);
+    //iprocmonitor
+   procedure processdied(const aprochandle: prochandlety;
+                              const aexecresult: integer; const adata: pointer);
   public
    destructor destroy; override;
    function listentoprocess(const aprochandle: prochandlety;
                                  const adata: pointer = nil): boolean;
           //does nothing and returns false if aprochandle = invalidprochandle
    procedure unlistentoprocess(const aprochandle: prochandlety);
+   function exec(const acommandline: string;
+                       const inactive: boolean = true; 
+                          //windows only
+                       const nostdhandle: boolean = false): prochandlety;
+                          //windows only
   published
    property onchilddied: childdiedeventty read fonchilddied write fonchilddied;
  end;
  
 implementation
 uses
- mseprocmonitor,msedatalist;
+ msedatalist,mseapplication,mseprocutils;
  
 { tprocessmonitor }
 
@@ -53,7 +61,7 @@ var
  int1: integer;
 begin
  for int1:= high(finfos) downto 0 do begin
-  pro_unlistentoprocess(finfos[int1].prochandle,ievent(self));
+  pro_unlistentoprocess(finfos[int1].prochandle,iprocmonitor(self));
  end;
  inherited;
 end;
@@ -68,7 +76,7 @@ begin
    prochandle:= aprochandle;
    data:= adata;
   end;
-  pro_listentoprocess(aprochandle,ievent(self),adata);
+  pro_listentoprocess(aprochandle,iprocmonitor(self),adata);
  end;
 end;
 
@@ -81,12 +89,19 @@ begin
   with finfos[int1] do begin
    if prochandle = aprochandle then begin 
     if not internal then begin
-     pro_unlistentoprocess(aprochandle,ievent(self));
+     pro_unlistentoprocess(aprochandle,iprocmonitor(self));
     end;
     deleteitem(finfos,typeinfo(proclisteninfoarty),int1);
    end;
   end;
  end;
+end;
+
+procedure tprocessmonitor.processdied(const aprochandle: prochandlety;
+               const aexecresult: integer; const adata: pointer);
+begin
+ application.postevent(tchildprocevent.create(ievent(self),aprochandle,
+                                   aexecresult,adata));
 end;
 
 procedure tprocessmonitor.receiveevent(const event: tobjectevent);
@@ -107,6 +122,19 @@ end;
 procedure tprocessmonitor.unlistentoprocess(const aprochandle: prochandlety);
 begin
  internalunlistentoprocess(aprochandle, false);
+end;
+
+function tprocessmonitor.exec(const acommandline: string;
+               const inactive: boolean = true;
+               const nostdhandle: boolean = false): prochandlety;
+begin
+ application.lock;
+ try
+  result:= execmse4(acommandline,inactive,nostdhandle);
+  listentoprocess(result);
+ finally
+  application.unlock;
+ end; 
 end;
 
 end.

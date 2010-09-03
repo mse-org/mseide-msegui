@@ -12,7 +12,7 @@ unit mseprocess;
 interface
 uses
  classes,mseclasses,msepipestream,msestrings,msestatfile,msestat,msesys,
- mseevent,msetypes;
+ mseevent,msetypes,mseprocmonitor;
 type
  processstatety = (prs_listening);
  processstatesty = set of processstatety;
@@ -23,7 +23,7 @@ type
                     );
  processoptionsty = set of processoptionty;
   
- tmseprocess = class(tmsecomponent,istatfile)
+ tmseprocess = class(tmsecomponent,istatfile,iprocmonitor)
   private
    finput: tpipewriter;
    foutput: tpipereaderpers;
@@ -48,6 +48,7 @@ type
    procedure updatecommandline;
    function getcommandline: string;
    procedure setcommandline(const avalue: string);
+   procedure procend;
   protected
    fstate: processstatesty;
    procedure loaded; override;
@@ -58,17 +59,23 @@ type
    procedure waitforpipeeof;
    procedure doprocfinished;
 
-   //istatfile
+    //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   procedure postprocessdied;
+    //iprocmonitor
+   procedure processdied(const aprochandle: prochandlety;
+                 const aexecresult: integer; const adata: pointer);
   public
    function running: boolean;
    procedure terminate;
    procedure kill;
-   function waitforprocess: integer; //returns exitcode
+   function waitforprocess: integer; overload; //returns exitcode
+   function waitforprocess(const atimeoutus: integer): boolean; overload;
+                                              //true if process finished
    property input: tpipewriter read finput;
    property commandline: string read getcommandline write setcommandline;
                  //overrides filename and parameter
@@ -87,10 +94,55 @@ type
    property erroroutput: tpipereaderpers read ferroroutput write seterroroutput;
    property onprocfinished: notifyeventty read fonprocfinished write fonprocfinished;
  end;
- 
+
+function getprocessoutput(const acommandline: string; const totext: string;
+                         out fromtext: string; out errortext: string;
+                         const atimeout: integer = -1): integer;
+                         //returns program exitcode
+
 implementation
 uses
- mseprocutils,msefileutils,mseapplication,mseprocmonitor,sysutils,msesysintf;
+ mseprocutils,msefileutils,mseapplication,sysutils,msesysintf;
+type
+ tstringprocess = class(tmseprocess)
+  private
+   ffromtext: string;
+   ferrortext: string;
+   procedure fromavail(const sender: tpipereader);
+   procedure erroravail(const sender: tpipereader);
+  public
+   constructor create(aowner: tcomponent); override;
+ end;
+ 
+function getprocessoutput(const acommandline: string; const totext: string;
+                         out fromtext: string; out errortext: string;
+                         const atimeout: integer = -1): integer;
+                         //returns program exitcode
+var
+ proc1: tstringprocess;
+begin
+ result:= -1;
+ proc1:= tstringprocess.create(nil);
+ try
+  with proc1 do begin
+   commandline:= acommandline;
+   active:= true;
+   input.write(totext);
+   if atimeout < 0 then begin
+    result:= waitforprocess;
+   end
+   else begin
+    if waitforprocess(atimeout) then begin
+     result:= exitcode;
+    end;
+   end;
+   fromtext:= proc1.ffromtext;
+   errortext:= proc1.ferrortext;
+  end;
+ finally
+  proc1.free;
+ end;
+end;
  
 { tmseprocess }
 
@@ -132,11 +184,38 @@ begin
  end;
 end;
 
+procedure tmseprocess.doprocfinished;
+begin
+ if canevent(tmethod(fonprocfinished)) then begin
+  fonprocfinished(self);
+ end;
+ if not (pro_nopipeterminate in foptions) then begin
+  foutput.pipereader.terminate;
+  ferroroutput.pipereader.terminate;
+ end;
+end;
+
+procedure tmseprocess.procend;
+begin  
+ fprochandle:= invalidprochandle;
+ waitforpipeeof;
+ doprocfinished;
+end;
+
+procedure tmseprocess.postprocessdied;
+begin
+ exclude(fstate,prs_listening);
+ application.postevent(tchildprocevent.create(ievent(self),fprochandle,
+                                   fexitcode,pointer(flistenid)));
+ fprochandle:= invalidprochandle;
+end;
+
 procedure tmseprocess.setactive(const avalue: boolean);
 var
  outp: tpipereader;
  erroroutp: tpipereader;
  inp: tpipewriter;
+ bo1: boolean;
 begin
  outp:= nil;
  erroroutp:= nil;
@@ -148,22 +227,75 @@ begin
   if avalue <> active then begin
    finalizeexec;
    if avalue then begin
-    updatecommandline;
-    if pro_output in foptions then begin
-     outp:= foutput.pipereader;
+    application.lock;
+    try
+     updatecommandline;
+     if pro_output in foptions then begin
+      outp:= foutput.pipereader;
+     end;
+     if pro_erroroutput in foptions then begin
+      erroroutp:= ferroroutput.pipereader;
+     end;
+     if pro_input in foptions then begin
+      inp:= finput;
+     end;
+     fprochandle:= execmse2(fcommandline1,inp,outp,erroroutp,false,-1,
+                 pro_inactive in foptions,false,
+                          pro_tty in foptions,pro_nostdhandle in foptions);
+     if fprochandle = invalidprochandle then begin
+      finalizeexec;
+     end
+     else begin
+      listen;
+     end;
+    finally
+     application.unlock;
     end;
-    if pro_erroroutput in foptions then begin
-     erroroutp:= ferroroutput.pipereader;
-    end;
-    if pro_input in foptions then begin
-     inp:= finput;
-    end;
-    fprochandle:= execmse2(fcommandline1,inp,outp,erroroutp,false,-1,
-                pro_inactive in foptions,false,
-                         pro_tty in foptions,pro_nostdhandle in foptions);
-    listen;
    end;
   end;
+ end;
+end;
+
+procedure tmseprocess.receiveevent(const event: tobjectevent);
+begin
+ if (event.kind = ek_childproc) then begin 
+  with tchildprocevent(event) do begin
+   if data = pointer(flistenid) then begin
+    procend;
+   end;
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+function tmseprocess.waitforprocess(const atimeoutus: integer): boolean;
+                                              //true if process finished
+var
+ int1: integer;
+ bo1: boolean;
+begin
+ result:= false;
+ application.lock;
+ try
+  bo1:= prs_listening in fstate;
+  unlisten;
+  if not bo1 or mseprocutils.getprocessexitcode(
+                                 fprochandle,fexitcode,atimeoutus) then begin
+   procend;
+   result:= true;
+  end;
+ finally
+  application.unlock;
+ end;
+end;
+
+function tmseprocess.waitforprocess: integer;
+begin
+ result:= -1;
+ if waitforprocess(-1) then begin
+  result:= fexitcode;
  end;
 end;
 
@@ -209,8 +341,7 @@ procedure tmseprocess.listen;
 begin
  application.lock;
  if not (prs_listening in fstate) and (fprochandle <> invalidprochandle) then begin
-  inc(flistenid);
-  pro_listentoprocess(fprochandle,ievent(self),pointer(flistenid));
+  pro_listentoprocess(fprochandle,iprocmonitor(self),pointer(flistenid));
   include(fstate,prs_listening);
  end;
  application.unlock;
@@ -220,8 +351,9 @@ procedure tmseprocess.unlisten;
 begin
  application.lock;
  try
+  inc(flistenid);
   if prs_listening in fstate then begin
-   pro_unlistentoprocess(fprochandle,ievent(self));   
+   pro_unlistentoprocess(fprochandle,iprocmonitor(self));   
   end;
   exclude(fstate,prs_listening);
  finally
@@ -262,33 +394,13 @@ begin
  end;
 end;
 
-procedure tmseprocess.doprocfinished;
+procedure tmseprocess.processdied(const aprochandle: prochandlety;
+               const aexecresult: integer; const adata: pointer);
 begin
- if canevent(tmethod(fonprocfinished)) then begin
-  fonprocfinished(self);
- end;
- if not (pro_nopipeterminate in foptions) then begin
-  foutput.pipereader.terminate;
-  ferroroutput.pipereader.terminate;
- end;
-end;
-
-procedure tmseprocess.receiveevent(const event: tobjectevent);
-begin
- if (event.kind = ek_childproc) and (prs_listening in fstate) then begin 
-  with tchildprocevent(event) do begin
-   if data = pointer(flistenid) then begin
-    waitforpipeeof;
-    fexitcode:= execresult;
-    fprochandle:= invalidprochandle;
-    exclude(fstate,prs_listening);
-    doprocfinished;
-   end;
-  end;
+ if (prs_listening in fstate) and (adata = pointer(flistenid)) then begin
+  fexitcode:= aexecresult;
+  postprocessdied;
  end
- else begin
-  inherited;
- end;
 end;
 
 procedure tmseprocess.updatecommandline;
@@ -315,17 +427,63 @@ begin
  fcommandline:= avalue;
 end;
 
+
+{
 function tmseprocess.waitforprocess: integer;
+var
+ int1: integer;
 begin
- unlisten;
- if running then begin
-  result:= mseprocutils.waitforprocess(fprochandle);
-  fexitcode:= result;
-  fprochandle:= invalidprochandle;
-  waitforpipeeof;
-  doprocfinished;
+ int1:= application.unlockall;
+ try
+  unlisten;
+  result:= fexitcode;
+  if running then begin
+   result:= mseprocutils.waitforprocess(fprochandle);
+   fexitcode:= result;
+   procend;
+  end;
+ finally
+  application.relockall(int1);
  end;
 end;
+
+function tmseprocess.waitforprocess(const atimeoutus: integer): boolean;
+                                              //true if process finished
+var
+ int1: integer;
+begin
+ int1:= application.unlockall;
+ try
+  unlisten;
+  if running then begin
+   result:= mseprocutils.getprocessexitcode(fprochandle,fexitcode,atimeoutus);
+   if result then begin
+    procend;
+   end
+   else begin
+    application.lock;
+    try
+     listen;
+     result:= mseprocutils.getprocessexitcode(fprochandle,fexitcode,0);
+     if result then begin
+      unlisten;
+     end;
+    finally
+     application.unlock;
+    end;
+    if result then begin
+     procend;
+    end;
+   end;
+  end
+  else begin
+   result:= true;
+  end;
+ finally
+  application.relockall(int1);
+ end;
+end;
+}
 
 function tmseprocess.running: boolean;
 begin
@@ -353,6 +511,30 @@ begin
   end;
  finally
   application.unlock;
+ end;
+end;
+
+{ tstringprocess }
+
+constructor tstringprocess.create(aowner: tcomponent);
+begin
+ inherited;
+ options:= options + [pro_output,pro_erroroutput,pro_input];
+ output.pipereader.oninputavailable:= {$ifdef FPC}@{$endif}fromavail;
+ erroroutput.pipereader.oninputavailable:= {$ifdef FPC}@{$endif}erroravail;
+end;
+
+procedure tstringprocess.fromavail(const sender: tpipereader);
+begin
+ if sender.active then begin
+  ffromtext:= ffromtext + sender.readdatastring;
+ end;
+end;
+
+procedure tstringprocess.erroravail(const sender: tpipereader);
+begin
+ if sender.active then begin
+  ferrortext:= ferrortext + sender.readdatastring;
  end;
 end;
 

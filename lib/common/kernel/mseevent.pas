@@ -100,7 +100,7 @@ type
    constructor create(const dest: ievent; const aprochandle: prochandlety;
                       const aexecresult: integer; const adata: pointer);   
  end;
- 
+
  tstringobjectevent = class(tobjectevent)
   private
   public

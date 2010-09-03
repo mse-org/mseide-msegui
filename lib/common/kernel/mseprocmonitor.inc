@@ -7,11 +7,16 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-
+type
+ iprocmonitor = interface(inullinterface)
+  procedure processdied(const aprochandle: prochandlety;
+                 const aexecresult: integer; const adata: pointer);
+ end;
+ 
 function pro_listentoprocess(const aprochandle: prochandlety;
-                             const adest: ievent; const adata: pointer): boolean;
+                             const adest: iprocmonitor; const adata: pointer): boolean;
              //false on error, limited to 63 items on windows
 procedure pro_unlistentoprocess(const aprochandle: prochandlety;
-                                     const adest: ievent);
+                                     const adest: iprocmonitor);
 procedure pro_killzombie(const aprochandle: prochandlety);
 

@@ -8,10 +8,10 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit mseprocmonitor;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- msesys,mseevent;
+ msesys,mseglob;
 {$include ../mseprocmonitor.inc}
 
 implementation
@@ -24,7 +24,7 @@ type
   private
    fwakeupevent: thandle;
    fhandles: handlearty;
-   fcallbacks: array of ievent;
+   fcallbacks: array of iprocmonitor;
    fdata: pointerarty;
    fcount: integer;
    procedure wakeup;
@@ -33,9 +33,11 @@ type
                     const afreeonterminate: boolean = false;
                     const astacksizekb: integer = 0); override;
    destructor destroy; override;
-   function listentoprocess(const prochandle: prochandlety; const dest: ievent;
+   function listentoprocess(const prochandle: prochandlety;
+                              const dest: iprocmonitor;
                               const data: pointer): boolean;
-   procedure unlistentoprocess(const prochandle: prochandlety; const dest: ievent);
+   procedure unlistentoprocess(const prochandle: prochandlety;
+                               const dest: iprocmonitor);
    function execute(thread: tmsethread): integer; override;
  end;
 
@@ -49,14 +51,16 @@ begin
  end;
 end;
 
-function pro_listentoprocess(const aprochandle: prochandlety; const adest: ievent;
+function pro_listentoprocess(const aprochandle: prochandlety;
+                             const adest: iprocmonitor;
                              const adata: pointer): boolean;
 begin
  checkinit;
  result:= monitor.listentoprocess(aprochandle,adest,adata);
 end;
 
-procedure pro_unlistentoprocess(const aprochandle: prochandlety; const adest: ievent);
+procedure pro_unlistentoprocess(const aprochandle: prochandlety;
+                                          const adest: iprocmonitor);
 begin
  if monitor <> nil then begin
   monitor.unlistentoprocess(aprochandle,adest);
@@ -111,8 +115,9 @@ begin
      lock;
      for int1:= high(fhandles) downto 1 do begin
       if fhandles[int1] = handle1 then begin
-       application.postevent(tchildprocevent.create(fcallbacks[int1-1],handle1,
-                      execresult1,fdata[int1-1]));
+       fcallbacks[int1-1].processdied(handle1,execresult1,fdata[int1-1]);
+//       application.postevent(tchildprocevent.create(fcallbacks[int1-1],handle1,
+//                      execresult1,fdata[int1-1]));
        deleteitem(pointerarty(fcallbacks),int1-1);
        deleteitem(fhandles,typeinfo(handlearty),int1);
        deleteitem(fdata,int1-1);

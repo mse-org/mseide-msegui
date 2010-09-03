@@ -32,7 +32,7 @@ type
    constructor create; reintroduce;
 //   destructor destroy; override;
 {$ifdef FPC}
-   function Write(const Buffer; Count: Longint): Longint; override;
+   function Write(const Buffer; Count: Longint): Longint; override; overload;
 {$endif}
    procedure connect(const ahandle: integer); //does not own handle
    function releasehandle: integer; virtual;

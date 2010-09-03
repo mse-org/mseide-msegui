@@ -775,7 +775,7 @@ begin
    exit;
   end;
   if interlockeddecrement(semacount) < 0 then begin
-   if timeoutusec = 0 then begin
+   if timeoutusec <= 0 then begin
     timeoutusec:= integer(infinite);
    end
    else begin

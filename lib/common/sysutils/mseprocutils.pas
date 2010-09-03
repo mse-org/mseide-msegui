@@ -24,21 +24,20 @@ type
  end;
 
 function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
-                              const timeoutus: longword = 0): boolean;
+                              const timeoutus: integer = 0): boolean;
+                               //<0 -> no timeout
                  //true if ok, close handle
 function waitforprocess(prochandle: prochandlety): integer;
 
 function execmse(const commandline: string;
-                    const inactive: boolean = true; //windows only
-                    const nostdhandle: boolean = false
-                               //windows only
+                    const inactive: boolean = true;    //windows only
+                    const nostdhandle: boolean = false //windows only
                 ): boolean;
 //starts program, true if OK
 
 function execmse4(const commandline: string;
-                    const inactive: boolean = true; //windows only
-                    const nostdhandle: boolean = false
-                               //windows only
+                    const inactive: boolean = true;    //windows only
+                    const nostdhandle: boolean = false //windows only
                 ): prochandlety;
 //starts program, returns processhandle, execerror on error
 //don't forget closehandle on windows!
@@ -52,8 +51,7 @@ function execmse1(const commandline: ansistring; topipe: pinteger = nil;
              frompipewritehandle: pinteger = nil;
              errorpipewritehandle: pinteger = nil;
              tty: boolean = false;
-             nostdhandle: boolean = false
-                              //windows only
+             nostdhandle: boolean = false //windows only
                  ): prochandlety;
 //starts program, returns processhandle, execerror on error
 //don't forget closehandle on windows!
@@ -91,7 +89,7 @@ function execmse3(const commandline: string; topipe: pinteger = nil;
 //uses existing file handles
 
 function execwaitmse(const commandline: string;
-                      const inactive: boolean = true): integer;
+                      const inactive: boolean = true): integer; overload;
 //runs programm, waits for program termination, returns program exitcode
 //inactive true -> no console window (win32 only)
 
@@ -245,32 +243,37 @@ end;
 {$ifdef mswindows}
 
 function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
-                  const timeoutus: longword = 0): boolean;
+                  const timeoutus: integer = 0): boolean;
                  //true if ok, close handle
 var
  dwo1: longword;
  ca1: longword;
 begin
- ca1:= timestep(timeoutus);
- result:= false; //compiler warning
- while true do begin
-  result:= getexitcodeprocess(prochandle,dwo1);
-  if result then begin
-   if dwo1 <> still_active then begin
-    exitcode:= dwo1;
-    closehandle(prochandle);
-    break;
+ if timeoutus < 0 then begin
+  result:= waitforprocess(prochandle);
+ end
+ else begin
+  ca1:= timestep(timeoutus);
+  result:= false; //compiler warning
+  while true do begin
+   result:= getexitcodeprocess(prochandle,dwo1);
+   if result then begin
+    if dwo1 <> still_active then begin
+     exitcode:= dwo1;
+     closehandle(prochandle);
+     break;
+    end
+    else begin
+     if timeout(ca1) then begin
+      result:= false;
+      break;
+     end;
+     sys_schedyield;
+    end;
    end
    else begin
-    if timeout(ca1) then begin
-     result:= false;
-     break;
-    end;
-    sys_schedyield;
+    raise eoserror.create('');
    end;
-  end
-  else begin
-   raise eoserror.create('');
   end;
  end;
 end;
@@ -526,16 +529,51 @@ end;
 
 {$ifdef UNIX}
 function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
-                               const timeoutus: longword = 0): boolean;
+                               const timeoutus: integer = 0): boolean;
+                               //-1 -> no timeout
                  //true if ok, close handle
 var
  dwo1: longword;
- pid: integer;
+ 
+ function check(const apid: integer): boolean;
+ begin
+  result:= false;
+  if apid <> -1 then begin
+   result:= apid = prochandle;
+   if result then begin
+    exitcode:= wexitstatus(dwo1);
+   end;
+  end
+  else begin
+   if sys_getlasterror <> eintr then begin
+    raise eoserror.create('getprocessexitcode: ');
+   end;
+  end;
+ end;
+
+var
  ca1: longword;
+
 begin
  result:= false;
- ca1:= timestep(timeoutus);
  exitcode:= -1;
+ result:= check(waitpid(prochandle,@dwo1,wnohang));
+ if not result and (timeoutus <> 0) then begin
+  if timeoutus < 0 then begin
+   repeat
+    result:= check(waitpid(prochandle,@dwo1,0));
+   until result;
+  end
+  else begin
+   ca1:= timestep(timeoutus);
+   while not result and not timeout(ca1) do begin
+    sys_schedyield;
+    sleep(10);       //todo: use better method
+    result:= check(waitpid(prochandle,@dwo1,wnohang));
+   end;
+  end;
+ end;
+ {
  while true do begin
   pid:= waitpid(prochandle,@dwo1,wnohang);
   if pid <> -1 then begin
@@ -556,6 +594,7 @@ begin
    raise eoserror.create('');
   end;
  end;
+ }
 end;
 
 function waitforprocess(prochandle: prochandlety): integer;
