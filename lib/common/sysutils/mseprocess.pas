@@ -95,10 +95,10 @@ type
    property onprocfinished: notifyeventty read fonprocfinished write fonprocfinished;
  end;
 
-function getprocessoutput(const acommandline: string; const totext: string;
-                         out fromtext: string; out errortext: string;
+function getprocessoutput(const acommandline: string; const todata: string;
+                         out fromdata: string; out errordata: string;
                          const atimeout: integer = -1): integer;
-                         //returns program exitcode
+                         //returns program exitcode, -1 in case of error
 
 implementation
 uses
@@ -106,18 +106,18 @@ uses
 type
  tstringprocess = class(tmseprocess)
   private
-   ffromtext: string;
-   ferrortext: string;
+   ffromdata: string;
+   ferrordata: string;
    procedure fromavail(const sender: tpipereader);
    procedure erroravail(const sender: tpipereader);
   public
    constructor create(aowner: tcomponent); override;
  end;
  
-function getprocessoutput(const acommandline: string; const totext: string;
-                         out fromtext: string; out errortext: string;
+function getprocessoutput(const acommandline: string; const todata: string;
+                         out fromdata: string; out errordata: string;
                          const atimeout: integer = -1): integer;
-                         //returns program exitcode
+                         //returns program exitcode, -1 in case of error
 var
  proc1: tstringprocess;
 begin
@@ -127,7 +127,12 @@ begin
   with proc1 do begin
    commandline:= acommandline;
    active:= true;
-   input.write(totext);
+   if todata <> '' then begin
+    try
+     input.write(todata);
+    except
+    end;
+   end;
    if atimeout < 0 then begin
     result:= waitforprocess;
    end
@@ -136,8 +141,8 @@ begin
      result:= exitcode;
     end;
    end;
-   fromtext:= proc1.ffromtext;
-   errortext:= proc1.ferrortext;
+   fromdata:= proc1.ffromdata;
+   errordata:= proc1.ferrordata;
   end;
  finally
   proc1.free;
@@ -527,14 +532,14 @@ end;
 procedure tstringprocess.fromavail(const sender: tpipereader);
 begin
  if sender.active then begin
-  ffromtext:= ffromtext + sender.readdatastring;
+  ffromdata:= ffromdata + sender.readdatastring;
  end;
 end;
 
 procedure tstringprocess.erroravail(const sender: tpipereader);
 begin
  if sender.active then begin
-  ferrortext:= ferrortext + sender.readdatastring;
+  ferrordata:= ferrordata + sender.readdatastring;
  end;
 end;
 
