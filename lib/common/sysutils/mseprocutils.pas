@@ -250,7 +250,8 @@ var
  ca1: longword;
 begin
  if timeoutus < 0 then begin
-  result:= waitforprocess(prochandle);
+  exitcode:= waitforprocess(prochandle);
+  result:= true;
  end
  else begin
   ca1:= timestep(timeoutus);

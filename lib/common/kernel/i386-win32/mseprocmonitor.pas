@@ -94,7 +94,7 @@ end;
 
 function tprocmonitor.execute(thread: tmsethread): integer;
 var
- event: tmseevent;
+// event: tmseevent;
  int1: integer;
  handles1: handlearty;
  handle1: thandle;
@@ -133,7 +133,7 @@ begin
 end;
 
 function tprocmonitor.listentoprocess(const prochandle: prochandlety;
-                        const dest: ievent; const data: pointer): boolean;
+                        const dest: iprocmonitor; const data: pointer): boolean;
 begin
  result:= false;
  lock;
@@ -151,7 +151,7 @@ begin
 end;
 
 procedure tprocmonitor.unlistentoprocess(const prochandle: prochandlety; 
-                     const dest: ievent);
+                     const dest: iprocmonitor);
 var
  int1: integer;
 begin
