@@ -264,6 +264,7 @@ type
    procedure setoptionsgrid(const avalue: optionsgridty); override;
    procedure dofocus; override;
    procedure unregisterchildwidget(const child: twidget); override;
+   procedure widgetregionchanged(const sender: twidget); override;
    function createdatacols: tdatacols; override;
    function createfixrows: tfixrows; override;
    function createfixcols: tfixcols; override;
@@ -288,6 +289,7 @@ type
 
    function getcontainer: twidget; override;
    function getchildwidgets(const index: integer): twidget; override;
+   procedure removefixwidget(const awidget: twidget);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -297,6 +299,7 @@ type
    
    function editwidgetatpos(const apos: pointty; out cell: gridcoordty): twidget;
    function widgetcell(const awidget: twidget): gridcoordty;
+   function cellwidget(const acell: gridcoordty): twidget;
    function copyselection: boolean; override;
     //false if no copy
    function pasteselection: boolean; override;
@@ -1167,7 +1170,10 @@ begin
                    {$ifdef FPC}@{$endif}writewidgetname,fintf <> nil);
  filer.defineproperty('fixwidgetnames',{$ifdef FPC}@{$endif}readfixwidgetnames,
                    {$ifdef FPC}@{$endif}writefixwidgetnames,
-                   needswidgetnamewriting(ffixrowwidgets));
+     (filer.ancestor = nil) and needswidgetnamewriting(ffixrowwidgets) or
+     (filer.ancestor <> nil) and 
+        needswidgetnamewriting(ffixrowwidgets,
+                       twidgetcol(filer.ancestor).ffixrowwidgets));
  bo1:= false;
  if (fdata <> nil) and ([dls_nogridstreaming,dls_remote] * 
                                    tdatalist1(fdata).fstate = []) then begin
@@ -1211,6 +1217,7 @@ end;
 procedure twidgetcol.setfixrowwidget(const awidget: twidget;
                        const rowindex: integer);
 begin
+ tcustomwidgetgrid(fgrid).removefixwidget(awidget);
  ffixrowwidgets[-rowindex-1]:= awidget;
  fgrid.layoutchanged;
 end;
@@ -1863,11 +1870,15 @@ begin
  inherited;
  filer.defineproperty('fixwidgetnames',{$ifdef FPC}@{$endif}readfixwidgetnames,
                    {$ifdef FPC}@{$endif}writefixwidgetnames,
-                   needswidgetnamewriting(ffixrowwidgets));
+     (filer.ancestor = nil) and needswidgetnamewriting(ffixrowwidgets) or
+     (filer.ancestor <> nil) and 
+        needswidgetnamewriting(ffixrowwidgets,
+                       twidgetfixcol(filer.ancestor).ffixrowwidgets));
 end;
 
 procedure twidgetfixcol.setfixrowwidget(const awidget: twidget; const rowindex: integer);
 begin
+ tcustomwidgetgrid(fgrid).removefixwidget(awidget);
  ffixrowwidgets[-rowindex-1]:= awidget;
  fgrid.layoutchanged;
 end;
@@ -1946,48 +1957,85 @@ begin
  inherited;
 end;
 
-procedure tfixcontainer.widgetregionchanged(const sender: twidget);
+procedure handlewidgetregionchanged(const self: twidget;
+                       const grid: tcustomwidgetgrid; const sender: twidget);
 var
- cell1: gridcoordty;
+ cell1,cell2: gridcoordty;
  int1,int2,int3: integer;
+ pt1: pointty;
 begin
- inherited;
- if not (gs_layoutupdating in fgrid.fstate) and 
-     (fgrid.componentstate * [csdesigning,csloading,csdestroying] = 
-      [csdesigning]) and (sender <> nil) and 
-         (twidget1(sender).fparentwidget = self) then begin
-  with fgrid do begin
-   cell1:= widgetcell(sender);
-   if cell1.row <> invalidaxis then begin
-    with ffixrows[cell1.row] do begin
-     height:= sender.bounds_cy;
-     int1:= 0;
-     int3:= 0;
-     if cell1.col < 0 then begin
-      int2:= ffixcols.count + cell1.col;
-      if int2 < captionsfix.count then begin
-       with captionsfix[int2] do begin
-        int1:= mergedcx;
-        int3:= mergedcy;
-       end;
-      end;
-      ffixcols[cell1.col].width:= sender.bounds_cx - int1;
+ with self do begin 
+  if not (gs_layoutupdating in grid.fstate) and 
+      (grid.componentstate * [csdesigning,csloading,csdestroying] = 
+       [csdesigning]) and (sender <> nil) and 
+          (twidget1(sender).fparentwidget = self) then begin
+   with grid do begin
+    cell1:= widgetcell(sender);
+    if cell1.row <> invalidaxis then begin
+     if self = grid then begin
+      pt1:= self.paintpos;
+      pt1.x:= -pt1.x;
+      pt1.y:= -pt1.y;
      end
      else begin
-      if cell1.col < captions.count then begin
-       with captions[cell1.col] do begin
-        int1:= mergedcx;
-        int3:= mergedcy;
-       end;
-      end;
-      fdatacols[cell1.col].width:= sender.bounds_cx - int1;
+      pt1:= self.parentpaintpos;
      end;
-     height:= sender.bounds_cy - int3;
+     if (cellatpos(addpoint(
+             rectcenter(sender.widgetrect),pt1),cell2) in 
+                                               [ck_fixrow,ck_fixcolrow]) and
+            ((cell1.col <> cell2.col) or (cell1.row <> cell2.row)) and
+            (cellwidget(cell2) = nil) then begin
+      if cell1.col >= 0 then begin
+       datacols[cell1.col].ffixrowwidgets[-1-cell1.row]:= nil;
+      end
+      else begin
+       fixcols[cell1.col].ffixrowwidgets[-1-cell1.row]:= nil;
+      end;
+      if cell2.col >= 0 then begin
+       datacols[cell2.col].ffixrowwidgets[-1-cell2.row]:= sender;
+      end
+      else begin
+       fixcols[cell2.col].ffixrowwidgets[-1-cell2.row]:= sender;
+      end;
+     end
+     else begin
+      with ffixrows[cell1.row] do begin
+       height:= sender.bounds_cy;
+       int1:= 0;
+       int3:= 0;
+       if cell1.col < 0 then begin
+        int2:= -1-cell1.col;
+        if (int2 < captionsfix.count) and (int2 >= 0) then begin
+         with captionsfix[cell1.col] do begin
+          int1:= mergedcx;
+          int3:= mergedcy;
+         end;
+        end;
+        ffixcols[cell1.col].width:= sender.bounds_cx - int1;
+       end
+       else begin
+        if cell1.col < captions.count then begin
+         with captions[cell1.col] do begin
+          int1:= mergedcx;
+          int3:= mergedcy;
+         end;
+        end;
+        fdatacols[cell1.col].width:= sender.bounds_cx - int1;
+       end;
+       height:= sender.bounds_cy - int3;
+      end;
+     end;
+     layoutchanged;
     end;
-    layoutchanged;
    end;
   end;
  end;
+end;
+
+procedure tfixcontainer.widgetregionchanged(const sender: twidget);
+begin
+ inherited;
+ handlewidgetregionchanged(self,fgrid,sender);
 end;
  
 procedure tfixcontainer.dochildfocused(const sender: twidget);
@@ -2461,12 +2509,48 @@ begin
      if ffixrowwidgets[int2] = awidget then begin
       result.col:= -int1 - 1; //int1 - fixcols.count;
       result.row:= -int2 - 1; //int2 - fixrows.count;
+      exit;
      end;
     end;
    end;
   end;
  end;
  result:= invalidcell;
+end;
+
+function tcustomwidgetgrid.cellwidget(const acell: gridcoordty): twidget;
+var
+ co1,ro1: integer;
+begin
+ result:= nil;
+ if acell.col >= 0 then begin
+  if acell.col < fdatacols.count then begin
+   if acell.row >= 0 then begin
+    if acell.row < rowcount then begin
+     result:= datacols[acell.col].getwidget;
+    end;
+   end
+   else begin
+    ro1:= -1-acell.row;
+    with datacols[acell.col] do begin
+     if ro1 <= high(ffixrowwidgets) then begin
+      result:= ffixrowwidgets[ro1];
+     end;
+    end;
+   end;
+  end;
+ end
+ else begin
+  co1:= -1-acell.col;
+  if (co1 < fixcols.count) and (acell.row < 0) then begin
+   ro1:= -1-acell.row;
+   with twidgetfixcol(twidgetfixcols(ffixcols).fitems[co1]) do begin
+    if ro1 <= high(ffixrowwidgets) then begin
+     result:= ffixrowwidgets[ro1];
+    end;
+   end;
+  end;
+ end;
 end;
 
 function tcustomwidgetgrid.getcontainer: twidget;
@@ -2491,6 +2575,32 @@ begin
   else begin
    result:= fcontainer3.children[int1-int2];
   end;
+ end;
+end;
+
+procedure tcustomwidgetgrid.removefixwidget(const awidget: twidget);
+var
+ int1,int2: integer;
+begin
+ if awidget <> nil then begin
+  for int1:= 0 to high(twidgetcols(fdatacols).fitems) do begin
+   with twidgetcol(twidgetcols(fdatacols).fitems[int1]) do begin
+    for int2:= 0 to high(ffixrowwidgets) do begin
+     if ffixrowwidgets[int2] = awidget then begin
+      ffixrowwidgets[int2]:= nil;
+     end;
+    end;
+   end;
+  end; 
+  for int1:= 0 to high(twidgetfixcols(ffixcols).fitems) do begin
+   with twidgetfixcol(twidgetfixcols(ffixcols).fitems[int1]) do begin
+    for int2:= 0 to high(ffixrowwidgets) do begin
+     if ffixrowwidgets[int2] = awidget then begin
+      ffixrowwidgets[int2]:= nil;
+     end;
+    end;
+   end;
+  end; 
  end;
 end;
 
@@ -2540,6 +2650,12 @@ begin
  twidgetfixrows(ffixrows).unregisterchildwidget(child);
  twidgetfixcols(ffixcols).unregisterchildwidget(child);
  inherited;
+end;
+
+procedure tcustomwidgetgrid.widgetregionchanged(const sender: twidget);
+begin
+ inherited;
+ handlewidgetregionchanged(self,self,sender);
 end;
 
 procedure tcustomwidgetgrid.scrolled(const dist: pointty);

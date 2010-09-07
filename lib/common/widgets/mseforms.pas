@@ -58,6 +58,7 @@ type
    procedure readbounds(reader: treader);
    procedure writebounds(writer: twriter);
   protected
+//   fowner: tcustommseform;
    fboundsread: boolean;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
    procedure defineproperties(filer: tfiler); override;
@@ -650,7 +651,8 @@ end;
 
 constructor tformscrollbox.create(aowner: tcustommseform);
 begin
- inherited create(aowner);
+// fowner:= aowner;
+ inherited create(aowner); //dockcontroller needs owner
  setsubcomponent(true);
  exclude(fwidgetstate,ws_iswidget);
  foptionswidget:= defaultcontaineroptionswidget;

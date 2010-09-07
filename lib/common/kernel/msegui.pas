@@ -1753,6 +1753,8 @@ type
    property parentclientpos: pointty read getparentclientpos write setparentclientpos;
                                              //origin = parentwidget.clientpos
    function paintparentpos: pointty;         //origin = parentwidget.pos
+   function parentpaintpos: pointty;         //origin = parentwidget.paintpos
+                                             //nullpoint if parent = nil
    function paintrectparent: rectty;         //origin = paintpos,
                                              //nullrect if parent = nil,
    function clientrectparent: rectty;        //origin = paintpos,
@@ -2512,7 +2514,8 @@ function showmodalwidget(const aclass: widgetclassty): modalresultty;
 
 
 procedure writewidgetnames(const writer: twriter; const ar: widgetarty);
-function needswidgetnamewriting(const ar: widgetarty): boolean;
+function needswidgetnamewriting(const ar: widgetarty): boolean; overload;
+function needswidgetnamewriting(const ar1,ar2: widgetarty): boolean; overload;
 
 procedure designeventloop;
 
@@ -3230,6 +3233,29 @@ begin
   if ar[int1] <> nil then begin
    result:= true;
    break;
+  end;
+ end;
+end;
+
+function needswidgetnamewriting(const ar1,ar2: widgetarty): boolean;
+var
+ int1: integer;
+begin
+ result:= high(ar1) <> high(ar2);
+ if not result then begin;
+  for int1:= 0 to high(ar1) do begin
+   if (ar1[int1] = nil) or (ar2[int1] = nil) then begin
+    if (ar1[int1] <> ar2[int1]) then begin
+     result:= true;
+     break;
+    end;
+   end
+   else begin
+    if ar1[int1].name <> ar2[int1].name then begin
+     result:= true;
+     break;
+    end;
+   end;
   end;
  end;
 end;
@@ -9004,6 +9030,17 @@ end;
 function twidget.paintparentpos: pointty;       //origin = parentwidget.pos
 begin
  result:= addpoint(fwidgetrect.pos,paintpos);
+end;
+
+function twidget.parentpaintpos: pointty;    //origin = parentwidget.paintpos
+                                             //nullpoint if parent = nil
+begin
+ if fparentwidget = nil then begin
+  result:= nullpoint;
+ end
+ else begin
+  result:= subpoint(fwidgetrect.pos,fparentwidget.paintpos);
+ end;
 end;
 
 function twidget.paintrectparent: rectty; //origin = paintpos,

@@ -3472,7 +3472,7 @@ begin
  inherited;
  foptionswidget:= defaulttaboptionswidget;
  optionsskin:= defaulttaboptionsskin;
- ftabs:= tcustomtabbar1.create(self);
+ ftabs:= tcustomtabbar1.create(self,nil);
  ftabs.fanchors:= [an_left,an_top,an_right];
  ftab_size:= ftabs.size.cy;
  ftabs.SetSubComponent(true);

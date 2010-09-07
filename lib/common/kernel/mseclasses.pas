@@ -254,6 +254,9 @@ type
               const linkintf: iobjectlink = nil); overload;
    procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
               const linkintf: iobjectlink = nil); overload;
+   procedure setlinkedvar(const source: tlinkedpersistent; 
+                                var dest: tlinkedpersistent;
+              const linkintf: iobjectlink = nil); overload;
  end;
 
  teventpersistent = class(tlinkedpersistent,ievent)
@@ -292,6 +295,8 @@ type
 
  msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc,
                         cs_noload,cs_tmpmodule,
+                        cs_subcompref, //subcomponent can be referenced 
+                                       //by component properties
                         cs_parentwidgetrect //info for designer, example ttabpage
 //                        cs_skinloaded
                         {cs_hasskin,cs_noskin}{,cs_updateskinproc});
@@ -2930,6 +2935,17 @@ end;
 
 procedure tlinkedpersistent.setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
               const linkintf: iobjectlink = nil);
+begin
+ if linkintf = nil then begin
+  getobjectlinker.setlinkedvar(iobjectlink(self),source,dest);
+ end
+ else begin
+  getobjectlinker.setlinkedvar(linkintf,source,dest);
+ end;
+end;
+
+procedure tlinkedpersistent.setlinkedvar(const source: tlinkedpersistent;
+              var dest: tlinkedpersistent; const linkintf: iobjectlink = nil);
 begin
  if linkintf = nil then begin
   getobjectlinker.setlinkedvar(iobjectlink(self),source,dest);

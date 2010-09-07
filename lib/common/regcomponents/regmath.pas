@@ -15,13 +15,19 @@ interface
 
 implementation
 uses
- {$ifdef FPC}msefft,{$endif}msedesignintf,msefilter;
-
+ {$ifdef FPC}msefft,{$endif}msedesignintf,msefilter,msepropertyeditors;
+{
+type
+ tdoublesourceeditor = class(tlinkedobjectpropertyeditor)
+ end;
+ }
 procedure register;
 begin
 {$ifdef FPC}
  registercomponents('Math',[tfft,tfirfilter,tiirfilter]);
  registercomponenttabhints(['Math'],['Experimental Mathematical Components']);
+ registerpropertyeditor(typeinfo(tdoubleconnection),tdoublezcomp,'',
+                                                   tsubcomponentpropertyeditor);
 {$endif}
 end;
 

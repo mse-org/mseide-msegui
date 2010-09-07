@@ -16,65 +16,149 @@ unit msefilter;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseclasses,msedatalist,classes,msetypes,msesignal,msearrayprops,msereal;
+ mseclasses,msedatalist,classes,msetypes,msesignal,msearrayprops,msereal,
+ msegui;
 type
 
- tdoublesignalcomp = class;
+ tdoublefiltercomp = class;
  
  tsections = class(tintegerarrayprop)
   protected
-   fowner: tdoublesignalcomp;
+   fowner: tdoublefiltercomp;
    function calccoeffcount: integer;
    procedure dochange(const aindex: integer); override;
    procedure updatecoeffcount;
   public
-   constructor create(const aowner: tdoublesignalcomp);
+   constructor create(const aowner: tdoublefiltercomp);
+ end;
+
+ tdoubleconnection = class(tmsecomponent) 
+        //no solution fond to link to streamed tpersistent or tobject,
+        //fork of classes.pp necessary. :-(
+  protected
+//   fowner: tcomponent;
+  public
+   constructor create(aowner: tcomponent); override;
+ end;
+ tdoubleoutput = class(tdoubleconnection)
+  protected
+//   procedure updatesig(var adata: doublearty);
+  public
+   constructor create(aowner: tcomponent); override;
+ end; 
+
+ tdoubleinput = class(tdoubleconnection)
+  private
+   fsource: tdoubleoutput;
+ftestvar: twidget;
+   procedure setsource(const avalue: tdoubleoutput);
+//   procedure readsource(reader: treader);
+//   procedure writesource(writer: twriter);
+  protected
+//   procedure updatesig(var adata: doublearty);
+//   procedure defineproperties(filer: tfiler); override;
+  published
+   property source: tdoubleoutput read fsource write setsource;
+   property testvar: twidget read ftestvar write ftestvar;
+ end;
+ {
+ tconnections = class(tmsecomponentarrayprop)
+ end;
+ tinputs = class(tconnections)
+ end;
+ toutputs = class(tconnections)
  end;
  
+ tdoublesingleinputs = class(tinputs)  
+  public
+   constructor create; reintroduce;
+ end;
+ tdoublesingleoutputs = class(toutputs)
+  public
+   constructor create; reintroduce;
+ end;
+ }
  tdoublesignalcomp = class(tsignalcomp)
   private
+//   procedure setinputs(const avalue: tinputs);
+//   procedure setoutputs(const avalue: toutputs);
+  protected
+//   finputs: tinputs;
+//   foutputs: toutputs;
+//   procedure createinputs; virtual; abstract;
+//   procedure createoutputs; virtual; abstract;
+//   property inputs: tinputs read finputs write setinputs;
+//   property outputs: toutputs read foutputs write setoutputs;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure clear; virtual;
+  published
+ end;
+ 
+ tdoublezcomp = class(tdoublesignalcomp) //single input, single output
+  private
+   fzcount: integer;
+   fzhigh: integer;
    fdoublez: doublearty;
    fzindex: integer;
    finputindex: integer;
    fdoubleinputdata: doubleararty;
-   fcoeffcount: integer;
-   fcoeffhigh: integer;
+   procedure setzcount(const avalue: integer);
+   procedure setinput(const avalue: tdoubleinput);
+   procedure setoutput(const avalue: tdoubleoutput);
+  protected
+   finput: tdoubleinput;
+   foutput: tdoubleoutput;
+   procedure processinout(const acount: integer;
+                    var ainp,aoutp: pdouble); virtual; abstract;
+   procedure zcountchanged; virtual;
+//   procedure createinputs; override;
+//   procedure createoutputs; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure clear; override;
+   procedure writesig(const adata: doublearty);
+   procedure readsig1(var adata: doublearty);
+   function readsig: doublearty;
+   procedure updatesig(var inout: doublearty);
+   property zcount: integer read fzcount default 0;
+  published
+   property input: tdoubleinput read finput write setinput;
+   property output: tdoubleoutput read foutput write setoutput;
+ end;
+
+ tdoublefiltercomp = class(tdoublezcomp)
+  private
    fsections: tsections;
    procedure setcoeff(const avalue: tdatalist);
-   procedure setcoeffcount(const avalue: integer);
    procedure setsections(const avalue: tsections);
   protected
    fcoeff: tdatalist;
    procedure coeffchanged(const sender: tdatalist;
                                  const aindex: integer); override;
-   procedure process(const acount: integer;
-                    var ainp,aoutp: pdouble); virtual; abstract;
    procedure createcoeff; virtual; abstract;
+   procedure zcountchanged; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure clear;
-   procedure input(const adata: doublearty);
-   procedure output1(var adata: doublearty);
-   function output: doublearty;
-   procedure update(var inout: doublearty);
-   property coeffcount: integer read fcoeffcount default 0;
   published
    property sections: tsections read fsections write setsections;
             //array of coeffcount
  end;
-
+ 
 // >---+-->(z)---+-->(z)---+-->(z)---+
 //     b0       b1        b2        bN-1
 //     +---------+---------+---------+--->
 //
- tfirfilter = class(tdoublesignalcomp)
+ tfirfilter = class(tdoublefiltercomp)
   private
    function getcoeff: trealcoeff;
    procedure setcoeff(const avalue: trealcoeff);
   protected
    procedure createcoeff; override;
-   procedure process(const acount: integer;
+   procedure processinout(const acount: integer;
                     var ainp,aoutp: pdouble); override;
   published
    property coeff: trealcoeff read getcoeff write setcoeff;
@@ -85,13 +169,13 @@ type
 //     b0       b1        b2        bN-1
 // >---+---------+---------+---------+
 //
- tiirfilter = class(tdoublesignalcomp)
+ tiirfilter = class(tdoublefiltercomp)
   private
    function getcoeff: tcomplexcoeff;
    procedure setcoeff(const avalue: tcomplexcoeff);
   protected
    procedure createcoeff; override;
-   procedure process(const acount: integer;
+   procedure processinout(const acount: integer;
                     var ainp,aoutp: pdouble); override;
   published
    property coeff: tcomplexcoeff read getcoeff write setcoeff;
@@ -112,53 +196,89 @@ begin
   setlength(abuffer,asize);
  end;
 end;
- 
+(*
+{ tdoublesingleinputs }
+
+constructor tdoublesingleinputs.create;
+begin
+ inherited create(tdoubleinput);
+ count:= 1;
+end;
+
+{ tdoublesingleoutputs }
+
+constructor tdoublesingleoutputs.create;
+begin
+ inherited create(tdoubleoutput);
+ count:= 1;
+end;
+*)
 { tdoublesignalcomp }
 
 constructor tdoublesignalcomp.create(aowner: tcomponent);
 begin
- fsections:= tsections.create(self);
- fcoeffhigh:= -1;
- createcoeff;
- inherited; 
+// createinputs;
+// createoutputs;
+ inherited;
 end;
-
+ 
 destructor tdoublesignalcomp.destroy;
 begin
  clear;
  inherited;
- fcoeff.free;
- fsections.free;
+// finputs.free;
+// foutputs.free;
 end;
-
-procedure tdoublesignalcomp.setcoeff(const avalue: tdatalist);
+{
+procedure tdoublesignalcomp.setinputs(const avalue: tinputs);
 begin
- fcoeff.assign(avalue);
+ finputs.assign(avalue);
 end;
 
-procedure tdoublesignalcomp.setcoeffcount(const avalue: integer);
+procedure tdoublesignalcomp.setoutputs(const avalue: toutputs);
 begin
- if fcoeffcount <> avalue then begin
-  if avalue < 0 then begin
-   raise exception.create('Invalid coeffcount.');
-  end;
-  clear;
-  fcoeffcount:= avalue;
-  fcoeffhigh:= avalue - 1;
-  fcoeff.count:= avalue;
-  setlength(fdoublez,avalue);
- end;
+ foutputs.assign(avalue);
 end;
-
+}
 procedure tdoublesignalcomp.clear;
 begin
+ //dummy
+end;
+
+{ tdoublezcomp }
+
+constructor tdoublezcomp.create(aowner: tcomponent);
+begin
+ fzhigh:= -1;
+ finput:= tdoubleinput.create(self);
+ finput.name:= 'input';
+ foutput:= tdoubleoutput.create(self);
+ foutput.name:= 'output';
+ inherited;
+end;
+
+destructor tdoublezcomp.destroy;
+begin
+ inherited;
+// finput.free;
+// foutput.free;
+end;
+
+procedure tdoublezcomp.zcountchanged;
+begin
+ //dummy
+end;
+
+procedure tdoublezcomp.clear;
+begin
+ inherited;
  fdoubleinputdata:= nil;
  finputindex:= 0;
- fillchar(pointer(fdoublez)^,fcoeffcount*sizeof(double),0);
+ fillchar(pointer(fdoublez)^,fzcount*sizeof(double),0);
  fzindex:= 0; 
 end;
 
-procedure tdoublesignalcomp.input(const adata: doublearty);
+procedure tdoublezcomp.writesig(const adata: doublearty);
 begin
  if finputindex > high(fdoubleinputdata) then begin
   setlength(fdoubleinputdata,finputindex+1);
@@ -167,16 +287,16 @@ begin
  inc(finputindex);
 end;
 
-procedure tdoublesignalcomp.update(var inout: doublearty);
+procedure tdoublezcomp.updatesig(var inout: doublearty);
 var
  po1,po2: pdouble;
 begin
  po1:= pointer(inout);
  po2:= po1;
- process(length(inout),po1,po2);
+ processinout(length(inout),po1,po2);
 end;
 
-procedure tdoublesignalcomp.output1(var adata: doublearty);
+procedure tdoublezcomp.readsig1(var adata: doublearty);
 var
  int1,int3: integer;
  po1,po2: pdouble;
@@ -190,7 +310,7 @@ begin
  po2:= pointer(adata);
  for int1:= 0 to finputindex-1 do begin
   po1:= pointer(fdoubleinputdata[int1]);
-  process(length(fdoubleinputdata[int1]),po1,po2);
+  processinout(length(fdoubleinputdata[int1]),po1,po2);
  end;  
  for int1:= 0 to finputindex-1 do begin
   fdoubleinputdata[int1]:= nil;
@@ -198,21 +318,88 @@ begin
  finputindex:= 0;
 end;
 
-function tdoublesignalcomp.output: doublearty;
+function tdoublezcomp.readsig: doublearty;
 begin
- output1(result);
+ readsig1(result);
 end;
 
-procedure tdoublesignalcomp.coeffchanged(const sender: tdatalist;
+procedure tdoublezcomp.setzcount(const avalue: integer);
+begin
+ if fzcount <> avalue then begin
+  if avalue < 0 then begin
+   raise exception.create('Invalid coeffcount.');
+  end;
+  clear;
+  fzcount:= avalue;
+  fzhigh:= avalue - 1;
+  setlength(fdoublez,avalue);
+  zcountchanged;
+ end;
+end;
+
+procedure tdoublezcomp.setinput(const avalue: tdoubleinput);
+begin
+ finput.assign(avalue);
+end;
+
+procedure tdoublezcomp.setoutput(const avalue: tdoubleoutput);
+begin
+ finput.assign(avalue);
+end;
+{
+procedure tdoublezcomp.createinputs;
+begin
+ if finputs = nil then begin
+  finputs:= tdoublesingleinputs.create;
+  finput:= tdoubleinput(finputs.fitems[0]);
+ end;
+end;
+
+procedure tdoublezcomp.createoutputs;
+begin
+ if foutputs = nil then begin
+  foutputs:= tdoublesingleoutputs.create;
+  foutput:= tdoubleoutput(foutputs.fitems[0]);
+ end;
+end;
+}
+{ tdoublefiltercomp }
+
+constructor tdoublefiltercomp.create(aowner: tcomponent);
+begin
+ fsections:= tsections.create(self);
+ createcoeff;
+ inherited; 
+end;
+
+destructor tdoublefiltercomp.destroy;
+begin
+ inherited;
+ fcoeff.free;
+ fsections.free;
+end;
+
+procedure tdoublefiltercomp.zcountchanged;
+begin
+ inherited;
+ fcoeff.count:= fzcount;
+end;
+
+procedure tdoublefiltercomp.setcoeff(const avalue: tdatalist);
+begin
+ fcoeff.assign(avalue);
+end;
+
+procedure tdoublefiltercomp.coeffchanged(const sender: tdatalist;
                const aindex: integer);
 begin
  if aindex < 0 then begin
-  setcoeffcount(sender.count);
+  setzcount(sender.count);
   fsections.updatecoeffcount;
  end;
 end;
 
-procedure tdoublesignalcomp.setsections(const avalue: tsections);
+procedure tdoublefiltercomp.setsections(const avalue: tsections);
 begin
  fsections.assign(avalue);
 end;
@@ -236,7 +423,7 @@ begin
  inherited setcoeff(avalue);
 end;
 
-procedure tfirfilter .process(const acount: integer; var ainp, aoutp: pdouble);
+procedure tfirfilter .processinout(const acount: integer; var ainp, aoutp: pdouble);
 var                             //todo: optimize
  int1,int2,int3: integer;
  ar1: doublearty;
@@ -245,7 +432,7 @@ var                             //todo: optimize
  inp1,outp1: pdouble;
  startindex1,endindex1,endindex2: integer;
 begin
- if fcoeffcount > 0 then begin
+ if fzcount > 0 then begin
   inp1:= ainp;
   outp1:= aoutp;
   for int1:= acount-1 downto 0 do begin
@@ -254,9 +441,9 @@ begin
    startindex1:= fzindex;
    for int3:= 0 to high(fsections.fitems) do begin
     endindex1:= startindex1 + fsections.fitems[int3] - 1;
-    if endindex1 > fcoeffhigh then begin
-     endindex2:= endindex1-fcoeffhigh-1;
-     endindex1:= fcoeffhigh;
+    if endindex1 > fzhigh then begin
+     endindex2:= endindex1-fzhigh-1;
+     endindex1:= fzhigh;
     end
     else begin
      endindex2:= -1;
@@ -273,15 +460,15 @@ begin
      inc(po1);
     end;
     startindex1:= startindex1 + fsections.fitems[int3];
-    if startindex1 >= fcoeffcount then begin
-     startindex1:= startindex1 - fcoeffcount;
+    if startindex1 >= fzcount then begin
+     startindex1:= startindex1 - fzcount;
     end;
     i:= o;
    end;
    outp1^:= o;
    dec(fzindex);
    if fzindex < 0 then begin
-    fzindex:= fcoeffhigh;
+    fzindex:= fzhigh;
    end;
    inc(outp1);
    inc(inp1);
@@ -314,7 +501,7 @@ begin
  inherited setcoeff(avalue);
 end;
 
-procedure tiirfilter.process(const acount: integer; var ainp: pdouble;
+procedure tiirfilter.processinout(const acount: integer; var ainp: pdouble;
                var aoutp: pdouble);
 var 
  int1,int2,int3: integer;
@@ -323,7 +510,7 @@ var
  po0: pcomplexty;
  po1: pcomplexty;          //todo: optimize
 begin
- if fcoeffcount > 0 then begin
+ if fzcount > 0 then begin
   inp1:= ainp;
   outp1:= aoutp;
   po0:= fcoeff.datapo;
@@ -332,7 +519,7 @@ begin
    i:= inp1^;
    o:= i*po1^.im+fdoublez[0];
    int3:= 0;
-   for int2:= 1 to fcoeffhigh do begin
+   for int2:= 1 to fzhigh do begin
     inc(po1);
     if int2 = fsections.fitems[int3] then begin
      i:= o;
@@ -359,7 +546,7 @@ end;
 
 { tsections }
 
-constructor tsections.create(const aowner: tdoublesignalcomp);
+constructor tsections.create(const aowner: tdoublefiltercomp);
 begin
  fowner:= aowner;
  inherited create;
@@ -377,7 +564,7 @@ end;
 
 procedure tsections.dochange(const aindex: integer);
 begin
- fowner.setcoeffcount(calccoeffcount);
+ fowner.setzcount(calccoeffcount);
 end;
 
 procedure tsections.updatecoeffcount;
@@ -385,7 +572,7 @@ var
  int1: integer;
 begin
  if not (csloading in fowner.componentstate) then begin
-  int1:= fowner.coeffcount-calccoeffcount;
+  int1:= fowner.zcount-calccoeffcount;
   if int1 <> 0 then begin
    beginupdate;
    try
@@ -411,5 +598,42 @@ begin
   end;
  end;
 end;
+
+{ tdoublconnection }
+
+constructor tdoubleconnection.create(aowner: tcomponent);
+begin
+// fowner:= aowner;
+// inherited create(nil);
+ inherited;
+ setsubcomponent(true);
+end;
+
+{ tdoubleoutput }
+
+constructor tdoubleoutput.create(aowner: tcomponent);
+begin
+ inherited;
+ include (fmsecomponentstate,cs_subcompref);
+end;
+
+{ tdoubleinput }
+
+procedure tdoubleinput.setsource(const avalue: tdoubleoutput);
+begin
+ setlinkedvar(avalue,fsource);
+end;
+(*
+procedure tdoubleinput.writesource(writer: twriter);
+begin
+ writer.writeident('fir.output');
+end;
+
+procedure tdoubleinput.defineproperties(filer: tfiler);
+begin
+ filer.defineproperty('source',nil,{$ifdef FPC}@{$endif}writesource,
+                                                             fsource <> nil);
+end;
+*)
 
 end.

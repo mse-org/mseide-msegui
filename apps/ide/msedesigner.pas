@@ -29,6 +29,7 @@ const
  formfileext = 'mfm';
  pasfileext = 'pas';
  backupext = '.bak';
+ subcomponentsplitchar = ':';
 
 type
  tdesigner = class;
@@ -159,7 +160,7 @@ type
    function findmoduleinstancebyname(const name: string): tcomponent;
    function findmoduleinstancebyclass(const aclass: tclass): tcomponent;
    function findmodulebyclassname(aclassname: string): pmoduleinfoty;
-   function findmodulebycomponent(const acomponent: tobject): pmoduleinfoty;
+   function findmodulebycomponent(const acomponent: tcomponent): pmoduleinfoty;
    function findmodulebyinstance(const ainstance: tcomponent): pmoduleinfoty;
    function findownermodule(const acomponent: tcomponent): pmoduleinfoty;
    function filenames: filenamearty;
@@ -499,6 +500,22 @@ var
 function designer: tdesigner;
 begin
  result:= fdesigner;
+end;
+
+function isnosubcomp(const acomp: tcomponent): boolean;
+begin
+ result:= (cssubcomponent in acomp.componentstyle) and 
+           (acomp is tmsecomponent) and
+            not(cs_subcompref in tmsecomponent1(acomp).fmsecomponentstate);
+end;
+
+function issubprop(const obj1: tobject): boolean;
+begin
+ result:= (obj1 <> nil) and (not (obj1 is tcomponent) or 
+            (cssubcomponent in tcomponent(obj1).componentstyle) and
+             ((tcomponent(obj1).owner = nil) or 
+               (obj1 is tmsecomponent) and 
+                not(cs_subcompref in tmsecomponent1(obj1).fmsecomponentstate)));
 end;
 
 function ismodule(const acomponent: tcomponent): boolean;
@@ -1683,18 +1700,30 @@ end;
 
 function tcomponents.getcomponent(const aname: string): tcomponent;
 var
- int1: integer;
+ int1,int2: integer;
  po1: pcomponentinfoty;
  str1: string;
-
+ ar1: stringarty;
 begin
  result:= nil;
  str1:= uppercase(aname);
  if aname <> '' then begin
+  ar1:= splitstring(str1,subcomponentsplitchar);
   for int1:= 0 to fcount - 1 do begin
    po1:= next;
-   if uppercase(po1^.name) = str1 then begin
+   if uppercase(po1^.name) = ar1[0] then begin
     result:= po1^.instance;
+    for int2:= 1 to high(ar1) do begin
+     result:= result.findcomponent(ar1[int2]);
+     if (result = nil) then begin
+      break;
+     end;
+     if isnosubcomp(result) then begin
+//     if not(cssubcomponent in result.componentstyle) then begin
+      result:= nil;
+      break;
+     end;
+    end;
     break;
    end;
   end;
@@ -2097,21 +2126,34 @@ begin
  end;
 end;
 
-function tmodulelist.findmodulebycomponent(const acomponent: tobject): pmoduleinfoty;
+function tmodulelist.findmodulebycomponent(const acomponent: tcomponent): pmoduleinfoty;
 var
  int1: integer;
  po1: ppointeraty;
  po2: pmoduleinfoty;
+// comp1: tcomponent;
 begin
  result:= nil;
  po1:= datapo;
- for int1:= 0 to fcount-1 do begin
-  po2:= @tmoduleinfo(iobjectlink(po1^[int1]).getinstance).info;
-  if po2^.components.find(acomponent) <> nil then begin
-   result:= po2;
-   break;
+// comp1:= acomponent;
+// while comp1 <> nil do begin
+  for int1:= 0 to fcount-1 do begin
+   po2:= @tmoduleinfo(iobjectlink(po1^[int1]).getinstance).info;
+   if po2^.components.find(acomponent) <> nil then begin
+    result:= po2;
+    break;
+   end;
   end;
- end;
+//  if result <> nil then begin
+//   break;
+//  end;
+//  if cssubcomponent in comp1.componentstyle then begin
+//   comp1:= comp1.owner;
+//  end
+//  else begin
+//   comp1:= nil;
+//  end; 
+// end;
 end;
 
 function tmodulelist.filenames: filenamearty;
@@ -2644,8 +2686,7 @@ begin
    end;
    tkclass: begin
     obj1:= getobjectprop(ainstance,ar1[int1]);
-    if (obj1 <> nil) and (not (obj1 is tcomponent) or 
-              (cssubcomponent in tcomponent(obj1).componentstyle)) then begin
+    if issubprop(obj1) then begin
      forallmethodproperties(obj1,data,aproc,dochildren);
      if obj1 is tpersistentarrayprop then begin
       with tpersistentarrayprop(obj1) do begin
@@ -3425,8 +3466,7 @@ var
     end;
     tkclass: begin
      obj1:= getobjectprop(instance,ar1[int1]);
-     if (obj1 <> nil) and (not (obj1 is tcomponent) or 
-               (cssubcomponent in tcomponent(obj1).componentstyle)) then begin
+     if issubprop(obj1) then begin
       doinit(obj1);
       if obj1 is tpersistentarrayprop then begin
        with tpersistentarrayprop(obj1) do begin
@@ -4097,9 +4137,12 @@ begin
    for int1:= 0 to fmodules.count - 1 do begin
     po1:= fmodules[int1];
     if issubcomponent(po1^.instance,comp) then begin
-     result:= po1^.instancevarname + '.' + getcomponentdispname(comp);
-//    if po1^.instance = comp.Owner then begin
-//     result:= po1^.instancevarname + '.' + comp.Name;
+     if po1 = floadingmodulepo then begin
+      result:= getcomponentdispname(comp);
+     end
+     else begin
+      result:= po1^.instancevarname + '.' + getcomponentdispname(comp);
+     end;
      break;
     end;
    end;
@@ -4112,12 +4155,20 @@ function tdesigner.getcomponentdispname(const comp: tcomponent): string;
 var
  comp1: tcomponent;
  bo1: boolean;
+ ch1: char;
 begin
  result:= comp.Name;
+ ch1:= subcomponentsplitchar;
+// if not (cssubcomponent in comp.componentstyle) then begin
+//  ch1:= '.';
+// end;
  comp1:= comp.owner;
  while not ismodule(comp1) do begin
-  result:= comp1.Name + '.' + result;
+  result:= comp1.Name + ch1 + result;
   comp1:= comp1.Owner;
+//  if not (cssubcomponent in comp1.componentstyle) then begin
+//   ch1:= '.';
+//  end;
  end;
  bo1:= ismodule(comp);
  if bo1 or ismodule(comp.owner) then begin
@@ -4186,26 +4237,40 @@ function tdesigner.getcomponentlist(
              const acomponentclass: tcomponentclass;
              const filter: compfilterfuncty = nil): componentarty;
 var
- int1,int2: integer;
- comp1: tcomponent;
+ acount: integer;
+
+ procedure check(const acomp: tcomponent);
+ begin
+  if acomp.InheritsFrom(acomponentclass) and 
+       (({$ifndef FPC}@{$endif}filter = nil) or filter(acomp)) and 
+       not isnosubcomp(acomp) then begin
+   additem(pointerarty(result),acomp,acount);
+  end;
+ end; //check
+
+var
+ int1,int3: integer;
+ comp1,comp2: tcomponent;
 begin
+ result:= nil;
  if floadingmodulepo <> nil then begin
   with floadingmodulepo^.components do begin
-   setlength(result,count);
-   int2:= 0;
+   acount:= 0;
    for int1:= 0 to high(result) do begin
+    check(next^.instance);
+   end;
+   for int1:= 0 to count - 1 do begin
     comp1:= next^.instance;
-    if comp1.InheritsFrom(acomponentclass) and 
-         (({$ifndef FPC}@{$endif}filter = nil) or filter(comp1)) then begin
-     result[int2]:= comp1;
-     inc(int2);
+    check(comp1);
+    for int3:= 0 to comp1.componentcount - 1  do begin
+     comp2:= comp1.components[int3];
+     if cssubcomponent in comp2.componentstyle then begin
+      check(comp2);
+     end;
     end;
    end;
+   setlength(result,acount);
   end;
-  setlength(result,int2);
- end
- else begin
-  result:= nil;
  end;
 end;
 
@@ -4226,11 +4291,25 @@ function tdesigner.getcomponentnamelist(const acomponentclass: tcomponentclass;
                             const aowner: tcomponent = nil;
                             const filter: compfilterfuncty = nil): msestringarty;
 var
- int1,int2: integer;
- comp1: tcomponent;
  str1: msestring;
- po1: pmoduleinfoty;
  acount: integer;
+
+ procedure check(const comp1: tcomponent);
+ begin
+  if comp1.InheritsFrom(acomponentclass) and 
+          (({$ifndef FPC}@{$endif}filter = nil) or filter(comp1)) then begin
+   if ((aowner = nil) or (aowner = comp1.owner)) and 
+            (includeinherited or 
+            (comp1.componentstate * [csinline,csancestor] = [])) then begin
+    additem(result,str1+getcomponentdispname(comp1),acount);
+   end;
+  end;
+ end;
+ 
+var
+ int1,int2,int3: integer;
+ comp1,comp2: tcomponent;
+ po1: pmoduleinfoty;
 begin
  result:= nil;
  acount:= 0;
@@ -4245,12 +4324,12 @@ begin
   with po1^.components do begin
    for int2:= 0 to count - 1 do begin
     comp1:= next^.instance;
-    if comp1.InheritsFrom(acomponentclass) and 
-            (({$ifndef FPC}@{$endif}filter = nil) or filter(comp1)) then begin
-     if ((aowner = nil) or (aowner = comp1.owner)) and 
-              (includeinherited or 
-              (comp1.componentstate * [csinline,csancestor] = [])) then begin
-      additem(result,str1+getcomponentdispname(comp1),acount);
+    check(comp1);
+    for int3:= 0 to comp1.componentcount - 1  do begin
+     comp2:= comp1.components[int3];
+     if (cssubcomponent in comp2.componentstyle) and 
+                                      not isnosubcomp(comp2) then begin
+      check(comp2);
      end;
     end;
    end;

@@ -361,9 +361,26 @@ type
    function getinstancepo(acomponent: tobject): ppersistent; override;
  end;
 
+
+        //no solution fond to link to streamed tpersistent or tobject,
+        //fork of classes.pp necessary. :-(
+{
+ tlinkedobjectpropertyeditor = class(tclasspropertyeditor)
+  protected
+//   function issubcomponent(const index: integer = 0): boolean;
+   function getdefaultstate: propertystatesty; override;
+   procedure checkobj(const avalue: tobject); virtual;
+   function filterobj(const aobj: tobject): boolean; virtual;
+  public
+   function allequal: boolean; override;
+   function getvalue: msestring; override;
+   procedure setvalue(const value: msestring); override;
+   function getvalues: msestringarty; override;
+ end;
+}
  tcomponentpropertyeditor = class(tclasspropertyeditor)
   protected
-   function issubcomponent(const index: integer = 0): boolean;
+   function issubcomponent(const index: integer = 0): boolean; virtual;
    function getdefaultstate: propertystatesty; override;
    procedure checkcomponent(const avalue: tcomponent); virtual;
    function filtercomponent(const acomponent: tcomponent): boolean; virtual;
@@ -374,6 +391,11 @@ type
    function getvalues: msestringarty; override;
  end;
 
+ tsubcomponentpropertyeditor = class(tcomponentpropertyeditor)
+  protected
+   function issubcomponent(const index: integer = 0): boolean; override;
+ end;
+ 
  tcomponentinterfacepropertyeditor = class(tcomponentpropertyeditor)
   private
    fintfinfo: ptypeinfo;
@@ -866,6 +888,7 @@ const
  truename = 'True';
 
 type
+ tmsecomponent1 = class(tmsecomponent);
  twidget1 = class(twidget);
  tcustomcaptionframe1 = class(tcustomcaptionframe);
  tdesigner1 = class(tdesigner);
@@ -1070,7 +1093,7 @@ function tpropertyeditors.getitems(
 begin
  result:= ppropertyeditorinfoty(getitempo(index));
 end;
-
+var testvar: string;
 function tpropertyeditors.geteditorclass(apropertytype: ptypeinfo;
                apropertyownerclass: tclass;
                apropertyname: string): propertyeditorclassty;
@@ -1093,6 +1116,7 @@ var
   typeclasslevel:= atypeclasslevel;
   propertyeditorlevel:= po1^.editorclasslevel;
   result:= po1^.editorclass;
+testvar:= result.classname;
  end;
 
 begin
@@ -2500,6 +2524,83 @@ begin
  end;
 end;
 
+{ tlinkedpersistentpropertyeditor }
+{
+function tlinkedpersistentpropertyeditor.issubcomponent(const index: integer = 0): boolean;
+var
+ comp: tcomponent;
+begin
+ comp:= tcomponent(getpointervalue(index));
+ if comp = nil then begin
+  result:= false;
+ end
+ else begin
+  result:= cssubcomponent in comp.ComponentStyle;
+ end;
+end;
+}
+{
+function tlinkedobjectpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_valuelist,ps_volatile,ps_component];
+end;
+
+function tlinkedobjectpropertyeditor.allequal: boolean;
+var
+ po1: pointer;
+ int1: integer;
+begin
+ result:= inherited allequal;
+ if not result then begin
+  result:= true;
+  po1:= getpointervalue;
+  for int1:= 1 to high(fprops) do begin
+   if getpointervalue(int1) <> po1 then begin
+    result:= false;
+    break;
+   end;
+  end;
+ end;
+end;
+
+function tlinkedobjectpropertyeditor.getvalue: msestring;
+var
+ obj1: tobject; 
+begin
+ obj1:= tobject(getpointervalue);
+ if obj1 = nil then begin
+  result:= '<nil>';
+ end
+ else begin
+  result:= obj1.classname;
+ end;
+end;
+
+function tlinkedobjectpropertyeditor.getvalues: msestringarty;
+begin
+ result:= nil;
+end;
+
+procedure tlinkedobjectpropertyeditor.setvalue(const value: msestring);
+var
+ obj1: tobject;
+begin
+ obj1:= nil;
+ if value = '' then begin
+  setpointervalue(obj1);
+ end;
+end;
+
+procedure tlinkedobjectpropertyeditor.checkobj(const avalue: tobject);
+begin
+ //dummy
+end;
+
+function tlinkedobjectpropertyeditor.filterobj(const aobj: tobject): boolean;
+begin
+ result:= true;
+end;
+}
 { tcomponentpropertyeditor }
 
 function tcomponentpropertyeditor.issubcomponent(const index: integer = 0): boolean;
@@ -2511,7 +2612,10 @@ begin
   result:= false;
  end
  else begin
-  result:= cssubcomponent in comp.ComponentStyle;
+  result:= (cssubcomponent in comp.ComponentStyle) and 
+   ((comp.owner = nil) or 
+    (comp is tmsecomponent) and 
+              not (cs_subcompref in tmsecomponent1(comp).fmsecomponentstate));
  end;
 end;
 
@@ -2661,6 +2765,13 @@ end;
 
 function tcomponentpropertyeditor.filtercomponent(
                                const acomponent: tcomponent): boolean;
+begin
+ result:= true;
+end;
+
+{ tsubcomponenteditor }
+
+function tsubcomponentpropertyeditor.issubcomponent(const index: integer = 0): boolean;
 begin
  result:= true;
 end;

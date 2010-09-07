@@ -244,7 +244,7 @@ end;
 
 constructor tpascform.create(aowner: tcomponent; load: boolean);
 begin
- fscript:= tformscript.create(self);
+ fscript:= tformscript.create(self{nil});
  fscript.setsubcomponent(true);
  inherited;
 end;

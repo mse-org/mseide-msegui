@@ -1792,6 +1792,9 @@ begin
   editor1:= tpropertyeditor1(tpropertyitem(props.item).feditor);
   if tpropertyeditor(editor1) is tcomponentpropertyeditor then begin
    comp1:= tcomponent(editor1.getpointervalue);
+   while (comp1 <> nil) and (cssubcomponent in comp1.componentstyle) do begin
+    comp1:= comp1.owner;
+   end;
    if comp1 <> nil then begin
     designer.showformdesigner(designer.modules.findmodulebycomponent(comp1));
     designer.selectcomponent(comp1);

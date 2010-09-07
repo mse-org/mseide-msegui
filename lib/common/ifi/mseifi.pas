@@ -1828,7 +1828,7 @@ end;
 
 constructor tsocketclientiochannel.create(aowner: tcomponent);
 begin
- fsocket:= tifisocketclient.create(nil);
+ fsocket:= tifisocketclient.create(self{nil});
  fsocket.setsubcomponent(true);
  fsocket.pipes.rx.oninputavailable:= @doinputavailable;
  fsocket.pipes.onbeforedisconnect:= @dobeforedisconnect;

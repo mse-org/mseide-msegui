@@ -1941,7 +1941,7 @@ end;
 constructor tmainmenuwidget.create(aowner: tcomponent);
 begin
  flocalframeandface:= true;
- setlinkedvar(twidgetmainmenu.create(self),tmsecomponent(fmenucomp));
+ setlinkedvar(twidgetmainmenu.create(self{nil}),tmsecomponent(fmenucomp));
  fmenucomp.setsubcomponent(true);
  inherited create(nil,fmenucomp.menu,nil,aowner,fmenucomp);
  if csdesigning in componentstate then begin
