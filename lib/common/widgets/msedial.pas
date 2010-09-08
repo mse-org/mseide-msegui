@@ -205,7 +205,7 @@ type
    property items[const index: integer]: tdialtick read getitems; default;
  end;
  
- dialoptionty = (do_opposite,do_sideline,do_boxline,do_log);
+ dialoptionty = (do_opposite,do_sideline,do_boxline,do_log,do_front);
  dialoptionsty = set of dialoptionty;  
 
  idialcontroller = interface(inullinterface)
@@ -275,6 +275,7 @@ type
    procedure transform(var apoint: pointty);
    procedure defineproperties(filer: tfiler); override;
    function getactdialrect(out arect: rectty): boolean;
+   procedure paintdial(const acanvas: tcanvas);
   public
    constructor create(const aintf: idialcontroller); reintroduce; virtual;
    destructor destroy; override;
@@ -1664,11 +1665,10 @@ begin
  fintf.getwidget.invalidate;
 end;
 
-procedure tcustomdialcontroller.paint(const acanvas: tcanvas);
+procedure tcustomdialcontroller.paintdial(const acanvas: tcanvas);
 var
  int1,int2: integer;
 begin
- checklayout;
  for int1:= high(fticks.fitems) downto 0 do begin
   with tdialtick(fticks.fitems[int1]),finfo do begin
    if ticks <> nil then begin
@@ -1692,8 +1692,19 @@ begin
  acanvas.linewidth:= 0;
 end;
 
+procedure tcustomdialcontroller.paint(const acanvas: tcanvas);
+begin
+ checklayout;
+ if not (do_front in foptions) then begin
+  paintdial(acanvas);
+ end;
+end;
+
 procedure tcustomdialcontroller.afterpaint(const acanvas: tcanvas);
 begin
+ if do_front in foptions then begin
+  paintdial(acanvas);
+ end;
  if foptions * [do_sideline,do_boxline] <> [] then begin
   acanvas.capstyle:= cs_projecting;
   acanvas.linewidthmm:= fwidthmm;

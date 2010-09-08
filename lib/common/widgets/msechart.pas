@@ -316,6 +316,7 @@ type
    fstate: chartstatesty;
    procedure changed; virtual;
    procedure clientrectchanged; override;
+   procedure dopaintcontent(const acanvas: tcanvas); virtual;
    procedure dopaintbackground(const canvas: tcanvas); override;
    procedure dopaint(const acanvas: tcanvas); override;
           //idialcontroller
@@ -356,7 +357,7 @@ type
    procedure setyrange(const avalue: real); override;
   protected
    procedure clientrectchanged; override;
-   procedure dopaint(const acanvas: tcanvas); override;
+   procedure dopaintcontent(const acanvas: tcanvas); override;
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
   public
@@ -404,7 +405,7 @@ type
   
  tchartrecorder = class(tcustomchart)
   private
-   fchart: tbitmap;
+   fchart: tmaskedbitmap;
    fsamplecount: integer;
    fstep: real;
    fstepsum: real;
@@ -419,7 +420,7 @@ type
    procedure initchart;
    procedure changed; override;
    procedure clientrectchanged; override;
-   procedure dobeforepaintforeground(const canvas: tcanvas); override;
+   procedure dopaintcontent(const acanvas: tcanvas); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1523,6 +1524,11 @@ begin
 end;
 }
 
+procedure tcustomchart.dopaintcontent(const acanvas: tcanvas);
+begin
+ //dummy
+end;
+
 procedure tcustomchart.dopaintbackground(const canvas: tcanvas);
 begin
  inherited;
@@ -1561,6 +1567,7 @@ begin
  inherited;
  fxdials.paint(acanvas);
  fydials.paint(acanvas);
+ dopaintcontent(acanvas);
  fxdials.afterpaint(acanvas);
  fydials.afterpaint(acanvas);
 end;
@@ -1715,7 +1722,7 @@ begin
  inherited;
 end;
 
-procedure tchart.dopaint(const acanvas: tcanvas);
+procedure tchart.dopaintcontent(const acanvas: tcanvas);
 var
  rect1: rectty;
 begin
@@ -1803,7 +1810,7 @@ end;
 constructor tchartrecorder.create(aowner: tcomponent);
 begin
  fsamplecount:= 100;
- fchart:= tbitmap.create(false);
+ fchart:= tmaskedbitmap.create(false);
  ftraces:= trecordertraces.create;
  inherited;
  include(fstate,chs_nocolorchart);
@@ -1823,26 +1830,51 @@ begin
 end;
 
 procedure tchartrecorder.initchart;
+var
+ int1: integer;
+ bo1: boolean;
 begin
  if not (csloading in componentstate) then begin
   fstarted:= false;
+  bo1:= false;
+  for int1:= 0 to fxdials.count -1 do begin
+   if not (do_front in fxdials[int1].options) then begin
+    bo1:= true;
+    break;
+   end;
+  end;
+  if not bo1 then begin
+   for int1:= 0 to fydials.count -1 do begin
+    if not (do_front in fydials[int1].options) then begin
+     bo1:= true;
+     break;
+    end;
+   end;
+  end;
   with fchart do begin
+   masked:= bo1;
    fchartclientrect:= innerclientrect;
    fchartwindowrect.size:= fchartclientrect.size;
    fchartrect.cx:= fchartclientrect.cx + 10; //room for linewidth
    fchartrect.cy:= fchartclientrect.cy;
    size:= fchartrect.size; 
-   fstep:= {$ifdef FPC}real({$endif}fchartwindowrect.cx{$ifdef FPC}){$endif} / fsamplecount;
+   fstep:= {$ifdef FPC}real({$endif}fchartwindowrect.cx{$ifdef FPC}){$endif} / 
+                                                                  fsamplecount;
    fstepsum:= 0;
    init(fcolorchart);
    canvas.capstyle:= cs_round;
+   if masked then begin
+    mask.init(cl_0);
+    mask.canvas.capstyle:= cs_round;
+   end;
   end;
  end;
 end;
 
-procedure tchartrecorder.dobeforepaintforeground(const canvas: tcanvas);
+procedure tchartrecorder.dopaintcontent(const acanvas: tcanvas);
 begin
- canvas.copyarea(fchart.canvas,fchartwindowrect,fchartclientrect.pos);
+ fchart.paint(acanvas,fchartclientrect.pos);
+// canvas.copyarea(fchart.canvas,fchartwindowrect,fchartclientrect.pos);
 end;
 
 procedure tchartrecorder.setsamplecount(const avalue: integer);
@@ -1860,7 +1892,7 @@ procedure tchartrecorder.addsample(const asamples: array of real);
 var
  int1,int2: integer;
  ax,ay: integer;
- acanvas: tcanvas;
+ acanvas,mcanvas: tcanvas;
 begin
  fstepsum:= fstepsum + fstep;
  int1:= round(fstepsum);
@@ -1868,8 +1900,13 @@ begin
  with fchart do begin
   acanvas:= canvas;
   ax:= fchartwindowrect.cx-int1;
-  acanvas.copyarea(canvas,fchartrect,makepoint(-int1,0));
+  acanvas.copyarea(acanvas,fchartrect,makepoint(-int1,0));
   acanvas.fillrect(makerect(fchartrect.cx-int1,0,int1,fchartrect.cy),fcolorchart);
+  if masked then begin
+   mcanvas:= mask.canvas;
+   mcanvas.copyarea(mcanvas,fchartrect,makepoint(-int1,0));
+   mcanvas.fillrect(makerect(fchartrect.cx-int1,0,int1,fchartrect.cy),cl_0);
+  end;
   for int2:= 0 to high(ftraces.fitems) do begin
    if int2 > high(asamples) then begin
     break;
@@ -1878,7 +1915,13 @@ begin
     ay:= fchartrect.cy - round(fchartrect.cy * ((asamples[int2] - foffset)/frange));
     if fstarted then begin
      acanvas.linewidth:= fwidth;
-     acanvas.drawline(makepoint(ax,fybefore),makepoint(fchartwindowrect.cx,ay),fcolor);
+     acanvas.drawline(makepoint(ax,fybefore),
+                                   makepoint(fchartwindowrect.cx,ay),fcolor);
+     if masked then begin
+      mcanvas.linewidth:= fwidth;
+      mcanvas.drawline(makepoint(ax,fybefore),
+                                    makepoint(fchartwindowrect.cx,ay),cl_1);
+     end;
     end;
     fybefore:= ay;
    end;
