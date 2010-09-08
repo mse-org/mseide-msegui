@@ -205,7 +205,8 @@ type
    property items[const index: integer]: tdialtick read getitems; default;
  end;
  
- dialoptionty = (do_opposite,do_sideline,do_boxline,do_log,do_front);
+ dialoptionty = (do_opposite,do_sideline,do_boxline,do_log,
+                 do_front,do_scrollwithdata,do_shiftwithdata);
  dialoptionsty = set of dialoptionty;  
 
  idialcontroller = interface(inullinterface)
@@ -219,7 +220,9 @@ type
   private
    fdirection: graphicdirectionty;
    fstate: dialstatesty;
+   fsstart: real;
    fstart: real;
+   fshift: real;
    frange: real;
    fmarkers: tdialmarkers;
    fticks: tdialticks;
@@ -244,6 +247,7 @@ type
    findent1: integer;
    findent2: integer;
    procedure setstart(const avalue: real);
+   procedure setshift(const avalue: real);
    procedure setrange(const avalue: real);
    procedure setmarkers(const avalue: tdialmarkers);
    procedure setoptions(const avalue: dialoptionsty);
@@ -288,6 +292,7 @@ type
    property indent1: integer read findent1 write setindent1 default 0;
    property indent2: integer read findent2 write setindent2 default 0;
    property start: real read fstart write setstart;
+   property shift: real read fshift write setshift; //added to start
    property range: real read frange write setrange; //default 1.0
    property kind: dialdatakindty read fkind write setkind default dtk_real;
    property markers: tdialmarkers read fmarkers write setmarkers;
@@ -375,7 +380,7 @@ function chartln(const avalue: real): real;
  
 implementation
 uses
- sysutils,msereal,msestreaming,mseformatstr,math;
+ sysutils,msereal,msestreaming,mseformatstr,math,msebits;
 type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
@@ -696,12 +701,12 @@ begin
   else begin
    calclineend(fli,dmo_opposite in options,rect1,linestart,lineend,dir1);
    if do_log in foptions then begin
-    rea2:= chartln(fstart);
-    rea1:= (chartln(value) - rea2)/(chartln(frange+fstart)-rea2);
+    rea2:= chartln(fsstart);
+    rea1:= (chartln(value) - rea2)/(chartln(frange+fsstart)-rea2);
 //    rea1:= (chartln(value)-chartln(fstart))/chartln({fstart+}frange);
    end
    else begin
-    rea1:= (value - fstart)/frange;
+    rea1:= (value - fsstart)/frange;
    end;
    case fdirection of
     gd_right: begin
@@ -1459,26 +1464,26 @@ begin
      else begin
       calclineend(fli,dto_opposite in options,rect1,linestart,lineend,dir1);
       if islog then begin
-       offs:= -chartln(fstart);
-       step:= 1/(chartln(fstart+frange) + offs); //used for scaling
+       offs:= -chartln(fsstart);
+       step:= 1/(chartln(fsstart+frange) + offs); //used for scaling
        offs:= offs * step;
        intervalcount1:= round(intervalcount);
        if interval <= 0 then begin
         interval:= 10;
        end;
-       logstartn:= getlogn(fstart,interval,intervalcount1);
+       logstartn:= getlogn(fsstart,interval,intervalcount1);
        rea1:= getlogval(logstartn,interval,intervalcount1);
-       if (fstart-rea1)/fstart > tolerance then begin
+       if (fsstart-rea1)/fsstart > tolerance then begin
         inc(logstartn);
        end;
-       rea1:= fstart + frange;
+       rea1:= fsstart + frange;
        int1:= getlogn(rea1,interval,intervalcount1);
        int1:= int1 - logstartn;
       end
       else begin
        step:= 1/intervalcount;
        valstep:= step * frange;
-       first:= (start*intervalcount)/range;
+       first:= (fsstart*intervalcount)/range;
        offs:= frac(first)/intervalcount; //scaled to 1.0
        first:= int(first);
        if offs > 0.0001 then begin
@@ -1738,6 +1743,16 @@ procedure tcustomdialcontroller.setstart(const avalue: real);
 begin
  if fstart <> avalue then begin
   fstart:= avalue;
+  fsstart:= fshift+avalue;
+  changed;
+ end;
+end;
+
+procedure tcustomdialcontroller.setshift(const avalue: real);
+begin
+ if fshift <> avalue then begin
+  fshift:= avalue;
+  fsstart:= fstart+avalue;
   changed;
  end;
 end;
@@ -1765,9 +1780,14 @@ begin
 end;
 
 procedure tcustomdialcontroller.setoptions(const avalue: dialoptionsty);
+const
+ mask: dialoptionsty = [do_scrollwithdata,do_shiftwithdata];
 begin
  if foptions <> avalue then begin
-  foptions:= avalue;
+  foptions:= dialoptionsty(
+   setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(avalue),
+                 {$ifdef FPC}longword{$else}byte{$endif}(foptions),
+                 {$ifdef FPC}longword{$else}byte{$endif}(mask)));
   changed;
  end;
 end;

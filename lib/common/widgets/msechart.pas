@@ -156,6 +156,7 @@ type
    fimage_list: timagelist;
    fimage_widthmm: real;
    fimage_heightmm: real;
+   foptions: charttraceoptionsty;
    procedure setitems(const index: integer; const avalue: ttrace);
    function getitems(const index: integer): ttrace;
    procedure setxserstart(const avalue: real);
@@ -168,6 +169,7 @@ type
    procedure setimage_list(const avalue: timagelist);
    procedure setimage_widthmm(const avalue: real);
    procedure setimage_heightmm(const avalue: real);
+   procedure setoptions(const avalue: charttraceoptionsty);
   protected
    fsize: sizety;
    fscalex: real;
@@ -186,6 +188,8 @@ type
    procedure dostatwrite(const writer: tstatwriter);
    property items[const index: integer]: ttrace read getitems write setitems; default;
   published
+   property options: charttraceoptionsty read foptions 
+                                                write setoptions default [];
    property xserstart: real read fxserstart write setxserstart;
    property xstart: real read fxstart write setxstart;
    property ystart: real read fystart write setystart;
@@ -289,11 +293,12 @@ type
    property colorclient default cl_foreground;
  end;
  
- chartstatety = (chs_nocolorchart,
+ chartstatety = (chs_nocolorchart,chs_hasdialscroll,chs_hasdialshift,
                  chs_started,chs_full,chs_chartvalid); //for tchartrecorder
  chartstatesty = set of chartstatety;
 const
- chartrecorderstatesmask  = [chs_started,chs_full,chs_chartvalid];
+ chartrecorderstatesmask  = [chs_hasdialscroll,chs_hasdialshift,chs_started,
+                             chs_full,chs_chartvalid];
  
 type
  tcustomchart = class(tscrollbox,ichartdialcontroller,istatfile)
@@ -321,12 +326,16 @@ type
   protected
    fcolorchart: colorty;
    fstate: chartstatesty;
+   fshiftsum: int64;
+   fscrollsum: integer;
+   fsampleco: integer;
    procedure changed; virtual;
+   procedure chartchange;
    procedure clientrectchanged; override;
    procedure dopaintcontent(const acanvas: tcanvas); virtual;
    procedure dopaintbackground(const canvas: tcanvas); override;
    procedure dopaint(const acanvas: tcanvas); override;
-          //idialcontroller
+    //idialcontroller
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
    function getdialrect: rectty;
    function getdialsize: sizety;
@@ -338,6 +347,7 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
+   procedure initscrollstate;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -370,6 +380,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure clear;
    procedure addsample(const asamples: array of real); virtual;
   published
    property traces: ttraces read ftraces write settraces;
@@ -433,8 +444,8 @@ type
   protected
    procedure checkinit;
 //   procedure changed; override;
-   procedure chartchange;
-   procedure clientrectchanged; override;
+//   procedure chartchange;
+//   procedure clientrectchanged; override;
    procedure dopaintcontent(const acanvas: tcanvas); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -466,7 +477,7 @@ function autointerval(const arange: real; const aintervalcount: real): real;
                    
 implementation
 uses
- sysutils,math;
+ sysutils,math,msebits;
 
 type
  tcustomdialcontroller1 = class(tcustomdialcontroller);
@@ -1375,6 +1386,26 @@ begin
  end;
 end;
 
+procedure ttraces.setoptions(const avalue: charttraceoptionsty);
+var
+ int1: integer;
+ mask: {$ifdef FPC}longword{$else}byte{$endif};
+begin
+ if foptions <> avalue then begin
+  mask:= longword(avalue) xor 
+                 {$ifdef FPC}longword{$else}byte{$endif}(foptions);
+  foptions:= avalue;
+  if not (csloading in tcustomchart(fowner).componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    ttrace(fitems[int1]).options:= charttraceoptionsty(replacebits(
+               {$ifdef FPC}longword{$else}byte{$endif}(foptions),
+               {$ifdef FPC}longword{$else}byte{$endif}(
+                                   ttrace(fitems[int1]).options),mask));
+   end;
+  end;
+ end;
+end;
+
 procedure ttraces.createitem(const index: integer; var item: tpersistent);
 begin
  inherited;
@@ -1538,6 +1569,7 @@ procedure tcustomchart.clientrectchanged;
 begin
  fxdials.changed;
  fydials.changed;
+ chartchange;
  inherited;
 end;
 {
@@ -1728,6 +1760,33 @@ begin
  result:= fstatvarname;
 end;
 
+procedure tcustomchart.initscrollstate;
+var
+ int1: integer;
+begin
+ fshiftsum:= 0;
+ fscrollsum:= 0;
+ fsampleco:= 0;
+ fstate:= fstate - [chs_hasdialscroll,chs_hasdialshift];
+ for int1:= 0 to fxdials.count -1 do begin
+  with fxdials[int1] do begin
+   if do_scrollwithdata in options then begin
+    include(self.fstate,chs_hasdialscroll);
+   end;
+   if do_shiftwithdata in options then begin
+    self.fstate:= self.fstate + [chs_hasdialscroll,chs_hasdialshift];
+   end;
+   shift:= 0;
+  end;
+ end;
+end;
+
+procedure tcustomchart.chartchange;
+begin
+ exclude(fstate,chs_chartvalid);
+ invalidate;
+end;
+
 { tchart }
 
 constructor tchart.create(aowner: tcomponent);
@@ -1742,16 +1801,64 @@ begin
  inherited;
 end;
 
-procedure tchart.addsample(const asamples: array of real);
+procedure tchart.clear;
 var
  int1: integer;
 begin
+ initscrollstate;
+ include(fstate,chs_chartvalid);
+ for int1:= 0 to ftraces.count - 1 do begin
+  ftraces[int1].clear;
+ end;
+end;
+
+procedure tchart.addsample(const asamples: array of real);
+var
+ int1: integer;
+ rea1,rea2: real;
+begin
+ if not (chs_chartvalid in fstate) then begin
+  initscrollstate;
+  include(fstate,chs_chartvalid);
+ end;
  int1:= high(asamples);
  if int1 >= ftraces.count then begin
   int1:= ftraces.count-1;
  end;
  for int1:= 0 to int1 do begin
   ttrace(ftraces.fitems[int1]).addxseriesdata(asamples[int1]);
+ end;
+ if chs_hasdialscroll in fstate then begin
+  inc(fsampleco);
+  if cto_adddataright in ftraces.options then begin
+   int1:= 1;
+  end
+  else begin
+   int1:= 0;
+   if fsampleco >= ftraces.maxcount then begin
+    int1:= fsampleco-ftraces.maxcount;
+    fsampleco:= fsampleco - int1;
+   end;
+  end;
+  if (int1 <> 0) and (ftraces.maxcount > 0) then begin
+   fscrollsum:= fscrollsum + int1;
+   fshiftsum:= fshiftsum + int1;
+   rea1:= (fshiftsum)/ftraces.maxcount;
+   if fscrollsum > ftraces.maxcount then begin
+    fscrollsum:= fscrollsum - ftraces.maxcount;
+   end;
+   rea2:= (fscrollsum)/ftraces.maxcount;
+   for int1:= 0 to fxdials.count - 1 do begin
+    with fxdials[int1] do begin
+     if do_shiftwithdata in options then begin
+      shift:= rea1*range;
+     end
+     else begin
+      shift:= rea2*range;
+     end;
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -1866,19 +1973,13 @@ begin
  ftraces.free;
  inherited;
 end;
-
-procedure tchartrecorder.chartchange;
-begin
- exclude(fstate,chs_chartvalid);
- invalidate;
-end;
-
+{
 procedure tchartrecorder.clientrectchanged;
 begin
  chartchange;
  inherited;
 end;
-
+}
 procedure tchartrecorder.checkinit;
 var
  int1: integer;
@@ -1888,10 +1989,12 @@ begin
   fstate:= fstate - chartrecorderstatesmask;
 //  fstarted:= false;
   bo1:= false;
+  initscrollstate;
   for int1:= 0 to fxdials.count -1 do begin
-   if not (do_front in fxdials[int1].options) then begin
-    bo1:= true;
-    break;
+   with fxdials[int1] do begin
+    if not (do_front in options) then begin
+     bo1:= true;
+    end;
    end;
   end;
   if not bo1 then begin
@@ -1952,6 +2055,8 @@ var
  
   procedure shift(const adist: integer);
   begin
+   fshiftsum:= fshiftsum+adist;
+   fscrollsum:= fscrollsum+adist;
    acanvas.copyarea(acanvas,fchartrect,makepoint(-adist,0));
    acanvas.fillrect(makerect(fchartrect.cx-adist,0,adist,fchartrect.cy),fcolorchart);
    if amasked then begin
@@ -1963,7 +2068,11 @@ var
 var
  int1,int2: integer;
  startx,endx,y: integer;
+ rea1,rea2: real;
 begin
+ if (chs_hasdialshift in fstate) and (fshiftsum < 0) then begin
+  exclude(fstate,chs_chartvalid);
+ end;
  checkinit;
  fstepsum:= fstepsum + fstep;
  int1:= round(fstepsum);
@@ -1992,6 +2101,23 @@ begin
     endx:= endx-int1;
    end;
    include(fstate,chs_full);
+  end;
+ end;
+ if (chs_hasdialscroll in fstate) and (fchartwindowrect.cx > 0) then begin
+  rea1:= fshiftsum/fchartwindowrect.cx;
+  if fscrollsum > fchartwindowrect.cx then begin
+   fscrollsum:= fscrollsum - fchartwindowrect.cx;
+  end;
+  rea2:= fscrollsum/fchartwindowrect.cx;
+  for int1:= 0 to fxdials.count -1 do begin
+   with fxdials[int1] do begin
+    if do_shiftwithdata in options then begin
+     shift:= rea1*range;
+    end
+    else begin
+     shift:= rea2*range;
+    end;
+   end;
   end;
  end;
  int1:= high(asamples);
