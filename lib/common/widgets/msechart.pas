@@ -414,11 +414,13 @@ type
    fchartwindowrect: rectty;
    ftraces: trecordertraces;
    fstarted: boolean;
+   fchartvalid: boolean;
    procedure setsamplecount(const avalue: integer);
    procedure settraces(const avalue: trecordertraces);
   protected
-   procedure initchart;
-   procedure changed; override;
+   procedure checkinit;
+//   procedure changed; override;
+   procedure chartchange;
    procedure clientrectchanged; override;
    procedure dopaintcontent(const acanvas: tcanvas); override;
   public
@@ -1823,18 +1825,24 @@ begin
  inherited;
 end;
 
-procedure tchartrecorder.clientrectchanged;
+procedure tchartrecorder.chartchange;
 begin
- inherited;
- initchart;
+ fchartvalid:= false;
+ invalidate;
 end;
 
-procedure tchartrecorder.initchart;
+procedure tchartrecorder.clientrectchanged;
+begin
+ chartchange;
+ inherited;
+end;
+
+procedure tchartrecorder.checkinit;
 var
  int1: integer;
  bo1: boolean;
 begin
- if not (csloading in componentstate) then begin
+ if not (csloading in componentstate) and not fchartvalid then begin
   fstarted:= false;
   bo1:= false;
   for int1:= 0 to fxdials.count -1 do begin
@@ -1868,11 +1876,13 @@ begin
     mask.canvas.capstyle:= cs_round;
    end;
   end;
+  fchartvalid:= true;
  end;
 end;
 
 procedure tchartrecorder.dopaintcontent(const acanvas: tcanvas);
 begin
+ checkinit;
  fchart.paint(acanvas,fchartclientrect.pos);
 // canvas.copyarea(fchart.canvas,fchartwindowrect,fchartclientrect.pos);
 end;
@@ -1884,7 +1894,7 @@ begin
   if fsamplecount <= 0 then begin
    fsamplecount:=  1;
   end;
-  initchart;
+  chartchange;
  end;  
 end;
 
@@ -1894,6 +1904,7 @@ var
  ax,ay: integer;
  acanvas,mcanvas: tcanvas;
 begin
+ checkinit;
  fstepsum:= fstepsum + fstep;
  int1:= round(fstepsum);
  fstepsum:= fstepsum - int1;
@@ -1938,14 +1949,16 @@ end;
 
 procedure tchartrecorder.clear;
 begin
- initchart;
+ fchartvalid:= false;
+ invalidate;
 end;
-
+{
 procedure tchartrecorder.changed;
 begin
- initchart;
+ fchartvalid:= false;
+ inherited;
 end;
-
+}
 { tchartdialshorz }
 
 function tchartdialshorz.getitemclass: dialcontrollerclassty;
