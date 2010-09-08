@@ -152,6 +152,7 @@ type
    fxserrange: real;
    fxrange: real;
    fyrange: real;
+   fmaxcount: integer;
    fimage_list: timagelist;
    fimage_widthmm: real;
    fimage_heightmm: real;
@@ -163,6 +164,7 @@ type
    procedure setxserrange(const avalue: real);
    procedure setxrange(const avalue: real);
    procedure setyrange(const avalue: real);
+   procedure setmaxcount(const avalue: integer);
    procedure setimage_list(const avalue: timagelist);
    procedure setimage_widthmm(const avalue: real);
    procedure setimage_heightmm(const avalue: real);
@@ -190,6 +192,7 @@ type
    property xrange: real read fxrange write setxrange;
    property xserrange: real read fxserrange write setxserrange;
    property yrange: real read fyrange write setyrange;
+   property maxcount: integer read fmaxcount write setmaxcount default 0;
      //properties not used in asssign below
    property image_list: timagelist read fimage_list write setimage_list;
    property image_widthmm: real read fimage_widthmm write setimage_widthmm;
@@ -286,9 +289,13 @@ type
    property colorclient default cl_foreground;
  end;
  
- chartstatety = (chs_nocolorchart);
+ chartstatety = (chs_nocolorchart,
+                 chs_started,chs_full,chs_chartvalid); //for tchartrecorder
  chartstatesty = set of chartstatety;
+const
+ chartrecorderstatesmask  = [chs_started,chs_full,chs_chartvalid];
  
+type
  tcustomchart = class(tscrollbox,ichartdialcontroller,istatfile)
   private
    fxdials: tchartdialshorz;
@@ -363,6 +370,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure addsample(const asamples: array of real); virtual;
   published
    property traces: ttraces read ftraces write settraces;
    property colorchart;
@@ -383,7 +391,7 @@ type
  trecordertrace = class(tvirtualpersistent)
   private
    fybefore: integer;
-   foffset: real;
+   fstart: real;
    frange: real;
    fcolor: colorty;
    fwidth: integer;
@@ -391,7 +399,7 @@ type
   public
    constructor create; override;
   published
-   property offset: real read foffset write foffset;
+   property start: real read fstart write fstart;
    property range: real read frange write setrange;
    property color: colorty read fcolor write fcolor default cl_glyph;
    property width: integer read fwidth write fwidth default 0;
@@ -403,6 +411,9 @@ type
    class function getitemclasstype: persistentclassty; override;
  end;
   
+ chartrecorderoptionty = (cro_adddataright);
+ chartrecorderoptionsty = set of chartrecorderoptionty;
+ 
  tchartrecorder = class(tcustomchart)
   private
    fchart: tmaskedbitmap;
@@ -412,9 +423,11 @@ type
    fchartrect: rectty;
    fchartclientrect: rectty;
    fchartwindowrect: rectty;
+   fxref: integer;
    ftraces: trecordertraces;
-   fstarted: boolean;
-   fchartvalid: boolean;
+//   fstarted: boolean;
+//   fchartvalid: boolean;
+   foptions: chartrecorderoptionsty;
    procedure setsamplecount(const avalue: integer);
    procedure settraces(const avalue: trecordertraces);
   protected
@@ -429,6 +442,8 @@ type
    procedure addsample(const asamples: array of real);
    procedure clear;
   published
+   property options: chartrecorderoptionsty read foptions write foptions 
+                                                                   default [];
    property samplecount: integer read fsamplecount write setsamplecount 
                                 default 100;
    property traces: trecordertraces read ftraces write settraces;
@@ -1348,6 +1363,18 @@ begin
  end;
 end;
 
+procedure ttraces.setmaxcount(const avalue: integer);
+var
+ int1: integer;
+begin
+ fmaxcount:= avalue;
+ if not (csloading in tcustomchart(fowner).componentstate) then begin
+  for int1:= 0 to high(fitems) do begin
+   ttrace(fitems[int1]).maxcount:= avalue;
+  end;
+ end;
+end;
+
 procedure ttraces.createitem(const index: integer; var item: tpersistent);
 begin
  inherited;
@@ -1358,6 +1385,7 @@ begin
   xserrange:= self.fxserrange;
   xrange:= self.fxrange;
   yrange:= self.fyrange;
+  maxcount:= self.fmaxcount;
  end;
 end;
 
@@ -1371,6 +1399,7 @@ begin
    self.fxserrange:= fxserrange;
    self.fxrange:= fxrange;
    self.fyrange:= fyrange;
+   self.maxcount:= fmaxcount;
   end;
  end;
  inherited;
@@ -1713,6 +1742,19 @@ begin
  inherited;
 end;
 
+procedure tchart.addsample(const asamples: array of real);
+var
+ int1: integer;
+begin
+ int1:= high(asamples);
+ if int1 >= ftraces.count then begin
+  int1:= ftraces.count-1;
+ end;
+ for int1:= 0 to int1 do begin
+  ttrace(ftraces.fitems[int1]).addxseriesdata(asamples[int1]);
+ end;
+end;
+
 procedure tchart.settraces(const avalue: ttraces);
 begin
  ftraces.assign(avalue);
@@ -1827,7 +1869,7 @@ end;
 
 procedure tchartrecorder.chartchange;
 begin
- fchartvalid:= false;
+ exclude(fstate,chs_chartvalid);
  invalidate;
 end;
 
@@ -1842,8 +1884,9 @@ var
  int1: integer;
  bo1: boolean;
 begin
- if not (csloading in componentstate) and not fchartvalid then begin
-  fstarted:= false;
+ if not (csloading in componentstate) and not (chs_chartvalid in fstate) then begin
+  fstate:= fstate - chartrecorderstatesmask;
+//  fstarted:= false;
   bo1:= false;
   for int1:= 0 to fxdials.count -1 do begin
    if not (do_front in fxdials[int1].options) then begin
@@ -1869,6 +1912,10 @@ begin
    fstep:= {$ifdef FPC}real({$endif}fchartwindowrect.cx{$ifdef FPC}){$endif} / 
                                                                   fsamplecount;
    fstepsum:= 0;
+   fxref:= fchartwindowrect.x;
+   if cro_adddataright in foptions then begin
+    include(fstate,chs_full);
+   end;
    init(fcolorchart);
    canvas.capstyle:= cs_round;
    if masked then begin
@@ -1876,7 +1923,7 @@ begin
     mask.canvas.capstyle:= cs_round;
    end;
   end;
-  fchartvalid:= true;
+  include(fstate,chs_chartvalid);
  end;
 end;
 
@@ -1900,9 +1947,22 @@ end;
 
 procedure tchartrecorder.addsample(const asamples: array of real);
 var
- int1,int2: integer;
- ax,ay: integer;
  acanvas,mcanvas: tcanvas;
+ amasked: boolean;
+ 
+  procedure shift(const adist: integer);
+  begin
+   acanvas.copyarea(acanvas,fchartrect,makepoint(-adist,0));
+   acanvas.fillrect(makerect(fchartrect.cx-adist,0,adist,fchartrect.cy),fcolorchart);
+   if amasked then begin
+    mcanvas.copyarea(mcanvas,fchartrect,makepoint(-adist,0));
+    mcanvas.fillrect(makerect(fchartrect.cx-adist,0,adist,fchartrect.cy),cl_0);
+   end;
+  end; //shift
+
+var
+ int1,int2: integer;
+ startx,endx,y: integer;
 begin
  checkinit;
  fstepsum:= fstepsum + fstep;
@@ -1910,36 +1970,50 @@ begin
  fstepsum:= fstepsum - int1;
  with fchart do begin
   acanvas:= canvas;
-  ax:= fchartwindowrect.cx-int1;
-  acanvas.copyarea(acanvas,fchartrect,makepoint(-int1,0));
-  acanvas.fillrect(makerect(fchartrect.cx-int1,0,int1,fchartrect.cy),fcolorchart);
-  if masked then begin
+  amasked:= masked;
+  if amasked then begin
    mcanvas:= mask.canvas;
-   mcanvas.copyarea(mcanvas,fchartrect,makepoint(-int1,0));
-   mcanvas.fillrect(makerect(fchartrect.cx-int1,0,int1,fchartrect.cy),cl_0);
   end;
-  for int2:= 0 to high(ftraces.fitems) do begin
-   if int2 > high(asamples) then begin
-    break;
-   end;
-   with trecordertrace(ftraces.fitems[int2]) do begin
-    ay:= fchartrect.cy - round(fchartrect.cy * ((asamples[int2] - foffset)/frange));
-    if fstarted then begin
-     acanvas.linewidth:= fwidth;
-     acanvas.drawline(makepoint(ax,fybefore),
-                                   makepoint(fchartwindowrect.cx,ay),fcolor);
-     if masked then begin
-      mcanvas.linewidth:= fwidth;
-      mcanvas.drawline(makepoint(ax,fybefore),
-                                    makepoint(fchartwindowrect.cx,ay),cl_1);
-     end;
-    end;
-    fybefore:= ay;
-   end;
-  end;
-  invalidaterect(fchartclientrect);
-  fstarted:= true;
  end;
+ if chs_full in fstate then begin
+  startx:= fchartwindowrect.cx-int1;
+  endx:= fchartwindowrect.cx;
+  shift(int1);
+ end
+ else begin
+  startx:= fxref;
+  fxref:= fxref+int1;
+  endx:= fxref;
+  int1:= endx-fchartwindowrect.cx;
+  if int1 >= 0 then begin
+   if int1 <> 0 then begin //should not happen
+    shift(int1);
+    startx:= startx-int1;
+    endx:= endx-int1;
+   end;
+   include(fstate,chs_full);
+  end;
+ end;
+ int1:= high(asamples);
+ if int1 > high(ftraces.fitems) then begin
+  int1:= high(ftraces.fitems);
+ end;
+ for int2:= 0 to int1 do begin
+  with trecordertrace(ftraces.fitems[int2]) do begin
+   y:= fchartrect.cy - round(fchartrect.cy * ((asamples[int2] - fstart)/frange));
+   if chs_started in fstate then begin
+    acanvas.linewidth:= fwidth;
+    acanvas.drawline(makepoint(startx,fybefore),makepoint(endx,y),fcolor);
+    if amasked then begin
+     mcanvas.linewidth:= fwidth;
+     mcanvas.drawline(makepoint(startx,fybefore),makepoint(endx,y),cl_1);
+    end;
+   end;
+   fybefore:= y;
+  end;
+ end;
+ invalidaterect(fchartclientrect);
+ include(fstate,chs_started);
 end;
 
 procedure tchartrecorder.settraces(const avalue: trecordertraces);
@@ -1949,7 +2023,7 @@ end;
 
 procedure tchartrecorder.clear;
 begin
- fchartvalid:= false;
+ exclude(fstate,chs_chartvalid);
  invalidate;
 end;
 {

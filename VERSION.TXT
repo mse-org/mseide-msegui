@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2010-09-08
+ trecordertrace.offset -> start.
 2010-09-01
  tapplication.create() calls lock().
 2010-08-27
