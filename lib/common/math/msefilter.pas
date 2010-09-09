@@ -87,23 +87,6 @@ implementation
 uses
  sysutils;
 
-(*
-{ tdoublesingleinputs }
-
-constructor tdoublesingleinputs.create;
-begin
- inherited create(tdoubleinput);
- count:= 1;
-end;
-
-{ tdoublesingleoutputs }
-
-constructor tdoublesingleoutputs.create;
-begin
- inherited create(tdoubleoutput);
- count:= 1;
-end;
-*)
 { tdoublefiltercomp }
 
 constructor tdoublefiltercomp.create(aowner: tcomponent);
@@ -270,8 +253,6 @@ begin
      fdoublez[int2-1]:= fdoublez[int2] + i*po1^.im - o*po1^.re;
     end;
    end;
-//   inc(po1);
-//   fdoublez[fcoeffhigh-1]:=             i*po1^.im - o*po1^.re;
    outp1^:= o;
    inc(outp1);
    inc(inp1);
