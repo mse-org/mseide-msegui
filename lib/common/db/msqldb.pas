@@ -606,6 +606,7 @@ type
    procedure SetIndexDefs(AValue : TIndexDefs);
    procedure SetReadOnly(AValue : Boolean);
    procedure SetParseSQL(AValue : Boolean);
+   procedure setstatementtype(const avalue: tstatementtype);
    procedure SetUsePrimaryKeyAsKey(AValue : Boolean);
    procedure SetUpdateMode(AValue : TUpdateMode);
    procedure OnChangeSQL(const Sender : TObject);
@@ -728,7 +729,7 @@ type
     property UpdateMode : TUpdateMode read FUpdateMode write SetUpdateMode;
     property UsePrimaryKeyAsKey : boolean read FUsePrimaryKeyAsKey write SetUsePrimaryKeyAsKey;
     property StatementType : TStatementType read fstatementtype 
-                           write fstatementtype default stnone;
+                           write setstatementtype default stnone;
     Property DataSource : TDatasource Read GetDataSource Write SetDatasource;
     property database: tcustomsqlconnection read getdatabase1 write setdatabase1;
     
@@ -3203,17 +3204,23 @@ procedure TSQLQuery.SetParseSQL(AValue : Boolean);
 
 begin
  CheckInactive;
- fparsesql:= avalue;
- if not AValue then begin
-//  FReadOnly := True;
-  Filtered := False;
-//  FParseSQL := False;
-//  freequery; //why?
-  resetparsing;
+ if fparsesql <> avalue then begin
+  fparsesql:= avalue;
+  if not AValue then begin
+   Filtered:= False;
+   resetparsing;
+  end;
+  unprepare; //refresh sqlparser
  end;
-// else begin
-//  FParseSQL := True;
-// end;
+end;
+
+procedure tsqlquery.setstatementtype(const avalue: tstatementtype);
+begin
+ CheckInactive;
+ if fstatementtype <> avalue then begin
+  fstatementtype:= avalue;
+  unprepare; //refresh sqlparser
+ end;
 end;
 
 procedure TSQLQuery.SetUsePrimaryKeyAsKey(AValue : Boolean);
