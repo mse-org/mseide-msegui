@@ -15,7 +15,8 @@ interface
 
 implementation
 uses
- {$ifdef FPC}msefft,{$endif}msedesignintf,msefilter,msepropertyeditors;
+ {$ifdef FPC}msefft,{$endif}msedesignintf,msesignal,msefilter,
+ msepropertyeditors;
 {
 type
  tdoublesourceeditor = class(tlinkedobjectpropertyeditor)
@@ -24,10 +25,12 @@ type
 procedure register;
 begin
 {$ifdef FPC}
- registercomponents('Math',[tfft,tfirfilter,tiirfilter]);
+ registercomponents('Math',[tfft,tfirfilter,tiirfilter,tsigout,tsigin]);
  registercomponenttabhints(['Math'],['Experimental Mathematical Components']);
- registerpropertyeditor(typeinfo(tdoubleconnection),tdoublezcomp,'',
+ registerpropertyeditor(typeinfo(tdoubleconn),tdoublezcomp,'',
                                                    tsubcomponentpropertyeditor);
+// registerpropertyeditor(typeinfo(tdoubleconn),tsigout,'',
+//                                                   tsubcomponentpropertyeditor);
 {$endif}
 end;
 

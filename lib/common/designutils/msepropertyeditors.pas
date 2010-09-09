@@ -1093,7 +1093,7 @@ function tpropertyeditors.getitems(
 begin
  result:= ppropertyeditorinfoty(getitempo(index));
 end;
-var testvar: string;
+
 function tpropertyeditors.geteditorclass(apropertytype: ptypeinfo;
                apropertyownerclass: tclass;
                apropertyname: string): propertyeditorclassty;
@@ -1116,7 +1116,6 @@ var
   typeclasslevel:= atypeclasslevel;
   propertyeditorlevel:= po1^.editorclasslevel;
   result:= po1^.editorclass;
-testvar:= result.classname;
  end;
 
 begin
