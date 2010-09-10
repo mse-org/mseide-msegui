@@ -271,7 +271,14 @@ procedure TIBCursor.close;
 begin
  inherited;
  if fopen then begin
-  if isc_dsql_free_statement(@status, @statement, dsql_close) <> 0 then begin
+  if (isc_dsql_free_statement(@status, @statement, dsql_close) <> 0) and
+         not (ibo_embedded in fconnection.foptions)  then begin 
+                              //bug in embedded? returns 
+                              // -Dynamic SQL Error
+                              // -SQL error code = -501
+                              // -Attempt to reclose a closed cursor
+                              // after INSERT ... RETURNING
+ 
    fconnection.checkerror('close cursor', status{,fname});
   end;
   fopen:= false;
