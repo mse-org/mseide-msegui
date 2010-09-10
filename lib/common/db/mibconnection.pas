@@ -54,10 +54,13 @@ type
    protected
     fconnection: tibconnection;
     fopen: boolean;
+    ffetched: boolean;
     Status               : array [0..19] of ISC_STATUS;
     Statement            : pointer;
+    fibstatementtype: integer;
     SQLDA                : PXSQLDA;
     in_SQLDA             : PXSQLDA;
+    fexecsqlda: pxsqlda;
     ParamBinding         : array of integer;
     paramtypes: fieldtypearty;
    public
@@ -270,15 +273,8 @@ type
 procedure TIBCursor.close;
 begin
  inherited;
- if fopen then begin
-  if (isc_dsql_free_statement(@status, @statement, dsql_close) <> 0) and
-         not (ibo_embedded in fconnection.foptions)  then begin 
-                              //bug in embedded? returns 
-                              // -Dynamic SQL Error
-                              // -SQL error code = -501
-                              // -Attempt to reclose a closed cursor
-                              // after INSERT ... RETURNING
- 
+ if fopen and (fibstatementtype <> isc_info_sql_stmt_exec_procedure) then begin
+  if isc_dsql_free_statement(@status, @statement, dsql_close) <> 0 then begin 
    fconnection.checkerror('close cursor', status{,fname});
   end;
   fopen:= false;
@@ -415,7 +411,6 @@ begin
   end;
 end;
 
-
 procedure TIBConnection.internalCommitRetaining(trans : TSQLHandle);
 begin
   with trans as TIBtrans do
@@ -489,7 +484,6 @@ begin
  ReleaseIBase60;
 {$EndIf}
 end;
-
 
 procedure TIBConnection.SetDBDialect;
 const
@@ -664,9 +658,12 @@ var dh    : pointer;
  TransLen: word;
  TransType: TFieldType;
  str1: string;
-
+ buf1: array[0..15] of byte;
+ int1: integer;
+ by1: byte;
 begin
  with cursor as TIBcursor do begin
+  ffetched:= false;
   dh := GetHandle;
   if isc_dsql_allocate_statement(@Status, @dh, @Statement) <> 0 then begin
    CheckError('PrepareStatement', Status);
@@ -685,11 +682,21 @@ begin
    isc_dsql_free_statement(@fstatus, @statement, dsql_drop);
    CheckError('PrepareStatement', Status);
   end;
+  by1:= isc_info_sql_stmt_type;
+  if isc_dsql_sql_info(@fstatus,@statement,sizeof(by1),@by1,
+                 sizeof(buf1),@buf1[0]) <> 0 then begin
+   isc_dsql_free_statement(@fstatus, @statement, dsql_drop);
+   CheckError('PrepareStatement get info', Status);
+  end;
+  if buf1[0] = isc_info_sql_stmt_type then begin
+   int1:= isc_vax_integer(@buf1[1], 2);
+   fibstatementtype:= isc_vax_integer(@buf1[3],int1);
+  end;
   FPrepared := True;
   if assigned(AParams) and (AParams.count > 0) then begin
    AllocSQLDA(in_SQLDA,Length(ParamBinding));
    if isc_dsql_describe_bind(@Status, @Statement, 1, in_SQLDA) <> 0 then begin
-     CheckError('PrepareStatement', Status);
+     CheckError('PrepareStatement bind', Status);
    end;
    if in_SQLDA^.SQLD > in_SQLDA^.SQLN then begin
      DatabaseError(SParameterCountIncorrect,self);
@@ -712,6 +719,7 @@ begin
     end;
    end;
   end;
+  fexecsqlda:= nil;
   if FStatementType in datareturningtypes then begin
   ///////////////////////      FPrepared := False;
    if isc_dsql_describe(@Status, @Statement, 1, SQLDA) <> 0 then begin
@@ -734,6 +742,9 @@ begin
      New(SQLInd);
     end;
    end;
+  end;
+  if fibstatementtype = isc_info_sql_stmt_exec_procedure then begin
+   fexecsqlda:= sqlda;
   end;
  end;
 end;
@@ -789,7 +800,7 @@ begin
  end;
  with TIBCursor(cursor) do begin
   if isc_dsql_execute2(@Status,@cursor.ftrans,
-                        @Statement,1,in_SQLDA,nil) <> 0 then begin
+                        @Statement,1,in_SQLDA,fexecsqlda) <> 0 then begin
    CheckError('Execute', Status);
   end;
   fopen:= true;  
@@ -1006,13 +1017,19 @@ var
  retcode: integer;
 begin
  with TIBCursor(cursor) do begin
-  retcode:= isc_dsql_fetch(@Status,@Statement,1,SQLDA);
-  if (retcode <> 0) and (retcode <> 100) and (retcode <> 335544364) then begin
-                     //request synchronizing error, FireBird bug?
-   CheckError('Fetch',Status);
+  if fibstatementtype = isc_info_sql_stmt_exec_procedure then begin
+   result:= not ffetched;
+   ffetched:= true;
+  end
+  else begin
+   retcode:= isc_dsql_fetch(@Status,@Statement,1,SQLDA);
+   if (retcode <> 0) and (retcode <> 100) and (retcode <> 335544364) then begin
+                      //request synchronizing error, FireBird bug?
+    CheckError('Fetch',Status);
+   end;
+   Result:= retcode = 0;
   end;
  end;
- Result:= retcode = 0;
 end;
 
 procedure TIBConnection.SetParameters(cursor: TSQLCursor; AParams: TmseParams);

@@ -26,7 +26,7 @@ procedure register;
 begin
 {$ifdef FPC}
  registercomponents('Math',[tfft,tsigfir,tsigiir,tsigout,tsigin,
-                            tsigadd,tsigmult]);
+                            tsigadd,tsigmult,tsigcontroller]);
  registercomponenttabhints(['Math'],['Experimental Mathematical Components']);
  registerpropertyeditor(typeinfo(tdoubleconn),tdoublezcomp,'',
                                                    tsubcomponentpropertyeditor);

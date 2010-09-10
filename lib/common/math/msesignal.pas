@@ -14,14 +14,17 @@
 //
 
 unit msesignal;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- msedatalist,mseclasses,classes,msetypes,msearrayprops;
+ msedatalist,mseclasses,classes,msetypes,msearrayprops,mseevent;
 type
  tcustomsigcomp = class;
-
  tdoublesigcomp = class;
+ tsigcontroller = class;
+ 
+ isigclient = interface(ievent)
+ end;
  
  tdoubleconn = class(tmsecomponent) 
         //no solution found to link to streamed tpersistent or tobject,
@@ -75,8 +78,10 @@ type
  tsigcomp = class(tcustomsigcomp)
  end;
 
- tdoublesigcomp = class(tsigcomp)
+ tdoublesigcomp = class(tsigcomp,isigclient)
   private
+   fcontroller: tsigcontroller;
+   procedure setcontroller(const avalue: tsigcontroller);
   protected
    procedure setsig1(const sender: tdoubleinputconn;
                                     var asource: doublearty); virtual;
@@ -87,6 +92,7 @@ type
    destructor destroy; override;
    procedure clear; virtual;
   published
+   property controller: tsigcontroller read fcontroller write setcontroller;
  end;
  
  tsigconnection = class(tdoublesigcomp)
@@ -236,6 +242,9 @@ type
   protected
    procedure processinout(const acount: integer;
              var ainp: doublepoarty; var aoutp: pdouble); override;
+ end;
+
+ tsigcontroller = class(tmsecomponent)
  end;
  
 procedure createsigbuffer(var abuffer: doublearty; const asize: integer);
@@ -419,6 +428,16 @@ procedure tdoublesigcomp.setsig(const sender: tdoubleinputconn;
                const asource: doublearty);
 begin
  //dummy
+end;
+
+procedure setsigcontroller(const sender: isigclient; 
+          const avalue: tsigcontroller; var dest: tsigcontroller);
+begin
+end;
+
+procedure tdoublesigcomp.setcontroller(const avalue: tsigcontroller);
+begin
+ setsigcontroller(isigclient(self),avalue,fcontroller);
 end;
 
 { tdoublezcomp }

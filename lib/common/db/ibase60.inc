@@ -2313,7 +2313,9 @@ var
   isc_dsql_insert : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:word; _para4:PXSQLDA):ISC_STATUS; extdecl;
   isc_dsql_prepare : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:Pisc_stmt_handle; _para4:word; _para5:Pchar;_para6:word; _para7:PXSQLDA):ISC_STATUS; extdecl;
   isc_dsql_set_cursor_name : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:Pchar; _para4:word):ISC_STATUS; extdecl;
-  isc_dsql_sql_info : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle; _para3:smallint; _para4:Pchar; _para5:smallint;_para6:Pchar):ISC_STATUS; extdecl;
+  isc_dsql_sql_info : function (_para1:PISC_STATUS; _para2:Pisc_stmt_handle;
+   _para3:smallint; _para4:Pchar; _para5:smallint;
+                                 _para6:Pchar):ISC_STATUS; extdecl;
   isc_encode_date : procedure (_para1:pointer; _para2:PISC_QUAD); extdecl;
   isc_encode_sql_date : procedure (_para1:pointer; _para2:PISC_DATE); extdecl;
   isc_encode_sql_time : procedure (_para1:pointer; _para2:PISC_TIME); extdecl;
