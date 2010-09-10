@@ -16,7 +16,15 @@ uses
  msegraphutils,
  msewidgets,msesimplewidgets,msedial,msebitmap,msemenus,mseevent,
  msedatalist,msestatfile,msestat,msestrings;
- 
+
+type
+ chartstatety = (chs_nocolorchart,chs_hasdialscroll,chs_hasdialshift,
+                 chs_started,chs_full,chs_chartvalid); //for tchartrecorder
+ chartstatesty = set of chartstatety;
+const
+ chartrecorderstatesmask  = [chs_hasdialscroll,chs_hasdialshift,chs_started,
+                             chs_full,chs_chartvalid];
+
 type
  tcustomchart = class;
  tracestatety = (trs_datapointsvalid);
@@ -293,14 +301,6 @@ type
    property colorclient default cl_foreground;
  end;
  
- chartstatety = (chs_nocolorchart,chs_hasdialscroll,chs_hasdialshift,
-                 chs_started,chs_full,chs_chartvalid); //for tchartrecorder
- chartstatesty = set of chartstatety;
-const
- chartrecorderstatesmask  = [chs_hasdialscroll,chs_hasdialshift,chs_started,
-                             chs_full,chs_chartvalid];
- 
-type
  tcustomchart = class(tscrollbox,ichartdialcontroller,istatfile)
   private
    fxdials: tchartdialshorz;
@@ -1392,7 +1392,7 @@ var
  mask: {$ifdef FPC}longword{$else}byte{$endif};
 begin
  if foptions <> avalue then begin
-  mask:= longword(avalue) xor 
+  mask:= {$ifdef FPC}longword{$else}byte{$endif}(avalue) xor 
                  {$ifdef FPC}longword{$else}byte{$endif}(foptions);
   foptions:= avalue;
   if not (csloading in tcustomchart(fowner).componentstate) then begin

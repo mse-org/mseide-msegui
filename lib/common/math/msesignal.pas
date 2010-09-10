@@ -29,7 +29,7 @@ type
   protected
    fowner: tdoublesigcomp;
   public
-   constructor create(const aowner: tdoublesigcomp); virtual; reintroduce;
+   constructor create(const aowner: tdoublesigcomp); reintroduce; virtual;
  end;
  
  tdoubleinputconn = class;
@@ -161,15 +161,15 @@ type
                     var ainp,aoutp: pdouble); virtual; abstract;
    procedure zcountchanged; virtual;
    procedure setsig1(const sender: tdoubleinputconn;
-                                    var asource: doublearty); override;
+                                    var asource: doublearty); overload; override;
    procedure setsig(const sender: tdoubleinputconn;
-                                    const asource: doublearty); override;
+                                    const asource: doublearty); overload; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure clear; override;
-   procedure setsig(const source: doublearty);
-   procedure getsig1(var dest: doublearty);
+   procedure setsig(const source: doublearty); overload;
+   procedure getsig1(var dest: doublearty); overload;
    function getsig: doublearty;
    procedure updatesig(var inout: doublearty);
    property zcount: integer read fzcount default 0;
@@ -278,7 +278,7 @@ begin
    removeitem(pointerarty(dest.fdestinations),sender);
   end;
  end;
- tmsecomponent1(sender).setlinkedvar(avalue,dest);
+ tmsecomponent1(sender).setlinkedvar(avalue,tmsecomponent(dest));
  if dest <> nil then begin
   additem(pointerarty(dest.fdestinations),sender);
  end;
@@ -661,7 +661,7 @@ var
  po1: pdouble;
 begin
 //todo: optimize
- stackarray(asource,sender.fbuffer);
+ stackarray(realarty(asource),realarty(sender.fbuffer));
  if not sender.fhasdata then begin
   sender.fhasdata:= true;
   inc(finpdatacount);
