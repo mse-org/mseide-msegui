@@ -101,6 +101,7 @@ type
  realarty = array of realty;
  prealarty = ^realarty;
  doublearty = array of double;
+ doublepoarty = array of pdouble;
  pdoublearty = ^doublearty;
  doubleararty = array of doublearty;
  currencyarty = array of currency;

@@ -592,7 +592,7 @@ type
  ificelleventty = procedure(const sender: tobject; 
                            var info: ificelleventinfoty) of object;
 
- tificolitem = class(tmsecomponentitem)
+ tificolitem = class(tmsecomponentlinkitem)
   private
    function getlink: tifivaluelinkcomp;
    procedure setlink(const avalue: tifivaluelinkcomp);
@@ -600,7 +600,7 @@ type
    property link: tifivaluelinkcomp read getlink write setlink;
  end;
  
- tifilinkcomparrayprop = class(tmsecomponentarrayprop)
+ tifilinkcomparrayprop = class(tmsecomponentlinkarrayprop)
   private
    function getitems(const index: integer): tificolitem;
   public 

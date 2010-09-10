@@ -25,11 +25,12 @@ type
 procedure register;
 begin
 {$ifdef FPC}
- registercomponents('Math',[tfft,tfirfilter,tiirfilter,tsigout,tsigin]);
+ registercomponents('Math',[tfft,tsigfir,tsigiir,tsigout,tsigin,
+                            tsigadd,tsigmult]);
  registercomponenttabhints(['Math'],['Experimental Mathematical Components']);
  registerpropertyeditor(typeinfo(tdoubleconn),tdoublezcomp,'',
                                                    tsubcomponentpropertyeditor);
-// registerpropertyeditor(typeinfo(tdoubleconn),tsigout,'',
+// registerpropertyeditor(typeinfo(tdoubleconn),tdoubleinpconnitem,'',
 //                                                   tsubcomponentpropertyeditor);
 {$endif}
 end;

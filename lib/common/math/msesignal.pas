@@ -9,26 +9,27 @@
 }
 
 //
-//not finished!!!!
+// todo: optimize for realtime, remove the OOP approach where
+// it degrades performance. Implement recursive systems
 //
 
 unit msesignal;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msedatalist,mseclasses,classes,msetypes;
+ msedatalist,mseclasses,classes,msetypes,msearrayprops;
 type
- tcustomsignalcomp = class;
+ tcustomsigcomp = class;
 
- tdoublesignalcomp = class;
+ tdoublesigcomp = class;
  
  tdoubleconn = class(tmsecomponent) 
-        //no solution fond to link to streamed tpersistent or tobject,
+        //no solution found to link to streamed tpersistent or tobject,
         //fork of classes.pp necessary. :-(
   protected
-   fowner: tdoublesignalcomp;
+   fowner: tdoublesigcomp;
   public
-   constructor create(const aowner: tdoublesignalcomp); virtual; reintroduce;
+   constructor create(const aowner: tdoublesigcomp); virtual; reintroduce;
  end;
  
  tdoubleinputconn = class;
@@ -38,7 +39,9 @@ type
   protected
    fdestinations: doubleinputconnarty;
   public
-   constructor create(const aowner: tdoublesignalcomp); override;
+   constructor create(const aowner: tdoublesigcomp); override;
+
+    //for systems without recursion
    procedure setsig1(var asource: doublearty); //asource is invalid afterwards
    procedure setsig(const asource: doublearty);
  end; 
@@ -48,26 +51,31 @@ type
    fsource: tdoubleoutputconn;
    procedure setsource(const avalue: tdoubleoutputconn);
   protected
+   fbuffer: doublearty;
+   fhasdata: boolean;
   public
-   constructor create(const aowner: tdoublesignalcomp); override;
+   constructor create(const aowner: tdoublesigcomp); override;
    destructor destroy; override;
-   procedure setsig1(var asource: doublearty); virtual;
+   
+    //for systems without recursion
+   procedure setsig1(var asource: doublearty); virtual; 
                        //asource is invalid afterwards
    procedure setsig(const asource: doublearty); virtual;
+   
   published
    property source: tdoubleoutputconn read fsource write setsource;
  end;
 
- tcustomsignalcomp = class(tmsecomponent)
+ tcustomsigcomp = class(tmsecomponent)
   protected
    procedure coeffchanged(const sender: tdatalist;
                                  const aindex: integer); virtual;
  end;
 
- tsignalcomp = class(tcustomsignalcomp)
+ tsigcomp = class(tcustomsigcomp)
  end;
 
- tdoublesignalcomp = class(tsignalcomp)
+ tdoublesigcomp = class(tsigcomp)
   private
   protected
    procedure setsig1(const sender: tdoubleinputconn;
@@ -81,7 +89,7 @@ type
   published
  end;
  
- tsigconnection = class(tdoublesignalcomp)
+ tsigconnection = class(tdoublesigcomp)
  end;
  
  tsigin = class(tsigconnection)
@@ -121,21 +129,21 @@ type
  
  trealcoeff = class(trealdatalist)
   protected
-   fowner: tcustomsignalcomp;
+   fowner: tcustomsigcomp;
    procedure change(const aindex: integer); override;
   public
-   constructor create(const aowner: tcustomsignalcomp);
+   constructor create(const aowner: tcustomsigcomp);
  end; 
 
  tcomplexcoeff = class(tcomplexdatalist)
   protected
-   fowner: tcustomsignalcomp;
+   fowner: tcustomsigcomp;
    procedure change(const aindex: integer); override;
   public
-   constructor create(const aowner: tcustomsignalcomp);
+   constructor create(const aowner: tcustomsigcomp);
  end; 
 
- tdoublezcomp = class(tdoublesignalcomp) //single input, single output
+ tdoublezcomp = class(tdoublesigcomp) //single input, single output
   private
    procedure setinput(const avalue: tdoubleinputconn);
    procedure setoutput(const avalue: tdoubleoutputconn);
@@ -165,11 +173,71 @@ type
    function getsig: doublearty;
    procedure updatesig(var inout: doublearty);
    property zcount: integer read fzcount default 0;
+   property output: tdoubleoutputconn read foutput write setoutput;
   published
    property input: tdoubleinputconn read finput write setinput;
-   property output: tdoubleoutputconn read foutput write setoutput;
  end;
-
+{                           
+ tdoubleinpconnitem = class(tsubcomponentitem)
+  private
+   function getitem: tdoubleinputconn;
+   procedure setitem(const avalue: tdoubleinputconn);
+  protected
+   function createitem: tcomponent; override;
+  published
+   property item: tdoubleinputconn read getitem write setitem;
+ end;
+ }
+ tdoubleinpconnarrayprop = class(tpersistentarrayprop)
+  private
+   fowner: tdoublesigcomp;
+   function getitems(const index: integer): tdoubleinputconn;
+  protected
+   procedure createitem(const index: integer; var item: tpersistent); override;
+  public
+   constructor create(const aowner: tdoublesigcomp); reintroduce;
+   property items[const index: integer]: tdoubleinputconn read getitems; default;
+ end;
+ 
+ tsigmultiinp = class(tdoublesigcomp)
+  private
+   finputs: tdoubleinpconnarrayprop;
+   foutput: tdoubleoutputconn;
+    //local variables
+   dar: doublearty;
+   pdar: doublepoarty;
+   procedure setinputs(const avalue: tdoubleinpconnarrayprop);
+   procedure setoutput(const avalue: tdoubleoutputconn);
+  protected
+   finpdatacount: integer;
+   procedure processinout(const acount: integer;
+             var ainp: doublepoarty; var aoutp: pdouble); virtual; abstract;
+    //for systems without recursion
+   procedure setsig1(const sender: tdoubleinputconn;
+                                    var asource: doublearty); override;
+   procedure setsig(const sender: tdoubleinputconn;
+                                    const asource: doublearty); override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure clear; override;
+   property output: tdoubleoutputconn read foutput write setoutput;
+  published
+   property inputs: tdoubleinpconnarrayprop read finputs write setinputs;
+ end;
+ 
+ tsigadd = class(tsigmultiinp)
+  protected
+   procedure processinout(const acount: integer;
+             var ainp: doublepoarty; var aoutp: pdouble); override;
+ end;
+ 
+ tsigmult = class(tsigmultiinp)
+  protected
+   procedure processinout(const acount: integer;
+             var ainp: doublepoarty; var aoutp: pdouble); override;
+ end;
+ 
 procedure createsigbuffer(var abuffer: doublearty; const asize: integer);
 procedure createsigarray(out abuffer: doublearty; const asize: integer);
 procedure setsourceconn(const sender: tmsecomponent;
@@ -218,7 +286,7 @@ end;
 
 { trealcoeff }
 
-constructor trealcoeff.create(const aowner: tcustomsignalcomp);
+constructor trealcoeff.create(const aowner: tcustomsigcomp);
 begin
  fowner:= aowner;
  inherited create;
@@ -232,7 +300,7 @@ end;
 
 { tcomplexcoeff }
 
-constructor tcomplexcoeff.create(const aowner: tcustomsignalcomp);
+constructor tcomplexcoeff.create(const aowner: tcustomsigcomp);
 begin
  fowner:= aowner;
  inherited create;
@@ -244,9 +312,9 @@ begin
  inherited;
 end;
 
-{ tcustomsignalcomp }
+{ tcustomsigcomp }
 
-procedure tcustomsignalcomp.coeffchanged(const sender: tdatalist;
+procedure tcustomsigcomp.coeffchanged(const sender: tdatalist;
                const aindex: integer);
 begin
  //dummy
@@ -254,7 +322,7 @@ end;
 
 { tdoublconn }
 
-constructor tdoubleconn.create(const aowner: tdoublesignalcomp);
+constructor tdoubleconn.create(const aowner: tdoublesigcomp);
 begin
  fowner:= aowner;
  inherited create(aowner);
@@ -263,7 +331,7 @@ end;
 
 { tdoubleoutputconn }
 
-constructor tdoubleoutputconn.create(const aowner: tdoublesignalcomp);
+constructor tdoubleoutputconn.create(const aowner: tdoublesigcomp);
 begin
  inherited;
  include (fmsecomponentstate,cs_subcompref);
@@ -296,7 +364,7 @@ end;
 
 { tdoubleinputconn }
 
-constructor tdoubleinputconn.create(const aowner: tdoublesignalcomp);
+constructor tdoubleinputconn.create(const aowner: tdoublesigcomp);
 begin
  inherited;
  name:= 'input';
@@ -323,31 +391,31 @@ begin
  fowner.setsig(self,asource);
 end;
 
-{ tdoublesignalcomp }
+{ tdoublesigcomp }
 
-constructor tdoublesignalcomp.create(aowner: tcomponent);
+constructor tdoublesigcomp.create(aowner: tcomponent);
 begin
  inherited;
 end;
  
-destructor tdoublesignalcomp.destroy;
+destructor tdoublesigcomp.destroy;
 begin
  clear;
  inherited;
 end;
 
-procedure tdoublesignalcomp.clear;
+procedure tdoublesigcomp.clear;
 begin
  //dummy
 end;
 
-procedure tdoublesignalcomp.setsig1(const sender: tdoubleinputconn;
+procedure tdoublesigcomp.setsig1(const sender: tdoubleinputconn;
                var asource: doublearty);
 begin
  //dummy
 end;
 
-procedure tdoublesignalcomp.setsig(const sender: tdoubleinputconn;
+procedure tdoublesigcomp.setsig(const sender: tdoubleinputconn;
                const asource: doublearty);
 begin
  //dummy
@@ -539,6 +607,171 @@ end;
 procedure tsigin.setsig1(var asource: doublearty);
 begin
  foutput.setsig1(asource);
+end;
+
+{ tsigmultiinp }
+
+constructor tsigmultiinp.create(aowner: tcomponent);
+begin
+ foutput:= tdoubleoutputconn.create(self);
+ inherited;
+ finputs:= tdoubleinpconnarrayprop.create(self);
+end;
+
+destructor tsigmultiinp.destroy;
+begin
+ inherited;
+ finputs.free;
+end;
+
+procedure tsigmultiinp.clear;
+var
+ int1: integer;
+begin
+ dar:= nil;
+ pdar:= nil;
+ finpdatacount:= 0;
+ inherited;
+ for int1:= 0 to high(finputs.fitems) do begin
+  tdoubleinputconn(finputs.fitems[int1]).fbuffer:= nil;
+ end;
+end;
+
+procedure tsigmultiinp.setinputs(const avalue: tdoubleinpconnarrayprop);
+begin
+ finputs.assign(avalue);
+end;
+
+procedure tsigmultiinp.setoutput(const avalue: tdoubleoutputconn);
+begin
+ foutput.assign(avalue);
+end;
+
+procedure tsigmultiinp.setsig(const sender: tdoubleinputconn;
+               const asource: doublearty);
+begin
+ dar:= copy(asource);
+ setsig1(sender,dar);
+end;
+
+procedure tsigmultiinp.setsig1(const sender: tdoubleinputconn;
+               var asource: doublearty);
+var
+ int1,int2,int3: integer;
+ po1: pdouble;
+begin
+//todo: optimize
+ stackarray(asource,sender.fbuffer);
+ if not sender.fhasdata then begin
+  sender.fhasdata:= true;
+  inc(finpdatacount);
+  if finpdatacount >= finputs.count then begin
+   int2:= bigint;
+   setlength(pdar,finputs.count);
+   for int1:= 0 to high(finputs.fitems) do begin
+    with tdoubleinputconn(finputs.fitems[int1]) do begin
+     int3:= high(fbuffer);
+     if int3 < int2 then begin
+      int2:= int3;
+     end;
+     pdar[int1]:= pointer(fbuffer);
+    end;
+   end;
+   inc(int2);
+//   createsigbuffer(asource,int2);
+   po1:= pointer(asource);
+   processinout(int2,pdar,po1);
+   for int1:= 0 to high(finputs.fitems) do begin
+    with tdoubleinputconn(finputs.fitems[int1]) do begin
+     if length(fbuffer) <= int2 then begin
+      fbuffer:= nil;
+      fhasdata:= false;
+      dec(finpdatacount);
+     end
+     else begin
+      move(fbuffer[int2],fbuffer[0],(length(fbuffer)-int2)*sizeof(double));
+     end;
+    end;
+   end;
+   foutput.setsig1(asource);
+  end;
+ end;
+end;
+
+{ tdoubleinpconnarrayprop }
+
+constructor tdoubleinpconnarrayprop.create(const aowner: tdoublesigcomp);
+begin
+ fowner:= aowner;
+ inherited create(nil);
+end;
+
+procedure tdoubleinpconnarrayprop.createitem(const index: integer;
+               var item: tpersistent);
+begin
+ item:= tdoubleinputconn.create(nil);
+ tdoubleinputconn(item).fowner:= fowner;
+end;
+
+function tdoubleinpconnarrayprop.getitems(const index: integer): tdoubleinputconn;
+begin
+ result:= tdoubleinputconn(inherited getitems(index));
+end;
+
+(*
+{ tdoubleinpconnitem }
+
+function tdoubleinpconnitem.createitem: tcomponent;
+begin
+ result:= tdoubleinputconn.create(tdoublesigcomp(fowner));
+end;
+
+function tdoubleinpconnitem.getitem: tdoubleinputconn;
+begin
+ result:= tdoubleinputconn(fitem);
+end;
+
+procedure tdoubleinpconnitem.setitem(const avalue: tdoubleinputconn);
+begin
+ fitem.assign(avalue);
+end;
+*)
+{ tsigadd }
+
+procedure tsigadd.processinout(const acount: integer; var ainp: doublepoarty;
+               var aoutp: pdouble);
+var
+ int1,int2: integer;
+ rea1: real;
+begin
+ for int1:= 0 to acount - 1 do begin
+  rea1:= 0;
+  for int2:= 0 to high(ainp) do begin
+   rea1:= rea1 + ainp[int2]^;
+   inc(ainp[int2]);
+  end;
+  aoutp^:= rea1;
+  inc(aoutp);
+ end;
+end;
+
+{ tsigmult }
+
+procedure tsigmult.processinout(const acount: integer; var ainp: doublepoarty;
+               var aoutp: pdouble);
+var
+ int1,int2: integer;
+ rea1: real;
+begin
+ for int1:= 0 to acount - 1 do begin
+  rea1:= 1;
+  for int2:= 0 to high(ainp) do begin
+   rea1:= rea1 * ainp[int2]^;
+   inc(ainp[int2]);
+  end;
+  aoutp^:= rea1;
+  inc(aoutp);
+ end;
 end;
 
 end.

@@ -54,7 +54,7 @@ type
 //     b0       b1        b2        bN-1
 //     +---------+---------+---------+--->
 //
- tfirfilter = class(tdoublefiltercomp)
+ tsigfir = class(tdoublefiltercomp)
   private
    function getcoeff: trealcoeff;
    procedure setcoeff(const avalue: trealcoeff);
@@ -71,7 +71,7 @@ type
 //     b0       b1        b2        bN-1
 // >---+---------+---------+---------+
 //
- tiirfilter = class(tdoublefiltercomp)
+ tsigiir = class(tdoublefiltercomp)
   private
    function getcoeff: tcomplexcoeff;
    procedure setcoeff(const avalue: tcomplexcoeff);
@@ -128,26 +128,26 @@ begin
  fsections.assign(avalue);
 end;
 
-{ tfirfilter }
+{ tsigfir }
 
-procedure tfirfilter.createcoeff;
+procedure tsigfir.createcoeff;
 begin
  fcoeff:= trealcoeff.create(self);
  trealcoeff(fcoeff).defaultzero:= true;
  trealcoeff(fcoeff).min:= -bigreal;
 end;
 
-function tfirfilter.getcoeff: trealcoeff;
+function tsigfir.getcoeff: trealcoeff;
 begin
  result:= trealcoeff(fcoeff);
 end;
 
-procedure tfirfilter.setcoeff(const avalue: trealcoeff);
+procedure tsigfir.setcoeff(const avalue: trealcoeff);
 begin
  inherited setcoeff(avalue);
 end;
 
-procedure tfirfilter .processinout(const acount: integer; var ainp, aoutp: pdouble);
+procedure tsigfir.processinout(const acount: integer; var ainp, aoutp: pdouble);
 var                             //todo: optimize
  int1,int2,int3: integer;
  ar1: doublearty;
@@ -206,26 +206,26 @@ begin
  end;
 end;
 
-{ tiirfilter }
+{ tsigiir }
 
-procedure tiirfilter.createcoeff;
+procedure tsigiir.createcoeff;
 begin
  fcoeff:= tcomplexcoeff.create(self);
  tcomplexcoeff(fcoeff).defaultzero:= true;
  tcomplexcoeff(fcoeff).min:= -bigreal;
 end;
 
-function tiirfilter.getcoeff: tcomplexcoeff;
+function tsigiir.getcoeff: tcomplexcoeff;
 begin
  result:= tcomplexcoeff(fcoeff);
 end;
 
-procedure tiirfilter.setcoeff(const avalue: tcomplexcoeff);
+procedure tsigiir.setcoeff(const avalue: tcomplexcoeff);
 begin
  inherited setcoeff(avalue);
 end;
 
-procedure tiirfilter.processinout(const acount: integer; var ainp: pdouble;
+procedure tsigiir.processinout(const acount: integer; var ainp: pdouble;
                var aoutp: pdouble);
 var 
  int1,int2,int3: integer;

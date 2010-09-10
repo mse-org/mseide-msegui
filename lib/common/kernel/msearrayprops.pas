@@ -299,36 +299,35 @@ type
  end;
  persistentarraypropclassty = class of tpersistentarrayprop;
 
- tmsecomponentarrayprop = class;
+ tmsecomponentlinkarrayprop = class;
  
- tmsecomponentitem = class(tvirtualpersistent)
+ tmsecomponentlinkitem = class(tvirtualpersistent)
   private
    fitem: tmsecomponent;
    procedure setitem(const avalue: tmsecomponent);
   protected
-   fprop: tmsecomponentarrayprop;
+   fprop: tmsecomponentlinkarrayprop;
    property item: tmsecomponent read fitem write setitem;
   public
    destructor destroy; override;
   published
  end;
 
- msecomponentitemclassty = class of tmsecomponentitem; 
+ msecomponentlinkitemclassty = class of tmsecomponentlinkitem; 
  
- tmsecomponentarrayprop = class(tpersistentarrayprop)
+ tmsecomponentlinkarrayprop = class(tpersistentarrayprop)
   private
 //   function getitems(const index: integer): tmsecomponent;
 //   procedure setitems(const index: integer; const avalue: tmsecomponent);
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
-   constructor create(const aitemclasstype: msecomponentitemclassty);
+   constructor create(const aitemclasstype: msecomponentlinkitemclassty);
    class function getitemclasstype: persistentclassty; override;
 //   property items[const index: integer]: tmsecomponent read getitems 
 //                                                   write setitems; default;
  end;
- 
- 
+
  ownedpersistentclassty = class of townedpersistent;
 
  townedpersistentarrayprop = class(tpersistentarrayprop)
@@ -343,6 +342,8 @@ type
                      aclasstype: ownedpersistentclassty); virtual;
  end;
 
+ tindexpersistentarrayprop = class;
+ 
  ownedeventpersistentclassty = class of townedeventpersistent;
 
  townedeventpersistentarrayprop = class(tpersistentarrayprop)
@@ -351,7 +352,8 @@ type
    fowner: tobject;
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
-   constructor create(const aowner: tobject; aclasstype: ownedeventpersistentclassty);
+   constructor create(const aowner: tobject;
+                  aclasstype: ownedeventpersistentclassty);
  end;
 
  tpersistonchangearrayprop = class(tpersistentarrayprop)
@@ -370,8 +372,6 @@ type
   public
    property items[index: integer]: tstringlist read getitems write setitems;
  end;
-
- tindexpersistentarrayprop = class;
 
  tindexpersistent = class(townedeventpersistent)
   private
@@ -411,7 +411,27 @@ type
    function newident: integer;
    property idents: integerarty read getidents;
  end;
+{ 
+ tsubcomponentitem = class(tindexpersistent)
+  protected
+   fitem: tcomponent;
+   function createitem: tcomponent; virtual; abstract;
+   function getnamebase: string; virtual;
+  public
+   constructor create(const aowner: tobject;
+                           const aprop: tindexpersistentarrayprop); override;
+   destructor destroy; override;
+ end; 
+ subcomponentitemclassty = class of tsubcomponentitem;
  
+ tsubcomponentarrayprop = class(tindexpersistentarrayprop)
+  protected
+//   procedure createitem(const index: integer; var item: tpersistent); override;
+  public
+   constructor create(const aowner: tcomponent; 
+                const aitemclasstype: subcomponentitemclassty); reintroduce;
+ end;
+}
 implementation
 
 uses
@@ -1759,8 +1779,7 @@ procedure townedpersistentarrayprop.createitem(const index: integer;
 begin
  if fitemclasstype <> nil then begin
   item:= tpersistent(fitemclasstype.newinstance);
-  townedpersistent(item).create(fowner)
-//  item:= ownedpersistentclassty(fitemclasstype).create(fowner);
+  townedpersistent(item).create(fowner);
  end
  else begin
   item:= nil;
@@ -1999,23 +2018,23 @@ begin
  //dummy
 end;
 
-{ tmsecomponentitem }
+{ tmsecomponenlinktitem }
 
-destructor tmsecomponentitem.destroy;
+destructor tmsecomponentlinkitem.destroy;
 begin
  item:= nil;
  inherited;
 end;
 
-procedure tmsecomponentitem.setitem(const avalue: tmsecomponent);
+procedure tmsecomponentlinkitem.setitem(const avalue: tmsecomponent);
 begin
  fprop.setlinkedvar(avalue,fitem);
 end;
 
-{ tmsecomponentarrayprop }
+{ tmsecomponentlinkarrayprop }
 
-constructor tmsecomponentarrayprop.create(
-                               const aitemclasstype: msecomponentitemclassty);
+constructor tmsecomponentlinkarrayprop.create(
+                        const aitemclasstype: msecomponentlinkitemclassty);
 begin
  inherited create(aitemclasstype);
 end;
@@ -2031,17 +2050,48 @@ begin
  inherited;
 end;
 }
-procedure tmsecomponentarrayprop.createitem(const index: integer;
+procedure tmsecomponentlinkarrayprop.createitem(const index: integer;
                var item: tpersistent);
 begin
  inherited;
- tmsecomponentitem(item).fprop:= self; 
+ tmsecomponentlinkitem(item).fprop:= self; 
 end;
 
-class function tmsecomponentarrayprop.getitemclasstype: persistentclassty;
+class function tmsecomponentlinkarrayprop.getitemclasstype: persistentclassty;
 begin
- result:= tmsecomponentitem;
+ result:= tmsecomponentlinkitem;
 // result:= tmsecomponent;
 end;
+(*
+{ tsubcomponentarrayprop }
 
+constructor tsubcomponentarrayprop.create(const aowner: tcomponent;
+               const aitemclasstype: subcomponentitemclassty);
+begin
+ inherited create(aowner,aitemclasstype);
+end;
+
+{ tsubcomponentitem }
+
+constructor tsubcomponentitem.create(const aowner: tobject;
+                  const aprop: tindexpersistentarrayprop);
+begin
+ inherited;
+ fitem:= createitem;
+ if not (csloading in tcomponent(aowner).componentstate) then begin
+  fitem.name:= getnumberedname(tcomponent(aowner),getnamebase);
+ end;
+end;
+
+destructor tsubcomponentitem.destroy;
+begin
+ inherited;
+ fitem.free;
+end;
+
+function tsubcomponentitem.getnamebase: string;
+begin
+ result:= 'item';
+end;
+*)
 end.

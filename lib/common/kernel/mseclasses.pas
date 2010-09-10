@@ -605,6 +605,8 @@ type
                    
 function ownernamepath(const acomponent: tcomponent): string; 
                      //namepath from root to acomponent separated by '.'
+function getnumberedname(const acomp: tcomponent;
+                                     const namebase: string): string;
 function rootcomponent(const acomponent: tcomponent): tcomponent;
 procedure setcomponentorder(const owner: tcomponent; const anames: msestringarty);
 
@@ -1207,6 +1209,17 @@ begin
    comp:= comp.Owner;
   end;
  end;
+end;
+
+function getnumberedname(const acomp: tcomponent;
+                              const namebase: string): string;
+var
+ int1: integer;
+begin
+ int1:= 0;
+ repeat
+  result:= namebase+inttostr(int1);
+ until acomp.findcomponent(result) = nil;
 end;
 
 function rootcomponent(const acomponent: tcomponent): tcomponent;

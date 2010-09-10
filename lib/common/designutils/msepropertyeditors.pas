@@ -362,7 +362,7 @@ type
  end;
 
 
-        //no solution fond to link to streamed tpersistent or tobject,
+        //no solution found to link to streamed tpersistent or tobject,
         //fork of classes.pp necessary. :-(
 {
  tlinkedobjectpropertyeditor = class(tclasspropertyeditor)
