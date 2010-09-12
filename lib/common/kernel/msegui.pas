@@ -16080,6 +16080,9 @@ begin
   tinternalapplication(self).getevents;
   result:= gui_escapepressed;
  end;
+// if result then begin
+//  gui_resetescapepressed;
+// end;
  unlock;
 end;
 

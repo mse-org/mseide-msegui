@@ -151,15 +151,21 @@ end;
 
 procedure killtimertick(aontimer: proceventty);
 var
- po1: ptimerinfoty;
+ po1,po2: ptimerinfoty;
 begin
  sys_mutexlock(mutex);
  po1:= first;
  while po1 <> nil do begin
   if issamemethod(tmethod(po1^.ontimer),tmethod(aontimer)) then begin
-   po1^.ontimer:= nil;
+   extract(po1);
+   po2:= po1;
+   po1:= po1^.nextpo;
+   dispose(po2);
+//   po1^.ontimer:= nil;
+  end
+  else begin
+   po1:= po1^.nextpo;
   end;
-  po1:= po1^.nextpo;
  end;
  sys_mutexunlock(mutex);
 end;

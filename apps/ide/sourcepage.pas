@@ -882,13 +882,27 @@ begin
 end;
 
 procedure tsourcepage.replace(all: boolean);
+
+ function checkescape: boolean;
+ begin
+  result:= application.waitescaped;
+  if result then begin
+   application.endwait;
+   result:= askyesno('Cancel?');
+   application.processmessages;
+   application.beginwait;
+  end;
+ end;
+ 
 var
  pos1: gridcoordty;
  res1: modalresultty;
  rect1: rectty;
+ updatedisabled: boolean;
  
 begin
  with projectoptions.findreplaceinfo,find do begin
+  updatedisabled:= false;
   edit.editor.begingroup;
   try
    if selectedonly then begin
@@ -909,8 +923,8 @@ begin
    else begin
     res1:= mr_yes;
     repeat
-     rect1:= edit.textpostomouserect(ffindpos);
      if prompt then begin
+      rect1:= edit.textpostomouserect(ffindpos);
       res1:= showmessage('Do you wish to to replace this occurence?','',
        [mr_yes,mr_all,mr_no,mr_cancel],rect1,grid,cp_bottomleft,res1);
      end
@@ -926,6 +940,12 @@ begin
        edit.inserttext(ffindpos,replacetext);
        inc(ffindpos.col,length(replacetext));
        if res1 = mr_all then begin
+        if prompt then begin
+         updatedisabled:= true;
+         edit.beginupdate;
+         application.beginwait;
+         application.processmessages; //remove message window
+        end;
         prompt:= false;
         all:= true;
        end;
@@ -934,9 +954,14 @@ begin
        exit;
       end;
      end;
-    until not all or not edit.find(text,options,ffindpos,pos1,true);
+    until not all or not edit.find(text,options,ffindpos,pos1,true) or
+                                              updatedisabled and checkescape;
    end;
   finally
+   if updatedisabled then begin
+    edit.endupdate;
+    application.endwait;
+   end;
    edit.editor.endgroup;
   end;
  end;

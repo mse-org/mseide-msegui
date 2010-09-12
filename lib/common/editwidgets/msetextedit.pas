@@ -803,8 +803,21 @@ end;
 
 procedure tcustomtextedit.beginupdate;
 begin
+ if fgridintf <> nil then begin
+  fgridintf.getgrid.beginupdate;
+ end;
  if flines <> nil then begin
   flines.beginupdate;
+ end;
+end;
+
+procedure tcustomtextedit.endupdate;
+begin
+ if flines <> nil then begin
+  flines.endupdate;
+ end;
+ if fgridintf <> nil then begin
+  fgridintf.getgrid.endupdate;
  end;
 end;
 
@@ -817,13 +830,6 @@ begin
 //  fgridintf.getcol.grid.rowcount:= 0;
  end;
  modified:= false;
-end;
-
-procedure tcustomtextedit.endupdate;
-begin
- if flines <> nil then begin
-  flines.endupdate;
- end;
 end;
 
 procedure tcustomtextedit.setfilename(const value: filenamety);
@@ -1403,7 +1409,7 @@ begin
      end;
     end;
     ea_caretupdating: begin
-     if focused then begin
+     if focused and not grid.updating then begin
       fgridintf.showcaretrect(info.caretrect,fframe);
      end;
     end;

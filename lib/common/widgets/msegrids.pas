@@ -206,6 +206,9 @@ type
       gs_islist,//contiguous select blocks
       gs_isdb); //do not change rowcount
  gridstatesty = set of gridstatety;
+ gridstate1ty = (gs1_showcellinvalid);
+ gridstates1ty = set of gridstate1ty;
+
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
  griderrorty = (gre_ok,gre_invaliddatacell,gre_differentrowcount,
                 gre_rowindex,gre_colindex,gre_invalidwidget);
@@ -1782,6 +1785,9 @@ type
    fstartanchor,fendanchor: gridcoordty;
    foptionsgrid: optionsgridty;
    fstate: gridstatesty;
+   fstate1: gridstates1ty;
+   fshowcell: gridcoordty;
+   fshowcellmode: cellpositionty;
    ffixcols: tfixcols;
    ffixrows: tfixrows;
    fdatacols: tdatacols;
@@ -1977,6 +1983,7 @@ type
 
    procedure beginupdate;
    procedure endupdate(const nosort: boolean = false);
+   function updating: boolean;
    function calcminscrollsize: sizety; override;
    procedure layoutchanged;
    function cellclicked: boolean;
@@ -10923,24 +10930,31 @@ var
  rect1: rectty;
  po1: pointty;
 begin
- if force or not (frame.sbhorz.clicked or frame.sbvert.clicked) then begin
-  coord1:= cell;
-  with coord1 do begin
-   if col >= fdatacols.count then begin
-    col:= fdatacols.count - 1;
+ if (fupdating > 0) then begin
+  include(fstate1,gs1_showcellinvalid);
+  fshowcell:= cell;
+  fshowcellmode:= position;
+ end
+ else begin
+  if force or not (frame.sbhorz.clicked or frame.sbvert.clicked) then begin
+   coord1:= cell;
+   with coord1 do begin
+    if col >= fdatacols.count then begin
+     col:= fdatacols.count - 1;
+    end;
+    if row >= frowcount then begin
+     row:= frowcount-1;
+    end;
+    rect1:= cellrect(coord1); //updatelayout
+    po1:= calcshowshift(rect1,position);
+    if (col < 0) or (co_nohscroll in fdatacols[col].foptions){noscrollingcol} then begin
+     po1.x:= 0;
+    end;
+    if coord1.row < 0 then begin
+     po1.y:= 0;
+    end;
+    tgridframe(fframe).scrollpos:= addpoint(tgridframe(fframe).scrollpos,po1);
    end;
-   if row >= frowcount then begin
-    row:= frowcount-1;
-   end;
-   rect1:= cellrect(coord1); //updatelayout
-   po1:= calcshowshift(rect1,position);
-   if (col < 0) or (co_nohscroll in fdatacols[col].foptions){noscrollingcol} then begin
-    po1.x:= 0;
-   end;
-   if coord1.row < 0 then begin
-    po1.y:= 0;
-   end;
-   tgridframe(fframe).scrollpos:= addpoint(tgridframe(fframe).scrollpos,po1);
   end;
  end;
 end;
@@ -12799,6 +12813,10 @@ begin
   if gs_selectionchanged in fstate then begin
    internalselectionchanged;
   end;
+  if (gs1_showcellinvalid in fstate1) then begin
+   showcell(fshowcell,fshowcellmode);
+   exclude(fstate1,gs1_showcellinvalid);
+  end;
   if (gs_focusedcellchanged in fstate) and 
                  (ffocusedcell.col >= 0) and (ffocusedcell.row >= 0) then begin
    focusedcellchanged;
@@ -13986,6 +14004,11 @@ end;
 procedure tcustomgrid.setifilink(const avalue: tifigridlinkcomp);
 begin
  mseificomp.setifilinkcomp(iifigridlink(self),avalue,tifilinkcomp(fifilink));
+end;
+
+function tcustomgrid.updating: boolean;
+begin
+ result:= fupdating > 0;
 end;
 
 {$endif}

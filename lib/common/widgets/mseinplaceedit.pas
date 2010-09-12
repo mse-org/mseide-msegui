@@ -106,6 +106,7 @@ type
 
    procedure setfiltertext(const avalue: msestring);
   protected
+   fgrouping: integer;
    fstate: inplaceeditstatesty;
    fcaretwidth: integer;
    frow: integer;
@@ -578,7 +579,7 @@ var
  posbefore: pointty;
 
 begin
- if (ws_destroying in fowner.widgetstate) or
+ if (fgrouping > 0) or (ws_destroying in fowner.widgetstate) or
                     (csdestroying in fowner.componentstate) then begin
   exit;  //no createwindow by getcanvas
  end;
@@ -1467,7 +1468,7 @@ begin
    int1:= 0;
   end;
  end;
- fcurindex := int1;
+ fcurindex:= int1;
  internalupdatecaret(ies_forcecaret in fstate);
 end;
 
@@ -1827,12 +1828,15 @@ end;
 
 procedure tinplaceedit.begingroup;
 begin
- //dummy
+ inc(fgrouping);
 end;
 
 procedure tinplaceedit.endgroup;
 begin
- //dummy
+ dec(fgrouping);
+ if fgrouping = 0 then begin
+  internalupdatecaret;
+ end;
 end;
 
 procedure tinplaceedit.setscrollvalue(const avalue: real; const horz: boolean);
@@ -2334,12 +2338,14 @@ end;
 
 procedure tundoinplaceedit.begingroup;
 begin
+ inherited;
  fundolist.beginlink(ut_none,true);
 end;
 
 procedure tundoinplaceedit.endgroup;
 begin
  fundolist.endlink(true);
+ inherited;
 end;
 
 end.
