@@ -5,7 +5,7 @@ implementation
 uses
  classes,mseificomp,msedesignintf,regifi_bmp,msepropertyeditors,mseclasses,
  msecomponenteditors,mseificomponenteditors,msestrings,msedatalist,
- {$ifdef FPC}mseifidbcomp,{$endif}
+ {$ifndef mse_no_db}{$ifdef FPC}mseifidbcomp,{$endif}{$endif}
  typinfo; 
     
 type
@@ -55,7 +55,7 @@ begin
        tifidropdownlistlinkcomp,tifienumlinkcomp,
        tifigridlinkcomp,
        tconnectedifidatasource{,tifisqldatasource,}
-       {$ifdef FPC},tifisqlresult{$endif}]);
+       {$ifndef mse_no_db}{$ifdef FPC},tifisqlresult{$endif}{$endif}]);
  registercomponenttabhints(['Ifi'],
    ['MSEifi Components (experimental).'+lineend+
    'Compile MSEide with -dmse_with_ifirem '+

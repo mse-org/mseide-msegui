@@ -23,7 +23,7 @@ uses
  classes,mseforms,mseguiglob,msegui,mseevent,msegraphutils,msegraphics,
  msedesignintf,mseclasses,msemenuwidgets,msemenus,msefiledialog,msedesigner,
  typinfo,componentpaletteform,msestrings,msewidgets,
- mseglob{$ifdef FPC}{$ifndef mse_withoutdb},msereport{$endif}{$endif},msetimer;
+ mseglob{$ifndef mse_no_db}{$ifdef FPC},msereport{$endif}{$endif},msetimer;
 
 type
  areaty = (ar_none,ar_component,ar_componentmove,ar_selectrect,ht_topleft,

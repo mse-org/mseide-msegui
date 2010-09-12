@@ -582,7 +582,7 @@ uses
  componentpaletteform,mserichstring,msesettings,formdesigner,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
  componentstore,cpuform
- {$ifdef FPC}{$ifndef mse_withoutdb},msedbfieldeditor{$endif}{$endif};
+ {$ifndef mse_no_db}{$ifdef FPC},msedbfieldeditor{$endif}{$endif};
 
 var
  projectoptionsfo: tprojectoptionsfo;
@@ -1062,7 +1062,7 @@ begin
   deletememorystatstream(colordialogstatname);
   deletememorystatstream(bmpfiledialogstatname);
   deletememorystatstream(fadeeditorstatname);
-  {$ifdef FPC}{$ifndef mse_withoutdb}
+  {$ifndef mse_no_db}{$ifdef FPC}
   deletememorystatstream(dbfieldeditorstatname);
   {$endif}{$endif}
   modified:= false;
@@ -1344,7 +1344,7 @@ begin
   updatememorystatstream('texteditor',texteditorstatname);
   updatememorystatstream('colordialog',colordialogstatname);
   updatememorystatstream('bmpfiledialog',bmpfiledialogstatname);
-{$ifdef FPC}{$ifndef mse_withoutdb}
+{$ifndef mse_no_db}{$ifdef FPC}
   updatememorystatstream('dbfieldeditor',dbfieldeditorstatname);
 {$endif}{$endif}
   if iswriter then begin

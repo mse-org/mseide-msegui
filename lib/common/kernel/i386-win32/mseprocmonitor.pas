@@ -12,7 +12,11 @@ unit mseprocmonitor;
 interface
 uses
  msesys,mseglob;
-{$include ../mseprocmonitor.inc}
+{$ifdef FPC}
+ {$include ../mseprocmonitor.inc}
+{$else}
+ {$include mseprocmonitor.inc}
+{$endif}
 
 implementation
 uses 
