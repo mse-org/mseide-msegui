@@ -817,7 +817,12 @@ begin
   flines.endupdate;
  end;
  if fgridintf <> nil then begin
-  fgridintf.getgrid.endupdate;
+  with fgridintf.getgrid do begin
+   endupdate;
+   if row >= 0 then begin
+    self.gridtovalue(row);
+   end;
+  end;
  end;
 end;
 
