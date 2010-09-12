@@ -157,15 +157,18 @@ begin
  po1:= first;
  while po1 <> nil do begin
   if issamemethod(tmethod(po1^.ontimer),tmethod(aontimer)) then begin
-   extract(po1);
+  {
    po2:= po1;
+   extract(po1);
    po1:= po1^.nextpo;
    dispose(po2);
-//   po1^.ontimer:= nil;
   end
   else begin
    po1:= po1^.nextpo;
+  }
+   po1^.ontimer:= nil;
   end;
+  po1:= po1^.nextpo;
  end;
  sys_mutexunlock(mutex);
 end;
