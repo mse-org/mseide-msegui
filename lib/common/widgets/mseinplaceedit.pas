@@ -106,7 +106,7 @@ type
 
    procedure setfiltertext(const avalue: msestring);
   protected
-   fgrouping: integer;
+   fupdating: integer;
    fstate: inplaceeditstatesty;
    fcaretwidth: integer;
    frow: integer;
@@ -145,6 +145,9 @@ type
    procedure begingroup; virtual;
    procedure endgroup; virtual;
    procedure scroll(const dist: pointty; const scrollcaret: boolean = true);
+   procedure beginupdate; //no caret update by index change
+   procedure endupdate; 
+   
    procedure updatecaret;
 
    procedure dokeydown(var kinfo: keyeventinfoty);
@@ -579,7 +582,7 @@ var
  posbefore: pointty;
 
 begin
- if (fgrouping > 0) or (ws_destroying in fowner.widgetstate) or
+ if (fupdating > 0) or (ws_destroying in fowner.widgetstate) or
                     (csdestroying in fowner.componentstate) then begin
   exit;  //no createwindow by getcanvas
  end;
@@ -738,11 +741,8 @@ begin
  exclude(fstate,ies_textrectvalid);
  rect1.x:= left;
  rect1.cx:= right-left;
-// rect1.y:= fclientrect.y;
-// rect1.cy:= fclientrect.cy;
  rect1.y:= finfo.clip.y;
  rect1.cy:= finfo.clip.cy;
-// if msegraphutils.intersectrect(fclientrect,rect1,rect1) then begin
  if msegraphutils.intersectrect(finfo.clip,rect1,rect1) then begin
   fowner.invalidaterect(rect1,org_client);
  end;
@@ -1828,15 +1828,28 @@ end;
 
 procedure tinplaceedit.begingroup;
 begin
- inc(fgrouping);
+ //dummy
 end;
 
 procedure tinplaceedit.endgroup;
 begin
- dec(fgrouping);
- if fgrouping = 0 then begin
+ //dummy
+end;
+
+procedure tinplaceedit.beginupdate;
+begin
+ application.caret.remove;
+ inc(fupdating);
+end;
+
+procedure tinplaceedit.endupdate;
+begin
+ dec(fupdating);
+ if fupdating = 0 then begin
   internalupdatecaret;
+  invalidatetextrect(minint,bigint);
  end;
+ application.caret.restore;
 end;
 
 procedure tinplaceedit.setscrollvalue(const avalue: real; const horz: boolean);

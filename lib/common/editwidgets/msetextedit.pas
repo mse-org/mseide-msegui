@@ -803,9 +803,7 @@ end;
 
 procedure tcustomtextedit.beginupdate;
 begin
- if fgridintf <> nil then begin
-  fgridintf.getgrid.beginupdate;
- end;
+ feditor.beginupdate;
  if flines <> nil then begin
   flines.beginupdate;
  end;
@@ -816,14 +814,7 @@ begin
  if flines <> nil then begin
   flines.endupdate;
  end;
- if fgridintf <> nil then begin
-  with fgridintf.getgrid do begin
-   endupdate;
-   if row >= 0 then begin
-    self.gridtovalue(row);
-   end;
-  end;
- end;
+ feditor.endupdate;
 end;
 
 procedure tcustomtextedit.clear;
@@ -1020,13 +1011,16 @@ begin
           prichstringty(flines.getitempo(po2.row))^);
     end;
     if (po1.row+1 < flines.count) then begin
-     fgridintf.getcol.grid.deleterow(po1.row+1,po2.row-po1.row);
+     grid.deleterow(po1.row+1,po2.row-po1.row);
     end
     else begin
      if po1.col = 0 then begin
-      fgridintf.getcol.grid.deleterow(po1.row,po2.row-po1.row);
+      grid.deleterow(po1.row,po2.row-po1.row);
      end;
     end;
+   end;
+   if grid.updating then begin
+    gridtovalue(-1);
    end;
   finally
    application.caret.restore;

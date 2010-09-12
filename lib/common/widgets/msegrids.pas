@@ -206,7 +206,7 @@ type
       gs_islist,//contiguous select blocks
       gs_isdb); //do not change rowcount
  gridstatesty = set of gridstatety;
- gridstate1ty = (gs1_showcellinvalid);
+ gridstate1ty = (gs1_showcellinvalid{,gs1_focusedcellchanged});
  gridstates1ty = set of gridstate1ty;
 
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
@@ -5272,6 +5272,10 @@ var
  info: celleventinfoty;
  bo1: boolean;
 begin
+ if fgrid.updating then begin
+  fgrid.factiverow:= newcell.row;
+  exit;
+ end;
  bo1:= (gs_hasactiverowcolor in fgrid.fstate) and (newcell.row <> cellbefore.row);
  if enter then begin
   fgrid.factiverow:= newcell.row;
@@ -5582,6 +5586,7 @@ procedure tdatacol.internaldoentercell(const cellbefore: gridcoordty;
 begin
  if not (gs_cellentered in fgrid.fstate) or (action = fca_entergrid) then begin
   include(fgrid.fstate,gs_cellentered);
+//  include(fgrid.fstate1,gs1_focusedcellchanged);
   dofocusedcellchanged(true,cellbefore,newcell,action);
  end;
 end;
@@ -5591,6 +5596,7 @@ procedure tdatacol.internaldoexitcell(const cellbefore: gridcoordty;
 begin
  if gs_cellentered in fgrid.fstate then begin
   exclude(fgrid.fstate,gs_cellentered);
+//  include(fgrid.fstate1,gs1_focusedcellchanged);
   dofocusedcellchanged(false,cellbefore,newcell,selectaction);
  end
  else begin

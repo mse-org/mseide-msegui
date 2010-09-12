@@ -98,7 +98,7 @@ type
    fwidgetname: string;
    ffixrowwidgets: widgetarty;
    ffixrowwidgetnames: stringarty;
-   procedure updatewidgetrect;
+   procedure updatewidgetrect(const updatedata: boolean = false);
    procedure readwidgetname(reader: treader);
    procedure writewidgetname(writer: twriter);
    procedure readfixwidgetnames(reader: treader);
@@ -262,6 +262,7 @@ type
    function getgriddatalink: pointer; virtual;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
+   procedure focusedcellchanged; override;
    procedure dofocus; override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure widgetregionchanged(const sender: twidget); override;
@@ -921,7 +922,7 @@ begin
 end;
 
 {$ifdef FPC}{$checkpointer off}{$endif} 
-procedure twidgetcol.updatewidgetrect;
+procedure twidgetcol.updatewidgetrect(const updatedata: boolean = false);
 var
  rect1: rectty;
  widget1: twidget;
@@ -961,6 +962,9 @@ begin
     end;
     widget1.widgetrect:= rect1;
    end;
+   if updatedata then begin
+    fintf.gridtovalue(-1);
+   end;
   end;
  end;
 end;
@@ -985,8 +989,11 @@ var
  bo1: boolean;
  
 begin
-// inherited;
  with twidgetgrid(fgrid) do begin
+  if updating then begin
+   inherited;
+   exit;
+  end;
   focuscount:= ffocuscount;
   activewidgetbefore:= factivewidget;
   if not enter and (selectaction <> fca_exitgrid) then begin
@@ -1002,14 +1009,12 @@ begin
       include(fstate,gs_childmousecaptured);
      end; 
     end;
-//    if (newcell.row < 0) then begin
-     if (activewidgetbefore <> nil) then begin
-      if activewidgetbefore.focused then begin
-       fwidgetdummy.setfocus(active);
-      end;
-      activewidgetbefore.visible:= false;
+    if (activewidgetbefore <> nil) then begin
+     if activewidgetbefore.focused then begin
+      fwidgetdummy.setfocus(active);
      end;
-//    end;
+     activewidgetbefore.visible:= false;
+    end;
     inherited;
    end
    else begin
@@ -2635,6 +2640,16 @@ end;
 procedure tcustomwidgetgrid.setoptionswidget(const avalue: optionswidgetty);
 begin
  inherited setoptionswidget(avalue - [ow_subfocus]); 
+end;
+
+procedure tcustomwidgetgrid.focusedcellchanged;
+begin
+ inherited;
+ if col >= 0 then begin
+  with twidgetcol(twidgetcols(fdatacols).fitems[col]) do begin
+   updatewidgetrect(true);
+  end;
+ end; 
 end;
 
 procedure tcustomwidgetgrid.dofocus;

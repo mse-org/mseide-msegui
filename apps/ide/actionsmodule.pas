@@ -313,12 +313,12 @@ end;
 
 procedure tactionsmo.undoactonexecute(const sender: tobject);
 begin
- sourcefo.activepage.edit.undo;
+ sourcefo.activepage.doundo;
 end;
 
 procedure tactionsmo.redoactonexecute(const sender: tobject);
 begin
- sourcefo.activepage.edit.redo;
+ sourcefo.activepage.doredo;
 end;
 
 procedure tactionsmo.copyactonexecute(const sender: tobject);

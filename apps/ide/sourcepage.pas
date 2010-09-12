@@ -90,6 +90,7 @@ type
    procedure showsourcehint(const apos: gridcoordty; const values: stringarty);
    procedure textnotfound;
    procedure setsyntaxdef(const value: filenamety);
+   procedure updatelinedisp;
   protected
    finitialfilepath: filenamety;
    finitialeditpos: gridcoordty;
@@ -100,6 +101,8 @@ type
    procedure callcheckbrackets;
    procedure checkbrackets;
    procedure clearbrackets;
+   procedure beginupdate;
+   procedure endupdate;
   public
    filechanged: boolean;
    ismoduletext: boolean;
@@ -127,6 +130,8 @@ type
    procedure repeatfind;
    procedure doreplace;
    procedure reload;
+   procedure doundo;
+   procedure doredo;
    function canchangenotify(const info: filechangeinfoty): boolean;
    function getbreakpointstate(arow: integer = -1): bkptstatety;
                      //-1 -> actual row
@@ -881,16 +886,31 @@ begin
  end;
 end;
 
+procedure tsourcepage.beginupdate;
+begin
+ edit.beginupdate;
+ grid.beginupdate;
+ application.beginwait;
+end;
+
+procedure tsourcepage.endupdate;
+begin
+ application.endwait;
+ grid.endupdate;
+ edit.endupdate;
+ updatelinedisp;
+end;
+
 procedure tsourcepage.replace(all: boolean);
 
  function checkescape: boolean;
  begin
   result:= application.waitescaped;
   if result then begin
-   application.endwait;
+   endupdate;
    result:= askyesno('Cancel?');
    application.processmessages;
-   application.beginwait;
+   beginupdate;
   end;
  end;
  
@@ -939,12 +959,11 @@ begin
        edit.deleteselection;
        edit.inserttext(ffindpos,replacetext);
        inc(ffindpos.col,length(replacetext));
-       if res1 = mr_all then begin
-        if prompt then begin
-         updatedisabled:= true;
-         edit.beginupdate;
-         application.beginwait;
+       if (res1 = mr_all) or (all and not prompt) then begin
+        if not updatedisabled then begin
          application.processmessages; //remove message window
+         updatedisabled:= true;
+         beginupdate;
         end;
         prompt:= false;
         all:= true;
@@ -959,8 +978,7 @@ begin
    end;
   finally
    if updatedisabled then begin
-    edit.endupdate;
-    application.endwait;
+    endupdate;
    end;
    edit.editor.endgroup;
   end;
@@ -1093,6 +1111,12 @@ begin
  end;
 end;
 
+procedure tsourcepage.updatelinedisp;
+begin
+ linedisp.value:= inttostr(edit.editpos.row+1) + ':'+
+                                          inttostr(edit.editpos.col+1);
+end;
+
 procedure tsourcepage.editoneditnotification(const sender: tobject;
   var info: editnotificationinfoty);
 begin
@@ -1100,8 +1124,8 @@ begin
   clearbrackets;
  end
  else begin
-  if info.action = ea_indexmoved then begin
-   linedisp.value:= inttostr(edit.editpos.row+1) + ':'+inttostr(edit.editpos.col+1);
+  if (info.action = ea_indexmoved) and not grid.updating then begin
+   updatelinedisp;
   end;
   if info.action in [ea_indexmoved,ea_delchar,ea_deleteselection,ea_pasteselection,
                      ea_textentered] then begin
@@ -1435,6 +1459,20 @@ end;
 function tsourcepage.source: trichstringdatalist;
 begin
  result:= edit.datalist;
+end;
+
+procedure tsourcepage.doundo;
+begin
+ beginupdate;
+ edit.undo;
+ endupdate;
+end;
+
+procedure tsourcepage.doredo;
+begin
+ beginupdate;
+ edit.redo;
+ endupdate;
 end;
 
 end.
