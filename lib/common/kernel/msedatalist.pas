@@ -6341,7 +6341,8 @@ begin
  end;
 end;
 
-function tpoorstringdatalist.dataastextstream: ttextstream; //chars truncated to 8bit
+function tpoorstringdatalist.dataastextstream: ttextstream; 
+                       //chars truncated to 8bit
 var
  len: integer;
  int1,int2,int3,int4: integer;
@@ -6378,7 +6379,7 @@ begin
     if wch1 > #$ff then begin
      wch1:= #$ff;
     end;
-    (po2 + int3)^:= char(wch1);
+    (po2 + int3)^:= char(byte(wch1));
    end;
    inc(po2,int4);
    po2^:= ch1;
