@@ -55,6 +55,7 @@ type
     fconnection: tibconnection;
     fopen: boolean;
     ffetched: boolean;
+    fempty: boolean;
     Status               : array [0..19] of ISC_STATUS;
     Statement            : pointer;
     fibstatementtype: integer;
@@ -152,6 +153,7 @@ type
              const autf8: boolean); override;
    procedure AddFieldDefs(const cursor: TSQLCursor;
                     const FieldDefs : TfieldDefs); override;
+   function fetch1(const cursor: tibcursor) : boolean;
    function Fetch(cursor : TSQLCursor) : boolean; override;
    function loadfield(const cursor: tsqlcursor; 
                const datatype: tfieldtype; const fieldnum: integer; //null based
@@ -664,6 +666,7 @@ var dh    : pointer;
 begin
  with cursor as TIBcursor do begin
   ffetched:= false;
+  fempty:= true;
   dh := GetHandle;
   if isc_dsql_allocate_statement(@Status, @dh, @Statement) <> 0 then begin
    CheckError('PrepareStatement', Status);
@@ -803,7 +806,11 @@ begin
                         @Statement,1,in_SQLDA,fexecsqlda) <> 0 then begin
    CheckError('Execute', Status);
   end;
-  fopen:= true;  
+  fopen:= true;
+  fempty:= sqlda^.sqld = 0;
+  if not fempty and (fexecsqlda = nil) then begin
+   fempty:= not fetch1(tibcursor(cursor)); //needed for rowsreturned?
+  end;
  end;
 end;
 
@@ -1011,15 +1018,41 @@ function TIBConnection.GetHandle: pointer;
 begin
   Result := FSQLDatabaseHandle;
 end;
-var testvar: tibcursor;
-function TIBConnection.Fetch(cursor : TSQLCursor) : boolean;
+
+function tibconnection.fetch1(const cursor: tibcursor): boolean;
 var
  retcode: integer;
 begin
+ with cursor do begin
+  retcode:= isc_dsql_fetch(@Status,@Statement,1,SQLDA);
+  if (retcode <> 0) and (retcode <> 100) and (retcode <> 335544364) then begin
+                     //request synchronizing error, FireBird bug?
+   CheckError('Fetch',Status);
+  end;
+ end;
+ Result:= retcode = 0;
+end;
+
+var testvar: tibcursor;
+function TIBConnection.Fetch(cursor : TSQLCursor) : boolean;
+begin
 testvar:= TIBCursor(cursor);
  with TIBCursor(cursor) do begin
+  result:= not fempty;
+  if result then begin
+   if fibstatementtype = isc_info_sql_stmt_exec_procedure then begin
+    result:= not ffetched;
+   end
+   else begin
+    result:= not ffetched or fetch1(tibcursor(cursor));
+   end;
+   ffetched:= true;
+  end;
+  {
   result:= sqlda^.sqld > 0;
   if result then begin
+   result:= fprefetched;
+   fprefetched:= false;
    if fibstatementtype = isc_info_sql_stmt_exec_procedure then begin
     result:= not ffetched;
     ffetched:= true;
@@ -1033,6 +1066,7 @@ testvar:= TIBCursor(cursor);
     Result:= retcode = 0;
    end;
   end;
+  }
  end;
 end;
 
