@@ -96,10 +96,11 @@ var
    scope.addidents(parser);
   end;
  end;
- 
+
  procedure parsecase;
  var
   ident1: pascalidentty;
+  int1: integer;
  begin
   with parser do begin
    if not checkname then begin
@@ -121,9 +122,10 @@ var
      exit;
     end;
     while not checkoperator(')') and not eof do begin
-     if not getnameorident(pinteger(@ident1)^) then begin
+     if not getnameorident(int1) then begin
       exit;
      end;
+     ident1:= pascalidentty(int1);
      if ident1 = pid_case then begin
       parsecase;
      end
@@ -144,6 +146,7 @@ var
  procedure parsetypedef;
  var
   ident1: pascalidentty;
+  int1: integer;
  begin
   with parser do begin
    while checkoperator('^') do begin
@@ -155,10 +158,11 @@ var
     end;
     pid_record: begin
      repeat
-      if not getnameorident(pinteger(@ident1)^) then begin
+      if not getnameorident(int1) then begin
        nexttoken;
        break;
       end;
+      ident1:= pascalidentty(int1);
       if ident1 = pid_case then begin
        parsecase;
       end
@@ -182,7 +186,7 @@ var
    checkoperator(';');
   end;
  end;
- 
+
 var
  bo1: boolean;
 begin
