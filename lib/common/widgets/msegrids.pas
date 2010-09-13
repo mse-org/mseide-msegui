@@ -608,7 +608,7 @@ type
    procedure setoptions(const Value: coloptionsty); override;
    function createdatalist: tdatalist; virtual;
    procedure rowcountchanged(const newcount: integer); override;
-   procedure dofocusedcellchanged(enter: boolean;
+   procedure docellfocuschanged(enter: boolean;
                const cellbefore: gridcoordty; var newcell: gridcoordty;
                const selectaction: focuscellactionty); virtual;
    procedure doactivate; virtual;
@@ -5265,17 +5265,19 @@ begin
  inherited;
 end;
 
-procedure tdatacol.dofocusedcellchanged(enter: boolean;
+procedure tdatacol.docellfocuschanged(enter: boolean;
                   const cellbefore: gridcoordty; var newcell: gridcoordty;
                   const selectaction: focuscellactionty);
 var
  info: celleventinfoty;
  bo1: boolean;
 begin
+{
  if fgrid.updating then begin
   fgrid.factiverow:= newcell.row;
   exit;
  end;
+}
  bo1:= (gs_hasactiverowcolor in fgrid.fstate) and (newcell.row <> cellbefore.row);
  if enter then begin
   fgrid.factiverow:= newcell.row;
@@ -5587,7 +5589,7 @@ begin
  if not (gs_cellentered in fgrid.fstate) or (action = fca_entergrid) then begin
   include(fgrid.fstate,gs_cellentered);
 //  include(fgrid.fstate1,gs1_focusedcellchanged);
-  dofocusedcellchanged(true,cellbefore,newcell,action);
+  docellfocuschanged(true,cellbefore,newcell,action);
  end;
 end;
 
@@ -5597,7 +5599,7 @@ begin
  if gs_cellentered in fgrid.fstate then begin
   exclude(fgrid.fstate,gs_cellentered);
 //  include(fgrid.fstate1,gs1_focusedcellchanged);
-  dofocusedcellchanged(false,cellbefore,newcell,selectaction);
+  docellfocuschanged(false,cellbefore,newcell,selectaction);
  end
  else begin
   if ((co1_rowcoloractive in foptions1) or (co1_rowcolorfocused in foptions1) or

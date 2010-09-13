@@ -136,7 +136,7 @@ type
   {$endif}
 
    procedure checkcanclose(var accepted: boolean);
-   procedure dofocusedcellchanged(enter: boolean;
+   procedure docellfocuschanged(enter: boolean;
                const cellbefore: gridcoordty; var newcell: gridcoordty;
                const selectaction: focuscellactionty); override;
    procedure defineproperties(filer: tfiler); override;
@@ -262,7 +262,7 @@ type
    function getgriddatalink: pointer; virtual;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
-   procedure focusedcellchanged; override;
+//   procedure focusedcellchanged; override;
    procedure dofocus; override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure widgetregionchanged(const sender: twidget); override;
@@ -978,7 +978,7 @@ begin
  end;
 end;
 
-procedure twidgetcol.dofocusedcellchanged(enter: boolean;
+procedure twidgetcol.docellfocuschanged(enter: boolean;
                      const cellbefore: gridcoordty; var newcell: gridcoordty;
                      const selectaction: focuscellactionty);
 var
@@ -990,10 +990,12 @@ var
  
 begin
  with twidgetgrid(fgrid) do begin
+{
   if updating then begin
    inherited;
    exit;
   end;
+}
   focuscount:= ffocuscount;
   activewidgetbefore:= factivewidget;
   if not enter and (selectaction <> fca_exitgrid) then begin
@@ -2641,7 +2643,7 @@ procedure tcustomwidgetgrid.setoptionswidget(const avalue: optionswidgetty);
 begin
  inherited setoptionswidget(avalue - [ow_subfocus]); 
 end;
-
+{
 procedure tcustomwidgetgrid.focusedcellchanged;
 begin
  inherited;
@@ -2651,7 +2653,7 @@ begin
   end;
  end; 
 end;
-
+}
 procedure tcustomwidgetgrid.dofocus;
 begin
  inherited;

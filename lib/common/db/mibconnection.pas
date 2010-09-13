@@ -1011,23 +1011,27 @@ function TIBConnection.GetHandle: pointer;
 begin
   Result := FSQLDatabaseHandle;
 end;
-
+var testvar: tibcursor;
 function TIBConnection.Fetch(cursor : TSQLCursor) : boolean;
 var
  retcode: integer;
 begin
+testvar:= TIBCursor(cursor);
  with TIBCursor(cursor) do begin
-  if fibstatementtype = isc_info_sql_stmt_exec_procedure then begin
-   result:= not ffetched;
-   ffetched:= true;
-  end
-  else begin
-   retcode:= isc_dsql_fetch(@Status,@Statement,1,SQLDA);
-   if (retcode <> 0) and (retcode <> 100) and (retcode <> 335544364) then begin
-                      //request synchronizing error, FireBird bug?
-    CheckError('Fetch',Status);
+  result:= sqlda^.sqld > 0;
+  if result then begin
+   if fibstatementtype = isc_info_sql_stmt_exec_procedure then begin
+    result:= not ffetched;
+    ffetched:= true;
+   end
+   else begin
+    retcode:= isc_dsql_fetch(@Status,@Statement,1,SQLDA);
+    if (retcode <> 0) and (retcode <> 100) and (retcode <> 335544364) then begin
+                       //request synchronizing error, FireBird bug?
+     CheckError('Fetch',Status);
+    end;
+    Result:= retcode = 0;
    end;
-   Result:= retcode = 0;
   end;
  end;
 end;

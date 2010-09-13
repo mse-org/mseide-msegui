@@ -23,9 +23,12 @@ type
  tdoublesigcomp = class;
  tsigcontroller = class;
  
- isigclient = interface(ievent)
+ {
+ sigclientinfoty = record
+  siginfo: siginfoty;
+  client: isigclient;
  end;
- 
+}
  tdoubleconn = class(tmsecomponent) 
         //no solution found to link to streamed tpersistent or tobject,
         //fork of classes.pp necessary. :-(
@@ -69,7 +72,29 @@ type
    property source: tdoubleoutputconn read fsource write setsource;
  end;
 
- tcustomsigcomp = class(tmsecomponent)
+ inputconnarty = array of tdoubleinputconn;
+ outputconnarty = array of tdoubleoutputconn;
+ 
+ isigclient = interface(ievent)
+  function getinputar: inputconnarty;
+  function getoutputar: outputconnarty;
+ end;
+ sigclientintfarty = array of isigclient;
+
+ psiginfoty = ^siginfoty;
+ signahdlerprocty = procedure(siginfo: psiginfoty);
+ siginfoty = record
+  inp: double;
+  inps: doublearty;
+  inphigh: integer;
+  outps: doublepoarty;
+  outphigh: integer;
+  inputs: inputconnarty;
+  outputs: outputconnarty;
+ end;
+ siginfoarty = array of siginfoty;
+ 
+ tcustomsigcomp = class(tmsecomponent)  
   protected
    procedure coeffchanged(const sender: tdatalist;
                                  const aindex: integer); virtual;
@@ -83,10 +108,16 @@ type
    fcontroller: tsigcontroller;
    procedure setcontroller(const avalue: tsigcontroller);
   protected
+//   finfo: siginfoty;
    procedure setsig1(const sender: tdoubleinputconn;
                                     var asource: doublearty); virtual;
    procedure setsig(const sender: tdoubleinputconn;
                                     const asource: doublearty); virtual;
+   procedure connchange;
+   procedure loaded; override;
+   
+   function getinputar: inputconnarty; virtual;
+   function getoutputar: outputconnarty; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -146,7 +177,7 @@ type
    fowner: tcustomsigcomp;
    procedure change(const aindex: integer); override;
   public
-   constructor create(const aowner: tcustomsigcomp);
+   constructor create(const aowner: tcustomsigcomp); reintroduce;
  end; 
 
  tdoublezcomp = class(tdoublesigcomp) //single input, single output
@@ -200,6 +231,7 @@ type
    function getitems(const index: integer): tdoubleinputconn;
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
+   procedure dosizechanged; override;
   public
    constructor create(const aowner: tdoublesigcomp); reintroduce;
    property items[const index: integer]: tdoubleinputconn read getitems; default;
@@ -244,7 +276,22 @@ type
              var ainp: doublepoarty; var aoutp: pdouble); override;
  end;
 
+ sigcontrollerstatety = (scs_modelvalid);
+ sigcontrollerstatesty = set of sigcontrollerstatety;
+ 
  tsigcontroller = class(tmsecomponent)
+  protected
+   fstate: sigcontrollerstatesty;
+   fclients: sigclientintfarty;
+   finfos: siginfoarty;
+   procedure addclient(const aintf: isigclient);
+   procedure removeclient(const aintf: isigclient);
+   procedure modelchange;
+   procedure updatemodel;
+   procedure internalstep;
+   procedure loaded; override;
+  public
+   procedure step(const acount: integer=1);
  end;
  
 procedure createsigbuffer(var abuffer: doublearty; const asize: integer);
@@ -387,7 +434,10 @@ end;
 
 procedure tdoubleinputconn.setsource(const avalue: tdoubleoutputconn);
 begin
- setsourceconn(self,avalue,fsource);
+ if fsource <> avalue then begin
+  setsourceconn(self,avalue,fsource);
+  fowner.connchange;
+ end;
 end;
 
 procedure tdoubleinputconn.setsig1(var asource: doublearty);
@@ -430,14 +480,49 @@ begin
  //dummy
 end;
 
-procedure setsigcontroller(const sender: isigclient; 
-          const avalue: tsigcontroller; var dest: tsigcontroller);
+procedure setsigcontroller(const linker: tobjectlinker; 
+          const intf: isigclient; 
+          const source: tsigcontroller; var dest: tsigcontroller);
 begin
+ if dest <> nil then begin
+  dest.removeclient(intf);
+ end;
+ linker.setlinkedvar(intf,source,dest);
+ if dest <> nil then begin
+  dest.addclient(intf);
+ end;
 end;
 
 procedure tdoublesigcomp.setcontroller(const avalue: tsigcontroller);
 begin
- setsigcontroller(isigclient(self),avalue,fcontroller);
+ setsigcontroller(getobjectlinker,isigclient(self),avalue,fcontroller);
+end;
+
+procedure tdoublesigcomp.connchange;
+begin
+ if ([csdestroying,csloading]*componentstate = []) then begin
+  if (fcontroller <> nil) then begin
+   if ([csdestroying,csloading]*fcontroller.componentstate = []) then begin
+    fcontroller.modelchange;
+   end;
+  end
+ end;
+end;
+
+function tdoublesigcomp.getinputar: inputconnarty;
+begin
+ result:= nil;
+end;
+
+function tdoublesigcomp.getoutputar: outputconnarty;
+begin
+ result:= nil;
+end;
+
+procedure tdoublesigcomp.loaded;
+begin
+ inherited;
+ connchange;
 end;
 
 { tdoublezcomp }
@@ -737,6 +822,12 @@ begin
  result:= tdoubleinputconn(inherited getitems(index));
 end;
 
+procedure tdoubleinpconnarrayprop.dosizechanged;
+begin
+ inherited;
+ fowner.connchange;
+end;
+
 (*
 { tdoubleinpconnitem }
 
@@ -791,6 +882,62 @@ begin
   aoutp^:= rea1;
   inc(aoutp);
  end;
+end;
+
+{ tsigcontroller }
+
+procedure tsigcontroller.addclient(const aintf: isigclient);
+begin
+ adduniqueitem(pointerarty(fclients),aintf);
+ modelchange;
+end;
+
+procedure tsigcontroller.removeclient(const aintf: isigclient);
+begin
+ removeitem(pointerarty(fclients),aintf);
+ modelchange;
+end;
+
+procedure tsigcontroller.modelchange;
+begin
+ exclude(fstate,scs_modelvalid);
+end;
+
+procedure tsigcontroller.updatemodel;
+var
+ int1: integer;
+begin
+ finfos:= nil;
+ setlength(finfos,length(fclients));
+ for int1:= 0 to high(fclients) do begin
+  with finfos[int1] do begin
+   inputs:= fclients[int1].getinputar;
+   outputs:= fclients[int1].getoutputar;
+  end;
+ end;
+ include(fstate,scs_modelvalid);
+end;
+
+procedure tsigcontroller.internalstep;
+begin
+end;
+
+procedure tsigcontroller.step(const acount: integer);
+var
+ int1: integer;
+begin
+ if not (scs_modelvalid in fstate) then begin
+  updatemodel;
+ end;
+ for int1:= acount-1 downto 0 do begin
+  internalstep;
+ end;
+end;
+
+procedure tsigcontroller.loaded;
+begin
+ inherited;
+ modelchange;
 end;
 
 end.
