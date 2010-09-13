@@ -889,14 +889,14 @@ end;
 procedure tsourcepage.beginupdate;
 begin
  edit.beginupdate;
- grid.beginupdate;
+ grid.focuslock;
  application.beginwait;
 end;
 
 procedure tsourcepage.endupdate;
 begin
  application.endwait;
- grid.endupdate;
+ grid.focusunlock;
  edit.endupdate;
  updatelinedisp;
 end;

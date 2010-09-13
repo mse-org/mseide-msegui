@@ -258,6 +258,7 @@ type
    function getfixcols: twidgetfixcols;
    procedure setfixcols(const avalue: twidgetfixcols);
   protected
+   ffocuslock: integer;
    factivewidget: twidget;
    function getgriddatalink: pointer; virtual;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
@@ -297,6 +298,9 @@ type
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    function childrencount: integer; override;
    function getlogicalchildren: widgetarty; override;
+   
+   procedure focuslock; //beginupdate + no cell widget focus/defocus
+   procedure focusunlock;
    
    function editwidgetatpos(const apos: pointty; out cell: gridcoordty): twidget;
    function widgetcell(const awidget: twidget): gridcoordty;
@@ -990,12 +994,16 @@ var
  
 begin
  with twidgetgrid(fgrid) do begin
-{
-  if updating then begin
+  if ffocuslock > 0 then begin
+   if not enter then begin
+    factivewidget:= nil;
+   end
+   else begin
+   end;
    inherited;
    exit;
   end;
-}
+  
   focuscount:= ffocuscount;
   activewidgetbefore:= factivewidget;
   if not enter and (selectaction <> fca_exitgrid) then begin
@@ -3157,6 +3165,21 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tcustomwidgetgrid.focuslock;
+begin
+ beginupdate;
+ inc(ffocuslock);
+end;
+
+procedure tcustomwidgetgrid.focusunlock;
+begin
+ dec(ffocuslock);
+ if (ffocuslock = 0) and (col >= 0) then begin
+  twidgetcol(twidgetcols(fdatacols).fitems[col]).updatewidgetrect;
+ end;
+ endupdate;
 end;
 
 procedure registergriddatalistclass(const tag: ansistring;
