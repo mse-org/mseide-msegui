@@ -1029,7 +1029,8 @@ procedure tpopupmenuwidget.updatelayout;
 begin
  flayout.popupdirection:= gd_right;
  calcmenulayout(flayout,getcanvas,
-          application.screenrect(transientforwindoworwindow).cy -
+//          application.screenrect(transientforwindoworwindow).cy -
+          application.workarea(transientforwindoworwindow).cy -
           innerclientframewidth.cy);
  movemenulayout(flayout,innerclientrect.pos);            
  updatepos;
