@@ -87,7 +87,7 @@ type
   end;
   pfbeventbufferty = ^fbeventbufferty;
 
-  ibconnectionoptionty = (ibo_embedded);
+  ibconnectionoptionty = (ibo_embedded,ibo_sqlinfo);
   ibconnectionoptionsty = set of ibconnectionoptionty;
   
   fbversionty = record
@@ -724,7 +724,6 @@ begin
   end;
   fexecsqlda:= nil;
   if FStatementType in datareturningtypes then begin
-  ///////////////////////      FPrepared := False;
    if isc_dsql_describe(@Status, @Statement, 1, SQLDA) <> 0 then begin
     CheckError('PrepareSelect', Status);
    end;
@@ -797,6 +796,15 @@ end;
 procedure TIBConnection.internalExecute(const cursor: TSQLCursor;
                 const atransaction: tsqltransaction; const AParams : TmseParams;
                 const autf8: boolean);
+var
+ buf1: array[0..127] of byte;
+ by1: byte;
+ int1,int2: integer;
+ datasize: integer;
+ selectcount: integer;
+ updatecount: integer;
+ deletecount: integer;
+ insertcount: integer;
 begin
  if Assigned(APArams) and (AParams.count > 0) then begin
   SetParameters(cursor, AParams);
@@ -811,9 +819,70 @@ begin
   if not fempty and (fexecsqlda = nil) then begin
    fempty:= not fetch1(tibcursor(cursor)); //needed for rowsreturned?
   end;
+  frowsaffected:= -1;
+  frowsreturned:= -1;
+  if ibo_sqlinfo in foptions then begin
+   by1:= isc_info_sql_records;
+   if isc_dsql_sql_info(@fstatus,@statement,sizeof(by1),@by1,
+                  sizeof(buf1),@buf1[0]) <> 0 then begin
+    CheckError('Execute get records info', Status);
+   end;
+   if buf1[0] = isc_info_sql_records then begin
+    int2:= isc_vax_integer(@buf1[1],2)+3; //record size
+    if int2 <= sizeof(buf1) then begin
+     selectcount:= -1;
+     updatecount:= -1;
+     deletecount:= -1;
+     insertcount:= -1;
+     int1:= 3;
+     while true do begin
+      by1:= buf1[int1];
+      if (by1 in [isc_info_end,isc_info_truncated]) or 
+                                        (int1 >= int2-1) then begin
+       break;
+      end;
+      datasize:= isc_vax_integer(@buf1[int1+1],2);
+      inc(int1,3);
+      if int1 + datasize > int2 then begin
+       break;
+      end;
+      case by1 of
+       isc_info_req_select_count: begin
+        selectcount:= isc_vax_integer(@buf1[int1],datasize);
+       end;
+       isc_info_req_update_count: begin
+        updatecount:= isc_vax_integer(@buf1[int1],datasize);
+       end;
+       isc_info_req_delete_count: begin
+        deletecount:= isc_vax_integer(@buf1[int1],datasize);
+       end;
+       isc_info_req_insert_count: begin
+        insertcount:= isc_vax_integer(@buf1[int1],datasize);
+       end;
+      end;
+      inc(int1,datasize);
+     end;
+     if selectcount >= 0 then begin
+      frowsreturned:= selectcount;
+     end;
+     if updatecount > 0 then begin
+      frowsreturned:= 0;
+      frowsaffected:= updatecount;
+     end;
+     if deletecount > 0 then begin
+      frowsreturned:= 0;
+      frowsaffected:= deletecount;
+     end;
+     if insertcount > 0 then begin
+      frowsreturned:= 0;
+      frowsaffected:= insertcount;
+     end;
+    end;
+   end;
+  end;
  end;
 end;
-
+(*
 type
  tcharlengthgetter = class
   private
@@ -828,7 +897,7 @@ type
    function characterlength(const relationname,fieldname: string): integer;
         //-maxint if invalid
  end;
- 
+
 { tcharlengthgetter }
 
 constructor tcharlengthgetter.create(const aowner: tibconnection);
@@ -917,7 +986,7 @@ begin
   isc_dsql_free_statement(@status,@statement,DSQL_close);
  end;
 end;
-
+*)
 function sqlvarnametostring(const avalue: pointer): string;
 type
  sqlnamety = packed record

@@ -701,14 +701,16 @@ type
     procedure Prepare; virtual;
     procedure UnPrepare; virtual;
     procedure ExecSQL; virtual;
-    function rowsreturned: integer; //-1 if not supported
     function executedirect(const asql: string): integer; 
               //uses writetransaction of tsqlquery
+
+    function rowsreturned: integer; //-1 if not supported
+    function rowsaffected: integer; //-1 if not supported
+    property updaterowsaffected: integer read fupdaterowsaffected;
     procedure SetSchemaInfo( SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string); virtual;
     function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
     property Prepared : boolean read IsPrepared;
     property connected: boolean read getconnected write setconnected;
-    property updaterowsaffected: integer read fupdaterowsaffected;
               //sum of rowsaffected of insert, update and delete query,
               //reset by close, applyupdate and applyupdates, -1 if not supported.
   published
@@ -3966,6 +3968,16 @@ function TSQLQuery.rowsreturned: integer;
 begin
  if active then begin
   result:= fcursor.frowsreturned;
+ end
+ else begin
+  result:= -1;
+ end;
+end;
+
+function TSQLQuery.rowsaffected: integer;
+begin
+ if active then begin
+  result:= fcursor.frowsaffected;
  end
  else begin
   result:= -1;
