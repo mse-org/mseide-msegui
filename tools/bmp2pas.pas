@@ -26,7 +26,7 @@ program bmp2pas;
 {$endif}
 
 uses
-  {$ifdef FPC}cthreads,{$endif}
+  {$ifdef FPC}{$ifdef linux}cthreads,{$endif}{$endif}
   SysUtils,
   msetypes,
   msesysenv,
