@@ -254,6 +254,39 @@ type
    function next: pptruintdataty;
  end;
 
+ pointerptruintdataty = record
+  key: ptruint;
+  data: pointer;
+ end;
+ ppointerptruintdataty = ^pointerptruintdataty;
+ pointerptruinthashdataty = record
+  header: hashheaderty;
+  data: pointerptruintdataty;
+ end;
+ ppointerptruinthashdataty = ^pointerptruinthashdataty;
+
+ pointerptruintiteratorprocty = 
+                     procedure(var aitem: pointerptruintdataty) of object;
+
+ tpointerptruinthashdatalist = class(tptruinthashdatalist)
+  private
+   fpointerparam: pointer;
+  protected
+   procedure checkexact(const aitemdata; var accept: boolean); override;
+  public
+   constructor create;
+   procedure add(const akey: ptruint; const avalue: pointer);
+   function addunique(const akey: ptruint; const avalue: pointer): boolean;
+                   //true if found
+   procedure delete(const akey: ptruint; const avalue: pointer);
+   function find(const akey: ptruint): pointer; overload;
+   function find(const akey: ptruint; out avalue: pointer): boolean; overload;
+   function first: ppointerptruintdataty;
+   function next: ppointerptruintdataty;
+   procedure iterate(const akey: ptruint;
+                     const aiterator: pointerptruintiteratorprocty); overload;
+ end;
+ 
  ansistringdataty = record
   key: ansistring;
   data: record end;
@@ -1635,7 +1668,7 @@ end;
 }
 function tptruinthashdatalist.checkkey(const akey; const aitemdata): boolean;
 begin
- result:= ptruint(akey) = ptruinthashdataty(aitemdata).data.key;
+ result:= ptruint(akey) = ptruintdataty(aitemdata).key;
 end;
 
 function tptruinthashdatalist.first: pptruintdataty;
@@ -1646,6 +1679,84 @@ end;
 function tptruinthashdatalist.next: pptruintdataty;
 begin
  result:= pptruintdataty(internalnext);
+end;
+
+{ tpointerptruinthashdatalist }
+
+constructor tpointerptruinthashdatalist.create;
+begin
+ inherited create(sizeof(pointer));
+end;
+
+procedure tpointerptruinthashdatalist.add(const akey: ptruint;
+                                       const avalue: pointer);
+begin
+ ppointer(inherited add(akey))^:= avalue;
+end;
+
+function tpointerptruinthashdatalist.find(const akey: ptruint;
+                                             out avalue: pointer): boolean;
+var
+ po1: ppointer;
+begin
+ po1:= inherited find(akey);
+ result:= po1 <> nil;
+ if result then begin
+  avalue:= po1^;
+ end
+ else begin
+  avalue:= nil;
+ end;
+end;
+
+function tpointerptruinthashdatalist.addunique(const akey: ptruint;
+                                               const avalue: pointer): boolean;
+var
+ po1: ppointer;
+begin
+ result:= true;
+ po1:= inherited find(akey);
+ if po1 = nil then begin
+  result:= false;
+  po1:= inherited add(akey);
+ end;
+ po1^:= avalue;
+end;
+
+procedure tpointerptruinthashdatalist.checkexact(const aitemdata;
+               var accept: boolean);
+begin
+ accept:= pointerptruintdataty(aitemdata).data = fpointerparam;
+end;
+
+procedure tpointerptruinthashdatalist.delete(const akey: ptruint;
+               const avalue: pointer);
+var
+ po1: phashdataty;
+begin
+ fpointerparam:= avalue;
+ internaldeleteitem(internalfindexact(akey));
+end;
+
+function tpointerptruinthashdatalist.find(const akey: ptruint): pointer;
+begin
+ find(akey,result);
+end;
+
+function tpointerptruinthashdatalist.first: ppointerptruintdataty;
+begin
+ result:= ppointerptruintdataty(internalfirst);
+end;
+
+function tpointerptruinthashdatalist.next: ppointerptruintdataty;
+begin
+ result:= ppointerptruintdataty(internalnext);
+end;
+
+procedure tpointerptruinthashdatalist.iterate(const akey: ptruint;
+               const aiterator: pointerptruintiteratorprocty);
+begin
+ iterate(akey,keyhashiteratorprocty(aiterator));
 end;
 
 { tansistringhashdatalist }

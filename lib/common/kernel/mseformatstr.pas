@@ -112,10 +112,15 @@ function octtostr(inp: longword; digits: integer): string; overload;
    //convert longword to octaltring, digits = octet count
 function octtostr(inp: qword; digits: integer): string; overload;
    //convert longword to octaltring, digits = octet count
-function hextostr(inp: longword; digits: integer): string; overload;
+function hextostr(inp: longword;
+             digits: integer = 2*sizeof(longword)): string; overload;
    //convert longword to hexstring, digits = nibble count
-function hextostr(inp: qword; digits: integer): string; overload;
-   //convert longword to hexstring, digits = nibble count
+function hextostr(inp: qword;
+             digits: integer = 2*sizeof(qword)): string; overload;
+   //convert qword to hexstring, digits = nibble count
+function hextostr(const inp: pointer;
+             digits: integer = 2*sizeof(pointer)): string; overload;
+   //convert pointer to hexstring, digits = nibble count
 function hextocstr(const inp: longword; stellen: integer): string; overload;
    //convert longword to 0x..., digits = nibble count
 function hextocstr(const inp: qword; stellen: integer): string; overload;
@@ -2231,6 +2236,13 @@ begin
   end;
   inp:= inp shr 4;
  end;
+end;
+
+function hextostr(const inp: pointer;
+             digits: integer = 2*sizeof(pointer)): string; overload;
+   //convert pointer to hexstring, digits = nibble count
+begin
+ result:= hextostr(ptruint(inp),digits);
 end;
 
 function hextocstr(const inp: longword; stellen: integer): string;
