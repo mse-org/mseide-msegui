@@ -29,6 +29,58 @@ type
   client: isigclient;
  end;
 }
+ tcustomsigcomp = class(tmsecomponent)  
+  protected
+   procedure coeffchanged(const sender: tdatalist;
+                                 const aindex: integer); virtual;
+ end;
+
+ tsigcomp = class(tcustomsigcomp)
+ end;
+ tdoubleinputconn = class;
+ tdoubleoutputconn = class;
+ 
+ inputconnarty = array of tdoubleinputconn;
+ outputconnarty = array of tdoubleoutputconn;
+ 
+ psighandlerinfoty = ^sighandlerinfoty;
+ sighandlerprocty = procedure(const ainfo: psighandlerinfoty) of object;
+
+ isigclient = interface(ievent)
+  procedure initmodel;
+  function getinputar: inputconnarty;
+  function getoutputar: outputconnarty;
+  function getnamepath: string;
+  function gethandler: sighandlerprocty;
+ end;
+ sigclientintfarty = array of isigclient;
+
+ tdoublesigcomp = class(tsigcomp,isigclient)
+  private
+   fcontroller: tsigcontroller;
+   procedure setcontroller(const avalue: tsigcontroller);
+  protected
+//   finfo: siginfoty;
+   procedure setsig1(const sender: tdoubleinputconn;
+                                    var asource: doublearty); virtual;
+   procedure setsig(const sender: tdoubleinputconn;
+                                    const asource: doublearty); virtual;
+   procedure connchange;
+   procedure loaded; override;
+   
+    //isigclient  
+   procedure initmodel; virtual;
+   function getinputar: inputconnarty; virtual;
+   function getoutputar: outputconnarty; virtual;
+   function gethandler: sighandlerprocty; virtual; abstract;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure clear; virtual;
+  published
+   property controller: tsigcontroller read fcontroller write setcontroller;
+ end;
+ 
  tsigconn = class(tmsecomponent)
         //no solution found to link to streamed tpersistent or tobject,
         //fork of classes.pp necessary. :-(
@@ -39,9 +91,9 @@ type
    fowner: tdoublesigcomp;
   public
    constructor create(const aowner: tdoublesigcomp); reintroduce; virtual;
+   property controller: tsigcontroller read fowner.fcontroller;
  end;
  
- tdoubleinputconn = class;
  doubleinputconnarty = array of tdoubleinputconn;
  
  tdoubleoutputconn = class(tdoubleconn)
@@ -60,6 +112,7 @@ type
    fsource: tdoubleoutputconn;
    procedure setsource(const avalue: tdoubleoutputconn);
   protected
+   fvalue: double;
    fbuffer: doublearty;
    fhasdata: boolean;
   public
@@ -74,16 +127,10 @@ type
   published
    property source: tdoubleoutputconn read fsource write setsource;
  end;
-
- inputconnarty = array of tdoubleinputconn;
- outputconnarty = array of tdoubleoutputconn;
  
- isigclient = interface(ievent)
-  function getinputar: inputconnarty;
-  function getoutputar: outputconnarty;
-  function getnamepath: string;
+ sighandlerinfoty = record
+  dest: pdouble;
  end;
- sigclientintfarty = array of isigclient;
 
  psiginfoty = ^siginfoty;
  siginfopoarty = array of psiginfoty;
@@ -108,75 +155,71 @@ type
   next: siginfopoarty;
  end;
  siginfoarty = array of siginfoty;
- 
- tcustomsigcomp = class(tmsecomponent)  
-  protected
-   procedure coeffchanged(const sender: tdatalist;
-                                 const aindex: integer); virtual;
- end;
 
- tsigcomp = class(tcustomsigcomp)
+ sighandlernodeinfoty = record
+  handlerinfo: sighandlerinfoty;
+  handler: sighandlerprocty;
+  dest: doublepoarty;
+  desthigh: integer;
+  recursivebuffer: double;
  end;
-
- tdoublesigcomp = class(tsigcomp,isigclient)
-  private
-   fcontroller: tsigcontroller;
-   procedure setcontroller(const avalue: tsigcontroller);
-  protected
-//   finfo: siginfoty;
-   procedure setsig1(const sender: tdoubleinputconn;
-                                    var asource: doublearty); virtual;
-   procedure setsig(const sender: tdoubleinputconn;
-                                    const asource: doublearty); virtual;
-   procedure connchange;
-   procedure loaded; override;
+ psighandlernodeinfoty = ^sighandlernodeinfoty;
+ sighandlernodeinfoarty = array of sighandlernodeinfoty;
    
-   function getinputar: inputconnarty; virtual;
-   function getoutputar: outputconnarty; virtual;
-  public
-   constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
-   procedure clear; virtual;
-  published
-   property controller: tsigcontroller read fcontroller write setcontroller;
- end;
- 
  tsigconnection = class(tdoublesigcomp)
  end;
  
+ sigineventty = procedure(const sender: tobject;
+                               var sig: real) of object; 
+
  tsigin = class(tsigconnection)
   private
    foutput: tdoubleoutputconn;
+   fvalue: double;
+   foninput: sigineventty;
   protected
    function getoutputar: outputconnarty; override;
+    //isigclient
+   function gethandler: sighandlerprocty; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy;
    procedure setsig1(var asource: doublearty); //asource is invalid afterwards
    procedure setsig(const asource: doublearty);
   published
+   property value: double read fvalue write fvalue;
+   property oninput: sigineventty read foninput write foninput;
  end;
 
  sigouteventty = procedure(const sender: tobject;
-                               const sig: doublearty) of object; 
+                               const sig: real) of object; 
                               
  tsigout = class(tsigconnection)
   private
    finput: tdoubleinputconn;
+   finputpo: pdouble;
    foutp: doublearty;
    fonoutput: sigouteventty;
+   fvalue: double;
    procedure setinput(const avalue: tdoubleinputconn);
    function getinput: tdoubleinputconn;
   protected
    function getinputar: inputconnarty; override;
+   {
    procedure setsig1(const sender: tdoubleinputconn;
                                  var asource: doublearty); override;
    procedure setsig(const sender: tdoubleinputconn;
                                  const asource: doublearty); override;
+   }
+    //isigclient
+   function gethandler: sighandlerprocty; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property outp: doublearty read foutp;
+   property value: double read fvalue;
   published
    property input: tdoubleinputconn read getinput write setinput;
    property onoutput: sigouteventty read fonoutput write fonoutput;
@@ -267,6 +310,8 @@ type
    procedure setinputs(const avalue: tdoubleinpconnarrayprop);
    procedure setoutput(const avalue: tdoubleoutputconn);
   protected
+   finps: doublepoarty;
+   finphigh: integer;
    finpdatacount: integer;
    procedure processinout(const acount: integer;
              var ainp: doublepoarty; var aoutp: pdouble); virtual; abstract;
@@ -277,6 +322,7 @@ type
                                     const asource: doublearty); override;
    function getinputar: inputconnarty; override;
    function getoutputar: outputconnarty; override;
+   procedure initmodel; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -290,12 +336,18 @@ type
   protected
    procedure processinout(const acount: integer;
              var ainp: doublepoarty; var aoutp: pdouble); override;
+    //isigclient
+   function gethandler: sighandlerprocty; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
  end;
  
  tsigmult = class(tsigmultiinp)
   protected
    procedure processinout(const acount: integer;
              var ainp: doublepoarty; var aoutp: pdouble); override;
+    //isigclient
+   function gethandler: sighandlerprocty; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
  end;
 
  sigcontrollerstatety = (scs_modelvalid);
@@ -304,6 +356,13 @@ type
  tsiginfohash = class(tpointerptruinthashdatalist)
  end;
  
+ recursiveinfoty = record
+  source: pdouble;
+  dest: doublepoarty;
+  desthigh: integer;
+ end;
+ recursiveinfoarty = array of recursiveinfoty;
+  
  tsigcontroller = class(tmsecomponent)
   private
    finphash: tsiginfohash;
@@ -315,6 +374,10 @@ type
    finputnodes: siginfopoarty;
    foutputnodes: siginfopoarty;
    frecursives: siginfopoarty;
+   fexecinfo: sighandlernodeinfoarty;
+   fexechigh: integer;
+   frecursiveinfos: recursiveinfoarty;
+   frecursivehigh: integer;
   {$ifdef mse_debugsignal}
    procedure debugnodeinfo(const atext: string; const anode: psiginfoty);
    procedure debugpointer(const atext: string; const apointer: pointer);
@@ -564,6 +627,11 @@ begin
  connchange;
 end;
 
+procedure tdoublesigcomp.initmodel;
+begin
+ //dummy
+end;
+
 { tdoublezcomp }
 
 constructor tdoublezcomp.create(aowner: tcomponent);
@@ -705,6 +773,7 @@ end;
 constructor tsigout.create(aowner: tcomponent);
 begin
  finput:= tdoubleinputconn.create(self);
+ finputpo:= @finput.fvalue;
  inherited;
 end;
 
@@ -722,7 +791,7 @@ function tsigout.getinput: tdoubleinputconn;
 begin
  result:= finput;
 end;
-
+{
 procedure tsigout.setsig1(const sender: tdoubleinputconn;
                var asource: doublearty);
 begin
@@ -740,11 +809,24 @@ begin
   fonoutput(self,foutp);
  end;
 end;
-
+}
 function tsigout.getinputar: inputconnarty;
 begin
  setlength(result,1);
  result[0]:= finput;
+end;
+
+function tsigout.gethandler: sighandlerprocty;
+begin
+ result:= @sighandler;
+end;
+
+procedure tsigout.sighandler(const ainfo: psighandlerinfoty);
+begin
+ fvalue:= finputpo^;
+ if assigned(fonoutput) then begin
+  fonoutput(self,fvalue);
+ end;
 end;
 
 { tsigin }
@@ -774,6 +856,19 @@ function tsigin.getoutputar: outputconnarty;
 begin
  setlength(result,1);
  result[0]:= foutput;
+end;
+
+function tsigin.gethandler: sighandlerprocty;
+begin
+ result:= @sighandler;
+end;
+
+procedure tsigin.sighandler(const ainfo: psighandlerinfoty);
+begin
+ if assigned(foninput) then begin
+  foninput(self,fvalue);
+ end;
+ ainfo^.dest^:= fvalue;
 end;
 
 { tsigmultiinp }
@@ -876,6 +971,17 @@ begin
  result[0]:= foutput;
 end;
 
+procedure tsigmultiinp.initmodel;
+var
+ int1: integer;
+begin
+ finphigh:= finputs.count-1;
+ setlength(finps,finphigh+1);
+ for int1:= 0 to finphigh do begin
+  finps[int1]:= @tdoubleinputconn(finputs.fitems[int1]).fvalue;
+ end;
+end;
+
 { tdoubleinpconnarrayprop }
 
 constructor tdoubleinpconnarrayprop.create(const aowner: tdoublesigcomp);
@@ -939,6 +1045,21 @@ begin
  end;
 end;
 
+function tsigadd.gethandler: sighandlerprocty;
+begin
+ result:= @sighandler;
+end;
+
+procedure tsigadd.sighandler(const ainfo: psighandlerinfoty);
+var
+ int1: integer;
+begin
+ ainfo^.dest^:= 0;
+ for int1:= 0 to finphigh do begin
+  ainfo^.dest^:= ainfo^.dest^ + finps[int1]^;
+ end;
+end;
+
 { tsigmult }
 
 procedure tsigmult.processinout(const acount: integer; var ainp: doublepoarty;
@@ -955,6 +1076,21 @@ begin
   end;
   aoutp^:= rea1;
   inc(aoutp);
+ end;
+end;
+
+function tsigmult.gethandler: sighandlerprocty;
+begin
+ result:= @sighandler;
+end;
+
+procedure tsigmult.sighandler(const ainfo: psighandlerinfoty);
+var
+ int1: integer;
+begin
+ ainfo^.dest^:= 1;
+ for int1:= 0 to finphigh do begin
+  ainfo^.dest^:= ainfo^.dest^ * finps[int1]^;
  end;
 end;
 
@@ -1125,6 +1261,7 @@ begin
  finputnodes:= nil;
  foutputnodes:= nil;
  frecursives:= nil;
+ fexecinfo:= nil;
  outputnodecount:= 0;
  inputnodecount:= 0;
  recursivenodecount:= 0;
@@ -1139,6 +1276,7 @@ begin
   po1:= @finfos[int1];
   with po1^ do begin
    intf:= fclients[int1];
+   intf.initmodel;
   {$ifdef mse_debugsignal}
    debugwriteln('client '+intf.getnamepath);
   {$endif}
@@ -1157,6 +1295,9 @@ begin
   {$endif}
     foutphash.add(ptruint(outputs[int2]),po1);
     with outputs[int2] do begin
+     if fdestinations = nil then begin
+      raise exception.create(po1^.intf.getnamepath+': open output');
+     end;
      stackarray(pointerarty(fdestinations),pointerarty(po1^.destinations));
    {$ifdef mse_debugsignal}
      for int3:= 0 to high(fdestinations) do begin
@@ -1271,11 +1412,62 @@ begin
  if execindex <> length(execorder) then begin
   internalerror('SIG20100916-2'); //unprocessed nodes
  end;
+ setlength(fexecinfo,execindex);
+ fexechigh:= execindex-1;
+ int3:= 0;
+ setlength(frecursiveinfos,recursivenodecount);
+ for int1:= 0 to high(fexecinfo) do begin
+  po1:= execorder[int1];
+  with fexecinfo[int1] do begin
+   handler:= po1^.intf.gethandler;
+   if sis_recursive in po1^.state then begin
+    desthigh:= -1;
+    handlerinfo.dest:= @recursivebuffer;
+    with frecursiveinfos[int3] do begin
+     desthigh:= high(po1^.destinations);
+     setlength(dest,desthigh+1);
+     for int2:= 0 to desthigh do begin
+      dest[int2]:= @po1^.destinations[int2].fvalue;
+     end;
+     source:= @recursivebuffer;
+     inc(int3);
+    end;
+   end
+   else begin
+    desthigh:= high(po1^.destinations)-1;
+    if length(po1^.destinations) > 0 then begin
+     handlerinfo.dest:= @po1^.destinations[0].fvalue;
+     setlength(dest,desthigh+1);
+     for int2:= 0 to desthigh do begin
+      dest[int2]:= @po1^.destinations[int2+1].fvalue;
+     end;
+    end; 
+   end;
+  end;
+ end;
  include(fstate,scs_modelvalid);
 end;
 
 procedure tsigcontroller.internalstep;
+var
+ int1,int2: integer;
+ po1: psighandlernodeinfoty;
 begin
+ po1:= pointer(fexecinfo);
+ for int1:= 0 to fexechigh do begin
+  po1^.handler(psighandlerinfoty(po1));
+  for int2:= 0 to po1^.desthigh do begin //multi inputs on output
+   po1^.dest[int2]^:= po1^.handlerinfo.dest^;
+  end;
+  inc(po1);
+ end;
+ for int1:= 0 to frecursivehigh do begin  //copy recursive buffer
+  with frecursiveinfos[int1] do begin
+   for int2:= 0 to desthigh do begin
+    dest[int2]^:= source^;
+   end;
+  end;
+ end;
 end;
 
 procedure tsigcontroller.step(const acount: integer);

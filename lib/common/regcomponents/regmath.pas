@@ -31,6 +31,11 @@ type
    function geteditorclass: propertyeditorclassty; override;
  end;
  
+ toutputconnpropertyeditor = class(tcomponentpropertyeditor)
+  protected
+   function filtercomponent(const acomponent: tcomponent): boolean; override;
+ end;
+  
 procedure register;
 begin
 {$ifdef FPC}
@@ -43,6 +48,8 @@ begin
 //                                                   tsubcomponentpropertyeditor);
  registerpropertyeditor(typeinfo(tdoubleinputconn),nil,'',
                                                    tinputconnpropertyeditor);
+ registerpropertyeditor(typeinfo(tdoubleoutputconn),tdoubleinputconn,'',
+                                                   toutputconnpropertyeditor);
  registerpropertyeditor(typeinfo(tdoubleinpconnarrayprop),nil,'',
                                      tinputconnarraypropertyeditor);
 {$endif}
@@ -56,7 +63,7 @@ var
 begin
  inst:= tdoubleinputconn(getpointervalue);
  if inst.source = nil then begin
-  result:= '<open>';
+  result:= '<->';
  end
  else begin
   result:= '<'+designer.getcomponentdispname(inst.source)+'>';
@@ -73,6 +80,16 @@ end;
 function tinputconnarraypropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tinputconnpropertyeditor;
+end;
+
+{ toutputconnpropertyeditor }
+
+function toutputconnpropertyeditor.filtercomponent(const acomponent: tcomponent): boolean;
+var
+ cont1: tsigcontroller;
+begin
+ cont1:= tdoubleinputconn(instance).controller;
+ result:= (cont1 <> nil) and (tdoubleoutputconn(acomponent).controller = cont1);
 end;
 
 initialization
