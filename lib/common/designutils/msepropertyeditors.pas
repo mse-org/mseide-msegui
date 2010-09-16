@@ -136,6 +136,8 @@ type
    procedure modified; virtual;
    function getdefaultstate: propertystatesty; virtual;
    procedure setsubprop; virtual;
+   function getvalueeditor: tpropertyeditor; virtual;
+   function getlinksource: tcomponent; virtual;
   public
    constructor create(const adesigner: idesigner;
         const amodule: tmsecomponent; const acomponent: tcomponent;
@@ -172,6 +174,8 @@ type
    property selected: boolean read getselected write setselected;
    property module: tmsecomponent read fmodule;
    property component: tcomponent read fcomponent;
+   property valueeditor: tpropertyeditor read getvalueeditor;
+   property linksource: tcomponent read getlinksource;
   end;
 
  propertyeditorclassty = class of tpropertyeditor;
@@ -384,6 +388,7 @@ type
    function getdefaultstate: propertystatesty; override;
    procedure checkcomponent(const avalue: tcomponent); virtual;
    function filtercomponent(const acomponent: tcomponent): boolean; virtual;
+   function getlinksource: tcomponent; override;
   public
    function allequal: boolean; override;
    function getvalue: msestring; override;
@@ -599,6 +604,8 @@ type
    function getselectedpropinstances: objectarty; virtual;
 
    function getdefaultstate: propertystatesty; override;
+   function getvalueeditor: tpropertyeditor; override;
+   function getlinksource: tcomponent; override;
   public
    constructor create(aindex: integer; aparenteditor: tarraypropertyeditor;
             aeditorclass: propertyeditorclassty;
@@ -2072,6 +2079,16 @@ begin
  include(fstate,ps_subprop);
 end;
 
+function tpropertyeditor.getvalueeditor: tpropertyeditor;
+begin
+ result:= self;
+end;
+
+function tpropertyeditor.getlinksource: tcomponent;
+begin
+ result:= nil;
+end;
+
 { tordinalpropertyeditor }
 
 function tordinalpropertyeditor.allequal: boolean;
@@ -2766,6 +2783,11 @@ function tcomponentpropertyeditor.filtercomponent(
                                const acomponent: tcomponent): boolean;
 begin
  result:= true;
+end;
+
+function tcomponentpropertyeditor.getlinksource: tcomponent;
+begin
+ result:= tcomponent(getpointervalue);
 end;
 
 { tsubcomponenteditor }
@@ -3551,6 +3573,16 @@ begin
   end;
   setlength(result,int2);
  end;
+end;
+
+function tarrayelementeditor.getvalueeditor: tpropertyeditor;
+begin
+ result:= feditor;
+end;
+
+function tarrayelementeditor.getlinksource: tcomponent;
+begin
+ result:= feditor.getlinksource;
 end;
 
 { tpersistentarraypropertyeditor }

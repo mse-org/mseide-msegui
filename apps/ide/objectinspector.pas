@@ -1781,17 +1781,18 @@ procedure tobjectinspectorfo.clearselect(const sender: TObject);
 begin
  grid.datacols[0].clearselection;
 end;
-
+var testvar: string;
 procedure tobjectinspectorfo.valuescellevent(const sender: TObject;
                var info: celleventinfoty);
 var
  editor1: tpropertyeditor1;
  comp1: tcomponent;
 begin
- if iscellclick(info,[ccr_dblclick]) then begin
-  editor1:= tpropertyeditor1(tpropertyitem(props.item).feditor);
-  if tpropertyeditor(editor1) is tcomponentpropertyeditor then begin
-   comp1:= tcomponent(editor1.getpointervalue);
+ if iscellclick(info,[ccr_dblclick,ccr_nokeyreturn]) then begin
+//  editor1:= tpropertyeditor1(tpropertyitem(props.item).feditor.valueeditor);
+//  if (tpropertyeditor(editor1) is tcomponentpropertyeditor) then begin
+//   comp1:= tcomponent(editor1.getpointervalue);
+   comp1:= tpropertyitem(props.item).feditor.linksource;
    while (comp1 <> nil) and (cssubcomponent in comp1.componentstyle) do begin
     comp1:= comp1.owner;
    end;
@@ -1799,7 +1800,7 @@ begin
     designer.showformdesigner(designer.modules.findmodulebycomponent(comp1));
     designer.selectcomponent(comp1);
    end;
-  end;
+//  end;
  end;
 end;
 

@@ -25,7 +25,9 @@ type
     //shows getlasterror
  end;
 
-
+ einternalerror = class(exception)
+ end;
+ 
 {$ifdef mswindows}
 type
  timeval = record
@@ -45,6 +47,7 @@ procedure debugwriteln(const value: string);
 procedure debugwritestack(const acount: integer = 30);
 procedure debugout(const sender: tcomponent; const atext: ansistring); overload;
 procedure debugout(const sender: tobject; const atext: ansistring); overload;
+procedure internalerror(const text: string);
 
 function getlasterror: integer;
 function getlasterrortext: string;
@@ -294,6 +297,11 @@ procedure debugout(const sender: tobject; const atext: ansistring);
 begin
  debugwriteln(hextostr(ptruint(sender),8)+' '+
                       sender.classname+' '+atext);
+end;
+
+procedure internalerror(const text: string);
+begin
+ raise einternalerror.create('Internal error '+text);
 end;
 
 procedure errorhalt(errortext: string; exitcode: integer = 1);

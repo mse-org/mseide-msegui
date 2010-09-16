@@ -1004,8 +1004,16 @@ end;
  {$ifdef mse_debugsignal}
 procedure tsigcontroller.debugnodeinfo(const atext: string;
                                                    const anode: psiginfoty);
+var
+ str1: string;
 begin
- debugwriteln(atext+anode^.intf.getnamepath);
+ if anode = nil then begin
+  str1:= '<NIL>';
+ end
+ else begin
+  str1:= anode^.intf.getnamepath;
+ end; 
+ debugwriteln(atext+str1);
 end;
 
 procedure tsigcontroller.debugpointer(const atext: string;
@@ -1062,6 +1070,10 @@ var
  {$endif}  
  end;
 
+var
+ execorder: siginfopoarty;
+ execindex: integer;
+ 
  procedure processcalcorder(const anode: psiginfoty);
  var
   int1: integer;
@@ -1073,8 +1085,13 @@ var
  {$ifdef mse_debugsignal}
   indentbefore:= indent;
   indent:= indent+' ';
-  debugnodeinfo(indent+'calcnode ',anode);
+  debugnodeinfo(inttostr(execindex)+indent+'calcnode ',anode);
  {$endif}   
+  if execindex > high(execorder) then begin
+   internalerror('SIG20100916-0');
+  end;
+  execorder[execindex]:= anode;
+  inc(execindex);
   with anode^ do begin
    for int1:= 0 to high(prev) do begin
     po1:= prev[int1];
@@ -1201,7 +1218,7 @@ begin
     end;      
    end;
   end;
- end;
+ end; 
  
 {$ifdef mse_debugsignal}
   debugwriteln('*check recursion');
@@ -1223,6 +1240,8 @@ begin
 {$ifdef mse_debugsignal}
  debugwriteln('*processcalcorder');  
 {$endif}
+ setlength(execorder,length(finfos));
+ execindex:= 0;
  for int1:= 0 to high(foutputnodes) do begin
  {$ifdef mse_debugsignal}
   debugnodeinfo('output ',foutputnodes[int1]);  
@@ -1234,6 +1253,23 @@ begin
   debugnodeinfo('recursive ',frecursives[int1]);  
  {$endif}
   processcalcorder(frecursives[int1]);
+ end;
+{$ifdef mse_debugsignal}
+ debugwriteln('*execorder '+inttostr(length(execorder))+' '+inttostr(execindex));
+ for int1:= 0 to high(execorder) do begin
+  debugnodeinfo(' ',execorder[int1]);
+ end;
+ for int1:= 0 to high(finfos) do begin
+  po1:= @finfos[int1];
+  with po1^ do begin
+   if outpcount <> 0 then begin
+    debugnodeinfo('! '+inttostr(outpcount)+ ' ',po1);
+   end;
+  end;
+ end;
+{$endif}
+ if execindex <> length(execorder) then begin
+  internalerror('SIG20100916-2'); //unprocessed nodes
  end;
  include(fstate,scs_modelvalid);
 end;
