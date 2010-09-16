@@ -3242,9 +3242,10 @@ begin
  for int1:= 0 to amodule^.components.fcount - 1 do begin
   fselections.remove(amodule^.components.next^.instance);
  end;
+ designnotifications.moduledestroyed(idesigner(self),amodule^.instance);
  designnotifications.selectionchanged(idesigner(self),
        idesignerselections(fselections));
- designnotifications.moduledestroyed(idesigner(self),amodule^.instance);
+// designnotifications.moduledestroyed(idesigner(self),amodule^.instance);
 end;
 
 procedure tdesigner.addancestorinfo(const ainstance,aancestor: tmsecomponent);

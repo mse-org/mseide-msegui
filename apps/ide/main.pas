@@ -2518,9 +2518,15 @@ begin
 end;
 
 procedure tmainfo.moduledestroyed(const adesigner: idesigner;
-  const amodule: tmsecomponent);
+                                                 const amodule: tmsecomponent);
+var
+ po1: pmoduleinfoty;
 begin
- removemodulemenuitem(designer.modules.findmodulebyinstance(amodule));
+ po1:= designer.modules.findmodulebyinstance(amodule);
+ removemodulemenuitem(po1);
+ if po1 = factivedesignmodule then begin
+  factivedesignmodule:= nil;
+ end;
 end;
 
 procedure tmainfo.methodcreated(const adesigner: idesigner;
