@@ -40,7 +40,7 @@ procedure register;
 begin
 {$ifdef FPC}
  registercomponents('Math',[tfft,tsigfir,tsigiir,tsigout,tsigin,
-                            tsigadd,tsigmult,tsigcontroller]);
+                            tsigadd,tsigdelay,tsigdelayn,tsigmult,tsigcontroller]);
  registercomponenttabhints(['Math'],['Experimental Mathematical Components']);
  registerpropertyeditor(typeinfo(tdoubleconn),tdoublezcomp,'',
                                                    tsubcomponentpropertyeditor);
