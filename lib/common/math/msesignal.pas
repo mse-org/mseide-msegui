@@ -126,7 +126,7 @@ type
    procedure setsig1(var asource: doublearty); virtual; 
                        //asource is invalid afterwards
    procedure setsig(const asource: doublearty); virtual;
-   
+   property value: double read fvalue;  
   published
    property source: tdoubleoutputconn read fsource write setsource;
  end;

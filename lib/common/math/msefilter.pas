@@ -62,6 +62,10 @@ type
    procedure createcoeff; override;
    procedure processinout(const acount: integer;
                     var ainp,aoutp: pdouble); override;
+   function getzcount: integer; override;
+    //isigclient
+   function gethandler: sighandlerprocty; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
   published
    property coeff: trealcoeff read getcoeff write setcoeff;
  end;
@@ -79,6 +83,10 @@ type
    procedure createcoeff; override;
    procedure processinout(const acount: integer;
                     var ainp,aoutp: pdouble); override;
+   function getzcount: integer; override;
+    //isigclient
+   function gethandler: sighandlerprocty; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
   published
    property coeff: tcomplexcoeff read getcoeff write setcoeff;
  end;
@@ -206,6 +214,76 @@ begin
  end;
 end;
 
+function tsigfir.gethandler: sighandlerprocty;
+begin
+ result:= @sighandler;
+end;
+
+procedure tsigfir.sighandler(const ainfo: psighandlerinfoty);
+var                             //todo: optimize
+ int1,int2,int3: integer;
+ ar1: doublearty;
+ i,o: double;
+ po1: pdouble;
+ inp1,outp1: pdouble;
+ startindex1,endindex1,endindex2: integer;
+begin
+ po1:= fcoeff.datapo;
+ i:= finput.value;
+ startindex1:= fzindex;
+ for int3:= 0 to high(fsections.fitems) do begin
+  endindex1:= startindex1 + fsections.fitems[int3] - 1;
+  if endindex1 > fzhigh then begin
+   endindex2:= endindex1-fzhigh-1;
+   endindex1:= fzhigh;
+  end
+  else begin
+   endindex2:= -1;
+  end;
+  
+  fdoublez[startindex1]:= i;
+  o:= 0;
+  for int2:= startindex1 to endindex1 do begin
+   o:= o + fdoublez[int2] * po1^;
+   inc(po1);
+  end;
+  for int2:= 0 to endindex2 do begin
+   o:= o + fdoublez[int2] * po1^;
+   inc(po1);
+  end;
+  startindex1:= startindex1 + fsections.fitems[int3];
+  if startindex1 >= fzcount then begin
+   startindex1:= startindex1 - fzcount;
+  end;
+  i:= o;
+ end;
+ ainfo^.dest^:= o;
+ dec(fzindex);
+ if fzindex < 0 then begin
+  fzindex:= fzhigh;
+ end;
+end;
+
+function tsigfir.getzcount: integer;
+var
+ int1,int2,int3: integer;
+begin
+ result:= 0;
+ int3:= 0;
+ for int1:= 0 to fsections.count -1 do begin
+  for int2:= 0 to fsections[int1]-1 do begin
+   if coeff[int3] = 0 then begin
+    inc(result);
+    inc(int3);
+   end
+   else begin
+    int3:= int3 + fsections[int1]-int2;
+    break;
+   end;
+  end;
+ end;
+end;
+
 { tsigiir }
 
 procedure tsigiir.createcoeff;
@@ -263,6 +341,58 @@ begin
  else begin
   inc(ainp,acount);
   inc(aoutp,acount);
+ end;
+end;
+
+function tsigiir.gethandler: sighandlerprocty;
+begin
+ result:= @sighandler;
+end;
+
+procedure tsigiir.sighandler(const ainfo: psighandlerinfoty);
+var 
+ int1,int2,int3,int4: integer;
+ inp1,outp1: pdouble;
+ i,o: double;
+ po1: pcomplexty;          //todo: optimize
+begin
+ po1:= fcoeff.datapo;
+ i:= finput.value;
+ o:= i*po1^.im+fdoublez[0];
+ int3:= 0;
+ int4:= fsections.fitems[0];
+ for int2:= 1 to fzhigh do begin
+  inc(po1);
+  if int2 = int4 then begin
+   inc(int3);
+   int4:= int4 + fsections.fitems[int3];
+   i:= o;
+   o:= i*po1^.im+fdoublez[int2];
+  end
+  else begin
+   fdoublez[int2-1]:= fdoublez[int2] + i*po1^.im - o*po1^.re;
+  end;
+ end;
+ ainfo^.dest^:= o;
+end;
+
+function tsigiir.getzcount: integer;
+var
+ int1,int2,int3: integer;
+begin
+ result:= 0;
+ int3:= 0;
+ for int1:= 0 to fsections.count -1 do begin
+  for int2:= 0 to fsections[int1]-1 do begin
+   if coeff[int3].im = 0 then begin
+    inc(result);
+    inc(int3);
+   end
+   else begin
+    int3:= int3 + fsections[int1]-int2;
+    break;
+   end;
+  end;
  end;
 end;
 
