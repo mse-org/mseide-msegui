@@ -113,6 +113,8 @@ type
  tdoubleinputconn = class(tdoubleconn)
   private
    fsource: tdoubleoutputconn;
+   foffset: double;
+   fgain: double;
    procedure setsource(const avalue: tdoubleoutputconn);
   protected
    fvalue: double;
@@ -129,6 +131,8 @@ type
    property value: double read fvalue;  
   published
    property source: tdoubleoutputconn read fsource write setsource;
+   property offset: double read foffset write foffset;
+   property gain: double read fgain write fgain;
  end;
  
  sighandlerinfoty = record
@@ -170,11 +174,20 @@ type
   next: siginfopoarty;
  end;
  siginfoarty = array of siginfoty;
-
+ 
+ destinfoty = record
+  dest: pdouble;
+  offset: double;
+  gain: double;
+  hasscale: boolean;
+ end;
+ destinfoarty = array of destinfoty;
+ 
  sighandlernodeinfoty = record
   handlerinfo: sighandlerinfoty;
   handler: sighandlerprocty;
-  dest: doublepoarty;
+  firstdest: destinfoty;
+  dest: destinfoarty;
   desthigh: integer;
 //  recursivebuffer: double;
  end;
@@ -570,6 +583,7 @@ end;
 
 constructor tdoubleinputconn.create(const aowner: tdoublesigcomp);
 begin
+ fgain:= 1;
  inherited;
  name:= 'input';
 end;
@@ -1369,7 +1383,7 @@ var
  {$ifdef mse_debugsignal}
   indent:= indentbefore;
  {$endif}  
- end;
+ end; //checkrecursion
 
 var
  execorder: siginfopoarty;
@@ -1413,7 +1427,16 @@ var
  {$ifdef mse_debugsignal}
   indent:= indentbefore;
  {$endif}  
- end;
+ end; //processcalcorder
+
+ procedure updatedestinfo(const ainput: tdoubleinputconn;
+                                        var ainfo: destinfoty);
+ begin
+  ainfo.dest:= @ainput.fvalue;
+  ainfo.offset:= ainput.offset;
+  ainfo.gain:= ainput.gain;
+  ainfo.hasscale:= (ainfo.offset <> 0) or (ainfo.gain <> 1);
+ end; //updatedestinfo
  
 var
  int1,int2,int3,int4: integer;
@@ -1586,9 +1609,12 @@ begin
    desthigh:= high(po1^.destinations)-1;
    if length(po1^.destinations) > 0 then begin
     handlerinfo.dest:= @po1^.destinations[0].fvalue;
+    updatedestinfo(po1^.destinations[0],firstdest);
+//    firstdest.dest:= handlerinfo.dest;
     setlength(dest,desthigh+1);
     for int2:= 0 to desthigh do begin
-     dest[int2]:= @po1^.destinations[int2+1].fvalue;
+     updatedestinfo(po1^.destinations[int2+1],dest[int2]);
+//     dest[int2].dest:= @po1^.destinations[int2+1].fvalue;
     end;
    end;
   end;
@@ -1894,8 +1920,18 @@ begin
  po1:= pointer(fexecinfo);
  for int1:= 0 to fexechigh do begin
   po1^.handler(psighandlerinfoty(po1));
+  with po1^.firstdest do begin
+   if hasscale then begin
+    dest^:= dest^*gain+offset;
+   end;
+  end;
   for int2:= 0 to po1^.desthigh do begin //multi inputs on output
-   po1^.dest[int2]^:= po1^.handlerinfo.dest^;
+   with po1^.dest[int2] do begin
+    dest^:= po1^.handlerinfo.dest^;
+    if hasscale then begin
+     dest^:= dest^*gain+offset;
+    end;
+   end;    
   end;
   inc(po1);
  end;
