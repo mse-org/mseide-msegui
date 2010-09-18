@@ -179,9 +179,15 @@ type
   descendent,ancestor: tmsecomponent
  end;
  pancestorinfoty = ^ancestorinfoty;
+ ancestorinfoarty = array of ancestorinfoty;
  ancestorinfoaty = array[0..0] of ancestorinfoty;
  pancestorinfoaty = ^ancestorinfoaty;
 
+ ancestornameinfoty = record
+  desc,anc: string;
+ end;
+ ancestornameinfoarty = array of ancestornameinfoty;
+ 
  tancestorlist = class(tobjectlinkrecordlist)
   private
    fstreaming: integer;
@@ -196,6 +202,8 @@ type
    function finddescendent(const aancestor: tcomponent): tmsecomponent;
    function finddescendentinfo(const adescendent: tcomponent): pancestorinfoty;
    function findancestorinfo(const aancestor: tcomponent): pancestorinfoty;
+   function findinfo(const ainfo: ancestornameinfoty): pancestorinfoty;
+   procedure getinfo(const apo: pancestorinfoty; out info: ancestornameinfoty);
    procedure add(const adescendent,aancestor: tmsecomponent);
    procedure beginstreaming;
    procedure endstreaming;
@@ -480,7 +488,7 @@ uses
  designer_bmp,msesys,msewidgets,formdesigner,mseevent,objectinspector,
  msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
  pascaldesignparser,msearrayprops,rtlconsts,
- msesimplewidgets;
+ msesimplewidgets,msesysutils;
 
 type
  tcomponent1 = class(tcomponent);
@@ -714,6 +722,30 @@ begin
  end;
 end;
 
+function tancestorlist.findinfo(const ainfo: ancestornameinfoty): pancestorinfoty;
+var
+ po1: pancestorinfoty;
+ int1: integer;
+begin
+ result:= nil;
+ po1:= datapo;
+ for int1:= 0 to count - 1 do begin
+  if (namepathowner(po1^.descendent) = ainfo.desc) and 
+       (namepathowner(po1^.ancestor) = ainfo.anc) then begin
+   result:= po1;
+   break;
+  end;
+  inc(po1);
+ end;
+end;
+
+procedure tancestorlist.getinfo(const apo: pancestorinfoty;
+               out info: ancestornameinfoty);
+begin
+ info.desc:= namepathowner(apo^.descendent);
+ info.anc:= namepathowner(apo^.ancestor);
+end;
+
 { tdesignerancestorlist }
 
 constructor tdesignerancestorlist.create(aowner: tdesigner);
@@ -880,6 +912,16 @@ var
  ancestorbefore: tmsecomponent;
  po1: pancestorinfoty;
 begin
+{$ifdef mse_debugsubmodule}
+ debugwriteln('***revert module'+ module^.instance.name+
+               ' dest '+info^.descendent.name+' anch '+info^.ancestor.name);
+ po1:= datapo;
+ for int1:= 0 to count-1 do begin
+  debugwriteln('*'+inttostr(int1)+' '+po1^.ancestor.name+' '+
+                                           po1^.descendent.name);
+  inc(po1);
+ end;
+{$endif}
  comp1:= info^.descendent;
  isroot:= comp1 = module^.instance;
  ancestorbefore:= nil; //compiler warning
@@ -983,18 +1025,28 @@ begin
  fmodule:= module;
  addcomp(comp2);
  removefixupreferences(module^.instance,'');
+ add(comp2,info^.ancestor); //restore
  if isroot then begin
   for int1:= 0 to high(ar1) do begin
    add(ar1[int1],comp2);
                      //restore entry;
   end;
   if ancestorbefore = nil then begin
-   fdesigner.fsubmodulelist.add(comp2); //shhould not happen
+   fdesigner.fsubmodulelist.add(comp2); //should not happen
   end
   else begin
    fdesigner.fsubmodulelist.add(comp2,ancestorbefore);
   end;
  end;
+{$ifdef mse_debugsubmodule}
+ debugwriteln('***end revert' );
+ po1:= datapo;
+ for int1:= 0 to count-1 do begin
+  debugwriteln('*'+inttostr(int1)+' '+po1^.ancestor.name+' '+
+                                           po1^.descendent.name);
+  inc(po1);
+ end;
+{$endif}
 end;         
 
 function tdescendentinstancelist.getancestors(
@@ -1117,6 +1169,8 @@ var
  reader1: treader;
  comp1: tcomponent;
  int2: integer;
+ compname: string;
+ po1: pmoduleinfoty;
 begin
  amodule^.designform.window.beginmoving; //no flicker
  try
@@ -1178,13 +1232,28 @@ begin
     reader1.readsignature;
     {$endif}
     reader1.beginreferences;
+    compname:= comp1.name;
     try
      designer.doswapmethodpointers(comp1,false);
      reader1.readcomponent(comp1);
-    finally
      reader1.fixupreferences;
      reader1.endreferences;
      designer.doswapmethodpointers(comp1,true);
+    except
+     on e: exception do begin
+      e.message:= compname+': '+e.message;
+      removefixupreferences(comp1,'');
+      reader1.endreferences;
+   {
+      with fdesigner.modules do begin
+       po1:= findmodulebyinstance(comp1);
+       if po1 <> nil then begin
+        delete(findmodule(po1));
+       end;
+      end;
+   }
+      raise;
+     end;
     end;
    end;
   finally
@@ -1239,11 +1308,12 @@ var
 var
  modifiedowners,dependentmodules: moduleinfopoarty;
  streams: streamarty;
- infos: ancestorinfopoarty;
+ infos: ancestornameinfoarty;
  comp1,ancestor: tcomponent;
  int1,int2: integer;
  po1: pancestorinfoty;
  po2: pmoduleinfoty;
+  
 
 begin
  if fmodifiedlevel >= 16 then begin
@@ -1251,6 +1321,16 @@ begin
  end;
  inc(fmodifiedlevel);
  try
+ {$ifdef mse_debugsubmodule}
+  debugwriteln('***modulemodified '+inttostr(fmodifiedlevel)+' '+
+                amodule^.instance.name);
+  po1:= datapo;
+  for int1:= 0 to count-1 do begin
+   debugwriteln('*'+inttostr(int1)+' '+po1^.ancestor.name+' '+
+                                            po1^.descendent.name);
+   inc(po1);
+  end;
+ {$endif}               
   po1:= datapo;
   if fmodifiedlevel = 16 then begin
    showmessage('Recursive form inheritance of "'+
@@ -1259,7 +1339,9 @@ begin
   end;
   for int1:= 0 to fcount - 1 do begin
    if po1^.ancestor = amodule^.instance then begin
-    additem(pointerarty(infos),po1);
+    setlength(infos,high(infos)+2);
+    getinfo(po1,infos[high(infos)]);
+//    additem(pointerarty(infos),po1);  //listitems can be deleted
     if ismodule(po1^.descendent) then begin  //inherited form        
      comp1:= po1^.descendent;
     end
@@ -1268,6 +1350,11 @@ begin
     end;
     po2:= fdesigner.modules.findmodule(tmsecomponent(comp1));
     additem(pointerarty(modifiedowners),po2);
+   {$ifdef mse_debugsubmodule}
+    debugwriteln(' item ancestor '+po1^.ancestor.name+ ' descendent '+
+             po1^.descendent.name + ' module '+po2^.instance.name);
+   {$endif}               
+
     if finditem(pointerarty(dependentmodules),po2) < 0 then begin
      additem(pointerarty(dependentmodules),po2);
     end;
@@ -1284,7 +1371,8 @@ begin
    try 
     setlength(streams,length(infos));
     for int1:= 0 to high(modifiedowners) do begin
-     savechanges(modifiedowners[int1],infos[int1],ancestor,streams[int1]);
+     savechanges(modifiedowners[int1],findinfo(infos[int1]),ancestor,
+                                                               streams[int1]);
   {$ifdef mse_debugsubmodule}
      debugout('state ' + modifiedowners[int1]^.instance.name,streams[int1]);
   {$endif}
@@ -1293,10 +1381,11 @@ begin
     ferrorhandler:= treaderrorhandler.create(nil);
     try
      for int1:= 0 to high(modifiedowners) do begin
-      restorechanges(modifiedowners[int1],infos[int1],{ancestor,}streams[int1]);
+      po1:= findinfo(infos[int1]);
+      restorechanges(modifiedowners[int1],po1,{ancestor,}streams[int1]);
  {$ifdef mse_debugsubmodule}
-      debugbinout('after load ' + infos[int1]^.descendent.name,
-                         infos[int1]^.descendent,infos[int1]^.ancestor);
+      debugbinout('after load ' + po1^.descendent.name,
+                         po1^.descendent,po1^.ancestor);
  {$endif}
      end;
     finally
@@ -1320,6 +1409,15 @@ begin
  finally
   dec(fmodifiedlevel);
  end;
+{$ifdef mse_debugsubmodule}
+ debugwriteln('***end modulemodified'+inttostr(fmodifiedlevel)+' '+
+               amodule^.instance.name);
+ po1:= datapo;
+ for int1:= 0 to count-1 do begin
+  debugwriteln('*'+inttostr(int1)+' '+po1^.ancestor.name+' '+po1^.descendent.name);
+  inc(po1);
+ end;
+{$endif}               
 end;
 
 procedure tdescendentinstancelist.add(const instance,ancestor: tmsecomponent;

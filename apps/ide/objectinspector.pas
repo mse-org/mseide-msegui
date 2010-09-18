@@ -1781,7 +1781,7 @@ procedure tobjectinspectorfo.clearselect(const sender: TObject);
 begin
  grid.datacols[0].clearselection;
 end;
-var testvar: string;
+
 procedure tobjectinspectorfo.valuescellevent(const sender: TObject;
                var info: celleventinfoty);
 var

@@ -1102,10 +1102,8 @@ begin
  Result:= retcode = 0;
 end;
 
-var testvar: tibcursor;
 function TIBConnection.Fetch(cursor : TSQLCursor) : boolean;
 begin
-testvar:= TIBCursor(cursor);
  with TIBCursor(cursor) do begin
   result:= not fempty;
   if result then begin

@@ -605,6 +605,8 @@ type
                    
 function ownernamepath(const acomponent: tcomponent): string; 
                      //namepath from root to acomponent separated by '.'
+function namepathowner(const acomponent: tcomponent): string; 
+                     //namepath from acomponent to root separated by '.'
 function getnumberedname(const acomp: tcomponent;
                                      const namebase: string): string;
 function rootcomponent(const acomponent: tcomponent): tcomponent;
@@ -1205,6 +1207,23 @@ begin
   while comp <> nil do begin
    if comp.Name <> '' then begin
     result:= comp.Name + '.' + result;
+   end;
+   comp:= comp.Owner;
+  end;
+ end;
+end;
+
+function namepathowner(const acomponent: tcomponent): string; 
+                     //namepath from acomponent to root separated by '.'
+var
+ comp: tcomponent;
+begin
+ with acomponent do begin
+  result:= name;
+  comp:= owner;
+  while comp <> nil do begin
+   if comp.Name <> '' then begin
+    result:= result +  '.' + comp.Name;
    end;
    comp:= comp.Owner;
   end;

@@ -2510,6 +2510,9 @@ procedure tmainfo.sourcechanged(const sender: tsourcepage);
 begin
  fnoremakecheck:= false;
  fcurrent:= false;
+ if sender = nil then begin
+  updatemodifiedforms;
+ end;
 end;
 
 procedure tmainfo.exitonexecute(const sender: tobject);
