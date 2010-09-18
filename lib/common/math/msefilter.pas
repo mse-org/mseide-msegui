@@ -216,7 +216,7 @@ end;
 
 function tsigfir.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigfir.sighandler(const ainfo: psighandlerinfoty);
@@ -346,7 +346,7 @@ end;
 
 function tsigiir.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigiir.sighandler(const ainfo: psighandlerinfoty);

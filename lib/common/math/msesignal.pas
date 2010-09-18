@@ -92,9 +92,16 @@ type
  tdoubleconn = class(tsigconn) 
   protected
    fowner: tdoublesigcomp;
+   {$ifndef FPC}
+   function getcontroller: tsigcontroller;
+   {$endif}
   public
    constructor create(const aowner: tdoublesigcomp); reintroduce; virtual;
+   {$ifdef FPC}
    property controller: tsigcontroller read fowner.fcontroller;
+   {$else}
+   property controller: tsigcontroller read getcontroller;
+   {$endif}
  end;
  
  doubleinputconnarty = array of tdoubleinputconn;
@@ -546,6 +553,13 @@ begin
  setsubcomponent(true);
 end;
 
+{$ifndef FPC}
+function tdoubleconn.getcontroller: tsigcontroller;
+begin
+ result:= fowner.fcontroller;
+end;
+{$endif}
+
 { tdoubleoutputconn }
 
 constructor tdoubleoutputconn.create(const aowner: tdoublesigcomp);
@@ -649,7 +663,7 @@ begin
  if dest <> nil then begin
   dest.removeclient(intf);
  end;
- linker.setlinkedvar(intf,source,dest);
+ linker.setlinkedvar(intf,source,tmsecomponent(dest));
  if dest <> nil then begin
   dest.addclient(intf);
  end;
@@ -883,7 +897,7 @@ end;
 
 function tsigout.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigout.sighandler(const ainfo: psighandlerinfoty);
@@ -925,13 +939,13 @@ end;
 
 function tsigin.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigin.sighandler(const ainfo: psighandlerinfoty);
 begin
  if assigned(foninput) then begin
-  foninput(self,fvalue);
+  foninput(self,real(fvalue));
  end;
  ainfo^.dest^:= fvalue;
 end;
@@ -1112,7 +1126,7 @@ end;
 
 function tsigadd.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigadd.sighandler(const ainfo: psighandlerinfoty);
@@ -1134,7 +1148,7 @@ end;
 
 function tsigdelay.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigdelay.sighandler(const ainfo: psighandlerinfoty);
@@ -1171,7 +1185,7 @@ end;
 procedure tsigdelayn.clear;
 begin
  inherited;
- fillchar(fz[0],sizeof(fz[0]*length(fz)),0);
+ fillchar(fz[0],sizeof(fz[0])*length(fz),0);
 end;
 
 function tsigdelayn.getzcount: integer;
@@ -1181,7 +1195,7 @@ end;
 
 function tsigdelayn.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigdelayn.sighandler(const ainfo: psighandlerinfoty);
@@ -1229,7 +1243,7 @@ end;
 
 function tsigmult.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigmult.sighandler(const ainfo: psighandlerinfoty);
@@ -1260,13 +1274,13 @@ end;
 
 procedure tsigcontroller.addclient(const aintf: isigclient);
 begin
- adduniqueitem(pointerarty(fclients),aintf);
+ adduniqueitem(pointerarty(fclients),pointer(aintf));
  modelchange;
 end;
 
 procedure tsigcontroller.removeclient(const aintf: isigclient);
 begin
- removeitem(pointerarty(fclients),aintf);
+ removeitem(pointerarty(fclients),pointer(aintf));
  modelchange;
 end;
 
