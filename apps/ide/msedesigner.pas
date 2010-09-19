@@ -939,7 +939,7 @@ begin
   actualclassname1:= factualclassname;
  end;
 
- info^.descendent:= nil;
+ info^.descendent:= nil; //no recursion
  if comp1 is twidget then begin
   with twidget1(comp1) do begin
    parent1:= parentwidget;
@@ -951,7 +951,7 @@ begin
   pt1:= getcomponentpos(comp1);
  end;
  str1:= comp1.name;
- fobjectlinker.unlink(comp1);
+// fobjectlinker.unlink(comp1);
  fdelcomps:= nil;
  froot:= comp1.owner;
  if ismodule(comp1) then begin 
@@ -1000,7 +1000,7 @@ begin
  end;
  }
 // checkinline(comp2);
- fobjectlinker.link(comp2);
+// fobjectlinker.link(comp2);
  if isroot then begin
   module^.instance:= comp2;
   if norootposition then begin
@@ -1025,7 +1025,7 @@ begin
  fmodule:= module;
  addcomp(comp2);
  removefixupreferences(module^.instance,'');
- add(comp2,info^.ancestor); //restore
+ add(comp2,info^.ancestor); //restore entry
  if isroot then begin
   for int1:= 0 to high(ar1) do begin
    add(ar1[int1],comp2);
@@ -1281,6 +1281,9 @@ var
  teststream: ttextstream;
  procedure debugout(const atext: string; const stream: tstream);
  begin
+  {$ifndef mse_debugsubmodule1}
+  exit;
+  {$endif}
   writeln(atext);
   stream.position:= 0;
   teststream.size:= 0;
@@ -1294,6 +1297,9 @@ var
   stream1: tmemorystream;
   writer1: twriter;
  begin
+  {$ifndef mse_debugsubmodule1}
+  exit;
+  {$endif}
   stream1:= tmemorystream.create;
   writer1:= twriter.create(stream1,1024);
   writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
@@ -1406,18 +1412,19 @@ begin
    end;
    fdesigner.fsubmodulelist.renewbackup(amodule^.instance);
   end;
+ {$ifdef mse_debugsubmodule}
+  debugwriteln('***end modulemodified '+inttostr(fmodifiedlevel)+' '+
+                amodule^.instance.name);
+  po1:= datapo;
+  for int1:= 0 to count-1 do begin
+   debugwriteln('*'+inttostr(int1)+' '+po1^.ancestor.name+' '+
+                                                        po1^.descendent.name);
+   inc(po1);
+  end;
+ {$endif}               
  finally
   dec(fmodifiedlevel);
  end;
-{$ifdef mse_debugsubmodule}
- debugwriteln('***end modulemodified'+inttostr(fmodifiedlevel)+' '+
-               amodule^.instance.name);
- po1:= datapo;
- for int1:= 0 to count-1 do begin
-  debugwriteln('*'+inttostr(int1)+' '+po1^.ancestor.name+' '+po1^.descendent.name);
-  inc(po1);
- end;
-{$endif}               
 end;
 
 procedure tdescendentinstancelist.add(const instance,ancestor: tmsecomponent;
