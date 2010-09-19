@@ -261,6 +261,7 @@ type
                       var astream: tstream);
    procedure modulemodified(const amodule: pmoduleinfoty);
    procedure revert(const info: pancestorinfoty; const module: pmoduleinfoty;
+                    out anewinstance: tmsecomponent;
                     const norootposition: boolean = false);
    procedure setnodefaultpos(const aroot: twidget);
    procedure restorepos(const aroot: twidget);
@@ -897,7 +898,8 @@ begin
 end;
 
 procedure tdescendentinstancelist.revert(const info: pancestorinfoty; 
-            const module: pmoduleinfoty; const norootposition: boolean = false); 
+            const module: pmoduleinfoty; out anewinstance: tmsecomponent;
+            const norootposition: boolean = false); 
 var
  comp1,comp2: tmsecomponent;
  decomp: tdelcomp;
@@ -910,6 +912,7 @@ var
  pt1: pointty;
  ar1: msecomponentarty;
  ancestorbefore: tmsecomponent;
+ infoancestor: tmsecomponent;
  po1: pancestorinfoty;
 begin
 {$ifdef mse_debugsubmodule}
@@ -923,7 +926,9 @@ begin
  end;
 {$endif}
  comp1:= info^.descendent;
+ infoancestor:= info^.ancestor;
  isroot:= comp1 = module^.instance;
+ delete((info-datapo) div recordsize); //remove item
  ancestorbefore:= nil; //compiler warning
  ar1:= nil;            //compiler warning
  if isroot then begin
@@ -939,7 +944,7 @@ begin
   actualclassname1:= factualclassname;
  end;
 
- info^.descendent:= nil; //no recursion
+// info^.descendent:= nil; //no recursion
  if comp1 is twidget then begin
   with twidget1(comp1) do begin
    parent1:= parentwidget;
@@ -971,6 +976,11 @@ begin
   decomp.free;
  end;
  fdelcomps:= nil;
+ comp2:= fdesigner.copycomponent(infoancestor,infoancestor);
+ if isroot then begin
+  initrootdescendent(comp2);
+ end;
+ {
  if not isroot then begin
 //  comp2:= fdesigner.copycomponent(info^.ancestor,nil);
   comp2:= fdesigner.copycomponent(info^.ancestor,info^.ancestor);
@@ -979,7 +989,8 @@ begin
   comp2:= fdesigner.copycomponent(info^.ancestor,info^.ancestor);
   initrootdescendent(comp2);
  end;
- info^.descendent:= comp2;
+ }
+// info^.descendent:= comp2;
  comp2.name:= str1;
  with tmsecomponent1(comp2) do begin
   fancestorclassname:= ancestorclassname1;
@@ -1020,12 +1031,14 @@ begin
   module^.instance.insertcomponent(comp2);
  end;
  if parent1 <> nil then begin
-  twidget(info^.descendent).parentwidget:= parent1;
+  twidget(comp2).parentwidget:= parent1;
  end;
  fmodule:= module;
  addcomp(comp2);
  removefixupreferences(module^.instance,'');
- add(comp2,info^.ancestor); //restore entry
+ anewinstance:= comp2;
+ add(comp2,infoancestor); //restore entry
+// add(comp2,info^.ancestor); //restore entry
  if isroot then begin
   for int1:= 0 to high(ar1) do begin
    add(ar1[int1],comp2);
@@ -1167,7 +1180,7 @@ procedure tdescendentinstancelist.restorechanges(const amodule: pmoduleinfoty;
                   var astream: tstream);
 var
  reader1: treader;
- comp1: tcomponent;
+ comp1: tmsecomponent;
  int2: integer;
  compname: string;
  po1: pmoduleinfoty;
@@ -1177,7 +1190,7 @@ begin
   astream.position:= 0;
   
   fdesigner.buildmethodtable(amodule);
-  revert(infopo,amodule,true); //revert to new inherited state
+  revert(infopo,amodule,comp1,true); //revert to new inherited state
   reader1:= treader.create(astream,4096);
   try
    reader1.onerror:= {$ifdef FPC}@{$endif}ferrorhandler.onerror;
@@ -1192,7 +1205,7 @@ begin
    ferrorhandler.fnewcomponents:= nil;
    reader1.root:= amodule^.instance;
    ferrorhandler.froot:= amodule^.instance;
-   comp1:= infopo^.descendent;
+//   comp1:= infopo^.descendent;
    if ismodule(comp1) then begin //inherited form
     fdesigner.beginstreaming(amodule);
     with tformdesignerfo(amodule^.designform) do begin
@@ -1262,7 +1275,7 @@ begin
    removefixupreferences(amodule^.instance,'');
   end;
   for int2:= high(ferrorhandler.fnewcomponents) downto 0 do begin
-   if ferrorhandler.fnewcomponents[int2] <> infopo^.descendent then begin
+   if ferrorhandler.fnewcomponents[int2] <> comp1{infopo^.descendent} then begin
     amodule^.components.add(ferrorhandler.fnewcomponents[int2]);
    end;
   end;
@@ -3056,6 +3069,7 @@ end;
 procedure tdesigner.revert(const acomponent: tcomponent);
 var
  comp1: tcomponent;
+ msecomp1: tmsecomponent;
  po1: pancestorinfoty;
  po2,po4: pmoduleinfoty;
  po3: pointer;
@@ -3074,9 +3088,9 @@ begin
     if bo1 then begin
      pos1:= twidget(acomponent).pos;
     end;
-    fdescendentinstancelist.revert(po1,po2);
+    fdescendentinstancelist.revert(po1,po2,msecomp1);
     if bo1 then begin
-     twidget(po1^.descendent).pos:= pos1;
+     twidget(comp1{po1^.descendent}).pos:= pos1;
     end;
    end;
   end;

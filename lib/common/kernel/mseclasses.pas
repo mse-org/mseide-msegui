@@ -535,7 +535,7 @@ type
    procedure dounlink(var item); virtual; abstract;
    procedure itemdestroyed(const sender: iobjectlink); virtual; abstract;
   public
-   constructor create(recordsize: integer; aoptions: recordliststatesty = []);
+   constructor create(arecordsize: integer; aoptions: recordliststatesty = []);
    destructor destroy; override;
  end;
 
@@ -3996,9 +3996,9 @@ end;
 
 { tobjectlinkrecordlist }
 
-constructor tobjectlinkrecordlist.create(recordsize: integer; aoptions: recordliststatesty = []);
+constructor tobjectlinkrecordlist.create(arecordsize: integer; aoptions: recordliststatesty = []);
 begin
- inherited create(recordsize,aoptions+[rels_needsfinalize]);
+ inherited create(arecordsize,aoptions+[rels_needsfinalize]);
  fobjectlinker:= tobjectlinker.create(iobjectlink(self),nil);
 end;
 

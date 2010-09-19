@@ -47,8 +47,9 @@ type
    procedure finalizerecord(var item); virtual;
    procedure initializerecord(var item); virtual;
    procedure copyrecord(var item); virtual;
+   property recordsize: integer read frecordsize;
   public
-   constructor create(recordsize: integer; aoptions: recordliststatesty = []);
+   constructor create(arecordsize: integer; aoptions: recordliststatesty = []);
    destructor destroy; override;
    procedure assign(const source: trecordlist);
    function datapo: pointer;
@@ -334,9 +335,9 @@ end;
 
 { trecordlist }
 
-constructor trecordlist.create(recordsize: integer; aoptions: recordliststatesty = []);
+constructor trecordlist.create(arecordsize: integer; aoptions: recordliststatesty = []);
 begin
- frecordsize:= recordsize;
+ frecordsize:= arecordsize;
  fstate:= aoptions;
 end;
 
