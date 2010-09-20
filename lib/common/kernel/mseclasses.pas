@@ -1323,6 +1323,26 @@ function copycomponent(const source: tcomponent; const aowner: tcomponent = nil;
               const oncreatecomponent: tcreatecomponentevent = nil;
               const onancestornotfound: tancestornotfoundevent = nil): tcomponent;
                 //copy by stream.writecomponent, readcomponent
+
+ procedure copyflags(const source: tcomponent; const dest: tcomponent);
+ var
+  int1: integer;
+  comp1,comp2: tcomponent;
+ begin
+  for int1:= 0 to source.componentcount - 1 do begin
+   comp1:= source.components[int1];
+   comp2:= dest.findcomponent(comp1.name);
+   if comp2 <> nil then begin
+    if csancestor in comp1.componentstate then begin
+     tcomponent1(comp2).setancestor(true);
+    end
+    else begin
+     copyflags(comp1,comp2);
+    end;
+   end;
+  end;
+ end; //copyflags
+ 
 var
  stream: tmemorystream;
  writer: twriter;
@@ -1347,6 +1367,15 @@ begin
    finally
     writer.Free;
    end;
+ {$ifdef mse_debugcopycomponent}
+   debugstream:= ttextstream.create;
+   stream.position:= 0;
+   objectbinarytotext(stream,debugstream);
+   debugstream.position:= 0;
+   writeln(output,'***copycomponent source');
+   debugstream.writetotext(output);
+   flush(output);
+  {$endif}
    stream.Position:= 0;
    reader:= treader.Create(stream,4096);
    try
@@ -1355,16 +1384,16 @@ begin
     reader.onancestornotfound:= onancestornotfound;
 //    reader.ancestor:= aancestor;
     reader.ReadrootComponent(result);
+    if (source.owner = nil) and (csancestor in source.componentstate) then begin
+     tcomponent1(source).setancestor(true);
+    end
+    else begin
+     copyflags(source,result);
+    end;
    finally
     reader.free;
    end;
  {$ifdef mse_debugcopycomponent}
-   debugstream:= ttextstream.create;
-   stream.position:= 0;
-   objectbinarytotext(stream,debugstream);
-   debugstream.position:= 0;
-   writeln(output,'copycomponent source');
-   debugstream.writetotext(output);
    stream.clear;
    writer:= twriter.Create(stream,4096);
    writer.Writerootcomponent(result);
@@ -1373,7 +1402,7 @@ begin
    debugstream.clear;
    objectbinarytotext(stream,debugstream);
    debugstream.position:= 0;
-   writeln(output,'copycomponent dest');
+   writeln(output,'***copycomponent dest');
    debugstream.writetotext(output);
    flush(output);
    debugstream.free;

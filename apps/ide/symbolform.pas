@@ -101,13 +101,15 @@ procedure tsymbolfo.symbolcha(const sender: tdatacol; const aindex: Integer);
 var
  int1: integer;
 begin
- if aindex < 0 then begin
-  for int1:= 0 to grid.rowhigh do begin
-   checksymbol(int1);
+ if not grid.updating then begin
+  if aindex < 0 then begin
+   for int1:= 0 to grid.rowhigh do begin
+    checksymbol(int1);
+   end;
+  end
+  else begin
+   checksymbol(aindex);
   end;
- end
- else begin
-  checksymbol(aindex);
  end;
 end;
 

@@ -190,7 +190,6 @@ object projectoptionsfo: tprojectoptionsfo
               font.xscale =  1.0000000000000000E+0000
               font.dummy = 0
               optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_autopopupmenu, oe_keyexecute, oe_savestate]
-              encoding = ce_locale
               reffontheight = 14
             end
           end
@@ -1790,7 +1789,6 @@ object projectoptionsfo: tprojectoptionsfo
                 taborder = 4
                 bounds_x = 437
                 bounds_y = 0
-                bounds_cx = 100
                 bounds_cy = 37
                 base = nb_hex
                 max = -1
@@ -3999,7 +3997,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cx = 640
           bounds_cy = 520
           anchors = []
-          activepageindex = 0
+          activepageindex = 2
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           tab_color = -2147483645
@@ -4012,7 +4010,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 3
-            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 640
@@ -4346,6 +4343,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 1
+            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 640
@@ -4440,7 +4438,7 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 96
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
                 reffontheight = 14
               end
               object newinheritedform: tbooleanedit
@@ -4463,7 +4461,7 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 73
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
                 reffontheight = 14
               end
               object newformsourcefile: tfilenameedit
@@ -4481,7 +4479,7 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 207
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
                 controller.filterlist.data = (
                   (
                     'Source'
@@ -4510,7 +4508,7 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 216
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
                 controller.filterlist.data = (
                   (
                     'Form Files'

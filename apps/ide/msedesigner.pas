@@ -262,7 +262,8 @@ type
    procedure modulemodified(const amodule: pmoduleinfoty);
    procedure revert(const info: pancestorinfoty; const module: pmoduleinfoty;
                     out anewinstance: tmsecomponent;
-                    const norootposition: boolean = false);
+                    const norootposition: boolean = false;
+                    const initflags: boolean = true);
    procedure setnodefaultpos(const aroot: twidget);
    procedure restorepos(const aroot: twidget);
   public
@@ -289,7 +290,7 @@ type
   dochi: boolean;
  end;
 
- designerstatety = (des_pasting);
+ designerstatety = (des_pasting,des_inheritednewmodule);
  designerstatesty = set of designerstatety;
   
  tdesigner = class(tactcomponent,idesigner)
@@ -899,7 +900,8 @@ end;
 
 procedure tdescendentinstancelist.revert(const info: pancestorinfoty; 
             const module: pmoduleinfoty; out anewinstance: tmsecomponent;
-            const norootposition: boolean = false); 
+            const norootposition: boolean = false;
+            const initflags: boolean = true); 
 var
  comp1,comp2: tmsecomponent;
  decomp: tdelcomp;
@@ -977,9 +979,10 @@ begin
  end;
  fdelcomps:= nil;
  comp2:= fdesigner.copycomponent(infoancestor,infoancestor);
- if isroot then begin
+ if isroot and initflags then begin
   initrootdescendent(comp2);
  end;
+
  {
  if not isroot then begin
 //  comp2:= fdesigner.copycomponent(info^.ancestor,nil);
@@ -1045,7 +1048,7 @@ begin
                      //restore entry;
   end;
   if ancestorbefore = nil then begin
-   fdesigner.fsubmodulelist.add(comp2); //should not happen
+//   fdesigner.fsubmodulelist.add(comp2); //should not happen
   end
   else begin
    fdesigner.fsubmodulelist.add(comp2,ancestorbefore);
@@ -1178,19 +1181,21 @@ end;
 procedure tdescendentinstancelist.restorechanges(const amodule: pmoduleinfoty;
                   const infopo: pancestorinfoty;{ const ancestor: tcomponent;}
                   var astream: tstream);
+
 var
  reader1: treader;
  comp1: tmsecomponent;
- int2: integer;
+ int1,int2: integer;
  compname: string;
  po1: pmoduleinfoty;
+ 
 begin
  amodule^.designform.window.beginmoving; //no flicker
  try
   astream.position:= 0;
   
   fdesigner.buildmethodtable(amodule);
-  revert(infopo,amodule,comp1,true); //revert to new inherited state
+  revert(infopo,amodule,comp1,true,false); //revert to new inherited state
   reader1:= treader.create(astream,4096);
   try
    reader1.onerror:= {$ifdef FPC}@{$endif}ferrorhandler.onerror;
@@ -1217,7 +1222,7 @@ begin
       try
        try
         reader1.readrootcomponent(comp1);
-        checkinline(comp1);
+//        checkinline(comp1);
         placemodule;
         inc(submodulecopy);
         designer.dofixup;
@@ -1284,46 +1289,47 @@ begin
  end;
 end;
 
+{$ifdef mse_debugsubmodule}
+procedure debugout(const atext: string; const stream: tstream);
+var
+ teststream: ttextstream;
+begin
+ {$ifndef mse_debugsubmodule1}
+ exit;
+ {$endif}
+ debugwriteln(atext);
+ teststream:= ttextstream.create;
+ stream.position:= 0;
+ teststream.size:= 0;
+ objectbinarytotextmse(stream,teststream);
+ teststream.position:= 0;
+ teststream.writetotext(output);
+ teststream.free;
+ flush(output);
+end;
+
+procedure debugbinout(const atext: string; const acomp,aancestor: tcomponent);
+var
+ stream1: tmemorystream;
+ writer1: twriter;
+begin
+ {$ifndef mse_debugsubmodule1}
+ exit;
+ {$endif}
+ stream1:= tmemorystream.create;
+ writer1:= twriter.create(stream1,1024);
+ writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
+ writer1.writedescendent(acomp,aancestor);
+ writer1.free;
+ debugout(atext,stream1);
+ stream1.free;
+end;
+{$endif}
+
 procedure tdescendentinstancelist.modulemodified(const amodule: pmoduleinfoty);
 type
  streamarty = array of tstream;
  ancestorinfopoarty = array of pancestorinfoty;
-
-{$ifdef mse_debugsubmodule}
-var
- teststream: ttextstream;
- procedure debugout(const atext: string; const stream: tstream);
- begin
-  {$ifndef mse_debugsubmodule1}
-  exit;
-  {$endif}
-  writeln(atext);
-  stream.position:= 0;
-  teststream.size:= 0;
-  objectbinarytotextmse(stream,teststream);
-  teststream.position:= 0;
-  teststream.writetotext(output);
-  flush(output);
- end;
- procedure debugbinout(const atext: string; const acomp,aancestor: tcomponent);
- var
-  stream1: tmemorystream;
-  writer1: twriter;
- begin
-  {$ifndef mse_debugsubmodule1}
-  exit;
-  {$endif}
-  stream1:= tmemorystream.create;
-  writer1:= twriter.create(stream1,1024);
-  writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
-  writer1.writedescendent(acomp,aancestor);
-  writer1.free;
-  debugout(atext,stream1);
-  stream1.free;
- end;
- 
-{$endif}
-
 var
  modifiedowners,dependentmodules: moduleinfopoarty;
  streams: streamarty;
@@ -1382,7 +1388,7 @@ begin
   end;
   if high(infos) >= 0 then begin
   {$ifdef mse_debugsubmodule}
-   teststream:= ttextstream.create;
+//   teststream:= ttextstream.create;
   {$endif}
    ancestor:= fdesigner.fsubmodulelist.findancestor(amodule^.instance);
    beginsubmodulecopy;
@@ -1400,9 +1406,9 @@ begin
     ferrorhandler:= treaderrorhandler.create(nil);
     try
      for int1:= 0 to high(modifiedowners) do begin
-      po1:= findinfo(infos[int1]);
-      restorechanges(modifiedowners[int1],po1,{ancestor,}streams[int1]);
+      restorechanges(modifiedowners[int1],findinfo(infos[int1]),{ancestor,}streams[int1]);
  {$ifdef mse_debugsubmodule}
+      po1:= findinfo(infos[int1]);
       debugbinout('after load ' + po1^.descendent.name,
                          po1^.descendent,po1^.ancestor);
  {$endif}
@@ -1417,7 +1423,7 @@ begin
     endsubmodulecopy;
     endstreaming;
   {$ifdef mse_debugsubmodule}
-    teststream.free;
+//    teststream.free;
   {$endif}
    end;
    for int1:= 0 to high(dependentmodules) do begin
@@ -2072,6 +2078,7 @@ function tmodulelist.newmodule(const ainherited: boolean;
                                 designmoduleclassname: string): tmoduleinfo;
 var
  po1: pmoduleinfoty;
+ inheritedbefore: boolean;
 begin
  po1:= findmodule(afilename);
  if po1 <> nil then begin
@@ -2090,8 +2097,13 @@ begin
     end;
     fdesigner.beginstreaming(po1);
     try
+     inheritedbefore:= des_inheritednewmodule in fdesigner.fstate;
+     include(fdesigner.fstate,des_inheritednewmodule);
      instance:= fdesigner.copycomponent(po1^.instance,po1^.instance);
     finally
+     if not inheritedbefore then begin
+      exclude(fdesigner.fstate,des_inheritednewmodule);
+     end;
      fdesigner.endstreaming(po1);
     end;
     moduleintf:= po1^.moduleintf;
@@ -2602,6 +2614,9 @@ begin
   component:= copycomponent(asubmoduleinfopo^.instance,asubmoduleinfopo^.instance);
   reader.root.insertcomponent(component);
   initinline(component);
+  if des_inheritednewmodule in fstate then begin
+   tcomponent1(component).setancestor(true);
+  end;
   if (submodulecopy = 0) and 
           (reader.root.componentstate * [csinline{,csancestor}] = [])  then begin
    additem(pointerarty(floadedsubmodules),component);
@@ -3028,7 +3043,25 @@ function tdesigner.copycomponent(const source: tmsecomponent;
                             const root: tmsecomponent): tmsecomponent;
 var
  po1: pmoduleinfoty;
+ ar1: msecomponentarty;
+ comp1: tmsecomponent;
+ int1: integer;
+ stream1: tmemorystream;
+ reader: treader;
+ writer: twriter;
+ 
 begin
+ comp1:= source;
+ setlength(ar1,1);
+ ar1[0]:= source;
+ while true do begin
+  comp1:= fdescendentinstancelist.findancestor(comp1);
+  if comp1 = nil then begin
+   break;
+  end;
+  additem(pointerarty(ar1),comp1);
+ end;
+ setlength(ar1,high(ar1)+2); //dummy ancestor
  beginsubmodulecopy;
  fdescendentinstancelist.beginstreaming;
  if root <> nil then begin
@@ -3041,14 +3074,51 @@ begin
  else begin
   po1:= nil;
  end;
- doswapmethodpointers(source,false);
+// doswapmethodpointers(source,false);
+ for int1:= 0 to high(ar1)-1 do begin
+  doswapmethodpointers(ar1[int1],false);
+ end;
+  
  try
   begingloballoading;
+  result:= tmsecomponent(source.newinstance);
+  tcomponent1(result).setdesigning(true);
+  result.create(nil);
+  stream1:= tmemorystream.create;
+  try
+   for int1:= high(ar1)-1 downto 0 do begin
+    stream1.clear;
+    writer:= twriter.create(stream1,4096);
+    try
+     writer.onfindancestor:= {$ifdef FPC}@{$endif}findancestor;
+     writer.writedescendent(ar1[int1],ar1[int1+1]);
+     result.name:= ar1[int1].name;
+    finally
+     writer.free;
+    end;
+    stream1.position:= 0;
+    reader:= treader.create(stream1,4096);
+    try
+     reader.onfindcomponentclass:= {$ifdef FPC}@{$endif}findcomponentclass;
+     reader.oncreatecomponent:= {$ifdef FPC}@{$endif}createcomponent;
+     reader.onancestornotfound:= {$ifdef FPC}@{$endif}ancestornotfound;
+     reader.readrootcomponent(result);
+    finally
+     reader.free;
+    end;
+   end;
+  finally
+   stream1.free;
+  end;
+  tmsecomponent1(result).factualclassname:= 
+                               tmsecomponent1(source).factualclassname;
+  (*
   result:= tmsecomponent(mseclasses.copycomponent(source,nil,
             {$ifdef FPC}@{$endif}findancestor,
             {$ifdef FPC}@{$endif}findcomponentclass,
             {$ifdef FPC}@{$endif}createcomponent,
             {$ifdef FPC}@{$endif}ancestornotfound));
+   *)
   if po1 = nil then begin
    docopymethods(source,result,false);
   end;
@@ -3056,7 +3126,10 @@ begin
   notifygloballoading;
  finally
   endgloballoading;
-  doswapmethodpointers(source,true);
+//  doswapmethodpointers(source,true);
+  for int1:= 0 to high(ar1)-1 do begin
+   doswapmethodpointers(ar1[int1],true);
+  end;
   fdescendentinstancelist.endstreaming;
   endsubmodulecopy;
   if po1 <> nil then begin
@@ -3891,6 +3964,9 @@ begin //loadformfile
    stream1.Free;
   end;
  end;
+  {$ifdef mse_debugsubmodule}
+ debugbinout('*****loadformfile '+filename,result^.instance,nil);
+  {$endif}
 end; //loadformfile
 
 procedure createbackupfile(const newname,origname: filenamety;

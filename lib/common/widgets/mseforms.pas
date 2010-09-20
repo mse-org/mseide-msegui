@@ -1461,12 +1461,16 @@ begin
  bo1:= false;
  with treadercracker(reader) do begin
   if floaded <> nil then begin
-   bo1:= floaded.IndexOf(fscrollbox) < 0;
-   if bo1 then begin
+   if floaded.IndexOf(fscrollbox) < 0 then begin
     floaded.add(fscrollbox);
     tcomponentcracker(fscrollbox).FComponentState:=
-     tcomponentcracker(fscrollbox).FComponentState + [csreading,csloading];
+     tcomponentcracker(fscrollbox).FComponentState + [csloading];
    end;
+  end;
+  bo1:= not (csreading in fscrollbox.componentstate);
+  if bo1 then begin
+   tcomponentcracker(fscrollbox).FComponentState:=
+             tcomponentcracker(fscrollbox).FComponentState + [csreading];
   end;
  end;
  inherited;
