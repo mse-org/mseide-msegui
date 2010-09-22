@@ -898,7 +898,7 @@ begin
  end;
 end;
 
-procedure tdescendentinstancelist.revert(const info: pancestorinfoty; 
+procedure tdescendentinstancelist.revert(const info: pancestorinfoty;
             const module: pmoduleinfoty; out anewinstance: tmsecomponent;
             const norootposition: boolean = false;
             const initflags: boolean = true); 
@@ -930,7 +930,7 @@ begin
  comp1:= info^.descendent;
  infoancestor:= info^.ancestor;
  isroot:= comp1 = module^.instance;
- delete((info-datapo) div recordsize); //remove item
+ delete((pchar(info)-pchar(datapo)) div recordsize); //remove item
  ancestorbefore:= nil; //compiler warning
  ar1:= nil;            //compiler warning
  if isroot then begin
