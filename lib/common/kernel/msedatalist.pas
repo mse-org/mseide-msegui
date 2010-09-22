@@ -366,8 +366,8 @@ type
    procedure insert(const index: integer; const avalue: int64);
    function find(const avalue: int64): integer;  //bringt index, -1 wenn nicht gefunden
    procedure fill(const acount: integer; const defaultvalue: int64);
-   function getastext(const index: integer): msestring; virtual;
-   procedure setastext(const index: integer; const avalue: msestring); virtual;
+   function getastext(const index: integer): msestring; override;
+   procedure setastext(const index: integer; const avalue: msestring); override;
 
    property asarray: int64arty read getasarray write setasarray;
    property items[index: integer]: int64 read Getitems write Setitems; default;
@@ -396,8 +396,8 @@ type
    procedure insert(const index: integer; const avalue: currency);
    function find(const avalue: currency): integer;  //bringt index, -1 wenn nicht gefunden
    procedure fill(const acount: integer; const defaultvalue: currency);
-   function getastext(const index: integer): msestring; virtual;
-   procedure setastext(const index: integer; const avalue: msestring); virtual;
+   function getastext(const index: integer): msestring; override;
+   procedure setastext(const index: integer; const avalue: msestring); override;
 
    property asarray: currencyarty read getasarray write setasarray;
    property items[index: integer]: currency read Getitems write Setitems; default;
@@ -457,8 +457,8 @@ type
    procedure number(start,step: real);
    procedure fill(acount: integer; const defaultvalue: realty);
    procedure minmax(out minval,maxval: realty);
-   function getastext(const index: integer): msestring; virtual;
-   procedure setastext(const index: integer; const avalue: msestring); virtual;
+   function getastext(const index: integer): msestring; override;
+   procedure setastext(const index: integer; const avalue: msestring); override;
 
    property asarray: realarty read getasarray write setasarray;
    property items[index: integer]: realty read Getitems write Setitems; default;
@@ -619,8 +619,8 @@ type
                 //returns added linecount
    function empty(const index: integer): boolean; override;   //true wenn leer
    procedure fill(acount: integer; const defaultvalue: ansistring);
-   function getastext(const index: integer): msestring; virtual;
-   procedure setastext(const index: integer; const avalue: msestring); virtual;
+   function getastext(const index: integer): msestring; override;
+   procedure setastext(const index: integer; const avalue: msestring); override;
 
    property items[index: integer]: ansistring read Getitems write 
                         setitems; default;
@@ -667,8 +667,8 @@ type
                             const maxchars: integer = 0): integer;
           //adds characters to last row, returns index
           //maxchars = 0 -> no limitation, inserts line breaks otherwise
-   function getastext(const index: integer): msestring; virtual;
-   procedure setastext(const index: integer; const avalue: msestring); virtual;
+   function getastext(const index: integer): msestring; override;
+   procedure setastext(const index: integer; const avalue: msestring); override;
    function indexof(const value: msestring): integer;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function concatstring(const delim: msestring = '';
