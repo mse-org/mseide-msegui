@@ -1585,6 +1585,7 @@ begin
     swapmethodtable(descendent,tabbefore);
    end;
    reader.free;
+   removefixupreferences(descendent,'');
   end;
   if not revert then begin
    reader:= treader.create(stream1,4096);  //restore old changes
@@ -1610,6 +1611,7 @@ begin
      swapmethodtable(descendent,tabbefore);
     end;
     reader.free;
+    removefixupreferences(descendent,'');
    end;
   end;
  finally
