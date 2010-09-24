@@ -1705,7 +1705,7 @@ begin
  end
  else begin
   path2:= filepath(newname);
-  if not canoverwrite and fileexists(path2) then begin
+  if not canoverwrite and findfile(path2) then begin
    if not autoincrement then begin
     showerror('File "'+newname+'" exists.');
     exit;

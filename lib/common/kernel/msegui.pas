@@ -12501,7 +12501,8 @@ begin
   if pointisequal(rect1.pos,fowner.fwidgetrect.pos) then begin
    include(fstate,tws_posvalid);
   end;
-  if sizeisequal(rect1.size,fowner.fwidgetrect.size) then begin
+//  if sizeisequal(rect1.size,fowner.fwidgetrect.size) then begin
+  if sizeisequal(arect.size,fowner.fwidgetrect.size) then begin
    include(fstate,tws_sizevalid);
    fsizeerrorcount:= 0;
   end
