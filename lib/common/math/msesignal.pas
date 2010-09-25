@@ -111,10 +111,11 @@ type
    fdestinations: doubleinputconnarty;
   public
    constructor create(const aowner: tdoublesigcomp); override;
-
+{
     //for systems without recursion
    procedure setsig1(var asource: doublearty); //asource is invalid afterwards
    procedure setsig(const asource: doublearty);
+}
  end; 
 
  tdoubleinputconn = class(tdoubleconn)
@@ -125,23 +126,26 @@ type
    procedure setsource(const avalue: tdoubleoutputconn);
   protected
    fvalue: double;
-   fbuffer: doublearty;
-   fhasdata: boolean;
+//   fbuffer: doublearty;
+//   fhasdata: boolean;
   public
    constructor create(const aowner: tdoublesigcomp); override;
    destructor destroy; override;
    
     //for systems without recursion
-   procedure setsig1(var asource: doublearty); virtual; 
+//   procedure setsig1(var asource: doublearty); virtual; 
                        //asource is invalid afterwards
-   procedure setsig(const asource: doublearty); virtual;
+//   procedure setsig(const asource: doublearty); virtual;
    property value: double read fvalue;  
   published
    property source: tdoubleoutputconn read fsource write setsource;
    property offset: double read foffset write foffset;
    property gain: double read fgain write fgain;
  end;
- 
+
+ tbufferdoubleinputconn = class(tdoubleinputconn)
+ end;
+  
  sighandlerinfoty = record
   dest: pdouble;
  end;
@@ -206,12 +210,17 @@ type
  
  sigineventty = procedure(const sender: tobject;
                                var sig: real) of object; 
+ siginbursteventty = procedure(const sender: tobject;
+                               var sig: realarty) of object; 
 
  tsigin = class(tsigconnection)
   private
    foutput: tdoubleoutputconn;
    fvalue: double;
+   finp: doublearty;
    foninput: sigineventty;
+   foninputburst: siginbursteventty;
+   finpindex: integer;
   protected
    function getoutputar: outputconnarty; override;
     //isigclient
@@ -220,25 +229,33 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy;
-   procedure setsig1(var asource: doublearty); //asource is invalid afterwards
-   procedure setsig(const asource: doublearty);
+//   procedure setsig1(var asource: doublearty); //asource is invalid afterwards
+   procedure siginput(const asource: doublearty);
+   procedure clear; override;
   published
    property value: double read fvalue write fvalue;
    property oninput: sigineventty read foninput write foninput;
+   property oninputburst: siginbursteventty read foninputburst write foninputburst;
  end;
 
  sigouteventty = procedure(const sender: tobject;
                                const sig: real) of object; 
+ sigoutbursteventty = procedure(const sender: tobject;
+                               const sig: realarty) of object; 
                               
  tsigout = class(tsigconnection)
   private
    finput: tdoubleinputconn;
    finputpo: pdouble;
-   foutp: doublearty;
    fonoutput: sigouteventty;
    fvalue: double;
+   fonoutputburst: sigoutbursteventty;
+   foutp: doublearty;
+   foutpindex: integer;
+   fbuffersize: integer;
    procedure setinput(const avalue: tdoubleinputconn);
    function getinput: tdoubleinputconn;
+   procedure setbuffersize(const avalue: integer);
   protected
    function getinputar: inputconnarty; override;
    {
@@ -253,11 +270,18 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property outp: doublearty read foutp;
+   procedure clear; override;
+   procedure sigoutput1(var adest: doublearty); //returns a data copy
+   function sigoutput: doublearty;
+//   property outp: doublearty read foutp;
    property value: double read fvalue;
   published
    property input: tdoubleinputconn read getinput write setinput;
+   property buffersize: integer read fbuffersize 
+                                              write setbuffersize default 0;
    property onoutput: sigouteventty read fonoutput write fonoutput;
+   property onoutputburst: sigoutbursteventty read fonoutputburst 
+                                              write fonoutputburst;
  end;
  
  trealcoeff = class(trealdatalist)
@@ -295,18 +319,20 @@ type
    procedure processinout(const acount: integer;
                     var ainp,aoutp: pdouble); virtual; abstract;
    procedure zcountchanged; virtual;
+   {
    procedure setsig1(const sender: tdoubleinputconn;
                                     var asource: doublearty); overload; override;
    procedure setsig(const sender: tdoubleinputconn;
                                     const asource: doublearty); overload; override;
+   }
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure clear; override;
-   procedure setsig(const source: doublearty); overload;
-   procedure getsig1(var dest: doublearty); overload;
-   function getsig: doublearty;
-   procedure updatesig(var inout: doublearty);
+//   procedure setsig(const source: doublearty); overload;
+//   procedure getsig1(var dest: doublearty); overload;
+//   function getsig: doublearty;
+//   procedure updatesig(var inout: doublearty);
    property zcount: integer read fzcount default 0;
    property output: tdoubleoutputconn read foutput write setoutput;
   published
@@ -348,6 +374,7 @@ type
    finps: doublepoarty;
    finphigh: integer;
    finpdatacount: integer;
+   {
    procedure processinout(const acount: integer;
              var ainp: doublepoarty; var aoutp: pdouble); virtual; abstract;
     //for systems without recursion
@@ -355,6 +382,7 @@ type
                                     var asource: doublearty); override;
    procedure setsig(const sender: tdoubleinputconn;
                                     const asource: doublearty); override;
+   }
    function getinputar: inputconnarty; override;
    function getoutputar: outputconnarty; override;
    procedure initmodel; override;
@@ -369,8 +397,8 @@ type
  
  tsigadd = class(tsigmultiinp)
   protected
-   procedure processinout(const acount: integer;
-             var ainp: doublepoarty; var aoutp: pdouble); override;
+//   procedure processinout(const acount: integer;
+//             var ainp: doublepoarty; var aoutp: pdouble); override;
     //isigclient
    function gethandler: sighandlerprocty; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
@@ -408,8 +436,8 @@ type
   
  tsigmult = class(tsigmultiinp)
   protected
-   procedure processinout(const acount: integer;
-             var ainp: doublepoarty; var aoutp: pdouble); override;
+//   procedure processinout(const acount: integer;
+//             var ainp: doublepoarty; var aoutp: pdouble); override;
     //isigclient
    function gethandler: sighandlerprocty; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
@@ -450,8 +478,8 @@ type
    procedure addclient(const aintf: isigclient);
    procedure removeclient(const aintf: isigclient);
    procedure modelchange;
-   function findinplink(const dest,source: psiginfoty): integer;
    procedure updatemodel;
+   function findinplink(const dest,source: psiginfoty): integer;
    procedure internalstep;
    procedure loaded; override;
    function findinp(const aconn: tsigconn): psiginfoty;
@@ -459,7 +487,9 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure checkmodel;
    procedure step(const acount: integer=1);
+   procedure clear;
  end;
  
 procedure createsigbuffer(var abuffer: doublearty; const asize: integer);
@@ -568,7 +598,7 @@ begin
  include (fmsecomponentstate,cs_subcompref);
  name:= 'output';
 end;
-
+{
 procedure tdoubleoutputconn.setsig1(var asource: doublearty);
 var
  int1: integer;
@@ -592,7 +622,7 @@ begin
   fdestinations[int1].setsig(asource);
  end;
 end;
-
+}
 { tdoubleinputconn }
 
 constructor tdoubleinputconn.create(const aowner: tdoublesigcomp);
@@ -615,7 +645,7 @@ begin
   fowner.connchange;
  end;
 end;
-
+{
 procedure tdoubleinputconn.setsig1(var asource: doublearty);
 begin
  fowner.setsig1(self,asource);
@@ -625,7 +655,7 @@ procedure tdoubleinputconn.setsig(const asource: doublearty);
 begin
  fowner.setsig(self,asource);
 end;
-
+}
 { tdoublesigcomp }
 
 constructor tdoublesigcomp.create(aowner: tcomponent);
@@ -739,7 +769,7 @@ begin
  fillchar(pointer(fdoublez)^,fzcount*sizeof(double),0);
  fzindex:= 0; 
 end;
-
+{
 procedure tdoublezcomp.setsig(const source: doublearty);
 begin
  if finputindex > high(fdoubleinputdata) then begin
@@ -810,7 +840,7 @@ begin
  processinout(int1,po1,po2);
  foutput.setsig1(ar1);
 end;
-
+}
 procedure tdoublezcomp.setzcount(const avalue: integer);
 begin
  if fzcount <> avalue then begin
@@ -901,11 +931,141 @@ begin
 end;
 
 procedure tsigout.sighandler(const ainfo: psighandlerinfoty);
+var
+ po1: psizeint;
 begin
  fvalue:= finputpo^;
  if assigned(fonoutput) then begin
   fonoutput(self,fvalue);
  end;
+ if fbuffersize > 0 then begin
+  if foutpindex = fbuffersize then begin
+   foutpindex:= 0;
+  end;
+  po1:= psizeint(pchar(foutp)-2*sizeof(sizeint));
+  if po1^ > 1 then begin //new buffer necessary
+   dec(po1^); //no thread safety
+  (*
+  {$ifdef CPU64}
+   interlockeddecrement64(po1^);
+  {$else}
+   interlockeddecrement(po1^);
+  {$endif}
+   if po1^ = 0 then begin
+    freemem(po1);
+   end;
+  *)
+   getmem(po1,fbuffersize * sizeof(double) + 2 * sizeof(sizeint));
+   po1^:= 1; //refcount
+   inc(po1);
+   {$ifdef FPC}
+   po1^:= fbuffersize - 1; //high
+   {$else}
+   po1^:= fbuffersize;     //count
+   {$endif}
+   inc(po1);
+   if foutpindex > 0 then begin
+    move(foutp[0],po1^,foutpindex*sizeof(double));
+   end;
+   pointer(foutp):= po1;
+  end;
+  foutp[foutpindex]:= fvalue;
+  inc(foutpindex);
+  if foutpindex = fbuffersize then begin
+//   foutpindex:= 0;
+   if assigned(fonoutputburst) then begin
+    fonoutputburst(self,foutp);
+   end;
+  end;
+ end;
+end;
+
+procedure tsigout.sigoutput1(var adest: doublearty);
+var
+ po1: psizeint;
+begin
+ if foutpindex > 0 then begin
+  if adest = nil then begin
+   getmem(po1,foutpindex * sizeof(double) + 2 * sizeof(sizeint));
+   po1^:= 1; //referencount;
+   inc(po1);
+  {$ifdef FPC}
+   po1^:= foutpindex-1; //high
+  {$else}
+   po1^:= foutpindex;   //length
+  {$endif}
+   inc(po1);
+   pointer(adest):= po1;
+  end
+  else begin
+   po1:= psizeint(pchar(adest)-2*sizeof(sizeint));
+   if po1^ = 1 then begin
+   {$ifdef FPC}
+    if psizeint(pchar(po1)+1*sizeof(sizeint))^ < foutpindex - 1 then begin
+   {$else}
+    if psizeint(pchar(po1)+1*sizeof(sizeint))^ < foutpindex then begin
+   {$endif}
+     freemem(po1);  //new buffer
+     getmem(po1,foutpindex * sizeof(double) + 2 * sizeof(sizeint)); 
+     po1^:= 1; //referencount;
+     inc(po1);
+    {$ifdef FPC}
+     po1^:= foutpindex-1; //high
+    {$else}
+     po1^:= foutpindex;   //length
+    {$endif}
+     inc(po1);
+     pointer(adest):= po1;
+    end
+    else begin           //reduce buffer
+    {$ifdef FPC}
+     if psizeint(pchar(po1)+1*sizeof(sizeint))^ > foutpindex - 1 then begin
+    {$else}
+     if psizeint(pchar(po1)+1*sizeof(sizeint))^ > foutpindex then begin
+    {$endif}
+      reallocmem(po1,foutpindex * sizeof(double) + 2 * sizeof(sizeint));
+      pointer(adest):= pchar(po1)+2*sizeof(sizeint);
+     end;
+    end;
+   end
+   else begin 
+    getmem(po1,foutpindex * sizeof(double) + 2 * sizeof(sizeint)); //new buffer
+    po1^:= 1; //referencount;
+    inc(po1);
+   {$ifdef FPC}
+    po1^:= foutpindex-1; //high
+   {$else}
+    po1^:= foutpindex;   //length
+   {$endif}
+    inc(po1);
+    pointer(adest):= po1;
+   end;
+  end;
+  move(foutp[0],adest[0],foutpindex*sizeof(double));
+ end
+ else begin
+  adest:= nil;
+ end;
+end;
+
+function tsigout.sigoutput: doublearty;
+begin
+ sigoutput1(result);
+end;
+
+procedure tsigout.setbuffersize(const avalue: integer);
+begin
+ if fbuffersize <> avalue then begin
+  fbuffersize:= avalue;
+  clear;
+ end;
+end;
+
+procedure tsigout.clear;
+begin
+ inherited;
+ setlength(foutp,fbuffersize);
+ foutpindex:= 0;
 end;
 
 { tsigin }
@@ -921,16 +1081,60 @@ begin
  inherited;
 end;
 
-procedure tsigin.setsig(const asource: doublearty);
+procedure tsigin.siginput(const asource: doublearty);
+var
+ int1,int2,int3: integer;
+ po1: psizeint;
 begin
- foutput.setsig(asource);
+ int1:= length(finp);
+ if int1 = 0 then begin
+  finp:= asource;
+ end
+ else begin
+  int1:= int1 - finpindex;
+  if int1 > 0 then begin
+   setlength(finp,length(finp)); //unique reference
+   move(finp[finpindex],finp[0],int1*sizeof(double));
+  end;
+  finpindex:= 0;
+  if asource <> finp then begin
+   int2:= length(asource);
+   int3:= int1+int2;
+   po1:= psizeint(pchar(finp)-2*sizeof(sizeint));
+   if po1^ <> 1 then begin
+    dec(po1^); //no thread safety
+    getmem(po1,int3*sizeof(double)+2*sizeof(sizeint));
+    po1^:= 1;
+    move(finp[0],(pchar(po1)+2*sizeof(sizeint))^,int1*sizeof(double));
+   end
+   else begin
+   {$ifdef FPC}
+    if psizeint(pchar(po1)+sizeof(sizeint))^ <> int3-1 then begin
+   {$else}
+    if psizeint(pchar(po1)+sizeof(sizeint))^ <> int3 then begin
+   {$endif}
+     reallocmem(po1,int3*sizeof(double)+2*sizeof(sizeint));
+    end;
+   end;
+   inc(po1);
+   {$ifdef FPC}
+   po1^:= int3-1;   //high
+   {$else}
+   po1^:= int3; //length
+   {$endif}
+   inc(po1);
+   pointer(finp):= po1;
+   move(asource[0],finp[int1],int2*sizeof(double));
+  end;
+ end;
+// foutput.setsig(asource);
 end;
-
+{
 procedure tsigin.setsig1(var asource: doublearty);
 begin
  foutput.setsig1(asource);
 end;
-
+}
 function tsigin.getoutputar: outputconnarty;
 begin
  setlength(result,1);
@@ -944,10 +1148,31 @@ end;
 
 procedure tsigin.sighandler(const ainfo: psighandlerinfoty);
 begin
+ if finpindex <= high(finp) then begin
+  fvalue:= finp[finpindex];
+  inc(finpindex);
+ end
+ else begin
+  if assigned(foninputburst) then begin
+   foninputburst(self,finp);
+   finpindex:= 0;
+   if finp <> nil then begin
+    fvalue:= finp[0];
+    inc(finpindex);
+   end;
+  end;
+ end;
  if assigned(foninput) then begin
   foninput(self,real(fvalue));
  end;
  ainfo^.dest^:= fvalue;
+end;
+
+procedure tsigin.clear;
+begin
+ inherited;
+ finp:= nil;
+ finpindex:= 0;
 end;
 
 { tsigmultiinp }
@@ -966,16 +1191,18 @@ begin
 end;
 
 procedure tsigmultiinp.clear;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  dar:= nil;
  pdar:= nil;
  finpdatacount:= 0;
  inherited;
+ {
  for int1:= 0 to high(finputs.fitems) do begin
   tdoubleinputconn(finputs.fitems[int1]).fbuffer:= nil;
  end;
+ }
 end;
 
 procedure tsigmultiinp.setinputs(const avalue: tdoubleinpconnarrayprop);
@@ -987,7 +1214,7 @@ procedure tsigmultiinp.setoutput(const avalue: tdoubleoutputconn);
 begin
  foutput.assign(avalue);
 end;
-
+{
 procedure tsigmultiinp.setsig(const sender: tdoubleinputconn;
                const asource: doublearty);
 begin
@@ -1038,7 +1265,7 @@ begin
   end;
  end;
 end;
-
+}
 function tsigmultiinp.getinputar: inputconnarty;
 begin
  result:= inputconnarty(finputs.fitems);
@@ -1106,7 +1333,7 @@ begin
 end;
 *)
 { tsigadd }
-
+{
 procedure tsigadd.processinout(const acount: integer; var ainp: doublepoarty;
                var aoutp: pdouble);
 var
@@ -1123,7 +1350,7 @@ begin
   inc(aoutp);
  end;
 end;
-
+}
 function tsigadd.gethandler: sighandlerprocty;
 begin
  result:= {$ifdef FPC}@{$endif}sighandler;
@@ -1223,7 +1450,7 @@ begin
 end;
 
 { tsigmult }
-
+{
 procedure tsigmult.processinout(const acount: integer; var ainp: doublepoarty;
                var aoutp: pdouble);
 var
@@ -1240,7 +1467,7 @@ begin
   inc(aoutp);
  end;
 end;
-
+}
 function tsigmult.gethandler: sighandlerprocty;
 begin
  result:= {$ifdef FPC}@{$endif}sighandler;
@@ -1963,10 +2190,26 @@ begin
  end;
 end;
 
+procedure tsigcontroller.checkmodel;
+begin
+ if not (scs_modelvalid in fstate) then begin
+  updatemodel;
+ end;
+end;
+
 procedure tsigcontroller.loaded;
 begin
  inherited;
  modelchange;
+end;
+
+procedure tsigcontroller.clear;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fclients) do begin
+  fclients[int1].clear;
+ end;
 end;
 
 end.

@@ -1832,7 +1832,8 @@ type
                   tws_modal,tws_needsdefaultpos,
                   tws_closing,tws_painting,tws_activating,
                   tws_globalshortcuts,tws_localshortcuts,
-                  tws_buttonendmodal,tws_grouphidden,tws_groupminimized,
+                  tws_buttonendmodal,
+                  tws_grouphidden,tws_groupminimized,tws_groupmaximized,
                   tws_grab,tws_activatelocked,
                   tws_canvasoverride,tws_destroying,
                   tws_raise,tws_lower);
@@ -1860,6 +1861,7 @@ type
    ftransientfor: twindow;
    ftransientforcount: integer;
    fwindowpos: windowposty;
+   fwindowposbefore: windowposty;
    fnormalwindowrect: rectty;
    fcaption: msestring;
    fscrollnotifylist: tnotifylist;
@@ -2525,6 +2527,10 @@ function activateprocesswindow(const procid: integer;
          //true if ok
 function combineframestateflags(
             const disabled,active,mouse,clicked: boolean): framestateflagsty;
+
+{$ifdef mse_debugwindowfocus}
+procedure debugwindow(const atext: string; const aid: winidty);
+{$endif}
 
 implementation
 
@@ -11875,6 +11881,7 @@ begin
   fowner.updatewindowinfo(aoptions);
   foptions:= aoptions.options;
   fwindowpos:= aoptions.initialwindowpos;
+  fwindowposbefore:= fwindowpos;
   updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
                ord(tws_needsdefaultpos),fwindowpos = wp_default);
   with aoptions do begin
@@ -12276,11 +12283,14 @@ begin
      include(appinst.fstate,aps_needsupdatewindowstack);
      if (application.fmainwindow = self) and not appinst.terminated then begin
       bo1:= gui_grouphideminimizedwindows;
-      gui_flushgdi;
-      sys_schedyield;
-      exclude(fstate,tws_windowvisible);
+//      gui_flushgdi;
+//      sys_schedyield;
+      fstate:= fstate - [tws_windowvisible,tws_groupmaximized];
       include(fstate,tws_grouphidden);
       include(fstate,tws_groupminimized);
+      if fwindowposbefore = wp_maximized then begin
+       include(fstate,tws_groupmaximized);
+      end;
       application.sortzorder;
       appinst.fgroupzorder:= copy(appinst.fwindows);
       for int1:= 0 to high(appinst.fwindows) do begin
@@ -12288,9 +12298,18 @@ begin
        if (window1 <> self) and (window1.fwindow.id <> 0) and 
                          gui_windowvisible(window1.fwindow.id) then begin
         with window1 do begin
+        {$ifdef mse_debugwindowfocus}
+         debugwindow('groupminimized ',fwindow.id);
+        {$endif}
          include(fstate,tws_grouphidden);
          if tws_windowvisible in fstate then begin
           include(fstate,tws_groupminimized);
+         end;
+         if windowpos = wp_maximized then begin
+          include(fstate,tws_groupmaximized);
+         end
+         else begin
+          exclude(fstate,tws_groupmaximized);
          end;
          gui_setwindowstate(winid,wsi_minimized,false);
          if bo1 then begin
@@ -12366,11 +12385,12 @@ begin
       if window1 <> self then begin
        with window1 do begin
         if tws_grouphidden in fstate then begin
+         size1:= wsi_minimized;
          if tws_groupminimized in fstate then begin
           size1:= wsi_normal;
-         end
-         else begin
-          size1:= wsi_minimized;
+          if tws_groupmaximized in fstate then begin
+           size1:= wsi_maximized;
+          end;
          end;
          gui_setwindowstate(winid,size1,true);
          bo2:= true;
@@ -12513,7 +12533,8 @@ begin
    end;
   end;
  end;
- if not (windowpos in [wp_minimized,wp_maximized,wp_fullscreen]) then begin
+ fwindowposbefore:= windowpos;
+ if not (fwindowposbefore in [wp_minimized,wp_maximized,wp_fullscreen]) then begin
   fnormalwindowrect:= fowner.fwidgetrect;
  end;
 end;
@@ -13315,7 +13336,8 @@ begin
    end;
   end;
  end;
- fwindowpos := Value;
+ fwindowpos:= value;
+ fwindowposbefore:= fwindowpos;
  if (wpo1 = wp_fullscreen) and (value = wp_normal) then begin
   gui_reposwindow(fwindow.id,fnormalwindowrect);
        //needed for win32
@@ -14285,10 +14307,10 @@ procedure tinternalapplication.setwindowfocus(winid: winidty);
 var
  window: twindow;
 begin
- try
-  if findwindow(winid,window) then begin
+ if findwindow(winid,window) and (window.fstate*[tws_grouphidden] = []) then begin
+  try
 {$ifdef mse_debugwindowfocus}
-  debugwriteln('setwindowfocus '+window.fowner.name+' '+hextostr(winid,8));
+   debugwriteln('setwindowfocus '+window.fowner.name+' '+hextostr(winid,8));
 {$endif}
    if (fmodalwindow = nil) or (fmodalwindow = window) then begin
     window.activated;
@@ -14325,11 +14347,11 @@ begin
      end;
     end;
    end;
-  end;
- finally
-  if not (aps_focused in fstate) then begin
-   include(fstate,aps_focused);
-   tcaret1(fcaret).restore;
+  finally
+   if not (aps_focused in fstate) then begin
+    include(fstate,aps_focused);
+    tcaret1(fcaret).restore;
+   end;
   end;
  end;
 end;
@@ -14506,6 +14528,23 @@ begin
  end;
 end;
 
+{$ifdef mse_debugwindowfocus}
+procedure debugwindow(const atext: string; const aid: winidty);
+var
+ str1: string;
+ window1: twindow;
+begin
+ str1:= atext+hextostr(aid)+' ';
+ if appinst.findwindow(aid,window1) then begin
+  str1:= str1+window1.owner.name;
+ end
+ else begin
+  str1:= str1+'NIL';
+ end;
+ debugwriteln(str1);
+end;
+{$endif}
+
 function tinternalapplication.eventloop(const amodalwindow: twindow;
                                     const once: boolean = false): boolean;
                    //true if actual modalwindow destroyed
@@ -14637,6 +14676,14 @@ begin       //eventloop
          ftimertick:= true;
         end;
         ek_show,ek_hide: begin
+        {$ifdef mse_debugwindowfocus}
+         if event.kind = ek_show then begin
+          debugwindow('show ',twindowevent(event).fwinid);
+         end
+         else begin
+          debugwindow('hide ',twindowevent(event).fwinid);
+         end;
+        {$endif}
          processshowingevent(twindowevent(event));
         end;
         ek_close: begin
@@ -14664,7 +14711,11 @@ gui_flushgdi(true);
 sys_schedyield;
 gui_flushgdi(true);
 sys_schedyield;
+gui_flushgdi(true);
 }
+        {$ifdef mse_debugwindowfocus}
+         debugwindow('focusin ',twindowevent(event).fwinid);
+        {$endif}
          getevents;
          po1:= pointer(eventlist.datapo);
          bo1:= true;
@@ -14678,6 +14729,9 @@ sys_schedyield;
             end;
             if (kind = ek_focusout) and 
                               (fwinid = twindowevent(event).fwinid) then begin
+            {$ifdef mse_debugwindowfocus}
+             debugwindow('focusout deleted ',twindowevent(event).fwinid);
+            {$endif}
              bo1:= false;
              freeandnil(po1^); 
                 //spurious focus, for instance minimize window group on windows
@@ -14699,7 +14753,11 @@ gui_flushgdi(true);
 sys_schedyield;
 gui_flushgdi(true);
 sys_schedyield;
+gui_flushgdi(true);
 }
+        {$ifdef mse_debugwindowfocus}
+         debugwindow('focusout ',twindowevent(event).fwinid);
+        {$endif}
          getevents;
          po1:= pointer(eventlist.datapo);
          bo1:= true; 
@@ -14707,6 +14765,9 @@ sys_schedyield;
           if po1^ <> nil then begin
            with po1^ do begin
             if (kind = ek_focusin) then begin
+            {$ifdef mse_debugwindowfocus}
+             debugwindow('focusout ignored',twindowevent(event).fwinid);
+            {$endif}
              bo1:= false; //ignore the event
              break;
             end;

@@ -1047,7 +1047,8 @@ begin
 // if fmainmenuwidget <> nil then begin
 //  fmainmenuwidget.loaded;
 // end;
- if (fo_screencentered in foptions) and not (csdesigning in componentstate) then begin
+ if (fo_screencentered in foptions) and 
+                                 not (csdesigning in componentstate) then begin
   window.windowpos:= wp_screencentered;
  end;
  inherited;
@@ -1801,8 +1802,8 @@ end;
 procedure tmainform.aftercreate;
 begin
  inherited;
- options:= defaultmainformoptions;
- optionswindow:= defaultmainformoptionswindow;
+ foptions:= defaultmainformoptions;
+ foptionswindow:= defaultmainformoptionswindow;
 end;
 
 { tformdockcontroller }
