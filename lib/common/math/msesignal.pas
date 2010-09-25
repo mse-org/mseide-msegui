@@ -63,10 +63,10 @@ type
    procedure setcontroller(const avalue: tsigcontroller);
   protected
 //   finfo: siginfoty;
-   procedure setsig1(const sender: tdoubleinputconn;
-                                    var asource: doublearty); virtual;
-   procedure setsig(const sender: tdoubleinputconn;
-                                    const asource: doublearty); virtual;
+//   procedure setsig1(const sender: tdoubleinputconn;
+//                                    var asource: doublearty); virtual;
+//   procedure setsig(const sender: tdoubleinputconn;
+//                                    const asource: doublearty); virtual;
    procedure connchange;
    procedure loaded; override;
    
@@ -143,9 +143,6 @@ type
    property gain: double read fgain write fgain;
  end;
 
- tbufferdoubleinputconn = class(tdoubleinputconn)
- end;
-  
  sighandlerinfoty = record
   dest: pdouble;
  end;
@@ -316,8 +313,8 @@ type
    function getinputar: inputconnarty; override;
    function getoutputar: outputconnarty; override;
    procedure setzcount(const avalue: integer);
-   procedure processinout(const acount: integer;
-                    var ainp,aoutp: pdouble); virtual; abstract;
+//   procedure processinout(const acount: integer;
+//                    var ainp,aoutp: pdouble); virtual; abstract;
    procedure zcountchanged; virtual;
    {
    procedure setsig1(const sender: tdoubleinputconn;
@@ -460,6 +457,7 @@ type
   private
    finphash: tsiginfohash;
    foutphash: tsiginfohash;
+   fvaluedummy: double;
   protected
    fstate: sigcontrollerstatesty;
    fclients: sigclientintfarty;
@@ -673,7 +671,7 @@ procedure tdoublesigcomp.clear;
 begin
  //dummy
 end;
-
+(*
 procedure tdoublesigcomp.setsig1(const sender: tdoubleinputconn;
                var asource: doublearty);
 begin
@@ -685,7 +683,7 @@ procedure tdoublesigcomp.setsig(const sender: tdoubleinputconn;
 begin
  //dummy
 end;
-
+*)
 procedure setsigcontroller(const linker: tobjectlinker; 
           const intf: isigclient; 
           const source: tsigcontroller; var dest: tsigcontroller);
@@ -1857,6 +1855,9 @@ begin
      updatedestinfo(po1^.destinations[int2+1],dest[int2]);
 //     dest[int2].dest:= @po1^.destinations[int2+1].fvalue;
     end;
+   end
+   else begin
+    handlerinfo.dest:= @fvaluedummy;
    end;
   end;
  end;

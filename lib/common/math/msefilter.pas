@@ -60,8 +60,8 @@ type
    procedure setcoeff(const avalue: trealcoeff);
   protected
    procedure createcoeff; override;
-   procedure processinout(const acount: integer;
-                    var ainp,aoutp: pdouble); override;
+//   procedure processinout(const acount: integer;
+//                    var ainp,aoutp: pdouble); override;
    function getzcount: integer; override;
     //isigclient
    function gethandler: sighandlerprocty; override;
@@ -81,8 +81,8 @@ type
    procedure setcoeff(const avalue: tcomplexcoeff);
   protected
    procedure createcoeff; override;
-   procedure processinout(const acount: integer;
-                    var ainp,aoutp: pdouble); override;
+//   procedure processinout(const acount: integer;
+//                    var ainp,aoutp: pdouble); override;
    function getzcount: integer; override;
     //isigclient
    function gethandler: sighandlerprocty; override;
@@ -90,7 +90,7 @@ type
   published
    property coeff: tcomplexcoeff read getcoeff write setcoeff;
  end;
- 
+
 implementation
 uses
  sysutils;
@@ -154,7 +154,7 @@ procedure tsigfir.setcoeff(const avalue: trealcoeff);
 begin
  inherited setcoeff(avalue);
 end;
-
+(*
 procedure tsigfir.processinout(const acount: integer; var ainp, aoutp: pdouble);
 var                             //todo: optimize
  int1,int2,int3: integer;
@@ -213,7 +213,7 @@ begin
   inc(aoutp,acount);
  end;
 end;
-
+*)
 function tsigfir.gethandler: sighandlerprocty;
 begin
  result:= {$ifdef FPC}@{$endif}sighandler;
@@ -302,7 +302,7 @@ procedure tsigiir.setcoeff(const avalue: tcomplexcoeff);
 begin
  inherited setcoeff(avalue);
 end;
-
+(*
 procedure tsigiir.processinout(const acount: integer; var ainp: pdouble;
                var aoutp: pdouble);
 var 
@@ -343,7 +343,7 @@ begin
   inc(aoutp,acount);
  end;
 end;
-
+*)
 function tsigiir.gethandler: sighandlerprocty;
 begin
  result:= {$ifdef FPC}@{$endif}sighandler;

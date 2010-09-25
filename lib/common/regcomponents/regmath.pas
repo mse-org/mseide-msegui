@@ -16,7 +16,7 @@ interface
 implementation
 uses
  classes,{$ifdef FPC}msefft,{$endif}msedesignintf,msesignal,msefilter,
- msepropertyeditors,msestrings,msedesigner;
+ msepropertyeditors,msestrings,msedesigner,msesigfft;
 
 type
  tinputconnpropertyeditor = class(tsubcomponentpropertyeditor)
@@ -39,8 +39,9 @@ type
 procedure register;
 begin
 {$ifdef FPC}
- registercomponents('Math',[tfft,tsigfir,tsigiir,tsigout,tsigin,
-                            tsigadd,tsigdelay,tsigdelayn,tsigmult,tsigcontroller]);
+ registercomponents('Math',[tfft,tsigfft,tsigfir,tsigiir,tsigout,tsigin,
+                            tsigadd,tsigdelay,tsigdelayn,tsigmult,
+                            tsigcontroller]);
  registercomponenttabhints(['Math'],['Experimental Mathematical Components']);
  registerpropertyeditor(typeinfo(tdoubleconn),tdoublezcomp,'',
                                                    tsubcomponentpropertyeditor);
