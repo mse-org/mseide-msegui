@@ -7862,7 +7862,7 @@ procedure tcustomrowstatelist.readstate(const reader; const acount: integer);
 begin
  initdirty;
  inherited;
- recalchidden; 
+ recalchidden;
 end;
 
 procedure tcustomrowstatelist.assign(source: tpersistent);

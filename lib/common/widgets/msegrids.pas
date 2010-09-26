@@ -1274,6 +1274,7 @@ type
    procedure checkdirty(const arow: integer); override;
    procedure checkdirtyautorowheight(const arow: integer);
    procedure recalchidden; override;
+   procedure readstate(const reader; const acount: integer); override;
    function getstatdata(const index: integer): msestring; override;
    procedure setstatdata(const index: integer; const value: msestring);
                                  override;
@@ -16288,6 +16289,14 @@ begin
   rowstatefoldleveltag,rowstateissumtag: begin
    result:= [dl_integer];
   end;
+ end;
+end;
+
+procedure trowstatelist.readstate(const reader; const acount: integer);
+begin
+ inherited;
+ if (infolevel > ril_normal) or folded then begin
+  fgrid.layoutchanged;
  end;
 end;
 
