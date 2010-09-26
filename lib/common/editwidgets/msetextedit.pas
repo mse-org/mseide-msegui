@@ -76,6 +76,7 @@ type
    fmarginlinepos: integer;
    ftabulators: ttabulators;
    fencoding: charencodingty;
+   fxpos: integer;
    procedure setstatfile(const Value: tstatfile);
    function geteditpos: gridcoordty;
    procedure seteditpos1(const value: gridcoordty);
@@ -663,10 +664,56 @@ end;
 procedure tcustomtextedit.dokeydown(var info: keyeventinfoty);
 var
  shiftstate1: shiftstatesty;
+ int1,int2: integer;
+ indexbefore: integer;
+ rect1: rectty;
 begin
  with info do begin
   shiftstate1:= shiftstate * shiftstatesmask;
-  if (fgridintf <> nil) then begin
+  if (tf_wordbreak in textflagsactive) and 
+                           (shiftstate1 - [ss_shift] = []) then begin
+   include(info.eventstate,es_processed);
+   with feditor do begin
+    int2:= fxpos;
+    int1:= 0;
+    case key of
+     key_up: begin
+      int1:= - self.font.lineheight;
+     end;
+     key_down: begin
+      int1:= self.font.lineheight; 
+     end;
+     else begin
+      exclude(info.eventstate,es_processed);
+     end;
+    end;
+    if int1 <> 0 then begin
+     int1:= caretpos.y + int1;
+     rect1:= textrect;
+     if int1 < rect1.y then begin
+      int1:= rect1.y;
+     end;
+     if int1 >= rect1.y + rect1.cy then begin
+      int1:= rect1.y + rect1.cy - 1;
+     end;
+     indexbefore:= curindex;
+     moveindex(mousepostotextindex(makepoint(fxpos,int1)),
+                      ss_shift in info.shiftstate);
+     if ss_shift in info.shiftstate then begin
+      invalidate;
+     end;
+     if fxpos < int2 then begin
+      fxpos:= int2;
+     end;
+     if {(oe_exitoncursor in foptionsedit) and} (indexbefore = curindex) and
+             {(info.shiftstate = []) and}
+             ((info.key = key_down) or (info.key = key_up)) then begin
+      exclude(info.eventstate,es_processed);
+     end;
+    end;
+   end;
+  end;
+  if not (es_processed in eventstate) and (fgridintf <> nil) then begin
    if ((shiftstate1 = [ss_shift,ss_ctrl]) or (shiftstate1 = [ss_ctrl])) then begin
     if key = key_home then begin
      seteditpos(makegridcoord(0,0),ss_shift in shiftstate1);
@@ -1325,6 +1372,7 @@ begin
      end;
     end;
     ea_indexmoved: begin
+     fxpos:= feditor.caretpos.x;
      fcolindex:= feditor.curindex;
      updateindex(eas_shift in state);
     end;
