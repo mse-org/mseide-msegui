@@ -16,7 +16,7 @@ interface
 implementation
 uses
  classes,{$ifdef FPC}msefft,{$endif}msedesignintf,msesignal,msefilter,
- msepropertyeditors,msestrings,msedesigner,msesigfft;
+ msepropertyeditors,msestrings,msedesigner,msesigfft,regmath_bmp;
 
 type
  tinputconnpropertyeditor = class(tsubcomponentpropertyeditor)
