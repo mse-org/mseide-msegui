@@ -89,6 +89,12 @@ type
    ffft: tfft;
    fsamplecount: integer;
    procedure setsamplecount(avalue: integer);
+   function getwindowfunc: windowfuncty;
+   procedure setwindowfunc(const avalue: windowfuncty);
+   function getwindowfuncpar0: double;
+   procedure setwindowfuncpar0(const avalue: double);
+   function getwindowfuncpar1: double;
+   procedure setwindowfuncpar1(const avalue: double);
   protected
    procedure sigbufferfull; override;
   public
@@ -97,6 +103,12 @@ type
   published
    property samplecount: integer read fsamplecount 
                                           write setsamplecount default 256;
+   property windowfunc: windowfuncty read getwindowfunc 
+                write setwindowfunc default wf_rectangular;
+   property windowfuncpar0: double read getwindowfuncpar0 
+                                          write setwindowfuncpar0;   
+   property windowfuncpar1: double read getwindowfuncpar1 
+                                          write setwindowfuncpar1;   
  end;
  
 implementation
@@ -260,6 +272,36 @@ procedure tsigfft.sigbufferfull;
 begin
  ffft.inpreal:= finput.fsignal;
  foutput.fsignal:= ffft.outreal;
+end;
+
+function tsigfft.getwindowfunc: windowfuncty;
+begin
+ result:= ffft.windowfunc;
+end;
+
+procedure tsigfft.setwindowfunc(const avalue: windowfuncty);
+begin
+ ffft.windowfunc:= avalue;
+end;
+
+function tsigfft.getwindowfuncpar0: double;
+begin
+ result:= ffft.windowfuncpar0;
+end;
+
+procedure tsigfft.setwindowfuncpar0(const avalue: double);
+begin
+ ffft.windowfuncpar0:= avalue;
+end;
+
+function tsigfft.getwindowfuncpar1: double;
+begin
+ result:= ffft.windowfuncpar1;
+end;
+
+procedure tsigfft.setwindowfuncpar1(const avalue: double);
+begin
+ ffft.windowfuncpar1:= avalue;
 end;
 
 end.
