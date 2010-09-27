@@ -3173,6 +3173,7 @@ begin
    comp1:= findancestorcomponent(acomponent);
    if comp1 <> nil then begin
 //    po2:= fmodules.findownermodule(acomponent);
+    beginsubmodulecopy;
     po4:= fmodules.findownermodule(comp1);
     po3:= po4^.methods.createmethodtable(getancestormethods(po4));
     fdescendentinstancelist.beginstreaming;
@@ -3185,6 +3186,7 @@ begin
       {$ifdef FPC}@{$endif}createcomponent,nil,po3,po3);
 //     docopymethods(comp1,acomponent,true);
     finally
+     endsubmodulecopy;
      po4^.methods.releasemethodtable;
      doswapmethodpointers(acomponent,true);
      doswapmethodpointers(comp1,true);
