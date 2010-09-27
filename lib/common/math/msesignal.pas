@@ -972,7 +972,7 @@ begin
   if foutpindex = fbuffersize then begin
 //   foutpindex:= 0;
    if assigned(fonoutputburst) then begin
-    fonoutputburst(self,foutp);
+    fonoutputburst(self,realarty(foutp));
    end;
   end;
  end;
@@ -1152,7 +1152,7 @@ begin
  end
  else begin
   if assigned(foninputburst) then begin
-   foninputburst(self,finp);
+   foninputburst(self,realarty(finp));
    finpindex:= 0;
    if finp <> nil then begin
     fvalue:= finp[0];

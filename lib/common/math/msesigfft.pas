@@ -134,7 +134,7 @@ begin
   with foutput do begin
    findex:= 0;
    if assigned(fonoutputburst) then begin
-    fonoutputburst(fowner,fsignal);
+    fonoutputburst(fowner,realarty(fsignal));
    end;
   end;
  end;
@@ -188,13 +188,13 @@ end;
 constructor tbufferdoublesigcomp.create(aowner: tcomponent);
 begin
  foutput:= tbufferdoubleoutputconn.create(self);
- finput:= tbufferdoubleinputconn.create(self,@sigbufferfull);
+ finput:= tbufferdoubleinputconn.create(self,{$ifdef FPC}@{$endif}sigbufferfull);
  inherited;
 end;
 
 function tbufferdoublesigcomp.gethandler: sighandlerprocty;
 begin
- result:= @finput.sighandler;
+ result:= {$ifdef FPC}@{$endif}finput.sighandler;
 end;
 
 procedure tbufferdoublesigcomp.setoutput(const avalue: tbufferdoubleoutputconn);
@@ -270,8 +270,8 @@ end;
 
 procedure tsigfft.sigbufferfull;
 begin
- ffft.inpreal:= finput.fsignal;
- foutput.fsignal:= ffft.outreal;
+ ffft.inpreal:= realarty(finput.fsignal);
+ foutput.fsignal:= doublearty(ffft.outreal);
 end;
 
 function tsigfft.getwindowfunc: windowfuncty;

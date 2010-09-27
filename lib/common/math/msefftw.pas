@@ -99,7 +99,7 @@ fftw_execute: procedure(plan: fftw_plan); cdecl;
 
 //{$calling register} {Back to normal!}
 procedure fftw_getmem(var p: pointer; size: sizeint);
-procedure fftw_freemem(var p: pointer);inline;
+procedure fftw_freemem(var p: pointer);{$ifdef FPC}inline;{$endif}
 
 procedure initializefftw(const sonames: array of filenamety); 
                                      //[] = default
@@ -125,7 +125,8 @@ var
 
 {$IF defined(cpui386) or defined(cpupowerpc)}
   {$DEFINE align:=16}
-{$ENDIF}
+//{$ENDIF}
+{$IFEND}
 
 procedure fftw_getmem(var p:pointer; size: sizeint);
 
@@ -146,7 +147,7 @@ begin
 {$ENDIF}
 end;
 
-procedure fftw_freemem(var p: pointer); inline;
+procedure fftw_freemem(var p: pointer); {$ifdef FPC}inline;{$endif}
 
 begin
  if p <> nil then begin
@@ -159,8 +160,27 @@ begin
  end;
 end;
 
-procedure initializefftw(const sonames: array of filenamety); 
+{$ifndef FPC}
+var
+ funcs: array[0..13] of funcinfoty = (
+   (n: 'fftw_plan_dft_1d'; d: nil),
+   (n: 'fftw_plan_dft_2d'; d: nil),
+   (n: 'fftw_plan_dft_3d'; d: nil),
+   (n: 'fftw_plan_dft'; d: nil),
+   (n: 'fftw_plan_dft_r2c_1d'; d: nil),
+   (n: 'fftw_plan_dft_r2c_2d'; d: nil),
+   (n: 'fftw_plan_dft_r2c_3d'; d: nil),
+   (n: 'fftw_plan_dft_r2c'; d: nil),
+   (n: 'fftw_plan_dft_c2r_1d'; d: nil),
+   (n: 'fftw_plan_dft_c2r_2d'; d: nil),
+   (n: 'fftw_plan_dft_c2r_3d'; d: nil),
+   (n: 'fftw_plan_dft_c2r'; d: nil),
+   (n: 'fftw_destroy_plan'; d: nil),
+   (n: 'fftw_execute'; d: nil));
+{$endif}
+procedure initializefftw(const sonames: array of filenamety);
                                      //[] = default
+{$ifdef FPC}
 const
  funcs: array[0..13] of funcinfoty = (
    (n: 'fftw_plan_dft_1d'; d: @fftw_plan_dft_1d),
@@ -177,9 +197,25 @@ const
    (n: 'fftw_plan_dft_c2r'; d: @fftw_plan_dft_c2r),
    (n: 'fftw_destroy_plan'; d: @fftw_destroy_plan),
    (n: 'fftw_execute'; d: @fftw_execute));
-
+{$endif}
 
 begin
+{$ifndef FPC}
+ funcs[0].d:= @fftw_plan_dft_1d;
+ funcs[1].d:= @fftw_plan_dft_2d;
+ funcs[2].d:= @fftw_plan_dft_3d;
+ funcs[3].d:= @fftw_plan_dft;
+ funcs[4].d:= @fftw_plan_dft_r2c_1d;
+ funcs[5].d:= @fftw_plan_dft_r2c_2d;
+ funcs[6].d:= @fftw_plan_dft_r2c_3d;
+ funcs[7].d:= @fftw_plan_dft_r2c;
+ funcs[8].d:= @fftw_plan_dft_c2r_1d;
+ funcs[9].d:= @fftw_plan_dft_c2r_2d;
+ funcs[1].d:= @fftw_plan_dft_c2r_3d;
+ funcs[11].d:= @fftw_plan_dft_c2r;
+ funcs[12].d:= @fftw_destroy_plan;
+ funcs[13].d:= @fftw_execute;
+{$endif}
  try
   if length(sonames) = 0 then begin
    initializedynlib(libinfo,fftwlib,funcs,[]);

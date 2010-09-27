@@ -2,7 +2,7 @@ unit msedynload;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msesys,dynlibs,msestrings,sysutils;
+ msesys,{$ifdef FPC}dynlibs,{$endif}msestrings,sysutils;
  
 type
  dynlibinfoty = record
@@ -24,15 +24,23 @@ procedure releasedynlib(var info: dynlibinfoty);
 implementation
 
 uses
- msesysintf;
- 
+ msesysintf{$ifndef FPC},windows{$endif};
+
+{$ifndef FPC}
+const
+ nilhandle = 0;
+Function UnloadLibrary(Lib : TLibHandle) : Boolean;
+begin
+ result:= freelibrary(lib);
+end;
+{$endif}
 procedure initializedynlib(var info: dynlibinfoty;
                               const alibnames: array of filenamety;
                               const funcs: array of funcinfoty;
                               const funcsopt: array of funcinfoty);
 begin
  with info do begin
-  sys_mutexlock(lock); 
+  sys_mutexlock(lock);
   try
    if refcount = 0 then begin
     libhandle:= loadlib(alibnames,libname);

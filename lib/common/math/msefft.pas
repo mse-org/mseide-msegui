@@ -91,10 +91,10 @@ begin
    fftw_destroy_plan(fplan);
    fplan:= nil;
   end;
-  fftw_freemem(finpreal);
-  fftw_freemem(finpcomplex);
-  fftw_freemem(foutreal);
-  fftw_freemem(foutcomplex);
+  fftw_freemem(pointer(finpreal));
+  fftw_freemem(pointer(finpcomplex));
+  fftw_freemem(pointer(foutreal));
+  fftw_freemem(pointer(foutcomplex));
   fn:= 0;
   resetwindowdata;
  end;
@@ -146,8 +146,8 @@ begin
   end;  //frequ -> time
   if fplan = nil then begin
    fn:= (length(finpcomplexar)-1)*2;
-   fftw_getmem(finpcomplex,(fn div 2 + 1) * sizeof(complexty));
-   fftw_getmem(foutreal,fn * sizeof(double));
+   fftw_getmem(pointer(finpcomplex),(fn div 2 + 1) * sizeof(complexty));
+   fftw_getmem(pointer(foutreal),fn * sizeof(double));
    fplan:= fftw_plan_dft_c2r_1d(fn,finpcomplex,foutreal,[fftw_estimate]);
   end;
   move(pointer(finpcomplexar)^,finpcomplex^,(fn div 2 + 1)*sizeof(complexty));
@@ -166,8 +166,8 @@ begin
   if finprealar <> nil then begin
    if fplan = nil then begin
     fn:= length(finprealar);
-    fftw_getmem(finpreal,fn * sizeof(double));
-    fftw_getmem(foutcomplex,(fn div 2 + 1) * sizeof(complexty));
+    fftw_getmem(pointer(finpreal),fn * sizeof(double));
+    fftw_getmem(pointer(foutcomplex),(fn div 2 + 1) * sizeof(complexty));
     fplan:= fftw_plan_dft_r2c_1d(fn,finpreal,foutcomplex,[fftw_estimate]);
    end;
    move(pointer(finprealar)^,finpreal^,fn*sizeof(double));
