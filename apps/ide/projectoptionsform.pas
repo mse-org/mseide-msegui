@@ -26,7 +26,8 @@ uses
  msegraphutils,mseevent,msetabsglob,msedatalist,msegraphics,msedropdownlist,
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
- msemenus,sysutils,mseglob,mseedit,db,msedialog,msescrollbar,msememodialog;
+ msemenus,sysutils,mseglob,mseedit,db,msedialog,msescrollbar,msememodialog,
+ msecodetemplates;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -89,6 +90,7 @@ type
   syntaxdeffiles: msestringarty;
   filemasknames: msestringarty;
   filemasks: msestringarty;
+  codetemplatedirs: msestringarty;
 
   toolmenus: msestringarty;
   toolfiles: msestringarty;
@@ -163,6 +165,8 @@ type
    function limitgridsize(const avalue: integer): integer;
    procedure setgridsizex(const avalue: integer);
    procedure setgridsizey(const avalue: integer);
+   function getcodetemplatedirs: msestringarty;
+   procedure setcodetemplatedirs(const avalue: msestringarty);
   public
    constructor create;
   published
@@ -201,6 +205,8 @@ type
    property backupfilecount: integer read fbackupfilecount 
                                               write fbackupfilecount;
    property encoding: integer read fencoding write fencoding;
+   property codetemplatedirs: msestringarty read getcodetemplatedirs write
+                  setcodetemplatedirs;
 
    property usercolors: colorarty read fusercolors write fusercolors;
    property usercolorcomment: msestringarty read fusercolorcomment 
@@ -510,6 +516,9 @@ type
    aftmake3on: tbooleanedit;
    aftmake4on: tbooleanedit;
    aftcommand: tmemodialogedit;
+   ttabpage19: ttabpage;
+   twidgetgrid5: twidgetgrid;
+   codetemplatedirs: tfilenameedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -567,10 +576,12 @@ function getsigname(const anum: integer): string;
 procedure projectoptionstofont(const afont: tfont);
 function objpath(const aname: filenamety): filenamety;
 function gettargetfile: filenamety;
+function getmacros: tmacrolist;
 
 var
  projectoptions: projectoptionsty;
  projecthistory: filenamearty;
+ codetemplates: tcodetemplates;
 
 implementation
 uses
@@ -581,7 +592,7 @@ uses
  msedesigner,panelform,watchpointsform,commandlineform,msestream,
  componentpaletteform,mserichstring,msesettings,formdesigner,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
- componentstore,cpuform
+ componentstore,cpuform,msesysutils
  {$ifndef mse_no_db}{$ifdef FPC},msedbfieldeditor{$endif}{$endif};
 
 var
@@ -850,6 +861,7 @@ begin
    li.expandmacros(syntaxdeffiles);
    li.expandmacros(filemasknames);
    li.expandmacros(filemasks);
+   li.expandmacros(codetemplatedirs);
    li.expandmacros(toolmenus);
    li.expandmacros(toolfiles);
    li.expandmacros(toolparams);
@@ -1044,6 +1056,7 @@ var
  int1: integer;
 begin
  projectoptions.o.free;
+ codetemplates.clear;
  finalize(projectoptions);
  fillchar(projectoptions,sizeof(projectoptions),0);
  projectoptions.o:= tprojectoptions.create;
@@ -1479,6 +1492,7 @@ begin
     macrogroup:= int1-1;
    end;
    expandprojectmacros;
+   codetemplates.scan(texp.codetemplatedirs);
   end;
   breakpointsfo.updatestat(statfiler);
   panelform.updatestat(statfiler);
@@ -2176,6 +2190,8 @@ end;
 { tprojectoptions }
 
 constructor tprojectoptions.create;
+var
+ ar1: msestringarty;
 begin
  closemessages:= true;
  checkmethods:= true;
@@ -2200,6 +2216,9 @@ begin
  activateonbreak:= true;
  additem(fexceptclassnames,'EconvertError');
  additem(fexceptignore,false);
+ setlength(ar1,1);
+ ar1[0]:= '${TEMPLATEDIR}';
+ codetemplatedirs:= ar1;
 end;
 
 function tprojectoptions.limitgridsize(const avalue: integer): integer;
@@ -2223,7 +2242,19 @@ begin
  fgridsizey:= limitgridsize(avalue);
 end;
 
+function tprojectoptions.getcodetemplatedirs: msestringarty;
+begin
+ result:= projectoptions.t.codetemplatedirs;
+end;
+
+procedure tprojectoptions.setcodetemplatedirs(const avalue: msestringarty);
+begin
+ projectoptions.t.codetemplatedirs:= avalue;
+end;
+
 initialization
+ codetemplates:= tcodetemplates.create;
 finalization
  projectoptions.o.free;
+ freeandnil(codetemplates);
 end.

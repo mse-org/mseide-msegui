@@ -58,8 +58,13 @@ type
    function charatpos(const apos: gridcoordty): msechar; //0 if none
    function charbeforepos(const apos: gridcoordty): msechar; //0 if none
    function wordatpos(const apos: gridcoordty; out word: msestring;
-                             const delimchars: msestring; 
-                             const nodelimstrings: array of msestring): gridcoordty;
+              const delimchars: msestring; 
+              const nodelimstrings: array of msestring;
+              const leftofcursor: boolean = false): gridcoordty; overload;
+   function wordatpos(const apos: gridcoordty; out start: gridcoordty;
+              const delimchars: msestring; 
+              const nodelimstrings: array of msestring;
+              const leftofcursor: boolean = false): msestring; overload;
    procedure indent(const acount: integer; const atabs: boolean);
    procedure unindent(const acount: integer);
    procedure removelink;
@@ -283,12 +288,13 @@ end;
 
 function tsyntaxedit.wordatpos(const apos: gridcoordty; out word: msestring;
                  const delimchars: msestring;
-                 const nodelimstrings:  array of msestring): gridcoordty;
+                 const nodelimstrings:  array of msestring;
+                 const leftofcursor: boolean = false): gridcoordty;
      //returns startpos
 var
  po1,po2: pmsechar;
  stringpo: pmsestring;
-
+ gc1: gridcoordty;
 begin
  word:= '';
  if (apos.row < 0) or (apos.row >= flines.count) then begin
@@ -319,6 +325,19 @@ begin
    word:= copy(msestring(po1),1,po2-po1);
   end;
  end;
+ if (word = '') and leftofcursor and (apos.col > 0) then begin
+  gc1:= apos;
+  dec(gc1.col);
+  result:= wordatpos(gc1,word,delimchars,nodelimstrings);
+ end;
+end;
+
+function tsyntaxedit.wordatpos(const apos: gridcoordty; out start: gridcoordty;
+              const delimchars: msestring; 
+              const nodelimstrings: array of msestring;
+              const leftofcursor: boolean = false): msestring; overload;
+begin
+ start:= wordatpos(apos,result,delimchars,nodelimstrings,leftofcursor);
 end;
 
 procedure tsyntaxedit.indent(const acount: integer; const atabs: boolean);

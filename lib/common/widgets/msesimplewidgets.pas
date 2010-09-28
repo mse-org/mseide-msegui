@@ -1547,7 +1547,7 @@ end;
 
 procedure tcustomlabel.getautopaintsize(var asize: sizety);
 begin
- asize:= textrect(getcanvas,fcaption,ftextflags).size;
+ asize:= textrect(getcanvas,fcaption,innerclientrect,ftextflags).size;
  innertopaintsize(asize);
 end;
 

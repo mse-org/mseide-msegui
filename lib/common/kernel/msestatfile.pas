@@ -264,11 +264,14 @@ begin
     areader.readstat(istatfile(self));
    end;
    if fobjectlinker <> nil then begin
-    fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatreading,typeinfo(istatfile));
+    fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatreading,
+                                                       typeinfo(istatfile));
     try
-     fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatread,typeinfo(istatfile));
+     fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatread,
+                                                       typeinfo(istatfile));
     finally
-     fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatreaded,typeinfo(istatfile));
+     fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatreaded,
+                                                       typeinfo(istatfile));
     end;
     if assigned(fonstatafterread) then begin
      fonstatafterread(self);

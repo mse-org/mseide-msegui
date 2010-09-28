@@ -75,6 +75,7 @@ type
  end;
 
  sectionty = record
+  fileposition: integer;
   names: thashedmsestrings;
   count: integer;
   values: msestringarty;
@@ -95,6 +96,7 @@ type
    factsection: psectionty;
    factitem: integer;
    fliststart: integerarty;
+   fstatend: integer;
    procedure checkrealrange(var value: realty; const min,max: realty);
    procedure checkintegerrange(var value: integer; const min,max: integer);
    procedure checkint64range(var value: int64; const min,max: int64);
@@ -112,6 +114,8 @@ type
    function sections: msestringarty;
    function findsection(const name: msestring): boolean; //true if found
    function checkvar(const name: msestring): boolean; //true if found
+   function streamdata: string;    //returns data after [-]
+   function streamtext: msestring; //returns text after [-]
 
    function readboolean(const name: msestring; const default: boolean = false): boolean;
    function readbyte(const name: msestring; const default: byte = 0): byte;
@@ -533,15 +537,20 @@ begin
      exit;
     end;
    end;
-   if not fstream.eof then begin
+   if not fstream.eof then begin     
     int1:= msestrscan(str1,msechar(']'));
     if int1 > 0 then begin
+     if int1 = 2 then begin
+      fstatend:= fstream.position;
+      exit;
+     end;
      if fsectioncount <= length(fsections) then begin
       setlength(fsections,length(fsections)+16);
      end;
      inc(fsectioncount);
      fsectionlist.add(copy(str1,2,int1-2),pointer(ptruint(fsectioncount)));
      with fsections[fsectioncount-1] do begin
+      fileposition:= fstream.position;
       names:= thashedmsestrings.create;
       count:= 0;
       while fstream.readln(str1) do begin
@@ -1184,6 +1193,24 @@ begin
  setlength(result,fsectionlist.count);
  for int1:= 0 to high(result) do begin
   result[int1]:= fsectionlist.next^.key;
+ end;
+end;
+
+function tstatreader.streamdata: string;
+begin
+ result:= '';
+ if fstatend > 0 then begin
+  fstream.position:= fstatend;
+  result:= fstream.readdatastring;
+ end;
+end;
+
+function tstatreader.streamtext: msestring;
+begin
+ result:= '';
+ if fstatend > 0 then begin
+  fstream.position:= fstatend;
+  result:= fstream.readmsedatastring;
  end;
 end;
 {

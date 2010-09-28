@@ -1048,6 +1048,7 @@ procedure arraydecref(var dynamicarray);
                  //no finalize and freemem if refcount = 0
 procedure allocuninitedarray(count,itemsize: integer; out dynamicarray);
                  //does not init memory, dynamicarray must be nil!
+function arrayrefcount(var dynamicarray): sizeint;
 
 procedure additem(var dest: stringarty; const value: string); overload;
 procedure additem(var dest: msestringarty; const value: msestring); overload;
@@ -1521,6 +1522,14 @@ begin
    interlockedincrement(refpo^);
    {$endif}
   end;
+ end;
+end;
+
+function arrayrefcount(var dynamicarray): sizeint;
+begin
+ result:= 0;
+ if pointer(dynamicarray) <> nil then begin
+  result:= psizeint(pchar(dynamicarray)-2*sizeof(sizeint))^;
  end;
 end;
 

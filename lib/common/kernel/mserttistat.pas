@@ -534,7 +534,7 @@ var
  intf1: iifidatalink;
  obj1: tobject;
  list1: tdatalist;
- arpo: pointer;
+// arpo: pointer;
 begin
  ar1:= getpropinfoar(dest.obj);
  for int1 := 0 to high(ar1) do begin
@@ -612,7 +612,7 @@ begin
       tkdynarray: begin
        list1:= intf1.getgriddata;
        if list1 <> nil then begin
-        arpo:= pointer(ptruint(getordprop(dest.obj,po1)));
+//        arpo:= pointer(ptruint(getordprop(dest.obj,po1)));
        {$ifdef FPC}
         po2:= pointer(gettypedata(proptype)^.eltype2);
                             //wrong define in ttypedata

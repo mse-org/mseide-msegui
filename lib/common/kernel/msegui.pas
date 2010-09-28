@@ -75,7 +75,8 @@ type
  optionswidgetty = set of optionwidgetty;
  optionwidget1ty = (ow1_noautosizing,
                     ow1_autowidth,ow1_autoheight,
-                    ow1_autosizeanright,ow1_autosizeanbottom,
+                    ow1_autosizeanright,ow1_noautosizeanright,
+                    ow1_autosizeanbottom,ow1_noautosizeanbottom,
                     ow1_noparentwidthextend,ow1_noparentheightextend,
                     ow1_canclosenil, //call canclose(nil) on exit
                     ow1_nocancloseifhidden);
@@ -6821,20 +6822,24 @@ begin
    size1.cy:= 0;
   end;
   inc(value.cx,size1.cx);
-  if (ow1_autosizeanright in foptionswidget1) and not (an_right in fanchors) then begin
+  if (ow1_autosizeanright in foptionswidget1) and 
+                                        not (an_right in fanchors) then begin
    dec(value.x,size1.cx);
   end;
   inc(value.cy,size1.cy);
-  if (ow1_autosizeanbottom in foptionswidget1) and not (an_bottom in fanchors) then begin
+  if (ow1_autosizeanbottom in foptionswidget1) and 
+                                        not (an_bottom in fanchors) then begin
    dec(value.y,size1.cy);
   end;
   if not windowevent then begin
    checkwidgetsize(value.size);
   end;
-  if an_right in fanchors then begin
+  if (an_right in fanchors) and not 
+                  (ow1_noautosizeanright in foptionswidget1) then begin
    dec(value.x,value.cx-size2.cx);
   end;
-  if an_bottom in fanchors then begin
+  if (an_bottom in fanchors) and not 
+                  (ow1_noautosizeanbottom in foptionswidget1) then begin
    dec(value.y,value.cy-size2.cy);
   end;
  end
@@ -10836,13 +10841,25 @@ begin
 end;
 
 procedure twidget.setoptionswidget1(const avalue: optionswidget1ty);
+const
+ mask1: optionswidget1ty = [ow1_autosizeanright,ow1_noautosizeanright];
+ mask2: optionswidget1ty = [ow1_autosizeanbottom,ow1_noautosizeanbottom];
 var
- delta: optionswidget1ty;
+ value,value1,value2,delta: optionswidget1ty;
 begin
- delta:= optionswidget1ty({$ifdef FPC}longword{$else}word{$endif}(avalue) xor
+ value1:= optionswidget1ty(setsinglebit(
+          {$ifdef FPC}longword{$else}word{$endif}(avalue),
+          {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1), 
+          {$ifdef FPC}longword{$else}word{$endif}(mask1)));
+ value2:= optionswidget1ty(setsinglebit(
+          {$ifdef FPC}longword{$else}word{$endif}(avalue),
+          {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1),
+          {$ifdef FPC}longword{$else}word{$endif}(mask2)));
+ value:= value1 * mask1 + value2 * mask2 + (avalue - (mask1 + mask2));
+ delta:= optionswidget1ty({$ifdef FPC}longword{$else}word{$endif}(value) xor
                     {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1));
  if delta <> [] then begin
-  foptionswidget1:= avalue;
+  foptionswidget1:= value;
   if delta * avalue * [ow1_autowidth,ow1_autoheight] <> [] then begin
    checkautosize;
   end;

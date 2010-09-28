@@ -1055,8 +1055,10 @@ begin
 end;
 }
 procedure tsourcefo.popupmonupdate(const sender: tcustommenu);
+var
+ gc1: gridcoordty;
 begin
- if (activepage <> nil) then begin
+ if (activepage <> nil) and (sender.mouseinfopo <> nil) then begin
   popuprow:= activepage.grid.cellatpos(translateclientpoint(
                    sender.mouseinfopo^.pos,activepage,activepage.grid)).row;
  end
@@ -1073,10 +1075,14 @@ begin
  sender.menu.itembyname('insgui').enabled:= (activepage <> nil);
  sender.menu.itembyname('convpas').enabled:= (activepage <> nil) and 
                                                   activepage.edit.hasselection;
- sender.menu.itembyname('addwatch').enabled:= (activepage <> nil) and   
+ sender.menu.itembyname('addwatch').enabled:= (activepage <> nil) and  
+            (sender.mouseinfopo <> nil) and
               (getpascalvarname(activepage.edit,
                 translateclientpoint(sender.mouseinfopo^.pos,
                         activepage,activepage.edit)) <> '');
+ sender.menu.itembyname('instempl').enabled:= (activepage <> nil) and 
+      codetemplates.hastemplate(
+                activepage.edit.wordatpos(activepage.edit.editpos,gc1,'',[],true));
 end;
 
 procedure tsourcefo.completeclassexecute(const sender: TObject);

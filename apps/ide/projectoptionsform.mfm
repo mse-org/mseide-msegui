@@ -92,7 +92,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 1
-      activepageindex = 2
+      activepageindex = 0
       tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
       tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
       tab_color = -2147483645
@@ -105,6 +105,7 @@ object projectoptionsfo: tprojectoptionsfo
         frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 5
+        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 640
@@ -771,7 +772,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cymin = 84
           anchors = [an_top, an_bottom]
           taborder = 7
-          activepageindex = 0
+          activepageindex = 2
           tab_color = -2147483645
           tab_size = 18
           statfile = statfile1
@@ -783,7 +784,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 1
-            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 640
@@ -915,6 +915,130 @@ object projectoptionsfo: tprojectoptionsfo
               datarowheight = 16
               statfile = statfile1
               reffontheight = 14
+            end
+          end
+          object ttabpage19: ttabpage
+            taborder = 3
+            visible = True
+            bounds_x = 0
+            bounds_y = 18
+            bounds_cx = 640
+            bounds_cy = 203
+            anchors = [an_left, an_top, an_right, an_bottom]
+            caption = 'Code Templates'
+            object twidgetgrid5: twidgetgrid
+              optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+              frame.caption = 'Code template directories, file extension = .mct'
+              frame.captionoffset = 3
+              frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+              frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+              frame.outerframe = (
+                0
+                17
+                0
+                0
+              )
+              bounds_x = 8
+              bounds_y = 0
+              bounds_cx = 640
+              bounds_cy = 268
+              bounds_cymin = 40
+              anchors = [an_top, an_bottom]
+              optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
+              fixcols.count = 1
+              fixcols.items = <              
+                item
+                  width = 28
+                  numstart = 1
+                  numstep = 1
+                end>
+              fixrows.count = 1
+              fixrows.items = <              
+                item
+                  height = 16
+                  captions.count = 11
+                  captions.items = <                  
+                    item
+                      caption = 'Directory'
+                    end                  
+                    item
+                      caption = 'O'
+                      hint = 'Add to object file search path'
+                    end                  
+                    item
+                      caption = 'L'
+                      hint = 'Add to library search path'
+                    end                  
+                    item
+                      caption = 'I'
+                      hint = 'Add to include file search path'
+                    end                  
+                    item
+                      caption = 'U'
+                      hint = 'Add to unit file search path'
+                    end                  
+                    item
+                      caption = '4'
+                      hint = 'Use in Make 4'
+                    end                  
+                    item
+                      caption = '3'
+                      hint = 'Use in Make 3'
+                    end                  
+                    item
+                      caption = '2'
+                      hint = 'Use in Make 2'
+                    end                  
+                    item
+                      caption = '1'
+                      hint = 'Use in Make 1'
+                    end                  
+                    item
+                      caption = 'B'
+                      hint = 'Use in Build'
+                    end                  
+                    item
+                      caption = 'M'
+                      hint = 'Use in Make'
+                    end>
+                end>
+              datacols.count = 1
+              datacols.width = 13
+              datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+              datacols.items = <              
+                item
+                  linecolorfix = -1610612733
+                  width = 606
+                  options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+                  onshowhint = colonshowhint
+                  widgetname = 'codetemplatedirs'
+                  dataclass = tgridmsestringdatalist
+                end>
+              datarowheight = 16
+              reffontheight = 14
+              object codetemplatedirs: tfilenameedit
+                optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+                optionsskin = [osk_framebuttononly]
+                frame.levelo = 0
+                frame.colorclient = -2147483646
+                frame.localprops = [frl_levelo, frl_colorclient]
+                frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+                frame.button.color = -2147483646
+                frame.button.imagenr = 17
+                taborder = 1
+                onshowhint = hintexpandedmacros
+                visible = False
+                bounds_x = 0
+                bounds_y = 0
+                bounds_cx = 606
+                bounds_cy = 16
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
+                controller.options = [fdo_directory]
+                controller.historymaxcount = 0
+                controller.captionopen = 'Select unit directory'
+                controller.ongetfilename = expandfilename
+                reffontheight = 14
+              end
             end
           end
         end
@@ -2024,7 +2148,6 @@ object projectoptionsfo: tprojectoptionsfo
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 6
-        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 640
@@ -2265,7 +2388,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cy = 333
           anchors = [an_top, an_bottom]
           taborder = 11
-          activepageindex = 1
+          activepageindex = 2
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
           tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
           tab_face.localprops = [fal_frameimageoffset]
@@ -2470,7 +2593,6 @@ object projectoptionsfo: tprojectoptionsfo
             face.localprops = [fal_frameimageoffset]
             face.dummy = 0
             taborder = 2
-            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 640
@@ -2665,6 +2787,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 1
+            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 640
@@ -2939,7 +3062,7 @@ object projectoptionsfo: tprojectoptionsfo
                 frame.colorclient = -2147483646
                 frame.localprops = [frl_levelo, frl_colorclient]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
-                frame.button.color = -2147483646
+                frame.button.color = -1879048187
                 frame.button.imagenr = 17
                 taborder = 11
                 onshowhint = hintexpandedmacros
@@ -2948,7 +3071,7 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_y = 0
                 bounds_cx = 494
                 bounds_cy = 16
-                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autopopupmenu, oe_savevalue, oe_savestate]
+                optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
                 controller.options = [fdo_directory]
                 controller.historymaxcount = 0
                 controller.captionopen = 'Select unit directory'

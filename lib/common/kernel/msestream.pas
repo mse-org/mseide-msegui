@@ -171,6 +171,7 @@ type
    procedure writemsestrings(const value: msestringarty);
    function readstrings: stringarty;
    function readmsestrings: msestringarty;
+   function readmsedatastring: msestring; //returns remainig data 
    function readstring(const default: string): string;
                 //liest string, bringt defaultwert bei fehler
    function readinteger(default: integer; min: integer = minint;
@@ -1678,6 +1679,11 @@ begin
   additem(result,mstr1,int1);
  end;
  setlength(result,int1);
+end;
+
+function ttextstream.readmsedatastring: msestring; //returns remainig data 
+begin
+ result:= decode(readdatastring);
 end;
 
 procedure ttextstream.writestrings(const value: stringarty);

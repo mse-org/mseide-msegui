@@ -132,6 +132,7 @@ type
    procedure reload;
    procedure doundo;
    procedure doredo;
+   procedure inserttemplate;
    function canchangenotify(const info: filechangeinfoty): boolean;
    function getbreakpointstate(arow: integer = -1): bkptstatety;
                      //-1 -> actual row
@@ -164,7 +165,7 @@ uses
  sourceupdate,msefiledialog,mseintegerenter,msedesigner,
  projectoptionsform,msesys,make,actionsmodule,msegraphics,sourcehintform,
  mseedit,msedrawtext,msebits,msedatalist,msestream,msedesignintf,
- msesysutils,msedesignparser,msesyntaxpainter;
+ msesysutils,msedesignparser,msesyntaxpainter,msesysenv;
 
 const
  pascaldelims = msestring(' :;+-*/(){},=<>' + c_linefeed + c_return + c_tab);
@@ -1473,6 +1474,47 @@ begin
  beginupdate;
  edit.redo;
  endupdate;
+end;
+
+procedure tsourcepage.inserttemplate;
+var
+ mstr1,mstr2: msestring;
+ po1: pmsechar;
+ gc1,gc2: gridcoordty;
+ int1: integer;
+ mac1: tmacrolist;
+begin
+ gc1:= edit.editpos;
+ if gc1.row >= 0 then begin
+  mstr1:= edit.wordatpos(gc1,gc2,'',[],true);
+  if mstr1 <> '' then begin
+  {
+   mstr1:= edit.text;
+   po1:= pmsechar(mstr1)+gc2.col;
+   while (po1^ <> ' ') and (po1 <> #0) do begin
+    inc(po1);
+   end;
+   mstr1:= copy(mstr1,gc2.col+1,(po1-pmsechar(mstr1))-gc2.col);
+   if codetemplates.hastemplate(mstr1) then begin
+   }
+    mac1:= getmacros;
+    try
+     mstr2:= codetemplates.gettemplate(mstr1,mac1);
+     if mstr2 <> '' then begin
+      with edit do begin
+       editor.begingroup;
+       gc1.col:= gc2.col+length(mstr1);
+       deletetext(gc2,gc1);
+       inserttext(mstr2);
+      end;
+      edit.editor.endgroup;
+     end;
+    finally
+     mac1.free;
+    end;
+//   end;
+  end;
+ end;
 end;
 
 end.

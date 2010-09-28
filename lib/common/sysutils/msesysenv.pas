@@ -204,7 +204,8 @@ type
    procedure add(const avalue: macroinfoarty); overload;
    procedure add(const names,values: array of msestring); overload;
    procedure resetexpandlevel;
-   function getvalue(const aname: msestring; var aexpandlevel: integer): msestring;
+   function getvalue(const aname: msestring;
+                                      var aexpandlevel: integer): msestring;
    procedure expandmacros(var avalue: msestring); overload;
    procedure expandmacros(var avalues: msestringarty); overload;
    function asarray: macroinfoarty; overload;

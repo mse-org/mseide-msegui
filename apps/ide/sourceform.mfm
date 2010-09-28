@@ -298,7 +298,7 @@ object sourcefo: tsourcefo
   end
   object formpopup: tpopupmenu
     onupdate = popupmonupdate
-    menu.submenu.count = 29
+    menu.submenu.count = 30
     menu.submenu.items = <    
       item
         action = actionsmo.selecteditpage
@@ -484,6 +484,12 @@ object sourcefo: tsourcefo
         action = completeclassact
         caption = 'Complete Class at Cursor'
         state = [as_localcaption]
+      end    
+      item
+        action = actionsmo.instemplate
+        caption = 'Insert Template'
+        name = 'instempl'
+        state = [as_localcaption]
       end>
     left = 176
     top = 40
@@ -495,7 +501,7 @@ object sourcefo: tsourcefo
     top = 208
     sc = (
       1
-      24643
+      24641
     )
   end
 end

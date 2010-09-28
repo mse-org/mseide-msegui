@@ -21,7 +21,7 @@ unit actionsmodule;
 interface
 uses
  mseclasses,mseact,mseactions,msebitmap,msestrings,msegui,msedatamodules,
- mseglob,msestat;
+ mseglob,msestat,mseifiglob;
  
 type
  tactionsmo = class(tmsedatamodule)
@@ -108,6 +108,7 @@ type
    findbm9: taction;
    setbm9: taction;
    setbmnone: taction;
+   instemplate: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -167,6 +168,7 @@ type
    procedure onattachtarget(const sender: TObject);
    procedure setbmexec(const sender: TObject);
    procedure findbmexec(const sender: TObject);
+   procedure instemplateactonexecute(const sender: TObject);
  end;
 
 var
@@ -387,6 +389,12 @@ procedure tactionsmo.togglebkptenableactonexecute(const sender: TObject);
 begin
  sourcefo.activepage.togglebreakpointenabled;
 end;
+
+procedure tactionsmo.instemplateactonexecute(const sender: TObject);
+begin
+ sourcefo.activepage.inserttemplate;
+end;
+
 
 //make
 

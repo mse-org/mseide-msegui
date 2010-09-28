@@ -283,6 +283,7 @@ type
   protected
    ftransientfor: twidget;
    fmouseinfopo: pmouseeventinfoty;
+   procedure doidle(var again: boolean);
    procedure readstate(reader: treader); override;
    procedure loaded; override;
    procedure setexecitem(const avalue: tmenuitem);
@@ -373,7 +374,6 @@ type
    procedure setpopupitemfacetemplateactive(const avalue: tfacecomp);
   protected
    class function classskininfo: skininfoty; override;
-   procedure doidle(var again: boolean);
    procedure menuchanged(const sender: tmenuitem);
    function gettemplatefont(const sender: tmenuitem): tmenufont; override;
    function gettemplatefontactive(
@@ -467,6 +467,7 @@ begin
  inherited;
 // include(fmsecomponentstate,cs_hasskin);
  fmenu:= tmenuitem.create(nil,self);
+ application.registeronidle({$ifdef FPC}@{$endif}doidle);
 end;
 
 constructor tcustommenu.createtransient(const atransientfor: twidget;
@@ -481,6 +482,7 @@ end;
 
 destructor tcustommenu.destroy;
 begin
+ application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
  fmenu.Free;
  inherited;
 end;
@@ -493,6 +495,11 @@ end;
 procedure tcustommenu.setmenu(const Value: tmenuitem);
 begin
  fmenu.assign(Value);
+end;
+
+procedure tcustommenu.doidle(var again: boolean);
+begin
+ doupdate;
 end;
 
 procedure tcustommenu.readstate(reader: treader);
@@ -1865,13 +1872,11 @@ end;
 constructor tcustommainmenu.create(aowner: tcomponent);
 begin
  inherited;
- application.registeronidle({$ifdef FPC}@{$endif}doidle);
  fmenu.onchange:= {$ifdef FPC}@{$endif}menuchanged;
 end;
 
 destructor tcustommainmenu.destroy;
 begin
- application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
  inherited;
 end;
 
@@ -1921,11 +1926,6 @@ class function tcustommainmenu.classskininfo: skininfoty;
 begin
  result:= inherited classskininfo;
  result.objectkind:= sok_mainmenu;
-end;
-
-procedure tcustommainmenu.doidle(var again: boolean);
-begin
- doupdate;
 end;
 
 procedure tcustommainmenu.menuchanged(const sender: tmenuitem);
