@@ -29,8 +29,8 @@ const
  defaultterminaloptions = [{teo_tty}];
  defaultoptionsprocess = [pro_output,pro_erroroutput,pro_input,pro_tty];
 type 
- terminalstatety = ({ts_running,}ts_listening);
- terminalstatesty = set of terminalstatety;
+// terminalstatety = ({ts_running,}ts_listening);
+// terminalstatesty = set of terminalstatety;
  
  tterminal = class(tcustomtextedit)
   private
@@ -54,7 +54,7 @@ type
    function getoptionsprocess: processoptionsty;
    procedure setoptionsprocess(const avalue: processoptionsty);
   protected
-   fstate: terminalstatesty;
+//   ftermstate: terminalstatesty;
    fprocess: tmseprocess;
 
    procedure doinputavailable(const sender: tpipereader);
