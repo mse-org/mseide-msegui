@@ -643,6 +643,8 @@ type
    function isreadonly: boolean; //col readonly or row readonly
    procedure updatecellzone(const row: integer; const pos: pointty;
                                        var result: cellzonety); virtual;
+   procedure autocellheightchanged(const aindex: integer);
+   procedure autocellwidthchanged(const aindex: integer);
    property datalist: tdatalist read fdata write setdata;
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
@@ -6023,6 +6025,16 @@ end;
 procedure tdatacol.setdata(const avalue: tdatalist);
 begin
  fdata.assign(avalue);
+end;
+
+procedure tdatacol.autocellheightchanged(const aindex: integer);
+begin
+ checkdirtyautorowheight(aindex); 
+end;
+
+procedure tdatacol.autocellwidthchanged(const aindex: integer);
+begin
+ //dummy
 end;
 
 { tdrawcol }

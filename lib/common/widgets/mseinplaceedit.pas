@@ -50,6 +50,7 @@ type
    fowner: twidget;
    fintf: iedit;
    finfo: drawtextinfoty;
+   ftextrectbefore: rectty;
    ffont: tfont;
    ffontstyle: fontstylesty;
    ffontcolor: colorty;
@@ -101,6 +102,7 @@ type
    procedure setformat(const avalue: formatinfoarty);
    function nofullinvalidateneeded: boolean;
    procedure setfont(const avalue: tfont);
+   procedure checktextrect;
    function gettextrect: rectty;
    function getfontcanvas: tcanvas;
 
@@ -844,8 +846,9 @@ end;
 
 function tinplaceedit.textclipped: boolean;
 begin
- msedrawtext.textrect(getfontcanvas,finfo);
- result:= not rectinrect(finfo.res,fowner.innerclientrect);
+// msedrawtext.textrect(getfontcanvas,finfo);
+// result:= not rectinrect(finfo.res,fowner.innerclientrect);
+ result:= not rectinrect(gettextrect,fowner.innerclientrect);
 end;
 
 function tinplaceedit.lasttextclipped: boolean;
@@ -872,6 +875,7 @@ function tinplaceedit.textindextomousepos(const aindex: integer): pointty;
 var
  mstr1: msestring;
 begin
+ ftextrectbefore:= finfo.res;
  if fpasswordchar <> #0 then begin
   mstr1:= finfo.text.text;
   finfo.text.text:= stringfromchar(fpasswordchar,length(mstr1));
@@ -881,6 +885,7 @@ begin
  else begin
   result:= textindextopos(getfontcanvas,finfo,aindex);
  end;
+ checktextrect;
 end;
 
 procedure tinplaceedit.deleteselection;
@@ -1667,6 +1672,7 @@ procedure tinplaceedit.dopaint(const canvas: tcanvas);
 var
  str1: msestring;
 begin
+ ftextrectbefore:= finfo.res;
  if length(finfo.text.text) > 0 then begin
   if fpasswordchar <> #0 then begin
    str1:= finfo.text.text;
@@ -1689,13 +1695,29 @@ begin
    finfo.text.text:= str1;
   end;
  end;
+ checktextrect;
+end;
+
+procedure tinplaceedit.checktextrect;
+var
+ info: editnotificationinfoty;
+begin
+ include(fstate,ies_textrectvalid);
+ if (ftextrectbefore.cx <> finfo.res.cx) or 
+                        (ftextrectbefore.cy <> finfo.res.cy) then begin
+  info:= initactioninfo(ea_textsizechanged);
+  info.sizebefore:= ftextrectbefore.size;
+  info.newsize:= finfo.res.size;
+  checkaction(info);
+ end;
 end;
 
 function tinplaceedit.gettextrect: rectty;
 begin
  if not (ies_textrectvalid in fstate) then begin
+  ftextrectbefore:= finfo.res;
   msedrawtext.textrect(getfontcanvas,finfo);
-  include(fstate,ies_textrectvalid);
+  checktextrect;
  end;
  result:= finfo.res;
 end;

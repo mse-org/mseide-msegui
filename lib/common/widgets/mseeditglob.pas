@@ -59,8 +59,9 @@ type
  optionsedit1ty = set of optionedit1ty;
 
  editactionty = (ea_none,ea_beforechange,ea_textchanged,ea_textedited,
-                 ea_textentered,ea_undo,
-                 ea_indexmoved,{ea_selectindexmoved,}ea_delchar,
+                 ea_textentered,ea_indexmoved,{ea_selectindexmoved,}
+                 ea_textsizechanged,
+                 ea_delchar,ea_undo,
                  {ea_selectstart,ea_selectend,}ea_clearselection,
                  ea_deleteselection,ea_copyselection,ea_pasteselection,
                  ea_selectall,ea_exit,ea_caretupdating);
@@ -77,6 +78,10 @@ type
    ea_caretupdating:(
     caretrect: rectty;
     showrect: rectty;
+   );
+   ea_textsizechanged:(
+    sizebefore: sizety;
+    newsize: sizety;
    )
  end;
 

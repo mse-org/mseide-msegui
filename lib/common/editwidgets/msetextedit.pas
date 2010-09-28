@@ -46,7 +46,7 @@ type
  textmouseeventty = procedure(const sender: tobject;
           var info: textmouseeventinfoty) of object;
 
- texteditstatety = (tes_selectinvalid);
+ texteditstatety = (tes_selectinvalid,tes_cellentering);
  texteditstatesty = set of texteditstatety;
 
  tgridrichstringdatalist = class(trichstringdatalist)
@@ -57,13 +57,13 @@ type
   public
    constructor create(owner: twidgetcol); reintroduce;
  end;
-  
+
  tcustomtextedit = class(tcustomedit,igridwidget,istatfile)
   private
    fstatfile: tstatfile;
    fstatvarname: msestring;
    fselectstart,fselectend: gridcoordty;
-   fcolindex: integer;
+//   fcolindex: integer;
    fmodified: boolean;
    fonmodifiedchanged: booleanchangedeventty;
    fontextmouseevent: textmouseeventty;
@@ -71,7 +71,6 @@ type
    foneditnotification: editnotificationeventty;
    foncellevent: celleventty;
    fonfontchanged: notifyeventty;
-   fstate: texteditstatesty;
    fmarginlinecolor: colorty;
    fmarginlinepos: integer;
    ftabulators: ttabulators;
@@ -104,6 +103,7 @@ type
    function getcol: integer;
    procedure setcol(const avalue: integer);
   protected
+   fstate: texteditstatesty;
    fgridintf: iwidgetgrid;
    fupdating: integer;
    fnotificationchangelock: integer;
@@ -134,7 +134,7 @@ type
    procedure setupeditor; override;
    procedure dofontheightdelta(var delta: integer); override;
 
-   //igridwidget
+    //igridwidget
    procedure setfirstclick;
    function createdatalist(const sender: twidgetcol): tdatalist; virtual;
    function getdatatype: listdatatypety; virtual;
@@ -167,7 +167,7 @@ type
    function getifilink: tifilinkcomp;
    {$endif}
 
-   //istatfile
+    //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
    procedure statreading;
@@ -1373,8 +1373,20 @@ begin
     end;
     ea_indexmoved: begin
      fxpos:= feditor.caretpos.x;
-     fcolindex:= feditor.curindex;
+//     fcolindex:= feditor.curindex;
      updateindex(eas_shift in state);
+    end;
+    ea_textsizechanged: begin
+     if not (tes_cellentering in fstate) then begin
+      with fgridintf.getcol do begin
+       if info.sizebefore.cy <> info.newsize.cy then begin
+        autocellheightchanged(grid.row);
+       end;
+       if info.sizebefore.cx <> info.newsize.cx then begin
+        autocellwidthchanged(grid.row);
+       end;
+      end;
+     end;
     end;
     ea_delchar: begin
      if (fselectstart.col = fselectend.col) and (fselectstart.row = fselectend.row) then begin
@@ -1573,7 +1585,8 @@ var
  textinfo: textmouseeventinfoty;
  bo1: boolean;
  po1: pointty;
- int1: integer;
+ int1,int2: integer;
+ rect1: rectty;
 begin
  if ownedcol then begin
   with info do begin
@@ -1586,28 +1599,48 @@ begin
    end;
    case eventkind of
     cek_enter: begin
-     with fgridintf.getcol.grid do begin
-      if fselectstart.row >= rowcount then begin
-       fselectstart.row:= rowcount - 1;
-       fselectstart.col:= length(flines[fselectstart.row]);
-              //check for removed empty row
+     bo1:= tes_cellentering in fstate;
+     include(fstate,tes_cellentering);
+     try
+      with fgridintf.getcol.grid do begin
+       if fselectstart.row >= rowcount then begin
+        fselectstart.row:= rowcount - 1;
+        fselectstart.col:= length(flines[fselectstart.row]);
+               //check for removed empty row
+       end;
       end;
-     end; 
-     feditor.curindex:= fcolindex;
-     int1:= fcolindex;
-     feditor.moveindex(feditor.curindex,
-                  selectaction in [fca_focusinshift,fca_focusinrepeater],true{false});
-     fcolindex:= int1; //restore
-     if selectaction = fca_focusinrepeater then begin
-      setclientclick;
+      with tinplaceedit1(feditor) do begin
+       rect1:= textrect;
+       if cellbefore.row < newcell.row then begin
+        int1:= mousepostotextindex(makepoint(fxpos,rect1.x));
+       end
+       else begin
+        int1:= mousepostotextindex(makepoint(fxpos,rect1.y+rect1.cy-1));
+       end;
+       int2:= fxpos;
+       moveindex(int1,
+             selectaction in [fca_focusinshift,fca_focusinrepeater],true{false});
+       fxpos:= int2; //restore
+      end;
+      if selectaction = fca_focusinrepeater then begin
+       setclientclick;
+      end;
+     finally
+      if not bo1 then begin
+       exclude(fstate,tes_cellentering);
+      end;
      end;
     end;
     cek_mousemove,cek_mousepark,cek_buttonpress,cek_buttonrelease: begin
      if cell.row >= 0 then begin
       mousepostotextpos1(cell.row,mouseeventinfopo^.pos,textinfo.pos,bo1);
-      if (eventkind = cek_mousemove) and (cell.row <> fgridintf.getcol.grid.row) and
-       (info.mouseeventinfopo^.shiftstate = [ss_left]) and grid.cellclicked then begin
-       fcolindex:= textinfo.pos.col;
+      if (eventkind = cek_mousemove) and 
+                 (cell.row <> fgridintf.getcol.grid.row) and
+       (info.mouseeventinfopo^.shiftstate = [ss_left]) and 
+                                                grid.cellclicked then begin
+       fxpos:= textpostomousepos(textinfo.pos).x;
+//       fcolindex:= textinfo.pos.col;
+       
        fgridintf.getcol.grid.focuscell(cell,fca_focusinshift);       
        setclientclick;
        exit;
@@ -1662,10 +1695,8 @@ begin
  tinplaceedit1(feditor).frow:= value.row;
  po1.row:= value.row;
  po1.col:= fgridintf.getcol.colindex;
-// if not select then begin
-//  clearselection;
-// end;
- fcolindex:= feditor.curindex;
+// fcolindex:= feditor.curindex;
+ fxpos:= feditor.caretpos.x;
  if select then begin
   fgridintf.getcol.grid.focuscell(po1,fca_focusinshift);
  end
@@ -1673,9 +1704,6 @@ begin
   fgridintf.getcol.grid.focuscell(po1,fca_focusin);
  end;
  feditor.moveindex(value.col,select,donotify);
-// fgridintf.setrow(value.row);
-// feditor.moveindex(value.col,false,false);
-// fcolindex:= feditor.curindex;
  updateindex(select);
 end;
 
