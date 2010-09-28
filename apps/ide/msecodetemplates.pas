@@ -39,6 +39,12 @@ Minimal template file:
 name=test
 []
 "
+Parameters can be entered in editor:
+"
+test,valueforparam1,valueforparam2
+"
+If there are more params defined than supplied a dialog window will be showed
+for param entry.
 *)
 
 interface
