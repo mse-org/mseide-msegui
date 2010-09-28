@@ -1505,7 +1505,7 @@ begin
        editor.begingroup;
        gc1.col:= gc2.col+length(mstr1);
        deletetext(gc2,gc1);
-       inserttext(mstr2);
+       inserttext(mstr2,true);
       end;
       edit.editor.endgroup;
      end;
