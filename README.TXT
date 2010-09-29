@@ -87,6 +87,41 @@ Predefined projectmacros:
 PROJECTNAME, PROJECTDIR, MAINFILE, TARGFILE, they can be overridden by 
 'Project'-'Options'-'Macros'.
 
+MSEide code templates
+*********************
+Extension for template files is *.mct
+Example of a template file:
+"
+[header]
+name=thename
+comment=Comment abcdefg HIKLMNO
+params=3
+ param1
+ param2
+ param3
+noselect=1
+cursorcol=12
+cursorrow=1
+[]
+The Template Text with macros ${param1}
+more text
+${param2} ${param3} more params
+"
+If noselect=0 or not defined the templateblock will be selected in editor.
+If noselect=1 the cursor will be placed at the offset by cursorcol, cursorrow
+Minimal template file:
+"
+[header]
+name=thename
+[]
+"
+Parameters can be entered in editor:
+"
+thename,valueforparam1,valueforparam2
+"
+A dialog window will be displayed if there are more params defined than supplied
+for param entry.
+
 Linux x84-64
 ************
 The 64bit version is experimental and not well tested because nobody

@@ -22,28 +22,33 @@ Extension for template files is *.mct
 Example of a template file:
 "
 [header]
-name=test
+name=thename
 comment=Comment abcdefg HIKLMNO
 params=3
  param1
  param2
  param3
+noselect=1
+cursorcol=12
+cursorrow=1
 []
 The Template Text with macros ${param1}
 more text
 ${param2} ${param3} more params
 "
+If noselect=0 or not defined the templateblock will be selected in editor.
+If noselect=1 the cursor will be placed at the offset by cursorcol, cursorrow
 Minimal template file:
 "
 [header]
-name=test
+name=thename
 []
 "
 Parameters can be entered in editor:
 "
-test,valueforparam1,valueforparam2
+thename,valueforparam1,valueforparam2
 "
-If there are more params defined than supplied a dialog window will be showed
+A dialog window will be displayed if there are more params defined than supplied
 for param entry.
 *)
 
@@ -56,6 +61,9 @@ type
   name: msestring;  
   path: filenamety;
   comment: msestring;
+  noselect: boolean;
+  cursorcol: integer;
+  cursorrow: integer;
   params: msestringarty;
   template: msestring;
  end;
@@ -151,6 +159,9 @@ begin
    if name <> '' then begin
     path:= afilename;
     comment:= readmsestring('comment','');
+    noselect:= readboolean('noselect',false);
+    cursorcol:= readinteger('cursorcol',0,0,1000);
+    cursorrow:= readinteger('cursorrow',0,0,1000000);
     params:= readarray('params',msestringarty(nil));
     template:= streamtext;
     result:= true;

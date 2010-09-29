@@ -1502,11 +1502,21 @@ begin
     try
      po2:= codetemplates.gettemplate(mstr1,mstr2,mac1);
      if po2 <> nil then begin
-      with edit do begin
+      with edit,po2^ do begin
        editor.begingroup;
        gc1.col:= gc2.col+length(mstr1);
        deletetext(gc2,gc1);
-       inserttext(gc2,mstr2,true);
+       inserttext(gc2,mstr2,not noselect);
+       if noselect then begin
+        if cursorrow = 0 then begin
+         gc2.col:= gc2.col + cursorcol;
+        end
+        else begin
+         gc2.col:= cursorcol;
+        end;
+        gc2.row:= gc2.row + cursorrow;
+        editpos:= gc2;
+       end;
       end;
       edit.editor.endgroup;
      end;
