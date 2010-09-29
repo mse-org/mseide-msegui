@@ -94,6 +94,7 @@ type
    procedure newprojectexe(const sender: TObject);
    procedure mainmenuupdate(const sender: tcustommenu);
    procedure aboutexe(const sender: TObject);
+   procedure exitexe(const sender: TObject);
   private
    datastream: ttextdatastream;
    alang: integer;
@@ -1082,6 +1083,11 @@ procedure tmainfo.aboutexe(const sender: TObject);
 begin
  showmessage('MSEgui version: '+mseguiversiontext+lineend+
          'MSEi18n version: ' + mseguiversiontext,'About MSEi18n');
+end;
+
+procedure tmainfo.exitexe(const sender: TObject);
+begin
+ close;
 end;
 
 end.

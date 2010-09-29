@@ -19,10 +19,11 @@ uses
 
 type
  menuoptionty = (mo_insertfirst,mo_singleregion,mo_shortcutright,mo_commonwidth,
-                 mo_activate,{mo_noanim,}mo_mainarrow);
+                 mo_activate,{mo_noanim,}mo_mainarrow,mo_updateonidle);
  menuoptionsty = set of menuoptionty;
 const
  defaultmenuoptions = [mo_shortcutright];
+ defaultmainmenuoptions = defaultmenuoptions + [mo_updateonidle];
  defaultmenuactoptions = [mao_shortcutcaption];
  
 type
@@ -319,7 +320,8 @@ type
    property itemfacetemplateactive: tfacecomp read ftemplate.itemfaceactive 
                             write setitemfacetemplateactive;
    property template: menutemplatety read ftemplate;
-   property options: menuoptionsty read foptions write setoptions default defaultmenuoptions;
+   property options: menuoptionsty read foptions write setoptions 
+                                                default defaultmenuoptions;
    property onupdate: menueventty read fonupdate write fonupdate;
  end;
 
@@ -383,6 +385,7 @@ type
    destructor destroy; override;
    property popuptemplate: menutemplatety read fpopuptemplate;
   published
+   property options default defaultmainmenuoptions;
    property popupframetemplate: tframecomp read fpopuptemplate.frame
                       write setpopupframetemplate;
    property popupfacetemplate: tfacecomp read fpopuptemplate.face
@@ -467,7 +470,6 @@ begin
  inherited;
 // include(fmsecomponentstate,cs_hasskin);
  fmenu:= tmenuitem.create(nil,self);
- application.registeronidle({$ifdef FPC}@{$endif}doidle);
 end;
 
 constructor tcustommenu.createtransient(const atransientfor: twidget;
@@ -482,7 +484,9 @@ end;
 
 destructor tcustommenu.destroy;
 begin
- application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
+ if mo_updateonidle in foptions then begin
+  application.unregisteronidle({$ifdef FPC}@{$endif}doidle); 
+ end;
  fmenu.Free;
  inherited;
 end;
@@ -684,15 +688,23 @@ end;
 
 procedure tcustommenu.setoptions(const avalue: menuoptionsty);
 var
- optionsbefore: menuoptionsty;
+ optionsbefore,delta: menuoptionsty;
 begin
  if avalue <> foptions then begin
   optionsbefore:= foptions;
   foptions:= avalue;
+  delta:= menuoptionsty(longword(optionsbefore) xor longword(foptions));
   if not (csreading in componentstate) and 
-       ((mo_shortcutright in optionsbefore) xor 
-                        (mo_shortcutright in foptions)) then begin
+       (mo_shortcutright in delta) then begin
    fmenu.updatecaption;
+  end;
+  if mo_updateonidle in delta then begin
+   if mo_updateonidle in foptions then begin
+    application.registeronidle({$ifdef FPC}@{$endif}doidle); 
+   end
+   else begin
+    application.unregisteronidle({$ifdef FPC}@{$endif}doidle); 
+   end;
   end;
   sendchangeevent;
  end;
@@ -1872,6 +1884,8 @@ end;
 constructor tcustommainmenu.create(aowner: tcomponent);
 begin
  inherited;
+ include(foptions,mo_updateonidle);
+ application.registeronidle({$ifdef FPC}@{$endif}doidle); 
  fmenu.onchange:= {$ifdef FPC}@{$endif}menuchanged;
 end;
 
