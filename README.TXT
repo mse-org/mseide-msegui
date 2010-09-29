@@ -108,7 +108,7 @@ more text
 ${param2} ${param3} more params
 "
 If noselect=0 or not defined the templateblock will be selected in editor.
-If noselect=1 the cursor will be placed at the offset by cursorcol, cursorrow
+If noselect=1 the cursor will be placed at the offset by cursorcol, cursorrow.
 Minimal template file:
 "
 [header]
@@ -120,7 +120,7 @@ Parameters can be entered in editor:
 thename,valueforparam1,valueforparam2
 "
 A dialog window will be displayed if there are more params defined than supplied
-for param entry.
+for param entry or if the template name can not be found.
 
 Linux x84-64
 ************
