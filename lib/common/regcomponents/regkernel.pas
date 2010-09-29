@@ -378,11 +378,14 @@ begin
   result:= '<--->';
  end
  else begin
+  result:= '<'+getcomponentpropname(item1.action)+'>';
+  {
   result:= '<';
   if item1.action.owner <> module then begin
    result:= result+module.name+'.';
   end;
   result:= result+designer.getcomponentdispname(item1.action)+'>';
+  }
  end;
  result:= result + '<' + item1.dispname + '>';
 end;
