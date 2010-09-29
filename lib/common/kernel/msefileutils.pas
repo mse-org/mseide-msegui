@@ -136,23 +136,27 @@ function searchfile(const afilename: filenamety;
             const adirnames: array of filenamety): filenamety; overload;
            //returns directory of last occurence in dirs, '' if none
            //afilename can be path and can have wildchars ('?','*'),
-           //adirnames can have wildchars ('?','*','**')
+           //adirnames can have wildchars ('?','*','**','***')
+              //'?'   -> any char
+              //'*'   -> any chars
+              //'**'  -> 1..x directory levels
+              //'***' -> 0..x directory levels
 function searchfile(const afilename: filenamety;
             const adirname: filenamety): filenamety; overload;
            //returns directory, '' if none
            //afilename must be simple filename and can have wildchars ('?','*'),
-           //adirname can have wildchars ('?','*','**')
+           //adirname can have wildchars ('?','*','**','***')
 
 function searchfiles(const afilename: filenamety;
             const adirnames: array of filenamety): filenamearty; overload;
            //returns filepats
            //afilename can be path and can have wildchars ('?','*'),
-           //adirnames can have wildchars ('?','*','**')
+           //adirnames can have wildchars ('?','*','**','***')
 function searchfiles(const afilename: filenamety;
             const adirname: filenamety): filenamearty; overload;
            //returns filepaths
            //afilename must be simple filename and can have wildchars ('?','*'),
-           //adirname can have wildchars ('?','*','**')
+           //adirname can have wildchars ('?','*','**','***')
             
 function dirhasentries(const adirname: filenamety;
                          const ainclude: fileattributesty = [fa_all];
@@ -556,7 +560,8 @@ begin
  end;
 end;
 
-function searchfile(const filename: filenamety; dir: boolean = false): filenamety; overload;
+function searchfile(const filename: filenamety;
+                            dir: boolean = false): filenamety; overload;
            //returns rootpath if file exists, '' otherwise
 begin
  result:= filepath(filename);
@@ -683,6 +688,14 @@ begin
      else begin
       dirname:= '/';
      end;
+     if ar1[int1] = '***' then begin
+      deleteitem(ar1,int1);
+      result:= searchfile(afilename,mergerootpath(ar1));
+      if result <> '' then begin
+       break;
+      end;
+      insertitem(ar1,int1,'**');
+     end;
      mask:= copy(ar1,int1,1);
      if mask[0] = '**' then begin
       recursive:= true;
@@ -790,6 +803,11 @@ begin
      end
      else begin
       dirname:= '/';
+     end;
+     if ar1[int1] = '***' then begin
+      deleteitem(ar1,int1);
+      stackarray(searchfiles(afilename,mergerootpath(ar1)),result);
+      insertitem(ar1,int1,'**');
      end;
      mask:= copy(ar1,int1,1);
      if mask[0] = '**' then begin
