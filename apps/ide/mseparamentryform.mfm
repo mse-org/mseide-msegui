@@ -11,6 +11,7 @@ object mseparamentryfo: tmseparamentryfo
     260
   )
   options = [fo_screencentered, fo_cancelonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  statfile = tstatfile1
   moduleclassname = 'tmseform'
   object twidgetgrid1: twidgetgrid
     bounds_x = 0
@@ -33,21 +34,22 @@ object mseparamentryfo: tmseparamentryfo
           end>
       end>
     datacols.count = 2
-    datacols.options = [co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+    datacols.options = [co_proportional, co_savestate, co_mousescrollrow]
     datacols.items = <    
       item
         width = 89
-        options = [co_readonly, co_nofocus, co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
         widgetname = 'macroname'
         dataclass = tgridmsestringdatalist
       end    
       item
         width = 276
-        options = [co_fill, co_savevalue, co_savestate, co_mousescrollrow]
+        options = [co_fill, co_savestate, co_mousescrollrow]
         widgetname = 'macrovalue'
         dataclass = tgridmsestringdatalist
       end>
     datarowheight = 16
+    statfile = tstatfile1
     reffontheight = 14
     object macroname: tstringedit
       taborder = 1
@@ -56,7 +58,7 @@ object mseparamentryfo: tmseparamentryfo
       bounds_y = 0
       bounds_cx = 89
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
     end
     object macrovalue: tmemodialogedit
@@ -72,6 +74,7 @@ object mseparamentryfo: tmseparamentryfo
       bounds_y = 0
       bounds_cx = 276
       bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
     end
   end
@@ -119,5 +122,11 @@ object mseparamentryfo: tmseparamentryfo
       textflags = [tf_ycentered, tf_wordbreak]
       reffontheight = 14
     end
+  end
+  object tstatfile1: tstatfile
+    filename = 'templparam.sta'
+    options = [sfo_memory, sfo_transaction, sfo_activatorread, sfo_activatorwrite]
+    left = 40
+    top = 80
   end
 end

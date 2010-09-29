@@ -618,6 +618,9 @@ const
  printerstatname =           'printer.sta';
  imageselectorstatname =     'imageselector.sta';
  fadeeditorstatname =        'fadeeditor.sta';
+ codetemplateselectstatname ='templselect.sta';
+ codetemplateparamstatname = 'templparam.sta';
+ 
  siginfocount = 30;
  siginfos: array[0..siginfocount-1] of signalinfoty = (
   (num:  1; flags: [sfl_stop]; name: 'SIGHUP'; comment: 'Hangup'),
@@ -1075,6 +1078,8 @@ begin
   deletememorystatstream(colordialogstatname);
   deletememorystatstream(bmpfiledialogstatname);
   deletememorystatstream(fadeeditorstatname);
+  deletememorystatstream(codetemplateselectstatname);
+  deletememorystatstream(codetemplateparamstatname);
   {$ifndef mse_no_db}{$ifdef FPC}
   deletememorystatstream(dbfieldeditorstatname);
   {$endif}{$endif}
@@ -1357,6 +1362,8 @@ begin
   updatememorystatstream('texteditor',texteditorstatname);
   updatememorystatstream('colordialog',colordialogstatname);
   updatememorystatstream('bmpfiledialog',bmpfiledialogstatname);
+  updatememorystatstream('codetemplateselect',codetemplateselectstatname);
+  updatememorystatstream('codetemplateparam',codetemplateparamstatname);
 {$ifndef mse_no_db}{$ifdef FPC}
   updatememorystatstream('dbfieldeditor',dbfieldeditorstatname);
 {$endif}{$endif}

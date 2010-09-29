@@ -21,7 +21,7 @@ uses
  mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msesimplewidgets,
  msewidgets,msedataedits,mseedit,msegrids,msestrings,msetypes,msewidgetgrid,
- msememodialog,msesplitter;
+ msememodialog,msesplitter,msestatfile;
 type
  tmseparamentryfo = class(tmseform)
    twidgetgrid1: twidgetgrid;
@@ -31,6 +31,7 @@ type
    tbutton2: tbutton;
    tbutton1: tbutton;
    comment: tlabel;
+   tstatfile1: tstatfile;
  end;
 var
  mseparamentryfo: tmseparamentryfo;

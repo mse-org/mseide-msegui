@@ -11,6 +11,7 @@ object msetemplateselectfo: tmsetemplateselectfo
     277
   )
   options = [fo_screencentered, fo_cancelonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  statfile = tstatfile1
   caption = 'Select Code Template'
   moduleclassname = 'tmseform'
   object tbutton1: tbutton
@@ -76,13 +77,13 @@ object msetemplateselectfo: tmsetemplateselectfo
       end>
     datacols.count = 6
     datacols.colorfocused = -1879048185
-    datacols.options = [co_nofocus, co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+    datacols.options = [co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
     datacols.options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
     datacols.items = <    
       item
         colorfocused = -1879048185
         width = 59
-        options = [co_readonly, co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        options = [co_readonly, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'templatename'
         dataclass = tgridmsestringdatalist
@@ -90,40 +91,41 @@ object msetemplateselectfo: tmsetemplateselectfo
       item
         colorfocused = -1879048185
         width = 277
-        options = [co_readonly, co_nofocus, co_fill, co_savevalue, co_savestate, co_mousescrollrow]
+        options = [co_readonly, co_nofocus, co_fill, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'comment'
         dataclass = tgridmsestringdatalist
       end    
       item
         colorfocused = -1879048185
-        options = [co_readonly, co_nofocus, co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par1'
         dataclass = tgridmsestringdatalist
       end    
       item
         colorfocused = -1879048185
-        options = [co_readonly, co_nofocus, co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par2'
         dataclass = tgridmsestringdatalist
       end    
       item
         colorfocused = -1879048185
-        options = [co_readonly, co_nofocus, co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par3'
         dataclass = tgridmsestringdatalist
       end    
       item
         colorfocused = -1879048185
-        options = [co_readonly, co_nofocus, co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par4'
         dataclass = tgridmsestringdatalist
       end>
     datarowheight = 16
+    statfile = tstatfile1
     oncellevent = celle
     reffontheight = 14
     object templatename: tstringedit
@@ -135,7 +137,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       bounds_y = 0
       bounds_cx = 59
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_locate, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_locate, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
     end
     object comment: tstringedit
@@ -147,7 +149,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       bounds_y = 0
       bounds_cx = 277
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
     end
     object par1: tstringedit
@@ -160,7 +162,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
     end
     object par2: tstringedit
@@ -173,7 +175,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
     end
     object par3: tstringedit
@@ -186,7 +188,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
     end
     object par4: tstringedit
@@ -199,7 +201,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
     end
   end
@@ -214,5 +216,11 @@ object msetemplateselectfo: tmsetemplateselectfo
     textflags = [tf_ycentered, tf_ellipseleft]
     options = [dwo_hintclippedtext]
     reffontheight = 14
+  end
+  object tstatfile1: tstatfile
+    filename = 'templselect.sta'
+    options = [sfo_memory, sfo_transaction, sfo_activatorread, sfo_activatorwrite]
+    left = 40
+    top = 80
   end
 end

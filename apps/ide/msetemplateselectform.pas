@@ -21,7 +21,7 @@ uses
  mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msesimplewidgets,
  msewidgets,msedataedits,mseedit,msegrids,msestrings,msetypes,msewidgetgrid,
- msedispwidgets,msecodetemplates;
+ msedispwidgets,msecodetemplates,msestatfile;
 type
  tmsetemplateselectfo = class(tmseform)
    tbutton1: tbutton;
@@ -34,6 +34,7 @@ type
    par3: tstringedit;
    par4: tstringedit;
    filename: tstringdisp;
+   tstatfile1: tstatfile;
    procedure celle(const sender: TObject; var info: celleventinfoty);
   public
    finfos: templateinfoarty;
