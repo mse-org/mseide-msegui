@@ -1488,42 +1488,30 @@ begin
  gc1:= edit.editpos;
  if gc1.row >= 0 then begin
   mstr1:= edit.wordatpos(gc1,gc2,'',[],true);
-  if mstr1 <> '' then begin
-  {
-   mstr1:= edit.text;
-   po1:= pmsechar(mstr1)+gc2.col;
-   while (po1^ <> ' ') and (po1 <> #0) do begin
-    inc(po1);
-   end;
-   mstr1:= copy(mstr1,gc2.col+1,(po1-pmsechar(mstr1))-gc2.col);
-   if codetemplates.hastemplate(mstr1) then begin
-   }
-    mac1:= getmacros;
-    try
-     po2:= codetemplates.gettemplate(mstr1,mstr2,mac1);
-     if po2 <> nil then begin
-      with edit,po2^ do begin
-       editor.begingroup;
-       gc1.col:= gc2.col+length(mstr1);
-       deletetext(gc2,gc1);
-       inserttext(gc2,mstr2,not noselect);
-       if noselect then begin
-        if cursorrow = 0 then begin
-         gc2.col:= gc2.col + cursorcol;
-        end
-        else begin
-         gc2.col:= cursorcol;
-        end;
-        gc2.row:= gc2.row + cursorrow;
-        editpos:= gc2;
-       end;
+  mac1:= getmacros;
+  try
+   po2:= codetemplates.gettemplate(mstr1,mstr2,mac1);
+   if po2 <> nil then begin
+    with edit,po2^ do begin
+     editor.begingroup;
+     gc1.col:= gc2.col+length(mstr1);
+     deletetext(gc2,gc1);
+     inserttext(gc2,mstr2,not noselect);
+     if noselect then begin
+      if cursorrow = 0 then begin
+       gc2.col:= gc2.col + cursorcol;
+      end
+      else begin
+       gc2.col:= cursorcol;
       end;
-      edit.editor.endgroup;
+      gc2.row:= gc2.row + cursorrow;
+      editpos:= gc2;
      end;
-    finally
-     mac1.free;
     end;
-//   end;
+    edit.editor.endgroup;
+   end;
+  finally
+   mac1.free;
   end;
  end;
 end;

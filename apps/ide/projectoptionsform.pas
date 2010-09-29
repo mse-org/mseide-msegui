@@ -1026,6 +1026,7 @@ begin
    end;
    setcolormapvalue(cl_user + longword(int1),o.usercolors[int1]);
   end;
+  codetemplates.scan(texp.codetemplatedirs);
  end;
  li.free;
  mainfo.updatesigsettings;
@@ -1499,7 +1500,6 @@ begin
     macrogroup:= int1-1;
    end;
    expandprojectmacros;
-   codetemplates.scan(texp.codetemplatedirs);
   end;
   breakpointsfo.updatestat(statfiler);
   panelform.updatestat(statfiler);
