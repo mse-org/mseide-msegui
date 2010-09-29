@@ -335,7 +335,7 @@ end;
 function tsyntaxedit.wordatpos(const apos: gridcoordty; out start: gridcoordty;
               const delimchars: msestring; 
               const nodelimstrings: array of msestring;
-              const leftofcursor: boolean = false): msestring; overload;
+              const leftofcursor: boolean = false): msestring;
 begin
  start:= wordatpos(apos,result,delimchars,nodelimstrings,leftofcursor);
 end;

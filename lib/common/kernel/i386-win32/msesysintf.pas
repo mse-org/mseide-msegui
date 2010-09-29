@@ -1879,11 +1879,45 @@ const
 
   CSIDL_FLAG_CREATE             = $8000; { (force creation of requested folder if it doesn't exist yet)     }
 
+{$ifdef FPC}
+function DoCompareStringA(const s1, s2: unicodestring; Flags: DWORD): PtrInt;
+  var
+    a1, a2: AnsiString;
+  begin
+    a1:=s1;
+    a2:=s2;
+    SetLastError(0);
+    Result:=CompareStringA(LOCALE_USER_DEFAULT,Flags,pchar(a1),
+      length(a1),pchar(a2),length(a2))-2;
+  end;
+
+function DoCompareStringW(const s1, s2: unicodestring; Flags: DWORD): PtrInt;
+  begin
+    SetLastError(0);
+    Result:=CompareStringW(LOCALE_USER_DEFAULT,Flags,pwidechar(s1),
+      length(s1),pwidechar(s2),length(s2))-2;
+    if GetLastError=0 then
+      Exit;
+    if GetLastError=ERROR_CALL_NOT_IMPLEMENTED then  // Win9x case
+      Result:=DoCompareStringA(s1, s2, Flags);
+    if GetLastError<>0 then
+      RaiseLastOSError;
+  end;
+
+function Win32CompareunicodeString(const s1, s2 : unicodestring) : PtrInt;
+  begin
+    Result:=DoCompareStringW(s1, s2, 0);
+  end;
+
+function Win32CompareTextunicodeString(const s1, s2 : unicodestring) : PtrInt;
+  begin
+    Result:=DoCompareStringW(s1, s2, NORM_IGNORECASE);
+  end;
+{$endif}
 
 type
  SHGetFolderPathW = function (hwndowner: HWND; nFolder: integer; hToken: thandle;
                                  dwFlags: DWORD; pszPath: LPTSTR): HRESULT; stdcall;
-
 
 procedure doinit;
 var
@@ -1893,6 +1927,10 @@ var
  buffer: array[0..max_path] of widechar;
 
 begin
+{$ifdef FPC}
+ widestringmanager.CompareUnicodeStringProc:=@win32CompareUnicodeString;
+ widestringmanager.CompareTextUnicodeStringProc:=@win32CompareTextUnicodeString;
+{$endif}
  po1:= nil; //compiler warning
  info.dwOSVersionInfoSize:= sizeof(info);
  if getversionex(info) then begin

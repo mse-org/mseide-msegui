@@ -693,7 +693,9 @@ begin
  if avalue <> foptions then begin
   optionsbefore:= foptions;
   foptions:= avalue;
-  delta:= menuoptionsty(longword(optionsbefore) xor longword(foptions));
+  delta:= menuoptionsty(
+        {$ifdef FPC}longword{$else}byte{$endif}(optionsbefore) xor
+        {$ifdef FPC}longword{$else}byte{$endif}(foptions));
   if not (csreading in componentstate) and 
        (mo_shortcutright in delta) then begin
    fmenu.updatecaption;

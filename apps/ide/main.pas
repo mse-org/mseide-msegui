@@ -338,7 +338,7 @@ begin
  watchpointsfo.gdb:= gdb;
  stackfo.gdb:= gdb;
  threadsfo.gdb:= gdb;
- disassfo.gdb:= gdb;
+ disassfo.gdb:= gdb; 
  initprojectoptions;
  sourceupdate.init(designer);
 {$ifndef mse_with_pascalscript}

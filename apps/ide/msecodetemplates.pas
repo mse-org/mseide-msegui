@@ -54,7 +54,7 @@ for param entry or if the template name can not be found.
 
 interface
 uses
- msestrings,msehash,msesysenv;
+ msestrings,msehash,msesysenv,msetypes;
  
 type
  templateinfoty = record
@@ -180,7 +180,7 @@ begin
  if aname <> '' then begin
   result:= flist.find(aname,po1);
   if not result then begin
-   splitstringquoted(aname,ar1,'"',',');
+   splitstringquoted(aname,ar1,msechar('"'),msechar(','));
    result:= flist.find(ar1[0],po1);
   end;
  end;
@@ -202,7 +202,7 @@ begin
  result:= nil;
  templatetext:= '';
  if aname <> '' then begin
-  splitstringquoted(aname,ar1,'"',',');
+  splitstringquoted(aname,ar1,msechar('"'),msechar(','));
  end
  else begin
   setlength(ar1,1);
