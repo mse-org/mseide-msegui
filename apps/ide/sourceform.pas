@@ -1080,9 +1080,11 @@ begin
               (getpascalvarname(activepage.edit,
                 translateclientpoint(sender.mouseinfopo^.pos,
                         activepage,activepage.edit)) <> '');
+{
  sender.menu.itembyname('instempl').enabled:= (activepage <> nil) and 
       codetemplates.hastemplate(
                 activepage.edit.wordatpos(activepage.edit.editpos,gc1,'',[],true));
+}                
 end;
 
 procedure tsourcefo.completeclassexecute(const sender: TObject);

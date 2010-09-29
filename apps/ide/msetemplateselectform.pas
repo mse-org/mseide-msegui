@@ -14,27 +14,42 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 }
-unit mseparamentryform;
+unit msetemplateselectform;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
  mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msesimplewidgets,
  msewidgets,msedataedits,mseedit,msegrids,msestrings,msetypes,msewidgetgrid,
- msememodialog,msesplitter;
+ msedispwidgets,msecodetemplates;
 type
- tmseparamentryfo = class(tmseform)
-   twidgetgrid1: twidgetgrid;
-   macroname: tstringedit;
-   macrovalue: tmemodialogedit;
-   tsplitter1: tsplitter;
-   tbutton2: tbutton;
+ tmsetemplateselectfo = class(tmseform)
    tbutton1: tbutton;
-   comment: tlabel;
+   tbutton2: tbutton;
+   grid: twidgetgrid;
+   templatename: tstringedit;
+   comment: tstringedit;
+   par1: tstringedit;
+   par2: tstringedit;
+   par3: tstringedit;
+   par4: tstringedit;
+   filename: tstringdisp;
+   procedure celle(const sender: TObject; var info: celleventinfoty);
+  public
+   finfos: templateinfoarty;
  end;
 var
- mseparamentryfo: tmseparamentryfo;
+ msetemplateselectfo: tmsetemplateselectfo;
 implementation
 uses
- mseparamentryform_mfm;
+ msetemplateselectform_mfm;
+ 
+procedure tmsetemplateselectfo.celle(const sender: TObject;
+               var info: celleventinfoty);
+begin
+ if isrowenter(info) then begin
+  filename.value:= finfos[info.newcell.row].path;
+ end;
+end;
+
 end.

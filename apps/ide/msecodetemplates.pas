@@ -54,10 +54,12 @@ uses
 type
  templateinfoty = record
   name: msestring;  
+  path: filenamety;
   comment: msestring;
   params: msestringarty;
   template: msestring;
  end;
+ ptemplateinfoty = ^templateinfoty;
  templateinfoarty = array of templateinfoty;
  
  tcodetemplates = class(tobject)
@@ -67,7 +69,7 @@ type
    flist: tpointermsestringhashdatalist;
   protected
    function loadfile(const afilename: filenamety;
-                          const aindex: integer): boolean;
+                          var ainfo: templateinfoty): boolean;
                                      //true if ok
   public
    constructor create;
@@ -75,13 +77,14 @@ type
    procedure clear;
    procedure scan(const adirectories: filenamearty);
    function hastemplate(const aname: msestring): boolean;
-   function gettemplate(const aname: msestring;
-                              const amacrolist: tmacrolist = nil): msestring;
+   function gettemplate(const aname: msestring; out templatetext: msestring;                     
+                        const amacrolist: tmacrolist = nil): ptemplateinfoty;
  end;
  
 implementation
 uses
- msefileutils,msesys,msestat,msestream,mseparamentryform,mseglob;
+ msefileutils,msesys,msestat,msestream,mseparamentryform,mseglob,msedatalist,
+ msetemplateselectform,msedataedits;
  
 { tcodetemplates }
 
@@ -105,6 +108,11 @@ begin
  flist.clear;
 end;
 
+function compitems(const l,r): integer;
+begin
+ result:= msecomparetext(templateinfoty(l).name,templateinfoty(r).name);
+end;
+
 procedure tcodetemplates.scan(const adirectories: filenamearty);
 var
  int1,int2: integer;
@@ -117,28 +125,34 @@ begin
   if high(finfos) < int2 then begin
    setlength(finfos,int2*2+16);
   end;
-  if loadfile(ar1[int1],int2) then begin
+  if loadfile(ar1[int1],finfos[int2]) then begin
    inc(int2);
   end;
  end;
  setlength(finfos,int2);
+ sortarray(finfos,@compitems,sizeof(templateinfoty));
+ for int1:= 0 to high(finfos) do begin
+  flist.add(finfos[int1].name,pointer(ptruint(int1)));
+ end; 
 end;
 
 function tcodetemplates.loadfile(const afilename: filenamety;
-               const aindex: integer): boolean;
+               var ainfo: templateinfoty): boolean;
 var
  stat: tstatreader; 
 begin
  result:= false;
+ finalize(ainfo);
+ fillchar(ainfo,sizeof(ainfo),0);
  stat:= tstatreader.create(afilename,ce_utf8n);
- with stat,finfos[aindex] do begin
+ with stat,ainfo do begin
   if findsection('header') then begin
    name:= readmsestring('name','');
    if name <> '' then begin
+    path:= afilename;
     comment:= readmsestring('comment','');
     params:= readarray('params',msestringarty(nil));
     template:= streamtext;
-    flist.add(name,pointer(ptruint(aindex)));
     result:= true;
    end;
   end;
@@ -162,54 +176,90 @@ begin
 end;
 
 function tcodetemplates.gettemplate(const aname: msestring;
-                                const amacrolist: tmacrolist = nil): msestring;
+                        out templatetext: msestring;
+                        const amacrolist: tmacrolist = nil): ptemplateinfoty;
 var
  ar1: msestringarty;
- po1: pointer;
+ po1: ptruint;
  mac1: tmacrolist;
  fo: tmseparamentryfo;
- int1: integer;
+ se: tmsetemplateselectfo;
+ int1,int2: integer;
  bo1: boolean;
+ edit1: tstringedit;
 begin
- result:= '';
+ result:= nil;
+ templatetext:= '';
  if aname <> '' then begin
   splitstringquoted(aname,ar1,'"',',');
-  if flist.find(ar1[0],po1) then begin
-   bo1:= true;
-   mac1:= amacrolist;
-   if mac1 = nil then begin
-    mac1:= tmacrolist.create([mao_caseinsensitive,mao_curlybraceonly]);
+ end
+ else begin
+  setlength(ar1,1);
+ end;
+ if (ar1[0] = '') or not flist.find(ar1[0],pointer(po1)) then begin
+  se:= tmsetemplateselectfo.create(nil);
+  try
+   se.finfos:= finfos;
+   se.grid.beginupdate;
+   se.grid.rowcount:= length(finfos);
+   for int1:= 0 to high(finfos) do begin
+    with finfos[int1] do begin
+     se.templatename[int1]:= name;
+     se.comment[int1]:= comment;
+     for int2:= 0 to high(params) do begin
+      edit1:= tstringedit(se.grid.findtagwidget(int2+1,tstringedit));
+      if edit1 <> nil then begin
+       edit1[int1]:= params[int2];
+      end;
+     end;
+    end;
    end;
+   se.grid.endupdate;
+   se.show;
+   se.grid.setfocus;
+   se.templatename.editor.filtertext:= ar1[0];
+   if (se.show(true) <> mr_ok) or (se.grid.row < 0) then begin
+    exit;
+   end;
+   po1:= se.grid.row;
+  finally
+   se.free;
+  end;
+ end;
+ bo1:= true;
+ mac1:= amacrolist;
+ if mac1 = nil then begin
+  mac1:= tmacrolist.create([mao_caseinsensitive,mao_curlybraceonly]);
+ end;
+ try
+  with finfos[po1] do begin
+   fo:= tmseparamentryfo.create(nil);
    try
-    with finfos[ptruint(po1)] do begin
-     fo:= tmseparamentryfo.create(nil);
-     try
-      fo.caption:= 'Code Template "'+ar1[0]+'"';
-      fo.comment.caption:= comment;
-      fo.macroname.gridvalues:= params;
-      for int1:= 0 to high(params) do begin
-       if int1 >= high(ar1) then begin
-        break;
-       end;
-       fo.macrovalue[int1]:= ar1[int1+1];
-      end;
-      if high(ar1) <= high(params) then begin
-       bo1:= fo.show(true) = mr_ok;
-      end;
-      mac1.add(params,fo.macrovalue.gridvalues);         
-     finally
-      fo.free;
+    fo.caption:= 'Code Template "'+name+'"';
+    fo.comment.caption:= comment;
+    fo.macroname.gridvalues:= params;
+    for int1:= 0 to high(params) do begin
+     if int1 >= high(ar1) then begin
+      break;
      end;
-     if bo1 then begin
-      result:= template;
-      mac1.expandmacros(result);
-     end;
+     fo.macrovalue[int1]:= ar1[int1+1];
     end;
+    if high(ar1) <= high(params) then begin
+     bo1:= fo.show(true) = mr_ok;
+    end;
+    mac1.add(params,fo.macrovalue.gridvalues);         
    finally
-    if mac1 <> amacrolist then begin
-     mac1.free;
-    end;
+    fo.free;
    end;
+   if bo1 then begin
+    result:= @finfos[ptruint(po1)];
+    templatetext:= template;
+    mac1.expandmacros(templatetext);
+   end;
+  end;
+ finally
+  if mac1 <> amacrolist then begin
+   mac1.free;
   end;
  end;
 end;

@@ -1,0 +1,218 @@
+object msetemplateselectfo: tmsetemplateselectfo
+  visible = False
+  bounds_x = 152
+  bounds_y = 247
+  bounds_cx = 572
+  bounds_cy = 277
+  container.bounds = (
+    0
+    0
+    572
+    277
+  )
+  options = [fo_screencentered, fo_cancelonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  caption = 'Select Code Template'
+  moduleclassname = 'tmseform'
+  object tbutton1: tbutton
+    taborder = 2
+    bounds_x = 515
+    bounds_y = 251
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    state = [as_localcaption]
+    caption = 'Cancel'
+    modalresult = mr_cancel
+  end
+  object tbutton2: tbutton
+    taborder = 1
+    bounds_x = 459
+    bounds_y = 251
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    state = [as_default, as_localdefault, as_localcaption]
+    caption = 'OK'
+    modalresult = mr_ok
+  end
+  object grid: twidgetgrid
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 572
+    bounds_cy = 245
+    anchors = [an_top, an_bottom]
+    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        width = 25
+        numstart = 1
+        numstep = 1
+      end>
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+        captions.count = 6
+        captions.items = <        
+          item
+            caption = 'Name'
+          end        
+          item
+            caption = 'Comment'
+          end        
+          item
+            caption = 'Par1'
+          end        
+          item
+            caption = 'Par2'
+          end        
+          item
+            caption = 'Par3'
+          end        
+          item
+            caption = 'Par4'
+          end>
+      end>
+    datacols.count = 6
+    datacols.colorfocused = -1879048185
+    datacols.options = [co_nofocus, co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+    datacols.options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
+    datacols.items = <    
+      item
+        colorfocused = -1879048185
+        width = 59
+        options = [co_readonly, co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
+        widgetname = 'templatename'
+        dataclass = tgridmsestringdatalist
+      end    
+      item
+        colorfocused = -1879048185
+        width = 277
+        options = [co_readonly, co_nofocus, co_fill, co_savevalue, co_savestate, co_mousescrollrow]
+        options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
+        widgetname = 'comment'
+        dataclass = tgridmsestringdatalist
+      end    
+      item
+        colorfocused = -1879048185
+        options = [co_readonly, co_nofocus, co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
+        widgetname = 'par1'
+        dataclass = tgridmsestringdatalist
+      end    
+      item
+        colorfocused = -1879048185
+        options = [co_readonly, co_nofocus, co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
+        widgetname = 'par2'
+        dataclass = tgridmsestringdatalist
+      end    
+      item
+        colorfocused = -1879048185
+        options = [co_readonly, co_nofocus, co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
+        widgetname = 'par3'
+        dataclass = tgridmsestringdatalist
+      end    
+      item
+        colorfocused = -1879048185
+        options = [co_readonly, co_nofocus, co_proportional, co_savevalue, co_savestate, co_mousescrollrow]
+        options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
+        widgetname = 'par4'
+        dataclass = tgridmsestringdatalist
+      end>
+    datarowheight = 16
+    oncellevent = celle
+    reffontheight = 14
+    object templatename: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 1
+      visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 59
+      bounds_cy = 16
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_locate, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+      reffontheight = 14
+    end
+    object comment: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 2
+      visible = False
+      bounds_x = 60
+      bounds_y = 0
+      bounds_cx = 277
+      bounds_cy = 16
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+      reffontheight = 14
+    end
+    object par1: tstringedit
+      Tag = 1
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 3
+      visible = False
+      bounds_x = 338
+      bounds_y = 0
+      bounds_cx = 50
+      bounds_cy = 16
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+      reffontheight = 14
+    end
+    object par2: tstringedit
+      Tag = 2
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 4
+      visible = False
+      bounds_x = 389
+      bounds_y = 0
+      bounds_cx = 50
+      bounds_cy = 16
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+      reffontheight = 14
+    end
+    object par3: tstringedit
+      Tag = 3
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 5
+      visible = False
+      bounds_x = 440
+      bounds_y = 0
+      bounds_cx = 50
+      bounds_cy = 16
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+      reffontheight = 14
+    end
+    object par4: tstringedit
+      Tag = 4
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 6
+      visible = False
+      bounds_x = 491
+      bounds_y = 0
+      bounds_cx = 50
+      bounds_cy = 16
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+      reffontheight = 14
+    end
+  end
+  object filename: tstringdisp
+    frame.dummy = 0
+    taborder = 3
+    bounds_x = 5
+    bounds_y = 252
+    bounds_cx = 449
+    bounds_cy = 18
+    anchors = [an_left, an_right, an_bottom]
+    textflags = [tf_ycentered, tf_ellipseleft]
+    options = [dwo_hintclippedtext]
+    reffontheight = 14
+  end
+end

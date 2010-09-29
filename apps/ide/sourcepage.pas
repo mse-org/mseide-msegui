@@ -165,7 +165,7 @@ uses
  sourceupdate,msefiledialog,mseintegerenter,msedesigner,
  projectoptionsform,msesys,make,actionsmodule,msegraphics,sourcehintform,
  mseedit,msedrawtext,msebits,msedatalist,msestream,msedesignintf,
- msesysutils,msedesignparser,msesyntaxpainter,msesysenv;
+ msesysutils,msedesignparser,msesyntaxpainter,msesysenv,msecodetemplates;
 
 const
  pascaldelims = msestring(' :;+-*/(){},=<>' + c_linefeed + c_return + c_tab);
@@ -1480,6 +1480,7 @@ procedure tsourcepage.inserttemplate;
 var
  mstr1,mstr2: msestring;
  po1: pmsechar;
+ po2: ptemplateinfoty;
  gc1,gc2: gridcoordty;
  int1: integer;
  mac1: tmacrolist;
@@ -1499,13 +1500,13 @@ begin
    }
     mac1:= getmacros;
     try
-     mstr2:= codetemplates.gettemplate(mstr1,mac1);
-     if mstr2 <> '' then begin
+     po2:= codetemplates.gettemplate(mstr1,mstr2,mac1);
+     if po2 <> nil then begin
       with edit do begin
        editor.begingroup;
        gc1.col:= gc2.col+length(mstr1);
        deletetext(gc2,gc1);
-       inserttext(mstr2,true);
+       inserttext(gc2,mstr2,true);
       end;
       edit.editor.endgroup;
      end;

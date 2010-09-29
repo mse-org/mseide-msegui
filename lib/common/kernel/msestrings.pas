@@ -224,7 +224,9 @@ function msestringicompupper(const a,upstr: msestring): integer;
 function comparestrlen(S1,S2: string): integer;
                 //case sensitiv, beruecksichtigt nur s1 laenge
 function msecomparestr(const S1, S2: msestring): Integer;
+                //case sensitive
 function msecomparetext(const S1, S2: msestring): Integer;
+                //case insensitive
 function msecomparestrlen(const S1, S2: msestring): Integer;
                 //case sensitiv, beruecksichtigt nur s1 laenge
 function mseCompareTextlen(const S1, S2: msestring): Integer;
@@ -796,7 +798,7 @@ begin
  setlength(result,length(value));
  for int1:= 0 to length(result)-1 do begin
   (pmsechar(pointer(result))+int1)^:= 
-          widechar(byte((pchar(pointer(value))+int1)^));
+          msechar(byte((pchar(pointer(value))+int1)^));
  end;
 end;
 
@@ -3858,10 +3860,10 @@ begin
   result:= comparestr(s1,s2);
  end
  else begin
-  result:= widecomparestr(s1,s2); 
+  result:= unicodecomparestr(s1,s2); 
  end;
  {$else}
-  result:= widecomparestr(s1,s2);
+  result:= unicodecomparestr(s1,s2);
  {$endif}
 {$else}
  result:= widecomparestr(s1,s2);
@@ -3876,10 +3878,10 @@ begin
   result:= comparetext(s1,s2);
  end
  else begin
-  result:= widecomparetext(s1,s2);
+  result:= unicodecomparetext(s1,s2);
  end;
  {$else}
-  result:= widecomparetext(s1,s2);
+  result:= unicodecomparetext(s1,s2);
  {$endif}
 {$else}
  result:= widecomparetext(s1,s2);
@@ -3946,10 +3948,10 @@ begin
   result:= lowercase(s);
  end
  else begin
-  result:= widelowercase(s);    
+  result:= unicodelowercase(s);    
  end;
  {$else}
- result:= widelowercase(s);    
+ result:= unicodelowercase(s);    
  {$endif}
 {$else}
  result:= widelowercase(s);    
