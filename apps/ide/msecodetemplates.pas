@@ -258,6 +258,7 @@ begin
      fo.macrovalue[int1]:= ar1[int1+1];
     end;
     if high(ar1) <= high(params) then begin
+     fo.grid.row:= high(ar1);
      bo1:= fo.show(true) = mr_ok;
     end;
     mac1.add(params,fo.macrovalue.gridvalues);         

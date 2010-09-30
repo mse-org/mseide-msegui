@@ -6365,14 +6365,17 @@ end;
 procedure tpoorstringdatalist.loadfromstream(const stream: ttextstream);
 var
  mstr1: msestring;
+ first: boolean;
 begin
  beginupdate;
  try
   clear;
+  first:= true;
   while stream.readln(mstr1) do begin
    add(mstr1);
+   first:= false;
   end;
-  if mstr1 <> '' then begin
+  if not first or (mstr1 <> '') then begin
    add(mstr1);
   end;
  finally
@@ -6411,9 +6414,15 @@ end;
 procedure tpoorstringdatalist.savetostream(const stream: ttextstream);
 var
  int1: integer;
+ po1: pmsestring;
 begin
- for int1:= 0 to count - 1 do begin
-  stream.writeln(items[int1]);
+ if fcount > 0 then begin
+  po1:= datapo;
+  for int1:= count - 2 downto 0 do begin
+   stream.writeln(po1^);
+   inc(pchar(po1),fsize);
+  end;
+  stream.write(po1^);
  end;
 end;
 

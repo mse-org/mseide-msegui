@@ -24,7 +24,7 @@ uses
  msememodialog,msesplitter,msestatfile;
 type
  tmseparamentryfo = class(tmseform)
-   twidgetgrid1: twidgetgrid;
+   grid: twidgetgrid;
    macroname: tstringedit;
    macrovalue: tmemodialogedit;
    tsplitter1: tsplitter;

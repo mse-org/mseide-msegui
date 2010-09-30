@@ -13,7 +13,7 @@ object mseparamentryfo: tmseparamentryfo
   options = [fo_screencentered, fo_cancelonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder]
   statfile = tstatfile1
   moduleclassname = 'tmseform'
-  object twidgetgrid1: twidgetgrid
+  object grid: twidgetgrid
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 371
@@ -87,7 +87,7 @@ object mseparamentryfo: tmseparamentryfo
     bounds_cy = 25
     anchors = [an_bottom]
     optionsscale = [osc_expandy, osc_shrinky]
-    linktop = twidgetgrid1
+    linktop = grid
     grip = stb_none
     object tbutton2: tbutton
       bounds_x = 312
