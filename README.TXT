@@ -91,7 +91,9 @@ PROJECTNAME, PROJECTDIR, MAINFILE, TARGFILE, they can be overridden by
 
 MSEide code templates
 *********************
-Extension for template files is *.mct
+Extension for template files is *.mct, searched directories are listed in
+'Project'-'Options'-'Editor'-'Code Templates'-'Directory'.
+
 Example of a template file:
 "
 [header]
