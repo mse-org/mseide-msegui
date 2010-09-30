@@ -234,7 +234,10 @@ type
               var textpos: gridcoordty; const endpos: gridcoordty; 
               selectfound: boolean = false): boolean;
 
-   function gettext(const start, stop: gridcoordty): msestring;
+   function gettext(const start, stop: gridcoordty): msestring; overload;
+   function gettext: msestring; overload;
+   procedure settext(const atext: msestring);
+   
    function linecount: integer;
    property gridvalue[const index: integer]: msestring 
                  read getgridvalue write setgridvalue; default;
@@ -1828,6 +1831,16 @@ begin
    result:= result + copy(flines[po2.row],1,po2.col);
   end;
  end;
+end;
+
+function tcustomtextedit.gettext: msestring;
+begin
+ result:= flines.gettext;
+end;
+
+procedure tcustomtextedit.settext(const atext: msestring);
+begin
+ flines.settext(atext);
 end;
 
 function tcustomtextedit.hasselection: boolean;

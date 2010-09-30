@@ -61,11 +61,12 @@ type
   name: msestring;  
   path: filenamety;
   comment: msestring;
-  noselect: boolean;
+  select: boolean;
   cursorcol: integer;
   cursorrow: integer;
   params: msestringarty;
   template: msestring;
+  cursorpos: gridcoordty; //variable
  end;
  ptemplateinfoty = ^templateinfoty;
  templateinfoarty = array of templateinfoty;
@@ -159,7 +160,7 @@ begin
    if name <> '' then begin
     path:= afilename;
     comment:= readmsestring('comment','');
-    noselect:= readboolean('noselect',false);
+    select:= readboolean('select',false);
     cursorcol:= readinteger('cursorcol',0,0,1000);
     cursorrow:= readinteger('cursorrow',0,0,1000000);
     params:= readarray('params',msestringarty(nil));
@@ -191,7 +192,8 @@ function tcodetemplates.gettemplate(const aname: msestring;
                         const amacrolist: tmacrolist = nil): ptemplateinfoty;
 var
  ar1: msestringarty;
- po1: ptruint;
+ ar2: integerarty;
+ puint1: ptruint;
  mac1: tmacrolist;
  fo: tmseparamentryfo;
  se: tmsetemplateselectfo;
@@ -207,7 +209,7 @@ begin
  else begin
   setlength(ar1,1);
  end;
- if (ar1[0] = '') or not flist.find(ar1[0],pointer(po1)) then begin
+ if (ar1[0] = '') or not flist.find(ar1[0],pointer(puint1)) then begin
   se:= tmsetemplateselectfo.create(nil);
   try
    se.finfos:= finfos;
@@ -232,7 +234,7 @@ begin
    if (se.show(true) <> mr_ok) or (se.grid.row < 0) then begin
     exit;
    end;
-   po1:= se.grid.row;
+   puint1:= se.grid.row;
   finally
    se.free;
   end;
@@ -243,7 +245,7 @@ begin
   mac1:= tmacrolist.create([mao_caseinsensitive,mao_curlybraceonly]);
  end;
  try
-  with finfos[po1] do begin
+  with finfos[puint1] do begin
    fo:= tmseparamentryfo.create(nil);
    try
     fo.caption:= 'Code Template "'+name+'"';
@@ -263,9 +265,38 @@ begin
     fo.free;
    end;
    if bo1 then begin
-    result:= @finfos[ptruint(po1)];
-    templatetext:= template;
-    mac1.expandmacros(templatetext);
+    result:= @finfos[puint1];
+    cursorpos.col:= cursorcol;
+    cursorpos.row:= cursorrow;
+    if (cursorcol > 0) or (cursorrow > 0) then begin
+     ar1:= breaklines(template);
+     int2:= 0;
+     for int1:= 0 to high(ar1) do begin
+      if int1 >= cursorrow then begin
+       break;
+      end;
+      int2:= int2 + length(ar1[int1]) + length(lineend);
+     end;
+     int2:= int2 + cursorcol;
+     setlength(ar2,1);
+     ar2[0]:= int2;
+     templatetext:= concatstrings(ar1,lineend);
+     mac1.expandmacros(templatetext,ar2);
+     ar1:= breaklines(templatetext);
+     int2:= ar2[0];
+     for int1:= 0 to high(ar1) do begin
+      int2:= int2 - (length(ar1[int1]) + length(lineend));
+      if int2 < 0 then begin
+       cursorpos.row:= int1;
+       cursorpos.col:= int2 + (length(ar1[int1]) + length(lineend));
+       break;
+      end;
+     end;
+    end
+    else begin
+     templatetext:= template;
+     mac1.expandmacros(templatetext);
+    end;
    end;
   end;
  finally

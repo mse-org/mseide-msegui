@@ -1496,15 +1496,15 @@ begin
      editor.begingroup;
      gc1.col:= gc2.col+length(mstr1);
      deletetext(gc2,gc1);
-     inserttext(gc2,mstr2,not noselect);
-     if noselect then begin
-      if cursorrow = 0 then begin
-       gc2.col:= gc2.col + cursorcol;
+     inserttext(gc2,mstr2,select);
+     if not select then begin
+      if cursorpos.row = 0 then begin
+       gc2.col:= gc2.col + cursorpos.col;
       end
       else begin
-       gc2.col:= cursorcol;
+       gc2.col:= cursorpos.col;
       end;
-      gc2.row:= gc2.row + cursorrow;
+      gc2.row:= gc2.row + cursorpos.row;
       editpos:= gc2;
      end;
     end;

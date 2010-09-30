@@ -196,7 +196,8 @@ type
    //istatupdatevalue
    procedure statreadvalue(const aname: msestring; const reader: tstatreader);
    procedure statwritevalue(const aname: msestring; const writer: tstatwriter);
-   procedure internalexpandmacros(var avalue: msestring; expandlevel: integer);
+   procedure internalexpandmacros(var avalue: msestring; expandlevel: integer;
+                                                     var refindex: integerarty);
   public
    constructor create(const aoptions: macrooptionsty);
    function itempo(const index: integer): pmacroinfoty;
@@ -207,6 +208,7 @@ type
    function getvalue(const aname: msestring;
                                       var aexpandlevel: integer): msestring;
    procedure expandmacros(var avalue: msestring); overload;
+   procedure expandmacros(var avalue: msestring; var refindex: integerarty); overload;
    procedure expandmacros(var avalues: msestringarty); overload;
    function asarray: macroinfoarty; overload;
    procedure asarray(out names,values: msestringarty); overload;
@@ -961,12 +963,11 @@ begin
 end;
  
 procedure tmacrolist.internalexpandmacros(var avalue: msestring; 
-                     expandlevel: integer);
+                     expandlevel: integer; var refindex: integerarty);
+
 var
- int1: integer;
- po1,po2,start: pmsechar;
- str1,str2,str3: msestring;
- 
+ start: pmsechar;
+                      
  function checkmacrostart(po: pmsechar): pmsechar;
  begin
   if mao_curlybraceonly in foptions then begin
@@ -989,11 +990,16 @@ var
   else begin
    result:= msestrscan(po,msechar('$'))
   end;
- end;
+ end; //checkmacrostart
+ 
+var
+ int1,int2,int3,int4: integer;
+ po1,po2: pmsechar;
+ str1,str2,str3: msestring;
  
 begin
  if avalue <> '' then begin
-  str1:= avalue;
+  str1:= avalue; //copy
   po2:= pmsechar(str1);
   start:= po2;
   po1:= checkmacrostart(po2);
@@ -1026,14 +1032,25 @@ begin
                (po2^ >= '0') and (po2^ <= '9'));
      str2:= stringsegment(po1+1,po2);
     end;
-    if str2 <> '' then begin
+    //po1 = macro def start, po2 = macro def end
+    if str2 <> '' then begin //macro name
      int1:= expandlevel+1;
      str3:= getvalue(str2,int1);
      if int1 <= expandlevel then begin
       str3:= '***'+str2+'***';
      end
      else begin
-      internalexpandmacros(str3,expandlevel+1);
+      internalexpandmacros(str3,expandlevel+1,integerarty(nil^));
+     end;
+     if @refindex <> nil then begin
+      int4:= (po2-po1);
+      int3:= length(str3) - int4;
+      int4:= length(avalue) + int4;
+      for int2:= high(refindex) downto 0 do begin
+       if refindex[int2] >= int4 then begin
+        refindex[int2]:= refindex[int2] + int3;
+       end;
+      end;
      end;
      avalue:= avalue + str3;
     end
@@ -1057,9 +1074,17 @@ begin
  end;
 end;
 
-procedure tmacrolist.expandmacros(var avalue: msestring);
+procedure tmacrolist.expandmacros(var avalue: msestring; var refindex: integerarty);
 begin
- internalexpandmacros(avalue,0);
+ internalexpandmacros(avalue,0,refindex);
+end;
+
+procedure tmacrolist.expandmacros(var avalue: msestring);
+var
+ ar1: integerarty;
+begin
+ ar1:= nil;
+ expandmacros(avalue,ar1);
 end;
 
 procedure tmacrolist.expandmacros(var avalues: msestringarty);

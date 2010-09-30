@@ -714,6 +714,8 @@ type
    function getdatalist: tstringcoldatalist;
    procedure setdatalist(const value: tstringcoldatalist);
    procedure settextflagsactive(const avalue: textflagsty);
+   function geteditpos: gridcoordty;
+   procedure seteditpos(const avalue: gridcoordty);
   protected
    ftextinfo: drawtextinfoty;
    foptionsedit: stringcoleditoptionsty;
@@ -755,6 +757,7 @@ type
                              write foptionsedit1 default defaultoptionsedit1;
    property font;
    property datalist: tstringcoldatalist read getdatalist write setdatalist;
+   property editpos: gridcoordty read geteditpos write seteditpos;
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
    property ondataentered: notifyeventty read fondataentered write fondataentered;
    property oncopytoclipboard: updatestringeventty read foncopytoclipboard 
@@ -6172,6 +6175,26 @@ procedure tcustomstringcol.modified;
 begin
  include(fstate,gps_edited);
  //dummy
+end;
+
+function tcustomstringcol.geteditpos: gridcoordty;
+begin
+ result.row:= invalidaxis;
+ result.col:= invalidaxis;
+ if (fgrid.row >= 0) and (fgrid.col >= index) then begin
+  result.row:= fgrid.row;
+  result.col:= tcustomstringgrid(fgrid).feditor.curindex;
+ end;
+end;
+
+procedure tcustomstringcol.seteditpos(const avalue: gridcoordty);
+begin
+ if (fgrid.row >= 0) and (fgrid.col >= index) then begin
+  fgrid.focuscell(makegridcoord(index,avalue.row));
+  if (fgrid.row >= 0) and (fgrid.col >= index) then begin
+   tcustomstringgrid(fgrid).feditor.curindex:= avalue.col;
+  end;
+ end;
 end;
 
 procedure tcustomstringcol.updatelayout;

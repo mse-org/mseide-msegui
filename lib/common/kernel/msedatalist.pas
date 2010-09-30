@@ -607,6 +607,7 @@ type
    procedure compare(const l,r; var result: integer); override;
    procedure setstatdata(const index: integer; const value: msestring); override;
    function getstatdata(const index: integer): msestring; override;
+   function textlength: integer;
   public
    function datatype: listdatatypety; override;
    procedure assign(source: tpersistent); override;
@@ -622,6 +623,9 @@ type
    function getastext(const index: integer): msestring; override;
    procedure setastext(const index: integer; const avalue: msestring); override;
 
+   function gettext: ansistring;
+   procedure settext(const avalue: ansistring);
+   
    property items[index: integer]: ansistring read Getitems write 
                         setitems; default;
    property asarray: stringarty read getasarray write setasarray;
@@ -652,6 +656,7 @@ type
    procedure setstatdata(const index: integer; const value: msestring); override;
    function getstatdata(const index: integer): msestring; override;
    function getnoparagraphs(index: integer): boolean; virtual;
+   function textlength: integer;
   public
    procedure assign(source: tpersistent); override;
    procedure assignopenarray(const data: array of msestring); overload;
@@ -667,8 +672,13 @@ type
                             const maxchars: integer = 0): integer;
           //adds characters to last row, returns index
           //maxchars = 0 -> no limitation, inserts line breaks otherwise
-   function getastext(const index: integer): msestring; override;
-   procedure setastext(const index: integer; const avalue: msestring); override;
+   function getastext(const index: integer): msestring; override; overload;
+   procedure setastext(const index: integer;
+                         const avalue: msestring); override; overload;
+
+   function gettext: msestring;
+   procedure settext(const avalue: msestring);
+   
    function indexof(const value: msestring): integer;
    function empty(const index: integer): boolean; override;   //true wenn leer
    function concatstring(const delim: msestring = '';
@@ -5959,6 +5969,63 @@ begin
  items[index]:= avalue;
 end;
 
+function tansistringdatalist.textlength: integer;
+var
+ int1,int2: integer;
+ po1: pchar;
+begin 
+ po1:= datapo;
+ int2:= 0;
+ for int1:= 0 to fcount - 1 do begin
+  inc(int2,length(ansistring(pointer(po1)^)));
+  inc(po1,fsize);
+ end;
+ result:= int2;
+end;
+
+function tansistringdatalist.gettext: ansistring;
+var
+ po1: pansistring;
+ po2: pansichar;
+ int1: integer;
+ int2: integer;
+ ch1,ch2: ansichar;
+begin
+ if count = 0 then begin
+  result:='';
+  exit;
+ end;
+ int2:= textlength;
+ int2:= int2 + count * length(lineend);
+ setlength(result,int2);
+ ch1:= string(lineend)[1];
+ if length(lineend) > 1 then begin
+  ch2:= string(lineend)[2];
+ end;
+ po1:= datapo;
+ po2:= pointer(result);
+ for int1:= count-1 downto 0 do begin
+  int2:= length(po1^);
+  if int2 <> 0 then begin
+   move(pointer(po1^)^,po2^,int2*sizeof(ansichar));
+   inc(po2,int2);
+  end;
+  po2^:= ch1;
+  inc(po2);
+  if length(lineend) > 1 then begin
+   po2^:= ch2;
+   inc(po2);
+  end;
+  inc(pchar(po1),fsize);
+ end;
+ setlength(result,length(result)-length(lineend)); //remove last lineend
+end;
+
+procedure tansistringdatalist.settext(const avalue: ansistring);
+begin
+ asarray:= breaklines(avalue);
+end;
+
 { tpoorstringdatalist }
 
 function tpoorstringdatalist.add(const value: tmsestringdatalist): integer;
@@ -6350,6 +6417,20 @@ begin
  end;
 end;
 
+function tpoorstringdatalist.textlength: integer;
+var
+ int1,int2: integer;
+ po1: pchar;
+begin 
+ po1:= datapo;
+ int2:= 0;
+ for int1:= 0 to fcount - 1 do begin
+  inc(int2,length(msestring(pointer(po1)^)));
+  inc(po1,fsize);
+ end;
+ result:= int2;
+end;
+
 function tpoorstringdatalist.dataastextstream: ttextstream; 
                        //chars truncated to 8bit
 var
@@ -6361,12 +6442,7 @@ var
  wch1: widechar;
 begin
  result:= ttextstream.create; //memorystream
- po1:= datapo;
- int2:= 0;
- for int1:= 0 to fcount - 1 do begin
-  inc(int2,length(msestring(pointer(po1)^)));
-  inc(po1,fsize);
- end;
+ int2:= textlength;
  if int2 > 0 then begin
   len:= int2+(fcount-1)*length(lineend);
   result.setsize(len+sizeof(lineend));
@@ -6569,6 +6645,49 @@ procedure tpoorstringdatalist.setastext(const index: integer;
                const avalue: msestring);
 begin
  items[index]:= avalue;
+end;
+
+function tpoorstringdatalist.gettext: msestring;
+var
+ po1: pmsestring;
+ po2: pmsechar;
+ int1: integer;
+ int2: integer;
+ ch1,ch2: msechar;
+begin
+ if count = 0 then begin
+  result:='';
+  exit;
+ end;
+ int2:= textlength;
+ int2:= int2 + count * length(lineend);
+ setlength(result,int2);
+ ch1:= string(lineend)[1];
+ if length(lineend) > 1 then begin
+  ch2:= string(lineend)[2];
+ end;
+ po1:= datapo;
+ po2:= pointer(result);
+ for int1:= count-1 downto 0 do begin
+  int2:= length(po1^);
+  if int2 <> 0 then begin
+   move(pointer(po1^)^,po2^,int2*sizeof(msechar));
+   inc(po2,int2);
+  end;
+  po2^:= ch1;
+  inc(po2);
+  if length(lineend) > 1 then begin
+   po2^:= ch2;
+   inc(po2);
+  end;
+  inc(pchar(po1),fsize);
+ end;
+ setlength(result,length(result)-length(lineend)); //remove last lineend
+end;
+
+procedure tpoorstringdatalist.settext(const avalue: msestring);
+begin
+ asarray:= breaklines(avalue);
 end;
 
 { tmsestringdatalist }

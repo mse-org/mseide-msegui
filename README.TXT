@@ -92,7 +92,8 @@ PROJECTNAME, PROJECTDIR, MAINFILE, TARGFILE, they can be overridden by
 MSEide code templates
 *********************
 Extension for template files is *.mct, searched directories are listed in
-'Project'-'Options'-'Editor'-'Code Templates'-'Directory'.
+'Project'-'Options'-'Editor'-'Code Templates'-'Directory'. Every template needs
+its own file.
 
 Example of a template file:
 "
@@ -103,7 +104,7 @@ params=3
  param1
  param2
  param3
-noselect=1
+select=0
 cursorcol=12
 cursorrow=1
 []
@@ -111,15 +112,19 @@ The Template Text with macros ${param1}
 more text
 ${param2} ${param3} more params
 "
-If noselect=0 or not defined the templateblock will be selected in editor.
-If noselect=1 the cursor will be placed at the offset by cursorcol, cursorrow.
+
+If select=1 the templateblock will be selected in editor.
+If select=0 or not defined the cursor will be moved by the offset
+cursorcol, cursorrow.
+
 Minimal template file:
 "
 [header]
 name=thename
 []
 "
-Parameters can be entered in editor:
+
+Parameters can be entered in editor after templatename separated by commas:
 "
 thename,valueforparam1,valueforparam2
 "
