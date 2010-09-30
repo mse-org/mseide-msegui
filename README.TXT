@@ -72,7 +72,9 @@ MSEide command line parameters
 --fontalias=<alias>,<fontname>[,<fontheight>[,<fontwidth>[,<options>[,<xscale>]
                               [,<ancestor>]]]]
  Change the used fonts. <alias> can be stf_default, stf_menu or mseide_source.
-
+--NOZORDERHANDLING
+ Do not touch Z-order of the windows, necessary for some window managers.
+ 
 MSEide environment variables
 ****************************
 Macros in 'Settings'-'Configure MSEide' can be overridden by environment
@@ -146,7 +148,7 @@ if is not necessary (KDE, Gnome... work well without).
 
 Blinking taskbar widgets in IceWM
 *********************************
-Newer revisions of IceWM let the taskbar icons of MSEgui applications blink.
+Newer revisions of IceWM let the taskbar icons of MSEgui applications flash.
 Start the MSEgui application with the option '--TOPLEVELRAISE'.
 
 Invalid inputmanager for Ubuntu
