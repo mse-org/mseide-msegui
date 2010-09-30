@@ -14011,6 +14011,11 @@ begin
  fdatacols.frowstate.assign(avalue);
 end;
 
+function tcustomgrid.updating: boolean;
+begin
+ result:= fupdating > 0;
+end;
+
 {$ifdef mse_with_ifi}
 function tcustomgrid.getifilinkkind: ptypeinfo;
 begin
@@ -14025,11 +14030,6 @@ end;
 procedure tcustomgrid.setifilink(const avalue: tifigridlinkcomp);
 begin
  mseificomp.setifilinkcomp(iifigridlink(self),avalue,tifilinkcomp(fifilink));
-end;
-
-function tcustomgrid.updating: boolean;
-begin
- result:= fupdating > 0;
 end;
 
 {$endif}
