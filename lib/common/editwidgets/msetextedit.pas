@@ -1612,18 +1612,20 @@ begin
                //check for removed empty row
        end;
       end;
-      with tinplaceedit1(feditor) do begin
-       rect1:= textrect;
-       if cellbefore.row < newcell.row then begin
-        int1:= mousepostotextindex(makepoint(fxpos,rect1.x));
-       end
-       else begin
-        int1:= mousepostotextindex(makepoint(fxpos,rect1.y+rect1.cy-1));
+      if cellbefore.row <> newcell.row then begin
+       with tinplaceedit1(feditor) do begin
+        rect1:= textrect;
+        if cellbefore.row < newcell.row then begin
+         int1:= mousepostotextindex(makepoint(fxpos,rect1.x));
+        end
+        else begin
+         int1:= mousepostotextindex(makepoint(fxpos,rect1.y+rect1.cy-1));
+        end;
+        int2:= fxpos;
+        moveindex(int1,
+              selectaction in [fca_focusinshift,fca_focusinrepeater],true{false});
+        fxpos:= int2; //restore
        end;
-       int2:= fxpos;
-       moveindex(int1,
-             selectaction in [fca_focusinshift,fca_focusinrepeater],true{false});
-       fxpos:= int2; //restore
       end;
       if selectaction = fca_focusinrepeater then begin
        setclientclick;
