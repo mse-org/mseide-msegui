@@ -315,6 +315,8 @@ type
    fnotifydeletedlock: integer;
    fallsaved: boolean;
    fforallmethpropsinfo: forallmethpropinfoty;
+   fcreatecomponenttag: integer; //incremented by createcoponent
+   ffindcompclasstag: integer;       //stamp of createcomponenttag
    function formfiletoname(const filename: msestring): msestring;
    procedure findmethod(Reader: TReader; const aMethodName: string;
                    var Address: Pointer; var Error: Boolean);
@@ -844,6 +846,7 @@ procedure treaderrorhandler.ancestornotfound(Reader: TReader;
                    const ComponentName: string;
                    ComponentClass: TPersistentClass; var Component: TComponent);
 begin
+ designer.fsubmoduleinfopo:= nil; //reset for createcomponent
  component:= findancestorcomponent(reader,componentname);
  if component = nil then begin
   doraise(nil); //changed name
@@ -1406,7 +1409,8 @@ begin
     ferrorhandler:= treaderrorhandler.create(nil);
     try
      for int1:= 0 to high(modifiedowners) do begin
-      restorechanges(modifiedowners[int1],findinfo(infos[int1]),{ancestor,}streams[int1]);
+      restorechanges(modifiedowners[int1],findinfo(infos[int1]),{ancestor,}
+                                                               streams[int1]);
  {$ifdef mse_debugsubmodule}
       po1:= findinfo(infos[int1]);
       debugbinout('after load ' + po1^.descendent.name,
@@ -2545,6 +2549,7 @@ var
  po1: pmoduleinfoty;
 begin
  fsubmoduleinfopo:= nil;
+ ffindcompclasstag:= fcreatecomponenttag+1;
  if componentclass = nil then begin
   po1:= getinheritedmodule(aclassname);
   if po1 <> nil then begin
@@ -2557,6 +2562,7 @@ end;
 procedure tdesigner.ancestornotfound(Reader: TReader; const ComponentName: string;
                    ComponentClass: TPersistentClass; var Component: TComponent);
 begin
+ fsubmoduleinfopo:= nil; //reset for createcomponent
  component:= fmodules.findmoduleinstancebyclass(componentclass);
  if component = nil then begin
   component:= mseclasses.findancestorcomponent(reader,componentname);
@@ -2602,25 +2608,30 @@ begin
  end;
 end;
 
-procedure tdesigner.createcomponent(Reader: TReader; ComponentClass: TComponentClass;
-                   var Component: TComponent);
+procedure tdesigner.createcomponent(Reader: TReader;
+                   ComponentClass: TComponentClass; var Component: TComponent);
 var
  asubmoduleinfopo: pmoduleinfoty;
 begin
+ inc(fcreatecomponenttag);
+ if fcreatecomponenttag <> ffindcompclasstag then begin
+  fsubmoduleinfopo:= nil; //invalid
+ end;
  asubmoduleinfopo:= fsubmoduleinfopo;    //can be recursive
  if asubmoduleinfopo <> nil then begin
-  fsubmoduleinfopo:= nil; 
-//  component:= copycomponent(asubmoduleinfopo^.instance,asubmoduleinfopo^.instance);
-  component:= copycomponent(asubmoduleinfopo^.instance,asubmoduleinfopo^.instance);
+  fsubmoduleinfopo:= nil;
+  component:= copycomponent(asubmoduleinfopo^.instance,
+                                               asubmoduleinfopo^.instance);
   reader.root.insertcomponent(component);
   initinline(component);
   if des_inheritednewmodule in fstate then begin
    tcomponent1(component).setancestor(true);
   end;
   if (submodulecopy = 0) and 
-          (reader.root.componentstate * [csinline{,csancestor}] = [])  then begin
+        (reader.root.componentstate * [csinline{,csancestor}] = [])  then begin
    additem(pointerarty(floadedsubmodules),component);
-   fdescendentinstancelist.add(tmsecomponent(component),asubmoduleinfopo^.instance,fsubmodulelist);
+   fdescendentinstancelist.add(tmsecomponent(component),
+                                   asubmoduleinfopo^.instance,fsubmodulelist);
   end;
  end;
 end;
