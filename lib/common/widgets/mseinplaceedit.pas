@@ -60,6 +60,8 @@ type
    fsellength: halfinteger;
    fcurindex: integer;
    curindexbackup,selstartbackup,sellengthbackup: integer;
+   fupdatecaretcount: integer;
+   fmoveindexcount: integer;
    fcaretpos: pointty;
    ftextrect: rectty;
    ftextflags: textflagsty;
@@ -149,6 +151,7 @@ type
    procedure scroll(const dist: pointty; const scrollcaret: boolean = true);
    procedure beginupdate; //no caret update by index change
    procedure endupdate; 
+   function updating: boolean;
    
    procedure updatecaret;
 
@@ -582,12 +585,15 @@ var
  actioninfo: editnotificationinfoty;
  int1,int2: integer;
  posbefore: pointty;
+ updatecaretcountref: integer;
 
 begin
  if (fupdating > 0) or (ws_destroying in fowner.widgetstate) or
                     (csdestroying in fowner.componentstate) then begin
   exit;  //no createwindow by getcanvas
  end;
+ inc(fupdatecaretcount);
+ updatecaretcountref:= fupdatecaretcount;
  posbefore:= finfo.dest.pos;
  if not (canedit or (oe_caretonreadonly in iedit(fintf).getoptionsedit)) then begin
   nocaret:= true;
@@ -701,6 +707,9 @@ begin
    end;
   end;
   if (ies_poschanging in fstate) or checkaction(actioninfo) then begin
+   if updatecaretcountref <> fupdatecaretcount then begin
+    exit;
+   end;
    if (fowner.active or (ies_forcecaret in fstate)) and not nocaret then begin
     fowner.getcaret;
     with application.caret do begin
@@ -1406,9 +1415,12 @@ var
  selstartbefore,sellengthbefore: integer;
  info: editnotificationinfoty;
  int1: integer;
+ moveindexcountref: integer;
 
 begin
  include(fstate,ies_touched);
+ inc(fmoveindexcount);
+ moveindexcountref:= fmoveindexcount;
  selstartbefore:= fselstart;
  sellengthbefore:= fsellength;
  if newindex > length(finfo.text.text) then begin
@@ -1439,6 +1451,9 @@ begin
   fselstart:= newindex;
   fsellength:= 0;
   notify(ea_clearselection);
+  if moveindexcountref <> fmoveindexcount then begin
+   exit;
+  end;
  end;
  if (ies_istextedit in fstate) or (sellengthbefore <> fsellength) or
              (selstartbefore <> fselstart) and (fsellength <> 0)   then begin
@@ -1446,11 +1461,17 @@ begin
  end;
  int1:= fcurindex;
  curindex:= newindex;
+ if moveindexcountref <> fmoveindexcount then begin
+  exit;
+ end;
  if (fcurindex > newindex) and (int1 > newindex) then begin
   curindex:= newindex-1; //linebreak
  end;
  if donotify then begin
   internalupdatecaret(true);
+  if moveindexcountref <> fmoveindexcount then begin
+   exit;
+  end;
   info:= initactioninfo(ea_indexmoved);
   if shift then begin
    include(info.state,eas_shift);
@@ -1811,8 +1832,13 @@ begin
 end;
 
 procedure tinplaceedit.updatecaret;
+//var
+// int1: integer;
 begin
+// int1:= fupdating;
+// fupdating:= 0;
  internalupdatecaret;
+// fupdating:= int1;
 end;
 
 procedure tinplaceedit.poschanged;
@@ -1981,6 +2007,11 @@ begin
   curindex:= 0;
   updateselect;    
  end;
+end;
+
+function tinplaceedit.updating: boolean;
+begin
+ result:= fupdating > 0;
 end;
 
 { ttextundolist }

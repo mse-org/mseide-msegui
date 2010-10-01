@@ -46,7 +46,7 @@ type
  textmouseeventty = procedure(const sender: tobject;
           var info: textmouseeventinfoty) of object;
 
- texteditstatety = (tes_selectinvalid,tes_cellentering);
+ texteditstatety = (tes_selectinvalid,tes_cellentering,tes_xposinvalid);
  texteditstatesty = set of texteditstatety;
 
  tgridrichstringdatalist = class(trichstringdatalist)
@@ -157,7 +157,8 @@ type
    procedure initgridwidget;
    procedure valuetogrid(row: integer);
    procedure gridtovalue(row: integer);
-   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
+   procedure docellevent(const ownedcol: boolean; 
+                                         var info: celleventinfoty); virtual;
    procedure sortfunc(const l,r; var result: integer);
    procedure gridvaluechanged(const index: integer); virtual;
    procedure updatecoloptions(const aoptions: coloptionsty);
@@ -269,7 +270,8 @@ type
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
    property tabulators: ttabulators read gettabulators write settabulators;
-   property marginlinepos: integer read fmarginlinepos write setmarginlinepos default 0;
+   property marginlinepos: integer read fmarginlinepos 
+                                             write setmarginlinepos default 0;
                      //offset to innerclientrect.x
    property marginlinecolor: colorty read fmarginlinecolor 
                                      write setmarginlinecolor default cl_none;
@@ -463,7 +465,7 @@ begin
  if (intf <> nil) then begin
   flines:= trichstringdatalist(fgridintf.getcol.datalist);
   if (ow_autoscale in foptionswidget) and
-             (foptionswidget * [ow_fontglyphheight,ow_fontlineheight] <> []) then begin
+      (foptionswidget * [ow_fontglyphheight,ow_fontlineheight] <> []) then begin
    fgridintf.getcol.grid.datarowheight:= bounds_cy;
   end;
  end;
@@ -472,10 +474,10 @@ end;
 function tcustomtextedit.getcellframe: framety;
 begin
  if fframe <> nil then begin
-  result:= fframe.innerframe;
+  result:= frame.cellframe;
  end
  else begin
-  result:= texteditminimalframe;
+  result:= tgridarrayprop(fgridintf.getcol.prop).innerframe;
  end;
 end;
 
@@ -705,9 +707,9 @@ begin
      if ss_shift in info.shiftstate then begin
       invalidate;
      end;
-     if fxpos < int2 then begin
-      fxpos:= int2;
-     end;
+//     if fxpos < int2 then begin
+      fxpos:= int2; //restore
+//     end;
      if {(oe_exitoncursor in foptionsedit) and} (indexbefore = curindex) and
              {(info.shiftstate = []) and}
              ((info.key = key_down) or (info.key = key_up)) then begin
@@ -865,6 +867,10 @@ begin
   flines.endupdate;
  end;
  feditor.endupdate;
+ if not feditor.updating and (tes_xposinvalid in fstate) then begin
+  fxpos:= feditor.caretpos.x;
+  exclude(fstate,tes_xposinvalid);
+ end;
 end;
 
 procedure tcustomtextedit.clear;
@@ -1047,6 +1053,7 @@ begin
    textdeleted(stop,gettext(po1,po2),false,po1,
                isequalgridcoord(po2,stop));
    seteditpos(po1,false);
+//   feditor.updatecaret; //locked by beginupdate
    if po1.row = po2.row then begin
     richdelete(prichstringty(flines.getitempo(po1.row))^,po1.col+1,po2.col-po1.col);
    end
@@ -1624,6 +1631,7 @@ begin
         int2:= fxpos;
         moveindex(int1,
               selectaction in [fca_focusinshift,fca_focusinrepeater],true{false});
+        exclude(self.fstate,tes_xposinvalid);
         fxpos:= int2; //restore
        end;
       end;
@@ -1692,8 +1700,8 @@ begin
  seteditpos(editpos,false);
 end;
 
-procedure tcustomtextedit.setedpos(const Value: gridcoordty; const select: boolean;
-                       const donotify: boolean);
+procedure tcustomtextedit.setedpos(const Value: gridcoordty;
+                              const select: boolean; const donotify: boolean);
 var
  po1: gridcoordty;
 begin
@@ -1701,7 +1709,6 @@ begin
  po1.row:= value.row;
  po1.col:= fgridintf.getcol.colindex;
 // fcolindex:= feditor.curindex;
- fxpos:= feditor.caretpos.x;
  if select then begin
   fgridintf.getcol.grid.focuscell(po1,fca_focusinshift);
  end
@@ -1709,10 +1716,19 @@ begin
   fgridintf.getcol.grid.focuscell(po1,fca_focusin);
  end;
  feditor.moveindex(value.col,select,donotify);
+ if donotify then begin
+  if feditor.updating then begin
+   include(fstate,tes_xposinvalid);;
+  end
+  else begin
+   fxpos:= feditor.caretpos.x;
+  end;
+ end;
  updateindex(select);
 end;
 
-procedure tcustomtextedit.seteditpos(const Value: gridcoordty; const select: boolean = false);
+procedure tcustomtextedit.seteditpos(const Value: gridcoordty; 
+                                          const select: boolean = false);
 begin
  setedpos(value,select,true);
 end;
