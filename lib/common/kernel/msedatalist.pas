@@ -672,9 +672,9 @@ type
                             const maxchars: integer = 0): integer;
           //adds characters to last row, returns index
           //maxchars = 0 -> no limitation, inserts line breaks otherwise
-   function getastext(const index: integer): msestring; override; overload;
+   function getastext(const index: integer): msestring; override;
    procedure setastext(const index: integer;
-                         const avalue: msestring); override; overload;
+                         const avalue: msestring); override;
 
    function gettext: msestring;
    procedure settext(const avalue: msestring);
@@ -6671,9 +6671,9 @@ begin
  int2:= textlength;
  int2:= int2 + count * length(lineend);
  setlength(result,int2);
- ch1:= string(lineend)[1];
+ ch1:= msechar(byte(string(lineend)[1]));
  if length(lineend) > 1 then begin
-  ch2:= string(lineend)[2];
+  ch2:= msechar(byte(string(lineend)[2]));
  end;
  po1:= datapo;
  po2:= pointer(result);
