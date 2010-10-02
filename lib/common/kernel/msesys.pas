@@ -43,7 +43,7 @@ type
   platformdata: array[0..3] of pointer;
  end;
 
- mutexty = array[0..7] of pointer;
+ mutexty = array[0..9] of pointer;
  semty = array[0..7] of pointer;
  psemty = ^semty;
  condty = array[0..31] of pointer;

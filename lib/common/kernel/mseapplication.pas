@@ -1178,7 +1178,6 @@ begin
   include(fstate,aps_eventflushing);
   for int1:= 0 to high(fpostedeventslocal) do begin
    feventlist.add(fpostedeventslocal[int1]);
-   dopostevent(fpostedeventslocal[int1]);
   end;
   fpostedeventslocal:= nil;
   for int1:= 0 to high(fpostedevents) do begin
@@ -1216,7 +1215,7 @@ begin
    sys_mutexlock(feventlock);
    if alocal then begin
     setlength(fpostedeventslocal,high(fpostedeventslocal) + 2);
-    fpostedevents[high(fpostedeventslocal)]:= event;
+    fpostedeventslocal[high(fpostedeventslocal)]:= event;
    end
    else begin
     setlength(fpostedevents,high(fpostedevents) + 2);

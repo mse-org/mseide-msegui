@@ -68,6 +68,8 @@ type
  win32mutexty = record
   mutex: trtlcriticalsection;
   trycount: integer;
+  lockco: integer; 
+  owningth: threadty;
   platformdata: array[7..7] of cardinal;
  end;
 
@@ -164,7 +166,9 @@ function Process32Next(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
 var
  GetLongPathNameW: function(lpszShortPath: LPCWSTR; lpszLongPath: LPCWSTR;
                                            cchBuffer: DWORD):DWORD; stdcall;
-
+ TryEnterCriticalSection: function (
+                 var lpCriticalSection: TRTLCriticalSection): BOOL; stdcall;
+              
 function sys_getpid: procidty;
 begin
  result:= getcurrentprocessid;
@@ -671,6 +675,8 @@ begin
  with win32mutexty(mutex) do begin
   windows.initializecriticalsection(mutex);
   trycount:= 0;
+  lockco:= 0;
+  owningth:= 0;
  end;
  result:= sye_ok;
 end;
@@ -684,19 +690,36 @@ end;
 function lockmutex(var mutex: mutexty; const noblock: boolean): syserrorty;
 var
  bo1: boolean;
+ id: threadty;
 begin
  with win32mutexty(mutex) do begin
-  while interlockedincrement(trycount) > 1 do begin
+  if not iswin95 then begin
+   if noblock then begin
+    if not tryentercriticalsection(mutex) then begin
+     result:= sye_busy;
+     exit;
+    end;
+   end
+   else begin
+    windows.entercriticalsection(mutex);
+   end;
+  end
+  else begin
+   while interlockedincrement(trycount) > 1 do begin
+    interlockeddecrement(trycount);
+    windows.sleep(0);
+   end;
+   id:= windows.getcurrentthreadid;
+   if noblock and not((lockco = 0) or (owningth = id)) then begin
+    interlockeddecrement(trycount);
+    result:= sye_busy;
+    exit;
+   end;
+   inc(lockco);
    interlockeddecrement(trycount);
-   windows.sleep(0);
+   windows.entercriticalsection(mutex);
+   owningth:= id;
   end;
-  bo1:= (mutex.lockcount = -1) or (mutex.owningthread = getcurrentthreadid);
-  interlockeddecrement(trycount);
-  if not bo1 and noblock then begin
-   result:= sye_busy;
-   exit;
-  end;
-  windows.entercriticalsection(mutex);
  end;
  result:= sye_ok;
 end;
@@ -713,7 +736,20 @@ end;
 
 function sys_mutexunlock(var mutex: mutexty): syserrorty;
 begin
- windows.leavecriticalsection(win32mutexty(mutex).mutex);
+ with win32mutexty(mutex) do begin
+  if iswin95 then begin
+   while interlockedincrement(trycount) > 1 do begin
+    interlockeddecrement(trycount);
+    windows.sleep(0);
+   end;
+   dec(lockco);
+   if lockco = 0 then begin
+    owningth:= 0;
+   end;
+   interlockeddecrement(trycount);
+  end;
+  windows.leavecriticalsection(mutex); 
+ end;
  result:= sye_ok;
 end;
 
@@ -1959,8 +1995,11 @@ begin
   end;
   freelibrary(libhandle);
  end;
- checkprocaddresses(['kernel32.dll'],['GetLongPathNameW'],
-                                    [{$ifndef FPC}@{$endif}@GetLongPathNameW]);
+ checkprocaddresses(['kernel32.dll'],
+      ['GetLongPathNameW',
+       'TryEnterCriticalSection'],
+      [{$ifndef FPC}@{$endif}@GetLongPathNameW,
+       {$ifndef FPC}@{$endif}@TryEnterCriticalSection]);
 end;
 {
 procedure initformatsettings;

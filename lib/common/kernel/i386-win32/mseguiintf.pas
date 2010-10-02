@@ -205,11 +205,13 @@ const
 // col0: tagrgbquad = (rgbblue: 0; rgbgreen: 0; rgbred: 0);
 // col1: tagrgbquad = (rgbblue: $ff; rgbgreen: $ff; rgbred: $ff);
 
+ defaultfontname = 'Tahoma';
+// defaultfontname = 'MS Sans Serif';
  defaultfontnames: defaultfontnamesty =
-  //stf_default  stf_empty stf_unicode stf_menu stf_message stf_report
-   ('',          '',       '',         '',      '',         'Arial',
+  //stf_default           stf_empty stf_unicode stf_menu stf_message stf_report
+   (defaultfontname,          '',       '',         '',      '',      'Arial',
   //stf_proportional stf_fixed,
-   'Tahoma',         'Courier',
+   defaultfontname,         'Courier',
   //stf_helvetica stf_roman          stf_courier
     'Arial',     'Times New Roman', 'Courier New');
 
@@ -1466,9 +1468,9 @@ var
 begin
  fillchar(defaultfontinfo,sizeof(defaultfontinfo),0);
  defaultfontinfo.lfHeight:= -11;
- defaultfontinfo.lfFaceName:= 'Tahoma';
- dc1:= getdc(0);
  bo1:= false;
+ defaultfontinfo.lfFaceName:= defaultfontname;
+ dc1:= getdc(0);
  {$ifdef FPC}
  enumfontfamiliesex(dc1,@defaultfontinfo,@fontenumcallback,ptruint(@bo1),0);
  {$else}

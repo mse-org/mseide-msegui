@@ -997,7 +997,7 @@ var
 begin
  factivedesign:= factivedesign and factive;
  bo1:= factive and (factivedesign or not (csdesigning in componentstate));
- if fisactive <> bo1 then begin
+ if (fisactive <> bo1) and (fhandler <> nil) then begin
   fisactive:= bo1;
   if not (csloading in componentstate) and not fisactive then begin
    dodeactivate;
@@ -2533,5 +2533,5 @@ end;
 initialization
  setskinhandler(tskinhandler.create);
 finalization
- fhandler.free;
+ freeandnil(fhandler);
 end.
