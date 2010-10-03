@@ -28,7 +28,7 @@ type
   classtype: cryptioclassty;
   rxfd: integer;
   txfd: integer;
-  cryptdata: array[0..15] of pointer;
+  cryptdata: array[0..17] of pointer;
  end;
  pcryptioinfoty = ^cryptioinfoty;
 
