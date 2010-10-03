@@ -1106,7 +1106,8 @@ begin
       str1:= dirent.d_name;
       name:= str1;
       if checkfilename(info.name,mask,true) then begin
-       if d.needsstat or d.needstype and (dirent.d_type = dt_unknown) then begin
+       if d.needsstat or d.needstype and 
+       ((dirent.d_type = dt_unknown) or (dirent.d_type = dt_lnk)) then begin
         error:= stat64(pchar(string(d.dirpath)+str1),@statbuffer) <> 0;
        end
        else begin
