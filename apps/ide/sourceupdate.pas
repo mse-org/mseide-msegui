@@ -1813,7 +1813,11 @@ var
  str1: string;
  int1: integer;
 begin
- po1:= updatemodule(amodule);
+ try
+  po1:= updatemodule(amodule);
+ except
+  exit; //no source file, no sourcepdate
+ end;
  po2:= findclassinfobyinstance(amodule,po1);
  str1:= uppercase(aitem.Name);
  if po2 <> nil then begin
@@ -1857,24 +1861,16 @@ var
  ar1: stringarty;
  first: boolean;
 begin
- po1:= updatemodule(amodule);
+ try
+  po1:= updatemodule(amodule);
+ except
+  exit; //no source file, no sourcepdate
+ end;
  updateunit(po1,true);
  po2:= findclassinfobyinstance(amodule,po1);
  str1:= uppercase(aitem.Name);
  pos1:= emptysourcepos;
  if po2 <> nil then begin
-  {
-  with po2^.componentlist do begin
-   for int1:= 0 to count - 1 do begin
-    with items[int1]^ do begin
-     if uppername > str1 then begin
-      pos1:= insertpos;
-      break;
-     end;
-    end;
-   end;
-  end;
-   }
   if (csinline in aitem.componentstate) and 
            designer.checksubmodule(aitem,po3) then begin
    classna:= po3^.moduleclassname;
@@ -1937,7 +1933,11 @@ var
  po2: pclassinfoty;
  po3: pcompinfoty;
 begin
- po1:= updatemodule(amodule);
+ try
+  po1:= updatemodule(amodule);
+ except
+  exit; //no source file, no sourcepdate
+ end;
  po2:= findclassinfobyinstance(amodule,po1);
  if po2 <> nil then begin
   po3:= po2^.componentlist.finditembyname(aitem.name);
