@@ -1945,7 +1945,7 @@ procedure ttabs.createfontactive;
 begin
  if ffontactive = nil then begin
   ffontactive:= ttabsfontactive.create;
-  ffont.onchange:= {$ifdef FPC}@{$endif}fontchanged;
+  ffontactive.onchange:= {$ifdef FPC}@{$endif}fontchanged;
  end;
 end;
 
