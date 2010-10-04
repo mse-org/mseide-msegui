@@ -4766,7 +4766,8 @@ begin
    id:= windows.CreateWindowex(windowstyleex,widgetclassname,nil,windowstyle,
          rect1.x,rect1.y,rect1.cx,rect1.cy,ownerwindow{transientfor},0,hinstance,nil);
    if transientfor = 0 then begin
-    setwindowpos(id,hwnd_top,0,0,0,0,swp_noactivate or swp_nomove or swp_nosize);
+    setwindowpos(id,hwnd_top,0,0,0,0,swp_noactivate or swp_nomove or 
+                                            swp_nosize or swp_noownerzorder);
    end;
   end
   else begin

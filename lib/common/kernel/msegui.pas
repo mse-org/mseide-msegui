@@ -14984,6 +14984,35 @@ begin
  end;
 end;
 
+{$ifdef mse_debugzorder}
+function debugwindowinfo(const awindow: twindow): string;
+begin
+ if awindow = nil then begin
+  result:= 'nil';
+ end
+ else begin
+  result:= '"'+awindow.fowner.name+'"';
+ end;
+end;
+
+procedure printwindowstackinfo(const ar3: windowarty);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(ar3) do begin
+  if ar3[int1].fowner.visible then begin
+   debugwrite('+ ');
+  end
+  else begin
+   debugwrite('- ');
+  end;
+  debugwriteln(debugwindowinfo(ar3[int1])+' '+
+                 debugwindowinfo(ar3[int1].ftransientfor));
+ end;
+end;
+
+{$endif}
+
 function cmpwindowstack(const l,r): integer;
 begin
  result:= windowstackinfoty(l).level - windowstackinfoty(r).level;
@@ -15034,14 +15063,23 @@ begin
    end;
    sortarray(fwindowstack,{$ifdef FPC}@{$endif}cmpwindowstack,
                                              sizeof(windowstackinfoty));
+  {$ifdef mse_debugzorder}
+   for int1:= 0 to high(fwindowstack) do begin
+    debugwriteln(debugwindowinfo(fwindowstack[int1].lower)+' '+
+                      debugwindowinfo(fwindowstack[int1].upper));
+   end;
+  {$endif}
    if gui_canstackunder then begin
     for int1:= 0 to high(fwindowstack) do begin
      with fwindowstack[int1] do begin
       if lower <> nil then begin
-       if upper = nil then begin
+       if (upper = nil) then begin
         gui_raisewindow(lower.winid);
        end
        else begin
+//        if int1 = 0 then begin
+//         gui_raisewindow(upper.winid); 
+//        end;
         gui_stackunderwindow(lower.winid,upper.winid);
        end;
       end;
@@ -15168,39 +15206,17 @@ begin
  end;  
 end;
 
-{$ifdef mse_debugzorder}
-procedure printwindowstackinfo(const ar3: windowarty);
-var
- int1: integer;
-begin
- for int1:= 0 to high(ar3) do begin
-  if ar3[int1].fowner.visible then begin
-   debugwrite('+ ');
-  end
-  else begin
-   debugwrite('- ');
-  end;
-  debugwrite('"'+ar3[int1].fowner.name+'" ');
-  if ar3[int1].ftransientfor = nil then begin
-   debugwriteln('nil');
-  end
-  else begin
-   debugwriteln('"'+ar3[int1].ftransientfor.fowner.name+'"');
-  end;
- end;
-end;
-{$endif}
-
 procedure tinternalapplication.updatewindowstack;
 var
  ar3,ar4: windowarty;
  int1,int2: integer;
+ bo1: boolean;
 begin
  checkwindowstack;
  sortzorder;
  ar3:= windowar; //refcount 1
 {$ifdef mse_debugzorder}
- debugwriteln('******************************');
+ debugwriteln('*****updatewindowstack*****');
  printwindowstackinfo(ar3);
 {$endif}
  ar4:= copy(ar3);
@@ -15223,6 +15239,20 @@ begin
   end;
  end;
  if int2 >= 0 then begin
+  if gui_canstackunder then begin
+   bo1:= true;
+   for int1:= int2+1 to high(ar3) do begin
+    if ar4[int1] <> ar3[int1-1] then begin
+     bo1:= false;
+     break;
+    end;
+   end;
+   if bo1 then begin //single local raise
+    gui_stackoverwindow(ar4[int2].winid,ar4[high(ar4)].winid);
+    fwindowstack:= nil;
+    exit;
+   end;
+  end;
   inc(int2);
   for int1:= high(ar3) downto int2 do begin
    if not (tws_windowvisible in ar3[int1-1].fstate) then begin
@@ -15786,6 +15816,9 @@ begin
    window1:= sender.window;
   end;
   fhintwidget:= thintwidget.create(nil,window1,fhintinfo);
+ {$ifdef mse_debugzorder}
+  debugwriteln('** showhint '+tinternalapplication(self).fhintinfo.caption);
+ {$endif}
   fhintwidget.show;
   if showtime <> 0 then begin
    fhinttimer.interval:= -showtime;
