@@ -92,9 +92,10 @@ type
 
 const
  defaulthistorymaxcount = 10;
-
+ 
 type
- filedialogoptionty = (fdo_save,fdo_dispname,fdo_dispnoext,
+ filedialogoptionty = (fdo_save,
+                       fdo_dispname,fdo_dispnoext,fdo_sysfilename,fdo_params,
                        fdo_directory,fdo_file,
                        fdo_absolute,fdo_relative,fdo_quotesingle,
                        fdo_link, //links lastdir of controllers with same group
@@ -136,6 +137,7 @@ type
    fongetfilename: setstringeventty;
    fongetfileicon: getfileiconeventty;
    fimagelist: timagelist;
+   fparams: msestring;
    procedure setfilterlist(const Value: tdoublemsestringdatalist);
    procedure sethistorymaxcount(const Value: integer);
    function getfilename: filenamety;
@@ -146,6 +148,7 @@ type
    procedure checklink;
    procedure setlastdir(const avalue: filenamety);
    procedure setimagelist(const avalue: timagelist);
+   function getsyscommandline: filenamety;
   protected
    flastdir: filenamety;
    fdefaultext: filenamety;
@@ -177,6 +180,8 @@ type
    procedure componentevent(const event: tcomponentevent);
    property history: msestringarty read fhistory write fhistory;
    property filenames: filenamearty read ffilenames write ffilenames;
+   property syscommandline: filenamety read getsyscommandline;
+   property params: msestring read fparams;
   published
    property filename: filenamety read getfilename write setfilename;
    property lastdir: filenamety read flastdir write setlastdir;
@@ -1330,6 +1335,9 @@ end;
 procedure tfiledialogcontroller.readstatvalue(const reader: tstatreader);
 begin
  ffilenames:= reader.readarray('filenames',ffilenames);
+ if fdo_params in foptions then begin
+  fparams:= reader.readmsestring('params',fparams);
+ end;
 end;
 
 procedure tfiledialogcontroller.readstatstate(const reader: tstatreader);
@@ -1359,6 +1367,9 @@ end;
 procedure tfiledialogcontroller.writestatvalue(const writer: tstatwriter);
 begin
  writer.writearray('filenames',ffilenames);
+ if fdo_params in foptions then begin
+  writer.writemsestring('params',fparams);
+ end;
 end;
 
 procedure tfiledialogcontroller.writestatstate(const writer: tstatwriter);
@@ -1544,7 +1555,9 @@ end;
 
 function tfiledialogcontroller.getfilename: filenamety;
 begin
- if (high(ffilenames) > 0) or (fdo_quotesingle in foptions) then begin
+ if (high(ffilenames) > 0) or (fdo_quotesingle in foptions) or
+  (fdo_params in foptions) and (high(ffilenames) = 0) and 
+    (findchar(pmsechar(ffilenames[0]),' ') > 0) then begin
   result:= quotefilename(ffilenames);
  end
  else begin
@@ -1555,14 +1568,47 @@ begin
    result:= '';
   end;
  end;
+ if (fdo_params in foptions) and (fparams <> '') then begin
+  if fdo_sysfilename in foptions then begin
+   tosysfilepath1(result);
+  end;
+  result:= result + ' '+fparams;
+ end
+ else begin
+  if fdo_sysfilename in foptions then begin
+   tosysfilepath1(result);
+  end;
+ end;
 end;
 
+const
+ quotechar = msechar('"');
+ 
 procedure tfiledialogcontroller.setfilename(const avalue: filenamety);
 var
  int1: integer;
  akind: filekindty;
 begin
  unquotefilename(avalue,ffilenames);
+ if fdo_params in foptions then begin
+  fparams:= '';
+  if high(ffilenames) >= 0 then begin
+   if avalue[1] = quotechar then begin
+    fparams:= copy(avalue,length(ffilenames[0])+3,bigint);
+    if (fparams <> '') and (fparams[1] = ' ') then begin
+     delete(fparams,1,1);
+    end;
+    setlength(ffilenames,1);
+   end
+   else begin
+    int1:= findchar(ffilenames[0],' ');
+    if int1 > 0 then begin
+     fparams:= copy(ffilenames[0],int1+1,bigint);
+     setlength(ffilenames[0],int1-1);
+    end;
+   end;
+  end;
+ end;
  if fdo_directory in foptions then begin
   akind:= fk_dir;
  end
@@ -1630,16 +1676,19 @@ const
  mask1: filedialogoptionsty = [fdo_absolute,fdo_relative];
  mask2: filedialogoptionsty = [fdo_directory,fdo_file];
 begin
- {$ifdef FPC}longword{$else}word{$endif}(value):=
-      setsinglebit({$ifdef FPC}longword{$else}word{$endif}(value),
-      {$ifdef FPC}longword{$else}word{$endif}(foptions),
-      {$ifdef FPC}longword{$else}word{$endif}(mask1));
- {$ifdef FPC}longword{$else}word{$endif}(value):=
-      setsinglebit({$ifdef FPC}longword{$else}word{$endif}(value),
-      {$ifdef FPC}longword{$else}word{$endif}(foptions),
-      {$ifdef FPC}longword{$else}word{$endif}(mask2));
+ {$ifdef FPC}longword{$else}longword{$endif}(value):=
+      setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(value),
+      {$ifdef FPC}longword{$else}longword{$endif}(foptions),
+      {$ifdef FPC}longword{$else}longword{$endif}(mask1));
+ {$ifdef FPC}longword{$else}longword{$endif}(value):=
+      setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(value),
+      {$ifdef FPC}longword{$else}longword{$endif}(foptions),
+      {$ifdef FPC}longword{$else}longword{$endif}(mask2));
  if foptions <> value then begin
   foptions:= Value;
+  if not (fdo_params in foptions) then begin
+   fparams:= '';
+  end;
   dochange;
  end;
 end;
@@ -1660,6 +1709,18 @@ end;
 procedure tfiledialogcontroller.setimagelist(const avalue: timagelist);
 begin
  setlinkedvar(avalue,tmsecomponent(fimagelist));
+end;
+
+function tfiledialogcontroller.getsyscommandline: filenamety;
+var
+ bo1: boolean;
+begin
+ bo1:= fdo_sysfilename in foptions;
+ system.include(foptions,fdo_sysfilename);
+ result:= getfilename;
+ if not bo1 then begin
+  system.exclude(foptions,fdo_sysfilename);
+ end;
 end;
 
 { tfiledialog }
@@ -1835,7 +1896,8 @@ begin
  result:= fcontroller.filename;
 end;
 
-procedure tcustomfilenameedit.texttovalue(var accept: boolean; const quiet: boolean);
+procedure tcustomfilenameedit.texttovalue(var accept: boolean;
+                                                    const quiet: boolean);
 var
  ar1: filenamearty;
  mstr1: filenamety;

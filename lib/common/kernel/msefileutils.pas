@@ -84,6 +84,8 @@ function combinerootpath(const rootpath: filenamety;
 function combinerootpath(const rootpaths: filenamearty; 
                                const name: filenamety): filenamearty; overload;
 
+function syscommandline(const acommandline: filenamety): filenamety;
+                 //converts exec path to sys format
 function filepath({const} directory: filenamety; {const} filename: filenamety;
                         kind: filekindty = fk_default;
                         relative: boolean = false): filenamety; overload;
@@ -1298,6 +1300,40 @@ begin
   result:= filepath(directory,fk_dir,relative);
   result:= filepath(result + unquotefilename(filename),kind,relative);
   tomsefilepath1(result); //really needed?
+ end;
+end;
+
+function syscommandline(const acommandline: filenamety): filenamety;
+                 //converts exec path to sys format
+var
+ int1,int2,int3: integer;
+begin
+ result:= '';
+ if length(acommandline) > 0 then begin
+  int1:= 1; //start exe
+  if acommandline[1] = quotechar then begin
+   int1:= 2;
+   int2:= findchar(pmsechar(@acommandline[2]),quotechar);//end of exe
+   if int2 = 0 then begin
+    int2:= length(acommandline);
+   end;
+   int3:= int2+1; //start of params
+  end
+  else begin
+   int2:= findchar(pmsechar(@acommandline[1]),' ');//end of exe
+   if int2 = 0 then begin
+    int2:= length(acommandline);
+   end;
+   int3:= int2;
+  end;
+ end;
+ if int1 > 1 then begin //quoted
+  result:= '"'+tosysfilepath(copy(acommandline,int1,int2-int1)) + '"'+
+                       copy(acommandline,int3,bigint);
+ end
+ else begin
+  result:= tosysfilepath(copy(acommandline,int1,int2-int1)) +
+                       copy(acommandline,int3,bigint);
  end;
 end;
 

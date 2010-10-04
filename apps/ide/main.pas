@@ -935,7 +935,7 @@ begin
    mstr1:= gdbservercommand;
   end;
   if mstr1 <> '' then begin
-   fgdbserverprocid:= execmse1(mstr1);
+   fgdbserverprocid:= execmse1(syscommandline(mstr1));
    if fgdbserverprocid <> invalidprochandle then begin
     fgdbservertimeout:= timestep(round(1000000*o.gdbserverwait));
     if application.waitdialog(nil,'Start gdb server command "'+
@@ -1182,7 +1182,7 @@ begin
   gdb.afterload:= afterload;
   gdb.startupbkpt:= o.startupbkpt;
   gdb.startupbkpton:= o.startupbkpton;
-  gdb.startgdb(tosysfilepath(quotefilename(debugcommand))+ ' ' + debugoptions);
+  gdb.startgdb(quotefilename(debugcommand)+ ' ' + debugoptions);
  end;
  updatesigsettings;
  cleardebugdisp;

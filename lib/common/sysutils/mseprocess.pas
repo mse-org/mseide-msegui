@@ -244,8 +244,8 @@ begin
      if pro_input in foptions then begin
       inp:= finput;
      end;
-     fprochandle:= execmse2(fcommandline1,inp,outp,erroroutp,false,-1,
-                 pro_inactive in foptions,false,
+     fprochandle:= execmse2(syscommandline(fcommandline1),
+           inp,outp,erroroutp,false,-1,pro_inactive in foptions,false,
                           pro_tty in foptions,pro_nostdhandle in foptions);
      if fprochandle = invalidprochandle then begin
       finalizeexec;

@@ -832,8 +832,8 @@ begin
  frunsequence:= 0;
  fsequence:= 1;
  flastbreakpoint:= 0;
- fgdb:= execmse2(commandline+' --interpreter=mi --nx',fgdbto,fgdbfrom,fgdberror,
-                false,-1,true,true,true);
+ fgdb:= execmse2(syscommandline(commandline)+' --interpreter=mi --nx',
+                      fgdbto,fgdbfrom,fgdberror,false,-1,true,true,true);
  if fgdb <> invalidprochandle then begin
   clicommand('set breakpoint pending on');
   clicommand('set height 0');

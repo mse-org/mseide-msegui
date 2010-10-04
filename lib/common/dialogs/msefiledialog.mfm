@@ -70,7 +70,7 @@ object filedialogfo: Tfiledialogfo
       taborder = 2
       bounds_x = 49
       bounds_y = 52
-      bounds_cx = 43
+      bounds_cx = 42
       bounds_cy = 19
       bounds_cxmin = 35
       anchors = [an_left, an_bottom]
@@ -163,17 +163,17 @@ object filedialogfo: Tfiledialogfo
     frame.outerframe = (
       0
       0
-      31
+      30
       0)
     taborder = 3
     bounds_x = 1
     bounds_y = 260
-    bounds_cx = 481
+    bounds_cx = 480
     bounds_cy = 19
     anchors = [an_left, an_right, an_bottom]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
     oncopytoclipboard = copytolip
     onpastefromclipboard = pastefromclip
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
     onsetvalue = filenamesetvalue
     dropdown.options = [deo_keydropdown]
     dropdown.dropdownrowcount = 10
@@ -192,12 +192,12 @@ object filedialogfo: Tfiledialogfo
     frame.outerframe = (
       0
       0
-      25
+      27
       0)
     taborder = 4
     bounds_x = 1
     bounds_y = 285
-    bounds_cx = 475
+    bounds_cx = 477
     bounds_cy = 19
     anchors = [an_left, an_right, an_bottom]
     ondataentered = filepathentered
