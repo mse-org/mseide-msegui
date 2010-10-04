@@ -306,7 +306,7 @@ begin
   dirname[1]:= dirname[2]; // '/c:' -> 'c:\'
   dirname[2]:= ':';
   dirname[3]:= '\';
-  if (dirname[4] = '\') and (length(dirname) > 4) then begin
+  if (length(dirname) > 3) and (dirname[4] = '\')  then begin
    move(dirname[5],dirname[4],(length(dirname) - 4)*sizeof(msechar));
    setlength(dirname,length(dirname) - 1);
   end;
