@@ -14604,6 +14604,9 @@ begin       //eventloop
 // lock;
 // try
   result:= false;
+  if aps_looplocked in fstate then begin
+   exit;
+  end;
   ftimertick:= false;
   fillchar(modalinfo,sizeof(modalinfo),0);
   waitcountbefore:= fwaitcount;
@@ -15054,60 +15057,65 @@ var
  int1: integer;
 begin
  if fwindowstack <> nil then begin
-  if not nozorderhandling then begin
- {$ifdef mse_debugzorder}
-   debugwriteln('****checkwindowstack****');
- {$endif}
-   for int1:= 0 to high(fwindowstack) do begin
-    findlevel(fwindowstack[int1]);
-   end;
-   sortarray(fwindowstack,{$ifdef FPC}@{$endif}cmpwindowstack,
-                                             sizeof(windowstackinfoty));
+  include(fstate,aps_looplocked); //no windows sizing callbacks
+  try
+   if not nozorderhandling then begin
   {$ifdef mse_debugzorder}
-   for int1:= 0 to high(fwindowstack) do begin
-    debugwriteln(debugwindowinfo(fwindowstack[int1].lower)+' '+
-                      debugwindowinfo(fwindowstack[int1].upper));
-   end;
+    debugwriteln('****checkwindowstack****');
   {$endif}
-   if gui_canstackunder then begin
     for int1:= 0 to high(fwindowstack) do begin
-     with fwindowstack[int1] do begin
-      if lower <> nil then begin
-       if (upper = nil) then begin
-        gui_raisewindow(lower.winid);
-       end
-       else begin
-//        if int1 = 0 then begin
-//         gui_raisewindow(upper.winid); 
-//        end;
-        gui_stackunderwindow(lower.winid,upper.winid);
+     findlevel(fwindowstack[int1]);
+    end;
+    sortarray(fwindowstack,{$ifdef FPC}@{$endif}cmpwindowstack,
+                                              sizeof(windowstackinfoty));
+   {$ifdef mse_debugzorder}
+    for int1:= 0 to high(fwindowstack) do begin
+     debugwriteln(debugwindowinfo(fwindowstack[int1].lower)+' '+
+                       debugwindowinfo(fwindowstack[int1].upper));
+    end;
+   {$endif}
+    if gui_canstackunder then begin
+     for int1:= 0 to high(fwindowstack) do begin
+      with fwindowstack[int1] do begin
+       if lower <> nil then begin
+        if (upper = nil) then begin
+         gui_raisewindow(lower.winid);
+        end
+        else begin
+ //        if int1 = 0 then begin
+ //         gui_raisewindow(upper.winid); 
+ //        end;
+         gui_stackunderwindow(lower.winid,upper.winid);
+        end;
+       end;
+      end;
+     end;
+    end
+    else begin
+     for int1:= high(fwindowstack) downto 0 do begin
+      with fwindowstack[int1] do begin
+       if (lower <> nil) then begin
+        gui_raisewindow(fwindowstack[int1].lower.winid);
+       end;
+      end;
+     end;
+     for int1:= 0 to high(fwindowstack) do begin //raise top level window
+      with fwindowstack[int1] do begin
+       if lower <> nil then begin
+        if upper <> nil then begin
+         gui_raisewindow(fwindowstack[int1].upper.winid);
+        end;
+        break;
        end;
       end;
      end;
     end;
-   end
-   else begin
-    for int1:= high(fwindowstack) downto 0 do begin
-     with fwindowstack[int1] do begin
-      if (lower <> nil) then begin
-       gui_raisewindow(fwindowstack[int1].lower.winid);
-      end;
-     end;
-    end;
-    for int1:= 0 to high(fwindowstack) do begin //raise top level window
-     with fwindowstack[int1] do begin
-      if lower <> nil then begin
-       if upper <> nil then begin
-        gui_raisewindow(fwindowstack[int1].upper.winid);
-       end;
-       break;
-      end;
-     end;
-    end;
+    exclude(fstate,aps_zordervalid);
    end;
-   exclude(fstate,aps_zordervalid);
+   fwindowstack:= nil;
+  finally
+   exclude(fstate,aps_looplocked);
   end;
-  fwindowstack:= nil;
  end;
 end;
 

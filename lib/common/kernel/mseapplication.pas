@@ -175,7 +175,7 @@ type
         (aps_inited,aps_running,aps_terminated,aps_mousecaptured,
          aps_invalidated,aps_zordervalid,aps_needsupdatewindowstack,
          aps_focused,aps_activewindowchecked,aps_restorelocktransientfor,
-         aps_exitloop,aps_cancelloop,
+         aps_exitloop,aps_cancelloop,aps_looplocked,
          aps_active,aps_waiting,aps_terminating,aps_deinitializing,
          aps_shortcutting,aps_clearkeyhistory,
          aps_waitstarted,aps_waitcanceled,aps_waitterminated,aps_waitok,
