@@ -961,8 +961,9 @@ begin
  if getcliresult('info program',ar1) = gdb_ok then begin
   for int1:= 0 to high(ar1) do begin
    if (pos('child thread',ar1[int1]) > 0) or 
-       (pos('attached thread',ar1[int1]) > 0) or 
-       (pos('attached LWP',ar1[int1]) > 0) then begin
+      (pos('child Thread',ar1[int1]) > 0) or
+      (pos('attached thread',ar1[int1]) > 0) or 
+      (pos('attached LWP',ar1[int1]) > 0) then begin
     splitstring(ar1[int1],ar2,' ');
     if high(ar2) > 0 then begin
      ar1:= nil;
