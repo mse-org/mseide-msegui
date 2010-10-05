@@ -12329,7 +12329,7 @@ begin
           exclude(fstate,tws_groupmaximized);
          end;
          gui_setwindowstate(winid,wsi_minimized,false);
-         if bo1 then begin
+         if bo1 or (wo_notaskbar in foptions) then begin
           gui_hidewindow(winid);
          end;
         end;
