@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -38,7 +38,7 @@ const
  defaultformoptions = [fo_autoreadstat,fo_autowritestat,
                        fo_savepos,fo_savezorder,fo_savestate];
  defaultmainformoptions = defaultformoptions + [fo_main,fo_terminateonclose];
- defaultmainformoptionswindow = [wo_groupleader,wo_taskbar];
+ defaultmainformoptionswindow = [wo_groupleader{,wo_taskbar}];
  
  defaultformwidgetoptions = (defaultoptionswidgetmousewheel - 
                          [ow_mousefocus{,ow_tabfocus}]) + [ow_subfocus,ow_hinton];

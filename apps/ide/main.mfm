@@ -19,6 +19,7 @@ object mainfo: tmainfo
     15
     429
     123)
+  optionswindow = [wo_groupleader]
   mainmenu = mainmenu1
   options = [fo_main, fo_terminateonclose, fo_globalshortcuts, fo_savepos, fo_savezorder, fo_savestate]
   statfile = projectstatfile
