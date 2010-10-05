@@ -87,9 +87,9 @@ type
    procedure objevent(const sender: iobjectlink; const event: objecteventty);
    function getinstance: tobject;
   public
-   procedure deliver;
    constructor create(const akind: eventkindty; const dest: ievent);
    destructor destroy; override;
+   procedure deliver;
  end;
 
  tchildprocevent = class(tobjectevent)
