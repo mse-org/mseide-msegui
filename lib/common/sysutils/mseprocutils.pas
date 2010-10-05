@@ -249,6 +249,7 @@ var
  dwo1: longword;
  ca1: longword;
 begin
+ exitcode:= -1;
  if timeoutus < 0 then begin
   exitcode:= waitforprocess(prochandle);
   result:= true;
@@ -265,7 +266,7 @@ begin
      break;
     end
     else begin
-     if timeout(ca1) then begin
+     if (timeoutus = 0) or timeout(ca1) then begin
       result:= false;
       break;
      end;

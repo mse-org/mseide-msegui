@@ -219,6 +219,7 @@ type
    procedure uploadexe(const sender: tguiapplication; var again: boolean);
    procedure uploadcancel(const sender: tobject);
    procedure gdbserverexe(const sender: tguiapplication; var again: boolean);
+   procedure terminategdbserver;
    procedure gdbservercancel(const sender: tobject);
    procedure updatetargetenvironment;
    function needsdownload: boolean;
@@ -228,6 +229,7 @@ type
    fprojectloaded: boolean;
    errorformfilename: filenamety;
    constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
 
    function checkgdberror(aresult: gdbresultty): boolean;
    function startgdbconnection(const attach: boolean): boolean;
@@ -321,7 +323,14 @@ end;
 constructor tmainfo.create(aowner: tcomponent);
 begin
  frunningprocess:= invalidprochandle;
+ fgdbserverprocid:= invalidprochandle;
  inherited create(aowner);
+end;
+
+destructor tmainfo.destroy;
+begin
+ terminategdbserver;
+ inherited;
 end;
 
 //common
@@ -908,7 +917,8 @@ procedure tmainfo.gdbserverexe(const sender: tguiapplication; var again: boolean
 begin
  sys_schedyield;
  if timeout(fgdbservertimeout) and 
-     getprocessexitcode(fgdbserverprocid,fgdbserverexitcode,100000) then begin
+     (getprocessexitcode(fgdbserverprocid,fgdbserverexitcode,100000) or
+      projectoptions.o.nogdbserverexit) then begin
   sender.terminatewait;
  end
  else begin
@@ -917,9 +927,21 @@ begin
  end;
 end;
 
+procedure tmainfo.terminategdbserver;
+var
+ int1: integer;
+begin
+ if fgdbserverprocid <> invalidprochandle then begin
+  if not getprocessexitcode(fgdbserverprocid,int1) then begin
+   killprocess(fgdbserverprocid);
+  end;
+  fgdbserverprocid:= invalidprochandle;
+ end;
+end;
+
 procedure tmainfo.gdbservercancel(const sender: tobject);
 begin
- killprocess(fgdbserverprocid);
+ terminategdbserver;
 end;
 
 function tmainfo.startgdbconnection(const attach: boolean): boolean;
@@ -935,6 +957,7 @@ begin
    mstr1:= gdbservercommand;
   end;
   if mstr1 <> '' then begin
+   terminategdbserver;
    fgdbserverprocid:= execmse1(syscommandline(mstr1));
    if fgdbserverprocid <> invalidprochandle then begin
     fgdbservertimeout:= timestep(round(1000000*o.gdbserverwait));
@@ -942,7 +965,9 @@ begin
                            mstr1+'" running.','Start gdb Server',
               {$ifdef FPC}@{$endif}gdbservercancel,nil,
               {$ifdef FPC}@{$endif}gdbserverexe) then begin
-     if fgdbserverexitcode <> 0 then begin
+     if (fgdbserverexitcode <> 0) and 
+                     not (projectoptions.o.nogdbserverexit and 
+                               (fgdbserverexitcode = -1)) then begin
       setstattext('gdb server start error '+inttostr(fgdbserverexitcode)+'.',
                 mtk_error);
       exit;
@@ -1172,6 +1197,7 @@ end;
 
 procedure tmainfo.startgdbonexecute(const sender: tobject);
 begin
+ terminategdbserver;
  with projectoptions,texp do begin
   gdb.remoteconnection:= remoteconnection;
   gdb.gdbdownload:= o.gdbdownload;
@@ -2048,6 +2074,7 @@ var
  
 begin
  gdb.abort;
+ terminategdbserver;
  result:= false;
  projectfilebefore:= projectoptions.projectfilename;
  projectdirbefore:= projectoptions.projectdir;

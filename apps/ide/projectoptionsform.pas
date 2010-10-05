@@ -162,6 +162,7 @@ type
    fgdbserverwait: real;
    fexceptclassnames: msestringarty;
    fexceptignore: booleanarty;
+   fnogdbserverexit: boolean;
    function limitgridsize(const avalue: integer): integer;
    procedure setgridsizex(const avalue: integer);
    procedure setgridsizey(const avalue: integer);
@@ -223,6 +224,8 @@ type
    property startupbkpton: boolean read fstartupbkpton write fstartupbkpton;
    property gdbsimulator: boolean read fgdbsimulator write fgdbsimulator;
    property gdbserverwait: real read fgdbserverwait write fgdbserverwait;
+   property nogdbserverexit: boolean read fnogdbserverexit 
+                                                   write fnogdbserverexit;
 
    property exceptclassnames: msestringarty read fexceptclassnames 
                                                  write fexceptclassnames;
@@ -519,6 +522,7 @@ type
    ttabpage19: ttabpage;
    twidgetgrid5: twidgetgrid;
    codetemplatedirs: tfilenameedit;
+   nogdbserverexit: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -2161,6 +2165,7 @@ begin
  gdbservercommand.enabled:= not gdbsimulator.value;
  gdbservercommandattach.enabled:= not gdbsimulator.value;
  gdbserverwait.enabled:= not gdbsimulator.value;
+ nogdbserverexit.enabled:= gdbserverwait.enabled;
  remoteconnection.enabled:= not gdbsimulator.value;
  gdbdownload.enabled:= not gdbsimulator.value;
  downloadalways.enabled:= not gdbsimulator.value;
