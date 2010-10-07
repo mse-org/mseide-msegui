@@ -2130,10 +2130,11 @@ begin
  {$endif !mswindows}
  end
  else begin
-//  internalcommand('-exec-interrupt');
-  {$ifdef linux}
-  kill(fgdb,sigint);
-  {$endif}
+ {$ifdef linux}     //how to do on windows?
+  kill(fgdb,sigint); 
+ {$else}
+  internalcommand('-exec-interrupt'); //hope the best
+ {$endif}
  end;
 end;
 
