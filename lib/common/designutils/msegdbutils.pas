@@ -37,10 +37,12 @@ const
  simulatorprocessors = [pro_arm];
  
 type
- gdbstatety = (gs_syncget,gs_syncack,gs_clicommand,gs_clilist,gs_started,
+ gdbstatety = (gs_syncget,gs_syncack,gs_clicommand,gs_clilist,
+               gs_started,gs_startup,
                gs_execloaded,gs_attached,gs_detached,
                gs_remote,gs_downloaded,gs_downloading,gs_runafterload,
-               gs_internalrunning,gs_running,gs_interrupted,gs_restarted,gs_closing);
+               gs_internalrunning,gs_running,gs_interrupted,gs_restarted,
+               gs_closing,gs_gdbdied);
  gdbstatesty = set of gdbstatety;
 
  recordclassty = 
@@ -69,7 +71,8 @@ type
  valuekindty = (vk_value,vk_tuple,vk_list);
  gdbeventkindty = (gek_done,gek_error,gek_connected,gek_running,
                    gek_stopped,gek_download,gek_loaded,
-                   gek_targetoutput,gek_writeerror,gek_startup);
+                   gek_targetoutput,gek_writeerror,gek_startup,
+                   gek_gdbdied);
 
  resultinfoty = record
   variablename: string;
@@ -79,7 +82,7 @@ type
  resultinfoarty = array of resultinfoty;
  resultinfoararty = array of resultinfoarty;
 
- stopreasonty = (sr_none,sr_error,sr_startup,sr_exception,
+ stopreasonty = (sr_none,sr_error,sr_startup,sr_exception,sr_gdbdied,
                  sr_breakpoint_hit,
                  sr_watchpointtrigger,sr_readwatchpointtrigger,
                  sr_accesswatchpointtrigger,
@@ -91,6 +94,7 @@ const
           'Error',
           'Startup',
           'Exception',
+          'GDB died',
           'Breakpoint hit',
           'Watchpoint triggered',
           'Read Watchpoint triggered',
@@ -107,7 +111,7 @@ type
   reason: stopreasonty;
   time: tdatetime;
   bkptno: integer;
-  threadid: integer;
+  threadid: qword;
   exitcode: integer;
   filename: filenamety;
   filedir: filenamety;
@@ -211,8 +215,8 @@ type
  threadstatety = (ts_none,ts_active);
 
  threadinfoty = record
-  id: integer;       //gdb id
-  threadid: integer; //system id
+  id: qword;         //gdb id
+  threadid: qword;   //system id
   state: threadstatety;
   stackframe: string;
  end;
@@ -308,6 +312,7 @@ type
    {$endif}
    procedure gdbfrom(const sender: tpipereader);
    procedure gdberror(const sender: tpipereader);
+   procedure gdbpipebroken(const sender: tpipereader);
    procedure interpret(const line: string);
    procedure consoleoutput(const text: string);
    procedure targetoutput(const text: string);
@@ -595,8 +600,8 @@ uses
 
 const                                      
  stopreasons: array[stopreasonty] of string = 
-           //sr_none sr_error sr_startup sr_exception
-             ('',     '',     '',          '',      
+           //sr_none sr_error sr_startup sr_exception sr_gdbdied
+             ('',     '',     '',          '',           '',
               'breakpoint-hit','watchpoint-trigger','read-watchpoint-trigger',
               'access-watchpoint-trigger',
               'end-stepping-range','function-finished','exited-normally',
@@ -766,7 +771,7 @@ end;
 procedure tgdbmi.resetexec;
 begin
  fstate:= fstate - [gs_internalrunning,gs_running,gs_execloaded,
-                          gs_attached,gs_started,gs_detached,gs_remote,
+                    gs_attached,gs_started,gs_startup,gs_detached,gs_remote,
                           gs_interrupted,gs_restarted,
                           gs_downloaded,gs_downloading];
  {$ifdef mswindows}
@@ -809,7 +814,7 @@ begin
   fsourcefiles.clear;
   fsourcefiledirs:= nil;
   resetexec;
-  exclude(fstate,gs_closing);
+  fstate:= fstate - [gs_closing,gs_gdbdied];
  end;
 end;
 
@@ -828,12 +833,14 @@ begin
  fgdberror.overloadsleepus:= foverloadsleepus;
  fgdbfrom.oninputavailable:= {$ifdef FPC}@{$endif}gdbfrom;
  fgdberror.oninputavailable:= {$ifdef FPC}@{$endif}gdberror;
+ fgdbfrom.onpipebroken:= {$ifdef FPC}@{$endif}gdbpipebroken;
+ fgdberror.onpipebroken:= {$ifdef FPC}@{$endif}gdbpipebroken;
  fconsolesequence:= 0;
  frunsequence:= 0;
  fsequence:= 1;
  flastbreakpoint:= 0;
  fgdb:= execmse2(syscommandline(commandline)+' --interpreter=mi --nx',
-                      fgdbto,fgdbfrom,fgdberror,false,-1,true,true,true);
+                      fgdbto,fgdbfrom,fgdberror,false,-1,true,false,true);
  if fgdb <> invalidprochandle then begin
   clicommand('set breakpoint pending on');
   clicommand('set height 0');
@@ -961,7 +968,9 @@ begin
  if getcliresult('info program',ar1) = gdb_ok then begin
   for int1:= 0 to high(ar1) do begin
    if (pos('child thread',ar1[int1]) > 0) or 
+   {$ifdef mswindows}
       (pos('child Thread',ar1[int1]) > 0) or
+   {$endif}
       (pos('attached thread',ar1[int1]) > 0) or 
       (pos('attached LWP',ar1[int1]) > 0) then begin
     splitstring(ar1[int1],ar2,' ');
@@ -969,10 +978,8 @@ begin
      ar1:= nil;
      splitstring(ar2[high(ar2)],ar1,'.');
      if high(ar1) > 0 then begin
-      try
-       aprocid:= strtointvalue(ar1[0]);
+      if trystrtointvalue(ar1[0],longword(aprocid)) then begin
        result:= true;
-      except
       end;
      end;
     end;
@@ -986,10 +993,8 @@ begin
       str1:= ar2[high(ar2)];
       if (length(str1) > 2) and (str1[length(str1)-1] = ')') then begin
        str1:= copy(str1,1,length(str1) - 2);
-       try
-        aprocid:= strtointvalue(str1);
+       if trystrtointvalue(str1,longword(aprocid)) then begin
         result:= true;
-       except
        end;
       end;
      end;
@@ -1112,8 +1117,23 @@ begin
   with tgdbevent(event) do begin
    case eventkind of
     gek_startup: begin
+     if gs_startup in fstate then begin
+      exit; //already done
+     end;
+     include(fstate,gs_startup);
      stopinfo:= tgdbstartupevent(event).stopinfo;
      eventkind:= gek_stopped;
+    end;
+    gek_gdbdied: begin
+     exclude(fstate,gs_running);
+     fstoptime:= stopinfo.time;
+     stopinfo.reason:= sr_gdbdied;
+     stopinfo.messagetext:= 'Process died.';
+     if getprocessexitcode(fgdb,int1,2000000) then begin
+      stopinfo.messagetext:= stopinfo.messagetext + 
+                                         ' Exitcode: '+inttostr(int1)+'.';
+     end;
+     closegdb;      
     end;
     gek_stopped: begin
      exclude(fstate,gs_running);
@@ -1185,7 +1205,7 @@ begin
         end;
        end;
        if stopinfo.reason in [sr_exited,sr_exited_normally] then begin
-        exclude(fstate,gs_started);
+        fstate:= fstate - [gs_started,gs_startup];
        end;
        if stopinfo.reason = sr_startup then begin
         if fstartupbreakpoint >= 0 then begin
@@ -1201,6 +1221,10 @@ begin
         {$ifdef UNIX}
         ftargetterminal.restart;
         {$endif}
+        if gs_startup in fstate then begin
+         exit; //already done
+        end;
+        include(fstate,gs_startup);
        end;
       end;
      end;
@@ -1498,13 +1522,26 @@ begin
  end;
 end;
 
+procedure tgdbmi.gdbpipebroken(const sender: tpipereader);
+var
+ ev: tgdbevent;
+begin
+ if not (gs_gdbdied in fstate) then begin
+  include(fstate,gs_gdbdied);
+  ev:= tgdbevent.create(ek_none,ievent(self));
+  ev.eventkind:= gek_gdbdied;
+  ev.flastconsoleoutput:= flastconsoleoutput;
+  application.postevent(ev);
+ end;
+end;
+
 procedure tgdbmi.gdberror(const sender: tpipereader);
 var
  str1: string;
 begin
- if fgdberror.eof then begin
-  exit;
- end;
+// if fgdberror.eof then begin
+//  exit;
+// end;
  str1:= fgdberror.readdatastring;
  targetoutput(str1);
 // writedebug(str1);
@@ -1516,9 +1553,9 @@ var
  bo1: boolean;
  int1: integer;
 begin
- if fgdbfrom.eof then begin
-  exit;
- end;
+// if fgdbfrom.eof then begin
+//  exit;
+// end;
  bo1:= false; //compiler warning
  repeat
   if gs_syncget in fstate then begin
@@ -1878,6 +1915,7 @@ var
 begin
  fstartupbreakpoint:= -1;
  fstartupbreakpoint1:= -1;
+ exclude(fstate,gs_startup);
  if fbeforerun <> '' then begin
   if source(fbeforerun) <> gdb_ok then begin
    postsyncerror;
@@ -2931,7 +2969,7 @@ begin
   end
   else begin
    if not (reason in [sr_exited_normally,sr_detached]) then begin
-    result:= getintegervalue(response,'thread-id',threadid);
+    result:= getqwordvalue(response,'thread-id',threadid);
     if gettuplevalue(response,'frame',frame) then begin
      getstringvalue(frame,'file',str1);
      filename:= str1;
@@ -3092,7 +3130,7 @@ begin
   for int1:= 0 to high(fclivaluelist) do begin
    with infolist[int2] do begin
     ar1:= splitstring(trim(fclivaluelist[int1]),' ',true);
-    if high(ar1) >= 2 then begin
+    if (high(ar1) >= 2) and (ar1[0][1] <> '[') then begin
      if ar1[0] = '*' then begin
       state:= ts_active;
       ar1:= copy(ar1,1,bigint);
@@ -3117,26 +3155,19 @@ begin
      threadid:= 0;
      ar2:= splitstring(ar1[2],'.');
      if high(ar2) > 0 then begin
-      try
-       threadid:= strtohex(ar2[1]);
-      except
-      end;
+      trystrtohex64(ar2[1],threadid);
      end
      else begin
       if (high(ar1) > 1) and (ar1[1] = '(LWP') then begin
-       try
-        threadid:= strtoint(copy(ar1[2],1,length(ar1[2])-1));
-       except
-       end;
+       trystrtoint64(copy(ar1[2],1,length(ar1[2])-1),int64(threadid));
 //       int3:= threadid;
 //       threadid:= id;
 //       id:= int3;
 //       ar1:= copy(ar1,2,bigint);
       end
       else begin
-       try
-        threadid:= strtohex(ar1[2]);
-       except
+       if not trystrtoint64(ar1[0],int64(threadid)) then begin
+        trystrtohex64(ar1[2],threadid);
        end;
       end;
      end;

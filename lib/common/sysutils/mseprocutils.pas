@@ -249,32 +249,34 @@ var
  dwo1: longword;
  ca1: longword;
 begin
+ result:= false;
  exitcode:= -1;
- if timeoutus < 0 then begin
-  exitcode:= waitforprocess(prochandle);
-  result:= true;
- end
- else begin
-  ca1:= timestep(timeoutus);
-  result:= false; //compiler warning
-  while true do begin
-   result:= getexitcodeprocess(prochandle,dwo1);
-   if result then begin
-    if dwo1 <> still_active then begin
-     exitcode:= dwo1;
-     closehandle(prochandle);
-     break;
+ if prochandle <> invalidprochandle then begin
+  if timeoutus < 0 then begin
+   exitcode:= waitforprocess(prochandle);
+   result:= true;
+  end
+  else begin
+   ca1:= timestep(timeoutus);
+   while true do begin
+    result:= getexitcodeprocess(prochandle,dwo1);
+    if result then begin
+     if dwo1 <> still_active then begin
+      exitcode:= dwo1;
+      closehandle(prochandle);
+      break;
+     end
+     else begin
+      if (timeoutus = 0) or timeout(ca1) then begin
+       result:= false;
+       break;
+      end;
+      sys_schedyield;
+     end;
     end
     else begin
-     if (timeoutus = 0) or timeout(ca1) then begin
-      result:= false;
-      break;
-     end;
-     sys_schedyield;
+     raise eoserror.create('');
     end;
-   end
-   else begin
-    raise eoserror.create('');
    end;
   end;
  end;
@@ -559,19 +561,21 @@ var
 begin
  result:= false;
  exitcode:= -1;
- result:= check(waitpid(prochandle,@dwo1,wnohang));
- if not result and (timeoutus <> 0) then begin
-  if timeoutus < 0 then begin
-   repeat
-    result:= check(waitpid(prochandle,@dwo1,0));
-   until result;
-  end
-  else begin
-   ca1:= timestep(timeoutus);
-   while not result and not timeout(ca1) do begin
-    sys_schedyield;
-    sleep(10);       //todo: use better method
-    result:= check(waitpid(prochandle,@dwo1,wnohang));
+ if prochandle <> invalidprochandle then begin
+  result:= check(waitpid(prochandle,@dwo1,wnohang));
+  if not result and (timeoutus <> 0) then begin
+   if timeoutus < 0 then begin
+    repeat
+     result:= check(waitpid(prochandle,@dwo1,0));
+    until result;
+   end
+   else begin
+    ca1:= timestep(timeoutus);
+    while not result and not timeout(ca1) do begin
+     sys_schedyield;
+     sleep(10);       //todo: use better method
+     result:= check(waitpid(prochandle,@dwo1,wnohang));
+    end;
    end;
   end;
  end;

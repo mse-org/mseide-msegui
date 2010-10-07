@@ -137,7 +137,6 @@ function intvaluetostr(const value: int64; const base: numbasety = nb_dec;
 function trystrtoptruint(const inp: string; out value: ptruint): boolean;
 function strtoptruint(const inp: string): ptruint;
 
- //todo: 64bit
 function trystrtobin(const inp: string; out value: longword): boolean;
 function strtobin(const inp: string): longword;
 function trystrtooct(const inp: string; out value: longword): boolean;

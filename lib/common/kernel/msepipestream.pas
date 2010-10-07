@@ -521,7 +521,8 @@ var
  str1: string;
  bo1: boolean;
 begin
- if (tss_pipeactive in fstate) or (bufend <> bufoffset) then begin
+ if not (tss_error in fstate) and 
+          ((tss_pipeactive in fstate) or (bufend <> bufoffset)) then begin
   bo1:= inherited readstrln(str1);
   fpipebuffer:= fpipebuffer + str1;
   if bo1 then begin

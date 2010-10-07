@@ -885,7 +885,7 @@ begin
    resetdebugdisp;
    setstattext('*** Running ***',mtk_running);   
   end;
-  gek_error,gek_writeerror: begin
+  gek_error,gek_writeerror,gek_gdbdied: begin
    setstattext('GDB: '+stopinfo.messagetext,mtk_error);
   end;
   gek_targetoutput: begin
