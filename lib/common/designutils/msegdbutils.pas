@@ -3159,14 +3159,12 @@ begin
      end
      else begin
       if (high(ar1) > 1) and (ar1[1] = '(LWP') then begin
-       trystrtoint64(copy(ar1[2],1,length(ar1[2])-1),int64(threadid));
-//       int3:= threadid;
-//       threadid:= id;
-//       id:= int3;
-//       ar1:= copy(ar1,2,bigint);
+       trystrtoint64(copy(ar1[2],1,length(ar1[2])-1),pint64(@threadid)^);
+                                   //delphi compatibility
+//       trystrtoint64(copy(ar1[2],1,length(ar1[2])-1),int64(threadid));
       end
       else begin
-       if not trystrtoint64(ar1[0],int64(threadid)) then begin
+       if not trystrtoint64(ar1[0],pint64(@threadid)^) then begin
         trystrtohex64(ar1[2],threadid);
        end;
       end;
