@@ -840,7 +840,8 @@ begin
  fsequence:= 1;
  flastbreakpoint:= 0;
  fgdb:= execmse2(syscommandline(commandline)+' --interpreter=mi --nx',
-                      fgdbto,fgdbfrom,fgdberror,false,-1,true,false,true);
+                      fgdbto,fgdbfrom,fgdberror,false,-1,true,
+                      {$ifdef mswindows}true{$else}false{$endif},true);
  if fgdb <> invalidprochandle then begin
   clicommand('set breakpoint pending on');
   clicommand('set height 0');
@@ -968,9 +969,6 @@ begin
  if getcliresult('info program',ar1) = gdb_ok then begin
   for int1:= 0 to high(ar1) do begin
    if (pos('child thread',ar1[int1]) > 0) or 
-   {$ifdef mswindows}
-      (pos('child Thread',ar1[int1]) > 0) or
-   {$endif}
       (pos('attached thread',ar1[int1]) > 0) or 
       (pos('attached LWP',ar1[int1]) > 0) then begin
     splitstring(ar1[int1],ar2,' ');
@@ -995,6 +993,14 @@ begin
        str1:= copy(str1,1,length(str1) - 2);
        if trystrtointvalue(str1,longword(aprocid)) then begin
         result:= true;
+       end;
+      end
+      else begin
+       if str1 <> '' then begin
+        ar2:= splitstring(str1,'.');
+        if trystrtointvalue(ar2[0],longword(aprocid)) then begin
+         result:= true;
+        end;
        end;
       end;
      end;
