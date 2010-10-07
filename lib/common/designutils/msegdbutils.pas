@@ -1782,7 +1782,9 @@ begin
  fillchar(info,sizeof(info),0);
  info.reason:= sr_error;
  if result = gdb_ok then begin
-  if getprocid(fprocid) and (fprocid = procid) then begin
+//  if getprocid(fprocid) and (fprocid = procid) then begin
+               //win32 gdb 7.1 crashes with "info program"
+   fprocid:= procid;
    result:= stacklistframes(frames1,0,1);
    if (result = gdb_ok) or (result = gdb_message) then begin
     if result = gdb_message then begin
@@ -1799,7 +1801,7 @@ begin
        filename+':'+inttostr(line)+' Function: '+func;
      end;
     end;
-   end;
+//   end;
    initinternalbkpts;
    initproginfo;
   end
