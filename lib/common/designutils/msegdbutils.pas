@@ -792,7 +792,9 @@ var
 begin
  if not (gs_closing in fstate) then begin
   include(fstate,gs_closing);
-  abort;
+  if fgdb <> invalidprochandle then begin
+   abort;
+  end;
  {$ifdef mswindows}
   if fgdb <> invalidprochandle then begin
    int1:= fgdb;
@@ -1143,6 +1145,7 @@ begin
      if getprocessexitcode(fgdb,int1,2000000) then begin
       stopinfo.messagetext:= stopinfo.messagetext + 
                                          ' Exitcode: '+inttostr(int1)+'.';
+      fgdb:= invalidprochandle;
      end;
      closegdb;      
     end;
@@ -2012,12 +2015,18 @@ function tgdbmi.checkconnection: gdbresultty;
 begin
  result:= gdb_ok;
  if fremoteconnection <> '' then begin
-  result:= synccommand('-target-select '+fremoteconnection);
+  result:= synccommand('-gdb-set target-async 1');
+  if result = gdb_ok then begin
+   result:= synccommand('-target-select '+fremoteconnection);
+  end;
   if result <> gdb_ok then begin
    exit;
   end;
   include(fstate,gs_remote);
   initproginfo;
+ end
+ else begin
+  result:= synccommand('-gdb-set target-async 0');
  end;
 end;
 
@@ -2130,11 +2139,11 @@ begin
  {$endif !mswindows}
  end
  else begin
- {$ifdef linux}     //how to do on windows?
-  kill(fgdb,sigint); 
- {$else}
-  internalcommand('-exec-interrupt'); //hope the best
- {$endif}
+// {$ifdef linux}     //how to do on windows?
+//  kill(fgdb,sigint); 
+// {$else}
+  internalcommand('-exec-interrupt'); //runs in async mode
+// {$endif}
  end;
 end;
 

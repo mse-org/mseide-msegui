@@ -932,8 +932,11 @@ var
  int1: integer;
 begin
  if fgdbserverprocid <> invalidprochandle then begin
-  if not getprocessexitcode(fgdbserverprocid,int1) then begin
-   killprocess(fgdbserverprocid);
+  try
+   if not getprocessexitcode(fgdbserverprocid,int1) then begin
+    killprocess(fgdbserverprocid);
+   end;
+  except
   end;
   fgdbserverprocid:= invalidprochandle;
  end;
