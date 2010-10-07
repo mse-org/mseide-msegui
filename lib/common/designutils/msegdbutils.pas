@@ -787,10 +787,19 @@ begin
 end;
 
 procedure tgdbmi.closegdb;
+var
+ int1: integer;
 begin
  if not (gs_closing in fstate) then begin
   include(fstate,gs_closing);
   abort;
+ {$ifdef mswindows}
+  if fgdb <> invalidprochandle then begin
+   int1:= fgdb;
+   fgdb:= invalidprochandle;
+   killprocess(int1);
+  end;
+ {$else}
   if fgdbfrom <> nil then begin
    fgdbfrom.terminate;
   end;
@@ -798,13 +807,10 @@ begin
    fgdberror.terminate;
   end;
   if fgdb <> invalidprochandle then begin
-//   try
-//    abort;
-//   except
-//   end;
    killprocess(fgdb);
    fgdb:= invalidprochandle;
   end;
+ {$endif}
   fgdbto.free;
   fgdbto:= nil;
   fgdbfrom.free;
@@ -840,8 +846,7 @@ begin
  fsequence:= 1;
  flastbreakpoint:= 0;
  fgdb:= execmse2(syscommandline(commandline)+' --interpreter=mi --nx',
-                      fgdbto,fgdbfrom,fgdberror,false,-1,true,
-                      {$ifdef mswindows}true{$else}false{$endif},true);
+                      fgdbto,fgdbfrom,fgdberror,false,-1,true,false,true);
  if fgdb <> invalidprochandle then begin
   clicommand('set breakpoint pending on');
   clicommand('set height 0');
@@ -1532,7 +1537,7 @@ procedure tgdbmi.gdbpipebroken(const sender: tpipereader);
 var
  ev: tgdbevent;
 begin
- if not (gs_gdbdied in fstate) then begin
+ if (fgdb <> invalidprochandle) and not (gs_gdbdied in fstate) then begin
   include(fstate,gs_gdbdied);
   ev:= tgdbevent.create(ek_none,ievent(self));
   ev.eventkind:= gek_gdbdied;
