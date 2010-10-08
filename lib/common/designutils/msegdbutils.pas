@@ -40,7 +40,7 @@ type
  gdbstatety = (gs_syncget,gs_syncack,gs_clicommand,gs_clilist,
                gs_started,gs_startup,
                gs_execloaded,gs_attached,gs_detached,
-               gs_remote,gs_downloaded,gs_downloading,gs_runafterload,
+               gs_remote,gs_async,gs_downloaded,gs_downloading,gs_runafterload,
                gs_internalrunning,gs_running,gs_interrupted,gs_restarted,
                gs_closing,gs_gdbdied);
  gdbstatesty = set of gdbstatety;
@@ -771,7 +771,8 @@ end;
 procedure tgdbmi.resetexec;
 begin
  fstate:= fstate - [gs_internalrunning,gs_running,gs_execloaded,
-                    gs_attached,gs_started,gs_startup,gs_detached,gs_remote,
+                    gs_attached,gs_started,gs_startup,gs_detached,
+                    gs_remote,gs_async,
                           gs_interrupted,gs_restarted,
                           gs_downloaded,gs_downloading];
  {$ifdef mswindows}
@@ -2015,7 +2016,9 @@ function tgdbmi.checkconnection: gdbresultty;
 begin
  result:= gdb_ok;
  if fremoteconnection <> '' then begin
-  result:= synccommand('-gdb-set target-async 1');
+  if synccommand('-gdb-set target-async 1') = gdb_ok then begin
+   include(fstate,gs_async);
+  end;
   if result = gdb_ok then begin
    result:= synccommand('-target-select '+fremoteconnection);
   end;
@@ -2026,7 +2029,7 @@ begin
   initproginfo;
  end
  else begin
-  result:= synccommand('-gdb-set target-async 0');
+  {result:= }synccommand('-gdb-set target-async 0'); //fails on older gdb's
  end;
 end;
 
@@ -2139,11 +2142,16 @@ begin
  {$endif !mswindows}
  end
  else begin
-// {$ifdef linux}     //how to do on windows?
-//  kill(fgdb,sigint); 
-// {$else}
-  internalcommand('-exec-interrupt'); //runs in async mode
-// {$endif}
+  if gs_async in fstate then begin
+   internalcommand('-exec-interrupt'); //runs in async mode
+  end
+  else begin
+  {$ifdef linux}     //how to do on windows?
+   kill(fgdb,sigint); 
+  {$else}
+   internalcommand('-exec-interrupt'); //runs in async mode
+  {$endif}
+  end;
  end;
 end;
 
