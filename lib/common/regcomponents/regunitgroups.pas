@@ -14,15 +14,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 }
-{ MSEgui Copyright (c) 2004-2009 by Martin Schreiber
-
-    See the file COPYING.MSE, included in this distribution,
-    for details about the copyright.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-}
 unit regunitgroups;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface

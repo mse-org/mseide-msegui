@@ -2149,7 +2149,8 @@ begin
   {$ifdef linux}     //how to do on windows?
    kill(fgdb,sigint); 
   {$else}
-   internalcommand('-exec-interrupt'); //runs in async mode
+   internalcommand('-exec-interrupt'); //probably no success because 
+                                       //not in async mode
   {$endif}
   end;
  end;
