@@ -2944,14 +2944,18 @@ end;
 procedure tdesigner.beginstreaming(const amodule: pmoduleinfoty);
 begin
  with amodule^ do begin
-  tformdesignerfo(designform).beginstreaming;
+  if designform <> nil then begin
+   tformdesignerfo(designform).beginstreaming;
+  end;
  end;
 end;
 
 procedure tdesigner.endstreaming(const amodule: pmoduleinfoty);
 begin
  with amodule^ do begin
-  tformdesignerfo(designform).endstreaming;
+  if designform <> nil then begin
+   tformdesignerfo(designform).endstreaming;
+  end;
  end;
 end;
 

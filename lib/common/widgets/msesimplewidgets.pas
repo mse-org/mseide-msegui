@@ -1232,8 +1232,13 @@ procedure tcustombutton.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  inherited;
- if (event = oe_changed) and (sender = finfo.ca.imagelist) then begin
-  actionchanged;
+ if sender = finfo.ca.imagelist then begin
+  if (event = oe_changed) then begin
+   actionchanged;
+  end;
+  if (event = oe_destroyed) then begin
+   finfo.ca.imagelist:= nil;
+  end;
  end;
 end;
 
