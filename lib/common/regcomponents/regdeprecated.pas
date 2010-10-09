@@ -19,13 +19,18 @@ unit regdeprecated;
 interface
 
 implementation
+{$ifndef mse_no_db}{$ifdef FPC}{$define hasdb}{$endif}{$endif}
 uses
- regdeprecated_bmp,msedesignintf,msemysql40conn,msemysql41conn,msemysql50conn;
- 
+ regdeprecated_bmp,msedesignintf
+    {$ifdef hasdb}
+     ,msemysql40conn,msemysql41conn,msemysql50conn
+    {$endif};
+
 procedure Register;
 begin
- registercomponents('Depr',[tmsemysql40connection,tmsemysql41connection,
-                            tmsemysql50connection]);
+ registercomponents('Depr',[{$ifdef hasdb}
+    tmsemysql40connection,tmsemysql41connection,tmsemysql50connection
+                            {$endif}]);
  registercomponenttabhints(['Depr'],['Deprecated Components']);
 end;
 
