@@ -2651,6 +2651,7 @@ type
    fmousewinid: winidty;
    fdesigning: boolean;
    fmodalwindow: twindow;
+   flockupdatewindowstack: twindow;
    fhintwidget: thintwidget;
    fhinttimer: tsimpletimer;
    fmouseparktimer: tsimpletimer;
@@ -12274,7 +12275,7 @@ end;
 
 procedure twindow.hide(windowevent: boolean);
 var
- int1: integer;
+ int1,int2: integer;
  window1: twindow;
  bo1: boolean;
 begin
@@ -12297,27 +12298,53 @@ begin
      end;
     end
     else begin
-     include(appinst.fstate,aps_needsupdatewindowstack);
+//     include(appinst.fstate,aps_needsupdatewindowstack);
      if (application.fmainwindow = self) and not appinst.terminated then begin
       bo1:= gui_grouphideminimizedwindows;
 //      gui_flushgdi;
 //      sys_schedyield;
+      application.sortzorder;
+      with appinst do begin
+       setlength(fgroupzorder,length(fwindows));
+       int2:= 0;
+       for int1:= 0 to high(fwindows) do begin
+        if tws_windowvisible in fwindows[int1].fstate then begin
+                      //don't touch invisible windows
+         fgroupzorder[int2]:= fwindows[int1];
+         inc(int2);
+        end;
+       end;
+       if int2 = 1 then begin
+        fgroupzorder:= nil; //only me
+       end
+       else begin
+        setlength(fgroupzorder,int2);
+       end;
+      end;
+      
       fstate:= fstate - [tws_windowvisible,tws_groupmaximized];
       include(fstate,tws_grouphidden);
       include(fstate,tws_groupminimized);
       if fwindowposbefore = wp_maximized then begin
        include(fstate,tws_groupmaximized);
       end;
-      application.sortzorder;
-      appinst.fgroupzorder:= copy(appinst.fwindows);
+      appinst.flockupdatewindowstack:= self; 
+             //lock z-order manipulation until show
+
       for int1:= 0 to high(appinst.fwindows) do begin
        window1:= appinst.fwindows[int1];
+      {$ifdef mse_debugwindowfocus}
+       if (window1.fwindow.id <> 0) and ((window1 = self) or
+                              gui_windowvisible(window1.fwindow.id)) then begin
+        if window1 = self then begin
+         debugwrite('* ');
+        end;
+        debugwindow('groupminimized ',window1.fwindow.id);
+       end;
+      {$endif}
        if (window1 <> self) and (window1.fwindow.id <> 0) and 
                          gui_windowvisible(window1.fwindow.id) then begin
         with window1 do begin
-        {$ifdef mse_debugwindowfocus}
-         debugwindow('groupminimized ',fwindow.id);
-        {$endif}
          include(fstate,tws_grouphidden);
          if tws_windowvisible in fstate then begin
           include(fstate,tws_groupminimized);
@@ -12335,6 +12362,11 @@ begin
         end;
        end;
       end;
+     {$ifdef mse_debugwindowfocus}
+      for int1:= 0 to high(appinst.fgroupzorder) do begin
+       debugwriteln(' groupzorder '+appinst.fgroupzorder[int1].fowner.name);
+      end;
+     {$endif}
       if bo1 then begin
        gui_minimizeapplication;
       end;
@@ -12361,6 +12393,15 @@ var
 begin
  if (ws_visible in fowner.fwidgetstate) then begin
   if not visible then begin
+  {$ifdef mse_debugwindowfocus}
+   debugwindow('show ',fwindow.id);
+  {$endif}
+   with appinst do begin
+    if flockupdatewindowstack = self then begin
+     flockupdatewindowstack:= nil; //enable z-order handling
+     fwindowstack:= nil; //remove pending    
+    end;
+   end;
    include(fstate,tws_windowvisible);
    if not (csdesigning in fowner.ComponentState) then begin
     if (fsyscontainer <> sywi_none) or (fcontainer <> 0) then begin
@@ -12409,6 +12450,10 @@ begin
            size1:= wsi_maximized;
           end;
          end;
+       {$ifdef mse_debugwindowfocus}
+         debugwindow('groupshow '+
+           getenumname(typeinfo(windowsizety),integer(size1))+' ',fwindow.id);
+       {$endif}
          gui_setwindowstate(winid,size1,true);
          bo2:= true;
         end;
@@ -12417,13 +12462,18 @@ begin
        end;
       end;
      end;
+     if (fwindowposbefore = wp_maximized) and 
+                  (windowpos <> wp_maximized) then begin
+                   //necessary for win32 show desktop
+      gui_setwindowstate(winid,wsi_maximized,true);
+     end;
      if bo1 and bo2 then begin
       window1:= nil; //compiler warning
       activate;
       with appinst do begin
        if fgroupzorder <> nil then begin
-        removeitem(pointerarty(fgroupzorder),window1);
-        additem(pointerarty(fgroupzorder),window1);
+//        removeitem(pointerarty(fgroupzorder),window1);
+//        additem(pointerarty(fgroupzorder),window1);
         fwindowstack:= nil;
         setlength(fwindowstack,high(fgroupzorder));
         window1:= fgroupzorder[0]; //lowest
@@ -13833,6 +13883,9 @@ begin
  if ffocuslocktransientfor = sender then begin
   ffocuslockwindow:= nil;
  end;
+ if flockupdatewindowstack = sender then begin
+  flockupdatewindowstack:= nil;
+ end;
 end;
 
 function tinternalapplication.getmousewinid: winidty;
@@ -14668,7 +14721,7 @@ begin       //eventloop
       if terminated then begin
        break;
       end;
-      if aps_needsupdatewindowstack in fstate then begin
+      if (aps_needsupdatewindowstack in fstate) then begin
        updatewindowstack;
        exclude(fstate,aps_needsupdatewindowstack);
       end
@@ -15056,7 +15109,7 @@ procedure tinternalapplication.checkwindowstack;
 var
  int1: integer;
 begin
- if fwindowstack <> nil then begin
+ if (fwindowstack <> nil) and (flockupdatewindowstack = nil) then begin
   include(fstate,aps_looplocked); //no windows sizing callbacks
   try
    if not nozorderhandling then begin
@@ -15220,55 +15273,57 @@ var
  int1,int2: integer;
  bo1: boolean;
 begin
- checkwindowstack;
- sortzorder;
- ar3:= windowar; //refcount 1
-{$ifdef mse_debugzorder}
- debugwriteln('*****updatewindowstack*****');
- printwindowstackinfo(ar3);
-{$endif}
- ar4:= copy(ar3);
- sortarray(ar3,{$ifdef FPC}@{$endif}compwindowzorder,sizeof(ar3[0]));
- for int1:= 0 to high(ar3) do begin
-  with ar3[int1] do begin
-   fstate:= fstate - [tws_raise,tws_lower]; 
-           //reset bringtofrontlocal/sendtobacklocal
-  end;
- end;
- int2:= -1;
-{$ifdef mse_debugzorder}
- debugwriteln('++++');
- printwindowstackinfo(ar3);
-{$endif}
- for int1:= 0 to high(ar4) do begin
-  if ar3[int1] <> ar4[int1] then begin
-   int2:= int1; //invalid stackorder
-   break;
-  end;
- end;
- if int2 >= 0 then begin
-  if gui_canstackunder then begin
-   bo1:= true;
-   for int1:= int2+1 to high(ar3) do begin
-    if ar4[int1] <> ar3[int1-1] then begin
-     bo1:= false;
-     break;
-    end;
-   end;
-   if bo1 then begin //single local raise
-    gui_stackoverwindow(ar4[int2].winid,ar4[high(ar4)].winid);
-    fwindowstack:= nil;
-    exit;
+ if flockupdatewindowstack = nil then begin
+  checkwindowstack;
+  sortzorder;
+  ar3:= windowar; //refcount 1
+ {$ifdef mse_debugzorder}
+  debugwriteln('*****updatewindowstack*****');
+  printwindowstackinfo(ar3);
+ {$endif}
+  ar4:= copy(ar3);
+  sortarray(ar3,{$ifdef FPC}@{$endif}compwindowzorder,sizeof(ar3[0]));
+  for int1:= 0 to high(ar3) do begin
+   with ar3[int1] do begin
+    fstate:= fstate - [tws_raise,tws_lower]; 
+            //reset bringtofrontlocal/sendtobacklocal
    end;
   end;
-  inc(int2);
-  for int1:= high(ar3) downto int2 do begin
-   if not (tws_windowvisible in ar3[int1-1].fstate) then begin
+  int2:= -1;
+ {$ifdef mse_debugzorder}
+  debugwriteln('++++');
+  printwindowstackinfo(ar3);
+ {$endif}
+  for int1:= 0 to high(ar4) do begin
+   if ar3[int1] <> ar4[int1] then begin
+    int2:= int1; //invalid stackorder
     break;
    end;
-   stackunder(ar3[int1-1],ar3[int1]);
   end;
-  checkwindowstack;
+  if int2 >= 0 then begin
+   if gui_canstackunder then begin
+    bo1:= true;
+    for int1:= int2+1 to high(ar3) do begin
+     if ar4[int1] <> ar3[int1-1] then begin
+      bo1:= false;
+      break;
+     end;
+    end;
+    if bo1 then begin //single local raise
+     gui_stackoverwindow(ar4[int2].winid,ar4[high(ar4)].winid);
+     fwindowstack:= nil;
+     exit;
+    end;
+   end;
+   inc(int2);
+   for int1:= high(ar3) downto int2 do begin
+    if not (tws_windowvisible in ar3[int1-1].fstate) then begin
+     break;
+    end;
+    stackunder(ar3[int1-1],ar3[int1]);
+   end;
+   checkwindowstack;
+  end;
  end;
 end;
 
