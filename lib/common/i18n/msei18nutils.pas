@@ -192,6 +192,7 @@ function loadlangunit(aname: string): boolean;
             //true if ok
 var
  reglang: registerlangty;
+ fdir,fname: filenamety;
 begin
  result:= false;
  try
@@ -209,11 +210,15 @@ begin
   {$ifdef mswindows}
    aname:= aname+'.dll';
   {$else}
-   aname:= 'lib'+aname+'.so';
+   splitfilepath(aname,fdir,fname);
+//   aname:= 'lib'+aname+'.so';
+   aname:= fdir+'lib'+fname+'.so';
   {$endif}
-   langlibhandle:= loadlibrary({$ifndef FPC}pchar({$endif}aname{$ifndef FPC}){$endif});
+   langlibhandle:= loadlibrary(
+                  {$ifndef FPC}pchar({$endif}aname{$ifndef FPC}){$endif});
   {$ifdef UNIX}
-   if langlibhandle = 0 then begin
+   if (langlibhandle = 0) and (fdir = '') then begin
+      //try in application dir
     langlibhandle:= loadlibrary({$ifndef FPC}pchar({$endif}
                filedir(sys_getapplicationpath)+aname{$ifndef FPC}){$endif});
    end;
