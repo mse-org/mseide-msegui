@@ -496,21 +496,21 @@ end;
 
 function scaleexp10(const value: currency; const exp: integer): currency;
 begin
-{$ifdef FPC}
- if exp < 0 then begin
-  int64(result):= int64(value) div int64exp10ar[-exp];
- end
- else begin
-  int64(result):= int64(value) * int64exp10ar[exp];
- end;
-{$else}
+//{$ifdef FPC}
+// if exp < 0 then begin
+//  int64(result):= int64(value) div int64exp10ar[-exp];
+// end
+// else begin
+//  int64(result):= int64(value) * int64exp10ar[exp];
+// end;
+//{$else}
  if exp < 0 then begin
   pint64(@result)^:= pint64(@value)^ div int64exp10ar[-exp];
  end
  else begin
   pint64(@result)^:= pint64(@value)^ * int64exp10ar[exp];
  end;
-{$endif}
+//{$endif}
 end;
 
 procedure scaleexp101(var value: int64; const exp: integer);
@@ -535,21 +535,21 @@ end;
 
 procedure scaleexp101(var value: currency; const exp: integer);
 begin
-{$ifdef FPC}
- if exp < 0 then begin
-  int64(value):= int64(value) div int64exp10ar[-exp];
- end
- else begin
-  int64(value):= int64(value) * int64exp10ar[exp];
- end;
-{$else}
+//{$ifdef FPC}
+// if exp < 0 then begin
+//  int64(value):= int64(value) div int64exp10ar[-exp];
+// end
+// else begin
+//  int64(value):= int64(value) * int64exp10ar[exp];
+// end;
+//{$else}
  if exp < 0 then begin
   pint64(@value)^:= pint64(@value)^ div int64exp10ar[-exp];
  end
  else begin
   pint64(@value)^:= pint64(@value)^ * int64exp10ar[exp];
  end;
-{$endif}
+//{$endif}
 end;
 
 procedure swaprgb1(var value: longword);
