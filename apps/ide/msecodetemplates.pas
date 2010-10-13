@@ -38,6 +38,7 @@ ${param2} ${param3} more params
 "
 If noselect=0 or not defined the templateblock will be selected in editor.
 If noselect=1 the cursor will be placed at the offset by cursorcol, cursorrow.
+If indent=1 the inserted block will be indented at cursor column
 Minimal template file:
 "
 [header]
@@ -62,6 +63,7 @@ type
   path: filenamety;
   comment: msestring;
   select: boolean;
+  indent: boolean;
   cursorcol: integer;
   cursorrow: integer;
   params: msestringarty;
@@ -161,6 +163,7 @@ begin
     path:= afilename;
     comment:= readmsestring('comment','');
     select:= readboolean('select',false);
+    indent:= readboolean('indent',false);
     cursorcol:= readinteger('cursorcol',0,0,1000);
     cursorrow:= readinteger('cursorrow',0,0,1000000);
     params:= readarray('params',msestringarty(nil));

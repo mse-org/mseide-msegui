@@ -1484,6 +1484,7 @@ var
  gc1,gc2: gridcoordty;
  int1: integer;
  mac1: tmacrolist;
+ ar1: msestringarty;
 begin
  gc1:= edit.editpos;
  if gc1.row >= 0 then begin
@@ -1496,6 +1497,13 @@ begin
      editor.begingroup;
      gc1.col:= gc2.col+length(mstr1);
      deletetext(gc2,gc1);
+     if po2^.indent then begin
+      ar1:= breaklines(mstr2);
+      for int1:= 1 to high(ar1) do begin
+       ar1[int1]:= charstring(msechar(' '),gc2.col)+ar1[int1];
+      end;
+      mstr2:= concatstrings(ar1,lineend);
+     end;
      inserttext(gc2,mstr2,select);
      if not select then begin
       if cursorpos.row = 0 then begin
