@@ -6900,6 +6900,7 @@ begin
   {$endif}
   lasteventtime:= currenttime;
   setlocale(lc_all,'');
+  xsupportslocale(); //try to run anyway
  // xsetlocalemodifiers(pchar('@im=local'));
  // cursorshape:= cursorshapety(-1);
   terminated:= false;
