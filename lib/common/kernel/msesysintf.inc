@@ -22,6 +22,7 @@ function sys_killprocess(const proc: prochandlety): syserrorty;
 function sys_threadcreate(var info: threadinfoty): syserrorty;
 function sys_threadwaitfor(var info: threadinfoty): syserrorty;
 function sys_threaddestroy(var info: threadinfoty): syserrorty;
+function sys_threadschedyield: syserrorty;
 function sys_getcurrentthread: threadty;
 function sys_issamethread(const a,b: threadty): boolean;
 

@@ -270,12 +270,12 @@ end;
 
 procedure sys_schedyield;
 begin
- sleep(0);
+ windows.sleep(0);
 end;
 
 procedure sys_usleep(const us: cardinal);
 begin
- sleep(us div 1000);
+ windows.sleep(us div 1000);
 end;
 
 function sys_getapplicationpath: filenamety;
@@ -668,6 +668,12 @@ begin
   end;
   closehandle(handle);
  end;
+end;
+
+function sys_threadschedyield: syserrorty;
+begin
+ result:= sye_ok;
+ windows.sleep(0);
 end;
 
 function sys_mutexcreate(out mutex: mutexty): syserrorty;

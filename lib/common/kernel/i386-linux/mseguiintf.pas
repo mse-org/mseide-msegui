@@ -951,7 +951,7 @@ var
     end;
     if bo1 then begin
      bo1:= false;
-//     sleep(0);
+//     sys_threadschedyield;
      sys_schedyield;
     end
     else begin

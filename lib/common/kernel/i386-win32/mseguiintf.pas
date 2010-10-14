@@ -4231,7 +4231,7 @@ begin
     result:= gue_ok;
     break;
    end;
-   sleep(0);
+   sys_threadschedyield;
   end;
  end;
  }

@@ -123,7 +123,7 @@ procedure lockiconv(var lockcount: integer);
 begin
  while interlockedincrement(lockcount) <> 0 do begin
   interlockeddecrement(lockcount);
-  sleep(0);
+  sys_threadschedyield;
  end;
 end;
 

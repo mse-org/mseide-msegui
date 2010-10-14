@@ -136,7 +136,7 @@ begin
    end;
   end;
   if not factive then begin
-   usleep(0);
+   sys_threadschedyield(0);
   end;
  until terminated;
  result:= 0;

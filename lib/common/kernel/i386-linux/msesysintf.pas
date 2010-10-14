@@ -854,6 +854,12 @@ begin
 {$endif}
 end;
 
+function sys_threadschedyield: syserrorty;
+begin
+ result:= sye_ok;
+ sched_yield;
+end;
+
 function sys_getcurrentthread: threadty;
 begin
  result:= pthread_self;

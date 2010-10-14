@@ -30,7 +30,6 @@ type
 procedure SetCWidestringManager;
 
 implementation
-
 {$linklib c}
 
 {$ifndef linux}  // Linux (and maybe glibc platforms in general), have iconv in glibc.
@@ -46,7 +45,7 @@ Uses
   unix,
   unixtype,
 //  sysutils,
-  initc, msedatalist;
+  initc, msedatalist,msesysintf;
 
 Const
 {$ifndef useiconv}
@@ -132,7 +131,7 @@ procedure lockiconv(var lockcount: integer);
 begin
  while interlockedincrement(lockcount) <> 0 do begin
   interlockeddecrement(lockcount);
-  sleep(0);
+  sys_threadschedyield;
  end;
 end;
 

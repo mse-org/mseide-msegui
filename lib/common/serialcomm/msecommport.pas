@@ -1295,7 +1295,7 @@ begin
   inherited postevent(tmseevent.create(ek_abort));
   if sys_getcurrentthread <> id then begin
    while fabort do begin
-    sleep(0);
+    sys_threadschedyield;
    end;
   end;
  end;

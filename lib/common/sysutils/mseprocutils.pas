@@ -593,7 +593,7 @@ begin
      break;
     end;
     sys_schedyield;
-//    sleep(0);
+//    sys_threadschedyield;
    end;
   end
   else begin
