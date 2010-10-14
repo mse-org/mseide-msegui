@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -26,8 +26,8 @@ const
   '',            //mr_escape
   '',            //mr_f10
   '',            //mr_exception
-  '&Gagal',   //mr_cancel
-  '&Batal',    //mr_abort
+  '&Batal',   //mr_cancel
+  '&Gagalkan',    //mr_abort
   '&OK',         //mr_ok
   '&Ya',      //mr_yes
   '&Tidak',         //mr_no
@@ -118,11 +118,11 @@ const
   'Filter mati',          //sc_filter_off
   'Berdiri',              //sc_portrait print orientation
   'Rebah',                //sc_landscape print orientation
-  'Delete row?',          //sc_Delete_row_question
-  'selected rows?',        //sc_selected_rows
-  'Single item only',     //sc_Single_item_only 
-  'Copy Cells',          //sc_Copy_Cells
-  'Paste Cells'          //sc_Paste_Cells
+  'Hapus baris?',          //sc_Delete_row_question
+  'baris yang terpilih?',        //sc_selected_rows
+  'Hanya satu item',     //sc_Single_item_only,
+  'Salin Cell',          //sc_Copy_Cells
+  'Tempel Cell'          //sc_Paste_Cells 
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;
