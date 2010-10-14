@@ -1925,7 +1925,7 @@ procedure tgdbmi.dorun;
 var
  int1: integer;
  ar1,ar2: stringarty;
- ca1: longword;
+ ca1: qword;
  str1: string;
  frames1: frameinfoarty;
  ev: tgdbstartupevent;
@@ -1974,14 +1974,14 @@ begin
    end;
   end;
   if str1 <> '' then begin
-   try
-    ca1:= strtointvalue(str1);
+   if trystrtointvalue64(str1,ca1) then begin
     fstartupbreakpoint:= breakinsert(ca1); //does not always work
     fstartupbreakpoint1:= breakinsert(ca1+1);
     if (fstartupbreakpoint < 0) and (fstartupbreakpoint1 < 0) then begin
      str1:= '';
     end;
-   except
+   end
+   else begin
     str1:= '';
    end;
   end;
