@@ -778,7 +778,7 @@ type
    property zebra_step;
    property zebra_options;
    property onfontheightdelta;
-   property onchildscaled;
+   property onlayout;
 
    property onbeforerender;
    property onbeforepaint;
@@ -843,7 +843,7 @@ type
    property zebra_step;
    property zebra_options;
    property onfontheightdelta;
-   property onchildscaled;
+   property onlayout;
 
    property onbeforerender;
    property onbeforepaint;
@@ -946,7 +946,7 @@ type
    property zebra_options;
 
    property onfontheightdelta;
-   property onchildscaled;
+   property onlayout;
 
    property onbeforerender;
    property onpaint;

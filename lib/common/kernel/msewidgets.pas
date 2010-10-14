@@ -994,12 +994,13 @@ type
   private
    fonscroll: pointeventty;
    fonfontheightdelta: fontheightdeltaeventty;
-   fonchildscaled: notifyeventty;
+   fonlayout: notifyeventty;
    foncalcminscrollsize: calcminscrollsizeeventty;
    fminclientsize: sizety;
    function getframe: tscrollboxframe;
    procedure setframe(const Value: tscrollboxframe);
    procedure setclientpos(const avalue: pointty);
+   procedure readonchildscaled(reader: treader);
   protected
    fminminclientsize: sizety; //exteded in design mode
    procedure widgetregionchanged(const sender: twidget); override;
@@ -1019,14 +1020,15 @@ type
    procedure loaded; override;
    procedure clampinview(const arect: rectty; const bottomright: boolean); override;
                 //origin paintpos
+   procedure defineproperties(filer: tfiler); override;
  public
    constructor create(aowner: tcomponent); override;
    function maxclientsize: sizety; override;
-   procedure dochildscaled(const sender: twidget); override;
+   procedure dolayout(const sender: twidget); override;
    property onscroll: pointeventty read fonscroll write fonscroll;
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
                      write fonfontheightdelta;
-   property onchildscaled: notifyeventty read fonchildscaled write fonchildscaled;
+   property onlayout: notifyeventty read fonlayout write fonlayout;
    property oncalcminscrollsize: calcminscrollsizeeventty 
                    read foncalcminscrollsize write foncalcminscrollsize;
    property scrollpos: pointty read getclientpos write setclientpos;
@@ -1232,7 +1234,7 @@ implementation
 
 uses
  msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets,mseactions,
- msepointer;
+ msepointer,msestreaming;
 
 const
  captionmargin = 1; //distance focusrect to caption in tcaptionframe
@@ -4996,10 +4998,10 @@ begin
  end;
 end;
 
-procedure tscrollingwidgetnwr.dochildscaled(const sender: twidget);
+procedure tscrollingwidgetnwr.dolayout(const sender: twidget);
 begin
- if canevent(tmethod(fonchildscaled)) then begin
-  fonchildscaled(self);
+ if canevent(tmethod(fonlayout)) then begin
+  fonlayout(self);
  end
  else begin
   inherited;
@@ -5009,7 +5011,7 @@ end;
 procedure tscrollingwidgetnwr.loaded;
 begin
  inherited;
- if canevent(tmethod(fonchildscaled)) then begin
+ if canevent(tmethod(fonlayout)) then begin
   postchildscaled;
  end;
 end;
@@ -5037,6 +5039,18 @@ end;
 procedure tscrollingwidgetnwr.setclientpos(const avalue: pointty);
 begin
  frame.showrect(makerect(avalue,paintsize),false);
+end;
+
+procedure tscrollingwidgetnwr.readonchildscaled(reader: treader);
+begin
+ onlayout:= notifyeventty(readmethod(reader));
+end;
+
+procedure tscrollingwidgetnwr.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('onchildscaled',{$ifdef FPC}@{$endif}readonchildscaled,
+                                                                   nil,false)
 end;
 
 { tscrollbarwidget }

@@ -484,7 +484,7 @@ type
                 //-2 -> same as imagenr
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property optionswidget default defaulttaboptionswidget;
-   property onchildscaled;
+   property onlayout;
    property onfontheightdelta;
    property onshow;
    property onhide;

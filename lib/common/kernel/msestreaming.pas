@@ -22,6 +22,7 @@ function readrealty(const reader: treader): realty;
 procedure writerealty(const writer: twriter; const value: realty);
 function readrectty(const reader: treader): rectty;
 procedure writerectty(const writer: twriter; const avalue: rectty);
+function readmethod(const reader: treader): tmethod;
 
 function readrecordcount(const obj: tpersistent;
     const recordsize: integer; const stream: tstream): integer;
@@ -123,6 +124,24 @@ begin
   writeinteger(cx);
   writeinteger(cy);
   writelistend;
+ end;
+end;
+
+function readmethod(const reader: treader): tmethod;
+var
+ str1: string;
+begin
+ with treader1(reader) do begin
+  if nextvalue = vanil then begin
+   result.code:= nil;
+   result.data:= nil;
+   readident;
+  end
+  else begin
+   str1:= readident;
+   result.code:= findmethod(root,str1);
+   result.data:= root;
+  end;
  end;
 end;
 

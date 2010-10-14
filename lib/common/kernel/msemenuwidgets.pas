@@ -1593,7 +1593,7 @@ procedure tpopupmenuwidget.fontchanged;
 begin
  updatelayout;
  if fparentwidget <> nil then begin
-  fparentwidget.dochildscaled(self);
+  fparentwidget.dolayout(self);
  end;
 end;
 

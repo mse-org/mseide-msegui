@@ -451,12 +451,13 @@ type
  tcustomscalingwidget = class(tpublishedwidget)
   private
    fonfontheightdelta: fontheightdeltaeventty;
-   fonchildscaled: notifyeventty;
+   fonlayout: notifyeventty;
    fscaling: integer;
    fonresize: notifyeventty;
    fonmove: notifyeventty;
    fsizebefore: sizety;
    procedure setoptionsscale(const avalue: optionsscalety);
+   procedure readonchildscaled(reader: treader);
   protected
    foptionsscale: optionsscalety;
    procedure beginscaling;
@@ -469,9 +470,10 @@ type
    procedure sizechanged; override;
    procedure visiblepropchanged; override;
    function getminshrinksize: sizety; override;
+   procedure defineproperties(filer: tfiler); override;
   public
    procedure writestate(writer: twriter); override;
-   procedure dochildscaled(const sender: twidget); override;
+   procedure dolayout(const sender: twidget); override;
    property onresize: notifyeventty read fonresize write fonresize;
    property onmove: notifyeventty read fonmove write fonmove;
   published
@@ -479,7 +481,7 @@ type
                   default [];
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
                      write fonfontheightdelta;
-   property onchildscaled: notifyeventty read fonchildscaled write fonchildscaled;
+   property onlayout: notifyeventty read fonlayout write fonlayout;
  end;
  
  tscalingwidget = class(tcustomscalingwidget)
@@ -487,7 +489,7 @@ type
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property optionsscale;
    property onfontheightdelta;
-   property onchildscaled;
+   property onlayout;
    property onresize;
    property onmove;
  end;
@@ -1592,10 +1594,10 @@ end;
 
 { tcustomscalingwidget }
 
-procedure tcustomscalingwidget.dochildscaled(const sender: twidget);
+procedure tcustomscalingwidget.dolayout(const sender: twidget);
 begin
- if canevent(tmethod(fonchildscaled)) then begin
-  fonchildscaled(self);
+ if canevent(tmethod(fonlayout)) then begin
+  fonlayout(self);
  end
  else begin
   inherited;
@@ -1798,6 +1800,18 @@ begin
   tcustomscrollboxframe(fframe).showrect(nullrect,false);
  end;
  inherited;
+end;
+
+procedure tcustomscalingwidget.readonchildscaled(reader: treader);
+begin
+ onlayout:= notifyeventty(readmethod(reader));
+end;
+
+procedure tcustomscalingwidget.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('onchildscaled',
+                          {$ifdef FPC}@{$endif}readonchildscaled,nil,false);
 end;
 
 { tgroupbox }

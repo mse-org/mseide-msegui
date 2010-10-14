@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2010-10-14
+ tscrollingwidget.onchildscaled -> onlayout.
 2010-09-10
  tmsecomponentarrayprop -> tmsecomponentlinkarrayprop,
  tmsecomponentitem -> tmsecomponentlinkitem

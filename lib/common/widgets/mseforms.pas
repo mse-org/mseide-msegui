@@ -62,14 +62,14 @@ type
    fboundsread: boolean;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
    procedure defineproperties(filer: tfiler); override;
-   procedure dochildscaled(const sender: twidget); override;
+   procedure dolayout(const sender: twidget); override;
   public
    constructor create(aowner: tcustommseform); reintroduce;
   published
    property onscroll;
    property onresize;
    property onfontheightdelta;
-   property onchildscaled;
+   property onlayout;
    property oncalcminscrollsize;
    property onchildmouseevent;
    property onmouseevent;
@@ -119,8 +119,8 @@ type
    ficonchanging: integer;
    fonsysevent: syseventeventty;
    fonsyswindowevent: syseventeventty;
-   function getonchildscaled: notifyeventty;
-   procedure setonchildscaled(const avalue: notifyeventty);
+   function getonlayout: notifyeventty;
+   procedure setonlayout(const avalue: notifyeventty);
    procedure setmainmenu(const Value: tmainmenu);
    procedure updatemainmenutemplates;
    procedure setoptions(const Value: formoptionsty);
@@ -139,6 +139,7 @@ type
    procedure unregisterhandlers;
    procedure setsyseventty(const avalue: syseventeventty);
    procedure setsyswindoweventty(const avalue: syseventeventty);
+   procedure readonchildscaled(reader: treader);
   protected
    fscrollbox: tformscrollbox;
     //needed to distinguish between scrolled and unscrolled (mainmenu...) widgets
@@ -155,6 +156,7 @@ type
    function isgroupleader: boolean; override;
 
    procedure readstate(reader: treader); override;
+   procedure defineproperties(filer: tfiler); override;
    procedure doonloaded; virtual;
    procedure doloaded; override;
    procedure loaded; override;
@@ -200,7 +202,7 @@ type
    function getminimizedsize(out apos: captionposty): sizety;
    procedure doafterload; override;
    procedure updatelayout(const sender: twidget); virtual; 
-                               //called from scrollbox.onchildscaled
+                               //called from scrollbox.dolayout
    //iificommand
    {$ifdef mse_with_ifi}
    procedure executeificommand(var acommand: ificommandcodety); override;
@@ -214,7 +216,7 @@ type
    procedure reload;
    
    procedure insertwidget(const widget: twidget; const apos: pointty); override;
-   procedure dochildscaled(const sender: twidget); override;
+   procedure dolayout(const sender: twidget); override;
    function childrencount: integer; override;
 
    procedure beforeclosequery(var amodalresult: modalresultty); override;
@@ -276,7 +278,7 @@ type
 
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
                      write fonfontheightdelta;
-   property onchildscaled: notifyeventty read getonchildscaled write setonchildscaled;
+   property onlayout: notifyeventty read getonlayout write setonlayout;
    property onsysevent: syseventeventty read fonsysevent write setsyseventty;
    property onsyswindowevent: syseventeventty read fonsyswindowevent 
                                          write setsyswindoweventty;
@@ -349,7 +351,7 @@ type
    property onstatafterwrite;
 
    property onfontheightdelta;
-   property onchildscaled;
+   property onlayout;
    
    property onsysevent;
    property onsyswindowevent;
@@ -476,7 +478,7 @@ type
    property onstatafterwrite;
 
    property onfontheightdelta;
-   property onchildscaled;
+   property onlayout;
  end;
 
  tdockform = class(tdockformwidget)
@@ -537,7 +539,7 @@ function simulatemodalresult(const awidget: twidget;
 
 implementation
 uses
- sysutils,mselist,typinfo,msekeyboard,msebits;
+ sysutils,mselist,typinfo,msekeyboard,msebits,msestreaming;
 const
  containercommonflags: optionswidgetty = 
             [ow_arrowfocus,ow_arrowfocusin,ow_arrowfocusout,ow_destroywidgets,
@@ -710,6 +712,7 @@ end;
 
 procedure tformscrollbox.defineproperties(filer: tfiler);
 begin
+ inherited;
  filer.defineproperty('bounds_x',{$ifdef FPC}@{$endif}readdummy,
                                  {$ifdef FPC}@{$endif}writedummy,false);
  filer.defineproperty('bounds_y',{$ifdef FPC}@{$endif}readdummy,
@@ -728,7 +731,7 @@ begin
                                  {$ifdef FPC}@{$endif}writebounds,true);
 end;
 
-procedure tformscrollbox.dochildscaled(const sender: twidget);
+procedure tformscrollbox.dolayout(const sender: twidget);
 begin
  tcustommseform(owner).updatelayout(sender);
  inherited;
@@ -1092,14 +1095,14 @@ begin
  end;
 end;
 
-function tcustommseform.getonchildscaled: notifyeventty;
+function tcustommseform.getonlayout: notifyeventty;
 begin
- result:= fscrollbox.onchildscaled;
+ result:= fscrollbox.onlayout;
 end;
 
-procedure tcustommseform.setonchildscaled(const avalue: notifyeventty);
+procedure tcustommseform.setonlayout(const avalue: notifyeventty);
 begin
- fscrollbox.onchildscaled:= avalue;
+ fscrollbox.onlayout:= avalue;
 end;
 
 procedure tcustommseform.updatemainmenutemplates;
@@ -1505,7 +1508,7 @@ begin
  result:= fscrollbox.childrencount;
 end;
 
-procedure tcustommseform.dochildscaled(const sender: twidget);
+procedure tcustommseform.dolayout(const sender: twidget);
 begin
  inherited;
  if (fmainmenuwidget <> nil) and (fmainmenuwidget = sender) then begin
@@ -1763,6 +1766,18 @@ end;
 procedure tcustommseform.updatelayout(const sender: twidget);
 begin
  //dummy
+end;
+
+procedure tcustommseform.readonchildscaled(reader: treader);
+begin
+ onlayout:= notifyeventty(readmethod(reader));
+end;
+
+procedure tcustommseform.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('onchildscaled',
+                 {$ifdef FPC}@{$endif}readonchildscaled,nil,false);
 end;
 
 { tmseform }

@@ -1599,7 +1599,7 @@ type
    procedure synctofontheight; virtual;
 
    procedure dragevent(var info: draginfoty); virtual;
-   procedure dochildscaled(const sender: twidget); virtual;
+   procedure dolayout(const sender: twidget); virtual;
 
    procedure invalidatewidget;     //invalidates whole widget
    procedure invalidate;           //invalidates clientrect
@@ -9926,10 +9926,10 @@ begin
  end;
 end;
 
-procedure twidget.dochildscaled(const sender: twidget);
+procedure twidget.dolayout(const sender: twidget);
 begin
  if fparentwidget <> nil then begin
-  fparentwidget.dochildscaled(sender);
+  fparentwidget.dolayout(sender);
  end;
 end;
 
@@ -10894,7 +10894,7 @@ begin
   end;
   ek_childscaled: begin
    exclude(fwidgetstate1,ws1_childscaled);
-   dochildscaled(nil);
+   dolayout(nil);
   end;
   ek_resize: begin
    clientsize:= addsize(clientsize,tresizeevent(event).size);
