@@ -1200,6 +1200,9 @@ begin
     flusheventbuffer;
     if alocal then begin
      eventlist.add(event);
+     if aps_waiting in fstate then begin
+      wakeupmainthread;
+     end;
     end
     else begin
      dopostevent(event);

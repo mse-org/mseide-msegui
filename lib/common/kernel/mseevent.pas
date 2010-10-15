@@ -81,6 +81,7 @@ type
  tobjectevent = class(tmseevent,iobjectlink)
   private
    finterface: pointer; //ievent;
+   fislinked: boolean;
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
                  ainterfacetype: pointer = nil; once: boolean = false);
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
@@ -134,7 +135,7 @@ type
 
 implementation
 uses
- msesysintf;
+ msesysintf,mseapplication;
  
 { tmseevent }
 
@@ -172,22 +173,18 @@ var
 {$endif}
 begin
  finterface:= pointer(dest);
- if finterface <> nil then begin
-{$ifndef FPC}
-  po1:= pointer(1);
-  ievent(finterface).link(iobjectlink(po1),iobjectlink(self));
-{$else}
-  ievent(finterface).link(iobjectlink(pointer(1)),iobjectlink(self));
-{$endif}
+ if (finterface <> nil) then begin
+  fislinked:= application.locked;
+  if fislinked then begin
+ {$ifndef FPC}
+   po1:= pointer(1);
+   ievent(finterface).link(iobjectlink(po1),iobjectlink(self));
+ {$else}
+   ievent(finterface).link(iobjectlink(pointer(1)),iobjectlink(self));
+ {$endif}
+  end;
  end;
  inherited create(akind);
-end;
-
-procedure tobjectevent.deliver;
-begin
- if finterface <> nil then begin
-  ievent(finterface).receiveevent(self);
- end;
 end;
 
 destructor tobjectevent.destroy;
@@ -196,7 +193,7 @@ var
  po1: pointer;
 {$endif}
 begin
- if finterface <> nil then begin
+ if fislinked and (finterface <> nil) then begin
 {$ifndef FPC}
   po1:= pointer(1);
   ievent(finterface).unlink(iobjectlink(po1),iobjectlink(self));
@@ -205,6 +202,13 @@ begin
 {$endif}
  end;
  inherited;
+end;
+
+procedure tobjectevent.deliver;
+begin
+ if finterface <> nil then begin
+  ievent(finterface).receiveevent(self);
+ end;
 end;
 
 procedure tobjectevent.objevent(const sender: iobjectlink; const event: objecteventty);
