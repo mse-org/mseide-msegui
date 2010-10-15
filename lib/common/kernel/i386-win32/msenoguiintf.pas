@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -91,22 +91,27 @@ var
  msg1: {$ifdef FPC}msg{$else}tmsg{$endif}; 
  
 begin
- checkevents;
- while tapplication1(application).eventlist.count = 0 do begin
-  application.unlock;
-  msgwaitformultipleobjects(1,{$ifdef FPC}@{$endif}win32semty(sempo^).event,
-                                     false,infinite,qs_allinput);
-  if iswin95 then begin
-   while peekmessagea(msg1,0,0,0,pm_remove) do begin
-    dispatchmessagea(msg1);
-   end;
-  end
-  else begin
-   while peekmessagew(msg1,0,0,0,pm_remove) do begin
-    dispatchmessagew(msg1);
-   end;
-  end;
+ with tapplication1(application) do begin
+  include(fstate,aps_waiting);
   checkevents;
+  while eventlist.count = 0 do begin
+   application.unlock;
+   msgwaitformultipleobjects(1,{$ifdef FPC}@{$endif}win32semty(sempo^).event,
+                                      false,infinite,qs_allinput);
+   application.lock;
+   if iswin95 then begin
+    while peekmessagea(msg1,0,0,0,pm_remove) do begin
+     dispatchmessagea(msg1);
+    end;
+   end
+   else begin
+    while peekmessagew(msg1,0,0,0,pm_remove) do begin
+     dispatchmessagew(msg1);
+    end;
+   end;
+   checkevents;
+  end;
+  fstate:= fstate -[aps_waiting,aps_woken];
  end;
 end;
 

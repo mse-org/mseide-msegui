@@ -58,14 +58,18 @@ procedure nogui_waitevent;
  end;
  
 begin
- checkevents;
- while tapplication1(application).eventlist.count = 0 do begin
-  with linuxsemty(sempo^) do begin
-   application.unlock;
-   sem_wait(d.sema);
-   application.lock;
-   checkevents;
+ with tapplication1(application) do begin
+  include(fstate,aps_waiting);
+  checkevents;
+  while eventlist.count = 0 do begin
+   with linuxsemty(sempo^) do begin
+    unlock;
+    sem_wait(d.sema);
+    lock;
+    checkevents;
+   end;
   end;
+  fstate:= fstate -[aps_waiting,aps_woken];
  end;
 end;
 

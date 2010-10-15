@@ -14319,15 +14319,15 @@ begin
 {$ifdef mse_debuggdisync}
  checkgdiunlocked;
 {$endif}
+ include(fstate,aps_waiting);
  while gui_hasevent do begin
   eventlist.add(gui_getevent);
  end;
  if eventlist.count = 0 then begin
   incidlecount;
-  include(fstate,aps_waiting);
   eventlist.add(gui_getevent);
-  exclude(fstate,aps_waiting);
- end
+ end;
+ fstate:= fstate - [aps_waiting,aps_woken];
 end;
 
 procedure tinternalapplication.flushmousemove;
@@ -14686,9 +14686,9 @@ begin       //eventloop
      checkwindowstack;
      repeat
       bo1:= false;
-      exclude(fstate,aps_invalidated);
+//      exclude(fstate,aps_invalidated);
       for int1:= 0 to high(fwindows) do begin
-       exclude(fstate,aps_invalidated);
+//       exclude(fstate,aps_invalidated);
        try
         bo1:= fwindows[int1].internalupdate or bo1;
        except
@@ -14733,7 +14733,7 @@ begin       //eventloop
        break;
       end;
       waitevent;
-      exclude(fstate,aps_invalidated);
+//      exclude(fstate,aps_invalidated);
      end;
     end;
     if terminated then begin
@@ -15608,10 +15608,10 @@ end;
 
 procedure tguiapplication.invalidated;
 begin
- if not (aps_invalidated in fstate) then begin
-  include(fstate,aps_invalidated);
+// if not (aps_invalidated in fstate) then begin
+//  include(fstate,aps_invalidated);
   wakeupmainthread;
- end;
+// end;
 end;
 
 procedure tguiapplication.showasyncexception(e: exception; 

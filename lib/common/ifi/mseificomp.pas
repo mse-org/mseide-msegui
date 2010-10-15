@@ -15,7 +15,7 @@ unit mseificomp;
 
 interface
 uses
- classes,mseclasses,msegui,mseifiglob,mseglob,typinfo,msestrings,msetypes,
+ classes,mseclasses,{msegui,}mseifiglob,mseglob,typinfo,msestrings,msetypes,
  mseificompglob,msearrayprops,msedatalist,msestat,msestatfile,mseapplication;
 
 type

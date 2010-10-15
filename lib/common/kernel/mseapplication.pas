@@ -173,10 +173,11 @@ type
 
  applicationstatety = 
         (aps_inited,aps_running,aps_terminated,aps_mousecaptured,
-         aps_invalidated,aps_zordervalid,aps_needsupdatewindowstack,
+         {aps_invalidated,}aps_zordervalid,aps_needsupdatewindowstack,
          aps_focused,aps_activewindowchecked,aps_restorelocktransientfor,
          aps_exitloop,aps_cancelloop,aps_looplocked,
-         aps_active,aps_waiting,aps_terminating,aps_deinitializing,
+         aps_active,aps_waiting,aps_woken,
+         aps_terminating,aps_deinitializing,
          aps_shortcutting,aps_clearkeyhistory,
          aps_waitstarted,aps_waitcanceled,aps_waitterminated,aps_waitok,
          aps_waitidlelock,aps_eventflushing);
@@ -1200,9 +1201,10 @@ begin
     flusheventbuffer;
     if alocal then begin
      eventlist.add(event);
-     if aps_waiting in fstate then begin
+//     if fstate * [aps_waiting,aps_woken] = [aps_waiting] then begin
+//      include(fstate,aps_woken);
       wakeupmainthread;
-     end;
+//     end;
     end
     else begin
      dopostevent(event);
@@ -1270,7 +1272,9 @@ end;
 
 procedure tcustomapplication.wakeupmainthread;
 begin
- if aps_running in fstate then begin
+ if fstate * [aps_running,aps_waiting,aps_woken] = 
+                        [aps_running,aps_waiting] then begin
+  include(fstate,aps_woken);      
   postevent(tmseevent.create(ek_wakeup));
  end;
 end;
