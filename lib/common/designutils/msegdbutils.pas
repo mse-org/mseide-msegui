@@ -20,8 +20,8 @@ uses
 //todo: byte endianess for remote debugging
 
 type
- gdbresultty = (gdb_ok,gdb_error,gdb_timeout,gdb_dataerror,gdb_message,gdb_running,
-                gdb_writeerror,gdb_notactive);
+ gdbresultty = (gdb_ok,gdb_error,gdb_timeout,gdb_dataerror,gdb_message,
+                gdb_running,gdb_writeerror,gdb_notactive);
 
  sigflagty = (sfl_internal,sfl_stop,sfl_handle);
  sigflagsty = set of sigflagty;
@@ -38,10 +38,11 @@ const
  
 type
  gdbstatety = (gs_syncget,gs_syncack,gs_clicommand,gs_clilist,
-               gs_started,gs_startup,
+               gs_started,gs_startup,gs_attaching,
                gs_execloaded,gs_attached,gs_detached,
                gs_remote,gs_async,gs_downloaded,gs_downloading,gs_runafterload,
-               gs_internalrunning,gs_running,gs_interrupted,gs_restarted,
+               gs_internalrunning,gs_running,gs_stopped,
+               gs_interrupted,gs_restarted,
                gs_closing,gs_gdbdied);
  gdbstatesty = set of gdbstatety;
 
@@ -82,7 +83,7 @@ type
  resultinfoarty = array of resultinfoty;
  resultinfoararty = array of resultinfoarty;
 
- stopreasonty = (sr_none,sr_error,sr_startup,sr_exception,sr_gdbdied,
+ stopreasonty = (sr_none,sr_unknown,sr_error,sr_startup,sr_exception,sr_gdbdied,
                  sr_breakpoint_hit,
                  sr_watchpointtrigger,sr_readwatchpointtrigger,
                  sr_accesswatchpointtrigger,
@@ -91,6 +92,7 @@ type
 const
  stopreasontext: array[stopreasonty] of string = (
           '',
+          'Unknown',
           'Error',
           'Startup',
           'Exception',
@@ -600,8 +602,8 @@ uses
 
 const                                      
  stopreasons: array[stopreasonty] of string = 
-           //sr_none sr_error sr_startup sr_exception sr_gdbdied
-             ('',     '',     '',          '',           '',
+           //sr_none sr_unknown, sr_error sr_startup sr_exception sr_gdbdied
+             ('',     '',          '',     '',          '',           '',
               'breakpoint-hit','watchpoint-trigger','read-watchpoint-trigger',
               'access-watchpoint-trigger',
               'end-stepping-range','function-finished','exited-normally',
@@ -771,7 +773,7 @@ end;
 procedure tgdbmi.resetexec;
 begin
  fstate:= fstate - [gs_internalrunning,gs_running,gs_execloaded,
-                    gs_attached,gs_started,gs_startup,gs_detached,
+                    gs_attached,gs_attaching,gs_started,gs_startup,gs_detached,
                     gs_remote,gs_async,
                           gs_interrupted,gs_restarted,
                           gs_downloaded,gs_downloading];
@@ -892,6 +894,7 @@ end;
 
 procedure tgdbmi.debugend;   //calls GUI_DEBUGEND in target
 begin
+ exclude(fstate,gs_stopped);
  if ftargetdebugend <> 0 then begin
   clicommand('call '+inttostr(ftargetdebugend)+'()');
  end;
@@ -1188,10 +1191,6 @@ begin
       finterruptthreadid:= 0;
      end;
      {$endif mswindows}
-     if values = nil then begin //gdb 6.8 attach 
-      exit;
-     end
-     else begin
       bo1:= getstopinfo(values,flastconsoleoutput,stopinfo);
       if not bo1 then begin
        stopinfo.messagetext:= 'Stop error: ' + stopinfo.messagetext;
@@ -1241,7 +1240,7 @@ begin
         end;
         include(fstate,gs_startup);
        end;
-      end;
+//      end;
      end;
     end;
     gek_running: begin
@@ -1328,6 +1327,9 @@ begin
    end;
    gek_stopped: begin
     exclude(fstate,gs_internalrunning);
+    if gs_attaching in fstate then begin
+     exit; //ignore
+    end;
    end;
    gek_error: begin
     exclude(fstate,gs_downloading);
@@ -1451,7 +1453,7 @@ begin
  else begin
   token:= 0;
  end;
- isconsole:= token = fconsolesequence;
+ isconsole:= (token <> 0) and (token = fconsolesequence);
  if isconsole then begin
   fconsolesequence:= 0;
  end;
@@ -1484,7 +1486,10 @@ begin
        doevent(token,gek_connected,resultar);
       end;
       rec_running: begin
-       doevent(token,gek_running,resultar);
+       if not (gs_stopped in fstate) then begin 
+                //no breakpoint while GUI_DEBUGBEGIN
+        doevent(token,gek_running,resultar);
+       end;
       end;
       rec_done: begin
        if isconsole then begin
@@ -1510,6 +1515,7 @@ begin
     if getrecordinfo(low(asyncclassty),high(asyncclassty)) then begin
      case recordclass of
       rec_stopped: begin
+       include(fstate,gs_stopped);
        doevent(token,gek_stopped,resultar);
       end;
       rec_download: begin
@@ -1781,7 +1787,9 @@ var
 begin
  abort;
  resetexec;
+ include(fstate,gs_attaching);
  result:= clicommand('attach '+inttostr(procid),false,10000000);
+ exclude(fstate,gs_attaching);
  finalize(info);
  fillchar(info,sizeof(info),0);
  info.reason:= sr_error;
@@ -2952,102 +2960,124 @@ begin
 end;
                         
 function tgdbmi.getstopinfo(const response: resultinfoarty;
-                  const lastconsoleoutput: ansistring;
-                  out info: stopinfoty): boolean;
+                            const lastconsoleoutput: ansistring;
+                            out info: stopinfoty): boolean;
 var
  int1: integer;
  ar1: resultinfoarty;
  frame: resultinfoarty;
  str1: string;
  wstr1: filenamety;
+ frames1: frameinfoarty;
+ res1: gdbresultty;
 begin
  finalize(info);
  fillchar(info,sizeof(info),0);
  with info do begin
-  if getenumvalue(response,'reason',stopreasons,int1) then begin
-   result:= true;
-   reason:= stopreasonty(int1);
+  if response = nil then begin
+   info.reason:= sr_unknown;
+   res1:= stacklistframes(frames1,0,1);
+   result:= res1 = gdb_ok;
+   if result then begin
+    with frames1[0] do begin
+     info.filename:= filename;
+     info.line:= line;
+     info.messagetext:= 'Stopped. File: '+
+                    filename+':'+inttostr(line)+' Function: '+func;
+    end;
+   end
+   else begin
+    if res1 = gdb_message then begin
+     info.messagetext:= errormessage;
+    end
+   end;   
   end
   else begin
-   reason:= sr_startup;
-   result:= false;
-  end;
-  if reason = sr_breakpoint_hit then begin
-   getintegervalue(response,'bkptno',info.bkptno);
-   if (info.bkptno = fstartupbreakpoint) or 
-                      (info.bkptno = fstartupbreakpoint1) then begin
+   if getenumvalue(response,'reason',stopreasons,int1) then begin
+    result:= true;
+    reason:= stopreasonty(int1);
+   end
+   else begin
     reason:= sr_startup;
     result:= false;
-   end; 
-  end;
-  if reason = sr_signal_received then begin
-   getstringvalue(response,'signal-name',signalname);
-   getstringvalue(response,'signal-meaning',signalmeaning);
-   if fsimulator and (signalname = '0') then begin
-    signalmeaning:= lastconsoleoutput;
    end;
-  end;
-  if reason = sr_watchpointtrigger then begin
-   if gettuplevalue(response,'wpt',ar1) then begin
-    getstringvalue(ar1,'exp',expression);
+   if reason = sr_breakpoint_hit then begin
+    getintegervalue(response,'bkptno',info.bkptno);
+    if (info.bkptno = fstartupbreakpoint) or 
+                       (info.bkptno = fstartupbreakpoint1) then begin
+     reason:= sr_startup;
+     result:= false;
+    end; 
    end;
-   if gettuplevalue(response,'value',ar1) then begin
-    getstringvalue(ar1,'old',oldvalue);
-    getstringvalue(ar1,'new',newvalue);
+   if reason = sr_signal_received then begin
+    getstringvalue(response,'signal-name',signalname);
+    getstringvalue(response,'signal-meaning',signalmeaning);
+    if fsimulator and (signalname = '0') then begin
+     signalmeaning:= lastconsoleoutput;
+    end;
    end;
-  end;
-  if reason = sr_exited then begin
-   getintegervalue(response,'exit-code',exitcode);
-  end
-  else begin
-   if not (reason in [sr_exited_normally,sr_detached]) then begin
-    result:= getqwordvalue(response,'thread-id',threadid);
-    if gettuplevalue(response,'frame',frame) then begin
-     getstringvalue(frame,'file',str1);
-     filename:= str1;
-     getintegervalue(frame,'line',line);
-     getstringvalue(frame,'func',func);
-     getinteger64value(frame,'addr',int64(addr));
-     if getsourcename(wstr1)= gdb_ok then begin
-      filedir:= msefileutils.filedir(wstr1);
+   if reason = sr_watchpointtrigger then begin
+    if gettuplevalue(response,'wpt',ar1) then begin
+     getstringvalue(ar1,'exp',expression);
+    end;
+    if gettuplevalue(response,'value',ar1) then begin
+     getstringvalue(ar1,'old',oldvalue);
+     getstringvalue(ar1,'new',newvalue);
+    end;
+   end;
+   if reason = sr_exited then begin
+    getintegervalue(response,'exit-code',exitcode);
+   end
+   else begin
+    if not (reason in [sr_exited_normally,sr_detached]) then begin
+     result:= getqwordvalue(response,'thread-id',threadid);
+     if gettuplevalue(response,'frame',frame) then begin
+      getstringvalue(frame,'file',str1);
+      filename:= str1;
+      getintegervalue(frame,'line',line);
+      getstringvalue(frame,'func',func);
+      getinteger64value(frame,'addr',int64(addr));
+      if getsourcename(wstr1)= gdb_ok then begin
+       filedir:= msefileutils.filedir(wstr1);
+      end;
      end;
     end;
    end;
-  end;
-  if result then begin
-   messagetext:= stopreasontext[reason] + '.';
-   if signalname <> '' then begin
-    messagetext:= messagetext + ' Signal: ' + signalname;
-   end;
-   if signalmeaning <> '' then begin
-    messagetext:= messagetext + ', ' + signalmeaning + '.';
-   end;
-   if filename <> '' then begin
-    messagetext:= messagetext + ' File: ' + filename;
-   end;
-   if line > 0 then begin
-    messagetext:= messagetext + ':'+inttostr(line);
-   end;
-   if func <> '' then begin
-    messagetext:= messagetext + ' Function: ' + func;
-   end;
-   if exitcode <> 0 then begin
-    messagetext:= messagetext + ' Exitcode: ' + inttostr(exitcode);
-   end;
-   if expression <> '' then begin
-    messagetext:= messagetext + ' Expression: '+expression;
-   end;
-   if oldvalue <> '' then begin
-    messagetext:= messagetext + ' old: '+oldvalue;
-   end;
-   if newvalue <> '' then begin
-    messagetext:= messagetext + ' new: '+newvalue;
-   end;
-  end
-  else begin
-   if getstringvalue(response,'msg',messagetext) then begin
-    if reason = sr_startup then begin
-     reason:= sr_error;
+   if result then begin
+    messagetext:= stopreasontext[reason] + '.';
+    if signalname <> '' then begin
+     messagetext:= messagetext + ' Signal: ' + signalname;
+    end;
+    if signalmeaning <> '' then begin
+     messagetext:= messagetext + ', ' + signalmeaning + '.';
+    end;
+    if filename <> '' then begin
+     messagetext:= messagetext + ' File: ' + filename;
+    end;
+    if line > 0 then begin
+     messagetext:= messagetext + ':'+inttostr(line);
+    end;
+    if func <> '' then begin
+     messagetext:= messagetext + ' Function: ' + func;
+    end;
+    if exitcode <> 0 then begin
+     messagetext:= messagetext + ' Exitcode: ' + inttostr(exitcode);
+    end;
+    if expression <> '' then begin
+     messagetext:= messagetext + ' Expression: '+expression;
+    end;
+    if oldvalue <> '' then begin
+     messagetext:= messagetext + ' old: '+oldvalue;
+    end;
+    if newvalue <> '' then begin
+     messagetext:= messagetext + ' new: '+newvalue;
+    end;
+   end
+   else begin
+    if getstringvalue(response,'msg',messagetext) then begin
+     if reason = sr_startup then begin
+      reason:= sr_error;
+     end;
     end;
    end;
   end;

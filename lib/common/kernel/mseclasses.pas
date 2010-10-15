@@ -428,7 +428,8 @@ type
                   //event will be destroyed if not async
    procedure asyncevent(atag: integer = 0; const alocal: boolean = false);
                           //posts event for doasyncevent to self
-   procedure postcomponentevent(const event: tcomponentevent; const alocal: boolean = false);
+   procedure postcomponentevent(const event: tcomponentevent;
+                                             const alocal: boolean = false);
 
    property moduleclassname: string read getmoduleclassname;
    property actualclassname: string read getactualclassname;
