@@ -272,8 +272,6 @@ procedure tterminal.doinputavailable(const sender: tpipereader);
 var
  str1: string;
 begin
-//exit;
-//write('*');
  try
   str1:= sender.readdatastring;
   if not (csdestroying in componentstate) then begin

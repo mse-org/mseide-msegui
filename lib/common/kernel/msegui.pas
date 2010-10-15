@@ -14713,6 +14713,7 @@ begin       //eventloop
       end;
       if not gui_hasevent then begin
        try
+        exclude(fstate,aps_invalidated);
         doidle;
        except
         handleexception(self);
@@ -14732,7 +14733,9 @@ begin       //eventloop
       if once then begin
        break;
       end;
-      waitevent;
+      if gui_hasevent or not (aps_invalidated in fstate) then begin
+       waitevent;
+      end;
 //      exclude(fstate,aps_invalidated);
      end;
     end;
@@ -15609,8 +15612,8 @@ end;
 procedure tguiapplication.invalidated;
 begin
 // if not (aps_invalidated in fstate) then begin
-//  include(fstate,aps_invalidated);
-  wakeupmainthread;
+ include(fstate,aps_invalidated);
+ wakeupmainthread;
 // end;
 end;
 

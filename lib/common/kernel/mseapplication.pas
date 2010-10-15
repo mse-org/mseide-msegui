@@ -173,7 +173,7 @@ type
 
  applicationstatety = 
         (aps_inited,aps_running,aps_terminated,aps_mousecaptured,
-         {aps_invalidated,}aps_zordervalid,aps_needsupdatewindowstack,
+         aps_invalidated,aps_zordervalid,aps_needsupdatewindowstack,
          aps_focused,aps_activewindowchecked,aps_restorelocktransientfor,
          aps_exitloop,aps_cancelloop,aps_looplocked,
          aps_active,aps_waiting,aps_woken,
