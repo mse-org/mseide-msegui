@@ -18,7 +18,8 @@ uses
 
 implementation
 uses
- windows,{$ifndef FPC}messages,{$endif}msesysintf,msenogui,mseevent;
+ windows,{$ifndef FPC}messages,{$endif}msesysintf,msenogui,mseevent,
+ mseapplication;
 type
  tapplication1 = class(tnoguiapplication);
 const
