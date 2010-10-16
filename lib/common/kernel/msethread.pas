@@ -42,6 +42,7 @@ type
    function getfreeonterminate: boolean;
    procedure setfreeonterminate(const avalue: boolean);
   protected
+   procedure afterconstruction; override;
    function execute(thread: tmsethread): integer; virtual;
   public
    constructor create; overload;
@@ -57,8 +58,9 @@ type
    property running: boolean read getrunning;
    property terminated: boolean read getterminated;
    property id: threadty read finfo.id;
-   property freeonterminate: boolean read getfreeonterminate write
-                          setfreeonterminate;
+   property freeonterminate: boolean read getfreeonterminate 
+                                          write setfreeonterminate; 
+           //do not change the value if the thread is running
  end;
 
  tmutexthread = class(tmsethread)
@@ -232,7 +234,9 @@ begin
  sys_semcreate(fwaitforsem,0);
  fthreadproc:= athreadproc;
  fstate:= [ts_running,ts_started];
- freeonterminate:= afreeonterminate;
+ if afreeonterminate then begin
+  include(fstate,ts_freeonterminate);
+ end;
  with finfo do begin
   if astacksizekb = 0 then begin
    stacksize:= defaultstacksize;
@@ -243,6 +247,13 @@ begin
   threadproc:= {$ifdef FPC}@{$endif}internalthreadproc;
  end;
  createthread(finfo);
+end;
+
+procedure tmsethread.afterconstruction;
+begin
+ if ts_freeonterminate in fstate then begin
+  sys_sempost(fwaitforsem);
+ end;
 end;
 
 destructor tmsethread.destroy;
@@ -314,6 +325,7 @@ begin
   sys_sempost(fwaitforsem);
  end
  else begin
+  sys_semwait(fwaitforsem,0);
   info1:= finfo;
   finfo.id:= 0;
   free;
@@ -330,6 +342,7 @@ procedure tmsethread.setfreeonterminate(const avalue: boolean);
 begin
  if avalue then begin
   include(fstate,ts_freeonterminate);
+  sys_semtrywait(fwaitforsem); //remove possible afterconstruction post
  end
  else begin
   exclude(fstate,ts_freeonterminate);
