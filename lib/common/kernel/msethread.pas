@@ -83,7 +83,7 @@ type
                       const afreeonterminate: boolean = false;
                       const astacksizekb: integer = 0); override;
    destructor destroy; override;
-   function semwait: boolean; //true if not destroyed
+   function semwait(const atimeoutus: integer = 0): boolean; //true if not destroyed
    function sempost: boolean; //true if not destroyed
    function semtrywait: boolean;
    function semcount: integer;
@@ -99,7 +99,8 @@ type
    destructor destroy; override;
    procedure terminate; override;
    procedure postevent(event: tmseevent);
-   function waitevent(noblock: boolean = false): tmseevent;
+   function waitevent(const timeoutus: integer = -1): tmseevent;
+                 // -1 infinite, 0 no block
    function eventcount: integer;
  end;
 
@@ -407,9 +408,9 @@ begin
  postevent(tmseevent.create(ek_terminate));
 end;
 
-function teventthread.waitevent(noblock: boolean = false): tmseevent;
+function teventthread.waitevent(const timeoutus: integer = -1): tmseevent;
 begin
- result:= feventlist.wait(noblock);
+ result:= feventlist.wait(timeoutus);
  if (result <> nil) and (result.kind = ek_terminate) then begin
   freeandnil(result);
  end;
@@ -447,9 +448,9 @@ begin
  result:= sys_semtrywait(fsem);
 end;
 
-function tsemthread.semwait: boolean;
+function tsemthread.semwait(const atimeoutus: integer = 0): boolean;
 begin
- result:= sys_semwait(fsem,0) = sye_ok;
+ result:= sys_semwait(fsem,atimeoutus) = sye_ok;
 end;
 
 end.

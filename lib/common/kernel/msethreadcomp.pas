@@ -51,7 +51,8 @@ type
    function lock: boolean;
    procedure unlock;
    procedure postevent(event: tmseevent);
-   function waitevent(noblock: boolean = false): tmseevent;
+   function waitevent(const timeoutus: integer = -1): tmseevent;
+                      // -1 infinite, 0 no block
 
    property thread: teventthread read getthread;
    property terminated: boolean read getterminated;
@@ -169,9 +170,9 @@ begin
  fthread.postevent(event);
 end;
 
-function tthreadcomp.waitevent(noblock: boolean): tmseevent;
+function tthreadcomp.waitevent(const timeoutus: integer = -1): tmseevent;
 begin
- result:= fthread.waitevent(noblock);
+ result:= fthread.waitevent(timeoutus);
 end;
 
 function tthreadcomp.getactive: boolean;

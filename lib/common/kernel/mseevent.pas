@@ -130,7 +130,8 @@ type
    constructor create(aownsobjects: boolean);
    destructor destroy; override;
    procedure post(event: tmseevent);
-   function wait(noblock: boolean = true): tmseevent;
+   function wait(const timeoutus: integer = 0): tmseevent;
+                 // -1 infinite, 0 no block
  end;
 
 implementation
@@ -288,7 +289,7 @@ begin
  sys_sempost(fsem);
 end;
 
-function teventqueue.wait(noblock: boolean): tmseevent;
+function teventqueue.wait(const timeoutus: integer = 0): tmseevent;
 
  procedure get;
  begin
@@ -301,7 +302,7 @@ function teventqueue.wait(noblock: boolean): tmseevent;
 
 begin
  result:= nil;
- if noblock then begin
+ if timeoutus = 0 then begin
   if sys_semtrywait(fsem) then begin
    get;
   end;
