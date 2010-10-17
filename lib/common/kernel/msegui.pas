@@ -14696,6 +14696,7 @@ begin       //eventloop
        end;
       end;
      until not bo1 and not terminated; //no more to paint
+     exclude(fstate,aps_invalidated);
      if terminated or (aps_exitloop in fstate) then begin
       break;
      end;
@@ -14713,7 +14714,6 @@ begin       //eventloop
       end;
       if not gui_hasevent then begin
        try
-        exclude(fstate,aps_invalidated);
         doidle;
        except
         handleexception(self);
