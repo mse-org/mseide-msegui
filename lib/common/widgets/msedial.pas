@@ -262,6 +262,8 @@ type
    procedure readstart(reader: treader);
    procedure setindent1(const avalue: integer);
    procedure setindent2(const avalue: integer);
+   function getlog: boolean;
+   procedure setlog(const avalue: boolean);
   protected
    procedure setdirection(const avalue: graphicdirectionty); virtual;
    procedure changed;
@@ -287,6 +289,7 @@ type
    procedure afterpaint(const acanvas: tcanvas);
    property options: dialoptionsty read foptions write setoptions default []; 
                 //first!
+   property log: boolean read getlog write setlog;
    property direction: graphicdirectionty read fdirection write setdirection
                                        default gd_right;
    property indent1: integer read findent1 write setindent1 default 0;
@@ -1906,6 +1909,21 @@ begin
    x:= x + int1;
    cx:= cx - int1 - int2;
   end;
+ end;
+end;
+
+function tcustomdialcontroller.getlog: boolean;
+begin
+ result:= do_log in options;
+end;
+
+procedure tcustomdialcontroller.setlog(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [do_log];
+ end
+ else begin
+  options:= options - [do_log];
  end;
 end;
 

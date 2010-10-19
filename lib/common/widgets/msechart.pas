@@ -103,6 +103,10 @@ type
    procedure setydatalist(const avalue: trealdatalist);
    procedure setimagenr(const avalue: imagenrty);
    function getimagelist: timagelist;
+   function getlogx: boolean;
+   procedure setlogx(const avalue: boolean);
+   function getlogy: boolean;
+   procedure setlogy(const avalue: boolean);
   protected
    ftraces: ttraces;
    procedure checkgraphic;
@@ -121,6 +125,8 @@ type
    property xydata: complexarty read finfo.xydata write setxydata;
    property xdatalist: trealdatalist read finfo.xdatalist write setxdatalist;
    property ydatalist: trealdatalist read finfo.ydatalist write setydatalist;
+   property logx: boolean read getlogx write setlogx;
+   property logy: boolean read getlogy write setlogy;
    
   published
    property color: colorty read finfo.color write setcolor default cl_black;
@@ -178,6 +184,10 @@ type
    procedure setimage_widthmm(const avalue: real);
    procedure setimage_heightmm(const avalue: real);
    procedure setoptions(const avalue: charttraceoptionsty);
+   function getlogx: boolean;
+   procedure setlogx(const avalue: boolean);
+   function getlogy: boolean;
+   procedure setlogy(const avalue: boolean);
   protected
    fsize: sizety;
    fscalex: real;
@@ -194,6 +204,8 @@ type
    procedure assign(source: tpersistent); override;
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
+   property logx: boolean read getlogx write setlogx;
+   property logy: boolean read getlogy write setlogy;
    property items[const index: integer]: ttrace read getitems write setitems; default;
   published
    property options: charttraceoptionsty read foptions 
@@ -782,7 +794,7 @@ begin
        int2:= 0;
       end;
       if int2 > int4 then begin
-       if inty < xtop then begin
+       if int2 < xtop then begin
         xtop:= int2;
        end;
        int2:= int4;
@@ -803,6 +815,9 @@ begin
         end;
        end;
        last:= int3;
+      end;
+      if xtop <> maxint then begin
+       break;
       end;
       inc(pox,intx);
       inc(poy,inty);
@@ -1197,6 +1212,36 @@ begin
  datachange;
 end;
 
+function ttrace.getlogx: boolean;
+begin
+ result:= cto_logx in options;
+end;
+
+procedure ttrace.setlogx(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [cto_logx];
+ end
+ else begin
+  options:= options - [cto_logx];
+ end;
+end;
+
+function ttrace.getlogy: boolean;
+begin
+ result:= cto_logy in options;
+end;
+
+procedure ttrace.setlogy(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [cto_logy];
+ end
+ else begin
+  options:= options - [cto_logy];
+ end;
+end;
+
 { ttraces }
 
 constructor ttraces.create(const aowner: tcustomchart);
@@ -1483,6 +1528,36 @@ begin
    writer.writereal('ystart'+mstr1,ystart);
    writer.writereal('yrange'+mstr1,yrange);
   end;
+ end;
+end;
+
+function ttraces.getlogx: boolean;
+begin
+ result:= cto_logx in options;
+end;
+
+procedure ttraces.setlogx(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [cto_logx];
+ end
+ else begin
+  options:= options - [cto_logx];
+ end;
+end;
+
+function ttraces.getlogy: boolean;
+begin
+ result:= cto_logy in options;
+end;
+
+procedure ttraces.setlogy(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [cto_logy];
+ end
+ else begin
+  options:= options - [cto_logy];
  end;
 end;
 
