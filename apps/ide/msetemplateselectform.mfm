@@ -2,12 +2,12 @@ object msetemplateselectfo: tmsetemplateselectfo
   visible = False
   bounds_x = 152
   bounds_y = 247
-  bounds_cx = 572
+  bounds_cx = 569
   bounds_cy = 277
   container.bounds = (
     0
     0
-    572
+    569
     277
   )
   options = [fo_screencentered, fo_cancelonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder]
@@ -16,7 +16,7 @@ object msetemplateselectfo: tmsetemplateselectfo
   moduleclassname = 'tmseform'
   object tbutton1: tbutton
     taborder = 2
-    bounds_x = 515
+    bounds_x = 512
     bounds_y = 251
     bounds_cx = 50
     bounds_cy = 20
@@ -27,7 +27,7 @@ object msetemplateselectfo: tmsetemplateselectfo
   end
   object tbutton2: tbutton
     taborder = 1
-    bounds_x = 459
+    bounds_x = 456
     bounds_y = 251
     bounds_cx = 50
     bounds_cy = 20
@@ -39,7 +39,7 @@ object msetemplateselectfo: tmsetemplateselectfo
   object grid: twidgetgrid
     bounds_x = 0
     bounds_y = 0
-    bounds_cx = 572
+    bounds_cx = 569
     bounds_cy = 245
     anchors = [an_top, an_bottom]
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
@@ -54,7 +54,7 @@ object msetemplateselectfo: tmsetemplateselectfo
     fixrows.items = <    
       item
         height = 16
-        captions.count = 6
+        captions.count = 7
         captions.items = <        
           item
             caption = 'Name'
@@ -73,9 +73,12 @@ object msetemplateselectfo: tmsetemplateselectfo
           end        
           item
             caption = 'Par4'
+          end        
+          item
+            caption = 'ed'
           end>
       end>
-    datacols.count = 6
+    datacols.count = 7
     datacols.colorfocused = -1879048185
     datacols.options = [co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
     datacols.options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
@@ -90,7 +93,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       end    
       item
         colorfocused = -1879048185
-        width = 277
+        width = 249
         options = [co_readonly, co_nofocus, co_fill, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'comment'
@@ -123,6 +126,15 @@ object msetemplateselectfo: tmsetemplateselectfo
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par4'
         dataclass = tgridmsestringdatalist
+      end    
+      item
+        color = -2147483646
+        colorfocused = -1879048185
+        width = 24
+        options = [co_proportional, co_savestate, co_mousescrollrow]
+        options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
+        widgetname = 'tstockglyphdatabutton1'
+        dataclass = tgridintegerdatalist
       end>
     datarowheight = 16
     statfile = tstatfile1
@@ -147,7 +159,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       visible = False
       bounds_x = 60
       bounds_y = 0
-      bounds_cx = 277
+      bounds_cx = 249
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
@@ -158,7 +170,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       optionsskin = [osk_framebuttononly]
       taborder = 3
       visible = False
-      bounds_x = 338
+      bounds_x = 310
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
@@ -171,7 +183,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       optionsskin = [osk_framebuttononly]
       taborder = 4
       visible = False
-      bounds_x = 389
+      bounds_x = 361
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
@@ -184,7 +196,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       optionsskin = [osk_framebuttononly]
       taborder = 5
       visible = False
-      bounds_x = 440
+      bounds_x = 412
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
@@ -197,12 +209,25 @@ object msetemplateselectfo: tmsetemplateselectfo
       optionsskin = [osk_framebuttononly]
       taborder = 6
       visible = False
-      bounds_x = 491
+      bounds_x = 463
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
+    end
+    object tstockglyphdatabutton1: tstockglyphdatabutton
+      optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+      optionsskin = [osk_framebuttononly]
+      taborder = 7
+      bounds_x = 514
+      bounds_y = 0
+      bounds_cx = 24
+      bounds_cy = 16
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
+      state = [as_invisible, as_localinvisible, as_localimagelist, as_localimagenr, as_localonexecute]
+      glyph = stg_ellipsesmall
+      onexecute = edtemplateactonexecute
     end
   end
   object filename: tstringdisp
@@ -210,7 +235,7 @@ object msetemplateselectfo: tmsetemplateselectfo
     taborder = 3
     bounds_x = 5
     bounds_y = 252
-    bounds_cx = 449
+    bounds_cx = 446
     bounds_cy = 18
     anchors = [an_left, an_right, an_bottom]
     textflags = [tf_ycentered, tf_ellipseleft]

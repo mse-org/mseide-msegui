@@ -2452,7 +2452,7 @@ begin
     if (fgridintf <> nil) and 
        (og_colchangeonreturnkey in fgridintf.getcol.grid.optionsgrid)then begin
      info.action:= ea_none;    
-     fgridintf.getcol.grid.colstep(fca_focusin,1,true,false);
+     fgridintf.getcol.grid.colstep(fca_focusin,1,true,false,true);
     end;
    end;
   end;

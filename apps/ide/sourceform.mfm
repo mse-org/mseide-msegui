@@ -475,6 +475,12 @@ object sourcefo: tsourcefo
         onexecute = insguiexec
       end    
       item
+        action = actionsmo.instemplate
+        caption = 'Insert Template'
+        name = 'instempl'
+        state = [as_localcaption]
+      end    
+      item
         caption = 'Convert to Pascal string'
         name = 'convpas'
         state = [as_localcaption, as_localonexecute]
@@ -483,12 +489,6 @@ object sourcefo: tsourcefo
       item
         action = completeclassact
         caption = 'Complete Class at Cursor'
-        state = [as_localcaption]
-      end    
-      item
-        action = actionsmo.instemplate
-        caption = 'Insert Template'
-        name = 'instempl'
         state = [as_localcaption]
       end>
     left = 176

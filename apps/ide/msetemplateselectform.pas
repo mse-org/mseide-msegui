@@ -21,7 +21,7 @@ uses
  mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msesimplewidgets,
  msewidgets,msedataedits,mseedit,msegrids,msestrings,msetypes,msewidgetgrid,
- msedispwidgets,msecodetemplates,msestatfile;
+ msedispwidgets,msecodetemplates,msestatfile,msegraphedits;
 type
  tmsetemplateselectfo = class(tmseform)
    tbutton1: tbutton;
@@ -35,7 +35,9 @@ type
    par4: tstringedit;
    filename: tstringdisp;
    tstatfile1: tstatfile;
+   tstockglyphdatabutton1: tstockglyphdatabutton;
    procedure celle(const sender: TObject; var info: celleventinfoty);
+   procedure edtemplateactonexecute(const sender: TObject);
   public
    finfos: templateinfoarty;
  end;
@@ -43,8 +45,13 @@ var
  msetemplateselectfo: tmsetemplateselectfo;
 implementation
 uses
- msetemplateselectform_mfm;
- 
+ msetemplateselectform_mfm,templateeditor;
+
+procedure tmsetemplateselectfo.edtemplateactonexecute(const sender: TObject);
+begin
+ ttemplateeditorfo.create(grid.row).show;
+end;
+
 procedure tmsetemplateselectfo.celle(const sender: TObject;
                var info: celleventinfoty);
 begin

@@ -24,7 +24,7 @@ uses
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,
  mseobjectpicker,msepointer,msetimer,msebits,msestat,msestatfile,msekeyboard,
  msestream,msedrag,msemenus,msepipestream,mseshapes,msegridsglob
- {$ifdef mse_with_ifi} ,mseificomp,mseifiglob,mseificompglob{$endif};
+ {$ifdef mse_with_ifi},mseificomp,mseifiglob,mseificompglob{$endif};
 
 type
          //     listvievoptionty from mselistbrowser
@@ -639,6 +639,7 @@ type
 
    function canfocus(const abutton: mousebuttonty;
                      const ashiftstate: shiftstatesty;
+                     const noreadonly: boolean;
                      out canrowfocus: boolean): boolean; virtual;
    function isreadonly: boolean; //col readonly or row readonly
    procedure updatecellzone(const row: integer; const pos: pointty;
@@ -1933,8 +1934,8 @@ type
    function mergestart(const acol: integer; const arow: integer): integer;
    function mergeend(const acol: integer; const arow: integer): integer;
    function getmerged(const arow: integer): longword;
-   function nextfocusablecol(acol: integer; const aleft: boolean;
-                                const arow: integer): integer;
+   function nextfocusablecol(const acol: integer; const aleft: boolean; 
+                      const arow: integer; const noreadonly: boolean): integer;
    procedure checkcellvalue(var accept: boolean); virtual; 
                    //store edited value to grid
    procedure beforefocuscell(const cell: gridcoordty;
@@ -2005,9 +2006,10 @@ type
    procedure lastrow(const action: focuscellactionty = fca_focusin); virtual;
    procedure firstrow(const action: focuscellactionty = fca_focusin); virtual;
 
-   procedure colstep(action: focuscellactionty; step: integer;
+   procedure colstep(const action: focuscellactionty; const step: integer;
                            const rowchange: boolean;
-                           const nocolwrap: boolean); virtual;
+                           const nocolwrap: boolean;
+                           const noreadonly: boolean); virtual;
                  //step > 0 -> right, step < 0 left
 
    function isautoappend: boolean; //true if last row is auto appended
@@ -5777,12 +5779,13 @@ begin
  end;
  if (co_disabled in optionsplusdelta) and 
                               (fgrid.ffocusedcell.col = colindex) then begin
-  fgrid.colstep(fca_focusin,1,false,false);
+  fgrid.colstep(fca_focusin,1,false,false,false);
  end;
 end;
 
 function tdatacol.canfocus(const abutton: mousebuttonty;
                                      const ashiftstate: shiftstatesty;
+                                     const noreadonly: boolean;
                                      out canrowfocus: boolean): boolean;
 begin
  canrowfocus:= ((abutton = mb_left) or (abutton = mb_none) or
@@ -5790,7 +5793,7 @@ begin
                ((ashiftstate*[ss_ctrl] = []) or 
                             not (co_noctrlmousefocus in foptions));
  result:= (foptions * [co_invisible,co_disabled,co_nofocus] = []) and
-                           canrowfocus;
+             canrowfocus and (not noreadonly or not(co_readonly in options));
 end;
 
 procedure tdatacol.rearange(const list: tintegerdatalist);
@@ -9596,19 +9599,21 @@ var
     if not (gs_mousecellredirected in fstate) then begin
      cell1:= fmousecell;
      cell1.col:= mergestart(cell1.col,cell1.row);
-     bo2:= fdatacols[cell1.col].canfocus(info.button,info.shiftstate,rowfocus);
+     bo2:= fdatacols[cell1.col].canfocus(info.button,info.shiftstate,false,
+                                                                     rowfocus);
      if not bo2 then begin
-      cell1.col:= mergestart(ffocusedcell.col,cell1.row); //try to focus mouse row
+      cell1.col:= mergestart(ffocusedcell.col,cell1.row); 
+                                          //try to focus mouse row
       if (cell1.col < 0) or (co_nofocus in fdatacols[cell1.col].options) then begin
-       cell1.col:= nextfocusablecol(0,false,cell1.row);
+       cell1.col:= nextfocusablecol(0,false,cell1.row,false);
       end;
      end;
      if (cell1.col >= 0) and 
-                fdatacols[cell1.col].canfocus(info.button,info.shiftstate,bo1) then begin
+         fdatacols[cell1.col].canfocus(info.button,
+                             info.shiftstate,false,bo1) then begin
       bo1:= not gridcoordisequal(cell1,ffocusedcell);
-      if (info.shiftstate * [ss_left,ss_middle,ss_right] = [ss_left])
-                  {(info.button = mb_left)} and
-             (co_mouseselect in fdatacols[cell1.col].foptions) then begin
+      if (info.shiftstate * [ss_left,ss_middle,ss_right] = [ss_left]) and
+                 (co_mouseselect in fdatacols[cell1.col].foptions) then begin
        if (info.shiftstate * keyshiftstatesmask = [ss_shift]) then begin
         action:= fca_selectend;
        end
@@ -9652,9 +9657,6 @@ var
       if (fmousecell.row <> ffocusedcell.row) or 
                              (info.eventkind = ek_buttonpress) then begin
        focusrow(fmousecell.row,getfocusact(fco_mouseselect in options),scm_row);
-//       focuscell(makegridcoord(nextfocusablecol(col,false,fmousecell.row),
-//                               fmousecell.row),
-//                getfocusact(fco_mouseselect in options),scm_row);
       end;
      end
      else begin
@@ -9760,7 +9762,6 @@ var
 
 begin
  inherited;
-// fobjectpicker.mouseevent(info);
  if not (es_processed in info.eventstate) then begin
   fobjectpicker.mouseevent(info);
   if (info.eventkind = ek_buttonpress) and 
@@ -9793,7 +9794,8 @@ begin
       if isvalidcell(coord1) then begin
        cellmouseevent(coord1,info,nil,cek_mouseleave);
       end;
-      if (fmousecell.row <> invalidaxis) and (fmousecell.col <> invalidaxis) then begin
+      if (fmousecell.row <> invalidaxis) and 
+                                    (fmousecell.col <> invalidaxis) then begin
        cellmouseevent(fmousecell,info,nil,cek_mouseenter);
       end;
      end;
@@ -9821,9 +9823,7 @@ begin
       checkfocuscell;
       if (mousewidgetbefore = application.mousewidget) and 
                        //not interrupted by beginmodal
-         (button = mb_left)
-                {and isdatacell(ffocusedcell) and 
-               gridcoordisequal(fmousecell,ffocusedcell)} then begin
+                                      (button = mb_left) then begin
        fclickedcellbefore:= fclickedcell;
        fclickedcell:= fmousecell;
        if isdatacell(fmousecell) then begin
@@ -9838,7 +9838,7 @@ begin
               datacols[fmousecell.col].getcursor(fmousecell.row,flastcellzone);
        end
        else begin
-        application.widgetcursorshape:= cr_default{cursor};
+        application.widgetcursorshape:= cr_default;
         if (eventkind = ek_mousepark) and (cellkind = ck_fixrow) and 
                ((fmousecell.row <> fmouseparkcell.row) or 
                 (fmousecell.col <> fmouseparkcell.col)) then begin
@@ -9876,8 +9876,8 @@ begin
          end;
          if (distance(fmouserefpos,info.pos) > 3) and active then begin
           fmouserefpos:= info.pos;
-          if not fdatacols[fmousecell.col].canfocus(info.button,info.shiftstate,
-                                                    bo1) then begin
+          if not fdatacols[fmousecell.col].canfocus(
+                     info.button,info.shiftstate,false,bo1) then begin
            showcell(fmousecell);
           end
           else begin
@@ -10368,7 +10368,8 @@ begin     //focuscell
    end;
   end;
   if (selectaction in [fca_focusin,fca_focusinrepeater,fca_focusinforce]) and 
-      ((cell.col < 0) or  not fdatacols[cell.col].canfocus(mb_none,[],bo1)) then begin
+      ((cell.col < 0) or  
+        not fdatacols[cell.col].canfocus(mb_none,[],false,bo1)) then begin
    selectaction:= fca_setfocusedcell;
   end;
   if selectaction = fca_entergrid then begin
@@ -10378,7 +10379,7 @@ begin     //focuscell
    if cell.col < 0 then begin
     cell.col:= 0;
    end;
-   cell.col:= nextfocusablecol(cell.col,false,cell.row);
+   cell.col:= nextfocusablecol(cell.col,false,cell.row,true);
    if (gs_hasactiverowcolor in fstate) and (cell.row < frowcount) then begin
     invalidaterow(cell.row);
    end;
@@ -11314,9 +11315,8 @@ procedure tcustomgrid.focusrow(const arow: integer;
 var
  int1,int2: integer;
 begin
-// focuscell(makegridcoord(ffocusedcell.col,arow),action);
  int1:= flastcol;
- focuscell(makegridcoord(nextfocusablecol(flastcol,false,arow),arow),action,
+ focuscell(makegridcoord(nextfocusablecol(flastcol,false,arow,true),arow),action,
                selectmode);
  int2:= mergestart(flastcol,ffocusedcell.row);
  if (int2 <= int1) and (mergeend(flastcol,ffocusedcell.row) > int1) or
@@ -11565,7 +11565,7 @@ begin
      end;
      key_home: begin
       if ss_ctrl in shiftstate then begin
-       focuscell(makegridcoord(nextfocusablecol(0,false,0),0),action);
+       focuscell(makegridcoord(nextfocusablecol(0,false,0,true),0),action);
       end
       else begin
        exclude(info.eventstate,es_processed);
@@ -11573,7 +11573,8 @@ begin
      end;
      key_end: begin
       if ss_ctrl in shiftstate then begin
-       focuscell(makegridcoord(nextfocusablecol(datacols.count-1,true,frowcount-1),
+       focuscell(makegridcoord(
+              nextfocusablecol(datacols.count-1,true,frowcount-1,true),
                                                        frowcount-1),action);
       end
       else begin
@@ -11615,10 +11616,10 @@ begin
                                 (ffocusedcell.col >= 0) then begin
     include(info.eventstate,es_processed);
     case info.key of
-     key_return{,key_enter}: begin
+     key_return: begin
       if (og_colchangeonreturnkey in foptionsgrid) and 
                  (shiftstate = []) then begin
-       colstep(fca_focusin,1,true,false);
+       colstep(fca_focusin,1,true,false,true);
       end
       else begin
        exclude(info.eventstate,es_processed);
@@ -11634,10 +11635,10 @@ begin
         if docheckcellvalue then begin
          action:= fca_focusin;
          if shiftstate = [ss_shift] then begin
-          colstep(actioncol,-1,true,false);
+          colstep(actioncol,-1,true,false,true);
          end
          else begin
-          colstep(actioncol,1,true,false);
+          colstep(actioncol,1,true,false,true);
          end;
         end;
        end
@@ -11659,7 +11660,7 @@ begin
        exit;
       end
       else begin
-       colstep(actioncol,-1,false,{bo1 or} not (og_wrapcol in foptionsgrid));
+       colstep(actioncol,-1,false,not (og_wrapcol in foptionsgrid),false);
        checkselection;
        goto checkwidgetexit;
       end;
@@ -11667,7 +11668,8 @@ begin
      key_right: begin
       if shiftstate = [ss_ctrl] then begin
        if og_keycolmoving in foptionsgrid then begin
-        if (ffocusedcell.col >= 0) and (ffocusedcell.col < fdatacols.count-1) then begin
+        if (ffocusedcell.col >= 0) and 
+                        (ffocusedcell.col < fdatacols.count-1) then begin
          moverow(ffocusedcell.col,ffocusedcell.col + 1);
         end;
        end
@@ -11677,7 +11679,7 @@ begin
        exit;
       end
       else begin
-       colstep(actioncol,1,false,{bo1 or} not (og_wrapcol in foptionsgrid));
+       colstep(actioncol,1,false, not (og_wrapcol in foptionsgrid),false);
        checkselection;
        goto checkwidgetexit;
       end;
@@ -11691,8 +11693,6 @@ begin
    if not (es_processed in info.eventstate) and (ffocusedcell.col >= 0) then begin
     with fdatacols[ffocusedcell.col] do begin
      if (info.key = key_space) and (co_keyselect in foptions) and
-//        (foptions * [co_keyselect,co_multiselect] = 
-//                                          [co_keyselect,co_multiselect]) and
       ((shiftstate = [ss_shift]) or (shiftstate = [ss_ctrl])) then begin
       if shiftstate = [ss_ctrl] then begin
        mo1:= csm_reverse;
@@ -12455,7 +12455,7 @@ begin
    if gs_scrollleft in fstate then begin
     if bo1 then begin
      if ffocusedcell.col > 0 then begin
-      colstep(frepeataction,-1,false,false);
+      colstep(frepeataction,-1,false,false,false);
      end;
     end
     else begin
@@ -12466,7 +12466,7 @@ begin
     if gs_scrollright in fstate then begin
      if bo1 then begin
       if ffocusedcell.col < fdatacols.count - 1 then begin
-       colstep(frepeataction,1,false,false);
+       colstep(frepeataction,1,false,false,false);
       end;
      end
      else begin
@@ -13108,162 +13108,157 @@ begin
  end;
 end;
 
-procedure tcustomgrid.colstep(action: focuscellactionty; step: integer;
-                 const rowchange: boolean; const nocolwrap: boolean);
+procedure tcustomgrid.colstep(const action: focuscellactionty;
+                 const step: integer;
+                 const rowchange: boolean; const nocolwrap: boolean;
+                 const noreadonly: boolean);
 var
  int1: integer;
- arow: integer;
+ row1: integer;
  bo1: boolean;
  finished: boolean;
+ act1: focuscellactionty;
+ step1: integer;
+
 begin
  if fdatacols.count > 0 then begin
-  arow:= ffocusedcell.row;
+  act1:= action;
+  step1:= step;
+  row1:= ffocusedcell.row;
   int1:= ffocusedcell.col;
   finished:= true;
   repeat
-   if step > 0 then begin
+   if step1 > 0 then begin
     inc(int1);
     finished:= int1 <= ffocusedcell.col;
-    int1:= mergeend(int1,arow);
+    int1:= mergeend(int1,row1);
     finished:= finished and (int1 >= ffocusedcell.col);
     if int1 >= fdatacols.count then begin
      if nocolwrap then begin
       exit;
      end;
      if rowchange then begin
-      inc(arow);
-      if action = fca_focusin then begin
-       action:= fca_focusinforce;
+      inc(row1);
+      if act1 = fca_focusin then begin
+       act1:= fca_focusinforce;
       end;
      end;
      int1:= 0;
      finished:= int1 = ffocusedcell.col;
     end;
-    if fdatacols[int1].canfocus(mb_none,[],bo1) then begin
-     dec(step);
+    if fdatacols[int1].canfocus(mb_none,[],noreadonly,bo1) then begin
+     dec(step1);
     end;
    end
    else begin
     dec(int1);
     finished:= int1 >= ffocusedcell.col;
-    int1:= mergestart(int1,arow);
+    int1:= mergestart(int1,row1);
     finished:= finished and (int1 <= ffocusedcell.col);
     if int1 < 0 then begin
      if nocolwrap then begin
       exit;
      end;
      if rowchange then begin
-      dec(arow);
-      if action = fca_focusin then begin
-       action:= fca_focusinforce;
+      dec(row1);
+      if act1 = fca_focusin then begin
+       act1:= fca_focusinforce;
       end;
      end;
-     int1:=  mergestart(fdatacols.count - 1,arow);
+     int1:=  mergestart(fdatacols.count - 1,row1);
      finished:= int1 <= ffocusedcell.col;
     end;
-    if fdatacols[int1].canfocus(mb_none,[],bo1) then begin
-     inc(step);
+    if fdatacols[int1].canfocus(mb_none,[],noreadonly,bo1) then begin
+     inc(step1);
     end;
    end;
-   if step = 0 then begin
-    if arow < 0 then begin
-     arow:= rowcount-1;
+   if step1 = 0 then begin
+    if row1 < 0 then begin
+     row1:= rowcount-1;
     end
     else begin
-     if arow >= rowcount then begin
+     if row1 >= rowcount then begin
       if not (gs_isdb in fstate) and (og_autoappend in foptionsgrid) then begin
        if fdatacols.rowempty(rowcount - 1) then begin
-        arow:= rowcount-1;
+        row1:= rowcount-1;
        end
        else begin
-        arow:= rowcount;
+        row1:= rowcount;
        end;
       end
       else begin
-       arow:= 0;
+       row1:= 0;
       end;
      end;
     end;
-    focuscell(makegridcoord(int1,arow),action);
+    focuscell(makegridcoord(int1,row1),act1);
     break;
    end;
   until finished; //none found
+  if finished and noreadonly then begin
+   colstep(action,step,rowchange,nocolwrap,false); //try readonly
+  end;
  end;
 end;
 
-function tcustomgrid.nextfocusablecol(acol: integer;
-  const aleft: boolean; const arow: integer): integer;
+function tcustomgrid.nextfocusablecol(const acol: integer;
+               const aleft: boolean; const arow: integer;
+               const noreadonly: boolean): integer;
 var
  int1,int2: integer;
  loopcount: integer;
  bo1: boolean;
-// merged1: longword;
+ col1: integer;
 begin
  result:= -1;
+ col1:= acol;
  if fdatacols.count > 0 then begin
-//  merged1:= getmerged(arow);
-  if acol > fdatacols.count then begin
-   acol:= fdatacols.count;
+  if col1 > fdatacols.count then begin
+   col1:= fdatacols.count;
   end;
-  if acol < -1 then begin
-   acol:= -1;
+  if col1 < -1 then begin
+   col1:= -1;
   end;
   loopcount:= -1;
   if aleft then begin
-   if acol = fdatacols.count then begin
-    acol:= fdatacols.count - 1;
+   if col1 = fdatacols.count then begin
+    col1:= fdatacols.count - 1;
    end;
-   int1:= acol;
+   int1:= col1;
    repeat
     if int1 < 0 then begin
      int1:=  fdatacols.count - 1;
      inc(loopcount);
     end;
     int1:= mergestart(int1,arow);
-    if fdatacols[int1].canfocus(mb_none,[],bo1) then begin
+    if fdatacols[int1].canfocus(mb_none,[],noreadonly,bo1) then begin
      result:= int1;
      break;
     end;
     dec(int1);
-   until (int1 = acol) or (loopcount > 0);
-   {
-   if (merged1 <> 0) and (result > 0) then begin
-    int2:= 0;
-    if (merged1 <> mergedcolall) then begin
-     if result < mergedcolmax then begin
-      for int1:= result - 1 downto 0 do begin
-       if merged1 and bits[int1] = 0 then begin
-        int2:= int1 + 1;
-        break;
-       end;
-      end;
-     end
-     else begin
-      int2:= result;
-     end;
-    end;
-    result:= int2
-   end;
-   }
+   until (int1 = col1) or (loopcount > 0);
   end
   else begin
-   if acol < 0 then begin
-    acol:= 0;
+   if col1 < 0 then begin
+    col1:= 0;
    end;
-   int1:= mergestart(acol,arow);
+   int1:= mergestart(col1,arow);
    repeat
     if int1 >= fdatacols.count then begin
      int1:= 0;
      inc(loopcount);
     end;
-    if fdatacols[int1].canfocus(mb_none,[],bo1) then begin
+    if fdatacols[int1].canfocus(mb_none,[],noreadonly,bo1) then begin
      result:= int1;
      break;
     end;
     inc(int1);
     int1:= mergeend(int1,arow);
-   until (int1 = acol) or (loopcount > 0);
+   until (int1 = col1) or (loopcount > 0);
   end;
+ end;
+ if noreadonly and (result = -1) then begin
+  result:= nextfocusablecol(acol,aleft,arow,false); //try readonly cols
  end;
 end;
 
@@ -14444,7 +14439,7 @@ begin
      end;
      if bo1 and (og_colchangeonreturnkey in fgrid.optionsgrid) then begin
       info.action:= ea_none;
-      fgrid.colstep(fca_focusin,1,true,false);
+      fgrid.colstep(fca_focusin,1,true,false,true);
      end;
     end;
     ea_undo: begin

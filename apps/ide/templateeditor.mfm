@@ -1,0 +1,31 @@
+object templateeditorfo: ttemplateeditorfo
+  bounds_x = 169
+  bounds_y = 239
+  bounds_cx = 367
+  bounds_cy = 226
+  container.bounds = (
+    0
+    0
+    367
+    226
+  )
+  options = [fo_freeonclose, fo_modal, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  statfile = tstatfile1
+  caption = 'Code Template Editor'
+  onloaded = onlo
+  moduleclassname = 'tmseform'
+  object tlabel1: tlabel
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 102
+    bounds_cy = 14
+    caption = 'under construction'
+    reffontheight = 14
+  end
+  object tstatfile1: tstatfile
+    filename = 'templedit.sta'
+    options = [sfo_memory, sfo_transaction, sfo_activatorread, sfo_activatorwrite]
+    left = 264
+    top = 64
+  end
+end

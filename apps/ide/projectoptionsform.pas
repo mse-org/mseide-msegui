@@ -624,6 +624,7 @@ const
  fadeeditorstatname =        'fadeeditor.sta';
  codetemplateselectstatname ='templselect.sta';
  codetemplateparamstatname = 'templparam.sta';
+ codetemplateeditstatname =  'templedit.sta';
  
  siginfocount = 30;
  siginfos: array[0..siginfocount-1] of signalinfoty = (
@@ -1085,6 +1086,7 @@ begin
   deletememorystatstream(fadeeditorstatname);
   deletememorystatstream(codetemplateselectstatname);
   deletememorystatstream(codetemplateparamstatname);
+  deletememorystatstream(codetemplateeditstatname);
   {$ifndef mse_no_db}{$ifdef FPC}
   deletememorystatstream(dbfieldeditorstatname);
   {$endif}{$endif}
@@ -1369,6 +1371,7 @@ begin
   updatememorystatstream('bmpfiledialog',bmpfiledialogstatname);
   updatememorystatstream('codetemplateselect',codetemplateselectstatname);
   updatememorystatstream('codetemplateparam',codetemplateparamstatname);
+  updatememorystatstream('codetemplateedit',codetemplateeditstatname);
 {$ifndef mse_no_db}{$ifdef FPC}
   updatememorystatstream('dbfieldeditor',dbfieldeditorstatname);
 {$endif}{$endif}

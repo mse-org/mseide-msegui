@@ -90,6 +90,7 @@ type
    function hastemplate(const aname: msestring): boolean;
    function gettemplate(const aname: msestring; out templatetext: msestring;                     
                         const amacrolist: tmacrolist = nil): ptemplateinfoty;
+   property templates: templateinfoarty read finfos;
  end;
  
 implementation

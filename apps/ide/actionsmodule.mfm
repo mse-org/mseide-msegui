@@ -1544,10 +1544,6 @@ object actionsmo: tactionsmo
       item
         action = instemplate
         dispname = 'Insert Template'
-        sc = (
-          1
-          16468
-        )
       end    
       item
         action = sourcefo.navigbackact
