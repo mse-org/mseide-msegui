@@ -55,7 +55,7 @@ for param entry or if the template name can not be found.
 
 interface
 uses
- msestrings,msehash,msesysenv,msetypes;
+ msestrings,msehash,msesysenv,msetypes,mseforms;
  
 type
  templateinfoty = record
@@ -82,6 +82,7 @@ type
    function loadfile(const afilename: filenamety;
                           var ainfo: templateinfoty): boolean;
                                      //true if ok
+   procedure reload(const selectform: tmseform); //tmsetemplateselectfo
   public
    constructor create;
    destructor destroy; override;
@@ -203,7 +204,6 @@ var
  se: tmsetemplateselectfo;
  int1,int2: integer;
  bo1: boolean;
- edit1: tstringedit;
 begin
  result:= nil;
  templatetext:= '';
@@ -214,24 +214,9 @@ begin
   setlength(ar1,1);
  end;
  if (ar1[0] = '') or not flist.find(ar1[0],pointer(puint1)) then begin
-  se:= tmsetemplateselectfo.create(nil);
+  se:= tmsetemplateselectfo.create(self);
   try
-   se.finfos:= finfos;
-   se.grid.beginupdate;
-   se.grid.rowcount:= length(finfos);
-   for int1:= 0 to high(finfos) do begin
-    with finfos[int1] do begin
-     se.templatename[int1]:= name;
-     se.comment[int1]:= comment;
-     for int2:= 0 to high(params) do begin
-      edit1:= tstringedit(se.grid.findtagwidget(int2+1,tstringedit));
-      if edit1 <> nil then begin
-       edit1[int1]:= params[int2];
-      end;
-     end;
-    end;
-   end;
-   se.grid.endupdate;
+   reload(se);
    se.show;
    se.grid.setfocus;
    se.templatename.editor.filtertext:= ar1[0];
@@ -309,6 +294,31 @@ begin
    mac1.free;
   end;
  end;
+end;
+
+procedure tcodetemplates.reload(const selectform: tmseform);
+var
+ se: tmsetemplateselectfo;
+ int1,int2: integer;
+ edit1: tstringedit;
+begin
+ se:= selectform as tmsetemplateselectfo;
+ se.finfos:= finfos;
+ se.grid.beginupdate;
+ se.grid.rowcount:= length(finfos);
+ for int1:= 0 to high(finfos) do begin
+  with finfos[int1] do begin
+   se.templatename[int1]:= name;
+   se.comment[int1]:= comment;
+   for int2:= 0 to high(params) do begin
+    edit1:= tstringedit(se.grid.findtagwidget(int2+1,tstringedit));
+    if edit1 <> nil then begin
+     edit1[int1]:= params[int2];
+    end;
+   end;
+  end;
+ end;
+ se.grid.endupdate;
 end;
 
 end.

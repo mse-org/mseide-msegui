@@ -10,18 +10,25 @@ type
  ttemplateeditorfo = class(tmseform)
    tstatfile1: tstatfile;
    tlabel1: tlabel;
+   tbutton1: tbutton;
+   tbutton2: tbutton;
+   tstringedit1: tstringedit;
+   tstringedit2: tstringedit;
+   tstringgrid1: tstringgrid;
    procedure onlo(const sender: TObject);
+  private
+   findex: integer;
   public
    constructor create(const aindex: integer); reintroduce;
  end;
-var
- templateeditorfo: ttemplateeditorfo;
+
 implementation
 uses
  templateeditor_mfm,msecodetemplates,projectoptionsform;
  
 constructor ttemplateeditorfo.create(const aindex: integer);
 begin
+ findex:= aindex;
  inherited create(nil);
 end;
 

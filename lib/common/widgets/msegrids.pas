@@ -1963,7 +1963,8 @@ type
    function calcshowshift(const rect: rectty; 
                                    const position: cellpositionty): pointty;
    procedure focusrow(const arow: integer; const action: focuscellactionty;
-                        const selectmode: selectcellmodety = scm_cell);
+                      const noreadonly: boolean; 
+                      const selectmode: selectcellmodety = scm_cell);
 
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
@@ -9656,7 +9657,8 @@ var
      if (fco_mousefocus in options) then begin
       if (fmousecell.row <> ffocusedcell.row) or 
                              (info.eventkind = ek_buttonpress) then begin
-       focusrow(fmousecell.row,getfocusact(fco_mouseselect in options),scm_row);
+       focusrow(fmousecell.row,getfocusact(fco_mouseselect in options),
+                                                            true,scm_row);
       end;
      end
      else begin
@@ -11311,13 +11313,14 @@ end;
 
 procedure tcustomgrid.focusrow(const arow: integer; 
                  const action: focuscellactionty;
+                 const noreadonly: boolean;
                  const selectmode: selectcellmodety = scm_cell);
 var
  int1,int2: integer;
 begin
  int1:= flastcol;
- focuscell(makegridcoord(nextfocusablecol(flastcol,false,arow,true),arow),action,
-               selectmode);
+ focuscell(makegridcoord(
+    nextfocusablecol(flastcol,false,arow,noreadonly),arow),action,selectmode);
  int2:= mergestart(flastcol,ffocusedcell.row);
  if (int2 <= int1) and (mergeend(flastcol,ffocusedcell.row) > int1) or
        (int2 > 0) and not (co_nofocus in datacols[int2].options) then begin
@@ -11330,11 +11333,11 @@ begin
  with fdatacols.frowstate do begin
   if visiblerowcount > 0 then begin
    if (ffocusedcell.row > 0) or not (og_wraprow in foptionsgrid) then begin
-    focusrow(visiblerowstep(ffocusedcell.row,-1,false),action);
+    focusrow(visiblerowstep(ffocusedcell.row,-1,false),action,false);
    end
    else begin
     if og_wraprow in foptionsgrid then begin
-     focusrow(visiblerowstep(frowcount-1,0,false),action);
+     focusrow(visiblerowstep(frowcount-1,0,false),action,false);
     end;
    end;
   end;
@@ -11350,11 +11353,11 @@ begin
    if not (og_wraprow in foptionsgrid) or 
                 (visiblerow(ffocusedcell.row) < visiblerowcount - 1) then begin
     focusrow(visiblerowstep(ffocusedcell.row,1,og_autoappend in foptionsgrid),
-                                                    action);
+                                                    action,false);
    end
    else begin
     if og_wraprow in foptionsgrid then begin
-     focusrow(visiblerowstep(0,0,false),action);
+     focusrow(visiblerowstep(0,0,false),action,false);
     end;
    end;
   end;
@@ -11370,7 +11373,7 @@ begin
    int1:= visiblerowstep(ffocusedcell.row,-rowsperpage+1,false);
    if visiblerow(int1) < visiblerowcount then begin
     scrollrows(rowsperpage - 1);
-    focusrow(int1,action);
+    focusrow(int1,action,false);
    end;
   end;
  end;
@@ -11385,7 +11388,7 @@ begin
    int1:= visiblerowstep(ffocusedcell.row,rowsperpage-1,false);
    if int1 >= 0 then begin
     scrollrows(-(rowsperpage - 1));
-    focusrow(int1,action);
+    focusrow(int1,action,false);
    end;
   end;
  end;
@@ -11401,7 +11404,7 @@ begin
  end;
  if int1 < frowcount then begin
   scrollrows(wheelheight);
-  focusrow(int1,action);
+  focusrow(int1,action,false);
  end;
 end;
 
@@ -11415,21 +11418,21 @@ begin
  end;
  if int1 >= 0 then begin
   scrollrows(-wheelheight);
-  focusrow(int1,action);
+  focusrow(int1,action,false);
  end;
 end;
 
 procedure tcustomgrid.firstrow(const action: focuscellactionty = fca_focusin);
 begin
  if frowcount > 0 then begin
-  focusrow(0,action);
+  focusrow(0,action,false);
  end;
 end;
 
 procedure tcustomgrid.lastrow(const action: focuscellactionty = fca_focusin);
 begin
  if frowcount > 0 then begin
-  focusrow(frowcount-1,action);
+  focusrow(frowcount-1,action,false);
  end;
 end;
 
@@ -13192,6 +13195,7 @@ begin
      end;
     end;
     focuscell(makegridcoord(int1,row1),act1);
+    finished:= false;
     break;
    end;
   until finished; //none found

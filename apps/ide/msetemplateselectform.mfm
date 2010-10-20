@@ -85,7 +85,7 @@ object msetemplateselectfo: tmsetemplateselectfo
     datacols.items = <    
       item
         colorfocused = -1879048185
-        width = 59
+        width = 60
         options = [co_readonly, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'templatename'
@@ -93,7 +93,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       end    
       item
         colorfocused = -1879048185
-        width = 249
+        width = 252
         options = [co_readonly, co_nofocus, co_fill, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'comment'
@@ -101,6 +101,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       end    
       item
         colorfocused = -1879048185
+        width = 51
         options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par1'
@@ -108,6 +109,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       end    
       item
         colorfocused = -1879048185
+        width = 51
         options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par2'
@@ -115,6 +117,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       end    
       item
         colorfocused = -1879048185
+        width = 51
         options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par3'
@@ -122,6 +125,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       end    
       item
         colorfocused = -1879048185
+        width = 51
         options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par4'
@@ -130,8 +134,8 @@ object msetemplateselectfo: tmsetemplateselectfo
       item
         color = -2147483646
         colorfocused = -1879048185
-        width = 24
-        options = [co_proportional, co_savestate, co_mousescrollrow]
+        width = 16
+        options = [co_fixwidth, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'tstockglyphdatabutton1'
         dataclass = tgridintegerdatalist
@@ -147,7 +151,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       visible = False
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 59
+      bounds_cx = 60
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_locate, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
@@ -157,9 +161,9 @@ object msetemplateselectfo: tmsetemplateselectfo
       optionsskin = [osk_framebuttononly]
       taborder = 2
       visible = False
-      bounds_x = 60
+      bounds_x = 61
       bounds_y = 0
-      bounds_cx = 249
+      bounds_cx = 252
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
@@ -170,9 +174,9 @@ object msetemplateselectfo: tmsetemplateselectfo
       optionsskin = [osk_framebuttononly]
       taborder = 3
       visible = False
-      bounds_x = 310
+      bounds_x = 314
       bounds_y = 0
-      bounds_cx = 50
+      bounds_cx = 51
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
@@ -183,9 +187,9 @@ object msetemplateselectfo: tmsetemplateselectfo
       optionsskin = [osk_framebuttononly]
       taborder = 4
       visible = False
-      bounds_x = 361
+      bounds_x = 366
       bounds_y = 0
-      bounds_cx = 50
+      bounds_cx = 51
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
@@ -196,9 +200,9 @@ object msetemplateselectfo: tmsetemplateselectfo
       optionsskin = [osk_framebuttononly]
       taborder = 5
       visible = False
-      bounds_x = 412
+      bounds_x = 418
       bounds_y = 0
-      bounds_cx = 50
+      bounds_cx = 51
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
@@ -209,9 +213,9 @@ object msetemplateselectfo: tmsetemplateselectfo
       optionsskin = [osk_framebuttononly]
       taborder = 6
       visible = False
-      bounds_x = 463
+      bounds_x = 470
       bounds_y = 0
-      bounds_cx = 50
+      bounds_cx = 51
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       reffontheight = 14
@@ -220,11 +224,12 @@ object msetemplateselectfo: tmsetemplateselectfo
       optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 7
-      bounds_x = 514
+      bounds_x = 522
       bounds_y = 0
-      bounds_cx = 24
+      bounds_cx = 16
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
+      options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_asyncexecute]
       state = [as_invisible, as_localinvisible, as_localimagelist, as_localimagenr, as_localonexecute]
       glyph = stg_ellipsesmall
       onexecute = edtemplateactonexecute

@@ -38,18 +38,31 @@ type
    tstockglyphdatabutton1: tstockglyphdatabutton;
    procedure celle(const sender: TObject; var info: celleventinfoty);
    procedure edtemplateactonexecute(const sender: TObject);
+  private
+   ftemplates: tcodetemplates;
   public
    finfos: templateinfoarty;
+   constructor create(const atemplates: tcodetemplates); reintroduce;
  end;
-var
- msetemplateselectfo: tmsetemplateselectfo;
+
 implementation
 uses
  msetemplateselectform_mfm,templateeditor;
+ 
+type
+ tcodetemplates1 = class(tcodetemplates);
+ 
+constructor tmsetemplateselectfo.create(const atemplates: tcodetemplates);
+begin
+ ftemplates:= atemplates;
+ inherited create(nil);
+end;
 
 procedure tmsetemplateselectfo.edtemplateactonexecute(const sender: TObject);
 begin
- ttemplateeditorfo.create(grid.row).show;
+ if ttemplateeditorfo.create(grid.row).show(true) = mr_ok then begin
+  tcodetemplates1(ftemplates).reload(self);
+ end;
 end;
 
 procedure tmsetemplateselectfo.celle(const sender: TObject;
