@@ -481,7 +481,7 @@ type
    fcheckcaption: boolean;
    fclickedrow: integer;
    procedure setoptions(const avalue: buttonoptionsty); virtual;
-   procedure togglevalue; virtual; abstract;
+   procedure togglevalue(const areadonly: boolean); virtual; abstract;
    procedure togglegridvalue(const index: integer); virtual; abstract;
    procedure resetgridvalue(const index: integer); virtual; abstract;
    procedure checkgridvalue(const index: integer); virtual; abstract;
@@ -539,7 +539,7 @@ type
    function gridvaluechecked(const aindex: integer): boolean; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
-   procedure togglevalue; override;
+   procedure togglevalue(const areadonly: boolean); override;
    procedure paintglyph(const canvas: tcanvas;  const acolorglyph: colorty; 
                     const avalue; const arect: rectty); override;
    procedure internalcheckvalue(var avalue; var accept: boolean); override;
@@ -621,7 +621,7 @@ type
    function internalcheckeditem(out single: boolean): tcustombooleaneditradio; //nil if none
   protected
    fresetting: integer;
-   procedure togglevalue; override;
+   procedure togglevalue(const areadonly: boolean); override;
   public
    procedure togglegridvalue(const index: integer); override;
    function checkeditem: tcustombooleaneditradio; //nil if none
@@ -665,7 +665,7 @@ type
    procedure internalcheckvalue(var avalue; var accept: boolean); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
-   procedure togglevalue; override;
+   procedure togglevalue(const areadonly: boolean); override;
    procedure doinc(var avalue: integer);
   public
    function checkvalue: boolean; override;
@@ -767,7 +767,7 @@ type
 
    procedure setnullvalue;
    procedure doexecute; virtual;
-   procedure togglevalue; override;
+   procedure togglevalue(const areadonly: boolean); override;
    procedure statechanged; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -1916,10 +1916,10 @@ end;
 procedure ttogglegraphdataedit.dokeyup(var info: keyeventinfoty);
 begin
  with info do begin
-  if not (oe_readonly in getoptionsedit) and (key = key_space) and
+  if (key = key_space) and
         (shiftstate = []) and (bo_executeonkey in foptions) then begin
    include(eventstate,es_processed);
-   togglevalue;
+   togglevalue(oe_readonly in getoptionsedit);
   end;
  end;
  inherited;
@@ -1927,10 +1927,9 @@ end;
 
 procedure ttogglegraphdataedit.doshortcut(var info: keyeventinfoty; const sender: twidget);
 begin
- if not (oe_readonly in getoptionsedit) and (bo_executeonshortcut in foptions)
-               and checkfocusshortcut(info) then begin
+ if (bo_executeonshortcut in foptions) and checkfocusshortcut(info) then begin
   include(info.eventstate,es_processed);
-  togglevalue;
+  togglevalue(oe_readonly in getoptionsedit);
   if (bo_focusonshortcut in foptions) and canfocus then begin
    setfocus;
   end;
@@ -1942,11 +1941,11 @@ end;
 
 procedure ttogglegraphdataedit.mouseevent(var info: mouseeventinfoty);
 begin
- if not (oe_readonly in getoptionsedit) and not (csdesigning in componentstate) and
-         iswidgetclick(info,fcheckcaption) and (bo_executeonclick in foptions) then begin
-//  include(info.eventstate,es_processed); 
+ if not (csdesigning in componentstate) and 
+                iswidgetclick(info,fcheckcaption) and 
+                      (bo_executeonclick in foptions) then begin
          //twidgetgrid needs childmouseevent
-  togglevalue;
+  togglevalue(oe_readonly in getoptionsedit);
  end;
  inherited;
 end;
@@ -2087,13 +2086,15 @@ begin
  end;
 end;
 
-procedure tcustombooleanedit.togglevalue;
+procedure tcustombooleanedit.togglevalue(const areadonly: boolean);
 var
  bo1: boolean;
 begin
- bo1:= not fvalue;
- fedited:= true;
- docheckvalue(bo1);
+ if not areadonly then begin
+  bo1:= not fvalue;
+  fedited:= true;
+  docheckvalue(bo1);
+ end;
 end;
 
 procedure tcustombooleanedit.togglegridvalue(const index: integer);
@@ -2406,12 +2407,11 @@ procedure tcustombooleanedit.dokeydown(var info: keyeventinfoty);
 begin
  with info do begin
   if not (es_processed in eventstate) then begin
-   if not (oe_readonly in getoptionsedit) and 
-    ((key = key_0) or (key = key_1) or (key = key_period)) and
+   if ((key = key_0) or (key = key_1) or (key = key_period)) and
          (shiftstate = []) and (bo_executeonkey in foptions) then begin
     include(eventstate,es_processed);
     if ((key = key_1) xor value) or (key = key_period) then begin
-     togglevalue;
+     togglevalue(oe_readonly in getoptionsedit);
     end;
    end;
    if not (es_processed in eventstate) then begin
@@ -2540,14 +2540,16 @@ begin
  result:= internalcheckeditem(bo1);
 end;
 
-procedure tcustombooleaneditradio.togglevalue;
+procedure tcustombooleaneditradio.togglevalue(const areadonly: boolean);
 var
  bo1: boolean;
 begin
- internalcheckeditem(bo1);
- if not fvalue or not bo1 then begin
-  bo1:= not fvalue;
-  docheckvalue(bo1);
+ if not areadonly then begin
+  internalcheckeditem(bo1);
+  if not fvalue or not bo1 then begin
+   bo1:= not fvalue;
+   docheckvalue(bo1);
+  end;
  end;
 end;
 
@@ -2652,13 +2654,15 @@ begin
  end;
 end;
 
-procedure tcustomintegergraphdataedit.togglevalue;
+procedure tcustomintegergraphdataedit.togglevalue(const areadonly: boolean);
 var
  int1: integer;
 begin
- int1:= fvalue;
- doinc(int1);
- docheckvalue(int1);
+ if not areadonly then begin
+  int1:= fvalue;
+  doinc(int1);
+  docheckvalue(int1);
+ end;
 end;
 
 procedure tcustomintegergraphdataedit.togglegridvalue(const index: integer);
@@ -2905,7 +2909,7 @@ begin
   else begin
    if isenterkey(self,info.key) then begin
     include(info.eventstate,es_processed);
-    togglevalue;
+    togglevalue(oe_readonly in getoptionsedit);
    end;
   end;
  end;
@@ -2943,7 +2947,7 @@ begin
        (info.shiftstate = [ss_second]));
    if bo1 then begin
     bo2:= true;
-    togglevalue;
+    togglevalue(oe_readonly in getoptionsedit);
 //    internalexecute;
    end;
    if bo2 then begin
@@ -3164,12 +3168,10 @@ begin
          msegui.checkshortcut(info,finfo.ca.caption,true);
 end;
 
-procedure tcustomdatabutton.togglevalue;
+procedure tcustomdatabutton.togglevalue(const areadonly: boolean);
 begin
  inherited;
-// if window.candefocus and isenabled then begin
  internalexecute;
-// end;
 end;
 
 procedure tcustomdatabutton.setimageoffset(const avalue: integer);

@@ -1,34 +1,26 @@
 object templateeditorfo: ttemplateeditorfo
   visible = False
-  bounds_x = 169
-  bounds_y = 239
-  bounds_cx = 412
-  bounds_cy = 425
+  bounds_x = 147
+  bounds_y = 120
+  bounds_cx = 473
+  bounds_cy = 399
+  container.frame.clientwidthmin = 473
   container.bounds = (
     0
     0
-    412
-    425
+    473
+    399
   )
   options = [fo_freeonclose, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
   statfile = tstatfile1
   caption = 'Code Template Editor'
   onloaded = onlo
+  onclosequery = closeq
   moduleclassname = 'tmseform'
-  object tlabel1: tlabel
-    taborder = 1
-    bounds_x = 192
-    bounds_y = 407
-    bounds_cx = 102
-    bounds_cy = 14
-    anchors = [an_left, an_bottom]
-    caption = 'under construction'
-    reffontheight = 14
-  end
   object tbutton1: tbutton
-    taborder = 2
-    bounds_x = 301
-    bounds_y = 399
+    taborder = 1
+    bounds_x = 362
+    bounds_y = 376
     bounds_cx = 50
     bounds_cy = 20
     anchors = [an_right, an_bottom]
@@ -37,8 +29,8 @@ object templateeditorfo: ttemplateeditorfo
     modalresult = mr_ok
   end
   object tbutton2: tbutton
-    bounds_x = 357
-    bounds_y = 399
+    bounds_x = 418
+    bounds_y = 376
     bounds_cx = 50
     bounds_cy = 20
     anchors = [an_right, an_bottom]
@@ -55,9 +47,10 @@ object templateeditorfo: ttemplateeditorfo
       0
       0
     )
-    taborder = 3
-    bounds_x = 8
+    taborder = 2
+    bounds_x = 0
     bounds_y = 4
+    bounds_cx = 109
     bounds_cy = 37
     reffontheight = 14
   end
@@ -70,15 +63,15 @@ object templateeditorfo: ttemplateeditorfo
       0
       0
     )
-    taborder = 4
+    taborder = 3
     bounds_x = 112
     bounds_y = 4
-    bounds_cx = 292
+    bounds_cx = 361
     bounds_cy = 37
     anchors = [an_left, an_top, an_right]
     reffontheight = 14
   end
-  object tstringgrid1: tstringgrid
+  object paramgrid: tstringgrid
     frame.caption = 'Parameter'
     frame.outerframe = (
       0
@@ -86,60 +79,63 @@ object templateeditorfo: ttemplateeditorfo
       0
       0
     )
-    taborder = 5
+    taborder = 4
     bounds_x = 0
     bounds_y = 46
-    bounds_cx = 412
+    bounds_cx = 473
     bounds_cy = 90
     anchors = [an_top]
     datacols.count = 1
     datacols.options = [co_fill, co_savevalue, co_savestate, co_mousescrollrow]
     datacols.items = <    
       item
-        width = 384
+        width = 437
         options = [co_fill, co_savevalue, co_savestate, co_mousescrollrow]
       end>
     fixcols.count = 1
     fixcols.items = <    
       item
-        width = 22
+        width = 30
+        numstart = 1
+        numstep = 1
       end>
     datarowheight = 16
     reffontheight = 14
   end
   object tspacer1: tspacer
-    taborder = 6
+    taborder = 5
     bounds_x = 192
     bounds_y = 41
     bounds_cx = 50
     bounds_cy = 5
     linktop = commented
-    linkbottom = tstringgrid1
+    linkbottom = paramgrid
   end
   object tsplitter1: tsplitter
-    taborder = 7
+    taborder = 6
     bounds_x = 0
     bounds_y = 136
-    bounds_cx = 412
+    bounds_cx = 473
     bounds_cy = 3
     anchors = [an_top]
     options = [spo_vmove, spo_vprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
-    linktop = tstringgrid1
-    linkbottom = twidgetgrid1
+    linktop = paramgrid
+    linkbottom = templgrid
     statfile = tstatfile1
   end
-  object twidgetgrid1: twidgetgrid
-    taborder = 8
+  object templgrid: twidgetgrid
+    taborder = 7
     bounds_x = 0
     bounds_y = 139
-    bounds_cx = 412
-    bounds_cy = 255
+    bounds_cx = 473
+    bounds_cy = 213
     anchors = [an_top, an_bottom]
-    optionsgrid = [og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+    optionsgrid = [og_focuscellonenter, og_autofirstrow, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
     fixcols.items = <    
       item
         width = 30
+        numstart = 1
         numstep = 1
       end>
     rowcount = 1
@@ -147,7 +143,7 @@ object templateeditorfo: ttemplateeditorfo
     datacols.items = <    
       item
         width = 1016
-        widgetname = 'templedit'
+        widgetname = 'templed'
         dataclass = tgridrichstringdatalist
         data = (
           (
@@ -156,9 +152,9 @@ object templateeditorfo: ttemplateeditorfo
         )
       end>
     datarowlinewidth = 0
-    datarowheight = 21
+    datarowheight = 15
     reffontheight = 14
-    object templedit: ttextedit
+    object templed: ttextedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
       optionsskin = [osk_framebuttononly]
       taborder = 1
@@ -166,12 +162,132 @@ object templateeditorfo: ttemplateeditorfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 1016
-      bounds_cy = 21
-      font.name = 'mseide_source'
+      bounds_cy = 15
+      font.name = 'stf_default'
       font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
-      reffontheight = 19
+      oneditnotifcation = editnotify
+      reffontheight = 14
     end
+  end
+  object cursordisp: tstringdisp
+    frame.caption = 'Cursor'
+    frame.captiondist = 2
+    frame.localprops1 = [frl1_captiondist]
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      18
+      0
+      0
+    )
+    taborder = 8
+    bounds_x = 8
+    bounds_y = 359
+    bounds_cx = 68
+    bounds_cy = 36
+    anchors = [an_left, an_bottom]
+    textflags = [tf_xcentered, tf_ycentered]
+    reffontheight = 14
+  end
+  object tsplitter2: tsplitter
+    taborder = 9
+    visible = False
+    bounds_x = 109
+    bounds_y = 16
+    bounds_cx = 3
+    bounds_cy = 29
+    options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
+    linkleft = nameed
+    linkright = commented
+    statfile = tstatfile1
+  end
+  object coled: tintegeredit
+    frame.caption = 'Col'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      17
+      0
+      0
+    )
+    taborder = 10
+    bounds_x = 216
+    bounds_y = 359
+    bounds_cx = 52
+    bounds_cy = 37
+    anchors = [an_left, an_bottom]
+    value = 1
+    min = 1
+    reffontheight = 14
+  end
+  object rowed: tintegeredit
+    frame.caption = 'Row'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      17
+      0
+      0
+    )
+    taborder = 11
+    bounds_x = 160
+    bounds_y = 359
+    bounds_cx = 52
+    bounds_cy = 37
+    anchors = [an_left, an_bottom]
+    value = 1
+    min = 1
+    reffontheight = 14
+  end
+  object tbutton3: tbutton
+    taborder = 12
+    bounds_x = 80
+    bounds_y = 376
+    bounds_cx = 74
+    bounds_cy = 20
+    anchors = [an_left, an_bottom]
+    state = [as_localcaption, as_localonexecute]
+    caption = 'Set Cursor'
+    onexecute = setcursorex
+  end
+  object selected: tbooleanedit
+    frame.caption = 'select'
+    frame.captionpos = cp_top
+    frame.captiondist = 4
+    frame.localprops1 = [frl1_captiondist]
+    frame.dummy = 0
+    frame.outerframe = (
+      11
+      20
+      11
+      0
+    )
+    taborder = 13
+    bounds_x = 269
+    bounds_y = 359
+    bounds_cx = 35
+    bounds_cy = 33
+    anchors = [an_left, an_bottom]
+  end
+  object indented: tbooleanedit
+    frame.caption = 'indent'
+    frame.captionpos = cp_top
+    frame.captiondist = 4
+    frame.localprops1 = [frl1_captiondist]
+    frame.dummy = 0
+    frame.outerframe = (
+      11
+      20
+      12
+      0
+    )
+    taborder = 14
+    bounds_x = 309
+    bounds_y = 359
+    bounds_cx = 36
+    bounds_cy = 33
+    anchors = [an_left, an_bottom]
   end
   object tstatfile1: tstatfile
     filename = 'templedit.sta'

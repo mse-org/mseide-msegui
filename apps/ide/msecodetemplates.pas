@@ -86,6 +86,7 @@ type
   public
    constructor create;
    destructor destroy; override;
+   procedure savefile(const ainfo: templateinfoty);
    procedure clear;
    procedure scan(const adirectories: filenamearty);
    function hastemplate(const aname: msestring): boolean;
@@ -173,6 +174,25 @@ begin
     result:= true;
    end;
   end;
+ end;
+ stat.free;
+end;
+
+procedure tcodetemplates.savefile(const ainfo: templateinfoty);
+var
+ stat: tstatwriter; 
+begin
+ stat:= tstatwriter.create(ainfo.path,ce_utf8n);
+ with stat,ainfo do begin
+  writesection('header');
+  writemsestring('name',name);
+  writemsestring('comment',comment);
+  writeboolean('select',select);
+  writeboolean('indent',indent);
+  writeinteger('cursorcol',cursorcol);
+  writeinteger('cursorrow',cursorrow);
+  writearray('params',params);
+  streamtext(template);
  end;
  stat.free;
 end;

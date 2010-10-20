@@ -24,6 +24,7 @@ uses
  msemenus,msepointer,msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif};
 
 const
+ 
  defaulttexteditoptions =  (defaultoptionsedit + 
               [oe_linebreak,oe_nofirstarrownavig]) -
               [oe_autoselect,oe_autoselectonfirstclick,oe_endonenter,
@@ -133,6 +134,7 @@ type
    procedure dotextmouseevent(var info: textmouseeventinfoty);
    procedure setupeditor; override;
    procedure dofontheightdelta(var delta: integer); override;
+   function getinnerframe: framety; override;
 
     //igridwidget
    procedure setfirstclick;
@@ -2147,6 +2149,11 @@ begin
  else begin
   optionsedit:= optionsedit - [oe_readonly];
  end;  
+end;
+
+function tcustomtextedit.getinnerframe: framety;
+begin
+ result:= minimaltextframe;
 end;
 
 { tundotextedit }

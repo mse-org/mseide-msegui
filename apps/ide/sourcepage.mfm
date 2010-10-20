@@ -57,7 +57,7 @@ object sourcepage: tsourcepage
         dataclass = tgridrichstringdatalist
       end>
     datarowlinewidth = 0
-    datarowheight = 16
+    datarowheight = 21
     onrowsinserted = gridonrowsinserted
     onrowsdeleted = gridonrowsdeleted
     oncellevent = gridoncellevent
@@ -68,7 +68,7 @@ object sourcepage: tsourcepage
       bounds_x = 2
       bounds_y = 2
       bounds_cx = 15
-      bounds_cy = 16
+      bounds_cy = 21
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       options = [bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey]
       visible = False
@@ -101,16 +101,15 @@ object sourcepage: tsourcepage
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 2000
-      bounds_cy = 16
+      bounds_cy = 21
       font.name = 'mseide_source'
       font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_keyexecute, oe_savestate]
       optionsedit1 = [oe1_noselectall]
-      encoding = ce_locale
-      onkeydown = editonkeydown
       tabulators.ppmm =  3.0000000000000000E+0000
       tabulators.defaultdist =  0.0000000000000000E+0000
+      onkeydown = editonkeydown
       onfontchanged = editonfontchanged
       onmodifiedchanged = editonmodifiedchanged
       ontextmouseevent = editontextmouseevent

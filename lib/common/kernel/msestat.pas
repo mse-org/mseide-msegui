@@ -204,6 +204,8 @@ type
    procedure writestat(const intf: istatfile);
    procedure writememorystatstream(const name: msestring;
                                                  const streamname: msestring);
+   procedure streamdata(const adata: string);
+   procedure streamtext(const atext: msestring);
  end;
 
  tmemorytextstream = class;
@@ -1492,6 +1494,18 @@ begin
  finally
   stream1.Free;
  end;
+end;
+
+procedure tstatwriter.streamdata(const adata: string);
+begin
+ writesection('-');
+ fstream.write(adata);
+end;
+
+procedure tstatwriter.streamtext(const atext: msestring);
+begin
+ writesection('-');
+ fstream.write(atext);
 end;
 {
 procedure tstatwriter.writestatfile(const name: msestring; const statfile: tstatfile);

@@ -329,6 +329,7 @@ const
  nullrect: rectty = (x: 0; y: 0; cx: 0; cy: 0);
  nullframe: framety = (left: 0; top: 0; right: 0; bottom: 0);
  minimalframe: framety = (left: 1; top: 1; right: 1; bottom: 1);
+ minimaltextframe: framety = (left: 1; top: 0; right: 0; bottom: 1);
 
 type
  gdierrorty = (gde_ok,

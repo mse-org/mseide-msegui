@@ -80,13 +80,13 @@ object msetemplateselectfo: tmsetemplateselectfo
       end>
     datacols.count = 7
     datacols.colorfocused = -1879048185
-    datacols.options = [co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
+    datacols.options = [co_nofocus, co_drawfocus, co_proportional, co_savestate, co_mousescrollrow]
     datacols.options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
     datacols.items = <    
       item
         colorfocused = -1879048185
         width = 60
-        options = [co_readonly, co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_readonly, co_drawfocus, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'templatename'
         dataclass = tgridmsestringdatalist
@@ -94,7 +94,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       item
         colorfocused = -1879048185
         width = 252
-        options = [co_readonly, co_nofocus, co_fill, co_savestate, co_mousescrollrow]
+        options = [co_readonly, co_nofocus, co_drawfocus, co_fill, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'comment'
         dataclass = tgridmsestringdatalist
@@ -102,7 +102,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       item
         colorfocused = -1879048185
         width = 51
-        options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_readonly, co_nofocus, co_drawfocus, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par1'
         dataclass = tgridmsestringdatalist
@@ -110,7 +110,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       item
         colorfocused = -1879048185
         width = 51
-        options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_readonly, co_nofocus, co_drawfocus, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par2'
         dataclass = tgridmsestringdatalist
@@ -118,7 +118,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       item
         colorfocused = -1879048185
         width = 51
-        options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_readonly, co_nofocus, co_drawfocus, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par3'
         dataclass = tgridmsestringdatalist
@@ -126,7 +126,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       item
         colorfocused = -1879048185
         width = 51
-        options = [co_readonly, co_nofocus, co_proportional, co_savestate, co_mousescrollrow]
+        options = [co_readonly, co_nofocus, co_drawfocus, co_proportional, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'par4'
         dataclass = tgridmsestringdatalist
@@ -135,7 +135,7 @@ object msetemplateselectfo: tmsetemplateselectfo
         color = -2147483646
         colorfocused = -1879048185
         width = 16
-        options = [co_fixwidth, co_savestate, co_mousescrollrow]
+        options = [co_readonly, co_fixwidth, co_savestate, co_mousescrollrow]
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused]
         widgetname = 'tstockglyphdatabutton1'
         dataclass = tgridintegerdatalist
@@ -228,7 +228,7 @@ object msetemplateselectfo: tmsetemplateselectfo
       bounds_y = 0
       bounds_cx = 16
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_asyncexecute]
       state = [as_invisible, as_localinvisible, as_localimagelist, as_localimagenr, as_localonexecute]
       glyph = stg_ellipsesmall
