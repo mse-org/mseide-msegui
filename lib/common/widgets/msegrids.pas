@@ -9246,7 +9246,7 @@ begin
  end
  else begin
   result:= arow;
-  if (arow <= 0) or (arow >= frowcount) then begin
+  if (arow < 0) or (arow >= frowcount) then begin
    result:= invalidaxis;
   end;
  end;
@@ -11134,20 +11134,15 @@ begin  //cellrect
     if (og_rowheight in foptionsgrid) and (int1 >= 0) then begin
      fdatacols.frowstate.cleanrowheight(row);
      fdatacols.frowstate.internalystep(row,y,cy);
-     
-//     with prowstaterowheightty(fdatacols.frowstate.getitempo(row))^ do begin
-//      if rowheight.height = 0 then begin
-//       cy:= fystep;
-//      end
-//      else begin
-//       cy:= rowheight.height + fdatarowlinewidth;
-//      end;
-//      y:= rowheight.ypos;
-//     end;
     end
     else begin
      cy:= fystep;
-     y:= int1 * cy;
+     if int1 < 0 then begin
+      y:= row * cy;
+     end
+     else begin
+      y:= int1 * cy;
+     end;
     end;
     y:= y + ffixrows.ffirstsize + fscrollrect.y;
     if innerlevel > cil_all then begin
