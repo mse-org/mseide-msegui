@@ -25,7 +25,7 @@ object templateeditorfo: ttemplateeditorfo
     bounds_cy = 20
     anchors = [an_right, an_bottom]
     state = [as_default, as_localdefault, as_localcaption]
-    caption = 'OK'
+    caption = '&OK'
     modalresult = mr_ok
   end
   object tbutton2: tbutton
@@ -35,11 +35,11 @@ object templateeditorfo: ttemplateeditorfo
     bounds_cy = 20
     anchors = [an_right, an_bottom]
     state = [as_localcaption]
-    caption = 'Cancel'
+    caption = '&Cancel'
     modalresult = mr_cancel
   end
   object nameed: tstringedit
-    frame.caption = 'Name'
+    frame.caption = '&Name'
     frame.dummy = 0
     frame.outerframe = (
       0
@@ -56,7 +56,7 @@ object templateeditorfo: ttemplateeditorfo
     reffontheight = 14
   end
   object commented: tstringedit
-    frame.caption = 'Comment'
+    frame.caption = 'C&omment'
     frame.dummy = 0
     frame.outerframe = (
       0
@@ -74,7 +74,7 @@ object templateeditorfo: ttemplateeditorfo
   end
   object paramgrid: tstringgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    frame.caption = 'Parameter'
+    frame.caption = '&Parameter'
     frame.outerframe = (
       0
       17
@@ -252,11 +252,11 @@ object templateeditorfo: ttemplateeditorfo
     bounds_cy = 20
     anchors = [an_left, an_bottom]
     state = [as_localcaption, as_localonexecute]
-    caption = 'Set Cursor'
+    caption = '&Set Cursor'
     onexecute = setcursorex
   end
   object selected: tbooleanedit
-    frame.caption = 'select'
+    frame.caption = '&select'
     frame.captionpos = cp_top
     frame.captiondist = 4
     frame.localprops1 = [frl1_captiondist]
@@ -275,7 +275,7 @@ object templateeditorfo: ttemplateeditorfo
     anchors = [an_left, an_bottom]
   end
   object indented: tbooleanedit
-    frame.caption = 'indent'
+    frame.caption = '&indent'
     frame.captionpos = cp_top
     frame.captiondist = 4
     frame.localprops1 = [frl1_captiondist]
