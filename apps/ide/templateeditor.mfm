@@ -19,9 +19,9 @@ object templateeditorfo: ttemplateeditorfo
   moduleclassname = 'tmseform'
   object tbutton1: tbutton
     taborder = 12
-    bounds_x = 362
+    bounds_x = 354
     bounds_y = 376
-    bounds_cx = 50
+    bounds_cx = 58
     bounds_cy = 20
     anchors = [an_right, an_bottom]
     state = [as_default, as_localdefault, as_localcaption]
@@ -52,7 +52,7 @@ object templateeditorfo: ttemplateeditorfo
     bounds_y = 4
     bounds_cx = 109
     bounds_cy = 37
-    optionsedit = [oe_undoonesc, oe_closequery, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_notnull, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_notnull, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
     reffontheight = 14
   end
   object commented: tstringedit
@@ -306,13 +306,13 @@ object templateeditorfo: ttemplateeditorfo
   end
   object saveasbu: tbutton
     taborder = 10
-    bounds_x = 362
+    bounds_x = 354
     bounds_y = 352
-    bounds_cx = 50
+    bounds_cx = 58
     bounds_cy = 20
     anchors = [an_right, an_bottom]
     state = [as_localcaption, as_localonexecute]
-    caption = 'Save as'
+    caption = 'Filename'
     onexecute = saveasexe
   end
   object tstatfile1: tstatfile

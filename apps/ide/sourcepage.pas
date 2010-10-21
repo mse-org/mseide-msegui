@@ -1489,6 +1489,9 @@ begin
  gc1:= edit.editpos;
  if gc1.row >= 0 then begin
   mstr1:= edit.wordatpos(gc1,gc2,'',[],true);
+  if gc2.col < 0 then begin
+   gc2.col:= gc1.col;
+  end;
   mac1:= getmacros;
   try
    po2:= codetemplates.gettemplate(mstr1,mstr2,mac1);

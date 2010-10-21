@@ -1498,13 +1498,13 @@ end;
 
 procedure tstatwriter.streamdata(const adata: string);
 begin
- writesection('-');
+ writesection('');
  fstream.write(adata);
 end;
 
 procedure tstatwriter.streamtext(const atext: msestring);
 begin
- writesection('-');
+ writesection('');
  fstream.write(atext);
 end;
 {
