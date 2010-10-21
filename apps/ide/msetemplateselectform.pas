@@ -47,7 +47,7 @@ type
 
 implementation
 uses
- msetemplateselectform_mfm,templateeditor;
+ msetemplateselectform_mfm,templateeditor,projectoptionsform;
  
 type
  tcodetemplates1 = class(tcodetemplates);
@@ -59,9 +59,13 @@ begin
 end;
 
 procedure tmsetemplateselectfo.edtemplateactonexecute(const sender: TObject);
+var
+ mstr1: msestring;
 begin
- if ttemplateeditorfo.create(grid.row).show(true) = mr_ok then begin
+ if ttemplateeditorfo.create(grid.row).show(mstr1) = mr_ok then begin
+  ftemplates.scan(projectoptions.texp.codetemplatedirs);
   tcodetemplates1(ftemplates).reload(self);
+  templatename.editor.filtertext:= mstr1;
  end;
 end;
 
@@ -69,7 +73,12 @@ procedure tmsetemplateselectfo.celle(const sender: TObject;
                var info: celleventinfoty);
 begin
  if isrowenter(info) then begin
-  filename.value:= finfos[info.newcell.row].path;
+  if info.newcell.row > high(finfos) then begin
+   filename.value:= '';
+  end
+  else begin
+   filename.value:= finfos[info.newcell.row].path;
+  end;
  end;
 end;
 

@@ -18,7 +18,7 @@ object templateeditorfo: ttemplateeditorfo
   onclosequery = closeq
   moduleclassname = 'tmseform'
   object tbutton1: tbutton
-    taborder = 1
+    taborder = 12
     bounds_x = 362
     bounds_y = 376
     bounds_cx = 50
@@ -47,11 +47,12 @@ object templateeditorfo: ttemplateeditorfo
       0
       0
     )
-    taborder = 2
+    taborder = 1
     bounds_x = 0
     bounds_y = 4
     bounds_cx = 109
     bounds_cy = 37
+    optionsedit = [oe_undoonesc, oe_closequery, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_notnull, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
     reffontheight = 14
   end
   object commented: tstringedit
@@ -63,7 +64,7 @@ object templateeditorfo: ttemplateeditorfo
       0
       0
     )
-    taborder = 3
+    taborder = 2
     bounds_x = 112
     bounds_y = 4
     bounds_cx = 361
@@ -72,6 +73,7 @@ object templateeditorfo: ttemplateeditorfo
     reffontheight = 14
   end
   object paramgrid: tstringgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     frame.caption = 'Parameter'
     frame.outerframe = (
       0
@@ -79,12 +81,13 @@ object templateeditorfo: ttemplateeditorfo
       0
       0
     )
-    taborder = 4
+    taborder = 3
     bounds_x = 0
     bounds_y = 46
     bounds_cx = 473
     bounds_cy = 90
     anchors = [an_top]
+    optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     datacols.count = 1
     datacols.options = [co_fill, co_savevalue, co_savestate, co_mousescrollrow]
     datacols.items = <    
@@ -103,7 +106,7 @@ object templateeditorfo: ttemplateeditorfo
     reffontheight = 14
   end
   object tspacer1: tspacer
-    taborder = 5
+    taborder = 13
     bounds_x = 192
     bounds_y = 41
     bounds_cx = 50
@@ -112,7 +115,7 @@ object templateeditorfo: ttemplateeditorfo
     linkbottom = paramgrid
   end
   object tsplitter1: tsplitter
-    taborder = 6
+    taborder = 14
     bounds_x = 0
     bounds_y = 136
     bounds_cx = 473
@@ -124,11 +127,12 @@ object templateeditorfo: ttemplateeditorfo
     statfile = tstatfile1
   end
   object templgrid: twidgetgrid
-    taborder = 7
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    taborder = 4
     bounds_x = 0
     bounds_y = 139
     bounds_cx = 473
-    bounds_cy = 213
+    bounds_cy = 205
     anchors = [an_top, an_bottom]
     optionsgrid = [og_focuscellonenter, og_autofirstrow, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
@@ -181,7 +185,7 @@ object templateeditorfo: ttemplateeditorfo
       0
       0
     )
-    taborder = 8
+    taborder = 15
     bounds_x = 8
     bounds_y = 359
     bounds_cx = 68
@@ -191,7 +195,7 @@ object templateeditorfo: ttemplateeditorfo
     reffontheight = 14
   end
   object tsplitter2: tsplitter
-    taborder = 9
+    taborder = 16
     visible = False
     bounds_x = 109
     bounds_y = 16
@@ -211,7 +215,7 @@ object templateeditorfo: ttemplateeditorfo
       0
       0
     )
-    taborder = 10
+    taborder = 7
     bounds_x = 216
     bounds_y = 359
     bounds_cx = 52
@@ -230,7 +234,7 @@ object templateeditorfo: ttemplateeditorfo
       0
       0
     )
-    taborder = 11
+    taborder = 6
     bounds_x = 160
     bounds_y = 359
     bounds_cx = 52
@@ -241,7 +245,7 @@ object templateeditorfo: ttemplateeditorfo
     reffontheight = 14
   end
   object tbutton3: tbutton
-    taborder = 12
+    taborder = 5
     bounds_x = 80
     bounds_y = 376
     bounds_cx = 74
@@ -263,7 +267,7 @@ object templateeditorfo: ttemplateeditorfo
       11
       0
     )
-    taborder = 13
+    taborder = 8
     bounds_x = 269
     bounds_y = 359
     bounds_cx = 35
@@ -282,17 +286,52 @@ object templateeditorfo: ttemplateeditorfo
       12
       0
     )
-    taborder = 14
+    taborder = 9
     bounds_x = 309
     bounds_y = 359
     bounds_cx = 36
     bounds_cy = 33
     anchors = [an_left, an_bottom]
   end
+  object deletebu: tbutton
+    taborder = 11
+    bounds_x = 418
+    bounds_y = 352
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    state = [as_localcaption, as_localonexecute]
+    caption = 'Delete'
+    onexecute = deleteexe
+  end
+  object saveasbu: tbutton
+    taborder = 10
+    bounds_x = 362
+    bounds_y = 352
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    state = [as_localcaption, as_localonexecute]
+    caption = 'Save as'
+    onexecute = saveasexe
+  end
   object tstatfile1: tstatfile
     filename = 'templedit.sta'
     options = [sfo_memory, sfo_transaction, sfo_activatorread, sfo_activatorwrite]
-    left = 272
-    top = 8
+    left = 104
+    top = 192
+  end
+  object savefiledialog: tfiledialog
+    statfile = tstatfile1
+    controller.filterlist.data = (
+      (
+        'Code Temlate Files'
+        '*.mct'
+      )
+    )
+    controller.defaultext = 'mct'
+    controller.options = [fdo_save, fdo_checkexist, fdo_savelastdir]
+    left = 200
+    top = 192
   end
 end

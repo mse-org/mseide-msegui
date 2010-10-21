@@ -5,7 +5,8 @@ uses
  mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msestatfile,
  msesimplewidgets,msewidgets,msedataedits,mseedit,msegrids,msestrings,msetypes,
- msewidgetgrid,msegraphedits,msesplitter,mseeditglob,msetextedit,msedispwidgets;
+ msewidgetgrid,msegraphedits,msesplitter,mseeditglob,msetextedit,msedispwidgets,
+ msebitmap,msedatanodes,msefiledialog,mselistbrowser,msescrollbar,msesys;
 type
  ttemplateeditorfo = class(tmseform)
    tstatfile1: tstatfile;
@@ -25,21 +26,31 @@ type
    tbutton3: tbutton;
    selected: tbooleanedit;
    indented: tbooleanedit;
+   savefiledialog: tfiledialog;
+   deletebu: tbutton;
+   saveasbu: tbutton;
    procedure onlo(const sender: TObject);
    procedure editnotify(const sender: TObject;
                    var info: editnotificationinfoty);
    procedure setcursorex(const sender: TObject);
    procedure closeq(const sender: tcustommseform;
                    var amodalresult: modalresultty);
+   procedure saveasexe(const sender: TObject);
+   procedure deleteexe(const sender: TObject);
   private
    findex: integer;
+   fpath: filenamety;
+   fdeleted: boolean;
+   procedure setpath(const avalue: filenamety);
+   property path: filenamety read fpath write setpath;
   public
    constructor create(const aindex: integer); reintroduce;
+   function show(out aname: msestring): modalresultty; reintroduce;
  end;
 
 implementation
 uses
- templateeditor_mfm,msecodetemplates,projectoptionsform,sysutils;
+ templateeditor_mfm,msecodetemplates,projectoptionsform,sysutils,msefileutils;
  
 constructor ttemplateeditorfo.create(const aindex: integer);
 begin
@@ -55,7 +66,7 @@ begin
  templgrid.datarowheight:= templed.font.lineheight;
  if (findex >= 0) and (findex <= high(codetemplates.templates)) then begin
   with codetemplates.templates[findex] do begin
-   caption:= shrinkstring(path,40);
+   self.path:= path;
    selected.value:= select;
    indented.value:= indent;
    coled.value:= cursorcol+1;
@@ -65,6 +76,9 @@ begin
    paramgrid[0].datalist.asarray:= params;
    templed.settext(template);
   end;
+ end
+ else begin
+  path:= '';
  end;
 end;
 
@@ -96,19 +110,70 @@ end;
 
 procedure ttemplateeditorfo.closeq(const sender: tcustommseform;
                var amodalresult: modalresultty);
+var
+ info1: templateinfoty;
 begin
- if amodalresult = mr_ok then begin
-  with codetemplates.templates[findex] do begin
-   select:= selected.value;
-   indent:= indented.value;
-   cursorcol:= coled.value - 1;
-   cursorrow:= rowed.value - 1;
-   comment:= commented.value;
-   name:= nameed.value;
-   params:= paramgrid[0].datalist.asarray;
-   template:= templed.gettext;
+ if fdeleted then begin
+  amodalresult:= mr_ok;
+ end
+ else begin
+  if amodalresult = mr_ok then begin
+   codetemplates.initinfo(info1);
+   with info1 do begin
+    select:= selected.value;
+    indent:= indented.value;
+    cursorcol:= coled.value - 1;
+    cursorrow:= rowed.value - 1;
+    comment:= commented.value;
+    name:= nameed.value;
+    params:= paramgrid[0].datalist.asarray;
+    template:= templed.gettext;
+    if fpath = '' then begin
+     if not savefiledialog.controller.execute(fpath) then begin
+      amodalresult:= mr_cancel;
+     end;
+    end;
+    path:= fpath;
+   end;
+   if amodalresult = mr_ok then begin
+    codetemplates.savefile(info1);
+   end;
   end;
-  codetemplates.savefile(codetemplates.templates[findex]);
+ end;
+end;
+
+function ttemplateeditorfo.show(out aname: msestring): modalresultty;
+begin
+ result:= inherited show(true);
+ aname:= nameed.value;
+end;
+
+procedure ttemplateeditorfo.saveasexe(const sender: TObject);
+begin
+ if savefiledialog.controller.execute(fpath) then begin
+  path:= fpath;
+ end;
+end;
+
+procedure ttemplateeditorfo.deleteexe(const sender: TObject);
+begin
+ if askyesno('Do you want to delete "'+fpath+'"?') then begin
+  deletefile(fpath);
+  fdeleted:= true;
+  window.modalresult:= mr_cancel;
+ end;
+end;
+
+procedure ttemplateeditorfo.setpath(const avalue: filenamety);
+begin
+ fpath:= avalue;
+ if fpath = '' then begin
+  caption:= 'Code Template Editor';
+  deletebu.enabled:= false;
+ end
+ else begin
+  caption:= shrinkstring(fpath,40);
+  deletebu.enabled:= true;
  end;
 end;
 

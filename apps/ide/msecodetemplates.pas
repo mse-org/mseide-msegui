@@ -80,12 +80,13 @@ type
    flist: tpointermsestringhashdatalist;
   protected
    function loadfile(const afilename: filenamety;
-                          var ainfo: templateinfoty): boolean;
+                          out ainfo: templateinfoty): boolean;
                                      //true if ok
    procedure reload(const selectform: tmseform); //tmsetemplateselectfo
   public
    constructor create;
    destructor destroy; override;
+   procedure initinfo(out ainfo: templateinfoty);
    procedure savefile(const ainfo: templateinfoty);
    procedure clear;
    procedure scan(const adirectories: filenamearty);
@@ -150,14 +151,19 @@ begin
  end; 
 end;
 
+procedure tcodetemplates.initinfo(out ainfo: templateinfoty);
+begin
+ finalize(ainfo);
+ fillchar(ainfo,sizeof(ainfo),0);
+end;
+
 function tcodetemplates.loadfile(const afilename: filenamety;
-               var ainfo: templateinfoty): boolean;
+               out ainfo: templateinfoty): boolean;
 var
  stat: tstatreader; 
 begin
  result:= false;
- finalize(ainfo);
- fillchar(ainfo,sizeof(ainfo),0);
+ initinfo(ainfo);
  stat:= tstatreader.create(afilename,ce_utf8n);
  with stat,ainfo do begin
   if findsection('header') then begin
@@ -325,7 +331,8 @@ begin
  se:= selectform as tmsetemplateselectfo;
  se.finfos:= finfos;
  se.grid.beginupdate;
- se.grid.rowcount:= length(finfos);
+ se.grid.clear;
+ se.grid.rowcount:= length(finfos)+1;
  for int1:= 0 to high(finfos) do begin
   with finfos[int1] do begin
    se.templatename[int1]:= name;
