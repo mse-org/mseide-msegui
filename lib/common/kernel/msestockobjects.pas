@@ -66,7 +66,7 @@ type
                     sc_Error,sc_Min,sc_Max,sc_Range_error,
                     sc_Undo,sc_copy,sc_cut,sc_paste,
                     sc_insert_row,sc_append_row,sc_delete_row,
-                    sc_Dir,sc_Up,sc_New_dir,sc_Name,
+                    sc_Dir,sc_Home,sc_Up,sc_New_dir,sc_Name,
                     sc_Show_hidden_files,sc_Filter,
                     sc_Save,sc_Open,
                     sc_name1,sc_create_new_directory,

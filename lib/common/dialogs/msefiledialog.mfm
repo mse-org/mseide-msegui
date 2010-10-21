@@ -230,7 +230,7 @@ object filedialogfo: Tfiledialogfo
     onshowhint = dirshowhint
     bounds_x = 1
     bounds_y = 2
-    bounds_cx = 483
+    bounds_cx = 431
     anchors = [an_left, an_top, an_right]
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
     ondataentered = filepathentered
@@ -244,7 +244,7 @@ object filedialogfo: Tfiledialogfo
     bounds_y = 0
     bounds_cx = 8
     bounds_cy = 20
-    linkleft = dir
+    linkleft = home
     linkright = up
     options = [spao_glueright]
   end
@@ -256,6 +256,32 @@ object filedialogfo: Tfiledialogfo
     bounds_cy = 20
     linkleft = up
     linkright = createdir
+    options = [spao_glueright]
+  end
+  object home: tbutton
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget1 = [ow1_autowidth, ow1_autoheight]
+    taborder = 10
+    bounds_x = 440
+    bounds_y = 3
+    bounds_cx = 44
+    bounds_cy = 20
+    bounds_cxmin = 35
+    anchors = [an_top, an_right]
+    state = [as_localcaption, as_localonexecute]
+    caption = '&Home'
+    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_candefocuswindow]
+    onexecute = homeaction
+    reffontheight = 14
+  end
+  object tspacer3: tspacer
+    taborder = 11
+    bounds_x = 432
+    bounds_y = 0
+    bounds_cx = 8
+    bounds_cy = 20
+    linkleft = dir
+    linkright = home
     options = [spao_glueright]
   end
 end

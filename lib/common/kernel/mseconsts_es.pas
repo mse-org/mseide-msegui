@@ -75,6 +75,7 @@ const
   '&Borrar fila',                //sc_delete_row ///         ///
 
   '&Directorio',                //sc_Dir               /// 
+  '&Home',                      //sc_home               //
   '&Subir',                     //sc_Up                 //
   'N&uevo dir.',                //sc_New_dir            // hotkeys
   'N&ombre',                    //sc_Name               //

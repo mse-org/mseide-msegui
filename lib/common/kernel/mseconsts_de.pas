@@ -72,6 +72,7 @@ const
   'Zeile &l'#246'schen',     //sc_delete_row ///         ///
 
   '&Dir',                 //sc_Dir               /// 
+  '&Home',                //sc_home               //
   '&Auf',                 //sc_Up                 //
   'Dir &neu',             //sc_New_dir            // hotkeys
   'N&ame',                //sc_Name               //

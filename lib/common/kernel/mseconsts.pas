@@ -132,6 +132,7 @@ const
   '&Delete Row',        //sc_delete_row ///         ///
 
   '&Dir',               //sc_Dir               /// 
+  '&Home',              //sc_home               //
   '&Up',                //sc_Up                 //
   '&New dir',           //sc_New_dir            // hotkeys
   '&Name',              //sc_Name               //

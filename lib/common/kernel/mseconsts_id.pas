@@ -71,6 +71,7 @@ const
   '&Tambah Baris',         //sc_append_row
   '&Hapus Baris',          //sc_delete_row
   '&Direktori',            //sc_Dir               /// 
+  '&Home',                 //sc_home               //
   '&Naik',                 //sc_Up                 //
   'Dir &Baru',             //sc_New_dir            // hotkeys
   '&Nama File',            //sc_Name               //

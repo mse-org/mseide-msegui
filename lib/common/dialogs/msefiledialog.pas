@@ -15,11 +15,10 @@ interface
 
 uses
  mseglob,mseguiglob,msegui,mseforms,Classes,mseclasses,msewidgets,msegrids,
- mselistbrowser,mseedit,
- msesimplewidgets,msedataedits,msedialog,msetypes,msestrings,msesys,
- msedispwidgets,msedatalist,msestat,msestatfile,msebitmap,msedatanodes,
- msefileutils,msedropdownlist,mseevent,msegraphedits,mseeditglob,msesplitter,
- msemenus,msegridsglob;
+ mselistbrowser,mseedit,msesimplewidgets,msedataedits,msedialog,msetypes,
+ msestrings,msesys,msedispwidgets,msedatalist,msestat,msestatfile,msebitmap,
+ msedatanodes,msefileutils,msedropdownlist,mseevent,msegraphedits,mseeditglob,
+ msesplitter,msemenus,msegridsglob,msegraphics,msegraphutils;
 
 type
 
@@ -341,6 +340,8 @@ type
    filename: thistoryedit;
    filter: tdropdownlistedit;
    dir: tdirdropdownedit;
+   home: tbutton;
+   tspacer3: tspacer;
    procedure createdironexecute(const sender: TObject);
    procedure listviewselectionchanged(const sender: tcustomlistview);
    procedure listviewitemevent(const sender: tcustomlistview;
@@ -363,6 +364,7 @@ type
    procedure dirshowhint(const sender: TObject; var info: hintinfoty);
    procedure copytolip(const sender: TObject; var avalue: msestring);
    procedure pastefromclip(const sender: TObject; var avalue: msestring);
+   procedure homeaction(const sender: TObject);
   private
     { Private declarations }
    fselectednames: filenamearty;
@@ -420,7 +422,7 @@ implementation
 uses
  msefiledialog_mfm,sysutils,msebits,
  msestringenter,msedirtree,msefiledialogres,msekeyboard,
- msestockobjects;
+ msestockobjects,msesysintf;
 
 procedure getfileicon(const info: fileinfoty; var imagelist: timagelist;
                       out imagenr: integer);
@@ -1258,7 +1260,7 @@ procedure tfiledialogfo.foonchildscaled(const sender: TObject);
 begin
 // syncmaxautosize([up,createdir]);
  placeyorder(2,[2],[dir,listview,filename,filter],2);
- aligny(wam_center,[dir,up,createdir]);
+ aligny(wam_center,[dir,home,up,createdir]);
  aligny(wam_center,[filename,showhidden]);
  aligny(wam_center,[filter,ok,cancel]);
  syncpaintwidth([filename,filter],namecont.bounds_cx);
@@ -1282,6 +1284,7 @@ procedure tfiledialogfo.formoncreate(const sender: TObject);
 begin
  with stockobjects do begin
   dir.frame.caption:= captions[sc_dir];
+  home.caption:= captions[sc_home];
   up.caption:= captions[sc_up];
   createdir.caption:= captions[sc_new_dir];
   filename.frame.caption:= captions[sc_name];
@@ -1309,6 +1312,13 @@ procedure tfiledialogfo.pastefromclip(const sender: TObject;
                var avalue: msestring);
 begin
  tomsefilepath1(avalue);
+end;
+
+procedure tfiledialogfo.homeaction(const sender: TObject);
+begin
+ dir.value:= sys_gethomedir;
+ listview.directory:= dir.value;
+ readlist;
 end;
 
 { tfiledialogcontroller }

@@ -80,6 +80,7 @@ const
   '&Delete Row',        //sc_delete_row ///         ///
 
   #1050#1072#1090#1072#1083#1086#1075 ,        //sc_Dir      => Katalog
+  '&Home',              //sc_home               //
   #1058#1077#1087#1087#1072#1075#1072 ,                  //sc_Up       => Vverh
   #1071#1085#1075#1080' '#1082#1072#1090'.' , //sc_New_dir  => Nov. kat-g
   #1053#1086#1084#1080 ,   ///sc_Name    => Nazvanie
