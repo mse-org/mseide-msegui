@@ -246,7 +246,8 @@ begin
    se.show;
    se.grid.setfocus;
    se.templatename.editor.filtertext:= ar1[0];
-   if (se.show(true) <> mr_ok) or (se.grid.row < 0) then begin
+   if (se.show(true) <> mr_ok) or (se.grid.row < 0) or 
+                                      (se.grid.row > high(finfos)) then begin
     exit;
    end;
    puint1:= se.grid.row;
