@@ -102,7 +102,7 @@ object filedialogfo: Tfiledialogfo
   end
   object listview: tfilelistview
     optionswidget = [ow_mousefocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    taborder = 9
+    taborder = 10
     bounds_x = 0
     bounds_y = 26
     bounds_cx = 588
@@ -128,7 +128,7 @@ object filedialogfo: Tfiledialogfo
   object createdir: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     optionswidget1 = [ow1_autowidth, ow1_autoheight]
-    taborder = 8
+    taborder = 9
     bounds_x = 535
     bounds_y = 3
     bounds_cx = 52
@@ -145,7 +145,7 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     optionswidget1 = [ow1_autowidth, ow1_autoheight]
     taborder = 7
-    bounds_x = 492
+    bounds_x = 440
     bounds_y = 3
     bounds_cx = 35
     bounds_cy = 20
@@ -240,12 +240,12 @@ object filedialogfo: Tfiledialogfo
   end
   object tspacer1: tspacer
     taborder = 2
-    bounds_x = 484
+    bounds_x = 475
     bounds_y = 0
     bounds_cx = 8
     bounds_cy = 20
-    linkleft = home
-    linkright = up
+    linkleft = up
+    linkright = home
     options = [spao_glueright]
   end
   object tspacer2: tspacer
@@ -254,15 +254,15 @@ object filedialogfo: Tfiledialogfo
     bounds_y = 0
     bounds_cx = 8
     bounds_cy = 20
-    linkleft = up
+    linkleft = home
     linkright = createdir
     options = [spao_glueright]
   end
   object home: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     optionswidget1 = [ow1_autowidth, ow1_autoheight]
-    taborder = 10
-    bounds_x = 440
+    taborder = 8
+    bounds_x = 483
     bounds_y = 3
     bounds_cx = 44
     bounds_cy = 20
@@ -281,7 +281,7 @@ object filedialogfo: Tfiledialogfo
     bounds_cx = 8
     bounds_cy = 20
     linkleft = dir
-    linkright = home
+    linkright = up
     options = [spao_glueright]
   end
 end
