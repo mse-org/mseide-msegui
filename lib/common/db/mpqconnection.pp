@@ -644,7 +644,7 @@ const TypeStrings : array[TFieldType] of string =
       'Unknown',  //ftCursor
       'varchar',  //ftFixedChar
       'varchar',  //ftWideString
-      'int',      //ftLargeint
+      'bigint',   //ftLargeint
       'Unknown',  //ftADT
       'Unknown',  //ftArray
       'Unknown',  //ftReference
@@ -818,11 +818,11 @@ begin
         else begin
          s:= AParams.asdbstring(i);
          if datatype = ftblob then begin
-          lengths[i]:= length(s);
           formats[i]:= 1; //binary
          end;
         end;
        end; {case}
+       lengths[i]:= length(s);
        GetMem(ar[i],length(s)+1);
        StrMove(PChar(ar[i]),Pchar(s),Length(S)+1);
       end;
