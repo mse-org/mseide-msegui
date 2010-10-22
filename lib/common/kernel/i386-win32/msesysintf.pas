@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1990,12 +1990,14 @@ begin
  end;
  libhandle:= loadlibrary('shell32.dll');
  if libhandle <> 0 then begin
-  {$ifdef FPC}pointer(po1){$else}po1{$endif}:= getprocaddress(libhandle,'SHGetFolderPathW');
+  {$ifdef FPC}pointer(po1){$else}po1{$endif}:= 
+                             getprocaddress(libhandle,'SHGetFolderPathW');
   if not assigned(po1) then begin
    freelibrary(libhandle);
    libhandle:= loadlibrary('shfolder.dll');
    if libhandle <> 0 then begin
-      {$ifdef FPC}pointer(po1){$else}po1{$endif}:= getprocaddress(libhandle,'SHGetFolderPathW');
+      {$ifdef FPC}pointer(po1){$else}po1{$endif}:= 
+                             getprocaddress(libhandle,'SHGetFolderPathW');
    end;
   end;
  end;
