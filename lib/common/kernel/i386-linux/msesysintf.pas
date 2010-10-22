@@ -1022,7 +1022,7 @@ end;
 
 function sys_getapphomedir: filenamety;
 begin
- result:= sys_getapphomedir;
+ result:= sys_getuserhomedir;
 end;
 
 function sys_gettempdir: filenamety;
