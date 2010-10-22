@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2010-10-22
+ sys_homedir -> sys_apphomedir.
+ "~/" returns sys_userhomedir, use "^/" for application home directory.
 2010-10-14
  tscrollingwidget.onchildscaled -> onlayout.
 2010-09-10

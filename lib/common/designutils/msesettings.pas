@@ -28,7 +28,7 @@ type
                    sma_syntaxdefdir,sma_templatedir,sma_compstoredir,
                    sma_compiler,sma_debugger,sma_exeext,sma_target);
 const
- statdirname = '~/.mseide';
+ statdirname = '^/.mseide';
  settingsmacronames: array[settingsmacroty] of msestring = (
                      'fpcdir','fpclibdir','msedir','mselibdir','syntaxdefdir',
                      'templatedir','compstoredir','compiler','debugger','exeext','target');

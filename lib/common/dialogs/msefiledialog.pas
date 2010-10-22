@@ -1316,7 +1316,7 @@ end;
 
 procedure tfiledialogfo.homeaction(const sender: TObject);
 begin
- dir.value:= sys_gethomedir;
+ dir.value:= sys_getuserhomedir;
  listview.directory:= dir.value;
  readlist;
 end;

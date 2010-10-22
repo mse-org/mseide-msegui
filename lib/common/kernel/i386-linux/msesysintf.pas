@@ -1007,7 +1007,7 @@ begin
  result:= str1;
 end;
 
-function sys_gethomedir: filenamety;
+function sys_getuserhomedir: filenamety;
 var
  po1: pchar;
 begin
@@ -1018,6 +1018,11 @@ begin
  else begin
   result:= '';
  end;
+end;
+
+function sys_getapphomedir: filenamety;
+begin
+ result:= sys_getapphomedir;
 end;
 
 function sys_gettempdir: filenamety;

@@ -1224,8 +1224,15 @@ var
  bo1: boolean;
 begin
  mstr1:= unquotefilename(tomsefilepath(path));
- if (length(mstr1) > 1) and (mstr1[1] = '~') and (mstr1[2] = '/') then begin
-  mstr1:= sys_gethomedir + copy(mstr1,2,bigint);
+ if (length(mstr1) > 1) and (mstr1[2] = '/') then begin
+  if mstr1[1] = '~' then begin
+   mstr1:= sys_getuserhomedir + copy(mstr1,2,bigint);
+  end
+  else begin
+   if mstr1[1] = '^' then begin
+    mstr1:= sys_getapphomedir + copy(mstr1,2,bigint);
+   end
+  end;
  end;
  if not relative and not isrootpath(mstr1) then begin
   if mstr1 <> '' then begin

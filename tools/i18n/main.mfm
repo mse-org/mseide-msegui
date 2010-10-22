@@ -16,10 +16,9 @@ object mainfo: tmainfo
   container.frame.sbvert.faceendbutton.dummy = 0
   container.bounds = (
     0
-    20
+    19
     624
-    370
-  )
+    371)
   optionswindow = [wo_groupleader]
   mainmenu = mainmenu1
   options = [fo_main, fo_terminateonclose, fo_savepos, fo_savezorder, fo_savestate]
@@ -55,58 +54,58 @@ object mainfo: tmainfo
     bounds_x = 1
     bounds_y = 25
     bounds_cx = 622
-    bounds_cy = 362
+    bounds_cy = 363
     anchors = [an_left, an_top, an_right, an_bottom]
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixrows.count = 1
-    fixrows.items = <    
+    fixrows.items = <
       item
         face.template = convexx
         face.dummy = 0
-        height = 16
+        height = 15
         captions.count = 5
-        captions.items = <        
+        captions.items = <
           item
             caption = 'Name'
-          end        
+          end
           item
             caption = 'Type'
-          end        
+          end
           item
             caption = 'NT'
-          end        
+          end
           item
             caption = 'Comment'
-          end        
+          end
           item
             caption = 'Value'
           end>
       end>
     datacols.count = 5
     datacols.options = [co_proportional, co_savestate]
-    datacols.items = <    
+    datacols.items = <
       item
         width = 210
         options = [co_readonly, co_proportional, co_savestate]
         widgetname = 'tree'
-      end    
+      end
       item
         options = [co_readonly, co_savestate]
         widgetname = 'typedisp'
         dataclass = tgridenumdatalist
-      end    
+      end
       item
         width = 19
         options = [co_drawfocus, co_savestate]
         widgetname = 'donottranslate'
         dataclass = tgridintegerdatalist
-      end    
+      end
       item
         width = 133
         options = [co_proportional, co_savestate]
         widgetname = 'comment'
         dataclass = tgridmsestringdatalist
-      end    
+      end
       item
         width = 110
         options = [co_readonly, co_proportional, co_savestate]
@@ -115,7 +114,7 @@ object mainfo: tmainfo
       end>
     datarowheight = 16
     statfile = projectfo.projectstat
-    reffontheight = 14
+    reffontheight = 13
     object tree: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       color = -1879048185
@@ -131,7 +130,7 @@ object mainfo: tmainfo
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
       onupdaterowvalues = treeonupdaterowvalues
       options = [teo_treecolnavig]
-      reffontheight = 14
+      reffontheight = 13
     end
     object typedisp: tenumtypeedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
@@ -149,11 +148,11 @@ object mainfo: tmainfo
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
       dropdown.options = [deo_selectonly, deo_autodropdown, deo_disabled]
       dropdown.cols.count = 1
-      dropdown.cols.items = <      
+      dropdown.cols.items = <
         item
         end>
       oninit = typedisponinit
-      reffontheight = 14
+      reffontheight = 13
     end
     object donottranslate: tbooleanedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
@@ -185,7 +184,7 @@ object mainfo: tmainfo
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       font.height = 12
       font.name = 'stf_default'
-      font.xscale =  1.0000000000000000E+0000
+      font.xscale = 1.000000000000000000
       font.dummy = 0
       onsetvalue = commentonsetvalue
       reffontheight = 14
@@ -205,7 +204,7 @@ object mainfo: tmainfo
       bounds_cx = 110
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_hintclippedtext, oe_savestate]
-      reffontheight = 14
+      reffontheight = 13
     end
   end
   object flat: tbooleanedit
@@ -216,13 +215,12 @@ object mainfo: tmainfo
       0
       1
       19
-      2
-    )
+      1)
     taborder = 1
     bounds_x = 9
     bounds_y = 5
     bounds_cx = 32
-    bounds_cy = 16
+    bounds_cy = 15
     statfile = projectfo.projectstat
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
     ondataentered = formatchanged
@@ -234,14 +232,13 @@ object mainfo: tmainfo
     frame.outerframe = (
       0
       1
-      59
-      2
-    )
+      53
+      1)
     taborder = 2
     bounds_x = 57
     bounds_y = 5
-    bounds_cx = 72
-    bounds_cy = 16
+    bounds_cx = 66
+    bounds_cy = 15
     statfile = projectfo.projectstat
     ondataentered = formatchanged
   end
@@ -252,14 +249,13 @@ object mainfo: tmainfo
     frame.outerframe = (
       0
       1
-      36
-      2
-    )
+      31
+      1)
     taborder = 3
     bounds_x = 153
     bounds_y = 5
-    bounds_cx = 49
-    bounds_cy = 16
+    bounds_cx = 44
+    bounds_cy = 15
     statfile = projectfo.projectstat
     ondataentered = formatchanged
     onsetvalue = nontonsetvalue
@@ -271,24 +267,23 @@ object mainfo: tmainfo
     frame.outerframe = (
       0
       1
-      44
-      2
-    )
+      39
+      1)
     taborder = 4
     bounds_x = 233
     bounds_y = 5
-    bounds_cx = 57
-    bounds_cy = 16
+    bounds_cx = 52
+    bounds_cy = 15
     statfile = projectfo.projectstat
     ondataentered = formatchanged
     onsetvalue = ntonlyonsetvalue
   end
   object mainstatfile: tstatfile
     filename = 'msei18n.sta'
-    filedir = '"~/.mseide"'
+    filedir = '"^/.mseide"'
     onstatupdate = mainupdatestat
-    left = 16
-    top = 96
+    Left = 16
+    Top = 96
   end
   object mainmenu1: tmainmenu
     onupdate = mainmenuupdate
@@ -296,63 +291,63 @@ object mainfo: tmainfo
     itemframetemplate = menuitemframe
     itemframetemplateactive = menuitemframe
     menu.submenu.count = 10
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = '&Open'
         name = 'open'
         state = [as_localcaption, as_localonexecute]
         onexecute = onprojectopen
-      end    
+      end
       item
         caption = '&Save'
         name = 'save'
         state = [as_localcaption, as_localonexecute]
         onexecute = onprojectsave
-      end    
+      end
       item
         caption = 'Save &as'
         name = 'saveas'
         state = [as_localcaption, as_localonexecute]
         onexecute = saveasexecute
-      end    
+      end
       item
         caption = '&New'
         name = 'new'
         state = [as_localcaption, as_localonexecute]
         onexecute = newprojectexe
-      end    
+      end
       item
         caption = '&Edit'
         name = 'edit'
         state = [as_localcaption, as_localonexecute]
         onexecute = onprojectedit
-      end    
+      end
       item
         caption = '&Import'
         name = 'import'
         state = [as_localcaption, as_localonexecute]
         onexecute = importonexecute
-      end    
+      end
       item
         caption = 'Ex&port'
         name = 'export'
         state = [as_localcaption, as_localonexecute]
         onexecute = exportonexecute
-      end    
+      end
       item
         caption = '&Make'
         name = 'make'
         state = [as_localcaption, as_localonexecute]
         onexecute = makeonexecute
-      end    
+      end
       item
         submenu.count = 2
-        submenu.items = <        
+        submenu.items = <
           item
             caption = '&About'
             state = [as_localcaption, as_localonexecute]
             onexecute = aboutexe
-          end        
+          end
           item
             caption = '&Configure MSEi18n'
             state = [as_localcaption, as_localonexecute]
@@ -361,99 +356,89 @@ object mainfo: tmainfo
         caption = 'Se&ttings'
         name = 'settings'
         state = [as_localcaption]
-      end    
+      end
       item
         caption = 'E&xit'
         state = [as_localcaption, as_localonexecute]
         onexecute = exitexe
       end>
-    left = 256
-    top = 160
+    Left = 256
+    Top = 160
   end
   object projectfiledialog: tfiledialog
     statfile = mainstatfile
     controller.filterlist.data = (
       (
         'Translate project'
-        '*.trp'
-      )
-    )
+        '*.trp'))
     controller.defaultext = 'trp'
     controller.options = [fdo_checkexist, fdo_chdir]
     controller.captionopen = 'Open translate project'
     controller.captionsave = 'Save translate project'
-    left = 120
-    top = 156
+    Left = 120
+    Top = 156
   end
   object threadcomp: tthreadcomp
     onexecute = makeexecute
     onterminate = maketerminate
-    left = 209
-    top = 115
+    Left = 209
+    Top = 115
   end
   object convexx: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
-    )
+      0.000000000000000000
+      1.000000000000000000)
     template.fade_color.count = 2
     template.fade_color.items = (
       -1610612732
-      -1610612731
-    )
+      -1610612731)
     template.fade_direction = gd_up
-    left = 385
-    top = 103
+    Left = 385
+    Top = 103
   end
   object menuitemframe: tframecomp
     template.levelo = -1
     template.leveli = 1
-    left = 385
-    top = 227
+    Left = 385
+    Top = 227
   end
   object convexy: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
-    )
+      0.000000000000000000
+      1.000000000000000000)
     template.fade_color.count = 2
     template.fade_color.items = (
       -1610612732
-      -1610612731
-    )
+      -1610612731)
     template.fade_direction = gd_left
-    left = 481
-    top = 103
+    Left = 481
+    Top = 103
   end
   object concavex: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
-    )
+      0.000000000000000000
+      1.000000000000000000)
     template.fade_color.count = 2
     template.fade_color.items = (
       -1610612732
-      -1610612731
-    )
+      -1610612731)
     template.fade_direction = gd_down
-    left = 385
-    top = 135
+    Left = 385
+    Top = 135
   end
   object concavey: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
-    )
+      0.000000000000000000
+      1.000000000000000000)
     template.fade_color.count = 2
     template.fade_color.items = (
       -1610612732
-      -1610612731
-    )
-    left = 481
-    top = 135
+      -1610612731)
+    Left = 481
+    Top = 135
   end
 end

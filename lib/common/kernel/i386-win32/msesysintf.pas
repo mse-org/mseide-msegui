@@ -36,7 +36,8 @@ uses
 //todo: correct unicode implementation, long filepaths, stubs for win95
 
 var
- homedir: filenamety;
+ apphomedir: filenamety;
+ userhomedir: filenamety;
 
 const
  FILE_ATTRIBUTE_ENCRYPTED	= $0040;
@@ -1821,9 +1822,14 @@ begin
  tomsefilepath1(result);
 end;
 
-function sys_gethomedir: filenamety;
+function sys_getapphomedir: filenamety;
 begin
- result:= homedir;
+ result:= apphomedir;
+end;
+
+function sys_getuserhomedir: filenamety;
+begin
+ result:= userhomedir;
 end;
 
 function sys_gettempdir: filenamety;
@@ -1996,7 +2002,10 @@ begin
  if libhandle <> 0 then begin
   if assigned(po1) then begin
    if po1(0,csidl_appdata or CSIDL_FLAG_CREATE,0,0,@buffer) = 0 then begin
-    homedir:= filepath(buffer,fk_file);
+    apphomedir:= filepath(buffer,fk_file);
+   end;
+   if po1(0,csidl_profile or CSIDL_FLAG_CREATE,0,0,@buffer) = 0 then begin
+    userhomedir:= filepath(buffer,fk_file);
    end;
   end;
   freelibrary(libhandle);
