@@ -145,7 +145,7 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     optionswidget1 = [ow1_autowidth, ow1_autoheight]
     taborder = 7
-    bounds_x = 440
+    bounds_x = 452
     bounds_y = 3
     bounds_cx = 35
     bounds_cy = 20
@@ -230,7 +230,7 @@ object filedialogfo: Tfiledialogfo
     onshowhint = dirshowhint
     bounds_x = 1
     bounds_y = 2
-    bounds_cx = 431
+    bounds_cx = 449
     anchors = [an_left, an_top, an_right]
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
     ondataentered = filepathentered
@@ -240,9 +240,9 @@ object filedialogfo: Tfiledialogfo
   end
   object tspacer1: tspacer
     taborder = 2
-    bounds_x = 475
+    bounds_x = 487
     bounds_y = 0
-    bounds_cx = 8
+    bounds_cx = 2
     bounds_cy = 20
     linkleft = up
     linkright = home
@@ -250,9 +250,9 @@ object filedialogfo: Tfiledialogfo
   end
   object tspacer2: tspacer
     taborder = 1
-    bounds_x = 527
+    bounds_x = 533
     bounds_y = 0
-    bounds_cx = 8
+    bounds_cx = 2
     bounds_cy = 20
     linkleft = home
     linkright = createdir
@@ -262,7 +262,7 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     optionswidget1 = [ow1_autowidth, ow1_autoheight]
     taborder = 8
-    bounds_x = 483
+    bounds_x = 489
     bounds_y = 3
     bounds_cx = 44
     bounds_cy = 20
@@ -276,9 +276,9 @@ object filedialogfo: Tfiledialogfo
   end
   object tspacer3: tspacer
     taborder = 11
-    bounds_x = 432
+    bounds_x = 450
     bounds_y = 0
-    bounds_cx = 8
+    bounds_cx = 2
     bounds_cy = 20
     linkleft = dir
     linkright = up
