@@ -90,6 +90,9 @@ function filepath({const} directory: filenamety; {const} filename: filenamety;
                         kind: filekindty = fk_default;
                         relative: boolean = false): filenamety; overload;
  //directory ignored if filename starts with root
+ //"~/....." expands to sys_getuserhomedir()/.....
+ //"^/....." expands to sys_getapphomedir()/.....
+ 
 function filepath({const} path: filenamety;
                         kind: filekindty = fk_default;
                         relative: boolean = false): filenamety; overload;
