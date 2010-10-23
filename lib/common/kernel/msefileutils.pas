@@ -167,9 +167,12 @@ function dirhasentries(const adirname: filenamety;
                          const ainclude: fileattributesty = [fa_all];
                          const aexclude: fileattributesty = []): boolean;
 
-function findfile(const filename: filenamety; const dirnames: array of filenamety;
+function findfile(const filename: filenamety;
+                             const dirnames: array of filenamety;
                              out path: filenamety): boolean; overload;
             //true if found
+function findfile(const filename: filenamety; const dirnames:
+                         array of filenamety): boolean; overload;
 function findfile(const filename: filenamety): boolean; overload;
 function finddir(const filename: filenamety): boolean;
 function findfileordir(const filename: filenamety): boolean;
@@ -925,27 +928,23 @@ function findfile(const filename: filenamety; const dirnames: array of filenamet
 var
  str1: filenamety;
 begin
-{
- if isrootpath(filename) then begin
-  path:= filepath(filename);
-  result:= findfile(path);
-  if not result then begin
-   path:= '';
-  end;
+ path:= searchfile(filename,dirnames);
+ if path <> '' then begin
+  path:= path + msefileutils.filename(filename);
+  result:= true;
  end
  else begin
- }
-  path:= searchfile(filename,dirnames);
-  if path <> '' then begin
-   path:= path + msefileutils.filename(filename);
-   result:= true;
-  end
-  else begin
-   result:= false;
-  end;
-{
+  result:= false;
  end;
- }
+end;
+
+function findfile(const filename: filenamety;
+                                 const dirnames: array of filenamety): boolean;
+            //true if found
+var
+ fna1: filenamety;
+begin
+ result:= findfile(filename,dirnames,fna1);
 end;
 
 function findfileordir(const filename: filenamety): boolean;

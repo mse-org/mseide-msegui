@@ -50,7 +50,8 @@ type
 
 implementation
 uses
- templateeditor_mfm,msecodetemplates,projectoptionsform,sysutils,msefileutils;
+ templateeditor_mfm,msecodetemplates,projectoptionsform,sysutils,msefileutils,
+ msedatalist,msesysintf;
  
 constructor ttemplateeditorfo.create(const aindex: integer);
 begin
@@ -112,6 +113,8 @@ procedure ttemplateeditorfo.closeq(const sender: tcustommseform;
                var amodalresult: modalresultty);
 var
  info1: templateinfoty;
+ dir1,pa1: filenamety;
+ int1: integer;
 begin
  if fdeleted then begin
   amodalresult:= mr_ok;
@@ -137,6 +140,22 @@ begin
    end;
    if amodalresult = mr_ok then begin
     codetemplates.savefile(info1);
+    dir1:= filedir(info1.path);
+    pa1:= intermediatefilename(dir1+'template');
+    if sys_openfile(pa1,fm_create,[],[],int1) = sye_ok then begin
+     sys_closefile(int1);
+     if not findfile(filename(pa1),
+                             projectoptions.texp.codetemplatedirs) then begin
+      deletefile(pa1);
+      additem(projectoptions.t.codetemplatedirs,dir1);
+      expandprojectmacros;
+      projectoptionsmodified;
+      showmessage('"'+dir1+
+  '" has been added to ''Project''-''Options''-''Editor''-''Code Templates''.');
+      exit;
+     end;
+    end;
+    deletefile(pa1);
    end;
   end;
  end;
