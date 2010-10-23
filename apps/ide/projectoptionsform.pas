@@ -232,6 +232,7 @@ type
    property exceptignore: booleanarty read fexceptignore 
                                                  write fexceptignore;
  end;
+{$M-}
  
  projectoptionsty = record
   o: tprojectoptions;

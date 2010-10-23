@@ -62,7 +62,14 @@ end;
 procedure ttemplateeditorfo.onlo(const sender: TObject);
 var
  int1: integer;
+ dir1: filenamety;
 begin
+ if savefiledialog.controller.lastdir = '' then begin
+  if findfile('',projectoptions.texp.codetemplatedirs,dir1) or 
+     findfile('',expandprmacros('${TEMPLATEDIR}'),dir1) then begin
+   savefiledialog.controller.lastdir:= dir1;
+  end;
+ end;
  projectoptionstofont(templed.font);
  templgrid.datarowheight:= templed.font.lineheight;
  if (findex >= 0) and (findex <= high(codetemplates.templates)) then begin

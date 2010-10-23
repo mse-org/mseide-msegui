@@ -1500,7 +1500,7 @@ begin
      editor.begingroup;
      gc1.col:= gc2.col+length(mstr1);
      deletetext(gc2,gc1);
-     if po2^.indent then begin
+     if indent then begin
       ar1:= breaklines(mstr2);
       for int1:= 1 to high(ar1) do begin
        ar1[int1]:= charstring(msechar(' '),gc2.col)+ar1[int1];
@@ -1509,7 +1509,7 @@ begin
      end;
      inserttext(gc2,mstr2,select);
      if not select then begin
-      if cursorpos.row = 0 then begin
+      if indent or (cursorpos.row = 0) then begin
        gc2.col:= gc2.col + cursorpos.col;
       end
       else begin

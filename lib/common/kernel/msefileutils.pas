@@ -154,7 +154,7 @@ function searchfile(const afilename: filenamety;
 
 function searchfiles(const afilename: filenamety;
             const adirnames: array of filenamety): filenamearty; overload;
-           //returns filepats
+           //returns filepaths
            //afilename can be path and can have wildchars ('?','*'),
            //adirnames can have wildchars ('?','*','**','***')
 function searchfiles(const afilename: filenamety;
@@ -578,99 +578,6 @@ begin
  end;
 end;
 
-{
-function searchfile(const filename: filenamety; dir: boolean = false): filenamety; overload;
-           //returns rootpath if file exists, '' otherwise
-var
- str1: msestring;
-begin
- str1:= unquotefilename(filename);
- tosysfilepath1(str1);
- if dir then begin
-  if directoryexists(str1) then begin
-   result:= filepath(filename,fk_dir);
-  end
-  else begin
-   result:= '';
-  end;
- end
- else begin
-  if fileexists(str1) then begin
-   result:= filepath(filename,fk_file);
-  end
-  else begin
-   result:= '';
-  end;
- end;
-end;
-}
-{
-function searchfile(const filename: filenamety; const dirnames: filenamearty): filenamety;
-           //returns directory of last occurence in dirnames, '' if none
-var
- dirdirstream,filedirstream: dirstreamty;
- int1: integer;
- dirdir,dirna: filenamety;
- fileinfo: fileinfoty;
-
- procedure checkfile;
- begin
-  if sys_opendirstream(filedirstream) = sye_ok then begin
-   if sys_readdirstream(filedirstream,fileinfo) then begin
-    result:= filedirstream.dirname;
-   end;
-   sys_closedirstream(filedirstream);
-  end;
- end;
-
-var
- filenamedir,filenamename: filenamety;
-begin
- result:= '';
- fillchar(dirdirstream,sizeof(dirstreamty),0);
- fillchar(filedirstream,sizeof(dirstreamty),0);
- dirdirstream.include:= [fa_dir];
- filedirstream.include:= [fa_all];
- filedirstream.exclude:= [fa_dir];
- setlength(filedirstream.mask,1);
- splitfilepath(filename,filenamedir,filenamename);
- filedirstream.mask[0]:= filenamename;
- for int1:= high(dirnames) downto 0 do begin
-  if filenamedir <> '' then begin
-   splitfilepath(filepath(dirnames[int1],filenamedir),dirdir,dirna);
-  end
-  else begin
-   splitfilepath(filepath(dirnames[int1]),dirdir,dirna);
-  end;
-  if dirna <> '' then begin
-   with dirdirstream do begin
-    dirname:= dirdir;
-    setlength(mask,1);
-    mask[0]:= dirna;
-    if sys_opendirstream(dirdirstream) = sye_ok then begin
-     while (result = '') and sys_readdirstream(dirdirstream,fileinfo) do begin
-      if (fileinfo.name <> '.') and (fileinfo.name <> '..') then begin
-       filedirstream.dirname:= dirdirstream.dirname + fileinfo.name + '/';
-       checkfile;
-      end;
-     end;
-     sys_closedirstream(dirdirstream);
-    end;
-   end;
-  end
-  else begin
-   with filedirstream do begin
-    dirname:= dirdir;
-    checkfile;
-   end;
-  end;
-  if result <> '' then begin
-   break;
-  end;
- end;
-end;
-}
-
 function searchfile(const afilename: filenamety;
                                      const adirname: filenamety): filenamety;
 var
@@ -759,7 +666,7 @@ end;
 
 function searchfile(const afilename: filenamety; 
                          const adirnames: array of filenamety): filenamety;
-           //returns directory of last occurence in dirnames, '' if none
+           //returns directory of last occurence in adirnames, '' if none
 var
  int1: integer;
  dir1,file1: filenamety;
