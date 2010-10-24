@@ -66,7 +66,7 @@ var
 begin
  if savefiledialog.controller.lastdir = '' then begin
   if findfile('',projectoptions.texp.codetemplatedirs,dir1) or 
-     findfile('',expandprmacros('${TEMPLATEDIR}'),dir1) then begin
+     findfile('',[expandprmacros('${TEMPLATEDIR}')],dir1) then begin
    savefiledialog.controller.lastdir:= dir1;
   end;
  end;
