@@ -200,6 +200,7 @@ type
  tgdbevent = class(tobjectevent)
   private
    flastconsoleoutput: ansistring;
+   fthreadid: integer;
   public
    eventkind: gdbeventkindty;
    values: resultinfoarty;
@@ -295,6 +296,9 @@ type
    fstartupbkpton: boolean;
    foverloadsleepus: integer;
    fstoptime: tdatetime;
+   fstopinfo: resultinfoarty;
+   fstopthreadid: integer;
+   fcurrthreadid: integer;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
    function checkconnection: gdbresultty;
@@ -323,7 +327,7 @@ type
    procedure initstopinfo(var ainfo: stopinfoty);
    procedure receiveevent(const event: tobjectevent); override;
    procedure doevent(const token: longword; const eventkind: gdbeventkindty;
-                       const values: resultinfoarty);
+                       values: resultinfoarty);
    procedure postsyncerror;
    procedure checkpointersize;
    procedure dorun;
@@ -787,6 +791,9 @@ begin
  ftargetdebugend:= 0;
  fstartupbreakpoint:= -1;
  fstartupbreakpoint1:= -1;
+ fstopinfo:= nil;
+ fstopthreadid:= -1;
+ fcurrthreadid:= -1;
 end;
 
 procedure tgdbmi.closegdb;
@@ -1125,8 +1132,8 @@ var
  ar1: resultinfoarty;
  {$ifdef mswindows}
  threadids: integerarty;
- mstr1: filenamety;
  {$endif}
+ mstr1: filenamety;
 
 begin
  if event is tgdbevent then begin
@@ -1190,57 +1197,60 @@ begin
       end;
       finterruptthreadid:= 0;
      end;
-     {$endif mswindows}
-      bo1:= getstopinfo(values,flastconsoleoutput,stopinfo);
-      if not bo1 then begin
-       stopinfo.messagetext:= 'Stop error: ' + stopinfo.messagetext;
-      end
-      else begin
-       if (stopinfo.reason = sr_breakpoint_hit) and 
-        (stopinfo.bkptno = fexceptionbkpt) then begin
-        if getshortstring('($eax^+12)^',str1) then begin
-         str2:= uppercase(str1);
-         bo1:= false;
-         for int1:= 0 to high(fignoreexceptionclasses) do begin
-          if str2 = fignoreexceptionclasses[int1] then begin
-           bo1:= true;
-           break;
-          end;
-         end;
-         if bo1 then begin
-          fstate:= fstate + [gs_restarted,gs_running];
-          continue;
-          stopinfo.reason:= sr_none;
-         end
-         else begin
-          stopinfo.messagetext:= 'Exception '+str1+'.';
-          stopinfo.reason:= sr_exception;
+    {$endif mswindows}
+     if fthreadid <> -1 then begin
+      threadselect(fthreadid,mstr1,int1); 
+               //there was an breakpoint in other thread
+     end;
+     bo1:= getstopinfo(values,flastconsoleoutput,stopinfo);
+     if not bo1 then begin
+      stopinfo.messagetext:= 'Stop error: ' + stopinfo.messagetext;
+     end
+     else begin
+      if (stopinfo.reason = sr_breakpoint_hit) and 
+       (stopinfo.bkptno = fexceptionbkpt) then begin
+       if getshortstring('($eax^+12)^',str1) then begin
+        str2:= uppercase(str1);
+        bo1:= false;
+        for int1:= 0 to high(fignoreexceptionclasses) do begin
+         if str2 = fignoreexceptionclasses[int1] then begin
+          bo1:= true;
+          break;
          end;
         end;
-       end;
-       if stopinfo.reason in [sr_exited,sr_exited_normally] then begin
-        fstate:= fstate - [gs_started,gs_startup];
-       end;
-       if stopinfo.reason = sr_startup then begin
-        if fstartupbreakpoint >= 0 then begin
-         breakdelete(fstartupbreakpoint);
-         fstartupbreakpoint:= -1;
+        if bo1 then begin
+         fstate:= fstate + [gs_restarted,gs_running];
+         continue;
+         stopinfo.reason:= sr_none;
+        end
+        else begin
+         stopinfo.messagetext:= 'Exception '+str1+'.';
+         stopinfo.reason:= sr_exception;
         end;
-        if fstartupbreakpoint1 >= 0 then begin
-         breakdelete(fstartupbreakpoint1);
-         fstartupbreakpoint1:= -1;
-        end;
-        fprocid:= 0;
-        getprocid(fprocid);
-        {$ifdef UNIX}
-        ftargetterminal.restart;
-        {$endif}
-        if gs_startup in fstate then begin
-         exit; //already done
-        end;
-        include(fstate,gs_startup);
        end;
-//      end;
+      end;
+      if stopinfo.reason in [sr_exited,sr_exited_normally] then begin
+       fstate:= fstate - [gs_started,gs_startup];
+      end;
+      if stopinfo.reason = sr_startup then begin
+       if fstartupbreakpoint >= 0 then begin
+        breakdelete(fstartupbreakpoint);
+        fstartupbreakpoint:= -1;
+       end;
+       if fstartupbreakpoint1 >= 0 then begin
+        breakdelete(fstartupbreakpoint1);
+        fstartupbreakpoint1:= -1;
+       end;
+       fprocid:= 0;
+       getprocid(fprocid);
+       {$ifdef UNIX}
+       ftargetterminal.restart;
+       {$endif}
+       if gs_startup in fstate then begin
+        exit; //already done
+       end;
+       include(fstate,gs_startup);
+      end;
      end;
     end;
     gek_running: begin
@@ -1309,10 +1319,12 @@ begin
 end;
 
 procedure tgdbmi.doevent(const token: longword; const eventkind: gdbeventkindty;
-                                   const values: resultinfoarty);
+                                   values: resultinfoarty);
 var
  ev: tgdbevent;
+ id1: integer;
 begin
+ id1:= fcurrthreadid;
  if (token <> 0) and (token = fsyncsequence) then begin
   fsyncvalues:= values;
   fsynceventkind:= eventkind;
@@ -1326,6 +1338,12 @@ begin
     fstate:= fstate + [gs_internalrunning,gs_started];
    end;
    gek_stopped: begin
+    if values <> nil then begin
+     fstopinfo:= values;
+     fstopthreadid:= fcurrthreadid;
+     id1:= -1; //no thread switch necessary;
+    end;
+    values:= fstopinfo;
     exclude(fstate,gs_internalrunning);
     if gs_attaching in fstate then begin
      exit; //ignore
@@ -1350,6 +1368,7 @@ begin
     ev.eventkind:= eventkind;
     ev.values:= copy(values);
     ev.flastconsoleoutput:= flastconsoleoutput;
+    ev.fthreadid:= id1;
     application.postevent(ev);
    end;
    if eventkind = gek_running then begin
@@ -1520,6 +1539,11 @@ begin
       end;
       rec_download: begin
        doevent(token,gek_download,resultar);
+      end;
+      rec_threadselected: begin
+       if not getintegervalue(resultar,'id',fcurrthreadid) then begin
+        fcurrthreadid:= -1;
+       end;
       end;
      end;
     end

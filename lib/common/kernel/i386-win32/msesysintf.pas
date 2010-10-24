@@ -2003,10 +2003,10 @@ begin
  end;
  if libhandle <> 0 then begin
   if assigned(po1) then begin
-   if po1(0,csidl_appdata or CSIDL_FLAG_CREATE,0,0,@buffer) = 0 then begin
+   if po1(0,CSIDL_APPDATA or CSIDL_FLAG_CREATE,0,0,@buffer) = 0 then begin
     apphomedir:= filepath(buffer,fk_file);
    end;
-   if po1(0,csidl_profile or CSIDL_FLAG_CREATE,0,0,@buffer) = 0 then begin
+   if po1(0,CSIDL_PROFILE or CSIDL_FLAG_CREATE,0,0,@buffer) = 0 then begin
     userhomedir:= filepath(buffer,fk_file);
    end;
   end;
