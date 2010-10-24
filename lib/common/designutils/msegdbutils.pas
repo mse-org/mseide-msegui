@@ -3180,6 +3180,7 @@ function tgdbmi.getthreadinfolist(out infolist: threadinfoarty): gdbresultty;
 var
  int1,int2,int3: integer;
  ar1,ar2: stringarty;
+ stackframeindex: integer;
 begin
  infolist:= nil;
  ar1:= nil; //compiler warning
@@ -3203,9 +3204,7 @@ begin
      if high(ar1) < 2 then begin
       exit;
      end;
-     try
-      id:= strtoint(ar1[0]);
-     except
+     if not trystrtoint64(ar1[0],pint64(@id)^) then begin
       exit;
      end;
      if ar1[1] = 'Thread' then begin
@@ -3215,6 +3214,7 @@ begin
       end;
      end;
      threadid:= 0;
+     stackframeindex:= 3;
      ar2:= splitstring(ar1[2],'.');
      if high(ar2) > 0 then begin
       trystrtohex64(ar2[1],threadid);
@@ -3223,17 +3223,23 @@ begin
       if (high(ar1) > 1) and (ar1[1] = '(LWP') then begin
        trystrtoint64(copy(ar1[2],1,length(ar1[2])-1),pint64(@threadid)^);
                                    //delphi compatibility
-//       trystrtoint64(copy(ar1[2],1,length(ar1[2])-1),int64(threadid));
       end
       else begin
        if not trystrtoint64(ar1[0],pint64(@threadid)^) then begin
-        trystrtohex64(ar1[2],threadid);
+        if not trystrtohex64(ar1[2],threadid) then begin
+         ar2:= splitstring(ar1[0],'.');
+         if high(ar2) > 0 then begin
+          stackframeindex:= 1;
+          trystrtohex64(ar2[1],threadid);
+         end;         
+        end;
        end;
       end;
      end;
-     if high(ar1) >= 3 then begin
-      stackframe:= ar1[3];
-      for int3:= 4 to high(ar1) do begin
+     
+     if high(ar1) >= stackframeindex then begin
+      stackframe:= ar1[stackframeindex];
+      for int3:= stackframeindex + 1 to high(ar1) do begin
        stackframe:= stackframe + ' ' + ar1[int3];
       end;
      end;
