@@ -41,7 +41,7 @@ const
 type
  frameskinoptionty = (fso_flat,
                       fso_noanim,fso_nomouseanim,fso_noclickanim,fso_nofocusanim,
-                      fso_nofocusrect,fso_nodefaultrect);
+                      fso_nofocusrect,fso_nodefaultrect,fso_noinnerrect);
  frameskinoptionsty = set of frameskinoptionty;
  
  optionwidgetty = (ow_background,ow_top,

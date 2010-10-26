@@ -32,12 +32,12 @@ type
                  shs_separator,shs_checkbox,shs_radiobutton,        //menuactionoptionty
 
                  shs_clicked,shs_mouse,shs_moveclick,shs_focused,shs_active,
-                 shs_horz,shs_vert,shs_opposite,
+                 shs_horz,shs_vert,shs_opposite,shs_ellipsemouse,
                  shs_widgetorg,shs_showfocusrect,shs_showdefaultrect,
                  shs_flat,shs_noanimation,shs_nomouseanimation,
                  shs_noclickanimation,shs_nofocusanimation,shs_focusanimation,
                  shs_checkbutton,
-                 {ss_submenu,}shs_menuarrow);
+                 {ss_submenu,}shs_menuarrow,shs_noinnerrect);
  shapestatesty = set of shapestatety;
 
  actionstatety = (as_disabled = ord(shs_disabled),as_invisible=ord(shs_invisible),

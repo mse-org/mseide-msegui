@@ -4,7 +4,7 @@ MSEide+MSEgui Pascal Cross Platform GUI Development System.
 Copyright (c) 1999-2010 by Martin Schreiber
 
 - Compiles with FPC 2.4 and FPC 2.4.2
-- Tested on i386-linux SuSE 9.0,10.3,11.1,11.2, x84_64-linux SuSE 11.1 and
+- Tested on i386-linux SuSE 9.0,10.3,11.3, x84_64-linux SuSE 11.1 and
   i386-win32 98, 2000, XP and Vista.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
@@ -89,54 +89,12 @@ Predefined projectmacros:
 PROJECTNAME, PROJECTDIR, MAINFILE, TARGFILE, they can be overridden by 
 'Project'-'Options'-'Macros'.
 
-MSEide code templates
-*********************
-Extension for template files is *.mct, searched directories are listed in
-'Project'-'Options'-'Editor'-'Code Templates'-'Directory'. Every template needs
-its own file.
-
-Example of a template file:
-"
-[header]
-name=thename
-comment=Comment abcdefg HIKLMNO
-params=3
- param1
- param2
- param3
-select=0
-cursorcol=12
-cursorrow=1
-[]
-The Template Text with macros ${param1}
-more text
-${param2} ${param3} more params
-"
-
-If select=1 the templateblock will be selected in editor.
-If select=0 or not defined the cursor will be moved by the offset
-cursorcol, cursorrow.
-
-Minimal template file:
-"
-[header]
-name=thename
-[]
-"
-
-Parameters can be entered in editor after templatename separated by commas:
-"
-thename,valueforparam1,valueforparam2
-"
-A dialog window will be displayed if there are more params defined than supplied
-for param entry or if the template name can not be found.
-
 Linux x84-64
 ************
 The 64bit version is experimental and not well tested because nobody
 uses 64bit it seems. ;-)
 There is a problem in FPC with -gl compiler switch, it is possible that the delay
-in case of an exception is very long, please dont use -gl on 64 bit.
+in case of an exception is very long, please don't use -gl on 64 bit.
 
 Debugging
 *********
@@ -153,7 +111,7 @@ If the popup widgets are showed behind the forms, try to start the
 MSEgui program with the option '--TOPLEVELRAISE'. Do *not* use this option
 if is not necessary (KDE, Gnome... work well without).
 
-Blinking taskbar widgets in IceWM
+Flashing taskbar widgets in IceWM
 *********************************
 Newer revisions of IceWM let the taskbar icons of MSEgui applications flash.
 Start the MSEgui application with the option '--TOPLEVELRAISE'.
@@ -166,7 +124,7 @@ replace your language locale in /usr/share/X11/locale/locale.dir
 by en_US as a workaround. Example for ru_RU.UTF-8:
 replace 
 ru_RU.UTF-8/XLC_LOCALE ru_RU.UTF-8
-with
+by
 en_US.UTF-8/XLC_LOCALE ru_RU.UTF-8
 
 How to add custom components to MSEide

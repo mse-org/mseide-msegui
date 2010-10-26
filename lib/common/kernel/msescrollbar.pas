@@ -467,21 +467,36 @@ begin
                                                     areas[sba_end].ca.dim.y;
    end;
   end;
-  buttonareas[bbu_down]:= areas[sbbu_down].ca.dim;
-  if fframeendbutton1 <> nil then begin
-   deflaterect1(areas[sbbu_down].ca.dim,fframeendbutton1.innerframe);
+  with areas[sbbu_down].ca do begin
+   buttonareas[bbu_down]:= dim;
+   if (fframeendbutton1 <> nil) then begin 
+    deflaterect1(dim,fframeendbutton1.paintframe);
+    if not (fso_noinnerrect in fframeendbutton1.optionsskin) then begin
+     deflaterect1(dim,fframeendbutton1.framei);
+    end;
+   end;
   end;
-  frameskinoptionstoshapestate(fframeendbutton1,areas[sbbu_down].state);
-  buttonareas[bbu_move]:= areas[sbbu_move].ca.dim;
-  if fframebutton <> nil then begin
-   deflaterect1(areas[sbbu_move].ca.dim,fframebutton.innerframe);
+  frameskinoptionstoshapestate(fframeendbutton1,areas[sbbu_down]);
+  with areas[sbbu_move].ca do begin
+   buttonareas[bbu_move]:= dim;
+   if (fframebutton <> nil) then begin 
+    deflaterect1(dim,fframebutton.paintframe);
+    if not (fso_noinnerrect in fframebutton.optionsskin) then begin
+     deflaterect1(dim,fframebutton.framei);
+    end;
+   end;
   end;
-  frameskinoptionstoshapestate(fframebutton,areas[sbbu_move].state);
-  buttonareas[bbu_up]:= areas[sbbu_up].ca.dim;
-  if fframeendbutton2 <> nil then begin
-   deflaterect1(areas[sbbu_up].ca.dim,fframeendbutton2.innerframe);
+  frameskinoptionstoshapestate(fframebutton,areas[sbbu_move]);
+  with areas[sbbu_up].ca do begin
+   buttonareas[bbu_up]:= dim;
+   if (fframeendbutton2 <> nil) then begin
+    deflaterect1(dim,fframeendbutton2.paintframe);
+    if not (fso_noinnerrect in fframeendbutton2.optionsskin) then begin
+     deflaterect1(dim,fframeendbutton2.framei);
+    end;
+   end;
   end;
-  frameskinoptionstoshapestate(fframeendbutton2,areas[sbbu_up].state);
+  frameskinoptionstoshapestate(fframeendbutton2,areas[sbbu_up]);
   {
   for bu1:= firstbutton to lastbutton do begin
    updatebit(longword(areas[bu1].state),ord(ss_flat),sbo_flat in foptions);
@@ -497,7 +512,8 @@ var
 begin
  result:= scrollbarareaty(-1);
  for ar1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
-  if pointinrect(point,fdrawinfo.areas[ar1].ca.dim) then begin
+//  if pointinrect(point,fdrawinfo.areas[ar1].ca.dim) then begin
+  if pointinshape(point,fdrawinfo.areas[ar1]) then begin
    result:= ar1;
    break;
   end;

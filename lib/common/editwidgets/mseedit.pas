@@ -894,7 +894,7 @@ var
 begin
  for int1:= 0 to high(fitems) do begin
   with tframebutton(fitems[int1]) do begin
-   frameskinoptionstoshapestate(fframe,finfo.state);
+   frameskinoptionstoshapestate(fframe,finfo);
    finfo.state:= finfo.state - [shs_showfocusrect,shs_showdefaultrect];
   end;
  end;
@@ -968,7 +968,8 @@ begin
        (fouterframe.right + fwidth.right + cx + aframe.right);
      inc(aframe.right,cx);
     end;
-    if fframe <> nil then begin
+    if (fframe <> nil) and 
+                 not (fso_noinnerrect in fframe.optionsskin) then begin
      finfo.ca.dim:= deflaterect(fframerect,fframe.innerframe);
     end
     else begin

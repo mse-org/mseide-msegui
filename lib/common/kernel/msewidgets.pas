@@ -1097,6 +1097,7 @@ type
                    bo_shortcutcaption,bo_altshortcut,
                    {bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect,}
                    bo_nodefaultframeactive,
+                   bo_ellipsemouse, //mouse area is elliptical
                    bo_nocandefocus,bo_candefocuswindow, //check own window only
                    bo_radioitemcol,bo_resetcheckedonrowexit
                                  //used in tdatabutton
@@ -1226,10 +1227,10 @@ function placepopuprect(const awidget: twidget; const adest: rectty; //clientori
                  const placement: captionposty; const asize: sizety): rectty; overload;
 procedure getwindowicon(const abitmap: tmaskedbitmap; out aicon,amask: pixmapty;
                         const anodefault: boolean = false);
-{
+
 procedure buttonoptionstoshapestate(avalue: buttonoptionsty;
                                               var astate: shapestatesty);
-}
+
 implementation
 
 uses
@@ -1264,6 +1265,17 @@ type
   public
    constructor create(const aowner: tcomponent; const apopuptransient: boolean;
                         const ahasaction: boolean; const exttext: msestring);
+end;
+
+procedure buttonoptionstoshapestate(avalue: buttonoptionsty;
+                                              var astate: shapestatesty);
+begin
+ if bo_ellipsemouse in avalue then begin
+  include(astate,shs_ellipsemouse);
+ end
+ else begin
+  exclude(astate,shs_ellipsemouse);
+ end;
 end;
 
 function readcaptiontoimagepos(const reader: treader): imageposty;
@@ -1771,8 +1783,13 @@ end;
 procedure tactionsimplebutton.clientrectchanged;
 begin
  inherited;
- finfo.ca.dim:= innerclientrect;
- frameskinoptionstoshapestate(fframe,finfo.state);
+ frameskinoptionstoshapestate(fframe,finfo);
+ if shs_noinnerrect in finfo.state then begin
+  finfo.ca.dim:= clientrect;
+ end
+ else begin
+  finfo.ca.dim:= innerclientrect;
+ end;
  if shs_flat in finfo.state then begin
   exclude(fwidgetstate1,ws1_nodesignframe);
  end
@@ -1903,7 +1920,7 @@ procedure tactionsimplebutton.setoptions(const avalue: buttonoptionsty);
 begin
  if foptions <> avalue then begin
   foptions:= avalue;
-//  buttonoptionstoshapestate(avalue,finfo.state);
+  buttonoptionstoshapestate(avalue,finfo.state);
   invalidate;
  end;
 end;

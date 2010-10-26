@@ -538,6 +538,8 @@ procedure clipinrect1(var rect: rectty; const boundsrect: rectty); overload;
 
 function pointinrect(const point: pointty; const rect: rectty): boolean;
      //true if point is in rect
+function pointinellipse(const point: pointty; const rect: rectty): boolean;
+     //true if point is in ellipse circumscribed by rect
 function rectinrect(const inner,outer: rectty): boolean;
      //true if inner in outer
 
@@ -1083,6 +1085,19 @@ function pointinrect(const point: pointty; const rect: rectty): boolean;
 begin
  result:= (point.x >= rect.x) and (point.x < rect.x + rect.cx) and
           (point.y >= rect.y) and (point.y < rect.y + rect.cy);
+end;
+
+function pointinellipse(const point: pointty; const rect: rectty): boolean;
+     //true if point is in ellipse circumscribed by rect
+var
+ x1,y1: real;
+ x0q,y0q: real;
+begin
+ x1:= point.x - rect.x - rect.cx div 2;
+ y1:= point.y - rect.y - rect.cy div 2;
+ x0q:= rect.cx*rect.cx;
+ y0q:= rect.cy*rect.cy;
+ result:= (x1*x1*y0q+y1*y1*x0q)*4 <= x0q*y0q;
 end;
 
 function fitsize(const asize: sizety; const maxsize: sizety): sizety;

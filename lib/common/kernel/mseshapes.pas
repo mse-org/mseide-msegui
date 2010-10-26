@@ -57,6 +57,7 @@ type
   imagecheckedoffset: integer;
   face: tcustomface;
   frame: tcustomframe;
+  mouseframe: framety;
   tag: integer;
   doexecute: tagmouseprocty;
  end;
@@ -97,6 +98,7 @@ function updatewidgetshapestate(var info: shapeinfoty; const widget: twidget;
                     const aframe: tcustomframe = nil): boolean;
 function findshapeatpos(const infoar: shapeinfoarty; const apos: pointty;
                const rejectstates: shapestatesty = [shs_disabled,shs_invisible]): integer;
+function pointinshape(const pos: pointty; const info: shapeinfoty): boolean;
 procedure initshapeinfo(var ainfo: shapeinfoty);
 
 procedure actioninfotoshapeinfo(var actioninfo: actioninfoty;
@@ -104,7 +106,7 @@ procedure actioninfotoshapeinfo(var actioninfo: actioninfoty;
 procedure actioninfotoshapeinfo(const sender: twidget; var actioninfo: actioninfoty;
                                     var shapeinfo: shapeinfoty); overload;
 procedure frameskinoptionstoshapestate(const aframe: tcustomframe;
-                                    var dest: shapestatesty);
+                                    var dest: shapeinfoty{shapestatesty});
 function shapestatetoframestate(const aindex: integer;
           const ashapes: shapeinfoarty): framestateflagsty;
 
@@ -129,26 +131,36 @@ var
  buttontab: tcustomtabulators;
 
 procedure frameskinoptionstoshapestate(const aframe: tcustomframe;
-                                    var dest: shapestatesty);
+                                    var dest: shapeinfoty{shapestatesty});
 begin
  if aframe <> nil then begin
-  updatebit(longword(dest),ord(shs_flat),fso_flat in aframe.optionsskin);
-  updatebit(longword(dest),ord(shs_noanimation),fso_noanim in aframe.optionsskin);
-  updatebit(longword(dest),ord(shs_nomouseanimation),
+  updatebit(longword(dest.state),ord(shs_flat),fso_flat in aframe.optionsskin);
+  updatebit(longword(dest.state),ord(shs_noanimation),fso_noanim in aframe.optionsskin);
+  updatebit(longword(dest.state),ord(shs_nomouseanimation),
                                     fso_nomouseanim in aframe.optionsskin);
-  updatebit(longword(dest),ord(shs_noclickanimation),
+  updatebit(longword(dest.state),ord(shs_noclickanimation),
                                     fso_noclickanim in aframe.optionsskin);
-  updatebit(longword(dest),ord(shs_nofocusanimation),
+  updatebit(longword(dest.state),ord(shs_nofocusanimation),
                                     fso_nofocusanim in aframe.optionsskin);
-  updatebit(longword(dest),ord(shs_showfocusrect),
+  updatebit(longword(dest.state),ord(shs_showfocusrect),
                               not(fso_nofocusrect in aframe.optionsskin));
-  updatebit(longword(dest),ord(shs_showdefaultrect),
+  updatebit(longword(dest.state),ord(shs_showdefaultrect),
                               not (fso_nodefaultrect in aframe.optionsskin));
+  updatebit(longword(dest.state),ord(shs_noinnerrect),
+                             fso_noinnerrect in aframe.optionsskin);
+  if shs_noinnerrect in dest.state then begin
+   dest.mouseframe:= aframe.framei;
+  end
+  else begin
+   dest.mouseframe:= nullframe;
+  end;
  end
  else begin
-//  dest:= (dest - [shs_flat,shs_noanimation,shs_nomouseanimation,
-//                  shs_noclickanimation,shs_nofocusanimation]) + 
-//                  [shs_showfocusrect,shs_showdefaultrect];
+  dest.state:= (dest.state - [shs_flat,shs_noanimation,shs_nomouseanimation,
+                  shs_noclickanimation,shs_nofocusanimation,
+                  shs_noinnerrect]) + 
+                  [shs_showfocusrect,shs_showdefaultrect];
+  dest.mouseframe:= nullframe;
  end; 
 end;
 
@@ -319,6 +331,16 @@ begin
  end;
 end;
 
+function pointinshape(const pos: pointty; const info: shapeinfoty): boolean;
+begin
+ if shs_ellipsemouse in info.state then begin
+  result:= pointinellipse(pos,deflaterect(info.ca.dim,info.mouseframe));
+ end
+ else begin
+  result:= pointinrect(pos,deflaterect(info.ca.dim,info.mouseframe));
+ end;
+end;
+
 function updatemouseshapestate(var info: shapeinfoty;
                  const mouseevent: mouseeventinfoty;
                  const widget: twidget; const aframe: tcustomframe;
@@ -347,11 +369,11 @@ begin
      ek_clientmouseleave,ek_mouseleave: begin
       if (eventkind = ek_mouseleave) or not (shs_widgetorg in state) then begin
        state:= state - [shs_mouse,shs_clicked];
-//       updateshapemoveclick(infoarpo,false);
       end;
      end;
      ek_mousemove,ek_mousepark: begin
-      if pointinrect(pos,ca.dim) then begin
+//      if pointinrect(pos,ca.dim) then begin
+      if pointinshape(pos,info) then begin
        state:= state + [shs_mouse];
        if (ss_left in shiftstate) and
          (state * [shs_disabled,shs_moveclick] = [shs_moveclick]) then begin
@@ -400,7 +422,6 @@ begin
          else begin
           widget.invalidaterect(ca.dim);
          end;
-//         widget.invalidaterect(ca.dim);
         end;
         doexecute(tag,mouseevent);
         exit;
@@ -414,7 +435,7 @@ begin
       if canclick and (button = mb_left) and 
       (not(shs_disabled in state) or 
              (widget <> nil) and (csdesigning in widget.componentstate)) 
-             and pointinrect(pos,ca.dim) then begin
+             and pointinshape(pos,info) then begin
        state:= state + [shs_clicked,shs_moveclick];
        updateshapemoveclick(infoarpo,true);
       end;
@@ -531,7 +552,6 @@ begin
   dec(arect.cy,awidth);
  end;
 end;
- 
 
 procedure draw3dframe(const canvas: tcanvas; const arect: rectty; level: integer;
                        colorinfo: framecolorinfoty; const hiddenedges: edgesty);
@@ -917,7 +937,7 @@ function drawbuttonimage(const canvas: tcanvas; const info: shapeinfoty;
 var
  align1: alignmentsty;
  rect1: rectty;
- int1,int2: integer;
+ int1: integer;
  reg1: regionty;
  co1: colorty;
 begin
@@ -1089,10 +1109,15 @@ begin
    //todo: optimize, move settings to tcustomstepframe updatestate
    canvas.save;
    info.frame.paintbackground(canvas,info.ca.dim);
-   canvas.restore;   
-   frame1:= info.frame.innerframe;
-   deflaterect1(info.ca.dim,frame1);
-   frameskinoptionstoshapestate(info.frame,info.state);
+   canvas.restore;
+   if not (fso_noinnerrect in info.frame.optionsskin) then begin
+    frame1:= info.frame.innerframe;
+    deflaterect1(info.ca.dim,frame1);
+   end
+   else begin
+    frame1:= nullframe;
+   end;
+   frameskinoptionstoshapestate(info.frame,info);
   end; 
   if drawbuttonframe(canvas,info,rect1) then begin
    info.ca.imagepos:= ip_center;
@@ -1209,13 +1234,15 @@ begin
    if frame <> nil then begin 
     //todo: optimize, move settings to tcustomstepframe updatestate
     rect3:= ca.dim;
-    deflaterect1(ca.dim,frame.framei);
+    if not (fso_noinnerrect in frame.optionsskin) then begin
+     deflaterect1(ca.dim,frame.framei);
+    end;
     canvas.save;
     frame.paintbackground(canvas,info.ca.dim);
     canvas.restore;   
     frame1:= frame.paintframe;
     deflaterect1(ca.dim,frame1);
-    frameskinoptionstoshapestate(frame,info.state);
+    frameskinoptionstoshapestate(frame,info);
    end;     
    if drawbuttonframe(canvas,info,rect1) then begin
     if ca.imagepos = ip_right then begin

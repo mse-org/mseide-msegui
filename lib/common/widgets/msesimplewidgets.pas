@@ -181,8 +181,6 @@ type
                          write settextflags default defaultcaptiontextflags;
    property imagepos: imageposty read finfo.ca.imagepos write setimagepos
                               default ip_center;
-//   property captionpos: captionposty read finfo.ca.captionpos write setcaptionpos
-//                              default cp_center;
    property captiondist: integer read finfo.ca.captiondist write setcaptiondist
                             default defaultshapecaptiondist;
    property imagelist: timagelist read getimagelist write setimagelist
@@ -192,6 +190,7 @@ type
    property imagenrdisabled: imagenrty read factioninfo.imagenrdisabled
                               write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
+
    property imagedist: integer read finfo.ca.imagedist write setimagedist default 0;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
                       stored iscolorglyphstored default cl_glyph;
@@ -210,8 +209,6 @@ type
    property enabled stored false;
    property state: actionstatesty read getstate write setstate
             stored isstatestored  default [];
-//   property visible stored false;
-//   property enabled stored false;
  end;
 
  tbutton = class(tcustombutton)
@@ -271,11 +268,8 @@ type
    ffacedisabled: tcustomface;
    ffacemouse: tcustomface;
    ffaceclicked: tcustomface;
-//   fonbeforepaint: painteventty;
-//   fonpaintbackground: painteventty;
-//   fonpaint: painteventty;
-//   fonafterpaint: painteventty;
-//   fonmouseevent: mouseeventty;
+   fimagenrmouse: imagenrty;
+   fimagenrclicked: imagenrty;
    function getfaceactive: tcustomface;
    procedure setfaceactive(const avalue: tcustomface);
    function getfacemouse: tcustomface;
@@ -288,20 +282,23 @@ type
    procedure createfaceclicked;
    function getfacedisabled: tcustomface;
    procedure setfacedisabled(const avalue: tcustomface);
+   procedure setimagenrmouse(const avalue: imagenrty);
+   procedure setimagenrclicked(const avalue: imagenrty);
   protected
    function getactface: tcustomface; override;
-//   procedure dobeforepaint(const canvas: tcanvas); override;
-//   procedure dopaintbackground(const canvas: tcanvas); override;
-//   procedure doonpaint(const canvas: tcanvas); override;
-//   procedure doafterpaint(const canvas: tcanvas); override;
-//   procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure dopaint(const canvas: tcanvas); override;
   public
+   constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-  published
    property faceactive: tcustomface read getfaceactive write setfaceactive;
    property facemouse: tcustomface read getfacemouse write setfacemouse;
    property faceclicked: tcustomface read getfaceclicked write setfaceclicked;
    property facedisabled: tcustomface read getfacedisabled write setfacedisabled;
+   property imagenrmouse: imagenrty read fimagenrmouse 
+                                        write setimagenrmouse default -1;
+   property imagenrclicked: imagenrty read fimagenrclicked
+                                        write setimagenrclicked default -1;
+  published
    property onmouseevent;
    property onbeforepaint;
    property onpaintbackground;
@@ -335,6 +332,8 @@ type
    property imagelist;
    property imagenr;
    property imagenrdisabled;
+   property imagenrmouse;
+   property imagenrclicked;
    property imagedist;
    property colorglyph;
    property options;
@@ -1205,7 +1204,9 @@ begin
  end;
  inc(asize.cx,8+fautosize_cx);
  inc(asize.cy,6+fautosize_cy);
- innertopaintsize(asize);
+ if not (shs_noinnerrect in finfo.state) then begin
+  innertopaintsize(asize);
+ end;
 end;
 
 procedure tcustombutton.clientrectchanged;
@@ -1263,13 +1264,14 @@ begin
  setactionshortcuts1(iactionlink(self),avalue);
 end;
 
-{
-function tcustombutton.getobjectlink: iobjectlink;
-begin
- result:= iactionlink(self);
-end;
-}
 { tcustomrichbutton }
+
+constructor tcustomrichbutton.create(aowner: tcomponent);
+begin
+ fimagenrmouse:= -1;
+ fimagenrclicked:= -1;
+ inherited;
+end;
 
 destructor tcustomrichbutton.destroy;
 begin
@@ -1278,6 +1280,22 @@ begin
  ffacedisabled.free;
  ffacemouse.free;
  ffaceclicked.free;
+end;
+
+procedure tcustomrichbutton.setimagenrmouse(const avalue: imagenrty);
+begin
+ if fimagenrmouse <> avalue then begin
+  fimagenrmouse:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomrichbutton.setimagenrclicked(const avalue: imagenrty);
+begin
+ if fimagenrclicked <> avalue then begin
+  fimagenrclicked:= avalue;
+  invalidate;
+ end;
 end;
 
 function tcustomrichbutton.getfaceactive: tcustomface;
@@ -1377,6 +1395,23 @@ begin
   end;
  end;
 end;
+
+procedure tcustomrichbutton.dopaint(const canvas: tcanvas);
+begin
+ finfo.ca.imagenr:= factioninfo.imagenr;
+ if shs_mouse in finfo.state then begin
+  if fimagenrmouse <> -1 then begin
+   finfo.ca.imagenr:= fimagenrmouse;
+  end;
+ end;
+ if shs_clicked in finfo.state then begin
+  if fimagenrclicked <> -1 then begin
+   finfo.ca.imagenr:= fimagenrclicked;
+  end;
+ end;
+ inherited;
+end;
+
 {
 procedure tcustomrichbutton.dobeforepaint(const canvas: tcanvas);
 begin
