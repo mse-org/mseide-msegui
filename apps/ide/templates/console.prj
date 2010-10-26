@@ -95,7 +95,7 @@ options=99
  sortdescent7=0
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=0
+ index=1
  [projectoptionsfo.exceptionsgrid]
  propcolwidthref=567
  width0=47
@@ -182,7 +182,7 @@ downloadalways=0
 startupbkpt=0
 startupbkpton=0
 gdbsimulator=0
-gdbprocessor=i386
+gdbprocessor=Auto
 gdbservercommand=
 gdbservercommandattach=
 gdbserverwait=0
