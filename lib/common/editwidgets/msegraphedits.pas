@@ -705,9 +705,13 @@ type
    fimagenr: integer;
    fimagenrdisabled: integer;
    fimageoffsetdisabled: integer;
+   fimageoffsetmouse: integer;
+   fimageoffsetclicked: integer;
+   fvaluecaptions: tmsestringarrayprop;
    procedure setcolorglyph(const avalue: colorty);
    function iscolorglyphstored: boolean;
    procedure setvaluefaces(const avalue: tvaluefacearrayprop);
+   procedure setvaluecaptions(const avalue: tmsestringarrayprop);
    procedure setcaption(const avalue: captionty);
    function iscaptionstored: boolean;
    function getimagelist: timagelist;
@@ -745,6 +749,8 @@ type
    procedure writesc(writer: twriter);
    procedure readsc1(reader: treader);
    procedure writesc1(writer: twriter);
+   procedure setimageoffsetmouse(const avalue: integer);
+   procedure setimageoffsetclicked(const avalue: integer);
   protected
    finfo: shapeinfoty;
    factioninfo: actioninfoty;
@@ -793,6 +799,8 @@ type
    procedure initnewcomponent(const ascale: real); override;
    property optionswidget default defaultoptionswidget - [ow_mousefocus];
    property valuefaces: tvaluefacearrayprop read fvaluefaces write setvaluefaces;
+   property valuecaptions: tmsestringarrayprop read fvaluecaptions
+                                                  write setvaluecaptions;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property action: tcustomaction read factioninfo.action write setaction;
    property caption: captionty read factioninfo.captiontext write setcaption stored iscaptionstored;
@@ -830,6 +838,10 @@ type
    property imageoffset: integer read fimageoffset write setimageoffset default 0;
    property imageoffsetdisabled: integer read fimageoffsetdisabled
                                  write setimageoffsetdisabled default 0;
+   property imageoffsetmouse: integer read fimageoffsetmouse 
+                                       write setimageoffsetmouse default 0;
+   property imageoffsetclicked: integer read fimageoffsetclicked 
+                                       write setimageoffsetclicked default 0;
    property imagenums: tintegerarrayprop read fimagenums write setimagenums;
 
    property options;
@@ -852,6 +864,7 @@ type
    property optionswidget;
    property optionsskin;
    property valuefaces;
+   property valuecaptions;
    property font;
 
    property action;
@@ -872,6 +885,8 @@ type
 
    property imageoffset;
    property imageoffsetdisabled;
+   property imageoffsetmouse;
+   property imageoffsetclicked;
    property imagenums;
    property onsetvalue;
    property value;
@@ -2789,6 +2804,7 @@ begin
  fmin:= -1;
  fmax:= 0;
  fvaluefaces:= tvaluefacearrayprop.create(self);
+ fvaluecaptions:= tmsestringarrayprop.create;
  optionswidget:= defaultoptionswidget - [ow_mousefocus];
  initshapeinfo(finfo);
  finfo.ca.imagepos:= ip_center;
@@ -2803,6 +2819,7 @@ end;
 destructor tcustomdatabutton.destroy;
 begin
  fvaluefaces.free;
+ fvaluecaptions.free;
  fimagenums.free;
  inherited;
 end;
@@ -3001,6 +3018,14 @@ begin
    end;
   end
   else begin
+   if shs_clicked in state then begin
+    inc(imagenr,fimageoffsetclicked);
+   end
+   else begin
+    if shs_mouse in state then begin
+     inc(imagenr,fimageoffsetmouse);
+    end
+   end;
    if imagenr >= 0 then begin
     inc(imagenr,fimageoffset);
    end;
@@ -3012,6 +3037,17 @@ procedure tcustomdatabutton.paintglyph(const canvas: tcanvas;
                 const acolorglyph: colorty; const avalue;
                 const arect: rectty);
                
+ function actualcaption(const aindex: integer): richstringty;
+ begin
+  if (aindex >= 0) and (aindex < fvaluecaptions.count) then begin
+   result.text:= fvaluecaptions[aindex];
+   result.format:= nil;
+  end
+  else begin
+   result:= factioninfo.caption1;
+  end;
+ end;
+ 
  function actualface(const aindex: integer): tface;
  begin
   if (aindex >= 0) and (aindex < fvaluefaces.count) then begin
@@ -3029,6 +3065,7 @@ begin
  finfo.ca.colorglyph:= acolorglyph;
  finfo.imagenrdisabled:= fimagenrdisabled;
  if (@avalue <> nil) then begin
+  finfo.ca.caption:= actualcaption(integer(avalue));
   finfo.face:= actualface(integer(avalue));
   statebefore:= finfo.state;
   dimbefore:= finfo.ca.dim;
@@ -3049,6 +3086,7 @@ begin
   finfo.ca.dim:= dimbefore;
  end
  else begin
+  finfo.ca.caption:= actualcaption(fvalue);
   finfo.face:= actualface(fvalue);
   setactualimagenr(fvalue);
   drawbutton(canvas,finfo);
@@ -3079,6 +3117,11 @@ end;
 procedure tcustomdatabutton.setvaluefaces(const avalue: tvaluefacearrayprop);
 begin
  fvaluefaces.assign(avalue);
+end;
+
+procedure tcustomdatabutton.setvaluecaptions(const avalue: tmsestringarrayprop);
+begin
+ fvaluecaptions.assign(avalue);
 end;
 
 procedure tcustomdatabutton.setcaption(const avalue: captionty);
@@ -3191,6 +3234,22 @@ procedure tcustomdatabutton.setimageoffsetdisabled(const avalue: integer);
 begin
  if fimageoffsetdisabled <> avalue then begin
   fimageoffsetdisabled := avalue;
+  formatchanged;
+ end;
+end;
+
+procedure tcustomdatabutton.setimageoffsetmouse(const avalue: integer);
+begin
+ if fimageoffsetmouse <> avalue then begin
+  fimageoffsetmouse := avalue;
+  formatchanged;
+ end;
+end;
+
+procedure tcustomdatabutton.setimageoffsetclicked(const avalue: integer);
+begin
+ if fimageoffsetclicked <> avalue then begin
+  fimageoffsetclicked := avalue;
   formatchanged;
  end;
 end;

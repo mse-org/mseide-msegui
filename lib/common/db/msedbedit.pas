@@ -617,6 +617,7 @@ type
    property optionswidget;
    property optionsskin;
    property valuefaces;
+   property valuecaptions;
    property font;
    property action;
    property caption;
@@ -635,6 +636,8 @@ type
    property onexecute;
    property imageoffset;
    property imageoffsetdisabled;
+   property imageoffsetmouse;
+   property imageoffsetclicked;
    property imagenums;
    property onsetvalue;
    property valuedefault;

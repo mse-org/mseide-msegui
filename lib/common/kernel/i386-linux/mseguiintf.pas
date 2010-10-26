@@ -5581,8 +5581,10 @@ begin
     end;
    end;
    with sattributes do begin
-    clip_x_origin:= ax;
-    clip_y_origin:= ay;
+//    clip_x_origin:= ax;
+//    clip_y_origin:= ay;
+    clip_x_origin:= 0;
+    clip_y_origin:= 0;
     if (mask <> nil) and not colormask then begin
      clip_mask:= tsimplebitmap1(mask).handle;
     end
