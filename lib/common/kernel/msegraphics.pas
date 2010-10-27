@@ -88,7 +88,7 @@ type
   width: integer;
   pitchoptions,familyoptions,antialiasedoptions{,xcoreoptions}: fontoptionsty;
   style: fontstylesty;                    //fs_bold,fs_italic
-  ascent,descent,linespacing,caretshift: integer;
+  ascent,descent,linespacing,caretshift,linewidth: integer;
   platformdata: fontdatapty; //platform dependent
  end;
  pfontdataty = ^fontdataty;
@@ -395,6 +395,7 @@ type
    procedure setxscale(const avalue: real);
    
    procedure readcolorshadow(reader: treader);
+   function getlinewidth: integer;
   protected
    finfo: fontinfoty;
    fhandlepo: ^fontnumty;
@@ -418,6 +419,7 @@ type
    property descent: integer read getdescent;
    property glyphheight: integer read getglyphheight; //ascent + descent
    property lineheight: integer read getlineheight;
+   property linewidth: integer read getlinewidth;
    property caretshift: integer read getcaretshift;
    property onchange: notifyeventty read fonchange write fonchange;
    
@@ -633,6 +635,8 @@ type
    procedure internaldrawtext(var info); virtual;
                        //info = drawtextinfoty
    function createfont: tcanvasfont; virtual;
+   procedure drawfontline(const startpoint,endpoint: pointty); 
+                           //draws line with font color 
   public
    drawinfopo: pointer; //used to transport additional drawing information
    constructor create(const user: tobject; const intf: icanvas);
@@ -2500,6 +2504,11 @@ function tfont.getfont(var drawinfo: drawinfoty): boolean;
 begin
  gdi_lock;
  result:= gui_getfont(drawinfo);
+ if result then begin
+  with drawinfo.getfont.fontdata^ do begin
+   linewidth:= height div (9 * (1 shl fontsizeshift));
+  end;
+ end;
  gdi_unlock;
 end;
 
@@ -2588,6 +2597,11 @@ begin
   end;
  end;
  result:= result + finfopo^.extraspace;
+end;
+
+function tfont.getlinewidth: integer;
+begin
+ result:= getdatapo^.linewidth;
 end;
 
 function tfont.getcaretshift: integer;
@@ -4336,6 +4350,40 @@ begin
   end;
   font1.rotation:= 0;
  end;
+end;
+
+procedure tcanvas.drawfontline(const startpoint,endpoint: pointty); 
+                           //draws line with font color 
+var
+ linewidthbefore: integer;
+ capstylebefore: capstylety;
+ pt1,pt2: pointty;
+begin
+ linewidthbefore:= linewidth;
+ capstylebefore:= capstyle;
+ linewidth:= font.linewidth;
+ capstyle:= cs_butt;
+ 
+ with fvaluepo^.font do begin
+  if (shadow_color <> cl_none) then begin
+   pt1.x:= startpoint.x + shadow_shiftx;     
+   pt1.y:= startpoint.y + shadow_shifty;     
+   pt2.x:= endpoint.x + shadow_shiftx;     
+   pt2.y:= endpoint.y + shadow_shifty;     
+   drawline(pt1,pt2,shadow_color);
+  end;
+  if (gloss_color <> cl_none) then begin
+   pt1.x:= startpoint.x + gloss_shiftx;     
+   pt1.y:= startpoint.y + gloss_shifty;     
+   pt2.x:= endpoint.x + gloss_shiftx;     
+   pt2.y:= endpoint.y + gloss_shifty;     
+   drawline(pt1,pt2,gloss_color);
+  end;
+ end;
+ 
+ drawline(startpoint,endpoint,font.color);
+ linewidth:= linewidthbefore;
+ capstyle:= capstylebefore;
 end;
 
 procedure tcanvas.drawstring(const atext: msestring; const apos: pointty;

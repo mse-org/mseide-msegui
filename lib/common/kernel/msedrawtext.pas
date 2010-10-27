@@ -28,7 +28,8 @@ type
                  //order fix, used in msepostscriptprinter
 //               tf_forcealignment, //do not use default alignment for buttons
                tf_clipi,tf_clipo,
-               tf_grayed,tf_wordbreak,tf_softhyphen,tf_noselect,
+               tf_grayed,tf_wordbreak,tf_softhyphen,
+               tf_noselect,tf_underlineselect,
                tf_ellipseleft,{tf_ellipsemid,}tf_ellipseright,tf_tabtospace,
                tf_force);
  textflagsty = set of textflagty;
@@ -875,7 +876,7 @@ var
    end;
    xbefore:= x;
    
-   with info,canvas,layoutinfo,lineinfos[row] do begin
+   with info,tcanvas1(canvas),layoutinfo,lineinfos[row] do begin
     if {(tabulators = nil) or}
              (tabchars = nil) then begin
      drawstring(@text.text[astart],acount,pos,nil,grayed,rot);
@@ -886,7 +887,8 @@ var
     else begin
      int2:= astart - 1;
      for int4:= 0 to high(tabchars) do begin
-      if (tabchars[int4] >= astart) and (tabchars[int4] < astart + acount) then begin
+      if (tabchars[int4] >= astart) and 
+                             (tabchars[int4] < astart + acount) then begin
        drawstring(@text.text[int2+1],tabchars[int4] - int2 - 1,pos,nil,
                                                                   grayed,rot);
        for int2:= int2 to tabchars[int4] - 1 do begin
@@ -933,6 +935,27 @@ var
     if not grayed then begin
      if fs_underline in canvas.font.style then begin
       if xyswapped then begin
+       drawfontline(makepoint(pos.x+underline,xbefore),
+                makepoint(pos.x+underline,x-1));
+      end
+      else begin
+       drawfontline(makepoint(xbefore,pos.y+underline),
+                makepoint(x-1,pos.y+underline));
+      end;
+     end;
+     if fs_strikeout in font.style then begin
+      if xyswapped then begin
+       drawfontline(makepoint(pos.x+layoutinfo.strikeout,xbefore),
+                 makepoint(pos.x+layoutinfo.strikeout,x-1));
+      end
+      else begin
+       drawfontline(makepoint(xbefore,pos.y+layoutinfo.strikeout),
+                 makepoint(x-1,pos.y+layoutinfo.strikeout));
+      end;
+     end;
+     {
+     if fs_underline in canvas.font.style then begin
+      if xyswapped then begin
        drawline(makepoint(pos.x+underline,xbefore),
                 makepoint(pos.x+underline,x-1),font.color);
       end
@@ -951,6 +974,7 @@ var
                  makepoint(x-1,pos.y+layoutinfo.strikeout),font.color);
       end;
      end;
+     }
     end;
     if layoutinfo.xyswapped then begin
      pos.y:= x;
@@ -982,27 +1006,40 @@ var
           not {$ifdef FPC}longword{$else}byte{$endif}(newinfos)) + style.fontstyle;
     font.style:= afontstyle + overridefontstyle;
    end;
-   if (ni_selected in newinfos) then begin
-    if (fs_selected in style.fontstyle) and not (tf_noselect in flags) then begin
-     font.color:= cl_selectedtext;
-     font.colorbackground:= cl_selectedtextbackground;
+   if (ni_selected in newinfos) and not (tf_noselect in flags)then begin
+    if tf_underlineselect in flags then begin
+     if not (fs_underline in style.fontstyle) then begin
+      if fs_selected in style.fontstyle then begin
+       font.style:= font.style + [fs_underline];
+      end
+      else begin
+       font.style:= font.style - [fs_underline];
+      end;
+     end;
     end
     else begin
-     if style.fontcolor = 0 then begin
-      font.color:= defaultcolor;
+     if (fs_selected in style.fontstyle) then begin
+      font.color:= cl_selectedtext;
+      font.colorbackground:= cl_selectedtextbackground;
      end
      else begin
-      font.color:= not style.fontcolor;
-     end;
-     if style.colorbackground = 0 then begin
-      font.colorbackground:= defaultcolorbackground;
-     end
-     else begin
-      font.colorbackground:= not style.colorbackground;
+      if style.fontcolor = 0 then begin
+       font.color:= defaultcolor;
+      end
+      else begin
+       font.color:= not style.fontcolor;
+      end;
+      if style.colorbackground = 0 then begin
+       font.colorbackground:= defaultcolorbackground;
+      end
+      else begin
+       font.colorbackground:= not style.colorbackground;
+      end;
      end;
     end;
    end;
-   if not (fs_selected in style.fontstyle) then begin
+   if not (fs_selected in style.fontstyle) or 
+                                  (tf_underlineselect in flags) then begin
     if ni_fontcolor in newinfos then begin
      if style.fontcolor = 0 then begin
       font.color:= defaultcolor;
