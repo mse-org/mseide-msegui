@@ -269,7 +269,7 @@ type
    fstartupbreakpoint1: integer;
    fstoponexception: boolean;
    ferrormessage: string;
-   fprocid: procidty;
+   fprocid: int64;
    {$ifdef mswindows}
    finterruptthreadid: longword;
    {$endif}
