@@ -70,27 +70,27 @@ const
   '&Copiar',                    //sc_Copy   // hotkeys       //
   'C&ortar',                    //sc_Cut    //               //
   '&Pegar',                     //sc_Paste ///               // hotkeys
-  '&Insertar fila',                //sc_insert_row ///          //
-  '&A'#241'adir fila',                //sc_append_row  // hotkeys  //
-  '&Borrar fila',                //sc_delete_row ///         ///
+  '&Insertar fila',             //sc_insert_row ///          //
+  '&A'#241'adir fila',          //sc_append_row  // hotkeys  //
+  '&Borrar fila',               //sc_delete_row ///         ///
 
-  '&Directorio',                //sc_Dir               /// 
-  '&Home',                      //sc_home               //
-  '&Subir',                     //sc_Up                 //
-  'N&uevo dir.',                //sc_New_dir            // hotkeys
+  '&Carpetas',                //sc_Dir               /// 
+  '&Principal',                      //sc_home               //
+  '&Subir un nivel',                     //sc_Up                 //
+  'Crear carpeta',                //sc_New_dir            // hotkeys
   'N&ombre',                    //sc_Name               //
   '&Mostrar archivos ocultos',  //sc_Show_hidden_files  //
   '&Filtro',                    //sc_Filter            ///   
   'Guardar',                    //sc_save 
   'Abrir',                      //sc_open
   'Nombre',                     //sc_name1
-  'Crear un directorio nuevo',  //sc_create_new_directory
+  'Crear una carpeta nueva',  //sc_create_new_directory
   'Archivo',                    //sc_file
   'existe, '#191'quiere sobreescribirlo?', //sc_exists_overwrite
   'ADVERTENCIA',                //sc_warningupper
   'ERROR',                      //sc_errorupper
   'no existe',                  //sc_does_not_exist
-  'No puedo leer el directorio',       //sc_can_not_read_directory
+  'No puedo leer la carpeta',       //sc_can_not_read_directory
   'Formato gr'#225'fico no soportado', //sc_graphic_not_supported
   'Error de formato gr'#225'fico',     //sc_graphic_format_error
   'MS Bitmap',                         //sc_MS_Icon
@@ -123,11 +123,11 @@ const
   'Filtro apagado',                    //sc_filter_off
   'Vertical',                          //sc_portrait print orientation
   'Apaisado',                          //sc_landscape print orientation
-  #191'Borrar fila?',                       //sc_Delete_row_question
-  'filas seleccionadas?',                    //sc_selected_rows
-  'un elemento solamente',                   //sc_Single_item_only 
-  'Copiar Celdas',          //sc_Copy_Cells
-  'Pegar Celdas'          //sc_Paste_Cells
+  #191'Borrar fila?',                  //sc_Delete_row_question
+  'filas seleccionadas?',              //sc_selected_rows
+  'un elemento solamente',             //sc_Single_item_only 
+  'Copiar Celdas',                     //sc_Copy_Cells
+  'Pegar Celdas'                       //sc_Paste_Cells
 );
     
 function delete_n_selected_rows(const params: array of const): msestring;
