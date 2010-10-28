@@ -466,7 +466,7 @@ type
    function attach(const procid: longword; out info: stopinfoty): gdbresultty;
    function attachtarget(out info: stopinfoty): gdbresultty;
    function detach: gdbresultty;
-   function getprocid(var aprocid: procidty): boolean;
+   function getprocid(var aprocid: int64): boolean;
                 //true if ok
    function clearenvvars: gdbresultty;
    function setenvvar(const aname,avalue: string): gdbresultty;
@@ -976,7 +976,7 @@ begin
 // consoleoutput(text);
 end;
 
-function tgdbmi.getprocid(var aprocid: procidty): boolean;
+function tgdbmi.getprocid(var aprocid: int64): boolean;
 var
  ar1,ar2: stringarty;
  int1: integer;
@@ -994,7 +994,7 @@ begin
      ar1:= nil;
      splitstring(ar2[high(ar2)],ar1,'.');
      if high(ar1) > 0 then begin
-      if trystrtointvalue(ar1[0],longword(aprocid)) then begin
+      if trystrtointvalue64(ar1[0],qword(aprocid)) then begin
        result:= true;
       end;
      end;
@@ -1009,14 +1009,14 @@ begin
       str1:= ar2[high(ar2)];
       if (length(str1) > 2) and (str1[length(str1)-1] = ')') then begin
        str1:= copy(str1,1,length(str1) - 2);
-       if trystrtointvalue(str1,longword(aprocid)) then begin
+       if trystrtointvalue64(str1,qword(aprocid)) then begin
         result:= true;
        end;
       end
       else begin
        if str1 <> '' then begin
         ar2:= splitstring(str1,'.');
-        if trystrtointvalue(ar2[0],longword(aprocid)) then begin
+        if trystrtointvalue64(ar2[0],qword(aprocid)) then begin
          result:= true;
         end;
        end;
