@@ -926,12 +926,15 @@ var
 begin
  statfile1:= tstatfile.create(nil);
  dialog:= tfiledialog.create(nil);
+ dialog.name:= 'filedialog'; //for statvarname
  try
   aformat:= '';
   afilename:= '';
   statfile1.options:= [sfo_memory];
   statfile1.filename:= bmpfiledialogstatname;
   with dialog,controller do begin
+   statfile1.options:= [sfo_memory];
+   statfile1.filename:= bmpfiledialogstatname;
    filterlist.asarraya:= graphicfilefilternames;
    filterlist.asarrayb:= graphicfilemasks;
    captionopen:= 'Open image file';
