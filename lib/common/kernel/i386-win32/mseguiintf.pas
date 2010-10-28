@@ -726,20 +726,10 @@ begin
    wo1:= wo1 and not 
     (ws_border or ws_dlgframe or ws_overlapped or ws_thickframe) or (ws_popup);
    setwindowlong(id,gwl_style,wo1);
-   (*
-   placement.length:= sizeof(placement);
-   if getwindowplacement(id,{$ifndef FPC}@{$endif}placement) then begin
-    with placement.rcnormalposition do begin
-     setwindowlong(id,loffs,left);
-     setwindowlong(id,toffs,top);
-     setwindowlong(id,roffs,right);
-     setwindowlong(id,boffs,bottom);
-    end;
-   end;
-   *)
    setwindowpos(id,0,0,0,getsystemmetrics(sm_cxscreen),
                       getsystemmetrics(sm_cyscreen),
-                      swp_framechanged {or swp_nomove or swp_nosize} or swp_nozorder);
+                      swp_framechanged {or swp_nomove or swp_nosize} 
+                      or swp_nozorder or swp_noownerzorder or swp_noactivate);
   end;
   if visible then begin
    showwindow(id,sw_shownoactivate);
@@ -750,10 +740,8 @@ begin
    wo1:= getwindowlong(id,stylebackupoffs);
    setwindowlong(id,gwl_style,getwindowlong(id,stylebackupoffs));
    setwindowpos(id,0,0,0,0,0,
-           swp_framechanged or swp_nomove or swp_nosize or swp_nozorder);
-//   setwindowpos(id,0,getwindowlong(id,loffs),getwindowlong(id,toffs),
-//                     getwindowlong(id,roffs),getwindowlong(id,boffs),
-//           swp_framechanged {or swp_nomove or swp_nosize} or swp_nozorder);
+           swp_framechanged or swp_nomove or swp_nosize or swp_nozorder or
+           swp_noownerzorder or swp_noactivate);
    setwindowlong(id,flagsoffs,0);
   end;   
   case size of
@@ -770,9 +758,6 @@ begin
   if visible or (size = wsi_minimized) then begin
    showwindow(id,int1);
   end;
-//  if not visible then begin
-//   showwindow(id,sw_hide);
-//  end;
  end;
 end;
 
@@ -4378,21 +4363,50 @@ begin
    exit;
   end;
   wm_destroy: begin
+  {$ifdef mse_debugwindowfocus}
+   debugwindow('wm_destroy ',ahwnd);
+  {$endif}
    windowdestroyed(ahwnd);
    eventlist.add(twindowevent.create(ek_destroy,ahwnd));
   end;
   wm_setfocus: begin
    if (ahwnd = applicationwindow) and (lastfocuswindow <> 0) then begin
-    setfocus(lastfocuswindow);
+   {$ifdef mse_debugwindowfocus}
+    debugwindow('wm_setfocus applicationwindow ',ahwnd);
+   {$endif}
+    if windowvisible(lastfocuswindow) then begin
+     setfocus(lastfocuswindow);
+    end
+    else begin
+     if application.activewindow <> nil then begin
+      setfocus(application.activewindow.winid);
+     end
+     else begin
+      if application.mainwindow <> nil then begin
+       setfocus(application.mainwindow.winid);
+      end;
+     end;
+    end;
    end
    else begin
     if windowvisible(ahwnd) then begin
+    {$ifdef mse_debugwindowfocus}
+     debugwindow('wm_setfocus ',ahwnd);
+    {$endif}
      lastfocuswindow:= ahwnd;
      eventlist.add(twindowevent.create(ek_focusin,ahwnd));
+    end{$ifndef mse_debugwindowfocus};{$endif}
+  {$ifdef mse_debugwindowfocus}
+    else begin
+     debugwindow('wm_setfocus invisible ',ahwnd);
     end;
+  {$endif}
    end;
   end;
   wm_killfocus: begin
+  {$ifdef mse_debugwindowfocus}
+   debugwindow('wm_killfocus ',ahwnd);
+  {$endif}
    eventlist.add(twindowevent.create(ek_focusout,ahwnd));
   end;
   wm_paint: begin
@@ -4831,7 +4845,7 @@ begin
   end
   else begin
    if setwindowpos(child,0,pos.x,pos.y,0,0,swp_nosize or swp_nozorder or
-                                                   swp_noactivate) then begin
+                               swp_noownerzorder or swp_noactivate) then begin
     result:= gue_ok;
    end;
   end;

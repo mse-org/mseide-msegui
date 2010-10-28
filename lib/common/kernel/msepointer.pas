@@ -106,6 +106,7 @@ type
    procedure show;    //restarts timer
    procedure move(const dist: pointty);
    function active: boolean;
+   function visible: boolean;
 
    property origin: pointty read forigin;
    property bounds: rectty read getbounds write setbounds;
@@ -574,6 +575,11 @@ end;
 function tcaret.active: boolean;
 begin
  result:= cas_active in fstate;
+end;
+
+function tcaret.visible: boolean;
+begin
+ result:= fvisible > 0;
 end;
 
 end.

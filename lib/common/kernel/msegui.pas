@@ -12054,7 +12054,7 @@ begin
 end;
 
 procedure twindow.internalactivate(const windowevent: boolean;
-                         const force: boolean = false);
+                                                 const force: boolean = false);
 
  procedure setwinfoc;
  var
@@ -12393,6 +12393,7 @@ var
 begin
  if (ws_visible in fowner.fwidgetstate) then begin
   if not visible then begin
+   checkwindowid;
   {$ifdef mse_debugwindowfocus}
    debugwindow('show ',fwindow.id);
   {$endif}
@@ -14423,7 +14424,19 @@ begin
     tcaret1(fcaret).restore;
    end;
   end;
+ end{$ifndef mse_debugwindowfocus};{$endif}
+{$ifdef mse_debugwindowfocus}
+ else begin
+  if not findwindow(winid,window) then begin
+   debugwriteln('setwindowfocus '+hextostr(winid,8)+' not found');
+  end
+  else begin
+   debugwriteln('setwindowfocus '+window.fowner.name+' '+
+       hextostr(winid,8)+' grouphidden');
+  end;
  end;
+{$endif}
+
 end;
 
 procedure tinternalapplication.unsetwindowfocus(winid: winidty);
@@ -14842,7 +14855,7 @@ gui_flushgdi(true);
            with po1^ do begin
             if (kind = ek_focusin) then begin
             {$ifdef mse_debugwindowfocus}
-             debugwindow('focusout ignored',twindowevent(event).fwinid);
+             debugwindow('focusout ignored ',twindowevent(event).fwinid);
             {$endif}
              bo1:= false; //ignore the event
              break;
