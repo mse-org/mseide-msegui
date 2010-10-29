@@ -1204,6 +1204,7 @@ type
    constructor create(const intf: idbdropdownlist; const aisstringkey: boolean);
    destructor destroy; override;
    procedure dropdown; override;
+   property datalink: tdropdowndatalink read fdatalink;
    property datasource: tdatasource read getdatasource write setdatasource;
    property keyfield: string read getkeyfield write setkeyfield;
    property options default defaultdbdropdownoptions;
