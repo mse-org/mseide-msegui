@@ -22,7 +22,7 @@ uses
 type
  sysshortcutty = (sho_copy,sho_paste,sho_cut,sho_selectall,
                   sho_rowinsert,sho_rowappend,sho_rowdelete,
-                  sho_copycells,sho_pastecells);
+                  sho_copycells,sho_pastecells,sho_groupundo,sho_groupredo);
  sysshortcutaty = array[sysshortcutty] of shortcutty;
  psysshortcutaty = ^sysshortcutaty;
  
@@ -303,7 +303,10 @@ const
 //sho_rowinsert,       sho_rowappend,             sho_rowdelete
   ctrl+ord(key_insert),shift+ctrl+ord(key_insert),ctrl+ord(key_delete),
 //sho_copycells        sho_pastecells
-  (ctrl+shift+ord(key_c)),(ctrl+shift+ord(key_v)));
+  (ctrl+shift+ord(key_c)),(ctrl+shift+ord(key_v)),
+//sho_groupundo,       sho_groupredo
+  ctrl+ord(key_z),      shift+ctrl+ord(key_z)
+  );
 
  defaultsysshortcuts1: sysshortcutaty = 
 //sho_copy,            sho_paste,                 sho_cut,   
@@ -313,7 +316,10 @@ const
 //sho_rowinsert,       sho_rowappend,             sho_rowdelete
   ord(key_none),       ord(key_none),             ord(key_none),
 //sho_copycells        sho_pastecells
-  ord(key_none),       ord(key_none));
+  ord(key_none),       ord(key_none),
+//sho_groupundo,       sho_groupredo
+  ord(key_none),      ord(key_none)
+  );
   
 var
  sysshortcuts: sysshortcutaty;
@@ -497,7 +503,7 @@ const
  list: array[sysshortcutty] of msestring = (
         'Copy','Paste','Cut','Select all',
         'Row insert','Row append','Row delete',
-        'Copy cells','Paste cells');
+        'Copy cells','Paste cells','Undo','Redo');
 begin
  result:= list[aitem];
 end;

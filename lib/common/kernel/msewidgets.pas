@@ -4243,26 +4243,28 @@ begin
   if canevent(tmethod(fonpopup)) then begin
    fonpopup(self,amenu,mouseinfo);
   end;
-  widget1:= fparentwidget;
-  while widget1 <> nil do begin
-   if widget1 is tactionwidget then begin
-    translateclientpoint1(mouseinfo.pos,self,widget1);
-    bo1:= not (es_child in mouseinfo.eventstate);
-    include(mouseinfo.eventstate,es_child);
-    try
-     tactionwidget(widget1).dopopup(amenu,mouseinfo);
-    finally
-     if bo1 then begin
-      exclude(mouseinfo.eventstate,es_child);
+  if not (es_parent in mouseinfo.eventstate) then begin
+   widget1:= fparentwidget;
+   while widget1 <> nil do begin
+    if widget1 is tactionwidget then begin
+     translateclientpoint1(mouseinfo.pos,self,widget1);
+     bo1:= not (es_child in mouseinfo.eventstate);
+     include(mouseinfo.eventstate,es_child);
+     try
+      tactionwidget(widget1).dopopup(amenu,mouseinfo);
+     finally
+      if bo1 then begin
+       exclude(mouseinfo.eventstate,es_child);
+      end;
+      translateclientpoint1(mouseinfo.pos,widget1,self);
      end;
-     translateclientpoint1(mouseinfo.pos,widget1,self);
+     break;
     end;
-    break;
+    widget1:= twidget1(widget1).fparentwidget;
    end;
-   widget1:= twidget1(widget1).fparentwidget;
-  end;
-  if (amenu <> nil) and (mouseinfo.eventstate * [es_processed,es_child] = []) then begin
-   amenu.show(self,mouseinfo);
+   if (amenu <> nil) and (mouseinfo.eventstate * [es_processed,es_child] = []) then begin
+    amenu.show(self,mouseinfo);
+   end;
   end;
  finally
   if not (es_child in mouseinfo.eventstate) then begin

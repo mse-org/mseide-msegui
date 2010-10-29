@@ -124,6 +124,7 @@ const
   'Range error',        //sc_Range_error  
 
   '&Undo',              //sc_Undo  ///              ///
+  '&Redo',              //sc_Redo   //               //
   '&Copy',              //sc_Copy   // hotkeys       //
   'Cu&t',               //sc_Cut    //               //
   '&Paste',             //sc_Paste ///               // hotkeys

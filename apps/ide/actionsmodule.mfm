@@ -1394,7 +1394,7 @@ object actionsmo: tactionsmo
     top = 136
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 78
+    actions.count = 76
     actions.items = <    
       item
         dispname = 'File'
@@ -1486,22 +1486,6 @@ object actionsmo: tactionsmo
         dispname = 'Edit'
       end    
       item
-        action = undo
-        dispname = 'Undo'
-        sc = (
-          1
-          16474
-        )
-      end    
-      item
-        action = redo
-        dispname = 'Redo'
-        sc = (
-          1
-          24666
-        )
-      end    
-      item
         action = selecteditpage
         dispname = 'Select Editpage'
         sc = (
@@ -1544,6 +1528,10 @@ object actionsmo: tactionsmo
       item
         action = instemplate
         dispname = 'Insert Template'
+        sc = (
+          1
+          16468
+        )
       end    
       item
         action = sourcefo.navigbackact
@@ -2210,5 +2198,9 @@ object actionsmo: tactionsmo
     onexecute = instemplateactonexecute
     left = 344
     top = 64
+    sc = (
+      1
+      16468
+    )
   end
 end

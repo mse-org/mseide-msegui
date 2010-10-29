@@ -64,6 +64,7 @@ const
   'Max',                   //sc_Max
   'Range salah',           //sc_Range_error  
   '&Batal',                //sc_Undo  ///
+  '&Redo',                 //sc_Redo   //               //
   '&Salin',                //sc_Copy   // hotkeys
   'Po&tong',               //sc_Cut    //
   '&Tempel',               //sc_Paste ///

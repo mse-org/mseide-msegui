@@ -312,8 +312,6 @@ type
    fontextedited: texteditedeventty;
    ftextflags: textflagsty;
    ftextflagsactive: textflagsty;
-//   fonkeydown: keyeventty;
-//   fonkeyup: keyeventty;
    foncopytoclipboard: updatestringeventty;
    fonpastefromclipboard: updatestringeventty;
    fcursorreadonly: cursorshapety;

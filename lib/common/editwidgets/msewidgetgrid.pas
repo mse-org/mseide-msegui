@@ -59,6 +59,8 @@ type
  igridwidget = interface(inullinterface) ['{CB4BC9B0-A6C2-4929-9E5F-92406B6617B4}']
   procedure setfirstclick;
   function getwidget: twidget;
+  procedure updatepopupmenu(var amenu: tpopupmenu; 
+                                          var mouseinfo: mouseeventinfoty);
   function getcellframe: framety;
   function getcellcursor(const arow: integer; //-1 -> widget
                 const acellzone: cellzonety): cursorshapety;
@@ -292,6 +294,8 @@ type
    function getcontainer: twidget; override;
    function getchildwidgets(const index: integer): twidget; override;
    procedure removefixwidget(const awidget: twidget);
+   procedure updatepopupmenu(var amenu: tpopupmenu; 
+                         var mouseinfo: mouseeventinfoty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -3180,6 +3184,36 @@ begin
   twidgetcol(twidgetcols(fdatacols).fitems[col]).updatewidgetrect;
  end;
  endupdate;
+end;
+
+procedure tcustomwidgetgrid.updatepopupmenu(var amenu: tpopupmenu;
+               var mouseinfo: mouseeventinfoty);
+var
+ cell1: gridcoordty;
+ widget1: twidget;
+begin
+ if not (es_child in mouseinfo.eventstate) then begin
+  cell1:= cellatpos(mouseinfo.pos);
+  if (cell1.col >= 0) and 
+                   ((cell1.row >= 0) or (cell1.row = invalidaxis)) then begin
+   with datacols[cell1.col] do begin
+    if fintf <> nil then begin
+     widget1:= fintf.getwidget;
+     if widget1 <> nil then begin
+      translateclientpoint1(mouseinfo.pos,self,widget1);
+      mouseinfo.eventstate:= mouseinfo.eventstate + [es_parent,es_child];
+      try
+       fintf.updatepopupmenu(amenu,mouseinfo);
+      finally    
+       translateclientpoint1(mouseinfo.pos,widget1,self);
+       mouseinfo.eventstate:= mouseinfo.eventstate - [es_parent,es_child];
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+ inherited;
 end;
 
 procedure registergriddatalistclass(const tag: ansistring;

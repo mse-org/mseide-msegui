@@ -67,6 +67,7 @@ const
   'Error de rango',             //sc_Range_error  
 
   '&Deshacer',                  //sc_Undo  ///              ///
+  '&Redo',                      //sc_Redo   //               //
   '&Copiar',                    //sc_Copy   // hotkeys       //
   'C&ortar',                    //sc_Cut    //               //
   '&Pegar',                     //sc_Paste ///               // hotkeys

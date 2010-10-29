@@ -120,7 +120,7 @@ begin
    {tstringlistedit,}
    titemedit,tdropdownitemedit,tmbdropdownitemedit,ttreeitemedit,
    trecordfieldedit,
-   ttextedit,tterminal]);
+   ttextedit,tundotextedit,tterminal]);
  registercomponenttabhints(['Edit'],
  ['Edit Widgets, twidgetgrid and Widgets'+c_linefeed+
   'which can be placed into twidgetgrid']);

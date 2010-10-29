@@ -64,6 +64,7 @@ const
   'Bereichs Fehler',         //sc_Range_error  
 
   '&R'#252'ckg'#228'ngig',   //sc_Undo  ///              ///
+  '&Redo',                   //sc_Redo   //               //
   '&Kopieren',               //sc_Copy   // hotkeys       //
   '&Ausschneiden',           //sc_Cut    //               //
   '&Einf'#252'gen',          //sc_Paste ///               // hotkeys

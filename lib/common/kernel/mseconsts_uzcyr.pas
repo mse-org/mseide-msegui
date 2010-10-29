@@ -72,6 +72,7 @@ const
                              //sc_Range_error => Nesootvetstvie diapazonu
 
   #1054#1083#1076#1080#1085#1075#1080 ,           //sc_Undo     => Vernut`
+  '&Redo',                                        //sc_Redo   //            //
   #1050#1118#1095#1080#1088#1080#1096 ,           //sc_Copy   // hotkeys=> Skopirovat`
   #1054#1083#1080#1073' '#1090#1072#1096#1083#1072#1096 ,      //sc_Cut      => Vyrezat`
   #1025#1079#1080#1073' '#1179#1118#1081#1080#1096 ,           //sc_Paste    => Vstavit`

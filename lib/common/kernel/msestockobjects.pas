@@ -64,7 +64,7 @@ type
 
  stockcaptionty = (sc_none,sc_is_invalid,sc_Format_error,sc_Value_is_required,
                     sc_Error,sc_Min,sc_Max,sc_Range_error,
-                    sc_Undo,sc_copy,sc_cut,sc_paste,
+                    sc_Undo,sc_Redo,sc_copy,sc_cut,sc_paste,
                     sc_insert_row,sc_append_row,sc_delete_row,
                     sc_Dir,sc_Home,sc_Up,sc_New_dir,sc_Name,
                     sc_Show_hidden_files,sc_Filter,

@@ -144,9 +144,11 @@ object templateeditorfo: ttemplateeditorfo
       end>
     rowcount = 1
     datacols.count = 1
+    datacols.options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_mousescrollrow]
     datacols.items = <    
       item
         width = 1016
+        options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_mousescrollrow]
         widgetname = 'templed'
         dataclass = tgridrichstringdatalist
         data = (
@@ -158,7 +160,7 @@ object templateeditorfo: ttemplateeditorfo
     datarowlinewidth = 0
     datarowheight = 15
     reffontheight = 14
-    object templed: ttextedit
+    object templed: tundotextedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
       optionsskin = [osk_framebuttononly]
       taborder = 1

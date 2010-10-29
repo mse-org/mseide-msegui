@@ -18,7 +18,7 @@ type
    tspacer1: tspacer;
    tsplitter1: tsplitter;
    templgrid: twidgetgrid;
-   templed: ttextedit;
+   templed: tundotextedit;
    cursordisp: tstringdisp;
    tsplitter2: tsplitter;
    coled: tintegeredit;

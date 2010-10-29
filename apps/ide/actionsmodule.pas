@@ -194,6 +194,10 @@ end;
 
 procedure tactionsmo.updateshortcuts(const sender: tshortcutcontroller);
 begin
+ undo.shortcut:= sysshortcuts[sho_groupundo];
+ undo.shortcut1:= sysshortcuts1[sho_groupundo];
+ redo.shortcut:= sysshortcuts[sho_groupredo];
+ redo.shortcut1:= sysshortcuts1[sho_groupredo];
  copy.shortcut:= sysshortcuts[sho_copy];
  copy.shortcut1:= sysshortcuts1[sho_copy];
  cut.shortcut:= sysshortcuts[sho_cut];

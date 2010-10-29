@@ -64,7 +64,6 @@ type
    fstatfile: tstatfile;
    fstatvarname: msestring;
    fselectstart,fselectend: gridcoordty;
-//   fcolindex: integer;
    fmodified: boolean;
    fonmodifiedchanged: booleanchangedeventty;
    fontextmouseevent: textmouseeventty;

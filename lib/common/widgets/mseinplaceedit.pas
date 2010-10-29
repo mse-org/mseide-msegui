@@ -42,7 +42,8 @@ type
  end;
 
  inplaceeditstatety = (ies_focused,ies_poschanging,ies_firstclick,ies_istextedit,
-                       ies_forcecaret,ies_textrectvalid,ies_touched);
+                       ies_forcecaret,ies_textrectvalid,ies_touched,
+                       ies_cangroupundo);
  inplaceeditstatesty = set of inplaceeditstatety;
 
  tinplaceedit = class
@@ -126,11 +127,15 @@ type
    function locating: boolean;
 
    procedure onundo(const sender: tobject);
+   procedure onredo(const sender: tobject);
    procedure oncopy(const sender: tobject);
    procedure oncut(const sender: tobject);
    procedure onpaste(const sender: tobject);
+   procedure redo; virtual;
+   function canredo: boolean; virtual;
   public
-   constructor create(aowner: twidget; editintf: iedit; istextedit: boolean = false);
+   constructor create(aowner: twidget; editintf: iedit;
+                                         istextedit: boolean = false);
    destructor destroy; override;
    procedure setup(const text: msestring; cursorindex: integer; shift: boolean;
               const atextrect,aclientrect: rectty;
@@ -159,7 +164,7 @@ type
    procedure mouseevent(var minfo: mouseeventinfoty);
    procedure updatepopupmenu(var amenu: tpopupmenu; const popupmenu: tpopupmenu;
                      var mouseinfo: mouseeventinfoty; 
-                     const hasselection{, cangridcopy}: boolean);
+                     const hasselection: boolean);
    procedure setfirstclick;
    procedure doactivate;
    procedure dodeactivate;
@@ -179,14 +184,14 @@ type
    function pastefromclipboard: boolean; virtual;        //true if pasted
    procedure deleteselection;
    procedure clearundo;
-   procedure undo;
+   procedure undo; virtual;
    procedure selectall;
    procedure clearselection;
    property forcecaret: boolean read getforcecaret write setforcecaret;
 
    function optionsedit: optionseditty;
    function canedit: boolean;
-   function canundo: boolean;
+   function canundo: boolean; virtual;
    function cancopy: boolean;
    function canpaste: boolean;
    function getinsertcaretwidth(const canvas: tcanvas; const afont: tfont): integer;
@@ -246,9 +251,6 @@ type
   procedure setselectstart(const selectstartpos: gridcoordty);
  end;
 
-// undoliststatety = (uls_forcenew);
-// undoliststatesty = set of undoliststatety;
-
  ttextundolist = class(tdynamicdatalist)
   private
    fintf: iundo;
@@ -257,7 +259,6 @@ type
    flinked: integer;
    fmaxsize: integer;
    fbuffersize: integer;
-//   fstate: undoliststatesty;
    function getitems(const index: integer): pundoinfoty;
    function checkrecord(atype: undotypety; const astartpos,aendpos: gridcoordty;
               selected: boolean; backwards: boolean; alink: boolean;
@@ -302,14 +303,20 @@ type
    procedure internaldelete(start,len,startindex: integer; selected: boolean); override;
    procedure enterchars(const chars: msestring); override;
   public
-   constructor create(aowner: twidget; editintf: iedit; undointf: iundo; istextedit: boolean);
+   constructor create(aowner: twidget; editintf: iedit; undointf: iundo;
+                      istextedit: boolean);
    destructor destroy; override;
    procedure begingroup; override;
    procedure endgroup; override;
+   function canundo: boolean; override;
+   function canredo: boolean; override;
+   procedure undo; override;
+   procedure redo; override;
    procedure moveindex(newindex: integer; shift: boolean = false;
             donotify: boolean = true); override;
    function cuttoclipboard: boolean; override;
    function pastefromclipboard: boolean; override;
+                     
    property undolist: ttextundolist read fundolist;
  end;
 
@@ -366,6 +373,11 @@ begin
  undo;
 end;
 
+procedure tinplaceedit.onredo(const sender: tobject);
+begin
+ redo;
+end;
+
 procedure tinplaceedit.oncopy(const sender: tobject);
 begin
  copytoclipboard;
@@ -385,35 +397,58 @@ procedure tinplaceedit.updatepopupmenu(var amenu: tpopupmenu;
                 const popupmenu: tpopupmenu; var mouseinfo: mouseeventinfoty;
                 const hasselection{, cangridcopy}: boolean);
 var
- states: array[0..3] of actionstatesty;
+ states: array of actionstatesty;
  sepchar: msechar;
  bo1: boolean;
-begin  
- if canundo then begin
-  states[0]:= []; //undo
- end
- else begin
-  states[0]:= [as_disabled];
- end;
- bo1:= cancopy or hasselection;
- if bo1 {or cangridcopy} then begin
-  states[1]:= []; //copy
-  if bo1 and canedit then begin
-   states[2]:= [];
+ undoindex,redoindex,copyindex,cutindex,pasteindex: integer;
+begin
+ if ies_cangroupundo in fstate then begin
+  setlength(states,5);
+  undoindex:= 0;
+  redoindex:= 1;
+  copyindex:= 2;
+  cutindex:= 3;
+  pasteindex:= 4;
+  if canredo then begin
+   states[redoindex]:= [];
   end
   else begin
-   states[2]:= [as_disabled]; //cut
+   states[redoindex]:= [as_disabled];
   end;
  end
  else begin
-  states[1]:= [as_disabled]; //copy
-  states[2]:= [as_disabled]; //cut
+  setlength(states,4);
+  undoindex:= 0;
+  redoindex:= 0; //invalid
+  copyindex:= 1;
+  cutindex:= 2;
+  pasteindex:= 3;
  end;
- if canpaste then begin
-  states[3]:= []; //paste
+ if canundo then begin
+  states[undoindex]:= []; //undo
  end
  else begin
-  states[3]:= [as_disabled];
+  states[undoindex]:= [as_disabled];
+ end;
+ bo1:= cancopy or hasselection;
+ if bo1 {or cangridcopy} then begin
+  states[copyindex]:= []; //copy
+  if bo1 and canedit then begin
+   states[cutindex]:= [];
+  end
+  else begin
+   states[cutindex]:= [as_disabled]; //cut
+  end;
+ end
+ else begin
+  states[copyindex]:= [as_disabled]; //copy
+  states[cutindex]:= [as_disabled]; //cut
+ end;
+ if canpaste then begin
+  states[pasteindex]:= []; //paste
+ end
+ else begin
+  states[pasteindex]:= [as_disabled];
  end;
  if popupmenu <> nil then begin
   sepchar:= popupmenu.shortcutseparator;
@@ -421,17 +456,38 @@ begin
  else begin
   sepchar:= tcustommenu.getshortcutseparator(amenu);
  end;
- tpopupmenu.additems(amenu,fintf.getwidget,mouseinfo,
-    [stockobjects.captions[sc_Undo]+sepchar+'(Esc)',
-     stockobjects.captions[sc_Copy]+sepchar+
-             '('+encodeshortcutname(sysshortcuts[sho_copy])+')',
-     stockobjects.captions[sc_Cut]+sepchar+
-             '('+encodeshortcutname(sysshortcuts[sho_cut])+')',
-     stockobjects.captions[sc_Paste]+sepchar+
-             '('+encodeshortcutname(sysshortcuts[sho_paste])+')'],
-    [[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus]],
-              states,[{$ifdef FPC}@{$endif}onundo,{$ifdef FPC}@{$endif}oncopy,
-    {$ifdef FPC}@{$endif}oncut,{$ifdef FPC}@{$endif}onpaste]);
+ if ies_cangroupundo in fstate then begin
+  tpopupmenu.additems(amenu,fintf.getwidget,mouseinfo,
+     [stockobjects.captions[sc_Undo]+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_groupundo])+')',
+      stockobjects.captions[sc_Redo]+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_groupredo])+')',
+      stockobjects.captions[sc_Copy]+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_copy])+')',
+      stockobjects.captions[sc_Cut]+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_cut])+')',
+      stockobjects.captions[sc_Paste]+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_paste])+')'],
+     [[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus],
+              [mao_nocandefocus]],
+               states,[{$ifdef FPC}@{$endif}onundo,{$ifdef FPC}@{$endif}onredo,
+               {$ifdef FPC}@{$endif}oncopy,
+     {$ifdef FPC}@{$endif}oncut,{$ifdef FPC}@{$endif}onpaste]);
+ end
+ else begin
+  tpopupmenu.additems(amenu,fintf.getwidget,mouseinfo,
+     [stockobjects.captions[sc_Undo]+sepchar+'(Esc)',
+      stockobjects.captions[sc_Copy]+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_copy])+')',
+      stockobjects.captions[sc_Cut]+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_cut])+')',
+      stockobjects.captions[sc_Paste]+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_paste])+')'],
+     [[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus]],
+               states,[{$ifdef FPC}@{$endif}onundo,
+               {$ifdef FPC}@{$endif}oncopy,
+     {$ifdef FPC}@{$endif}oncut,{$ifdef FPC}@{$endif}onpaste]);
+ end;
 end;
 
 procedure tinplaceedit.notify(var info: editnotificationinfoty);
@@ -1031,6 +1087,22 @@ begin
      end
      else begin
       finished:= false;
+      if ies_cangroupundo in fstate then begin
+       if issysshortcut(sho_groupundo,kinfo) then begin
+        if canundo then begin
+         undo;
+         finished:= true;
+        end;
+       end
+       else begin
+        if issysshortcut(sho_groupredo,kinfo) then begin
+         if canredo then begin
+          redo;
+          finished:= true;
+         end;
+        end;
+       end;
+      end;
      end;
     end;
    end;
@@ -1062,7 +1134,8 @@ begin
        end;
       end;
       key_escape: begin
-       if canundo and (oe_undoonesc in opt1) then begin
+       if canundo and (oe_undoonesc in opt1) and 
+                        not (ies_cangroupundo in fstate) then begin
         undo;
        end
        else begin
@@ -2014,6 +2087,16 @@ begin
  result:= fupdating > 0;
 end;
 
+procedure tinplaceedit.redo;
+begin
+ //dummy
+end;
+
+function tinplaceedit.canredo: boolean;
+begin
+ result:= false;
+end;
+
 { ttextundolist }
 
 constructor ttextundolist.create(intf: iundo);
@@ -2316,9 +2399,11 @@ end;
 
 { tundoinplaceedit }
 
-constructor tundoinplaceedit.create(aowner: twidget; editintf: iedit; undointf: iundo; istextedit: boolean);
+constructor tundoinplaceedit.create(aowner: twidget; editintf: iedit;
+              undointf: iundo; istextedit: boolean);
 begin
  inherited create(aowner,editintf,istextedit);
+ include(fstate,ies_cangroupundo);
  fundolist:= ttextundolist.create(undointf);
 end;
 
@@ -2412,6 +2497,26 @@ procedure tundoinplaceedit.endgroup;
 begin
  fundolist.endlink(true);
  inherited;
+end;
+
+procedure tundoinplaceedit.redo;
+begin
+ fundolist.redo;
+end;
+
+procedure tundoinplaceedit.undo;
+begin
+ fundolist.undo;
+end;
+
+function tundoinplaceedit.canundo: boolean;
+begin
+ result:= fundolist.canundo;
+end;
+
+function tundoinplaceedit.canredo: boolean;
+begin
+ result:= fundolist.canredo;
 end;
 
 end.

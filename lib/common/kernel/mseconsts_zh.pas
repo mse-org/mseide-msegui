@@ -67,6 +67,7 @@ const
   #28322#20986#38169#35823,           //sc_Range_error  
 
   '&u'#21462#28040,                   //sc_Undo  ///              ///
+  '&Redo',                            //sc_Redo   //               //
   '&c'#22797#21046,                   //sc_Copy   // hotkeys       //
   '&t'#21098#20999,                   //sc_Cut    //               //
   '&p'#31896#36148,                   //sc_Paste ///               // hotkeys
