@@ -1308,7 +1308,8 @@ begin
     end
     else begin
      finished:= false;
-     if (shiftstate1 = [ss_ctrl,ss_alt]) then begin
+     if (shiftstate1 = [ss_ctrl,ss_alt]) and 
+                              not (ss_second in shiftstate) then begin
       nochars:= false;
      end;
     end;
