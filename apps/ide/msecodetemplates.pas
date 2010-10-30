@@ -243,7 +243,8 @@ begin
  else begin
   setlength(ar1,1);
  end;
- if (ar1[0] = '') or not flist.find(ar1[0],pointer(puint1)) then begin
+ if (ar1[0] = '') or not flist.find(ar1[0],pointer(puint1),int1) or 
+                                                         (int1 > 1) then begin
   se:= tmsetemplateselectfo.create(self);
   try
    reload(se);

@@ -207,17 +207,25 @@ type
    procedure internaldeleteitem(const aitem: phashdataty);
    function internaldelete(const akey; const all: boolean): boolean;
    function internalfind(const akey): phashdataty; overload;
+   function internalfind(const akey; out acount: integer): phashdataty; overload;
    function internalfind(const akey;
                const acheckproc: findcheckprocty): phashdataty; overload;
-   function internalfindexact(const akey): phashdataty;
+   function internalfind(const akey;
+               const acheckproc: findcheckprocty;
+               out acount: integer): phashdataty; overload;
+   function internalfindexact(const akey): phashdataty; overload;
+   function internalfindexact(const akey;
+                           out acount: integer): phashdataty; overload;
    procedure checkexact(const aitemdata; var accept: boolean); virtual; abstract;
    function hashkey(const akey): hashvaluety; virtual; abstract;
    function checkkey(const akey; const aitemdata): boolean; virtual; abstract;
    procedure rehash;
    procedure grow;
    procedure finalizeitem(var aitemdata); virtual;
-   procedure internaliterate(const aiterator: internalhashiteratorprocty); overload;
-   procedure iterate(const akey; const aiterator: keyhashiteratorprocty); overload;
+   procedure internaliterate(
+                       const aiterator: internalhashiteratorprocty); overload;
+   procedure iterate(const akey; 
+                            const aiterator: keyhashiteratorprocty); overload;
    function internalfirst: phashdatadataty;
    function internalnext: phashdatadataty;
   public
@@ -377,7 +385,8 @@ type
    function add(const akey: msestring): pointer;
                  //returns pointer on msestringdataty.data
    function addunique(const akey: msestring): pointer;
-   function find(const akey: msestring): pointer;
+   function find(const akey: msestring): pointer; overload;
+   function find(const akey: msestring; out acount: integer): pointer; overload;
    function delete(const akey: msestring; 
                          const all: boolean = false): boolean; //true if found
    function first: pmsestringdataty;
@@ -413,6 +422,8 @@ type
    procedure delete(const akey: msestring; const avalue: pointer);
    function find(const akey: msestring): pointer; overload;
    function find(const akey: msestring; out avalue: pointer): boolean; overload;
+   function find(const akey: msestring; out avalue: pointer;
+                                        out acount: integer): boolean; overload;
    function first: ppointermsestringdataty;
    function next: ppointermsestringdataty;
    procedure iterate(const akey: msestring;
@@ -1534,6 +1545,40 @@ begin
  result:= po1;
 end;
 
+function thashdatalist.internalfind(const akey; out acount: integer): phashdataty;
+var
+ ha1: hashvaluety;
+ uint1: ptruint;
+ po1: phashdataty;
+begin
+ result:= nil;
+ acount:= 0;
+ if count > 0 then begin
+  ha1:= hashkey(akey);
+  uint1:= fhashtable[ha1 and fmask];
+  if uint1 <> 0 then begin
+   po1:= phashdataty(pchar(fdata) + uint1);
+   while true do begin
+    if (po1^.header.hash = ha1) and checkkey(akey,po1^.data) then begin
+     if result = nil then begin
+      result:= po1;
+     end;
+     inc(acount);
+    end
+    else begin
+     if result <> nil then begin
+      break;
+     end;
+    end;
+    if po1^.header.nexthash = 0 then begin
+     break;
+    end;
+    po1:= phashdataty(pchar(fdata) + po1^.header.nexthash);
+   end;
+  end;
+ end;
+end;
+
 function thashdatalist.internalfind(const akey; 
                              const acheckproc: findcheckprocty): phashdataty;
 var
@@ -1567,9 +1612,56 @@ begin
  result:= po1;
 end;
 
+function thashdatalist.internalfind(const akey; 
+                             const acheckproc: findcheckprocty;
+                             out acount: integer): phashdataty;
+var
+ ha1: hashvaluety;
+ uint1: ptruint;
+ po1: phashdataty;
+ bo1: boolean;
+begin
+ result:= nil;
+ acount:= 0;
+ if count > 0 then begin
+  ha1:= hashkey(akey);
+  uint1:= fhashtable[ha1 and fmask];
+  if uint1 <> 0 then begin
+   po1:= phashdataty(pchar(fdata) + uint1);
+   bo1:= false;
+   while true do begin
+    if (po1^.header.hash = ha1) and checkkey(akey,po1^.data) then begin
+     acheckproc(pointer(@po1^.data)^,bo1);
+     if bo1 then begin
+      if result = nil then begin
+       result:= po1;
+      end;
+      inc(acount);
+     end
+     else begin
+      if result <> nil then begin
+       break;
+      end;
+     end;
+    end;
+    if po1^.header.nexthash = 0 then begin
+     break;
+    end;
+    po1:= phashdataty(pchar(fdata) + po1^.header.nexthash);
+   end;
+  end;
+ end;
+end;
+
 function thashdatalist.internalfindexact(const akey): phashdataty;
 begin
  result:= internalfind(akey,{$ifdef FPC}@{$endif}checkexact);
+end;
+
+function thashdatalist.internalfindexact(const akey;
+                                        out acount: integer): phashdataty;
+begin
+ result:= internalfind(akey,{$ifdef FPC}@{$endif}checkexact,acount);
 end;
 
 function thashdatalist.internalfirst: phashdatadataty;
@@ -1937,6 +2029,15 @@ begin
  end;
 end;
 
+function tmsestringhashdatalist.find(const akey: msestring;
+                                                out acount: integer): pointer;
+begin
+ result:= internalfind(akey,acount);
+ if result <> nil then begin
+  result:= @pmsestringdataty(pchar(result)+sizeof(hashheaderty))^.data;
+ end;
+end;
+
 function tmsestringhashdatalist.addunique(const akey: msestring): pointer;
 begin
  result:= find(akey);
@@ -1996,6 +2097,21 @@ var
  po1: ppointer;
 begin
  po1:= inherited find(akey);
+ result:= po1 <> nil;
+ if result then begin
+  avalue:= po1^;
+ end
+ else begin
+  avalue:= nil;
+ end;
+end;
+
+function tpointermsestringhashdatalist.find(const akey: msestring;
+                        out avalue: pointer; out acount: integer): boolean;
+var
+ po1: ppointer;
+begin
+ po1:= inherited find(akey,acount);
  result:= po1 <> nil;
  if result then begin
   avalue:= po1^;
