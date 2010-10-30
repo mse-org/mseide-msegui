@@ -944,6 +944,10 @@ type
    procedure settextfield(value: tfield);
    procedure updatefields;
    procedure updatelookupvalue;
+   function getvalueasmsestring: msestring;
+   function getvalueasinteger: integer;
+   function getvalueaslargeint: int64;
+   function gettextasmsestring: msestring;
   protected
    procedure layoutchanged; override;
    procedure activechanged; override;
@@ -953,9 +957,13 @@ type
    function getlookuptext(const key: integer): msestring; overload;
    function getlookuptext(const key: int64): msestring; overload;
    function getlookuptext(const key: msestring): msestring; overload;
-   property valuefield: tfield read fvaluefield;
    property valuefieldName: string read fvaluefieldname write setvaluefieldname;
+   property valuefield: tfield read fvaluefield;
+   property valueasmsestring: msestring read getvalueasmsestring;
+   property valueasinteger: integer read getvalueasinteger;
+   property valueaslargeint: int64 read getvalueaslargeint;
    property textfield: tfield read ftextfield;
+   property textasmsestring: msestring read gettextasmsestring;
  end;
 
  tdbdropdownstringcol = class(tdropdownstringcol)
@@ -4864,6 +4872,38 @@ begin
   finally
    dataset.enablecontrols;
   end;
+ end;
+end;
+
+function tdropdowndatalink.getvalueasmsestring: msestring;
+begin
+ result:= '';
+ if active and (fvaluefield <> nil) then begin
+  result:= getasmsestring(fvaluefield,utf8);
+ end;
+end;
+
+function tdropdowndatalink.getvalueasinteger: integer;
+begin
+ result:= 0;
+ if active and (fvaluefield <> nil) then begin
+  result:= fvaluefield.asinteger;
+ end;
+end;
+
+function tdropdowndatalink.getvalueaslargeint: int64;
+begin
+ result:= 0;
+ if active and (fvaluefield <> nil) then begin
+  result:= fvaluefield.aslargeint;
+ end;
+end;
+
+function tdropdowndatalink.gettextasmsestring: msestring;
+begin
+ result:= '';
+ if active and (ftextfield <> nil) then begin
+  result:= getasmsestring(ftextfield,utf8);
  end;
 end;
 
