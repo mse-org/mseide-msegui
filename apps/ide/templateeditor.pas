@@ -82,6 +82,7 @@ begin
    commented.value:= comment;
    nameed.value:= name;
    paramgrid[0].datalist.asarray:= params;
+   paramgrid[1].datalist.asarray:= paramdefaults;
    templed.settext(template);
   end;
  end
@@ -137,6 +138,7 @@ begin
     comment:= commented.value;
     name:= nameed.value;
     params:= paramgrid[0].datalist.asarray;
+    paramdefaults:= paramgrid[1].datalist.asarray;
     template:= templed.gettext;
     if fpath = '' then begin
      if not savefiledialog.controller.execute(fpath) then begin

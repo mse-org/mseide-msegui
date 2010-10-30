@@ -85,15 +85,19 @@ object templateeditorfo: ttemplateeditorfo
     bounds_x = 0
     bounds_y = 46
     bounds_cx = 473
-    bounds_cy = 90
+    bounds_cy = 122
     anchors = [an_top]
-    optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
-    datacols.count = 1
-    datacols.options = [co_fill, co_savevalue, co_savestate, co_mousescrollrow]
+    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+    datacols.count = 2
+    datacols.options = [co_fill, co_savestate, co_mousescrollrow]
     datacols.items = <    
       item
-        width = 437
-        options = [co_fill, co_savevalue, co_savestate, co_mousescrollrow]
+        width = 100
+        options = [co_savestate, co_mousescrollrow]
+      end    
+      item
+        width = 336
+        options = [co_fill, co_savestate, co_mousescrollrow]
       end>
     fixcols.count = 1
     fixcols.items = <    
@@ -102,7 +106,21 @@ object templateeditorfo: ttemplateeditorfo
         numstart = 1
         numstep = 1
       end>
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+        captions.count = 2
+        captions.items = <        
+          item
+            caption = 'Name'
+          end        
+          item
+            caption = 'Default Value'
+          end>
+      end>
     datarowheight = 16
+    statfile = tstatfile1
     reffontheight = 14
   end
   object tspacer1: tspacer
@@ -117,7 +135,7 @@ object templateeditorfo: ttemplateeditorfo
   object tsplitter1: tsplitter
     taborder = 14
     bounds_x = 0
-    bounds_y = 136
+    bounds_y = 168
     bounds_cx = 473
     bounds_cy = 3
     anchors = [an_top]
@@ -130,9 +148,9 @@ object templateeditorfo: ttemplateeditorfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     taborder = 4
     bounds_x = 0
-    bounds_y = 139
+    bounds_y = 171
     bounds_cx = 473
-    bounds_cy = 205
+    bounds_cy = 173
     anchors = [an_top, an_bottom]
     optionsgrid = [og_focuscellonenter, og_autofirstrow, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1

@@ -67,6 +67,7 @@ type
   cursorcol: integer;
   cursorrow: integer;
   params: msestringarty;
+  paramdefaults: msestringarty;
   template: msestring;
   cursorpos: gridcoordty; //variable
  end;
@@ -176,6 +177,8 @@ begin
     cursorcol:= readinteger('cursorcol',0,0,1000);
     cursorrow:= readinteger('cursorrow',0,0,1000000);
     params:= readarray('params',msestringarty(nil));
+    paramdefaults:= readarray('paramdefaults',msestringarty(nil));
+    setlength(paramdefaults,length(params));
     template:= streamtext;
     result:= true;
    end;
@@ -198,6 +201,7 @@ begin
   writeinteger('cursorcol',cursorcol);
   writeinteger('cursorrow',cursorrow);
   writearray('params',params);
+  writearray('paramdefaults',paramdefaults);
   streamtext(template);
  end;
  stat.free;
@@ -267,6 +271,7 @@ begin
     fo.caption:= 'Code Template "'+name+'"';
     fo.comment.caption:= comment;
     fo.macroname.gridvalues:= params;
+    fo.macrovalue.gridvalues:= paramdefaults;
     for int1:= 0 to high(params) do begin
      if int1 >= high(ar1) then begin
       break;
