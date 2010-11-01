@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+Version 2.4
+2010-11-01
 2010-10-22
  sys_homedir -> sys_apphomedir.
  "~/" returns sys_userhomedir, use "^/" for application home directory.

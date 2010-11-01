@@ -1,9 +1,9 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
  
-2010-07-03 Version 2.4rc1
+2010-11-01 Version 2.4
 Copyright (c) 1999-2010 by Martin Schreiber
 
-- Compiles with FPC 2.4 and FPC 2.4.2
+- Compiles with FPC 2.4.2
 - Tested on i386-linux SuSE 9.0,10.3,11.3, x84_64-linux SuSE 11.1 and
   i386-win32 98, 2000, XP and Vista.
 - Links to xlib and gdi32, no external widget library needed.
@@ -32,10 +32,10 @@ IDE is under GPL, library under modified LGPL like FPC-RTL.
 
 Installation:
 *************
-1. Download and install FPC 2.4 or FPC 2.4.2, you can get it from 
+1. Download and install FPC 2.4.2, you can get it from 
    http://www.freepascal.org/download.var
-2. Download mseide_msegui_src_2_4rc1.zip and mseide_i386_win32_2_4rc1.zip or
-   mseide_i386_linux_2_4rc1.tar.gz or mseide_x84_64_linux_2_4rc1.tar.gz
+2. Download mseide_msegui_src_2_4.zip and mseide_i386_win32_2_4.zip or
+   mseide_i386_linux_2_4.tar.gz or mseide_x84_64_linux_2_4.tar.gz
    http://developer.berlios.de/project/showfiles.php?group_id=11520
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/mseide' on linux or 
@@ -208,3 +208,6 @@ Dependent of the Zeos version it will be necessary to add -MDelphi to 'Project'-
 There is a predefined IDE project apps/ide/mseide_zeos.prj, update 'Project'-
 'Options'-'Macros' according to your installation.
 
+Have a lot of fun!
+
+Martin

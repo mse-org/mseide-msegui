@@ -32,7 +32,7 @@ uses
  classes,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
  msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,msesys,mserttistat;
 const
- versiontext = '2.5 unstable';
+ versiontext = '2.4';
 {$ifdef linux}
  {$ifdef CPU64}
   hosttext = 'x86_64-linux';
