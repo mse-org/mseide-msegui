@@ -2635,7 +2635,11 @@ procedure tmainfo.aboutonexecute(const sender: TObject);
 begin
  showmessage('MSEgui version: '+mseguiversiontext+c_linefeed+
              'MSEide version: '+versiontext+c_linefeed+
-             'Host: '+ hosttext,'About MSEide');
+             'Host: '+ hosttext+ c_linefeed+
+             c_linefeed+
+             'Copyright 1999-2010'+c_linefeed+
+             'by Martin Schreiber'
+             ,'About MSEide');
 end;
 
 procedure tmainfo.configureexecute(const sender: TObject);
