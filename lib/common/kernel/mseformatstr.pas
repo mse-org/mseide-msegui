@@ -87,6 +87,10 @@ function formatfloatmse(const value: double; const format: msestring;
 
 function formatfloatmse(const value: double; const format: msestring; 
                          const dot: boolean = false): msestring; overload;
+function inttostrmse(const value: integer): msestring; overload;
+function inttostrmse(const value: longword): msestring; overload;
+function inttostrmse(const value: int64): msestring; overload;
+function inttostrmse(const value: qword): msestring; overload;
    
 function realtostr(const value: double): string;     //immer'.' als separator
 function strtoreal(const s: string): double;   //immer'.' als separator
@@ -1848,6 +1852,106 @@ begin
  result:= formatfloatmse(value,format,defaultformatsettingsmse,dot);
 end;
 
+function inttostrmse(const value: integer): msestring;
+var
+ buffer: array[0..22] of msechar;
+ int1,int2: integer;
+ lwo1,lwo2: longword;
+begin
+ lwo1:= abs(value);
+ if lwo1 = 0 then begin
+  result:= '0';
+  exit;
+ end;
+ int1:= high(buffer);
+ while lwo1 > 0 do begin
+  lwo2:= lwo1 div 10;
+  buffer[int1]:= msechar(lwo1 - lwo2 * 10 + ord('0'));
+  lwo1:= lwo2;
+  dec(int1);
+ end;
+ if value < 0 then begin
+  buffer[int1]:= msechar('-');
+  dec(int1);
+ end;
+ int2:= (high(buffer))-int1;
+ setlength(result,int2);
+ move(buffer[int1+1],pointer(result)^,int2*sizeof(msechar));
+end;
+
+function inttostrmse(const value: longword): msestring;
+var
+ buffer: array[0..22] of msechar;
+ int1,int2: integer;
+ lwo1,lwo2: longword;
+begin
+ lwo1:= value;
+ if lwo1 = 0 then begin
+  result:= '0';
+  exit;
+ end;
+ int1:= high(buffer);
+ while lwo1 > 0 do begin
+  lwo2:= lwo1 div 10;
+  buffer[int1]:= msechar(lwo1 - lwo2 * 10 + ord('0'));
+  lwo1:= lwo2;
+  dec(int1);
+ end;
+ int2:= (high(buffer))-int1;
+ setlength(result,int2);
+ move(buffer[int1+1],pointer(result)^,int2*sizeof(msechar));
+end;
+
+function inttostrmse(const value: int64): msestring;
+var
+ buffer: array[0..22] of msechar;
+ int1,int2: integer;
+ lwo1,lwo2: qword;
+begin
+ lwo1:= abs(value);
+ if lwo1 = 0 then begin
+  result:= '0';
+  exit;
+ end;
+ int1:= high(buffer);
+ while lwo1 > 0 do begin
+  lwo2:= lwo1 div 10;
+  buffer[int1]:= msechar(lwo1 - lwo2 * 10 + ord('0'));
+  lwo1:= lwo2;
+  dec(int1);
+ end;
+ if value < 0 then begin
+  buffer[int1]:= msechar('-');
+  dec(int1);
+ end;
+ int2:= (high(buffer))-int1;
+ setlength(result,int2);
+ move(buffer[int1+1],pointer(result)^,int2*sizeof(msechar));
+end;
+
+function inttostrmse(const value: qword): msestring;
+var
+ buffer: array[0..22] of msechar;
+ int1,int2: integer;
+ lwo1,lwo2: qword;
+begin
+ lwo1:= value;
+ if lwo1 = 0 then begin
+  result:= '0';
+  exit;
+ end;
+ int1:= high(buffer);
+ while lwo1 > 0 do begin
+  lwo2:= lwo1 div 10;
+  buffer[int1]:= msechar(lwo1 - lwo2 * 10 + ord('0'));
+  lwo1:= lwo2;
+  dec(int1);
+ end;
+ int2:= (high(buffer))-int1;
+ setlength(result,int2);
+ move(buffer[int1+1],pointer(result)^,int2*sizeof(msechar));
+end;
+
 {
 function formatfloatmse(const value: double; const format: msestring;
                                  const dot: boolean = false): msestring;
@@ -2202,7 +2306,7 @@ begin
   result:= copy(nullen,1,digits-length(result)) + result;
  end;
  result:= copy(result,length(result)-digits+1,bigint);
- if inp < 0 then begin
+ if (inp < 0) and (result[1] <> '-') then begin
   result:= '-' + result;
  end;
 end;
