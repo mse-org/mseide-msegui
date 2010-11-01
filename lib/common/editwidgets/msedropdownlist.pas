@@ -1271,6 +1271,7 @@ begin
  end
  else begin
   fcols.fkeyvalue:= valuelist[fcols.fitemindex];
+  fdataselected:= true;
   setdropdowntext(fcols.fkeyvalue,false,false,key_none);
  end;
 end;
