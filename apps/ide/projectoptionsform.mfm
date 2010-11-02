@@ -878,6 +878,7 @@ object projectoptionsfo: tprojectoptionsfo
                 item
                   width = 219
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste]
+                  onshowhint = colonshowhint
                   datalist.data = (
                     'pascal.sdef'
                   )
@@ -1540,7 +1541,7 @@ object projectoptionsfo: tprojectoptionsfo
               color = -2147483645
               taborder = 2
               bounds_x = 0
-              bounds_y = 71
+              bounds_y = 73
               bounds_cx = 640
               bounds_cy = 37
               anchors = [an_top]
@@ -1608,7 +1609,7 @@ object projectoptionsfo: tprojectoptionsfo
               hint = '"--tty DEVICE" to set target terminal'
               onshowhint = hintexpandedmacros
               bounds_x = 1
-              bounds_y = 107
+              bounds_y = 110
               bounds_cx = 638
               bounds_cy = 37
               anchors = [an_left, an_top, an_right]
@@ -1621,7 +1622,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 5
               bounds_x = 0
-              bounds_y = 184
+              bounds_y = 187
               bounds_cx = 640
               bounds_cy = 37
               anchors = [an_top]
@@ -1705,7 +1706,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 6
               bounds_x = 0
-              bounds_y = 222
+              bounds_y = 221
               bounds_cx = 640
               bounds_cy = 37
               anchors = [an_top]
@@ -1758,7 +1759,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 1
               bounds_x = 0
-              bounds_y = 36
+              bounds_y = 37
               bounds_cx = 640
               bounds_cy = 37
               anchors = [an_top]
@@ -1853,7 +1854,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 4
               bounds_x = 0
-              bounds_y = 147
+              bounds_y = 150
               bounds_cx = 555
               bounds_cy = 37
               optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
