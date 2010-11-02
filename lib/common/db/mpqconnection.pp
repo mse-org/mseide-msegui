@@ -866,6 +866,7 @@ procedure tpqconnection.internalexecuteunprepared(const cursor: tsqlcursor;
                const asql: string);
 begin
  with TPQCursor(cursor) do begin
+  tr := TPQTrans(cursor.ftrans);
   frowsreturned:= -1;
   frowsaffected:= -1;
   curtuple:= -1;
