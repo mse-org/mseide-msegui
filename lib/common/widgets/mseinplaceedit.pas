@@ -1430,7 +1430,8 @@ begin
      if not pointinrect(pos,ftextrect) then begin
       if frepeater = nil then begin
        movemouseindex(nil);
-       frepeater:= tsimpletimer.create(100000,{$ifdef FPC}@{$endif}movemouseindex,true);
+       frepeater:= tsimpletimer.create(100000,
+                    {$ifdef FPC}@{$endif}movemouseindex,true,[]);
       end;
      end
      else begin

@@ -233,7 +233,8 @@ begin
   if amessage <> '' then begin
    gui_traymessage(windowpo^,amessage,fmessageid,timeoutms);
    if timeoutms > 0 then begin
-    ftimer:= tsimpletimer.create(-timeoutms*1000,{$ifdef FPC}@{$endif}dotimer,true);
+    ftimer:= tsimpletimer.create(timeoutms*1000,{$ifdef FPC}@{$endif}dotimer,
+                true,[to_single]);
    end;
   end;
  end;

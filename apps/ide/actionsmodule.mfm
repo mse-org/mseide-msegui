@@ -1883,7 +1883,7 @@ object actionsmo: tactionsmo
           304
         )
       end>
-    sysshortcuts.count = 9
+    sysshortcuts.count = 11
     sysshortcuts.items = (
       16451
       16470
@@ -1894,12 +1894,16 @@ object actionsmo: tactionsmo
       16647
       24643
       24662
+      16474
+      24666
     )
-    sysshortcuts1.count = 9
+    sysshortcuts1.count = 11
     sysshortcuts1.items = (
       0
       8454
       8455
+      0
+      0
       0
       0
       0

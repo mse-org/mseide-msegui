@@ -12481,7 +12481,7 @@ begin
  if not (state in fstate) then begin
   killrepeater;
   include(fstate,state);
-  frepeater:= tsimpletimer.create(time,{$ifdef FPC}@{$endif}repeatproc,true);
+  frepeater:= tsimpletimer.create(time,{$ifdef FPC}@{$endif}repeatproc,true,[]);
  end;
 end;
 

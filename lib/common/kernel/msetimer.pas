@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,24 +16,36 @@ uses
  Classes,msetypes,mseevent,mseclasses;
 
 type
+ timeroptionty = (to_single, //single shot
+                  to_leak);  //do not catch up missed timeouts
+ timeroptionsty = set of timeroptionty;
+ 
  tsimpletimer = class(tnullinterfacedobject)
   private
    fenabled: boolean;
    finterval: integer;
    fontimer: notifyeventty;
+   foptions: timeroptionsty;
    fpending: boolean;
    procedure setenabled(const Value: boolean);
    procedure setinterval(const Value: integer);
+   function getsingleshot: boolean;
+   procedure setsingleshot(const avalue: boolean);
   protected
    procedure dotimer;
   public
-   constructor create(interval: integer; ontimer: notifyeventty; active: boolean);
+   constructor create(const interval: integer; 
+                const ontimer: notifyeventty; const active: boolean;
+                const aoptions: timeroptionsty);
              //activates timer
    destructor destroy; override;
    procedure firependingandstop;
    property interval: integer read finterval write setinterval;
-             //in microseconds, <= 0 -> single shot, max +-2000 seconds
+             //in microseconds, max +2000 seconds
              //restarts timer if active
+             //0 -> fire once in mainloop idle
+   property singleshot: boolean read getsingleshot write setsingleshot;
+   property options: timeroptionsty read foptions write foptions;
    property ontimer: notifyeventty read fontimer write fontimer;
    property enabled: boolean read fenabled write setenabled default true;
              //last!
@@ -43,12 +55,17 @@ type
   private
    ftimer: tsimpletimer;
    fenabled: boolean; //for design
+   foptions: timeroptionsty;
    function getenabled: boolean;
    procedure setenabled(const avalue: boolean);
    function getinterval: integer;
-   procedure setinterval(const avalue: integer);
+   procedure setinterval(avalue: integer);
    function getontimer: notifyeventty;
    procedure setontimer(const Value: notifyeventty);
+   function getoptions: timeroptionsty;
+   procedure setoptions(const avalue: timeroptionsty);
+   function getsingleshot: boolean;
+   procedure setsingleshot(const avalue: boolean);
   protected
    procedure doasyncevent(var atag: integer); override;
   public
@@ -56,10 +73,13 @@ type
    destructor destroy; override;
    procedure restart;
    procedure firependingandstop;
+   property singleshot: boolean read getsingleshot write setsingleshot;
   published
    property interval: integer read getinterval write setinterval default 1000000;
-             //in microseconds, <= 0 -> single shot, max +-2000 seconds
+             //in microseconds, max 2000 seconds
              //restarts timer if enabled
+             //0 -> fire once in main loop idle
+   property options: timeroptionsty read getoptions write setoptions default [];
    property ontimer: notifyeventty read getontimer write setontimer;
    property enabled: boolean read getenabled write setenabled default false;
              //last!
@@ -83,6 +103,7 @@ type
   interval: longword;
   prevpo,nextpo: ptimerinfoty;
   ontimer: proceventty;
+  options: timeroptionsty
  end;
  
 var
@@ -157,15 +178,6 @@ begin
  po1:= first;
  while po1 <> nil do begin
   if issamemethod(tmethod(po1^.ontimer),tmethod(aontimer)) then begin
-  {
-   po2:= po1;
-   extract(po1);
-   po1:= po1^.nextpo;
-   dispose(po2);
-  end
-  else begin
-   po1:= po1^.nextpo;
-  }
    po1^.ontimer:= nil;
   end;
   po1:= po1^.nextpo;
@@ -178,15 +190,11 @@ var
  int1: integer;
 begin
  int1:= first^.nexttime-reftime;
-// if int1 < 1000 then begin
-//  application.postevent(tevent.create(ek_timer));
-// end
-// else begin
-  application.settimer(int1);
-// end;
+ application.settimer(int1);
 end;
 
-procedure settimertick(ainterval: integer; aontimer: proceventty);
+procedure settimertick(const ainterval: integer;
+     const aontimer: proceventty; const aoptions: timeroptionsty);
 var
  po: ptimerinfoty;
  time: longword;
@@ -196,13 +204,11 @@ begin
  time:= sys_gettimeus;
  fillchar(po^,sizeof(timerinfoty),0);
  with po^ do begin
-  if ainterval < 0 then begin
-   nexttime:= time + longword(-ainterval);
+  nexttime:= time + longword(ainterval);
+  interval:= ainterval;
+  options:= aoptions;
+  if to_single in aoptions{ainterval < 0} then begin
    interval:= 0;
-  end
-  else begin
-   nexttime:= time + longword(ainterval);
-   interval:= ainterval;
   end;
   ontimer:= aontimer;
  end;
@@ -212,7 +218,8 @@ begin
  end
  else begin
   if later(first^.nexttime,time) then begin
-   application.postevent(tmseevent.create(ek_timer)); //timerevent is ev. lost
+   application.postevent(tmseevent.create(ek_timer));
+              //timerevent is possibly lost
   end;
  end;
  sys_mutexunlock(mutex);
@@ -258,11 +265,17 @@ begin
     end;
    end
    else begin
-    int1:= 0;
-    repeat
-     inc(int1);
-     inc(po^.nexttime,po^.interval)
-    until later(time,po^.nexttime);
+    if to_leak in po^.options then begin
+     int1:= 1;
+     po^.nexttime:= time + po^.interval;
+    end
+    else begin
+     int1:= 0;
+     repeat
+      inc(int1);
+      inc(po^.nexttime,po^.interval)
+     until later(time,po^.nexttime);
+    end;
     insert(po);
     for int1:= int1 - 1 downto 0 do begin
      if assigned(po^.ontimer) then begin
@@ -306,11 +319,13 @@ end;
 
 { tsimpletimer }
 
-constructor tsimpletimer.create(interval: integer; ontimer: notifyeventty;
-                active: boolean);
+constructor tsimpletimer.create(const interval: integer; 
+                const ontimer: notifyeventty; const active: boolean;
+                const aoptions: timeroptionsty = []);
 begin
  finterval:= interval;
  fontimer:= ontimer;
+ foptions:= aoptions;
  setenabled(active);
 end;
 
@@ -322,9 +337,12 @@ end;
 
 procedure tsimpletimer.dotimer;
 begin
- if finterval <= 0 then begin
+ if (to_single in foptions) or (finterval = 0) then begin
   fenabled:= false;
  end;
+// if finterval <= 0 then begin
+//  fenabled:= false;
+// end;
  if assigned(fontimer) then begin
   fontimer(self);
  end;
@@ -339,7 +357,7 @@ begin
    killtimertick({$ifdef FPC}@{$endif}dotimer);
   end
   else begin
-   settimertick(finterval,{$ifdef FPC}@{$endif}dotimer);
+   settimertick(finterval,{$ifdef FPC}@{$endif}dotimer,foptions);
   end;
   sys_mutexunlock(mutex);
  end;
@@ -347,14 +365,14 @@ end;
 
 procedure tsimpletimer.setinterval(const Value: integer);
 begin
- if (value > 2000000000) or (value < -2000000000) then begin
+ if (value > 2000000000) or (value < 0{-2000000000}) then begin
   raise exception.create('Invalid timer interval ' + inttostr(value));
  end;
  finterval:= Value;
  if fenabled then begin
   sys_mutexlock(mutex);
   killtimertick({$ifdef FPC}@{$endif}dotimer);
-  settimertick(finterval,{$ifdef FPC}@{$endif}dotimer);
+  settimertick(finterval,{$ifdef FPC}@{$endif}dotimer,foptions);
   sys_mutexunlock(mutex);
  end;
 end;
@@ -367,11 +385,26 @@ begin
  end;
 end;
 
+function tsimpletimer.getsingleshot: boolean;
+begin
+ result:= to_single in foptions;
+end;
+
+procedure tsimpletimer.setsingleshot(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [to_single];
+ end
+ else begin
+  options:= options - [to_single];
+ end;
+end;
+
 { ttimer }
 
 constructor ttimer.create(aowner: tcomponent);
 begin
- ftimer:= tsimpletimer.create(1000000,nil,false);
+ ftimer:= tsimpletimer.create(1000000,nil,false,[]);
  inherited;
 end;
 
@@ -427,8 +460,12 @@ begin
  result:= ftimer.interval;
 end;
 
-procedure ttimer.setinterval(const avalue: integer);
+procedure ttimer.setinterval(avalue: integer);
 begin
+ if avalue < 0 then begin
+  include(ftimer.foptions,to_single);
+  avalue:= -avalue;
+ end;
  if not application.ismainthread and ftimer.enabled then begin
   enabled:= false;
   ftimer.interval:= avalue; //win32 settimer must be in main thread
@@ -458,6 +495,26 @@ end;
 procedure ttimer.firependingandstop;
 begin
  ftimer.firependingandstop;
+end;
+
+function ttimer.getoptions: timeroptionsty;
+begin
+ result:= ftimer.options;
+end;
+
+procedure ttimer.setoptions(const avalue: timeroptionsty);
+begin
+ ftimer.options:= avalue;
+end;
+
+function ttimer.getsingleshot: boolean;
+begin
+ result:= ftimer.singleshot;
+end;
+
+procedure ttimer.setsingleshot(const avalue: boolean);
+begin
+ ftimer.singleshot:= avalue;
 end;
 
 initialization

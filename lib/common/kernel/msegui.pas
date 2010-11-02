@@ -13818,8 +13818,10 @@ begin
 // fwindows:= tpointerlist.create;
  fcaret:= tcaret.create;
  fmouse:= tmouse.create(imouse(self));
- fhinttimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}hinttimer,false);
- fmouseparktimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}mouseparktimer,false);
+ fhinttimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}hinttimer,
+                                                           false,[to_single]);
+ fmouseparktimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}mouseparktimer,
+                                                             false,[to_single]);
  inherited;
 // initialize;
 end;
@@ -14085,7 +14087,7 @@ begin
     end;
     }
     factmousewindow:= window;
-    fmouseparktimer.interval:= -mouseparktime;
+    fmouseparktimer.interval:= mouseparktime;
     fmouseparktimer.enabled:= true;
     if ftimestamp <> 0 then begin
      if (fbutton <> mb_none) then begin
@@ -14191,7 +14193,7 @@ begin
        deactivatehint;
        fhintedwidget:= widget1;
        if fhintedwidget <> nil then begin
-        fhinttimer.interval:= -hintdelaytime;
+        fhinttimer.interval:= hintdelaytime;
         fhinttimer.enabled:= true;
        end;
       end;
@@ -14199,7 +14201,7 @@ begin
      else begin
       if (fhintedwidget <> nil) and (fhintwidget = nil) and 
                                    (kind = ek_mousemove) then begin
-       fhinttimer.interval:= -hintdelaytime;
+       fhinttimer.interval:= hintdelaytime;
        if (ow_multiplehint in fhintedwidget.foptionswidget) and
          (distance(fhintinfo.mouserefpos,abspos) > 3) then begin
         fhinttimer.enabled:= true;
@@ -15900,7 +15902,7 @@ begin
  {$endif}
   fhintwidget.show;
   if showtime <> 0 then begin
-   fhinttimer.interval:= -showtime;
+   fhinttimer.interval:= showtime;
    fhinttimer.enabled:= true;
   end;
  end;
@@ -16393,7 +16395,7 @@ begin
  with tinternalapplication(self) do begin
   if fhintedwidget = sender then begin
    deactivatehint;
-   fhinttimer.interval:= -hintdelaytime;
+   fhinttimer.interval:= hintdelaytime;
    fhinttimer.enabled:= true;
   end;
  end;

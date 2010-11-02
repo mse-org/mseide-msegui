@@ -1771,7 +1771,7 @@ end;
 procedure tdropdownlist.startrepeater(up: boolean);
 begin
  if frepeater = nil then begin
-  frepeater:= tsimpletimer.create(100000,{$ifdef FPC}@{$endif}dorepeat,true);
+  frepeater:= tsimpletimer.create(100000,{$ifdef FPC}@{$endif}dorepeat,true,[]);
  end;
  if up then begin
   include(fdropdownstate,dls_scrollup);

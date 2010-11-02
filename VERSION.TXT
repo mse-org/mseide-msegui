@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2010-11-2
+ No negative ttimer values for single shot, use options to_single instead.
+ 
 Version 2.4
 2010-11-01
 2010-10-22

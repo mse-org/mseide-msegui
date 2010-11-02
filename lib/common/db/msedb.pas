@@ -6627,10 +6627,10 @@ begin
  end
  else begin
   if ftimer = nil then begin
-   ftimer:= tsimpletimer.create(-delayus,@dorefresh,true);
+   ftimer:= tsimpletimer.create(delayus,@dorefresh,true,[to_single]);
   end
   else begin
-   ftimer.interval:= -delayus; //single shot
+   ftimer.interval:= delayus; //single shot
    ftimer.enabled:= true;
   end;
  end;

@@ -282,7 +282,7 @@ end;
 constructor tsyntaxpainter.create(aowner: tcomponent);
 begin
  frefreshlist:= trefreshinfolist.create;
- ftimer:= tsimpletimer.Create(0,{$ifdef FPC}@{$endif}dotimer,false);
+ ftimer:= tsimpletimer.Create(0,{$ifdef FPC}@{$endif}dotimer,false,[to_single]);
  flinesperslice:= defaultlinesperslice;
  fdefdefs:= tdoublemsestringdatalist.create;
  fdefaultsyntax:= -1;

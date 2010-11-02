@@ -3100,8 +3100,8 @@ begin
   killrepeater;
   if clickedbutton >= 0 then begin
    frepeatedbutton:= clickedbutton;
-   frepeater:= tsimpletimer.create(-repeatdelaytime,
-                                       {$ifdef FPC}@{$endif}dorepeat,true);
+   frepeater:= tsimpletimer.create(repeatdelaytime,
+               {$ifdef FPC}@{$endif}dorepeat,true,[to_single]);
   end;
  end;
 end;

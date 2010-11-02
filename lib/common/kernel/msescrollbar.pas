@@ -962,8 +962,8 @@ begin
      end;
      invalidateclickedarea;
      if dobuttoncommand then begin
-      frepeater:= tsimpletimer.create(-repeatdelaytime,
-                    {$ifdef FPC}@{$endif}timer,true);
+      frepeater:= tsimpletimer.create(repeatdelaytime,
+                    {$ifdef FPC}@{$endif}timer,true,[to_single]);
      end
      else begin
       if fclickedarea = sbbu_move then begin
@@ -1139,7 +1139,8 @@ procedure tcustomscrollbar.timer(const sender: tobject);
 begin
  dobuttoncommand;
  with tsimpletimer(sender) do begin
-  if interval < 0 then begin
+  if singleshot then begin
+   singleshot:= false;
    interval:= repeatrepeattime;
    enabled:= true;
   end;

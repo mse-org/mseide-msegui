@@ -190,7 +190,7 @@ constructor tdbeventcontroller.create(const aintf: idbeventcontroller);
 begin
  fintf:= aintf;
  ftimer:= tsimpletimer.create(defaultdbeventinterval,
-                 {$ifdef FPC}@{$endif}dotimer,false);
+                 {$ifdef FPC}@{$endif}dotimer,false,[]);
  inherited create;
 end;
 

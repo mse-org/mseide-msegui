@@ -316,7 +316,7 @@ end;
 constructor tcaret.create{(out intf: pointer)};
 begin
 // intf:= pointer(icaret(self));
- ftimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}timerevent,false);
+ ftimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}timerevent,false,[]);
  fbackup:= tsimplebitmap.create(false);
  fcaret:= tsimplebitmap.create(false);
  periodetime:= defaultcaretblinkperiodetime;
