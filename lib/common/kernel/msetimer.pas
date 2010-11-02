@@ -321,7 +321,7 @@ end;
 
 constructor tsimpletimer.create(const interval: integer; 
                 const ontimer: notifyeventty; const active: boolean;
-                const aoptions: timeroptionsty = []);
+                const aoptions: timeroptionsty);
 begin
  finterval:= interval;
  fontimer:= ontimer;
