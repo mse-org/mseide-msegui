@@ -715,8 +715,7 @@ procedure readstringar(const reader: treader; out ar: stringarty);
 procedure writestringar(const writer: twriter; const ar: stringarty);
 
 function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
-procedure objectbinarytotextmse(input, output: tstream);
-                //workaround for FPC bug 7813 with localized float strings
+
 function readenum(const reader: treader; const atypeinfo: ptypeinfo): integer;
 procedure writeenum(const writer: twriter; const value: integer;
                                                  const atypeinfo: ptypeinfo);
@@ -1041,26 +1040,6 @@ begin
  {$endif}
 end;
 
-procedure objectbinarytotextmse(input, output: tstream);
-                //workaround for FPC bug with localized float strings
-{$ifdef FPC}
-var
- ch1: char;
-{$endif}
-begin
- {$ifdef FPC}
- ch1:= decimalseparator;
- decimalseparator:= '.';
- try
-  objectbinarytotext(input,output);
- finally
-  decimalseparator:= ch1;
- end;  
- {$else}
-  objectbinarytotext(input,output);
- {$endif}
-end;
-
 procedure writeset(const writer: twriter; const value: tintegerset;
                             const atypeinfo: ptypeinfo);
 var
@@ -1371,7 +1350,7 @@ begin
  {$ifdef mse_debugcopycomponent}
    debugstream:= ttextstream.create;
    stream.position:= 0;
-   objectbinarytotext(stream,debugstream);
+   objectbinarytotextmse(stream,debugstream);
    debugstream.position:= 0;
    writeln(output,'***copycomponent source');
    debugstream.writetotext(output);
@@ -1401,7 +1380,7 @@ begin
    writer.Free;
    stream.position:= 0;
    debugstream.clear;
-   objectbinarytotext(stream,debugstream);
+   objectbinarytotextmse(stream,debugstream);
    debugstream.position:= 0;
    writeln(output,'***copycomponent dest');
    debugstream.writetotext(output);

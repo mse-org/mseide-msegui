@@ -777,7 +777,7 @@ function encodeselectiondata(const acell: gridcoordty;
 
 implementation
 uses
- sysutils,msestream,msesysutils,msetmpmodules,msebits;
+ sysutils,msestream,msesysutils,msetmpmodules,msebits,mseobjecttext;
 
 type
  tcustomrowstatelist1 = class(tcustomrowstatelist);
@@ -1744,7 +1744,7 @@ begin
  stream1:= tstringcopystream.create(aobjecttext);
  stream2:= tmemorystream.create;
  try
-  objecttexttobinary(stream1,stream2);
+  objecttexttobinarymse(stream1,stream2);
   stream2.position:= 0;
   stream2.readcomponent(comp1);
  finally

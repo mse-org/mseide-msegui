@@ -71,6 +71,8 @@ type
   procedure setstringvalue(const value: string);
   function getmsestringvalue(const index: integer = 0): msestring;
   procedure setmsestringvalue(const value: msestring);
+  function getvariantvalue(const index: integer = 0): variant;
+  procedure setvariantvalue(const value: variant);
   function getparenteditor: tpropertyeditor;
 
   function getmethodvalue(const index: integer = 0): tmethod;
@@ -124,6 +126,8 @@ type
    procedure setstringvalue(const value: string);
    function getmsestringvalue(const index: integer = 0): msestring;
    procedure setmsestringvalue(const value: msestring);
+   function getvariantvalue(const index: integer = 0): variant;
+   procedure setvariantvalue(const value: variant);
    
    function decodemsestring(const avalue: msestring): msestring;
    function encodemsestring(const avalue: msestring): msestring;
@@ -292,6 +296,14 @@ type
    function getvalue: msestring; override;
  end;
 
+ tvariantpropertyeditor = class(tpropertyeditor)
+  protected
+  public
+   function allequal: boolean; override;
+   procedure setvalue(const value: msestring); override;
+   function getvalue: msestring; override;
+ end;
+ 
  tenumpropertyeditor = class(tordinalpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -887,7 +899,7 @@ uses
  mseformatbmpicoread{$ifdef FPC},mseformatjpgread,mseformatpngread,
  mseformatpnmread,mseformattgaread,mseformatxpmread{$endif},
  msestat,msestatfile,msefileutils,
- msedesigner;
+ msedesigner,variants;
 
 const
  methodsortlevel = 100;
@@ -1912,6 +1924,44 @@ begin
 //   {$else}
 //    setwidestrprop(ar1[int1],fprops[0].propinfo,mstr1);  
 //   {$endif}
+   end;
+  end;    
+  modified;
+ end;
+end;
+
+function tpropertyeditor.getvariantvalue(const index: integer = 0): variant;
+begin
+ if fremote <> nil then begin
+  result:= fremote.getvariantvalue(index);
+ end
+ else begin
+  with fprops[index] do begin
+   result:= getvariantprop(instance,propinfo);
+  end;
+ end;
+end;
+
+procedure tpropertyeditor.setvariantvalue(const value: variant);
+var
+ int1: integer;
+ ar1: objectarty;
+begin
+ if fremote <> nil then begin
+  fremote.setvariantvalue(value);
+ end
+ else begin
+  ar1:= queryselectedpropinstances;
+  if ar1 = nil then begin
+   for int1:= 0 to high(fprops) do begin
+    with fprops[int1] do begin
+     setvariantprop(instance,propinfo,value);
+    end;
+   end;
+  end
+  else begin
+   for int1:= 0 to high(ar1) do begin
+    setvariantprop(ar1[int1],fprops[0].propinfo,value);  
    end;
   end;    
   modified;
@@ -4446,6 +4496,53 @@ begin
   end;
  end;
  setfloatvalue(rea1);
+end;
+
+{ tvariantpropertyeditor }
+
+function tvariantpropertyeditor.allequal: boolean;
+var
+ int1: integer;
+ var1: variant;
+begin
+ result:= inherited allequal;
+ if not result then begin
+  result:= true;
+  var1:= getvariantvalue;
+  for int1:= 1 to high(fprops) do begin
+   if var1 <> getvariantvalue(int1) then begin
+    result:= false;
+    break;
+   end;
+  end;
+ end;
+end;
+
+procedure tvariantpropertyeditor.setvalue(const value: msestring);
+var
+ var1: variant;
+begin
+ if value = '' then begin
+  fillchar(var1,sizeof(var1),0);
+  setvariantvalue(var1);
+ end
+ else begin
+  setvariantvalue(value);
+ end;
+end;
+
+function tvariantpropertyeditor.getvalue: msestring;
+var
+ var1: variant;
+begin
+ var1:= getvariantvalue;
+ result:= '';
+ if not varisnull(var1) then begin
+  try
+   result:= var1;
+  except
+  end;
+ end;
 end;
 
 { tshortcutpropertyeditor }

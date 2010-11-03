@@ -457,7 +457,7 @@ begin
  memstream:= tmemorystream.Create;
  result:= '';
  try
-  objecttexttobinary(stream,memstream);
+  objecttexttobinarymse(stream,memstream);
   memstream.Position:= 0;
   node:= tpropinfonode.Create;
   readprops(memstream,node);

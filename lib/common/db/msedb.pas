@@ -1376,11 +1376,23 @@ type
                              write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
  end;
- 
+
+ tmseparam = class(tparam)
+  private
+   procedure setasvariant(const avalue: variant);
+  published
+   property value : variant read getasvariant write setasvariant 
+                                                  stored isparamstored;
+ end;
+  
  tmseparams = class(tparams)
   private
    fisutf8: boolean;
+   function getitem(const index: integer): tmseparam;
+   procedure setitem(const index: integer; const avalue: tmseparam);
   public
+   constructor create(aowner: tpersistent); overload;
+   constructor create; overload;
    Function  ParseSQL(const SQL: mseString; const DoCreate: Boolean): mseString; overload;
    Function  ParseSQL(const SQL: mseString;
                       const DoCreate,EscapeSlash,EscapeRepeat: Boolean;
@@ -1399,6 +1411,7 @@ type
    function expandvalues(const sql: msestring): msestring; overload;
    function asdbstring(const index: integer): string;
    property isutf8: boolean read fisutf8 write fisutf8;
+   property items[index: integer]: tmseparam read getitem write setitem; default;
  end;
  
 const
@@ -1596,6 +1609,24 @@ type
     FValidChars : TFieldChars;
     FValueBuffer : Pointer;
     FValidating : Boolean;
+  end;
+
+  TCollectioncracker = class(TPersistent)
+   private
+    FItemClass: TCollectionItemClass;
+  end;
+  
+  TParamcracker = class(TCollectionItem)
+  private
+    FNativeStr: string;
+    FValue: Variant;
+    FPrecision: Integer;
+    FNumericScale: Integer;
+    FName: string;
+    FDataType: TFieldType;
+    FBound: Boolean;
+    FParamType: TParamType;
+    FSize: Integer;
   end;
   
  tdataset1 = class(tdataset);
@@ -6832,6 +6863,17 @@ end;
 
 { tmseparams }
 
+constructor tmseparams.create(aowner: tpersistent);
+begin
+ inherited create(aowner);
+ tcollectioncracker(self).fitemclass:= tmseparam;
+end;
+
+constructor tmseparams.create;
+begin
+ create(tpersistent(nil));
+end;
+
 function tmseparams.parsesql(const sql: msestring;
                const docreate,EscapeSlash,EscapeRepeat: boolean;
                const parameterstyle: tparamstyle;
@@ -7137,6 +7179,16 @@ begin
  end;
 end;
 
+function tmseparams.getitem(const index: integer): tmseparam;
+begin
+ result:= tmseparam(inherited items[index]);
+end;
+
+procedure tmseparams.setitem(const index: integer; const avalue: tmseparam);
+begin
+ inherited items[index]:= avalue;
+end;
+
 { tblobcachenode }
 
 constructor tblobcachenode.create(const akey: blobidty; const adata: string);
@@ -7192,6 +7244,14 @@ begin
  ffindnode.fkey:= akey.id;
  ffindnode.flocal:= akey.local;
  result:= find(ffindnode,tavlnode(anode));
+end;
+
+{ tmseparam }
+
+procedure tmseparam.setasvariant(const avalue: variant);
+begin
+ inherited setasvariant(avalue);
+ tparamcracker(self).fbound:= not varisclear(avalue);
 end;
 
 end.

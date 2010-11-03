@@ -492,7 +492,7 @@ uses
  designer_bmp,msesys,msewidgets,formdesigner,mseevent,objectinspector,
  msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
  pascaldesignparser,msearrayprops,rtlconsts,
- msesimplewidgets,msesysutils;
+ msesimplewidgets,msesysutils,mseobjecttext;
 
 type
  tcomponent1 = class(tcomponent);
@@ -3807,7 +3807,7 @@ begin //loadformfile
    stream2:= tmemorystream.Create;
    try
     try
-     objecttexttobinary(stream1,stream2);
+     objecttexttobinarymse(stream1,stream2);
      stream2.position:= 0;
      reader:= treader.create(stream2,4096);
      try

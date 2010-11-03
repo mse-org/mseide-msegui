@@ -1448,6 +1448,7 @@ begin
  registerpropertyeditor(typeinfo(double),nil,'',trealpropertyeditor);
  registerpropertyeditor(typeinfo(realty),nil,'',trealtypropertyeditor);
  registerpropertyeditor(typeinfo(tdatetime),nil,'',tdatetimepropertyeditor);
+ registerpropertyeditor(typeinfo(variant),nil,'',tvariantpropertyeditor);
  registerpropertyeditor(typeinfo(char),nil,'',tcharpropertyeditor);
  registerpropertyeditor(typeinfo(widechar),nil,'',twidecharpropertyeditor);
  registerpropertyeditor(typeinfo(defaultenumerationty),nil,'',tenumpropertyeditor);

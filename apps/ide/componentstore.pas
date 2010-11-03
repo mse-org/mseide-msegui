@@ -165,7 +165,7 @@ var
 implementation
 uses
  componentstore_mfm,msestream,storedcomponentinfodialog,msedatalist,msefileutils,
- sysutils,projectoptionsform,componentpaletteform;
+ sysutils,projectoptionsform,componentpaletteform,mseobjecttext;
 const
  storecaption = 'Component Store';
 type
@@ -341,7 +341,7 @@ begin
   stream1:= tstringcopystream.create(str1);
   stream2:= ttextstream.create;
   try
-   objecttexttobinary(stream1,stream2);
+   objecttexttobinarymse(stream1,stream2);
    stream2.position:= 0;
    reader1:= treader.create(stream2,4096);
    with info,treader1(reader1) do begin
@@ -413,7 +413,7 @@ begin
    str1:= mstr1;
    stream2:= ttextstream.create;
    try
-    objecttexttobinary(stream1,stream2);
+    objecttexttobinarymse(stream1,stream2);
     bo1:= true; //no error
    except
    end;

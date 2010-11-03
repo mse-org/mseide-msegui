@@ -252,7 +252,12 @@ type
    function getvalue: msestring; override;
    procedure setvalue(const value: msestring); override;
  end;
- 
+
+ tparamvaluepropertyeditor = class(tvariantpropertyeditor)
+  protected
+   procedure setvalue(const value: msestring); override;
+ end;
+  
 procedure Register;
 begin
  registercomponents('DB',[     
@@ -308,7 +313,10 @@ begin
       tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb
       ]);
  registercomponenttabhints(['DBf'],['Datafield and Data display Components']);
- registerpropertyeditor(typeinfo(tnolistdropdowncol),nil,'',tclasspropertyeditor);
+ registerpropertyeditor(typeinfo(variant),tmseparam,'value',
+                                                 tparamvaluepropertyeditor);
+ registerpropertyeditor(typeinfo(tnolistdropdowncol),nil,'',
+                                                 tclasspropertyeditor);
  registerpropertyeditor(typeinfo(tnolistdropdowncols),nil,'',
         tnolistdropdowncolpropertyeditor);
  registerpropertyeditor(typeinfo(string),nil,'datafield',
@@ -1294,6 +1302,33 @@ end;
 function tlbdropdowncolseditor.geteditorclass: propertyeditorclassty;
 begin    
  result:= tlbdropdowncolitemeditor;
+end;
+
+{ tparamvaluepropertyeditor }
+
+procedure tparamvaluepropertyeditor.setvalue(const value: msestring);
+var
+ var1: variant;
+begin
+ fillchar(var1,sizeof(var1),0);
+ if value = '' then begin
+  setvariantvalue(var1);
+ end
+ else begin
+  var1:= value;
+  case tmseparam(instance).datatype of
+   ftBoolean: setvariantvalue(boolean(var1));
+   ftsmallint: setvariantvalue(word(var1));
+   ftinteger: setvariantvalue(integer(var1));
+   ftlargeint: setvariantvalue(int64(var1));
+   ftcurrency: setvariantvalue(currency(var1));
+   ftfloat: setvariantvalue(double(var1));
+   ftdatetime: setvariantvalue(tdatetime(var1));
+   else begin
+    setvariantvalue(value);
+   end;
+  end;
+ end;   
 end;
 
 initialization

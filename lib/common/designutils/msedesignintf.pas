@@ -336,9 +336,9 @@ function getcomponentpos(const component: tcomponent): pointty;
 implementation
 uses
  msesysutils,msestream,msewidgets,msedatalist,rtlconsts,msedesigner,
- msetabs,mseapplication;
+ msetabs,mseapplication,mseobjecttext;
+ 
 type
-
  {$ifdef FPC}
   TFilercracker = class(TObject)
   private
@@ -1056,7 +1056,7 @@ begin
    try
     while textstream.position < textstream.Size do begin
      binstream.Position:= 0;
-     objecttexttobinary(textstream,binstream);
+     objecttexttobinarymse(textstream,binstream);
      binstream.Write(listend,sizeof(listend));
      binstream.Position:= 0;
      reader:= treader.create(binstream,4096);

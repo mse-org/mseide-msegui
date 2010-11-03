@@ -88,7 +88,8 @@ function loadpascform(const filename: filenamety): tpascform;
 
 implementation
 uses
- msestream,msegui,msesys,sysutils,msetmpmodules;
+ msestream,msegui,msesys,sysutils,msetmpmodules,mseobjecttext;
+ 
 type
  tmsecomponent1 = class(tmsecomponent);
  
@@ -104,7 +105,7 @@ begin
 //  result:= tpascform.create(application,false);
   stream1:= ttextstream.create(filename,fm_read);
   stream2:= tmemorystream.create;
-  objecttexttobinary(stream1,stream2);
+  objecttexttobinarymse(stream1,stream2);
   stream2.position:= 0;
   result:= tpascform(createtmpmodule('tpascform',stream2));
  finally
@@ -130,7 +131,7 @@ begin
    result:= tpascform.create(application,false);
    stream1:= ttextstream.create(filename,fm_read);
    stream2:= tmemorystream.create;
-   objecttexttobinary(stream1,stream2);
+   objecttexttobinarymse(stream1,stream2);
    stream2.position:= 0;
    reader1:= treader.create(stream2,4048);
    reader1.onsetmethodproperty:= @methlist.dosetmethodprop;

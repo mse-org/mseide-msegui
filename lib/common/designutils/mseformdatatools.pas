@@ -40,7 +40,7 @@ procedure writeconstdata(po1: pbyte; length: integer; const dataname: string;
 
 implementation
 uses
- msefileutils,sysutils,msesys;
+ msefileutils,sysutils,msesys,mseobjecttext;
 const
  formdataext = '_mfm';
  objdataname = 'objdata';
@@ -241,7 +241,7 @@ begin
   outname:= removefileext(sourcefilename) + formdataext;
   memstream:= tmemorystream.Create;
   try
-   objecttexttobinary(instream,memstream);
+   objecttexttobinarymse(instream,memstream);
    outstream:= ttextstream.createtransaction(outname+'.pas');
    try
     outstream.writeln('unit ' + unitname + formdataext+';');
