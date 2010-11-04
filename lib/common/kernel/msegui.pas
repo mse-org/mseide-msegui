@@ -99,7 +99,8 @@ type
                    //don't use widget_colorcaptinframe independent of caption
                  osk_nopropleft,osk_noproptop,     //used by tlayouter
                  osk_nopropwidth,osk_nopropheight, //used by tlayouter
-                 osk_nopropfont                    //used by tlayouter
+                 osk_nopropfont,                   //used by tlayouter
+                 osk_nolayoutcx,osk_nolayoutcy     //used by syncmaxaoutsize()
                  );
  optionsskinty = set of optionskinty;
  
@@ -2402,6 +2403,7 @@ procedure sortwidgetsxorder(var awidgets: widgetarty; const parent: twidget = ni
 procedure sortwidgetsyorder(var awidgets: widgetarty; const parent: twidget = nil);
 
 procedure syncmaxautosize(const widgets: array of twidget);
+           //checks osk_nolayoutcx, osk_nolayoutcy
 procedure syncpaintwidth(const awidgets: array of twidget;
                                const awidgetwidth: integer = -1);
                                //biggest if < 0
@@ -3046,18 +3048,29 @@ begin
   with widgets[int1] do begin
    size2:= clientsize;   
    getautopaintsize(size2);
-  end;
-  if size2.cx > size1.cx then begin
-   size1.cx:= size2.cx;
-  end;
-  if size2.cy > size1.cy then begin
-   size1.cy:= size2.cy;
+   if not (osk_nolayoutcx in optionsskin) then begin
+    if size2.cx > size1.cx then begin
+     size1.cx:= size2.cx;
+    end;
+   end;
+   if not (osk_nolayoutcy in optionsskin) then begin
+    if size2.cy > size1.cy then begin
+     size1.cy:= size2.cy;
+    end;
+   end;
   end;
  end;
  for int1:= 0 to high(widgets) do begin
   with widgets[int1] do begin
    rect1:= fwidgetrect;
-   clientsize:= size1;
+   size2:= clientsize;
+   if not (osk_nolayoutcx in optionsskin) then begin
+    size2.cx:= size1.cx;
+   end;
+   if not (osk_nolayoutcy in optionsskin) then begin
+    size2.cy:= size1.cy;
+   end;
+   clientsize:= size2;
    po1:= pos;
    if an_right in fanchors then begin
     dec(po1.x,fwidgetrect.cx-rect1.cx);

@@ -163,6 +163,7 @@ type
    fexceptclassnames: msestringarty;
    fexceptignore: booleanarty;
    fnogdbserverexit: boolean;
+   fsettingsfile: filenamety;
    function limitgridsize(const avalue: integer): integer;
    procedure setgridsizex(const avalue: integer);
    procedure setgridsizey(const avalue: integer);
@@ -231,6 +232,7 @@ type
                                                  write fexceptclassnames;
    property exceptignore: booleanarty read fexceptignore 
                                                  write fexceptignore;
+   property settingsfile: filenamety read fsettingsfile write fsettingsfile;
  end;
 {$M-}
  
@@ -524,6 +526,10 @@ type
    twidgetgrid5: twidgetgrid;
    codetemplatedirs: tfilenameedit;
    nogdbserverexit: tbooleanedit;
+   settingsfile: tfilenameedit;
+   tsimplewidget1: tsimplewidget;
+   tbutton2: tbutton;
+   tbutton3: tbutton;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);

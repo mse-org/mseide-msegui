@@ -29,6 +29,10 @@ uses
 { Object conversion routines }
 
 type
+  TObjectTextEncoding = (
+    oteDFM,
+    oteLFM
+    );
   CharToOrdFuncty = Function(var charpo: Pointer): Cardinal;
 
 function CharToOrd(var P: Pointer): Cardinal;
