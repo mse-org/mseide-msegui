@@ -810,6 +810,7 @@ begin
   SetParameters(cursor, AParams);
  end;
  with TIBCursor(cursor) do begin
+  ffetched:= false;
   if isc_dsql_execute2(@Status,@cursor.ftrans,
                         @Statement,1,in_SQLDA,fexecsqlda) <> 0 then begin
    CheckError('Execute', Status);
