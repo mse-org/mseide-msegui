@@ -94,6 +94,18 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_y = 6
         bounds_cx = 422
         anchors = [an_left, an_top, an_right]
+        ondataentered = settingsdataent
+        controller.filterlist.data = (
+          (
+            'Project Files'
+            '*.prj'
+          )
+          (
+            'All Files'
+            '*'
+          )
+        )
+        controller.defaultext = 'prj'
         reffontheight = 14
       end
       object tsimplewidget1: tsimplewidget
@@ -104,23 +116,25 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cx = 18
         bounds_cy = 20
       end
-      object tbutton2: tbutton
+      object loadbu: tbutton
         taborder = 4
         bounds_x = 432
         bounds_y = 6
         bounds_cx = 49
         bounds_cy = 20
-        state = [as_localcaption]
+        state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
         caption = 'Load'
+        onexecute = loadexe
       end
-      object tbutton3: tbutton
+      object savebu: tbutton
         taborder = 5
         bounds_x = 486
         bounds_y = 6
         bounds_cx = 49
         bounds_cy = 20
-        state = [as_localcaption]
+        state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
         caption = 'Save'
+        onexecute = saveexe
       end
     end
     object tabwidget: ttabwidget

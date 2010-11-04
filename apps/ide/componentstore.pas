@@ -532,7 +532,7 @@ begin
  fgroupfilename:= msefileutils.filepath(afilename);
  writer2:= nil;
  try
-  writer2:= tstatwriter.create(fgroupfilename,ce_utf8n);
+  writer2:= tstatwriter.create(fgroupfilename,ce_utf8n,true);
   with writer2,node do begin
    for int1:= 0 to itemlist.count - 1 do begin
     item1:= tstoredcomponent(items[int1]);
@@ -546,7 +546,7 @@ begin
     for int1:= 0 to high(far1) do begin
      with far1[int1] do begin
       if isstatechanged then begin
-       writer1:= tstatwriter.create(finfo.filepath,ce_utf8n);
+       writer1:= tstatwriter.create(finfo.filepath,ce_utf8n,true);
        try
         writer1.writesection('store'); 
         far1[int1].dostatwrite(writer1);

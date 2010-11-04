@@ -191,7 +191,7 @@ procedure tcodetemplates.savefile(const ainfo: templateinfoty);
 var
  stat: tstatwriter; 
 begin
- stat:= tstatwriter.create(ainfo.path,ce_utf8n);
+ stat:= tstatwriter.create(ainfo.path,ce_utf8n,true);
  with stat,ainfo do begin
   writesection('header');
   writemsestring('name',name);

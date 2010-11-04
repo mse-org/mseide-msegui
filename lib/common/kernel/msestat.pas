@@ -166,7 +166,8 @@ type
   public
    constructor create(const astream: ttextstream); overload;
    constructor create(const filename: filenamety; 
-                              const aencoding: charencodingty); overload;
+                              const aencoding: charencodingty;
+                              const atransaction: boolean); overload;
  
    procedure writesection(const name: msestring);
    procedure writeboolean(const name: msestring; const value: boolean);
@@ -1241,12 +1242,18 @@ begin
 end;
 
 constructor tstatwriter.create(const filename: filenamety;
-                                       const aencoding: charencodingty);
+                                       const aencoding: charencodingty;
+                                       const atransaction: boolean);
 var
  stream1: ttextstream;
 begin
  fownsstream:= true;
- stream1:= ttextstream.Create(filename,fm_create);
+ if atransaction then begin
+  stream1:= ttextstream.Createtransaction(filename);
+ end
+ else begin
+  stream1:= ttextstream.Create(filename,fm_create);
+ end;
  stream1.encoding:= aencoding;
  create(stream1);
 end;

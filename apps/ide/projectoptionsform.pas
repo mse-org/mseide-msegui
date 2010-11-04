@@ -528,8 +528,8 @@ type
    nogdbserverexit: tbooleanedit;
    settingsfile: tfilenameedit;
    tsimplewidget1: tsimplewidget;
-   tbutton2: tbutton;
-   tbutton3: tbutton;
+   loadbu: tbutton;
+   savebu: tbutton;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -564,6 +564,9 @@ type
    procedure copymessagechanged(const sender: TObject);
    procedure runcommandchange(const sender: TObject);
    procedure newprojectchildscaled(const sender: TObject);
+   procedure saveexe(const sender: TObject);
+   procedure settingsdataent(const sender: TObject);
+   procedure loadexe(const sender: TObject);
   private
    procedure activegroupchanged;
  end;
@@ -1518,7 +1521,9 @@ begin
 {$ifndef mse_no_db}{$ifdef FPC}
   updatememorystatstream('dbfieldeditor',dbfieldeditorstatname);
 {$endif}{$endif}
+
   updateprojectsettings(statfiler);
+
   if not iswriter then begin
    if guitemplatesmo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
     macrogroup:= int1-1;
@@ -1724,6 +1729,7 @@ begin
   fo.def.gridvalues:= defines;
   fo.defon.gridvalues:= defineson;
  end;
+ fo.settingsdataent(nil);
 end;
 
 procedure storemacros(fo: tprojectoptionsfo);
@@ -1909,7 +1915,7 @@ begin
  if filename = '' then begin
   filename:= projectoptions.projectfilename;
  end;
- statwriter:= tstatwriter.create(filename,ce_utf8n);
+ statwriter:= tstatwriter.create(filename,ce_utf8n,true);
  try
   updateprojectoptions(statwriter,filename);
  finally
@@ -2217,6 +2223,55 @@ end;
 procedure tprojectoptionsfo.newprojectchildscaled(const sender: TObject);
 begin
  placeyorder(4,[4,4],[scriptbeforecopy,scriptaftercopy,copygrid],0);
+end;
+
+procedure tprojectoptionsfo.saveexe(const sender: TObject);
+var
+ stat1: tstatwriter;
+begin
+ if findfile(settingsfile.value) then begin
+  if not askyesno('File "'+settingsfile.value+'" exists.'+lineend+
+   'Do you want to overwrite?') then begin
+   exit;
+  end;
+ end;
+ stat1:= tstatwriter.create(settingsfile.value,ce_utf8n,true);
+ try
+  stat1.setsection('projectoptions');
+  updateprojectsettings(stat1);
+ finally
+  stat1.free;
+ end;
+end;
+
+procedure tprojectoptionsfo.loadexe(const sender: TObject);
+var
+ fnambefore: filenamety;
+ stat1: tstatreader;
+begin
+ fnambefore:= settingsfile.value;
+ if askyesno('Do you want to replace the settings by'+lineend+
+              '"'+fnambefore+'"?') then begin
+  stat1:= tstatreader.create(fnambefore,ce_utf8n);
+  try
+   initprojectoptions;
+   stat1.setsection('projectoptions');
+   updateprojectsettings(stat1);
+  finally
+   stat1.free;
+  end;
+  projectoptionstoform(self);
+  settingsfile.value:= fnambefore;
+ end;
+end;
+
+procedure tprojectoptionsfo.settingsdataent(const sender: TObject);
+var
+ bo1: boolean;
+begin
+ bo1:= settingsfile.value <> '';
+ savebu.enabled:= bo1;
+ loadbu.enabled:= bo1;
 end;
 
 { tprojectoptions }
