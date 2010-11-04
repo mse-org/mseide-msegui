@@ -870,7 +870,8 @@ begin
   frowsreturned:= -1;
   frowsaffected:= -1;
   curtuple:= -1;
-  res:= pqexec(tr.fconn,pchar(asql));
+//  res:= pqexec(tr.fconn,pchar(asql));
+  res:= pqexecparams(tr.fconn,pchar(asql),0,nil,nil,nil,nil,1);
   
   frowsaffected:= strtointdef(pqcmdtuples(res),-1);
   checkerror(tr.fconn,res,'Execution of query failed');
