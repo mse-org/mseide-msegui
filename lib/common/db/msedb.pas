@@ -1376,13 +1376,17 @@ type
                              write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
  end;
-
+ 
+ {$define mse_withpublishedparamvalue}
+ 
  tmseparam = class(tparam)
+ {$ifdef mse_withpublishedparamvalue}
   private
    procedure setasvariant(const avalue: variant);
   published
    property value : variant read getasvariant write setasvariant 
                                                   stored isparamstored;
+ {$endif mse_withpublishedparamvalue}
  end;
   
  tmseparams = class(tparams)
@@ -7248,10 +7252,12 @@ end;
 
 { tmseparam }
 
+{$ifdef mse_withpublishedparamvalue}
 procedure tmseparam.setasvariant(const avalue: variant);
 begin
  inherited setasvariant(avalue);
  tparamcracker(self).fbound:= not varisclear(avalue);
 end;
+{$endif mse_withpublishedparamvalue}
 
 end.
