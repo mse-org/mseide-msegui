@@ -1327,55 +1327,12 @@ begin
  end;
 end;
 
-procedure updateprojectoptions(const statfiler: tstatfiler;
-                  const afilename: filenamety);
+procedure updateprojectsettings(const statfiler: tstatfiler);
 var
- int1,int2,int3: integer;
+ int1: integer;
 begin
  with statfiler,projectoptions,t do begin
-  if iswriter then begin
-   projectdir:= msefileutils.getcurrentdir;
-   with mainfo,mainmenu1.menu.itembyname('view') do begin
-    int3:= formmenuitemstart;
-    int2:= count - int3;
-    setlength(modulenames,int2);
-    setlength(moduletypes,int2);
-    setlength(modulefilenames,int2);
-    for int1:= 0 to high(modulenames) do begin
-     with pmoduleinfoty(submenu[int1+int3].tagpointer)^ do begin
-      modulenames[int1]:= struppercase(instance.name);
-      moduletypes[int1]:= struppercase(string(moduleclassname));
-      modulefilenames[int1]:= filename;
-     end;
-    end;
-   end;
-  end;
-  registeredcomponents.updatestat(statfiler);
-  setsection('projectoptions');
-  updatevalue('projectdir',projectdir);
-  updatevalue('projectfilename',projectfilename);
-  projectfilename:= afilename;
-  updatememorystatstream('findinfiledialog',findinfiledialogstatname);
-  updatememorystatstream('finddialog',finddialogstatname);
-  updatememorystatstream('replacedialog',replacedialogstatname);
-  updatememorystatstream('options',optionsstatname);
-  updatememorystatstream('settaborder',settaborderstatname);
-  updatememorystatstream('setcreateorder',setcreateorderstatname);
-  updatememorystatstream('programparameters',programparametersstatname);
-  updatememorystatstream('settings',settingsstatname);
-  updatememorystatstream('printer',printerstatname);
-  updatememorystatstream('imageselector',imageselectorstatname);
-  updatememorystatstream('fadeeditor',fadeeditorstatname);
-  updatememorystatstream('stringlisteditor',stringlisteditorstatname);
-  updatememorystatstream('texteditor',texteditorstatname);
-  updatememorystatstream('colordialog',colordialogstatname);
-  updatememorystatstream('bmpfiledialog',bmpfiledialogstatname);
-  updatememorystatstream('codetemplateselect',codetemplateselectstatname);
-  updatememorystatstream('codetemplateparam',codetemplateparamstatname);
-  updatememorystatstream('codetemplateedit',codetemplateeditstatname);
-{$ifndef mse_no_db}{$ifdef FPC}
-  updatememorystatstream('dbfieldeditor',dbfieldeditorstatname);
-{$endif}{$endif}
+  
   if iswriter then begin
    mainfo.statoptions.writestat(tstatwriter(statfiler));
    with tstatwriter(statfiler) do begin
@@ -1503,6 +1460,59 @@ begin
    setlength(newfosources,int1);
    setlength(newfoforms,int1);
   end;
+ end;
+end;
+
+procedure updateprojectoptions(const statfiler: tstatfiler;
+                  const afilename: filenamety);
+var
+ int1,int2,int3: integer;
+begin
+ with statfiler,projectoptions,t do begin
+  if iswriter then begin
+   projectdir:= msefileutils.getcurrentdir;
+   with mainfo,mainmenu1.menu.itembyname('view') do begin
+    int3:= formmenuitemstart;
+    int2:= count - int3;
+    setlength(modulenames,int2);
+    setlength(moduletypes,int2);
+    setlength(modulefilenames,int2);
+    for int1:= 0 to high(modulenames) do begin
+     with pmoduleinfoty(submenu[int1+int3].tagpointer)^ do begin
+      modulenames[int1]:= struppercase(instance.name);
+      moduletypes[int1]:= struppercase(string(moduleclassname));
+      modulefilenames[int1]:= filename;
+     end;
+    end;
+   end;
+  end;
+  registeredcomponents.updatestat(statfiler);
+  setsection('projectoptions');
+  updatevalue('projectdir',projectdir);
+  updatevalue('projectfilename',projectfilename);
+  projectfilename:= afilename;
+  updatememorystatstream('findinfiledialog',findinfiledialogstatname);
+  updatememorystatstream('finddialog',finddialogstatname);
+  updatememorystatstream('replacedialog',replacedialogstatname);
+  updatememorystatstream('options',optionsstatname);
+  updatememorystatstream('settaborder',settaborderstatname);
+  updatememorystatstream('setcreateorder',setcreateorderstatname);
+  updatememorystatstream('programparameters',programparametersstatname);
+  updatememorystatstream('settings',settingsstatname);
+  updatememorystatstream('printer',printerstatname);
+  updatememorystatstream('imageselector',imageselectorstatname);
+  updatememorystatstream('fadeeditor',fadeeditorstatname);
+  updatememorystatstream('stringlisteditor',stringlisteditorstatname);
+  updatememorystatstream('texteditor',texteditorstatname);
+  updatememorystatstream('colordialog',colordialogstatname);
+  updatememorystatstream('bmpfiledialog',bmpfiledialogstatname);
+  updatememorystatstream('codetemplateselect',codetemplateselectstatname);
+  updatememorystatstream('codetemplateparam',codetemplateparamstatname);
+  updatememorystatstream('codetemplateedit',codetemplateeditstatname);
+{$ifndef mse_no_db}{$ifdef FPC}
+  updatememorystatstream('dbfieldeditor',dbfieldeditorstatname);
+{$endif}{$endif}
+  updateprojectsettings(statfiler);
   if not iswriter then begin
    if guitemplatesmo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
     macrogroup:= int1-1;

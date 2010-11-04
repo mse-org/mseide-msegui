@@ -382,7 +382,6 @@ object componentstorefo: tcomponentstorefo
     controller.options = [fdo_checkexist, fdo_savelastdir]
     controller.captionopen = 'Load Component Store'
     controller.captionsave = 'New Component Store'
-    dialogkind = fdk_none
     left = 40
     top = 136
   end
@@ -397,7 +396,6 @@ object componentstorefo: tcomponentstorefo
     controller.defaultext = 'stg'
     controller.captionopen = 'Open Store Group'
     controller.captionsave = 'Save Store Group'
-    dialogkind = fdk_none
     left = 40
     top = 168
   end
@@ -405,11 +403,11 @@ object componentstorefo: tcomponentstorefo
     caption = 'Add Componentfile'
     onexecute = doaddfile
     onupdate = pasteupda
-    left = 184
-    top = 120
+    left = 176
+    top = 112
   end
   object compfiledialog: tfiledialog
-    statfile = mainfo.mainstatfile
+    statfile = mainfo.projectstatfile
     controller.filterlist.data = (
       (
         'Component File'
@@ -423,7 +421,6 @@ object componentstorefo: tcomponentstorefo
     controller.defaultext = 'cmp'
     controller.options = [fdo_checkexist, fdo_savelastdir]
     controller.captionopen = 'Select Component File'
-    dialogkind = fdk_none
     left = 40
     top = 200
   end
