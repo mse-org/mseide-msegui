@@ -2389,7 +2389,7 @@ var
  stream1: ttextstream;
 begin
  if askyesno('Do you want to replace the settings by'+lineend+
-              '"'+settingsfile.value+'"?') then begin
+              '"'+settingsfile.value+'"?','WARNING') then begin
   savevalues(self,buffer);
   savestat(stream1);
   try
@@ -2416,7 +2416,7 @@ var
 begin
  if findfile(settingsfile.value) then begin
   if not askyesno('File "'+settingsfile.value+'" exists.'+lineend+
-   'Do you want to overwrite?') then begin
+   'Do you want to overwrite?','WARNING') then begin
    exit;
   end;
  end;
