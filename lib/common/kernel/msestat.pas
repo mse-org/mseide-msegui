@@ -44,7 +44,8 @@ type
   protected
    function varname(const intf: istatfile): msestring;
   public
-   constructor create(const astream: ttextstream);
+   constructor create(const astream: ttextstream;
+                            const aencoding: charencodingty = ce_utf8n);
    destructor destroy; override;
    function arrayname(const name: msestring; index: integer): msestring;
    function iswriter: boolean;
@@ -107,9 +108,10 @@ type
    function findvar(const name: msestring; var value: msestring;
                         out isarray: boolean): boolean; overload; //true if ok
   public
-   constructor create(const astream: ttextstream); overload;
+   constructor create(const astream: ttextstream;
+                      const aencoding: charencodingty = ce_utf8n); overload;
    constructor create(const filename: filenamety;
-                      const aencoding: charencodingty); overload;
+                      const aencoding: charencodingty = ce_utf8n); overload;
    destructor destroy; override;
    function sections: msestringarty;
    function findsection(const name: msestring): boolean; //true if found
@@ -164,10 +166,11 @@ type
    procedure writeval(const name: msestring; const avalue: msestring);
    procedure writelistval(const avalue: msestring);
   public
-   constructor create(const astream: ttextstream); overload;
+   constructor create(const astream: ttextstream;
+                              const aencoding: charencodingty = ce_utf8n); overload;
    constructor create(const filename: filenamety; 
-                              const aencoding: charencodingty;
-                              const atransaction: boolean); overload;
+                              const aencoding: charencodingty = ce_utf8n;
+                              const atransaction: boolean = true); overload;
  
    procedure writesection(const name: msestring);
    procedure writeboolean(const name: msestring; const value: boolean);
@@ -278,14 +281,16 @@ end;
 
 { tstatfiler }                                                          
 
+constructor tstatfiler.create(const astream: ttextstream;
+                              const aencoding: charencodingty = ce_utf8n);
+begin
+ fstream:= astream;
+ fstream.encoding:= aencoding;
+end;
+
 function tstatfiler.arrayname(const name: msestring; index: integer): msestring;
 begin
  result:= name + '_'+inttostr(index);
-end;
-
-constructor tstatfiler.create(const astream: ttextstream);
-begin
- fstream:= astream;
 end;
 
 destructor tstatfiler.destroy;
@@ -496,7 +501,8 @@ end;
 
 { tstatreader }
 
-constructor tstatreader.create(const astream: ttextstream);
+constructor tstatreader.create(const astream: ttextstream;
+                                  const aencoding: charencodingty = ce_utf8n);
 begin
  inherited;
  fsectionlist:= thashedmsestrings.create;
@@ -504,14 +510,14 @@ begin
 end;
 
 constructor tstatreader.create(const filename: filenamety;
-                               const aencoding: charencodingty);
+                               const aencoding: charencodingty = ce_utf8n);
 var
  stream1: ttextstream;
 begin
  fownsstream:= true;
  stream1:= ttextstream.Create(filename,fm_read);
- stream1.encoding:= aencoding;
- create(stream1);
+// stream1.encoding:= aencoding;
+ create(stream1,aencoding);
 end;
 
 destructor tstatreader.destroy;
@@ -1235,15 +1241,16 @@ end;
 }
 { tstatwriter }
 
-constructor tstatwriter.create(const astream: ttextstream);
+constructor tstatwriter.create(const astream: ttextstream;
+                                const aencoding: charencodingty = ce_utf8n);
 begin
  fiswriter:= true;
  inherited;
 end;
 
 constructor tstatwriter.create(const filename: filenamety;
-                                       const aencoding: charencodingty;
-                                       const atransaction: boolean);
+                               const aencoding: charencodingty = ce_utf8n;
+                                       const atransaction: boolean = true);
 var
  stream1: ttextstream;
 begin
@@ -1254,8 +1261,7 @@ begin
  else begin
   stream1:= ttextstream.Create(filename,fm_create);
  end;
- stream1.encoding:= aencoding;
- create(stream1);
+ create(stream1,aencoding);
 end;
 
 procedure tstatwriter.writesection(const name: msestring);

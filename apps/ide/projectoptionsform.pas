@@ -1066,7 +1066,7 @@ begin
  setlength(result,int2);
 end;
 
-procedure initprojectoptions;
+procedure initpr(const expand: boolean);
 const 
  alloptionson = 1+2+4+8+16+32;
  unitson = 1+2+4+8+16+32+$10000;
@@ -1080,28 +1080,31 @@ begin
  fillchar(projectoptions,sizeof(projectoptions),0);
  projectoptions.o:= tprojectoptions.create;
  with projectoptions,t do begin
-  deletememorystatstream(findinfiledialogstatname);
-  deletememorystatstream(finddialogstatname);
-  deletememorystatstream(replacedialogstatname);
-  deletememorystatstream(optionsstatname);
-  deletememorystatstream(settaborderstatname);
-  deletememorystatstream(setcreateorderstatname);
-  deletememorystatstream(programparametersstatname);
-  deletememorystatstream(printerstatname);
-  deletememorystatstream(imageselectorstatname);
-  deletememorystatstream(stringlisteditorstatname);
-  deletememorystatstream(texteditorstatname);
-  deletememorystatstream(colordialogstatname);
-  deletememorystatstream(bmpfiledialogstatname);
-  deletememorystatstream(fadeeditorstatname);
-  deletememorystatstream(codetemplateselectstatname);
-  deletememorystatstream(codetemplateparamstatname);
-  deletememorystatstream(codetemplateeditstatname);
-  {$ifndef mse_no_db}{$ifdef FPC}
-  deletememorystatstream(dbfieldeditorstatname);
-  {$endif}{$endif}
-  modified:= false;
-  savechecked:= false;
+  if expand then begin
+   deletememorystatstream(findinfiledialogstatname);
+   deletememorystatstream(finddialogstatname);
+   deletememorystatstream(replacedialogstatname);
+   deletememorystatstream(optionsstatname);
+   deletememorystatstream(settaborderstatname);
+   deletememorystatstream(setcreateorderstatname);
+   deletememorystatstream(programparametersstatname);
+   deletememorystatstream(printerstatname);
+   deletememorystatstream(imageselectorstatname);
+   deletememorystatstream(stringlisteditorstatname);
+   deletememorystatstream(texteditorstatname);
+   deletememorystatstream(colordialogstatname);
+   deletememorystatstream(bmpfiledialogstatname);
+   deletememorystatstream(fadeeditorstatname);
+   deletememorystatstream(codetemplateselectstatname);
+   deletememorystatstream(codetemplateparamstatname);
+   deletememorystatstream(codetemplateeditstatname);
+   {$ifndef mse_no_db}{$ifdef FPC}
+   deletememorystatstream(dbfieldeditorstatname);
+   {$endif}{$endif}
+   modified:= false;
+   savechecked:= false;
+   findreplaceinfo.find.options:= [so_caseinsensitive];
+  end;
   sigsettings:= defaultsigsettings;
   ignoreexceptionclasses:= nil;
 
@@ -1127,7 +1130,6 @@ begin
   macroon:= nil;
   macronames:= nil;
   macrovalues:= nil;
-  findreplaceinfo.find.options:= [so_caseinsensitive];
   mainfile:= '';
   targetfile:= '';
   messageoutputfile:= '';
@@ -1293,8 +1295,14 @@ begin
   newfoforms[9]:= '${TEMPLATEDIR}default/inheritedform.mfm';
  
  end;
- 
- expandprojectmacros;
+ if expand then begin 
+  expandprojectmacros;
+ end;
+end;
+
+procedure initprojectoptions;
+begin
+ initpr(true);
 end;
 
 procedure projectoptionsmodified;
@@ -2225,9 +2233,186 @@ begin
  placeyorder(4,[4,4],[scriptbeforecopy,scriptaftercopy,copygrid],0);
 end;
 
+type
+ valuebufferty = record
+  settingsfile: filenamety;
+  projectfilename: filenamety;
+  projectdir: filenamety;
+
+  showgrid: boolean;
+  snaptogrid: boolean;
+  moveonfirstclick: boolean;
+  gridsizex: integer;
+  gridsizey: integer;
+  autoindent: boolean;
+  blockindent: integer;
+  rightmarginon: boolean;
+  rightmarginchars: integer;
+  scrollheight: integer;
+  tabstops: integer;
+  spacetabs: boolean;
+  tabindent: boolean;
+  editfontname: string;
+  editfontheight: integer;
+  editfontwidth: integer;
+  editfontextraspace: integer;
+  editfontcolor: integer;
+  editbkcolor: integer;
+  statementcolor: integer;
+  editfontantialiased: boolean;
+  editmarkbrackets: boolean;
+  backupfilecount: integer;
+  encoding: integer;
+  codetemplatedirs: msestringarty;
+
+  sourcefilemasks: msestringarty;
+  syntaxdeffiles: msestringarty;
+  filemasknames: msestringarty;
+  filemasks: msestringarty;
+ end;
+
+procedure savevalues(fo: tprojectoptionsfo; out buffer: valuebufferty);
+begin
+ with buffer do begin
+  settingsfile:= fo.settingsfile.value;
+  projectfilename:= projectoptions.projectfilename;
+  projectdir:= projectoptions.projectdir;
+
+  showgrid:= fo.showgrid.value;
+  snaptogrid:= fo.snaptogrid.value;
+  moveonfirstclick:= fo.moveonfirstclick.value;
+  gridsizex:= fo.gridsizex.value;
+  gridsizey:= fo.gridsizey.value;
+  autoindent:= fo.autoindent.value;
+  blockindent:= fo.blockindent.value;
+  rightmarginon:= fo.rightmarginon.value;
+  rightmarginchars:= fo.rightmarginchars.value;
+  scrollheight:= fo.scrollheight.value;
+  tabstops:= fo.tabstops.value;
+  spacetabs:= fo.spacetabs.value;
+  tabindent:= fo.tabindent.value;
+  editfontname:= fo.editfontname.value;
+  editfontheight:= fo.editfontheight.value;
+  editfontwidth:= fo.editfontwidth.value;
+  editfontextraspace:= fo.editfontextraspace.value;
+  editfontcolor:= fo.editfontcolor.value;
+  editbkcolor:= fo.editbkcolor.value;
+  statementcolor:= fo.statementcolor.value;
+  editfontantialiased:= fo.editfontantialiased.value;
+  editmarkbrackets:= fo.editmarkbrackets.value;
+  backupfilecount:= fo.backupfilecount.value;
+  encoding:= fo.encoding.value;
+  codetemplatedirs:= fo.codetemplatedirs.gridvalues;
+
+  sourcefilemasks:= fo.filefiltergrid[0].datalist.asarray;
+  syntaxdeffiles:= fo.grid[0].datalist.asarray;
+  filemasknames:= fo.filefiltergrid[1].datalist.asarray;
+  filemasks:= fo.grid[1].datalist.asarray;
+ end;
+end;
+
+procedure restorevalues(fo: tprojectoptionsfo; const buffer: valuebufferty);
+begin
+ with buffer do begin
+  fo.settingsfile.value:= settingsfile;
+  projectoptions.projectfilename:= projectfilename;
+  projectoptions.projectdir:= projectdir;
+
+  fo.showgrid.value:= showgrid;
+  fo.snaptogrid.value:= snaptogrid;
+  fo.moveonfirstclick.value:= moveonfirstclick;
+  fo.gridsizex.value:= gridsizex;
+  fo.gridsizey.value:= gridsizey;
+  fo.autoindent.value:= autoindent;
+  fo.blockindent.value:= blockindent;
+  fo.rightmarginon.value:= rightmarginon;
+  fo.rightmarginchars.value:= rightmarginchars;
+  fo.scrollheight.value:= scrollheight;
+  fo.tabstops.value:= tabstops;
+  fo.spacetabs.value:= spacetabs;
+  fo.tabindent.value:= tabindent;
+  fo.editfontname.value:= editfontname;
+  fo.editfontheight.value:= editfontheight;
+  fo.editfontwidth.value:= editfontwidth;
+  fo.editfontextraspace.value:= editfontextraspace;
+  fo.editfontcolor.value:= editfontcolor;
+  fo.editbkcolor.value:= editbkcolor;
+  fo.statementcolor.value:= statementcolor;
+  fo.editfontantialiased.value:= editfontantialiased;
+  fo.editmarkbrackets.value:= editmarkbrackets;
+  fo.backupfilecount.value:= backupfilecount;
+  fo.encoding.value:= encoding;
+  fo.codetemplatedirs.gridvalues:= codetemplatedirs;
+
+  fo.filefiltergrid[0].datalist.asarray:= sourcefilemasks;
+  fo.grid[0].datalist.asarray:= syntaxdeffiles;
+  fo.filefiltergrid[1].datalist.asarray:= filemasknames;
+  fo.grid[1].datalist.asarray:= filemasks;
+ end;
+ fo.fontondataentered(nil);
+ fo.settingsdataent(nil);
+end;
+
+procedure savestat(out astream: ttextstream);
+var
+ write1: tstatwriter;
+begin
+ astream:= ttextstream.create; //memory stream
+ write1:= tstatwriter.create(astream,ce_utf8n);
+ try
+  write1.setsection('projectoptions');
+  updateprojectsettings(write1); //save projectoptions state
+ finally
+  write1.free;
+ end;
+end;
+
+procedure restorestat(var astream: ttextstream);
+var
+ read1: tstatreader;
+begin
+ astream.position:= 0;
+ read1:= tstatreader.create(astream,ce_utf8n);
+ try
+  read1.setsection('projectoptions');
+  updateprojectsettings(read1); //restore projectoptions state
+ finally
+  read1.free;
+  astream.free;
+ end;
+end;
+
+procedure tprojectoptionsfo.loadexe(const sender: TObject);
+var
+ read1: tstatreader;
+ buffer: valuebufferty;
+ stream1: ttextstream;
+begin
+ if askyesno('Do you want to replace the settings by'+lineend+
+              '"'+settingsfile.value+'"?') then begin
+  savevalues(self,buffer);
+  savestat(stream1);
+  try
+   read1:= tstatreader.create(buffer.settingsfile,ce_utf8n);
+   try
+    initpr(false);
+    read1.setsection('projectoptions');
+    updateprojectsettings(read1);
+   finally
+    read1.free;
+   end;
+   projectoptionstoform(self);
+   restorevalues(self,buffer);
+  finally
+   restorestat(stream1);
+  end;
+ end;
+end;
+
 procedure tprojectoptionsfo.saveexe(const sender: TObject);
 var
  stat1: tstatwriter;
+ stream1: ttextstream;
 begin
  if findfile(settingsfile.value) then begin
   if not askyesno('File "'+settingsfile.value+'" exists.'+lineend+
@@ -2237,31 +2422,13 @@ begin
  end;
  stat1:= tstatwriter.create(settingsfile.value,ce_utf8n,true);
  try
+  savestat(stream1);
+  formtoprojectoptions(self);
   stat1.setsection('projectoptions');
   updateprojectsettings(stat1);
  finally
   stat1.free;
- end;
-end;
-
-procedure tprojectoptionsfo.loadexe(const sender: TObject);
-var
- fnambefore: filenamety;
- stat1: tstatreader;
-begin
- fnambefore:= settingsfile.value;
- if askyesno('Do you want to replace the settings by'+lineend+
-              '"'+fnambefore+'"?') then begin
-  stat1:= tstatreader.create(fnambefore,ce_utf8n);
-  try
-   initprojectoptions;
-   stat1.setsection('projectoptions');
-   updateprojectsettings(stat1);
-  finally
-   stat1.free;
-  end;
-  projectoptionstoform(self);
-  settingsfile.value:= fnambefore;
+  restorestat(stream1);
  end;
 end;
 

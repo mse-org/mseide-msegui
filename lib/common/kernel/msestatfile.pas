@@ -252,12 +252,12 @@ begin
      end;
      stream1:= ttextstream.Create(floadedfile,fm_read);
     end;
-    stream1.encoding:= fencoding;
+//    stream1.encoding:= fencoding;
    except
     floadedfile:= '';
    end;
   end;
-  areader:= tstatreader.create(stream1);
+  areader:= tstatreader.create(stream1,fencoding);
   try
    if assigned(fonstatread) or assigned(fonstatupdate) or
                                     (fsavedmemoryfiles <> '') then begin
@@ -377,13 +377,13 @@ begin
     raise;
    end;
   end;
-  stream1.encoding:= fencoding;
+//  stream1.encoding:= fencoding;
  end;
  if stream1 = nil then begin
   exit;
  end;
  try
-  awriter:= tstatwriter.create(stream1);
+  awriter:= tstatwriter.create(stream1,fencoding);
   bo1:= false;
   try
    if (stream1.handle <> invalidfilehandle) and 

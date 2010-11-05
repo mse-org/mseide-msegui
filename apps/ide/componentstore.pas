@@ -830,8 +830,8 @@ var
  writer1: tstatwriter;
 begin
  stream1:= ttextstream.create; //memory stream
- writer1:= tstatwriter.create(stream1);
- stream1.encoding:= ce_utf8n;
+ writer1:= tstatwriter.create(stream1,ce_utf8n);
+// stream1.encoding:= ce_utf8n;
  try
   writer1.writesection('nodecopy');
   writer1.writemsestring('signature',nodecopysig);
@@ -856,8 +856,8 @@ begin
   stream1:= nil;
   try
    stream1:= ttextstream.createdata(stringtoutf8(mstr1));
-   stream1.encoding:= ce_utf8n;
-   reader1:= tstatreader.create(stream1);
+//   stream1.encoding:= ce_utf8n;
+   reader1:= tstatreader.create(stream1,ce_utf8n);
    if reader1.findsection('nodecopy') and 
         (reader1.readmsestring('signature','') = nodecopysig) then begin
     node1:= tstoredcomponent.create(true);
