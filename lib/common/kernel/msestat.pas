@@ -285,7 +285,9 @@ constructor tstatfiler.create(const astream: ttextstream;
                               const aencoding: charencodingty = ce_utf8n);
 begin
  fstream:= astream;
- fstream.encoding:= aencoding;
+ if fstream <> nil then begin
+  fstream.encoding:= aencoding;
+ end;
 end;
 
 function tstatfiler.arrayname(const name: msestring; index: integer): msestring;
