@@ -106,7 +106,7 @@ object projectoptionsfo: tprojectoptionsfo
           )
         )
         controller.defaultext = 'prj'
-        controller.captionopen = 'Select Settings File'
+        controller.captionopen = 'Enter Settings File'
         reffontheight = 14
       end
       object tsimplewidget1: tsimplewidget
