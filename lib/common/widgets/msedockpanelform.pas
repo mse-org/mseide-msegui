@@ -165,29 +165,31 @@ begin
   if fmenunamepath <> '' then begin
    item1:= fmenu.menu.itembynames(splitstring(fmenunamepath,'.'));
   end;
-  if aname = '' then begin
-   setlength(ar1,fpanellist.count);
-   for int1:= 0 to high(ar1) do begin
-    ar1[int1]:= tdockpanelform(fpanellist[int1]).fnameindex;
-   end;
-   sortarray(ar1);
-   int2:= length(ar1);
-   for int1:= 0 to high(ar1) do begin //find first gap
-    if ar1[int1] <> int1 then begin
-     int2:= int1;
-     break;
-    end;
-   end;
-  end
-  else begin
-   int2:= strtoint(copy(aname,6,bigint))-1;
-  end;
  end;
+ if aname = '' then begin
+  setlength(ar1,fpanellist.count);
+  for int1:= 0 to high(ar1) do begin
+   ar1[int1]:= tdockpanelform(fpanellist[int1]).fnameindex;
+  end;
+  sortarray(ar1);
+  int2:= length(ar1);
+  for int1:= 0 to high(ar1) do begin //find first gap
+   if ar1[int1] <> int1 then begin
+    int2:= int1;
+    break;
+   end;
+  end;
+ end
+ else begin
+  int2:= strtoint(copy(aname,6,bigint))-1;
+ end;
+
  pacla1:= tdockpanelform;
  if canevent(tmethod(fongetpanelclass)) then begin
   fongetpanelclass(self,pacla1);
  end;
  result:= pacla1.create(self);
+
  int1:= int2 + 1;
  if aname = '' then begin
   aname:= 'panel'+inttostr(int1);
@@ -200,10 +202,10 @@ begin
   end;
   updatecaption('');
  end;
- if int2 > item1.count - 2 then begin
-  int2:= item1.count - 2;
- end;
  if item1 <> nil then begin
+  if int2 > item1.count - 2 then begin
+   int2:= item1.count - 2;
+  end;
   item1.submenu.insert(int2,result.fmenuitem);
  end;
  if canevent(tmethod(foncreatepanel)) then begin
@@ -307,30 +309,34 @@ begin
  if acaption = '' then begin
   acaption:= 'Panel';
  end;
- with fmenuitem do begin
-  onexecute:= {$ifdef FPC}@{$endif}showexecute;
-  if fnameindex < 9 then begin
-   shortcut:= (ord(key_f1) or key_modctrl) + fnameindex;
-   acaption:= acaption + ' &' + inttostr(fnameindex+1);
-  end
-  else begin
-   shortcut:= 0;
+ if fmenuitem <> nil then begin
+  with fmenuitem do begin
+   onexecute:= {$ifdef FPC}@{$endif}showexecute;
+   if fnameindex < 9 then begin
+    shortcut:= (ord(key_f1) or key_modctrl) + fnameindex;
+    acaption:= acaption + ' &' + inttostr(fnameindex+1);
+   end
+   else begin
+    shortcut:= 0;
+   end;
+   caption:= acaption;
+   if (fcontroller <> nil) and 
+                  fcontroller.canevent(tmethod(fcontroller.fonupdatemenu)) then begin
+    fcontroller.fonupdatemenu(fcontroller,self,fmenuitem);
+   end;
+   if shortcut <> 0 then begin
+    acaption:= acaption + ' ('+encodeshortcutname(shortcut)+')';
+   end;
   end;
-  caption:= acaption;
-  if (fcontroller <> nil) and 
-                 fcontroller.canevent(tmethod(fcontroller.fonupdatemenu)) then begin
-   fcontroller.fonupdatemenu(fcontroller,self,fmenuitem);
-  end;
-  if shortcut <> 0 then begin
-   acaption:= acaption + ' ('+encodeshortcutname(shortcut)+')';
-//   acaption:= acaption + ' (Ctrl+F' + inttostr(fnameindex+1)+')';
-  end;
-  if (fcontroller <> nil) and 
-            fcontroller.canevent(tmethod(fcontroller.fonupdatecaption)) then begin
-   fcontroller.fonupdatecaption(fcontroller,self,acaption);
-  end;
-  self.caption:= acaption;
+ end
+ else begin
+  acaption:= acaption+' '+inttostr(fnameindex+1);
  end;
+ if (fcontroller <> nil) and 
+           fcontroller.canevent(tmethod(fcontroller.fonupdatecaption)) then begin
+  fcontroller.fonupdatecaption(fcontroller,self,acaption);
+ end;
+ caption:= acaption;
 end;
 
 procedure tdockpanelform.showexecute(const sender: tobject);
