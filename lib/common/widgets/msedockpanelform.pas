@@ -10,20 +10,40 @@ uses
 type
  tdockpanelcontroller = class;
  
- tpanelfo = class(tdockform)
-   procedure onclo(const sender: TObject);
-   procedure panellayoutchanged(const sender: tdockcontroller);
+ tdockpanelform = class(tdockformwidget)
   private
    fmenuitem: tmenuitem;
    fnameindex: integer; //0 for unnumbered
+   fcontroller: tdockpanelcontroller;
    procedure showexecute(const sender: tobject);
   protected
    procedure updatecaption(acaption: msestring);
+   procedure doonclose; override;
+   procedure dolayoutchanged(const sender: tdockcontroller); override;
+   class function hasresource: boolean; override;
+   class function getmoduleclassname: string; override;
+   constructor docreate(aowner: tcomponent); override;
   public
-   constructor create(const aowner: tdockpanelcontroller); reintroduce;
+   constructor create(aowner: tcomponent; load: boolean); override;
+   constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function canclose(const newfocus: twidget): boolean; override;
  end;
+
+ panelfoclassty = class of tdockpanelform;
+ 
+ dockpanelupdatecaptioneventty = 
+     procedure(const sender: tdockpanelcontroller; const apanel: tdockpanelform;
+                                  var avalue: msestring) of object;
+ dockpanelupdatemenueventty = 
+     procedure(const sender: tdockpanelcontroller; const apanel: tdockpanelform;
+                                  const avalue: tmenuitem) of object;
+ createpaneleventty =
+     procedure(const sender: tdockpanelcontroller; 
+                                  const apanel: tdockpanelform) of object;
+ getpanelclasseventty =
+     procedure(const sender: tdockpanelcontroller; 
+                                  var aclass: panelfoclassty) of object;
 
  tdockpanelcontroller = class(tmsecomponent,istatfile)
   private
@@ -31,9 +51,16 @@ type
    fmenu: tcustommenu;
    fstatfile: tstatfile;
    fstatvarname: msestring;
+   fmenunamepath: string;
+   fonupdatecaption: dockpanelupdatecaptioneventty;
+   fonupdatemenu: dockpanelupdatemenueventty;
+   fstatfileclient: tstatfile;
+   foncreatepanel: createpaneleventty;
+   fongetpanelclass: getpanelclasseventty;
    procedure updatestat(const filer: tstatfiler);
    procedure setmenu(const avalue: tcustommenu);
    procedure setstatfile(const avalue: tstatfile);
+   procedure setstatfileclient(const avalue: tstatfile);
   protected
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
@@ -44,17 +71,46 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function newpanel(aname: string = ''): tpanelfo;
+   function newpanel(aname: string = ''): tdockpanelform;
   published
    property menu: tcustommenu read fmenu write setmenu;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statfileclient: tstatfile read fstatfileclient 
+                                                     write setstatfileclient;
+   property menunamepath: string read fmenunamepath write fmenunamepath;
+                      //delimiter = '.'
+   property onupdatecaption: dockpanelupdatecaptioneventty 
+                     read fonupdatecaption write fonupdatecaption;
+   property onupdatemenu: dockpanelupdatemenueventty 
+                     read fonupdatemenu write fonupdatemenu;
+   property oncreatepanel: createpaneleventty read foncreatepanel 
+                                                      write foncreatepanel;
+   property ongetpanelclass: getpanelclasseventty read fongetpanelclass 
+                                                     write fongetpanelclass;
  end;
  
+function createdockpanelform(const aclass: tclass; 
+                    const aclassname: pshortstring): tmsecomponent;
+
 implementation
 uses
- msedockpanelform_mfm,sysutils,msekeyboard;
+ {msedockpanelform_mfm,}sysutils,msekeyboard,mseactions;
+type
+ tcomponent1 = class(tcomponent);
+ tmsecomponent1 = class(tmsecomponent);
+ 
+function createdockpanelform(const aclass: tclass; 
+                    const aclassname: pshortstring): tmsecomponent;
 
+begin
+ result:= tmsecomponent(aclass.newinstance);
+ tcomponent1(result).setdesigning(true); //used for wo_groupleader
+ tdockpanelform(result).create(nil,false);
+ tmsecomponent1(result).factualclassname:= aclassname;
+end;
+
+{ tdockpanelcontroller }
 constructor tdockpanelcontroller.create(aowner: tcomponent);
 begin
  fpanellist:= tpointerlist.create;
@@ -76,13 +132,13 @@ begin
  if filer.iswriter then begin
   setlength(ar1,fpanellist.count);
   for int1:= 0 to high(ar1) do begin
-   ar1[int1]:= tpanelfo(fpanellist[int1]).name;
+   ar1[int1]:= tdockpanelform(fpanellist[int1]).name;
   end;
  end;
  filer.updatevalue('panels',ar1);
  if not filer.iswriter then begin
   for int1:= fpanellist.count - 1 downto 0 do begin
-   tpanelfo(fpanellist[int1]).free;
+   tdockpanelform(fpanellist[int1]).free;
   end;
   for int1:= 0 to high(ar1) do begin
    try
@@ -91,25 +147,28 @@ begin
    end;
   end;
  end;
+ if fstatfileclient <> nil then begin
+  fstatfileclient.updatestat('clients',filer);
+ end;
 end;
 
-function tdockpanelcontroller.newpanel(aname: string = ''): tpanelfo;
+function tdockpanelcontroller.newpanel(aname: string = ''): tdockpanelform;
 var
  item1: tmenuitem;
  int1,int2: integer;
  ar1: integerarty;
+ pacla1: panelfoclassty;
 begin
  item1:= nil;
  int2:= 0;
  if fmenu <> nil then begin
-  item1:= fmenu.menu.itembyname('view');
-  if item1 <> nil then begin
-   item1:= item1.itembyname('panels');
+  if fmenunamepath <> '' then begin
+   item1:= fmenu.menu.itembynames(splitstring(fmenunamepath,'.'));
   end;
   if aname = '' then begin
    setlength(ar1,fpanellist.count);
    for int1:= 0 to high(ar1) do begin
-    ar1[int1]:= tpanelfo(fpanellist[int1]).fnameindex;
+    ar1[int1]:= tdockpanelform(fpanellist[int1]).fnameindex;
    end;
    sortarray(ar1);
    int2:= length(ar1);
@@ -124,7 +183,11 @@ begin
    int2:= strtoint(copy(aname,6,bigint))-1;
   end;
  end;
- result:= tpanelfo.create(self);
+ pacla1:= tdockpanelform;
+ if canevent(tmethod(fongetpanelclass)) then begin
+  fongetpanelclass(self,pacla1);
+ end;
+ result:= pacla1.create(self);
  int1:= int2 + 1;
  if aname = '' then begin
   aname:= 'panel'+inttostr(int1);
@@ -142,6 +205,9 @@ begin
  end;
  if item1 <> nil then begin
   item1.submenu.insert(int2,result.fmenuitem);
+ end;
+ if canevent(tmethod(foncreatepanel)) then begin
+  foncreatepanel(self,result);
  end;
 end;
 
@@ -178,31 +244,65 @@ begin
  result:= fstatvarname;
 end;
 
-{ tpanelfo }
-
-constructor tpanelfo.create(const aowner: tdockpanelcontroller);
+procedure tdockpanelcontroller.setstatfileclient(const avalue: tstatfile);
 begin
- inherited create(aowner);
- statfile:= aowner.statfile;
- aowner.fpanellist.add(self);
+ setlinkedvar(avalue,tmsecomponent(fstatfileclient));
 end;
 
-destructor tpanelfo.destroy;
+{ tdockpanelform }
+
+constructor tdockpanelform.create(aowner: tcomponent);
 begin
- with tdockpanelcontroller(owner) do begin
-  if fpanellist <> nil then begin
-   fpanellist.remove(self);
-  end;
-  if (fmenuitem <> nil) and (fmenuitem.owner <> nil) and 
-            not (csdestroying in fmenuitem.owner.componentstate) then begin
-   fmenuitem.parentmenu.submenu.delete(fmenuitem.index);
+ if aowner is tdockpanelcontroller then begin
+  setlinkedvar(tmsecomponent(aowner),tmsecomponent(fcontroller));
+ end;
+ inherited;
+end;
+
+constructor tdockpanelform.create(aowner: tcomponent; load: boolean);
+begin
+ include(fmsecomponentstate,cs_ismodule);
+ inherited;
+end;
+
+constructor tdockpanelform.docreate(aowner: tcomponent);
+begin
+ inherited;
+ visible:= false;
+ createframe;
+ dragdock.optionsdock:= dragdock.optionsdock + 
+       [od_canmove,od_canfloat,od_candock,od_acceptsdock,od_dockparent,
+        od_splitvert,od_splithorz,od_tabed,od_proportional,od_propsize];
+ options:= (options - [fo_autoreadstat,fo_autowritestat]) + 
+                      [fo_globalshortcuts,fo_screencentered];
+ optionswidget:= (optionswidget - [ow_destroywidgets]) + 
+                  [ow_mousefocus,ow_arrowfocusin,ow_arrowfocusout];
+ frame.grip_options:= frame.grip_options + 
+     [go_fixsizebutton,go_topbutton,go_backgroundbutton,go_lockbutton];
+ size:= makesize(350,200);
+ if fcontroller <> nil then begin
+  statfile:= fcontroller.statfileclient;
+  fcontroller.fpanellist.add(self);
+ end;
+end;
+
+destructor tdockpanelform.destroy;
+begin
+ if fcontroller <> nil then begin
+  with fcontroller do begin
+   if fpanellist <> nil then begin
+    fpanellist.remove(self);
+   end;
+   if (fmenuitem <> nil) and (fmenuitem.owner <> nil) and 
+             not (csdestroying in fmenuitem.owner.componentstate) then begin
+    fmenuitem.parentmenu.submenu.delete(fmenuitem.index);
+   end;
   end;
  end;
  inherited;
 end;
 
-procedure tpanelfo.updatecaption(acaption: msestring);
-
+procedure tdockpanelform.updatecaption(acaption: msestring);
 begin
  if acaption = '' then begin
   acaption:= 'Panel';
@@ -211,25 +311,34 @@ begin
   onexecute:= {$ifdef FPC}@{$endif}showexecute;
   if fnameindex < 9 then begin
    shortcut:= (ord(key_f1) or key_modctrl) + fnameindex;
-   caption:= acaption + ' &' + inttostr(fnameindex+1);
+   acaption:= acaption + ' &' + inttostr(fnameindex+1);
   end
   else begin
    shortcut:= 0;
-   caption:= acaption;
+  end;
+  caption:= acaption;
+  if (fcontroller <> nil) and 
+                 fcontroller.canevent(tmethod(fcontroller.fonupdatemenu)) then begin
+   fcontroller.fonupdatemenu(fcontroller,self,fmenuitem);
   end;
   if shortcut <> 0 then begin
-   acaption:= acaption + ' (Ctrl+F' + inttostr(fnameindex+1)+')';
+   acaption:= acaption + ' ('+encodeshortcutname(shortcut)+')';
+//   acaption:= acaption + ' (Ctrl+F' + inttostr(fnameindex+1)+')';
+  end;
+  if (fcontroller <> nil) and 
+            fcontroller.canevent(tmethod(fcontroller.fonupdatecaption)) then begin
+   fcontroller.fonupdatecaption(fcontroller,self,acaption);
   end;
   self.caption:= acaption;
  end;
 end;
 
-procedure tpanelfo.showexecute(const sender: tobject);
+procedure tdockpanelform.showexecute(const sender: tobject);
 begin
  activate;
 end;
 
-function tpanelfo.canclose(const newfocus: twidget): boolean;
+function tdockpanelform.canclose(const newfocus: twidget): boolean;
 
  function containerempty: boolean;
  var
@@ -255,7 +364,7 @@ begin
  }
 end;
 
-procedure tpanelfo.onclo(const sender: TObject);
+procedure tdockpanelform.doonclose;
  function containerempty: boolean;
  var
   int1: integer;
@@ -271,12 +380,13 @@ procedure tpanelfo.onclo(const sender: TObject);
   result:= true;
  end;
 begin
+ inherited;
  if containerempty then begin
   release;
  end;
 end;
 
-procedure tpanelfo.panellayoutchanged(const sender: tdockcontroller);
+procedure tdockpanelform.dolayoutchanged(const sender: tdockcontroller);
 var
  intf1: idocktarget;
  mstr1: msestring;
@@ -291,6 +401,16 @@ begin
   end;
  end;
  updatecaption(copy(mstr1,1,length(mstr1)-1)); //remove last comma
+end;
+
+class function tdockpanelform.hasresource: boolean;
+begin
+ result:= self <> tdockpanelform;
+end;
+
+class function tdockpanelform.getmoduleclassname: string;
+begin
+ result:= 'tdockpanelform';
 end;
 
 end.

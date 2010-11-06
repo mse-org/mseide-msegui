@@ -85,6 +85,7 @@ type
   function getminimizedsize(out apos: captionposty): sizety;  
                      //cx = 0 -> normalwidth, cy = 0 -> normalheight
   function getcaption: msestring;
+  procedure dolayoutchanged(const sender: tdockcontroller);
  end;
 
  checkdockeventty = procedure(const sender: tobject; const apos: pointty;
@@ -536,6 +537,7 @@ type
    function getplacementrect: rectty;
    function getminimizedsize(out apos: captionposty): sizety;
    function getcaption: msestring;
+   procedure dolayoutchanged(const sender: tdockcontroller); virtual;
    //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
@@ -3619,6 +3621,7 @@ var
  widget1: twidget;
  intf1: idocktarget;
 begin
+ idockcontroller(fintf).dolayoutchanged(self);
  widget1:= fintf.getwidget;
  if widget1.canevent(tmethod(fonlayoutchanged)) then begin
   fonlayoutchanged(self);
@@ -4758,6 +4761,11 @@ end;
 function tdockpanel.getdockcontroller: tdockcontroller;
 begin
  result:= fdragdock;
+end;
+
+procedure tdockpanel.dolayoutchanged(const sender: tdockcontroller);
+begin
+ //dummy
 end;
 
 end.

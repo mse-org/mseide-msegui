@@ -122,6 +122,9 @@ const
  mainformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmainform;
      initnewcomponent: nil; getscale: nil);
+ dockpanelformintf: designmoduleintfty = 
+  (createfunc: {$ifdef FPC}@{$endif}createdockpanelform;
+     initnewcomponent: nil; getscale: nil);
  subformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createsubform;
      initnewcomponent: nil; getscale: nil);
@@ -137,6 +140,7 @@ begin
  registerclass(tmseform);
  registerclass(tdockform);
  registerclass(tsubform);
+ registerclass(tdockpanelform);
  registercomponents('Widget',[tsimplewidget,teventwidget,tbutton,trichbutton,
   tstockglyphbutton,trichstockglyphbutton,
   tdrawgrid,tstringgrid,tlistview,
@@ -196,6 +200,7 @@ begin
  registerdesignmoduleclass(tmseform,@mseformintf);
  registerdesignmoduleclass(tmainform,@mainformintf);
  registerdesignmoduleclass(tdockform,@mseformintf);
+ registerdesignmoduleclass(tdockpanelform,@dockpanelformintf);
  registerdesignmoduleclass(tsubform,@subformintf);
  registerdesignmoduleclass(tscrollboxform,@scrollboxformintf);
  registerdesignmoduleclass(ttabform,@tabformintf);

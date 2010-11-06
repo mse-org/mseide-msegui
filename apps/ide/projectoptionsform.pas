@@ -1228,11 +1228,11 @@ begin
   newfiexts[2]:= '';
   newfisources[2]:= '';
   
-  setlength(newfonames,10);
-  setlength(newfonamebases,10);
-  setlength(newinheritedforms,10);
-  setlength(newfosources,10);
-  setlength(newfoforms,10);
+  setlength(newfonames,11);
+  setlength(newfonamebases,11);
+  setlength(newinheritedforms,11);
+  setlength(newfosources,11);
+  setlength(newfoforms,11);
 
   newfonames[0]:= 'Mainform';
   newfonamebases[0]:= 'form';
@@ -1276,23 +1276,29 @@ begin
   newfosources[6]:= '${TEMPLATEDIR}default/tabform.pas';
   newfoforms[6]:= '${TEMPLATEDIR}default/tabform.mfm';
  
-  newfonames[7]:= 'Report';
-  newfonamebases[7]:= 'report';
+  newfonames[7]:= 'Dockpanel';
+  newfonamebases[7]:= 'form';
   newinheritedforms[7]:= false;
-  newfosources[7]:= '${TEMPLATEDIR}default/report.pas';
-  newfoforms[7]:= '${TEMPLATEDIR}default/report.mfm';
- 
-  newfonames[8]:= 'Scriptform';
-  newfonamebases[8]:= 'script';
-  newinheritedforms[8]:= false;
-  newfosources[8]:= '${TEMPLATEDIR}default/pascform.pas';
-  newfoforms[8]:= '${TEMPLATEDIR}default/pascform.mfm';
+  newfosources[7]:= '${TEMPLATEDIR}default/dockpanelform.pas';
+  newfoforms[7]:= '${TEMPLATEDIR}default/dockpanelform.mfm';
 
-  newfonames[9]:= 'Inherited Form';
-  newfonamebases[9]:= 'form';
-  newinheritedforms[9]:= true;
-  newfosources[9]:= '${TEMPLATEDIR}default/inheritedform.pas';
-  newfoforms[9]:= '${TEMPLATEDIR}default/inheritedform.mfm';
+  newfonames[8]:= 'Report';
+  newfonamebases[8]:= 'report';
+  newinheritedforms[8]:= false;
+  newfosources[8]:= '${TEMPLATEDIR}default/report.pas';
+  newfoforms[8]:= '${TEMPLATEDIR}default/report.mfm';
+ 
+  newfonames[9]:= 'Scriptform';
+  newfonamebases[9]:= 'script';
+  newinheritedforms[9]:= false;
+  newfosources[9]:= '${TEMPLATEDIR}default/pascform.pas';
+  newfoforms[9]:= '${TEMPLATEDIR}default/pascform.mfm';
+
+  newfonames[10]:= 'Inherited Form';
+  newfonamebases[10]:= 'form';
+  newinheritedforms[10]:= true;
+  newfosources[10]:= '${TEMPLATEDIR}default/inheritedform.pas';
+  newfoforms[10]:= '${TEMPLATEDIR}default/inheritedform.mfm';
  
  end;
  if expand then begin 

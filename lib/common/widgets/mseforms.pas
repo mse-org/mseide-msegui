@@ -200,6 +200,8 @@ type
    function getbuttonrects(const index: dockbuttonrectty): rectty;  
    function getplacementrect: rectty;
    function getminimizedsize(out apos: captionposty): sizety;
+   procedure dolayoutchanged(const sender: tdockcontroller); virtual;
+
    procedure doafterload; override;
    procedure updatelayout(const sender: twidget); virtual; 
                                //called from scrollbox.dolayout
@@ -220,6 +222,7 @@ type
    function childrencount: integer; override;
 
    procedure beforeclosequery(var amodalresult: modalresultty); override;
+   procedure doonclose; virtual;
    function canclose(const newfocus: twidget): boolean; override;
    function close(const amodalresult: modalresultty = mr_windowclosed): boolean; 
               //true if ok
@@ -785,6 +788,17 @@ end;
 constructor tcustommseform.docreate(aowner: tcomponent);
 begin
  inherited create(aowner);
+ fwidgetrect.cx:= 100;
+ fwidgetrect.cy:= 100;
+ if fscrollbox = nil then begin
+  fscrollbox:= tformscrollbox.create(self);
+ end;
+ optionswidget:= defaultformwidgetoptions;
+end;
+
+procedure tcustommseform.aftercreate;
+begin
+ //dummy
 end;
 
 constructor tcustommseform.create(aowner: tcomponent; load: boolean);
@@ -796,15 +810,13 @@ begin
  fwidgetrect.y:= 100;
  options:= defaultformoptions;
  docreate(aowner);
-// inherited create(aowner);
  aftercreate;
- fwidgetrect.cx:= 100;
- fwidgetrect.cy:= 100;
- if fscrollbox = nil then begin
-  fscrollbox:= tformscrollbox.create(self);
- end;
- optionswidget:= defaultformwidgetoptions;
-// color:= cl_background;
+// fwidgetrect.cx:= 100;
+// fwidgetrect.cy:= 100;
+// if fscrollbox = nil then begin
+//  fscrollbox:= tformscrollbox.create(self);
+// end;
+// optionswidget:= defaultformwidgetoptions;
  if load and not (csdesigning in componentstate) and
           (cs_ismodule in fmsecomponentstate) then begin
   loadmsemodule(self,tcustommseform);
@@ -912,6 +924,13 @@ begin
  end;
 end;
 
+procedure tcustommseform.doonclose;
+begin
+ if canevent(tmethod(fonclose)) then begin
+  fonclose(self);
+ end;
+end;
+
 function tcustommseform.canclose(const newfocus: twidget): boolean;
 var
  modres: modalresultty;
@@ -931,9 +950,7 @@ begin
   end;
   if result and ((twindow1(window).fmodalresult <> mr_none) or 
                                         (application.terminating)) then begin
-   if canevent(tmethod(fonclose)) then begin
-    fonclose(self);
-   end;
+   doonclose;
    if (fstatfile <> nil) and (fo_autowritestat in foptions) and
                  not (csdesigning in componentstate) then begin
     fstatfile.writestat;
@@ -1758,11 +1775,6 @@ begin
  end;
 end;
 
-procedure tcustommseform.aftercreate;
-begin
- //dummy
-end;
-
 procedure tcustommseform.updatelayout(const sender: twidget);
 begin
  //dummy
@@ -1778,6 +1790,11 @@ begin
  inherited;
  filer.defineproperty('onchildscaled',
                  {$ifdef FPC}@{$endif}readonchildscaled,nil,false);
+end;
+
+procedure tcustommseform.dolayoutchanged(const sender: tdockcontroller);
+begin
+ //dummy
 end;
 
 { tmseform }

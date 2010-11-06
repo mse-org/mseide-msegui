@@ -175,6 +175,11 @@ begin
  end;
 end;
 
+function tnoguiapplication.modallevel: integer;
+begin
+ result:= fmodallevel;
+end;
+
 initialization
  registerapplicationclass(tnoguiapplication);
 end.
