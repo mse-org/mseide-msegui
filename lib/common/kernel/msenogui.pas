@@ -16,6 +16,7 @@ type
  tnoguiapplication = class(tcustomapplication)
   private
    feventsem: semty;
+   fmodallevel: integer;
   protected
    procedure dopostevent(const aevent: tmseevent); override;
    procedure doeventloop(const once: boolean); override;
@@ -27,6 +28,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function modallevel: integer; override;
    procedure showexception(e: exception; const leadingtext: msestring = '');
                                   override;
    procedure errormessage(const amessage: msestring); override;
@@ -54,6 +56,7 @@ end;
 
 constructor tnoguiapplication.create(aowner: tcomponent);
 begin
+ fmodallevel:= -1;
  appinst:= self;
  sys_semcreate(feventsem,0);
  inherited;
@@ -96,6 +99,7 @@ var
 begin
 // lock;
 // try
+  inc(fmodallevel);
   while not terminated do begin
    if eventlist.count = 0 then begin
     try
@@ -132,6 +136,7 @@ begin
    end;
    event1.free1; //do not destroy synchronizeevent
   end;
+  dec(fmodallevel);
 // finally
 //  unlock;
 // end;

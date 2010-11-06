@@ -232,6 +232,7 @@ type
    property eventlist: teventlist read feventlist;
    procedure internalinitialize; virtual;
    procedure internaldeinitialize;  virtual;
+   procedure objecteventdestroyed(const sender: tobjectevent); virtual;
   public
   {$ifdef mse_debugmutex}
    function getmutexaddr: pointer;
@@ -250,6 +251,7 @@ type
    function running: boolean; //true if eventloop entered
    procedure processmessages; virtual; //handle with care!
    function idle: boolean; virtual;
+   function modallevel: integer; virtual; abstract;
    property applicationname: msestring read fapplicationname write fapplicationname;
    
    procedure postevent(event: tmseevent; const alocal: boolean = false);
@@ -351,6 +353,7 @@ uses
  {$ifdef mse_debuggdisync},msegraphics{$endif};
 
 type
+ tobjectevent1 = class(tobjectevent);
  tappsynchronizeevent = class(tsynchronizeevent)
   private
    fproc: proceventty; 
@@ -1173,16 +1176,33 @@ end;
 procedure tcustomapplication.flusheventbuffer;
 var
  int1: integer;
+ event1: tmseevent;
 begin
  sys_mutexlock(feventlock);
  if not (aps_eventflushing in fstate) then begin
   include(fstate,aps_eventflushing);
   for int1:= 0 to high(fpostedeventslocal) do begin
-   feventlist.add(fpostedeventslocal[int1]);
+   event1:= fpostedeventslocal[int1];
+   if (event1 is tobjectevent) {and ismainthread} then begin
+    with tobjectevent1(event1) do begin
+     if oes_modaldeferred in fstate then begin
+      fmodallevel:= self.modallevel;
+     end;
+    end;
+   end;
+   feventlist.add(event1);
   end;
   fpostedeventslocal:= nil;
   for int1:= 0 to high(fpostedevents) do begin
-   dopostevent(fpostedevents[int1]);
+   event1:= fpostedevents[int1];
+   if (event1 is tobjectevent) {and ismainthread} then begin
+    with tobjectevent1(event1) do begin
+     if oes_modaldeferred in fstate then begin
+      fmodallevel:= self.modallevel;
+     end;
+    end;
+   end;
+   dopostevent(event1);
   end;
   fpostedevents:= nil;
   exclude(fstate,aps_eventflushing);
@@ -1190,7 +1210,8 @@ begin
  sys_mutexunlock(feventlock);
 end;
 
-procedure tcustomapplication.postevent(event: tmseevent; const alocal: boolean = false);
+procedure tcustomapplication.postevent(event: tmseevent;
+                                                const alocal: boolean = false);
 begin
  if csdestroying in componentstate then begin
   event.free1;
@@ -1198,6 +1219,13 @@ begin
  else begin
   if trylock then begin
    try
+    if (event is tobjectevent) {and ismainthread} then begin
+     with tobjectevent1(event) do begin
+      if oes_modaldeferred in fstate then begin
+       fmodallevel:= self.modallevel;
+      end;
+     end;
+    end;
     flusheventbuffer;
     if alocal then begin
      eventlist.add(event);
@@ -1488,6 +1516,11 @@ begin
   end;
   exclude(fstate,aps_inited);
  end;
+end;
+
+procedure tcustomapplication.objecteventdestroyed(const sender: tobjectevent);
+begin
+ //dummy
 end;
 
 { tactivatorcontroller }

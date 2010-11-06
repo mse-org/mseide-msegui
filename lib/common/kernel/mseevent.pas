@@ -78,19 +78,25 @@ type
   procedure receiveevent(const event: tobjectevent);
  end;
 
+ objeventstatety = (oes_islinked,oes_modaldeferred);
+ objeventstatesty = set of objeventstatety;
+ 
  tobjectevent = class(tmseevent,iobjectlink)
   private
    finterface: pointer; //ievent;
-   fislinked: boolean;
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
                  ainterfacetype: pointer = nil; once: boolean = false);
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
    procedure objevent(const sender: iobjectlink; const event: objecteventty);
    function getinstance: tobject;
+  protected
+   fstate: objeventstatesty;
+   fmodallevel: integer;
   public
    constructor create(const akind: eventkindty; const dest: ievent);
    destructor destroy; override;
    procedure deliver;
+   property modallevel: integer read fmodallevel;
  end;
 
  tchildprocevent = class(tobjectevent)
@@ -137,6 +143,8 @@ type
 implementation
 uses
  msesysintf,mseapplication;
+type
+ tapplication1 = class(tcustomapplication);
  
 { tmseevent }
 
@@ -174,9 +182,13 @@ var
 {$endif}
 begin
  finterface:= pointer(dest);
+ fmodallevel:= -1;
+ if akind = ek_release then begin
+  include(fstate,oes_modaldeferred);
+ end;
  if (finterface <> nil) then begin
-  fislinked:= application.locked;
-  if fislinked then begin
+  if application.locked then begin
+   include(fstate,oes_islinked);
  {$ifndef FPC}
    po1:= pointer(1);
    ievent(finterface).link(iobjectlink(po1),iobjectlink(self));
@@ -194,7 +206,10 @@ var
  po1: pointer;
 {$endif}
 begin
- if fislinked and (finterface <> nil) then begin
+ if (fmodallevel >= 0) then begin
+  tapplication1(application).objecteventdestroyed(self);
+ end;
+ if (oes_islinked in fstate) and (finterface <> nil) then begin
 {$ifndef FPC}
   po1:= pointer(1);
   ievent(finterface).unlink(iobjectlink(po1),iobjectlink(self));

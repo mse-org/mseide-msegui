@@ -47,7 +47,7 @@ uses
  msetoolbar,msetabs,msedesignintf,regwidgets_bmp,mselistbrowser,
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
- msepolygon,msepickwidget,msetraywidget
+ msepolygon,msepickwidget,msetraywidget,msedockpanelform
  {$ifndef mse_no_opengl}{$ifdef FPC},mseopenglwidget{$endif}{$endif};
  
 type
@@ -147,7 +147,7 @@ begin
   tsplitter,tspacer,tlayouter,ttoolbar,ttabbar,ttabwidget,ttabpage,
   tdial,tchart,tchartrecorder,twindowwidget
    {$ifndef mse_no_opengl}{$ifdef FPC},topenglwidget{$endif}{$endif}
-  ,ttraywidget]);
+  ,ttraywidget,tdockpanelcontroller]);
  registercomponenttabhints(['Widget'],
          ['Display Widgets, Widgets which can''t be placed into twidgetgrid']);
  registerpropertyeditor(typeinfo(tcellframe),nil,'',

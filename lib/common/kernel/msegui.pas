@@ -1845,6 +1845,9 @@ type
  modalinfoty = record
   modalend: boolean;
   modalwindowbefore: twindow;
+  level: integer;
+  parent: pmodalinfoty;
+  events: eventarty; //deferred events
  end;
 
  twindow = class(teventobject,icanvas)
@@ -2180,7 +2183,8 @@ type
    flastmousewheeltimestamp: longword;
    flastmousewheeltimestampbefore: longword;
    
-   fmodallevel: integer;
+   fcurrmodalinfo: pmodalinfoty;
+//   fmodallevel: integer;
    
    procedure invalidated;
    function grabpointer(const aid: winidty): boolean;
@@ -2212,6 +2216,7 @@ type
    procedure doafterrun; override;
    procedure internalinitialize; override;
    procedure internaldeinitialize;  override;
+   procedure objecteventdestroyed(const sender: tobjectevent); override;
   public
    constructor create(aowner: tcomponent); override;
    procedure langchanged; override;
@@ -2225,7 +2230,7 @@ type
    
    procedure processmessages; override; //handle with care!
    function idle: boolean; override;
-   property modallevel: integer read fmodallevel;
+   function modallevel: integer; override;
    
    procedure beginwait; override;
    procedure endwait; override;
@@ -2551,6 +2556,7 @@ type
  tcolorarrayprop1 = class(tcolorarrayprop);
  trealarrayprop1 = class(trealarrayprop);
  tcaret1 = class(tcaret);
+ tobjectevent1 = class(tobjectevent);
 
 const
  cancelwaittag = 823757;
@@ -14678,8 +14684,10 @@ var
  bo1: boolean;
  window: twindow;
  po1: ^twindowevent;
+ po2: pmodalinfoty;
  waitcountbefore: integer;
  ar1: integerarty;
+ ar2: eventarty;
  
 begin       //eventloop
 // lock;
@@ -14688,8 +14696,17 @@ begin       //eventloop
   if aps_looplocked in fstate then begin
    exit;
   end;
+  if not ismainthread then begin
+   raise exception.create('Eventloop must be in main thread.');
+  end;
+ 
   ftimertick:= false;
   fillchar(modalinfo,sizeof(modalinfo),0);
+  if fcurrmodalinfo <> nil then begin
+   modalinfo.parent:= fcurrmodalinfo;
+   modalinfo.level:= fcurrmodalinfo^.level+1;
+  end;
+  fcurrmodalinfo:= @modalinfo;
   waitcountbefore:= fwaitcount;
   fwaitcount:= 0;
   checkcursorshape;
@@ -14702,15 +14719,11 @@ begin       //eventloop
    amodalwindow.internalactivate(false,true);
   end;
  
-  if not ismainthread then begin
-   raise exception.create('Eventloop must be in main thread.');
-  end;
- 
   while not modalinfo.modalend and not terminated and 
                  (fstate * [aps_exitloop,aps_cancelloop] = []) do begin 
                                                   //main eventloop
    try
-    if getevents = 0 then begin
+    if (high(modalinfo.events) < 0) and (getevents = 0) then begin
      checkwindowstack;
      repeat
       bo1:= false;
@@ -14771,7 +14784,14 @@ begin       //eventloop
      break;
     end;
     getevents;
-    event:= tmseevent(eventlist.getfirst);
+    if high(modalinfo.events) >= 0 then begin
+     event:= modalinfo.events[0];
+     tobjectevent1(event).fmodallevel:= -1;
+     deleteitem(pointerarty(modalinfo.events),0);
+    end
+    else begin
+     event:= tmseevent(eventlist.getfirst);
+    end;
     if event <> nil then begin
      try
       try
@@ -14810,13 +14830,6 @@ begin       //eventloop
          doterminate(true);
         end;
         ek_focusin: begin
-{
-gui_flushgdi(true);
-sys_schedyield;
-gui_flushgdi(true);
-sys_schedyield;
-gui_flushgdi(true);
-}
         {$ifdef mse_debugwindowfocus}
          debugwindow('focusin ',twindowevent(event).fwinid);
         {$endif}
@@ -14852,13 +14865,6 @@ gui_flushgdi(true);
          end;
         end;
         ek_focusout: begin
-{
-gui_flushgdi(true);
-sys_schedyield;
-gui_flushgdi(true);
-sys_schedyield;
-gui_flushgdi(true);
-}
         {$ifdef mse_debugwindowfocus}
          debugwindow('focusout ',twindowevent(event).fwinid);
         {$endif}
@@ -14956,7 +14962,18 @@ gui_flushgdi(true);
         else begin
          if event is tobjectevent then begin
           with tobjectevent(event) do begin
-           deliver;
+           int1:= modalinfo.level-modallevel;
+           if (int1 > 0) and (modallevel >= 0) then begin
+            po2:= modalinfo.parent;
+            for int1:= int1 - 2 downto 0 do begin
+             po2:= po2^.parent;
+            end;
+            additem(pointerarty(po2^.events),event);
+            event:= nil;
+           end
+           else begin
+            deliver;
+           end;
           end;
          end;
         end;
@@ -14997,6 +15014,25 @@ gui_flushgdi(true);
    mouse.shape:= cr_wait;
   end;
   checkcursorshape;
+  if modalinfo.parent <> nil then begin
+   stackarray(pointer(modalinfo.events),pointerarty(modalinfo.parent^.events));
+  end
+  else begin
+   ar2:= modalinfo.events;
+   modalinfo.events:= nil;
+   for int1:= 0 to high(ar2) do begin
+    if ar2[int1] is tobjectevent then begin
+     with tobjectevent1(ar2[int1]) do begin
+      fmodallevel:= -1;
+      free1;
+     end;
+    end
+    else begin
+     ar2[int1].free;
+    end;
+   end;
+  end;
+  fcurrmodalinfo:= modalinfo.parent;
 // finally
 //  unlock;
 // end;
@@ -15023,10 +15059,10 @@ begin
 // bo1:= ismainthread and unlock;
  try
 //  sender.activate;  
-  inc(fmodallevel);
+//  inc(fmodallevel);
   result:= eventloop(sender);
  finally
-  dec(fmodallevel);
+//  dec(fmodallevel);
 //  if bo1 then begin
 //   lock;
 //  end;
@@ -16615,6 +16651,34 @@ end;
 function tguiapplication.shortcutting: boolean;
 begin
  result:= aps_shortcutting in fstate;
+end;
+
+function tguiapplication.modallevel: integer;
+begin
+ result:= -1;
+ if fcurrmodalinfo <> nil then begin
+  result:= fcurrmodalinfo^.level;
+ end;
+end;
+
+procedure tguiapplication.objecteventdestroyed(const sender: tobjectevent);
+var
+ po1: pmodalinfoty;
+ int1: integer;
+begin
+ if sender.modallevel >= 0 then begin
+  lock;
+  po1:= fcurrmodalinfo;
+  while po1 <> nil do begin
+   for int1:= high(po1^.events) downto 0 do begin
+    if po1^.events[int1] = sender then begin
+     po1^.events[int1]:= nil;
+    end;
+   end;
+   po1:= po1^.parent;
+  end; 
+  unlock;
+ end;
 end;
 
 { tasyncmessageevent }

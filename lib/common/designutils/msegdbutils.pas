@@ -1141,15 +1141,15 @@ begin
   with tgdbevent(event) do begin
    case eventkind of
     gek_startup: begin
-     if gs_startup in fstate then begin
+     if gs_startup in self.fstate then begin
       exit; //already done
      end;
-     include(fstate,gs_startup);
+     include(self.fstate,gs_startup);
      stopinfo:= tgdbstartupevent(event).stopinfo;
      eventkind:= gek_stopped;
     end;
     gek_gdbdied: begin
-     exclude(fstate,gs_running);
+     exclude(self.fstate,gs_running);
      fstoptime:= stopinfo.time;
      stopinfo.reason:= sr_gdbdied;
      stopinfo.messagetext:= 'Process died.';
@@ -1161,7 +1161,7 @@ begin
      closegdb;      
     end;
     gek_stopped: begin
-     exclude(fstate,gs_running);
+     exclude(self.fstate,gs_running);
      fstoptime:= stopinfo.time;
      {$ifdef mswindows}
      if finterruptthreadid <> 0 then begin
@@ -1219,7 +1219,7 @@ begin
          end;
         end;
         if bo1 then begin
-         fstate:= fstate + [gs_restarted,gs_running];
+         self.fstate:= self.fstate + [gs_restarted,gs_running];
          continue;
          stopinfo.reason:= sr_none;
         end
@@ -1230,7 +1230,7 @@ begin
        end;
       end;
       if stopinfo.reason in [sr_exited,sr_exited_normally] then begin
-       fstate:= fstate - [gs_started,gs_startup];
+       self.fstate:= self.fstate - [gs_started,gs_startup];
       end;
       if stopinfo.reason = sr_startup then begin
        if fstartupbreakpoint >= 0 then begin
@@ -1246,35 +1246,35 @@ begin
        {$ifdef UNIX}
        ftargetterminal.restart;
        {$endif}
-       if gs_startup in fstate then begin
+       if gs_startup in self.fstate then begin
         exit; //already done
        end;
-       include(fstate,gs_startup);
+       include(self.fstate,gs_startup);
       end;
      end;
     end;
     gek_running: begin
      fstoptime:= emptydatetime;
-     include(fstate,gs_running);
+     include(self.fstate,gs_running);
     end;
     gek_error,gek_writeerror: begin
      getstringvalue(values,'msg',stopinfo.messagetext);
     end;
     gek_done: begin
-     if gs_downloading in fstate then begin
-      include(fstate,gs_downloaded);
+     if gs_downloading in self.fstate then begin
+      include(self.fstate,gs_downloaded);
       with stopinfo do begin
        getintegervalue(values,'load-size',totalsent);
        if fafterload <> '' then begin
         if source(fafterload) <> gdb_ok then begin
-         exclude(fstate,gs_downloaded);
+         exclude(self.fstate,gs_downloaded);
          postsyncerror;
         end;
        end;
        initproginfo;
-       include(fstate,gs_downloading);
+       include(self.fstate,gs_downloading);
                 //restore downloading flag;
-       if gs_runafterload in fstate then begin
+       if gs_runafterload in self.fstate then begin
         dorun;
        end;
       end;
@@ -1301,14 +1301,14 @@ begin
      fonerror(self,eventkind,values,stopinfo);
     end;
     if (eventkind = gek_done) and 
-             (fstate * [gs_downloading,gs_runafterload] =
+             (self.fstate * [gs_downloading,gs_runafterload] =
                     [gs_downloading,gs_runafterload]) then begin
-     exclude(fstate,gs_downloading);
+     exclude(self.fstate,gs_downloading);
      dorun;
     end;
    finally
     if eventkind = gek_done then begin
-     exclude(fstate,gs_downloading);
+     exclude(self.fstate,gs_downloading);
     end;
    end;
   end;
