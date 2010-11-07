@@ -95,6 +95,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function newpanel(aname: string = ''): tdockpanelform;
+   procedure updatewindowcaptions(const avalue: msestring);
   published
    property menu: tcustommenu read fmenu write setmenu;
    property statfile: tstatfile read fstatfile write setstatfile;
@@ -127,6 +128,8 @@ uses
 type
  tcomponent1 = class(tcomponent);
  tmsecomponent1 = class(tmsecomponent);
+ 
+ pdockpanelform = ^tdockpanelform;
  
 function createdockpanelform(const aclass: tclass; 
                     const aclassname: pshortstring): tmsecomponent;
@@ -287,6 +290,20 @@ end;
 procedure tdockpanelcontroller.setstatfileclient(const avalue: tstatfile);
 begin
  setlinkedvar(avalue,tmsecomponent(fstatfileclient));
+end;
+
+procedure tdockpanelcontroller.updatewindowcaptions(const avalue: msestring);
+var
+ po1: pdockpanelform;
+ int1: integer;
+begin
+ with fpanellist do begin
+  po1:= pointer(datapo);
+  for int1:= 0 to count - 1 do begin
+   po1^.caption:= avalue;
+   inc(po1);
+  end;
+ end;
 end;
 
 { tdockpanelform }
