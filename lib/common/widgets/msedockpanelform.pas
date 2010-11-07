@@ -313,7 +313,7 @@ begin
  if aowner is tdockpanelcontroller then begin
   setlinkedvar(tmsecomponent(aowner),tmsecomponent(fcontroller));
  end;
- inherited;
+ inherited create(aowner);
 end;
 
 constructor tdockpanelform.create(aowner: tcomponent; load: boolean);

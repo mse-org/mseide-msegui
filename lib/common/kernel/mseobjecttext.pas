@@ -8,7 +8,7 @@
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    
+
     Modified 2010 by Martin Schreiber
 }
 unit mseobjecttext;
@@ -17,14 +17,21 @@ unit mseobjecttext;
 interface
 uses
  classes;
- 
+
 procedure objectbinarytotextmse(input, output: tstream);
 procedure objecttexttobinarymse(input, output: tstream);
 
 implementation
 uses
- sysutils,rtlconsts;
+ sysutils,rtlconsts,msestrings,msetypes;
 {$ifdef FPC} {$define CLASSESINLINE} {$endif}
+
+{$ifndef FPC}
+type
+ unicodestring = widestring;
+resourcestring
+ SerrInvalidPropertyType       = 'Invalid property type from streamed property: %d';
+{$endif}
 
 { Object conversion routines }
 
@@ -51,27 +58,28 @@ function Utf8ToOrd(var P:Pointer): Cardinal;
 begin
   // Should also check for illegal utf8 combinations
   Result := Ord(PChar(P)^);
-  Inc(P);
+  Inc(pbyte(P));
   if (Result and $80) <> 0 then
-    if (Ord(Result) and %11100000) = %11000000 then begin
-      Result := ((Result and %00011111) shl 6)
-                or (ord(PChar(P)^) and %00111111);
-      Inc(P);
-    end else if (Ord(Result) and %11110000) = %11100000 then begin
-      Result := ((Result and %00011111) shl 12)
-                or ((ord(PChar(P)^) and %00111111) shl 6)
-                or (ord((PChar(P)+1)^) and %00111111);
-      Inc(P,2);
+    if (Ord(Result) and $e0) = $c0 then begin
+      Result := ((Result and $1f) shl 6)
+                or (ord(PChar(P)^) and $3f);
+      Inc(pbyte(P));
+    end else if (Ord(Result) and $f0) = $e0 then begin
+      Result := ((Result and $1f) shl 12)
+                or ((ord(PChar(P)^) and $3f) shl 6)
+                or (ord((PChar(P)+1)^) and $3f);
+      Inc(pbyte(P),2);
     end else begin
-      Result := ((ord(Result) and %00011111) shl 18)
-                or ((ord(PChar(P)^) and %00111111) shl 12)
-                or ((ord((PChar(P)+1)^) and %00111111) shl 6)
-                or (ord((PChar(P)+2)^) and %00111111);
-      Inc(P,3);
+      Result := ((ord(Result) and $1f) shl 18)
+                or ((ord(PChar(P)^) and $3f) shl 12)
+                or ((ord((PChar(P)+1)^) and $3f) shl 6)
+                or (ord((PChar(P)+2)^) and $3f);
+      Inc(pbyte(P),3);
     end;
 end;
 
-procedure ObjectBinaryToText(Input, Output: TStream; Encoding: TObjectTextEncoding);
+procedure ObjectBinaryToText1(Input, Output: TStream;
+                          Encoding: TObjectTextEncoding);
 
   procedure OutStr(s: String);
   begin
@@ -81,7 +89,7 @@ procedure ObjectBinaryToText(Input, Output: TStream; Encoding: TObjectTextEncodi
 
   procedure OutLn(s: String);
   begin
-    OutStr(s + LineEnding);
+    OutStr(s + LineEnd);
   end;
 
   procedure Outchars(P, LastP : Pointer; CharToOrdFunc: CharToOrdFuncty;
@@ -95,11 +103,11 @@ procedure ObjectBinaryToText(Input, Output: TStream; Encoding: TObjectTextEncodi
    if p = nil then begin
     res:= '''''';
    end
-   else 
+   else
     begin
     res := '';
     InString := False;
-    while P < LastP do 
+    while ptruint(P) < ptruint(LastP) do
       begin
       NewInString := InString;
       w := CharToOrdfunc(P);
@@ -157,22 +165,41 @@ procedure ObjectBinaryToText(Input, Output: TStream; Encoding: TObjectTextEncodi
       OutChars(Pointer(S),PChar(S)+Length(S),@Utf8ToOrd);
   end;
 
+{$ifndef FPC}
+  function readbyte: byte;
+  begin
+   input.readbuffer(result,sizeof(result));
+  end;
+{$endif}
+
   function ReadWord : word; {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
   begin
+   {$ifdef FPC}
     Result:=Input.ReadWord;
     Result:=LEtoN(Result);
+   {$else}
+    input.ReadBuffer(result,sizeof(result));
+   {$endif}
   end;
 
   function ReadDWord : longword; {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
   begin
+   {$ifdef FPC}
     Result:=Input.ReadDWord;
     Result:=LEtoN(Result);
+   {$else}
+    input.ReadBuffer(result,sizeof(result));
+   {$endif}
   end;
 
   function ReadQWord : qword; {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
   begin
+   {$ifdef FPC}
     Input.ReadBuffer(Result,sizeof(Result));
     Result:=LEtoN(Result);
+   {$else}
+    input.ReadBuffer(result,sizeof(result));
+   {$endif}
   end;
 
 {$ifndef FPUNONE}
@@ -183,6 +210,7 @@ procedure ObjectBinaryToText(Input, Output: TStream; Encoding: TObjectTextEncodi
       sign : boolean;
       d : qword;
   begin
+   {$ifdef FPC}
     move(pbyte(e)[0],mant,8); //mantissa         : bytes 0..7
     move(pbyte(e)[8],exp,2);  //exponent and sign: bytes 8..9
     mant:=LEtoN(mant);
@@ -218,23 +246,26 @@ procedure ObjectBinaryToText(Input, Output: TStream; Encoding: TObjectTextEncodi
     d:=d or mant;
     if sign then d:=d or $8000000000000000;
     Result:=pdouble(@d)^;
+   {$else}
+    result:= extended(e^);
+   {$endif}
   end;
   {$ENDIF}
 {$endif}
 
-  function ReadInt(ValueType: TValueType): Int64;
+  function ReadInt(ValueType: TValueType): Int64; overload;
   begin
     case ValueType of
-      vaInt8: Result := ShortInt(Input.ReadByte);
+      vaInt8: Result := ShortInt({$ifdef FPC}Input.{$endif}ReadByte);
       vaInt16: Result := SmallInt(ReadWord);
       vaInt32: Result := LongInt(ReadDWord);
       vaInt64: Result := Int64(ReadQWord);
     end;
   end;
 
-  function ReadInt: Int64;
+  function ReadInt: Int64; overload;
   begin
-    Result := ReadInt(TValueType(Input.ReadByte));
+    Result := ReadInt(TValueType({$ifdef FPC}Input.{$endif}ReadByte));
   end;
 
 {$ifndef FPUNONE}
@@ -256,7 +287,7 @@ procedure ObjectBinaryToText(Input, Output: TStream; Encoding: TObjectTextEncodi
   var
     len: Byte;
   begin
-    len := Input.ReadByte;
+    len := {$ifdef FPC}Input.{$endif}ReadByte;
     SetLength(Result, len);
     if (len > 0) then
       Input.ReadBuffer(Result[1], len);
@@ -349,7 +380,7 @@ procedure ObjectBinaryToText(Input, Output: TStream; Encoding: TObjectTextEncodi
             OutStr('(');
             IsFirst := True;
             while True do begin
-              ValueType := TValueType(Input.ReadByte);
+              ValueType := TValueType({$ifdef FPC}Input.{$endif}ReadByte);
               if ValueType = vaNull then break;
               if IsFirst then begin
                 OutLn('');
@@ -360,7 +391,7 @@ procedure ObjectBinaryToText(Input, Output: TStream; Encoding: TObjectTextEncodi
             end;
             OutLn(Indent + ')');
           end;
-        vaInt8: OutLn(IntToStr(ShortInt(Input.ReadByte)));
+        vaInt8: OutLn(IntToStr(ShortInt({$ifdef FPC}Input.{$endif}ReadByte)));
         vaInt16: OutLn( IntToStr(SmallInt(ReadWord)));
         vaInt32: OutLn(IntToStr(LongInt(ReadDWord)));
         vaInt64: OutLn(IntToStr(Int64(ReadQWord)));
@@ -401,22 +432,24 @@ procedure ObjectBinaryToText(Input, Output: TStream; Encoding: TObjectTextEncodi
           OutWString(ReadWStr);
           OutLn('');
           end;
+        {$ifdef FPC}
         vaUString:
           begin
           OutWString(ReadWStr);
           OutLn('');
           end;
+        {$endif}
         vaNil:
           OutLn('nil');
         vaNull:
           OutLn('null');
         vaCollection: begin
             OutStr('<');
-            while Input.ReadByte <> 0 do begin
+            while {$ifdef FPC}Input.{$endif}ReadByte <> 0 do begin
               OutLn(Indent);
               Input.Seek(-1, soFromCurrent);
               OutStr(indent + '  item');
-              ValueType := TValueType(Input.ReadByte);
+              ValueType := TValueType({$ifdef FPC}Input.{$endif}ReadByte);
               if ValueType <> vaList then
                 OutStr('[' + IntToStr(ReadInt(ValueType)) + ']');
               OutLn('');
@@ -438,10 +471,10 @@ procedure ObjectBinaryToText(Input, Output: TStream; Encoding: TObjectTextEncodi
     end;
 
   begin
-    while Input.ReadByte <> 0 do begin
+    while {$ifdef FPC}Input.{$endif}ReadByte <> 0 do begin
       Input.Seek(-1, soFromCurrent);
       OutStr(indent + ReadSStr + ' = ');
-      ProcessValue(TValueType(Input.ReadByte), Indent);
+      ProcessValue(TValueType({$ifdef FPC}Input.{$endif}ReadByte), Indent);
     end;
   end;
 
@@ -452,7 +485,7 @@ procedure ObjectBinaryToText(Input, Output: TStream; Encoding: TObjectTextEncodi
     ChildPos: LongInt;
   begin
     // Check for FilerFlags
-    b := Input.ReadByte;
+    b := {$ifdef FPC}Input.{$endif}ReadByte;
     if (b and $f0) = $f0 then begin
       if (b and 2) <> 0 then ChildPos := ReadInt;
     end else begin
@@ -477,7 +510,7 @@ procedure ObjectBinaryToText(Input, Output: TStream; Encoding: TObjectTextEncodi
 
     ReadPropList(indent + '  ');
 
-    while Input.ReadByte <> 0 do begin
+    while {$ifdef FPC}Input.{$endif}ReadByte <> 0 do begin
       Input.Seek(-1, soFromCurrent);
       ReadObject(indent + '  ');
     end;
@@ -488,38 +521,57 @@ type
   PLongWord = ^LongWord;
 const
   signature: PChar = 'TPF0';
-  
+
 begin
-  if Input.ReadDWord <> PLongWord(Pointer(signature))^ then
+  if {$ifdef FPC}Input.{$endif}ReadDWord <> PLongWord(Pointer(signature))^ then
     raise EReadError.Create('Illegal stream image' {###SInvalidImage});
   ReadObject('');
 end;
 
 procedure ObjectBinaryToText(Input, Output: TStream);
 begin
-  ObjectBinaryToText(Input,Output,oteDFM);
+  ObjectBinaryToText1(Input,Output,oteDFM);
 end;
 
 procedure ObjectTextToBinary(Input, Output: TStream);
 var
   parser: TParser;
 
+ {$ifndef FPC}
+  procedure Writebyte(b : byte); {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
+  begin
+    output.WriteBuffer(b,sizeof(b));
+  end;
+ {$endif}
+
   procedure WriteWord(w : word); {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
   begin
+   {$ifdef FPC}
     w:=NtoLE(w);
     Output.WriteWord(w);
+   {$else}
+    output.WriteBuffer(w,sizeof(w));
+   {$endif}
   end;
 
   procedure WriteDWord(lw : longword); {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
   begin
+   {$ifdef FPC}
     lw:=NtoLE(lw);
     Output.WriteDWord(lw);
+   {$else}
+    output.WriteBuffer(lw,sizeof(lw));
+   {$endif}
   end;
 
   procedure WriteQWord(qw : qword); {$ifdef CLASSESINLINE}inline;{$endif CLASSESINLINE}
   begin
+   {$ifdef FPC}
     qw:=NtoLE(qw);
     Output.WriteBuffer(qw,sizeof(qword));
+   {$else}
+    output.WriteBuffer(qw,sizeof(qw));
+   {$endif}
   end;
 
 {$ifndef FPUNONE}
@@ -529,6 +581,7 @@ var
       exp : smallint;
       sign : boolean;
   begin
+ {$ifdef FPC}
     mant:=(qword(d) and $000FFFFFFFFFFFFF) shl 12;
     exp :=(qword(d) shr 52) and $7FF;
     sign:=(qword(d) and $8000000000000000)<>0;
@@ -557,6 +610,9 @@ var
     exp:=NtoLE(word(exp));
     move(mant,pbyte(e)[0],8); //mantissa         : bytes 0..7
     move(exp,pbyte(e)[8],2);  //exponent and sign: bytes 8..9
+ {$else}
+    extended(E^):= d;
+ {$endif}
   end;
   {$ENDIF}
 
@@ -579,7 +635,7 @@ var
   begin
     if length(s)>255 then size:=255
     else size:=length(s);
-    Output.WriteByte(size);
+    {$ifdef FPC}Output.{$endif}WriteByte(size);
     if Length(s) > 0 then
       Output.WriteBuffer(s[1], size);
   end;
@@ -616,16 +672,20 @@ var
   procedure WriteInteger(value: Int64);
   begin
     if (value >= -128) and (value <= 127) then begin
-      Output.WriteByte(Ord(vaInt8));
-      Output.WriteByte(byte(value));
+      {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaInt8));
+      {$ifdef FPC}Output.{$endif}WriteByte(byte(value));
     end else if (value >= -32768) and (value <= 32767) then begin
-      Output.WriteByte(Ord(vaInt16));
+      {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaInt16));
       WriteWord(word(value));
+    {$ifdef FPC}
     end else if (value >= -2147483648) and (value <= 2147483647) then begin
-      Output.WriteByte(Ord(vaInt32));
+    {$else}
+    end else if (value+2147483648>=0) and (value-2147483647<=0) then begin
+    {$endif}
+      {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaInt32));
       WriteDWord(longword(value));
     end else begin
-      Output.WriteByte(ord(vaInt64));
+      {$ifdef FPC}Output.{$endif}WriteByte(ord(vaInt64));
       WriteQWord(qword(value));
     end;
   end;
@@ -641,7 +701,7 @@ var
         parser.CheckToken(toWString);
       ws:=ws+parser.TokenWideString;
     end;
-    Output.WriteByte(Ord(vaWstring));
+    {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaWstring));
     WriteWString(ws);
   end;
   
@@ -664,7 +724,7 @@ var
 {$ifndef FPUNONE}
       toFloat:
         begin
-          Output.WriteByte(Ord(vaExtended));
+          {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaExtended));
           flt := Parser.TokenFloat;
           WriteExtended(flt);
           parser.NextToken;
@@ -687,12 +747,12 @@ var
           end;
           if (length(S)>255) then
           begin
-            Output.WriteByte(Ord(vaLString));
+            {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaLString));
             WriteLString(S);
           end
           else
           begin
-            Output.WriteByte(Ord(vaString));
+            {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaString));
             WriteString(s);
           end;
         end;
@@ -700,22 +760,22 @@ var
         ProcessWideString('');
       toSymbol: begin
        if CompareText(parser.TokenString, 'True') = 0 then begin
-         Output.WriteByte(Ord(vaTrue));
+         {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaTrue));
        end
        else begin
         if CompareText(parser.TokenString, 'False') = 0 then begin
-         Output.WriteByte(Ord(vaFalse));
+         {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaFalse));
         end
         else begin
          if CompareText(parser.TokenString, 'nil') = 0 then begin
-          Output.WriteByte(Ord(vaNil));
+          {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaNil));
          end
          else begin
           if CompareText(parser.TokenString, 'null') = 0 then begin
-           Output.WriteByte(Ord(vaNull));
+           {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaNull));
           end
           else begin
-           Output.WriteByte(Ord(vaIdent));
+           {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaIdent));
            WriteString(parser.TokenComponentIdent);
           end;
          end;
@@ -727,7 +787,7 @@ var
       '[':
         begin
           parser.NextToken;
-          Output.WriteByte(Ord(vaSet));
+          {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaSet));
           if parser.Token <> ']' then
             while True do
             begin
@@ -739,42 +799,42 @@ var
               parser.CheckToken(',');
               parser.NextToken;
             end;
-          Output.WriteByte(0);
+          {$ifdef FPC}Output.{$endif}WriteByte(0);
           parser.NextToken;
         end;
       // List
       '(':
         begin
           parser.NextToken;
-          Output.WriteByte(Ord(vaList));
+          {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaList));
           while parser.Token <> ')' do
             ProcessValue;
-          Output.WriteByte(0);
+          {$ifdef FPC}Output.{$endif}WriteByte(0);
           parser.NextToken;
         end;
       // Collection
       '<':
         begin
           parser.NextToken;
-          Output.WriteByte(Ord(vaCollection));
+          {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaCollection));
           while parser.Token <> '>' do
           begin
             parser.CheckTokenSymbol('item');
             parser.NextToken;
             // ConvertOrder
-            Output.WriteByte(Ord(vaList));
+            {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaList));
             while not parser.TokenSymbolIs('end') do
               ProcessProperty;
             parser.NextToken;   // Skip 'end'
-            Output.WriteByte(0);
+            {$ifdef FPC}Output.{$endif}WriteByte(0);
           end;
-          Output.WriteByte(0);
+          {$ifdef FPC}Output.{$endif}WriteByte(0);
           parser.NextToken;
         end;
       // Binary data
       '{':
         begin
-          Output.WriteByte(Ord(vaBinary));
+          {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaBinary));
           stream := TMemoryStream.Create;
           try
             parser.HexToBinary(stream);
@@ -847,7 +907,7 @@ var
       end;
     end;
     if Flags <> 0 then begin
-      Output.WriteByte($f0 or Flags);
+      {$ifdef FPC}Output.{$endif}WriteByte($f0 or Flags);
       if (Flags and 2) <> 0 then
         WriteInteger(ChildPos);
     end;
@@ -860,12 +920,12 @@ var
       parser.TokenSymbolIs('INHERITED') or
       parser.TokenSymbolIs('INLINE')) do
       ProcessProperty;
-    Output.WriteByte(0);        // Terminate property list
+    {$ifdef FPC}Output.{$endif}WriteByte(0);        // Terminate property list
 
     // Convert child objects
     while not parser.TokenSymbolIs('END') do ProcessObject;
     parser.NextToken;           // Skip end token
-    Output.WriteByte(0);        // Terminate property list
+    {$ifdef FPC}Output.{$endif}WriteByte(0);        // Terminate property list
   end;
 
 const
@@ -906,7 +966,7 @@ begin
   objectbinarytotext(input,output);
  finally
   decimalseparator:= ch1;
- end;  
+ end;
  {$else}
   objectbinarytotext(input,output);
  {$endif}
