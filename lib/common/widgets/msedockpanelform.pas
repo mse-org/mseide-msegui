@@ -7,6 +7,20 @@ uses
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msedock,
  msestrings,msestatfile;
 
+const
+ defaultdockpanelgripoptions = defaultgripoptions + 
+             [go_fixsizebutton,go_topbutton,go_backgroundbutton,go_lockbutton];
+ defaultdockpaneloptionsdock = defaultoptionsdock +
+       [od_canmove,od_canfloat,od_candock,od_acceptsdock,od_dockparent,
+        od_splitvert,od_splithorz,od_tabed,od_proportional,od_propsize];
+ defaultdockpanelwidth = 350;
+ defaultdockpanelheight = 200;
+ defaultdockpaneloptions = 
+                (defaultformoptions - [fo_autoreadstat,fo_autowritestat]) + 
+                [fo_globalshortcuts,fo_screencentered];
+ defaultdockpaneloptionswidget =
+                (defaultformwidgetoptions - [ow_destroywidgets]) + 
+                [ow_mousefocus,ow_arrowfocusin,ow_arrowfocusout];
 type
  tdockpanelcontroller = class;
  
@@ -28,6 +42,12 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function canclose(const newfocus: twidget): boolean; override;
+  published
+   property visible default false;
+   property bounds_cx default defaultdockpanelwidth;
+   property bounds_cy default defaultdockpanelheight;
+   property options default defaultdockpaneloptions;
+   property optionswidget default defaultdockpaneloptionswidget;
  end;
 
  panelfoclassty = class of tdockpanelform;
@@ -40,10 +60,11 @@ type
                                   const avalue: tmenuitem) of object;
  createpaneleventty =
      procedure(const sender: tdockpanelcontroller; 
-                                  const apanel: tdockpanelform) of object;
- getpanelclasseventty =
+                                  var apanel: tdockpanelform) of object;
+{ getpanelclasseventty =
      procedure(const sender: tdockpanelcontroller; 
                                   var aclass: panelfoclassty) of object;
+}
 
  tdockpanelcontroller = class(tmsecomponent,istatfile)
   private
@@ -56,7 +77,9 @@ type
    fonupdatemenu: dockpanelupdatemenueventty;
    fstatfileclient: tstatfile;
    foncreatepanel: createpaneleventty;
-   fongetpanelclass: getpanelclasseventty;
+   foptionsdock: optionsdockty;
+   foptionsgrip: gripoptionsty;
+   fcaption: msestring;
    procedure updatestat(const filer: tstatfiler);
    procedure setmenu(const avalue: tcustommenu);
    procedure setstatfile(const avalue: tstatfile);
@@ -80,14 +103,19 @@ type
                                                      write setstatfileclient;
    property menunamepath: string read fmenunamepath write fmenunamepath;
                       //delimiter = '.'
+   property caption: msestring read fcaption write fcaption;
+   property optionsdock: optionsdockty read foptionsdock
+                   write foptionsdock default defaultdockpaneloptionsdock;
+   property optionsgrip: gripoptionsty read foptionsgrip 
+                   write foptionsgrip default defaultdockpanelgripoptions;
    property onupdatecaption: dockpanelupdatecaptioneventty 
                      read fonupdatecaption write fonupdatecaption;
    property onupdatemenu: dockpanelupdatemenueventty 
                      read fonupdatemenu write fonupdatemenu;
    property oncreatepanel: createpaneleventty read foncreatepanel 
                                                       write foncreatepanel;
-   property ongetpanelclass: getpanelclasseventty read fongetpanelclass 
-                                                     write fongetpanelclass;
+//   property ongetpanelclass: getpanelclasseventty read fongetpanelclass 
+//                                                     write fongetpanelclass;
  end;
  
 function createdockpanelform(const aclass: tclass; 
@@ -111,8 +139,12 @@ begin
 end;
 
 { tdockpanelcontroller }
+
 constructor tdockpanelcontroller.create(aowner: tcomponent);
 begin
+ foptionsdock:= defaultdockpaneloptionsdock;
+ foptionsgrip:= defaultdockpanelgripoptions;
+// fcaption:= 'Panel';
  fpanellist:= tpointerlist.create;
  inherited;
 end;
@@ -157,8 +189,8 @@ var
  item1: tmenuitem;
  int1,int2: integer;
  ar1: integerarty;
- pacla1: panelfoclassty;
 begin
+ result:= nil;
  item1:= nil;
  int2:= 0;
  if fmenu <> nil then begin
@@ -184,12 +216,21 @@ begin
   int2:= strtoint(copy(aname,6,bigint))-1;
  end;
 
- pacla1:= tdockpanelform;
- if canevent(tmethod(fongetpanelclass)) then begin
-  fongetpanelclass(self,pacla1);
+ if canevent(tmethod(foncreatepanel)) then begin
+  foncreatepanel(self,result);
  end;
- result:= pacla1.create(self);
-
+ if result = nil then begin
+  result:= tdockpanelform.create(self);
+  with result do begin
+   createframe;
+   dragdock.optionsdock:= defaultdockpaneloptionsdock;
+   frame.grip_options:= defaultdockpanelgripoptions;
+   dragdock.optionsdock:= foptionsdock;
+   frame.grip_options:= foptionsgrip;
+   container.frame.framei:= nullframe;
+  end;
+ end;
+ 
  int1:= int2 + 1;
  if aname = '' then begin
   aname:= 'panel'+inttostr(int1);
@@ -207,9 +248,6 @@ begin
    int2:= item1.count - 2;
   end;
   item1.submenu.insert(int2,result.fmenuitem);
- end;
- if canevent(tmethod(foncreatepanel)) then begin
-  foncreatepanel(self,result);
  end;
 end;
 
@@ -271,17 +309,18 @@ constructor tdockpanelform.docreate(aowner: tcomponent);
 begin
  inherited;
  visible:= false;
+ options:= defaultdockpaneloptions;
+ optionswidget:= defaultdockpaneloptionswidget;
+ {
  createframe;
- dragdock.optionsdock:= dragdock.optionsdock + 
-       [od_canmove,od_canfloat,od_candock,od_acceptsdock,od_dockparent,
-        od_splitvert,od_splithorz,od_tabed,od_proportional,od_propsize];
  options:= (options - [fo_autoreadstat,fo_autowritestat]) + 
                       [fo_globalshortcuts,fo_screencentered];
  optionswidget:= (optionswidget - [ow_destroywidgets]) + 
                   [ow_mousefocus,ow_arrowfocusin,ow_arrowfocusout];
- frame.grip_options:= frame.grip_options + 
-     [go_fixsizebutton,go_topbutton,go_backgroundbutton,go_lockbutton];
- size:= makesize(350,200);
+ dragdock.optionsdock:= defaultdockpaneloptionsdock;
+ frame.grip_options:= defaultdockpanelgripoptions;
+ }
+ size:= makesize(defaultdockpanelwidth,defaultdockpanelheight);
  if fcontroller <> nil then begin
   statfile:= fcontroller.statfileclient;
   fcontroller.fpanellist.add(self);
@@ -307,14 +346,19 @@ end;
 procedure tdockpanelform.updatecaption(acaption: msestring);
 begin
  if acaption = '' then begin
-  acaption:= 'Panel';
+  if fcontroller <> nil then begin
+   acaption:= fcontroller.caption;
+  end;
  end;
  if fmenuitem <> nil then begin
   with fmenuitem do begin
    onexecute:= {$ifdef FPC}@{$endif}showexecute;
    if fnameindex < 9 then begin
     shortcut:= (ord(key_f1) or key_modctrl) + fnameindex;
-    acaption:= acaption + ' &' + inttostr(fnameindex+1);
+    if acaption <> '' then begin
+     acaption:= acaption + ' ';
+    end;
+    acaption:= acaption + '&' + inttostr(fnameindex+1);
    end
    else begin
     shortcut:= 0;

@@ -1,7 +1,21 @@
 object ${%FORMNAME%}: t${%FORMNAME%}
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton, go_lockbutton]
+  frame.dummy = 0
   bounds_x = 100
   bounds_y = 100
-  bounds_cx = 350
-  bounds_cy = 200
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_autoscale]
+  container.frame.framei_left = 0
+  container.frame.framei_top = 0
+  container.frame.framei_right = 0
+  container.frame.framei_bottom = 0
+  container.frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
+  container.bounds = (
+    0
+    0
+    340
+    200
+  )
+  dragdock.optionsdock = [od_savepos, od_savezorder, od_savechildren, od_canmove, od_canfloat, od_candock, od_acceptsdock, od_dockparent, od_splitvert, od_splithorz, od_tabed, od_proportional, od_propsize]
   moduleclassname = 'tdockpanelform'
 end
