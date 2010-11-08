@@ -977,7 +977,8 @@ var
          setlength(value1,length(value1) + int1 );
          move(po1^,value1[charoffset],int1);
          inc(charoffset,int1);
-         inc(longoffset,int1 div sizeof(atom)); //32/64 bit
+         inc(longoffset,int1 div sizeof(dword));
+//         inc(longoffset,int1 div sizeof(atom)); //32/64 bit
          result:= gue_ok;
         end;
        end
@@ -997,7 +998,7 @@ var
     end;
    end;
   until false;
- end;
+ end; //getdata
 
 var
  int1,int2: integer; 
