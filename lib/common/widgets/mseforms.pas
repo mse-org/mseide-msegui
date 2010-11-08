@@ -1502,7 +1502,8 @@ end;
 
 procedure tcustommseform.insertwidget(const widget: twidget; const apos: pointty);
 begin
- if not (csloading in widget.componentstate) then begin
+// if not (csloading in widget.componentstate) then begin
+ if not (csloading in componentstate) then begin
   fscrollbox.insertwidget(widget,subpoint(apos,fscrollbox.fwidgetrect.pos));
  end
  else begin

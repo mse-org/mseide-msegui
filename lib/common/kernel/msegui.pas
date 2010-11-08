@@ -2137,6 +2137,7 @@ type
  tguiapplication = class(tcustomapplication)
   private
    fwindows: windowarty;
+   fwindowupdateindex: integer;
    fgroupzorder: windowarty;
    factivewindow: twindow;
    fwantedactivewindow: twindow; //set by twindow.activate if modal
@@ -14498,10 +14499,15 @@ begin
 end;
 
 procedure tinternalapplication.unregisterwindow(window: twindow);
+var
+ int1: integer;
 begin
  lock;
  try
-  removeitem(pointerarty(fwindows),window);
+  int1:= removeitem(pointerarty(fwindows),window);
+  if (int1 >= 0) and (int1 <= fwindowupdateindex) then begin
+   dec(fwindowupdateindex);
+  end;
   if window.fwindow.id = fmousewinid then begin
    fmousewinid:= 0;
   end;
@@ -14728,13 +14734,14 @@ begin       //eventloop
      repeat
       bo1:= false;
 //      exclude(fstate,aps_invalidated);
-      for int1:= 0 to high(fwindows) do begin
-//       exclude(fstate,aps_invalidated);
+      fwindowupdateindex:= 0;
+      while fwindowupdateindex <= high(fwindows) do begin
        try
-        bo1:= fwindows[int1].internalupdate or bo1;
+        bo1:= fwindows[fwindowupdateindex].internalupdate or bo1;
        except
         handleexception(self);
        end;
+       inc(fwindowupdateindex);
       end;
      until not bo1 and not terminated; //no more to paint
      exclude(fstate,aps_invalidated);
