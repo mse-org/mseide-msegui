@@ -151,7 +151,7 @@ begin
   tsplitter,tspacer,tlayouter,ttoolbar,ttabbar,ttabwidget,ttabpage,
   tdial,tchart,tchartrecorder,twindowwidget
    {$ifndef mse_no_opengl}{$ifdef FPC},topenglwidget{$endif}{$endif}
-  ,ttraywidget,tdockpanelcontroller]);
+  ,ttraywidget,tdockpanelformcontroller]);
  registercomponenttabhints(['Widget'],
          ['Display Widgets, Widgets which can''t be placed into twidgetgrid']);
  registerpropertyeditor(typeinfo(tcellframe),nil,'',
@@ -205,7 +205,6 @@ begin
  registerdesignmoduleclass(tscrollboxform,@scrollboxformintf);
  registerdesignmoduleclass(ttabform,@tabformintf);
 end;
-
 
 { tgridpropseditor }
 

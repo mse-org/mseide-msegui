@@ -22,13 +22,13 @@ const
                 (defaultformwidgetoptions - [ow_destroywidgets]) + 
                 [ow_mousefocus,ow_arrowfocusin,ow_arrowfocusout];
 type
- tdockpanelcontroller = class;
+ tdockpanelformcontroller = class;
  
  tdockpanelform = class(tdockformwidget)
   private
    fmenuitem: tmenuitem;
    fnameindex: integer; //0 for unnumbered
-   fcontroller: tdockpanelcontroller;
+   fcontroller: tdockpanelformcontroller;
    procedure showexecute(const sender: tobject);
   protected
    procedure updatecaption(acaption: msestring);
@@ -53,20 +53,20 @@ type
  panelfoclassty = class of tdockpanelform;
  
  dockpanelupdatecaptioneventty = 
-     procedure(const sender: tdockpanelcontroller; const apanel: tdockpanelform;
+     procedure(const sender: tdockpanelformcontroller; const apanel: tdockpanelform;
                                   var avalue: msestring) of object;
  dockpanelupdatemenueventty = 
-     procedure(const sender: tdockpanelcontroller; const apanel: tdockpanelform;
+     procedure(const sender: tdockpanelformcontroller; const apanel: tdockpanelform;
                                   const avalue: tmenuitem) of object;
  createpaneleventty =
-     procedure(const sender: tdockpanelcontroller; 
+     procedure(const sender: tdockpanelformcontroller; 
                                   var apanel: tdockpanelform) of object;
 { getpanelclasseventty =
      procedure(const sender: tdockpanelcontroller; 
                                   var aclass: panelfoclassty) of object;
 }
 
- tdockpanelcontroller = class(tmsecomponent,istatfile)
+ tdockpanelformcontroller = class(tmsecomponent,istatfile)
   private
    fpanellist: tpointerlist;
    fmenu: tcustommenu;
@@ -141,9 +141,9 @@ begin
  tmsecomponent1(result).factualclassname:= aclassname;
 end;
 
-{ tdockpanelcontroller }
+{ tdockpanelformcontroller }
 
-constructor tdockpanelcontroller.create(aowner: tcomponent);
+constructor tdockpanelformcontroller.create(aowner: tcomponent);
 begin
  foptionsdock:= defaultdockpaneloptionsdock;
  foptionsgrip:= defaultdockpanelgripoptions;
@@ -152,13 +152,13 @@ begin
  inherited;
 end;
 
-destructor tdockpanelcontroller.destroy;
+destructor tdockpanelformcontroller.destroy;
 begin
  inherited;
  freeandnil(fpanellist);
 end;
 
-procedure tdockpanelcontroller.updatestat(const filer: tstatfiler);
+procedure tdockpanelformcontroller.updatestat(const filer: tstatfiler);
 var
  ar1: msestringarty;
  int1: integer;
@@ -187,7 +187,7 @@ begin
  end;
 end;
 
-function tdockpanelcontroller.newpanel(aname: string = ''): tdockpanelform;
+function tdockpanelformcontroller.newpanel(aname: string = ''): tdockpanelform;
 var
  item1: tmenuitem;
  int1,int2: integer;
@@ -254,45 +254,47 @@ begin
  end;
 end;
 
-procedure tdockpanelcontroller.setmenu(const avalue: tcustommenu);
+procedure tdockpanelformcontroller.setmenu(const avalue: tcustommenu);
 begin
  setlinkedvar(avalue,tmsecomponent(fmenu));
 end;
 
-procedure tdockpanelcontroller.setstatfile(const avalue: tstatfile);
+procedure tdockpanelformcontroller.setstatfile(const avalue: tstatfile);
 begin
  setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
 
-procedure tdockpanelcontroller.dostatread(const reader: tstatreader);
+procedure tdockpanelformcontroller.dostatread(const reader: tstatreader);
 begin
  updatestat(reader);
 end;
 
-procedure tdockpanelcontroller.dostatwrite(const writer: tstatwriter);
+procedure tdockpanelformcontroller.dostatwrite(const writer: tstatwriter);
 begin
  updatestat(writer);
 end;
 
-procedure tdockpanelcontroller.statreading;
+procedure tdockpanelformcontroller.statreading;
 begin
+ //dummy
 end;
 
-procedure tdockpanelcontroller.statread;
+procedure tdockpanelformcontroller.statread;
 begin
+ //dummy
 end;
 
-function tdockpanelcontroller.getstatvarname: msestring;
+function tdockpanelformcontroller.getstatvarname: msestring;
 begin
  result:= fstatvarname;
 end;
 
-procedure tdockpanelcontroller.setstatfileclient(const avalue: tstatfile);
+procedure tdockpanelformcontroller.setstatfileclient(const avalue: tstatfile);
 begin
  setlinkedvar(avalue,tmsecomponent(fstatfileclient));
 end;
 
-procedure tdockpanelcontroller.updatewindowcaptions(const avalue: msestring);
+procedure tdockpanelformcontroller.updatewindowcaptions(const avalue: msestring);
 var
  po1: pdockpanelform;
  int1: integer;
@@ -310,7 +312,7 @@ end;
 
 constructor tdockpanelform.create(aowner: tcomponent);
 begin
- if aowner is tdockpanelcontroller then begin
+ if aowner is tdockpanelformcontroller then begin
   setlinkedvar(tmsecomponent(aowner),tmsecomponent(fcontroller));
  end;
  inherited create(aowner);
