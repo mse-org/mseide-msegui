@@ -576,7 +576,12 @@ begin
    end;
    res.y:= info.dest.y;
    if tf_ycentered in flags then begin
-    res.y:= res.y + (info.dest.cy - height) div 2;
+    if info.dest.cy < height then begin
+     res.y:= res.y + (info.dest.cy - height -1) div 2;
+    end
+    else begin
+     res.y:= res.y + (info.dest.cy - height) div 2;
+    end;
    end
    else begin
     if tf_bottom in flags then begin
@@ -594,7 +599,12 @@ begin
      y1:= y1 + lineheight;     
      listartx:= info.dest.x;
      if tf_xcentered in flags then begin
-      listartx:= listartx + (info.dest.cx - liwidth) div 2;
+      if info.dest.cx < liwidth then begin
+       listartx:= listartx + (info.dest.cx - liwidth - 1) div 2;
+      end
+      else begin
+       listartx:= listartx + (info.dest.cx - liwidth) div 2;
+      end;
      end
      else begin
       if tf_right in flags then begin
