@@ -23,7 +23,7 @@ procedure objecttexttobinarymse(input, output: tstream);
 
 implementation
 uses
- sysutils,rtlconsts,msestrings,msetypes;
+ sysutils,rtlconsts,msestrings,msetypes,msereal,msefloattostr;
 {$ifdef FPC} {$define CLASSESINLINE} {$endif}
 
 {$ifndef FPC}
@@ -398,7 +398,13 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
 {$ifndef FPUNONE}
         vaExtended: begin
             ext:=ReadExtended;
-            Str(ext,S);// Do not use localized strings.
+            if isemptyreal(ext) then begin
+             s:= 'NegInf';
+            end
+            else begin
+             s:= doubletostring(ext,0,fsm_default,'.');
+//             Str(ext,S);// Do not use localized strings.
+            end;
             OutLn(S);
           end;
 {$endif}
@@ -775,8 +781,14 @@ var
            {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaNull));
           end
           else begin
-           {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaIdent));
-           WriteString(parser.TokenComponentIdent);
+           if CompareText(parser.TokenString, 'NegInf') = 0 then begin
+           {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaExtended));
+            Writeextended(emptyreal);
+           end
+           else begin
+            {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaIdent));
+            WriteString(parser.TokenComponentIdent);
+           end;
           end;
          end;
         end;
@@ -939,18 +951,6 @@ begin
     parser.Free;
   end;
 end;
-
-
-
-
-
-
-
-
-
-
-
-
 
 procedure objectbinarytotextmse(input, output: tstream);
                 //workaround for FPC bug with localized float strings
