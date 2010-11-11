@@ -57,7 +57,7 @@ type
    procedure flush; virtual;
 
    procedure setsize(const newsize: int64); override;
-   procedure clear;        //only for memorystream
+   procedure clear; virtual;        //only for memorystream
    property memory: pointer read getmemory;     //only for memorystream
  end;
 
@@ -95,6 +95,8 @@ type
   public
    constructor create(ahandle: integer); override;
    constructor createdata(const adata: string);
+   procedure clear; override;        //only for memorystream
+
    function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
    function Read(var Buffer; Count: Longint): Longint; override;
    function Write(const Buffer; Count: Longint): Longint; override;
@@ -1215,6 +1217,14 @@ endlab:
  if result < count then begin
   include(fstate,tss_eof);
  end;
+end;
+
+procedure tcustombufstream.clear;
+begin
+ inherited;
+ fstate:= [];
+ bufoffset:= nil; 
+ bufend:= nil; 
 end;
 
 { tbufstream }
