@@ -31,7 +31,7 @@ type
  tracestatesty = set of tracestatety;
  tracekindty = (trk_xseries,trk_xy);
 
- charttraceoptionty = (cto_adddataright,
+ charttraceoptionty = (cto_invisible,cto_adddataright,
                        cto_xordered, //optimize for big data quantity
                        cto_logx,cto_logy
                        );
@@ -107,6 +107,8 @@ type
    procedure setlogx(const avalue: boolean);
    function getlogy: boolean;
    procedure setlogy(const avalue: boolean);
+   function getvisible: boolean;
+   procedure setvisible(const avalue: boolean);
   protected
    ftraces: ttraces;
    procedure checkgraphic;
@@ -127,6 +129,7 @@ type
    property ydatalist: trealdatalist read finfo.ydatalist write setydatalist;
    property logx: boolean read getlogx write setlogx;
    property logy: boolean read getlogy write setlogy;
+   property visible: boolean read getvisible write setvisible;
    
   published
    property color: colorty read finfo.color write setcolor default cl_black;
@@ -649,7 +652,7 @@ var
  islogx,islogy: boolean;
  
 begin
- if not (trs_datapointsvalid in finfo.state) then begin
+ if not (trs_datapointsvalid in finfo.state) and visible then begin
   finfo.datapoints:= nil;
   include(finfo.state,trs_datapointsvalid);
   dpcountx:= 0;
@@ -906,7 +909,7 @@ end;
 
 procedure ttrace.paint(const acanvas: tcanvas);
 begin
- if finfo.widthmm > 0 then begin
+ if (finfo.widthmm > 0) and visible then begin
   acanvas.linewidthmm:= finfo.widthmm;
   if finfo.dashes <> '' then begin
    acanvas.dashes:= finfo.dashes;
@@ -932,6 +935,9 @@ var
  bmp1,bmp2: tmaskedbitmap;
  margin: integer;
 begin
+ if not visible then begin
+  exit;
+ end;
  with ftraces do begin
   if (fimage_list <> nil) and (finfo.imagenr >= 0) and 
                                     (finfo.imagenr < fimage_list.count) then begin
@@ -1239,6 +1245,21 @@ begin
  end
  else begin
   options:= options - [cto_logy];
+ end;
+end;
+
+function ttrace.getvisible: boolean;
+begin
+ result:= not (cto_invisible in finfo.options);
+end;
+
+procedure ttrace.setvisible(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options - [cto_invisible];
+ end
+ else begin
+  options:= options + [cto_invisible];
  end;
 end;
 
