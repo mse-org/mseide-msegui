@@ -970,13 +970,13 @@ type
    procedure setformatdisp(const Value: msestring);
    procedure setformatedit(const Value: msestring);
    procedure readvalue(reader: treader);
-   procedure writevalue(writer: twriter);
+//   procedure writevalue(writer: twriter);
    procedure readvaluedefault(reader: treader);
-   procedure writevaluedefault(writer: twriter);
+//   procedure writevaluedefault(writer: twriter);
    procedure readmin(reader: treader);
-   procedure writemin(writer: twriter);
+//   procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
-   procedure writemax(writer: twriter);
+//   procedure writemax(writer: twriter);
    function getgridvalue(const index: integer): realty;
    function getgridintvalue(const index: integer): integer;
    procedure setgridvalue(const index: integer; const avalue: realty);
@@ -1023,14 +1023,14 @@ type
    property onsetintvalue: setintegereventty read fonsetintvalue 
                                   write fonsetintvalue;
                     //overrides onsetvalue
-   property value: realty read fvalue write setvalue stored false;
+   property value: realty read fvalue write setvalue {stored false};
    property valuedefault: realty read fvaluedefault 
-                                    write fvaluedefault stored false;
+                                    write fvaluedefault {stored false};
    property formatedit: msestring read fformatedit write setformatedit;
    property formatdisp: msestring read fformatdisp write setformatdisp;
    property valuerange: real read fvaluerange write setvaluerange;
-   property min: realty read fmin write fmin stored false;
-   property max: realty read fmax write fmax stored false;
+   property min: realty read fmin write fmin {stored false};
+   property max: realty read fmax write fmax {stored false};
    property gridvalue[const index: integer]: realty
         read getgridvalue write setgridvalue; default;
    property gridintvalue[const index: integer]: integer
@@ -1049,13 +1049,13 @@ type
   published
    property onsetvalue;
    property onsetintvalue;
-   property value stored false;
-   property valuedefault stored false;
+   property value {stored false};
+   property valuedefault {stored false};
    property formatedit;
    property formatdisp;
    property valuerange;
-   property min stored false;
-   property max stored false;
+   property min {stored false};
+   property max {stored false};
   {$ifdef mse_with_ifi}
    property ifilink;
   {$endif}
@@ -1159,12 +1159,12 @@ type
  trealspinedit = class(tcustomrealspinedit)
   published
    property onsetvalue;
-   property value stored false;
+   property value {stored false};
    property formatedit;
    property formatdisp;
    property valuerange;
-   property min stored false;
-   property max stored false;
+   property min {stored false};
+   property max {stored false};
    property step;
  end;
 
@@ -1188,13 +1188,13 @@ type
    function checkkind(const avalue: tdatetime): tdatetime;
    procedure setkind(const avalue: datetimekindty);
    procedure readvalue(reader: treader);
-   procedure writevalue(writer: twriter);
+//   procedure writevalue(writer: twriter);
    procedure readvaluedefault(reader: treader);
-   procedure writevaluedefault(writer: twriter);
+//   procedure writevaluedefault(writer: twriter);
    procedure readmin(reader: treader);
-   procedure writemin(writer: twriter);
+//   procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
-   procedure writemax(writer: twriter);
+//   procedure writemax(writer: twriter);
   {$ifdef mse_with_ifi}
    function getifilink: tifidatetimelinkcomp;
    procedure setifilink(const avalue: tifidatetimelinkcomp);
@@ -1220,9 +1220,9 @@ type
    procedure assigncol(const value: trealdatalist);
    function isnull: boolean;
    property onsetvalue: setdatetimeeventty read fonsetvalue write fonsetvalue;
-   property value: tdatetime read fvalue write setvalue stored false;
+   property value: tdatetime read fvalue write setvalue {stored false};
    property valuedefault: tdatetime read fvaluedefault 
-                                             write fvaluedefault stored false;
+                                             write fvaluedefault {stored false};
    property formatedit: msestring read fformatedit write setformatedit;
    property formatdisp: msestring read fformatdisp write setformatdisp;
    property min: tdatetime read fmin write fmin;
@@ -1239,12 +1239,12 @@ type
  tdatetimeedit = class(tcustomdatetimeedit)
   published
    property onsetvalue;
-   property value stored false;
-   property valuedefault stored false;
+   property value {stored false};
+   property valuedefault {stored false};
    property formatedit;
    property formatdisp;
-   property min stored false;
-   property max stored false;
+   property min {stored false};
+   property max {stored false};
    property kind;
   {$ifdef mse_with_ifi}
    property ifilink;
@@ -4750,42 +4750,42 @@ procedure tcustomrealedit.readvalue(reader: treader);
 begin
  value:= readrealty(reader);
 end;
-
+{
 procedure tcustomrealedit.writevalue(writer: twriter);
 begin
  writerealty(writer,fvalue);
 end;
-
+}
 procedure tcustomrealedit.readvaluedefault(reader: treader);
 begin
  valuedefault:= readrealty(reader);
 end;
-
+{
 procedure tcustomrealedit.writevaluedefault(writer: twriter);
 begin
  writerealty(writer,fvaluedefault);
 end;
-
+}
 procedure tcustomrealedit.readmin(reader: treader);
 begin
  fmin:= readrealty(reader);
 end;
-
+{
 procedure tcustomrealedit.writemin(writer: twriter);
 begin
  writerealty(writer,fmin);
 end;
-
+}
 procedure tcustomrealedit.readmax(reader: treader);
 begin
  fmax:= readrealty(reader);
 end;
-
+{
 procedure tcustomrealedit.writemax(writer: twriter);
 begin
  writerealty(writer,fmax);
 end;
-
+}
 procedure tcustomrealedit.readvaluescale(reader: treader);
 begin
  valuerange:= valuescaletorange(reader);
@@ -4796,31 +4796,12 @@ var
  bo1,bo2,bo3,bo4: boolean;
 begin
  inherited;
- if filer.ancestor <> nil then begin
-  with tcustomrealedit(filer.ancestor) do begin
-   bo1:= self.fvalue <> fvalue;
-   bo2:= self.fmin <> fmin;
-   bo3:= self.fmax <> fmax;
-   bo4:= self.fvaluedefault <> fvaluedefault;
-  end;
- end
- else begin
-  bo1:= not isemptyreal(fvalue);
-  bo2:= not isemptyreal(fmin);
-  bo3:= cmprealty(fmax,bigreal) <> 0;
-  bo4:= not isemptyreal(fvaluedefault);
-//  bo3:= cmprealty(fmax,0.99*bigreal) < 0;
- end;
  
  filer.DefineProperty('val',
-             {$ifdef FPC}@{$endif}readvalue,
-             {$ifdef FPC}@{$endif}writevalue,bo1);
- filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,
-          {$ifdef FPC}@{$endif}writemin,bo2);
- filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
-          {$ifdef FPC}@{$endif}writemax,bo3);
- filer.DefineProperty('def',{$ifdef FPC}@{$endif}readvaluedefault,
-          {$ifdef FPC}@{$endif}writevaluedefault,bo4);
+             {$ifdef FPC}@{$endif}readvalue,nil,false);
+ filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,nil,false);
+ filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,nil,false);
+ filer.DefineProperty('def',{$ifdef FPC}@{$endif}readvaluedefault,nil,false);
  filer.defineproperty('valuescale',{$ifdef FPC}@{$endif}readvaluescale,nil,false);
 end;
 
@@ -5390,72 +5371,52 @@ procedure tcustomdatetimeedit.readvalue(reader: treader);
 begin
  value:= readrealty(reader);
 end;
-
+{
 procedure tcustomdatetimeedit.writevalue(writer: twriter);
 begin
  writerealty(writer,fvalue);
 end;
-
+}
 procedure tcustomdatetimeedit.readvaluedefault(reader: treader);
 begin
  valuedefault:= readrealty(reader);
 end;
-
+{
 procedure tcustomdatetimeedit.writevaluedefault(writer: twriter);
 begin
  writerealty(writer,fvaluedefault);
 end;
-
+}
 procedure tcustomdatetimeedit.readmin(reader: treader);
 begin
  fmin:= readrealty(reader);
 end;
-
+{
 procedure tcustomdatetimeedit.writemin(writer: twriter);
 begin
  writerealty(writer,fmin);
 end;
-
+}
 procedure tcustomdatetimeedit.readmax(reader: treader);
 begin
  fmax:= readrealty(reader);
 end;
-
+{
 procedure tcustomdatetimeedit.writemax(writer: twriter);
 begin
  writerealty(writer,fmax);
 end;
-
+}
 procedure tcustomdatetimeedit.defineproperties(filer: tfiler);
-var
- bo1,bo2,bo3,bo4: boolean;
 begin
  inherited;
- if filer.ancestor <> nil then begin
-  with tcustomdatetimeedit(filer.ancestor) do begin
-   bo1:= self.fvalue <> fvalue;
-   bo2:= self.fmin <> fmin;
-   bo3:= self.fmax <> fmax;
-   bo4:= self.fvaluedefault <> fvaluedefault;
-  end;
- end
- else begin
-  bo1:= not isemptyreal(fvalue);
-  bo2:= not isemptyreal(fmin);
-  bo3:= cmprealty(fmax,bigdatetime) <> 0;
-  bo4:= not isemptyreal(fvaluedefault);
- end;
  
  filer.DefineProperty('val',
-             {$ifdef FPC}@{$endif}readvalue,
-             {$ifdef FPC}@{$endif}writevalue,bo1);
- filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,
-          {$ifdef FPC}@{$endif}writemin,bo2);
- filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
-          {$ifdef FPC}@{$endif}writemax,bo3);
+             {$ifdef FPC}@{$endif}readvalue,nil,false);
+ filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,nil,false);
+ filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,nil,false);
  filer.DefineProperty('def',
-             {$ifdef FPC}@{$endif}readvaluedefault,
-             {$ifdef FPC}@{$endif}writevaluedefault,bo4);
+             {$ifdef FPC}@{$endif}readvaluedefault,nil,false);
 end;
 
 function tcustomdatetimeedit.isempty(const atext: msestring): boolean;

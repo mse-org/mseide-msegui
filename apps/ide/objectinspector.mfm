@@ -9,7 +9,7 @@ object objectinspectorfo: tobjectinspectorfo
   bounds_cx = 254
   bounds_cy = 248
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.onchildscaled = objectinspectoronchildscaled
+  container.onlayout = objectinspectoronchildscaled
   container.bounds = (
     0
     0
@@ -89,7 +89,7 @@ object objectinspectorfo: tobjectinspectorfo
   }
   oncreate = tmseformcreate
   oneventloopstart = objectinspectorfoonloaded
-  onchildscaled = objectinspectoronchildscaled
+  onlayout = objectinspectoronchildscaled
   left = 239
   top = 180
   moduleclassname = 'tdockform'
@@ -100,7 +100,6 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 220
-    bounds_cy = 20
     anchors = [an_left, an_top, an_right]
     onsetvalue = compselectoronsetvalue
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown]
@@ -129,37 +128,37 @@ object objectinspectorfo: tobjectinspectorfo
     rowfonts.items = <    
       item
         name = 'stf_default'
-        xscale =  1.0000000000000000E+0000
+        xscale = 1
         dummy = 0
       end    
       item
         color = 32768
         name = 'stf_default'
-        xscale =  1.0000000000000000E+0000
+        xscale = 1
         dummy = 0
       end    
       item
         color = 32768
         name = 'stf_default'
-        xscale =  1.0000000000000000E+0000
+        xscale = 1
         dummy = 0
       end    
       item
         color = -1610612723
         name = 'stf_default'
-        xscale =  1.0000000000000000E+0000
+        xscale = 1
         dummy = 0
       end    
       item
         style = [fs_bold]
         name = 'stf_default'
-        xscale =  1.0000000000000000E+0000
+        xscale = 1
         dummy = 0
       end    
       item
         style = [fs_bold]
         name = 'stf_default'
-        xscale =  1.0000000000000000E+0000
+        xscale = 1
         dummy = 0
       end>
     datacols.count = 2
@@ -241,7 +240,7 @@ object objectinspectorfo: tobjectinspectorfo
       bounds_cy = 16
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_forcereturncheckvalue, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       font.name = 'stf_default'
-      font.xscale =  1.0000000000000000E+0000
+      font.xscale = 1
       font.dummy = 0
       onkeydown = valueskeydown
       onsetvalue = valuessetvalue

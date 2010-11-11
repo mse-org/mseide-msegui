@@ -45,8 +45,8 @@ type
    destructor destroy; override;
   published
    property datalink: teditwidgetdatalink read fdatalink write setdatalink;
-   property min stored false;
-   property max stored false;
+   property min {stored false};
+   property max {stored false};
    property formatedit;
    property formatdisp;
    property kind;

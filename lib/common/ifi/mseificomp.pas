@@ -500,17 +500,13 @@ type
    procedure setmin(const avalue: realty);
    procedure setmax(const avalue: realty);
    procedure readvalue(reader: treader);
-   procedure writevalue(writer: twriter);
+//   procedure writevalue(writer: twriter);
    procedure readmin(reader: treader);
-   procedure writemin(writer: twriter);
+//   procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
-   procedure writemax(writer: twriter);
+//   procedure writemax(writer: twriter);
    procedure readvaluedefault(reader: treader);
-   procedure writevaluedefault(writer: twriter);
-//   function getgridvalues: realarty;
-//   procedure setgridvalues(const avalue: realarty);
-//   function getgridvalue(const index: integer): real;
-//   procedure setgridvalue(const index: integer; const avalue: real);
+//   procedure writevaluedefault(writer: twriter);
    function getgriddata: tifirealdatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
@@ -529,11 +525,11 @@ type
 //   property gridvalue[const index: integer]: real read getgridvalue 
 //                                                             write setgridvalue;
   published
-   property value: realty read fvalue write setvalue1 stored false;
+   property value: realty read fvalue write setvalue1 {stored false};
    property valuedefault: realty read fvaluedefault
-                                          write fvaluedefault stored false;
-   property min: realty read fmin write setmin stored false;
-   property max: realty read fmax write setmax stored false;
+                                          write fvaluedefault {stored false};
+   property min: realty read fmin write setmin {stored false};
+   property max: realty read fmax write setmax {stored false};
    property onclientsetvalue: setrealeventty 
                        read fonclientsetvalue write fonclientsetvalue;
  end;
@@ -551,17 +547,13 @@ type
    procedure setmin(const avalue: tdatetime);
    procedure setmax(const avalue: tdatetime);
    procedure readvalue(reader: treader);
-   procedure writevalue(writer: twriter);
+//   procedure writevalue(writer: twriter);
    procedure readmin(reader: treader);
-   procedure writemin(writer: twriter);
+//   procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
-   procedure writemax(writer: twriter);
+//   procedure writemax(writer: twriter);
    procedure readvaluedefault(reader: treader);
-   procedure writevaluedefault(writer: twriter);
-//   function getgridvalues: datetimearty;
-//   procedure setgridvalues(const avalue: datetimearty);
-//   function getgridvalue(const index: integer): tdatetime;
-//   procedure setgridvalue(const index: integer; const avalue: tdatetime);
+//   procedure writevaluedefault(writer: twriter);
    function getgriddata: tifidatetimedatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
@@ -576,15 +568,12 @@ type
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tifidatetimedatalist read getgriddata;
-//   property gridvalues: datetimearty read getgridvalues write setgridvalues;
-//   property gridvalue[const index: integer]: tdatetime read getgridvalue 
-//                                                             write setgridvalue;
   published
-   property value: tdatetime read fvalue write setvalue1 stored false;
+   property value: tdatetime read fvalue write setvalue1 {stored false};
    property valuedefault: tdatetime read fvaluedefault 
-                                             write fvaluedefault stored false;
-   property min: tdatetime read fmin write setmin stored false;
-   property max: tdatetime read fmax write setmax stored false;
+                                             write fvaluedefault {stored false};
+   property min: tdatetime read fmin write setmin {stored false};
+   property max: tdatetime read fmax write setmax {stored false};
    property onclientsetvalue: setrealeventty 
                        read fonclientsetvalue write fonclientsetvalue;
  end;
@@ -2554,72 +2543,51 @@ procedure trealclientcontroller.readvalue(reader: treader);
 begin
  value:= readrealty(reader);
 end;
-
+{
 procedure trealclientcontroller.writevalue(writer: twriter);
 begin
  writerealty(writer,fvalue);
 end;
-
+}
 procedure trealclientcontroller.readmin(reader: treader);
 begin
  fmin:= readrealty(reader);
 end;
-
+{
 procedure trealclientcontroller.writemin(writer: twriter);
 begin
  writerealty(writer,fmin);
 end;
-
+}
 procedure trealclientcontroller.readmax(reader: treader);
 begin
  fmax:= readrealty(reader);
 end;
-
+{
 procedure trealclientcontroller.writemax(writer: twriter);
 begin
  writerealty(writer,fmax);
 end;
-
+}
 procedure trealclientcontroller.readvaluedefault(reader: treader);
 begin
  valuedefault:= readrealty(reader);
 end;
-
+{
 procedure trealclientcontroller.writevaluedefault(writer: twriter);
 begin
  writerealty(writer,fvaluedefault);
 end;
-
+}
 procedure trealclientcontroller.defineproperties(filer: tfiler);
-var
- bo1,bo2,bo3,bo4: boolean;
 begin
  inherited;
- if filer.ancestor <> nil then begin
-  with trealclientcontroller(filer.ancestor) do begin
-   bo1:= self.fvalue <> fvalue;
-   bo2:= self.fmin <> fmin;
-   bo3:= self.fmax <> fmax;
-   bo4:= self.fvaluedefault <> fvaluedefault;
-  end;
- end
- else begin
-  bo1:= not isemptyreal(fvalue);
-  bo2:= not isemptyreal(fmin);
-  bo3:= cmprealty(fmax,bigreal) <> 0;
-  bo4:= not isemptyreal(fvaluedefault);
-//  bo3:= cmprealty(fmax,0.99*bigreal) < 0;
- end;
  
  filer.DefineProperty('val',
-             {$ifdef FPC}@{$endif}readvalue,
-             {$ifdef FPC}@{$endif}writevalue,bo1);
- filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,
-          {$ifdef FPC}@{$endif}writemin,bo2);
- filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
-          {$ifdef FPC}@{$endif}writemax,bo3);
- filer.DefineProperty('def',{$ifdef FPC}@{$endif}readvaluedefault,
-          {$ifdef FPC}@{$endif}writevaluedefault,bo4);
+             {$ifdef FPC}@{$endif}readvalue,nil,false);
+ filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,nil,false);
+ filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,nil,false);
+ filer.DefineProperty('def',{$ifdef FPC}@{$endif}readvaluedefault,nil,false);
 end;
 {
 function trealclientcontroller.getgridvalues: realarty;
@@ -2723,72 +2691,51 @@ procedure tdatetimeclientcontroller.readvalue(reader: treader);
 begin
  value:= readrealty(reader);
 end;
-
+{
 procedure tdatetimeclientcontroller.writevalue(writer: twriter);
 begin
  writerealty(writer,fvalue);
 end;
-
+}
 procedure tdatetimeclientcontroller.readmin(reader: treader);
 begin
  fmin:= readrealty(reader);
 end;
-
+{
 procedure tdatetimeclientcontroller.writemin(writer: twriter);
 begin
  writerealty(writer,fmin);
 end;
-
+}
 procedure tdatetimeclientcontroller.readmax(reader: treader);
 begin
  fmax:= readrealty(reader);
 end;
-
+{
 procedure tdatetimeclientcontroller.writemax(writer: twriter);
 begin
  writerealty(writer,fmax);
 end;
-
+}
 procedure tdatetimeclientcontroller.readvaluedefault(reader: treader);
 begin
  valuedefault:= readrealty(reader);
 end;
-
+{
 procedure tdatetimeclientcontroller.writevaluedefault(writer: twriter);
 begin
  writerealty(writer,fvaluedefault);
 end;
-
+}
 procedure tdatetimeclientcontroller.defineproperties(filer: tfiler);
-var
- bo1,bo2,bo3,bo4: boolean;
 begin
  inherited;
- if filer.ancestor <> nil then begin
-  with tdatetimeclientcontroller(filer.ancestor) do begin
-   bo1:= self.fvalue <> fvalue;
-   bo2:= self.fmin <> fmin;
-   bo3:= self.fmax <> fmax;
-   bo4:= self.fvaluedefault <> fvaluedefault;
-  end;
- end
- else begin
-  bo1:= not isemptydatetime(fvalue);
-  bo2:= not isemptydatetime(fmin);
-  bo3:= cmprealty(fmax,bigdatetime) <> 0;
-  bo4:= not isemptyreal(fvaluedefault);
-//  bo3:= cmpdatetime(fmax,0.99*bigdatetime) < 0;
- end;
  
  filer.DefineProperty('val',
-             {$ifdef FPC}@{$endif}readvalue,
-             {$ifdef FPC}@{$endif}writevalue,bo1);
- filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,
-          {$ifdef FPC}@{$endif}writemin,bo2);
- filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
-          {$ifdef FPC}@{$endif}writemax,bo3);
- filer.DefineProperty('def',{$ifdef FPC}@{$endif}readvaluedefault,
-          {$ifdef FPC}@{$endif}writevaluedefault,bo4);
+             {$ifdef FPC}@{$endif}readvalue,nil,false);
+ filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,nil,false);
+ filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,nil,false);
+ filer.DefineProperty('def',{$ifdef FPC}@{$endif}readvaluedefault,nil,false);
 end;
 {
 function tdatetimeclientcontroller.getgridvalues: datetimearty;

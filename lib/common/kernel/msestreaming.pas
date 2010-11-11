@@ -19,7 +19,7 @@ uses
 function readshortcutarty(const reader: treader): shortcutarty;
 procedure writeshortcutarty(const writer: twriter; const avalue: shortcutarty);
 function readrealty(const reader: treader): realty;
-procedure writerealty(const writer: twriter; const value: realty);
+//procedure writerealty(const writer: twriter; const value: realty);
 function readrectty(const reader: treader): rectty;
 procedure writerectty(const writer: twriter; const avalue: rectty);
 function readmethod(const reader: treader): tmethod;
@@ -84,7 +84,6 @@ begin
    result:= readfloat;
   end;
  end;
-// stream.ReadBuffer(result,sizeof(result));
 end;
 
 procedure writerealty(const writer: twriter; const value: realty);
@@ -100,7 +99,6 @@ begin
    writefloat(value);
   end;
  end;
-// stream.WriteBuffer(value,sizeof(value));
 end;
 
 function readrectty(const reader: treader): rectty;

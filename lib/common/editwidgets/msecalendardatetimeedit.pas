@@ -48,11 +48,11 @@ type
  tcalendardatetimeedit = class(tcustomcalendardatetimeedit)
   published
    property onsetvalue;
-   property value stored false;
+   property value {stored false};
    property formatedit;
    property formatdisp;
-   property min stored false;
-   property max stored false;
+   property min {stored false};
+   property max {stored false};
    property kind;
    property dropdown;
  end;

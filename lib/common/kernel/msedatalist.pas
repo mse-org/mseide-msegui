@@ -5294,7 +5294,8 @@ end;
 
 procedure trealdatalist.writeitem(const writer: twriter; var value);
 begin
- writerealty(writer,realty(value));
+ writer.writefloat(double(value));
+// writerealty(writer,realty(value));
 end;
 
 function trealdatalist.checkassigncompatibility(const source: tpersistent): boolean;
@@ -5554,8 +5555,10 @@ procedure tcomplexdatalist.writeitem(const writer: twriter; var value);
 begin
  with writer do begin
   writelistbegin;
-  writerealty(writer,complexty(value).re);
-  writerealty(writer,complexty(value).im);
+  writer.writefloat(complexty(value).re);
+  writer.writefloat(complexty(value).im);
+//  writerealty(writer,complexty(value).re);
+//  writerealty(writer,complexty(value).im);
   writelistend;
  end;
 end;
@@ -7576,7 +7579,8 @@ procedure trealintdatalist.writeitem(const writer: twriter; var value);
 begin
  with writer do begin
   writelistbegin;
-  writerealty(writer,realintty(value).rea);
+  writer.writefloat(realintty(value).rea);
+//  writerealty(writer,realintty(value).rea);
   writeinteger(realintty(value).int);
   writelistend;
  end;

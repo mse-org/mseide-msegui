@@ -140,7 +140,7 @@ type
    finfo: markerinfoty;
    procedure checklayout;
    procedure readvalue(reader: treader);
-   procedure writevalue(writer: twriter);
+//   procedure writevalue(writer: twriter);
    procedure setvalue(const avalue: realty);
    procedure setoptions(const avalue: dialmarkeroptionsty);
   protected
@@ -149,7 +149,7 @@ type
   public
    procedure paint(const acanvas: tcanvas);
   published
-   property value: realty read finfo.value write setvalue stored false;
+   property value: realty read finfo.value write setvalue {stored false};
    property options: dialmarkeroptionsty read finfo.options 
                           write setoptions default [];
  end;
@@ -625,28 +625,17 @@ procedure tdialmarker.readvalue(reader: treader);
 begin
  value:= readrealty(reader);
 end;
-
+{
 procedure tdialmarker.writevalue(writer: twriter);
 begin
  writerealty(writer,finfo.value);
 end;
-
+}
 procedure tdialmarker.defineproperties(filer: tfiler);
-var
- bo1: boolean;
 begin
  inherited;
- if filer.ancestor <> nil then begin
-  with tdialmarker(filer.ancestor) do begin
-   bo1:= self.finfo.value <> finfo.value;
-  end;
- end
- else begin
-  bo1:= finfo.value <> 0;
- end; 
  filer.defineproperty('val',
-             {$ifdef FPC}@{$endif}readvalue,
-             {$ifdef FPC}@{$endif}writevalue,bo1);
+             {$ifdef FPC}@{$endif}readvalue,nil,false);
 end;
 
 procedure tdialmarker.updatemarker;

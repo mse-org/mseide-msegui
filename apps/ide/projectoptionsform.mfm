@@ -194,7 +194,7 @@ object projectoptionsfo: tprojectoptionsfo
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
             frame.caption = 'Test'
             frame.captionpos = cp_topright
-            frame.font.xscale =  1.0000000000000000E+0000
+            frame.font.xscale = 1
             frame.font.dummy = 0
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
@@ -210,7 +210,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cx = 656
             bounds_cy = 91
             anchors = [an_left, an_top, an_right]
-            font.xscale =  1.0000000000000000E+0000
+            font.xscale = 1
             font.dummy = 0
             optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
             rowcount = 2
@@ -247,7 +247,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_cx = 651
               bounds_cy = 16
               font.name = 'stf_default'
-              font.xscale =  1.0000000000000000E+0000
+              font.xscale = 1
               font.dummy = 0
               optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_autopopupmenu, oe_keyexecute, oe_savestate]
               reffontheight = 14
@@ -1869,13 +1869,14 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_cx = 54
                 bounds_cy = 37
                 anchors = [an_top, an_right]
+                value = 0
+                valuedefault = NegInf
                 formatedit = '0.#'
                 formatdisp = '0.#sec'
-                valuerange =  1.0000000000000000E+0000
+                valuerange = 1
+                min = 0
+                max = 10
                 reffontheight = 14
-                val =  0.0000000000000000E+0000
-                mi =  0.0000000000000000E+0000
-                ma =  1.0000000000000000E+0001
               end
             end
             object uploadcommand: tfilenameedit
@@ -1884,7 +1885,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.caption = 'Download command'
               frame.captionoffset = 3
               frame.font.name = 'stf_default'
-              frame.font.xscale =  1.0000000000000000E+0000
+              frame.font.xscale = 1
               frame.font.dummy = 0
               frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
@@ -4008,10 +4009,12 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cx = 50
             bounds_cy = 16
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
-            valuerange =  1.0000000000000000E+0000
+            value = 1
+            valuedefault = NegInf
+            valuerange = 1
+            min = 0
+            max = 1E+038
             reffontheight = 14
-            val =  1.0000000000000000E+0000
-            mi =  0.0000000000000000E+0000
           end
           object fontancestors: tstringedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]

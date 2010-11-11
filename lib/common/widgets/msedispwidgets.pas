@@ -256,7 +256,7 @@ type
    fvaluerange: real;
    procedure setvalue(const avalue: realty);
    procedure readvalue(reader: treader);
-   procedure writevalue(writer: twriter);
+//   procedure writevalue(writer: twriter);
    procedure setformat(const avalue: msestring);
    procedure setvaluerange(const avalue: real);
    procedure readvaluescale(reader: treader);
@@ -270,7 +270,7 @@ type
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
-   property value: realty read fvalue write setvalue stored false;
+   property value: realty read fvalue write setvalue {stored false};
   published
    property valuerange: real read fvaluerange write setvaluerange;
    property format: msestring read fformat write setformat;
@@ -282,7 +282,7 @@ type
 
  trealdisp = class(tcustomrealdisp)
   published
-   property value stored false;
+   property value{stored false};
  end;
  
  tcustomdatetimedisp = class(tnumdisp)
@@ -295,7 +295,7 @@ type
    procedure setformat(const avalue: msestring);
    procedure setkind(const avalue: datetimekindty);
    procedure readvalue(reader: treader);
-   procedure writevalue(writer: twriter);
+//   procedure writevalue(writer: twriter);
   {$ifdef mse_with_ifi}
    function getifilink: tifidatetimelinkcomp;
    procedure setifilink(const avalue: tifidatetimelinkcomp);
@@ -318,7 +318,7 @@ type
 
  tdatetimedisp = class(tcustomdatetimedisp)
   published
-   property value stored false;
+   property value{ stored false};
  end;
   
  tcustombooleandisp = class(tdispwidget)
@@ -692,30 +692,21 @@ procedure tcustomrealdisp.readvalue(reader: treader);
 begin
  value:= readrealty(reader);
 end;
-
+{
 procedure tcustomrealdisp.writevalue(writer: twriter);
 begin
  writerealty(writer,fvalue);
 end;
-
+}
 procedure tcustomrealdisp.readvaluescale(reader: treader);
 begin
  valuerange:= valuescaletorange(reader);
 end;
 
 procedure tcustomrealdisp.defineproperties(filer: tfiler);
-var
- bo1: boolean;
 begin
  inherited;
- if filer.ancestor <> nil then begin
-  bo1:= tcustomrealdisp(filer.ancestor).fvalue <> fvalue;
- end
- else  begin
-  bo1:= not isemptyreal(fvalue);
- end;
- filer.DefineProperty('val',{$ifdef FPC}@{$endif}readvalue,
-          {$ifdef FPC}@{$endif}writevalue,bo1);
+ filer.DefineProperty('val',{$ifdef FPC}@{$endif}readvalue,nil,false);
  filer.defineproperty('valuescale',{$ifdef FPC}@{$endif}readvaluescale,nil,false);
 end;
 
@@ -834,26 +825,17 @@ procedure tcustomdatetimedisp.readvalue(reader: treader);
 begin
  value:= readrealty(reader);
 end;
-
+{
 procedure tcustomdatetimedisp.writevalue(writer: twriter);
 begin
  writerealty(writer,fvalue);
 end;
-
+}
 procedure tcustomdatetimedisp.defineproperties(filer: tfiler);
-var
- bo1: boolean;
 begin
  inherited;
- if filer.ancestor <> nil then begin
-  bo1:= tcustomdatetimedisp(filer.ancestor).fvalue <> fvalue;
- end
- else  begin
-  bo1:= not isemptydatetime(fvalue);
- end;
  filer.DefineProperty('val',
-             {$ifdef FPC}@{$endif}readvalue,
-             {$ifdef FPC}@{$endif}writevalue,bo1);
+             {$ifdef FPC}@{$endif}readvalue,nil,false);
 end;
 
 { tcustombooleandisp }
