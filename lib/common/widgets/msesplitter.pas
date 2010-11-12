@@ -1590,6 +1590,8 @@ begin
 end;
 
 function tlayouter.calcminscrollsize: sizety;
+var
+ int1,int2: integer;
 begin
  result:= inherited calcminscrollsize;
  if lao_placex in foptionslayout then begin
@@ -1602,6 +1604,39 @@ begin
   result.cy:= childrenheight + high(fwidgets) * fplace_mindist + innerframewidth.cy;
   if plo_propmargin in fplace_options then begin
    result.cy:= result.cy + 2 * fplace_mindist;
+  end;
+ end;
+ if (high(fwidgets) >= 0) and (align_glue <> wam_none) and 
+                                     (align_mode <> wam_none)then begin
+  if lao_alignx in foptionslayout then begin
+   int2:= 0;
+   for int1:= 0 to high(fwidgets) do begin
+    with fwidgets[int1] do begin
+     if isvisible and (fwidgetrect.cx > int2) then begin
+      int2:= fwidgetrect.cx;
+     end;
+    end;  
+   end;
+   int2:= int2 + innerframewidth.cx;
+   if int2 < bounds_cxmin then begin
+    int2:= bounds_cxmin;
+   end;
+   result.cx:= int2;
+  end;   
+  if lao_aligny in foptionslayout then begin
+   int2:= 0;
+   for int1:= 0 to high(fwidgets) do begin
+    with fwidgets[int1] do begin
+     if isvisible and (fwidgetrect.cy > int2) then begin
+      int2:= fwidgetrect.cy;
+     end;
+    end;  
+   end;
+   int2:= int2 + innerframewidth.cy;
+   if int2 < bounds_cymin then begin
+    int2:= bounds_cymin;
+   end;
+   result.cy:= int2;
   end;
  end;
 end;
