@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -103,6 +103,7 @@ type
    fpaintedbutton: scrollbarareaty;
    fonbeforeevent: beforescrollbareventty;
    fonafterevent: scrollbareventty;
+   fstepctrlfact: real;
    procedure updatedim;
    procedure setdirection(const avalue: graphicdirectionty);
    procedure setcolor(const avalue: colorty);
@@ -167,6 +168,8 @@ type
    procedure invalidate;
    procedure dostep(akind: scrolleventty; astep: real);
    procedure dothumbevent(const aevent: scrolleventty);
+   function dostepup(const ashiftstate: shiftstatesty): boolean;
+   function dostepdown(const ashiftstate: shiftstatesty): boolean;
   public
    tag: integer;
    constructor create(intf: iscrollbar; org: originty = org_client;
@@ -208,6 +211,8 @@ type
                           default defaultscrollbaroptions;
    property stepsize: real read getstepsize write fstepsize stored isstepsizestored;
                     //default = 0 -> pagesize /10
+   property stepctrlfact: real read fstepctrlfact write fstepctrlfact;
+                    //default = 0 -> no ctrl step
    property pagesize: real read fpagesize write setpagesize stored ispagesizestored;
                     //default = defaultpagesize
    property buttonlength: integer read fbuttonlength write setbuttonlength default 0;
@@ -254,6 +259,7 @@ type
    property indentstart;
    property indentend;
    property stepsize;
+   property stepctrlfact;
    property pagesize;
    property buttonlength;
    property buttonminlength;
@@ -817,10 +823,10 @@ begin
  result:= true;
  case fclickedarea of
   sbbu_up: begin
-   stepup;
+   result:= dostepup(application.lastshiftstate*keyshiftstatesmask);
   end;
   sbbu_down: begin
-   stepdown;
+   dostepdown(application.lastshiftstate*keyshiftstatesmask);
   end;
   sba_start: begin
    pagedown;
@@ -992,9 +998,64 @@ begin
  end;
 end;
 
+function tcustomscrollbar.dostepup(const ashiftstate: shiftstatesty): boolean;
+begin
+ result:= true;
+ if (ashiftstate * shiftstatesmask = [ss_ctrl]) then begin
+  if fstepctrlfact <> 0 then begin
+   dostep(sbe_stepup,stepsize*fstepctrlfact);
+  end
+  else begin
+   result:= false;
+  end;
+ end
+ else begin
+   dostep(sbe_stepup,stepsize);
+ end;  
+end; //dostepup
+
+function tcustomscrollbar.dostepdown(const ashiftstate: shiftstatesty): boolean;
+begin
+ result:= true;
+ if (ashiftstate * shiftstatesmask = [ss_ctrl]) then begin
+  if fstepctrlfact <> 0 then begin
+   dostep(sbe_stepdown,-stepsize*fstepctrlfact);
+  end
+  else begin
+   result:= false;
+  end;
+ end
+ else begin
+   dostep(sbe_stepdown,-stepsize);
+ end;  
+end; //dostepdown
+  
+
 procedure tcustomscrollbar.keydown(var info: keyeventinfoty);
+
+ procedure dopageup;
+ begin
+  if info.shiftstate * shiftstatesmask = [ss_ctrl] then begin
+   value:= 1;
+  end
+  else begin
+   pageup;
+  end;
+ end; //dopageup
+ 
+ procedure dopagedown;
+ begin
+  if info.shiftstate * shiftstatesmask = [ss_ctrl] then begin
+   value:= 0;
+  end
+  else begin
+   pagedown;
+  end;
+ end; //dopagedown
+
 var
  bo1: boolean;
+
 begin
  with info do begin
   if not (es_processed in eventstate) then begin
@@ -1006,10 +1067,10 @@ begin
     bo1:= true;
     if sbo_valuekeys in foptions then begin
      case info.key of
-      key_pageup: pageup;
-      key_pagedown: pagedown;
-      key_up: stepup;
-      key_down: stepdown;
+      key_pageup: dopageup;
+      key_pagedown: dopagedown;
+      key_up: bo1:= dostepup(info.shiftstate);
+      key_down: bo1:= dostepdown(info.shiftstate);
       else begin
        bo1:= false;
       end;
@@ -1019,10 +1080,10 @@ begin
      case fdirection of
       gd_right: begin
        case info.key of
-        key_right: stepup;
-        key_left: stepdown;
-        key_pageup: pagedown;
-        key_pagedown: pageup;
+        key_right: bo1:= dostepup(info.shiftstate);
+        key_left: bo1:= dostepdown(info.shiftstate);
+        key_pageup: dopageup;
+        key_pagedown: dopagedown;
         else begin
          bo1:= false;
         end;
@@ -1030,10 +1091,10 @@ begin
       end;
       gd_up: begin
        case info.key of
-        key_up: stepdown;
-        key_down: stepup;
-        key_pageup: pageup;
-        key_pagedown: pagedown;
+        key_up: bo1:= dostepdown(info.shiftstate);
+        key_down: bo1:= dostepup(info.shiftstate);
+        key_pageup: dopageup;
+        key_pagedown: dopagedown;
         else begin
          bo1:= false;
         end;
@@ -1041,10 +1102,10 @@ begin
       end;
       gd_left: begin
        case info.key of
-        key_right: stepdown;
-        key_left: stepup;
-        key_pageup: pageup;
-        key_pagedown: pagedown;
+        key_right: bo1:= dostepdown(info.shiftstate);
+        key_left: bo1:= dostepup(info.shiftstate);
+        key_pageup: dopageup;
+        key_pagedown: dopagedown;
         else begin
          bo1:= false;
         end;
@@ -1052,10 +1113,10 @@ begin
       end;
       gd_down: begin
        case info.key of
-        key_down: stepup;
-        key_up: stepdown;
-        key_pageup: pagedown;
-        key_pagedown: pageup;
+        key_down: bo1:= dostepup(info.shiftstate);
+        key_up: bo1:= dostepdown(info.shiftstate);
+        key_pageup: dopagedown;
+        key_pagedown: dopageup;
         else begin
          bo1:= false;
         end;

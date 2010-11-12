@@ -290,6 +290,7 @@ type
 //   property indentstart;
 //   property indentend;
    property stepsize;
+   property stepctrlfact;
    property pagesize;
    property buttonlength default defaultbuttonminlength;
    property buttonendlength;
