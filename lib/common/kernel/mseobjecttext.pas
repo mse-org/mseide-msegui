@@ -31,6 +31,14 @@ type
  unicodestring = widestring;
 resourcestring
  SerrInvalidPropertyType       = 'Invalid property type from streamed property: %d';
+ SParExpected                  = 'Wrong token type: %s expected';
+ SParInvalidFloat              = 'Invalid floating point number: %s';
+ SParInvalidInteger            = 'Invalid integer number: %s';
+ SParUnterminatedString        = 'Unterminated string';
+ SParWrongTokenType            = 'Wrong token type: %s expected but %s found';
+ SParWrongTokenSymbol          = 'Wrong token symbol: %s expected but %s found';
+ SParLocInfo                   = ' (at %d,%d, stream offset %.8x)';
+ SParUnterminatedBinValue      = 'Unterminated byte value';
 {$endif}
 
 const
@@ -1386,7 +1394,7 @@ end;
 constructor TParser.Create(Stream: TStream);
 begin
   fStream:=Stream;
-  fBuf:=GetMem(ParseBufSize+1);
+  GetMem(fbuf,ParseBufSize+1);
   fBufLen:=0;
   fPos:=0;
   fDeltaPos:=1;
@@ -1505,7 +1513,12 @@ end;
 {$ifndef FPUNONE}
 Function TParser.TokenFloat: Extended;
 
-var errcode : word;
+var
+{$ifdef FPC}
+ errcode : word;
+{$else}
+ errcode: integer;
+{$endif}
 
 begin
   Val(fLastTokenStr,Result,errcode);
@@ -1516,8 +1529,16 @@ end;
 
 Function TParser.TokenInt: Int64;
 begin
-  if not TryStrToInt64(fLastTokenStr,Result) then
-    Result:=Int64(StrToQWord(fLastTokenStr)); //second chance for malformed files
+ if not TryStrToInt64(fLastTokenStr,Result) then begin
+ {$ifdef FPC}
+  if not tryStrToQWord(fLastTokenStr,qword(result)) then begin
+                 //second chance for malformed files
+   ErrorFmt(SParInvalidInteger,[fLastTokenStr]);
+  end;
+ {$else}
+  ErrorFmt(SParInvalidInteger,[fLastTokenStr]);
+ {$endif}
+ end;
 end;
 
 function TParser.TokenString: string;
