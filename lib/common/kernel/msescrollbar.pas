@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1021,8 +1021,8 @@ begin
        case info.key of
         key_right: stepup;
         key_left: stepdown;
-        key_pageup: pagedown;
-        key_pagedown: pageup;
+        key_pageup: pageup;
+        key_pagedown: pagedown;
         else begin
          bo1:= false;
         end;
