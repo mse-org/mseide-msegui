@@ -31,6 +31,10 @@ type
    fonsend8: send8eventty;
    fmutex: mutexty;
    fonerror: erroreventty;
+   fappname: msestring;
+   fstreamname: msestring;
+   fserver: msestring;
+   fdev: msestring;
    procedure setactive(const avalue: boolean);
   protected
    fpulsestream: ppa_simple;
@@ -47,6 +51,10 @@ type
    procedure unlock;
   published
    property active: boolean read factive write setactive default false;
+   property server: msestring read fserver write fserver;
+   property dev: msestring read fdev write fdev;
+   property appname: msestring read fappname write fappname;
+   property streamname: msestring read fstreamname write fstreamname;
    property stacksizekb: integer read fstacksizekb write fstacksizekb default 0;
    property onsend8: send8eventty read fonsend8 write fonsend8;
    property onerror: erroreventty read fonerror write fonerror;
@@ -106,8 +114,11 @@ begin
  ss.format:= pa_sample_u8;
  ss.rate:= 44100;
  ss.channels:= 1;
- fpulsestream:= pa_simple_new(nil,'msetest',pa_stream_playback,nil,'stream1',
-        @ss,nil,nil,@int1);
+ fpulsestream:= pa_simple_new(pointer(string(fserver)),
+                pointer(string(fappname)),
+                pa_stream_playback,pointer(string(fdev)),
+                pointer(string(fstreamname)),
+                @ss,nil,nil,@int1);
  if fpulsestream = nil then begin
   raiseerror(int1);
  end;
@@ -119,9 +130,16 @@ end;
 procedure taudioout.loaded;
 begin
  inherited;
- if not (csdesigning in componentstate) and factive and 
-                                       (fthread = nil) then begin
-  run;
+ if not (csdesigning in componentstate) then begin
+  if fappname = '' then begin
+   fappname:= application.applicationname;
+  end;
+  if fstreamname = '' then begin
+   fstreamname:= name;
+  end;
+  if factive and (fthread = nil) then begin
+   run;
+  end;
  end;
 end;
 
