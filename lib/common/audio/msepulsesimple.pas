@@ -115,7 +115,7 @@ uses
  
 const
 {$ifdef mswindows}
- pulsesimplelib: array[0..0] of filenamety = ('sqlite3.dll');  
+ pulsesimplelib: array[0..0] of filenamety = ('libpulse-simple-0.dll');  
 {$else}
  pulsesimplelib: array[0..1] of filenamety = 
                   ('libpulse-simple.so.0','libpulse-simple.so'); 
@@ -142,9 +142,6 @@ var
                       ): ppa_simple; cdecl;
 //** Close and free the connection to the server. The connection objects becomes invalid when this is called. */
  pa_simple_free: procedure(s: ppa_simple); cdecl;
-
-//** Return a human readable error message for the specified numeric error code */
- pa_strerror: function(error: cint): pchar; cdecl;
  
 //** Write some data to the server */
  pa_simple_write: function(s: ppa_simple; const data: pointer;
@@ -169,22 +166,21 @@ procedure releasepulsesimple;
 
 implementation
 uses
- msedynload,sysutils,msesys;
+ msedynload,sysutils,msesys,msepulse;
 
 var
  libinfo: dynlibinfoty;
 
 procedure initializepulsesimple(const sonames: array of filenamety); //[] = default
 const
- funcs: array[0..7] of funcinfoty = (
+ funcs: array[0..6] of funcinfoty = (
    (n: 'pa_simple_new'; d: @pa_simple_new),     //0
    (n: 'pa_simple_free'; d: @pa_simple_free),   //1
-   (n: 'pa_strerror'; d: @pa_strerror),         //2
-   (n: 'pa_simple_write'; d: @pa_simple_write), //3
-   (n: 'pa_simple_drain'; d: @pa_simple_drain), //4
-   (n: 'pa_simple_read'; d: @pa_simple_read),   //5
-   (n: 'pa_simple_get_latency'; d: @pa_simple_get_latency), //6
-   (n: 'pa_simple_flush'; d: @pa_simple_flush)  //7
+   (n: 'pa_simple_write'; d: @pa_simple_write), //2
+   (n: 'pa_simple_drain'; d: @pa_simple_drain), //3
+   (n: 'pa_simple_read'; d: @pa_simple_read),   //4
+   (n: 'pa_simple_get_latency'; d: @pa_simple_get_latency), //5
+   (n: 'pa_simple_flush'; d: @pa_simple_flush)  //6
    );
    
 begin
@@ -201,11 +197,13 @@ begin
    raise;
   end;  
  end;
+ initializepulse([]);
 end;
 
 procedure releasepulsesimple;
 begin
  releasedynlib(libinfo);
+ releasepulse;
 end;
 
 initialization

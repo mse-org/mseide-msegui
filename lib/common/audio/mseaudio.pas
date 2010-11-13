@@ -54,7 +54,7 @@ type
  
 implementation
 uses
- sysutils,msesysintf,mseapplication;
+ sysutils,msesysintf,mseapplication,msepulse;
  
 { taudioout }
 
