@@ -92,7 +92,11 @@
 unit msepulseglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
+uses
+ msetypes;
+{$ifdef FPC}
  {$packrecords c}
+{$endif}
 const
  PA_CHANNELS_MAX = 32;   //** Maximum number of allowed channels */
  PA_RATE_MAX = (48000*4);//** Maximum allowed sample rate */
