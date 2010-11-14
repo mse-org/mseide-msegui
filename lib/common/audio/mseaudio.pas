@@ -16,25 +16,97 @@ uses
  
 type
 
+ sampleformatty = (sfm_u8,sfm_8alaw,sfm_8ulaw,
+                   sfm_s16,sfm_s24,sfm_s32,sfm_f32,smf_s2432,
+                   sfm_s16le,sfm_s24le,sfm_s32le,sfm_f32le,smf_s2432le,
+                   sfm_s16be,sfm_s24be,sfm_s32be,sfm_f32be,smf_s2432be);
+const
+ defaultsampleformat = sfm_u8;
+ defaultsamplechannels = 1;
+ defaultsamplerate = 44100;
+ 
+{$ifdef endian_little}
+ pulsesampleformatmatrix: array[sampleformatty] of pa_sample_format_t =
+ //sfm_u8,      sfm_8alaw,     sfm_8ulaw,
+  (PA_SAMPLE_U8,PA_SAMPLE_ALAW,PA_SAMPLE_ULAW,
+ //sfm_s16,        sfm_s24,        sfm_s32,        
+   PA_SAMPLE_S16LE,PA_SAMPLE_S24LE,PA_SAMPLE_S32LE,
+ //sfm_f32,            smf_s2432,
+   PA_SAMPLE_FLOAT32LE,PA_SAMPLE_S24_32LE,
+ //sfm_s16le,      sfm_s24le,      sfm_s32le,
+   PA_SAMPLE_S16LE,PA_SAMPLE_S24LE,PA_SAMPLE_S32LE,
+ //sfm_f32le,          smf_s2432le,
+   PA_SAMPLE_FLOAT32LE,PA_SAMPLE_S24_32LE,
+ //sfm_s16be,      sfm_s24be,       sfm_s32be,
+   PA_SAMPLE_S16BE,PA_SAMPLE_S24BE,PA_SAMPLE_S32BE,
+ //sfm_f32be,          smf_s2432be);
+   PA_SAMPLE_FLOAT32BE,PA_SAMPLE_S24_32BE);
+{$else}
+ pulsesampleformatmatrix: array[sampleformatty] of pa_sample_format_t =
+ //sfm_u8,      sfm_8alaw,     sfm_8ulaw,
+  (PA_SAMPLE_U8,PA_SAMPLE_ALAW,PA_SAMPLE_ULAW,
+ //sfm_s16,        sfm_s24,        sfm_s32,        
+   PA_SAMPLE_S16BE,PA_SAMPLE_S24BE,PA_SAMPLE_S32BE,
+ //sfm_f32,            smf_s2432,
+   PA_SAMPLE_FLOAT32BE,PA_SAMPLE_S24_32BE,
+ //sfm_s16le,      sfm_s24le,      sfm_s32le,
+   PA_SAMPLE_S16LE,PA_SAMPLE_S24LE,PA_SAMPLE_S32LE,
+ //sfm_f32le,          smf_s2432le,
+   PA_SAMPLE_FLOAT32LE,PA_SAMPLE_S24_32LE,
+ //sfm_s16be,      sfm_s24be,       sfm_s32be,
+   PA_SAMPLE_S16BE,PA_SAMPLE_S24BE,PA_SAMPLE_S32BE,
+ //sfm_f32be,          smf_s2432be);
+   PA_SAMPLE_FLOAT32BE,PA_SAMPLE_S24_32BE);
+{$endif}
+
+ samplesizematrix: array[sampleformatty] of integer =
+ //sfm_u8,      sfm_8alaw,     sfm_8ulaw,
+  (1,           1,             1,
+ //sfm_s16,     sfm_s24,       sfm_s32,        
+   2,           1,             4,
+ //sfm_f32,     smf_s2432,
+   4,           4,
+ //sfm_s16le,   sfm_s24le,     sfm_s32le,
+   2,           1,             4,
+ //sfm_f32le,   smf_s2432le,
+   4,           4,
+ //sfm_s16be,   sfm_s24be,     sfm_s32be,
+   2,           1,             4,
+ //sfm_f32be,   smf_s2432be);
+   4,           4);
+
+type
+
  toutstreamthread = class(tmsethread)
  end;
 
- send8eventty = procedure(var data: bytearty) of object;
+ sendeventty = procedure(var data: pointer) of object;
+                  //data = 
+                  //bytearty       (sfm_u8,sfm_8alaw,sfm_8ulaw,
+                  //                sfm_s24,sfm_s24le,sfm_s24be)
+                  //smallintarty   (sfm_s16,sfm_s16le,sfm_s16be)
+                  //integerarty    (sfm_s32,smf_s2432,sfm_s32le,smf_s2432le,
+                  //                sfm_s32be,smf_s2432be)
+                  //or singlearty  (sfm_f32,sfm_f32le,sfm_f32be)
+ 
  erroreventty = procedure(const sender: tobject; const errorcode: integer;
                   const errortext: msestring) of object;
-  
+
  taudioout = class(tmsecomponent)
   private
    fthread: toutstreamthread;
    factive: boolean;
    fstacksizekb: integer;
-   fonsend8: send8eventty;
+   fonsend: sendeventty;
    fmutex: mutexty;
    fonerror: erroreventty;
    fappname: msestring;
    fstreamname: msestring;
    fserver: msestring;
    fdev: msestring;
+   fchannels: integer;
+   fformat: sampleformatty;
+   frate: integer;
    procedure setactive(const avalue: boolean);
   protected
    fpulsestream: ppa_simple;
@@ -55,8 +127,13 @@ type
    property dev: msestring read fdev write fdev;
    property appname: msestring read fappname write fappname;
    property streamname: msestring read fstreamname write fstreamname;
+   property channels: integer read fchannels write fchannels 
+                                                 default defaultsamplechannels;
+   property format: sampleformatty read fformat write fformat 
+                                              default defaultsampleformat;
+   property rate: integer read frate write frate default defaultsamplerate;
    property stacksizekb: integer read fstacksizekb write fstacksizekb default 0;
-   property onsend8: send8eventty read fonsend8 write fonsend8;
+   property onsend: sendeventty read fonsend write fonsend;
    property onerror: erroreventty read fonerror write fonerror;
  end;
  
@@ -69,6 +146,9 @@ uses
 constructor taudioout.create(aowner: tcomponent);
 begin
  syserror(sys_mutexcreate(fmutex),self);
+ fchannels:= defaultsamplechannels;
+ fformat:= defaultsampleformat;
+ frate:= defaultsamplerate;
  inherited;
 end;
 
@@ -111,9 +191,9 @@ var
 begin
  initializepulsesimple([]);
  fillchar(ss,sizeof(ss),0);
- ss.format:= pa_sample_u8;
- ss.rate:= 44100;
- ss.channels:= 1;
+ ss.format:= pulsesampleformatmatrix[fformat];
+ ss.rate:= frate;
+ ss.channels:= fchannels;
  fpulsestream:= pa_simple_new(pointer(string(fserver)),
                 pointer(string(fappname)),
                 pa_stream_playback,pointer(string(fdev)),
@@ -157,20 +237,22 @@ function taudioout.threadproc(sender: tmsethread): integer;
 var
  data: pointer;
  int1: integer;
+ datasize: integer;
 begin
  result:= 0;
- if canevent(tmethod(fonsend8)) then begin
+ if canevent(tmethod(fonsend)) then begin
   factive:= true;
+  datasize:= samplesizematrix[fformat]*fchannels;
   while not sender.terminated do begin
    data:= nil;
    lock;
    try
-    fonsend8(data);
+    fonsend(data);
    finally
     unlock;
    end;
    if data <> nil then begin
-    if pa_simple_write(fpulsestream,data,length(bytearty(data)),
+    if pa_simple_write(fpulsestream,data,length(bytearty(data))*datasize,
                                                   @int1) <> 0 then begin
      doerror(int1);
      break;

@@ -84,6 +84,8 @@ type
  pbytearty = ^bytearty;
  wordarty = array of word;
  pwordarty = ^wordarty;
+ smallintarty = array of smallint;
+ psmallintarty = ^smallintarty;
  longwordarty = array of longword;
  plongwordarty = ^longwordarty;
  integerarty = array of integer;
@@ -98,12 +100,20 @@ type
  pobjectarty = ^objectarty;
  classarty = array of tclass;
  pclassarty = ^classarty;
+
  realarty = array of realty;
  prealarty = ^realarty;
+
+ singlearty = array of single;
+ singlepoarty = array of psingle;
+ psinglearty = ^singlearty;
+ singleararty = array of singlearty;
+
  doublearty = array of double;
  doublepoarty = array of pdouble;
  pdoublearty = ^doublearty;
  doubleararty = array of doublearty;
+
  currencyarty = array of currency;
  pcurrencyarty = ^currencyarty;
  datetimearty = array of tdatetime;
