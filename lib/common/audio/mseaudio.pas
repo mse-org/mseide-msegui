@@ -242,7 +242,7 @@ begin
  result:= 0;
  if canevent(tmethod(fonsend)) then begin
   factive:= true;
-  datasize:= samplesizematrix[fformat]*fchannels;
+  datasize:= samplesizematrix[fformat];
   while not sender.terminated do begin
    data:= nil;
    lock;
