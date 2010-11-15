@@ -75,6 +75,22 @@ const
  //sfm_f32be,   smf_s2432be);
    4,           4);
 
+ samplebuffersizematrix: array[sampleformatty] of integer =
+ //sfm_u8,      sfm_8alaw,     sfm_8ulaw,
+  (1,           1,             1,
+ //sfm_s16,     sfm_s24,       sfm_s32,        
+   2,           3,             4,
+ //sfm_f32,     smf_s2432,
+   4,           4,
+ //sfm_s16le,   sfm_s24le,     sfm_s32le,
+   2,           3,             4,
+ //sfm_f32le,   smf_s2432le,
+   4,           4,
+ //sfm_s16be,   sfm_s24be,     sfm_s32be,
+   2,           3,             4,
+ //sfm_f32be,   smf_s2432be);
+   4,           4);
+
 type
 
  toutstreamthread = class(tmsethread)
@@ -92,36 +108,37 @@ type
  erroreventty = procedure(const sender: tobject; const errorcode: integer;
                   const errortext: msestring) of object;
 
- taudioout = class(tmsecomponent)
+ tcustomaudioout = class(tmsecomponent)
   private
    fthread: toutstreamthread;
-   factive: boolean;
    fstacksizekb: integer;
    fonsend: sendeventty;
-   fmutex: mutexty;
+//   fmutex: mutexty;
    fonerror: erroreventty;
-   fappname: msestring;
-   fstreamname: msestring;
    fserver: msestring;
    fdev: msestring;
    fchannels: integer;
-   fformat: sampleformatty;
    frate: integer;
    procedure setactive(const avalue: boolean);
   protected
+   factive: boolean;
+   fformat: sampleformatty;
+   fappname: msestring;
+   fstreamname: msestring;
    fpulsestream: ppa_simple;
+   procedure initnames; virtual;
    procedure loaded; override;
-   procedure run;
-   procedure stop;
-   function threadproc(sender: tmsethread): integer;   
+   procedure run; virtual;
+   procedure stop; virtual;
+   function threadproc(sender: tmsethread): integer; virtual;   
    procedure raiseerror(const aerror: integer);
    procedure doerror(const aerror: integer);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function lock: boolean;
-   procedure unlock;
-  published
+//   function lock: boolean;
+//   procedure unlock;
+
    property active: boolean read factive write setactive default false;
    property server: msestring read fserver write fserver;
    property dev: msestring read fdev write fdev;
@@ -136,30 +153,45 @@ type
    property onsend: sendeventty read fonsend write fonsend;
    property onerror: erroreventty read fonerror write fonerror;
  end;
- 
+
+ taudioout = class(tcustomaudioout)
+  published
+   property active;
+   property server;
+   property dev;
+   property appname;
+   property streamname;
+   property channels;
+   property format;
+   property rate;
+   property stacksizekb;
+   property onsend;
+   property onerror;
+ end;
+  
 implementation
 uses
  sysutils,msesysintf,mseapplication,msepulse;
  
-{ taudioout }
+{ tcustomaudioout }
 
-constructor taudioout.create(aowner: tcomponent);
+constructor tcustomaudioout.create(aowner: tcomponent);
 begin
- syserror(sys_mutexcreate(fmutex),self);
+// syserror(sys_mutexcreate(fmutex),self);
  fchannels:= defaultsamplechannels;
  fformat:= defaultsampleformat;
  frate:= defaultsamplerate;
  inherited;
 end;
 
-destructor taudioout.destroy;
+destructor tcustomaudioout.destroy;
 begin
  active:= false;
  inherited;
- sys_mutexdestroy(fmutex);
+// sys_mutexdestroy(fmutex);
 end;
 
-procedure taudioout.setactive(const avalue: boolean);
+procedure tcustomaudioout.setactive(const avalue: boolean);
 begin
  if factive <> avalue then begin
   if componentstate * [csloading,csdesigning] = [] then begin
@@ -176,7 +208,7 @@ begin
  end;
 end;
 
-procedure taudioout.stop;
+procedure tcustomaudioout.stop;
 begin
  freeandnil(fthread);
  pa_simple_free(fpulsestream);
@@ -184,7 +216,7 @@ begin
  factive:= false;
 end;
 
-procedure taudioout.run;
+procedure tcustomaudioout.run;
 var
  ss: pa_sample_spec;
  int1: integer;
@@ -207,33 +239,38 @@ begin
  factive:= true;
 end;
 
-procedure taudioout.loaded;
+procedure tcustomaudioout.initnames;
+begin
+ if fappname = '' then begin
+  fappname:= application.applicationname;
+ end;
+ if fstreamname = '' then begin
+  fstreamname:= name;
+ end;
+end;
+
+procedure tcustomaudioout.loaded;
 begin
  inherited;
  if not (csdesigning in componentstate) then begin
-  if fappname = '' then begin
-   fappname:= application.applicationname;
-  end;
-  if fstreamname = '' then begin
-   fstreamname:= name;
-  end;
+  initnames;
   if factive and (fthread = nil) then begin
    run;
   end;
  end;
 end;
-
-function taudioout.lock: boolean;
+{
+function tcustomaudioout.lock: boolean;
 begin
  result:= sys_mutexlock(fmutex) = sye_ok;
 end;
 
-procedure taudioout.unlock;
+procedure tcustomaudioout.unlock;
 begin
  sys_mutexunlock(fmutex);
 end;
-
-function taudioout.threadproc(sender: tmsethread): integer;
+}
+function tcustomaudioout.threadproc(sender: tmsethread): integer;
 var
  data: pointer;
  int1: integer;
@@ -245,12 +282,12 @@ begin
   datasize:= samplesizematrix[fformat];
   while not sender.terminated do begin
    data:= nil;
-   lock;
-   try
+//   lock;
+//   try
     fonsend(data);
-   finally
-    unlock;
-   end;
+//   finally
+//    unlock;
+//   end;
    if data <> nil then begin
     if pa_simple_write(fpulsestream,data,length(bytearty(data))*datasize,
                                                   @int1) <> 0 then begin
@@ -262,12 +299,12 @@ begin
  end;
 end;
 
-procedure taudioout.raiseerror(const aerror: integer);
+procedure tcustomaudioout.raiseerror(const aerror: integer);
 begin
  raise exception.create(pa_strerror(aerror));
 end;
 
-procedure taudioout.doerror(const aerror: integer);
+procedure tcustomaudioout.doerror(const aerror: integer);
 begin
  application.lock;
  try

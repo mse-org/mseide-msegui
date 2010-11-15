@@ -10,14 +10,15 @@
 
 //
 // todo: optimize for realtime, remove the OOP approach where
-// it degrades performance. Implement recursive systems
+// it degrades performance.
 //
 
 unit msesignal;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- msedatalist,mseclasses,classes,msetypes,msearrayprops,mseevent,msehash;
+ msedatalist,mseclasses,classes,msetypes,msearrayprops,mseevent,msehash,
+ msesys;
 type
  tcustomsigcomp = class;
  tdoublesigcomp = class;
@@ -361,38 +362,37 @@ type
  tsigmultiinp = class(tdoublesigcomp)
   private
    finputs: tdoubleinpconnarrayprop;
-   foutput: tdoubleoutputconn;
-    //local variables
-   dar: doublearty;
-   pdar: doublepoarty;
    procedure setinputs(const avalue: tdoubleinpconnarrayprop);
-   procedure setoutput(const avalue: tdoubleoutputconn);
   protected
    finps: doublepoarty;
    finphigh: integer;
-   finpdatacount: integer;
-   {
-   procedure processinout(const acount: integer;
-             var ainp: doublepoarty; var aoutp: pdouble); virtual; abstract;
-    //for systems without recursion
-   procedure setsig1(const sender: tdoubleinputconn;
-                                    var asource: doublearty); override;
-   procedure setsig(const sender: tdoubleinputconn;
-                                    const asource: doublearty); override;
-   }
+//   finpdatacount: integer;
    function getinputar: inputconnarty; override;
-   function getoutputar: outputconnarty; override;
    procedure initmodel; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure clear; override;
-   property output: tdoubleoutputconn read foutput write setoutput;
+//   procedure clear; override;
   published
    property inputs: tdoubleinpconnarrayprop read finputs write setinputs;
  end;
+
+ tsigmultiinpout = class(tsigmultiinp)
+  private
+   foutput: tdoubleoutputconn;
+    //local variables
+//   dar: doublearty;
+//   pdar: doublepoarty;
+   procedure setoutput(const avalue: tdoubleoutputconn);
+  protected
+   function getoutputar: outputconnarty; override;
+  public
+   constructor create(aowner: tcomponent); override;
+//   destructor destroy; override;
+   property output: tdoubleoutputconn read foutput write setoutput;
+ end;
  
- tsigadd = class(tsigmultiinp)
+ tsigadd = class(tsigmultiinpout)
   protected
 //   procedure processinout(const acount: integer;
 //             var ainp: doublepoarty; var aoutp: pdouble); override;
@@ -431,7 +431,7 @@ type
    property delay: integer read fdelay write fdelay default 1;
  end;
   
- tsigmult = class(tsigmultiinp)
+ tsigmult = class(tsigmultiinpout)
   protected
 //   procedure processinout(const acount: integer;
 //             var ainp: doublepoarty; var aoutp: pdouble); override;
@@ -445,30 +445,21 @@ type
  
  tsiginfohash = class(tpointerptruinthashdatalist)
  end;
-{ 
- recursiveinfoty = record
-  source: pdouble;
-  dest: doublepoarty;
-  desthigh: integer;
- end;
- recursiveinfoarty = array of recursiveinfoty;
-} 
+
  tsigcontroller = class(tmsecomponent)
   private
    finphash: tsiginfohash;
    foutphash: tsiginfohash;
    fvaluedummy: double;
+   fmutex: mutexty;
   protected
    fstate: sigcontrollerstatesty;
    fclients: sigclientintfarty;
    finfos: siginfoarty;
    finputnodes: siginfopoarty;
    foutputnodes: siginfopoarty;
-//   frecursives: siginfopoarty;
    fexecinfo: sighandlernodeinfoarty;
    fexechigh: integer;
-//   frecursiveinfos: recursiveinfoarty;
-//   frecursivehigh: integer;
   {$ifdef mse_debugsignal}
    procedure debugnodeinfo(const atext: string; const anode: psiginfoty);
    procedure debugpointer(const atext: string; const apointer: pointer);
@@ -488,6 +479,8 @@ type
    procedure checkmodel;
    procedure step(const acount: integer=1);
    procedure clear;
+   procedure lock;
+   procedure unlock;
  end;
  
 procedure createsigbuffer(var abuffer: doublearty; const asize: integer);
@@ -497,7 +490,7 @@ procedure setsourceconn(const sender: tmsecomponent;
  
 implementation
 uses
- sysutils,mseformatstr,msesysutils;
+ sysutils,mseformatstr,msesysutils,msesysintf;
 type
  tmsecomponent1 = class(tmsecomponent);
   
@@ -1177,7 +1170,7 @@ end;
 
 constructor tsigmultiinp.create(aowner: tcomponent);
 begin
- foutput:= tdoubleoutputconn.create(self);
+// foutput:= tdoubleoutputconn.create(self);
  inherited;
  finputs:= tdoubleinpconnarrayprop.create(self);
 end;
@@ -1187,14 +1180,14 @@ begin
  inherited;
  finputs.free;
 end;
-
+(*
 procedure tsigmultiinp.clear;
 //var
 // int1: integer;
 begin
  dar:= nil;
  pdar:= nil;
- finpdatacount:= 0;
+// finpdatacount:= 0;
  inherited;
  {
  for int1:= 0 to high(finputs.fitems) do begin
@@ -1202,16 +1195,13 @@ begin
  end;
  }
 end;
+*)
 
 procedure tsigmultiinp.setinputs(const avalue: tdoubleinpconnarrayprop);
 begin
  finputs.assign(avalue);
 end;
 
-procedure tsigmultiinp.setoutput(const avalue: tdoubleoutputconn);
-begin
- foutput.assign(avalue);
-end;
 {
 procedure tsigmultiinp.setsig(const sender: tdoubleinputconn;
                const asource: doublearty);
@@ -1269,12 +1259,6 @@ begin
  result:= inputconnarty(finputs.fitems);
 end;
 
-function tsigmultiinp.getoutputar: outputconnarty;
-begin
- setlength(result,1);
- result[0]:= foutput;
-end;
-
 procedure tsigmultiinp.initmodel;
 var
  int1: integer;
@@ -1284,6 +1268,25 @@ begin
  for int1:= 0 to finphigh do begin
   finps[int1]:= @tdoubleinputconn(finputs.fitems[int1]).fvalue;
  end;
+end;
+
+{ tsigmultiinpout }
+
+constructor tsigmultiinpout.create(aowner: tcomponent);
+begin
+ foutput:= tdoubleoutputconn.create(self);
+ inherited;
+end;
+
+procedure tsigmultiinpout.setoutput(const avalue: tdoubleoutputconn);
+begin
+ foutput.assign(avalue);
+end;
+
+function tsigmultiinpout.getoutputar: outputconnarty;
+begin
+ setlength(result,1);
+ result[0]:= foutput;
 end;
 
 { tdoubleinpconnarrayprop }
@@ -1485,6 +1488,7 @@ end;
 
 constructor tsigcontroller.create(aowner: tcomponent);
 begin
+ syserror(sys_mutexcreate(fmutex),self);
  finphash:= tsiginfohash.create;
  foutphash:= tsiginfohash.create;
  inherited;
@@ -1495,6 +1499,7 @@ begin
  inherited;
  finphash.free;
  foutphash.free;
+ sys_mutexdestroy(fmutex);
 end;
 
 procedure tsigcontroller.addclient(const aintf: isigclient);
@@ -2211,6 +2216,16 @@ begin
  for int1:= 0 to high(fclients) do begin
   fclients[int1].clear;
  end;
+end;
+
+procedure tsigcontroller.lock;
+begin
+ sys_mutexlock(fmutex);
+end;
+
+procedure tsigcontroller.unlock;
+begin
+ sys_mutexunlock(fmutex);
 end;
 
 end.

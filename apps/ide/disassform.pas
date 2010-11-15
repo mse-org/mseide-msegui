@@ -140,6 +140,9 @@ begin
     break;
    end;
   end;
+  if (factiverow >= 0) and (factiverow <= grid.rowcount) then begin
+   grid.showcell(makegridcoord(invalidaxis,factiverow));
+  end;
  finally
   grid.endupdate;
  end;
@@ -148,8 +151,13 @@ end;
 procedure tdisassfo.internalrefresh;
 begin
  if isvisible and gdb.cancommand then begin
-  grid.rowcount:= 0;
-  addlines(faddress,grid.rowsperpage);
+  grid.beginupdate;
+  try
+   grid.rowcount:= 0;
+   addlines(faddress,grid.rowsperpage);
+  finally
+   grid.endupdate;
+  end;
  end;
 end;
 
