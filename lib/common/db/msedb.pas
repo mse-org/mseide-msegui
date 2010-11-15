@@ -76,7 +76,7 @@ type
 
  locatekeyoptionty = (lko_caseinsensitive,lko_partialkey,lko_posinsensitive);
  locatekeyoptionsty = set of locatekeyoptionty;
- locaterecordoptionty = (lro_noforeward,lro_nobackward,lro_utf8);
+ locaterecordoptionty = (lro_noforeward,lro_nobackward,lro_nocurrent,lro_utf8);
  locaterecordoptionsty = set of locaterecordoptionty;
  
  fieldarty = array of tfield;
@@ -2890,7 +2890,14 @@ begin
   bm:= bookmark;
   disablecontrols;
   try
+   if not (lro_nocurrent in options) then begin
+    if check then begin
+     result:= loc_ok;
+     exit;
+    end;
+   end;
    if not (lro_noforeward in options) then begin
+    next;
     while not eof do begin
      if check then begin
       result:= loc_ok;
@@ -2901,17 +2908,16 @@ begin
     bookmark:= bm;
    end;
    if not (lro_nobackward in options) then begin
-    while true do begin
+    prior;
+    while not bof do begin
      if check then begin
       result:= loc_ok;
       exit;
      end;
-     if bof then begin
-      break;
-     end;
      prior;
     end;
    end;
+   {
    if not (lro_nobackward in options) then begin
     while true do begin
      if check then begin
@@ -2924,6 +2930,7 @@ begin
      prior;
     end;
    end;
+   }
   finally
    try
     if result <> loc_ok then begin
