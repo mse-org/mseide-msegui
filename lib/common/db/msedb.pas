@@ -2826,7 +2826,7 @@ begin
       end
       else begin
        if lro_utf8 in options then begin
-        if lko_caseinsensitive in keyoptions[int1] then begin
+        if lko_caseinsensitive in opt1 then begin
          keyansistrings[int1]:= stringtoutf8(mseuppercase(
                                   msestring(tvarrec(keys[int1]).vwidestring)));
         end
@@ -2836,7 +2836,7 @@ begin
         end;
        end
        else begin
-        if lko_caseinsensitive in keyoptions[int1] then begin
+        if lko_caseinsensitive in opt1 then begin
          keyansistrings[int1]:= 
                        mseuppercase(msestring(tvarrec(keys[int1]).vwidestring));
         end
