@@ -2818,7 +2818,7 @@ begin
      vtwidestring: begin
       if fields[int1] is tmsestringfield then begin
        comparefuncar[int1]:= msestringcomp[longword(opt1)];
-       if lko_caseinsensitive in keyoptions[int1] then begin
+       if lko_caseinsensitive in opt1 then begin
         keymsestrings[int1]:= 
                   mseuppercase(msestring(tvarrec(keys[int1]).vwidestring));
         pvarrec(@keys[int1])^.vwidestring:= pointer(keymsestrings[int1]);
