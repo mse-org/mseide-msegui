@@ -330,12 +330,10 @@ type
    fclientwidth: integer;
    fclientheightmin: integer;
    fclientwidthmin: integer;
-   fowner: twidget;
    fdragging: boolean;
    fpickpos: pointty;
    fpickref: pointty;
    procedure clientrecttoscrollbar(const rect: rectty);
-   procedure scrollpostoclientpos(var aclientrect: rectty);
    procedure setclientheigth(const Value: integer);
    procedure setclientwidth(const Value: integer);
    procedure setclientheigthmin(const Value: integer);
@@ -347,6 +345,8 @@ type
    procedure setsbvert(const avalue: tscrollboxscrollbar);
    function getsbvert: tscrollboxscrollbar;
   protected
+   fowner: twidget;
+   procedure scrollpostoclientpos(var aclientrect: rectty); virtual;
    procedure checkminscrollsize(var asize: sizety); override;
    function isdragstart(const sender: twidget; 
                                   const info: mouseeventinfoty): boolean;

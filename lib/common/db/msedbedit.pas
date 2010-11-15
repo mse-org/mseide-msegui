@@ -1356,6 +1356,7 @@ type
  
  tdbgridframe = class(tgridframe)
   protected
+   procedure scrollpostoclientpos(var aclientrect: rectty); override;
    function getscrollbarclass(vert: boolean): framescrollbarclassty; override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); override;
   public
@@ -7091,6 +7092,13 @@ begin
  end;
 end;
 
+procedure tdbgridframe.scrollpostoclientpos(var aclientrect: rectty);
+begin
+ with aclientrect do begin
+  x:= - round(fhorz.value * (cx-fpaintrect.cx));
+  y:= tcustomgrid1(fowner).fscrollrect.y;
+ end;
+end;
 
 { tcustomdbwidgetgrid }
 
