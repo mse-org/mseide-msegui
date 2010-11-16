@@ -11,7 +11,7 @@ unit msesignalgui;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,msegraphedits,msesignal;
+ classes,msegraphedits,msesignal,mseguiglob,mseevent;
  
 type
  sigeditoptionty = (sieo_exp);

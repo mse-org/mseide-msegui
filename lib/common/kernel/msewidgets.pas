@@ -2765,25 +2765,7 @@ begin
     end;
    end;
    if scrollbar <> nil then begin
-    include(eventstate,es_processed);
-    case wheel of
-     mw_up: begin
-      if (ss_ctrl in info.shiftstate) xor pagingreversed then begin
-       scrollbar.pagedown;
-      end
-      else begin
-       scrollbar.wheeldown;
-      end;
-     end;
-     mw_down: begin
-      if (ss_ctrl in info.shiftstate) xor pagingreversed then begin
-       scrollbar.pageup;
-      end
-      else begin
-       scrollbar.wheelup;
-      end;
-     end;
-    end;
+    scrollbar.mousewheelevent(info,pagingreversed);
    end;
   end;
  end;

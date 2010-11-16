@@ -104,6 +104,7 @@ type
    fonbeforeevent: beforescrollbareventty;
    fonafterevent: scrollbareventty;
    fstepctrlfact: real;
+   fwheelsensitivity: real;
    procedure updatedim;
    procedure setdirection(const avalue: graphicdirectionty);
    procedure setcolor(const avalue: colorty);
@@ -185,6 +186,8 @@ type
                        //color <> cl_none -> flat paint for grid cell
    function wantmouseevent(const apos: pointty): boolean;
    procedure mouseevent(var info: mouseeventinfoty);
+   procedure mousewheelevent(var info: mousewheeleventinfoty;
+                               const pagingreversed: boolean = false);
    procedure keydown(var info: keyeventinfoty);
    procedure enter;
    procedure exit;
@@ -215,6 +218,7 @@ type
                     //default = 0 -> no ctrl step
    property pagesize: real read fpagesize write setpagesize stored ispagesizestored;
                     //default = defaultpagesize
+   property wheelsensitivity: real read fwheelsensitivity write fwheelsensitivity;
    property buttonlength: integer read fbuttonlength write setbuttonlength default 0;
                      //0 -> proportional -1 -> square
    property buttonminlength: integer read fbuttonminlength
@@ -261,6 +265,7 @@ type
    property stepsize;
    property stepctrlfact;
    property pagesize;
+   property wheelsensitivity;
    property buttonlength;
    property buttonminlength;
    property buttonendlength;
@@ -300,6 +305,7 @@ begin
  fwidth:= defaultscrollbarwidth;
  fondimchanged:= ondimchanged;
  fpagesize:= defaultpagesize;
+ fwheelsensitivity:= 1;
  for bu1:= low(scrollbarareaty) to high(scrollbarareaty) do begin
   fdrawinfo.areas[bu1].color:= cl_parent;
  end;
@@ -998,6 +1004,32 @@ begin
  end;
 end;
 
+procedure tcustomscrollbar.mousewheelevent(var info: mousewheeleventinfoty;
+                                       const pagingreversed: boolean = false);
+begin
+ with info do begin
+  include(eventstate,es_processed);
+  case wheel of
+   mw_down{mw_up}: begin
+    if (ss_ctrl in shiftstate) xor pagingreversed then begin
+     pagedown;
+    end
+    else begin
+     wheeldown;
+    end;
+   end;
+   mw_up{mw_down}: begin
+    if (ss_ctrl in shiftstate) xor pagingreversed then begin
+     pageup;
+    end
+    else begin
+     wheelup;
+    end;
+   end;
+  end;
+ end;
+end;
+
 function tcustomscrollbar.dostepup(const ashiftstate: shiftstatesty): boolean;
 begin
  result:= true;
@@ -1167,12 +1199,14 @@ end;
 
 procedure tcustomscrollbar.wheeldown;
 begin
- dostep(sbe_wheeldown,-application.mousewheelacceleration(stepsize));
+ dostep(sbe_wheeldown,
+            -application.mousewheelacceleration(stepsize)*fwheelsensitivity);
 end;
 
 procedure tcustomscrollbar.wheelup;
 begin
- dostep(sbe_wheelup,application.mousewheelacceleration(stepsize));
+ dostep(sbe_wheelup,
+             application.mousewheelacceleration(stepsize)*fwheelsensitivity);
 end;
 
 procedure tcustomscrollbar.stepdown;

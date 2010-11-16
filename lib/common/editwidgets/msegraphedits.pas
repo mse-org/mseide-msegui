@@ -292,6 +292,7 @@ type
    property stepsize;
    property stepctrlfact;
    property pagesize;
+   property wheelsensitivity;
    property buttonlength default defaultbuttonminlength;
    property buttonendlength;
    property buttonminlength;
@@ -353,6 +354,9 @@ type
    property direction;
  end;
  
+const
+  defaultslideroptionswidget = defaultoptionswidget + [ow_mousewheel];
+type
  tcustomslider = class(tcustomrealgraphdataedit,iscrollbar)
   private
    fscrollbar: tsliderscrollbar;
@@ -363,6 +367,7 @@ type
    procedure objectchanged(const sender: tobject); override;
    procedure clientrectchanged; override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure doenter; override;
    procedure doexit; override;
@@ -377,6 +382,8 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property scrollbar: tsliderscrollbar read fscrollbar write setscrollbar;
+  published
+   property optionswidget default defaultslideroptionswidget;
  end;
 
  tslider = class(tcustomslider)
@@ -1189,6 +1196,7 @@ begin
  fscrollbar:= tsliderscrollbar.create(iscrollbar(self));
 // fscrollbar.options:= [sbo_moveauto];
  inherited;
+ optionswidget:= defaultslideroptionswidget;
  size:= makesize(defaultsliderwidth,defaultsliderheight);
 end;
 
@@ -1246,6 +1254,14 @@ begin
   fscrollbar.mouseevent(info);
  end;
  inherited;
+end;
+
+procedure tcustomslider.domousewheelevent(var info: mousewheeleventinfoty);
+begin
+ scrollbar.mousewheelevent(info);
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
 end;
 
 procedure tcustomslider.dokeydown(var info: keyeventinfoty);
