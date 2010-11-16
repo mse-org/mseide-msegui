@@ -23,7 +23,8 @@ interface
 implementation
 uses
  classes,msefft,msedesignintf,msesignal,msefilter,
- msepropertyeditors,msestrings,msedesigner,msesigfft,regmath_bmp;
+ msepropertyeditors,msestrings,msedesigner,msesigfft,regmath_bmp,
+ msesignalgui;
 
 type
  tinputconnpropertyeditor = class(tsubcomponentpropertyeditor)
@@ -48,7 +49,8 @@ begin
  registercomponents('Math',[tsigcontroller,tsigout,tsigin,tsigadd,tsigmult,
                             tsigdelay,tsigdelayn,tsigfir,tsigiir,
                             tsigwavetable,
-                            tsigfft,tfft
+                            tsigfft,tfft,
+                            tsigslider
                             ]);
  registercomponenttabhints(['Math'],['Experimental Mathematical Components']);
  registerpropertyeditor(typeinfo(tdoubleconn),tdoublezcomp,'',
@@ -96,8 +98,8 @@ function toutputconnpropertyeditor.filtercomponent(const acomponent: tcomponent)
 var
  cont1: tsigcontroller;
 begin
- cont1:= tdoubleinputconn(instance).controller;
- result:= (cont1 <> nil) and (tdoubleoutputconn(acomponent).controller = cont1);
+ cont1:= tdoubleinputconn(instance).controller1;
+ result:= (cont1 <> nil) and (tdoubleoutputconn(acomponent).controller1 = cont1);
 end;
 
 initialization

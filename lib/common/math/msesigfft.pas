@@ -36,7 +36,8 @@ type
    property samplecount: integer read fsamplecount 
                                            write setsamplecount default 1;
   public
-   constructor create(const aowner: tdoublesigcomp); override;
+   constructor create(const aowner: tcomponent;
+                     const asigintf: isigclient); override;
   published
    property onoutputburst: sigoutbursteventty read fonoutputburst 
                                               write fonoutputburst;
@@ -121,7 +122,7 @@ begin
  samplecount:= 1;
  fonsigbufferfull:= aonsigbufferfull;
  foutput:= aowner.foutput;
- inherited create(aowner);
+ inherited create(aowner,isigclient(aowner));
 end;
 
 procedure tbufferdoubleinputconn.sighandler(const ainfo: psighandlerinfoty);
@@ -134,7 +135,7 @@ begin
   with foutput do begin
    findex:= 0;
    if assigned(fonoutputburst) then begin
-    fonoutputburst(fowner,realarty(fsignal));
+    fonoutputburst(self,realarty(fsignal));
    end;
   end;
  end;
@@ -163,7 +164,8 @@ end;
 
 { tbufferdoubleoutputconn }
 
-constructor tbufferdoubleoutputconn.create(const aowner: tdoublesigcomp);
+constructor tbufferdoubleoutputconn.create(const aowner: tcomponent;
+                     const asigintf: isigclient);
 begin
  samplecount:= 1;
  inherited;
@@ -187,7 +189,7 @@ end;
 
 constructor tbufferdoublesigcomp.create(aowner: tcomponent);
 begin
- foutput:= tbufferdoubleoutputconn.create(self);
+ foutput:= tbufferdoubleoutputconn.create(self,isigclient(self));
  finput:= tbufferdoubleinputconn.create(self,{$ifdef FPC}@{$endif}sigbufferfull);
  inherited;
 end;

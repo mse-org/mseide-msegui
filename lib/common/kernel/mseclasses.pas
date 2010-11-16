@@ -373,6 +373,7 @@ type
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil); virtual;
    procedure objevent(const sender: iobjectlink; const event: objecteventty); virtual;
    function getinstance: tobject;
+   function getcomponent: tcomponent;
      //ievent
    procedure receiveevent(const event: tobjectevent); virtual;
 
@@ -3391,6 +3392,11 @@ begin
 end;
 
 function tmsecomponent.getinstance: tobject;
+begin
+ result:= self;
+end;
+
+function tmsecomponent.getcomponent: tcomponent;
 begin
  result:= self;
 end;

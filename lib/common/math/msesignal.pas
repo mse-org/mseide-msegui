@@ -56,6 +56,9 @@ type
   function getnamepath: string;
   function gethandler: sighandlerprocty;
   function getzcount: integer;
+  function getcomponent: tcomponent;
+  procedure connchange;
+  function getsigcontroller: tsigcontroller;
  end;
  sigclientintfarty = array of isigclient;
 
@@ -78,6 +81,7 @@ type
    function getoutputar: outputconnarty; virtual;
    function gethandler: sighandlerprocty; virtual; abstract;
    function getzcount: integer; virtual;
+   function getsigcontroller: tsigcontroller;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -93,17 +97,18 @@ type
  
  tdoubleconn = class(tsigconn) 
   protected
-   fowner: tdoublesigcomp;
-   {$ifndef FPC}
+   fsigintf: isigclient;
+//   {$ifndef FPC}
    function getcontroller: tsigcontroller;
-   {$endif}
+//   {$endif}
   public
-   constructor create(const aowner: tdoublesigcomp); reintroduce; virtual;
-   {$ifdef FPC}
-   property controller: tsigcontroller read fowner.fcontroller;
-   {$else}
-   property controller: tsigcontroller read getcontroller;
-   {$endif}
+   constructor create(const aowner: tcomponent;
+                     const asigintf: isigclient); reintroduce; virtual;
+//   {$ifdef FPC}
+//   property controller: tsigcontroller read fowner.fcontroller;
+//   {$else}
+   property controller1: tsigcontroller read getcontroller;
+//   {$endif}
  end;
  
  doubleinputconnarty = array of tdoubleinputconn;
@@ -112,7 +117,8 @@ type
   protected
    fdestinations: doubleinputconnarty;
   public
-   constructor create(const aowner: tdoublesigcomp); override;
+   constructor create(const aowner: tcomponent;
+                     const asigintf: isigclient); override;
 {
     //for systems without recursion
    procedure setsig1(var asource: doublearty); //asource is invalid afterwards
@@ -131,7 +137,8 @@ type
 //   fbuffer: doublearty;
 //   fhasdata: boolean;
   public
-   constructor create(const aowner: tdoublesigcomp); override;
+   constructor create(const aowner: tcomponent;
+                     const asigintf: isigclient); override;
    destructor destroy; override;
    
     //for systems without recursion
@@ -350,13 +357,13 @@ type
  }
  tdoubleinpconnarrayprop = class(tpersistentarrayprop)
   private
-   fowner: tdoublesigcomp;
+   fsigintf: isigclient;
    function getitems(const index: integer): tdoubleinputconn;
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure dosizechanged; override;
   public
-   constructor create(const aowner: tdoublesigcomp); reintroduce;
+   constructor create(const asigintf: isigclient); reintroduce;
    property items[const index: integer]: tdoubleinputconn read getitems; default;
  end;
  
@@ -467,6 +474,7 @@ type
    procedure sighandler(const ainfo: psighandlerinfoty);
    procedure initmodel; override;
    function getinputar: inputconnarty; override;
+   function getzcount: integer; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure clear; override;
@@ -534,6 +542,9 @@ procedure createsigbuffer(var abuffer: doublearty; const asize: integer);
 procedure createsigarray(out abuffer: doublearty; const asize: integer);
 procedure setsourceconn(const sender: tmsecomponent;
               const avalue: tdoubleoutputconn; var dest: tdoubleoutputconn);
+procedure setsigcontroller(const linker: tobjectlinker; 
+          const intf: isigclient; 
+          const source: tsigcontroller; var dest: tsigcontroller);
  
 implementation
 uses
@@ -614,23 +625,25 @@ end;
 
 { tdoublconn }
 
-constructor tdoubleconn.create(const aowner: tdoublesigcomp);
+constructor tdoubleconn.create(const aowner: tcomponent;
+                     const asigintf: isigclient);
 begin
- fowner:= aowner;
+ fsigintf:= asigintf;
  inherited create(aowner);
  setsubcomponent(true);
 end;
 
-{$ifndef FPC}
+//{$ifndef FPC}
 function tdoubleconn.getcontroller: tsigcontroller;
 begin
- result:= fowner.fcontroller;
+ result:= fsigintf.getsigcontroller;
 end;
-{$endif}
+//{$endif}
 
 { tdoubleoutputconn }
 
-constructor tdoubleoutputconn.create(const aowner: tdoublesigcomp);
+constructor tdoubleoutputconn.create(const aowner: tcomponent;
+                     const asigintf: isigclient);
 begin
  inherited;
  include (fmsecomponentstate,cs_subcompref);
@@ -663,7 +676,8 @@ end;
 }
 { tdoubleinputconn }
 
-constructor tdoubleinputconn.create(const aowner: tdoublesigcomp);
+constructor tdoubleinputconn.create(const aowner: tcomponent;
+                     const asigintf: isigclient);
 begin
  fgain:= 1;
  inherited;
@@ -680,7 +694,7 @@ procedure tdoubleinputconn.setsource(const avalue: tdoubleoutputconn);
 begin
  if fsource <> avalue then begin
   setsourceconn(self,avalue,fsource);
-  fowner.connchange;
+  fsigintf.connchange;
  end;
 end;
 
@@ -780,13 +794,18 @@ begin
  result:= 0;
 end;
 
+function tdoublesigcomp.getsigcontroller: tsigcontroller;
+begin
+ result:= fcontroller;
+end;
+
 { tdoublezcomp }
 
 constructor tdoublezcomp.create(aowner: tcomponent);
 begin
  fzhigh:= -1;
- finput:= tdoubleinputconn.create(self);
- foutput:= tdoubleoutputconn.create(self);
+ finput:= tdoubleinputconn.create(self,isigclient(self));
+ foutput:= tdoubleoutputconn.create(self,isigclient(self));
  inherited;
 end;
 
@@ -920,7 +939,7 @@ end;
 
 constructor tsigout.create(aowner: tcomponent);
 begin
- finput:= tdoubleinputconn.create(self);
+ finput:= tdoubleinputconn.create(self,isigclient(self));
  finputpo:= @finput.fvalue;
  inherited;
 end;
@@ -1111,7 +1130,7 @@ end;
 
 constructor tsigin.create(aowner: tcomponent);
 begin
- foutput:= tdoubleoutputconn.create(self);
+ foutput:= tdoubleoutputconn.create(self,isigclient(self));
  inherited;
 end;
 
@@ -1322,7 +1341,7 @@ end;
 
 constructor tsigmultiinpout.create(aowner: tcomponent);
 begin
- foutput:= tdoubleoutputconn.create(self);
+ foutput:= tdoubleoutputconn.create(self,isigclient(self));
  inherited;
 end;
 
@@ -1341,7 +1360,7 @@ end;
 
 constructor tdoublesigoutcomp.create(aowner: tcomponent);
 begin
- foutput:= tdoubleoutputconn.create(self);
+ foutput:= tdoubleoutputconn.create(self,isigclient(self));
  inherited;
 end;
 
@@ -1356,21 +1375,18 @@ begin
  result[0]:= foutput;
 end;
 
-{ tsigwavetable }
-
 { tdoubleinpconnarrayprop }
 
-constructor tdoubleinpconnarrayprop.create(const aowner: tdoublesigcomp);
+constructor tdoubleinpconnarrayprop.create(const asigintf: isigclient);
 begin
- fowner:= aowner;
+ fsigintf:= asigintf;
  inherited create(nil);
 end;
 
 procedure tdoubleinpconnarrayprop.createitem(const index: integer;
                var item: tpersistent);
 begin
- item:= tdoubleinputconn.create(nil);
- tdoubleinputconn(item).fowner:= fowner;
+ item:= tdoubleinputconn.create(nil,fsigintf);
 end;
 
 function tdoubleinpconnarrayprop.getitems(const index: integer): tdoubleinputconn;
@@ -1381,7 +1397,7 @@ end;
 procedure tdoubleinpconnarrayprop.dosizechanged;
 begin
  inherited;
- fowner.connchange;
+ fsigintf.connchange;
 end;
 
 (*
@@ -1866,7 +1882,7 @@ begin
         raise exception.create(
          'Destination not found. Controller: '+self.name+ ', Node: '+
                      fclients[int1].getnamepath +
-                                ', Dest: '+fdestinations[int3].fowner.name+'.');
+                 ', Dest: '+fdestinations[int3].fsigintf.getcomponent.name+'.');
        end;
        if finditem(pointerarty(po2^.prev),po1) < 0 then begin
         inc(po2^.connectedcount);
@@ -2062,11 +2078,11 @@ end;
 constructor tsigwavetable.create(aowner: tcomponent);
 begin
  inherited;
- ffrequency:= tdoubleinputconn.create(self);
+ ffrequency:= tdoubleinputconn.create(self,isigclient(self));
  ffrequency.name:= 'frequency';
- fphase:= tdoubleinputconn.create(self);
+ fphase:= tdoubleinputconn.create(self,isigclient(self));
  fphase.name:= 'phase';
- famplitude:= tdoubleinputconn.create(self);
+ famplitude:= tdoubleinputconn.create(self,isigclient(self));
  famplitude.name:= 'amplitude';
 end;
 
@@ -2140,6 +2156,11 @@ begin
  result[0]:= ffrequency;
  result[1]:= fphase;
  result[2]:= famplitude;
+end;
+
+function tsigwavetable.getzcount: integer;
+begin
+ result:= 1;
 end;
 
 end.
