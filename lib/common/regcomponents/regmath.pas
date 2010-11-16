@@ -47,6 +47,7 @@ procedure register;
 begin
  registercomponents('Math',[tsigcontroller,tsigout,tsigin,tsigadd,tsigmult,
                             tsigdelay,tsigdelayn,tsigfir,tsigiir,
+                            tsigwavetable,
                             tsigfft,tfft
                             ]);
  registercomponenttabhints(['Math'],['Experimental Mathematical Components']);

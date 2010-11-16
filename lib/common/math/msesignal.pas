@@ -38,6 +38,7 @@ type
 
  tsigcomp = class(tcustomsigcomp)
  end;
+
  tdoubleinputconn = class;
  tdoubleoutputconn = class;
  
@@ -137,11 +138,11 @@ type
 //   procedure setsig1(var asource: doublearty); virtual; 
                        //asource is invalid afterwards
 //   procedure setsig(const asource: doublearty); virtual;
-   property value: double read fvalue;  
   published
    property source: tdoubleoutputconn read fsource write setsource;
    property offset: double read foffset write foffset;
    property gain: double read fgain write fgain;
+   property value: double read fvalue write fvalue;  
  end;
 
  sighandlerinfoty = record
@@ -431,6 +432,52 @@ type
    property delay: integer read fdelay write fdelay default 1;
  end;
   
+ tdoublesigoutcomp = class(tdoublesigcomp)
+  private
+   foutput: tdoubleoutputconn;
+   procedure setoutput(const avalue: tdoubleoutputconn);
+  protected
+   function getoutputar: outputconnarty; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   property output: tdoubleoutputconn read foutput write setoutput;
+  published
+ end;
+ 
+ tsigwavetable = class(tdoublesigoutcomp)
+  private
+   ffrequency: tdoubleinputconn;
+   fphase: tdoubleinputconn;
+   famplitude: tdoubleinputconn;
+   ftable: doublearty;
+   ftablelength: integer;
+   ftime: double;
+   ffrequencypo: pdouble;
+   fphasepo: pdouble;
+   famplitudepo: pdouble;
+   foninittable: siginbursteventty;
+   procedure setfrequency(const avalue: tdoubleinputconn);
+   procedure setphase(const avalue: tdoubleinputconn);
+   procedure setamplitude(const avalue: tdoubleinputconn);
+   procedure settable(const avalue: doublearty);
+  protected
+   procedure checktable;
+    //isigclient
+   function gethandler: sighandlerprocty; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
+   procedure initmodel; override;
+   function getinputar: inputconnarty; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   procedure clear; override;
+   property table: doublearty read ftable write settable;
+  published
+   property frequency: tdoubleinputconn read ffrequency write setfrequency;
+   property phase: tdoubleinputconn read fphase write setphase;
+   property amplitude: tdoubleinputconn read famplitude write setamplitude;
+   property oninittable: siginbursteventty read foninittable write foninittable;
+ end;
+ 
  tsigmult = class(tsigmultiinpout)
   protected
 //   procedure processinout(const acount: integer;
@@ -636,6 +683,7 @@ begin
   fowner.connchange;
  end;
 end;
+
 {
 procedure tdoubleinputconn.setsig1(var asource: doublearty);
 begin
@@ -1289,6 +1337,27 @@ begin
  result[0]:= foutput;
 end;
 
+{ tdoublesigoutcomp }
+
+constructor tdoublesigoutcomp.create(aowner: tcomponent);
+begin
+ foutput:= tdoubleoutputconn.create(self);
+ inherited;
+end;
+
+procedure tdoublesigoutcomp.setoutput(const avalue: tdoubleoutputconn);
+begin
+ foutput.assign(avalue);
+end;
+
+function tdoublesigoutcomp.getoutputar: outputconnarty;
+begin
+ setlength(result,1);
+ result[0]:= foutput;
+end;
+
+{ tsigwavetable }
+
 { tdoubleinpconnarrayprop }
 
 constructor tdoubleinpconnarrayprop.create(const aowner: tdoublesigcomp);
@@ -1539,7 +1608,8 @@ begin
   str1:= '<NIL>';
  end
  else begin
-  str1:= anode^.intf.getnamepath;
+  str1:= anode^.intf.getnamepath + 
+             ' conncount: '+inttostr(anode^.connectedcount);
  end; 
  debugwriteln(atext+str1);
 end;
@@ -1681,7 +1751,33 @@ var
   ainfo.gain:= ainput.gain;
   ainfo.hasscale:= (ainfo.offset <> 0) or (ainfo.gain <> 1);
  end; //updatedestinfo
+
+ function isopeninput(const ainputs: inputinfoarty): boolean;
+ var
+  int1: integer;
+ begin
+  result:= true;
+  for int1:= 0 to high(ainputs) do begin
+   if ainputs[int1].source <> nil then begin
+    result:= false;
+    break;
+   end;
+  end;
+ end;
  
+ function isopenoutput(const aoutputs: outputconnarty): boolean;
+ var
+  int1: integer;
+ begin
+  result:= true;
+  for int1:= 0 to high(aoutputs) do begin
+   if aoutputs[int1].fdestinations <> nil then begin
+    result:= false;
+    break;
+   end;
+  end;
+ end;
+  
 var
  int1,int2,int3,int4: integer;
  po1,po2: psiginfoty;
@@ -1742,24 +1838,9 @@ begin
    {$endif}
     end;
    end;
-   state:= [];
-   if inputs <> nil then begin
-    include(state,sis_input);
-   end
-   else begin
-    additem(pointerarty(finputnodes),po1,inputnodecount);
-   end;
-   if outputs <> nil then begin
-    include(state,sis_output);
-   end
-   else begin
-    additem(pointerarty(foutputnodes),po1,outputnodecount);
-   end;
   end;
  end;
- setlength(finputnodes,inputnodecount);
- setlength(foutputnodes,outputnodecount);
- 
+  
 {$ifdef mse_debugsignal}
   debugwriteln('*link items');
 {$endif}
@@ -1778,6 +1859,9 @@ begin
        debugpointer('lookup inp ',fdestinations[int3]);
       {$endif}
        po2:= findinp(fdestinations[int3]);
+      {$ifdef mse_debugsignal}
+       debugnodeinfo(' ',po2);
+      {$endif}
        if po2 = nil then begin
         raise exception.create(
          'Destination not found. Controller: '+self.name+ ', Node: '+
@@ -1785,7 +1869,10 @@ begin
                                 ', Dest: '+fdestinations[int3].fowner.name+'.');
        end;
        if finditem(pointerarty(po2^.prev),po1) < 0 then begin
-        inc(po1^.connectedcount);
+        inc(po2^.connectedcount);
+       {$ifdef mse_debugsignal}
+        debugnodeinfo(' new link ',po2);
+       {$endif}
         additem(pointerarty(po2^.prev),po1);
         additem(pointerarty(po1^.next),po2);
        end;
@@ -1801,7 +1888,37 @@ begin
    end;
   end;
  end; 
- 
+
+{$ifdef mse_debugsignal}
+ debugwriteln('*check input/output');
+{$endif}
+ for int1:= 0 to high(fclients) do begin
+  po1:= @finfos[int1];
+  with po1^ do begin
+   state:= [];
+   if not isopeninput(inputs) then begin
+    include(state,sis_input);
+   end
+   else begin
+    additem(pointerarty(finputnodes),po1,inputnodecount);
+   {$ifdef mse_debugsignal}
+    debugnodeinfo(' input node ',po1);
+   {$endif}
+   end;
+   if not isopenoutput(outputs) then begin
+    include(state,sis_output);
+   end
+   else begin
+    additem(pointerarty(foutputnodes),po1,outputnodecount);
+   {$ifdef mse_debugsignal}
+    debugnodeinfo(' output node ',po1);
+   {$endif}
+   end;
+  end;
+ end;
+ setlength(finputnodes,inputnodecount);
+ setlength(foutputnodes,outputnodecount);
+  
 {$ifdef mse_debugsignal}
   debugwriteln('*check recursion');
 {$endif}
@@ -1819,6 +1936,7 @@ begin
 {$endif}
  setlength(execorder,length(finfos));
  execindex:= 0;
+// resetchecked;
  for int1:= 0 to high(finputnodes) do begin
  {$ifdef mse_debugsignal}
   debugnodeinfo('input ',finputnodes[int1]);  
@@ -1867,298 +1985,9 @@ begin
   end;
  end;
  include(fstate,scs_modelvalid);
+ clear;
 end;
 
-(*         from output
-procedure tsigcontroller.updatemodel;
-{$ifdef mse_debugsignal}
-var
- indent: string;
-{$endif}
- procedure resetchecked;
- var 
-  int1: integer;
- begin
-  for int1:= 0 to high(finfos) do begin
-   exclude(finfos[int1].state,sis_checked);
-  end;
- end; //resetchecked
- 
- procedure checkrecursion(const anode: psiginfoty);
- var
-  int1: integer;
-  po1: psiginfoty;
- {$ifdef mse_debugsignal}
-  indentbefore: string;
- {$endif}
- begin
- {$ifdef mse_debugsignal}
-  indentbefore:= indent;
-  indent:= indent+' ';
-  debugnodeinfo(indent+'node ',anode);
- {$endif}  
-  with anode^ do begin
-   include(state,sis_checked);
-   for int1:= 0 to high(destinations) do begin
-    po1:= findinp(destinations[int1]);
-    if sis_checked in po1^.state then begin
-    {$ifdef mse_debugsignal}
-     debugnodeinfo(indent+' dest recursive ',po1);
-    {$endif}
-     include(state,sis_recursive);
-    end
-    else begin
-     checkrecursion(po1);
-    end;
-   end;
-  end;
- {$ifdef mse_debugsignal}
-  indent:= indentbefore;
- {$endif}  
- end;
-
-var
- execorder: siginfopoarty;
- execindex: integer;
- 
- procedure processcalcorder(const anode: psiginfoty);
- var
-  int1: integer;
-  po1,po2: psiginfoty;
- {$ifdef mse_debugsignal}
-  indentbefore: string;
- {$endif}
- begin
- {$ifdef mse_debugsignal}
-  indentbefore:= indent;
-  indent:= indent+' ';
-  debugnodeinfo(inttostr(execindex)+indent+'calcnode ',anode);
- {$endif}   
-  if execindex > high(execorder) then begin
-   internalerror('SIG20100916-0');
-  end;
-  execorder[execindex]:= anode;
-  inc(execindex);
-  with anode^ do begin
-   for int1:= 0 to high(prev) do begin
-    po1:= prev[int1];
-   {$ifdef mse_debugsignal}
-    debugnodeinfo(indent+' source ',po1);
-   {$endif}   
-    dec(po1^.outpcount);
-    if not (sis_recursive in po1^.state) then begin
-     if po1^.outpcount = 0 then begin
-      processcalcorder(po1);
-     end;
-    end;
-   end;
-  end;
- {$ifdef mse_debugsignal}
-  indent:= indentbefore;
- {$endif}  
- end;
- 
-var
- int1,int2,int3: integer;
- po1,po2: psiginfoty;
- inputnodecount: integer;
- outputnodecount: integer;
- recursivenodecount: integer;
- ar1,ar2: siginfopoarty;
-begin
- finfos:= nil;
- finphash.clear;
- foutphash.clear;
- finputnodes:= nil;
- foutputnodes:= nil;
- frecursives:= nil;
- fexecinfo:= nil;
- outputnodecount:= 0;
- inputnodecount:= 0;
- recursivenodecount:= 0;
- setlength(finfos,length(fclients));
-{$ifdef mse_debugsignal}
- debugwriteln('**updatemodel '+name);
-{$endif}
-{$ifdef mse_debugsignal}
-  debugwriteln('*get info');
-{$endif}
- for int1:= 0 to high(fclients) do begin //get basic info
-  po1:= @finfos[int1];
-  with po1^ do begin
-   intf:= fclients[int1];
-   intf.initmodel;
-  {$ifdef mse_debugsignal}
-   debugwriteln('client '+intf.getnamepath);
-  {$endif}
-   inputs:= fclients[int1].getinputar;
-   outputs:= fclients[int1].getoutputar;
-   destinations:= nil;
-   for int2:= 0 to high(inputs) do begin
-  {$ifdef mse_debugsignal}
-    debugpointer(' inp ',inputs[int2]);
-  {$endif}
-    finphash.add(ptruint(inputs[int2]),po1);
-   end;
-   for int2:= 0 to high(outputs) do begin
-  {$ifdef mse_debugsignal}
-    debugpointer(' outp ',outputs[int2]);
-  {$endif}
-    foutphash.add(ptruint(outputs[int2]),po1);
-    with outputs[int2] do begin
-     if fdestinations = nil then begin
-      raise exception.create(po1^.intf.getnamepath+': open output');
-     end;
-     stackarray(pointerarty(fdestinations),pointerarty(po1^.destinations));
-   {$ifdef mse_debugsignal}
-     for int3:= 0 to high(fdestinations) do begin
-      debugpointer('  dest ',fdestinations[int3]);
-     end;
-   {$endif}
-    end;
-   end;
-   inphigh:= high(inputs);
-   outphigh:= high(destinations);
-   outpcount:= outphigh + 1;
-   state:= [];
-   if inputs <> nil then begin
-    include(state,sis_input);
-   end
-   else begin
-    additem(pointerarty(finputnodes),po1,inputnodecount);
-   end;
-   if outputs <> nil then begin
-    include(state,sis_output);
-   end
-   else begin
-    additem(pointerarty(foutputnodes),po1,outputnodecount);
-   end;
-  end;
- end;
- setlength(finputnodes,inputnodecount);
- setlength(foutputnodes,outputnodecount);
- 
-{$ifdef mse_debugsignal}
-  debugwriteln('*link items');
-{$endif}
- for int1:= 0 to high(fclients) do begin //link the items
-  po1:= @finfos[int1];
-  with po1^ do begin
-   if not (sis_checked in state) then begin
-   {$ifdef mse_debugsignal}
-    debugnodeinfo('node ',po1);
-   {$endif}
-    include(state,sis_checked);
-    for int2:= 0 to high(outputs) do begin
-     with outputs[int2] do begin
-      outphigh:= outphigh + length(fdestinations);
-      for int3:= 0 to high(fdestinations) do begin
-      {$ifdef mse_debugsignal}
-       debugpointer('lookup inp ',fdestinations[int3]);
-      {$endif}
-       po2:= findinp(fdestinations[int3]);
-       if po2 = nil then begin
-        raise exception.create(
-         'Destination not found. Controller: '+self.name+ ', Node: '+
-                     fclients[int1].getnamepath +
-                                ', Dest: '+fdestinations[int3].fowner.name+'.');
-       end;
-       adduniqueitem(pointerarty(po2^.prev),po1);
-       adduniqueitem(pointerarty(po1^.next),po2);
-      end;
-     end;
-    end;      
-   end;
-  end;
- end; 
- 
-{$ifdef mse_debugsignal}
-  debugwriteln('*check recursion');
-{$endif}
- for int1:= 0 to high(finputnodes) do begin //check recursion
-  resetchecked;
- {$ifdef mse_debugsignal}
-  debugnodeinfo('input ',finputnodes[int1]);
- {$endif}
-  checkrecursion(finputnodes[int1]);
- end;
- for int1:= 0 to high(finfos) do begin
-  po1:= @finfos[int1];
-  if sis_recursive in po1^.state then begin
-   additem(pointerarty(frecursives),po1,recursivenodecount);
-  end;
- end;
- setlength(frecursives,recursivenodecount);
-{$ifdef mse_debugsignal}
- debugwriteln('*processcalcorder');  
-{$endif}
- setlength(execorder,length(finfos));
- execindex:= 0;
- for int1:= 0 to high(foutputnodes) do begin
- {$ifdef mse_debugsignal}
-  debugnodeinfo('output ',foutputnodes[int1]);  
- {$endif}
-  processcalcorder(foutputnodes[int1]);
- end;
- for int1:= 0 to high(frecursives) do begin
- {$ifdef mse_debugsignal}
-  debugnodeinfo('recursive ',frecursives[int1]);  
- {$endif}
-  processcalcorder(frecursives[int1]);
- end;
-{$ifdef mse_debugsignal}
- debugwriteln('*execorder '+inttostr(length(execorder))+' '+inttostr(execindex));
- for int1:= 0 to high(execorder) do begin
-  debugnodeinfo(' ',execorder[int1]);
- end;
- for int1:= 0 to high(finfos) do begin
-  po1:= @finfos[int1];
-  with po1^ do begin
-   if outpcount <> 0 then begin
-    debugnodeinfo('! '+inttostr(outpcount)+ ' ',po1);
-   end;
-  end;
- end;
-{$endif}
- if execindex <> length(execorder) then begin
-  internalerror('SIG20100916-2'); //unprocessed nodes
- end;
- setlength(fexecinfo,execindex);
- fexechigh:= execindex-1;
- int3:= 0;
- setlength(frecursiveinfos,recursivenodecount);
- for int1:= 0 to high(fexecinfo) do begin
-  po1:= execorder[int1];
-  with fexecinfo[int1] do begin
-   handler:= po1^.intf.gethandler;
-   if sis_recursive in po1^.state then begin
-    desthigh:= -1;
-    handlerinfo.dest:= @recursivebuffer;
-    with frecursiveinfos[int3] do begin
-     desthigh:= high(po1^.destinations);
-     setlength(dest,desthigh+1);
-     for int2:= 0 to desthigh do begin
-      dest[int2]:= @po1^.destinations[int2].fvalue;
-     end;
-     source:= @recursivebuffer;
-     inc(int3);
-    end;
-   end
-   else begin
-    desthigh:= high(po1^.destinations)-1;
-    if length(po1^.destinations) > 0 then begin
-     handlerinfo.dest:= @po1^.destinations[0].fvalue;
-     setlength(dest,desthigh+1);
-     for int2:= 0 to desthigh do begin
-      dest[int2]:= @po1^.destinations[int2+1].fvalue;
-     end;
-    end; 
-   end;
-  end;
- end;
- include(fstate,scs_modelvalid);
-end;
-*)
 procedure tsigcontroller.internalstep;
 var
  int1,int2: integer;
@@ -2226,6 +2055,91 @@ end;
 procedure tsigcontroller.unlock;
 begin
  sys_mutexunlock(fmutex);
+end;
+
+{ tsigwavetable }
+
+constructor tsigwavetable.create(aowner: tcomponent);
+begin
+ inherited;
+ ffrequency:= tdoubleinputconn.create(self);
+ ffrequency.name:= 'frequency';
+ fphase:= tdoubleinputconn.create(self);
+ fphase.name:= 'phase';
+ famplitude:= tdoubleinputconn.create(self);
+ famplitude.name:= 'amplitude';
+end;
+
+procedure tsigwavetable.setfrequency(const avalue: tdoubleinputconn);
+begin
+ ffrequency.assign(avalue);
+end;
+
+procedure tsigwavetable.setphase(const avalue: tdoubleinputconn);
+begin
+ fphase.assign(avalue);
+end;
+
+procedure tsigwavetable.setamplitude(const avalue: tdoubleinputconn);
+begin
+ famplitude.assign(avalue);
+end;
+
+function tsigwavetable.gethandler: sighandlerprocty;
+begin
+ result:= @sighandler;
+end;
+
+procedure tsigwavetable.sighandler(const ainfo: psighandlerinfoty);
+var
+ int1: integer;
+begin
+ int1:= trunc((ftime+fphasepo^)*ftablelength) mod ftablelength;
+ if int1 < 0 then begin
+  int1:= int1 + ftablelength;
+ end;
+ ainfo^.dest^:= ftable[int1] * famplitudepo^;
+ ftime:= frac(ftime+ffrequencypo^);
+end;
+
+procedure tsigwavetable.settable(const avalue: doublearty);
+begin
+ ftable:= avalue;
+ checktable;
+end;
+
+procedure tsigwavetable.clear;
+begin
+ inherited;
+ if canevent(tmethod(foninittable)) then begin
+  foninittable(self,ftable);
+ end;
+ checktable;
+end;
+
+procedure tsigwavetable.checktable;
+begin
+ ftime:= 0;
+ if ftable = nil then begin
+  setlength(ftable,1);
+ end;
+ ftablelength:= length(ftable);
+end;
+
+procedure tsigwavetable.initmodel;
+begin
+ ffrequencypo:= @ffrequency.fvalue;
+ fphasepo:= @fphase.fvalue;
+ famplitudepo:= @famplitude.fvalue;
+ inherited;
+end;
+
+function tsigwavetable.getinputar: inputconnarty;
+begin
+ setlength(result,3);
+ result[0]:= ffrequency;
+ result[1]:= fphase;
+ result[2]:= famplitude;
 end;
 
 end.
