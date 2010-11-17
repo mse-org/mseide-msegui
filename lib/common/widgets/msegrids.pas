@@ -9135,10 +9135,10 @@ begin
   case event of
    sbe_stepup: scrollrows(-1);
    sbe_stepdown: scrollrows(1);
-   sbe_pageup: scrollrows((rowsperpage-1));
-   sbe_pagedown: scrollrows(-(rowsperpage-1));
-   sbe_wheelup: scrollrows(wheelheight);
-   sbe_wheeldown: scrollrows(-wheelheight);
+   sbe_pageup: scrollrows(-(rowsperpage-1));
+   sbe_pagedown: scrollrows(rowsperpage-1);
+   sbe_wheelup: scrollrows(-wheelheight);
+   sbe_wheeldown: scrollrows(wheelheight);
   end;
  end
  else begin

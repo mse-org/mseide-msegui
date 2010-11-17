@@ -1009,22 +1009,20 @@ procedure tcustomscrollbar.mousewheelevent(var info: mousewheeleventinfoty;
 begin
  with info do begin
   include(eventstate,es_processed);
-  case wheel of
-   mw_down{mw_up}: begin
-    if (ss_ctrl in shiftstate) xor pagingreversed then begin
-     pagedown;
-    end
-    else begin
-     wheeldown;
-    end;
+  if (wheel = mw_down) xor (fdirection in [gd_left,gd_down]) then begin
+   if (ss_ctrl in shiftstate) xor pagingreversed then begin
+    pagedown;
+   end
+   else begin
+    wheeldown;
    end;
-   mw_up{mw_down}: begin
-    if (ss_ctrl in shiftstate) xor pagingreversed then begin
-     pageup;
-    end
-    else begin
-     wheelup;
-    end;
+  end
+  else begin
+   if (ss_ctrl in shiftstate) xor pagingreversed then begin
+    pageup;
+   end
+   else begin
+    wheelup;
    end;
   end;
  end;
