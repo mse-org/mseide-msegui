@@ -450,6 +450,9 @@ type
    property output: tdoubleoutputconn read foutput write setoutput;
   published
  end;
+
+ sigwavetableoptionty = (siwto_intpol);
+ sigwavetableoptionsty = set of sigwavetableoptionty;
  
  tsigwavetable = class(tdoublesigoutcomp)
   private
@@ -463,15 +466,18 @@ type
    fphasepo: pdouble;
    famplitudepo: pdouble;
    foninittable: siginbursteventty;
+   foptions: sigwavetableoptionsty;
    procedure setfrequency(const avalue: tdoubleinputconn);
    procedure setphase(const avalue: tdoubleinputconn);
    procedure setamplitude(const avalue: tdoubleinputconn);
    procedure settable(const avalue: doublearty);
+   procedure setoptions(const avalue: sigwavetableoptionsty);
   protected
    procedure checktable;
+   procedure sighandler(const ainfo: psighandlerinfoty);
+   procedure sighandlerintpol(const ainfo: psighandlerinfoty);
     //isigclient
    function gethandler: sighandlerprocty; override;
-   procedure sighandler(const ainfo: psighandlerinfoty);
    procedure initmodel; override;
    function getinputar: inputconnarty; override;
    function getzcount: integer; override;
@@ -484,6 +490,8 @@ type
    property phase: tdoubleinputconn read fphase write setphase;
    property amplitude: tdoubleinputconn read famplitude write setamplitude;
    property oninittable: siginbursteventty read foninittable write foninittable;
+   property options: sigwavetableoptionsty read foptions 
+                                           write setoptions default [];
  end;
  
  tsigmult = class(tsigmultiinpout)
@@ -521,7 +529,6 @@ type
   {$endif}
    procedure addclient(const aintf: isigclient);
    procedure removeclient(const aintf: isigclient);
-   procedure modelchange;
    procedure updatemodel;
    function findinplink(const dest,source: psiginfoty): integer;
    procedure internalstep;
@@ -531,6 +538,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure modelchange;
    procedure checkmodel;
    procedure step(const acount: integer=1);
    procedure clear;
@@ -2103,7 +2111,12 @@ end;
 
 function tsigwavetable.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ if siwto_intpol in foptions then begin
+  result:= @sighandlerintpol;
+ end
+ else begin
+  result:= @sighandler;
+ end;
 end;
 
 procedure tsigwavetable.sighandler(const ainfo: psighandlerinfoty);
@@ -2117,6 +2130,24 @@ begin
  ainfo^.dest^:= ftable[int1] * famplitudepo^;
  ftime:= frac(ftime+ffrequencypo^);
 end;
+
+procedure tsigwavetable.sighandlerintpol(const ainfo: psighandlerinfoty);
+var
+ int1: integer;
+ do1: double;
+begin
+ do1:= (ftime+fphasepo^)*ftablelength;
+ int1:= trunc(do1) mod ftablelength;
+ if int1 < 0 then begin
+  int1:= int1 + ftablelength;
+ end;
+ ainfo^.dest^:= (ftable[int1] + 
+                 (ftable[(int1+1) mod ftablelength] - ftable[int1]) * 
+                 ((do1-int1)/ftablelength)
+                ) * famplitudepo^;
+ ftime:= frac(ftime+ffrequencypo^);
+end;
+
 
 procedure tsigwavetable.settable(const avalue: doublearty);
 begin
@@ -2161,6 +2192,16 @@ end;
 function tsigwavetable.getzcount: integer;
 begin
  result:= 1;
+end;
+
+procedure tsigwavetable.setoptions(const avalue: sigwavetableoptionsty);
+begin
+ if avalue <> foptions then begin
+  foptions:= avalue;
+  if fcontroller <> nil then begin
+   fcontroller.modelchange;
+  end;
+ end;
 end;
 
 end.
