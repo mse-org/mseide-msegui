@@ -57,7 +57,7 @@ type
   function gethandler: sighandlerprocty;
   function getzcount: integer;
   function getcomponent: tcomponent;
-  procedure connchange;
+  procedure modelchange;
   function getsigcontroller: tsigcontroller;
  end;
  sigclientintfarty = array of isigclient;
@@ -72,8 +72,10 @@ type
 //                                    var asource: doublearty); virtual;
 //   procedure setsig(const sender: tdoubleinputconn;
 //                                    const asource: doublearty); virtual;
-   procedure connchange;
+   procedure modelchange;
    procedure loaded; override;
+   procedure lock;
+   procedure unlock;
    
     //isigclient  
    procedure initmodel; virtual;
@@ -98,17 +100,13 @@ type
  tdoubleconn = class(tsigconn) 
   protected
    fsigintf: isigclient;
-//   {$ifndef FPC}
    function getcontroller: tsigcontroller;
-//   {$endif}
+   procedure lock;
+   procedure unlock;
   public
    constructor create(const aowner: tcomponent;
                      const asigintf: isigclient); reintroduce; virtual;
-//   {$ifdef FPC}
-//   property controller: tsigcontroller read fowner.fcontroller;
-//   {$else}
-   property controller1: tsigcontroller read getcontroller;
-//   {$endif}
+//   property controller1: tsigcontroller read getcontroller;
  end;
  
  doubleinputconnarty = array of tdoubleinputconn;
@@ -132,6 +130,9 @@ type
    foffset: double;
    fgain: double;
    procedure setsource(const avalue: tdoubleoutputconn);
+   procedure setoffset(const avalue: double);
+   procedure setgain(const avalue: double);
+   procedure setvalue(const avalue: double);
   protected
    fvalue: double;
 //   fbuffer: doublearty;
@@ -147,9 +148,9 @@ type
 //   procedure setsig(const asource: doublearty); virtual;
   published
    property source: tdoubleoutputconn read fsource write setsource;
-   property offset: double read foffset write foffset;
-   property gain: double read fgain write fgain;
-   property value: double read fvalue write fvalue;  
+   property offset: double read foffset write setoffset;
+   property gain: double read fgain write setgain;
+   property value: double read fvalue write setvalue;  
  end;
 
  sighandlerinfoty = record
@@ -227,6 +228,7 @@ type
    foninput: sigineventty;
    foninputburst: siginbursteventty;
    finpindex: integer;
+   procedure setvalue(const avalue: double);
   protected
    function getoutputar: outputconnarty; override;
     //isigclient
@@ -239,7 +241,7 @@ type
    procedure siginput(const asource: doublearty);
    procedure clear; override;
   published
-   property value: double read fvalue write fvalue;
+   property value: double read fvalue write setvalue;
    property oninput: sigineventty read foninput write foninput;
    property oninputburst: siginbursteventty read foninputburst write foninputburst;
  end;
@@ -262,6 +264,7 @@ type
    procedure setinput(const avalue: tdoubleinputconn);
    function getinput: tdoubleinputconn;
    procedure setbuffersize(const avalue: integer);
+   function getvalue: double;
   protected
    function getinputar: inputconnarty; override;
    {
@@ -280,7 +283,7 @@ type
    procedure sigoutput1(var adest: doublearty); //returns a data copy
    function sigoutput: doublearty;
 //   property outp: doublearty read foutp;
-   property value: double read fvalue;
+   property value: double read getvalue;
   published
    property input: tdoubleinputconn read getinput write setinput;
    property buffersize: integer read fbuffersize 
@@ -339,7 +342,7 @@ type
 //   procedure getsig1(var dest: doublearty); overload;
 //   function getsig: doublearty;
 //   procedure updatesig(var inout: doublearty);
-   property zcount: integer read fzcount default 0;
+   property zcount: integer read getzcount default 0;
    property output: tdoubleoutputconn read foutput write setoutput;
   published
    property input: tdoubleinputconn read finput write setinput;
@@ -425,6 +428,7 @@ type
   private
    fdelay: integer;
    finppo: integer;
+   procedure setdelay(const avalue: integer);
   protected
    fz: doublearty;
    procedure initmodel; override;
@@ -436,7 +440,7 @@ type
    constructor create(aowner: tcomponent); override;
    procedure clear; override;
   published
-   property delay: integer read fdelay write fdelay default 1;
+   property delay: integer read fdelay write setdelay default 1;
  end;
   
  tdoublesigoutcomp = class(tdoublesigcomp)
@@ -646,6 +650,26 @@ function tdoubleconn.getcontroller: tsigcontroller;
 begin
  result:= fsigintf.getsigcontroller;
 end;
+
+procedure tdoubleconn.lock;
+var
+ cont1: tsigcontroller;
+begin
+ cont1:= fsigintf.getsigcontroller;
+ if cont1 <> nil then begin
+  cont1.lock;
+ end;
+end;
+
+procedure tdoubleconn.unlock;
+var
+ cont1: tsigcontroller;
+begin
+ cont1:= fsigintf.getsigcontroller;
+ if cont1 <> nil then begin
+  cont1.unlock;
+ end;
+end;
 //{$endif}
 
 { tdoubleoutputconn }
@@ -702,8 +726,29 @@ procedure tdoubleinputconn.setsource(const avalue: tdoubleoutputconn);
 begin
  if fsource <> avalue then begin
   setsourceconn(self,avalue,fsource);
-  fsigintf.connchange;
+  fsigintf.modelchange;
  end;
+end;
+
+procedure tdoubleinputconn.setoffset(const avalue: double);
+begin
+ lock;
+ foffset:= avalue;
+ unlock;
+end;
+
+procedure tdoubleinputconn.setgain(const avalue: double);
+begin
+ lock;
+ fgain:= avalue;
+ unlock;
+end;
+
+procedure tdoubleinputconn.setvalue(const avalue: double);
+begin
+ lock;
+ fvalue:= avalue;
+ unlock;
 end;
 
 {
@@ -765,7 +810,7 @@ begin
  setsigcontroller(getobjectlinker,isigclient(self),avalue,fcontroller);
 end;
 
-procedure tdoublesigcomp.connchange;
+procedure tdoublesigcomp.modelchange;
 begin
  if ([csdestroying,csloading]*componentstate = []) then begin
   if (fcontroller <> nil) then begin
@@ -789,7 +834,7 @@ end;
 procedure tdoublesigcomp.loaded;
 begin
  inherited;
- connchange;
+ modelchange;
 end;
 
 procedure tdoublesigcomp.initmodel;
@@ -805,6 +850,20 @@ end;
 function tdoublesigcomp.getsigcontroller: tsigcontroller;
 begin
  result:= fcontroller;
+end;
+
+procedure tdoublesigcomp.lock;
+begin
+ if fcontroller <> nil then begin
+  fcontroller.lock;
+ end;
+end;
+
+procedure tdoublesigcomp.unlock;
+begin
+ if fcontroller <> nil then begin
+  fcontroller.unlock;
+ end;
 end;
 
 { tdoublezcomp }
@@ -1134,6 +1193,13 @@ begin
  foutpindex:= 0;
 end;
 
+function tsigout.getvalue: double;
+begin
+ lock;
+ result:= fvalue;
+ unlock;
+end;
+
 { tsigin }
 
 constructor tsigin.create(aowner: tcomponent);
@@ -1239,6 +1305,13 @@ begin
  inherited;
  finp:= nil;
  finpindex:= 0;
+end;
+
+procedure tsigin.setvalue(const avalue: double);
+begin
+ lock;
+ fvalue:= avalue;
+ unlock;
 end;
 
 { tsigmultiinp }
@@ -1405,7 +1478,7 @@ end;
 procedure tdoubleinpconnarrayprop.dosizechanged;
 begin
  inherited;
- fsigintf.connchange;
+ fsigintf.modelchange;
 end;
 
 (*
@@ -1540,6 +1613,16 @@ begin
   if finppo = fdelay then begin
    finppo:= 0;
   end;
+ end;
+end;
+
+procedure tsigdelayn.setdelay(const avalue: integer);
+begin
+ if fdelay <> avalue then begin
+  lock;
+  modelchange;
+  fdelay:= avalue;
+  unlock;
  end;
 end;
 
@@ -2166,11 +2249,13 @@ end;
 
 procedure tsigwavetable.checktable;
 begin
+ lock;
  ftime:= 0;
  if ftable = nil then begin
   setlength(ftable,1);
  end;
  ftablelength:= length(ftable);
+ unlock;
 end;
 
 procedure tsigwavetable.initmodel;

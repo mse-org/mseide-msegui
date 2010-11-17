@@ -42,7 +42,7 @@ type
    function gethandler: sighandlerprocty;
    function getzcount: integer;
    procedure clear;
-   procedure connchange;
+   procedure modelchange;
    function getsigcontroller: tsigcontroller;
   public
    constructor create(aowner: tcomponent); override;
@@ -103,7 +103,7 @@ begin
  foutput.assign(avalue);
 end;
 
-procedure tsigslider.connchange;
+procedure tsigslider.modelchange;
 begin
  //dummy
 end;
