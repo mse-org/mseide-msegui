@@ -98,8 +98,8 @@ function toutputconnpropertyeditor.filtercomponent(const acomponent: tcomponent)
 var
  cont1: tsigcontroller;
 begin
- cont1:= tdoubleinputconn(instance).controller1;
- result:= (cont1 <> nil) and (tdoubleoutputconn(acomponent).controller1 = cont1);
+ cont1:= tdoubleinputconn(instance).controller;
+ result:= (cont1 <> nil) and (tdoubleoutputconn(acomponent).controller = cont1);
 end;
 
 initialization

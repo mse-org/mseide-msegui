@@ -106,7 +106,7 @@ type
   public
    constructor create(const aowner: tcomponent;
                      const asigintf: isigclient); reintroduce; virtual;
-//   property controller1: tsigcontroller read getcontroller;
+   property controller: tsigcontroller read getcontroller;
  end;
  
  doubleinputconnarty = array of tdoubleinputconn;
