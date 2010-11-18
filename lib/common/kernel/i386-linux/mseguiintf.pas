@@ -2490,13 +2490,23 @@ end;
 function gui_setcursorshape(winid: winidty; shape: cursorshapety): guierrorty;
 var
  cursor1: cursor;
+ bmp: pixmapty;
+ color: txcolor;
 begin
  result:= gue_ok;
  if winid = 0 then begin
   exit; //do not modify root window cursor
  end;
  gdi_lock;
- cursor1:= xcreatefontcursor(appdisp,standardcursors[shape]);
+ if shape = cr_none then begin
+  fillchar(color,sizeof(color),0);
+  bmp:= xcreatebitmapfromdata(appdisp,winid,@color,1,1); //dummy data
+  cursor1:= xcreatepixmapcursor(appdisp,bmp,bmp,@color,@color,0,0);
+  xfreepixmap(appdisp,bmp);
+ end
+ else begin
+  cursor1:= xcreatefontcursor(appdisp,standardcursors[shape]);
+ end;
  if cursor1 <> 0 then begin
   xdefinecursor(appdisp,winid,cursor1);
   xflush(appdisp);
