@@ -12435,7 +12435,7 @@ begin
    end;
   end
   else begin
-   scrollrows(-1);
+   scrollrows(1);
   end;
  end
  else begin
@@ -12446,7 +12446,7 @@ begin
     end;
    end
    else begin
-    scrollrows(1);
+    scrollrows(-1);
    end;
   end
   else begin
@@ -12457,7 +12457,7 @@ begin
      end;
     end
     else begin
-     scrollleft;
+     scrollright;
     end;
    end
    else begin
@@ -12468,7 +12468,7 @@ begin
       end;
      end
      else begin
-      scrollright;
+      scrollleft;
      end;
     end
    end;
