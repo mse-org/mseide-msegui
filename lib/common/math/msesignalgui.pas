@@ -122,7 +122,7 @@ begin
   do1:= exp(do1);
  end;
  if canevent(tmethod(fontransformvalue)) then begin
-  fontransformvalue(self,do1);
+  fontransformvalue(self,real(do1));
  end;
  if fcontroller <> nil then begin
   fcontroller.lock;
@@ -146,7 +146,7 @@ end;
 
 function tsigslider.gethandler: sighandlerprocty;
 begin
- result:= @sighandler;
+ result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
 procedure tsigslider.setmin(const avalue: real);

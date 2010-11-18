@@ -3896,7 +3896,8 @@ begin
  drawpoints(point,acolor,0,1);
 end;
 
-procedure tcanvas.drawlines(const apoints: array of pointty; const aclosed: boolean;
+procedure tcanvas.drawlines(const apoints: array of pointty;
+                       const aclosed: boolean = false;
                        const acolor: colorty = cl_default;
                        const first: integer = 0; const acount: integer = -1);
                                                           //-1 -> all

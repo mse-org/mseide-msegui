@@ -2195,10 +2195,10 @@ end;
 function tsigwavetable.gethandler: sighandlerprocty;
 begin
  if siwto_intpol in foptions then begin
-  result:= @sighandlerintpol;
+  result:= {$ifdef FPC}@{$endif}sighandlerintpol;
  end
  else begin
-  result:= @sighandler;
+  result:= {$ifdef FPC}@{$endif}sighandler;
  end;
 end;
 
@@ -2242,7 +2242,7 @@ procedure tsigwavetable.clear;
 begin
  inherited;
  if canevent(tmethod(foninittable)) then begin
-  foninittable(self,ftable);
+  foninittable(self,realarty(ftable));
  end;
  checktable;
 end;
