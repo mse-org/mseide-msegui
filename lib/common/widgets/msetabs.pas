@@ -723,11 +723,12 @@ type
 
     //iobjectpicker
    function getcursorshape(const apos: pointty;  const shiftstate: shiftstatesty;
-                                var shape: cursorshapety): boolean;
+           const objects: integerarty; var shape: cursorshapety): boolean;
                              //true if found
    procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
                                 var objects: integerarty);
-   procedure beginpickmove(const objects: integerarty);
+   procedure beginpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
+                           const objects: integerarty);
    procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
                          const offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
@@ -4170,7 +4171,7 @@ end;
 
    //iobjectpicker
 function tcustomtabwidget.getcursorshape(const apos: pointty;  const shiftstate: shiftstatesty;
-                                var shape: cursorshapety): boolean;
+        const objects: integerarty; var shape: cursorshapety): boolean;
     //true if found
 begin
  result:= checktabsizingpos(apos);
@@ -4192,8 +4193,10 @@ begin
  end;
 end;
 
-procedure tcustomtabwidget.beginpickmove(const objects: integerarty);
+procedure tcustomtabwidget.beginpickmove(const apos: pointty;
+                const ashiftstate: shiftstatesty;const objects: integerarty);
 begin
+ //dummy
 end;
 
 function tcustomtabwidget.checkpickoffset(const aoffset: pointty): pointty;

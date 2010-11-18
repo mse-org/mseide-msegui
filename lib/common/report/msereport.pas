@@ -685,11 +685,12 @@ type
    procedure setppmm(const avalue: real);
       //iobjectpicker
    function getcursorshape(const apos: pointty; const ashiftstate: shiftstatesty; 
-                                     var ashape: cursorshapety): boolean;
+              const objects: integerarty; var ashape: cursorshapety): boolean;
     //true if found
    procedure getpickobjects(const arect: rectty;  const ashiftstate: shiftstatesty;
                                      var aobjects: integerarty);
-   procedure beginpickmove(const aobjects: integerarty);
+   procedure beginpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
+                           const aobjects: integerarty);
    procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
                          const aoffset: pointty; const aobjects: integerarty);
    procedure paintxorpic(const acanvas: tcanvas; const apos,aoffset: pointty;
@@ -4361,7 +4362,7 @@ end;
 
 function tcustomrecordband.getcursorshape(const apos: pointty;
                const ashiftstate: shiftstatesty;
-               var ashape: cursorshapety): boolean;
+               const objects: integerarty; var ashape: cursorshapety): boolean;
 var
  ar1: integerarty;
 begin
@@ -4393,8 +4394,10 @@ begin
  end;
 end;
 
-procedure tcustomrecordband.beginpickmove(const aobjects: integerarty);
+procedure tcustomrecordband.beginpickmove(const apos: pointty;
+              const ashiftstate: shiftstatesty;const aobjects: integerarty);
 begin
+ //dummy
 end;
 
 procedure tcustomrecordband.endpickmove(const apos: pointty;

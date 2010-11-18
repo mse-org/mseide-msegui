@@ -96,10 +96,11 @@ type
 
    //iobjectpicker
    function getcursorshape(const apos: pointty; const shiftstate: shiftstatesty;
-                                           var shape: cursorshapety): boolean;
+             const objects: integerarty; var shape: cursorshapety): boolean;
    procedure getpickobjects(const rect: rectty; const shiftstate: shiftstatesty;
                                            var objects: integerarty);
-   procedure beginpickmove(const objects: integerarty);
+   procedure beginpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
+                              const objects: integerarty);
    procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
                          const offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
@@ -331,13 +332,14 @@ begin
  end;
 end;
 
-procedure tsplitter.beginpickmove(const objects: integerarty);
+procedure tsplitter.beginpickmove(const apos: pointty;
+           const ashiftstate: shiftstatesty;const objects: integerarty);
 begin
  //dummy
 end;
 
 function tsplitter.getcursorshape(const apos: pointty; const shiftstate: shiftstatesty;
-  var shape: cursorshapety): boolean;
+          const objects: integerarty; var shape: cursorshapety): boolean;
 begin
  result:= not (csdesigning in componentstate) and
                 pointinrect(apos,makerect(nullpoint,fwidgetrect.size));

@@ -1072,10 +1072,13 @@ procedure deleteitem(var dest: stringarty; index: integer); overload;
 procedure deleteitem(var dest: msestringarty; index: integer); overload;
 procedure deleteitem(var dest: integerarty; index: integer); overload;
 procedure deleteitem(var dest: realarty; index: integer); overload;
+procedure deleteitem(var dest: complexarty; index: integer); overload;
 procedure deleteitem(var dest: pointerarty; index: integer); overload;
 procedure deleteitem(var dest: winidarty; index: integer); overload;
 procedure insertitem(var dest: integerarty; index: integer; value: integer); overload;
 procedure insertitem(var dest: realarty; index: integer; value: realty); overload;
+procedure insertitem(var dest: complexarty; index: integer;
+                                                value: complexty); overload;
 procedure insertitem(var dest: pointerarty; index: integer; value: pointer); overload;
 procedure insertitem(var dest: winidarty; index: integer; value: winidty); overload;
 procedure insertitem(var dest: stringarty; index: integer; value: string); overload;
@@ -1121,6 +1124,8 @@ procedure moveitem(var dest: integerarty; const sourceindex: integer;
 
 function adduniqueitem(var dest: pointerarty; const value: pointer): integer;
                         //returns index
+
+function isequalarray(const a: integerarty; const b: integerarty): boolean;
 
 procedure minmax(const ar: realarty; out minval,maxval: realty);
 
@@ -1765,6 +1770,15 @@ begin
  setlength(dest,high(dest));
 end;
 
+procedure deleteitem(var dest: complexarty; index: integer);
+begin
+ if (index < 0) or (index > high(dest)) then begin
+  tlist.Error(SListIndexError, Index);
+ end;
+ move(dest[index+1],dest[index],sizeof(dest[0])*(high(dest)-index));
+ setlength(dest,high(dest));
+end;
+
 procedure deleteitem(var dest: pointerarty; index: integer);
 begin
  if (index < 0) or (index > high(dest)) then begin
@@ -1791,6 +1805,13 @@ begin
 end;
 
 procedure insertitem(var dest: realarty; index: integer; value: realty);
+begin
+ setlength(dest,high(dest) + 2);
+ move(dest[index],dest[index+1],(high(dest)-index) * sizeof(dest[0]));
+ dest[index]:= value;
+end;
+
+procedure insertitem(var dest: complexarty; index: integer; value: complexty);
 begin
  setlength(dest,high(dest) + 2);
  move(dest[index],dest[index+1],(high(dest)-index) * sizeof(dest[0]));
@@ -1856,6 +1877,24 @@ begin
    deleteitem(dest,int1);
    break;
   end;
+ end;
+end;
+
+function isequalarray(const a: integerarty; const b: integerarty): boolean;
+var
+ int1: integer;
+ po1,po2: pintegeraty;
+begin
+ result:= pointer(a) = pointer(b);
+ if not result and (high(a) = high(b)) then begin
+  po1:= pointer(a);
+  po2:= pointer(b);
+  for int1:= high(a) downto 0 do begin
+   if po1^[int1] <> po2^[int1] then begin
+    exit;
+   end;
+  end;
+  result:= true;
  end;
 end;
 

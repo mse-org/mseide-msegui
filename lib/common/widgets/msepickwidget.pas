@@ -23,12 +23,14 @@ type
  getcursorshapeeventty =  
       procedure (const sender: tcustompickwidget;
           const apos: pointty; const shiftstate: shiftstatesty;
-                  var shape: cursorshapety; var found: boolean) of object;
+                  const objects: integerarty; var shape: cursorshapety;
+                  var found: boolean) of object;
  getpickobjectseventty = procedure (const sender: tcustompickwidget;
                            const rect: rectty; const shiftstate: shiftstatesty;
                            var objects: integerarty) of object;
  beginpickmoveeventty = procedure(const sender: tcustompickwidget;
-                           const objects: integerarty) of object;
+               const apos: pointty; const ashiftstate: shiftstatesty; 
+                                       const objects: integerarty) of object;
  endpickmoveeventty = procedure(const sender: tcustompickwidget;
                   const apos: pointty; const ashiftstate: shiftstatesty;
                   const offset: pointty; const objects: integerarty) of object;
@@ -48,10 +50,12 @@ type
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    //iobjectpicker
    function getcursorshape(const apos: pointty; const shiftstate: shiftstatesty;
-                                           var shape: cursorshapety): boolean;
+                           const objects: integerarty;
+                           var shape: cursorshapety): boolean;
    procedure getpickobjects(const rect: rectty; const shiftstate: shiftstatesty;
                                            var objects: integerarty);
-   procedure beginpickmove(const objects: integerarty);
+   procedure beginpickmove(const apos: pointty;
+               const ashiftstate: shiftstatesty; const objects: integerarty);
    procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
                          const offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
@@ -97,14 +101,14 @@ begin
 end;
 
 function tcustompickwidget.getcursorshape(const apos: pointty;
-               const shiftstate: shiftstatesty;
+               const shiftstate: shiftstatesty; const objects: integerarty;
                var shape: cursorshapety): boolean;
 var
  bo1: boolean;
 begin
  bo1:= false;
  if canevent(tmethod(fongetcursorshape)) then begin
-  fongetcursorshape(self,apos,shiftstate,shape,bo1);
+  fongetcursorshape(self,apos,shiftstate,objects,shape,bo1);
  end;
  result:= bo1;
 end;
@@ -117,10 +121,11 @@ begin
  end;
 end;
 
-procedure tcustompickwidget.beginpickmove(const objects: integerarty);
+procedure tcustompickwidget.beginpickmove(const apos: pointty;
+               const ashiftstate: shiftstatesty; const objects: integerarty);
 begin
  if canevent(tmethod(fonbeginpickmove)) then begin
-  fonbeginpickmove(self,objects);
+  fonbeginpickmove(self,apos,ashiftstate,objects);
  end;
 end;
 

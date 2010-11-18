@@ -1943,6 +1943,12 @@ type
    procedure afterfocuscell(const cellbefore: gridcoordty;
                              const selectaction: focuscellactionty); virtual;
    function wheelheight: integer;
+   function calcshowshift(const rect: rectty; 
+                                   const position: cellpositionty): pointty;
+   procedure focusrow(const arow: integer; const action: focuscellactionty;
+                      const noreadonly: boolean; 
+                      const selectmode: selectcellmodety = scm_cell);
+
    
     //idragcontroller
    function getdragrect(const apos: pointty): rectty; override;
@@ -1952,20 +1958,16 @@ type
     //idragcontroller
     //iobjectpicker
    function getcursorshape(const apos: pointty;  const shiftstate: shiftstatesty;
-                                    var shape: cursorshapety): boolean;
+                const objects: integerarty; var shape: cursorshapety): boolean;
    procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
                                     var objects: integerarty);
-   procedure beginpickmove(const objects: integerarty);
+   procedure beginpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
+                            const objects: integerarty);
    procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
                          const offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
                                    const objects: integerarty);
-   function calcshowshift(const rect: rectty; 
-                                   const position: cellpositionty): pointty;
-   procedure focusrow(const arow: integer; const action: focuscellactionty;
-                      const noreadonly: boolean; 
-                      const selectmode: selectcellmodety = scm_cell);
-
+                                   
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
@@ -12134,15 +12136,15 @@ begin
 end;
 
 function tcustomgrid.getcursorshape(const apos: pointty; const shiftstate: shiftstatesty;
-                     var shape: cursorshapety): boolean;
+              const objects: integerarty; var shape: cursorshapety): boolean;
 var
- objects: integerarty;
+ objects1: integerarty;
 begin
  if shiftstate = [] then begin
-  getpickobjects(makerect(apos,nullsize),[ss_left],objects);
+  getpickobjects(makerect(apos,nullsize),[ss_left],objects1);
  end;
- if length(objects) > 0 then begin
-  fpickkind:= pickobjectkindty(objects[0] mod pickobjectstep);
+ if length(objects1) > 0 then begin
+  fpickkind:= pickobjectkindty(objects1[0] mod pickobjectstep);
   result:= true;
   case fpickkind of
    pok_datacolsize,pok_fixcolsize: shape:= cr_sizehor;
@@ -12158,7 +12160,8 @@ begin
  end;
 end;
 
-procedure tcustomgrid.beginpickmove(const objects: integerarty);
+procedure tcustomgrid.beginpickmove(const apos: pointty;
+             const ashiftstate: shiftstatesty;const objects: integerarty);
 begin
  //dummy
 end;
@@ -12435,7 +12438,7 @@ begin
    end;
   end
   else begin
-   scrollrows(-1);
+   scrollrows(1);
   end;
  end
  else begin
@@ -12446,7 +12449,7 @@ begin
     end;
    end
    else begin
-    scrollrows(1);
+    scrollrows(-1);
    end;
   end
   else begin
@@ -12457,7 +12460,7 @@ begin
      end;
     end
     else begin
-     scrollleft;
+     scrollright;
     end;
    end
    else begin
@@ -12468,7 +12471,7 @@ begin
       end;
      end
      else begin
-      scrollright;
+      scrollleft;
      end;
     end
    end;

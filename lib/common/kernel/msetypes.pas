@@ -220,6 +220,7 @@ function mergevarrec(a,b: array of const): varrecarty;
 function issamemethod(const method1,method2: tmethod): boolean;
 function isemptydatetime(const avalue: tdatetime): boolean;
 function emptydatetime: tdatetime;
+function makecomplex(const are: real; aim: real): complexty;
 
 implementation
 
@@ -255,6 +256,12 @@ end;
 function issamemethod(const method1,method2: tmethod): boolean;
 begin
  result:= (method1.Code = method2.code) and (method1.Data = method2.Data);
+end;
+
+function makecomplex(const are: real; aim: real): complexty;
+begin
+ result.re:= are;
+ result.im:= aim;
 end;
 
 end.

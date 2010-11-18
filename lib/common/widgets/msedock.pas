@@ -460,11 +460,12 @@ type
    //iobjectpicker
    function getwidget: twidget;
    function getcursorshape(const pos: pointty; const shiftstate: shiftstatesty; 
-                                     var shape: cursorshapety): boolean;
+             const objects: integerarty; var shape: cursorshapety): boolean;
                    //true if found
    procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
                                      var objects: integerarty);
-   procedure beginpickmove(const objects: integerarty);
+   procedure beginpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
+                                      const objects: integerarty);
    procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
                           const offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const pos,offset: pointty;
@@ -4345,7 +4346,8 @@ begin
 end;
 
 function tgripframe.getcursorshape(const pos: pointty;
-           const shiftstate: shiftstatesty; var shape: cursorshapety): boolean;
+           const shiftstate: shiftstatesty;
+           const objects: integerarty;  var shape: cursorshapety): boolean;
 var
  ar1: integerarty;
 begin
@@ -4356,8 +4358,10 @@ begin
  end
 end;
 
-procedure tgripframe.beginpickmove(const objects: integerarty);
+procedure tgripframe.beginpickmove(const apos: pointty;
+         const ashiftstate: shiftstatesty; const objects: integerarty);
 begin
+ //dummy
 end;
 
 function tgripframe.calcsizingrect(const akind: sizingkindty;

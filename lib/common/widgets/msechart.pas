@@ -109,8 +109,21 @@ type
    procedure setlogy(const avalue: boolean);
    function getvisible: boolean;
    procedure setvisible(const avalue: boolean);
+   function getxdatapo: preal;
+   function getydatapo: preal;
+   function getxydatapo: pcomplexty;
+   function getcount: integer;
+   function getxvalue(const index: integer): real;
+   procedure setxvalue(const index: integer; const avalue: real);
+   function getyvalue(const index: integer): real;
+   procedure setyvalue(const index: integer; const avalue: real);
+   function getxyvalue(const index: integer): complexty;
+   procedure setxyvalue(const index: integer; const avalue: complexty);
   protected
    ftraces: ttraces;
+   function getxitempo(const aindex: integer): preal;
+   function getyitempo(const aindex: integer): preal;
+   
    procedure checkgraphic;
    procedure paint(const acanvas: tcanvas);
    procedure paint1(const acanvas: tcanvas; const imagesize: sizety;
@@ -119,7 +132,8 @@ type
   public
    constructor create(aowner: tobject); override;
    procedure clear;
-   procedure addxydata(const x: real; const y: real);
+   procedure addxydata(const xy: complexty); overload;
+   procedure addxydata(const x: real; const y: real); overload;
    procedure addxseriesdata(const avalue: real);
    procedure assign(source: tpersistent); override;
    property xdata: realarty read finfo.ydata write setxdata;
@@ -127,6 +141,16 @@ type
    property xydata: complexarty read finfo.xydata write setxydata;
    property xdatalist: trealdatalist read finfo.xdatalist write setxdatalist;
    property ydatalist: trealdatalist read finfo.ydatalist write setydatalist;
+
+   property xvalue[const index: integer]: real read getxvalue write setxvalue;
+   property yvalue[const index: integer]: real read getyvalue write setyvalue;
+   property xyvalue[const index: integer]: complexty read getxyvalue
+                                                            write setxyvalue;
+   property xdatapo: preal read getxdatapo;
+   property ydatapo: preal read getydatapo;
+   property xydatapo: pcomplexty read getxydatapo;
+   property count: integer read getcount;
+
    property logx: boolean read getlogx write setlogx;
    property logy: boolean read getlogy write setlogy;
    property visible: boolean read getvisible write setvisible;
@@ -1180,30 +1204,62 @@ begin
 end;
 
 procedure ttrace.addxydata(const x: real; const y: real);
+var
+ int1,int2: integer;
 begin
  with finfo do begin
   xdatalist:= nil;
   ydatalist:= nil;
   if xydata <> nil then begin
-   setlength(xydata,high(xydata)+2);
-   with xydata[high(xydata)] do begin
-    re:= x;
-    im:= y;
-   end;   
+   if cto_xordered in options then begin
+    int2:= 0;
+    for int1:= high(xydata) downto 0 do begin
+     if xydata[int1].re <= x then begin
+      int2:= int1+1;
+      break;
+     end;
+    end;
+    insertitem(xydata,int2,makecomplex(x,y));
+   end
+   else begin
+    setlength(xydata,high(xydata)+2);
+    with xydata[high(xydata)] do begin
+     re:= x;
+     im:= y;
+    end;   
+   end;
   end
   else begin
    if (xdata <> nil) then begin   
-    setlength(xdata,high(xdata)+2);
-    setlength(ydata,length(xdata));
-    xdata[high(xdata)]:= x;
-    ydata[high(xdata)]:= y;
+    if cto_xordered in options then begin
+     int2:= 0;
+     for int1:= high(xdata) downto 0 do begin
+      if xdata[int1] <= x then begin
+       int2:= int1+1;
+       break;
+      end;
+     end;
+     setlength(ydata,length(xdata));
+     insertitem(xdata,int2,x);
+     insertitem(ydata,int2,y);
+    end
+    else begin
+     setlength(xdata,high(xdata)+2);
+     setlength(ydata,length(xdata));
+     xdata[high(xdata)]:= x;
+     ydata[high(xdata)]:= y;
+    end;
    end
    else begin
     if (ydata <> nil) then begin   
-     setlength(ydata,high(ydata)+2);
-     setlength(xdata,length(ydata));
-     xdata[high(xdata)]:= x;
-     ydata[high(xdata)]:= y;
+     if cto_xordered in options then begin
+     end
+     else begin
+      setlength(ydata,high(ydata)+2);
+      setlength(xdata,length(ydata));
+      xdata[high(xdata)]:= x;
+      ydata[high(xdata)]:= y;
+     end;
     end
     else begin
      setlength(xydata,1);
@@ -1260,6 +1316,127 @@ begin
  end
  else begin
   options:= options + [cto_invisible];
+ end;
+end;
+
+function ttrace.getxdatapo: preal;
+begin
+ result:= pointer(finfo.xdata);
+ if xdatalist <> nil then begin
+  result:= xdatalist.datapo;
+ end;
+end;
+
+function ttrace.getydatapo: preal;
+begin
+ result:= pointer(finfo.ydata);
+ if ydatalist <> nil then begin
+  result:= ydatalist.datapo;
+ end;
+end;
+
+function ttrace.getxydatapo: pcomplexty;
+begin
+ result:= pointer(finfo.xydata);
+end;
+
+function ttrace.getcount: integer;
+begin
+ result:= 0;
+ with finfo do begin
+  if ydata <> nil then begin
+   result:= length(ydata);
+  end;
+  if xdata <> nil then begin
+   result:= length(xdata);
+  end;
+  if xydata <> nil then begin
+   result:= length(xydata);
+  end;
+  if ydatalist <> nil then begin
+   result:= ydatalist.count;
+  end;
+  if xdatalist <> nil then begin
+   result:= xdatalist.count;
+  end;
+ end;
+end;
+
+function ttrace.getxvalue(const index: integer): real;
+begin
+ result:= getxitempo(index)^;
+end;
+
+procedure ttrace.setxvalue(const index: integer; const avalue: real);
+begin
+ getxitempo(index)^:= avalue;
+ datachange;
+end;
+
+function ttrace.getyvalue(const index: integer): real;
+begin
+ result:= getyitempo(index)^;
+end;
+
+procedure ttrace.setyvalue(const index: integer; const avalue: real);
+begin
+ getyitempo(index)^:= avalue;
+ datachange;
+end;
+
+function ttrace.getxyvalue(const index: integer): complexty;
+begin
+ result.re:= getxitempo(index)^;
+ result.im:= getyitempo(index)^;
+end;
+
+procedure ttrace.setxyvalue(const index: integer; const avalue: complexty);
+begin
+ getxitempo(index)^:= avalue.re;
+ getyitempo(index)^:= avalue.im;
+ datachange;
+end;
+
+procedure ttrace.addxydata(const xy: complexty);
+begin
+ addxydata(xy.re,xy.im);
+end;
+
+function ttrace.getxitempo(const aindex: integer): preal;
+begin
+ with finfo do begin
+  if xdatalist <> nil then begin
+   result:= xdatalist.getitempo(aindex);
+  end
+  else begin
+   if xdata <> nil then begin
+    checkarrayindex(xdata,aindex);
+    result:= @xdata[aindex];
+   end
+   else begin
+    checkarrayindex(xydata,aindex);
+    result:= @xydata[aindex].re;
+   end;
+  end;
+ end;
+end;
+
+function ttrace.getyitempo(const aindex: integer): preal;
+begin
+ with finfo do begin
+  if ydatalist <> nil then begin
+   result:= ydatalist.getitempo(aindex);
+  end
+  else begin
+   if ydata <> nil then begin
+    checkarrayindex(ydata,aindex);
+    result:= @ydata[aindex];
+   end
+   else begin
+    checkarrayindex(xydata,aindex);
+    result:= @xydata[aindex].im;
+   end
+  end;
  end;
 end;
 

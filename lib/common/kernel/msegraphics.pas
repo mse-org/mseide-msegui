@@ -681,7 +681,8 @@ type
    procedure drawline(const startpoint,endpoint: pointty; const acolor: colorty = cl_default);
    procedure drawlinesegments(const apoints: array of segmentty;
                          const acolor: colorty = cl_default);
-   procedure drawlines(const apoints: array of pointty; const aclosed: boolean; 
+   procedure drawlines(const apoints: array of pointty;
+                       const aclosed: boolean = false; 
                        const acolor: colorty = cl_default;
                        const first: integer = 0; const acount: integer = -1);
                                                           //-1 -> all
