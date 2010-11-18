@@ -2492,7 +2492,7 @@ var
  cursor1: cursor;
  bmp: pixmapty;
  color: txcolor;
-begin
+begin 
  result:= gue_ok;
  if winid = 0 then begin
   exit; //do not modify root window cursor
