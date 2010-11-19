@@ -132,6 +132,8 @@ type
   public
    constructor create(aowner: tobject); override;
    procedure clear;
+   procedure deletedata(const aindex: integer); overload;
+   procedure deletedata(const aindexar: integerarty); overload;
    procedure addxydata(const xy: complexty); overload;
    procedure addxydata(const x: real; const y: real); overload;
    procedure addxseriesdata(const avalue: real);
@@ -516,7 +518,7 @@ function autointerval(const arange: real; const aintervalcount: real): real;
                    
 implementation
 uses
- sysutils,math,msebits;
+ sysutils,math,msebits,rtlconsts;
 
 type
  tcustomdialcontroller1 = class(tcustomdialcontroller);
@@ -1436,6 +1438,48 @@ begin
     checkarrayindex(xydata,aindex);
     result:= @xydata[aindex].im;
    end
+  end;
+ end;
+end;
+
+procedure ttrace.deletedata(const aindex: integer);
+begin
+ if (aindex < 0) or (aindex >= count) then begin
+  tlist.error(slistindexerror, aindex);
+ end;
+ datachange;
+ with finfo do begin
+  if ydata <> nil then begin
+   deleteitem(ydata,aindex);
+  end;
+  if xdata <> nil then begin
+   deleteitem(xdata,aindex);
+  end;
+  if xydata <> nil then begin
+   deleteitem(xydata,aindex);
+  end;
+  if ydatalist <> nil then begin
+   ydatalist.deletedata(aindex);
+  end;
+  if xdatalist <> nil then begin
+   xdatalist.deletedata(aindex);
+  end;
+ end;
+end;
+
+procedure ttrace.deletedata(const aindexar: integerarty);
+var
+ int1,int2,int3: integer;
+ ar1: integerarty;
+begin
+ ar1:= copy(aindexar);
+ for int1:= 0 to high(ar1) do begin
+  int2:= ar1[int1];
+  deletedata(int2);
+  for int3:= int1+1 to high(ar1) do begin
+   if ar1[int3] <= int2 then begin
+    dec(ar1[int3]);
+   end;
   end;
  end;
 end;

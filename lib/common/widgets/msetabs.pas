@@ -721,20 +721,16 @@ type
    procedure statread;
    function getstatvarname: msestring;
 
-    //iobjectpicker
-   function getcursorshape(const apos: pointty;  const shiftstate: shiftstatesty;
-           const objects: integerarty; var shape: cursorshapety): boolean;
-                             //true if found
-   procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
-                                var objects: integerarty);
-   procedure beginpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
-                           const objects: integerarty);
-   procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
-                         const offset: pointty; const objects: integerarty);
-   procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
-                 const objects: integerarty);
-
    function checkpickoffset(const aoffset: pointty): pointty;
+    //iobjectpicker
+   function getcursorshape(const sender: tobjectpicker; var shape: cursorshapety): boolean;
+                             //true if found
+   procedure getpickobjects(const sender: tobjectpicker;
+                                var objects: integerarty);
+   procedure beginpickmove(const sender: tobjectpicker);
+   procedure endpickmove(const sender: tobjectpicker);
+   procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
+
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -4170,11 +4166,11 @@ begin
 end;
 
    //iobjectpicker
-function tcustomtabwidget.getcursorshape(const apos: pointty;  const shiftstate: shiftstatesty;
-        const objects: integerarty; var shape: cursorshapety): boolean;
+function tcustomtabwidget.getcursorshape(const sender: tobjectpicker;
+                                             var shape: cursorshapety): boolean;
     //true if found
 begin
- result:= checktabsizingpos(apos);
+ result:= checktabsizingpos(sender.pos);
  if result then begin
   if tabo_vertical in ftabs.foptions then begin
    shape:= cr_sizehor;
@@ -4185,16 +4181,15 @@ begin
  end
 end;
 
-procedure tcustomtabwidget.getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
+procedure tcustomtabwidget.getpickobjects(const sender: tobjectpicker;
                                  var objects: integerarty);
 begin
- if checktabsizingpos(rect.pos) then begin
+ if checktabsizingpos(sender.pos) then begin
   setlength(objects,1);
  end;
 end;
 
-procedure tcustomtabwidget.beginpickmove(const apos: pointty;
-                const ashiftstate: shiftstatesty;const objects: integerarty);
+procedure tcustomtabwidget.beginpickmove(const sender: tobjectpicker);
 begin
  //dummy
 end;
@@ -4236,13 +4231,11 @@ begin
  end;
 end;
 
-procedure tcustomtabwidget.endpickmove(const apos: pointty;
-             const ashiftstate: shiftstatesty; const offset: pointty; 
-             const objects: integerarty);
+procedure tcustomtabwidget.endpickmove(const sender: tobjectpicker);
 var
  offset1: pointty;
 begin
- offset1:= checkpickoffset(offset);
+ offset1:= checkpickoffset(sender.pickoffset);
  with ftabs do begin
   if tabo_vertical in foptions then begin
    if tabo_opposite in foptions then begin
@@ -4263,12 +4256,12 @@ begin
  end;
 end;
 
-procedure tcustomtabwidget.paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
-                 const objects: integerarty);
+procedure tcustomtabwidget.paintxorpic(const sender: tobjectpicker; 
+                                                const canvas: tcanvas);
 var
  offset1: pointty;
 begin
- offset1:= checkpickoffset(offset);
+ offset1:= checkpickoffset(sender.pickoffset);
  with ftabs,ftabs.fwidgetrect do begin
   if tabo_vertical in options then begin
    if tabo_opposite in foptions then begin

@@ -1957,16 +1957,13 @@ type
 
     //idragcontroller
     //iobjectpicker
-   function getcursorshape(const apos: pointty;  const shiftstate: shiftstatesty;
-                const objects: integerarty; var shape: cursorshapety): boolean;
-   procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
-                                    var objects: integerarty);
-   procedure beginpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
-                            const objects: integerarty);
-   procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
-                         const offset: pointty; const objects: integerarty);
-   procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
-                                   const objects: integerarty);
+   function getcursorshape(const sender: tobjectpicker;
+                                     var shape: cursorshapety): boolean;
+   procedure getpickobjects(const sender: tobjectpicker;
+                                               var objects: integerarty);
+   procedure beginpickmove(const sender: tobjectpicker);
+   procedure endpickmove(const sender: tobjectpicker);
+   procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
                                    
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
@@ -11943,8 +11940,8 @@ begin
  end;
 end;
 
-procedure tcustomgrid.getpickobjects(const rect: rectty; 
-                   const shiftstate: shiftstatesty; var objects: integerarty);
+procedure tcustomgrid.getpickobjects(const sender: tobjectpicker;
+                                               var objects: integerarty);
 var
  cellkind: cellkindty;
  cell: gridcoordty;
@@ -11978,7 +11975,7 @@ var
  function checkfixcol(nofixed: boolean = false): boolean;
  begin
   result:= false;
-  with rect do begin
+  with sender.pickrect do begin
    if (cell.row >= 0) and (pos.y <= rect1.y + sizingtol) then begin
     if canrowsizing then begin
      objects[0]:= pickobjectstep * (cell.row-1) + integer(pok_datarowsize);
@@ -12031,7 +12028,7 @@ var
   int1: integer;
  begin
   result:= false;
-  with rect do begin
+  with sender.pickrect do begin
    if (pos.x >= rect1.x + rect1.cx - sizingtol) then begin
     if (cell.col >= 0) and cancolsizing(cell.col) then begin
      objects[0]:= pickobjectstep * (cell.col) + integer(pok_datacolsize);
@@ -12095,13 +12092,13 @@ var
  end;
 
 begin
- if (shiftstate * shiftstatesmask <> [ss_left]) or 
+ if ((sender.shiftstate * shiftstatesmask) - [ss_left] <> []) or 
                                            (gs_child in fstate) then begin
   exit;
  end;
  setlength(objects,1);
  objects[0]:= -1; //none
- with rect do begin
+ with sender.pickrect do begin
   cellkind:= cellatpos(pos,cell);
   rect1:= cellrect(cell,cil_noline,true);
   case cellkind of
@@ -12135,14 +12132,12 @@ begin
  end;
 end;
 
-function tcustomgrid.getcursorshape(const apos: pointty; const shiftstate: shiftstatesty;
-              const objects: integerarty; var shape: cursorshapety): boolean;
+function tcustomgrid.getcursorshape(const sender: tobjectpicker;
+                                        var shape: cursorshapety): boolean;
 var
  objects1: integerarty;
 begin
- if shiftstate = [] then begin
-  getpickobjects(makerect(apos,nullsize),[ss_left],objects1);
- end;
+ getpickobjects(sender,objects1);
  if length(objects1) > 0 then begin
   fpickkind:= pickobjectkindty(objects1[0] mod pickobjectstep);
   result:= true;
@@ -12160,8 +12155,7 @@ begin
  end;
 end;
 
-procedure tcustomgrid.beginpickmove(const apos: pointty;
-             const ashiftstate: shiftstatesty;const objects: integerarty);
+procedure tcustomgrid.beginpickmove(const sender: tobjectpicker);
 begin
  //dummy
 end;
@@ -12201,9 +12195,7 @@ begin
  end;
 end;
 
-procedure tcustomgrid.endpickmove(const apos: pointty; 
-                    const ashiftstate: shiftstatesty; const offset: pointty; 
-                    const objects: integerarty);
+procedure tcustomgrid.endpickmove(const sender: tobjectpicker);
 var
  kind: pickobjectkindty;
  cell,cell1: gridcoordty;
@@ -12211,10 +12203,13 @@ var
  fixrow: tfixrow;
  cellkind: cellkindty;
  int1,int2: integer;
-
+ offset: pointty;
+ apos: pointty;
 begin
  killrepeater;
- decodepickobject(objects[0],kind,cell,col1,fixrow);
+ decodepickobject(sender.objects[0],kind,cell,col1,fixrow);
+ offset:= sender.pickoffset;
+ apos:= sender.pos;
  case kind of
   pok_datacolsize,pok_fixcolsize: begin
    if (kind = pok_fixcolsize) and (cell.col <= fixcols.ffirstopposite) then begin
@@ -12251,7 +12246,7 @@ begin
   end;
   pok_datarowsize: begin
    if og_rowheight in foptionsgrid then begin
-    if ss_double in ashiftstate then begin
+    if ss_double in sender.shiftstate then begin
      rowheight[cell.row]:= 0;
     end
     else begin
@@ -12283,8 +12278,8 @@ begin
  designchanged;
 end;
 
-procedure tcustomgrid.paintxorpic(const canvas: tcanvas;
-  const apos,offset: pointty; const objects: integerarty);
+procedure tcustomgrid.paintxorpic(const sender: tobjectpicker;
+                                               const canvas: tcanvas);
 
  procedure drawhorzline(pos: integer);
  begin
@@ -12313,9 +12308,12 @@ var
  fixrow: tfixrow;
  int1: integer;
  rect1: rectty;
-
+ offset: pointty;
+ apos: pointty;
 begin
- decodepickobject(objects[0],kind,cell,col1,fixrow);
+ offset:= sender.pickoffset;
+ apos:= sender.pos;
+ decodepickobject(sender.objects[0],kind,cell,col1,fixrow);
  canvas.rasterop:= rop_xor;
  rect1:= cellrect(cell);
  with rect1 do begin

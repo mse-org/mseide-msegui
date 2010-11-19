@@ -684,17 +684,14 @@ type
 
    procedure setppmm(const avalue: real);
       //iobjectpicker
-   function getcursorshape(const apos: pointty; const ashiftstate: shiftstatesty; 
-              const objects: integerarty; var ashape: cursorshapety): boolean;
-    //true if found
-   procedure getpickobjects(const arect: rectty;  const ashiftstate: shiftstatesty;
-                                     var aobjects: integerarty);
-   procedure beginpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
-                           const aobjects: integerarty);
-   procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
-                         const aoffset: pointty; const aobjects: integerarty);
-   procedure paintxorpic(const acanvas: tcanvas; const apos,aoffset: pointty;
-                 const aobjects: integerarty);
+   function getcursorshape(const sender: tobjectpicker;
+                                var ashape: cursorshapety): boolean;
+                                      //true if found
+   procedure getpickobjects(const sender: tobjectpicker;
+                                        var aobjects: integerarty);
+   procedure beginpickmove(const sender: tobjectpicker);
+   procedure endpickmove(const sender: tobjectpicker);
+   procedure paintxorpic(const sender: tobjectpicker; const acanvas: tcanvas);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -4360,24 +4357,25 @@ begin
  ftabs.recchanged;
 end;
 
-function tcustomrecordband.getcursorshape(const apos: pointty;
-               const ashiftstate: shiftstatesty;
-               const objects: integerarty; var ashape: cursorshapety): boolean;
+function tcustomrecordband.getcursorshape(const sender: tobjectpicker;
+                                        var ashape: cursorshapety): boolean;
 var
  ar1: integerarty;
 begin
- getpickobjects(makerect(apos,nullsize),ashiftstate,ar1);
+ getpickobjects(sender,ar1);
  result:= ar1 <> nil;
  if result then begin
   ashape:= cr_sizehor;
  end;
 end;
 
-procedure tcustomrecordband.getpickobjects(const arect: rectty;
-               const ashiftstate: shiftstatesty; var aobjects: integerarty);
+procedure tcustomrecordband.getpickobjects(const sender: tobjectpicker;
+                                                 var aobjects: integerarty);
 var
  int1,int2,int3: integer;
+ arect: rectty;
 begin
+ arect:= sender.pickrect;
  if fframe <> nil then begin
   int3:= arect.x - frame.framei_left;
  end
@@ -4394,26 +4392,23 @@ begin
  end;
 end;
 
-procedure tcustomrecordband.beginpickmove(const apos: pointty;
-              const ashiftstate: shiftstatesty;const aobjects: integerarty);
+procedure tcustomrecordband.beginpickmove(const sender: tobjectpicker);
 begin
  //dummy
 end;
 
-procedure tcustomrecordband.endpickmove(const apos: pointty;
-                      const ashiftstate: shiftstatesty; const aoffset: pointty;
-                      const aobjects: integerarty);
+procedure tcustomrecordband.endpickmove(const sender: tobjectpicker);
 begin
- ftabs.linepos[aobjects[0]]:= ftabs.linepos[aobjects[0]] + aoffset.x;
+ ftabs.linepos[sender.objects[0]]:= ftabs.linepos[sender.objects[0]] + 
+                                                        sender.pickoffset.x;
  designchanged;
 end;
 
-procedure tcustomrecordband.paintxorpic(const acanvas: tcanvas;
-               const apos: pointty; const aoffset: pointty;
-               const aobjects: integerarty);
+procedure tcustomrecordband.paintxorpic(const sender: tobjectpicker; 
+                                                 const acanvas: tcanvas);
 begin
- acanvas.fillxorrect(makerect(innerclientpos.x+aoffset.x+ftabs.linepos[aobjects[0]],0,
-                               1,clientheight));
+ acanvas.fillxorrect(makerect(innerclientpos.x+sender.pickoffset.x + 
+       ftabs.linepos[sender.objects[0]],0,1,clientheight));
 end;
 
 procedure tcustomrecordband.clientmouseevent(var info: mouseeventinfoty);

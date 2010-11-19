@@ -23,7 +23,7 @@ uses
  msepointer,msewidgets,msedataedits,mseedit,msegrids,msestrings,msewidgetgrid,
  msecolordialog,mseeditglob,msesimplewidgets,msepropertyeditors,msestatfile,
  msegraphedits,msebitmap,msedatanodes,msefiledialog,mselistbrowser,msesys,
- msegridsglob;
+ msegridsglob,mseobjectpicker;
 
 type
  tfadeeditfo = class(tmseform)
@@ -45,17 +45,15 @@ type
    procedure pospaintev(const sender: twidget; const canvas: tcanvas);
    procedure createev(const sender: TObject);
    procedure getcursorshapeev(const sender: tcustompickwidget;
-                   const apos: pointty; const shiftstate: shiftstatesty;
+                   const picker: tobjectpicker;
                    var shape: cursorshapety; var found: Boolean);
    procedure getpickobjectev(const sender: tcustompickwidget;
-                   const rect: rectty; const shiftstate: shiftstatesty;
-                   var objects: integerarty);
-   procedure paintxorev(const sender: tcustompickwidget; const canvas: tcanvas;
-                   const apos: pointty; const offset: pointty;
-                   const objects: integerarty);
-   procedure endpickev(const sender: tcustompickwidget; const apos: pointty;
-                    const ashiftstate: shiftstatesty; const offset: pointty;
-                   const objects: integerarty);
+                             const picker: tobjectpicker;
+                             var objects: integerarty);
+   procedure paintxorev(const sender: tcustompickwidget; 
+                          const picker: tobjectpicker; const canvas: tcanvas);
+   procedure endpickev(const sender: tcustompickwidget; 
+                             const picker: tobjectpicker);
    procedure resizeev(const sender: TObject);
    procedure dataenteterev(const sender: TObject);
    procedure rowdeleteev(const sender: tcustomgrid; const aindex: Integer;
@@ -371,14 +369,14 @@ begin
 end;
 
 procedure tfadeeditfo.getcursorshapeev(const sender: tcustompickwidget;
-               const apos: pointty; const shiftstate: shiftstatesty;
-               var shape: cursorshapety; var found: Boolean);
+                         const picker: tobjectpicker;
+                         var shape: cursorshapety; var found: Boolean);
 var
  rect1: rectty;
  int1,int2,int3: integer;
 begin
- if shiftstate = [] then begin
-  int1:= findmarker(apos);
+ if picker.shiftstate = [] then begin
+  int1:= findmarker(picker.pos);
   if int1 >= 0 then begin
    shape:= cr_sizehor;
    found:= true;
@@ -387,13 +385,12 @@ begin
 end;
 
 procedure tfadeeditfo.getpickobjectev(const sender: tcustompickwidget;
-               const rect: rectty; const shiftstate: shiftstatesty;
-               var objects: integerarty);
+               const picker: tobjectpicker; var objects: integerarty);
 var
  int1: integer;
 begin
- if shiftstate = [ss_left] then begin
-  int1:= findmarker(rect.pos);
+ if picker.shiftstate = [ss_left] then begin
+  int1:= findmarker(picker.pickrect.pos);
   if int1 >= 0 then begin
    setlength(objects,1);
    objects[0]:= int1;
@@ -466,31 +463,29 @@ begin
 end;
 
 procedure tfadeeditfo.paintxorev(const sender: tcustompickwidget;
-               const canvas: tcanvas; const apos: pointty;
-               const offset: pointty; const objects: integerarty);
+                                  const picker: tobjectpicker;
+                                  const canvas: tcanvas);
 begin
- movemarker(limitmarkerpos(objects[0],offset.x));
+ movemarker(limitmarkerpos(picker.objects[0],picker.pickoffset.x));
  canvas.drawlines(fmarker,true,cl_white);
  canvas.drawline(makepoint(fmarker[1].x,fmarker[1].y-1),
               makepoint(fmarker[1].x,posedit.innerclientpos.y),cl_white);
 end;
 
 procedure tfadeeditfo.endpickev(const sender: tcustompickwidget;
-               const apos: pointty;  const ashiftstate: shiftstatesty; 
-               const offset: pointty;
-               const objects: integerarty);
+                                           const picker: tobjectpicker);
 var
  int1: integer;
  rect1: rectty;
  rea1: real;
  offsetx: integer;
 begin
- offsetx:= offset.x;
+ offsetx:= picker.pickoffset.x;
  if reverse.value then begin
   offsetx:= -offsetx;
  end;
  rect1:= sender.innerclientrect;
- int1:= objects[0];
+ int1:= picker.objects[0];
  if rect1.cx = 0 then begin
   rea1:= 0;
  end

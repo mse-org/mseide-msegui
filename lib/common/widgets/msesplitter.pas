@@ -95,16 +95,13 @@ type
    function getstatvarname: msestring;
 
    //iobjectpicker
-   function getcursorshape(const apos: pointty; const shiftstate: shiftstatesty;
-             const objects: integerarty; var shape: cursorshapety): boolean;
-   procedure getpickobjects(const rect: rectty; const shiftstate: shiftstatesty;
-                                           var objects: integerarty);
-   procedure beginpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
-                              const objects: integerarty);
-   procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
-                         const offset: pointty; const objects: integerarty);
-   procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
-                 const objects: integerarty);
+   function getcursorshape(const sender: tobjectpicker;
+                                        var shape: cursorshapety): boolean;
+   procedure getpickobjects(const sender: tobjectpicker; 
+                                          var objects: integerarty);
+   procedure beginpickmove(const sender: tobjectpicker);
+   procedure endpickmove(const sender: tobjectpicker);
+   procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -332,17 +329,15 @@ begin
  end;
 end;
 
-procedure tsplitter.beginpickmove(const apos: pointty;
-           const ashiftstate: shiftstatesty;const objects: integerarty);
+procedure tsplitter.beginpickmove(const sender: tobjectpicker);
 begin
  //dummy
 end;
 
-function tsplitter.getcursorshape(const apos: pointty; const shiftstate: shiftstatesty;
-          const objects: integerarty; var shape: cursorshapety): boolean;
+function tsplitter.getcursorshape(const sender: tobjectpicker; var shape: cursorshapety): boolean;
 begin
  result:= not (csdesigning in componentstate) and
-                pointinrect(apos,makerect(nullpoint,fwidgetrect.size));
+                pointinrect(sender.pos,makerect(nullpoint,fwidgetrect.size));
  if result then begin
   if spo_hmove in foptions then begin
    if spo_vmove in foptions then begin
@@ -363,8 +358,8 @@ begin
  end;
 end;
 
-procedure tsplitter.getpickobjects(const rect: rectty; const shiftstate: shiftstatesty;
-  var objects: integerarty);
+procedure tsplitter.getpickobjects(const sender: tobjectpicker;
+                                                var objects: integerarty);
 begin
  if (foptions * [spo_hmove,spo_vmove] <> []) and
             not (csdesigning in componentstate) then begin
@@ -449,15 +444,15 @@ begin
  end;
 end;
 
-procedure tsplitter.paintxorpic(const canvas: tcanvas; const apos,
-  offset: pointty; const objects: integerarty);
+procedure tsplitter.paintxorpic(const sender: tobjectpicker; 
+                                                         const canvas: tcanvas);
 begin
  if fparentwidget <> nil then begin
   canvas.addcliprect(makerect(-fwidgetrect.x,-fwidgetrect.y,
     twidget1(fparentwidget).fwidgetrect.cx,
     twidget1(fparentwidget).fwidgetrect.cy));
  end;
- canvas.drawxorframe(makerect(clippoint(offset),fwidgetrect.size),-4,
+ canvas.drawxorframe(makerect(clippoint(sender.pickoffset),fwidgetrect.size),-4,
             stockobjects.bitmaps[stb_dens25]);
 end;
 
@@ -528,11 +523,9 @@ begin
  setpickoffset(dist);
 end;
 
-procedure tsplitter.endpickmove(const apos: pointty;
-                        const ashiftstate: shiftstatesty;
-                         const offset: pointty; const objects: integerarty);
+procedure tsplitter.endpickmove(const sender: tobjectpicker);
 begin
- setpickoffset(offset);
+ setpickoffset(sender.pickoffset);
 end;
 
 procedure tsplitter.setstatfile(const avalue: tstatfile);

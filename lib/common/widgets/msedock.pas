@@ -457,22 +457,20 @@ type
               const linkintf: iobjectlink = nil);
    function getcomponentstate: tcomponentstate;
    procedure widgetregioninvalid;
-   //iobjectpicker
-   function getwidget: twidget;
-   function getcursorshape(const pos: pointty; const shiftstate: shiftstatesty; 
-             const objects: integerarty; var shape: cursorshapety): boolean;
-                   //true if found
-   procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
-                                     var objects: integerarty);
-   procedure beginpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
-                                      const objects: integerarty);
-   procedure endpickmove(const apos: pointty; const ashiftstate: shiftstatesty;
-                          const offset: pointty; const objects: integerarty);
-   procedure paintxorpic(const canvas: tcanvas; const pos,offset: pointty;
-                 const objects: integerarty);
    procedure drawgripbutton(const acanvas: tcanvas; const kind: dockbuttonrectty;
                     const arect: rectty; 
                     const acolorglyph,acolorbutton: colorty); virtual;
+   //iobjectpicker
+   function getwidget: twidget;
+   function getcursorshape(const sender: tobjectpicker;
+                              var shape: cursorshapety): boolean;
+                                       //true if found
+   procedure getpickobjects(const sender: tobjectpicker;
+                                                  var objects: integerarty);
+   procedure beginpickmove(const sender: tobjectpicker);
+   procedure endpickmove(const sender: tobjectpicker);
+   procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
+   
   public
    constructor create(const intf: icaptionframe;
                                      const acontroller: tdockcontroller);
@@ -4307,11 +4305,13 @@ begin
  end;  
 end;
  
-procedure tgripframe.getpickobjects(const rect: rectty;
-               const shiftstate: shiftstatesty; var objects: integerarty);
+procedure tgripframe.getpickobjects(const sender: tobjectpicker;
+                                                  var objects: integerarty);
 var
  kind1: sizingkindty;
+ rect: rectty;
 begin
+ rect:= sender.pickrect;
  if (fcontroller.mdistate <> mds_minimized) and
       (not pointinrect(rect.pos,fgriprect) or 
          pointinrect(rect.pos,frects[dbr_handle])) then begin
@@ -4345,21 +4345,19 @@ begin
  end;
 end;
 
-function tgripframe.getcursorshape(const pos: pointty;
-           const shiftstate: shiftstatesty;
-           const objects: integerarty;  var shape: cursorshapety): boolean;
+function tgripframe.getcursorshape(const sender: tobjectpicker;
+                                      var shape: cursorshapety): boolean;
 var
  ar1: integerarty;
 begin
- getpickobjects(makerect(pos,nullsize),shiftstate,ar1);
+ getpickobjects(sender,ar1);
  result:= ar1 <> nil;
  if result then begin
   shape:= sizingcursors[sizingkindty(ar1[0])];
  end
 end;
 
-procedure tgripframe.beginpickmove(const apos: pointty;
-         const ashiftstate: shiftstatesty; const objects: integerarty);
+procedure tgripframe.beginpickmove(const sender: tobjectpicker);
 begin
  //dummy
 end;
@@ -4406,21 +4404,20 @@ begin
  end;
 end;
  
-procedure tgripframe.endpickmove(const apos: pointty;
-              const ashiftstate: shiftstatesty; const offset: pointty;
-              const objects: integerarty);
+procedure tgripframe.endpickmove(const sender: tobjectpicker);
 begin
- fcontroller.fnormalrect:= calcsizingrect(sizingkindty(objects[0]),offset);
+ fcontroller.fnormalrect:= calcsizingrect(sizingkindty(sender.objects[0]),
+                                                       sender.pickoffset);
  fcontroller.mdistate:= mds_normal;
  fintf.getwidget.widgetrect:= fcontroller.fnormalrect;
 end;
 
-procedure tgripframe.paintxorpic(const canvas: tcanvas; const pos: pointty;
-               const offset: pointty; const objects: integerarty);
+procedure tgripframe.paintxorpic(const sender: tobjectpicker;
+                                                  const canvas: tcanvas);
 var
  rect1: rectty;
 begin
- rect1:= calcsizingrect(sizingkindty(objects[0]),offset);
+ rect1:= calcsizingrect(sizingkindty(sender.objects[0]),sender.pickoffset);
  with fintf.getwidget do begin
   subpoint1(rect1.pos,paintparentpos);
   canvas.save;

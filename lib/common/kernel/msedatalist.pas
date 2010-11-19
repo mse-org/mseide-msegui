@@ -1088,7 +1088,8 @@ procedure removeitems(var dest: pointerarty; const aitem: pointer);
                             //removes all matching items
 function removeitem(var dest: pointerarty; const aitem: pointer): integer;
                                                 overload;
-                        //returns removed index, -1 if none
+                            //returns removed index, -1 if none
+                            
 function finditem(const ar: pointerarty; const aitem: pointer): integer;
                                                 overload;
                            //-1 if none
