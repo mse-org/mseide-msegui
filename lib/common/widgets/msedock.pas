@@ -4406,7 +4406,7 @@ end;
  
 procedure tgripframe.endpickmove(const sender: tobjectpicker);
 begin
- fcontroller.fnormalrect:= calcsizingrect(sizingkindty(sender.objects[0]),
+ fcontroller.fnormalrect:= calcsizingrect(sizingkindty(sender.currentobjects[0]),
                                                        sender.pickoffset);
  fcontroller.mdistate:= mds_normal;
  fintf.getwidget.widgetrect:= fcontroller.fnormalrect;
@@ -4417,7 +4417,7 @@ procedure tgripframe.paintxorpic(const sender: tobjectpicker;
 var
  rect1: rectty;
 begin
- rect1:= calcsizingrect(sizingkindty(sender.objects[0]),sender.pickoffset);
+ rect1:= calcsizingrect(sizingkindty(sender.currentobjects[0]),sender.pickoffset);
  with fintf.getwidget do begin
   subpoint1(rect1.pos,paintparentpos);
   canvas.save;

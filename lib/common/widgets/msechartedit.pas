@@ -39,6 +39,9 @@ type
    function tracecoord(const apos: pointty): complexty;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
+   procedure dobeforepaint(const acanvas: tcanvas); override;
+   procedure doafterpaint(const acanvas: tcanvas); override;
+
 
     //iobjectpicker
    function getcursorshape(const sender: tobjectpicker;
@@ -63,7 +66,7 @@ type
  
 implementation
 uses
- msereal;
+ msereal,msekeyboard,msedatalist;
  
 { tchartedit }
 
@@ -98,8 +101,8 @@ begin
  if not (es_processed in info.eventstate) then begin
   fobjectpicker.mouseevent(info);
   if not (es_processed in info.eventstate) and 
-     not (csdesigning in componentstate) and not (oe_readonly in foptionsedit) and 
-            hasactivetrace then begin
+     not (csdesigning in componentstate) and 
+         not (oe_readonly in foptionsedit) and hasactivetrace then begin
    if (info.eventkind = ek_buttonpress) and 
              (info.shiftstate * shiftstatesmask = [ss_left]) then begin
     if pointinrect(info.pos,innerclientrect) then begin
@@ -257,7 +260,7 @@ end;
 function tchartedit.getcursorshape(const sender: tobjectpicker;
                                            var shape: cursorshapety): boolean;
 begin
- result:= sender.moving and (high(sender.objects) = 0);
+ result:= sender.moving and (high(sender.currentobjects) = 0);
  if result then begin
   shape:= cr_none;
  end;
@@ -311,15 +314,17 @@ var
  mi,ma: pointty;
  pt1: pointty;
  ar1: pointarty;
+ objs: integerarty;
 begin
  rect1:= innerclientrect;
  mi.x:= maxint;
  mi.y:= maxint;
  ma.x:= minint;
  ma.y:= minint;
- setlength(ar1,length(sender.objects));
- for int1:= 0 to high(sender.objects) do begin
-  pt1:= nodepos(sender.objects[int1]);
+ objs:= sender.currentobjects;
+ setlength(ar1,length(objs));
+ for int1:= 0 to high(objs) do begin
+  pt1:= nodepos(objs[int1]);
   ar1[int1]:= pt1;
   if pt1.x < mi.x then begin
    mi.x:= pt1.x;
@@ -343,8 +348,8 @@ begin
  if cto_xordered in traces[factivetrace].options then begin
             //limit to neighbours
   for int1:= 0 to high(ar1) do begin
-   int2:= sender.objects[int1];
-   if (int2 > 0) and ((int1 = 0) or (sender.objects[int1-1] <> int2 - 1)) then begin
+   int2:= objs[int1];
+   if (int2 > 0) and ((int1 = 0) or (objs[int1-1] <> int2 - 1)) then begin
     pt1:= nodepos(int2-1);
     int3:= pt1.x - ar1[int1].x;
     if int3 > foffsetmin.x then begin
@@ -353,7 +358,7 @@ begin
    end;
    int4:= traces[factivetrace].count - 1;
    if (int2 < int4) and ((int1 = high(ar1)) or 
-                         (sender.objects[int1+1] <> int2 + 1)) then begin
+                         (objs[int1+1] <> int2 + 1)) then begin
     pt1:= nodepos(int2+1);
     int3:= pt1.x - ar1[int1].x;
     if int3 < foffsetmax.x then begin
@@ -370,10 +375,12 @@ var
  pt1: pointty;
  co1,co2: complexty;
  offs: pointty;
+ objs: integerarty;
 begin
  offs:= limitmoveoffset(sender.pickoffset);
- for int1:= 0 to high(sender.objects) do begin
-  int2:= sender.objects[int1];
+ objs:= sender.currentobjects;
+ for int1:= 0 to high(objs) do begin
+  int2:= objs[int1];
   pt1:= nodepos(int2);
   co1:= traces[factivetrace].xyvalue[int2];
   co2:= tracecoord(addpoint(pt1,offs));
@@ -392,26 +399,36 @@ procedure tchartedit.paintxorpic(const sender: tobjectpicker;
 var
  ar1: pointarty;
  ar2: segmentarty;
- int1,int2: integer;
+ int1,int2,int3: integer;
  offs: pointty;
+ objs: integerarty;
+ pt1: pointty;
 begin
  with sender do begin
-  if objects <> nil then begin
+  objs:= currentobjects;
+  if objs <> nil then begin
    offs:= limitmoveoffset(pickoffset);
-   setlength(ar1,length(objects));
-   setlength(ar2,length(objects)*2); //max
+   setlength(ar1,length(objs));
+   setlength(ar2,length(objs)*2); //max
    int2:= 0;
-   for int1:= 0 to high(objects) do begin
-    ar1[int1]:= addpoint(nodepos(objects[int1]),offs);
-    if objects[int1] > 0 then begin
-     ar2[int2].a:= nodepos(objects[int1]-1);
+   for int1:= 0 to high(objs) do begin
+    ar1[int1]:= addpoint(nodepos(objs[int1]),offs);
+    int3:= objs[int1]-1;
+    if int3 > 0 then begin
+     ar2[int2].a:= nodepos(int3);
      ar2[int2].b:= ar1[int1];
+     if finditem(objs,int3) >= 0 then begin
+      addpoint1(ar2[int2].a,offs);
+     end;
      inc(int2);
     end;
-    if objects[int1] < traces[factivetrace].count-1 then begin
+    int3:= objs[int1]+1;
+    if int3 < traces[factivetrace].count-1 then begin
      ar2[int2].a:= ar1[int1];
-     ar2[int2].b:= nodepos(objects[int1]+1);
-     inc(int2);
+     ar2[int2].b:= nodepos(int3);
+     if finditem(objs,int3) < 0 then begin
+      inc(int2);
+     end;
     end;
    end;
    setlength(ar2,int2);
@@ -419,10 +436,14 @@ begin
    for int1:= 0 to high(ar1) do begin
     canvas.drawellipse(makerect(ar1[int1],makesize(6,6)));
    end;
-   if (ops_moving in fobjectpicker.state) and (high(objects) = 0) then begin
-    canvas.drawline(makepoint(0,ar1[0].y),makepoint(clientwidth,ar1[0].y));
-    canvas.drawline(makepoint(ar1[0].x,0),makepoint(ar1[0].x,clientheight));
+   if (ops_moving in fobjectpicker.state) {and (high(objs) = 0)} then begin
+    objs:= sender.mouseoverobjects;
+    if objs <> nil then begin
+     pt1:= addpoint(nodepos(objs[0]),offs);
+     canvas.drawline(makepoint(0,pt1.y),makepoint(clientwidth,pt1.y));
+     canvas.drawline(makepoint(pt1.x,0),makepoint(pt1.x,clientheight));
                      //crosshair cursor
+    end;
    end;
   end;
  end;
@@ -445,16 +466,28 @@ end;
 
 procedure tchartedit.dokeydown(var ainfo: keyeventinfoty);
 begin
- if not (es_processed in ainfo.eventstate) and not readonly and 
-     (ainfo.shiftstate*shiftstatesmask = []) and 
-                                       fobjectpicker.hasobjects  then begin
-  traces[factivetrace].deletedata(fobjectpicker.objects);
+ if not (es_processed in ainfo.eventstate) and (ainfo.key = key_delete) and
+     not readonly and (ainfo.shiftstate*shiftstatesmask = []) and 
+                                 fobjectpicker.hascurrentobjects  then begin
+  traces[factivetrace].deletedata(fobjectpicker.currentobjects);
   fobjectpicker.clear;
   include(ainfo.eventstate,es_processed);
  end;
  if not (es_processed in ainfo.eventstate) then begin
   inherited;
  end;
+end;
+
+procedure tchartedit.dobeforepaint(const acanvas: tcanvas);
+begin
+ fobjectpicker.dobeforepaint(acanvas);
+ inherited;
+end;
+
+procedure tchartedit.doafterpaint(const acanvas: tcanvas);
+begin
+ inherited;
+ fobjectpicker.doafterpaint(acanvas);
 end;
 
 end.

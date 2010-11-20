@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2010-11-19
+ Changed iobjectpicker and tpickwidget event properties.
 2010-11-2
  No negative ttimer values for single shot, use options to_single instead.
  

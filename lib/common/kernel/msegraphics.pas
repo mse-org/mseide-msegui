@@ -764,7 +764,12 @@ type
    procedure drawxorframe(const po1: pointty; const po2: pointty;
                            const awidth: integer = -1;
                                  const abrush: tsimplebitmap = nil); overload;
-   procedure fillxorrect(const arect: rectty; const abrush: tsimplebitmap = nil);
+   procedure fillxorrect(const arect: rectty;
+                        const abrush: tsimplebitmap = nil); overload;
+   procedure fillxorrect(const start: pointty; const length: integer;
+                      const direction: graphicdirectionty;
+                      const awidth: integer = 0;
+                      const abrush: tsimplebitmap = nil); overload;
    procedure drawstring(const atext: msestring; const apos: pointty;
                         const afont: tfont = nil; const grayed: boolean = false;
                         const arotation: real = 0); overload;
@@ -4547,7 +4552,8 @@ begin
  drawxorframe(makerect(po1,makesize(po2.x-po1.x,po2.y-po1.y)),awidth,abrush);
 end;
 
-procedure tcanvas.fillxorrect(const arect: rectty; const abrush: tsimplebitmap = nil);
+procedure tcanvas.fillxorrect(const arect: rectty;
+                                     const abrush: tsimplebitmap = nil);
 var
  rasteropbefore: rasteropty;
  brushbefore: tsimplebitmap;
@@ -4570,6 +4576,43 @@ begin
  end;
  rasterop:= rasteropbefore;
 end;
+
+procedure tcanvas.fillxorrect(const start: pointty; const length: integer;
+                      const direction: graphicdirectionty;
+                      const awidth: integer = 0;
+                      const abrush: tsimplebitmap = nil);
+var
+ rect1: rectty;
+begin
+ case direction of
+  gd_left: begin
+   rect1.x:= start.x - length;
+   rect1.y:= start.y - awidth div 2;
+   rect1.cx:= length;
+   rect1.cy:= awidth;
+  end;
+  gd_down: begin
+   rect1.y:= start.y;
+   rect1.x:= start.x - awidth div 2;
+   rect1.cy:= length;
+   rect1.cx:= awidth;
+  end;
+  gd_up: begin
+   rect1.y:= start.y - length;
+   rect1.x:= start.x - awidth div 2;
+   rect1.cy:= length;
+   rect1.cx:= awidth;
+  end;
+  else begin //gd_right
+   rect1.x:= start.x;
+   rect1.y:= start.y - awidth div 2;
+   rect1.cx:= length;
+   rect1.cy:= awidth;
+  end;
+ end;
+ fillxorrect(rect1,abrush);
+end;
+
 
 //
 // region helpers

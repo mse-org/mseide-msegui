@@ -4399,7 +4399,7 @@ end;
 
 procedure tcustomrecordband.endpickmove(const sender: tobjectpicker);
 begin
- ftabs.linepos[sender.objects[0]]:= ftabs.linepos[sender.objects[0]] + 
+ ftabs.linepos[sender.currentobjects[0]]:= ftabs.linepos[sender.currentobjects[0]] + 
                                                         sender.pickoffset.x;
  designchanged;
 end;
@@ -4408,7 +4408,7 @@ procedure tcustomrecordband.paintxorpic(const sender: tobjectpicker;
                                                  const acanvas: tcanvas);
 begin
  acanvas.fillxorrect(makerect(innerclientpos.x+sender.pickoffset.x + 
-       ftabs.linepos[sender.objects[0]],0,1,clientheight));
+       ftabs.linepos[sender.currentobjects[0]],0,1,clientheight));
 end;
 
 procedure tcustomrecordband.clientmouseevent(var info: mouseeventinfoty);

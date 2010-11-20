@@ -1477,7 +1477,7 @@ begin
   int2:= ar1[int1];
   deletedata(int2);
   for int3:= int1+1 to high(ar1) do begin
-   if ar1[int3] <= int2 then begin
+   if ar1[int3] >= int2 then begin
     dec(ar1[int3]);
    end;
   end;

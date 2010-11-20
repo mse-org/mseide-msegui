@@ -709,6 +709,7 @@ type
    procedure createpagetab(const sender: tcustomtabbar; const index: integer; var tab: ttab);
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure childmouseevent(const sender: twidget; var info: mouseeventinfoty); override;
+   procedure dobeforepaint(const canvas: tcanvas); override;
    procedure doafterpaint(const canvas: tcanvas); override;
 //   procedure dofontheightdelta(var delta: integer); override;
    procedure doclosepage(const sender: tobject); virtual;
@@ -4070,10 +4071,16 @@ begin
  end;
 end;
 
+procedure tcustomtabwidget.dobeforepaint(const canvas: tcanvas);
+begin
+ fobjectpicker.dobeforepaint(canvas);
+ inherited;
+end;
+
 procedure tcustomtabwidget.doafterpaint(const canvas: tcanvas);
 begin
  inherited;
- fobjectpicker.restorexorpic(canvas);
+ fobjectpicker.doafterpaint(canvas);
 end;
 
 procedure tcustomtabwidget.synctofontheight;

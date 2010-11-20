@@ -375,13 +375,13 @@ var
  rect1: rectty;
  int1,int2,int3: integer;
 begin
- if picker.shiftstate = [] then begin
+// if picker.shiftstate = [] then begin
   int1:= findmarker(picker.pos);
   if int1 >= 0 then begin
    shape:= cr_sizehor;
    found:= true;
   end;
- end;
+// end;
 end;
 
 procedure tfadeeditfo.getpickobjectev(const sender: tcustompickwidget;
@@ -466,7 +466,7 @@ procedure tfadeeditfo.paintxorev(const sender: tcustompickwidget;
                                   const picker: tobjectpicker;
                                   const canvas: tcanvas);
 begin
- movemarker(limitmarkerpos(picker.objects[0],picker.pickoffset.x));
+ movemarker(limitmarkerpos(picker.currentobjects[0],picker.pickoffset.x));
  canvas.drawlines(fmarker,true,cl_white);
  canvas.drawline(makepoint(fmarker[1].x,fmarker[1].y-1),
               makepoint(fmarker[1].x,posedit.innerclientpos.y),cl_white);
@@ -485,7 +485,7 @@ begin
   offsetx:= -offsetx;
  end;
  rect1:= sender.innerclientrect;
- int1:= picker.objects[0];
+ int1:= picker.currentobjects[0];
  if rect1.cx = 0 then begin
   rea1:= 0;
  end

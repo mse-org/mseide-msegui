@@ -1922,6 +1922,7 @@ type
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure dopaint(const acanvas: tcanvas); override;
+   procedure dobeforepaint(const canvas: tcanvas); override;
    procedure doafterpaint(const canvas: tcanvas); override;
    procedure drawfocusedcell(const acanvas: tcanvas); virtual;
    procedure drawcellbackground(const acanvas: tcanvas);
@@ -8391,10 +8392,12 @@ end;
 procedure tcustomgrid.setscrollrect(const rect: rectty);
 var
  po2,po3: pointty;
+ bo1: boolean;
 begin
  po2:= subpoint(rect.pos,fscrollrect.pos);
  fscrollrect.size:= rect.size;
  if (po2.x <> 0) or (po2.y <> 0) then begin
+  bo1:= fobjectpicker.removexorpic;
   po3.x:= 0;
   po3.y:= po2.y;
   scrollrect(po3,fdatarecty,scrollcaret);
@@ -8406,6 +8409,10 @@ begin
   scrollrect(po3,fdatarectx,scrollcaret);
   fscrollrect.x:= rect.x;
   scrolled(po3);
+  if bo1 then begin
+   update;
+   fobjectpicker.paintxorpic;
+  end;
  end;
 end;
 
@@ -8471,7 +8478,9 @@ procedure tcustomgrid.updatelayout;
 var
  scrollstate: framestatesty;
  int1,int2,int3: integer;
+ bo1: boolean;
 begin
+ bo1:= fobjectpicker.removexorpic;
  exclude(fstate,gs_hasactiverowcolor);
  exclude(fstate,gs_needszebraoffset);
  if (zebra_step <> 0) then begin
@@ -8619,6 +8628,10 @@ begin
  until (frame.state * scrollbarframestates = 
                        scrollstate * scrollbarframestates) or
                                           (int2 > 40);
+
+ if bo1 then begin
+  fobjectpicker.paintxorpic;
+ end;
 // if og_folded in foptionsgrid then begin
 //  updatevisiblerows;
 // end;
@@ -9767,8 +9780,8 @@ begin
   fobjectpicker.mouseevent(info);
   if (info.eventkind = ek_buttonpress) and 
              not(csdesigning in componentstate) and
-            (fobjectpicker.objects <> nil) and
-            (pickobjectkindty(fobjectpicker.objects[0] mod pickobjectstep) in 
+            (fobjectpicker.currentobjects <> nil) and
+            (pickobjectkindty(fobjectpicker.currentobjects[0] mod pickobjectstep) in 
                                       [pok_datacol,pok_datarow]) then begin
    exclude(info.eventstate,es_processed); //allow mouse row selecting
   end;
@@ -12207,7 +12220,7 @@ var
  apos: pointty;
 begin
  killrepeater;
- decodepickobject(sender.objects[0],kind,cell,col1,fixrow);
+ decodepickobject(sender.currentobjects[0],kind,cell,col1,fixrow);
  offset:= sender.pickoffset;
  apos:= sender.pos;
  case kind of
@@ -12286,8 +12299,10 @@ procedure tcustomgrid.paintxorpic(const sender: tobjectpicker;
   with tframe1(fframe) do begin
    canvas.intersectcliprect(makerect(fdatarecty.x,0,
                        fdatarecty.cx,fpaintrect.cy));
-   canvas.drawline(makepoint(finnerclientrect.x,pos),
-          makepoint(finnerclientrect.x + finnerclientrect.cx,pos),cl_white);
+//   canvas.drawline(makepoint(finnerclientrect.x,pos),
+//          makepoint(finnerclientrect.x + finnerclientrect.cx,pos){,cl_white});
+   canvas.fillxorrect(makepoint(finnerclientrect.x,pos),finnerclientrect.cx,
+                                  gd_right,2,stockobjects.bitmaps[stb_dens50]);
   end;
  end;
 
@@ -12296,8 +12311,10 @@ procedure tcustomgrid.paintxorpic(const sender: tobjectpicker;
   with tframe1(fframe) do begin
    canvas.intersectcliprect(makerect(0,fdatarectx.y,
                       fpaintrect.cx,fdatarectx.cy));
-   canvas.drawline(makepoint(pos,finnerclientrect.y),
-           makepoint(pos,finnerclientrect.y + finnerclientrect.cy),cl_white);
+//   canvas.drawline(makepoint(pos,finnerclientrect.y),
+//           makepoint(pos,finnerclientrect.y + finnerclientrect.cy){,cl_white});
+   canvas.fillxorrect(makepoint(pos,finnerclientrect.y),finnerclientrect.cy,
+                                 gd_down,2,stockobjects.bitmaps[stb_dens50]);
   end;
  end;
 
@@ -12313,8 +12330,8 @@ var
 begin
  offset:= sender.pickoffset;
  apos:= sender.pos;
- decodepickobject(sender.objects[0],kind,cell,col1,fixrow);
- canvas.rasterop:= rop_xor;
+ decodepickobject(sender.currentobjects[0],kind,cell,col1,fixrow);
+// canvas.rasterop:= rop_xor;
  rect1:= cellrect(cell);
  with rect1 do begin
   case kind of
@@ -12354,7 +12371,7 @@ begin
       end;
      end
      else begin
-      if (cell.row > 0) and (rect1.y - fystep < fdatarect.y) then begin
+      if (cell1.row > 0) and (rect1.y {- fystep} < fdatarect.y) then begin
        startrepeater(gs_scrollup,slowrepeat);
       end
       else begin
@@ -12389,7 +12406,7 @@ begin
       end;
      end
      else begin
-      if (cell.col > 0) and (rect1.x - fdatacols[cell.col-1].step < fdatarect.x) then begin
+      if (cell1.col > 0) and (rect1.x{ - fdatacols[cell.col-1].step} < fdatarect.x) then begin
        startrepeater(gs_scrollleft,slowrepeat);
       end
       else begin
@@ -12418,10 +12435,17 @@ begin
  fstate:= fstate - repeaterstates;
 end;
 
+
+procedure tcustomgrid.dobeforepaint(const canvas: tcanvas);
+begin
+ fobjectpicker.dobeforepaint(canvas);
+ inherited;
+end;
+
 procedure tcustomgrid.doafterpaint(const canvas: tcanvas);
 begin
  inherited;
- fobjectpicker.restorexorpic(canvas);
+ fobjectpicker.doafterpaint(canvas);
 end;
 
 procedure tcustomgrid.repeatproc(const sender: tobject);
