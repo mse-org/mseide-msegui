@@ -229,7 +229,6 @@ begin
       fpickrect.size:= nullsize;
       fpickoffset:= nullpoint;
       fintf.getpickobjects(self,ar1);
-      checkcursorshape;
       removexorpic;
       fmouseoverobjects:= ar1;
       if (ar1 = nil) then begin
@@ -262,6 +261,7 @@ begin
        fintf.beginpickmove(self);
        paintxorpic;
        include(info.eventstate,es_processed);
+       checkcursorshape;
       end;
      end
      else begin
@@ -371,12 +371,10 @@ end;
 
 procedure tobjectpicker.dopaint(const acanvas: tcanvas);
 begin
+ fintf.paintxorpic(self,acanvas);
  if ops_rectselecting in fstate then begin
   acanvas.dashes:= #3#3;
   acanvas.drawrect(fpickrect);
- end
- else begin
-  fintf.paintxorpic(self,acanvas);
  end;
 end;
 
@@ -434,6 +432,9 @@ begin
    fkeyeventinfopo:= @info;
    try
     endmoving(true);
+    if fselectobjects <> nil then begin
+     paintxorpic;
+    end;
     include(info.eventstate,es_processed);
    finally
     fkeyeventinfopo:= nil;

@@ -166,7 +166,6 @@ var
  datahigh: integer;
  px,py: preal;
  pxy: pcomplexty;
-// nearestpos: pointty;
  pt1: pointty;
 begin
  result:= -1;
@@ -260,7 +259,7 @@ end;
 function tchartedit.getcursorshape(const sender: tobjectpicker;
                                            var shape: cursorshapety): boolean;
 begin
- result:= sender.moving and (high(sender.currentobjects) = 0);
+ result:= sender.moving and sender.hascurrentobjects;
  if result then begin
   shape:= cr_none;
  end;
@@ -414,7 +413,7 @@ begin
    for int1:= 0 to high(objs) do begin
     ar1[int1]:= addpoint(nodepos(objs[int1]),offs);
     int3:= objs[int1]-1;
-    if int3 > 0 then begin
+    if int3 >= 0 then begin
      ar2[int2].a:= nodepos(int3);
      ar2[int2].b:= ar1[int1];
      if finditem(objs,int3) >= 0 then begin
@@ -423,7 +422,7 @@ begin
      inc(int2);
     end;
     int3:= objs[int1]+1;
-    if int3 < traces[factivetrace].count-1 then begin
+    if int3 < traces[factivetrace].count then begin
      ar2[int2].a:= ar1[int1];
      ar2[int2].b:= nodepos(int3);
      if finditem(objs,int3) < 0 then begin

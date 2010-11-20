@@ -4272,18 +4272,22 @@ begin
  with ftabs,ftabs.fwidgetrect do begin
   if tabo_vertical in options then begin
    if tabo_opposite in foptions then begin
-    canvas.drawline(makepoint(x+offset1.x,y),makepoint(x+offset1.x,y+cy-1),cl_white);
+    canvas.fillxorrect(makepoint(x+offset1.x,y),cy,gd_down,2,
+                                           stockobjects.bitmaps[stb_dens50]);
    end
    else begin
-    canvas.drawline(makepoint(x+cx+offset1.x,y),makepoint(x+cx+offset1.x,y+cy-1),cl_white);
+    canvas.fillxorrect(makepoint(x+cx+offset1.x,y),cy,gd_down,2,
+                                           stockobjects.bitmaps[stb_dens50]);
    end;
   end
   else begin
    if tabo_opposite in foptions then begin
-    canvas.drawline(makepoint(x,y+offset1.y),makepoint(cx-1,y+offset1.y),cl_white);
+    canvas.fillxorrect(makepoint(x,y+offset1.y),cx,gd_right,2,
+                                           stockobjects.bitmaps[stb_dens50]);
    end
    else begin
-    canvas.drawline(makepoint(x,y+cy+offset1.y),makepoint(cx-1,y+cy+offset1.y),cl_white);
+    canvas.fillxorrect(makepoint(x,y+cy+offset1.y),cx,gd_right,2,
+                                           stockobjects.bitmaps[stb_dens50]);
    end;
   end;
  end;
