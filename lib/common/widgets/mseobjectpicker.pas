@@ -43,10 +43,11 @@ type
   procedure paintxorpic(const sender: tobjectpicker; const acanvas: tcanvas);
  end;
 
- objectpickerstatety = (ops_moving,ops_rectselecting,ops_xorpicpainted,
-                        ops_xorpicremoved);
+ objectpickerstatety = (ops_moving,ops_rectselecting,ops_multiselecting,
+                        ops_xorpicpainted,ops_xorpicremoved);
  objectpickerstatesty = set of objectpickerstatety;
- objectpickeroptionty = (opo_mousemoveobjectquery,opo_rectselect);
+ objectpickeroptionty = (opo_mousemoveobjectquery,opo_rectselect,
+                         opo_multiselect);
  objectpickeroptionsty = set of objectpickeroptionty;
  
  tobjectpicker = class      //todo: area selecting, area deselecting
@@ -72,6 +73,7 @@ type
    constructor create(const intf: iobjectpicker; aorigin: originty = org_client);
    destructor destroy; override;
    procedure mouseevent(var info: mouseeventinfoty);
+   procedure dokeydown(var ainfo: keyeventinfoty);
    function removexorpic: boolean;
    function paintxorpic: boolean;
    procedure dobeforepaint(const acanvas: tcanvas);
@@ -84,6 +86,7 @@ type
    function hascurrentobjects: boolean;
    function moving: boolean;
    function rectselecting: boolean;
+   function multiselecting: boolean;
    
    property mouseoverobjects: integerarty read fmouseoverobjects;
    property selectobjects: integerarty read fselectobjects;
@@ -145,6 +148,7 @@ procedure tobjectpicker.mouseevent(var info: mouseeventinfoty);
 var
  shape: cursorshapety;
  widget1: twidget1;
+ shiftstates1: shiftstatesty;
 
  procedure domousemovequery(const force: boolean);
  var
@@ -160,7 +164,7 @@ var
    fpickoffset:= nullpoint;
    fintf.getpickobjects(self,fmouseoverobjects);
    if (force or not isequalarray(ar1,fmouseoverobjects)) and 
-                                           (fselectobjects = nil) then begin
+      ((fselectobjects = nil) or (ops_multiselecting in fstate)) then begin
     po1:= pointer(fmouseoverobjects);
     pointer(fmouseoverobjects):= pointer(ar1);
     fpickrect.pos:= pt1;
@@ -169,7 +173,8 @@ var
     fpickrect.pos:= info.pos;
     fpickoffset:= nullpoint;
     pointer(fmouseoverobjects):= po1;
-    if fmouseoverobjects <> nil then begin
+    if (fmouseoverobjects <> nil) or (fselectobjects <> nil) and 
+                                      (ops_multiselecting in fstate) then begin
      paintxorpic;
     end;
    end;
@@ -209,27 +214,89 @@ var
   end;
  end; //checkcursorshape
 
+ function hasintersection(const ar1: integerarty): boolean;
+ var 
+  int1,int2: integer;
+ begin       
+  result:= false;
+  for int1:= 0 to high(ar1) do begin
+   for int2:= 0 to high(fselectobjects) do begin  //check intersection
+    if ar1[int1] = fselectobjects[int2] then begin
+     result:= true;
+     break;
+    end;
+   end;
+   if result then begin
+    break;
+   end;
+  end;
+ end; //hasintersection
+ 
+ procedure removeintersection(const ar1: integerarty);
+ var
+  int1: integer;
+ begin
+  for int1:= 0 to high(ar1) do begin
+   removeitem(fselectobjects,ar1[int1]);
+  end;
+ end; //removeintersection
+
+ procedure addintersection(const ar1: integerarty);
+ var
+  int1,int2,int3: integer;
+ begin
+  for int1:= 0 to high(ar1) do begin
+   int3:= length(fselectobjects);
+   for int2:= 0 to high(fselectobjects) do begin
+    if fselectobjects[int2] = ar1[int1] then begin
+     int3:= -1;
+     break; //no duplicates;
+    end;
+    if fselectobjects[int2] > ar1[int1] then begin
+     int3:= int2;
+     break;
+    end;
+   end;
+   if int3 >= 0 then begin
+    insertitem(fselectobjects,int3,ar1[int1]);
+   end;
+  end;
+ end; //addintersection
+  
 var
- shiftstates1: shiftstatesty;
  ar1: integerarty;
  bo1: boolean;
- int1,int2,int3: integer;
+// int1,int2,int3: integer;
  
 begin
  fmouseeventinfopo:= @info;
  try
   shiftstates1:= info.shiftstate * shiftstatesmask;
+  if (opo_multiselect in foptions) and 
+          (shiftstates1*keyshiftstatesmask = [ss_ctrl]) xor 
+                    (ops_multiselecting in fstate) then begin
+   bo1:= removexorpic;
+   if (shiftstates1*keyshiftstatesmask = [ss_ctrl]) then begin
+    include(fstate,ops_multiselecting);
+   end
+   else begin
+    exclude(fstate,ops_multiselecting);
+   end;
+   if bo1 then begin
+    paintxorpic;
+   end;
+  end;
   case info.eventkind of
    ek_buttonpress: begin
     if info.button = mb_left then begin
+     removexorpic;
+     fstate:= fstate - [ops_moving,ops_rectselecting];
+     fpickrect.pos:= info.pos;
+     fpickrect.size:= nullsize;
+     fpickoffset:= nullpoint;
+     ar1:= nil;
+     fintf.getpickobjects(self,ar1);
      if shiftstates1 = [ss_left] then begin
-      ar1:= nil;
-      fstate:= fstate - [ops_moving,ops_rectselecting];
-      fpickrect.pos:= info.pos;
-      fpickrect.size:= nullsize;
-      fpickoffset:= nullpoint;
-      fintf.getpickobjects(self,ar1);
-      removexorpic;
       fmouseoverobjects:= ar1;
       if (ar1 = nil) then begin
        if fselectobjects <> nil then begin
@@ -238,20 +305,7 @@ begin
        end;
       end
       else begin
-       bo1:= false;
-       for int1:= 0 to high(ar1) do begin
-        for int2:= 0 to high(fselectobjects) do begin
-                         //check intersection
-         if ar1[int1] = fselectobjects[int2] then begin
-          bo1:= true;
-          break;
-         end;
-        end;
-        if bo1 then begin
-         break;
-        end;
-       end;
-       if not bo1 then begin
+       if not hasintersection(ar1) then begin
         fselectobjects:= nil;
        end;
        application.registeronkeypress({$ifdef FPC}@{$endif}dokeypress);
@@ -269,8 +323,22 @@ begin
                           (opo_rectselect in foptions) then begin
        application.registeronkeypress({$ifdef FPC}@{$endif}dokeypress);
        include(fstate,ops_rectselecting);
-       fpickrect.pos:= info.pos;
-       fpickrect.size:= nullsize;
+       include(info.eventstate,es_processed);
+      end
+      else begin
+       if (shiftstates1 = [ss_ctrl,ss_left]) and 
+                   (opo_multiselect in foptions) and (ar1 <> nil) then begin
+        fmouseoverobjects:= ar1;
+        if hasintersection(ar1) then begin
+         removeintersection(ar1);
+        end
+        else begin
+         addintersection(ar1);
+        end;
+        paintxorpic;
+        include(info.eventstate,es_processed);
+        checkcursorshape;
+       end;
       end;
      end;
     end;
@@ -296,27 +364,10 @@ begin
        fintf.getpickobjects(self,ar1);
        if (ar1 <> nil) then begin
         if bo1 then begin
-         for int1:= 0 to high(ar1) do begin
-          removeitem(fselectobjects,ar1[int1]);
-         end;
+         removeintersection(ar1);
         end
         else begin
-         for int1:= 0 to high(ar1) do begin
-          int3:= length(fselectobjects);
-          for int2:= 0 to high(fselectobjects) do begin
-           if fselectobjects[int2] = ar1[int1] then begin
-            int3:= -1;
-            break; //no duplicates;
-           end;
-           if fselectobjects[int2] > ar1[int1] then begin
-            int3:= int2;
-            break;
-           end;
-          end;
-          if int3 >= 0 then begin
-           insertitem(fselectobjects,int3,ar1[int1]);
-          end;
-         end;
+         addintersection(ar1);
         end;
        end;
        exclude(fstate,ops_rectselecting);
@@ -427,24 +478,33 @@ end;
 procedure tobjectpicker.dokeypress(const sender: twidget;
                var info: keyeventinfoty);
 begin
- if info.key = key_escape then begin
-  if (fstate * [ops_moving,ops_rectselecting] <> []) then begin
-   fkeyeventinfopo:= @info;
-   try
-    endmoving(true);
-    if fselectobjects <> nil then begin
-     paintxorpic;
+ case info.key of
+  key_escape: begin
+   if (fstate * [ops_moving,ops_rectselecting] <> []) then begin
+    fkeyeventinfopo:= @info;
+    try
+     endmoving(true);
+     if fselectobjects <> nil then begin
+      paintxorpic;
+     end;
+     include(info.eventstate,es_processed);
+    finally
+     fkeyeventinfopo:= nil;
     end;
-    include(info.eventstate,es_processed);
-   finally
-    fkeyeventinfopo:= nil;
    end;
-  end
-  else begin
-   if (fselectobjects <> nil) and 
-                     (info.shiftstate*shiftstatesmask = []) then begin
+  end;
+ end
+end;
+
+procedure tobjectpicker.dokeydown(var ainfo: keyeventinfoty);
+begin
+ case ainfo.key of
+  key_escape: begin
+   if (fstate * [ops_moving,ops_rectselecting] = []) and
+    (fselectobjects <> nil) and (ainfo.shiftstate*shiftstatesmask = []) then begin
     removexorpic;
     fselectobjects:= nil;
+    include(ainfo.eventstate,es_processed);
    end;
   end;
  end;
@@ -494,14 +554,33 @@ begin
  result:= ops_rectselecting in fstate;
 end;
 
-function tobjectpicker.getcurrentobjects: integerarty;
+function tobjectpicker.multiselecting: boolean;
 begin
- if fselectobjects <> nil then begin
+ result:= ops_multiselecting in fstate;
+end;
+
+function tobjectpicker.getcurrentobjects: integerarty;
+var
+ int1: integer;
+begin
+{
+ if ops_multiselecting in fstate then begin
   result:= fselectobjects;
+  for int1:= 0 to high(fmouseoverobjects) do begin
+   if finditem(result,fmouseoverobjects[int1]) < 0 then begin
+    additem(result,fmouseoverobjects[int1]);
+   end;
+  end;
  end
  else begin
-  result:= fmouseoverobjects;
- end;
+}
+  if (fselectobjects <> nil) or (ops_multiselecting in fstate) then begin
+   result:= fselectobjects;
+  end
+  else begin
+   result:= fmouseoverobjects;
+  end;
+// end;
 end;
 
 function tobjectpicker.hascurrentobjects: boolean;

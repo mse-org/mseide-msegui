@@ -75,7 +75,8 @@ begin
  fsnapdist:= defaultsnapdist;
  inherited;
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
- fobjectpicker.options:= [opo_mousemoveobjectquery,opo_rectselect];
+ fobjectpicker.options:= [opo_mousemoveobjectquery,opo_rectselect,
+                          opo_multiselect];
 end;
 
 destructor tchartedit.destroy;
@@ -465,15 +466,18 @@ end;
 
 procedure tchartedit.dokeydown(var ainfo: keyeventinfoty);
 begin
+ if not (es_processed in ainfo.eventstate) then begin
+  inherited;
+ end;
+ if not (es_processed in ainfo.eventstate) then begin
+  fobjectpicker.dokeydown(ainfo);
+ end;
  if not (es_processed in ainfo.eventstate) and (ainfo.key = key_delete) and
      not readonly and (ainfo.shiftstate*shiftstatesmask = []) and 
                                  fobjectpicker.hascurrentobjects  then begin
   traces[factivetrace].deletedata(fobjectpicker.currentobjects);
   fobjectpicker.clear;
   include(ainfo.eventstate,es_processed);
- end;
- if not (es_processed in ainfo.eventstate) then begin
-  inherited;
  end;
 end;
 
