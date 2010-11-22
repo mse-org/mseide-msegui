@@ -50,7 +50,7 @@ begin
                             tsigdelay,tsigdelayn,tsigfir,tsigiir,
                             tsigwavetable,
                             tsigfft,tfft,
-                            tsigslider
+                            tsigslider,twavetableedit
                             ]);
  registercomponenttabhints(['Math'],['Experimental Mathematical Components']);
  registerpropertyeditor(typeinfo(tdoubleconn),tdoublezcomp,'',
@@ -94,7 +94,8 @@ end;
 
 { toutputconnpropertyeditor }
 
-function toutputconnpropertyeditor.filtercomponent(const acomponent: tcomponent): boolean;
+function toutputconnpropertyeditor.filtercomponent(
+                                  const acomponent: tcomponent): boolean;
 var
  cont1: tsigcontroller;
 begin

@@ -4508,6 +4508,9 @@ var
  acount: integer;
 
  procedure check(const comp1: tcomponent);
+ var
+  int3: integer;
+  comp2: tcomponent;
  begin
   if comp1.InheritsFrom(acomponentclass) and 
           (({$ifndef FPC}@{$endif}filter = nil) or filter(comp1)) then begin
@@ -4515,6 +4518,13 @@ var
             (includeinherited or 
             (comp1.componentstate * [csinline,csancestor] = [])) then begin
     additem(result,str1+getcomponentdispname(comp1),acount);
+   end;
+  end;
+  for int3:= 0 to comp1.componentcount - 1  do begin
+   comp2:= comp1.components[int3];
+   if (cssubcomponent in comp2.componentstyle) and 
+                                    not isnosubcomp(comp2) then begin
+    check(comp2);
    end;
   end;
  end;
@@ -4538,13 +4548,6 @@ begin
    for int2:= 0 to count - 1 do begin
     comp1:= next^.instance;
     check(comp1);
-    for int3:= 0 to comp1.componentcount - 1  do begin
-     comp2:= comp1.components[int3];
-     if (cssubcomponent in comp2.componentstyle) and 
-                                      not isnosubcomp(comp2) then begin
-      check(comp2);
-     end;
-    end;
    end;
   end;
  end;

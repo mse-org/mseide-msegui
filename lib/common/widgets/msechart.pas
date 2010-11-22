@@ -88,11 +88,9 @@ type
    procedure scaleerror;
    procedure setxdata(const avalue: realarty);
    procedure setydata(const avalue: realarty);
-   procedure setkind(const avalue: tracekindty);
    procedure setmaxcount(const avalue: integer);
    procedure setwidthmm(const avalue: real);
    procedure setdashes(const avalue: string);
-   procedure setoptions(const avalue: charttraceoptionsty);
    procedure readxseriescount(reader: treader);
    procedure readxscale(reader: treader);
    procedure readxoffset(reader: treader);
@@ -121,6 +119,8 @@ type
    procedure setxyvalue(const index: integer; const avalue: complexty);
   protected
    ftraces: ttraces;
+   procedure setkind(const avalue: tracekindty); virtual;
+   procedure setoptions(const avalue: charttraceoptionsty); virtual;
    function getxitempo(const aindex: integer): preal;
    function getyitempo(const aindex: integer): preal;
    
@@ -174,7 +174,8 @@ type
    property start: integer read finfo.start write setstart default 0;
    property maxcount: integer read finfo.maxcount write setmaxcount default 0;
                       //0-> data count
-   property options: charttraceoptionsty read finfo.options write setoptions default [];
+   property options: charttraceoptionsty read finfo.options 
+                                             write setoptions default [];
    property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
    property name: string read finfo.name write finfo.name;
  end;
@@ -200,6 +201,7 @@ type
    fimage_widthmm: real;
    fimage_heightmm: real;
    foptions: charttraceoptionsty;
+   fkind: tracekindty;
    procedure setitems(const index: integer; const avalue: ttrace);
    function getitems(const index: integer): ttrace;
    procedure setxserstart(const avalue: real);
@@ -212,7 +214,6 @@ type
    procedure setimage_list(const avalue: timagelist);
    procedure setimage_widthmm(const avalue: real);
    procedure setimage_heightmm(const avalue: real);
-   procedure setoptions(const avalue: charttraceoptionsty);
    function getlogx: boolean;
    procedure setlogx(const avalue: boolean);
    function getlogy: boolean;
@@ -221,6 +222,8 @@ type
    fsize: sizety;
    fscalex: real;
    fscaley: real;
+   procedure setkind(const avalue: tracekindty); virtual;
+   procedure setoptions(const avalue: charttraceoptionsty); virtual;
    procedure change; reintroduce;
    procedure clientrectchanged;
    procedure paint(const acanvas: tcanvas);
@@ -237,6 +240,7 @@ type
    property logy: boolean read getlogy write setlogy;
    property items[const index: integer]: ttrace read getitems write setitems; default;
   published
+   property kind: tracekindty read fkind write setkind default trk_xseries;
    property options: charttraceoptionsty read foptions 
                                                 write setoptions default [];
    property xserstart: real read fxserstart write setxserstart;
@@ -407,13 +411,13 @@ type
 
  tchart = class(tcustomchart)
   private
-   ftraces: ttraces;
    procedure settraces(const avalue: ttraces);
    procedure setxstart(const avalue: real); override;
    procedure setystart(const avalue: real); override;
    procedure setxrange(const avalue: real); override;
    procedure setyrange(const avalue: real); override;
   protected
+   ftraces: ttraces;
    procedure clientrectchanged; override;
    procedure dopaintcontent(const acanvas: tcanvas); override;
    procedure dostatread(const reader: tstatreader); override;
@@ -1488,10 +1492,11 @@ end;
 
 constructor ttraces.create(const aowner: tcustomchart);
 begin
+ fkind:= trk_xseries;
  fxserrange:= 1;
  fxrange:= 1;
  fyrange:= 1;
- inherited create(aowner,ttrace);
+ inherited create(aowner,ownedeventpersistentclassty(getitemclasstype));
 end;
 
 class function ttraces.getitemclasstype: persistentclassty;
@@ -1673,6 +1678,20 @@ begin
  end;
 end;
 
+procedure ttraces.setkind(const avalue: tracekindty);
+var
+ int1: integer;
+begin
+ if fkind <> avalue then begin
+  fkind:= avalue;
+  if not (csloading in tcustomchart(fowner).componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    ttrace(fitems[int1]).kind:= avalue;
+   end;
+  end;
+ end;
+end;
+
 procedure ttraces.setoptions(const avalue: charttraceoptionsty);
 var
  int1: integer;
@@ -1697,6 +1716,8 @@ procedure ttraces.createitem(const index: integer; var item: tpersistent);
 begin
  inherited;
  with ttrace(item) do begin
+  kind:= self.fkind;
+  options:= self.foptions;
   xserstart:= self.fxserstart;
   xstart:= self.fxstart;
   ystart:= self.fystart;
@@ -2108,7 +2129,9 @@ end;
 
 constructor tchart.create(aowner: tcomponent);
 begin
- ftraces:= ttraces.create(self);
+ if ftraces = nil then begin
+  ftraces:= ttraces.create(self);
+ end;
  inherited;
 end;
 

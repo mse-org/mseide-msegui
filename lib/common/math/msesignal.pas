@@ -2234,17 +2234,24 @@ end;
 
 procedure tsigwavetable.settable(const avalue: doublearty);
 begin
+ lock;
  ftable:= avalue;
  checktable;
+ unlock;
 end;
 
 procedure tsigwavetable.clear;
 begin
  inherited;
- if canevent(tmethod(foninittable)) then begin
-  foninittable(self,realarty(ftable));
+ lock;
+ try
+  if canevent(tmethod(foninittable)) then begin
+   foninittable(self,realarty(ftable));
+  end;
+  checktable;
+ finally
+  unlock;
  end;
- checktable;
 end;
 
 procedure tsigwavetable.checktable;

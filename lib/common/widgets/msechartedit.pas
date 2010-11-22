@@ -31,7 +31,6 @@ type
    fsnapdist: integer;
    foffsetmin: pointty;
    foffsetmax: pointty;
-   fvalue: complexarty;
    fvaluechecking: integer;
    fonchange: notifyeventty;
    fondataentered: notifyeventty;
@@ -49,6 +48,7 @@ type
    function getimitems(const index: integer): real;
    procedure setimitems(const index: integer; const avalue: real);
   protected
+   fvalue: complexarty;
    function hasactivetrace: boolean;
    function nodepos(const aindex: integer): pointty;
    function nearestnode(const apos: pointty): integer;   

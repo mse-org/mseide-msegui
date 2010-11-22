@@ -405,6 +405,7 @@ type
    procedure setinline(value: boolean);
    procedure setancestor(value: boolean);
    {$endif}
+   procedure setsubcompref;
    function canevent(const event: tmethod): boolean;
    procedure setoptionalobject(const value: tpersistent; var instance;
                         createproc: createprocty);
@@ -3753,6 +3754,12 @@ begin
  end;
 end;
 
+procedure tmsecomponent.setsubcompref;
+begin
+ setsubcomponent(true);
+ include (fmsecomponentstate,cs_subcompref);
+end;
+
 {$ifdef mse_with_ifi}
 procedure tmsecomponent.setifiserverintf(const aintf: iifiserver);
 begin
@@ -3768,6 +3775,7 @@ procedure tmsecomponent.executeificommand(var acommand: ificommandcodety);
 begin
  //dummy
 end;
+
 {$endif}
 
 { tlinkedqueue }
