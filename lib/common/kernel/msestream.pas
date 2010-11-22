@@ -714,29 +714,17 @@ begin
      end;
     end;
     'i': begin
-     try
-      pinteger(fields[int1])^:= strtoint(ar1[int1]);
-     except
-      result:= false;
-     end;
+     result:= result and trystrtoint(ar1[int1],pinteger(fields[int1])^);
     end;
     'I': begin
-     try
-      pint64(fields[int1])^:= strtoint64(ar1[int1]);
-     except
-      result:= false;
-     end;
+     result:= result and trystrtoint64(ar1[int1],pint64(fields[int1])^);
     end;
     'r': begin
      if ar1[int1] = '' then begin
       preal(fields[int1])^:= emptyreal;
      end
      else begin
-      try
-       preal(fields[int1])^:= strtoreal(ar1[int1]);
-      except
-       result:= false;
-      end;
+      result:= result and trystrtoreal(ar1[int1],preal(fields[int1])^);
      end;
     end;
     's': begin

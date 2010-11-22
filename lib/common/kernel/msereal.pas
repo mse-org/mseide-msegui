@@ -28,6 +28,7 @@ function trystrtorealty(const ein: string; out value: realty;
                              forcevalue: boolean = false): boolean;
 function strtorealty(const ein: string; forcevalue: boolean = false): realty;
 function strtorealtydot(const ein: string): realty;
+function trystrtorealtydot(const ein: string; out value: realty): boolean;
 //function realtytostr(const val: realty; const format: msestring = ''): msestring;
 function realtytostr(const val: realty; const format: msestring = '';
                                             const scale: real = 1): msestring;
@@ -299,6 +300,21 @@ begin
   result:= strtofloat(ein,defaultformatsettings);
  {$else}
   result:= strtofloat(replacechar(ein,'.',decimalseparator));
+ {$endif}
+ end;
+end;
+
+function trystrtorealtydot(const ein: string; out value: realty): boolean;
+begin
+ result:= true;
+ if trim(ein) = emptyrealstring then begin
+  value:= emptyreal;
+ end
+ else begin
+ {$ifdef withformatsettings}
+  result:= trystrtofloat(ein,defaultformatsettings,value);
+ {$else}
+  result:= trystrtofloat(replacechar(ein,'.',decimalseparator),value);
  {$endif}
  end;
 end;

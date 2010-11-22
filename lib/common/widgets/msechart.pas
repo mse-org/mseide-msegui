@@ -385,8 +385,8 @@ type
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
-   procedure statreading;
-   procedure statread;
+   procedure statreading; virtual;
+   procedure statread; virtual;
    function getstatvarname: msestring;
    procedure initscrollstate;
   public

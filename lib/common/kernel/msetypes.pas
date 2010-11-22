@@ -221,9 +221,11 @@ function issamemethod(const method1,method2: tmethod): boolean;
 function isemptydatetime(const avalue: tdatetime): boolean;
 function emptydatetime: tdatetime;
 function makecomplex(const are: real; aim: real): complexty;
+procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
 
 implementation
-
+uses
+ msedatalist;
 const
 {$ifdef FPC_DOUBLE_HILO_SWAPPED}
  co1: array[0..7] of byte = (0,0,$f0,$ff,$0,0,0,0);      //- inf
@@ -262,6 +264,21 @@ function makecomplex(const are: real; aim: real): complexty;
 begin
  result.re:= are;
  result.im:= aim;
+end;
+
+procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
+var
+ int1: integer;
+begin
+ int1:= length(acomplex);
+ if int1 > 0 then begin
+  allocuninitedarray(int1,sizeof(re[0]),re);
+  allocuninitedarray(int1,sizeof(im[0]),im);
+  for int1:= int1-1 downto 0 do begin
+   re[int1]:= acomplex[int1].re;
+   im[int1]:= acomplex[int1].im;
+  end;
+ end;
 end;
 
 end.

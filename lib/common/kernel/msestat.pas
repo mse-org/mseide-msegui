@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -67,6 +67,7 @@ type
    procedure updatevalue(const name: msestring; var value: integerarty); overload;
    procedure updatevalue(const name: msestring; var value: int64arty); overload;
    procedure updatevalue(const name: msestring; var value: realarty);  overload;
+   procedure updatevalue(const name: msestring; var value: complexarty);  overload;
 
    procedure updatevalue(const name: msestring; const intf: istatupdatevalue); overload;
    procedure updatestat(const intf: istatfile);
@@ -140,7 +141,10 @@ type
    function readarray(const name: msestring; const default: int64arty): int64arty; overload;
    function readarray(const name: msestring; const default: booleanarty): booleanarty; overload;
    function readarray(const name: msestring; const default: longboolarty): longboolarty; overload;
-   function readarray(const name: msestring; const default: realarty): realarty; overload;
+   function readarray(const name: msestring;
+                          const default: realarty): realarty; overload;
+   function readarray(const name: msestring;
+                          const default: complexarty): complexarty; overload;
    function readlistitem: msestring;
 
    procedure readrecord(const name: msestring; const values: array of pointer;
@@ -191,10 +195,12 @@ type
    procedure writearray(const name: msestring; const value: booleanarty); overload;
    procedure writearray(const name: msestring; const value: longboolarty); overload;
    procedure writearray(const name: msestring; const value: realarty); overload;
+   procedure writearray(const name: msestring; const value: complexarty); overload;
  
    procedure writelistitem(const value: msestring); overload;
    procedure writelistitem(const value: integer); overload;
    procedure writelistitem(const value: realty); overload;
+   procedure writelistitem(const value: complexty); overload;
  
    procedure writerecord(const name: msestring; const values: array of const);
    procedure writerecordarray(const name: msestring; const count: integer;
@@ -409,6 +415,16 @@ begin
 end;
 
 procedure tstatfiler.updatevalue(const name: msestring; var value: realarty);
+begin
+ if fiswriter then begin
+  tstatwriter(self).writearray(name,value);
+ end
+ else begin
+  value:= tstatreader(self).readarray(name,value);
+ end;
+end;
+
+procedure tstatfiler.updatevalue(const name: msestring; var value: complexarty);
 begin
  if fiswriter then begin
   tstatwriter(self).writearray(name,value);
@@ -965,9 +981,8 @@ begin
   int2:= strtoint(str1);
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
-   try
-    result[int1]:= strtoint(readlistitem);
-   except
+   if not trystrtoint(readlistitem,result[int1]) then begin
+    result:= default;
     break;
    end;
   end;
@@ -987,9 +1002,8 @@ begin
   int2:= strtoint(str1);
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
-   try
-    result[int1]:= strtoint64(readlistitem);
-   except
+   if not trystrtoint64(readlistitem,result[int1]) then begin
+    result:= default;
     break;
    end;
   end;
@@ -1003,17 +1017,17 @@ function tstatreader.readarray(const name: msestring;
             const default: longboolarty): longboolarty;
 var
  str1: msestring;
- int1,int2: integer;
+ int1,int2,int3: integer;
 begin
  if findvar(name,str1) then begin
   int2:= strtoint(str1);
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
-   try
-    result[int1]:= longbool(strtoint(readlistitem));
-   except
+   if not trystrtoint(readlistitem,int3) then begin
+    result:= default;
     break;
    end;
+   result[int1]:= longbool(int3);
   end;
  end
  else begin
@@ -1025,17 +1039,17 @@ function tstatreader.readarray(const name: msestring;
             const default: booleanarty): booleanarty;
 var
  str1: msestring;
- int1,int2: integer;
+ int1,int2,int3: integer;
 begin
  if findvar(name,str1) then begin
   int2:= strtoint(str1);
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
-   try
-    result[int1]:= boolean(strtoint(readlistitem));
-   except
+   if not trystrtoint(readlistitem,int3) then begin
+    result:= default;
     break;
    end;
+   result[int1]:= boolean(int3);
   end;
  end
  else begin
@@ -1049,13 +1063,34 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) then begin       //todo: how to cancel on error?
+ if findvar(name,str1) then begin
   int2:= strtoint(str1);
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
-   try
-    result[int1]:= strtorealtydot(readlistitem);
-   except
+   if not trystrtorealtydot(readlistitem,result[int1]) then begin
+    result:= default;
+    break;
+   end;
+  end;
+ end
+ else begin
+  result:= default;
+ end;
+end;
+
+function tstatreader.readarray(const name: msestring;
+                               const default: complexarty): complexarty;
+var
+ str1: msestring;
+ int1,int2: integer;
+begin
+ if findvar(name,str1) then begin   
+  int2:= strtoint(str1);
+  setlength(result,int2);
+  for int1:= 0 to int2-1 do begin
+   if not decoderecord(
+          readlistitem,[@result[int1].re,@result[int1].im],'rr') then begin
+    result:= default;
     break;
    end;
   end;
@@ -1395,6 +1430,11 @@ begin
  writelistval(realtytostrdot(value));
 end;
 
+procedure tstatwriter.writelistitem(const value: complexty);
+begin
+ writelistval(encoderecord([value.re,value.im]));
+end;
+
 procedure tstatwriter.writedatalist(const name: msestring; const value: tdatalist);
 begin
  tdatalist1(value).writestate(self,name);
@@ -1462,6 +1502,16 @@ begin
 end;
 
 procedure tstatwriter.writearray(const name: msestring; const value: realarty);
+var
+ int1: integer;
+begin
+ writeinteger(name,length(value));
+ for int1:= 0 to high(value) do begin
+  writelistitem(value[int1]);
+ end;
+end;
+
+procedure tstatwriter.writearray(const name: msestring; const value: complexarty);
 var
  int1: integer;
 begin

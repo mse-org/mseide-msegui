@@ -12,12 +12,17 @@ unit msechartedit;
 interface
 uses
  classes,msechart,mseguiglob,mseevent,mseeditglob,msegraphutils,msetypes,
- mseobjectpicker,msepointer,msegraphics;
+ mseobjectpicker,msepointer,msegraphics,mseclasses,msestat,msestatfile,
+ msestrings;
  
 const
  defaultsnapdist = 4;
+ defaultchartoptionsedit = [oe_checkvaluepaststatread,oe_savevalue,oe_savestate];
  
 type
+ setcomplexareventty = procedure(const sender: tobject;
+                var avalue: complexarty; var accept: boolean) of object;
+                
  tchartedit = class(tchart,iobjectpicker)
   private
    factivetrace: integer;
@@ -26,10 +31,23 @@ type
    fsnapdist: integer;
    foffsetmin: pointty;
    foffsetmax: pointty;
+   fvalue: complexarty;
+   fvaluechecking: integer;
+   fonchange: notifyeventty;
+   fondataentered: notifyeventty;
+   fonsetvalue: setcomplexareventty;
    procedure setactivetrace(const avalue: integer);
    function limitmoveoffset(const aoffset: pointty): pointty;
    function getreadonly: boolean;
    procedure setreadonly(const avalue: boolean);
+   function getvalue: complexarty;
+   procedure setvalue(const avalue: complexarty);
+   function getvalueitems(const index: integer): complexty;
+   procedure setvalueitems(const index: integer; const avalue: complexty);
+   function getreitems(const index: integer): real;
+   procedure setreitems(const index: integer; const avalue: real);
+   function getimitems(const index: integer): real;
+   procedure setimitems(const index: integer; const avalue: real);
   protected
    function hasactivetrace: boolean;
    function nodepos(const aindex: integer): pointty;
@@ -41,7 +59,12 @@ type
    procedure dokeydown(var ainfo: keyeventinfoty); override;
    procedure dobeforepaint(const acanvas: tcanvas); override;
    procedure doafterpaint(const acanvas: tcanvas); override;
+   procedure dochange; virtual;
+   function chartdata: complexarty;
 
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
+   procedure statread; override;
 
     //iobjectpicker
    function getcursorshape(const sender: tobjectpicker;
@@ -54,25 +77,40 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+//   procedure changed;
+   function checkvalue: boolean; virtual;
    property readonly: boolean read getreadonly write setreadonly;
+   property value: complexarty read getvalue write setvalue;
+   property valueitems[const index: integer]: complexty read getvalueitems 
+                                                       write setvalueitems;
+   property reitems[const index: integer]: real read getreitems write setreitems;
+   property imitems[const index: integer]: real read getimitems write setimitems;
   published
    property activetrace: integer read factivetrace 
                            write setactivetrace default 0;
    property optionsedit: optionseditty read foptionsedit 
-                                     write foptionsedit default [];
+                           write foptionsedit default defaultchartoptionsedit;
    property snapdist: integer read fsnapdist write fsnapdist 
                                               default defaultsnapdist;
+
+   property statfile;
+   property statvarname;
+   property onchange: notifyeventty read fonchange write fonchange;
+   property ondataentered: notifyeventty read fondataentered 
+                                                 write fondataentered;
+   property onsetvalue: setcomplexareventty read fonsetvalue write fonsetvalue;
  end;
  
 implementation
 uses
- msereal,msekeyboard,msedatalist;
+ msereal,msekeyboard,msedatalist,msegui;
  
 { tchartedit }
 
 constructor tchartedit.create(aowner: tcomponent);
 begin
  fsnapdist:= defaultsnapdist;
+ foptionsedit:= defaultchartoptionsedit;
  inherited;
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
  fobjectpicker.options:= [opo_mousemoveobjectquery,opo_rectselect,
@@ -112,6 +150,7 @@ begin
       addxydata(co1.re,co1.im);
      end;
      include(info.eventstate,es_processed);
+     checkvalue;
     end;   
    end;
    if not (es_processed in info.eventstate) then begin
@@ -392,6 +431,7 @@ begin
   end;
   traces[factivetrace].xyvalue[int2]:= co1;
  end;
+ checkvalue;
 end;
 
 procedure tchartedit.paintxorpic(const sender: tobjectpicker; 
@@ -478,6 +518,7 @@ begin
   traces[factivetrace].deletedata(fobjectpicker.currentobjects);
   fobjectpicker.clear;
   include(ainfo.eventstate,es_processed);
+  checkvalue;
  end;
 end;
 
@@ -491,6 +532,123 @@ procedure tchartedit.doafterpaint(const acanvas: tcanvas);
 begin
  inherited;
  fobjectpicker.doafterpaint(acanvas);
+end;
+
+function tchartedit.getvalue: complexarty;
+begin
+ result:= fvalue;
+// result:= traces[factivetrace].xydata;
+end;
+
+function tchartedit.chartdata: complexarty;
+begin
+ result:= copy(traces[factivetrace].xydata);
+end;
+
+procedure tchartedit.setvalue(const avalue: complexarty);
+begin
+ fvalue:= avalue;
+ dochange;
+end;
+
+procedure tchartedit.dochange;
+begin
+ traces[factivetrace].xydata:= fvalue;
+ if not (ws_loadedproc in fwidgetstate) then begin
+  if canevent(tmethod(fonchange)) then begin
+   fonchange(self);
+  end;
+ end;
+end;
+{
+procedure tchartedit.changed;
+begin
+ dochange;
+end;
+}
+function tchartedit.checkvalue: boolean;
+var
+ ar1: complexarty;
+begin
+ result:= true;
+ ar1:= chartdata;
+ if canevent(tmethod(fonsetvalue)) then begin
+  fonsetvalue(self,ar1,result);
+ end;
+ if result then begin
+  value:= ar1;
+  if canevent(tmethod(fondataentered)) then begin
+   fondataentered(self);
+  end;
+ end;
+end;
+
+procedure tchartedit.dostatread(const reader: tstatreader);
+begin
+ if oe_savestate in foptionsedit then begin
+  inherited;
+ end;
+ if oe_savevalue in foptionsedit then begin
+  value:= reader.readarray('value',fvalue);
+ end;
+end;
+
+procedure tchartedit.dostatwrite(const writer: tstatwriter);
+begin
+ if oe_savestate in foptionsedit then begin
+  inherited;
+ end;
+ if oe_savevalue in foptionsedit then begin
+  writer.writearray('value',fvalue);
+ end;
+end;
+
+procedure tchartedit.statread;
+begin
+ inherited;
+ if oe_checkvaluepaststatread in foptionsedit then begin
+  checkvalue;
+ end;
+end;
+
+function tchartedit.getvalueitems(const index: integer): complexty;
+begin
+ checkarrayindex(fvalue,index);
+ result:= fvalue[index];
+end;
+
+procedure tchartedit.setvalueitems(const index: integer;
+               const avalue: complexty);
+begin
+ checkarrayindex(fvalue,index);
+ fvalue[index]:= avalue;
+ dochange;
+end;
+
+function tchartedit.getreitems(const index: integer): real;
+begin
+ checkarrayindex(fvalue,index);
+ result:= fvalue[index].re;
+end;
+
+procedure tchartedit.setreitems(const index: integer; const avalue: real);
+begin
+ checkarrayindex(fvalue,index);
+ fvalue[index].re:= avalue;
+ dochange;
+end;
+
+function tchartedit.getimitems(const index: integer): real;
+begin
+ checkarrayindex(fvalue,index);
+ result:= fvalue[index].im;
+end;
+
+procedure tchartedit.setimitems(const index: integer; const avalue: real);
+begin
+ checkarrayindex(fvalue,index);
+ fvalue[index].im:= avalue;
+ dochange;
 end;
 
 end.
