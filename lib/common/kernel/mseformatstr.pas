@@ -252,12 +252,12 @@ function TryStrToQWord(const S: string; out Value: QWord): Boolean;
 // {$ifend}
 //{$endif}
 
-{$define withformatsettings}
+//{$define withformatsettings}
 
-{$ifdef withformatsettings}
+//{$ifdef withformatsettings}
 var
  defaultformatsettings: tformatsettings; //mit '.' als dezitrenner
-{$endif}
+//{$endif}
 
 const
  charhex: array[0..15] of char =
@@ -1970,29 +1970,29 @@ end;
 }
 function realToStr(const value: double): string;     //immer'.' als separator
 begin
- {$ifdef withformatsettings}
+// {$ifdef withformatsettings}
  result:= floattostr(value,defaultformatsettings)
- {$else}
- result:= replacechar(floattostr(value),decimalseparator,'.');
- {$endif}
+// {$else}
+// result:= replacechar(floattostr(value),decimalseparator,'.');
+// {$endif}
 end;
 
 function StrToreal(const S: string): double;   //immer'.' als separator
 begin
- {$ifdef withformatsettings}
+// {$ifdef withformatsettings}
  result:= strtofloat(s,defaultformatsettings);
- {$else}
- result:= strtofloat(replacechar(s,'.',decimalseparator));
- {$endif}
+// {$else}
+// result:= strtofloat(replacechar(s,'.',decimalseparator));
+// {$endif}
 end;
 
 function trystrtoreal(const s: string; out value: real): boolean;
 begin
- {$ifdef withformatsettings}
+// {$ifdef withformatsettings}
  result:= trystrtofloat(s,double(value),defaultformatsettings);
- {$else}
- result:= trystrtofloat(replacechar(s,'.',decimalseparator),double(value));
- {$endif}
+// {$else}
+// result:= trystrtofloat(replacechar(s,'.',decimalseparator),double(value));
+// {$endif}
 end;
 
 function bcdtostr(inp: byte): string;
@@ -2844,7 +2844,7 @@ begin
  end;
 end;
 
-{$ifdef withformatsettings}
+//{$ifdef withformatsettings}
 initialization
 {$ifndef FPC}
  getlocaleformatsettings(0,defaultformatsettings);
@@ -2852,5 +2852,5 @@ initialization
  defaultformatsettings:= sysutils.defaultformatsettings;
 {$endif}
  defaultformatsettings.DecimalSeparator:= '.';
-{$endif}
+//{$endif}
 end.

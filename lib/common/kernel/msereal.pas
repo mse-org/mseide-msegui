@@ -62,7 +62,7 @@ begin
  end
  else begin
   result:= avalue * arange;
- end;  
+ end;
 end;
 
 function reapplyrange(const avalue: realty; const arange: real): realty;
@@ -281,11 +281,11 @@ begin
   result:= emptyrealstring;
  end
  else begin
- {$ifdef withformatsettings}
+// {$ifdef withformatsettings}
   result:= floattostr(val,defaultformatsettings);
- {$else}
-  result:= replacechar(floattostr(val),decimalseparator,'.');
- {$endif}
+// {$else}
+//  result:= replacechar(floattostr(val),decimalseparator,'.');
+// {$endif}
  end;
 end;
 
@@ -296,11 +296,11 @@ begin
   result:= emptyreal;
  end
  else begin
- {$ifdef withformatsettings}
+// {$ifdef withformatsettings}
   result:= strtofloat(ein,defaultformatsettings);
- {$else}
-  result:= strtofloat(replacechar(ein,'.',decimalseparator));
- {$endif}
+// {$else}
+//  result:= strtofloat(replacechar(ein,'.',decimalseparator));
+// {$endif}
  end;
 end;
 
@@ -311,11 +311,11 @@ begin
   value:= emptyreal;
  end
  else begin
- {$ifdef withformatsettings}
-  result:= trystrtofloat(ein,defaultformatsettings,value);
- {$else}
-  result:= trystrtofloat(replacechar(ein,'.',decimalseparator),value);
- {$endif}
+// {$ifdef withformatsettings}
+  result:= trystrtofloat(ein,double(value),defaultformatsettings);
+// {$else}
+//  result:= trystrtofloat(replacechar(ein,'.',decimalseparator),double(value));
+// {$endif}
  end;
 end;
 
