@@ -353,6 +353,7 @@ type
  end;
 
 procedure zeropad(var aimage: imagety);
+procedure freeimage(var aimage: imagety);
 
 implementation
 uses
@@ -384,6 +385,14 @@ begin
     end; 
    end;
   end;
+ end;
+end;
+
+procedure freeimage(var aimage: imagety);
+begin
+ if aimage.pixels <> nil then begin
+  gui_freeimagemem(aimage.pixels);
+  fillchar(aimage,sizeof(aimage),0);
  end;
 end;
 
