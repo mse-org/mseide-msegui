@@ -61,6 +61,7 @@ type
    procedure doafterpaint(const acanvas: tcanvas); override;
    procedure dochange; virtual;
    function chartdata: complexarty;
+   function activetraceitem: ttrace;
 
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
@@ -103,8 +104,11 @@ type
  
 implementation
 uses
- msereal,msekeyboard,msedatalist,msegui;
+ msereal,msekeyboard,msedatalist,msegui,sysutils;
  
+type
+ ttraces1 = class(ttraces);
+  
 { tchartedit }
 
 constructor tchartedit.create(aowner: tcomponent);
@@ -112,6 +116,7 @@ begin
  fsnapdist:= defaultsnapdist;
  foptionsedit:= defaultchartoptionsedit;
  inherited;
+ traces.count:= 1;
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
  fobjectpicker.options:= [opo_mousemoveobjectquery,opo_rectselect,
                           opo_multiselect];
@@ -125,7 +130,21 @@ end;
 
 procedure tchartedit.setactivetrace(const avalue: integer);
 begin
+ if avalue < 0 then begin
+  raise exception.create('Negative value');
+ end;
  factivetrace:= avalue;
+ if traces.count < avalue then begin
+  traces.count:= avalue;
+ end;
+end;
+
+function tchartedit.activetraceitem: ttrace;
+begin
+ if factivetrace >= traces.count then begin
+  traces.count:= factivetrace+1;
+ end;
+ result:= ttrace(ttraces1(traces).fitems[factivetrace]);
 end;
 
 function tchartedit.hasactivetrace: boolean;
@@ -146,7 +165,7 @@ begin
              (info.shiftstate * shiftstatesmask = [ss_left]) then begin
     if pointinrect(info.pos,innerclientrect) then begin
      co1:= tracecoord(info.pos);
-     with traces[factivetrace] do begin
+     with activetraceitem do begin
       addxydata(co1.re,co1.im);
      end;
      include(info.eventstate,es_processed);
@@ -515,7 +534,7 @@ begin
  if not (es_processed in ainfo.eventstate) and (ainfo.key = key_delete) and
      not readonly and (ainfo.shiftstate*shiftstatesmask = []) and 
                                  fobjectpicker.hascurrentobjects  then begin
-  traces[factivetrace].deletedata(fobjectpicker.currentobjects);
+  activetraceitem.deletedata(fobjectpicker.currentobjects);
   fobjectpicker.clear;
   include(ainfo.eventstate,es_processed);
   checkvalue;
@@ -542,7 +561,7 @@ end;
 
 function tchartedit.chartdata: complexarty;
 begin
- result:= copy(traces[factivetrace].xydata);
+ result:= copy(activetraceitem.xydata);
 end;
 
 procedure tchartedit.setvalue(const avalue: complexarty);
@@ -553,7 +572,7 @@ end;
 
 procedure tchartedit.dochange;
 begin
- traces[factivetrace].xydata:= fvalue;
+ activetraceitem.xydata:= fvalue;
  if not (ws_loadedproc in fwidgetstate) then begin
   if canevent(tmethod(fonchange)) then begin
    fonchange(self);
