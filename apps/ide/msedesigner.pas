@@ -4522,8 +4522,8 @@ var
   end;
   for int3:= 0 to comp1.componentcount - 1  do begin
    comp2:= comp1.components[int3];
-   if (cssubcomponent in comp2.componentstyle) and 
-                                    not isnosubcomp(comp2) then begin
+   if (cssubcomponent in comp2.componentstyle){ and 
+                                    not isnosubcomp(comp2)} then begin
     check(comp2);
    end;
   end;

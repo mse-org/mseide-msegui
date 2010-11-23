@@ -22,7 +22,10 @@ const
 type
  setcomplexareventty = procedure(const sender: tobject;
                 var avalue: complexarty; var accept: boolean) of object;
-                
+
+ charteditoptionty = (ceo_thumbtrack);
+ charteditoptionsty = set of charteditoptionty;
+                 
  tchartedit = class(tchart,iobjectpicker)
   private
    factivetrace: integer;
@@ -35,6 +38,8 @@ type
    fonchange: notifyeventty;
    fondataentered: notifyeventty;
    fonsetvalue: setcomplexareventty;
+   foptions: charteditoptionsty;
+   fpickref: pointty;
    procedure setactivetrace(const avalue: integer);
    function limitmoveoffset(const aoffset: pointty): pointty;
    function getreadonly: boolean;
@@ -47,6 +52,8 @@ type
    procedure setreitems(const index: integer; const avalue: real);
    function getimitems(const index: integer): real;
    procedure setimitems(const index: integer; const avalue: real);
+   procedure setoptions(const avalue: charteditoptionsty);
+   procedure dopickmove(const sender: tobjectpicker);
   protected
    fvalue: complexarty;
    function hasactivetrace: boolean;
@@ -73,6 +80,7 @@ type
    procedure getpickobjects(const sender: tobjectpicker;
                                     var objects: integerarty);
    procedure beginpickmove(const sender: tobjectpicker);
+   procedure pickthumbtrack(const sender: tobjectpicker);
    procedure endpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
   public
@@ -93,6 +101,7 @@ type
                            write foptionsedit default defaultchartoptionsedit;
    property snapdist: integer read fsnapdist write fsnapdist 
                                               default defaultsnapdist;
+   property options: charteditoptionsty read foptions write setoptions default [];
 
    property statfile;
    property statvarname;
@@ -134,8 +143,8 @@ begin
   raise exception.create('Negative value');
  end;
  factivetrace:= avalue;
- if traces.count < avalue then begin
-  traces.count:= avalue;
+ if traces.count <= avalue then begin
+  traces.count:= avalue+1;
  end;
 end;
 
@@ -206,8 +215,8 @@ var
 begin
  rect1:= innerclientrect;
  with traces[factivetrace] do begin
-  result.x:= rect1.x + round(((avalue.re-start)/xrange)*rect1.cx);
-  result.y:= rect1.y + rect1.cy - round(((avalue.im-start)/xrange)*rect1.cy);
+  result.x:= rect1.x + round(((avalue.re-xstart)/xrange)*rect1.cx);
+  result.y:= rect1.y + rect1.cy - round(((avalue.im-ystart)/yrange)*rect1.cy);
  end;
 end;
 
@@ -348,7 +357,7 @@ end;
 
 function tchartedit.limitmoveoffset(const aoffset: pointty): pointty;
 begin
- result:= aoffset;
+ result:= addpoint(aoffset,fpickref);
  if ops_moving in fobjectpicker.state then begin
   if result.x > foffsetmax.x then begin
    result.x:= foffsetmax.x;
@@ -363,6 +372,7 @@ begin
    result.y:= foffsetmin.y;
   end;
  end;
+ subpoint1(result,fpickref);
 end;
 
 procedure tchartedit.beginpickmove(const sender: tobjectpicker);
@@ -374,6 +384,7 @@ var
  ar1: pointarty;
  objs: integerarty;
 begin
+ fpickref:= nullpoint;
  rect1:= innerclientrect;
  mi.x:= maxint;
  mi.y:= maxint;
@@ -427,7 +438,7 @@ begin
  end;
 end;
 
-procedure tchartedit.endpickmove(const sender: tobjectpicker);
+procedure tchartedit.dopickmove(const sender: tobjectpicker);
 var
  int1,int2: integer;
  pt1: pointty;
@@ -435,22 +446,33 @@ var
  offs: pointty;
  objs: integerarty;
 begin
- offs:= limitmoveoffset(sender.pickoffset);
+ offs:= limitmoveoffset(subpoint(sender.pickoffset,fpickref));
+ addpoint1(fpickref,offs);
  objs:= sender.currentobjects;
  for int1:= 0 to high(objs) do begin
   int2:= objs[int1];
   pt1:= nodepos(int2);
   co1:= traces[factivetrace].xyvalue[int2];
   co2:= tracecoord(addpoint(pt1,offs));
-  if sender.pickoffset.x <> 0 then begin //no rounding if nochange
+  if offs.x <> 0 then begin //no rounding if nochange
    co1.re:= co2.re;
   end;
-  if sender.pickoffset.y <> 0 then begin //no rounding if nochange
+  if offs.y <> 0 then begin //no rounding if nochange
    co1.im:= co2.im;
   end;
   traces[factivetrace].xyvalue[int2]:= co1;
  end;
  checkvalue;
+end;
+
+procedure tchartedit.pickthumbtrack(const sender: tobjectpicker);
+begin
+ dopickmove(sender);
+end;
+
+procedure tchartedit.endpickmove(const sender: tobjectpicker);
+begin
+ dopickmove(sender);
 end;
 
 procedure tchartedit.paintxorpic(const sender: tobjectpicker; 
@@ -466,7 +488,12 @@ begin
  with sender do begin
   objs:= currentobjects;
   if objs <> nil then begin
-   offs:= limitmoveoffset(pickoffset);
+   if ceo_thumbtrack in foptions then begin
+    offs:= nullpoint;
+   end
+   else begin
+    offs:= limitmoveoffset(pickoffset);
+   end;
    setlength(ar1,length(objs));
    setlength(ar2,length(objs)*2); //max
    int2:= 0;
@@ -668,6 +695,21 @@ begin
  checkarrayindex(fvalue,index);
  fvalue[index].im:= avalue;
  dochange;
+end;
+
+procedure tchartedit.setoptions(const avalue: charteditoptionsty);
+begin
+ if avalue <> foptions then begin
+  foptions:= avalue;
+  with fobjectpicker do begin
+   if ceo_thumbtrack in avalue then begin
+    options:= options + [opo_thumbtrack];
+   end
+   else begin
+    options:= options - [opo_thumbtrack];
+   end;
+  end;
+ end; 
 end;
 
 end.

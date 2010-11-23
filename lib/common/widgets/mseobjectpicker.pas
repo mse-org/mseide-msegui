@@ -39,6 +39,7 @@ type
   procedure getpickobjects(const sender: tobjectpicker; var objects: integerarty);
 //  procedure getmouseoverobjects(const sender: tobjectpicker; var objects: integerarty);
   procedure beginpickmove(const sender: tobjectpicker);
+  procedure pickthumbtrack(const sender: tobjectpicker);
   procedure endpickmove(const sender: tobjectpicker);
   procedure paintxorpic(const sender: tobjectpicker; const acanvas: tcanvas);
  end;
@@ -47,7 +48,7 @@ type
                         ops_xorpicpainted,ops_xorpicremoved);
  objectpickerstatesty = set of objectpickerstatety;
  objectpickeroptionty = (opo_mousemoveobjectquery,opo_rectselect,
-                         opo_multiselect);
+                         opo_multiselect,opo_thumbtrack);
  objectpickeroptionsty = set of objectpickeroptionty;
  
  tobjectpicker = class      //todo: area selecting, area deselecting
@@ -138,6 +139,9 @@ begin
   addpoint1(fpickrect.pos,fpickoffset);
   fpickrect.size:= nullsize;
   fpickoffset:= nullpoint;
+  if opo_thumbtrack in foptions then begin
+   fintf.pickthumbtrack(self);
+  end;
   exclude(fstate,ops_moving);
  end;
  exclude(fstate,ops_rectselecting);
@@ -383,6 +387,9 @@ begin
     if ops_moving in fstate then begin
      removexorpic;
      fpickoffset:= subpoint(info.pos,fpickrect.pos);
+     if opo_thumbtrack in foptions then begin
+      fintf.pickthumbtrack(self);
+     end;
      paintxorpic;
      include(info.eventstate,es_processed);
     end

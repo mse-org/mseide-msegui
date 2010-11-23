@@ -100,6 +100,7 @@ type
    procedure getpickobjects(const sender: tobjectpicker; 
                                           var objects: integerarty);
    procedure beginpickmove(const sender: tobjectpicker);
+   procedure pickthumbtrack(const sender: tobjectpicker);
    procedure endpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
   public
@@ -330,6 +331,11 @@ begin
 end;
 
 procedure tsplitter.beginpickmove(const sender: tobjectpicker);
+begin
+ //dummy
+end;
+
+procedure tsplitter.pickthumbtrack(const sender: tobjectpicker);
 begin
  //dummy
 end;
@@ -980,7 +986,6 @@ function tsplitter.getshrinkpriority: integer;
 begin
  result:= fshrinkpriority;
 end;
-
 { tspacer }
 
 constructor tspacer.create(aowner: tcomponent);

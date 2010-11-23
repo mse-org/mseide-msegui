@@ -225,7 +225,7 @@ begin
  inherited;
  fwave:= tsigwavetable.create(self);
  fwave.name:= 'wave';
- fwave.setsubcompref;
+ fwave.setsubcomponent(true);
 end;
 
 destructor twavetableedit.destroy;

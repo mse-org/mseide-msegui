@@ -729,6 +729,7 @@ type
    procedure getpickobjects(const sender: tobjectpicker;
                                 var objects: integerarty);
    procedure beginpickmove(const sender: tobjectpicker);
+   procedure pickthumbtrack(const sender: tobjectpicker);
    procedure endpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
 
@@ -4663,6 +4664,11 @@ end;
 procedure tcustomtabwidget.settab_widthmax(const avalue: integer);
 begin
  ftabs.tabs.widthmax:= avalue;
+end;
+
+procedure tcustomtabwidget.pickthumbtrack(const sender: tobjectpicker);
+begin
+ //dummy
 end;
 
 { tpagetab }
