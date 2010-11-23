@@ -26,9 +26,7 @@ type
  getpickobjectseventty = procedure (const sender: tcustompickwidget;
                             const picker: tobjectpicker;
                             var objects: integerarty) of object;
- beginpickmoveeventty = procedure(const sender: tcustompickwidget;
-                                  const picker: tobjectpicker) of object;
- endpickmoveeventty = procedure(const sender: tcustompickwidget;
+ pickmoveeventty = procedure(const sender: tcustompickwidget;
                                   const picker: tobjectpicker) of object;
  paintxorpiceventty = procedure(const sender: tcustompickwidget;
                                        const picker: tobjectpicker;
@@ -39,11 +37,15 @@ type
    fobjectpicker: tobjectpicker;
    fongetcursorshape: getcursorshapeeventty;
    fongetpickobjects: getpickobjectseventty;
-   fonbeginpickmove: beginpickmoveeventty;
-   fonendpickmove: endpickmoveeventty;
+   fonbeginpickmove: pickmoveeventty;
+   fonpickthumbtrack: pickmoveeventty;
+   fonendpickmove: pickmoveeventty;
    fonpaintxorpic: paintxorpiceventty;
+   function getoptions: objectpickeroptionsty;
+   procedure setoptions(const avalue: objectpickeroptionsty);
   protected
    procedure clientmouseevent(var info: mouseeventinfoty); override;
+   procedure dokeydown(var ainfo: keyeventinfoty); override;
    //iobjectpicker
    function getcursorshape(const sender: tobjectpicker;
                            var shape: cursorshapety): boolean;
@@ -56,13 +58,16 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   property options: objectpickeroptionsty read getoptions write setoptions;
    property ongetcursorshape: getcursorshapeeventty read fongetcursorshape
                                 write fongetcursorshape;
    property ongetpickobjects: getpickobjectseventty read fongetpickobjects
                                 write fongetpickobjects;
-   property onbeginpickmove: beginpickmoveeventty read fonbeginpickmove 
+   property onbeginpickmove: pickmoveeventty read fonbeginpickmove 
                                 write fonbeginpickmove;
-   property onendpickmove: endpickmoveeventty read fonendpickmove
+   property onpickthumbtrack: pickmoveeventty read fonpickthumbtrack 
+                                write fonpickthumbtrack;
+   property onendpickmove: pickmoveeventty read fonendpickmove
                                 write fonendpickmove;
    property onpaintxorpic: paintxorpiceventty read fonpaintxorpic 
                                 write fonpaintxorpic;
@@ -70,6 +75,7 @@ type
 
  tpickwidget = class(tcustompickwidget)
   published
+   property options;
    property ongetcursorshape;
    property ongetpickobjects;
    property onbeginpickmove;
@@ -91,6 +97,16 @@ destructor tcustompickwidget.destroy;
 begin
  inherited;
  fobjectpicker.free;
+end;
+
+function tcustompickwidget.getoptions: objectpickeroptionsty;
+begin
+ result:= fobjectpicker.options;
+end;
+
+procedure tcustompickwidget.setoptions(const avalue: objectpickeroptionsty);
+begin
+ fobjectpicker.options:= avalue;
 end;
 
 function tcustompickwidget.getcursorshape(const sender: tobjectpicker;
@@ -122,7 +138,9 @@ end;
 
 procedure tcustompickwidget.pickthumbtrack(const sender: tobjectpicker);
 begin
- //dummy
+ if canevent(tmethod(fonpickthumbtrack)) then begin
+  fonpickthumbtrack(self,sender);
+ end;
 end;
 
 procedure tcustompickwidget.endpickmove(const sender: tobjectpicker);
@@ -145,6 +163,16 @@ begin
  fobjectpicker.mouseevent(info);
  if not (es_processed in info.eventstate) then begin
   inherited;
+ end;
+end;
+
+procedure tcustompickwidget.dokeydown(var ainfo: keyeventinfoty);
+begin
+ if not (es_processed in ainfo.eventstate) then begin
+  inherited;
+ end;
+ if not (es_processed in ainfo.eventstate) then begin
+  fobjectpicker.dokeydown(ainfo);
  end;
 end;
 
