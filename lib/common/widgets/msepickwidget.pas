@@ -50,6 +50,7 @@ type
    procedure getpickobjects(const sender: tobjectpicker; 
                                          var objects: integerarty);
    procedure beginpickmove(const sender: tobjectpicker);
+   procedure pickthumbtrack(const sender: tobjectpicker);
    procedure endpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
   public
@@ -117,6 +118,11 @@ begin
  if canevent(tmethod(fonbeginpickmove)) then begin
   fonbeginpickmove(self,sender);
  end;
+end;
+
+procedure tcustompickwidget.pickthumbtrack(const sender: tobjectpicker);
+begin
+ //dummy
 end;
 
 procedure tcustompickwidget.endpickmove(const sender: tobjectpicker);

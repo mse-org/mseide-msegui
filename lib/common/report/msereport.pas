@@ -690,6 +690,7 @@ type
    procedure getpickobjects(const sender: tobjectpicker;
                                         var aobjects: integerarty);
    procedure beginpickmove(const sender: tobjectpicker);
+   procedure pickthumbtrack(const sender: tobjectpicker);
    procedure endpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const acanvas: tcanvas);
   public
@@ -4393,6 +4394,11 @@ begin
 end;
 
 procedure tcustomrecordband.beginpickmove(const sender: tobjectpicker);
+begin
+ //dummy
+end;
+
+procedure tcustomrecordband.pickthumbtrack(const sender: tobjectpicker);
 begin
  //dummy
 end;
