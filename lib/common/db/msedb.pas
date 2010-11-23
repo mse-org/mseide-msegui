@@ -9,6 +9,9 @@
 }
 unit msedb;
 
+{$if fpc_fullversion >= 20300}
+ {$define mse_fpc_2_4_3}
+{$endif}
 {$ifdef VER2_2_0} {$define focuscontrolbug} {$endif}
 {$define mse_FPC_2_2}
 {$define hasaswidestring}
@@ -31,7 +34,7 @@ interface
 
 uses
  classes,db,mseclasses,mseglob,msestrings,msetypes,msearrayprops,mseapplication,
- sysutils,msebintree,mseact,msetimer;
+ sysutils,msebintree,mseact,msetimer{$ifdef mse_fpc_2_4_3},maskutils{$endif};
 
 type
  fieldtypearty = array of tfieldtype;
@@ -1417,6 +1420,47 @@ type
    property isutf8: boolean read fisutf8 write fisutf8;
    property items[index: integer]: tmseparam read getitem write setitem; default;
  end;
+
+ TFieldcracker = class(TComponent)
+  Public
+    FAlignMent : TAlignment;
+    FAttributeSet : String;
+    FCalculated : Boolean;
+    FConstraintErrorMessage : String;
+    FCustomConstraint : String;
+    FDataSet : TDataSet;
+//    FDataSize : Word;
+    FDataType : TFieldType;
+    FDefaultExpression : String;
+    FDisplayLabel : String;
+    FDisplayWidth : Longint;
+{$ifdef mse_fpc_2_4_3}FEditMask: TEditMask;{$endif}
+    FFieldKind : TFieldKind;
+    FFieldName : String;
+    FFieldNo : Longint;
+    FFields : TFields;
+    FHasConstraints : Boolean;
+    FImportedConstraint : String;
+    FIsIndexField : Boolean;
+    FKeyFields : String;
+    FLookupCache : Boolean;
+    FLookupDataSet : TDataSet;
+    FLookupKeyfields : String;
+    FLookupresultField : String;
+    FLookupList: TLookupList;
+    FOffset : Word;
+    FOnChange : TFieldNotifyEvent;
+    FOnGetText: TFieldGetTextEvent;
+    FOnSetText: TFieldSetTextEvent;
+    FOnValidate: TFieldNotifyEvent;
+    FOrigin : String;
+    FReadOnly : Boolean;
+    FRequired : Boolean;
+    FSize : integer;
+    FValidChars : TFieldChars;
+    FValueBuffer : Pointer;
+    FValidating : Boolean;
+  end;
  
 const
  fieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
@@ -1572,49 +1616,9 @@ type
     FInternalCalcField : Boolean;
     FPrecision : Longint;
     FRequired : Boolean;
-    FSize : Word;
+    FSize : integer;
  end;
  
- TFieldcracker = class(TComponent)
-  Private
-    FAlignMent : TAlignment;
-    FAttributeSet : String;
-    FCalculated : Boolean;
-    FConstraintErrorMessage : String;
-    FCustomConstraint : String;
-    FDataSet : TDataSet;
-//    FDataSize : Word;
-    FDataType : TFieldType;
-    FDefaultExpression : String;
-    FDisplayLabel : String;
-    FDisplayWidth : Longint;
-    FFieldKind : TFieldKind;
-    FFieldName : String;
-    FFieldNo : Longint;
-    FFields : TFields;
-    FHasConstraints : Boolean;
-    FImportedConstraint : String;
-    FIsIndexField : Boolean;
-    FKeyFields : String;
-    FLookupCache : Boolean;
-    FLookupDataSet : TDataSet;
-    FLookupKeyfields : String;
-    FLookupresultField : String;
-    FLookupList: TLookupList;
-    FOffset : Word;
-    FOnChange : TFieldNotifyEvent;
-    FOnGetText: TFieldGetTextEvent;
-    FOnSetText: TFieldSetTextEvent;
-    FOnValidate: TFieldNotifyEvent;
-    FOrigin : String;
-    FReadOnly : Boolean;
-    FRequired : Boolean;
-    FSize : Word;
-    FValidChars : TFieldChars;
-    FValueBuffer : Pointer;
-    FValidating : Boolean;
-  end;
-
   TCollectioncracker = class(TPersistent)
    private
     FItemClass: TCollectionItemClass;

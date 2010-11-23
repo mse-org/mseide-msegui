@@ -888,7 +888,7 @@ type
  tmsestringfield1 = class(tmsestringfield); 
  tmseblobfield1 = class(tmseblobfield);
  tmsevariantfield1 = class(tmsevariantfield);
-  
+ { 
  TFieldcracker = class(TComponent)
   private
    FAlignMent : TAlignment;
@@ -906,6 +906,7 @@ type
    FFieldName : String;
    FFieldNo : Longint;
  end;
+}
 { 
   TDataSetcracker = class(TComponent)
   Private
