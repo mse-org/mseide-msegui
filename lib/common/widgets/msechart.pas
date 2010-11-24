@@ -831,6 +831,12 @@ begin
      end;
     end;
     checkrange(dpcountxy);
+    if isxseries and (cto_seriescentered in finfo.options) and 
+                                             (dpcounty > 0) then begin
+     xs:= xs*(dpcounty1/dpcounty);
+     xo:= xo + 0.5;
+    end;
+    
     if (cto_xordered in finfo.options) or isxseries then begin
      int4:= tchart(fowner).traces.fsize.cx+3;//2; //cx + 1
      setlength(ar1,int4);
