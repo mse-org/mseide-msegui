@@ -149,7 +149,7 @@ begin
   tgroupbox,tscrollbox,tstepbox,tdockpanel,tdockhandle,tmseformwidget,
   tdockformwidget,tmainmenuwidget,
   tsplitter,tspacer,tlayouter,ttoolbar,ttabbar,ttabwidget,ttabpage,
-  tdial,tchart,tchartedit,tchartrecorder,twindowwidget
+  tdial,tchart,txychartedit,txserieschartedit,tchartrecorder,twindowwidget
    {$ifndef mse_no_opengl}{$ifdef FPC},topenglwidget{$endif}{$endif}
   ,ttraywidget,tdockpanelformcontroller]);
  registercomponenttabhints(['Widget'],

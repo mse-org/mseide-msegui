@@ -14,7 +14,6 @@ uses
  classes,msegraphedits,msesignal,mseguiglob,mseevent,msechartedit,msetypes,
  msechart,mseclasses;
 const
- defaultwavetraceoptions = [cto_xordered];
  defaultsamplecount = 4096;
  
 type
@@ -60,30 +59,7 @@ type
    property options: sigeditoptionsty read foptions write setoptions default [];
  end;
 
- twavetrace = class(ttrace)
-  protected
-   procedure setkind(const avalue: tracekindty); override;
-   procedure setoptions(const avalue: charttraceoptionsty); override;
-  public
-   constructor create(aowner: tobject); override;
-  published
-   property kind default trk_xy;
-   property options default defaultwavetraceoptions;
- end;
- 
- twavetraces = class(ttraces)
-  protected
-   procedure setkind(const avalue: tracekindty); override;
-   procedure setoptions(const avalue: charttraceoptionsty); override;
-  public
-   constructor create(const aowner: tcustomchart);
-   class function getitemclasstype: persistentclassty; override;
-  published
-   property kind default trk_xy;
-   property options default defaultwavetraceoptions;
- end;
-
- twavetableedit = class(tchartedit)
+ twavetableedit = class(torderedxychartedit)
   private
    fwave: tsigwavetable;
    fsamplecount: integer;
@@ -219,9 +195,6 @@ end;
 constructor twavetableedit.create(aowner: tcomponent);
 begin
  fsamplecount:= defaultsamplecount;
- if ftraces = nil then begin
-  ftraces:= twavetraces.create(self);
- end;
  inherited;
  fwave:= tsigwavetable.create(self);
  fwave.name:= 'wave';
@@ -298,47 +271,6 @@ begin
   fsamplecount:= avalue;
   sample;
  end;
-end;
-
-{ twavetrace }
-
-constructor twavetrace.create(aowner: tobject);
-begin
- inherited;
-end;
-
-procedure twavetrace.setoptions(const avalue: charttraceoptionsty);
-begin
- inherited setoptions(avalue + [cto_xordered]);
-end;
-
-procedure twavetrace.setkind(const avalue: tracekindty);
-begin
- inherited setkind(trk_xy);
-end;
-
-{ twavetraces }
-
-constructor twavetraces.create(const aowner: tcustomchart);
-begin
- inherited;
- kind:= trk_xy;
- options:= defaultwavetraceoptions;
-end;
-
-class function twavetraces.getitemclasstype: persistentclassty;
-begin
- result:= twavetrace;
-end;
-
-procedure twavetraces.setoptions(const avalue: charttraceoptionsty);
-begin
- inherited setoptions(avalue + [cto_xordered]);
-end;
-
-procedure twavetraces.setkind(const avalue: tracekindty);
-begin
- inherited setkind(trk_xy);
 end;
 
 end.

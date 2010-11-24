@@ -33,9 +33,17 @@ type
 
  charttraceoptionty = (cto_invisible,cto_adddataright,
                        cto_xordered, //optimize for big data quantity
-                       cto_logx,cto_logy
+                       cto_logx,cto_logy,cto_seriescentered
                        );
  charttraceoptionsty = set of charttraceoptionty;
+const
+ defaultxytraceoptions = [cto_xordered];
+
+type
+ xseriesdataty = record
+  value: real;
+  index: integer;
+ end;
 
  datapointty = record
   first,min,max,last: integer;
@@ -137,6 +145,7 @@ type
    procedure addxydata(const xy: complexty); overload;
    procedure addxydata(const x: real; const y: real); overload;
    procedure addxseriesdata(const avalue: real);
+   procedure insertxseriesdata(const avalue: xseriesdataty);
    procedure assign(source: tpersistent); override;
    property xdata: realarty read finfo.ydata write setxdata;
    property ydata: realarty read finfo.ydata write setydata;
@@ -254,6 +263,30 @@ type
    property image_list: timagelist read fimage_list write setimage_list;
    property image_widthmm: real read fimage_widthmm write setimage_widthmm;
    property image_heighthmm: real read fimage_heightmm write setimage_heightmm;
+ end;
+
+ txytrace = class(ttrace)
+  protected
+   procedure setkind(const avalue: tracekindty); override;
+   procedure setoptions(const avalue: charttraceoptionsty); override;
+  public
+   constructor create(aowner: tobject); override;
+  published
+   property kind default trk_xy;
+   property options default defaultxytraceoptions;
+ end;
+ 
+ txytraces = class(ttraces)
+  protected
+   fxordered: boolean;
+   procedure setkind(const avalue: tracekindty); override;
+   procedure setoptions(const avalue: charttraceoptionsty); override;
+  public
+   constructor create(const aowner: tcustomchart; const axordered: boolean);
+   class function getitemclasstype: persistentclassty; override;
+  published
+   property kind default trk_xy;
+   property options default defaultxytraceoptions;
  end;
 
  ichartdialcontroller = interface(idialcontroller)
@@ -519,13 +552,20 @@ type
 
 function autointerval(const arange: real; const aintervalcount: real): real;
                    //returns apropropriate 1/2/5 value
-                   
+function makexseriesdata(const value: real; const index: integer): xseriesdataty;
+
 implementation
 uses
  sysutils,math,msebits,rtlconsts;
 
 type
  tcustomdialcontroller1 = class(tcustomdialcontroller);
+
+function makexseriesdata(const value: real; const index: integer): xseriesdataty;
+begin
+ result.value:= value;
+ result.index:= index;
+end;
 
 function autointerval(const arange: real; const aintervalcount: real): real;
                    //returns apropropriate 1/2/5 value
@@ -1135,6 +1175,13 @@ begin
           sizeof(finfo.ydata[0])*high(finfo.ydata));
  end;
  finfo.ydata[high(finfo.ydata)]:= avalue;
+ datachange;
+end;
+
+procedure ttrace.insertxseriesdata(const avalue: xseriesdataty);
+begin
+ finfo.ydatalist:= nil;
+ insertitem(finfo.ydata,avalue.index,avalue.value);
  datachange;
 end;
 
@@ -2597,6 +2644,58 @@ end;
 constructor tchartdials.create(const aintf: ichartdialcontroller);
 begin
  inherited create(aintf);
+end;
+
+{ txytrace }
+
+constructor txytrace.create(aowner: tobject);
+begin
+ inherited;
+end;
+
+procedure txytrace.setoptions(const avalue: charttraceoptionsty);
+begin
+ if txytraces(ftraces).fxordered then begin
+  inherited setoptions(avalue + [cto_xordered]);
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+procedure txytrace.setkind(const avalue: tracekindty);
+begin
+ inherited setkind(trk_xy);
+end;
+
+{ txytraces }
+
+constructor txytraces.create(const aowner: tcustomchart; const axordered: boolean);
+begin
+ fxordered:= axordered;
+ inherited create(aowner);
+ kind:= trk_xy;
+ options:= defaultxytraceoptions;
+end;
+
+class function txytraces.getitemclasstype: persistentclassty;
+begin
+ result:= txytrace;
+end;
+
+procedure txytraces.setoptions(const avalue: charttraceoptionsty);
+begin
+ if fxordered then begin
+  inherited setoptions(avalue + [cto_xordered]);
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+procedure txytraces.setkind(const avalue: tracekindty);
+begin
+ inherited setkind(trk_xy);
 end;
 
 end.

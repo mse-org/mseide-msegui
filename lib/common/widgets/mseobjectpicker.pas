@@ -270,9 +270,11 @@ var
 var
  ar1: integerarty;
  bo1: boolean;
+ infopobefore: pmouseeventinfoty;
 // int1,int2,int3: integer;
  
 begin
+ infopobefore:= fmouseeventinfopo;
  fmouseeventinfopo:= @info;
  try
   shiftstates1:= info.shiftstate * shiftstatesmask;
@@ -414,7 +416,7 @@ begin
    end;
   end;
  finally
-  fmouseeventinfopo:= nil;
+  fmouseeventinfopo:= infopobefore;
  end;
 end;
 
