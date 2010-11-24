@@ -9,8 +9,8 @@
 }
 unit msedb;
 
-{$if fpc_fullversion >= 20300}
- {$define mse_fpc_2_4_3}
+{$if fpc_fullversion >= 020403}
+ {$define mse_fpc_2_4_3} 
 {$endif}
 {$ifdef VER2_2_0} {$define focuscontrolbug} {$endif}
 {$define mse_FPC_2_2}
