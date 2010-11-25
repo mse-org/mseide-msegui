@@ -265,6 +265,8 @@ type
    fimage_heightmm: real;
    foptions: charttraceoptionsty;
    fkind: tracekindty;
+   fchartkind: tracechartkindty;
+   fbar_width: integer;
    procedure setitems(const index: integer; const avalue: ttrace);
    function getitems(const index: integer): ttrace;
    procedure setxserstart(const avalue: real);
@@ -281,6 +283,8 @@ type
    procedure setlogx(const avalue: boolean);
    function getlogy: boolean;
    procedure setlogy(const avalue: boolean);
+   procedure setchartkind(const avalue: tracechartkindty);
+   procedure setbar_width(const avalue: integer);
   protected
    fsize: sizety;
    fscalex: real;
@@ -301,9 +305,12 @@ type
    procedure dostatwrite(const writer: tstatwriter);
    property logx: boolean read getlogx write setlogx;
    property logy: boolean read getlogy write setlogy;
-   property items[const index: integer]: ttrace read getitems write setitems; default;
+   property items[const index: integer]: ttrace read getitems 
+                                                   write setitems; default;
   published
    property kind: tracekindty read fkind write setkind default trk_xseries;
+   property chartkind: tracechartkindty read fchartkind 
+                                     write setchartkind default tck_line;
    property options: charttraceoptionsty read foptions 
                                                 write setoptions default [];
    property xserstart: real read fxserstart write setxserstart;
@@ -317,6 +324,8 @@ type
    property image_list: timagelist read fimage_list write setimage_list;
    property image_widthmm: real read fimage_widthmm write setimage_widthmm;
    property image_heighthmm: real read fimage_heightmm write setimage_heightmm;
+   property bar_width: integer read fbar_width 
+                                  write setbar_width default 0; //0 -> bar line
  end;
 
  txytrace = class(ttrace)
@@ -2012,6 +2021,35 @@ begin
  end;
 end;
 
+procedure ttraces.setchartkind(const avalue: tracechartkindty);
+var
+ int1: integer;
+begin
+ if fchartkind <> avalue then begin
+  fchartkind:= avalue;
+  if not (csloading in tcustomchart(fowner).componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    ttrace(fitems[int1]).chartkind:= avalue;
+   end;
+  end;
+ end;
+end;
+
+procedure ttraces.setbar_width(const avalue: integer);
+var
+ int1: integer;
+begin
+ if fbar_width <> avalue then begin
+  fbar_width:= avalue;
+  if not (csloading in tcustomchart(fowner).componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    ttrace(fitems[int1]).bar_width:= avalue;
+   end;
+  end;
+ end;
+end;
+
+
 procedure ttraces.setoptions(const avalue: charttraceoptionsty);
 var
  int1: integer;
@@ -2037,6 +2075,8 @@ begin
  inherited;
  with ttrace(item) do begin
   kind:= self.fkind;
+  chartkind:= self.fchartkind;
+  bar_width:= self.fbar_width;
   options:= self.foptions;
   xserstart:= self.fxserstart;
   xstart:= self.fxstart;
