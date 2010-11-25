@@ -181,6 +181,7 @@ type
    procedure widgetregioninvalid;
   public
    constructor create(aowner: tobject); override;
+   destructor destroy; override;
    procedure createbar_frame;
    procedure createbar_face;
    
@@ -680,6 +681,13 @@ begin
  finfo.yrange:= 1.0;
  finfo.imagenr:= -1;
  inherited;
+end;
+
+destructor ttrace.destroy;
+begin
+ inherited;
+ finfo.bar_frame.free;
+ finfo.bar_face.free;
 end;
 
 procedure ttrace.datachange;
