@@ -30,12 +30,15 @@ type
  tracestatety = (trs_datapointsvalid);
  tracestatesty = set of tracestatety;
  tracekindty = (trk_xseries,trk_xy);
+ tracechartkindty = (tck_line,tck_barline);
+ tracechartkindsty = set of tracechartkindty;
 
  charttraceoptionty = (cto_invisible,cto_adddataright,
                        cto_xordered, //optimize for big data quantity
                        cto_logx,cto_logy,cto_seriescentered
                        );
  charttraceoptionsty = set of charttraceoptionty;
+ 
 const
  defaultxytraceoptions = [cto_xordered];
 
@@ -59,6 +62,7 @@ type
   ydatalist: trealdatalist;
   state: tracestatesty;
   datapoints: pointarty;
+  barlines: segmentarty;
   bottommargin,topmargin: integer;
   color: colorty;
   colorimage: colorty;
@@ -83,6 +87,7 @@ type
  ttrace = class(townedeventpersistent,iimagelistinfo)
   private
    finfo: traceinfoty;
+   fchartkind: tracechartkindty;
    procedure setxydata(const avalue: complexarty);
    procedure datachange;
    procedure setcolor(const avalue: colorty);
@@ -125,6 +130,7 @@ type
    procedure setyvalue(const index: integer; const avalue: real);
    function getxyvalue(const index: integer): complexty;
    procedure setxyvalue(const index: integer; const avalue: complexty);
+   procedure setchartkind(const avalue: tracechartkindty);
   protected
    ftraces: ttraces;
    procedure setkind(const avalue: tracekindty); virtual;
@@ -183,6 +189,7 @@ type
    property start: integer read finfo.start write setstart default 0;
    property maxcount: integer read finfo.maxcount write setmaxcount default 0;
                       //0-> data count
+   property chartkind: tracechartkindty read fchartkind write setchartkind;
    property options: charttraceoptionsty read finfo.options 
                                              write setoptions default [];
    property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
@@ -939,27 +946,51 @@ begin
       end;
      end;
      setlength(finfo.datapoints,int2);
-     with finfo do begin //adjust boundary values 
-                         //todo: extend window for image size
-      if int2 > 1 then begin
-       if ar1[0].used then begin
-        bottommargin:= 1;
-        datapoints[0].y:= pkround(datapoints[0].y + 
-              (datapoints[1].y - datapoints[0].y) * 
-                (-1-xbottom)/
-                (datapoints[1].x-xbottom));
+     if fchartkind = tck_line then begin
+      with finfo do begin //adjust boundary values 
+                          //todo: extend window for image size
+       barlines:= nil;
+       if int2 > 1 then begin
+        if ar1[0].used then begin
+         bottommargin:= 1;
+         datapoints[0].y:= pkround(datapoints[0].y + 
+               (datapoints[1].y - datapoints[0].y) * 
+                 (-1-xbottom)/
+                 (datapoints[1].x-xbottom));
+        end;
+        if ar1[high(ar1)].used then begin
+         topmargin:= 1;
+         datapoints[int2-1].y:= pkround(datapoints[int2-1].y + 
+               (datapoints[int2-2].y - datapoints[int2-1].y) * 
+                 (length(ar1)-xtop)/
+                 (datapoints[int2-2].x-xtop));
+        end;
        end;
-       if ar1[high(ar1)].used then begin
-        topmargin:= 1;
-        datapoints[int2-1].y:= pkround(datapoints[int2-1].y + 
-              (datapoints[int2-2].y - datapoints[int2-1].y) * 
-                (length(ar1)-xtop)/
-                (datapoints[int2-2].x-xtop));
+      end;
+     end
+     else begin //tck_barline
+      with finfo do begin
+       setlength(barlines,length(datapoints));
+       with tchart(fowner).traces.fsize do begin
+        int2:= round(yo*ys); //zero position
+        if int2 < 0 then begin
+         int2:= 0;
+        end;
+        if int2 > cy then begin
+         int2:= cy;
+        end;
+       end;
+       for int1:= 0 to high(barlines) do begin
+        with barlines[int1] do begin
+         a:= datapoints[int1];
+         b.x:= a.x;
+         b.y:= int2;
+        end;
        end;
       end;
      end;
-    end
-    else begin
+    end            //xordered
+    else begin     //xy
      setlength(finfo.datapoints,dpcountxy);
      for int1:= 0 to high(finfo.datapoints) do begin
       if islogx then begin
@@ -990,11 +1021,16 @@ begin
   if finfo.dashes <> '' then begin
    acanvas.dashes:= finfo.dashes;
   end;
-  acanvas.capstyle:= cs_round;
-  acanvas.joinstyle:= js_round;
-  acanvas.drawlines(finfo.datapoints,false,finfo.color);
-  acanvas.capstyle:= cs_butt;
-  acanvas.joinstyle:= js_miter;
+  if fchartkind = tck_barline then begin
+   acanvas.drawlinesegments(finfo.barlines,finfo.color);
+  end
+  else begin
+   acanvas.capstyle:= cs_round;
+   acanvas.joinstyle:= js_round;
+   acanvas.drawlines(finfo.datapoints,false,finfo.color);
+   acanvas.capstyle:= cs_butt;
+   acanvas.joinstyle:= js_miter;
+  end;
   if finfo.dashes <> '' then begin
    acanvas.dashes:= '';
   end;
@@ -1110,6 +1146,14 @@ procedure ttrace.setoptions(const avalue: charttraceoptionsty);
 begin
  if avalue <> finfo.options then begin
   finfo.options:= avalue;
+  datachange;
+ end;
+end;
+
+procedure ttrace.setchartkind(const avalue: tracechartkindty);
+begin
+ if fchartkind <> avalue then begin
+  fchartkind:= avalue;
   datachange;
  end;
 end;
