@@ -13,7 +13,7 @@ interface
 
 uses
  classes,msegui,mseguiglob,mseclasses,msearrayprops,msetypes,msegraphics,
- msegraphutils,
+ msegraphutils,mseglob,
  msewidgets,msesimplewidgets,msedial,msebitmap,msemenus,mseevent,
  msedatalist,msestatfile,msestat,msestrings;
 
@@ -30,7 +30,7 @@ type
  tracestatety = (trs_datapointsvalid);
  tracestatesty = set of tracestatety;
  tracekindty = (trk_xseries,trk_xy);
- tracechartkindty = (tck_line,tck_barline);
+ tracechartkindty = (tck_line,tck_bar);
  tracechartkindsty = set of tracechartkindty;
 
  charttraceoptionty = (cto_invisible,cto_adddataright,
@@ -77,17 +77,26 @@ type
   widthmm: real;
   dashes: string;
   options: charttraceoptionsty;
+  chartkind: tracechartkindty;
+  bar_offset: integer;
+  bar_width: integer;
+  bar_frame: tframe;
+  bar_face: tface;
   start: integer;
   imagenr: imagenrty;
   name: string;
  end;
 
  ttraces = class;
-   
- ttrace = class(townedeventpersistent,iimagelistinfo)
+
+ tbarframe = class(tframe)
+  public
+   constructor create(const intf: iframe);
+ end;
+ 
+ ttrace = class(townedeventpersistent,iimagelistinfo,iframe,iface)
   private
    finfo: traceinfoty;
-   fchartkind: tracechartkindty;
    procedure setxydata(const avalue: complexarty);
    procedure datachange;
    procedure setcolor(const avalue: colorty);
@@ -131,6 +140,12 @@ type
    function getxyvalue(const index: integer): complexty;
    procedure setxyvalue(const index: integer; const avalue: complexty);
    procedure setchartkind(const avalue: tracechartkindty);
+   procedure setbar_offset(const avalue: integer);
+   procedure setbar_width(const avalue: integer);
+   function getbar_frame: tframe;
+   procedure setbar_frame(const avalue: tframe);
+   function getbar_face: tface;
+   procedure setbar_face(const avalue: tface);
   protected
    ftraces: ttraces;
    procedure setkind(const avalue: tracekindty); virtual;
@@ -143,8 +158,32 @@ type
    procedure paint1(const acanvas: tcanvas; const imagesize: sizety;
                         const imagealignment: alignmentsty);
    procedure defineproperties(filer: tfiler); override;
+    //iframe
+   procedure setframeinstance(instance: tcustomframe);
+   procedure setstaticframe(value: boolean);
+   function getstaticframe: boolean;
+   procedure scrollwidgets(const dist: pointty);
+   procedure clientrectchanged;
+   function getcomponentstate: tcomponentstate;
+   function getmsecomponentstate: msecomponentstatesty;
+   procedure invalidate;
+   procedure invalidatewidget;
+   procedure invalidaterect(const rect: rectty; 
+               const org: originty = org_client; const noclip: boolean = false);
+   function getwidget: twidget;
+   function getwidgetrect: rectty;
+   function getframestateflags: framestateflagsty;
+    //iface
+   function translatecolor(const acolor: colorty): colorty;
+   function getclientrect: rectty;
+   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+               const linkintf: iobjectlink = nil);
+   procedure widgetregioninvalid;
   public
    constructor create(aowner: tobject); override;
+   procedure createbar_frame;
+   procedure createbar_face;
+   
    procedure clear;
    procedure deletedata(const aindex: integer); overload;
    procedure deletedata(const aindexar: integerarty); overload;
@@ -189,9 +228,17 @@ type
    property start: integer read finfo.start write setstart default 0;
    property maxcount: integer read finfo.maxcount write setmaxcount default 0;
                       //0-> data count
-   property chartkind: tracechartkindty read fchartkind write setchartkind;
+   property chartkind: tracechartkindty read finfo.chartkind write setchartkind 
+                                                             default tck_line;
    property options: charttraceoptionsty read finfo.options 
                                              write setoptions default [];
+   property bar_offset: integer read finfo.bar_offset 
+                                  write setbar_offset default 0;
+   property bar_width: integer read finfo.bar_width 
+                                  write setbar_width default 0; //0 -> bar line
+   property bar_frame: tframe read getbar_frame write setbar_frame;
+   property bar_face: tface read getbar_face write setbar_face;
+   
    property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
    property name: string read finfo.name write finfo.name;
  end;
@@ -246,7 +293,7 @@ type
    procedure checkgraphic;
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
-   constructor create(const aowner: tcustomchart); reintroduce;
+   constructor create(const aowner: tchart); reintroduce;
    class function getitemclasstype: persistentclassty; override;
    function itembyname(const aname: string): ttrace;
    procedure assign(source: tpersistent); override;
@@ -289,7 +336,7 @@ type
    procedure setkind(const avalue: tracekindty); override;
    procedure setoptions(const avalue: charttraceoptionsty); override;
   public
-   constructor create(const aowner: tcustomchart; const axordered: boolean);
+   constructor create(const aowner: tchart; const axordered: boolean);
    class function getitemclasstype: persistentclassty; override;
   published
    property kind default trk_xy;
@@ -946,7 +993,7 @@ begin
       end;
      end;
      setlength(finfo.datapoints,int2);
-     if fchartkind = tck_line then begin
+     if chartkind = tck_line then begin
       with finfo do begin //adjust boundary values 
                           //todo: extend window for image size
        barlines:= nil;
@@ -971,18 +1018,17 @@ begin
      else begin //tck_barline
       with finfo do begin
        setlength(barlines,length(datapoints));
-       with tchart(fowner).traces.fsize do begin
-        int2:= round(yo*ys); //zero position
-        if int2 < 0 then begin
-         int2:= 0;
-        end;
-        if int2 > cy then begin
-         int2:= cy;
-        end;
+       int2:= round(yo*ys); //zero position
+       if int2 < 0 then begin
+        int2:= 0;
+       end;
+       if int2 > tchart(fowner).traces.fsize.cy then begin
+        int2:= tchart(fowner).traces.fsize.cy;
        end;
        for int1:= 0 to high(barlines) do begin
         with barlines[int1] do begin
-         a:= datapoints[int1];
+         a.x:= datapoints[int1].x + bar_offset;
+         a.y:= datapoints[int1].y;
          b.x:= a.x;
          b.y:= int2;
         end;
@@ -1015,14 +1061,41 @@ begin
 end;
 
 procedure ttrace.paint(const acanvas: tcanvas);
+var
+ int1: integer;
+ rect1,rect2: rectty;
 begin
  if (finfo.widthmm > 0) and visible then begin
   acanvas.linewidthmm:= finfo.widthmm;
   if finfo.dashes <> '' then begin
    acanvas.dashes:= finfo.dashes;
   end;
-  if fchartkind = tck_barline then begin
-   acanvas.drawlinesegments(finfo.barlines,finfo.color);
+  if finfo.chartkind = tck_bar then begin
+   if finfo.bar_width = 0 then begin
+    acanvas.drawlinesegments(finfo.barlines,finfo.color);
+   end
+   else begin
+    rect1.cx:= finfo.bar_width;
+    for int1:= 0 to high(finfo.barlines) do begin
+     with finfo.barlines[int1] do begin
+      rect1.pos:= a;
+      rect1.cy:= b.y - a.y;
+      acanvas.fillrect(rect1,finfo.color);
+      if finfo.bar_frame <> nil then begin
+       normalizerect1(rect1);
+       acanvas.save;
+       finfo.bar_frame.paintbackground(acanvas,rect1);
+       if finfo.bar_face <> nil then begin
+        rect2:= deflaterect(rect1,finfo.bar_frame.innerframe);
+        acanvas.remove(pointty(finfo.bar_frame.paintframe.topleft));
+        finfo.bar_face.paint(acanvas,rect2);
+       end;
+       acanvas.restore;
+       finfo.bar_frame.paintoverlay(acanvas,rect1);
+      end;
+     end;
+    end;
+   end;
   end
   else begin
    acanvas.capstyle:= cs_round;
@@ -1152,8 +1225,24 @@ end;
 
 procedure ttrace.setchartkind(const avalue: tracechartkindty);
 begin
- if fchartkind <> avalue then begin
-  fchartkind:= avalue;
+ if finfo.chartkind <> avalue then begin
+  finfo.chartkind:= avalue;
+  datachange;
+ end;
+end;
+
+procedure ttrace.setbar_offset(const avalue: integer);
+begin
+ if finfo.bar_offset <> avalue then begin
+  finfo.bar_offset:= avalue;
+  datachange;
+ end;
+end;
+
+procedure ttrace.setbar_width(const avalue: integer);
+begin
+ if finfo.bar_width <> avalue then begin
+  finfo.bar_width:= avalue;
   datachange;
  end;
 end;
@@ -1585,9 +1674,143 @@ begin
  end;
 end;
 
+function ttrace.getbar_frame: tframe;
+begin
+ tchart(fowner).getoptionalobject(finfo.bar_frame,
+                               {$ifdef FPC}@{$endif}createbar_frame);
+ result:= finfo.bar_frame;
+end;
+
+procedure ttrace.setbar_frame(const avalue: tframe);
+begin
+ tchart(fowner).setoptionalobject(avalue,finfo.bar_frame,
+                                 {$ifdef FPC}@{$endif}createbar_frame);
+ datachange;
+end;
+
+function ttrace.getbar_face: tface;
+begin
+ tchart(fowner).getoptionalobject(finfo.bar_face,{$ifdef FPC}@{$endif}createbar_face);
+ result:= finfo.bar_face;
+end;
+
+procedure ttrace.setbar_face(const avalue: tface);
+begin
+ tchart(fowner).setoptionalobject(avalue,finfo.bar_face,
+                                      {$ifdef FPC}@{$endif}createbar_face);
+ datachange;
+end;
+
+procedure ttrace.createbar_frame;
+begin
+ if finfo.bar_frame = nil then begin
+  tbarframe.create(iframe(self));
+ end;
+end;
+
+procedure ttrace.createbar_face;
+begin
+ if finfo.bar_face = nil then begin
+  finfo.bar_face:= tface.create(iface(self));
+ end;
+end;
+
+procedure ttrace.setframeinstance(instance: tcustomframe);
+begin
+ finfo.bar_frame:= tframe(instance);
+end;
+
+procedure ttrace.setstaticframe(value: boolean);
+begin
+ //dummy
+end;
+
+function ttrace.getstaticframe: boolean;
+begin
+ result:= false;
+end;
+
+procedure ttrace.scrollwidgets(const dist: pointty);
+begin
+ //dummy
+end;
+
+procedure ttrace.clientrectchanged;
+begin
+ invalidate;
+end;
+
+function ttrace.getcomponentstate: tcomponentstate;
+begin
+ result:= tchart(fowner).componentstate;
+end;
+
+function ttrace.getmsecomponentstate: msecomponentstatesty;
+begin
+ result:= tchart(fowner).msecomponentstate;
+end;
+
+procedure ttrace.invalidate;
+begin
+ tchart(fowner).invalidate;
+end;
+
+procedure ttrace.invalidatewidget;
+begin
+ tchart(fowner).invalidatewidget;
+end;
+
+procedure ttrace.invalidaterect(const rect: rectty;
+               const org: originty = org_client; const noclip: boolean = false);
+begin
+ tchart(fowner).invalidaterect(rect,org,noclip);
+end;
+
+function ttrace.getwidget: twidget;
+begin
+ result:= tchart(fowner);
+end;
+
+function ttrace.getwidgetrect: rectty;
+begin
+ result:= tchart(fowner).innerclientrect;
+end;
+
+function ttrace.getframestateflags: framestateflagsty;
+begin
+ result:= [];
+end;
+
+function ttrace.translatecolor(const acolor: colorty): colorty;
+begin
+ result:= acolor;
+ if acolor = cl_default then begin
+  result:= finfo.color;
+ end
+ else begin
+  result:= acolor;
+ end;
+end;
+
+function ttrace.getclientrect: rectty;
+begin
+ result:= tchart(fowner).innerclientrect;
+end;
+
+procedure ttrace.setlinkedvar(const source: tmsecomponent;
+               var dest: tmsecomponent; const linkintf: iobjectlink = nil);
+begin
+ tchart(fowner).setlinkedvar(source,dest,linkintf);
+end;
+
+procedure ttrace.widgetregioninvalid;
+begin
+ //dummy
+end;
+
 { ttraces }
 
-constructor ttraces.create(const aowner: tcustomchart);
+constructor ttraces.create(const aowner: tchart);
 begin
  fkind:= trk_xseries;
  fxserrange:= 1;
@@ -2720,7 +2943,7 @@ end;
 
 { txytraces }
 
-constructor txytraces.create(const aowner: tcustomchart; const axordered: boolean);
+constructor txytraces.create(const aowner: tchart; const axordered: boolean);
 begin
  fxordered:= axordered;
  inherited create(aowner);
@@ -2746,6 +2969,14 @@ end;
 procedure txytraces.setkind(const avalue: tracekindty);
 begin
  inherited setkind(trk_xy);
+end;
+
+{ tbarframe }
+
+constructor tbarframe.create(const intf: iframe);
+begin
+ inherited;
+ include(fstate,fs_nowidget);
 end;
 
 end.

@@ -366,6 +366,7 @@ type
    procedure invalidaterect(const rect: rectty; const org: originty = org_client;
                                   const noclip: boolean = false);
    function getframestateflags: framestateflagsty;
+
    procedure updatecellheight(const canvas: tcanvas; var aheight: integer); virtual;
   //iface
    function getclientrect: rectty;
