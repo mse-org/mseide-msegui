@@ -59,6 +59,7 @@ type
    procedure dokeydown(var ainfo: keyeventinfoty); override;
    procedure dobeforepaint(const acanvas: tcanvas); override;
    procedure doafterpaint(const acanvas: tcanvas); override;
+   procedure change;
    procedure dochange; virtual;
    function chartdataxy: complexarty;
    function chartdataxseries: realarty;
@@ -69,6 +70,7 @@ type
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
    procedure statread; override;
+   procedure loaded; override;
    procedure docheckvalue(var accept: boolean); virtual; abstract;
 
     //iobjectpicker
@@ -757,19 +759,20 @@ end;
 
 procedure tcustomchartedit.dochange;
 begin
-// activetraceitem.xydata:= fvalue;
  if not (ws_loadedproc in fwidgetstate) then begin
   if canevent(tmethod(fonchange)) then begin
    fonchange(self);
   end;
  end;
 end;
-{
-procedure tcustomchartedit.changed;
+
+procedure tcustomchartedit.change;
 begin
- dochange;
+ if not (csloading in componentstate) then begin
+  dochange;
+ end;
 end;
-}
+
 function tcustomchartedit.checkvalue: boolean;
 begin
  result:= true;
@@ -824,6 +827,17 @@ begin
  end; 
 end;
 
+procedure tcustomchartedit.loaded;
+begin
+ inherited;
+ include(fwidgetstate,ws_loadedproc);
+ try
+  change;
+ finally
+  exclude(fwidgetstate,ws_loadedproc);
+ end;
+end;
+
 { txychartedit }
 
 constructor txychartedit.create(aowner: tcomponent);
@@ -843,7 +857,7 @@ end;
 procedure txychartedit.setvalue(const avalue: complexarty);
 begin
  fvalue:= avalue;
- dochange;
+ change;
 end;
 
 procedure txychartedit.dochange;
@@ -886,7 +900,7 @@ procedure txychartedit.setvalueitems(const index: integer;
 begin
  checkarrayindex(fvalue,index);
  fvalue[index]:= avalue;
- dochange;
+ change;
 end;
 
 function txychartedit.getreitems(const index: integer): real;
@@ -899,7 +913,7 @@ procedure txychartedit.setreitems(const index: integer; const avalue: real);
 begin
  checkarrayindex(fvalue,index);
  fvalue[index].re:= avalue;
- dochange;
+ change;
 end;
 
 function txychartedit.getimitems(const index: integer): real;
@@ -912,7 +926,7 @@ procedure txychartedit.setimitems(const index: integer; const avalue: real);
 begin
  checkarrayindex(fvalue,index);
  fvalue[index].im:= avalue;
- dochange;
+ change;
 end;
 
 class function txychartedit.xordered: boolean;
@@ -931,7 +945,7 @@ end;
 procedure txserieschartedit.setvalue(const avalue: realarty);
 begin
  fvalue:= avalue;
- dochange;
+ change;
 end;
 
 procedure txserieschartedit.dochange;
@@ -974,7 +988,7 @@ procedure txserieschartedit.setvalueitems(const index: integer;
 begin
  checkarrayindex(fvalue,index);
  fvalue[index]:= avalue;
- dochange;
+ change;
 end;
 
 { torderedxychartedit }

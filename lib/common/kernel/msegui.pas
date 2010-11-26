@@ -1462,7 +1462,7 @@ type
    procedure dokeydown(var info: keyeventinfoty); virtual;
                                        //do not call dokeydown, call dokeydown1
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); virtual;
-                    //called twice, first before dokeydown with 
+                    //called twice, first before dokeydown with es_preview set
    function checkfocusshortcut(var info: keyeventinfoty): boolean; virtual;
    procedure dokeydownaftershortcut(var info: keyeventinfoty); virtual;
    procedure dokeyup(var info: keyeventinfoty); virtual;

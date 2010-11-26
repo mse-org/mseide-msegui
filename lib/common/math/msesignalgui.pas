@@ -12,9 +12,11 @@ unit msesignalgui;
 interface
 uses
  classes,msegraphedits,msesignal,mseguiglob,mseevent,msechartedit,msetypes,
- msechart,mseclasses;
+ msechart,mseclasses,msefft;
 const
  defaultsamplecount = 4096;
+ defaultharmonicscount = 16;
+ defaultffttableeditoptions = [ceo_noinsert];
  
 type
  sigeditoptionty = (sieo_exp);
@@ -75,6 +77,46 @@ type
    property samplecount: integer read fsamplecount 
                                  write setsamplecount default defaultsamplecount;
    property wave: tsigwavetable read fwave write setwave;
+ end;
+ 
+ ffteditoptionty = (feo_exp);
+ ffteditoptionsty = set of ffteditoptionty;
+const
+ defaultffteditoptions = [feo_exp];
+ 
+type  
+ tffttableedit = class(txserieschartedit)
+  private
+   fwave: tsigwavetable;
+   fsamplecount: integer;
+   ffft: tfft;
+   ffft_harmonicscount: integer;
+   ffft_options: ffteditoptionsty;
+   ffft_expmin: real;
+   ffft_max: real;
+   procedure setwave(const avalue: tsigwavetable);
+   procedure setsamplecount(const avalue: integer);
+   procedure setfft_harmonicscount(const avalue: integer);
+   procedure setfft_options(const avalue: ffteditoptionsty);
+   procedure setfft_expmin(const avalue: real);
+   procedure setfft_max(const avalue: real);
+  protected
+   procedure sample;
+   procedure dochange; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property samplecount: integer read fsamplecount 
+                                write setsamplecount default defaultsamplecount;
+   property fft_harmonicscount: integer read ffft_harmonicscount 
+                      write setfft_harmonicscount default defaultharmonicscount;
+   property fft_options: ffteditoptionsty read ffft_options 
+               write setfft_options default defaultffteditoptions;
+   property fft_expmin: real read ffft_expmin write setfft_expmin;
+   property fft_max: real read ffft_max write setfft_max;
+   property wave: tsigwavetable read fwave write setwave;
+   property options default defaultffttableeditoptions;
  end;
   
 implementation
@@ -270,6 +312,112 @@ begin
  if avalue <> fsamplecount then begin
   fsamplecount:= avalue;
   sample;
+ end;
+end;
+
+{ tffttableedit }
+
+constructor tffttableedit.create(aowner: tcomponent);
+begin
+ fsamplecount:= defaultsamplecount;
+ ffft_options:= defaultffteditoptions;
+ ffft_expmin:= 0.01; //-40dB
+ ffft_max:= 1;
+ inherited;
+ ffft:= tfft.create(nil);
+ fwave:= tsigwavetable.create(self);
+ fwave.name:= 'wave';
+ fwave.setsubcomponent(true);
+ fft_harmonicscount:= defaultharmonicscount;
+ options:= defaultffttableeditoptions;
+end;
+
+destructor tffttableedit.destroy;
+begin
+ fwave.free;
+ ffft.free;
+ inherited;
+end;
+
+procedure tffttableedit.setwave(const avalue: tsigwavetable);
+begin
+ fwave.assign(avalue);
+end;
+
+procedure tffttableedit.sample;
+const
+ scale1 = 1/2;
+var
+ ar1: complexarty; 
+ int1,int2: integer;
+ rea1,rea2,rea3: real;
+begin
+ setlength(ar1,fsamplecount div 2 + 1);
+ int2:= high(fvalue);
+ if int2 > high(ar1) then begin
+  int2:= high(ar1);
+ end;
+ rea3:= ffft_max*scale1;
+ if (feo_exp in ffft_options) and (ffft_expmin > 0) and (ffft_max > 0) then begin
+  rea1:= ln(ffft_max) - ln(ffft_expmin);
+  for int1:= 1 to int2 do begin
+   rea2:= fvalue[int1-1];
+   if rea2 > 0 then begin
+    ar1[int1].im:= exp((rea2-1)*rea1)*rea3;
+   end;
+  end;  
+ end
+ else begin
+  for int1:= 1 to int2 do begin
+   ar1[int1].im:= fvalue[int1-1]*rea3;
+  end;
+ end;
+ ffft.inpcomplex:= ar1;
+ fwave.table:= ffft.outreal;
+end;
+
+procedure tffttableedit.dochange;
+begin
+ sample;
+ inherited;
+end;
+
+procedure tffttableedit.setsamplecount(const avalue: integer);
+begin
+ if avalue <> fsamplecount then begin
+  fsamplecount:= avalue;
+  sample;
+ end;
+end;
+
+procedure tffttableedit.setfft_harmonicscount(const avalue: integer);
+begin
+ ffft_harmonicscount:= avalue;
+ setlength(fvalue,avalue);
+ change;
+end;
+
+procedure tffttableedit.setfft_options(const avalue: ffteditoptionsty);
+begin
+ if ffft_options <> avalue then begin
+  ffft_options:= avalue;
+  change;
+ end;
+end;
+
+procedure tffttableedit.setfft_expmin(const avalue: real);
+begin
+ if avalue <> ffft_expmin then begin
+  ffft_expmin:= avalue;
+  change;
+ end;
+end;
+
+procedure tffttableedit.setfft_max(const avalue: real);
+begin
+ if avalue <> ffft_max then begin
+  ffft_max:= avalue;
+  change;
  end;
 end;
 
