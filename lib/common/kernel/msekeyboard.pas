@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -209,6 +209,7 @@ type
         key_Next =               $0117,
         Key_PageDown = Key_Next,
         key_clear =              $0118,
+        key_decimal =            $0119,
 
         key_Shift =              $0120,             // modifiers
         key_Control =            $0121,
@@ -280,6 +281,8 @@ const
 
  padcharkeynames: array[key_asterisk..key_slash] of msestring =
   ('Asterisk','Plus','Comma','Minus','Period','Slash');
+ padspecialkeynames: array[key_decimal..key_decimal] of msestring =
+  ('Decimal');
  misckeynames: array[key_escape..key_sysreq] of msestring =
   ('Escape','Tab','Backtab','Backspace','Return','Enter',
    'Insert','Delete','Pause','Print','SysReq');

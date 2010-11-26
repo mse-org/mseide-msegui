@@ -337,6 +337,7 @@ const
  specialshortcutcount = ord(high(specialshortcutty))+1;
  specialkeycount = misckeycount + specialshortcutcount + cursorkeycount;
  padcharkeycount = ord(key_slash)-ord(key_asterisk) + 1;
+ padspecialkeycount = ord(key_decimal)-ord(key_decimal) + 1;
 {
  shortcutcount = (letterkeycount + cipherkeycount) * 2 + //ctrl,shiftctrl
                  3 + //space
@@ -345,7 +346,8 @@ const
 }
  baseshortcutcount = letterkeycount + cipherkeycount + 1 + //Space
                      functionkeycount + specialkeycount;
- shortcutcount = 4 * (baseshortcutcount + padcharkeycount + cipherkeycount);
+ shortcutcount = 4 * (baseshortcutcount + padcharkeycount + padspecialkeycount +
+                      cipherkeycount);
                               //none,shift,ctrl,shift+ctrl
 
 var
@@ -355,6 +357,8 @@ var
  baseshortcutnames: msestringarty;
  padcharshortcutkeys: integerarty;
  padcharshortcutnames: msestringarty;
+ padspecialshortcutkeys: integerarty;
+ padspecialshortcutnames: msestringarty;
 
 function issysshortcut(const ashortcut: sysshortcutty;
                                  const ainfo: keyeventinfoty): boolean;
@@ -422,6 +426,21 @@ begin
  bottom:= bottom+padcharkeycount;
 end;
 
+procedure getpadspecialvalues(var bottom: integer; prefix: msestring;
+            const modvalue: integer; var keys: integerarty; 
+            var names: msestringarty);
+var
+ int1: integer;
+ akey: keyty;
+begin
+ for int1:= bottom to bottom + padspecialkeycount - 1 do begin
+  akey:= keyty(ord(key_decimal) + int1-bottom);
+  keys[int1]:= ord(akey) or modvalue;
+  names[int1]:= prefix+padspecialkeynames[akey];
+ end;
+ bottom:= bottom+padspecialkeycount;
+end;
+
 procedure getpadvalues(var bottom: integer; prefix: msestring;
             const modvalue: integer; var keys: integerarty; 
             var names: msestringarty);
@@ -440,6 +459,12 @@ begin
   names[int1]:= prefix+padcharkeynames[akey];
  end;
  bottom:= bottom+padcharkeycount;
+ for int1:= bottom to bottom + padspecialkeycount - 1 do begin
+  akey:= keyty(ord(key_decimal) + int1-bottom);
+  keys[int1]:= ord(akey) or modvalue;
+  names[int1]:= prefix+padspecialkeynames[akey];
+ end;
+ bottom:= bottom+padspecialkeycount;
 end;
 
 procedure getshortcutlist(out keys: integerarty; out names: msestringarty);
@@ -572,11 +597,21 @@ begin
   setlength(padcharshortcutnames,padcharkeycount);
   bo1:= true;
  end;
+ if padspecialshortcutkeys = nil then begin
+  setlength(padspecialshortcutkeys,padspecialkeycount);
+  bo1:= true;
+ end;
+ if padspecialshortcutnames = nil then begin
+  setlength(padspecialshortcutnames,padspecialkeycount);
+  bo1:= true;
+ end;
  if bo1 then begin
   int1:= 0;
   getvalues(int1,'',0,baseshortcutkeys,baseshortcutnames);
   int1:= 0;
   getpadcharvalues(int1,'',0,padcharshortcutkeys,padcharshortcutnames);
+  int1:= 0;
+  getpadspecialvalues(int1,'',0,padspecialshortcutkeys,padspecialshortcutnames);
  end;
  mstr1:= '';
  k1:= key and not modmask;
@@ -590,6 +625,14 @@ begin
   for int1:= 0 to high(padcharshortcutkeys) do begin
    if padcharshortcutkeys[int1] = k1 then begin
     mstr1:= padcharshortcutnames[int1];
+    break;
+   end;
+  end;
+ end;
+ if mstr1 = '' then begin
+  for int1:= 0 to high(padspecialshortcutkeys) do begin
+   if padspecialshortcutkeys[int1] = k1 then begin
+    mstr1:= padspecialshortcutnames[int1];
     break;
    end;
   end;

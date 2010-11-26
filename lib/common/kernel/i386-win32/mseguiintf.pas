@@ -3873,7 +3873,7 @@ begin
    include(shiftstate,ss_second);
   end;
   vk_decimal: begin
-   result:= key_period;
+   result:= key_decimal;
    include(shiftstate,ss_second);
   end;
   vk_multiply: begin
