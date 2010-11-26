@@ -413,6 +413,7 @@ begin
     if fselectobjects = nil then begin
      removexorpic;
     end;
+    fmouseoverobjects:= nil;
    end;
   end;
  finally

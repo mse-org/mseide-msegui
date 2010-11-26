@@ -16,7 +16,7 @@ uses
 const
  defaultsamplecount = 4096;
  defaultharmonicscount = 16;
- defaultffttableeditoptions = [ceo_noinsert];
+ defaultffttableeditoptions = [ceo_noinsert,ceo_nodelete];
  
 type
  sigeditoptionty = (sieo_exp);
@@ -103,6 +103,7 @@ type
   protected
    procedure sample;
    procedure dochange; override;
+   procedure doclear; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -321,7 +322,7 @@ constructor tffttableedit.create(aowner: tcomponent);
 begin
  fsamplecount:= defaultsamplecount;
  ffft_options:= defaultffteditoptions;
- ffft_expmin:= 0.01; //-40dB
+ ffft_expmin:= 0.001; //-60dB
  ffft_max:= 1;
  inherited;
  ffft:= tfft.create(nil);
@@ -354,16 +355,16 @@ var
 begin
  setlength(ar1,fsamplecount div 2 + 1);
  int2:= high(fvalue);
- if int2 > high(ar1) then begin
-  int2:= high(ar1);
+ if int2 >= high(ar1) then begin
+  int2:= high(ar1)-1;
  end;
  rea3:= ffft_max*scale1;
  if (feo_exp in ffft_options) and (ffft_expmin > 0) and (ffft_max > 0) then begin
   rea1:= ln(ffft_max) - ln(ffft_expmin);
-  for int1:= 1 to int2 do begin
-   rea2:= fvalue[int1-1];
+  for int1:= 0 to int2 do begin
+   rea2:= fvalue[int1];
    if rea2 > 0 then begin
-    ar1[int1].im:= exp((rea2-1)*rea1)*rea3;
+    ar1[int1+1].im:= exp((rea2-1)*rea1)*rea3;
    end;
   end;  
  end
@@ -395,6 +396,12 @@ begin
  ffft_harmonicscount:= avalue;
  setlength(fvalue,avalue);
  change;
+end;
+
+procedure tffttableedit.doclear;
+begin
+ fvalue:= nil;
+ setlength(fvalue,ffft_harmonicscount);
 end;
 
 procedure tffttableedit.setfft_options(const avalue: ffteditoptionsty);

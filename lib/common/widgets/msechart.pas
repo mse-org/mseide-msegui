@@ -519,7 +519,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure clear;
+   procedure clear; virtual;
    procedure addsample(const asamples: array of real); virtual;
   published
    property traces: ttraces read ftraces write settraces;

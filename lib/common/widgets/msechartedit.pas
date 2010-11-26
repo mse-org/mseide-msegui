@@ -24,7 +24,7 @@ type
                 var avalue: complexarty; var accept: boolean) of object;
  setrealareventty = procedure(const sender: tobject;
                 var avalue: realarty; var accept: boolean) of object;
- charteditoptionty = (ceo_noinsert,ceo_thumbtrack);
+ charteditoptionty = (ceo_thumbtrack,ceo_noinsert,ceo_nodelete);
  charteditoptionsty = set of charteditoptionty;
 
  tcustomchartedit = class(tchart,iobjectpicker)
@@ -72,6 +72,7 @@ type
    procedure statread; override;
    procedure loaded; override;
    procedure docheckvalue(var accept: boolean); virtual; abstract;
+   procedure doclear; virtual; abstract;
 
     //iobjectpicker
    function getcursorshape(const sender: tobjectpicker;
@@ -85,6 +86,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure clear; override;
    function checkvalue: boolean;
    property readonly: boolean read getreadonly write setreadonly;
    property activetrace: integer read factivetrace 
@@ -116,6 +118,7 @@ type
    procedure doreadvalue(const reader: tstatreader); override;
    procedure dowritevalue(const writer: tstatwriter); override;
    class function xordered: boolean; virtual;
+   procedure doclear; override;
   public
    constructor create(aowner: tcomponent); override;
    property value: complexarty read getvalue write setvalue;
@@ -155,6 +158,7 @@ type
    procedure docheckvalue(var accept: boolean); override;
    procedure doreadvalue(const reader: tstatreader); override;
    procedure dowritevalue(const writer: tstatwriter); override;
+   procedure doclear; override;
   public
    property value: realarty read getvalue write setvalue;
    property valueitems[const index: integer]: real read getvalueitems 
@@ -726,7 +730,8 @@ begin
   fobjectpicker.dokeydown(ainfo);
  end;
  if not (es_processed in ainfo.eventstate) and (ainfo.key = key_delete) and
-     not readonly and (ainfo.shiftstate*shiftstatesmask = []) and 
+     not readonly and not (ceo_nodelete in foptions) and
+     (ainfo.shiftstate*shiftstatesmask = []) and 
                                  fobjectpicker.hascurrentobjects  then begin
   activetraceitem.deletedata(fobjectpicker.currentobjects);
   fobjectpicker.clear;
@@ -838,6 +843,13 @@ begin
  end;
 end;
 
+procedure tcustomchartedit.clear;
+begin
+ inherited;
+ doclear;
+ change;
+end;
+
 { txychartedit }
 
 constructor txychartedit.create(aowner: tcomponent);
@@ -934,6 +946,11 @@ begin
  result:= false;
 end;
 
+procedure txychartedit.doclear;
+begin
+ fvalue:= nil;
+end;
+
 { txserieschartedit }
 
 function txserieschartedit.getvalue: realarty;
@@ -989,6 +1006,11 @@ begin
  checkarrayindex(fvalue,index);
  fvalue[index]:= avalue;
  change;
+end;
+
+procedure txserieschartedit.doclear;
+begin
+ fvalue:= nil;
 end;
 
 { torderedxychartedit }
