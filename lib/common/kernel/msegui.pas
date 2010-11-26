@@ -14264,7 +14264,12 @@ begin
       key_control: shift:= [ss_ctrl];
       else shift:= [];
      end;
-     chars:= fchars;
+     if (fkey = key_decimal) and (fchars = '.') then begin
+      chars:= defaultformatsettingsmse.decimalseparator;
+     end
+     else begin
+      chars:= fchars;
+     end;
      if kind = ek_keypress then begin
       shiftstate:= fshiftstate + shift;
      end
