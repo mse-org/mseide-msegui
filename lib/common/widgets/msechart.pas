@@ -21,9 +21,16 @@ type
  chartstatety = (chs_nocolorchart,chs_hasdialscroll,chs_hasdialshift,
                  chs_started,chs_full,chs_chartvalid); //for tchartrecorder
  chartstatesty = set of chartstatety;
+ charttraceoptionty = (cto_invisible,cto_adddataright,
+                       cto_xordered, //optimize for big data quantity
+                       cto_logx,cto_logy,cto_seriescentered
+                       );
+ charttraceoptionsty = set of charttraceoptionty;
+
 const
  chartrecorderstatesmask  = [chs_hasdialscroll,chs_hasdialshift,chs_started,
                              chs_full,chs_chartvalid];
+ defaultxytraceoptions = [cto_xordered];
 
 type
  tcustomchart = class;
@@ -33,16 +40,6 @@ type
  tracechartkindty = (tck_line,tck_bar);
  tracechartkindsty = set of tracechartkindty;
 
- charttraceoptionty = (cto_invisible,cto_adddataright,
-                       cto_xordered, //optimize for big data quantity
-                       cto_logx,cto_logy,cto_seriescentered
-                       );
- charttraceoptionsty = set of charttraceoptionty;
- 
-const
- defaultxytraceoptions = [cto_xordered];
-
-type
  xseriesdataty = record
   value: real;
   index: integer;

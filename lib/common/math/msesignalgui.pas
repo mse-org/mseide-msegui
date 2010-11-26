@@ -373,7 +373,7 @@ begin
   end;
  end;
  ffft.inpcomplex:= ar1;
- fwave.table:= ffft.outreal;
+ fwave.table:= doublearty(ffft.outreal);
 end;
 
 procedure tffttableedit.dochange;
