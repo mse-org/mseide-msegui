@@ -3063,7 +3063,7 @@ begin
     include(shiftstate,ss_second);
    end;
    xk_kp_decimal: begin
-    result:= key_period;
+    result:= key_decimal;
     include(shiftstate,ss_second);
    end;
    xk_kp_divide: begin
