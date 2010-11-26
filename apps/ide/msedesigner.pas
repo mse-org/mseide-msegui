@@ -3178,7 +3178,7 @@ begin
     end;
     fdescendentinstancelist.revert(po1,po2,msecomp1);
     if bo1 then begin
-     twidget(comp1{po1^.descendent}).pos:= pos1;
+     twidget(msecomp1{po1^.descendent}).pos:= pos1;
     end;
    end;
   end;
@@ -4403,21 +4403,23 @@ end;
 function tdesigner.getcomponent(const aname: string; 
                       const aroot: tcomponent): tcomponent;
 var
- strar1: stringarty;
+ ar1,ar2: stringarty;
  po1,po2: pmoduleinfoty;
  int1,int2: integer;
  bo1: boolean;
+ str1: string;
 begin
  if floadingmodulepo <> nil then begin
-  result:= floadingmodulepo^.components.getcomponent(aname);
+  splitstring(aname,ar2,':');
+  result:= floadingmodulepo^.components.getcomponent(ar2[0]);
   if result = nil then begin
-   splitstring(aname,strar1,'.');
-   if high(strar1) = 1 then begin
-    strar1[0]:= uppercase(strar1[0]);
+   splitstring(ar2[0],ar1,'.');
+   if high(ar1) = 1 then begin
+    ar1[0]:= uppercase(ar1[0]);
     for int1:= 0 to fmodules.count - 1 do begin
      po1:= fmodules[int1];
-     if stricomp(pchar(po1^.instancevarname),pchar(strar1[0])) = 0 then begin
-      result:= po1^.components.getcomponent(strar1[1]);
+     if stricomp(pchar(po1^.instancevarname),pchar(ar1[0])) = 0 then begin
+      result:= po1^.components.getcomponent(ar1[1]);
       if result <> nil then begin
        if (aroot <> nil) and (aroot <> po1^.instance) then begin
         po2:= fmodules.findmodulebyinstance(aroot);
@@ -4437,6 +4439,14 @@ begin
        break;
       end;
      end;
+    end;
+   end;
+  end;
+  if (result <> nil) and (high(ar2) > 0) then begin
+   for int1:= 1 to high(ar2) do begin
+    result:= result.findcomponent(ar2[int1]);
+    if result = nil then begin
+     break;
     end;
    end;
   end;
