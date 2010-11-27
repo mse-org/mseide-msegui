@@ -48,6 +48,12 @@ type
  psighandlerinfoty = ^sighandlerinfoty;
  sighandlerprocty = procedure(const ainfo: psighandlerinfoty) of object;
 
+ psiginfoty = ^siginfoty;
+ sigclientinfoty = record
+  infopo: psiginfoty;
+ end;
+ psigclientinfoty = ^sigclientinfoty;
+  
  isigclient = interface(ievent)
   procedure initmodel;
   procedure clear;
@@ -59,19 +65,16 @@ type
   function getcomponent: tcomponent;
   procedure modelchange;
   function getsigcontroller: tsigcontroller;
+  function getsigclientinfopo: psigclientinfoty;
  end;
  sigclientintfarty = array of isigclient;
 
  tdoublesigcomp = class(tsigcomp,isigclient)
   private
    fcontroller: tsigcontroller;
+   fsigclientinfo: sigclientinfoty;
    procedure setcontroller(const avalue: tsigcontroller);
   protected
-//   finfo: siginfoty;
-//   procedure setsig1(const sender: tdoubleinputconn;
-//                                    var asource: doublearty); virtual;
-//   procedure setsig(const sender: tdoubleinputconn;
-//                                    const asource: doublearty); virtual;
    procedure modelchange;
    procedure loaded; override;
    procedure lock;
@@ -84,6 +87,7 @@ type
    function gethandler: sighandlerprocty; virtual; abstract;
    function getzcount: integer; virtual;
    function getsigcontroller: tsigcontroller;
+   function getsigclientinfopo: psigclientinfoty;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -110,18 +114,18 @@ type
  end;
  
  doubleinputconnarty = array of tdoubleinputconn;
- 
+
+ outputconnstatety = (ocs_eventdriven);
+ outputconnstatesty = set of outputconnstatety;
+  
  tdoubleoutputconn = class(tdoubleconn)
   protected
+   fstate: outputconnstatesty;
    fdestinations: doubleinputconnarty;
   public
    constructor create(const aowner: tcomponent;
-                     const asigintf: isigclient); override;
-{
-    //for systems without recursion
-   procedure setsig1(var asource: doublearty); //asource is invalid afterwards
-   procedure setsig(const asource: doublearty);
-}
+         const asigintf: isigclient; const aeventdriven: boolean); 
+                                                       reintroduce; virtual;
  end; 
 
  tdoubleinputconn = class(tdoubleconn)
@@ -135,17 +139,10 @@ type
    procedure setvalue(const avalue: double);
   protected
    fvalue: double;
-//   fbuffer: doublearty;
-//   fhasdata: boolean;
   public
    constructor create(const aowner: tcomponent;
                      const asigintf: isigclient); override;
    destructor destroy; override;
-   
-    //for systems without recursion
-//   procedure setsig1(var asource: doublearty); virtual; 
-                       //asource is invalid afterwards
-//   procedure setsig(const asource: doublearty); virtual;
   published
    property source: tdoubleoutputconn read fsource write setsource;
    property offset: double read foffset write setoffset;
@@ -157,11 +154,11 @@ type
   dest: pdouble;
  end;
 
- psiginfoty = ^siginfoty;
  siginfopoarty = array of psiginfoty;
  signahdlerprocty = procedure(siginfo: psiginfoty);
  
- siginfostatety = (sis_checked,sis_input,sis_output{,sis_recursive});
+ siginfostatety = (sis_checked,sis_eventchecked,
+                   sis_input,sis_output{,sis_recursive});
  siginfostatesty = set of siginfostatety;
  
  inputstatety = (ins_checked,ins_recursive);
@@ -176,16 +173,12 @@ type
  
  siginfoty = record
   intf: isigclient;
+  handler: sighandlerprocty;
   zcount: integer;
-//  inp: double;
-//  inps: doublearty;
-//  inphigh: integer;
-//  outps: doublepoarty;
-//  outphigh: integer;
-//  outpcount: integer;
   inputs: inputinfoarty;
   outputs: outputconnarty;
   destinations: inputconnarty;
+  eventdestinations: siginfopoarty;
   state: siginfostatesty;
   prev: siginfopoarty;
   connectedcount: integer;
@@ -194,6 +187,7 @@ type
  siginfoarty = array of siginfoty;
  
  destinfoty = record
+  source: pdouble;
   dest: pdouble;
   offset: double;
   gain: double;
@@ -524,7 +518,7 @@ type
    fclients: sigclientintfarty;
    finfos: siginfoarty;
    finputnodes: siginfopoarty;
-   foutputnodes: siginfopoarty;
+//   foutputnodes: siginfopoarty;
    fexecinfo: sighandlernodeinfoarty;
    fexechigh: integer;
   {$ifdef mse_debugsignal}
@@ -539,6 +533,8 @@ type
    procedure loaded; override;
    function findinp(const aconn: tsigconn): psiginfoty;
    function findoutp(const aconn: tsigconn): psiginfoty;
+   procedure internalexecevent(const ainfopo: psiginfoty);
+   procedure execevent(const aintf: isigclient);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -675,9 +671,12 @@ end;
 { tdoubleoutputconn }
 
 constructor tdoubleoutputconn.create(const aowner: tcomponent;
-                     const asigintf: isigclient);
+                     const asigintf: isigclient; const aeventdriven: boolean);
 begin
- inherited;
+ inherited create(aowner,asigintf);
+ if aeventdriven then begin 
+  include(fstate,ocs_eventdriven);
+ end;
  include (fmsecomponentstate,cs_subcompref);
  name:= 'output';
 end;
@@ -866,13 +865,18 @@ begin
  end;
 end;
 
+function tdoublesigcomp.getsigclientinfopo: psigclientinfoty;
+begin
+ result:= @fsigclientinfo;
+end;
+
 { tdoublezcomp }
 
 constructor tdoublezcomp.create(aowner: tcomponent);
 begin
  fzhigh:= -1;
  finput:= tdoubleinputconn.create(self,isigclient(self));
- foutput:= tdoubleoutputconn.create(self,isigclient(self));
+ foutput:= tdoubleoutputconn.create(self,isigclient(self),false);
  inherited;
 end;
 
@@ -1204,7 +1208,7 @@ end;
 
 constructor tsigin.create(aowner: tcomponent);
 begin
- foutput:= tdoubleoutputconn.create(self,isigclient(self));
+ foutput:= tdoubleoutputconn.create(self,isigclient(self),false);
  inherited;
 end;
 
@@ -1422,7 +1426,7 @@ end;
 
 constructor tsigmultiinpout.create(aowner: tcomponent);
 begin
- foutput:= tdoubleoutputconn.create(self,isigclient(self));
+ foutput:= tdoubleoutputconn.create(self,isigclient(self),false);
  inherited;
 end;
 
@@ -1441,7 +1445,7 @@ end;
 
 constructor tdoublesigoutcomp.create(aowner: tcomponent);
 begin
- foutput:= tdoubleoutputconn.create(self,isigclient(self));
+ foutput:= tdoubleoutputconn.create(self,isigclient(self),false);
  inherited;
 end;
 
@@ -1850,9 +1854,10 @@ var
  {$endif}  
  end; //processcalcorder
 
- procedure updatedestinfo(const ainput: tdoubleinputconn;
+ procedure updatedestinfo(const ainput: tdoubleinputconn; const source: pdouble;
                                         var ainfo: destinfoty);
  begin
+  ainfo.source:= source;
   ainfo.dest:= @ainput.fvalue;
   ainfo.offset:= ainput.offset;
   ainfo.gain:= ainput.gain;
@@ -1865,9 +1870,11 @@ var
  begin
   result:= true;
   for int1:= 0 to high(ainputs) do begin
-   if ainputs[int1].source <> nil then begin
-    result:= false;
-    break;
+   with ainputs[int1] do begin
+    if (source <> nil) {and not (ocs_eventdriven in source.fstate)} then begin
+     result:= false;
+     break;
+    end;
    end;
   end;
  end;
@@ -1878,9 +1885,11 @@ var
  begin
   result:= true;
   for int1:= 0 to high(aoutputs) do begin
-   if aoutputs[int1].fdestinations <> nil then begin
-    result:= false;
-    break;
+   with aoutputs[int1] do begin
+    if not (ocs_eventdriven in fstate) and (fdestinations <> nil) then begin
+     result:= false;
+     break;
+    end;
    end;
   end;
  end;
@@ -1889,7 +1898,8 @@ var
  int1,int2,int3,int4: integer;
  po1,po2: psiginfoty;
  inputnodecount: integer;
- outputnodecount: integer;
+ notconnectedcount: integer;
+// outputnodecount: integer;
  recursivenodecount: integer;
  ar1,ar2: siginfopoarty;
  ar3: inputconnarty;
@@ -1898,10 +1908,11 @@ begin
  finphash.clear;
  foutphash.clear;
  finputnodes:= nil;
- foutputnodes:= nil;
+// foutputnodes:= nil;
  fexecinfo:= nil;
- outputnodecount:= 0;
+// outputnodecount:= 0;
  inputnodecount:= 0;
+ notconnectedcount:= 0;
  setlength(finfos,length(fclients));
 {$ifdef mse_debugsignal}
  debugwriteln('**updatemodel '+name);
@@ -1910,8 +1921,10 @@ begin
 
  for int1:= 0 to high(fclients) do begin //get basic info
   po1:= @finfos[int1];
+  fclients[int1].getsigclientinfopo^.infopo:= po1;
   with po1^ do begin
    intf:= fclients[int1];
+   handler:= intf.gethandler;
    intf.initmodel;
    intf.clear;
    zcount:= intf.getzcount;
@@ -1975,18 +1988,20 @@ begin
                      fclients[int1].getnamepath +
                  ', Dest: '+fdestinations[int3].fsigintf.getcomponent.name+'.');
        end;
-       if finditem(pointerarty(po2^.prev),po1) < 0 then begin
-        inc(po2^.connectedcount);
-       {$ifdef mse_debugsignal}
-        debugnodeinfo(' new link ',po2);
-       {$endif}
-        additem(pointerarty(po2^.prev),po1);
-        additem(pointerarty(po1^.next),po2);
-       end;
-       for int4:= 0 to high(po2^.inputs) do begin
-        if po2^.inputs[int4].input = fdestinations[int3] then begin
-         po2^.inputs[int4].source:= po1;
-         break;
+       if not (ocs_eventdriven in fstate) then begin
+        if finditem(pointerarty(po2^.prev),po1) < 0 then begin
+         inc(po2^.connectedcount);
+        {$ifdef mse_debugsignal}
+         debugnodeinfo(' new link ',po2);
+        {$endif}
+         additem(pointerarty(po2^.prev),po1);
+         additem(pointerarty(po1^.next),po2);
+        end;
+        for int4:= 0 to high(po2^.inputs) do begin
+         if po2^.inputs[int4].input = fdestinations[int3] then begin
+          po2^.inputs[int4].source:= po1;
+          break;
+         end;
         end;
        end;
       end;
@@ -2003,28 +2018,66 @@ begin
   po1:= @finfos[int1];
   with po1^ do begin
    state:= [];
-   if not isopeninput(inputs) then begin
-    include(state,sis_input);
-   end
-   else begin
-    additem(pointerarty(finputnodes),po1,inputnodecount);
-   {$ifdef mse_debugsignal}
-    debugnodeinfo(' input node ',po1);
-   {$endif}
-   end;
    if not isopenoutput(outputs) then begin
     include(state,sis_output);
    end
    else begin
-    additem(pointerarty(foutputnodes),po1,outputnodecount);
+//    additem(pointerarty(foutputnodes),po1,outputnodecount);
    {$ifdef mse_debugsignal}
     debugnodeinfo(' output node ',po1);
    {$endif}
    end;
+   if not isopeninput(inputs) then begin
+    include(state,sis_input);
+   end
+   else begin
+    if sis_output in state then begin
+     additem(pointerarty(finputnodes),po1,inputnodecount);
+    {$ifdef mse_debugsignal}
+     debugnodeinfo(' input node ',po1);
+    {$endif}
+    end
+    else begin
+     inc(notconnectedcount);
+    {$ifdef mse_debugsignal}
+     debugnodeinfo(' not connected node ',po1);
+    {$endif}     
+    end;
+   end;
   end;
  end;
  setlength(finputnodes,inputnodecount);
- setlength(foutputnodes,outputnodecount);
+// setlength(foutputnodes,outputnodecount);
+
+{$ifdef mse_debugsignal}
+ debugwriteln('*check event connections');
+{$endif}
+ for int1:= 0 to high(finfos) do begin
+  with finfos[int1] do begin
+   for int2:= 0 to high(outputs) do begin
+    with outputs[int2] do begin
+     for int3:= 0 to high(fdestinations) do begin
+      po2:= findinp(fdestinations[int3]);
+      if not (sis_input in po2^.state) then begin
+       if sis_eventchecked in po2^.state then begin
+        raise exception.create(
+         'Recursive event connection: '+self.name+ ', Node: '+
+                     finfos[int1].intf.getnamepath +
+                 ', Dest: '+po2^.intf.getnamepath+'.');
+       end; 
+      {$ifdef mse_debugsignal}
+       debugnodeinfo('event source ',@finfos[int1]);
+       debugpointer(' lookup inp ',fdestinations[int3]);
+       debugnodeinfo('  event ',po2);
+      {$endif}
+       adduniqueitem(pointerarty(eventdestinations),po2);
+       include(state,sis_eventchecked);
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
   
 {$ifdef mse_debugsignal}
   debugwriteln('*check recursion');
@@ -2066,7 +2119,7 @@ begin
   end;
  end;
 {$endif}
- if execindex <> length(execorder) then begin
+ if execindex+notconnectedcount <> length(execorder) then begin
   internalerror('SIG20100916-2'); //unprocessed nodes
  end;
  setlength(fexecinfo,execindex);
@@ -2074,20 +2127,18 @@ begin
  for int1:= 0 to high(fexecinfo) do begin
   po1:= execorder[int1];
   with fexecinfo[int1] do begin
-   handler:= po1^.intf.gethandler;
+   handler:= po1^.handler;
    desthigh:= high(po1^.destinations)-1;
+   handlerinfo.dest:= @fvaluedummy;
    if length(po1^.destinations) > 0 then begin
-    handlerinfo.dest:= @po1^.destinations[0].fvalue;
-    updatedestinfo(po1^.destinations[0],firstdest);
-//    firstdest.dest:= handlerinfo.dest;
+    if desthigh < 0 then begin
+     handlerinfo.dest:= @po1^.destinations[0].fvalue;
+    end;    
+    updatedestinfo(po1^.destinations[0],handlerinfo.dest,firstdest);
     setlength(dest,desthigh+1);
     for int2:= 0 to desthigh do begin
-     updatedestinfo(po1^.destinations[int2+1],dest[int2]);
-//     dest[int2].dest:= @po1^.destinations[int2+1].fvalue;
+     updatedestinfo(po1^.destinations[int2+1],handlerinfo.dest,dest[int2]);
     end;
-   end
-   else begin
-    handlerinfo.dest:= @fvaluedummy;
    end;
   end;
  end;
@@ -2105,12 +2156,12 @@ begin
   po1^.handler(psighandlerinfoty(po1));
   with po1^.firstdest do begin
    if hasscale then begin
-    dest^:= dest^*gain+offset;
+    dest^:= source^*gain+offset;
    end;
   end;
   for int2:= 0 to po1^.desthigh do begin //multi inputs on output
    with po1^.dest[int2] do begin
-    dest^:= po1^.handlerinfo.dest^;
+    dest^:= source^;
     if hasscale then begin
      dest^:= dest^*gain+offset;
     end;
@@ -2162,6 +2213,38 @@ end;
 procedure tsigcontroller.unlock;
 begin
  sys_mutexunlock(fmutex);
+end;
+
+procedure tsigcontroller.internalexecevent(const ainfopo: psiginfoty);
+var
+ po1: psiginfoty;
+ handlerinfo: sighandlerinfoty;
+ do1: double;
+ int1: integer;
+begin
+ handlerinfo.dest:= @do1;
+ with ainfopo^ do begin
+  handler(@handlerinfo);
+  for int1:= 0 to high(destinations) do begin
+   with destinations[int1] do begin
+    fvalue:= do1*fgain+foffset;
+   end;
+  end;
+  for int1:= 0 to high(eventdestinations) do begin
+   internalexecevent(eventdestinations[int1]);
+  end;
+ end;
+end;
+
+procedure tsigcontroller.execevent(const aintf: isigclient);
+begin
+ lock;
+ checkmodel;
+ try
+  internalexecevent(aintf.getsigclientinfopo^.infopo);
+ finally
+  unlock;
+ end;
 end;
 
 { tsigwavetable }

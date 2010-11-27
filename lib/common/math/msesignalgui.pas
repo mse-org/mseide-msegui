@@ -12,11 +12,12 @@ unit msesignalgui;
 interface
 uses
  classes,msegraphedits,msesignal,mseguiglob,mseevent,msechartedit,msetypes,
- msechart,mseclasses,msefft;
+ msechart,mseclasses,msefft,msewidgets,msegraphics,msegraphutils;
 const
  defaultsamplecount = 4096;
  defaultharmonicscount = 16;
  defaultffttableeditoptions = [ceo_noinsert,ceo_nodelete];
+ defaultkeywidth = 8;
  
 type
  sigeditoptionty = (sieo_exp);
@@ -26,6 +27,7 @@ type
   private
    foutput: tdoubleoutputconn;
    fcontroller: tsigcontroller;
+   fsigclientinfo: sigclientinfoty;
    fontransformvalue: sigineventty;
    fmin: real;
    fmax: real;
@@ -49,6 +51,7 @@ type
    procedure clear;
    procedure modelchange;
    function getsigcontroller: tsigcontroller;
+   function getsigclientinfopo: psigclientinfoty;
   public
    constructor create(aowner: tcomponent); override;
    property output: tdoubleoutputconn read foutput write setoutput;
@@ -61,6 +64,60 @@ type
    property options: sigeditoptionsty read foptions write setoptions default [];
  end;
 
+ tsigkeyboard = class(trealgraphdataedit,isigclient)
+  private
+   foutput: tdoubleoutputconn;
+   fcontroller: tsigcontroller;
+   fsigclientinfo: sigclientinfoty;
+   fontransformvalue: sigineventty;
+   fmin: real;
+//   fmax: real;
+   foptions: sigeditoptionsty;
+   fkeywidth: integer;
+   fkey: integer;
+   flastkey: integer;
+   fkeypressed: boolean;
+   procedure setoutput(const avalue: tdoubleoutputconn);
+   procedure setcontroller(const avalue: tsigcontroller);
+   procedure setmin(const avalue: real);
+//   procedure setmax(const avalue: real);
+   procedure setoptions(const avalue: sigeditoptionsty);
+   procedure setkeywidth(const avalue: integer);
+  protected
+   fsigvalue: real;
+   procedure updatesigvalue;
+   procedure dochange; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
+   procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
+                        const avalue; const arect: rectty); override;
+   procedure clientmouseevent(var info: mouseeventinfoty); override;
+   procedure dokeydown(var info: keyeventinfoty); override;
+   procedure dokeyup(var info: keyeventinfoty); override;
+   procedure doexit; override;
+
+    //isigclient  
+   procedure initmodel;
+   function getinputar: inputconnarty;
+   function getoutputar: outputconnarty;
+   function gethandler: sighandlerprocty;
+   function getzcount: integer;
+   procedure clear;
+   procedure modelchange;
+   function getsigcontroller: tsigcontroller;
+   function getsigclientinfopo: psigclientinfoty;
+  public
+   constructor create(aowner: tcomponent); override;
+   property output: tdoubleoutputconn read foutput write setoutput;
+  published
+   property keywidth: integer read fkeywidth write setkeywidth default defaultkeywidth;
+   property controller: tsigcontroller read fcontroller write setcontroller;
+   property ontransformvalue: sigineventty read fontransformvalue 
+                                                 write fontransformvalue;
+   property min: real read fmin write setmin;
+//   property max: real read fmax write setmax;
+   property options: sigeditoptionsty read foptions write setoptions default [];
+ end;
+ 
  twavetableedit = class(torderedxychartedit)
   private
    fwave: tsigwavetable;
@@ -119,14 +176,25 @@ type
    property wave: tsigwavetable read fwave write setwave;
    property options default defaultffttableeditoptions;
  end;
-  
-implementation
 
+const
+ semitoneln = ln(2)/12;
+ chromaticscale: array[0..12] of double =
+    (1.0,exp(1*semitoneln),exp(2*semitoneln),exp(3*semitoneln),exp(4*semitoneln),
+     exp(5*semitoneln),exp(6*semitoneln),exp(7*semitoneln),exp(8*semitoneln),
+     exp(9*semitoneln),exp(10*semitoneln),exp(11*semitoneln),2.0);
+
+implementation
+uses
+ math,msekeyboard;
+type
+ tsigcontroller1 = class(tsigcontroller);
+ 
 { tsigslider }
 
 constructor tsigslider.create(aowner: tcomponent);
 begin
- foutput:= tdoubleoutputconn.create(self,isigclient(self));
+ foutput:= tdoubleoutputconn.create(self,isigclient(self),true);
  fmax:= 1;
  inherited;
 end;
@@ -181,9 +249,11 @@ procedure tsigslider.updatesigvalue;
 var
  do1: double;
 begin
- do1:= fvalue*(fmax-fmin)+fmin; 
- if sieo_exp in foptions then begin
-  do1:= exp(do1);
+ if (sieo_exp in foptions) and (fmin > 0) and (fmax > 0) then begin
+  do1:= fmin*exp(fvalue*(ln(fmax)-ln(fmin)));
+ end
+ else begin
+  do1:= fvalue*(fmax-fmin)+fmin; 
  end;
  if canevent(tmethod(fontransformvalue)) then begin
   fontransformvalue(self,real(do1));
@@ -194,6 +264,7 @@ begin
  fsigvalue:= do1;
  if fcontroller <> nil then begin
   fcontroller.unlock;
+  tsigcontroller1(fcontroller).execevent(isigclient(self));
  end;
 end;
 
@@ -231,6 +302,274 @@ begin
   foptions:= avalue;
   updatesigvalue;
  end;
+end;
+
+function tsigslider.getsigclientinfopo: psigclientinfoty;
+begin
+ result:= @fsigclientinfo;
+end;
+
+{ tsigkeyboard }
+
+constructor tsigkeyboard.create(aowner: tcomponent);
+begin
+ fkey:= -1;
+ foutput:= tdoubleoutputconn.create(self,isigclient(self),true);
+ fmin:= 0.001;
+// fmax:= 1;
+ fkeywidth:= defaultkeywidth;
+ inherited;
+end;
+
+procedure tsigkeyboard.setcontroller(const avalue: tsigcontroller);
+begin
+ setsigcontroller(getobjectlinker,isigclient(self),avalue,fcontroller);
+end;
+
+procedure tsigkeyboard.initmodel;
+begin
+ //dummy
+end;
+
+function tsigkeyboard.getinputar: inputconnarty;
+begin
+ result:= nil;
+end;
+
+function tsigkeyboard.getoutputar: outputconnarty;
+begin
+ setlength(result,1);
+ result[0]:= foutput;
+end;
+
+function tsigkeyboard.getzcount: integer;
+begin
+ result:= 0;
+end;
+
+procedure tsigkeyboard.clear;
+begin
+ //dummy
+end;
+
+procedure tsigkeyboard.setoutput(const avalue: tdoubleoutputconn);
+begin
+ foutput.assign(avalue);
+end;
+
+procedure tsigkeyboard.modelchange;
+begin
+ //dummy
+end;
+
+function tsigkeyboard.getsigcontroller: tsigcontroller;
+begin
+ result:= fcontroller;
+end;
+
+procedure tsigkeyboard.updatesigvalue;
+var
+ do1: double;
+begin
+ if fkey < 0 then begin
+  do1:= 0;
+ end
+ else begin  
+  if (sieo_exp in foptions) then begin
+   do1:= intpower(2.0,fkey div 12) * chromaticscale[fkey mod 12] * fmin;
+  end
+  else begin
+   do1:= fkey/12.0 + fmin;
+  end;
+ end;
+ if canevent(tmethod(fontransformvalue)) then begin
+  fontransformvalue(self,real(do1));
+ end;
+ if fcontroller <> nil then begin
+  fcontroller.lock;
+ end;
+ fsigvalue:= do1;
+ if fcontroller <> nil then begin
+  fcontroller.unlock;
+  tsigcontroller1(fcontroller).execevent(isigclient(self));
+ end;
+end;
+
+procedure tsigkeyboard.dochange;
+begin
+ inherited;
+ updatesigvalue; 
+end;
+
+procedure tsigkeyboard.sighandler(const ainfo: psighandlerinfoty);
+begin
+ ainfo^.dest^:= fsigvalue;
+end;
+
+function tsigkeyboard.gethandler: sighandlerprocty;
+begin
+ result:= {$ifdef FPC}@{$endif}sighandler;
+end;
+
+procedure tsigkeyboard.setmin(const avalue: real);
+begin
+ fmin:= avalue;
+ updatesigvalue;
+end;
+{
+procedure tsigkeyboard.setmax(const avalue: real);
+begin
+ fmax:= avalue;
+ updatesigvalue;
+end;
+}
+procedure tsigkeyboard.setoptions(const avalue: sigeditoptionsty);
+begin
+ if options <> avalue then begin
+  foptions:= avalue;
+  updatesigvalue;
+ end;
+end;
+
+function tsigkeyboard.getsigclientinfopo: psigclientinfoty;
+begin
+ result:= @fsigclientinfo;
+end;
+
+procedure tsigkeyboard.paintglyph(const canvas: tcanvas;
+               const acolorglyph: colorty; const avalue; const arect: rectty);
+var
+ pt1: pointty;
+ ar1: segmentarty;
+ int1,int2,int3,int4: integer;
+ rect1: rectty;
+begin
+ setlength(ar1,arect.cx div fkeywidth + 1);
+ int2:= arect.y + arect.cy;
+ int3:= arect.x;
+ for int1:= 0 to high(ar1) do begin
+  with(ar1[int1]) do begin
+   a.x:= int3;
+   a.y:= arect.y;
+   b.x:= int3;
+   b.y:= int2;
+  end;
+  inc(int3,fkeywidth);
+ end;
+ canvas.drawlinesegments(ar1,colorglyph);
+ int4:= (fkeywidth*2+1) div 3 + 1; //width of black keys
+ rect1.x:= arect.x + (fkeywidth - int4 div 2);
+ rect1.y:= arect.y;
+ rect1.cx:= int4+1;
+ rect1.cy:= arect.cy div 2;
+ for int1:= 0 to high(ar1) do begin
+  int3:= int1 mod 7;
+  if (int3 <> 2) and (int3 <> 6) then begin
+   canvas.fillrect(rect1,colorglyph);
+  end;
+  inc(rect1.x,fkeywidth);
+ end;
+end;
+
+procedure tsigkeyboard.setkeywidth(const avalue: integer);
+begin
+ if avalue <> fkeywidth then begin
+  fkeywidth:= avalue;
+  if fkeywidth < 4 then begin
+   fkeywidth:= 4;
+  end;
+  invalidate;
+ end;
+end;
+
+const
+ whitekeys: array[0..6] of integer = (0,2,4,5,7,9,11);
+ blackkeys: array[0..6] of integer = (-1,1,3,-1,6,8,10);
+procedure tsigkeyboard.clientmouseevent(var info: mouseeventinfoty);
+var
+ keybefore: integer;
+ keynumber,key: integer;
+ rect1: rectty;
+begin
+ keybefore:= fkey;
+ if info.eventkind in mouseposevents then begin
+  if (ss_left in info.shiftstate) or fkeypressed then begin
+   rect1:= innerclientrect;
+   if pointinrect(info.pos,rect1) then begin
+    if info.pos.y >= rect1.y + rect1.cy div 2 then begin //white keys
+     keynumber:= (info.pos.x - rect1.x) div fkeywidth;
+     key:= whitekeys[keynumber mod 7];
+    end
+    else begin
+     keynumber:= (info.pos.x - rect1.x + fkeywidth div 2) div fkeywidth;
+     key:= blackkeys[keynumber mod 7];
+     if key < 0 then begin
+      keynumber:= (info.pos.x - rect1.x) div fkeywidth;
+      key:= whitekeys[keynumber mod 7];
+     end;
+    end;
+    fkey:= (keynumber div 7)*12+key;
+    flastkey:= fkey;
+   end
+   else begin
+    if not fkeypressed then begin
+     fkey:= -1;
+    end;
+   end;
+  end
+  else begin
+   if not fkeypressed then begin
+    fkey:= -1;
+   end;
+  end;
+ end
+ else begin
+  if not fkeypressed and 
+           (info.eventkind in [ek_mouseleave,ek_clientmouseleave]) then begin
+   fkey:= -1;
+  end;
+ end;
+ if keybefore <> fkey then begin
+  include(info.eventstate,es_processed);
+  updatesigvalue;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+procedure tsigkeyboard.dokeydown(var info: keyeventinfoty);
+begin
+ if (info.key = key_space) and not (ss_repeat in info.shiftstate) and
+                                             (flastkey <> fkey) then begin
+  fkey:= flastkey;
+  include(info.eventstate,es_processed);
+  fkeypressed:= true;
+  updatesigvalue;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+procedure tsigkeyboard.dokeyup(var info: keyeventinfoty);
+begin
+ if (info.key = key_space) and 
+           not (ss_repeat in info.shiftstate) and (fkey >= 0) then begin
+  fkey:= -1;
+  include(info.eventstate,es_processed);
+  updatesigvalue;
+  fkeypressed:= false;
+ end
+ else begin
+  inherited;
+ end; 
+end;
+
+procedure tsigkeyboard.doexit;
+begin
+ fkeypressed:= false;
+ inherited;
 end;
 
 { twavetableedit }

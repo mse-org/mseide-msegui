@@ -50,7 +50,8 @@ begin
                             tsigdelay,tsigdelayn,tsigfir,tsigiir,
                             tsigwavetable,
                             tsigfft,tfft,
-                            tsigslider,twavetableedit,tffttableedit
+                            tsigslider,tsigkeyboard,
+                            twavetableedit,tffttableedit
                             ]);
  registercomponenttabhints(['Math'],['Experimental Mathematical Components']);
  registerpropertyeditor(typeinfo(tdoubleconn),tdoublezcomp,'',

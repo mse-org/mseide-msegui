@@ -37,7 +37,7 @@ type
                                            write setsamplecount default 1;
   public
    constructor create(const aowner: tcomponent;
-                     const asigintf: isigclient); override;
+          const asigintf: isigclient; const aeventdriven: boolean); override;
   published
    property onoutputburst: sigoutbursteventty read fonoutputburst 
                                               write fonoutputburst;
@@ -165,7 +165,7 @@ end;
 { tbufferdoubleoutputconn }
 
 constructor tbufferdoubleoutputconn.create(const aowner: tcomponent;
-                     const asigintf: isigclient);
+                     const asigintf: isigclient; const aeventdriven: boolean);
 begin
  samplecount:= 1;
  inherited;
@@ -189,7 +189,7 @@ end;
 
 constructor tbufferdoublesigcomp.create(aowner: tcomponent);
 begin
- foutput:= tbufferdoubleoutputconn.create(self,isigclient(self));
+ foutput:= tbufferdoubleoutputconn.create(self,isigclient(self),false);
  finput:= tbufferdoubleinputconn.create(self,{$ifdef FPC}@{$endif}sigbufferfull);
  inherited;
 end;
