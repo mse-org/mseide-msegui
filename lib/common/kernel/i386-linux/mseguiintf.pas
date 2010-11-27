@@ -6805,16 +6805,35 @@ end;
 
 function createim: boolean; forward;
 
+function checklocale: pchar;
+begin
+ result:= setlocale(lc_all,'');
+ if xsupportslocale() = 0 then begin
+  setlocale(lc_all,'en_US.UTF-8');
+  if xsupportslocale() = 0 then begin  
+   setlocale(lc_all,'en_US.utf8');
+   if xsupportslocale() = 0 then begin  
+    setlocale(lc_all,'POSIX');
+    xsupportslocale();
+   end;
+  end;
+ end;
+end;
+
 procedure imdestroyed(ic: txim; client_data: txpointer;
                                           call_data: txpointer); cdecl;
+var
+ po1: pchar;
 begin
  im:= nil;
  appic:= nil;
  if not terminated then begin
+  po1:= checklocale;
   if not createim or not createappic then begin
    debugwriteln('Input method lost.');
    halt(1);
   end;
+  setlocale(lc_all,po1); //restore original
  end;
 end;
 
@@ -6912,10 +6931,9 @@ begin
   saveyourselfwindow:= 0;
   {$endif}
   lasteventtime:= currenttime;
-  setlocale(lc_all,'');
-  xsupportslocale(); //try to run anyway
- // xsetlocalemodifiers(pchar('@im=local'));
- // cursorshape:= cursorshapety(-1);
+
+  po1:= checklocale;
+  
   terminated:= false;
   result:= gue_nodisplay;
   timerevent:= false;
@@ -6934,6 +6952,8 @@ begin
    result:= gue_inputmanager;
    goto error;
   end; 
+  setlocale(lc_all,po1); //restore original
+  
   defscreen:= xdefaultscreenofdisplay(appdisp);
   rootid:= xrootwindowofscreen(defscreen);
   defvisual:= msepvisual(xdefaultvisualofscreen(defscreen));
