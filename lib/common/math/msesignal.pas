@@ -19,6 +19,10 @@ interface
 uses
  msedatalist,mseclasses,classes,msetypes,msearrayprops,mseevent,msehash,
  msesys;
+ 
+const
+ defaultsamplefrequ = 44100; //Hz
+ defaulttickdiv = 200;
 type
  tcustomsigcomp = class;
  tdoublesigcomp = class;
@@ -53,7 +57,10 @@ type
   infopo: psiginfoty;
  end;
  psigclientinfoty = ^sigclientinfoty;
-  
+
+ sigclientoptionty = (sco_tick);
+ sigclientoptionsty = set of sigclientoptionty;
+   
  isigclient = interface(ievent)
   procedure initmodel;
   procedure clear;
@@ -66,6 +73,8 @@ type
   procedure modelchange;
   function getsigcontroller: tsigcontroller;
   function getsigclientinfopo: psigclientinfoty;
+  function getsigoptions: sigclientoptionsty;
+  procedure sigtick;
  end;
  sigclientintfarty = array of isigclient;
 
@@ -82,12 +91,14 @@ type
    
     //isigclient  
    procedure initmodel; virtual;
+   procedure sigtick; virtual;
    function getinputar: inputconnarty; virtual;
    function getoutputar: outputconnarty; virtual;
    function gethandler: sighandlerprocty; virtual; abstract;
    function getzcount: integer; virtual;
    function getsigcontroller: tsigcontroller;
    function getsigclientinfopo: psigclientinfoty;
+   function getsigoptions: sigclientoptionsty; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -136,7 +147,7 @@ type
    procedure setsource(const avalue: tdoubleoutputconn);
    procedure setoffset(const avalue: double);
    procedure setgain(const avalue: double);
-   procedure setvalue(const avalue: double);
+   procedure setvalue(const avalue: double); virtual;
   protected
    fvalue: double;
   public
@@ -150,6 +161,16 @@ type
    property value: double read fvalue write setvalue;  
  end;
 
+ tchangedoubleinputconn = class(tdoubleinputconn)
+  private
+   fonchange: notifyeventty;
+  protected
+   procedure setvalue(const avalue: double); override;
+  public
+   constructor create(const aowner: tcomponent; const asigintf: isigclient;
+                      const aonchange: notifyeventty); reintroduce;
+ end;
+ 
  sighandlerinfoty = record
   dest: pdouble;
  end;
@@ -501,21 +522,107 @@ type
    procedure sighandler(const ainfo: psighandlerinfoty);
  end;
 
- sigcontrollerstatety = (scs_modelvalid);
+ sigenvelopeoptionty = (seo_negtrig,seo_exp);
+ sigenvelopeoptionsty = set of sigenvelopeoptionty;
+ envproginfoty = record
+  startval: double;
+  ramp: double;
+  starttime: integer;
+  endtime: integer;
+ end;
+ envproginfoarty = array of envproginfoty;
+ 
+ tsigenvelope = class(tdoublesigoutcomp)
+  private
+   ftrigvalues: complexarty;
+   faftertrigvalues: complexarty;
+   ftrigger: tchangedoubleinputconn;
+   ftriggerlevel: tchangedoubleinputconn;
+   fprog: envproginfoarty;
+   findex: integer;
+   
+   fcurrval: double;
+   fhasdecay: boolean;
+   fdecayindex: integer;
+   fdecaystart: double;
+   fdecayramp: double;
+   
+   ftime: integer;
+   foptions: sigenvelopeoptionsty;
+   ftimescale: real;
+   fscale: real;
+   foffset: real;
+   fmin: real;
+   fmax: real;
+   procedure settrigvalues(const avalue: complexarty);
+   procedure setaftertrigvalues(const avalue: complexarty);
+   procedure settrigger(const avalue: tchangedoubleinputconn);
+   procedure settriggerlevel(const avalue: tchangedoubleinputconn);
+   procedure setmin(const avalue: real);
+   procedure setmax(const avalue: real);
+  protected
+   ftriggered: boolean;
+   ftriggerpending: boolean;
+//   function getsigoptions: sigclientoptionsty; override;
+//   procedure sigtick; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);   
+   procedure updatevalues;
+
+   procedure initmodel; override;
+   function getinputar: inputconnarty; override;
+   function getzcount: integer; override;
+   function gethandler: sighandlerprocty; override;
+   procedure dotriggerchange(const sender: tobject);
+  public
+   constructor create(aowner: tcomponent); override;
+   property trigvalues: complexarty read ftrigvalues write settrigvalues;
+   property aftertrigvalues: complexarty read faftertrigvalues 
+                                            write setaftertrigvalues;
+  published
+   property trigger: tchangedoubleinputconn read ftrigger write settrigger;
+   property triggerlevel: tchangedoubleinputconn read ftriggerlevel 
+                                              write settriggerlevel;
+   property options: sigenvelopeoptionsty read foptions 
+                                                write foptions default [];
+   property timescale: real read ftimescale write ftimescale; //default 1s
+   property min: real read fmin write setmin;
+   property max: real read fmax write setmax;
+ end;
+ 
+ sigcontrollerstatety = (scs_modelvalid,scs_hastick);
  sigcontrollerstatesty = set of sigcontrollerstatety;
  
  tsiginfohash = class(tpointerptruinthashdatalist)
  end;
 
+ beforestepeventty = procedure(const sender: tsigcontroller;
+                        var acount: integer; var handled: boolean) of object;
+ afterstepeventty = procedure(const sender: tsigcontroller;
+                               const acount: integer) of object;
+ 
  tsigcontroller = class(tmsecomponent)
   private
    finphash: tsiginfohash;
    foutphash: tsiginfohash;
    fvaluedummy: double;
    fmutex: mutexty;
+   fticktime: integer;
+   ftickdiv: integer;
+   fonbeforetick: notifyeventty;
+   fonaftertick: notifyeventty;
+   fonbeforestep: beforestepeventty;
+   fonbeafterstep: afterstepeventty;
+   fonbeforeupdatemodel: notifyeventty;
+   fonafterupdatemodel: notifyeventty;
+   fonafterstep: afterstepeventty;
+   fsamplefrequ: real;
+   procedure settickdiv(const avalue: integer);
+   procedure setonbeforetick(const avalue: notifyeventty);
+   procedure setonaftertick(const avalue: notifyeventty);
   protected
    fstate: sigcontrollerstatesty;
    fclients: sigclientintfarty;
+   fticks: proceventarty;
    finfos: siginfoarty;
    finputnodes: siginfopoarty;
 //   foutputnodes: siginfopoarty;
@@ -535,15 +642,35 @@ type
    function findoutp(const aconn: tsigconn): psiginfoty;
    procedure internalexecevent(const ainfopo: psiginfoty);
    procedure execevent(const aintf: isigclient);
+   procedure checktick;
+   procedure dotick;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure modelchange;
    procedure checkmodel;
-   procedure step(const acount: integer=1);
+   procedure step(acount: integer=1);
    procedure clear;
    procedure lock;
    procedure unlock;
+  published
+   property samplefrequ: real read fsamplefrequ write fsamplefrequ;
+                                //default 44100
+   property tickdiv: integer read ftickdiv write settickdiv 
+                                            default defaulttickdiv;
+   property onbeforetick: notifyeventty read fonbeforetick 
+                                                      write setonbeforetick;
+   property onaftertick: notifyeventty read fonaftertick 
+                                                      write setonaftertick;
+   property onbeforestep: beforestepeventty read fonbeforestep 
+                                                         write fonbeforestep;
+   property onafterstep: afterstepeventty read fonbeafterstep 
+                                                         write fonafterstep;
+
+   property onbeforeupdatemodel: notifyeventty read fonbeforeupdatemodel 
+                               write fonbeforeupdatemodel; //application.locked
+   property onafterupdatemodel: notifyeventty read fonafterupdatemodel 
+                               write fonafterupdatemodel;  //application.locked
  end;
  
 procedure createsigbuffer(var abuffer: doublearty; const asize: integer);
@@ -556,7 +683,7 @@ procedure setsigcontroller(const linker: tobjectlinker;
  
 implementation
 uses
- sysutils,mseformatstr,msesysutils,msesysintf;
+ sysutils,mseformatstr,msesysutils,msesysintf,mseapplication;
 type
  tmsecomponent1 = class(tmsecomponent);
   
@@ -868,6 +995,16 @@ end;
 function tdoublesigcomp.getsigclientinfopo: psigclientinfoty;
 begin
  result:= @fsigclientinfo;
+end;
+
+procedure tdoublesigcomp.sigtick;
+begin
+ //dummy
+end;
+
+function tdoublesigcomp.getsigoptions: sigclientoptionsty;
+begin
+ result:= [];
 end;
 
 { tdoublezcomp }
@@ -1668,6 +1805,8 @@ end;
 
 constructor tsigcontroller.create(aowner: tcomponent);
 begin
+ fsamplefrequ:= defaultsamplefrequ;
+ ftickdiv:= defaulttickdiv;
  syserror(sys_mutexcreate(fmutex),self);
  finphash:= tsiginfohash.create;
  foutphash:= tsiginfohash.create;
@@ -1904,9 +2043,18 @@ var
  ar1,ar2: siginfopoarty;
  ar3: inputconnarty;
 begin
+ if assigned(fonbeforeupdatemodel) then begin
+  application.lock;
+  try
+   fonbeforeupdatemodel(self);
+  finally
+   application.unlock;
+  end;
+ end;
  finfos:= nil;
  finphash.clear;
  foutphash.clear;
+ fticks:= nil;
  finputnodes:= nil;
 // foutputnodes:= nil;
  fexecinfo:= nil;
@@ -1921,6 +2069,10 @@ begin
 
  for int1:= 0 to high(fclients) do begin //get basic info
   po1:= @finfos[int1];
+  if sco_tick in fclients[int1].getsigoptions then begin
+   setlength(fticks,high(fticks)+2);
+   fticks[high(fticks)]:= @fclients[int1].sigtick;
+  end;
   fclients[int1].getsigclientinfopo^.infopo:= po1;
   with po1^ do begin
    intf:= fclients[int1];
@@ -2131,10 +2283,13 @@ begin
    desthigh:= high(po1^.destinations)-1;
    handlerinfo.dest:= @fvaluedummy;
    if length(po1^.destinations) > 0 then begin
-    if desthigh < 0 then begin
+    updatedestinfo(po1^.destinations[0],handlerinfo.dest,firstdest);
+                      //setup hasscale
+    if (desthigh < 0) or not firstdest.hasscale then begin
      handlerinfo.dest:= @po1^.destinations[0].fvalue;
     end;    
     updatedestinfo(po1^.destinations[0],handlerinfo.dest,firstdest);
+                      //setup again with correct dest
     setlength(dest,desthigh+1);
     for int2:= 0 to desthigh do begin
      updatedestinfo(po1^.destinations[int2+1],handlerinfo.dest,dest[int2]);
@@ -2144,6 +2299,15 @@ begin
  end;
  include(fstate,scs_modelvalid);
  clear;
+ checktick;
+ if assigned(fonafterupdatemodel) then begin
+  application.lock;
+  try
+   fonafterupdatemodel(self);
+  finally
+   application.unlock;
+  end;
+ end;
 end;
 
 procedure tsigcontroller.internalstep;
@@ -2171,15 +2335,32 @@ begin
  end;
 end;
 
-procedure tsigcontroller.step(const acount: integer);
+procedure tsigcontroller.step(acount: integer);    
 var
  int1: integer;
+ bo1: boolean;
 begin
  if not (scs_modelvalid in fstate) then begin
   updatemodel;
  end;
- for int1:= acount-1 downto 0 do begin
-  internalstep;
+ bo1:= false;
+ if assigned(fonbeforestep) then begin
+  fonbeforestep(self,acount,bo1);
+ end;
+ if not bo1 then begin
+  if scs_hastick in fstate then begin
+   fticktime:= fticktime + acount;
+   while fticktime > 0 do begin
+    dotick;
+    dec(fticktime,ftickdiv);
+   end;
+  end;
+  for int1:= acount-1 downto 0 do begin
+   internalstep;
+  end;
+  if assigned(fonafterstep) then begin
+   fonafterstep(self,acount);
+  end;
  end;
 end;
 
@@ -2245,6 +2426,51 @@ begin
  finally
   unlock;
  end;
+end;
+
+procedure tsigcontroller.settickdiv(const avalue: integer);
+begin
+ ftickdiv:= avalue;
+ if ftickdiv <= 0 then begin
+  ftickdiv:= 0;
+ end;
+end;
+
+procedure tsigcontroller.checktick;
+begin
+ if (fticks <> nil) or assigned(fonbeforetick) or assigned(fonaftertick) then begin
+  include(fstate,scs_hastick);
+ end
+ else begin
+  exclude(fstate,scs_hastick);
+ end;
+end;
+
+procedure tsigcontroller.dotick;
+var
+ int1: integer;
+begin
+ if assigned(fonbeforetick) then begin
+  fonbeforetick(self);
+ end;
+ for int1:= high(fticks) downto 0 do begin
+  fticks[int1];
+ end;
+ if assigned(fonaftertick) then begin
+  fonaftertick(self);
+ end;
+end;
+
+procedure tsigcontroller.setonbeforetick(const avalue: notifyeventty);
+begin
+ fonbeforetick:= avalue;
+ checktick;
+end;
+
+procedure tsigcontroller.setonaftertick(const avalue: notifyeventty);
+begin
+ fonaftertick:= avalue;
+ checktick;
 end;
 
 { tsigwavetable }
@@ -2376,6 +2602,245 @@ begin
   if fcontroller <> nil then begin
    fcontroller.modelchange;
   end;
+ end;
+end;
+
+{ tsigenvelope }
+
+constructor tsigenvelope.create(aowner: tcomponent);
+begin
+ fmax:= 1;
+ inherited;
+ ftrigger:= tchangedoubleinputconn.create(self,isigclient(self),
+                                                             @dotriggerchange);
+ ftrigger.name:= 'trigger';
+ ftriggerlevel:= tchangedoubleinputconn.create(self,isigclient(self),
+                                                             @dotriggerchange);
+ ftriggerlevel.name:= 'triggerlevel';
+end;
+
+procedure tsigenvelope.updatevalues;
+var
+ int1: integer;
+ timsca: double;
+ 
+ procedure calcvalues(avalues: complexarty);
+ var
+  int2: integer;
+  ti: integer;
+  sta: double;
+  int3: integer;
+ begin
+  ti:= 0;
+  sta:= 0;
+  for int2:= 0 to high(avalues) do begin
+   with fprog[int1] do begin
+    starttime:= ti;
+    startval:= sta;
+    int3:= ti;
+    ti:= round(avalues[int2].re*timsca);
+    endtime:= ti;
+    if int3 = ti then begin
+     dec(int3);
+    end;
+    ramp:= (avalues[int2].im - sta)/(ti-int3);
+    sta:= avalues[int2].im;
+    inc(int1);
+   end;
+  end;
+  with fprog[int1] do begin
+   startval:= sta;
+   ramp:= 0;
+   starttime:= ti;
+   endtime:= -1;
+   inc(int1);
+  end;
+ end; //calcvalues
+ 
+begin
+ fprog:= nil;
+ ftime:= 0;
+ setlength(fprog,length(ftrigvalues)+length(faftertrigvalues)+2);
+ findex:= high(fprog);
+ int1:= 0;
+ timsca:= 1;
+ if fcontroller <> nil then begin
+  timsca:= timsca * fcontroller.samplefrequ;
+ end;
+ fdecayindex:= high(ftrigvalues)+2;
+ fdecayramp:= 1;
+ fdecaystart:= 0;
+ fhasdecay:= high(faftertrigvalues) >= 0;
+ calcvalues(ftrigvalues);
+ calcvalues(faftertrigvalues);
+ if fhasdecay then begin
+  with faftertrigvalues[0],fprog[fdecayindex] do begin
+   fdecaystart:= im;
+   if endtime > 0 then begin
+    fdecayramp:= (1/endtime);
+   end;
+  end;
+ end;
+ if seo_exp in foptions then begin
+  if (fmin > 0) and (fmax > 0) then begin
+   foffset:= ln(fmin);
+   fscale:= ln(max)-foffset;
+  end
+  else begin
+   fscale:= 1; //invalid
+   foffset:= 0;
+  end;
+ end
+ else begin
+  foffset:= fmin;
+  fscale:= fmax-fmin;
+ end;
+end;
+
+{
+function tsigenvelope.getsigoptions: sigclientoptionsty;
+begin
+ result:= [sco_tick];
+end;
+
+procedure tsigenvelope.sigtick;
+begin
+ fcontroller.execevent(isigclient(self));
+end;
+}
+procedure tsigenvelope.sighandler(const ainfo: psighandlerinfoty);
+var
+ bo1,bo2: boolean;
+begin
+ bo1:= (ftrigger.value > ftriggerlevel.value) xor (seo_negtrig in foptions);
+             //triggered
+ bo2:= bo1 xor ftriggered;
+ if bo2 or ftriggerpending then begin
+  ftriggerpending:= false;
+  ftriggered:= bo1 xor not bo2;
+  ftime:= 0;
+  if ftriggered then begin
+   findex:= 0;
+  end
+  else begin
+   findex:= fdecayindex;
+   if fhasdecay then begin
+    with fprog[findex] do begin
+     startval:= fcurrval;
+     ramp:= (fdecaystart-startval)*fdecayramp;
+    end;
+   end;
+  end;
+ end;
+ with fprog[findex] do begin
+  fcurrval:= startval+ramp*(ftime-starttime);
+  if endtime >= 0 then begin
+   inc(ftime);
+   if (ftime > endtime) then begin
+    inc(findex);
+   end;
+  end;
+ end;
+ if seo_exp in foptions then begin
+  if fcurrval <= 0 then begin
+   ainfo^.dest^:= 0;
+  end
+  else begin
+   ainfo^.dest^:= exp(fcurrval*fscale + foffset);
+  end;
+ end
+ else begin
+  ainfo^.dest^:= fcurrval*fscale + foffset;
+ end;
+end;
+
+function tsigenvelope.gethandler: sighandlerprocty;
+begin
+ result:= @sighandler;
+end;
+
+procedure tsigenvelope.settrigvalues(const avalue: complexarty);
+begin
+ ftrigvalues:= avalue;
+ updatevalues;
+end;
+
+procedure tsigenvelope.setaftertrigvalues(const avalue: complexarty);
+begin
+ faftertrigvalues:= avalue;
+ updatevalues;
+end;
+
+procedure tsigenvelope.settrigger(const avalue: tchangedoubleinputconn);
+begin
+ ftrigger.assign(avalue);
+end;
+
+procedure tsigenvelope.settriggerlevel(const avalue: tchangedoubleinputconn);
+begin
+ ftriggerlevel.assign(avalue);
+end;
+
+function tsigenvelope.getinputar: inputconnarty;
+begin
+ setlength(result,2);
+ result[0]:= ftrigger;
+ result[1]:= ftriggerlevel;
+end;
+
+function tsigenvelope.getzcount: integer;
+begin
+ result:= 1;
+end;
+
+procedure tsigenvelope.initmodel;
+begin
+ inherited;
+ updatevalues;
+end;
+
+procedure tsigenvelope.setmin(const avalue: real);
+begin
+ fmin:= avalue;
+ updatevalues;
+end;
+
+procedure tsigenvelope.setmax(const avalue: real);
+begin
+ fmax:= avalue;
+ updatevalues;
+end;
+
+procedure tsigenvelope.dotriggerchange(const sender: tobject);
+begin
+ if ftriggered xor ((ftrigger.value > ftriggerlevel.value) xor 
+                                        (seo_negtrig in foptions)) then begin
+  ftriggerpending:= true;
+ end;
+end;
+
+{ tchangedoubleinputconn }
+
+constructor tchangedoubleinputconn.create(const aowner: tcomponent;
+               const asigintf: isigclient; const aonchange: notifyeventty);
+begin
+ fonchange:= aonchange;
+ inherited create(aowner,asigintf);
+end;
+
+procedure tchangedoubleinputconn.setvalue(const avalue: double);
+begin
+ lock;
+ inherited;
+ if tmsecomponent(owner).canevent(tmethod(fonchange)) then begin
+  try
+   fonchange(self);
+  finally
+   unlock
+  end;
+ end
+ else begin
+  unlock;
  end;
 end;
 

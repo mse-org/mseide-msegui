@@ -48,7 +48,7 @@ procedure register;
 begin
  registercomponents('Math',[tsigcontroller,tsigout,tsigin,tsigadd,tsigmult,
                             tsigdelay,tsigdelayn,tsigfir,tsigiir,
-                            tsigwavetable,
+                            tsigwavetable,tsigenvelope,
                             tsigfft,tfft,
                             tsigslider,tsigkeyboard,
                             twavetableedit,tffttableedit

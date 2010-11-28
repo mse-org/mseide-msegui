@@ -44,6 +44,7 @@ type
    procedure sighandler(const ainfo: psighandlerinfoty);
     //isigclient  
    procedure initmodel;
+   procedure sigtick; virtual;
    function getinputar: inputconnarty;
    function getoutputar: outputconnarty;
    function gethandler: sighandlerprocty;
@@ -52,6 +53,7 @@ type
    procedure modelchange;
    function getsigcontroller: tsigcontroller;
    function getsigclientinfopo: psigclientinfoty;
+   function getsigoptions: sigclientoptionsty;
   public
    constructor create(aowner: tcomponent); override;
    property output: tdoubleoutputconn read foutput write setoutput;
@@ -97,6 +99,7 @@ type
 
     //isigclient  
    procedure initmodel;
+   procedure sigtick; virtual;
    function getinputar: inputconnarty;
    function getoutputar: outputconnarty;
    function gethandler: sighandlerprocty;
@@ -105,6 +108,7 @@ type
    procedure modelchange;
    function getsigcontroller: tsigcontroller;
    function getsigclientinfopo: psigclientinfoty;
+   function getsigoptions: sigclientoptionsty;
   public
    constructor create(aowner: tcomponent); override;
    property output: tdoubleoutputconn read foutput write setoutput;
@@ -309,6 +313,16 @@ begin
  result:= @fsigclientinfo;
 end;
 
+procedure tsigslider.sigtick;
+begin
+ //dummy
+end;
+
+function tsigslider.getsigoptions: sigclientoptionsty;
+begin
+ result:= [];
+end;
+
 { tsigkeyboard }
 
 constructor tsigkeyboard.create(aowner: tcomponent);
@@ -372,7 +386,7 @@ var
  do1: double;
 begin
  if fkey < 0 then begin
-  do1:= 0;
+  do1:= fsigvalue;
  end
  else begin  
   if (sieo_exp in foptions) then begin
@@ -570,6 +584,16 @@ procedure tsigkeyboard.doexit;
 begin
  fkeypressed:= false;
  inherited;
+end;
+
+procedure tsigkeyboard.sigtick;
+begin
+ //dummy
+end;
+
+function tsigkeyboard.getsigoptions: sigclientoptionsty;
+begin
+ result:= [];
 end;
 
 { twavetableedit }
