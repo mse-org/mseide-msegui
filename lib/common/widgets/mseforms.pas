@@ -8,9 +8,12 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit mseforms;
-
 {$ifdef FPC}
  {$mode objfpc}{$h+}{$interfaces corba}
+ {$if defined(FPC) //delphi compatibility
+   and (fpc_fullversion >= 020403)}
+  {$define mse_fpc_2_4_3}
+ {$ifend}
 {$endif}
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
@@ -557,6 +560,16 @@ type
  tcustomframe1 = class(tcustomframe);
 
  {$ifdef FPC}
+  {$ifdef mse_fpc_2_4_3}
+  TReadercracker = class(TFiler)
+  private
+    FDriver: TAbstractObjectReader;
+    FOwner: TComponent;
+    FParent: TComponent;
+    FFixups: TObject;
+    FLoaded: TFpList;
+  end;
+  {$else}
   TReadercracker = class(TFiler)
   private
     FDriver: TAbstractObjectReader;
@@ -565,6 +578,7 @@ type
     FFixups: TList;
     FLoaded: TList;
   end;
+  {$endif}
   TComponentcracker = class(TPersistent)
   private
     FOwner: TComponent;
