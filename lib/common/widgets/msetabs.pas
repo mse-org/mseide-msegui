@@ -731,6 +731,7 @@ type
    procedure beginpickmove(const sender: tobjectpicker);
    procedure pickthumbtrack(const sender: tobjectpicker);
    procedure endpickmove(const sender: tobjectpicker);
+   procedure cancelpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
 
   public
@@ -4667,6 +4668,11 @@ begin
 end;
 
 procedure tcustomtabwidget.pickthumbtrack(const sender: tobjectpicker);
+begin
+ //dummy
+end;
+
+procedure tcustomtabwidget.cancelpickmove(const sender: tobjectpicker);
 begin
  //dummy
 end;

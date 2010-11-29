@@ -41,10 +41,12 @@ type
   procedure beginpickmove(const sender: tobjectpicker);
   procedure pickthumbtrack(const sender: tobjectpicker);
   procedure endpickmove(const sender: tobjectpicker);
+  procedure cancelpickmove(const sender: tobjectpicker);
   procedure paintxorpic(const sender: tobjectpicker; const acanvas: tcanvas);
  end;
 
- objectpickerstatety = (ops_moving,ops_rectselecting,ops_multiselecting,
+ objectpickerstatety = (ops_picking,ops_rectselecting,
+                        ops_multiselecting,ops_moving,
                         ops_xorpicpainted,ops_xorpicremoved);
  objectpickerstatesty = set of objectpickerstatety;
  objectpickeroptionty = (opo_mousemoveobjectquery,opo_rectselect,
@@ -63,6 +65,7 @@ type
    foptions: objectpickeroptionsty;
    fmouseeventinfopo: pmouseeventinfoty;
    fkeyeventinfopo: pkeyeventinfoty;
+   fcursorshape: cursorshapety;
    procedure dopaint(const acanvas: tcanvas);
    procedure dokeypress(const sender: twidget; var info: keyeventinfoty);
    procedure endmoving(const resetflag: boolean);
@@ -85,9 +88,10 @@ type
    function hasselectobjects: boolean;
    function hasmouseoverobjects: boolean;
    function hascurrentobjects: boolean;
-   function moving: boolean;
+   function picking: boolean;
    function rectselecting: boolean;
    function multiselecting: boolean;
+   function moving: boolean;
    
    property mouseoverobjects: integerarty read fmouseoverobjects;
    property selectobjects: integerarty read fselectobjects;
@@ -98,6 +102,7 @@ type
    property pickoffset: pointty read fpickoffset;
    property pickpos: pointty read fpickrect.pos;
    property pickrect: rectty read fpickrect;
+   property cursor: cursorshapety read fcursorshape;
    property mouseeventinfopo: pmouseeventinfoty read fmouseeventinfopo;
    property keyeventinfopo: pkeyeventinfoty read fkeyeventinfopo;
    property shiftstate: shiftstatesty read getshiftstate;
@@ -118,6 +123,7 @@ constructor tobjectpicker.create(const intf: iobjectpicker;
 begin
  fintf:= intf;
  forigin:= aorigin;
+ fcursorshape:= cr_default;
 end;
 
 destructor tobjectpicker.destroy;
@@ -150,7 +156,7 @@ end;
 
 procedure tobjectpicker.mouseevent(var info: mouseeventinfoty);
 var
- shape: cursorshapety;
+// shape: cursorshapety;
  widget1: twidget1;
  shiftstates1: shiftstatesty;
 
@@ -186,6 +192,8 @@ var
  end; //domousemovequery
  
  procedure doend;
+ var
+  bo1: boolean;
  begin
   endmoving(false);
   fintf.endpickmove(self);
@@ -195,10 +203,13 @@ var
   fpickoffset:= nullpoint;
   
   with fintf.getwidget do begin
-   shape:= actualcursor(widgetmousepos(info));
+   fcursorshape:= actualcursor(widgetmousepos(info));
   end;
-  fintf.getcursorshape(self,shape);
-  application.widgetcursorshape:= shape; //restore pick cursor
+  bo1:= fintf.getcursorshape(self,fcursorshape);
+  application.widgetcursorshape:= fcursorshape; //restore pick cursor
+  if not bo1 then begin
+   fcursorshape:= cr_default;
+  end;
   include(info.eventstate,es_processed);
   fmouseoverobjects:= nil;
   domousemovequery(true);
@@ -207,15 +218,15 @@ var
  procedure checkcursorshape;
  begin
   with fintf.getwidget do begin
-   shape:= actualcursor(widgetmousepos(info));
+   fcursorshape:= actualcursor(widgetmousepos(info));
   end;
-  if fintf.getcursorshape(self,shape) then begin
+  if fintf.getcursorshape(self,fcursorshape) then begin
    include(info.eventstate,es_processed);
-   application.widgetcursorshape:= shape;
   end
   else begin
-   application.widgetcursorshape:= cr_default;
+   fcursorshape:= cr_default;
   end;
+  application.widgetcursorshape:= fcursorshape;
  end; //checkcursorshape
 
  function hasintersection(const ar1: integerarty): boolean;
@@ -301,7 +312,12 @@ begin
      fpickrect.size:= nullsize;
      fpickoffset:= nullpoint;
      ar1:= nil;
-     fintf.getpickobjects(self,ar1);
+     include(fstate,ops_picking);
+     try
+      fintf.getpickobjects(self,ar1);
+     finally
+      exclude(fstate,ops_picking);
+     end;
      if shiftstates1 = [ss_left] then begin
       fmouseoverobjects:= ar1;
       if (ar1 = nil) then begin
@@ -498,6 +514,7 @@ begin
       paintxorpic;
      end;
      include(info.eventstate,es_processed);
+     fintf.cancelpickmove(self);
     finally
      fkeyeventinfopo:= nil;
     end;
@@ -554,9 +571,9 @@ begin
  result:= fselectobjects <> nil;
 end;
 
-function tobjectpicker.moving: boolean;
+function tobjectpicker.picking: boolean;
 begin
- result:= ops_moving in fstate;
+ result:= ops_picking in fstate;
 end;
 
 function tobjectpicker.rectselecting: boolean;
@@ -567,6 +584,11 @@ end;
 function tobjectpicker.multiselecting: boolean;
 begin
  result:= ops_multiselecting in fstate;
+end;
+
+function tobjectpicker.moving: boolean;
+begin
+ result:= ops_moving in fstate;
 end;
 
 function tobjectpicker.getcurrentobjects: integerarty;

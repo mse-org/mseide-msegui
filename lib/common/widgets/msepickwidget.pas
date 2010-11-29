@@ -41,6 +41,7 @@ type
    fonpickthumbtrack: pickmoveeventty;
    fonendpickmove: pickmoveeventty;
    fonpaintxorpic: paintxorpiceventty;
+   foncancelpickmove: pickmoveeventty;
    function getoptions: objectpickeroptionsty;
    procedure setoptions(const avalue: objectpickeroptionsty);
   protected
@@ -54,6 +55,7 @@ type
    procedure beginpickmove(const sender: tobjectpicker);
    procedure pickthumbtrack(const sender: tobjectpicker);
    procedure endpickmove(const sender: tobjectpicker);
+   procedure cancelpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
   public
    constructor create(aowner: tcomponent); override;
@@ -69,6 +71,8 @@ type
                                 write fonpickthumbtrack;
    property onendpickmove: pickmoveeventty read fonendpickmove
                                 write fonendpickmove;
+   property oncancelpickmove: pickmoveeventty read foncancelpickmove
+                                write foncancelpickmove;
    property onpaintxorpic: paintxorpiceventty read fonpaintxorpic 
                                 write fonpaintxorpic;
  end;
@@ -147,6 +151,13 @@ procedure tcustompickwidget.endpickmove(const sender: tobjectpicker);
 begin
  if canevent(tmethod(fonendpickmove)) then begin
   fonendpickmove(self,sender);
+ end;
+end;
+
+procedure tcustompickwidget.cancelpickmove(const sender: tobjectpicker);
+begin
+ if canevent(tmethod(foncancelpickmove)) then begin
+  foncancelpickmove(self,sender);
  end;
 end;
 

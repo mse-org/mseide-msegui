@@ -51,7 +51,7 @@ begin
                             tsigwavetable,tsigenvelope,
                             tsigfft,tfft,
                             tsigslider,tsigkeyboard,
-                            twavetableedit,tffttableedit
+                            twavetableedit,tffttableedit,tenvelopeedit
                             ]);
  registercomponenttabhints(['Math'],['Experimental Mathematical Components']);
  registerpropertyeditor(typeinfo(tdoubleconn),tdoublezcomp,'',

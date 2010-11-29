@@ -13,10 +13,11 @@ interface
 uses
  classes,msechart,mseguiglob,mseevent,mseeditglob,msegraphutils,msetypes,
  mseobjectpicker,msepointer,msegraphics,mseclasses,msestat,msestatfile,
- msestrings;
+ msestrings,msedial;
  
 const
  defaultsnapdist = 4;
+ markersnapdist = 2;
  defaultchartoptionsedit = [oe_checkvaluepaststatread,oe_savevalue,oe_savestate];
  
 type
@@ -26,6 +27,11 @@ type
                 var avalue: realarty; var accept: boolean) of object;
  charteditoptionty = (ceo_thumbtrack,ceo_noinsert,ceo_nodelete);
  charteditoptionsty = set of charteditoptionty;
+
+ charteditmovestatety = (cems_markermoving,cems_canbottomlimit,cems_cantoplimit,
+                         cems_xbottomlimit,cems_ybottomlimit,
+                         cems_xtoplimit,cems_ytoplimit);
+ charteditmovestatesty = set of charteditmovestatety;
 
  tcustomchartedit = class(tchart,iobjectpicker)
   private
@@ -40,6 +46,7 @@ type
    fondataentered: notifyeventty;
    foptions: charteditoptionsty;
    fpickref: pointty;
+   fmovestate: charteditmovestatesty;
    procedure setactivetrace(const avalue: integer);
    function limitmoveoffset(const aoffset: pointty): pointty;
    function getreadonly: boolean;
@@ -61,6 +68,7 @@ type
    procedure doafterpaint(const acanvas: tcanvas); override;
    procedure change;
    procedure dochange; virtual;
+   procedure domarkerchange; virtual;
    function chartdataxy: complexarty;
    function chartdataxseries: realarty;
    function activetraceitem: ttrace;
@@ -73,6 +81,12 @@ type
    procedure loaded; override;
    procedure docheckvalue(var accept: boolean); virtual; abstract;
    procedure doclear; virtual; abstract;
+   function xmarkertochart(const avalue: real): integer;
+   function ymarkertochart(const avalue: real): integer;
+   function xcharttomarker(const apos: integer): real;
+   function ycharttomarker(const apos: integer): real;
+   function getmarker(const apos: pointty): integer; 
+                             //-1 if none, even -> x, odd -> y, first dial only
 
     //iobjectpicker
    function getcursorshape(const sender: tobjectpicker;
@@ -82,6 +96,7 @@ type
    procedure beginpickmove(const sender: tobjectpicker);
    procedure pickthumbtrack(const sender: tobjectpicker);
    procedure endpickmove(const sender: tobjectpicker);
+   procedure cancelpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
   public
    constructor create(aowner: tcomponent); override;
@@ -182,6 +197,7 @@ uses
  
 type
  ttraces1 = class(ttraces);
+ tdialmarkers1 = class(tdialmarkers);
   
 { tcustomchartedit }
 
@@ -258,6 +274,46 @@ begin
     inherited;
    end;
   end;
+ end;
+end;
+
+function tcustomchartedit.xmarkertochart(const avalue: real): integer;
+var
+ rect1: rectty;
+begin
+ rect1:= innerclientrect;
+ with xdials[0] do begin
+  result:= rect1.x + round(((avalue-xstart)/xrange)*rect1.cx);
+ end;
+end;
+
+function tcustomchartedit.ymarkertochart(const avalue: real): integer;
+var
+ rect1: rectty;
+begin
+ rect1:= innerclientrect;
+ with ydials[0] do begin
+  result:= rect1.y + rect1.cy - round(((avalue-ystart)/yrange)*rect1.cy);
+ end;
+end;
+
+function tcustomchartedit.xcharttomarker(const apos: integer): real;
+var
+ rect1: rectty;
+begin
+ rect1:= innerclientrect;
+ with xdials[0] do begin
+  result:= xstart + ((apos - rect1.x) / rect1.cx)*xrange;
+ end;
+end;
+
+function tcustomchartedit.ycharttomarker(const apos: integer): real;
+var
+ rect1: rectty;
+begin
+ rect1:= innerclientrect;
+ with ydials[0] do begin
+  result:= ystart + ((rect1.y+rect1.cy-apos) / rect1.cy)*yrange;
  end;
 end;
 
@@ -470,10 +526,27 @@ end;
 
 function tcustomchartedit.getcursorshape(const sender: tobjectpicker;
                                            var shape: cursorshapety): boolean;
+var
+ int1: integer;
 begin
- result:= sender.moving and sender.hascurrentobjects;
+ result:= not (cems_markermoving in fmovestate) and sender.moving and
+                                                      sender.hascurrentobjects;
  if result then begin
   shape:= cr_none;
+ end
+ else begin
+  if not sender.hascurrentobjects or (cems_markermoving in fmovestate) then begin
+   int1:= getmarker(sender.pickpos);
+   if int1 >= 0 then begin
+    result:= true;
+    if odd(int1) then begin
+     shape:= cr_sizever;
+    end
+    else begin
+     shape:= cr_sizehor;
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -495,6 +568,13 @@ begin
   end
   else begin
    objects:= nil;
+   if sender.picking then begin
+    int1:= getmarker(sender.pickpos);
+    if int1 >= 0 then begin
+     setlength(objects,1);
+     objects[0]:= -int1-1;
+    end;
+   end;
   end;
  end;
 end;
@@ -502,18 +582,24 @@ end;
 function tcustomchartedit.limitmoveoffset(const aoffset: pointty): pointty;
 begin
  result:= addpoint(aoffset,fpickref);
+ fmovestate:= fmovestate - [cems_xbottomlimit,cems_ybottomlimit,
+                            cems_xtoplimit,cems_ytoplimit];
  if ops_moving in fobjectpicker.state then begin
   if result.x > foffsetmax.x then begin
    result.x:= foffsetmax.x;
+   include(fmovestate,cems_xtoplimit);
   end;
   if result.y > foffsetmax.y then begin
    result.y:= foffsetmax.y;
+   include(fmovestate,cems_ytoplimit);
   end;
   if result.x < foffsetmin.x then begin
    result.x:= foffsetmin.x;
+   include(fmovestate,cems_xbottomlimit);
   end;
   if result.y < foffsetmin.y then begin
    result.y:= foffsetmin.y;
+   include(fmovestate,cems_ybottomlimit);
   end;
  end;
  subpoint1(result,fpickref);
@@ -536,52 +622,116 @@ begin
  ma.y:= minint;
  objs:= sender.currentobjects;
  setlength(ar1,length(objs));
+ exclude(fmovestate,cems_markermoving);
  for int1:= 0 to high(objs) do begin
-  pt1:= nodepos(objs[int1]);
-  ar1[int1]:= pt1;
-  if pt1.x < mi.x then begin
-   mi.x:= pt1.x;
-  end;
-  if pt1.y < mi.y then begin
-   mi.y:= pt1.y;
-  end;
-  if pt1.x > ma.x then begin
-   ma.x:= pt1.x;
-  end;
-  if pt1.y > ma.y then begin
-   ma.y:= pt1.y;
-  end;
- end;
- with rect1 do begin
-  foffsetmin.x:= x - mi.x;
-  foffsetmin.y:= y - mi.y;
-  foffsetmax.x:= x + cx - ma.x;
-  foffsetmax.y:= y + cy - ma.y;
- end;
- with activetraceitem do begin
-  if kind = trk_xseries then begin
-   foffsetmin.x:= 0;
-   foffsetmax.x:= 0;   
-  end
-  else begin
-   if cto_xordered in options then begin
-              //limit to neighbours
-    for int1:= 0 to high(ar1) do begin
-     int2:= objs[int1];
-     if (int2 > 0) and ((int1 = 0) or (objs[int1-1] <> int2 - 1)) then begin
-      pt1:= nodepos(int2-1);
-      int3:= pt1.x - ar1[int1].x;
-      if int3 > foffsetmin.x then begin
-       foffsetmin.x:= int3;
+  if objs[int1] < 0 then begin
+   include(fmovestate,cems_markermoving);
+   fmovestate:= fmovestate - [cems_canbottomlimit,cems_cantoplimit];
+   int2:= -objs[int1]-1;
+   with rect1 do begin
+    if odd(int2) then begin
+     int2:= int2 div 2;
+     with ydials[0].markers[int2] do begin
+      int3:= ymarkertochart(value);
+      ma.y:= y-int3;
+      mi.y:= y+cy-int3;
+      if (dmo_ordered in options) then begin
+       if int2 < ydials[0].markers.count - 1 then begin
+        int4:= ymarkertochart(ydials[0].markers[int2+1].value);
+        if int4 > y then begin
+         ma.y:= int4-int3;
+         include(fmovestate,cems_canbottomlimit);
+        end;
+       end;
+       if int2 > 0 then begin
+        int4:= ymarkertochart(ydials[0].markers[int2-1].value);
+        if int4 < y+cy then begin
+         mi.y:= int4-int3;
+         include(fmovestate,cems_cantoplimit);
+        end;
+       end;
       end;
      end;
-     int4:= traces[factivetrace].count - 1;
-     if (int2 < int4) and ((int1 = high(ar1)) or 
-                           (objs[int1+1] <> int2 + 1)) then begin
-      pt1:= nodepos(int2+1);
-      int3:= pt1.x - ar1[int1].x;
-      if int3 < foffsetmax.x then begin
-       foffsetmax.x:= int3;
+    end
+    else begin
+     int2:= int2 div 2;
+     with xdials[0].markers[int2] do begin
+      int3:= xmarkertochart(value);
+      ma.x:= x-int3;
+      mi.x:= x+cx-int3;
+      if (dmo_ordered in options) then begin
+       if int2 > 0 then begin
+        int4:= xmarkertochart(xdials[0].markers[int2-1].value);
+        if int4 > x then begin
+         ma.x:= int4-int3;
+         include(fmovestate,cems_canbottomlimit);
+        end;
+       end;
+       if int2 < xdials[0].markers.count - 1 then begin
+        int4:= xmarkertochart(xdials[0].markers[int2+1].value);
+        if int4 < x+cx then begin
+         mi.x:= int4-int3;
+         include(fmovestate,cems_cantoplimit);
+        end;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end
+  else begin
+   pt1:= nodepos(objs[int1]);
+   ar1[int1]:= pt1;
+   if pt1.x < mi.x then begin
+    mi.x:= pt1.x;
+   end;
+   if pt1.y < mi.y then begin
+    mi.y:= pt1.y;
+   end;
+   if pt1.x > ma.x then begin
+    ma.x:= pt1.x;
+   end;
+   if pt1.y > ma.y then begin
+    ma.y:= pt1.y;
+   end;
+  end;
+ end;
+ if  cems_markermoving in fmovestate then begin
+  foffsetmin:= ma;
+  foffsetmax:= mi;
+ end
+ else begin
+  with rect1 do begin
+   foffsetmin.x:= x - mi.x;
+   foffsetmin.y:= y - mi.y;
+   foffsetmax.x:= x + cx - ma.x;
+   foffsetmax.y:= y + cy - ma.y;
+  end;
+  with activetraceitem do begin
+   if kind = trk_xseries then begin
+    foffsetmin.x:= 0;
+    foffsetmax.x:= 0;   
+   end
+   else begin
+    if cto_xordered in options then begin
+               //limit to neighbours
+     for int1:= 0 to high(ar1) do begin
+      int2:= objs[int1];
+      if (int2 > 0) and ((int1 = 0) or (objs[int1-1] <> int2 - 1)) then begin
+       pt1:= nodepos(int2-1);
+       int3:= pt1.x - ar1[int1].x;
+       if int3 > foffsetmin.x then begin
+        foffsetmin.x:= int3;
+       end;
+      end;
+      int4:= traces[factivetrace].count - 1;
+      if (int2 < int4) and ((int1 = high(ar1)) or 
+                            (objs[int1+1] <> int2 + 1)) then begin
+       pt1:= nodepos(int2+1);
+       int3:= pt1.x - ar1[int1].x;
+       if int3 < foffsetmax.x then begin
+        foffsetmax.x:= int3;
+       end;
       end;
      end;
     end;
@@ -599,51 +749,107 @@ var
  co1,co2: complexty;
  offs: pointty;
  objs: integerarty;
+ marker1: tdialmarker;
 begin
  offs:= limitmoveoffset(subpoint(sender.pickoffset,fpickref));
- addpoint1(fpickref,offs);
- objs:= sender.currentobjects;
- with activetraceitem do begin
-  if kind = trk_xseries then begin
-   for int1:= 0 to high(objs) do begin
-    int2:= objs[int1];
-    pt1:= nodepos(int2);
-    rea1:= yvalue[int2];
-    da1:= tracecoordxseries(addpoint(pt1,offs));
-    if offs.y <> 0 then begin //no rounding if nochange
-     rea1:= da1.value;
+ if cems_markermoving in fmovestate then begin
+  int1:= -(sender.currentobjects[0]+1);
+  if odd(int1) then begin
+   int1:= int1 div 2;
+   marker1:= ydials[0].markers[int1];
+   if fmovestate * [cems_cantoplimit,cems_ytoplimit] = 
+                           [cems_cantoplimit,cems_ytoplimit] then begin
+    marker1.value:= ydials[0].markers[int1-1].value; //y is screen reverted
+   end
+   else begin
+    if fmovestate * [cems_canbottomlimit,cems_ybottomlimit] = 
+                           [cems_canbottomlimit,cems_ybottomlimit] then begin
+     marker1.value:= ydials[0].markers[int1+1].value; //y is screen reverted
+    end
+    else begin
+     if offs.y <> 0 then begin
+      marker1.value:= ycharttomarker(ymarkertochart(marker1.value)+offs.y);
+      domarkerchange;
+     end;
     end;
-    yvalue[int2]:= rea1;
    end;
   end
   else begin
-   for int1:= 0 to high(objs) do begin
-    int2:= objs[int1];
-    pt1:= nodepos(int2);
-    co1:= xyvalue[int2];
-    co2:= tracecoordxy(addpoint(pt1,offs));
-    if offs.x <> 0 then begin //no rounding if nochange
-     co1.re:= co2.re;
+   int1:= int1 div 2;
+   marker1:= xdials[0].markers[int1];
+   if fmovestate * [cems_cantoplimit,cems_xtoplimit] = 
+                           [cems_cantoplimit,cems_xtoplimit] then begin
+    marker1.value:= xdials[0].markers[int1+1].value;
+   end
+   else begin
+    if fmovestate * [cems_canbottomlimit,cems_xbottomlimit] = 
+                           [cems_canbottomlimit,cems_xbottomlimit] then begin
+     marker1.value:= xdials[0].markers[int1-1].value;
+    end
+    else begin
+     if offs.y <> 0 then begin
+      marker1.value:= xcharttomarker(xmarkertochart(marker1.value)+offs.x);
+      domarkerchange;
+     end;
     end;
-    if offs.y <> 0 then begin //no rounding if nochange
-     co1.im:= co2.im;
-    end;
-    xyvalue[int2]:= co1;
    end;
   end;
+ end
+ else begin
+  addpoint1(fpickref,offs);
+  objs:= sender.currentobjects;
+  with activetraceitem do begin
+   if kind = trk_xseries then begin
+    for int1:= 0 to high(objs) do begin
+     int2:= objs[int1];
+     pt1:= nodepos(int2);
+     rea1:= yvalue[int2];
+     da1:= tracecoordxseries(addpoint(pt1,offs));
+     if offs.y <> 0 then begin //no rounding if nochange
+      rea1:= da1.value;
+     end;
+     yvalue[int2]:= rea1;
+    end;
+   end
+   else begin
+    for int1:= 0 to high(objs) do begin
+     int2:= objs[int1];
+     pt1:= nodepos(int2);
+     co1:= xyvalue[int2];
+     co2:= tracecoordxy(addpoint(pt1,offs));
+     if offs.x <> 0 then begin //no rounding if nochange
+      co1.re:= co2.re;
+     end;
+     if offs.y <> 0 then begin //no rounding if nochange
+      co1.im:= co2.im;
+     end;
+     xyvalue[int2]:= co1;
+    end;
+   end;
+  end;
+  checkvalue;
  end;
- checkvalue;
 end;
 
 procedure tcustomchartedit.pickthumbtrack(const sender: tobjectpicker);
 begin
- dopickmove(sender);
+ if not (cems_markermoving in fmovestate) then begin
+  dopickmove(sender);
+ end;
 end;
 
 procedure tcustomchartedit.endpickmove(const sender: tobjectpicker);
 begin
  dopickmove(sender);
- addpoint1(sender.mouseeventinfopo^.pos,subpoint(fpickref,sender.pickoffset));
+ if not (cems_markermoving in fmovestate) then begin
+  addpoint1(sender.mouseeventinfopo^.pos,subpoint(fpickref,sender.pickoffset));
+ end;
+ exclude(fmovestate,cems_markermoving);
+end;
+
+procedure tcustomchartedit.cancelpickmove(const sender: tobjectpicker);
+begin
+ exclude(fmovestate,cems_markermoving);
 end;
 
 procedure tcustomchartedit.paintxorpic(const sender: tobjectpicker; 
@@ -655,51 +861,69 @@ var
  offs: pointty;
  objs: integerarty;
  pt1: pointty;
+ rect1: rectty;
 begin
  with sender do begin
-  objs:= currentobjects;
-  if objs <> nil then begin
-   if ceo_thumbtrack in foptions then begin
-    offs:= nullpoint;
-   end
-   else begin
-    offs:= limitmoveoffset(pickoffset);
-   end;
-   setlength(ar1,length(objs));
-   setlength(ar2,length(objs)*2); //max
-   int2:= 0;
-   for int1:= 0 to high(objs) do begin
-    ar1[int1]:= addpoint(nodepos(objs[int1]),offs);
-    int3:= objs[int1]-1;
-    if int3 >= 0 then begin
-     ar2[int2].a:= nodepos(int3);
-     ar2[int2].b:= ar1[int1];
-     if finditem(objs,int3) >= 0 then begin
-      addpoint1(ar2[int2].a,offs);
-     end;
-     inc(int2);
+  if cems_markermoving in fmovestate then begin
+   offs:= limitmoveoffset(pickoffset);
+   rect1:= innerclientrect;
+   int1:= -(sender.currentobjects[0]+1);
+   with rect1 do begin
+    if odd(int1) then begin
+     int2:= ymarkertochart(ydials[0].markers[int1 div 2].value)+offs.y;
+     canvas.drawline(makepoint(x,int2),makepoint(x+cx,int2));
+    end
+    else begin
+     int2:= xmarkertochart(xdials[0].markers[int1 div 2].value)+offs.x;
+     canvas.drawline(makepoint(int2,y),makepoint(int2,y+cy));
     end;
-    int3:= objs[int1]+1;
-    if int3 < traces[factivetrace].count then begin
-     ar2[int2].a:= ar1[int1];
-     ar2[int2].b:= nodepos(int3);
-     if finditem(objs,int3) < 0 then begin
+   end;
+  end
+  else begin
+   objs:= currentobjects;
+   if objs <> nil then begin
+    if ceo_thumbtrack in foptions then begin
+     offs:= nullpoint;
+    end
+    else begin
+     offs:= limitmoveoffset(pickoffset);
+    end;
+    setlength(ar1,length(objs));
+    setlength(ar2,length(objs)*2); //max
+    int2:= 0;
+    for int1:= 0 to high(objs) do begin
+     ar1[int1]:= addpoint(nodepos(objs[int1]),offs);
+     int3:= objs[int1]-1;
+     if int3 >= 0 then begin
+      ar2[int2].a:= nodepos(int3);
+      ar2[int2].b:= ar1[int1];
+      if finditem(objs,int3) >= 0 then begin
+       addpoint1(ar2[int2].a,offs);
+      end;
       inc(int2);
      end;
+     int3:= objs[int1]+1;
+     if int3 < traces[factivetrace].count then begin
+      ar2[int2].a:= ar1[int1];
+      ar2[int2].b:= nodepos(int3);
+      if finditem(objs,int3) < 0 then begin
+       inc(int2);
+      end;
+     end;
     end;
-   end;
-   setlength(ar2,int2);
-   canvas.drawlinesegments(ar2);
-   for int1:= 0 to high(ar1) do begin
-    canvas.drawellipse(makerect(ar1[int1],makesize(6,6)));
-   end;
-   if (ops_moving in fobjectpicker.state) {and (high(objs) = 0)} then begin
-    objs:= sender.mouseoverobjects;
-    if objs <> nil then begin
-     pt1:= addpoint(nodepos(objs[0]),offs);
-     canvas.drawline(makepoint(0,pt1.y),makepoint(clientwidth,pt1.y));
-     canvas.drawline(makepoint(pt1.x,0),makepoint(pt1.x,clientheight));
-                     //crosshair cursor
+    setlength(ar2,int2);
+    canvas.drawlinesegments(ar2);
+    for int1:= 0 to high(ar1) do begin
+     canvas.drawellipse(makerect(ar1[int1],makesize(6,6)));
+    end;
+    if (ops_moving in fobjectpicker.state) {and (high(objs) = 0)} then begin
+     objs:= sender.mouseoverobjects;
+     if objs <> nil then begin
+      pt1:= addpoint(nodepos(objs[0]),offs);
+      canvas.drawline(makepoint(0,pt1.y),makepoint(clientwidth,pt1.y));
+      canvas.drawline(makepoint(pt1.x,0),makepoint(pt1.x,clientheight));
+                      //crosshair cursor
+     end;
     end;
    end;
   end;
@@ -763,6 +987,15 @@ begin
 end;
 
 procedure tcustomchartedit.dochange;
+begin
+ if not (ws_loadedproc in fwidgetstate) then begin
+  if canevent(tmethod(fonchange)) then begin
+   fonchange(self);
+  end;
+ end;
+end;
+
+procedure tcustomchartedit.domarkerchange;
 begin
  if not (ws_loadedproc in fwidgetstate) then begin
   if canevent(tmethod(fonchange)) then begin
@@ -848,6 +1081,44 @@ begin
  inherited;
  doclear;
  change;
+end;
+
+function tcustomchartedit.getmarker(const apos: pointty): integer;
+var
+ int1,int2: integer;
+ marker1: tdialmarker;
+begin
+ result:= -1;
+ if xdials.count > 0 then begin
+  with xdials[0] do begin
+   int2:= high(tdialmarkers1(markers).fitems);
+   if int2 >= 0 then begin
+    for int1:= 0 to int2 do begin
+     marker1:= tdialmarker(tdialmarkers1(markers).fitems[int1]);
+     if not (dmo_fix in marker1.options) and 
+          (abs(apos.x-xmarkertochart(marker1.value)) <= markersnapdist) then begin
+      result:= 2*int1;
+      exit;
+     end;
+    end;
+   end;
+  end;
+ end;
+ if ydials.count > 0 then begin
+  with ydials[0] do begin
+   int2:= high(tdialmarkers1(markers).fitems);
+   if int2 >= 0 then begin
+    for int1:= 0 to int2 do begin
+     marker1:= tdialmarker(tdialmarkers1(markers).fitems[int1]);
+     if not (dmo_fix in marker1.options) and 
+          (abs(apos.y-ymarkertochart(marker1.value)) <= markersnapdist) then begin
+      result:= 2*int1+1;
+      exit;
+     end;
+    end;
+   end;
+  end;
+ end;
 end;
 
 { txychartedit }

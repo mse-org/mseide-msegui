@@ -1966,6 +1966,7 @@ type
    procedure beginpickmove(const sender: tobjectpicker);
    procedure pickthumbtrack(const sender: tobjectpicker);
    procedure endpickmove(const sender: tobjectpicker);
+   procedure cancelpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
                                    
     //istatfile
@@ -12296,6 +12297,11 @@ begin
   end;
  end;
  designchanged;
+end;
+
+procedure tcustomgrid.cancelpickmove(const sender: tobjectpicker);
+begin
+ //dummy
 end;
 
 procedure tcustomgrid.paintxorpic(const sender: tobjectpicker;

@@ -121,7 +121,8 @@ type
  end;
 
  dialmarkeroptionty = (dmo_opposite,dmo_rotatetext,
-                       dmo_hideoverload,dmo_limitoverload);
+                       dmo_hideoverload,dmo_limitoverload,
+                       dmo_fix,dmo_ordered); //for tchartedit
  dialmarkeroptionsty = set of dialmarkeroptionty;
  
  markerinfoty = record

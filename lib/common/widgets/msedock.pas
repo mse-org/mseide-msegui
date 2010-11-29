@@ -470,6 +470,7 @@ type
    procedure beginpickmove(const sender: tobjectpicker);
    procedure pickthumbtrack(const sender: tobjectpicker);
    procedure endpickmove(const sender: tobjectpicker);
+   procedure cancelpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const canvas: tcanvas);
    
   public
@@ -4466,6 +4467,11 @@ end;
 function tgripframe.translatecolor(const acolor: colorty): colorty;
 begin
  result:= fintf.getwidget.translatecolor(acolor);
+end;
+
+procedure tgripframe.cancelpickmove(const sender: tobjectpicker);
+begin
+ //dummy
 end;
 
 { tdockhandle }

@@ -692,6 +692,7 @@ type
    procedure beginpickmove(const sender: tobjectpicker);
    procedure pickthumbtrack(const sender: tobjectpicker);
    procedure endpickmove(const sender: tobjectpicker);
+   procedure cancelpickmove(const sender: tobjectpicker);
    procedure paintxorpic(const sender: tobjectpicker; const acanvas: tcanvas);
   public
    constructor create(aowner: tcomponent); override;
@@ -4506,6 +4507,11 @@ procedure tcustomrecordband.scale(const ascale: real);
 begin
  inherited;
  ftabs.scale(ascale);
+end;
+
+procedure tcustomrecordband.cancelpickmove(const sender: tobjectpicker);
+begin
+ //dummy
 end;
 
 { tcustombandgroup }

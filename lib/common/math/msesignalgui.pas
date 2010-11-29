@@ -180,6 +180,20 @@ type
    property wave: tsigwavetable read fwave write setwave;
    property options default defaultffttableeditoptions;
  end;
+ 
+ tenvelopeedit = class(torderedxychartedit)
+  private
+   fenvelope: tsigenvelope;
+   procedure setenvelope(const avalue: tsigenvelope);
+  protected
+   procedure updatevalues;
+   procedure dochange; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property wave: tsigenvelope read fenvelope write setenvelope;
+ end;
 
 const
  semitoneln = ln(2)/12;
@@ -789,6 +803,37 @@ begin
   ffft_max:= avalue;
   change;
  end;
+end;
+
+{ tenvelopeedit }
+
+constructor tenvelopeedit.create(aowner: tcomponent);
+begin
+ inherited;
+ fenvelope:= tsigenvelope.create(self);
+ fenvelope.name:= 'envelope';
+ fenvelope.setsubcomponent(true);
+end;
+
+destructor tenvelopeedit.destroy;
+begin
+ fenvelope.free;
+ inherited;
+end;
+
+procedure tenvelopeedit.setenvelope(const avalue: tsigenvelope);
+begin
+ fenvelope.assign(avalue);
+end;
+
+procedure tenvelopeedit.dochange;
+begin
+ inherited;
+ updatevalues;
+end;
+
+procedure tenvelopeedit.updatevalues;
+begin
 end;
 
 end.
