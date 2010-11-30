@@ -10,10 +10,6 @@
 unit mseforms;
 {$ifdef FPC}
  {$mode objfpc}{$h+}{$interfaces corba}
- {$if defined(FPC) //delphi compatibility
-   and (fpc_fullversion >= 020403)}
-  {$define mse_fpc_2_4_3}
- {$ifend}
 {$endif}
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
@@ -25,6 +21,10 @@ uses
  msetypes,msestrings,mseglob,mseguiglob,mseguiintf,
  msemenuwidgets,msestat,msestatfile,mseclasses,Classes,msedock,msesimplewidgets,
  msebitmap{$ifdef mse_with_ifi},mseifiglob{$endif};
+
+{$if defined(FPC) and (fpc_fullversion >= 020403)}
+ {$define mse_fpc_2_4_3}
+{$ifend}
 
 type
  formoptionty = (fo_main,fo_terminateonclose,fo_freeonclose,
@@ -559,56 +559,6 @@ type
  twindow1 = class(twindow);
  tcustomframe1 = class(tcustomframe);
 
- {$ifdef FPC}
-  {$ifdef mse_fpc_2_4_3}
-  TReadercracker = class(TFiler)
-  private
-    FDriver: TAbstractObjectReader;
-    FOwner: TComponent;
-    FParent: TComponent;
-    FFixups: TObject;
-    FLoaded: TFpList;
-  end;
-  {$else}
-  TReadercracker = class(TFiler)
-  private
-    FDriver: TAbstractObjectReader;
-    FOwner: TComponent;
-    FParent: TComponent;
-    FFixups: TList;
-    FLoaded: TList;
-  end;
-  {$endif}
-  TComponentcracker = class(TPersistent)
-  private
-    FOwner: TComponent;
-    FName: TComponentName;
-    FTag: Longint;
-    FComponents: TList;
-    FFreeNotifies: TList;
-    FDesignInfo: Longint;
-    FVCLComObject: Pointer;
-    FComponentState: TComponentState;
-  end;
- {$else}
-  TReadercracker = class(TFiler)
-  private
-    FOwner: TComponent;
-    FParent: TComponent;
-    FFixups: TList;
-    FLoaded: TList;
-  end;
-  TComponentcracker = class(TPersistent{, IInterface, IInterfaceComponentReference})
-  private
-    FOwner: TComponent;
-    FName: TComponentName;
-    FTag: Longint;
-    FComponents: TList;
-    FFreeNotifies: TList;
-    FDesignInfo: Longint;
-    FComponentState: TComponentState;
-  end;
-  {$endif}
 
 function createmseform(const aclass: tclass; 
                     const aclassname: pshortstring): tmsecomponent;

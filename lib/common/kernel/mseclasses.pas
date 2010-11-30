@@ -21,20 +21,21 @@ uses
  classes,mseglob,mseevent,msetypes,msestrings,sysutils,typinfo,mselist,
  msegraphutils{$ifdef mse_with_ifi},mseifiglob{$endif};
 
-{ $define debugobjectlink}
+{$if defined(FPC) and (fpc_fullversion >= 020403)}
+ {$define mse_fpc_2_4_3}
+{$ifend}
+{$if defined(FPC) and (fpc_fullversion >= 020400)}
+ {$define mse_fpc_2_4}
+{$ifend}
 
 {$ifdef FPC}
-            //{$if xxx} makes compiling with delphi7 impossible
- {$ifdef VER2_4} {$define mse_FPC_2_4} {$endif}
- {$ifdef VER2_5} {$define mse_FPC_2_4} {$endif}
- {$ifdef VER2_6} {$define mse_FPC_2_4} {$endif}
- {$ifdef VER2_7} {$define mse_FPC_2_4} {$endif}
  {$ifdef mse_FPC_2_4}
   {$define hascorbagetinterface}
  {$endif}
 const
  s_ok = 0;
 {$endif}
+
 const
  moduleclassnamename = 'moduleclassname';
 // inheritedmoduleclassnamename = 'inheritedmoduleclassname';
@@ -740,7 +741,11 @@ var
 // onremoveskinobject: skineventty;
 // onremoveskinobjectdesign: skineventty;
  
+{$ifdef mse_fpc_2_4_3}
+function getcomponentlist(const acomponent: tcomponent): tfplist;
+{$else}
 function getcomponentlist(const acomponent: tcomponent): tlist;
+{$endif}
                     //uses tcomponentcracker;
 procedure clearcomponentlist(const acomponent: tcomponent);
                     //uses tcomponentcracker;
@@ -748,6 +753,103 @@ procedure clearpastedcomponents;
 procedure addpastedcomponentname(const acomp: tcomponent);
 function findpastedcomponent(const origname: string): tcomponent;
 function findpastedcomponentname(const comp: tcomponent): string;
+
+type
+{$ifdef FPC}
+  TFilercracker = class(TObject)
+   public
+     FRoot: TComponent;
+     FLookupRoot: TComponent;
+     FAncestor: TPersistent;
+     FIgnoreChildren: Boolean;
+  end;
+ {$ifdef mse_fpc_2_4_3}
+  TReadercracker = class(TFiler)
+  public
+    FDriver: TAbstractObjectReader;
+    FOwner: TComponent;
+    FParent: TComponent;
+    FFixups: TObject;
+    FLoaded: TFpList;
+  end;
+ {$else}
+  TReadercracker = class(TFiler)
+  public
+    FDriver: TAbstractObjectReader;
+    FOwner: TComponent;
+    FParent: TComponent;
+    FFixups: TList;
+    FLoaded: TList;
+  end;
+ {$endif}
+  TWritercracker = class(TFiler)
+  public
+    FDriver: TAbstractObjectWriter;
+    FDestroyDriver: Boolean;
+    FRootAncestor: TComponent;
+    FPropPath: String;
+  end;
+ {$ifdef mse_fpc_2_4_3}
+  TComponentcracker = class(TPersistent{,IUnknown,IInterfaceComponentReference})
+  public
+    FOwner: TComponent;
+    FName: TComponentName;
+    FTag: Longint;
+    FComponents: TFpList;
+    FFreeNotifies: TFpList;
+    FDesignInfo: Longint;
+    FVCLComObject: Pointer;
+    FComponentState: TComponentState;
+  end;
+ {$else}
+  TComponentcracker = class(TPersistent)
+  public
+    FOwner: TComponent;
+    FName: TComponentName;
+    FTag: Longint;
+    FComponents: TList;
+    FFreeNotifies: TList;
+    FDesignInfo: Longint;
+    FVCLComObject: Pointer;
+    FComponentState: TComponentState;
+  end;
+ {$endif}
+{$else} //delphi
+  TReadercracker = class(TFiler)
+  public
+    FOwner: TComponent;
+    FParent: TComponent;
+    FFixups: TList;
+    FLoaded: TList;
+  end;
+  TComponentcracker = class(TPersistent{, IInterface, IInterfaceComponentReference})
+  public
+    FOwner: TComponent;
+    FName: TComponentName;
+    FTag: Longint;
+    FComponents: TList;
+    FFreeNotifies: TList;
+    FDesignInfo: Longint;
+    FComponentState: TComponentState;
+  end;
+  TFilercracker = class(TObject)
+   public
+     FStream: TStream;
+     FBuffer: Pointer;
+     FBufSize: Integer;
+     FBufPos: Integer;
+     FBufEnd: Integer;
+     FRoot: TComponent;
+     FLookupRoot: TComponent;
+     FAncestor: TPersistent;
+     FIgnoreChildren: Boolean;
+   end;
+  TWritercracker = class(TFiler)
+  public
+    FRootAncestor: TComponent;
+    FPropPath: string;
+  end;
+{$endif}
 
 implementation
 uses
@@ -759,73 +861,7 @@ uses
  windows,
 {$endif}
  msestream,msesys,msedatalist,msedatamodules,rtlconsts;
-
 type
- {$ifdef FPC}
- TComponentcracker = class(TPersistent)
- private
-   FOwner: TComponent;
-   FName: TComponentName;
-   FTag: Longint;
-   FComponents: TList;
-   FFreeNotifies: TList;
-   FDesignInfo: Longint;
-   FVCLComObject: Pointer;
-   FComponentState: TComponentState;
- end;
- {$else}
- TComponentcracker = class(TPersistent)
- private
-   FOwner: TComponent;
-   FName: TComponentName;
-   FTag: Longint;
-   FComponents: TList;
-   FFreeNotifies: TList;
-   FDesignInfo: Longint;
-   FComponentState: TComponentState;
-
-   FVCLComObject: Pointer;
- end;
- {$endif}
- {$ifdef FPC}
- TFilercracker = class(TObject)
-  private
-    FRoot: TComponent;
-    FLookupRoot: TComponent;
-    FAncestor: TPersistent;
-    FIgnoreChildren: Boolean;
- end;
- {$else}
- TFilercracker = class(TObject)
-  private
-    FStream: TStream;
-    FBuffer: Pointer;
-    FBufSize: Integer;
-    FBufPos: Integer;
-    FBufEnd: Integer;
-    FRoot: TComponent;
-    FLookupRoot: TComponent;
-    FAncestor: TPersistent;
-    FIgnoreChildren: Boolean;
-  end;
- {$endif}
-
- {$ifdef FPC}
-  TWritercracker = class(TFiler)
-  private
-    FDriver: TAbstractObjectWriter;
-    FDestroyDriver: Boolean;
-    FRootAncestor: TComponent;
-    FPropPath: String;
-  end;
-  {$else}
-  TWritercracker = class(TFiler)
-  private
-    FRootAncestor: TComponent;
-    FPropPath: string;
-  end;
-  {$endif}
- 
  tpersistent1 = class(tpersistent);
  tcomponent1 = class(tcomponent);
  twriter1 = class(twriter);
@@ -896,11 +932,19 @@ begin
  result:= fmodules;
 end;
 
+{$ifdef mse_fpc_2_4_3}
+function getcomponentlist(const acomponent: tcomponent): tfplist;
+{$else}
 function getcomponentlist(const acomponent: tcomponent): tlist;
+{$endif}
 begin
  with tcomponentcracker(acomponent) do begin
   if fcomponents = nil then begin
+   {$ifdef mse_fpc_2_4_3}
+   fcomponents:= tfplist.create;
+   {$else}
    fcomponents:= tlist.create;
+   {$endif}
   end;
   result:= fcomponents;
  end;
