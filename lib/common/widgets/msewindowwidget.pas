@@ -280,7 +280,8 @@ begin
  if awinid = fclientwindow.id then begin
   fclientwindow.id:= 0;
  end;
- if (fwindow <> nil) and (fwindow.haswinid) then begin
+ if (fwindow <> nil) and (fwindow.haswinid) and 
+                                        (fwindow.winid = awinid) then begin
   destroyclientwindow;
  end;
 end;
