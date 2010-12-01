@@ -6173,7 +6173,7 @@ begin
       free;
      end
      else begin
-      setlength(fwidgets,high(fwidgets));
+      setlength(self.fwidgets,high(self.fwidgets));
      end;
     end;
    end;
