@@ -190,6 +190,8 @@ type
   protected
    fenvelope: tenvelopeedit;
    procedure dochange; override;
+   procedure drawcrosshaircursor(const canvas: tcanvas;
+                                         const center: pointty); override;
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -1141,6 +1143,27 @@ procedure tenvelopechartedit.dochange;
 begin
  inherited;
  fenvelope.dochange;
+end;
+
+procedure tenvelopechartedit.drawcrosshaircursor(const canvas: tcanvas;
+               const center: pointty);
+begin
+ inherited;
+ canvas.save;
+ canvas.clipregion:= 0;
+ if self = fenvelope.fedtrig then begin
+  canvas.drawvect(makepoint(
+   fenvelope.fedaftertrig.paintparentpos.x-paintparentpos.x,
+                                                     center.y),gd_right,
+                                         fenvelope.fedaftertrig.paintsize.cx);
+ end
+ else begin
+  canvas.drawvect(makepoint(
+   fenvelope.fedtrig.paintparentpos.x-paintparentpos.x,
+                                                     center.y),gd_right,
+                                         fenvelope.fedtrig.paintsize.cx);
+ end;
+ canvas.restore;
 end;
 
 

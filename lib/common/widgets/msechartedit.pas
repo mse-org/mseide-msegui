@@ -88,6 +88,8 @@ type
    function getmarker(const apos: pointty): integer; 
                              //-1 if none, even -> x, odd -> y, first dial only
 
+   procedure drawcrosshaircursor(const canvas: tcanvas;
+                                         const center: pointty); virtual;
     //iobjectpicker
    function getcursorshape(const sender: tobjectpicker;
                             var shape: cursorshapety): boolean;
@@ -852,6 +854,15 @@ begin
  exclude(fmovestate,cems_markermoving);
 end;
 
+procedure tcustomchartedit.drawcrosshaircursor(const canvas: tcanvas; 
+                                                         const center: pointty);
+begin
+ with center do begin
+  canvas.drawline(makepoint(0,y),makepoint(clientwidth,y));
+  canvas.drawline(makepoint(x,0),makepoint(x,clientheight));
+ end;
+end;
+
 procedure tcustomchartedit.paintxorpic(const sender: tobjectpicker; 
               const canvas: tcanvas);
 var
@@ -919,10 +930,7 @@ begin
     if (ops_moving in fobjectpicker.state) {and (high(objs) = 0)} then begin
      objs:= sender.mouseoverobjects;
      if objs <> nil then begin
-      pt1:= addpoint(nodepos(objs[0]),offs);
-      canvas.drawline(makepoint(0,pt1.y),makepoint(clientwidth,pt1.y));
-      canvas.drawline(makepoint(pt1.x,0),makepoint(pt1.x,clientheight));
-                      //crosshair cursor
+      drawcrosshaircursor(canvas,addpoint(nodepos(objs[0]),offs));
      end;
     end;
    end;

@@ -805,7 +805,7 @@ type
    procedure intersectclipregion(const region: regionty);
 
    function copyclipregion: regionty;
-                  //returns a copy of the actual clipregion
+                  //returns a copy of the current clipregion
 
    function clipregionisempty: boolean; //true if no drawing possible
    function clipbox: rectty; //smallest possible rect around clipregion
