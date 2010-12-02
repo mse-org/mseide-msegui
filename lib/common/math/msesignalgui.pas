@@ -13,7 +13,7 @@ interface
 uses
  classes,msegraphedits,msesignal,mseguiglob,mseevent,msechartedit,msetypes,
  msechart,mseclasses,msefft,msewidgets,msegraphics,msegraphutils,msedial,
- msesplitter,msegui,msestat,msestatfile,msestrings;
+ msesplitter,msegui,msestat,msestatfile,msestrings,msestockobjects;
  
 const
  defaultsamplecount = 4096;
@@ -190,6 +190,7 @@ type
   protected
    fenvelope: tenvelopeedit;
    procedure dochange; override;
+   procedure domarkerchange; override;
    procedure drawcrosshaircursor(const canvas: tcanvas;
                                          const center: pointty); override;
   public
@@ -959,6 +960,15 @@ begin
  updatelayout;
  fsplitter.linkleft:= fedtrig;
  fsplitter.linkright:= fedaftertrig;
+ with fedtrig do begin
+  xdials.count:= 1;
+  xdials[0].markers.count:= 1;
+  with xdials[0].markers[0] do begin
+   value:= 1;
+   color:= cl_red;
+   options:= [dmo_savevalue];
+  end;
+ end;
 end;
 
 destructor tenvelopeedit.destroy;
@@ -1082,7 +1092,7 @@ begin
       loopstart:= markers[0].value;
      end
      else begin
-      loopstart:= 0;
+      loopstart:= 1;
      end;
      {
      if markers.count > 1 then begin
@@ -1137,9 +1147,18 @@ begin
  end;
  inherited create(nil);
  setsubcomponent(true);
+ traces.count:= 1;
+ traces.image_list:= stockobjects.glyphs;
+ traces[0].imagenr:= ord(stg_checkboxradio);
 end;
 
 procedure tenvelopechartedit.dochange;
+begin
+ inherited;
+ fenvelope.dochange;
+end;
+
+procedure tenvelopechartedit.domarkerchange;
 begin
  inherited;
  fenvelope.dochange;

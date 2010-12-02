@@ -566,6 +566,8 @@ type
    fmin: real;
    fmax: real;
    floopstart: real;
+   floopstartindex: integer;
+   floopendindex: integer;
    freleasestart: real;
    procedure setvaluestrig(const avalue: complexarty);
    procedure setvaluesaftertrig(const avalue: complexarty);
@@ -2398,8 +2400,13 @@ begin
     dec(fticktime,ftickdiv);
    end;
   end;
-  for int1:= acount-1 downto 0 do begin
-   internalstep;
+  lock;
+  try
+   for int1:= acount-1 downto 0 do begin
+    internalstep;
+   end;
+  finally
+   unlock;
   end;
   if assigned(fonafterstep) then begin
    fonafterstep(self,acount);
@@ -2704,6 +2711,7 @@ var
  int1,int2,int3: integer;
  ti: integer;
  sta: double;
+ do1: double;
   
 begin
  if fupdating > 0 then begin
@@ -2718,7 +2726,8 @@ begin
  ftime:= 0;
  fattackval:= 0;
  fattackramp:= 0;
- floopindex:= bigint;
+ floopstartindex:= -1;
+ floopendindex:= -1;
  floopval:= 0;
  floopramp:= 1;
  freleaseindex:= -1;
@@ -2726,10 +2735,11 @@ begin
  freleaseramp:= 0;
  
  int1:= high(fvaluestrig) + 2; //+ enditem
- if floopstart > 0 then begin
+ if floopstart < 1 then begin
   for int2:= 0 to high(fvaluestrig) do begin
    if fvaluestrig[int2].re >= floopstart then begin
-    floopindex:= int2;
+    floopstartindex:= int2; //fvaluestrig index
+    floopendindex:= length(fvaluestrig);
     break;
    end;
   end;
@@ -2759,15 +2769,25 @@ begin
  for int2:= 0 to int3 do begin
   calc(fvaluestrig[int2],int1,ti,sta);
  end;
- if high(fvaluesaftertrig) >= 0 then begin  
+ if floopstartindex >= 0 then begin
+  do1:= sta;
+  calc(makecomplex(
+       fvaluestrig[int3].re+fvaluestrig[floopstartindex].re-floopstart,
+       fvaluestrig[floopstartindex].im),int1,ti,sta);
+  sta:= do1;
+  inc(floopstartindex); //fprog index
+ end
+ else begin
   setend(int1,ti,sta);
+ end;
+ if high(fvaluesaftertrig) >= 0 then begin  
   ti:= 0;
   freleaseindex:= int1; //prog index
   for int2:= 0 to high(fvaluesaftertrig) do begin
    calc(fvaluesaftertrig[int2],int1,ti,sta);
   end;
+  setend(int1,ti,sta);
  end;
- setend(int1,ti,sta);
  if fprog[0].endtime > 0 then begin
   fattackramp:= 1/fprog[0].endtime;
  end;
@@ -2808,8 +2828,8 @@ begin
  if bo2 or ftriggerpending then begin
   ftriggerpending:= false;
   ftriggered:= bo1 xor not bo2;
-  ftime:= 0;
   if ftriggered then begin
+   ftime:= 0;
    findex:= 0;
    with fprog[0] do begin
     ramp:= (fattackval-fcurrval)*fattackramp;
@@ -2823,6 +2843,7 @@ begin
   end
   else begin
    if freleaseindex >= 0 then begin
+    ftime:= 0;
     findex:= freleaseindex;
     with fprog[findex] do begin
      ramp:= (freleaseval-fcurrval)*freleaseramp;
@@ -2841,7 +2862,13 @@ begin
   if endtime >= 0 then begin
    inc(ftime);
    if (ftime > endtime) then begin
-    inc(findex);
+    if findex = floopendindex then begin
+     findex:= floopstartindex;
+     ftime:= fprog[floopstartindex].starttime;
+    end
+    else begin
+     inc(findex);
+    end;
    end;
   end;
  end;

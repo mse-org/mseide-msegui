@@ -59,7 +59,21 @@ type
  //  37        38           39                    40 
   stg_dot,stg_dotsmall,stg_arrowtopsmall,stg_arrowbottomsmall,
  //    41               42                      43               44
-  stg_checkbox,stg_checkboxchecked,stg_checkboxchildchecked,stg_checkboxradio
+  stg_checkbox,stg_checkboxchecked,stg_checkboxchildchecked,stg_checkboxradio,
+ //    45             46          47
+  stg_circlesmall,stg_circle,stg_circlebig,
+ //    48             49          50
+  stg_squaresmall,stg_square,stg_squarebig,
+ //    51             52          53
+  stg_diamondsmall,stg_diamond,stg_diamondbig,
+ //    54             55          56
+  stg_crosssmall,stg_cross,stg_crossbig,
+ //    57             58          59
+  stg_diagsmall,stg_diag,stg_diagbig,
+ //    60             61          62
+  stg_triasmall,stg_tria,stg_triabig,
+ //    63             64          65
+  stg_triatopsmall,stg_triatop,stg_triatopbig
                  );
 
  stockcaptionty = (sc_none,sc_is_invalid,sc_Format_error,sc_Value_is_required,
