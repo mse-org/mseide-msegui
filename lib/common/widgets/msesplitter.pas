@@ -343,7 +343,7 @@ end;
 
 function tsplitter.getcursorshape(const sender: tobjectpicker; var shape: cursorshapety): boolean;
 begin
- result:= not (csdesigning in componentstate) and
+ result:= canmouseinteract and
                 pointinrect(sender.pos,makerect(nullpoint,fwidgetrect.size));
  if result then begin
   if spo_hmove in foptions then begin
@@ -368,8 +368,7 @@ end;
 procedure tsplitter.getpickobjects(const sender: tobjectpicker;
                                                 var objects: integerarty);
 begin
- if (foptions * [spo_hmove,spo_vmove] <> []) and
-            not (csdesigning in componentstate) then begin
+ if (foptions * [spo_hmove,spo_vmove] <> []) and canmouseinteract then begin
   setlength(objects,1);
  end;
 end;
@@ -834,7 +833,7 @@ end;
 procedure tsplitter.parentclientrectchanged;
 begin
  inherited;
- if (componentstate * [csloading,csdesigning] = []) and
+ if (componentstate * [csloading{,csdesigning}] = []) and canmouseinteract and
               (fparentwidget <> nil) and (fnotified = 0) then begin
   inc(fnotified);
   asyncevent(updatepropeventtag,true);

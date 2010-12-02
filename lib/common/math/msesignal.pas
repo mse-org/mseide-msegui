@@ -36,11 +36,17 @@ type
 }
  tcustomsigcomp = class(tmsecomponent)  
   protected
+   fupdating: integer;
    procedure coeffchanged(const sender: tdatalist;
                                  const aindex: integer); virtual;
+   procedure update; virtual;
+  public
+   procedure beginupdate;
+   procedure endupdate;
  end;
 
  tsigcomp = class(tcustomsigcomp)
+  
  end;
 
  tdoubleinputconn = class;
@@ -534,18 +540,23 @@ type
  
  tsigenvelope = class(tdoublesigoutcomp)
   private
-   ftrigvalues: complexarty;
-   faftertrigvalues: complexarty;
+   fvaluestrig: complexarty;
+   fvaluesaftertrig: complexarty;
+//   faftertrigvalues: complexarty;
    ftrigger: tchangedoubleinputconn;
    ftriggerlevel: tchangedoubleinputconn;
    fprog: envproginfoarty;
    findex: integer;
    
    fcurrval: double;
-   fhasdecay: boolean;
-   fdecayindex: integer;
-   fdecaystart: double;
-   fdecayramp: double;
+   fattackval: double;
+   fattackramp: double;
+   freleaseindex: integer;
+   freleaseval: double;
+   freleaseramp: double;
+   floopindex: integer;
+   floopval: double;
+   floopramp: double;
    
    ftime: integer;
    foptions: sigenvelopeoptionsty;
@@ -554,12 +565,18 @@ type
    foffset: real;
    fmin: real;
    fmax: real;
-   procedure settrigvalues(const avalue: complexarty);
-   procedure setaftertrigvalues(const avalue: complexarty);
+   floopstart: real;
+   freleasestart: real;
+   procedure setvaluestrig(const avalue: complexarty);
+   procedure setvaluesaftertrig(const avalue: complexarty);
+//   procedure setaftertrigvalues(const avalue: complexarty);
    procedure settrigger(const avalue: tchangedoubleinputconn);
    procedure settriggerlevel(const avalue: tchangedoubleinputconn);
    procedure setmin(const avalue: real);
    procedure setmax(const avalue: real);
+   procedure setloopstart(const avalue: real);
+//   procedure setdecaystart(const avalue: real);
+   procedure setoptions(const avalue: sigenvelopeoptionsty);
   protected
    ftriggered: boolean;
    ftriggerpending: boolean;
@@ -573,17 +590,24 @@ type
    function getzcount: integer; override;
    function gethandler: sighandlerprocty; override;
    procedure dotriggerchange(const sender: tobject);
+   procedure update; override;
   public
    constructor create(aowner: tcomponent); override;
-   property trigvalues: complexarty read ftrigvalues write settrigvalues;
-   property aftertrigvalues: complexarty read faftertrigvalues 
-                                            write setaftertrigvalues;
+   property valuestrig: complexarty read fvaluestrig 
+                                                     write setvaluestrig;
+   property valuesaftertrig: complexarty read fvaluesaftertrig 
+                                                     write setvaluesaftertrig;
+   property loopstart: real read floopstart write setloopstart;
+//   property decaystart: real read fdecaystart write setdecaystart;
+   
+//   property aftertrigvalues: complexarty read faftertrigvalues 
+//                                            write setaftertrigvalues;
   published
    property trigger: tchangedoubleinputconn read ftrigger write settrigger;
    property triggerlevel: tchangedoubleinputconn read ftriggerlevel 
                                               write settriggerlevel;
    property options: sigenvelopeoptionsty read foptions 
-                                                write foptions default [];
+                                                write setoptions default [];
    property timescale: real read ftimescale write ftimescale; //default 1s
    property min: real read fmin write setmin;
    property max: real read fmax write setmax;
@@ -756,6 +780,24 @@ procedure tcustomsigcomp.coeffchanged(const sender: tdatalist;
                const aindex: integer);
 begin
  //dummy
+end;
+
+procedure tcustomsigcomp.update;
+begin
+ //dummy
+end;
+
+procedure tcustomsigcomp.beginupdate;
+begin
+ inc(fupdating);
+end;
+
+procedure tcustomsigcomp.endupdate;
+begin
+ dec(fupdating);
+ if fupdating = 0 then begin
+  update;
+ end;
 end;
 
 { tdoublconn }
@@ -961,6 +1003,7 @@ procedure tdoublesigcomp.loaded;
 begin
  inherited;
  modelchange;
+ update;
 end;
 
 procedure tdoublesigcomp.initmodel;
@@ -2610,6 +2653,8 @@ end;
 constructor tsigenvelope.create(aowner: tcomponent);
 begin
  fmax:= 1;
+ freleasestart:= 1;
+ ftimescale:= 1;
  inherited;
  ftrigger:= tchangedoubleinputconn.create(self,isigclient(self),
                                                              @dotriggerchange);
@@ -2621,65 +2666,110 @@ end;
 
 procedure tsigenvelope.updatevalues;
 var
- int1: integer;
  timsca: double;
+ timoffs: double;
  
- procedure calcvalues(avalues: complexarty);
+ procedure calc(const valueitem: complexty; var progindex: integer;
+                                            var ti: integer; var sta: real);
  var
-  int2: integer;
-  ti: integer;
-  sta: double;
   int3: integer;
  begin
-  ti:= 0;
-  sta:= 0;
-  for int2:= 0 to high(avalues) do begin
-   with fprog[int1] do begin
-    starttime:= ti;
-    startval:= sta;
-    int3:= ti;
-    ti:= round(avalues[int2].re*timsca);
-    endtime:= ti;
-    if int3 = ti then begin
-     dec(int3);
-    end;
-    ramp:= (avalues[int2].im - sta)/(ti-int3);
-    sta:= avalues[int2].im;
-    inc(int1);
+  with fprog[progindex] do begin   
+   starttime:= ti;
+   startval:= sta;
+   int3:= ti;
+   ti:= round((valueitem.re+timoffs)*timsca);
+   endtime:= ti;
+   if int3 >= ti then begin
+    int3:= ti-1;
    end;
+   ramp:= (valueitem.im - sta)/(ti-int3);
+   sta:= valueitem.im;
   end;
-  with fprog[int1] do begin
+  inc(progindex);
+ end; //calc
+
+ procedure setend(var progindex: integer; var ti: integer; var sta: real);
+ begin
+  with fprog[progindex] do begin //end item
    startval:= sta;
    ramp:= 0;
    starttime:= ti;
    endtime:= -1;
-   inc(int1);
+   inc(progindex);
   end;
- end; //calcvalues
+ end;
  
+var
+ int1,int2,int3: integer;
+ ti: integer;
+ sta: double;
+  
 begin
+ if fupdating > 0 then begin
+  exit;
+ end;
  fprog:= nil;
- ftime:= 0;
- setlength(fprog,length(ftrigvalues)+length(faftertrigvalues)+2);
- findex:= high(fprog);
- int1:= 0;
+ timoffs:= 0;
  timsca:= 1;
  if fcontroller <> nil then begin
   timsca:= timsca * fcontroller.samplefrequ;
  end;
- fdecayindex:= high(ftrigvalues)+2;
- fdecayramp:= 1;
- fdecaystart:= 0;
- fhasdecay:= high(faftertrigvalues) >= 0;
- calcvalues(ftrigvalues);
- calcvalues(faftertrigvalues);
- if fhasdecay then begin
-  with faftertrigvalues[0],fprog[fdecayindex] do begin
-   fdecaystart:= im;
-   if endtime > 0 then begin
-    fdecayramp:= (1/endtime);
+ ftime:= 0;
+ fattackval:= 0;
+ fattackramp:= 0;
+ floopindex:= bigint;
+ floopval:= 0;
+ floopramp:= 1;
+ freleaseindex:= -1;
+ freleaseval:= 0;
+ freleaseramp:= 0;
+ 
+ int1:= high(fvaluestrig) + 2; //+ enditem
+ if floopstart > 0 then begin
+  for int2:= 0 to high(fvaluestrig) do begin
+   if fvaluestrig[int2].re >= floopstart then begin
+    floopindex:= int2;
+    break;
    end;
   end;
+ end;
+ if high(fvaluestrig) >= 0 then begin
+  fattackval:= fvaluestrig[0].im;
+  freleasestart:= fvaluestrig[high(fvaluestrig)].re;
+ end;
+
+ if high(fvaluesaftertrig) >= 0 then begin
+  int1:= int1 + high(fvaluesaftertrig) + 2; //+enditem
+  freleaseval:= fvaluesaftertrig[0].im;
+  freleaseramp:= fvaluesaftertrig[0].re;
+  if freleaseramp > 0 then begin
+   freleaseramp:= 1/(freleaseramp*timsca);
+  end;
+ end;
+ setlength(fprog,int1);
+ findex:= high(fprog); //init inactive
+ ti:= 0;
+ sta:= fattackval;
+ int1:= 0;
+ int3:= high(fvaluestrig);
+// if fdecayindex >= 0 then begin
+//  int3:= fdecayindex-1;
+// end;
+ for int2:= 0 to int3 do begin
+  calc(fvaluestrig[int2],int1,ti,sta);
+ end;
+ if high(fvaluesaftertrig) >= 0 then begin  
+  setend(int1,ti,sta);
+  ti:= 0;
+  freleaseindex:= int1; //prog index
+  for int2:= 0 to high(fvaluesaftertrig) do begin
+   calc(fvaluesaftertrig[int2],int1,ti,sta);
+  end;
+ end;
+ setend(int1,ti,sta);
+ if fprog[0].endtime > 0 then begin
+  fattackramp:= 1/fprog[0].endtime;
  end;
  if seo_exp in foptions then begin
   if (fmin > 0) and (fmax > 0) then begin
@@ -2721,13 +2811,27 @@ begin
   ftime:= 0;
   if ftriggered then begin
    findex:= 0;
+   with fprog[0] do begin
+    ramp:= (fattackval-fcurrval)*fattackramp;
+    if ramp = 0 then begin
+     startval:= fattackval;
+    end
+    else begin
+     startval:= fcurrval;
+    end;
+   end;
   end
   else begin
-   findex:= fdecayindex;
-   if fhasdecay then begin
+   if freleaseindex >= 0 then begin
+    findex:= freleaseindex;
     with fprog[findex] do begin
-     startval:= fcurrval;
-     ramp:= (fdecaystart-startval)*fdecayramp;
+     ramp:= (freleaseval-fcurrval)*freleaseramp;
+     if ramp = 0 then begin
+      startval:= freleaseval;
+     end
+     else begin
+      startval:= fcurrval;
+     end;
     end;
    end;
   end;
@@ -2759,18 +2863,37 @@ begin
  result:= @sighandler;
 end;
 
-procedure tsigenvelope.settrigvalues(const avalue: complexarty);
+procedure tsigenvelope.setvaluestrig(const avalue: complexarty);
 begin
- ftrigvalues:= avalue;
+ fvaluestrig:= avalue;
  updatevalues;
 end;
 
+procedure tsigenvelope.setvaluesaftertrig(const avalue: complexarty);
+begin
+ fvaluesaftertrig:= avalue;
+ updatevalues;
+end;
+
+procedure tsigenvelope.setloopstart(const avalue: real);
+begin
+ floopstart:= avalue;
+ updatevalues;
+end;
+{
+procedure tsigenvelope.setdecaystart(const avalue: real);
+begin
+ fdecaystart:= avalue;
+ updatevalues;
+end;
+}
+{
 procedure tsigenvelope.setaftertrigvalues(const avalue: complexarty);
 begin
  faftertrigvalues:= avalue;
  updatevalues;
 end;
-
+}
 procedure tsigenvelope.settrigger(const avalue: tchangedoubleinputconn);
 begin
  ftrigger.assign(avalue);
@@ -2811,12 +2934,26 @@ begin
  updatevalues;
 end;
 
+procedure tsigenvelope.setoptions(const avalue: sigenvelopeoptionsty);
+begin
+ if avalue <> foptions then begin
+  foptions:= avalue;
+  updatevalues;
+ end;
+end;
+
 procedure tsigenvelope.dotriggerchange(const sender: tobject);
 begin
  if ftriggered xor ((ftrigger.value > ftriggerlevel.value) xor 
                                         (seo_negtrig in foptions)) then begin
   ftriggerpending:= true;
  end;
+end;
+
+procedure tsigenvelope.update;
+begin
+ inherited;
+ updatevalues;
 end;
 
 { tchangedoubleinputconn }

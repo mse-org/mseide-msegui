@@ -122,7 +122,7 @@ type
 
  dialmarkeroptionty = (dmo_opposite,dmo_rotatetext,
                        dmo_hideoverload,dmo_limitoverload,
-                       dmo_fix,dmo_ordered); //for tchartedit
+                       dmo_fix,dmo_ordered,dmo_savevalue); //for tchartedit
  dialmarkeroptionsty = set of dialmarkeroptionty;
  
  markerinfoty = record
@@ -207,7 +207,8 @@ type
  end;
  
  dialoptionty = (do_opposite,do_sideline,do_boxline,do_log,
-                 do_front,do_scrollwithdata,do_shiftwithdata);
+                 do_front,do_scrollwithdata,do_shiftwithdata,
+                 do_savestate);
  dialoptionsty = set of dialoptionty;  
 
  idialcontroller = interface(inullinterface)
@@ -2015,28 +2016,48 @@ end;
 
 procedure tcustomdialcontrollers.dostatread(const reader: tstatreader);
 var
- int1: integer;
+ int1,int2: integer;
  mstr1: msestring;
 begin
  for int1:= 0 to count - 1 do begin
   mstr1:= inttostr(int1);
   with tcustomdialcontroller(fitems[int1]) do begin
-   start:= reader.readreal('start'+mstr1,start);
-   range:= reader.readreal('range'+mstr1,range);
+   if do_savestate in foptions then begin
+    start:= reader.readreal('start'+mstr1,start);
+    range:= reader.readreal('range'+mstr1,range);
+   end;
+   mstr1:= 'marker'+mstr1+'_';
+   for int2:= 0 to markers.count - 1 do begin
+    with markers[int2] do begin
+     if dmo_savevalue in options then begin
+      value:= reader.readreal(mstr1+inttostrmse(int2),value);      
+     end;
+    end;
+   end;
   end;
  end;
 end;
 
 procedure tcustomdialcontrollers.dostatwrite(const writer: tstatwriter);
 var
- int1: integer;
+ int1,int2: integer;
  mstr1: msestring;
 begin
  for int1:= 0 to count - 1 do begin
   mstr1:= inttostr(int1);
   with tcustomdialcontroller(fitems[int1]) do begin
-   writer.writereal('start'+mstr1,start);
-   writer.writereal('range'+mstr1,range);
+   if do_savestate in options then begin
+    writer.writereal('start'+mstr1,start);
+    writer.writereal('range'+mstr1,range);
+   end;
+   mstr1:= 'marker'+mstr1+'_';
+   for int2:= 0 to markers.count - 1 do begin
+    with markers[int2] do begin
+     if dmo_savevalue in options then begin
+      writer.writereal(mstr1+inttostrmse(int2),value);      
+     end;
+    end;
+   end;
   end;
  end;
 end;

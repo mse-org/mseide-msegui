@@ -12,12 +12,15 @@ unit msesignalgui;
 interface
 uses
  classes,msegraphedits,msesignal,mseguiglob,mseevent,msechartedit,msetypes,
- msechart,mseclasses,msefft,msewidgets,msegraphics,msegraphutils;
+ msechart,mseclasses,msefft,msewidgets,msegraphics,msegraphutils,msedial,
+ msesplitter,msegui,msestat,msestatfile,msestrings;
+ 
 const
  defaultsamplecount = 4096;
  defaultharmonicscount = 16;
  defaultffttableeditoptions = [ceo_noinsert,ceo_nodelete];
  defaultkeywidth = 8;
+ defaultenvsplitteroptions = defaultsplitteroptions+[spo_hmove,spo_hprop];
  
 type
  sigeditoptionty = (sieo_exp);
@@ -181,7 +184,66 @@ type
    property options default defaultffttableeditoptions;
  end;
  
- tenvelopeedit = class(torderedxychartedit)
+ tenvelopeedit = class;
+ 
+ tenvelopechartedit = class(torderedxychartedit)
+  protected
+   fenvelope: tenvelopeedit;
+   procedure dochange; override;
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+ end;
+ 
+ tenvelopesplitter = class(tsplitter)
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property options default defaultenvsplitteroptions;
+ end;
+ 
+ tenvelopeedit = class(tpublishedwidget,istatfile)
+  private
+   fstatvarname: msestring;
+   fstatfile: tstatfile;
+   fedtrig: tenvelopechartedit;
+   fedaftertrig: tenvelopechartedit;
+   fsplitter: tenvelopesplitter;
+//   finnerframebefore: framety;
+   fenvelope: tsigenvelope;
+   fupdating: integer;
+   procedure setenvelope(const avalue: tsigenvelope);
+   procedure setedtrig(const avalue: tenvelopechartedit);
+   procedure setedaftertrig(const avalue: tenvelopechartedit);
+   procedure setsplitter(const avalue: tenvelopesplitter);
+   procedure setstatfile(const avalue: tstatfile);
+    //istatfile
+   procedure dostatread(const reader: tstatreader);
+   procedure dostatwrite(const writer: tstatwriter);
+   procedure statreading; virtual;
+   procedure statread; virtual;
+   function getstatvarname: msestring;
+  protected
+   procedure updatelayout;
+   procedure clientrectchanged; override;
+   procedure dochange;
+   procedure updatevalues;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure beginupdate;
+   procedure endupdate;
+  published
+   property edtrig: tenvelopechartedit read fedtrig write setedtrig;
+   property edaftertrig: tenvelopechartedit read fedaftertrig 
+                                                         write setedaftertrig;
+   property splitter: tenvelopesplitter read fsplitter write setsplitter;
+   property statfile: tstatfile read fstatfile write setstatfile;
+   property statvarname: msestring read getstatvarname write fstatvarname;
+   property envelope: tsigenvelope read fenvelope write setenvelope;
+ end;
+(*  
+ tenvelopeedit1 = class(torderedxychartedit)
   private
    fenvelope: tsigenvelope;
    procedure setenvelope(const avalue: tsigenvelope);
@@ -192,9 +254,9 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property wave: tsigenvelope read fenvelope write setenvelope;
+   property envelope: tsigenvelope read fenvelope write setenvelope;
  end;
-
+*)
 const
  semitoneln = ln(2)/12;
  chromaticscale: array[0..12] of double =
@@ -805,20 +867,244 @@ begin
  end;
 end;
 
-{ tenvelopeedit }
-
-constructor tenvelopeedit.create(aowner: tcomponent);
+{ tenvelopeedit1 }
+(*
+constructor tenvelopeedit1.create(aowner: tcomponent);
 begin
  inherited;
+ xdials.count:= 1;
+ with xdials[0] do begin
+  markers.count:= 2;
+  with markers[0] do begin  //loop start
+   value:= 0;
+   color:= cl_red;
+   options:= [dmo_ordered,dmo_savevalue];
+  end;
+  with markers[1] do begin  //decay
+   value:= 1;
+   color:= cl_green;
+   options:= [dmo_ordered,dmo_savevalue];
+  end;
+ end;
  fenvelope:= tsigenvelope.create(self);
  fenvelope.name:= 'envelope';
  fenvelope.setsubcomponent(true);
 end;
 
-destructor tenvelopeedit.destroy;
+destructor tenvelopeedit1.destroy;
 begin
  fenvelope.free;
  inherited;
+end;
+
+procedure tenvelopeedit1.setenvelope(const avalue: tsigenvelope);
+begin
+ fenvelope.assign(avalue);
+end;
+
+procedure tenvelopeedit1.dochange;
+begin
+ inherited;
+ updatevalues;
+end;
+
+procedure tenvelopeedit1.updatevalues;
+begin
+ with fenvelope do begin
+  beginupdate;
+  values:= activetraceitem.xydata;
+  if xdials.count > 0 then begin
+   with xdials[0] do begin
+    if markers.count > 0 then begin
+     loopstart:= markers[0].value;
+    end
+    else begin
+     loopstart:= 0;
+    end;
+    if markers.count > 1 then begin
+     decaystart:= markers[1].value;
+    end
+    else begin
+     decaystart:= 1;
+    end
+   end;
+  end;    
+  endupdate;
+ end;
+end;
+*)
+{ tenvelopeedit }
+
+constructor tenvelopeedit.create(aowner: tcomponent);
+const
+ splitterwidth = 4;
+var
+ int1: integer;
+begin
+ include(fwidgetstate1,ws1_noframewidgetshift);
+ inherited;
+ fenvelope:= tsigenvelope.create(self);
+ fenvelope.setsubcomponent(true);
+ fenvelope.name:= 'envelope';
+ fedtrig:= tenvelopechartedit.create(self,self,false);
+ fedaftertrig:= tenvelopechartedit.create(self,self,false);
+ fsplitter:= tenvelopesplitter.create(self,self,false);
+ int1:= (fwidgetrect.cx - splitterwidth) div 2;
+ fedtrig.bounds_cx:= int1;
+ fedaftertrig.bounds_cx:= int1;
+ fsplitter.bounds_cx:= splitterwidth;
+ fsplitter.bounds_x:= fedtrig.bounds_x + fedtrig.bounds_cx;
+ updatelayout;
+ fsplitter.linkleft:= fedtrig;
+ fsplitter.linkright:= fedaftertrig;
+end;
+
+destructor tenvelopeedit.destroy;
+begin
+ fedtrig.free;
+ fedaftertrig.free;
+ fsplitter.free;
+ fenvelope.free;
+ inherited;
+end;
+
+procedure tenvelopeedit.setedtrig(const avalue: tenvelopechartedit);
+begin
+ fedtrig.assign(avalue);
+end;
+
+procedure tenvelopeedit.setedaftertrig(const avalue: tenvelopechartedit);
+begin
+ fedaftertrig.assign(avalue);
+end;
+
+procedure tenvelopeedit.setsplitter(const avalue: tenvelopesplitter);
+begin
+ fsplitter.assign(avalue);
+end;
+
+procedure tenvelopeedit.updatelayout;
+var
+ rect1: rectty;
+ rect2: rectty;
+ fr1,fr2: framety;
+begin
+ rect1:= innerwidgetrect;
+ with rect1 do begin
+  rect2.pos:= pos;
+  rect2.cy:= cy;
+  rect2.cx:= fedtrig.bounds_cx - x + fedtrig.bounds_x;
+  fedtrig.widgetrect:= rect2;
+  rect2.x:= fsplitter.bounds_x;
+  rect2.cx:= fsplitter.bounds_cx;
+  fsplitter.widgetrect:= rect2;
+  rect2.x:= fedaftertrig.bounds_x;
+  rect2.cx:= cx - rect2.x; 
+  fedaftertrig.widgetrect:= rect2;
+ end;
+end;
+
+procedure tenvelopeedit.clientrectchanged;
+begin
+ inherited;
+ updatelayout;
+end;
+
+procedure tenvelopeedit.setstatfile(const avalue: tstatfile);
+begin
+ setstatfilevar(istatfile(self),avalue,fstatfile);
+end;
+
+procedure tenvelopeedit.dostatread(const reader: tstatreader);
+var
+ mstr1: msestring;
+begin
+ mstr1:= reader.varname(istatfile(self));
+ beginupdate;
+ try
+  if reader.findsection(mstr1+'.0') then begin
+   fedtrig.dostatread(reader);  
+  end;
+  if reader.findsection(mstr1+'.1') then begin
+   fedaftertrig.dostatread(reader);  
+  end;
+  if reader.findsection(mstr1+'.2') then begin
+   fsplitter.dostatread(reader);  
+  end;
+ finally
+  endupdate;
+ end; 
+end;
+
+procedure tenvelopeedit.dostatwrite(const writer: tstatwriter);
+var
+ mstr1: msestring;
+begin
+ mstr1:= writer.varname(istatfile(self));
+ writer.writesection(mstr1+'.0');
+ fedtrig.dostatwrite(writer);  
+ writer.writesection(mstr1+'.1');
+ fedaftertrig.dostatwrite(writer);  
+ writer.writesection(mstr1+'.2');
+ fsplitter.dostatwrite(writer);  
+end;
+
+procedure tenvelopeedit.statreading;
+begin
+ fedtrig.statreading;
+ fedaftertrig.statreading;
+ fsplitter.statreading;
+end;
+
+procedure tenvelopeedit.statread;
+begin
+ fedtrig.statread;
+ fedaftertrig.statread;
+ fsplitter.statread;
+end;
+
+function tenvelopeedit.getstatvarname: msestring;
+begin
+ result:= fstatvarname;
+end;
+
+procedure tenvelopeedit.updatevalues;
+begin
+ with fenvelope do begin
+  beginupdate;
+  with fedtrig do begin
+   valuestrig:= activetraceitem.xydata;
+   if xdials.count > 0 then begin
+    with xdials[0] do begin
+     if markers.count > 0 then begin
+      loopstart:= markers[0].value;
+     end
+     else begin
+      loopstart:= 0;
+     end;
+     {
+     if markers.count > 1 then begin
+      decaystart:= markers[1].value;
+     end
+     else begin
+      decaystart:= 1;
+     end
+     }
+    end;
+   end;    
+  end;
+  with fedaftertrig do begin
+   valuesaftertrig:= activetraceitem.xydata;
+  end;
+  endupdate;
+ end;
+end;
+
+procedure tenvelopeedit.dochange;
+begin
+ if fupdating >= 0 then begin
+  updatevalues;
+ end;
 end;
 
 procedure tenvelopeedit.setenvelope(const avalue: tsigenvelope);
@@ -826,14 +1112,48 @@ begin
  fenvelope.assign(avalue);
 end;
 
-procedure tenvelopeedit.dochange;
+procedure tenvelopeedit.beginupdate;
 begin
- inherited;
- updatevalues;
+ inc(fupdating);
 end;
 
-procedure tenvelopeedit.updatevalues;
+procedure tenvelopeedit.endupdate;
 begin
+ dec(fupdating);
+ if fupdating = 0 then begin
+  dochange;
+ end;
+end;
+
+{ tenvelopechartedit }
+
+constructor tenvelopechartedit.create(aowner: tcomponent);
+begin
+ fenvelope:= tenvelopeedit(aowner);
+ if csdesigning in aowner.componentstate then begin
+  setdesigning(true);
+ end;
+ inherited create(nil);
+ setsubcomponent(true);
+end;
+
+procedure tenvelopechartedit.dochange;
+begin
+ inherited;
+ fenvelope.dochange;
+end;
+
+
+{ tenvelopesplitter }
+
+constructor tenvelopesplitter.create(aowner: tcomponent);
+begin
+ if csdesigning in aowner.componentstate then begin
+  setdesigning(true);
+ end;
+ inherited create(nil);
+ options:= defaultenvsplitteroptions;
+ setsubcomponent(true);
 end;
 
 end.

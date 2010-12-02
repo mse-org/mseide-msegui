@@ -131,7 +131,7 @@ type
                    ws1_parentupdating, //set while setparentwidget
                    ws1_isstreamed,     //used by ttabwidget
                    ws1_scaled,         //used in tcustomscalingwidget
-                   ws1_noclipchildren,ws1_tryshrink,
+                   ws1_noclipchildren,ws1_tryshrink,ws1_noframewidgetshift,
                    ws1_nodesignvisible,ws1_nodesignframe,ws1_nodesignhandles,
                    ws1_nodesigndelete,ws1_designactive,
                    ws1_fakevisible,ws1_nominsize,
@@ -1520,7 +1520,8 @@ type
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(const aowner: tcomponent; 
-                                     const aparentwidget: twidget); overload;
+                      const aparentwidget: twidget;
+                      const aiswidget: boolean = true); overload;
    destructor destroy; override;
    procedure afterconstruction; override;
    procedure initnewcomponent(const ascale: real); override;
@@ -1533,6 +1534,7 @@ type
    procedure createfontempty;
 
    function isloading: boolean;      //checks ws_loadlock and csdestroing too
+   function canmouseinteract: boolean; //checks csdesigning and cssubcomponent
    function widgetstate: widgetstatesty;                 //iframe
    property widgetstate1: widgetstates1ty read fwidgetstate1;
    function hasparent: boolean; override;               //tcomponent
@@ -3448,8 +3450,14 @@ begin
 end;
 
 constructor tcustomframe.create(const intf: iframe);
+var
+ ws1: widgetstates1ty;
 begin
  fintf:= intf;
+ ws1:= fintf.getwidget.fwidgetstate1;
+ if ws1_noframewidgetshift in ws1 then begin
+  include(fstate,fs_nowidget);
+ end;
  if not (fs_nosetinstance in fstate) then begin
   fintf.setframeinstance(self);
  end;
@@ -6160,10 +6168,13 @@ begin
 end;
 
 constructor twidget.create(const aowner: tcomponent; 
-                                             const aparentwidget: twidget);
+             const aparentwidget: twidget; const aiswidget: boolean = true);
 begin
  create(aowner);
  setlockedparentwidget(aparentwidget);
+ if not aiswidget then begin
+  exclude(fwidgetstate,ws_iswidget);
+ end;
 end;
 
 procedure twidget.afterconstruction;
@@ -6192,7 +6203,7 @@ begin
       free;
      end
      else begin
-      setlength(fwidgets,high(fwidgets));
+      setlength(self.fwidgets,high(self.fwidgets));
      end;
     end;
    end;
@@ -11841,6 +11852,12 @@ begin
  for int1:= 0 to high(fwidgets) do begin
   fwidgets[int1].dragstarted;
  end;
+end;
+
+function twidget.canmouseinteract: boolean;
+begin
+ result:= not (csdesigning in componentstate) or 
+                                    (cssubcomponent in componentstyle);
 end;
 
 { twindow }

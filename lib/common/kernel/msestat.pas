@@ -42,11 +42,11 @@ type
    fiswriter: boolean;
    flistlevel: integer;
   protected
-   function varname(const intf: istatfile): msestring;
   public
    constructor create(const astream: ttextstream;
                             const aencoding: charencodingty = ce_utf8n);
    destructor destroy; override;
+   function varname(const intf: istatfile): msestring;
    function arrayname(const name: msestring; index: integer): msestring;
    function iswriter: boolean;
    property stream: ttextstream read fstream;
