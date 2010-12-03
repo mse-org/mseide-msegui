@@ -246,7 +246,6 @@ type
  
  tracesstatety = (trss_graphicvalid);
  tracesstatesty = set of tracesstatety;
- tchart = class;
    
  ttraces = class(townedeventpersistentarrayprop)
   private
@@ -295,7 +294,7 @@ type
    procedure checkgraphic;
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
-   constructor create(const aowner: tchart); reintroduce;
+   constructor create(const aowner: tcustomchart); reintroduce;
    class function getitemclasstype: persistentclassty; override;
    function itembyname(const aname: string): ttrace;
    procedure assign(source: tpersistent); override;
@@ -343,7 +342,7 @@ type
    procedure setkind(const avalue: tracekindty); override;
    procedure setoptions(const avalue: charttraceoptionsty); override;
   public
-   constructor create(const aowner: tchart; const axordered: boolean);
+   constructor create(const aowner: tcustomchart; const axordered: boolean);
    class function getitemclasstype: persistentclassty; override;
   published
    property kind default trk_xy;
@@ -440,7 +439,7 @@ type
    property colorclient default cl_foreground;
  end;
  
- tcustomchart = class(tscrollbox,ichartdialcontroller,istatfile)
+ tcuchart = class(tscrollbox,ichartdialcontroller,istatfile)
   private
    fxdials: tchartdialshorz;
    fydials: tchartdialsvert;
@@ -503,7 +502,7 @@ type
    property statvarname: msestring read getstatvarname write fstatvarname;
  end;
 
- tchart = class(tcustomchart)
+ tcustomchart = class(tcuchart)
   private
    procedure settraces(const avalue: ttraces);
    procedure setxstart(const avalue: real); override;
@@ -521,8 +520,12 @@ type
    destructor destroy; override;
    procedure clear; virtual;
    procedure addsample(const asamples: array of real); virtual;
-  published
    property traces: ttraces read ftraces write settraces;
+ end;
+
+ tchart = class(tcustomchart)
+  published
+   property traces;
    property colorchart;
    property xstart;
    property ystart;
@@ -537,7 +540,7 @@ type
    property onpaint;
    property onafterpaint;
  end;
-
+ 
  trecordertrace = class(tvirtualpersistent)
   private
    fybefore: integer;
@@ -564,7 +567,7 @@ type
  chartrecorderoptionty = (cro_adddataright);
  chartrecorderoptionsty = set of chartrecorderoptionty;
  
- tchartrecorder = class(tcustomchart)
+ tchartrecorder = class(tcuchart)
   private
    fchart: tmaskedbitmap;
    fsamplecount: integer;
@@ -669,7 +672,7 @@ end;
 
 constructor ttrace.create(aowner: tobject);
 begin
- ftraces:= tchart(aowner).ftraces;
+ ftraces:= tcustomchart(aowner).ftraces;
  finfo.color:= cl_black;
  finfo.colorimage:= cl_default;
  finfo.widthmm:= 0.3;
@@ -690,7 +693,7 @@ end;
 procedure ttrace.datachange;
 begin
  exclude(finfo.state,trs_datapointsvalid);
- tchart(fowner).traces.change;
+ tcustomchart(fowner).traces.change;
 end;
 
 procedure ttrace.setxydata(const avalue: complexarty);
@@ -838,11 +841,11 @@ begin
   end;
   if islogy then begin
    yo:= -(chartln(finfo.ystart + finfo.yrange));
-   ys:= -tchart(fowner).traces.fscaley / (-chartln(finfo.ystart) - yo);
+   ys:= -tcustomchart(fowner).traces.fscaley / (-chartln(finfo.ystart) - yo);
   end
   else begin
    yo:= -finfo.ystart - finfo.yrange;
-   ys:= -tchart(fowner).traces.fscaley / finfo.yrange;
+   ys:= -tcustomchart(fowner).traces.fscaley / finfo.yrange;
   end;
   case finfo.kind of
    trk_xy,trk_xseries: begin     
@@ -866,7 +869,7 @@ begin
       lxo:= int2 * (finfo.xserstart/finfo.xserrange);
       lxs:= finfo.xserrange;
       xo:= -chartln(-(rea1 - finfo.xstart) * int2);
-      xs:= tchart(fowner).traces.fscalex;
+      xs:= tcustomchart(fowner).traces.fscalex;
       if int2 > 0 then begin
        xs:= xs / (chartln((finfo.xstart+finfo.xrange) * int2)+xo);
       end;
@@ -876,7 +879,7 @@ begin
      end
      else begin
       xo:= (rea1 - finfo.xstart) * int2;
-      xs:= tchart(fowner).traces.fscalex;
+      xs:= tcustomchart(fowner).traces.fscalex;
       if int2 > 0 then begin
        xs:= xs / (finfo.xrange * int2);
       end;
@@ -890,12 +893,12 @@ begin
     else begin
      if cto_logx in options then begin
       xo:= -chartln(finfo.xstart);
-      xs:= tchart(fowner).traces.fscalex / 
+      xs:= tcustomchart(fowner).traces.fscalex / 
                                      (chartln(finfo.xrange+finfo.xstart)+xo);
      end
      else begin
       xo:= -finfo.xstart;
-      xs:= tchart(fowner).traces.fscalex / finfo.xrange;
+      xs:= tcustomchart(fowner).traces.fscalex / finfo.xrange;
      end;
     end;
     checkrange(dpcountxy);
@@ -906,7 +909,7 @@ begin
     end;
     
     if (cto_xordered in finfo.options) or isxseries then begin
-     int4:= tchart(fowner).traces.fsize.cx+3;//2; //cx + 1
+     int4:= tcustomchart(fowner).traces.fsize.cx+3;//2; //cx + 1
      setlength(ar1,int4);
      dec(int4);
      xbottom:= minint;
@@ -1036,8 +1039,8 @@ begin
        if int2 < 0 then begin
         int2:= 0;
        end;
-       if int2 > tchart(fowner).traces.fsize.cy then begin
-        int2:= tchart(fowner).traces.fsize.cy;
+       if int2 > tcustomchart(fowner).traces.fsize.cy then begin
+        int2:= tcustomchart(fowner).traces.fsize.cy;
        end;
        for int1:= 0 to high(barlines) do begin
         with barlines[int1] do begin
@@ -1157,7 +1160,7 @@ begin
      bmp1.masked:= fimage_list.masked;
      fimage_list.getimage(finfo.imagenr,bmp1);
      bmp1.colorforeground:= co1;
-     bmp1.colorbackground:= tcustomchart(fowner).colorchart;
+     bmp1.colorbackground:= tcuchart(fowner).colorchart;
      bmp1.monochrome:= false;
      bmp1.colormask:= true;
      bmp2.size:= imagesize;
@@ -1187,7 +1190,7 @@ procedure ttrace.setcolor(const avalue: colorty);
 begin
  if finfo.color <> avalue then begin
   finfo.color:= avalue;
-  tchart(fowner).traces.change;
+  tcustomchart(fowner).traces.change;
  end;
 end;
 
@@ -1195,20 +1198,20 @@ procedure ttrace.setcolorimage(const avalue: colorty);
 begin
  if finfo.colorimage <> avalue then begin
   finfo.colorimage:= avalue;
-  tchart(fowner).traces.change;
+  tcustomchart(fowner).traces.change;
  end;
 end;
 
 procedure ttrace.setwidthmm(const avalue: real);
 begin
  finfo.widthmm:= avalue;
- tchart(fowner).traces.change;
+ tcustomchart(fowner).traces.change;
 end;
 
 procedure ttrace.setdashes(const avalue: string);
 begin
  finfo.dashes:= avalue;
- tchart(fowner).traces.change;
+ tcustomchart(fowner).traces.change;
 end;
 
 procedure ttrace.setxserrange(const avalue: real);
@@ -1690,27 +1693,27 @@ end;
 
 function ttrace.getbar_frame: tframe;
 begin
- tchart(fowner).getoptionalobject(finfo.bar_frame,
+ tcustomchart(fowner).getoptionalobject(finfo.bar_frame,
                                {$ifdef FPC}@{$endif}createbar_frame);
  result:= finfo.bar_frame;
 end;
 
 procedure ttrace.setbar_frame(const avalue: tframe);
 begin
- tchart(fowner).setoptionalobject(avalue,finfo.bar_frame,
+ tcustomchart(fowner).setoptionalobject(avalue,finfo.bar_frame,
                                  {$ifdef FPC}@{$endif}createbar_frame);
  datachange;
 end;
 
 function ttrace.getbar_face: tface;
 begin
- tchart(fowner).getoptionalobject(finfo.bar_face,{$ifdef FPC}@{$endif}createbar_face);
+ tcustomchart(fowner).getoptionalobject(finfo.bar_face,{$ifdef FPC}@{$endif}createbar_face);
  result:= finfo.bar_face;
 end;
 
 procedure ttrace.setbar_face(const avalue: tface);
 begin
- tchart(fowner).setoptionalobject(avalue,finfo.bar_face,
+ tcustomchart(fowner).setoptionalobject(avalue,finfo.bar_face,
                                       {$ifdef FPC}@{$endif}createbar_face);
  datachange;
 end;
@@ -1756,38 +1759,38 @@ end;
 
 function ttrace.getcomponentstate: tcomponentstate;
 begin
- result:= tchart(fowner).componentstate;
+ result:= tcustomchart(fowner).componentstate;
 end;
 
 function ttrace.getmsecomponentstate: msecomponentstatesty;
 begin
- result:= tchart(fowner).msecomponentstate;
+ result:= tcustomchart(fowner).msecomponentstate;
 end;
 
 procedure ttrace.invalidate;
 begin
- tchart(fowner).invalidate;
+ tcustomchart(fowner).invalidate;
 end;
 
 procedure ttrace.invalidatewidget;
 begin
- tchart(fowner).invalidatewidget;
+ tcustomchart(fowner).invalidatewidget;
 end;
 
 procedure ttrace.invalidaterect(const rect: rectty;
                const org: originty = org_client; const noclip: boolean = false);
 begin
- tchart(fowner).invalidaterect(rect,org,noclip);
+ tcustomchart(fowner).invalidaterect(rect,org,noclip);
 end;
 
 function ttrace.getwidget: twidget;
 begin
- result:= tchart(fowner);
+ result:= tcustomchart(fowner);
 end;
 
 function ttrace.getwidgetrect: rectty;
 begin
- result:= tchart(fowner).innerclientrect;
+ result:= tcustomchart(fowner).innerclientrect;
 end;
 
 function ttrace.getframestateflags: framestateflagsty;
@@ -1808,13 +1811,13 @@ end;
 
 function ttrace.getclientrect: rectty;
 begin
- result:= tchart(fowner).innerclientrect;
+ result:= tcustomchart(fowner).innerclientrect;
 end;
 
 procedure ttrace.setlinkedvar(const source: tmsecomponent;
                var dest: tmsecomponent; const linkintf: iobjectlink = nil);
 begin
- tchart(fowner).setlinkedvar(source,dest,linkintf);
+ tcustomchart(fowner).setlinkedvar(source,dest,linkintf);
 end;
 
 procedure ttrace.widgetregioninvalid;
@@ -1824,7 +1827,7 @@ end;
 
 { ttraces }
 
-constructor ttraces.create(const aowner: tchart);
+constructor ttraces.create(const aowner: tcustomchart);
 begin
  fkind:= trk_xseries;
  fxserrange:= 1;
@@ -1841,7 +1844,7 @@ end;
 procedure ttraces.change;
 begin 
  exclude(ftracestate,trss_graphicvalid);
- tcustomchart(fowner).invalidate;
+ tcuchart(fowner).invalidate;
 end;
 
 procedure ttraces.clientrectchanged;
@@ -1933,7 +1936,7 @@ var
  int1: integer;
 begin
  fxserstart:= avalue;
- if not (csloading in tcustomchart(fowner).componentstate) then begin
+ if not (csloading in tcuchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).xserstart:= avalue;
   end;
@@ -1945,7 +1948,7 @@ var
  int1: integer;
 begin
  fxstart:= avalue;
- if not (csloading in tcustomchart(fowner).componentstate) then begin
+ if not (csloading in tcuchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).xstart:= avalue;
   end;
@@ -1957,7 +1960,7 @@ var
  int1: integer;
 begin
  fystart:= avalue;
- if not (csloading in tcustomchart(fowner).componentstate) then begin
+ if not (csloading in tcuchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).ystart:= avalue;
   end;
@@ -1969,7 +1972,7 @@ var
  int1: integer;
 begin
  fxserrange:= avalue;
- if not (csloading in tcustomchart(fowner).componentstate) then begin
+ if not (csloading in tcuchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).xserrange:= avalue;
   end;
@@ -1981,7 +1984,7 @@ var
  int1: integer;
 begin
  fxrange:= avalue;
- if not (csloading in tcustomchart(fowner).componentstate) then begin
+ if not (csloading in tcuchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).xrange:= avalue;
   end;
@@ -1993,7 +1996,7 @@ var
  int1: integer;
 begin
  fyrange:= avalue;
- if not (csloading in tcustomchart(fowner).componentstate) then begin
+ if not (csloading in tcuchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).yrange:= avalue;
   end;
@@ -2005,7 +2008,7 @@ var
  int1: integer;
 begin
  fmaxcount:= avalue;
- if not (csloading in tcustomchart(fowner).componentstate) then begin
+ if not (csloading in tcuchart(fowner).componentstate) then begin
   for int1:= 0 to high(fitems) do begin
    ttrace(fitems[int1]).maxcount:= avalue;
   end;
@@ -2018,7 +2021,7 @@ var
 begin
  if fkind <> avalue then begin
   fkind:= avalue;
-  if not (csloading in tcustomchart(fowner).componentstate) then begin
+  if not (csloading in tcuchart(fowner).componentstate) then begin
    for int1:= 0 to count - 1 do begin
     ttrace(fitems[int1]).kind:= avalue;
    end;
@@ -2032,7 +2035,7 @@ var
 begin
  if fchartkind <> avalue then begin
   fchartkind:= avalue;
-  if not (csloading in tcustomchart(fowner).componentstate) then begin
+  if not (csloading in tcuchart(fowner).componentstate) then begin
    for int1:= 0 to count - 1 do begin
     ttrace(fitems[int1]).chartkind:= avalue;
    end;
@@ -2046,7 +2049,7 @@ var
 begin
  if fbar_width <> avalue then begin
   fbar_width:= avalue;
-  if not (csloading in tcustomchart(fowner).componentstate) then begin
+  if not (csloading in tcuchart(fowner).componentstate) then begin
    for int1:= 0 to count - 1 do begin
     ttrace(fitems[int1]).bar_width:= avalue;
    end;
@@ -2064,7 +2067,7 @@ begin
   mask:= {$ifdef FPC}longword{$else}byte{$endif}(avalue) xor 
                  {$ifdef FPC}longword{$else}byte{$endif}(foptions);
   foptions:= avalue;
-  if not (csloading in tcustomchart(fowner).componentstate) then begin
+  if not (csloading in tcuchart(fowner).componentstate) then begin
    for int1:= 0 to count - 1 do begin
     ttrace(fitems[int1]).options:= charttraceoptionsty(replacebits(
                {$ifdef FPC}longword{$else}byte{$endif}(foptions),
@@ -2231,9 +2234,9 @@ begin
  fi.colorclient:= cl_foreground;
 end;
 
-{ tcustomchart }
+{ tcuchart }
 
-constructor tcustomchart.create(aowner: tcomponent);
+constructor tcuchart.create(aowner: tcomponent);
 begin
  fcolorchart:= cl_foreground;
  fxrange:= 1;
@@ -2261,14 +2264,14 @@ begin
  inherited;
 end;
 
-destructor tcustomchart.destroy;
+destructor tcuchart.destroy;
 begin
  fydials.free;
  fxdials.free;
  inherited;
 end;
 
-procedure tcustomchart.clientrectchanged;
+procedure tcuchart.clientrectchanged;
 begin
  fxdials.changed;
  fydials.changed;
@@ -2276,7 +2279,7 @@ begin
  inherited;
 end;
 {
-procedure tcustomchart.dobeforepaint(const canvas: tcanvas);
+procedure tcuchart.dobeforepaint(const canvas: tcanvas);
 var
  pt1: pointty;
 begin
@@ -2290,12 +2293,12 @@ begin
 end;
 }
 
-procedure tcustomchart.dopaintcontent(const acanvas: tcanvas);
+procedure tcuchart.dopaintcontent(const acanvas: tcanvas);
 begin
  //dummy
 end;
 
-procedure tcustomchart.dopaintbackground(const canvas: tcanvas);
+procedure tcuchart.dopaintbackground(const canvas: tcanvas);
 begin
  inherited;
  if not (chs_nocolorchart in fstate) and 
@@ -2307,7 +2310,7 @@ begin
 // end;
 end;
 {
-procedure tcustomchart.doonpaint(const canvas: tcanvas);
+procedure tcuchart.doonpaint(const canvas: tcanvas);
 begin
  inherited;
  if canevent(tmethod(fonpaint)) then begin
@@ -2315,7 +2318,7 @@ begin
  end;
 end;
 
-procedure tcustomchart.doafterpaint(const canvas: tcanvas);
+procedure tcuchart.doafterpaint(const canvas: tcanvas);
 var
  pt1: pointty;
 begin
@@ -2328,7 +2331,7 @@ begin
  end;
 end;
 }
-procedure tcustomchart.dopaint(const acanvas: tcanvas);
+procedure tcuchart.dopaint(const acanvas: tcanvas);
 begin
  inherited;
  fxdials.paint(acanvas);
@@ -2338,7 +2341,7 @@ begin
  fydials.afterpaint(acanvas);
 end;
 
-procedure tcustomchart.setcolorchart(const avalue: colorty);
+procedure tcuchart.setcolorchart(const avalue: colorty);
 begin
  if fcolorchart <> avalue then begin
   fcolorchart:= avalue;
@@ -2346,124 +2349,124 @@ begin
  end;
 end;
 
-procedure tcustomchart.setxdials(const avalue: tchartdialshorz);
+procedure tcuchart.setxdials(const avalue: tchartdialshorz);
 begin
  fxdials.assign(avalue);
 end;
 
-procedure tcustomchart.setydials(const avalue: tchartdialsvert);
+procedure tcuchart.setydials(const avalue: tchartdialsvert);
 begin
  fydials.assign(avalue);
 end;
 
-procedure tcustomchart.directionchanged(const dir: graphicdirectionty;
+procedure tcuchart.directionchanged(const dir: graphicdirectionty;
                const dirbefore: graphicdirectionty);
 begin
  //dummy
 end;
 
-function tcustomchart.getdialrect: rectty;
+function tcuchart.getdialrect: rectty;
 begin
  result:= innerclientrect;
 end;
 
-function tcustomchart.getdialsize: sizety;
+function tcuchart.getdialsize: sizety;
 begin
  result:= clientsize;
 end;
 
-procedure tcustomchart.internalcreateframe;
+procedure tcuchart.internalcreateframe;
 begin
  tchartframe.create(iscrollframe(self),self);
 end;
 
-procedure tcustomchart.changed;
+procedure tcuchart.changed;
 begin
  invalidate;
 end;
 
-procedure tcustomchart.defineproperties(filer: tfiler);
+procedure tcuchart.defineproperties(filer: tfiler);
 begin
  inherited;
 end;
 
-function tcustomchart.getxstart: real;
+function tcuchart.getxstart: real;
 begin
  result:= fxstart;
 end;
 
-procedure tcustomchart.setxstart(const avalue: real);
+procedure tcuchart.setxstart(const avalue: real);
 begin
  fxstart:= avalue;
  fxdials.start:= avalue;
 end;
 
-function tcustomchart.getystart: real;
+function tcuchart.getystart: real;
 begin
  result:= fystart;
 end;
 
-procedure tcustomchart.setystart(const avalue: real);
+procedure tcuchart.setystart(const avalue: real);
 begin
  fystart:= avalue;
  fydials.start:= avalue;
 end;
 
-function tcustomchart.getxrange: real;
+function tcuchart.getxrange: real;
 begin
  result:= fxrange;
 end;
 
-procedure tcustomchart.setxrange(const avalue: real);
+procedure tcuchart.setxrange(const avalue: real);
 begin
  fxrange:= avalue;
  fxdials.range:= avalue;
 end;
 
-function tcustomchart.getyrange: real;
+function tcuchart.getyrange: real;
 begin
  result:= fyrange;
 end;
 
-procedure tcustomchart.setyrange(const avalue: real);
+procedure tcuchart.setyrange(const avalue: real);
 begin
  fyrange:= avalue;
  fydials.range:= avalue;
 end;
 
-procedure tcustomchart.setstatfile(const avalue: tstatfile);
+procedure tcuchart.setstatfile(const avalue: tstatfile);
 begin
  setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
 
-procedure tcustomchart.dostatread(const reader: tstatreader);
+procedure tcuchart.dostatread(const reader: tstatreader);
 begin
  fxdials.dostatread(reader);
  fydials.dostatread(reader);
 end;
 
-procedure tcustomchart.dostatwrite(const writer: tstatwriter);
+procedure tcuchart.dostatwrite(const writer: tstatwriter);
 begin
  fxdials.dostatwrite(writer);
  fydials.dostatwrite(writer);
 end;
 
-procedure tcustomchart.statreading;
+procedure tcuchart.statreading;
 begin
  //dummy
 end;
 
-procedure tcustomchart.statread;
+procedure tcuchart.statread;
 begin
  //dummy
 end;
 
-function tcustomchart.getstatvarname: msestring;
+function tcuchart.getstatvarname: msestring;
 begin
  result:= fstatvarname;
 end;
 
-procedure tcustomchart.initscrollstate;
+procedure tcuchart.initscrollstate;
 var
  int1: integer;
 begin
@@ -2484,15 +2487,15 @@ begin
  end;
 end;
 
-procedure tcustomchart.chartchange;
+procedure tcuchart.chartchange;
 begin
  exclude(fstate,chs_chartvalid);
  invalidate;
 end;
 
-{ tchart }
+{ tcustomchart }
 
-constructor tchart.create(aowner: tcomponent);
+constructor tcustomchart.create(aowner: tcomponent);
 begin
  if ftraces = nil then begin
   ftraces:= ttraces.create(self);
@@ -2500,13 +2503,13 @@ begin
  inherited;
 end;
 
-destructor tchart.destroy;
+destructor tcustomchart.destroy;
 begin
  ftraces.free;
  inherited;
 end;
 
-procedure tchart.clear;
+procedure tcustomchart.clear;
 var
  int1: integer;
 begin
@@ -2517,7 +2520,7 @@ begin
  end;
 end;
 
-procedure tchart.addsample(const asamples: array of real);
+procedure tcustomchart.addsample(const asamples: array of real);
 var
  int1: integer;
  rea1,rea2: real;
@@ -2567,18 +2570,18 @@ begin
  end;
 end;
 
-procedure tchart.settraces(const avalue: ttraces);
+procedure tcustomchart.settraces(const avalue: ttraces);
 begin
  ftraces.assign(avalue);
 end;
 
-procedure tchart.clientrectchanged;
+procedure tcustomchart.clientrectchanged;
 begin
  ftraces.clientrectchanged;
  inherited;
 end;
 
-procedure tchart.dopaintcontent(const acanvas: tcanvas);
+procedure tcustomchart.dopaintcontent(const acanvas: tcanvas);
 var
  rect1: rectty;
 begin
@@ -2594,41 +2597,41 @@ begin
 // acanvas.remove(innerclientpos);
 end;
 
-procedure tchart.setxstart(const avalue: real);
+procedure tcustomchart.setxstart(const avalue: real);
 begin
  inherited;
  ftraces.xstart:= avalue;
  fxdials.start:= avalue;
 end;
 
-procedure tchart.setystart(const avalue: real);
+procedure tcustomchart.setystart(const avalue: real);
 begin
  inherited;
  ftraces.ystart:= avalue;
  fydials.start:= avalue;
 end;
 
-procedure tchart.setxrange(const avalue: real);
+procedure tcustomchart.setxrange(const avalue: real);
 begin
  inherited;
  ftraces.xrange:= avalue;
  fxdials.range:= avalue;
 end;
 
-procedure tchart.setyrange(const avalue: real);
+procedure tcustomchart.setyrange(const avalue: real);
 begin
  inherited;
  ftraces.yrange:= avalue;
  fydials.range:= avalue;
 end;
 
-procedure tchart.dostatread(const reader: tstatreader);
+procedure tcustomchart.dostatread(const reader: tstatreader);
 begin
  inherited;
  ftraces.dostatread(reader);
 end;
 
-procedure tchart.dostatwrite(const writer: tstatwriter);
+procedure tcustomchart.dostatwrite(const writer: tstatwriter);
 begin
  inherited;
  ftraces.dostatwrite(writer);
@@ -2988,7 +2991,7 @@ end;
 
 { txytraces }
 
-constructor txytraces.create(const aowner: tchart; const axordered: boolean);
+constructor txytraces.create(const aowner: tcustomchart; const axordered: boolean);
 begin
  fxordered:= axordered;
  inherited create(aowner);

@@ -186,7 +186,7 @@ type
  
  tenvelopeedit = class;
  
- tenvelopechartedit = class(torderedxychartedit)
+ tenvelopechartedit = class(tcustomorderedxychartedit)
   protected
    fenvelope: tenvelopeedit;
    procedure dochange; override;
@@ -196,13 +196,46 @@ type
   public
    constructor create(aowner: tcomponent); override;
   published
+   property traces;
+   property colorchart;
+   property xstart;
+   property ystart;
+   property xrange;
+   property yrange;
+   property xdials;
+   property ydials;
+//   property statfile;
+//   property statvarname;
+   property onbeforepaint;
+   property onpaintbackground;
+   property onpaint;
+   property onafterpaint;
+
+   property ondataentered;
+   property onsetvalue;
+   property activetrace;
+   property optionsedit;
+   property snapdist;
+   property options;
+   property onchange;
  end;
  
- tenvelopesplitter = class(tsplitter)
+ tenvelopesplitter = class(tcustomsplitter)
   public
    constructor create(aowner: tcomponent); override;
   published
    property options default defaultenvsplitteroptions;
+   property shrinkpriority;
+//   property linkleft;
+//   property linktop;
+//   property linkright;
+//   property linkbottom;
+
+   property grip;
+   property colorgrip;
+//   property statfile;
+//   property statvarname;
+   property onupdatelayout;
  end;
  
  tenvelopeedit = class(tpublishedwidget,istatfile)
@@ -1193,7 +1226,8 @@ begin
  if csdesigning in aowner.componentstate then begin
   setdesigning(true);
  end;
- inherited create(nil);
+ inherited; //owner needed because of csreading and csloading
+// inherited create(nil);
  options:= defaultenvsplitteroptions;
  setsubcomponent(true);
 end;

@@ -35,7 +35,7 @@ const
  retrypropeventtag = 1;
 
 type
- tsplitter = class(tscalingwidget,iobjectpicker,istatfile)
+ tcustomsplitter = class(tscalingwidget,iobjectpicker,istatfile)
   private
    fobjectpicker: tobjectpicker;
    foptions: splitteroptionsty;
@@ -108,7 +108,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure move(const dist: pointty);
-  published
+
    property optionswidget default defaultoptionswidgetnofocus;
    property options: splitteroptionsty read foptions write setoptions 
                  default defaultsplitteroptions;
@@ -127,6 +127,24 @@ type
    property onupdatelayout: notifyeventty read fonupdatelayout write fonupdatelayout;
  end;
 
+ tsplitter = class(tcustomsplitter)
+  published
+//   property optionswidget;
+   property options;
+   property shrinkpriority;
+   property linkleft;
+   property linktop;
+   property linkright;
+   property linkbottom;
+
+//   property color;
+   property grip;
+   property colorgrip;
+   property statfile;
+   property statvarname;
+   property onupdatelayout;
+ end;
+ 
  spaceroptionty = (spao_glueright,spao_gluebottom);
  spaceroptionsty = set of spaceroptionty;
  
@@ -299,9 +317,9 @@ type
 
 {$define useround}
 
-{ tsplitter }
+{ tcustomsplitter }
 
-constructor tsplitter.create(aowner: tcomponent);
+constructor tcustomsplitter.create(aowner: tcomponent);
 begin
 // include(fwidgetstate1,ws1_tryshrink);
  foptions:= defaultsplitteroptions;
@@ -317,13 +335,13 @@ begin
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self),org_widget);
 end;
 
-destructor tsplitter.destroy;
+destructor tcustomsplitter.destroy;
 begin
  fobjectpicker.Free;
  inherited;
 end;
 
-procedure tsplitter.mouseevent(var info: mouseeventinfoty);
+procedure tcustomsplitter.mouseevent(var info: mouseeventinfoty);
 begin
  inherited;
  if not (es_processed in info.eventstate) then begin
@@ -331,17 +349,17 @@ begin
  end;
 end;
 
-procedure tsplitter.beginpickmove(const sender: tobjectpicker);
+procedure tcustomsplitter.beginpickmove(const sender: tobjectpicker);
 begin
  //dummy
 end;
 
-procedure tsplitter.pickthumbtrack(const sender: tobjectpicker);
+procedure tcustomsplitter.pickthumbtrack(const sender: tobjectpicker);
 begin
  //dummy
 end;
 
-function tsplitter.getcursorshape(const sender: tobjectpicker; var shape: cursorshapety): boolean;
+function tcustomsplitter.getcursorshape(const sender: tobjectpicker; var shape: cursorshapety): boolean;
 begin
  result:= canmouseinteract and
                 pointinrect(sender.pos,makerect(nullpoint,fwidgetrect.size));
@@ -365,7 +383,7 @@ begin
  end;
 end;
 
-procedure tsplitter.getpickobjects(const sender: tobjectpicker;
+procedure tcustomsplitter.getpickobjects(const sender: tobjectpicker;
                                                 var objects: integerarty);
 begin
  if (foptions * [spo_hmove,spo_vmove] <> []) and canmouseinteract then begin
@@ -373,7 +391,7 @@ begin
  end;
 end;
 
-function tsplitter.clippoint(const aoffset: pointty): pointty;
+function tcustomsplitter.clippoint(const aoffset: pointty): pointty;
 var
  int1: integer;
 begin
@@ -450,7 +468,7 @@ begin
  end;
 end;
 
-procedure tsplitter.paintxorpic(const sender: tobjectpicker; 
+procedure tcustomsplitter.paintxorpic(const sender: tobjectpicker; 
                                                          const canvas: tcanvas);
 begin
  if fparentwidget <> nil then begin
@@ -462,7 +480,7 @@ begin
             stockobjects.bitmaps[stb_dens25]);
 end;
 
-procedure tsplitter.updatelinkedwidgets(const delta: pointty);
+procedure tcustomsplitter.updatelinkedwidgets(const delta: pointty);
 var
  rect1: rectty;
 begin
@@ -508,7 +526,7 @@ begin
  end;
 end;
 
-procedure tsplitter.setclippedpickoffset(const aoffset: pointty);
+procedure tcustomsplitter.setclippedpickoffset(const aoffset: pointty);
 begin
  inc(fupdating);
  try
@@ -519,32 +537,32 @@ begin
  updatelinkedwidgets(aoffset);
 end;
 
-procedure tsplitter.setpickoffset(const aoffset: pointty);
+procedure tcustomsplitter.setpickoffset(const aoffset: pointty);
 begin
  setclippedpickoffset(clippoint(aoffset));
 end;
 
-procedure tsplitter.move(const dist: pointty);
+procedure tcustomsplitter.move(const dist: pointty);
 begin
  setpickoffset(dist);
 end;
 
-procedure tsplitter.endpickmove(const sender: tobjectpicker);
+procedure tcustomsplitter.endpickmove(const sender: tobjectpicker);
 begin
  setpickoffset(sender.pickoffset);
 end;
 
-procedure tsplitter.cancelpickmove(const sender: tobjectpicker);
+procedure tcustomsplitter.cancelpickmove(const sender: tobjectpicker);
 begin
  //dummy
 end;
 
-procedure tsplitter.setstatfile(const avalue: tstatfile);
+procedure tcustomsplitter.setstatfile(const avalue: tstatfile);
 begin
  setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
 
-procedure tsplitter.dostatread(const reader: tstatreader);
+procedure tcustomsplitter.dostatread(const reader: tstatreader);
 var
  po1,po2: pointty;
 begin
@@ -570,7 +588,7 @@ begin
  end;
 end;
 
-procedure tsplitter.dostatwrite(const writer: tstatwriter);
+procedure tcustomsplitter.dostatwrite(const writer: tstatwriter);
 var
  po1: pointty;
 begin
@@ -581,22 +599,22 @@ begin
  writer.writereal('yprop',fvprop);
 end;
 
-procedure tsplitter.statreading;
+procedure tcustomsplitter.statreading;
 begin
  //dummy
 end;
 
-procedure tsplitter.statread;
+procedure tcustomsplitter.statread;
 begin
  //dummy
 end;
 
-function tsplitter.getstatvarname: msestring;
+function tcustomsplitter.getstatvarname: msestring;
 begin
  result:= fstatvarname;
 end;
 
-procedure tsplitter.setlinkbottom(const avalue: twidget);
+procedure tcustomsplitter.setlinkbottom(const avalue: twidget);
 begin
 // if flinkbottom <> nil then begin
 //  twidget1(flinkbottom).fminshrinkposoffset.y:= 0;
@@ -605,13 +623,13 @@ begin
  updatedock;
 end;
 
-procedure tsplitter.setlinkleft(const avalue: twidget);
+procedure tcustomsplitter.setlinkleft(const avalue: twidget);
 begin
  setlinkedvar(avalue,tmsecomponent(flinkleft));
  updatedock;
 end;
 
-procedure tsplitter.setlinkright(const avalue: twidget);
+procedure tcustomsplitter.setlinkright(const avalue: twidget);
 begin
 // if flinkright <> nil then begin
 //  twidget1(flinkright).fminshrinkposoffset.x:= 0;
@@ -620,13 +638,13 @@ begin
  updatedock;
 end;
 
-procedure tsplitter.setlinktop(const avalue: twidget);
+procedure tcustomsplitter.setlinktop(const avalue: twidget);
 begin
  setlinkedvar(avalue,tmsecomponent(flinktop));
  updatedock;
 end;
 
-procedure tsplitter.poschanged1;
+procedure tcustomsplitter.poschanged1;
 var
  int1,int2,int3: integer;
 begin
@@ -660,7 +678,7 @@ begin
  end;
 end;
 
-procedure tsplitter.poschanged;
+procedure tcustomsplitter.poschanged;
 begin
  inherited;
  if (fparentwidget <> nil) then begin
@@ -670,7 +688,7 @@ begin
  end;
 end;
 
-procedure tsplitter.sizechanged;
+procedure tcustomsplitter.sizechanged;
 var
  int1: integer;
 begin
@@ -698,7 +716,7 @@ begin
  end;
 end;
 
-procedure tsplitter.calcoffset(const refsize: sizety;
+procedure tcustomsplitter.calcoffset(const refsize: sizety;
             out offset,clippedoffset: pointty; out newsize: sizety);
 //var
 // size1: sizety;
@@ -740,7 +758,7 @@ begin
 //  pt2:= pt1;
 end;
 
-procedure tsplitter.setpropoffset(const aoffset: pointty; const asize: sizety);
+procedure tcustomsplitter.setpropoffset(const aoffset: pointty; const asize: sizety);
 begin      
  inc(fpropsetting);
  try
@@ -760,7 +778,7 @@ begin
  end;
 end;
 
-procedure tsplitter.doasyncevent(var atag: integer);
+procedure tcustomsplitter.doasyncevent(var atag: integer);
 var
  pt1,pt2: pointty;
  size2: sizety;
@@ -798,7 +816,7 @@ begin //doasyncevent
  end;
 end;
 
-procedure tsplitter.tryshrink(const aclientsize: sizety);
+procedure tcustomsplitter.tryshrink(const aclientsize: sizety);
 var
  pt1,pt2: pointty;
  size1,size2: sizety;
@@ -830,7 +848,7 @@ begin
  end;
 end;
 
-procedure tsplitter.parentclientrectchanged;
+procedure tcustomsplitter.parentclientrectchanged;
 begin
  inherited;
  if (componentstate * [csloading{,csdesigning}] = []) and canmouseinteract and
@@ -840,7 +858,7 @@ begin
  end;
 end;
 
-procedure tsplitter.setcolorgrip(const avalue: colorty);
+procedure tcustomsplitter.setcolorgrip(const avalue: colorty);
 begin
  if fcolorgrip <> avalue then begin
   fcolorgrip:= avalue;
@@ -848,7 +866,7 @@ begin
  end;
 end;
 
-procedure tsplitter.setgrip(const avalue: stockbitmapty);
+procedure tcustomsplitter.setgrip(const avalue: stockbitmapty);
 begin
  if fgrip <> avalue then begin
   fgrip:= avalue;
@@ -856,7 +874,7 @@ begin
  end;
 end;
 
-procedure tsplitter.dopaint(const acanvas: tcanvas);
+procedure tcustomsplitter.dopaint(const acanvas: tcanvas);
 begin
  inherited;
  if fgrip <> stb_none then begin
@@ -868,7 +886,7 @@ begin
  end;
 end;
 
-procedure tsplitter.parentwidgetregionchanged(const sender: twidget);
+procedure tcustomsplitter.parentwidgetregionchanged(const sender: twidget);
 begin
  inc(fregionchangedcount);
  inherited;
@@ -879,13 +897,13 @@ begin
  end;
 end;
 
-procedure tsplitter.loaded;
+procedure tcustomsplitter.loaded;
 begin
  inherited;
  updatedock;
 end;
 
-procedure tsplitter.updatedock;
+procedure tcustomsplitter.updatedock;
 var
  pt1: pointty;
  rect1: rectty;
@@ -950,7 +968,7 @@ begin
  end;
 end;
 {
-function tsplitter.getminshrinkpos: pointty;
+function tcustomsplitter.getminshrinkpos: pointty;
 var
  int1: integer;
 begin
@@ -973,7 +991,7 @@ begin
  end;
 end;
 }
-procedure tsplitter.setoptions(const avalue: splitteroptionsty);
+procedure tcustomsplitter.setoptions(const avalue: splitteroptionsty);
 begin
  if foptions <> avalue then begin
   foptions:= avalue;
@@ -987,7 +1005,7 @@ begin
  end;
 end;
 
-function tsplitter.getshrinkpriority: integer;
+function tcustomsplitter.getshrinkpriority: integer;
 begin
  result:= fshrinkpriority;
 end;

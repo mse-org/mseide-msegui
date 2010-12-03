@@ -33,7 +33,7 @@ type
                          cems_xtoplimit,cems_ytoplimit);
  charteditmovestatesty = set of charteditmovestatety;
 
- tcustomchartedit = class(tchart,iobjectpicker)
+ tcustomchartedit = class(tcustomchart,iobjectpicker)
   private
    factivetrace: integer;
    foptionsedit: optionseditty;
@@ -117,7 +117,7 @@ type
 
  end;
 
- txychartedit = class(tcustomchartedit)
+ tcustomxychartedit = class(tcustomchartedit)
   private
    fonsetvalue: setcomplexareventty;
    function getvalue: complexarty;
@@ -143,12 +143,62 @@ type
                                                        write setvalueitems;
    property reitems[const index: integer]: real read getreitems write setreitems;
    property imitems[const index: integer]: real read getimitems write setimitems;
-  published
-   property statfile;
-   property statvarname;
    property ondataentered: notifyeventty read fondataentered 
                                                  write fondataentered;
    property onsetvalue: setcomplexareventty read fonsetvalue write fonsetvalue;
+ end;
+
+ txychartedit = class(tcustomxychartedit)
+  published
+   property traces;
+   property colorchart;
+   property xstart;
+   property ystart;
+   property xrange;
+   property yrange;
+   property xdials;
+   property ydials;
+   property statfile;
+   property statvarname;
+   property onbeforepaint;
+   property onpaintbackground;
+   property onpaint;
+   property onafterpaint;
+
+   property ondataentered;
+   property onsetvalue;
+   property activetrace;
+   property optionsedit;
+   property snapdist;
+   property options;
+   property onchange;
+ end;
+  
+ tcustomorderedxychartedit = class(tcustomxychartedit)
+  protected
+   class function xordered: boolean; override;
+  public
+ end;
+ 
+ torderedxychartedit = class(tcustomorderedxychartedit)
+  published
+   property traces;
+   property colorchart;
+   property xstart;
+   property ystart;
+   property xrange;
+   property yrange;
+   property xdials;
+   property ydials;
+   property statfile;
+   property statvarname;
+   property onbeforepaint;
+   property onpaintbackground;
+   property onpaint;
+   property onafterpaint;
+
+   property ondataentered;
+   property onsetvalue;
    property activetrace;
    property optionsedit;
    property snapdist;
@@ -156,13 +206,7 @@ type
    property onchange;
  end;
  
- torderedxychartedit = class(txychartedit)
-  protected
-   class function xordered: boolean; override;
-  public
- end;
- 
- txserieschartedit = class(tcustomchartedit)
+ tcustomxserieschartedit = class(tcustomchartedit)
   private
    fonsetvalue: setrealareventty;
    function getvalue: realarty;
@@ -180,19 +224,38 @@ type
    property value: realarty read getvalue write setvalue;
    property valueitems[const index: integer]: real read getvalueitems 
                                                        write setvalueitems;
-  published
-   property statfile;
-   property statvarname;
+  public
    property ondataentered: notifyeventty read fondataentered 
                                                  write fondataentered;
    property onsetvalue: setrealareventty read fonsetvalue write fonsetvalue;
+ end;
+
+ txserieschartedit = class(tcustomxserieschartedit)
+  published
+   property traces;
+   property colorchart;
+   property xstart;
+   property ystart;
+   property xrange;
+   property yrange;
+   property xdials;
+   property ydials;
+   property statfile;
+   property statvarname;
+   property onbeforepaint;
+   property onpaintbackground;
+   property onpaint;
+   property onafterpaint;
+
+   property ondataentered;
+   property onsetvalue;
    property activetrace;
    property optionsedit;
    property snapdist;
    property options;
    property onchange;
  end;
-  
+   
 implementation
 uses
  msereal,msekeyboard,msedatalist,msegui,sysutils;
@@ -1129,9 +1192,9 @@ begin
  end;
 end;
 
-{ txychartedit }
+{ tcustomxychartedit }
 
-constructor txychartedit.create(aowner: tcomponent);
+constructor tcustomxychartedit.create(aowner: tcomponent);
 begin
  if ftraces = nil then begin
   ftraces:= txytraces.create(self,xordered);
@@ -1139,25 +1202,25 @@ begin
  inherited;
 end;
 
-function txychartedit.getvalue: complexarty;
+function tcustomxychartedit.getvalue: complexarty;
 begin
  result:= fvalue;
 // result:= traces[factivetrace].xydata;
 end;
 
-procedure txychartedit.setvalue(const avalue: complexarty);
+procedure tcustomxychartedit.setvalue(const avalue: complexarty);
 begin
  fvalue:= avalue;
  change;
 end;
 
-procedure txychartedit.dochange;
+procedure tcustomxychartedit.dochange;
 begin
  activetraceitem.xydata:= fvalue;
  inherited;
 end;
 
-procedure txychartedit.docheckvalue(var accept: boolean);
+procedure tcustomxychartedit.docheckvalue(var accept: boolean);
 var
  ar1: complexarty;
 begin
@@ -1170,23 +1233,23 @@ begin
  end;
 end;
 
-procedure txychartedit.doreadvalue(const reader: tstatreader);
+procedure tcustomxychartedit.doreadvalue(const reader: tstatreader);
 begin
  value:= reader.readarray('value',fvalue);
 end;
 
-procedure txychartedit.dowritevalue(const writer: tstatwriter);
+procedure tcustomxychartedit.dowritevalue(const writer: tstatwriter);
 begin
  writer.writearray('value',fvalue);
 end;
 
-function txychartedit.getvalueitems(const index: integer): complexty;
+function tcustomxychartedit.getvalueitems(const index: integer): complexty;
 begin
  checkarrayindex(fvalue,index);
  result:= fvalue[index];
 end;
 
-procedure txychartedit.setvalueitems(const index: integer;
+procedure tcustomxychartedit.setvalueitems(const index: integer;
                const avalue: complexty);
 begin
  checkarrayindex(fvalue,index);
@@ -1194,63 +1257,63 @@ begin
  change;
 end;
 
-function txychartedit.getreitems(const index: integer): real;
+function tcustomxychartedit.getreitems(const index: integer): real;
 begin
  checkarrayindex(fvalue,index);
  result:= fvalue[index].re;
 end;
 
-procedure txychartedit.setreitems(const index: integer; const avalue: real);
+procedure tcustomxychartedit.setreitems(const index: integer; const avalue: real);
 begin
  checkarrayindex(fvalue,index);
  fvalue[index].re:= avalue;
  change;
 end;
 
-function txychartedit.getimitems(const index: integer): real;
+function tcustomxychartedit.getimitems(const index: integer): real;
 begin
  checkarrayindex(fvalue,index);
  result:= fvalue[index].im;
 end;
 
-procedure txychartedit.setimitems(const index: integer; const avalue: real);
+procedure tcustomxychartedit.setimitems(const index: integer; const avalue: real);
 begin
  checkarrayindex(fvalue,index);
  fvalue[index].im:= avalue;
  change;
 end;
 
-class function txychartedit.xordered: boolean;
+class function tcustomxychartedit.xordered: boolean;
 begin
  result:= false;
 end;
 
-procedure txychartedit.doclear;
+procedure tcustomxychartedit.doclear;
 begin
  fvalue:= nil;
 end;
 
-{ txserieschartedit }
+{ tcustomxserieschartedit }
 
-function txserieschartedit.getvalue: realarty;
+function tcustomxserieschartedit.getvalue: realarty;
 begin
  result:= fvalue;
 // result:= traces[factivetrace].xydata;
 end;
 
-procedure txserieschartedit.setvalue(const avalue: realarty);
+procedure tcustomxserieschartedit.setvalue(const avalue: realarty);
 begin
  fvalue:= avalue;
  change;
 end;
 
-procedure txserieschartedit.dochange;
+procedure tcustomxserieschartedit.dochange;
 begin
  activetraceitem.ydata:= fvalue;
  inherited;
 end;
 
-procedure txserieschartedit.docheckvalue(var accept: boolean);
+procedure tcustomxserieschartedit.docheckvalue(var accept: boolean);
 var
  ar1: realarty;
 begin
@@ -1263,23 +1326,23 @@ begin
  end;
 end;
 
-procedure txserieschartedit.doreadvalue(const reader: tstatreader);
+procedure tcustomxserieschartedit.doreadvalue(const reader: tstatreader);
 begin
  value:= reader.readarray('value',fvalue);
 end;
 
-procedure txserieschartedit.dowritevalue(const writer: tstatwriter);
+procedure tcustomxserieschartedit.dowritevalue(const writer: tstatwriter);
 begin
  writer.writearray('value',fvalue);
 end;
 
-function txserieschartedit.getvalueitems(const index: integer): real;
+function tcustomxserieschartedit.getvalueitems(const index: integer): real;
 begin
  checkarrayindex(fvalue,index);
  result:= fvalue[index];
 end;
 
-procedure txserieschartedit.setvalueitems(const index: integer;
+procedure tcustomxserieschartedit.setvalueitems(const index: integer;
                const avalue: real);
 begin
  checkarrayindex(fvalue,index);
@@ -1287,14 +1350,14 @@ begin
  change;
 end;
 
-procedure txserieschartedit.doclear;
+procedure tcustomxserieschartedit.doclear;
 begin
  fvalue:= nil;
 end;
 
-{ torderedxychartedit }
+{ tcustomorderedxychartedit }
 
-class function torderedxychartedit.xordered: boolean;
+class function tcustomorderedxychartedit.xordered: boolean;
 begin
  result:= true;
 end;
