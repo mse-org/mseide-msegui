@@ -527,6 +527,7 @@ type
                               var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure doscroll(const dist: pointty); override;
+   procedure clampinview(const arect: rectty; const bottomright: boolean); override;
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -1908,7 +1909,7 @@ procedure tscrollbox.mouseevent(var info: mouseeventinfoty);
 begin
  inherited;
  if not (es_processed in info .eventstate) then begin
-  tscrollframe(fframe).mouseevent(info);
+  tscrollboxframe(fframe).mouseevent(info);
  end;
 end;
 
@@ -1925,7 +1926,7 @@ end;
 
 procedure tscrollbox.domousewheelevent(var info: mousewheeleventinfoty);
 begin
- tscrollframe(fframe).domousewheelevent(info,false);
+ tscrollboxframe(fframe).domousewheelevent(info,false);
  inherited;
 end;
 
@@ -1948,6 +1949,13 @@ begin
  if canevent(tmethod(fonscroll)) then begin
   fonscroll(self,dist);
  end;
+end;
+
+procedure tscrollbox.clampinview(const arect: rectty; const bottomright: boolean);
+begin
+ frame.showrect(removerect(arect,clientpos),bottomright);
+// frame.showrect(removerect(arect,clientwidgetpos));
+// frame.showrect(arect);
 end;
 
 { tcustomstepbox }

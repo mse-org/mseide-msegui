@@ -208,7 +208,7 @@ type
  
  framescrollbarclassty = class of tcustomscrollbar;
 
- optionscrollty = (oscr_drag,oscr_key,oscr_mousewheel);
+ optionscrollty = (oscr_drag,oscr_zoom,oscr_key,oscr_mousewheel);
  optionsscrollty = set of optionscrollty;
 
 const
@@ -333,6 +333,9 @@ type
    fdragging: boolean;
    fpickpos: pointty;
    fpickref: pointty;
+   fzoom: complexty;
+   fzoomwidthstep: real;
+   fzoomheightstep: real;
    procedure clientrecttoscrollbar(const rect: rectty);
    procedure setclientheigth(const Value: integer);
    procedure setclientwidth(const Value: integer);
@@ -344,6 +347,9 @@ type
    function getsbhorz: tscrollboxscrollbar;
    procedure setsbvert(const avalue: tscrollboxscrollbar);
    function getsbvert: tscrollboxscrollbar;
+   procedure setzoom(const avalue: complexty);
+   procedure setzoomwidth(const avalue: real);
+   procedure setzoomheight(const avalue: real);
   protected
    fowner: twidget;
    procedure scrollpostoclientpos(var aclientrect: rectty); virtual;
@@ -357,6 +363,7 @@ type
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure updatemousestate(const sender: twidget;
                                const info: mouseeventinfoty); override;
+   procedure setclientpos(apos: pointty);
   //iscrollbar
    function translatecolor(const acolor: colorty): colorty;
    procedure invalidaterect(const rect: rectty; const org: originty;
@@ -366,10 +373,19 @@ type
   public
    constructor create(const intf: iscrollframe; const owner: twidget);
    procedure childmouseevent(const sender: twidget;
-                                             var info: mouseeventinfoty);
+                                var info: mouseeventinfoty); virtual;
+   procedure domousewheelevent(var info: mousewheeleventinfoty;
+                                   const pagingreversed: boolean); override;
    procedure updateclientrect; override;
    procedure showrect(const arect: rectty; const bottomright: boolean); 
                            //origin paintpos
+   property zoom: complexty read fzoom write setzoom; //default 1,1
+   property zoomwidth: real read fzoom.re write setzoomwidth;   //default 1
+   property zoomheight: real read fzoom.im write setzoomheight; //default 1
+   property zoomwidthstep: real read fzoomwidthstep write fzoomwidthstep;
+                                 //default 1
+   property zoomheightstep: real read fzoomheightstep write fzoomheightstep;
+                                 //default 1
    property clientwidth: integer read fclientwidth write setclientwidth default 0;
    property clientheight: integer read fclientheight write setclientheigth default 0;
    property clientwidthmin: integer read fclientwidthmin write setclientwidthmin default 0;
@@ -389,6 +405,8 @@ type
    property clientheight;
    property clientwidthmin;
    property clientheightmin;
+   property zoomwidthstep;
+   property zoomheightstep;
    property levelo;
    property leveli;
    property framewidth;
@@ -3633,8 +3651,13 @@ end;
 
 { tcustomscrollboxframe }
 
-constructor tcustomscrollboxframe.create(const intf: iscrollframe; const owner: twidget);
+constructor tcustomscrollboxframe.create(const intf: iscrollframe;
+                                                      const owner: twidget);
 begin
+ fzoom.re:= 1;
+ fzoom.im:= 1;
+ fzoomwidthstep:= 1;
+ fzoomheightstep:= 1;
  fowner:= owner;
  inherited create(intf,iscrollbox(self));
  initinnerframe;
@@ -3799,18 +3822,45 @@ begin
  end;
 end;
 
+procedure tcustomscrollboxframe.setclientpos(apos: pointty);
+var
+ pt1: pointty;
+begin
+ if apos.x + fclientrect.cx < fpaintrect.cx then begin
+  apos.x:= fpaintrect.cx-fclientrect.cx;
+ end;
+ if apos.y + fclientrect.cy < fpaintrect.cy then begin
+  apos.y:= fpaintrect.cx-fclientrect.cy;
+ end;
+ if apos.x > 0 then begin
+  apos.x:= 0;
+ end;
+ if apos.y > 0 then begin
+  apos.y:= 0;
+ end;
+ pt1:= subpoint(apos,fclientrect.pos);
+ twidget1(fowner).scroll(pt1);
+ fclientrect.pos:= apos;
+ addpoint1(finnerclientrect.pos,pt1);
+end;
+
 procedure tcustomscrollboxframe.scrollevent(sender: tcustomscrollbar;
                   event: scrolleventty);
 var
- po1: pointty;
+ rect1: rectty;
 begin
  if fscrolling = 0 then begin
   if event = sbe_valuechanged then begin
+   rect1:= fclientrect;
+   scrollpostoclientpos(rect1);
+   setclientpos(rect1.pos);
+{   
    po1:= fclientrect.pos;
    scrollpostoclientpos(fclientrect);
    po1:= subpoint(fclientrect.pos,po1); 
    addpoint1(finnerclientrect.pos,po1);
    twidget1(fowner).scroll(po1);
+}
   end;
  end;
 end;
@@ -4103,6 +4153,94 @@ begin
  end;
  if (clientheightmin > 0) and (clientheightmin > asize.cy) then begin
   asize.cy:= clientheightmin;
+ end;
+end;
+
+procedure tcustomscrollboxframe.setzoom(const avalue: complexty);
+begin
+ fzoom:= avalue;
+ if fzoom.re < 1 then begin
+  fzoom.re:= 1;
+ end;
+ if fzoom.im < 1 then begin
+  fzoom.im:= 1;
+ end;
+ checkstate;
+ with fpaintframedelta do begin
+  if avalue.re > 1 then begin
+   clientwidth:= round((fpaintrect.cx+left+right)*avalue.re); 
+                                        //do not use scrollbarwidth
+  end
+  else begin
+   clientwidth:= 0;
+  end;
+  if avalue.im > 1 then begin
+   clientheight:= round((fpaintrect.cy+top+bottom)*avalue.re);
+                                        //do not use scrollbarwidth
+  end
+  else begin
+   clientheight:= 0;
+  end;
+ end;
+end;
+
+procedure tcustomscrollboxframe.setzoomwidth(const avalue: real);
+begin
+ setzoom(makecomplex(avalue,fzoom.im));
+end;
+
+procedure tcustomscrollboxframe.setzoomheight(const avalue: real);
+begin
+ setzoom(makecomplex(fzoom.re,avalue));
+end;
+
+procedure tcustomscrollboxframe.domousewheelevent(var info: mousewheeleventinfoty;
+               const pagingreversed: boolean);
+var
+ size1: sizety;
+ pt1: pointty;
+begin
+ with info do begin
+  if not (es_processed in eventstate) then begin
+   if (foptionsscroll*[oscr_zoom,oscr_mousewheel] = 
+                                 [oscr_zoom,oscr_mousewheel]) and 
+      (shiftstate*shiftstatesmask = [ss_ctrl]) then begin
+    include(eventstate,es_processed);
+    size1:= fclientrect.size;
+    if (fzoomwidthstep <> 1) and (fzoomwidthstep > 0) then begin
+     if wheel = mw_down then begin
+      zoomwidth:= zoomwidth / fzoomwidthstep;
+     end
+     else begin
+      zoomwidth:= zoomwidth * fzoomwidthstep;
+     end;
+    end;     
+    if (fzoomheightstep <> 1) and (fzoomheightstep > 0) then begin
+     if wheel = mw_down then begin
+      zoomheight:= zoomheight / fzoomheightstep;
+     end
+     else begin
+      zoomheight:= zoomheight * fzoomheightstep;
+     end;
+    end;
+    pt1:= nullpoint;
+    if size1.cx > 0 then begin
+     pt1.x:= -((info.pos.x-fclientrect.x+fpaintrect.x) * 
+                            (fclientrect.cx-size1.cx)) div size1.cx;
+    end;
+    if size1.cy > 0 then begin
+     pt1.y:= -((info.pos.y-fclientrect.y+fpaintrect.y) * 
+                            (fclientrect.cy-size1.cy) div size1.cy);
+    end;
+    if (pt1.x <> 0) or (pt1.y <> 0) then begin
+     setclientpos(addpoint(fclientrect.pos,pt1));
+//     twidget1(fowner).invalidate;
+    end;
+   end
+   else begin
+    inherited;
+   end;
+  end;
  end;
 end;
 
