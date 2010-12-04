@@ -82,14 +82,17 @@ type
    fkey: integer;
    flastkey: integer;
    fkeypressed: boolean;
+   ftrigout: tdoubleoutputconn;
    procedure setoutput(const avalue: tdoubleoutputconn);
    procedure setcontroller(const avalue: tsigcontroller);
    procedure setmin(const avalue: real);
 //   procedure setmax(const avalue: real);
    procedure setoptions(const avalue: sigeditoptionsty);
    procedure setkeywidth(const avalue: integer);
+   procedure settrigout(const avalue: tdoubleoutputconn);
   protected
    fsigvalue: real;
+   ftrigvalue: real;
    procedure updatesigvalue;
    procedure dochange; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
@@ -115,6 +118,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    property output: tdoubleoutputconn read foutput write setoutput;
+   property trigout: tdoubleoutputconn read ftrigout write settrigout;
   published
    property keywidth: integer read fkeywidth write setkeywidth default defaultkeywidth;
    property controller: tsigcontroller read fcontroller write setcontroller;
@@ -441,6 +445,8 @@ end;
 constructor tsigkeyboard.create(aowner: tcomponent);
 begin
  fkey:= -1;
+ ftrigout:= tdoubleoutputconn.create(self,isigclient(self),true);
+ ftrigout.name:= 'trigout';
  foutput:= tdoubleoutputconn.create(self,isigclient(self),true);
  fmin:= 0.001;
 // fmax:= 1;
@@ -465,8 +471,9 @@ end;
 
 function tsigkeyboard.getoutputar: outputconnarty;
 begin
- setlength(result,1);
+ setlength(result,2);
  result[0]:= foutput;
+ result[1]:= ftrigout;
 end;
 
 function tsigkeyboard.getzcount: integer;
@@ -482,6 +489,11 @@ end;
 procedure tsigkeyboard.setoutput(const avalue: tdoubleoutputconn);
 begin
  foutput.assign(avalue);
+end;
+
+procedure tsigkeyboard.settrigout(const avalue: tdoubleoutputconn);
+begin
+ ftrigout.assign(avalue);
 end;
 
 procedure tsigkeyboard.modelchange;
@@ -516,6 +528,12 @@ begin
   fcontroller.lock;
  end;
  fsigvalue:= do1;
+ if fkey < 0 then begin
+  ftrigvalue:= 0;
+ end
+ else begin
+  ftrigvalue:= 1;
+ end;
  if fcontroller <> nil then begin
   fcontroller.unlock;
   tsigcontroller1(fcontroller).execevent(isigclient(self));
@@ -531,6 +549,7 @@ end;
 procedure tsigkeyboard.sighandler(const ainfo: psighandlerinfoty);
 begin
  ainfo^.dest^:= fsigvalue;
+ ftrigout.value:= ftrigvalue;
 end;
 
 function tsigkeyboard.gethandler: sighandlerprocty;
@@ -612,6 +631,7 @@ end;
 const
  whitekeys: array[0..6] of integer = (0,2,4,5,7,9,11);
  blackkeys: array[0..6] of integer = (-1,1,3,-1,6,8,10);
+
 procedure tsigkeyboard.clientmouseevent(var info: mouseeventinfoty);
 var
  keybefore: integer;
@@ -619,7 +639,8 @@ var
  rect1: rectty;
 begin
  keybefore:= fkey;
- if info.eventkind in mouseposevents then begin
+ if not (csdesigning in componentstate) and 
+                        (info.eventkind in mouseposevents) then begin
   if (ss_left in info.shiftstate) or fkeypressed then begin
    rect1:= innerclientrect;
    if pointinrect(info.pos,rect1) then begin
@@ -1186,6 +1207,10 @@ begin
  traces.options:= traces.options + [cto_stockglyphs];
 // traces.image_list:= stockobjects.glyphs;
  traces[0].imagenr:= ord(stg_circlesmall);
+ with frame do begin
+  optionsscroll:= optionsscroll + [oscr_zoom,oscr_drag,oscr_mousewheel];
+  zoomwidthstep:= 1.5;
+ end;
 end;
 
 procedure tenvelopechartedit.dochange;

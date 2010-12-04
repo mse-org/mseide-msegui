@@ -139,10 +139,12 @@ type
   protected
    fstate: outputconnstatesty;
    fdestinations: doubleinputconnarty;
+   fvalue: double;
   public
    constructor create(const aowner: tcomponent;
          const asigintf: isigclient; const aeventdriven: boolean); 
                                                        reintroduce; virtual;
+   property value: double read fvalue write fvalue;
  end; 
 
  tdoubleinputconn = class(tdoubleconn)
@@ -198,13 +200,20 @@ type
  end;
  inputinfoarty = array of inputinfoty;
  
+ sigdestinfoty = record
+  outputindex: integer;
+  destinput: tdoubleinputconn;
+ end;
+ sigdestinfoarty = array of sigdestinfoty;
+ 
  siginfoty = record
   intf: isigclient;
   handler: sighandlerprocty;
   zcount: integer;
   inputs: inputinfoarty;
   outputs: outputconnarty;
-  destinations: inputconnarty;
+//  destinations: inputconnarty;
+  destinations: sigdestinfoarty;
   eventdestinations: siginfopoarty;
   state: siginfostatesty;
   prev: siginfopoarty;
@@ -1934,6 +1943,7 @@ procedure tsigcontroller.updatemodel;
 var
  indent: string;
 {$endif}
+
  procedure resetchecked;
  var 
   int1,int2: integer;
@@ -1970,7 +1980,7 @@ var
   with anode^ do begin
    for int1:= 0 to high(destinations) do begin
     visited:= visitedbefore;
-    po1:= findinp(destinations[int1]);
+    po1:= findinp(destinations[int1].destinput);
     int2:= findinplink(po1,anode);
     if finditem(visited,po1) >= 0 then begin
      if zcount = 0 then begin
@@ -2038,8 +2048,8 @@ var
  {$endif}  
  end; //processcalcorder
 
- procedure updatedestinfo(const ainput: tdoubleinputconn; const source: pdouble;
-                                        var ainfo: destinfoty);
+ procedure updatedestinfo(const ainput: tdoubleinputconn;
+                                 const source: pdouble; var ainfo: destinfoty);
  begin
   ainfo.source:= source;
   ainfo.dest:= @ainput.fvalue;
@@ -2147,7 +2157,15 @@ begin
   {$endif}
     foutphash.add(ptruint(outputs[int2]),po1);
     with outputs[int2] do begin
-     stackarray(pointerarty(fdestinations),pointerarty(po1^.destinations));
+     int3:= length(po1^.destinations);
+     setlength(po1^.destinations,int3+length(fdestinations));
+     for int4:= 0 to high(fdestinations) do begin
+      with po1^.destinations[int3+int4] do begin
+       outputindex:= int2;
+       destinput:= fdestinations[int4];       
+      end;
+     end;
+//     stackarray(pointerarty(fdestinations),pointerarty(po1^.destinations));
    {$ifdef mse_debugsignal}
      for int3:= 0 to high(fdestinations) do begin
       debugpointer('  dest ',fdestinations[int3]);
@@ -2328,16 +2346,31 @@ begin
    desthigh:= high(po1^.destinations)-1;
    handlerinfo.dest:= @fvaluedummy;
    if length(po1^.destinations) > 0 then begin
-    updatedestinfo(po1^.destinations[0],handlerinfo.dest,firstdest);
+    int3:= po1^.destinations[0].outputindex;
+    updatedestinfo(po1^.destinations[0].destinput,handlerinfo.dest,firstdest);
                       //setup hasscale
-    if (desthigh < 0) or not firstdest.hasscale then begin
-     handlerinfo.dest:= @po1^.destinations[0].fvalue;
+    if (int3 = 0) and (desthigh < 0) or not firstdest.hasscale then begin
+     handlerinfo.dest:= @po1^.destinations[0].destinput.fvalue;
     end;    
-    updatedestinfo(po1^.destinations[0],handlerinfo.dest,firstdest);
-                      //setup again with correct dest
+    if int3 = 0 then begin                //setup again with correct dest
+     updatedestinfo(po1^.destinations[0].destinput,handlerinfo.dest,firstdest);
+    end
+    else begin
+     updatedestinfo(po1^.destinations[0].destinput,
+                                         @po1^.outputs[int3].fvalue,firstdest);
+    end;
+       
     setlength(dest,desthigh+1);
     for int2:= 0 to desthigh do begin
-     updatedestinfo(po1^.destinations[int2+1],handlerinfo.dest,dest[int2]);
+     int3:= po1^.destinations[int2+1].outputindex;
+     if int3 > 0 then begin //additional output
+      updatedestinfo(po1^.destinations[int2+1].destinput,
+                                @po1^.outputs[int3].fvalue,dest[int2]);
+     end
+     else begin
+      updatedestinfo(po1^.destinations[int2+1].destinput,handlerinfo.dest,
+                                                                   dest[int2]);
+     end;
     end;
    end;
   end;
@@ -2458,7 +2491,14 @@ begin
   handler(@handlerinfo);
   for int1:= 0 to high(destinations) do begin
    with destinations[int1] do begin
-    fvalue:= do1*fgain+foffset;
+    with destinput do begin
+     if outputindex = 0 then begin
+      fvalue:= do1*fgain+foffset;
+     end
+     else begin
+      fvalue:= outputs[outputindex].fvalue*fgain+foffset;
+     end;
+    end;
    end;
   end;
   for int1:= 0 to high(eventdestinations) do begin
