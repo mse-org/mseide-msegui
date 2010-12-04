@@ -277,6 +277,7 @@ type
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
    property envelope: tsigenvelope read fenvelope write setenvelope;
+   property optionswidget default defaultoptionswidgetmousewheel;
  end;
 (*  
  tenvelopeedit1 = class(torderedxychartedit)
@@ -979,6 +980,7 @@ var
 begin
  include(fwidgetstate1,ws1_noframewidgetshift);
  inherited;
+ optionswidget:= defaultoptionswidgetmousewheel;
  fenvelope:= tsigenvelope.create(self);
  fenvelope.setsubcomponent(true);
  fenvelope.name:= 'envelope';
@@ -1181,8 +1183,9 @@ begin
  inherited create(nil);
  setsubcomponent(true);
  traces.count:= 1;
- traces.image_list:= stockobjects.glyphs;
- traces[0].imagenr:= ord(stg_checkboxradio);
+ traces.options:= traces.options + [cto_stockglyphs];
+// traces.image_list:= stockobjects.glyphs;
+ traces[0].imagenr:= ord(stg_circlesmall);
 end;
 
 procedure tenvelopechartedit.dochange;

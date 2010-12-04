@@ -3830,7 +3830,7 @@ begin
   apos.x:= fpaintrect.cx-fclientrect.cx;
  end;
  if apos.y + fclientrect.cy < fpaintrect.cy then begin
-  apos.y:= fpaintrect.cx-fclientrect.cy;
+  apos.y:= fpaintrect.cy-fclientrect.cy;
  end;
  if apos.x > 0 then begin
   apos.x:= 0;
@@ -4199,6 +4199,8 @@ procedure tcustomscrollboxframe.domousewheelevent(var info: mousewheeleventinfot
 var
  size1: sizety;
  pt1: pointty;
+ co1: complexty;
+ bo1: boolean;
 begin
  with info do begin
   if not (es_processed in eventstate) then begin
@@ -4207,34 +4209,40 @@ begin
       (shiftstate*shiftstatesmask = [ss_ctrl]) then begin
     include(eventstate,es_processed);
     size1:= fclientrect.size;
+    co1:= fzoom;
+    bo1:= false;
     if (fzoomwidthstep <> 1) and (fzoomwidthstep > 0) then begin
+     bo1:= true;
      if wheel = mw_down then begin
-      zoomwidth:= zoomwidth / fzoomwidthstep;
+      co1.re:= zoomwidth / fzoomwidthstep;
      end
      else begin
-      zoomwidth:= zoomwidth * fzoomwidthstep;
+      co1.re:= zoomwidth * fzoomwidthstep;
      end;
     end;     
     if (fzoomheightstep <> 1) and (fzoomheightstep > 0) then begin
+     bo1:= true;
      if wheel = mw_down then begin
-      zoomheight:= zoomheight / fzoomheightstep;
+      co1.im:= zoomheight / fzoomheightstep;
      end
      else begin
-      zoomheight:= zoomheight * fzoomheightstep;
+      co1.im:= zoomheight * fzoomheightstep;
      end;
     end;
-    pt1:= nullpoint;
-    if size1.cx > 0 then begin
-     pt1.x:= -((info.pos.x-fclientrect.x+fpaintrect.x) * 
-                            (fclientrect.cx-size1.cx)) div size1.cx;
-    end;
-    if size1.cy > 0 then begin
-     pt1.y:= -((info.pos.y-fclientrect.y+fpaintrect.y) * 
-                            (fclientrect.cy-size1.cy) div size1.cy);
-    end;
-    if (pt1.x <> 0) or (pt1.y <> 0) then begin
-     setclientpos(addpoint(fclientrect.pos,pt1));
-//     twidget1(fowner).invalidate;
+    if bo1 then begin
+     zoom:= co1;
+     pt1:= nullpoint;
+     if size1.cx > 0 then begin
+      pt1.x:= -((info.pos.x-fclientrect.x+fpaintrect.x) * 
+                             (fclientrect.cx-size1.cx)) div size1.cx;
+     end;
+     if size1.cy > 0 then begin
+      pt1.y:= -((info.pos.y-fclientrect.y+fpaintrect.y) * 
+                             (fclientrect.cy-size1.cy) div size1.cy);
+     end;
+     if (pt1.x <> 0) or (pt1.y <> 0) then begin
+      setclientpos(addpoint(fclientrect.pos,pt1));
+     end;
     end;
    end
    else begin

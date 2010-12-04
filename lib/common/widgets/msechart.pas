@@ -21,7 +21,7 @@ type
  chartstatety = (chs_nocolorchart,chs_hasdialscroll,chs_hasdialshift,
                  chs_started,chs_full,chs_chartvalid); //for tchartrecorder
  chartstatesty = set of chartstatety;
- charttraceoptionty = (cto_invisible,cto_adddataright,
+ charttraceoptionty = (cto_invisible,cto_stockglyphs,cto_adddataright,
                        cto_xordered, //optimize for big data quantity
                        cto_logx,cto_logy,cto_seriescentered
                        );
@@ -190,6 +190,7 @@ type
    procedure addxseriesdata(const avalue: real);
    procedure insertxseriesdata(const avalue: xseriesdataty);
    procedure assign(source: tpersistent); override;
+
    property xdata: realarty read finfo.ydata write setxdata;
    property ydata: realarty read finfo.ydata write setydata;
    property xydata: complexarty read finfo.xydata write setxydata;
@@ -297,6 +298,7 @@ type
    constructor create(const aowner: tcustomchart); reintroduce;
    class function getitemclasstype: persistentclassty; override;
    function itembyname(const aname: string): ttrace;
+   function actualimagelist: timagelist;
    procedure assign(source: tpersistent); override;
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
@@ -620,7 +622,7 @@ function makexseriesdata(const value: real; const index: integer): xseriesdataty
 
 implementation
 uses
- sysutils,math,msebits,rtlconsts;
+ sysutils,math,msebits,rtlconsts,msestockobjects;
 
 type
  tcustomdialcontroller1 = class(tcustomdialcontroller);
@@ -1136,13 +1138,15 @@ var
  co1: colorty;
  bmp1,bmp2: tmaskedbitmap;
  margin: integer;
+ imli1: timagelist;
 begin
  if not visible then begin
   exit;
  end;
  with ftraces do begin
-  if (fimage_list <> nil) and (finfo.imagenr >= 0) and 
-                                    (finfo.imagenr < fimage_list.count) then begin
+  imli1:= actualimagelist;
+  if (imli1 <> nil) and (finfo.imagenr >= 0) and 
+                                    (finfo.imagenr < imli1.count) then begin
    pt1:= pointty(imagesize);
    pt1.x:= pt1.x div 2;
    pt1.y:= pt1.y div 2;
@@ -1154,11 +1158,11 @@ begin
    end;
    if not acanvas.highresdevice and 
                (imagealignment * [al_stretchx,al_stretchy] <> []) then begin
-    bmp1:= tmaskedbitmap.create(fimage_list.monochrome);
+    bmp1:= tmaskedbitmap.create(imli1.monochrome);
     bmp2:= tmaskedbitmap.create(false);
     try
-     bmp1.masked:= fimage_list.masked;
-     fimage_list.getimage(finfo.imagenr,bmp1);
+     bmp1.masked:= imli1.masked;
+     imli1.getimage(finfo.imagenr,bmp1);
      bmp1.colorforeground:= co1;
      bmp1.colorbackground:= tcuchart(fowner).colorchart;
      bmp1.monochrome:= false;
@@ -1178,7 +1182,7 @@ begin
     for int1:= finfo.bottommargin to high(finfo.datapoints) - 
                                                  finfo.topmargin do begin
      rect1.pos:= finfo.datapoints[int1];
-     fimage_list.paint(acanvas,finfo.imagenr,rect1,imagealignment,co1);
+     imli1.paint(acanvas,finfo.imagenr,rect1,imagealignment,co1);
     end;
    end;
    acanvas.move(pt1);
@@ -1235,7 +1239,7 @@ end;
 procedure ttrace.setoptions(const avalue: charttraceoptionsty);
 begin
  if avalue <> finfo.options then begin
-  finfo.options:= avalue;
+  finfo.options:= avalue - [cto_stockglyphs];
   datachange;
  end;
 end;
@@ -1391,7 +1395,7 @@ end;
 
 function ttrace.getimagelist: timagelist;
 begin
- result:= ftraces.fimage_list;
+ result:= ftraces.actualimagelist;
 end;
 
 procedure ttrace.assign(source: tpersistent);
@@ -1862,6 +1866,7 @@ var
  int1: integer;
  size1: sizety;
  align1: alignmentsty;
+ imli1: timagelist;
 begin
  checkgraphic;
  for int1:= 0 to high(fitems) do begin
@@ -1869,8 +1874,9 @@ begin
  end;
  align1:= [];
  size1:= nullsize;
- if fimage_list <> nil then begin
-  size1:= fimage_list.size;
+ imli1:= actualimagelist;
+ if imli1 <> nil then begin
+  size1:= imli1.size;
   if fimage_widthmm <> 0 then begin
    size1.cx:= round(fimage_widthmm*acanvas.ppmm);
    align1:= align1 + [al_stretchx,al_intpol];
@@ -2189,6 +2195,14 @@ begin
  end
  else begin
   options:= options - [cto_logy];
+ end;
+end;
+
+function ttraces.actualimagelist: timagelist;
+begin
+ result:= fimage_list;
+ if (result = nil) and (cto_stockglyphs in foptions) then begin
+  result:= stockobjects.glyphs;
  end;
 end;
 
