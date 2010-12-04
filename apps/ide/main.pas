@@ -52,7 +52,7 @@ type
 // formkindty = (fok_main,fok_simple,fok_dock,fok_data,fok_subform,
 //               fok_report,fok_script,fok_inherited);
 
- tmainfo = class(tmainform,idesignnotification)
+ tmainfo = class(tdockform,idesignnotification)
    gdb: tgdbmi;
    filedisp: tstringdisp;
    linedisp: tintegerdisp;
