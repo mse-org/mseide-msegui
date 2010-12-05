@@ -3132,6 +3132,8 @@ begin
       end;
       fsizeindex:= -1;
       fintf.getwidget.invalidate;
+      checksizing((dos_moving in fdockstate) or 
+                         (od_nosplitsize in foptionsdock));
      end
      else begin
       case checkbuttonarea(pos) of

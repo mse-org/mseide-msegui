@@ -1759,6 +1759,8 @@ type
    function paintparentpos: pointty;         //origin = parentwidget.pos
    function parentpaintpos: pointty;         //origin = parentwidget.paintpos
                                              //nullpoint if parent = nil
+   function refpos(const aorigin: originty): pointty;
+   
    function paintrectparent: rectty;         //origin = paintpos,
                                              //nullrect if parent = nil,
    function clientrectparent: rectty;        //origin = paintpos,
@@ -9068,6 +9070,24 @@ function twidget.clientparentpos: pointty;
         //origin = parentwidget.pos
 begin
  result:= addpoint(fwidgetrect.pos,clientwidgetpos);
+end;
+
+function twidget.refpos(const aorigin: originty): pointty;
+begin
+ case aorigin of
+  org_screen: begin
+   result:= screenpos;
+  end;
+  org_widget: begin
+   result:= pos;
+  end;
+  org_client: begin
+   result:= parentclientpos;
+  end;
+  org_inner: begin
+   result:= addpoint(parentclientpos,innerclientpos);
+  end;
+ end;
 end;
 
 function twidget.paintparentpos: pointty;       //origin = parentwidget.pos

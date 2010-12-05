@@ -194,11 +194,16 @@ var
  procedure doend;
  var
   bo1: boolean;
+  pt1: pointty;
+  widget1: twidget;
  begin
+  widget1:= fintf.getwidget;
+  pt1:=  widget1.refpos(forigin);   
   endmoving(false);
   fintf.endpickmove(self);
   exclude(fstate,ops_moving);
   addpoint1(fpickrect.pos,fpickoffset);
+  addpoint1(fpickrect.pos,subpoint(pt1,widget1.refpos(forigin)));
   fpickrect.size:= nullsize;
   fpickoffset:= nullpoint;
   
