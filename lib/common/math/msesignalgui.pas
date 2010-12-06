@@ -16,8 +16,6 @@ uses
  msesplitter,msegui,msestat,msestatfile,msestrings,msestockobjects;
  
 const
- defaultsamplecount = 4096;
- defaultharmonicscount = 16;
  defaultffttableeditoptions = [ceo_noinsert,ceo_nodelete];
  defaultkeywidth = 8;
  defaultenvsplitteroptions = defaultsplitteroptions+[spo_hmove,spo_hprop];

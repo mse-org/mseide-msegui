@@ -18,11 +18,14 @@ unit msesignal;
 interface
 uses
  msedatalist,mseclasses,classes,msetypes,msearrayprops,mseevent,msehash,
- msesys;
+ msesys,msereal;
  
 const
  defaultsamplefrequ = 44100; //Hz
  defaulttickdiv = 200;
+ defaultsamplecount = 4096;
+ defaultharmonicscount = 16;
+ functionsegmentcount = 32;
 type
  tcustomsigcomp = class;
  tdoublesigcomp = class;
@@ -249,6 +252,10 @@ type
                                var sig: real) of object; 
  siginbursteventty = procedure(const sender: tobject;
                                var sig: realarty) of object; 
+ sigincomplexeventty = procedure(const sender: tobject;
+                               var sig: complexty) of object; 
+ sigincomplexbursteventty = procedure(const sender: tobject;
+                               var sig: complexarty) of object; 
 
  tsigin = class(tsigconnection)
   private
@@ -526,6 +533,49 @@ type
    property oninittable: siginbursteventty read foninittable write foninittable;
    property options: sigwavetableoptionsty read foptions 
                                            write setoptions default [];
+ end;
+
+ functionnodety = record
+  xend: double;
+  offs: double;
+  ramp: double;
+ end;
+ functionnodearty = array of functionnodety;
+ functionsegmentty = record
+  defaultnode: functionnodety;
+  nodes: functionnodearty;
+ end;
+ pfunctionsegmentty = ^functionsegmentty;
+ functionsegmentsty = array[0..functionsegmentcount-1] of functionsegmentty;
+ 
+ tsigfunctiontable = class(tdoublesigoutcomp)
+  private
+   finput: tdoubleinputconn;
+   foninittable: sigincomplexbursteventty;
+   ftable: complexarty;
+   fsegments: functionsegmentsty;
+   finpmin: double;
+   finpmax: double;
+   finpfact: double; //map input value to segmentindex
+   procedure setinput(const avalue: tdoubleinputconn);
+   procedure settable(const avalue: complexarty);
+  protected
+   procedure checktable;
+   procedure sighandler(const ainfo: psighandlerinfoty);
+    //isigclient
+   function gethandler: sighandlerprocty; override;
+   procedure initmodel; override;
+   function getinputar: inputconnarty; override;
+   function getzcount: integer; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   procedure clear; override;
+   property table: complexarty read ftable write settable;
+                 //must be ordered by re values
+  published
+   property input: tdoubleinputconn read finput write setinput;
+   property oninittable: sigincomplexbursteventty read foninittable 
+                                                        write foninittable;
  end;
  
  tsigmult = class(tsigmultiinpout)
@@ -2691,6 +2741,215 @@ begin
   foptions:= avalue;
   if fcontroller <> nil then begin
    fcontroller.modelchange;
+  end;
+ end;
+end;
+
+{ tsigfunctiontable }
+
+constructor tsigfunctiontable.create(aowner: tcomponent);
+begin
+ inherited;
+ finput:= tdoubleinputconn.create(self,isigclient(self));
+ finput.name:= 'frequency';
+end;
+
+procedure tsigfunctiontable.setinput(const avalue: tdoubleinputconn);
+begin
+ finput.assign(avalue);
+end;
+
+function tsigfunctiontable.gethandler: sighandlerprocty;
+begin
+ result:= @sighandler;
+end;
+
+procedure tsigfunctiontable.initmodel;
+begin
+ //dummy
+end;
+
+function tsigfunctiontable.getinputar: inputconnarty;
+begin
+ setlength(result,1);
+ result[0]:= finput;
+end;
+
+function tsigfunctiontable.getzcount: integer;
+begin
+ result:= 1;
+end;
+
+procedure tsigfunctiontable.clear;
+begin
+ inherited;
+ lock;
+ try
+  if canevent(tmethod(foninittable)) then begin
+   foninittable(self,ftable);
+  end;
+  checktable;
+ finally
+  unlock;
+ end;
+end;
+
+procedure tsigfunctiontable.settable(const avalue: complexarty);
+begin
+ lock;
+ ftable:= avalue;
+ checktable;
+ unlock;
+end;
+
+procedure tsigfunctiontable.sighandler(const ainfo: psighandlerinfoty);
+var
+ int1,int2: integer;
+ do1: double;
+begin
+ do1:= finput.value;
+ if do1 <= finpmin then begin
+  with fsegments[0].defaultnode do begin
+   ainfo^.dest^:= offs + do1 * ramp;
+  end;
+  exit;
+ end
+ else begin
+  if do1 >= finpmax then begin
+   with fsegments[functionsegmentcount-1] do begin
+    if nodes <> nil then begin
+     with nodes[high(nodes)] do begin
+      ainfo^.dest^:= offs + do1 * ramp;
+     end;
+    end
+    else begin   
+     with defaultnode do begin
+      ainfo^.dest^:= offs + do1 * ramp;
+     end;
+    end;
+   end;
+   exit;
+  end
+  else begin
+   int1:= trunc(do1*finpfact);
+  end;
+ end;
+ with fsegments[int1] do begin
+  if do1 <= defaultnode.xend  then begin
+   with defaultnode do begin
+    ainfo^.dest^:= offs + do1 * ramp;
+   end;
+  end
+  else begin
+   for int2:= 0 to high(nodes) do begin
+    with nodes[int2] do begin
+     if do1 <= xend then begin
+      ainfo^.dest^:= offs + do1 * ramp;
+      break;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tsigfunctiontable.checktable;
+ procedure calc(const index: integer; out node: functionnodety);
+ var 
+ den1: double;
+ begin
+  if index = high(ftable) then begin
+   if index = 0 then begin
+    den1:= 0;
+   end
+   else begin
+    den1:= ftable[index].re - ftable[index-1].re;
+   end;
+  end
+  else begin
+   den1:= ftable[index+1].re - ftable[index].re;
+  end;
+  with node do begin
+   if index >= high(ftable) then begin
+    xend:= bigreal;
+   end
+   else begin
+    xend:= ftable[index+1].re;
+   end;
+   if den1 = 0 then begin
+    offs:= ftable[index].im;
+    ramp:= 0;
+   end
+   else begin
+    if index = high(ftable) then begin
+     ramp:= (ftable[index].im - ftable[index-1].im)/den1;
+    end
+    else begin
+     ramp:= (ftable[index+1].im - ftable[index].im)/den1;
+    end;
+    offs:= ftable[index].im - ftable[index].re*ramp;
+   end;
+  end;
+ end;
+var
+ int1,int2: integer;
+ ar1: booleanarty;
+ po1: pfunctionsegmentty;
+begin
+ finalize(fsegments);
+ fillchar(fsegments,sizeof(fsegments),0);
+ finpmin:= 0;
+ finpmax:= 0;
+ finpfact:= 0;
+ if high(ftable) >= 0 then begin
+  finpmin:= bigreal;
+  finpmax:= -bigreal;
+  for int1:= 0 to high(ftable) do begin
+   with ftable[int1] do begin
+    if (int1 > 0) and (re < ftable[int1-1].re) then begin
+     raise exception.create('Invalid table order');
+    end;
+    if re < finpmin then begin
+     finpmin:= re;
+    end;
+    if re > finpmax then begin
+     finpmax:= re;
+    end;
+   end;
+  end;
+  finpfact:= (finpmax-finpmin)*functionsegmentcount;
+  setlength(ar1,functionsegmentcount);
+  for int1:= 0 to high(ftable) do begin
+   int2:= trunc((ftable[int1].re-finpmin)*finpfact);
+   if int2 >= functionsegmentcount then begin
+    int2:= functionsegmentcount-1;
+   end;
+   with fsegments[int2] do begin
+    if ar1[int2] then begin //multiple nodes
+     setlength(nodes,high(nodes)+2);
+     calc(int1,nodes[high(nodes)]);
+    end
+    else begin
+     ar1[int2]:= true;
+     calc(int1,defaultnode);
+    end;
+   end;
+  end;
+  po1:= @fsegments[0];
+  for int1:= 1 to high(fsegments) do begin
+   if not ar1[int1] then begin
+    with fsegments[int1] do begin
+     if po1^.nodes <> nil then begin
+      defaultnode:= po1^.nodes[high(po1^.nodes)];
+     end
+     else begin
+      defaultnode:= po1^.defaultnode;
+     end;
+    end;
+   end
+   else begin
+    po1:= @fsegments[int1];
+   end;
   end;
  end;
 end;
