@@ -48,10 +48,10 @@ procedure register;
 begin
  registercomponents('Math',[tsigcontroller,tsigout,tsigin,tsigadd,tsigmult,
                             tsigdelay,tsigdelayn,tsigfir,tsigiir,
-                            tsigwavetable,tsigfunctiontable,tsigenvelope,
+                            tsigwavetable,tsigfuncttable,tsigenvelope,
                             tsigfft,tfft,
                             tsigslider,tsigkeyboard,
-                            twavetableedit,tffttableedit,tenvelopeedit
+                            twavetableedit,tfuncttableedit,tffttableedit,tenvelopeedit
                             ]);
  registercomponenttabhints(['Math'],['Experimental Mathematical Components']);
  registerpropertyeditor(typeinfo(tdoubleconn),tdoublezcomp,'',

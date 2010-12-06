@@ -144,6 +144,26 @@ type
                                  write setsamplecount default defaultsamplecount;
    property wave: tsigwavetable read fwave write setwave;
  end;
+
+ optionfuncteditty = (ofe_symmetric,ofe_mirrored);
+ optionsfuncteditty = set of optionfuncteditty;
+ 
+ tfuncttableedit = class(torderedxychartedit)
+  private
+   ffunct: tsigfuncttable;
+   foptionsfunct: optionsfuncteditty;
+   procedure setfunct(const avalue: tsigfuncttable);
+   procedure setoptionsfunct(const avalue: optionsfuncteditty);
+  protected
+   procedure dochange; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property funct: tsigfuncttable read ffunct write setfunct;
+   property optionsfunct: optionsfuncteditty read foptionsfunct 
+                                            write setoptionsfunct default [];
+ end;
  
  ffteditoptionty = (feo_exp);
  ffteditoptionsty = set of ffteditoptionty;
@@ -305,7 +325,7 @@ const
 
 implementation
 uses
- math,msekeyboard;
+ math,msekeyboard,msebits;
 type
  tsigcontroller1 = class(tsigcontroller);
  
@@ -811,6 +831,78 @@ begin
  end;
 end;
 
+{ tfuncttableedit }
+
+constructor tfuncttableedit.create(aowner: tcomponent);
+begin
+ inherited;
+ ffunct:= tsigfuncttable.create(self);
+ ffunct.name:= 'funct';
+ ffunct.setsubcomponent(true);
+end;
+
+destructor tfuncttableedit.destroy;
+begin
+ ffunct.free;
+ inherited;
+end;
+
+procedure tfuncttableedit.setfunct(const avalue: tsigfuncttable);
+begin
+ ffunct.assign(avalue);
+end;
+
+procedure tfuncttableedit.dochange;
+var
+ ar1: complexarty;
+ int1,int2: integer;
+begin
+ if ofe_symmetric in foptionsfunct then begin
+  int2:= length(fvalue);
+  setlength(ar1,int2*2);
+  for int1:= 0 to high(fvalue) do begin
+   ar1[int2+int1]:= fvalue[int1];
+   with ar1[int2-int1-1] do begin
+    re:= -fvalue[int1].re;
+    im:= -fvalue[int1].im;
+   end;
+  end;
+  ffunct.table:= ar1;
+ end
+ else begin
+  if ofe_mirrored in foptionsfunct then begin
+   int2:= length(fvalue);
+   setlength(ar1,int2*2);
+   for int1:= 0 to high(fvalue) do begin
+    ar1[int2+int1]:= fvalue[int1];
+    with ar1[int2-int1-1] do begin
+     re:= -fvalue[int1].re;
+     im:= fvalue[int1].im;
+    end;
+   end;
+   ffunct.table:= ar1;
+  end
+  else begin
+   ffunct.table:= fvalue;
+  end;
+ end;
+end;
+
+procedure tfuncttableedit.setoptionsfunct(const avalue: optionsfuncteditty);
+const
+ mask: optionsfuncteditty = [ofe_symmetric,ofe_mirrored];
+begin
+ if foptionsfunct <> avalue then begin
+  foptionsfunct:=
+   optionsfuncteditty(setsinglebit(longword(avalue),
+                               longword(foptionsfunct),
+                               longword(mask)));
+  if not (csloading in componentstate) then begin
+   dochange;
+  end;
+ end;
+end;
+
 { tffttableedit }
 
 constructor tffttableedit.create(aowner: tcomponent);
@@ -1243,7 +1335,6 @@ begin
  end;
  canvas.restore;
 end;
-
 
 { tenvelopesplitter }
 

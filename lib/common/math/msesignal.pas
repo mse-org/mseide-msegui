@@ -548,7 +548,7 @@ type
  pfunctionsegmentty = ^functionsegmentty;
  functionsegmentsty = array[0..functionsegmentcount-1] of functionsegmentty;
  
- tsigfunctiontable = class(tdoublesigoutcomp)
+ tsigfuncttable = class(tdoublesigoutcomp)
   private
    finput: tdoubleinputconn;
    foninittable: sigincomplexbursteventty;
@@ -2745,42 +2745,42 @@ begin
  end;
 end;
 
-{ tsigfunctiontable }
+{ tsigfuncttable }
 
-constructor tsigfunctiontable.create(aowner: tcomponent);
+constructor tsigfuncttable.create(aowner: tcomponent);
 begin
  inherited;
  finput:= tdoubleinputconn.create(self,isigclient(self));
  finput.name:= 'frequency';
 end;
 
-procedure tsigfunctiontable.setinput(const avalue: tdoubleinputconn);
+procedure tsigfuncttable.setinput(const avalue: tdoubleinputconn);
 begin
  finput.assign(avalue);
 end;
 
-function tsigfunctiontable.gethandler: sighandlerprocty;
+function tsigfuncttable.gethandler: sighandlerprocty;
 begin
  result:= @sighandler;
 end;
 
-procedure tsigfunctiontable.initmodel;
+procedure tsigfuncttable.initmodel;
 begin
  //dummy
 end;
 
-function tsigfunctiontable.getinputar: inputconnarty;
+function tsigfuncttable.getinputar: inputconnarty;
 begin
  setlength(result,1);
  result[0]:= finput;
 end;
 
-function tsigfunctiontable.getzcount: integer;
+function tsigfuncttable.getzcount: integer;
 begin
  result:= 1;
 end;
 
-procedure tsigfunctiontable.clear;
+procedure tsigfuncttable.clear;
 begin
  inherited;
  lock;
@@ -2794,7 +2794,7 @@ begin
  end;
 end;
 
-procedure tsigfunctiontable.settable(const avalue: complexarty);
+procedure tsigfuncttable.settable(const avalue: complexarty);
 begin
  lock;
  ftable:= avalue;
@@ -2802,7 +2802,7 @@ begin
  unlock;
 end;
 
-procedure tsigfunctiontable.sighandler(const ainfo: psighandlerinfoty);
+procedure tsigfuncttable.sighandler(const ainfo: psighandlerinfoty);
 var
  int1,int2: integer;
  do1: double;
@@ -2831,7 +2831,7 @@ begin
    exit;
   end
   else begin
-   int1:= trunc(do1*finpfact);
+   int1:= trunc((do1-finpmin)*finpfact);
   end;
  end;
  with fsegments[int1] do begin
@@ -2853,7 +2853,7 @@ begin
  end;
 end;
 
-procedure tsigfunctiontable.checktable;
+procedure tsigfuncttable.checktable;
  procedure calc(const index: integer; out node: functionnodety);
  var 
  den1: double;
@@ -2917,12 +2917,21 @@ begin
     end;
    end;
   end;
-  finpfact:= (finpmax-finpmin)*functionsegmentcount;
+  finpfact:= finpmax-finpmin;
+  if finpfact > 0 then begin
+   finpfact:= functionsegmentcount/finpfact;
+  end
+  else begin
+   finpfact:= 0;
+  end;
   setlength(ar1,functionsegmentcount);
   for int1:= 0 to high(ftable) do begin
    int2:= trunc((ftable[int1].re-finpmin)*finpfact);
    if int2 >= functionsegmentcount then begin
     int2:= functionsegmentcount-1;
+   end;
+   if int2 < 0 then begin
+    int2:= 0;
    end;
    with fsegments[int2] do begin
     if ar1[int2] then begin //multiple nodes
