@@ -2055,6 +2055,7 @@ begin
 //  openfile.controller.lastdir:= msefileutils.getcurrentdir;
   openfile.controller.filename:= '';
  end;
+ dragdock.layoutchanged; //refresh possible dockpanel caption
 end;
 
 function tmainfo.openproject(const aname: filenamety;

@@ -208,7 +208,6 @@ type
    fdefaultsplitdir: splitdirty;
    procedure updaterefsize;
    procedure setdockhandle(const avalue: tdockhandle);
-   procedure layoutchanged;
    function checksplit(const awidgets: widgetarty;
                  out propsize,varsize,fixsize,fixcount: integer;
                  out isprop,isfix: booleanarty;
@@ -317,6 +316,7 @@ type
    procedure widgetregionchanged(const sender: twidget);
    procedure beginclientrectchanged;
    procedure endclientrectchanged;
+   procedure layoutchanged; //force layout calcualation
       //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter; const bounds: prectty = nil);
@@ -1745,6 +1745,8 @@ var
  newwidget: boolean;
  controller1: tdockcontroller;
  bo1: boolean;
+label
+ endlab;
 begin
  container1:= twidget1(fintf.getwidget.container);
  if container1.componentstate * [csdestroying,csdesigning] <> [] then begin
@@ -1778,7 +1780,7 @@ begin
   if fsplitdir = sd_none then begin
    fsplitterrects:= nil;
   end;
-  exit;
+  goto endlab;
  end;
  rect1:= fplacementrect;//idockcontroller(fintf).getplacementrect;
  po1:= addpoint(pointty(rect1.size),rect1.pos); //lower right
@@ -1938,6 +1940,7 @@ begin
  exclude(fdockstate,dos_updating1);
  sizechanged(true,false,ar1);
  updatesplitterrects(ar1);
+endlab:
  widget1:= fintf.getwidget;
  if widget1.canevent(tmethod(foncalclayout)) then begin
   foncalclayout(widget1,ar1);
