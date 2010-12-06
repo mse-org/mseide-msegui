@@ -551,13 +551,16 @@ type
  tsigfuncttable = class(tdoublesigoutcomp)
   private
    finput: tdoubleinputconn;
+   famplitude: tdoubleinputconn;
    foninittable: sigincomplexbursteventty;
    ftable: complexarty;
    fsegments: functionsegmentsty;
    finpmin: double;
    finpmax: double;
    finpfact: double; //map input value to segmentindex
+   famplitudepo: pdouble;
    procedure setinput(const avalue: tdoubleinputconn);
+   procedure setamplitude(const avalue: tdoubleinputconn);
    procedure settable(const avalue: complexarty);
   protected
    procedure checktable;
@@ -574,6 +577,7 @@ type
                  //must be ordered by re values
   published
    property input: tdoubleinputconn read finput write setinput;
+   property amplitude: tdoubleinputconn read famplitude write setamplitude;
    property oninittable: sigincomplexbursteventty read foninittable 
                                                         write foninittable;
  end;
@@ -2750,13 +2754,21 @@ end;
 constructor tsigfuncttable.create(aowner: tcomponent);
 begin
  inherited;
+ famplitude:= tdoubleinputconn.create(self,isigclient(self));
+ famplitude.name:= 'amplitude';
+ famplitudepo:= @famplitude.fvalue;
  finput:= tdoubleinputconn.create(self,isigclient(self));
- finput.name:= 'frequency';
+ finput.name:= 'input';
 end;
 
 procedure tsigfuncttable.setinput(const avalue: tdoubleinputconn);
 begin
  finput.assign(avalue);
+end;
+
+procedure tsigfuncttable.setamplitude(const avalue: tdoubleinputconn);
+begin
+ famplitude.assign(avalue);
 end;
 
 function tsigfuncttable.gethandler: sighandlerprocty;
@@ -2771,8 +2783,9 @@ end;
 
 function tsigfuncttable.getinputar: inputconnarty;
 begin
- setlength(result,1);
+ setlength(result,2);
  result[0]:= finput;
+ result[1]:= famplitude;
 end;
 
 function tsigfuncttable.getzcount: integer;
@@ -2810,7 +2823,7 @@ begin
  do1:= finput.value;
  if do1 <= finpmin then begin
   with fsegments[0].defaultnode do begin
-   ainfo^.dest^:= offs + do1 * ramp;
+   ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^;
   end;
   exit;
  end
@@ -2819,12 +2832,12 @@ begin
    with fsegments[functionsegmentcount-1] do begin
     if nodes <> nil then begin
      with nodes[high(nodes)] do begin
-      ainfo^.dest^:= offs + do1 * ramp;
+      ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^;
      end;
     end
     else begin   
      with defaultnode do begin
-      ainfo^.dest^:= offs + do1 * ramp;
+      ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^;
      end;
     end;
    end;
@@ -2837,14 +2850,14 @@ begin
  with fsegments[int1] do begin
   if do1 <= defaultnode.xend  then begin
    with defaultnode do begin
-    ainfo^.dest^:= offs + do1 * ramp;
+    ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^;
    end;
   end
   else begin
    for int2:= 0 to high(nodes) do begin
     with nodes[int2] do begin
      if do1 <= xend then begin
-      ainfo^.dest^:= offs + do1 * ramp;
+      ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^;
       break;
      end;
     end;
