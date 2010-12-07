@@ -42,6 +42,7 @@ type
 //   property channels;
    property format;
    property rate;
+   property latency;
    property stacksizekb;
 //   property onsend;
 //   property onerror;

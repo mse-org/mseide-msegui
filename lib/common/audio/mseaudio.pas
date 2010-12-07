@@ -119,6 +119,7 @@ type
    fdev: msestring;
    fchannels: integer;
    frate: integer;
+   flatency: real;
    procedure setactive(const avalue: boolean);
   protected
    factive: boolean;
@@ -150,6 +151,8 @@ type
                                               default defaultsampleformat;
    property rate: integer read frate write frate default defaultsamplerate;
    property stacksizekb: integer read fstacksizekb write fstacksizekb default 0;
+   property latency: real read flatency write flatency; 
+           //seconds, default 0 -> server default
    property onsend: sendeventty read fonsend write fonsend;
    property onerror: erroreventty read fonerror write fonerror;
  end;
@@ -164,6 +167,7 @@ type
    property channels;
    property format;
    property rate;
+   property latency;
    property stacksizekb;
    property onsend;
    property onerror;
@@ -220,9 +224,22 @@ procedure tcustomaudioout.run;
 var
  ss: pa_sample_spec;
  int1: integer;
+ buattr: pa_buffer_attr;
 begin
  initializepulsesimple([]);
  fillchar(ss,sizeof(ss),0);
+ fillchar(buattr,sizeof(buattr),0);
+ with buattr do begin
+  maxlength:= -1; 
+  tlength:= -1;
+  prebuf:= -1;
+  minreq:= -1;
+  fragsize:= -1;
+ end;
+ if flatency > 0 then begin
+  int1:= round(flatency*frate*samplebuffersizematrix[fformat]*fchannels);
+  buattr.tlength:= int1;
+ end;
  ss.format:= pulsesampleformatmatrix[fformat];
  ss.rate:= frate;
  ss.channels:= fchannels;
@@ -230,7 +247,7 @@ begin
                 pointer(string(fappname)),
                 pa_stream_playback,pointer(string(fdev)),
                 pointer(string(fstreamname)),
-                @ss,nil,nil,@int1);
+                @ss,nil,@buattr,@int1);
  if fpulsestream = nil then begin
   raiseerror(int1);
  end;
