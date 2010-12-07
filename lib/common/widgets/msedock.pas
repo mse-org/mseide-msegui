@@ -2533,15 +2533,17 @@ begin
     cy:= reader.readinteger('rcy',cy);
    end;
    bo1:= visible;
+   bo1:= reader.readboolean('visible',bo1);
    if application.findwidget(str1,widget1) then begin
-    visible:= false;
+    if not bo1 then begin
+     visible:= false;
+    end;
     if (widget1 <> nil) and 
                  widget1.getcorbainterface(typeinfo(idocktarget),intf1) then begin
      intf1.getdockcontroller.frefsize:= 0; //invalid
     end;
     parentwidget:= widget1;
    end;
-   bo1:= reader.readboolean('visible',bo1);
    if (parentwidget <> nil) then begin
     if not parentwidget.getcorbainterface(typeinfo(idocktarget),intf1) then begin
      rect1:= clipinrect(rect1,parentwidget.paintrect); //shift into widget

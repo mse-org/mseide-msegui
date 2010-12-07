@@ -2261,6 +2261,7 @@ begin
    end;
   end
   else begin
+   projectoptions.projectfilename:= '';
    projectoptions.modified:= true;
   end;
  end;

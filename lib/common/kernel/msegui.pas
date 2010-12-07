@@ -10315,7 +10315,8 @@ begin
   end
   else begin
    exclude(fwidgetstate,ws_visible);
-   if not (csloading in componentstate) and ownswindow then begin
+   if not (csloading in componentstate) and ownswindow and 
+                    (tws_windowvisible in fwindow.fstate) then begin    
     gui_hidewindow(fwindow.fwindow.id);
    end;
   end;
