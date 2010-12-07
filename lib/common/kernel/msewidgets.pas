@@ -348,8 +348,8 @@ type
    procedure setsbvert(const avalue: tscrollboxscrollbar);
    function getsbvert: tscrollboxscrollbar;
    procedure setzoom(const avalue: complexty);
-   procedure setzoomwidth(const avalue: real);
-   procedure setzoomheight(const avalue: real);
+   procedure setzoomwidth(const avalue: double);
+   procedure setzoomheight(const avalue: double);
   protected
    fowner: twidget;
    procedure scrollpostoclientpos(var aclientrect: rectty); virtual;
@@ -380,8 +380,8 @@ type
    procedure showrect(const arect: rectty; const bottomright: boolean); 
                            //origin paintpos
    property zoom: complexty read fzoom write setzoom; //default 1,1
-   property zoomwidth: real read fzoom.re write setzoomwidth;   //default 1
-   property zoomheight: real read fzoom.im write setzoomheight; //default 1
+   property zoomwidth: double read fzoom.re write setzoomwidth;   //default 1
+   property zoomheight: double read fzoom.im write setzoomheight; //default 1
    property zoomwidthstep: real read fzoomwidthstep write fzoomwidthstep;
                                  //default 1
    property zoomheightstep: real read fzoomheightstep write fzoomheightstep;
@@ -4184,12 +4184,12 @@ begin
  end;
 end;
 
-procedure tcustomscrollboxframe.setzoomwidth(const avalue: real);
+procedure tcustomscrollboxframe.setzoomwidth(const avalue: double);
 begin
  setzoom(makecomplex(avalue,fzoom.im));
 end;
 
-procedure tcustomscrollboxframe.setzoomheight(const avalue: real);
+procedure tcustomscrollboxframe.setzoomheight(const avalue: double);
 begin
  setzoom(makecomplex(fzoom.re,avalue));
 end;
