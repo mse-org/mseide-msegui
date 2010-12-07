@@ -406,7 +406,7 @@ type
    constructor create(const asigintf: isigclient); reintroduce;
    property items[const index: integer]: tdoubleinputconn read getitems; default;
  end;
- 
+
  tsigmultiinp = class(tdoublesigcomp)
   private
    finputs: tdoubleinpconnarrayprop;
@@ -425,6 +425,45 @@ type
    property inputs: tdoubleinpconnarrayprop read finputs write setinputs;
  end;
 
+ tsigsampler = class;
+ samplerbufferty = array of doublearty;
+ samplerbufferfulleventty = procedure(const sender: tsigsampler;
+                              const abuffer: samplerbufferty) of object;
+
+ tsigsampler = class(tsigmultiinp)
+  private
+   fbufferlength: integer;
+   fbufpo: integer;
+   ftrigger: tchangedoubleinputconn;
+   ftriggerlevel: tchangedoubleinputconn;
+   fonbufferfull: samplerbufferfulleventty;
+   procedure setbufferlength(const avalue: integer);
+   procedure settrigger(const avalue: tchangedoubleinputconn);
+   procedure settriggerlevel(const avalue: tchangedoubleinputconn);
+  protected
+   fstarted: boolean;
+   fpretrigger: boolean;
+   frunning: boolean;
+   fbuffer: samplerbufferty;
+   function gethandler: sighandlerprocty; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
+   procedure initmodel; override;
+   function getinputar: inputconnarty; override;
+   procedure dotriggerchange(const sender: tobject);
+   procedure dobufferfull;
+  public
+   constructor create(aowner: tcomponent); override;
+   procedure clear; override;
+   procedure start;
+  published
+   property bufferlength: integer read fbufferlength 
+                          write setbufferlength default defaultsamplecount;
+   property trigger: tchangedoubleinputconn read ftrigger write settrigger;
+   property triggerlevel: tchangedoubleinputconn read ftriggerlevel 
+                                              write settriggerlevel;
+   property onbufferfull: samplerbufferfulleventty read fonbufferfull write fonbufferfull;
+ end;
+ 
  tsigmultiinpout = class(tsigmultiinp)
   private
    foutput: tdoubleoutputconn;
@@ -1049,7 +1088,9 @@ begin
  if ([csdestroying,csloading]*componentstate = []) then begin
   if (fcontroller <> nil) then begin
    if ([csdestroying,csloading]*fcontroller.componentstate = []) then begin
+    fcontroller.lock;
     fcontroller.modelchange;
+    fcontroller.unlock;
    end;
   end
  end;
@@ -3332,6 +3373,125 @@ begin
  else begin
   unlock;
  end;
+end;
+
+{ tsigsampler }
+
+constructor tsigsampler.create(aowner: tcomponent);
+begin
+ fbufferlength:= defaultsamplecount;
+ inherited;
+ ftrigger:= tchangedoubleinputconn.create(self,isigclient(self),
+                                                             @dotriggerchange);
+ ftrigger.name:= 'trigger';
+ ftriggerlevel:= tchangedoubleinputconn.create(self,isigclient(self),
+                                                             @dotriggerchange);
+ ftriggerlevel.name:= 'triggerlevel';
+end;
+
+function tsigsampler.gethandler: sighandlerprocty;
+begin
+ result:= @sighandler;
+end;
+
+procedure tsigsampler.sighandler(const ainfo: psighandlerinfoty);
+var
+ int1: integer;
+begin
+ if not frunning and fstarted then begin
+  if ftrigger.value >= ftriggerlevel.value then begin
+   if fpretrigger then begin
+    fbufpo:= 0;
+    frunning:= true;
+    fstarted:= false;
+   end;
+  end
+  else begin
+   fpretrigger:= true;
+  end;
+ end;
+ if frunning then begin
+  for int1:= 0 to high(fbuffer) do begin
+   fbuffer[int1][fbufpo]:= finps[int1]^;
+  end;
+  inc(fbufpo);
+  if fbufpo = fbufferlength then begin
+   frunning:= false;
+   dobufferfull;
+  end;
+ end;
+end;
+
+procedure tsigsampler.clear;
+begin
+// fstarted:= false;
+ frunning:= false;
+ inherited;
+end;
+
+procedure tsigsampler.setbufferlength(const avalue: integer);
+begin
+ if fbufferlength <> avalue then begin
+  lock;
+  if avalue = 0 then begin
+   fbufferlength:= 1;
+  end
+  else begin
+   fbufferlength:= avalue;
+  end;
+  modelchange;
+  unlock;
+ end;
+end;
+
+procedure tsigsampler.initmodel;
+var
+ int1: integer;
+begin
+ inherited;
+ fbuffer:= nil;
+ setlength(fbuffer,finputs.count);
+ for int1:= 0 to high(fbuffer) do begin
+  setlength(fbuffer[int1],fbufferlength);
+ end;
+end;
+
+procedure tsigsampler.settrigger(const avalue: tchangedoubleinputconn);
+begin
+ ftrigger.assign(avalue);
+end;
+
+procedure tsigsampler.settriggerlevel(const avalue: tchangedoubleinputconn);
+begin
+ ftriggerlevel.assign(avalue);
+end;
+
+procedure tsigsampler.dotriggerchange(const sender: tobject);
+begin
+end;
+
+procedure tsigsampler.start;
+begin
+ lock;
+ fstarted:= true;
+ frunning:= false;
+ fpretrigger:= false;
+ unlock;
+end;
+
+procedure tsigsampler.dobufferfull;
+begin
+ if assigned(fonbufferfull) then begin
+  fonbufferfull(self,fbuffer);
+ end;
+end;
+
+function tsigsampler.getinputar: inputconnarty;
+begin
+ setlength(result,2);
+ result[0]:= ftrigger;
+ result[1]:= ftriggerlevel;
+ stackarray(pointerarty(inherited getinputar),pointerarty(result));
 end;
 
 end.
