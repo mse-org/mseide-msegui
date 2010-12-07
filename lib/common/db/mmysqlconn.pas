@@ -1339,6 +1339,7 @@ begin
 //  inc(row,fno);
   if row^ <> nil then begin
    if abuffer = nil then begin
+    result:= true;
     exit;
    end;
    field:= mysql_fetch_field_direct(C.FRES,c.MapDSRowToMSQLRow[fno]);
