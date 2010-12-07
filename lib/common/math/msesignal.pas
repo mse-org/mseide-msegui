@@ -1004,6 +1004,7 @@ end;
  
 destructor tdoublesigcomp.destroy;
 begin
+ controller:= nil;
  clear;
  inherited;
 end;
@@ -1931,14 +1932,18 @@ end;
 
 procedure tsigcontroller.addclient(const aintf: isigclient);
 begin
+ lock;
  adduniqueitem(pointerarty(fclients),pointer(aintf));
  modelchange;
+ unlock;
 end;
 
 procedure tsigcontroller.removeclient(const aintf: isigclient);
 begin
+ lock;
  removeitem(pointerarty(fclients),pointer(aintf));
  modelchange;
+ unlock;
 end;
 
 procedure tsigcontroller.modelchange;
