@@ -803,9 +803,9 @@ procedure tsqlite3connection.DoInternalConnect;
 var
  str1: string;
 begin
- if (inherited databasename = '') then begin
-  DatabaseError(SErrNoDatabaseName,self);
- end;
+// if (inherited databasename = '') then begin
+//  DatabaseError(SErrNoDatabaseName,self);
+// end;
  initializesqlite3([]);
  str1:= stringtoutf8(inherited databasename);
  checkerror(sqlite3_open(pchar(str1),@fhandle));
