@@ -108,6 +108,9 @@ type
    function getsigcontroller: tsigcontroller;
    function getsigclientinfopo: psigclientinfoty;
    function getsigoptions: sigclientoptionsty; virtual;
+   procedure lockapplication;  //releases controller lock, can not be nested,
+                               //call from locked signal thread only
+   procedure unlockapplication;//acquires controller lock
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -430,6 +433,9 @@ type
  samplerbufferfulleventty = procedure(const sender: tsigsampler;
                               const abuffer: samplerbufferty) of object;
 
+ sigsampleroptionty = (sso_negtrig);
+ sigsampleroptionsty = set of sigsampleroptionty;
+
  tsigsampler = class(tsigmultiinp)
   private
    fbufferlength: integer;
@@ -437,10 +443,13 @@ type
    ftrigger: tchangedoubleinputconn;
    ftriggerlevel: tchangedoubleinputconn;
    fonbufferfull: samplerbufferfulleventty;
+   foptions: sigsampleroptionsty;
    procedure setbufferlength(const avalue: integer);
    procedure settrigger(const avalue: tchangedoubleinputconn);
    procedure settriggerlevel(const avalue: tchangedoubleinputconn);
+   procedure setoptions(const avalue: sigsampleroptionsty);
   protected
+   fnegtrig: boolean;
    fstarted: boolean;
    fpretrigger: boolean;
    frunning: boolean;
@@ -450,7 +459,7 @@ type
    procedure initmodel; override;
    function getinputar: inputconnarty; override;
    procedure dotriggerchange(const sender: tobject);
-   procedure dobufferfull;
+   procedure dobufferfull; virtual;
   public
    constructor create(aowner: tcomponent); override;
    procedure clear; override;
@@ -461,6 +470,8 @@ type
    property trigger: tchangedoubleinputconn read ftrigger write settrigger;
    property triggerlevel: tchangedoubleinputconn read ftriggerlevel 
                                               write settriggerlevel;
+   property options: sigsampleroptionsty read foptions 
+                                         write setoptions default [];
    property onbufferfull: samplerbufferfulleventty read fonbufferfull write fonbufferfull;
  end;
  
@@ -734,6 +745,8 @@ type
    foutphash: tsiginfohash;
    fvaluedummy: double;
    fmutex: mutexty;
+   flockcount: integer;
+   flockapplocks: integer;
    fticktime: integer;
    ftickdiv: integer;
    fonbeforetick: notifyeventty;
@@ -772,6 +785,9 @@ type
    procedure execevent(const aintf: isigclient);
    procedure checktick;
    procedure dotick;
+   procedure lockapplication;  //releases controller lock, can not be nested
+                               //call from locked signal thread only
+   procedure unlockapplication;//acquires controller lock
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1155,6 +1171,20 @@ end;
 function tdoublesigcomp.getsigoptions: sigclientoptionsty;
 begin
  result:= [];
+end;
+
+procedure tdoublesigcomp.lockapplication;
+begin
+ if fcontroller <> nil then begin
+  fcontroller.lockapplication;
+ end;
+end;
+
+procedure tdoublesigcomp.unlockapplication;
+begin
+ if fcontroller <> nil then begin
+  fcontroller.unlockapplication;
+ end;
 end;
 
 { tdoublezcomp }
@@ -2572,10 +2602,12 @@ end;
 procedure tsigcontroller.lock;
 begin
  sys_mutexlock(fmutex);
+ inc(flockcount);
 end;
 
 procedure tsigcontroller.unlock;
 begin
+ dec(flockcount);
  sys_mutexunlock(fmutex);
 end;
 
@@ -2661,6 +2693,27 @@ procedure tsigcontroller.setonaftertick(const avalue: notifyeventty);
 begin
  fonaftertick:= avalue;
  checktick;
+end;
+
+procedure tsigcontroller.lockapplication;
+var
+ int1: integer;
+begin
+ flockapplocks:= flockcount;
+ for int1:= flockcount - 1 downto 0 do begin
+  unlock;
+ end;
+ application.lock;
+end;
+
+procedure tsigcontroller.unlockapplication;
+var
+ int1: integer;
+begin
+ application.unlock;
+ for int1:= flockapplocks - 1 downto 0 do begin
+  lock;
+ end;
 end;
 
 { tsigwavetable }
@@ -3397,9 +3450,19 @@ end;
 procedure tsigsampler.sighandler(const ainfo: psighandlerinfoty);
 var
  int1: integer;
+ do1: double;
 begin
  if not frunning and fstarted then begin
-  if ftrigger.value >= ftriggerlevel.value then begin
+  if fnegtrig then begin
+   do1:= ftrigger.value-ftriggerlevel.value;
+  end
+  else begin
+   do1:= ftriggerlevel.value-ftrigger.value;
+  end;
+  if do1 >= 0 then begin
+//   if do1 = 0 then begin
+//    fpretrigger:= true;
+//   end;
    if fpretrigger then begin
     fbufpo:= 0;
     frunning:= true;
@@ -3492,6 +3555,14 @@ begin
  result[0]:= ftrigger;
  result[1]:= ftriggerlevel;
  stackarray(pointerarty(inherited getinputar),pointerarty(result));
+end;
+
+procedure tsigsampler.setoptions(const avalue: sigsampleroptionsty);
+begin
+ if foptions <> avalue then begin
+  foptions:= avalue;
+  fnegtrig:= sso_negtrig in foptions;
+ end;
 end;
 
 end.

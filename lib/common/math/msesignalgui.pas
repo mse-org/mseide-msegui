@@ -316,6 +316,27 @@ type
    property envelope: tsigenvelope read fenvelope write setenvelope;
  end;
 *)
+ tsigscope = class;
+ tscopesampler = class(tsigsampler)
+  private
+   fscope: tsigscope;
+  protected
+   procedure dobufferfull; override;
+  public
+   constructor create(const aowner: tsigscope); reintroduce;
+ end;
+ 
+ tsigscope = class(tchart)
+  private
+   fsampler: tscopesampler;
+   procedure setsampler(const avalue: tscopesampler);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property sampler: tscopesampler read fsampler write setsampler;
+ end;
+ 
 const
  semitoneln = ln(2)/12;
  chromaticscale: array[0..12] of double =
@@ -1347,6 +1368,57 @@ begin
 // inherited create(nil);
  options:= defaultenvsplitteroptions;
  setsubcomponent(true);
+end;
+
+{ tscopesampler }
+
+constructor tscopesampler.create(const aowner: tsigscope);
+begin
+ fscope:= aowner;
+ inherited create(aowner);
+ setsubcomponent(true);
+ name:= 'sampler';
+end;
+
+procedure tscopesampler.dobufferfull;
+var
+ buf1: samplerbufferty;
+ int1: integer;
+begin
+ buf1:= copy(fbuffer);
+ lockapplication;
+ try
+  with fscope.traces do begin
+   for int1:= 0 to high(buf1) do begin
+    if int1 >= count then begin
+     break;
+    end;
+    items[int1].ydata:= buf1[int1];
+   end;
+  end;
+ finally
+  unlockapplication;
+ end;
+ inherited;
+end;
+
+{ tsigscope }
+
+constructor tsigscope.create(aowner: tcomponent);
+begin
+ fsampler:= tscopesampler.create(self);
+ inherited;
+end;
+
+destructor tsigscope.destroy;
+begin
+ fsampler.free;
+ inherited;
+end;
+
+procedure tsigscope.setsampler(const avalue: tscopesampler);
+begin
+ fsampler.assign(avalue);
 end;
 
 end.

@@ -49,12 +49,12 @@ begin
  registercomponents('Math',[tsigcontroller,tsigout,tsigin,tsigadd,tsigmult,
                             tsigdelay,tsigdelayn,tsigfir,tsigiir,
                             tsigwavetable,tsigfuncttable,tsigenvelope,
-                            tsigsampler,
+                            tsigsampler,tsigscope,
                             tsigfft,tfft,
                             tsigslider,tsigkeyboard,
                             twavetableedit,tfuncttableedit,tffttableedit,tenvelopeedit
                             ]);
- registercomponenttabhints(['Math'],['Experimental Mathematical Components']);
+ registercomponenttabhints(['Math'],['Experimental mathematical and signal processing components']);
  registerpropertyeditor(typeinfo(tdoubleconn),tdoublezcomp,'',
                                                    tsubcomponentpropertyeditor);
 // registerpropertyeditor(typeinfo(tdoubleconn),tdoubleinpconnitem,'',
