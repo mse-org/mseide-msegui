@@ -133,7 +133,8 @@ Type
 //    Procedure ConnectToServer; virtual;
 //    Procedure SelectDatabase; virtual;
 //    function MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer; var NewType: TFieldType; var NewSize: Integer): Boolean;
-    function MySQLDataType(const afield: mysql_field; out NewType: TFieldType;
+    function MySQLDataType(const afield: mysql_field;
+               const charsetinfo: my_charset_info; out NewType: TFieldType;
                out NewSize: Integer; out newprecision: integer): Boolean;
     function MySQLWriteData(const acursor: tsqlcursor; AType: enum_field_types;
                         ASize: Integer;
@@ -1073,6 +1074,7 @@ end;
 //function tmysqlconnection.MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer;
 //   var NewType: TFieldType; var NewSize: Integer): Boolean;
 function tmysqlconnection.MySQLDataType(const afield: mysql_field;
+                const charsetinfo: my_charset_info;
                 out NewType: TFieldType; out NewSize: Integer;
                 out newprecision: integer): Boolean;
 begin
@@ -1122,6 +1124,9 @@ begin
                             FIELD_TYPE_SET: begin
      NewType:= ftString;
      NewSize:= length;
+     if charsetinfo.mbmaxlen > 0 then begin
+      newsize:= newsize div charsetinfo.mbmaxlen;
+     end;
     end;
     {$ifdef mysql41}     
     field_type_blob: begin
@@ -1153,10 +1158,11 @@ var
  fd: tfielddef;
  str1: ansistring;
  res1: pmysql_res;
-
+ charsetinfo: my_charset_info;
 begin
  fielddefs.clear;
  C:= tmysqlcursor(cursor);
+ mysql_get_character_set_info(c.fconn,@charsetinfo);
  if c.fprepstatement <> nil then begin
   fc:= c.fresultfieldcount;
   c.fresultbindinginfo:= nil; //initialize with zeros
@@ -1181,7 +1187,7 @@ begin
     c.fprimarykeyfieldname:= name;
    end;
   end;
-  if MySQLDataType(field^,DFT,DFS,precision) then begin
+  if MySQLDataType(field^,charsetinfo,DFT,DFS,precision) then begin
    if not(dft in varsizefields) then begin
     dfs:= 0;
    end;
