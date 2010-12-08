@@ -907,6 +907,7 @@ begin
    ffunct.table:= fvalue;
   end;
  end;
+ inherited;
 end;
 
 procedure tfuncttableedit.setoptionsfunct(const avalue: optionsfuncteditty);

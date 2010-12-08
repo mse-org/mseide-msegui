@@ -18,7 +18,7 @@ unit msesignal;
 interface
 uses
  msedatalist,mseclasses,classes,msetypes,msearrayprops,mseevent,msehash,
- msesys,msereal;
+ msesys,msereal,msetimer;
  
 const
  defaultsamplefrequ = 44100; //Hz
@@ -444,24 +444,31 @@ type
    ftriggerlevel: tchangedoubleinputconn;
    fonbufferfull: samplerbufferfulleventty;
    foptions: sigsampleroptionsty;
+   ftimer: tsimpletimer;
+   frefreshus: integer;
    procedure setbufferlength(const avalue: integer);
    procedure settrigger(const avalue: tchangedoubleinputconn);
    procedure settriggerlevel(const avalue: tchangedoubleinputconn);
    procedure setoptions(const avalue: sigsampleroptionsty);
+   procedure setrefreshus(const avalue: integer);
   protected
    fnegtrig: boolean;
    fstarted: boolean;
+   fstartpending: boolean;
    fpretrigger: boolean;
    frunning: boolean;
    fbuffer: samplerbufferty;
+   procedure dotimer(const sender: tobject);
    function gethandler: sighandlerprocty; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
    procedure initmodel; override;
    function getinputar: inputconnarty; override;
    procedure dotriggerchange(const sender: tobject);
    procedure dobufferfull; virtual;
+   procedure loaded; override;
   public
    constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
    procedure clear; override;
    procedure start;
   published
@@ -472,7 +479,10 @@ type
                                               write settriggerlevel;
    property options: sigsampleroptionsty read foptions 
                                          write setoptions default [];
-   property onbufferfull: samplerbufferfulleventty read fonbufferfull write fonbufferfull;
+   property onbufferfull: samplerbufferfulleventty read fonbufferfull 
+                                                         write fonbufferfull;
+   property refreshus: integer read frefreshus write setrefreshus default -1;
+                          //micro seconds, -1 -> off, 0 -> on idle
  end;
  
  tsigmultiinpout = class(tsigmultiinp)
@@ -598,9 +608,9 @@ type
  pfunctionsegmentty = ^functionsegmentty;
  functionsegmentsty = array[0..functionsegmentcount-1] of functionsegmentty;
  
- tsigfuncttable = class(tdoublesigoutcomp)
+ tsigfuncttable = class(tsigmultiinpout)
   private
-   finput: tdoubleinputconn;
+//   finput: tdoubleinputconn;
    famplitude: tdoubleinputconn;
    foninittable: sigincomplexbursteventty;
    ftable: complexarty;
@@ -609,7 +619,7 @@ type
    finpmax: double;
    finpfact: double; //map input value to segmentindex
    famplitudepo: pdouble;
-   procedure setinput(const avalue: tdoubleinputconn);
+//   procedure setinput(const avalue: tdoubleinputconn);
    procedure setamplitude(const avalue: tdoubleinputconn);
    procedure settable(const avalue: complexarty);
   protected
@@ -626,7 +636,7 @@ type
    property table: complexarty read ftable write settable;
                  //must be ordered by re values
   published
-   property input: tdoubleinputconn read finput write setinput;
+//   property input: tdoubleinputconn read finput write setinput;
    property amplitude: tdoubleinputconn read famplitude write setamplitude;
    property oninittable: sigincomplexbursteventty read foninittable 
                                                         write foninittable;
@@ -2856,15 +2866,15 @@ begin
  famplitude:= tdoubleinputconn.create(self,isigclient(self));
  famplitude.name:= 'amplitude';
  famplitudepo:= @famplitude.fvalue;
- finput:= tdoubleinputconn.create(self,isigclient(self));
- finput.name:= 'input';
+// finput:= tdoubleinputconn.create(self,isigclient(self));
+// finput.name:= 'input';
 end;
-
+{
 procedure tsigfuncttable.setinput(const avalue: tdoubleinputconn);
 begin
  finput.assign(avalue);
 end;
-
+}
 procedure tsigfuncttable.setamplitude(const avalue: tdoubleinputconn);
 begin
  famplitude.assign(avalue);
@@ -2877,14 +2887,15 @@ end;
 
 procedure tsigfuncttable.initmodel;
 begin
- //dummy
+ inherited;
 end;
 
 function tsigfuncttable.getinputar: inputconnarty;
 begin
- setlength(result,2);
- result[0]:= finput;
- result[1]:= famplitude;
+ setlength(result,1);
+// result[0]:= finput;
+ result[0]:= famplitude;
+ stackarray(pointerarty(inherited getinputar),pointerarty(result));
 end;
 
 function tsigfuncttable.getzcount: integer;
@@ -2919,7 +2930,10 @@ var
  int1,int2: integer;
  do1: double;
 begin
- do1:= finput.value;
+ do1:= 0;
+ for int1:= 0 to finphigh do begin
+  do1:= do1 + finps[int1]^;
+ end;
  if do1 <= finpmin then begin
   with fsegments[0].defaultnode do begin
    ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^;
@@ -3046,31 +3060,25 @@ begin
     int2:= 0;
    end;
    with fsegments[int2] do begin
-    if ar1[int2] then begin //multiple nodes
+    if ar1[int2] or (int2 > 0) then begin //multiple nodes
      setlength(nodes,high(nodes)+2);
      calc(int1,nodes[high(nodes)]);
     end
     else begin
-     ar1[int2]:= true;
      calc(int1,defaultnode);
     end;
+    ar1[int2]:= true;
    end;
   end;
   po1:= @fsegments[0];
   for int1:= 1 to high(fsegments) do begin
-   if not ar1[int1] then begin
-    with fsegments[int1] do begin
-     if po1^.nodes <> nil then begin
-      defaultnode:= po1^.nodes[high(po1^.nodes)];
-     end
-     else begin
-      defaultnode:= po1^.defaultnode;
-     end;
-    end;
+   if po1^.nodes = nil then begin
+    fsegments[int1].defaultnode:= po1^.defaultnode;
    end
    else begin
-    po1:= @fsegments[int1];
+    fsegments[int1].defaultnode:= po1^.nodes[high(po1^.nodes)];
    end;
+   inc(po1);
   end;
  end;
 end;
@@ -3433,6 +3441,7 @@ end;
 constructor tsigsampler.create(aowner: tcomponent);
 begin
  fbufferlength:= defaultsamplecount;
+ frefreshus:= -1;
  inherited;
  ftrigger:= tchangedoubleinputconn.create(self,isigclient(self),
                                                              @dotriggerchange);
@@ -3440,6 +3449,13 @@ begin
  ftriggerlevel:= tchangedoubleinputconn.create(self,isigclient(self),
                                                              @dotriggerchange);
  ftriggerlevel.name:= 'triggerlevel';
+ ftimer:= tsimpletimer.create(0,@dotimer,false,[to_leak]);
+end;
+
+destructor tsigsampler.destroy;
+begin
+ ftimer.free;
+ inherited;
 end;
 
 function tsigsampler.gethandler: sighandlerprocty;
@@ -3481,6 +3497,12 @@ begin
   if fbufpo = fbufferlength then begin
    frunning:= false;
    dobufferfull;
+  end;
+ end
+ else begin
+  if fstartpending then begin
+   fstartpending:= false;
+   start;
   end;
  end;
 end;
@@ -3531,6 +3553,7 @@ end;
 
 procedure tsigsampler.dotriggerchange(const sender: tobject);
 begin
+ //dummy
 end;
 
 procedure tsigsampler.start;
@@ -3562,6 +3585,42 @@ begin
  if foptions <> avalue then begin
   foptions:= avalue;
   fnegtrig:= sso_negtrig in foptions;
+ end;
+end;
+
+procedure tsigsampler.setrefreshus(const avalue: integer);
+begin
+ if frefreshus <> avalue then begin
+  frefreshus:= avalue;
+  if avalue < 0 then begin
+   ftimer.enabled:= false;
+  end
+  else begin
+   ftimer.interval:= avalue;
+   if componentstate * [csloading,csdesigning] = [] then begin
+    ftimer.enabled:= true;
+   end;
+  end;
+ end;
+end;
+
+procedure tsigsampler.dotimer(const sender: tobject);
+begin
+ lock;
+ if not fstarted then begin
+  start;
+ end
+ else begin
+  fstartpending:= true;
+ end;
+ unlock;
+end;
+
+procedure tsigsampler.loaded;
+begin
+ inherited;
+ if (frefreshus >= 0) and not (csdesigning in componentstate) then begin
+  ftimer.enabled:= true;
  end;
 end;
 

@@ -214,6 +214,8 @@ end;
 
 procedure tcustomaudioout.stop;
 begin
+ fthread.terminate;
+ application.waitforthread(fthread);
  freeandnil(fthread);
  pa_simple_free(fpulsestream);
  releasepulsesimple;

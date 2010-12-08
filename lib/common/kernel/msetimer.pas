@@ -207,9 +207,12 @@ begin
   nexttime:= time + longword(ainterval);
   interval:= ainterval;
   options:= aoptions;
-  if to_single in aoptions{ainterval < 0} then begin
-   interval:= 0;
+  if ainterval = 0 then begin
+   include(options,to_leak); //on idle
   end;
+//  if to_single in aoptions{ainterval < 0} then begin
+//   interval:= 0;
+//  end;
   ontimer:= aontimer;
  end;
  insert(po);
@@ -253,7 +256,7 @@ begin
    extract(po);
    ontimer:= po^.ontimer;
    po2:= po^.nextpo;
-   if (po^.interval = 0) or not assigned(ontimer) then begin
+   if (to_single in po^.options) or not assigned(ontimer) then begin
                   //single shot or killed, remove item
     dispose(po);
     if assigned(ontimer) then begin
@@ -337,7 +340,7 @@ end;
 
 procedure tsimpletimer.dotimer;
 begin
- if (to_single in foptions) or (finterval = 0) then begin
+ if (to_single in foptions) {or (finterval = 0)} then begin
   fenabled:= false;
  end;
 // if finterval <= 0 then begin
