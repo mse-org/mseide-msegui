@@ -192,7 +192,7 @@ type
  siginfopoarty = array of psiginfoty;
  signahdlerprocty = procedure(siginfo: psiginfoty);
  
- siginfostatety = (sis_checked,sis_eventchecked,
+ siginfostatety = (sis_checked,sis_eventchecked,sis_touched,
                    sis_input,sis_output{,sis_recursive});
  siginfostatesty = set of siginfostatety;
  
@@ -459,6 +459,7 @@ type
    fpretrigger: boolean;
    frunning: boolean;
    fsigbuffer: samplerbufferty;
+   procedure updateoptions(var avalue: sigsampleroptionsty); virtual;
    procedure dotimer(const sender: tobject);
    function gethandler: sighandlerprocty; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
@@ -2206,9 +2207,23 @@ var
   result:= true;
   for int1:= 0 to high(ainputs) do begin
    with ainputs[int1] do begin
-    if (source <> nil) {and not (ocs_eventdriven in source.fstate)} then begin
+    if (source <> nil) then begin
      result:= false;
      break;
+    end;
+   end;
+  end;
+ end;
+
+ procedure touchnode(const anode: psiginfoty);
+ var
+  int1: integer;
+ begin
+  with anode^ do begin
+   include(state,sis_touched);
+   for int1:= 0 to high(next) do begin
+    if not (sis_touched in next[int1]^.state) then begin
+     touchnode(next[int1]);
     end;
    end;
   end;
@@ -2378,7 +2393,6 @@ begin
     include(state,sis_output);
    end
    else begin
-//    additem(pointerarty(foutputnodes),po1,outputnodecount);
    {$ifdef mse_debugsignal}
     debugnodeinfo(' output node ',po1);
    {$endif}
@@ -2389,6 +2403,7 @@ begin
    else begin
     if sis_output in state then begin
      additem(pointerarty(finputnodes),po1,inputnodecount);
+     touchnode(po1);
     {$ifdef mse_debugsignal}
      debugnodeinfo(' input node ',po1);
     {$endif}
@@ -2402,8 +2417,6 @@ begin
    end;
   end;
  end;
- setlength(finputnodes,inputnodecount);
-// setlength(foutputnodes,outputnodecount);
 
 {$ifdef mse_debugsignal}
  debugwriteln('*check event connections');
@@ -2435,6 +2448,25 @@ begin
   end;
  end;
   
+{$ifdef mse_debugsignal}
+ debugwriteln('*check recursive without inputs');
+{$endif}
+ for int1:= 0 to high(fclients) do begin
+  po1:= @finfos[int1];
+  with po1^ do begin
+   if state * [sis_output,sis_touched,sis_eventchecked] = 
+                                                [sis_output] then begin
+    additem(pointerarty(finputnodes),po1,inputnodecount);
+   {$ifdef mse_debugsignal}
+    debugnodeinfo(' recursive circle start ',po1);
+    touchnode(po1);
+   {$endif}
+   end;
+  end;
+ end;
+ 
+ setlength(finputnodes,inputnodecount);
+
 {$ifdef mse_debugsignal}
   debugwriteln('*check recursion');
 {$endif}
@@ -3585,6 +3617,7 @@ procedure tsigsampler.setoptions(const avalue: sigsampleroptionsty);
 begin
  if foptions <> avalue then begin
   foptions:= avalue;
+  updateoptions(foptions);
   fnegtrig:= sso_negtrig in foptions;
  end;
 end;
@@ -3623,6 +3656,11 @@ begin
  if (frefreshus >= 0) and not (csdesigning in componentstate) then begin
   ftimer.enabled:= true;
  end;
+end;
+
+procedure tsigsampler.updateoptions(var avalue: sigsampleroptionsty);
+begin
+ exclude(avalue,sso_fftmag);
 end;
 
 end.

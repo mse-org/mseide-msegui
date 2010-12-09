@@ -130,6 +130,7 @@ type
    ffftbuffer: samplerbufferty;
    procedure dobufferfull; override;
    procedure initmodel; override;
+   procedure updateoptions(var avalue: sigsampleroptionsty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -404,6 +405,11 @@ begin
  inherited;
  ffftbuffer:= nil;
  setlength(ffftbuffer,inputs.count);
+end;
+
+procedure tsigsamplerfft.updateoptions(var avalue: sigsampleroptionsty);
+begin
+ //dummy
 end;
 
 end.
