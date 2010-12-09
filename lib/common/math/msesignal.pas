@@ -796,12 +796,12 @@ type
    procedure execevent(const aintf: isigclient);
    procedure checktick;
    procedure dotick;
-   procedure lockapplication;  //releases controller lock, can not be nested
-                               //call from locked signal thread only
-   procedure unlockapplication;//acquires controller lock
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure lockapplication;  //releases controller lock, can not be nested
+                               //call from locked signal thread only
+   procedure unlockapplication;//acquires controller lock
    procedure modelchange;
    procedure checkmodel;
    procedure step(acount: integer=1);

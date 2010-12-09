@@ -309,6 +309,8 @@ type
    procedure assign(source: tpersistent); override;
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
+   procedure setdata(const adata: realararty); overload;
+   procedure setdata(const adata: complexararty); overload;
    property logx: boolean read getlogx write setlogx;
    property logy: boolean read getlogy write setlogy;
    property items[const index: integer]: ttrace read getitems 
@@ -2247,6 +2249,30 @@ begin
  result:= fimage_list;
  if (result = nil) and (cto_stockglyphs in foptions) then begin
   result:= stockobjects.glyphs;
+ end;
+end;
+
+procedure ttraces.setdata(const adata: realararty);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(adata) do begin
+  if int1 > high(fitems) then begin
+   break;
+  end;
+  ttrace(fitems[int1]).ydata:= adata[int1];
+ end;
+end;
+
+procedure ttraces.setdata(const adata: complexararty);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(adata) do begin
+  if int1 > high(fitems) then begin
+   break;
+  end;
+  ttrace(fitems[int1]).xydata:= adata[int1];
  end;
 end;
 

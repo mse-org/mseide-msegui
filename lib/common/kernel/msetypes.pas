@@ -103,6 +103,7 @@ type
 
  realarty = array of realty;
  prealarty = ^realarty;
+ realararty = array of realarty;
 
  singlearty = array of single;
  singlepoarty = array of psingle;
@@ -132,6 +133,7 @@ type
  pcomplexty = ^complexty;
  complexarty = array of complexty;
  pcomplexarty = ^complexarty;
+ complexararty = array of complexarty;
  stringarty = array of string;
  pstringarty = ^stringarty;
  stringararty = array of stringarty;
