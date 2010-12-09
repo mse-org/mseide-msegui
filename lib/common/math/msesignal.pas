@@ -433,7 +433,8 @@ type
  samplerbufferfulleventty = procedure(const sender: tsigsampler;
                               const abuffer: samplerbufferty) of object;
 
- sigsampleroptionty = (sso_negtrig);
+ sigsampleroptionty = (sso_negtrig,
+                       sso_fftmag); //used by tsigsamplerfft
  sigsampleroptionsty = set of sigsampleroptionty;
 
  tsigsampler = class(tsigmultiinp)
@@ -457,7 +458,7 @@ type
    fstartpending: boolean;
    fpretrigger: boolean;
    frunning: boolean;
-   fbuffer: samplerbufferty;
+   fsigbuffer: samplerbufferty;
    procedure dotimer(const sender: tobject);
    function gethandler: sighandlerprocty; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
@@ -3490,8 +3491,8 @@ begin
   end;
  end;
  if frunning then begin
-  for int1:= 0 to high(fbuffer) do begin
-   fbuffer[int1][fbufpo]:= finps[int1]^;
+  for int1:= 0 to high(fsigbuffer) do begin
+   fsigbuffer[int1][fbufpo]:= finps[int1]^;
   end;
   inc(fbufpo);
   if fbufpo = fbufferlength then begin
@@ -3534,10 +3535,10 @@ var
  int1: integer;
 begin
  inherited;
- fbuffer:= nil;
- setlength(fbuffer,finputs.count);
- for int1:= 0 to high(fbuffer) do begin
-  setlength(fbuffer[int1],fbufferlength);
+ fsigbuffer:= nil;
+ setlength(fsigbuffer,finputs.count);
+ for int1:= 0 to high(fsigbuffer) do begin
+  setlength(fsigbuffer[int1],fbufferlength);
  end;
 end;
 
@@ -3568,7 +3569,7 @@ end;
 procedure tsigsampler.dobufferfull;
 begin
  if assigned(fonbufferfull) then begin
-  fonbufferfull(self,fbuffer);
+  fonbufferfull(self,fsigbuffer);
  end;
 end;
 

@@ -111,7 +111,38 @@ type
    property windowfuncpar1: double read getwindowfuncpar1 
                                           write setwindowfuncpar1;   
  end;
- 
+
+ tsigsamplerfft = class;
+ samplerffteventty = procedure(const sender: tsigsamplerfft;
+                              const abuffer: samplerbufferty) of object;
+
+ tsigsamplerfft = class(tsigsampler)
+  private
+   ffft: tfft;
+   fonfft: samplerffteventty;
+   function getwindowfunc: windowfuncty;
+   procedure setwindowfunc(const avalue: windowfuncty);
+   function getwindowfuncpar0: double;
+   procedure setwindowfuncpar0(const avalue: double);
+   function getwindowfuncpar1: double;
+   procedure setwindowfuncpar1(const avalue: double);
+  protected
+   ffftbuffer: samplerbufferty;
+   procedure dobufferfull; override;
+   procedure initmodel; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property windowfunc: windowfuncty read getwindowfunc 
+                write setwindowfunc default wf_rectangular;
+   property windowfuncpar0: double read getwindowfuncpar0 
+                                          write setwindowfuncpar0;   
+   property windowfuncpar1: double read getwindowfuncpar1 
+                                          write setwindowfuncpar1;   
+   property onfft: samplerffteventty read fonfft write fonfft;
+ end;
+  
 implementation
 
 { tbufferdoubleinputconn }
@@ -304,6 +335,75 @@ end;
 procedure tsigfft.setwindowfuncpar1(const avalue: double);
 begin
  ffft.windowfuncpar1:= avalue;
+end;
+
+{ tsigsamplerfft }
+
+constructor tsigsamplerfft.create(aowner: tcomponent);
+begin
+ inherited;
+ ffft:= tfft.create(nil);
+end;
+
+destructor tsigsamplerfft.destroy;
+begin
+ ffft.free;
+ inherited;
+end;
+
+function tsigsamplerfft.getwindowfunc: windowfuncty;
+begin
+ result:= ffft.windowfunc;
+end;
+
+procedure tsigsamplerfft.setwindowfunc(const avalue: windowfuncty);
+begin
+ ffft.windowfunc:= avalue;
+end;
+
+function tsigsamplerfft.getwindowfuncpar0: double;
+begin
+ result:= ffft.windowfuncpar0;
+end;
+
+procedure tsigsamplerfft.setwindowfuncpar0(const avalue: double);
+begin
+ ffft.windowfuncpar0:= avalue;
+end;
+
+function tsigsamplerfft.getwindowfuncpar1: double;
+begin
+ result:= ffft.windowfuncpar1;
+end;
+
+procedure tsigsamplerfft.setwindowfuncpar1(const avalue: double);
+begin
+ ffft.windowfuncpar1:= avalue;
+end;
+
+procedure tsigsamplerfft.dobufferfull;
+var
+ int1: integer;
+begin
+ inherited;
+ if sso_fftmag in options then begin
+  for int1:= 0 to high(ffftbuffer) do begin
+   ffft.inpreal:= fsigbuffer[int1];
+   ffftbuffer[int1]:= ffft.outreal;
+  end;
+  if assigned(fonfft) then begin
+   fonfft(self,ffftbuffer);
+  end;
+ end;
+end;
+
+procedure tsigsamplerfft.initmodel;
+var
+ int1: integer;
+begin
+ inherited;
+ ffftbuffer:= nil;
+ setlength(ffftbuffer,inputs.count);
 end;
 
 end.

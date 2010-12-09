@@ -1386,7 +1386,8 @@ var
  buf1: samplerbufferty;
  int1: integer;
 begin
- buf1:= copy(fbuffer);
+ inherited;
+ buf1:= copy(fsigbuffer);
  lockapplication;
  try
   with fscope.traces do begin
@@ -1400,7 +1401,6 @@ begin
  finally
   unlockapplication;
  end;
- inherited;
 end;
 
 { tsigscope }

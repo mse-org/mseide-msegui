@@ -50,7 +50,7 @@ begin
                             tsigdelay,tsigdelayn,tsigfir,tsigiir,
                             tsigwavetable,tsigfuncttable,tsigenvelope,
                             tsigsampler,tsigscope,
-                            tsigfft,tfft,
+                            tsigfft,tfft,tsigsamplerfft,
                             tsigslider,tsigkeyboard,
                             twavetableedit,tfuncttableedit,tffttableedit,tenvelopeedit
                             ]);
