@@ -51,6 +51,8 @@ type
  end;
  datapointarty = array of datapointty;
 
+ barrefty = (br_zero,br_top,br_bottom);
+  
  traceinfoty = record
   xdata: realarty;
   ydata: realarty;
@@ -79,6 +81,7 @@ type
   bar_width: integer;
   bar_frame: tframe;
   bar_face: tface;
+  bar_ref: barrefty;
   start: integer;
   imagenr: imagenrty;
   name: string;
@@ -90,7 +93,7 @@ type
   public
    constructor create(const intf: iframe);
  end;
- 
+
  ttrace = class(townedeventpersistent,iimagelistinfo,iframe,iface)
   private
    finfo: traceinfoty;
@@ -143,6 +146,7 @@ type
    procedure setbar_frame(const avalue: tframe);
    function getbar_face: tface;
    procedure setbar_face(const avalue: tface);
+   procedure setbar_ref(const avalue: barrefty);
   protected
    ftraces: ttraces;
    procedure setkind(const avalue: tracekindty); virtual;
@@ -237,6 +241,7 @@ type
                                   write setbar_width default 0; //0 -> bar line
    property bar_frame: tframe read getbar_frame write setbar_frame;
    property bar_face: tface read getbar_face write setbar_face;
+   property bar_ref: barrefty read finfo.bar_ref write setbar_ref default br_zero;
    
    property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
    property name: string read finfo.name write finfo.name;
@@ -265,6 +270,7 @@ type
    fkind: tracekindty;
    fchartkind: tracechartkindty;
    fbar_width: integer;
+   fbar_ref: barrefty;
    procedure setitems(const index: integer; const avalue: ttrace);
    function getitems(const index: integer): ttrace;
    procedure setxserstart(const avalue: real);
@@ -283,6 +289,7 @@ type
    procedure setlogy(const avalue: boolean);
    procedure setchartkind(const avalue: tracechartkindty);
    procedure setbar_width(const avalue: integer);
+   procedure setbar_ref(const avalue: barrefty);
   protected
    fsize: sizety;
    fscalex: real;
@@ -325,6 +332,7 @@ type
    property image_heighthmm: real read fimage_heightmm write setimage_heightmm;
    property bar_width: integer read fbar_width 
                                   write setbar_width default 0; //0 -> bar line
+   property bar_ref: barrefty read fbar_ref write setbar_ref default br_zero;
  end;
 
  txytrace = class(ttrace)
@@ -1037,12 +1045,22 @@ begin
      else begin //tck_barline
       with finfo do begin
        setlength(barlines,length(datapoints));
-       int2:= round(yo*ys); //zero position
-       if int2 < 0 then begin
-        int2:= 0;
-       end;
-       if int2 > tcustomchart(fowner).traces.fsize.cy then begin
-        int2:= tcustomchart(fowner).traces.fsize.cy;
+       case bar_ref of
+        br_top: begin
+         int2:= -1;
+        end;
+        br_bottom: begin 
+         int2:= tcustomchart(fowner).traces.fsize.cy+1;
+        end;
+        else begin //br_zero
+         int2:= round(yo*ys); //zero position
+         if int2 < 0 then begin
+          int2:= -1;
+         end;
+         if int2 > tcustomchart(fowner).traces.fsize.cy+1 then begin
+          int2:= tcustomchart(fowner).traces.fsize.cy+1;
+         end;
+        end;
        end;
        for int1:= 0 to high(barlines) do begin
         with barlines[int1] do begin
@@ -1101,7 +1119,11 @@ begin
       rect1.cy:= b.y - a.y;
       acanvas.fillrect(rect1,finfo.color);
       if finfo.bar_frame <> nil then begin
-       normalizerect1(rect1);
+//       normalizerect1(rect1);
+       if rect1.cy < 0 then begin
+        rect1.y:= rect1.y + rect1.cy;
+        rect1.y:= -rect1.y;
+       end;
        acanvas.save;
        finfo.bar_frame.paintbackground(acanvas,rect1);
        if finfo.bar_face <> nil then begin
@@ -1264,6 +1286,14 @@ procedure ttrace.setbar_width(const avalue: integer);
 begin
  if finfo.bar_width <> avalue then begin
   finfo.bar_width:= avalue;
+  datachange;
+ end;
+end;
+
+procedure ttrace.setbar_ref(const avalue: barrefty);
+begin
+ if finfo.bar_ref <> avalue then begin
+  finfo.bar_ref:= avalue;
   datachange;
  end;
 end;
@@ -2063,6 +2093,19 @@ begin
  end;
 end;
 
+procedure ttraces.setbar_ref(const avalue: barrefty);
+var
+ int1: integer;
+begin
+ if fbar_ref <> avalue then begin
+  fbar_ref:= avalue;
+  if not (csloading in tcuchart(fowner).componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    ttrace(fitems[int1]).bar_ref:= avalue;
+   end;
+  end;
+ end;
+end;
 
 procedure ttraces.setoptions(const avalue: charttraceoptionsty);
 var
@@ -2091,6 +2134,7 @@ begin
   kind:= self.fkind;
   chartkind:= self.fchartkind;
   bar_width:= self.fbar_width;
+  bar_ref:= self.fbar_ref;
   options:= self.foptions;
   xserstart:= self.fxserstart;
   xstart:= self.fxstart;
