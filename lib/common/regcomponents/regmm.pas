@@ -19,7 +19,7 @@ unit regmm;
 interface
 implementation
 uses
- mseaudio,msedesignintf,msesignalaudio;
+ mseaudio,msedesignintf,msesigaudio;
  
 procedure register;
 begin
