@@ -3641,7 +3641,7 @@ end;
 procedure tsigsampler.dotimer(const sender: tobject);
 begin
  lock;
- if not fstarted then begin
+ if not fstarted and not frunning then begin
   start;
  end
  else begin

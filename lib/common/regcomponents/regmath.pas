@@ -24,7 +24,7 @@ implementation
 uses
  classes,msefft,msedesignintf,msesignal,msefilter,
  msepropertyeditors,msestrings,msedesigner,msesigfft,regmath_bmp,
- msesiggui,msesigfftgui;
+ msesiggui,msesigfftgui,msesignoise;
 
 type
  tinputconnpropertyeditor = class(tsubcomponentpropertyeditor)
@@ -48,7 +48,7 @@ procedure register;
 begin
  registercomponents('Math',[tsigcontroller,tsigout,tsigin,tsigadd,tsigmult,
                             tsigdelay,tsigdelayn,tsigfir,tsigiir,
-                            tsigwavetable,tsigfuncttable,tsigenvelope,
+                            tsigwavetable,tsignoise,tsigfuncttable,tsigenvelope,
                             tsigsampler,tsigscope,tsigscopefft,
                             tsigfft,tfft,tsigsamplerfft,
                             tsigslider,tsigkeyboard,
