@@ -15,6 +15,8 @@ uses
  msesignal,classes;
  
 type
+ noisekindty = (nk_white,nk_pink);
+ 
  tsignoise = class(tdoublesigoutcomp)
   private
    famplitudepo: pdouble;
@@ -25,10 +27,18 @@ type
    fscale: double;
    fsamplehigh: integer;
    fsamplecount: integer;
+   fkind: noisekindty;
+   fcutofffrequ: real;
+   fsum: real;
+   fsumfact: real;
    procedure setamplitude(const avalue: tdoubleinputconn);
    procedure setoffset(const avalue: tdoubleinputconn);
    procedure setsamplecount(const avalue: integer);
+   procedure setkind(const avalue: noisekindty);
+   procedure setcutofffrequ(const avalue: real);
   protected
+   procedure sighandlerpink1(const ainfo: psighandlerinfoty);
+   procedure sighandlerpinkn(const ainfo: psighandlerinfoty);
    procedure sighandler1(const ainfo: psighandlerinfoty);
    procedure sighandlern(const ainfo: psighandlerinfoty);
     //isigclient
@@ -45,6 +55,9 @@ type
    property samplecount: integer read fsamplecount 
                                      write setsamplecount default 1;
                       //1 -> uniform distribution
+   property kind: noisekindty read fkind write setkind default nk_white;
+   property cutofffrequ: real read fcutofffrequ write setcutofffrequ;
+                                               //nk_pink only
  end;
  
 implementation
@@ -67,21 +80,45 @@ procedure tsignoise.clear;
 begin
  fz:= random($ffffffff)+1;
  fw:= random($ffffffff)+1;
+ fsum:= 0;
  inherited;
 end;
 
 function tsignoise.gethandler: sighandlerprocty;
 begin
  if fsamplecount = 1 then begin
-  result:= @sighandler1;
+  case fkind of
+   nk_pink: begin
+    result:= @sighandlerpink1;
+   end
+   else begin //nk_white
+    result:= @sighandler1;
+   end;
+  end;
  end
  else begin
-  result:= @sighandlern;
+  case fkind of
+   nk_pink: begin
+    result:= @sighandlerpinkn;
+   end
+   else begin //nk_white
+    result:= @sighandlern;
+   end;
+  end;
  end;
 end;
 
 procedure tsignoise.initmodel;
+var
+ do1: double;
 begin
+ do1:= fcutofffrequ*2*pi;
+ fsamplehigh:= fsamplecount - 1;
+ fscale:= maxint * sqrt(fsamplecount);
+ if (fkind = nk_pink) and (do1 > 0) then begin
+  fscale:= fscale/sqrt(do1);
+ end;
+ fsumfact:= exp(-do1);
  famplitudepo:= @tdoubleinputconn1(famplitude).fvalue;
  foffsetpo:= @tdoubleinputconn1(foffset).fvalue;
  inherited;
@@ -120,6 +157,29 @@ begin
  ainfo^.dest^:= integer((fz shl 16) + fw)/fscale;
 end;
 
+procedure tsignoise.sighandlerpinkn(const ainfo: psighandlerinfoty);
+var
+ int1: integer;
+ do1: double;
+begin
+ do1:= 0;
+ for int1:= 0 to fsamplehigh do begin //mwc by george marsaglia
+  fz:= 36969 * (fz and $ffff) + (fz shr 16);
+  fw:= 18000 * (fw and $ffff) + (fw shr 16);
+  do1:= do1 + integer((fz shl 16) + fw)/fscale;
+ end;
+ fsum:= fsum*fsumfact+do1;
+ ainfo^.dest^:= fsum;
+end;
+
+procedure tsignoise.sighandlerpink1(const ainfo: psighandlerinfoty);
+begin
+ fz:= 36969 * (fz and $ffff) + (fz shr 16);
+ fw:= 18000 * (fw and $ffff) + (fw shr 16);
+ fsum:= fsum*fsumfact + integer((fz shl 16) + fw)/fscale;
+ ainfo^.dest^:= fsum;
+end;
+
 procedure tsignoise.setamplitude(const avalue: tdoubleinputconn);
 begin
  famplitude.assign(avalue);
@@ -138,8 +198,26 @@ begin
   if fsamplecount <= 0 then begin
    fsamplecount:= 1;
   end;
-  fsamplehigh:= fsamplecount - 1;
-  fscale:= maxint * sqrt(fsamplecount);
+  modelchange;
+  unlock;
+ end;
+end;
+
+procedure tsignoise.setkind(const avalue: noisekindty);
+begin
+ if fkind <> avalue then begin
+  lock;
+  fkind:= avalue;
+  modelchange;
+  unlock;
+ end;
+end;
+
+procedure tsignoise.setcutofffrequ(const avalue: real);
+begin
+ if fcutofffrequ <> avalue then begin
+  lock;
+  fcutofffrequ:= avalue;
   modelchange;
   unlock;
  end;
