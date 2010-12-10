@@ -75,7 +75,7 @@ type
   procedure clear;
   function getinputar: inputconnarty;
   function getoutputar: outputconnarty;
-  function getnamepath: string;
+//  function getnamepath: string;
   function gethandler: sighandlerprocty;
   function getzcount: integer;
   function getcomponent: tcomponent;
@@ -797,6 +797,7 @@ type
    procedure execevent(const aintf: isigclient);
    procedure checktick;
    procedure dotick;
+   function getnodenamepath(const aintf: isigclient): string;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2054,7 +2055,7 @@ begin
   str1:= '<NIL>';
  end
  else begin
-  str1:= anode^.intf.getnamepath + 
+  str1:= getnodenamepath(anode^.intf) + 
              ' conncount: '+inttostr(anode^.connectedcount);
  end; 
  debugwriteln(atext+str1);
@@ -2126,8 +2127,9 @@ var
     int2:= findinplink(po1,anode);
     if finditem(visited,po1) >= 0 then begin
      if zcount = 0 then begin
-      raise exception.create('No Z-delay in recursion node '+intf.getnamepath+
-             ' -> '+po1^.intf.getnamepath+'.');
+      raise exception.create('No Z-delay in recursion node '+
+                getnodenamepath(intf)+
+             ' -> '+getnodenamepath(po1^.intf)+'.');
      end
      else begin
       include(po1^.inputs[int2].state,ins_recursive);
@@ -2292,7 +2294,7 @@ begin
    intf.clear;
    zcount:= intf.getzcount;
   {$ifdef mse_debugsignal}
-   debugwriteln('client '+intf.getnamepath);
+   debugwriteln('client '+getnodenamepath(intf));
   {$endif}
    ar3:= fclients[int1].getinputar;
    setlength(inputs,length(ar3));
@@ -2356,7 +2358,7 @@ begin
        if po2 = nil then begin
         raise exception.create(
          'Destination not found. Controller: '+self.name+ ', Node: '+
-                     fclients[int1].getnamepath +
+                     getnodenamepath(fclients[int1]) +
                  ', Dest: '+fdestinations[int3].fsigintf.getcomponent.name+'.');
        end;
        if not (ocs_eventdriven in fstate) then begin
@@ -2431,8 +2433,8 @@ begin
        if sis_eventchecked in po2^.state then begin
         raise exception.create(
          'Recursive event connection: '+self.name+ ', Node: '+
-                     finfos[int1].intf.getnamepath +
-                 ', Dest: '+po2^.intf.getnamepath+'.');
+                     getnodenamepath(finfos[int1].intf) +
+                 ', Dest: '+getnodenamepath(po2^.intf)+'.');
        end; 
       {$ifdef mse_debugsignal}
        debugnodeinfo('event source ',@finfos[int1]);
@@ -2454,7 +2456,7 @@ begin
  for int1:= 0 to high(fclients) do begin
   po1:= @finfos[int1];
   with po1^ do begin
-   if state * [sis_output,sis_touched,sis_eventchecked] = 
+   if state * [sis_input,sis_output,sis_touched,sis_eventchecked] = 
                                                 [sis_output] then begin
     additem(pointerarty(finputnodes),po1,inputnodecount);
    {$ifdef mse_debugsignal}
@@ -2757,6 +2759,11 @@ begin
  for int1:= flockapplocks - 1 downto 0 do begin
   lock;
  end;
+end;
+
+function tsigcontroller.getnodenamepath(const aintf: isigclient): string;
+begin
+ result:= ownernamepath(aintf.getcomponent);
 end;
 
 { tsigwavetable }
