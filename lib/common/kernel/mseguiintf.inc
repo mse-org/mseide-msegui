@@ -14,6 +14,7 @@ procedure GUI_DEBUGBEGIN; export;
 procedure GUI_DEBUGEND; export;
 
 function gui_setmainthread: guierrorty; //set mainthread to currentthread
+function gui_sethighrestimer(const avalue: boolean): guierrorty;
 function gui_grouphideminimizedwindows: boolean; //true for win32
 
 //application has to be locked for all following calls

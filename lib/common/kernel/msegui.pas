@@ -2213,6 +2213,7 @@ type
   protected  
    procedure sysevent(const awindow: winidty; var aevent: syseventty;
                                                     var handled: boolean);
+   procedure sethighrestimer(const avalue: boolean); override;
    procedure dopostevent(const aevent: tmseevent); override;
    procedure eventloop(const once: boolean = false);
                         //used in win32 wm_queryendsession and wm_entersizemove
@@ -16670,6 +16671,11 @@ procedure tguiapplication.sysevent(const awindow: winidty;
                             var aevent: syseventty; var handled: boolean);
 begin
  tinternalapplication(self).fonsyseventlist.doevent(awindow,aevent,handled);
+end;
+
+procedure tguiapplication.sethighrestimer(const avalue: boolean);
+begin
+ guierror(gui_sethighrestimer(avalue));
 end;
 
 procedure tguiapplication.dopostevent(const aevent: tmseevent);

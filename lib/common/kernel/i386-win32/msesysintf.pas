@@ -31,7 +31,7 @@ var
 
 implementation
 uses
- sysutils,windows,msebits,msefileutils,msedatalist,dateutils;
+ sysutils,windows,msebits,msefileutils,msedatalist,dateutils,msesystimer;
 
 //todo: correct unicode implementation, long filepaths, stubs for win95
 
@@ -577,9 +577,10 @@ begin
  end;
 end;
 
-function sys_gettimeus: cardinal;
+function sys_gettimeus: longword;
 begin
- result:= gettickcount * 1000;
+ result:= systimerus;
+// result:= gettickcount * 1000;
 end;
 {
 function sys_getlastsyserror: integer;

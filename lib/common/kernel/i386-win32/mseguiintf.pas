@@ -32,6 +32,12 @@ const
  pixel0 = $ffffff;   //select colorbackground
  pixel1 = $000000;   //select colorforeground
 
+ msemessage = wm_user + $3694;
+ wakeupmessage = msemessage + 1;
+ destroymessage = msemessage + 2;
+ traycallbackmessage = msemessage + 3;
+ timermessage = msemessage + 4;
+
 {$ifdef FPC}
 {$include ../mseguiintf.inc}
 {$else}
@@ -52,7 +58,8 @@ var
 implementation
 //todo: 19.10.03 rasterops for textout
 uses
- sysutils,mselist,msekeyboard,msebits,msedatalist,msesysutils,msegui;
+ sysutils,mselist,msekeyboard,msebits,msedatalist,msesysutils,msegui,
+ msesystimer;
 
 type
 
@@ -88,12 +95,7 @@ const
  widgetclassname = 'msetoplevelwidget';
  childwidgetclassname = 'msechildwidget';
  wndextrabytes = sizeof(wndextrainfoty);
- 
- msemessage = wm_user + $3694;
- wakeupmessage = msemessage + 1;
- destroymessage = msemessage + 2;
- traycallbackmessage = msemessage + 3;
- 
+  
  mouseidletime = 100; //milliseconds
  capstyles: array[capstylety] of longword =
        (ps_endcap_flat,ps_endcap_round,ps_endcap_square);
@@ -307,7 +309,7 @@ var
  eventlist: tobjectqueue;
  nullpen: hpen;
  nullbrush: hbrush;
- timer: longword;
+// timer: longword;
  mouseidletimer: longword;
  mainthread: longword;
  mousewindow: hwnd;
@@ -523,6 +525,16 @@ begin
   top:= atop;
   right:= aright;
   bottom:= abottom;
+ end;
+end;
+
+function gui_sethighrestimer(const avalue: boolean): guierrorty;
+begin
+ if setmmtimer(avalue) then begin
+  result:= gue_ok;
+ end
+ else begin
+  result:= gue_timer;
  end;
 end;
 
@@ -1238,7 +1250,7 @@ begin
  mousecursor:= cursor;
  result:= gue_ok;
 end;
-
+{
 procedure killtimer;
 begin
  if timer <> 0 then begin
@@ -1265,6 +1277,12 @@ begin
  else begin
   result:= gue_ok;
  end;
+end;
+}
+function gui_settimer(us: longword): guierrorty;
+               //send et_timer event after delay or us (micro seconds)
+begin
+ setsystimer(us);
 end;
 
 procedure gui_beep;
@@ -4318,6 +4336,10 @@ begin
    eventlist.add(nil);
    exit;
   end;
+  timermessage: begin
+   eventlist.add(tmseevent.create(ek_timer));
+   exit;
+  end;
   traycallbackmessage: begin
    case lparam and $ffff of
     wm_lbuttondown,wm_mbuttondown,wm_rbuttondown: begin
@@ -5213,6 +5235,7 @@ begin
  if applicationallocated then begin
   createapphandle(applicationwindow);
  end;
+ systimerinit(eventlist);
 end;
 
 function gui_deinit: guierrorty;
@@ -5220,7 +5243,8 @@ var
  acursor: cursorshapety;
 
 begin
- killtimer;
+ systimerdeinit;
+// killtimer;
  killmouseidletimer;
  if applicationwindow <> 0 then begin
   destroywindow(applicationwindow);

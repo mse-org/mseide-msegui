@@ -855,6 +855,11 @@ begin
  end;
 end;
 
+function gui_sethighrestimer(const avalue: boolean): guierrorty;
+begin
+ result:= gue_ok; //dummy
+end;
+
 function gui_grouphideminimizedwindows: boolean;
 begin
  result:= false;

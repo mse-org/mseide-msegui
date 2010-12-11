@@ -207,6 +207,7 @@ type
    fexceptioncount: longword;
    fonexception: exceptioneventty;
    finiting: integer;
+   fhighrestimercount: integer;
    function dolock: boolean;
    function internalunlock(count: integer): boolean;
    function getterminated: boolean;
@@ -220,6 +221,7 @@ type
    fonidlelist: tonidlelist;
    procedure flusheventbuffer;
    procedure doidle;
+   procedure sethighrestimer(const avalue: boolean); virtual; abstract;
    procedure dopostevent(const aevent: tmseevent); virtual; abstract;
    function getevents: integer; virtual; abstract;
     //application must be locked
@@ -244,6 +246,8 @@ type
    
    procedure initialize;
    procedure deinitialize;
+   procedure beginhighrestimer;
+   procedure endhighrestimer;
    
    function procid: procidty;
    procedure createdatamodule(instanceclass: msecomponentclassty; var reference);
@@ -1521,6 +1525,22 @@ end;
 procedure tcustomapplication.objecteventdestroyed(const sender: tobjectevent);
 begin
  //dummy
+end;
+
+procedure tcustomapplication.beginhighrestimer;
+begin
+ if fhighrestimercount = 0 then begin
+  sethighrestimer(true);
+ end;
+ inc(fhighrestimercount);
+end;
+
+procedure tcustomapplication.endhighrestimer;
+begin
+ dec(fhighrestimercount);
+ if fhighrestimercount = 0 then begin
+  sethighrestimer(false);
+ end;
 end;
 
 { tactivatorcontroller }

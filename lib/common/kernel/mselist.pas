@@ -14,7 +14,7 @@ unit mselist;
 interface
 
 uses
- msetypes,msestrings,mseglob,Classes,sysutils;
+ msetypes,msestrings,mseglob,Classes,sysutils,msesys;
 
 type
  arraysortcomparety = function (const l,r): integer;
@@ -174,6 +174,26 @@ type
    property items[index: integer]: tobject read getitems write setitems;
  end;
 
+ tlockedobjectqueue = class(tobjectqueue)
+  private
+   fmutex: mutexty;
+   function getitems(index: integer): tobject;
+   procedure setitems(index: integer; const Value: tobject);
+  protected
+   procedure lock;
+   procedure unlock;
+   procedure setcapacity(Value: integer); override;
+  public
+   constructor create(aownsobjects: boolean);
+   destructor destroy; override;
+              //items below are thread safe
+   procedure add(value: tobject);
+   procedure insert(const index: integer; const value: tobject); reintroduce;
+   function getfirst: tobject;
+   function getlast: tobject;
+   property items[index: integer]: tobject read getitems write setitems;
+ end;
+ 
  nameidty = integer;
 
  indexednameinfoty = record
@@ -1379,6 +1399,79 @@ begin
  else begin
   result:= inherited find(avalue);
  end;
+end;
+
+{ tlockedobjectqueue }
+
+constructor tlockedobjectqueue.create(aownsobjects: boolean);
+begin
+ sys_mutexcreate(fmutex);
+ inherited;
+end;
+
+destructor tlockedobjectqueue.destroy;
+begin
+ inherited;
+ sys_mutexdestroy(fmutex);
+end;
+
+function tlockedobjectqueue.getitems(index: integer): tobject;
+begin
+ lock;
+ result:= inherited getitems(index);
+ unlock;
+end;
+
+procedure tlockedobjectqueue.setitems(index: integer; const Value: tobject);
+begin
+ lock;
+ inherited setitems(index,value);
+ unlock;
+end;
+
+procedure tlockedobjectqueue.lock;
+begin
+ sys_mutexlock(fmutex);
+end;
+
+procedure tlockedobjectqueue.unlock;
+begin
+ sys_mutexunlock(fmutex);
+end;
+
+procedure tlockedobjectqueue.setcapacity(Value: integer);
+begin
+ lock;
+ inherited;
+ unlock;
+end;
+
+procedure tlockedobjectqueue.add(value: tobject);
+begin
+ lock;
+ inherited add(value);
+ unlock;
+end;
+
+procedure tlockedobjectqueue.insert(const index: integer; const value: tobject);
+begin
+ lock;
+ inherited insert(index,value);
+ unlock;
+end;
+
+function tlockedobjectqueue.getfirst: tobject;
+begin
+ lock;
+ result:= inherited getfirst;
+ unlock;
+end;
+
+function tlockedobjectqueue.getlast: tobject;
+begin
+ lock;
+ result:= inherited getlast;
+ unlock;
 end;
 
 end.
