@@ -57,7 +57,7 @@ type
                       //1 -> uniform distribution
    property kind: noisekindty read fkind write setkind default nk_white;
    property cutofffrequ: real read fcutofffrequ write setcutofffrequ;
-                                               //nk_pink only
+                                      //nk_pink only, default 0.001
  end;
  
 implementation
@@ -68,6 +68,7 @@ type
 
 constructor tsignoise.create(aowner: tcomponent);
 begin
+ fcutofffrequ:= 0.001;
  samplecount:= 1;
  inherited;
  famplitude:= tdoubleinputconn.create(self,isigclient(self));

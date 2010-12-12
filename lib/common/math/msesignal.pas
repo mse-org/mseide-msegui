@@ -554,6 +554,18 @@ type
   published
  end;
 
+ tdoublesiginoutcomp = class(tdoublesigoutcomp)
+  private
+   procedure setinput(const avalue: tdoubleinputconn);
+  protected
+   finput: tdoubleinputconn;
+   function getinputar: inputconnarty; override;
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property input: tdoubleinputconn read finput write setinput;
+ end;
+ 
  sigwavetableoptionty = (siwto_intpol);
  sigwavetableoptionsty = set of sigwavetableoptionty;
  
@@ -3668,6 +3680,25 @@ end;
 procedure tsigsampler.updateoptions(var avalue: sigsampleroptionsty);
 begin
  exclude(avalue,sso_fftmag);
+end;
+
+{ tdoublesiginoutcomp }
+
+constructor tdoublesiginoutcomp.create(aowner: tcomponent);
+begin
+ finput:= tdoubleinputconn.create(self,isigclient(self));
+ inherited;
+end;
+
+procedure tdoublesiginoutcomp.setinput(const avalue: tdoubleinputconn);
+begin
+ finput.assign(avalue);
+end;
+
+function tdoublesiginoutcomp.getinputar: inputconnarty;
+begin
+ setlength(result,1);
+ result[0]:= finput;
 end;
 
 end.
