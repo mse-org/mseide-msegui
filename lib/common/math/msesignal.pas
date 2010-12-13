@@ -665,7 +665,7 @@ type
    procedure sighandler(const ainfo: psighandlerinfoty);
  end;
 
- sigenvelopeoptionty = (seo_negtrig,seo_exp);
+ sigenvelopeoptionty = (seo_negtrig,seo_exp,seo_nozero);
  sigenvelopeoptionsty = set of sigenvelopeoptionty;
  envproginfoty = record
   startval: double;
@@ -3353,7 +3353,7 @@ begin
   end;
  end;
  if seo_exp in foptions then begin
-  if fcurrval <= 0 then begin
+  if (fcurrval <= 0) and not (seo_nozero in foptions) then begin
    ainfo^.dest^:= 0;
   end
   else begin

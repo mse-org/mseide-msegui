@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2010-12-13
+ tscrollingwidget.scrollpos -> tscrollboxframe.scrollpos.
 2010-11-19
  Changed iobjectpicker and tpickwidget event properties.
 2010-11-2

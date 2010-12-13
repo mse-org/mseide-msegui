@@ -1094,9 +1094,22 @@ begin
 end;
 
 procedure tcustomchartedit.dostatread(const reader: tstatreader);
+var
+ co1: complexty;
+ pt1: pointty;
 begin
  if oe_savestate in foptionsedit then begin
   inherited;
+  with frame do begin
+   co1:= zoom;
+   co1.re:= reader.readreal('zoomx',co1.re,1,1000);
+   co1.im:= reader.readreal('zoomy',co1.im,1,1000);
+   zoom:= co1;
+   pt1:= scrollpos;
+   pt1.x:= reader.readinteger('scrollx',pt1.x,-bigint,0);
+   pt1.y:= reader.readinteger('scrolly',pt1.y,-bigint,0);
+   scrollpos:= pt1;
+  end;
  end;
  if oe_savevalue in foptionsedit then begin
   doreadvalue(reader);
@@ -1104,9 +1117,20 @@ begin
 end;
 
 procedure tcustomchartedit.dostatwrite(const writer: tstatwriter);
+var
+ co1: complexty;
+ pt1: pointty;
 begin
  if oe_savestate in foptionsedit then begin
   inherited;
+  with frame do begin
+   co1:= zoom;
+   writer.writereal('zoomx',co1.re);
+   writer.writereal('zoomy',co1.im);
+   pt1:= scrollpos;
+   writer.writeinteger('scrollx',pt1.x);
+   writer.writeinteger('scrolly',pt1.y);
+  end;
  end;
  if oe_savevalue in foptionsedit then begin
   dowritevalue(writer);

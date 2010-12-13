@@ -599,6 +599,9 @@ end;
 procedure tsigkeyboard.setmin(const avalue: real);
 begin
  fmin:= avalue;
+ if fsigvalue < fmin then begin
+  fsigvalue:= fmin;
+ end;
  updatesigvalue;
 end;
 {

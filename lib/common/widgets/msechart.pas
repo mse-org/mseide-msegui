@@ -23,7 +23,8 @@ type
  chartstatesty = set of chartstatety;
  charttraceoptionty = (cto_invisible,cto_stockglyphs,cto_adddataright,
                        cto_xordered, //optimize for big data quantity
-                       cto_logx,cto_logy,cto_seriescentered
+                       cto_logx,cto_logy,cto_seriescentered,
+                       cto_savexscale,cto_saveyscale
                        );
  charttraceoptionsty = set of charttraceoptionty;
 
@@ -2190,10 +2191,14 @@ begin
  for int1:= 0 to count - 1 do begin
   mstr1:= inttostr(int1);
   with ttrace(fitems[int1]) do begin
-   xstart:= reader.readreal('xstart'+mstr1,xstart);
-   xrange:= reader.readreal('xrange'+mstr1,xrange);
-   ystart:= reader.readreal('ystart'+mstr1,ystart);
-   yrange:= reader.readreal('yrange'+mstr1,yrange);
+   if cto_savexscale in foptions then begin
+    xstart:= reader.readreal('xstart'+mstr1,xstart);
+    xrange:= reader.readreal('xrange'+mstr1,xrange);
+   end;
+   if cto_saveyscale in foptions then begin
+    ystart:= reader.readreal('ystart'+mstr1,ystart);
+    yrange:= reader.readreal('yrange'+mstr1,yrange);
+   end;
   end;
  end;
 end;
@@ -2206,10 +2211,14 @@ begin
  for int1:= 0 to count - 1 do begin
   mstr1:= inttostr(int1);
   with ttrace(fitems[int1]) do begin
-   writer.writereal('xstart'+mstr1,xstart);
-   writer.writereal('xrange'+mstr1,xrange);
-   writer.writereal('ystart'+mstr1,ystart);
-   writer.writereal('yrange'+mstr1,yrange);
+   if cto_savexscale in foptions then begin
+    writer.writereal('xstart'+mstr1,xstart);
+    writer.writereal('xrange'+mstr1,xrange);
+   end;
+   if cto_saveyscale in foptions then begin
+    writer.writereal('ystart'+mstr1,ystart);
+    writer.writereal('yrange'+mstr1,yrange);
+   end;
   end;
  end;
 end;

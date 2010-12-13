@@ -528,6 +528,7 @@ type
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure doscroll(const dist: pointty); override;
    procedure clampinview(const arect: rectty; const bottomright: boolean); override;
+//   procedure setclientpos(const avalue: pointty);
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -1957,7 +1958,12 @@ begin
 // frame.showrect(removerect(arect,clientwidgetpos));
 // frame.showrect(arect);
 end;
-
+{
+procedure tscrollbox.setclientpos(const avalue: pointty);
+begin
+ tscrollboxframe(fframe).setclientpos(avalue);
+end;
+}
 { tcustomstepbox }
 
 constructor tcustomstepbox.create(aowner: tcomponent);

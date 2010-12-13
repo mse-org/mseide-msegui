@@ -350,6 +350,10 @@ type
    procedure setzoom(const avalue: complexty);
    procedure setzoomwidth(const avalue: double);
    procedure setzoomheight(const avalue: double);
+   function getscrollpos_x: integer;
+   procedure setscrollpos_x(const avalue: integer);
+   function getscrollpos_y: integer;
+   procedure setscrollpos_y(const avalue: integer);
   protected
    fowner: twidget;
    procedure scrollpostoclientpos(var aclientrect: rectty); virtual;
@@ -363,7 +367,9 @@ type
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure updatemousestate(const sender: twidget;
                                const info: mouseeventinfoty); override;
+   function getclientpos: pointty;
    procedure setclientpos(apos: pointty);
+   procedure setscrollpos(apos: pointty);
   //iscrollbar
    function translatecolor(const acolor: colorty): colorty;
    procedure invalidaterect(const rect: rectty; const org: originty;
@@ -379,6 +385,10 @@ type
    procedure updateclientrect; override;
    procedure showrect(const arect: rectty; const bottomright: boolean); 
                            //origin paintpos
+   property scrollpos: pointty read getclientpos write setscrollpos;
+   property scrollpos_x: integer read getscrollpos_x write setscrollpos_x;
+   property scrollpos_y: integer read getscrollpos_y write setscrollpos_y;
+               //origin = paintpos
    property zoom: complexty read fzoom write setzoom; //default 1,1
    property zoomwidth: double read fzoom.re write setzoomwidth;   //default 1
    property zoomheight: double read fzoom.im write setzoomheight; //default 1
@@ -1017,7 +1027,7 @@ type
    fminclientsize: sizety;
    function getframe: tscrollboxframe;
    procedure setframe(const Value: tscrollboxframe);
-   procedure setclientpos(const avalue: pointty);
+//   procedure setclientpos(const avalue: pointty);
    procedure readonchildscaled(reader: treader);
   protected
    fminminclientsize: sizety; //exteded in design mode
@@ -1049,7 +1059,7 @@ type
    property onlayout: notifyeventty read fonlayout write fonlayout;
    property oncalcminscrollsize: calcminscrollsizeeventty 
                    read foncalcminscrollsize write foncalcminscrollsize;
-   property scrollpos: pointty read getclientpos write setclientpos;
+//   property scrollpos: pointty read getclientpos write setclientpos;
   published
    property frame: tscrollboxframe read getframe write setframe;
    property optionswidget default defaultoptionswidgetmousewheel;
@@ -3822,6 +3832,12 @@ begin
  end;
 end;
 
+function tcustomscrollboxframe.getclientpos: pointty;
+begin
+ checkstate;
+ result:= fclientrect.pos;
+end;
+
 procedure tcustomscrollboxframe.setclientpos(apos: pointty);
 var
  pt1: pointty;
@@ -3842,6 +3858,12 @@ begin
  twidget1(fowner).scroll(pt1);
  fclientrect.pos:= apos;
  addpoint1(finnerclientrect.pos,pt1);
+end;
+
+procedure tcustomscrollboxframe.setscrollpos(apos: pointty);
+begin
+ setclientpos(apos);
+ clientrecttoscrollbar(fclientrect);
 end;
 
 procedure tcustomscrollboxframe.scrollevent(sender: tcustomscrollbar;
@@ -4192,6 +4214,26 @@ end;
 procedure tcustomscrollboxframe.setzoomheight(const avalue: double);
 begin
  setzoom(makecomplex(fzoom.re,avalue));
+end;
+
+function tcustomscrollboxframe.getscrollpos_x: integer;
+begin
+ result:= getclientpos.x;
+end;
+
+procedure tcustomscrollboxframe.setscrollpos_x(const avalue: integer);
+begin
+ setscrollpos(makepoint(avalue,getclientpos.y));
+end;
+
+function tcustomscrollboxframe.getscrollpos_y: integer;
+begin
+ result:= getclientpos.y;
+end;
+
+procedure tcustomscrollboxframe.setscrollpos_y(const avalue: integer);
+begin
+ setscrollpos(makepoint(getclientpos.x,avalue));
 end;
 
 procedure tcustomscrollboxframe.domousewheelevent(var info: mousewheeleventinfoty;
@@ -5182,12 +5224,12 @@ function tscrollingwidgetnwr.maxclientsize: sizety;
 begin
  result:= makesize(bigint,bigint);
 end;
-
+{
 procedure tscrollingwidgetnwr.setclientpos(const avalue: pointty);
 begin
  frame.showrect(makerect(avalue,paintsize),false);
 end;
-
+}
 procedure tscrollingwidgetnwr.readonchildscaled(reader: treader);
 begin
  onlayout:= notifyeventty(readmethod(reader));

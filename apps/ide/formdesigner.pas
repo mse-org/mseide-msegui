@@ -2886,7 +2886,7 @@ begin
   setcomponentpos(fmodule,modulerect.pos);
  end;
  if fform is tcustommseform then begin
-  tcustommseform(fform).container.scrollpos:= nullpoint;
+  tcustommseform(fform).container.frame.scrollpos:= nullpoint;
  end;
 end;
 
