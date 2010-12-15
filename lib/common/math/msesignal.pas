@@ -572,17 +572,20 @@ type
  tsigwavetable = class(tdoublesigoutcomp)
   private
    ffrequency: tdoubleinputconn;
+   ffrequfact: tdoubleinputconn;
    fphase: tdoubleinputconn;
    famplitude: tdoubleinputconn;
    ftable: doublearty;
    ftablelength: integer;
    ftime: double;
    ffrequencypo: pdouble;
+   ffrequfactpo: pdouble;
    fphasepo: pdouble;
    famplitudepo: pdouble;
    foninittable: siginbursteventty;
    foptions: sigwavetableoptionsty;
    procedure setfrequency(const avalue: tdoubleinputconn);
+   procedure setfrequfact(const avalue: tdoubleinputconn);
    procedure setphase(const avalue: tdoubleinputconn);
    procedure setamplitude(const avalue: tdoubleinputconn);
    procedure settable(const avalue: doublearty);
@@ -602,6 +605,7 @@ type
    property table: doublearty read ftable write settable;
   published
    property frequency: tdoubleinputconn read ffrequency write setfrequency;
+   property freqfact: tdoubleinputconn read ffrequfact write setfrequfact;
    property phase: tdoubleinputconn read fphase write setphase;
    property amplitude: tdoubleinputconn read famplitude write setamplitude;
    property oninittable: siginbursteventty read foninittable write foninittable;
@@ -2802,6 +2806,9 @@ begin
  inherited;
  ffrequency:= tdoubleinputconn.create(self,isigclient(self));
  ffrequency.name:= 'frequency';
+ ffrequfact:= tdoubleinputconn.create(self,isigclient(self));
+ ffrequfact.name:= 'frequfact';
+ ffrequfact.fvalue:= 1;
  fphase:= tdoubleinputconn.create(self,isigclient(self));
  fphase.name:= 'phase';
  famplitude:= tdoubleinputconn.create(self,isigclient(self));
@@ -2811,6 +2818,11 @@ end;
 procedure tsigwavetable.setfrequency(const avalue: tdoubleinputconn);
 begin
  ffrequency.assign(avalue);
+end;
+
+procedure tsigwavetable.setfrequfact(const avalue: tdoubleinputconn);
+begin
+ ffrequfact.assign(avalue);
 end;
 
 procedure tsigwavetable.setphase(const avalue: tdoubleinputconn);
@@ -2842,7 +2854,7 @@ begin
   int1:= int1 + ftablelength;
  end;
  ainfo^.dest^:= ftable[int1] * famplitudepo^;
- ftime:= frac(ftime+ffrequencypo^);
+ ftime:= frac(ftime+ffrequencypo^*ffrequfactpo^);
 end;
 
 procedure tsigwavetable.sighandlerintpol(const ainfo: psighandlerinfoty);
@@ -2859,7 +2871,7 @@ begin
                  (ftable[(int1+1) mod ftablelength] - ftable[int1]) * 
                  ((do1-int1)/ftablelength)
                 ) * famplitudepo^;
- ftime:= frac(ftime+ffrequencypo^);
+ ftime:= frac(ftime+ffrequencypo^*ffrequfactpo^);
 end;
 
 
@@ -2899,6 +2911,7 @@ end;
 procedure tsigwavetable.initmodel;
 begin
  ffrequencypo:= @ffrequency.fvalue;
+ ffrequfactpo:= @ffrequfact.fvalue;
  fphasepo:= @fphase.fvalue;
  famplitudepo:= @famplitude.fvalue;
  inherited;
@@ -2906,10 +2919,11 @@ end;
 
 function tsigwavetable.getinputar: inputconnarty;
 begin
- setlength(result,3);
+ setlength(result,4);
  result[0]:= ffrequency;
- result[1]:= fphase;
- result[2]:= famplitude;
+ result[1]:= ffrequfact;
+ result[2]:= fphase;
+ result[3]:= famplitude;
 end;
 
 function tsigwavetable.getzcount: integer;
@@ -3156,6 +3170,7 @@ end;
 
 constructor tsigenvelope.create(aowner: tcomponent);
 begin
+ fmin:= 0.001;
  fmax:= 1;
  freleasestart:= 1;
  ftimescale:= 1;
