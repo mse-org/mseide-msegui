@@ -34,6 +34,7 @@ const
   TIME_CALLBACK_EVENT_PULSE = $0020;  { callback is event - use PulseEvent }
 
 type 
+  MMRESULT = Longint;
   PTimeCaps = ^TTimeCaps;
   timecaps_tag = record
     wPeriodMin: UINT;     { minimum period supported  }

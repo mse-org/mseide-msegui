@@ -2116,14 +2116,14 @@ var
  mask: {$ifdef FPC}longword{$else}byte{$endif};
 begin
  if foptions <> avalue then begin
-  mask:= {$ifdef FPC}longword{$else}byte{$endif}(avalue) xor 
-                 {$ifdef FPC}longword{$else}byte{$endif}(foptions);
+  mask:= {$ifdef FPC}longword{$else}word{$endif}(avalue) xor
+                 {$ifdef FPC}longword{$else}word{$endif}(foptions);
   foptions:= avalue;
   if not (csloading in tcuchart(fowner).componentstate) then begin
    for int1:= 0 to count - 1 do begin
     ttrace(fitems[int1]).options:= charttraceoptionsty(replacebits(
-               {$ifdef FPC}longword{$else}byte{$endif}(foptions),
-               {$ifdef FPC}longword{$else}byte{$endif}(
+               {$ifdef FPC}longword{$else}word{$endif}(foptions),
+               {$ifdef FPC}longword{$else}word{$endif}(
                                    ttrace(fitems[int1]).options),mask));
    end;
   end;
