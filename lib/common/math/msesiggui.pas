@@ -264,16 +264,20 @@ type
   private
    fstatvarname: msestring;
    fstatfile: tstatfile;
-   fedtrig: tenvelopechartedit;
-   fedaftertrig: tenvelopechartedit;
-   fsplitter: tenvelopesplitter;
+   fattack: tenvelopechartedit;
+   fdecay: tenvelopechartedit;
+   frelease: tenvelopechartedit;
+   fsplitter1: tenvelopesplitter;
+   fsplitter2: tenvelopesplitter;
 //   finnerframebefore: framety;
    fenvelope: tsigenvelope;
    fupdating: integer;
    procedure setenvelope(const avalue: tsigenvelope);
-   procedure setedtrig(const avalue: tenvelopechartedit);
-   procedure setedaftertrig(const avalue: tenvelopechartedit);
-   procedure setsplitter(const avalue: tenvelopesplitter);
+   procedure setattack(const avalue: tenvelopechartedit);
+   procedure setdecay(const avalue: tenvelopechartedit);
+   procedure setrelease(const avalue: tenvelopechartedit);
+   procedure setsplitter1(const avalue: tenvelopesplitter);
+   procedure setsplitter2(const avalue: tenvelopesplitter);
    procedure setstatfile(const avalue: tstatfile);
     //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -292,10 +296,11 @@ type
    procedure beginupdate;
    procedure endupdate;
   published
-   property edtrig: tenvelopechartedit read fedtrig write setedtrig;
-   property edaftertrig: tenvelopechartedit read fedaftertrig 
-                                                         write setedaftertrig;
-   property splitter: tenvelopesplitter read fsplitter write setsplitter;
+   property attack: tenvelopechartedit read fattack write setattack;
+   property decay: tenvelopechartedit read fdecay write setdecay;
+   property release: tenvelopechartedit read frelease write setrelease;
+   property splitter1: tenvelopesplitter read fsplitter1 write setsplitter1;
+   property splitter2: tenvelopesplitter read fsplitter2 write setsplitter2;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
    property envelope: tsigenvelope read fenvelope write setenvelope;
@@ -349,6 +354,7 @@ uses
  math,msekeyboard,msebits;
 type
  tsigcontroller1 = class(tsigcontroller);
+ tsigenvelope1 = class(tsigenvelope);
  
 { tsigslider }
 
@@ -1120,50 +1126,73 @@ begin
  fenvelope:= tsigenvelope.create(self);
  fenvelope.setsubcomponent(true);
  fenvelope.name:= 'envelope';
- fedtrig:= tenvelopechartedit.create(self,self,false);
- fedaftertrig:= tenvelopechartedit.create(self,self,false);
- fsplitter:= tenvelopesplitter.create(self,self,false);
- int1:= (fwidgetrect.cx - splitterwidth) div 2;
- fedtrig.bounds_cx:= int1;
- fedaftertrig.bounds_cx:= int1;
- fsplitter.bounds_cx:= splitterwidth;
- fsplitter.bounds_x:= fedtrig.bounds_x + fedtrig.bounds_cx;
+ fattack:= tenvelopechartedit.create(self,self,false);
+ fdecay:= tenvelopechartedit.create(self,self,false);
+ frelease:= tenvelopechartedit.create(self,self,false);
+ fsplitter1:= tenvelopesplitter.create(self,self,false);
+ fsplitter2:= tenvelopesplitter.create(self,self,false);
+ width:= 3*30+2*splitterwidth;
+ int1:= (fwidgetrect.cx - splitterwidth*2) div 3;
+ fattack.bounds_cx:= int1;
+ fdecay.bounds_cx:= int1;
+ frelease.bounds_cx:= int1;
+ fsplitter1.bounds_cx:= splitterwidth;
+ fsplitter2.bounds_cx:= splitterwidth;
+ fsplitter1.bounds_x:= fattack.bounds_x + fattack.bounds_cx;
+ fsplitter2.bounds_x:= fsplitter1.bounds_x + fsplitter1.bounds_cx +
+                                                          fdecay.bounds_cx;
  updatelayout;
- fsplitter.linkleft:= fedtrig;
- fsplitter.linkright:= fedaftertrig;
- with fedtrig do begin
+ fsplitter1.linkleft:= fattack;
+ fsplitter1.linkright:= fdecay;
+ fsplitter2.linkleft:= fdecay;
+ fsplitter2.linkright:= frelease;
+
+ with fdecay do begin
   xdials.count:= 1;
   xdials[0].markers.count:= 1;
   with xdials[0].markers[0] do begin
-   value:= 1;
+   value:= 10;
    color:= cl_red;
    options:= [dmo_savevalue];
   end;
  end;
+ fattack.xrange:= 0.1;
+ fdecay.xrange:= 10;
+ frelease.xrange:= 1;
 end;
 
 destructor tenvelopeedit.destroy;
 begin
- fedtrig.free;
- fedaftertrig.free;
- fsplitter.free;
+ fattack.free;
+ fdecay.free;
+ frelease.free;
  fenvelope.free;
  inherited;
 end;
 
-procedure tenvelopeedit.setedtrig(const avalue: tenvelopechartedit);
+procedure tenvelopeedit.setattack(const avalue: tenvelopechartedit);
 begin
- fedtrig.assign(avalue);
+ fattack.assign(avalue);
 end;
 
-procedure tenvelopeedit.setedaftertrig(const avalue: tenvelopechartedit);
+procedure tenvelopeedit.setdecay(const avalue: tenvelopechartedit);
 begin
- fedaftertrig.assign(avalue);
+ fdecay.assign(avalue);
 end;
 
-procedure tenvelopeedit.setsplitter(const avalue: tenvelopesplitter);
+procedure tenvelopeedit.setrelease(const avalue: tenvelopechartedit);
 begin
- fsplitter.assign(avalue);
+ frelease.assign(avalue);
+end;
+
+procedure tenvelopeedit.setsplitter1(const avalue: tenvelopesplitter);
+begin
+ fsplitter1.assign(avalue);
+end;
+
+procedure tenvelopeedit.setsplitter2(const avalue: tenvelopesplitter);
+begin
+ fsplitter2.assign(avalue);
 end;
 
 procedure tenvelopeedit.updatelayout;
@@ -1176,14 +1205,20 @@ begin
  with rect1 do begin
   rect2.pos:= pos;
   rect2.cy:= cy;
-  rect2.cx:= fedtrig.bounds_cx - x + fedtrig.bounds_x;
-  fedtrig.widgetrect:= rect2;
-  rect2.x:= fsplitter.bounds_x;
-  rect2.cx:= fsplitter.bounds_cx;
-  fsplitter.widgetrect:= rect2;
-  rect2.x:= fedaftertrig.bounds_x;
+  rect2.cx:= fattack.bounds_cx - x + fattack.bounds_x;
+  fattack.widgetrect:= rect2;
+  rect2.x:= fsplitter1.bounds_x;
+  rect2.cx:= fsplitter1.bounds_cx;
+  fsplitter1.widgetrect:= rect2;
+  rect2.x:= fsplitter2.bounds_x;
+  rect2.cx:= fsplitter2.bounds_cx;
+  fsplitter2.widgetrect:= rect2;
+  rect2.x:= fsplitter1.bounds_x+fsplitter1.bounds_cx;
+  rect2.cx:= fdecay.bounds_cx; 
+  fdecay.widgetrect:= rect2;    
+  rect2.x:= fsplitter2.bounds_x+fsplitter2.bounds_cx;
   rect2.cx:= cx - rect2.x; 
-  fedaftertrig.widgetrect:= rect2;
+  frelease.widgetrect:= rect2;
  end;
 end;
 
@@ -1206,13 +1241,19 @@ begin
  beginupdate;
  try
   if reader.findsection(mstr1+'.0') then begin
-   fedtrig.dostatread(reader);  
+   fattack.dostatread(reader);  
   end;
   if reader.findsection(mstr1+'.1') then begin
-   fedaftertrig.dostatread(reader);  
+   fsplitter1.dostatread(reader);  
   end;
   if reader.findsection(mstr1+'.2') then begin
-   fsplitter.dostatread(reader);  
+   fdecay.dostatread(reader);  
+  end;
+  if reader.findsection(mstr1+'.3') then begin
+   fsplitter2.dostatread(reader);  
+  end;
+  if reader.findsection(mstr1+'.4') then begin
+   frelease.dostatread(reader);  
   end;
  finally
   endupdate;
@@ -1225,25 +1266,33 @@ var
 begin
  mstr1:= writer.varname(istatfile(self));
  writer.writesection(mstr1+'.0');
- fedtrig.dostatwrite(writer);  
+ fattack.dostatwrite(writer);  
  writer.writesection(mstr1+'.1');
- fedaftertrig.dostatwrite(writer);  
+ fsplitter1.dostatwrite(writer);  
  writer.writesection(mstr1+'.2');
- fsplitter.dostatwrite(writer);  
+ fdecay.dostatwrite(writer);  
+ writer.writesection(mstr1+'.3');
+ fsplitter2.dostatwrite(writer);  
+ writer.writesection(mstr1+'.4');
+ frelease.dostatwrite(writer);  
 end;
 
 procedure tenvelopeedit.statreading;
 begin
- fedtrig.statreading;
- fedaftertrig.statreading;
- fsplitter.statreading;
+ fattack.statreading;
+ fdecay.statreading;
+ frelease.statreading;
+ fsplitter1.statreading;
+ fsplitter2.statreading;
 end;
 
 procedure tenvelopeedit.statread;
 begin
- fedtrig.statread;
- fedaftertrig.statread;
- fsplitter.statread;
+ fattack.statread;
+ fdecay.statread;
+ frelease.statread;
+ fsplitter1.statread;
+ fsplitter2.statread;
 end;
 
 function tenvelopeedit.getstatvarname: msestring;
@@ -1255,30 +1304,26 @@ procedure tenvelopeedit.updatevalues;
 begin
  with fenvelope do begin
   beginupdate;
-  with fedtrig do begin
-   valuestrig:= activetraceitem.xydata;
+  attack_values:= fattack.activetraceitem.xydata;
+  with fdecay do begin
+   decay_values:= activetraceitem.xydata;
    if xdials.count > 0 then begin
     with xdials[0] do begin
      if markers.count > 0 then begin
-      loopstart:= markers[0].value;
+      if markers[0].value < start+range then begin
+       loopstart:= markers[0].value;
+      end
+      else begin
+       loopstart:= -1;
+      end;
      end
      else begin
-      loopstart:= 1;
+      loopstart:= -1;
      end;
-     {
-     if markers.count > 1 then begin
-      decaystart:= markers[1].value;
-     end
-     else begin
-      decaystart:= 1;
-     end
-     }
     end;
    end;    
   end;
-  with fedaftertrig do begin
-   valuesaftertrig:= activetraceitem.xydata;
-  end;
+  release_values:= frelease.activetraceitem.xydata;
   endupdate;
  end;
 end;
@@ -1342,21 +1387,46 @@ end;
 
 procedure tenvelopechartedit.drawcrosshaircursor(const canvas: tcanvas;
                const center: pointty);
+ procedure drawyline(const dest: tenvelopechartedit;
+         const sourceoptions,destoptions: sigenveloperangeoptionsty);
+ var
+  co1: complexty;
+  pt1: pointty;
+ begin
+  co1:= tracecoordxy(center);
+  if (sero_exp in sourceoptions) xor (sero_exp in destoptions) then begin
+   if (sero_exp in sourceoptions) then begin
+    tsigenvelope1(fenvelope.fenvelope).exptolin(co1.im);
+   end
+   else begin
+    tsigenvelope1(fenvelope.fenvelope).lintoexp(co1.im);
+   end;
+  end;
+  pt1:= dest.chartcoordxy(co1);
+  canvas.drawvect(subpoint(
+     makepoint(dest.paintparentpos.x-paintparentpos.x,pt1.y),clientpos),
+                                          gd_right,dest.paintsize.cx);
+ end; //drawyline
+ 
 begin
  inherited;
  canvas.save;
  canvas.clipregion:= 0;
- if self = fenvelope.fedtrig then begin
-  canvas.drawvect(makepoint(
-   fenvelope.fedaftertrig.paintparentpos.x-paintparentpos.x,
-                                                     center.y),gd_right,
-                                         fenvelope.fedaftertrig.paintsize.cx);
+ with fenvelope,fenvelope do begin
+ if self = fattack then begin
+  drawyline(fdecay,attack_options,decay_options);
+  drawyline(frelease,attack_options,release_options);
  end
  else begin
-  canvas.drawvect(makepoint(
-   fenvelope.fedtrig.paintparentpos.x-paintparentpos.x,
-                                                     center.y),gd_right,
-                                         fenvelope.fedtrig.paintsize.cx);
+  if self = fdecay then begin
+   drawyline(fattack,decay_options,attack_options);
+   drawyline(frelease,decay_options,release_options);
+   end
+   else begin //release
+    drawyline(fattack,release_options,attack_options);
+    drawyline(fdecay,release_options,decay_options);
+   end;
+  end;
  end;
  canvas.restore;
 end;

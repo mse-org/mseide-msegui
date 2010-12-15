@@ -96,9 +96,9 @@ type
  sigfilteroptionty = (sfo_passgainfix,sfo_noprewarp);
  sigfilteroptionsty = set of sigfilteroptionty;
  
- tsigfilter = class(tdoublesiginoutcomp) //todo: speed optimized prewarp
+ tsigfilter = class(tsigmultiinpout) //todo: speed optimized prewarp
   private
-   finppo: pdouble;
+//   finppo: pdouble;
    fcutofffrequpo: pdouble;
    fcutofffrequ: tdoubleinputconn;
    fqfactorpo: pdouble;
@@ -543,30 +543,37 @@ begin
  end;
 end;
 
+//     +---------+---------+---------+---> o
+//     |       -a1       -a2       -aN-1
+//     +---(z)<--+---(z)<--+---(z)<--+
+//     b0       b1        b2        bN-1
+// i >---+---------+---------+---------+
+//
+
 procedure tsigfilter.sighandlerlp1inv(const ainfo: psighandlerinfoty);
 var
- do1: double;
+ i,o: double;
+ int1: integer;
 begin
  if fcutofffrequpo^ <> fcutoffbefore then begin
   fcutoffbefore:= fcutofffrequpo^;
   fb0:= 2*pi*fcutoffbefore;
   fa1:= exp(-fb0);
  end;
- do1:= finppo^*fb0 + fz1*fa1;
- ainfo^.dest^:= do1*famplitudepo^;
- fz1:= do1;
+ i:= 0;
+ for int1:= 0 to finphigh do begin
+  i:= i+finps[int1]^;
+ end;
+ o:= i*fb0 + fz1;
+ ainfo^.dest^:= o*famplitudepo^;
+ fz1:= o*fa1;
 end;
-
-//     +---------+---------+---------+--->
-//     |       -a1       -a2       -aN-1
-//     +---(z)<--+---(z)<--+---(z)<--+
-//     b0       b1        b2        bN-1
-// >---+---------+---------+---------+
-//
 
 procedure tsigfilter.sighandlerlp1bi(const ainfo: psighandlerinfoty);
 var
+ i,o: double;
  do1: double;
+ int1: integer;
 begin
  if fcutofffrequpo^ <> fcutoffbefore then begin
   fcutoffbefore:= fcutofffrequpo^;
@@ -575,15 +582,20 @@ begin
   fb1:= fb0;
   fa1:= (do1-2)/(do1+2);
  end;
- do1:= finppo^*fb0 + fz1;
- ainfo^.dest^:= do1*famplitudepo^;
- fz1:= finppo^*fb1-fa1*do1;
+ i:= 0;
+ for int1:= 0 to finphigh do begin
+  i:= i+finps[int1]^;
+ end;
+ o:= i*fb0 + fz1;
+ ainfo^.dest^:= o*famplitudepo^;
+ fz1:= i*fb1-fa1*o;
 end;
 
 procedure tsigfilter.sighandlerlp2bi(const ainfo: psighandlerinfoty);
 var
  QfT_4,fT2_4,den: double;
  i,o: double;
+ int1: integer;
 begin
  if (fqfactorpo^ <> fqfactorbefore) or 
                              (fcutofffrequpo^ <> fcutoffbefore) then begin
@@ -608,7 +620,10 @@ begin
   fa1:= 2*(1-fT2_4)/den;
   fa2:= (1-QfT_4+fT2_4)/den;
  end;
- i:= finppo^;
+ i:= 0;
+ for int1:= 0 to finphigh do begin
+  i:= i+finps[int1]^;
+ end;
  o:= fz1+i*fb0;
  fz1:= fz2-o*fa1+i*fb1;
  fz2:= i*fb2-o*fa2;
@@ -619,6 +634,7 @@ procedure tsigfilter.sighandlerbp2bi(const ainfo: psighandlerinfoty);
 var
  fT,QfT_4,fT2_4,den: double;
  i,o: double;
+ int1: integer;
 begin
  if (fcutofffrequpo^ <> fcutoffbefore) or 
                      (fqfactorpo^ <> fqfactorbefore) then begin
@@ -643,7 +659,10 @@ begin
   fa1:= 2*(1-fT2_4)/den;
   fa2:= (1-QfT_4+fT2_4)/den;
  end;
- i:= finppo^;
+ i:= 0;
+ for int1:= 0 to finphigh do begin
+  i:= i+finps[int1]^;
+ end;
  o:= fz1+i*fb0;
  fz1:= fz2-o*fa1+i*fb1;
  fz2:= i*fb2-o*fa2;
@@ -659,7 +678,7 @@ end;
 
 procedure tsigfilter.initmodel;
 begin
- finppo:= @tdoubleinputconn1(finput).fvalue;
+// finppo:= @tdoubleinputconn1(finput).fvalue;
  fcutofffrequpo:= @tdoubleinputconn1(fcutofffrequ).fvalue;
  fqfactorpo:= @tdoubleinputconn1(fqfactor).fvalue;
  famplitudepo:= @tdoubleinputconn1(famplitude).fvalue;
