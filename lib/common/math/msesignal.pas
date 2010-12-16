@@ -534,11 +534,18 @@ type
    procedure setinput(const avalue: tdoubleinputconn);
   protected
    finput: tdoubleinputconn;
+   finputpo: pdouble;
    function getinputar: inputconnarty; override;
   public
    constructor create(aowner: tcomponent); override;
   published
    property input: tdoubleinputconn read finput write setinput;
+ end;
+
+ tsigconnector = class(tdoublesiginoutcomp)
+  protected
+   function gethandler: sighandlerprocty; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
  end;
  
  sigwavetableoptionty = (siwto_intpol);
@@ -3920,6 +3927,7 @@ end;
 constructor tdoublesiginoutcomp.create(aowner: tcomponent);
 begin
  finput:= tdoubleinputconn.create(self,isigclient(self));
+ finputpo:= @finput.fvalue;
  inherited;
 end;
 
@@ -3932,6 +3940,18 @@ function tdoublesiginoutcomp.getinputar: inputconnarty;
 begin
  setlength(result,1);
  result[0]:= finput;
+end;
+
+{ tsigconnector }
+
+function tsigconnector.gethandler: sighandlerprocty;
+begin
+ result:= @sighandler;
+end;
+
+procedure tsigconnector.sighandler(const ainfo: psighandlerinfoty);
+begin
+ ainfo^.dest^:= finputpo^;
 end;
 
 end.
