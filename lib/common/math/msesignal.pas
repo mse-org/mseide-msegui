@@ -18,7 +18,7 @@ unit msesignal;
 interface
 uses
  msedatalist,mseclasses,classes,msetypes,msearrayprops,mseevent,msehash,
- msesys,msereal,msetimer;
+ msesys,msereal,msetimer,mseglob;
  
 const
  defaultsamplefrequ = 44100; //Hz
@@ -584,16 +584,19 @@ type
    famplitudepo: pdouble;
    foninittable: siginbursteventty;
    foptions: sigwavetableoptionsty;
+   fmaster: tsigwavetable;
    procedure setfrequency(const avalue: tdoubleinputconn);
    procedure setfrequfact(const avalue: tdoubleinputconn);
    procedure setphase(const avalue: tdoubleinputconn);
    procedure setamplitude(const avalue: tdoubleinputconn);
    procedure settable(const avalue: doublearty);
    procedure setoptions(const avalue: sigwavetableoptionsty);
+   procedure setmaster(const avalue: tsigwavetable);
   protected
    procedure checktable;
    procedure sighandler(const ainfo: psighandlerinfoty);
    procedure sighandlerintpol(const ainfo: psighandlerinfoty);
+   procedure objectevent(const sender: tobject; const event: objecteventty); override;
     //isigclient
    function gethandler: sighandlerprocty; override;
    procedure initmodel; override;
@@ -604,6 +607,7 @@ type
    procedure clear; override;
    property table: doublearty read ftable write settable;
   published
+   property master: tsigwavetable read fmaster write setmaster;
    property frequency: tdoubleinputconn read ffrequency write setfrequency;
    property freqfact: tdoubleinputconn read ffrequfact write setfrequfact;
    property phase: tdoubleinputconn read fphase write setphase;
@@ -628,7 +632,6 @@ type
  
  tsigfuncttable = class(tsigmultiinpout)
   private
-//   finput: tdoubleinputconn;
    famplitude: tdoubleinputconn;
    foninittable: sigincomplexbursteventty;
    ftable: complexarty;
@@ -637,12 +640,14 @@ type
    finpmax: double;
    finpfact: double; //map input value to segmentindex
    famplitudepo: pdouble;
-//   procedure setinput(const avalue: tdoubleinputconn);
+   fmaster: tsigfuncttable;
    procedure setamplitude(const avalue: tdoubleinputconn);
    procedure settable(const avalue: complexarty);
+   procedure setmaster(const avalue: tsigfuncttable);
   protected
    procedure checktable;
    procedure sighandler(const ainfo: psighandlerinfoty);
+   procedure objectevent(const sender: tobject; const event: objecteventty); override;
     //isigclient
    function gethandler: sighandlerprocty; override;
    procedure initmodel; override;
@@ -654,7 +659,7 @@ type
    property table: complexarty read ftable write settable;
                  //must be ordered by re values
   published
-//   property input: tdoubleinputconn read finput write setinput;
+   property master: tsigfuncttable read fmaster write setmaster;
    property amplitude: tdoubleinputconn read famplitude write setamplitude;
    property oninittable: sigincomplexbursteventty read foninittable 
                                                         write foninittable;
@@ -719,6 +724,7 @@ type
    fattack_options: sigenveloperangeoptionsty;
    fdecay_options: sigenveloperangeoptionsty;
    frelease_options: sigenveloperangeoptionsty;
+   fmaster: tsigenvelope;
    procedure setattack_values(const avalue: complexarty);
    procedure setdecay_values(const avalue: complexarty);
    procedure setrelease_values(const avalue: complexarty);
@@ -731,12 +737,14 @@ type
    procedure setattack_options(const avalue: sigenveloperangeoptionsty);
    procedure setdecay_options(const avalue: sigenveloperangeoptionsty);
    procedure setrelease_options(const avalue: sigenveloperangeoptionsty);
+   procedure setmaster(const avalue: tsigenvelope);
   protected
    ftriggered: boolean;
    ftriggerpending: boolean;
    procedure sighandler(const ainfo: psighandlerinfoty);   
    procedure updatevalues;
 
+   procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure initmodel; override;
    function getinputar: inputconnarty; override;
    function getzcount: integer; override;
@@ -757,6 +765,7 @@ type
    property loopstart: real read floopstart write setloopstart;
                      //<0 -> inactive
   published
+   property master: tsigenvelope read fmaster write setmaster;
    property trigger: tchangedoubleinputconn read ftrigger write settrigger;
    property triggerlevel: tchangedoubleinputconn read ftriggerlevel 
                                               write settriggerlevel;
@@ -2877,10 +2886,8 @@ end;
 
 procedure tsigwavetable.settable(const avalue: doublearty);
 begin
- lock;
  ftable:= avalue;
  checktable;
- unlock;
 end;
 
 procedure tsigwavetable.clear;
@@ -2900,12 +2907,16 @@ end;
 procedure tsigwavetable.checktable;
 begin
  lock;
- ftime:= 0;
- if ftable = nil then begin
-  setlength(ftable,1);
+ try
+  ftime:= 0;
+  if ftable = nil then begin
+   setlength(ftable,1);
+  end;
+  ftablelength:= length(ftable);
+  sendchangeevent;
+ finally
+  unlock;
  end;
- ftablelength:= length(ftable);
- unlock;
 end;
 
 procedure tsigwavetable.initmodel;
@@ -2938,6 +2949,28 @@ begin
   if fcontroller <> nil then begin
    fcontroller.modelchange;
   end;
+ end;
+end;
+
+procedure tsigwavetable.setmaster(const avalue: tsigwavetable);
+var
+ tab1: tsigwavetable;
+begin
+ tab1:= avalue;
+ while tab1 <> nil do begin
+  if tab1 = self then begin
+   raise exception.create('Recursive master.');
+  end;
+  tab1:= tab1.master;
+ end;
+ setlinkedvar(avalue,fmaster);
+end;
+
+procedure tsigwavetable.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ if (event = oe_changed) and (sender <> nil) and (sender = master) then begin
+  table:= master.table;
  end;
 end;
 
@@ -3002,10 +3035,8 @@ end;
 
 procedure tsigfuncttable.settable(const avalue: complexarty);
 begin
- lock;
  ftable:= avalue;
  checktable;
- unlock;
 end;
 
 procedure tsigfuncttable.sighandler(const ainfo: psighandlerinfoty);
@@ -3105,64 +3136,92 @@ var
  ar1: booleanarty;
  po1: pfunctionsegmentty;
 begin
- finalize(fsegments);
- fillchar(fsegments,sizeof(fsegments),0);
- finpmin:= 0;
- finpmax:= 0;
- finpfact:= 0;
- if high(ftable) >= 0 then begin
-  finpmin:= bigreal;
-  finpmax:= -bigreal;
-  for int1:= 0 to high(ftable) do begin
-   with ftable[int1] do begin
-    if (int1 > 0) and (re < ftable[int1-1].re) then begin
-     raise exception.create('Invalid table order');
-    end;
-    if re < finpmin then begin
-     finpmin:= re;
-    end;
-    if re > finpmax then begin
-     finpmax:= re;
+ lock;
+ try
+  finalize(fsegments);
+  fillchar(fsegments,sizeof(fsegments),0);
+  finpmin:= 0;
+  finpmax:= 0;
+  finpfact:= 0;
+  if high(ftable) >= 0 then begin
+   finpmin:= bigreal;
+   finpmax:= -bigreal;
+   for int1:= 0 to high(ftable) do begin
+    with ftable[int1] do begin
+     if (int1 > 0) and (re < ftable[int1-1].re) then begin
+      raise exception.create('Invalid table order');
+     end;
+     if re < finpmin then begin
+      finpmin:= re;
+     end;
+     if re > finpmax then begin
+      finpmax:= re;
+     end;
     end;
    end;
-  end;
-  finpfact:= finpmax-finpmin;
-  if finpfact > 0 then begin
-   finpfact:= functionsegmentcount/finpfact;
-  end
-  else begin
-   finpfact:= 0;
-  end;
-  setlength(ar1,functionsegmentcount);
-  for int1:= 0 to high(ftable) do begin
-   int2:= trunc((ftable[int1].re-finpmin)*finpfact);
-   if int2 >= functionsegmentcount then begin
-    int2:= functionsegmentcount-1;
-   end;
-   if int2 < 0 then begin
-    int2:= 0;
-   end;
-   with fsegments[int2] do begin
-    if ar1[int2] or (int2 > 0) then begin //multiple nodes
-     setlength(nodes,high(nodes)+2);
-     calc(int1,nodes[high(nodes)]);
-    end
-    else begin
-     calc(int1,defaultnode);
-    end;
-    ar1[int2]:= true;
-   end;
-  end;
-  po1:= @fsegments[0];
-  for int1:= 1 to high(fsegments) do begin
-   if po1^.nodes = nil then begin
-    fsegments[int1].defaultnode:= po1^.defaultnode;
+   finpfact:= finpmax-finpmin;
+   if finpfact > 0 then begin
+    finpfact:= functionsegmentcount/finpfact;
    end
    else begin
-    fsegments[int1].defaultnode:= po1^.nodes[high(po1^.nodes)];
+    finpfact:= 0;
    end;
-   inc(po1);
+   setlength(ar1,functionsegmentcount);
+   for int1:= 0 to high(ftable) do begin
+    int2:= trunc((ftable[int1].re-finpmin)*finpfact);
+    if int2 >= functionsegmentcount then begin
+     int2:= functionsegmentcount-1;
+    end;
+    if int2 < 0 then begin
+     int2:= 0;
+    end;
+    with fsegments[int2] do begin
+     if ar1[int2] or (int2 > 0) then begin //multiple nodes
+      setlength(nodes,high(nodes)+2);
+      calc(int1,nodes[high(nodes)]);
+     end
+     else begin
+      calc(int1,defaultnode);
+     end;
+     ar1[int2]:= true;
+    end;
+   end;
+   po1:= @fsegments[0];
+   for int1:= 1 to high(fsegments) do begin
+    if po1^.nodes = nil then begin
+     fsegments[int1].defaultnode:= po1^.defaultnode;
+    end
+    else begin
+     fsegments[int1].defaultnode:= po1^.nodes[high(po1^.nodes)];
+    end;
+    inc(po1);
+   end;
   end;
+  sendchangeevent;
+ finally
+  unlock;
+ end;
+end;
+
+procedure tsigfuncttable.setmaster(const avalue: tsigfuncttable);
+var
+ tab1: tsigfuncttable;
+begin
+ tab1:= avalue;
+ while tab1 <> nil do begin
+  if tab1 = self then begin
+   raise exception.create('Recursive master.');
+  end;
+  tab1:= tab1.master;
+ end;
+ setlinkedvar(avalue,fmaster);
+end;
+
+procedure tsigfuncttable.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ if (event = oe_changed) and (sender <> nil) and (sender = master) then begin
+  table:= master.table;
  end;
 end;
 
@@ -3306,104 +3365,110 @@ begin
  if fupdating > 0 then begin
   exit;
  end;
- isexpbefore:= false;
- isexpbeforeset:= false;
- int1:= high(fattack_values);
- allocuninitedarray(int1+high(fdecay_values)+2,sizeof(complexty),
-                                                      aftertrigvalues);
- for int2:= 0 to int1 do begin
-  aftertrigvalues[int2]:= fattack_values[int2];
- end;
- if int1 >= 0 then begin
-  decaystart:= fattack_values[int1].re;
- end
- else begin
-  decaystart:= 0;
- end;
- inc(int1);
- for int2:= 0 to high(fdecay_values) do begin
-  with aftertrigvalues[int2+int1] do begin
-   re:= fdecay_values[int2].re + decaystart;
-   im:= fdecay_values[int2].im;
+ lock;
+ try
+  isexpbefore:= false;
+  isexpbeforeset:= false;
+  int1:= high(fattack_values);
+  allocuninitedarray(int1+high(fdecay_values)+2,sizeof(complexty),
+                                                       aftertrigvalues);
+  for int2:= 0 to int1 do begin
+   aftertrigvalues[int2]:= fattack_values[int2];
   end;
- end;
- fprog:= nil;
- timoffs:= 0;
- timsca:= 1;
- if fcontroller <> nil then begin
-  timsca:= timsca * fcontroller.samplefrequ;
- end;
- ftime:= 0;
- fattackval:= 0;
- fattackramp:= 0;
- floopstartindex:= -1;
- floopendindex:= -1;
- floopval:= 0;
- floopramp:= 1;
- freleaseindex:= -1;
- freleaseval:= 0;
- freleaseramp:= 0;
- 
- int1:= high(aftertrigvalues) + 2; //+ enditem
- if floopstart >= 0 then begin
+  if int1 >= 0 then begin
+   decaystart:= fattack_values[int1].re;
+  end
+  else begin
+   decaystart:= 0;
+  end;
+  inc(int1);
   for int2:= 0 to high(fdecay_values) do begin
-   if fdecay_values[int2].re >= floopstart then begin
-    floopstartindex:= int2+length(fattack_values); //fvaluestrig index
-    floopendindex:= length(aftertrigvalues);
-    break;
+   with aftertrigvalues[int2+int1] do begin
+    re:= fdecay_values[int2].re + decaystart;
+    im:= fdecay_values[int2].im;
    end;
   end;
- end;
- if high(aftertrigvalues) >= 0 then begin
-  fattackval:= aftertrigvalues[0].im;
-  freleasestart:= aftertrigvalues[high(aftertrigvalues)].re;
- end;
-
- if high(frelease_values) >= 0 then begin
-  int1:= int1 + high(frelease_values) + 2; //+enditem
-  freleaseval:= frelease_values[0].im;
-  freleaseramp:= frelease_values[0].re;
-  if freleaseramp > 0 then begin
-   freleaseramp:= 1/(freleaseramp*timsca);
+  fprog:= nil;
+  timoffs:= 0;
+  timsca:= 1;
+  if fcontroller <> nil then begin
+   timsca:= timsca * fcontroller.samplefrequ;
   end;
- end;
- setlength(fprog,int1);
- findex:= high(fprog); //init inactive
- ti:= 0;
- sta:= fattackval;
- int1:= 0;
- int3:= high(aftertrigvalues);
- for int2:= 0 to high(fattack_values) do begin
-  calc(fattack_options,aftertrigvalues[int2],int1,ti,sta);
- end;
- for int2:= length(fattack_values) to int3 do begin
-  calc(fdecay_options,aftertrigvalues[int2],int1,ti,sta);
- end;
- if floopstartindex >= 0 then begin
-  do1:= sta;
-  calc(fdecay_options,makecomplex(
-       aftertrigvalues[int3].re+aftertrigvalues[floopstartindex].re-floopstart,
-       aftertrigvalues[floopstartindex].im),int1,ti,sta);
-  sta:= do1;
-  inc(floopstartindex); //fprog index
- end
- else begin
-  opt1:= fdecay_options;
-  if (fdecay_values = nil) and (fattack_values <> nil) then begin
-   opt1:= fattack_options;
+  ftime:= 0;
+  fattackval:= 0;
+  fattackramp:= 0;
+  floopstartindex:= -1;
+  floopendindex:= -1;
+  floopval:= 0;
+  floopramp:= 1;
+  freleaseindex:= -1;
+  freleaseval:= 0;
+  freleaseramp:= 0;
+  
+  int1:= high(aftertrigvalues) + 2; //+ enditem
+  if floopstart >= 0 then begin
+   for int2:= 0 to high(fdecay_values) do begin
+    if fdecay_values[int2].re >= floopstart then begin
+     floopstartindex:= int2+length(fattack_values); //fvaluestrig index
+     floopendindex:= length(aftertrigvalues);
+     break;
+    end;
+   end;
   end;
-  setend(opt1,int1,ti,sta);
- end;
- if high(frelease_values) >= 0 then begin  
+  if high(aftertrigvalues) >= 0 then begin
+   fattackval:= aftertrigvalues[0].im;
+   freleasestart:= aftertrigvalues[high(aftertrigvalues)].re;
+  end;
+ 
+  if high(frelease_values) >= 0 then begin
+   int1:= int1 + high(frelease_values) + 2; //+enditem
+   freleaseval:= frelease_values[0].im;
+   freleaseramp:= frelease_values[0].re;
+   if freleaseramp > 0 then begin
+    freleaseramp:= 1/(freleaseramp*timsca);
+   end;
+  end;
+  setlength(fprog,int1);
+  findex:= high(fprog); //init inactive
   ti:= 0;
-  freleaseindex:= int1; //prog index
-  for int2:= 0 to high(frelease_values) do begin
-   calc(frelease_options,frelease_values[int2],int1,ti,sta);
+  sta:= fattackval;
+  int1:= 0;
+  int3:= high(aftertrigvalues);
+  for int2:= 0 to high(fattack_values) do begin
+   calc(fattack_options,aftertrigvalues[int2],int1,ti,sta);
   end;
-  setend(frelease_options,int1,ti,sta);
- end;
- if fprog[0].endtime > 0 then begin
-  fattackramp:= 1/fprog[0].endtime;
+  for int2:= length(fattack_values) to int3 do begin
+   calc(fdecay_options,aftertrigvalues[int2],int1,ti,sta);
+  end;
+  if floopstartindex >= 0 then begin
+   do1:= sta;
+   calc(fdecay_options,makecomplex(
+        aftertrigvalues[int3].re+aftertrigvalues[floopstartindex].re-floopstart,
+        aftertrigvalues[floopstartindex].im),int1,ti,sta);
+   sta:= do1;
+   inc(floopstartindex); //fprog index
+  end
+  else begin
+   opt1:= fdecay_options;
+   if (fdecay_values = nil) and (fattack_values <> nil) then begin
+    opt1:= fattack_options;
+   end;
+   setend(opt1,int1,ti,sta);
+  end;
+  if high(frelease_values) >= 0 then begin  
+   ti:= 0;
+   freleaseindex:= int1; //prog index
+   for int2:= 0 to high(frelease_values) do begin
+    calc(frelease_options,frelease_values[int2],int1,ti,sta);
+   end;
+   setend(frelease_options,int1,ti,sta);
+  end;
+  if fprog[0].endtime > 0 then begin
+   fattackramp:= 1/fprog[0].endtime;
+  end;
+  sendchangeevent;
+ finally
+  unlock;
  end;
 end;
 
@@ -3631,6 +3696,31 @@ begin
  if frelease_options <> avalue then begin
   frelease_options:= avalue;
   updatevalues;
+ end;
+end;
+
+procedure tsigenvelope.setmaster(const avalue: tsigenvelope);
+var
+ env1: tsigenvelope;
+begin
+ env1:= avalue;
+ while env1 <> nil do begin
+  if env1 = self then begin
+   raise exception.create('Recursive master.');
+  end;
+  env1:= env1.master;
+ end;
+ setlinkedvar(avalue,fmaster);
+end;
+
+procedure tsigenvelope.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ if (event = oe_changed) and (sender <> nil) and (sender = master) then begin
+  attack_values:= master.attack_values;
+  decay_values:= master.decay_values;
+  release_values:= master.release_values;
+  loopstart:= master.loopstart;
  end;
 end;
 

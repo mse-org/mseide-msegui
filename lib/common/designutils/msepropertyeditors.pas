@@ -2682,7 +2682,7 @@ begin
  end
  else begin
   result:= (cssubcomponent in comp.ComponentStyle) and 
-   ((comp.owner = nil) or 
+   ((comp.owner = nil) or ownscomponent(component,comp) and
     (comp is tmsecomponent) and 
               not (cs_subcompref in tmsecomponent1(comp).fmsecomponentstate));
  end;

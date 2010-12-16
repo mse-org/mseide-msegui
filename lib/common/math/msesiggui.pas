@@ -14,15 +14,18 @@ uses
  classes,msegraphedits,msesignal,mseguiglob,mseevent,msechartedit,msetypes,
  msechart,mseclasses,msefft,msewidgets,msegraphics,msegraphutils,msedial,
  msesplitter,msegui,msestat,msestatfile,msestrings,msestockobjects;
+
+type
+ sigeditoptionty = (sieo_exp);
+ sigeditoptionsty = set of sigeditoptionty;
  
 const
  defaultffttableeditoptions = [ceo_noinsert,ceo_nodelete];
  defaultkeywidth = 8;
  defaultenvsplitteroptions = defaultsplitteroptions+[spo_hmove,spo_hprop];
+ defaultsigkeyboardoptions = [sieo_exp];
  
 type
- sigeditoptionty = (sieo_exp);
- sigeditoptionsty = set of sigeditoptionty;
  
  tsigslider = class(tslider,isigclient)
   private
@@ -124,7 +127,8 @@ type
                                                  write fontransformvalue;
    property min: real read fmin write setmin;
 //   property max: real read fmax write setmax;
-   property options: sigeditoptionsty read foptions write setoptions default [];
+   property options: sigeditoptionsty read foptions write setoptions 
+                                    default defaultsigkeyboardoptions;
  end;
  
  twavetableedit = class(torderedxychartedit)
@@ -489,6 +493,7 @@ end;
 
 constructor tsigkeyboard.create(aowner: tcomponent);
 begin
+ foptions:= defaultsigkeyboardoptions;
  fkey:= -1;
  ftrigout:= tdoubleoutputconn.create(self,isigclient(self),true);
  ftrigout.name:= 'trigout';

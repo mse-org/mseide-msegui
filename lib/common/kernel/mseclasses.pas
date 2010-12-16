@@ -606,7 +606,8 @@ type
                    splittype: ptypeinfo;
                    enums: array of setsplitpairty;
                   end;
-                   
+
+function ownscomponent(const owner: tcomponent; const child: tcomponent): boolean;
 function ownernamepath(const acomponent: tcomponent): string; 
                      //namepath from root to acomponent separated by '.'
 function namepathowner(const acomponent: tcomponent): string; 
@@ -1221,6 +1222,21 @@ end;
 function findglobalcomponentlocked: boolean;
 begin
  result:= modules.flocked <> 0;
+end;
+
+function ownscomponent(const owner: tcomponent; const child: tcomponent): boolean;
+var
+ comp1: tcomponent;
+begin
+ result:= false;
+ comp1:= child;
+ while comp1 <> nil do begin
+  if comp1 = owner then begin
+   result:= true;
+   break;
+  end;
+  comp1:= comp1.owner;
+ end;
 end;
 
 function ownernamepath(const acomponent: tcomponent): string;
