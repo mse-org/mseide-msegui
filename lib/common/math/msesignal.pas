@@ -31,12 +31,6 @@ type
  tdoublesigcomp = class;
  tsigcontroller = class;
  
- {
- sigclientinfoty = record
-  siginfo: siginfoty;
-  client: isigclient;
- end;
-}
  tcustomsigcomp = class(tmsecomponent)  
   protected
    fupdating: integer;
@@ -75,7 +69,6 @@ type
   procedure clear;
   function getinputar: inputconnarty;
   function getoutputar: outputconnarty;
-//  function getnamepath: string;
   function gethandler: sighandlerprocty;
   function getzcount: integer;
   function getcomponent: tcomponent;
@@ -218,7 +211,6 @@ type
   zcount: integer;
   inputs: inputinfoarty;
   outputs: outputconnarty;
-//  destinations: inputconnarty;
   destinations: sigdestinfoarty;
   eventdestinations: siginfopoarty;
   state: siginfostatesty;
@@ -243,7 +235,6 @@ type
   firstdest: destinfoty;
   dest: destinfoarty;
   desthigh: integer;
-//  recursivebuffer: double;
  end;
  psighandlernodeinfoty = ^sighandlernodeinfoty;
  sighandlernodeinfoarty = array of sighandlernodeinfoty;
@@ -277,7 +268,6 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy;
-//   procedure setsig1(var asource: doublearty); //asource is invalid afterwards
    procedure siginput(const asource: doublearty);
    procedure clear; override;
   published
@@ -307,12 +297,6 @@ type
    function getvalue: double;
   protected
    function getinputar: inputconnarty; override;
-   {
-   procedure setsig1(const sender: tdoubleinputconn;
-                                 var asource: doublearty); override;
-   procedure setsig(const sender: tdoubleinputconn;
-                                 const asource: doublearty); override;
-   }
     //isigclient
    function gethandler: sighandlerprocty; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
@@ -322,7 +306,6 @@ type
    procedure clear; override;
    procedure sigoutput1(var adest: doublearty); //returns a data copy
    function sigoutput: doublearty;
-//   property outp: doublearty read foutp;
    property value: double read getvalue;
   published
    property input: tdoubleinputconn read getinput write setinput;
@@ -365,39 +348,17 @@ type
    function getinputar: inputconnarty; override;
    function getoutputar: outputconnarty; override;
    procedure setzcount(const avalue: integer);
-//   procedure processinout(const acount: integer;
-//                    var ainp,aoutp: pdouble); virtual; abstract;
    procedure zcountchanged; virtual;
-   {
-   procedure setsig1(const sender: tdoubleinputconn;
-                                    var asource: doublearty); overload; override;
-   procedure setsig(const sender: tdoubleinputconn;
-                                    const asource: doublearty); overload; override;
-   }
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure clear; override;
-//   procedure setsig(const source: doublearty); overload;
-//   procedure getsig1(var dest: doublearty); overload;
-//   function getsig: doublearty;
-//   procedure updatesig(var inout: doublearty);
    property zcount: integer read getzcount default 0;
    property output: tdoubleoutputconn read foutput write setoutput;
   published
    property input: tdoubleinputconn read finput write setinput;
  end;
-{                           
- tdoubleinpconnitem = class(tsubcomponentitem)
-  private
-   function getitem: tdoubleinputconn;
-   procedure setitem(const avalue: tdoubleinputconn);
-  protected
-   function createitem: tcomponent; override;
-  published
-   property item: tdoubleinputconn read getitem write setitem;
- end;
- }
+
  tdoubleinpconnarrayprop = class(tpersistentarrayprop)
   private
    fsigintf: isigclient;
@@ -410,6 +371,22 @@ type
    property items[const index: integer]: tdoubleinputconn read getitems; default;
  end;
 
+ tdoubleoutconnarrayprop = class(tpersistentarrayprop)
+  private
+   fsigintf: isigclient;
+   fname: string;
+   fowner: tcomponent;
+   feventdriven: boolean;
+   function getitems(const index: integer): tdoubleoutputconn;
+  protected
+   procedure createitem(const index: integer; var item: tpersistent); override;
+   procedure dosizechanged; override;
+  public
+   constructor create(const aowner: tcomponent; const aname: string;
+           const asigintf: isigclient; const aeventdriven: boolean); reintroduce;
+   property items[const index: integer]: tdoubleoutputconn read getitems; default;
+ end;
+
  tsigmultiinp = class(tdoublesigcomp)
   private
    finputs: tdoubleinpconnarrayprop;
@@ -417,13 +394,11 @@ type
   protected
    finps: doublepoarty;
    finphigh: integer;
-//   finpdatacount: integer;
    function getinputar: inputconnarty; override;
    procedure initmodel; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-//   procedure clear; override;
   published
    property inputs: tdoubleinpconnarrayprop read finputs write setinputs;
  end;
@@ -1857,43 +1832,40 @@ begin
  fsigintf.modelchange;
 end;
 
-(*
-{ tdoubleinpconnitem }
+{ tdoubleoutconnarrayprop }
 
-function tdoubleinpconnitem.createitem: tcomponent;
+constructor tdoubleoutconnarrayprop.create(const aowner: tcomponent;
+                              const aname: string; const asigintf: isigclient;
+                              const aeventdriven: boolean);
 begin
- result:= tdoubleinputconn.create(tdoublesigcomp(fowner));
+ fsigintf:= asigintf;
+ fowner:= aowner;
+ fname:= aname;
+ feventdriven:= aeventdriven;
+ inherited create(nil);
 end;
 
-function tdoubleinpconnitem.getitem: tdoubleinputconn;
+procedure tdoubleoutconnarrayprop.createitem(const index: integer;
+               var item: tpersistent);
 begin
- result:= tdoubleinputconn(fitem);
+ item:= tdoubleoutputconn.create(fowner,fsigintf,feventdriven);
+ tdoubleoutputconn(item).name:= fname+inttostr(index);
 end;
 
-procedure tdoubleinpconnitem.setitem(const avalue: tdoubleinputconn);
+function tdoubleoutconnarrayprop.getitems(
+                           const index: integer): tdoubleoutputconn;
 begin
- fitem.assign(avalue);
+ result:= tdoubleoutputconn(inherited getitems(index));
 end;
-*)
+
+procedure tdoubleoutconnarrayprop.dosizechanged;
+begin
+ inherited;
+ fsigintf.modelchange;
+end;
+
 { tsigadd }
-{
-procedure tsigadd.processinout(const acount: integer; var ainp: doublepoarty;
-               var aoutp: pdouble);
-var
- int1,int2: integer;
- rea1: real;
-begin
- for int1:= 0 to acount - 1 do begin
-  rea1:= 0;
-  for int2:= 0 to high(ainp) do begin
-   rea1:= rea1 + ainp[int2]^;
-   inc(ainp[int2]);
-  end;
-  aoutp^:= rea1;
-  inc(aoutp);
- end;
-end;
-}
+
 function tsigadd.gethandler: sighandlerprocty;
 begin
  result:= {$ifdef FPC}@{$endif}sighandler;

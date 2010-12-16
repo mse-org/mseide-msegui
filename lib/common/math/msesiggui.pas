@@ -58,6 +58,8 @@ type
    function getsigcontroller: tsigcontroller;
    function getsigclientinfopo: psigclientinfoty;
    function getsigoptions: sigclientoptionsty;
+   procedure lock;
+   procedure unlock;
   public
    constructor create(aowner: tcomponent); override;
    property output: tdoubleoutputconn read foutput write setoutput;
@@ -70,31 +72,43 @@ type
    property options: sigeditoptionsty read foptions write setoptions default [];
  end;
 
+ sigkeyinfoty = record
+  sigvalue: double;
+  trigvalue: double;
+  key: integer;
+  pressed: boolean;
+  timestamp: longword;
+  outpo: pdouble;
+  trigoutpo: pdouble;
+ end;
+ sigkeyinfoarty = array of sigkeyinfoty;
+ 
  tsigkeyboard = class(trealgraphdataedit,isigclient)
   private
-   foutput: tdoubleoutputconn;
+   foutput: tdoubleoutconnarrayprop;
+   ftrigout: tdoubleoutconnarrayprop;
    fcontroller: tsigcontroller;
    fsigclientinfo: sigclientinfoty;
    fontransformvalue: sigineventty;
    fmin: real;
-//   fmax: real;
    foptions: sigeditoptionsty;
    fkeywidth: integer;
    fkey: integer;
    flastkey: integer;
    fkeypressed: boolean;
-   ftrigout: tdoubleoutputconn;
-   procedure setoutput(const avalue: tdoubleoutputconn);
+   foutputcount: integer;
+   foutputhigh: integer;
+   procedure setoutput(const avalue: tdoubleoutconnarrayprop);
+   procedure settrigout(const avalue: tdoubleoutconnarrayprop);
    procedure setcontroller(const avalue: tsigcontroller);
    procedure setmin(const avalue: real);
-//   procedure setmax(const avalue: real);
    procedure setoptions(const avalue: sigeditoptionsty);
    procedure setkeywidth(const avalue: integer);
-   procedure settrigout(const avalue: tdoubleoutputconn);
+   procedure setoutputcount(const avalue: integer);
   protected
-   fsigvalue: real;
-   ftrigvalue: real;
-   procedure updatesigvalue;
+   fdummy: double;
+   fkeyinfos: sigkeyinfoarty;
+   procedure updatesigvalue(const akey: integer; const apressed: boolean);
    procedure dochange; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
    procedure paintglyph(const canvas: tcanvas; const acolorglyph: colorty;
@@ -116,10 +130,13 @@ type
    function getsigcontroller: tsigcontroller;
    function getsigclientinfopo: psigclientinfoty;
    function getsigoptions: sigclientoptionsty;
+   procedure lock;
+   procedure unlock;
   public
    constructor create(aowner: tcomponent); override;
-   property output: tdoubleoutputconn read foutput write setoutput;
-   property trigout: tdoubleoutputconn read ftrigout write settrigout;
+   destructor destroy; override;
+   property output: tdoubleoutconnarrayprop read foutput write setoutput;
+   property trigout: tdoubleoutconnarrayprop read ftrigout write settrigout;
   published
    property keywidth: integer read fkeywidth write setkeywidth default defaultkeywidth;
    property controller: tsigcontroller read fcontroller write setcontroller;
@@ -129,6 +146,7 @@ type
 //   property max: real read fmax write setmax;
    property options: sigeditoptionsty read foptions write setoptions 
                                     default defaultsigkeyboardoptions;
+   property outputcount: integer read foutputcount write setoutputcount default 1;
  end;
  
  twavetableedit = class(torderedxychartedit)
@@ -355,10 +373,11 @@ const
 
 implementation
 uses
- math,msekeyboard,msebits;
+ math,msekeyboard,msebits,msesysutils;
 type
  tsigcontroller1 = class(tsigcontroller);
  tsigenvelope1 = class(tsigenvelope);
+ tdoubleoutputconn1 = class(tdoubleoutputconn); 
  
 { tsigslider }
 
@@ -428,12 +447,10 @@ begin
  if canevent(tmethod(fontransformvalue)) then begin
   fontransformvalue(self,real(do1));
  end;
- if fcontroller <> nil then begin
-  fcontroller.lock;
- end;
+ lock;
  fsigvalue:= do1;
+ unlock;
  if fcontroller <> nil then begin
-  fcontroller.unlock;
   tsigcontroller1(fcontroller).execevent(isigclient(self));
  end;
 end;
@@ -489,18 +506,40 @@ begin
  result:= [];
 end;
 
+procedure tsigslider.lock;
+begin
+ if fcontroller <> nil then begin
+  fcontroller.lock;
+ end;
+end;
+
+procedure tsigslider.unlock;
+begin
+ if fcontroller <> nil then begin
+  fcontroller.unlock;
+ end;
+end;
+
 { tsigkeyboard }
 
 constructor tsigkeyboard.create(aowner: tcomponent);
 begin
  foptions:= defaultsigkeyboardoptions;
  fkey:= -1;
- ftrigout:= tdoubleoutputconn.create(self,isigclient(self),true);
- ftrigout.name:= 'trigout';
- foutput:= tdoubleoutputconn.create(self,isigclient(self),true);
+ ftrigout:= tdoubleoutconnarrayprop.create(self,'trigout',isigclient(self),true);
+// ftrigout.name:= 'trigout';
+ foutput:= tdoubleoutconnarrayprop.create(self,'output',isigclient(self),true);
  fmin:= 0.001;
 // fmax:= 1;
  fkeywidth:= defaultkeywidth;
+ inherited;
+ outputcount:= 1;
+end;
+
+destructor tsigkeyboard.destroy;
+begin
+ ftrigout.free;
+ foutput.free;
  inherited;
 end;
 
@@ -510,8 +549,31 @@ begin
 end;
 
 procedure tsigkeyboard.initmodel;
+var
+ int1: integer;
+ ti1: longword;
 begin
- //dummy
+ ti1:= timestamp;
+ for int1:= 0 to foutputhigh do begin
+  with fkeyinfos[int1] do begin
+   timestamp:= ti1;
+   trigvalue:= 0;
+   sigvalue:= fmin;
+   key:= -1;
+   if int1 < output.count then begin
+    outpo:= @tdoubleoutputconn1(output[int1]).fvalue;
+   end
+   else begin
+    outpo:= @fdummy;
+   end;
+   if int1 < trigout.count then begin
+    trigoutpo:= @tdoubleoutputconn1(trigout[int1]).fvalue;
+   end
+   else begin
+    trigoutpo:= @fdummy;
+   end;
+  end;   
+ end;
 end;
 
 function tsigkeyboard.getinputar: inputconnarty;
@@ -520,10 +582,17 @@ begin
 end;
 
 function tsigkeyboard.getoutputar: outputconnarty;
+var
+ int1,int2: integer;
 begin
- setlength(result,2);
- result[0]:= foutput;
- result[1]:= ftrigout;
+ setlength(result,foutput.count+ftrigout.count);
+ int2:= foutput.count;
+ for int1:= 0 to int2-1 do begin
+  result[int1]:= foutput[int1];
+ end;
+ for int1:= 0 to ftrigout.count - 1 do begin
+  result[int1+int2]:= ftrigout[int1];
+ end;
 end;
 
 function tsigkeyboard.getzcount: integer;
@@ -536,12 +605,12 @@ begin
  //dummy
 end;
 
-procedure tsigkeyboard.setoutput(const avalue: tdoubleoutputconn);
+procedure tsigkeyboard.setoutput(const avalue: tdoubleoutconnarrayprop);
 begin
  foutput.assign(avalue);
 end;
 
-procedure tsigkeyboard.settrigout(const avalue: tdoubleoutputconn);
+procedure tsigkeyboard.settrigout(const avalue: tdoubleoutconnarrayprop);
 begin
  ftrigout.assign(avalue);
 end;
@@ -556,50 +625,85 @@ begin
  result:= fcontroller;
 end;
 
-procedure tsigkeyboard.updatesigvalue;
+procedure tsigkeyboard.updatesigvalue(const akey: integer; const apressed: boolean);
 var
- do1: double;
+ do1,do2: double;
+ int1,int2: integer;
+ ind1,oldest: integer;
+ ti1,ti2: longword;
 begin
- if fkey < 0 then begin
-  do1:= fsigvalue;
- end
- else begin  
-  if (sieo_exp in foptions) then begin
-   do1:= intpower(2.0,fkey div 12) * chromaticscale[fkey mod 12] * fmin;
-  end
-  else begin
-   do1:= fkey/12.0 + fmin;
+ if foutputcount > 0 then begin
+  ind1:= -1;
+  ti1:= timestamp;
+  ti2:= 0;
+  oldest:= 0;
+  lock;
+  for int1:= 0 to foutputhigh do begin   
+   with fkeyinfos[int1] do begin
+    int2:= ti1 - timestamp;
+    if int2 > ti2 then begin
+     ti2:= int2;
+     oldest:= int1;
+    end;
+    if key = akey then begin
+     ind1:= int1;
+    end;
+   end;
   end;
- end;
- if canevent(tmethod(fontransformvalue)) then begin
-  fontransformvalue(self,real(do1));
- end;
- if fcontroller <> nil then begin
-  fcontroller.lock;
- end;
- fsigvalue:= do1;
- if fkey < 0 then begin
-  ftrigvalue:= 0;
- end
- else begin
-  ftrigvalue:= 1;
- end;
- if fcontroller <> nil then begin
-  fcontroller.unlock;
-  tsigcontroller1(fcontroller).execevent(isigclient(self));
+  if ind1 < 0 then begin
+   ind1:= oldest;
+  end;
+  with fkeyinfos[ind1] do begin
+   key:= akey;
+   timestamp:= ti1;
+   pressed:= apressed;
+   if not apressed then begin
+    do1:= sigvalue;
+    do2:= 0;
+   end
+   else begin  
+    do2:= 1;
+    if (sieo_exp in foptions) then begin
+     do1:= intpower(2.0,key div 12) * chromaticscale[key mod 12] * fmin;
+    end
+    else begin
+     do1:= fkey/12.0 + fmin;
+    end;
+   end;
+   if canevent(tmethod(fontransformvalue)) then begin
+    fontransformvalue(self,real(do1));
+   end;
+   sigvalue:= do1;
+   trigvalue:= do2;
+  end;
+  unlock;             //todo: single event for current output only
+  if fcontroller <> nil then begin
+   tsigcontroller1(fcontroller).execevent(isigclient(self));
+  end;
  end;
 end;
 
 procedure tsigkeyboard.dochange;
 begin
  inherited;
- updatesigvalue; 
+ updatesigvalue(-1,false); 
 end;
 
 procedure tsigkeyboard.sighandler(const ainfo: psighandlerinfoty);
+var
+ int1: integer;
 begin
- ainfo^.dest^:= fsigvalue;
- ftrigout.value:= ftrigvalue;
+ if foutputcount > 0 then begin
+  ainfo^.dest^:= fkeyinfos[0].sigvalue;
+  for int1:= 0 to foutputhigh do begin
+   with fkeyinfos[int1] do begin
+    outpo^:= sigvalue;
+    trigoutpo^:= trigvalue;
+   end;
+  end;
+ end;
+// ainfo^.dest^:= fsigvalue;
+// ftrigout.value:= ftrigvalue;
 end;
 
 function tsigkeyboard.gethandler: sighandlerprocty;
@@ -608,12 +712,20 @@ begin
 end;
 
 procedure tsigkeyboard.setmin(const avalue: real);
+var
+ int1: integer;
 begin
+ lock;
  fmin:= avalue;
- if fsigvalue < fmin then begin
-  fsigvalue:= fmin;
+ for int1:= 0 to foutputhigh do begin
+  with fkeyinfos[int1] do begin
+   if sigvalue < fmin then begin
+    sigvalue:= fmin;
+   end;
+  end;
  end;
- updatesigvalue;
+ updatesigvalue(-1,false);
+ unlock;
 end;
 {
 procedure tsigkeyboard.setmax(const avalue: real);
@@ -625,8 +737,10 @@ end;
 procedure tsigkeyboard.setoptions(const avalue: sigeditoptionsty);
 begin
  if options <> avalue then begin
+  lock;
   foptions:= avalue;
-  updatesigvalue;
+  updatesigvalue(-1,false);
+  unlock;
  end;
 end;
 
@@ -732,7 +846,15 @@ begin
  end;
  if keybefore <> fkey then begin
   include(info.eventstate,es_processed);
-  updatesigvalue;
+  if fkey = -1 then begin
+   updatesigvalue(keybefore,false);
+  end
+  else begin
+   if keybefore >= 0 then begin
+    updatesigvalue(keybefore,false);
+   end;
+   updatesigvalue(fkey,true);
+  end;
  end
  else begin
   inherited;
@@ -746,7 +868,7 @@ begin
   fkey:= flastkey;
   include(info.eventstate,es_processed);
   fkeypressed:= true;
-  updatesigvalue;
+  updatesigvalue(fkey,true);
  end
  else begin
   inherited;
@@ -757,9 +879,9 @@ procedure tsigkeyboard.dokeyup(var info: keyeventinfoty);
 begin
  if (info.key = key_space) and 
            not (ss_repeat in info.shiftstate) and (fkey >= 0) then begin
-  fkey:= -1;
   include(info.eventstate,es_processed);
-  updatesigvalue;
+  updatesigvalue(fkey,false);
+  fkey:= -1;
   fkeypressed:= false;
  end
  else begin
@@ -781,6 +903,29 @@ end;
 function tsigkeyboard.getsigoptions: sigclientoptionsty;
 begin
  result:= [];
+end;
+
+procedure tsigkeyboard.setoutputcount(const avalue: integer);
+begin
+ foutputcount:= avalue;
+ foutputhigh:= avalue-1;
+ output.count:= avalue;
+ trigout.count:= avalue;
+ setlength(fkeyinfos,avalue);
+end;
+
+procedure tsigkeyboard.lock;
+begin
+ if fcontroller <> nil then begin
+  fcontroller.lock;
+ end;
+end;
+
+procedure tsigkeyboard.unlock;
+begin
+ if fcontroller <> nil then begin
+  fcontroller.unlock;
+ end;
 end;
 
 { twavetableedit }
