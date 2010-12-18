@@ -5181,13 +5181,13 @@ begin
   end;
   case fkind of
    dtk_time: begin
-    result:= stringtotime(mstr1);
+    result:= stringtotime(mstr1,fformatedit);
    end;
    dtk_date: begin
-    result:= stringtodate(mstr1);
+    result:= stringtodate(mstr1,fformatedit);
    end;
    else begin
-    result:= stringtodatetime(mstr1);
+    result:= stringtodatetime(mstr1,fformatedit);
    end;
   end;
  except
@@ -5203,26 +5203,7 @@ var
  mstr1: msestring;
 begin
  dat1:= gettextvalue(accept,quiet);
- {
- try
-  mstr1:= feditor.text;
-  checktext(mstr1,accept);
-  if not accept then begin
-   exit;
-  end;
-  if fkind = dtk_time then begin
-   dat1:= stringtotime(mstr1);
-  end
-  else begin
-   dat1:= stringtodatetime(mstr1);
-  end;
- except
-  formaterror(quiet);
-  accept:= false
- end;
- }
  if accept then begin
-//  dat1:= checkkind(dat1);
   if not ((des_isdb in fstate) and isemptydatetime(dat1)) then begin
    if fkind = dtk_time then begin
     if isemptydatetime(fmax) and not isemptydatetime(dat1) or

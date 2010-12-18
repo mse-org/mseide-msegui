@@ -211,23 +211,22 @@ function replaceext(inp,ext: string): string;
 function bcdtoint(inp: byte): integer;
 function inttobcd(inp: integer): byte;
 
-function stringtotime(const avalue: msestring): tdatetime;
+function stringtotime(const avalue: msestring): tdatetime; overload;
+function stringtotime(const avalue: msestring;
+                              const aformat: msestring): tdatetime; overload;
+
 function timetostring(const avalue: tdatetime; 
                           const format: msestring = 't'): msestring;
 function datetostring(const avalue: tdatetime;
                           const format: msestring = 'c'): msestring;
-function stringtodate(const avalue: msestring): tdatetime;
+function stringtodate(const avalue: msestring): tdatetime;  overload;
+function stringtodate(const avalue: msestring;
+                              const aformat: msestring): tdatetime;  overload;
 function datetimetostring(const avalue: tdatetime;
                           const format: msestring = 'c'): msestring;
-function stringtodatetime(const avalue: msestring): tdatetime;
-
-//function strtotime(ein: string; var resultat: tdatetime): boolean;
- //true bei fehler
-{wandelt string in zeit, 0.0 -> leer,
-                         friss -> 0.000001 ca. 1/10 sek, 0:0:0 -> 0.000002,}
-//function strtodat(ein: string; var resultat: tdatetime): boolean;
- //true bei fehler
-{wandelt string in datum year = 0 -> leer, bereich 1950..2049}
+function stringtodatetime(const avalue: msestring): tdatetime; overload;
+function stringtodatetime(const avalue: msestring;
+                              const aformat: msestring): tdatetime; overload;
 
 function timemse(const value: tdatetime): tdatetime;
   //bringt timeanteil im mseformat
@@ -283,7 +282,8 @@ const
 implementation
 
 uses
- sysconst,msedate,msereal,Math,msefloattostr;
+ sysconst,msedate,msereal,Math,msefloattostr,msedatalist;
+ 
 {$ifndef FPC}
 function TryStrToQWord(const S: string; out Value: QWord): Boolean;
 begin
@@ -1396,6 +1396,538 @@ begin
     result:= strtodatetime(avalue);
    end;
   end;
+ end;
+end;
+
+type
+ datetimeformattokenty = (
+  dtft_default,        // c        shortdateformat + ' ' + longtimeformat
+  dtft_day,            // d        day of month
+  dtft_dayzero,        // dd       day of month (leading zero)
+  dtft_dayabbr,        // ddd      day of week (abbreviation)
+  dtft_dayfull,        // dddd     day of week (full)
+  dtft_shortdate,      // ddddd    shortdateformat
+  dtft_longdate,       // dddddd   longdateformat
+  dtft_month,          // m        month
+  dtft_monthzero,      // mm       month (leading zero)
+  dtft_monthabbr,      // mmm      month (abbreviation)
+  dtft_monthfull,      // mmmm     month (full)
+  dtft_year,           // y        year (2 digits)
+  dtft_yearzero,       // yy       year (two digits)
+  dtft_yearcentury,    // yyyy     year (with century)
+  dtft_hour,           // h        hour
+  dtft_hourzero,       // hh       hour (leading zero)
+  dtft_minute,         // n        minute
+  dtft_minutezero,     // nn       minute (leading zero)
+  dtft_second,         // s        second
+  dtft_secondzero,     // ss       second (leading zero)
+  dtft_shorttime,      // t        shorttimeformat
+  dtft_longtime,       // tt       longtimeformat
+  dtft_ampm,           // am/pm    use 12 hour clock and
+                       //          display am and pm accordingly
+  dtft_ap,             // a/p      use 12 hour clock and display 
+                       //          a and p accordingly
+  dtft_datesep,        // /        insert date seperator
+  dtft_timesep,        // :        insert time seperator
+  dtft_millisec        // z        milliseconds
+ );
+
+dttokengroupty = (dttg_none,dttg_millisec,dttg_sec,
+                  dttg_min,dttg_hour,
+                  dttg_day,dttg_mon,dttg_year);
+dttokeninfoty = record
+ token: datetimeformattokenty;
+ group: dttokengroupty;
+ chars: msestring;
+end;
+
+const
+ tokeninfos: array[0..ord(high(datetimeformattokenty))] of dttokeninfoty =
+  (                    //longest first
+   (token: dtft_default;     group: dttg_none;     chars: 'C'),        //0
+   (token: dtft_longdate;    group: dttg_none;     chars: 'DDDDDD'),   //1
+   (token: dtft_shortdate;   group: dttg_none;     chars: 'DDDDD'),    //2
+   (token: dtft_longtime;    group: dttg_none;     chars: 'TT'),       //3
+   (token: dtft_shorttime;   group: dttg_none;     chars: 'T'),        //4
+   (token: dtft_ampm;        group: dttg_none;     chars: 'AM/PM'),    //5
+   (token: dtft_ap;          group: dttg_none;     chars: 'A/P'),      //6
+   (token: dtft_datesep;     group: dttg_none;     chars: '/'),        //7
+   (token: dtft_timesep;     group: dttg_none;     chars: ':'),        //8
+
+   (token: dtft_dayfull;     group: dttg_day;      chars: 'DDDD'),     //9
+   (token: dtft_monthfull;   group: dttg_mon;      chars: 'MMMM'),
+   (token: dtft_yearcentury; group: dttg_year;     chars: 'YYYY'),
+   (token: dtft_dayabbr;     group: dttg_day;      chars: 'DDD'),
+   (token: dtft_monthabbr;   group: dttg_mon;      chars: 'MMM'),
+   (token: dtft_dayzero;     group: dttg_day;      chars: 'DD'),
+   (token: dtft_monthzero;   group: dttg_mon;      chars: 'MM'),
+   (token: dtft_yearzero;    group: dttg_year;     chars: 'YY'),
+   (token: dtft_hourzero;    group: dttg_hour;     chars: 'HH'),
+   (token: dtft_minutezero;  group: dttg_min;      chars: 'NN'),
+   (token: dtft_secondzero;  group: dttg_sec;      chars: 'SS'),
+   (token: dtft_day;         group: dttg_day;      chars: 'D'),
+   (token: dtft_month;       group: dttg_mon;      chars: 'M'),
+   (token: dtft_year;        group: dttg_year;     chars: 'Y'),
+   (token: dtft_hour;        group: dttg_hour;     chars: 'H'),
+   (token: dtft_minute;      group: dttg_min;      chars: 'N'),
+   (token: dtft_second;      group: dttg_sec;      chars: 'S'),
+   (token: dtft_millisec;    group: dttg_millisec; chars: 'Z')
+  );
+
+//todo: use format cache
+
+type
+ scaninfoty = record
+  index: integer;
+  group: dttokengroupty;
+ end;
+
+function comparescan(const l,r): integer;
+begin
+ result:= scaninfoty(l).index - scaninfoty(r).index;
+end;
+ 
+function stringtodatetime(const avalue: msestring;
+                              const aformat: msestring): tdatetime;
+ procedure removequotes(var astring: msestring);
+ var
+  po1: pmsechar;
+ begin
+  uniquestring(astring);
+  po1:= pmsechar(astring);
+  while po1^ <> #0 do begin
+   case po1^ of 
+    '"': begin
+     repeat
+      po1^:= ' ';
+      inc(po1)
+     until  (po1^ = '"') or (po1^ = #0 );
+     if po1^ <> #0 then begin
+      po1^:= ' ';
+     end;
+    end;
+   end;
+   case po1^ of 
+    '''': begin
+     repeat
+      po1^:= ' ';
+      inc(po1)
+     until  (po1^ = '''') or (po1^ = #0 );
+     if po1^ <> #0 then begin
+      po1^:= ' ';
+     end;
+    end;
+    else begin
+     if (po1^ >= 'a') and (po1^ <= 'z') then begin
+      dec(po1^,ord('a')-ord('A'));
+     end;
+     inc(po1);
+    end;
+   end;
+  end;
+ end; //removequotes
+ 
+ procedure expand(var astring: msestring; const ainfo: dttokeninfoty;
+                      const substitute: msestring);
+ var
+  mstr1,mstr2: msestring;
+  int1,int2: integer;
+ begin
+  mstr1:= astring;
+  mstr2:= substitute;
+  removequotes(mstr2);
+  int2:= length(ainfo.chars);
+  int1:= 1;
+  while true do begin
+   int1:= mseposex(ainfo.chars,mstr1,int1); //no recursion
+   if int1 = 0 then begin
+    break;
+   end;
+   mstr1:= copy(mstr1,1,int1)+mstr2+copy(mstr1,int1+int2,bigint);
+   int1:= int1 + int2;
+  end;
+  astring:= mstr1;
+ end; //expand
+ 
+var
+ scanar: array of scaninfoty;
+ scanindex: integer;
+ 
+ procedure scan(var astring: msestring; const ainfo: dttokeninfoty);
+ var
+  po1: pmsecharaty;
+  int1,int2,int3: integer;
+ begin
+  int1:= 1;
+  while true do begin
+   int1:= mseposex(ainfo.chars,astring,int1); //no recursion
+   if int1 = 0 then begin
+    break;
+   end;
+   with scanar[scanindex] do begin
+    index:= int1;
+    group:= ainfo.group;
+   end;
+   inc(scanindex);
+   po1:= @astring[int1];
+   int3:= length(ainfo.chars);
+   for int2:= 0 to int3-1 do begin
+    po1^[int2]:= ' ';
+   end;
+   int1:= int1 + int3;
+  end;
+ end; //scan
+
+var
+ dateorder: array[0..2] of dttokengroupty = (dttg_none,dttg_none,dttg_none);
+
+ function finddateorder(const agroup: dttokengroupty): integer;
+ var
+  int1: integer;
+ begin
+  result:= -1;
+  for int1:= 0 to high(dateorder) do begin
+   if agroup = dateorder[int1] then begin
+    result:= int1;
+    break;
+   end;
+  end;
+ end;
+  
+var
+ mstr1: msestring;
+ int1,int2,int3,int4,int5: integer;
+ grouporder: array of dttokengroupty;
+ groupused: array[dttokengroupty] of boolean;
+ ar1: msestringarty;
+ datear,timear: integerarty;
+ po1,po2: pmsechar;
+ tisep: msechar;
+ year,month,defmonth,day,hour,minute,second,millisecond: word;
+ ispm,hasmonthname,hasdateformat,hastimeformat: boolean;
+ refdate: tdatetime;
+ defaultdateorder: array[0..2] of dttokengroupty = (dttg_year,dttg_mon,dttg_day);
+  
+begin
+ if avalue = '' then begin
+  result:= emptydatetime;
+ end
+ else begin
+  refdate:= now;
+  if aformat = '' then begin
+   mstr1:= 'c';
+  end
+  else begin
+   mstr1:= aformat;
+  end;
+  removequotes(mstr1);
+  expand(mstr1,tokeninfos[0],defaultformatsettingsmse.shortdateformat + ' ' + 
+                             defaultformatsettingsmse.longtimeformat); //c
+  expand(mstr1,tokeninfos[1],defaultformatsettingsmse.longdateformat); //dddddd
+  expand(mstr1,tokeninfos[2],defaultformatsettingsmse.shortdateformat);//ddddd
+  expand(mstr1,tokeninfos[3],defaultformatsettingsmse.longtimeformat); //tt
+  expand(mstr1,tokeninfos[4],defaultformatsettingsmse.shorttimeformat);//t
+  allocuninitedarray(length(mstr1),sizeof(scanar[0]),scanar); //max
+  scanindex:= 0;
+  for int1:= 9 to high(tokeninfos) do begin
+   scan(mstr1,tokeninfos[int1]);
+  end;
+  setlength(scanar,scanindex);
+  sortarray(scanar,@comparescan,sizeof(scanar[0]));
+  fillchar(groupused,sizeof(groupused),0);
+  allocuninitedarray(length(scanar),sizeof(scanar[0]),grouporder); //max
+  int2:= 0;
+  for int1:= 0 to high(scanar) do begin
+   with scanar[int1] do begin
+    if not groupused[group] then begin
+     groupused[group]:= true;
+     grouporder[int2]:= group;
+     inc(int2);
+    end;
+   end;
+  end;
+  setlength(grouporder,int2);
+  int2:= 0;
+  hastimeformat:= false;
+  for int1:= 0 to high(grouporder) do begin
+   if grouporder[int1] in [dttg_hour,dttg_min,dttg_sec,dttg_millisec] then begin
+    hastimeformat:= true;
+   end;
+  end;
+  hasdateformat:= false;
+  for int1:= 0 to high(grouporder) do begin
+   if grouporder[int1] in [dttg_year,dttg_mon,dttg_day] then begin
+    hasdateformat:= true;
+    dateorder[int2]:= grouporder[int1];
+    inc(int2);
+    if int2 > high(dateorder) then begin
+     break;
+    end;
+   end;
+  end;
+  for int1:= 0 to high(dateorder)do begin
+   if dateorder[int1] = dttg_none then begin
+    break;
+   end;
+   for int2:= high(defaultdateorder) downto 0 do begin
+    if defaultdateorder[int2] = dateorder[int1] then begin
+     defaultdateorder[int2]:= dttg_none;
+     break;
+    end;
+   end;
+  end;
+  for int1:= high(dateorder) downto 0 do begin
+   if dateorder[int1] <> dttg_none then begin
+    break;
+   end;
+   for int2:= high(defaultdateorder) downto 0 do begin
+    if defaultdateorder[int2] <> dttg_none then begin
+     dateorder[int1]:= defaultdateorder[int2];
+     defaultdateorder[int2]:= dttg_none;
+     break;
+    end;
+   end;
+  end;
+  
+  int2:= length(avalue);
+  if (int2 > 2) and isnumber(avalue) then begin
+   mstr1:= '';
+   int1:= 1;
+   while int1 <= int2 do begin
+    mstr1:= mstr1+copy(avalue,int1,2)+' ';
+    int1:= int1 + 2;
+   end;
+  end
+  else begin
+   mstr1:= struppercase(avalue);
+  end;
+  setlength(ar1,length(mstr1)); //max
+  int2:= 0;
+  po1:= pmsechar(mstr1);
+  tisep:= defaultformatsettingsmse.timeseparator;
+  while po1^ <> #0 do begin        //split numerals
+   case po1^ of
+    '0'..'9': begin
+     po2:= po1;
+     while (po1^ >= '0') and (po1^ <= '9') do begin
+      inc(po1);
+     end;
+     int3:= po1-po2;
+     setlength(ar1[int2],int3);
+     move(po2^,pointer(ar1[int2])^,int3*sizeof(msechar));
+     inc(int2);
+     dec(po1);
+    end;
+    'A','P': begin
+     setlength(ar1[int2],1);
+     ar1[int2]:= po1^;
+     inc(int2);
+     inc(po1);
+     if po1^ <> 'M' then begin
+      dec(po1)
+     end;
+    end;
+    else begin
+     if po1^ = tisep then begin
+      setlength(ar1[int2],1);
+      ar1[int2]:= ':';
+      inc(int2);
+     end;
+    end;
+   end;
+   inc(po1);
+  end;
+  setlength(ar1,int2);
+  
+  month:= 0;                       //check month names
+  hasmonthname:= false;
+  for int1:= 1 to 12 do begin
+   if pos(struppercase(defaultformatsettingsmse.longmonthnames[int1]),
+                                                        mstr1) <> 0 then begin
+    month:= int1;
+    hasmonthname:= true;
+    break;
+   end;
+  end;
+  if month = 0 then begin
+   for int1:= 1 to 12 do begin
+    if pos(struppercase(defaultformatsettingsmse.shortmonthnames[int1]),
+                                                        mstr1) <> 0 then begin
+     month:= int1;
+     hasmonthname:= true;
+     break;
+    end;
+   end;
+  end;
+
+  ispm:= false;                  //split date/time formats
+  setlength(datear,length(ar1)); //max
+  setlength(timear,length(ar1)); //max
+  int2:= 0;
+  int3:= 0;
+  for int1:= 0 to high(ar1) do begin
+   case ar1[int1][1] of
+    'P': begin
+     ispm:= true;
+    end;
+    '0'..'9': begin
+     if (int1 > 0) and (ar1[int1-1][1] = ':') or 
+        (int1 < high(ar1)) and (ar1[int1+1][1] = ':') then begin
+      timear[int3]:= int1;
+      inc(int3);
+     end
+     else begin
+      datear[int2]:= int1;
+      inc(int2);
+     end;
+    end;
+   end;
+  end;
+
+  setlength(datear,int2);
+  setlength(timear,int3);
+  decodedate(refdate,year,defmonth,day);
+//   decodetime(refdate,hour,minute,second,millisecond);
+  if (high(timear) < 0) and not hasdateformat then begin
+   timear:= datear;        //use entries for time
+   datear:= nil;
+  end;
+  case high(datear) of
+   -1: begin
+   end;
+   0: begin
+    day:= strtoint(ar1[datear[0]]);
+   end;
+   1: begin
+    if month = 0 then begin //no month name found
+     if finddateorder(dttg_mon) > finddateorder(dttg_day) then begin
+      day:= strtoint(ar1[datear[0]]);
+      month:= strtoint(ar1[datear[1]]);
+     end
+     else begin
+      day:= strtoint(ar1[datear[1]]);
+      month:= strtoint(ar1[datear[0]]);
+     end;
+    end
+    else begin
+     if finddateorder(dttg_year) > finddateorder(dttg_day) then begin
+      day:= strtoint(ar1[datear[0]]);
+      year:= strtoint(ar1[datear[1]]);
+     end
+     else begin
+      day:= strtoint(ar1[datear[1]]);
+      year:= strtoint(ar1[datear[0]]);
+     end;
+    end;
+   end;
+   else begin //>= 2
+    for int1:= 0 to 2 do begin
+     mstr1:= ar1[datear[int1]];
+     int2:= strtoint(mstr1);
+     case dateorder[int1] of
+      dttg_year: begin
+       if length(mstr1) <= 2 then begin
+        int3:= defaultformatsettingsmse.twodigityearcenturywindow;
+        int4:= year-int3;    //window start
+        int5:= int4 div 100; //century
+        if (int3 <> 0) and ((int4 mod 100) > int2) then begin
+         inc(int5);
+        end;
+        int2:= int2 + int5 * 100;
+       end;
+       year:= int2;
+      end;
+      dttg_mon: begin
+       month:= int2;
+      end;
+      dttg_day: begin
+       day:= int2;
+      end;
+     end;
+    end;
+   end;
+  end;
+  if month = 0 then begin 
+   month:= defmonth;         //use current month
+  end;
+  int1:= high(timear);
+  if int1 >= 0 then begin
+   if int1 >= 3 then begin
+    millisecond:= strtoint(ar1[timear[3]]);
+   end
+   else begin
+    millisecond:= 0;
+   end;
+   if int1 >= 2 then begin
+    second:= strtoint(ar1[timear[2]]);
+   end
+   else begin
+    second:= 0;
+   end;
+   if int1 >= 1 then begin
+    minute:= strtoint(ar1[timear[1]]);
+   end
+   else begin
+    minute:= 0;
+   end;
+   hour:= strtoint(ar1[timear[0]]);
+   if ispm and (hour < 12) then begin
+    hour:= hour + 12;
+   end;
+   if high(datear) >= 0 then begin
+    result:= composedatetime(encodedate(year,month,day),
+                                encodetime(hour,minute,second,millisecond));
+   end
+   else begin
+    result:= encodetime(hour,minute,second,millisecond);
+   end;
+  end
+  else begin
+   if (high(datear) >= 0) or hasmonthname then begin
+    result:= encodedate(year,month,day);
+   end
+   else begin
+    if avalue = ' ' then begin
+     if hasdateformat and hastimeformat or 
+        not(hasdateformat or hastimeformat) then begin
+      result:= refdate;
+     end
+     else begin
+      if hasdateformat then begin
+       result:= trunc(refdate);
+      end
+      else begin
+       result:= frac(refdate);
+      end;
+     end;
+    end
+    else begin
+     raise exception.create('Invalid date or time.');
+    end;
+   end;
+  end;
+ end;
+end;
+
+function stringtodate(const avalue: msestring;
+                              const aformat: msestring): tdatetime;
+begin
+ if avalue = '' then begin
+  result:= emptydatetime;
+ end
+ else begin
+  result:= trunc(stringtodatetime(avalue,aformat));
+ end;
+end;
+
+function stringtotime(const avalue: msestring;
+                              const aformat: msestring): tdatetime;
+begin
+ if avalue = '' then begin
+  result:= emptydatetime;
+ end
+ else begin
+  result:= frac(stringtodatetime(avalue,aformat));
  end;
 end;
 

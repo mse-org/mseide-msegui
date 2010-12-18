@@ -121,7 +121,7 @@ type
   res: rectty;
  end;
 
- lineinfoty = record
+ textlineinfoty = record
   liindex,licount: integer;
   liy: integer;
   listartx: integer;
@@ -129,11 +129,11 @@ type
   tabchars,justifychars: integerarty;
   linebreak: boolean;  //true if newline sequnce detected
  end;
- lineinfoarty = array of lineinfoty;
+ textlineinfoarty = array of textlineinfoty;
 
  layoutinfoty = record
   charwidths: integerarty;
-  lineinfos: lineinfoarty;
+  lineinfos: textlineinfoarty;
   ascent,descent,lineheight,
   underline,strikeout: integer;
   starty: integer;

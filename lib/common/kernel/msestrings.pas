@@ -313,6 +313,9 @@ function isemptystring(const s: pmsechar): boolean; overload;
 function isnamechar(achar: char): boolean; overload;
 function isnamechar(achar: msechar): boolean; overload;
             //true if achar in 'a'..'z','A'..'Z','0'..'9','_';
+function isnumber(const s: string): boolean; overload;
+function isnumber(const s: msestring): boolean; overload;
+            //true if all characters in '0'..'9'
 
 function strlcopy(const str: pchar; len: integer): ansistring;
                        //nicht nullterminiert
@@ -334,6 +337,8 @@ function struppercase(const s: string): string; overload;
 function struppercase(const s: msestring): msestring; overload;
 function struppercase(const s: lmsestringty): msestring; overload;
 function struppercase(const s: lstringty): string; overload;
+procedure struppercase1(var s: msestring); overload;
+
 //ascii only
 
 function mseremspace(const s: msestring): msestring;
@@ -1918,6 +1923,22 @@ begin
    inc(ch1,ord('A') - ord('a'));
   end;
   po2^[int1]:= ch1;
+ end;
+end;
+
+procedure struppercase1(var s: msestring); overload;
+var
+ ch1: msechar;
+ int1: integer;
+ po1: pmsecharaty;
+begin
+ po1:= pointer(s);
+ for int1:= 0 to length(s) - 1 do begin
+  ch1:= po1^[int1];
+  if (ch1 >= 'a') and (ch1 <= 'z') then begin
+   inc(ch1,ord('A') - ord('a'));
+  end;
+  po1^[int1]:= ch1;
  end;
 end;
 
@@ -3776,6 +3797,46 @@ function isnamechar(achar: msechar): boolean;
 begin
  result:= (achar >= 'a') and (achar <= 'z') or (achar >= 'A') and (achar <= 'Z') or
                 (achar >= '0') and (achar <= '9') or (achar = '_');
+end;
+
+function isnumber(const s: string): boolean;
+var
+ int1: integer;
+ ch1: char;
+begin
+ if s = '' then begin
+  result:= false;
+ end
+ else begin
+  result:= true;
+  for int1:= length(s)-1 downto 0 do begin
+   ch1:= (pchar(pointer(s))+int1)^;
+   if (ch1 < '0') or (ch1 > '9') then begin
+    result:= false;
+    break;
+   end;
+  end;
+ end; 
+end;
+
+function isnumber(const s: msestring): boolean;
+var
+ int1: integer;
+ ch1: msechar;
+begin
+ if s = '' then begin
+  result:= false;
+ end
+ else begin
+  result:= true;
+  for int1:= length(s)-1 downto 0 do begin
+   ch1:= (pmsechar(pointer(s))+int1)^;
+   if (ch1 < '0') or (ch1 > '9') then begin
+    result:= false;
+    break;
+   end;
+  end;
+ end; 
 end;
 
 function startsstr(substring: pchar; s: pchar): boolean;
