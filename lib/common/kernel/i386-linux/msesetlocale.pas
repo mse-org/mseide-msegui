@@ -43,33 +43,33 @@ begin
     '%': result:= result + '%';
     'a': result:= result + 'ddd';
     'A': result:= result + 'dddd';
-    'b': result:= result + 'MMM';
-    'B': result:= result + 'MMMM';
+    'b': result:= result + 'mmm';
+    'B': result:= result + 'mmmm';
     'c': result:= result + 'c';
 //  'C':
     'd': result:= result + 'dd';
-    'D': result:= result + 'MM/dd/yy';
+    'D': result:= result + 'mm/dd/yy';
     'e': result:= result + 'd';
 //  'E':
     'g': result:= result + 'yy';
     'G': result:= result + 'yyyy';
-    'h': result:= result + 'MMM';
+    'h': result:= result + 'mmm';
     'H': result:= result + 'HH';
     'I': result:= result + 'hh';
 //  'j':
     'k': result:= result + 'H';
     'l': result:= result + 'h';
-    'm': result:= result + 'MM';
+    'm': result:= result + 'mm';
     'M': result:= result + 'nn'; 
     'n': result:= result + lineend;
 //  'O':
-    'P','p': result:= result + 'AMPM';
+    'P','p': result:= result + 'ampm';
     'r': result:= result + convertcformatstring(nl_langinfo(t_fmt_ampm),'');
-    'R': result:= result + 'HH:mm';
+    'R': result:= result + 'hh:nn';
 //  's':
     'S': result:= result + 'ss';
     't': result:= result + c_tab;
-    'T': result:= result + 'HH:mm:ss';
+    'T': result:= result + 'hh:nn:ss';
 //  'u':
 //  'U':
 //  'V':
@@ -179,7 +179,13 @@ begin
   findfirstchar(shorttimeformat,':.',timeseparator);
   
   timeamstring:= getlocstr(am_str,timeamstring);
+  if timeamstring = '' then begin
+   timeamstring:= 'am';
+  end;
   timepmstring:= getlocstr(pm_str,timepmstring);
+  if timepmstring = '' then begin
+   timepmstring:= 'pm';
+  end;
   currencystring:= getlocstr(currency_symbol,currencystring);
  {$ifdef FPC}{$checkpointer off}{$endif}
   ch1:= nl_langinfo(p_cs_precedes)^;

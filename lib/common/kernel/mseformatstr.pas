@@ -1423,7 +1423,8 @@ type
   dtft_secondzero,     // ss       second (leading zero)
   dtft_shorttime,      // t        shorttimeformat
   dtft_longtime,       // tt       longtimeformat
-  dtft_ampm,           // am/pm    use 12 hour clock and
+  dtft_ampm,           // ampm     
+  dtft_amspm,          // am/pm    use 12 hour clock and
                        //          display am and pm accordingly
   dtft_ap,             // a/p      use 12 hour clock and display 
                        //          a and p accordingly
@@ -1449,14 +1450,15 @@ const
    (token: dtft_shortdate;   group: dttg_none;     chars: 'DDDDD'),    //2
    (token: dtft_longtime;    group: dttg_none;     chars: 'TT'),       //3
    (token: dtft_shorttime;   group: dttg_none;     chars: 'T'),        //4
-   (token: dtft_ampm;        group: dttg_none;     chars: 'AM/PM'),    //5
-   (token: dtft_ap;          group: dttg_none;     chars: 'A/P'),      //6
-   (token: dtft_datesep;     group: dttg_none;     chars: '/'),        //7
-   (token: dtft_timesep;     group: dttg_none;     chars: ':'),        //8
+   (token: dtft_datesep;     group: dttg_none;     chars: '/'),        //5
+   (token: dtft_timesep;     group: dttg_none;     chars: ':'),        //6
 
-   (token: dtft_dayfull;     group: dttg_day;      chars: 'DDDD'),     //9
+   (token: dtft_amspm;        group: dttg_none;     chars: 'AM/PM'),    //7
+   (token: dtft_ampm;        group: dttg_none;     chars: 'AMPM'),     
+   (token: dtft_dayfull;     group: dttg_day;      chars: 'DDDD'),     
    (token: dtft_monthfull;   group: dttg_mon;      chars: 'MMMM'),
    (token: dtft_yearcentury; group: dttg_year;     chars: 'YYYY'),
+   (token: dtft_ap;          group: dttg_none;     chars: 'A/P'),      
    (token: dtft_dayabbr;     group: dttg_day;      chars: 'DDD'),
    (token: dtft_monthabbr;   group: dttg_mon;      chars: 'MMM'),
    (token: dtft_dayzero;     group: dttg_day;      chars: 'DD'),
@@ -1474,6 +1476,8 @@ const
    (token: dtft_millisec;    group: dttg_millisec; chars: 'Z')
   );
 
+ startscan = 7;
+ 
 //todo: use format cache
 
 type
@@ -1543,7 +1547,7 @@ function stringtodatetime(const avalue: msestring;
    if int1 = 0 then begin
     break;
    end;
-   mstr1:= copy(mstr1,1,int1)+mstr2+copy(mstr1,int1+int2,bigint);
+   mstr1:= copy(mstr1,1,int1-1)+mstr2+copy(mstr1,int1+int2,bigint);
    int1:= int1 + int2;
   end;
   astring:= mstr1;
@@ -1629,7 +1633,7 @@ begin
   expand(mstr1,tokeninfos[4],defaultformatsettingsmse.shorttimeformat);//t
   allocuninitedarray(length(mstr1),sizeof(scanar[0]),scanar); //max
   scanindex:= 0;
-  for int1:= 9 to high(tokeninfos) do begin
+  for int1:= startscan to high(tokeninfos) do begin
    scan(mstr1,tokeninfos[int1]);
   end;
   setlength(scanar,scanindex);
@@ -1922,12 +1926,20 @@ end;
 
 function stringtotime(const avalue: msestring;
                               const aformat: msestring): tdatetime;
+var
+ mstr1: msestring;
 begin
  if avalue = '' then begin
   result:= emptydatetime;
  end
  else begin
-  result:= frac(stringtodatetime(avalue,aformat));
+  if aformat = '' then begin
+   mstr1:= 'tt';
+  end
+  else begin
+   mstr1:= aformat;
+  end;
+  result:= frac(stringtodatetime(avalue,mstr1));
  end;
 end;
 
