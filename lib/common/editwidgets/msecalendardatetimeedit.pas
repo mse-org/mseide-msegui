@@ -24,13 +24,7 @@ type
    function getframe: tdropdownbuttonframe;
   protected
    function getcellframe: framety; override;
-//   procedure internalcreateframe; override;
-//   procedure dokeydown(var info: keyeventinfoty); override;
-//   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
-//   procedure mouseevent(var info: mouseeventinfoty); override;
-//   procedure editnotification(var info: editnotificationinfoty); override;
-//   procedure updatereadonlystate; override;
-  //idropdownwidget
+    //idropdownwidget
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
    procedure dobeforedropdown;
    procedure doafterclosedropdown;
@@ -148,35 +142,22 @@ begin
  dat1:= now;
  if trim(mstr1) <> '' then begin
   try
-   dat1:= stringtodatetime(mstr1);
+   dat1:= stringtodatetime(mstr1,formatedit);
   except
   end;
  end;
- tpopupcalendarfo(awidget).value:= dat1;
+ with tpopupcalendarfo(awidget) do begin
+  formatedit:= self.formatedit;
+  value:= dat1;
+ end;
 end;
 
-function tcustomcalendardatetimeedit.getdropdowntext(const awidget: twidget): msestring;
+function tcustomcalendardatetimeedit.getdropdowntext(
+                                         const awidget: twidget): msestring;
 begin
  result:= text;
 end;
-{
-procedure tcustomcalendardatetimeedit.editnotification(var info: editnotificationinfoty);
-begin
- if fdropdown <> nil then begin
-  fdropdown.editnotification(info);
- end;
- inherited;
-end;
-}
-{
-procedure tcustomcalendardatetimeedit.updatereadonlystate;
-begin
- inherited;
- if fdropdown <> nil then begin
-  fdropdown.updatereadonlystate;
- end;
-end;
-}
+
 function tcustomcalendardatetimeedit.getcellframe: framety;
 begin
  result:= fframe.cellframe;

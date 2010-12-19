@@ -14,7 +14,7 @@ interface
 uses
  msegui,mseclasses,mseforms,msegraphutils,msegrids,msedispwidgets,classes,
  msegraphics,mseeditglob,msetypes,msedropdownlist,msetimer,msesimplewidgets,
- mseinplaceedit,mseevent,mseguiglob,msegridsglob;
+ mseinplaceedit,mseevent,mseguiglob,msegridsglob,msestrings;
  
 const
  popupcalendarwidth = 233;
@@ -55,6 +55,7 @@ type
    ffirstcol,flastcol,flastrow: integer;
    fvalueupdating: integer;
    fcontroller: tcalendarcontroller;
+   fformatedit: msestring;
    procedure setvalue(const avalue: tdatetime);
    function isinvalidcell(const acell: gridcoordty): boolean;
   protected
@@ -67,16 +68,18 @@ type
    constructor create(const aowner: tcomponent;
                        const acontroller: tcalendarcontroller); reintroduce;
    property value: tdatetime read fvalue write setvalue;
+   property formatedit: msestring read fformatedit write fformatedit;
  end;
 
 implementation
 uses
- msepopupcalendar_mfm,sysutils,{$ifndef UNIX}
+ mseformatstr,msepopupcalendar_mfm,sysutils,
+                               {$ifndef UNIX}
                                  dateutils,
                                {$else}
                                 {$ifdef FPC}dateutils,{$endif}
                                {$endif} //kylix compatibility
- msedrawtext,msestrings,
+ msedrawtext,
  msekeyboard;
 
  {$ifdef UNIX}
@@ -241,7 +244,9 @@ begin
   setcellvalue;
   options:= options - [fo_freeonclose];
   hide; //do not show error messages above the popup window
-  if fcontroller.setdropdowntext(datetimetostr(fvalue),true,false,key_none) then begin
+  if fcontroller.setdropdowntext(
+                   mseformatstr.datetimetostring(fvalue,fformatedit),
+                                          true,false,key_none) then begin
 //   release;
   end;
   release;
