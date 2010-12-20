@@ -38,7 +38,7 @@ type
   protected
    procedure dotimer;
   public
-   constructor create(const interval: integer; 
+   constructor create(const interval: longword; 
                 const ontimer: notifyeventty; const active: boolean;
                 const aoptions: timeroptionsty);
              //activates timer
@@ -332,7 +332,7 @@ end;
 
 { tsimpletimer }
 
-constructor tsimpletimer.create(const interval: integer; 
+constructor tsimpletimer.create(const interval: longword; 
                 const ontimer: notifyeventty; const active: boolean;
                 const aoptions: timeroptionsty);
 begin
