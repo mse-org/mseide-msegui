@@ -285,9 +285,19 @@ uses
  sysconst,msedate,msereal,Math,msefloattostr,msedatalist;
  
 {$ifndef FPC}
-function TryStrToQWord(const S: string; out Value: QWord): Boolean;
+function trystrtoqword(const s: string; out value: qword): boolean;
 begin
  result:= trystrtoint64(s,int64(value));
+end;
+
+function composedatetime(const adate: tdatetime; const atime: tdatetime): tdatetime;
+begin
+ if date < 0 then begin
+  result := trunc(date) - abs(frac(time));
+ end
+ else begin
+  result := trunc(date) + abs(frac(time));
+ end;
 end;
 {$endif}
 
@@ -1583,7 +1593,8 @@ var
  end; //scan
 
 var
- dateorder: array[0..2] of dttokengroupty = (dttg_none,dttg_none,dttg_none);
+ dateorder: array[0..2] of dttokengroupty;
+                 { = (dttg_none,dttg_none,dttg_none); does not work in delphi}
 
  function finddateorder(const agroup: dttokengroupty): integer;
  var
@@ -1610,13 +1621,21 @@ var
  year,month,defmonth,day,hour,minute,second,millisecond: word;
  ispm,hasmonthname,hasdateformat,hastimeformat: boolean;
  refdate: tdatetime;
- defaultdateorder: array[0..2] of dttokengroupty = (dttg_year,dttg_mon,dttg_day);
-  
+ defaultdateorder: array[0..2] of dttokengroupty;
+                  { = (dttg_year,dttg_mon,dttg_day);}
+
 begin
  if avalue = '' then begin
   result:= emptydatetime;
  end
  else begin
+  for int1:= 0 to high(dateorder) do begin
+   dateorder[int1]:= dttg_none; //delphi compatibility
+  end;
+  defaultdateorder[0]:= dttg_year;
+  defaultdateorder[1]:= dttg_mon;
+  defaultdateorder[2]:= dttg_day;
+
   refdate:= now;
   if aformat = '' then begin
    mstr1:= 'c';
