@@ -45,12 +45,15 @@ type
                       mmk_controller,mmk_programchange,mmk_channelaftertouch,
                       mmk_pitchbend,mmk_system);
 type
- trackeventinfoty = record
-  delta: longword; //microseconds
+ midieventinfoty = record
   kind: midimessagekindty;
   channel: byte;
   par1: byte;
   par2: byte;
+ end;
+ trackeventinfoty = record
+  delta: longword; //microseconds
+  event: midieventinfoty;
  end;
   
  tmidistream = class(tbufstream)
@@ -95,7 +98,7 @@ type
  end;
 
  trackeventty = procedure(const sender: tobject;
-                         var ainfo: trackeventinfoty) of object;
+                         var ainfo: midieventinfoty) of object;
 
  midisourcestatety = (mss_inited,mss_endoftrack);
  midisourcestatesty = set of midisourcestatety;
@@ -133,7 +136,7 @@ type
   
 implementation
 uses
- msesysutils,msegui; 
+ msesysutils; 
 const
  errormessages: array[midierrorty] of msestring = (
   '',
@@ -395,15 +398,15 @@ begin
  if not result then exit;
  if (stat1 and $80) <> 0 then begin
   fstatus:= stat1;
-  result:= readtrackdatabyte(adata.par1);
+  result:= readtrackdatabyte(adata.event.par1);
   if not result then exit;
  end
  else begin
-  adata.par1:= stat1;
+  adata.event.par1:= stat1;
   stat1:= fstatus;
  end;
- adata.kind:= messagetable[(stat1 shr 4) and $7];
- if adata.kind = mmk_system then begin
+ adata.event.kind:= messagetable[(stat1 shr 4) and $7];
+ if adata.event.kind = mmk_system then begin
   result:= readtrackvarlength(lwo1) and (lwo1 <= fmaxdatasize);
   if not result then exit;
   setlength(fmetadata,lwo1); 
@@ -412,9 +415,9 @@ begin
   end;
  end
  else begin
-  adata.channel:= stat1 and $0f;
-  if parcount[adata.kind] > 1 then begin
-   result:= readtrackdatabyte(adata.par2);
+  adata.event.channel:= stat1 and $0f;
+  if parcount[adata.event.kind] > 1 then begin
+   result:= readtrackdatabyte(adata.event.par2);
   end;
  end;
 end;
@@ -471,13 +474,15 @@ end;
 
 procedure tmidisource.dotrackevent;
 begin
+ if assigned(fontrackevent) then begin
+  fontrackevent(self,ftrackevent.event);
+ end;
 end;
 
 procedure tmidisource.dotimer(const sender: tobject);
 begin
  dotrackevent;
  processevent;
-msegui.beep;
 end;
 
 procedure tmidisource.processevent;
@@ -485,7 +490,7 @@ begin
  repeat
   if fstream.readtrackevent(ftrackevent) then begin
    with ftrackevent do begin
-    case kind of
+    case event.kind of
      mmk_noteoff,mmk_noteon: begin     
       if delta = 0 then begin
        dotrackevent;
@@ -497,7 +502,7 @@ begin
       end;
      end;
      mmk_system: begin
-      if par1 = endoftrack then begin
+      if event.par1 = endoftrack then begin
        include(fstate,mss_endoftrack);
        break;
       end;
@@ -515,7 +520,8 @@ begin
  end;
  if checkresult(fstream.initfile,em_fileformat) then begin
   if checkresult(fstream.skiptrack,em_notrack) and
-//     checkresult(fstream.skiptrack,em_notrack) and
+     checkresult(fstream.skiptrack,em_notrack) and
+     checkresult(fstream.skiptrack,em_notrack) and
            checkresult(fstream.starttrack,em_notrack)then begin
    fstarttime:= timestamp;
    feventtime:= fstarttime;

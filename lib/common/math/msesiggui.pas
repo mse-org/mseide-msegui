@@ -74,7 +74,7 @@ type
 
  sigkeyinfoty = record
   sigvalue: double;
-  trigvalue: double;
+  eventvalue: double;
   key: integer;
   pressed: boolean;
   timestamp: longword;
@@ -137,6 +137,7 @@ type
    destructor destroy; override;
    property output: tdoubleoutconnarrayprop read foutput write setoutput;
    property trigout: tdoubleoutconnarrayprop read ftrigout write settrigout;
+                     //1 -> key down, -1 key up, 0 none
   published
    property keywidth: integer read fkeywidth write setkeywidth default defaultkeywidth;
    property controller: tsigcontroller read fcontroller write setcontroller;
@@ -364,13 +365,6 @@ type
    property sampler: tscopesampler read fsampler write setsampler;
  end;
  
-const
- semitoneln = ln(2)/12;
- chromaticscale: array[0..12] of double =
-    (1.0,exp(1*semitoneln),exp(2*semitoneln),exp(3*semitoneln),exp(4*semitoneln),
-     exp(5*semitoneln),exp(6*semitoneln),exp(7*semitoneln),exp(8*semitoneln),
-     exp(9*semitoneln),exp(10*semitoneln),exp(11*semitoneln),2.0);
-
 implementation
 uses
  math,msekeyboard,msebits,msesysutils;
@@ -448,10 +442,13 @@ begin
   fontransformvalue(self,real(do1));
  end;
  lock;
- fsigvalue:= do1;
- unlock;
- if fcontroller <> nil then begin
-  tsigcontroller1(fcontroller).execevent(isigclient(self));
+ try
+  fsigvalue:= do1;
+  if fcontroller <> nil then begin
+   tsigcontroller1(fcontroller).execevent(isigclient(self));
+  end;
+ finally
+  unlock;
  end;
 end;
 
@@ -557,7 +554,7 @@ begin
  for int1:= 0 to foutputhigh do begin
   with fkeyinfos[int1] do begin
    timestamp:= ti1;
-   trigvalue:= 0;
+   eventvalue:= 0;
    sigvalue:= fmin;
    key:= -1;
    if int1 < output.count then begin
@@ -625,7 +622,8 @@ begin
  result:= fcontroller;
 end;
 
-procedure tsigkeyboard.updatesigvalue(const akey: integer; const apressed: boolean);
+procedure tsigkeyboard.updatesigvalue(const akey: integer; 
+                                               const apressed: boolean);
 var
  do1,do2: double;
  int1,int2: integer;
@@ -638,47 +636,50 @@ begin
   ti2:= 0;
   oldest:= 0;
   lock;
-  for int1:= 0 to foutputhigh do begin   
-   with fkeyinfos[int1] do begin
-    int2:= ti1 - timestamp;
-    if int2 > ti2 then begin
-     ti2:= int2;
-     oldest:= int1;
-    end;
-    if key = akey then begin
-     ind1:= int1;
+  try
+   for int1:= 0 to foutputhigh do begin   
+    with fkeyinfos[int1] do begin
+     int2:= ti1 - timestamp;
+     if int2 > ti2 then begin
+      ti2:= int2;
+      oldest:= int1;
+     end;
+     if key = akey then begin
+      ind1:= int1;
+     end;
     end;
    end;
-  end;
-  if ind1 < 0 then begin
-   ind1:= oldest;
-  end;
-  with fkeyinfos[ind1] do begin
-   key:= akey;
-   timestamp:= ti1;
-   pressed:= apressed;
-   if not apressed then begin
-    do1:= sigvalue;
-    do2:= 0;
-   end
-   else begin  
-    do2:= 1;
-    if (sieo_exp in foptions) then begin
-     do1:= intpower(2.0,key div 12) * chromaticscale[key mod 12] * fmin;
+   if ind1 < 0 then begin
+    ind1:= oldest;
+   end;
+   with fkeyinfos[ind1] do begin
+    key:= akey;
+    timestamp:= ti1;
+    pressed:= apressed;
+    if not apressed then begin
+     do1:= sigvalue;
+     do2:= -1;
     end
-    else begin
-     do1:= fkey/12.0 + fmin;
+    else begin  
+     do2:= 1;
+     if (sieo_exp in foptions) then begin
+      do1:= intpower(2.0,key div 12) * chromaticscale[key mod 12] * fmin;
+     end
+     else begin
+      do1:= fkey/12.0 + fmin;
+     end;
     end;
+    if canevent(tmethod(fontransformvalue)) then begin
+     fontransformvalue(self,real(do1));
+    end;
+    sigvalue:= do1;
+    eventvalue:= do2;
    end;
-   if canevent(tmethod(fontransformvalue)) then begin
-    fontransformvalue(self,real(do1));
+   if fcontroller <> nil then begin
+    tsigcontroller1(fcontroller).execevent(isigclient(self));
    end;
-   sigvalue:= do1;
-   trigvalue:= do2;
-  end;
-  unlock;             //todo: single event for current output only
-  if fcontroller <> nil then begin
-   tsigcontroller1(fcontroller).execevent(isigclient(self));
+  finally
+   unlock;             //todo: single event for current output only
   end;
  end;
 end;
@@ -698,12 +699,11 @@ begin
   for int1:= 0 to foutputhigh do begin
    with fkeyinfos[int1] do begin
     outpo^:= sigvalue;
-    trigoutpo^:= trigvalue;
+    trigoutpo^:= eventvalue;
+    eventvalue:= 0;
    end;
   end;
  end;
-// ainfo^.dest^:= fsigvalue;
-// ftrigout.value:= ftrigvalue;
 end;
 
 function tsigkeyboard.gethandler: sighandlerprocty;

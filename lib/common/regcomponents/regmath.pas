@@ -24,7 +24,7 @@ implementation
 uses
  classes,msefft,msedesignintf,msesignal,msefilter,
  msepropertyeditors,msestrings,msedesigner,msesigfft,regmath_bmp,
- msesiggui,msesigfftgui,msesignoise;
+ msesiggui,msesigfftgui,msesignoise,msesigmidi;
 
 type
  tinputconnpropertyeditor = class(tsubcomponentpropertyeditor)
@@ -52,7 +52,7 @@ begin
                             tsigwavetable,tsignoise,tsigfuncttable,tsigenvelope,
                             tsigsampler,tsigscope,tsigscopefft,
                             tsigfft,tfft,tsigsamplerfft,
-                            tsigslider,tsigkeyboard,
+                            tsigslider,tsigkeyboard,tsigmidiconnector,
                             twavetableedit,tfuncttableedit,tffttableedit,tenvelopeedit
                             ]);
  registercomponenttabhints(['Math'],['Experimental mathematical and signal processing components']);

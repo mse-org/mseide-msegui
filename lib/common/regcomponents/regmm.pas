@@ -19,13 +19,13 @@ unit regmm;
 interface
 implementation
 uses
- mseaudio,msedesignintf,msesigaudio,msemidi;
+ mseaudio,msedesignintf,msesigaudio,msemidi,msesigmidi;
  
 procedure register;
 begin
  registercomponents('MM',[taudioout,tmidisource]);
  registercomponenttabhints(['MM'],['Multimedia components (experimental).']);
- registercomponents('Math',[tsigoutaudio]);
+ registercomponents('Math',[tsigoutaudio,tsigmidiconnector]);
 end;
 
 initialization
