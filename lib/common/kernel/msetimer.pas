@@ -16,19 +16,23 @@ uses
  Classes,msetypes,mseevent,mseclasses;
 
 type
- timeroptionty = (to_single, //single shot
-                  to_leak);  //do not catch up missed timeouts
+ timeroptionty = (to_single,   //single shot
+                  to_absolute, //use absolute time (timestamp()) for to_single
+                               //disabled for ttimer
+                  to_autostart,//set enabled for to_single by setting interval,
+                               //disabled for ttimer
+                  to_leak);    //do not catch up missed timeouts
  timeroptionsty = set of timeroptionty;
  
  tsimpletimer = class(tnullinterfacedobject)
   private
    fenabled: boolean;
-   finterval: integer;
+   finterval: longword;
    fontimer: notifyeventty;
    foptions: timeroptionsty;
    fpending: boolean;
    procedure setenabled(const Value: boolean);
-   procedure setinterval(const Value: integer);
+   procedure setinterval(const avalue: longword);
    function getsingleshot: boolean;
    procedure setsingleshot(const avalue: boolean);
   protected
@@ -40,7 +44,7 @@ type
              //activates timer
    destructor destroy; override;
    procedure firependingandstop;
-   property interval: integer read finterval write setinterval;
+   property interval: longword read finterval write setinterval;
              //in microseconds, max +2000 seconds
              //restarts timer if active
              //0 -> fire once in mainloop idle
@@ -193,7 +197,7 @@ begin
  application.settimer(int1);
 end;
 
-procedure settimertick(const ainterval: integer;
+procedure settimertick(ainterval: integer;
      const aontimer: proceventty; const aoptions: timeroptionsty);
 var
  po: ptimerinfoty;
@@ -202,6 +206,12 @@ begin
  new(po);
  sys_mutexlock(mutex);
  time:= sys_gettimeus;
+ if to_absolute in aoptions then begin
+  ainterval:= ainterval - time;
+  if integer(ainterval) < 0 then begin
+   ainterval:= 0; //on idle
+  end;
+ end;
  fillchar(po^,sizeof(timerinfoty),0);
  with po^ do begin
   nexttime:= time + longword(ainterval);
@@ -366,17 +376,22 @@ begin
  end;
 end;
 
-procedure tsimpletimer.setinterval(const Value: integer);
+procedure tsimpletimer.setinterval(const avalue: longword);
 begin
- if (value > 2000000000) or (value < 0{-2000000000}) then begin
-  raise exception.create('Invalid timer interval ' + inttostr(value));
+ if not (to_absolute in foptions) and (avalue > 2000000000) then begin
+  raise exception.create('Invalid timer interval ' + inttostr(avalue));
  end;
- finterval:= Value;
+ finterval:= avalue;
  if fenabled then begin
   sys_mutexlock(mutex);
   killtimertick({$ifdef FPC}@{$endif}dotimer);
   settimertick(finterval,{$ifdef FPC}@{$endif}dotimer,foptions);
   sys_mutexunlock(mutex);
+ end
+ else begin
+  if foptions * [to_single,to_autostart] = [to_single,to_autostart] then begin
+   enabled:= true;
+  end;
  end;
 end;
 
@@ -507,7 +522,7 @@ end;
 
 procedure ttimer.setoptions(const avalue: timeroptionsty);
 begin
- ftimer.options:= avalue;
+ ftimer.options:= avalue - [to_autostart,to_absolute];
 end;
 
 function ttimer.getsingleshot: boolean;

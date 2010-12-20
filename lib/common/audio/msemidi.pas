@@ -11,13 +11,18 @@ unit msemidi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msestream,classes;
+ msestream,classes,mseclasses,sysutils,msestrings,msetimer;
 
 const 
  defaultmidimaxdatasize = 1000000;
+ defaulttimescaleus = 1000000/(120);
  endoftrack = 47;
  
 type
+ midierrorty = (em_ok,em_nostream,em_fileformat,em_notrack);
+
+ emidiexception = class(exception);
+ 
  idstringty = array[0..3] of char;
  midichunkheaderty = record
   id: idstringty;
@@ -40,8 +45,8 @@ type
                       mmk_controller,mmk_programchange,mmk_channelaftertouch,
                       mmk_pitchbend,mmk_system);
 type
- trackeventty = record
-  delta: longword;
+ trackeventinfoty = record
+  delta: longword; //microseconds
   kind: midimessagekindty;
   channel: byte;
   par1: byte;
@@ -57,6 +62,8 @@ type
    fmetadata: string;
    fstatus: byte;
    fmaxdatasize: longword;
+   ftimescaleus: real;
+   ftimesum: real;
   protected
    function readtrackbyte(out adata: byte): boolean;
    function readtrackdatabyte(out adata: byte): boolean; //check bit 7
@@ -79,17 +86,62 @@ type
    constructor create(ahandle: integer); override;
    function initfile: boolean;
    function starttrack: boolean;
-   function readtrackevent(out adata: trackeventty): boolean;
+   function skiptrack: boolean;
+   function readtrackevent(out adata: trackeventinfoty): boolean;
    property metadata: string read fmetadata;
    property maxdatasize: longword read fmaxdatasize write fmaxdatasize 
                          default defaultmidimaxdatasize;
+   property timescaleus: real read ftimescaleus; //miditicks to microseconds
  end;
- 
+
+ trackeventty = procedure(const sender: tobject;
+                         var ainfo: trackeventinfoty) of object;
+
+ midisourcestatety = (mss_inited,mss_endoftrack);
+ midisourcestatesty = set of midisourcestatety;
+                          
+ tmidisource = class(tmsecomponent)
+  private
+   fstream: tmidistream;
+   factive: boolean;
+   fontrackevent: trackeventty;
+   fstarttime: longword;
+   feventtime: longword;
+   ftimer: tsimpletimer;
+   procedure setstream(const avalue: tmidistream);
+   procedure setactive(const avalue: boolean);
+  protected
+   fstate: midisourcestatesty;
+   ftrackevent: trackeventinfoty;
+   procedure error(const aerror: midierrorty);
+   procedure start;
+   procedure stop;
+   function checkresult(const aresult: boolean;
+                       const aerror: midierrorty): boolean; inline;
+   procedure processevent;
+   procedure dotrackevent;
+   procedure dotimer(const sender: tobject);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   property active: boolean read factive write setactive;
+   property stream: tmidistream read fstream write setstream;
+                                //owns the stream
+  published
+   property ontrackevent: trackeventty read fontrackevent write fontrackevent;
+ end;
+  
 implementation
 uses
- sysutils;
-
+ msesysutils,msegui; 
 const
+ errormessages: array[midierrorty] of msestring = (
+  '',
+  'No midi stream',
+  'No midi file.',
+  'No track found.'
+  );
+  
  messagetable: array[0..7] of midimessagekindty = (
   mmk_noteoff,              //8c
   mmk_noteon,               //9c
@@ -133,6 +185,7 @@ end;
 constructor tmidistream.create(ahandle: integer);
 begin
  fmaxdatasize:= defaultmidimaxdatasize;
+ ftimescaleus:= defaulttimescaleus;
  inherited;
 end;
 
@@ -278,6 +331,26 @@ begin
  until not result;
 end;
 
+function tmidistream.skiptrack: boolean;
+var
+ header: midichunkheaderty;
+begin
+ repeat
+  result:= readchunkheader(header);
+  if result then begin
+   with header do begin
+    ftracksize:= header.size;
+    if id = 'MTrk' then begin
+     result:= skip(ftracksize);
+     break;
+    end;
+    result:= skip(ftracksize);
+   end;
+  end;
+ until not result;
+end;
+
+
 function tmidistream.skip(const adist: longword): boolean;
 var
  lint1: int64;
@@ -302,14 +375,22 @@ begin
  end;
 end;
 
-function tmidistream.readtrackevent(out adata: trackeventty): boolean;
+function tmidistream.readtrackevent(out adata: trackeventinfoty): boolean;
 var
  stat1: byte;
  lwo1: longword;
+ rea1: real;
 begin
  fillchar(adata,sizeof(adata),0);
  result:= readtrackvarlength(adata.delta);
  if not result then exit;
+
+ if adata.delta <> 0 then begin
+  ftimesum:= ftimesum + adata.delta*ftimescaleus;
+  adata.delta:= round(ftimesum);
+  ftimesum:= ftimesum - adata.delta;
+ end;
+   
  result:= readtrackbyte(stat1);
  if not result then exit;
  if (stat1 and $80) <> 0 then begin
@@ -336,6 +417,116 @@ begin
    result:= readtrackdatabyte(adata.par2);
   end;
  end;
+end;
+
+{ tmidisource }
+
+constructor tmidisource.create(aowner: tcomponent);
+begin
+ inherited;
+ ftimer:= tsimpletimer.create(0,@dotimer,false,
+                     [to_single,to_absolute,to_autostart]);
+end;
+
+destructor tmidisource.destroy;
+begin
+ stream:= nil;
+ ftimer.free;
+ inherited;
+end;
+
+function tmidisource.checkresult(const aresult: boolean;
+               const aerror: midierrorty): boolean;
+begin
+ result:= aresult;
+ if not aresult then begin
+  error(aerror);
+ end;
+end;
+
+procedure tmidisource.setstream(const avalue: tmidistream);
+begin
+ active:= false;
+ fstream.free;
+ fstream:= avalue;
+end;
+
+procedure tmidisource.setactive(const avalue: boolean);
+begin
+ if factive <> avalue then begin
+  factive:= avalue;
+  if avalue then begin
+   start;
+  end
+  else begin
+   stop;
+  end;
+ end;
+end;
+
+procedure tmidisource.error(const aerror: midierrorty);
+begin
+ raise emidiexception.create(self.name+': '+errormessages[aerror]);
+end;
+
+procedure tmidisource.dotrackevent;
+begin
+end;
+
+procedure tmidisource.dotimer(const sender: tobject);
+begin
+ dotrackevent;
+ processevent;
+msegui.beep;
+end;
+
+procedure tmidisource.processevent;
+begin
+ repeat
+  if fstream.readtrackevent(ftrackevent) then begin
+   with ftrackevent do begin
+    case kind of
+     mmk_noteoff,mmk_noteon: begin     
+      if delta = 0 then begin
+       dotrackevent;
+      end
+      else begin
+       feventtime:= feventtime + delta;
+       ftimer.interval:= feventtime;
+       break;
+      end;
+     end;
+     mmk_system: begin
+      if par1 = endoftrack then begin
+       include(fstate,mss_endoftrack);
+       break;
+      end;
+     end;
+    end;
+   end;
+  end;
+ until fstream.eof;
+end;
+
+procedure tmidisource.start;
+begin
+ if fstream = nil then begin
+  error(em_nostream);
+ end;
+ if checkresult(fstream.initfile,em_fileformat) then begin
+  if checkresult(fstream.skiptrack,em_notrack) and
+//     checkresult(fstream.skiptrack,em_notrack) and
+           checkresult(fstream.starttrack,em_notrack)then begin
+   fstarttime:= timestamp;
+   feventtime:= fstarttime;
+   processevent;
+  end;
+ end;
+end;
+
+procedure tmidisource.stop;
+begin
+ ftimer.enabled:= false;
 end;
 
 end.
