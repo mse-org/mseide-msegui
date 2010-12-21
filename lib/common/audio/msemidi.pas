@@ -30,7 +30,11 @@ type
  midierrorty = (em_ok,em_nostream,em_fileformat,em_notrack,em_trackdata);
 
  emidiexception = class(exception);
- 
+
+ midichannelty = (mic_0,mic_1,mic_2,mic_3,mic_4,mic_5,mic_6,mic_7,
+                  mic_8,mic_9,mic_10,mic_11,mic_12,mic_13,mic_14,mic_15);
+ midichannelsty = set of midichannelty;
+                  
  idstringty = array[0..3] of char;
  midichunkheaderty = record
   id: idstringty;
@@ -125,6 +129,7 @@ type
   keysig: byte;
   tempo: longword; //micro seconds per quarter note
   timesig: longword;
+  channels: midichannelsty;
  end;
  trackinfoarty = array of trackinfoty;
 
@@ -660,6 +665,7 @@ begin
        mmk_pitchbend: begin
         int3:= additem(ftrackbuffer[int1],typeinfo(trackbufferarty),int2);
         ftrackbuffer[int1][int3]:= trackdata;
+        include(channels,midichannelty(trackdata.event.channel and $0f));
        end;
        mmk_system: begin
         case par1 of

@@ -21,9 +21,11 @@ type
    ftrigout: tdoubleoutputconn;
    ffrequmin: double;
    fsource: tsigmidisource;
+   fchannel: integer;
    procedure setfrequout(const avalue: tdoubleoutputconn);
    procedure settrigout(const avalue: tdoubleoutputconn);
    procedure setsource(const avalue: tsigmidisource);
+   procedure setchannel(const avalue: integer);
   protected
    ftrigvalue: double;
    procedure sighandler(const ainfo: psighandlerinfoty);
@@ -38,6 +40,7 @@ type
   published
    property frequmin: double read ffrequmin write ffrequmin;
    property source: tsigmidisource read fsource write setsource;
+   property channel: integer read fchannel write setchannel default 0;
  end;
  sigmidiconnectorarty = array of tsigmidiconnector;
 
@@ -74,6 +77,7 @@ type
    procedure unregisterconnector(const avalue: tsigmidiconnector);
    procedure dotrackevent; override;
    procedure updatepatch;
+   procedure patchchanged;
   public
    destructor destroy; override;
  end;
@@ -174,6 +178,16 @@ begin
  end;
 end;
 
+procedure tsigmidiconnector.setchannel(const avalue: integer);
+begin
+ if fchannel <> avalue then begin
+  fchannel:= avalue;
+  if fsource <> nil then begin
+   fsource.patchchanged;
+  end;
+ end;
+end;
+
 { tsigmidisource }
 
 destructor tsigmidisource.destroy;
@@ -186,16 +200,21 @@ begin
  inherited;
 end;
 
+procedure tsigmidisource.patchchanged;
+begin
+ exclude(fsigstate,smss_patchvalid);
+end;
+
 procedure tsigmidisource.registerconnector(const avalue: tsigmidiconnector);
 begin
  additem(pointerarty(fconnections),avalue);
- exclude(fsigstate,smss_patchvalid);
+ patchchanged;
 end;
 
 procedure tsigmidisource.unregisterconnector(const avalue: tsigmidiconnector);
 begin
  removeitem(pointerarty(fconnections),avalue);
- exclude(fsigstate,smss_patchvalid);
+ patchchanged;
 end;
 
 procedure tsigmidisource.dotrackevent;
@@ -205,11 +224,11 @@ var
  by1: byte;
 begin
  inherited;
- if fconnections <> nil then begin
-  if not (smss_patchvalid in fsigstate) then begin
-   updatepatch;
-  end;
-  with fchannels[0] do begin
+ if not (smss_patchvalid in fsigstate) then begin
+  updatepatch;
+ end;
+ with fchannels[ftrackevent.event.channel and $0f] do begin
+  if connections <> nil then begin
    po1:= first;
    by1:= ftrackevent.event.par1;
    repeat
@@ -244,25 +263,35 @@ end;
 
 procedure tsigmidisource.updatepatch;
 var
- int1: integer;
+ int1,int2: integer;
 begin
- setlength(fchannels,1);
- with fchannels[0] do begin
-  first:= nil;
-  last:= nil;
-  connections:= nil;
-  setlength(connections,length(fconnections)); //init with zero
-  if high(connections) >= 0 then begin
-   first:= @connections[0];
-   last:= @connections[high(connections)];
-   for int1:= 0 to high(connections) do begin
-    with connections[int1] do begin
-     dest:= fconnections[int1];
-     if int1 < high(connections) then begin
-      next:= @connections[int1+1];
-     end;
-     if int1 > 0 then begin
-      prev:= @connections[int1-1];
+ fchannels:= nil;
+ setlength(fchannels,16);
+ for int1:= 0 to high(fconnections) do begin
+  with fchannels[fconnections[int1].channel and $0f] do begin
+   int2:= high(connections)+1;
+   setlength(connections,int2+1);
+   connections[int2].dest:= fconnections[int1];
+  end;
+ end;
+ for int2:= 0 to high(fchannels) do begin
+  with fchannels[int2] do begin
+   first:= nil;
+   last:= nil;
+//   connections:= nil;
+//   setlength(connections,length(fconnections)); //init with zero
+   if high(connections) >= 0 then begin
+    first:= @connections[0];
+    last:= @connections[high(connections)];
+    for int1:= 0 to high(connections) do begin
+     with connections[int1] do begin
+//      dest:= fconnections[int1];
+      if int1 < high(connections) then begin
+       next:= @connections[int1+1];
+      end;
+      if int1 > 0 then begin
+       prev:= @connections[int1-1];
+      end;
      end;
     end;
    end;
