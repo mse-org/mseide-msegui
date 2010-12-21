@@ -1047,7 +1047,8 @@ procedure additem(var dest: winidarty; const value: winidty;
 function incrementarraylength(var value: pointer; typeinfo: pdynarraytypeinfo;
                              increment: integer = 1): sizeint; overload;
   //returns new length
-function additem(var value; const typeinfo: pdynarraytypeinfo; //typeinfo of dynarray
+function additem(var value; const typeinfo: pdynarraytypeinfo; 
+                                  //typeinfo of dynarray
                 var count: integer; step: integer = 32): integer; overload;
   //value = array of type, returns index of new item
 procedure deleteitem(var value; const typeinfo: pdynarraytypeinfo;
@@ -1506,7 +1507,7 @@ var
 begin
  int1:= high(pointerarty(value)) + 1;
  if int1 <= count then begin
-  incrementarraylength(pointer(value),typeinfo,count+step);
+  incrementarraylength(pointer(value),typeinfo,2*count+step);
 //  incrementarraylength(pointer(value),typeinfo,count-int1+step);
  end;
  result:= count;

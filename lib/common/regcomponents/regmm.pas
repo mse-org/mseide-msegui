@@ -25,7 +25,7 @@ procedure register;
 begin
  registercomponents('MM',[taudioout,tmidisource]);
  registercomponenttabhints(['MM'],['Multimedia components (experimental).']);
- registercomponents('Math',[tsigoutaudio,tsigmidiconnector]);
+ registercomponents('Math',[tsigoutaudio,tsigmidiconnector,tsigmidisource]);
 end;
 
 initialization
