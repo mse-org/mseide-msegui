@@ -53,8 +53,8 @@ type
   timedivision: word;
  end;
 
- midimessagekindty = (mmk_none,mmk_noteoff,mmk_noteon,mmk_noteaftertouch,
-                      mmk_controller,mmk_programchange,mmk_channelaftertouch,
+ midimessagekindty = (mmk_none,mmk_noteoff,mmk_noteon,mmk_notepressure,
+                      mmk_controller,mmk_programchange,mmk_channelpressure,
                       mmk_pitchbend,mmk_system);
 type
  midieventinfoty = record
@@ -198,17 +198,17 @@ const
  messagetable: array[0..7] of midimessagekindty = (
   mmk_noteoff,              //8c
   mmk_noteon,               //9c
-  mmk_noteaftertouch,       //ac
+  mmk_notepressure,         //ac
   mmk_controller,           //bc
   mmk_programchange,        //cc
-  mmk_channelaftertouch,    //dc
+  mmk_channelpressure,      //dc
   mmk_pitchbend,            //ec
   mmk_system);              //fx
 
  parcount: array[midimessagekindty] of integer = (
- // mmk_none,mmk_noteoff,mmk_noteon,mmk_noteaftertouch,
+ // mmk_none,mmk_noteoff,mmk_noteon,mmk_notepressure,
     0,       2,          2,         2,
- // mmk_controller,mmk_programchange,mmk_channelaftertouch,
+ // mmk_controller,mmk_programchange,mmk_channelpressure,
     2,             1,                1,
  // mmk_pitchbend,mmk_system
     2,            0);
@@ -660,8 +660,8 @@ begin
      checkresult(fstream.readtrackdata(trackdata),em_trackdata);
      with trackdata.event do begin
       case kind of
-       mmk_noteoff,mmk_noteon,mmk_noteaftertouch,
-       mmk_controller,mmk_programchange,mmk_channelaftertouch,
+       mmk_noteoff,mmk_noteon,mmk_notepressure,
+       mmk_controller,mmk_programchange,mmk_channelpressure,
        mmk_pitchbend: begin
         int3:= additem(ftrackbuffer[int1],typeinfo(trackbufferarty),int2);
         ftrackbuffer[int1][int3]:= trackdata;

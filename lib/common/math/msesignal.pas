@@ -136,6 +136,16 @@ type
                      const asigintf: isigclient); reintroduce; virtual;
    property controller: tsigcontroller read getcontroller;
  end;
+
+ valuescaleoptionty = (vso_exp,vso_null); //out:= 0 for inp <= 0
+ valuescaleoptionsty = set of valuescaleoptionty;
+ doublescaleinfoty = record
+  value: double;
+  min: double;
+  max: double;
+  options: valuescaleoptionsty;
+  gain,offset: double;
+ end;
  
  doubleinputconnarty = array of tdoubleinputconn;
 
@@ -687,9 +697,7 @@ type
    fattack_values: complexarty;
    fdecay_values: complexarty;
    frelease_values: complexarty;
-//   fevent: tchangedoubleinputconn;
    ftrigger: tchangedoubleinputconn;
-//   ftriggerlevel: tchangedoubleinputconn;
    fprog: envproginfoarty;
    findex: integer;
    
@@ -703,6 +711,7 @@ type
    floopindex: integer;
    floopval: double;
    floopramp: double;
+   famplitudepo: pdouble;
    
    ftime: integer;
    foptions: sigenvelopeoptionsty;
@@ -719,6 +728,7 @@ type
    fdecay_options: sigenveloperangeoptionsty;
    frelease_options: sigenveloperangeoptionsty;
    fmaster: tsigenvelope;
+   famplitude: tdoubleinputconn;
    procedure setattack_values(const avalue: complexarty);
    procedure setdecay_values(const avalue: complexarty);
    procedure setrelease_values(const avalue: complexarty);
@@ -731,6 +741,7 @@ type
    procedure setdecay_options(const avalue: sigenveloperangeoptionsty);
    procedure setrelease_options(const avalue: sigenveloperangeoptionsty);
    procedure setmaster(const avalue: tsigenvelope);
+   procedure setamplitude(const avalue: tdoubleinputconn);
   protected
    fattackpending: boolean;
    freleasepending: boolean;
@@ -762,6 +773,7 @@ type
    property master: tsigenvelope read fmaster write setmaster;
    property trigger: tchangedoubleinputconn read ftrigger write settrigger;
                          //1 -> start, -1 -> stop
+   property amplitude: tdoubleinputconn read famplitude write setamplitude;
    property options: sigenvelopeoptionsty read foptions 
                                                 write setoptions default [];
    property timescale: real read ftimescale write ftimescale; //default 1s
@@ -872,12 +884,56 @@ procedure setsourceconn(const sender: tmsecomponent;
 procedure setsigcontroller(const linker: tobjectlinker; 
           const intf: isigclient; 
           const source: tsigcontroller; var dest: tsigcontroller);
+procedure initscale(const amin,amax: double; const aoptions: valuescaleoptionsty;
+                                            out ainfo: doublescaleinfoty);
+procedure updatescale(var ainfo: doublescaleinfoty);
+function scalevalue(const ainfo: doublescaleinfoty): double;
  
 implementation
 uses
  sysutils,mseformatstr,msesysutils,msesysintf,mseapplication;
 type
  tmsecomponent1 = class(tmsecomponent);
+
+procedure initscale(const amin,amax: double; const aoptions: valuescaleoptionsty;
+                                            out ainfo: doublescaleinfoty);
+begin
+ with ainfo do begin
+  min:= amin;
+  max:= amax;
+  options:= aoptions;
+  updatescale(ainfo);
+ end;
+end;
+
+procedure updatescale(var ainfo: doublescaleinfoty);
+begin
+ with ainfo do begin
+  if (vso_exp in options) and (min > 0) and (max > 0) then begin
+   offset:= ln(min);
+   gain:= ln(max)-ln(min);
+  end
+  else begin
+   offset:= min;
+   gain:= max-min;
+  end;
+ end;
+end;
+
+function scalevalue(const ainfo: doublescaleinfoty): double;
+begin
+ with ainfo do begin
+  if (vso_null in options) and (value <= 0) then begin
+   result:= 0;
+  end
+  else begin
+   result:= value*gain+offset;
+   if vso_exp in options then begin
+    result:= exp(result);
+   end;
+  end;
+ end;
+end;
   
 procedure createsigbuffer(var abuffer: doublearty; const asize: integer);
 begin
@@ -3230,6 +3286,9 @@ begin
  ftrigger:= tchangedoubleinputconn.create(self,isigclient(self),
                                                              @dotriggerchange);
  ftrigger.name:= 'trigger';
+ famplitude:= tdoubleinputconn.create(self,isigclient(self));
+ famplitude.name:= 'amplitude';
+ famplitude.value:= 1;
 end;
 
 procedure tsigenvelope.lintoexp(var avalue: double);
@@ -3525,11 +3584,11 @@ begin
     ainfo^.dest^:= 0;
    end
    else begin
-    ainfo^.dest^:= exp(fcurrval*scale + offset);
+    ainfo^.dest^:= exp(fcurrval*scale + offset)*famplitudepo^;
    end;
   end
   else begin
-   ainfo^.dest^:= fcurrval*scale + offset;
+   ainfo^.dest^:= (fcurrval*scale + offset)*famplitudepo^;
   end;
   if endtime >= 0 then begin
    inc(ftime);
@@ -3596,8 +3655,9 @@ end;
 
 function tsigenvelope.getinputar: inputconnarty;
 begin
- setlength(result,1);
+ setlength(result,2);
  result[0]:= ftrigger;
+ result[1]:= famplitude;
 end;
 
 function tsigenvelope.getzcount: integer;
@@ -3608,6 +3668,7 @@ end;
 procedure tsigenvelope.initmodel;
 begin
  inherited;
+ famplitudepo:= @famplitude.fvalue;
  updatevalues;
 end;
 
@@ -3709,6 +3770,11 @@ begin
   release_values:= master.release_values;
   loopstart:= master.loopstart;
  end;
+end;
+
+procedure tsigenvelope.setamplitude(const avalue: tdoubleinputconn);
+begin
+ famplitude.assign(avalue);
 end;
 
 { tchangedoubleinputconn }
