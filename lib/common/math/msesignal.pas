@@ -566,6 +566,11 @@ type
    procedure sighandler(const ainfo: psighandlerinfoty);
  end;
 
+ ttrigconnector = class(tsigconnector)
+  public
+   constructor create(aowner: tcomponent); override;
+ end;
+
  tsigeventconnector = class(tdoublesigcomp)
  end;
  
@@ -2513,24 +2518,26 @@ begin
 {$endif}
  for int1:= 0 to high(finfos) do begin
   with finfos[int1] do begin
-   for int2:= 0 to high(outputs) do begin
-    with outputs[int2] do begin
-     for int3:= 0 to high(fdestinations) do begin
-      po2:= findinp(fdestinations[int3]);
-      if not (sis_input in po2^.state) then begin
-       if sis_eventchecked in po2^.state then begin
-        raise exception.create(
-         'Recursive event connection: '+self.name+ ', Node: '+
-                     getnodenamepath(finfos[int1].intf) +
-                 ', Dest: '+getnodenamepath(po2^.intf)+'.');
-       end; 
-      {$ifdef mse_debugsignal}
-       debugnodeinfo('event source ',@finfos[int1]);
-       debugpointer(' lookup inp ',fdestinations[int3]);
-       debugnodeinfo('  event ',po2);
-      {$endif}
-       adduniqueitem(pointerarty(eventdestinations),po2);
-       include(state,sis_eventchecked);
+   if not (sis_eventchecked in state) then begin
+    for int2:= 0 to high(outputs) do begin
+     with outputs[int2] do begin
+      for int3:= 0 to high(fdestinations) do begin
+       po2:= findinp(fdestinations[int3]);
+       if not (sis_input in po2^.state) then begin
+       {$ifdef mse_debugsignal}
+        debugnodeinfo('event source ',@finfos[int1]);
+        debugpointer(' lookup inp ',fdestinations[int3]);
+        debugnodeinfo('  event ',po2);
+       {$endif}
+        if sis_eventchecked in po2^.state then begin
+         raise exception.create(
+          'Recursive event connection: '+self.name+ ', Node: '+
+                      getnodenamepath(finfos[int1].intf) +
+                  ', Dest: '+getnodenamepath(po2^.intf)+'.');
+        end; 
+        adduniqueitem(pointerarty(eventdestinations),po2);
+        include(state,sis_eventchecked);
+       end;
       end;
      end;
     end;
@@ -4026,6 +4033,14 @@ end;
 procedure tsigconnector.sighandler(const ainfo: psighandlerinfoty);
 begin
  ainfo^.dest^:= finputpo^;
+end;
+
+{ ttrigconnector }
+
+constructor ttrigconnector.create(aowner: tcomponent);
+begin
+ inherited;
+ include(foutput.fstate,ocs_eventdriven);
 end;
 
 end.

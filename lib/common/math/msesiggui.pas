@@ -526,6 +526,8 @@ begin
  ftrigout:= tdoubleoutconnarrayprop.create(self,'trigout',isigclient(self),true);
 // ftrigout.name:= 'trigout';
  foutput:= tdoubleoutconnarrayprop.create(self,'output',isigclient(self),true);
+ include(tdoubleoutputconn1(foutput).fstate,ocs_eventdriven);
+ include(tdoubleoutputconn1(ftrigout).fstate,ocs_eventdriven);
  fmin:= 0.001;
 // fmax:= 1;
  fkeywidth:= defaultkeywidth;

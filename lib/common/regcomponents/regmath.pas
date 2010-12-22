@@ -46,7 +46,8 @@ type
   
 procedure register;
 begin
- registercomponents('Math',[tsigcontroller,tsigout,tsigin,tsigconnector,
+ registercomponents('Math',[tsigcontroller,tsigout,tsigin,
+                            tsigconnector,ttrigconnector,
                             tsigadd,tsigmult,
                             tsigdelay,tsigdelayn,tsigfir,tsigiir,tsigfilter,
                             tsigwavetable,tsignoise,tsigfuncttable,tsigenvelope,
