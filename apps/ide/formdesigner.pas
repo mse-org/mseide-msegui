@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -201,6 +201,7 @@ type
    fcompsoffsetused: boolean;
    fclickedcompbefore: tcomponent;
    fselectwidget: twidget;
+   fselectcomp: tcomponent;
    procedure drawgrid(const canvas: tcanvas);
    procedure hidexorpic(const canvas: tcanvas);
    procedure showxorpic(const canvas: tcanvas);
@@ -225,6 +226,7 @@ type
    function getcomponentrect(const component: tcomponent): rectty;
    function getcomponentrect1(const component: tcomponent): rectty;
    function componentatpos(const pos: pointty): tcomponent;
+   function iswidgetcomp(const acomp: tcomponent): boolean;
  
    procedure poschanged; override;
    procedure dispatchmouseevent(var info: moeventinfoty; capture: twidget); override;
@@ -455,10 +457,15 @@ function tdesignwindow.getcomponentrect(const component: tcomponent): rectty;
 begin
  result.pos:= getcomponentpos(component);
  addpoint1(result.pos,componentoffset);
- result.cx:= componentsize + complabelleftmargin + 
-                 fowner.getcanvas.getstringwidth(component.name) +
-                  complabelrightmargin;
- result.cy:= componentsize;
+ if isdatasubmodule(component) then begin
+  result.size:= tmsedatamodule(component).size;
+ end
+ else begin
+  result.cx:= componentsize + complabelleftmargin + 
+                  fowner.getcanvas.getstringwidth(component.name) +
+                   complabelrightmargin;
+  result.cy:= componentsize;
+ end;
 end;
 
 function tdesignwindow.getcomponentrect1(const component: tcomponent): rectty;
@@ -467,11 +474,18 @@ var
  bo1: boolean;
 begin
  result:= getcomponentrect(component);
+ comp1:= component.owner;
+ while comp1 <> nil do begin
+  if isdatasubmodule(comp1) then begin        //adjust submodulepos
+   addpoint1(result.pos,getcomponentpos(comp1));
+  end;
+  comp1:= comp1.owner;
+ end;
  if tformdesignerfo(fowner).fform <> nil then begin
-  comp1:= component;
+  comp1:= component.owner;
   bo1:= false;
   while (comp1 <> module) and (comp1 <> nil) do begin
-   if comp1 is twidget then begin
+   if iswidgetcomp(comp1) then begin
     if not bo1 then begin
      adjustchildcomponentpos(result.pos);
      bo1:= true;
@@ -492,34 +506,42 @@ var
  function checkcomponent(const component: tcomponent; const pos: pointty): tcomponent;
  var
   int1: integer;
-  po1: pointty;
-  bo1: boolean;
+  pt1: pointty;
+  bo1,bo2: boolean;
+  rect1: rectty;
  begin
   result:= nil;
-  bo1:= (component is twidget) and not isdatamodule;
+  bo2:= false;
+  bo1:=  not isdatamodule and iswidgetcomp(component) and 
+                               (twidget(component).parentwidget <> nil);
+  pt1:= pos;
+  rect1:= getcomponentrect(component);
   if bo1 and not toplevel then begin
-   po1:= subpoint(pos,twidget(component).pos);
+   subpoint1(pt1,twidget(component).pos);
    if (component.owner = module) and (module is twidget) then begin
-    tdesignwindow(twidget(component).window).readjustchildcomponentpos(po1);
+    tdesignwindow(twidget(component).window).readjustchildcomponentpos(pt1);
    end;
   end
   else begin
-   po1:= pos;
+   if isdatasubmodule(component) then begin
+    bo2:= pointinrect(pt1,rect1);
+    subpoint1(pt1,rect1.pos);
+   end;
   end;
   if toplevel or 
-              not isdatamodule and bo1 and 
+              (not isdatamodule and bo1 or bo2) and 
               not (cssubcomponent in component.componentstyle) and
               (component.componentstate * [csinline,csancestor] <> []) then begin
    toplevel:= false;
    for int1:= component.componentcount - 1 downto 0 do begin
-    result:= checkcomponent(component.components[int1],po1);
+    result:= checkcomponent(component.components[int1],pt1);
     if result <> nil then begin
      exit;
     end;
    end;
   end;
   if not bo1 {or isdatamodule} then begin
-   if pointinrect(pos,getcomponentrect(component)) then begin
+   if pointinrect(pos,rect1) then begin
     result:= component;
    end;
   end;
@@ -582,7 +604,7 @@ begin
   fcandelete:= count > 0;
   for int1:= 0 to count - 1 do begin
    with itempo(int1)^,selectedinfo do begin
-    if (instance is twidget) and (fowner.form <> nil) then begin
+    if fowner.iswidgetcomp(instance) then begin
      with twidget1(instance) do begin
       nohandles:= ws1_nodesignhandles in fwidgetstate1;
       fcandelete:= fcandelete and not (ws1_nodesigndelete in fwidgetstate1);
@@ -706,7 +728,7 @@ begin
   setlength(ar1,count);
   for int1:= 0 to high(ar1) do begin
    comp1:= items[int1];
-   while comp1 is twidget and 
+   while fowner.iswidgetcomp(comp1) and 
              (cs_parentwidgetrect in twidget1(comp1).fmsecomponentstate) do begin
     comp1:= twidget(comp1).parentwidget;
    end;
@@ -724,8 +746,7 @@ begin
    comp1:= ar1[int1];
    if comp1 <> nil then begin
     with itempo(int1)^,selectedinfo do begin
-     if (fowner.form <> nil) and (comp1 is twidget) and
-                                     (comp1 <> fowner.module) then begin
+     if fowner.iswidgetcomp(comp1) and (comp1 <> fowner.module) then begin
       if not nohandles then begin
        widget1:= twidget(comp1).parentwidget;
        while widget1 <> nil do begin
@@ -745,7 +766,8 @@ begin
      else begin
       comp2:= tcomponent(comp1).owner;
       while comp2 <> nil do begin
-       if (comp2 <> fowner.module) and (comp2 is twidget) and
+       if (comp2 <> fowner.module) and 
+            (fowner.iswidgetcomp(comp2) or isdatasubmodule(comp2)) and
                                          (indexof(comp2) >= 0) then begin 
         break; //moved by owner
        end;
@@ -790,7 +812,7 @@ begin
  if (dist.x <> 0) or (dist.y <> 0) then begin
   for int1:= 0 to count - 1 do begin
    with itempo(int1)^,selectedinfo do begin
-    if instance is twidget then begin
+    if fowner.iswidgetcomp(instance) then begin
      with twidget(instance) do begin
       if not nohandles then begin
        size:= sizety(addpoint(pointty(size),dist));
@@ -847,7 +869,7 @@ begin
   with itempo(0)^,selectedinfo do begin
    if not nohandles then begin
     if instance is tcomponent then begin
-     if (instance is twidget) and 
+     if isdatasubmodule(instance) or fowner.iswidgetcomp(instance) and 
                     not (cs_parentwidgetrect in 
                           twidget1(instance).fmsecomponentstate) then begin
       for handle:= firsthandle to lasthandle do begin
@@ -967,6 +989,12 @@ begin
  fselections.free;
 end;
 
+function tdesignwindow.iswidgetcomp(const acomp: tcomponent): boolean;
+begin
+ result:= (acomp is twidget) and (form <> nil) and 
+                        (twidget(acomp).parentwidget <> nil);
+end;
+
 procedure tdesignwindow.paintxorpic(const canvas: tcanvas);
 begin
  if fxorpicactive then begin
@@ -1057,18 +1085,31 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
   int1: integer;
   pt1: pointty;
  begin
-  if ((form = nil) or not (component is twidget)) and 
+  if not iswidgetcomp(component) and 
            not (cssubcomponent in component.componentstyle) then begin
    rect1:= getcomponentrect(component);
-   rect1.cx:= rect1.cx - complabelrightmargin;
-   drawtext(canvas,component.name,rect1,[tf_ycentered,tf_right],
-                      stockobjects.fonts[stf_default]);
-   rect1.cx:= rect1.cy;
-   registeredcomponents.drawcomponenticon(component,canvas,rect1);
+   if isdatasubmodule(component) then begin
+    canvas.dashes:= #3#3;
+    canvas.drawrect(rect1);
+    canvas.dashes:= '';
+    canvas.save;
+    canvas.intersectcliprect(rect1);
+    canvas.move(rect1.pos);
+    for int1:= 0 to component.componentcount - 1 do begin
+     drawcomponent(component.components[int1]);
+    end;
+    canvas.restore;
+   end
+   else begin
+    rect1.cx:= rect1.cx - complabelrightmargin;
+    drawtext(canvas,component.name,rect1,[tf_ycentered,tf_right],
+                       stockobjects.fonts[stf_default]);
+    rect1.cx:= rect1.cy;
+    registeredcomponents.drawcomponenticon(component,canvas,rect1);
+   end;
   end;
-  if (form <> nil) and (component is twidget) and 
-                      not (cssubcomponent in component.componentstyle){ and 
-                      (csinline in component.componentstate)} then begin
+  if iswidgetcomp(component) and 
+                    not (cssubcomponent in component.componentstyle) then begin
    pt1:= twidget(component).pos;
    if component.owner = tformdesignerfo(fowner).fmodule then begin
     adjustchildcomponentpos(pt1);
@@ -1087,19 +1128,15 @@ var
 begin
  if tformdesignerfo(fowner).fmodule <> nil then begin
   canvas.intersectcliprect(tformdesignerfo(fowner).gridrect);
-//  canvas.move(fowner.container.clientpos);
-//  canvas.move(tformdesignerfo(fowner).gridoffset);
   with tformdesignerfo(fowner).fmodule do begin
    for int1:= 0 to componentcount - 1 do begin
     drawcomponent(components[int1]);
    end;
   end;
-//  canvas.remove(tformdesignerfo(fowner).gridoffset);
   if form <> nil then begin
    drawgrid(canvas);
   end;
   fselections.paint(canvas);
-//  canvas.remove(fowner.container.clientpos);
   showxorpic(canvas);
  end;
 end;
@@ -1115,7 +1152,7 @@ begin
   with tformdesignerfo(fowner).fmodule do begin
    for int1:= 0 to componentcount - 1 do begin
     component:= components[int1];
-    if (form = nil) or not (component is twidget) then begin
+    if not iswidgetcomp(component) then begin
      rect1:= getcomponentrect(component);
      subpoint1(rect1.pos,componentoffset);
      int2:= rect1.x + rect1.cx;
@@ -1207,10 +1244,10 @@ begin
   end
   else begin
    widget1:= nil;
-   if (fselections.count > 0) and (fselections[0] is twidget) then begin
+   if (fselections.count > 0) and iswidgetcomp(fselections[0]) then begin
     widget1:= twidget(fselections[0]).parentofcontainer;
     for int1:= 1 to fselections.count - 1 do begin
-     if not (fselections[int1] is twidget) or 
+     if not iswidgetcomp(fselections[int1]) or 
        (twidget(fselections[int1]).parentofcontainer <> widget1) then begin
       widget1:= nil; //no common parent
       break;
@@ -1244,7 +1281,7 @@ begin
    with fselections do begin
     if count = 1 then begin
      widget1:= twidget(items[0]);
-     if (widget1 is twidget) and form.checkdescendent(widget1) then begin
+     if iswidgetcomp(widget1) and form.checkdescendent(widget1) then begin
       fuseinitcompsoffset:= usemousepos;
       fcompsoffsetused:= false;
       if usemousepos then begin
@@ -1331,7 +1368,7 @@ procedure tdesignwindow.dispatchkeyevent(const eventkind: eventkindty;
 
 var
  po1: pointty;
- widget1: twidget;
+ comp1: tcomponent;
  shiftstate1: shiftstatesty;
 // component1: tcomponent;
 
@@ -1358,25 +1395,30 @@ begin
        factarea:= ar_none;
       end
       else begin      
-       if (fselections.count > 1) or (form = nil) then begin
+       if (fselections.count > 1){ or (form = nil)} then begin
         selectcomponent(module);
        end
        else begin
         if fselections.count = 1 then begin
-         widget1:= twidget(fselections[0]);
-         if widget1 is twidget then begin
+         comp1:= fselections[0];
+         if iswidgetcomp(comp1) then begin
           repeat
-           widget1:= widget1.parentwidget;
-          until (widget1 = nil) or (ws_iswidget in widget1.widgetstate);
-          if (widget1 <> nil) and (widget1 <> fowner) then begin
-           selectcomponent(widget1);
+           comp1:= twidget(comp1).parentwidget;
+          until (comp1 = nil) or (ws_iswidget in twidget(comp1).widgetstate);
+          if (comp1 <> nil) and (comp1 <> fowner) then begin
+           selectcomponent(comp1);
           end
           else begin
            selectcomponent(module);
           end;
          end
          else begin
-          selectcomponent(module);
+          if isdatasubmodule(comp1.owner) then begin
+           selectcomponent(comp1.owner);
+          end
+          else begin
+           selectcomponent(module);
+          end;
          end;
         end;
        end;
@@ -1459,7 +1501,12 @@ var
 begin
  with tmenuitem(sender) do begin
   ar1:= splitstring(caption,widechar(' '));
-  comp1:= fselectwidget.findlogicalchild(ar1[0]);
+  if fselectwidget <> nil then begin
+   comp1:= fselectwidget.findlogicalchild(ar1[0]);
+  end
+  else begin
+   comp1:= fselectcomp.findcomponent(ar1[0]);
+  end;
   if comp1 <> nil then begin
    selectcomponent(comp1,sm_select);
   end;
@@ -1472,37 +1519,62 @@ var
  bo1,bo2: boolean;
  item1: tmenuitem;
  ar1: msestringarty;
- ar2: widgetarty;
+ ar2: componentarty;
  int1: integer;
+ selectcomp: tcomponent;
 begin
  with tformdesignerfo(fowner),popupme,menu do begin
+  selectcomp:= nil;
+  if fselections.count = 1 then begin
+   selectcomp:= fselections[0];
+  end;
   bo1:= (fselections.count > 0) and (fselections[0] <> module);
   bo2:= bo1 and fselections.candelete;
   itembyname('copy').enabled:= bo1;
   itembyname('cut').enabled:= bo2;
   itembyname('delete').enabled:= bo2;
   itembyname('undelete').enabled:= fdelobjs <> nil;
-  itembyname('paste').enabled:= (fselections.count = 1) and 
-                   ((form = nil) or (fselections[0] is twidget));
+  itembyname('paste').enabled:= iswidgetcomp(selectcomp) or 
+                                isdatasubmodule(selectcomp);
   itembyname('editcomp').enabled:= designer.componentcanedit;
-  bo1:= not((fselections.count <> 1) or not(fselections.items[0] is twidget) or
-           not fowner.checkdescendent(twidget(fselections.items[0])));
-  itembyname('insertsub').enabled:= bo1;
+  {
+  bo1:= not(
+           (fselections.count <> 1) or 
+           not(fselections.items[0] is twidget) or
+           not fowner.checkdescendent(twidget(fselections.items[0]))
+           );
+  }
+  bo1:= iswidgetcomp(selectcomp) and fowner.checkdescendent(twidget(selectcomp));
+  itembyname('insertsub').enabled:= bo1 or (selectcomp = module) or
+                                               isdatasubmodule(selectcomp);
+                      
   itembyname('revert').enabled:= (fselections.count = 1) and 
           (fselections[0].componentstate * [csinline,csancestor] <> []);
   itembyname('insertcomp').enabled:= designer.hascurrentcomponent and
-           (fselections.count = 1);
+                                                      (fselections.count = 1);
   itembyname('bringtofro').enabled:= bo1;
   itembyname('sendtoba').enabled:= bo1;
   itembyname('settabord').enabled:= bo1 and 
           (twidget(fselections.items[0]).parentwidget.childrencount >= 2);
   itembyname('synctofo').enabled:= fselections.count > 0;
   item1:= itembyname('selectchild');
-  item1.enabled:= (fselections.count = 1) and (fselections[0] is twidget) and
-                   (twidget(fselections[0]).container.widgetcount > 0);  
+  item1.enabled:= iswidgetcomp(selectcomp) and
+                        (twidget(selectcomp).container.widgetcount > 0) or
+                  isdatasubmodule(selectcomp) and 
+                        (selectcomp.componentcount > 0);
   if item1.enabled then begin
-   fselectwidget:= twidget(fselections[0]);
-   ar2:= fselectwidget.getlogicalchildren;
+   if iswidgetcomp(selectcomp) then begin
+    fselectwidget:= twidget(selectcomp);
+    ar2:= componentarty(fselectwidget.getlogicalchildren);
+   end
+   else begin
+    fselectwidget:= nil;
+    fselectcomp:= selectcomp;
+    setlength(ar2,fselectcomp.componentcount);
+    for int1:= 0 to high(ar2) do begin
+     ar2[int1]:= fselectcomp.components[int1];
+    end;
+   end;
    setlength(ar1,length(ar2));
    for int1:= 0 to high(ar1) do begin
     with ar2[int1] do begin
@@ -1725,7 +1797,8 @@ begin
                      (eventkind = ek_buttonpress) and 
        (button = mb_left) and (ss1 = [ss_left])) and 
        not ((area1 = ar_component) and 
-           not(fselections[int1] is twidget)) and 
+           not((fselections[int1] is twidget) or 
+               isdatasubmodule(fselections[int1]))) and 
        (factarea <> ar_componentmove) then begin
      inherited;
     end;
@@ -1775,13 +1848,24 @@ begin
      case factarea of
       firsthandle..lasthandle: begin
        if (factcompindex >= 0) and (factcompindex < fselections.count) then begin
-        component:= tcomponent(fselections.itempo(factcompindex)^.selectedinfo.instance);
+        component:= tcomponent(
+                     fselections.itempo(factcompindex)^.selectedinfo.instance);
         if (component is twidget) and (form <> nil) then begin
          with twidget(component) do begin
           subpoint1(factsizerect.pos,parentwidget.rootpos);
           widgetrect:= factsizerect;
          end;
          fselections.componentschanged;
+        end
+        else begin
+         if component is tmsedatamodule then begin
+          with tmsedatamodule(component) do begin
+//////           subpoint1(factsizerect.pos,parentwidget.rootpos);
+           setcomponentpos(component,factsizerect.pos);
+           size:= factsizerect.size;
+          end;
+          fselections.componentschanged;
+         end;
         end;
        end;
        fowner.invalidate;
@@ -2641,7 +2725,6 @@ begin
  if po1 <> nil then begin
   comp:= fdesigner.copycomponent(po1^.instance,po1^.instance);
   initinline(comp);
-//  checkinline(comp);
   comp.name:= po1^.instance.name;
   fdesigner.addancestorinfo(comp,po1^.instance);
   with tdesignwindow(window) do begin
@@ -2700,16 +2783,22 @@ procedure tformdesignerfo.dosetcreationorder(const sender: TObject);
 var
  fo: tsetcreateorderfo;
  str1: string;
+ comp1: tcomponent;
 begin
  with tdesignwindow(window) do begin
-  if (fselections.count = 1) and (selections[0].owner = module) then begin
-   str1:= fselections[0].name;
+  comp1:= nil;
+  str1:= '';
+  if (fselections.count = 1) then begin
+   comp1:= selections[0].owner;
+  end;
+  if comp1 = nil then begin
+   comp1:= module;
   end
   else begin
-   str1:= '';
+   str1:= fselections[0].name;
   end;
  end;
- fo:= tsetcreateorderfo.create(module,str1);
+ fo:= tsetcreateorderfo.create(comp1,str1);
  try
   fo.show(true,window);
  finally

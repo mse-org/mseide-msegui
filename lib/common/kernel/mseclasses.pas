@@ -358,6 +358,7 @@ type
    procedure loaded; override;
    procedure validaterename(acomponent: tcomponent;
                          const curname, newname: string); override;
+   procedure setchildorder(child: tcomponent; order: integer); override;
    procedure sendchangeevent(const aevent: objecteventty = oe_changed);
    function linkcount: integer;
    function candestroyevent(const event: tmethod): boolean;
@@ -692,6 +693,9 @@ procedure initrootdescendent(const acomponent: tcomponent);
                  //clears csinline flags of acomoponent and children,
                  // sets csancestor
 function issubcomponent(const root,child: tcomponent): boolean;
+function fixupsetchildorder(const sender: tcomponent;
+                     const child: tcomponent; const order: integer): boolean;
+                                 //true if handled
 function findcomponentbynamepath(const namepath: string): tcomponent;
 function getlinkedcomponents(const acomponent: tcomponent): componentarty;
                  //returns items of free notify list
@@ -1678,6 +1682,21 @@ begin
    break;
   end;
   comp:= comp.Owner;
+ end;
+end;
+
+function fixupsetchildorder(const sender: tcomponent;
+                     const child: tcomponent; const order: integer): boolean;
+                                 //true if handled
+begin
+ result:= false;
+ if (csloading in child.componentstate) and 
+    (child.getparentcomponent = nil) and ownscomponent(sender,child) and
+    (child.owner.componentstate*[csreading,csinline] = [csreading,csinline]) and 
+    (child.owner <> sender) then begin
+   //treader set root as parent istead of lookuproot.
+  tcomponent1(child.owner).setchildorder(child,order);
+  result:= true;
  end;
 end;
 
@@ -3834,6 +3853,22 @@ end;
 procedure tmsecomponent.executeificommand(var acommand: ificommandcodety);
 begin
  //dummy
+end;
+
+procedure tmsecomponent.setchildorder(child: tcomponent; order: integer);
+var
+ int1,int2: integer;
+begin
+ int2:= -1;
+ for int1:= 0 to componentcount-1 do begin
+  if not components[int1].hasparent then begin //number simple owned only
+   inc(int2);
+   if int2 = order then begin
+    child.componentindex:= int1;
+    break;
+   end;    
+  end;
+ end;
 end;
 
 {$endif}

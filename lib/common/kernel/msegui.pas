@@ -10740,9 +10740,14 @@ end;
 function twidget.getparentcomponent: tcomponent;
 begin
  result:= parentofcontainer;
- if (result <> nil) and (csdesigning in componentstate) and 
+ if result = nil then begin
+//  result:= owner;
+ end
+ else begin
+  if (csdesigning in componentstate) and 
          not(csdesigning in result.componentstate) then begin
-  result:= nil; //parentwidget is designer
+   result:= nil; //parentwidget is designer
+  end;
  end
 end;
 
@@ -10755,20 +10760,27 @@ procedure twidget.setparentcomponent(value: tcomponent);
 begin
  if value is twidget then begin
   twidget(value).insertwidget(self,fwidgetrect.pos);
+ end
+ else begin
+//  value.insertcomponent(self);
  end;
 end;
 
 procedure twidget.setchildorder(child: tcomponent; order: integer);
+var
+ comp1: tcomponent;
 begin
- with container do begin
-  if order < 0 then begin
-   order:= 0;
-  end;
-  if order > high(fwidgets) then begin
-   order:= high(fwidgets);
-  end;
-  if removeitem(pointerarty(fwidgets),child) >= 0 then begin
-   insertitem(pointerarty(fwidgets),order,child);
+ if not fixupsetchildorder(self,child,order) then begin
+  with container do begin
+   if order > high(fwidgets) then begin
+    inherited setchildorder(child,order-length(fwidgets));
+   end;
+   if order < 0 then begin
+    order:= 0;
+   end;
+   if removeitem(pointerarty(fwidgets),child) >= 0 then begin
+    insertitem(pointerarty(fwidgets),order,child);
+   end;
   end;
  end;
 end;

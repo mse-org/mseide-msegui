@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -484,6 +484,7 @@ procedure createbackupfile(const newname,origname: filenamety;
                       var backupcreated: boolean; const backupcount: integer);
            
 function designer: tdesigner;
+function isdatasubmodule(const acomponent: tcomponent): boolean;
 
 implementation
 
@@ -491,7 +492,7 @@ uses
  msestream,msefileutils,{$ifdef mswindows}windows{$else}mselibc{$endif},
  designer_bmp,msesys,msewidgets,formdesigner,mseevent,objectinspector,
  msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
- pascaldesignparser,msearrayprops,rtlconsts,
+ pascaldesignparser,msearrayprops,rtlconsts,msedatamodules,
  msesimplewidgets,msesysutils,mseobjecttext;
 
 type
@@ -519,6 +520,12 @@ begin
  result:= (cssubcomponent in acomp.componentstyle) and 
            (acomp is tmsecomponent) and
             not(cs_subcompref in tmsecomponent1(acomp).fmsecomponentstate);
+end;
+
+function isdatasubmodule(const acomponent: tcomponent): boolean;
+begin
+ result:= (acomponent <> nil) and (csinline in acomponent.componentstate) and 
+                                   (acomponent is tmsedatamodule);
 end;
 
 function issubprop(const obj1: tobject): boolean;
@@ -1341,6 +1348,7 @@ var
  int1,int2: integer;
  po1: pancestorinfoty;
  po2: pmoduleinfoty;
+ bo1: boolean;
   
 
 begin
@@ -1369,7 +1377,6 @@ begin
    if po1^.ancestor = amodule^.instance then begin
     setlength(infos,high(infos)+2);
     getinfo(po1,infos[high(infos)]);
-//    additem(pointerarty(infos),po1);  //listitems can be deleted
     if ismodule(po1^.descendent) then begin  //inherited form        
      comp1:= po1^.descendent;
     end
@@ -1390,9 +1397,6 @@ begin
    inc(po1);
   end;
   if high(infos) >= 0 then begin
-  {$ifdef mse_debugsubmodule}
-//   teststream:= ttextstream.create;
-  {$endif}
    ancestor:= fdesigner.fsubmodulelist.findancestor(amodule^.instance);
    beginsubmodulecopy;
    beginstreaming;
@@ -1405,12 +1409,10 @@ begin
      debugout('state ' + modifiedowners[int1]^.instance.name,streams[int1]);
   {$endif}
     end;
-//    fdesigner.fsubmodulelist.renewbackup(amodule^.instance);
     ferrorhandler:= treaderrorhandler.create(nil);
     try
      for int1:= 0 to high(modifiedowners) do begin
-      restorechanges(modifiedowners[int1],findinfo(infos[int1]),{ancestor,}
-                                                               streams[int1]);
+      restorechanges(modifiedowners[int1],findinfo(infos[int1]),streams[int1]);
  {$ifdef mse_debugsubmodule}
       po1:= findinfo(infos[int1]);
       debugbinout('after load ' + po1^.descendent.name,
@@ -1426,12 +1428,15 @@ begin
    finally
     endsubmodulecopy;
     endstreaming;
-  {$ifdef mse_debugsubmodule}
-//    teststream.free;
-  {$endif}
    end;
+   bo1:= amodule^.instance is twidget;
    for int1:= 0 to high(dependentmodules) do begin
-    fdesigner.componentmodified(dependentmodules[int1]^.instance);
+    with dependentmodules[int1]^ do begin
+     fdesigner.componentmodified(instance);
+     if not bo1 then begin
+      designform.invalidate; //refresh submodule frame
+     end;
+    end;
    end;
    fdesigner.fsubmodulelist.renewbackup(amodule^.instance);
   end;
@@ -2234,10 +2239,6 @@ var
 begin
  if acomponent is tcomponent then begin
   comp:= rootcomponent(tcomponent(acomponent));
-//  comp:= tcomponent(acomponent);
-//  while (comp.owner <> nil) and (comp.owner.owner <> nil) do begin
-//   comp:= comp.owner; //top level component
-//  end;
   po1:= datapo;
   for int1:= 0 to count - 1 do begin
    with tmoduleinfo(iobjectlink(po1^[int1]).getinstance) do begin
@@ -3030,7 +3031,8 @@ begin
   fmodules.componentmodified(component);
  end;
  if fcomponentmodifying = 0 then begin
-  postcomponentevent(tcomponentevent.create(component,ord(me_componentmodified),false));
+  postcomponentevent(
+         tcomponentevent.create(component,ord(me_componentmodified),false));
  end
 end;
 
@@ -3161,10 +3163,9 @@ var
  po1: pancestorinfoty;
  po2,po4: pmoduleinfoty;
  po3: pointer;
- bo1: boolean;
- pos1: pointty;
+ bo1,bo2: boolean;
+ pt1: pointty;
 begin
-// po2:= fmodules.findmodule(tmsecomponent(acomponent.owner));
  po2:= fmodules.findmodule(tmsecomponent(rootcomponent(acomponent)));
  if (csinline in acomponent.componentstate) and (acomponent.owner <> nil) and
           not (csancestor in acomponent.owner.componentstate) then begin
@@ -3174,11 +3175,22 @@ begin
    if po2 <> nil then begin
     bo1:= acomponent is twidget;
     if bo1 then begin
-     pos1:= twidget(acomponent).pos;
+     pt1:= twidget(acomponent).pos;
+    end
+    else begin
+     bo2:= isdatasubmodule(acomponent);
+     if bo2 then begin
+      pt1:= getcomponentpos(acomponent);
+     end;
     end;
     fdescendentinstancelist.revert(po1,po2,msecomp1);
     if bo1 then begin
-     twidget(msecomp1{po1^.descendent}).pos:= pos1;
+     twidget(msecomp1).pos:= pt1;  //restore insert position
+    end
+    else begin
+     if bo2 then begin
+      setcomponentpos(msecomp1,pt1); //restore insert position
+     end;
     end;
    end;
   end;
@@ -3187,7 +3199,6 @@ begin
   if csancestor in acomponent.componentstate then begin
    comp1:= findancestorcomponent(acomponent);
    if comp1 <> nil then begin
-//    po2:= fmodules.findownermodule(acomponent);
     beginsubmodulecopy;
     po4:= fmodules.findownermodule(comp1);
     po3:= po4^.methods.createmethodtable(getancestormethods(po4));

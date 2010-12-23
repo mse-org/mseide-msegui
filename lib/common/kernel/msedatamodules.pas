@@ -36,9 +36,19 @@ type
    fonevent: eventeventty;
    fonterminatequery: terminatequeryeventty;
    fonterminated: notifyeventty;
-   procedure writesize(writer: twriter);
+//   procedure writesize(writer: twriter);
    procedure readsize(reader: treader);
+   {
+   procedure readsize_x(reader: treader);
+   procedure writesize_x(writer: twriter);
+   procedure readsize_y(reader: treader);
+   procedure writesize_y(writer: twriter);
+   }
    procedure setstatfile(const avalue: tstatfile);
+   function getbounds_x: integer;
+   procedure setbounds_x(const avalue: integer);
+   function getbounds_y: integer;
+   procedure setbounds_y(const avalue: integer);
   protected
    procedure doterminated(const sender: tobject);
    procedure doterminatequery(var terminate: boolean);
@@ -61,6 +71,11 @@ type
   published
    property options: datamoduleoptionsty read foptions write foptions 
                            default defaultdatamoduleoptions;
+   property bounds_x: integer read getbounds_x write setbounds_x stored false;
+   property bounds_y: integer read getbounds_y write setbounds_y stored false;
+   property bounds_cx: integer read fsize.cx write fsize.cx;
+   property bounds_cy: integer read fsize.cy write fsize.cy;
+   
    property statfile: tstatfile read fstatfile write setstatfile;
    property oncreate: notifyeventty read foncreate write foncreate;
    property onloaded: notifyeventty read fonloaded write fonloaded;
@@ -80,7 +95,9 @@ type
 function createmsedatamodule(const aclass: tclass;
                      const aclassname: pshortstring): tmsecomponent;
 implementation
- 
+uses
+ sysutils;
+  
 type
  tmsecomponent1 = class(tmsecomponent);
   
@@ -184,7 +201,7 @@ class function tmsedatamodule.hasresource: boolean;
 begin
  result:= self <> tmsedatamodule;
 end;
-
+{
 procedure tmsedatamodule.writesize(writer: twriter);
 begin
  with writer do begin
@@ -194,7 +211,7 @@ begin
   writelistend;
  end;
 end;
-
+}
 procedure tmsedatamodule.readsize(reader: treader);
 begin
  with reader do begin
@@ -204,12 +221,41 @@ begin
   readlistend;
  end;
 end;
+{
+procedure tmsedatamodule.readsize_x(reader: treader);
+begin
+ fsize.cx:= reader.readinteger;
+end;
 
+procedure tmsedatamodule.writesize_x(writer: twriter);
+begin
+ writer.writeinteger(fsize.cx);
+end;
+
+procedure tmsedatamodule.readsize_y(reader: treader);
+begin
+ fsize.cy:= reader.readinteger;
+end;
+
+procedure tmsedatamodule.writesize_y(writer: twriter);
+begin
+ writer.writeinteger(fsize.cy);
+end;
+}
 procedure tmsedatamodule.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('size',{$ifdef FPC}@{$endif}readsize,
-                       {$ifdef FPC}@{$endif}writesize, true);  
+ filer.defineproperty('size',{$ifdef FPC}@{$endif}readsize,nil,false);
+{
+ filer.defineproperty('size_x',{$ifdef FPC}@{$endif}readsize_x,
+                       {$ifdef FPC}@{$endif}writesize_x,
+                 (filer.ancestor = nil) or 
+                 (tmsedatamodule(filer.ancestor).fsize.cx <> fsize.cx));  
+ filer.defineproperty('size_y',{$ifdef FPC}@{$endif}readsize_y,
+                       {$ifdef FPC}@{$endif}writesize_y,
+                 (filer.ancestor = nil) or 
+                 (tmsedatamodule(filer.ancestor).fsize.cy <> fsize.cy));  
+}
 end;
 
 procedure tmsedatamodule.loaded;
@@ -264,6 +310,34 @@ begin
  if canevent(tmethod(fonterminatequery)) then begin
   fonterminatequery(terminate);
  end;
+end;
+
+function tmsedatamodule.getbounds_x: integer;
+begin
+ result:= longrec(designinfo).lo;
+end;
+
+procedure tmsedatamodule.setbounds_x(const avalue: integer);
+var
+ rec: longrec;
+begin
+ rec:= longrec(designinfo);
+ rec.lo:= avalue;
+ designinfo:= longint(rec);
+end;
+
+function tmsedatamodule.getbounds_y: integer;
+begin
+ result:= longrec(designinfo).hi;
+end;
+
+procedure tmsedatamodule.setbounds_y(const avalue: integer);
+var
+ rec: longrec;
+begin
+ rec:= longrec(designinfo);
+ rec.hi:= avalue;
+ designinfo:= longint(rec);
 end;
 
 end.
