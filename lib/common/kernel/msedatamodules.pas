@@ -221,41 +221,11 @@ begin
   readlistend;
  end;
 end;
-{
-procedure tmsedatamodule.readsize_x(reader: treader);
-begin
- fsize.cx:= reader.readinteger;
-end;
 
-procedure tmsedatamodule.writesize_x(writer: twriter);
-begin
- writer.writeinteger(fsize.cx);
-end;
-
-procedure tmsedatamodule.readsize_y(reader: treader);
-begin
- fsize.cy:= reader.readinteger;
-end;
-
-procedure tmsedatamodule.writesize_y(writer: twriter);
-begin
- writer.writeinteger(fsize.cy);
-end;
-}
 procedure tmsedatamodule.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('size',{$ifdef FPC}@{$endif}readsize,nil,false);
-{
- filer.defineproperty('size_x',{$ifdef FPC}@{$endif}readsize_x,
-                       {$ifdef FPC}@{$endif}writesize_x,
-                 (filer.ancestor = nil) or 
-                 (tmsedatamodule(filer.ancestor).fsize.cx <> fsize.cx));  
- filer.defineproperty('size_y',{$ifdef FPC}@{$endif}readsize_y,
-                       {$ifdef FPC}@{$endif}writesize_y,
-                 (filer.ancestor = nil) or 
-                 (tmsedatamodule(filer.ancestor).fsize.cy <> fsize.cy));  
-}
 end;
 
 procedure tmsedatamodule.loaded;
