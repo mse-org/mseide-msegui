@@ -457,16 +457,23 @@ end;
 }
 
 function tdesignwindow.getcomponentrect(const component: tcomponent): rectty;
+var
+ bo1: boolean;
 begin
  result.pos:= getcomponentpos(component);
  addpoint1(result.pos,componentoffset);
- if isdatasubmodule(component) then begin
+ bo1:= (component is tmsedatamodule) and 
+                 (csinline in tmsedatamodule(component).componentstate);
+ if bo1 and not (dmo_iconic in tmsedatamodule(component).options) then begin
   result.size:= tmsedatamodule(component).size;
  end
  else begin
-  result.cx:= componentsize + complabelleftmargin + 
+  result.cx:= complabelleftmargin + 
                   fowner.getcanvas.getstringwidth(component.name) +
                    complabelrightmargin;
+  if not bo1 then begin 
+   result.cx:= result.cx + componentsize;
+  end;
   result.cy:= componentsize;
  end;
 end;
@@ -512,6 +519,7 @@ var
   pt1: pointty;
   bo1,bo2: boolean;
   rect1: rectty;
+  comp1: tcomponent;
  begin
   result:= nil;
   bo2:= false;
@@ -537,9 +545,21 @@ var
               (component.componentstate * [csinline,csancestor] <> []) then begin
    toplevel:= false;
    for int1:= component.componentcount - 1 downto 0 do begin
-    result:= checkcomponent(component.components[int1],pt1);
-    if result <> nil then begin
-     exit;
+    comp1:= component.components[int1];
+    if isdatasubmodule(comp1) then begin
+     result:= checkcomponent(comp1,pt1);
+     if result <> nil then begin
+      exit;
+     end;
+    end;
+   end;
+   for int1:= component.componentcount - 1 downto 0 do begin
+    comp1:= component.components[int1];
+    if not isdatasubmodule(comp1) then begin
+     result:= checkcomponent(comp1,pt1);
+     if result <> nil then begin
+      exit;
+     end;
     end;
    end;
   end;
@@ -1080,60 +1100,119 @@ procedure tdesignwindow.adjustchildcomponentpos(var apos: pointty);
 begin
  subpoint1(apos,componentoffset);
  addpoint1(apos,tformdesignerfo(fowner).widgetrefpoint);
-// addpoint1(apos,tformdesignerfo(fowner).insertoffset);
-// addpoint1(apos,tformdesignerfo(fowner).gridrect.pos);
 end;
 
 procedure tdesignwindow.readjustchildcomponentpos(var apos: pointty);
 begin
  addpoint1(apos,componentoffset);
  subpoint1(apos,tformdesignerfo(fowner).widgetrefpoint);
-// subpoint1(apos,tformdesignerfo(fowner).insertoffset);
-// subpoint1(apos,tformdesignerfo(fowner).gridrect.pos);
 end;
 
 procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
 
+ procedure clipchildren(const acomp: tcomponent; const aindex: integer);
+ var
+  int1: integer;
+  comp1: tcomponent;
+ begin
+  for int1:= aindex to acomp.componentcount - 1 do begin
+   comp1:= acomp.components[int1];
+   if isdatasubmodule(comp1) then begin
+    canvas.subcliprect(makerect(getcomponentpos(comp1),
+                                          tmsedatamodule(comp1).size));
+   end;
+  end;
+ end;
+ 
  procedure drawcomponent(const component: tcomponent);
  var
   rect1: rectty;
   int1: integer;
   pt1: pointty;
+  isroot,iswidget,issub: boolean;
+  comp1: tcomponent;
  begin
-  if not iswidgetcomp(component) and 
-           not (cssubcomponent in component.componentstyle) then begin
-   rect1:= getcomponentrect(component);
-   if isdatasubmodule(component) then begin
-    canvas.dashes:= #3#3;
-    canvas.drawrect(rect1);
-    canvas.dashes:= '';
-    canvas.save;
-    canvas.intersectcliprect(rect1);
-    canvas.move(rect1.pos);
-    for int1:= 0 to component.componentcount - 1 do begin
-     drawcomponent(component.components[int1]);
-    end;
-    canvas.restore;
+  if not (cssubcomponent in component.componentstyle) then begin
+   iswidget:= false;
+   issub:= false;
+   isroot:= component = tformdesignerfo(fowner).fmodule;
+   if isroot then begin
+    iswidget:= true;
    end
    else begin
-    rect1.cx:= rect1.cx - complabelrightmargin;
-    drawtext(canvas,component.name,rect1,[tf_ycentered,tf_right],
+    iswidget:= iswidgetcomp(component);
+    if not iswidget then begin
+     issub:= isdatasubmodule(component);
+    end;
+   end;
+   if iswidget then begin
+    if isroot then begin
+     rect1:= tformdesignerfo(fowner).gridrect;
+    end
+    else begin
+     rect1:= twidget(component).widgetrect;
+    end
+   end
+   else begin
+    rect1:= getcomponentrect(component);
+   end;
+   if not (iswidget or issub) then begin
+    if isdatasubmodule(component,true) then begin
+     canvas.fillrect(rect1,cl_ltgray);
+     drawtext(canvas,component.name,rect1,[tf_ycentered,tf_xcentered],
                        stockobjects.fonts[stf_default]);
-    rect1.cx:= rect1.cy;
-    registeredcomponents.drawcomponenticon(component,canvas,rect1);
+    end
+    else begin
+     rect1.cx:= rect1.cx - complabelrightmargin;
+     drawtext(canvas,component.name,rect1,[tf_ycentered,tf_right],
+                        stockobjects.fonts[stf_default]);
+     rect1.cx:= rect1.cy;
+     registeredcomponents.drawcomponenticon(component,canvas,rect1);
+    end;
+   end
+   else begin
+    if component.componentcount > 0 then begin
+     canvas.save;
+     clipchildren(component,0);
+     canvas.intersectcliprect(rect1);
+     pt1:= rect1.pos;
+     if component.owner = tformdesignerfo(fowner).fmodule then begin
+      adjustchildcomponentpos(pt1);
+     end;
+     if not isroot then begin
+      canvas.move(rect1.pos);
+     end;
+     for int1:= 0 to component.componentcount - 1 do begin
+      comp1:= component.components[int1];
+      if not isdatasubmodule(comp1) then begin
+       drawcomponent(comp1);
+      end;
+     end;
+     canvas.restore;
+     if not isroot then begin
+      canvas.move(rect1.pos);
+     end;
+     for int1:= 0 to component.componentcount - 1 do begin
+      comp1:= component.components[int1];
+      if isdatasubmodule(comp1) then begin
+       canvas.save;
+       clipchildren(component,int1+1);
+       drawcomponent(comp1);
+       canvas.restore;
+      end;
+     end;
+     if not isroot then begin
+      canvas.remove(rect1.pos);
+     end;
+     if issub then begin
+      canvas.dashes:= #3#3;
+      dec(rect1.cx);
+      dec(rect1.cy);
+      canvas.drawrect(rect1);
+      canvas.dashes:= '';
+     end;
+    end;
    end;
-  end;
-  if iswidgetcomp(component) and 
-                    not (cssubcomponent in component.componentstyle) then begin
-   pt1:= twidget(component).pos;
-   if component.owner = tformdesignerfo(fowner).fmodule then begin
-    adjustchildcomponentpos(pt1);
-   end;
-   canvas.move(pt1);
-   for int1:= 0 to component.componentcount - 1 do begin
-    drawcomponent(component.components[int1]);        //components of submodule
-   end;
-   canvas.remove(pt1);
   end;
  end;
  
@@ -1143,11 +1222,7 @@ var
 begin
  if tformdesignerfo(fowner).fmodule <> nil then begin
   canvas.intersectcliprect(tformdesignerfo(fowner).gridrect);
-  with tformdesignerfo(fowner).fmodule do begin
-   for int1:= 0 to componentcount - 1 do begin
-    drawcomponent(components[int1]);
-   end;
-  end;
+  drawcomponent(tformdesignerfo(fowner).fmodule);
   if form <> nil then begin
    drawgrid(canvas);
   end;
@@ -1531,12 +1606,13 @@ end;
 procedure tdesignwindow.dopopup(var info: mouseeventinfoty);
 
 var
- bo1,bo2,bo3: boolean;
+ bo1,bo2,bo3,bo4: boolean;
  item1: tmenuitem;
  ar1: msestringarty;
  ar2: componentarty;
  int1: integer;
  selectcomp: tcomponent;
+ comp1: tcomponent;
 begin
  with tformdesignerfo(fowner),popupme,menu do begin
   selectcomp:= nil;
@@ -1569,9 +1645,26 @@ begin
                                                       (fselections.count = 1);
   itembyname('bringtofro').enabled:= bo1;
   itembyname('sendtoba').enabled:= bo1;
-  
-  itembyname('iconify').enabled:= isdatasubmodule(selectcomp,false);
-  itembyname('deiconify').enabled:= isdatasubmodule(selectcomp,true);
+
+  bo3:= false;
+  bo4:= false;
+  for int1:= 0 to fselections.count - 1 do begin
+   comp1:= fselections[int1];
+   if not (comp1 is tmsedatamodule) or 
+          not (csinline in comp1.componentstate) then begin
+    bo3:= false;
+    bo4:= false;
+    break;
+   end;
+   if dmo_iconic in tmsedatamodule(comp1).options then begin
+    bo4:= true;
+   end
+   else begin
+    bo3:= true;
+   end;
+  end;
+  itembyname('iconify').enabled:= bo3;
+  itembyname('deiconify').enabled:= bo4;
   
   itembyname('settabord').enabled:= bo1 and 
           (twidget(fselections.items[0]).parentwidget.childrencount >= 2);
@@ -2788,16 +2881,28 @@ begin
 end;
 
 procedure tformdesignerfo.doiconify(const sender: TObject);
+var
+ int1: integer;
 begin
- with tdesignwindow(window),tmsedatamodule(fselections[0]) do begin
-  options:= options + [dmo_iconic];
+ with tdesignwindow(window) do begin
+  for int1:= 0 to fselections.count - 1 do begin
+   with tmsedatamodule(fselections[int1]) do begin
+    options:= options + [dmo_iconic];
+   end;
+  end;
  end;
 end;
 
 procedure tformdesignerfo.dodeiconify(const sender: TObject);
+var
+ int1: integer;
 begin
- with tdesignwindow(window),tmsedatamodule(fselections[0]) do begin
-  options:= options - [dmo_iconic];
+ with tdesignwindow(window) do begin
+  for int1:= 0 to fselections.count - 1 do begin
+   with tmsedatamodule(fselections[int1]) do begin
+    options:= options - [dmo_iconic];
+   end;
+  end;
  end;
 end;
 

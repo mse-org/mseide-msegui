@@ -7770,13 +7770,6 @@ begin
     canvas.remove(paintpos);
    end;
   end;
-  {
-  if (csdesigning in componentstate) and needsdesignframe then begin
-   canvas.dashes:= #2#3;
-   canvas.drawrect(makerect(0,0,rect1.cx-1,rect1.cy-1),cl_black);
-   canvas.dashes:= '';
-  end;
-  }
  end
  else begin
   updatewidgetregion;
