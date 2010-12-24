@@ -111,6 +111,8 @@ type
    procedure doinsertcomponent(const sender: TObject);
    procedure dotouch(const sender: TObject);
    procedure dosetcreationorder(const sender: TObject);
+   procedure doiconify(const sender: TObject);
+   procedure dodeiconify(const sender: TObject);
   private
    fdesigner: tdesigner;
    fform: twidget;
@@ -202,6 +204,7 @@ type
    fclickedcompbefore: tcomponent;
    fselectwidget: twidget;
    fselectcomp: tcomponent;
+   fclientsizevalid: boolean;
    procedure drawgrid(const canvas: tcanvas);
    procedure hidexorpic(const canvas: tcanvas);
    procedure showxorpic(const canvas: tcanvas);
@@ -219,7 +222,7 @@ type
    procedure dopaste(const usemousepos: boolean; const adata: string);
    procedure docopy(const noclear: boolean);
    procedure docut;
-   procedure recalcclientsize;
+   procedure clientsizechanged;
    procedure adjustchildcomponentpos(var apos: pointty);
    procedure readjustchildcomponentpos(var apos: pointty);
   protected
@@ -812,10 +815,17 @@ begin
  if (dist.x <> 0) or (dist.y <> 0) then begin
   for int1:= 0 to count - 1 do begin
    with itempo(int1)^,selectedinfo do begin
-    if fowner.iswidgetcomp(instance) then begin
-     with twidget(instance) do begin
-      if not nohandles then begin
+    if not nohandles then begin
+     if fowner.iswidgetcomp(instance) then begin
+      with twidget(instance) do begin
        size:= sizety(addpoint(pointty(size),dist));
+      end;
+     end
+     else begin
+      if isdatasubmodule(instance) then begin
+       with tmsedatamodule(instance) do begin
+        size:= sizety(addpoint(pointty(size),dist));
+       end;
       end;
      end;
     end;
@@ -848,7 +858,8 @@ begin
  end;
 end;
 
-procedure tformdesignerselections.externalcomponentchanged(const acomponent: tobject);
+procedure tformdesignerselections.externalcomponentchanged(
+                                                const acomponent: tobject);
 begin
  finfovalid:= false;
  if count > 0 then begin
@@ -1058,6 +1069,10 @@ end;
 procedure tdesignwindow.dobeforepaint(const canvas: tcanvas);
 begin
  hidexorpic(canvas);
+ if not fclientsizevalid then begin
+  tformdesignerfo(fowner).recalcclientsize;
+  fclientsizevalid:= true;
+ end;
  inherited;
 end;
 
@@ -1313,7 +1328,7 @@ begin
  finally
   fclipinitcomps:= false;
  end;
- recalcclientsize;
+ clientsizechanged;
 end;
 
 procedure tdesignwindow.doundelete;
@@ -1359,7 +1374,7 @@ begin
   deletecomponents;
  end;
  domodified;
- recalcclientsize;
+ clientsizechanged;
 end;
 
 procedure tdesignwindow.dispatchkeyevent(const eventkind: eventkindty;
@@ -1465,7 +1480,7 @@ begin
        end;
       end;
       fowner.invalidate;
-      recalcclientsize;
+      clientsizechanged;
      end;
     end;
    end;
@@ -1516,7 +1531,7 @@ end;
 procedure tdesignwindow.dopopup(var info: mouseeventinfoty);
 
 var
- bo1,bo2: boolean;
+ bo1,bo2,bo3: boolean;
  item1: tmenuitem;
  ar1: msestringarty;
  ar2: componentarty;
@@ -1554,6 +1569,10 @@ begin
                                                       (fselections.count = 1);
   itembyname('bringtofro').enabled:= bo1;
   itembyname('sendtoba').enabled:= bo1;
+  
+  itembyname('iconify').enabled:= isdatasubmodule(selectcomp,false);
+  itembyname('deiconify').enabled:= isdatasubmodule(selectcomp,true);
+  
   itembyname('settabord').enabled:= bo1 and 
           (twidget(fselections.items[0]).parentwidget.childrencount >= 2);
   itembyname('synctofo').enabled:= fselections.count > 0;
@@ -1616,9 +1635,9 @@ begin
  end;
 end;
 
-procedure tdesignwindow.recalcclientsize;
+procedure tdesignwindow.clientsizechanged;
 begin
- tformdesignerfo(fowner).recalcclientsize;
+ fclientsizevalid:= false;
 end;
 
 procedure tdesignwindow.dispatchmouseevent(var info: moeventinfoty;
@@ -1873,7 +1892,7 @@ begin
       ar_componentmove: begin
        if fselections.move(griddelta) then begin
         fowner.invalidate; //redraw handles
-        recalcclientsize;
+        clientsizechanged;
        end;
       end;
       ar_selectrect: begin
@@ -2127,7 +2146,7 @@ begin
  fdesigner.selectcomponent(component);
  fdesigner.deleteselection(true);
  domodified;
- recalcclientsize;
+ clientsizechanged;
 end;
 
 function tdesignwindow.form: twidget;
@@ -2281,6 +2300,9 @@ procedure tdesignwindow.ItemsModified(const ADesigner: IDesigner;
            const AItem: tobject);
 begin
  fselections.externalcomponentchanged(aitem);
+ if isdatasubmodule(aitem) then begin
+  clientsizechanged;
+ end;
 end;
 
 procedure tdesignwindow.componentnamechanging(const adesigner: idesigner;
@@ -2762,6 +2784,20 @@ begin
  with tdesignwindow(window) do begin
   twidget(fselections[0]).sendtoback;
   domodified;
+ end;
+end;
+
+procedure tformdesignerfo.doiconify(const sender: TObject);
+begin
+ with tdesignwindow(window),tmsedatamodule(fselections[0]) do begin
+  options:= options + [dmo_iconic];
+ end;
+end;
+
+procedure tformdesignerfo.dodeiconify(const sender: TObject);
+begin
+ with tdesignwindow(window),tmsedatamodule(fselections[0]) do begin
+  options:= options - [dmo_iconic];
  end;
 end;
 

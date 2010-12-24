@@ -7,6 +7,8 @@ object formdesignerfo: tformdesignerfo
   bounds_cx = 287
   bounds_cy = 300
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
   container.oncalcminscrollsize = calcscrollsize
   container.bounds = (
     0
@@ -86,7 +88,7 @@ object formdesignerfo: tformdesignerfo
   top = 180
   moduleclassname = 'tmseform'
   object popupme: tpopupmenu
-    menu.submenu.count = 22
+    menu.submenu.count = 24
     menu.submenu.items = <    
       item
         caption = 'Show objectinspector'
@@ -182,6 +184,18 @@ object formdesignerfo: tformdesignerfo
         onexecute = dosendtoback
       end    
       item
+        caption = 'Iconify'
+        name = 'iconify'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = doiconify
+      end    
+      item
+        caption = 'Deiconify'
+        name = 'deiconify'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = dodeiconify
+      end    
+      item
         caption = 'Set Tab Order'
         name = 'settabord'
         state = [as_localcaption, as_localonexecute]
@@ -199,19 +213,19 @@ object formdesignerfo: tformdesignerfo
         onexecute = dosyncfontheight
       end    
       item
+        caption = 'Revert to inherited'
+        name = 'revert'
+        state = [as_localcaption, as_localonexecute]
+        options = [mao_shortcutcaption, mao_asyncexecute]
+        onexecute = revertexe
+      end    
+      item
         options = [mao_separator, mao_shortcutcaption]
       end    
       item
         caption = 'Touch Form'
         state = [as_localcaption, as_localonexecute]
         onexecute = dotouch
-      end    
-      item
-        caption = 'Revert to inherited'
-        name = 'revert'
-        state = [as_localcaption, as_localonexecute]
-        options = [mao_shortcutcaption, mao_asyncexecute]
-        onexecute = revertexe
       end    
       item
         caption = 'Insert Submodule'

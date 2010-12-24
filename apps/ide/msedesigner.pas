@@ -484,7 +484,8 @@ procedure createbackupfile(const newname,origname: filenamety;
                       var backupcreated: boolean; const backupcount: integer);
            
 function designer: tdesigner;
-function isdatasubmodule(const acomponent: tcomponent): boolean;
+function isdatasubmodule(const acomponent: tobject;
+                               const iconified: boolean = false): boolean;
 
 implementation
 
@@ -522,10 +523,12 @@ begin
             not(cs_subcompref in tmsecomponent1(acomp).fmsecomponentstate);
 end;
 
-function isdatasubmodule(const acomponent: tcomponent): boolean;
+function isdatasubmodule(const acomponent: tobject;
+                            const iconified: boolean = false): boolean;
 begin
- result:= (acomponent <> nil) and (csinline in acomponent.componentstate) and 
-                                   (acomponent is tmsedatamodule);
+ result:= (acomponent <> nil) and (acomponent is tmsedatamodule) and 
+            (csinline in tmsedatamodule(acomponent).componentstate) and
+            (iconified = (dmo_iconic in tmsedatamodule(acomponent).options));
 end;
 
 function issubprop(const obj1: tobject): boolean;

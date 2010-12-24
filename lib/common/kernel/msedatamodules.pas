@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,7 +16,7 @@ uses
  classes,mseclasses,msetypes,msegraphutils,msestatfile,mseevent,mseapplication;
  
 type
- datamoduleoptionty = (dmo_autoreadstat,dmo_autowritestat);
+ datamoduleoptionty = (dmo_autoreadstat,dmo_autowritestat,dmo_iconic);
  datamoduleoptionsty = set of datamoduleoptionty;
 const
  defaultdatamoduleoptions = [dmo_autoreadstat,dmo_autowritestat];
@@ -49,7 +49,12 @@ type
    procedure setbounds_x(const avalue: integer);
    function getbounds_y: integer;
    procedure setbounds_y(const avalue: integer);
+   procedure setbounds_cx(const avalue: integer);
+   procedure setbounds_cy(const avalue: integer);
+   procedure setsize(const avalue: sizety);
+   procedure setoptions(const avalue: datamoduleoptionsty);
   protected
+   procedure boundschanged;
    procedure doterminated(const sender: tobject);
    procedure doterminatequery(var terminate: boolean);
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
@@ -67,14 +72,14 @@ type
    destructor destroy; override;
    procedure reload;
    procedure beforedestruction; override;
-   property size: sizety read fsize write fsize;
+   property size: sizety read fsize write setsize;
   published
-   property options: datamoduleoptionsty read foptions write foptions 
+   property options: datamoduleoptionsty read foptions write setoptions 
                            default defaultdatamoduleoptions;
    property bounds_x: integer read getbounds_x write setbounds_x stored false;
    property bounds_y: integer read getbounds_y write setbounds_y stored false;
-   property bounds_cx: integer read fsize.cx write fsize.cx;
-   property bounds_cy: integer read fsize.cy write fsize.cy;
+   property bounds_cx: integer read fsize.cx write setbounds_cx;
+   property bounds_cy: integer read fsize.cy write setbounds_cy;
    
    property statfile: tstatfile read fstatfile write setstatfile;
    property oncreate: notifyeventty read foncreate write foncreate;
@@ -282,6 +287,11 @@ begin
  end;
 end;
 
+procedure tmsedatamodule.boundschanged;
+begin
+ designchanged;
+end;
+
 function tmsedatamodule.getbounds_x: integer;
 begin
  result:= longrec(designinfo).lo;
@@ -292,8 +302,11 @@ var
  rec: longrec;
 begin
  rec:= longrec(designinfo);
- rec.lo:= avalue;
- designinfo:= longint(rec);
+ if rec.lo <> avalue then begin
+  rec.lo:= avalue;
+  designinfo:= longint(rec);
+  boundschanged;
+ end;
 end;
 
 function tmsedatamodule.getbounds_y: integer;
@@ -306,8 +319,46 @@ var
  rec: longrec;
 begin
  rec:= longrec(designinfo);
- rec.hi:= avalue;
- designinfo:= longint(rec);
+ if rec.hi <> avalue then begin
+  rec.hi:= avalue;
+  designinfo:= longint(rec);
+  boundschanged;
+ end;
+end;
+
+procedure tmsedatamodule.setbounds_cx(const avalue: integer);
+begin
+ if fsize.cx <> avalue then begin
+  fsize.cx:= avalue;
+  boundschanged;
+ end;
+end;
+
+procedure tmsedatamodule.setbounds_cy(const avalue: integer);
+begin
+ if fsize.cy <> avalue then begin
+  fsize.cy:= avalue;
+  boundschanged;
+ end;
+end;
+
+procedure tmsedatamodule.setsize(const avalue: sizety);
+begin
+ if (fsize.cx <> avalue.cx) or (fsize.cy <> avalue.cy) then begin
+  fsize:= avalue;
+  boundschanged;
+ end;
+end;
+
+procedure tmsedatamodule.setoptions(const avalue: datamoduleoptionsty);
+var
+ optionsbefore: datamoduleoptionsty;
+begin
+ optionsbefore:= foptions;
+ foptions:= avalue;
+ if (dmo_iconic in avalue) xor (dmo_iconic in optionsbefore) then begin
+  boundschanged;
+ end;
 end;
 
 end.
