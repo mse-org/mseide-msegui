@@ -342,6 +342,7 @@ procedure tmainfo.mainfooncreate(const sender: tobject);
 begin
  designer.ongetmodulenamefile:= {$ifdef FPC}@{$endif}dofindmodulebyname;
  designer.ongetmoduletypefile:= {$ifdef FPC}@{$endif}dofindmodulebytype;
+
  designer.objformat:= of_fp;
  componentpalettefo.updatecomponentpalette(true);
  designnotifications.Registernotification(idesignnotification(self));
@@ -459,6 +460,7 @@ var
      end
      else begin
       po1:= nil;
+      application.handleexception;
      end;
     end;
    end;

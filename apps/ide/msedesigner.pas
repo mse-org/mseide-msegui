@@ -95,6 +95,7 @@ type
   referencedmodules: stringarty;
   methodtablebefore: pointer;
   resolved: boolean;
+  loadingstream: tstream;
  end;
  pmoduleinfoty = ^moduleinfoty;
  moduleinfopoarty = array of pmoduleinfoty;
@@ -148,6 +149,7 @@ type
    function findform(aform: tmseform): pmoduleinfoty;
    function removemoduleinfo(po: pmoduleinfoty): integer;
    procedure componentmodified(const acomponent: tobject);
+   procedure freeloadingstreams;
 
   public
    constructor create(adesigner: tdesigner); reintroduce;
@@ -317,6 +319,7 @@ type
    fforallmethpropsinfo: forallmethpropinfoty;
    fcreatecomponenttag: integer; //incremented by createcoponent
    ffindcompclasstag: integer;       //stamp of createcomponenttag
+   fcheckfixups: moduleinfopoarty;
    function formfiletoname(const filename: msestring): msestring;
    procedure findmethod(Reader: TReader; const aMethodName: string;
                    var Address: Pointer; var Error: Boolean);
@@ -477,7 +480,6 @@ type
                    write fongetmodulenamefile;
    property ongetmoduletypefile: getmoduletypeeventty read fongetmoduletypefile
                    write fongetmoduletypefile;
-
  end;
 
 procedure createbackupfile(const newname,origname: filenamety;
@@ -779,6 +781,9 @@ begin
   ancestor:= nil;
  end;
  inherited;
+ if comp <> nil then begin
+  removefixupreferences(comp,'');
+ end;
  comp.Free;
 end;
 
@@ -799,6 +804,9 @@ begin
  if po1 <> nil then begin
   comp:= po1^.ancestor;
   po1^.ancestor:= nil;
+  if comp <> nil then begin
+   removefixupreferences(comp,'');
+  end;  
   comp.Free;  
   po1^.ancestor:= fdesigner.copycomponent(amodule,amodule);
 //  po1^.ancestor:= fdesigner.copycomponent(amodule,nil);
@@ -1910,7 +1918,9 @@ end;
 destructor tmoduleinfo.destroy;
 begin
  inherited;
+ removeitem(pointerarty(fdesigner.fcheckfixups),@info);
  with info do begin
+  freeandnil(loadingstream);
   freeandnil(methods);
   freeandnil(components);
   freeandnil(designform);
@@ -2230,6 +2240,18 @@ begin
     break;
    end;
   end;
+ end;
+end;
+
+procedure tmodulelist.freeloadingstreams;
+var
+ int1: integer;
+ po1: ppointeraty;
+begin
+ po1:= datapo;
+ for int1:= 0 to count - 1 do begin
+  freeandnil(tmoduleinfo(
+              iobjectlink(po1^[int1]).getinstance).info.loadingstream);
  end;
 end;
 
@@ -2558,6 +2580,7 @@ begin
   po1:= getinheritedmodule(aclassname);
   if po1 <> nil then begin
    fsubmoduleinfopo:= po1;  //used in createcomponent
+   ffindcompclasstag:= fcreatecomponenttag+1;
    componentclass:= tcomponentclass(po1^.instance.classtype);
   end;
  end;
@@ -3060,15 +3083,17 @@ begin
 end;
 
 function tdesigner.copycomponent(const source: tmsecomponent;
-                            const root: tmsecomponent): tmsecomponent;
+         const root: tmsecomponent): tmsecomponent;
 var
- po1: pmoduleinfoty;
+ po1,po2: pmoduleinfoty;
  ar1: msecomponentarty;
  comp1: tmsecomponent;
  int1: integer;
  stream1: tmemorystream;
+ stream2: tstream;
  reader: treader;
  writer: twriter;
+ posbefore: integer;
  
 begin
  comp1:= source;
@@ -3107,17 +3132,26 @@ begin
   stream1:= tmemorystream.create;
   try
    for int1:= high(ar1)-1 downto 0 do begin
-    stream1.clear;
-    writer:= twriter.create(stream1,4096);
-    try
-     writer.onfindancestor:= {$ifdef FPC}@{$endif}findancestor;
-     writer.writedescendent(ar1[int1],ar1[int1+1]);
-     result.name:= ar1[int1].name;
-    finally
-     writer.free;
+    stream2:= nil;
+    po2:= fmodules.findmodule(root);
+    if po2 <> nil then begin
+     stream2:= po2^.loadingstream; //needs possibly fixup
     end;
-    stream1.position:= 0;
-    reader:= treader.create(stream1,4096);
+    if stream2 = nil then begin
+     stream2:= stream1;
+     stream1.clear;
+     writer:= twriter.create(stream1,4096);
+     try
+      writer.onfindancestor:= {$ifdef FPC}@{$endif}findancestor;
+      writer.writedescendent(ar1[int1],ar1[int1+1]);
+      result.name:= ar1[int1].name;
+     finally
+      writer.free;
+     end;
+    end;
+    posbefore:= stream2.position;
+    stream2.position:= 0;
+    reader:= treader.create(stream2,4096);
     try
      reader.onfindcomponentclass:= {$ifdef FPC}@{$endif}findcomponentclass;
      reader.oncreatecomponent:= {$ifdef FPC}@{$endif}createcomponent;
@@ -3125,6 +3159,7 @@ begin
      reader.readrootcomponent(result);
     finally
      reader.free;
+     stream2.position:= posbefore;
     end;
    end;
   finally
@@ -3459,6 +3494,7 @@ procedure tdesigner.moduledestroyed(const amodule: pmoduleinfoty);
 var
  int1: integer;
 begin
+ removefixupreferences(amodule^.instance,'');
  if amodule = factmodulepo then begin
   setactivemodule(nil);
  end;
@@ -3774,21 +3810,24 @@ var
  procedure dodelete;
  var
   int1: integer;
+  desfo: tmseform;
  begin
   removefixupreferences(module,'');
   for int1:= high(floadedsubmodules) downto loadedsubmodulesindex+1 do begin
    removefixupreferences(floadedsubmodules[int1],'');
   end;
-//  fmodules.delete(fmodules.findmodule(result)); //remove added module
-  moduleinfo.free;
-  module.Free;
+  desfo:= result^.designform;
+  moduleinfo.free; //frees module by designform
+  if desfo = nil then begin
+   module.Free;
+  end;
   module:= nil;
   result:= nil;
  end;
  
 var
  moduleclassname1,modulename,
- designmoduleclassname{,inheritedmoduleclassname}: string;
+ designmoduleclassname: string;
  stream1: ttextstream;
  stream2: tmemorystream;
  reader: treader;
@@ -3805,6 +3844,9 @@ var
  str1: string;
  fixupmodule: string;
  lastmissed: string;
+ comp1: tcomponent;
+ deletefixups: boolean;
+ exp1: exception;
 
 begin //loadformfile
  filename:= filepath(filename);
@@ -3814,9 +3856,11 @@ begin //loadformfile
   if bo1 then begin
    exit; //canceled
   end;
+  exp1:= nil;
   stream1:= ttextstream.Create(filename,fm_read);
   designmoduleclassname:= '';
-//  inheritedmoduleclassname:= '';
+  rootnames:= tstringlist.create;
+  rootinstancenames:= tstringlist.create;
   try
    stream2:= tmemorystream.Create;
    try
@@ -3863,6 +3907,7 @@ begin //loadformfile
        designmoduleclassname);
        fmodules.add(moduleinfo);
        result:= @moduleinfo.info;
+       result^.loadingstream:= stream2;
        module:= result^.instance;
        stream2.Position:= 0;
        reader:= treader.Create(stream2,4096);
@@ -3881,8 +3926,6 @@ begin //loadformfile
          reader.ReadrootComponent(module);
          doswapmethodpointers(module,true);
          result^.components.assigncomps(module);
-         rootnames:= tstringlist.create;
-         rootinstancenames:= tstringlist.create;
          getfixupreferencenames(module,rootnames);
          setlength(result^.referencedmodules,rootnames.Count);
          for int1:= 0 to high(result^.referencedmodules) do begin
@@ -3891,10 +3934,20 @@ begin //loadformfile
          dofixup;
          fixupmodule:= '';
          lastmissed:= '';
+         deletefixups:= true;
          while true do begin
           rootnames.clear;
           rootinstancenames.clear;
           getfixupreferencenames(module,rootnames);
+          for int1:= rootnames.count - 1 downto 0 do begin
+           comp1:= fmodules.findmoduleinstancebyname(rootnames[int1]);
+           if (comp1 <> nil) and (comp1 <> module) and 
+                                (csloading in comp1.componentstate) then begin
+            deletefixups:= false;
+            additem(pointerarty(fcheckfixups),result);
+            rootnames.delete(int1); //there is hope
+           end;
+          end;
           if rootnames.Count > 0 then begin
            if assigned(fongetmodulenamefile) then begin
             try
@@ -3937,7 +3990,7 @@ begin //loadformfile
            break;
           end;
          end;
-         if module <> nil then begin
+         if (module <> nil) and deletefixups then begin
           removefixupreferences(module,'');
          end;
          if rootnames.Count > 0 then begin
@@ -3945,33 +3998,26 @@ begin //loadformfile
           for int1:= 1 to rootnames.Count - 1 do begin
            wstr1:= wstr1 + ','+rootnames[int1];
           end;
-          rootnames.free;
-          rootinstancenames.free;
           raise exception.Create('Unresolved reference(s) to '+lastmissed+lineend+
           'Module(s): '+wstr1+'.');
          end;
-         rootnames.free;
-         rootinstancenames.free;
          result^.resolved:= true;
         except
+         freeandnil(reader); //used stream will be freed
          dodelete;
          raise;
         end;
        finally
+        reader.free;
         floadingmodulepo:= loadingmodulepobefore;
         setlength(floadedsubmodules,loadedsubmodulesindex+1);
                      //remove info
         dec(fformloadlevel);
-        if fformloadlevel = 0 then begin
-         removefixupreferences(nil,'');
-        end;
         unlockfindglobalcomponent;
-        reader.free;
        end;
        if result <> nil then begin
         result^.designform:= createdesignform(self,result);
-        checkmethodtypes(result,true{,nil});
- //       showformdesigner(result);
+        checkmethodtypes(result,true);
         result^.modified:= false;
        end;
       finally
@@ -3989,9 +4035,46 @@ begin //loadformfile
      end;
     end;
    finally
-    stream2.Free;
+    if fformloadlevel = 0 then begin
+     fmodules.freeloadingstreams;
+     while high(fcheckfixups) >= 0 do begin
+      rootnames.clear;
+      with fcheckfixups[high(fcheckfixups)]^ do begin
+       getfixupreferencenames(instance,rootnames);
+       if rootnames.count > 0 then begin
+        designnotifications.showobjecttext(
+                                  idesigner(self),filename,backupcreated);
+        if exp1 = nil then begin
+         rootinstancenames.clear;      
+         getfixupinstancenames(instance,rootnames[0],rootinstancenames);
+         if rootinstancenames.count > 0 then begin
+          str1:= '.'+rootinstancenames[0];
+         end
+         else begin
+          str1:= '';
+         end;
+         exp1:= exception.create(
+             'Can not read formfile "'+filename+'".'+lineend+
+             'Unresolved reference(s) to '+rootnames[0]+str1+'.');
+        end;
+        instance.free;
+        fmodules.removemoduleinfo(fcheckfixups[high(fcheckfixups)]);
+       end
+       else begin
+        setlength(fcheckfixups,high(fcheckfixups));
+       end;
+      end;
+     end;
+     removefixupreferences(nil,'');
+     if exp1 <> nil then begin
+      dodelete;
+      raise exp1;
+     end;
+    end;
    end;
   finally
+   rootnames.free;
+   rootinstancenames.free;
    stream1.Free;
   end;
  end;
