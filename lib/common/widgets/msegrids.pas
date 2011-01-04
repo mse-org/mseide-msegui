@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -708,6 +708,7 @@ type
  tcustomstringcol = class(tdatacol)
   private
    ftextflagsactive: textflagsty;
+   fpasswordchar: msechar;
    fonsetvalue: setstringeventty;
    fondataentered: notifyeventty;
    foncopytoclipboard: updatestringeventty;
@@ -718,6 +719,7 @@ type
    procedure settextflagsactive(const avalue: textflagsty);
    function geteditpos: gridcoordty;
    procedure seteditpos(const avalue: gridcoordty);
+   procedure setpasswordchar(const avalue: msechar);
   protected
    ftextinfo: drawtextinfoty;
    foptionsedit: stringcoleditoptionsty;
@@ -757,6 +759,8 @@ type
                write foptionsedit default defaultstringcoleditoptions;
    property optionsedit1: optionsedit1ty read foptionsedit1
                              write foptionsedit1 default defaultoptionsedit1;
+   property passwordchar: msechar read fpasswordchar 
+                                    write setpasswordchar default #0;
    property font;
    property datalist: tstringcoldatalist read getdatalist write setdatalist;
    property editpos: gridcoordty read geteditpos write seteditpos;
@@ -774,6 +778,7 @@ type
    property focusrectdist;
    property textflags;
    property textflagsactive;
+   property passwordchar;
    property optionsedit;
    property optionsedit1;
    property font;
@@ -6235,6 +6240,14 @@ begin
  end;
 end;
 
+procedure tcustomstringcol.setpasswordchar(const avalue: widechar);
+begin
+ if fpasswordchar <> avalue then begin
+  fpasswordchar:= avalue;
+  changed;
+ end;
+end;
+
 procedure tcustomstringcol.drawcell(const canvas: tcanvas);
 var
  int1: integer;
@@ -6250,6 +6263,9 @@ begin
    ftextinfo.clip.cy:= rect.cy;
    ftextinfo.text.text:= getrowtext(cell.row);
    updatedisptext(ftextinfo.text.text);
+   if passwordchar <> #0 then begin
+    ftextinfo.text.text:= charstring(passwordchar,length(ftextinfo.text.text));
+   end;
    if calcautocellsize then begin
     textrect(canvas,ftextinfo);
     int1:= rect.cx - innerrect.cx + ftextinfo.res.cx;
@@ -14238,6 +14254,7 @@ begin
                     fdatacols[acell.col].rowfont(acell.row));
  feditor.textflags:= col1.textflags;
  feditor.textflagsactive:= col1.ftextflagsactive;
+ feditor.passwordchar:= col1.passwordchar;
  if focusin then begin
   feditor.dofocus;
  end;
