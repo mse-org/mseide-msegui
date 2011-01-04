@@ -1594,7 +1594,8 @@ type
                   const acommand: string; const astream: ttextstream;
                   const anilstream: boolean; const onafterrender: reporteventty);
    procedure unregisterchildwidget(const child: twidget); override;
-   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
+   procedure getchildren1(const proc: tgetchildproc; 
+                                     const root: tcomponent); override;
    procedure defineproperties(filer: tfiler); override;
    procedure nextpage(const acanvas: tcanvas);
    procedure doprogress;
@@ -6419,7 +6420,8 @@ begin
  internalrender(aprinter.canvas,aprinter,'',nil,true,onafterrender);
 end;
 
-procedure tcustomreport.getchildren(proc: tgetchildproc; root: tcomponent);
+procedure tcustomreport.getchildren1(const proc: tgetchildproc;
+                                                const root: tcomponent);
 var
  int1: integer;
  comp1: tcomponent;

@@ -855,7 +855,7 @@ var
  textstream: ttextstream;
  int1: integer;
  component: tcomponent;
- writer: twriter;
+ writer: twritermse;
  comp1,comp2: tcomponent;
  po1: pointer;
  modulepo: pmoduleinfoty;
@@ -868,7 +868,7 @@ begin
    for int1:= 0 to count -1 do begin
     component:= items[int1];
     if not isembedded(component) then begin
-     writer:= twriter.Create(binstream,4096);
+     writer:= twritermse.Create(binstream,4096);
      comp1:= tcomponent.create(nil);
      try
       modulepo:= designer.modules.findmodulebycomponent(component);
@@ -920,7 +920,7 @@ var
  co1: tcomponent;
  binstream: tmemorystream;
  textstream: ttextstream;
- writer: twriter;
+ writer: twritermse;
 begin
  result:= nil;
  for int1:= 0 to count - 1 do begin
@@ -936,7 +936,7 @@ begin
      parent:= nil;
     end;
     binstream:= tmemorystream.create;
-    writer:= twriter.create(binstream,4096);
+    writer:= twritermse.create(binstream,4096);
     textstream:= ttextstream.create;
     try
      writer.root:= co1.owner;
@@ -1485,7 +1485,7 @@ end;
 procedure checkreversedcomponentpos;
 var
  comp1: tcomponent;
- writer1: twriter;
+ writer1: twritermse;
  reader1: treader;
  stream1: tmemorystream;
  int1: integer;
@@ -1494,7 +1494,7 @@ begin
  comp1:= tcomponent.create(nil);
  comp1.designinfo:= 1;
  stream1:= tmemorystream.create;
- writer1:= twriter.create(stream1,256);
+ writer1:= twritermse.create(stream1,256);
  twriter1(writer1).writeproperties(comp1);
  writer1.free;
  stream1.position:= 0;

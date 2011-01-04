@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -349,6 +349,7 @@ type
    procedure executeificommand(var acommand: ificommandcodety); virtual;
 {$endif}   
 
+   function getancestorclassname: string;
    function getmsecomponentstate: msecomponentstatesty;
    function getobjectlinker: tobjectlinker;
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
@@ -397,6 +398,10 @@ type
    procedure componentevent(const event: tcomponentevent); virtual;
    procedure doasyncevent(var atag: integer); virtual;
    procedure doafterload; virtual;
+
+   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
+   procedure getchildren1(const proc: tgetchildproc;
+                                      const root: tcomponent); virtual;
   public
    destructor destroy; override;
    procedure updateskin(const recursive: boolean = false); virtual;
@@ -590,15 +595,42 @@ type
    flocked: integer;
    procedure ancestornotfound(Reader: TReader; const ComponentName: string;
                    ComponentClass: TPersistentClass; var Component: TComponent);
-//   procedure findmethod(Reader: TReader; const MethodName: string;
-//      var Address: Pointer; var Error: Boolean);
-         //does not work because method.data is not writable
   public
    function findmodulebyname(const name: string): tcomponent;
    procedure lock;
    procedure unlock;
  end;
 
+ getchildreneventty = procedure (const sender: tmsecomponent;
+                const proc: tgetchildproc; const root: tcomponent) of object;
+
+ twritermse = class(twriter)
+  private
+   fgetchildrenbefore: getchildreneventty;
+   fancestorlookuplevel: integer;
+   procedure DetermineAncestor(Component : TComponent);
+   procedure AddToAncestorList(Component: TComponent);
+   procedure DoFindAncestor(Component : TComponent);
+  protected
+   frootrootancestor: tcomponent;
+   frootroot: tcomponent;
+   function rootcompname(const acomp: tcomponent;
+                             const aroot: tcomponent): string;
+   function rootcompname(const acomp: tcomponent;
+                             arootlevel: integer): string; overload;
+   procedure dogetchildren(const sender: tmsecomponent;
+                             const proc: tgetchildproc; const aroot: tcomponent);
+   procedure WriteChildren(Component : TComponent);
+   procedure WriteComponentData(Instance: TComponent);
+  public
+   constructor create(stream: tstream; bufsize: integer);
+   destructor destroy; override;
+   procedure WriteComponent(Component: TComponent);
+   procedure writedescendent(const aroot: tcomponent;
+                                       const aancestor: tcomponent);
+   procedure writerootcomponent(aroot: tcomponent);
+ end;
+ 
  setsplitpairty = record 
                    oldenum,newenum: string
                   end;
@@ -617,7 +649,9 @@ function getnumberedname(const acomp: tcomponent;
                                      const namebase: string): string;
 function rootcomponent(const acomponent: tcomponent): tcomponent;
 procedure setcomponentorder(const owner: tcomponent; const anames: msestringarty);
-
+function getcomponentchildren(const acomp: tcomponent;
+           const aroot: tcomponent; 
+           const nestedowners: boolean = false): componentarty;
 function getpropinfoar(const obj: tobject): propinfopoarty; overload;
 function getpropinfoar(const atypeinfo: ptypeinfo): propinfopoarty; overload;
 
@@ -742,10 +776,9 @@ type
  skineventty = procedure(const ainfo: skininfoty) of object;
 var
  oninitskinobject: skineventty;
-// oninitskinobjectdesign: skineventty;
-// onremoveskinobject: skineventty;
-// onremoveskinobjectdesign: skineventty;
- 
+threadvar
+ onstreaminggetchildren: getchildreneventty;
+  
 {$ifdef mse_fpc_2_4_3}
 function getcomponentlist(const acomponent: tcomponent): tfplist;
 {$else}
@@ -758,6 +791,15 @@ procedure clearpastedcomponents;
 procedure addpastedcomponentname(const acomp: tcomponent);
 function findpastedcomponent(const origname: string): tcomponent;
 function findpastedcomponentname(const comp: tcomponent): string;
+
+{$ifdef mse_debug}
+procedure dumpcomponent(const acomp: tcomponent; const atext: string = '');
+procedure dumpstreamcomponent(const acomp: tcomponent; const atext: string = '');
+procedure debugstreamout(const stream: tstream; const atext: string);
+procedure debugbinstreamout(const acomp,aancestor: tcomponent; 
+             const aonfindancestor: tfindancestorevent; const atext: string);
+function debugcompname(const acomponent: tcomponent): string;
+{$endif}
 
 type
 {$ifdef FPC}
@@ -787,12 +829,18 @@ type
     FLoaded: TList;
   end;
  {$endif}
-  TWritercracker = class(TFiler)
+  TWritercracker = class(TFilercracker)
   public
     FDriver: TAbstractObjectWriter;
     FDestroyDriver: Boolean;
     FRootAncestor: TComponent;
     FPropPath: String;
+    FAncestors: TStringList;
+    FAncestorPos: Integer;
+    FCurrentPos: Integer;
+    FOnFindAncestor: TFindAncestorEvent;
+    FOnWriteMethodProperty: TWriteMethodPropertyEvent;
+    FOnWriteStringProperty:TReadWriteStringPropertyEvent;
   end;
  {$ifdef mse_fpc_2_4_3}
   TComponentcracker = class(TPersistent{,IUnknown,IInterfaceComponentReference})
@@ -865,7 +913,12 @@ uses
 {$ifdef mswindows}
  windows,
 {$endif}
- msestream,msesys,msedatalist,msedatamodules,rtlconsts;
+{$ifdef mse_debug}
+ mseobjecttext,
+{$endif}
+ msestream,msesys,msedatalist,msedatamodules,rtlconsts,msesysutils,
+ msestreaming;
+ 
 type
  tpersistent1 = class(tpersistent);
  tcomponent1 = class(tcomponent);
@@ -907,11 +960,94 @@ type
    procedure notification(acomponent: tcomponent; operation: toperation); override;
  end;
 
+ trefreshwriter = class(twritermse)
+  protected
+ end;
+ 
 var
  objectdatalist: tobjectdatainfolist;
  fmodules: tmodulelist;
  floadedlist: tloadedlist;
  fmodulestoregister: msecomponentarty;
+
+{$ifdef mse_debug}
+function debugcompname(const acomponent: tcomponent): string;
+begin
+ if acomponent = nil then begin
+  result:= 'NIL';
+ end
+ else begin
+  result:= acomponent.name;
+ end;
+end;
+
+procedure dumpcomponent(const acomp: tcomponent; const atext: string = '');
+var
+ indent: string;
+ 
+ procedure dodump(const acomp: tcomponent);
+ var
+  int1: integer;
+  str1: string;
+ begin
+  str1:= settostring(ptypeinfo(typeinfo(tcomponentstate)),
+               integer(tintegerset(acomp.componentstate)),true);
+  debugwriteln(indent+acomp.name+' '+str1);
+  indent:= indent+' ';
+  for int1:= 0 to acomp.componentcount-1 do begin
+   dodump(acomp.components[int1]);
+  end;
+  setlength(indent,length(indent)-1);
+ end;
+ 
+begin
+ if atext = '' then begin
+  debugwriteln('*dumpcomp')
+ end
+ else begin
+  debugwriteln(atext);
+ end;
+ dodump(acomp);
+end;
+
+procedure debugstreamout(const stream: tstream; const atext: string);
+var
+ teststream: ttextstream;
+begin
+ debugwriteln(atext);
+ teststream:= ttextstream.create;
+ stream.position:= 0;
+ teststream.size:= 0;
+ objectbinarytotextmse(stream,teststream);
+ teststream.position:= 0;
+ teststream.writetotext(output);
+ teststream.free;
+ flush(output);
+end;
+
+procedure debugbinstreamout(const acomp,aancestor: tcomponent;
+                            const aonfindancestor: tfindancestorevent; const atext: string);
+var
+ stream1: tmemorystream;
+ writer1: twritermse;
+begin
+ stream1:= tmemorystream.create;
+ writer1:= twritermse.create(stream1,1024);
+ writer1.onfindancestor:= aonfindancestor;
+// writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
+ writer1.writedescendent(acomp,aancestor);
+ writer1.free;
+ debugstreamout(stream1,atext);
+ stream1.free;
+end;
+
+procedure dumpstreamcomponent(const acomp: tcomponent; const atext: string = '');
+begin
+ debugbinstreamout(acomp,nil,nil,atext);
+end;
+
+{$endif}
+
 
 procedure componentexception(const acomponent: tcomponent;
                                    const atext: msestring);
@@ -1033,15 +1169,19 @@ end;
 
 procedure initinline(const acomponent: tcomponent);
                  //sets inline, resets ancestor, sets ancestor of children
+                 //clears inline of children
 var
  int1: integer;
+ comp1: tcomponent;
 begin
  with tcomponentcracker(acomponent) do begin
   exclude(fcomponentstate,csancestor);
   include(fcomponentstate,csinline);   
  end; 
  for int1:= 0 to acomponent.componentcount - 1 do begin
-  tcomponent1(acomponent.components[int1]).setancestor(true);
+  comp1:= acomponent.components[int1];
+  tcomponent1(comp1).setancestor(true);
+//  clearinline(comp1);
  end;
 end;
 
@@ -1290,8 +1430,10 @@ end;
 function rootcomponent(const acomponent: tcomponent): tcomponent;
 begin
  result:= acomponent;
- while result.owner <> nil do begin
-  result:= result.owner;
+ if result <> nil then begin
+  while result.owner <> nil do begin
+   result:= result.owner;
+  end;
  end;
 end;
 
@@ -1307,6 +1449,78 @@ begin
    add(comp1);
   end;
  end; 
+end;
+
+{ trefreshwriter }
+
+type
+ tgetcomponentchildren = class
+  private
+   fcomp: tcomponent;
+   froot: tcomponent;
+   fnestedowners: boolean;
+   fchildren: componentarty;
+   fcount: integer;
+   function getchildrenar: componentarty;
+  protected
+   procedure childproc(child: tcomponent);
+  public
+   constructor create(const acomp: tcomponent; const aroot: tcomponent;
+                            const nestedowners: boolean);
+   property children: componentarty read getchildrenar;
+ end;
+
+{ tgetcomponentchildren }
+
+constructor tgetcomponentchildren.create(const acomp: tcomponent;
+      const aroot: tcomponent; const nestedowners: boolean = false);
+begin
+ fcomp:= acomp;
+ froot:= aroot;
+ fnestedowners:= nestedowners;
+end;
+
+function tgetcomponentchildren.getchildrenar: componentarty;
+var
+ comp1: tcomponent;
+begin
+ fchildren:= nil;
+ fcount:= 0;
+ if froot <> nil then begin
+  tcomponent1(fcomp).getchildren(@childproc,froot);
+ end;
+ if fnestedowners then begin
+  comp1:= fcomp;
+  while (comp1 <> froot) and (comp1 <> nil) do begin
+   tcomponent1(fcomp).getchildren(@childproc,comp1);
+   comp1:= comp1.owner;
+  end;
+ end;
+ setlength(fchildren,fcount);
+ result:= fchildren;
+end;
+
+procedure tgetcomponentchildren.childproc(child: tcomponent);
+begin
+ additem(pointerarty(fchildren),child,fcount);
+end;
+
+function getcomponentchildren(const acomp: tcomponent;
+                const aroot: tcomponent;
+                const nestedowners: boolean = false): componentarty;
+var
+ obj: tgetcomponentchildren;
+ ev1: getchildreneventty; 
+begin
+ ev1:= onstreaminggetchildren;
+ try
+  onstreaminggetchildren:= nil;
+  obj:= tgetcomponentchildren.create(acomp,aroot,nestedowners);
+  result:= obj.children;
+  obj.free;
+ finally
+  onstreaminggetchildren:= ev1;
+ end;
 end;
 
 function getlinkedcomponents(const acomponent: tcomponent): componentarty;
@@ -1391,7 +1605,7 @@ function copycomponent(const source: tcomponent; const aowner: tcomponent = nil;
  
 var
  stream: tmemorystream;
- writer: twriter;
+ writer: twritermse;
  reader: treader;
  {$ifdef mse_debugcopycomponent}
  debugstream: ttextstream;
@@ -1406,7 +1620,7 @@ begin
   result.Create(aowner);
   stream:= tmemorystream.Create;
   try
-   writer:= twriter.Create(stream,4096);
+   writer:= twritermse.Create(stream,4096);
    try
     writer.OnFindAncestor:= onfindancestor;
     writer.Writerootcomponent(source);
@@ -1419,6 +1633,7 @@ begin
    objectbinarytotextmse(stream,debugstream);
    debugstream.position:= 0;
    writeln(output,'***copycomponent source');
+   dumpcomponent(source);
    debugstream.writetotext(output);
    flush(output);
   {$endif}
@@ -1441,7 +1656,7 @@ begin
    end;
  {$ifdef mse_debugcopycomponent}
    stream.clear;
-   writer:= twriter.Create(stream,4096);
+   writer:= twritermse.Create(stream,4096);
    writer.Writerootcomponent(result);
    writer.Free;
    stream.position:= 0;
@@ -1449,6 +1664,7 @@ begin
    objectbinarytotextmse(stream,debugstream);
    debugstream.position:= 0;
    writeln(output,'***copycomponent dest');
+   dumpcomponent(result);
    debugstream.writetotext(output);
    flush(output);
    debugstream.free;
@@ -1465,210 +1681,6 @@ begin
  end;
 end;
 
-const
- skipmark = 'h71%z/ur';
- 
-type 
- trefresheventhandler = class(tcomponent)
-  private
-   fcomponentar: componentarty;
-   procedure onsetname(reader: treader; component: tcomponent; var aname: string);
-   procedure onerror(reader: treader; const message: string; var handled: boolean);
-  protected
-   procedure notification(acomponent: tcomponent; operation: toperation);
-                               override;        
-  public
-   destructor destroy; override;
- end;
-
- trefreshexception = class(exception)
- end;
-  
-destructor trefresheventhandler.destroy;
-var
- int1: integer;
-begin
- for int1:= 0 to high(fcomponentar) do begin
-  fcomponentar[int1].free; //FPC does not free the component
- end;
- inherited;
-end;
-
-procedure trefresheventhandler.notification(acomponent: tcomponent; operation: toperation);
-begin
- if (operation = opremove) then begin
-  removeitem(pointerarty(fcomponentar),acomponent);
- end;
- inherited;
-end;
-
-procedure trefresheventhandler.onerror(reader: treader; const message: string;
-                        var handled: boolean);
-begin
- if message = skipmark then begin
-  handled:= true;
- end;
-end;
-
-procedure trefresheventhandler.onsetname(reader: treader; 
-                                    component: tcomponent; var aname: string);
-begin
- if (component.owner <> nil) and (csinline in component.owner.componentstate) and
-        not(csancestor in component.componentstate) then begin
-  additem(pointerarty(fcomponentar),component);
-  component.freenotification(self);
-  raise trefreshexception.create(skipmark);
- end;
-end;
-
-
-procedure refreshancestor(const descendent,newancestor,oldancestor: tcomponent;
-              const revert: boolean; 
-              const onfindancestor: tfindancestorevent = nil;
-              const onfindcomponentclass: tfindcomponentclassevent = nil;
-              const oncreatecomponent: tcreatecomponentevent = nil;
-              const onfindmethod: tfindmethodevent = nil;
-              const sourcemethodtab: pointer = nil;
-              const destmethodtab: pointer = nil);
-var
- stream1,stream2: tmemorystream;
- writer: twriter;
- reader: treader;
-// comp1: tcomponent;
- comp2: tcomponent;
- int1: integer;
- eventhandler: trefresheventhandler;
- inl,anc: boolean;
- tabbefore: pointer;
- {$ifdef mse_debugrefresh}
- stream3: ttextstream;
- {$endif}
-begin
- {$ifdef mse_debugrefresh}
-  writeln('descendent: '+ descendent.name + ' newancestor: '+
-         newancestor.name + ' oldancestor: '+oldancestor.name);
- stream3:= ttextstream.create;
- {$endif}
- eventhandler:= trefresheventhandler.create(nil);
- stream1:= tmemorystream.Create;
- stream2:= tmemorystream.Create;
- try
-  writer:= twriter.Create(stream1,4096);
-  tabbefore:= nil; //compiler warning
-  if destmethodtab <> nil then begin
-   tabbefore:= swapmethodtable(descendent,destmethodtab);
-  end;
-  try
-   writer.OnFindAncestor:= onfindancestor;
-   writer.WriteDescendent(descendent,oldancestor); //changes from oldancestor
-  finally
-   if destmethodtab <> nil then begin
-    swapmethodtable(descendent,tabbefore);
-   end;
-   writer.Free;
-  end;
- {$ifdef mse_debugrefresh}
-   stream1.position:= 0;
-   objectbinarytotextmse(stream1,stream3);
-   stream3.position:= 0;
-   writeln('changes oldancestor->descendent');
-   stream3.writetotext(output);
- {$endif}
-  writer:= twriter.Create(stream2,4096);
-  inl:= csinline in newancestor.componentstate;
-  anc:= csancestor in newancestor.componentstate;
-  if csinline in descendent.componentstate then begin
-   tmsecomponent(newancestor).SetInline(true);
-  end;
-  tcomponent1(newancestor).SetAncestor(true);
-  if sourcemethodtab <> nil then begin
-   tabbefore:= swapmethodtable(newancestor,sourcemethodtab);
-  end;
-  try
-   writer.OnFindAncestor:= onfindancestor;
-   {
-   writer.root:= newancestor;
-   writer.ancestor:= descendent;
-   writer.rootancestor:= newancestor;
-   if descendent.owner <> nil then begin
-    twritercracker(writer).flookuproot:= descendent.owner; 
-   end
-   else begin
-    writer.lookuproot:= descendent; 
-   end;
-   writer.writecomponent(newancestor);
-   }
-   writer.WriteDescendent(newancestor,descendent); //new state
-  finally
-   tmsecomponent(newancestor).SetInline(inl);
-   tcomponent1(newancestor).SetAncestor(anc);
-   if sourcemethodtab <> nil then begin
-    swapmethodtable(newancestor,tabbefore);
-   end;
-   writer.Free;
-  end;
- {$ifdef mse_debugrefresh}
-   stream2.position:= 0;
-   stream3.setsize(0);
-   objectbinarytotextmse(stream2,stream3);
-   stream3.position:= 0;
-   writeln('changes descendent->newancestor');
-   stream3.writetotext(output);
- {$endif}
-  stream1.Position:= 0;
-  stream2.Position:= 0;
-  reader:= treader.create(stream2,4096);  //new state
-  if destmethodtab <> nil then begin
-   tabbefore:= swapmethodtable(descendent,destmethodtab);
-  end;
-  try
-   reader.OnFindComponentClass:= onfindcomponentclass;
-   reader.OnCreateComponent:= oncreatecomponent;
-   reader.onfindmethod:= onfindmethod;
-   reader.ReadRootComponent(descendent);
-  finally
-   if destmethodtab <> nil then begin
-    swapmethodtable(descendent,tabbefore);
-   end;
-   reader.free;
-   removefixupreferences(descendent,'');
-  end;
-  if not revert then begin
-   reader:= treader.create(stream1,4096);  //restore old changes
-   if destmethodtab <> nil then begin
-    tabbefore:= swapmethodtable(descendent,destmethodtab);
-   end;
-   try
-    reader.OnFindComponentClass:= onfindcomponentclass;
-    reader.OnCreateComponent:= oncreatecomponent;
-    reader.onfindmethod:= onfindmethod;
-    reader.onsetname:= {$ifdef FPC}@{$endif}eventhandler.onsetname;
-    reader.onerror:= {$ifdef FPC}@{$endif}eventhandler.onerror;
-    reader.ReadRootComponent(descendent);
-    for int1:= descendent.componentcount - 1 downto 0 do begin
-     comp2:= descendent.components[int1];
-     if not (cssubcomponent in comp2.componentstyle) and 
-                   (newancestor.findcomponent(comp2.name) = nil) then begin
-      comp2.free;     //remove deleted components
-     end;
-    end;
-   finally
-    if destmethodtab <> nil then begin
-     swapmethodtable(descendent,tabbefore);
-    end;
-    reader.free;
-    removefixupreferences(descendent,'');
-   end;
-  end;
- finally
-  stream1.Free;
-  stream2.Free;
-  {$ifdef mse_debugrefresh}
-  stream3.free;
-  {$endif}
-  eventhandler.free;
- end;
-end;
 
 function issubcomponent(const root,child: tcomponent): boolean;
 var
@@ -1718,45 +1730,6 @@ begin
  end;
 end;
 
-type
-{$ifdef FPC}
- tasinheritedobjectreader = class(tbinaryobjectreader)
-  protected
-   procedure begincomponent(var flags: tfilerflags; var achildpos: Integer;
-      var compclassName, compname: string); override;
- end;
-
- tasinheritedreader = class(treader)
-  protected
-   function createdriver(stream: tstream; bufsize: integer): tabstractobjectreader; override;
- end;
-
-procedure tasinheritedobjectreader.begincomponent(var flags: tfilerflags;
-        var achildpos: Integer; var compclassName, compname: string);
-begin
- inherited;
- include(flags,ffinherited);
-end;
-
-function tasinheritedreader.createdriver(stream: tstream;
-                   bufsize: integer): tabstractobjectreader;
-begin
- result:= tasinheritedobjectreader.create(stream, bufsize);
-end;
-
-{$else}
- tasinheritedreader = class(treader)
-  public
-   procedure readprefix(var flags: tfilerflags; var achildpos: integer); override;
- end;
-
-procedure tasinheritedreader.readprefix(var flags: tfilerflags; var achildpos: integer);
-begin
- inherited;
- include(flags,ffinherited);
-end;
-
-{$endif}
 
 function findmoduledata(const aclassname: string; 
                   out aparentclassname: string): pobjectdataty;
@@ -1788,7 +1761,7 @@ begin
  try
   globalnamespace.beginwrite;
   if asinherited then begin
-   reader := tasinheritedreader.create(stream, 4096);
+   reader := tasinheritedreader.create(stream, 4096,true);
   end
   else begin
    reader := treader.create(stream, 4096);
@@ -1807,6 +1780,332 @@ begin
   floadedlist:= tloadedlist.create(nil);
  end;
  instance.freenotification(floadedlist);
+end;
+
+const
+ skipmark = 'h71%z/ur';
+ 
+type 
+ trefresheventhandler = class(tcomponent)
+  private
+   fcomponentar: componentarty;
+   procedure onsetname(reader: treader; component: tcomponent; var aname: string);
+   procedure onerror(reader: treader; const message: string; var handled: boolean);
+   procedure doancestornotfound(reader: treader; const componentname: string;
+                   componentclass: tpersistentclass; var component: tcomponent);
+  protected
+   procedure notification(acomponent: tcomponent; operation: toperation);
+                               override;        
+  public
+   destructor destroy; override;
+ end;
+
+ trefreshexception = class(exception)
+ end;
+  
+destructor trefresheventhandler.destroy;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fcomponentar) do begin
+  fcomponentar[int1].free; //FPC does not free the component
+ end;
+ inherited;
+end;
+
+procedure trefresheventhandler.notification(acomponent: tcomponent; operation: toperation);
+begin
+ if (operation = opremove) then begin
+  removeitem(pointerarty(fcomponentar),acomponent);
+ end;
+ inherited;
+end;
+
+procedure trefresheventhandler.onerror(reader: treader; const message: string;
+                        var handled: boolean);
+begin
+ if message = skipmark then begin
+  handled:= true;
+ end;
+end;
+
+procedure trefresheventhandler.onsetname(reader: treader; 
+                                    component: tcomponent; var aname: string);
+begin
+exit;
+ if (component.owner <> nil) and ((csinline in component.owner.componentstate) and
+        not(csancestor in component.componentstate) or
+        (component.owner.findcomponent(aname) <> nil)) then begin
+  additem(pointerarty(fcomponentar),component);
+  component.freenotification(self);
+  raise trefreshexception.create(skipmark); //skip the component
+ end;
+end;
+
+procedure trefresheventhandler.doancestornotfound(reader: treader;
+               const componentname: string; componentclass: tpersistentclass;
+               var component: tcomponent);
+begin
+ if component = nil then begin
+  component:= tasinheritedreader(reader).existingcomp;
+ end;
+end;
+
+
+type
+ tcomponentdeleter = class(tcomponent)
+  private
+   fcomponents: componentarty;
+  protected
+   procedure notification(acomponent: tcomponent; operation: toperation); override;
+  public
+   constructor create(const acomponents: componentarty);
+ end;
+
+{ tcomponentdeleter }
+
+constructor tcomponentdeleter.create(const acomponents: componentarty);
+var
+ int1: integer;
+begin
+ inherited create(nil);
+ fcomponents:= acomponents;
+ for int1:= 0 to high(fcomponents) do begin
+  if fcomponents[int1] <> nil then begin
+   fcomponents[int1].freenotification(self);
+  end;
+ end;
+end;
+ 
+procedure tcomponentdeleter.notification(acomponent: tcomponent;
+               operation: toperation);
+var
+ int1: integer;
+begin
+ inherited;
+ if operation = opremove then begin
+  for int1:= 0 to high(fcomponents) do begin
+   if fcomponents[int1] = acomponent then begin
+    fcomponents[int1]:= nil;
+   end;
+  end;
+ end;
+end;
+
+procedure refreshancestor(const descendent,newancestor,oldancestor: tcomponent;
+              const revert: boolean; 
+              const onfindancestor: tfindancestorevent = nil;
+              const onfindcomponentclass: tfindcomponentclassevent = nil;
+              const oncreatecomponent: tcreatecomponentevent = nil;
+              const onfindmethod: tfindmethodevent = nil;
+              const sourcemethodtab: pointer = nil;
+              const destmethodtab: pointer = nil);
+
+var
+ descendentroot: tcomponent;
+ newancestorroot: tcomponent;
+ oldancestorroot: tcomponent;
+ 
+ procedure deletecomps(const adescendent,anewancestor,aoldancestor: tcomponent);
+ var
+  deleter: tcomponentdeleter;
+  descendentar,newancestorar,oldancestorar: componentarty;
+  int1,int2: integer;
+  comp1,comp2: tcomponent;
+  str1: string;
+ begin
+  descendentar:= getcomponentchildren(adescendent,descendentroot,true);
+                   //nested components
+  deleter:= tcomponentdeleter.create(descendentar);
+  try
+   newancestorar:= getcomponentchildren(anewancestor,newancestorroot,true);    
+   if not revert then begin
+    oldancestorar:= getcomponentchildren(aoldancestor,oldancestorroot,true);
+   end;
+   for int1:= 0 to high(descendentar) do begin
+    if descendentar[int1] <> nil then begin
+     str1:= descendentar[int1].name;
+     comp1:= nil;
+     for int2:= 0 to high(newancestorar) do begin
+      if newancestorar[int2].name = str1 then begin
+       comp1:= newancestorar[int2];
+       break;
+      end;
+     end;
+     comp2:= nil;
+     if not revert then begin
+      for int2:= 0 to high(oldancestorar) do begin
+       if oldancestorar[int2].name = str1 then begin
+        comp2:= oldancestorar[int2];
+        break;
+       end;
+      end;
+     end;
+     if (comp1 = nil) and (revert or (comp2 <> nil)) then begin
+      descendentar[int1].free;
+     end
+     else begin
+      if revert or (comp2 <> nil) then begin
+       deletecomps(descendentar[int1],comp1,comp2);
+      end
+      else begin
+       with tcomponent1(descendentar[int1]) do begin
+        if owner.componentstate * [csinline,csancestor] <> [] then begin
+         setancestor(true);
+        end;
+       end;
+      end;
+     end;
+    end;
+   end;
+  finally
+   deleter.free;
+  end;
+ end;
+
+var
+ stream1,stream2: tmemorystream;
+ writer: twritermse;
+ reader: treader;
+// comp1: tcomponent;
+ comp1,comp2: tcomponent;
+ int1: integer;
+ eventhandler: trefresheventhandler;
+ inl{,anc}: boolean;
+ tabbefore: pointer;
+ {$ifdef mse_debugrefresh}
+ stream3: ttextstream;
+ {$endif}
+ ar1,ar2: componentarty;
+ bo1: boolean;
+ 
+begin
+ {$ifdef mse_debugrefresh}
+  if revert then begin
+   write('****revert ');
+  end
+  else begin
+   write('****refresh ');
+  end;
+  comp1:= rootcomponent(descendent);
+  writeln('root: '+comp1.name+' descendent: '+ descendent.name + ' newancestor: '+
+         newancestor.name + ' oldancestor: '+oldancestor.name);
+  dumpcomponent(descendent,'*descendent');
+  dumpcomponent(newancestor,'*newancestor');
+  dumpcomponent(oldancestor,'*oldancestor');
+ stream3:= ttextstream.create;
+ {$endif}
+ eventhandler:= trefresheventhandler.create(nil);
+ stream1:= tmemorystream.Create;
+ stream2:= tmemorystream.Create;
+ try
+  writer:= trefreshwriter.Create(stream1,4096);
+  tabbefore:= nil; //compiler warning
+  if destmethodtab <> nil then begin
+   tabbefore:= swapmethodtable(descendent,destmethodtab);
+  end;
+  try
+   writer.OnFindAncestor:= onfindancestor;
+   writer.WriteDescendent(descendent,oldancestor); //changes from oldancestor
+  finally
+   if destmethodtab <> nil then begin
+    swapmethodtable(descendent,tabbefore);
+   end;
+   writer.Free;
+  end;
+ {$ifdef mse_debugrefresh}
+   stream1.position:= 0;
+   objectbinarytotextmse(stream1,stream3);
+   stream3.position:= 0;
+   writeln('changes descendent->oldancestor');
+   stream3.writetotext(output);
+ {$endif}
+  writer:= twritermse.Create(stream2,4096);
+  inl:= csinline in newancestor.componentstate;
+//  anc:= csancestor in newancestor.componentstate;
+  if csinline in descendent.componentstate then begin
+   tmsecomponent(newancestor).SetInline(true);
+  end;
+//  tcomponent1(newancestor).SetAncestor(true);
+  if sourcemethodtab <> nil then begin
+   tabbefore:= swapmethodtable(newancestor,sourcemethodtab);
+  end;
+  try
+   writer.OnFindAncestor:= onfindancestor;
+   writer.WriteDescendent(newancestor,descendent); //new state
+  finally
+   tmsecomponent(newancestor).SetInline(inl);
+//   tcomponent1(newancestor).SetAncestor(anc);
+   if sourcemethodtab <> nil then begin
+    swapmethodtable(newancestor,tabbefore);
+   end;
+   writer.Free;
+  end;
+ {$ifdef mse_debugrefresh}
+   stream2.position:= 0;
+   stream3.setsize(0);
+   objectbinarytotextmse(stream2,stream3);
+   stream3.position:= 0;
+   writeln('changes newancestor->descendent');
+   stream3.writetotext(output);
+ {$endif}
+  stream1.Position:= 0;
+  stream2.Position:= 0;
+  reader:= tasinheritedreader.create(stream2,4096,inl{false});  //new state
+  if destmethodtab <> nil then begin
+   tabbefore:= swapmethodtable(descendent,destmethodtab);
+  end;
+  try
+   reader.OnFindComponentClass:= onfindcomponentclass;
+   reader.OnCreateComponent:= oncreatecomponent;
+   reader.onfindmethod:= onfindmethod;
+   reader.onancestornotfound:= 
+                {$ifdef FPC}@{$endif}eventhandler.doancestornotfound;
+   reader.ReadRootComponent(descendent);
+  finally
+   if destmethodtab <> nil then begin
+    swapmethodtable(descendent,tabbefore);
+   end;
+   reader.free;
+   removefixupreferences(descendent,'');
+  end;
+  if not revert then begin
+   reader:= tasinheritedreader.create(stream1,4096,false);  //restore old changes
+   if destmethodtab <> nil then begin
+    tabbefore:= swapmethodtable(descendent,destmethodtab);
+   end;
+   try
+    reader.OnFindComponentClass:= onfindcomponentclass;
+    reader.OnCreateComponent:= oncreatecomponent;
+    reader.onfindmethod:= onfindmethod;
+    reader.onsetname:= {$ifdef FPC}@{$endif}eventhandler.onsetname;
+    reader.onerror:= {$ifdef FPC}@{$endif}eventhandler.onerror;
+    reader.onancestornotfound:= 
+                {$ifdef FPC}@{$endif}eventhandler.doancestornotfound;
+    reader.ReadRootComponent(descendent);
+   {$ifdef mse_debugrefresh}
+    dumpcomponent(descendent,'descendent');
+   {$endif}
+   finally
+    if destmethodtab <> nil then begin
+     swapmethodtable(descendent,tabbefore);
+    end;
+    reader.free;
+    removefixupreferences(descendent,'');
+   end;
+  end;
+ finally
+  stream1.Free;
+  stream2.Free;
+  {$ifdef mse_debugrefresh}
+  stream3.free;
+  {$endif}
+  eventhandler.free;
+ end;
+ descendentroot:= rootcomponent(descendent);
+ newancestorroot:= rootcomponent(newancestor);
+ oldancestorroot:= rootcomponent(oldancestor);
+ deletecomps(descendent,newancestor,oldancestor);
 end;
 
 var
@@ -3623,6 +3922,16 @@ begin
  //dummy
 end;
 
+function tmsecomponent.getancestorclassname: string;
+begin
+ if fancestorclassname <> '' then begin
+  result:= fancestorclassname;
+ end
+ else begin
+  result:= getmoduleclassname;
+ end;
+end;
+
 procedure tmsecomponent.readmoduleclassname(reader: treader);
 begin
  reader.ReadString; //dummy
@@ -3630,12 +3939,7 @@ end;
 
 procedure tmsecomponent.writemoduleclassname(writer: twriter);
 begin
- if fancestorclassname <> '' then begin
-  writer.writestring(fancestorclassname);
- end
- else begin
-  writer.writestring(getmoduleclassname);
- end;
+ writer.writestring(getancestorclassname);
 end;
 
 procedure tmsecomponent.defineproperties(filer: tfiler);
@@ -3644,7 +3948,10 @@ begin
  filer.defineproperty(moduleclassnamename,
            {$ifdef FPC}@{$endif}readmoduleclassname,
            {$ifdef FPC}@{$endif}writemoduleclassname,
-                  (cs_ismodule in fmsecomponentstate) and (filer.Root = self));
+           (cs_ismodule in fmsecomponentstate) and (filer.Root = self) and
+            ((filer.ancestor = nil) or 
+               (tmsecomponent(filer.ancestor).getancestorclassname <> 
+                                                     getancestorclassname)));
 end;
 
 function tmsecomponent.getactualclassname: string;
@@ -3697,7 +4004,12 @@ var
 begin
  classnamebefore:= setclassname(self,factualclassname);
  try
-  inherited;
+  if writer is twritermse then begin
+   twritermse(writer).writecomponentdata(self);
+  end
+  else begin
+   inherited;
+  end;
  finally
   setclassname(self,classnamebefore);
  end;
@@ -3742,6 +4054,25 @@ end;
 procedure tmsecomponent.doafterload;
 begin
  //dummy
+end;
+
+procedure tmsecomponent.getchildren1(const proc: tgetchildproc;
+                                      const root: tcomponent);
+begin
+ //dummy
+end;
+
+procedure tmsecomponent.getchildren(proc: tgetchildproc; root: tcomponent);
+var
+ ev1: getchildreneventty; 
+begin
+ ev1:= onstreaminggetchildren;
+ if assigned(ev1) then begin
+  ev1(self,proc,root);
+ end
+ else begin
+  getchildren1(proc,root);
+ end;
 end;
 
 procedure tmsecomponent.updateskin(const recursive: boolean = false);
@@ -4262,6 +4593,296 @@ begin
    result:= result.FindComponent(ar1[int1]);
   end;
  end;
+end;
+
+Type
+  TPosComponent = Class(TObject)
+    FPos : Integer;
+    FComponent : TComponent;
+    Constructor Create(APos : Integer; AComponent : TComponent);
+  end;
+
+Constructor TPosComponent.Create(APos : Integer; AComponent : TComponent);
+
+begin
+  FPos:=APos;
+  FComponent:=AComponent;
+end;
+
+{ twritermse }
+
+constructor twritermse.Create(Stream: TStream; BufSize: Integer);
+begin
+ fgetchildrenbefore:= onstreaminggetchildren;
+ onstreaminggetchildren:= @dogetchildren;
+ inherited;
+end;
+
+destructor twritermse.destroy;
+begin
+ inherited;
+ onstreaminggetchildren:= fgetchildrenbefore;
+end;
+
+function twritermse.rootcompname(const acomp: tcomponent;
+               const aroot: tcomponent): string;
+var
+ comp1: tcomponent;
+begin
+ result:= acomp.name;
+ comp1:= acomp.owner;
+ while (comp1 <> aroot) and (comp1 <> nil) do begin
+  result:= comp1.name+'.'+result;
+  comp1:= comp1.owner;
+ end;
+end;
+
+function twritermse.rootcompname(const acomp: tcomponent;
+               arootlevel: integer): string;
+var
+ comp1: tcomponent;
+begin
+ result:= acomp.name;
+ comp1:= acomp.owner;
+ while (arootlevel > 0) and (comp1 <> nil) do begin
+  result:= comp1.name+'.'+result;
+  comp1:= comp1.owner;
+  dec(arootlevel);
+ end;
+end;
+
+// Used as argument for calls to TComponent.GetChildren:
+procedure TWritermse.AddToAncestorList(Component: TComponent);
+begin
+ with twritercracker(self) do begin
+  FAncestors.AddObject(rootcompname(Component,fancestorlookuplevel),
+                        TPosComponent.Create(FAncestors.Count,Component));
+ end;
+end;
+
+
+procedure TWritermse.DetermineAncestor(Component : TComponent);
+
+Var
+  I : Integer;
+ comp1: tcomponent;
+ int1: integer;
+begin
+  // Should be set only when we write an inherited with children.
+ with twritercracker(self) do begin
+  if Not Assigned(FAncestors) then
+    exit;
+  comp1:= froot;
+  for int1:= fancestorlookuplevel-1 downto 0 do begin
+   comp1:= comp1.owner;
+  end;
+  if comp1 = nil then begin
+   comp1:= flookuproot; //should not happen
+  end;
+  I:=FAncestors.IndexOf(rootcompname(Component,comp1));
+  If (I=-1) then
+    begin
+    FAncestor:=Nil;
+    FAncestorPos:=-1;
+    end
+  else
+    With TPosComponent(FAncestors.Objects[i]) do
+      begin
+      FAncestor:=FComponent;
+      FAncestorPos:=FPos;
+      end;
+ end;
+end;
+
+procedure TWritermse.DoFindAncestor(Component : TComponent);
+
+Var
+  C : TComponent;
+
+begin
+ with twritercracker(self) do begin
+  if Assigned(FOnFindAncestor) then
+    if (Ancestor=Nil) or (Ancestor is TComponent) then
+      begin
+      C:=TComponent(Ancestor);
+      FOnFindAncestor(Self,Component,Component.Name,C,FRootAncestor);
+      Ancestor:=C;
+      end;
+  if frootrootancestor = nil then begin
+   frootrootancestor:= tcomponent(fancestor);
+  end;
+ end;
+end;
+
+procedure TWritermse.WriteComponent(Component: TComponent);
+
+var
+  SA : TPersistent;
+  SR, SRA : TComponent;
+begin
+ with twritercracker(self) do begin
+  SR:=FRoot;
+  SA:=FAncestor;
+  SRA:=FRootAncestor;
+  Try
+    tcomponentcracker(Component).FComponentState:=
+               tcomponentcracker(Component).FComponentState+[csWriting];
+    Try
+      // Possibly set ancestor.
+      DetermineAncestor(Component);
+      DoFindAncestor(Component); // Mainly for IDE when a parent form had an ancestor renamed...
+      // Will call WriteComponentData.
+      Component.WriteState(Self);
+      FDriver.EndList;
+    Finally
+      tcomponentcracker(Component).FComponentState:=
+                   tcomponentcracker(Component).FComponentState-[csWriting];
+    end;
+  Finally
+    FAncestor:=SA;
+    FRoot:=SR;
+    FRootAncestor:=SRA;
+  end;
+ end;
+end;
+
+procedure TWritermse.WriteChildren(Component : TComponent);
+
+Var
+  SRoot, SRootA : TComponent;
+  SList : TStringList;
+  SPos : Integer;
+  I : Integer;
+  ancestorlookuplevelbefore: integer;
+  rootrootancestorbefore: tcomponent;
+  
+begin
+ with twritercracker(self) do begin
+  // Write children list. 
+  // While writing children, the ancestor environment must be saved
+  // This is recursive...
+  SRoot:=FRoot;
+  SRootA:=FRootAncestor;
+  SList:=FAncestors;
+  SPos:=FCurrentPos;
+  ancestorlookuplevelbefore:= fancestorlookuplevel;
+  rootrootancestorbefore:= frootrootancestor;
+  try
+    FAncestors:=Nil;
+    FCurrentPos:=0;
+    FAncestorPos:=-1;
+    if csInline in Component.ComponentState then
+       FRoot:=Component;
+    if (FAncestor is TComponent) then
+       begin
+       FAncestors:=TStringList.Create;
+       if csInline in TComponent(FAncestor).ComponentState then begin
+        FRootAncestor := TComponent(FAncestor);
+        if frootrootancestor <> frootancestor then begin
+         inc(fancestorlookuplevel);
+        end;
+       end;
+       TComponent1(FAncestor).GetChildren(@AddToAncestorList,frootancestor);
+       FAncestors.Sorted:=True;
+       end;
+    try
+      tcomponent1(Component).GetChildren(@WriteComponent, FRoot);
+    Finally
+      If Assigned(Fancestors) then
+        For I:=0 to FAncestors.Count-1 do 
+          FAncestors.Objects[i].Free;
+      FreeAndNil(FAncestors);
+    end;    
+  finally
+   FAncestors:=Slist;
+   FRoot:=SRoot;
+   FRootAncestor:=SRootA;
+   FCurrentPos:=SPos;
+   FAncestorPos:=Spos;
+   fancestorlookuplevel:= ancestorlookuplevelbefore;
+   frootrootancestor:= rootrootancestorbefore;
+  end;
+ end;
+end;
+
+procedure TWritermse.WriteComponentData(Instance: TComponent);
+var 
+  Flags: TFilerFlags;
+begin
+ with twritercracker(self) do begin
+  Flags := [];
+  If (Assigned(FAncestor)) and  //has ancestor
+     (not (csInline in Instance.ComponentState) or // no inline component
+      // .. or the inline component is inherited
+      (csAncestor in Instance.Componentstate) and (FAncestors <> nil)) then
+    Flags:=[ffInherited]
+  else If csInline in Instance.ComponentState then
+    Flags:=[ffInline];
+  If (FAncestors<>Nil) and ((FCurrentPos<>FAncestorPos) or (FAncestor=Nil)) then
+    Include(Flags,ffChildPos);
+  FDriver.BeginComponent(Instance,Flags,FCurrentPos);
+  If (FAncestors<>Nil) then
+    Inc(FCurrentPos);
+  WriteProperties(Instance);
+  WriteListEnd;
+  // Needs special handling of ancestor.
+  If not IgnoreChildren then
+    WriteChildren(Instance);
+ end;
+end;
+
+procedure twritermse.dogetchildren(const sender: tmsecomponent;
+               const proc: tgetchildproc; const aroot: tcomponent);
+var
+ root1: tcomponent;
+ comp1,comp2: tcomponent;
+ int1: integer;
+begin
+ comp1:= aroot;
+ if aroot = rootancestor then begin
+  comp2:= frootrootancestor;
+  int1:= fancestorlookuplevel;
+  try 
+   while (comp1 <> nil) and (fancestorlookuplevel >= 0) do begin
+    tmsecomponent(sender).getchildren1(proc,comp1);
+    comp1:= comp1.owner;
+    dec(fancestorlookuplevel);
+   end;
+  finally
+   fancestorlookuplevel:= int1;
+  end;
+ end
+ else begin
+  comp2:= frootroot;
+  while comp1 <> nil do begin
+   tmsecomponent(sender).getchildren1(proc,comp1);
+   if comp1 = comp2 then begin
+    break;
+   end;
+   comp1:= comp1.owner;
+  end;
+ end;
+end;
+
+procedure twritermse.writedescendent(const aroot: tcomponent;
+               const aancestor: tcomponent);
+begin
+ frootrootancestor:= aancestor;
+ frootroot:= aroot;
+ with twritercracker(self) do begin
+  FRoot := ARoot;
+  FAncestor := AAncestor;
+  FRootAncestor := AAncestor;
+  FLookupRoot := ARoot;
+
+  WriteComponent(ARoot);
+ end;
+// inherited writedescendent(aroot,aancestor);
+end;
+
+procedure twritermse.writerootcomponent(aroot: tcomponent);
+begin
+ writedescendent(aroot,nil);
 end;
 
 initialization

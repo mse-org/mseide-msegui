@@ -816,7 +816,6 @@ type
    fonbeforetick: notifyeventty;
    fonaftertick: notifyeventty;
    fonbeforestep: beforestepeventty;
-   fonbeafterstep: afterstepeventty;
    fonbeforeupdatemodel: notifyeventty;
    fonafterupdatemodel: notifyeventty;
    fonafterstep: afterstepeventty;
@@ -873,7 +872,7 @@ type
                                                       write setonaftertick;
    property onbeforestep: beforestepeventty read fonbeforestep 
                                                          write fonbeforestep;
-   property onafterstep: afterstepeventty read fonbeafterstep 
+   property onafterstep: afterstepeventty read fonafterstep 
                                                          write fonafterstep;
 
    property onbeforeupdatemodel: notifyeventty read fonbeforeupdatemodel 

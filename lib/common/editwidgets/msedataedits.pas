@@ -970,13 +970,9 @@ type
    procedure setformatdisp(const Value: msestring);
    procedure setformatedit(const Value: msestring);
    procedure readvalue(reader: treader);
-//   procedure writevalue(writer: twriter);
    procedure readvaluedefault(reader: treader);
-//   procedure writevaluedefault(writer: twriter);
    procedure readmin(reader: treader);
-//   procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
-//   procedure writemax(writer: twriter);
    function getgridvalue(const index: integer): realty;
    function getgridintvalue(const index: integer): integer;
    procedure setgridvalue(const index: integer; const avalue: realty);
@@ -1188,13 +1184,9 @@ type
    function checkkind(const avalue: tdatetime): tdatetime;
    procedure setkind(const avalue: datetimekindty);
    procedure readvalue(reader: treader);
-//   procedure writevalue(writer: twriter);
    procedure readvaluedefault(reader: treader);
-//   procedure writevaluedefault(writer: twriter);
    procedure readmin(reader: treader);
-//   procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
-//   procedure writemax(writer: twriter);
   {$ifdef mse_with_ifi}
    function getifilink: tifidatetimelinkcomp;
    procedure setifilink(const avalue: tifidatetimelinkcomp);
@@ -4750,42 +4742,22 @@ procedure tcustomrealedit.readvalue(reader: treader);
 begin
  value:= readrealty(reader);
 end;
-{
-procedure tcustomrealedit.writevalue(writer: twriter);
-begin
- writerealty(writer,fvalue);
-end;
-}
+
 procedure tcustomrealedit.readvaluedefault(reader: treader);
 begin
  valuedefault:= readrealty(reader);
 end;
-{
-procedure tcustomrealedit.writevaluedefault(writer: twriter);
-begin
- writerealty(writer,fvaluedefault);
-end;
-}
+
 procedure tcustomrealedit.readmin(reader: treader);
 begin
  fmin:= readrealty(reader);
 end;
-{
-procedure tcustomrealedit.writemin(writer: twriter);
-begin
- writerealty(writer,fmin);
-end;
-}
+
 procedure tcustomrealedit.readmax(reader: treader);
 begin
  fmax:= readrealty(reader);
 end;
-{
-procedure tcustomrealedit.writemax(writer: twriter);
-begin
- writerealty(writer,fmax);
-end;
-}
+
 procedure tcustomrealedit.readvaluescale(reader: treader);
 begin
  valuerange:= valuescaletorange(reader);
@@ -5352,42 +5324,22 @@ procedure tcustomdatetimeedit.readvalue(reader: treader);
 begin
  value:= readrealty(reader);
 end;
-{
-procedure tcustomdatetimeedit.writevalue(writer: twriter);
-begin
- writerealty(writer,fvalue);
-end;
-}
+
 procedure tcustomdatetimeedit.readvaluedefault(reader: treader);
 begin
  valuedefault:= readrealty(reader);
 end;
-{
-procedure tcustomdatetimeedit.writevaluedefault(writer: twriter);
-begin
- writerealty(writer,fvaluedefault);
-end;
-}
+
 procedure tcustomdatetimeedit.readmin(reader: treader);
 begin
  fmin:= readrealty(reader);
 end;
-{
-procedure tcustomdatetimeedit.writemin(writer: twriter);
-begin
- writerealty(writer,fmin);
-end;
-}
+
 procedure tcustomdatetimeedit.readmax(reader: treader);
 begin
  fmax:= readrealty(reader);
 end;
-{
-procedure tcustomdatetimeedit.writemax(writer: twriter);
-begin
- writerealty(writer,fmax);
-end;
-}
+
 procedure tcustomdatetimeedit.defineproperties(filer: tfiler);
 begin
  inherited;

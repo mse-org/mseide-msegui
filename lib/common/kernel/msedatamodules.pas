@@ -57,7 +57,8 @@ type
    procedure boundschanged;
    procedure doterminated(const sender: tobject);
    procedure doterminatequery(var terminate: boolean);
-   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
+   procedure getchildren1(const proc: tgetchildproc;
+                             const root: tcomponent); override;
    class function getmoduleclassname: string; override;
    class function hasresource: boolean; override;
    procedure defineproperties(filer: tfiler); override;
@@ -71,6 +72,8 @@ type
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;
    destructor destroy; override;
    procedure reload;
+   function hasparent: boolean; override;               
+   function getparentcomponent: tcomponent; override;
    procedure beforedestruction; override;
    property size: sizety read fsize write setsize;
   published
@@ -167,6 +170,16 @@ begin
  end;
 end;
 
+function tmsedatamodule.getparentcomponent: tcomponent;
+begin
+ result:= owner;
+end;
+
+function tmsedatamodule.hasparent: boolean;
+begin
+ result:= getparentcomponent <> nil;
+end;
+
 procedure tmsedatamodule.beforedestruction;
 begin
  if (fstatfile <> nil) and (dmo_autowritestat in foptions) and
@@ -179,18 +192,21 @@ begin
  end;
 end;
 
-procedure tmsedatamodule.getchildren(proc: tgetchildproc;
-  root: tcomponent);
+procedure tmsedatamodule.getchildren1(const proc: tgetchildproc;
+                                              const root: tcomponent);
 var
  int1: integer;
- component: tcomponent;
+ comp1: tcomponent;
 begin
  if root = self then begin
   for int1 := 0 to componentcount - 1 do begin
-   component := components[int1];
-   if not component.hasparent then begin
-    proc(component);
+   comp1 := components[int1];
+   if not comp1.hasparent or (comp1.getparentcomponent = self) then begin
+    proc(comp1);
    end;
+//   if not component.hasparent then begin
+//    proc(component);
+//   end;
   end;
  end;
 end;

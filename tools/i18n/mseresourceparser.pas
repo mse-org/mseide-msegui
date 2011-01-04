@@ -407,7 +407,7 @@ end;
 procedure writeprops(const stream: tstream; const node: tpropinfonode);
 
 var
- writer: twriter;
+ writer: twritermse;
 
  procedure writeobj(const node: tpropinfonode);
   procedure writepropdat(const node: tpropinfonode);
@@ -634,7 +634,7 @@ var
  end;
 
 begin //writeprops
- writer:= twriter.Create(stream,4096);
+ writer:= twritermse.Create(stream,4096);
  try
   with twriter1(writer) do begin
   {$ifdef FPC}

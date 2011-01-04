@@ -1362,7 +1362,9 @@ type
    procedure windowcreated; virtual;
    procedure setoptionswidget(const avalue: optionswidgetty); virtual;
    procedure setoptionswidget1(const avalue: optionswidget1ty); virtual;
-   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
+//   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
+   procedure getchildren1(const proc: tgetchildproc;
+                                    const root: tcomponent); override;
 
    procedure initparentclientsize;
    function getcaretcliprect: rectty; virtual;  //origin = clientrect.pos
@@ -7390,7 +7392,7 @@ begin
   indent:= nullframe;
   clientorig:= nullpoint;
  end;
- for int1:= 0 to widgetcount - 1 do begin
+ for int1:= 0 to high(fwidgets) do begin
   with fwidgets[int1],fwidgetrect do begin
    if visible and not(ws1_nominsize in fwidgetstate1) or 
                                   (csdesigning in componentstate) then begin
@@ -10768,28 +10770,34 @@ begin
    if order > high(fwidgets) then begin
     inherited setchildorder(child,order-length(fwidgets));
    end;
-   if order < 0 then begin
-    order:= 0;
-   end;
    if removeitem(pointerarty(fwidgets),child) >= 0 then begin
+    if order < 0 then begin
+     order:= 0;
+    end;
+    if order > length(fwidgets) then begin
+     order:= length(fwidgets);
+    end;
     insertitem(pointerarty(fwidgets),order,child);
    end;
   end;
  end;
 end;
 
-procedure twidget.getchildren(proc: tgetchildproc; root: tcomponent);
+procedure twidget.getchildren1(const proc: tgetchildproc;
+                                              const root: tcomponent);
 var
  int1: integer;
  widget: twidget;
+ ev1: getchildreneventty; 
 begin
  for int1:= 0 to high(fwidgets) do begin
   widget:= fwidgets[int1];
   if (ws_iswidget in widget.fwidgetstate) and
-     ((widget.owner = root) or 
-        (widget.owner<> nil) and (csinline in root.componentstate) and
+     //(
+     (widget.owner = root){ or 
+         bo1 and (widget.owner <> nil) and 
            (issubcomponent(widget.owner,root) or //common owner
-               issubcomponent(root,widget.owner))) then begin
+               issubcomponent(root,widget.owner)))} then begin
    proc(widget);
   end;
  end;

@@ -500,13 +500,9 @@ type
    procedure setmin(const avalue: realty);
    procedure setmax(const avalue: realty);
    procedure readvalue(reader: treader);
-//   procedure writevalue(writer: twriter);
    procedure readmin(reader: treader);
-//   procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
-//   procedure writemax(writer: twriter);
    procedure readvaluedefault(reader: treader);
-//   procedure writevaluedefault(writer: twriter);
    function getgriddata: tifirealdatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
@@ -547,13 +543,9 @@ type
    procedure setmin(const avalue: tdatetime);
    procedure setmax(const avalue: tdatetime);
    procedure readvalue(reader: treader);
-//   procedure writevalue(writer: twriter);
    procedure readmin(reader: treader);
-//   procedure writemin(writer: twriter);
    procedure readmax(reader: treader);
-//   procedure writemax(writer: twriter);
    procedure readvaluedefault(reader: treader);
-//   procedure writevaluedefault(writer: twriter);
    function getgriddata: tifidatetimedatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
@@ -2543,42 +2535,22 @@ procedure trealclientcontroller.readvalue(reader: treader);
 begin
  value:= readrealty(reader);
 end;
-{
-procedure trealclientcontroller.writevalue(writer: twriter);
-begin
- writerealty(writer,fvalue);
-end;
-}
+
 procedure trealclientcontroller.readmin(reader: treader);
 begin
  fmin:= readrealty(reader);
 end;
-{
-procedure trealclientcontroller.writemin(writer: twriter);
-begin
- writerealty(writer,fmin);
-end;
-}
+
 procedure trealclientcontroller.readmax(reader: treader);
 begin
  fmax:= readrealty(reader);
 end;
-{
-procedure trealclientcontroller.writemax(writer: twriter);
-begin
- writerealty(writer,fmax);
-end;
-}
+
 procedure trealclientcontroller.readvaluedefault(reader: treader);
 begin
  valuedefault:= readrealty(reader);
 end;
-{
-procedure trealclientcontroller.writevaluedefault(writer: twriter);
-begin
- writerealty(writer,fvaluedefault);
-end;
-}
+
 procedure trealclientcontroller.defineproperties(filer: tfiler);
 begin
  inherited;
@@ -2589,30 +2561,7 @@ begin
  filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,nil,false);
  filer.DefineProperty('def',{$ifdef FPC}@{$endif}readvaluedefault,nil,false);
 end;
-{
-function trealclientcontroller.getgridvalues: realarty;
-begin
- result:= nil;
- getvalar(@getrealtyvalar,result);
-end;
 
-procedure trealclientcontroller.setgridvalues(const avalue: realarty);
-begin
- setvalar(@setrealtyvalar,avalue);
-end;
-
-function trealclientcontroller.getgridvalue(const index: integer): real;
-begin
- result:= emptyreal;
- getitem(index,@getrealtyitem,result);
-end;
-
-procedure trealclientcontroller.setgridvalue(const index: integer;
-               const avalue: real);
-begin
- setitem(index,@setrealtyitem,avalue);
-end;
-}
 function trealclientcontroller.getgriddata: tifirealdatalist;
 begin
  result:= tifirealdatalist(ifigriddata);
