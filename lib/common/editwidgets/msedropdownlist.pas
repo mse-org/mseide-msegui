@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -58,6 +58,7 @@ type
    fcolorselect: colorty;
    ffontcolorselect: colorty;
    fcaption: msestring;
+   fpasswordchar: msechar;
    procedure setoptions(const avalue: coloptionsty);
   protected
    fowner: tobject;
@@ -67,12 +68,17 @@ type
    property width: integer read fwidth write fwidth default griddefaultcolwidth;
    property options: coloptionsty read foptions write setoptions
                    default defaultdropdowncoloptions;
-   property textflags: textflagsty read ftextflags write ftextflags default defaultdropdowncoltextflags;
+   property textflags: textflagsty read ftextflags write ftextflags 
+                                           default defaultdropdowncoltextflags;
+   property passwordchar: msechar read fpasswordchar write fpasswordchar 
+                                           default #0;
    property linewidth: integer read flinewidth write flinewidth default 0;
    property linecolor: colorty read flinecolor write flinecolor default cl_gray;
    property color: colorty read fcolor write fcolor default cl_default;
-   property colorselect: colorty read fcolorselect write fcolorselect default cl_default;
-   property fontcolorselect: colorty read ffontcolorselect write ffontcolorselect default cl_default;
+   property colorselect: colorty read fcolorselect write fcolorselect 
+                                           default cl_default;
+   property fontcolorselect: colorty read ffontcolorselect 
+                                      write ffontcolorselect default cl_default;
    property caption: msestring read fcaption write fcaption;
  end;
 
@@ -1498,6 +1504,7 @@ begin
     linewidth:= col1.flinewidth;
     linecolor:= col1.flinecolor;
     textflags:= col1.ftextflags;
+    passwordchar:= col1.passwordchar;
     textflagsactive:= col1.ftextflags;
     if col1.fcolor <> cl_default then begin
      color:= col1.fcolor;
