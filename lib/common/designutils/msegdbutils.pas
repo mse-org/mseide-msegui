@@ -848,8 +848,8 @@ var testvar: msestring;
 procedure tgdbmi.startgdb(commandline: string);
 const
  lcmessages = 'LC_MESSAGES';
-{$ifdef UNIX}
 var
+{$ifdef UNIX}
  bo1: boolean;
  str1: string;
 {$endif}
