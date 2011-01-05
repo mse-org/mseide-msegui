@@ -844,7 +844,7 @@ begin
   fstate:= fstate - [gs_closing,gs_gdbdied];
  end;
 end;
-var testvar: msestring;
+
 procedure tgdbmi.startgdb(commandline: string);
 const
  lcmessages = 'LC_MESSAGES';

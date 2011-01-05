@@ -301,17 +301,69 @@ end;
 
 function sys_getenv(const aname: msestring; out avalue: msestring): boolean;
                           //true if found
+var
+ str1,str2: string;
+ lwo1: longword;
 begin
  avalue:= '';
- result:= false;
+ if iswin95 then begin
+  str2:= ansistring(aname);
+  lwo1:= getenvironmentvariablea(pchar(str2),nil,0);
+  result:= lwo1 > 0;
+  if result then begin
+   if lwo1 > 1 then begin
+    setlength(str1,lwo1-1);
+    lwo1:= getenvironmentvariablea(pchar(str2),pointer(str1),lwo1);
+    result:= lwo1 > 0;
+    setlength(str1,lwo1);
+    avalue:= str1;
+   end;
+  end;
+ end
+ else begin
+  lwo1:= getenvironmentvariablew(pmsechar(aname),nil,0);
+  result:= lwo1 > 0;
+  if result then begin
+   if lwo1 > 1 then begin
+    setlength(avalue,lwo1-1);
+    lwo1:= getenvironmentvariablew(pmsechar(aname),pointer(avalue),lwo1);
+    result:= lwo1 > 0;
+    setlength(avalue,lwo1);
+   end;
+  end;
+ end;
 end;
 
-procedure sys_setenv(const aname: msestring; const avalue: msestring);
+function sys_setenv(const aname: msestring; const avalue: msestring): syserrorty;
 begin
+ result:= sye_ok;
+ if iswin95 then begin
+  if not setenvironmentvariablea(pchar(ansistring(aname)),
+                                     pchar(ansistring(avalue))) then begin
+   result:= syelasterror;
+  end;
+ end
+ else begin
+  if not setenvironmentvariablew(pmsechar(aname),
+                                     pmsechar(avalue)) then begin
+   result:= syelasterror;
+  end;
+ end;
 end;
 
-procedure sys_unsetenv(const aname: msestring);
+function sys_unsetenv(const aname: msestring): syserrorty;
 begin
+ result:= sye_ok;
+ if iswin95 then begin
+  if not setenvironmentvariablea(pchar(ansistring(aname)),nil) then begin
+   result:= syelasterror;
+  end;
+ end
+ else begin
+  if not setenvironmentvariablew(pmsechar(aname),nil) then begin
+   result:= syelasterror;
+  end;
+ end;
 end;
 
 function winfilepath(dirname,filename: msestring): msestring;

@@ -321,13 +321,15 @@ begin
  end;
 end;
 
-procedure sys_setenv(const aname: msestring; const avalue: msestring);
+function sys_setenv(const aname: msestring; const avalue: msestring): syserrorty;
 begin
+ result:= sye_ok;
  setenv(pchar(ansistring(aname)),pchar(ansistring(avalue)),1);
 end;
 
-procedure sys_unsetenv(const aname: msestring);
+function sys_unsetenv(const aname: msestring): syserrorty;
 begin
+ result:= sye_ok;
  unsetenv(pchar(ansistring(aname)));
 end;
 

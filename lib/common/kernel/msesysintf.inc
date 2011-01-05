@@ -61,8 +61,9 @@ function sys_getapplicationpath: filenamety;
 function sys_getcommandlinearguments: stringarty;
 function sys_getenv(const aname: msestring; out avalue: msestring): boolean;
                           //true if found
-procedure sys_setenv(const aname: msestring; const avalue: msestring);
-procedure sys_unsetenv(const aname: msestring);
+function sys_setenv(const aname: msestring; 
+                                const avalue: msestring): syserrorty;
+function sys_unsetenv(const aname: msestring): syserrorty;
 
 function sys_filesystemiscaseinsensitive: boolean;
 function sys_tosysfilepath(var path: filenamety): syserrorty;
