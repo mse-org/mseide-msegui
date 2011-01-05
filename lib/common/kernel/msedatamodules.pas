@@ -57,8 +57,8 @@ type
    procedure boundschanged;
    procedure doterminated(const sender: tobject);
    procedure doterminatequery(var terminate: boolean);
-   procedure getchildren1(const proc: tgetchildproc;
-                             const root: tcomponent); override;
+   procedure getchildren(proc: tgetchildproc;
+                             root: tcomponent); override;
    class function getmoduleclassname: string; override;
    class function hasresource: boolean; override;
    procedure defineproperties(filer: tfiler); override;
@@ -192,23 +192,9 @@ begin
  end;
 end;
 
-procedure tmsedatamodule.getchildren1(const proc: tgetchildproc;
-                                              const root: tcomponent);
-var
- int1: integer;
- comp1: tcomponent;
+procedure tmsedatamodule.getchildren(proc: tgetchildproc; root: tcomponent);
 begin
- if root = self then begin
-  for int1 := 0 to componentcount - 1 do begin
-   comp1 := components[int1];
-   if not comp1.hasparent or (comp1.getparentcomponent = self) then begin
-    proc(comp1);
-   end;
-//   if not component.hasparent then begin
-//    proc(component);
-//   end;
-  end;
- end;
+ getcompchildren(proc,root);
 end;
 
 class function tmsedatamodule.getmoduleclassname: string;

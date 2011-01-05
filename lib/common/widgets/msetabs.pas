@@ -698,8 +698,7 @@ type
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure pagechanged(const sender: itabpage);
-   procedure GetChildren1(const Proc: TGetChildProc;
-                                       const Root: TComponent); override;
+   procedure GetChildren(Proc: TGetChildProc; Root: TComponent); override;
    procedure tabchanged;
    procedure loaded; override;
    procedure clientrectchanged; override;
@@ -3799,8 +3798,7 @@ begin
  end;
 end;
 
-procedure tcustomtabwidget.GetChildren1(const Proc: TGetChildProc;
-                                                       const Root: TComponent);
+procedure tcustomtabwidget.GetChildren(Proc: TGetChildProc; Root: TComponent);
 var
  int1: integer;
  widget1: twidget1;

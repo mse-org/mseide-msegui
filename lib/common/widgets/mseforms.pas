@@ -167,7 +167,7 @@ type
 
    function getcaption: msestring;
    procedure setcaption(const Value: msestring); virtual;
-   procedure getchildren1(const proc: tgetchildproc; const root: tcomponent); override;
+   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    procedure doeventloopstart; virtual;
    procedure doterminated(const sender: tobject); virtual;
    procedure doterminatequery(var terminate: boolean); virtual;
@@ -510,8 +510,7 @@ type
   protected
    class function getmoduleclassname: string; override;
    class function hasresource: boolean; override;
-   procedure getchildren1(const proc: tgetchildproc;
-                             const root: tcomponent); override;
+   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); 
@@ -524,8 +523,7 @@ type
   protected
    class function getmoduleclassname: string; override;
    class function hasresource: boolean; override;
-   procedure getchildren1(const proc: tgetchildproc;
-                                 const root: tcomponent); override;
+   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); 
@@ -993,24 +991,11 @@ begin
  end;
 end;
 
-procedure tcustommseform.getchildren1(const proc: tgetchildproc; 
-                                                      const root: tcomponent);
-var
- int1: integer;
- comp1: tcomponent;
+procedure tcustommseform.getchildren(proc: tgetchildproc; root: tcomponent);
 begin
  inherited;
- fscrollbox.getchildren1(proc,root);
- if root = self then begin
-// if (root = self) or issubcomponent(root,self) then begin
-  for int1:= 0 to componentcount - 1 do begin
-   comp1:= components[int1];
-   if not (cssubcomponent in comp1.componentstyle) and 
-                              not comp1.hasparent then begin
-    proc(comp1);
-   end;
-  end;
- end;
+ fscrollbox.getchildren(proc,root);
+ getcompchildren(proc,root);
 end;
 
 procedure tcustommseform.doonloaded;
@@ -2054,21 +2039,10 @@ begin
  result:= self <> tsubform;
 end;
 
-procedure tsubform.getchildren1(const proc: tgetchildproc;
-                                               const root: tcomponent);
-var
- int1: integer;
- comp1: tcomponent;
+procedure tsubform.getchildren(proc: tgetchildproc; root: tcomponent);
 begin
  inherited;
- if root = self then begin
-  for int1:= 0 to componentcount - 1 do begin
-   comp1:= components[int1];
-   if not comp1.hasparent then begin
-    proc(comp1);
-   end;
-  end;
- end;
+ getcompchildren(proc,root);
 end;
 
 { tscrollboxform }
@@ -2102,21 +2076,10 @@ begin
  result:= self <> tscrollboxform;
 end;
 
-procedure tscrollboxform.getchildren1(const proc: tgetchildproc;
-                                        const root: tcomponent);
-var
- int1: integer;
- comp1: tcomponent;
+procedure tscrollboxform.getchildren(proc: tgetchildproc; root: tcomponent);
 begin
  inherited;
- if root = self then begin
-  for int1:= 0 to componentcount - 1 do begin
-   comp1:= components[int1];
-   if not comp1.hasparent then begin
-    proc(comp1);
-   end;
-  end;
- end;
+ getcompchildren(proc,root);
 end;
 
 end.

@@ -369,6 +369,8 @@ type
    function skininfo: skininfoty; virtual;
    function hasskin: boolean; virtual;
    function getcomponentinstance: tcomponent;
+   procedure getcompchildren(const proc: tgetchildproc;
+                                                  const root: tcomponent);
    
     //iobjectlink
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
@@ -399,9 +401,9 @@ type
    procedure doasyncevent(var atag: integer); virtual;
    procedure doafterload; virtual;
 
-   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
-   procedure getchildren1(const proc: tgetchildproc;
-                                      const root: tcomponent); virtual;
+//   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
+//   procedure getchildren1(const proc: tgetchildproc;
+//                                      const root: tcomponent); virtual;
   public
    destructor destroy; override;
    procedure updateskin(const recursive: boolean = false); virtual;
@@ -618,7 +620,9 @@ type
                              const aroot: tcomponent): string;
    function rootcompname(const acomp: tcomponent;
                              arootlevel: integer): string; overload;
-   procedure dogetchildren(const sender: tmsecomponent;
+//   procedure dogetchildren(const sender: tmsecomponent;
+//                             const proc: tgetchildproc; const aroot: tcomponent);
+   procedure getchildren1(const acomp: tcomponent;
                              const proc: tgetchildproc; const aroot: tcomponent);
    procedure WriteChildren(Component : TComponent);
    procedure WriteComponentData(Instance: TComponent);
@@ -776,8 +780,8 @@ type
  skineventty = procedure(const ainfo: skininfoty) of object;
 var
  oninitskinobject: skineventty;
-threadvar
- onstreaminggetchildren: getchildreneventty;
+//threadvar
+// onstreaminggetchildren: getchildreneventty;
   
 {$ifdef mse_fpc_2_4_3}
 function getcomponentlist(const acomponent: tcomponent): tfplist;
@@ -1496,15 +1500,15 @@ var
 begin
  fchildren:= nil;
  fcount:= 0;
- if froot <> nil then begin
-  tcomponent1(fcomp).getchildren(@childproc,froot);
- end;
  if fnestedowners then begin
   comp1:= fcomp;
   while (comp1 <> froot) and (comp1 <> nil) do begin
    tcomponent1(fcomp).getchildren(@childproc,comp1);
    comp1:= comp1.owner;
   end;
+ end;
+ if froot <> nil then begin
+  tcomponent1(fcomp).getchildren(@childproc,froot);
  end;
  setlength(fchildren,fcount);
  result:= fchildren;
@@ -1520,17 +1524,17 @@ function getcomponentchildren(const acomp: tcomponent;
                 const nestedowners: boolean = false): componentarty;
 var
  obj: tgetcomponentchildren;
- ev1: getchildreneventty; 
+// ev1: getchildreneventty; 
 begin
- ev1:= onstreaminggetchildren;
- try
-  onstreaminggetchildren:= nil;
+// ev1:= onstreaminggetchildren;
+// try
+//  onstreaminggetchildren:= nil;
   obj:= tgetcomponentchildren.create(acomp,aroot,nestedowners);
   result:= obj.children;
   obj.free;
- finally
-  onstreaminggetchildren:= ev1;
- end;
+// finally
+//  onstreaminggetchildren:= ev1;
+// end;
 end;
 
 function getlinkedcomponents(const acomponent: tcomponent): componentarty;
@@ -3795,6 +3799,23 @@ begin
  result:= self;
 end;
 
+procedure tmsecomponent.getcompchildren(const proc: tgetchildproc;
+                                                  const root: tcomponent);
+var
+ int1: integer;
+ comp1: tcomponent;
+begin
+ if root = self then begin
+  for int1:= 0 to componentcount - 1 do begin
+   comp1:= components[int1];
+   if not (cssubcomponent in comp1.componentstyle) and
+                                      not comp1.hasparent then begin
+    proc(comp1);
+   end;
+  end;
+ end;
+end;
+
 procedure tmsecomponent.componentevent(const event: tcomponentevent);
 var
  int1: integer;
@@ -4065,7 +4086,7 @@ procedure tmsecomponent.doafterload;
 begin
  //dummy
 end;
-
+{
 procedure tmsecomponent.getchildren1(const proc: tgetchildproc;
                                       const root: tcomponent);
 begin
@@ -4084,7 +4105,7 @@ begin
   getchildren1(proc,root);
  end;
 end;
-
+}
 procedure tmsecomponent.updateskin(const recursive: boolean = false);
 var
  int1: integer;
@@ -4623,15 +4644,15 @@ end;
 
 constructor twritermse.Create(Stream: TStream; BufSize: Integer);
 begin
- fgetchildrenbefore:= onstreaminggetchildren;
- onstreaminggetchildren:= @dogetchildren;
+// fgetchildrenbefore:= onstreaminggetchildren;
+// onstreaminggetchildren:= @dogetchildren;
  inherited;
 end;
 
 destructor twritermse.destroy;
 begin
  inherited;
- onstreaminggetchildren:= fgetchildrenbefore;
+// onstreaminggetchildren:= fgetchildrenbefore;
 end;
 
 function twritermse.rootcompname(const acomp: tcomponent;
@@ -4792,11 +4813,13 @@ begin
          inc(fancestorlookuplevel);
         end;
        end;
-       TComponent1(FAncestor).GetChildren(@AddToAncestorList,frootancestor);
+//       TComponent1(FAncestor).GetChildren(@AddToAncestorList,frootancestor);
+       GetChildren1(tcomponent(FAncestor),@AddToAncestorList,frootancestor);
        FAncestors.Sorted:=True;
        end;
     try
-      tcomponent1(Component).GetChildren(@WriteComponent, FRoot);
+//      tcomponent1(Component).GetChildren(@WriteComponent, FRoot);
+      GetChildren1(component,@WriteComponent, FRoot);
     Finally
       If Assigned(Fancestors) then
         For I:=0 to FAncestors.Count-1 do 
@@ -4840,7 +4863,7 @@ begin
     WriteChildren(Instance);
  end;
 end;
-
+{
 procedure twritermse.dogetchildren(const sender: tmsecomponent;
                const proc: tgetchildproc; const aroot: tcomponent);
 var
@@ -4866,6 +4889,40 @@ begin
   comp2:= frootroot;
   while comp1 <> nil do begin
    tmsecomponent(sender).getchildren1(proc,comp1);
+   if comp1 = comp2 then begin
+    break;
+   end;
+   comp1:= comp1.owner;
+  end;
+ end;
+end;
+}
+procedure twritermse.getchildren1(const acomp: tcomponent;
+               const proc: tgetchildproc; const aroot: tcomponent);
+   //support for added components to submodules
+var
+ root1: tcomponent;
+ comp1,comp2: tcomponent;
+ int1: integer;
+begin
+ comp1:= aroot;
+ if aroot = rootancestor then begin
+  comp2:= frootrootancestor;
+  int1:= fancestorlookuplevel;
+  try 
+   while (comp1 <> nil) and (fancestorlookuplevel >= 0) do begin
+    tcomponent1(acomp).getchildren(proc,comp1);
+    comp1:= comp1.owner;
+    dec(fancestorlookuplevel);
+   end;
+  finally
+   fancestorlookuplevel:= int1;
+  end;
+ end
+ else begin
+  comp2:= frootroot;
+  while comp1 <> nil do begin
+   tcomponent1(acomp).getchildren(proc,comp1);
    if comp1 = comp2 then begin
     break;
    end;

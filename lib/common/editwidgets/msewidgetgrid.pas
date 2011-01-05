@@ -276,8 +276,7 @@ type
    procedure scrolled(const dist: pointty); override;
    procedure updatecontainerrect;
    procedure updatelayout; override;
-   procedure getchildren1(const proc: tgetchildproc;
-                             const root: tcomponent); override;
+   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    procedure loaded; override;
    function scrollcaret: boolean; override;
    procedure docellevent(var info: celleventinfoty); override;
@@ -2703,13 +2702,12 @@ begin
  inherited;
 end;
 
-procedure tcustomwidgetgrid.getchildren1(const proc: tgetchildproc;
-                                                   const root: tcomponent);
+procedure tcustomwidgetgrid.getchildren(proc: tgetchildproc; root: tcomponent);
 begin
  inherited;
- twidget1(fcontainer2).getchildren1(proc,root);
- twidget1(fcontainer1).getchildren1(proc,root);
- twidget1(fcontainer3).getchildren1(proc,root);
+ twidget1(fcontainer2).getchildren(proc,root);
+ twidget1(fcontainer1).getchildren(proc,root);
+ twidget1(fcontainer3).getchildren(proc,root);
 end;
 
 procedure tcustomwidgetgrid.loaded;

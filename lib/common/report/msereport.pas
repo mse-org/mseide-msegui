@@ -1594,8 +1594,7 @@ type
                   const acommand: string; const astream: ttextstream;
                   const anilstream: boolean; const onafterrender: reporteventty);
    procedure unregisterchildwidget(const child: twidget); override;
-   procedure getchildren1(const proc: tgetchildproc; 
-                                     const root: tcomponent); override;
+   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    procedure defineproperties(filer: tfiler); override;
    procedure nextpage(const acanvas: tcanvas);
    procedure doprogress;
@@ -6420,12 +6419,20 @@ begin
  internalrender(aprinter.canvas,aprinter,'',nil,true,onafterrender);
 end;
 
-procedure tcustomreport.getchildren1(const proc: tgetchildproc;
-                                                const root: tcomponent);
+procedure tcustomreport.getchildren(proc: tgetchildproc; root: tcomponent);
 var
  int1: integer;
  comp1: tcomponent;
 begin
+ for int1:= 0 to high(freppages) do begin
+  comp1:= freppages[int1];
+  if (comp1.owner = root) and 
+           not (cssubcomponent in comp1.componentstyle) then begin
+   proc(comp1);
+  end;
+ end;
+ getcompchildren(proc,root);
+ {
  for int1:= 0 to high(freppages) do begin
   comp1:= freppages[int1];
   if ((comp1.owner = root) or (csinline in root.componentstate) and
@@ -6442,6 +6449,7 @@ begin
    end;
   end;
  end;
+ }
 end;
 
 function tcustomreport.getreppages(index: integer): tcustomreportpage;

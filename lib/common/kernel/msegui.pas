@@ -1363,8 +1363,7 @@ type
    procedure setoptionswidget(const avalue: optionswidgetty); virtual;
    procedure setoptionswidget1(const avalue: optionswidget1ty); virtual;
 //   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
-   procedure getchildren1(const proc: tgetchildproc;
-                                    const root: tcomponent); override;
+   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
 
    procedure initparentclientsize;
    function getcaretcliprect: rectty; virtual;  //origin = clientrect.pos
@@ -10783,8 +10782,7 @@ begin
  end;
 end;
 
-procedure twidget.getchildren1(const proc: tgetchildproc;
-                                              const root: tcomponent);
+procedure twidget.getchildren(proc: tgetchildproc; root: tcomponent);
 var
  int1: integer;
  widget: twidget;
