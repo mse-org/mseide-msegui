@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -242,6 +242,13 @@ type
  end;
 {$endif} 
 
+ envvarinfoty = record
+  name: string;
+  value: string;
+  unset: boolean;
+ end;
+ envvararty = array of envvarinfoty;
+ 
  tgdbmi = class(tactcomponent)
   private
    fgdbto: tpipewriter;
@@ -279,7 +286,7 @@ type
    fignoreexceptionclasses: stringarty;
    flogtext: string;
    flastbreakpoint: integer;
-   fenvvars: doublestringarty;
+   fenvvars: envvararty;
    ftargetdebugbegin,ftargetdebugend: qword;
    {$ifdef mswindows}
    fnewconsole: boolean;
@@ -365,6 +372,7 @@ type
                            const mixed: boolean): gdbresultty;
    function getshortstring(const address: string; out avalue: string): boolean;
    function setenv(const aname,avalue: string): gdbresultty;
+   function unsetenv(const aname: string): gdbresultty;
    function getsysregnum(const varname: string; out num: integer): boolean;
    function currentlang: string;
    function assignoperator: string;
@@ -470,6 +478,7 @@ type
                 //true if ok
    function clearenvvars: gdbresultty;
    function setenvvar(const aname,avalue: string): gdbresultty;
+   function unsetenvvar(const aname: string): gdbresultty;
 
    function download(const runafterload: boolean): gdbresultty;
    function run: gdbresultty;
@@ -835,13 +844,18 @@ begin
   fstate:= fstate - [gs_closing,gs_gdbdied];
  end;
 end;
-
+var testvar: msestring;
 procedure tgdbmi.startgdb(commandline: string);
+const
+ lcmessages = 'LC_MESSAGES';
 {$ifdef UNIX}
 var
  bo1: boolean;
  str1: string;
 {$endif}
+ haslang: boolean;
+ langbefore: msestring;
+ 
 begin
  closegdb;
  fgdbto:= tpipewriter.create;
@@ -857,9 +871,25 @@ begin
  frunsequence:= 0;
  fsequence:= 1;
  flastbreakpoint:= 0;
+ haslang:= sys_getenv(lcmessages,langbefore);
+ sys_setenv(lcmessages,'C');
+  
  fgdb:= execmse2(syscommandline(commandline)+' --interpreter=mi --nx',
                       fgdbto,fgdbfrom,fgdberror,false,-1,true,false,true);
+
+ if haslang then begin
+  sys_setenv(lcmessages,langbefore);
+ end
+ else begin
+  sys_unsetenv(lcmessages);
+ end;
  if fgdb <> invalidprochandle then begin
+  if haslang then begin
+   setenv(lcmessages,langbefore);
+  end
+  else begin
+   unsetenv(lcmessages);
+  end;
   clicommand('set breakpoint pending on');
   clicommand('set height 0');
   clicommand('set width 0');
@@ -1054,9 +1084,13 @@ begin
  result:= gdb_ok;
  if active then begin
   for int1:= 0 to high(fenvvars) do begin
-   result:= clicommand('unset environement '+fenvvars[int1].a);
-   if result <> gdb_ok then begin
-    break;
+   with fenvvars[int1] do begin
+    if not unset then begin
+     result:= clicommand('unset environement '+fenvvars[int1].name);
+     if result <> gdb_ok then begin
+      break;
+     end;
+    end;
    end;
   end;
  end;
@@ -1068,25 +1102,55 @@ begin
  result:= synccommand('-gdb-set environment '+aname+'='+avalue);
 end;
 
+function tgdbmi.unsetenv(const aname: string): gdbresultty;
+begin
+ result:= clicommand('unset environment '+aname);
+end;
+
 function tgdbmi.setenvvar(const aname,avalue: string): gdbresultty;
 var
  int1: integer;
 begin
  result:= gdb_ok;
  if active then begin
-  setenv(aname,avalue);
+  result:= setenv(aname,avalue);
  end;
  if result = gdb_ok then begin
   for int1:= 0 to high(fenvvars) do begin
-   if aname = fenvvars[int1].a then begin
-    fenvvars[int1].b:= avalue;
+   if aname = fenvvars[int1].name then begin
+    fenvvars[int1].value:= avalue;
+    fenvvars[int1].unset:= false;
     exit;
    end;
   end;
   setlength(fenvvars,high(fenvvars)+2);
   with fenvvars[high(fenvvars)] do begin
-   a:= aname;
-   b:= avalue;
+   name:= aname;
+   value:= avalue;
+  end;
+ end;
+end;
+
+function tgdbmi.unsetenvvar(const aname: string): gdbresultty;
+var
+ int1: integer;
+begin
+ result:= gdb_ok;
+ if active then begin
+  unsetenv(aname);
+ end;
+ if result = gdb_ok then begin
+  for int1:= 0 to high(fenvvars) do begin
+   if aname = fenvvars[int1].name then begin
+    fenvvars[int1].value:= '';
+    fenvvars[int1].unset:= true;
+    exit;
+   end;
+  end;
+  setlength(fenvvars,high(fenvvars)+2);
+  with fenvvars[high(fenvvars)] do begin
+   name:= aname;
+   unset:= true;
   end;
  end;
 end;
@@ -1250,6 +1314,7 @@ begin
         exit; //already done
        end;
        include(self.fstate,gs_startup);
+       include(self.fstate,gs_started); //gek_running can be missed
       end;
      end;
     end;
@@ -2018,14 +2083,19 @@ begin
    end;
   end;
   if str1 = '' then begin
-   synccommand('-break-insert -t main');
+   fstartupbreakpoint:= breakinsert('main');
   end;
  end;
  synccommand('-exec-arguments '+ fprogparameters);
  synccommand('-environment-cd '+ tosysfilepath(filepath(fworkingdirectory)));
  for int1:= 0 to high(fenvvars) do begin
   with fenvvars[int1] do begin
-   setenv(a,b);
+   if unset then begin
+    unsetenv(name);
+   end
+   else begin
+    setenv(name,value);
+   end;
   end;
  end;
  {$ifdef mswindows}

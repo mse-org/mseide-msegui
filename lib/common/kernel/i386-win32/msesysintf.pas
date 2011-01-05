@@ -299,6 +299,21 @@ begin
  {$ifdef FPC}{$checkpointer default}{$endif}
 end;
 
+function sys_getenv(const aname: msestring; out avalue: msestring): boolean;
+                          //true if found
+begin
+ avalue:= '';
+ result:= false;
+end;
+
+procedure sys_setenv(const aname: msestring; const avalue: msestring);
+begin
+end;
+
+procedure sys_unsetenv(const aname: msestring);
+begin
+end;
+
 function winfilepath(dirname,filename: msestring): msestring;
 begin
  replacechar1(dirname,msechar('/'),msechar('\'));

@@ -1578,11 +1578,16 @@ function lstat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
 
 function S_ISDIR(mode : __mode_t) : boolean;
 
-function fchmod(__fd:longint; __mode:__mode_t):longint;cdecl;external clib name 'fchmod';
-function __rename(__old:Pchar; __new:Pchar):longint;cdecl;external clib name 'rename';
-function unlink(__name:Pchar):longint;cdecl;external clib name 'unlink';
-function getcwd(__buf:Pchar; __size:size_t):Pchar;cdecl;external clib name 'getcwd';
-function getenv(__name:Pchar):Pchar;cdecl;external clib name 'getenv';
+function fchmod(__fd: longint; __mode:__mode_t):longint;cdecl;external clib name 'fchmod';
+function __rename(__old: Pchar; __new:Pchar):longint;cdecl;external clib name 'rename';
+function unlink(__name: Pchar): longint;cdecl;external clib name 'unlink';
+function getcwd(__buf: Pchar; __size:size_t):Pchar;cdecl;external clib name 'getcwd';
+function getenv(__name: Pchar): Pchar; cdecl; external clib name 'getenv';
+function setenv(envname: pchar; envval: pchar;
+                overwrite: cint): cint; cdecl; external clib name 'setenv';
+function putenv(astring: Pchar): longint; cdecl; external clib name 'putenv';
+function unsetenv(envname: pchar): cint; cdecl; external clib name 'unsetenv';
+
 function __chdir(__path:Pchar):longint;cdecl;external clib name 'chdir';
 function opendir(__name:Pchar):PDIR;cdecl;external clib name 'opendir';
 function closedir(__dirp:PDIR):longint;cdecl;external clib name 'closedir';

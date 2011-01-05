@@ -1102,6 +1102,9 @@ begin
    end;
    if envvarons[int1] then begin
     gdb.setenvvar(envvarnames[int1],envvarvalues[int1]);
+   end
+   else begin
+    gdb.unsetenvvar(envvarnames[int1]);
    end;
   end;
  end;
@@ -2643,7 +2646,7 @@ begin
              'MSEide version: '+versiontext+c_linefeed+
              'Host: '+ hosttext+ c_linefeed+
              c_linefeed+
-             'Copyright 1999-2010'+c_linefeed+
+             'Copyright 1999-2011'+c_linefeed+
              'by Martin Schreiber'
              ,'About MSEide');
 end;

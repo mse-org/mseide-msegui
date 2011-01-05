@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -304,6 +304,31 @@ begin
  for int1:= 0 to ac^-1 do begin
   result[int1]:= av^[int1];
  end;
+end;
+
+function sys_getenv(const aname: msestring; out avalue: msestring): boolean;
+                          //true if found
+var
+ po1: pchar;
+ str1: ansistring;
+begin
+ avalue:= '';
+ po1:= getenv(pchar(ansistring(aname)));
+ result:= po1 <> nil;
+ if result then begin
+  str1:= po1;
+  avalue:= str1;
+ end;
+end;
+
+procedure sys_setenv(const aname: msestring; const avalue: msestring);
+begin
+ setenv(pchar(ansistring(aname)),pchar(ansistring(avalue)),1);
+end;
+
+procedure sys_unsetenv(const aname: msestring);
+begin
+ unsetenv(pchar(ansistring(aname)));
 end;
 
 function timestampms: longword;
