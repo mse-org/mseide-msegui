@@ -336,6 +336,8 @@ type
    procedure releasemethodtable(const amodule: pmoduleinfoty);
   protected
    fstate: designerstatesty;
+   procedure readererror(reader: treader; const message: string;
+                                 var handled: boolean);
 //   procedure forallmethprop(child: tcomponent);
    procedure forallmethodproperties(const aroot: tcomponent;
                  const ainstance: tobject; const data: pointer;
@@ -3912,6 +3914,7 @@ begin //loadformfile
          reader.onfindcomponentclass:= {$ifdef FPC}@{$endif}findcomponentclass;
          reader.onancestornotfound:= {$ifdef FPC}@{$endif}ancestornotfound;
          reader.oncreatecomponent:= {$ifdef FPC}@{$endif}createcomponent;
+         reader.onerror:= {$ifdef FPC}@{$endif}readererror;
          module.Name:= modulename;
          reader.ReadrootComponent(module);
          doswapmethodpointers(module,true);
@@ -4776,6 +4779,20 @@ function tdesigner.selectedcomponents: componentarty;
 begin
  setlength(result,fselections.count);
  move(fselections.datapo^,result[0],length(result)*sizeof(pointer)); 
+end;
+
+procedure tdesigner.readererror(reader: treader; const message: string;
+               var handled: boolean);
+var
+ comp1: tcomponent;
+begin
+ comp1:= reader.lookuproot;
+ if comp1 = nil then begin
+  comp1:= reader.root;
+ end;
+ with exception(ExceptObject) do begin
+  message:= 'Component "'+ownernamepath(comp1)+'":'+lineend+message;
+ end;
 end;
 
 { tcomponentslink }

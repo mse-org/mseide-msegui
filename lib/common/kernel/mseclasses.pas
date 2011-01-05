@@ -1387,14 +1387,19 @@ function ownernamepath(const acomponent: tcomponent): string;
 var
  comp: tcomponent;
 begin
- with acomponent do begin
-  result:= name;
-  comp:= owner;
-  while comp <> nil do begin
-   if comp.Name <> '' then begin
-    result:= comp.Name + '.' + result;
+ if acomponent = nil then begin
+  result:= ''
+ end
+ else begin
+  with acomponent do begin
+   result:= name;
+   comp:= owner;
+   while comp <> nil do begin
+    if comp.Name <> '' then begin
+     result:= comp.Name + '.' + result;
+    end;
+    comp:= comp.Owner;
    end;
-   comp:= comp.Owner;
   end;
  end;
 end;
@@ -1404,14 +1409,19 @@ function namepathowner(const acomponent: tcomponent): string;
 var
  comp: tcomponent;
 begin
- with acomponent do begin
-  result:= name;
-  comp:= owner;
-  while comp <> nil do begin
-   if comp.Name <> '' then begin
-    result:= result +  '.' + comp.Name;
+ if acomponent = nil then begin
+  result:= ''
+ end
+ else begin
+  with acomponent do begin
+   result:= name;
+   comp:= owner;
+   while comp <> nil do begin
+    if comp.Name <> '' then begin
+     result:= result +  '.' + comp.Name;
+    end;
+    comp:= comp.Owner;
    end;
-   comp:= comp.Owner;
   end;
  end;
 end;
