@@ -324,13 +324,17 @@ end;
 function sys_setenv(const aname: msestring; const avalue: msestring): syserrorty;
 begin
  result:= sye_ok;
- setenv(pchar(ansistring(aname)),pchar(ansistring(avalue)),1);
+ if setenv(pchar(ansistring(aname)),pchar(ansistring(avalue)),1) <> 0 then begin
+  result:= syelasterror;
+ end;
 end;
 
 function sys_unsetenv(const aname: msestring): syserrorty;
 begin
  result:= sye_ok;
- unsetenv(pchar(ansistring(aname)));
+ if unsetenv(pchar(ansistring(aname))) <> 0 then begin
+  result:= syelasterror;
+ end;
 end;
 
 function timestampms: longword;
