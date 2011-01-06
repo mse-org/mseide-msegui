@@ -1173,14 +1173,14 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
    else begin
     if component.componentcount > 0 then begin
      canvas.save;
-     clipchildren(component,0);
      canvas.intersectcliprect(rect1);
+     if not isroot then begin
+      canvas.move(rect1.pos);
+     end;
+     clipchildren(component,0);
      pt1:= rect1.pos;
      if component.owner = tformdesignerfo(fowner).fmodule then begin
       adjustchildcomponentpos(pt1);
-     end;
-     if not isroot then begin
-      canvas.move(rect1.pos);
      end;
      for int1:= 0 to component.componentcount - 1 do begin
       comp1:= component.components[int1];
