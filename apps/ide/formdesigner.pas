@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1204,13 +1204,13 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
      if not isroot then begin
       canvas.remove(rect1.pos);
      end;
-     if issub then begin
-      canvas.dashes:= #3#3;
-      dec(rect1.cx);
-      dec(rect1.cy);
-      canvas.drawrect(rect1);
-      canvas.dashes:= '';
-     end;
+    end;
+    if issub then begin
+     canvas.dashes:= #3#3;
+     dec(rect1.cx);
+     dec(rect1.cy);
+     canvas.drawrect(rect1);
+     canvas.dashes:= '';
     end;
    end;
   end;
