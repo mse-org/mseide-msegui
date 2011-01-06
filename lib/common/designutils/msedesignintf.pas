@@ -336,7 +336,7 @@ function getcomponentpos(const component: tcomponent): pointty;
 implementation
 uses
  msesysutils,msestream,msewidgets,msedatalist,rtlconsts,msedesigner,
- msetabs,mseapplication,mseobjecttext;
+ msetabs,mseapplication,mseobjecttext,msedatamodules;
  
 type
  {$ifdef FPC}
@@ -1093,7 +1093,7 @@ begin
       for int1:= aowner.componentcount to comp1.componentcount - 1 do begin
        comp2:= comp1.components[int1];
        designer.doswapmethodpointers(comp2,true);
-       if comp2.getparentcomponent = nil then begin
+       if (comp2.getparentcomponent = nil) or (comp2 is tmsedatamodule) then begin
         add(comp2);
        end;
       end;
@@ -1102,7 +1102,7 @@ begin
       if assigned(initproc) then begin
        for int1:= comp1.componentcount - 1 downto aowner.componentcount do begin
         comp2:= comp1.components[int1]; 
-        if comp2.getparentcomponent = nil then begin
+        if (comp2.getparentcomponent = nil) or (comp2 is tmsedatamodule) then begin
          initproc(comp2,aparent);
         end;
        end;

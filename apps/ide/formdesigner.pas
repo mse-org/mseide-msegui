@@ -1579,7 +1579,7 @@ begin
    end;
   end;
  end;
-if not (es_processed in info.eventstate) then begin
+ if not (es_processed in info.eventstate) then begin
   inherited;
  end;
 end;
