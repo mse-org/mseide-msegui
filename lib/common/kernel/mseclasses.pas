@@ -3812,7 +3812,7 @@ begin
   for int1:= 0 to componentcount - 1 do begin
    comp1:= components[int1];
    if not (cssubcomponent in comp1.componentstyle) and
-                                      not comp1.hasparent then begin
+                   not comp1.hasparent or (comp1 is tmsedatamodule) then begin
     proc(comp1);
    end;
   end;

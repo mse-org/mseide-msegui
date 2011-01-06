@@ -205,8 +205,14 @@ begin
     proc(comp1);
    end;
   end;
+  for int1:= 0 to componentcount - 1 do begin
+   comp1:= components[int1];
+   if not (cssubcomponent in comp1.componentstyle) and
+                                      not comp1.hasparent then begin
+    proc(comp1);
+   end;
+  end;
  end;
- getcompchildren(proc,root);
 end;
 
 class function tmsedatamodule.getmoduleclassname: string;
