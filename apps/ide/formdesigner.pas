@@ -1288,7 +1288,7 @@ end;
 procedure tdesignwindow.doinitcomponent(component: tcomponent; parent: tcomponent);
 var
  rect1: rectty;
- pt1: pointty;
+ pt1,pt2: pointty;
 begin
  doaddcomponent(component);
  if (component is twidget) and (parent is twidget) then begin
@@ -1311,13 +1311,25 @@ begin
   twidget(parent).insertwidget(twidget(component),pt1);
   if fclipinitcomps then begin
    rect1:= twidget(component).widgetrect;
-//   if fuseinitcompsoffset then begin
-//    addpoint1(rect1.pos,finitcompsoffset);
-//   end;
    shiftinrect(rect1,twidget(component).parentwidget.clientwidgetrect);
-//   shiftinrect(rect1,makerect(nullpoint,twidget(component).parentwidget.size));
    twidget(component).widgetrect:= rect1;
   end;
+ end
+ else begin
+  pt2:= getcomponentpos(component);
+  if fuseinitcompsoffset then begin  
+   pt1:= finitcompsoffset;
+   subpoint1(finitcompsoffset,pt2);
+   fcompsoffsetused:= true;
+   fuseinitcompsoffset:= false;
+  end
+  else begin 
+   pt1:= pt2;
+   if fcompsoffsetused then begin
+    addpoint1(pt1,finitcompsoffset);
+   end;
+  end;
+  setcomponentpos(component,pt1);
  end;
 end;
 
@@ -1363,42 +1375,38 @@ end;
 procedure tdesignwindow.dopaste(const usemousepos: boolean;
                                                   const adata: string);
 var
- widget1: twidget;
+ comp1: tcomponent;
+ bo1: boolean;
 begin
  try
-  if form <> nil then begin
-   fclipinitcomps:= not usemousepos;
-   with fselections do begin
-    if count = 1 then begin
-     widget1:= twidget(items[0]);
-     if iswidgetcomp(widget1) and form.checkdescendent(widget1) then begin
-      fuseinitcompsoffset:= usemousepos;
-      fcompsoffsetused:= false;
-      if usemousepos then begin
-       finitcompsoffset:= subpoint(dosnaptogrid(fmousepos),widget1.rootpos);
-      end;
-      clear;
-      if adata <> '' then begin
-       pastefromobjecttext(adata,module,widget1,{$ifdef FPC}@{$endif}doinitcomponent);
-      end
-      else begin
-       pastefromclipboard(module,widget1,{$ifdef FPC}@{$endif}doinitcomponent);
-      end;
-      updateselections;
+//  if form <> nil then begin
+  fclipinitcomps:= not usemousepos;
+  comp1:= module;
+  bo1:= true;
+  fuseinitcompsoffset:= usemousepos;
+  fcompsoffsetused:= false;
+  finitcompsoffset:= dosnaptogrid(fmousepos);
+  with fselections do begin
+   if count = 1 then begin
+    comp1:= items[0];
+    if iswidgetcomp(comp1) then begin
+     bo1:= form.checkdescendent(twidget(comp1));
+     if usemousepos then begin
+      finitcompsoffset:= subpoint(dosnaptogrid(fmousepos),
+                                          twidget(comp1).rootpos);
      end;
     end;
    end;
-  end
-  else begin
-   fselections.clear;
-   if adata <> '' then begin
-    fselections.pastefromobjecttext(adata,module,module,{$ifdef FPC}@{$endif}doinitcomponent);
-   end
-   else begin
-    fselections.pastefromclipboard(module,module,{$ifdef FPC}@{$endif}doinitcomponent);
+   if bo1 then begin
+    clear;
+    if adata <> '' then begin
+     pastefromobjecttext(adata,module,comp1,{$ifdef FPC}@{$endif}doinitcomponent);
+    end
+    else begin
+     pastefromclipboard(module,comp1,{$ifdef FPC}@{$endif}doinitcomponent);
+    end;
+    updateselections;
    end;
-   updateselections;
-   //todo
   end;
  finally
   fclipinitcomps:= false;
@@ -1625,8 +1633,7 @@ begin
   itembyname('cut').enabled:= bo2;
   itembyname('delete').enabled:= bo2;
   itembyname('undelete').enabled:= fdelobjs <> nil;
-  itembyname('paste').enabled:= iswidgetcomp(selectcomp) or 
-                                isdatasubmodule(selectcomp);
+  itembyname('paste').enabled:= iswidgetcomp(selectcomp) or (fform = nil);
   itembyname('editcomp').enabled:= designer.componentcanedit;
   {
   bo1:= not(
