@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -193,7 +193,19 @@ begin
 end;
 
 procedure tmsedatamodule.getchildren(proc: tgetchildproc; root: tcomponent);
+var
+ int1: integer;
+ comp1: tcomponent;
 begin
+ if root = self then begin
+  for int1:= 0 to componentcount - 1 do begin
+   comp1:= components[int1];
+   if not (cssubcomponent in comp1.componentstyle) and
+                             (comp1.getparentcomponent = self) then begin
+    proc(comp1);
+   end;
+  end;
+ end;
  getcompchildren(proc,root);
 end;
 
