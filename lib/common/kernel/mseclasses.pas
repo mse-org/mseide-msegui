@@ -610,6 +610,8 @@ type
   private
    fgetchildrenbefore: getchildreneventty;
    fancestorlookuplevel: integer;
+   fchildlevel: integer;
+   fnoancestor: boolean; //used for copy paste of inherited components
    procedure DetermineAncestor(Component : TComponent);
    procedure AddToAncestorList(Component: TComponent);
    procedure DoFindAncestor(Component : TComponent);
@@ -627,7 +629,8 @@ type
    procedure WriteChildren(Component : TComponent);
    procedure WriteComponentData(Instance: TComponent);
   public
-   constructor create(stream: tstream; bufsize: integer);
+   constructor create(const stream: tstream; const bufsize: integer;
+                            const anoancestor: boolean = false);
    destructor destroy; override;
    procedure WriteComponent(Component: TComponent);
    procedure writedescendent(const aroot: tcomponent;
@@ -1036,7 +1039,7 @@ var
  writer1: twritermse;
 begin
  stream1:= tmemorystream.create;
- writer1:= twritermse.create(stream1,1024);
+ writer1:= twritermse.create(stream1,1024,false);
  writer1.onfindancestor:= aonfindancestor;
 // writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
  writer1.writedescendent(acomp,aancestor);
@@ -1634,7 +1637,7 @@ begin
   result.Create(aowner);
   stream:= tmemorystream.Create;
   try
-   writer:= twritermse.Create(stream,4096);
+   writer:= twritermse.Create(stream,4096,false);
    try
     writer.OnFindAncestor:= onfindancestor;
     writer.Writerootcomponent(source);
@@ -2013,7 +2016,7 @@ begin
  stream1:= tmemorystream.Create;
  stream2:= tmemorystream.Create;
  try
-  writer:= trefreshwriter.Create(stream1,4096);
+  writer:= trefreshwriter.Create(stream1,4096,false);
   tabbefore:= nil; //compiler warning
   if destmethodtab <> nil then begin
    tabbefore:= swapmethodtable(descendent,destmethodtab);
@@ -2034,7 +2037,7 @@ begin
    writeln('changes descendent->oldancestor');
    stream3.writetotext(output);
  {$endif}
-  writer:= twritermse.Create(stream2,4096);
+  writer:= twritermse.Create(stream2,4096,false);
   inl:= csinline in newancestor.componentstate;
 //  anc:= csancestor in newancestor.componentstate;
   if csinline in descendent.componentstate then begin
@@ -4642,11 +4645,13 @@ end;
 
 { twritermse }
 
-constructor twritermse.Create(Stream: TStream; BufSize: Integer);
+constructor twritermse.create(const stream: tstream; const bufsize: integer;
+                               const anoancestor: boolean);
 begin
 // fgetchildrenbefore:= onstreaminggetchildren;
 // onstreaminggetchildren:= @dogetchildren;
- inherited;
+ fnoancestor:= anoancestor;
+ inherited create(stream,bufsize);
 end;
 
 destructor twritermse.destroy;
@@ -4755,24 +4760,30 @@ begin
   SR:=FRoot;
   SA:=FAncestor;
   SRA:=FRootAncestor;
+  inc(fchildlevel);
   Try
     tcomponentcracker(Component).FComponentState:=
                tcomponentcracker(Component).FComponentState+[csWriting];
     Try
+     if not fnoancestor or (csinline in component.componentstate) or
+                                                 (fchildlevel > 1) then begin
       // Possibly set ancestor.
       DetermineAncestor(Component);
-      DoFindAncestor(Component); // Mainly for IDE when a parent form had an ancestor renamed...
-      // Will call WriteComponentData.
-      Component.WriteState(Self);
-      FDriver.EndList;
+      DoFindAncestor(Component); 
+            // Mainly for IDE when a parent form had an ancestor renamed...
+     end;
+     Component.WriteState(Self);
+           // Will call WriteComponentData.
+     FDriver.EndList;
     Finally
       tcomponentcracker(Component).FComponentState:=
                    tcomponentcracker(Component).FComponentState-[csWriting];
     end;
   Finally
-    FAncestor:=SA;
-    FRoot:=SR;
-    FRootAncestor:=SRA;
+   dec(fchildlevel);
+   FAncestor:=SA;
+   FRoot:=SR;
+   FRootAncestor:=SRA;
   end;
  end;
 end;

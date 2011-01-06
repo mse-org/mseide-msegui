@@ -3120,7 +3120,7 @@ begin
     if stream2 = nil then begin
      stream2:= stream1;
      stream1.clear;
-     writer:= twritermse.create(stream1,4096);
+     writer:= twritermse.create(stream1,4096,false);
      try
       writer.onfindancestor:= {$ifdef FPC}@{$endif}findancestor;
       writer.writedescendent(ar1[int1],ar1[int1+1]);
@@ -3307,31 +3307,28 @@ begin
    ancestor:= fdescendentinstancelist.findancestor(component);
    rootancestor:= ancestor;
   end;
- end
- else begin
-//  if (component.owner <> nil) and (ancestor <> rootancestor) and
-//          not (csinline in component.owner.componentstate) and
-//          not (csancestor in component.owner.componentstate) then begin
-  if csancestor in component.componentstate then begin
-   if ancestor = nil then begin
-    str1:= aname;
-    comp1:= component.owner;
-    while comp1 <> nil do begin
-     if csinline in comp1.componentstate then begin
-      break;
-     end;
-     str1:= comp1.name+'.'+str1;
-     comp1:= comp1.owner;     
+ end;
+ if csancestor in component.componentstate then begin
+  if ancestor = nil then begin
+   str1:= aname;
+   comp1:= component.owner;
+   while comp1 <> nil do begin
+    if csinline in comp1.componentstate then begin
+     break;
     end;
+    str1:= comp1.name+'.'+str1;
+    comp1:= comp1.owner;     
+   end;
+   if comp1 <> nil then begin
+    comp1:= fdescendentinstancelist.findancestor(comp1);
     if comp1 <> nil then begin
-     comp1:= fdescendentinstancelist.findancestor(comp1);
-     if comp1 <> nil then begin
-      ancestor:= findnestedcomponent(comp1,str1);
-     end;
+     ancestor:= findnestedcomponent(comp1,str1);
     end;
    end;
-  end
-  else begin
+  end;
+ end
+ else begin
+  if not (csinline in component.componentstate) then begin
    ancestor:= nil; //has name duplicate
   end;
  end; 
@@ -4164,7 +4161,7 @@ begin
  with amodule^ do begin
   fdescendentinstancelist.beginstreaming;
   doswapmethodpointers(instance,false);
-  writer1:= twritermse.create(astream,4096);
+  writer1:= twritermse.create(astream,4096,false);
   beginstreaming(amodule);
   try
    if csancestor in instance.componentstate then begin

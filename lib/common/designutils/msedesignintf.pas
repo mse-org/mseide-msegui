@@ -868,7 +868,7 @@ begin
    for int1:= 0 to count -1 do begin
     component:= items[int1];
     if not isembedded(component) then begin
-     writer:= twritermse.Create(binstream,4096);
+     writer:= twritermse.Create(binstream,4096,true);
      comp1:= tcomponent.create(nil);
      try
       modulepo:= designer.modules.findmodulebycomponent(component);
@@ -878,8 +878,6 @@ begin
       designer.doswapmethodpointers(component,false);
       try
        writer.Root:= component.Owner;
-//       tfilercracker(writer).flookuproot:= comp1;
-//        //force qualified component names     
        designer.descendentinstancelist.beginstreaming; 
        comp2:= designer.descendentinstancelist.findancestor(component);
        writer.ancestor:= comp2;
@@ -936,7 +934,7 @@ begin
      parent:= nil;
     end;
     binstream:= tmemorystream.create;
-    writer:= twritermse.create(binstream,4096);
+    writer:= twritermse.create(binstream,4096,true);
     textstream:= ttextstream.create;
     try
      writer.root:= co1.owner;
@@ -1494,7 +1492,7 @@ begin
  comp1:= tcomponent.create(nil);
  comp1.designinfo:= 1;
  stream1:= tmemorystream.create;
- writer1:= twritermse.create(stream1,256);
+ writer1:= twritermse.create(stream1,256,false);
  twriter1(writer1).writeproperties(comp1);
  writer1.free;
  stream1.position:= 0;

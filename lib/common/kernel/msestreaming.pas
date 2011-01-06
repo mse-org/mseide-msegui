@@ -177,7 +177,7 @@ procedure writecomponentmse(const astream: tstream; const acomp: tcomponent);
 var
  writer1: twritermse;
 begin
- writer1:= twritermse.create(astream,4096);
+ writer1:= twritermse.create(astream,4096,false);
  try
   writer1.writerootcomponent(acomp);
  finally
@@ -321,7 +321,7 @@ begin
  reader:= nil;
  stream:= tmemorystream.Create;
  try
-  writer:= twritermse.Create(stream,1024);
+  writer:= twritermse.Create(stream,1024,false);
   writer.WriteListBegin;
   twriter1(writer).WriteProperties(source);
   writer.WriteListEnd;
