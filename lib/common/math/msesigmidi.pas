@@ -371,30 +371,32 @@ begin
  with fchannels[ftrackevent.event.channel and $0f] do begin
   if connections <> nil then begin
    po1:= first;
-   by1:= ftrackevent.event.par1;
-   repeat
-    if po1^.key = by1 then begin
-     break;
+   if po1 <> last then begin
+    by1:= ftrackevent.event.par1;
+    repeat
+     if po1^.key = by1 then begin
+      break;
+     end;
+     po1:= po1^.next;
+    until po1 = nil;
+    if po1 <> first then begin
+     if po1 = nil then begin
+      po1:= last;
+     end;
+     if po1^.prev <> nil then begin
+      po1^.prev^.next:= po1^.next;
+     end;
+     if (po1^.next <> nil) then begin
+      po1^.next^.prev:= po1^.prev;
+     end;
+     first^.prev:= po1;
+     po1^.next:= first;
+     first:= po1;
+     if po1 = last then begin
+      last:= po1^.prev;
+     end;
+     po1^.prev:= nil;
     end;
-    po1:= po1^.next;
-   until po1 = nil;
-   if po1 <> first then begin
-    if po1 = nil then begin
-     po1:= last;
-    end;
-    if po1^.prev <> nil then begin
-     po1^.prev^.next:= po1^.next;
-    end;
-    if (po1^.next <> nil) then begin
-     po1^.next^.prev:= po1^.prev;
-    end;
-    first^.prev:= po1;
-    po1^.next:= first;
-    first:= po1;
-    if po1 = last then begin
-     last:= po1^.prev;
-    end;
-    po1^.prev:= nil;
    end;
    po1^.key:= by1;
    po1^.dest.midievent(ftrackevent.event);
