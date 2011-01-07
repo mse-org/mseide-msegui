@@ -594,7 +594,7 @@ object mainfo: tmainfo
             onexecute = viewprojectonexecute
           end        
           item
-            caption = '&Source'
+            caption = 'So&urce'
             state = [as_localcaption, as_localonexecute]
             onexecute = viewprojectsourceonexecute
           end        
@@ -619,11 +619,11 @@ object mainfo: tmainfo
                 state = [as_localcaption, as_localonexecute]
                 onexecute = newemptyprojectexe
               end>
-            caption = 'New'
+            caption = '&New'
             state = [as_localcaption]
           end        
           item
-            caption = 'Open'
+            caption = 'O&pen'
             state = [as_localcaption, as_localonexecute]
             onexecute = openprojectonexecute
           end        
@@ -633,12 +633,12 @@ object mainfo: tmainfo
             onexecute = openprojectcopyexecute
           end        
           item
-            caption = 'Save'
+            caption = '&Save'
             state = [as_localcaption, as_localonexecute]
             onexecute = projectsaveonexecute
           end        
           item
-            caption = 'Save as'
+            caption = 'Save &as'
             state = [as_localcaption, as_localonexecute]
             onexecute = saveprojectasonexecute
           end        
@@ -648,7 +648,7 @@ object mainfo: tmainfo
             onexecute = saveprojectcopyexecute
           end        
           item
-            caption = 'Close'
+            caption = '&Close'
             name = 'close'
             state = [as_localcaption, as_localonexecute]
             onexecute = closeprojectactonexecute
