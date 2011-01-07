@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,7 +53,8 @@ begin
                             tsigwavetable,tsignoise,tsigfuncttable,tsigenvelope,
                             tsigsampler,tsigscope,tsigscopefft,
                             tsigfft,tfft,tsigsamplerfft,
-                            tsigslider,tsigkeyboard,tsigmidiconnector,
+                            tsigslider,tsigkeyboard,
+                            tsigmidiconnector,tsigmidimulticonnector,
                             twavetableedit,tfuncttableedit,tffttableedit,tenvelopeedit
                             ]);
  registercomponenttabhints(['Math'],['Experimental mathematical and signal processing components']);

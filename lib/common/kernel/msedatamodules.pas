@@ -99,6 +99,7 @@ type
                  write fonterminated;
  end;
  datamoduleclassty = class of tmsedatamodule;
+ msedatamodulearty = array of tmsedatamodule;
  
 function createmsedatamodule(const aclass: tclass;
                      const aclassname: pshortstring): tmsecomponent;

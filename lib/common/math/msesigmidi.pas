@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit msesigmidi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msesignal,classes,msemidi,msetypes;
+ msesignal,classes,msemidi,msetypes,mseclasses,msedatamodules;
 const
  defaultmidiattackvalueoptions = [vso_exp,vso_null];
  defaultmidiattackvaluemin = 0.1; //20 dB
@@ -21,6 +21,8 @@ const
  defaultmidipressurevaluemin = 0;
  defaultmidivaluemax = 1;
  paramscale = 1/127; //0..1
+ defaultconnectorname = 'midiconn';
+ 
 type  
  tsigmidisource = class;
  
@@ -127,10 +129,36 @@ type
   public
    destructor destroy; override;
  end;
- 
+
+ getvoiceclasseventty = procedure(const sender: tobject;
+                           var avoiceclass: datamoduleclassty) of object;
+
+ tsigmidimulticonnector = class(tmsecomponent)
+  private
+   fongetvoiceclass: getvoiceclasseventty;
+   fconnectorname: string;
+   fcount: integer;
+   fvoices: msedatamodulearty;
+   fconnectors: sigmidiconnectorarty;
+   function getitems(const index: integer): tmsedatamodule;
+   procedure setitems(const index: integer; const avalue: tmsedatamodule);
+   procedure setcount(const avalue: integer);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   property items[const index: integer]: tmsedatamodule read getitems 
+                                                     write setitems; default;
+  published
+   property connectorname: string read fconnectorname write fconnectorname;
+                                //'' -> defaultconnectorname
+   property ongetvoiceclass: getvoiceclasseventty read fongetvoiceclass 
+                                                  write fongetvoiceclass;
+   property count: integer read fcount write setcount default 0;
+ end;
+  
 implementation
 uses
- math,msedatalist;
+ math,msedatalist,sysutils;
 type
  tsigcontroller1 = class(tsigcontroller);
  tdoubleoutputconn1 = class(tdoubleoutputconn);
@@ -441,6 +469,84 @@ begin
   end;
  end;
  include(fsigstate,smss_patchvalid);
+end;
+
+{ tsigmidimulticonnector }
+
+constructor tsigmidimulticonnector.create(aowner: tcomponent);
+begin
+ inherited;
+end;
+
+destructor tsigmidimulticonnector.destroy;
+begin
+ count:= 0;
+ inherited;
+end;
+
+function tsigmidimulticonnector.getitems(const index: integer): tmsedatamodule;
+begin
+ checkarrayindex(fvoices,index);
+ result:= fvoices[index];
+end;
+
+procedure tsigmidimulticonnector.setitems(const index: integer;
+               const avalue: tmsedatamodule);
+begin
+ checkarrayindex(fvoices,index);
+ fvoices[index].assign(avalue);
+end;
+
+procedure tsigmidimulticonnector.setcount(const avalue: integer);
+var
+ int1: integer;
+ class1: datamoduleclassty;
+ str1: string;
+ voice1: tmsedatamodule;
+ conn1: tcomponent;
+begin
+ if not (csdesigning in componentstate) then begin
+  try
+   if avalue <> fcount then begin
+    if avalue < fcount then begin
+     for int1:= fcount-1 downto avalue do begin
+      fvoices[int1].free;
+      dec(fcount);
+     end;
+    end
+    else begin
+     if not assigned(fongetvoiceclass) then begin
+      raise exception.create('ongetvoiceclass not assigned.');
+     end;
+     class1:= nil;
+     fongetvoiceclass(self,class1);
+     if class1 = nil then begin
+      raise exception.create('Voiceclass not set.');
+     end;
+     str1:= fconnectorname;
+     if str1 = '' then begin
+      str1:= defaultconnectorname;
+     end;
+     setlength(fvoices,avalue);     //max
+     setlength(fconnectors,avalue); //max
+     for int1:= fcount to avalue - 1 do begin
+      voice1:= class1.create(nil);
+      conn1:= voice1.findcomponent(str1);
+      if not (conn1 is tsigmidiconnector) then begin
+       voice1.free;
+       raise exception.create('tmidiconnector "'+str1+'" not found.');
+      end;
+      fvoices[int1]:= voice1;
+      fconnectors[int1]:= tsigmidiconnector(conn1);
+     end;
+    end;  
+   end;
+  finally
+   setlength(fvoices,fcount);
+   setlength(fconnectors,fcount);
+  end;
+ end;
+ fcount:= avalue;
 end;
 
 end.
