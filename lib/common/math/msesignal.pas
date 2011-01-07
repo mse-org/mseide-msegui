@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -391,12 +391,12 @@ type
 
  tdoubleoutconnarrayprop = class(tpersistentarrayprop)
   private
+   function getitems(const index: integer): tdoubleoutputconn;
+  protected
    fsigintf: isigclient;
    fname: string;
    fowner: tcomponent;
    feventdriven: boolean;
-   function getitems(const index: integer): tdoubleoutputconn;
-  protected
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure dosizechanged; override;
   public

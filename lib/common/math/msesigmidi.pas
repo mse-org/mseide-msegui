@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -130,30 +130,71 @@ type
    destructor destroy; override;
  end;
 
+ tsigmidimulticonnector = class;
  getvoiceclasseventty = procedure(const sender: tobject;
                            var avoiceclass: datamoduleclassty) of object;
+ initvoiceeventty = procedure(const sender: tsigmidimulticonnector;
+               const aindex: integer; const avoice: tmsedatamodule) of object;
 
- tsigmidimulticonnector = class(tmsecomponent)
+ tdoubleoutmultiinpconn = class(tdoubleoutputconn)
+  private
+   finputs: tdoubleinpconnarrayprop;
+  public
+   constructor create(const aowner: tcomponent;
+         const asigintf: isigclient; const aeventdriven: boolean); override;
+   destructor destroy; override;
+   property inputs: tdoubleinpconnarrayprop read finputs;
+ end;
+ 
+ tmidiconnoutputarrayprop = class(tdoubleoutconnarrayprop)
+  private
+   function getitems(const index: integer): tdoubleoutmultiinpconn;
+  protected
+   procedure createitem(const index: integer; var item: tpersistent); override;
+  public
+   property items[const index: integer]: tdoubleoutmultiinpconn 
+                                              read getitems; default;
+ end;
+ 
+ tsigmidimulticonnector = class(tdoublesigcomp,isigclient)
   private
    fongetvoiceclass: getvoiceclasseventty;
    fconnectorname: string;
-   fcount: integer;
+   finputcount: integer;
+   foutputcount: integer;
    fvoices: msedatamodulearty;
    fconnectors: sigmidiconnectorarty;
+   foninitvoice: initvoiceeventty;
+   foutputs: tmidiconnoutputarrayprop;
+   finps: doublepoarty;
+   fouts: doublepoarty;
+   foutputhigh,finputhigh: integer;
    function getitems(const index: integer): tmsedatamodule;
    procedure setitems(const index: integer; const avalue: tmsedatamodule);
-   procedure setcount(const avalue: integer);
+   procedure setinputcount(const avalue: integer);
+   function getoutputcount: integer;
+   procedure setoutputcount(const avalue: integer);
+  protected
+    //isigclient
+   procedure initmodel; override;
+   function gethandler: sighandlerprocty; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
+   function getinputar: inputconnarty; override;
+   function getoutputar: outputconnarty; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property items[const index: integer]: tmsedatamodule read getitems 
                                                      write setitems; default;
+   property outputs: tmidiconnoutputarrayprop read foutputs;
   published
    property connectorname: string read fconnectorname write fconnectorname;
                                 //'' -> defaultconnectorname
    property ongetvoiceclass: getvoiceclasseventty read fongetvoiceclass 
                                                   write fongetvoiceclass;
-   property count: integer read fcount write setcount default 0;
+   property oninitvoice: initvoiceeventty read foninitvoice write foninitvoice;
+   property inputcount: integer read finputcount write setinputcount default 0;
+   property outputcount: integer read getoutputcount write setoutputcount default 0;
  end;
   
 implementation
@@ -162,6 +203,7 @@ uses
 type
  tsigcontroller1 = class(tsigcontroller);
  tdoubleoutputconn1 = class(tdoubleoutputconn);
+ tdoubleinputconn1 = class(tdoubleinputconn);
  
 { tsigmidiconnector }
 
@@ -471,16 +513,49 @@ begin
  include(fsigstate,smss_patchvalid);
 end;
 
+{ tdoubleoutmultiinpconn }
+
+constructor tdoubleoutmultiinpconn.create(const aowner: tcomponent;
+               const asigintf: isigclient; const aeventdriven: boolean);
+begin
+ finputs:= tdoubleinpconnarrayprop.create(asigintf);
+ inherited;
+end;
+
+destructor tdoubleoutmultiinpconn.destroy;
+begin
+ finputs.free;
+ inherited;
+end;
+
+{ tmidiconnoutputarrayprop }
+
+function tmidiconnoutputarrayprop.getitems(const index: integer):
+                                             tdoubleoutmultiinpconn;
+begin
+ result:= tdoubleoutmultiinpconn(inherited getitems(index));
+end;
+
+procedure tmidiconnoutputarrayprop.createitem(const index: integer;
+               var item: tpersistent);
+begin
+ item:= tdoubleoutmultiinpconn.create(fowner,fsigintf,feventdriven);
+ tdoubleoutputconn(item).name:= fname+inttostr(index);
+end;
+
 { tsigmidimulticonnector }
 
 constructor tsigmidimulticonnector.create(aowner: tcomponent);
 begin
+ foutputs:= tmidiconnoutputarrayprop.create(self,'output',
+                                              isigclient(self),false);
  inherited;
 end;
 
 destructor tsigmidimulticonnector.destroy;
 begin
- count:= 0;
+ inputcount:= 0;
+ foutputs.free;
  inherited;
 end;
 
@@ -497,7 +572,7 @@ begin
  fvoices[index].assign(avalue);
 end;
 
-procedure tsigmidimulticonnector.setcount(const avalue: integer);
+procedure tsigmidimulticonnector.setinputcount(const avalue: integer);
 var
  int1: integer;
  class1: datamoduleclassty;
@@ -507,11 +582,11 @@ var
 begin
  if not (csdesigning in componentstate) then begin
   try
-   if avalue <> fcount then begin
-    if avalue < fcount then begin
-     for int1:= fcount-1 downto avalue do begin
+   if avalue <> finputcount then begin
+    if avalue < finputcount then begin
+     for int1:= finputcount-1 downto avalue do begin
       fvoices[int1].free;
-      dec(fcount);
+      dec(finputcount);
      end;
     end
     else begin
@@ -529,7 +604,10 @@ begin
      end;
      setlength(fvoices,avalue);     //max
      setlength(fconnectors,avalue); //max
-     for int1:= fcount to avalue - 1 do begin
+     for int1:= 0 to foutputs.count - 1 do begin
+      foutputs[int1].inputs.count:= avalue; //max
+     end;
+     for int1:= finputcount to avalue - 1 do begin
       voice1:= class1.create(nil);
       conn1:= voice1.findcomponent(str1);
       if not (conn1 is tsigmidiconnector) then begin
@@ -539,14 +617,98 @@ begin
       fvoices[int1]:= voice1;
       fconnectors[int1]:= tsigmidiconnector(conn1);
      end;
+     if assigned(foninitvoice) then begin
+      for int1:= finputcount to avalue - 1 do begin
+       foninitvoice(self,int1,fvoices[int1]);
+      end;
+     end;
     end;  
    end;
   finally
-   setlength(fvoices,fcount);
-   setlength(fconnectors,fcount);
+   setlength(fvoices,finputcount);
+   setlength(fconnectors,finputcount);
+   for int1:= 0 to foutputs.count - 1 do begin
+    foutputs[int1].inputs.count:= finputcount;
+   end;
   end;
  end;
- fcount:= avalue;
+ finputcount:= avalue;
+end;
+
+function tsigmidimulticonnector.gethandler: sighandlerprocty;
+begin
+ result:= @sighandler;
+end;
+
+procedure tsigmidimulticonnector.sighandler(const ainfo: psighandlerinfoty);
+var
+ int1,int2: integer;
+ po1: pdouble;
+ do1: double;
+begin
+ po1:= pdouble(finps);
+ if po1 <> nil then begin
+  for int1:= 0 to foutputhigh do begin
+   do1:= 0;
+   for int2:= finputhigh downto 0 do begin
+    do1:= do1 + po1^;
+    inc(po1);
+   end;
+   fouts[int1]^:= do1;
+  end;
+  ainfo^.dest^:= pdouble(finps)^;
+ end;
+end;
+
+function tsigmidimulticonnector.getinputar: inputconnarty;
+var
+ int1,int2,int3: integer;
+begin
+ setlength(result,finputcount*foutputs.count);
+ int3:= 0;
+ for int1:= 0 to foutputs.count - 1 do begin
+  with foutputs[int1] do begin
+   for int2:= 0 to finputcount - 1 do begin
+    result[int3]:= inputs[int2];
+    inc(int3);
+   end;
+  end;
+ end;
+end;
+
+function tsigmidimulticonnector.getoutputar: outputconnarty;
+begin
+ result:= outputconnarty(copy(foutputs.fitems));
+end;
+
+procedure tsigmidimulticonnector.initmodel;
+var
+ int1,int2,int3: integer;
+begin
+ setlength(fouts,foutputs.count);
+ setlength(finps,finputcount*foutputs.count);
+ finputhigh:= finputcount-1;
+ foutputhigh:= foutputs.count-1;
+ int3:= 0;
+ for int1:= 0 to foutputhigh do begin
+  with foutputs[int1] do begin
+   fouts[int1]:= @fvalue;
+   for int2:= 0 to finputhigh do begin
+    finps[int3]:= @tdoubleinputconn1(inputs[int2]).fvalue;
+    inc(int3);
+   end;
+  end;
+ end;
+end;
+
+function tsigmidimulticonnector.getoutputcount: integer;
+begin
+ result:= foutputs.count;
+end;
+
+procedure tsigmidimulticonnector.setoutputcount(const avalue: integer);
+begin
+ foutputs.count:= avalue;
 end;
 
 end.
