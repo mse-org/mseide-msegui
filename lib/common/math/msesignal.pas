@@ -288,6 +288,7 @@ type
    destructor destroy;
    procedure siginput(const asource: doublearty);
    procedure clear; override;
+   property output: tdoubleoutputconn read foutput;
   published
    property value: double read fvalue write setvalue;
    property oninput: sigineventty read foninput write foninput;

@@ -161,6 +161,7 @@ type
    fongetvoiceclass: getvoiceclasseventty;
    fconnectorname: string;
    finputcount: integer;
+   fpendinginputcount: integer;
    foutputcount: integer;
    fvoices: msedatamodulearty;
    fconnectors: sigmidiconnectorarty;
@@ -169,12 +170,19 @@ type
    finps: doublepoarty;
    fouts: doublepoarty;
    foutputhigh,finputhigh: integer;
+   fsource: tsigmidisource;
+   fchannel: integer;
    function getitems(const index: integer): tmsedatamodule;
    procedure setitems(const index: integer; const avalue: tmsedatamodule);
    procedure setinputcount(const avalue: integer);
    function getoutputcount: integer;
    procedure setoutputcount(const avalue: integer);
+   procedure setsource(const avalue: tsigmidisource);
+   procedure updatesource;
+   procedure setchannel(const avalue: integer);
   protected
+   procedure doinitvoice(const aindex: integer);
+   procedure loaded; override;
     //isigclient
    procedure initmodel; override;
    function gethandler: sighandlerprocty; override;
@@ -188,13 +196,16 @@ type
                                                      write setitems; default;
    property outputs: tmidiconnoutputarrayprop read foutputs;
   published
+   property inputcount: integer read finputcount write setinputcount default 0;
+   property outputcount: integer read getoutputcount 
+                                             write setoutputcount default 0;
+   property source: tsigmidisource read fsource write setsource;   
+   property channel: integer read fchannel write setchannel default 0;
    property connectorname: string read fconnectorname write fconnectorname;
                                 //'' -> defaultconnectorname
    property ongetvoiceclass: getvoiceclasseventty read fongetvoiceclass 
                                                   write fongetvoiceclass;
    property oninitvoice: initvoiceeventty read foninitvoice write foninitvoice;
-   property inputcount: integer read finputcount write setinputcount default 0;
-   property outputcount: integer read getoutputcount write setoutputcount default 0;
  end;
   
 implementation
@@ -572,6 +583,22 @@ begin
  fvoices[index].assign(avalue);
 end;
 
+procedure tsigmidimulticonnector.doinitvoice(const aindex: integer);
+begin
+ lock;
+ try
+  with fconnectors[aindex] do begin
+   channel:= self.fchannel;
+   source:= self.fsource;
+  end;
+  if assigned(foninitvoice) then begin
+   foninitvoice(self,aindex,fvoices[aindex]);
+  end;
+ finally
+  unlock;
+ end;
+end;
+
 procedure tsigmidimulticonnector.setinputcount(const avalue: integer);
 var
  int1: integer;
@@ -580,59 +607,88 @@ var
  voice1: tmsedatamodule;
  conn1: tcomponent;
 begin
- if not (csdesigning in componentstate) then begin
-  try
-   if avalue <> finputcount then begin
-    if avalue < finputcount then begin
-     for int1:= finputcount-1 downto avalue do begin
-      fvoices[int1].free;
-      dec(finputcount);
+ if finputcount <> avalue then begin  
+  if csloading in componentstate then begin
+   fpendinginputcount:= avalue;
+  end
+  else begin
+   if csdesigning in componentstate then begin
+    finputcount:= avalue;
+   end
+   else begin
+    lock;
+    try
+     if avalue <> finputcount then begin
+      if avalue < finputcount then begin
+       for int1:= finputcount-1 downto avalue do begin
+        fvoices[int1].free;
+        dec(finputcount);
+       end;
+      end
+      else begin
+       if not assigned(fongetvoiceclass) then begin
+        raise exception.create('ongetvoiceclass not assigned.');
+       end;
+       class1:= nil;
+       fongetvoiceclass(self,class1);
+       if class1 = nil then begin
+        raise exception.create('Voiceclass not set.');
+       end;
+       str1:= fconnectorname;
+       if str1 = '' then begin
+        str1:= defaultconnectorname;
+       end;
+       setlength(fvoices,avalue);     //max
+       setlength(fconnectors,avalue); //max
+       for int1:= 0 to foutputs.count - 1 do begin
+        foutputs[int1].inputs.count:= avalue; //max
+       end;
+       for int1:= finputcount to avalue - 1 do begin
+        voice1:= class1.create(nil);
+        conn1:= voice1.findcomponent(str1);
+        if not (conn1 is tsigmidiconnector) then begin
+         voice1.free;
+         raise exception.create('tmidiconnector "'+str1+'" not found.');
+        end;
+        fvoices[int1]:= voice1;
+        fconnectors[int1]:= tsigmidiconnector(conn1);
+        inc(finputcount);
+        doinitvoice(int1);
+       end;
+      end;  
      end;
-    end
-    else begin
-     if not assigned(fongetvoiceclass) then begin
-      raise exception.create('ongetvoiceclass not assigned.');
-     end;
-     class1:= nil;
-     fongetvoiceclass(self,class1);
-     if class1 = nil then begin
-      raise exception.create('Voiceclass not set.');
-     end;
-     str1:= fconnectorname;
-     if str1 = '' then begin
-      str1:= defaultconnectorname;
-     end;
-     setlength(fvoices,avalue);     //max
-     setlength(fconnectors,avalue); //max
+    finally
+     setlength(fvoices,finputcount);
+     setlength(fconnectors,finputcount);
      for int1:= 0 to foutputs.count - 1 do begin
-      foutputs[int1].inputs.count:= avalue; //max
+      foutputs[int1].inputs.count:= finputcount;
      end;
-     for int1:= finputcount to avalue - 1 do begin
-      voice1:= class1.create(nil);
-      conn1:= voice1.findcomponent(str1);
-      if not (conn1 is tsigmidiconnector) then begin
-       voice1.free;
-       raise exception.create('tmidiconnector "'+str1+'" not found.');
-      end;
-      fvoices[int1]:= voice1;
-      fconnectors[int1]:= tsigmidiconnector(conn1);
-     end;
-     if assigned(foninitvoice) then begin
-      for int1:= finputcount to avalue - 1 do begin
-       foninitvoice(self,int1,fvoices[int1]);
-      end;
-     end;
-    end;  
-   end;
-  finally
-   setlength(fvoices,finputcount);
-   setlength(fconnectors,finputcount);
-   for int1:= 0 to foutputs.count - 1 do begin
-    foutputs[int1].inputs.count:= finputcount;
+     unlock;
+    end;
    end;
   end;
  end;
- finputcount:= avalue;
+end;
+
+procedure tsigmidimulticonnector.initmodel;
+var
+ int1,int2,int3: integer;
+begin
+ setlength(fouts,foutputs.count);
+ setlength(finps,finputcount*foutputs.count);
+ finputhigh:= finputcount-1;
+ foutputhigh:= foutputs.count-1;
+ int3:= 0;
+ for int1:= 0 to foutputhigh do begin
+  with foutputs[int1] do begin
+   fouts[int1]:= @fvalue;
+   for int2:= 0 to finputhigh do begin
+    finps[int3]:= @tdoubleinputconn1(inputs[int2]).fvalue;
+    inc(int3);
+   end;
+  end;
+ end;
+ inherited;
 end;
 
 function tsigmidimulticonnector.gethandler: sighandlerprocty;
@@ -643,15 +699,15 @@ end;
 procedure tsigmidimulticonnector.sighandler(const ainfo: psighandlerinfoty);
 var
  int1,int2: integer;
- po1: pdouble;
+ po1: ppdouble;
  do1: double;
 begin
- po1:= pdouble(finps);
+ po1:= ppdouble(finps);
  if po1 <> nil then begin
   for int1:= 0 to foutputhigh do begin
    do1:= 0;
    for int2:= finputhigh downto 0 do begin
-    do1:= do1 + po1^;
+    do1:= do1 + po1^^;
     inc(po1);
    end;
    fouts[int1]^:= do1;
@@ -681,26 +737,6 @@ begin
  result:= outputconnarty(copy(foutputs.fitems));
 end;
 
-procedure tsigmidimulticonnector.initmodel;
-var
- int1,int2,int3: integer;
-begin
- setlength(fouts,foutputs.count);
- setlength(finps,finputcount*foutputs.count);
- finputhigh:= finputcount-1;
- foutputhigh:= foutputs.count-1;
- int3:= 0;
- for int1:= 0 to foutputhigh do begin
-  with foutputs[int1] do begin
-   fouts[int1]:= @fvalue;
-   for int2:= 0 to finputhigh do begin
-    finps[int3]:= @tdoubleinputconn1(inputs[int2]).fvalue;
-    inc(int3);
-   end;
-  end;
- end;
-end;
-
 function tsigmidimulticonnector.getoutputcount: integer;
 begin
  result:= foutputs.count;
@@ -709,6 +745,50 @@ end;
 procedure tsigmidimulticonnector.setoutputcount(const avalue: integer);
 begin
  foutputs.count:= avalue;
+end;
+
+procedure tsigmidimulticonnector.setsource(const avalue: tsigmidisource);
+begin
+ if avalue <> fsource then begin
+  setlinkedvar(avalue,fsource);
+  updatesource;
+ end;
+end;
+
+procedure tsigmidimulticonnector.updatesource;
+var
+ int1: integer;
+begin
+ lock;
+ try
+  for int1:= 0 to high(fconnectors) do begin
+   with fconnectors[int1] do begin
+    channel:= self.fchannel;
+    source:= self.fsource;
+   end;
+  end;
+ finally
+  unlock;
+ end;
+end;
+
+procedure tsigmidimulticonnector.setchannel(const avalue: integer);
+begin
+ if fchannel <> avalue then begin
+  fchannel:= avalue;
+  updatesource;
+ end;
+end;
+
+procedure tsigmidimulticonnector.loaded;
+begin
+ inherited;
+ lock;
+ try
+  inputcount:= fpendinginputcount;
+ finally
+  unlock;
+ end;
 end;
 
 end.

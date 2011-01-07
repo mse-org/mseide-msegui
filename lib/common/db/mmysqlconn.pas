@@ -65,8 +65,8 @@ Type
  bindinginfoty = record
   length: integer;
   buffer: pointer;
-  isnull: boolean;
-  isblob: boolean
+  isnull: longbool;
+  isblob: longbool;
  end;
  pbindinginfoty = ^bindinginfoty;
  bindinginfoarty = array of bindinginfoty;
@@ -374,7 +374,6 @@ begin
    is_null:= @bi^.isnull;
   end;
  end;
- bufsize:= 0;
  case fieldtype of
   ftinteger: begin
    bufsize:= sizeof(longint);
@@ -399,6 +398,10 @@ begin
   ftblob,ftmemo,ftgraphic: begin
    bufsize:= 0;
    pbuffer_type^:= mysql_type_blob;
+  end
+  else begin
+   bufsize:= 0;            //dummy
+   pbuffer_type^:= mysql_type_null;
   end;
  end;
  pbuffer_length^:= bufsize;
@@ -434,7 +437,6 @@ begin
    buffer:= abuffer;
   end;
  end;
- bufsize:= 0;
  case fieldtype of
   ftinteger: begin
    bufsize:= sizeof(longint);
@@ -459,6 +461,10 @@ begin
   ftblob,ftmemo,ftgraphic: begin
    bufsize:= abufsize;
    pbuffer_type^:= mysql_type_blob;
+  end
+  else begin
+   bufsize:= 0;          //dummy
+   pbuffer_type^:= mysql_type_null;
   end;
  end;
  bi^.length:= bufsize;
@@ -962,7 +968,9 @@ begin
                                  inputparambindings,nil,sizeof(mysql_time));
        end;
        ftstring,ftwidestring,ftblob,ftmemo,ftfixedchar,ftfixedwidechar: begin
-        //setup later
+        setupinputbinding(int1,ftstring,inputbindings,
+                                 inputparambindings,nil,0);
+           //dummy for NULL, setup later
        end;
        else begin
         freebindings(inputbindings);
