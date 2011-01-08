@@ -3767,10 +3767,12 @@ end;
 
 procedure tsigenvelope.dosync;
 begin
+ beginupdate;
  attack_values:= master.attack_values;
  decay_values:= master.decay_values;
  release_values:= master.release_values;
  loopstart:= master.loopstart;
+ endupdate;
 end;
 
 procedure tsigenvelope.setmaster(const avalue: tsigenvelope);
