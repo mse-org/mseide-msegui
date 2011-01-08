@@ -1667,6 +1667,7 @@ type
       mysql_thread_id: function (mysql:PMYSQL):culong;extdecl;
       mysql_character_set_name: function (mysql:PMYSQL):Pchar;extdecl;
       mysql_set_character_set: function (mysql:PMYSQL; csname:Pchar):cint;extdecl;
+      mysql_get_character_set_info: procedure(mysql : PMYSQL; charset : PMY_CHARSET_INFO);extdecl;
       mysql_init: function (mysql:PMYSQL):PMYSQL;extdecl;
       mysql_ssl_set: function (mysql:PMYSQL; key:Pchar; cert:Pchar; ca:Pchar; capath:Pchar;
                  cipher:Pchar):my_bool;extdecl;
@@ -2119,7 +2120,7 @@ end;
 
 procedure initializemysql(const sonames: array of filenamety);
 const 
- funcs: array[0..89] of funcinfoty = (
+ funcs: array[0..91] of funcinfoty = (
   (n: 'mysql_affected_rows'; d: @mysql_affected_rows),
   (n: 'mysql_autocommit'; d: @mysql_autocommit),
   (n: 'mysql_change_user'; d: @mysql_change_user),
@@ -2209,7 +2210,9 @@ const
   (n: 'mysql_stmt_affected_rows'; d: @mysql_stmt_affected_rows),
   (n: 'mysql_stmt_insert_id'; d: @mysql_stmt_insert_id),
   (n: 'mysql_stmt_field_count'; d: @mysql_stmt_field_count),
-  (n: 'mysql_ssl_set'; d: @mysql_ssl_set)
+  (n: 'mysql_ssl_set'; d: @mysql_ssl_set),
+  (n: 'mysql_character_set_name'; d: @mysql_character_set_name),
+  (n: 'mysql_get_character_set_info'; d: @mysql_get_character_set_info)
   );
  funcsopt: array[0..0] of funcinfoty = (
    (n: 'mysql_get_ssl_cipher'; d: @mysql_get_ssl_cipher)

@@ -40,7 +40,7 @@ interface
 
 uses
   Classes, SysUtils,msqldb,db,dynlibs,msestrings,msedb,
-  mysqldyn,msetypes;
+  mysqldyn,msetypes,ctypes;
 
 Type
 
@@ -63,10 +63,10 @@ Type
   end;
  
  bindinginfoty = record
-  length: integer;
+  length: culong;
   buffer: pointer;
-  isnull: boolean;
-  isblob: boolean
+  isnull: boolean; //-> cchar
+  isblob: boolean; //-> cchar
  end;
  pbindinginfoty = ^bindinginfoty;
  bindinginfoarty = array of bindinginfoty;
@@ -133,7 +133,8 @@ Type
 //    Procedure ConnectToServer; virtual;
 //    Procedure SelectDatabase; virtual;
 //    function MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer; var NewType: TFieldType; var NewSize: Integer): Boolean;
-    function MySQLDataType(const afield: mysql_field; out NewType: TFieldType;
+    function MySQLDataType(const afield: mysql_field;
+               const charsetinfo: my_charset_info; out NewType: TFieldType;
                out NewSize: Integer; out newprecision: integer): Boolean;
     function MySQLWriteData(const acursor: tsqlcursor; AType: enum_field_types;
                         ASize: Integer;
@@ -373,7 +374,6 @@ begin
    is_null:= @bi^.isnull;
   end;
  end;
- bufsize:= 0;
  case fieldtype of
   ftinteger: begin
    bufsize:= sizeof(longint);
@@ -398,6 +398,10 @@ begin
   ftblob,ftmemo,ftgraphic: begin
    bufsize:= 0;
    pbuffer_type^:= mysql_type_blob;
+  end
+  else begin
+   bufsize:= 0;            //dummy
+   pbuffer_type^:= mysql_type_null;
   end;
  end;
  pbuffer_length^:= bufsize;
@@ -433,7 +437,6 @@ begin
    buffer:= abuffer;
   end;
  end;
- bufsize:= 0;
  case fieldtype of
   ftinteger: begin
    bufsize:= sizeof(longint);
@@ -458,6 +461,10 @@ begin
   ftblob,ftmemo,ftgraphic: begin
    bufsize:= abufsize;
    pbuffer_type^:= mysql_type_blob;
+  end
+  else begin
+   bufsize:= 0;          //dummy
+   pbuffer_type^:= mysql_type_null;
   end;
  end;
  bi^.length:= bufsize;
@@ -961,7 +968,9 @@ begin
                                  inputparambindings,nil,sizeof(mysql_time));
        end;
        ftstring,ftwidestring,ftblob,ftmemo,ftfixedchar,ftfixedwidechar: begin
-        //setup later
+        setupinputbinding(int1,ftstring,inputbindings,
+                                 inputparambindings,nil,0);
+           //dummy for NULL, setup later
        end;
        else begin
         freebindings(inputbindings);
@@ -1073,6 +1082,7 @@ end;
 //function tmysqlconnection.MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer;
 //   var NewType: TFieldType; var NewSize: Integer): Boolean;
 function tmysqlconnection.MySQLDataType(const afield: mysql_field;
+                const charsetinfo: my_charset_info;
                 out NewType: TFieldType; out NewSize: Integer;
                 out newprecision: integer): Boolean;
 begin
@@ -1122,6 +1132,9 @@ begin
                             FIELD_TYPE_SET: begin
      NewType:= ftString;
      NewSize:= length;
+     if charsetinfo.mbmaxlen > 0 then begin
+      newsize:= newsize div charsetinfo.mbmaxlen;
+     end;
     end;
     {$ifdef mysql41}     
     field_type_blob: begin
@@ -1153,10 +1166,11 @@ var
  fd: tfielddef;
  str1: ansistring;
  res1: pmysql_res;
-
+ charsetinfo: my_charset_info;
 begin
  fielddefs.clear;
  C:= tmysqlcursor(cursor);
+ mysql_get_character_set_info(c.fconn,@charsetinfo);
  if c.fprepstatement <> nil then begin
   fc:= c.fresultfieldcount;
   c.fresultbindinginfo:= nil; //initialize with zeros
@@ -1181,7 +1195,7 @@ begin
     c.fprimarykeyfieldname:= name;
    end;
   end;
-  if MySQLDataType(field^,DFT,DFS,precision) then begin
+  if MySQLDataType(field^,charsetinfo,DFT,DFS,precision) then begin
    if not(dft in varsizefields) then begin
     dfs:= 0;
    end;
