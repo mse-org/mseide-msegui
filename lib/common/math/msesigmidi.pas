@@ -712,7 +712,9 @@ begin
    end;
    fouts[int1]^:= do1;
   end;
-  ainfo^.dest^:= pdouble(finps)^;
+  if fouts <> nil then begin
+   ainfo^.dest^:= ppdouble(fouts)^^;
+  end;
  end;
 end;
 

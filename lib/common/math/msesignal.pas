@@ -748,6 +748,7 @@ type
    procedure setrelease_options(const avalue: sigenveloperangeoptionsty);
    procedure setmaster(const avalue: tsigenvelope);
    procedure setamplitude(const avalue: tdoubleinputconn);
+   procedure dosync;
   protected
    fattackpending: boolean;
    freleasepending: boolean;
@@ -3009,14 +3010,19 @@ procedure tsigwavetable.setmaster(const avalue: tsigwavetable);
 var
  tab1: tsigwavetable;
 begin
- tab1:= avalue;
- while tab1 <> nil do begin
-  if tab1 = self then begin
-   raise exception.create('Recursive master.');
+ if avalue <> fmaster then begin
+  tab1:= avalue;
+  while tab1 <> nil do begin
+   if tab1 = self then begin
+    raise exception.create('Recursive master.');
+   end;
+   tab1:= tab1.master;
   end;
-  tab1:= tab1.master;
+  setlinkedvar(avalue,fmaster);
+  if avalue <> nil then begin
+   table:= avalue.table;
+  end;
  end;
- setlinkedvar(avalue,fmaster);
 end;
 
 procedure tsigwavetable.objectevent(const sender: tobject;
@@ -3260,14 +3266,19 @@ procedure tsigfuncttable.setmaster(const avalue: tsigfuncttable);
 var
  tab1: tsigfuncttable;
 begin
- tab1:= avalue;
- while tab1 <> nil do begin
-  if tab1 = self then begin
-   raise exception.create('Recursive master.');
+ if avalue <> fmaster then begin
+  tab1:= avalue;
+  while tab1 <> nil do begin
+   if tab1 = self then begin
+    raise exception.create('Recursive master.');
+   end;
+   tab1:= tab1.master;
   end;
-  tab1:= tab1.master;
+  setlinkedvar(avalue,fmaster);
+  if avalue <> nil then begin
+   table:= avalue.table;
+  end;
  end;
- setlinkedvar(avalue,fmaster);
 end;
 
 procedure tsigfuncttable.objectevent(const sender: tobject;
@@ -3754,28 +3765,38 @@ begin
  end;
 end;
 
+procedure tsigenvelope.dosync;
+begin
+ attack_values:= master.attack_values;
+ decay_values:= master.decay_values;
+ release_values:= master.release_values;
+ loopstart:= master.loopstart;
+end;
+
 procedure tsigenvelope.setmaster(const avalue: tsigenvelope);
 var
  env1: tsigenvelope;
 begin
- env1:= avalue;
- while env1 <> nil do begin
-  if env1 = self then begin
-   raise exception.create('Recursive master.');
+ if avalue <> fmaster then begin
+  env1:= avalue;
+  while env1 <> nil do begin
+   if env1 = self then begin
+    raise exception.create('Recursive master.');
+   end;
+   env1:= env1.master;
   end;
-  env1:= env1.master;
+  setlinkedvar(avalue,fmaster);
+  if avalue <> nil then begin
+   dosync;
+  end;
  end;
- setlinkedvar(avalue,fmaster);
 end;
 
 procedure tsigenvelope.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  if (event = oe_changed) and (sender <> nil) and (sender = master) then begin
-  attack_values:= master.attack_values;
-  decay_values:= master.decay_values;
-  release_values:= master.release_values;
-  loopstart:= master.loopstart;
+  dosync;
  end;
 end;
 

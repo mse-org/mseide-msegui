@@ -40,7 +40,7 @@ interface
 
 uses
   Classes, SysUtils,msqldb,db,dynlibs,msestrings,msedb,
-  mysqldyn,msetypes;
+  mysqldyn,msetypes,ctypes;
 
 Type
 
@@ -63,10 +63,10 @@ Type
   end;
  
  bindinginfoty = record
-  length: integer;
+  length: culong;
   buffer: pointer;
-  isnull: longbool;
-  isblob: longbool;
+  isnull: boolean; //-> cchar
+  isblob: boolean; //-> cchar
  end;
  pbindinginfoty = ^bindinginfoty;
  bindinginfoarty = array of bindinginfoty;
