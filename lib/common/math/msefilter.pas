@@ -516,6 +516,7 @@ constructor tsigfilter.create(aowner: tcomponent);
 begin
  fcutofffrequ:= tdoubleinputconn.create(self,isigclient(self));
  fcutofffrequ.name:= 'cutofffrequ';
+ fcutofffrequ.value:= 0.01;
  fqfactor:= tdoubleinputconn.create(self,isigclient(self));
  fqfactor.name:= 'qfactor';
  fqfactor.value:= 1;
@@ -597,37 +598,39 @@ var
  i,o: double;
  int1: integer;
 begin
- if (fqfactorpo^ <> fqfactorbefore) or 
-                             (fcutofffrequpo^ <> fcutoffbefore) then begin
-  fcutoffbefore:= fcutofffrequpo^;
-  fqfactorbefore:= fqfactorpo^;
-  fT2_4:= fcutoffbefore*2*pi;        // fT
-  if not (sfo_noprewarp in foptions) then begin
-   fT2_4:= 2*tan(0.5*fT2_4);
+ if fcutofffrequpo^ > 0 then begin
+  if (fqfactorpo^ <> fqfactorbefore) or 
+                              (fcutofffrequpo^ <> fcutoffbefore) then begin
+   fcutoffbefore:= fcutofffrequpo^;
+   fqfactorbefore:= fqfactorpo^;
+   fT2_4:= fcutoffbefore*2*pi;        // fT
+   if not (sfo_noprewarp in foptions) then begin
+    fT2_4:= 2*tan(0.5*fT2_4);
+   end;
+   if sfo_passgainfix in foptions then begin
+    fgain:= 1;
+   end
+   else begin
+    fgain:= (1/sqrt(sqrt(2)))/sqrt(fqfactorbefore);
+   end;
+   QfT_4:= 4/(fqfactorbefore*fT2_4);  // 4/(Q*fT)
+   fT2_4:= 4/(fT2_4*fT2_4);           // 4/fT^2
+   den:= 1 + QfT_4 + fT2_4;           // 1 + 4/(Q*fT) + 4/fT^2
+   fb0:= fgain/den;
+   fb1:= 2*fb0;
+   fb2:= fb0;
+   fa1:= 2*(1-fT2_4)/den;
+   fa2:= (1-QfT_4+fT2_4)/den;
   end;
-  if sfo_passgainfix in foptions then begin
-   fgain:= 1;
-  end
-  else begin
-   fgain:= (1/sqrt(sqrt(2)))/sqrt(fqfactorbefore);
+  i:= 0;
+  for int1:= 0 to finphigh do begin
+   i:= i+finps[int1]^;
   end;
-  QfT_4:= 4/(fqfactorbefore*fT2_4);  // 4/(Q*fT)
-  fT2_4:= 4/(fT2_4*fT2_4);           // 4/fT^2
-  den:= 1 + QfT_4 + fT2_4;           // 1 + 4/(Q*fT) + 4/fT^2
-  fb0:= fgain/den;
-  fb1:= 2*fb0;
-  fb2:= fb0;
-  fa1:= 2*(1-fT2_4)/den;
-  fa2:= (1-QfT_4+fT2_4)/den;
+  o:= fz1+i*fb0;
+  fz1:= fz2-o*fa1+i*fb1;
+  fz2:= i*fb2-o*fa2;
+  ainfo^.dest^:= o*famplitudepo^;
  end;
- i:= 0;
- for int1:= 0 to finphigh do begin
-  i:= i+finps[int1]^;
- end;
- o:= fz1+i*fb0;
- fz1:= fz2-o*fa1+i*fb1;
- fz2:= i*fb2-o*fa2;
- ainfo^.dest^:= o*famplitudepo^;
 end;
 
 procedure tsigfilter.sighandlerbp2bi(const ainfo: psighandlerinfoty);
@@ -636,28 +639,30 @@ var
  i,o: double;
  int1: integer;
 begin
- if (fcutofffrequpo^ <> fcutoffbefore) or 
-                     (fqfactorpo^ <> fqfactorbefore) then begin
-  fcutoffbefore:= fcutofffrequpo^;
-  fqfactorbefore:= fqfactorpo^;
-  fT:= fcutoffbefore*2*pi;           // fT
-  if not (sfo_noprewarp in foptions) then begin
-   fT:= 2*tan(0.5*fT);
+ if fcutofffrequpo^ > 0 then begin
+  if ((fcutofffrequpo^ <> fcutoffbefore) or 
+                      (fqfactorpo^ <> fqfactorbefore)) then begin
+   fcutoffbefore:= fcutofffrequpo^;
+   fqfactorbefore:= fqfactorpo^;
+   fT:= fcutoffbefore*2*pi;           // fT
+   if not (sfo_noprewarp in foptions) then begin
+    fT:= 2*tan(0.5*fT);
+   end;
+   if sfo_passgainfix in foptions then begin
+    fgain:= 4/(fT*fqfactorbefore);
+   end
+   else begin
+    fgain:= 4/(fT*sqrt(fqfactorbefore));
+   end;
+   QfT_4:= 4/(fqfactorbefore*fT);     // 4/(Q*fT)
+   fT2_4:= 4/(fT*fT);                 // 4/fT^2
+   den:= 1 + QfT_4 + fT2_4;           // 1 + 4/(Q*fT) + 4/fT^2
+   fb0:= fgain/den;
+   fb1:= 0;
+   fb2:= -fb0;
+   fa1:= 2*(1-fT2_4)/den;
+   fa2:= (1-QfT_4+fT2_4)/den;
   end;
-  if sfo_passgainfix in foptions then begin
-   fgain:= 4/(fT*fqfactorbefore);
-  end
-  else begin
-   fgain:= 4/(fT*sqrt(fqfactorbefore));
-  end;
-  QfT_4:= 4/(fqfactorbefore*fT);     // 4/(Q*fT)
-  fT2_4:= 4/(fT*fT);                 // 4/fT^2
-  den:= 1 + QfT_4 + fT2_4;           // 1 + 4/(Q*fT) + 4/fT^2
-  fb0:= fgain/den;
-  fb1:= 0;
-  fb2:= -fb0;
-  fa1:= 2*(1-fT2_4)/den;
-  fa2:= (1-QfT_4+fT2_4)/den;
  end;
  i:= 0;
  for int1:= 0 to finphigh do begin

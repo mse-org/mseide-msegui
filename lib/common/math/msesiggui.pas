@@ -432,23 +432,25 @@ procedure tsigslider.updatesigvalue;
 var
  do1: double;
 begin
- if (sieo_exp in foptions) and (fmin > 0) and (fmax > 0) then begin
-  do1:= fmin*exp(fvalue*(ln(fmax)-ln(fmin)));
- end
- else begin
-  do1:= fvalue*(fmax-fmin)+fmin; 
- end;
- if canevent(tmethod(fontransformvalue)) then begin
-  fontransformvalue(self,real(do1));
- end;
- lock;
- try
-  fsigvalue:= do1;
-  if fcontroller <> nil then begin
-   tsigcontroller1(fcontroller).execevent(isigclient(self));
+ if componentstate * [csdesigning,csloading] = [] then begin
+  if (sieo_exp in foptions) and (fmin > 0) and (fmax > 0) then begin
+   do1:= fmin*exp(fvalue*(ln(fmax)-ln(fmin)));
+  end
+  else begin
+   do1:= fvalue*(fmax-fmin)+fmin; 
   end;
- finally
-  unlock;
+  if canevent(tmethod(fontransformvalue)) then begin
+   fontransformvalue(self,real(do1));
+  end;
+  lock;
+  try
+   fsigvalue:= do1;
+   if fcontroller <> nil then begin
+    tsigcontroller1(fcontroller).execevent(isigclient(self));
+   end;
+  finally
+   unlock;
+  end;
  end;
 end;
 

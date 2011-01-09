@@ -2640,7 +2640,7 @@ begin
     ftablename:= ffrompart;
     int1:= pos(' ',ftablename);
     if int1 > 0 then begin
-     setlength(ftablename,int1); //use real name only
+     setlength(ftablename,int1-1); //use real name only
     end;
     fupdateable:= not readonly;
    end;
