@@ -1044,7 +1044,7 @@ end;
 
 procedure tcustommseform.doeventloopstart;
 begin
- if (fstatfile <> nil) and 
+ if (fstatfile <> nil) and not (csdesigning in componentstate) and
        (foptions*[fo_autoreadstat,fo_delayedreadstat] = 
         [fo_autoreadstat,fo_delayedreadstat]) then begin
   fstatfile.readstat;
