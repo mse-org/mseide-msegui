@@ -73,6 +73,7 @@ begin
  inherited;
  famplitude:= tdoubleinputconn.create(self,isigclient(self));
  famplitude.name:= 'amplitude';
+ famplitude.value:= 1;
  foffset:= tdoubleinputconn.create(self,isigclient(self));
  foffset.name:= 'offset';
 end;

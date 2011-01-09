@@ -33,7 +33,7 @@ type
                fo_minimized,fo_maximized,fo_fullscreen,
                fo_closeonesc,fo_cancelonesc,fo_closeonenter,fo_closeonf10,
                fo_globalshortcuts,fo_localshortcuts,
-               fo_autoreadstat,fo_autowritestat,
+               fo_autoreadstat,fo_delayedreadstat,fo_autowritestat,
                fo_savepos,fo_savezorder,fo_savestate);
  formoptionsty = set of formoptionty;
 
@@ -858,7 +858,9 @@ end;
 procedure tcustommseform.doafterload;
 begin
  if (fstatfile <> nil) and (fo_autoreadstat in foptions) then begin
-  fstatfile.readstat;
+  if not (fo_delayedreadstat in foptions) then begin
+   fstatfile.readstat;
+  end;
  end;
  registerhandlers;
  doonloaded;
@@ -1042,6 +1044,11 @@ end;
 
 procedure tcustommseform.doeventloopstart;
 begin
+ if (fstatfile <> nil) and 
+       (foptions*[fo_autoreadstat,fo_delayedreadstat] = 
+        [fo_autoreadstat,fo_delayedreadstat]) then begin
+  fstatfile.readstat;
+ end;
  if canevent(tmethod(foneventloopstart)) then begin
   foneventloopstart(self);
  end;
