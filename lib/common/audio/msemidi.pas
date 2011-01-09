@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -58,6 +58,7 @@ type
                       mmk_pitchbend,mmk_system);
 type
  midieventinfoty = record
+  track: integer;
   kind: midimessagekindty;
   channel: byte;
   par1: byte;
@@ -74,12 +75,10 @@ type
    ftrackcount: integer;
    ftimedivision: longword;
    ftracksize: longword;
-//   ftrackpo: longword;
    fmetadata: string;
    fstatus: byte;
    fmaxdatasize: longword;
-//   ftimescaleus: real;
-//   ftimesum: real;
+   ftracknum: integer;
   protected
    function readtrackbyte(out adata: byte): boolean;
    function readtrackdatabyte(out adata: byte): boolean; //check bit 7
@@ -91,7 +90,6 @@ type
    function readbyte(out adata: byte): boolean;
    function readword(out adata: word): boolean;
    function readlongword(out adata: word): boolean;
-//   function readvarlength(out adata: longword): boolean;
    function readchunkheader(out adata: midichunkheaderty): boolean;
 
    function checkchunkheader(const aid: idstringty;
@@ -104,13 +102,11 @@ type
    function starttrack: boolean;
    function skiptrack: boolean;
    function readtrackdata(out adata: trackeventinfoty): boolean;
-//   function readtrackevent(out adata: trackeventinfoty): boolean;
    function getmetadata(const alen: integer; out avalue: longword): boolean;
    property timedivision: longword read ftimedivision;
    property metadata: string read fmetadata;
    property maxdatasize: longword read fmaxdatasize write fmaxdatasize 
                          default defaultmidimaxdatasize;
-//   property timescaleus: real read ftimescaleus; //miditicks to microseconds
  end;
 
  trackeventty = procedure(const sender: tobject;
@@ -356,6 +352,7 @@ function tmidistream.initfile: boolean;
 var
  header: midifileheaderty;
 begin
+ ftracknum:= -1;
  result:= readfileheader(header);
  if result then begin
   with header do begin
@@ -377,6 +374,7 @@ begin
     ftracksize:= header.size;
     if id = 'MTrk' then begin
      ftrackcount:= ftracksize;
+     inc(ftracknum);
      break;
     end;
     result:= skip(ftracksize);
@@ -396,6 +394,7 @@ begin
     ftracksize:= header.size;
     if id = 'MTrk' then begin
      result:= skip(ftracksize);
+     inc(ftracknum);
      break;
     end;
     result:= skip(ftracksize);
@@ -480,16 +479,10 @@ var
  rea1: real;
 begin
  fillchar(adata,sizeof(adata),0);
+ adata.event.track:= ftracknum;
  fmetadata:= '';
  result:= readtrackvarlength(adata.delta);
  if not result then exit;
-{
- if adata.delta <> 0 then begin
-  ftimesum:= ftimesum + adata.delta*ftimescaleus;
-  adata.delta:= round(ftimesum);
-  ftimesum:= ftimesum - adata.delta;
- end;
- }  
  result:= readtrackbyte(stat1);
  if not result then exit;
  if (stat1 and $80) <> 0 then begin

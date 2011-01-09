@@ -11,7 +11,8 @@ unit msesigmidi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msesignal,classes,msemidi,msetypes,mseclasses,msedatamodules;
+ msesignal,classes,msemidi,msetypes,mseclasses,msedatamodules,msearrayprops,
+ msehash;
 const
  defaultmidiattackvalueoptions = [vso_exp,vso_null];
  defaultmidiattackvaluemin = 0.1; //20 dB
@@ -22,6 +23,8 @@ const
  defaultmidivaluemax = 1;
  paramscale = 1/127; //0..1
  defaultconnectorname = 'midiconn';
+ channelmaxcount = 16;
+ channelmask = channelmaxcount - 1;
  
 type  
  tsigmidisource = class;
@@ -114,10 +117,68 @@ type
  end;
    
  sigchannelinfoarty = array of sigchannelinfoty;
+
+ patchinfoty = record
+  channel: integer;
+  track: integer;
+  notemin: integer;
+  notemax: integer;
+  midichannel: midichannelty;
+ end;
+ ppatchinfoty = ^patchinfoty;
+
+ patchty = record
+  info: patchinfoty;
+  index: integer;
+ end;
+ ppatchty = ^patchty;
  
+ tmidipatch = class(townedpersistent)
+  private
+   finfo: patchinfoty;
+   procedure setchannel(const avalue: integer);
+   procedure settrack(const avalue: integer);
+   procedure setnotemin(const avalue: integer);
+   procedure setnotemax(const avalue: integer);
+   procedure setmidichannel(const avalue: midichannelty);
+  protected
+   procedure changed;
+  public
+   constructor create(aowner: tobject); override;
+  published
+   property channel: integer read finfo.channel write setchannel default 0;
+   property track: integer read finfo.track write settrack default -1;
+                          //-1 -> all
+   property midichannel: midichannelty read finfo.midichannel 
+                                     write setmidichannel default mic_0;
+   property notemin: integer read finfo.notemin write setnotemin default 0;
+   property notemax: integer read finfo.notemax write setnotemax default 127;
+ end;
+ 
+ tmidipatches = class(townedpersistentarrayprop)
+  protected
+  public
+   constructor create(const aowner: tsigmidisource); reintroduce;
+ end;
+ 
+ tpatchinfolist = class(tptruinthashdatalist)
+  private
+   findexresult: integer;
+   fnote: byte;
+   fnoterange: integer;
+   procedure checkeventindex(const aitemdata; var accept: boolean);
+  public
+   constructor create;
+   function add(const apatch: tmidipatch): ppatchty;
+   function geteventindex(const aevent: midieventinfoty): integer;
+ end;
+  
  tsigmidisource = class(tmidisource)
   private
    fconnections: sigmidiconnectorarty;
+   fpatches: tmidipatches;
+   fpatchpanel: tpatchinfolist;
+   procedure setpatches(const avalue: tmidipatches);
   protected
    fsigstate: sigmidisourcestatesty;
    fchannels: sigchannelinfoarty;
@@ -127,7 +188,10 @@ type
    procedure updatepatch;
    procedure patchchanged;
   public
+   constructor create(avalue: tcomponent); override;
    destructor destroy; override;
+  published
+   property patches: tmidipatches read fpatches write setpatches;
  end;
 
  tsigmidimulticonnector = class;
@@ -412,6 +476,13 @@ end;
 
 { tsigmidisource }
 
+constructor tsigmidisource.create(avalue: tcomponent);
+begin
+ fpatches:= tmidipatches.create(self);
+ fpatchpanel:= tpatchinfolist.create;
+ inherited;
+end;
+
 destructor tsigmidisource.destroy;
 var
  int1: integer;
@@ -420,6 +491,8 @@ begin
   fconnections[int1].fsource:= nil;
  end;
  inherited;
+ fpatchpanel.free;
+ fpatches.free;
 end;
 
 procedure tsigmidisource.patchchanged;
@@ -449,38 +522,41 @@ begin
  if not (smss_patchvalid in fsigstate) then begin
   updatepatch;
  end;
- with fchannels[ftrackevent.event.channel and $0f] do begin
-  if connections <> nil then begin
-   po1:= first;
-   if po1 <> last then begin
-    by1:= ftrackevent.event.par1;
-    repeat
-     if po1^.key = by1 then begin
-      break;
+ int1:= fpatchpanel.geteventindex(ftrackevent.event);
+ if int1 >= 0 then begin
+  with fchannels[int1] do begin
+   if connections <> nil then begin
+    po1:= first;
+    if po1 <> last then begin
+     by1:= ftrackevent.event.par1;
+     repeat
+      if po1^.key = by1 then begin
+       break;
+      end;
+      po1:= po1^.next;
+     until po1 = nil;
+     if po1 <> first then begin
+      if po1 = nil then begin
+       po1:= last;
+      end;
+      if po1^.prev <> nil then begin
+       po1^.prev^.next:= po1^.next;
+      end;
+      if (po1^.next <> nil) then begin
+       po1^.next^.prev:= po1^.prev;
+      end;
+      first^.prev:= po1;
+      po1^.next:= first;
+      first:= po1;
+      if po1 = last then begin
+       last:= po1^.prev;
+      end;
+      po1^.prev:= nil;
      end;
-     po1:= po1^.next;
-    until po1 = nil;
-    if po1 <> first then begin
-     if po1 = nil then begin
-      po1:= last;
-     end;
-     if po1^.prev <> nil then begin
-      po1^.prev^.next:= po1^.next;
-     end;
-     if (po1^.next <> nil) then begin
-      po1^.next^.prev:= po1^.prev;
-     end;
-     first^.prev:= po1;
-     po1^.next:= first;
-     first:= po1;
-     if po1 = last then begin
-      last:= po1^.prev;
-     end;
-     po1^.prev:= nil;
     end;
+    po1^.key:= by1;
+    po1^.dest.midievent(ftrackevent.event);
    end;
-   po1^.key:= by1;
-   po1^.dest.midievent(ftrackevent.event);
   end;
  end;
 end;
@@ -488,22 +564,39 @@ end;
 procedure tsigmidisource.updatepatch;
 var
  int1,int2: integer;
+ destlist: tpointerptruinthashdatalist;
+ patch1: tmidipatch;
+ po1: ppatchty;
+ po2: pointer;
 begin
  fchannels:= nil;
- setlength(fchannels,16);
+ fpatchpanel.clear;
+ destlist:= tpointerptruinthashdatalist.create;
+ int2:= 0;
  for int1:= 0 to high(fconnections) do begin
-  with fchannels[fconnections[int1].channel and $0f] do begin
+  if not destlist.addunique(fconnections[int1].channel,pointer(ptrint(int2))) then begin
+   inc(int2);
+  end;
+ end;
+ setlength(fchannels,int2);
+ for int1:= 0 to high(fconnections) do begin
+  with fchannels[ptrint(destlist.find(fconnections[int1].channel))] do begin
    int2:= high(connections)+1;
    setlength(connections,int2+1);
    connections[int2].dest:= fconnections[int1];
   end;
  end;
+ for int1:= 0 to fpatches.count - 1 do begin
+  patch1:= tmidipatch(fpatches.fitems[int1]);  
+  if destlist.find(patch1.channel,po2) then begin
+   fpatchpanel.add(patch1)^.index:= ptrint(po2);
+  end;
+ end;
+ destlist.free;
  for int2:= 0 to high(fchannels) do begin
   with fchannels[int2] do begin
    first:= nil;
    last:= nil;
-//   connections:= nil;
-//   setlength(connections,length(fconnections)); //init with zero
    if high(connections) >= 0 then begin
     first:= @connections[0];
     last:= @connections[high(connections)];
@@ -522,6 +615,11 @@ begin
   end;
  end;
  include(fsigstate,smss_patchvalid);
+end;
+
+procedure tsigmidisource.setpatches(const avalue: tmidipatches);
+begin
+ fpatches.assign(avalue);
 end;
 
 { tdoubleoutmultiinpconn }
@@ -790,6 +888,113 @@ begin
   inputcount:= fpendinginputcount;
  finally
   unlock;
+ end;
+end;
+
+{ tmidipatches }
+
+constructor tmidipatches.create(const aowner: tsigmidisource);
+begin
+ inherited create(aowner,tmidipatch);
+end;
+
+{ tmidipatch }
+
+constructor tmidipatch.create(aowner: tobject);
+begin
+ finfo.track:= -1;
+ finfo.notemax:= 127;
+ inherited;
+end;
+
+procedure tmidipatch.changed;
+begin
+ tsigmidisource(fowner).patchchanged;
+end;
+
+procedure tmidipatch.setchannel(const avalue: integer);
+begin
+ if finfo.channel <> avalue then begin
+  finfo.channel:= avalue and channelmask;
+  changed;
+ end;
+end;
+
+procedure tmidipatch.setmidichannel(const avalue: midichannelty);
+begin
+ if finfo.midichannel <> avalue then begin
+  finfo.midichannel:= avalue;
+  changed;
+ end;
+end;
+
+procedure tmidipatch.settrack(const avalue: integer);
+begin
+ if finfo.track <> avalue then begin
+  finfo.track:= avalue;
+  changed;
+ end;
+end;
+
+procedure tmidipatch.setnotemin(const avalue: integer);
+begin
+ if finfo.notemin <> avalue then begin
+  finfo.notemin:= avalue;
+  changed;
+ end;
+end;
+
+procedure tmidipatch.setnotemax(const avalue: integer);
+begin
+ if finfo.notemax <> avalue then begin
+  finfo.notemax:= avalue;
+  changed;
+ end;
+end;
+
+{ tpatchinfolist }
+
+constructor tpatchinfolist.create;
+begin
+ inherited create(sizeof(patchty));
+end;
+
+function tpatchinfolist.add(const apatch: tmidipatch): ppatchty;
+begin
+ with apatch do begin
+  result:= inherited add((track shl 5) or ord(midichannel));
+  result^.info:= finfo;
+ end;
+end;
+
+function tpatchinfolist.geteventindex(const aevent: midieventinfoty): integer;
+var
+ puint1: ptruint;
+begin
+ findexresult:= -1;
+ fnote:= aevent.par1 and $7f;
+ fnoterange:= bigint;
+ puint1:= (aevent.track shl 5) or aevent.channel;
+ internalfind(puint1,@checkeventindex);
+ if findexresult = -1 then begin
+  puint1:= puint1 or ($ffffffff shl 5); //-1
+  internalfind(puint1,@checkeventindex);
+ end;
+ result:= findexresult;
+end;
+
+procedure tpatchinfolist.checkeventindex(const aitemdata; var accept: boolean);
+var
+ int1: integer;
+begin
+ with ppatchty(@ptruintdataty(aitemdata).data)^,info do begin
+  if (fnote >= notemin) and (fnote <= notemax) then begin
+   int1:= notemax - notemin;
+   if int1 < fnoterange then begin
+    findexresult:= index;
+    fnoterange:= int1;
+   end;
+  end;
  end;
 end;
 

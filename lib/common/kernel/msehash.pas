@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1721,28 +1721,6 @@ begin
  if result <> nil then begin
   result:= @pptruinthashdataty(result)^.data.data;
  end;
-{
- result:= nil;
- if count > 0 then begin
-  uint1:= fhashtable[hash(key) and fmask];
-  if uint1 <> 0 then begin
-   po1:= pptruinthashdataty(pchar(fdata) + uint1);
-   while true do begin
-    if po1^.data.key = key then begin
-     break;
-    end;
-    if po1^.header.nexthash = 0 then begin
-     po1:= nil;
-     break;
-    end;
-    po1:= pptruinthashdataty(pchar(fdata) + po1^.header.nexthash);
-   end;
-   if po1 <> nil then begin
-    result:= @po1^.data.data;
-   end;
-  end;
- end;
-}
 end;
 
 function tptruinthashdatalist.addunique(const akey: ptruint): pointer;
@@ -1752,12 +1730,7 @@ begin
   result:= add(akey);
  end;
 end;
-{
-function tptruinthashdatalist.dohash(const aitem: phashdataty): hashvaluety;
-begin
- result:= hash(pptruinthashdataty(aitem)^.data.key);
-end;
-}
+
 function tptruinthashdatalist.checkkey(const akey; const aitemdata): boolean;
 begin
  result:= ptruint(akey) = ptruintdataty(aitemdata).key;
@@ -1811,8 +1784,8 @@ begin
  if po1 = nil then begin
   result:= false;
   po1:= inherited add(akey);
+  po1^:= avalue;
  end;
- po1^:= avalue;
 end;
 
 procedure tpointerptruinthashdatalist.checkexact(const aitemdata;
@@ -1959,8 +1932,8 @@ begin
  if po1 = nil then begin
   result:= false;
   po1:= inherited add(akey);
+  po1^:= avalue;
  end;
- po1^:= avalue;
 end;
 
 procedure tpointeransistringhashdatalist.checkexact(const aitemdata;
@@ -2145,8 +2118,8 @@ begin
  if po1 = nil then begin
   result:= false;
   po1:= inherited add(akey);
+  po1^:= avalue;
  end;
- po1^:= avalue;
 end;
 
 procedure tpointermsestringhashdatalist.checkexact(const aitemdata;
