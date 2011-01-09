@@ -1,6 +1,6 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    Modified 2006-2010 by Martin Schreiber
+    Modified 2006-2011 by Martin Schreiber
 
     SQL database & dataset
 
@@ -2593,6 +2593,7 @@ procedure TSQLQuery.Prepare;
 var
  db: tcustomsqlconnection;
  sqltr: tsqltransaction;
+ int1: integer;
 
 begin
  if not IsPrepared then begin
@@ -2637,6 +2638,10 @@ begin
                                     (fsqldelete.count > 0);
    if fparsesql and (pos(',',FFromPart) <= 0) then begin
     ftablename:= ffrompart;
+    int1:= pos(' ',ftablename);
+    if int1 > 0 then begin
+     setlength(ftablename,int1); //use real name only
+    end;
     fupdateable:= not readonly;
    end;
   end;
