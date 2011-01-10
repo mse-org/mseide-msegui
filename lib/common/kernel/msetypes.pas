@@ -17,9 +17,15 @@ uses
 
 type
 {$ifdef FPC}
- {$ifdef ver2_3}{$define longwordbyteset}{$endif}
- {$ifdef ver2_4}{$define longwordbyteset}{$endif}
- {$ifdef ver2_5}{$define longwordbyteset}{$endif}
+ {$if defined(FPC) and (fpc_fullversion >= 020300)}
+  {$define mse_fpc_2_3_0}
+ {$ifend}
+ {$if defined(FPC) and (fpc_fullversion >= 020402)}
+  {$define mse_fpc_2_4_2}
+ {$ifend}
+
+ {$ifdef mse_fpc_2_3_0}{$define longwordbyteset}{$endif}
+
  {$ifdef longwordbyteset}
   byteset = byte;
   wordset = word;
@@ -34,7 +40,8 @@ type
   wordset = word;
   longwordset = longword;
 {$endif}
- {$ifndef FPC}
+
+{$ifndef FPC} //delphi
   DWord = Longword;
   SizeInt = Longint;
   psizeint = ^sizeint;
@@ -50,7 +57,11 @@ type
   ValUInt = Cardinal;
   qword = uint64;
   pqword = ^qword;
+{$else}
+ {$ifndef mse_fpc_2_4_2}
+  ppdouble = ^pdouble;
  {$endif}
+{$endif}
  {$ifdef VER2_2_0}
   PPtrUInt = ^PtrUInt;
  {$endif}
