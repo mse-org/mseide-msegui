@@ -29,7 +29,7 @@ type
                                                        const bufsize: integer);
  end;
 
- tasinheritedreader = class(treader)  
+ tasinheritedreader = class(treader)
   protected
    fforceinherited: boolean;
    fexistingcomp: tcomponent;
@@ -40,18 +40,20 @@ type
                     const forceinherited: boolean);
    property existingcomp: tcomponent read fexistingcomp;
  end;
- 
+
 {$else}
 
  tasinheritedreader = class(treader)
   protected
-   fforceinherited: boolen;
+   fforceinherited: boolean;
+   fexistingcomp: tcomponent;
   public
    constructor Create(Stream: TStream; BufSize: Integer;
                     const forceinherited: boolean);
    procedure readprefix(var flags: tfilerflags; var achildpos: integer); override;
+   property existingcomp: tcomponent read fexistingcomp;
  end;
- 
+
 {$endif}
 
 function readshortcutarty(const reader: treader): shortcutarty;
@@ -103,7 +105,7 @@ begin
   end;
  end;
  result:= areader.fexistingcomp <> nil;
-// result:= (areader.lookuproot = nil) or 
+// result:= (areader.lookuproot = nil) or
 //            (areader.lookuproot.findcomponent(aname) <> nil);
 end;
 }
@@ -158,13 +160,48 @@ end;
 
 {$else}
 
+constructor tasinheritedreader.Create(Stream: TStream; BufSize: Integer;
+                    const forceinherited: boolean);
+begin
+ fforceinherited:= forceinherited;
+ inherited create(stream,bufsize);
+end;
+
 procedure tasinheritedreader.readprefix(var flags: tfilerflags;
                                               var achildpos: integer);
+var
+ comp1: tcomponent;
+ pos1: integer;
+ compname: string;
 begin
+ inherited;
+ fexistingcomp:= nil;
+ if (lookuproot = nil) or fforceinherited then begin
+  include(flags,ffinherited);
+ end
+ else begin
+  comp1:= lookuproot;
+  pos1:= position;
+  readstr; //type
+  compname:= readstr;
+  flushbuffer;
+  treadercracker(self).fstream.position:= pos1;
+  while (comp1 <> nil) do begin
+   fexistingcomp:= comp1.findcomponent(compname);
+   if fexistingcomp <> nil then begin
+    include(flags,ffinherited);
+    exit;
+   end;
+   comp1:= comp1.owner;
+  end;
+  exclude(flags,ffinherited);
+ end;
+ {
  inherited;
 // if findinheritedcomponent(compname,compclassname,self) then begin
  //todo!!!!
  include(flags,ffinherited);
+ }
 end;
 
 {$endif}

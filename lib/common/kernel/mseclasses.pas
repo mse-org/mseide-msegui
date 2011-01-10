@@ -612,6 +612,12 @@ type
    fancestorlookuplevel: integer;
    fchildlevel: integer;
    fnoancestor: boolean; //used for copy paste of inherited components
+  {$ifndef FPC}
+   FAncestors: TStringList;
+   fcurrentpos: integer;
+   fancestorpos: integer;
+   fsignaturewritten: boolean;
+  {$endif}
    procedure DetermineAncestor(Component : TComponent);
    procedure AddToAncestorList(Component: TComponent);
    procedure DoFindAncestor(Component : TComponent);
@@ -619,7 +625,7 @@ type
    frootrootancestor: tcomponent;
    frootroot: tcomponent;
    function rootcompname(const acomp: tcomponent;
-                             const aroot: tcomponent): string;
+                             const aroot: tcomponent): string; overload;
    function rootcompname(const acomp: tcomponent;
                              arootlevel: integer): string; overload;
 //   procedure dogetchildren(const sender: tmsecomponent;
@@ -628,6 +634,10 @@ type
                              const proc: tgetchildproc; const aroot: tcomponent);
    procedure WriteChildren(Component : TComponent);
    procedure WriteComponentData(Instance: TComponent);
+  {$ifndef FPC}
+   procedure BeginComponent(Component: TComponent;
+                           Flags: TFilerFlags; ChildPos: Integer);
+  {$endif}
   public
    constructor create(const stream: tstream; const bufsize: integer;
                             const anoancestor: boolean = false);
@@ -638,7 +648,7 @@ type
    procedure writerootcomponent(aroot: tcomponent);
  end;
  
- setsplitpairty = record 
+ setsplitpairty = record
                    oldenum,newenum: string
                   end;
  setsplitinfoty = record
@@ -875,13 +885,6 @@ type
   end;
  {$endif}
 {$else} //delphi
-  TReadercracker = class(TFiler)
-  public
-    FOwner: TComponent;
-    FParent: TComponent;
-    FFixups: TList;
-    FLoaded: TList;
-  end;
   TComponentcracker = class(TPersistent{, IInterface, IInterfaceComponentReference})
   public
     FOwner: TComponent;
@@ -904,10 +907,22 @@ type
      FAncestor: TPersistent;
      FIgnoreChildren: Boolean;
    end;
-  TWritercracker = class(TFiler)
+  TReadercracker = class(TFilercracker)
+  public
+    FOwner: TComponent;
+    FParent: TComponent;
+    FFixups: TList;
+    FLoaded: TList;
+  end;
+  TWritercracker = class(TFilercracker)
   public
     FRootAncestor: TComponent;
     FPropPath: string;
+    FAncestorList: TList;
+    FAncestorPos: Integer;
+    FChildPos: Integer;
+    FOnFindAncestor: TFindAncestorEvent;
+    FUseQualifiedNames: Boolean;
   end;
 {$endif}
 
@@ -925,12 +940,17 @@ uses
 {$endif}
  msestream,msesys,msedatalist,msedatamodules,rtlconsts,msesysutils,
  msestreaming;
- 
+
 type
  tpersistent1 = class(tpersistent);
  tcomponent1 = class(tcomponent);
  twriter1 = class(twriter);
  treader1 = class(treader);
+{$ifndef FPC}
+const
+  filersignature : array[1..4] of char = 'TPF0';
+type
+{$endif}
 
  tobjectdatastream = class(tcustommemorystream)
   public
@@ -1483,7 +1503,7 @@ type
    procedure childproc(child: tcomponent);
   public
    constructor create(const acomp: tcomponent; const aroot: tcomponent;
-                            const nestedowners: boolean);
+                            const nestedowners: boolean = false);
    property children: componentarty read getchildrenar;
  end;
 
@@ -1506,12 +1526,12 @@ begin
  if fnestedowners then begin
   comp1:= fcomp;
   while (comp1 <> froot) and (comp1 <> nil) do begin
-   tcomponent1(fcomp).getchildren(@childproc,comp1);
+   tcomponent1(fcomp).getchildren({$ifdef FPC}@{$endif}childproc,comp1);
    comp1:= comp1.owner;
   end;
  end;
  if froot <> nil then begin
-  tcomponent1(fcomp).getchildren(@childproc,froot);
+  tcomponent1(fcomp).getchildren({$ifdef FPC}@{$endif}childproc,froot);
  end;
  setlength(fchildren,fcount);
  result:= fchildren;
@@ -4769,12 +4789,16 @@ begin
                                                  (fchildlevel > 1) then begin
       // Possibly set ancestor.
       DetermineAncestor(Component);
-      DoFindAncestor(Component); 
+      DoFindAncestor(Component);
             // Mainly for IDE when a parent form had an ancestor renamed...
      end;
-     Component.WriteState(Self);
+     tcomponent1(Component).WriteState(Self);
            // Will call WriteComponentData.
+    {$ifdef FPC}
      FDriver.EndList;
+    {$else}
+     writelistend;
+    {$endif}
     Finally
       tcomponentcracker(Component).FComponentState:=
                    tcomponentcracker(Component).FComponentState-[csWriting];
@@ -4825,15 +4849,15 @@ begin
         end;
        end;
 //       TComponent1(FAncestor).GetChildren(@AddToAncestorList,frootancestor);
-       GetChildren1(tcomponent(FAncestor),@AddToAncestorList,frootancestor);
+       GetChildren1(tcomponent(FAncestor),{$ifdef FPC}@{$endif}AddToAncestorList,frootancestor);
        FAncestors.Sorted:=True;
        end;
     try
 //      tcomponent1(Component).GetChildren(@WriteComponent, FRoot);
-      GetChildren1(component,@WriteComponent, FRoot);
+      GetChildren1(component,{$ifdef FPC}@{$endif}WriteComponent, FRoot);
     Finally
       If Assigned(Fancestors) then
-        For I:=0 to FAncestors.Count-1 do 
+        For I:=0 to FAncestors.Count-1 do
           FAncestors.Objects[i].Free;
       FreeAndNil(FAncestors);
     end;    
@@ -4849,8 +4873,34 @@ begin
  end;
 end;
 
+{$ifndef FPC}
+procedure twritermse.BeginComponent(Component: TComponent;
+  Flags: TFilerFlags; ChildPos: Integer);
+var
+  Prefix: Byte;
+begin
+  if not FSignatureWritten then
+  begin
+    Write(FilerSignature, SizeOf(FilerSignature));
+    FSignatureWritten := True;
+  end;
+
+  { Only write the flags if they are needed! }
+  if Flags <> [] then
+  begin
+    Prefix := byte(Flags) or $f0;
+    Write(Prefix, 1);
+    if ffChildPos in Flags then
+      WriteInteger(ChildPos);
+  end;
+
+  WriteStr(Component.ClassName);
+  WriteStr(Component.Name);
+end;
+{$endif}
+
 procedure TWritermse.WriteComponentData(Instance: TComponent);
-var 
+var
   Flags: TFilerFlags;
 begin
  with twritercracker(self) do begin
@@ -4864,7 +4914,11 @@ begin
     Flags:=[ffInline];
   If (FAncestors<>Nil) and ((FCurrentPos<>FAncestorPos) or (FAncestor=Nil)) then
     Include(Flags,ffChildPos);
+ {$ifdef fpc}
   FDriver.BeginComponent(Instance,Flags,FCurrentPos);
+ {$else}
+  BeginComponent(Instance,Flags,FCurrentPos);
+ {$endif}
   If (FAncestors<>Nil) then
     Inc(FCurrentPos);
   WriteProperties(Instance);
