@@ -1172,7 +1172,7 @@ procedure tcustombutton.getautopaintsize(var asize: sizety);
 var
  int1: integer;
 begin
- asize:= textrect(getcanvas,finfo.ca.caption,[],font).size;
+ asize:= textrect(getcanvas,finfo.ca.caption,finfo.ca.textflags,font).size;
  if imagepos in [ip_top,ip_bottom,ip_topcenter,ip_bottomcenter] then begin
   inc(asize.cy,finfo.ca.captiondist);
  end
