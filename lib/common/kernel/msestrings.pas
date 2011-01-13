@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -166,10 +166,12 @@ procedure replacechar1(var dest: msestring; a,b: msechar); overload;
 function stringfromchar(achar: char; count : integer): string; overload;
 function stringfromchar(achar: msechar; count : integer): msestring; overload;
 
-function replacetext(const source: string; index: integer; a: string): string; overload;
+function replacetext(const source: string; index: integer;
+                                      a: string): string; overload;
 function replacetext(const source: msestring; index: integer;
-       a: msestring): msestring; overload;
-procedure replacetext1(var dest: string; index: integer; const a: string); overload;
+                                      a: msestring): msestring; overload;
+procedure replacetext1(var dest: string; index: integer; 
+                                      const a: string); overload;
 procedure replacetext1(var dest: msestring; index: integer; const a: msestring); overload;
 
 procedure addstringsegment(var dest: msestring; const a,b: pmsechar);
@@ -246,7 +248,12 @@ function msestringsearch(const substring,s: msestring; start: integer;
 function stringsearch(const substring,s: string; start: integer;
                       options: searchoptionsty;
                       const substringupcase: string = ''): integer; overload;
-
+function replacestring(const s: msestring; oldsub: msestring;
+                           const newsub: msestring;
+               const options: searchoptionsty = []): msestring; overload;
+function replacestring(const s: string; oldsub: string;
+                           const newsub: string;
+               const options: searchoptionsty = []): string; overload;
 
 procedure addeditchars(const source: msestring; var buffer: msestring; var cursorpos: integer);
                                   //cursorpos nullbased
@@ -2620,6 +2627,160 @@ begin
    end
   end;
  end;
+end;
+
+function replacestring(const s: msestring; oldsub: msestring;
+                           const newsub: msestring;
+                           const options: searchoptionsty = []): msestring;
+var
+ po1,po2,po3,poend: pmsechar;
+ pold: pmsechar;
+ oldhigh,newhigh: integer;
+ int1,int2: integer;
+ ch1: msechar;
+ bo1: boolean;
+ s1: msestring;
+begin
+ int1:= length(s);
+ if (int1 = 0) or (length(oldsub) = 0) then begin
+  result:= s;
+  exit;
+ end;
+ oldhigh:= length(oldsub)-1;
+ newhigh:= length(newsub)-1;
+ po1:= pointer(s);
+ poend:= po1;
+ if so_caseinsensitive in options then begin
+  s1:= mseuppercase(s);
+  po3:= pointer(s1);
+  oldsub:= mseuppercase(oldsub);
+ end
+ else begin
+  po3:= po1;
+ end;
+ inc(poend,int1-oldhigh);
+ if length(newsub) > length(oldsub) then begin
+  int1:= (int1 div length(oldsub) + 1) * length(newsub);
+ end;
+ setlength(result,int1); //max
+ po2:= pointer(result);
+ ch1:= oldsub[1];
+ while po1 < poend do begin
+  bo1:= po3^ = ch1;
+  if bo1 then begin
+   for int2:= 0 to oldhigh do begin
+    if (po3+int2)^ <> (pmsechar(pointer(oldsub))+int2)^ then begin
+     bo1:= false;
+     break;
+    end;
+   end;
+   bo1:= bo1 and not(so_wholeword in options) or 
+             (not isnamechar((po1+length(oldsub))^) and
+              ((po1=pointer(s)) or not isnamechar((po1-1)^)));
+   if bo1 then begin
+    for int2:= 0 to newhigh do begin
+     po2^:= (pmsechar(pointer(newsub))+int2)^;
+     inc(po2);
+    end;
+    inc(po1,oldhigh);
+    inc(po3,oldhigh);
+    dec(po2);
+   end
+   else begin
+    po2^:= po1^;
+   end;
+  end
+  else begin
+   po2^:= po1^;
+  end;
+  inc(po1);
+  inc(po2);
+  inc(po3);
+ end;
+ inc(poend,oldhigh);
+ while po1 < poend do begin
+  po2^:= po1^;
+  inc(po1);
+  inc(po2);
+ end;
+ setlength(result,po2 - pmsechar(pointer(result)));
+end;
+
+function replacestring(const s: string; oldsub: string;
+                           const newsub: string;
+                           const options: searchoptionsty = []): string;
+var
+ po1,po2,po3,poend: pchar;
+ pold: pchar;
+ oldhigh,newhigh: integer;
+ int1,int2: integer;
+ ch1: char;
+ bo1: boolean;
+ s1: string;
+begin
+ int1:= length(s);
+ if (int1 = 0) or (length(oldsub) = 0) then begin
+  result:= s;
+  exit;
+ end;
+ oldhigh:= length(oldsub)-1;
+ newhigh:= length(newsub)-1;
+ po1:= pointer(s);
+ poend:= po1;
+ if so_caseinsensitive in options then begin
+  s1:= uppercase(s);
+  po3:= pointer(s1);
+  oldsub:= uppercase(oldsub);
+ end
+ else begin
+  po3:= po1;
+ end;
+ inc(poend,int1-oldhigh);
+ if length(newsub) > length(oldsub) then begin
+  int1:= (int1 div length(oldsub) + 1) * length(newsub);
+ end;
+ setlength(result,int1); //max
+ po2:= pointer(result);
+ ch1:= oldsub[1];
+ while po1 < poend do begin
+  bo1:= po3^ = ch1;
+  if bo1 then begin
+   for int2:= 0 to oldhigh do begin
+    if (po3+int2)^ <> (pchar(pointer(oldsub))+int2)^ then begin
+     bo1:= false;
+     break;
+    end;
+   end;
+   bo1:= bo1 and not(so_wholeword in options) or 
+             (not isnamechar((po1+length(oldsub))^) and
+              ((po1=pointer(s)) or not isnamechar((po1-1)^)));
+   if bo1 then begin
+    for int2:= 0 to newhigh do begin
+     po2^:= (pchar(pointer(newsub))+int2)^;
+     inc(po2);
+    end;
+    inc(po1,oldhigh);
+    inc(po3,oldhigh);
+    dec(po2);
+   end
+   else begin
+    po2^:= po1^;
+   end;
+  end
+  else begin
+   po2^:= po1^;
+  end;
+  inc(po1);
+  inc(po2);
+  inc(po3);
+ end;
+ inc(poend,oldhigh);
+ while po1 < poend do begin
+  po2^:= po1^;
+  inc(po1);
+  inc(po2);
+ end;
+ setlength(result,po2 - pchar(pointer(result)));
 end;
 
 function msePosEx(const SubStr, S: msestring; Offset: longword = 1): Integer;
