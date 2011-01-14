@@ -2674,8 +2674,8 @@ begin
      break;
     end;
    end;
-   bo1:= bo1 and not(so_wholeword in options) or 
-             (not isnamechar((po1+length(oldsub))^) and
+   bo1:= bo1 and (not(so_wholeword in options) or 
+             not isnamechar((po1+length(oldsub))^) and
               ((po1=pointer(s)) or not isnamechar((po1-1)^)));
    if bo1 then begin
     for int2:= 0 to newhigh do begin
@@ -2751,8 +2751,8 @@ begin
      break;
     end;
    end;
-   bo1:= bo1 and not(so_wholeword in options) or 
-             (not isnamechar((po1+length(oldsub))^) and
+   bo1:= bo1 and (not(so_wholeword in options) or 
+             not isnamechar((po1+length(oldsub))^) and
               ((po1=pointer(s)) or not isnamechar((po1-1)^)));
    if bo1 then begin
     for int2:= 0 to newhigh do begin
