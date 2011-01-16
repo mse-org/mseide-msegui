@@ -847,7 +847,7 @@ function concatstrings(const source: msestringarty;
 var
  int1: integer;
 begin
- if length(source) = 0 then begin
+ if source = nil then begin
   result:= '';
  end
  else begin
@@ -863,7 +863,7 @@ function concatstrings(const source: stringarty;
 var
  int1: integer;
 begin
- if length(source) = 0 then begin
+ if source = nil then begin
   result:= '';
  end
  else begin

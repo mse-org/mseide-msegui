@@ -23,7 +23,7 @@ uses
  classes,msegraphutils,mseglob,mseguiglob,msedesignintf,
  mseforms,mselist,msedatalist,msebitmap,msetypes,sysutils,msehash,mseclasses,
  mseformdatatools,typinfo,msepropertyeditors,msecomponenteditors,msegraphics,
- mseapplication,msegui,msestrings,msedesignparser;
+ mseapplication,msegui,msestrings,msedesignparser,msecomptree;
 
 const
  formfileext = 'mfm';
@@ -430,6 +430,10 @@ type
                                  const includeinherited: boolean;
                                  const aowner: tcomponent = nil;
                                  const filter: compfilterfuncty = nil): msestringarty;
+   function getcomponentnametree(const acomponentclass: tcomponentclass;
+                                 const includeinherited: boolean;
+                                 const aowner: tcomponent = nil;
+                                 const filter: compfilterfuncty = nil): tcompnameitem;
    function getancestorclassinfo(const ainstance: tcomponent;
                  const interfaceonly: boolean): classinfopoarty;
                                                   overload;
@@ -498,7 +502,7 @@ uses
  designer_bmp,msesys,msewidgets,formdesigner,mseevent,objectinspector,
  msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
  pascaldesignparser,msearrayprops,rtlconsts,msedatamodules,
- msesimplewidgets,msesysutils,mseobjecttext,msestreaming;
+ msesimplewidgets,msesysutils,mseobjecttext,msestreaming,msedatanodes;
 
 type
  tcomponent1 = class(tcomponent);
@@ -4662,6 +4666,111 @@ begin
  for int1:= 0 to high(result) do begin
   result[int1]:= copy(result[int1],2,bigint);
  end;
+end;
+
+type
+ tdesigncompnameitem = class(tcompnameitem)
+  private
+   fcomp: tcomponent;
+  public
+   constructor create(const acomp: tcomponent; const aisvalue: boolean);
+   function findcomp(const acomp: tcomponent): tdesigncompnameitem;
+ end;
+
+{ tdesigncompnameitem }
+
+constructor tdesigncompnameitem.create(const acomp: tcomponent;
+               const aisvalue: boolean);
+begin
+ fcomp:= acomp;
+ inherited create;
+ isvalue:= aisvalue;
+ if acomp <> nil then begin
+  caption:= acomp.name;
+ end;
+end;
+
+function tdesigncompnameitem.findcomp(const acomp: tcomponent): tdesigncompnameitem;
+var
+ int1: integer;
+begin
+ result:= nil;
+ for int1:= 0 to fcount -1 do begin
+  if tdesigncompnameitem(fitems[int1]).fcomp = acomp then begin
+   result:= tdesigncompnameitem(fitems[int1]);
+   break;
+  end;
+ end;
+end;
+
+ 
+function tdesigner.getcomponentnametree(const acomponentclass: tcomponentclass;
+                         const includeinherited: boolean;
+                         const aowner: tcomponent = nil;
+                         const filter: compfilterfuncty = nil): tcompnameitem;
+
+ procedure check(const acomp: tcomponent);
+ var
+  int1,int3: integer;
+  comp1,comp2: tcomponent;
+  node1,node2,node3: tdesigncompnameitem;
+  ar1: componentarty;
+ begin
+  if acomp.InheritsFrom(acomponentclass) and 
+          (({$ifndef FPC}@{$endif}filter = nil) or filter(acomp)) then begin
+   if ((aowner = nil) or (aowner = acomp.owner)) and 
+            (includeinherited or 
+            (acomp.componentstate * [csinline,csancestor] = [])) then begin
+    node1:= tdesigncompnameitem.create(acomp,true);
+    node1.imagenr:= 4;
+    node1.state:= node1.state + [ns_imagenrfix];
+    comp1:= acomp.owner;
+    while comp1 <> nil do begin
+     additem(pointerarty(ar1),comp1);
+     comp1:= comp1.owner;
+    end;
+    node2:= tdesigncompnameitem(result);
+    for int1:= high(ar1) downto 0 do begin
+     node3:= node2.findcomp(ar1[int1]);
+     if node3 = nil then begin
+      node3:= tdesigncompnameitem.create(ar1[int1],false);
+      node2.add(node3);
+     end;
+     node3.state:= node3.state - [ns_imagenrfix];
+     node2:= node3;
+    end;
+    node2.add(node1);
+   end;
+  end;
+  for int3:= 0 to acomp.componentcount - 1  do begin
+   comp2:= acomp.components[int3];
+   if (cssubcomponent in comp2.componentstyle){ and 
+                                    not isnosubcomp(comp2)} then begin
+//    node1:= anode.findcomp(comp2);
+//    if node1 = nil then begin
+//     node1:= tdesigncompnameitem.create(comp2,false);
+//    end;
+    check(comp2);
+   end;
+  end;
+ end;
+ 
+var
+ int1,int2,int3: integer;
+ comp1,comp2: tcomponent;
+ po1: pmoduleinfoty;
+begin
+ result:= tdesigncompnameitem.create(nil,false);
+ for int1:= 0 to fmodules.count - 1 do begin
+  po1:= fmodules[int1];
+  with po1^.components do begin
+   for int2:= 0 to count - 1 do begin
+    comp1:= next^.instance;
+    check(comp1);
+   end;
+  end;
+ end;
+ result.sort(false,true);
 end;
 
 function tdesigner.getmodules: tmodulelist;

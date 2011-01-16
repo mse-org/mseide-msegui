@@ -650,6 +650,7 @@ type
    procedure endupdate; override;
    procedure assign(const root: ttreelistedititem); reintroduce; overload;
                  //root is freed
+   procedure assign(const aitems: treelistedititemarty); reintroduce; overload;
    procedure add(const anode: ttreelistedititem); overload;
                  //adds toplevel node
    procedure add(const anodes: treelistedititemarty); overload;
@@ -3394,14 +3395,14 @@ end;
 
 procedure ttreeitemeditlist.assign(const root: ttreelistedititem);
 var
- ar1: listitemarty;
+ ar1: treelistedititemarty;
  int1: integer;
 begin
  with ttreelistitem1(root) do begin
   if fcount > 0 then begin
    setlength(ar1,fcount);
    for int1:= fcount-1 downto 0 do begin
-    ar1[int1]:= remove(int1);
+    ar1[int1]:= ttreelistedititem(remove(int1));
    end;
    self.assign(ar1);
   end
@@ -3410,6 +3411,34 @@ begin
   end;
  end;
  root.Free;
+end;
+
+procedure ttreeitemeditlist.assign(const aitems: treelistedititemarty);
+var
+ int1,int2: integer;
+ ar1: listitemarty;
+ 
+ procedure doadd(const aitem: ttreelistedititem);
+ var
+  int1: integer;
+ begin
+  additem(pointerarty(ar1),aitem,int2);
+  if aitem.expanded then begin
+   for int1:= 0 to aitem.count-1 do begin
+    doadd(ttreelistedititem(aitem.fitems[int1]));
+   end;
+  end;
+ end;
+ 
+begin
+ int2:= 0;
+ setlength(ar1,length(aitems)); //min
+ int2:= 0;
+ for int1:= 0 to high(aitems) do begin
+  doadd(aitems[int1]);  
+ end;
+ setlength(ar1,int2);
+ inherited assign(listitemarty(ar1));
 end;
 
 procedure ttreeitemeditlist.add(const anode: ttreelistedititem); //adds toplevel node

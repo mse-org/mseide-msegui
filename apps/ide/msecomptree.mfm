@@ -1,0 +1,76 @@
+object compnametreefo: tcompnametreefo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  visible = False
+  bounds_x = 80
+  bounds_y = 374
+  bounds_cx = 300
+  bounds_cy = 203
+  bounds_cxmin = 200
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
+  container.bounds = (
+    0
+    0
+    300
+    203
+  )
+  optionswindow = [wo_notaskbar]
+  options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
+  statfile = tstatfile1
+  caption = 'Select Component'
+  moduleclassname = 'tmseform'
+  object grid: twidgetgrid
+    frame.levelo = 0
+    frame.framewidth = 1
+    frame.colorframe = -1610612734
+    frame.localprops = [frl_levelo, frl_framewidth, frl_colorframe]
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 300
+    bounds_cy = 203
+    anchors = []
+    datacols.count = 1
+    datacols.items = <    
+      item
+        width = 297
+        options = [co_readonly, co_fill, co_savevalue]
+        widgetname = 'treeitem'
+      end>
+    datarowlinewidth = 0
+    datarowheight = 16
+    reffontheight = 14
+    object treeitem: ttreeitemedit
+      color = -1879048185
+      cursor = cr_arrow
+      frame.levelo = 0
+      frame.colorclient = -2147483646
+      frame.localprops = [frl_levelo, frl_colorclient]
+      taborder = 1
+      visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 297
+      bounds_cy = 16
+      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_forcereturncheckvalue, oe_locate, oe_savevalue, oe_savestate]
+      ondataentered = treeitemondataentered
+      itemlist.imnr_base = 2
+      itemlist.imnr_expanded = 1
+      itemlist.imnr_subitems = -2
+      itemlist.imagelist = filedialogres.images
+      itemlist.imagewidth = 16
+      itemlist.imageheight = 16
+      itemlist.onitemnotification = treeitemonitemnotification
+      itemlist.oncreateitem = treeitemoncreateitem
+      oncellevent = treeitemoncellevent
+      options = [teo_treecolnavig, teo_enteronimageclick]
+      reffontheight = 14
+    end
+  end
+  object tstatfile1: tstatfile
+    filename = 'compnamedialog.sta'
+    options = [sfo_memory]
+    left = 48
+    top = 48
+  end
+end

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -15,7 +15,7 @@ interface
 uses
  classes,msegraphutils,msedrawtext,msegraphics,msedatalist,mseglob,mseguiglob,
  msebitmap,mseclasses,mseevent,msegrids,msetypes,msestrings,mseinplaceedit,
- msestat,msegridsglob;
+ msestat,msegridsglob,mselist;
 
 type
 
@@ -146,6 +146,7 @@ type
    function captionclipped: boolean;
    property caption: msestring read fcaption write setcaption;
    property state: nodestatesty read fstate write setstate;
+   property state1: nodestates1ty read fstate1;
    property imagelist: timagelist read getimagelist write setimagelist;
                       //nil -> fowner.imagelist
    property imagenr: integer read fimagenr write setimagenr;
@@ -155,7 +156,6 @@ type
    function getvaluetext: msestring; virtual;
    procedure setvaluetext(var avalue: msestring); virtual;
    property valuetext: msestring read getvaluetext write setvaluetext1;
-   property state1: nodestates1ty read fstate1;
  end;
 
  plistitem = ^tlistitem;
@@ -238,7 +238,9 @@ type
    function candrop(const source: ttreelistitem): boolean; virtual;
 
    function finditembycaption(const acaption: msestring;
-            casesensitive: boolean = false): ttreelistitem;
+            casesensitive: boolean = false): ttreelistitem; overload;
+   function finditembycaption(const acaptions: msestringarty;
+            casesensitive: boolean = false): ttreelistitem; overload;
    function rootnode: ttreelistitem;
    function rootpath: treelistitemarty;
              //top-down
@@ -270,8 +272,13 @@ type
 
    procedure expandall;
    procedure collapseall;
+   procedure expandtoroot;
+   procedure collapsetoroot;
    function remove(const aindex: integer): ttreelistitem;
-   procedure sort(casesensitive: boolean);
+   procedure sort(const casesensitive: boolean;
+                           const recursive: boolean = false); overload;
+   procedure sort(const sortfunc: arraysortcomparety;
+                           const recursive: boolean = false); overload;
    property count: integer read fcount;
    procedure setupeditor(const editor: tinplaceedit; const font: tfont); override;
    property expanded: boolean read getexpanded write setexpanded;
@@ -1798,6 +1805,28 @@ begin
  end;
 end;
 
+procedure ttreelistitem.expandtoroot;
+var
+ item1: ttreelistitem;
+begin
+ item1:= fparent;
+ while item1 <> nil do begin
+  item1.expanded:= true;
+  item1:= item1.fparent;
+ end;
+end;
+
+procedure ttreelistitem.collapsetoroot;
+var
+ item1: ttreelistitem;
+begin
+ item1:= fparent;
+ while item1 <> nil do begin
+  item1.expanded:= false;
+  item1:= item1.fparent;
+ end;
+end;
+
 procedure ttreelistitem.internalcheckitems(
                  const checkdelete: checktreelistitemprocty);
 var
@@ -1876,7 +1905,8 @@ begin
  result:= msestringicomp(ttreelistitem(l).caption,ttreelistitem(r).caption);
 end;
 
-procedure ttreelistitem.sort(casesensitive: boolean);
+procedure ttreelistitem.sort(const casesensitive: boolean;
+                                        const recursive: boolean = false);
 var
  int1: integer;
 begin
@@ -1890,7 +1920,30 @@ begin
  for int1:= 0 to high(fitems) do begin
   fitems[int1].fparentindex:= int1;
  end;
+ if recursive then begin
+  for int1:= 0 to high(fitems) do begin
+   fitems[int1].sort(casesensitive,true);
+  end;
+ end;
  change;
+end;
+
+procedure ttreelistitem.sort(const sortfunc: arraysortcomparety;
+                           const recursive: boolean = false);
+var
+ int1: integer;
+begin
+ setlength(fitems,fcount);
+ sortarray(pointerarty(fitems),sortfunc);
+ for int1:= 0 to high(fitems) do begin
+  fitems[int1].fparentindex:= int1;
+ end;
+ if recursive then begin
+  for int1:= 0 to high(fitems) do begin
+   fitems[int1].sort(sortfunc,true);
+  end;
+ end;
+ change; 
 end;
 
 procedure ttreelistitem.checksort;
@@ -2266,6 +2319,20 @@ begin
  for int1:= 0 to fcount - 1 do begin
   if compfunc(acaption,fitems[int1].fcaption) = 0 then begin
    result:= fitems[int1];
+   break;
+  end;
+ end;
+end;
+
+function ttreelistitem.finditembycaption(const acaptions: msestringarty;
+         casesensitive: boolean = false): ttreelistitem;
+var
+ int1: integer;
+begin
+ result:= self;
+ for int1:= 0 to high(acaptions) do begin
+  result:= result.finditembycaption(acaptions[int1],casesensitive);
+  if result = nil then begin
    break;
   end;
  end;

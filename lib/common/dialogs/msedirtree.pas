@@ -75,8 +75,8 @@ type
   private
  end;
 }
-var
- dirtreefo: tdirtreefo;
+//var
+// dirtreefo: tdirtreefo;
 
 implementation
 uses

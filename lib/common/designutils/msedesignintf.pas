@@ -15,7 +15,7 @@ interface
 uses
  classes,msegraphutils,mselist,sysutils,typinfo,msebitmap,
  msetypes,msestrings,msegraphics,msegui,mseglob,
- mseclasses,mseforms,msestat,mserichstring;
+ mseclasses,mseforms,msestat,mserichstring,msecomptree;
 const
  defaultmoduleclassname = 'tmseform';
 type
@@ -129,11 +129,15 @@ type
   function componentcanedit: boolean;
   function getcomponenteditor: icomponenteditor;
   function getcomponentlist(const acomponentclass: tcomponentclass;
-                               const filter: compfilterfuncty = nil): componentarty;
+                  const filter: compfilterfuncty = nil): componentarty;
   function getcomponentnamelist(const acomponentclass: tcomponentclass;
                           const includeinherited: boolean;
                           const aowner: tcomponent = nil;
                           const filter: compfilterfuncty = nil): msestringarty;
+  function getcomponentnametree(const acomponentclass: tcomponentclass;
+                          const includeinherited: boolean;
+                          const aowner: tcomponent = nil;
+                          const filter: compfilterfuncty = nil): tcompnameitem;
   procedure setactivemodule(const adesignform: tmseform);
   procedure setmodulex(const amodule: tmsecomponent; avalue: integer);
   procedure setmoduley(const amodule: tmsecomponent; avalue: integer);

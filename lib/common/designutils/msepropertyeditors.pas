@@ -402,6 +402,7 @@ type
    function filtercomponent(const acomponent: tcomponent): boolean; virtual;
    function getlinksource: tcomponent; override;
   public
+   procedure edit; override;
    function allequal: boolean; override;
    function getvalue: msestring; override;
    procedure setvalue(const value: msestring); override;
@@ -424,9 +425,10 @@ type
  
  tsisterwidgetpropertyeditor = class(tcomponentpropertyeditor)
   protected
+   function filtercomponent(const acomponent: tcomponent): boolean; override;
    function getdefaultstate: propertystatesty; override;
   public
-   function getvalues: msestringarty; override;
+//   function getvalues: msestringarty; override;
  end;
   
  tchildwidgetpropertyeditor = class(tcomponentpropertyeditor)
@@ -891,7 +893,7 @@ uses
  msefiledialog,mseimagelisteditor,msereal,msewidgets,
  mseactions,msehash,msegraphutils,
  msestringlisteditor,msedoublestringlisteditor,msestringintlisteditor,
- msereallisteditor,msedoublereallisteditor,
+ msereallisteditor,msedoublereallisteditor,msecomptree,
  mseintegerlisteditor,mseact,
  msecolordialog,msememodialog,
  mseshapes,msestockobjects,msetexteditor,
@@ -2692,7 +2694,7 @@ function tcomponentpropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate;
  if not issubcomponent then begin
-  result:= result + [ps_valuelist,ps_volatile,ps_component];
+  result:= result + [ps_valuelist,ps_volatile,ps_component,ps_dialog];
  end;
 end;
 
@@ -2792,6 +2794,33 @@ begin
  end;
 end;
 
+procedure tcomponentpropertyeditor.edit;
+var
+ tree1: tcompnameitem;
+ mstr1: msestring;
+ co1: tcomponent;
+begin
+ if ps_local in fstate then begin
+  co1:= fmodule;
+ end
+ else begin
+  co1:= nil;
+ end;
+ tree1:= fdesigner.getcomponentnametree(
+                tcomponentclass(typedata^.classtype),true{false},co1,
+                {$ifdef FPC}@{$endif}filtercomponent);
+ co1:= tcomponent(getpointervalue);
+ if co1 = nil then begin
+  mstr1:= fmodule.name;
+ end
+ else begin
+  mstr1:= ownernamepath(co1);
+ end;
+ if compnamedialog(tree1,mstr1) = mr_ok then begin
+  setvalue(mstr1);
+ end;
+end;
+
 procedure tcomponentpropertyeditor.setvalue(const value: msestring);
 var
  comp: tcomponent;
@@ -2851,7 +2880,7 @@ begin
 end;
 
 { tsisterwidgetpropertyeditor }
-
+{
 function tsisterwidgetpropertyeditor.getvalues: msestringarty;
 var
  ar1: componentarty;
@@ -2880,6 +2909,14 @@ begin
    end;
   end;
  end;
+end;
+}
+
+function tsisterwidgetpropertyeditor.filtercomponent(
+                      const acomponent: tcomponent): boolean;
+begin
+ result:= (acomponent <> fcomponent) and
+          (twidget(acomponent).parentwidget = twidget(fcomponent).parentwidget);
 end;
 
 function tsisterwidgetpropertyeditor.getdefaultstate: propertystatesty;

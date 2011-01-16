@@ -606,7 +606,7 @@ uses
  msedesigner,panelform,watchpointsform,commandlineform,msestream,
  componentpaletteform,mserichstring,msesettings,formdesigner,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
- componentstore,cpuform,msesysutils
+ componentstore,cpuform,msesysutils,msecomptree
  {$ifndef mse_no_db}{$ifdef FPC},msedbfieldeditor{$endif}{$endif};
 
 var
@@ -1093,6 +1093,7 @@ begin
    deletememorystatstream(stringlisteditorstatname);
    deletememorystatstream(texteditorstatname);
    deletememorystatstream(colordialogstatname);
+   deletememorystatstream(compnamedialogstatname);
    deletememorystatstream(bmpfiledialogstatname);
    deletememorystatstream(fadeeditorstatname);
    deletememorystatstream(codetemplateselectstatname);
@@ -1528,6 +1529,7 @@ begin
   updatememorystatstream('stringlisteditor',stringlisteditorstatname);
   updatememorystatstream('texteditor',texteditorstatname);
   updatememorystatstream('colordialog',colordialogstatname);
+  updatememorystatstream('compnamedialog',compnamedialogstatname);
   updatememorystatstream('bmpfiledialog',bmpfiledialogstatname);
   updatememorystatstream('codetemplateselect',codetemplateselectstatname);
   updatememorystatstream('codetemplateparam',codetemplateparamstatname);
