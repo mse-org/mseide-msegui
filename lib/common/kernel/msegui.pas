@@ -2186,6 +2186,7 @@ type
    fmousewheeldeltamin: real;
    fmousewheeldeltamax: real;
    fmousewheelaccelerationmax: real;
+   flastinputtimestamp: longword;
    flastmousewheeltimestamp: longword;
    flastmousewheeltimestampbefore: longword;
    
@@ -2351,6 +2352,8 @@ type
    procedure clearkeyhistory; //called by matching shortcut sequence
    property keyhistory: keyinfoarty read fkeyhistory;   
                         //does not contain modifier keys
+   property lastinputtimestamp: longword read flastinputtimestamp;
+                        //microseconds
    property lastshiftstate: shiftstatesty read flastshiftstate;
    property lastkey: keyty read flastkey;
    property lastbutton: mousebuttonty read flastbutton;
@@ -14285,6 +14288,9 @@ begin
    end;
   end;
  finally
+  if event.timestamp <> 0 then begin
+   flastinputtimestamp:= event.timestamp;
+  end;
   fmouseeventinfo:= nil;
   fmousewheeleventinfo:= nil;
  end;
@@ -14377,6 +14383,9 @@ begin
    end;
   end;
  finally
+  if event.timestamp <> 0 then begin
+   flastinputtimestamp:= event.timestamp;
+  end;
   exclude(fstate,aps_clearkeyhistory);
   fkeyeventinfo:= nil;
  end;
