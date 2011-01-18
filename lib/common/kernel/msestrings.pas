@@ -1512,6 +1512,7 @@ begin
          inc(po2);
          break;
         end;
+        {
         '\': begin
          if (po1+1)^ = '"' then begin
           addsubstring;
@@ -1519,9 +1520,11 @@ begin
           inc(po2);
          end;
         end;
+        }
        end;
       until po1^ = #0;
      end;
+     {
      '\': begin
       if ((po1+1)^ < ' ') or ((po1+1)^ in ['"','\']) then begin
        addsubstring;
@@ -1536,6 +1539,7 @@ begin
        inc(po1);
       end;
      end;
+     }
      else begin
       inc(po1);
      end;
