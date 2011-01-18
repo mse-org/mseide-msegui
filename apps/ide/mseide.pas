@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +20,9 @@ program mseide;
  {$ifdef mswindows}
   {$ifdef mse_debug}{$apptype console}{$else}{$apptype gui}{$endif}
  {$endif}
+{$endif}
+{$ifdef mswindows}
+ {$R mseide.res}
 {$endif}
 uses
 {$ifdef FPC}{$ifdef linux}
