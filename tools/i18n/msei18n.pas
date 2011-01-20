@@ -19,6 +19,9 @@ program msei18n;
  {$mode objfpc}{$h+}
  {$ifdef mswindows}{$apptype gui}{$endif}
 {$endif}
+{$ifdef mswindows}
+ {$R msei18n.res}
+{$endif}
 
 uses
   {$ifdef FPC}{$ifdef linux}cthreads,{$endif}{$endif}msegui,

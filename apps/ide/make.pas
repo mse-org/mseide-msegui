@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,17 +50,22 @@ type
    fmessagefile: ttextstream;
    fnofilecopy: boolean;
    ffinished: boolean;
+   ferrorfinished: boolean;
+   fmessagefinished: boolean;
    fsetmakedir: boolean;
+   messagepipe: tpipereader;
+   errorpipe: tpipereader;
   protected
    fcanceled: boolean;
    procid: integer;
    procedure doasyncevent(var atag: integer); override;
    procedure inputavailable(const sender: tpipereader);
-   procedure dofinished(const sender: tpipereader); virtual;
+   procedure errorfinished(const sender: tpipereader);
+   procedure messagefinished(const sender: tpipereader);
+   procedure dofinished; virtual;
    function getcommandline: ansistring; virtual;
    procedure runprog(const acommandline: string);
   public
-   messagepipe: tpipereader;
    constructor create(const aowner: tcomponent;
                          const clearscreen,setmakedir: boolean); reintroduce;
    destructor destroy; override;
@@ -73,7 +78,7 @@ type
    function getcommandline: ansistring; override;
 //   procedure scriptexe(const sender: tguiapplication; var again: boolean);
 //   procedure scriptcancel(const sender: tobject);
-   procedure dofinished(const sender: tpipereader); override;
+   procedure dofinished; override;
   public
    constructor create(const aowner: tcomponent; const ascriptpath: filenamety;
                                          const clearscreen,setmakedir: boolean);
@@ -88,9 +93,10 @@ type
    fmaketag: integer;
    fstep: makestepty;
    fscriptnum: integer;
+   fcurrentdir: filenamety;
   protected
    procedure doasyncevent(var atag: integer); override;
-   procedure dofinished(const sender: tpipereader); override;
+   procedure dofinished; override;
    function getcommandline: ansistring; override;
   public
    constructor create(atag: integer); reintroduce;
@@ -98,7 +104,7 @@ type
   
  tloader = class(tprogrunner)
   protected
-   procedure dofinished(const sender: tpipereader); override;
+   procedure dofinished; override;
    function getcommandline: ansistring; override;
   public
    constructor create(aowner: tcomponent);
@@ -255,7 +261,10 @@ begin
   end;
   messagepipe:= tpipereader.create;
   messagepipe.oninputavailable:= {$ifdef FPC}@{$endif}inputavailable;
-  messagepipe.onpipebroken:= {$ifdef FPC}@{$endif}dofinished;
+  messagepipe.onpipebroken:= {$ifdef FPC}@{$endif}messagefinished;
+  errorpipe:= tpipereader.create;
+  errorpipe.oninputavailable:= {$ifdef FPC}@{$endif}inputavailable;
+  errorpipe.onpipebroken:= {$ifdef FPC}@{$endif}errorfinished;
   if clearscreen then begin
    messagefo.messages.rowcount:= 0;
   end;
@@ -276,6 +285,7 @@ begin
   procid:= invalidprochandle;
  end;
  messagepipe.Free;
+ errorpipe.Free;
  fmessagefile.free;
  inherited;
 end;
@@ -285,6 +295,10 @@ var
  wdbefore: string;
 begin
  fexitcode:= 1; //defaulterror
+ ferrorfinished:= false;
+ fmessagefinished:= false;
+ ffinished:= false;
+ 
  procid:= invalidprochandle;
  with projectoptions,texp do begin
   if fsetmakedir and (makedir <> '') then begin
@@ -292,7 +306,7 @@ begin
    setcurrentdir(makedir);
   end;
   try
-   procid:= execmse2(acommandline,nil,messagepipe,messagepipe,false,-1,
+   procid:= execmse2(acommandline,nil,messagepipe,errorpipe,false,-1,
                                                             true,false,true);
   except
    on e: exception do begin
@@ -319,10 +333,26 @@ begin
  procid:= invalidprochandle;
 end;
 
-procedure tprogrunner.dofinished(const sender: tpipereader);
+procedure tprogrunner.dofinished;
 begin
  ffinished:= true;
  asyncevent(0);
+end;
+
+procedure tprogrunner.errorfinished(const sender: tpipereader);
+begin
+ ferrorfinished:= true;
+ if fmessagefinished then begin
+  dofinished;
+ end;
+end;
+
+procedure tprogrunner.messagefinished(const sender: tpipereader);
+begin
+ fmessagefinished:= true;
+ if ferrorfinished then begin
+  dofinished;
+ end;
 end;
 
 procedure tprogrunner.inputavailable(const sender: tpipereader);
@@ -359,6 +389,7 @@ begin
  fstep:= maks_before;
  fmaketag:= atag;
  ftargettimestamp:= getfilemodtime(gettargetfile);
+ fcurrentdir:= getcurrentdir;
  inherited create(nil,true,true);
  if procid <> invalidprochandle then begin
   mainfo.setstattext('Making.',mtk_running);
@@ -371,7 +402,7 @@ begin
  end;
 end;
 
-procedure tmaker.dofinished(const sender: tpipereader);
+procedure tmaker.dofinished;
 begin
  if ftargettimestamp <> getfilemodtime(gettargetfile) then begin
   mainfo.targetfilemodified;
@@ -429,6 +460,7 @@ end;
 procedure tmaker.doasyncevent(var atag: integer);
  procedure finished;
  begin
+  setcurrentdir(fcurrentdir);
   designnotifications.aftermake(idesigner(designer),fexitcode);
   messagefo.messages.font.options:= messagefo.messages.font.options +
               [foo_antialiased] - [foo_nonantialiased];
@@ -465,7 +497,7 @@ begin
  end;
 end;
 
-procedure tloader.dofinished(const sender: tpipereader);
+procedure tloader.dofinished;
 begin
  inherited;
 end;
@@ -500,7 +532,7 @@ begin
  result:= fscriptpath;
 end;
 
-procedure tscriptrunner.dofinished(const sender: tpipereader);
+procedure tscriptrunner.dofinished;
 begin
  inherited;
  application.terminatewait;
