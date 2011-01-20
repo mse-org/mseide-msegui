@@ -2417,7 +2417,7 @@ begin
    end;
    frunningprocess:= targetconsolefo.terminal.execprog(mstr1);   
    if frunningprocess = invalidprochandle then begin
-    setstattext('Can not start Process',mtk_error);
+    setstattext('Can not start process',mtk_error);
     exit;
    end;
    runprocmon.listentoprocess(frunningprocess);
