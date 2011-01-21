@@ -12,7 +12,7 @@ unit msesigmidi;
 interface
 uses
  msesignal,classes,msemidi,msetypes,mseclasses,msedatamodules,msearrayprops,
- msehash;
+ msehash,msesockets;
 const
  defaultmidiattackvalueoptions = [vso_exp,vso_null];
  defaultmidiattackvaluemin = 0.1; //20 dB
@@ -173,15 +173,19 @@ type
    function geteventindex(const aevent: midieventinfoty): integer;
  end;
   
- tsigmidisource = class(tmidisource)
+ tsigmidisource = class(tmidisource,icommclient)
   private
    fconnections: sigmidiconnectorarty;
    fpatches: tmidipatches;
    fpatchpanel: tpatchinfolist;
+   fsercomm: tcustomcommcomp;
+   fserverintf: icommserver;
    procedure setpatches(const avalue: tmidipatches);
+   procedure setsercomm(const avalue: tcustomcommcomp);
   protected
    fsigstate: sigmidisourcestatesty;
    fchannels: sigchannelinfoarty;
+   procedure setcommserverintf(const aintf: icommserver);
    procedure registerconnector(const avalue: tsigmidiconnector);
    procedure unregisterconnector(const avalue: tsigmidiconnector);
    procedure dotrackevent; override;
@@ -192,6 +196,7 @@ type
    destructor destroy; override;
   published
    property patches: tmidipatches read fpatches write setpatches;
+   property sercomm: tcustomcommcomp read fsercomm write setsercomm;
  end;
 
  tsigmidimulticonnector = class;
@@ -620,6 +625,16 @@ end;
 procedure tsigmidisource.setpatches(const avalue: tmidipatches);
 begin
  fpatches.assign(avalue);
+end;
+
+procedure tsigmidisource.setsercomm(const avalue: tcustomcommcomp);
+begin
+ setcomcomp(icommclient(self),avalue,fsercomm);
+end;
+
+procedure tsigmidisource.setcommserverintf(const aintf: icommserver);
+begin
+ fserverintf:= aintf;
 end;
 
 { tdoubleoutmultiinpconn }

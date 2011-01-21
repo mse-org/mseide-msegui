@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -8,7 +8,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msesockets;
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
  classes,mseglob,mseclasses,msesys,msestrings,msepipestream,
@@ -20,61 +20,82 @@ const
  closeconnectiontag = closepipestag + 1;
   
 type
- tcustomsocketpipes = class;
- socketpipeseventty = procedure(const sender: tcustomsocketpipes) of object;
+ tcustomcommpipes = class;
+ commpipeseventty = procedure(const sender: tcustomcommpipes) of object;
 
- tsocketreader = class(tpipereader)
+ icommserver = interface(inullinterface)
+ end;
+ icommclient = interface(iobjectlink)
+  procedure setcommserverintf(const aintf: icommserver);
+  function getobjectlinker: tobjectlinker;
+ end;
+ 
+ tcommreader = class(tpipereader)
   private
    ftimeoutms: integer;
    fonthreadterminate: proceventty;
-   procedure settimeoutms(const avalue: integer);
-   function doread(var buf; const acount: integer;
-                    const nonblocked: boolean = false): integer; override;
   protected
    fcrypt: pcryptioinfoty;
    fonafterconnect: proceventty;
-   procedure closehandle(const ahandle: integer); override;
+   procedure settimeoutms(const avalue: integer); virtual;
    function execthread(thread: tmsethread): integer; override;
-   procedure sethandle(value: integer); override;
+   function internalread(var buf; const acount: integer;
+                    const nonblocked: boolean = false): integer; virtual;
+   function doread(var buf; const acount: integer;
+                    const nonblocked: boolean = false): integer; override;
   public
-   constructor create;
    property timeoutms: integer read ftimeoutms write settimeoutms;
  end;
  
- tsocketwriter = class(tpipewriter)
+ tsocketreader = class(tcommreader)
+  protected
+   procedure settimeoutms(const avalue: integer); override;
+   procedure sethandle(value: integer); override;
+   function internalread(var buf; const acount: integer;
+                    const nonblocked: boolean = false): integer; override;
+   procedure closehandle(const ahandle: integer); override;
+  public
+   constructor create;
+ end;
+
+ tcommwriter = class(tpipewriter)
   private
    ftimeoutms: integer;
-   procedure settimeoutms(const avalue: integer);
+   procedure settimeoutms(const avalue: integer); virtual;
   protected
    fcrypt: pcryptioinfoty;
-   procedure closehandle(const ahandle: integer); override;
+   function internalwrite(const buffer; count: longint): longint; virtual;
    function dowrite(const buffer; count: longint): longint; override;
   public
    property timeoutms: integer read ftimeoutms write settimeoutms;
  end;
  
- tcustomsocketcomp = class;
+ tsocketwriter = class(tcommwriter)
+  protected
+   procedure settimeoutms(const avalue: integer); override;
+   procedure closehandle(const ahandle: integer); override;
+   function internalwrite(const buffer; count: longint): longint; override;
+ end;
+ 
+ tcustomcommcomp = class;
  
  socketpipesstatety = (sops_open,sops_closing,sops_detached,sops_releasing);
  socketpipesstatesty = set of socketpipesstatety;
  
- tcustomsocketpipes = class(tlinkedpersistent,ievent)
+ tcustomcommpipes = class(tlinkedpersistent,ievent)
   private
-   frx: tsocketreader;
-   ftx: tsocketwriter;
-   foninputavailable: socketpipeseventty;
-   fonsocketbroken: socketpipeseventty;
-   fowner: tcustomsocketcomp;
-   fonbeforeconnect: socketpipeseventty;
-   fonafterconnect: socketpipeseventty;
-   fonbeforedisconnect: socketpipeseventty;
-   fonafterdisconnect: socketpipeseventty;
-   fstate: socketpipesstatesty;
+   foninputavailable: commpipeseventty;
+   foncommbroken: commpipeseventty;
+   fowner: tcustomcommcomp;
+   fonbeforeconnect: commpipeseventty;
+   fonafterconnect: commpipeseventty;
+   fonbeforedisconnect: commpipeseventty;
+   fonafterdisconnect: commpipeseventty;
    function gethandle: integer;
    procedure sethandle(const avalue: integer);
    function getoverloadsleepus: integer;
    procedure setoverloadsleepus(const avalue: integer);
-   procedure setoninputavailable(const avalue: socketpipeseventty);
+   procedure setoninputavailable(const avalue: commpipeseventty);
    procedure doinputavailable(const sender: tpipereader);
    procedure dopipebroken(const sender: tpipereader);   
    procedure internalclose;
@@ -85,15 +106,20 @@ type
    function gettxtimeoutms: integer;
    procedure settxtimeoutms(const avalue: integer);
   protected
+   fstate: socketpipesstatesty;
+   frx: tcommreader;
+   ftx: tcommwriter;
    fcryptio: tcryptio;
    fcryptioinfo: cryptioinfoty;
+   procedure createpipes; virtual; abstract;
    procedure doafterconnect; virtual;
    procedure dothreadterminate;
    procedure setcryptio(const acryptio: tcryptio);
    procedure receiveevent(const event: tobjectevent);
-   property onsocketbroken: socketpipeseventty read fonsocketbroken write fonsocketbroken;
+   property oncommbroken: commpipeseventty read foncommbroken 
+                                                      write foncommbroken;
   public
-   constructor create(const aowner: tcustomsocketcomp;
+   constructor create(const aowner: tcustomcommcomp;
                                  const acryptkind: cryptiokindty);
    destructor destroy; override;
    procedure close;
@@ -103,8 +129,8 @@ type
                    //connects to input/output
                    }
    property handle: integer read gethandle write sethandle;
-   property rx: tsocketreader read frx;
-   property tx: tsocketwriter read ftx;
+   property rx: tcommreader read frx;
+   property tx: tcommwriter read ftx;
    property rxtimeoutms: integer read getrxtimeoutms write setrxtimeoutms;
    property txtimeoutms: integer read gettxtimeoutms write settxtimeoutms;
    
@@ -114,25 +140,30 @@ type
             //if >= 0
    property optionsreader: pipereaderoptionsty read getoptionsreader 
                                  write setoptionsreader default [];
-   property onbeforeconnect: socketpipeseventty read fonbeforeconnect 
+   property onbeforeconnect: commpipeseventty read fonbeforeconnect 
                                                       write fonbeforeconnect;
-   property onafterconnect: socketpipeseventty read fonafterconnect 
+   property onafterconnect: commpipeseventty read fonafterconnect 
                                                       write fonafterconnect;
-   property onbeforedisconnect: socketpipeseventty read fonbeforedisconnect 
+   property onbeforedisconnect: commpipeseventty read fonbeforedisconnect 
                                                       write fonbeforedisconnect;
-   property onafterdisconnect: socketpipeseventty read fonafterdisconnect 
+   property onafterdisconnect: commpipeseventty read fonafterdisconnect 
                                                       write fonafterdisconnect;
-   property oninputavailable: socketpipeseventty read foninputavailable write setoninputavailable;
+   property oninputavailable: commpipeseventty read foninputavailable write setoninputavailable;
  end;
 
  tcustomsocketclient = class;
+
+ tcustomsocketpipes = class(tcustomcommpipes)
+  protected
+   procedure createpipes; override;
+ end;
  
  tsocketpipes = class(tcustomsocketpipes)
   published
    property optionsreader;
    property overloadsleepus;
    property oninputavailable;
-   property onsocketbroken;
+   property oncommbroken;
  end;
 { 
  tclientsocketpipes = class(tsocketpipes)
@@ -146,49 +177,52 @@ type
    procedure doafterconnect; override;
  end;
 }
- socketpipesarty = array of tsocketpipes;
- tcustomsocketserver = class;
-
- socketeventty = procedure(sender: tcustomsocketcomp) of object;  
+ commcompeventty = procedure(sender: tcustomcommcomp) of object;  
  
- tcustomsocketcomp = class(tactcomponent)
+ tcustomcommcomp = class(tactcomponent,icommserver)
   private
-   fhandle: integer;
-   factive: boolean;
-   fonbeforeconnect: socketeventty;
-   fonafterconnect: socketeventty;
-   fonbeforedisconnect: socketeventty;
-   fonafterdisconnect: socketeventty;
-   fcryptio: tcryptio;
+   fonbeforeconnect: commcompeventty;
+   fonafterconnect: commcompeventty;
+   fonbeforedisconnect: commcompeventty;
+   fonafterdisconnect: commcompeventty;
    procedure setactive(const avalue: boolean);
    procedure setcryptio(const avalue: tcryptio);
   protected
+   fhandle: integer;
+   factive: boolean;
+   fcryptio: tcryptio;
    procedure doactivated; override;
    procedure dodeactivated; override;
    procedure internalconnect; virtual; abstract;
    procedure internaldisconnect; virtual;
-   procedure closepipes(const sender: tcustomsocketpipes); virtual; abstract;
+   procedure closepipes(const sender: tcustomcommpipes); virtual; abstract;
    procedure connect;
    procedure disconnect;
    procedure checkinactive;
-   procedure doafterconnect(const sender: tcustomsocketpipes);
+   procedure doafterconnect(const sender: tcustomcommpipes);
    procedure loaded; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property active: boolean read factive write setactive;
+   property active: boolean read factive write setactive default false;
    property cryptio: tcryptio read fcryptio write setcryptio;
    
-   property onbeforeconnect: socketeventty read fonbeforeconnect 
+   property onbeforeconnect: commcompeventty read fonbeforeconnect 
                                                 write fonbeforeconnect;
-   property onafterconnect: socketeventty read fonafterconnect 
+   property onafterconnect: commcompeventty read fonafterconnect 
                                                 write fonafterconnect;
-   property onbeforedisconnect: socketeventty read fonbeforedisconnect 
+   property onbeforedisconnect: commcompeventty read fonbeforedisconnect 
                                                 write fonbeforedisconnect;
-   property onafterdisconnect: socketeventty read fonafterdisconnect 
+   property onafterdisconnect: commcompeventty read fonafterdisconnect 
                                                 write fonafterdisconnect;
  end;
 
+ socketpipesarty = array of tsocketpipes;
+ tcustomsocketserver = class;
+
+ tcustomsocketcomp = class(tcustomcommcomp)
+ end;
+ 
  tsocketcomp = class(tcustomsocketcomp)
   published
    property active;
@@ -235,7 +269,7 @@ type
    fpipes: tsocketpipes;
    procedure internalconnect; override;
    procedure internaldisconnect; override;
-   procedure closepipes(const sender: tcustomsocketpipes); override;
+   procedure closepipes(const sender: tcustomcommpipes); override;
    procedure doasyncevent(var atag: integer); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -268,7 +302,7 @@ type
    fpipes: tsocketpipes;
    procedure internalconnect; override;
    procedure internaldisconnect; override;
-   procedure closepipes(const sender: tcustomsocketpipes); override;
+   procedure closepipes(const sender: tcustomcommpipes); override;
    procedure doasyncevent(var atag: integer); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -284,7 +318,7 @@ type
                      const asocket: integer;
                      const addr: socketaddrty; var accept: boolean) of object;
  socketserverconnecteventty = procedure(const sender: tcustomsocketserver;
-                     const apipes: tcustomsocketpipes) of object;
+                     const apipes: tcustomcommpipes) of object;
 
  socketserverstatety = (sss_closepipespending);
  socketserverstatesty = set of socketserverstatety;
@@ -302,8 +336,8 @@ type
    fonafterchdisconnect: socketserverconnecteventty;
    fpipes: socketpipesarty;
    foverloadsleepus: integer;
-   foninputavailable: socketpipeseventty;
-   fonsocketbroken: socketpipeseventty;
+   foninputavailable: commpipeseventty;
+   fonsocketbroken: commpipeseventty;
    fconnectioncount: integer;
    foptionsreader: pipereaderoptionsty;
    frxtimeoutms: integer;
@@ -312,9 +346,9 @@ type
   protected
    procedure internaldisconnect; override;
    procedure doclosepipes;
-   procedure closepipes(const sender: tcustomsocketpipes); override;
+   procedure closepipes(const sender: tcustomcommpipes); override;
    procedure doasyncevent(var atag: integer); override;
-   procedure doafterchconnect(const sender: tcustomsocketpipes);
+   procedure doafterchconnect(const sender: tcustomcommpipes);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -343,9 +377,9 @@ type
             //if >= 0
    property optionsreader: pipereaderoptionsty read foptionsreader
                                write foptionsreader default [];
-   property oninputavailable: socketpipeseventty read foninputavailable 
+   property oninputavailable: commpipeseventty read foninputavailable 
                                  write foninputavailable;
-   property onsocketbroken: socketpipeseventty read fonsocketbroken 
+   property onsocketbroken: commpipeseventty read fonsocketbroken 
                                  write fonsocketbroken;
  end;
 
@@ -377,17 +411,33 @@ type
      
 procedure checksyserror(const aresult: integer);
 
-procedure connectcryptio(const acryptio: tcryptio; const tx: tsocketwriter;
-                         const rx: tsocketreader;
+procedure connectcryptio(const acryptio: tcryptio; const tx: tcommwriter;
+                         const rx: tcommreader;
                          var cryptioinfo: cryptioinfoty;
                          txfd: integer = invalidfilehandle;
                          rxfd: integer = invalidfilehandle);
 procedure socketerror(const error: syserrorty; const text: string = '');
 
+procedure setcomcomp(const alink: icommclient; const acommcomp: tcustomcommcomp;
+                                   var dest: tcustomcommcomp);
+
 implementation
 uses
  msefileutils,msesysintf,sysutils,msestream,mseprocutils,msesysutils,
  msesocketintf;
+
+procedure setcomcomp(const alink: icommclient;
+               const acommcomp: tcustomcommcomp; var dest: tcustomcommcomp);
+var
+ po1: pointer;
+begin
+ alink.setcommserverintf(nil);
+ po1:= acommcomp;
+ alink.getobjectlinker.setlinkedvar(alink,acommcomp,tmsecomponent(dest),po1);
+ if dest <> nil then begin
+  alink.setcommserverintf(icommserver(dest));
+ end;
+end;
 
 procedure socketerror(const error: syserrorty; const text: string = '');
 begin
@@ -413,8 +463,8 @@ begin
  end;
 end;
 
-procedure connectcryptio(const acryptio: tcryptio; const tx: tsocketwriter;
-                         const rx: tsocketreader;
+procedure connectcryptio(const acryptio: tcryptio; const tx: tcommwriter;
+                         const rx: tcommreader;
                          var cryptioinfo: cryptioinfoty;
                          txfd: integer = invalidfilehandle;
                          rxfd: integer = invalidfilehandle);
@@ -442,22 +492,23 @@ begin
  end;
 end;
 
-{ tcustomsocketpipes }
+{ tcustomcommpipes }
 
-constructor tcustomsocketpipes.create(const aowner: tcustomsocketcomp; 
+constructor tcustomcommpipes.create(const aowner: tcustomcommcomp; 
                                               const acryptkind: cryptiokindty);
 begin
  fowner:= aowner;
- frx:= tsocketreader.create;
+ createpipes;
+// frx:= tsocketreader.create;
  frx.fonafterconnect:= @doafterconnect;
  frx.onpipebroken:= @dopipebroken;
  frx.fonthreadterminate:= @dothreadterminate;
- ftx:= tsocketwriter.create;
+// ftx:= tsocketwriter.create;
  setlinkedvar(aowner.fcryptio,tmsecomponent(fcryptio));
  fcryptioinfo.kind:= acryptkind;
 end;
 
-destructor tcustomsocketpipes.destroy;
+destructor tcustomcommpipes.destroy;
 begin
  inherited;
  close;
@@ -465,7 +516,7 @@ begin
  ftx.free;
 end;
 
-procedure tcustomsocketpipes.release;
+procedure tcustomcommpipes.release;
 begin
  if not (sops_releasing in fstate) then begin
   application.postevent(tobjectevent.create(ek_release,ievent(self)));
@@ -473,12 +524,12 @@ begin
  end;
 end;
 
-function tcustomsocketpipes.gethandle: integer;
+function tcustomcommpipes.gethandle: integer;
 begin
  result:= ftx.handle;
 end;
 
-procedure tcustomsocketpipes.doafterconnect;
+procedure tcustomcommpipes.doafterconnect;
 begin
  connectcryptio(fcryptio,ftx,frx,fcryptioinfo);
  if assigned(fonafterconnect) then begin
@@ -486,13 +537,13 @@ begin
  end;  
 end;
 
-procedure tcustomsocketpipes.dothreadterminate;
+procedure tcustomcommpipes.dothreadterminate;
 begin
  cryptthreadterminate(fcryptioinfo);
  //dummy
 end;
 
-procedure tcustomsocketpipes.sethandle(const avalue: integer);
+procedure tcustomcommpipes.sethandle(const avalue: integer);
 var
  int1: integer;
 begin
@@ -515,7 +566,7 @@ begin
  end;
 end;
 
-procedure tcustomsocketpipes.setcryptio(const acryptio: tcryptio);
+procedure tcustomcommpipes.setcryptio(const acryptio: tcryptio);
 begin
  fcryptio:= acryptio;
  with fcryptioinfo do begin
@@ -525,17 +576,17 @@ begin
  end;
 end;
 
-function tcustomsocketpipes.getoverloadsleepus: integer;
+function tcustomcommpipes.getoverloadsleepus: integer;
 begin
  result:= frx.overloadsleepus;
 end;
 
-procedure tcustomsocketpipes.setoverloadsleepus(const avalue: integer);
+procedure tcustomcommpipes.setoverloadsleepus(const avalue: integer);
 begin
  frx.overloadsleepus:= avalue;
 end;
 
-procedure tcustomsocketpipes.setoninputavailable(const avalue: socketpipeseventty);
+procedure tcustomcommpipes.setoninputavailable(const avalue: commpipeseventty);
 begin
  foninputavailable:= avalue;
  if assigned(avalue) then begin
@@ -546,18 +597,18 @@ begin
  end;
 end;
 
-procedure tcustomsocketpipes.doinputavailable(const sender: tpipereader);
+procedure tcustomcommpipes.doinputavailable(const sender: tpipereader);
 begin
  if fowner.canevent(tmethod(foninputavailable)) then begin
   foninputavailable(self);
  end;
 end;
 
-procedure tcustomsocketpipes.receiveevent(const event: tobjectevent);
+procedure tcustomcommpipes.receiveevent(const event: tobjectevent);
 begin
  if (event is tuserevent) and (tuserevent(event).tag = closepipestag) then begin
-  if assigned(fonsocketbroken) then begin
-   fonsocketbroken(self);
+  if assigned(foncommbroken) then begin
+   foncommbroken(self);
   end
   else begin
    close;
@@ -570,17 +621,17 @@ begin
  end;
 end;
 
-procedure tcustomsocketpipes.dopipebroken(const sender: tpipereader);
+procedure tcustomcommpipes.dopipebroken(const sender: tpipereader);
 begin
  application.postevent(tuserevent.create(ievent(self),closepipestag));
 end;
 
-procedure tcustomsocketpipes.internalclose;
+procedure tcustomcommpipes.internalclose;
 begin
  fowner.closepipes(self);
 end;
 
-procedure tcustomsocketpipes.close;
+procedure tcustomcommpipes.close;
 begin
  if fstate * [sops_open,sops_closing] = [sops_open] then begin
   include(fstate,sops_closing);
@@ -598,38 +649,38 @@ begin
  end;
 end;
 
-function tcustomsocketpipes.getoptionsreader: pipereaderoptionsty;
+function tcustomcommpipes.getoptionsreader: pipereaderoptionsty;
 begin
  result:= frx.options;
 end;
 
-procedure tcustomsocketpipes.setoptionsreader(const avalue: pipereaderoptionsty);
+procedure tcustomcommpipes.setoptionsreader(const avalue: pipereaderoptionsty);
 begin
  frx.options:= avalue;
 end;
 
-function tcustomsocketpipes.getrxtimeoutms: integer;
+function tcustomcommpipes.getrxtimeoutms: integer;
 begin
  result:= frx.timeoutms;
 end;
 
-procedure tcustomsocketpipes.setrxtimeoutms(const avalue: integer);
+procedure tcustomcommpipes.setrxtimeoutms(const avalue: integer);
 begin
  frx.timeoutms:= avalue;
 end;
 
-function tcustomsocketpipes.gettxtimeoutms: integer;
+function tcustomcommpipes.gettxtimeoutms: integer;
 begin
  result:= ftx.timeoutms;
 end;
 
-procedure tcustomsocketpipes.settxtimeoutms(const avalue: integer);
+procedure tcustomcommpipes.settxtimeoutms(const avalue: integer);
 begin
  ftx.timeoutms:= avalue;
 end;
 
 {
-procedure tcustomsocketpipes.runhandlerapp(const commandline: filenamety);
+procedure tcustomcommpipes.runhandlerapp(const commandline: filenamety);
 var
  rxha,txha: integer;
  str1: string;
@@ -643,20 +694,20 @@ begin
  execmse1(commandline,@rxha,@txha);
 end;
 }
-{ tcustomsocketcomp }
+{ tcustomcommcomp }
 
-constructor tcustomsocketcomp.create(aowner: tcomponent);
+constructor tcustomcommcomp.create(aowner: tcomponent);
 begin
  fhandle:= invalidfilehandle;
  inherited;
 end;
 
-destructor tcustomsocketcomp.destroy;
+destructor tcustomcommcomp.destroy;
 begin
  inherited;
 end;
 
-procedure tcustomsocketcomp.doactivated;
+procedure tcustomcommcomp.doactivated;
 begin
  active:= true;
 // if factive then begin
@@ -664,25 +715,25 @@ begin
 // end;
 end;
 
-procedure tcustomsocketcomp.dodeactivated;
+procedure tcustomcommcomp.dodeactivated;
 begin
  active:= false;
 end;
 
-procedure tcustomsocketcomp.internaldisconnect;
+procedure tcustomcommcomp.internaldisconnect;
 begin
  fhandle:= invalidfilehandle;
  factive:= false;
 end;
 
-procedure tcustomsocketcomp.checkinactive;
+procedure tcustomcommcomp.checkinactive;
 begin
  if not (csloading in componentstate) and active then begin
   raise exception.create('Socket must be inactive.');
  end;
 end;
 
-procedure tcustomsocketcomp.setactive(const avalue: boolean);
+procedure tcustomcommcomp.setactive(const avalue: boolean);
 begin
  if factive <> avalue then begin
   if not (csloading in componentstate) then begin
@@ -699,7 +750,7 @@ begin
  end;
 end;
 
-procedure tcustomsocketcomp.doafterconnect(const sender: tcustomsocketpipes);
+procedure tcustomcommcomp.doafterconnect(const sender: tcustomcommpipes);
 begin
  if canevent(tmethod(fonafterconnect)) then begin
   application.lock;
@@ -711,7 +762,7 @@ begin
  end; 
 end;
 
-procedure tcustomsocketcomp.connect;
+procedure tcustomcommcomp.connect;
 begin
  if canevent(tmethod(fonbeforeconnect)) then begin
   fonbeforeconnect(self);
@@ -719,7 +770,7 @@ begin
  internalconnect;
 end;
 
-procedure tcustomsocketcomp.disconnect;
+procedure tcustomcommcomp.disconnect;
 begin
  if canevent(tmethod(fonbeforedisconnect)) then begin
   fonbeforedisconnect(self);
@@ -730,12 +781,12 @@ begin
  end; 
 end;
 
-procedure tcustomsocketcomp.setcryptio(const avalue: tcryptio);
+procedure tcustomcommcomp.setcryptio(const avalue: tcryptio);
 begin
  setlinkedvar(avalue,tmsecomponent(fcryptio));
 end;
 
-procedure tcustomsocketcomp.loaded;
+procedure tcustomcommcomp.loaded;
 begin
  inherited;
  if factive then begin
@@ -803,7 +854,7 @@ begin
  inherited
 end;
 
-procedure tsocketstdio.closepipes(const sender: tcustomsocketpipes);
+procedure tsocketstdio.closepipes(const sender: tcustomcommpipes);
 begin
  asyncevent(closepipestag);
 end;
@@ -886,7 +937,7 @@ begin
  inherited
 end;
 
-procedure tcustomsocketclient.closepipes(const sender: tcustomsocketpipes);
+procedure tcustomsocketclient.closepipes(const sender: tcustomcommpipes);
 begin
  if (csdestroying in componentstate) and application.ismainthread then begin
   disconnect;
@@ -937,7 +988,7 @@ begin
  end;
 end;
 
-procedure tcustomsocketserver.doafterchconnect(const sender: tcustomsocketpipes);
+procedure tcustomsocketserver.doafterchconnect(const sender: tcustomcommpipes);
 begin
  if canevent(tmethod(fonafterchconnect)) then begin
   application.lock;
@@ -1076,7 +1127,7 @@ begin
  end;
 end;
 
-procedure tcustomsocketserver.closepipes(const sender: tcustomsocketpipes);
+procedure tcustomsocketserver.closepipes(const sender: tcustomcommpipes);
 begin
  if (sender.rx.handle <> invalidfilehandle) or 
              (sops_detached in sender.fstate) then begin
@@ -1173,48 +1224,14 @@ begin
  end;
 end;
 
-{ tsocketreader }
+{ tcommreader }
 
-constructor tsocketreader.create;
-begin
- inherited;
- fstate:= fstate + [tss_nosigio,tss_unblocked];
-end;
-
-procedure tsocketreader.closehandle(const ahandle: integer);
-begin
- soc_shutdown(ahandle,ssk_rx);
- inherited;
-end;
-
-procedure tsocketreader.settimeoutms(const avalue: integer);
+procedure tcommreader.settimeoutms(const avalue: integer);
 begin
  ftimeoutms:= avalue;
- if handle <> invalidfilehandle then begin
-  soc_setrxtimeout(handle,avalue);
- end;
 end;
 
-function tsocketreader.doread(var buf; const acount: integer;
-                   const nonblocked: boolean = false): integer;
-var
- int1: integer;
-begin
- if nonblocked then begin
-  int1:= -1;
- end
- else begin
-  int1:= 0;
- end;
- if fcrypt <> nil then begin
-  result:= cryptread(fcrypt^,@buf,acount,int1);
- end
- else begin  
-  soc_read(handle,@buf,acount,result,int1);
- end;
-end;
-
-function tsocketreader.execthread(thread: tmsethread): integer;
+function tcommreader.execthread(thread: tmsethread): integer;
 var
  int1: integer;
 begin                          
@@ -1265,12 +1282,95 @@ begin
 {$endif}
 end;
 
+function tcommreader.internalread(var buf; const acount: integer;
+               const nonblocked: boolean = false): integer;
+begin
+ result:= inherited doread(buf,acount,nonblocked);
+end;
+
+function tcommreader.doread(var buf; const acount: integer;
+               const nonblocked: boolean = false): integer;
+var
+ int1: integer;
+begin
+ if fcrypt <> nil then begin
+  if nonblocked then begin
+   int1:= -1;
+  end
+  else begin
+   int1:= 0;
+  end;
+  result:= cryptread(fcrypt^,@buf,acount,int1);
+ end
+ else begin  
+  result:= internalread(buf,acount,nonblocked);
+ end;
+end;
+
+{ tsocketreader }
+
+constructor tsocketreader.create;
+begin
+ inherited;
+ fstate:= fstate + [tss_nosigio,tss_unblocked];
+end;
+
 procedure tsocketreader.sethandle(value: integer);
 begin
  if value <> invalidfilehandle then begin
   soc_setnonblock(value,true);
  end;
  inherited;
+end;
+
+function tsocketreader.internalread(var buf; const acount: integer;
+                   const nonblocked: boolean = false): integer;
+var
+ int1: integer;
+begin
+ if nonblocked then begin
+  int1:= -1;
+ end
+ else begin
+  int1:= 0;
+ end;
+ soc_read(handle,@buf,acount,result,int1);
+end;
+
+procedure tsocketreader.closehandle(const ahandle: integer);
+begin
+ soc_shutdown(ahandle,ssk_rx);
+ inherited;
+end;
+
+procedure tsocketreader.settimeoutms(const avalue: integer);
+begin
+ inherited;
+ if handle <> invalidfilehandle then begin
+  soc_setrxtimeout(handle,avalue);
+ end;
+end;
+
+{ tcommwriter }
+
+procedure tcommwriter.settimeoutms(const avalue: integer);
+begin
+ ftimeoutms:= avalue;
+end;
+
+function tcommwriter.internalwrite(const buffer; count: longint): longint;
+begin
+ result:= inherited dowrite(buffer,count);
+end;
+
+function tcommwriter.dowrite(const buffer; count: longint): longint;
+begin
+ if fcrypt <> nil then begin
+  result:= cryptwrite(fcrypt^,@buffer,count,ftimeoutms);
+ end
+ else begin
+  result:= internalwrite(buffer,count);
+ end;
 end;
 
 { tsocketwriter }
@@ -1283,20 +1383,23 @@ end;
 
 procedure tsocketwriter.settimeoutms(const avalue: integer);
 begin
- ftimeoutms:= avalue;
+ inherited;
  if handle <> invalidfilehandle then begin
   soc_settxtimeout(handle,avalue);
  end;
 end;
 
-function tsocketwriter.dowrite(const buffer; count: longint): longint;
+function tsocketwriter.internalwrite(const buffer; count: longint): longint;
 begin
- if fcrypt <> nil then begin
-  result:= cryptwrite(fcrypt^,@buffer,count,ftimeoutms);
- end
- else begin
-  soc_write(handle,@buffer,count,result,0);
- end;
+ soc_write(handle,@buffer,count,result,0);
+end;
+
+{ tcustomsocketpipes }
+
+procedure tcustomsocketpipes.createpipes;
+begin
+ frx:= tsocketreader.create;
+ ftx:= tsocketwriter.create;
 end;
 
 end.

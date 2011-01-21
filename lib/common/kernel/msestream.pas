@@ -440,12 +440,18 @@ procedure streamerror;
 begin
  syserror(syelasterror,'Streamerror: ');
 end;
-
+var testvar: integer;
  {$ifdef UNIX}
 procedure setfilenonblock(handle: integer; value: boolean);
 var
  int1: integer;
 begin
+if value then begin
+inc(testvar);
+end
+else begin
+dec(testvar);
+end;
  int1:= fcntl(handle,f_getfl,0);
  if int1 = -1 then begin
   streamerror;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -135,7 +135,7 @@ const
 
 type
 
- trs232 = class
+ tcustomrs232 = class(tpersistent)
   private
    fowner: tmsecomponent; //can be nil
    fhandle: ptruint;
@@ -167,6 +167,7 @@ type
    {$endif}
    procedure setdatabits(const avalue: commdatabitsty);
   protected
+   fvmin: char;
    function canevent(const aevent: tmethod): boolean;
   public
    constructor create(const aowner: tmsecomponent;  //aowner can be nil
@@ -188,20 +189,23 @@ type
    function readstring(anzahl: integer; out dat: string;
                        timeout: longword = infinitemse): boolean;
             //list daten, true wenn gelungen, timeout in us 0 -> 2*uebertragungszeit
-   function uebertragungszeit(anzahl: integer): longword; //bringt uebertragungszeit in us
+   function transmissiontime(const acount: integer): longword; //bringt uebertragungszeit in us
    property handle: ptruint read fhandle;
-   property commnr:commnrty read Fcommnr write Setcommnr;
-   property baud: commbaudratety read Fbaud write Setbaud;
-   property databits: commdatabitsty read fdatabits write setdatabits;
-   property stopbit: commstopbitty read Fstopbit write Setstopbit;
-   property parity: commparityty read Faparity write Setparity;
-   property halfduplex: boolean read fhalfduplex write fhalfduplex;
+   property commnr: commnrty read Fcommnr write Setcommnr default cnr_1;
+   property baud: commbaudratety read Fbaud write Setbaud default cbr_9600;
+   property databits: commdatabitsty read fdatabits write setdatabits default cdb_8;
+   property stopbit: commstopbitty read Fstopbit write Setstopbit default csb_1;
+   property parity: commparityty read Faparity write Setparity default cpa_none;
+   property halfduplex: boolean read fhalfduplex write fhalfduplex default false;
    property oncheckabort: checkeventty read foncheckabort;
    property rtstimevor: integer read frtstimevor write frtstimevor; //in us
    property rtstimenach: integer read frtstimenach write frtstimenach; //in us
    property byteus: integer read fbyteus;
  end;
 
+ trs232 = class(tcustomrs232)
+ end;
+ 
  tcommevent = class;
  commeventty = procedure(const sender: tcommevent) of object;
  tcommthread = class;
@@ -238,7 +242,8 @@ type
    destructor destroy; override;
    function writestring(const dat: string; timeout: integer = 0): boolean;
   //timeout in us, wenn = 0 -> warten auf uebertragungsende, bei halbduplex sowiso
-   function readstring(anzahl: integer; out dat: string; timeout: integer = 0): boolean;
+   function readstring(anzahl: integer; out dat: string;
+                                         timeout: integer = 0): boolean;
    //list daten, true wenn gelungen, timeout in us, 0 -> doppelte uebertragungszeit
    procedure abort;  //alle laufende auftraege werden mit timeout abgebrochen
       //ruecksetzung bei leerer messagequeue, bei aufruf aus fremdem thread,
@@ -651,9 +656,9 @@ begin
  end;
 end;
 
-{ trs232 }
+{ tcustomrs232 }
 
-constructor trs232.create(const aowner: tmsecomponent; const
+constructor tcustomrs232.create(const aowner: tmsecomponent; const
                       aoncheckabort: checkeventty = nil);
 begin
  fowner:= aowner;
@@ -666,13 +671,13 @@ begin
  updatebyteinfo;
 end;
 
-destructor trs232.destroy;
+destructor tcustomrs232.destroy;
 begin
  close;
  inherited;
 end;
 
-procedure trs232.updatebyteinfo;
+procedure tcustomrs232.updatebyteinfo;
 var
  openedvorher: boolean;
  int1: integer;
@@ -694,12 +699,12 @@ begin
  end;
 end;
 
-function trs232.uebertragungszeit(anzahl: integer): longword;
+function tcustomrs232.transmissiontime(const acount: integer): longword;
 begin
- result:= fbyteus * anzahl
+ result:= fbyteus * acount;
 end;
 
-procedure trs232.Setbaud(const Value: commbaudratety);
+procedure tcustomrs232.Setbaud(const Value: commbaudratety);
 begin
  if fbaud <> value then begin
   Fbaud := Value;
@@ -707,7 +712,7 @@ begin
  end;
 end;
 
-procedure trs232.Setcommnr(const Value: commnrty);
+procedure tcustomrs232.Setcommnr(const Value: commnrty);
 begin
  if (value < low(commnrty)) or (value > high(commnrty)) then begin
   raise exception.Create('Invalid commnr: '+inttostr(integer(value))+'.');
@@ -718,7 +723,7 @@ begin
  end;
 end;
 
-procedure trs232.Setparity(const Value: commparityty);
+procedure tcustomrs232.Setparity(const Value: commparityty);
 begin
  if faparity <> value then begin
   Faparity := Value;
@@ -726,7 +731,7 @@ begin
  end;
 end;
 
-procedure trs232.setdatabits(const avalue: commdatabitsty);
+procedure tcustomrs232.setdatabits(const avalue: commdatabitsty);
 begin
  if fdatabits <> avalue then begin
   fdatabits:= avalue;
@@ -734,12 +739,12 @@ begin
  end;
 end;
 
-function trs232.canevent(const aevent: tmethod): boolean;
+function tcustomrs232.canevent(const aevent: tmethod): boolean;
 begin
  result:= (fowner = nil) or (fowner.canevent(aevent));
 end;
 
-procedure trs232.Setstopbit(const Value: commstopbitty);
+procedure tcustomrs232.Setstopbit(const Value: commstopbitty);
 begin
  if fstopbit <> value then begin
   Fstopbit := Value;
@@ -747,7 +752,7 @@ begin
  end;
 end;
 
-procedure trs232.reset;
+procedure tcustomrs232.reset;
 begin
  if opened then begin
  {$ifdef UNIX}
@@ -758,7 +763,7 @@ begin
  end;
 end;
 
-procedure trs232.resetinput;
+procedure tcustomrs232.resetinput;
 begin
  if opened then begin
  {$ifdef UNIX}
@@ -769,7 +774,7 @@ begin
  end;
 end;
 
-procedure trs232.resetoutput;
+procedure tcustomrs232.resetoutput;
 begin
  if opened then begin
  {$ifdef UNIX}
@@ -780,7 +785,7 @@ begin
  end;
 end;
 
-procedure trs232.close;
+procedure tcustomrs232.close;
 begin
  if opened then begin
  {$ifdef UNIX}
@@ -803,12 +808,12 @@ begin
  fhandle:= invalidfilehandle;
 end;
 
-function trs232.opened: boolean;
+function tcustomrs232.opened: boolean;
 begin
  result:= fhandle <> invalidfilehandle;
 end;
 
-function trs232.open: boolean;
+function tcustomrs232.open: boolean;
 {$ifdef UNIX}
 const
  iflagoff = BRKINT or INPCK or ISTRIP or IGNCR or INLCR or ICRNL or IUCLC or
@@ -900,7 +905,7 @@ begin       //open
    info.c_cflag:= info.c_cflag or parodd;
   end;
   info.c_line:= char(N_TTY);
-  info.c_cc[VMIN]:= #0;
+  info.c_cc[VMIN]:= fvmin;
   info.c_cc[VTIME]:= #0;
 
   info.c_cflag:= info.c_cflag or commdatabitflags[fdatabits];
@@ -956,7 +961,7 @@ begin       //open
  result:= opened;
 end;
 
-procedure trs232.setrts(active: boolean);
+procedure tcustomrs232.setrts(active: boolean);
 {$ifndef mswindows}
 var
  flags: integer;
@@ -982,7 +987,7 @@ begin
  end;
 end;
 
-function trs232.waitfortx(timeout: integer): boolean;
+function tcustomrs232.waitfortx(timeout: integer): boolean;
   //fuer LINUX: um max ein tick verzoegert!
   //funktioniert nicht in win2k, vermutlich bug
 
@@ -1008,13 +1013,13 @@ begin
 end;
 
 {$ifdef mswindows}
-procedure trs232.eotevent(sender: tobject);
+procedure tcustomrs232.eotevent(sender: tobject);
 begin
  setrts(false);
 end;
 
 {$endif}
-function trs232.defaulttimeout(us: longword; anzahl: integer;
+function tcustomrs232.defaulttimeout(us: longword; anzahl: integer;
       out timeout: longword): boolean;
   // timeout in us 0 -> 2*uebertragungszeit,
 begin
@@ -1022,12 +1027,12 @@ begin
  result:= us <> infinitemse;
  if result then begin
   if us = 0 then begin
-   timeout:= uebertragungszeit(anzahl)*2+30000;
+   timeout:= transmissiontime(anzahl)*2+30000;
   end;
  end;
 end;
 
-function trs232.writestring(const dat: string; timeout: longword = 0;
+function tcustomrs232.writestring(const dat: string; timeout: longword = 0;
       waitforeot: boolean = false): boolean;
   // timeout in us 0 -> 2*uebertragungszeit,
   // waitforeot -> warten auf uebertragungsende, bei halbduplex sowiso
@@ -1095,7 +1100,7 @@ begin
     timer.wait;
     {$else}
 //    result:= false;
-    time:= timestep(uebertragungszeit(length(dat)*2));
+    time:= timestep(transmissiontime(length(dat)*2));
     repeat
      ioctl(fhandle,tiocsergetlsr,@ca1);
      result:= ca1 and TIOCSER_TEMT <> 0;
@@ -1119,7 +1124,7 @@ begin
  {$endif}
 end;
 
-function trs232.readbuffer(anzahl: integer; out dat;
+function tcustomrs232.readbuffer(anzahl: integer; out dat;
                        timeout: longword = 0): integer;
             //list daten, bringt anzahl gelesene zeichen timeout in us 0 -> 2*uebertragungszeit
 var
@@ -1172,7 +1177,7 @@ begin
 end;
 {$if 0=1}
 {$ifdef UNIX}
-function trs232.readbuffer(anzahl: integer; out dat;
+function tcustomrs232.readbuffer(anzahl: integer; out dat;
                        timeout: longword = 0): integer;
             //list daten, bringt anzahl gelesene zeichen timeout in us 0 -> 2*uebertragungszeit
 var
@@ -1211,7 +1216,7 @@ end;
 
 {$else}
 
-function trs232.readbuffer(anzahl: integer; out dat;
+function tcustomrs232.readbuffer(anzahl: integer; out dat;
                        timeout: longword = 0): integer;
             //liest daten, bringt anzahl gelesene zeichen timeout in us 0 -> 2*uebertragungszeit
 var
@@ -1243,7 +1248,7 @@ end;
 {$ifend}
 
 
-function trs232.readstring(anzahl: integer; out dat: string;
+function tcustomrs232.readstring(anzahl: integer; out dat: string;
   timeout: longword = infinitemse): boolean;
   //timeout = 0 -> timeout = 2*uebertragungszeit
 var
@@ -1518,7 +1523,7 @@ begin
   }
   end;
   po1:= po+laenge;
-  lwo1:= fport.readbuffer(asciipufferlaenge-laenge,po1[0],fport.uebertragungszeit(2));
+  lwo1:= fport.readbuffer(asciipufferlaenge-laenge,po1[0],fport.transmissiontime(2));
   laenge:= laenge + integer(lwo1);
   bo1:= bo2;
   bo2:= checkabort(nil);

@@ -506,7 +506,7 @@ type
    procedure localsenddata(const adata: ansistring); override;
    procedure internalsenddata(const adata: ansistring); override;
    procedure doinputavailable(const sender: tpipereader);
-   procedure dobeforedisconnect(const sender: tcustomsocketpipes);
+   procedure dobeforedisconnect(const sender: tcustomcommpipes);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -528,7 +528,7 @@ type
    procedure localsenddata(const adata: ansistring); override;
    procedure internalsenddata(const adata: ansistring); override;
    procedure doinputavailable(const sender: tpipereader);
-   procedure dobeforedisconnect(const sender: tcustomsocketpipes);
+   procedure dobeforedisconnect(const sender: tcustomcommpipes);
    procedure unlink;
    function canconnect: boolean; override;
   public
@@ -1837,8 +1837,8 @@ end;
 
 destructor tsocketclientiochannel.destroy;
 begin
- inherited;
  fsocket.free;
+ inherited;
 end;
 
 procedure tsocketclientiochannel.internalconnect;
@@ -1876,7 +1876,8 @@ begin
  fsocket.assign(avalue);
 end;
 
-procedure tsocketclientiochannel.dobeforedisconnect(const sender: tcustomsocketpipes);
+procedure tsocketclientiochannel.dobeforedisconnect(
+                                            const sender: tcustomcommpipes);
 begin
  disconnect;
 end;
@@ -1945,7 +1946,8 @@ begin
  addata(sender.readdatastring);
 end;
 
-procedure tcustomsocketserveriochannel.dobeforedisconnect(const sender: tcustomsocketpipes);
+procedure tcustomsocketserveriochannel.dobeforedisconnect(
+                                       const sender: tcustomcommpipes);
 begin
  disconnect;
  unlink;

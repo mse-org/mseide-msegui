@@ -22,12 +22,13 @@ interface
 
 implementation
 uses
- Classes,msecommport,msecommutils ,msedesignintf,regserialcomm_bmp;
+ Classes,msecommport,msecommutils,msesercomm,msedesignintf,regserialcomm_bmp;
 
 procedure Register;
 begin
  registercomponents('Comm',[tcommport,tasciicommport,tasciiprotport,
-                                                            tcommselector]);
+                            tsercommcomp,
+                            tcommselector]);
  registercomponenttabhints(['Comm'],['Components for serial Port (RS232)']);
 end;
 
