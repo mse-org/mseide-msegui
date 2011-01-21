@@ -229,7 +229,7 @@ type
    fowner: tmsecomponent;
    fport: trs232;
    fabort: boolean;
-   fsendretrys: integer;
+   fsendretries: integer;
   protected
    function checkabort(const sender: tobject): boolean; virtual;
    function execute(thread: tmsethread): integer; override;
@@ -246,7 +246,7 @@ type
    procedure postevent(event: tcommevent);
    procedure reset; virtual;
    property port: trs232 read fport;
-   property sendretrys: integer read fsendretrys write fsendretrys default 0;
+   property sendretries: integer read fsendretries write fsendretries default 0;
  end;
 
  tcommport = class(tmsecomponent,istatfile)
@@ -271,8 +271,8 @@ type
    procedure Setstopbit(const Value: commstopbitty);
    function gethalfduplex: boolean;
    procedure sethalfduplex(const Value: boolean);
-   function getsendretrys: integer;
-   procedure setsendretrys(const Value: integer);
+   function getsendretries: integer;
+   procedure setsendretries(const Value: integer);
    function getrtstimenach: integer;
    function getrtstimevor: integer;
    procedure setrtstimenach(const Value: integer);
@@ -322,7 +322,7 @@ type
         write fonportchange;
    property onconnectchanged: booleanchangedeventty read Fonconnectedchange
         write fonconnectedchange;
-   property sendretrys: integer read getsendretrys write setsendretrys default 0;
+   property sendretries: integer read getsendretries write setsendretries default 0;
    property port: commnrty read getport write setport default cnr_1;
    property baudrate: commbaudratety read getbaudrate write Setbaudrate default cbr_9600;
    property stopbit: commstopbitty read getstopbit write Setstopbit default csb_1;
@@ -1556,7 +1556,7 @@ begin
   result:= cpf_notopen;
   exit;
  end;
- int1:= fsendretrys;
+ int1:= fsendretries;
  repeat
 // while (result <> cpf_ok) and (int1 >= 0) do begin
   reset;     // puffer loeschen
@@ -1718,14 +1718,14 @@ begin
  fthread.fport.rtstimevor:= value;
 end;
 
-function tcommport.getsendretrys: integer;
+function tcommport.getsendretries: integer;
 begin
- result:= fthread.sendretrys;
+ result:= fthread.sendretries;
 end;
 
-procedure tcommport.setsendretrys(const Value: integer);
+procedure tcommport.setsendretries(const Value: integer);
 begin
- fthread.sendretrys:= value;
+ fthread.sendretries:= value;
 end;
 
 function tcommport.getstopbit: commstopbitty;
