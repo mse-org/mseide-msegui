@@ -1110,6 +1110,7 @@ begin
    pt1.y:= reader.readinteger('scrolly',pt1.y,-bigint,0);
    scrollpos:= pt1;
   end;
+  activetrace:= reader.readinteger('activetrace',activetrace,0,ftraces.count-1);
  end;
  if oe_savevalue in foptionsedit then begin
   doreadvalue(reader);
@@ -1131,6 +1132,7 @@ begin
    writer.writeinteger('scrollx',pt1.x);
    writer.writeinteger('scrolly',pt1.y);
   end;
+  writer.writeinteger('activetrace',activetrace);
  end;
  if oe_savevalue in foptionsedit then begin
   dowritevalue(writer);
@@ -1258,13 +1260,27 @@ begin
 end;
 
 procedure tcustomxychartedit.doreadvalue(const reader: tstatreader);
+var
+ int1: integer;
 begin
- value:= reader.readarray('value',fvalue);
+ for int1:= 0 to ftraces.count - 1 do begin
+  ftraces[int1].xydata:= reader.readarray('value'+inttostr(int1),
+                    ftraces[int1].xydata);
+ end;
+ if hasactivetrace then begin
+  value:= activetraceitem.xydata;
+ end;
+// value:= reader.readarray('value',fvalue);
 end;
 
 procedure tcustomxychartedit.dowritevalue(const writer: tstatwriter);
+var
+ int1: integer;
 begin
- writer.writearray('value',fvalue);
+ for int1:= 0 to ftraces.count - 1 do begin
+  writer.writearray('value'+inttostr(int1),ftraces[int1].xydata);
+ end;
+// writer.writearray('value',fvalue);
 end;
 
 function tcustomxychartedit.getvalueitems(const index: integer): complexty;

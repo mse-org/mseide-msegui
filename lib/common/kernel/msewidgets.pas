@@ -714,6 +714,8 @@ type
                                    var mouseinfo: mouseeventinfoty); virtual;
    procedure dopopup(var amenu: tpopupmenu; 
                                    var mouseinfo: mouseeventinfoty); virtual;
+   procedure doafterpopupmenu(var amenu: tpopupmenu; 
+                                   var mouseinfo: mouseeventinfoty); virtual;
 
    procedure poschanged; override;
    procedure sizechanged; override;
@@ -4401,9 +4403,37 @@ end;
 
 procedure tactionwidget.dopopup(var amenu: tpopupmenu;
                                         var mouseinfo: mouseeventinfoty);
+ procedure doparent(const after: boolean);
+ var
+  widget1: twidget;
+  bo1: boolean;
+ begin
+  widget1:= fparentwidget;
+  while widget1 <> nil do begin
+   if widget1 is tactionwidget then begin
+    translateclientpoint1(mouseinfo.pos,self,widget1);
+    bo1:= not (es_child in mouseinfo.eventstate);
+    include(mouseinfo.eventstate,es_child);
+    try
+     if after then begin
+      tactionwidget(widget1).doafterpopupmenu(amenu,mouseinfo);
+     end
+     else begin
+      tactionwidget(widget1).dopopup(amenu,mouseinfo);
+     end;
+    finally
+     if bo1 then begin
+      exclude(mouseinfo.eventstate,es_child);
+     end;
+     translateclientpoint1(mouseinfo.pos,widget1,self);
+    end;
+    break;
+   end;
+   widget1:= twidget1(widget1).fparentwidget;
+  end;
+ end; //doparent()
+  
 var
- widget1: twidget;
- bo1: boolean;
  menu1: tpopupmenu;
 
 begin
@@ -4414,26 +4444,11 @@ begin
    fonpopup(self,amenu,mouseinfo);
   end;
   if not (es_parent in mouseinfo.eventstate) then begin
-   widget1:= fparentwidget;
-   while widget1 <> nil do begin
-    if widget1 is tactionwidget then begin
-     translateclientpoint1(mouseinfo.pos,self,widget1);
-     bo1:= not (es_child in mouseinfo.eventstate);
-     include(mouseinfo.eventstate,es_child);
-     try
-      tactionwidget(widget1).dopopup(amenu,mouseinfo);
-     finally
-      if bo1 then begin
-       exclude(mouseinfo.eventstate,es_child);
-      end;
-      translateclientpoint1(mouseinfo.pos,widget1,self);
-     end;
-     break;
-    end;
-    widget1:= twidget1(widget1).fparentwidget;
-   end;
+   doparent(false);
    if (amenu <> nil) and (mouseinfo.eventstate * [es_processed,es_child] = []) then begin
     amenu.show(self,mouseinfo);
+    doafterpopupmenu(amenu,mouseinfo);
+    doparent(true);
    end;
   end;
  finally
@@ -4784,6 +4799,12 @@ begin
   fonasyncevent(self,atag);
  end;
  inherited;
+end;
+
+procedure tactionwidget.doafterpopupmenu(var amenu: tpopupmenu;
+               var mouseinfo: mouseeventinfoty);
+begin
+ //dummy
 end;
 
 { tcustomeventwidgetnwr }

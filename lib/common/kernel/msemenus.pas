@@ -46,15 +46,18 @@ type
    constructor create(const aowner: tmenuitem);
    class function getitemclasstype: persistentclassty; override;
    procedure assign(source: tpersistent); override;
-   procedure insert(const index: integer; const aitem: tmenuitem); overload;
-      //aitem is owned
-   procedure insert(const index: integer; const aitems: tmenuitems); overload;
-      //items are copied
-   procedure insert(const index: integer; const captions: array of msestring;
+   function insert(const index: integer; const aitem: tmenuitem): integer; overload;
+      //aitem is owned, returns index of new item
+                            //if index > count -> index:= count
+   function insert(const index: integer; const aitems: tmenuitems): integer; overload;
+      //items are copied, returns index of first new item
+                            //if index > count -> index:= count
+   function insert(const index: integer; const captions: array of msestring;
                             //if index > count -> index:= count
                  const options: array of menuactionoptionsty;
                  const states: array of actionstatesty;
-                 const onexecutes: array of notifyeventty); overload;
+                 const onexecutes: array of notifyeventty): integer; overload;
+                        //returns index of first new item
    procedure insertseparator(const index: integer);
    property items[index: integer]: tmenuitem read getmenuitems write setmenuitems; default;
    function itembyname(const name: ansistring): tmenuitem;
@@ -348,21 +351,24 @@ type
    function show(const atransientfor: twidget;
            var mouseinfo: mouseeventinfoty): tmenuitem; overload;
                             //returns selected item, nil if none
-   class procedure additems(var amenu: tpopupmenu; const atransientfor: twidget;
+   class function additems(var amenu: tpopupmenu; const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty;
                  const captions: array of msestring;
                             //if index > count -> index:= count
                  const aoptions: array of menuactionoptionsty;
                  const states: array of actionstatesty;
                  const onexecutes: array of notifyeventty;
-                 const aseparator: boolean = true); overload;
-   class procedure additems(var amenu: tpopupmenu; const atransientfor: twidget;
+                 const aseparator: boolean = true): integer; overload;
+                            //returs index of first added item
+   class function additems(var amenu: tpopupmenu; const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty; const items: tmenuitems;
                  const aseparator: boolean = true;
-                 const first: boolean = false); overload;
-   class procedure additems(var amenu: tpopupmenu; const atransientfor: twidget;
+                 const first: boolean = false): integer; overload;
+                            //returs index of first added item
+   class function additems(var amenu: tpopupmenu; const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty; const items: tcustommenu;
-                 const aseparator: boolean = true); overload;
+                 const aseparator: boolean = true): integer; overload;
+                            //returs index of first added item
  end;
 
  tcustommainmenu = class(tcustommenu)
@@ -1636,7 +1642,7 @@ begin
  result:= tmenuitem(getitems(index));
 end;
 
-procedure tmenuitems.insert(const index: integer; const aitem: tmenuitem);
+function tmenuitems.insert(const index: integer; const aitem: tmenuitem): integer;
 var
  int1: integer;
 begin
@@ -1644,6 +1650,7 @@ begin
  if index > count then begin
   int1:= count;
  end;
+ result:= int1;
  beginupdate;
  try
   insertempty(int1);
@@ -1664,7 +1671,8 @@ begin
  insert(index,item1);
 end;
 
-procedure tmenuitems.insert(const index: integer; const aitems: tmenuitems);
+function tmenuitems.insert(const index: integer;
+                             const aitems: tmenuitems): integer;
 var
  int1,int2: integer;
  item1: tmenuitem;
@@ -1673,6 +1681,7 @@ begin
  if index > count then begin
   int1:= count;
  end;
+ result:= int1;
  beginupdate;
  try
   for int2:= 0 to aitems.count - 1 do begin
@@ -1686,11 +1695,12 @@ begin
  end;
 end;
 
-procedure tmenuitems.insert(const index: integer; const captions: array of msestring;
+function tmenuitems.insert(const index: integer;
+                 const captions: array of msestring;
                             //if index > count -> index:= count
                  const options: array of menuactionoptionsty;
                  const states: array of actionstatesty;
-                 const onexecutes: array of notifyeventty);
+                 const onexecutes: array of notifyeventty): integer;
 var
  int1,int2,int3: integer;
  item1: tmenuitem;
@@ -1714,6 +1724,7 @@ begin
  else begin
   int3:= index;
  end;
+ result:= int3;
  beginupdate;
  try
   for int2:= 0 to int1 do begin
@@ -1810,7 +1821,7 @@ begin
  end;
 end;
 
-class procedure tpopupmenu.additems(var amenu: tpopupmenu;
+class function tpopupmenu.additems(var amenu: tpopupmenu;
                  const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty;
                  const captions: array of msestring;
@@ -1818,7 +1829,7 @@ class procedure tpopupmenu.additems(var amenu: tpopupmenu;
                  const aoptions: array of menuactionoptionsty;
                  const states: array of actionstatesty;
                  const onexecutes: array of notifyeventty;
-                 const aseparator: boolean = true);
+                 const aseparator: boolean = true): integer;
 begin
  if amenu = nil then begin
   amenu:= tpopupmenu.createtransient(atransientfor,@mouseinfo);
@@ -1826,20 +1837,20 @@ begin
  if aseparator and (amenu.menu.submenu.count > 0) then begin
   amenu.menu.submenu.insertseparator(bigint);
  end;
- amenu.menu.submenu.insert(bigint,captions,aoptions,states,onexecutes);
+ result:= amenu.menu.submenu.insert(bigint,captions,aoptions,states,onexecutes);
 end;
 
-class procedure tpopupmenu.additems(var amenu: tpopupmenu; const atransientfor: twidget;
+class function tpopupmenu.additems(var amenu: tpopupmenu; const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty; const items: tmenuitems;
                  const aseparator: boolean = true;
-                 const first: boolean = false);
+                 const first: boolean = false): integer;
 begin
  if amenu = nil then begin
   amenu:= tpopupmenu.createtransient(atransientfor,@mouseinfo);
  end;
  if items <> nil then begin
   if first then begin
-   amenu.menu.submenu.insert(0,items);
+   result:= amenu.menu.submenu.insert(0,items);
    if aseparator and (items.count > 0) then begin
     amenu.menu.submenu.insertseparator(items.count);
    end;
@@ -1848,14 +1859,14 @@ begin
    if aseparator and (amenu.menu.count > 0) then begin
     amenu.menu.submenu.insertseparator(bigint);
    end;
-   amenu.menu.submenu.insert(bigint,items);
+   result:= amenu.menu.submenu.insert(bigint,items);
   end;
  end;
 end;
 
-class procedure tpopupmenu.additems(var amenu: tpopupmenu; const atransientfor: twidget;
+class function tpopupmenu.additems(var amenu: tpopupmenu; const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty; const items: tcustommenu;
-                 const aseparator: boolean = true);
+                 const aseparator: boolean = true): integer;
 var
  bo1: boolean;
  widget1: twidget;
@@ -1869,7 +1880,7 @@ begin
   items.ftransientfor:= widget1;
  end;
  bo1:= (amenu = nil) or amenu.ftransient;
- additems(amenu,atransientfor,mouseinfo,items.fmenu.fsubmenu,aseparator,
+ result:= additems(amenu,atransientfor,mouseinfo,items.fmenu.fsubmenu,aseparator,
             mo_insertfirst in items.foptions);
  if bo1 then begin
   amenu.foptions:= items.foptions;

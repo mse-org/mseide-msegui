@@ -52,6 +52,7 @@ type
                   as_localhint,as_localshortcut,as_localshortcut1,as_localtag,
                   as_localgroup,as_localonexecute);
  actionstatesty = set of actionstatety;
+ actionstatesarty = array of actionstatesty;
 
  menuactionoptionty = (mao_separator,mao_checkbox,mao_radiobutton,
                        mao_shortcutcaption,

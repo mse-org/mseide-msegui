@@ -13,7 +13,8 @@ interface
 uses
  classes,msegraphedits,msesignal,mseguiglob,mseevent,msechartedit,msetypes,
  msechart,mseclasses,msefft,msewidgets,msegraphics,msegraphutils,msedial,
- msesplitter,msegui,msestat,msestatfile,msestrings,msestockobjects;
+ msesplitter,msegui,msestat,msestatfile,msestrings,msestockobjects,
+ msemenus,mseact;
 
 type
  sigeditoptionty = (sieo_exp);
@@ -295,6 +296,8 @@ type
 //   finnerframebefore: framety;
    fenvelope: tsigenvelope;
    fupdating: integer;
+   factivetrace: integer;
+   fmenustart: integer;
    procedure setenvelope(const avalue: tsigenvelope);
    procedure setattack(const avalue: tenvelopechartedit);
    procedure setdecay(const avalue: tenvelopechartedit);
@@ -308,11 +311,17 @@ type
    procedure statreading; virtual;
    procedure statread; virtual;
    function getstatvarname: msestring;
+   procedure setactivetrace(avalue: integer);
   protected
    procedure updatelayout;
    procedure clientrectchanged; override;
    procedure dochange;
    procedure updatevalues;
+   procedure updatepopupmenu(var amenu: tpopupmenu;
+                                   var mouseinfo: mouseeventinfoty); override;
+   procedure doafterpopupmenu(var amenu: tpopupmenu; 
+                                   var mouseinfo: mouseeventinfoty); override;
+
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -328,6 +337,8 @@ type
    property statvarname: msestring read getstatvarname write fstatvarname;
    property envelope: tsigenvelope read fenvelope write setenvelope;
    property optionswidget default defaultoptionswidgetmousewheel;
+   property activetrace: integer read factivetrace 
+                                      write setactivetrace default 0;
  end;
 (*  
  tenvelopeedit1 = class(torderedxychartedit)
@@ -1453,31 +1464,38 @@ begin
 end;
 
 procedure tenvelopeedit.updatevalues;
-begin
- with fenvelope do begin
-  beginupdate;
-  attack_values:= fattack.activetraceitem.xydata;
-  with fdecay do begin
-   decay_values:= activetraceitem.xydata;
-   if xdials.count > 0 then begin
-    with xdials[0] do begin
-     if markers.count > 0 then begin
-      if markers[0].value < start+range then begin
-       loopstart:= markers[0].value;
+
+ procedure setva(const aindex: integer);
+ begin
+  with fenvelope do begin
+   attack_values[aindex]:= fattack.traces[aindex].xydata;
+   with fdecay do begin
+    decay_values[aindex]:= traces[aindex].xydata;
+    if xdials.count > 0 then begin
+     with xdials[0] do begin
+      if markers.count > 0 then begin
+       if markers[0].value < start+range then begin
+        loopstart[aindex]:= markers[0].value;
+       end
+       else begin
+        loopstart[aindex]:= -1;
+       end;
       end
       else begin
-       loopstart:= -1;
+       loopstart[aindex]:= -1;
       end;
-     end
-     else begin
-      loopstart:= -1;
      end;
-    end;
-   end;    
+    end;    
+   end;
+   release_values[aindex]:= frelease.traces[aindex].xydata;
   end;
-  release_values:= frelease.activetraceitem.xydata;
-  endupdate;
- end;
+ end; //setva()
+ 
+begin
+  fenvelope.beginupdate;
+  setva(0);
+  setva(1);
+  fenvelope.endupdate;
 end;
 
 procedure tenvelopeedit.dochange;
@@ -1505,6 +1523,44 @@ begin
  end;
 end;
 
+procedure tenvelopeedit.setactivetrace(avalue: integer);
+begin
+ if avalue < 0 then begin
+  avalue:= 0;
+ end;
+ if avalue > 1 then begin
+  avalue:= 1;
+ end;
+ factivetrace:= avalue;
+ fattack.activetrace:= avalue;
+ fdecay.activetrace:= avalue;
+ frelease.activetrace:= avalue;
+end;
+
+procedure tenvelopeedit.updatepopupmenu(var amenu: tpopupmenu;
+               var mouseinfo: mouseeventinfoty);
+var
+ st1: actionstatesarty;
+begin
+ inherited;
+ setlength(st1,2);
+ st1[factivetrace]:= [as_checked];
+ fmenustart:= tpopupmenu.additems(amenu,self,mouseinfo,['Main Trace','Secondary Trace'],
+                           [[mao_radiobutton],[mao_radiobutton]],st1,[]);
+end;
+
+procedure tenvelopeedit.doafterpopupmenu(var amenu: tpopupmenu;
+               var mouseinfo: mouseeventinfoty);
+begin
+ inherited;
+ if amenu.menu.submenu[fmenustart].checked then begin
+  activetrace:= 0;
+ end
+ else begin
+  activetrace:= 1;
+ end;
+end;
+
 { tenvelopechartedit }
 
 constructor tenvelopechartedit.create(aowner: tcomponent);
@@ -1515,10 +1571,16 @@ begin
  end;
  inherited create(nil);
  setsubcomponent(true);
- traces.count:= 1;
+ traces.count:= 2;
  traces.options:= traces.options + [cto_stockglyphs];
 // traces.image_list:= stockobjects.glyphs;
- traces[0].imagenr:= ord(stg_circlesmall);
+ with traces[0] do begin
+  imagenr:= ord(stg_circlesmall);
+ end;
+ with traces[1]do begin
+  imagenr:= ord(stg_squaresmall);
+  color:= cl_red;
+ end;
  with frame do begin
   optionsscroll:= optionsscroll + [oscr_zoom,oscr_drag,oscr_mousewheel];
   zoomwidthstep:= 1.5;

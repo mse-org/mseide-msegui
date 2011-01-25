@@ -169,10 +169,14 @@ type
    fsource: tdoubleoutputconn;
    foffset: double;
    fgain: double;
+   fmin: realty;
+   fmax: realty;
    procedure setsource(const avalue: tdoubleoutputconn);
    procedure setoffset(const avalue: double);
    procedure setgain(const avalue: double);
    procedure setvalue(const avalue: double); virtual;
+   procedure setmin(const avalue: realty);
+   procedure setmax(const avalue: realty);
   protected
    fvalue: double;
   public
@@ -183,9 +187,18 @@ type
    property source: tdoubleoutputconn read fsource write setsource;
    property offset: double read foffset write setoffset;
    property gain: double read fgain write setgain;
+   property min: realty read fmin write setmin;
+   property max: realty read fmax write setmax;
    property value: double read fvalue write setvalue;  
  end;
 
+ tlimitinputconn = class(tdoubleinputconn)
+  public
+   constructor create(const aowner: tcomponent;
+                     const asigintf: isigclient); override;
+    //deafault min = 0, default max = 1
+ end;
+ 
  tchangedoubleinputconn = class(tdoubleinputconn)
   private
    fonchange: notifyeventty;
@@ -243,7 +256,11 @@ type
   dest: pdouble;
   offset: double;
   gain: double;
+  min: double;
+  max: double;
   hasscale: boolean;
+  hasmin: boolean;
+  hasmax: boolean;
  end;
  destinfoarty = array of destinfoty;
  
@@ -683,7 +700,7 @@ type
    procedure sighandler(const ainfo: psighandlerinfoty);
  end;
 
- sigenveloperangeoptionty = (sero_exp);
+ sigenveloperangeoptionty = (sero_exp,sero_mix);
  sigenveloperangeoptionsty = set of sigenveloperangeoptionty;
  
  sigenvelopeoptionty = (seo_negtrig,seo_nozero);
@@ -697,28 +714,41 @@ type
   isexp: boolean;
  end;
  envproginfoarty = array of envproginfoty;
+
+ envelopeinfoty = record
+  floopstart: real;
+  floopstartindex: integer;
+  floopendindex: integer;
+  freleasestart: real;
+  fattack_values: complexarty;
+  attack_valuespo: pcomplexarty;
+  fdecay_values: complexarty;
+  decay_valuespo: pcomplexarty;
+  frelease_values: complexarty;
+  release_valuespo: pcomplexarty;
+  fprog: envproginfoarty;
+  findex: integer;
+  fdest: double;
+  
+  fcurrval: double;
+  fcurrisexp: boolean;
+  fattackval: double;
+  fattackramp: double;
+  freleaseindex: integer;
+  freleaseval: double;
+  freleaseramp: double;
+  floopindex: integer;
+  floopval: double;
+  floopramp: double;
+ end;   
  
  tsigenvelope = class(tdoublesigoutcomp)
   private
-   fattack_values: complexarty;
-   fdecay_values: complexarty;
-   frelease_values: complexarty;
    ftrigger: tchangedoubleinputconn;
-   fprog: envproginfoarty;
-   findex: integer;
-   
-   fcurrval: double;
-   fcurrisexp: boolean;
-   fattackval: double;
-   fattackramp: double;
-   freleaseindex: integer;
-   freleaseval: double;
-   freleaseramp: double;
-   floopindex: integer;
-   floopval: double;
-   floopramp: double;
    famplitudepo: pdouble;
-   
+   fmixpo: pdouble;
+
+   fhasmix: boolean;   
    ftime: integer;
    foptions: sigenvelopeoptionsty;
    ftimescale: real;
@@ -726,22 +756,26 @@ type
    foffset: real;
    fmin: real;
    fmax: real;
-   floopstart: real;
-   floopstartindex: integer;
-   floopendindex: integer;
-   freleasestart: real;
+   finfos: array [0..1] of envelopeinfoty;
+
    fattack_options: sigenveloperangeoptionsty;
    fdecay_options: sigenveloperangeoptionsty;
    frelease_options: sigenveloperangeoptionsty;
    fmaster: tsigenvelope;
    famplitude: tdoubleinputconn;
-   procedure setattack_values(const avalue: complexarty);
-   procedure setdecay_values(const avalue: complexarty);
-   procedure setrelease_values(const avalue: complexarty);
+   fmix: tlimitinputconn;
+   function getattack_values(const index: integer): complexarty;
+   procedure setattack_values(const index: integer; const avalue: complexarty);
+   function getdecay_values(const index: integer): complexarty;
+   procedure setdecay_values(const index: integer; const avalue: complexarty);
+   function getrelease_values(const index: integer): complexarty;
+   procedure setrelease_values(const index: integer; const avalue: complexarty);
+   function getloopstart(const index: integer): real;
+   procedure setloopstart(const index: integer; const avalue: real);
+
    procedure settrigger(const avalue: tchangedoubleinputconn);
    procedure setmin(const avalue: real);
    procedure setmax(const avalue: real);
-   procedure setloopstart(const avalue: real);
    procedure setoptions(const avalue: sigenvelopeoptionsty);
    procedure setattack_options(const avalue: sigenveloperangeoptionsty);
    procedure setdecay_options(const avalue: sigenveloperangeoptionsty);
@@ -749,11 +783,14 @@ type
    procedure setmaster(const avalue: tsigenvelope);
    procedure setamplitude(const avalue: tdoubleinputconn);
    procedure dosync;
+   procedure setmix(const avalue: tlimitinputconn);
   protected
    fattackpending: boolean;
    freleasepending: boolean;
    procedure sighandler(const ainfo: psighandlerinfoty);   
-   procedure updatevalues;
+   procedure updatevalues(var ainfo: envelopeinfoty);
+   procedure updatevalueindex(const aindex: integer);
+   procedure updatevaluesx;
 
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure initmodel; override;
@@ -764,23 +801,26 @@ type
    procedure update; override;
    procedure lintoexp(var avalue: double);
    procedure exptolin(var avalue: double);
+   procedure checkindex(const index: integer);
   public
    constructor create(aowner: tcomponent); override;
    procedure start;
    procedure stop;
-   property attack_values: complexarty read fattack_values
-                                                     write setattack_values;
-   property decay_values: complexarty read fdecay_values
-                                                     write setdecay_values;
-   property release_values: complexarty read frelease_values 
-                                                     write setrelease_values;
-   property loopstart: real read floopstart write setloopstart;
+   property attack_values[const index: integer]: complexarty 
+                        read getattack_values  write setattack_values;
+   property decay_values[const index: integer]: complexarty 
+                        read getdecay_values write setdecay_values;
+   property release_values[const index: integer]: complexarty 
+                        read getrelease_values write setrelease_values;
+   property loopstart[const index: integer]: real 
+                        read getloopstart write setloopstart;
                      //<0 -> inactive
   published
    property master: tsigenvelope read fmaster write setmaster;
    property trigger: tchangedoubleinputconn read ftrigger write settrigger;
                          //1 -> start, -1 -> stop
    property amplitude: tdoubleinputconn read famplitude write setamplitude;
+   property mix: tlimitinputconn read fmix write setmix;
    property options: sigenvelopeoptionsty read foptions 
                                                 write setoptions default [];
    property timescale: real read ftimescale write ftimescale; //default 1s
@@ -1110,6 +1150,8 @@ constructor tdoubleinputconn.create(const aowner: tcomponent;
                      const asigintf: isigclient);
 begin
  fgain:= 1;
+ fmin:= emptyreal;
+ fmax:= emptyreal;
  inherited;
  name:= 'input';
 end;
@@ -1146,6 +1188,20 @@ procedure tdoubleinputconn.setvalue(const avalue: double);
 begin
  lock;
  fvalue:= avalue;
+ unlock;
+end;
+
+procedure tdoubleinputconn.setmin(const avalue: realty);
+begin
+ lock;
+ fmin:= avalue;
+ unlock;
+end;
+
+procedure tdoubleinputconn.setmax(const avalue: realty);
+begin
+ lock;
+ fmax:= avalue;
  unlock;
 end;
 
@@ -2293,7 +2349,12 @@ var
   ainfo.dest:= @ainput.fvalue;
   ainfo.offset:= ainput.offset;
   ainfo.gain:= ainput.gain;
-  ainfo.hasscale:= (ainfo.offset <> 0) or (ainfo.gain <> 1);
+  ainfo.min:= ainput.min;
+  ainfo.max:= ainput.max;
+  ainfo.hasmin:= not isemptyreal(ainfo.min);
+  ainfo.hasmax:= not isemptyreal(ainfo.max);
+  ainfo.hasscale:= ainfo.hasmin or ainfo.hasmax or 
+                                (ainfo.offset <> 0) or (ainfo.gain <> 1);
  end; //updatedestinfo
 
  function isopeninput(const ainputs: inputinfoarty): boolean;
@@ -2670,6 +2731,12 @@ begin
   with po1^.firstdest do begin
    if hasscale then begin
     dest^:= source^*gain+offset;
+    if hasmin and (dest^ < min) then begin
+     dest^:= min;
+    end;
+    if hasmax and (dest^ > max) then begin
+     dest^:= max;
+    end;
    end;
   end;
   for int2:= 0 to po1^.desthigh do begin //multi inputs on output
@@ -2677,6 +2744,12 @@ begin
     dest^:= source^;
     if hasscale then begin
      dest^:= dest^*gain+offset;
+     if hasmin and (dest^ < min) then begin
+      dest^:= min;
+     end;
+     if hasmax and (dest^ > max) then begin
+      dest^:= max;
+     end;
     end;
    end;    
   end;
@@ -3292,12 +3365,21 @@ end;
 { tsigenvelope }
 
 constructor tsigenvelope.create(aowner: tcomponent);
+
+ procedure initinfo(var ainfo: envelopeinfoty);
+ begin
+  with ainfo do begin
+   freleasestart:= 1;
+   ftimescale:= 1;
+   floopstart:= -1;
+  end;
+ end; //initinfo()
+ 
 begin
  fmin:= 0.001;
  fmax:= 1;
- freleasestart:= 1;
- ftimescale:= 1;
- floopstart:= -1;
+ initinfo(finfos[0]);
+ initinfo(finfos[1]);
  fdecay_options:= [sero_exp];
  frelease_options:= [sero_exp];
  inherited;
@@ -3307,6 +3389,8 @@ begin
  famplitude:= tdoubleinputconn.create(self,isigclient(self));
  famplitude.name:= 'amplitude';
  famplitude.value:= 1;
+ fmix:= tlimitinputconn.create(self,isigclient(self));
+ fmix.name:= 'mix';
 end;
 
 procedure tsigenvelope.lintoexp(var avalue: double);
@@ -3341,7 +3425,7 @@ begin
  end;
 end;
 
-procedure tsigenvelope.updatevalues;
+procedure tsigenvelope.updatevalues(var ainfo: envelopeinfoty);
 var
  timsca: double;
  timoffs: double;
@@ -3353,7 +3437,7 @@ var
  var
   do1: double;
  begin
-  with fprog[progindex] do begin   
+  with ainfo.fprog[progindex] do begin   
    isexp:= sero_exp in options;
    if isexp then begin
     if (fmin > 0) and (fmax > 0) then begin
@@ -3384,7 +3468,7 @@ var
                       var progindex: integer; var ti: integer; var sta: real);
  begin
   setscale(options,progindex,sta);
-  with fprog[progindex] do begin //end item
+  with ainfo.fprog[progindex] do begin //end item
    startval:= sta;
    ramp:= 0;
    starttime:= ti;
@@ -3400,7 +3484,7 @@ var
   int3: integer;
  begin
   setscale(options,progindex,sta);
-  with fprog[progindex] do begin
+  with ainfo.fprog[progindex] do begin
    starttime:= ti;
    startval:= sta;
    int3:= ti;
@@ -3431,106 +3515,125 @@ begin
  end;
  lock;
  try
-  isexpbefore:= false;
-  isexpbeforeset:= false;
-  int1:= high(fattack_values);
-  allocuninitedarray(int1+high(fdecay_values)+2,sizeof(complexty),
-                                                       aftertrigvalues);
-  for int2:= 0 to int1 do begin
-   aftertrigvalues[int2]:= fattack_values[int2];
-  end;
-  if int1 >= 0 then begin
-   decaystart:= fattack_values[int1].re;
-  end
-  else begin
-   decaystart:= 0;
-  end;
-  inc(int1);
-  for int2:= 0 to high(fdecay_values) do begin
-   with aftertrigvalues[int2+int1] do begin
-    re:= fdecay_values[int2].re + decaystart;
-    im:= fdecay_values[int2].im;
-   end;
-  end;
-  fprog:= nil;
-  timoffs:= 0;
-  timsca:= 1;
-  if fcontroller <> nil then begin
-   timsca:= timsca * fcontroller.samplefrequ;
-  end;
-  ftime:= 0;
-  fattackval:= 0;
-  fattackramp:= 0;
-  floopstartindex:= -1;
-  floopendindex:= -1;
-  floopval:= 0;
-  floopramp:= 1;
-  freleaseindex:= -1;
-  freleaseval:= 0;
-  freleaseramp:= 0;
-  
-  int1:= high(aftertrigvalues) + 2; //+ enditem
-  if floopstart >= 0 then begin
-   for int2:= 0 to high(fdecay_values) do begin
-    if fdecay_values[int2].re >= floopstart then begin
-     floopstartindex:= int2+length(fattack_values); //fvaluestrig index
-     floopendindex:= length(aftertrigvalues);
-     break;
+  fhasmix:= (sero_mix in fattack_options) or (sero_mix in fdecay_options) or
+            (sero_mix in frelease_options);
+  with ainfo do begin
+   isexpbefore:= false;
+   isexpbeforeset:= false;
+   attack_valuespo:= @fattack_values;
+   decay_valuespo:= @fdecay_values;
+   release_valuespo:= @frelease_values;
+   if @ainfo = @finfos[1] then begin
+    if not(sero_mix in fattack_options) then begin
+     attack_valuespo:= @finfos[0].fattack_values;
+    end;
+    if not(sero_mix in fdecay_options) then begin
+     decay_valuespo:= @finfos[0].fdecay_values;
+    end;
+    if not(sero_mix in frelease_options) then begin
+     release_valuespo:= @finfos[0].frelease_values;
     end;
    end;
-  end;
-  if high(aftertrigvalues) >= 0 then begin
-   fattackval:= aftertrigvalues[0].im;
-   freleasestart:= aftertrigvalues[high(aftertrigvalues)].re;
-  end;
- 
-  if high(frelease_values) >= 0 then begin
-   int1:= int1 + high(frelease_values) + 2; //+enditem
-   freleaseval:= frelease_values[0].im;
-   freleaseramp:= frelease_values[0].re;
-   if freleaseramp > 0 then begin
-    freleaseramp:= 1/(freleaseramp*timsca);
+   
+   int1:= high(attack_valuespo^);
+   allocuninitedarray(int1+high(decay_valuespo^)+2,sizeof(complexty),
+                                                        aftertrigvalues);
+   for int2:= 0 to int1 do begin
+    aftertrigvalues[int2]:= attack_valuespo^[int2];
    end;
-  end;
-  setlength(fprog,int1);
-  findex:= high(fprog); //init inactive
-  ti:= 0;
-  sta:= fattackval;
-  int1:= 0;
-  int3:= high(aftertrigvalues);
-  for int2:= 0 to high(fattack_values) do begin
-   calc(fattack_options,aftertrigvalues[int2],int1,ti,sta);
-  end;
-  for int2:= length(fattack_values) to int3 do begin
-   calc(fdecay_options,aftertrigvalues[int2],int1,ti,sta);
-  end;
-  if floopstartindex >= 0 then begin
-   do1:= sta;
-   calc(fdecay_options,makecomplex(
-        aftertrigvalues[int3].re+aftertrigvalues[floopstartindex].re-floopstart,
-        aftertrigvalues[floopstartindex].im),int1,ti,sta);
-   sta:= do1;
-   inc(floopstartindex); //fprog index
-  end
-  else begin
-   opt1:= fdecay_options;
-   if (fdecay_values = nil) and (fattack_values <> nil) then begin
-    opt1:= fattack_options;
+   if int1 >= 0 then begin
+    decaystart:= attack_valuespo^[int1].re;
+   end
+   else begin
+    decaystart:= 0;
    end;
-   setend(opt1,int1,ti,sta);
-  end;
-  if high(frelease_values) >= 0 then begin  
+   inc(int1);
+   for int2:= 0 to high(decay_valuespo^) do begin
+    with aftertrigvalues[int2+int1] do begin
+     re:= decay_valuespo^[int2].re + decaystart;
+     im:= decay_valuespo^[int2].im;
+    end;
+   end;
+   fprog:= nil;
+   timoffs:= 0;
+   timsca:= 1;
+   if fcontroller <> nil then begin
+    timsca:= timsca * fcontroller.samplefrequ;
+   end;
+   ftime:= 0;
+   fattackval:= 0;
+   fattackramp:= 0;
+   floopstartindex:= -1;
+   floopendindex:= -1;
+   floopval:= 0;
+   floopramp:= 1;
+   freleaseindex:= -1;
+   freleaseval:= 0;
+   freleaseramp:= 0;
+   
+   int1:= high(aftertrigvalues) + 2; //+ enditem
+   if floopstart >= 0 then begin
+    for int2:= 0 to high(decay_valuespo^) do begin
+     if decay_valuespo^[int2].re >= floopstart then begin
+      floopstartindex:= int2+length(attack_valuespo^); //fvaluestrig index
+      floopendindex:= length(aftertrigvalues);
+      break;
+     end;
+    end;
+   end;
+   if high(aftertrigvalues) >= 0 then begin
+    fattackval:= aftertrigvalues[0].im;
+    freleasestart:= aftertrigvalues[high(aftertrigvalues)].re;
+   end;
+  
+   if high(release_valuespo^) >= 0 then begin
+    int1:= int1 + high(release_valuespo^) + 2; //+enditem
+    freleaseval:= release_valuespo^[0].im;
+    freleaseramp:= release_valuespo^[0].re;
+    if freleaseramp > 0 then begin
+     freleaseramp:= 1/(freleaseramp*timsca);
+    end;
+   end;
+   setlength(fprog,int1);
+   findex:= high(fprog); //init inactive
    ti:= 0;
-   freleaseindex:= int1; //prog index
-   for int2:= 0 to high(frelease_values) do begin
-    calc(frelease_options,frelease_values[int2],int1,ti,sta);
+   sta:= fattackval;
+   int1:= 0;
+   int3:= high(aftertrigvalues);
+   for int2:= 0 to high(attack_valuespo^) do begin
+    calc(fattack_options,aftertrigvalues[int2],int1,ti,sta);
    end;
-   setend(frelease_options,int1,ti,sta);
+   for int2:= length(attack_valuespo^) to int3 do begin
+    calc(fdecay_options,aftertrigvalues[int2],int1,ti,sta);
+   end;
+   if floopstartindex >= 0 then begin
+    do1:= sta;
+    calc(fdecay_options,makecomplex(
+         aftertrigvalues[int3].re+aftertrigvalues[floopstartindex].re-floopstart,
+         aftertrigvalues[floopstartindex].im),int1,ti,sta);
+    sta:= do1;
+    inc(floopstartindex); //fprog index
+   end
+   else begin
+    opt1:= fdecay_options;
+    if (decay_valuespo^ = nil) and (attack_valuespo^ <> nil) then begin
+     opt1:= fattack_options;
+    end;
+    setend(opt1,int1,ti,sta);
+   end;
+   if high(release_valuespo^) >= 0 then begin  
+    ti:= 0;
+    freleaseindex:= int1; //prog index
+    for int2:= 0 to high(release_valuespo^) do begin
+     calc(frelease_options,release_valuespo^[int2],int1,ti,sta);
+    end;
+    setend(frelease_options,int1,ti,sta);
+   end;
+   if fprog[0].endtime > 0 then begin
+    fattackramp:= 1/fprog[0].endtime;
+   end;
+   sendchangeevent;
   end;
-  if fprog[0].endtime > 0 then begin
-   fattackramp:= 1/fprog[0].endtime;
-  end;
-  sendchangeevent;
  finally
   unlock;
  end;
@@ -3549,77 +3652,108 @@ end;
 }
 procedure tsigenvelope.sighandler(const ainfo: psighandlerinfoty);
  
-begin
- if fattackpending or (ftrigger.fvalue = 1) then begin
-  ftrigger.fvalue:= 0;
-  fattackpending:= false;
-  ftime:= 0;
-  findex:= 0;
-  with fprog[0] do begin
-   if fcurrisexp and not isexp then begin
-    exptolin(fcurrval);
-   end;
-   if not fcurrisexp and isexp then begin
-    lintoexp(fcurrval);
-   end;
-   ramp:= (fattackval-fcurrval)*fattackramp;
-   if ramp = 0 then begin
-    startval:= fattackval;
-   end
-   else begin
-    startval:= fcurrval;
-   end;
-  end;
- end;
- if freleasepending or (ftrigger.fvalue = -1) then begin
-  ftrigger.fvalue:= 0;
-  freleasepending:= false;
-  if freleaseindex >= 0 then begin
+ procedure startattack(var ainfo: envelopeinfoty);
+ begin
+  with ainfo do begin
    ftime:= 0;
-   findex:= freleaseindex;
-   with fprog[findex] do begin
+   findex:= 0;
+   with fprog[0] do begin
     if fcurrisexp and not isexp then begin
      exptolin(fcurrval);
     end;
     if not fcurrisexp and isexp then begin
      lintoexp(fcurrval);
     end;
-    ramp:= (freleaseval-fcurrval)*freleaseramp;
+    ramp:= (fattackval-fcurrval)*fattackramp;
     if ramp = 0 then begin
-     startval:= freleaseval;
+     startval:= fattackval;
     end
     else begin
      startval:= fcurrval;
     end;
    end;
   end;
- end;
- with fprog[findex] do begin
-  fcurrisexp:= isexp;
-  fcurrval:= startval+ramp*(ftime-starttime);
-  if isexp then begin
-   if (fcurrval <= 0) and not (seo_nozero in foptions) then begin
-    ainfo^.dest^:= 0;
-   end
-   else begin
-    ainfo^.dest^:= exp(fcurrval*scale + offset)*famplitudepo^;
-   end;
-  end
-  else begin
-   ainfo^.dest^:= (fcurrval*scale + offset)*famplitudepo^;
-  end;
-  if endtime >= 0 then begin
-   inc(ftime);
-   if (ftime > endtime) then begin
-    if findex = floopendindex then begin
-     findex:= floopstartindex;
-     ftime:= fprog[floopstartindex].starttime;
-    end
-    else begin
-     inc(findex);
+ end; //startattack()
+
+ procedure startrelease(var ainfo: envelopeinfoty);
+ begin
+  with ainfo do begin
+   if freleaseindex >= 0 then begin
+    ftime:= 0;
+    findex:= freleaseindex;
+    with fprog[findex] do begin
+     if fcurrisexp and not isexp then begin
+      exptolin(fcurrval);
+     end;
+     if not fcurrisexp and isexp then begin
+      lintoexp(fcurrval);
+     end;
+     ramp:= (freleaseval-fcurrval)*freleaseramp;
+     if ramp = 0 then begin
+      startval:= freleaseval;
+     end
+     else begin
+      startval:= fcurrval;
+     end;
     end;
    end;
   end;
+ end; //startrelease()
+ 
+ procedure calc(var ainfo: envelopeinfoty);
+ begin
+  with ainfo do begin
+   with fprog[findex] do begin
+    fcurrisexp:= isexp;
+    fcurrval:= startval+ramp*(ftime-starttime);
+    if isexp then begin
+     if (fcurrval <= 0) and not (seo_nozero in foptions) then begin
+      fdest:= 0;
+     end
+     else begin
+      fdest:= exp(fcurrval*scale + offset)*famplitudepo^;
+     end;
+    end
+    else begin
+     fdest:= (fcurrval*scale + offset)*famplitudepo^;
+    end;
+    if endtime >= 0 then begin
+     inc(ftime);
+     if (ftime > endtime) then begin
+      if findex = floopendindex then begin
+       findex:= floopstartindex;
+       ftime:= fprog[floopstartindex].starttime;
+      end
+      else begin
+       inc(findex);
+      end;
+     end;
+    end;
+   end;
+  end;
+ end; //calc()
+ 
+begin
+ if fattackpending or (ftrigger.fvalue = 1) then begin
+  ftrigger.fvalue:= 0;
+  fattackpending:= false;
+  startattack(finfos[0]);
+  startattack(finfos[1]);
+ end;
+ if freleasepending or (ftrigger.fvalue = -1) then begin
+  ftrigger.fvalue:= 0;
+  freleasepending:= false;
+  startrelease(finfos[0]);
+  startrelease(finfos[1]);
+ end;
+ calc(finfos[0]);
+ if fhasmix then begin
+  calc(finfos[1]);
+  ainfo^.dest^:= finfos[1].fdest * fmixpo^ + 
+                 finfos[0].fdest * (1-fmixpo^);
+ end
+ else begin
+  ainfo^.dest^:= finfos[0].fdest;
  end;
 end;
 
@@ -3628,29 +3762,78 @@ begin
  result:= @sighandler;
 end;
 
-procedure tsigenvelope.setattack_values(const avalue: complexarty);
+procedure tsigenvelope.checkindex(const index: integer);
 begin
- fattack_values:= avalue;
- updatevalues;
+ if (index < 0) or (index > 1) then begin
+  raise exception.create(ownernamepath(self)+': Invalid array index '+
+                                                   inttostr(index)+'.');
+ end;
 end;
 
-procedure tsigenvelope.setdecay_values(const avalue: complexarty);
+procedure tsigenvelope.updatevalueindex(const aindex: integer);
 begin
- fdecay_values:= avalue;
- updatevalues;
+ updatevalues(finfos[aindex]);
+ if aindex = 0 then begin
+  updatevalues(finfos[1]);  //affects both
+ end;
 end;
 
-procedure tsigenvelope.setrelease_values(const avalue: complexarty);
+function tsigenvelope.getattack_values(const index: integer): complexarty;
 begin
- frelease_values:= avalue;
- updatevalues;
+ checkindex(index);
+ result:= finfos[index].fattack_values;
 end;
 
-procedure tsigenvelope.setloopstart(const avalue: real);
+procedure tsigenvelope.setattack_values(const index: integer;
+                                                  const avalue: complexarty);
 begin
- floopstart:= avalue;
- updatevalues;
+ checkindex(index);
+ finfos[index].fattack_values:= avalue;
+ updatevalueindex(index);
 end;
+
+function tsigenvelope.getdecay_values(const index: integer): complexarty;
+begin
+ checkindex(index);
+ result:= finfos[index].fdecay_values;
+end;
+
+procedure tsigenvelope.setdecay_values(const index: integer;
+                                                  const avalue: complexarty);
+begin
+ checkindex(index);
+ finfos[index].fdecay_values:= avalue;
+ updatevalueindex(index);
+end;
+
+function tsigenvelope.getrelease_values(const index: integer): complexarty;
+begin
+ checkindex(index);
+ result:= finfos[index].frelease_values;
+end;
+
+procedure tsigenvelope.setrelease_values(const index: integer;
+                                                  const avalue: complexarty);
+begin
+ checkindex(index);
+ finfos[index].frelease_values:= avalue;
+ updatevalueindex(index);
+end;
+
+function tsigenvelope.getloopstart(const index: integer): real;
+begin
+ checkindex(index);
+ result:= finfos[index].floopstart;
+end;
+
+procedure tsigenvelope.setloopstart(const index: integer;
+                                                  const avalue: real);
+begin
+ checkindex(index);
+ finfos[index].floopstart:= avalue;
+ updatevalues(finfos[index]);
+end;
+
 {
 procedure tsigenvelope.setdecaystart(const avalue: real);
 begin
@@ -3673,9 +3856,10 @@ end;
 
 function tsigenvelope.getinputar: inputconnarty;
 begin
- setlength(result,2);
+ setlength(result,3);
  result[0]:= ftrigger;
  result[1]:= famplitude;
+ result[2]:= fmix;
 end;
 
 function tsigenvelope.getzcount: integer;
@@ -3687,26 +3871,27 @@ procedure tsigenvelope.initmodel;
 begin
  inherited;
  famplitudepo:= @famplitude.fvalue;
- updatevalues;
+ fmixpo:= @fmix.fvalue;
+ updatevaluesx;
 end;
 
 procedure tsigenvelope.setmin(const avalue: real);
 begin
  fmin:= avalue;
- updatevalues;
+ updatevaluesx;
 end;
 
 procedure tsigenvelope.setmax(const avalue: real);
 begin
  fmax:= avalue;
- updatevalues;
+ updatevaluesx;
 end;
 
 procedure tsigenvelope.setoptions(const avalue: sigenvelopeoptionsty);
 begin
  if avalue <> foptions then begin
   foptions:= avalue;
-  updatevalues;
+  updatevaluesx;
  end;
 end;
 
@@ -3738,14 +3923,14 @@ end;
 procedure tsigenvelope.update;
 begin
  inherited;
- updatevalues;
+ updatevaluesx;
 end;
 
 procedure tsigenvelope.setattack_options(const avalue: sigenveloperangeoptionsty);
 begin
  if fattack_options <> avalue then begin
   fattack_options:= avalue;
-  updatevalues;
+  updatevaluesx;
  end;
 end;
 
@@ -3753,7 +3938,7 @@ procedure tsigenvelope.setdecay_options(const avalue: sigenveloperangeoptionsty)
 begin
  if fdecay_options <> avalue then begin
   fdecay_options:= avalue;
-  updatevalues;
+  updatevaluesx;
  end;
 end;
 
@@ -3761,17 +3946,24 @@ procedure tsigenvelope.setrelease_options(const avalue: sigenveloperangeoptionst
 begin
  if frelease_options <> avalue then begin
   frelease_options:= avalue;
-  updatevalues;
+  updatevaluesx;
  end;
 end;
 
 procedure tsigenvelope.dosync;
+
+ procedure setval(const aindex: integer);
+ begin
+  attack_values[aindex]:= master.attack_values[aindex];
+  decay_values[aindex]:= master.decay_values[aindex];
+  release_values[aindex]:= master.release_values[aindex];
+  loopstart[aindex]:= master.loopstart[aindex];
+ end; //setval()
+ 
 begin
  beginupdate;
- attack_values:= master.attack_values;
- decay_values:= master.decay_values;
- release_values:= master.release_values;
- loopstart:= master.loopstart;
+ setval(0);
+ setval(1);
  endupdate;
 end;
 
@@ -3805,6 +3997,17 @@ end;
 procedure tsigenvelope.setamplitude(const avalue: tdoubleinputconn);
 begin
  famplitude.assign(avalue);
+end;
+
+procedure tsigenvelope.updatevaluesx;
+begin
+ updatevalues(finfos[0]);
+ updatevalues(finfos[1]);
+end;
+
+procedure tsigenvelope.setmix(const avalue: tlimitinputconn);
+begin
+ fmix.assign(avalue);
 end;
 
 { tchangedoubleinputconn }
@@ -4064,6 +4267,16 @@ constructor ttrigconnector.create(aowner: tcomponent);
 begin
  inherited;
  include(foutput.fstate,ocs_eventdriven);
+end;
+
+{ tlimitinputconn }
+
+constructor tlimitinputconn.create(const aowner: tcomponent;
+               const asigintf: isigclient);
+begin
+ inherited;
+ fmin:= 0;
+ fmax:= 1;
 end;
 
 end.
