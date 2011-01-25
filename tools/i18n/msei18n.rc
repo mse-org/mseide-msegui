@@ -11,12 +11,12 @@ FILETYPE 1
   BLOCK "040904E4"
   {
   VALUE "CompanyName",""
-  VALUE "FileDescription","MSE NLS editor"
+  VALUE "FileDescription","MSEi18n"
   VALUE "FileVersion","2.5.0.0"
   VALUE "InternalName","msei18n"
   VALUE "LegalCopyright","2011 (c) Martin Schreiber"
-  VALUE "OriginalFilename","msei18n.pas"
-  VALUE "ProductName","MSE NLS editor"
+  VALUE "OriginalFilename","MSEi18n"
+  VALUE "ProductName","MSEi18n"
   VALUE "ProductVersion","2.5.0"
   }
  }
