@@ -14,6 +14,9 @@ uses
  classes,mseapplication,mseclasses,msearrayprops,mseact,msestrings,msetypes,mseevent,
  mseglob,msestream,msepipestream,{msegui,}mseifiglob,typinfo,msebintree,
  msesys,msesockets,msecryptio,msethread,msedatalist;
+
+//todo: use icommclient instead of oninputavailable
+
 type
  
  sequencety = longword;

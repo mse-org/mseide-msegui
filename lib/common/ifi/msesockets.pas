@@ -8,6 +8,8 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msesockets;
+//todo: separate comm base code and sockets
+
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
@@ -21,6 +23,7 @@ const
   
 type
  tcustomcommpipes = class;
+ tcommreader = class;
  commpipeseventty = procedure(const sender: tcustomcommpipes) of object;
 
  icommserver = interface(inullinterface)
@@ -28,13 +31,16 @@ type
  icommclient = interface(iobjectlink)
   procedure setcommserverintf(const aintf: icommserver);
   function getobjectlinker: tobjectlinker;
+  procedure dorxchange(const areader: tcommreader);
  end;
- 
+ icommclientarty = array of icommclient;
+  
  tcommreader = class(tpipereader)
   private
    ftimeoutms: integer;
    fonthreadterminate: proceventty;
   protected
+   fowner: tcustomcommpipes;
    fcrypt: pcryptioinfoty;
    fonafterconnect: proceventty;
    procedure settimeoutms(const avalue: integer); virtual;
@@ -43,7 +49,9 @@ type
                     const nonblocked: boolean = false): integer; virtual;
    function doread(var buf; const acount: integer;
                     const nonblocked: boolean = false): integer; override;
+   procedure dochange; override;
   public
+   constructor create(const aowner: tcustomcommpipes);
    property timeoutms: integer read ftimeoutms write settimeoutms;
  end;
  
@@ -55,7 +63,7 @@ type
                     const nonblocked: boolean = false): integer; override;
    procedure closehandle(const ahandle: integer); override;
   public
-   constructor create;
+   constructor create(const aowner: tcustomcommpipes);
  end;
 
  tcommwriter = class(tpipewriter)
@@ -63,10 +71,12 @@ type
    ftimeoutms: integer;
    procedure settimeoutms(const avalue: integer); virtual;
   protected
+   fowner: tcustomcommpipes;
    fcrypt: pcryptioinfoty;
    function internalwrite(const buffer; count: longint): longint; virtual;
    function dowrite(const buffer; count: longint): longint; override;
   public
+   constructor create(const aowner: tcustomcommpipes);
    property timeoutms: integer read ftimeoutms write settimeoutms;
  end;
  
@@ -105,6 +115,7 @@ type
    procedure setrxtimeoutms(const avalue: integer);
    function gettxtimeoutms: integer;
    procedure settxtimeoutms(const avalue: integer);
+   procedure dorxchange(const areader: tcommreader);
   protected
    fstate: socketpipesstatesty;
    frx: tcommreader;
@@ -148,7 +159,8 @@ type
                                                       write fonbeforedisconnect;
    property onafterdisconnect: commpipeseventty read fonafterdisconnect 
                                                       write fonafterdisconnect;
-   property oninputavailable: commpipeseventty read foninputavailable write setoninputavailable;
+   property oninputavailable: commpipeseventty read foninputavailable 
+                                                   write setoninputavailable;
  end;
 
  tcustomsocketclient = class;
@@ -181,6 +193,7 @@ type
  
  tcustomcommcomp = class(tactcomponent,icommserver)
   private
+   fclients: icommclientarty;
    fonbeforeconnect: commcompeventty;
    fonafterconnect: commcompeventty;
    fonbeforedisconnect: commcompeventty;
@@ -424,17 +437,18 @@ procedure setcomcomp(const alink: icommclient; const acommcomp: tcustomcommcomp;
 implementation
 uses
  msefileutils,msesysintf,sysutils,msestream,mseprocutils,msesysutils,
- msesocketintf;
+ msesocketintf,msedatalist;
 
 procedure setcomcomp(const alink: icommclient;
                const acommcomp: tcustomcommcomp; var dest: tcustomcommcomp);
-var
- po1: pointer;
 begin
  alink.setcommserverintf(nil);
- po1:= acommcomp;
- alink.getobjectlinker.setlinkedvar(alink,acommcomp,tmsecomponent(dest),po1);
  if dest <> nil then begin
+  removeitem(pointerarty(dest.fclients),alink);
+ end;
+ alink.getobjectlinker.setlinkedvar(alink,acommcomp,tmsecomponent(dest));
+ if dest <> nil then begin
+  additem(pointerarty(dest.fclients),alink);
   alink.setcommserverintf(icommserver(dest));
  end;
 end;
@@ -679,6 +693,15 @@ begin
  ftx.timeoutms:= avalue;
 end;
 
+procedure tcustomcommpipes.dorxchange(const areader: tcommreader);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fowner.fclients) do begin
+  fowner.fclients[int1].dorxchange(areader);
+ end;
+end;
+
 {
 procedure tcustomcommpipes.runhandlerapp(const commandline: filenamety);
 var
@@ -703,7 +726,13 @@ begin
 end;
 
 destructor tcustomcommcomp.destroy;
+var
+ int1: integer;
 begin
+ for int1:= 0 to high(fclients) do begin
+  fclients[int1].setcommserverintf(nil);
+ end;
+ fclients:= nil; 
  inherited;
 end;
 
@@ -1226,6 +1255,13 @@ end;
 
 { tcommreader }
 
+constructor tcommreader.create(const aowner: tcustomcommpipes);
+begin
+ fowner:= aowner;
+ inherited create;
+ fstate:= fstate + [tss_haslink];
+end;
+
 procedure tcommreader.settimeoutms(const avalue: integer);
 begin
  ftimeoutms:= avalue;
@@ -1307,9 +1343,14 @@ begin
  end;
 end;
 
+procedure tcommreader.dochange;
+begin
+ fowner.dorxchange(self);
+end;
+
 { tsocketreader }
 
-constructor tsocketreader.create;
+constructor tsocketreader.create(const aowner: tcustomcommpipes);
 begin
  inherited;
  fstate:= fstate + [tss_nosigio,tss_unblocked];
@@ -1352,6 +1393,12 @@ begin
 end;
 
 { tcommwriter }
+
+constructor tcommwriter.create(const aowner: tcustomcommpipes);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
 
 procedure tcommwriter.settimeoutms(const avalue: integer);
 begin
@@ -1398,8 +1445,8 @@ end;
 
 procedure tcustomsocketpipes.createpipes;
 begin
- frx:= tsocketreader.create;
- ftx:= tsocketwriter.create;
+ frx:= tsocketreader.create(self);
+ ftx:= tsocketwriter.create(self);
 end;
 
 end.

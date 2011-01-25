@@ -76,6 +76,7 @@ type
           //nonblocked -> result = 0 for no data, < = for error
    function readbytes(var buf): integer; override;
    procedure doinputavailable;
+   procedure dochange; virtual;
   public
    constructor create;
    destructor destroy; override;
@@ -448,6 +449,7 @@ end;
 
 function tpipereader.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
 begin
+ inherited;
  result:= 0;
 end;
 
@@ -455,7 +457,8 @@ procedure tpipereader.doinputavailable;
 var
  needslock: boolean;
 begin
- if assigned(foninputavailable) or assigned(fonpipebroken) then begin
+ if (tss_haslink in fstate) or 
+         assigned(foninputavailable) or assigned(fonpipebroken) then begin
   if foverloadsleepus >= 0 then begin
    while not fthread.terminated and application.checkoverload(-1) do begin
     sleepus(foverloadsleepus);
@@ -473,6 +476,7 @@ begin
     if eof and assigned(fonpipebroken) then begin
      fonpipebroken(self);
     end;
+    dochange;
    end;
   finally
    if needslock then begin
@@ -612,6 +616,11 @@ end;
 function tpipereader.active: boolean;
 begin
  result:= (handle <> invalidfilehandle) and (fstate * [tss_error,tss_eof] = []);
+end;
+
+procedure tpipereader.dochange;
+begin
+ //dummy
 end;
 
 { tpipereadercomp }

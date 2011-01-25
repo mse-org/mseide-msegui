@@ -67,7 +67,7 @@ const
 
 type
  textstreamstatety = (tss_eof,tss_error,tss_notopen,tss_pipeactive,tss_response,
-                      tss_nosigio,tss_unblocked);
+                      tss_nosigio,tss_unblocked,tss_haslink);
  textstreamstatesty = set of textstreamstatety;
 
  charencodingty = (ce_locale,ce_utf8n,ce_ascii,ce_iso8859_1);
@@ -82,6 +82,7 @@ type
    fusewritebuffer: boolean;
    function getnotopen: boolean;
    procedure setusewritebuffer(const avalue: boolean);
+   function getbufpo: pchar;
   protected
    fwriting: boolean;
    fbuffer: pchar;
@@ -102,12 +103,13 @@ type
    function Write(const Buffer; Count: Longint): Longint; override;
 
    procedure flushbuffer; override;
-//   procedure writebuffer(const buffer; count: longint);
 
    property buflen: integer read fbuflen write setbuflen default defaultbuflen;
    property usewritebuffer: boolean read fusewritebuffer 
                                        write setusewritebuffer default false;
    property eof: boolean read geteof;
+   property bufpo: pchar read getbufpo;
+   procedure skip(const adist: integer); //skips characters
  end;
 
  tbufstream = class(tcustombufstream)
@@ -1136,12 +1138,15 @@ end;
 function tcustombufstream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
 begin
  if (origin = sobeginning) and (bufoffset <> nil) then begin
-  result:= seek(offset-inherited seek(0,socurrent)+(bufend-bufoffset),socurrent);
+  result:= inherited seek(0,socurrent);
+  if result >= 0 then begin
+   result:= seek(offset-result+(bufend-bufoffset),socurrent);
+  end;
  end
  else begin
   if (origin = socurrent) and (offset = 0) then begin
    result:= inherited seek(offset,origin);
-   if bufoffset <> nil then begin
+   if (bufoffset <> nil) and (result >= 0) then begin
     result:= result + (bufoffset-bufend);
    end;
   end
@@ -1154,7 +1159,10 @@ begin
     end
     else begin
      bufoffset:= bufoffset + offset;
-     result:= inherited seek(0,socurrent)+(bufoffset-bufend);
+     result:= inherited seek(0,socurrent);
+     if result >= 0 then begin
+      result:= result + (bufoffset-bufend);
+     end;
     end;
    end
    else begin
@@ -1163,6 +1171,11 @@ begin
    exclude(fstate,tss_eof);
   end;
  end;
+end;
+
+procedure tcustombufstream.skip(const adist: integer);
+begin
+ seek(adist,socurrent);
 end;
 
 function tcustombufstream.Read(var Buffer; Count: Longint): Longint;
@@ -1219,6 +1232,20 @@ begin
  fstate:= [];
  bufoffset:= nil; 
  bufend:= nil; 
+end;
+
+function tcustombufstream.getbufpo: pchar;
+var
+ int1: integer;
+begin
+ if bufoffset = nil then begin
+  int1:= readbytes(fbuffer^);
+  if int1 > 0 then begin
+   bufend:= fbuffer + int1;
+   bufoffset:= fbuffer;
+  end;
+ end;
+ result:= bufoffset;
 end;
 
 { tbufstream }

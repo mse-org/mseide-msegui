@@ -104,11 +104,13 @@ end;
 
 procedure tcustomsercommcomp.internalconnect;
 begin
- fport.open;
- {$ifdef unix}
- setfilenonblock(fport.handle,false);
- {$endif};
- fpipes.handle:= fport.handle;
+ if not (csdesigning in componentstate) then begin
+  fport.open;
+  {$ifdef unix}
+  setfilenonblock(fport.handle,false);
+  {$endif};
+  fpipes.handle:= fport.handle;
+ end;
  factive:= true;
 end;
 
@@ -145,8 +147,8 @@ end;
 
 procedure tsercommpipes.createpipes;
 begin
- ftx:= tsercommwriter.create;
- frx:= tsercommreader.create;
+ ftx:= tsercommwriter.create(self);
+ frx:= tsercommreader.create(self);
 end;
 
 { tasyncserport }

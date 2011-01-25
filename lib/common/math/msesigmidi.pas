@@ -173,6 +173,8 @@ type
    function geteventindex(const aevent: midieventinfoty): integer;
  end;
   
+ mididecodestatety = (mds_start,mds_readbytes,mds_eventcomplete);
+ 
  tsigmidisource = class(tmidisource,icommclient)
   private
    fconnections: sigmidiconnectorarty;
@@ -180,9 +182,14 @@ type
    fpatchpanel: tpatchinfolist;
    fsercomm: tcustomcommcomp;
    fserverintf: icommserver;
+   fdecodestate: mididecodestatety;
+   fbytecount: integer;
+   fbyteindex: integer;
+   fnextstate: mididecodestatety;
    procedure setpatches(const avalue: tmidipatches);
    procedure setsercomm(const avalue: tcustomcommcomp);
   protected
+   fbytebuffer: array[0..15] of byte;
    fsigstate: sigmidisourcestatesty;
    fchannels: sigchannelinfoarty;
    procedure setcommserverintf(const aintf: icommserver);
@@ -191,6 +198,8 @@ type
    procedure dotrackevent; override;
    procedure updatepatch;
    procedure patchchanged;
+    //icommclient
+   procedure dorxchange(const areader: tcommreader);
   public
    constructor create(avalue: tcomponent); override;
    destructor destroy; override;
@@ -492,6 +501,7 @@ destructor tsigmidisource.destroy;
 var
  int1: integer;
 begin
+ sercomm:= nil;
  for int1:= 0 to high(fconnections) do begin
   fconnections[int1].fsource:= nil;
  end;
@@ -629,12 +639,82 @@ end;
 
 procedure tsigmidisource.setsercomm(const avalue: tcustomcommcomp);
 begin
- setcomcomp(icommclient(self),avalue,fsercomm);
+ if fsercomm <> avalue then begin
+  setcomcomp(icommclient(self),avalue,fsercomm);
+ end;
 end;
 
 procedure tsigmidisource.setcommserverintf(const aintf: icommserver);
 begin
  fserverintf:= aintf;
+end;
+
+procedure tsigmidisource.dorxchange(const areader: tcommreader);
+
+ procedure readbytes(const acount : integer; const nextstate: mididecodestatety);
+ begin
+  fbytecount:= acount;
+  fnextstate:= nextstate;
+  fdecodestate:= mds_readbytes;
+  fbyteindex:= 0;
+ end; //readbytes()
+
+var
+ po1: pchar;
+begin
+ with ftrackevent.event do begin
+  while true do begin
+   po1:= areader.bufpo;
+   if po1 = nil then begin
+    break;
+   end;
+   if fdecodestate = mds_readbytes then begin
+    if po1 >= #$80 then begin
+     fdecodestate:= mds_start; //cancel byte read
+    end
+    else begin
+     if fbytecount > 0 then begin
+      fbytebuffer[fbyteindex]:= byte(po1^);
+      inc(fbyteindex);
+      if fbyteindex = fbytecount then begin
+       fdecodestate:= fnextstate;
+      end;
+     end;
+     areader.skip(1);
+    end;
+   end;
+   if fdecodestate <> mds_readbytes then begin
+    case fdecodestate of
+     mds_start: begin
+      if po1^ >= #$80 then begin //commandstart
+       fillchar(ftrackevent,sizeof(ftrackevent),0);
+       kind:= midimessagetable[(byte(po1^) shr 4) and $7];
+       if kind in midichannelmessages then begin
+        channel:= byte(po1^) and $0f;
+        readbytes(midiparcount[kind],mds_eventcomplete);
+       end
+       else begin
+       end;             
+       areader.skip(1);
+      end
+      else begin
+       areader.skip(1);
+      end;
+     end;
+     mds_eventcomplete: begin
+      ftrackevent.event.par1:= fbytebuffer[0];
+      ftrackevent.event.par2:= fbytebuffer[1];
+      readbytes(midiparcount[kind],mds_eventcomplete); 
+                    //prepare for next event with same state
+      dotrackevent;
+     end;
+     else begin
+      areader.skip(1);
+     end;
+    end;
+   end;
+  end;
+ end;
 end;
 
 { tdoubleoutmultiinpconn }

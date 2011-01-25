@@ -56,6 +56,9 @@ type
  midimessagekindty = (mmk_none,mmk_noteoff,mmk_noteon,mmk_notepressure,
                       mmk_controller,mmk_programchange,mmk_channelpressure,
                       mmk_pitchbend,mmk_system);
+const
+ midichannelmessages = [mmk_noteoff,mmk_noteon,mmk_notepressure,
+                      mmk_controller,mmk_programchange,mmk_channelpressure];
 type
  midieventinfoty = record
   track: integer;
@@ -115,6 +118,7 @@ type
  midisourcestatety = (mss_inited,mss_tracksloaded,mss_eventsmerged,
                       mss_endoftrack);
  midisourcestatesty = set of midisourcestatety;
+
 const
  loadstates = [mss_inited,mss_tracksloaded,mss_eventsmerged];
 type                          
@@ -178,7 +182,26 @@ type
   published
    property ontrackevent: trackeventty read fontrackevent write fontrackevent;
  end;
-  
+ 
+const  
+ midimessagetable: array[0..7] of midimessagekindty = (
+  mmk_noteoff,              //8c
+  mmk_noteon,               //9c
+  mmk_notepressure,         //ac
+  mmk_controller,           //bc
+  mmk_programchange,        //cc
+  mmk_channelpressure,      //dc
+  mmk_pitchbend,            //ec
+  mmk_system);              //fx
+
+ midiparcount: array[midimessagekindty] of integer = (
+ // mmk_none,mmk_noteoff,mmk_noteon,mmk_notepressure,
+    0,       2,          2,         2,
+ // mmk_controller,mmk_programchange,mmk_channelpressure,
+    2,             1,                1,
+ // mmk_pitchbend,mmk_system
+    2,            0);
+
 implementation
 uses
  msesysutils,msedatalist; 
@@ -191,24 +214,6 @@ const
   'Invalid track data.'
   );
   
- messagetable: array[0..7] of midimessagekindty = (
-  mmk_noteoff,              //8c
-  mmk_noteon,               //9c
-  mmk_notepressure,         //ac
-  mmk_controller,           //bc
-  mmk_programchange,        //cc
-  mmk_channelpressure,      //dc
-  mmk_pitchbend,            //ec
-  mmk_system);              //fx
-
- parcount: array[midimessagekindty] of integer = (
- // mmk_none,mmk_noteoff,mmk_noteon,mmk_notepressure,
-    0,       2,          2,         2,
- // mmk_controller,mmk_programchange,mmk_channelpressure,
-    2,             1,                1,
- // mmk_pitchbend,mmk_system
-    2,            0);
-
 function swap(const avalue: word): word; inline;
 begin
  result:= (avalue shl 8) or (avalue shr 8);
@@ -494,7 +499,7 @@ begin
   adata.event.par1:= stat1;
   stat1:= fstatus;
  end;
- adata.event.kind:= messagetable[(stat1 shr 4) and $7];
+ adata.event.kind:= midimessagetable[(stat1 shr 4) and $7];
  if adata.event.kind = mmk_system then begin
   result:= readtrackvarlength(lwo1) and (lwo1 <= fmaxdatasize);
   if not result then exit;
@@ -505,7 +510,7 @@ begin
  end
  else begin
   adata.event.channel:= stat1 and $0f;
-  if parcount[adata.event.kind] > 1 then begin
+  if midiparcount[adata.event.kind] > 1 then begin
    result:= readtrackdatabyte(adata.event.par2);
   end;
  end;
