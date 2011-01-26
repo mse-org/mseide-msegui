@@ -566,25 +566,27 @@ procedure tcustomsplitter.dostatread(const reader: tstatreader);
 var
  po1,po2: pointty;
 begin
- po1:= parentclientpos;
- if spo_hmove in foptions then begin
-  po2.x:= reader.readinteger('x',po1.x);
- end
- else begin
-  po2.x:= po1.x;
- end;
- if spo_vmove in foptions then begin
-  po2.y:= reader.readinteger('y',po1.y);
- end
- else begin
-  po2.y:= po1.y;
- end;
- setclippedpickoffset(subpoint(po2,po1));
- if foptions * [spo_hmove,spo_hprop] = [spo_hmove,spo_hprop] then begin
-  fhprop:= reader.readreal('xprop',fhprop,0,1);
- end;
- if foptions * [spo_vmove,spo_vprop] = [spo_vmove,spo_vprop] then begin
-  fvprop:= reader.readreal('yprop',fvprop,0,1);
+ if reader.canstate then begin
+  po1:= parentclientpos;
+  if spo_hmove in foptions then begin
+   po2.x:= reader.readinteger('x',po1.x);
+  end
+  else begin
+   po2.x:= po1.x;
+  end;
+  if spo_vmove in foptions then begin
+   po2.y:= reader.readinteger('y',po1.y);
+  end
+  else begin
+   po2.y:= po1.y;
+  end;
+  setclippedpickoffset(subpoint(po2,po1));
+  if foptions * [spo_hmove,spo_hprop] = [spo_hmove,spo_hprop] then begin
+   fhprop:= reader.readreal('xprop',fhprop,0,1);
+  end;
+  if foptions * [spo_vmove,spo_vprop] = [spo_vmove,spo_vprop] then begin
+   fvprop:= reader.readreal('yprop',fvprop,0,1);
+  end;
  end;
 end;
 
@@ -592,11 +594,13 @@ procedure tcustomsplitter.dostatwrite(const writer: tstatwriter);
 var
  po1: pointty;
 begin
- po1:= parentclientpos;
- writer.writeinteger('x',po1.x);
- writer.writeinteger('y',po1.y);
- writer.writereal('xprop',fhprop);
- writer.writereal('yprop',fvprop);
+ if writer.canstate then begin
+  po1:= parentclientpos;
+  writer.writeinteger('x',po1.x);
+  writer.writeinteger('y',po1.y);
+  writer.writereal('xprop',fhprop);
+  writer.writereal('yprop',fvprop);
+ end;
 end;
 
 procedure tcustomsplitter.statreading;

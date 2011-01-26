@@ -1352,7 +1352,6 @@ end;
 
 procedure tfiledialogcontroller.readstatstate(const reader: tstatreader);
 begin
-// flastdir:= reader.readstring('lastdir',filedir(filename));
  if fdo_savelastdir in foptions then begin
   flastdir:= reader.readmsestring('lastdir',flastdir);
  end;
@@ -1771,26 +1770,26 @@ end;
 
 procedure tfiledialog.dostatread(const reader: tstatreader);
 begin
- if oe_savevalue in foptionsedit then begin
+ if canstatvalue(foptionsedit,reader) then begin
   fcontroller.readstatvalue(reader);
  end;
- if oe_savestate in foptionsedit then begin
+ if canstatstate(foptionsedit,reader) then begin
   fcontroller.readstatstate(reader);
  end;
- if oe_saveoptions in foptionsedit then begin
+ if canstatoptions(foptionsedit,reader) then begin
   fcontroller.readstatoptions(reader);
  end;
 end;
 
 procedure tfiledialog.dostatwrite(const writer: tstatwriter);
 begin
- if oe_savevalue in foptionsedit then begin
+ if canstatvalue(foptionsedit,writer) then begin
   fcontroller.writestatvalue(writer);
  end;
- if oe_savestate in foptionsedit then begin
+ if canstatstate(foptionsedit,writer) then begin
   fcontroller.writestatstate(writer);
  end;
- if oe_saveoptions in foptionsedit then begin
+ if canstatoptions(foptionsedit,writer) then begin
   fcontroller.writestatoptions(writer);
  end;
 end;

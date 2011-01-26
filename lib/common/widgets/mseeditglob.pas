@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,7 +13,7 @@ unit mseeditglob;
 
 interface
 uses
- mseglob,mseguiglob,msegui,msetypes,msegraphics,msegraphutils;
+ mseglob,mseguiglob,msegui,msetypes,msegraphics,msegraphutils,msestat;
 
 type
 
@@ -116,7 +116,33 @@ function makegridrect(const start,stop: gridcoordty): gridrectty;  overload;
                   //normalized rect, includes start and stop
 function gridcoordisequal(const a,b: gridcoordty): boolean;
 
+function canstatvalue(const editoptions: optionseditty;
+                         const stat: tstatfiler): boolean;
+function canstatstate(const editoptions: optionseditty;
+                         const stat: tstatfiler): boolean;
+function canstatoptions(const editoptions: optionseditty;
+                         const stat: tstatfiler): boolean;
+
 implementation
+
+function canstatvalue(const editoptions: optionseditty;
+                         const stat: tstatfiler): boolean;
+begin
+ result:= (oe_savevalue in editoptions) and stat.candata;
+end;
+
+function canstatstate(const editoptions: optionseditty;
+                         const stat: tstatfiler): boolean;
+begin
+ result:= (oe_savestate in editoptions) and stat.canstate;
+end;
+
+function canstatoptions(const editoptions: optionseditty;
+                         const stat: tstatfiler): boolean;
+begin
+ result:= (oe_saveoptions in editoptions) and stat.canoptions;
+end;
+
 
 function makegridcoord(col: integer; row: integer): gridcoordty;
 begin

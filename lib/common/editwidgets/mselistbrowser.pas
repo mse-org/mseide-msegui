@@ -1016,7 +1016,7 @@ procedure tlistcols.dostatread(const reader: tstatreader);
 begin
  inherited;
  with tcustomlistview(fgrid) do begin
-  if lvo_savevalue in foptions then begin
+  if (lvo_savevalue in foptions) and reader.candata then begin
    reader.readdatalist('values',fitemlist);
   end;
  end;
@@ -1026,7 +1026,7 @@ procedure tlistcols.dostatwrite(const writer: tstatwriter);
 begin
  inherited;
  with tcustomlistview(fgrid) do begin
-  if lvo_savevalue in foptions then begin
+  if (lvo_savevalue in foptions) and writer.candata then begin
    writer.writedatalist('values',fitemlist);
   end;
  end;

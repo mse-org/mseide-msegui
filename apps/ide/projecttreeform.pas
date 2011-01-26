@@ -654,6 +654,9 @@ end;
 
 procedure tprojecttree.updatestat(const filer: tstatfiler);
 begin
+ if not filer.candata then begin
+  exit;
+ end;
  if not filer.iswriter then begin
   funits.clear;
   fcmodules.clear;

@@ -34,13 +34,16 @@ type
   procedure statreadvalue(const aname: msestring; const reader: tstatreader);
   procedure statwritevalue(const aname: msestring; const writer: tstatwriter);
  end;
-
+ statfileroptionty = (sfro_nodata,sfro_nostate,sfro_nooptions);
+ statfileroptionsty = set of statfileroptionty;
+ 
  tstatfiler = class
   private
    fstream: ttextstream;
    fownsstream: boolean;
    fiswriter: boolean;
    flistlevel: integer;
+   foptions: statfileroptionsty;
   protected
   public
    constructor create(const astream: ttextstream;
@@ -74,6 +77,10 @@ type
    procedure updatememorystatstream(const name: msestring; const streamname: msestring);
    function beginlist(const name: msestring = ''): boolean;  virtual; abstract;
    function endlist: boolean;  virtual; abstract;
+   property options: statfileroptionsty read foptions write foptions;
+   function candata: boolean;
+   function canstate: boolean;
+   function canoptions: boolean;
  end;
 
  sectionty = record
@@ -515,6 +522,21 @@ begin
  if result = '' then begin
   result:= ownernamepath(tcomponent(intf.getinstance));
  end;
+end;
+
+function tstatfiler.candata: boolean;
+begin
+ result:= not (sfro_nodata in foptions);
+end;
+
+function tstatfiler.canstate: boolean;
+begin
+ result:= not (sfro_nostate in foptions);
+end;
+
+function tstatfiler.canoptions: boolean;
+begin
+ result:= not (sfro_nooptions in foptions);
 end;
 
 { tstatreader }

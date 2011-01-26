@@ -202,6 +202,7 @@ end;
 procedure tstoredcomponent.dostatread(const reader: tstatreader);
 begin
  inherited;
+
  if not fpasting and isroot then begin
   caption:= compname; //restore
  end

@@ -2775,8 +2775,12 @@ begin
   statreader:= tstatreader.create(windowlayoutfile,ce_utf8n);
   try
    statreader.setsection('layout');
+   projectstatfile.options:= projectstatfile.options + 
+                                           [sfo_nodata,sfo_nooptions];
    projectstatfile.readstat('windowlayout',statreader);
   finally
+   projectstatfile.options:= projectstatfile.options -
+                                           [sfo_nodata,sfo_nooptions];
    statreader.free;
   end;
  end;

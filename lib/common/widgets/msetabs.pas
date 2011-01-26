@@ -2688,13 +2688,17 @@ end;
 procedure ttabbar.dostatread(const reader: tstatreader);
 begin
  flayoutinfo.tabs.dostatread(reader);
- activetab:= reader.readinteger('activetab',activetab);
+ if reader.canstate then begin
+  activetab:= reader.readinteger('activetab',activetab);
+ end;
 end;
 
 procedure ttabbar.dostatwrite(const writer: tstatwriter);
 begin
  flayoutinfo.tabs.dostatwrite(writer);
- writer.writeinteger('activetab',activetab);
+ if writer.canstate then begin
+  writer.writeinteger('activetab',activetab);
+ end;
 end;
 
 function ttabbar.getstatvarname: msestring;
@@ -4142,21 +4146,25 @@ end;
 procedure tcustomtabwidget.dostatread(const reader: tstatreader);
 begin
  ftabs.flayoutinfo.tabs.dostatread(reader);
- if tabo_tabsizing in tab_options then begin
-  tab_size:= reader.readinteger('tabsize',tab_size);
+ if reader.canstate then begin
+  if tabo_tabsizing in tab_options then begin
+   tab_size:= reader.readinteger('tabsize',tab_size);
+  end;
+  ftabs.firsttab:= reader.readinteger('firsttab',ftabs.firsttab);
+  setactivepageindex(reader.readinteger('index',activepageindex,-1,count-1));
  end;
- ftabs.firsttab:= reader.readinteger('firsttab',ftabs.firsttab);
- setactivepageindex(reader.readinteger('index',activepageindex,-1,count-1));
 end;
 
 procedure tcustomtabwidget.dostatwrite(const writer: tstatwriter);
 begin
  ftabs.flayoutinfo.tabs.dostatwrite(writer);
- if tabo_tabsizing in tab_options then begin
-  writer.writeinteger('tabsize',tab_size);
+ if writer.canstate then begin
+  if tabo_tabsizing in tab_options then begin
+   writer.writeinteger('tabsize',tab_size);
+  end;
+  writer.writeinteger('firsttab',ftabs.firsttab);
+  writer.writeinteger('index',activepageindex);
  end;
- writer.writeinteger('firsttab',ftabs.firsttab);
- writer.writeinteger('index',activepageindex);
 end;
 
 procedure tcustomtabwidget.statreading;

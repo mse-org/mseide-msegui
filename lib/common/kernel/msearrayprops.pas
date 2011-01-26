@@ -1960,14 +1960,16 @@ procedure tindexpersistentarrayprop.dostatread(const reader: tstatreader);
 var
  int1: integer;
 begin
- beginupdate;
- try
-  readorder(reader);
-  for int1:= 0 to count -1 do begin
-   tindexpersistent(fitems[int1]).dostatread(reader);
+ if reader.canstate then begin
+  beginupdate;
+  try
+   readorder(reader);
+   for int1:= 0 to count -1 do begin
+    tindexpersistent(fitems[int1]).dostatread(reader);
+   end;
+  finally
+   endupdate;
   end;
- finally
-  endupdate;
  end;
 end;
 
@@ -1975,10 +1977,12 @@ procedure tindexpersistentarrayprop.dostatwrite(const writer: tstatwriter);
 var
  int1: integer;
 begin
- for int1:= 0 to count -1 do begin
-  tindexpersistent(fitems[int1]).dostatwrite(writer);
+ if writer.canstate then begin
+  for int1:= 0 to count -1 do begin
+   tindexpersistent(fitems[int1]).dostatwrite(writer);
+  end;
+  writeorder(writer);
  end;
- writeorder(writer);
 end;
 
 procedure tindexpersistentarrayprop.add(const item: tindexpersistent);

@@ -1404,10 +1404,12 @@ end;
 
 procedure tshortcutcontroller.dostatread(const reader: tstatreader);
 begin
- fsysshortcuts.dostatread('sysshortcuts',reader);
- fsysshortcuts1.dostatread('sysshortcuts1',reader);
- reader.readrecordarray('shortcuts',{$ifdef FPC}@{$endif}setactionreccount,
-           {$ifdef FPC}@{$endif}setactionrecord);
+ if reader.candata then begin
+  fsysshortcuts.dostatread('sysshortcuts',reader);
+  fsysshortcuts1.dostatread('sysshortcuts1',reader);
+  reader.readrecordarray('shortcuts',{$ifdef FPC}@{$endif}setactionreccount,
+            {$ifdef FPC}@{$endif}setactionrecord);
+ end;
 end;
 
 function tshortcutcontroller.getactionrecord(const index: integer): msestring;
@@ -1448,10 +1450,12 @@ end;
 
 procedure tshortcutcontroller.dostatwrite(const writer: tstatwriter);
 begin
- fsysshortcuts.dostatwrite('sysshortcuts',writer);
- fsysshortcuts1.dostatwrite('sysshortcuts1',writer);
- writer.writerecordarray('shortcuts',factions.count,
-                               {$ifdef FPC}@{$endif}getactionrecord);
+ if writer.candata then begin
+  fsysshortcuts.dostatwrite('sysshortcuts',writer);
+  fsysshortcuts1.dostatwrite('sysshortcuts1',writer);
+  writer.writerecordarray('shortcuts',factions.count,
+                                {$ifdef FPC}@{$endif}getactionrecord);
+ end;
 end;
 
 procedure tshortcutcontroller.statreading;

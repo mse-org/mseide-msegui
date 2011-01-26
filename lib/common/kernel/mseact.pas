@@ -1140,12 +1140,16 @@ end;
 
 procedure tcustomaction.dostatread(const reader: tstatreader);
 begin
- checked:= reader.readboolean('checked',checked);
+ if reader.candata then begin
+  checked:= reader.readboolean('checked',checked);
+ end;
 end;
 
 procedure tcustomaction.dostatwrite(const writer: tstatwriter);
 begin
- writer.writeboolean('checked',checked);
+ if writer.candata then begin
+  writer.writeboolean('checked',checked);
+ end;
 end;
 
 procedure tcustomaction.statreading;

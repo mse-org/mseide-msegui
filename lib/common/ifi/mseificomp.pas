@@ -2164,22 +2164,26 @@ end;
 procedure tvalueclientcontroller.dostatread(const reader: tstatreader);
 begin
  inherited;
- if fdatalist = nil then begin
-  statreadvalue(reader);
- end
- else begin
-  reader.readdatalist(listvarname,fdatalist);
+ if reader.candata then begin
+  if fdatalist = nil then begin
+   statreadvalue(reader);
+  end
+  else begin
+   reader.readdatalist(listvarname,fdatalist);
+  end;
  end;
 end;
 
 procedure tvalueclientcontroller.dostatwrite(const writer: tstatwriter);
 begin
  inherited;
- if fdatalist = nil then begin
-  statwritevalue(writer);
- end
- else begin
-  writer.writedatalist(listvarname,fdatalist);
+ if writer.candata then begin
+  if fdatalist = nil then begin
+   statwritevalue(writer);
+  end
+  else begin
+   writer.writedatalist(listvarname,fdatalist);
+  end;
  end;
 end;
 
@@ -3770,8 +3774,6 @@ begin
    with lico.controller do begin
     if fstatfile = nil then begin
      dostatread(reader);
-//     fitempo:= reader;
-//     tmsecomponent1(fowner).getobjectlinker.forall(@statreadlist,lico.controller); 
     end;
    end;
   end;

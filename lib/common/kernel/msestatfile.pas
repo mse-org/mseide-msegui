@@ -14,7 +14,8 @@ type
 
  statfileoptionty = (sfo_memory,sfo_createpath,
                      sfo_transaction, //use intermedate file and rename
-                     sfo_savedata,sfo_activatorread,sfo_activatorwrite);
+                     sfo_savedata,sfo_activatorread,sfo_activatorwrite,
+                     sfo_nodata,sfo_nostate,sfo_nooptions);
  statfileoptionsty = set of statfileoptionty;
 const
  defaultstatfileoptions = [sfo_activatorread,sfo_activatorwrite,sfo_transaction];
@@ -51,6 +52,8 @@ type
   protected
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
+   procedure updateoptions(const afiler: tstatfiler);
+   
    //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
@@ -62,10 +65,12 @@ type
    procedure initnewcomponent(const ascale: real); override;
    procedure readstat(stream: ttextstream = nil); overload;
    procedure readstat(const afilename: filenamety); overload; //disk file
-   procedure readstat(const aname: msestring; const statreader: tstatreader); overload;
+   procedure readstat(const aname: msestring;
+                                     const statreader: tstatreader); overload;
    procedure writestat(const stream: ttextstream = nil); overload;
    procedure writestat(const afilename: filenamety); overload; //disk file
-   procedure writestat(const aname: msestring; const statwriter: tstatwriter); overload;
+   procedure writestat(const aname: msestring;
+                                     const statwriter: tstatwriter); overload;
    procedure updatestat(const aname: msestring; const statfiler: tstatfiler);
   published
    property filename: filenamety read ffilename write setfilename nodefault;
@@ -230,6 +235,23 @@ begin
  istatfile(info.dest).statread;
 end;
 
+procedure tstatfile.updateoptions(const afiler: tstatfiler);
+var
+ opt1: statfileroptionsty;
+begin
+ opt1:= afiler.options;
+ if sfo_nodata in foptions then begin
+  include(opt1,sfro_nodata);
+ end;
+ if sfo_nostate in foptions then begin
+  include(opt1,sfro_nostate);
+ end;
+ if sfo_nooptions in foptions then begin
+  include(opt1,sfro_nooptions);
+ end;
+ afiler.options:= opt1;
+end;
+
 procedure tstatfile.readstat(stream: ttextstream = nil);
 var
  stream1: ttextstream;
@@ -258,6 +280,7 @@ begin
    end;
   end;
   areader:= tstatreader.create(stream1,fencoding);
+  updateoptions(areader);
   try
    if assigned(fonstatread) or assigned(fonstatupdate) or
                                     (fsavedmemoryfiles <> '') then begin
@@ -384,6 +407,7 @@ begin
  end;
  try
   awriter:= tstatwriter.create(stream1,fencoding);
+  updateoptions(awriter);
   bo1:= false;
   try
    if (stream1.handle <> invalidfilehandle) and 

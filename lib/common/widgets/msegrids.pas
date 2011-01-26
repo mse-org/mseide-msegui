@@ -5879,10 +5879,10 @@ var
 begin
  if (fdata <> nil) and not (dls_remote in fdata.state) and
                                 (co_savevalue in foptions) and 
-                                 not (gs_isdb in fgrid.fstate) then begin
+                    not (gs_isdb in fgrid.fstate) and reader.candata then begin
   reader.readdatalist(getdatastatname,fdata);
  end;
- if co_savestate in foptions then begin
+ if (co_savestate in foptions) and reader.canstate then begin
   mstr1:= inttostr(ident);
   if not (co_fixwidth in foptions) and 
                    (og_colsizing in fgrid.optionsgrid) then begin
@@ -5905,10 +5905,11 @@ begin
  inherited;
  if (fdata <> nil) and not (dls_remote in fdata.state) and
                          (co_savevalue in foptions) and 
-                         not (gs_isdb in fgrid.fstate) then begin
+                         not (gs_isdb in fgrid.fstate) and
+                         writer.candata then begin
   writer.writedatalist(getdatastatname,fdata);
  end;
- if co_savestate in foptions then begin
+ if (co_savestate in foptions) and writer.canstate then begin
   mstr1:= inttostr(ident);
   if not (co_fixwidth in foptions) and 
                    (og_colsizing in fgrid.optionsgrid) then begin
@@ -7648,7 +7649,7 @@ begin
  ar1:= nil; //compiler warning
  fgrid.beginupdate;
  try
-  if og_savestate in fgrid.foptionsgrid then begin
+  if (og_savestate in fgrid.foptionsgrid) and reader.canstate then begin
    sortcol:= reader.readinteger('sortcol',sortcol,-1,count-1);
    if og_colmoving in fgrid.optionsgrid then begin
     ar1:= readorder(reader);
@@ -7663,7 +7664,8 @@ begin
   end;
   if not (gs_isdb in fgrid.fstate) then begin
    int2:= 0;
-   if fgrid.foptionsgrid * [og_folded,og_colmerged,og_rowheight] <> [] then begin
+   if (fgrid.foptionsgrid * [og_folded,og_colmerged,og_rowheight] <> []) and
+                                                      reader.candata then begin
     reader.readdatalist('rowstate',frowstate);
     int2:= frowstate.count;
    end;
@@ -7695,10 +7697,11 @@ end;
 procedure tdatacols.dostatwrite(const writer: tstatwriter);
 begin
  inherited;
- if og_savestate in fgrid.foptionsgrid then begin
+ if (og_savestate in fgrid.foptionsgrid) and writer.canstate then begin
   writer.writeinteger('sortcol',sortcol);
  end;
- if fgrid.foptionsgrid * [og_folded,og_colmerged,og_rowheight] <> [] then begin
+ if (fgrid.foptionsgrid * [og_folded,og_colmerged,og_rowheight] <> []) and
+                                 writer.candata then begin
   writer.writedatalist('rowstate',frowstate);
  end;
 end;
@@ -8984,9 +8987,11 @@ procedure tcustomgrid.dostatread(const reader: tstatreader);
 var
  po1: gridcoordty;
 begin
- fpropcolwidthref:= reader.readinteger('propcolwidthref',fpropcolwidthref,0);
+ if reader.canstate then begin
+  fpropcolwidthref:= reader.readinteger('propcolwidthref',fpropcolwidthref,0);
+ end;
  fdatacols.dostatread(reader);
- if og_savestate in foptionsgrid then begin
+ if (og_savestate in foptionsgrid) and reader.canstate then begin
   po1.col:= reader.readinteger('col',ffocusedcell.col);
   if not (gs_isdb in fstate) then begin
    po1.row:= reader.readinteger('row',ffocusedcell.row);
@@ -9012,10 +9017,12 @@ begin
  else begin
   docheckcellvalue;
  end;
- writer.writeinteger('propcolwidthref',fpropcolwidthref);
+ if writer.canstate then begin
+  writer.writeinteger('propcolwidthref',fpropcolwidthref);
+ end;
  fdatacols.dostatwrite(writer);
  row:= int1;
- if og_savestate in foptionsgrid then begin
+ if (og_savestate in foptionsgrid) and writer.canstate then begin
   writer.writeinteger('col',ffocusedcell.col);
   if not (gs_isdb in fstate) then begin
    writer.writeinteger('row',ffocusedcell.row);

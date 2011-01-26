@@ -164,6 +164,9 @@ type
    property value: double read fvalue write fvalue;
  end; 
 
+ siginpoptionty = (sio_exp);
+ siginpoptionsty = set of siginpoptionty;
+ 
  tdoubleinputconn = class(tdoubleconn)
   private
    fsource: tdoubleoutputconn;
@@ -171,12 +174,14 @@ type
    fgain: double;
    fmin: realty;
    fmax: realty;
+   foptions: siginpoptionsty;
    procedure setsource(const avalue: tdoubleoutputconn);
    procedure setoffset(const avalue: double);
    procedure setgain(const avalue: double);
    procedure setvalue(const avalue: double); virtual;
    procedure setmin(const avalue: realty);
    procedure setmax(const avalue: realty);
+   procedure setoptions(const avalue: siginpoptionsty);
   protected
    fvalue: double;
   public
@@ -190,6 +195,7 @@ type
    property min: realty read fmin write setmin;
    property max: realty read fmax write setmax;
    property value: double read fvalue write setvalue;  
+   property options: siginpoptionsty read foptions write setoptions;
  end;
 
  tlimitinputconn = class(tdoubleinputconn)
@@ -261,6 +267,7 @@ type
   hasscale: boolean;
   hasmin: boolean;
   hasmax: boolean;
+  isexp: boolean;
  end;
  destinfoarty = array of destinfoty;
  
@@ -1202,6 +1209,13 @@ procedure tdoubleinputconn.setmax(const avalue: realty);
 begin
  lock;
  fmax:= avalue;
+ unlock;
+end;
+
+procedure tdoubleinputconn.setoptions(const avalue: siginpoptionsty);
+begin
+ lock;
+ foptions:= avalue;
  unlock;
 end;
 
@@ -2353,7 +2367,8 @@ var
   ainfo.max:= ainput.max;
   ainfo.hasmin:= not isemptyreal(ainfo.min);
   ainfo.hasmax:= not isemptyreal(ainfo.max);
-  ainfo.hasscale:= ainfo.hasmin or ainfo.hasmax or 
+  ainfo.isexp:= sio_exp in ainput.options;
+  ainfo.hasscale:= ainfo.hasmin or ainfo.hasmax or ainfo.isexp or
                                 (ainfo.offset <> 0) or (ainfo.gain <> 1);
  end; //updatedestinfo
 

@@ -1535,30 +1535,26 @@ end;
 
 procedure tgraphdataedit.dostatread(const reader: tstatreader);
 begin
- if fgridintf = nil then begin
-  if oe_savevalue in foptionsedit then begin
-   readstatvalue(reader);
-  end;
+ if (fgridintf = nil) and canstatvalue(foptionsedit,reader) then begin
+  readstatvalue(reader);
  end;
- if oe_savestate in foptionsedit then begin
+ if canstatstate(foptionsedit,reader) then begin
   readstatstate(reader);
  end;
- if oe_saveoptions in foptionsedit then begin
+ if canstatoptions(foptionsedit,reader) then begin
   readstatoptions(reader);
  end;
 end;
 
 procedure tgraphdataedit.dostatwrite(const writer: tstatwriter);
 begin
- if fgridintf = nil then begin
-  if oe_savevalue in foptionsedit then begin
-   writestatvalue(writer);
-  end;
+ if (fgridintf = nil) and canstatvalue(foptionsedit,writer) then begin
+  writestatvalue(writer);
  end;
- if oe_savestate in foptionsedit then begin
+ if canstatstate(foptionsedit,writer) then begin
   writestatstate(writer);
  end;
- if oe_saveoptions in foptionsedit then begin
+ if canstatoptions(foptionsedit,writer) then begin
   writestatoptions(writer);
  end;
 end;
