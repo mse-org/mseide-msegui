@@ -164,9 +164,18 @@ type
    property value: double read fvalue write fvalue;
  end; 
 
- siginpoptionty = (sio_exp);
- siginpoptionsty = set of siginpoptionty;
- 
+// siginpoptionty = (sio_exp);
+// siginpoptionsty = set of siginpoptionty;
+
+ inpscaleinfoty = record  
+  offset: double;
+  gain: double;
+  hasscale: boolean;
+  hasmin: boolean;
+  hasmax: boolean;
+  isexp: boolean;
+ end;
+  
  tdoubleinputconn = class(tdoubleconn)
   private
    fsource: tdoubleoutputconn;
@@ -174,15 +183,19 @@ type
    fgain: double;
    fmin: realty;
    fmax: realty;
-   foptions: siginpoptionsty;
+   fexpstart: realty;
+   fexpend: realty;
+//   foptions: siginpoptionsty;
    procedure setsource(const avalue: tdoubleoutputconn);
    procedure setoffset(const avalue: double);
    procedure setgain(const avalue: double);
    procedure setvalue(const avalue: double); virtual;
    procedure setmin(const avalue: realty);
    procedure setmax(const avalue: realty);
-   procedure setoptions(const avalue: siginpoptionsty);
+   procedure setexpstart(const avalue: realty);
+   procedure setexpend(const avalue: realty);
   protected
+   fsca: inpscaleinfoty;
    fvalue: double;
   public
    constructor create(const aowner: tcomponent;
@@ -194,8 +207,10 @@ type
    property gain: double read fgain write setgain;
    property min: realty read fmin write setmin;
    property max: realty read fmax write setmax;
+   property expstart: realty read fexpstart write setexpstart;
+   property expend: realty read fexpend write setexpend;
    property value: double read fvalue write setvalue;  
-   property options: siginpoptionsty read foptions write setoptions;
+//   property options: siginpoptionsty read foptions write setoptions;
  end;
 
  tlimitinputconn = class(tdoubleinputconn)
@@ -256,18 +271,13 @@ type
   next: siginfopoarty;
  end;
  siginfoarty = array of siginfoty;
- 
+
  destinfoty = record
   source: pdouble;
   dest: pdouble;
-  offset: double;
-  gain: double;
   min: double;
   max: double;
-  hasscale: boolean;
-  hasmin: boolean;
-  hasmax: boolean;
-  isexp: boolean;
+  sca: inpscaleinfoty;
  end;
  destinfoarty = array of destinfoty;
  
@@ -1159,6 +1169,8 @@ begin
  fgain:= 1;
  fmin:= emptyreal;
  fmax:= emptyreal;
+ fexpstart:= emptyreal;
+ fexpend:= emptyreal;
  inherited;
  name:= 'input';
 end;
@@ -1212,13 +1224,27 @@ begin
  unlock;
 end;
 
+procedure tdoubleinputconn.setexpstart(const avalue: realty);
+begin
+ lock;
+ fexpstart:= avalue;
+ unlock;
+end;
+
+procedure tdoubleinputconn.setexpend(const avalue: realty);
+begin
+ lock;
+ fexpend:= avalue;
+ unlock;
+end;
+{
 procedure tdoubleinputconn.setoptions(const avalue: siginpoptionsty);
 begin
  lock;
  foptions:= avalue;
  unlock;
 end;
-
+}
 {
 procedure tdoubleinputconn.setsig1(var asource: doublearty);
 begin
@@ -2354,22 +2380,39 @@ var
  {$ifdef mse_debugsignal}
   indent:= indentbefore;
  {$endif}  
- end; //processcalcorder
+ end; //processcalcorder()
+
+  procedure updatesca(const ainput: tdoubleinputconn; var sca: inpscaleinfoty);
+  var
+   a,b: double;
+  begin
+   sca.offset:= ainput.offset;
+   sca.gain:= ainput.gain;
+   sca.hasmin:= not isemptyreal(ainput.min);
+   sca.hasmax:= not isemptyreal(ainput.max);
+   sca.isexp:= (ainput.expstart > 0) and (ainput.expend > 0) and 
+                    (ainput.expend > ainput.expstart);
+   if sca.isexp then begin
+    b:= ln(ainput.expstart);
+    a:= ln(ainput.expend) - b;
+    sca.offset:= b+a*sca.offset;
+    sca.gain:= a*sca.gain;
+   end;
+   sca.hasscale:= sca.hasmin or sca.hasmax or sca.isexp or
+                                 (sca.offset <> 0) or (sca.gain <> 1);
+  end; //updatesca()
 
  procedure updatedestinfo(const ainput: tdoubleinputconn;
-                                 const source: pdouble; var ainfo: destinfoty);
+                                 const asource: pdouble; var ainfo: destinfoty);
  begin
-  ainfo.source:= source;
-  ainfo.dest:= @ainput.fvalue;
-  ainfo.offset:= ainput.offset;
-  ainfo.gain:= ainput.gain;
-  ainfo.min:= ainput.min;
-  ainfo.max:= ainput.max;
-  ainfo.hasmin:= not isemptyreal(ainfo.min);
-  ainfo.hasmax:= not isemptyreal(ainfo.max);
-  ainfo.isexp:= sio_exp in ainput.options;
-  ainfo.hasscale:= ainfo.hasmin or ainfo.hasmax or ainfo.isexp or
-                                (ainfo.offset <> 0) or (ainfo.gain <> 1);
+  with ainfo do begin
+   source:= asource;
+   dest:= @ainput.fvalue;
+   min:= ainput.min;
+   max:= ainput.max;
+   sca:= ainput.fsca;
+//   updatesca(ainput,sca);
+  end;
  end; //updatedestinfo
 
  function isopeninput(const ainputs: inputinfoarty): boolean;
@@ -2478,6 +2521,7 @@ begin
     debugpointer(' inp ',inputs[int2].input);
   {$endif}
     finphash.add(ptruint(inputs[int2].input),po1);
+    updatesca(inputs[int2].input,inputs[int2].input.fsca);
    end;
    for int2:= 0 to high(outputs) do begin
   {$ifdef mse_debugsignal}
@@ -2696,7 +2740,7 @@ begin
     int3:= po1^.destinations[0].outputindex;
     updatedestinfo(po1^.destinations[0].destinput,handlerinfo.dest,firstdest);
                       //setup hasscale
-    if (int3 = 0) and (desthigh < 0) or not firstdest.hasscale then begin
+    if (int3 = 0) and (desthigh < 0) or not firstdest.sca.hasscale then begin
      handlerinfo.dest:= @po1^.destinations[0].destinput.fvalue;
     end;    
     if int3 = 0 then begin                //setup again with correct dest
@@ -2744,12 +2788,15 @@ begin
  for int1:= 0 to fexechigh do begin
   po1^.handler(psighandlerinfoty(po1));
   with po1^.firstdest do begin
-   if hasscale then begin
-    dest^:= source^*gain+offset;
-    if hasmin and (dest^ < min) then begin
+   if sca.hasscale then begin
+    dest^:= source^*sca.gain+sca.offset;
+    if sca.isexp then begin
+     dest^:= exp(dest^);
+    end;
+    if sca.hasmin and (dest^ < min) then begin
      dest^:= min;
     end;
-    if hasmax and (dest^ > max) then begin
+    if sca.hasmax and (dest^ > max) then begin
      dest^:= max;
     end;
    end;
@@ -2757,12 +2804,15 @@ begin
   for int2:= 0 to po1^.desthigh do begin //multi inputs on output
    with po1^.dest[int2] do begin
     dest^:= source^;
-    if hasscale then begin
-     dest^:= dest^*gain+offset;
-     if hasmin and (dest^ < min) then begin
+    if sca.hasscale then begin
+     dest^:= dest^*sca.gain+sca.offset;
+     if sca.isexp then begin
+      dest^:= exp(dest^);
+     end;
+     if sca.hasmin and (dest^ < min) then begin
       dest^:= min;
      end;
-     if hasmax and (dest^ > max) then begin
+     if sca.hasmax and (dest^ > max) then begin
       dest^:= max;
      end;
     end;
@@ -2854,10 +2904,19 @@ begin
    with destinations[int1] do begin
     with destinput do begin
      if outputindex = 0 then begin
-      fvalue:= do1*fgain+foffset;
+      fvalue:= do1*fsca.gain+fsca.offset;
      end
      else begin
-      fvalue:= outputs[outputindex].fvalue*fgain+foffset;
+      fvalue:= outputs[outputindex].fvalue*fsca.gain+fsca.offset;
+     end;
+     if fsca.isexp then begin
+      fvalue:= exp(fvalue);
+     end;
+     if fsca.hasmin and (fvalue < min) then begin
+      fvalue:= min;
+     end;
+     if fsca.hasmax and (fvalue > max) then begin
+      fvalue:= max;
      end;
     end;
    end;
