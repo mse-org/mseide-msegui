@@ -124,6 +124,7 @@ type
   prev: pconnectioninfoty;
   next: pconnectioninfoty;
   key: byte;
+  active: boolean;
  end;
  connectioninfoarty = array of connectioninfoty;
   
@@ -590,40 +591,54 @@ begin
  if not (smss_patchvalid in fsigstate) then begin
   updatepatch;
  end;
- int1:= fpatchpanel.geteventindex(ftrackevent.event);
- if int1 >= 0 then begin
-  with fchannels[int1] do begin
-   if connections <> nil then begin
-    po1:= first;
-    if po1 <> last then begin
-     by1:= ftrackevent.event.par1;
-     repeat
-      if po1^.key = by1 then begin
-       break;
-      end;
-      po1:= po1^.next;
-     until po1 = nil;
-     if po1 <> first then begin
+ if ftrackevent.event.kind in [mmk_noteon,mmk_noteoff,mmk_notepressure] then begin
+  int1:= fpatchpanel.geteventindex(ftrackevent.event);
+  if int1 >= 0 then begin
+   with fchannels[int1] do begin
+    if connections <> nil then begin
+     po1:= first;
+     if po1 <> last then begin
+      by1:= ftrackevent.event.par1;
+      repeat
+       if po1^.key = by1 then begin
+        break;
+       end;
+       po1:= po1^.next;
+      until po1 = nil;
       if po1 = nil then begin
        po1:= last;
+       while po1 <> nil do begin
+        if not po1^.active then begin
+         break;
+        end;
+        po1:= po1^.prev;
+       end;
       end;
-      if po1^.prev <> nil then begin
-       po1^.prev^.next:= po1^.next;
+      if po1 <> first then begin
+       if po1 = nil then begin
+        po1:= last;
+       end;
+       if po1^.prev <> nil then begin
+        po1^.prev^.next:= po1^.next;
+       end;
+       if (po1^.next <> nil) then begin
+        po1^.next^.prev:= po1^.prev;
+       end;
+       first^.prev:= po1;
+       po1^.next:= first;
+       first:= po1;
+       if po1 = last then begin
+        last:= po1^.prev;
+       end;
+       po1^.prev:= nil;
       end;
-      if (po1^.next <> nil) then begin
-       po1^.next^.prev:= po1^.prev;
-      end;
-      first^.prev:= po1;
-      po1^.next:= first;
-      first:= po1;
-      if po1 = last then begin
-       last:= po1^.prev;
-      end;
-      po1^.prev:= nil;
      end;
+     po1^.key:= by1;
+     po1^.active:= (ftrackevent.event.kind = mmk_noteon) and 
+                             (ftrackevent.event.par2 <> 0) or
+                      (ftrackevent.event.kind = mmk_notepressure);
+     po1^.dest.midievent(ftrackevent.event);
     end;
-    po1^.key:= by1;
-    po1^.dest.midievent(ftrackevent.event);
    end;
   end;
  end;
