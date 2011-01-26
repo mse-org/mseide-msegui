@@ -164,6 +164,8 @@ type
    fexceptignore: booleanarty;
    fnogdbserverexit: boolean;
    fsettingsfile: filenamety;
+//   fwindowlayoutfile: filenamety;
+//   fwindowlayouthistory: filenamearty;
    function limitgridsize(const avalue: integer): integer;
    procedure setgridsizex(const avalue: integer);
    procedure setgridsizey(const avalue: integer);
@@ -233,6 +235,11 @@ type
    property exceptignore: booleanarty read fexceptignore 
                                                  write fexceptignore;
    property settingsfile: filenamety read fsettingsfile write fsettingsfile;
+   
+//   property windowlayoutfile: filenamety read fwindowlayoutfile 
+//                                                write fwindowlayoutfile;
+//   property windowlayouthistory: filenamearty read fwindowlayouthistory 
+//                                                write fwindowlayouthistory;
  end;
 {$M-}
  
@@ -595,6 +602,8 @@ function getmacros: tmacrolist;
 var
  projectoptions: projectoptionsty;
  projecthistory: filenamearty;
+ windowlayoutfile: filenamety;
+ windowlayouthistory: filenamearty;
  codetemplates: tcodetemplates;
 
 implementation

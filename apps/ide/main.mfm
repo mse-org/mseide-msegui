@@ -356,7 +356,7 @@ object mainfo: tmainfo
         state = [as_localcaption]
       end    
       item
-        submenu.count = 26
+        submenu.count = 27
         submenu.items = <        
           item
             submenu.count = 2
@@ -374,6 +374,12 @@ object mainfo: tmainfo
             state = [as_localcaption, as_localimagelist, as_localimagenr]
             imagelist = vievmenuicons
             imagenr = 0
+          end        
+          item
+            caption = 'Load Wi&ndow Layout'
+            state = [as_localcaption, as_localimagelist, as_localonexecute]
+            imagelist = vievmenuicons
+            onexecute = loadwindowlayoutexe
           end        
           item
             options = [mao_separator, mao_shortcutcaption]
@@ -624,7 +630,7 @@ object mainfo: tmainfo
           end        
           item
             caption = 'O&pen'
-            state = [as_localcaption, as_localonexecute]
+            state = [as_localcaption, as_localimagelist, as_localonexecute]
             onexecute = openprojectonexecute
           end        
           item

@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -141,6 +141,7 @@ type
    procedure statbefread(const sender: TObject);
    procedure getstatobj(const sender: TObject; var aobject: TObject);
    procedure viewsymbolsonexecute(const sender: TObject);
+   procedure loadwindowlayoutexe(const sender: TObject);
   private
    fstartcommand: startcommandty;
    fnoremakecheck: boolean;
@@ -2354,6 +2355,9 @@ begin
  mstr1:= projectoptions.projectfilename;
  filer.updatevalue('projectname',mstr1);
  filer.updatevalue('projecthistory',projecthistory);
+ filer.updatevalue('windowlayoutfile',windowlayoutfile);
+ filer.updatevalue('windowlayouthistory',windowlayouthistory);
+ 
  if not filer.iswriter then begin
   if guitemplatesmo.sysenv.defined[ord(env_filename)] then begin
    ar1:= guitemplatesmo.sysenv.values[ord(env_filename)];
@@ -2758,6 +2762,24 @@ end;
 procedure tmainfo.getstatobj(const sender: TObject; var aobject: TObject);
 begin
  aobject:= projectoptions.o;
+end;
+
+procedure tmainfo.loadwindowlayoutexe(const sender: TObject);
+var
+ statreader: tstatreader;
+begin
+ if filedialog(windowlayoutfile,[fdo_checkexist],'Load Window Layout',
+          ['Project files','All files'],['*.prj','*'],'prj',
+          nil,nil,nil,[fa_all],[fa_hidden],
+                        @windowlayouthistory) = mr_ok then begin          
+  statreader:= tstatreader.create(windowlayoutfile,ce_utf8n);
+  try
+   statreader.setsection('layout');
+   projectstatfile.readstat('windowlayout',statreader);
+  finally
+   statreader.free;
+  end;
+ end;
 end;
 
 end.
