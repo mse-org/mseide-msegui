@@ -159,6 +159,7 @@ type
    fgdbservertimeout: longword;
    ftargetfilemodified: boolean;
    frunningprocess: prochandlety;
+   flayoutloading: boolean;
    procedure dorun;
    function runtarget: boolean; //true if run possible
    procedure newproject(const fromprogram,empty: boolean);
@@ -2774,11 +2775,15 @@ begin
                         @windowlayouthistory) = mr_ok then begin          
   statreader:= tstatreader.create(windowlayoutfile,ce_utf8n);
   try
+   statreader.setsection('breakpoints');
+   panelform.updatestat(statreader);
    statreader.setsection('layout');
    projectstatfile.options:= projectstatfile.options + 
                                            [sfo_nodata,sfo_nooptions];
+   flayoutloading:= true;
    projectstatfile.readstat('windowlayout',statreader);
   finally
+   flayoutloading:= false;
    projectstatfile.options:= projectstatfile.options -
                                            [sfo_nodata,sfo_nooptions];
    statreader.free;

@@ -142,11 +142,15 @@ begin
  if acaption = '' then begin
   acaption:= 'Panel';
  end;
+ if length(acaption) > 40 then begin
+  setlength(acaption,40);
+  acaption:= acaption+'...';
+ end;
  with fmenuitem do begin
   onexecute:= {$ifdef FPC}@{$endif}showexecute;
   if fnameindex < 9 then begin
    shortcut:= (ord(key_f1) or key_modctrl) + fnameindex;
-   caption:= acaption + ' &' + inttostr(fnameindex+1);
+   caption:= '&' + inttostr(fnameindex+1)+' '+acaption;
   end
   else begin
    shortcut:= 0;

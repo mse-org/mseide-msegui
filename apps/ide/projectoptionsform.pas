@@ -1556,7 +1556,8 @@ begin
    expandprojectmacros;
   end;
   breakpointsfo.updatestat(statfiler);
-  panelform.updatestat(statfiler);
+  panelform.updatestat(statfiler); //uses section breakpoints!
+  
   projecttree.updatestat(statfiler);
   componentstorefo.updatestat(statfiler);
 
