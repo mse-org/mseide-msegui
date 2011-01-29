@@ -964,8 +964,6 @@ type
    fformatdisp: msestring;
    fformatedit: msestring;
    fvaluerange: real;
-   fmin: realty;
-   fmax: realty;
    procedure setvalue(const Value: realty);
    procedure setformatdisp(const Value: msestring);
    procedure setformatedit(const Value: msestring);
@@ -994,6 +992,10 @@ type
   protected
    fvalue: realty;
    fvaluedefault: realty;
+   fmin: realty;
+   fmax: realty;
+   procedure setmin(const avalue: realty); virtual;
+   procedure setmax(const avalue: realty); virtual;
    function gettextvalue(var accept: boolean; const quiet: boolean): realty; virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function internaldatatotext(const data): msestring; override;
@@ -1025,8 +1027,8 @@ type
    property formatedit: msestring read fformatedit write setformatedit;
    property formatdisp: msestring read fformatdisp write setformatdisp;
    property valuerange: real read fvaluerange write setvaluerange;
-   property min: realty read fmin write fmin {stored false};
-   property max: realty read fmax write fmax {stored false};
+   property min: realty read fmin write setmin;
+   property max: realty read fmax write setmax;
    property gridvalue[const index: integer]: realty
         read getgridvalue write setgridvalue; default;
    property gridintvalue[const index: integer]: integer
@@ -4924,6 +4926,16 @@ end;
 function tcustomrealedit.getdefaultvalue: pointer;
 begin
  result:= @fvaluedefault;
+end;
+
+procedure tcustomrealedit.setmin(const avalue: realty);
+begin
+ fmin:= avalue;
+end;
+
+procedure tcustomrealedit.setmax(const avalue: realty);
+begin
+ fmax:= avalue;
 end;
 
 { tspineditframe }

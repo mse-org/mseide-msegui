@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -14,7 +14,7 @@ uses
  classes,msegraphedits,msesignal,mseguiglob,mseevent,msechartedit,msetypes,
  msechart,mseclasses,msefft,msewidgets,msegraphics,msegraphutils,msedial,
  msesplitter,msegui,msestat,msestatfile,msestrings,msestockobjects,
- msemenus,mseact;
+ msemenus,mseact,msedataedits,msereal;
 
 type
  sigeditoptionty = (sieo_exp);
@@ -73,6 +73,57 @@ type
    property options: sigeditoptionsty read foptions write setoptions default [];
  end;
 
+ tsigrealedit = class(trealedit,isigclient)
+  private
+   foutput: tdoubleoutputconn;
+   fcontroller: tsigcontroller;
+   fontransformvalue: sigineventty;
+   foptions: sigeditoptionsty;
+   fsigclientinfo: sigclientinfoty;
+   foffset: real;
+   procedure setoutput(const avalue: tdoubleoutputconn);
+   procedure setcontroller(const avalue: tsigcontroller);
+   procedure setoptions(const avalue: sigeditoptionsty);
+   procedure setoffset(const avalue: real);
+  protected
+   fsigvalue: real;
+   foutmin: real;
+   foutmax: real;
+   procedure setoutmin(const avalue: real);
+   procedure setoutmax(const avalue: real);
+   procedure setmin(const avalue: realty); override;
+   procedure setmax(const avalue: realty); override;
+
+   procedure updatesigvalue;
+   procedure dochange; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
+    //isigclient  
+   procedure initmodel;
+   procedure sigtick; virtual;
+   function getinputar: inputconnarty;
+   function getoutputar: outputconnarty;
+   function gethandler: sighandlerprocty;
+   function getzcount: integer;
+   procedure clear;
+   procedure modelchange;
+   function getsigcontroller: tsigcontroller;
+   function getsigclientinfopo: psigclientinfoty;
+   function getsigoptions: sigclientoptionsty;
+   procedure lock;
+   procedure unlock;
+  public
+   constructor create(aowner: tcomponent); override;
+   property output: tdoubleoutputconn read foutput write setoutput;
+  published
+   property controller: tsigcontroller read fcontroller write setcontroller;
+   property ontransformvalue: sigineventty read fontransformvalue 
+                                                 write fontransformvalue;
+   property offset: real read foffset write setoffset;
+   property outmin: real read foutmin write setoutmin;
+   property outmax: real read foutmax write setoutmax;
+   property options: sigeditoptionsty read foptions write setoptions default [];
+ end;
+ 
  sigkeyinfoty = record
   sigvalue: double;
   eventvalue: double;
@@ -384,6 +435,173 @@ type
  tsigenvelope1 = class(tsigenvelope);
  tdoubleoutputconn1 = class(tdoubleoutputconn); 
  
+{ tsigrealedit }
+
+constructor tsigrealedit.create(aowner: tcomponent);
+begin
+ foutput:= tdoubleoutputconn.create(self,isigclient(self),true);
+ inherited;
+ fvalue:= 0;
+ fmin:= -bigreal;
+ foutmax:= 1;
+end;
+
+procedure tsigrealedit.setoutput(const avalue: tdoubleoutputconn);
+begin
+ foutput.assign(avalue);
+end;
+
+procedure tsigrealedit.setcontroller(const avalue: tsigcontroller);
+begin
+ setsigcontroller(getobjectlinker,isigclient(self),avalue,fcontroller);
+end;
+
+procedure tsigrealedit.setoptions(const avalue: sigeditoptionsty);
+begin
+ if options <> avalue then begin
+  foptions:= avalue;
+  updatesigvalue;
+ end;
+end;
+
+procedure tsigrealedit.initmodel;
+begin
+ //dummy
+end;
+
+function tsigrealedit.getinputar: inputconnarty;
+begin
+ result:= nil;
+end;
+
+function tsigrealedit.getoutputar: outputconnarty;
+begin
+ setlength(result,1);
+ result[0]:= foutput;
+end;
+
+function tsigrealedit.getzcount: integer;
+begin
+ result:= 0;
+end;
+
+procedure tsigrealedit.clear;
+begin
+ //dummy
+end;
+
+procedure tsigrealedit.modelchange;
+begin
+ //dummy
+end;
+
+function tsigrealedit.getsigcontroller: tsigcontroller;
+begin
+ result:= fcontroller;
+end;
+
+procedure tsigrealedit.updatesigvalue;
+var
+ do1: double;
+begin
+ if componentstate * [csdesigning,csloading] = [] then begin
+  do1:= fvalue + offset;
+  if (sieo_exp in foptions) and (foutmin > 0) and (foutmax > 0) then begin
+   do1:= foutmin*exp(do1*(ln(foutmax)-ln(foutmin)));
+  end
+  else begin
+   do1:= fvalue*(foutmax-foutmin)+foutmin; 
+  end;
+  if canevent(tmethod(fontransformvalue)) then begin
+   fontransformvalue(self,real(do1));
+  end;
+  lock;
+  try
+   fsigvalue:= do1;
+   if fcontroller <> nil then begin
+    tsigcontroller1(fcontroller).execevent(isigclient(self));
+   end;
+  finally
+   unlock;
+  end;
+ end;
+end;
+
+procedure tsigrealedit.dochange;
+begin
+ inherited;
+ updatesigvalue; 
+end;
+
+procedure tsigrealedit.sighandler(const ainfo: psighandlerinfoty);
+begin
+ ainfo^.dest^:= fsigvalue;
+end;
+
+function tsigrealedit.gethandler: sighandlerprocty;
+begin
+ result:= {$ifdef FPC}@{$endif}sighandler;
+end;
+
+procedure tsigrealedit.setoutmin(const avalue: real);
+begin
+ foutmin:= avalue;
+ updatesigvalue;
+end;
+
+procedure tsigrealedit.setoutmax(const avalue: real);
+begin
+ foutmax:= avalue;
+ updatesigvalue;
+end;
+
+function tsigrealedit.getsigclientinfopo: psigclientinfoty;
+begin
+ result:= @fsigclientinfo;
+end;
+
+procedure tsigrealedit.sigtick;
+begin
+ //dummy
+end;
+
+function tsigrealedit.getsigoptions: sigclientoptionsty;
+begin
+ result:= [];
+end;
+
+procedure tsigrealedit.lock;
+begin
+ if fcontroller <> nil then begin
+  fcontroller.lock;
+ end;
+end;
+
+procedure tsigrealedit.unlock;
+begin
+ if fcontroller <> nil then begin
+  fcontroller.unlock;
+ end;
+end;
+
+procedure tsigrealedit.setoffset(const avalue: real);
+begin
+ foffset:= avalue;
+ updatesigvalue;
+end;
+
+procedure tsigrealedit.setmin(const avalue: realty);
+begin
+ inherited;
+ updatesigvalue;
+end;
+
+procedure tsigrealedit.setmax(const avalue: realty);
+begin
+ inherited;
+ updatesigvalue;
+end;
+
 { tsigslider }
 
 constructor tsigslider.create(aowner: tcomponent);

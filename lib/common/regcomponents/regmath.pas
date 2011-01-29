@@ -53,7 +53,7 @@ begin
                             tsigwavetable,tsignoise,tsigfuncttable,tsigenvelope,
                             tsigsampler,tsigscope,tsigscopefft,
                             tsigfft,tfft,tsigsamplerfft,
-                            tsigslider,tsigkeyboard,
+                            tsigrealedit,tsigslider,tsigkeyboard,
                             tsigmidiconnector,tsigmidimulticonnector,
                             twavetableedit,tfuncttableedit,tffttableedit,tenvelopeedit
                             ]);
