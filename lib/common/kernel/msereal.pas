@@ -33,15 +33,18 @@ function trystrtorealtydot(const ein: string; out value: realty): boolean;
 function realtytostr(const val: realty; const format: msestring = '';
                                             const scale: real = 1): msestring;
 function realtytostrrange(const val: realty; const format: msestring = '';
-                                            const range: real = 1): msestring;
+                                            const range: real = 1;
+                                            const offset: real = 0): msestring;
 function realtytostrdot(const val: realty): string;
 
 function addrealty(const a,b: realty): realty; //result = a - b
 function subrealty(const a,b: realty): realty; //result = a + b
 function mulrealty(const a,b: realty): realty; //result = a * b
 
-function applyrange(const avalue: realty; const arange: real): realty;
-function reapplyrange(const avalue: realty; const arange: real): realty;
+function applyrange(const avalue: realty; const arange: real;
+                                       const aoffset: real): realty;
+function reapplyrange(const avalue: realty; const arange: real;
+                                       const aoffset: real): realty;
 function valuescaletorange(const reader: treader): real;
 
 implementation
@@ -55,23 +58,25 @@ const
  co1: array[0..7] of byte = ($0,0,0,0,0,0,$f0,$ff);      //- inf
 {$endif}
 
-function applyrange(const avalue: realty; const arange: real): realty;
+function applyrange(const avalue: realty; const arange: real;
+                                            const aoffset: real): realty;
 begin
  if isemptyreal(avalue) or (arange = 0) then begin
   result:= avalue;
  end
  else begin
-  result:= avalue * arange;
+  result:= avalue * arange + aoffset;
  end;
 end;
 
-function reapplyrange(const avalue: realty; const arange: real): realty;
+function reapplyrange(const avalue: realty; const arange: real;
+                                               const aoffset: real): realty;
 begin
  if isemptyreal(avalue) or (arange = 0) then begin
   result:= avalue;
  end
  else begin
-  result:= avalue / arange;
+  result:= (avalue-aoffset) / arange;
  end;  
 end;
 
@@ -209,7 +214,7 @@ begin
 end;
 
 function realtytostrrange(const val: realty; const format: msestring = '';
-                                            const range: real = 1): msestring;
+                       const range: real = 1; const offset: real = 0): msestring;
 var
  rea1: real;
 begin
@@ -218,7 +223,7 @@ begin
  end
  else begin
   if range <> 0 then begin
-   rea1:= val*range;
+   rea1:= val*range+offset;
   end
   else begin
    rea1:= val;

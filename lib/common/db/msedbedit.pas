@@ -708,6 +708,7 @@ type
    property formatedit;
    property formatdisp;
    property valuerange;
+   property valueoffset;
    property onsetvalue;
    property onsetintvalue;
  end;
@@ -742,6 +743,7 @@ type
    property formatedit;
    property formatdisp;
    property valuerange;
+   property valueoffset;
    property onsetvalue;
    property step;
  end;
@@ -750,6 +752,7 @@ type
   private
    fdatalink: teditwidgetdatalink;
    fvaluerange: real;
+   fvalueoffset: real;
    procedure setdatalink(const avalue: teditwidgetdatalink);
    procedure readvaluescale(reader: treader);
   protected   
@@ -773,6 +776,7 @@ type
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
   published
    property valuerange: real read fvaluerange write fvaluerange;
+   property valueoffset: real read fvalueoffset write fvalueoffset;
    property datalink: teditwidgetdatalink read fdatalink write setdatalink;
    property scrollbar;
    property onsetvalue;
@@ -4208,7 +4212,7 @@ begin
   fdatalink.field.clear;
  end
  else begin
-  fdatalink.field.asfloat:= applyrange(value,valuerange);
+  fdatalink.field.asfloat:= applyrange(value,valuerange,valueoffset);
  end;
 end;
 
@@ -4218,7 +4222,7 @@ begin
   value:= emptyreal;
  end
  else begin
-  value:= reapplyrange(fdatalink.field.asfloat,valuerange);
+  value:= reapplyrange(fdatalink.field.asfloat,valuerange,valueoffset);
  end;
 end;
 
@@ -4228,7 +4232,7 @@ begin
   if griddatalink <> nil then begin
    result:= tgriddatalink(griddatalink).getrealtybuffer(fdatalink.field,cell.row);
    if result <> nil then begin
-    preal(result)^:= reapplyrange(preal(result)^,valuerange);
+    preal(result)^:= reapplyrange(preal(result)^,valuerange,valueoffset);
    end;
   end
   else begin
@@ -4312,7 +4316,7 @@ begin
   if griddatalink <> nil then begin
    result:= tgriddatalink(griddatalink).getrealtybuffer(fdatalink.field,cell.row);
    if result <> nil then begin
-    preal(result)^:= reapplyrange(preal(result)^,valuerange);
+    preal(result)^:= reapplyrange(preal(result)^,valuerange,valueoffset);
    end;
   end
   else begin
@@ -4329,7 +4333,7 @@ begin
   fdatalink.field.clear;
  end
  else begin
-  fdatalink.field.asfloat:= applyrange(value,valuerange);
+  fdatalink.field.asfloat:= applyrange(value,valuerange,valueoffset);
  end;
 end;
 
@@ -4339,7 +4343,7 @@ begin
   value:= emptyreal;
  end
  else begin
-  value:= reapplyrange(fdatalink.field.asfloat,valuerange);
+  value:= reapplyrange(fdatalink.field.asfloat,valuerange,valueoffset);
  end;
 end;
 

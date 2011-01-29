@@ -17,7 +17,7 @@ uses
  msemenus,mseact,msedataedits,msereal;
 
 type
- sigeditoptionty = (sieo_exp);
+ sigeditoptionty = (sieo_exp,sieo_expzero);
  sigeditoptionsty = set of sigeditoptionty;
  
 const
@@ -80,11 +80,11 @@ type
    fontransformvalue: sigineventty;
    foptions: sigeditoptionsty;
    fsigclientinfo: sigclientinfoty;
-   foffset: real;
+//   foffset: real;
    procedure setoutput(const avalue: tdoubleoutputconn);
    procedure setcontroller(const avalue: tsigcontroller);
    procedure setoptions(const avalue: sigeditoptionsty);
-   procedure setoffset(const avalue: real);
+//   procedure setoffset(const avalue: real);
   protected
    fsigvalue: real;
    foutmin: real;
@@ -118,7 +118,7 @@ type
    property controller: tsigcontroller read fcontroller write setcontroller;
    property ontransformvalue: sigineventty read fontransformvalue 
                                                  write fontransformvalue;
-   property offset: real read foffset write setoffset;
+//   property offset: real read foffset write setoffset;
    property outmin: real read foutmin write setoutmin;
    property outmax: real read foutmax write setoutmax;
    property options: sigeditoptionsty read foptions write setoptions default [];
@@ -442,6 +442,7 @@ begin
  foutput:= tdoubleoutputconn.create(self,isigclient(self),true);
  inherited;
  fvalue:= 0;
+ fvaluedefault:= 0;
  fmin:= -bigreal;
  foutmax:= 1;
 end;
@@ -505,9 +506,13 @@ var
  do1: double;
 begin
  if componentstate * [csdesigning,csloading] = [] then begin
-  do1:= fvalue + offset;
   if (sieo_exp in foptions) and (foutmin > 0) and (foutmax > 0) then begin
-   do1:= foutmin*exp(do1*(ln(foutmax)-ln(foutmin)));
+   if (sieo_expzero in foptions) and (fvalue <= 0) then begin
+    do1:= 0;
+   end
+   else begin
+    do1:= foutmin*exp(fvalue*(ln(foutmax)-ln(foutmin)));
+   end;
   end
   else begin
    do1:= fvalue*(foutmax-foutmin)+foutmin; 
@@ -583,13 +588,13 @@ begin
   fcontroller.unlock;
  end;
 end;
-
+{
 procedure tsigrealedit.setoffset(const avalue: real);
 begin
  foffset:= avalue;
  updatesigvalue;
 end;
-
+}
 procedure tsigrealedit.setmin(const avalue: realty);
 begin
  inherited;
@@ -663,7 +668,12 @@ var
 begin
  if componentstate * [csdesigning,csloading] = [] then begin
   if (sieo_exp in foptions) and (fmin > 0) and (fmax > 0) then begin
-   do1:= fmin*exp(fvalue*(ln(fmax)-ln(fmin)));
+   if (sieo_expzero in foptions) and (fvalue <= 0) then begin
+    do1:= 0;
+   end
+   else begin
+    do1:= fmin*exp(fvalue*(ln(fmax)-ln(fmin)));
+   end;
   end
   else begin
    do1:= fvalue*(fmax-fmin)+fmin; 

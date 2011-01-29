@@ -169,9 +169,11 @@ type
   private
    fformat: msestring;
    fvaluerange: real;
+   fvalueoffset: real;
    fvalue: real;
    procedure setformat(const avalue: msestring);
    procedure setvaluerange(const avalue: real);
+   procedure setvalueoffset(const avalue: real);
    procedure readvaluescale(reader: treader);
   protected
    procedure defineproperties(filer: tfiler); override;
@@ -183,6 +185,7 @@ type
    property value: real read fvalue;
   published
    property valuerange: real read fvaluerange write setvaluerange;
+   property valueoffset: real read fvalueoffset write setvalueoffset;
    property format: msestring read fformat write setformat;
  end;
 
@@ -237,9 +240,11 @@ type
   private
    fformat: msestring;
    fvaluerange: real;
+   fvalueoffset: real;
    fvalue: real;
    procedure setformat(const avalue: msestring);
    procedure setvaluerange(const avalue: real);
+   procedure setvalueoffset(const avalue: real);
    procedure readvaluescale(reader: treader);
   protected
    procedure defineproperties(filer: tfiler); override;
@@ -251,6 +256,7 @@ type
    property value: real read fvalue;
   published
    property valuerange: real read fvaluerange write setvaluerange;
+   property valueoffset: real read fvalueoffset write setvalueoffset;
    property format: msestring read fformat write setformat;
  end;
 
@@ -306,9 +312,11 @@ type
   private
    fformat: msestring;
    fvaluerange: real;
+   fvalueoffset: real;
    fvalue: real;
    procedure setformat(const avalue: msestring);
    procedure setvaluerange(const avalue: real);
+   procedure setvalueoffset(const avalue: real);
    procedure readvaluescale(reader: treader);
   protected
    procedure defineproperties(filer: tfiler); override;
@@ -320,6 +328,7 @@ type
    property value: real read fvalue;
   published
    property valuerange: real read fvaluerange write setvaluerange;
+   property valueoffset: real read fvalueoffset write setvalueoffset;
    property format: msestring read fformat write setformat;
  end;
 
@@ -796,7 +805,7 @@ begin
  end
  else begin
   fvalue:= reapplyrange(flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex),
-                           valuerange);
+                           valuerange,valueoffset);
  end;
 end;
 
@@ -809,6 +818,12 @@ end;
 procedure tdbreallookuplb.setvaluerange(const avalue: real);
 begin
  fvaluerange:= avalue;
+ formatchanged;
+end;
+
+procedure tdbreallookuplb.setvalueoffset(const avalue: real);
+begin
+ fvalueoffset:= avalue;
  formatchanged;
 end;
 
@@ -961,7 +976,7 @@ begin
  end
  else begin
   fvalue:= reapplyrange(flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex),
-                        valuerange);
+                        valuerange,valueoffset);
  end;
 end;
 
@@ -974,6 +989,12 @@ end;
 procedure tdbreallookup64lb.setvaluerange(const avalue: real);
 begin
  fvaluerange:= avalue;
+ formatchanged;
+end;
+
+procedure tdbreallookup64lb.setvalueoffset(const avalue: real);
+begin
+ fvalueoffset:= avalue;
  formatchanged;
 end;
 
@@ -1127,7 +1148,7 @@ begin
  end
  else begin
   fvalue:= reapplyrange(flookupbuffer.floatvaluephys(flookupvaluefieldno,aindex),
-                     valuerange);
+                     valuerange,valueoffset);
  end;
 end;
 
@@ -1140,6 +1161,12 @@ end;
 procedure tdbreallookupstrlb.setvaluerange(const avalue: real);
 begin
  fvaluerange:= avalue;
+ formatchanged;
+end;
+
+procedure tdbreallookupstrlb.setvalueoffset(const avalue: real);
+begin
+ fvalueoffset:= avalue;
  formatchanged;
 end;
 

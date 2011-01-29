@@ -583,7 +583,7 @@ end;
 procedure trealdialogcontroller.setexecresult(var avalue: realty);
 begin
  with tcustomrealedit(fowner) do begin
-  text:= realtytostrrange(avalue,formatedit,valuerange);
+  text:= realtytostrrange(avalue,formatedit,valuerange,valueoffset);
  end;
 end;
 
