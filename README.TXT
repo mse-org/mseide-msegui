@@ -208,6 +208,11 @@ Dependent of the Zeos version it will be necessary to add -MDelphi to 'Project'-
 There is a predefined IDE project apps/ide/mseide_zeos.prj, update 'Project'-
 'Options'-'Macros' according to your installation.
 
+patch_fpc_2_4_2
+***************
+Has a patched writer.inc which fixes FPC bug #18021, necessary for the signal
+processing components.
+
 Have a lot of fun!
 
 Martin

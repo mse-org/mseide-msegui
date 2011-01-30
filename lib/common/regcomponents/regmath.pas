@@ -57,7 +57,9 @@ begin
                             tsigmidiconnector,tsigmidimulticonnector,
                             twavetableedit,tfuncttableedit,tffttableedit,tenvelopeedit
                             ]);
- registercomponenttabhints(['Math'],['Experimental mathematical and signal processing components']);
+ registercomponenttabhints(['Math'],
+ ['Experimental mathematical and signal processing components.'+lineend+
+  'Needs writer.inc from "patch_fpc_2_4_2".']);
  registerpropertyeditor(typeinfo(tdoubleconn),tdoublezcomp,'',
                                                    tsubcomponentpropertyeditor);
 // registerpropertyeditor(typeinfo(tdoubleconn),tdoubleinpconnitem,'',
