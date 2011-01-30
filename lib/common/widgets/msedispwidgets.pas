@@ -254,13 +254,13 @@ type
    fonchange: changerealeventty;
    fformat: msestring;
    fvaluerange: real;
-   fvalueoffset: real;
+   fvaluestart: real;
    procedure setvalue(const avalue: realty);
    procedure readvalue(reader: treader);
 //   procedure writevalue(writer: twriter);
    procedure setformat(const avalue: msestring);
    procedure setvaluerange(const avalue: real);
-   procedure setvalueoffset(const avalue: real);
+   procedure setvaluestart(const avalue: real);
    procedure readvaluescale(reader: treader);
   {$ifdef mse_with_ifi}
    function getifilink: tifireallinkcomp;
@@ -275,7 +275,7 @@ type
    property value: realty read fvalue write setvalue {stored false};
   published
    property valuerange: real read fvaluerange write setvaluerange;
-   property valueoffset: real read fvalueoffset write setvalueoffset;
+   property valuestart: real read fvaluestart write setvaluestart;
    property format: msestring read fformat write setformat;
    property onchange: changerealeventty read fonchange write fonchange;
 {$ifdef mse_with_ifi}
@@ -715,7 +715,7 @@ end;
 
 function tcustomrealdisp.getvaluetext: msestring;
 begin
- result:= realtytostrrange(fvalue,fformat,fvaluerange,fvalueoffset);
+ result:= realtytostrrange(fvalue,fformat,fvaluerange,fvaluestart);
 end;
 
 procedure tcustomrealdisp.setvalue(const avalue: realty);
@@ -759,9 +759,9 @@ begin
  formatchanged;
 end;
 
-procedure tcustomrealdisp.setvalueoffset(const avalue: real);
+procedure tcustomrealdisp.setvaluestart(const avalue: real);
 begin
- fvalueoffset:= avalue;
+ fvaluestart:= avalue;
  formatchanged;
 end;
 

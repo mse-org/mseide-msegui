@@ -708,7 +708,7 @@ type
    property formatedit;
    property formatdisp;
    property valuerange;
-   property valueoffset;
+   property valuestart;
    property onsetvalue;
    property onsetintvalue;
  end;
@@ -743,7 +743,7 @@ type
    property formatedit;
    property formatdisp;
    property valuerange;
-   property valueoffset;
+   property valuestart;
    property onsetvalue;
    property step;
  end;
@@ -752,7 +752,7 @@ type
   private
    fdatalink: teditwidgetdatalink;
    fvaluerange: real;
-   fvalueoffset: real;
+   fvaluestart: real;
    procedure setdatalink(const avalue: teditwidgetdatalink);
    procedure readvaluescale(reader: treader);
   protected   
@@ -776,7 +776,7 @@ type
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
   published
    property valuerange: real read fvaluerange write fvaluerange;
-   property valueoffset: real read fvalueoffset write fvalueoffset;
+   property valuestart: real read fvaluestart write fvaluestart;
    property datalink: teditwidgetdatalink read fdatalink write setdatalink;
    property scrollbar;
    property onsetvalue;
@@ -4212,7 +4212,7 @@ begin
   fdatalink.field.clear;
  end
  else begin
-  fdatalink.field.asfloat:= applyrange(value,valuerange,valueoffset);
+  fdatalink.field.asfloat:= applyrange(value,valuerange,valuestart);
  end;
 end;
 
@@ -4222,7 +4222,7 @@ begin
   value:= emptyreal;
  end
  else begin
-  value:= reapplyrange(fdatalink.field.asfloat,valuerange,valueoffset);
+  value:= reapplyrange(fdatalink.field.asfloat,valuerange,valuestart);
  end;
 end;
 
@@ -4232,7 +4232,7 @@ begin
   if griddatalink <> nil then begin
    result:= tgriddatalink(griddatalink).getrealtybuffer(fdatalink.field,cell.row);
    if result <> nil then begin
-    preal(result)^:= reapplyrange(preal(result)^,valuerange,valueoffset);
+    preal(result)^:= reapplyrange(preal(result)^,valuerange,valuestart);
    end;
   end
   else begin
@@ -4316,7 +4316,7 @@ begin
   if griddatalink <> nil then begin
    result:= tgriddatalink(griddatalink).getrealtybuffer(fdatalink.field,cell.row);
    if result <> nil then begin
-    preal(result)^:= reapplyrange(preal(result)^,valuerange,valueoffset);
+    preal(result)^:= reapplyrange(preal(result)^,valuerange,valuestart);
    end;
   end
   else begin
@@ -4333,7 +4333,7 @@ begin
   fdatalink.field.clear;
  end
  else begin
-  fdatalink.field.asfloat:= applyrange(value,valuerange,valueoffset);
+  fdatalink.field.asfloat:= applyrange(value,valuerange,valuestart);
  end;
 end;
 
@@ -4343,7 +4343,7 @@ begin
   value:= emptyreal;
  end
  else begin
-  value:= reapplyrange(fdatalink.field.asfloat,valuerange,valueoffset);
+  value:= reapplyrange(fdatalink.field.asfloat,valuerange,valuestart);
  end;
 end;
 

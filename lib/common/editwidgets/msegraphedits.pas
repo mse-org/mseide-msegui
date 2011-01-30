@@ -420,7 +420,7 @@ type
    fframebarrect: rectty;
    ffacebarrect: rectty;
    fvaluerange: real;
-   fvalueoffset: real;
+   fvaluestart: real;
    fformat: string;
    ftextflags: textflagsty;
    fonfinished: progresseventty;
@@ -432,7 +432,7 @@ type
                     out facedest,framebardest,facebardest: rectty);
    procedure updatebar;
    procedure setvaluerange(const avalue: real);
-   procedure setvalueoffset(const avalue: real);
+   procedure setvaluestart(const avalue: real);
    procedure setformat(const avalue: string);
    procedure settextflags(const avalue: textflagsty);
    procedure setbar_frame(const avalue: tbarframe);
@@ -466,7 +466,7 @@ type
    property bar_face: tbarface read fbar_face write setbar_face;
    property bar_frame: tbarframe read fbar_frame write setbar_frame;
    property valuerange: real read fvaluerange write setvaluerange; //default 100
-   property valueoffset: real read fvalueoffset write setvalueoffset;
+   property valuestart: real read fvaluestart write setvaluestart;
    property format: string read fformat write setformat stored false;
                    //default '0%', '' for no numeric
    property textflags: textflagsty read ftextflags write settextflags default
@@ -3851,7 +3851,7 @@ begin
   canvas.restore;
   fbar_frame.paintoverlay(canvas,po2^);
   if fformat <> '' then begin
-   drawtext(canvas,realtytostr(applyrange(rea1,fvaluerange,fvalueoffset),
+   drawtext(canvas,realtytostr(applyrange(rea1,fvaluerange,fvaluestart),
                                          fformat),arect,ftextflags,ffont);
   end;
  end;
@@ -3868,9 +3868,9 @@ begin
  formatchanged;
 end;
 
-procedure tcustomprogressbar.setvalueoffset(const avalue: real);
+procedure tcustomprogressbar.setvaluestart(const avalue: real);
 begin
- fvalueoffset:= avalue;
+ fvaluestart:= avalue;
  formatchanged;
 end;
 

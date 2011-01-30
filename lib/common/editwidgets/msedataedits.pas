@@ -964,7 +964,7 @@ type
    fformatdisp: msestring;
    fformatedit: msestring;
    fvaluerange: real;
-   fvalueoffset: real;
+   fvaluestart: real;
    procedure setvalue(const Value: realty);
    procedure setformatdisp(const Value: msestring);
    procedure setformatedit(const Value: msestring);
@@ -981,7 +981,7 @@ type
    procedure setgridvalues(const avalue: realarty);
    procedure setgridintvalues(const avalue: integerarty);
    procedure setvaluerange(const avalue: real);
-   procedure setvalueoffset(const avalue: real);
+   procedure setvaluestart(const avalue: real);
    function getasinteger: integer;
    procedure setasinteger(const avalue: integer);
    function getascurrency: currency;
@@ -1029,7 +1029,7 @@ type
    property formatedit: msestring read fformatedit write setformatedit;
    property formatdisp: msestring read fformatdisp write setformatdisp;
    property valuerange: real read fvaluerange write setvaluerange;
-   property valueoffset: real read fvalueoffset write setvalueoffset;
+   property valuestart: real read fvaluestart write setvaluestart;
    property min: realty read fmin write setmin;
    property max: realty read fmax write setmax;
    property gridvalue[const index: integer]: realty
@@ -1055,7 +1055,7 @@ type
    property formatedit;
    property formatdisp;
    property valuerange;
-   property valueoffset;
+   property valuestart;
    property min;
    property max;
   {$ifdef mse_with_ifi}
@@ -1166,7 +1166,7 @@ type
    property formatedit;
    property formatdisp;
    property valuerange;
-   property valueoffset;
+   property valuestart;
    property min;
    property max;
    property step;
@@ -4627,10 +4627,10 @@ begin
   rea1:= realty(data);
  end;
  if (@data = nil) and focused then begin
-  result:= realtytostrrange(rea1,fformatedit,fvaluerange,fvalueoffset);
+  result:= realtytostrrange(rea1,fformatedit,fvaluerange,fvaluestart);
  end
  else begin
-  result:= realtytostrrange(rea1,fformatdisp,fvaluerange,fvalueoffset);
+  result:= realtytostrrange(rea1,fformatdisp,fvaluerange,fvaluestart);
  end;
 end;
 
@@ -4671,7 +4671,7 @@ begin
    mstr1:= feditor.text;
   end
   else begin
-   mstr1:= realtytostrrange(fvalue,fformatedit,fvaluerange,fvalueoffset)
+   mstr1:= realtytostrrange(fvalue,fformatedit,fvaluerange,fvaluestart)
   end;
   checktext(mstr1,accept);
   if not accept then begin
@@ -4699,7 +4699,7 @@ begin
    rea1:= rea2;
   except
   end;
-  rea1:= reapplyrange(rea1,fvaluerange,fvalueoffset);
+  rea1:= reapplyrange(rea1,fvaluerange,fvaluestart);
   if not ((des_isdb in fstate) and isemptyreal(rea1)) then begin
    if (cmprealty(fmin,rea1) > 0) or (cmprealty(fmax,rea1) < 0) then begin
     rangeerror(fmin,fmax,quiet);
@@ -4731,7 +4731,7 @@ var
  rea1: realty;
 begin
  try
-  rea1:= reapplyrange(strtorealty(atext),fvaluerange,fvalueoffset);
+  rea1:= reapplyrange(strtorealty(atext),fvaluerange,fvaluestart);
  except
   rea1:= emptyreal;
  end;
@@ -4875,10 +4875,10 @@ begin
  end;
 end;
 
-procedure tcustomrealedit.setvalueoffset(const avalue: real);
+procedure tcustomrealedit.setvaluestart(const avalue: real);
 begin
- if fvalueoffset <> avalue then begin
-  fvalueoffset:= avalue;
+ if fvaluestart <> avalue then begin
+  fvaluestart:= avalue;
   valuetotext;
  end;
 end;

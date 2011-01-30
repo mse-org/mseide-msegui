@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -42,9 +42,9 @@ function subrealty(const a,b: realty): realty; //result = a + b
 function mulrealty(const a,b: realty): realty; //result = a * b
 
 function applyrange(const avalue: realty; const arange: real;
-                                       const aoffset: real): realty;
+                                       const astart: real): realty;
 function reapplyrange(const avalue: realty; const arange: real;
-                                       const aoffset: real): realty;
+                                       const astart: real): realty;
 function valuescaletorange(const reader: treader): real;
 
 implementation
@@ -59,24 +59,24 @@ const
 {$endif}
 
 function applyrange(const avalue: realty; const arange: real;
-                                            const aoffset: real): realty;
+                                            const astart: real): realty;
 begin
  if isemptyreal(avalue) or (arange = 0) then begin
   result:= avalue;
  end
  else begin
-  result:= avalue * arange + aoffset;
+  result:= avalue * arange - astart;
  end;
 end;
 
 function reapplyrange(const avalue: realty; const arange: real;
-                                               const aoffset: real): realty;
+                                               const astart: real): realty;
 begin
  if isemptyreal(avalue) or (arange = 0) then begin
   result:= avalue;
  end
  else begin
-  result:= (avalue-aoffset) / arange;
+  result:= (avalue-astart) / arange;
  end;  
 end;
 
