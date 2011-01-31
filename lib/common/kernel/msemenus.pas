@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -15,7 +15,7 @@ interface
 uses
  mseact,msegui,msearrayprops,mseclasses,msegraphutils,
  msedrawtext,msegraphics,mseevent,mseglob,mseguiglob,mseshapes,mserichstring,
- msetypes,msestrings,Classes,msekeyboard,msebitmap;
+ msetypes,msestrings,classes,msekeyboard,msebitmap;
 
 type
  menuoptionty = (mo_insertfirst,mo_singleregion,mo_shortcutright,mo_commonwidth,

@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -622,7 +622,11 @@ begin
   end
   else begin
    if checkident(integer(pid_of)) then begin
-    result:= false;     //type of class
+    result:= checkname and checkoperator(';');
+    if result then begin
+     funitinfopo^.deflist.add(lstringtostring(value),syk_typedef,
+                  getsourcepos(token1),sourcepos);
+    end;
     exit;
    end;
    classinfopo:= funitinfopo^.p.classinfolist.newitem;
@@ -854,6 +858,7 @@ var
  statementstart: tokenidty;
  ident1: pascalidentty;
  lstr1: lstringty;
+ bo1: boolean;
 begin
  while not eof do begin
   skipwhitespace;

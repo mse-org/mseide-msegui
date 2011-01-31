@@ -14,7 +14,7 @@ uses
  classes,msegraphedits,msesignal,mseguiglob,mseevent,msechartedit,msetypes,
  msechart,mseclasses,msefft,msewidgets,msegraphics,msegraphutils,msedial,
  msesplitter,msegui,msestat,msestatfile,msestrings,msestockobjects,
- msemenus,mseact,msedataedits,msereal;
+ msemenus,mseact,msedataedits,msereal,mseedit;
 
 type
  sigeditoptionty = (sieo_exp,sieo_expzero);

@@ -179,6 +179,7 @@ tsqlite3connection is available without -dmse_with_sqlite. Field type mapping:
 +--------------------+---------------------+-------------+-------------+
 | INTEGER or INT     | INTEGER 4           | ftinteger   | integer     |
 | LARGEINT           | INTEGER 8           | ftlargeint  | largeint    |
+| BIGINT             | INTEGER 8           | ftlargeint  | largeint    |
 | WORD               | INTEGER 2           | ftword      | word        |
 | SMALLINT           | INTEGER 2           | ftsmallint  | smallint    |
 | BOOLEAN            | INTEGER 2           | ftboolean   | wordbool    |

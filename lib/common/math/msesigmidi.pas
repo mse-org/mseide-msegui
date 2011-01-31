@@ -174,6 +174,8 @@ type
  
  tmidipatches = class(townedpersistentarrayprop)
   protected
+   class function getitemclasstype: persistentclassty; override;
+               //used in dumpunitgroups
   public
    constructor create(const aowner: tsigmidisource); reintroduce;
  end;
@@ -1059,6 +1061,11 @@ end;
 constructor tmidipatches.create(const aowner: tsigmidisource);
 begin
  inherited create(aowner,tmidipatch);
+end;
+
+class function tmidipatches.getitemclasstype: persistentclassty;
+begin
+ result:= tmidipatch;
 end;
 
 { tmidipatch }

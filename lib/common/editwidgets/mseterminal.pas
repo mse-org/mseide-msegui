@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -15,7 +15,7 @@ interface
 uses
  msegrids,Classes,msestream,mseclasses,msepipestream,mseevent,mseinplaceedit,
  msetextedit,msestrings,msesys,mseeditglob,msemenus,msegui,mseguiglob,
- mseprocess,msegridsglob;
+ mseprocess,msegridsglob,mseedit;
 type
  sendtexteventty = procedure(const sender: tobject; 
                        var atext: msestring; var donotsend: boolean) of object;

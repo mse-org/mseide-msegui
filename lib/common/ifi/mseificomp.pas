@@ -892,6 +892,7 @@ type
  tififields = class(tpersistentarrayprop,iififieldsource)
   protected
    function getififieldclass: ififieldclassty; virtual;
+   class function getitemclasstype: persistentclassty; override;
   public
    constructor create;
 //   function destdatalists: datalistarty;
@@ -3265,6 +3266,11 @@ begin
   end;
  end;
  setlength(result,int2);
+end;
+
+class function tififields.getitemclasstype: persistentclassty;
+begin
+ result:= tififield;
 end;
 
 { tififieldlink }

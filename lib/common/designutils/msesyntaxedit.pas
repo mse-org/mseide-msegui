@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,7 +16,7 @@ uses
  Classes,msetextedit,msesyntaxpainter,mseclasses,
  mseglob,mseguiglob,msetypes,mseevent,
  mseeditglob,msestrings,msewidgetgrid,msedatalist,msemenus,msegui,mseinplaceedit,
- msegrids;
+ msegrids,mseedit;
  
 type
  bracketkindty = (bki_none,bki_round,bki_square,bki_curly);

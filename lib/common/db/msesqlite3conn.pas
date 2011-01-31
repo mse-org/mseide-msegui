@@ -23,6 +23,7 @@ uses
 +--------------------+---------------------+-------------+-------------+
 | INTEGER or INT     | INTEGER 4           | ftinteger   | integer     |
 | LARGEINT           | INTEGER 8           | ftlargeint  | largeint    |
+| BIGINT             | INTEGER 8           | ftlargeint  | largeint    |
 | WORD               | INTEGER 2           | ftword      | word        |
 | SMALLINT           | INTEGER 2           | ftsmallint  | smallint    |
 | BOOLEAN            | INTEGER 2           | ftboolean   | wordbool    |
@@ -375,7 +376,7 @@ begin
     ft1:= ftinteger;
    end
    else begin
-    if str2 = 'LARGEINT' then begin
+    if (str2 = 'LARGEINT') or (str2 = 'BIGINT') then begin
      ft1:= ftlargeint;
     end
     else begin

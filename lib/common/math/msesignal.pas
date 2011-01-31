@@ -419,6 +419,8 @@ type
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure dosizechanged; override;
+   class function getitemclasstype: persistentclassty; override;
+               //used in dumpunitgroups
   public
    constructor create(const asigintf: isigclient); reintroduce;
    property items[const index: integer]: tdoubleinputconn read getitems; default;
@@ -2006,6 +2008,11 @@ procedure tdoubleinpconnarrayprop.dosizechanged;
 begin
  inherited;
  fsigintf.modelchange;
+end;
+
+class function tdoubleinpconnarrayprop.getitemclasstype: persistentclassty;
+begin
+ result:= tdoubleinputconn;
 end;
 
 { tdoubleoutconnarrayprop }

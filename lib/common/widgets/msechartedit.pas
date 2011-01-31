@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,7 +13,7 @@ interface
 uses
  classes,msechart,mseguiglob,mseevent,mseeditglob,msegraphutils,msetypes,
  mseobjectpicker,msepointer,msegraphics,mseclasses,msestat,msestatfile,
- msestrings,msedial;
+ msestrings,msedial,msegui,msemenus;
  
 const
  defaultsnapdist = 4;
@@ -258,7 +258,7 @@ type
    
 implementation
 uses
- msereal,msekeyboard,msedatalist,msegui,sysutils;
+ msereal,msekeyboard,msedatalist,sysutils;
  
 type
  ttraces1 = class(ttraces);
