@@ -1039,7 +1039,9 @@ begin
    if (fintf <> nil) then begin
     updatewidgetrect;
     inherited;
-    if fgrid.entered or (tcustomwidgetgrid(fgrid).fmouseinfopo <> nil) and 
+    if fgrid.entered or 
+              not (gs_cellexiting in tcustomwidgetgrid(fgrid).fstate) and
+              (tcustomwidgetgrid(fgrid).fmouseinfopo <> nil) and 
               tcustomwidgetgrid(fgrid).wantmousefocus(fmouseinfopo^) then begin
      widget1:= fintf.getwidget;
      with widget1 do begin
@@ -2276,6 +2278,7 @@ begin
   fgrid.setfocus;
  end
  else begin
+  fgrid.factivewidget.visible:= true;
   inherited;
  end;
 end;

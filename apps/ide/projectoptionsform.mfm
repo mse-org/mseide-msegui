@@ -7,6 +7,8 @@ object projectoptionsfo: tprojectoptionsfo
   bounds_cy = 567
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.color = -2147483645
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
   container.frame.framei_bottom = 0
   container.frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
   container.frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
@@ -40,9 +42,9 @@ object projectoptionsfo: tprojectoptionsfo
       frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
       frame.dummy = 0
       bounds_x = 0
-      bounds_y = 536
+      bounds_y = 537
       bounds_cx = 671
-      bounds_cy = 31
+      bounds_cy = 30
       anchors = [an_bottom]
       optionsscale = [osc_expandy, osc_shrinky]
       linktop = tabwidget
@@ -56,7 +58,7 @@ object projectoptionsfo: tprojectoptionsfo
         optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
         color = -2147483645
         bounds_x = 617
-        bounds_y = 6
+        bounds_y = 5
         bounds_cx = 49
         bounds_cy = 20
         state = [as_localcaption, as_localcolor]
@@ -69,7 +71,7 @@ object projectoptionsfo: tprojectoptionsfo
         color = -2147483645
         taborder = 1
         bounds_x = 563
-        bounds_y = 6
+        bounds_y = 5
         bounds_cx = 49
         bounds_cy = 20
         state = [as_default, as_localdefault, as_localcaption, as_localcolor]
@@ -91,7 +93,7 @@ object projectoptionsfo: tprojectoptionsfo
         )
         taborder = 2
         bounds_x = 5
-        bounds_y = 6
+        bounds_y = 5
         bounds_cx = 422
         anchors = [an_left, an_top, an_right]
         ondataentered = settingsdataent
@@ -113,14 +115,14 @@ object projectoptionsfo: tprojectoptionsfo
         optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
         taborder = 3
         bounds_x = 540
-        bounds_y = 6
+        bounds_y = 5
         bounds_cx = 18
         bounds_cy = 20
       end
       object loadbu: tbutton
         taborder = 4
         bounds_x = 432
-        bounds_y = 6
+        bounds_y = 5
         bounds_cx = 49
         bounds_cy = 20
         state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
@@ -130,7 +132,7 @@ object projectoptionsfo: tprojectoptionsfo
       object savebu: tbutton
         taborder = 5
         bounds_x = 486
-        bounds_y = 6
+        bounds_y = 5
         bounds_cx = 49
         bounds_cy = 20
         state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
@@ -143,7 +145,7 @@ object projectoptionsfo: tprojectoptionsfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 671
-      bounds_cy = 536
+      bounds_cy = 537
       color = -1879048187
       frame.levelo = -1
       frame.captionoffset = 3
@@ -152,7 +154,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 1
-      activepageindex = 2
+      activepageindex = 3
       tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
       tab_frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
       tab_color = -2147483645
@@ -161,6 +163,8 @@ object projectoptionsfo: tprojectoptionsfo
       reffontheight = 14
       object editorpage: ttabpage
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight]
+        frame.zoomwidthstep = 1
+        frame.zoomheightstep = 1
         frame.framei_bottom = 0
         frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
@@ -168,7 +172,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669
-        bounds_cy = 516
+        bounds_cy = 517
         anchors = [an_top]
         caption = '&Editor'
         reffontheight = 14
@@ -827,7 +831,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 299
           bounds_cx = 669
-          bounds_cy = 217
+          bounds_cy = 218
           bounds_cymin = 84
           anchors = [an_top, an_bottom]
           taborder = 7
@@ -839,6 +843,8 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage13: ttabpage
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             color = -2147483645
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             frame.framei_bottom = 0
             frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
@@ -847,7 +853,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 199
+            bounds_cy = 200
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'File filter'
             reffontheight = 14
@@ -868,7 +874,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 669
-              bounds_cy = 199
+              bounds_cy = 200
               anchors = []
               optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
               datacols.count = 2
@@ -910,13 +916,15 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage14: ttabpage
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             color = -2147483645
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 2
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 199
+            bounds_cy = 200
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Syntax definition files'
             reffontheight = 14
@@ -928,7 +936,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 669
-              bounds_cy = 199
+              bounds_cy = 200
               bounds_cymin = 60
               anchors = []
               optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
@@ -979,11 +987,13 @@ object projectoptionsfo: tprojectoptionsfo
             end
           end
           object ttabpage19: ttabpage
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             taborder = 3
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 199
+            bounds_cy = 200
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Code Templates'
             object twidgetgrid5: twidgetgrid
@@ -1001,7 +1011,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 669
-              bounds_cy = 264
+              bounds_cy = 265
               bounds_cymin = 40
               anchors = [an_top, an_bottom]
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
@@ -1105,6 +1115,8 @@ object projectoptionsfo: tprojectoptionsfo
       end
       object debuggerpage: ttabpage
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+        frame.zoomwidthstep = 1
+        frame.zoomheightstep = 1
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
@@ -1112,7 +1124,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669
-        bounds_cy = 516
+        bounds_cy = 517
         anchors = [an_left, an_top, an_right, an_bottom]
         caption = '&Debugger'
         onlayout = debuggeronchildscaled
@@ -1170,7 +1182,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 222
           bounds_cx = 669
-          bounds_cy = 293
+          bounds_cy = 294
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 3
           activepageindex = 0
@@ -1185,6 +1197,8 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage6: ttabpage
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             color = -2147483645
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 4
@@ -1192,7 +1206,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 275
+            bounds_cy = 276
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Source &directories'
             reffontheight = 14
@@ -1205,7 +1219,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 669
-              bounds_cy = 275
+              bounds_cy = 276
               bounds_cymin = 40
               anchors = []
               optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
@@ -1251,13 +1265,15 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage9: ttabpage
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             color = -2147483645
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 1
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 275
+            bounds_cy = 276
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Defi&nes'
             reffontheight = 14
@@ -1268,7 +1284,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 669
-              bounds_cy = 275
+              bounds_cy = 276
               anchors = []
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
               fixrows.count = 1
@@ -1341,13 +1357,15 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage7: ttabpage
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             color = -2147483645
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 3
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 275
+            bounds_cy = 276
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = '&Signals'
             reffontheight = 14
@@ -1360,7 +1378,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 669
-              bounds_cy = 275
+              bounds_cy = 276
               bounds_cymin = 40
               anchors = []
               optionsgrid = [og_colsizing, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_sorted, og_wrapcol, og_autopopup]
@@ -1500,13 +1518,15 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage8: ttabpage
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             color = -2147483645
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 2
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 275
+            bounds_cy = 276
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = '&Exceptions'
             reffontheight = 14
@@ -1517,7 +1537,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 669
-              bounds_cy = 275
+              bounds_cy = 276
               anchors = []
               optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
               fixrows.count = 1
@@ -1587,13 +1607,15 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage16: ttabpage
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             color = -2147483645
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 5
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 275
+            bounds_cy = 276
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = '&Target'
             reffontheight = 14
@@ -1719,6 +1741,8 @@ object projectoptionsfo: tprojectoptionsfo
                 reffontheight = 14
               end
               object tsplitter7: tsplitter
+                optionswidget = [ow_destroywidgets, ow_autoscale]
+                color = -1879048189
                 taborder = 1
                 visible = False
                 bounds_x = 319
@@ -1802,6 +1826,8 @@ object projectoptionsfo: tprojectoptionsfo
                 reffontheight = 14
               end
               object tsplitter8: tsplitter
+                optionswidget = [ow_destroywidgets, ow_autoscale]
+                color = -1879048189
                 taborder = 1
                 visible = False
                 bounds_x = 319
@@ -1870,10 +1896,11 @@ object projectoptionsfo: tprojectoptionsfo
                 bounds_cy = 37
                 anchors = [an_top, an_right]
                 value = 0
-                valuedefault = NegInf
+                valuedefault = -Inf
                 formatedit = '0.#'
                 formatdisp = '0.#sec'
                 valuerange = 1
+                valuestart = 0
                 min = 0
                 max = 10
                 reffontheight = 14
@@ -2208,6 +2235,8 @@ object projectoptionsfo: tprojectoptionsfo
           reffontheight = 14
         end
         object tsplitter6: tsplitter
+          optionswidget = [ow_destroywidgets, ow_autoscale]
+          color = -1879048189
           taborder = 6
           visible = False
           bounds_x = 351
@@ -2221,14 +2250,15 @@ object projectoptionsfo: tprojectoptionsfo
       end
       object makepage: ttabpage
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets]
+        frame.zoomwidthstep = 1
+        frame.zoomheightstep = 1
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 6
-        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669
-        bounds_cy = 516
+        bounds_cy = 517
         anchors = [an_top, an_bottom]
         caption = '&Make'
         onlayout = makepageonchildscaled
@@ -2462,7 +2492,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 187
           bounds_cx = 669
-          bounds_cy = 329
+          bounds_cy = 330
           anchors = [an_top, an_bottom]
           taborder = 11
           activepageindex = 1
@@ -2475,11 +2505,13 @@ object projectoptionsfo: tprojectoptionsfo
           statfile = statfile1
           reffontheight = 14
           object ttabpage17: ttabpage
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             taborder = 3
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 311
+            bounds_cy = 312
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Command before'
             object befcommandgrid: twidgetgrid
@@ -2491,7 +2523,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 669
-              bounds_cy = 311
+              bounds_cy = 312
               bounds_cymin = 40
               anchors = []
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
@@ -2665,6 +2697,8 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage12: ttabpage
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             color = -2147483645
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             face.localprops = [fal_frameimageoffset]
@@ -2674,7 +2708,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 311
+            bounds_cy = 312
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Make options'
             reffontheight = 14
@@ -2687,7 +2721,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 669
-              bounds_cy = 311
+              bounds_cy = 312
               bounds_cymin = 40
               anchors = []
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
@@ -2862,13 +2896,15 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage11: ttabpage
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             color = -2147483645
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 1
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 311
+            bounds_cy = 312
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Directories'
             reffontheight = 14
@@ -2887,7 +2923,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 47
               bounds_cx = 669
-              bounds_cy = 264
+              bounds_cy = 265
               bounds_cymin = 40
               anchors = [an_top, an_bottom]
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
@@ -3240,11 +3276,13 @@ object projectoptionsfo: tprojectoptionsfo
             end
           end
           object ttabpage18: ttabpage
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             taborder = 4
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 311
+            bounds_cy = 312
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'Command after'
             object aftcommandgrid: twidgetgrid
@@ -3256,7 +3294,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 669
-              bounds_cy = 311
+              bounds_cy = 312
               bounds_cymin = 40
               anchors = []
               optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
@@ -3476,6 +3514,8 @@ object projectoptionsfo: tprojectoptionsfo
           reffontheight = 14
         end
         object tsplitter1: tsplitter
+          optionswidget = [ow_destroywidgets, ow_autoscale]
+          color = -1879048189
           taborder = 12
           visible = False
           bounds_x = 263
@@ -3487,6 +3527,8 @@ object projectoptionsfo: tprojectoptionsfo
           linkright = makedir
         end
         object tsplitter2: tsplitter
+          optionswidget = [ow_destroywidgets, ow_autoscale]
+          color = -1879048189
           taborder = 13
           visible = False
           bounds_x = 263
@@ -3498,6 +3540,8 @@ object projectoptionsfo: tprojectoptionsfo
           linkright = targetfile
         end
         object tsplitter3: tsplitter
+          optionswidget = [ow_destroywidgets, ow_autoscale]
+          color = -1879048189
           taborder = 14
           visible = False
           bounds_x = 263
@@ -3508,6 +3552,8 @@ object projectoptionsfo: tprojectoptionsfo
           linkleft = messageoutputfile
         end
         object tsplitter4: tsplitter
+          optionswidget = [ow_destroywidgets, ow_autoscale]
+          color = -1879048189
           taborder = 16
           visible = False
           bounds_x = 503
@@ -3519,6 +3565,8 @@ object projectoptionsfo: tprojectoptionsfo
           linkright = targpref
         end
         object tsplitter5: tsplitter
+          optionswidget = [ow_destroywidgets, ow_autoscale]
+          color = -1879048189
           taborder = 17
           visible = False
           bounds_x = 503
@@ -3531,13 +3579,16 @@ object projectoptionsfo: tprojectoptionsfo
       end
       object ttabpage1: ttabpage
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+        frame.zoomwidthstep = 1
+        frame.zoomheightstep = 1
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 3
+        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669
-        bounds_cy = 516
+        bounds_cy = 517
         anchors = [an_left, an_top, an_right, an_bottom]
         caption = 'M&acros'
         onlayout = macronchildscaled
@@ -3550,7 +3601,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 124
           bounds_cx = 669
-          bounds_cy = 393
+          bounds_cy = 394
           bounds_cymin = 40
           anchors = [an_top, an_bottom]
           optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
@@ -3832,6 +3883,8 @@ object projectoptionsfo: tprojectoptionsfo
           end
         end
         object macrosplitter: tsplitter
+          optionswidget = [ow_destroywidgets, ow_autoscale]
+          color = -1879048189
           taborder = 2
           bounds_x = 0
           bounds_y = 121
@@ -3846,13 +3899,15 @@ object projectoptionsfo: tprojectoptionsfo
       end
       object fontaliaspage: ttabpage
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+        frame.zoomwidthstep = 1
+        frame.zoomheightstep = 1
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 2
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669
-        bounds_cy = 516
+        bounds_cy = 517
         anchors = [an_left, an_top, an_right, an_bottom]
         caption = '&Font Alias'
         object fontaliasgrid: twidgetgrid
@@ -3863,7 +3918,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 0
           bounds_cx = 669
-          bounds_cy = 516
+          bounds_cy = 517
           anchors = []
           optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
           fixrows.count = 1
@@ -4010,8 +4065,9 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cy = 16
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
             value = 1
-            valuedefault = NegInf
+            valuedefault = -Inf
             valuerange = 1
+            valuestart = 0
             min = 0
             max = 1E+038
             reffontheight = 14
@@ -4032,6 +4088,8 @@ object projectoptionsfo: tprojectoptionsfo
         end
       end
       object ttabpage10: ttabpage
+        frame.zoomwidthstep = 1
+        frame.zoomheightstep = 1
         frame.framei_bottom = 0
         frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
@@ -4039,7 +4097,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669
-        bounds_cy = 516
+        bounds_cy = 517
         anchors = [an_left, an_top, an_right, an_bottom]
         caption = 'User &Colors'
         object tlayouter7: tlayouter
@@ -4049,7 +4107,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.dummy = 0
           taborder = 1
           bounds_x = 0
-          bounds_y = 999
+          bounds_y = 1000
           bounds_cx = 669
           bounds_cy = 42
           anchors = [an_bottom]
@@ -4075,7 +4133,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 0
           bounds_cx = 669
-          bounds_cy = 516
+          bounds_cy = 517
           anchors = []
           optionsgrid = [og_rowmoving, og_keyrowmoving, og_focuscellonenter, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
           fixcols.count = 1
@@ -4183,13 +4241,15 @@ object projectoptionsfo: tprojectoptionsfo
         end
       end
       object ttabpage2: ttabpage
+        frame.zoomwidthstep = 1
+        frame.zoomheightstep = 1
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 1
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669
-        bounds_cy = 516
+        bounds_cy = 517
         anchors = [an_left, an_top, an_right, an_bottom]
         caption = '&Templates'
         object newfile: ttabwidget
@@ -4197,7 +4257,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 0
           bounds_cx = 669
-          bounds_cy = 516
+          bounds_cy = 517
           anchors = []
           activepageindex = 2
           tab_frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
@@ -4209,13 +4269,15 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage3: ttabpage
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             color = -2147483645
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 3
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 498
+            bounds_cy = 499
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'New Project'
             onlayout = newprojectchildscaled
@@ -4228,7 +4290,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 80
               bounds_cx = 669
-              bounds_cy = 416
+              bounds_cy = 417
               anchors = [an_top, an_bottom]
               optionsgrid = [og_colsizing, og_keycolmoving, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
               fixrows.count = 1
@@ -4403,13 +4465,15 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage4: ttabpage
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             color = -2147483645
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 2
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 498
+            bounds_cy = 499
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'New File'
             reffontheight = 14
@@ -4418,7 +4482,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 667
-              bounds_cy = 498
+              bounds_cy = 499
               anchors = [an_left, an_top, an_right, an_bottom]
               optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
               fixcols.count = 1
@@ -4542,6 +4606,8 @@ object projectoptionsfo: tprojectoptionsfo
           object ttabpage5: ttabpage
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             color = -2147483645
+            frame.zoomwidthstep = 1
+            frame.zoomheightstep = 1
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 1
@@ -4549,7 +4615,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
-            bounds_cy = 498
+            bounds_cy = 499
             anchors = [an_left, an_top, an_right, an_bottom]
             caption = 'New Form'
             onlayout = formtemplateonchildscaled
@@ -4559,7 +4625,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_x = -1
               bounds_y = 0
               bounds_cx = 667
-              bounds_cy = 497
+              bounds_cy = 498
               anchors = [an_left, an_top, an_right, an_bottom]
               optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_savestate, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
               fixcols.count = 1
@@ -4730,13 +4796,15 @@ object projectoptionsfo: tprojectoptionsfo
       end
       object ttabpage15: ttabpage
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        frame.zoomwidthstep = 1
+        frame.zoomheightstep = 1
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 8
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669
-        bounds_cy = 516
+        bounds_cy = 517
         anchors = [an_left, an_top, an_right, an_bottom]
         caption = 'Tools'
         reffontheight = 14
@@ -4747,7 +4815,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 0
           bounds_cx = 669
-          bounds_cy = 516
+          bounds_cy = 517
           anchors = []
           optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
           fixcols.count = 1

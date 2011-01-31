@@ -10225,10 +10225,10 @@ function tcustomgrid.focuscell(cell: gridcoordty;
    end;      
   end;
 
-var
- cells,celle: gridcoordty;
- rect1: gridrectty;
- int1: integer;
+ var
+  cells,celle: gridcoordty;
+  rect1: gridrectty;
+  int1: integer;
  
  begin //doselectaction
   beginupdate;
@@ -10343,7 +10343,7 @@ var
   finally
    endupdate(true);
   end;
- end;
+ end; //doselectaction()
 
 var
  focuscount: integer;
@@ -10533,11 +10533,14 @@ begin     //focuscell
       fdatacols.selected[makegridcoord(int1,-1)]:= false;
      end;
     end;
+    if gs_emptyrowremoved in fstate then begin
+     cell:= ffocusedcell;
+     selectaction:= fca_focusin;
+     doselectaction;
+    end;
    end
    else begin
     doselectaction;
-   end;
-   if selectaction <> fca_exitgrid then begin
     ffocusedcell:= cell;
    end;
    if bo1 then begin
