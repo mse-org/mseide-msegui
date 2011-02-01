@@ -2152,7 +2152,7 @@ var
  bo1: boolean;
   
 begin
- mstr2:= projecttemplatedir; //use macros of actual project
+ mstr2:= projecttemplatedir; //use macros of current project
  if openproject('') then begin
   gdb.closegdb;
   cleardebugdisp;

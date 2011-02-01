@@ -94,7 +94,7 @@ object projectoptionsfo: tprojectoptionsfo
         taborder = 2
         bounds_x = 5
         bounds_y = 5
-        bounds_cx = 422
+        bounds_cx = 368
         anchors = [an_left, an_top, an_right]
         ondataentered = settingsdataent
         controller.filterlist.data = (
@@ -138,6 +138,23 @@ object projectoptionsfo: tprojectoptionsfo
         state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
         caption = 'Save'
         onexecute = saveexe
+      end
+      object settingseditor: tbooleanedit
+        optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
+        frame.caption = 'Editor'
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          1
+          35
+          2
+        )
+        taborder = 6
+        hint = 'Load/Save editor settings also.'
+        bounds_x = 378
+        bounds_y = 8
+        bounds_cx = 49
+        bounds_cy = 16
       end
     end
     object tabwidget: ttabwidget

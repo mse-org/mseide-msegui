@@ -121,7 +121,7 @@ afterload=
 beforerun=
 defaultmake=1
 makeoptions=4
- -l -Mobjfpc -Sh
+ -l -Mobjfpc -Sh -Fcutf8
  -gl
  -B
  -OG2p3 -XX -CX -Xs
@@ -197,7 +197,7 @@ editfontextraspace=0
 editfontantialiased=1
 editmarkbrackets=1
 backupfilecount=2
-encoding=0
+encoding=1
 newprojectfiles=0
 newprojectfilesdest=0
 expandprojectfilemacros=0

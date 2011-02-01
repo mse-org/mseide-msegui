@@ -105,7 +105,7 @@ debugoptions=
 debugtarget=
 defaultmake=1
 makeoptions=4
- -l -Mobjfpc -Sh
+ -l -Mobjfpc -Sh -Fcutf8
  -gl -O-
  -B
  -O2 -XX -Xs -CX
@@ -184,7 +184,7 @@ editfontextraspace=0
 editfontantialiased=1
 editmarkbrackets=1
 backupfilecount=2
-encoding=0
+encoding=1
 newprojectfiles=4
  ${TEMPLATEDIR}default/project.pas
  ${TEMPLATEDIR}default/main.pas

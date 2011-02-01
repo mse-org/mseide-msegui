@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ uses
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
  msemenus,sysutils,mseglob,mseedit,db,msedialog,msescrollbar,msememodialog,
- msecodetemplates;
+ msecodetemplates,mseifiglob;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -164,6 +164,7 @@ type
    fexceptignore: booleanarty;
    fnogdbserverexit: boolean;
    fsettingsfile: filenamety;
+   fsettingseditor: boolean;
 //   fwindowlayoutfile: filenamety;
 //   fwindowlayouthistory: filenamearty;
    function limitgridsize(const avalue: integer): integer;
@@ -235,6 +236,7 @@ type
    property exceptignore: booleanarty read fexceptignore 
                                                  write fexceptignore;
    property settingsfile: filenamety read fsettingsfile write fsettingsfile;
+   property settingseditor: boolean read fsettingseditor write fsettingseditor;
    
 //   property windowlayoutfile: filenamety read fwindowlayoutfile 
 //                                                write fwindowlayoutfile;
@@ -537,6 +539,7 @@ type
    tsimplewidget1: tsimplewidget;
    loadbu: tbutton;
    savebu: tbutton;
+   settingseditor: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1124,7 +1127,7 @@ begin
   aftcommandon:= nil;
   
   makeoptions:= nil;
-  additem(makeoptions,'-l -Mobjfpc -Sh');
+  additem(makeoptions,'-l -Mobjfpc -Sh -Fcutf8');
   additem(makeoptions,'-gl');
   additem(makeoptions,'-B');
   additem(makeoptions,'-O2 -XX -CX -Xs');
@@ -2254,6 +2257,7 @@ end;
 type
  valuebufferty = record
   settingsfile: filenamety;
+  settingseditor: boolean;
   projectfilename: filenamety;
   projectdir: filenamety;
 
@@ -2293,6 +2297,7 @@ procedure savevalues(fo: tprojectoptionsfo; out buffer: valuebufferty);
 begin
  with buffer do begin
   settingsfile:= fo.settingsfile.value;
+  settingseditor:= fo.settingseditor.value;
   projectfilename:= projectoptions.projectfilename;
   projectdir:= projectoptions.projectdir;
 
@@ -2329,43 +2334,47 @@ begin
  end;
 end;
 
-procedure restorevalues(fo: tprojectoptionsfo; const buffer: valuebufferty);
+procedure restorevalues(fo: tprojectoptionsfo; const buffer: valuebufferty;
+                          const noeditor: boolean);
 begin
  with buffer do begin
   fo.settingsfile.value:= settingsfile;
+  fo.settingseditor.value:= settingseditor;
   projectoptions.projectfilename:= projectfilename;
   projectoptions.projectdir:= projectdir;
 
-  fo.showgrid.value:= showgrid;
-  fo.snaptogrid.value:= snaptogrid;
-  fo.moveonfirstclick.value:= moveonfirstclick;
-  fo.gridsizex.value:= gridsizex;
-  fo.gridsizey.value:= gridsizey;
-  fo.autoindent.value:= autoindent;
-  fo.blockindent.value:= blockindent;
-  fo.rightmarginon.value:= rightmarginon;
-  fo.rightmarginchars.value:= rightmarginchars;
-  fo.scrollheight.value:= scrollheight;
-  fo.tabstops.value:= tabstops;
-  fo.spacetabs.value:= spacetabs;
-  fo.tabindent.value:= tabindent;
-  fo.editfontname.value:= editfontname;
-  fo.editfontheight.value:= editfontheight;
-  fo.editfontwidth.value:= editfontwidth;
-  fo.editfontextraspace.value:= editfontextraspace;
-  fo.editfontcolor.value:= editfontcolor;
-  fo.editbkcolor.value:= editbkcolor;
-  fo.statementcolor.value:= statementcolor;
-  fo.editfontantialiased.value:= editfontantialiased;
-  fo.editmarkbrackets.value:= editmarkbrackets;
-  fo.backupfilecount.value:= backupfilecount;
-  fo.encoding.value:= encoding;
-  fo.codetemplatedirs.gridvalues:= codetemplatedirs;
-
-  fo.filefiltergrid[0].datalist.asarray:= sourcefilemasks;
-  fo.grid[0].datalist.asarray:= syntaxdeffiles;
-  fo.filefiltergrid[1].datalist.asarray:= filemasknames;
-  fo.grid[1].datalist.asarray:= filemasks;
+  if not noeditor then begin
+   fo.showgrid.value:= showgrid;
+   fo.snaptogrid.value:= snaptogrid;
+   fo.moveonfirstclick.value:= moveonfirstclick;
+   fo.gridsizex.value:= gridsizex;
+   fo.gridsizey.value:= gridsizey;
+   fo.autoindent.value:= autoindent;
+   fo.blockindent.value:= blockindent;
+   fo.rightmarginon.value:= rightmarginon;
+   fo.rightmarginchars.value:= rightmarginchars;
+   fo.scrollheight.value:= scrollheight;
+   fo.tabstops.value:= tabstops;
+   fo.spacetabs.value:= spacetabs;
+   fo.tabindent.value:= tabindent;
+   fo.editfontname.value:= editfontname;
+   fo.editfontheight.value:= editfontheight;
+   fo.editfontwidth.value:= editfontwidth;
+   fo.editfontextraspace.value:= editfontextraspace;
+   fo.editfontcolor.value:= editfontcolor;
+   fo.editbkcolor.value:= editbkcolor;
+   fo.statementcolor.value:= statementcolor;
+   fo.editfontantialiased.value:= editfontantialiased;
+   fo.editmarkbrackets.value:= editmarkbrackets;
+   fo.backupfilecount.value:= backupfilecount;
+   fo.encoding.value:= encoding;
+   fo.codetemplatedirs.gridvalues:= codetemplatedirs;
+ 
+   fo.filefiltergrid[0].datalist.asarray:= sourcefilemasks;
+   fo.grid[0].datalist.asarray:= syntaxdeffiles;
+   fo.filefiltergrid[1].datalist.asarray:= filemasknames;
+   fo.grid[1].datalist.asarray:= filemasks;
+  end;
  end;
  fo.fontondataentered(nil);
  fo.settingsdataent(nil);
@@ -2405,9 +2414,11 @@ var
  read1: tstatreader;
  buffer: valuebufferty;
  stream1: ttextstream;
+ bo1: boolean;
 begin
  if askyesno('Do you want to replace the settings by'+lineend+
               '"'+settingsfile.value+'"?','WARNING') then begin
+  bo1:= settingseditor.value;
   savevalues(self,buffer);
   savestat(stream1);
   try
@@ -2420,7 +2431,7 @@ begin
     read1.free;
    end;
    projectoptionstoform(self);
-   restorevalues(self,buffer);
+   restorevalues(self,buffer,bo1);
   finally
    restorestat(stream1);
   end;
@@ -2472,6 +2483,7 @@ begin
  moveonfirstclick:= true;
  gridsizex:= defaultgridsizex;
  gridsizey:= defaultgridsizey;
+ encoding:= 1; //utf8n
  autoindent:= true;
  blockindent:= 1;
  rightmarginon:= true;
