@@ -680,7 +680,7 @@ type
   published
    property master: tsigwavetable read fmaster write setmaster;
    property frequency: tdoubleinputconn read ffrequency write setfrequency;
-   property freqfact: tdoubleinputconn read ffrequfact write setfrequfact;
+   property frequfact: tdoubleinputconn read ffrequfact write setfrequfact;
    property phase: tdoubleinputconn read fphase write setphase;
    property amplitude: tdoubleinputconn read famplitude write setamplitude;
    property oninittable: siginbursteventty read foninittable write foninittable;

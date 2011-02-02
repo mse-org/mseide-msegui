@@ -99,8 +99,9 @@ type
  tsigfilter = class(tsigmultiinpout) //todo: speed optimized prewarp
   private
 //   finppo: pdouble;
-   fcutofffrequpo: pdouble;
-   fcutofffrequ: tdoubleinputconn;
+   ffrequencypo: pdouble;
+   ffrequfactpo: pdouble;
+   ffrequency: tdoubleinputconn;
    fqfactorpo: pdouble;
    famplitudepo: pdouble;
    fgain: double;
@@ -111,17 +112,19 @@ type
    fb2: double;
    fa1: double;
    fa2: double;
-   fcutoffbefore: double;
+   ffrequencybefore: double;
    fqfactorbefore: double;
    fqfactor: tdoubleinputconn;
    fkind: sigfilterkindty;
    foptions: sigfilteroptionsty;
    famplitude: tdoubleinputconn;
-   procedure setcutofffrequ(const avalue: tdoubleinputconn);
+   ffrequfact: tdoubleinputconn;
+   procedure setfrequency(const avalue: tdoubleinputconn);
    procedure setqfactor(const avalue: tdoubleinputconn);
    procedure setkind(const avalue: sigfilterkindty);
    procedure setoptions(const avalue: sigfilteroptionsty);
    procedure setamplitude(const avalue: tdoubleinputconn);
+   procedure setfrequfact(const avalue: tdoubleinputconn);
   protected
    procedure sighandlerlp1inv(const ainfo: psighandlerinfoty);
    procedure sighandlerlp1bi(const ainfo: psighandlerinfoty);
@@ -138,8 +141,9 @@ type
   public
    constructor create(aowner: tcomponent); override;
   published
-   property cutofffrequ: tdoubleinputconn read fcutofffrequ 
-                                                 write setcutofffrequ;   
+   property frequency: tdoubleinputconn read ffrequency 
+                                                 write setfrequency;   
+   property frequfact: tdoubleinputconn read ffrequfact write setfrequfact;
    property qfactor: tdoubleinputconn read fqfactor 
                                                  write setqfactor;   
    property amplitude: tdoubleinputconn read famplitude 
@@ -516,9 +520,12 @@ end;
 
 constructor tsigfilter.create(aowner: tcomponent);
 begin
- fcutofffrequ:= tdoubleinputconn.create(self,isigclient(self));
- fcutofffrequ.name:= 'cutofffrequ';
- fcutofffrequ.value:= 0.01;
+ ffrequency:= tdoubleinputconn.create(self,isigclient(self));
+ ffrequency.name:= 'frequeny';
+ ffrequency.value:= 0.01;
+ ffrequfact:= tdoubleinputconn.create(self,isigclient(self));
+ ffrequfact.name:= 'frequfact';
+ ffrequfact.value:= 1;
  fqfactor:= tdoubleinputconn.create(self,isigclient(self));
  fqfactor.name:= 'qfactor';
  fqfactor.value:= 1;
@@ -558,12 +565,13 @@ end;
 
 procedure tsigfilter.sighandlerlp1inv(const ainfo: psighandlerinfoty);
 var
- i,o: double;
+ i,o,do1: double;
  int1: integer;
 begin
- if fcutofffrequpo^ <> fcutoffbefore then begin
-  fcutoffbefore:= fcutofffrequpo^;
-  fb0:= 2*pi*fcutoffbefore;
+ do1:= ffrequencypo^*ffrequfactpo^;
+ if do1 <> ffrequencybefore then begin
+  ffrequencybefore:= do1;
+  fb0:= 2*pi*do1;
   fa1:= exp(-fb0);
  end;
  i:= 0;
@@ -581,9 +589,11 @@ var
  do1: double;
  int1: integer;
 begin
- if fcutofffrequpo^ <> fcutoffbefore then begin
-  fcutoffbefore:= fcutofffrequpo^;
-  do1:= 2*pi*fcutoffbefore;
+ do1:= ffrequencypo^*ffrequfactpo^;
+ if do1 <> ffrequencybefore then begin
+  ffrequencybefore:= do1;
+  ffrequencybefore:= do1;
+  do1:= 2*pi*do1;
   fb0:= do1/(do1+2);
   fb1:= fb0;
   fa1:= (do1-2)/(do1+2);
@@ -600,15 +610,15 @@ end;
 procedure tsigfilter.sighandlerlp2bi(const ainfo: psighandlerinfoty);
 var
  QfT_4,fT2_4,den: double;
- i,o: double;
+ i,o,do1: double;
  int1: integer;
 begin
- if fcutofffrequpo^ > 0 then begin
-  if (fqfactorpo^ <> fqfactorbefore) or 
-                              (fcutofffrequpo^ <> fcutoffbefore) then begin
-   fcutoffbefore:= fcutofffrequpo^;
+ do1:= ffrequencypo^*ffrequfactpo^;
+ if do1 > 0 then begin
+  if (fqfactorpo^ <> fqfactorbefore) or (do1 <> ffrequencybefore) then begin
+   ffrequencybefore:= do1;
    fqfactorbefore:= fqfactorpo^;
-   fT2_4:= fcutoffbefore*2*pi;        // fT
+   fT2_4:= do1*2*pi;        // fT
    if not (sfo_noprewarp in foptions) then begin
     fT2_4:= 2*tan(0.5*fT2_4);
    end;
@@ -640,14 +650,14 @@ end;
 
 procedure tsigfilter.sighandlerb2bi;
 var
- fT,QfT_4,fT2_4,den: double;
+ fT,QfT_4,fT2_4,den,do1: double;
 begin
- if fcutofffrequpo^ > 0 then begin
-  if ((fcutofffrequpo^ <> fcutoffbefore) or 
-                      (fqfactorpo^ <> fqfactorbefore)) then begin
-   fcutoffbefore:= fcutofffrequpo^;
+ do1:= ffrequencypo^*ffrequfactpo^;
+ if do1 > 0 then begin
+  if (fqfactorpo^ <> fqfactorbefore) or (do1 <> ffrequencybefore) then begin
+   ffrequencybefore:= do1;
    fqfactorbefore:= fqfactorpo^;
-   fT:= fcutoffbefore*2*pi;           // fT
+   fT:= do1*2*pi;           // fT
    if not (sfo_noprewarp in foptions) then begin
     fT:= 2*tan(0.5*fT);
    end;
@@ -704,30 +714,32 @@ end;
 procedure tsigfilter.clear;
 begin
  inherited;
- fcutoffbefore:= -1;
+ ffrequencybefore:= -1;
  fqfactorbefore:= -1;
 end;
 
 procedure tsigfilter.initmodel;
 begin
 // finppo:= @tdoubleinputconn1(finput).fvalue;
- fcutofffrequpo:= @tdoubleinputconn1(fcutofffrequ).fvalue;
+ ffrequencypo:= @tdoubleinputconn1(ffrequency).fvalue;
+ ffrequfactpo:= @tdoubleinputconn1(ffrequfact).fvalue;
  fqfactorpo:= @tdoubleinputconn1(fqfactor).fvalue;
  famplitudepo:= @tdoubleinputconn1(famplitude).fvalue;
  inherited;
 end;
 
-procedure tsigfilter.setcutofffrequ(const avalue: tdoubleinputconn);
+procedure tsigfilter.setfrequency(const avalue: tdoubleinputconn);
 begin
- fcutofffrequ.assign(avalue);
+ ffrequency.assign(avalue);
 end;
 
 function tsigfilter.getinputar: inputconnarty;
 begin
- setlength(result,3);
- result[0]:= fcutofffrequ;
- result[1]:= fqfactor;
- result[2]:= famplitude;
+ setlength(result,4);
+ result[0]:= ffrequency;
+ result[1]:= ffrequfact;
+ result[2]:= fqfactor;
+ result[3]:= famplitude;
  stackarray(pointerarty(inherited getinputar),pointerarty(result));
 end;
 
@@ -759,6 +771,11 @@ end;
 procedure tsigfilter.setamplitude(const avalue: tdoubleinputconn);
 begin
  famplitude.assign(avalue);
+end;
+
+procedure tsigfilter.setfrequfact(const avalue: tdoubleinputconn);
+begin
+ ffrequfact.assign(avalue);
 end;
 
 end.
