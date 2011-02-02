@@ -554,7 +554,7 @@ type
    procedure clear; override;
  end;
 
- tsigdelayn = class(tsigadd)
+ tcustomsigdelay = class(tsigadd)
   private
    fdelay: integer;
    finppo: integer;
@@ -566,13 +566,38 @@ type
     //isigclient
    function gethandler: sighandlerprocty; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
+
+   property delay: integer read fdelay write setdelay default 1;
   public
    constructor create(aowner: tcomponent); override;
    procedure clear; override;
-  published
-   property delay: integer read fdelay write setdelay default 1;
  end;
-  
+ 
+ tsigdelayn = class(tcustomsigdelay)
+  published
+   property delay;
+ end;
+ 
+ tsigdelayvar = class(tcustomsigdelay)
+  private
+   fdelayinp: tdoubleinputconn;
+   fdelayinppo: pdouble;
+   function getdelaymax: integer;
+   procedure setdelaymax(const avalue: integer);
+   procedure setdelayinp(const avalue: tdoubleinputconn);
+  protected
+   function getinputar: inputconnarty; override;
+   procedure initmodel; override;
+    //isigclient
+   function gethandler: sighandlerprocty; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property delaymax: integer read getdelaymax write setdelaymax default 1;
+   property delay: tdoubleinputconn read fdelayinp write setdelayinp;
+ end;
+ 
  tdoublesigoutcomp = class(tdoublesigcomp)
   private
    foutput: tdoubleoutputconn;
@@ -2093,41 +2118,112 @@ begin
  fz:= 0;
 end;
 
-{ tsigdelayn }
+{ tcustomsigdelay }
 
-constructor tsigdelayn.create(aowner: tcomponent);
+constructor tcustomsigdelay.create(aowner: tcomponent);
 begin
  fdelay:= 1;
  inherited;
 end;
 
-procedure tsigdelayn.initmodel;
+procedure tcustomsigdelay.initmodel;
 begin
  inherited;
  finppo:= 0;
  setlength(fz,fdelay);
 end;
 
-procedure tsigdelayn.clear;
+procedure tcustomsigdelay.clear;
 begin
  inherited;
  fillchar(fz[0],sizeof(fz[0])*length(fz),0);
 end;
 
-function tsigdelayn.getzcount: integer;
+function tcustomsigdelay.getzcount: integer;
 begin
  result:= fdelay;
 end;
 
-function tsigdelayn.gethandler: sighandlerprocty;
+function tcustomsigdelay.gethandler: sighandlerprocty;
 begin
  result:= {$ifdef FPC}@{$endif}sighandler;
 end;
 
-procedure tsigdelayn.sighandler(const ainfo: psighandlerinfoty);
+procedure tcustomsigdelay.sighandler(const ainfo: psighandlerinfoty);
 var
  int1: integer;
  po1: pdouble;
+begin
+ if fdelay = 0 then begin
+  ainfo^.dest^:= 0;
+  for int1:= 0 to finphigh do begin
+   ainfo^.dest^:= ainfo^.dest^ + finps[int1]^;
+  end;
+ end
+ else begin
+  po1:= @fz[finppo];
+  ainfo^.dest^:= po1^;
+  po1^:= 0;
+  for int1:= 0 to finphigh do begin
+   po1^:= po1^ + finps[int1]^;
+  end;
+  inc(finppo);
+  if finppo = fdelay then begin
+   finppo:= 0;
+  end;
+ end;
+end;
+
+procedure tcustomsigdelay.setdelay(const avalue: integer);
+begin
+ if fdelay <> avalue then begin
+  lock;
+  modelchange;
+  fdelay:= avalue;
+  unlock;
+ end;
+end;
+
+{ tsigdelayvar }
+
+constructor tsigdelayvar.create(aowner: tcomponent);
+begin
+ inherited;
+ fdelayinp:= tdoubleinputconn.create(self,isigclient(self));
+end;
+
+function tsigdelayvar.getdelaymax: integer;
+begin
+ result:= inherited delay;
+end;
+
+procedure tsigdelayvar.setdelaymax(const avalue: integer);
+begin
+ inherited  delay:= avalue;
+end;
+
+procedure tsigdelayvar.setdelayinp(const avalue: tdoubleinputconn);
+begin
+ fdelayinp.assign(avalue);
+end;
+
+function tsigdelayvar.getinputar: inputconnarty;
+begin
+ result:= inherited getinputar;
+ setlength(result,high(result)+2);
+ result[high(result)]:= fdelayinp;
+end;
+
+function tsigdelayvar.gethandler: sighandlerprocty;
+begin
+ result:= @sighandler;
+end;
+
+procedure tsigdelayvar.sighandler(const ainfo: psighandlerinfoty);
+var
+ int1,int2: integer;
+ po1: pdouble;
+ do1: double;
 begin
  if fdelay = 0 then begin
   ainfo^.dest^:= 0;
@@ -2141,6 +2237,25 @@ begin
   for int1:= 0 to finphigh do begin
    po1^:= po1^ + finps[int1]^;
   end;
+  do1:= fdelayinppo^;
+  if do1 < 0 then begin
+   do1:= 0;
+  end;
+  if do1 >= fdelay then begin
+   do1:= fdelay;
+  end;
+  int1:= finppo-trunc(do1);
+  if int1 < 0 then begin
+   int1:= int1 + fdelay;
+  end;
+  if int1 = 0 then begin
+   int2:= fdelay-1;
+  end
+  else begin
+   int2:= int1-1;
+  end;
+  do1:= frac(do1);
+  ainfo^.dest^:= fz[int1]*(1-do1) + fz[int2]*do1;
   inc(finppo);
   if finppo = fdelay then begin
    finppo:= 0;
@@ -2148,15 +2263,13 @@ begin
  end;
 end;
 
-procedure tsigdelayn.setdelay(const avalue: integer);
+procedure tsigdelayvar.initmodel;
 begin
- if fdelay <> avalue then begin
-  lock;
-  modelchange;
-  fdelay:= avalue;
-  unlock;
- end;
+ fdelayinppo:= @fdelayinp.value;
+ inherited;
 end;
+
+{ tsigdelayvar }
 
 { tsigmult }
 {

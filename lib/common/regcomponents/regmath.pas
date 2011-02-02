@@ -49,7 +49,7 @@ begin
  registercomponents('Math',[tsigcontroller,tsigout,tsigin,
                             tsigconnector,ttrigconnector,
                             tsigadd,tsigmult,
-                            tsigdelay,tsigdelayn,tsigfir,tsigiir,tsigfilter,
+                            tsigdelay,tsigdelayn,tsigdelayvar,tsigfir,tsigiir,tsigfilter,
                             tsigwavetable,tsignoise,tsigfuncttable,tsigenvelope,
                             tsigsampler,tsigscope,tsigscopefft,
                             tsigfft,tfft,tsigsamplerfft,
