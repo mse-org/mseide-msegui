@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -92,7 +92,7 @@ type
  end;
 
  sigfilterkindty = (sfk_lp1bilinear,sfk_lp1impulseinvariant,
-                    sfk_lp2bilinear,sfk_bp2bilinear);
+                    sfk_lp2bilinear,sfk_bp2bilinear,sfk_bs2bilinear);
  sigfilteroptionty = (sfo_passgainfix,sfo_noprewarp);
  sigfilteroptionsty = set of sigfilteroptionty;
  
@@ -126,7 +126,9 @@ type
    procedure sighandlerlp1inv(const ainfo: psighandlerinfoty);
    procedure sighandlerlp1bi(const ainfo: psighandlerinfoty);
    procedure sighandlerlp2bi(const ainfo: psighandlerinfoty);
+   procedure sighandlerb2bi;
    procedure sighandlerbp2bi(const ainfo: psighandlerinfoty);
+   procedure sighandlerbs2bi(const ainfo: psighandlerinfoty);
    
     //isigclient
    function getinputar: inputconnarty; override;
@@ -538,6 +540,9 @@ begin
   sfk_bp2bilinear: begin
    result:= @sighandlerbp2bi;
   end;
+  sfk_bs2bilinear: begin
+   result:= @sighandlerbs2bi;
+  end;
   else begin //sfk_lp1bilinear
    result:= @sighandlerlp1bi;
   end;
@@ -633,11 +638,9 @@ begin
  end;
 end;
 
-procedure tsigfilter.sighandlerbp2bi(const ainfo: psighandlerinfoty);
+procedure tsigfilter.sighandlerb2bi;
 var
  fT,QfT_4,fT2_4,den: double;
- i,o: double;
- int1: integer;
 begin
  if fcutofffrequpo^ > 0 then begin
   if ((fcutofffrequpo^ <> fcutoffbefore) or 
@@ -648,7 +651,7 @@ begin
    if not (sfo_noprewarp in foptions) then begin
     fT:= 2*tan(0.5*fT);
    end;
-   if sfo_passgainfix in foptions then begin
+   if (sfo_passgainfix in foptions) or (fkind = sfk_bs2bilinear) then begin
     fgain:= 4/(fT*fqfactorbefore);
    end
    else begin
@@ -664,6 +667,14 @@ begin
    fa2:= (1-QfT_4+fT2_4)/den;
   end;
  end;
+end;
+
+procedure tsigfilter.sighandlerbp2bi(const ainfo: psighandlerinfoty);
+var
+ i,o: double;
+ int1: integer;
+begin
+ sighandlerb2bi;
  i:= 0;
  for int1:= 0 to finphigh do begin
   i:= i+finps[int1]^;
@@ -672,6 +683,22 @@ begin
  fz1:= fz2-o*fa1+i*fb1;
  fz2:= i*fb2-o*fa2;
  ainfo^.dest^:= o*famplitudepo^;
+end;
+
+procedure tsigfilter.sighandlerbs2bi(const ainfo: psighandlerinfoty);
+var
+ i,o: double;
+ int1: integer;
+begin
+ sighandlerb2bi;
+ i:= 0;
+ for int1:= 0 to finphigh do begin
+  i:= i+finps[int1]^;
+ end;
+ o:= fz1+i*fb0;
+ fz1:= fz2-o*fa1+i*fb1;
+ fz2:= i*fb2-o*fa2;
+ ainfo^.dest^:= (i-o)*famplitudepo^;
 end;
 
 procedure tsigfilter.clear;

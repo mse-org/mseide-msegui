@@ -463,7 +463,7 @@ type
  samplerbufferfulleventty = procedure(const sender: tsigsampler;
                               const abuffer: samplerbufferty) of object;
 
- sigsampleroptionty = (sso_negtrig,
+ sigsampleroptionty = (sso_negtrig,sso_autorun,
                        sso_fftmag); //used by tsigsamplerfft
  sigsampleroptionsty = set of sigsampleroptionty;
 
@@ -498,6 +498,7 @@ type
    procedure dotriggerchange(const sender: tobject);
    procedure dobufferfull; virtual;
    procedure loaded; override;
+   procedure checkautostart;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -4150,10 +4151,10 @@ var
 begin
  if not frunning and fstarted then begin
   if fnegtrig then begin
-   do1:= ftrigger.value-ftriggerlevel.value;
+   do1:= ftriggerlevel.value-ftrigger.value;
   end
   else begin
-   do1:= ftriggerlevel.value-ftrigger.value;
+   do1:= ftrigger.value-ftriggerlevel.value;
   end;
   if do1 >= 0 then begin
 //   if do1 = 0 then begin
@@ -4177,6 +4178,7 @@ begin
   if fbufpo = fbufferlength then begin
    frunning:= false;
    dobufferfull;
+   checkautostart;
   end;
  end
  else begin
@@ -4241,7 +4243,7 @@ begin
  lock;
  fstarted:= true;
  frunning:= false;
- fpretrigger:= false;
+ fpretrigger:= sso_autorun in foptions;
  unlock;
 end;
 
@@ -4260,12 +4262,26 @@ begin
  stackarray(pointerarty(inherited getinputar),pointerarty(result));
 end;
 
+procedure tsigsampler.checkautostart;
+begin
+ if (sso_autorun in foptions) and (frefreshus < 0) and 
+              (componentstate * [csloading,csdesigning] = []) then begin
+  start;
+ end;
+end;
+
 procedure tsigsampler.setoptions(const avalue: sigsampleroptionsty);
+var
+ optionsbefore: sigsampleroptionsty;
 begin
  if foptions <> avalue then begin
+  optionsbefore:= foptions;
   foptions:= avalue;
   updateoptions(foptions);
   fnegtrig:= sso_negtrig in foptions;
+  if not (sso_autorun in optionsbefore) then begin
+   checkautostart;
+  end;
  end;
 end;
 
@@ -4275,6 +4291,7 @@ begin
   frefreshus:= avalue;
   if avalue < 0 then begin
    ftimer.enabled:= false;
+   checkautostart;
   end
   else begin
    ftimer.interval:= avalue;
@@ -4300,8 +4317,13 @@ end;
 procedure tsigsampler.loaded;
 begin
  inherited;
- if (frefreshus >= 0) and not (csdesigning in componentstate) then begin
-  ftimer.enabled:= true;
+ if not (csdesigning in componentstate) then begin
+  if (frefreshus >= 0)  then begin
+   ftimer.enabled:= true;
+  end
+  else begin
+   checkautostart;
+  end;
  end;
 end;
 

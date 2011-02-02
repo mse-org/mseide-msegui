@@ -46,6 +46,7 @@ function applyrange(const avalue: realty; const arange: real;
 function reapplyrange(const avalue: realty; const arange: real;
                                        const astart: real): realty;
 function valuescaletorange(const reader: treader): real;
+function expscale(const value: real; const min: real; const max: real): real;
 
 implementation
 uses
@@ -57,6 +58,15 @@ const
 {$else}
  co1: array[0..7] of byte = ($0,0,0,0,0,0,$f0,$ff);      //- inf
 {$endif}
+
+function expscale(const value: real; const min: real; const max: real): real;
+var
+ mi,ma: real;
+begin
+ mi:= ln(min);
+ ma:= ln(max);
+ result:= exp(value*(ma-mi)+mi);
+end;
 
 function applyrange(const avalue: realty; const arange: real;
                                             const astart: real): realty;
