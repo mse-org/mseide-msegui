@@ -60,7 +60,7 @@ type
    function getmonochrome: boolean;
   public
    constructor create(aowner: tcomponent); override;
-   procedure beginprint(const adryrun: boolean = false);
+   procedure beginprint(const adryrun: boolean = false); override;
    procedure endprint; override;
  end;
 
@@ -349,6 +349,7 @@ end;
 {$else}
 procedure tcustomgdiprinter.beginprint(const adryrun: boolean = false);
 begin
+ inherited;
  checkgdiprint;
 end;
 

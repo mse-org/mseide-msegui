@@ -154,6 +154,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    
+   procedure beginprint(const adryrun: boolean = false); virtual;
    procedure endprint; virtual;
    property canvas: tprintercanvas read fcanvas write setcanvas;
    property onpagestart: printereventty read fonpagestart write fonpagestart;
@@ -713,6 +714,11 @@ end;
 function tcustomprinter.getsize: sizety;
 begin
  result:= fcanvas.fdrawinfo.gc.paintdevicesize;
+end;
+
+procedure tcustomprinter.beginprint(const adryrun: boolean = false);
+begin
+ //dummy
 end;
 
 procedure tcustomprinter.endprint;

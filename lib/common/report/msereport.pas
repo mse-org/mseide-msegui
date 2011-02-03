@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -6187,12 +6187,7 @@ begin
       end;
      end;
      if rs_endpass in fstate then begin
-      if fprinter is tcustomgdiprinter then begin
-       with tcustomgdiprinter(fprinter) do begin
-        beginprint(false);
-       end;
-      end
-      else begin
+      if fprinter is tstreamprinter then begin
        with tstreamprinter(fprinter) do begin
         if fstreamset then begin
          stream1:= fstream;
@@ -6203,18 +6198,21 @@ begin
          beginprint(fcommand,str1);
         end;
        end;
+      end
+      else begin
+       with fprinter do begin
+        beginprint(false);
+       end;
       end;
      end
      else begin
-      if fprinter is tcustomgdiprinter then begin
-       with tcustomgdiprinter(fprinter) do begin
-        beginprint(true);
-       end;
-      end
-      else begin
+      if fprinter is tstreamprinter then begin
        with tstreamprinter(fprinter) do begin
         beginprint(nil,str1);
        end;
+      end
+      else begin
+       fprinter.beginprint(true);
       end;
      end;
     end;   
