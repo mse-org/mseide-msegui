@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -637,6 +637,7 @@ type
    function createfont: tcanvasfont; virtual;
    procedure drawfontline(const startpoint,endpoint: pointty); 
                            //draws line with font color 
+   procedure nextpage; virtual; //used by tcustomprintercanvas
   public
    drawinfopo: pointer; //used to transport additional drawing information
    constructor create(const user: tobject; const intf: icanvas);
@@ -4391,6 +4392,11 @@ begin
  drawline(startpoint,endpoint,font.color);
  linewidth:= linewidthbefore;
  capstyle:= capstylebefore;
+end;
+
+procedure tcanvas.nextpage; //used by tcustomprintercanvas
+begin
+ //dummy
 end;
 
 procedure tcanvas.drawstring(const atext: msestring; const apos: pointty;

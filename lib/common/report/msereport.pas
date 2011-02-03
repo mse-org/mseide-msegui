@@ -1724,6 +1724,7 @@ type
  twindow1 = class(twindow);
  tmsecomponent1 = class(tmsecomponent);
  tdataset1 = class(tdataset);
+ tcanvas1 = class(tcanvas);
 
 function checkdashes(const avalue: string): string;
 var
@@ -5425,14 +5426,14 @@ begin
   end;
   exclude(fstate,rpps_backgroundrendered);
   acanvas.reset;
-  if acanvas is tprintercanvas then begin
+  if acanvas is tcustomprintercanvas then begin
    if fprintorientation = rpo_default then begin
     orient1:= freport.fdefaultprintorientation;
    end
    else begin
     orient1:= pageorientationty(pred(fprintorientation));
    end;
-   tprintercanvas(acanvas).printorientation:= orient1;
+   tcustomprintercanvas(acanvas).printorientation:= orient1;
   end;
   acanvas.intersectcliprect(makerect(nullpoint,fwidgetrect.size));
   updatevisible;
@@ -6534,9 +6535,12 @@ end;
 
 procedure tcustomreport.nextpage(const acanvas: tcanvas);
 begin
+ tcanvas1(acanvas).nextpage;
+{
  if acanvas is tcustomprintercanvas then begin
   tcustomprintercanvas(acanvas).nextpage;
  end;
+}
 end;
 
 function tcustomreport.getcanceled: boolean;
