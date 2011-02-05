@@ -10,7 +10,7 @@
 
 //
 // todo: optimize for realtime, remove the OOP approach where
-// it degrades performance.
+// it degrades performance, use SSE.
 //
 
 unit msesignal;

@@ -24,6 +24,11 @@ type
  filechangety = (fc_name,fc_attributes,fc_modtime,fc_accesstime,fc_ctime,
             fc_size,fc_removed,fc_direntries);
  filechangesty = set of filechangety;
+ checkfileeventty = procedure (const sender: tobject;
+                                    const streaminfo: dirstreaminfoty;
+                                    const fileinfo: fileinfoty;
+                                    var accept: boolean) of object;
+                                     //default true
 
 const
  sortflags: filelistoptionsty = [flo_sortname,flo_sorttime,flo_sortsize];
@@ -51,12 +56,16 @@ type
    procedure adddirectory(const directoryname: filenamety;
         ainfolevel: fileinfolevelty = fil_name; const amask: filenamearty = nil;
         const aincludeattrib: fileattributesty = [fa_all];
-        const aexcludeattrib: fileattributesty = []); overload;
+        const aexcludeattrib: fileattributesty = [];
+        const aoptions: dirstreamoptionsty = [];
+        const acheckproc: checkfileeventty = nil); overload;
         //amask = nil -> all,
    procedure adddirectory(const directoryname: filenamety;
         ainfolevel: fileinfolevelty; const amask: filenamety;
         const aincludeattrib: fileattributesty = [fa_all];
-        const aexcludeattrib: fileattributesty = []); overload;
+        const aexcludeattrib: fileattributesty = [];
+        const aoptions: dirstreamoptionsty = [];
+        const acheckproc: checkfileeventty = nil); overload;
         //amask = '' -> all,
    function itempo(const index: integer): pfileinfoty;
     //invalid after capacity change!
@@ -113,11 +122,14 @@ procedure splitfilepath(const path: filenamety;
                             out directory,filename,fileext: filenamety); overload;
 function splitrootpath(const path: filenamety): filenamearty;
 function mergerootpath(const segments: filenamearty): filenamety;
+
 function checkfilename(const filename,mask: filenamety;
                           casesensitive: boolean = false): boolean; overload;
           //true if filename fits mask, maskchars: '*','?'
 function checkfilename(const filename: filenamety; const mask: filenamearty;
                           casesensitive: boolean = false): boolean; overload;
+function checkfilename(const filename: filenamety; 
+                        const dirstream: dirstreamty): boolean; overload;
 function hasmaskchars(const filename: filenamety): boolean;
 function issamefilename(const a,b: filenamety): boolean;
 
@@ -196,7 +208,8 @@ function getcurrentdir: filenamety;
 procedure setcurrentdir(const path: filenamety);
 
 procedure clearfileinfo(var info: fileinfoty);
-procedure initdirfileinfo(var info: fileinfoty; const aname: filenamety; open: boolean = false);
+procedure initdirfileinfo(var info: fileinfoty; const aname: filenamety;
+                                                        open: boolean = false);
 function getfileinfo(const path: filenamety; var info: fileinfoty): boolean;
                   //false if not found
 function getfilemodtime(const path: filenamety): tdatetime; 
@@ -543,6 +556,40 @@ begin
  end;
 end;
 
+function checkfilename(const filename: filenamety; 
+                        const dirstream: dirstreamty): boolean;
+                          //mask must be uppercase if case sensitive
+var
+ str1,str2: msestring;
+ int1: integer;
+begin
+ with dirstream,dirinfo do begin
+  if mask = nil then begin
+   result:= true;
+  end
+  else begin
+   result:= false;
+   if caseinsensitive then begin
+    str1:= mseuppercase(filename);
+    for int1:= 0 to high(mask) do begin
+     if internalcheckfilename(str1,mask[int1]) then begin
+      result:= true;
+      break;
+     end;
+    end;
+   end
+   else begin
+    for int1:= 0 to high(mask) do begin
+     if internalcheckfilename(filename,mask[int1]) then begin
+      result:= true;
+      break;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
 function hasmaskchars(const filename: filenamety): boolean;
 begin
  if msestrscan(pmsechar(filename),msechar('*')) = nil then begin
@@ -596,7 +643,7 @@ begin
   ar1:= splitrootpath(adirname);
   for int1:= 0 to high(ar1) do begin
    if hasmaskchars(ar1[int1]) then begin
-    with dirstream do begin
+    with dirstream,dirinfo do begin
      if int1 > 0 then begin
       dirname:= mergerootpath(copy(ar1,0,int1));
      end
@@ -646,7 +693,7 @@ begin
   end;
  end
  else begin
-  with dirstream do begin
+  with dirstream,dirinfo do begin
    dirname:= filepath(adirname,fk_file);
    if afilename <> '' then begin
     setlength(mask,1);
@@ -712,7 +759,7 @@ begin
   ar1:= splitrootpath(adirname);
   for int1:= 0 to high(ar1) do begin
    if hasmaskchars(ar1[int1]) then begin
-    with dirstream do begin
+    with dirstream,dirinfo do begin
      if int1 > 0 then begin
       dirname:= mergerootpath(copy(ar1,0,int1));
      end
@@ -753,7 +800,7 @@ begin
   end;
  end
  else begin
-  with dirstream do begin
+  with dirstream,dirinfo do begin
    dirname:= filepath(adirname,fk_file);
    if afilename <> '' then begin
     setlength(mask,1);
@@ -812,7 +859,7 @@ var
 begin
  result:= false;
  fillchar(dirstream,sizeof(dirstream),0);
- with dirstream do begin
+ with dirstream,dirinfo do begin
   dirname:= filepath(adirname,fk_file);
   include:= ainclude;
   exclude:= aexclude;
@@ -1577,22 +1624,25 @@ end;
 procedure tcustomfiledatalist.adddirectory(const directoryname: filenamety;
         ainfolevel: fileinfolevelty = fil_name; const amask: filenamearty = nil;
         const aincludeattrib: fileattributesty = [fa_all];
-        const aexcludeattrib: fileattributesty = []);
+        const aexcludeattrib: fileattributesty = [];
+        const aoptions: dirstreamoptionsty = [];
+        const acheckproc: checkfileeventty = nil);
         //amask = '' -> all,
 var
  dirstream: dirstreamty;
  info: fileinfoty;
- bo1: boolean;
+ bo1,bo2: boolean;
 begin
  fillchar(dirstream,sizeof(dirstream),0);
- with dirstream do begin
+ with dirstream,dirinfo do begin
+  options:= aoptions;
   dirname:= unquotefilename(filepath(directoryname,fk_file));
   mask:= amask;
   include:= aincludeattrib;
   exclude:= aexcludeattrib;
   infolevel:= ainfolevel;
  end;
- syserror(sys_opendirstream(dirstream),'"'+dirstream.dirname + '" ');
+ syserror(sys_opendirstream(dirstream),'"'+dirstream.dirinfo.dirname + '" ');
  beginupdate;
  try
   finalize(info);
@@ -1602,7 +1652,13 @@ begin
    if bo1 then begin
     if not ((info.extinfo1.filetype = ft_dir) and ((info.name = '.') or
                  (info.name = '..'))) then begin
-     add(info);
+     bo2:= true;
+     if assigned(acheckproc) then begin
+      acheckproc(self,dirstream.dirinfo,info,bo2);
+     end;
+     if bo2 then begin
+      add(info);
+     end;
     end;
    end;
   until not bo1;
@@ -1615,13 +1671,16 @@ end;
 procedure tcustomfiledatalist.adddirectory(const directoryname: filenamety;
         ainfolevel: fileinfolevelty; const amask: filenamety;
         const aincludeattrib: fileattributesty = [fa_all];
-        const aexcludeattrib: fileattributesty = []);
+        const aexcludeattrib: fileattributesty = [];
+        const aoptions: dirstreamoptionsty = [];
+        const acheckproc: checkfileeventty = nil);
         //amask = '' -> all
 var
  ar1: filenamearty;
 begin
  unquotefilename(amask,ar1);
- adddirectory(directoryname,ainfolevel,ar1,aincludeattrib,aexcludeattrib);
+ adddirectory(directoryname,ainfolevel,ar1,
+                          aincludeattrib,aexcludeattrib,aoptions,acheckproc);
 end;
 
 function tcustomfiledatalist.itempo(const index: integer): pfileinfoty;

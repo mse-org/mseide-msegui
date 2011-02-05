@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -87,18 +87,6 @@ type
  fileattributesty = set of fileattributety;
   
 type
- fileinfolevelty = (fil_name,fil_type, //fa_dir and fa_hidden
-                    fil_ext1,fil_ext2);
-
- dirstreampty = array[0..7] of longword;
- dirstreamty = record
-  infolevel: fileinfolevelty;
-  dirname: filenamety;
-  mask: filenamearty;
-  include,exclude: fileattributesty;
-  platformdata: dirstreampty;
- end;
-
  ext1fileinfoty = record
   filetype: filetypety;
   attributes: fileattributesty;
@@ -125,6 +113,29 @@ type
   extinfo2: ext2fileinfoty;
  end;
  pfileinfoty = ^fileinfoty;
+
+ fileinfolevelty = (fil_name,fil_type, //fa_dir and fa_hidden
+                    fil_ext1,fil_ext2);
+ dirstreamoptionty = (dso_casesensitive,dso_caseinsensitive);
+                             //platform default if empty,
+                             // same layout as filelistviewoptionty
+ dirstreamoptionsty = set of dirstreamoptionty;
+
+ dirstreaminfoty = record
+  dirname: filenamety;
+  mask: filenamearty;
+  include,exclude: fileattributesty;
+  infolevel: fileinfolevelty;
+  options: dirstreamoptionsty;
+  caseinsensitive: boolean;
+ end;
+
+ dirstreampty = array[0..7] of longword;
+ dirstreamty = record
+//  checkcallback: dirstreamcheckeventty;
+  dirinfo: dirstreaminfoty;
+  platformdata: dirstreampty;
+ end;
 
  syserrorty = (sye_ok,sye_lasterror,sye_extendederror,sye_busy,sye_dirstream,
                 sye_network,
@@ -195,6 +206,8 @@ var
    LongDayNames:  ('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
    TwoDigitYearCenturyWindow: 50;
  );
+
+procedure checkdirstreamdata(var adata: dirstreamty);
  
 procedure syserror(const error: syserrorty; const text: string = ''); overload;
 procedure syserror(const error: syserrorty;
@@ -263,6 +276,26 @@ Procedure CatchUnhandledException (Obj : TObject; Addr: Pointer;
  //[public,alias:'FPC_BREAK_UNHANDLED_EXCEPTION'];
  {$endif}
 {$endif}
+
+procedure checkdirstreamdata(var adata: dirstreamty);
+var
+ int1: integer;
+begin
+ with adata.dirinfo do begin
+  caseinsensitive:= sys_filesystemiscaseinsensitive;
+  if dso_caseinsensitive in options then begin
+   caseinsensitive:= true;
+  end;
+  if dso_casesensitive in options then begin
+   caseinsensitive:= false;
+  end;
+  if caseinsensitive then begin
+   for int1:= 0 to high(mask) do begin
+    mask[int1]:= mseuppercase(mask[int1]);
+   end;
+  end;
+ end;
+end;
 
 {$ifndef FPC}
  {$ifdef MSWINDOWS}

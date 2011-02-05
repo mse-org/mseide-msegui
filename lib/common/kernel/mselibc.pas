@@ -9,49 +9,6 @@ const
  threadslib = 'pthread';
 
 type
-(* moved to msectypes
-// from bits/types.h
- __S16_TYPE = smallint;
- __U16_TYPE = word;
- __S32_TYPE = longint;
- __U32_TYPE = longword;
-{$ifndef CPU64}
- __SLONGWORD_TYPE = longint;
- __ULONGWORD_TYPE = longword;
- __SQUAD_TYPE = int64;
- __UQUAD_TYPE = uint64;
- __SWORD_TYPE = integer;
- __UWORD_TYPE = longword;
- __SLONG32_TYPE = integer;
- __ULONG32_TYPE = longword;
- __S64_TYPE = int64;
- __U64_TYPE = uint64;
-{$else}
- __SLONGWORD_TYPE = int64;
- __ULONGWORD_TYPE = uint64;
- __SQUAD_TYPE = int64;
- __UQUAD_TYPE = uint64;
- __SWORD_TYPE = int64;
- __UWORD_TYPE = uint64;
- __SLONG32_TYPE = integer;
- __ULONG32_TYPE = longword;
- __S64_TYPE = int64;
- __U64_TYPE = uint64;
-{$endif}
-
- culong = __ULONGWORD_TYPE;
- pculong = ^culong;
- clong = __SLONGWORD_TYPE;
- pclong = ^clong;
- cint = __S32_TYPE;
- pcint = ^cint;
- cuint = __U32_TYPE;
- pcuint = ^cuint;
- cshort = __S16_TYPE;
- pcshort = ^cshort;
- cushort = __U16_TYPE;
- pcushort = ^cushort;
-*)
  
 //from bits/typesizes.h
 
@@ -513,6 +470,7 @@ type
 {$ifdef CPU64}
  P_stat = ^_stat;
  PStat = ^_stat;
+
  _stat = packed record
   st_dev: culong;
   st_ino: culong;
@@ -541,7 +499,8 @@ type
 {$else}
  P_stat = ^_stat;
  PStat = ^_stat;
- _stat = packed record
+
+ _stat = packed record //probably wrong, not used
    st_dev : __dev_t;
    __pad1 : word;
    __align_pad1 : word;
@@ -568,26 +527,29 @@ type
 
    P_stat64 = ^_stat64;
    Pstat64 = ^_stat64;
-   _stat64 = record
-    st_dev : __dev_t;
-    __pad1 : dword;
-    __st_ino : __ino_t;
-    st_mode : __mode_t;
-    st_nlink : __nlink_t;
-    st_uid : __uid_t;
-    st_gid : __gid_t;
-    st_rdev : __dev_t;
-    __pad2 : dword;
-    st_size : __off64_t;
-    st_blksize : __blksize_t;
-    st_blocks : __blkcnt64_t;
-    st_atime : __time_t;
-    st_atime_nsec : longword;
-    st_mtime : __time_t;
-    st_mtime_nsec: longword;
-    st_ctime : __time_t;
-    st_ctime_nsec: longword;
-    st_ino : __ino64_t;
+
+   _stat64 = packed record
+	st_dev: culonglong;                 // 0
+	__pad0: array[0..3] of byte;        // 8
+	__st_ino: culong;                   //12
+	st_mode: cuint;                     //16
+	st_nlink: cuint;                    //20
+	st_uid: culong;                     //24
+	st_gid: culong;                     //28
+	st_rdev: culonglong;                //32
+	__pad3: array[0..3] of byte;        //40
+	st_size: clonglong;                 //44
+	st_blksize: culong;                 //52
+	st_blocks: culonglong;              //56
+	st_atime: culong;                   //64
+	st_atime_nsec: culong;              //68
+	st_mtime: culong;                   //72
+	st_mtime_nsec: cuint;               //76
+	st_ctime: culong;                   //80
+	st_ctime_nsec: culong;              //84
+	st_ino: culonglong;                 //88
+	                                    //96
+	
    end;
 {$endif}
 

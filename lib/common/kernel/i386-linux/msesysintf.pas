@@ -1092,8 +1092,9 @@ function sys_opendirstream(var stream: dirstreamty): syserrorty;
 var
  str1: string;
 begin
- str1:= stream.dirname;
- with stream,dirstreamlinuxty(platformdata) do begin
+ checkdirstreamdata(stream);
+ str1:= stream.dirinfo.dirname;
+ with stream,dirinfo,dirstreamlinuxty(platformdata) do begin
   d.dir:= pdir(opendir(pchar(str1)));
   if d.dir = nil then begin
    result:= syelasterror;
@@ -1139,7 +1140,7 @@ var
  error: boolean;
 begin
  result:= false;
- with stream,dirstreamlinuxty(platformdata) do begin
+ with stream,dirinfo,dirstreamlinuxty(platformdata) do begin
   if not ((include <> []) and (fa_all in exclude)) then begin
    while true do begin
     if (readdir64_r(d.dir,@dirent,@po1) = 0) and
@@ -1147,7 +1148,7 @@ begin
      with info do begin
       str1:= dirent.d_name;
       name:= str1;
-      if checkfilename(info.name,mask,true) then begin
+      if checkfilename(info.name,stream) then begin
        if d.needsstat or d.needstype and 
        ((dirent.d_type = dt_unknown) or (dirent.d_type = dt_lnk)) then begin
         error:= stat64(pchar(string(d.dirpath)+str1),@statbuffer) <> 0;

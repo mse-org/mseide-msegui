@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1585,7 +1585,8 @@ var
  wo1: longword;
  int1: integer;
 begin
- with stream,dirstreamwin32ty(platformdata) do begin
+ with stream,dirinfo,dirstreamwin32ty(platformdata) do begin
+  checkdirstreamdata(stream);
   result:= sye_ok;
   if dirname <> '/' then begin
    if msestartsstr('//',dirname) then begin //UNC
@@ -1639,11 +1640,11 @@ begin
    end
    else begin
     handle:= findfirstfilew(pmsechar(winfilepath(stream.dirname,'*')),
-    {$ifdef FPC}
-     lpwin32_find_dataw(finddatapo));
-    {$else}
-     _win32_find_dataw(finddatapo^));
-    {$endif}
+   {$ifdef FPC}
+    lpwin32_find_dataw(finddatapo));
+   {$else}
+    _win32_find_dataw(finddatapo^));
+   {$endif}
    end;
    if handle = invalid_handle_value then begin
     int1:= getlasterror;
@@ -1685,10 +1686,10 @@ function sys_readdirstream(var stream: dirstreamty; var info: fileinfoty): boole
 
  procedure checkinfo;
  begin
-  result:= ((fa_all in stream.include) or
-                    (info.extinfo1.attributes * stream.include <> [])) and
-             checkfilename(info.name,stream.mask) and
-               (info.extinfo1.attributes * stream.exclude = []);
+  result:= ((fa_all in stream.info.include) or
+                    (info.extinfo1.attributes * stream.dirinfo.include <> [])) and
+             (info.extinfo1.attributes * stream.dirinfo.exclude = []) and
+             checkfilename(info.name,stream);
  end;
 
 var
@@ -1698,7 +1699,7 @@ var
  po2: pchar;
 
 begin
- with stream,dirstreamwin32ty(platformdata),finddatapo^,winfo do begin
+ with stream,dirinfo,dirstreamwin32ty(platformdata),finddatapo^,winfo do begin
   result:= false;
   if (include <> []) and not (fa_all in exclude) then begin
    case drivenum of

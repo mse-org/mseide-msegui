@@ -8,7 +8,12 @@ type
  __U16_TYPE = word;
  __S32_TYPE = longint;
  __U32_TYPE = longword;
+ __S64_TYPE = int64;
+ __U64_TYPE = uint64;
+ 
 {$ifndef CPU64}
+ __ULONGLONGWORD_TYPE = uint64;
+ __SLONGLONGWORD_TYPE = int64;
  __SLONGWORD_TYPE = longint;
  __ULONGWORD_TYPE = longword;
  __SQUAD_TYPE = int64;
@@ -17,9 +22,9 @@ type
  __UWORD_TYPE = longword;
  __SLONG32_TYPE = integer;
  __ULONG32_TYPE = longword;
- __S64_TYPE = int64;
- __U64_TYPE = uint64;
 {$else}
+ __ULONGLONGWORD_TYPE = uint64;
+ __SLONGLONGWORD_TYPE = int64;
  __SLONGWORD_TYPE = int64;
  __ULONGWORD_TYPE = uint64;
  __SQUAD_TYPE = int64;
@@ -28,10 +33,11 @@ type
  __UWORD_TYPE = uint64;
  __SLONG32_TYPE = integer;
  __ULONG32_TYPE = longword;
- __S64_TYPE = int64;
- __U64_TYPE = uint64;
 {$endif}
 
+ cuchar = byte;
+ culonglong = __ULONGLONGWORD_TYPE;
+ clonglong = __SLONGLONGWORD_TYPE;
  culong = __ULONGWORD_TYPE;
  pculong = ^culong;
  clong = __SLONGWORD_TYPE;

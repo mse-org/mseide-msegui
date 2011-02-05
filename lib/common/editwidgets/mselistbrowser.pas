@@ -37,7 +37,11 @@ type
           lvo_locate,lvo_casesensitive,lvo_savevalue,lvo_hintclippedtext
                      );
  listviewoptionsty = set of listviewoptionty;
- filelistviewoptionty = (flvo_nodirselect,flvo_nofileselect,flvo_checksubdir);
+ 
+ filelistviewoptionty = (flvo_casesensitive,   //dso_casesensitive,
+                         flvo_caseinsensitive, //dso_caseinsensitive
+                         flvo_nodirselect,flvo_nofileselect,flvo_checksubdir);
+                                  //same layout as dristreamoptionty
  filelistviewoptionsty = set of filelistviewoptionty;
 
 const

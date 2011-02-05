@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -49,6 +49,7 @@ type
    fonlistread: notifyeventty;
    ffocusmoved: boolean;
    fongetfileicon: getfileiconeventty;
+   foncheckfile: checkfileeventty;
    procedure filelistchanged(const sender: tobject);
    procedure setfilelist(const Value: tfiledatalist);
    function getpath: msestring;
@@ -60,7 +61,11 @@ type
    procedure setselectednames(const avalue: filenamearty);
    function getchecksubdir: boolean;
    procedure setchecksubdir(const avalue: boolean);
+   procedure setoptionsfile(const avalue: filelistviewoptionsty);
+   procedure checkcasesensitive;
   protected
+   foptionsdir: dirstreamoptionsty;
+   fcaseinsensitive: boolean;
    procedure setoptions(const Value: listviewoptionsty); override;
    procedure docellevent(var info: celleventinfoty); override;
   public
@@ -81,19 +86,22 @@ type
    property selectednames: filenamearty read getselectednames write setselectednames;
    property  checksubdir: boolean read getchecksubdir write setchecksubdir;
   published
-   property optionsfile: filelistviewoptionsty read foptionsfile write foptionsfile
-                  default defaultfilelistviewoptions;
+   property optionsfile: filelistviewoptionsty read foptionsfile 
+                 write setoptionsfile default defaultfilelistviewoptions;
    property filelist: tfiledatalist read ffilelist write setfilelist;
    property onlistread: notifyeventty read fonlistread write fonlistread;
    property ongetfileicon: getfileiconeventty read fongetfileicon 
                                               write fongetfileicon;
+   property oncheckfile: checkfileeventty read foncheckfile write foncheckfile;
  end;
 
 const
  defaulthistorymaxcount = 10;
  
 type
- filedialogoptionty = (fdo_save,
+ filedialogoptionty = (fdo_casesensitive,    //flvo_casesensitive
+                       fdo_caseinsensitive,  //flvo_caseinsensitive
+                       fdo_save,
                        fdo_dispname,fdo_dispnoext,fdo_sysfilename,fdo_params,
                        fdo_directory,fdo_file,
                        fdo_absolute,fdo_relative,fdo_quotesingle,
@@ -135,6 +143,7 @@ type
    fonafterexecute: filedialogafterexecuteeventty;
    fongetfilename: setstringeventty;
    fongetfileicon: getfileiconeventty;
+   foncheckfile: checkfileeventty;
    fimagelist: timagelist;
    fparams: msestring;
    procedure setfilterlist(const Value: tdoublemsestringdatalist);
@@ -203,6 +212,7 @@ type
    property ongetfilename: setstringeventty read fongetfilename write fongetfilename;
    property ongetfileicon: getfileiconeventty read fongetfileicon 
                                               write fongetfileicon;
+   property oncheckfile: checkfileeventty read foncheckfile write foncheckfile;
    property onbeforeexecute: filedialogbeforeexecuteeventty
                   read fonbeforeexecute write fonbeforeexecute;
    property onafterexecute: filedialogafterexecuteeventty
@@ -392,7 +402,8 @@ function filedialog(var afilenames: filenamearty;
            const history: pmsestringarty = nil;
            const historymaxcount: integer = defaulthistorymaxcount;
            const imagelist: timagelist = nil;
-           const ongetfileicon: getfileiconeventty = nil
+           const ongetfileicon: getfileiconeventty = nil;
+           const oncheckfile: checkfileeventty = nil
                       ): modalresultty; overload;
 //theadsave
 function filedialog(var afilename: filenamety;
@@ -409,7 +420,8 @@ function filedialog(var afilename: filenamety;
            const history: pmsestringarty = nil;
            const historymaxcount: integer = defaulthistorymaxcount;
            const imagelist: timagelist = nil;
-           const ongetfileicon: getfileiconeventty = nil
+           const ongetfileicon: getfileiconeventty = nil;
+           const oncheckfile: checkfileeventty = nil
            ): modalresultty; overload;
 //theadsave
 
@@ -473,18 +485,19 @@ end;
 function filedialog1(dialog: tfiledialogfo; var afilenames: filenamearty;
            const filterdesc: array of msestring;
            const filtermask: array of msestring;
-           const filterindex: pinteger = nil;
-           const afilter: pfilenamety = nil;      //nil -> unused
-           const colwidth: pinteger = nil;        //nil -> default
-           const includeattrib: fileattributesty = [fa_all];
-           const excludeattrib: fileattributesty = [fa_hidden];
-           const history: pmsestringarty = nil;
-           const historymaxcount: integer = defaulthistorymaxcount;
-           const acaption: msestring = '';
-           const aoptions: filedialogoptionsty = [];
-           const adefaultext: filenamety = '';
-           const imagelist: timagelist = nil;
-           const ongetfileicon: getfileiconeventty = nil
+           const filterindex: pinteger;
+           const afilter: pfilenamety;      //nil -> unused
+           const colwidth: pinteger;        //nil -> default
+           const includeattrib: fileattributesty;
+           const excludeattrib: fileattributesty;
+           const history: pmsestringarty;
+           const historymaxcount: integer;
+           const acaption: msestring;
+           const aoptions: filedialogoptionsty;
+           const adefaultext: filenamety;
+           const imagelist: timagelist;
+           const ongetfileicon: getfileiconeventty;
+           const oncheckfile: checkfileeventty
            ): modalresultty;
 var
  int1: integer;
@@ -493,6 +506,12 @@ begin
   dir.checksubdir:= fdo_checksubdir in aoptions;
   listview.checksubdir:= fdo_checksubdir in aoptions;
   dialogoptions:= aoptions;
+  if fdo_casesensitive in aoptions then begin
+   listview.optionsfile:= listview.optionsfile + [flvo_casesensitive];
+  end;
+  if fdo_caseinsensitive in aoptions then begin
+   listview.optionsfile:= listview.optionsfile + [flvo_caseinsensitive];
+  end;
   if fdo_single in aoptions then begin
    listview.options:= listview.options - [lvo_multiselect];
   end;
@@ -505,6 +524,7 @@ begin
    listview.itemlist.imagesize:= imagelist.size;
   end;
   listview.ongetfileicon:= ongetfileicon;
+  listview.oncheckfile:= oncheckfile;
   filter.dropdown.cols[0].count:= high(filtermask) + 1;
   for int1:= 0 to high(filtermask) do begin
    if (int1 <= high(filterdesc)) and (filterdesc[int1] <> '') then begin
@@ -589,7 +609,8 @@ function filedialog(var afilenames: filenamearty;
            const history: pmsestringarty = nil;
            const historymaxcount: integer = defaulthistorymaxcount;
            const imagelist: timagelist = nil;
-           const ongetfileicon: getfileiconeventty = nil
+           const ongetfileicon: getfileiconeventty = nil;
+           const oncheckfile: checkfileeventty = nil
            ): modalresultty;
 var
  dialog: tfiledialogfo;
@@ -615,7 +636,7 @@ begin
    result:= filedialog1(dialog,afilenames,filterdesc,filtermask,
             filterindex,filter,colwidth,
             includeattrib,excludeattrib,history,historymaxcount,str1,aoptions,
-            adefaultext,imagelist,ongetfileicon);
+            adefaultext,imagelist,ongetfileicon,oncheckfile);
  
   finally
    dialog.Free;
@@ -639,7 +660,8 @@ function filedialog(var afilename: filenamety;
            const history: pmsestringarty = nil;
            const historymaxcount: integer = defaulthistorymaxcount;
            const imagelist: timagelist = nil;
-           const ongetfileicon: getfileiconeventty = nil
+           const ongetfileicon: getfileiconeventty = nil;
+           const oncheckfile: checkfileeventty = nil
            ): modalresultty;
 var
  ar1: filenamearty;
@@ -649,7 +671,7 @@ begin
  result:= filedialog(ar1,aoptions,acaption,filterdesc,filtermask,adefaultext,
            filterindex,
            filter,colwidth,includeattrib,excludeattrib,history,historymaxcount,
-           imagelist,ongetfileicon);
+           imagelist,ongetfileicon,oncheckfile);
  if result = mr_ok then begin
   if (high(ar1) > 0) or (fdo_quotesingle in aoptions) then begin 
    afilename:= quotefilename(ar1);
@@ -669,6 +691,7 @@ end;
 
 constructor tfilelistview.create(aowner: tcomponent);
 begin
+ fcaseinsensitive:= filesystemiscaseinsensitive;
  fincludeattrib:= [fa_all];
  fexcludeattrib:= [fa_hidden];
  fitemlist:= tfileitemlist.create(self);
@@ -676,7 +699,7 @@ begin
  ffilelist:= tfiledatalist.create;
  ffilelist.onchange:= {$ifdef FPC}@{$endif}filelistchanged;
  inherited;
- options:= options; //set casesensitive
+ checkcasesensitive;
 end;
 
 destructor tfilelistview.destroy;
@@ -685,9 +708,21 @@ begin
  ffilelist.Free;
 end;
 
+procedure tfilelistview.checkcasesensitive;
+begin
+ fcaseinsensitive:= filesystemiscaseinsensitive;
+ if flvo_casesensitive in foptionsfile then begin
+  fcaseinsensitive:= false;
+ end;
+ if flvo_caseinsensitive in foptionsfile then begin
+  fcaseinsensitive:= true;
+ end;
+ options:= options; //set casesensitive
+end;
+
 procedure tfilelistview.setoptions(const Value: listviewoptionsty);
 begin
- if filesystemiscaseinsensitive then begin
+ if fcaseinsensitive then begin
   inherited setoptions(value - [lvo_casesensitive]);
  end
  else begin
@@ -839,6 +874,7 @@ procedure tfilelistview.readlist;
 var
  int1: integer;
  po1: pfileinfoty;
+ level1: fileinfolevelty;
 begin
  beginupdate;
  try
@@ -846,8 +882,14 @@ begin
   fdatacols.clearselection;
   ffilelist.clear;
   ffilecount:= 0;
+  level1:= fil_type;
+  if assigned(foncheckfile) then begin
+   level1:= fil_ext2;
+  end;
   if fmaskar = nil then begin
-   ffilelist.adddirectory(fdirectory,fil_type,fmaskar,fincludeattrib,fexcludeattrib);
+   ffilelist.adddirectory(fdirectory,level1,fmaskar,
+                          fincludeattrib,fexcludeattrib,foptionsdir,
+                          foncheckfile);
    if ffilelist.count > 0 then begin
     po1:= ffilelist.itempo(0);
     for int1:= 0 to ffilelist.count - 1 do begin
@@ -860,16 +902,16 @@ begin
   end
   else begin
    if (fincludeattrib = [fa_all]) or not(fa_dir in fincludeattrib) then begin
-    ffilelist.adddirectory(fdirectory,fil_type,nil,[fa_dir],
-               fexcludeattrib*[fa_hidden]);
+    ffilelist.adddirectory(fdirectory,level1,nil,[fa_dir],
+               fexcludeattrib*[fa_hidden],foptionsdir,foncheckfile);
     int1:= ffilelist.count;
-    ffilelist.adddirectory(fdirectory,fil_type,fmaskar,fincludeattrib,
-                   fexcludeattrib+[fa_dir]);
+    ffilelist.adddirectory(fdirectory,level1,fmaskar,fincludeattrib,
+                   fexcludeattrib+[fa_dir],foptionsdir,foncheckfile);
     ffilecount:= ffilelist.count - int1;
    end
    else begin
-    ffilelist.adddirectory(fdirectory,fil_type,fmaskar,
-                               fincludeattrib,fexcludeattrib);
+    ffilelist.adddirectory(fdirectory,level1,fmaskar,
+                       fincludeattrib,fexcludeattrib,foptionsdir,foncheckfile);
     ffilecount:= ffilelist.count;
    end;
   end;
@@ -879,9 +921,6 @@ begin
  if assigned(fonlistread) then begin
   fonlistread(self);
  end;
-// if ffilelist.count > 0 then begin
-//  focuscell(indextocell(0),fca_focusin);
-// end;
 end;
 
 procedure tfilelistview.updir;
@@ -953,6 +992,21 @@ begin
  end
  else begin
   exclude(foptionsfile,flvo_checksubdir);
+ end;
+end;
+
+procedure tfilelistview.setoptionsfile(const avalue: filelistviewoptionsty);
+const
+ mask1: filelistviewoptionsty = [flvo_casesensitive,flvo_caseinsensitive];
+begin
+ if avalue <> foptionsfile then begin
+  foptionsfile:= filelistviewoptionsty(
+                  setsinglebit(longword(avalue),
+                               longword(foptionsfile),
+                               longword(mask1)));
+  foptionsdir:= dirstreamoptionsty(foptionsfile) * 
+                             [dso_casesensitive,dso_caseinsensitive];
+  checkcasesensitive;
  end;
 end;
 
@@ -1463,7 +1517,7 @@ begin
   result:= filedialog1(fo,ffilenames,ara,arb,
         @ffilterindex,@ffilter,@fcolwidth,finclude,
             fexclude,po1,fhistorymaxcount,acaption,aoptions,fdefaultext,
-            fimagelist,fongetfileicon);
+            fimagelist,fongetfileicon,foncheckfile);
   if assigned(fonafterexecute) then begin
    fonafterexecute(self,result);
   end;
@@ -1684,6 +1738,7 @@ procedure tfiledialogcontroller.setoptions(Value: filedialogoptionsty);
 const
  mask1: filedialogoptionsty = [fdo_absolute,fdo_relative];
  mask2: filedialogoptionsty = [fdo_directory,fdo_file];
+ mask3: filedialogoptionsty = [fdo_casesensitive,fdo_caseinsensitive];
 begin
  {$ifdef FPC}longword{$else}longword{$endif}(value):=
       setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(value),
@@ -1693,6 +1748,10 @@ begin
       setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(value),
       {$ifdef FPC}longword{$else}longword{$endif}(foptions),
       {$ifdef FPC}longword{$else}longword{$endif}(mask2));
+ {$ifdef FPC}longword{$else}longword{$endif}(value):=
+      setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(value),
+      {$ifdef FPC}longword{$else}longword{$endif}(foptions),
+      {$ifdef FPC}longword{$else}longword{$endif}(mask3));
  if foptions <> value then begin
   foptions:= Value;
   if not (fdo_params in foptions) then begin
