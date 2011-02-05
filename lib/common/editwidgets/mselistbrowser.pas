@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -38,10 +38,10 @@ type
                      );
  listviewoptionsty = set of listviewoptionty;
  
- filelistviewoptionty = (flvo_casesensitive,   //dso_casesensitive,
-                         flvo_caseinsensitive, //dso_caseinsensitive
+ filelistviewoptionty = (flvo_maskcasesensitive,   //dso_casesensitive,
+                         flvo_maskcaseinsensitive, //dso_caseinsensitive
                          flvo_nodirselect,flvo_nofileselect,flvo_checksubdir);
-                                  //same layout as dristreamoptionty
+                                  //same layout as dirstreamoptionty
  filelistviewoptionsty = set of filelistviewoptionty;
 
 const

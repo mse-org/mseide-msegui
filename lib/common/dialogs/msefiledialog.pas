@@ -68,7 +68,7 @@ type
   protected
    foptionsdir: dirstreamoptionsty;
    fcaseinsensitive: boolean;
-   procedure setoptions(const Value: listviewoptionsty); override;
+//   procedure setoptions(const Value: listviewoptionsty); override;
    procedure docellevent(var info: celleventinfoty); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -102,8 +102,8 @@ const
  defaulthistorymaxcount = 10;
  
 type
- filedialogoptionty = (fdo_casesensitive,    //flvo_casesensitive
-                       fdo_caseinsensitive,  //flvo_caseinsensitive
+ filedialogoptionty = (fdo_filtercasesensitive,    //flvo_maskcasesensitive
+                       fdo_filtercaseinsensitive,  //flvo_maskcaseinsensitive
                        fdo_save,
                        fdo_dispname,fdo_dispnoext,fdo_sysfilename,fdo_params,
                        fdo_directory,fdo_file,
@@ -509,11 +509,11 @@ begin
   dir.checksubdir:= fdo_checksubdir in aoptions;
   listview.checksubdir:= fdo_checksubdir in aoptions;
   dialogoptions:= aoptions;
-  if fdo_casesensitive in aoptions then begin
-   listview.optionsfile:= listview.optionsfile + [flvo_casesensitive];
+  if fdo_filtercasesensitive in aoptions then begin
+   listview.optionsfile:= listview.optionsfile + [flvo_maskcasesensitive];
   end;
-  if fdo_caseinsensitive in aoptions then begin
-   listview.optionsfile:= listview.optionsfile + [flvo_caseinsensitive];
+  if fdo_filtercaseinsensitive in aoptions then begin
+   listview.optionsfile:= listview.optionsfile + [flvo_maskcaseinsensitive];
   end;
   if fdo_single in aoptions then begin
    listview.options:= listview.options - [lvo_multiselect];
@@ -715,15 +715,15 @@ end;
 procedure tfilelistview.checkcasesensitive;
 begin
  fcaseinsensitive:= filesystemiscaseinsensitive;
- if flvo_casesensitive in foptionsfile then begin
+ if flvo_maskcasesensitive in foptionsfile then begin
   fcaseinsensitive:= false;
  end;
- if flvo_caseinsensitive in foptionsfile then begin
+ if flvo_maskcaseinsensitive in foptionsfile then begin
   fcaseinsensitive:= true;
  end;
- options:= options; //set casesensitive
+// options:= options; //set casesensitive
 end;
-
+{
 procedure tfilelistview.setoptions(const Value: listviewoptionsty);
 begin
  if fcaseinsensitive then begin
@@ -733,7 +733,7 @@ begin
   inherited setoptions(value + [lvo_casesensitive]);
  end;
 end;
-
+}
 procedure tfilelistview.docellevent(var info: celleventinfoty);
 var
  index: integer;
@@ -1001,7 +1001,7 @@ end;
 
 procedure tfilelistview.setoptionsfile(const avalue: filelistviewoptionsty);
 const
- mask1: filelistviewoptionsty = [flvo_casesensitive,flvo_caseinsensitive];
+ mask1: filelistviewoptionsty = [flvo_maskcasesensitive,flvo_maskcaseinsensitive];
 begin
  if avalue <> foptionsfile then begin
   foptionsfile:= filelistviewoptionsty(
@@ -1742,7 +1742,7 @@ procedure tfiledialogcontroller.setoptions(Value: filedialogoptionsty);
 const
  mask1: filedialogoptionsty = [fdo_absolute,fdo_relative];
  mask2: filedialogoptionsty = [fdo_directory,fdo_file];
- mask3: filedialogoptionsty = [fdo_casesensitive,fdo_caseinsensitive];
+ mask3: filedialogoptionsty = [fdo_filtercasesensitive,fdo_filtercaseinsensitive];
 begin
  {$ifdef FPC}longword{$else}longword{$endif}(value):=
       setsinglebit({$ifdef FPC}longword{$else}longword{$endif}(value),

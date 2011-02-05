@@ -1786,18 +1786,18 @@ end;
 function tcustomfiledatalist.sortname(const l, r: fileinfoty): integer;
 begin
  if flo_casesensitive in foptions then begin
-  {$ifdef FPC}
-  result:= comparestr(l.name,r.name); //!!!!todo
-  {$else}
+//  {$ifdef FPC}
+//  result:= comparestr(l.name,r.name); //!!!!todo
+//  {$else}
   result:= msecomparestr(l.name,r.name);
-  {$endif}
+//  {$endif}
  end
  else begin
-  {$ifdef FPC}
-  result:= comparetext(l.name,r.name);    //!!!!todo
-  {$else}
+//  {$ifdef FPC}
+//  result:= comparetext(l.name,r.name);    //!!!!todo
+//  {$else}
   result:= msecomparetext(l.name,r.name);
-  {$endif}
+//  {$endif}
  end;
 end;
 
