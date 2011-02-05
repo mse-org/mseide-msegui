@@ -20,8 +20,10 @@ uses
  msedatanodes,msefileutils,msedropdownlist,mseevent,msegraphedits,mseeditglob,
  msesplitter,msemenus,msegridsglob,msegraphics,msegraphutils;
 
+const
+ defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly];
+ 
 type
-
  tfilelistitem = class(tlistitem)
   private
   protected
@@ -86,6 +88,7 @@ type
    property selectednames: filenamearty read getselectednames write setselectednames;
    property  checksubdir: boolean read getchecksubdir write setchecksubdir;
   published
+   property options default defaultlistviewoptionsfile;
    property optionsfile: filelistviewoptionsty read foptionsfile 
                  write setoptionsfile default defaultfilelistviewoptions;
    property filelist: tfiledatalist read ffilelist write setfilelist;
@@ -699,6 +702,7 @@ begin
  ffilelist:= tfiledatalist.create;
  ffilelist.onchange:= {$ifdef FPC}@{$endif}filelistchanged;
  inherited;
+ options:= defaultlistviewoptionsfile;
  checkcasesensitive;
 end;
 
