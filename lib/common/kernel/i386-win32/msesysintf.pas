@@ -1631,7 +1631,7 @@ begin
    last:= true;
    new(finddatapo);
    if iswin95 then begin
-    handle:= findfirstfilea(pchar(string(winfilepath(stream.dirname,'*'))),
+    handle:= findfirstfilea(pchar(string(winfilepath(stream.dirinfo.dirname,'*'))),
     {$ifdef FPC}
      lpwin32_find_data(finddatapo));
     {$else}
@@ -1639,7 +1639,7 @@ begin
     {$endif}
    end
    else begin
-    handle:= findfirstfilew(pmsechar(winfilepath(stream.dirname,'*')),
+    handle:= findfirstfilew(pmsechar(winfilepath(stream.dirinfo.dirname,'*')),
    {$ifdef FPC}
     lpwin32_find_dataw(finddatapo));
    {$else}
@@ -1686,7 +1686,7 @@ function sys_readdirstream(var stream: dirstreamty; var info: fileinfoty): boole
 
  procedure checkinfo;
  begin
-  result:= ((fa_all in stream.info.include) or
+  result:= ((fa_all in stream.dirinfo.include) or
                     (info.extinfo1.attributes * stream.dirinfo.include <> [])) and
              (info.extinfo1.attributes * stream.dirinfo.exclude = []) and
              checkfilename(info.name,stream);
