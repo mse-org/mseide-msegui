@@ -3,7 +3,7 @@ unit mselibc;
 interface
 uses
  msectypes;
- 
+
 const
  clib = 'c';
  threadslib = 'pthread';
