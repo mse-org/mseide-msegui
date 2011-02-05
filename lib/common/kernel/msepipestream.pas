@@ -449,7 +449,7 @@ end;
 
 function tpipereader.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
 begin
- inherited;
+ inherited seek(offset,origin);
  result:= 0;
 end;
 

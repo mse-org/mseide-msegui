@@ -71,7 +71,7 @@ var
 begin
  fo1:= tcompnametreefo.create(nil);
  try
-  ar1:= splitstring(avalue,'.');
+  ar1:= splitstring(avalue,msechar('.'));
   item1:= avalues.finditembycaption(ar1);
   if item1 <> nil then begin
    item1.expandtoroot;

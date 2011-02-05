@@ -17,7 +17,7 @@ uses
 
 implementation
 uses
- winsock2,sysutils,msestrings,msetypes;
+ {$ifdef FPC}winsock2{$else}winsock2_del{$endif},sysutils,msestrings,msetypes;
 type
  paddrinfo = ^addrinfo;
  addrinfo = record
@@ -322,7 +322,7 @@ end;
 
 function soc_setnonblock(const handle: integer; const nonblock: boolean): syserrorty;
 var
- int1: integer;
+ int1: u_long;
 begin
  result:= sye_ok;
  if nonblock then begin
@@ -331,7 +331,7 @@ begin
  else begin
   int1:= 0;
  end;
- if ioctlsocket(handle,fionbio,@int1) <> 0 then begin
+ if ioctlsocket(tsocket(handle),longint(fionbio),pu_long(@int1)) <> 0 then begin
   result:= setsocketerror;
  end;
 end;

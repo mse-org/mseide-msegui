@@ -1005,9 +1005,9 @@ const
 begin
  if avalue <> foptionsfile then begin
   foptionsfile:= filelistviewoptionsty(
-                  setsinglebit(longword(avalue),
-                               longword(foptionsfile),
-                               longword(mask1)));
+                  setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(avalue),
+                               {$ifdef FPC}longword{$else}byte{$endif}(foptionsfile),
+                               {$ifdef FPC}longword{$else}byte{$endif}(mask1)));
   foptionsdir:= dirstreamoptionsty(foptionsfile) * 
                              [dso_casesensitive,dso_caseinsensitive];
   checkcasesensitive;

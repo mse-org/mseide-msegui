@@ -57,6 +57,7 @@ type
   ValUInt = Cardinal;
   qword = uint64;
   pqword = ^qword;
+  size_t = dword;
 {$else}
  {$ifndef mse_fpc_2_4_2}
   ppdouble = ^pdouble;

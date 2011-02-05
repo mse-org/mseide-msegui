@@ -444,11 +444,11 @@ procedure setcomcomp(const alink: icommclient;
 begin
  alink.setcommserverintf(nil);
  if dest <> nil then begin
-  removeitem(pointerarty(dest.fclients),alink);
+  removeitem(pointerarty(dest.fclients),pointer(alink));
  end;
  alink.getobjectlinker.setlinkedvar(alink,acommcomp,tmsecomponent(dest));
  if dest <> nil then begin
-  additem(pointerarty(dest.fclients),alink);
+  additem(pointerarty(dest.fclients),pointer(alink));
   alink.setcommserverintf(icommserver(dest));
  end;
 end;
@@ -514,9 +514,9 @@ begin
  fowner:= aowner;
  createpipes;
 // frx:= tsocketreader.create;
- frx.fonafterconnect:= @doafterconnect;
- frx.onpipebroken:= @dopipebroken;
- frx.fonthreadterminate:= @dothreadterminate;
+ frx.fonafterconnect:= {$ifdef FPC}@{$endif}doafterconnect;
+ frx.onpipebroken:= {$ifdef FPC}@{$endif}dopipebroken;
+ frx.fonthreadterminate:= {$ifdef FPC}@{$endif}dothreadterminate;
 // ftx:= tsocketwriter.create;
  setlinkedvar(aowner.fcryptio,tmsecomponent(fcryptio));
  fcryptioinfo.kind:= acryptkind;
@@ -604,7 +604,7 @@ procedure tcustomcommpipes.setoninputavailable(const avalue: commpipeseventty);
 begin
  foninputavailable:= avalue;
  if assigned(avalue) then begin
-  frx.oninputavailable:= @doinputavailable;
+  frx.oninputavailable:= {$ifdef FPC}@{$endif}doinputavailable;
  end
  else begin
   frx.oninputavailable:= nil;
@@ -950,7 +950,7 @@ begin
   raise;
  end;
  try
-  fpipes.onafterconnect:= @doafterconnect;
+  fpipes.onafterconnect:= {$ifdef FPC}@{$endif}doafterconnect;
   fpipes.setcryptio(fcryptio);
   fpipes.handle:= fhandle;
  except
@@ -1082,7 +1082,7 @@ begin
         overloadsleepus:= self.foverloadsleepus;
         oninputavailable:= self.foninputavailable;
         onsocketbroken:= self.fonsocketbroken;
-        onafterconnect:= @self.doafterchconnect;
+        onafterconnect:= {$ifdef FPC}@{$endif}self.doafterchconnect;
         if canevent(tmethod(fonbeforechconnect)) then begin
          fonbeforechconnect(self,fpipes[int2]);
         end;
@@ -1228,7 +1228,7 @@ begin
    raise;
   end;
   factive:= true;
-  fthread:= tmsethread.create(@execthread);
+  fthread:= tmsethread.create({$ifdef FPC}@{$endif}execthread);
  end;
  factive:= true;
 end;
@@ -1246,7 +1246,7 @@ begin
  if not (csdesigning in componentstate) then begin
   syserror(sys_dup(sys_stdin,fhandle));
   factive:= true;
-  fthread:= tmsethread.create(@execthread);
+  fthread:= tmsethread.create({$ifdef FPC}@{$endif}execthread);
  end
  else begin
   factive:= true;
