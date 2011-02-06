@@ -100,9 +100,12 @@ type
   private
 //   finppo: pdouble;
    ffrequencypo: pdouble;
+   ffrequencychangepo: psiginchangeflagsty;
    ffrequfactpo: pdouble;
+   ffrequfactchangepo: psiginchangeflagsty;
    ffrequency: tdoubleinputconn;
    fqfactorpo: pdouble;
+   fqfactorchangepo: psiginchangeflagsty;
    famplitudepo: pdouble;
    fgain: double;
    fz1: double;
@@ -112,8 +115,8 @@ type
    fb2: double;
    fa1: double;
    fa2: double;
-   ffrequencybefore: double;
-   fqfactorbefore: double;
+//   ffrequencybefore: double;
+//   fqfactorbefore: double;
    fqfactor: tdoubleinputconn;
    fkind: sigfilterkindty;
    foptions: sigfilteroptionsty;
@@ -568,11 +571,14 @@ var
  i,o,do1: double;
  int1: integer;
 begin
- do1:= ffrequencypo^*ffrequfactpo^;
- if do1 <> ffrequencybefore then begin
-  ffrequencybefore:= do1;
-  fb0:= 2*pi*do1;
-  fa1:= exp(-fb0);
+ if (ffrequencychangepo^ <> []) or (ffrequfactchangepo^ <> []) then begin
+  exclude(ffrequencychangepo^,sic_value);
+  exclude(ffrequfactchangepo^,sic_value);
+  do1:= ffrequencypo^*ffrequfactpo^;
+  if do1 > 0 then begin
+   fb0:= 2*pi*do1;
+   fa1:= exp(-fb0);
+  end;
  end;
  i:= 0;
  for int1:= 0 to finphigh do begin
@@ -589,14 +595,16 @@ var
  do1: double;
  int1: integer;
 begin
- do1:= ffrequencypo^*ffrequfactpo^;
- if do1 <> ffrequencybefore then begin
-  ffrequencybefore:= do1;
-  ffrequencybefore:= do1;
-  do1:= 2*pi*do1;
-  fb0:= do1/(do1+2);
-  fb1:= fb0;
-  fa1:= (do1-2)/(do1+2);
+ if (ffrequencychangepo^ <> []) or (ffrequfactchangepo^ <> []) then begin
+  exclude(ffrequencychangepo^,sic_value);
+  exclude(ffrequfactchangepo^,sic_value);
+  do1:= ffrequencypo^*ffrequfactpo^;
+  if do1 > 0 then begin
+   do1:= 2*pi*do1;
+   fb0:= do1/(do1+2);
+   fb1:= fb0;
+   fa1:= (do1-2)/(do1+2);
+  end;
  end;
  i:= 0;
  for int1:= 0 to finphigh do begin
@@ -613,11 +621,16 @@ var
  i,o,do1: double;
  int1: integer;
 begin
- do1:= ffrequencypo^*ffrequfactpo^;
- if do1 > 0 then begin
-  if (fqfactorpo^ <> fqfactorbefore) or (do1 <> ffrequencybefore) then begin
-   ffrequencybefore:= do1;
-   fqfactorbefore:= fqfactorpo^;
+ if (ffrequencychangepo^ <> []) or (ffrequfactchangepo^ <> []) or
+                   (fqfactorchangepo^ <> []) then begin
+  exclude(ffrequencychangepo^,sic_value);
+  exclude(ffrequfactchangepo^,sic_value);
+  exclude(fqfactorchangepo^,sic_value);
+  do1:= ffrequencypo^*ffrequfactpo^;
+  if do1 > 0 then begin
+//  if (fqfactorpo^ <> fqfactorbefore) or (do1 <> ffrequencybefore) then begin
+//   ffrequencybefore:= do1;
+//   fqfactorbefore:= fqfactorpo^;
    fT2_4:= do1*2*pi;        // fT
    if not (sfo_noprewarp in foptions) then begin
     fT2_4:= 2*tan(0.5*fT2_4);
@@ -626,9 +639,9 @@ begin
     fgain:= 1;
    end
    else begin
-    fgain:= (1/sqrt(sqrt(2)))/sqrt(fqfactorbefore);
+    fgain:= (1/sqrt(sqrt(2)))/sqrt(fqfactorpo^);
    end;
-   QfT_4:= 4/(fqfactorbefore*fT2_4);  // 4/(Q*fT)
+   QfT_4:= 4/(fqfactorpo^*fT2_4);  // 4/(Q*fT)
    fT2_4:= 4/(fT2_4*fT2_4);           // 4/fT^2
    den:= 1 + QfT_4 + fT2_4;           // 1 + 4/(Q*fT) + 4/fT^2
    fb0:= fgain/den;
@@ -637,37 +650,44 @@ begin
    fa1:= 2*(1-fT2_4)/den;
    fa2:= (1-QfT_4+fT2_4)/den;
   end;
-  i:= 0;
-  for int1:= 0 to finphigh do begin
-   i:= i+finps[int1]^;
-  end;
-  o:= fz1+i*fb0;
-  fz1:= fz2-o*fa1+i*fb1;
-  fz2:= i*fb2-o*fa2;
-  ainfo^.dest^:= o*famplitudepo^;
  end;
+ i:= 0;
+ for int1:= 0 to finphigh do begin
+  i:= i+finps[int1]^;
+ end;
+ o:= fz1+i*fb0;
+ fz1:= fz2-o*fa1+i*fb1;
+ fz2:= i*fb2-o*fa2;
+ ainfo^.dest^:= o*famplitudepo^;
 end;
 
 procedure tsigfilter.sighandlerb2bi;
 var
  fT,QfT_4,fT2_4,den,do1: double;
 begin
- do1:= ffrequencypo^*ffrequfactpo^;
- if do1 > 0 then begin
-  if (fqfactorpo^ <> fqfactorbefore) or (do1 <> ffrequencybefore) then begin
-   ffrequencybefore:= do1;
-   fqfactorbefore:= fqfactorpo^;
+ if (ffrequencychangepo^ <> []) or (ffrequfactchangepo^ <> []) or
+                   (fqfactorchangepo^ <> []) then begin
+  exclude(ffrequencychangepo^,sic_value);
+  exclude(ffrequfactchangepo^,sic_value);
+  exclude(fqfactorchangepo^,sic_value);
+  do1:= ffrequencypo^*ffrequfactpo^;
+  if do1 > 0 then begin
+// do1:= ffrequencypo^*ffrequfactpo^;
+// if do1 > 0 then begin
+//  if (fqfactorpo^ <> fqfactorbefore) or (do1 <> ffrequencybefore) then begin
+//   ffrequencybefore:= do1;
+//   fqfactorbefore:= fqfactorpo^;
    fT:= do1*2*pi;           // fT
    if not (sfo_noprewarp in foptions) then begin
     fT:= 2*tan(0.5*fT);
    end;
    if (sfo_passgainfix in foptions) or (fkind = sfk_bs2bilinear) then begin
-    fgain:= 4/(fT*fqfactorbefore);
+    fgain:= 4/(fT*fqfactorpo^);
    end
    else begin
-    fgain:= 4/(fT*sqrt(fqfactorbefore));
+    fgain:= 4/(fT*sqrt(fqfactorpo^));
    end;
-   QfT_4:= 4/(fqfactorbefore*fT);     // 4/(Q*fT)
+   QfT_4:= 4/(fqfactorpo^*fT);     // 4/(Q*fT)
    fT2_4:= 4/(fT*fT);                 // 4/fT^2
    den:= 1 + QfT_4 + fT2_4;           // 1 + 4/(Q*fT) + 4/fT^2
    fb0:= fgain/den;
@@ -714,16 +734,19 @@ end;
 procedure tsigfilter.clear;
 begin
  inherited;
- ffrequencybefore:= -1;
- fqfactorbefore:= -1;
+// ffrequencybefore:= -1;
+// fqfactorbefore:= -1;
 end;
 
 procedure tsigfilter.initmodel;
 begin
 // finppo:= @tdoubleinputconn1(finput).fvalue;
  ffrequencypo:= @tdoubleinputconn1(ffrequency).fvalue;
+ ffrequencychangepo:= @tdoubleinputconn1(ffrequency).fchanged;
  ffrequfactpo:= @tdoubleinputconn1(ffrequfact).fvalue;
+ ffrequfactchangepo:= @tdoubleinputconn1(ffrequfact).fchanged;
  fqfactorpo:= @tdoubleinputconn1(fqfactor).fvalue;
+ fqfactorchangepo:= @tdoubleinputconn1(fqfactor).fchanged;
  famplitudepo:= @tdoubleinputconn1(famplitude).fvalue;
  inherited;
 end;

@@ -26,13 +26,18 @@ const
  defaultsamplecount = 4096;
  defaultharmonicscount = 16;
  functionsegmentcount = 32;
-
-const
  semitoneln = ln(2)/12;
  chromaticscale: array[0..12] of double =
     (1.0,exp(1*semitoneln),exp(2*semitoneln),exp(3*semitoneln),exp(4*semitoneln),
      exp(5*semitoneln),exp(6*semitoneln),exp(7*semitoneln),exp(8*semitoneln),
      exp(9*semitoneln),exp(10*semitoneln),exp(11*semitoneln),2.0);
+
+type
+ siginchangeflagty = (sic_value,sic_stream);
+ siginchangeflagsty = set of siginchangeflagty;
+ psiginchangeflagsty = ^siginchangeflagsty;
+const
+ siginchangeresetflags = [sic_value];
 
 type
  tcustomsigcomp = class;
@@ -197,6 +202,7 @@ type
   protected
    fsca: inpscaleinfoty;
    fvalue: double;
+   fchanged: siginchangeflagsty;
   public
    constructor create(const aowner: tcomponent;
                      const asigintf: isigclient); override;
@@ -238,7 +244,8 @@ type
  signahdlerprocty = procedure(siginfo: psiginfoty);
  
  siginfostatety = (sis_checked,sis_eventchecked,sis_touched,
-                   sis_input,sis_output{,sis_recursive});
+                   sis_input,sis_output,
+                   sis_eventoutput,sis_eventinput{,sis_recursive});
  siginfostatesty = set of siginfostatety;
  
  inputstatety = (ins_checked,ins_recursive);
@@ -1199,6 +1206,7 @@ begin
  fmax:= emptyreal;
  fexpstart:= emptyreal;
  fexpend:= emptyreal;
+ fchanged:= siginchangeresetflags;
  inherited;
  name:= 'input';
 end;
@@ -1235,6 +1243,7 @@ procedure tdoubleinputconn.setvalue(const avalue: double);
 begin
  lock;
  fvalue:= avalue;
+ include(fchanged,sic_value);
  unlock;
 end;
 
@@ -2503,25 +2512,33 @@ var
  {$endif}  
  end; //processcalcorder()
 
-  procedure updatesca(const ainput: tdoubleinputconn; var sca: inpscaleinfoty);
-  var
-   a,b: double;
-  begin
-   sca.offset:= ainput.offset;
-   sca.gain:= ainput.gain;
-   sca.hasmin:= not isemptyreal(ainput.min);
-   sca.hasmax:= not isemptyreal(ainput.max);
-   sca.isexp:= (ainput.expstart > 0) and (ainput.expend > 0) and 
-                    (ainput.expend > ainput.expstart);
-   if sca.isexp then begin
-    b:= ln(ainput.expstart);
-    a:= ln(ainput.expend) - b;
-    sca.offset:= b+a*sca.offset;
-    sca.gain:= a*sca.gain;
-   end;
-   sca.hasscale:= sca.hasmin or sca.hasmax or sca.isexp or
-                                 (sca.offset <> 0) or (sca.gain <> 1);
-  end; //updatesca()
+ procedure updatesca(const ainput: tdoubleinputconn; var sca: inpscaleinfoty);
+ var
+  a,b: double;
+ begin
+  sca.offset:= ainput.offset;
+  sca.gain:= ainput.gain;
+  sca.hasmin:= not isemptyreal(ainput.min);
+  sca.hasmax:= not isemptyreal(ainput.max);
+  sca.isexp:= (ainput.expstart > 0) and (ainput.expend > 0) and 
+                   (ainput.expend > ainput.expstart);
+  if sca.isexp then begin
+   b:= ln(ainput.expstart);
+   a:= ln(ainput.expend) - b;
+   sca.offset:= b+a*sca.offset;
+   sca.gain:= a*sca.gain;
+  end;
+  sca.hasscale:= sca.hasmin or sca.hasmax or sca.isexp or
+                                (sca.offset <> 0) or (sca.gain <> 1);
+ end; //updatesca()
+
+ procedure initinput(const ainput: tdoubleinputconn);
+ begin
+  with ainput do begin
+   updatesca(ainput,fsca);
+   fchanged:= [sic_value];
+  end;
+ end; //initinput()
 
  procedure updatedestinfo(const ainput: tdoubleinputconn;
                                  const asource: pdouble; var ainfo: destinfoty);
@@ -2642,7 +2659,7 @@ begin
     debugpointer(' inp ',inputs[int2].input);
   {$endif}
     finphash.add(ptruint(inputs[int2].input),po1);
-    updatesca(inputs[int2].input,inputs[int2].input.fsca);
+    initinput(inputs[int2].input);
    end;
    for int2:= 0 to high(outputs) do begin
   {$ifdef mse_debugsignal}
@@ -2650,6 +2667,9 @@ begin
   {$endif}
     foutphash.add(ptruint(outputs[int2]),po1);
     with outputs[int2] do begin
+     if ocs_eventdriven in fstate then begin
+      include(po1^.state,sis_eventoutput);
+     end;
      int3:= length(po1^.destinations);
      setlength(po1^.destinations,int3+length(fdestinations));
      for int4:= 0 to high(fdestinations) do begin
@@ -2707,7 +2727,10 @@ begin
         end;
         for int4:= 0 to high(po2^.inputs) do begin
          if po2^.inputs[int4].input = fdestinations[int3] then begin
-          po2^.inputs[int4].source:= po1;
+          with po2^.inputs[int4] do begin
+           source:= po1;
+           include(input.fchanged,sic_stream);
+          end;
           break;
          end;
         end;
@@ -2725,7 +2748,7 @@ begin
  for int1:= 0 to high(fclients) do begin
   po1:= @finfos[int1];
   with po1^ do begin
-   state:= [];
+//   state:= [];
    if not isopenoutput(outputs) then begin
     include(state,sis_output);
    end
@@ -2773,11 +2796,12 @@ begin
        {$endif}
         if sis_eventchecked in po2^.state then begin
          raise exception.create(
-          'Recursive event connection: '+self.name+ ', Node: '+
+           'Recursive event connection: '+self.name+ ', Node: '+
                       getnodenamepath(finfos[int1].intf) +
                   ', Dest: '+getnodenamepath(po2^.intf)+'.');
         end; 
         adduniqueitem(pointerarty(eventdestinations),po2);
+        include(po2^.state,sis_eventinput);
         include(state,sis_eventchecked);
        end;
       end;
@@ -2798,8 +2822,8 @@ begin
     additem(pointerarty(finputnodes),po1,inputnodecount);
    {$ifdef mse_debugsignal}
     debugnodeinfo(' recursive circle start ',po1);
-    touchnode(po1);
    {$endif}
+    touchnode(po1);
    end;
   end;
  end;
@@ -2890,6 +2914,19 @@ begin
  include(fstate,scs_modelvalid);
  clear;
  checktick;
+{$ifdef mse_debugsignal}
+ debugwriteln('*execute event start nodes');
+{$endif}
+ po1:= pointer(finfos);
+ for int1:= 0 to high(finfos) do begin
+  if po1^.state * [sis_eventoutput,sis_eventinput] = [sis_eventoutput] then begin
+  {$ifdef mse_debugsignal}
+   debugnodeinfo(' exec ',po1);
+   {$endif}
+   internalexecevent(po1);
+  end;
+  inc(po1);
+ end; 
  if assigned(fonafterupdatemodel) then begin
   application.lock;
   try
@@ -3024,6 +3061,7 @@ begin
   for int1:= 0 to high(destinations) do begin
    with destinations[int1] do begin
     with destinput do begin
+     include(fchanged,sic_value);
      if outputindex = 0 then begin
       fvalue:= do1*fsca.gain+fsca.offset;
      end
