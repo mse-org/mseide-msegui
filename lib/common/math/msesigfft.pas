@@ -399,8 +399,8 @@ begin
 end;
 
 procedure tsigsamplerfft.initmodel;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  inherited;
  ffftbuffer:= nil;

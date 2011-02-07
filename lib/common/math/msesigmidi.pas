@@ -174,10 +174,10 @@ type
  
  tmidipatches = class(townedpersistentarrayprop)
   protected
-   class function getitemclasstype: persistentclassty; override;
-               //used in dumpunitgroups
   public
    constructor create(const aowner: tsigmidisource); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
+               //used in dumpunitgroups
  end;
  
  tpatchinfolist = class(tptruinthashdatalist)
@@ -352,8 +352,8 @@ begin
 end;
 
 procedure tsigmidiconnector.sighandler(const ainfo: psighandlerinfoty);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  ainfo^.dest^:= ftrigvalue;
 end;
@@ -651,7 +651,7 @@ var
  int1,int2: integer;
  destlist: tpointerptruinthashdatalist;
  patch1: tmidipatch;
- po1: ppatchty;
+// po1: ppatchty;
  po2: pointer;
 begin
  fchannels:= nil;
@@ -665,7 +665,7 @@ begin
  end;
  setlength(fchannels,int2);
  for int1:= 0 to high(fconnections) do begin
-  with fchannels[ptrint(destlist.find(fconnections[int1].channel))] do begin
+  with fchannels[ptruint(destlist.find(fconnections[int1].channel))] do begin
    int2:= high(connections)+1;
    setlength(connections,int2+1);
    connections[int2].dest:= fconnections[int1];

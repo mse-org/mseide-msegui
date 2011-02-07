@@ -214,11 +214,13 @@ end;
 
 procedure tcustomaudioout.stop;
 begin
- fthread.terminate;
- application.waitforthread(fthread);
- freeandnil(fthread);
- pa_simple_free(fpulsestream);
- releasepulsesimple;
+ if fthread <> nil then begin
+  fthread.terminate;
+  application.waitforthread(fthread);
+  freeandnil(fthread);
+  pa_simple_free(fpulsestream);
+  releasepulsesimple;
+ end;
  factive:= false;
 end;
 

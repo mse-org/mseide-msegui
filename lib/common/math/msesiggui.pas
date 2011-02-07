@@ -993,7 +993,7 @@ end;
 procedure tsigkeyboard.paintglyph(const canvas: tcanvas;
                const acolorglyph: colorty; const avalue; const arect: rectty);
 var
- pt1: pointty;
+// pt1: pointty;
  ar1: segmentarty;
  int1,int2,int3,int4: integer;
  rect1: rectty;
@@ -1590,7 +1590,7 @@ procedure tenvelopeedit.updatelayout;
 var
  rect1: rectty;
  rect2: rectty;
- fr1,fr2: framety;
+// fr1,fr2: framety;
 begin
  rect1:= innerwidgetrect;
  with rect1 do begin

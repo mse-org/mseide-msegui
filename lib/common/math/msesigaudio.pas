@@ -315,13 +315,13 @@ end;
 
 function tsigaudioout.threadproc(sender: tmsethread): integer;
 var
- data: pointer;
+// data: pointer;
  int1: integer;
  datasize1,blocksize1,bufferlength1,valuehigh1: integer;
  controller1: tsigcontroller;
- po1: pointer;
- po2: pdouble;
- do1: double;
+// po1: pointer;
+// po2: pdouble;
+// do1: double;
  convert: convertprocty;
  info: convertinfoty;
 begin

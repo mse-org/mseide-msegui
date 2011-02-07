@@ -289,11 +289,11 @@ end;
 
 procedure tsigfir.sighandler(const ainfo: psighandlerinfoty);
 var                             //todo: optimize
- int1,int2,int3: integer;
- ar1: doublearty;
+ {int1,}int2,int3: integer;
+// ar1: doublearty;
  i,o: double;
  po1: pdouble;
- inp1,outp1: pdouble;
+// inp1,outp1: pdouble;
  startindex1,endindex1,endindex2: integer;
 begin
  po1:= fcoeff.datapo;
@@ -419,8 +419,8 @@ end;
 
 procedure tsigiir.sighandler(const ainfo: psighandlerinfoty);
 var 
- int1,int2,int3,int4: integer;
- inp1,outp1: pdouble;
+ {int1,}int2,int3,int4: integer;
+// inp1,outp1: pdouble;
  i,o: double;
  po1: pcomplexty;          //todo: optimize
 begin
