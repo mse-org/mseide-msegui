@@ -719,6 +719,9 @@ begin
    setfocus;
   end;
   bo1:= doactionshortcut(self,factioninfo,info);
+  if bo1 and (fmodalresult <> mr_none) then begin
+   window.modalresult:= fmodalresult;
+  end;
   if not bo1 and not (es_preview in info.eventstate) then begin
    bo2:= es_processed in info.eventstate;
    exclude(info.eventstate,es_processed);

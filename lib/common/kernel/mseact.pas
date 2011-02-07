@@ -292,7 +292,12 @@ procedure actionendload(const sender: iactionlink);
 function doactionexecute(const sender: tobject; var info: actioninfoty;
                                const nocheckbox: boolean = false;
                                const nocandefocus: boolean = false): boolean;
-      //true if local checked changed
+          //true if local checked changed
+function doactionexecute1(const sender: tobject; var info: actioninfoty;
+                         out changed: boolean;
+                         const nocheckbox: boolean = false;
+                         const nocandefocus: boolean = false): boolean;
+          //true if not canceled
 
 procedure initactioninfo(var info: actioninfoty; aoptions: menuactionoptionsty = []);
 procedure actionstatestoshapestates(const source: actioninfoty; var dest: shapestatesty);
@@ -320,12 +325,14 @@ begin
  translateshortcut1(result);
 end;
 
-function doactionexecute(const sender: tobject; var info: actioninfoty;
+function doactionexecute1(const sender: tobject; var info: actioninfoty;
+                         out changed: boolean;
                          const nocheckbox: boolean = false;
                          const nocandefocus: boolean = false): boolean;
-      //true if local checked changed
+          //true if not canceled
 begin
  result:= false;
+ changed:= false;
  with info do begin
   if not (as_disabled in state) then begin
    if not nocandefocus and 
@@ -341,7 +348,7 @@ begin
     end
     else begin
      togglebit1(longword(info.state),ord(as_checked));
-     result:= true;
+     changed:= true;
     end;
    end;
    if assigned(info.onexecute) then begin
@@ -350,8 +357,17 @@ begin
    if info.action <> nil then begin
     info.action.eventfired(sender,info); 
    end;
+   result:= true;
   end;
  end;
+end;
+
+function doactionexecute(const sender: tobject; var info: actioninfoty;
+                         const nocheckbox: boolean = false;
+                         const nocandefocus: boolean = false): boolean;
+      //true if local checked changed
+begin
+ doactionexecute1(sender,info,result,nocheckbox,nocandefocus);
 end;
 
 procedure actionstatestoshapestates(const source: actioninfoty; var dest: shapestatesty);

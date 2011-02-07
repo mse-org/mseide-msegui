@@ -1058,7 +1058,7 @@ begin
  if bo1 then begin
   include(keyinfo.eventstate,es_processed);
   if result then begin
-   doactionexecute(sender,info,false,false);
+   result:= doactionexecute1(sender,info,bo1,false,false);
 //   changed;
   end;
  end;
