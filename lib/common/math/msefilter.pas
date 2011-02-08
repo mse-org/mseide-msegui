@@ -98,15 +98,10 @@ type
  
  tsigfilter = class(tsigmultiinpout) //todo: speed optimized prewarp
   private
-//   finppo: pdouble;
-   ffrequencypo: pdouble;
-   ffrequencychangepo: psiginchangeflagsty;
-   ffrequfactpo: pdouble;
-   ffrequfactchangepo: psiginchangeflagsty;
-   ffrequency: tdoubleinputconn;
-   fqfactorpo: pdouble;
-   fqfactorchangepo: psiginchangeflagsty;
-   famplitudepo: pdouble;
+   ffrequencypo: psigvaluety;
+   ffrequfactpo: psigvaluety;
+   fqfactorpo: psigvaluety;
+   famplitudepo: psigvaluety;
    fgain: double;
    fz1: double;
    fz2: double;
@@ -115,8 +110,7 @@ type
    fb2: double;
    fa1: double;
    fa2: double;
-//   ffrequencybefore: double;
-//   fqfactorbefore: double;
+   ffrequency: tdoubleinputconn;
    fqfactor: tdoubleinputconn;
    fkind: sigfilterkindty;
    foptions: sigfilteroptionsty;
@@ -155,6 +149,90 @@ type
                                                  default sfk_lp1bilinear;
    property options: sigfilteroptionsty read foptions 
                                              write setoptions default [];
+ end;
+
+ tfilterbanksection = class(townedpersistent)
+  private
+   ffrequfact: tdoubleinputconn;
+   fqfactor: tdoubleinputconn;
+   famplitude: tdoubleinputconn;
+   procedure setfrequfact(const avalue: tdoubleinputconn);
+   procedure setqfactor(const avalue: tdoubleinputconn);
+   procedure setamplitude(const avalue: tdoubleinputconn);
+  public
+   constructor create(aowner: tobject); override;
+   destructor destroy; override;
+  published
+   property frequfact: tdoubleinputconn read ffrequfact 
+                                                 write setfrequfact;   
+   property qfactor: tdoubleinputconn read fqfactor 
+                                                 write setqfactor;   
+   property amplitude: tdoubleinputconn read famplitude 
+                                                 write setamplitude;   
+ end;
+ 
+ tfilterbanksections = class(townedpersistentarrayprop)
+  private
+  protected
+   procedure getinputar(var inputs: inputconnarty);
+   procedure dosizechanged; override;
+  public
+   constructor create(const aowner: tcomponent); reintroduce;
+  published
+ end;
+
+ filterinfoty = record
+  ffrequfactpo: psigvaluety;
+  fqfactorpo: psigvaluety;
+  famplitudepo: psigvaluety;
+  fa1: double;
+  fa2: double;
+  fb0: double;
+  fb1: double;
+  fb2: double;
+  z1: double;
+  z2: double;
+ end;
+ pfilterinfoty = ^filterinfoty;
+ filterinfoarty = array of filterinfoty;
+  
+ tsigfilterbank = class(tsigmultiinpout) //todo: speed optimized prewarp
+  private
+   fsections: tfilterbanksections;
+   ffrequency: tdoubleinputconn;
+   foptions: sigfilteroptionsty;
+   finfos: filterinfoarty;
+   finfohigh: integer;
+   fz1: double;
+   fz2: double;
+   ffrequencypo: psigvaluety;
+   famplitudepo: psigvaluety;
+   fbaseamplitudepo: psigvaluety;
+   famplitude: tdoubleinputconn;
+   fbaseamplitude: tdoubleinputconn;
+   procedure setfrequency(const avalue: tdoubleinputconn);
+   procedure setoptions(const avalue: sigfilteroptionsty);
+   procedure setsections(const avalue: tfilterbanksections);
+   procedure setamplitude(const avalue: tdoubleinputconn);
+   procedure setbaseamplitude(const avalue: tdoubleinputconn);
+  protected
+    //isigclient
+   procedure initmodel; override;
+   function getinputar: inputconnarty; override;
+   function gethandler: sighandlerprocty; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
+   procedure clear; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property frequency: tdoubleinputconn read ffrequency write setfrequency;
+   property amplitude: tdoubleinputconn read famplitude write setamplitude;
+   property baseamplitude: tdoubleinputconn read fbaseamplitude 
+                                            write setbaseamplitude;
+   property options: sigfilteroptionsty read foptions 
+                                             write setoptions default [];
+   property sections: tfilterbanksections read fsections write setsections;
  end;
  
 implementation
@@ -571,10 +649,10 @@ var
  i,o,do1: double;
  int1: integer;
 begin
- if (ffrequencychangepo^ <> []) or (ffrequfactchangepo^ <> []) then begin
-  exclude(ffrequencychangepo^,sic_value);
-  exclude(ffrequfactchangepo^,sic_value);
-  do1:= ffrequencypo^*ffrequfactpo^;
+ if (ffrequencypo^.changed <> []) or (ffrequfactpo^.changed <> []) then begin
+  exclude(ffrequencypo^.changed,sic_value);
+  exclude(ffrequfactpo^.changed,sic_value);
+  do1:= ffrequencypo^.value*ffrequfactpo^.value;
   if do1 > 0 then begin
    fb0:= 2*pi*do1;
    fa1:= exp(-fb0);
@@ -582,10 +660,10 @@ begin
  end;
  i:= 0;
  for int1:= 0 to finphigh do begin
-  i:= i+finps[int1]^;
+  i:= i+finps[int1]^.value;
  end;
  o:= i*fb0 + fz1;
- ainfo^.dest^:= o*famplitudepo^;
+ ainfo^.dest^:= o*famplitudepo^.value;
  fz1:= o*fa1;
 end;
 
@@ -595,10 +673,10 @@ var
  do1: double;
  int1: integer;
 begin
- if (ffrequencychangepo^ <> []) or (ffrequfactchangepo^ <> []) then begin
-  exclude(ffrequencychangepo^,sic_value);
-  exclude(ffrequfactchangepo^,sic_value);
-  do1:= ffrequencypo^*ffrequfactpo^;
+ if (ffrequencypo^.changed <> []) or (ffrequfactpo^.changed <> []) then begin
+  exclude(ffrequencypo^.changed,sic_value);
+  exclude(ffrequfactpo^.changed,sic_value);
+  do1:= ffrequencypo^.value*ffrequfactpo^.value;
   if do1 > 0 then begin
    do1:= 2*pi*do1;
    fb0:= do1/(do1+2);
@@ -608,10 +686,10 @@ begin
  end;
  i:= 0;
  for int1:= 0 to finphigh do begin
-  i:= i+finps[int1]^;
+  i:= i+finps[int1]^.value;
  end;
  o:= i*fb0 + fz1;
- ainfo^.dest^:= o*famplitudepo^;
+ ainfo^.dest^:= o*famplitudepo^.value;
  fz1:= i*fb1-fa1*o;
 end;
 
@@ -621,12 +699,12 @@ var
  i,o,do1: double;
  int1: integer;
 begin
- if (ffrequencychangepo^ <> []) or (ffrequfactchangepo^ <> []) or
-                   (fqfactorchangepo^ <> []) then begin
-  exclude(ffrequencychangepo^,sic_value);
-  exclude(ffrequfactchangepo^,sic_value);
-  exclude(fqfactorchangepo^,sic_value);
-  do1:= ffrequencypo^*ffrequfactpo^;
+ if (ffrequencypo^.changed <> []) or (ffrequfactpo^.changed <> []) or
+                   (fqfactorpo^.changed <> []) then begin
+  exclude(ffrequencypo^.changed,sic_value);
+  exclude(ffrequfactpo^.changed,sic_value);
+  exclude(fqfactorpo^.changed,sic_value);
+  do1:= ffrequencypo^.value*ffrequfactpo^.value;
   if do1 > 0 then begin
 //  if (fqfactorpo^ <> fqfactorbefore) or (do1 <> ffrequencybefore) then begin
 //   ffrequencybefore:= do1;
@@ -639,9 +717,9 @@ begin
     fgain:= 1;
    end
    else begin
-    fgain:= (1/sqrt(sqrt(2)))/sqrt(fqfactorpo^);
+    fgain:= (1/sqrt(sqrt(2)))/sqrt(fqfactorpo^.value);
    end;
-   QfT_4:= 4/(fqfactorpo^*fT2_4);  // 4/(Q*fT)
+   QfT_4:= 4/(fqfactorpo^.value*fT2_4);  // 4/(Q*fT)
    fT2_4:= 4/(fT2_4*fT2_4);           // 4/fT^2
    den:= 1 + QfT_4 + fT2_4;           // 1 + 4/(Q*fT) + 4/fT^2
    fb0:= fgain/den;
@@ -653,24 +731,24 @@ begin
  end;
  i:= 0;
  for int1:= 0 to finphigh do begin
-  i:= i+finps[int1]^;
+  i:= i+finps[int1]^.value;
  end;
  o:= fz1+i*fb0;
  fz1:= fz2-o*fa1+i*fb1;
  fz2:= i*fb2-o*fa2;
- ainfo^.dest^:= o*famplitudepo^;
+ ainfo^.dest^:= o*famplitudepo^.value;
 end;
 
 procedure tsigfilter.sighandlerb2bi;
 var
  fT,QfT_4,fT2_4,den,do1: double;
 begin
- if (ffrequencychangepo^ <> []) or (ffrequfactchangepo^ <> []) or
-                   (fqfactorchangepo^ <> []) then begin
-  exclude(ffrequencychangepo^,sic_value);
-  exclude(ffrequfactchangepo^,sic_value);
-  exclude(fqfactorchangepo^,sic_value);
-  do1:= ffrequencypo^*ffrequfactpo^;
+ if (ffrequencypo^.changed <> []) or (ffrequfactpo^.changed <> []) or
+                   (fqfactorpo^.changed <> []) then begin
+  exclude(ffrequencypo^.changed,sic_value);
+  exclude(ffrequfactpo^.changed,sic_value);
+  exclude(fqfactorpo^.changed,sic_value);
+  do1:= ffrequencypo^.value*ffrequfactpo^.value;
   if do1 > 0 then begin
 // do1:= ffrequencypo^*ffrequfactpo^;
 // if do1 > 0 then begin
@@ -682,12 +760,12 @@ begin
     fT:= 2*tan(0.5*fT);
    end;
    if (sfo_passgainfix in foptions) or (fkind = sfk_bs2bilinear) then begin
-    fgain:= 4/(fT*fqfactorpo^);
+    fgain:= 4/(fT*fqfactorpo^.value);
    end
    else begin
-    fgain:= 4/(fT*sqrt(fqfactorpo^));
+    fgain:= 4/(fT*sqrt(fqfactorpo^.value));
    end;
-   QfT_4:= 4/(fqfactorpo^*fT);     // 4/(Q*fT)
+   QfT_4:= 4/(fqfactorpo^.value*fT);     // 4/(Q*fT)
    fT2_4:= 4/(fT*fT);                 // 4/fT^2
    den:= 1 + QfT_4 + fT2_4;           // 1 + 4/(Q*fT) + 4/fT^2
    fb0:= fgain/den;
@@ -707,12 +785,12 @@ begin
  sighandlerb2bi;
  i:= 0;
  for int1:= 0 to finphigh do begin
-  i:= i+finps[int1]^;
+  i:= i+finps[int1]^.value;
  end;
  o:= fz1+i*fb0;
  fz1:= fz2-o*fa1+i*fb1;
  fz2:= i*fb2-o*fa2;
- ainfo^.dest^:= o*famplitudepo^;
+ ainfo^.dest^:= o*famplitudepo^.value;
 end;
 
 procedure tsigfilter.sighandlerbs2bi(const ainfo: psighandlerinfoty);
@@ -723,12 +801,12 @@ begin
  sighandlerb2bi;
  i:= 0;
  for int1:= 0 to finphigh do begin
-  i:= i+finps[int1]^;
+  i:= i+finps[int1]^.value;
  end;
  o:= fz1+i*fb0;
  fz1:= fz2-o*fa1+i*fb1;
  fz2:= i*fb2-o*fa2;
- ainfo^.dest^:= (i-o)*famplitudepo^;
+ ainfo^.dest^:= (i-o)*famplitudepo^.value;
 end;
 
 procedure tsigfilter.clear;
@@ -741,13 +819,10 @@ end;
 procedure tsigfilter.initmodel;
 begin
 // finppo:= @tdoubleinputconn1(finput).fvalue;
- ffrequencypo:= @tdoubleinputconn1(ffrequency).fvalue;
- ffrequencychangepo:= @tdoubleinputconn1(ffrequency).fchanged;
- ffrequfactpo:= @tdoubleinputconn1(ffrequfact).fvalue;
- ffrequfactchangepo:= @tdoubleinputconn1(ffrequfact).fchanged;
- fqfactorpo:= @tdoubleinputconn1(fqfactor).fvalue;
- fqfactorchangepo:= @tdoubleinputconn1(fqfactor).fchanged;
- famplitudepo:= @tdoubleinputconn1(famplitude).fvalue;
+ ffrequencypo:= @tdoubleinputconn1(ffrequency).fv;
+ ffrequfactpo:= @tdoubleinputconn1(ffrequfact).fv;
+ fqfactorpo:= @tdoubleinputconn1(fqfactor).fv;
+ famplitudepo:= @tdoubleinputconn1(famplitude).fv;
  inherited;
 end;
 
@@ -799,6 +874,250 @@ end;
 procedure tsigfilter.setfrequfact(const avalue: tdoubleinputconn);
 begin
  ffrequfact.assign(avalue);
+end;
+
+{ tfilterbanksection }
+
+constructor tfilterbanksection.create(aowner: tobject);
+begin
+ inherited;
+ ffrequfact:= tdoubleinputconn.create(nil,isigclient(tsigfilterbank(aowner)));
+ ffrequfact.name:= 'frequfact';
+ ffrequfact.value:= 1;
+ fqfactor:= tdoubleinputconn.create(nil,isigclient(tsigfilterbank(aowner)));
+ fqfactor.name:= 'qfactor';
+ fqfactor.value:= 1;
+ famplitude:= tdoubleinputconn.create(nil,isigclient(tsigfilterbank(aowner)));
+ famplitude.name:= 'amplitude';
+ famplitude.value:= 1;
+end;
+
+destructor tfilterbanksection.destroy;
+begin
+ ffrequfact.free;
+ fqfactor.free;
+ famplitude.free;
+ inherited;
+end;
+
+procedure tfilterbanksection.setfrequfact(const avalue: tdoubleinputconn);
+begin
+ ffrequfact.assign(avalue);
+end;
+
+procedure tfilterbanksection.setqfactor(const avalue: tdoubleinputconn);
+begin
+ fqfactor.assign(avalue);
+end;
+
+procedure tfilterbanksection.setamplitude(const avalue: tdoubleinputconn);
+begin
+ famplitude.assign(avalue);
+end;
+
+{ tfilterbanksections }
+
+constructor tfilterbanksections.create(const aowner: tcomponent);
+begin
+ inherited create(aowner,tfilterbanksection);
+end;
+
+procedure tfilterbanksections.getinputar(var inputs: inputconnarty);
+var
+ int1,int2,int3: integer;
+begin
+ int1:= length(inputs);
+ setlength(inputs,int1+count*3);
+ for int2:= 0 to count - 1 do begin
+  with tfilterbanksection(fitems[int2]) do begin
+   inputs[int1]:= ffrequfact;
+   inc(int1);
+   inputs[int1]:= fqfactor;
+   inc(int1);
+   inputs[int1]:= famplitude;
+   inc(int1);
+  end;
+ end;
+end;
+
+procedure tfilterbanksections.dosizechanged;
+begin
+ inherited;
+ tsigfilterbank(fowner).modelchange;
+end;
+
+{ tsigfilterbank }
+
+constructor tsigfilterbank.create(aowner: tcomponent);
+begin
+ fsections:= tfilterbanksections.create(self);
+ ffrequency:= tdoubleinputconn.create(nil,isigclient(self));
+ ffrequency.name:= 'frequency';
+ ffrequency.value:= 0.01;
+ famplitude:= tdoubleinputconn.create(nil,isigclient(self));
+ famplitude.name:= 'amplitude';
+ famplitude.value:= 1;
+ fbaseamplitude:= tdoubleinputconn.create(nil,isigclient(self));
+ fbaseamplitude.name:= 'baseamplitude';
+ fbaseamplitude.value:= 1;
+ inherited;
+end;
+
+destructor tsigfilterbank.destroy;
+begin
+ inherited;
+ fsections.free;
+ ffrequency.free;
+ famplitude.free;
+ fbaseamplitude.free;
+end;
+
+procedure tsigfilterbank.setsections(const avalue: tfilterbanksections);
+begin
+ fsections.assign(avalue);
+end;
+
+procedure tsigfilterbank.setfrequency(const avalue: tdoubleinputconn);
+begin
+ ffrequency.assign(avalue);
+end;
+
+procedure tsigfilterbank.setoptions(const avalue: sigfilteroptionsty);
+begin
+ if foptions <> avalue then begin
+  lock;
+  foptions:= avalue;
+  modelchange;
+  unlock;
+ end;
+end;
+
+function tsigfilterbank.getinputar: inputconnarty;
+begin
+ result:= inherited getinputar;
+ setlength(result,high(result)+4);
+ result[high(result)-2]:= ffrequency;
+ result[high(result)-1]:= famplitude;
+ result[high(result)]:= fbaseamplitude;
+ fsections.getinputar(result);
+end;
+
+function tsigfilterbank.gethandler: sighandlerprocty;
+begin
+  result:= @sighandler;
+end;
+
+procedure tsigfilterbank.sighandler(const ainfo: psighandlerinfoty);
+
+ procedure setupparams(const asection: pfilterinfoty);
+ var
+  fT,QfT_4,fT2_4,den,do1,fgain: double;
+ begin
+  with asection^ do begin
+   exclude(ffrequfactpo^.changed,sic_value);
+   exclude(fqfactorpo^.changed,sic_value);
+   do1:= ffrequencypo^.value*ffrequfactpo^.value;
+   if do1 > 0 then begin
+    fT:= do1*2*pi;           // fT
+    if not (sfo_noprewarp in foptions) then begin
+     fT:= 2*tan(0.5*fT);
+    end;
+//     if (sfo_passgainfix in foptions) or (fkind = sfk_bs2bilinear) then begin
+    fgain:= 4/(fT*fqfactorpo^.value);
+//     end
+//     else begin
+//      fgain:= 4/(fT*sqrt(fqfactorpo^.value));
+//     end;
+    QfT_4:= 4/(fqfactorpo^.value*fT);     // 4/(Q*fT)
+    fT2_4:= 4/(fT*fT);                 // 4/fT^2
+    den:= 1 + QfT_4 + fT2_4;           // 1 + 4/(Q*fT) + 4/fT^2
+    fb0:= fgain/den;
+    fb1:= 0;
+    fb2:= -fb0;
+    fa1:= 2*(1-fT2_4)/den;
+    fa2:= (1-QfT_4+fT2_4)/den;
+   end;
+  end;
+ end; //setupparams()
+
+var
+ i,o,ot: double;
+ int1: integer;
+ po1: pfilterinfoty;
+begin
+ if (ffrequencypo^.changed <> []) then begin
+  exclude(ffrequencypo^.changed,sic_value);
+  po1:= pointer(finfos);
+  for int1:= finfohigh downto 0 do begin
+   setupparams(po1);
+   inc(po1);
+  end;
+ end;
+ i:= 0;
+ for int1:= 0 to finphigh do begin
+  i:= i+finps[int1]^.value;
+ end;
+ ot:= 0;
+ po1:= pointer(finfos);
+ for int1:= finfohigh downto 0 do begin
+  with po1^ do begin
+   if (ffrequfactpo^.changed <> []) or (fqfactorpo^.changed <> []) then begin
+    setupparams(po1);
+   end;
+   o:= i*fb0+fz1*fb1+fz2*fb2-z1*fa1-z2*fa2;
+   z2:= z1;
+   z1:= o;
+   ot:= ot+o*famplitudepo^.value;
+  end;
+  inc(po1);
+ end;
+ fz2:= fz1;
+ fz1:= i;
+ ainfo^.dest^:= (i*fbaseamplitudepo^.value+ot)*famplitudepo^.value; 
+end;
+
+procedure tsigfilterbank.initmodel;
+var
+ int1: integer;
+begin
+ inherited;
+ ffrequencypo:= @tdoubleinputconn1(ffrequency).fv;
+ famplitudepo:= @tdoubleinputconn1(famplitude).fv;
+ fbaseamplitudepo:= @tdoubleinputconn1(fbaseamplitude).fv;
+ setlength(finfos,fsections.count);
+ finfohigh:= high(finfos);
+ for int1:= finfohigh downto 0 do begin
+  with finfos[int1],tfilterbanksection(fsections.fitems[int1]) do begin
+   ffrequfactpo:= @tdoubleinputconn1(ffrequfact).fv;
+   fqfactorpo:= @tdoubleinputconn1(fqfactor).fv;
+   famplitudepo:= @tdoubleinputconn1(famplitude).fv;
+  end;
+ end;
+end;
+
+procedure tsigfilterbank.clear;
+var
+ int1: integer;
+begin
+ inherited;
+ fz1:= 0;
+ fz2:= 0;
+ for int1:= high(finfos) downto 0 do begin
+  with finfos[int1] do begin
+   z1:= 0;
+   z2:= 0;
+  end;
+ end;
+end;
+
+procedure tsigfilterbank.setamplitude(const avalue: tdoubleinputconn);
+begin
+ famplitude.assign(avalue);
+end;
+
+procedure tsigfilterbank.setbaseamplitude(const avalue: tdoubleinputconn);
+begin
+ fbaseamplitude.assign(avalue);
 end;
 
 end.

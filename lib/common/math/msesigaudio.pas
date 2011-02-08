@@ -474,7 +474,7 @@ var
 begin
  if fbufpo <> nil then begin
   for int1:= 0 to finphigh do begin
-   fbufpo^:= finps[int1]^;
+   fbufpo^:= finps[int1]^.value;
    inc(fbufpo);
   end;
  end;

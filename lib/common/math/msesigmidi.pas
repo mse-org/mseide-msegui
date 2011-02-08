@@ -264,7 +264,7 @@ type
    fconnectors: sigmidiconnectorarty;
    foninitvoice: initvoiceeventty;
    foutputs: tmidiconnoutputarrayprop;
-   finps: doublepoarty;
+   finps: sigvaluepoarty;
    fouts: doublepoarty;
    foutputhigh,finputhigh: integer;
    fsource: tsigmidisource;
@@ -946,7 +946,7 @@ begin
   with foutputs[int1] do begin
    fouts[int1]:= @fvalue;
    for int2:= 0 to finputhigh do begin
-    finps[int3]:= @tdoubleinputconn1(inputs[int2]).fvalue;
+    finps[int3]:= @tdoubleinputconn1(inputs[int2]).fv;
     inc(int3);
    end;
   end;

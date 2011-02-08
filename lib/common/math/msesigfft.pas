@@ -159,7 +159,7 @@ end;
 
 procedure tbufferdoubleinputconn.sighandler(const ainfo: psighandlerinfoty);
 begin
- fsignal[findex]:= fvalue;
+ fsignal[findex]:= fv.value;
  inc(findex);
  if findex = fsamplecount then begin
   findex:= 0;

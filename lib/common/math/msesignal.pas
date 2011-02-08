@@ -181,7 +181,14 @@ type
   hasmax: boolean;
   isexp: boolean;
  end;
-  
+
+ sigvaluety = record
+  value: double;
+  changed: siginchangeflagsty;
+ end;
+ psigvaluety = ^sigvaluety;
+ sigvaluepoarty = array of psigvaluety;
+ 
  tdoubleinputconn = class(tdoubleconn)
   private
    fsource: tdoubleoutputconn;
@@ -202,8 +209,7 @@ type
    procedure setexpend(const avalue: realty);
   protected
    fsca: inpscaleinfoty;
-   fvalue: double;
-   fchanged: siginchangeflagsty;
+   fv: sigvaluety;
   public
    constructor create(const aowner: tcomponent;
                      const asigintf: isigclient); override;
@@ -216,7 +222,7 @@ type
    property max: realty read fmax write setmax;
    property expstart: realty read fexpstart write setexpstart;
    property expend: realty read fexpend write setexpend;
-   property value: double read fvalue write setvalue;  
+   property value: double read fv.value write setvalue;  
 //   property options: siginpoptionsty read foptions write setoptions;
  end;
 
@@ -347,7 +353,7 @@ type
  tsigout = class(tsigconnection)
   private
    finput: tdoubleinputconn;
-   finputpo: pdouble;
+   finputpo: psigvaluety;
    fonoutput: sigouteventty;
    fvalue: double;
    fonoutputburst: sigoutbursteventty;
@@ -459,7 +465,7 @@ type
    finputs: tdoubleinpconnarrayprop;
    procedure setinputs(const avalue: tdoubleinpconnarrayprop);
   protected
-   finps: doublepoarty;
+   finps: sigvaluepoarty;
    finphigh: integer;
    function getinputar: inputconnarty; override;
    procedure initmodel; override;
@@ -632,7 +638,7 @@ type
    procedure setinput(const avalue: tdoubleinputconn);
   protected
    finput: tdoubleinputconn;
-   finputpo: pdouble;
+   finputpo: psigvaluety;
    function getinputar: inputconnarty; override;
   public
    constructor create(aowner: tcomponent); override;
@@ -666,10 +672,10 @@ type
    ftable: doublearty;
    ftablelength: integer;
    ftime: double;
-   ffrequencypo: pdouble;
-   ffrequfactpo: pdouble;
-   fphasepo: pdouble;
-   famplitudepo: pdouble;
+   ffrequencypo: psigvaluety;
+   ffrequfactpo: psigvaluety;
+   fphasepo: psigvaluety;
+   famplitudepo: psigvaluety;
    foninittable: siginbursteventty;
    foptions: sigwavetableoptionsty;
    fmaster: tsigwavetable;
@@ -727,7 +733,7 @@ type
    finpmin: double;
    finpmax: double;
    finpfact: double; //map input value to segmentindex
-   famplitudepo: pdouble;
+   famplitudepo: psigvaluety;
    fmaster: tsigfuncttable;
    procedure setamplitude(const avalue: tdoubleinputconn);
    procedure settable(const avalue: complexarty);
@@ -809,8 +815,8 @@ type
  tsigenvelope = class(tdoublesigoutcomp)
   private
    ftrigger: tchangedoubleinputconn;
-   famplitudepo: pdouble;
-   fmixpo: pdouble;
+   famplitudepo: psigvaluety;
+   fmixpo: psigvaluety;
 
    fhasmix: boolean;   
    ftime: integer;
@@ -1238,7 +1244,7 @@ begin
  fmax:= emptyreal;
  fexpstart:= emptyreal;
  fexpend:= emptyreal;
- fchanged:= siginchangeresetflags;
+ fv.changed:= siginchangeresetflags;
  inherited;
  name:= 'input';
 end;
@@ -1274,8 +1280,8 @@ end;
 procedure tdoubleinputconn.setvalue(const avalue: double);
 begin
  lock;
- fvalue:= avalue;
- include(fchanged,sic_value);
+ fv.value:= avalue;
+ include(fv.changed,sic_value);
  unlock;
 end;
 
@@ -1603,7 +1609,7 @@ end;
 constructor tsigout.create(aowner: tcomponent);
 begin
  finput:= tdoubleinputconn.create(self,isigclient(self));
- finputpo:= @finput.fvalue;
+ finputpo:= @finput;
  inherited;
 end;
 
@@ -1655,7 +1661,7 @@ procedure tsigout.sighandler(const ainfo: psighandlerinfoty);
 var
  po1: psizeint;
 begin
- fvalue:= finputpo^;
+ fvalue:= finputpo^.value;
  if assigned(fonoutput) then begin
   fonoutput(self,fvalue);
  end;
@@ -2010,7 +2016,7 @@ begin
  finphigh:= finputs.count-1;
  setlength(finps,finphigh+1);
  for int1:= 0 to finphigh do begin
-  finps[int1]:= @tdoubleinputconn(finputs.fitems[int1]).fvalue;
+  finps[int1]:= @tdoubleinputconn(finputs.fitems[int1]).value;
  end;
 end;
 
@@ -2144,7 +2150,7 @@ var
 begin
  ainfo^.dest^:= 0;
  for int1:= 0 to finphigh do begin
-  ainfo^.dest^:= ainfo^.dest^ + finps[int1]^;
+  ainfo^.dest^:= ainfo^.dest^ + finps[int1]^.value;
  end;
 end;
 
@@ -2167,7 +2173,7 @@ begin
  ainfo^.dest^:= fz;
  fz:= 0;
  for int1:= 0 to finphigh do begin
-  fz:= fz + finps[int1]^;
+  fz:= fz + finps[int1]^.value;
  end;
 end;
 
@@ -2215,7 +2221,7 @@ begin
  if fdelay = 0 then begin
   ainfo^.dest^:= 0;
   for int1:= 0 to finphigh do begin
-   ainfo^.dest^:= ainfo^.dest^ + finps[int1]^;
+   ainfo^.dest^:= ainfo^.dest^ + finps[int1]^.value;
   end;
  end
  else begin
@@ -2223,7 +2229,7 @@ begin
   ainfo^.dest^:= po1^;
   po1^:= 0;
   for int1:= 0 to finphigh do begin
-   po1^:= po1^ + finps[int1]^;
+   po1^:= po1^ + finps[int1]^.value;
   end;
   inc(finppo);
   if finppo = fdelay then begin
@@ -2286,14 +2292,14 @@ begin
  if fdelay = 0 then begin
   ainfo^.dest^:= 0;
   for int1:= 0 to finphigh do begin
-   ainfo^.dest^:= ainfo^.dest^ + finps[int1]^;
+   ainfo^.dest^:= ainfo^.dest^ + finps[int1]^.value;
   end;
  end
  else begin
   po1:= @fz[finppo];
   po1^:= 0;
   for int1:= 0 to finphigh do begin
-   po1^:= po1^ + finps[int1]^;
+   po1^:= po1^ + finps[int1]^.value;
   end;
   do1:= fdelayinppo^;
   if do1 < 0 then begin
@@ -2359,7 +2365,7 @@ var
 begin
  ainfo^.dest^:= 1;
  for int1:= 0 to finphigh do begin
-  ainfo^.dest^:= ainfo^.dest^ * finps[int1]^;
+  ainfo^.dest^:= ainfo^.dest^ * finps[int1]^.value;
  end;
 end;
 
@@ -2586,7 +2592,7 @@ var
  begin
   with ainput do begin
    updatesca(ainput,fsca);
-   fchanged:= [sic_value];
+   fv.changed:= [sic_value];
   end;
  end; //initinput()
 
@@ -2595,7 +2601,7 @@ var
  begin
   with ainfo do begin
    source:= asource;
-   dest:= @ainput.fvalue;
+   dest:= @ainput.fv.value;
    min:= ainput.min;
    max:= ainput.max;
    sca:= ainput.fsca;
@@ -2782,7 +2788,7 @@ begin
          if po2^.inputs[int4].input = fdestinations[int3] then begin
           with po2^.inputs[int4] do begin
            source:= po1;
-           include(input.fchanged,sic_stream);
+           include(input.fv.changed,sic_stream);
           end;
           break;
          end;
@@ -2952,7 +2958,7 @@ begin
     updatedestinfo(po1^.destinations[0].destinput,handlerinfo.dest,firstdest);
                       //setup hasscale
     if (int3 = 0) and (desthigh < 0) or not firstdest.sca.hasscale then begin
-     handlerinfo.dest:= @po1^.destinations[0].destinput.fvalue;
+     handlerinfo.dest:= @po1^.destinations[0].destinput.fv.value;
     end;    
     if int3 = 0 then begin                //setup again with correct dest
      updatedestinfo(po1^.destinations[0].destinput,handlerinfo.dest,firstdest);
@@ -3132,21 +3138,21 @@ begin
    for int1:= 0 to high(destinations) do begin
     with destinations[int1] do begin
      with destinput do begin
-      include(fchanged,sic_value);
+      include(fv.changed,sic_value);
       if outputindex = 0 then begin
-       fvalue:= do1*fsca.gain+fsca.offset;
+       fv.value:= do1*fsca.gain+fsca.offset;
       end
       else begin
-       fvalue:= outputs[outputindex].fvalue*fsca.gain+fsca.offset;
+       fv.value:= outputs[outputindex].fvalue*fsca.gain+fsca.offset;
       end;
       if fsca.isexp then begin
-       fvalue:= exp(fvalue);
+       fv.value:= exp(fv.value);
       end;
-      if fsca.hasmin and (fvalue < min) then begin
-       fvalue:= min;
+      if fsca.hasmin and (fv.value < min) then begin
+       fv.value:= min;
       end;
-      if fsca.hasmax and (fvalue > max) then begin
-       fvalue:= max;
+      if fsca.hasmax and (fv.value > max) then begin
+       fv.value:= max;
       end;
      end;
     end;
@@ -3168,16 +3174,16 @@ begin
   for int1:= 0 to high(destinations) do begin
    with destinations[int1] do begin
     with destinput do begin
-     include(fchanged,sic_value);
-     fvalue:= outputs[outputindex].fvalue*fsca.gain+fsca.offset;
+     include(fv.changed,sic_value);
+     fv.value:= outputs[outputindex].fvalue*fsca.gain+fsca.offset;
      if fsca.isexp then begin
-      fvalue:= exp(fvalue);
+      fv.value:= exp(fv.value);
      end;
-     if fsca.hasmin and (fvalue < min) then begin
-      fvalue:= min;
+     if fsca.hasmin and (fv.value < min) then begin
+      fv.value:= min;
      end;
-     if fsca.hasmax and (fvalue > max) then begin
-      fvalue:= max;
+     if fsca.hasmax and (fv.value > max) then begin
+      fv.value:= max;
      end;
     end;
    end;
@@ -3277,15 +3283,15 @@ begin
  inherited;
  ffrequency:= tdoubleinputconn.create(self,isigclient(self));
  ffrequency.name:= 'frequency';
- ffrequency.fvalue:= 0.01;
+ ffrequency.fv.value:= 0.01;
  ffrequfact:= tdoubleinputconn.create(self,isigclient(self));
  ffrequfact.name:= 'frequfact';
- ffrequfact.fvalue:= 1;
+ ffrequfact.fv.value:= 1;
  fphase:= tdoubleinputconn.create(self,isigclient(self));
  fphase.name:= 'phase';
  famplitude:= tdoubleinputconn.create(self,isigclient(self));
  famplitude.name:= 'amplitude';
- famplitude.fvalue:= 1;
+ famplitude.fv.value:= 1;
 end;
 
 procedure tsigwavetable.setfrequency(const avalue: tdoubleinputconn);
@@ -3322,12 +3328,12 @@ procedure tsigwavetable.sighandler(const ainfo: psighandlerinfoty);
 var
  int1: integer;
 begin
- int1:= trunc((ftime+fphasepo^)*ftablelength) mod ftablelength;
+ int1:= trunc((ftime+fphasepo^.value)*ftablelength) mod ftablelength;
  if int1 < 0 then begin
   int1:= int1 + ftablelength;
  end;
- ainfo^.dest^:= ftable[int1] * famplitudepo^;
- ftime:= frac(ftime+ffrequencypo^*ffrequfactpo^);
+ ainfo^.dest^:= ftable[int1] * famplitudepo^.value;
+ ftime:= frac(ftime+ffrequencypo^.value*ffrequfactpo^.value);
 end;
 
 procedure tsigwavetable.sighandlerintpol(const ainfo: psighandlerinfoty);
@@ -3335,7 +3341,7 @@ var
  int1: integer;
  do1: double;
 begin
- do1:= (ftime+fphasepo^)*ftablelength;
+ do1:= (ftime+fphasepo^.value)*ftablelength;
  int1:= trunc(do1) mod ftablelength;
  if int1 < 0 then begin
   int1:= int1 + ftablelength;
@@ -3343,8 +3349,8 @@ begin
  ainfo^.dest^:= (ftable[int1] + 
                  (ftable[(int1+1) mod ftablelength] - ftable[int1]) * 
                  ((do1-int1)/ftablelength)
-                ) * famplitudepo^;
- ftime:= frac(ftime+ffrequencypo^*ffrequfactpo^);
+                ) * famplitudepo^.value;
+ ftime:= frac(ftime+ffrequencypo^.value*ffrequfactpo^.value);
 end;
 
 
@@ -3385,10 +3391,10 @@ end;
 
 procedure tsigwavetable.initmodel;
 begin
- ffrequencypo:= @ffrequency.fvalue;
- ffrequfactpo:= @ffrequfact.fvalue;
- fphasepo:= @fphase.fvalue;
- famplitudepo:= @famplitude.fvalue;
+ ffrequencypo:= @ffrequency.fv;
+ ffrequfactpo:= @ffrequfact.fv;
+ fphasepo:= @fphase.fv;
+ famplitudepo:= @famplitude.fv;
  inherited;
 end;
 
@@ -3450,7 +3456,7 @@ begin
  inherited;
  famplitude:= tdoubleinputconn.create(self,isigclient(self));
  famplitude.name:= 'amplitude';
- famplitudepo:= @famplitude.fvalue;
+ famplitudepo:= @famplitude.fv;
 // finput:= tdoubleinputconn.create(self,isigclient(self));
 // finput.name:= 'input';
 end;
@@ -3515,11 +3521,11 @@ var
 begin
  do1:= 0;
  for int1:= 0 to finphigh do begin
-  do1:= do1 + finps[int1]^;
+  do1:= do1 + finps[int1]^.value;
  end;
  if do1 <= finpmin then begin
   with fsegments[0].defaultnode do begin
-   ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^;
+   ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^.value;
   end;
   exit;
  end
@@ -3528,12 +3534,12 @@ begin
    with fsegments[functionsegmentcount-1] do begin
     if nodes <> nil then begin
      with nodes[high(nodes)] do begin
-      ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^;
+      ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^.value;
      end;
     end
     else begin   
      with defaultnode do begin
-      ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^;
+      ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^.value;
      end;
     end;
    end;
@@ -3546,14 +3552,14 @@ begin
  with fsegments[int1] do begin
   if do1 <= defaultnode.xend  then begin
    with defaultnode do begin
-    ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^;
+    ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^.value;
    end;
   end
   else begin
    for int2:= 0 to high(nodes) do begin
     with nodes[int2] do begin
      if do1 <= xend then begin
-      ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^;
+      ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^.value;
       break;
      end;
     end;
@@ -4066,11 +4072,11 @@ procedure tsigenvelope.sighandler(const ainfo: psighandlerinfoty);
       fdest:= 0;
      end
      else begin
-      fdest:= exp(fcurrval*scale + offset)*famplitudepo^;
+      fdest:= exp(fcurrval*scale + offset)*famplitudepo^.value;
      end;
     end
     else begin
-     fdest:= (fcurrval*scale + offset)*famplitudepo^;
+     fdest:= (fcurrval*scale + offset)*famplitudepo^.value;
     end;
     if endtime >= 0 then begin
      inc(ftime);
@@ -4091,14 +4097,14 @@ var
  bo1: boolean; 
 // int1: integer;
 begin
- if fattackpending or (ftrigger.fvalue = 1) then begin
-  ftrigger.fvalue:= 0;
+ if fattackpending or (ftrigger.fv.value = 1) then begin
+  ftrigger.fv.value:= 0;
   fattackpending:= false;
   startattack(finfos[0]);
   startattack(finfos[1]);
  end;
- if freleasepending or (ftrigger.fvalue = -1) then begin
-  ftrigger.fvalue:= 0;
+ if freleasepending or (ftrigger.fv.value = -1) then begin
+  ftrigger.fv.value:= 0;
   freleasepending:= false;
   startrelease(finfos[0]);
   startrelease(finfos[1]);
@@ -4121,8 +4127,8 @@ begin
     bo1:= bo1 or (abs(fcurrval-fcurrvalbefore) > feventthreshold);
     if bo1 then begin
      fcurrvalbefore:= fcurrval;
-     foutputpo^:= finfos[1].fdest * fmixpo^ + 
-                    finfos[0].fdest * (1-fmixpo^);
+     foutputpo^:= finfos[1].fdest * fmixpo^.value + 
+                    finfos[0].fdest * (1-fmixpo^.value);
     end;
    end;
   end
@@ -4253,8 +4259,8 @@ end;
 procedure tsigenvelope.initmodel;
 begin
  inherited;
- famplitudepo:= @famplitude.fvalue;
- fmixpo:= @fmix.fvalue;
+ famplitudepo:= @famplitude.fv;
+ fmixpo:= @fmix.fv;
  updatevaluesx;
 end;
 
@@ -4280,13 +4286,13 @@ end;
 
 procedure tsigenvelope.dotriggerchange(const sender: tobject);
 begin
- if ftrigger.fvalue = 1 then begin
+ if ftrigger.fv.value = 1 then begin
   fattackpending:= true;
  end;
- if ftrigger.fvalue = -1 then begin
+ if ftrigger.fv.value = -1 then begin
   freleasepending:= true;
  end;
- ftrigger.fvalue:= 0;
+ ftrigger.fv.value:= 0;
 end;
 
 procedure tsigenvelope.start;
@@ -4486,7 +4492,7 @@ begin
  end;
  if frunning then begin
   for int1:= 0 to high(fsigbuffer) do begin
-   fsigbuffer[int1][fbufpo]:= finps[int1]^;
+   fsigbuffer[int1][fbufpo]:= finps[int1]^.value;
   end;
   inc(fbufpo);
   if fbufpo = fbufferlength then begin
@@ -4651,7 +4657,7 @@ end;
 constructor tdoublesiginoutcomp.create(aowner: tcomponent);
 begin
  finput:= tdoubleinputconn.create(self,isigclient(self));
- finputpo:= @finput.fvalue;
+ finputpo:= @finput.fv;
  inherited;
 end;
 
@@ -4675,7 +4681,7 @@ end;
 
 procedure tsigconnector.sighandler(const ainfo: psighandlerinfoty);
 begin
- ainfo^.dest^:= finputpo^;
+ ainfo^.dest^:= finputpo^.value;
 end;
 
 { ttrigconnector }

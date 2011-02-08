@@ -19,8 +19,8 @@ type
  
  tsignoise = class(tdoublesigoutcomp)
   private
-   famplitudepo: pdouble;
-   foffsetpo: pdouble;
+   famplitudepo: psigvaluety;
+   foffsetpo: psigvaluety;
    famplitude: tdoubleinputconn;
    foffset: tdoubleinputconn;
    fw,fz: longword; //random seeds
@@ -121,8 +121,8 @@ begin
   fscale:= fscale/sqrt(do1);
  end;
  fsumfact:= exp(-do1);
- famplitudepo:= @tdoubleinputconn1(famplitude).fvalue;
- foffsetpo:= @tdoubleinputconn1(foffset).fvalue;
+ famplitudepo:= @tdoubleinputconn1(famplitude).fv;
+ foffsetpo:= @tdoubleinputconn1(foffset).fv;
  inherited;
 end;
 
@@ -149,14 +149,15 @@ begin
   fw:= 18000 * (fw and $ffff) + (fw shr 16);
   do1:= do1 + integer((fz shl 16) + fw)/fscale;
  end;
- ainfo^.dest^:= do1*famplitudepo^+foffsetpo^;
+ ainfo^.dest^:= do1*famplitudepo^.value+foffsetpo^.value;
 end;
 
 procedure tsignoise.sighandler1(const ainfo: psighandlerinfoty);
 begin
  fz:= 36969 * (fz and $ffff) + (fz shr 16);
  fw:= 18000 * (fw and $ffff) + (fw shr 16);
- ainfo^.dest^:= (integer((fz shl 16) + fw)/fscale)*famplitudepo^+foffsetpo^;
+ ainfo^.dest^:= (integer((fz shl 16) + fw)/fscale)*famplitudepo^.value+
+                                                          foffsetpo^.value;
 end;
 
 procedure tsignoise.sighandlerpinkn(const ainfo: psighandlerinfoty);
@@ -171,7 +172,7 @@ begin
   do1:= do1 + integer((fz shl 16) + fw)/fscale;
  end;
  fsum:= fsum*fsumfact+do1;
- ainfo^.dest^:= fsum*famplitudepo^+foffsetpo^;
+ ainfo^.dest^:= fsum*famplitudepo^.value+foffsetpo^.value;
 end;
 
 procedure tsignoise.sighandlerpink1(const ainfo: psighandlerinfoty);
@@ -179,7 +180,7 @@ begin
  fz:= 36969 * (fz and $ffff) + (fz shr 16);
  fw:= 18000 * (fw and $ffff) + (fw shr 16);
  fsum:= fsum*fsumfact + integer((fz shl 16) + fw)/fscale;
- ainfo^.dest^:= fsum*famplitudepo^+foffsetpo^;
+ ainfo^.dest^:= fsum*famplitudepo^.value+foffsetpo^.value;
 end;
 
 procedure tsignoise.setamplitude(const avalue: tdoubleinputconn);
