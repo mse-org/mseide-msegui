@@ -35,7 +35,9 @@ type
    fsampler: tscopesamplerfft;
    ffftfirst: integer;
    ffftcount: integer;
+   fslave: tsigscopefft;
    procedure setsampler(const avalue: tscopesamplerfft);
+   procedure setslave(const avalue: tsigscopefft);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -44,10 +46,13 @@ type
    property fftfirst: integer read ffftfirst write ffftfirst default 0;
    property fftcount: integer read ffftcount write ffftcount default 0;
                                //0 -> all
+   property slave: tsigscopefft read fslave write setslave;
  end;
  
 implementation
-
+uses
+ sysutils;
+ 
 { tsigscopefft }
 
 constructor tsigscopefft.create(aowner: tcomponent);
@@ -67,6 +72,20 @@ begin
  fsampler.assign(avalue);
 end;
 
+procedure tsigscopefft.setslave(const avalue: tsigscopefft);
+var
+ slave1: tsigscopefft;
+begin
+ slave1:= avalue;
+ while slave1 <> nil do begin
+  if slave1 = self then begin
+   raise exception.create(name+': recursive slave '+avalue.name+'.');
+  end;
+  slave1:= slave1.slave;
+ end;
+ setlinkedvar(avalue,fslave);
+end;
+
 { tscopesamplerfft }
 
 constructor tscopesamplerfft.create(const aowner: tsigscopefft);
@@ -78,39 +97,54 @@ begin
 end;
 
 procedure tscopesamplerfft.dobufferfull;
-var
- buf1: samplerbufferty;
- int1: integer;
-begin
- inherited;
- if sso_fftmag in options then begin
-  with fscope do begin
-   if (ffftfirst = 0) and (ffftcount = 0) then begin
-    buf1:= ffftbuffer;
+
+ procedure handleslave(const asampler: tscopesamplerfft;
+                                      const asig,afft: samplerbufferty);
+          //todo: optimize  slave handling, no additional buffer copy
+ var
+  buf1: samplerbufferty;
+  int1: integer;
+ begin
+  with asampler do begin
+   if sso_fftmag in options then begin
+    with fscope do begin
+     if (ffftfirst = 0) and (ffftcount = 0) then begin
+      buf1:= afft;
+     end
+     else begin
+      setlength(buf1,length(afft));
+      for int1:= 0 to high(buf1) do begin
+       buf1[int1]:= copy(afft[int1],fftfirst,ffftcount);
+      end;
+     end;
+    end;
    end
    else begin
-    setlength(buf1,length(ffftbuffer));
-    for int1:= 0 to high(buf1) do begin
-     buf1[int1]:= copy(ffftbuffer[int1],fftfirst,ffftcount);
+    buf1:= copy(asig);
+   end;
+   lockapplication;
+   try
+    with fscope.traces do begin
+     for int1:= 0 to high(buf1) do begin
+      if int1 >= count then begin
+       break;
+      end;
+      items[int1].ydata:= buf1[int1];
+     end;
     end;
+   finally
+    unlockapplication;
    end;
   end;
- end
- else begin
-  buf1:= copy(fsigbuffer);
- end;
- lockapplication;
- try
-  with fscope.traces do begin
-   for int1:= 0 to high(buf1) do begin
-    if int1 >= count then begin
-     break;
-    end;
-    items[int1].ydata:= buf1[int1];
-   end;
-  end;
- finally
-  unlockapplication;
+ end; //handleslave()
+var
+ slave: tsigscopefft; 
+begin
+ inherited;
+ slave:= self.fscope;
+ while slave <> nil do begin
+  handleslave(slave.fsampler,fsigbuffer,ffftbuffer);
+  slave:= slave.slave;
  end;
 end;
 

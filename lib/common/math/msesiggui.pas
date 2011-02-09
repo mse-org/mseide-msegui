@@ -1216,9 +1216,9 @@ procedure twavetableedit.sample;
      rea1:= 0.5;
     end
     else begin
-     rea1:= (ax-fvalue[int2-1].re)/rea1;
+     rea1:= (fvalue[int2].re-ax)/rea1;
     end;
-    result:= result + (fvalue[int2-1].im - result) * rea1;
+    result:= result + (fvalue[int2-1].im-result)*rea1;
    end;
   end;
  end; //intpol
