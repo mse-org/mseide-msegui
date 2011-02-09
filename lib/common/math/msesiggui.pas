@@ -1232,7 +1232,7 @@ procedure twavetableedit.sample;
  
 var
  ar1: doublearty;
- int1,int2: integer;
+ int1,int2,int3: integer;
  sampco,start: integer;
  do1: double;
 begin
@@ -1252,15 +1252,16 @@ begin
   end;
  end;
  int2:= fsamplecount and 1; //odd
+ int3:= start+start+int2-1;
  if owt_rotate in foptionswave then begin
-  for int1:= int2 to start+int2-1 do begin
-   ar1[start-int1]:= - ar1[start+int1];
+  for int1:= start+int2 to int3 do begin
+   ar1[int3-int1]:= - ar1[int1];
   end;
  end
  else begin
   if owt_mirror in foptionswave then begin
-   for int1:= int2 to start+int2-1 do begin
-    ar1[start-int1]:= ar1[start+int1];
+   for int1:= start+int2 to int3 do begin
+    ar1[int3-int1]:= ar1[int1];
    end;
   end;
  end;

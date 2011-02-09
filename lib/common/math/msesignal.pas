@@ -476,14 +476,17 @@ type
    property inputs: tdoubleinpconnarrayprop read finputs write setinputs;
  end;
 
+ sigsampleroptionty = (sso_fulltick,sso_negtrig,sso_autorun,
+                       sso_fftmag); //used by tsigsamplerfft
+ sigsampleroptionsty = set of sigsampleroptionty;
+
+const
+ defaultsigsampleroptions = [sso_fulltick];
+type
  tsigsampler = class;
  samplerbufferty = array of doublearty;
  samplerbufferfulleventty = procedure(const sender: tsigsampler;
                               const abuffer: samplerbufferty) of object;
-
- sigsampleroptionty = (sso_negtrig,sso_autorun,
-                       sso_fftmag); //used by tsigsamplerfft
- sigsampleroptionsty = set of sigsampleroptionty;
 
  tsigsampler = class(tsigmultiinp)
   private
@@ -509,14 +512,16 @@ type
    fsigbuffer: samplerbufferty;
    procedure updateoptions(var avalue: sigsampleroptionsty); virtual;
    procedure dotimer(const sender: tobject);
-   function gethandler: sighandlerprocty; override;
-   procedure sighandler(const ainfo: psighandlerinfoty);
-   procedure initmodel; override;
-   function getinputar: inputconnarty; override;
    procedure dotriggerchange(const sender: tobject);
    procedure dobufferfull; virtual;
    procedure loaded; override;
    procedure checkautostart;
+    //isigclient
+   function getsigoptions: sigclientoptionsty; override;
+   function gethandler: sighandlerprocty; override;
+   procedure sighandler(const ainfo: psighandlerinfoty);
+   procedure initmodel; override;
+   function getinputar: inputconnarty; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -529,7 +534,7 @@ type
    property triggerlevel: tchangedoubleinputconn read ftriggerlevel 
                                               write settriggerlevel;
    property options: sigsampleroptionsty read foptions 
-                                         write setoptions default [];
+                          write setoptions default defaultsigsampleroptions;
    property onbufferfull: samplerbufferfulleventty read fonbufferfull 
                                                          write fonbufferfull;
    property refreshus: integer read frefreshus write setrefreshus default -1;
@@ -4443,6 +4448,7 @@ constructor tsigsampler.create(aowner: tcomponent);
 begin
  fbufferlength:= defaultsamplecount;
  frefreshus:= -1;
+ foptions:= defaultsigsampleroptions;
  inherited;
  ftrigger:= tchangedoubleinputconn.create(self,isigclient(self),
                                                              @dotriggerchange);
@@ -4599,6 +4605,9 @@ begin
   foptions:= avalue;
   updateoptions(foptions);
   fnegtrig:= sso_negtrig in foptions;
+  if (sso_fulltick in foptions) xor (sso_fulltick in optionsbefore) then begin
+   modelchange;
+  end;
   if not (sso_autorun in optionsbefore) then begin
    checkautostart;
   end;
@@ -4650,6 +4659,14 @@ end;
 procedure tsigsampler.updateoptions(var avalue: sigsampleroptionsty);
 begin
  exclude(avalue,sso_fftmag);
+end;
+
+function tsigsampler.getsigoptions: sigclientoptionsty;
+begin
+ result:= inherited getsigoptions;
+ if sso_fulltick in foptions then begin
+  include(result,sco_fulltick);
+ end;
 end;
 
 { tdoublesiginoutcomp }
