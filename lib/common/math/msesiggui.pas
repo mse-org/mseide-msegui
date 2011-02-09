@@ -201,13 +201,18 @@ type
                                     default defaultsigkeyboardoptions;
    property outputcount: integer read foutputcount write setoutputcount default 1;
  end;
+
+ optionwavetablety = (owt_rotate,owt_mirror,owt_nodc);
+ optionswavetablety = set of optionwavetablety;
  
  twavetableedit = class(torderedxychartedit)
   private
    fwave: tsigwavetable;
    fsamplecount: integer;
+   foptionswave: optionswavetablety;
    procedure setwave(const avalue: tsigwavetable);
    procedure setsamplecount(const avalue: integer);
+   procedure setoptionswave(const avalue: optionswavetablety);
   protected
    procedure sample;
    procedure dochange; override;
@@ -218,9 +223,11 @@ type
    property samplecount: integer read fsamplecount 
                                  write setsamplecount default defaultsamplecount;
    property wave: tsigwavetable read fwave write setwave;
+   property optionswave: optionswavetablety read foptionswave 
+                                            write setoptionswave default [];
  end;
 
- optionfuncteditty = (ofe_symmetric,ofe_mirrored);
+ optionfuncteditty = (ofe_rotate,ofe_mirror);
  optionsfuncteditty = set of optionfuncteditty;
  
  tfuncttableedit = class(torderedxychartedit)
@@ -1218,21 +1225,53 @@ procedure twavetableedit.sample;
     else begin
      rea1:= (fvalue[int2].re-ax)/rea1;
     end;
-    result:= result + (fvalue[int2-1].im-result)*rea1;
+    result:= result + (fvalue[int2-1].im - result) * rea1;
    end;
   end;
  end; //intpol
  
 var
  ar1: doublearty;
- int1: integer;
- rea1: real;
+ int1,int2: integer;
+ sampco,start: integer;
+ do1: double;
 begin
+ if foptionswave * [owt_rotate,owt_mirror] = [] then begin
+  sampco:= fsamplecount;
+  start:= 0;
+ end
+ else begin
+  sampco:= (fsamplecount+1) div 2;
+  start:= fsamplecount div 2;
+ end;
  setlength(ar1,fsamplecount);
- if (fsamplecount >= 0) and (high(fvalue) >= 0) then begin
-  rea1:= 1/fsamplecount;
-  for int1:= 0 to fsamplecount - 1 do begin
-   ar1[int1]:= intpol(rea1*int1);
+ if (sampco > 0) and (high(fvalue) >= 0) then begin
+  do1:= 1/sampco;
+  for int1:= 0 to sampco - 1 do begin
+   ar1[int1+start]:= intpol(do1*int1);
+  end;
+ end;
+ int2:= fsamplecount and 1; //odd
+ if owt_rotate in foptionswave then begin
+  for int1:= int2 to start+int2-1 do begin
+   ar1[start-int1]:= - ar1[start+int1];
+  end;
+ end
+ else begin
+  if owt_mirror in foptionswave then begin
+   for int1:= int2 to start+int2-1 do begin
+    ar1[start-int1]:= ar1[start+int1];
+   end;
+  end;
+ end;
+ if (owt_nodc in foptionswave) and (ar1 <> nil) then begin
+  do1:= 0;
+  for int1:= 0 to high(ar1) do begin
+   do1:= do1 + ar1[int1];
+  end;
+  do1:= do1 / length(ar1);
+  for int1:= 0 to high(ar1) do begin
+   ar1[int1]:= ar1[int1] - do1;;
   end;
  end;
  fwave.table:= ar1;
@@ -1248,7 +1287,23 @@ procedure twavetableedit.setsamplecount(const avalue: integer);
 begin
  if avalue <> fsamplecount then begin
   fsamplecount:= avalue;
-  sample;
+  if not (csloading in componentstate) then begin
+   dochange;
+  end;
+ end;
+end;
+
+procedure twavetableedit.setoptionswave(const avalue: optionswavetablety);
+const
+ mask: optionswavetablety = [owt_rotate,owt_mirror];
+begin
+ if foptionswave <> avalue then begin
+  foptionswave:= optionswavetablety(setsinglebit(longword(avalue),
+                               longword(foptionswave),
+                               longword(mask)));
+  if not (csloading in componentstate) then begin
+   dochange;
+  end;
  end;
 end;
 
@@ -1278,7 +1333,7 @@ var
  ar1: complexarty;
  int1,int2: integer;
 begin
- if ofe_symmetric in foptionsfunct then begin
+ if ofe_rotate in foptionsfunct then begin
   int2:= length(fvalue);
   setlength(ar1,int2*2);
   for int1:= 0 to high(fvalue) do begin
@@ -1291,7 +1346,7 @@ begin
   ffunct.table:= ar1;
  end
  else begin
-  if ofe_mirrored in foptionsfunct then begin
+  if ofe_mirror in foptionsfunct then begin
    int2:= length(fvalue);
    setlength(ar1,int2*2);
    for int1:= 0 to high(fvalue) do begin
@@ -1312,11 +1367,10 @@ end;
 
 procedure tfuncttableedit.setoptionsfunct(const avalue: optionsfuncteditty);
 const
- mask: optionsfuncteditty = [ofe_symmetric,ofe_mirrored];
+ mask: optionsfuncteditty = [ofe_rotate,ofe_mirror];
 begin
  if foptionsfunct <> avalue then begin
-  foptionsfunct:=
-   optionsfuncteditty(setsinglebit(longword(avalue),
+  foptionsfunct:= optionsfuncteditty(setsinglebit(longword(avalue),
                                longword(foptionsfunct),
                                longword(mask)));
   if not (csloading in componentstate) then begin
