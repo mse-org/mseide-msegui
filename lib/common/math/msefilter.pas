@@ -403,7 +403,7 @@ begin
   end;
   i:= o;
  end;
- ainfo^.dest^:= o;
+ foutputpo^:= o;
  dec(fzindex);
  if fzindex < 0 then begin
   fzindex:= fzhigh;
@@ -519,7 +519,7 @@ begin
    fdoublez[int2-1]:= fdoublez[int2] + i*po1^.im - o*po1^.re;
   end;
  end;
- ainfo^.dest^:= o;
+ foutputpo^:= o;
 end;
 
 function tsigiir.getzcount: integer;
@@ -663,7 +663,7 @@ begin
   i:= i+finps[int1]^.value;
  end;
  o:= i*fb0 + fz1;
- ainfo^.dest^:= o*famplitudepo^.value;
+ foutputpo^:= o*famplitudepo^.value;
  fz1:= o*fa1;
 end;
 
@@ -689,7 +689,7 @@ begin
   i:= i+finps[int1]^.value;
  end;
  o:= i*fb0 + fz1;
- ainfo^.dest^:= o*famplitudepo^.value;
+ foutputpo^:= o*famplitudepo^.value;
  fz1:= i*fb1-fa1*o;
 end;
 
@@ -736,7 +736,7 @@ begin
  o:= fz1+i*fb0;
  fz1:= fz2-o*fa1+i*fb1;
  fz2:= i*fb2-o*fa2;
- ainfo^.dest^:= o*famplitudepo^.value;
+ foutputpo^:= o*famplitudepo^.value;
 end;
 
 procedure tsigfilter.sighandlerb2bi;
@@ -790,7 +790,7 @@ begin
  o:= fz1+i*fb0;
  fz1:= fz2-o*fa1+i*fb1;
  fz2:= i*fb2-o*fa2;
- ainfo^.dest^:= o*famplitudepo^.value;
+ foutputpo^:= o*famplitudepo^.value;
 end;
 
 procedure tsigfilter.sighandlerbs2bi(const ainfo: psighandlerinfoty);
@@ -806,7 +806,7 @@ begin
  o:= fz1+i*fb0;
  fz1:= fz2-o*fa1+i*fb1;
  fz2:= i*fb2-o*fa2;
- ainfo^.dest^:= (i-o)*famplitudepo^.value;
+ foutputpo^:= (i-o)*famplitudepo^.value;
 end;
 
 procedure tsigfilter.clear;
@@ -1073,7 +1073,7 @@ begin
  end;
  fz2:= fz1;
  fz1:= i;
- ainfo^.dest^:= (i*fbaseamplitudepo^.value+ot)*famplitudepo^.value; 
+ foutputpo^:= (i*fbaseamplitudepo^.value+ot)*famplitudepo^.value; 
 end;
 
 procedure tsigfilterbank.initmodel;

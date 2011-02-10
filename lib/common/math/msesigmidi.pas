@@ -32,7 +32,9 @@ type
  tsigmidiconnector = class(tsigeventconnector)
   private
    ffrequout: tdoubleoutputconn;
+//   ffrequoutpo: pdouble;
    ftrigout: tdoubleoutputconn;
+ //  ftrigoutpo: pdouble;
    ffrequ_min: double;
    fattack: doublescaleinfoty;
    fpressure: doublescaleinfoty;
@@ -68,6 +70,7 @@ type
    procedure setreleaseoutlin(const avalue: tdoubleoutputconn);
   protected
    ftrigvalue: double;
+//   procedure initmodel; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
    function getoutputar: outputconnarty; override;
    function gethandler: sighandlerprocty; override;
@@ -355,7 +358,8 @@ procedure tsigmidiconnector.sighandler(const ainfo: psighandlerinfoty);
 //var
 // int1: integer;
 begin
- ainfo^.dest^:= ftrigvalue;
+ //dummy
+// ftrigoutpo^:= ftrigvalue;
 end;
 
 function tsigmidiconnector.getoutputar: outputconnarty;
@@ -975,9 +979,11 @@ begin
    end;
    fouts[int1]^:= do1;
   end;
+  {
   if fouts <> nil then begin
    ainfo^.dest^:= ppdouble(fouts)^^;
   end;
+  }
  end;
 end;
 

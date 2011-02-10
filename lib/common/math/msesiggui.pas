@@ -31,6 +31,7 @@ type
  tsigslider = class(tslider,isigclient)
   private
    foutput: tdoubleoutputconn;
+   foutputpo: pdouble;
    fcontroller: tsigcontroller;
    fsigclientinfo: sigclientinfoty;
    fontransformvalue: sigineventty;
@@ -76,6 +77,7 @@ type
  tsigrealedit = class(trealedit,isigclient)
   private
    foutput: tdoubleoutputconn;
+   foutputpo: pdouble;
    fcontroller: tsigcontroller;
    fontransformvalue: sigineventty;
    foptions: sigeditoptionsty;
@@ -474,7 +476,7 @@ end;
 
 procedure tsigrealedit.initmodel;
 begin
- //dummy
+ foutputpo:= @foutput.value;
 end;
 
 function tsigrealedit.getinputar: inputconnarty;
@@ -547,7 +549,7 @@ end;
 
 procedure tsigrealedit.sighandler(const ainfo: psighandlerinfoty);
 begin
- ainfo^.dest^:= fsigvalue;
+ foutputpo^:= fsigvalue;
 end;
 
 function tsigrealedit.gethandler: sighandlerprocty;
@@ -630,7 +632,7 @@ end;
 
 procedure tsigslider.initmodel;
 begin
- //dummy
+ foutputpo:= @tdoubleoutputconn1(foutput).fvalue;
 end;
 
 function tsigslider.getinputar: inputconnarty;
@@ -708,7 +710,7 @@ end;
 
 procedure tsigslider.sighandler(const ainfo: psighandlerinfoty);
 begin
- ainfo^.dest^:= fsigvalue;
+ foutputpo^:= fsigvalue;
 end;
 
 function tsigslider.gethandler: sighandlerprocty;
@@ -943,7 +945,7 @@ var
  int1: integer;
 begin
  if foutputcount > 0 then begin
-  ainfo^.dest^:= fkeyinfos[0].sigvalue;
+//  ainfo^.dest^:= fkeyinfos[0].sigvalue;
   for int1:= 0 to foutputhigh do begin
    with fkeyinfos[int1] do begin
     outpo^:= sigvalue;

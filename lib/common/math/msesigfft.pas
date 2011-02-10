@@ -172,7 +172,7 @@ begin
   end;
  end;
  with foutput do begin
-  ainfo^.dest^:= fsignal[findex];
+  fvalue:= fsignal[findex];
   inc(findex);
   if findex = fsamplecount then begin
    dec(findex);

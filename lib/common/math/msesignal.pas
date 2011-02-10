@@ -248,7 +248,7 @@ type
  end;
  
  sighandlerinfoty = record
-  dest: pdouble;
+//  dest: pdouble;
   discard: boolean;
  end;
 
@@ -304,7 +304,7 @@ type
  sighandlernodeinfoty = record
   handlerinfo: sighandlerinfoty;
   handler: sighandlerprocty;
-  firstdest: destinfoty;
+//  firstdest: destinfoty;
   dest: destinfoarty;
   desthigh: integer;
  end;
@@ -326,6 +326,7 @@ type
  tsigin = class(tsigconnection)
   private
    foutput: tdoubleoutputconn;
+   foutputpo: pdouble;
    fvalue: double;
    finp: doublearty;
    foninput: sigineventty;
@@ -335,6 +336,7 @@ type
   protected
    function getoutputar: outputconnarty; override;
     //isigclient
+   procedure initmodel; override;
    function gethandler: sighandlerprocty; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
   public
@@ -418,10 +420,12 @@ type
    fdoubleinputdata: doubleararty;
    finput: tdoubleinputconn;
    foutput: tdoubleoutputconn;
+   foutputpo: pdouble;
    function getinputar: inputconnarty; override;
    function getoutputar: outputconnarty; override;
    procedure setzcount(const avalue: integer);
    procedure zcountchanged; virtual;
+   procedure initmodel; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1630,6 +1634,12 @@ begin
  result[0]:= foutput;
 end;
 
+procedure tdoublezcomp.initmodel;
+begin
+ inherited;
+ foutputpo:= @foutput.fvalue;
+end;
+
 { tsigout }
 
 constructor tsigout.create(aowner: tcomponent);
@@ -1925,7 +1935,7 @@ begin
  if assigned(foninput) then begin
   foninput(self,real(fvalue));
  end;
- ainfo^.dest^:= fvalue;
+ foutputpo^:= fvalue;
 end;
 
 procedure tsigin.clear;
@@ -1940,6 +1950,12 @@ begin
  lock;
  fvalue:= avalue;
  unlock;
+end;
+
+procedure tsigin.initmodel;
+begin
+ inherited;
+ foutputpo:= @foutput.value;
 end;
 
 { tsigmultiinp }
@@ -2182,11 +2198,13 @@ end;
 procedure tsigadd.sighandler(const ainfo: psighandlerinfoty);
 var
  int1: integer;
+ do1: double;
 begin
- ainfo^.dest^:= 0;
+ do1:= 0;
  for int1:= 0 to finphigh do begin
-  ainfo^.dest^:= ainfo^.dest^ + finps[int1]^.value;
+  do1:= do1 + finps[int1]^.value;
  end;
+ foutputpo^:= do1;
 end;
 
 { tsigdelay }
@@ -2204,12 +2222,14 @@ end;
 procedure tsigdelay.sighandler(const ainfo: psighandlerinfoty);
 var
  int1: integer;
+ do1: double;
 begin
- ainfo^.dest^:= fz;
- fz:= 0;
+ foutputpo^:= fz;
+ do1:= 0;
  for int1:= 0 to finphigh do begin
-  fz:= fz + finps[int1]^.value;
+  do1:= do1 + finps[int1]^.value;
  end;
+ fz:= do1;
 end;
 
 procedure tsigdelay.clear;
@@ -2252,20 +2272,23 @@ procedure tcustomsigdelay.sighandler(const ainfo: psighandlerinfoty);
 var
  int1: integer;
  po1: pdouble;
+ do1: double;
 begin
  if fdelay = 0 then begin
-  ainfo^.dest^:= 0;
+  do1:= 0;
   for int1:= 0 to finphigh do begin
-   ainfo^.dest^:= ainfo^.dest^ + finps[int1]^.value;
+   do1:= do1 + finps[int1]^.value;
   end;
+  foutputpo^:= do1;
  end
  else begin
-  po1:= @fz[finppo];
-  ainfo^.dest^:= po1^;
-  po1^:= 0;
+  do1:= 0;
   for int1:= 0 to finphigh do begin
-   po1^:= po1^ + finps[int1]^.value;
+   do1:= do1 + finps[int1]^.value;
   end;
+  po1:= @fz[finppo];
+  foutputpo^:= po1^;
+  po1^:= do1;
   inc(finppo);
   if finppo = fdelay then begin
    finppo:= 0;
@@ -2325,10 +2348,11 @@ var
  do1: double;
 begin
  if fdelay = 0 then begin
-  ainfo^.dest^:= 0;
+  do1:= 0;
   for int1:= 0 to finphigh do begin
-   ainfo^.dest^:= ainfo^.dest^ + finps[int1]^.value;
+   do1:= do1 + finps[int1]^.value;
   end;
+  foutputpo^:= do1;
  end
  else begin
   po1:= @fz[finppo];
@@ -2354,7 +2378,7 @@ begin
    int2:= int1-1;
   end;
   do1:= frac(do1);
-  ainfo^.dest^:= fz[int1]*(1-do1) + fz[int2]*do1;
+  foutputpo^:= fz[int1]*(1-do1) + fz[int2]*do1;
   inc(finppo);
   if finppo = fdelay then begin
    finppo:= 0;
@@ -2397,11 +2421,13 @@ end;
 procedure tsigmult.sighandler(const ainfo: psighandlerinfoty);
 var
  int1: integer;
+ do1: double;
 begin
- ainfo^.dest^:= 1;
+ do1:= 1;
  for int1:= 0 to finphigh do begin
-  ainfo^.dest^:= ainfo^.dest^ * finps[int1]^.value;
+  do1:= do1 * finps[int1]^.value;
  end;
+ foutputpo^:= do1;
 end;
 
 { tsigcontroller }
@@ -2986,6 +3012,18 @@ begin
   po1:= execorder[int1];
   with fexecinfo[int1] do begin
    handler:= po1^.handler;
+   desthigh:= high(po1^.destinations);
+//   handlerinfo.dest:= @fvaluedummy;
+   if length(po1^.destinations) > 0 then begin
+    setlength(dest,desthigh+1);
+    for int2:= 0 to desthigh do begin
+     int3:= po1^.destinations[int2].outputindex;
+     updatedestinfo(po1^.destinations[int2].destinput,
+                                @po1^.outputs[int3].fvalue,dest[int2]);
+    end;
+   end;
+  (*
+   handler:= po1^.handler;
    desthigh:= high(po1^.destinations)-1;
    handlerinfo.dest:= @fvaluedummy;
    if length(po1^.destinations) > 0 then begin
@@ -3016,6 +3054,7 @@ begin
      end;
     end;
    end;
+   *)
   end;
  end;
  include(fstate,scs_modelvalid);
@@ -3055,6 +3094,7 @@ begin
  for int1:= 0 to fexechigh do begin
   po1^.handler(psighandlerinfoty(po1));
   if not po1^.handlerinfo.discard then begin
+  {
    with po1^.firstdest do begin
     if sca.hasscale then begin
      dest^:= source^*sca.gain+sca.offset;
@@ -3069,7 +3109,8 @@ begin
      end;
     end;
    end;
-   for int2:= 0 to po1^.desthigh do begin //multi inputs on output
+   }
+   for int2:= 0 to po1^.desthigh do begin
     with po1^.dest[int2] do begin
      dest^:= source^;
      if sca.hasscale then begin
@@ -3168,18 +3209,13 @@ var
 begin
  with ainfopo^ do begin
   if not (sis_sighandler in state) then begin
-   handlerinfo.dest:= @do1;
+//   handlerinfo.dest:= @do1;
    handler(@handlerinfo);
    for int1:= 0 to high(destinations) do begin
     with destinations[int1] do begin
      with destinput do begin
       include(fv.changed,sic_value);
-      if outputindex = 0 then begin
-       fv.value:= do1*fsca.gain+fsca.offset;
-      end
-      else begin
-       fv.value:= outputs[outputindex].fvalue*fsca.gain+fsca.offset;
-      end;
+      fv.value:= outputs[outputindex].fvalue*fsca.gain+fsca.offset;
       if fsca.isexp then begin
        fv.value:= exp(fv.value);
       end;
@@ -3367,7 +3403,7 @@ begin
  if int1 < 0 then begin
   int1:= int1 + ftablelength;
  end;
- ainfo^.dest^:= ftable[int1] * famplitudepo^.value;
+ foutputpo^:= ftable[int1] * famplitudepo^.value;
  ftime:= frac(ftime+ffrequencypo^.value*ffrequfactpo^.value);
 end;
 
@@ -3381,7 +3417,7 @@ begin
  if int1 < 0 then begin
   int1:= int1 + ftablelength;
  end;
- ainfo^.dest^:= (ftable[int1] + 
+ foutputpo^:= (ftable[int1] + 
                  (ftable[(int1+1) mod ftablelength] - ftable[int1]) * 
                  ((do1-int1)/ftablelength)
                 ) * famplitudepo^.value;
@@ -3560,7 +3596,7 @@ begin
  end;
  if do1 <= finpmin then begin
   with fsegments[0].defaultnode do begin
-   ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^.value;
+   foutputpo^:= (offs + do1 * ramp)*famplitudepo^.value;
   end;
   exit;
  end
@@ -3569,12 +3605,12 @@ begin
    with fsegments[functionsegmentcount-1] do begin
     if nodes <> nil then begin
      with nodes[high(nodes)] do begin
-      ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^.value;
+      foutputpo^:= (offs + do1 * ramp)*famplitudepo^.value;
      end;
     end
     else begin   
      with defaultnode do begin
-      ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^.value;
+      foutputpo^:= (offs + do1 * ramp)*famplitudepo^.value;
      end;
     end;
    end;
@@ -3587,14 +3623,14 @@ begin
  with fsegments[int1] do begin
   if do1 <= defaultnode.xend  then begin
    with defaultnode do begin
-    ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^.value;
+    foutputpo^:= (offs + do1 * ramp)*famplitudepo^.value;
    end;
   end
   else begin
    for int2:= 0 to high(nodes) do begin
     with nodes[int2] do begin
      if do1 <= xend then begin
-      ainfo^.dest^:= (offs + do1 * ramp)*famplitudepo^.value;
+      foutputpo^:= (offs + do1 * ramp)*famplitudepo^.value;
       break;
      end;
     end;
@@ -4172,14 +4208,14 @@ begin
     with finfos[1] do begin
      if bo1 then begin
       fcurrvalbefore:= fcurrval;
-      ainfo^.dest^{foutputpo^}:= finfos[1].fdest * fmixpo^.value + 
+      foutputpo^:= finfos[1].fdest * fmixpo^.value + 
                      finfos[0].fdest * (1-fmixpo^.value);
      end;
     end;
    end
    else begin
     if bo1 then begin
-     ainfo^.dest^{foutputpo^}:= finfos[0].fdest;
+     foutputpo^:= finfos[0].fdest;
     end;
    end;
    if bo1 then begin
@@ -4194,11 +4230,11 @@ begin
    calc(finfos[0]);
    if fhasmix then begin
     calc(finfos[1]);
-    ainfo^.dest^{foutputpo^}:= finfos[1].fdest * fmixpo^.value + 
+    foutputpo^:= finfos[1].fdest * fmixpo^.value + 
                       finfos[0].fdest * (1-fmixpo^.value);
    end
    else begin
-    ainfo^.dest^{foutputpo^}:= finfos[0].fdest;
+    foutputpo^:= finfos[0].fdest;
    end;
   end;
  end;
@@ -4756,7 +4792,7 @@ end;
 
 procedure tsigconnector.sighandler(const ainfo: psighandlerinfoty);
 begin
- ainfo^.dest^:= finputpo^.value;
+ foutputpo^:= finputpo^.value;
 end;
 
 { ttrigconnector }
