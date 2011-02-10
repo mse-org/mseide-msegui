@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -21,9 +21,10 @@ type
                    sfm_s16le,sfm_s24le,sfm_s32le,sfm_f32le,smf_s2432le,
                    sfm_s16be,sfm_s24be,sfm_s32be,sfm_f32be,smf_s2432be);
 const
- defaultsampleformat = sfm_u8;
+ defaultsampleformat = sfm_s16;
  defaultsamplechannels = 1;
  defaultsamplerate = 44100;
+ defaultlatency = 0.1;
  
 {$ifdef endian_little}
  pulsesampleformatmatrix: array[sampleformatty] of pa_sample_format_t =
@@ -152,7 +153,7 @@ type
    property rate: integer read frate write frate default defaultsamplerate;
    property stacksizekb: integer read fstacksizekb write fstacksizekb default 0;
    property latency: real read flatency write flatency; 
-           //seconds, default 0 -> server default
+           //seconds, 0 -> server default
    property onsend: sendeventty read fonsend write fonsend;
    property onerror: erroreventty read fonerror write fonerror;
  end;
@@ -185,6 +186,7 @@ begin
  fchannels:= defaultsamplechannels;
  fformat:= defaultsampleformat;
  frate:= defaultsamplerate;
+ flatency:= defaultlatency;
  inherited;
 end;
 

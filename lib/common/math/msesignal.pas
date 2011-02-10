@@ -4219,7 +4219,7 @@ begin
     end;
    end;
    if bo1 then begin
-    ainfo^.discard:= false;
+//    ainfo^.discard:= false;
     feventtime:= 0;
     fcontroller.dispatcheventoutput(fsigclientinfo.infopo);
    end;
