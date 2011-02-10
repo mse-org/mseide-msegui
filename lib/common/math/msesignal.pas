@@ -159,10 +159,14 @@ type
  outputconnstatesty = set of outputconnstatety;
   
  tdoubleoutputconn = class(tdoubleconn)
+  private
+   function geteventdriven: boolean;
+   procedure seteventdriven(const avalue: boolean);
   protected
    fstate: outputconnstatesty;
    fdestinations: doubleinputconnarty;
    fvalue: double;
+   property eventdriven: boolean read geteventdriven write seteventdriven;
   public
    constructor create(const aowner: tcomponent;
          const asigintf: isigclient; const aeventdriven: boolean); 
@@ -626,12 +630,14 @@ type
  tdoublesigoutcomp = class(tdoublesigcomp)
   private
    procedure setoutput(const avalue: tdoubleoutputconn);
+   procedure seteventdriven(const avalue: boolean);
   protected
    foutput: tdoubleoutputconn;
    foutputpo: pdouble;
    feventdriven: boolean;
    function getoutputar: outputconnarty; override;
    procedure initmodel; override;
+   property eventdriven: boolean read feventdriven write seteventdriven;
   public
    constructor create(aowner: tcomponent); override;
    property output: tdoubleoutputconn read foutput write setoutput;
@@ -776,7 +782,7 @@ type
  sigenveloperangeoptionty = (sero_exp,sero_mix);
  sigenveloperangeoptionsty = set of sigenveloperangeoptionty;
  
- sigenvelopeoptionty = (seo_negtrig,seo_nozero);
+ sigenvelopeoptionty = (seo_eventoutput,seo_negtrig,seo_nozero);
  sigenvelopeoptionsty = set of sigenvelopeoptionty;
  envproginfoty = record
   startval: double;
@@ -1213,6 +1219,21 @@ begin
  end;
  include (fmsecomponentstate,cs_subcompref);
  name:= 'output';
+end;
+
+function tdoubleoutputconn.geteventdriven: boolean;
+begin
+ result:= ocs_eventdriven in fstate;
+end;
+
+procedure tdoubleoutputconn.seteventdriven(const avalue: boolean);
+begin
+ if avalue then begin
+  include(fstate,ocs_eventdriven);
+ end
+ else begin
+  exclude(fstate,ocs_eventdriven);
+ end;
 end;
 {
 procedure tdoubleoutputconn.setsig1(var asource: doublearty);
@@ -2073,6 +2094,15 @@ procedure tdoublesigoutcomp.initmodel;
 begin
  inherited;
  foutputpo:= @foutput.value;
+end;
+
+procedure tdoublesigoutcomp.seteventdriven(const avalue: boolean);
+begin
+ if feventdriven <> avalue then begin
+  feventdriven:= avalue;
+  foutput.eventdriven:= avalue;
+  modelchange;
+ end;
 end;
 
 { tdoubleinpconnarrayprop }
@@ -3724,7 +3754,7 @@ constructor tsigenvelope.create(aowner: tcomponent);
  end; //initinfo()
  
 begin
- feventdriven:= true;
+// feventdriven:= true;
  fsubsampling:= defaultenvelopesubsampling;
  fmin:= 0.001;
  fmax:= 1;
@@ -4067,9 +4097,6 @@ procedure tsigenvelope.sighandler(const ainfo: psighandlerinfoty);
  begin
   with ainfo do begin
    with fprog[findex] do begin
-    if maxeventdelay < fmaxeventdelay then begin
-     fmaxeventdelay:= maxeventdelay;
-    end;
     fcurrisexp:= isexp;
     fcurrval:= startval+ramp*(ftime-starttime);
     if isexp then begin
@@ -4098,9 +4125,10 @@ procedure tsigenvelope.sighandler(const ainfo: psighandlerinfoty);
    end;
   end;
  end; //calc()
+ 
 var
  bo1: boolean; 
-// int1: integer;
+ int1: integer;
 begin
  if fattackpending or (ftrigger.fv.value = 1) then begin
   ftrigger.fv.value:= 0;
@@ -4114,39 +4142,65 @@ begin
   startrelease(finfos[0]);
   startrelease(finfos[1]);
  end;
+ ainfo^.discard:= true;
  if fsamplecount = 0 then begin
   fsamplecount:= fsubsampling;
-  fmaxeventdelay:= bigint;
-  calc(finfos[0]);
-  bo1:= feventtime >= fmaxeventdelay;
-  with finfos[0] do begin
-   bo1:= bo1 or (abs(fcurrval-fcurrvalbefore) > feventthreshold);
-   if bo1 then begin
-    fcurrvalbefore:= fcurrval;
-   end;
-  end;
-  ainfo^.discard:= true;
-  if fhasmix then begin
-   calc(finfos[1]);
-   with finfos[1] do begin
-    bo1:= bo1 or (abs(fcurrval-fcurrvalbefore) > feventthreshold);
+  if feventdriven then begin
+   calc(finfos[0]);
+   with finfos[0] do begin
+    fmaxeventdelay:= fprog[findex].maxeventdelay;
+    bo1:= false;
+    if fhasmix then begin
+     calc(finfos[1]);
+     with finfos[1] do begin
+      int1:= fprog[findex].maxeventdelay;
+      if int1 < fmaxeventdelay then begin
+       fmaxeventdelay:= int1;
+      end;
+      bo1:= (feventtime >= fmaxeventdelay) or 
+                      (abs(fcurrval-fcurrvalbefore) > feventthreshold);
+     end;
+    end;
+    bo1:= bo1 or (feventtime >= fmaxeventdelay) or 
+                    (abs(fcurrval-fcurrvalbefore) > feventthreshold);
     if bo1 then begin
      fcurrvalbefore:= fcurrval;
-     foutputpo^:= finfos[1].fdest * fmixpo^.value + 
-                    finfos[0].fdest * (1-fmixpo^.value);
     end;
    end;
+   if fhasmix then begin
+    calc(finfos[1]);
+    with finfos[1] do begin
+     if bo1 then begin
+      fcurrvalbefore:= fcurrval;
+      ainfo^.dest^{foutputpo^}:= finfos[1].fdest * fmixpo^.value + 
+                     finfos[0].fdest * (1-fmixpo^.value);
+     end;
+    end;
+   end
+   else begin
+    if bo1 then begin
+     ainfo^.dest^{foutputpo^}:= finfos[0].fdest;
+    end;
+   end;
+   if bo1 then begin
+    ainfo^.discard:= false;
+    feventtime:= 0;
+    fcontroller.dispatcheventoutput(fsigclientinfo.infopo);
+   end;
+   inc(feventtime);
   end
   else begin
-   if bo1 then begin
-    foutputpo^:= finfos[0].fdest;
+   ainfo^.discard:= false;
+   calc(finfos[0]);
+   if fhasmix then begin
+    calc(finfos[1]);
+    ainfo^.dest^{foutputpo^}:= finfos[1].fdest * fmixpo^.value + 
+                      finfos[0].fdest * (1-fmixpo^.value);
+   end
+   else begin
+    ainfo^.dest^{foutputpo^}:= finfos[0].fdest;
    end;
   end;
-  if bo1 then begin
-   feventtime:= 0;
-   fcontroller.dispatcheventoutput(fsigclientinfo.infopo);
-  end;
-  inc(feventtime);
  end;
  dec(fsamplecount);
 end;
@@ -4284,6 +4338,7 @@ end;
 procedure tsigenvelope.setoptions(const avalue: sigenvelopeoptionsty);
 begin
  if avalue <> foptions then begin
+  eventdriven:= seo_eventoutput in avalue;
   foptions:= avalue;
   updatevaluesx;
  end;
@@ -4406,7 +4461,10 @@ end;
 
 function tsigenvelope.getsigoptions: sigclientoptionsty;
 begin
- result:= inherited getsigoptions + [sco_fulltick];
+ result:= inherited getsigoptions;
+ if feventdriven then begin 
+  result:= result + [sco_fulltick];
+ end;
 end;
 
 procedure tsigenvelope.setsubsampling(avalue: integer);
@@ -4482,7 +4540,7 @@ begin
   else begin
    do1:= ftrigger.value-ftriggerlevel.value;
   end;
-  if do1 >= 0 then begin
+  if do1 >{=} 0 then begin
 //   if do1 = 0 then begin
 //    fpretrigger:= true;
 //   end;

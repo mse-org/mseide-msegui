@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1264,7 +1264,7 @@ end;
 procedure ttrace.setoptions(const avalue: charttraceoptionsty);
 begin
  if avalue <> finfo.options then begin
-  finfo.options:= avalue - [cto_stockglyphs];
+  finfo.options:= avalue {- [cto_stockglyphs]};
   datachange;
  end;
 end;
