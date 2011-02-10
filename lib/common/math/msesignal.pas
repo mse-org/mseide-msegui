@@ -812,6 +812,7 @@ type
   release_valuespo: pcomplexarty;
   fprog: envproginfoarty;
   findex: integer;
+  findexhigh: integer;
   fdest: double;
   
   fcurrval: double;
@@ -877,6 +878,7 @@ type
   protected
    fattackpending: boolean;
    freleasepending: boolean;
+   ffinished: boolean;
    fsubsampling: integer;
    fsamplecount: integer;
    feventtime: integer;
@@ -3936,6 +3938,7 @@ begin
  end;
  lock;
  try
+  ffinished:= false;
   if fcontroller <> nil then begin
    do1:= fcontroller.samplefrequ;
   end
@@ -4024,6 +4027,7 @@ begin
    end;
    setlength(fprog,int1);
    findex:= high(fprog); //init inactive
+   findexhigh:= findex;
    ti:= 0;
    sta:= fattackval;
    int1:= 0;
@@ -4169,12 +4173,14 @@ begin
  if fattackpending or (ftrigger.fv.value = 1) then begin
   ftrigger.fv.value:= 0;
   fattackpending:= false;
+  ffinished:= false;
   startattack(finfos[0]);
   startattack(finfos[1]);
  end;
  if freleasepending or (ftrigger.fv.value = -1) then begin
   ftrigger.fv.value:= 0;
   freleasepending:= false;
+  ffinished:= false;
   startrelease(finfos[0]);
   startrelease(finfos[1]);
  end;
@@ -4219,7 +4225,6 @@ begin
     end;
    end;
    if bo1 then begin
-//    ainfo^.discard:= false;
     feventtime:= 0;
     fcontroller.dispatcheventoutput(fsigclientinfo.infopo);
    end;
@@ -4228,8 +4233,10 @@ begin
   else begin
    ainfo^.discard:= false;
    calc(finfos[0]);
+   ffinished:= finfos[0].findex = finfos[0].findexhigh;
    if fhasmix then begin
     calc(finfos[1]);
+    ffinished:= ffinished and (finfos[1].findex = finfos[1].findexhigh);
     foutputpo^:= finfos[1].fdest * fmixpo^.value + 
                       finfos[0].fdest * (1-fmixpo^.value);
    end
@@ -4238,7 +4245,9 @@ begin
    end;
   end;
  end;
- dec(fsamplecount);
+ if not ffinished then begin
+  dec(fsamplecount);
+ end;
 end;
 
 function tsigenvelope.gethandler: sighandlerprocty;
