@@ -258,6 +258,7 @@ begin
 {$ifdef unix}
   glxmakecurrent(fdpy,0,nil);
   glxdestroycontext(fdpy,fcontext);
+  xfreecolormap(fdpy,fcolormap);
 {$else}
   wglmakecurrent(0,0);
   wgldeletecontext(fcontext);

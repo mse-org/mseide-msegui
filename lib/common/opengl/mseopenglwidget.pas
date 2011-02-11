@@ -174,6 +174,7 @@ begin
   glxmakecurrent(fdpy,0,nil);
   glxdestroycontext(fdpy,fcontext);
   fcontext:= nil;
+  xfreecolormap(fdpy,fcolormap);
  end;
  {$else}
  if fcontext <> 0 then begin
