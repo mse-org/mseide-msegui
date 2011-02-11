@@ -48,7 +48,14 @@ uses
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
  msepolygon,msepickwidget,msetraywidget,msedockpanelform,msechartedit
- {$ifndef mse_no_opengl}{$ifdef FPC},mseopenglwidget{$endif}{$endif};
+ {$ifndef mse_no_opengl}
+  {$ifdef FPC}
+     ,mseopenglwidget
+   {$ifdef mse_with_openglcanvas}
+     ,mseopenglcanvaswidget
+   {$endif}
+  {$endif}
+ {$endif};
  
 type
  tpropertyeditor1 = class(tpropertyeditor);
@@ -150,7 +157,14 @@ begin
   tdockformwidget,tmainmenuwidget,
   tsplitter,tspacer,tlayouter,ttoolbar,ttabbar,ttabwidget,ttabpage,
   tdial,tchart,txychartedit,txserieschartedit,tchartrecorder,twindowwidget
-   {$ifndef mse_no_opengl}{$ifdef FPC},topenglwidget{$endif}{$endif}
+   {$ifndef mse_no_opengl}
+    {$ifdef FPC}
+     ,topenglwidget
+     {$ifdef mse_with_openglcanvas}
+      ,topenglcanvaswidget
+     {$endif}
+    {$endif}
+   {$endif}
   ,ttraywidget,tdockpanelformcontroller]);
  registercomponenttabhints(['Widget'],
          ['Display Widgets, Edit Widgets which can''t be placed into twidgetgrid']);

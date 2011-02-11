@@ -222,7 +222,8 @@ type
                gue_notlocked,
                gue_characterencoding,gue_invalidstream,gue_invalidcanvas,
                gue_notimplemented,gue_getchildren,gue_reparent,gue_docktosyswindow,
-               gue_notraywindow,gue_sendevent,gue_noshelllib
+               gue_notraywindow,gue_sendevent,gue_noshelllib,
+               gue_noglx,gue_novisual,gue_rendercontext
                );
 
  egui = class(eerror)
@@ -300,7 +301,10 @@ const
    'Can not dock to syswindow.',
    'No tray window.',
    'Can not send event.',
-   'Problem with shell library.'
+   'Problem with shell library.',
+   'GLX extension not supported.',
+   'Could not find visual.',
+   'Could not create a rendering context.'
    );
 
 

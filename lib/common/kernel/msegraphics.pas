@@ -217,6 +217,9 @@ type
   count: integer;
   closed: boolean;
  end;
+ colorinfoty = record
+  color: colorty;
+ end;
  getfontinfoty = record
   fontdata: pfontdataty;
   basefont: fontty;
@@ -318,15 +321,16 @@ type
    3: (textpos: textposinfoty);
    4: (text16pos: text16posinfoty);
    5: (points: pointsinfoty);
-   6: (getfont: getfontinfoty);
-   7: (gettextwidth: gettextwidthinfoty);
-   8: (gettext16width: gettext16widthinfoty);
-   9: (getcharwidths: getcharwidthsinfoty);
-  10: (getchar16widths: getchar16widthsinfoty);
-  11: (getfontmetrics: getfontmetricsinfoty);
-  12: (copyarea: copyareainfoty);
-  13: (regionoperation: regionoperationinfoty);
-  14: (fonthasglyph: fonthasglyphinfoty);
+   6: (color: colorinfoty);
+   7: (getfont: getfontinfoty);
+   8: (gettextwidth: gettextwidthinfoty);
+   9: (gettext16width: gettext16widthinfoty);
+  10: (getcharwidths: getcharwidthsinfoty);
+  11: (getchar16widths: getchar16widthsinfoty);
+  12: (getfontmetrics: getfontmetricsinfoty);
+  13: (copyarea: copyareainfoty);
+  14: (regionoperation: regionoperationinfoty);
+  15: (fonthasglyph: fonthasglyphinfoty);
  end;
 
  getfontfuncty = function (var drawinfo: drawinfoty): boolean of object;
@@ -600,6 +604,8 @@ type
    gcfonthandle1: fontnumty;
    afonthandle1: fontnumty;
    ffont: tfont;
+
+   function getgdifuncs: pgdifunctionaty; virtual;
    procedure registergclink(const dest: tcanvas);
    procedure unregistergclink(const dest: tcanvas);
    procedure gcdestroyed(const sender: tcanvas); virtual;
@@ -610,12 +616,11 @@ type
    procedure initgcvalues; virtual;
    procedure initgcstate; virtual;
    procedure finalizegcstate; virtual;
-   function getgdifuncs: pgdifunctionaty; virtual;
    procedure checkrect(const rect: rectty);
    procedure checkgcstate(state: canvasstatesty); virtual;
    procedure checkregionstate;  //copies region if necessary
    function defaultcliprect: rectty; virtual;
-   procedure gdi(const func: gdifuncty);
+   procedure gdi(const func: gdifuncty); virtual;
    procedure init;
    procedure internalcopyarea(asource: tcanvas; const asourcerect: rectty;
               const adestrect: rectty; acopymode: rasteropty;
