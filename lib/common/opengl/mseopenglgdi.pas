@@ -189,29 +189,43 @@ end;
 {$endif}
 
 {$ifdef mswindows}
-function createrendercontext(const id: winidty; const ainfo: contextinfoty;
-                                out gc: gcty): guierrorty;
+function createrendercontext(const aparent: winidty; const windowrect: rectty;
+                                   const ainfo: contextinfoty;
+                                   var gc: gcty; out aid: winidty): guierrorty;
 var
  pixeldesc: tpixelformatdescriptor;
  int1: integer; 
+ options1: internalwindowoptionsty;
+ wi1: windowty;
 begin
- aid:= createchildwindow;
- fwin:= aid;
- fdc:= getdc(fwin);
- fillchar(pixeldesc,sizeof(pixeldesc),0);
- with pixeldesc do begin
-  nsize:= sizeof(pixeldesc);
-  nversion:= 1;
-  dwflags:= pfd_draw_to_window or pfd_support_opengl or pfd_doublebuffer;
-  ipixeltype:= pfd_type_rgba;
-  ccolorbits:= 24;
-  cdepthbits:= 32;
+ result:= gue_ok;
+ fillchar(options1,sizeof(options1),0);
+ options1.parent:= aparent;
+ guierror(gui_createwindow(windowrect,options1,wi1));
+ aid:= wi1.id;
+ if aid = 0 then begin
+  result:= gue_createwindow;
+  exit;
  end;
- int1:= choosepixelformat(fdc,@pixeldesc);
- setpixelformat(fdc,int1,@pixeldesc);
- fcontext:= wglcreatecontext(fdc);
- if fcontext = 0 then begin
-  raise exception.create('Could not create an OpenGL rendering context.');
+ with oglgcty(gc.platformdata).d do begin
+  fdc:= getdc(aid);
+  fillchar(pixeldesc,sizeof(pixeldesc),0);
+  with pixeldesc do begin
+   nsize:= sizeof(pixeldesc);
+   nversion:= 1;
+   dwflags:= pfd_draw_to_window or pfd_support_opengl or pfd_doublebuffer;
+   ipixeltype:= pfd_type_rgba;
+   ccolorbits:= 24;
+   cdepthbits:= 32;
+  end;
+  int1:= choosepixelformat(fdc,@pixeldesc);
+  setpixelformat(fdc,int1,@pixeldesc);
+  fcontext:= wglcreatecontext(fdc);
+  if fcontext = 0 then begin
+   result:= gue_rendercontext;
+   exit;
+  end;
+  gc.handle:= ptruint(fcontext);
  end;
 end;
 {$endif}
@@ -247,7 +261,7 @@ begin
 {$else}
   wglmakecurrent(0,0);
   wgldeletecontext(fcontext);
-  releasedc(fwin,fdc);
+  releasedc(drawinfo.paintdevice,fdc);
 {$endif}
  end;
 end;
