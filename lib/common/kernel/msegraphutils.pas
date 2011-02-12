@@ -464,10 +464,19 @@ function colortostring(value: colorty): string;
 function getcolornames: msestringarty;
 function getcolorvalues: colorarty;
 
-function makepoint(const x,y: integer): pointty;
-function makesize(const cx,cy: integer): sizety;
+function makepoint(const x,y: integer): pointty; {$ifdef FPC}inline;{$endif}
+function makesize(const cx,cy: integer): sizety; {$ifdef FPC}inline;{$endif}
 function makerect(const x,y,cx,cy: integer): rectty; overload;
+                               {$ifdef FPC}inline;{$endif}
 function makerect(const pos: pointty; const size: sizety): rectty; overload;
+                               {$ifdef FPC}inline;{$endif}
+
+function mp(const x,y: integer): pointty; {$ifdef FPC}inline;{$endif}
+function ms(const cx,cy: integer): sizety; {$ifdef FPC}inline;{$endif}
+function mr(const x,y,cx,cy: integer): rectty; overload; 
+                               {$ifdef FPC}inline;{$endif}
+function mr(const pos: pointty; const size: sizety): rectty; overload;
+                               {$ifdef FPC}inline;{$endif}
 
 function bottomright(const rect: rectty): pointty;
 function isnullpoint(const point: pointty): boolean;
@@ -826,19 +835,19 @@ begin
  end;
 end;
 
-function makepoint(const x,y: integer): pointty;
+function makepoint(const x,y: integer): pointty; {$ifdef FPC}inline;{$endif}
 begin
  result.x:= x;
  result.y:= y;
 end;
 
-function makesize(const cx,cy: integer): sizety;
+function makesize(const cx,cy: integer): sizety; {$ifdef FPC}inline;{$endif}
 begin
  result.cx:= cx;
  result.cy:= cy;
 end;
 
-function makerect(const x,y,cx,cy: integer): rectty;
+function makerect(const x,y,cx,cy: integer): rectty; {$ifdef FPC}inline;{$endif}
 begin
  result.x:= x;
  result.y:= y;
@@ -847,6 +856,34 @@ begin
 end;
 
 function makerect(const pos: pointty; const size: sizety): rectty; overload;
+                                    {$ifdef FPC}inline;{$endif}
+begin
+ result.pos:= pos;
+ result.size:= size;
+end;
+
+function mp(const x,y: integer): pointty;{$ifdef FPC}inline;{$endif}
+begin
+ result.x:= x;
+ result.y:= y;
+end;
+
+function ms(const cx,cy: integer): sizety; {$ifdef FPC}inline;{$endif}
+begin
+ result.cx:= cx;
+ result.cy:= cy;
+end;
+
+function mr(const x,y,cx,cy: integer): rectty; {$ifdef FPC}inline;{$endif}
+begin
+ result.x:= x;
+ result.y:= y;
+ result.cx:= cx;
+ result.cy:= cy;
+end;
+
+function mr(const pos: pointty; const size: sizety): rectty; overload;
+                                      {$ifdef FPC}inline;{$endif}
 begin
  result.pos:= pos;
  result.size:= size;

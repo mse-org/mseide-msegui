@@ -270,7 +270,11 @@ end;
 procedure gdi_setviewport(var drawinfo: drawinfoty);
 begin
  with drawinfo.rect.rect^ do begin
-  glviewport(x,y,cx,cy);  
+  glviewport(x,y,cx,cy);
+  glloadidentity;
+  if (cx > 0) and (cy > 0) then begin
+   glortho(-1,cx-1,cy-1,-1,-1,1);
+  end;
  end;
 end;
 
@@ -300,7 +304,13 @@ end;
 
 procedure gdi_changegc(var drawinfo: drawinfoty); //gdifunc
 begin
-// notimplemented;
+ with drawinfo.gcvalues^ do begin
+  if gvm_colorforeground in mask then begin
+   with rgbtriplety(colorforeground) do begin
+    glcolor3ub(red,green,blue);
+   end;
+  end;
+ end;
 end;
 
 procedure gdi_drawlines(var drawinfo: drawinfoty); //gdifunc
