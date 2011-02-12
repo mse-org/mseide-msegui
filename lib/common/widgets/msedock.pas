@@ -2052,10 +2052,12 @@ var
      size1:= container1.paintsize;
      if (widget.anchors * [an_left,an_right] = []) and 
                                (fsplitdir = sd_none) then begin
+      rect1.x:= container1.screenpos.x + container1.paintpos.x;
       rect1.cx:= size1.cx;
      end;
      if (widget.anchors * [an_top,an_bottom] = []) and 
                                (fsplitdir = sd_none) then begin
+      rect1.y:= container1.screenpos.y + container1.paintpos.y;
       rect1.cy:= size1.cy;
      end;
      sd1:= fsplitdir;
