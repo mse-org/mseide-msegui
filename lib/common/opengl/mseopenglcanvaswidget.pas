@@ -140,6 +140,7 @@ end;
 procedure topenglcanvaswidget.doclientpaint(const aupdaterect: rectty);
 begin
  if canevent(tmethod(fonrender)) then begin
+  fcanvas.reset;
   fonrender(self,aupdaterect);
   fcanvas.swapbuffers;
  end;
