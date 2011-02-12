@@ -42,6 +42,8 @@ type
 
  capstylety = (cs_butt,cs_round,cs_projecting);
  joinstylety = (js_miter,js_round,js_bevel);
+ lineoptionty = (lio_antialias);
+ lineoptionsty = set of lineoptionty;
 
  dashesstringty = string[9];    //last byte 0 -> opaque
 
@@ -105,7 +107,7 @@ type
  canvasstatety =
   (cs_regioncopy,cs_clipregion,cs_origin,cs_gc,
    cs_acolorbackground,cs_acolorforeground,cs_color,cs_colorbackground,
-   cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,
+   cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,cs_lineoptions,
    cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,cs_fonteffect,
    cs_rasterop,cs_brush,cs_brushorigin,
    cs_painted,cs_internaldrawtext,cs_highresdevice,
@@ -113,7 +115,8 @@ type
  canvasstatesty = set of canvasstatety;
 
 const
- linecanvasstates = [cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle];
+ linecanvasstates = [cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,
+                     cs_lineoptions];
 
 type
 
@@ -279,6 +282,7 @@ type
  
  gcvaluemaskty = (gvm_clipregion,gvm_colorbackground,gvm_colorforeground,
                   gvm_dashes,gvm_linewidth,gvm_capstyle,gvm_joinstyle,
+                  gvm_lineoptions,
                   gvm_font,gvm_brush,gvm_brushorigin,gvm_rasterop,
                   gvm_brushflag);
  gcvaluemasksty = set of gcvaluemaskty;
@@ -288,6 +292,7 @@ type
   dashes: dashesstringty;
   capstyle: capstylety;
   joinstyle: joinstylety;
+  options: lineoptionsty;
  end;
 
  gcvaluesty = record
@@ -586,8 +591,10 @@ type
    procedure setlinewidth(Value: integer);
    function getcapstyle: capstylety;
    function getjoinstyle: joinstylety;
+   function getlineoptions: lineoptionsty;
    procedure setcapstyle(const Value: capstylety);
    procedure setjoinstyle(const Value: joinstylety);
+   procedure setlineoptions(const avalue: lineoptionsty);
    procedure initregrect(const adest: regionty; const arect: rectty);
    procedure initregreg(const adest: regionty; const asource: regionty);
    procedure updatecliporigin(const Value: pointty);
@@ -855,6 +862,8 @@ type
                 default cs_butt;
    property joinstyle: joinstylety read getjoinstyle write setjoinstyle
                 default js_miter;
+   property lineoptions: lineoptionsty read getlineoptions write setlineoptions
+                default [];
 
    property paintdevice: paintdevicety read fdrawinfo.paintdevice;
    property gchandle: ptruint read getgchandle;
@@ -3564,6 +3573,7 @@ begin
    if cs_dashes in state then include(values.mask,gvm_dashes);
    if cs_capstyle in state then include(values.mask,gvm_capstyle);
    if cs_joinstyle in state then include(values.mask,gvm_joinstyle);
+   if cs_lineoptions in state then include(values.mask,gvm_lineoptions);
    fstate:= fstate + state;
   end;
   if values.mask <> [] then begin
@@ -5052,10 +5062,21 @@ begin
  result:= fvaluepo^.lineinfo.joinstyle;
 end;
 
+function tcanvas.getlineoptions: lineoptionsty;
+begin
+ result:= fvaluepo^.lineinfo.options;
+end;
+
 procedure tcanvas.setjoinstyle(const Value: joinstylety);
 begin
  fvaluepo^.lineinfo.joinstyle:= value;
  valuechanged(cs_joinstyle);
+end;
+
+procedure tcanvas.setlineoptions(const avalue: lineoptionsty);
+begin
+ fvaluepo^.lineinfo.options:= avalue;
+ valuechanged(cs_lineoptions);
 end;
 
 function tcanvas.defaultcliprect: rectty;

@@ -28,7 +28,6 @@ type
    function getgdifuncs: pgdifunctionaty; override;
    procedure lock;
    procedure unlock;
-   procedure makecurrent; //calls lock
    procedure gdi(const func: gdifuncty); override;
   public
    constructor create(const user: tobject; const intf: icanvas);
@@ -97,32 +96,23 @@ procedure topenglcanvas.setviewport(const avalue: rectty);
 begin
  fviewport:= avalue;
  if fdrawinfo.gc.handle <> 0 then begin
-  makecurrent;
+  lock;
   fdrawinfo.rect.rect:= @fviewport;
   gdi_setviewport(fdrawinfo);
   unlock;
  end;
 end;
 
-procedure topenglcanvas.makecurrent;
-begin
- if fdrawinfo.gc.handle = 0 then begin
-  checkgcstate([cs_gc]);
- end;
- lock;
- gdi_makecurrent(fdrawinfo);
-end;
-
 procedure topenglcanvas.swapbuffers;
 begin
- makecurrent;
+ lock;
  gdi_swapbuffers(fdrawinfo);
  unlock;
 end;
 
 procedure topenglcanvas.init(const acolor: colorty = cl_none);
 begin
- makecurrent;
+ lock;
  if acolor = cl_none then begin
   fdrawinfo.color.color:= colorbackground;
  end
@@ -135,12 +125,20 @@ end;
 
 procedure topenglcanvas.gdi(const func: gdifuncty);
 begin
+ lock;
  fgdifuncs^[func](fdrawinfo);
+ unlock;
 end;
 
 procedure topenglcanvas.lock;
 begin
  //todo
+// if fdrawinfo.gc.handle = 0 then begin
+//  checkgcstate([cs_gc]);
+// end;
+ if fdrawinfo.gc.handle <> 0 then begin
+  gdi_makecurrent(fdrawinfo);
+ end;
 end;
 
 procedure topenglcanvas.unlock;

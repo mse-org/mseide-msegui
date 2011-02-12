@@ -70,6 +70,7 @@ type
   fdc: hdc;
   fcontext: hglrc;
   {$endif}
+  gclineoptions: lineoptionsty;
  end;
 
  oglgcty =  record
@@ -304,11 +305,26 @@ end;
 
 procedure gdi_changegc(var drawinfo: drawinfoty); //gdifunc
 begin
- with drawinfo.gcvalues^ do begin
+ with drawinfo.gcvalues^,oglgcty(drawinfo.gc.platformdata).d do begin
   if gvm_colorforeground in mask then begin
    with rgbtriplety(colorforeground) do begin
     glcolor3ub(red,green,blue);
    end;
+  end;
+  if gvm_lineoptions in mask then begin
+   if (lio_antialias in lineinfo.options) xor 
+                (lio_antialias in gclineoptions) then begin
+    if lio_antialias in lineinfo.options then begin
+     glenable(gl_line_smooth);
+     glenable(gl_blend);
+     glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
+    end
+    else begin
+     gldisable(gl_line_smooth);
+     gldisable(gl_blend);
+    end;
+   end;
+   gclineoptions:= lineinfo.options;
   end;
  end;
 end;
