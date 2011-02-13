@@ -51,6 +51,10 @@ type
  cushort = __U16_TYPE;
  pcushort = ^cushort;
 
+ cfloat = single;
+ pcfloat = ^cfloat;
+ cdouble = double;
+ pcdouble = ^cdouble;
 
 implementation
 end.

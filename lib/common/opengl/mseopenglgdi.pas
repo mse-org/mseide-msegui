@@ -57,7 +57,7 @@ procedure gdi_clear(var drawinfo: drawinfoty);
 
 implementation
 uses
- mseguiintf;
+ mseguiintf,mseftgl;
  
 type
  oglgcdty = record
