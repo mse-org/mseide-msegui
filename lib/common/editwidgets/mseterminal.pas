@@ -32,6 +32,7 @@ type
 // terminalstatety = ({ts_running,}ts_listening);
 // terminalstatesty = set of terminalstatety;
  
+ 
  tterminal = class(tcustomtextedit)
   private
    foninputpipebroken: notifyeventty;
@@ -42,6 +43,7 @@ type
    foptions: terminaloptionsty;
    fmaxchars: integer;
    fupdatingcount: integer;
+   fonprocfinished: notifyeventty;
    function getinputfd: integer;
    procedure setinoutfd(const Value: integer);
    procedure setoptions(const avalue: terminaloptionsty);
@@ -49,8 +51,8 @@ type
    procedure setoutputfd(const avalue: integer);
    function geterrorfd: integer;
    procedure seterrorfd(const avalue: integer);
-   function getonprocfinished: notifyeventty;
-   procedure setonprocfinished(const avalue: notifyeventty);
+//   function getonprocfinished: notifyeventty;
+//   procedure setonprocfinished(const avalue: notifyeventty);
    function getoptionsprocess: processoptionsty;
    procedure setoptionsprocess(const avalue: processoptionsty);
   protected
@@ -59,6 +61,7 @@ type
 
    procedure doinputavailable(const sender: tpipereader);
    procedure dopipebroken(const sender: tpipereader);
+   procedure doprocfinished(const sender: tobject);
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure docellevent(const ownedcol: boolean; 
@@ -104,7 +107,7 @@ type
    property onerrorpipebroken: notifyeventty read fonerrorpipebroken 
                                                    write fonerrorpipebroken;
    property onprocfinished: notifyeventty 
-                  read getonprocfinished write setonprocfinished;
+                  read fonprocfinished write fonprocfinished;
    
    property onsendtext: sendtexteventty read fonsendtext write fonsendtext;
    property onreceivetext: receivetexteventty read fonreceivetext 
@@ -136,6 +139,7 @@ begin
   output.onpipebroken:= {$ifdef FPC}@{$endif}dopipebroken;
   erroroutput.oninputavailable:= {$ifdef FPC}@{$endif}doinputavailable;
   erroroutput.onpipebroken:= {$ifdef FPC}@{$endif}dopipebroken;
+  onprocfinished:= {$ifdef FPC}@{$endif}doprocfinished;
   output.overloadsleepus:= 50000;
   erroroutput.overloadsleepus:= 50000;
   options:= [pro_output,pro_erroroutput,pro_input,pro_tty];
@@ -322,6 +326,13 @@ begin
  end;
 end;
 
+procedure tterminal.doprocfinished(const sender: tobject);
+begin
+ if canevent(tmethod(fonprocfinished)) then begin
+  fonprocfinished(self);
+ end;
+end;
+
 function tterminal.execprog(const acommandline: string): integer;
 begin
  with fprocess do begin
@@ -404,7 +415,7 @@ procedure tterminal.writestrln(const atext: string);
 begin
  writestr(atext+lineend);
 end;
-
+{
 function tterminal.getonprocfinished: notifyeventty;
 begin
  result:= fprocess.onprocfinished;
@@ -414,7 +425,7 @@ procedure tterminal.setonprocfinished(const avalue: notifyeventty);
 begin
  fprocess.onprocfinished:= avalue;
 end;
-
+}
 procedure tterminal.terminateprocess;
 begin
  fprocess.terminate;
