@@ -54,7 +54,7 @@ const
    bluesize: 8;
    alphasize: -1;
    depthsize: -1;
-   stencilsize: -1;
+   stencilsize: 1;
    accumredsize: -1;
    accumgreensize: -1;
    accumbluesize: -1;

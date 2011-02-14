@@ -70,6 +70,7 @@ type
   fdc: hdc;
   fcontext: hglrc;
   {$endif}
+  pd: paintdevicety;
   gclineoptions: lineoptionsty;
  end;
 
@@ -112,6 +113,27 @@ begin
   ar1[index]:= avalue;
   inc(index);
  end;
+end;
+
+procedure makecurrent(const gc: gcty);
+begin
+ with oglgcty(gc.platformdata).d do begin
+{$ifdef unix}
+  glxmakecurrent(fdpy,pd,fcontext);
+{$else}
+  wglmakecurrent(fdc,fcontext);
+{$endif}
+ end;
+end;
+
+procedure initcontext(const winid: winidty; var gc: gcty);
+begin
+ with oglgcty(gc.platformdata).d do begin
+  pd:= winid;
+ end;
+ makecurrent(gc);
+ glclearstencil(0);
+ glclear(gl_stencil_buffer_bit);
 end;
  
 {$ifdef unix}
@@ -186,6 +208,7 @@ begin
    xfree(visinfo);
   end;
  end;
+ initcontext(aid,gc);
 end;
 {$endif}
 
@@ -228,6 +251,7 @@ begin
   end;
   gc.handle:= ptruint(fcontext);
  end;
+ initcontext(aid,gc);
 end;
 {$endif}
 
@@ -240,6 +264,20 @@ begin
  dest.g:= co1.green/255;
  dest.b:= co1.blue/255;
  dest.a:= 0;
+end;
+
+procedure sendrect(const arect: rectty);
+var
+ endx,endy: integer;
+begin
+ with arect do begin
+  endx:= x+cx-1;
+  endy:= y+cy-1;
+  glvertex2iv(@pos);
+  glvertex2i(endx,y);
+  glvertex2i(endx,endy);
+  glvertex2i(x,endy);
+ end;
 end;
 
 procedure gdi_makecurrent(var drawinfo: drawinfoty);
@@ -361,8 +399,10 @@ begin
 end;
 
 procedure gdi_fillrect(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
+begin 
+ glbegin(gl_quads);
+ sendrect(drawinfo.rect.rect^);
+ glend;
 end;
 
 procedure gdi_fillelipse(var drawinfo: drawinfoty); //gdifunc
@@ -387,7 +427,6 @@ end;
 
 procedure gdi_setcliporigin(var drawinfo: drawinfoty); //gdifunc
 begin
-// notimplemented;
 end;
 
 procedure gdi_createemptyregion(var drawinfo: drawinfoty); //gdifunc

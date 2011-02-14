@@ -295,7 +295,7 @@ const
    'Error in character encoding',
    'Invalid stream',
    'Invalid canvas',
-   'Not implemnted.',
+   'Not implemented.',
    'Can not get children.',
    'Can not reparent window.',
    'Can not dock to syswindow.',
