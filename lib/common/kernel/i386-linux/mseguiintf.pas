@@ -663,6 +663,7 @@ type
   xftstate: xftstatesty;
  // fontdirection: graphicdirectionty;
  end;
+ {$if sizeof(x11gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$endif}
  x11gcty = record
   case integer of
    0: (d: x11gcdty;);

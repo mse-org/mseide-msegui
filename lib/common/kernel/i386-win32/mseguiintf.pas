@@ -335,7 +335,7 @@ type
                           gcf_last = 31);
             //-> longword
  gcflagsty = set of gcflagty;
- win32gcty = record
+ win32gcdty = record
   flags: gcflagsty;
   backgroundcol,foregroundcol: longword;
   backgroundbrush: hbrush;
@@ -351,11 +351,12 @@ type
   selectedpen: hpen;
   selectedbrush: hbrush;
   secondpen: hpen;
-  {$ifndef FPC}
-  local: array[21..23] of longword;
-  {$else}
-  local: array[23..23] of longword;
-  {$endif}
+ end;
+ {$if sizeof(win32gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$endif}
+ win32gcty = record
+  case integer of
+   0: (d: win32gcdty;);
+   1: (_bufferspace: gcpty;);
  end;
 
  charwidthsty = array[0..255] of integer;
@@ -1333,7 +1334,7 @@ begin
    gc.handle:= createcompatibledc(0);
    if gc.handle <> 0 then begin
     selectobject(gc.handle,paintdevice);
-    win32gcty(gc.platformdata).kind:= akind;
+    win32gcty(gc.platformdata).d.kind:= akind;
    end;
   end;
   gck_printer: begin
@@ -1365,7 +1366,7 @@ begin
 {$ifdef mse_debuggdi}
   inc(gccount);
 {$endif}
-  win32gcty(gc.platformdata).kind:= akind;
+  win32gcty(gc.platformdata).d.kind:= akind;
   settextalign(gc.handle,ta_left or ta_baseline or ta_noupdatecp);
   setbkmode(gc.handle,transparent);
   setmapmode(gc.handle,mm_text);
@@ -1375,7 +1376,7 @@ end;
 
 procedure gui_destroygc(var drawinfo: drawinfoty);
 begin
- with drawinfo,gc,win32gcty(platformdata) do begin
+ with drawinfo,gc,win32gcty(platformdata).d do begin
   selectobject(handle,nullpen);
   selectobject(handle,nullbrush);
 {$ifdef mse_debuggdi}
@@ -2255,7 +2256,7 @@ end;
 
 procedure gui_changegc(var drawinfo: drawinfoty);
 begin
- with drawinfo.gcvalues^,drawinfo.gc,win32gcty(platformdata) do begin
+ with drawinfo.gcvalues^,drawinfo.gc,win32gcty(platformdata).d do begin
   if gvm_colorbackground in mask then begin
    exclude(flags,gcf_backgroundbrushvalid);
    backgroundcol:= colorbackground;
@@ -2300,7 +2301,7 @@ end;
 
 procedure updateopaquemode(var gc: gcty);
 begin
- with gc,win32gcty(platformdata) do begin
+ with gc,win32gcty(platformdata).d do begin
   settextcolor(handle,foregroundcol);
   if df_opaque in drawingflags then begin
    setbkmode(handle,opaque);
@@ -2315,7 +2316,7 @@ end;
 procedure checkgc2(var gc: gcty);
          //second pass for transparent patternpen
 begin
- with gc,win32gcty(platformdata) do begin
+ with gc,win32gcty(platformdata).d do begin
   if gcf_isopaquedashpen in flags then begin
    selectobject(handle,secondpen);
    deleteobject(selectedpen);
@@ -2346,7 +2347,7 @@ var
 
 begin
  result:= false;
- with gc,win32gcty(platformdata) do begin
+ with gc,win32gcty(platformdata).d do begin
   exclude(flags,gcf_isopaquedashpen);
   if (df_brush in drawingflags) xor (gcf_ispatternpen in flags) then begin
    exclude(flags,gcf_foregroundpenvalid);
@@ -2533,7 +2534,7 @@ begin
 {$ifdef mse_debuggdi}
  inc(regioncount);
 {$endif}
- if win32gcty(gc.platformdata).kind = gck_printer then begin
+ if win32gcty(gc.platformdata).d.kind = gck_printer then begin
   rect1:= rect;
   recttowinrect(rect1);
   lptodp(gc.handle,
@@ -2559,7 +2560,7 @@ var
  reg1: hrgn;
  delta: pointty;
 begin
- with drawinfo.gc,win32gcty(platformdata) do begin
+ with drawinfo.gc,win32gcty(platformdata).d do begin
   delta:= subpoint(cliporigin,gccliporigin);
   if (delta.x <> 0) or (delta.y <> 0) then begin
    reg1:= createregion;
@@ -2593,7 +2594,7 @@ begin
  with drawinfo.regionoperation do begin
   dest:= createregion;
   if rectscount > 0 then begin
-   if win32gcty(drawinfo.gc.platformdata).kind = gck_printer then begin
+   if win32gcty(drawinfo.gc.platformdata).d.kind = gck_printer then begin
     for int1:= 0 to rectscount - 1 do begin
      rect1:= rectspo^[int1];
      recttowinrect(rect1);
@@ -2647,7 +2648,7 @@ procedure gui_regionclipbox(var drawinfo: drawinfoty);
 begin
  with drawinfo.regionoperation do begin
   getrgnbox(source,trect(rect));
-  if win32gcty(drawinfo.gc.platformdata).kind = gck_printer then begin
+  if win32gcty(drawinfo.gc.platformdata).d.kind = gck_printer then begin
    dptolp(drawinfo.gc.handle,
           {$ifdef FPC}lppoint(@{$endif}rect{$ifdef FPC}){$endif},2);
   end;
@@ -2907,7 +2908,7 @@ var
     end;
    end;
    if shape <> fs_copyarea then begin
-    with win32gcty(gc.platformdata) do begin
+    with win32gcty(gc.platformdata).d do begin
      if patternbrush <> 0 then begin
       selectobject(adc,patternbrush);
       if adc = gc.handle then begin
@@ -2923,7 +2924,7 @@ var
        bitblt(adc,destrect^.x,destrect^.y,cx,cy,tcanvas1(source).fdrawinfo.gc.handle,x,y,rasterops3[arop]);
       end
       else begin
-       if iswin95 or (win32gcty(gc.platformdata).kind = gck_printer) then begin
+       if iswin95 or (win32gcty(gc.platformdata).d.kind = gck_printer) then begin
 //        win95maskblt(adc,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,
 //                    x,y,mask,maskgchandle,x,y,arop);
         tcanvas1(mask.canvas).checkgcstate([cs_gc]);
@@ -2980,7 +2981,7 @@ begin
   getarcinfo(drawinfo,xstart,ystart,xend,yend);
  end;
  with drawinfo do begin
-  with gc,win32gcty(platformdata) do begin
+  with gc,win32gcty(platformdata).d do begin
    if (drawingflags * [df_monochrome,df_opaque,df_brush] = 
                                           [df_monochrome,df_brush]) then begin
     if shape <> fs_rect then begin
@@ -3261,7 +3262,7 @@ var
 
  procedure transfer(double: boolean = false);
  begin
-  with drawinfo,copyarea,sourcerect^,gc,win32gcty(platformdata) do begin
+  with drawinfo,copyarea,sourcerect^,gc,win32gcty(platformdata).d do begin
    if alignment * [al_stretchx,al_stretchy] = [] then begin
     if mask = nil then begin
      bitblt(handle,destrect^.x,destrect^.y,cx,cy,
@@ -3363,7 +3364,7 @@ var
  point1: tpoint;
  maskbefore: tsimplebitmap; 
 begin
- with drawinfo,copyarea,gc,win32gcty(platformdata) do begin
+ with drawinfo,copyarea,gc,win32gcty(platformdata).d do begin
   
   nomaskblt:= iswin95 or (kind = gck_printer);
   setintpolmode(handle);
@@ -3622,8 +3623,8 @@ begin
   end
   else begin
    bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen]);
-   if ((win32gcty(gc.platformdata).peninfo.width <= 1) or
-           (win32gcty(gc.platformdata).peninfo.capstyle = cs_butt)) and 
+   if ((win32gcty(gc.platformdata).d.peninfo.width <= 1) or
+           (win32gcty(gc.platformdata).d.peninfo.capstyle = cs_butt)) and 
            (count > 0) then begin
     po1:= @pointarty(buffer.buffer)[count-1]; //endpoint
     if (po1^.x <> pointarty(buffer.buffer)[0].x) or
@@ -3659,7 +3660,7 @@ begin
   int1:= points.count div 2; //segmentcount
 //  bo1:= (win32gcty(gc.platformdata).peninfo.width <= 1) or
 //          (win32gcty(gc.platformdata).peninfo.capstyle = cs_butt);
-  bo1:= (win32gcty(gc.platformdata).peninfo.width < 1) {or
+  bo1:= (win32gcty(gc.platformdata).d.peninfo.width < 1) {or
           (win32gcty(gc.platformdata).peninfo.capstyle = cs_butt)};
 //  bo1:= false;
   for int2:= 0 to int1 - 1 do begin
@@ -3710,7 +3711,7 @@ begin
   if (xstart = xend) and (ystart = yend) and (abs(extentang) < 1) then begin
    checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen,gcf_selectnullbrush]);
    movetoex(gc.handle,xstart,ystart,nil);
-   if (win32gcty(gc.platformdata).peninfo.width = 0) {and 
+   if (win32gcty(gc.platformdata).d.peninfo.width = 0) {and 
            (win32gcty(gc.platformdata).peninfo.capstyle <> cs_butt)} then begin
     inc(xstart);
    end;

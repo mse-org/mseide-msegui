@@ -290,6 +290,7 @@ begin
    caseinsensitive:= false;
   end;
   if caseinsensitive then begin
+   setlength(mask,length(mask)); //unique
    for int1:= 0 to high(mask) do begin
     mask[int1]:= mseuppercase(mask[int1]);
    end;

@@ -175,7 +175,7 @@ type
   function getsize: sizety;
  end;
 
- gcpty = array[0..23] of longword;
+ gcpty = array[0..31] of pointer;
  gcty = record
   handle: ptruint;//cardinal;
   refgc: ptruint;//cardinal; //for windowsmetafile

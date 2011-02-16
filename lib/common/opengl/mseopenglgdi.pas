@@ -74,6 +74,8 @@ type
   gclineoptions: lineoptionsty;
  end;
 
+ {$if sizeof(oglgcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$endif}
+
  oglgcty =  record
   case integer of
    0: (d: oglgcdty;);
