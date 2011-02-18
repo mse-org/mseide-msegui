@@ -57,7 +57,7 @@ procedure gdi_clear(var drawinfo: drawinfoty);
 
 implementation
 uses
- mseguiintf,mseftgl;
+ mseguiintf,mseftgl,msegenericgdi;
  
 type
  oglgcdty = record
@@ -85,11 +85,6 @@ type
   r,g,b,a: glclampf;
  end;
   
-procedure notimplemented;
-begin
- guierror(gue_notimplemented);
-end;
-
 
 procedure putboolean(var ar1: integerarty; var index: integer;
                              const atag: integer; const avalue: boolean);
@@ -371,7 +366,7 @@ end;
 
 procedure gdi_drawlines(var drawinfo: drawinfoty); //gdifunc
 begin
- notimplemented;
+ gdinotimplemented;
 end;
 
 procedure gdi_drawlinesegments(var drawinfo: drawinfoty); //gdifunc
@@ -392,12 +387,12 @@ end;
 
 procedure gdi_drawellipse(var drawinfo: drawinfoty); //gdifunc
 begin
- notimplemented;
+ gdinotimplemented;
 end;
 
 procedure gdi_drawarc(var drawinfo: drawinfoty); //gdifunc
 begin
- notimplemented;
+ gdinotimplemented;
 end;
 
 procedure gdi_fillrect(var drawinfo: drawinfoty); //gdifunc
@@ -409,106 +404,36 @@ end;
 
 procedure gdi_fillelipse(var drawinfo: drawinfoty); //gdifunc
 begin
- notimplemented;
+ gdinotimplemented;
 end;
 
 procedure gdi_fillarc(var drawinfo: drawinfoty); //gdifunc
 begin
- notimplemented;
+ gdinotimplemented;
 end;
 
 procedure gdi_fillpolygon(var drawinfo: drawinfoty); //gdifunc
 begin
- notimplemented;
+ gdinotimplemented;
 end;
 
 procedure gdi_drawstring16(var drawinfo: drawinfoty); //gdifunc
 begin
- notimplemented;
+ gdinotimplemented;
 end;
 
 procedure gdi_setcliporigin(var drawinfo: drawinfoty); //gdifunc
 begin
 end;
 
-procedure gdi_createemptyregion(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
-end;
-
-procedure gdi_createrectregion(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
-end;
-
-procedure gdi_createrectsregion(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
-end;
-
-procedure gdi_destroyregion(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
-end;
-
-procedure gdi_copyregion(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
-end;
-
-procedure gdi_moveregion(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
-end;
-
-procedure gdi_regionisempty(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
-end;
-
-procedure gdi_regionclipbox(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
-end;
-
-procedure gdi_regsubrect(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
-end;
-
-procedure gdi_regsubregion(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
-end;
-
-procedure gdi_regaddrect(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
-end;
-
-procedure gdi_regaddregion(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
-end;
-
-procedure gdi_regintersectrect(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
-end;
-
-procedure gdi_regintersectregion(var drawinfo: drawinfoty); //gdifunc
-begin
- notimplemented;
-end;
-
 procedure gdi_copyarea(var drawinfo: drawinfoty); //gdifunc
 begin
- notimplemented;
+ gdinotimplemented;
 end;
 
 procedure gdi_fonthasglyph(var drawinfo: drawinfoty); //gdifunc
 begin
- notimplemented;
+ gdinotimplemented;
 end;
 
 const
@@ -525,20 +450,20 @@ const
    {$ifdef FPC}@{$endif}gdi_fillpolygon,
    {$ifdef FPC}@{$endif}gdi_drawstring16,
    {$ifdef FPC}@{$endif}gdi_setcliporigin,
-   {$ifdef FPC}@{$endif}gdi_createemptyregion,
-   {$ifdef FPC}@{$endif}gdi_createrectregion,
-   {$ifdef FPC}@{$endif}gdi_createrectsregion,
-   {$ifdef FPC}@{$endif}gdi_destroyregion,
-   {$ifdef FPC}@{$endif}gdi_copyregion,
-   {$ifdef FPC}@{$endif}gdi_moveregion,
-   {$ifdef FPC}@{$endif}gdi_regionisempty,
-   {$ifdef FPC}@{$endif}gdi_regionclipbox,
-   {$ifdef FPC}@{$endif}gdi_regsubrect,
-   {$ifdef FPC}@{$endif}gdi_regsubregion,
-   {$ifdef FPC}@{$endif}gdi_regaddrect,
-   {$ifdef FPC}@{$endif}gdi_regaddregion,
-   {$ifdef FPC}@{$endif}gdi_regintersectrect,
-   {$ifdef FPC}@{$endif}gdi_regintersectregion,
+   {$ifdef FPC}@{$endif}msegenericgdi.gdi_createemptyregion,
+   {$ifdef FPC}@{$endif}msegenericgdi.gdi_createrectregion,
+   {$ifdef FPC}@{$endif}msegenericgdi.gdi_createrectsregion,
+   {$ifdef FPC}@{$endif}msegenericgdi.gdi_destroyregion,
+   {$ifdef FPC}@{$endif}msegenericgdi.gdi_copyregion,
+   {$ifdef FPC}@{$endif}msegenericgdi.gdi_moveregion,
+   {$ifdef FPC}@{$endif}msegenericgdi.gdi_regionisempty,
+   {$ifdef FPC}@{$endif}msegenericgdi.gdi_regionclipbox,
+   {$ifdef FPC}@{$endif}msegenericgdi.gdi_regsubrect,
+   {$ifdef FPC}@{$endif}msegenericgdi.gdi_regsubregion,
+   {$ifdef FPC}@{$endif}msegenericgdi.gdi_regaddrect,
+   {$ifdef FPC}@{$endif}msegenericgdi.gdi_regaddregion,
+   {$ifdef FPC}@{$endif}msegenericgdi.gdi_regintersectrect,
+   {$ifdef FPC}@{$endif}msegenericgdi.gdi_regintersectregion,
    {$ifdef FPC}@{$endif}gdi_copyarea,
    {$ifdef FPC}@{$endif}gdi_fonthasglyph
  );

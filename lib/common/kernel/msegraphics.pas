@@ -798,12 +798,6 @@ type
    function getfontmetrics(const achar: msechar;
                                      const afont: tfont = nil): fontmetricsty;
 
-   function createregion: regionty; overload;
-   function createregion(const asource: regionty): regionty; overload;
-   function createregion(const arect: rectty): regionty; overload;
-   function createregion(const rects: array of rectty): regionty; overload;
-   function createregion(frame: rectty; const inflate: integer): regionty; overload;
-   procedure destroyregion(region: regionty);
                    //all boundaries of regionrects are clipped to
                    // -$8000..$7fff in device space
    procedure addcliprect(const rect: rectty);
@@ -822,6 +816,13 @@ type
 
    function clipregionisempty: boolean; //true if no drawing possible
    function clipbox: rectty; //smallest possible rect around clipregion
+
+   function createregion: regionty; overload;
+   function createregion(const asource: regionty): regionty; overload;
+   function createregion(const arect: rectty): regionty; overload;
+   function createregion(const rects: array of rectty): regionty; overload;
+   function createregion(frame: rectty; const inflate: integer): regionty; overload;
+   procedure destroyregion(region: regionty);
 
    procedure regmove(const adest: regionty; const dist: pointty);
    procedure regremove(const adest: regionty; const dist: pointty);
