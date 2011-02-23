@@ -45,7 +45,7 @@ uses
  msesysutils,sysutils;
  
 type
- regopty = (reop_add);
+ regopty = (reop_add,reop_sub);
  
  rectextentty = integer;
  prectextentty = ^rectextentty;
@@ -527,7 +527,8 @@ end;
 
 type
  regopdataty = record
-  counta,countb: rectextentty;
+  counta: rectextentty; //new
+  countb: rectextentty; //existing
  end;
 
 function addop(var data: regopdataty): boolean;
@@ -537,11 +538,18 @@ begin
  end;
 end;
 
+function subop(var data: regopdataty): boolean;
+begin
+ with data do begin
+  result:= not odd(counta) and odd(countb);
+ end;
+end;
+
 type
  regopprocty = function (var data: regopdataty): boolean;
  
 const
- regops: array[regopty] of regopprocty = (@addop);
+ regops: array[regopty] of regopprocty = (@addop,@subop);
  
 procedure stripeop(var reg: regioninfoty;
                              const astripestart: rectextentty; 
@@ -616,6 +624,9 @@ begin
     end;
     while posa <= posb do begin           //new
      if posb = posa then begin
+      if posa = maxint then begin
+       break;
+      end;
       dec(d.countb);
       inc(prectextentty(psb1));
       if d.countb = 0 then begin
@@ -888,8 +899,15 @@ begin
 end;
 
 procedure gdi_regsubrect(var drawinfo: drawinfoty); //gdifunc
+var
+ stri1: regionrectstripety;
+ ext1: rectextentty;
 begin
- gdinotimplemented;
+ with drawinfo.regionoperation do begin
+  if recttostripe(rect,ext1,stri1) then begin
+   stripeop(pregioninfoty(dest)^,ext1,@stri1,reop_sub);
+  end;
+ end;
 end;
 
 procedure gdi_regsubregion(var drawinfo: drawinfoty); //gdifunc
