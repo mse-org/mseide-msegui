@@ -1398,8 +1398,8 @@ type
      end;
 type
   timespec = record
-    tv_sec: Longint;
-    tv_nsec: Longint;
+    tv_sec: __time_t;
+    tv_nsec: clong;
   end;
 
   TTimeSpec = timespec;
@@ -1561,9 +1561,18 @@ type
 function __time(var __timer : ttime_t):time_t;cdecl;external clib name 'time';
 function __time(__timer:Ptime_t):time_t;cdecl;external clib name 'time';
 function timelocal(var __tp: tm):time_t;cdecl;external clib name 'timelocal';
-function setlocale(__category:longint; __locale:Pchar):Pchar;cdecl;external clib name 'setlocale';
-
+function setlocale(__category:longint; __locale:Pchar):Pchar;cdecl;
+                                               external clib name 'setlocale';
+var
+ clock_gettime: function(clk_id: cint; tp: ptimespec): cint; cdecl;
+ 
 const
+   CLOCK_REALTIME = 0;
+   CLOCK_MONOTONIC = 1;
+   CLOCK_PROCESS_CPUTIME_ID = 2;
+   CLOCK_THREAD_CPUTIME_ID = 3;
+   TIMER_ABSTIME = 1;
+
    SA_ONSTACK = $08000000;
    SA_RESTART = $10000000;
    SA_NODEFER = $40000000;
@@ -2144,7 +2153,9 @@ function ntohs(__netshort:uint16_t):uint16_t;cdecl;external clib name 'ntohs';
 function gai_strerror(__ecode:longint):Pchar;cdecl;external clib name 'gai_strerror';
 
 implementation
-
+uses
+ msedynload,msesys;
+ 
 Function WEXITSTATUS(Status: longint): longint;
 begin
   Result:=(Status and $FF00) shr 8;
@@ -2212,4 +2223,24 @@ end;
 
 {$endif} //linux
 
+var
+ rtlibinfo: dynlibinfoty;
+
+procedure initlib;
+const
+ funcs: array[0..0] of funcinfoty = (
+   (n: 'clock_gettime'; d: @clock_gettime) //0
+   );    
+begin
+ try
+  initializedynlib(rtlibinfo,['librt.so.1','librt.so','libc.so.6'],[],funcs);
+ except
+ end;
+end;
+
+initialization
+ initializelibinfo(rtlibinfo);
+ initlib;
+finalization
+ finalizelibinfo(rtlibinfo);
 end.

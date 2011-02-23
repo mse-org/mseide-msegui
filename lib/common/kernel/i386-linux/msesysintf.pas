@@ -542,10 +542,16 @@ end;
 {$R-}
 function sys_gettimeus: longword;
 var
- time: timeval;
+ time1: timeval;
+ time2: timespec;
 begin
- gettimeofday(@time,ptimezone(nil));
- result:= time.tv_sec * 1000000 + time.tv_usec;
+ if (clock_gettime = nil) or (clock_gettime(clock_monotonic,@time2) <> 0) then begin
+  gettimeofday(@time1,ptimezone(nil));
+  result:= time1.tv_sec * 1000000 + time1.tv_usec;
+ end
+ else begin
+  result:= time2.tv_sec * 1000000 + time2.tv_nsec div 1000;
+ end;
 end;
 
 function sys_mutexcreate(out mutex: mutexty): syserrorty;
