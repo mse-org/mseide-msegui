@@ -101,6 +101,8 @@ type
   stripecount: integer;
   stripestart: rectextentty;
   stripeend: rectextentty;
+  rectstart: rectextentty;    //minint = invalid
+  rectend: rectextentty;      //maxint = invalid
   datapo: pstripety;
  end;
  pregioninfoty = ^regioninfoty;
@@ -162,6 +164,8 @@ begin
                     'stripecount: '+inttostr(stripecount)+
                     ' stripestart: '+inttostr(stripestart)+
                     ' stripeend: '+inttostr(stripeend)+
+                    ' rectstart: '+inttostr(rectstart)+
+                    ' rectend: '+inttostr(rectend)+
                     ' rectcount: '+ inttostr(rectcount)+
                     ' datasize: '+inttostr(datasize)+
                     ' buffersize: '+inttostr(buffersize)
@@ -240,6 +244,8 @@ begin
   rectcount:= arectcount;
   buffersize:=  calcdatasize(stripecount,rectcount);
   datasize:= buffersize;
+  rectstart:= maxint;
+  rectend:= minint;
   if buffersize > 0 then begin
    getmem(datapo,buffersize);
   end
@@ -311,6 +317,9 @@ begin
   start^.header.rectcount:= 0;
   if (stripecount = 0) or (astart < stripestart) then begin
    stripestart:= astart;
+   if stripecount = 0 then begin
+    stripeend:= astart+aheight;
+   end;
   end;
   inc(stripecount);
   ext1:= astart + aheight;
@@ -374,7 +383,7 @@ begin
     po1:= datapo;
     while true do begin
      ext1:= ext1 + po1^.header.height;
-     if ext1 >= start then begin
+     if ext1 > start then begin
       ext1:= ext1-po1^.header.height;
       break;
      end;
@@ -557,13 +566,14 @@ procedure stripeop(var reg: regioninfoty;
 var
  d: regopdataty;
  po1,po6,psa1,psb,psb1,pd,pd1,pd2: pstripety;
+ lastdeststripe: pstripety;
  psbbelowref: ptrint;
  po2,po3: prectextentaty;
  po4: pointer;
  po5: ppointer;
  stripeco,rectco: integer;
- posa,posb: rectextentty;
- ext1: rectextentty;
+ posa,posb,startb,startd,endb: rectextentty;
+ ext1,ext2: rectextentty;
  int1,int2,int3: integer;
  bo1: boolean;
  pui1,pui2: ptruint;
@@ -571,7 +581,8 @@ var
  don: boolean;
  dpos: rectextentty;
  dstripeco,drectco: rectextentty;
- 
+const
+ endmark = maxint-1; 
 begin
  splitstripes(reg,astripestart,stripe,psb,psbbelowref,stripeco,rectco);
 {$ifdef mse_debugregion}
@@ -590,10 +601,10 @@ begin
 //   dumpstripe('S'+inttostr(stripeco-1-int1)+' ',psb1);
    psa1:= stripe;                                              //new
    pd1^.header.height:= psb1^.header.height;
-   pd2:= pd1; //header backup
+   pd2:= pd1;   //header backup
    pd1:= @pd1^.data;
-   posa:= maxint;
-   posb:= maxint;
+   posa:= endmark;
+   posb:= endmark;
    dpos:= 0;
    don:= false;
    d.counta:= psa1^.header.rectcount * 2;
@@ -606,6 +617,8 @@ begin
    if d.countb > 0 then begin
     posb:= prectextentty(psb1)^;
    end;
+   startb:= posb;
+   startd:= endmark;
    while (d.counta > 0) or (d.countb > 0) do begin
     while posb < posa do begin        //existing
      dec(d.countb);
@@ -613,24 +626,29 @@ begin
       don:= not don;
       prectextentty(pd1)^:= posb-dpos;
       dpos:= posb;
+      if startd = endmark then begin
+       startd:= posb;
+      end;
       inc(prectextentty(pd1));
      end;
      inc(prectextentty(psb1));
      if (d.countb = 0) then begin
-      posb:= maxint;
+      endb:= posb;
+      posb:= endmark;
       break;
      end;
      posb:= posb + prectextentty(psb1)^;
     end;
     while posa <= posb do begin           //new
      if posb = posa then begin
-      if posa = maxint then begin
+      if posa = endmark then begin
        break;
       end;
       dec(d.countb);
       inc(prectextentty(psb1));
       if d.countb = 0 then begin
-       posb:= maxint;
+       endb:= posb;
+       posb:= endmark;
       end
       else begin
        posb:= posb + prectextentty(psb1)^;
@@ -641,11 +659,14 @@ begin
       don:= not don;
       prectextentty(pd1)^:= posa-dpos;
       dpos:= posa;
+      if startd = endmark then begin
+       startd:= posa;
+      end;
       inc(prectextentty(pd1));
      end;
      inc(prectextentty(psa1));
      if (d.counta = 0) then begin
-      posa:= maxint;
+      posa:= endmark;
       break;
      end;
      posa:= posa + prectextentty(psa1)^;
@@ -654,6 +675,32 @@ begin
    pd2^.header.rectcount:= ((pchar(pd1)-pchar(pd2))-sizeof(stripeheaderty)) 
                                                        div sizeof(rectdataty);
    drectco:= drectco + pd2^.header.rectcount;
+   if startd <> endmark then begin  //has result rects
+    if startd <= rectstart then begin
+     rectstart:= startd;
+    end
+    else begin
+     if startb = rectstart then begin   //higher
+      rectstart:= minint; //invalid
+     end;
+    end;
+    if dpos >= rectend then begin
+     rectend:= dpos;
+    end
+    else begin
+     if endb = rectend then begin      //lower
+      rectend:= maxint; //invalid
+     end;
+    end;
+   end
+   else begin        //no result rects
+    if startb = rectstart then begin
+     rectstart:= minint; //invalid
+    end;
+    if endb = rectend then begin
+     rectend:= maxint;
+    end;
+   end;
   end;
  {$ifdef mse_debugregion}
   dumpstripes('before pack ',pd,stripeco,astripestart);
@@ -698,6 +745,7 @@ begin
     dec(int1);
    end;
   end;
+  lastdeststripe:= psb1;
  {$ifdef mse_debugregion}
   dumpstripes('after pack ',pd,dstripeco,astripestart);
   dumpregion('region after pack',ptruint(@reg));
@@ -748,7 +796,17 @@ begin
     end;
    end;
   end;
-
+  if psb = datapo then begin //first stripe
+   int1:= 0;
+   po1:= pd;
+   while (po1^.header.rectcount = 0) and (int1 < dstripeco) do begin
+    stripestart:= stripestart + po1^.header.height;
+    inc(int1);          
+    inc(po1);
+   end;
+  end;
+  inc(pd,int1);      //remove leading empty stripes
+  dstripeco:= dstripeco-int1;
   pui2:= calcdatasize(dstripeco,drectco); //new size
   psb1:= pstripety(pchar(psb)+ pui2);     //new block end
   move(po1^,psb1^,datasize-(pchar(po1)-pchar(datapo)));
@@ -757,6 +815,26 @@ begin
   rectcount:= rectcount - rectco + drectco;
   stripecount:= stripecount - stripeco + dstripeco;
   datasize:= calcdatasize(stripecount,rectcount);
+  if (lastdeststripe^.header.rectcount = 0) and 
+                     ((pchar(psb)-pchar(datapo))+pui2 = datasize) then begin
+                   //changed last stripe
+   po1:= pd;
+   po6:= po1;
+   ext1:= 0;
+   ext2:= 0;
+   for int1:= dstripeco-1 downto 0 do begin
+    ext1:= ext1+po1^.header.height;
+    if po1^.header.rectcount > 0 then begin
+     po6:= po1;        //last not empty stripe
+     ext2:= ext1;
+    end;
+    incstripe(po1);
+   end;
+   stripeend:= stripeend-ext1+ext2;     //remove trailing empty stripes
+   int1:= po1-po6;
+   stripecount:= stripecount-int1;
+   datasize:= datasize-int1*sizeof(stripeheaderty);
+  end;
  end;
 end;
 
@@ -771,6 +849,71 @@ begin
    header.rectcount:= 1;
    data.gap:= rect.x;
    data.width:= rect.cx;
+  end;
+ end;
+end;
+
+function regextents(var reg: regioninfoty): rectty;
+var
+ mi,ma: rectextentty;
+ po1,po2: pstripety;
+ int1: rectextentty;
+ ext1: rectextentty;
+begin
+ with reg do begin
+  if rectcount = 0 then begin
+   result:= nullrect;
+  end
+  else begin
+   if rectend = maxint then begin //invalid
+    mi:= maxint;
+    ma:= minint;
+    po1:= datapo;
+    po2:= pstripety(pchar(po1)+datasize);
+    repeat
+     int1:= po1^.header.rectcount;
+     po1:= @po1^.data;
+     if int1 > 0 then begin
+      ext1:= prectextentty(po1)^;
+      if ext1 < mi then begin
+       mi:= ext1
+      end;
+      for int1:= int1*2-2 downto 0 do begin
+       inc(prectextentty(po1));
+       ext1:= ext1 + prectextentty(po1)^;
+      end;
+      inc(prectextentty(po1));
+      if ext1 > ma then begin
+       ma:= ext1;
+      end;
+     end;
+    until po1 >= po2;
+    rectstart:= mi;
+    rectend:= ma;
+   end
+   else begin
+    if rectstart = minint then begin //invalid
+     mi:= maxint;
+     po1:= datapo;
+     po2:= pstripety(pchar(po1)+datasize);
+     repeat
+      int1:= po1^.header.rectcount;
+      if int1 > 0 then begin
+       ext1:= prectdataty(@po1^.data)^.gap;
+       if ext1 < mi then begin
+        mi:= ext1;
+       end;
+       po1:= pstripety(pchar(po1) + sizeof(stripeheaderty) +
+                                                 sizeof(rectdataty)*int1);
+      end;
+     until po1 >= po2;
+     rectstart:= mi;
+    end;
+   end;
+   result.x:= rectstart;
+   result.y:= stripestart;
+   result.cx:= rectend-rectstart;
+   result.cy:= stripeend-stripestart;
   end;
  end;
 end;
@@ -815,7 +958,7 @@ end;
 procedure gdi_createemptyregion(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.regionoperation do begin
-  pointer(dest):= getregmem(0,0);
+  pointer(dest):= getregmem(0,0);  
  end;
 end;
 
@@ -835,6 +978,8 @@ begin
    stripeend:= rect.y + rect.cy;
    stripecount:= 1;
    rectcount:= 1;
+   rectstart:= rect.x;
+   rectend:= rect.x + rect.cx;
    with datapo^ do begin
     header.height:= rect.cy;
     header.rectcount:= 1;
@@ -888,14 +1033,16 @@ end;
 
 procedure gdi_regionisempty(var drawinfo: drawinfoty); //gdifunc
 begin
- with pregioninfoty((drawinfo.regionoperation.source))^ do begin
+ with pregioninfoty(drawinfo.regionoperation.source)^ do begin
   drawinfo.regionoperation.dest:= rectcount;
  end;
 end;
 
 procedure gdi_regionclipbox(var drawinfo: drawinfoty); //gdifunc
 begin
- gdinotimplemented;
+ with drawinfo.regionoperation do begin
+  rect:= regextents(pregioninfoty(source)^);
+ end;
 end;
 
 procedure gdi_regsubrect(var drawinfo: drawinfoty); //gdifunc
