@@ -766,80 +766,94 @@ begin
   dumpstripes('dest after pack ',pd,dstripeco,astripestart);
   dumpregion('region after pack',ptruint(@reg));
  {$endif}
- 
-        //merge stripe above
-        
-  pui1:= calcdatasize(stripeco,rectco);  //old size
-  po1:= pstripety(pchar(psb) + pui1);    //first stripe after touched block
-  if (pchar(po1) < (pchar(datapo) + datasize)) and 
-           (po1^.header.rectcount = psa1^.header.rectcount) then begin
-   po3:= @psa1^.data;                     //last stripe in new block
-   po2:= @po1^.data;
-   bo1:= false;
-   for int1:= 0 to psa1^.header.rectcount*2-1 do begin
-    if po2^[int1] <> po3^[int1] then begin
-     bo1:= true;
-     break;
-    end;
-   end;
-   if not bo1 then begin
-    psa1^.header.height:= psa1^.header.height + po1^.header.height;
-    dec(stripecount);
-    rectcount:= rectcount-psa1^.header.rectcount;
-    incstripe(po1);
-   end;
-  end;
 
-        //merge stripe below
-
-  if (psbbelowref >= 0) then begin
-   po6:= pstripety(pchar(datapo)+psbbelowref); //stripe below touched block
-   if po6^.header.rectcount = pd^.header.rectcount then begin
+  if op <> reop_intersect then begin 
+         //merge stripe above
+         
+   pui1:= calcdatasize(stripeco,rectco);  //old size
+   po1:= pstripety(pchar(psb) + pui1);    //first stripe after touched block
+   if (pchar(po1) < (pchar(datapo) + datasize)) and 
+            (po1^.header.rectcount = psa1^.header.rectcount) then begin
+    po3:= @psa1^.data;                     //last stripe in new block
+    po2:= @po1^.data;
     bo1:= false;
-    po3:= @pd^.data;         //first stripe in new block
-    po2:= @po6^.data;
-    for int1:= 0 to pd^.header.rectcount*2-1 do begin
+    for int1:= 0 to psa1^.header.rectcount*2-1 do begin
      if po2^[int1] <> po3^[int1] then begin
       bo1:= true;
       break;
      end;
     end;
     if not bo1 then begin
-     pd^.header.height:= pd^.header.height + po6^.header.height;
+     psa1^.header.height:= psa1^.header.height + po1^.header.height;
      dec(stripecount);
-     rectcount:= rectcount-pd^.header.rectcount;
-     psb:= po6;
+     rectcount:= rectcount-psa1^.header.rectcount;
+     incstripe(po1);
     end;
    end;
-  end;
- {$ifdef mse_debugregion}
-  dumpstripes('dest after merge ',pd,dstripeco,0);
- {$endif}
  
+         //merge stripe below
+ 
+   if (psbbelowref >= 0) then begin
+    po6:= pstripety(pchar(datapo)+psbbelowref); //stripe below touched block
+    if po6^.header.rectcount = pd^.header.rectcount then begin
+     bo1:= false;
+     po3:= @pd^.data;         //first stripe in new block
+     po2:= @po6^.data;
+     for int1:= 0 to pd^.header.rectcount*2-1 do begin
+      if po2^[int1] <> po3^[int1] then begin
+       bo1:= true;
+       break;
+      end;
+     end;
+     if not bo1 then begin
+      pd^.header.height:= pd^.header.height + po6^.header.height;
+      dec(stripecount);
+      rectcount:= rectcount-pd^.header.rectcount;
+      psb:= po6;
+     end;
+    end;
+   end;
+  {$ifdef mse_debugregion}
+   dumpstripes('dest after merge ',pd,dstripeco,0);
+  {$endif}
+  end
+  else begin
+   psb:= datapo; //intersect
+   stripestart:= astripestart;
+   stripeend:= stripestart + stripe^.header.height;
+  end;
   if psb = datapo then begin //first stripe
    int1:= 0;
-   po1:= pd;
-   while (po1^.header.rectcount = 0) and (int1 < dstripeco) do begin
-    stripestart:= stripestart + po1^.header.height;
+   po6:= pd;
+   while (po6^.header.rectcount = 0) and (int1 < dstripeco) do begin
+    stripestart:= stripestart + po6^.header.height;
     inc(int1);          
-    inc(po1);
+    inc(po6);
    end;
    inc(pd,int1);      //remove leading empty stripes
    dstripeco:= dstripeco-int1;
   end;
   pui2:= calcdatasize(dstripeco,drectco); //new size
-  psb1:= pstripety(pchar(psb)+ pui2);     //new block end
-  move(po1^,psb1^,datasize-(pchar(po1)-pchar(datapo)));
-                        //existing data
-  move(pd^,psb^,pui2);  //new data
-  rectcount:= rectcount - rectco + drectco;
-  stripecount:= stripecount - stripeco + dstripeco;
-  datasize:= calcdatasize(stripecount,rectcount);
-
- {$ifdef mse_debugregion}
-  dumpregion('region after move',ptruint(@reg));
- {$endif}
-  
+  if op = reop_intersect then begin
+   datasize:= pui2;
+   stripecount:= dstripeco;
+   rectcount:= drectco;
+   move(pd^,psb^,pui2);  //new data
+  end
+  else begin
+   psb1:= pstripety(pchar(psb)+ pui2);     //new block end
+   move(po1^,psb1^,datasize-(pchar(po1)-pchar(datapo)));
+                         //existing data
+   move(pd^,psb^,pui2);  //new data
+   rectcount:= rectcount - rectco + drectco;
+   stripecount:= stripecount - stripeco + dstripeco;
+   datasize:= calcdatasize(stripecount,rectcount);
+ 
+  {$ifdef mse_debugregion}
+   dumpregion('region after move',ptruint(@reg));
+  {$endif}
+   
+  end;
   if (lastdeststripe^.header.rectcount = 0) and 
                      ((pchar(psb)-pchar(datapo))+pui2 = datasize) then begin
                    //changed last stripe
