@@ -13,9 +13,52 @@ unit msegenericgdi;
 // 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
-{$checkpointer on}
+//{$checkpointer on}
 uses
  mseguiglob,msegraphics,msetypes,msegraphutils;
+type
+ rectextentty = integer;
+ prectextentty = ^rectextentty;
+ rectextentaty = array[0..0] of rectextentty;
+ prectextentaty = ^rectextentaty;
+
+ rectdataty = record
+  gap: rectextentty;
+  width: rectextentty;
+ end;
+ prectdataty = ^rectdataty;
+ rectdataaty = array[0..0] of rectdataty;
+ prectdataaty = ^rectdataaty;
+  
+ stripedataty = record //aray[n] of rectdataty
+ end;
+
+ stripeheaderty = record
+  height: rectextentty; 
+  rectcount: rectextentty;
+ end;
+
+ stripety = record
+  header: stripeheaderty;
+  data: stripedataty;    
+ end;                  
+ pstripety = ^stripety;
+
+ regiondataty = record 
+ end;
+
+ regioninfoty = record
+  buffersize: ptruint;
+  datasize: ptruint;
+  rectcount: integer;
+  stripecount: integer;
+  stripestart: rectextentty;
+  stripeend: rectextentty;
+  rectstart: rectextentty;    //minint = invalid
+  rectend: rectextentty;      //maxint = invalid
+  datapo: pstripety;
+ end;
+ pregioninfoty = ^regioninfoty;
   
 procedure gdinotimplemented;
 function gdi_regiontorects(const aregion: regionty): rectarty;
@@ -47,40 +90,6 @@ uses
 type
  regopty = (reop_add,reop_sub,reop_intersect);
  
- rectextentty = integer;
- prectextentty = ^rectextentty;
- rectextentaty = array[0..0] of rectextentty;
- prectextentaty = ^rectextentaty;
-
- rectdataty = record
-  gap: rectextentty;
-  width: rectextentty;
- end;
- prectdataty = ^rectdataty;
- rectdataaty = array[0..0] of rectdataty;
- prectdataaty = ^rectdataaty;
-  
- stripedataty = record //aray[n] of rectdataty
- end;
-
- stripeheaderty = record
-  height: rectextentty; 
-  rectcount: rectextentty;
- end;
-
- stripety = record
-  header: stripeheaderty;
-  data: stripedataty;     //
- end;                  
- pstripety = ^stripety;
-
- regiondataty = record 
- end;
- //array of cellextentty rows:
- // height, colstart, width, gap, width,...,gap, width, 0
- // ...
- //empty row:
- // height, emptyrowmark
  regionrectstripety = record
   header: stripeheaderty;
   data: rectdataty;
@@ -92,20 +101,6 @@ type
 const
  rowheadersize = 2*sizeof(rectextentty);      //height, colstart
  celldatasize = 2*sizeof(rectextentty);       //width, gap or 0
-
-type
- regioninfoty = record
-  buffersize: ptruint;
-  datasize: ptruint;
-  rectcount: integer;
-  stripecount: integer;
-  stripestart: rectextentty;
-  stripeend: rectextentty;
-  rectstart: rectextentty;    //minint = invalid
-  rectend: rectextentty;      //maxint = invalid
-  datapo: pstripety;
- end;
- pregioninfoty = ^regioninfoty;
  
 {$ifdef mse_debugregion}
 
@@ -992,20 +987,25 @@ var
  int1: ptruint;
 begin
  with drawinfo.regionoperation do begin
-  pointer(dest):= getregmem(1,1);
-  with pregioninfoty(dest)^ do begin
-   stripestart:= rect.y;
-   stripeend:= rect.y + rect.cy;
-   stripecount:= 1;
-   rectcount:= 1;
-   rectstart:= rect.x;
-   rectend:= rect.x + rect.cx;
-   with datapo^ do begin
-    header.height:= rect.cy;
-    header.rectcount:= 1;
-    with prectdataty(@data)^ do begin
-     gap:= rect.x;
-     width:= rect.cx;
+  if (rect.cx = 0) or (rect.cy = 0) then begin
+   gdi_createemptyregion(drawinfo);
+  end
+  else begin
+   pointer(dest):= getregmem(1,1);
+   with pregioninfoty(dest)^ do begin
+    stripestart:= rect.y;
+    stripeend:= rect.y + rect.cy;
+    stripecount:= 1;
+    rectcount:= 1;
+    rectstart:= rect.x;
+    rectend:= rect.x + rect.cx;
+    with datapo^ do begin
+     header.height:= rect.cy;
+     header.rectcount:= 1;
+     with prectdataty(@data)^ do begin
+      gap:= rect.x;
+      width:= rect.cx;
+     end;
     end;
    end;
   end;

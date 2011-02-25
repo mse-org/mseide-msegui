@@ -72,6 +72,7 @@ type
   {$endif}
   pd: paintdevicety;
   gclineoptions: lineoptionsty;
+  sourceheight: integer;
  end;
 
  {$if sizeof(oglgcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$endif}
@@ -123,10 +124,12 @@ begin
  end;
 end;
 
-procedure initcontext(const winid: winidty; var gc: gcty);
+procedure initcontext(const winid: winidty; var gc: gcty;
+              const sourceviewport: rectty);
 begin
  with oglgcty(gc.platformdata).d do begin
   pd:= winid;
+  sourceheight:= sourceviewport.cy;
  end;
  makecurrent(gc);
  glclearstencil(0);
@@ -205,7 +208,7 @@ begin
    xfree(visinfo);
   end;
  end;
- initcontext(aid,gc);
+ initcontext(aid,gc,windowrect);
 end;
 {$endif}
 
@@ -248,7 +251,7 @@ begin
   end;
   gc.handle:= ptruint(fcontext);
  end;
- initcontext(aid,gc);
+ initcontext(aid,gc,windowrect);
 end;
 {$endif}
 
@@ -263,15 +266,18 @@ begin
  dest.a:= 0;
 end;
 
-procedure sendrect(const arect: rectty);
+procedure sendrect(const gc: oglgcdty; const arect: rectty);
 var
- endx,endy: integer;
+ starty,endx,endy: integer;
+ 
 begin
  with arect do begin
   endx:= x+cx-1;
-  endy:= y+cy-1;
-  glvertex2iv(@pos);
-  glvertex2i(endx,y);
+  starty:= gc.sourceheight-y;
+  endy:= starty-cy+1;
+//  glvertex2iv(@pos);
+  glvertex2i(x,starty);
+  glvertex2i(endx,starty);
   glvertex2i(endx,endy);
   glvertex2i(x,endy);
  end;
@@ -304,12 +310,16 @@ begin
 end;
 
 procedure gdi_setviewport(var drawinfo: drawinfoty);
+var
+ int1: integer;
 begin
  with drawinfo.rect.rect^ do begin
-  glviewport(x,y,cx,cy);
+  int1:= oglgcty(drawinfo.gc.platformdata).d.sourceheight;
+  glviewport(x,int1-y-cy,cx,cy);
   glloadidentity;
   if (cx > 0) and (cy > 0) then begin
-   glortho(-1,cx-1,cy-1,-1,-1,1);
+   glortho(-0.5,cx-0.5,-0.5,cy-1,-1,1);
+//   glortho(-1,cx-1,cy-1,-1,-1,1);
   end;
  end;
 end;
@@ -339,6 +349,10 @@ end;
 {***************}
 
 procedure gdi_changegc(var drawinfo: drawinfoty); //gdifunc
+var
+ po1: pstripety;
+ int1,int2,int3,int4: integer;
+ y1,x1: integer;
 begin
  with drawinfo.gcvalues^,oglgcty(drawinfo.gc.platformdata).d do begin
   if gvm_colorforeground in mask then begin
@@ -361,6 +375,46 @@ begin
    end;
    gclineoptions:= lineinfo.options;
   end;
+  if gvm_clipregion in mask then begin
+   if clipregion = 0 then begin
+    gldisable(gl_stencil_test);
+   end
+   else begin
+    glclearstencil(0);
+    glclear(gl_stencil_buffer_bit);
+    glenable(gl_stencil_test);
+    glstencilfunc(gl_never,1,1);
+    glstencilop(gl_replace,gl_keep,gl_keep);
+    with pregioninfoty(clipregion)^ do begin
+     if rectcount > 0 then begin
+      glbegin(gl_quads);
+      y1:= sourceheight-stripestart;
+      po1:= datapo;      
+      for int1:= stripecount-1 downto 0 do begin
+       int3:= y1;
+       x1:= 0;
+       y1:= y1 - po1^.header.height; //next stripe
+       int2:= po1^.header.rectcount -1;
+       po1:= @po1^.data;
+       for int2:= int2 downto 0 do begin
+        x1:= x1 + prectextentty(po1)^; //gap
+        glvertex2i(x1,int3);
+        inc(prectextentty(po1));
+        int4:= x1;
+        x1:= x1 + prectextentty(po1)^;
+        glvertex2i(x1,int3);
+        glvertex2i(x1,y1);
+        glvertex2i(int4,y1);
+        inc(prectextentty(po1));
+       end;
+      end;
+      glend;
+     end;
+    end;
+    glstencilop(gl_keep,gl_keep,gl_keep);
+    glstencilfunc(gl_equal,1,1);
+   end;
+  end;
  end;
 end;
 
@@ -372,13 +426,17 @@ end;
 procedure gdi_drawlinesegments(var drawinfo: drawinfoty); //gdifunc
 var
  po1: ppointty;
- int1: integer;
+ int1,int2: integer;
 begin
+ int2:= oglgcty(drawinfo.gc.platformdata).d.sourceheight;
  glbegin(gl_lines);
  with drawinfo.points do begin
   po1:= points;
   for int1:= count-1 downto 0 do begin
-   glvertex2iv(pglint(po1));
+   glvertex2i(po1^.x,int2-po1^.y);
+//   po1^.y:= int2 - po1^.y;
+//   glvertex2iv(pglint(po1));
+//   po1^.y:= int2 - po1^.y;
    inc(po1);
   end;
  end;
@@ -398,7 +456,7 @@ end;
 procedure gdi_fillrect(var drawinfo: drawinfoty); //gdifunc
 begin 
  glbegin(gl_quads);
- sendrect(drawinfo.rect.rect^);
+ sendrect(oglgcty(drawinfo.gc.platformdata).d,drawinfo.rect.rect^);
  glend;
 end;
 

@@ -89,12 +89,14 @@ var
 begin
  fillchar(gc1,sizeof(gc1),0);
  guierror(createrendercontext(aparent,windowrect,fcontextinfo,gc1,aid));
+ gc1.paintdevicesize:= windowrect.size;
  inherited linktopaintdevice(paintdevicety(aid),gc1,nullpoint);
 end;
 
 procedure topenglcanvas.setviewport(const avalue: rectty);
 begin
  fviewport:= avalue;
+ fdrawinfo.gc.paintdevicesize:= fviewport.size;
  if fdrawinfo.gc.handle <> 0 then begin
   lock;
   fdrawinfo.rect.rect:= @fviewport;
