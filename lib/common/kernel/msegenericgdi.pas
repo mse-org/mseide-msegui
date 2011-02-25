@@ -45,7 +45,7 @@ uses
  msesysutils,sysutils;
  
 type
- regopty = (reop_add,reop_sub);
+ regopty = (reop_add,reop_sub,reop_intersect);
  
  rectextentty = integer;
  prectextentty = ^rectextentty;
@@ -562,11 +562,18 @@ begin
  end;
 end;
 
+function intersectop(var data: regopdataty): boolean;
+begin
+ with data do begin
+  result:= odd(counta) and odd(countb);
+ end;
+end;
+
 type
  regopprocty = function (var data: regopdataty): boolean;
  
 const
- regops: array[regopty] of regopprocty = (@addop,@subop);
+ regops: array[regopty] of regopprocty = (@addop,@subop,@intersectop);
  
 procedure stripeop(var reg: regioninfoty;
                              const astripestart: rectextentty; 
@@ -1098,8 +1105,15 @@ begin
 end;
 
 procedure gdi_regintersectrect(var drawinfo: drawinfoty); //gdifunc
+var
+ stri1: regionrectstripety;
+ ext1: rectextentty;
 begin
- gdinotimplemented;
+ with drawinfo.regionoperation do begin
+  if recttostripe(rect,ext1,stri1) then begin
+   stripeop(pregioninfoty(dest)^,ext1,@stri1,reop_intersect);
+  end;
+ end;
 end;
 
 procedure gdi_regintersectregion(var drawinfo: drawinfoty); //gdifunc
