@@ -877,6 +877,24 @@ begin
  end;
 end;
 
+procedure regionop(const source: regioninfoty; var dest: regioninfoty;
+                                                          const op: regopty);
+var
+ int1: integer;
+ ext1: rectextentty;
+ po1: pstripety;
+begin
+ with source do begin
+  po1:= datapo;
+  ext1:= stripestart;
+  for int1:= stripecount - 1 downto 0 do begin
+   stripeop(dest,ext1,po1,op);
+   ext1:= ext1 + po1^.header.height;
+   incstripe(po1);
+  end;
+ end;
+end;
+
 function recttostripe(const rect: rectty; out stripestart: rectextentty;
                           out stripe: regionrectstripety): boolean;
 begin
@@ -1123,7 +1141,9 @@ end;
 
 procedure gdi_regsubregion(var drawinfo: drawinfoty); //gdifunc
 begin
- gdinotimplemented;
+ with drawinfo.regionoperation do begin
+  regionop(pregioninfoty(source)^,pregioninfoty(dest)^,reop_sub);
+ end;
 end;
 
 procedure gdi_regaddrect(var drawinfo: drawinfoty); //gdifunc
@@ -1140,7 +1160,9 @@ end;
 
 procedure gdi_regaddregion(var drawinfo: drawinfoty); //gdifunc
 begin
- gdinotimplemented;
+ with drawinfo.regionoperation do begin
+  regionop(pregioninfoty(source)^,pregioninfoty(dest)^,reop_add);
+ end;
 end;
 
 procedure gdi_regintersectrect(var drawinfo: drawinfoty); //gdifunc
@@ -1157,7 +1179,9 @@ end;
 
 procedure gdi_regintersectregion(var drawinfo: drawinfoty); //gdifunc
 begin
- gdinotimplemented;
+ with drawinfo.regionoperation do begin
+  regionop(pregioninfoty(source)^,pregioninfoty(dest)^,reop_intersect);
+ end;
 end;
 
 end.
