@@ -1052,8 +1052,33 @@ begin
 end;
 
 procedure gdi_moveregion(var drawinfo: drawinfoty); //gdifunc
+var
+ int1,int2: integer;
+ po1: pstripety;
 begin
- gdinotimplemented;
+ with drawinfo.regionoperation do begin
+  with pregioninfoty(dest)^ do begin
+   stripestart:= stripestart + rect.y;
+   stripeend:= stripeend + rect.y;
+   if rect.x <> 0 then begin
+    if rectstart <> minint then begin
+     rectstart:= rectstart + rect.x;
+    end;
+    if rectend <> maxint then begin
+     rectend:= rectend + rect.x;
+    end;
+    po1:= datapo;
+    for int1:= stripecount - 1 downto 0 do begin
+     int2:= po1^.header.rectcount;
+     inc(po1);
+     if int2 <> 0 then begin
+      prectextentty(po1)^:= prectextentty(po1)^+rect.x;
+      inc(prectdataty(po1),int2);
+     end;
+    end;
+   end;
+  end;
+ end;
 end;
 
 procedure gdi_regionisempty(var drawinfo: drawinfoty); //gdifunc
