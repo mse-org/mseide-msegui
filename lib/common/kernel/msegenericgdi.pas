@@ -1020,8 +1020,22 @@ begin
 end;
 
 procedure gdi_createrectsregion(var drawinfo: drawinfoty); //gdifunc
+var
+ stri1: regionrectstripety;
+ int1: integer;
 begin
- gdinotimplemented;
+ gdi_createemptyregion(drawinfo);
+ with drawinfo.regionoperation do begin
+  stri1.header.rectcount:= 1;
+  for int1:= rectscount - 1 downto 0 do begin
+   with rectspo^[int1] do begin
+    stri1.header.height:= cy;
+    stri1.data.gap:= x;
+    stri1.data.width:= cx;
+    stripeop(pregioninfoty(dest)^,y,@stri1,reop_add);
+   end;
+  end;
+ end;
 end;
 
 procedure gdi_createrectregion(var drawinfo: drawinfoty); //gdifunc
