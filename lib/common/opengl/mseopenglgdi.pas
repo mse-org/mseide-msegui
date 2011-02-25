@@ -419,8 +419,25 @@ begin
 end;
 
 procedure gdi_drawlines(var drawinfo: drawinfoty); //gdifunc
+var
+ po1: ppointty;
+ int1,int2: integer;
 begin
- gdinotimplemented;
+ int2:= oglgcty(drawinfo.gc.platformdata).d.sourceheight;
+ with drawinfo.points do begin
+  if closed then begin
+   glbegin(gl_line_loop);
+  end
+  else begin
+   glbegin(gl_line_strip);
+  end;
+  po1:= points;
+  for int1:= count-1 downto 0 do begin
+   glvertex2i(po1^.x,int2-po1^.y);
+   inc(po1);
+  end;
+ end;
+ glend;
 end;
 
 procedure gdi_drawlinesegments(var drawinfo: drawinfoty); //gdifunc
@@ -434,9 +451,6 @@ begin
   po1:= points;
   for int1:= count-1 downto 0 do begin
    glvertex2i(po1^.x,int2-po1^.y);
-//   po1^.y:= int2 - po1^.y;
-//   glvertex2iv(pglint(po1));
-//   po1^.y:= int2 - po1^.y;
    inc(po1);
   end;
  end;
