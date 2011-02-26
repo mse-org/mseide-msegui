@@ -1,6 +1,6 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
  
-2010-11-01 Version 2.6
+2011-02-26 Version 2.6
 Copyright (c) 1999-2010 by Martin Schreiber
 
 - Compiles with FPC 2.4.2
