@@ -2637,7 +2637,7 @@ begin
  xunionrectwithregion(@rect1,region(result),region(result));
 end;
 
-procedure gui_createemptyregion(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_createemptyregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2647,7 +2647,7 @@ begin
  end;
 end;
 
-procedure gui_createrectregion(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_createrectregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2657,7 +2657,7 @@ begin
  end;
 end;
 
-procedure gui_createrectsregion(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_createrectsregion(var drawinfo: drawinfoty); //gdifunc
 var
  int1: integer;
  rect1: xrectangle;
@@ -2674,7 +2674,7 @@ begin
  end;
 end;                           
 
-procedure gui_destroyregion(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_destroyregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2686,7 +2686,7 @@ begin
  end;
 end;
 
-procedure gui_regionisempty(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_regionisempty(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2699,7 +2699,7 @@ begin
  end;
 end;
 
-procedure gui_regionclipbox(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_regionclipbox(var drawinfo: drawinfoty); //gdifunc
 var
  rect1: xrectangle;
 begin
@@ -2715,7 +2715,7 @@ begin
  end;
 end;
 
-procedure gui_copyregion(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_copyregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2731,7 +2731,7 @@ begin
  end;
 end;
 
-procedure gui_moveregion(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_moveregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2741,7 +2741,7 @@ begin
  end;
 end;
 
-procedure gui_regsubrect(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_regsubrect(var drawinfo: drawinfoty); //gdifunc
 var
  reg1: region;
 begin
@@ -2755,7 +2755,7 @@ begin
  end;
 end;
 
-procedure gui_regintersectrect(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_regintersectrect(var drawinfo: drawinfoty); //gdifunc
 var
  reg1: region;
 begin
@@ -2769,7 +2769,7 @@ begin
  end;
 end;
 
-procedure gui_regintersectregion(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_regintersectregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2779,7 +2779,7 @@ begin
  end;
 end;
 
-procedure gui_regaddrect(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_regaddrect(var drawinfo: drawinfoty); //gdifunc
 var
  rect1: xrectangle;
 begin
@@ -2792,7 +2792,7 @@ begin
  end;
 end;
 
-procedure gui_regaddregion(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_regaddregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2802,7 +2802,7 @@ begin
  end;
 end;
 
-procedure gui_regsubregion(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_regsubregion(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -3872,6 +3872,7 @@ function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
      var gc: gcty; const aprintername: msestring = ''): guierrorty;
 begin
  gdi_lock;
+ gc.gdifuncs:= gui_getgdifuncs;
  if paintdevice = 0 then begin
   paintdevice:= mserootwindow;
  end;
@@ -4068,7 +4069,7 @@ begin
  result:= true;
 end;
 
-procedure gui_destroygc(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_destroygc(var drawinfo: drawinfoty); //gdifunc
 begin
  gdi_lock;
  with drawinfo do begin
@@ -4200,7 +4201,7 @@ begin
  result:= colortorendercolor(colortorgb(avalue));
 end;
 
-procedure gui_changegc(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_changegc(var drawinfo: drawinfoty); //gdifunc
 var
  xmask: longword;
  xvalues: xgcvalues;
@@ -5480,7 +5481,7 @@ end;
 const
  rgbwhite: rgbtriplety = (blue: $ff; green: $ff; red: $ff; res: $00);
 
-procedure gui_copyarea(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_copyarea(var drawinfo: drawinfoty); //gdifunc
 
 const
  sourceformats = cpclipmask or cpclipxorigin or cpclipyorigin;
@@ -5852,7 +5853,7 @@ endlab:
  end;
 end;
 
-procedure gui_fonthasglyph(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_fonthasglyph(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -5867,7 +5868,7 @@ begin
  end;
 end;
 
-procedure gui_drawlines(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_drawlines(var drawinfo: drawinfoty); //gdifunc
 var
  int1: integer;
 begin
@@ -5885,7 +5886,7 @@ begin
  end;
 end;
 
-procedure gui_drawlinesegments(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_drawlinesegments(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -5896,7 +5897,7 @@ begin
  end;
 end;
 
-procedure gui_drawellipse(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_drawellipse(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -5910,7 +5911,7 @@ end;
 const
  angscale = 64*360/(2*pi);
  
-procedure gui_drawarc(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_drawarc(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -5922,7 +5923,7 @@ begin
  end;
 end;
 
-procedure gui_drawstring16(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_drawstring16(var drawinfo: drawinfoty); //gdifunc
 var
  po1: pxchar2b;
  xvalues: xgcvalues;
@@ -5991,7 +5992,7 @@ begin
  end;
 end;
 
-procedure gui_setcliporigin(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_setcliporigin(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -6001,7 +6002,7 @@ begin
  end;
 end;
 
-procedure gui_fillrect(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_fillrect(var drawinfo: drawinfoty); //gdifunc
 var
  points1: array[0..3] of xpoint;
  x1,y1: smallint;
@@ -6027,7 +6028,7 @@ begin
  end;
 end;
 
-procedure gui_fillelipse(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_fillelipse(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -6038,7 +6039,7 @@ begin
  end;
 end;
 
-procedure gui_fillarc(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_fillarc(var drawinfo: drawinfoty); //gdifunc
 var
  xvalues: xgcvalues;
 begin
@@ -6059,7 +6060,7 @@ begin
  end;
 end;
 
-procedure gui_fillpolygon(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_fillpolygon(var drawinfo: drawinfoty); //gdifunc
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -7258,34 +7259,34 @@ end;
 
 const
  gdifunctions: gdifunctionaty = (
-   {$ifdef FPC}@{$endif}gui_destroygc,
-   {$ifdef FPC}@{$endif}gui_changegc,
-   {$ifdef FPC}@{$endif}gui_drawlines,
-   {$ifdef FPC}@{$endif}gui_drawlinesegments,
-   {$ifdef FPC}@{$endif}gui_drawellipse,
-   {$ifdef FPC}@{$endif}gui_drawarc,
-   {$ifdef FPC}@{$endif}gui_fillrect,
-   {$ifdef FPC}@{$endif}gui_fillelipse,
-   {$ifdef FPC}@{$endif}gui_fillarc,
-   {$ifdef FPC}@{$endif}gui_fillpolygon,
-   {$ifdef FPC}@{$endif}gui_drawstring16,
-   {$ifdef FPC}@{$endif}gui_setcliporigin,
-   {$ifdef FPC}@{$endif}gui_createemptyregion,
-   {$ifdef FPC}@{$endif}gui_createrectregion,
-   {$ifdef FPC}@{$endif}gui_createrectsregion,
-   {$ifdef FPC}@{$endif}gui_destroyregion,
-   {$ifdef FPC}@{$endif}gui_copyregion,
-   {$ifdef FPC}@{$endif}gui_moveregion,
-   {$ifdef FPC}@{$endif}gui_regionisempty,
-   {$ifdef FPC}@{$endif}gui_regionclipbox,
-   {$ifdef FPC}@{$endif}gui_regsubrect,
-   {$ifdef FPC}@{$endif}gui_regsubregion,
-   {$ifdef FPC}@{$endif}gui_regaddrect,
-   {$ifdef FPC}@{$endif}gui_regaddregion,
-   {$ifdef FPC}@{$endif}gui_regintersectrect,
-   {$ifdef FPC}@{$endif}gui_regintersectregion,
-   {$ifdef FPC}@{$endif}gui_copyarea,
-   {$ifdef FPC}@{$endif}gui_fonthasglyph
+   {$ifdef FPC}@{$endif}gdi_destroygc,
+   {$ifdef FPC}@{$endif}gdi_changegc,
+   {$ifdef FPC}@{$endif}gdi_drawlines,
+   {$ifdef FPC}@{$endif}gdi_drawlinesegments,
+   {$ifdef FPC}@{$endif}gdi_drawellipse,
+   {$ifdef FPC}@{$endif}gdi_drawarc,
+   {$ifdef FPC}@{$endif}gdi_fillrect,
+   {$ifdef FPC}@{$endif}gdi_fillelipse,
+   {$ifdef FPC}@{$endif}gdi_fillarc,
+   {$ifdef FPC}@{$endif}gdi_fillpolygon,
+   {$ifdef FPC}@{$endif}gdi_drawstring16,
+   {$ifdef FPC}@{$endif}gdi_setcliporigin,
+   {$ifdef FPC}@{$endif}gdi_createemptyregion,
+   {$ifdef FPC}@{$endif}gdi_createrectregion,
+   {$ifdef FPC}@{$endif}gdi_createrectsregion,
+   {$ifdef FPC}@{$endif}gdi_destroyregion,
+   {$ifdef FPC}@{$endif}gdi_copyregion,
+   {$ifdef FPC}@{$endif}gdi_moveregion,
+   {$ifdef FPC}@{$endif}gdi_regionisempty,
+   {$ifdef FPC}@{$endif}gdi_regionclipbox,
+   {$ifdef FPC}@{$endif}gdi_regsubrect,
+   {$ifdef FPC}@{$endif}gdi_regsubregion,
+   {$ifdef FPC}@{$endif}gdi_regaddrect,
+   {$ifdef FPC}@{$endif}gdi_regaddregion,
+   {$ifdef FPC}@{$endif}gdi_regintersectrect,
+   {$ifdef FPC}@{$endif}gdi_regintersectregion,
+   {$ifdef FPC}@{$endif}gdi_copyarea,
+   {$ifdef FPC}@{$endif}gdi_fonthasglyph
  );
 {
 procedure gui_gdifunc(const func: gdifuncty; var drawinfo: drawinfoty);

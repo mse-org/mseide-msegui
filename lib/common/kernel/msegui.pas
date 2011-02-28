@@ -3345,7 +3345,7 @@ var
 begin
  if region <> 0 then begin
   info.regionoperation.source:= region;
-  gdi_call(gdi_destroyregion,info);
+  gdi_call(gdf_destroyregion,info);
   region:= 0;
  end;
 end;
@@ -3355,7 +3355,7 @@ var
  info: drawinfoty;
 begin
  with info.regionoperation do begin
-  gdi_call(gdi_createemptyregion,info);
+  gdi_call(gdf_createemptyregion,info);
   result:= dest;
  end;
 end;
@@ -3366,7 +3366,7 @@ var
 begin
  with info.regionoperation do begin
   rect:= arect;
-  gdi_call(gdi_createrectregion,info);
+  gdi_call(gdf_createrectregion,info);
   result:= dest;
  end;
 end;
@@ -3379,7 +3379,7 @@ begin
   rectscount:= length(rects);
   if rectscount > 0 then begin
    rectspo:= @rects[0];
-   gdi_call(gdi_createrectsregion,info);
+   gdi_call(gdf_createrectsregion,info);
    result:= dest;
   end
   else begin
@@ -3395,7 +3395,7 @@ begin
  with info.regionoperation do begin
   dest:= region;
   rect:= arect;
-  gdi_call(gdi_regintersectrect,info);
+  gdi_call(gdf_regintersectrect,info);
  end;
 end;
 
@@ -3406,7 +3406,7 @@ begin
  with info.regionoperation do begin
   dest:= region;
   rect:= arect;
-  gdi_call(gdi_regaddrect,info);
+  gdi_call(gdf_regaddrect,info);
  end;
 end;
 

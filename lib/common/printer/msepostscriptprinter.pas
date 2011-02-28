@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -202,7 +202,7 @@ function pspoint(const apoint: pointty): pspointty;
 implementation
 uses
  msegui,msesys,sysutils,msedatalist,mseformatstr,mseunicodeps,
- mseguiintf,msebits,msefloattostr;
+ mseguiintf,msebits,msefloattostr,msefont;
 type
  tsimplebitmap1 = class(tsimplebitmap); 
  tcanvas1 = class(tcanvas);
@@ -619,7 +619,7 @@ type
  end;
 
  
-procedure gui_destroygc(var drawinfo: drawinfoty);
+procedure gdi_destroygc(var drawinfo: drawinfoty);
 begin
  try
   postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_destroygc;
@@ -627,174 +627,99 @@ begin
  end;
 end;
  
-procedure gui_changegc(var drawinfo: drawinfoty);
+procedure gdi_changegc(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_changegc;
 end;
 
-procedure gui_drawlines(var drawinfo: drawinfoty);
+procedure gdi_drawlines(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_drawlines;
 end;
 
-procedure gui_drawlinesegments(var drawinfo: drawinfoty);
+procedure gdi_drawlinesegments(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_drawlinesegments;
 end;
 
-procedure gui_drawellipse(var drawinfo: drawinfoty);
+procedure gdi_drawellipse(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.handleellipse(
                         drawinfo.rect.rect^,false);
 end;
 
-procedure gui_drawarc(var drawinfo: drawinfoty);
+procedure gdi_drawarc(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_drawarc;
 end;
 
-procedure gui_fillrect(var drawinfo: drawinfoty);
+procedure gdi_fillrect(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_fillrect;
 end;
 
-procedure gui_fillelipse(var drawinfo: drawinfoty);
+procedure gdi_fillelipse(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.handleellipse(
                         drawinfo.rect.rect^,true);
 end;
 
-procedure gui_fillarc(var drawinfo: drawinfoty);
+procedure gdi_fillarc(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_fillarc;
 end;
 
-procedure gui_fillpolygon(var drawinfo: drawinfoty);
+procedure gdi_fillpolygon(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_fillpolygon;
 end;
 
-procedure gui_drawstring16(var drawinfo: drawinfoty);
+procedure gdi_drawstring16(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_drawstring16;
 end;
 
-procedure gui_setcliporigin(var drawinfo: drawinfoty);
+procedure gdi_setcliporigin(var drawinfo: drawinfoty);
 begin
 // gdierror(gde_notimplemented);
 end;
 
-procedure gui_createemptyregion(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_createemptyregion](drawinfo);
-end;
-
-procedure gui_createrectregion(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_createrectregion](drawinfo);
-end;
-
-procedure gui_createrectsregion(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_createrectsregion](drawinfo);
-end;
-
-procedure gui_destroyregion(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_destroyregion](drawinfo);
-end;
-
-procedure gui_copyregion(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_copyregion](drawinfo);
-end;
-
-procedure gui_moveregion(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_moveregion](drawinfo);
-end;
-
-procedure gui_regionisempty(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_regionisempty](drawinfo);
-end;
-
-procedure gui_regionclipbox(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_regionclipbox](drawinfo);
-end;
-
-procedure gui_regsubrect(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_regsubrect](drawinfo);
-end;
-
-procedure gui_regsubregion(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_regsubregion](drawinfo);
-end;
-
-procedure gui_regaddrect(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_regaddrect](drawinfo);
-end;
-
-procedure gui_regaddregion(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_regaddregion](drawinfo);
-end;
-
-procedure gui_regintersectrect(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_regintersectrect](drawinfo);
-end;
-
-procedure gui_regintersectregion(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_regintersectregion](drawinfo);
-end;
-   
-procedure gui_copyarea(var drawinfo: drawinfoty);
+procedure gdi_copyarea(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_copyarea;
 end;
    
-procedure gui_fonthasglyph(var drawinfo: drawinfoty);
-begin
- gdifuncs^[gdi_fonthasglyph](drawinfo);
-end;
-
 const
  gdifunctions: gdifunctionaty = (
-   {$ifdef FPC}@{$endif}gui_destroygc,
-   {$ifdef FPC}@{$endif}gui_changegc,
-   {$ifdef FPC}@{$endif}gui_drawlines,
-   {$ifdef FPC}@{$endif}gui_drawlinesegments,
-   {$ifdef FPC}@{$endif}gui_drawellipse,
-   {$ifdef FPC}@{$endif}gui_drawarc,
-   {$ifdef FPC}@{$endif}gui_fillrect,
-   {$ifdef FPC}@{$endif}gui_fillelipse,
-   {$ifdef FPC}@{$endif}gui_fillarc,
-   {$ifdef FPC}@{$endif}gui_fillpolygon,
-//   {$ifdef FPC}@{$endif}gui_drawstring,
-   {$ifdef FPC}@{$endif}gui_drawstring16,
-   {$ifdef FPC}@{$endif}gui_setcliporigin,
-   {$ifdef FPC}@{$endif}gui_createemptyregion,
-   {$ifdef FPC}@{$endif}gui_createrectregion,
-   {$ifdef FPC}@{$endif}gui_createrectsregion,
-   {$ifdef FPC}@{$endif}gui_destroyregion,
-   {$ifdef FPC}@{$endif}gui_copyregion,
-   {$ifdef FPC}@{$endif}gui_moveregion,
-   {$ifdef FPC}@{$endif}gui_regionisempty,
-   {$ifdef FPC}@{$endif}gui_regionclipbox,
-   {$ifdef FPC}@{$endif}gui_regsubrect,
-   {$ifdef FPC}@{$endif}gui_regsubregion,
-   {$ifdef FPC}@{$endif}gui_regaddrect,
-   {$ifdef FPC}@{$endif}gui_regaddregion,
-   {$ifdef FPC}@{$endif}gui_regintersectrect,
-   {$ifdef FPC}@{$endif}gui_regintersectregion,
-   {$ifdef FPC}@{$endif}gui_copyarea,
-   {$ifdef FPC}@{$endif}gui_fonthasglyph
+   {$ifdef FPC}@{$endif}gdi_destroygc,
+   {$ifdef FPC}@{$endif}gdi_changegc,
+   {$ifdef FPC}@{$endif}gdi_drawlines,
+   {$ifdef FPC}@{$endif}gdi_drawlinesegments,
+   {$ifdef FPC}@{$endif}gdi_drawellipse,
+   {$ifdef FPC}@{$endif}gdi_drawarc,
+   {$ifdef FPC}@{$endif}gdi_fillrect,
+   {$ifdef FPC}@{$endif}gdi_fillelipse,
+   {$ifdef FPC}@{$endif}gdi_fillarc,
+   {$ifdef FPC}@{$endif}gdi_fillpolygon,
+//   {$ifdef FPC}@{$endif}gdi_drawstring,
+   {$ifdef FPC}@{$endif}gdi_drawstring16,
+   {$ifdef FPC}@{$endif}gdi_setcliporigin,
+   {$ifdef FPC}@{$endif}gdi_createemptyregion,
+   {$ifdef FPC}@{$endif}gdi_createrectregion,
+   {$ifdef FPC}@{$endif}gdi_createrectsregion,
+   {$ifdef FPC}@{$endif}gdi_destroyregion,
+   {$ifdef FPC}@{$endif}gdi_copyregion,
+   {$ifdef FPC}@{$endif}gdi_moveregion,
+   {$ifdef FPC}@{$endif}gdi_regionisempty,
+   {$ifdef FPC}@{$endif}gdi_regionclipbox,
+   {$ifdef FPC}@{$endif}gdi_regsubrect,
+   {$ifdef FPC}@{$endif}gdi_regsubregion,
+   {$ifdef FPC}@{$endif}gdi_regaddrect,
+   {$ifdef FPC}@{$endif}gdi_regaddregion,
+   {$ifdef FPC}@{$endif}gdi_regintersectrect,
+   {$ifdef FPC}@{$endif}gdi_regintersectregion,
+   {$ifdef FPC}@{$endif}gdi_copyarea,
+   {$ifdef FPC}@{$endif}gdi_fonthasglyph
  );
 
 function psrealtostr(const avalue: real): string;
@@ -1905,7 +1830,7 @@ begin
  cached:= getimagecache(ick_3,acanvas,sourcerect,varname{,rowbytes});
  if not cached then begin
   gdi_lock;
- // result:= gui_pixmaptoimage(pixmap,image,agchandle) = gde_ok;
+ // result:= gdi_pixmaptoimage(pixmap,image,agchandle) = gde_ok;
   result:= gui_pixmaptoimage(acanvas.paintdevice,image,acanvas.gchandle) = gde_ok;
   gdi_unlock;
   if not result then begin

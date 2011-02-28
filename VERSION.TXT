@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2011-02-28
+ Font handling functions moved to graphics/msefont.pas.
+ 
 Version 2.6
 2011-02-26
 2011-02-13

@@ -618,7 +618,7 @@ uses
  msedesigner,panelform,watchpointsform,commandlineform,msestream,
  componentpaletteform,mserichstring,msesettings,formdesigner,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
- componentstore,cpuform,msesysutils,msecomptree
+ componentstore,cpuform,msesysutils,msecomptree,msefont
  {$ifndef mse_no_db}{$ifdef FPC},msedbfieldeditor{$endif}{$endif};
 
 var

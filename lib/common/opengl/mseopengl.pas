@@ -41,7 +41,9 @@ type
 implementation
 uses
  mseguiintf;
-
+var
+ gdinum: integer;
+ 
 const
  defaultcontextattributes: contextattributesty =
   (buffersize: -1;
@@ -128,7 +130,7 @@ end;
 procedure topenglcanvas.gdi(const func: gdifuncty);
 begin
  lock;
- fgdifuncs^[func](fdrawinfo);
+ fdrawinfo.gc.gdifuncs^[func](fdrawinfo);
  unlock;
 end;
 
@@ -148,4 +150,6 @@ begin
  //todo
 end;
 
+initialization
+ gdinum:= registergdi;
 end.

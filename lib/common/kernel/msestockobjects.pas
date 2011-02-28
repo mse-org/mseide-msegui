@@ -154,7 +154,7 @@ procedure deinit;
 implementation
 
 uses
- sysutils,msestockobjects_mfm,msesysintf,mseguiintf,typinfo,mseconsts;
+ sysutils,msestockobjects_mfm,msesysintf,mseguiintf,typinfo,mseconsts,msefont;
 //const
 // defaultfontheight = 14;
 // defaultfontheight = 26;

@@ -127,6 +127,7 @@ end;
 procedure initcontext(const winid: winidty; var gc: gcty;
               const sourceviewport: rectty);
 begin
+ gc.gdifuncs:= openglgetgdifuncs; 
  with oglgcty(gc.platformdata).d do begin
   pd:= winid;
   sourceheight:= sourceviewport.cy;

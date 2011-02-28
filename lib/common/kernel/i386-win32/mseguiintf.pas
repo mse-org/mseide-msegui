@@ -1328,6 +1328,7 @@ function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
 var
  wrect1: trect;
 begin
+ gc.gdifuncs:= gui_getgdifuncs;
  case akind of
   gck_pixmap: begin
    result:= gue_creategc;
@@ -5271,36 +5272,36 @@ begin
 end;
 
 const
- gdifunctions: array[gdifuncty] of gdifunctionty = (
-   {$ifdef FPC}@{$endif}gui_destroygc,
-   {$ifdef FPC}@{$endif}gui_changegc,
-   {$ifdef FPC}@{$endif}gui_drawlines,
-   {$ifdef FPC}@{$endif}gui_drawlinesegments,
-   {$ifdef FPC}@{$endif}gui_drawellipse,
-   {$ifdef FPC}@{$endif}gui_drawarc,
-   {$ifdef FPC}@{$endif}gui_fillrect,
-   {$ifdef FPC}@{$endif}gui_fillelipse,
-   {$ifdef FPC}@{$endif}gui_fillarc,
-   {$ifdef FPC}@{$endif}gui_fillpolygon,
-//   {$ifdef FPC}@{$endif}gui_drawstring,
-   {$ifdef FPC}@{$endif}gui_drawstring16,
-   {$ifdef FPC}@{$endif}gui_setcliporigin,
-   {$ifdef FPC}@{$endif}gui_createemptyregion,
-   {$ifdef FPC}@{$endif}gui_createrectregion,
-   {$ifdef FPC}@{$endif}gui_createrectsregion,
-   {$ifdef FPC}@{$endif}gui_destroyregion,
-   {$ifdef FPC}@{$endif}gui_copyregion,
-   {$ifdef FPC}@{$endif}gui_moveregion,
-   {$ifdef FPC}@{$endif}gui_regionisempty,
-   {$ifdef FPC}@{$endif}gui_regionclipbox,
-   {$ifdef FPC}@{$endif}gui_regsubrect,
-   {$ifdef FPC}@{$endif}gui_regsubregion,
-   {$ifdef FPC}@{$endif}gui_regaddrect,
-   {$ifdef FPC}@{$endif}gui_regaddregion,
-   {$ifdef FPC}@{$endif}gui_regintersectrect,
-   {$ifdef FPC}@{$endif}gui_regintersectregion,
-   {$ifdef FPC}@{$endif}gui_copyarea,
-   {$ifdef FPC}@{$endif}gui_fonthasglyph
+ gdifunctions: gdifunctionaty = (
+   {$ifdef FPC}@{$endif}gdi_destroygc,
+   {$ifdef FPC}@{$endif}gdi_changegc,
+   {$ifdef FPC}@{$endif}gdi_drawlines,
+   {$ifdef FPC}@{$endif}gdi_drawlinesegments,
+   {$ifdef FPC}@{$endif}gdi_drawellipse,
+   {$ifdef FPC}@{$endif}gdi_drawarc,
+   {$ifdef FPC}@{$endif}gdi_fillrect,
+   {$ifdef FPC}@{$endif}gdi_fillelipse,
+   {$ifdef FPC}@{$endif}gdi_fillarc,
+   {$ifdef FPC}@{$endif}gdi_fillpolygon,
+//   {$ifdef FPC}@{$endif}gdi_drawstring,
+   {$ifdef FPC}@{$endif}gdi_drawstring16,
+   {$ifdef FPC}@{$endif}gdi_setcliporigin,
+   {$ifdef FPC}@{$endif}gdi_createemptyregion,
+   {$ifdef FPC}@{$endif}gdi_createrectregion,
+   {$ifdef FPC}@{$endif}gdi_createrectsregion,
+   {$ifdef FPC}@{$endif}gdi_destroyregion,
+   {$ifdef FPC}@{$endif}gdi_copyregion,
+   {$ifdef FPC}@{$endif}gdi_moveregion,
+   {$ifdef FPC}@{$endif}gdi_regionisempty,
+   {$ifdef FPC}@{$endif}gdi_regionclipbox,
+   {$ifdef FPC}@{$endif}gdi_regsubrect,
+   {$ifdef FPC}@{$endif}gdi_regsubregion,
+   {$ifdef FPC}@{$endif}gdi_regaddrect,
+   {$ifdef FPC}@{$endif}gdi_regaddregion,
+   {$ifdef FPC}@{$endif}gdi_regintersectrect,
+   {$ifdef FPC}@{$endif}gdi_regintersectregion,
+   {$ifdef FPC}@{$endif}gdi_copyarea,
+   {$ifdef FPC}@{$endif}gdi_fonthasglyph
  );
 
 function gui_getgdifuncs: pgdifunctionaty;

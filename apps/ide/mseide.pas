@@ -35,7 +35,7 @@ uses
   stackform,projecttreeform,findinfileform,cpuform,disassform,memoryform,
   threadsform,mseguiglob,symbolform,
   targetconsole,main,mseguiintf,msestockobjects,regunitgroups,guitemplates,
-  msegraphutils;
+  msegraphutils,msefont;
 begin
  registerfontalias('mseide_source',gui_getdefaultfontnames[stf_courier],
                     fam_fixnooverwrite,16);

@@ -786,7 +786,8 @@ procedure setskinhandler(const avalue: tskinhandler);
 
 implementation
 uses
- msetabsglob,sysutils,mseapplication,msedatalist,msestockobjects;
+ msetabsglob,sysutils,mseapplication,msedatalist,msestockobjects,msefont;
+ 
 type
  twidget1 = class(twidget);
  tcustomframe1 = class(tcustomframe);

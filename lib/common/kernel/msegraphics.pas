@@ -78,6 +78,7 @@ const
 type
  fontdatapty = array[0..15] of pointer;
  fontdataty = record
+  gdi: integer;        //gdi framework, 0 -> platform default
   font: fontty;
   fonthighres: fontty;
   basefont: fontty;
@@ -175,10 +176,13 @@ type
   function getsize: sizety;
  end;
 
+ pgdifunctionaty = ^gdifunctionaty;
+ 
  gcpty = array[0..31] of pointer;
  gcty = record
   handle: ptruint;//cardinal;
   refgc: ptruint;//cardinal; //for windowsmetafile
+  gdifuncs: pgdifunctionaty;
   drawingflags: drawingflagsty;
   cliporigin: pointty;
   paintdevicesize: sizety;
@@ -491,22 +495,22 @@ type
 
  gdifunctionty = procedure(var drawinfo: drawinfoty);
 
- gdifuncty = (gdi_destroygc,gdi_changegc,
-              gdi_drawlines,gdi_drawlinesegments,gdi_drawellipse,gdi_drawarc,
-              gdi_fillrect,
-              gdi_fillelipse,gdi_fillarc,gdi_fillpolygon,{gdi_drawstring,}
-              gdi_drawstring16,
-              gdi_setcliporigin,
-              gdi_createemptyregion,gdi_createrectregion,gdi_createrectsregion,
-              gdi_destroyregion,gdi_copyregion,gdi_moveregion,
-              gdi_regionisempty,gdi_regionclipbox,
-              gdi_regsubrect,gdi_regsubregion,
-              gdi_regaddrect,gdi_regaddregion,gdi_regintersectrect,
-              gdi_regintersectregion,
-              gdi_copyarea,gdi_fonthasglyph);
+ gdifuncty = (gdf_destroygc,gdf_changegc,
+              gdf_drawlines,gdf_drawlinesegments,gdf_drawellipse,gdf_drawarc,
+              gdf_fillrect,
+              gdf_fillelipse,gdf_fillarc,gdf_fillpolygon,{gdf_drawstring,}
+              gdf_drawstring16,
+              gdf_setcliporigin,
+              gdf_createemptyregion,gdf_createrectregion,gdf_createrectsregion,
+              gdf_destroyregion,gdf_copyregion,gdf_moveregion,
+              gdf_regionisempty,gdf_regionclipbox,
+              gdf_regsubrect,gdf_regsubregion,
+              gdf_regaddrect,gdf_regaddregion,gdf_regintersectrect,
+              gdf_regintersectregion,
+              gdf_copyarea,gdf_fonthasglyph);
 
  gdifunctionaty = array[gdifuncty] of gdifunctionty;
- pgdifunctionaty = ^gdifunctionaty;
+// pgdifunctionaty = ^gdifunctionaty;
 
  canvasvaluesty = record
   changed: canvasstatesty;
@@ -607,7 +611,7 @@ type
 //   fsize: sizety;
    fvaluepo: canvasvaluespoty;
    fdrawinfo: drawinfoty;
-   fgdifuncs: pgdifunctionaty;
+//   fgdifuncs: pgdifunctionaty;
    gcfonthandle1: fontnumty;
    afonthandle1: fontnumty;
    ffont: tfont;
@@ -995,27 +999,10 @@ procedure deinit;
 procedure gdi_lock;   //locks only if not mainthread
 procedure gdi_unlock; //unlocks only if not mainthread
 procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty);
+function registergdi: integer; //returns unique number
 
 procedure allocbuffer(var buffer: bufferty; size: integer);
 procedure freebuffer(var buffer: bufferty);
-procedure checkhighresfont(const afont: pfontdataty; var drawinfo: drawinfoty);
-function getfontdata(font: fontnumty): pfontdataty;
-function findfontdata(const afont: fontty): pfontdataty;
-function registerfontalias(const alias,name: string;
-              mode: fontaliasmodety = fam_nooverwrite;
-              const height: integer = 0; const width: integer = 0;
-              const options: fontoptionsty = [];
-              const xscale: real = 1.0;
-              const ancestor: string = defaultfontalias): boolean;
-              //true if registering ok
-function unregisterfontalias(const alias: string): boolean;
-              //false if alias does not exist
-procedure clearfontalias; //removes all alias which are not fam_fix
-function fontaliascount: integer;
-procedure setfontaliascount(const acount: integer);
-function realfontname(const aliasname: string): string;
-function getfontforglyph(const abasefont: fontty; const glyph: unicharty): fontnumty;
-function fontoptioncharstooptions(const astring: string): fontoptionsty;
 
 procedure gdierrorlocked(error: gdierrorty; const text: string = ''); overload;
 procedure gdierrorlocked(error: gdierrorty; sender: tobject; text: string = ''); overload;
@@ -1044,47 +1031,7 @@ procedure checkgdiunlocked;
 implementation
 uses
  SysUtils,msegui,mseguiintf,msestreaming,mseformatstr,msestockobjects,
- msedatalist,mselist,msebits,msewidgets,msesysintf,msesysutils;
-const
- maxfontcount = 64;
-
-type
- fontdatarecty = record
-  refcount: integer;
-  data: pfontdataty;
- end;
- fontdatarecpoty = ^fontdatarecty;
-
- fontaliasty = record
-  alias: string;
-  ancestor: string;
-  name: string;
-  mode: fontaliasmodety;
-  height: integer;
-  width: integer;
-  options: fontoptionsty;
-  xscale: real;
- end;
- pfontaliasty = ^fontaliasty;
- fontaliasaty = array[0..0] of fontaliasty;
- pfontaliasaty = ^fontaliasaty;
-
- tfontaliaslist = class(trecordlist)
-  protected
-   procedure finalizerecord(var item); override;
-   procedure copyrecord(var item); override;
-   procedure updatefontdata(var info: fontdataty);
-   function find(const alias: string): integer;
-  public
-   constructor create;
-   function registeralias(const alias,name: string;
-              mode: fontaliasmodety = fam_nooverwrite;
-              const height: integer = 0; const width: integer = 0;
-              const options: fontoptionsty = [];
-              const xscale: real = 1.0;
-              const ancestor: string = ''): boolean;
-              //true if registering ok
- end;
+ msedatalist,mselist,msebits,msewidgets,msesysintf,msesysutils,msefont;
 
 var
  gdilockcount: integer;
@@ -1215,9 +1162,6 @@ end;
 
 var
  colormaps: array[colormapsty] of array of pixelty;
- fonts: array of fontdatarecty;
- lastreusedfont: integer;
- ffontaliaslist: tfontaliaslist;
  inited: boolean;
 
 function checkfontoptions(const new,old: fontoptionsty): fontoptionsty;
@@ -1251,321 +1195,6 @@ begin
                       {$ifdef FPC}longword{$else}byte{$endif}(mask4)));
 *)
   result:= value1 * mask1 + value2 * mask2 + value3 * mask3 {+ value4 * mask4};
-end;
-
-function fontaliaslist: tfontaliaslist;
-begin
- if ffontaliaslist = nil then begin
-  ffontaliaslist:= tfontaliaslist.create;
- end;
- result:= ffontaliaslist;
-end;
-
-function registerfontalias(const alias,name: string;
-              mode: fontaliasmodety = fam_nooverwrite;
-              const height: integer = 0; const width: integer = 0;
-              const options: fontoptionsty = [];
-              const xscale: real = 1.0;
-              const ancestor: string = defaultfontalias): boolean;
-              //true if registering ok
-begin
- result:= fontaliaslist.registeralias(alias,name,mode,height,width,options,
-                                       xscale,ancestor);
-end;
-
-function realfontname(const aliasname: string): string;
-var                            
- int1: integer;
- str1: string;
-begin
- result:= '';
- if ffontaliaslist <> nil then begin
-  str1:= aliasname;
-  while str1 <> '' do begin
-   int1:= ffontaliaslist.find(str1);
-   if int1 >= 0 then begin
-    with pfontaliasaty(ffontaliaslist.datapo)^[int1] do begin
-     if (result = '') and (name <> '') then begin
-      result:= name;
-      break;
-     end;
-    end;
-   end
-   else begin
-    break;
-   end;
-  end;
- end;
- if result = '' then begin
-  result:= aliasname;
- end;
-end;
-
-function unregisterfontalias(const alias: string): boolean;
-              //false if alias does not exist
-var
- int1: integer;
-begin
- result:= false;
- if ffontaliaslist <> nil then begin
-  int1:= ffontaliaslist.find(alias);
-  if int1 >= 0 then begin
-   ffontaliaslist.delete(int1);
-   if ffontaliaslist.count = 0 then begin
-    freeandnil(ffontaliaslist);
-   end;
-  end;
- end;
-end;
-
-procedure clearfontalias; //removes all alias which are not fam_fix
-var
- int1: integer;
-begin
- if ffontaliaslist <> nil then begin
-  for int1:= ffontaliaslist.count - 1 downto 0 do begin
-   if pfontaliasty(ffontaliaslist.getitempo(int1))^.mode <> fam_fix then begin
-    ffontaliaslist.delete(int1);
-   end;
-  end;
- end;
-end;
-
-function fontaliascount: integer;
-begin
- result:= ffontaliaslist.count;
-end;
-
-procedure setfontaliascount(const acount: integer);
-begin
- ffontaliaslist.count:= acount;
-end;
-
-function getfontdata(font: fontnumty): pfontdataty;
-begin
- dec(font);
- if font >= longword(length(fonts)) then begin
-  result:= nil;
- end
- else begin
-  result:= fonts[font].data;
- end;
-end;
-
-function findfontdata(const afont: fontty): pfontdataty;
-var
- int1: integer;
-begin
- result:= nil;
- for int1:= 0 to high(fonts) do begin
-  with fonts[int1] do begin
-   if (refcount > 0) and (data^.font = afont) then begin
-    result:= fonts[int1].data;
-    break;
-   end;
-  end;
- end;
-end;
-
-procedure freefont(index: integer);
-begin
- with fonts[index] do begin
-  data^.name:= '';
-  data^.charset:= '';
-  gdi_lock;
-  gui_freefontdata(data^);
-  gdi_unlock;
-  refcount:= 0;
- end;
-end;
-
-type
- fontmatrixmodety = (fmm_fix,fmm_linear,fmm_matrix);
- x11fontdatadty = record
-  infopo: pointer;
-  matrixmode: fontmatrixmodety;
-  defaultwidth: integer;
-  xftascent,xftdescent: integer;
-  rowlength: word;
-  xftdirection: graphicdirectionty;
- end;
- px11fontdatadty = ^x11fontdatadty;
- x11fontdataty = record
-  case integer of
-   0: (d: x11fontdatadty;);
-   1: (_bufferspace: fontdatapty;);
- end;
- 
-function registerfont(var fontdata: fontdataty): fontnumty;
-
- procedure reusefont(startindex: integer);
- var
-  int1: integer;
- begin
-  for int1:= startindex to high(fonts) do begin   //reuse oldest
-   if fonts[int1].refcount <= 0 then begin
-    freefont(int1);
-    lastreusedfont:= int1;
-    result:= int1+1;
-    break;
-   end;
-  end;
- end;
-
-begin //registerfont
- result:= 0;
- if length(fonts) > maxfontcount then begin
-  reusefont(lastreusedfont+1);
-  if result = 0 then begin
-   reusefont(0);
-  end;
- end;
- if result = 0 then begin
-  result:= length(fonts)+1;
-  setlength(fonts,result);
-  with fonts[high(fonts)] do begin
-   getmem(data,sizeof(fontdataty));
-   fillchar(data^,sizeof(fontdataty),0);
-  end;
- end;
- fonts[result-1].data^:= fontdata;
- fonts[result-1].refcount:= 1;
-end;
-
-procedure releasefont(font: fontnumty);
-begin
- dec(font);
- if integer(font) < 0 then begin
-  exit;
- end;
- if integer(font) <= high(fonts) then begin
-  with fonts[font] do begin
-   if refcount > 0 then begin
-    dec(refcount);
-   end;
-  end;
- end;
-end;
-
-procedure addreffont(font: fontnumty);
-begin
- if font > 0 then begin
-  inc(fonts[font-1].refcount);
- end;
-end;
-
-procedure checkhighresfont(const afont: pfontdataty; var drawinfo: drawinfoty);
-var
- fontinfobefore: getfontinfoty;
-begin
- with afont^ do begin
-  if fonthighres = 0 then begin
-   fontinfobefore:= drawinfo.getfont;
-   with drawinfo.getfont do begin
-    fontdata:= afont;
-    basefont:= 0;
-   end;
-   gdi_lock;
-   gui_getfonthighres(drawinfo);
-   gdi_unlock;   
-   drawinfo.getfont:= fontinfobefore;
-  end;
- end;
-end;
-
-function getfontnum(const fontinfo: fontinfoty; var drawinfo: drawinfoty;
-                     getfont: getfontfuncty): fontnumty;
-var
- int1: integer;
- data1: fontdataty;
- style1: {$ifdef FPC}longword{$else}byte{$endif};
-
- procedure getvalues;
- begin
-  with fontinfo do begin           //todo: hash or similar
-   data1.name:= name;
-   data1.height:= height;
-   data1.width:= width;
-   data1.familyoptions:= options * fontfamilymask;
-   data1.pitchoptions:= options * fontpitchmask;
-   data1.antialiasedoptions:= options * fontantialiasedmask;
-//   data1.xcoreoptions:= options * fontxcoremask;
-   data1.charset:= charset;
-   data1.style:= fontstylesty({$ifdef FPC}longword{$else}byte{$endif}(style) and
-                            fontstylehandlemask);
-   data1.glyph:= glyph;
-   data1.rotation:= rotation;
-   data1.xscale:= xscale;
-  end;
- end; //getvalues
- 
-label
- endlab;
-begin
- gdi_lock;
- with fontinfo do begin           //todo: hash or similar
-  style1:= {$ifdef FPC}longword{$else}byte{$endif}(style) and fontstylehandlemask;
-  for int1:= 0 to high(fonts) do begin
-   with fonts[int1] do begin
-    if (refcount >= 0) and
-     (data^.glyph = glyph) and           //unicode substitutes
-     (data^.height = height) and
-     (data^.width = width)  and
-     (data^.pitchoptions = options * fontpitchmask) and
-     (data^.familyoptions = options * fontfamilymask) and
-     (data^.antialiasedoptions = options * fontantialiasedmask) and
-//     (data.xcoreoptions = options * fontxcoremask) and
-     ({$ifdef FPC}longword{$else}byte{$endif}(data^.style) = style1) and
-     (name = data^.name) and
-     (charset = data^.charset) and
-     (rotation = data^.rotation) and
-     (xscale = data^.xscale) then begin
-     inc(refcount);
-     result:= int1 + 1;
-     goto endlab
-    end;
-   end;
-  end;
-  fillchar(data1,sizeof(fontdataty),0);
-  getvalues;
-  if ffontaliaslist <> nil then begin
-   ffontaliaslist.updatefontdata(data1);
-  end;
-  drawinfo.getfont.fontdata:= @data1;
-  drawinfo.getfont.basefont:= 0;
-  if getfont(drawinfo) then begin
-   getvalues;
-   data1.basefont:= drawinfo.getfont.basefont;
-   result:= registerfont(data1);
-  end
-  else begin
-   result:= 0;
-  end;
- end;
-endlab:
- gdi_unlock;
-end;
-
-function getfontforglyph(const abasefont: fontty; const glyph: unicharty): fontnumty;
-var
- info: drawinfoty;
- int1: integer;
-begin
- result:= 0;
- info.fonthasglyph.unichar:= glyph;  
- gdi_lock;
- for int1:= 0 to high(fonts) do begin
-  with fonts[int1],data^ do begin
-   if (refcount >= 0) and (basefont = abasefont) then begin
-    info.fonthasglyph.font:= font;
-    gui_getgdifuncs^[gdi_fonthasglyph](info);    
-    if info.fonthasglyph.hasglyph then begin
-     result:= int1 + 1;
-    end;
-   end;
-  end;
- end;
- gdi_unlock;
 end;
 
 procedure freebuffer(var buffer: bufferty);
@@ -1740,86 +1369,13 @@ begin
  setcolormapvalue(index,rgb1.red,rgb1.green,rgb1.blue);
 end;
 
-function fontoptioncharstooptions(const astring: string): fontoptionsty;
 var
- int1: integer;
- option1: fontoptionty;
+ gdinum: integer;
+ 
+function registergdi: integer; //returns unique number
 begin
- result:= [];
- for int1:= 1 to length(astring) do begin
-  for option1:= low(fontoptionty) to high(fontoptionty) do begin
-   if astring[int1] = fontaliasoptionchars[option1] then begin
-    include(result,option1);
-   end;
-  end;
- end;
-end;
-
-procedure initfontalias;
-//format aliasdef: 
-//--FONTALIAS=<alias>,<fontname>[,<fontheight>[,<fontwidth>[,<options>[,<xscale>]
-//                    [,<ancestor>]]]
-const
- paramname = '--FONTALIAS=';
-var
- ar1,ar2: stringarty;
- int1,{int2,}int3,int4,int5: integer;
- ar3: array[0..1] of integer;
- options1: fontoptionsty;
- xscale1: real;
- str1: string;
-begin
- ar1:= getcommandlinearguments;
- int3:= 1;
- xscale1:= 1.0;
- for int1:= 1 to high(ar1) do begin
-  if strlicomp(pchar(ar1[int1]),pchar(paramname),length(paramname)) = 0 then begin
-   ar2:= nil;
-   splitstringquoted(copy(ar1[int1],length(paramname)+1,bigint),ar2,'"',',');
-   if (high(ar2) >= 1) and (high(ar2) <= 6) then begin
-    try
-     for int4:= 0 to high(ar3) do begin
-      if int4 + 2 > high(ar2) then begin
-       ar3[int4]:= 0;
-      end
-      else begin
-       if trim(ar2[int4+2]) <> '' then begin
-        ar3[int4]:= strtoint(ar2[int4+2]);
-       end
-       else begin
-        ar3[int4]:= 0;
-       end;
-      end;
-     end;
-     options1:= [];
-     if high(ar2) >= 4 then begin
-      options1:= fontoptioncharstooptions(ar2[4]);
-     end;
-     if (high(ar2) >= 5) and (trim(ar2[5]) <> '') then begin
-      xscale1:= strtoreal(ar2[5]);
-     end;
-     if high(ar2) >= 6 then begin
-      str1:= trim(ar2[6]);
-     end
-     else begin
-      if lowercase(ar2[0]) = defaultfontalias then begin
-       str1:= '';
-      end
-      else begin
-       str1:= defaultfontalias;
-      end;
-     end;
-     
-     fontaliaslist.registeralias(ar2[0],ar2[1],fam_overwrite,ar3[0],ar3[1],options1,
-                                 xscale1,str1);
-     deletecommandlineargument(int3);
-     dec(int3);
-    except
-    end;
-   end;
-  end;
-  inc(int3);
- end;
+ inc(gdinum);
+ result:= gdinum;
 end;
 
 procedure init;
@@ -1828,7 +1384,6 @@ var
 begin
  gdi_lock;
  try
-  initfontalias;
   initcolormap;
   msestockobjects.init;
   inited:= true;
@@ -1840,166 +1395,14 @@ begin
 end;
 
 procedure deinit;
-var
- int1: integer;
 begin
  if inited then begin
   msestockobjects.deinit;
-  for int1:= 0 to high(fonts) do begin
-   with fonts[int1] do begin
-    refcount:= 1;
-    freefont(int1);
-    freemem(data);
-   end;
-  end;
+  msefont.deinit;
  end;
- freeandnil(ffontaliaslist);
  inited:= false;
 end;
 
-{ tfontaliaslist }
-
-constructor tfontaliaslist.create;
-begin
- inherited create(sizeof(fontaliasty),[rels_needsfinalize,rels_needscopy]);
-end;
-
-procedure tfontaliaslist.finalizerecord(var item);
-begin
- finalize(fontaliasty(item));
-end;
-
-procedure tfontaliaslist.copyrecord(var item);
-begin
- with fontaliasty(item) do begin
-  stringaddref(alias);
-  stringaddref(name);
- end;
-end;
-
-function tfontaliaslist.find(const alias: string): integer;
-var
- str1: string;
- po1: pfontaliasaty;
- int1: integer;
-begin
- result:= -1;
- str1:= struppercase(alias);
- po1:= datapo;
- for int1:= 0 to count-1 do begin
-  if po1^[int1].alias = str1 then begin
-   result:= int1;
-   break;
-  end;
- end;
-end;
-
-procedure tfontaliaslist.updatefontdata(var info: fontdataty);
-var
- int1: integer;
- str1: string;
- po1: pchar;
-begin
- str1:= info.name;
- po1:= nil;
- while str1 <> '' do begin
-  int1:= find(str1);
-  if int1 < 0 then begin
-   break;
-  end;
-  with pfontaliasty(getitempo(int1))^ do begin
-   str1:= ancestor;
-   if (name <> '') and (po1 = nil) then begin
-    po1:= pchar(name);
-   end;
-   if (height <> 0) and (info.height = 0) then begin
-    info.height:= height;
-   end;
-   if (width <> 0) and (info.width = 0) then begin
-    info.width:= width;
-   end;
-   if (xscale <> 1) and (info.xscale = 1) then begin
-    info.xscale:= xscale;
-   end;
-   if (options * fontpitchmask <> []) and 
-      (info.pitchoptions * fontpitchmask = []) then begin
-    info.pitchoptions:= options * fontpitchmask;
-   end;
-   if (options * fontfamilymask <> []) and 
-      (info.pitchoptions * fontfamilymask = []) then begin
-    info.familyoptions:= options * fontfamilymask;
-   end;
-   if (options * fontantialiasedmask <> []) and 
-      (info.pitchoptions * fontantialiasedmask = []) then begin
-    info.antialiasedoptions:= options * fontantialiasedmask;
-   end;
-  end;
- end;
- if po1 <> nil then begin
-  info.name:= po1;
- end;
-end;
-
-function tfontaliaslist.registeralias(const alias,name: string;
-              mode: fontaliasmodety = fam_nooverwrite;
-               const height: integer = 0; const width: integer = 0;
-               const options: fontoptionsty = [];
-               const xscale: real = 1.0;
-               const ancestor: string = ''): boolean;
-              //true if registering ok
-var
- po1: pfontaliasty;
-
- procedure doupdate;
- begin
-  po1^.name:= name;
-  po1^.mode:= mode;
-  po1^.height:= height shl fontsizeshift;
-  po1^.width:= width shl fontsizeshift;
-  po1^.options:= options;
-  po1^.xscale:= xscale;
-  po1^.ancestor:= ancestor;
- end;
-
-var
- int1: integer;
- str1,str2: string;
-begin
- result:= false;
- str1:= uppercase(alias);
- str2:= uppercase(ancestor);
- while str2 <> '' do begin
-  if str1 = str2 then begin
-   raise exception.create('Recursive fontalias "'
-                  +alias+'" name "'+name+'" caller "'+str1+'".');
-  end;
-  int1:= find(str2);
-  if int1 >= 0 then begin
-   str2:= uppercase(pfontaliasty(getitempo(int1))^.ancestor);
-  end
-  else begin
-   break;
-  end;
- end;
- int1:= find(alias);
- if int1 >= 0 then begin
-  po1:= pfontaliasty(getitempo(int1));
-  if not (mode in [fam_nooverwrite,fam_fixnooverwrite]) then begin
-   if po1^.mode <> fam_fix then begin
-    doupdate;
-   end;
-  end;
- end
- else begin
-  count:= count + 1;
-  po1:= getitempo(count-1);
-  po1^.alias:= struppercase(alias);
-  doupdate;
- end;
- if mode = fam_fixnooverwrite then begin
-  po1^.mode:= fam_fix;
- end;
-end;
 
  { tsimplebitmap }
 
@@ -2105,7 +1508,7 @@ begin
   err:= gui_creategc(fhandle,gck_pixmap,gc);
   gdi_unlock;
   guierror(err,self);
-  fcanvas.linktopaintdevice(fhandle,gc{,fsize},fdefaultcliporigin);
+  fcanvas.linktopaintdevice(fhandle,gc,fdefaultcliporigin);
  end;
 end;
 
@@ -2539,7 +1942,8 @@ begin
  if (canvas <> nil) then begin
   releasefont(fhandlepo^);
   canvas.checkgcstate([cs_gc]); //windows needs gc
-  fhandlepo^:= getfontnum(finfopo^,canvas.fdrawinfo,{$ifdef FPC}@{$endif}getfont);
+  fhandlepo^:= getfontnum(finfopo^,canvas.fdrawinfo,
+                                         {$ifdef FPC}@{$endif}getfont);
   if fhandlepo^ = 0 then begin
    canvas.error(gde_font,finfopo^.name);
   end;
@@ -3102,7 +2506,7 @@ end;
 
 constructor tcanvas.create(const user: tobject; const intf: icanvas);
 begin
- fgdifuncs:= getgdifuncs;
+ fdrawinfo.gc.gdifuncs:= getgdifuncs; //default
  fuser:= user;
  fintf:= pointer(intf);
  with fvaluestack do begin
@@ -3169,7 +2573,7 @@ begin
   if not locked then begin
    lock;
    try
-    fgdifuncs^[func](fdrawinfo);
+    fdrawinfo.gc.gdifuncs^[func](fdrawinfo);
     if flushgdi then begin
      gui_flushgdi;
     end;
@@ -3178,7 +2582,7 @@ begin
    end;
   end
   else begin
-   fgdifuncs^[func](fdrawinfo);
+   fdrawinfo.gc.gdifuncs^[func](fdrawinfo);
    if flushgdi then begin
     gui_flushgdi;
    end;
@@ -3221,7 +2625,7 @@ end;
 // gcident: longword;
  
 procedure tcanvas.linktopaintdevice(apaintdevice: paintdevicety;
-               const gc: gcty; {const size: sizety;} const cliporigin: pointty);
+               const gc: gcty; const cliporigin: pointty);
 var
  rea1: real;
  int1: integer;
@@ -3231,28 +2635,15 @@ begin
   for int1:= 0 to high(fgclinksto) do begin
    fgclinksto[int1].gcdestroyed(self);
   end;
-  gdi(gdi_destroygc);
+  gdi(gdf_destroygc);
  end;
  fdrawinfo.paintdevice:= apaintdevice;
-{
- if apaintdevice = 0 then begin
-  fdrawinfo.gcident:= 0;
- end
- else begin
-  if gcident = 0 then begin
-   gcident:= 1;
-  end;
-  fdrawinfo.gcident:= gcident;
-  inc(gcident);
- end;
-}
  rea1:= fdrawinfo.gc.ppmm;
  fdrawinfo.gc:= gc;
  fdrawinfo.gc.ppmm:= rea1;
-// fdrawinfo.gc.size:= size;
  updatecliporigin(cliporigin);
  if gc.handle <> 0 then begin
-  gdi(gdi_setcliporigin);
+  gdi(gdf_setcliporigin);
  end;
  if fdefaultfont <> 0 then begin
   releasefont(fdefaultfont);
@@ -3579,7 +2970,7 @@ begin
   end;
   if values.mask <> [] then begin
    fdrawinfo.gcvalues:= @values;
-   gdi(gdi_changegc);
+   gdi(gdf_changegc);
   end;
  end;
 end;
@@ -3831,7 +3222,7 @@ begin
  //     bo1:= false;
       drect.cx:= srect.cx;
      end;
-     gdi(gdi_copyarea);
+     gdi(gdf_copyarea);
      inc(drect.x,srect.cx);
      srect.cx:= stepx;
      srect.x:= sourcex;
@@ -3844,7 +3235,7 @@ begin
   end;
  end
  else begin
-  gdi(gdi_copyarea);
+  gdi(gdf_copyarea);
  end;
  if amask <> nil then begin
   exclude(fstate,cs_clipregion);
@@ -3907,7 +3298,7 @@ begin
     end;
     points:= @pointar[0];
    end;
-   gdi(gdi_drawlinesegments);
+   gdi(gdf_drawlinesegments);
   end;
  end;
 end;
@@ -3946,7 +3337,7 @@ begin
      count:= acount;
     end;
    end;
-   gdi(gdi_drawlines);
+   gdi(gdf_drawlines);
   end;
  end;
 end;
@@ -3995,7 +3386,7 @@ begin
     points:= @apoints[0];
     count:= length(apoints) * 2;
    end;
-   gdi(gdi_drawlinesegments);
+   gdi(gdf_drawlinesegments);
   end;
  end;
 end;
@@ -4044,7 +3435,7 @@ begin
  if cs_inactive in fstate then exit;
  if checkforeground(acolor,true) then begin
   fdrawinfo.rect.rect:= @def;
-  gdi(gdi_drawellipse);
+  gdi(gdf_drawellipse);
  end;
 end;
 
@@ -4073,7 +3464,7 @@ begin
   fdrawinfo.arc.rect:= @def;
   fdrawinfo.arc.startang:= startang;
   fdrawinfo.arc.extentang:= extentang;
-  gdi(gdi_drawarc);
+  gdi(gdf_drawarc);
  end;
 end;
 
@@ -4127,7 +3518,7 @@ begin
     end;
    end;
   end;
-  gdi(gdi_fillrect);
+  gdi(gdf_fillrect);
  end;
  if (linecolor <> cl_none) then begin
   drawrect(arect,linecolor);
@@ -4142,7 +3533,7 @@ begin
   with fdrawinfo.rect do begin
    rect:= @def;
   end;
-  gdi(gdi_fillelipse);
+  gdi(gdf_fillelipse);
  end;
  if (linecolor <> cl_none) then begin
   drawellipse(def,linecolor);
@@ -4177,7 +3568,7 @@ begin
   fdrawinfo.arc.startang:= startang;
   fdrawinfo.arc.extentang:= extentang;
   fdrawinfo.arc.pieslice:= pieslice;
-  gdi(gdi_fillarc);
+  gdi(gdf_fillarc);
  end;
 end;
 
@@ -4274,7 +3665,7 @@ begin
    points:= @apoints;
    count:= length(apoints);
   end;
-  gdi(gdi_fillpolygon);
+  gdi(gdf_fillpolygon);
  end;
  if (linecolor <> cl_none) then begin
   drawlines(apoints,true,linecolor);
@@ -4337,7 +3728,7 @@ begin
     end;
     acolorbackground:= cl_transparent;
     checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
-    gdi(gdi_drawstring16);
+    gdi(gdf_drawstring16);
     if grayed then begin
      dec(pos^.x);
      dec(pos^.y);
@@ -4352,7 +3743,7 @@ begin
        inc(pos^.x,po1^.gloss_shiftx);
        inc(pos^.y,po1^.gloss_shifty);
        checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
-       gdi(gdi_drawstring16);
+       gdi(gdf_drawstring16);
        dec(pos^.x,po1^.gloss_shiftx);
        dec(pos^.y,po1^.gloss_shifty);
       end;
@@ -4364,12 +3755,12 @@ begin
      acolorforeground:= po1^.color;
     end;
     checkgcstate([cs_acolorforeground]);
-    gdi(gdi_drawstring16);
+    gdi(gdf_drawstring16);
    end
    else begin
     acolorforeground:= po1^.color;
     checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
-    gdi(gdi_drawstring16);
+    gdi(gdf_drawstring16);
    end;
   end;
   font1.rotation:= 0;
@@ -4505,11 +3896,11 @@ begin
       rect1.cx:= cx;
       rect1.cy:= awidth;
       if not (edg_top in hiddenedges) then begin
-       gdi(gdi_fillrect); //top
+       gdi(gdf_fillrect); //top
       end;
       rect1.pos.y:= y + cy - awidth;
       if not (edg_bottom in hiddenedges) then begin
-       gdi(gdi_fillrect); //bottom
+       gdi(gdf_fillrect); //bottom
       end;
       rect1.pos.y:= y;
       rect1.cy:= cy;
@@ -4522,11 +3913,11 @@ begin
       end;
       rect1.cx:= awidth;
       if not (edg_left in hiddenedges) then begin
-       gdi(gdi_fillrect); //left
+       gdi(gdf_fillrect); //left
       end;
       rect1.pos.x:= x + cx - awidth;
       if not (edg_right in hiddenedges) then begin
-       gdi(gdi_fillrect); //right
+       gdi(gdf_fillrect); //right
       end;
      end;
     end;
@@ -4642,7 +4033,7 @@ end;
 
 function tcanvas.createregion: regionty;
 begin
- gdi(gdi_createemptyregion);
+ gdi(gdf_createemptyregion);
  result:= fdrawinfo.regionoperation.dest;
 end;
 
@@ -4650,7 +4041,7 @@ function tcanvas.createregion(const asource: regionty): regionty;
 begin
  with fdrawinfo.regionoperation do begin
   source:= asource;
-  gdi(gdi_copyregion);
+  gdi(gdf_copyregion);
   result:= dest;
  end;
 end;
@@ -4661,7 +4052,7 @@ begin
   rect:= arect;
   inc(rect.x,origin.x);
   inc(rect.y,origin.y);
-  gdi(gdi_createrectregion);
+  gdi(gdf_createrectregion);
   result:= dest;
  end;
 end;
@@ -4673,7 +4064,7 @@ begin
   if rectscount > 0 then begin
    rectspo:= @rects[0];
    adjustrectar(@rects[0],rectscount);
-   gdi(gdi_createrectsregion);
+   gdi(gdf_createrectsregion);
    result:= dest;
    readjustrectar(@rects[0],rectscount);
   end
@@ -4708,7 +4099,7 @@ procedure tcanvas.destroyregion(region: regionty);
 begin
  with fdrawinfo.regionoperation do begin
   source:= region;
-  gdi(gdi_destroyregion);
+  gdi(gdf_destroyregion);
  end;
 end;
 
@@ -4718,7 +4109,7 @@ begin
   dest:= adest;
   rect.pos:= dist;
  end;
- gdi(gdi_moveregion);
+ gdi(gdf_moveregion);
 end;
 
 procedure tcanvas.regremove(const adest: regionty; const dist: pointty);
@@ -4773,44 +4164,44 @@ end;
 procedure tcanvas.regsubrect(const dest: regionty; const rect: rectty);
 begin
  initregrect(dest,rect);
- gdi(gdi_regsubrect);
+ gdi(gdf_regsubrect);
 end;
 
 procedure tcanvas.regaddrect(const dest: regionty; const rect: rectty);
 begin
  initregrect(dest,rect);
- gdi(gdi_regaddrect);
+ gdi(gdf_regaddrect);
 end;
 
 procedure tcanvas.regintersectrect(const dest: regionty; const rect: rectty);
 begin
  initregrect(dest,rect);
- gdi(gdi_regintersectrect);
+ gdi(gdf_regintersectrect);
 end;
 
 procedure tcanvas.regaddregion(const dest: regionty; const region: regionty);
 begin
  initregreg(dest,region);
- gdi(gdi_regaddregion);
+ gdi(gdf_regaddregion);
 end;
 
 procedure tcanvas.regsubregion(const dest: regionty; const region: regionty);
 begin
  initregreg(dest,region);
- gdi(gdi_regsubregion);
+ gdi(gdf_regsubregion);
 end;
 
 procedure tcanvas.regintersectregion(const dest: regionty; const region: regionty);
 begin
  initregreg(dest,region);
- gdi(gdi_regintersectregion);
+ gdi(gdf_regintersectregion);
 end;
 
 function tcanvas.regionisempty(const region: regionty): boolean;
 begin
  with fdrawinfo.regionoperation do begin
   source:= region;
-  gdi(gdi_regionisempty);
+  gdi(gdf_regionisempty);
   result:= dest <> 0;
  end;
 end;
@@ -4820,7 +4211,7 @@ begin
  if region <> 0 then begin
   with fdrawinfo.regionoperation do begin
    source:= region;
-   gdi(gdi_regionclipbox);
+   gdi(gdf_regionclipbox);
    result:= rect;
   end;
  end
@@ -4915,7 +4306,7 @@ function tcanvas.copyclipregion: regionty;
 begin
  with fdrawinfo.regionoperation do begin
   source:= fvaluepo^.clipregion;
-  gdi(gdi_copyregion);
+  gdi(gdf_copyregion);
   result:= dest;
  end;
 end;
@@ -5611,7 +5002,7 @@ procedure tcanvas.setcliporigin(const Value: pointty);
 begin
  checkgcstate([cs_gc]);
  updatecliporigin(value);
- gdi(gdi_setcliporigin);
+ gdi(gdf_setcliporigin);
 end;
 
 procedure tcanvas.setppmm(avalue: real);
