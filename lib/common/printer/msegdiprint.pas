@@ -479,7 +479,7 @@ begin
  if ffilehandle = 0 then begin
   ffilehandle:= closeenhmetafile(gchandle);
   fdrawinfo.gc.handle:= 0;
-  gdi(gdi_destroygc);
+  gdi(gdf_destroygc);
  end;
  result:= ffilehandle;
 end;

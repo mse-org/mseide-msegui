@@ -1375,7 +1375,7 @@ begin
  end;
 end;
 
-procedure gui_destroygc(var drawinfo: drawinfoty);
+procedure gdi_destroygc(var drawinfo: drawinfoty);
 begin
  with drawinfo,gc,win32gcty(platformdata).d do begin
   selectobject(handle,nullpen);
@@ -2255,7 +2255,7 @@ begin
  result:= swaprgb(pixel);
 end;
 
-procedure gui_changegc(var drawinfo: drawinfoty);
+procedure gdi_changegc(var drawinfo: drawinfoty);
 begin
  with drawinfo.gcvalues^,drawinfo.gc,win32gcty(platformdata).d do begin
   if gvm_colorbackground in mask then begin
@@ -2549,14 +2549,14 @@ begin
  end;
 end;
 
-procedure gui_createemptyregion(var drawinfo: drawinfoty);
+procedure gdi_createemptyregion(var drawinfo: drawinfoty);
 begin
  with drawinfo.regionoperation do begin
   dest:= createregion;
  end;
 end;
 
-procedure gui_setcliporigin(var drawinfo: drawinfoty);
+procedure gdi_setcliporigin(var drawinfo: drawinfoty);
 var
  reg1: hrgn;
  delta: pointty;
@@ -2579,14 +2579,14 @@ begin
 // gdierror(gde_notimplemented,'setcliporigin');
 end;
 
-procedure gui_createrectregion(var drawinfo: drawinfoty);
+procedure gdi_createrectregion(var drawinfo: drawinfoty);
 begin
  with drawinfo.regionoperation do begin
   dest:= createregion(rect,drawinfo.gc);
  end;
 end;
 
-procedure gui_createrectsregion(var drawinfo: drawinfoty);
+procedure gdi_createrectsregion(var drawinfo: drawinfoty);
 var
  reg1: hrgn;
  int1: integer;
@@ -2619,7 +2619,7 @@ begin
  end;
 end;
 
-procedure gui_destroyregion(var drawinfo: drawinfoty);
+procedure gdi_destroyregion(var drawinfo: drawinfoty);
 begin
  with drawinfo.regionoperation do begin
   if source <> 0 then begin
@@ -2631,7 +2631,7 @@ begin
  end;
 end;
 
-procedure gui_regionisempty(var drawinfo: drawinfoty);
+procedure gdi_regionisempty(var drawinfo: drawinfoty);
 var
  rect1: trect;
 begin
@@ -2645,7 +2645,7 @@ begin
  end;
 end;
 
-procedure gui_regionclipbox(var drawinfo: drawinfoty);
+procedure gdi_regionclipbox(var drawinfo: drawinfoty);
 begin
  with drawinfo.regionoperation do begin
   getrgnbox(source,trect(rect));
@@ -2657,7 +2657,7 @@ begin
  end;
 end;
 
-procedure gui_copyregion(var drawinfo: drawinfoty);
+procedure gdi_copyregion(var drawinfo: drawinfoty);
 begin
  with drawinfo.regionoperation do begin
   if source = 0 then begin
@@ -2670,14 +2670,14 @@ begin
  end;
 end;
 
-procedure gui_moveregion(var drawinfo: drawinfoty);
+procedure gdi_moveregion(var drawinfo: drawinfoty);
 begin
  with drawinfo.regionoperation do begin
   offsetrgn(source,rect.x,rect.y);
  end;
 end;
 
-procedure gui_regsubrect(var drawinfo: drawinfoty);
+procedure gdi_regsubrect(var drawinfo: drawinfoty);
 var
  reg1: hrgn;
 begin
@@ -2691,14 +2691,14 @@ begin
  end;
 end;
 
-procedure gui_regsubregion(var drawinfo: drawinfoty);
+procedure gdi_regsubregion(var drawinfo: drawinfoty);
 begin
  with drawinfo.regionoperation do begin
   combinergn(dest,dest,source,rgn_diff);
  end;
 end;
 
-procedure gui_regaddrect(var drawinfo: drawinfoty);
+procedure gdi_regaddrect(var drawinfo: drawinfoty);
 var
  reg1: hrgn;
 begin
@@ -2712,14 +2712,14 @@ begin
  end;
 end;
 
-procedure gui_regaddregion(var drawinfo: drawinfoty);
+procedure gdi_regaddregion(var drawinfo: drawinfoty);
 begin
  with drawinfo.regionoperation do begin
   combinergn(dest,dest,source,rgn_or);
  end;
 end;
 
-procedure gui_regintersectrect(var drawinfo: drawinfoty);
+procedure gdi_regintersectrect(var drawinfo: drawinfoty);
 var
  reg1: hrgn;
 begin
@@ -2733,7 +2733,7 @@ begin
  end;
 end;
 
-procedure gui_regintersectregion(var drawinfo: drawinfoty);
+procedure gdi_regintersectregion(var drawinfo: drawinfoty);
 begin
  with drawinfo.regionoperation do begin
   combinergn(dest,dest,source,rgn_and);
@@ -3159,31 +3159,31 @@ begin
  end;
 end;
 
-procedure gui_fillrect(var drawinfo: drawinfoty);
+procedure gdi_fillrect(var drawinfo: drawinfoty);
 begin
  offsetrect(drawinfo);
  fill(drawinfo,fs_rect);
 end;
 
-procedure gui_fillelipse(var drawinfo: drawinfoty);
+procedure gdi_fillelipse(var drawinfo: drawinfoty);
 begin
  transformellipseinfo(drawinfo,true);
  fill(drawinfo,fs_ellipse);
 end;
 
-procedure gui_fillarc(var drawinfo: drawinfoty);
+procedure gdi_fillarc(var drawinfo: drawinfoty);
 begin
  transformellipseinfo(drawinfo,true);
  fill(drawinfo,fs_arc);
 end;
 
-procedure gui_fillpolygon(var drawinfo: drawinfoty);
+procedure gdi_fillpolygon(var drawinfo: drawinfoty);
 begin
  transformpoints(drawinfo,false);
  fill(drawinfo,fs_polygon);
 end;
 
-procedure gui_copyarea(var drawinfo: drawinfoty);
+procedure gdi_copyarea(var drawinfo: drawinfoty);
 
 var
  maskbmp,stretchedbmp: pixmapty;
@@ -3567,7 +3567,7 @@ begin
  end;
 end;
 
-procedure gui_fonthasglyph(var drawinfo: drawinfoty);
+procedure gdi_fonthasglyph(var drawinfo: drawinfoty);
 begin
  with drawinfo,fonthasglyph do begin
   hasglyph:= true;
@@ -3606,7 +3606,7 @@ begin
  end;
 end;
 
-procedure gui_drawlines(var drawinfo: drawinfoty);
+procedure gdi_drawlines(var drawinfo: drawinfoty);
 var
  po1: ppointty;
  bo1: boolean;
@@ -3642,7 +3642,7 @@ begin
  end;
 end;
 
-procedure gui_drawlinesegments(var drawinfo: drawinfoty);
+procedure gdi_drawlinesegments(var drawinfo: drawinfoty);
 var
  int1,int2: integer;
  po1,po2: pdword;
@@ -3681,7 +3681,7 @@ begin
  end;
 end;
 
-procedure gui_drawellipse(var drawinfo: drawinfoty);
+procedure gdi_drawellipse(var drawinfo: drawinfoty);
 var
  bo1: boolean;
 begin
@@ -3702,7 +3702,7 @@ begin
  end;
 end;
 
-procedure gui_drawarc(var drawinfo: drawinfoty);
+procedure gdi_drawarc(var drawinfo: drawinfoty);
 var                         //todo: optimize
  bo1: boolean;
  xstart,ystart,xend,yend: integer;
@@ -3745,7 +3745,7 @@ begin
  end;
 end;
 
-procedure gui_drawstring16(var drawinfo: drawinfoty);
+procedure gdi_drawstring16(var drawinfo: drawinfoty);
 begin
  with drawinfo do begin
   updateopaquemode(gc);
