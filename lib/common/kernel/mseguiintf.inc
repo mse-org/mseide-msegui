@@ -121,9 +121,7 @@ function gui_regiontorects(const aregion: regionty): rectarty;
 //procedure gui_changegc(var drawinfo: drawinfoty; const values: gcvaluesty);
 
 function gui_getdefaultfontnames: defaultfontnamesty;
-function gui_getfont(var drawinfo: drawinfoty): boolean;
-procedure gui_getfonthighres(var drawinfo: drawinfoty);
-procedure gui_freefontdata(const data: fontdataty);
+
 function gui_gettext16width(var drawinfo: drawinfoty): integer; //-1 on error
 function gui_getchar16widths(var drawinfo: drawinfoty): gdierrorty;
 function gui_getfontmetrics(var drawinfo: drawinfoty): gdierrorty;
@@ -182,3 +180,7 @@ procedure gdi_regintersectrect(var drawinfo: drawinfoty);
 procedure gdi_regintersectregion(var drawinfo: drawinfoty);
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 procedure gdi_fonthasglyph(var drawinfo: drawinfoty);
+procedure gdi_getfont(var drawinfo: drawinfoty);
+procedure gdi_getfonthighres(var drawinfo: drawinfoty);
+procedure gdi_freefontdata(var drawinfo: drawinfoty);
+

@@ -230,6 +230,7 @@ type
  getfontinfoty = record
   fontdata: pfontdataty;
   basefont: fontty;
+  ok: boolean;
  end;
  gettextwidthinfoty = record
   text: pchar;
@@ -507,7 +508,8 @@ type
               gdf_regsubrect,gdf_regsubregion,
               gdf_regaddrect,gdf_regaddregion,gdf_regintersectrect,
               gdf_regintersectregion,
-              gdf_copyarea,gdf_fonthasglyph);
+              gdf_copyarea,gdf_fonthasglyph,
+              gdf_getfont,gdf_getfonthighres,gdi_freefontdata);
 
  gdifunctionaty = array[gdifuncty] of gdifunctionty;
 // pgdifunctionaty = ^gdifunctionaty;
@@ -1928,7 +1930,8 @@ end;
 function tfont.getfont(var drawinfo: drawinfoty): boolean;
 begin
  gdi_lock;
- result:= gui_getfont(drawinfo);
+ gdi_getfont(drawinfo);
+ result:= drawinfo.getfont.ok;
  if result then begin
   with drawinfo.getfont.fontdata^ do begin
    linewidth:= height div (9 * (1 shl fontsizeshift));

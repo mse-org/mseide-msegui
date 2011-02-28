@@ -5140,7 +5140,7 @@ begin
  result:= buildxftpat(fontdata,fontinfo,highres);
 end;
 
-procedure gui_getfonthighres(var drawinfo: drawinfoty);
+procedure gdi_getfonthighres(var drawinfo: drawinfoty);
 var
  pat1,pat2: pfcpattern;
  res1: tfcresult;
@@ -5160,7 +5160,7 @@ begin
  gdi_unlock;
 end;
 
-function gui_getfont(var drawinfo: drawinfoty): boolean;
+procedure gdi_getfont(var drawinfo: drawinfoty);
 
  procedure getfontdata(po: pxfontstruct);
  var
@@ -5213,7 +5213,7 @@ begin
 {$ifdef FPC} {$checkpointer off} {$endif}
  with drawinfo.getfont.fontdata^ do begin
   if fhasxft then begin
-   result:= false;
+   drawinfo.getfont.ok:= false;
    po3:= buildxftpat(drawinfo.getfont.fontdata^,fontinfo,false);
    po4:= xftfontmatch(appdisp,xdefaultscreen(appdisp),po3,@res1);
    if po4 <> nil then begin
@@ -5225,7 +5225,7 @@ begin
    {$endif}
     po2:= xftfontopenpattern(appdisp,po4);
     if po2 <> nil then begin
-     result:= true;
+     drawinfo.getfont.ok:= true;
      getxftfontdata(po2,drawinfo);
      if rotation <> 0 then begin //ascent and descent are 0 for rotated fonts
       fcpatterndestroy(po3);
@@ -5286,10 +5286,10 @@ begin
    end;
    if po1 <> nil then begin
     getfontdata(po1);
-    result:= true;
+    drawinfo.getfont.ok:= true;
    end
    else begin
-    result:= false;
+    drawinfo.getfont.ok:= false;
    end;
   end;
  end;
@@ -5297,19 +5297,21 @@ begin
  gdi_unlock;
 end;
 
-procedure gui_freefontdata(const data: fontdataty);
+procedure gdi_freefontdata(var drawinfo: drawinfoty);
 begin
  gdi_lock;
- if fhasxft then begin
-  xftfontclose(appdisp,pxftfont(data.font));
-  if data.fonthighres <> 0 then begin
-   xftfontclose(appdisp,pxftfont(data.fonthighres));
-  end;
- end
- else begin
-  with x11fontdataty(data.platformdata) do begin
-   xfreefontinfo(nil,d.infopo,1);
-   xunloadfont(appdisp,data.font);
+ with drawinfo.getfont.fontdata^ do begin
+  if fhasxft then begin
+   xftfontclose(appdisp,pxftfont(font));
+   if fonthighres <> 0 then begin
+    xftfontclose(appdisp,pxftfont(fonthighres));
+   end;
+  end
+  else begin
+   with x11fontdataty(platformdata) do begin
+    xfreefontinfo(nil,d.infopo,1);
+    xunloadfont(appdisp,font);
+   end;
   end;
  end;
  gdi_unlock;
@@ -7286,8 +7288,11 @@ const
    {$ifdef FPC}@{$endif}gdi_regintersectrect,
    {$ifdef FPC}@{$endif}gdi_regintersectregion,
    {$ifdef FPC}@{$endif}gdi_copyarea,
-   {$ifdef FPC}@{$endif}gdi_fonthasglyph
- );
+   {$ifdef FPC}@{$endif}gdi_fonthasglyph,
+   {$ifdef FPC}@{$endif}gdi_getfont,
+   {$ifdef FPC}@{$endif}gdi_getfonthighres,
+   {$ifdef FPC}@{$endif}gdi_freefontdata
+);
 {
 procedure gui_gdifunc(const func: gdifuncty; var drawinfo: drawinfoty);
 begin

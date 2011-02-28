@@ -538,8 +538,11 @@ const
    {$ifdef FPC}@{$endif}msegenericgdi.gdi_regintersectrect,
    {$ifdef FPC}@{$endif}msegenericgdi.gdi_regintersectregion,
    {$ifdef FPC}@{$endif}gdi_copyarea,
-   {$ifdef FPC}@{$endif}gdi_fonthasglyph
- );
+   {$ifdef FPC}@{$endif}gdi_fonthasglyph,
+   {$ifdef FPC}@{$endif}gdi_getfont,
+   {$ifdef FPC}@{$endif}gdi_getfonthighres,
+   {$ifdef FPC}@{$endif}gdi_freefontdata
+);
 
 function openglgetgdifuncs: pgdifunctionaty;
 begin

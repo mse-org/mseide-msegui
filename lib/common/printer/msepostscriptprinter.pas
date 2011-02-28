@@ -719,8 +719,11 @@ const
    {$ifdef FPC}@{$endif}gdi_regintersectrect,
    {$ifdef FPC}@{$endif}gdi_regintersectregion,
    {$ifdef FPC}@{$endif}gdi_copyarea,
-   {$ifdef FPC}@{$endif}gdi_fonthasglyph
- );
+   {$ifdef FPC}@{$endif}gdi_fonthasglyph,
+   {$ifdef FPC}@{$endif}gdi_getfont,
+   {$ifdef FPC}@{$endif}gdi_getfonthighres,
+   {$ifdef FPC}@{$endif}gdi_freefontdata
+);
 
 function psrealtostr(const avalue: real): string;
 begin

@@ -207,12 +207,16 @@ begin
 end;
 
 procedure freefont(index: integer);
+var
+ drawinfo: drawinfoty;
 begin
  with fonts[index] do begin
   data^.name:= '';
   data^.charset:= '';
   gdi_lock;
-  gui_freefontdata(data^);
+  drawinfo.getfont.fontdata:= data;
+  gdi_freefontdata(drawinfo);
+//  gui_freefontdata(data^);
   gdi_unlock;
   refcount:= 0;
  end;
@@ -305,7 +309,7 @@ begin
     basefont:= 0;
    end;
    gdi_lock;
-   gui_getfonthighres(drawinfo);
+   gdi_getfonthighres(drawinfo);
    gdi_unlock;   
    drawinfo.getfont:= fontinfobefore;
   end;
