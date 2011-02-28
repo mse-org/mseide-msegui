@@ -1705,19 +1705,19 @@ endlab:
  closedc; 
 end;
 
-procedure gui_getfonthighres(var drawinfo: drawinfoty);
+procedure gdi_getfonthighres(var drawinfo: drawinfoty);
 begin
  dogetfont(drawinfo,true);
 end;
 
-function gui_getfont(var drawinfo: drawinfoty): boolean;
+procedure gdi_getfont(var drawinfo: drawinfoty);
 begin
- result:= dogetfont(drawinfo,false);
+ drawinfo.getfont.ok:= dogetfont(drawinfo,false);
 end;
 
-procedure gui_freefontdata(const data: fontdataty);
+procedure gdi_freefontdata(var drawinfo: drawinfoty);
 begin
- with data,win32fontdataty(platformdata) do begin
+ with drawinfo.getfont.fontdata^,win32fontdataty(platformdata) do begin
   if charwidths <> nil then begin
    dispose(charwidths);
   end;
@@ -5301,8 +5301,11 @@ const
    {$ifdef FPC}@{$endif}gdi_regintersectrect,
    {$ifdef FPC}@{$endif}gdi_regintersectregion,
    {$ifdef FPC}@{$endif}gdi_copyarea,
-   {$ifdef FPC}@{$endif}gdi_fonthasglyph
- );
+   {$ifdef FPC}@{$endif}gdi_fonthasglyph,
+   {$ifdef FPC}@{$endif}gdi_getfont,
+   {$ifdef FPC}@{$endif}gdi_getfonthighres,
+   {$ifdef FPC}@{$endif}gdi_freefontdata
+);
 
 function gui_getgdifuncs: pgdifunctionaty;
 begin
