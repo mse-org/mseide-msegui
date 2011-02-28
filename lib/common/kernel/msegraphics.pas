@@ -2643,6 +2643,9 @@ begin
  fdrawinfo.paintdevice:= apaintdevice;
  rea1:= fdrawinfo.gc.ppmm;
  fdrawinfo.gc:= gc;
+ if fdrawinfo.gc.gdifuncs = nil then begin
+  fdrawinfo.gc.gdifuncs:= getgdifuncs; //default
+ end;
  fdrawinfo.gc.ppmm:= rea1;
  updatecliporigin(cliporigin);
  if gc.handle <> 0 then begin
