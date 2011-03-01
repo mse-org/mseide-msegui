@@ -122,10 +122,6 @@ function gui_regiontorects(const aregion: regionty): rectarty;
 
 function gui_getdefaultfontnames: defaultfontnamesty;
 
-function gui_gettext16width(var drawinfo: drawinfoty): integer; //-1 on error
-function gui_getchar16widths(var drawinfo: drawinfoty): gdierrorty;
-function gui_getfontmetrics(var drawinfo: drawinfoty): gdierrorty;
-
 function gui_createpixmap(const size: sizety; winid: winidty = 0;
       monochrome: boolean = false; copyfrom: pixmapty = 0): pixmapty; overload;
 function gui_freepixmap(pixmap: pixmapty): gdierrorty;
@@ -182,4 +178,7 @@ procedure gdi_fonthasglyph(var drawinfo: drawinfoty);
 procedure gdi_getfont(var drawinfo: drawinfoty);
 procedure gdi_getfonthighres(var drawinfo: drawinfoty);
 procedure gdi_freefontdata(var drawinfo: drawinfoty);
+procedure gdi_gettext16width(var drawinfo: drawinfoty);
+procedure gdi_getchar16widths(var drawinfo: drawinfoty);
+procedure gdi_getfontmetrics(var drawinfo: drawinfoty);
 

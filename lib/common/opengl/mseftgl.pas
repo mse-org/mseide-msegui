@@ -149,7 +149,10 @@ type
  
  makeglyphcallbackty = function(par1: FT_GlyphSlot; par2: pointer): pFTGLglyph;
                                                                         cdecl;
- boundsty = array[0..5] of cfloat;
+// boundsty = array[0..5] of cfloat;
+ boundsty = packed record
+  lower,left,near,upper,right,far: cfloat;
+ end;
 
 var
  
@@ -185,6 +188,10 @@ var
  * Create a specialised FTGLfont object for handling texture-mapped fonts.
  */}
  ftglCreateTextureFont: function(_file: pchar): pFTGLfont; cdecl;
+{/**
+ * Create a specialised FTGLfont object for handling memory buffer fonts.
+ */}
+ ftglCreateBufferFont: function(_file: pchar): pFTGLfont; cdecl;
 
 
 {/**
@@ -373,13 +380,14 @@ end;
 
 procedure initializeftgl(const sonames: array of filenamety);
 const 
- funcs: array[0..23] of funcinfoty = (
+ funcs: array[0..24] of funcinfoty = (
   (n: 'ftglCreateCustomFont'; d: @ftglCreateCustomFont),
   (n: 'ftglCreateBitmapFont'; d: @ftglCreateBitmapFont),
   (n: 'ftglCreatePixmapFont'; d: @ftglCreatePixmapFont),
   (n: 'ftglCreateOutlineFont'; d: @ftglCreateOutlineFont),
   (n: 'ftglCreatePolygonFont'; d: @ftglCreatePolygonFont),
   (n: 'ftglCreateTextureFont'; d: @ftglCreateTextureFont),
+  (n: 'ftglCreateBufferFont'; d: @ftglCreateBufferFont),
   (n: 'ftglDestroyFont'; d: @ftglDestroyFont),
   (n: 'ftglAttachFile'; d: @ftglAttachFile),
   (n: 'ftglAttachData'; d: @ftglAttachData),

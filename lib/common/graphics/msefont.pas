@@ -20,6 +20,9 @@ procedure addreffont(font: fontnumty);
 procedure releasefont(font: fontnumty);
 
 procedure checkhighresfont(const afont: pfontdataty; var drawinfo: drawinfoty);
+procedure getchar16widths(var drawinfo: drawinfoty);
+procedure getfontmetrics(var drawinfo: drawinfoty);
+
 function getfontdata(font: fontnumty): pfontdataty;
 function findfontdata(const afont: fontty): pfontdataty;
 function registerfontalias(const alias,name: string;
@@ -316,6 +319,20 @@ begin
  end;
 end;
 
+procedure getchar16widths(var drawinfo: drawinfoty);
+begin
+ with drawinfo.getchar16widths.fontdata^ do begin
+  gdifuncs^[gdf_getchar16widths](drawinfo);
+ end;
+end;
+
+procedure getfontmetrics(var drawinfo: drawinfoty);
+begin
+ with drawinfo.getfontmetrics.fontdata^ do begin
+  gdifuncs^[gdf_getfontmetrics](drawinfo);
+ end;
+end;
+
 function getfontnum(const fontinfo: fontinfoty; var drawinfo: drawinfoty;
                      getfont: getfontfuncty): fontnumty;
 var
@@ -326,7 +343,7 @@ var
  procedure getvalues;
  begin
   with fontinfo do begin           //todo: hash or similar
-   data1.gdinum:= gdinum;
+   data1.gdifuncs:= gdifuncs;
    data1.name:= name;
    data1.height:= height;
    data1.width:= width;
@@ -353,7 +370,7 @@ begin
    with fonts[int1] do begin
     if (refcount >= 0) and
      (data^.glyph = glyph) and           //unicode substitutes
-     (data^.gdinum = gdinum) and
+     (data^.gdifuncs = gdifuncs) and
      (data^.height = height) and
      (data^.width = width)  and
      (data^.pitchoptions = options * fontpitchmask) and

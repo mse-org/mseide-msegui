@@ -76,9 +76,30 @@ const
  fontaliasoptionchars : array[fontoptionty] of char =
                 ('p','P','H','R','S','D','A','a'{,'C','c'});
 type
+ canvasstatety =
+  (cs_regioncopy,cs_clipregion,cs_origin,cs_gc,
+   cs_acolorbackground,cs_acolorforeground,cs_color,cs_colorbackground,
+   cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,cs_lineoptions,
+   cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,cs_fonteffect,
+   cs_rasterop,cs_brush,cs_brushorigin,
+   cs_painted,cs_internaldrawtext,cs_highresdevice,
+   cs_inactive,cs_pagestarted,cs_metafile{,cs_monochrome});
+ canvasstatesty = set of canvasstatety;
+const
+ linecanvasstates = [cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,
+                     cs_lineoptions];
+
+const
+ fontstylehandlemask = 3; //[fs_bold,fs_italic]
+ fontstylesmamask: fontstylesty = 
+           [fs_bold,fs_italic,fs_underline,fs_strikeout,fs_selected];
+
+type
+ pgdifunctionaty = ^gdifunctionaty;
+
  fontdatapty = array[0..15] of pointer;
  fontdataty = record
-  gdinum: integer;        //gdi framework, 0 -> platform default
+  gdifuncs: pgdifunctionaty;        //gdi framework
   font: fontty;
   fonthighres: fontty;
   basefont: fontty;
@@ -104,33 +125,13 @@ type
  end;
  pfontmetricsty = ^fontmetricsty;
 
-type
- canvasstatety =
-  (cs_regioncopy,cs_clipregion,cs_origin,cs_gc,
-   cs_acolorbackground,cs_acolorforeground,cs_color,cs_colorbackground,
-   cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,cs_lineoptions,
-   cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,cs_fonteffect,
-   cs_rasterop,cs_brush,cs_brushorigin,
-   cs_painted,cs_internaldrawtext,cs_highresdevice,
-   cs_inactive,cs_pagestarted,cs_metafile{,cs_monochrome});
- canvasstatesty = set of canvasstatety;
 
-const
- linecanvasstates = [cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,
-                     cs_lineoptions];
-
-type
 
  rasteropty = (rop_clear,rop_and,rop_andnot,rop_copy,
                  rop_notand,rop_nop,rop_xor,rop_or,
                  rop_nor,rop_notxor,rop_not,rop_ornot,
                  rop_notcopy,rop_notor,rop_nand,rop_set);
-const
- fontstylehandlemask = 3; //[fs_bold,fs_italic]
- fontstylesmamask: fontstylesty = 
-           [fs_bold,fs_italic,fs_underline,fs_strikeout,fs_selected];
 
-type
  tfont = class;
  tsimplebitmap = class;
  fontchangedeventty = procedure(sender: tfont; changed: canvasstatesty) of object;
@@ -165,7 +166,7 @@ type
   charset: string;
   options: fontoptionsty;
   glyph: unicharty;
-  gdinum: integer;
+  gdifuncs: pgdifunctionaty;
   rotation: real; //0..2*pi -> 0deg..360deg CCW
   xscale: real;   //default 1.0
  end;
@@ -176,8 +177,6 @@ type
   function getmonochrome: boolean;
   function getsize: sizety;
  end;
-
- pgdifunctionaty = ^gdifunctionaty;
  
  gcpty = array[0..31] of pointer;
  gcty = record
@@ -233,31 +232,36 @@ type
   basefont: fontty;
   ok: boolean;
  end;
+ {
  gettextwidthinfoty = record
   text: pchar;
   count: integer;
   datapo: pfontdataty;
  end;
+ }
  gettext16widthinfoty = record
   text: pmsechar;
   count: integer;
-  datapo: pfontdataty;
+  fontdata: pfontdataty;
+  result: integer;
  end;
+ {
  getcharwidthsinfoty = record
   text: pchar;
   count: integer;
   datapo: pfontdataty;
   resultpo: pinteger;
  end;
+ }
  getchar16widthsinfoty = record
   text: pmsechar;
   count: integer;
-  datapo: pfontdataty;
+  fontdata: pfontdataty;
   resultpo: pinteger;
  end;
  getfontmetricsinfoty = record
   char: msechar;
-  datapo: pfontdataty;
+  fontdata: pfontdataty;
   resultpo: pfontmetricsty;
  end;
  copyareainfoty = record
@@ -334,9 +338,9 @@ type
    5: (points: pointsinfoty);
    6: (color: colorinfoty);
    7: (getfont: getfontinfoty);
-   8: (gettextwidth: gettextwidthinfoty);
+//   8: (gettextwidth: gettextwidthinfoty);
    9: (gettext16width: gettext16widthinfoty);
-  10: (getcharwidths: getcharwidthsinfoty);
+//  10: (getcharwidths: getcharwidthsinfoty);
   11: (getchar16widths: getchar16widthsinfoty);
   12: (getfontmetrics: getfontmetricsinfoty);
   13: (copyarea: copyareainfoty);
@@ -510,7 +514,9 @@ type
               gdf_regaddrect,gdf_regaddregion,gdf_regintersectrect,
               gdf_regintersectregion,
               gdf_copyarea,gdf_fonthasglyph,
-              gdf_getfont,gdf_getfonthighres,gdf_freefontdata);
+              gdf_getfont,gdf_getfonthighres,gdf_freefontdata,
+              gdf_gettext16width,gdf_getchar16widths,gdf_getfontmetrics
+              );
 
  gdifunctionaty = array[gdifuncty] of gdifunctionty;
 // pgdifunctionaty = ^gdifunctionaty;
@@ -1392,7 +1398,7 @@ end;
 
 procedure freefontdata(var drawinfo: drawinfoty);
 begin
- gdifuncs[drawinfo.getfont.fontdata^.gdinum]^[gdf_freefontdata](drawinfo);
+ drawinfo.getfont.fontdata^.gdifuncs^[gdf_freefontdata](drawinfo);
 end;
 
 procedure init;
@@ -1961,7 +1967,7 @@ begin
  if (canvas <> nil) then begin
   releasefont(fhandlepo^);
   canvas.checkgcstate([cs_gc]); //windows needs gc
-  finfopo^.gdinum:= canvas.fgdinum;
+  finfopo^.gdifuncs:= gdifuncs[canvas.fgdinum];
   fhandlepo^:= getfontnum(finfopo^,canvas.fdrawinfo,
                                          {$ifdef FPC}@{$endif}getfont);
   if fhandlepo^ = 0 then begin
@@ -3866,13 +3872,15 @@ begin
    afontnum:= ffont.handle;
   end;
   with fdrawinfo.gettext16width do begin
-   datapo:= getfontdata(afontnum);
+   fontdata:= getfontdata(afontnum);
    text:= atext;
    count:= acount;
   end;
-  gdi_lock;
-  result:= gui_gettext16width(fdrawinfo);
-  gdi_unlock;
+  gdi(gdf_gettext16width);
+  result:= fdrawinfo.gettext16width.result;
+//  gdi_lock;
+//  result:= gui_gettext16width(fdrawinfo);
+//  gdi_unlock;
  end;
 end;
 
@@ -3893,13 +3901,14 @@ begin
   afontnum:= ffont.handle;
  end;
  with fdrawinfo.getfontmetrics do begin
-  datapo:= getfontdata(afontnum);
+  fontdata:= getfontdata(afontnum);
   char:= achar;
   resultpo:= @result;
  end;
  checkgcstate([cs_gc]);
- gdi_lock;
- gdierrorlocked(gui_getfontmetrics(fdrawinfo),self);
+ gdi(gdf_getfontmetrics);
+// gdi_lock;
+// gdierrorlocked(gui_getfontmetrics(fdrawinfo),self);
  with result do begin
   sum:= width - leftbearing - rightbearing;
  end;

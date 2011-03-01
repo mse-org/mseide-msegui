@@ -58,9 +58,24 @@ procedure gdi_clear(var drawinfo: drawinfoty);
 
 implementation
 uses
- mseguiintf,mseftgl,msegenericgdi,msestrings;
+ mseguiintf,mseftgl,msegenericgdi,msestrings,msectypes;
+type
+ ftglfontty = record
+  handle: pftglfont;
+ end;
+ pftglfontty = ^ftglfontty;
  
+ tfontcache = class
+  public
+   procedure getfont(var drawinfo: drawinfoty);
+   procedure freefontdata(var drawinfo: drawinfoty);
+   procedure gettext16width(var drawinfo: drawinfoty);
+   procedure getchar16widths(var drawinfo: drawinfoty);
+   procedure getfontmetrics(var drawinfo: drawinfoty);
+ end;
+  
 var
+ fontcache: tfontcache;
  gdinumber: integer;
   
 type
@@ -77,7 +92,7 @@ type
   pd: paintdevicety;
   gclineoptions: lineoptionsty;
   sourceheight: integer;
-  ftglfont: pftglfont;
+  ftglfont: ftglfontty;
  end;
 
  {$if sizeof(oglgcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$endif}
@@ -382,7 +397,7 @@ begin
    gclineoptions:= lineinfo.options;
   end;
   if gvm_font in mask then begin
-   ftglfont:= pftglfont(font);
+   ftglfont:= pftglfontty(font)^;
   end;
   if gvm_clipregion in mask then begin
    if clipregion = 0 then begin
@@ -504,8 +519,12 @@ var
 begin
  with drawinfo.text16pos,oglgcty(drawinfo.gc.platformdata).d do begin
   str1:= stringtoutf8(text,count);
+//  glmatrixmode(gl_projection);
   glpushmatrix;
-  ftglrenderfont(ftglfont,pchar(str1),ftgl_render_all);
+  gltranslatef(pos^.x,sourceheight-pos^.y,0);
+//  glrasterpos2i(pos^.x,sourceheight-pos^.y);
+  glwindowpos2i(pos^.x,sourceheight-pos^.y);
+  ftglrenderfont(ftglfont.handle,pchar(str1),ftgl_render_all);
   glpopmatrix;
  end;
 end;
@@ -526,10 +545,7 @@ end;
 
 procedure gdi_getfont(var drawinfo: drawinfoty);
 begin
- with drawinfo.getfont.fontdata^ do begin 
-  font:= ptruint(ftglcreatebitmapfont('/usr/share/fonts/truetype/arial.ttf'));
-  ftglsetfontfacesize(pftglfont(font),20,20);
- end;
+ fontcache.getfont(drawinfo);
 end;
 
 procedure gdi_getfonthighres(var drawinfo: drawinfoty);
@@ -539,9 +555,22 @@ end;
 
 procedure gdi_freefontdata(var drawinfo: drawinfoty);
 begin
- with drawinfo.getfont.fontdata^ do begin
-  ftgldestroyfont(pftglfont(font));
- end;
+ fontcache.freefontdata(drawinfo);
+end;
+
+procedure gdi_gettext16width(var drawinfo: drawinfoty);
+begin
+ fontcache.gettext16width(drawinfo);
+end;
+
+procedure gdi_getchar16widths(var drawinfo: drawinfoty);
+begin
+ fontcache.getchar16widths(drawinfo);
+end;
+
+procedure gdi_getfontmetrics(var drawinfo: drawinfoty);
+begin
+ fontcache.getfontmetrics(drawinfo);
 end;
 
 const
@@ -576,7 +605,10 @@ const
    {$ifdef FPC}@{$endif}gdi_fonthasglyph,
    {$ifdef FPC}@{$endif}gdi_getfont,
    {$ifdef FPC}@{$endif}gdi_getfonthighres,
-   {$ifdef FPC}@{$endif}gdi_freefontdata
+   {$ifdef FPC}@{$endif}gdi_freefontdata,
+   {$ifdef FPC}@{$endif}gdi_gettext16width,
+   {$ifdef FPC}@{$endif}gdi_getchar16widths,
+   {$ifdef FPC}@{$endif}gdi_getfontmetrics
 );
 
 function openglgetgdifuncs: pgdifunctionaty;
@@ -589,6 +621,88 @@ begin
  result:= gdinumber;
 end;
 
+{ tfontcache }
+
+procedure tfontcache.getfont(var drawinfo: drawinfoty);
+begin
+ with drawinfo.getfont.fontdata^ do begin 
+  getmem(pointer(font),sizeof(ftglfontty));
+  with pftglfontty(font)^ do begin
+   handle:= ftglcreatepixmapfont('/usr/share/fonts/truetype/arial.ttf');
+   ftglsetfontcharmap(handle,ft_encoding_unicode);
+   ftglsetfontfacesize(handle,20,72);
+   ascent:= round(ftglgetfontascender(handle));
+   descent:= -round(ftglgetfontdescender(handle));
+   linespacing:= round(ftglgetfontlineheight(handle));
+   caretshift:= 0;
+  end;
+ end;
+end;
+
+procedure tfontcache.freefontdata(var drawinfo: drawinfoty);
+begin
+ with drawinfo.getfont.fontdata^ do begin
+  with pftglfontty(font)^ do begin
+   ftgldestroyfont(handle);
+  end;
+  freemem(pointer(font));
+ end;
+end;
+
+procedure tfontcache.gettext16width(var drawinfo: drawinfoty);
+begin
+ with drawinfo.gettext16width do begin
+  with pftglfontty(fontdata^.font)^ do begin
+   result:= round(ftglgetfontadvance(handle,pchar(stringtoutf8(text))));
+  end;
+ end;
+end;
+
+procedure tfontcache.getchar16widths(var drawinfo: drawinfoty);
+var
+ f1: cfloat;
+ int1,int2: integer;
+ po1: pmsechar;
+ po2: pinteger;
+begin
+ with drawinfo.getchar16widths do begin
+  with pftglfontty(fontdata^.font)^ do begin
+   f1:= 0;
+   int2:= 0;
+   po1:= text;
+   po2:= resultpo;
+   for int1:= count-1 downto 0 do begin
+    f1:= f1 + ftglgetfontadvance(handle,pchar(stringtoutf8(po1^)));
+    po2^:= round(f1);
+    f1:= f1-po2^;
+    inc(po1);
+    inc(po2);
+   end;
+  end;
+ end;
+end;
+
+procedure tfontcache.getfontmetrics(var drawinfo: drawinfoty);
+var
+ bbox: boundsty;
+ str1: string;
+begin
+ with drawinfo.getfontmetrics do begin
+  with pftglfontty(fontdata^.font)^ do begin
+   str1:= stringtoutf8(char);
+   with resultpo^ do begin
+    width:= round(ftglgetfontadvance(handle,pchar(str1)));
+    ftglgetfontbbox(handle,pchar(str1),length(str1),bbox);
+    leftbearing:= round(bbox.left);
+    rightbearing:= width-round(bbox.right); //correct???
+   end;
+  end;
+ end;
+end;
+
 initialization
  gdinumber:= registergdi(openglgetgdifuncs);
+ fontcache:= tfontcache.create;
+finalization
+ fontcache.free;
 end.

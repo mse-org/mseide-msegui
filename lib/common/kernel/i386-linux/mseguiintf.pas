@@ -4362,7 +4362,7 @@ begin
 {$ifdef FPC} {$checkpointer default} {$endif}
 end;
 
-function gui_getchar16widths(var drawinfo: drawinfoty): gdierrorty;
+procedure gdi_getchar16widths(var drawinfo: drawinfoty);
 var
  int1,int2: integer;
  char: word;
@@ -4379,7 +4379,7 @@ begin
   po1:= text;
   po2:= resultpo;
 {$ifdef FPC} {$checkpointer off} {$endif}
-  with datapo^,x11fontdataty(platformdata),d.infopo^ do begin
+  with fontdata^,x11fontdataty(platformdata),d.infopo^ do begin
    if fhasxft then begin
     bo1:= (df_highresfont in drawinfo.gc.drawingflags) and 
            (fonthighres <> 0);
@@ -4424,7 +4424,8 @@ begin
      end;
      fmm_matrix: begin
       for int1:= 0 to count -1 do begin
-       charstructpo:= getmatrixcharstruct(po1^,x11fontdataty(datapo^.platformdata));
+       charstructpo:= getmatrixcharstruct(po1^,
+                             x11fontdataty(fontdata^.platformdata));
        if charstructpo <> nil then begin
         po2^:= charstructpo^.width;
         if po2^ = 0 then begin
@@ -4450,11 +4451,11 @@ begin
   end;
 {$ifdef FPC} {$checkpointer default} {$endif}
  end;
- result:= gde_ok;
+// result:= gde_ok;
  gdi_unlock;
 end;
 
-function gui_getfontmetrics(var drawinfo: drawinfoty): gdierrorty;
+procedure gdi_getfontmetrics(var drawinfo: drawinfoty);
 var
  po1: pxcharstruct;
  glyphinfo: txglyphinfo;
@@ -4462,7 +4463,7 @@ begin
  gdi_lock;
  with drawinfo.getfontmetrics do begin
 {$ifdef FPC} {$checkpointer off} {$endif}
-  with datapo^,x11fontdataty(platformdata),d.infopo^ do begin
+  with fontdata^,x11fontdataty(platformdata),d.infopo^ do begin
    if fhasxft then begin
     xfttextextents16(appdisp,pxftfont(font),@char,1,@glyphinfo);
     with resultpo^ do begin
@@ -4484,9 +4485,10 @@ begin
       end;
      end;
      fmm_matrix: begin
-      po1:= getmatrixcharstruct(char,x11fontdataty(datapo^.platformdata));
+      po1:= getmatrixcharstruct(char,x11fontdataty(fontdata^.platformdata));
       if po1 = nil then begin
-       po1:= getmatrixcharstruct(msechar(default_char),x11fontdataty(datapo^.platformdata));
+       po1:= getmatrixcharstruct(msechar(default_char),
+                                x11fontdataty(fontdata^.platformdata));
        if po1 = nil then begin
         with resultpo^ do begin
          width:= 0;
@@ -4509,11 +4511,11 @@ begin
   end;
  end;
 {$ifdef FPC} {$checkpointer default} {$endif}
- result:= gde_ok;
+// result:= gde_ok;
  gdi_unlock;
 end;
 
-function gui_gettext16width(var drawinfo: drawinfoty): integer;
+procedure gdi_gettext16width(var drawinfo: drawinfoty);
 var
  int1: integer;
  char: word;
@@ -4521,10 +4523,10 @@ var
  glyphinfo: txglyphinfo;
 begin
  gdi_lock;
- result:= 0;
 {$ifdef FPC} {$checkpointer off} {$endif}
  with drawinfo.gettext16width do begin
-  with datapo^,x11fontdataty(platformdata),d.infopo^ do begin
+  result:= 0;
+  with fontdata^,x11fontdataty(platformdata),d.infopo^ do begin
    if fhasxft then begin
     xfttextextents16(appdisp,pxftfont(font),text,count,@glyphinfo);
     result:= glyphinfo.xoff;
@@ -4545,7 +4547,8 @@ begin
      end;
      fmm_matrix: begin
       for int1:= 0 to count - 1 do begin
-       charstructpo:= getmatrixcharstruct(text[int1],x11fontdataty(datapo^.platformdata));
+       charstructpo:= getmatrixcharstruct(text[int1],
+                             x11fontdataty(fontdata^.platformdata));
        if charstructpo <> nil then begin
         inc(result,charstructpo^.width);
        end
@@ -7291,7 +7294,10 @@ const
    {$ifdef FPC}@{$endif}gdi_fonthasglyph,
    {$ifdef FPC}@{$endif}gdi_getfont,
    {$ifdef FPC}@{$endif}gdi_getfonthighres,
-   {$ifdef FPC}@{$endif}gdi_freefontdata
+   {$ifdef FPC}@{$endif}gdi_freefontdata,
+   {$ifdef FPC}@{$endif}gdi_gettext16width,
+   {$ifdef FPC}@{$endif}gdi_getchar16widths,
+   {$ifdef FPC}@{$endif}gdi_getfontmetrics
 );
 {
 procedure gui_gdifunc(const func: gdifuncty; var drawinfo: drawinfoty);

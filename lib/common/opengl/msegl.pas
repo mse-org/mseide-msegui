@@ -1431,6 +1431,25 @@ var
   glRasterPos4iv: procedure(const v: PGLint); extdecl;
   glRasterPos4s: procedure(x, y, z, w: GLshort); extdecl;
   glRasterPos4sv: procedure(const v: PGLshort); extdecl;
+
+
+  glWindowPos2d: procedure(x, y: GLdouble); extdecl;
+  glWindowPos2dv: procedure(const v: PGLdouble); extdecl;
+  glWindowPos2f: procedure(x, y: GLfloat); extdecl;
+  glWindowPos2fv: procedure(const v: PGLfloat); extdecl;
+  glWindowPos2i: procedure(x, y: GLint); extdecl;
+  glWindowPos2iv: procedure(const v: PGLint); extdecl;
+  glWindowPos2s: procedure(x, y: GLshort); extdecl;
+  glWindowPos2sv: procedure(const v: PGLshort); extdecl;
+  glWindowPos3d: procedure(x, y, z: GLdouble); extdecl;
+  glWindowPos3dv: procedure(const v: PGLdouble); extdecl;
+  glWindowPos3f: procedure(x, y, z: GLfloat); extdecl;
+  glWindowPos3fv: procedure(const v: PGLfloat); extdecl;
+  glWindowPos3i: procedure(x, y, z: GLint); extdecl;
+  glWindowPos3iv: procedure(const v: PGLint); extdecl;
+  glWindowPos3s: procedure(x, y, z: GLshort); extdecl;
+  glWindowPos3sv: procedure(const v: PGLshort); extdecl;
+
   glReadBuffer: procedure(mode: GLenum); extdecl;
   glReadPixels: procedure(x, y: GLint; width, height: GLsizei; format, atype: GLenum; pixels: Pointer); extdecl;
   glRectd: procedure(x1, y1, x2, y2: GLdouble); extdecl;
@@ -1820,6 +1839,24 @@ begin
   @glRasterPos3iv := nil;
   @glRasterPos3s := nil;
   @glRasterPos3sv := nil;
+
+  @glWindowPos2d := nil;
+  @glWindowPos2dv := nil;
+  @glWindowPos2f := nil;
+  @glWindowPos2fv := nil;
+  @glWindowPos2i := nil;
+  @glWindowPos2iv := nil;
+  @glWindowPos2s := nil;
+  @glWindowPos2sv := nil;
+  @glWindowPos3d := nil;
+  @glWindowPos3dv := nil;
+  @glWindowPos3f := nil;
+  @glWindowPos3fv := nil;
+  @glWindowPos3i := nil;
+  @glWindowPos3iv := nil;
+  @glWindowPos3s := nil;
+  @glWindowPos3sv := nil;
+
   @glRasterPos4d := nil;
   @glRasterPos4dv := nil;
   @glRasterPos4f := nil;
@@ -2187,6 +2224,24 @@ begin
     @glRasterPos3iv := GetGLProcAddress(LibGL, 'glRasterPos3iv');
     @glRasterPos3s := GetGLProcAddress(LibGL, 'glRasterPos3s');
     @glRasterPos3sv := GetGLProcAddress(LibGL, 'glRasterPos3sv');
+
+    @glWindowPos2d := GetGLProcAddress(LibGL, 'glWindowPos2d');
+    @glWindowPos2dv := GetGLProcAddress(LibGL, 'glWindowPos2dv');
+    @glWindowPos2f := GetGLProcAddress(LibGL, 'glWindowPos2f');
+    @glWindowPos2fv := GetGLProcAddress(LibGL, 'glWindowPos2fv');
+    @glWindowPos2i := GetGLProcAddress(LibGL, 'glWindowPos2i');
+    @glWindowPos2iv := GetGLProcAddress(LibGL, 'glWindowPos2iv');
+    @glWindowPos2s := GetGLProcAddress(LibGL, 'glWindowPos2s');
+    @glWindowPos2sv := GetGLProcAddress(LibGL, 'glWindowPos2sv');
+    @glWindowPos3d := GetGLProcAddress(LibGL, 'glWindowPos3d');
+    @glWindowPos3dv := GetGLProcAddress(LibGL, 'glWindowPos3dv');
+    @glWindowPos3f := GetGLProcAddress(LibGL, 'glWindowPos3f');
+    @glWindowPos3fv := GetGLProcAddress(LibGL, 'glWindowPos3fv');
+    @glWindowPos3i := GetGLProcAddress(LibGL, 'glWindowPos3i');
+    @glWindowPos3iv := GetGLProcAddress(LibGL, 'glWindowPos3iv');
+    @glWindowPos3s := GetGLProcAddress(LibGL, 'glWindowPos3s');
+    @glWindowPos3sv := GetGLProcAddress(LibGL, 'glWindowPos3sv');
+
     @glRasterPos4d := GetGLProcAddress(LibGL, 'glRasterPos4d');
     @glRasterPos4dv := GetGLProcAddress(LibGL, 'glRasterPos4dv');
     @glRasterPos4f := GetGLProcAddress(LibGL, 'glRasterPos4f');

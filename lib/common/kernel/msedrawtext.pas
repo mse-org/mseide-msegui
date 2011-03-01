@@ -254,21 +254,22 @@ var
    exit;
   end;
   with drawinfo.getchar16widths do begin
-   datapo:= getfontdata(canvas.font.handle);
+   fontdata:= getfontdata(canvas.font.handle);
    resultpo:= resultpo1;
    text:= text1;
    count:= acount;
    if highresfo then begin
-    checkhighresfont(datapo,tcanvas1(canvas).fdrawinfo);
+    checkhighresfont(fontdata,tcanvas1(canvas).fdrawinfo);
    end;
-   gdierror(gui_getchar16widths(drawinfo));
+   getchar16widths(drawinfo);
+//   gdierror(gui_getchar16widths(drawinfo));
   end;
   if tf_tabtospace in info.flags then begin
    with drawinfo.getfontmetrics do begin
-    datapo:= drawinfo.getchar16widths.datapo;
+    fontdata:= drawinfo.getchar16widths.fontdata;
     char:= ' ';
     resultpo:= @fontmetrics1;       
-    gdierror(gui_getfontmetrics(drawinfo));
+    getfontmetrics({datapo,}drawinfo);
    end;
    for int1:= 0 to acount-1 do begin
     if (text1+int1)^ = c_tab then begin

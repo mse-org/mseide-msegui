@@ -722,7 +722,10 @@ const
    {$ifdef FPC}@{$endif}gdi_fonthasglyph,
    {$ifdef FPC}@{$endif}gdi_getfont,
    {$ifdef FPC}@{$endif}gdi_getfonthighres,
-   {$ifdef FPC}@{$endif}gdi_freefontdata
+   {$ifdef FPC}@{$endif}gdi_freefontdata,
+   {$ifdef FPC}@{$endif}gdi_gettext16width,
+   {$ifdef FPC}@{$endif}gdi_getchar16widths,
+   {$ifdef FPC}@{$endif}gdi_getfontmetrics
 );
 
 function psrealtostr(const avalue: real): string;
