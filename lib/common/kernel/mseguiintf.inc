@@ -126,9 +126,6 @@ function gui_gettext16width(var drawinfo: drawinfoty): integer; //-1 on error
 function gui_getchar16widths(var drawinfo: drawinfoty): gdierrorty;
 function gui_getfontmetrics(var drawinfo: drawinfoty): gdierrorty;
 
-//procedure gui_gdifunc(const func: gdifuncty; var drawinfo: drawinfoty);
-function gui_getgdifuncs: pgdifunctionaty;
-
 function gui_createpixmap(const size: sizety; winid: winidty = 0;
       monochrome: boolean = false; copyfrom: pixmapty = 0): pixmapty; overload;
 function gui_freepixmap(pixmap: pixmapty): gdierrorty;
@@ -151,6 +148,8 @@ procedure gui_beep;
 function gui_copytoclipboard(const value: msestring): guierrorty;
 function gui_pastefromclipboard(out value: msestring): guierrorty;
 function gui_canpastefromclipboard: boolean;
+
+function gui_getgdifuncs: pgdifunctionaty;
 
 procedure gdi_destroygc(var drawinfo: drawinfoty);
 procedure gdi_changegc(var drawinfo: drawinfoty);

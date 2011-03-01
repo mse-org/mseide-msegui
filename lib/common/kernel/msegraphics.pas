@@ -78,7 +78,7 @@ const
 type
  fontdatapty = array[0..15] of pointer;
  fontdataty = record
-  gdi: integer;        //gdi framework, 0 -> platform default
+  gdinum: integer;        //gdi framework, 0 -> platform default
   font: fontty;
   fonthighres: fontty;
   basefont: fontty;
@@ -165,6 +165,7 @@ type
   charset: string;
   options: fontoptionsty;
   glyph: unicharty;
+  gdinum: integer;
   rotation: real; //0..2*pi -> 0deg..360deg CCW
   xscale: real;   //default 1.0
  end;
@@ -509,7 +510,7 @@ type
               gdf_regaddrect,gdf_regaddregion,gdf_regintersectrect,
               gdf_regintersectregion,
               gdf_copyarea,gdf_fonthasglyph,
-              gdf_getfont,gdf_getfonthighres,gdi_freefontdata);
+              gdf_getfont,gdf_getfonthighres,gdf_freefontdata);
 
  gdifunctionaty = array[gdifuncty] of gdifunctionty;
 // pgdifunctionaty = ^gdifunctionaty;
@@ -609,6 +610,7 @@ type
    function getmonochrome: boolean;
   protected
    fintf: pointer; //icanvas;
+   fgdinum: integer;
    fstate: canvasstatesty;
 //   fsize: sizety;
    fvaluepo: canvasvaluespoty;
@@ -633,6 +635,8 @@ type
    procedure checkgcstate(state: canvasstatesty); virtual;
    procedure checkregionstate;  //copies region if necessary
    function defaultcliprect: rectty; virtual;
+   function lock: boolean; virtual;
+   procedure unlock; virtual;
    procedure gdi(const func: gdifuncty); virtual;
    procedure init;
    procedure internalcopyarea(asource: tcanvas; const asourcerect: rectty;
@@ -1001,7 +1005,9 @@ procedure deinit;
 procedure gdi_lock;   //locks only if not mainthread
 procedure gdi_unlock; //unlocks only if not mainthread
 procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty);
-function registergdi: integer; //returns unique number
+function registergdi(const agdifuncs: pgdifunctionaty): integer;
+                                            //returns unique number
+procedure freefontdata(var drawinfo: drawinfoty);
 
 procedure allocbuffer(var buffer: bufferty; size: integer);
 procedure freebuffer(var buffer: bufferty);
@@ -1373,11 +1379,20 @@ end;
 
 var
  gdinum: integer;
+ gdifuncs: array of pgdifunctionaty;
  
-function registergdi: integer; //returns unique number
+function registergdi(const agdifuncs: pgdifunctionaty): integer; 
+                         //returns unique number
 begin
  inc(gdinum);
+ setlength(gdifuncs,gdinum+1); //item 0 = system default
+ gdifuncs[gdinum]:= agdifuncs;
  result:= gdinum;
+end;
+
+procedure freefontdata(var drawinfo: drawinfoty);
+begin
+ gdifuncs[drawinfo.getfont.fontdata^.gdinum]^[gdf_freefontdata](drawinfo);
 end;
 
 procedure init;
@@ -1930,7 +1945,8 @@ end;
 function tfont.getfont(var drawinfo: drawinfoty): boolean;
 begin
  gdi_lock;
- gdi_getfont(drawinfo);
+// gdi_getfont(drawinfo);
+ drawinfo.gc.gdifuncs^[gdf_getfont](drawinfo);
  result:= drawinfo.getfont.ok;
  if result then begin
   with drawinfo.getfont.fontdata^ do begin
@@ -1945,6 +1961,7 @@ begin
  if (canvas <> nil) then begin
   releasefont(fhandlepo^);
   canvas.checkgcstate([cs_gc]); //windows needs gc
+  finfopo^.gdinum:= canvas.fgdinum;
   fhandlepo^:= getfontnum(finfopo^,canvas.fdrawinfo,
                                          {$ifdef FPC}@{$endif}getfont);
   if fhandlepo^ = 0 then begin
@@ -2570,25 +2587,37 @@ begin
  gdierror(nr,fuser,text);
 end;
 
-procedure tcanvas.gdi(const func: gdifuncty);
+function tcanvas.lock: boolean;
 begin
  with application do begin
-  if not locked then begin
+  result:= not locked;
+  if result then begin
    lock;
-   try
-    fdrawinfo.gc.gdifuncs^[func](fdrawinfo);
-    if flushgdi then begin
-     gui_flushgdi;
-    end;
-   finally
-    unlock;
-   end;
-  end
-  else begin
+  end;
+ end;
+end;
+
+procedure tcanvas.unlock;
+begin
+ application.unlock;
+end;
+
+procedure tcanvas.gdi(const func: gdifuncty);
+begin
+ if lock then begin
+  try
    fdrawinfo.gc.gdifuncs^[func](fdrawinfo);
    if flushgdi then begin
     gui_flushgdi;
    end;
+  finally
+   unlock;
+  end;
+ end
+ else begin
+  fdrawinfo.gc.gdifuncs^[func](fdrawinfo);
+  if flushgdi then begin
+   gui_flushgdi;
   end;
  end;
 end;
@@ -5047,6 +5076,8 @@ initialization
 {$ifdef mse_flushgdi}
  flushgdi:= true;
 {$endif}
+ setlength(gdifuncs,1); //item 0 = system default
+ gdifuncs[0]:= gui_getgdifuncs;
 finalization
  deinit;
 end.

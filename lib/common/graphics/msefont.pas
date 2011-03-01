@@ -215,7 +215,7 @@ begin
   data^.charset:= '';
   gdi_lock;
   drawinfo.getfont.fontdata:= data;
-  gdi_freefontdata(drawinfo);
+  freefontdata(drawinfo);
 //  gui_freefontdata(data^);
   gdi_unlock;
   refcount:= 0;
@@ -326,6 +326,7 @@ var
  procedure getvalues;
  begin
   with fontinfo do begin           //todo: hash or similar
+   data1.gdinum:= gdinum;
    data1.name:= name;
    data1.height:= height;
    data1.width:= width;
@@ -352,6 +353,7 @@ begin
    with fonts[int1] do begin
     if (refcount >= 0) and
      (data^.glyph = glyph) and           //unicode substitutes
+     (data^.gdinum = gdinum) and
      (data^.height = height) and
      (data^.width = width)  and
      (data^.pitchoptions = options * fontpitchmask) and

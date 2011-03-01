@@ -49,6 +49,7 @@ function createrendercontext(const aparent: winidty; const windowrect: rectty;
                                    const ainfo: contextinfoty;
                                    var gc: gcty; out aid: winidty): guierrorty;
 function openglgetgdifuncs: pgdifunctionaty;
+function openglgetgdinum: integer;
 
 procedure gdi_makecurrent(var drawinfo: drawinfoty);
 procedure gdi_setviewport(var drawinfo: drawinfoty);
@@ -57,8 +58,11 @@ procedure gdi_clear(var drawinfo: drawinfoty);
 
 implementation
 uses
- mseguiintf,mseftgl,msegenericgdi;
+ mseguiintf,mseftgl,msegenericgdi,msestrings;
  
+var
+ gdinumber: integer;
+  
 type
  oglgcdty = record
   {$ifdef unix}
@@ -73,6 +77,7 @@ type
   pd: paintdevicety;
   gclineoptions: lineoptionsty;
   sourceheight: integer;
+  ftglfont: pftglfont;
  end;
 
  {$if sizeof(oglgcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$endif}
@@ -349,7 +354,7 @@ end;
 
 {***************}
 
-procedure gdi_changegc(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_changegc(var drawinfo: drawinfoty);
 var
  po1: pstripety;
  int1,int2,int3,int4: integer;
@@ -375,6 +380,9 @@ begin
     end;
    end;
    gclineoptions:= lineinfo.options;
+  end;
+  if gvm_font in mask then begin
+   ftglfont:= pftglfont(font);
   end;
   if gvm_clipregion in mask then begin
    if clipregion = 0 then begin
@@ -419,7 +427,7 @@ begin
  end;
 end;
 
-procedure gdi_drawlines(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_drawlines(var drawinfo: drawinfoty);
 var
  po1: ppointty;
  int1,int2: integer;
@@ -441,7 +449,7 @@ begin
  glend;
 end;
 
-procedure gdi_drawlinesegments(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_drawlinesegments(var drawinfo: drawinfoty);
 var
  po1: ppointty;
  int1,int2: integer;
@@ -458,55 +466,82 @@ begin
  glend;
 end;
 
-procedure gdi_drawellipse(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_drawellipse(var drawinfo: drawinfoty);
 begin
  gdinotimplemented;
 end;
 
-procedure gdi_drawarc(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_drawarc(var drawinfo: drawinfoty);
 begin
  gdinotimplemented;
 end;
 
-procedure gdi_fillrect(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_fillrect(var drawinfo: drawinfoty);
 begin 
  glbegin(gl_quads);
  sendrect(oglgcty(drawinfo.gc.platformdata).d,drawinfo.rect.rect^);
  glend;
 end;
 
-procedure gdi_fillelipse(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_fillelipse(var drawinfo: drawinfoty);
 begin
  gdinotimplemented;
 end;
 
-procedure gdi_fillarc(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_fillarc(var drawinfo: drawinfoty);
 begin
  gdinotimplemented;
 end;
 
-procedure gdi_fillpolygon(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_fillpolygon(var drawinfo: drawinfoty);
 begin
  gdinotimplemented;
 end;
 
-procedure gdi_drawstring16(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_drawstring16(var drawinfo: drawinfoty);
+var
+ str1: string;
+begin
+ with drawinfo.text16pos,oglgcty(drawinfo.gc.platformdata).d do begin
+  str1:= stringtoutf8(text,count);
+  glpushmatrix;
+  ftglrenderfont(ftglfont,pchar(str1),ftgl_render_all);
+  glpopmatrix;
+ end;
+end;
+
+procedure gdi_setcliporigin(var drawinfo: drawinfoty);
+begin
+end;
+
+procedure gdi_copyarea(var drawinfo: drawinfoty);
 begin
  gdinotimplemented;
 end;
 
-procedure gdi_setcliporigin(var drawinfo: drawinfoty); //gdifunc
-begin
-end;
-
-procedure gdi_copyarea(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_fonthasglyph(var drawinfo: drawinfoty);
 begin
  gdinotimplemented;
 end;
 
-procedure gdi_fonthasglyph(var drawinfo: drawinfoty); //gdifunc
+procedure gdi_getfont(var drawinfo: drawinfoty);
+begin
+ with drawinfo.getfont.fontdata^ do begin 
+  font:= ptruint(ftglcreatebitmapfont('/usr/share/fonts/truetype/arial.ttf'));
+  ftglsetfontfacesize(pftglfont(font),20,20);
+ end;
+end;
+
+procedure gdi_getfonthighres(var drawinfo: drawinfoty);
 begin
  gdinotimplemented;
+end;
+
+procedure gdi_freefontdata(var drawinfo: drawinfoty);
+begin
+ with drawinfo.getfont.fontdata^ do begin
+  ftgldestroyfont(pftglfont(font));
+ end;
 end;
 
 const
@@ -549,4 +584,11 @@ begin
  result:= @gdifunctions;
 end;
 
+function openglgetgdinum: integer;
+begin
+ result:= gdinumber;
+end;
+
+initialization
+ gdinumber:= registergdi(openglgetgdifuncs);
 end.

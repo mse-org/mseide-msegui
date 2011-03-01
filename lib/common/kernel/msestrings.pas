@@ -440,7 +440,9 @@ function concatstrings(const source: stringarty;
 function parsecommandline(const s: pchar): stringarty;
 
            //no surrogate pair handling!
-function stringtoutf8(const value: msestring): utf8string;
+function stringtoutf8(const value: msestring): utf8string; overload;
+function stringtoutf8(const value: pmsechar;
+                            const count: integer): utf8string; overload;
 function utf8tostring(const value: pchar): msestring; overload;
 function utf8tostring(const value: utf8string): msestring; overload;
 function checkutf8(const value: ansistring): boolean;
@@ -663,7 +665,7 @@ end;
 
 //no surrogate pair handling!
 
-function stringtoutf8(const value: msestring): utf8string;
+function stringtoutf8(const value: pmsechar; const count: integer): utf8string; overload;
 var
  int1: integer;
  po1: pchar;
@@ -671,7 +673,7 @@ var
 begin
  setlength(result,length(value)*3); //max
  po1:= pchar(pointer(result));
- for int1:= 1 to length(value) do begin
+ for int1:= 0 to count-1 do begin
   wo1:= word(value[int1]);
   wo2:= wo1 and $ff80;
   if wo2 = 0 then begin
@@ -697,6 +699,11 @@ begin
   end;
  end;
  setlength(result,po1-pchar(pointer(result)));
+end;
+
+function stringtoutf8(const value: msestring): utf8string;
+begin
+ result:= stringtoutf8(pmsechar(value),length(value));
 end;
 
 function doutf8tostring(const value: pchar; const alength: integer): msestring;

@@ -26,9 +26,9 @@ type
   protected
    fcontextinfo: contextinfoty;
    function getgdifuncs: pgdifunctionaty; override;
-   procedure lock;
-   procedure unlock;
-   procedure gdi(const func: gdifuncty); override;
+   function lock: boolean; override;
+//   procedure unlock; override;
+//   procedure gdi(const func: gdifuncty); override;
   public
    constructor create(const user: tobject; const intf: icanvas);
    procedure linktopaintdevice(const aparent: winidty;
@@ -41,9 +41,6 @@ type
 implementation
 uses
  mseguiintf;
-var
- gdinum: integer;
- 
 const
  defaultcontextattributes: contextattributesty =
   (buffersize: -1;
@@ -72,6 +69,7 @@ const
 
 constructor topenglcanvas.create(const user: tobject; const intf: icanvas);
 begin
+ fgdinum:= openglgetgdinum;
  fcontextinfo.attrib:= defaultcontextattributes;
 {$ifdef unix}
  fcontextinfo.visualattributes:= defaultvisualattributes;
@@ -96,27 +94,37 @@ begin
 end;
 
 procedure topenglcanvas.setviewport(const avalue: rectty);
+var
+ bo1: boolean;
 begin
  fviewport:= avalue;
  fdrawinfo.gc.paintdevicesize:= fviewport.size;
  if fdrawinfo.gc.handle <> 0 then begin
-  lock;
+  bo1:= lock;
   fdrawinfo.rect.rect:= @fviewport;
   gdi_setviewport(fdrawinfo);
-  unlock;
+  if bo1 then begin
+   unlock;
+  end;
  end;
 end;
 
 procedure topenglcanvas.swapbuffers;
+var
+ bo1: boolean;
 begin
- lock;
+ bo1:= lock;
  gdi_swapbuffers(fdrawinfo);
- unlock;
+ if bo1 then begin
+  unlock;
+ end;
 end;
 
 procedure topenglcanvas.init(const acolor: colorty = cl_none);
+var
+ bo1: boolean;
 begin
- lock;
+ bo1:= lock;
  if acolor = cl_none then begin
   fdrawinfo.color.color:= colorbackground;
  end
@@ -124,32 +132,29 @@ begin
   fdrawinfo.color.color:= acolor;
  end;
  gdi_clear(fdrawinfo);
- unlock;
+ if bo1 then begin
+  unlock;
+ end;
 end;
-
+{
 procedure topenglcanvas.gdi(const func: gdifuncty);
 begin
  lock;
  fdrawinfo.gc.gdifuncs^[func](fdrawinfo);
  unlock;
 end;
-
-procedure topenglcanvas.lock;
+}
+function topenglcanvas.lock: boolean;
 begin
- //todo
-// if fdrawinfo.gc.handle = 0 then begin
-//  checkgcstate([cs_gc]);
-// end;
+ result:= inherited lock;
  if fdrawinfo.gc.handle <> 0 then begin
   gdi_makecurrent(fdrawinfo);
  end;
 end;
-
+{
 procedure topenglcanvas.unlock;
 begin
- //todo
+ inherited;
 end;
-
-initialization
- gdinum:= registergdi;
+}
 end.
