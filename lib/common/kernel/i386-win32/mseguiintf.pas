@@ -352,7 +352,7 @@ type
   selectedbrush: hbrush;
   secondpen: hpen;
  end;
- {$if sizeof(win32gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$endif}
+ {$if sizeof(win32gcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$ifend}
  win32gcty = record
   case integer of
    0: (d: win32gcdty;);
@@ -1736,7 +1736,7 @@ begin
  end;
 end;
 
-function gui_gettext16width(var drawinfo: drawinfoty): integer;
+procedure gdi_gettext16width(var drawinfo: drawinfoty);
 label                     //todo: kerning?
  endlab;
 var
@@ -1756,7 +1756,7 @@ begin
   else begin
    gc1:= drawinfo.gc.handle;
   end;
-  fh1:= selectobject(gc1,datapo^.font);
+  fh1:= selectobject(gc1,fontdata^.font);
   if fh1 <> 0 then begin
    if not iswin95 then begin
     fillchar(gcpresults,sizeof(gcpresults),0);
@@ -1772,7 +1772,7 @@ begin
     result:= 0;
     int1:= count;
     po1:= text;
-    with win32fontdataty(datapo^.platformdata) do begin
+    with win32fontdataty(fontdata^.platformdata) do begin
      widths:= charwidths;
      overha:= overhang;
     end;
@@ -1816,9 +1816,9 @@ endlab:
  end;
 end;
 
-function gui_getchar16widths(var drawinfo: drawinfoty): gdierrorty;
+procedure gdi_getchar16widths(var drawinfo: drawinfoty);
 label                        //todo: kerning?
- endlab;        
+ endlab;
 var
  int1,int2: integer;
  po1: pmsechar;
@@ -1832,10 +1832,10 @@ var
  fo1: hfont;
  hires: boolean;
 begin
- result:= gde_fontmetrics;
+// result:= gde_fontmetrics;
  with drawinfo.getchar16widths do begin
   hires:= (df_highresfont in drawinfo.gc.drawingflags) and 
-                          (datapo^.fonthighres <> 0);
+                          (fontdata^.fonthighres <> 0);
   if (drawinfo.gc.handle = invalidgchandle) or hires then begin
    gc1:= getdc(0);  //use default dc
   end
@@ -1843,10 +1843,10 @@ begin
    gc1:= drawinfo.gc.handle;
   end;
   if hires then begin
-   ahandle:= selectobject(gc1,datapo^.fonthighres);
+   ahandle:= selectobject(gc1,fontdata^.fonthighres);
   end
   else begin
-   ahandle:= selectobject(gc1,datapo^.font);
+   ahandle:= selectobject(gc1,fontdata^.font);
   end;
   if ahandle <> 0 then begin
    if not iswin95 then begin
@@ -1873,7 +1873,7 @@ begin
    else begin
     po1:= text;
     po2:= resultpo;
-    with win32fontdataty(datapo^.platformdata) do begin
+    with win32fontdataty(fontdata^.platformdata) do begin
      widths:= charwidths;
      overha:= overhang;
     end;
@@ -1902,7 +1902,7 @@ begin
     end;
    end;
 //   selectobject(gc1,ahandle);
-   result:= gde_ok;
+//   result:= gde_ok;
   end;
  end;
 
@@ -1915,16 +1915,16 @@ endlab:
  end;
 end;
 
-function gui_getfontmetrics(var drawinfo: drawinfoty): gdierrorty;
+procedure gdi_getfontmetrics(var drawinfo: drawinfoty);
 var
  data: abc;
  bo1: boolean;
  ahandle: thandle;
- 
+
 begin
- result:= gde_fontmetrics;
+// result:= gde_fontmetrics;
  with drawinfo,drawinfo.getfontmetrics do begin
-  ahandle:= selectobject(gc.handle,datapo^.font);
+  ahandle:= selectobject(gc.handle,fontdata^.font);
   if ahandle <> 0 then begin
    fillchar(data,sizeof(data),0);
    if iswin95 then begin
@@ -1944,7 +1944,7 @@ begin
    if not bo1 then begin
     if iswin95 then begin
      bo1:= getcharwidthw(drawinfo.gc.handle,longword(char),longword(char),data.abcb);
-     dec(data.abcB,win32fontdataty(datapo^.platformdata).overhang);
+     dec(data.abcB,win32fontdataty(fontdata^.platformdata).overhang);
     end
     else begin
      bo1:= getcharwidth32w(drawinfo.gc.handle,longword(char),longword(char),data.abcb);
@@ -1959,7 +1959,7 @@ begin
      rightbearing:= data.abcc;
     end;
     selectobject(gc.handle,ahandle);
-    result:= gde_ok;
+//    result:= gde_ok;
    end;
   end;
  end;
@@ -5304,7 +5304,10 @@ const
    {$ifdef FPC}@{$endif}gdi_fonthasglyph,
    {$ifdef FPC}@{$endif}gdi_getfont,
    {$ifdef FPC}@{$endif}gdi_getfonthighres,
-   {$ifdef FPC}@{$endif}gdi_freefontdata
+   {$ifdef FPC}@{$endif}gdi_freefontdata,
+   {$ifdef FPC}@{$endif}gdi_gettext16width,
+   {$ifdef FPC}@{$endif}gdi_getchar16widths,
+   {$ifdef FPC}@{$endif}gdi_getfontmetrics
 );
 
 function gui_getgdifuncs: pgdifunctionaty;
