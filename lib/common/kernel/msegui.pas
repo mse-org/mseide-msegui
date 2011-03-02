@@ -14753,6 +14753,7 @@ var
  int1: integer;
  bo1: boolean;
  window: twindow;
+ id1: winidty;
  po1: ^twindowevent;
  po2: pmodalinfoty;
  waitcountbefore: integer;
@@ -14975,6 +14976,20 @@ begin       //eventloop
         end;
         ek_configure: begin
          exclude(fstate,aps_zordervalid);
+         id1:= twindowrectevent(event).fwinid;
+         getevents;
+         po1:= pointer(eventlist.datapo);
+         for int1:= 0 to eventlist.count - 1 do begin
+          if po1^ <> nil then begin   //use last configure event for the window
+           with twindowrectevent(po1^) do begin
+            if (kind = ek_configure) and (fwinid = id1) then begin
+             event.free;
+             event:= po1^;
+             po1^:= nil;
+            end;
+           end;
+          end;
+         end;
          processconfigureevent(twindowrectevent(event));
         end;
         ek_enterwindow: begin
