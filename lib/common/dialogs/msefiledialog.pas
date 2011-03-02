@@ -135,6 +135,7 @@ type
    ffilter: filenamety;
    ffilterindex: integer;
    fcolwidth: integer;
+   fwindowrect: rectty;
    fhistorymaxcount: integer;
    fhistory: msestringarty;
    fcaptionopen: msestring;
@@ -574,6 +575,9 @@ begin
   showhidden.value:= not (fa_hidden in excludeattrib);
   show(true);
   result:= window.modalresult;
+  if (colwidth <> nil) then begin
+   colwidth^:= listview.cellwidth;
+  end;
   if result = mr_ok then begin
    afilenames:= filenames;
    if filterindex <> nil then begin
@@ -581,9 +585,6 @@ begin
    end;
    if afilter <> nil then begin
     afilter^:= listview.mask;
-   end;
-   if (colwidth <> nil) then begin
-    colwidth^:= listview.cellwidth;
    end;
    if high(afilenames) = 0 then begin
     filename.dropdown.savehistoryvalue(afilenames[0]);
@@ -1418,6 +1419,10 @@ begin
  end;
  ffilterindex:= reader.readinteger('filefilterindex',ffilterindex);
  ffilter:= reader.readstring('filefilter',ffilter);
+ fwindowrect.x:= reader.readinteger('x',fwindowrect.x);
+ fwindowrect.y:= reader.readinteger('y',fwindowrect.y);
+ fwindowrect.cx:= reader.readinteger('cx',fwindowrect.cx);
+ fwindowrect.cy:= reader.readinteger('cy',fwindowrect.cy);
  fcolwidth:= reader.readinteger('filecolwidth',fcolwidth);
  if fdo_chdir in foptions then begin
   try
@@ -1450,6 +1455,10 @@ begin
  writer.writeinteger('filefilterindex',ffilterindex);
  writer.writestring('filefilter',ffilter);
  writer.writeinteger('filecolwidth',fcolwidth);
+ writer.writeinteger('x',fwindowrect.x);
+ writer.writeinteger('y',fwindowrect.y);
+ writer.writeinteger('cx',fwindowrect.cx);
+ writer.writeinteger('cy',fwindowrect.cy);
 end;
 
 procedure tfiledialogcontroller.writestatoptions(const writer: tstatwriter);
@@ -1518,10 +1527,14 @@ begin
   else begin
    fo.listview.directory:= flastdir;
   end;
+  if (fwindowrect.cx > 0) and (fwindowrect.cy > 0) then begin
+   fo.widgetrect:= clipinrect(fwindowrect,application.screenrect(fo.window));
+  end;
   result:= filedialog1(fo,ffilenames,ara,arb,
         @ffilterindex,@ffilter,@fcolwidth,finclude,
             fexclude,po1,fhistorymaxcount,acaption,aoptions,fdefaultext,
             fimagelist,fongetfileicon,foncheckfile);
+  fwindowrect:= fo.widgetrect;
   if assigned(fonafterexecute) then begin
    fonafterexecute(self,result);
   end;
