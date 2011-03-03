@@ -555,6 +555,16 @@ type
   hiddenedges: edgesty;
  end;
 
+ imagety = record
+  monochrome: boolean;
+  bgr: boolean;
+  size: sizety;
+  length: integer;  //number of longword
+  pixels: plongwordaty;
+ end;
+ pimagety = ^imagety;
+
+
  edgeinfoty = (kin_dark,kin_reverseend,kin_reversestart);
  edgeinfosty = set of edgeinfoty;
 
@@ -563,7 +573,6 @@ type
  
  tcanvas = class(tpersistent)
   private
-   fuser: tobject;
    fvaluestack: canvasvaluestackty;
    gccolorbackground,gccolorforeground: colorty;
    fdefaultfont: fontnumty;
@@ -615,13 +624,12 @@ type
    procedure setlinewidthmm(const avalue: real);
    function getmonochrome: boolean;
   protected
+   fuser: tobject;
    fintf: pointer; //icanvas;
    fgdinum: integer;
    fstate: canvasstatesty;
-//   fsize: sizety;
    fvaluepo: canvasvaluespoty;
    fdrawinfo: drawinfoty;
-//   fgdifuncs: pgdifunctionaty;
    gcfonthandle1: fontnumty;
    afonthandle1: fontnumty;
    ffont: tfont;
@@ -657,6 +665,8 @@ type
    procedure setcliporigin(const Value: pointty);
                //value not saved!
    function getgchandle: ptruint;
+   function getimage(const bgr: boolean): imagety; virtual;
+   
    procedure fillarc(const def: rectty; const startang,extentang: real; 
                               const acolor: colorty; const pieslice: boolean);
    procedure getarcinfo(out startpo,endpo: pointty);
@@ -899,14 +909,6 @@ type
   depth: integer;
  end;
 
- imagety = record
-  monochrome: boolean;
-  size: sizety;
-  length: integer;  //number of longword
-  pixels: plongwordaty;
- end;
- pimagety = ^imagety;
-
  tsimplebitmap = class(tnullinterfacedpersistent,icanvas)
   private
    function gethandle: pixmapty;
@@ -923,6 +925,7 @@ type
    fcolorbackground: colorty;
    fcolorforeground: colorty;
    fdefaultcliporigin: pointty;
+   function createcanvas: tcanvas; virtual;
    procedure creategc;
    procedure internaldestroyhandle;
    procedure destroyhandle; virtual;
@@ -934,7 +937,7 @@ type
 //   function getmaskhandle(var gchandle: ptruint): pixmapty; virtual;
                   //gc handle is invalid if result = 0,
                   //gc handle can be 0
-   function getimagepo: pimagety; virtual;
+//   function getimagepo: pimagety; virtual;
    procedure initimage(alloc: boolean; out aimage: imagety);
                   //sets inf in aimage acording to self,
                   //allocates memory if alloc = true, no clear
@@ -1535,10 +1538,15 @@ begin
  end;
 end;
 
+function tsimplebitmap.createcanvas: tcanvas;
+begin
+ result:= tcanvas.create(self,icanvas(self));
+end;
+
 function tsimplebitmap.getcanvas: tcanvas;
 begin
  if fcanvas = nil then begin
-  fcanvas:= tcanvas.create(self,icanvas(self));
+  fcanvas:= createcanvas;
  end;
  result:= fcanvas;
 end;
@@ -1892,12 +1900,12 @@ function tsimplebitmap.getmask: tsimplebitmap;
 begin
  result:= nil; //dummy
 end;
-
+{
 function tsimplebitmap.getimagepo: pimagety;
 begin
  result:= nil; //dummy
 end;
-
+}
 procedure tsimplebitmap.initimage(alloc: boolean; out aimage: imagety);
                   //allocates memory, no clear
 var
@@ -3020,6 +3028,11 @@ function tcanvas.getgchandle: ptruint;
 begin
  checkgcstate([cs_gc]);
  result:= fdrawinfo.gc.handle;
+end;
+
+function tcanvas.getimage(const bgr: boolean): imagety;
+begin
+ fillchar(result,sizeof(result),0);
 end;
 
 function tcanvas.checkforeground(acolor: colorty; lineinfo: boolean): boolean;

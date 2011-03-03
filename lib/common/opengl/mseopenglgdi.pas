@@ -60,6 +60,8 @@ implementation
 uses
  mseguiintf,mseftgl,msegenericgdi,msestrings,msectypes;
 type
+ tcanvas1 = class(tcanvas);
+ 
  ftglfontty = record
   handle: pftglfont;
  end;
@@ -534,8 +536,30 @@ begin
 end;
 
 procedure gdi_copyarea(var drawinfo: drawinfoty);
+var
+ im1: imagety;
 begin
- gdinotimplemented;
+ with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
+  im1:= tcanvas1(source).getimage(true);
+  with destrect^ do begin
+   glwindowpos2i(x,sourceheight-y);
+  end;
+  glpixeltransferf(gl_alpha_scale,0);
+  glpixeltransferf(gl_alpha_bias,1);
+  with sourcerect^ do begin
+   glpixelzoom(destrect^.cx/cx,-destrect^.cy/cy);
+   glpixelstorei(gl_unpack_row_length,im1.size.cx);
+   glpixelstorei(gl_unpack_skip_rows,x);
+   glpixelstorei(gl_unpack_skip_pixels,y);
+   gldrawpixels(cx,cy,gl_rgba,gl_unsigned_byte,im1.pixels);
+  end;
+  glpixeltransferf(gl_alpha_scale,1);
+  glpixeltransferf(gl_alpha_bias,0);
+  glpixelzoom(1,1);
+  glpixelstorei(gl_unpack_row_length,0);
+  glpixelstorei(gl_unpack_skip_rows,0);
+  glpixelstorei(gl_unpack_skip_pixels,0);
+ end;
 end;
 
 procedure gdi_fonthasglyph(var drawinfo: drawinfoty);

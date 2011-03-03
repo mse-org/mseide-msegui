@@ -37,7 +37,8 @@ type
    ftransparency: colorty;
    fnochange: integer;
    function getscanline(index: integer): pointer;
-   procedure checkimage;
+   procedure checkimagebgr(const bgr: boolean);
+   procedure checkimage(const bgr: boolean);
    procedure getimage;
    procedure putimage;
    procedure allocimagemem;
@@ -55,11 +56,12 @@ type
    procedure setcolorbackground(const Value: colorty);
    procedure setcolorforeground(const Value: colorty);
   protected
+   function createcanvas: tcanvas; override;
    procedure setsize(const Value: sizety); override;
    function getasize: sizety; virtual;
    procedure destroyhandle; override;
    procedure createhandle(copyfrom: pixmapty); override;
-   function getimagepo: pimagety; override;
+//   function getimagepo: pimagety; override;
    function getsource: tbitmapcomp; virtual;
    procedure assign1(const source: tsimplebitmap; const docopy: boolean); override; 
                     //calls change
@@ -135,6 +137,13 @@ type
   reserve: array[0..7] of longword;
  end;
 
+ tbitmapcanvas = class(tcanvas)
+  protected
+   function getimage(const bgr: boolean): imagety; override;
+  public
+   constructor create(const user: tbitmap);
+ end;
+ 
  bitmapoptionty = (bmo_monochrome,bmo_masked,bmo_colormask);
  bitmapoptionsty = set of bitmapoptionty;
 
@@ -728,12 +737,31 @@ begin
  end;
 end;
 
-procedure tbitmap.checkimage;
+procedure tbitmap.checkimagebgr(const bgr: boolean);
+var
+ by1: byte;
+ int1: integer;
+ po1: prgbtriplety;
+begin
+ if not fimage.monochrome and (fimage.bgr xor bgr) then begin
+  po1:= prgbtriplety(fimage.pixels);
+  for int1:= fimage.length-1 downto 0 do begin
+   by1:= po1^.red;
+   po1^.red:= po1^.blue;
+   po1^.blue:= by1;
+   inc(po1);
+  end;
+  fimage.bgr:= bgr;
+ end;
+end;
+
+procedure tbitmap.checkimage(const bgr: boolean);
 begin
  if fimage.pixels = nil then begin
   getimage;
   internaldestroyhandle;
  end;
+ checkimagebgr(bgr);
 end;
 
 procedure tbitmap.putimage;
@@ -748,6 +776,7 @@ begin
   ca1:= 0;
  end;
  gdi_lock;
+ checkimagebgr(false);
  if gui_imagetopixmap(fimage,pixmap,ca1) = gde_ok then begin
   handle:= pixmap;
   include(fstate,pms_ownshandle);
@@ -785,7 +814,7 @@ end;
 
 function tbitmap.getscanline(index: integer): pointer;
 begin
- checkimage;
+ checkimage(false);
  result:= @fimage.pixels[checkindex(makepoint(0,index))];
 end;
 
@@ -794,7 +823,7 @@ var
  int1: integer;
 begin
  int1:= checkindex(index);
- checkimage;
+ checkimage(false);
  if monochrome then begin
   if fimage.pixels^[int1] and bits[index.x and $1f] <> 0 then begin
    result:= cl_1;
@@ -815,7 +844,7 @@ var
  int1: integer;
 begin
  int1:= checkindex(index);
- checkimage;
+ checkimage(false);
  if monochrome then begin
   if value = 0 then begin
    fimage.pixels^[int1]:= fimage.pixels^[int1] and not bits[index.x and $1f];
@@ -834,7 +863,7 @@ var
  int1: integer;
 begin
  int1:= checkindex(x,y);
- checkimage;
+ checkimage(false);
  if monochrome then begin
   if fimage.pixels^[int1] and bits[x and $1f] <> 0 then begin
    result:= cl_1;
@@ -855,7 +884,7 @@ var
  int1: integer;
 begin
  int1:= checkindex(x,y);
- checkimage;
+ checkimage(false);
  if monochrome then begin
   if value = 0 then begin
    fimage.pixels^[int1]:= fimage.pixels^[int1] and not bits[x and $1f];
@@ -894,12 +923,12 @@ begin
   inherited;
  end;
 end;
-
+{
 function tbitmap.getimagepo: pimagety;
 begin
  result:= @fimage;
 end;
-
+}
 function tbitmap.getsource: tbitmapcomp;
 begin
  result:= nil;
@@ -1061,7 +1090,7 @@ var
  po1: plongword;
  ca1: longword;
 begin
- checkimage;
+ checkimage(false);
  allocuninitedarray(fimage.length,sizeof(longword),result); //max
  if monochrome then begin
   move(fimage.pixels^,result[0],fimage.length*sizeof(longword));
@@ -1197,6 +1226,11 @@ end;
 function tbitmap.scanhigh: integer;
 begin
  result:= fsize.cx * fsize.cy - 1;
+end;
+
+function tbitmap.createcanvas: tcanvas;
+begin
+ result:= tbitmapcanvas.create(self);
 end;
 
 { tmaskedbitmap }
@@ -1708,8 +1742,8 @@ begin
            (size.cy <> ancestor.size.cy);
   if not result then begin
    if masked then begin
-    fmask.checkimage;
-    ancestor.fmask.checkimage;
+    fmask.checkimage(false);
+    ancestor.fmask.checkimage(false);
     zeropad(fmask.fimage);
     zeropad(ancestor.fmask.fimage);
     result:= (fmask.fimage.length <> ancestor.fmask.fimage.length) or 
@@ -1717,8 +1751,8 @@ begin
                          fmask.fimage.length * sizeof(longword));
    end;
    if not result then begin
-    checkimage;
-    ancestor.checkimage;
+    checkimage(false);
+    ancestor.checkimage(false);
     result:= (fimage.length <> ancestor.fimage.length) or
               not comparemem(fimage.pixels,ancestor.fimage.pixels,
                          fimage.length * sizeof(longword));
@@ -2488,6 +2522,21 @@ constructor tcenteredbitmap.create(amonochrome: boolean);
 begin
  inherited;
  alignment:= [al_xcentered,al_ycentered];
+end;
+
+{ tbitmapcanvas }
+
+constructor tbitmapcanvas.create(const user: tbitmap);
+begin
+ inherited create(user,icanvas(user));
+end;
+
+function tbitmapcanvas.getimage(const bgr: boolean): imagety;
+begin
+ with tbitmap(fuser) do begin
+  checkimage(bgr);
+  result:= fimage;
+ end;
 end;
 
 end.
