@@ -64,7 +64,7 @@ procedure unidrawstring(const acanvas: tcanvas; const atext: msestring;
                         const afont: tfont = nil; const grayed: boolean = false);
 implementation
 uses
- mseuniintf,sysutils;
+ mseuniintf,sysutils,msefont;
  
 procedure unidrawstring(const acanvas: tcanvas; const atext: msestring; 
                         const apos: pointty;
@@ -96,7 +96,7 @@ begin
   try
    font:= getdatapo^.font;
    unichar:= achar;
-   gdi_call(gdi_fonthasglyph,info);
+   gdi_call(gdf_fonthasglyph,info);
    result:= hasglyph;
   except
    result:= false;

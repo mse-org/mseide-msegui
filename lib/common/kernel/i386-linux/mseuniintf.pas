@@ -39,23 +39,23 @@ begin
   if pat1 <> nil then begin
    with drawinfo.getfont.fontdata^ do begin
     charset1:= fccharsetcreate();
-    fccharsetaddchar(charset1,glyph);
+    fccharsetaddchar(charset1,h.d.glyph);
     fcpatternaddcharset(pat1,fc_charset,charset1);
     fccharsetdestroy(charset1);
     fcconfigsubstitute(nil,pat1,fcmatchpattern);
     fcconfigsubstitute(nil,pat1,fcmatchfont);
     xftdefaultsubstitute(msedisplay,xdefaultscreen(msedisplay),pat1);
     fontset1:= fcfontsort(nil,pat1,true,@charset1,@res1);
-    if fccharsethaschar(charset1,glyph) then begin
+    if fccharsethaschar(charset1,h.d.glyph) then begin
      with fontset1^ do begin
       po1:= fonts;
       for int1:= 0 to nfont - 1 do begin
        if fcpatterngetcharset(po1^,fc_charset,0,@charset2) = fcresultmatch then begin
-        if fccharsethaschar(charset2,glyph) then begin
+        if fccharsethaschar(charset2,h.d.glyph) then begin
          font1:= xftfontopenpattern(msedisplay,
                                      fcfontrenderprepare(nil,pat1,po1^));
          if font1 <> nil then begin
-          if xftcharexists(msedisplay,font1,glyph) then begin
+          if xftcharexists(msedisplay,font1,h.d.glyph) then begin
            getxftfontdata(font1,drawinfo);
            result:= true;
           end

@@ -430,7 +430,8 @@ type
                      const aiterator: pointermsestringiteratorprocty); overload;
  end;
 
-function datahash(const data; len: integer): longword;
+function datahash(const data; len: integer): longword; //simple
+function datahash2(const data; len: integer): longword;
 function stringhash(const key: string): longword; overload;
 function stringhash(const key: lstringty): longword; overload;
 function stringhash(const key: msestring): longword; overload;
@@ -448,8 +449,24 @@ var
 begin
  ca1:= 0;
  po1:= @data;
- for int1:= 0 to len - 1 do begin
+ for int1:= len - 1 downto 0 do begin
   inc(ca1,po1^);
+  inc(po1);
+ end;
+ result:= ca1;
+end;
+
+function datahash2(const data; len: integer): longword;
+var
+ po1: pbyte;
+ int1: integer;
+ ca1: longword;
+begin
+ ca1:= 0;
+ po1:= @data;
+ for int1:= len - 1 downto 0 do begin
+  ca1:= ((ca1 shl 2) or (ca1 shr (sizeof(ca1) * 8 - 2))) xor po1^;
+  inc(po1);
  end;
  result:= ca1;
 end;

@@ -60,6 +60,7 @@ type
   header: hashheaderty;
   data: fontnumdataty;
  end;
+ pfontnumhashdataty = ^fontnumhashdataty;
 
  tfonthashlist = class(thashdatalist)
   protected
@@ -67,7 +68,9 @@ type
    function checkkey(const akey; const aitemdata): boolean; override;
   public
    constructor create;
-//   function find(const afont: fonthashdataty): fontnumty;
+   function find(const afont: fonthashdataty): fontnumty;
+   procedure add(const afont: fontnumty);
+   procedure delete(const afont: fontnumty);
  end;
  
  fontdatarecty = record
@@ -234,9 +237,11 @@ procedure freefont(index: integer);
 var
  drawinfo: drawinfoty;
 begin
+ ffonthashlist.delete(index);
  with fonts[index] do begin
-  data^.h.name:= '';
-  data^.h.charset:= '';
+  finalize(data^);
+//  data^.h.name:= '';
+//  data^.h.charset:= '';
   gdi_lock;
   drawinfo.getfont.fontdata:= data;
   freefontdata(drawinfo);
@@ -278,7 +283,8 @@ function registerfont(var fontdata: fontdataty): fontnumty;
    end;
   end;
  end;
-
+var
+ int1: integer;
 begin //registerfont
  result:= 0;
  if length(fonts) > maxfontcount then begin
@@ -295,8 +301,11 @@ begin //registerfont
    fillchar(data^,sizeof(fontdataty),0);
   end;
  end;
- fonts[result-1].data^:= fontdata;
- fonts[result-1].refcount:= 1;
+ int1:= result-1;
+ fonts[int1].data^:= fontdata;
+// move(fontdata,fonts[int1].data^,sizeof(fontdata));
+ fonts[int1].refcount:= 1;
+ ffonthashlist.add(int1);
 end;
 
 procedure releasefont(font: fontnumty);
@@ -354,23 +363,6 @@ begin
  end;
 end;
 
-procedure getfontvalues(const s: fontinfoty; var d: fontdataty);
-begin
- d.h.d.gdifuncs:= s.gdifuncs;
- d.h.d.height:= s.height;
- d.h.d.width:= s.width;
- d.h.d.familyoptions:= s.options * fontfamilymask;
- d.h.d.pitchoptions:= s.options * fontpitchmask;
- d.h.d.antialiasedoptions:= s.options * fontantialiasedmask;
- d.h.d.style:= fontstylesty({$ifdef FPC}longword{$else}byte{$endif}(s.style) and
-                          fontstylehandlemask);
- d.h.d.glyph:= s.glyph;
- d.h.d.rotation:= s.rotation;
- d.h.d.xscale:= s.xscale;
- d.h.name:= s.name;
- d.h.charset:= s.charset;
-end;
-
 function comparefont(const s: fontinfoty; const d: fontdataty): boolean;
 begin
  result:=
@@ -412,9 +404,51 @@ var
 begin
  po1:= fonts[fontnumdataty(aitemdata).num].data;
  with fontdataty(akey) do begin
-  result:= comparemem(@po1^.h,@h.d,sizeof(h.d)) and
+  result:= comparemem(@po1^.h.d,@h.d,sizeof(h.d)) and
                       (po1^.h.name = h.name) and (po1^.h.charset = h.charset);
  end;           
+end;
+
+function tfonthashlist.find(const afont: fonthashdataty): fontnumty;
+var
+ po1: pfontnumhashdataty;
+begin
+ result:= -1;
+ po1:= pfontnumhashdataty(internalfind(afont));
+ if po1 <> nil then begin
+  result:= po1^.data.num;
+ end;
+end;
+
+procedure tfonthashlist.add(const afont: fontnumty);
+var
+ po1: pfontnumhashdataty;
+begin
+ po1:= pfontnumhashdataty(internaladd(fonts[afont].data^.h));
+ po1^.data.num:= afont;
+end;
+
+procedure tfonthashlist.delete(const afont: fontnumty);
+begin
+ internaldeleteitem(internalfind(fonts[afont].data^.h));
+end;
+
+procedure getfontvalues(const s: fontinfoty; var d: fontdataty);
+begin
+ fillchar(d.h.d,sizeof(d.h.d),0);
+ d.h.d.gdifuncs:= s.gdifuncs;
+ d.h.d.height:= s.height;
+ d.h.d.width:= s.width;
+ d.h.d.familyoptions:= s.options * fontfamilymask;
+ d.h.d.pitchoptions:= s.options * fontpitchmask;
+ d.h.d.antialiasedoptions:= s.options * fontantialiasedmask;
+ d.h.d.style:= fontstylesty({$ifdef FPC}longword{$else}byte{$endif}(s.style) and
+                          fontstylehandlemask);
+ d.h.d.glyph:= s.glyph;
+ d.h.d.rotation:= s.rotation;
+ d.h.d.xscale:= s.xscale;
+ d.h.name:= s.name;
+ d.h.charset:= s.charset;
 end;
 
 function getfontnum(const fontinfo: fontinfoty; var drawinfo: drawinfoty;
@@ -422,11 +456,12 @@ function getfontnum(const fontinfo: fontinfoty; var drawinfo: drawinfoty;
 var
  int1: integer;
  data1: fontdataty; 
-label
- endlab;
+//label
+// endlab;
 begin
  gdi_lock;
  with fontinfo do begin
+ {
   for int1:= 0 to high(fonts) do begin
    with fonts[int1] do begin
     if (refcount >= 0) and comparefont(fontinfo,data^) then begin
@@ -436,24 +471,37 @@ begin
     end;
    end;
   end;
-  fillchar(data1,sizeof(fontdataty),0);
+  }
   getfontvalues(fontinfo,data1);
-  if ffontaliaslist <> nil then begin
-   ffontaliaslist.updatefontdata(data1);
-  end;
-  drawinfo.getfont.fontdata:= @data1;
-  drawinfo.getfont.basefont:= 0;
-  if getfont(drawinfo) then begin
-   getfontvalues(fontinfo,data1);
-   data1.basefont:= drawinfo.getfont.basefont;
-   result:= registerfont(data1);
+  int1:= ffonthashlist.find(data1.h);
+  if int1 >= 0 then begin
+   with fonts[int1] do begin
+    inc(refcount);
+    result:= int1 + 1;
+//    goto endlab
+   end;
   end
   else begin
-   result:= 0;
+   finalize(data1);
+   fillchar(data1,sizeof(data1),0);
+   getfontvalues(fontinfo,data1);
+   if ffontaliaslist <> nil then begin
+    ffontaliaslist.updatefontdata(data1);
+   end;
+   drawinfo.getfont.fontdata:= @data1;
+   drawinfo.getfont.basefont:= 0;
+   if getfont(drawinfo) then begin
+    getfontvalues(fontinfo,data1);
+    data1.basefont:= drawinfo.getfont.basefont;
+    result:= registerfont(data1);
+   end
+   else begin
+    result:= 0;
+   end;
   end;
  end;
-endlab:
- gdi_unlock;
+//endlab:
+// gdi_unlock;
 end;
 
 function getfontforglyph(const abasefont: fontty; const glyph: unicharty): fontnumty;
