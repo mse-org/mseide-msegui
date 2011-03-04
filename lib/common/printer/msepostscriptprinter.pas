@@ -827,19 +827,19 @@ var
  rea1: real;
 begin
  with getfontdata(adata)^ do begin
-  str1:= realfontname(name);
+  str1:= realfontname(h.name);
   if str1 = '' then begin
    str1:= 'Helvetica';
   end
   else begin
    str1:= psencode(pchar(str1),length(str1));
   end;
-  if h.style * [fs_bold,fs_italic] <> [] then begin
+  if h.d.style * [fs_bold,fs_italic] <> [] then begin
    str1:= str1 + '-';
-   if fs_bold in h.style then begin
+   if fs_bold in h.d.style then begin
     str1:= str1 + 'Bold';
    end;
-   if fs_italic in h.style then begin
+   if fs_italic in h.d.style then begin
     str1:= str1 + 'Italic';
    end;
   end;
@@ -864,23 +864,23 @@ begin
    handle:= adata;
    namenum:= int2;
    additem(codepages,acodepage);
-   if h.height = 0 then begin
+   if h.d.height = 0 then begin
     size:= round(defaultfontheight*ppmm);
    end
    else begin
-    size:= (h.height + fontsizeroundvalue) shr fontsizeshift;
+    size:= (h.d.height + fontsizeroundvalue) shr fontsizeshift;
    end;
    rea1:= (size / ppmm) * mmtoprintscale;
-   scalestring1:= psrealtostr(rea1 * h.xscale);     //xscale
+   scalestring1:= psrealtostr(rea1 * h.d.xscale);     //xscale
    scalestringfull:= scalestring1;
    str1:= ' ' + psrealtostr(rea1);                //yscale
    scalestringfull:= scalestringfull + str1;
-   if (h.xscale <> 1) or (h.rotation <> 0) then begin
+   if (h.d.xscale <> 1) or (h.d.rotation <> 0) then begin
     scalestring1:= scalestring1 + str1;
    end;
-   str1:= ' ' + psrealtostr(h.rotation*radtodeg);
+   str1:= ' ' + psrealtostr(h.d.rotation*radtodeg);
    scalestringfull:= scalestringfull + str1;
-   if h.rotation <> 0 then begin 
+   if h.d.rotation <> 0 then begin 
     scalestring1:= scalestring1 + str1;
    end;
   end;

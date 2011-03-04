@@ -99,7 +99,7 @@ type
 
  fontdatapty = array[0..15] of pointer;
  
- fonthashdataty = record       //hashed by byteshash
+ fonthashdty = record       //hashed by byteshash
   glyph: unicharty;
   gdifuncs: pgdifunctionaty;   //gdi framework
   height: integer;
@@ -109,11 +109,15 @@ type
   rotation: real; //0..1 -> 0deg..360deg CCW
   xscale: real;   //default 1.0
  end;
- 
+
+ fonthashdataty = record
+  d: fonthashdty;
+  name: string;      
+  charset: string;
+ end;
+  
  fontdataty = record
-  h: fonthashdataty; ///
-  name: string;       // hashed
-  charset: string;   ///
+  h: fonthashdataty;
 
   font: fontty;
   fonthighres: fontty;
@@ -1407,7 +1411,7 @@ end;
 
 procedure freefontdata(var drawinfo: drawinfoty);
 begin
- drawinfo.getfont.fontdata^.h.gdifuncs^[gdf_freefontdata](drawinfo);
+ drawinfo.getfont.fontdata^.h.d.gdifuncs^[gdf_freefontdata](drawinfo);
 end;
 
 procedure init;

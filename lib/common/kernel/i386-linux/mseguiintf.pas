@@ -4912,30 +4912,30 @@ begin
  ar1:= nil; //compiler warning;
  fontinfo:= defaultfontinfo;
  with pfontdataty(@fontdata)^ do begin
-  height1:= (h.height + fontsizeroundvalue) shr fontsizeshift;
-  width1:= (h.width + fontsizeroundvalue) shr fontsizeshift;
+  height1:= (h.d.height + fontsizeroundvalue) shr fontsizeshift;
+  width1:= (h.d.width + fontsizeroundvalue) shr fontsizeshift;
   if height1 <> 0 then begin
    fontinfo[fn_pixel_size]:= inttostr(height1);
   end;
   if width1 <> 0 then begin
    fontinfo[fn_average_width]:= inttostr(width1);
   end;
-  if charset <> '' then begin
-   ar1:= splitstring(charset,'-');
+  if h.charset <> '' then begin
+   ar1:= splitstring(h.charset,'-');
    fontinfo[fn_charset_registry]:= ar1[0];
    if high(ar1) > 0 then begin
     fontinfo[fn_encoding]:= ar1[1];
    end;
   end;
-  if name <> '' then begin
-   setfontinfoname(name,fontinfo);
+  if h.name <> '' then begin
+   setfontinfoname(h.name,fontinfo);
   end
   else begin
   end;
-  if fs_bold in h.style then begin
+  if fs_bold in h.d.style then begin
    fontinfo[fn_weight_name]:= 'bold';
   end;
-  if fs_italic in h.style then begin
+  if fs_italic in h.d.style then begin
    fontinfo[fn_slant]:= 'i';
   end;
  end;
@@ -5047,33 +5047,33 @@ begin
   if fontinfo[fn_foundry] <> '*' then begin
    fcpatternaddstring(result,fc_foundry,pansichar(fontinfo[fn_foundry]));
   end;
-  if (h.familyoptions = []) then begin
-   if (h.pitchoptions = []) and (fontinfo[fn_family_name] <> '*') then begin
+  if (h.d.familyoptions = []) then begin
+   if (h.d.pitchoptions = []) and (fontinfo[fn_family_name] <> '*') then begin
     fcpatternaddstring(result,fc_family,pansichar(fontinfo[fn_family_name]));
    end;
   end
   else begin
-   if foo_helvetica in h.familyoptions then begin
+   if foo_helvetica in h.d.familyoptions then begin
     fcpatternaddstring(result,fc_family,'sans');
    end
    else begin
-    if foo_roman in h.familyoptions then begin
+    if foo_roman in h.d.familyoptions then begin
      fcpatternaddstring(result,fc_family,'serif');
     end
     else begin
-     if foo_decorative in h.familyoptions then begin
+     if foo_decorative in h.d.familyoptions then begin
      end
      else begin
-      if foo_script in h.familyoptions then begin
+      if foo_script in h.d.familyoptions then begin
       end;
      end;
     end;
    end;
   end;
-  if fs_bold in h.style then begin
+  if fs_bold in h.d.style then begin
    fcpatternaddinteger(result,fc_weight,fc_weight_bold);
   end;
-  if fs_italic in h.style then begin
+  if fs_italic in h.d.style then begin
    fcpatternaddinteger(result,fc_slant,fc_slant_italic);
   end;
   if fontinfo[fn_pixel_size] <> '*' then begin
@@ -5093,23 +5093,23 @@ begin
    except
    end;
   end;
-  if foo_fixed in h.pitchoptions then begin
+  if foo_fixed in h.d.pitchoptions then begin
    fcpatternaddinteger(result,fc_spacing,fc_mono);
   end;
-  if foo_proportional in h.pitchoptions then begin
+  if foo_proportional in h.d.pitchoptions then begin
    fcpatternaddinteger(result,fc_spacing,fc_proportional);
   end;
-  if foo_antialiased in h.antialiasedoptions then begin
+  if foo_antialiased in h.d.antialiasedoptions then begin
    fcpatternaddbool(result,fc_antialias,true);
   end;
-  if foo_nonantialiased in h.antialiasedoptions then begin
+  if foo_nonantialiased in h.d.antialiasedoptions then begin
    fcpatternaddbool(result,fc_antialias,false);
   end;
-  if (h.xscale <> 1.0) or (h.rotation <> 0) then begin
+  if (h.d.xscale <> 1.0) or (h.d.rotation <> 0) then begin
    fcmatrixinit(mat1);
-   mat1.xx:= h.xscale;
-   if h.rotation <> 0 then begin
-    fcmatrixrotate(@mat1,cos(h.rotation),sin(h.rotation));
+   mat1.xx:= h.d.xscale;
+   if h.d.rotation <> 0 then begin
+    fcmatrixrotate(@mat1,cos(h.d.rotation),sin(h.d.rotation));
    end;
    fcpatternaddmatrix(result,fc_matrix,@mat1);
   end;
@@ -5230,9 +5230,9 @@ begin
     if po2 <> nil then begin
      drawinfo.getfont.ok:= true;
      getxftfontdata(po2,drawinfo);
-     if h.rotation <> 0 then begin //ascent and descent are 0 for rotated fonts
+     if h.d.rotation <> 0 then begin //ascent and descent are 0 for rotated fonts
       fcpatterndestroy(po3);
-      rea1:= h.rotation;
+      rea1:= h.d.rotation;
       if rea1 <> 0 then begin
        int1:= round(rea1/(pi/2)) mod 4;
        if int1 < 0 then begin
@@ -5241,7 +5241,7 @@ begin
        x11fontdataty(platformdata).d.xftdirection:= graphicdirectionty(int1); 
                                           //for xft colorbackground
       end;
-      h.rotation:= 0;
+      h.d.rotation:= 0;
       po3:= buildxftpat(drawinfo.getfont.fontdata^,fontinfo,false);
       po4:= xftfontmatch(appdisp,xdefaultscreen(appdisp),po3,@res1);
       if po4 <> nil then begin
@@ -5254,7 +5254,7 @@ begin
         xftfontclose(appdisp,po2);
        end;
       end;
-      h.rotation:= rea1;
+      h.d.rotation:= rea1;
      end;
     end;
    end;
@@ -5263,15 +5263,15 @@ begin
   else begin
    po1:=  xloadqueryfont(appdisp,pchar(fontinfotoxlfdname(fontinfo)));
    if po1 = nil then begin
-    if fs_italic in h.style then begin
+    if fs_italic in h.d.style then begin
      fontinfo[fn_slant]:= 'o';
      po1:=  xloadqueryfont(appdisp,pchar(fontinfotoxlfdname(fontinfo)));
      fontinfo[fn_slant]:= 'i';
     end;
     if po1 = nil then begin
-     if (name <> '') and (h.style * [fs_italic,fs_bold] = []) and 
-                               (charset <> '') and (h.height = 0) then begin
-      po1:= xloadqueryfont(appdisp,pchar(name));
+     if (h.name <> '') and (h.d.style * [fs_italic,fs_bold] = []) and 
+                               (h.charset <> '') and (h.d.height = 0) then begin
+      po1:= xloadqueryfont(appdisp,pchar(h.name));
      end;
      if po1 = nil then begin
       if simpledefaultfont then begin
