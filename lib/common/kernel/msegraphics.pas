@@ -98,20 +98,26 @@ type
  pgdifunctionaty = ^gdifunctionaty;
 
  fontdatapty = array[0..15] of pointer;
+ 
+ fonthashdataty = record       //hashed by byteshash
+  glyph: unicharty;
+  gdifuncs: pgdifunctionaty;   //gdi framework
+  height: integer;
+  width: integer;
+  style: fontstylesty;         //fs_bold,fs_italic
+  pitchoptions,familyoptions,antialiasedoptions: fontoptionsty;
+  rotation: real; //0..1 -> 0deg..360deg CCW
+  xscale: real;   //default 1.0
+ end;
+ 
  fontdataty = record
-  gdifuncs: pgdifunctionaty;        //gdi framework
+  h: fonthashdataty; ///
+  name: string;       // hashed
+  charset: string;   ///
+
   font: fontty;
   fonthighres: fontty;
   basefont: fontty;
-  glyph: unicharty;
-  rotation: real; //0..1 -> 0deg..360deg CCW
-  xscale: real;   //default 1.0
-  name: string;
-  charset: string;
-  height: integer;
-  width: integer;
-  pitchoptions,familyoptions,antialiasedoptions{,xcoreoptions}: fontoptionsty;
-  style: fontstylesty;                    //fs_bold,fs_italic
   ascent,descent,linespacing,caretshift,linewidth: integer;
   platformdata: fontdatapty; //platform dependent
  end;
@@ -1401,7 +1407,7 @@ end;
 
 procedure freefontdata(var drawinfo: drawinfoty);
 begin
- drawinfo.getfont.fontdata^.gdifuncs^[gdf_freefontdata](drawinfo);
+ drawinfo.getfont.fontdata^.h.gdifuncs^[gdf_freefontdata](drawinfo);
 end;
 
 procedure init;
@@ -1411,6 +1417,7 @@ begin
  gdi_lock;
  try
   initcolormap;
+  msefont.init;
   msestockobjects.init;
   inited:= true;
   getwindowicon(nil,icon,mask);

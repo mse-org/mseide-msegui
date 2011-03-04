@@ -834,12 +834,12 @@ begin
   else begin
    str1:= psencode(pchar(str1),length(str1));
   end;
-  if style * [fs_bold,fs_italic] <> [] then begin
+  if h.style * [fs_bold,fs_italic] <> [] then begin
    str1:= str1 + '-';
-   if fs_bold in style then begin
+   if fs_bold in h.style then begin
     str1:= str1 + 'Bold';
    end;
-   if fs_italic in style then begin
+   if fs_italic in h.style then begin
     str1:= str1 + 'Italic';
    end;
   end;
@@ -864,23 +864,23 @@ begin
    handle:= adata;
    namenum:= int2;
    additem(codepages,acodepage);
-   if height = 0 then begin
+   if h.height = 0 then begin
     size:= round(defaultfontheight*ppmm);
    end
    else begin
-    size:= (height + fontsizeroundvalue) shr fontsizeshift;
+    size:= (h.height + fontsizeroundvalue) shr fontsizeshift;
    end;
    rea1:= (size / ppmm) * mmtoprintscale;
-   scalestring1:= psrealtostr(rea1 * xscale);     //xscale
+   scalestring1:= psrealtostr(rea1 * h.xscale);     //xscale
    scalestringfull:= scalestring1;
    str1:= ' ' + psrealtostr(rea1);                //yscale
    scalestringfull:= scalestringfull + str1;
-   if (xscale <> 1) or (rotation <> 0) then begin
+   if (h.xscale <> 1) or (h.rotation <> 0) then begin
     scalestring1:= scalestring1 + str1;
    end;
-   str1:= ' ' + psrealtostr(rotation*radtodeg);
+   str1:= ' ' + psrealtostr(h.rotation*radtodeg);
    scalestringfull:= scalestringfull + str1;
-   if rotation <> 0 then begin 
+   if h.rotation <> 0 then begin 
     scalestring1:= scalestring1 + str1;
    end;
   end;

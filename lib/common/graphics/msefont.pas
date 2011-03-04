@@ -30,7 +30,7 @@ function registerfontalias(const alias,name: string;
               const height: integer = 0; const width: integer = 0;
               const options: fontoptionsty = [];
               const xscale: real = 1.0;
-              const ancestor: string = defaultfontalias): boolean;
+              ancestor: string = defaultfontalias): boolean;
               //true if registering ok
 function unregisterfontalias(const alias: string): boolean;
               //false if alias does not exist
@@ -47,7 +47,7 @@ procedure deinit;
 implementation
 uses
  mselist,sysutils,mseguiintf,msegraphutils,msetypes,msesys,
- msestrings,mseformatstr;
+ msestrings,mseformatstr,msehash;
  
 const
  maxfontcount = 64;
@@ -108,9 +108,12 @@ function registerfontalias(const alias,name: string;
               const height: integer = 0; const width: integer = 0;
               const options: fontoptionsty = [];
               const xscale: real = 1.0;
-              const ancestor: string = defaultfontalias): boolean;
+              ancestor: string = defaultfontalias): boolean;
               //true if registering ok
 begin
+ if (alias = defaultfontalias) and (ancestor = defaultfontalias) then begin
+  ancestor:= '';
+ end;
  result:= fontaliaslist.registeralias(alias,name,mode,height,width,options,
                                        xscale,ancestor);
 end;
@@ -322,15 +325,59 @@ end;
 procedure getchar16widths(var drawinfo: drawinfoty);
 begin
  with drawinfo.getchar16widths.fontdata^ do begin
-  gdifuncs^[gdf_getchar16widths](drawinfo);
+  h.gdifuncs^[gdf_getchar16widths](drawinfo);
  end;
 end;
 
 procedure getfontmetrics(var drawinfo: drawinfoty);
 begin
  with drawinfo.getfontmetrics.fontdata^ do begin
-  gdifuncs^[gdf_getfontmetrics](drawinfo);
+  h.gdifuncs^[gdf_getfontmetrics](drawinfo);
  end;
+end;
+
+function comparefont(const s: fontinfoty; const d: fontdataty): boolean;
+begin
+ result:=
+     (d.h.glyph = s.glyph) and           //unicode substitutes
+     (d.h.gdifuncs = s.gdifuncs) and
+     (d.h.height = s.height) and
+     (d.h.width = s.width)  and
+     (d.h.pitchoptions = s.options * fontpitchmask) and
+     (d.h.familyoptions = s.options * fontfamilymask) and
+     (d.h.antialiasedoptions = s.options * fontantialiasedmask) and
+     ({$ifdef FPC}longword{$else}byte{$endif}(d.h.style) xor 
+      {$ifdef FPC}longword{$else}byte{$endif}(s.style) and
+                                          fontstylehandlemask = 0) and
+     (d.name = s.name) and
+     (d.charset = s.charset) and
+     (d.h.rotation = s.rotation) and
+     (d.h.xscale = s.xscale);
+
+end;
+
+function fonthash(const afont: fontdataty): hashvaluety;
+begin
+ with afont do begin
+  result:= stringhash(name) xor stringhash(charset) xor datahash(h,sizeof(h));
+ end;
+end;
+
+procedure getfontvalues(const s: fontinfoty; var d: fontdataty);
+begin
+ d.h.gdifuncs:= s.gdifuncs;
+ d.h.height:= s.height;
+ d.h.width:= s.width;
+ d.h.familyoptions:= s.options * fontfamilymask;
+ d.h.pitchoptions:= s.options * fontpitchmask;
+ d.h.antialiasedoptions:= s.options * fontantialiasedmask;
+ d.h.style:= fontstylesty({$ifdef FPC}longword{$else}byte{$endif}(s.style) and
+                          fontstylehandlemask);
+ d.h.glyph:= s.glyph;
+ d.h.rotation:= s.rotation;
+ d.h.xscale:= s.xscale;
+ d.name:= s.name;
+ d.charset:= s.charset;
 end;
 
 function getfontnum(const fontinfo: fontinfoty; var drawinfo: drawinfoty;
@@ -338,50 +385,18 @@ function getfontnum(const fontinfo: fontinfoty; var drawinfo: drawinfoty;
 var
  int1: integer;
  data1: fontdataty;
- style1: {$ifdef FPC}longword{$else}byte{$endif};
-
- procedure getvalues;
- begin
-  with fontinfo do begin           //todo: hash or similar
-   data1.gdifuncs:= gdifuncs;
-   data1.name:= name;
-   data1.height:= height;
-   data1.width:= width;
-   data1.familyoptions:= options * fontfamilymask;
-   data1.pitchoptions:= options * fontpitchmask;
-   data1.antialiasedoptions:= options * fontantialiasedmask;
-//   data1.xcoreoptions:= options * fontxcoremask;
-   data1.charset:= charset;
-   data1.style:= fontstylesty({$ifdef FPC}longword{$else}byte{$endif}(style) and
-                            fontstylehandlemask);
-   data1.glyph:= glyph;
-   data1.rotation:= rotation;
-   data1.xscale:= xscale;
-  end;
- end; //getvalues
+// style1: {$ifdef FPC}longword{$else}byte{$endif};
  
 label
  endlab;
 begin
  gdi_lock;
  with fontinfo do begin           //todo: hash or similar
-  style1:= {$ifdef FPC}longword{$else}byte{$endif}(style) and fontstylehandlemask;
+//  style1:= {$ifdef FPC}longword{$else}byte{$endif}(style) and 
+//                                                     fontstylehandlemask;
   for int1:= 0 to high(fonts) do begin
    with fonts[int1] do begin
-    if (refcount >= 0) and
-     (data^.glyph = glyph) and           //unicode substitutes
-     (data^.gdifuncs = gdifuncs) and
-     (data^.height = height) and
-     (data^.width = width)  and
-     (data^.pitchoptions = options * fontpitchmask) and
-     (data^.familyoptions = options * fontfamilymask) and
-     (data^.antialiasedoptions = options * fontantialiasedmask) and
-//     (data.xcoreoptions = options * fontxcoremask) and
-     ({$ifdef FPC}longword{$else}byte{$endif}(data^.style) = style1) and
-     (name = data^.name) and
-     (charset = data^.charset) and
-     (rotation = data^.rotation) and
-     (xscale = data^.xscale) then begin
+    if (refcount >= 0) and comparefont(fontinfo,data^) then begin
      inc(refcount);
      result:= int1 + 1;
      goto endlab
@@ -389,14 +404,14 @@ begin
    end;
   end;
   fillchar(data1,sizeof(fontdataty),0);
-  getvalues;
+  getfontvalues(fontinfo,data1);
   if ffontaliaslist <> nil then begin
    ffontaliaslist.updatefontdata(data1);
   end;
   drawinfo.getfont.fontdata:= @data1;
   drawinfo.getfont.basefont:= 0;
   if getfont(drawinfo) then begin
-   getvalues;
+   getfontvalues(fontinfo,data1);
    data1.basefont:= drawinfo.getfont.basefont;
    result:= registerfont(data1);
   end
@@ -586,26 +601,26 @@ begin
    if (name <> '') and (po1 = nil) then begin
     po1:= pchar(name);
    end;
-   if (height <> 0) and (info.height = 0) then begin
-    info.height:= height;
+   if (height <> 0) and (info.h.height = 0) then begin
+    info.h.height:= height;
    end;
-   if (width <> 0) and (info.width = 0) then begin
-    info.width:= width;
+   if (width <> 0) and (info.h.width = 0) then begin
+    info.h.width:= width;
    end;
-   if (xscale <> 1) and (info.xscale = 1) then begin
-    info.xscale:= xscale;
+   if (xscale <> 1) and (info.h.xscale = 1) then begin
+    info.h.xscale:= xscale;
    end;
    if (options * fontpitchmask <> []) and 
-      (info.pitchoptions * fontpitchmask = []) then begin
-    info.pitchoptions:= options * fontpitchmask;
+      (info.h.pitchoptions * fontpitchmask = []) then begin
+    info.h.pitchoptions:= options * fontpitchmask;
    end;
    if (options * fontfamilymask <> []) and 
-      (info.pitchoptions * fontfamilymask = []) then begin
-    info.familyoptions:= options * fontfamilymask;
+      (info.h.pitchoptions * fontfamilymask = []) then begin
+    info.h.familyoptions:= options * fontfamilymask;
    end;
    if (options * fontantialiasedmask <> []) and 
-      (info.pitchoptions * fontantialiasedmask = []) then begin
-    info.antialiasedoptions:= options * fontantialiasedmask;
+      (info.h.pitchoptions * fontantialiasedmask = []) then begin
+    info.h.antialiasedoptions:= options * fontantialiasedmask;
    end;
   end;
  end;
