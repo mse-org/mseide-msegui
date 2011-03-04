@@ -1521,14 +1521,14 @@ label
 begin
  result:= false;
  with drawinfo.getfont.fontdata^ do begin
-  height1:= (h.height + fontsizeroundvalue) shr fontsizeshift;
-  width1:= (h.width + fontsizeroundvalue) shr fontsizeshift;
+  height1:= (h.d.height + fontsizeroundvalue) shr fontsizeshift;
+  width1:= (h.d.width + fontsizeroundvalue) shr fontsizeshift;
   fontinfo1:= defaultfontinfo;
   with fontinfo1 do begin
    if height1 <> 0 then begin
     lfheight:= -height1; //use character height
    end;
-   if h.xscale = 1 then begin
+   if h.d.xscale = 1 then begin
     if width1 <> 0 then begin
      lfwidth:= (width1 + 5) div 10;
      if lfwidth = 0 then begin
@@ -1537,22 +1537,22 @@ begin
      lfoutprecision:= out_tt_only_precis;
     end;
    end;
-   if fs_bold in h.style then begin
+   if fs_bold in h.d.style then begin
     lfweight:= fw_bold;
    end;
-   if fs_italic in h.style then begin
+   if fs_italic in h.d.style then begin
     lfitalic:= 1;
    end;
-   if (h.pitchoptions <> []) or (h.familyoptions <> []) then begin
+   if (h.d.pitchoptions <> []) or (h.d.familyoptions <> []) then begin
     lffacename[0]:= #0;
    end
    else begin
-    if (name <> '') then begin
-     strlcopy(@lffacename,pchar(name),sizeof(lffacename)-1);
+    if (h.name <> '') then begin
+     strlcopy(@lffacename,pchar(h.name),sizeof(lffacename)-1);
     end;
    end;
-   if charset <> '' then begin
-    str1:= uppercase(charset);
+   if h.charset <> '' then begin
+    str1:= uppercase(h.charset);
     for int1:= 0 to high(charsets) do begin
      if charsets[int1].name = str1 then begin
       lfcharset:= charsets[int1].code;
@@ -1560,42 +1560,42 @@ begin
      end;
     end;
    end;
-   if foo_fixed in h.pitchoptions then begin
+   if foo_fixed in h.d.pitchoptions then begin
     lfpitchandfamily:= lfpitchandfamily or fixed_pitch;
    end
    else begin
-    if foo_proportional in h.pitchoptions then begin
+    if foo_proportional in h.d.pitchoptions then begin
      lfpitchandfamily:= lfpitchandfamily or variable_pitch;
     end
    end;
-   if foo_helvetica in h.familyoptions then begin
+   if foo_helvetica in h.d.familyoptions then begin
     lfpitchandfamily:= lfpitchandfamily or ff_swiss;
    end
    else begin
-    if foo_roman in h.familyoptions then begin
+    if foo_roman in h.d.familyoptions then begin
      lfpitchandfamily:= lfpitchandfamily or ff_roman;
     end
     else begin
-     if foo_script in h.familyoptions then begin
+     if foo_script in h.d.familyoptions then begin
       lfpitchandfamily:= lfpitchandfamily or ff_script;
      end
      else begin
-      if foo_decorative in h.familyoptions then begin
+      if foo_decorative in h.d.familyoptions then begin
        lfpitchandfamily:= lfpitchandfamily or ff_decorative;
       end
      end;
     end;
    end;
-   if foo_antialiased in h.antialiasedoptions then begin
+   if foo_antialiased in h.d.antialiasedoptions then begin
     lfquality:= antialiased_quality;
    end
    else begin
-    if foo_nonantialiased in h.antialiasedoptions then begin
+    if foo_nonantialiased in h.d.antialiasedoptions then begin
      lfquality:= nonantialiased_quality;
     end;
    end;
-   if h.rotation <> 0 then begin
-    int1:= round(h.rotation*((10*360)/(2*pi)));
+   if h.d.rotation <> 0 then begin
+    int1:= round(h.d.rotation*((10*360)/(2*pi)));
     lfescapement:= int1;
     lforientation:= int1;
     lfoutprecision:= out_tt_only_precis;
@@ -1623,10 +1623,10 @@ begin
    if not gettextmetricsa(dc1,{$ifdef FPC}@{$endif}textmetricsa) then begin
     goto endlab;
    end;
-   if h.xscale <> 1 then begin
+   if h.d.xscale <> 1 then begin
     closedc;
-    int1:= h.width;
-    rea1:= h.xscale;
+    int1:= h.d.width;
+    rea1:= h.d.xscale;
     with win32fontdataty(platformdata) do begin
      if ahighres then begin
       fontinfo1.lfwidth:= ((xwidth+5) div 10) shl highresfontshift;
@@ -1635,14 +1635,14 @@ begin
       result:= fonthighres <> 0;
      end
      else begin
-      xwidth:= round(h.xscale * textmetricsa.tmavecharwidth*10);
-      h.width:= xwidth shl fontsizeshift; 
-      h.xscale:= 1.0;
+      xwidth:= round(h.d.xscale * textmetricsa.tmavecharwidth*10);
+      h.d.width:= xwidth shl fontsizeshift; 
+      h.d.xscale:= 1.0;
       result:= dogetfont(drawinfo,false);
      end;
     end;
-    h.width:= int1;  //restore
-    h.xscale:= rea1; 
+    h.d.width:= int1;  //restore
+    h.d.xscale:= rea1; 
     exit;
    end;
    with win32fontdataty(platformdata) do begin
