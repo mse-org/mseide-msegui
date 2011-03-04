@@ -1521,14 +1521,14 @@ label
 begin
  result:= false;
  with drawinfo.getfont.fontdata^ do begin
-  height1:= (height + fontsizeroundvalue) shr fontsizeshift;
-  width1:= (width + fontsizeroundvalue) shr fontsizeshift;
+  height1:= (h.height + fontsizeroundvalue) shr fontsizeshift;
+  width1:= (h.width + fontsizeroundvalue) shr fontsizeshift;
   fontinfo1:= defaultfontinfo;
   with fontinfo1 do begin
    if height1 <> 0 then begin
     lfheight:= -height1; //use character height
    end;
-   if xscale = 1 then begin
+   if h.xscale = 1 then begin
     if width1 <> 0 then begin
      lfwidth:= (width1 + 5) div 10;
      if lfwidth = 0 then begin
@@ -1537,13 +1537,13 @@ begin
      lfoutprecision:= out_tt_only_precis;
     end;
    end;
-   if fs_bold in style then begin
+   if fs_bold in h.style then begin
     lfweight:= fw_bold;
    end;
-   if fs_italic in style then begin
+   if fs_italic in h.style then begin
     lfitalic:= 1;
    end;
-   if (pitchoptions <> []) or (familyoptions <> []) then begin
+   if (h.pitchoptions <> []) or (h.familyoptions <> []) then begin
     lffacename[0]:= #0;
    end
    else begin
@@ -1560,42 +1560,42 @@ begin
      end;
     end;
    end;
-   if foo_fixed in pitchoptions then begin
+   if foo_fixed in h.pitchoptions then begin
     lfpitchandfamily:= lfpitchandfamily or fixed_pitch;
    end
    else begin
-    if foo_proportional in pitchoptions then begin
+    if foo_proportional in h.pitchoptions then begin
      lfpitchandfamily:= lfpitchandfamily or variable_pitch;
     end
    end;
-   if foo_helvetica in familyoptions then begin
+   if foo_helvetica in h.familyoptions then begin
     lfpitchandfamily:= lfpitchandfamily or ff_swiss;
    end
    else begin
-    if foo_roman in familyoptions then begin
+    if foo_roman in h.familyoptions then begin
      lfpitchandfamily:= lfpitchandfamily or ff_roman;
     end
     else begin
-     if foo_script in familyoptions then begin
+     if foo_script in h.familyoptions then begin
       lfpitchandfamily:= lfpitchandfamily or ff_script;
      end
      else begin
-      if foo_decorative in familyoptions then begin
+      if foo_decorative in h.familyoptions then begin
        lfpitchandfamily:= lfpitchandfamily or ff_decorative;
       end
      end;
     end;
    end;
-   if foo_antialiased in antialiasedoptions then begin
+   if foo_antialiased in h.antialiasedoptions then begin
     lfquality:= antialiased_quality;
    end
    else begin
-    if foo_nonantialiased in antialiasedoptions then begin
+    if foo_nonantialiased in h.antialiasedoptions then begin
      lfquality:= nonantialiased_quality;
     end;
    end;
-   if rotation <> 0 then begin
-    int1:= round(rotation*((10*360)/(2*pi)));
+   if h.rotation <> 0 then begin
+    int1:= round(h.rotation*((10*360)/(2*pi)));
     lfescapement:= int1;
     lforientation:= int1;
     lfoutprecision:= out_tt_only_precis;
@@ -1623,10 +1623,10 @@ begin
    if not gettextmetricsa(dc1,{$ifdef FPC}@{$endif}textmetricsa) then begin
     goto endlab;
    end;
-   if xscale <> 1 then begin
+   if h.xscale <> 1 then begin
     closedc;
-    int1:= width;
-    rea1:= xscale;
+    int1:= h.width;
+    rea1:= h.xscale;
     with win32fontdataty(platformdata) do begin
      if ahighres then begin
       fontinfo1.lfwidth:= ((xwidth+5) div 10) shl highresfontshift;
@@ -1635,14 +1635,14 @@ begin
       result:= fonthighres <> 0;
      end
      else begin
-      xwidth:= round(xscale * textmetricsa.tmavecharwidth*10);
-      width:= xwidth shl fontsizeshift; 
-      xscale:= 1.0;
+      xwidth:= round(h.xscale * textmetricsa.tmavecharwidth*10);
+      h.width:= xwidth shl fontsizeshift; 
+      h.xscale:= 1.0;
       result:= dogetfont(drawinfo,false);
      end;
     end;
-    width:= int1;  //restore
-    xscale:= rea1; 
+    h.width:= int1;  //restore
+    h.xscale:= rea1; 
     exit;
    end;
    with win32fontdataty(platformdata) do begin
