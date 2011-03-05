@@ -58,7 +58,7 @@ procedure gdi_clear(var drawinfo: drawinfoty);
 
 implementation
 uses
- mseguiintf,mseftgl,msegenericgdi,msestrings,msectypes;
+ mseguiintf,mseftgl,msegenericgdi,msestrings,msectypes,msehash,sysutils;
 type
  tcanvas1 = class(tcanvas);
  
@@ -66,9 +66,32 @@ type
   handle: pftglfont;
  end;
  pftglfontty = ^ftglfontty;
- 
- tfontcache = class
+
+ glfonthdataty = record
+  height: integer;
+  name: string;
+ end; 
+ glfontdataty = record
+  h: glfonthdataty;
+  handle: pftglfont;
+  refcount: integer;
+ end;
+ pglfontdataty = ^glfontdataty;
+ glfonthashdataty = record
+  header: hashheaderty;
+  data: glfontdataty;
+ end;
+ pglfonthashdataty = ^glfonthashdataty;
+
+ tglfontcache = class(thashdatalist)
+  protected
+   function hashkey(const akey): hashvaluety; override;
+   function checkkey(const akey; const aitemdata): boolean; override;
+   procedure finalizeitem(var aitemdata); override;
+   function find(const afont: fontdataty): pglfontdataty;
   public
+   constructor create;
+ 
    procedure getfont(var drawinfo: drawinfoty);
    procedure freefontdata(var drawinfo: drawinfoty);
    procedure gettext16width(var drawinfo: drawinfoty);
@@ -77,9 +100,17 @@ type
  end;
   
 var
- fontcache: tfontcache;
+ ffontcache: tglfontcache;
  gdinumber: integer;
-  
+
+function fontcache: tglfontcache;
+begin
+ if ffontcache = nil then begin
+  ffontcache:= tglfontcache.create;
+ end;
+ result:= ffontcache;
+end;
+
 type
  oglgcdty = record
   {$ifdef unix}
@@ -645,35 +676,92 @@ begin
  result:= gdinumber;
 end;
 
-{ tfontcache }
+{ tglfontcache }
 
-procedure tfontcache.getfont(var drawinfo: drawinfoty);
+constructor tglfontcache.create;
 begin
- with drawinfo.getfont.fontdata^ do begin 
-  getmem(pointer(font),sizeof(ftglfontty));
-  with pftglfontty(font)^ do begin
-   handle:= ftglcreatepixmapfont('/usr/share/fonts/truetype/arial.ttf');
-   ftglsetfontcharmap(handle,ft_encoding_unicode);
-   ftglsetfontfacesize(handle,20,72);
-   ascent:= round(ftglgetfontascender(handle));
-   descent:= -round(ftglgetfontdescender(handle));
-   linespacing:= round(ftglgetfontlineheight(handle));
-   caretshift:= 0;
+ inherited create(sizeof(glfontdataty));
+ fstate:= fstate + [hls_needsnull,hls_needsfinalize];
+end;
+
+procedure tglfontcache.finalizeitem(var aitemdata);
+begin
+ finalize(glfontdataty(aitemdata));
+end;
+
+function tglfontcache.hashkey(const akey): hashvaluety;
+begin
+ with fontdataty(akey) do begin
+  result:= stringhash(h.name) xor h.d.height;
+ end;
+end;
+
+function tglfontcache.checkkey(const akey; const aitemdata): boolean;
+begin
+ with fontdataty(akey),glfontdataty(aitemdata).h do begin
+  result:= (h.name = name) and (h.d.height = height);
+ end;
+end;
+
+function tglfontcache.find(const afont: fontdataty): pglfontdataty;
+begin
+ result:= pointer(internalfind(afont));
+ if result <> nil then begin
+  result:= @pglfonthashdataty(result)^.data;
+ end;
+end;
+
+procedure tglfontcache.getfont(var drawinfo: drawinfoty);
+var
+ po1: pglfontdataty;
+begin
+ with drawinfo.getfont do begin
+  po1:= find(fontdata^);
+  with fontdata^ do begin 
+   getmem(pointer(font),sizeof(ftglfontty));
+   with pftglfontty(font)^ do begin
+    if po1 = nil then begin
+     po1:= @((internaladd(fontdata^)^.data));
+     po1^.h.name:= fontdata^.h.name;
+     po1^.h.height:= fontdata^.h.d.height;
+     po1^.handle:= ftglcreatepixmapfont('/usr/share/fonts/truetype/arial.ttf');
+     ftglsetfontcharmap(po1^.handle,ft_encoding_unicode);
+     ftglsetfontfacesize(po1^.handle,20,72);
+    end;
+    inc(po1^.refcount);
+    handle:= po1^.handle;
+    ascent:= round(ftglgetfontascender(handle));
+    descent:= -round(ftglgetfontdescender(handle));
+    linespacing:= round(ftglgetfontlineheight(handle));
+    caretshift:= 0;
+   end;
   end;
  end;
 end;
 
-procedure tfontcache.freefontdata(var drawinfo: drawinfoty);
+procedure tglfontcache.freefontdata(var drawinfo: drawinfoty);
+var
+ po1: pglfontdataty;
 begin
- with drawinfo.getfont.fontdata^ do begin
-  with pftglfontty(font)^ do begin
-   ftgldestroyfont(handle);
+ with drawinfo.getfont do begin
+  po1:= find(fontdata^);
+  dec(po1^.refcount);
+  with fontdata^ do begin 
+   if po1^.refcount = 0 then begin
+    with pftglfontty(font)^ do begin
+     ftgldestroyfont(handle);
+    end;
+   end;
+   internaldeleteitem(phashdatadataty(po1));
+   freemem(pointer(font));
   end;
-  freemem(pointer(font));
+ end;
+ if count = 0 then begin
+  freeandnil(ffontcache);
  end;
 end;
 
-procedure tfontcache.gettext16width(var drawinfo: drawinfoty);
+procedure tglfontcache.gettext16width(var drawinfo: drawinfoty);
 begin
  with drawinfo.gettext16width do begin
   with pftglfontty(fontdata^.font)^ do begin
@@ -682,7 +770,7 @@ begin
  end;
 end;
 
-procedure tfontcache.getchar16widths(var drawinfo: drawinfoty);
+procedure tglfontcache.getchar16widths(var drawinfo: drawinfoty);
 var
  f1: cfloat;
  int1,int2: integer;
@@ -706,7 +794,7 @@ begin
  end;
 end;
 
-procedure tfontcache.getfontmetrics(var drawinfo: drawinfoty);
+procedure tglfontcache.getfontmetrics(var drawinfo: drawinfoty);
 var
  bbox: boundsty;
  str1: string;
@@ -726,7 +814,7 @@ end;
 
 initialization
  gdinumber:= registergdi(openglgetgdifuncs);
- fontcache:= tfontcache.create;
-finalization
- fontcache.free;
+// fontcache:= tglfontcache.create;
+//finalization           
+// fontcache.free;  //finalization order not guaranteed
 end.

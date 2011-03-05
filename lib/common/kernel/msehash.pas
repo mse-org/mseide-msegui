@@ -204,7 +204,8 @@ type
   protected
    fstate: hashliststatesty;
    function internaladd(const akey): phashdataty;
-   procedure internaldeleteitem(const aitem: phashdataty);
+   procedure internaldeleteitem(const aitem: phashdataty); overload;
+   procedure internaldeleteitem(const aitem: phashdatadataty); overload;
    function internaldelete(const akey; const all: boolean): boolean;
    function internalfind(const akey): phashdataty; overload;
    function internalfind(const akey; out acount: integer): phashdataty; overload;
@@ -1430,6 +1431,13 @@ begin
   end;
   fdeletedroot:= puint1;
   dec(fcount);
+ end;
+end;
+
+procedure thashdatalist.internaldeleteitem(const aitem: phashdatadataty);
+begin
+ if aitem <> nil then begin
+  internaldeleteitem(phashdataty(pchar(aitem)-sizeof(hashheaderty)));
  end;
 end;
 

@@ -19,15 +19,39 @@ uses
  
 type
 
+ topenglwidgetcanvas = class(topenglcanvas)
+ {
+  published
+   property monochrome;
+   property color;
+   property colorbackground;
+   property rasterop;
+   property font;
+   property brush;
+
+   property linewidth;
+   property linewidthmm;
+   
+   property dashes;
+     //last byte 0 -> opaque dash  //todo: dashoffset
+   property capstyle;
+   property joinstyle;
+   property lineoptions;
+
+   property ppmm; 
+                   //used for linewidth mm, value not saved/restored
+  }
+ end;
+
  topenglcanvaswidget = class;
  openglcanvasrendereventty = procedure(const sender: topenglcanvaswidget;
                                  const aupdaterect: rectty) of object;
 
  topenglcanvaswidget = class(tcustomwindowwidget,icanvas)
   private
-   fcanvas: topenglcanvas;
+   fcanvas: topenglwidgetcanvas;
    fonrender: openglcanvasrendereventty;
-   procedure setcanvas(const avalue: topenglcanvas);
+   procedure setcanvas(const avalue: topenglwidgetcanvas);
   protected
    procedure doclientrectchanged; override;
    procedure docreatewinid(const aparent: winidty; const awidgetrect: rectty;
@@ -42,8 +66,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property canvas: topenglcanvas read fcanvas write setcanvas;
   published
+   property canvas: topenglwidgetcanvas read fcanvas write setcanvas;
    property onrender: openglcanvasrendereventty read fonrender write fonrender;
    property optionswidget;
    property optionsskin;
@@ -84,7 +108,7 @@ type
 
 constructor topenglcanvaswidget.create(aowner: tcomponent);
 begin
- fcanvas:= topenglcanvas.create(self,icanvas(self));
+ fcanvas:= topenglwidgetcanvas.create(self,icanvas(self));
  inherited;
 end;
 
@@ -94,7 +118,7 @@ begin
  inherited;
 end;
 
-procedure topenglcanvaswidget.setcanvas(const avalue: topenglcanvas);
+procedure topenglcanvaswidget.setcanvas(const avalue: topenglwidgetcanvas);
 begin
  fcanvas.assign(avalue);
 end;
