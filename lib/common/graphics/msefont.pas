@@ -556,6 +556,7 @@ var
  options1: fontoptionsty;
  xscale1: real;
  str1: string;
+ bo1: boolean;
 begin
  ar1:= getcommandlinearguments;
  int3:= 1;
@@ -586,11 +587,15 @@ begin
      if (high(ar2) >= 5) and (trim(ar2[5]) <> '') then begin
       xscale1:= strtoreal(ar2[5]);
      end;
+     bo1:= lowercase(ar2[0]) = defaultfontalias;
+     if bo1 and (ar2[1] = '') then begin
+      ar2[1]:= gui_getdefaultfontnames[stf_default];
+     end;
      if high(ar2) >= 6 then begin
       str1:= trim(ar2[6]);
      end
      else begin
-      if lowercase(ar2[0]) = defaultfontalias then begin
+      if bo1 then begin
        str1:= '';
       end
       else begin
