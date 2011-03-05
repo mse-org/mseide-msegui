@@ -1594,6 +1594,7 @@ begin
     else begin
      lfquality:= antialiased_quality;
     end;
+   end
    else begin
     if foo_antialiased in h.d.antialiasedoptions then begin
      lfquality:= antialiased_quality;

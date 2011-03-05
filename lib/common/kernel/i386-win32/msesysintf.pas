@@ -28,7 +28,7 @@ type
 var
  iswin95: boolean;
  iswin98: boolean;
- cantcleartype: boolean;
+ cancleartype: boolean;
 
 implementation
 uses
@@ -2043,6 +2043,7 @@ var
  libhandle: thandle;
  po1: SHGetFolderPathW;
  buffer: array[0..max_path] of widechar;
+ int1: integer;
 
 begin
 {$ifdef FPC}
