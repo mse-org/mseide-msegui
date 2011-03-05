@@ -41,7 +41,11 @@ const
 type
  frameskinoptionty = (fso_flat,
                       fso_noanim,fso_nomouseanim,fso_noclickanim,fso_nofocusanim,
-                      fso_nofocusrect,fso_nodefaultrect,fso_noinnerrect);
+                      fso_nofocusrect,fso_nodefaultrect,fso_noinnerrect,
+                      fso_colorclient,  //set colorclient in skincontroller
+                      fso_frameileftsize,fso_frameirightsize,
+                      fso_frameitopsize,fso_frameibottomsize); 
+                                        //adjust clientsize in skincontroller
  frameskinoptionsty = set of frameskinoptionty;
  
  optionwidgetty = (ow_background,ow_top,

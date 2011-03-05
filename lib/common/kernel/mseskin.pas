@@ -790,6 +790,7 @@ uses
  
 type
  twidget1 = class(twidget);
+ tframe1 = class(tcustomframe);
  tcustomframe1 = class(tcustomframe);
  ttabs1 = class(ttabs);
 var
@@ -1171,6 +1172,8 @@ procedure tcustomskincontroller.setwidgetframe(const instance: twidget;
 var
  size1: sizety;
  col1: colorty;
+ frame1: framety;
+ opt1: frameskinoptionsty;
 begin
  with twidget1(instance) do begin
   if (aframe <> nil) and (optionsskin * 
@@ -1181,8 +1184,35 @@ begin
    end;
    col1:= frame.colorclient;
    size1:= clientsize;
+   with tframe1(frame).fpaintframedelta do begin
+    size1.cx:= size1.cx + left + right;
+    size1.cy:= size1.cy + top + bottom;
+   end;
+   frame1:= innerclientframe;
    frame.template:= aframe;
-   frame.colorclient:= col1;
+   opt1:= aframe.template.optionsskin;
+   if not (fso_colorclient in opt1) then begin
+//    tframe1(frame).fi.colorclient:= col1; //restore
+    frame.colorclient:= col1;
+   end;
+   with tframe1(frame).fi.innerframe do begin
+    if fso_frameirightsize in opt1 then begin
+     size1.cx:= size1.cx + right - frame1.right;
+    end;
+    if fso_frameileftsize in opt1 then begin
+     size1.cx:= size1.cx + left - frame1.left;
+    end;
+    if fso_frameitopsize in opt1 then begin
+     size1.cy:= size1.cy + top - frame1.top;
+    end;
+    if fso_frameibottomsize in opt1 then begin
+     size1.cy:= size1.cy + bottom - frame1.bottom;
+    end;
+   end;
+   with tframe1(frame).fpaintframedelta do begin
+    size1.cx:= size1.cx - left - right;
+    size1.cy:= size1.cy - top - bottom;
+   end;
    clientsize:= size1;      //same clientsize as before
   end;
  end;
