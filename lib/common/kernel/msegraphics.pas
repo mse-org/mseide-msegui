@@ -61,7 +61,8 @@ type
                  foo_roman,            // 'R'
                  foo_script,           // 'S'
                  foo_decorative,       // 'D'
-                 foo_antialiased,      // 'A'
+                 foo_antialiased,      // 'A' 
+                 foo_antialiased2,     // 'B' cleartype on windows
                  foo_nonantialiased    // 'a'
 //                 foo_xcore,            // 'C'  //seems not to work with xft2
 //                 foo_noxcore           // 'c'
@@ -71,10 +72,10 @@ type
 const
  fontpitchmask = [foo_fixed,foo_proportional];
  fontfamilymask = [foo_helvetica,foo_roman,foo_script,foo_decorative];
- fontantialiasedmask = [foo_antialiased,foo_nonantialiased];
+ fontantialiasedmask = [foo_antialiased,foo_antialiased2,foo_nonantialiased];
 // fontxcoremask = [foo_xcore,foo_noxcore];
  fontaliasoptionchars : array[fontoptionty] of char =
-                ('p','P','H','R','S','D','A','a'{,'C','c'});
+                ('p','P','H','R','S','D','A','B','a'{,'C','c'});
 type
  canvasstatety =
   (cs_regioncopy,cs_clipregion,cs_origin,cs_gc,

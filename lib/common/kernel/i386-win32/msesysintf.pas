@@ -28,6 +28,7 @@ type
 var
  iswin95: boolean;
  iswin98: boolean;
+ cantcleartype: boolean;
 
 implementation
 uses
@@ -2051,10 +2052,14 @@ begin
  po1:= nil; //compiler warning
  info.dwOSVersionInfoSize:= sizeof(info);
  if getversionex(info) then begin
-  iswin95:= info.dwPlatformId = ver_platform_win32_windows;
-  if iswin95 then begin
-   iswin98:= (info.dwMajorVersion >= 4) or
-               (info.dwMajorVersion = 4) and (info.dwminorVersion > 0);
+  with info do begin
+   int1:= dwmajorversion*1000+dwminorversion;
+   cancleartype:= int1 >= 5001;
+   iswin95:= dwPlatformId = ver_platform_win32_windows;
+   if iswin95 then begin
+    iswin98:= (dwMajorVersion >= 4) or
+                (dwMajorVersion = 4) and (dwminorVersion > 0);
+   end;
   end;
  end;
  libhandle:= loadlibrary('shell32.dll');

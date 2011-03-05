@@ -84,6 +84,7 @@ type
 {$endif}
 
 const
+ CLEARTYPE_QUALITY = ANTIALIASED_QUALITY+1;
  MAPVK_VK_TO_VSC = 0;
  flagsoffs =       0*sizeof(integer); //for setwindowlong
  stylebackupoffs = 1*sizeof(integer);
@@ -1586,12 +1587,21 @@ begin
      end;
     end;
    end;
-   if foo_antialiased in h.d.antialiasedoptions then begin
-    lfquality:= antialiased_quality;
-   end
+   if (foo_antialiased2 in h.d.antialiasedoptions) then begin
+    if cancleartype then begin
+     lfquality:= cleartype_quality;
+    end
+    else begin
+     lfquality:= antialiased_quality;
+    end;
    else begin
-    if foo_nonantialiased in h.d.antialiasedoptions then begin
-     lfquality:= nonantialiased_quality;
+    if foo_antialiased in h.d.antialiasedoptions then begin
+     lfquality:= antialiased_quality;
+    end
+    else begin
+     if foo_nonantialiased in h.d.antialiasedoptions then begin
+      lfquality:= nonantialiased_quality;
+     end;
     end;
    end;
    if h.d.rotation <> 0 then begin

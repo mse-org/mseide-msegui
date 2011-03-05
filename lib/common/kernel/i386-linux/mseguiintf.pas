@@ -5099,7 +5099,7 @@ begin
   if foo_proportional in h.d.pitchoptions then begin
    fcpatternaddinteger(result,fc_spacing,fc_proportional);
   end;
-  if foo_antialiased in h.d.antialiasedoptions then begin
+  if [foo_antialiased,foo_antialiased2]*h.d.antialiasedoptions <> [] then begin
    fcpatternaddbool(result,fc_antialias,true);
   end;
   if foo_nonantialiased in h.d.antialiasedoptions then begin

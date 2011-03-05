@@ -759,7 +759,7 @@ begin
   width:= o.editfontwidth;
   extraspace:= o.editfontextraspace;
   if o.editfontantialiased then begin
-   options:= options + [foo_antialiased];
+   options:= options + [foo_antialiased2];
   end
   else begin
    options:= options + [foo_nonantialiased];
@@ -2095,7 +2095,7 @@ begin
   color:= editfontcolor.value;
   dispgrid.frame.colorclient:= editbkcolor.value;
   if editfontantialiased.value then begin
-   options:= options + [foo_antialiased];
+   options:= options + [foo_antialiased2];
   end
   else begin
    options:= options + [foo_nonantialiased];

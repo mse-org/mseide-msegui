@@ -44,14 +44,16 @@ function fontoptioncharstooptions(const astring: string): fontoptionsty;
 procedure init;
 procedure deinit;
 
+const
+ defaultmaxfontcachecount = 64;
+var
+ maxfontcachecount: integer = defaultmaxfontcachecount;
+ 
 implementation
 uses
  mselist,sysutils,mseguiintf,msegraphutils,msetypes,msesys,
  msestrings,mseformatstr,msehash;
  
-const
- maxfontcount = 64;
-
 type
  fontnumdataty = record
   num: integer;
@@ -287,7 +289,7 @@ var
  int1: integer;
 begin //registerfont
  result:= 0;
- if length(fonts) > maxfontcount then begin
+ if length(fonts) > maxfontcachecount then begin
   reusefont(lastreusedfont+1);
   if result = 0 then begin
    reusefont(0);

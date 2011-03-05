@@ -393,8 +393,8 @@ begin
  inherited create(nil,true,true);
  if procid <> invalidprochandle then begin
   mainfo.setstattext('Making.',mtk_running);
-  messagefo.messages.font.options:= messagefo.messages.font.options -
-               [foo_antialiased] + [foo_nonantialiased];
+  messagefo.messages.font.options:= messagefo.messages.font.options {-
+               [foo_antialiased]} + [foo_nonantialiased];
  end
  else begin
   mainfo.setstattext('Make not running.',mtk_error);
@@ -463,7 +463,7 @@ procedure tmaker.doasyncevent(var atag: integer);
   setcurrentdir(fcurrentdir);
   designnotifications.aftermake(idesigner(designer),fexitcode);
   messagefo.messages.font.options:= messagefo.messages.font.options +
-              [foo_antialiased] - [foo_nonantialiased];
+              [foo_antialiased2]{ - [foo_nonantialiased]};
  end;
 var
  str1: string;
