@@ -41,13 +41,16 @@ const
 type
  frameskinoptionty = (fso_flat,
                       fso_noanim,fso_nomouseanim,fso_noclickanim,fso_nofocusanim,
-                      fso_nofocusrect,fso_nodefaultrect,fso_noinnerrect,
-                      fso_colorclient,  //set colorclient in skincontroller
-                      fso_frameileftsize,fso_frameirightsize,
-                      fso_frameitopsize,fso_frameibottomsize); 
-                                        //adjust clientsize in skincontroller
+                      fso_nofocusrect,fso_nodefaultrect,fso_noinnerrect);
  frameskinoptionsty = set of frameskinoptionty;
- 
+
+ frameskincontrolleroptionty =
+                     (fsco_colorclient,  //set colorclient in skincontroller
+                      fsco_frameileftsize,fsco_frameirightsize,
+                      fsco_frameitopsize,fsco_frameibottomsize); 
+                                        //adjust clientsize in skincontroller
+ frameskincontrolleroptionsty = set of frameskincontrolleroptionty;
+  
  optionwidgetty = (ow_background,ow_top,
                    ow_noautosizing, //don't use, moved to optionswidget1
                    ow_mousefocus,ow_tabfocus,
@@ -727,6 +730,7 @@ type
 
  tframetemplate = class(tpersistenttemplate,iimagelistinfo)
   private
+   foptionsskincontroller: frameskincontrolleroptionsty;
    procedure setcolorclient(const Value: colorty);
    procedure setcolorframe(const Value: colorty);
    procedure setcolorframeactive(const avalue: colorty);
@@ -920,6 +924,9 @@ type
                            default [];
    property optionsskin: frameskinoptionsty read fi.ba.optionsskin 
                       write setoptionsskin default [];
+   property optionsskincontroller: frameskincontrolleroptionsty 
+                      read foptionsskincontroller
+                      write foptionsskincontroller default [];
  end;
 
  tframecomp = class(ttemplatecontainer)
