@@ -1205,17 +1205,17 @@ var
 // value4: fontoptionsty;
 begin
   value1:= fontoptionsty(
-         setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(new),
-                      {$ifdef FPC}longword{$else}byte{$endif}(old),
-                      {$ifdef FPC}longword{$else}byte{$endif}(mask1)));
+         setsinglebit({$ifdef FPC}longword{$else}word{$endif}(new),
+                      {$ifdef FPC}longword{$else}word{$endif}(old),
+                      {$ifdef FPC}longword{$else}word{$endif}(mask1)));
   value2:= fontoptionsty(
-         setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(new),
-                      {$ifdef FPC}longword{$else}byte{$endif}(old),
-                      {$ifdef FPC}longword{$else}byte{$endif}(mask2)));
+         setsinglebit({$ifdef FPC}longword{$else}word{$endif}(new),
+                      {$ifdef FPC}longword{$else}word{$endif}(old),
+                      {$ifdef FPC}longword{$else}word{$endif}(mask2)));
   value3:= fontoptionsty(
-         setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(new),
-                      {$ifdef FPC}longword{$else}byte{$endif}(old),
-                      {$ifdef FPC}longword{$else}byte{$endif}(mask3)));
+         setsinglebit({$ifdef FPC}longword{$else}word{$endif}(new),
+                      {$ifdef FPC}longword{$else}word{$endif}(old),
+                      {$ifdef FPC}longword{$else}word{$endif}(mask3)));
 (*                      
   value4:= fontoptionsty(
          setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(new),

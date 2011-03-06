@@ -70,7 +70,7 @@ type
    function checkkey(const akey; const aitemdata): boolean; override;
   public
    constructor create;
-   function find(const afont: fonthashdataty): fontnumty;
+   function find(const afont: fonthashdataty): integer;
    procedure add(const afont: fontnumty);
    procedure delete(const afont: fontnumty);
  end;
@@ -412,7 +412,7 @@ begin
  end;           
 end;
 
-function tfonthashlist.find(const afont: fonthashdataty): fontnumty;
+function tfonthashlist.find(const afont: fonthashdataty): integer;
 var
  po1: pfontnumhashdataty;
 begin
