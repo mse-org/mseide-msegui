@@ -344,7 +344,8 @@ begin
     basefont:= 0;
    end;
    gdi_lock;
-   gdi_getfonthighres(drawinfo);
+//   gdi_getfonthighres(drawinfo);
+   h.d.gdifuncs^[gdf_getfonthighres](drawinfo);
    gdi_unlock;   
    drawinfo.getfont:= fontinfobefore;
   end;
@@ -458,29 +459,15 @@ function getfontnum(const fontinfo: fontinfoty; var drawinfo: drawinfoty;
 var
  int1: integer;
  data1: fontdataty; 
-//label
-// endlab;
 begin
  gdi_lock;
  with fontinfo do begin
- {
-  for int1:= 0 to high(fonts) do begin
-   with fonts[int1] do begin
-    if (refcount >= 0) and comparefont(fontinfo,data^) then begin
-     inc(refcount);
-     result:= int1 + 1;
-     goto endlab
-    end;
-   end;
-  end;
-  }
   getfontvalues(fontinfo,data1);
   int1:= ffonthashlist.find(data1.h);
   if int1 >= 0 then begin
    with fonts[int1] do begin
     inc(refcount);
     result:= int1 + 1;
-//    goto endlab
    end;
   end
   else begin
@@ -502,8 +489,7 @@ begin
    end;
   end;
  end;
-//endlab:
-// gdi_unlock;
+ gdi_unlock;
 end;
 
 function getfontforglyph(const abasefont: fontty; const glyph: unicharty): fontnumty;

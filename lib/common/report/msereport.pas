@@ -1613,7 +1613,8 @@ type
                         const onafterrender: reporteventty = nil); overload;
    procedure render(const aprinter: tstreamprinter; const command: string = '';
                         const onafterrender: reporteventty = nil); overload;
-   procedure render(const aprinter: tstreamprinter; const astream: ttextstream;
+   procedure render(const aprinter: tstreamprinter;
+                        const astream: ttextstream; //owns the stream
                         const onafterrender: reporteventty = nil); overload;
    procedure render(const aprinter: tcustomgdiprinter;
                            const onafterrender: reporteventty = nil); overload;
