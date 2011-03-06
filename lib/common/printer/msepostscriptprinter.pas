@@ -688,46 +688,10 @@ procedure gdi_copyarea(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).d.canvas.ps_copyarea;
 end;
-   
-const
- gdifunctions: gdifunctionaty = (
-   {$ifdef FPC}@{$endif}gdi_destroygc,
-   {$ifdef FPC}@{$endif}gdi_changegc,
-   {$ifdef FPC}@{$endif}gdi_drawlines,
-   {$ifdef FPC}@{$endif}gdi_drawlinesegments,
-   {$ifdef FPC}@{$endif}gdi_drawellipse,
-   {$ifdef FPC}@{$endif}gdi_drawarc,
-   {$ifdef FPC}@{$endif}gdi_fillrect,
-   {$ifdef FPC}@{$endif}gdi_fillelipse,
-   {$ifdef FPC}@{$endif}gdi_fillarc,
-   {$ifdef FPC}@{$endif}gdi_fillpolygon,
-//   {$ifdef FPC}@{$endif}gdi_drawstring,
-   {$ifdef FPC}@{$endif}gdi_drawstring16,
-   {$ifdef FPC}@{$endif}gdi_setcliporigin,
-   {$ifdef FPC}@{$endif}gdi_createemptyregion,
-   {$ifdef FPC}@{$endif}gdi_createrectregion,
-   {$ifdef FPC}@{$endif}gdi_createrectsregion,
-   {$ifdef FPC}@{$endif}gdi_destroyregion,
-   {$ifdef FPC}@{$endif}gdi_copyregion,
-   {$ifdef FPC}@{$endif}gdi_moveregion,
-   {$ifdef FPC}@{$endif}gdi_regionisempty,
-   {$ifdef FPC}@{$endif}gdi_regionclipbox,
-   {$ifdef FPC}@{$endif}gdi_regsubrect,
-   {$ifdef FPC}@{$endif}gdi_regsubregion,
-   {$ifdef FPC}@{$endif}gdi_regaddrect,
-   {$ifdef FPC}@{$endif}gdi_regaddregion,
-   {$ifdef FPC}@{$endif}gdi_regintersectrect,
-   {$ifdef FPC}@{$endif}gdi_regintersectregion,
-   {$ifdef FPC}@{$endif}gdi_copyarea,
-   {$ifdef FPC}@{$endif}gdi_fonthasglyph,
-   {$ifdef FPC}@{$endif}gdi_getfont,
-   {$ifdef FPC}@{$endif}gdi_getfonthighres,
-   {$ifdef FPC}@{$endif}gdi_freefontdata,
-   {$ifdef FPC}@{$endif}gdi_gettext16width,
-   {$ifdef FPC}@{$endif}gdi_getchar16widths,
-   {$ifdef FPC}@{$endif}gdi_getfontmetrics
-);
 
+var
+ gdifunctions: gdifunctionaty;
+ 
 function psrealtostr(const avalue: real): string;
 begin
 // result:= replacechar(formatfloat('0.###',avalue),decimalseparator,'.');
@@ -2508,4 +2472,46 @@ end;
 
 initialization
  gdifuncs:= gui_getgdifuncs;
+ gdifunctions:= gdifuncs^; //default
+ gdifunctions[gdf_destroygc]:= {$ifdef FPC}@{$endif}gdi_destroygc;
+ gdifunctions[gdf_changegc]:= {$ifdef FPC}@{$endif}gdi_changegc;
+ gdifunctions[gdf_drawlines]:= {$ifdef FPC}@{$endif}gdi_drawlines;
+ gdifunctions[gdf_drawlinesegments]:= {$ifdef FPC}@{$endif}gdi_drawlinesegments;
+ gdifunctions[gdf_drawellipse]:= {$ifdef FPC}@{$endif}gdi_drawellipse;
+ gdifunctions[gdf_drawarc]:= {$ifdef FPC}@{$endif}gdi_drawarc;
+ gdifunctions[gdf_fillrect]:= {$ifdef FPC}@{$endif}gdi_fillrect;
+ gdifunctions[gdf_fillelipse]:= {$ifdef FPC}@{$endif}gdi_fillelipse;
+ gdifunctions[gdf_fillarc]:= {$ifdef FPC}@{$endif}gdi_fillarc;
+ gdifunctions[gdf_fillpolygon]:= {$ifdef FPC}@{$endif}gdi_fillpolygon;
+ gdifunctions[gdf_drawstring16]:= {$ifdef FPC}@{$endif}gdi_drawstring16;
+ gdifunctions[gdf_setcliporigin]:= {$ifdef FPC}@{$endif}gdi_setcliporigin;
+
+// gdifunctions[gdf_createemptyregion]:= {$ifdef FPC}@{$endif}gdi_createemptyregion;
+// gdifunctions[gdf_createrectregion]:= {$ifdef FPC}@{$endif}gdi_createrectregion;
+// gdifunctions[gdf_createrectsregion]:= {$ifdef FPC}@{$endif}gdi_createrectsregion;
+// gdifunctions[gdf_destroyregion]:= {$ifdef FPC}@{$endif}gdi_destroyregion;
+// gdifunctions[gdf_copyregion]:= {$ifdef FPC}@{$endif}gdi_copyregion;
+// gdifunctions[gdf_moveregion]:= {$ifdef FPC}@{$endif}gdi_moveregion;
+// gdifunctions[gdf_regionisempty]:= {$ifdef FPC}@{$endif}gdi_regionisempty;
+// gdifunctions[gdf_regionclipbox]:= {$ifdef FPC}@{$endif}gdi_regionclipbox;
+// gdifunctions[gdf_regsubrect]:= {$ifdef FPC}@{$endif}gdi_regsubrect;
+// gdifunctions[gdf_regsubregion]:= {$ifdef FPC}@{$endif}gdi_regsubregion;
+// gdifunctions[gdf_regaddrect]:= {$ifdef FPC}@{$endif}gdi_regaddrect;
+// gdifunctions[gdf_regaddregion]:= {$ifdef FPC}@{$endif}gdi_regaddregion;
+// gdifunctions[gdf_regintersectrect]:= {$ifdef FPC}@{$endif}gdi_regintersectrect;
+// gdifunctions[gdf_regintersectregion]:= {$ifdef FPC}@{$endif}gdi_regintersectregion;
+
+ gdifunctions[gdf_copyarea]:= {$ifdef FPC}@{$endif}gdi_copyarea;
+
+// gdifunctions[gdf_fonthasglyph]:= {$ifdef FPC}@{$endif}gdi_fonthasglyph;
+// gdifunctions[gdf_getfont]:= {$ifdef FPC}@{$endif}gdi_getfont;
+// gdifunctions[gdf_getfonthighres]:= {$ifdef FPC}@{$endif}gdi_getfonthighres;
+// gdifunctions[gdf_freefontdata]:= {$ifdef FPC}@{$endif}gdi_freefontdata;
+// gdifunctions[gdf_gettext16width]:= {$ifdef FPC}@{$endif}gdi_gettext16width;
+// gdifunctions[gdf_getchar16widths]:= {$ifdef FPC}@{$endif}gdi_getchar16widths;
+// gdifunctions[gdf_gdi_getfontmetrics]:= {$ifdef FPC}@{$endif}gdi_getfontmetrics
+
+ {$if high(gdifuncty) <> gdf_getfontmetrics}
+  {$error missing gdi function}
+ {$ifend}
 end.

@@ -146,7 +146,7 @@ function gui_pastefromclipboard(out value: msestring): guierrorty;
 function gui_canpastefromclipboard: boolean;
 
 function gui_getgdifuncs: pgdifunctionaty;
-
+(*
 procedure gdi_destroygc(var drawinfo: drawinfoty);
 procedure gdi_changegc(var drawinfo: drawinfoty);
 procedure gdi_drawlines(var drawinfo: drawinfoty);
@@ -181,4 +181,4 @@ procedure gdi_freefontdata(var drawinfo: drawinfoty);
 procedure gdi_gettext16width(var drawinfo: drawinfoty);
 procedure gdi_getchar16widths(var drawinfo: drawinfoty);
 procedure gdi_getfontmetrics(var drawinfo: drawinfoty);
-
+*)
