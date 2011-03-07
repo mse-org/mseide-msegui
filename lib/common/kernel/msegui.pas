@@ -12508,6 +12508,9 @@ begin
        end;
        wp_fullscreen: begin
         size1:= wsi_fullscreen;
+       end;
+       wp_fullscreenmax: begin
+        size1:= wsi_fullscreenmax;
        end
        else begin
         size1:= wsi_normal;
@@ -13443,6 +13446,9 @@ begin
   wsi_fullscreen: begin
    result:= wp_fullscreen;
   end;
+  wsi_fullscreenmax: begin
+   result:= wp_fullscreenmax;
+  end;
   else begin //wsi_normal
    if fwindowpos in [wp_minimized,wp_maximized,wp_fullscreen,wp_screencentered] then begin
     result:= wp_normal;
@@ -13459,14 +13465,30 @@ var
  rect1,rect2: rectty;
  bo1: boolean;
  wpo1: windowposty;
+ window1: twindow;
 begin
  wpo1:= getwindowpos;
  if wpo1 <> value then begin
   bo1:= (tws_windowvisible in fstate) {or (wpo1 = wp_minimized)};
+  window1:= nil;
+  if value in [wp_screencentered] then begin
+   window1:= transientfor;
+   if window1 = nil then begin
+    window1:= appinst.activewindow;
+    if window1 = nil then begin
+     window1:= self;
+    end;
+   end;
+  end;
   case value of
-   wp_screencentered: begin
+   wp_screencentered,wp_screencenteredmax: begin
     gui_setwindowstate(winid,wsi_normal,bo1);
-    rect2:= appinst.workarea(self);
+    if value = wp_screencenteredmax then begin
+     rect2:= appinst.screenrect(nil);
+    end
+    else begin
+     rect2:= appinst.workarea(window1);
+    end;
     with fowner do begin
      rect1:= widgetrect;
      rect1.x:= rect2.x + (rect2.cx - rect1.cx) div 2;
@@ -13482,6 +13504,9 @@ begin
    end;
    wp_fullscreen: begin
     gui_setwindowstate(winid,wsi_fullscreen,bo1);
+   end;
+   wp_fullscreenmax: begin
+    gui_setwindowstate(winid,wsi_fullscreenmax,bo1);
    end
    else begin
     gui_setwindowstate(winid,wsi_normal,bo1);

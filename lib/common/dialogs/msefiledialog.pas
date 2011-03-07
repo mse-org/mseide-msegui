@@ -1492,6 +1492,7 @@ var
  po1: pmsestringarty;
  fo: tfiledialogfo;
  ara,arb: msestringarty;
+ rectbefore: rectty;
 begin
  ara:= nil; //compiler warning
  arb:= nil; //compiler warning
@@ -1530,11 +1531,14 @@ begin
   if (fwindowrect.cx > 0) and (fwindowrect.cy > 0) then begin
    fo.widgetrect:= clipinrect(fwindowrect,application.screenrect(fo.window));
   end;
+  rectbefore:= fo.widgetrect;
   result:= filedialog1(fo,ffilenames,ara,arb,
         @ffilterindex,@ffilter,@fcolwidth,finclude,
             fexclude,po1,fhistorymaxcount,acaption,aoptions,fdefaultext,
             fimagelist,fongetfileicon,foncheckfile);
-  fwindowrect:= fo.widgetrect;
+  if not rectisequal(fo.widgetrect,rectbefore) then begin
+   fwindowrect:= fo.widgetrect;
+  end;
   if assigned(fonafterexecute) then begin
    fonafterexecute(self,result);
   end;

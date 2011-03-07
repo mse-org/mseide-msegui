@@ -104,9 +104,11 @@ type
                    wo_notaskbar,  //linux only
                    wo_windowcentermessage); //showmessage centered in window
  windowoptionsty = set of windowoptionty;
- windowposty = (wp_normal,wp_screencentered,wp_minimized,wp_maximized,wp_default,
-                wp_fullscreen);
- windowsizety = (wsi_normal,wsi_minimized,wsi_maximized,wsi_fullscreen);
+ windowposty = (wp_normal,wp_screencentered,wp_screencenteredmax,
+                wp_minimized,wp_maximized,wp_default,
+                wp_fullscreen,wp_fullscreenmax);
+ windowsizety = (wsi_normal,wsi_minimized,wsi_maximized,
+                 wsi_fullscreen,wsi_fullscreenmax);
 
  syswindowty = (sywi_none,sywi_tray);
  

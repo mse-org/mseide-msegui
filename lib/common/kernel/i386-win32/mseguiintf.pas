@@ -704,16 +704,21 @@ function gui_getwindowsize(id: winidty): windowsizety;
 var
  placement: twindowplacement;
 begin
- if getwindowlong(id,flagsoffs) <> 0 then begin
-  result:= wsi_fullscreen;
- end
- else begin
-  result:= wsi_normal;
-  placement.length:= sizeof(placement);
-  if getwindowplacement(id,{$ifndef FPC}@{$endif}placement) then begin
-   case placement.showcmd of
-    sw_showmaximized: result:= wsi_maximized;
-    sw_showminimized: result:= wsi_minimized;
+ case getwindowlong(id,flagsoffs) of
+  1: begin
+   result:= wsi_fullscreen;
+  end;
+  2: begin
+   result:= wsi_fullscreenmax;
+  end;
+  else begin
+   result:= wsi_normal;
+   placement.length:= sizeof(placement);
+   if getwindowplacement(id,{$ifndef FPC}@{$endif}placement) then begin
+    case placement.showcmd of
+     sw_showmaximized: result:= wsi_maximized;
+     sw_showminimized: result:= wsi_minimized;
+    end;
    end;
   end;
  end;
@@ -724,26 +729,44 @@ begin
  result:= iswindowvisible(id);
 end;
 
-function gui_setwindowstate(id: winidty; size: windowsizety; visible: boolean): guierrorty;
+function gui_setwindowstate(id: winidty; size: windowsizety;
+                            visible: boolean): guierrorty;
 var
- int1: integer;
+ int1,int2: integer;
  wo1: longword;
 // placement: twindowplacement;
 begin
  result:= gue_ok;
  int1:= getwindowlong(id,flagsoffs);
- if size = wsi_fullscreen then begin
-  if int1 = 0 then begin
-   wo1:= getwindowlong(id,gwl_style);
-   setwindowlong(id,stylebackupoffs,wo1);
-   setwindowlong(id,flagsoffs,1);
-   wo1:= wo1 and not 
-    (ws_border or ws_dlgframe or ws_overlapped or ws_thickframe) or (ws_popup);
-   setwindowlong(id,gwl_style,wo1);
-   setwindowpos(id,0,0,0,getsystemmetrics(sm_cxscreen),
+ int2:= 0;
+ if size in [wsi_fullscreen,wsi_fullscreenmax] then begin
+  case size of 
+   wsi_fullscreen: int2:= 1;
+   wsi_fullscreenmax: int2:= 2;
+  end;
+  if int1 <> int2 then begin
+   setwindowlong(id,flagsoffs,int2);
+   if int1 = 0 then begin
+    wo1:= getwindowlong(id,gwl_style);
+    setwindowlong(id,stylebackupoffs,wo1);
+    wo1:= wo1 and not 
+     (ws_border or ws_dlgframe or ws_overlapped or ws_thickframe) or (ws_popup);
+    setwindowlong(id,gwl_style,wo1);
+   end;
+   if size = wsi_fullscreen then begin
+    setwindowpos(id,0,0,0,getsystemmetrics(sm_cxscreen),
                       getsystemmetrics(sm_cyscreen),
                       swp_framechanged {or swp_nomove or swp_nosize} 
                       or swp_nozorder or swp_noownerzorder or swp_noactivate);
+   end
+   else begin
+    setwindowpos(id,0,getsystemmetrics(sm_xvirtualscreen),
+                      getsystemmetrics(sm_yvirtualscreen),
+                      getsystemmetrics(sm_cxvirtualscreen),
+                      getsystemmetrics(sm_cyvirtualscreen),
+                      swp_framechanged {or swp_nomove or swp_nosize} 
+                      or swp_nozorder or swp_noownerzorder or swp_noactivate);
+   end;   
   end;
   if visible then begin
    showwindow(id,sw_shownoactivate);
@@ -756,7 +779,7 @@ begin
    setwindowpos(id,0,0,0,0,0,
            swp_framechanged or swp_nomove or swp_nosize or swp_nozorder or
            swp_noownerzorder or swp_noactivate);
-   setwindowlong(id,flagsoffs,0);
+   setwindowlong(id,flagsoffs,int2);
   end;   
   case size of
    wsi_maximized: begin
