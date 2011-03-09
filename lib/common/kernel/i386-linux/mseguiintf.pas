@@ -1325,7 +1325,12 @@ function gui_setwindowstate(id: winidty; size: windowsizety;
                                         visible: boolean): guierrorty;
  procedure fullscreen;
  begin
-  gui_reposwindow(id,gui_getworkarea(id));
+  if size = wsi_fullscreenvirt then begin
+   gui_reposwindow(id,gui_getscreenrect(0));
+  end
+  else begin
+   gui_reposwindow(id,gui_getscreenrect(id));
+  end
  end;
 
 begin
@@ -1334,7 +1339,7 @@ begin
  if visible then begin
   xmapwindow(appdisp,id);
  end;
- if size = wsi_fullscreen then begin
+ if size in [wsi_fullscreen,wsi_fullscreenvirt] then begin
   if not canfullscreen or not changenetwmstate(id,nso_add,net_wm_state_fullscreen) then begin
    fullscreen; //no windowmanager
   end;
