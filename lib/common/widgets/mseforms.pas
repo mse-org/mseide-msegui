@@ -29,8 +29,8 @@ uses
 type
  formoptionty = (fo_main,fo_terminateonclose,fo_freeonclose,
                fo_windowclosecancel,
-               fo_defaultpos,fo_screencentered,fo_modal,
-               fo_minimized,fo_maximized,fo_fullscreen,
+               fo_defaultpos,fo_screencentered,fo_screencenteredvirt,fo_modal,
+               fo_minimized,fo_maximized,fo_fullscreen,fo_fullscreenvirt,
                fo_closeonesc,fo_cancelonesc,fo_closeonenter,fo_closeonf10,
                fo_globalshortcuts,fo_localshortcuts,
                fo_autoreadstat,fo_delayedreadstat,fo_autowritestat,
@@ -1021,9 +1021,13 @@ begin
 // if fmainmenuwidget <> nil then begin
 //  fmainmenuwidget.loaded;
 // end;
- if (fo_screencentered in foptions) and 
-                                 not (csdesigning in componentstate) then begin
-  window.windowpos:= wp_screencentered;
+ if not (csdesigning in componentstate) then begin
+  if fo_screencentered in foptions then begin
+   window.windowpos:= wp_screencentered;
+  end;
+  if fo_screencenteredvirt in foptions then begin
+   window.windowpos:= wp_screencenteredvirt;
+  end;
  end;
  inherited;
  if fmainmenuwidget <> nil then begin
@@ -1136,9 +1140,9 @@ end;
 
 procedure tcustommseform.setoptions(const Value: formoptionsty);
 const
- mask1: formoptionsty = [fo_screencentered,fo_defaultpos];
+ mask1: formoptionsty = [fo_screencentered,fo_screencenteredvirt,fo_defaultpos];
  mask2: formoptionsty = [fo_closeonesc,fo_cancelonesc];
- mask3: formoptionsty = [fo_maximized,fo_minimized,fo_fullscreen];
+ mask3: formoptionsty = [fo_maximized,fo_minimized,fo_fullscreen,fo_fullscreenvirt];
 var
  opt1,opt2: formoptionsty;
 begin

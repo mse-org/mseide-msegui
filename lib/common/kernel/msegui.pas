@@ -12510,7 +12510,7 @@ begin
         size1:= wsi_fullscreen;
        end;
        wp_fullscreenmax: begin
-        size1:= wsi_fullscreenmax;
+        size1:= wsi_fullscreenvirt;
        end
        else begin
         size1:= wsi_normal;
@@ -13446,7 +13446,7 @@ begin
   wsi_fullscreen: begin
    result:= wp_fullscreen;
   end;
-  wsi_fullscreenmax: begin
+  wsi_fullscreenvirt: begin
    result:= wp_fullscreenmax;
   end;
   else begin //wsi_normal
@@ -13481,9 +13481,9 @@ begin
    end;
   end;
   case value of
-   wp_screencentered,wp_screencenteredmax: begin
+   wp_screencentered,wp_screencenteredvirt: begin
     gui_setwindowstate(winid,wsi_normal,bo1);
-    if value = wp_screencenteredmax then begin
+    if value = wp_screencenteredvirt then begin
      rect2:= appinst.screenrect(nil);
     end
     else begin
@@ -13506,7 +13506,7 @@ begin
     gui_setwindowstate(winid,wsi_fullscreen,bo1);
    end;
    wp_fullscreenmax: begin
-    gui_setwindowstate(winid,wsi_fullscreenmax,bo1);
+    gui_setwindowstate(winid,wsi_fullscreenvirt,bo1);
    end
    else begin
     gui_setwindowstate(winid,wsi_normal,bo1);
