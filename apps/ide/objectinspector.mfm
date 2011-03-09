@@ -184,6 +184,7 @@ object objectinspectorfo: tobjectinspectorfo
         rowfontoffset = 4
         options = [co_fill, co_savestate]
         options1 = [co1_rowfont, co1_zebracolor]
+        widthmin = 10
         oncellevent = valuescellevent
         onshowhint = col1onshowhint
         widgetname = 'values'
