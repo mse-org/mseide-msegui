@@ -12509,7 +12509,7 @@ begin
        wp_fullscreen: begin
         size1:= wsi_fullscreen;
        end;
-       wp_fullscreenmax: begin
+       wp_fullscreenvirt: begin
         size1:= wsi_fullscreenvirt;
        end
        else begin
@@ -12689,7 +12689,8 @@ begin
   end;
  end;
  fwindowposbefore:= windowpos;
- if not (fwindowposbefore in [wp_minimized,wp_maximized,wp_fullscreen]) then begin
+ if not (fwindowposbefore in [wp_minimized,wp_maximized,
+                              wp_fullscreen,wp_fullscreenvirt]) then begin
   fnormalwindowrect:= fowner.fwidgetrect;
  end;
 end;
@@ -13447,7 +13448,7 @@ begin
    result:= wp_fullscreen;
   end;
   wsi_fullscreenvirt: begin
-   result:= wp_fullscreenmax;
+   result:= wp_fullscreenvirt;
   end;
   else begin //wsi_normal
    if fwindowpos in [wp_minimized,wp_maximized,wp_fullscreen,wp_screencentered] then begin
@@ -13505,7 +13506,7 @@ begin
    wp_fullscreen: begin
     gui_setwindowstate(winid,wsi_fullscreen,bo1);
    end;
-   wp_fullscreenmax: begin
+   wp_fullscreenvirt: begin
     gui_setwindowstate(winid,wsi_fullscreenvirt,bo1);
    end
    else begin
@@ -13515,7 +13516,7 @@ begin
  end;
  fwindowpos:= value;
  fwindowposbefore:= fwindowpos;
- if (wpo1 = wp_fullscreen) and (value = wp_normal) then begin
+ if (wpo1 in [wp_fullscreen,wp_fullscreenvirt]) and (value = wp_normal) then begin
   gui_reposwindow(fwindow.id,fnormalwindowrect);
        //needed for win32
  end;

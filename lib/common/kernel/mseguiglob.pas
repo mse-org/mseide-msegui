@@ -106,7 +106,7 @@ type
  windowoptionsty = set of windowoptionty;
  windowposty = (wp_normal,wp_screencentered,wp_screencenteredvirt,
                 wp_minimized,wp_maximized,wp_default,
-                wp_fullscreen,wp_fullscreenmax);
+                wp_fullscreen,wp_fullscreenvirt);
  windowsizety = (wsi_normal,wsi_minimized,wsi_maximized,
                  wsi_fullscreen,wsi_fullscreenvirt);
 
