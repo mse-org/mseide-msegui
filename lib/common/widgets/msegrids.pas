@@ -1608,6 +1608,7 @@ type
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
    
+   property options;
    property optionsskin;
 
    property sbvert;

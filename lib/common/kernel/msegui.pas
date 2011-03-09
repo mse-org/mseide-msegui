@@ -11058,7 +11058,9 @@ begin
      setwidgetrect(makerect(x-delta,y,cx+delta,cy));
     end
     else begin
-     bounds_cx:= cx + delta;
+     if fanchors * [an_left,an_right] = [an_left] then begin
+      bounds_cx:= cx + delta;
+     end
     end;
    end
    else begin
@@ -11066,7 +11068,9 @@ begin
      setwidgetrect(makerect(x,y-delta,cx,cy+delta));
     end
     else begin
-     bounds_cy:= cy + delta;
+     if fanchors * [an_top,an_bottom] = [an_top] then begin
+      bounds_cy:= cy + delta;
+     end;
     end;
    end;
   end;
