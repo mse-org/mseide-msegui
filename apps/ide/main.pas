@@ -30,7 +30,8 @@ uses
  msedispwidgets,msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,
  msegrids,msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,
  classes,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
- msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,msesys,mserttistat;
+ msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,msesys,mserttistat,
+ msedatanodes,mseedit,mseifiglob,mselistbrowser;
 const
  versiontext = '2.7 ustable';
 {$ifdef linux}
@@ -76,6 +77,7 @@ type
    viewmenu: tframecomp;
    runprocmon: tprocessmonitor;
    statoptions: trttistat;
+   projectfiledia: tfiledialog;
    procedure newfileonexecute(const sender: tobject);
    procedure newformonexecute(const sender: TObject);
 

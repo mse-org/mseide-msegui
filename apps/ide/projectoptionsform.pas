@@ -784,6 +784,19 @@ end;
 
 function projectfiledialog(var aname: filenamety; save: boolean): modalresultty;
 begin
+ with mainfo.projectfiledia.controller do begin
+  filename:= projectoptions.projectfilename;
+  history:= projecthistory;
+  if save then begin
+   result:= execute(fdk_save,[fdo_save,fdo_checkexist]);
+  end
+  else begin
+   result:= execute(fdk_open,[fdo_checkexist]);
+  end;
+  aname:= filename;
+  projecthistory:= history;
+ end;
+ {
  aname:= projectoptions.projectfilename;
  if save then begin
   result:= filedialog(aname,[fdo_save,fdo_checkexist],'Save Project',
@@ -795,6 +808,7 @@ begin
           ['Project files','All files'],['*.prj','*'],'prj',
           nil,nil,nil,[fa_all],[fa_hidden],@projecthistory);
  end;
+ }
 end;
 
 function getmacros: tmacrolist;

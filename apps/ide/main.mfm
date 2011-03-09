@@ -4,8 +4,8 @@ object mainfo: tmainfo
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton, go_lockbutton]
   frame.dummy = 0
   visible = False
-  bounds_x = 111
-  bounds_y = 115
+  bounds_x = 121
+  bounds_y = 160
   bounds_cx = 437
   bounds_cy = 138
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
@@ -1426,5 +1426,23 @@ object mainfo: tmainfo
     ongetobject = getstatobj
     left = 16
     top = 88
+  end
+  object projectfiledia: tfiledialog
+    statfile = projectstatfile
+    controller.filterlist.data = (
+      (
+        'Project files'
+        '*.prj'
+      )
+      (
+        'All Files'
+        '*'
+      )
+    )
+    controller.defaultext = 'prj'
+    controller.captionopen = 'Open Project'
+    controller.captionsave = 'Save Project'
+    left = 264
+    top = 56
   end
 end
