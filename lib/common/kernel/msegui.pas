@@ -13483,6 +13483,7 @@ begin
   end;
   case value of
    wp_screencentered,wp_screencenteredvirt: begin
+    rect1:= fnormalwindowrect;
     gui_setwindowstate(winid,wsi_normal,bo1);
     if value = wp_screencenteredvirt then begin
      rect2:= appinst.screenrect(nil);
@@ -13491,7 +13492,7 @@ begin
      rect2:= appinst.workarea(window1);
     end;
     with fowner do begin
-     rect1:= widgetrect;
+//     rect1:= widgetrect;
      rect1.x:= rect2.x + (rect2.cx - rect1.cx) div 2;
      rect1.y:= rect2.y + (rect2.cy - rect1.cy) div 2;
      widgetrect:= rect1;
@@ -13516,7 +13517,8 @@ begin
  end;
  fwindowpos:= value;
  fwindowposbefore:= fwindowpos;
- if (wpo1 in [wp_fullscreen,wp_fullscreenvirt]) and (value = wp_normal) then begin
+ if (wpo1 in [wp_fullscreen,wp_fullscreenvirt]) and 
+                                (value = wp_normal) then begin
   gui_reposwindow(fwindow.id,fnormalwindowrect);
        //needed for win32
  end;
