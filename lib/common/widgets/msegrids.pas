@@ -482,6 +482,7 @@ type
    ffocusrectdist: integer;
    procedure createfontselect;
    function getselected(const row: integer): boolean; virtual;
+   procedure updatewidth(var avalue: integer); virtual;
    procedure setwidth(const Value: integer); virtual;
    procedure invalidatelayout;
    procedure setoptions(const Value: coloptionsty); virtual;
@@ -620,6 +621,7 @@ type
    procedure checkdirtyautorowheight(aindex: integer);
    procedure afterrowcountupdate; virtual;
    procedure itemchanged(const sender: tdatalist; const aindex: integer); virtual;
+   procedure updatewidth(var avalue: integer); override;
    procedure updatelayout; override;
    procedure moverow(const fromindex,toindex: integer; const count: integer = 1); override;
    procedure insertrow(const aindex: integer; const count: integer = 1); override;
@@ -1606,6 +1608,7 @@ type
    property frameface_offsetactivemouse;
    property frameface_offsetactiveclicked;
    
+   property options;
    property optionsskin;
 
    property sbvert;
@@ -3541,6 +3544,7 @@ begin
   else begin
    fwidth:= Value;
   end;
+  updatewidth(fwidth);
   fgrid.layoutchanged;
   if (gps_needsrowheight in fstate) and 
         not (csloading in fgrid.componentstate) then begin
@@ -3791,6 +3795,11 @@ begin
 end;
 
 procedure tcol.clean(const start,stop: integer);
+begin
+ //dummy
+end;
+
+procedure tcol.updatewidth(var avalue: integer);
 begin
  //dummy
 end;
@@ -5723,6 +5732,16 @@ begin
  end;
 end;
 
+procedure tdatacol.updatewidth(var avalue: integer);
+begin
+ if (fwidthmax <> 0) and (avalue > fwidthmax) then begin
+  avalue:= fwidthmax;
+ end;
+ if (fwidthmin <> 0) and (avalue < fwidthmin) then begin
+  avalue:= fwidthmin;
+ end;
+end;
+
 procedure tdatacol.updatelayout;
 begin
  if fpropwidth = 0 then begin
@@ -5732,12 +5751,7 @@ begin
   fwidth:= round(fgrid.fpropcolwidthref * fpropwidth);
 //  fwidth:= round(tgridframe(fgrid.fframe).fpaintrect.cx * fpropwidth);
  end;
- if (fwidthmax <> 0) and (fwidth > fwidthmax) then begin
-  fwidth:= fwidthmax;
- end;
- if (fwidthmin <> 0) and (fwidth < fwidthmin) then begin
-  fwidth:= fwidthmin;
- end;
+ updatewidth(fwidth);
  inherited;
 end;
 

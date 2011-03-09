@@ -423,10 +423,12 @@ begin
       paintxorpic;
      end
      else begin
-      fpickrect.pos:= info.pos;
-      fpickoffset:= nullpoint;
-      checkcursorshape;
-      domousemovequery(false);
+      if shiftstate * buttonshiftstatesmask = [] then begin
+       fpickrect.pos:= info.pos;
+       fpickoffset:= nullpoint;
+       checkcursorshape;
+       domousemovequery(false);
+      end;
      end;
     end;
    end;
