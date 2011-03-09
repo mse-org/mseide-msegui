@@ -242,6 +242,7 @@ type
   protected
    fitemlist: titemviewlist;
    procedure setframeinstance(instance: tcustomframe); override;
+   procedure limitcellwidth(var avalue: integer);
 
    procedure setoptions(const avalue: listviewoptionsty); virtual;
    procedure rootchanged; override;
@@ -865,8 +866,12 @@ begin
 end;
 
 procedure tlistcol.setwidth(const Value: integer);
+var
+ int1: integer;
 begin
- inherited;
+ int1:= value;
+// tcustomlistview(fgrid).limitcellwidth(int1);
+ inherited setwidth(int1);
  tcustomlistview(fgrid).cellwidth:= fwidth;
 end;
 
@@ -1432,6 +1437,16 @@ begin
  end;
 end;
 
+procedure tcustomlistview.limitcellwidth(var avalue: integer);
+begin 
+ if (avalue <> 0) and (fcellwidthmin > avalue) then begin
+  avalue:= fcellwidthmin;
+ end;
+ if (fcellwidthmax <> 0) and (fcellwidthmax < avalue) then begin
+  avalue:= fcellwidthmax;
+ end;
+end;
+
 procedure tcustomlistview.updatelayout;
 var
  int1,int2: integer;
@@ -1441,7 +1456,7 @@ var
  width1,height1: integer;
 begin
  indexbefore:= celltoindex(ffocusedcell,true);
- fitemlist.updatelayout;
+// fitemlist.updatelayout;
  width1:= fcellwidth;
  height1:= datarowheight;
  if lvo_fill in foptions then begin
@@ -1453,17 +1468,13 @@ begin
    height1:= finnerdatarect.cy - datarowlinewidth;
   end;
  end;
- if (width1 <> 0) and (fcellwidthmin > width1) then begin
-  width1:= fcellwidthmin;
- end;
- if (fcellwidthmax <> 0) and (fcellwidthmax < width1) then begin
-  width1:= fcellwidthmax;
- end;
+ limitcellwidth(width1);
  datarowheight:= height1;
  for int1:= 0 to fdatacols.count-1 do begin
   fdatacols[int1].width:= width1;
   fdatacols[int1].cursor:= fcellcursor;
  end;
+ fitemlist.updatelayout;
  repeat
   inherited;
   bo1:= false;
