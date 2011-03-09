@@ -870,7 +870,7 @@ var
  int1: integer;
 begin
  int1:= value;
-// tcustomlistview(fgrid).limitcellwidth(int1);
+ tcustomlistview(fgrid).limitcellwidth(int1);
  inherited setwidth(int1);
  tcustomlistview(fgrid).cellwidth:= fwidth;
 end;
