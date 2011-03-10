@@ -514,9 +514,31 @@ begin
  glend;
 end;
 
+procedure drawlines(const gc: gcty; const points: pfpointty;
+                                 const count: integer; const close: boolean);
+var
+ po1: pfpointty;
+ int1,int2: integer;
+begin
+ int2:= oglgcty(gc.platformdata).d.sourceheight;
+ if close then begin
+  int1:= gl_line_loop;
+ end
+ else begin
+  int1:= gl_line;
+ end;
+ glbegin(int1);
+ po1:= points;
+ for int1:= count-1 downto 0 do begin
+  glvertex2f(po1^.x,int2-po1^.y);
+  inc(po1);
+ end;
+ glend;
+end;
+
 procedure gdi_drawellipse(var drawinfo: drawinfoty);
 begin
- gdinotimplemented;
+ segmentellipsef(drawinfo,@drawlines);
 end;
 
 procedure gdi_drawarc(var drawinfo: drawinfoty);

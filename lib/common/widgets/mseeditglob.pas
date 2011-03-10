@@ -109,11 +109,23 @@ const
  invalidcell: gridcoordty = (col: invalidaxis; row: invalidaxis);
  bigcoord: gridcoordty = (col: bigint; row: bigint);
 
-function makegridcoord(col: integer; row: integer): gridcoordty;
+function makegridcoord(col: integer; row: integer): gridcoordty;                               {$ifdef FPC}inline;{$endif}
+                               {$ifdef FPC}inline;{$endif}
+function mgc(col: integer; row: integer): gridcoordty;                               {$ifdef FPC}inline;{$endif}
+                               {$ifdef FPC}inline;{$endif}
 function makegridsize(colcount: integer; rowcount: integer): gridsizety;
+                               {$ifdef FPC}inline;{$endif}
+function mgs(colcount: integer; rowcount: integer): gridsizety;
+                               {$ifdef FPC}inline;{$endif}
 function makegridrect(const pos: gridcoordty; const size: gridsizety): gridrectty;  overload;
+                               {$ifdef FPC}inline;{$endif}
+function mgr(const pos: gridcoordty; const size: gridsizety): gridrectty;  overload;
+                               {$ifdef FPC}inline;{$endif}
 function makegridrect(const start,stop: gridcoordty): gridrectty;  overload;
                   //normalized rect, includes start and stop
+function mgr(const start,stop: gridcoordty): gridrectty;  overload;
+                  //normalized rect, includes start and stop
+
 function gridcoordisequal(const a,b: gridcoordty): boolean;
 
 function canstatvalue(const editoptions: optionseditty;
@@ -150,6 +162,12 @@ begin
  result.row:= row;
 end;
 
+function mgc(col: integer; row: integer): gridcoordty;
+begin
+ result.col:= col;
+ result.row:= row;
+end;
+
 function gridcoordisequal(const a,b: gridcoordty): boolean;
 begin
  result:= (a.col = b.col) and (a.row = b.row);
@@ -161,13 +179,45 @@ begin
  result.rowcount:= rowcount;
 end;
 
+function mgs(colcount: integer; rowcount: integer): gridsizety;
+begin
+ result.colcount:= colcount;
+ result.rowcount:= rowcount;
+end;
+
 function makegridrect(const pos: gridcoordty; const size: gridsizety): gridrectty;  overload;
 begin
  result.pos:= pos;
  result.size:= size;
 end;
 
+function mgr(const pos: gridcoordty; const size: gridsizety): gridrectty;  overload;
+begin
+ result.pos:= pos;
+ result.size:= size;
+end;
+
 function makegridrect(const start,stop: gridcoordty): gridrectty;  overload;
+begin
+ if stop.col >= start.col then begin
+  result.col:= start.col;
+  result.colcount:= stop.col - start.col + 1;
+ end
+ else begin
+  result.col:= stop.col;
+  result.colcount:= start.col - stop.col + 1;
+ end;
+ if stop.row >= start.row then begin
+  result.row:= start.row;
+  result.rowcount:= stop.row - start.row + 1;
+ end
+ else begin
+  result.row:= stop.row;
+  result.rowcount:= start.row - stop.row + 1;
+ end;
+end;
+
+function mgr(const start,stop: gridcoordty): gridrectty;  overload;
 begin
  if stop.col >= start.col then begin
   result.col:= start.col;

@@ -59,7 +59,10 @@ type
   datapo: pstripety;
  end;
  pregioninfoty = ^regioninfoty;
-  
+
+ pointsfprocty = procedure(const gc: gcty; const points: pfpointty;
+                                 const count: integer; const close: boolean);
+ 
 procedure gdinotimplemented;
 function gdi_regiontorects(const aregion: regionty): rectarty;
 
@@ -78,6 +81,9 @@ procedure gdi_regaddregion(var drawinfo: drawinfoty);
 procedure gdi_regintersectrect(var drawinfo: drawinfoty);
 procedure gdi_regintersectregion(var drawinfo: drawinfoty);
 
+procedure segmentellipsef(var drawinfo: drawinfoty;
+                      const segmentsproc: pointsfprocty);
+                      
 {$ifdef mse_debugregion}
 procedure dumpregion(const atext: string; const aregion: regionty);
 {$endif}
@@ -85,7 +91,7 @@ procedure dumpregion(const atext: string; const aregion: regionty);
 implementation
 //todo: optimize, especially memory handling, use changebuffer
 uses
- msesysutils,sysutils;
+ msesysutils,sysutils,math;
  
 type
  regopty = (reop_add,reop_sub,reop_intersect);
@@ -1146,5 +1152,71 @@ begin
   regionop(pregioninfoty(source)^,pregioninfoty(dest)^,reop_intersect);
  end;
 end;
+
+procedure segmentellipsef(var drawinfo: drawinfoty;
+                      const segmentsproc: pointsfprocty);
+var
+ count: integer;
+ po1: pfpointty;
+ ox,oy,x1,y1,si,co,a: double;
+ do1: double;
+ int1: integer;
+begin
+ with drawinfo,drawinfo.rect.rect^ do begin
+  count:= 2;
+  if cx = 0 then begin
+   allocbuffer(buffer,2*sizeof(po1^));
+   po1:= buffer.buffer;
+   po1^.x:= x;
+   po1^.y:= y;
+   inc(po1);
+   po1^.x:= x;
+   po1^.y:= y+cy;
+  end
+  else begin
+   if cy = 0 then begin
+    allocbuffer(buffer,2*sizeof(po1^));
+    po1:= buffer.buffer;
+    po1^.x:= x;
+    po1^.y:= y;
+    inc(po1);
+    po1^.x:= x+cx;
+    po1^.y:= y;
+   end
+   else begin
+    int1:= abs(cx);
+    if abs(cy) > int1 then begin
+     int1:= abs(cy);
+    end;
+    count:= ceil((0.5*pi)/arccos((int1-1)/int1))*4; //one pixel resolution
+    if count = 0 then begin
+     count:= 4;
+    end;
+    allocbuffer(buffer,count*sizeof(po1^));
+    a:= cy/cx;
+    oy:= y+cy/2;
+    do1:= cx/2;
+    x1:= do1;
+    y1:= 0;
+    ox:= x+do1;
+    do1:= 2*pi/count;
+    si:= sin(do1);
+    co:= cos(do1);
+    po1:= buffer.buffer;
+    po1^.x:= x1+ox;
+    po1^.y:= oy;
+    for int1:= count-2 downto 0 do begin
+     do1:= x1*co - y1*si;
+     y1:= y1*co + x1*si;
+     x1:= do1;
+     inc(po1);
+     po1^.x:= x1+ox;
+     po1^.y:= y1*a+oy;   
+    end;
+   end;
+  end;
+  segmentsproc(gc,buffer.buffer,count,true);
+ end;
+end;                      
 
 end.
