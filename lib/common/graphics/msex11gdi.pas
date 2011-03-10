@@ -11,11 +11,16 @@ unit msex11gdi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
 uses
-{$ifdef FPC}xlib{$else}Xlib{$endif},
- msegraphics,mseguiglob,msestrings,msegraphutils,mseguiintf,msetypes;
+ {$ifdef FPC}xlib{$else}Xlib{$endif},xft,
+ {$ifdef FPC}x,xutil,dynlibs{$endif},
+ msegraphics,mseguiglob,msestrings,msegraphutils,mseguiintf,msetypes,
+ msectypes,xrender;
 
 procedure init(const adisp: pdisplay; const avisual: msepvisual;
                  const adepth: integer);
+function hasxft: boolean;
+function fontdatatoxftpat(const fontdata: fontdataty; const highres: boolean): pfcpattern;
+procedure getxftfontdata(po: pxftfont; var drawinfo: drawinfoty);
  
 function x11getgdifuncs: pgdifunctionaty;
 function x11creategc(paintdevice: paintdevicety; const akind: gckindty;
@@ -24,10 +29,6 @@ function x11regiontorects(const aregion: regionty): rectarty;
 function x11getdefaultfontnames: defaultfontnamesty;
 procedure x11initdefaultfont;
 
-implementation
-uses
- {$ifdef FPC}x,xutil,dynlibs{$endif},xft,xrender,
-          msesys,msesonames,msectypes,sysutils;
 {$ifdef FPC}
  {$macro on}
  {$define xchar2b:=txchar2b}
@@ -197,11 +198,13 @@ var
               format:longint):PXRenderPictFormat; cdecl;
 
 
+implementation
+uses
+ msesys,msesonames,sysutils;
+
+
 (*
-function hasxft: boolean;
 //function fontdatatoxftname(const fontdata: fontdataty): string;
-function fontdatatoxftpat(const fontdata: fontdataty; const highres: boolean): pfcpattern;
-procedure getxftfontdata(po: pxftfont; var drawinfo: drawinfoty);
 *)
 type
  tsimplebitmap1 = class(tsimplebitmap);
@@ -2514,6 +2517,11 @@ begin
  with drawinfo.regionoperation do begin
   xsubtractregion(region(dest),region(source),region(dest));
  end;
+end;
+
+function hasxft: boolean;
+begin
+ result:= fhasxft;
 end;
 
 function getxftlib: boolean;
