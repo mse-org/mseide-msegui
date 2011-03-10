@@ -15,7 +15,7 @@ unit mseopenglgdi;
 
 interface
 uses
- msegl,{$ifdef unix}mseglx,x,xlib,xutil,{$else}windows,{$endif}
+ msegl,mseglu,{$ifdef unix}mseglx,x,xlib,xutil,{$else}windows,{$endif}
  msegraphics,msetypes,msegraphutils,mseguiglob;
 
 type
@@ -126,6 +126,7 @@ type
   gclineoptions: lineoptionsty;
   sourceheight: integer;
   ftglfont: ftglfontty;
+  tess: pglutesselator;
  end;
 
  {$if sizeof(oglgcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$endif}
@@ -184,6 +185,7 @@ begin
  with oglgcty(gc.platformdata).d do begin
   pd:= winid;
   sourceheight:= sourceviewport.cy;
+  tess:= glunewtess();
  end;
  makecurrent(gc);
  glclearstencil(0);
@@ -351,6 +353,7 @@ end;
 procedure gdi_destroygc(var drawinfo: drawinfoty); //gdifunc
 begin
  with oglgcty(drawinfo.gc.platformdata).d do begin
+  gludeletetess(tess);
 {$ifdef unix}
   glxmakecurrent(fdpy,0,nil);
   glxdestroycontext(fdpy,fcontext);
@@ -564,8 +567,21 @@ begin
 end;
 
 procedure gdi_fillpolygon(var drawinfo: drawinfoty);
+var
+ int1: integer;
 begin
- gdinotimplemented;
+ with drawinfo.points,oglgcty(drawinfo.gc.platformdata).d do begin
+  glutesscallback(tess, glu_tess_begin, tcallback(glbegin));
+  glutesscallback(tess, glu_tess_vertex, tcallback(glvertex3dv));
+  glutesscallback(tess, glu_tess_end, tcallback(glend));
+//  gluTessCallback(tess, GLU_TESS_COMBINE, myCombine);
+
+  glutessbeginpolygon(tess,@drawinfo.gc);
+  glutessbegincontour(tess);
+  glutessendcontour(tess);
+  glutessendpolygon(tess);
+
+ end;
 end;
 
 procedure gdi_drawstring16(var drawinfo: drawinfoty);
