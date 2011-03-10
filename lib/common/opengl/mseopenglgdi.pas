@@ -62,6 +62,14 @@ uses
 type
  tcanvas1 = class(tcanvas);
  
+ gluvertexty = packed record
+  x: double;
+  y: double;
+  z: double;
+ end;
+ pgluvertexty = ^gluvertexty;
+ ppgluvertexty = ^pgluvertexty;
+ 
  ftglfontty = record
   handle: pftglfont;
  end;
@@ -565,22 +573,96 @@ procedure gdi_fillarc(var drawinfo: drawinfoty);
 begin
  gdinotimplemented;
 end;
+var
+ testvar: pchar;
+
+procedure tesserror(err: glenum); {$ifdef mswindows}stdcall;{$else}cdecl;{$endif}
+begin
+ testvar:= gluerrorstring(err);
+end;
+
+type
+ vertexpoar4ty = array[0..3] of pgluvertexty;
+ pvertexpoar4ty = ^vertexpoar4ty;
+ glfloatar4ty = array[0..3] of glfloat;
+ pglfloatar4ty = ^glfloatar4ty;
+
+var
+ tessbuffer: array of pgluvertexty;
+ tessbufferindex: integer;
+
+function gettessbuffer: pgluvertexty;
+var
+ int1: integer;
+begin
+ if tessbufferindex > high(tessbuffer) then begin
+  setlength(tessbuffer,high(tessbuffer)*2+32);
+  for int1:= tessbufferindex to high(tessbuffer) do begin
+   getmem(tessbuffer[int1],sizeof(gluvertexty));
+  end;
+  result:= tessbuffer[tessbufferindex];
+ end;
+ result:= tessbuffer[tessbufferindex];
+ inc(tessbufferindex);
+end;
+
+procedure freetessbuffer;
+var
+ int1: integer;
+begin
+ for int1:= high(tessbuffer) downto 0 do begin
+  freemem(tessbuffer[int1]);
+ end;
+end; 
+
+procedure tesscombine(coords: pgluvertexty;
+                      vertex_data: pvertexpoar4ty;
+                      weight: pglfloatar4ty;
+                      outdata: ppgluvertexty;
+                      polygon_data: pointer);
+                           {$ifdef mswindows}stdcall;{$else}cdecl;{$endif}
+var
+ po1: pgluvertexty;
+begin
+// po1:= gettessbuffer; //not used
+// outdata^:= po1;
+ outdata^:= coords;
+end;
 
 procedure gdi_fillpolygon(var drawinfo: drawinfoty);
 var
  int1: integer;
+ do1: double;
+ vertex: gluvertexty;
+ po1: ppointty;
+ po2: pgluvertexty;
 begin
  with drawinfo.points,oglgcty(drawinfo.gc.platformdata).d do begin
+  glutesscallback(tess, glu_tess_error, tcallback(@tesserror));
   glutesscallback(tess, glu_tess_begin, tcallback(glbegin));
   glutesscallback(tess, glu_tess_vertex, tcallback(glvertex3dv));
+  glutesscallback(tess, glu_tess_combine_data, tcallback(@tesscombine));
   glutesscallback(tess, glu_tess_end, tcallback(glend));
-//  gluTessCallback(tess, GLU_TESS_COMBINE, myCombine);
-
+  po1:= points;
+  allocbuffer(drawinfo.buffer,count*sizeof(po2^));
+  tessbufferindex:= 0;
+  po2:= drawinfo.buffer.buffer;
+  do1:= sourceheight;
   glutessbeginpolygon(tess,@drawinfo.gc);
   glutessbegincontour(tess);
+  for int1:= count-1 downto 0 do begin
+   with po2^ do begin
+    x:= po1^.x;
+    y:= do1-po1^.y;
+    z:= 0;
+   end;
+   glutessvertex(tess,p3darray(po2)^,po2);
+   inc(po1);
+   inc(po2);
+  end;
   glutessendcontour(tess);
   glutessendpolygon(tess);
-
+  testvar:= gluerrorstring(glgeterror());
  end;
 end;
 
@@ -855,4 +937,6 @@ initialization
 // fontcache:= tglfontcache.create;
 //finalization           
 // fontcache.free;  //finalization order not guaranteed
+finalization
+ freetessbuffer;
 end.

@@ -85,6 +85,7 @@ type
   T16dArray = array [0..15] of GLdouble;
   TCallBack = procedure;
   T3dArray = array [0..2] of GLdouble;
+  p3darray = ^t3darray;
   T4pArray = array [0..3] of Pointer;
   T4fArray = array [0..3] of GLfloat;
   PPointer = ^Pointer;

@@ -1030,6 +1030,7 @@ function registergdi(const agdifuncs: pgdifunctionaty): integer;
 procedure freefontdata(var drawinfo: drawinfoty);
 
 procedure allocbuffer(var buffer: bufferty; size: integer);
+function replacebuffer(var buffer: bufferty; size: integer): pointer;
 procedure freebuffer(var buffer: bufferty);
 
 procedure gdierrorlocked(error: gdierrorty; const text: string = ''); overload;
@@ -1242,6 +1243,13 @@ begin
   getmem(buffer.buffer,size);
   buffer.size:= size;
  end;
+end;
+
+function replacebuffer(var buffer: bufferty; size: integer): pointer;
+begin
+ result:= buffer.buffer;
+ getmem(buffer.buffer,size);
+ buffer.size:= size; 
 end;
 
 procedure gdierrorlocked(error: gdierrorty; const text: string = ''); overload;
