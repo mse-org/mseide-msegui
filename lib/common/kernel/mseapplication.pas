@@ -406,6 +406,8 @@ function getclientname(const avalue: tobject;
                    const aindex: integer): string;
 begin
  if avalue is tcomponent then begin
+  result:= ownernamepath(tcomponent(avalue));
+ {
   with tcomponent(avalue) do begin
    if owner <> nil then begin
     if not (csdesigning in componentstate) or 
@@ -420,6 +422,7 @@ begin
     result:= '';
    end;
   end;
+  }
  end
  else begin
   result:= inttostr(aindex)+'<'+avalue.classname+'>';

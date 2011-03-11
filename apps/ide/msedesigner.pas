@@ -3890,6 +3890,9 @@ begin //loadformfile
      finally
       reader.free;
      end;
+     if modules.findmodulebyname(modulename) <> nil then begin
+      raise exception.create('A module "'+modulename+'" is already open.');
+     end;
      stream2.Position:= 0;
      loadingdesignerbefore:= loadingdesigner;
      loadingdesigner:= self;
