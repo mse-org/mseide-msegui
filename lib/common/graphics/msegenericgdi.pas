@@ -550,6 +550,9 @@ var
 const
  endmark = maxint-1; 
 begin
+{$ifdef mse_debugregion}
+ dumpregion('beforesplit ',ptruint(@reg));
+{$endif}
  splitstripes(reg,astripestart,stripe,psb,psbbelowref,stripeco,rectco);
 {$ifdef mse_debugregion}
  dumpregion('split ',ptruint(@reg));
@@ -825,6 +828,9 @@ begin
    datasize:= datasize-ext3*sizeof(stripeheaderty);
   end;
  end;
+{$ifdef mse_debugregion}
+ dumpregion('afterstripeop ',ptruint(@reg));
+{$endif}
 end;
 
 procedure regionop(const source: regioninfoty; var dest: regioninfoty;
@@ -1085,7 +1091,10 @@ end;
 procedure gdi_regionisempty(var drawinfo: drawinfoty); //gdifunc
 begin
  with pregioninfoty(drawinfo.regionoperation.source)^ do begin
-  drawinfo.regionoperation.dest:= rectcount;
+  drawinfo.regionoperation.dest:= 0;
+  if rectcount = 0 then begin
+   drawinfo.regionoperation.dest:= 1;
+  end;
  end;
 end;
 

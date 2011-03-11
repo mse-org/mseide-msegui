@@ -625,6 +625,7 @@ var
  po1: pgluvertexty;
 begin
 // po1:= gettessbuffer; //not used
+// po1^:= coords^;
 // outdata^:= po1;
  outdata^:= coords;
 end;
