@@ -1082,6 +1082,7 @@ begin
    end;
    try
     if fdropdownwidget.show(true,fintf.getwidget.window) = mr_ok then begin
+     fintf.geteditor.forcecaret:= false;
      setdropdowntext(idropdownwidget(fintf).getdropdowntext(fdropdownwidget),
                                      true,false,fselectkey);
     end;
@@ -1242,6 +1243,7 @@ begin
       end;
       fselectkey:= key_none;
       show(int1,fdropdownrowcount,int2,str1);
+      fintf.geteditor.forcecaret:= false;
       self.itemselected(int2,fselectkey);
      end;
     finally

@@ -1666,9 +1666,9 @@ type
    property focusedchildbefore: twidget read ffocusedchildbefore;
 
    function mouseeventwidget(const info: mouseeventinfoty): twidget;
-   function checkdescendent(widget: twidget): boolean;
+   function checkdescendent(awidget: twidget): boolean;
                     //true if widget is descendent or self
-   function checkancestor(widget: twidget): boolean;
+   function checkancestor(awidget: twidget): boolean;
                     //true if widget is ancestor or self
    function containswidget(awidget: twidget): boolean;
 
@@ -1876,6 +1876,7 @@ type
    fsizeerrorcount: integer;
    fmoving: integer;
    ffocusedwidget: twidget;
+   fenteredwidget: twidget;
    fcaller: twidget; //used in twidget.doshortcut
    fmodalinfopo: pmodalinfoty;
    foptions: windowoptionsty;
@@ -9157,28 +9158,28 @@ begin
  end;
 end;
 
-function twidget.checkdescendent(widget: twidget): boolean;
+function twidget.checkdescendent(awidget: twidget): boolean;
 begin
  result:= false;
- while widget <> nil do begin
-  if widget = self then begin
+ while awidget <> nil do begin
+  if awidget = self then begin
    result:= true;
    break;
   end;
-  widget:= widget.fparentwidget;
+  awidget:= awidget.fparentwidget;
  end;
 end;
 
-function twidget.checkancestor(widget: twidget): boolean;
+function twidget.checkancestor(awidget: twidget): boolean;
                   //true if widget is ancestor or self
 var
  widget1: twidget;
 begin
  result:= false;
- if widget <> nil then begin
+ if awidget <> nil then begin
   widget1:= self;
   while widget1 <> nil do begin
-   if widget1 = widget then begin
+   if widget1 = awidget then begin
     result:= true;
     break;
    end;
@@ -12903,6 +12904,7 @@ begin
     end;
     while (widget1 <> nil) and (widget1 <> widget) and 
                 not widget1.checkdescendent(widget) do begin
+     fenteredwidget:= widget1.fparentwidget;
      if not (csdestroying in widget1.componentstate) then begin
       widget1.internaldodeactivate;
       if ffocuscount <> focuscountbefore then begin
@@ -12913,7 +12915,7 @@ begin
        exit;
       end;
      end;
-     widget1:= widget1.fparentwidget;
+     widget1:= fenteredwidget;
     end;
    end;
    if (widget <> nil) and not widget.canfocus then begin
@@ -12921,9 +12923,12 @@ begin
    end;
    ffocusedwidget:= widget;
    if widget <> nil then begin
-    widgetar:= widget.getrootwidgetpath;
+    widgetar:= widget.getrootwidgetpath; //new focus
     int2:= length(widgetar);
     if widget1 <> nil then begin
+     if widget1.checkancestor(fenteredwidget) then begin
+      widget1:= fenteredwidget;
+     end;
      for int1:= 0 to high(widgetar) do begin
       if widgetar[int1] = widget1 then begin
        int2:= int1;    //common ancestor
@@ -12931,10 +12936,10 @@ begin
       end;
      end;
     end;
- //   bo1:= ws_active in fowner.fwidgetstate;
     bo1:= appinst.factivewindow = self;
     for int1:= int2-1 downto 0 do begin
-     widgetar[int1].internaldoenter;
+     fenteredwidget:= widgetar[int1];
+     fenteredwidget.internaldoenter;
      if ffocuscount <> focuscountbefore then begin
       exit;
      end;
@@ -12946,6 +12951,9 @@ begin
      end;
     end;
     ffocusedwidget.internaldofocus;
+   end
+   else begin
+    fenteredwidget:= nil;
    end;
    fowner.dofocuschanged(focusedwidgetbefore,ffocusedwidget);
   finally

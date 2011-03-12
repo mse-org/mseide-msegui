@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -985,7 +985,7 @@ begin
   accepted:= fintf.getwidget.canclose(nil);
  end;
 end;
-
+var testvar: twidgetgrid;
 procedure twidgetcol.docellfocuschanged(enter: boolean;
                      const cellbefore: gridcoordty; var newcell: gridcoordty;
                      const selectaction: focuscellactionty);
@@ -997,6 +997,7 @@ var
  bo1: boolean;
  
 begin
+testvar:= twidgetgrid(fgrid);
  with twidgetgrid(fgrid) do begin
   if ffocuslock > 0 then begin
    if not enter then begin
@@ -1046,10 +1047,10 @@ begin
      widget1:= fintf.getwidget;
      with widget1 do begin
       visible:= true;
-      if {(selectaction in [fca_focusin,fca_entergrid,fca_focusinshift]) and}
-         canfocus and tcustomwidgetgrid(fgrid).entered and 
-           not (tcustomwidgetgrid(fgrid).fcontainer1.entered or 
-                tcustomwidgetgrid(fgrid).fcontainer3.entered) then begin
+      if canfocus and tcustomwidgetgrid(fgrid).entered and 
+            not ({(fwindow.focusedwidget <> fwidgetdummy) and}
+             (fcontainer1.checkdescendent(fwindow.focusedwidget) or
+              fcontainer3.checkdescendent(fwindow.focusedwidget))) then begin
        setfocus(fgrid.active);
       end;
      end;
@@ -2672,8 +2673,11 @@ end;
 procedure tcustomwidgetgrid.dofocus;
 begin
  inherited;
- if (factivewidget <> nil) and factivewidget.canfocus then begin
-  factivewidget.setfocus(false);
+ if (factivewidget <> nil) and (factivewidget <> fwidgetdummy) then begin
+  factivewidget.visible:= true;
+  if factivewidget.canfocus then begin
+   factivewidget.setfocus(false);
+  end;
  end;
 end;
 
@@ -2867,7 +2871,8 @@ begin
  try
   inherited;
  finally;
-  fmouseinfopo:= @info;
+//  fmouseinfopo:= @info;
+  fmouseinfopo:= nil;
  end;
  if (info.eventkind = ek_buttonpress) and 
                     (factivewidget <> nil) and entered then begin
@@ -3129,7 +3134,9 @@ end;
 procedure tcustomwidgetgrid.dokeydown(var info: keyeventinfoty);
 begin
  if not (es_child in info.eventstate) or 
-         (window.focusedwidget = factivewidget) or (factivewidget = nil) then begin
+         (window.focusedwidget = factivewidget) or 
+         (factivewidget = nil) and 
+          not (fcontainer1.entered or fcontainer3.entered) then begin
   inherited;
  end;
 end;

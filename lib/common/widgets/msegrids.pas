@@ -1921,7 +1921,8 @@ type
                                  const event: objecteventty); override;
    procedure loaded; override;
    procedure doexit; override;
-   procedure dofocus; override;
+   procedure doenter; override;
+//   procedure dofocus; override;
    procedure doactivate; override;
    procedure dodeactivate; override;
    procedure activechanged; override;
@@ -11928,6 +11929,14 @@ begin
  end;
 end;
 
+procedure tcustomgrid.doenter;
+begin
+ inherited;
+ if og_focuscellonenter in foptionsgrid then begin
+  focuscell(ffocusedcell,fca_entergrid);
+ end;
+end;
+{
 procedure tcustomgrid.dofocus;
 begin
  inherited;
@@ -11935,7 +11944,7 @@ begin
   focuscell(ffocusedcell,fca_entergrid);
  end;
 end;
-
+}
 procedure tcustomgrid.initnewcomponent(const ascale: real);
 begin
  ffixrows.count:= 1;
