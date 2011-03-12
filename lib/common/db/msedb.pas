@@ -161,7 +161,7 @@ type
   function getinstance: tfield;
  end;
 
- providerflag1ty = (pf1_refresh);
+ providerflag1ty = (pf1_refreshinsert,pf1_refreshupdate);
  providerflags1ty = set of providerflag1ty;
  
  imsefield = interface(inullinterface)['{259AB385-E638-49D6-8C0E-688BE164D130}']

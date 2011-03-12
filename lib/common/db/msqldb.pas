@@ -692,7 +692,7 @@ type
     procedure applyupdate(const cancelonerror: boolean); override;
     procedure applyupdates(const maxerrors: integer;
                    const cancelonerror: boolean); override;
-    function refreshrecquery: string;
+    function refreshrecquery(const update: boolean): string;
     function updaterecquery{(const refreshfieldvalues: boolean)} : string;
     function insertrecquery{(const refreshfieldvalues: boolean)} : string;
     function deleterecquery : string;
@@ -3304,28 +3304,32 @@ begin
  setlength(sql_where,length(sql_where)-5);
  result := 'update ' + FTableName + ' set ' + sql_set + ' where ' + sql_where;
 // if refreshfieldvalues then begin
-  result:= result + refreshrecquery;
+  result:= result + refreshrecquery(true);
 // end;
 end;
 
-function tsqlquery.refreshrecquery: string;
+function tsqlquery.refreshrecquery(const update: boolean): string;
 var
  int1,int2: integer;
  intf1: imsefield;
  field1: tfield;
+ flags1: providerflags1ty;
 begin
  result:= '';
  int2:= 0;
  for int1:= 0 to fields.count - 1 do begin
   field1:= fields[int1];
   if (field1.fieldkind = fkdata) and 
-         getcorbainterface(field1,typeinfo(imsefield),intf1) and 
-         (pf1_refresh in intf1.getproviderflags1) then begin
-   if int2 = 0 then begin
-    result:= 'returning ';
+    getcorbainterface(field1,typeinfo(imsefield),intf1) then begin
+   flags1:= intf1.getproviderflags1;
+   if (pf1_refreshupdate in flags1) and update or 
+      (pf1_refreshinsert in flags1) and not update then begin
+    if int2 = 0 then begin
+     result:= 'returning ';
+    end;
+    result:= result + field1.fieldname + ',';
+    inc(int2);
    end;
-   result:= result + field1.fieldname + ',';
-   inc(int2);
   end;
  end;
  if int2 > 0 then begin
@@ -3363,7 +3367,7 @@ begin
  result := 'insert into ' + FTableName + ' (' + sql_fields + ') values (' +
                      sql_values + ')';
 // if refreshfieldvalues then begin
-  result:= result + ' '+refreshrecquery;
+  result:= result + ' '+refreshrecquery(false);
 // end;
 end;
 

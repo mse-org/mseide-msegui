@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2011-03-12
+ tmse*field.providerflags1 pf1_refresh -> pf1_refreshinsert, pf1_refreshupdate.
 2011-02-28
  Font handling functions moved to graphics/msefont.pas.
  

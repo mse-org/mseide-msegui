@@ -29,7 +29,8 @@ type
 
  dbnavigbuttonty = (dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
            dbnb_delete,dbnb_edit,dbnb_post,dbnb_cancel,dbnb_refresh,
-           dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find);
+           dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,
+           dbnb_dialog);
  dbnavigbuttonsty = set of dbnavigbuttonty;
  
 const
@@ -43,7 +44,10 @@ const
 type
 
  dbnavigatoroptionty = (dno_confirmdelete,dno_append,dno_shortcuthint,
-                        dno_norefreshrecno);
+                        dno_norefreshrecno,
+                        dno_dialogifinactive,dno_nodialogifempty,
+                        dno_nodialogifnoeditmode,dno_nodialogifreadonly,
+                        dno_postbeforedialog);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
  optioneditdbty = (oed_autopost,oed_nofilteredit,oed_nofilterminedit,
                    oed_nofiltermaxedit,oed_nofindedit,
@@ -76,6 +80,7 @@ type
                const afiltered: boolean);
   function getwidget: twidget;
   function getnavigoptions: dbnavigatoroptionsty;
+  procedure dodialogexecute;
  end;
 
  tnavigdatalink = class(tmsedatalink)
@@ -99,6 +104,7 @@ type
    fvisiblebuttons: dbnavigbuttonsty;
    fshortcuts: array[dbnavigbuttonty] of shortcutty;
    foptions: dbnavigatoroptionsty;
+   fondialogexecute: notifyeventty;
    function getdatasource: tdatasource;
    procedure setdatasource(const Value: tdatasource);
    procedure setvisiblebuttons(const avalue: dbnavigbuttonsty);
@@ -107,6 +113,8 @@ type
    procedure setoptions(const avalue: dbnavigatoroptionsty);
    function getbuttonface: tface;
    procedure setbuttonface(const avalue: tface);
+   function getdialoghint: msestring;
+   procedure setdialoghint(const avalue: msestring);
   protected
    procedure inithints;
    procedure doexecute(const sender: tobject);
@@ -117,6 +125,7 @@ type
    procedure setactivebuttons(const abuttons: dbnavigbuttonsty;
                              const afiltered: boolean);
    function getnavigoptions: dbnavigatoroptionsty;
+   procedure dodialogexecute;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override; 
@@ -148,8 +157,24 @@ type
                   write fshortcuts[dbnb_cancel] default ord(key_none);
    property shortcut_refresh: shortcutty read fshortcuts[dbnb_refresh]
                   write fshortcuts[dbnb_refresh] default ord(key_none);
+   property shortcut_filter: shortcutty read fshortcuts[dbnb_filter]
+                  write fshortcuts[dbnb_filter] default ord(key_none);
+   property shortcut_filtermin: shortcutty read fshortcuts[dbnb_filtermax]
+                  write fshortcuts[dbnb_filtermin] default ord(key_none);
+   property shortcut_filtermax: shortcutty read fshortcuts[dbnb_filtermax]
+                  write fshortcuts[dbnb_filtermax] default ord(key_none);
+   property shortcut_filteronoff: shortcutty read fshortcuts[dbnb_filteronoff]
+                  write fshortcuts[dbnb_filteronoff] default ord(key_none);
+   property shortcut_find: shortcutty read fshortcuts[dbnb_find]
+                  write fshortcuts[dbnb_find] default ord(key_none);
+   property shortcut_dialog: shortcutty read fshortcuts[dbnb_dialog]
+                  write fshortcuts[dbnb_dialog] default ord(key_none);
    property options: dbnavigatoroptionsty read foptions write setoptions 
                   default defaultdbnavigatoroptions;
+   property dialoghint: msestring read getdialoghint write setdialoghint;
+   
+   property ondialogexecute: notifyeventty read fondialogexecute 
+                           write fondialogexecute;
  end;
 
  idbeditfieldlink = interface(inullinterface)
@@ -2150,17 +2175,32 @@ procedure tnavigdatalink.updatebuttonstate;
 var
  bu1: dbnavigbuttonsty;
  bo1: boolean;
+ options1: dbnavigatoroptionsty;
 begin
+ options1:= fintf.getnavigoptions;
  bu1:= [];
+ if dno_dialogifinactive in options1 then begin
+  bu1:= bu1+[dbnb_dialog];
+ end;
  bo1:= false;
  if active then begin
-  bu1:= [dbnb_first,dbnb_prior,dbnb_next,dbnb_last]+
-                 filterdbnavigbuttons;
+  bu1:= bu1+[dbnb_first,dbnb_prior,dbnb_next,dbnb_last]+
+                 filterdbnavigbuttons+[dbnb_dialog];
   if bof then begin
    bu1:= bu1 - [dbnb_first,dbnb_prior];
   end;
   if eof then begin
    bu1:= bu1 - [dbnb_next,dbnb_last];
+  end;
+  if (dno_dialogifinactive in options1) and bof and eof then begin
+   bu1:= bu1 - [dbnb_dialog];
+  end;
+  if (dno_nodialogifnoeditmode in options1) and 
+         not (datasource.state in dseditmodes) then begin
+   bu1:= bu1 - [dbnb_dialog];
+  end;
+  if (dno_nodialogifreadonly in options1) and noedit then begin
+   bu1:= bu1 - [dbnb_dialog];
   end;
   case datasource.state of
    dsfilter: begin
@@ -2273,6 +2313,12 @@ begin
      end;
     end;
     dbnb_filteronoff: filtered:= not filtered;
+    dbnb_dialog: begin
+     if (dno_postbeforedialog in options1) and (state in dseditmodes) then begin
+      post;
+     end;
+     fintf.dodialogexecute;
+    end;
    end;
    if fdscontroller <> nil then begin
     if state = dsfilter then begin
@@ -2321,6 +2367,8 @@ begin
    onexecute:= {$ifdef FPC}@{$endif}doexecute;
   end;
  end;
+ buttons[ord(dbnb_dialog)].imagenr:= ord(stg_ellipsesmall);
+  
  fdatalink:= tnavigdatalink.Create(idbnaviglink(self));
  visiblebuttons:= defaultvisibledbnavigbuttons;
 end;
@@ -2488,6 +2536,23 @@ begin
   end;
   inithints;
  end;
+end;
+
+procedure tdbnavigator.dodialogexecute;
+begin
+ if canevent(tmethod(fondialogexecute)) then begin
+  fondialogexecute(self);
+ end;
+end;
+
+function tdbnavigator.getdialoghint: msestring;
+begin
+ result:= buttons[ord(dbnb_dialog)].hint;
+end;
+
+procedure tdbnavigator.setdialoghint(const avalue: msestring);
+begin
+ buttons[ord(dbnb_dialog)].hint:= avalue;
 end;
 
 { tcustomeditwidgetdatalink }
