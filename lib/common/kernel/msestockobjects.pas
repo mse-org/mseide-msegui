@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -73,7 +73,16 @@ type
  //    60             61          62
   stg_triasmall,stg_tria,stg_triabig,
  //    63             64          65
-  stg_triatopsmall,stg_triatop,stg_triatopbig
+  stg_triatopsmall,stg_triatop,stg_triatopbig,
+ // add by Alexandre Minoshi 
+ //    66             67          68      69               70
+  stg_mmprev, stg_mmnext, stg_mmplay, stg_mmpause, stg_mmplayandpause,
+ //    71
+  stg_mmclear,
+ //    72         73
+  stg_sound, stg_soundoff,
+ //    74             75           76        77         78          79  
+  stg_fullscreen, stg_settings, stg_save, stg_rename, stg_list, stg_listbold
                  );
 
  stockcaptionty = (sc_none,sc_is_invalid,sc_Format_error,sc_Value_is_required,
