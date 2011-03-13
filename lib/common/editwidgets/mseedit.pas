@@ -372,6 +372,7 @@ type
    procedure dofocus; override;
    procedure dodefocus; override;
    procedure dopaint(const canvas: tcanvas); override;
+   procedure doafterpaint(const canvas: tcanvas); override;
    procedure rootchanged; override;
    procedure showhint(var info: hintinfoty); override;
 
@@ -1155,6 +1156,15 @@ begin
  feditor.dopaint(canvas);
 end;
 
+procedure tcustomedit.doafterpaint(const canvas: tcanvas);
+begin
+ if ([oe_focusrectonreadonly,oe_readonly] * optionsedit = 
+        [oe_focusrectonreadonly,oe_readonly]) and focused then begin
+  drawfocusrect(canvas,paintrect);
+ end;
+ inherited;
+end;
+
 procedure tcustomedit.editnotification(var info: editnotificationinfoty);
 begin
  case info.action of
@@ -1583,6 +1593,9 @@ begin
   feditor.updatecaret;
  end;
  cursorchanged;
+ if (oe_focusrectonreadonly in foptionsedit) and focused then begin
+  invalidate;
+ end;
 end;
 
 function tcustomedit.hasselection: boolean;

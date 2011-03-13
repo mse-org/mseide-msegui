@@ -39,6 +39,7 @@ type
                     oe_autoselect, //selectall bei widget enter
                     oe_autoselectonfirstclick,
                     oe_caretonreadonly,
+                    oe_focusrectonreadonly,
                     oe_trimright,
                     oe_trimleft,
                     oe_uppercase,
