@@ -23,7 +23,8 @@ uses
  msewidgetgrid,msedatalist,msetypes,msegrids,msegraphics,mseevent,msekeyboard,
  msegraphedits,msestrings,msegraphutils,mselist,msedropdownlist,
  msescrollbar,msedataedits,msewidgets,msearrayprops,msedb,mselookupbuffer,
- msedialog,mseinplaceedit,msemenus,mseedit,msestat,msegridsglob;
+ msedialog,mseinplaceedit,msemenus,mseedit,msestat,msegridsglob,typinfo
+ {$ifdef mse_with_ifi},mseifiglob,mseificompglob,mseificomp{$endif};
 
 type
 
@@ -113,8 +114,10 @@ type
    procedure setoptions(const avalue: dbnavigatoroptionsty);
    function getbuttonface: tface;
    procedure setbuttonface(const avalue: tface);
-   function getdialoghint: msestring;
-   procedure setdialoghint(const avalue: msestring);
+//   function getdialoghint: msestring;
+//   procedure setdialoghint(const avalue: msestring);
+   function gettoolbutton: ttoolbutton;
+   procedure settoolbutton(const avalue: ttoolbutton);
   protected
    procedure inithints;
    procedure doexecute(const sender: tobject);
@@ -171,8 +174,9 @@ type
                   write fshortcuts[dbnb_dialog] default ord(key_none);
    property options: dbnavigatoroptionsty read foptions write setoptions 
                   default defaultdbnavigatoroptions;
-   property dialoghint: msestring read getdialoghint write setdialoghint;
-   
+//   property dialoghint: msestring read getdialoghint write setdialoghint;
+//   
+   property dialogbutton: ttoolbutton read gettoolbutton write settoolbutton;
    property ondialogexecute: notifyeventty read fondialogexecute 
                            write fondialogexecute;
  end;
@@ -474,9 +478,9 @@ type
    destructor destroy; override;
   published
    property datalink: tstringeditwidgetdatalink read fdatalink write setdatalink;
+   property dropdown;
    property valuedefault;
    property onsetvalue;
-   property dropdown;
    property onbeforedropdown;
    property onafterclosedropdown;
    property oninit;
@@ -895,13 +899,13 @@ type
   published
    property valueoffset; //before value
    property datalink;
+   property dropdown;
    property valuedefault;
    property valueempty;
    property base;
    property bitcount;
    property min;
    property max;
-   property dropdown;
    property onsetvalue;
    property onbeforedropdown;
    property onafterclosedropdown;
@@ -1947,6 +1951,10 @@ type
    function getgridvalues: int64arty;
    procedure setgridvalues(const avalue: int64arty);
    procedure setvalue(const avalue: int64);
+  {$ifdef mse_with_ifi}
+   function getifilink: tifiint64linkcomp;
+   procedure setifilink1(const avalue: tifiint64linkcomp);
+  {$endif}
   protected
    fvalue1: int64;
    fvaluedefault1: int64;
@@ -1962,12 +1970,20 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
 
+  {$ifdef mse_with_ifi}
+   function getifidatalinkintf: iifidatalink; override;
+    //iifidatalink
+   function getifilinkkind: ptypeinfo; override;
+  {$endif}
   public
    constructor create(aowner: tcomponent); override;
    property gridvalue[const index: integer]: int64
         read getgridvalue write setgridvalue; default;
    property gridvalues: int64arty read getgridvalues write setgridvalues;
    property value: int64 read fvalue1 write setvalue default -1;
+{$ifdef mse_with_ifi}
+   property ifilink: tifiint64linkcomp read getifilink write setifilink1;
+{$endif}
    property valuedefault: int64 read fvaluedefault1 write fvaluedefault1 default -1;
    property onsetvalue: setint64eventty read fonsetvalue1 write fonsetvalue1;
  end;
@@ -1988,6 +2004,9 @@ type
 
  tenum64editlb = class(tcustomenum64editlb)
   published
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
    property dropdown;
    property value;
    property valuedefault;
@@ -2040,6 +2059,9 @@ type
 
  tenum64editdb = class(tcustomenum64editdb)
   published
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
    property dropdown;
    property value;
    property valuedefault;
@@ -2109,7 +2131,7 @@ function encoderowstate(const color: integer = -1; const font: integer = -1;
 implementation
 uses
  msestockobjects,mseshapes,msereal,msebits,
- mseactions,mseact,rtlconsts,msedrawtext,sysutils,typinfo;
+ mseactions,mseact,rtlconsts,msedrawtext,sysutils;
 
 type
  tcomponent1 = class(tcomponent);
@@ -2544,7 +2566,7 @@ begin
   fondialogexecute(self);
  end;
 end;
-
+{
 function tdbnavigator.getdialoghint: msestring;
 begin
  result:= buttons[ord(dbnb_dialog)].hint;
@@ -2553,6 +2575,16 @@ end;
 procedure tdbnavigator.setdialoghint(const avalue: msestring);
 begin
  buttons[ord(dbnb_dialog)].hint:= avalue;
+end;
+}
+function tdbnavigator.gettoolbutton: ttoolbutton;
+begin
+ result:= buttons[ord(dbnb_dialog)];
+end;
+
+procedure tdbnavigator.settoolbutton(const avalue: ttoolbutton);
+begin
+ buttons[ord(dbnb_dialog)]:= avalue;
 end;
 
 { tcustomeditwidgetdatalink }
@@ -8610,8 +8642,13 @@ begin
  end;
    //no checktext call
  if accept then begin
-  if not quiet and canevent(tmethod(fonsetvalue1)) then begin
-   fonsetvalue1(self,lint1,accept);
+  if not quiet then begin
+   if canevent(tmethod(fonsetvalue1)) then begin
+    fonsetvalue1(self,lint1,accept);
+   end;
+{$ifdef mse_with_ifi}
+   ifisetvalue(lint1,accept);
+{$endif}  
   end;
   if accept then begin
    value:= lint1;
@@ -8648,6 +8685,26 @@ end;
 procedure tcustomenum64edit.writestatvalue(const writer: tstatwriter);
 begin
  writer.writeint64(valuevarname,value);
+end;
+
+function tcustomenum64edit.getifilink: tifiint64linkcomp;
+begin
+ result:= tifiint64linkcomp(fifilink);
+end;
+
+procedure tcustomenum64edit.setifilink1(const avalue: tifiint64linkcomp);
+begin
+ setifilink0(avalue);
+end;
+
+function tcustomenum64edit.getifidatalinkintf: iifidatalink;
+begin
+ result:= iifidatalink(self); 
+end;
+
+function tcustomenum64edit.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifidatalink);
 end;
 
  { tcustomenum64editlb }

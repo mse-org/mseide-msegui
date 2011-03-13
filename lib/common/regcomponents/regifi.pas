@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,7 +65,8 @@ type
  
 procedure register;
 begin
- registercomponents('Ifi',[tifiactionlinkcomp,tifiintegerlinkcomp,
+ registercomponents('Ifi',[tifiactionlinkcomp,
+       tifiintegerlinkcomp,tifiint64linkcomp,
        tifibooleanlinkcomp,
        tifireallinkcomp,tifidatetimelinkcomp,tifistringlinkcomp,
        tifidropdownlistlinkcomp,tifienumlinkcomp,

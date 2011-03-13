@@ -32,6 +32,9 @@ type
    constructor create(aowner: tcomponent); override;
   published
    property value: commnrty read getvalue write setvalue default cnr_1;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
    property dropdown;
    property onsetvalue: setcommnreventty read readonsetvalue write writeonsetvalue;
    property onbeforedropdown;

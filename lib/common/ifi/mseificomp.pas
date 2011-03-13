@@ -97,6 +97,12 @@ type
    function getintegerval(const alink: iificlient; const aname: string;
                                  var avalue: integer): boolean;
                                     //true if found
+   function setint64val(const alink: iificlient; const aname: string;
+                                 const avalue: int64): boolean;
+                                    //true if found
+   function getint64val(const alink: iificlient; const aname: string;
+                                 var avalue: int64): boolean;
+                                    //true if found
    function setbooleanval(const alink: iificlient; const aname: string;
                                  const avalue: boolean): boolean;
                                     //true if found
@@ -399,10 +405,6 @@ type
    procedure setvalue1(const avalue: integer);
    procedure setmin(const avalue: integer);
    procedure setmax(const avalue: integer);
-//   function getgridvalues: integerarty;
-//   procedure setgridvalues(const avalue: integerarty);
-//   function getgridvalue(const index: integer): integer;
-//   procedure setgridvalue(const index: integer; const avalue: integer);
    function getgriddata: tifiintegerdatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
@@ -418,9 +420,6 @@ type
   public
    constructor create(const aowner: tmsecomponent); override;
    property griddata: tifiintegerdatalist read getgriddata;
-//   property gridvalues: integerarty read getgridvalues write setgridvalues;
-//   property gridvalue[const index: integer]: integer read getgridvalue 
-//                                                             write setgridvalue;
   published
    property value: integer read fvalue write setvalue1 default 0;
    property valuedefault: integer read fvaluedefault 
@@ -428,6 +427,43 @@ type
    property min: integer read fmin write setmin default 0;
    property max: integer read fmax write setmax default maxint;
    property onclientsetvalue: setintegereventty 
+                read fonclientsetvalue write fonclientsetvalue;
+ end;
+
+ tifiint64datalist = class;
+
+ tint64clientcontroller = class(tvalueclientcontroller)
+  private
+   fvalue: int64;
+   fvaluedefault: int64;
+   fmin: int64;
+   fmax: int64;
+   fonclientsetvalue: setint64eventty;
+   procedure setvalue1(const avalue: int64);
+   procedure setmin(const avalue: int64);
+   procedure setmax(const avalue: int64);
+   function getgriddata: tifiint64datalist;
+  protected
+   procedure valuestoclient(const alink: pointer); override;
+   procedure clienttovalues(const alink: pointer); override;
+   procedure setvalue(const sender: iificlient;
+                              var avalue; var accept: boolean); override;
+   function createdatalist: tdatalist; override;
+   function getlistdatatypes: listdatatypesty; override;
+   
+    //istatfile
+   procedure statreadvalue(const reader: tstatreader); override;
+   procedure statwritevalue(const writer: tstatwriter); override;
+  public
+   constructor create(const aowner: tmsecomponent); override;
+   property griddata: tifiint64datalist read getgriddata;
+  published
+   property value: int64 read fvalue write setvalue1 default 0;
+   property valuedefault: int64 read fvaluedefault 
+                                        write fvaluedefault default 0;
+   property min: int64 read fmin write setmin default 0;
+   property max: int64 read fmax write setmax default maxint;
+   property onclientsetvalue: setint64eventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
@@ -802,6 +838,17 @@ type
                                                          write setcontroller;
  end;
 
+ tifiint64linkcomp = class(tifivaluelinkcomp)
+  private
+   function getcontroller: tint64clientcontroller;
+   procedure setcontroller(const avalue: tint64clientcontroller);
+  protected
+   function getcontrollerclass: ificlientcontrollerclassty; override;
+  published
+   property controller: tint64clientcontroller read getcontroller
+                                                         write setcontroller;
+ end;
+
  tifienumlinkcomp = class(tifiintegerlinkcomp)
   private
    function getcontroller: tenumclientcontroller;
@@ -1016,6 +1063,14 @@ end;
    function getdefault: pointer; override;
   public
    constructor create(const aowner: tintegerclientcontroller); reintroduce;
+ end;
+
+ tifiint64datalist = class(tint64datalist)
+  protected
+   fowner: tint64clientcontroller;
+   function getdefault: pointer; override;
+  public
+   constructor create(const aowner: tint64clientcontroller); reintroduce;
  end;
 
  tifibooleandatalist = class(tbooleandatalist)
@@ -1398,6 +1453,38 @@ begin
  end; 
 end;
 
+function tcustomificlientcontroller.setint64val(const alink: iificlient;
+               const aname: string; const avalue: int64): boolean;
+var
+ inst: tobject;
+ prop: ppropinfo;
+ 
+begin
+ inst:= alink.getinstance;
+ prop:= getpropinfo(inst,aname);
+ result:= (prop <> nil) and (prop^.proptype^.kind = tkint64);
+ if result then begin
+  setordprop(inst,prop,avalue);
+ end; 
+end;
+
+function tcustomificlientcontroller.getint64val(
+                     const alink: iificlient; const aname: string;
+                     var avalue: int64): boolean;
+                                    //true if found
+var
+ inst: tobject;
+ prop: ppropinfo;
+ 
+begin
+ inst:= alink.getinstance;
+ prop:= getpropinfo(inst,aname);
+ result:= (prop <> nil) and (prop^.proptype^.kind = tkint64);
+ if result then begin
+  avalue:= getordprop(inst,prop);
+ end; 
+end;
+
 function tcustomificlientcontroller.setbooleanval(const alink: iificlient;
                const aname: string; const avalue: boolean): boolean;
 var
@@ -1511,6 +1598,9 @@ begin
   tkinteger: begin
    getintegerval(iificlient(alink),fapropname,pinteger(fapropvalue)^);
   end;
+  tkint64: begin
+   getint64val(iificlient(alink),fapropname,pint64(fapropvalue)^);
+  end;
   {$ifdef FPC}tkbool{$else}tkenumeration{$endif}: begin
    getbooleanval(iificlient(alink),fapropname,pboolean(fapropvalue)^);
   end;
@@ -1537,6 +1627,18 @@ begin
  case fapropkind of
   tkinteger: begin
    setintegerval(iificlient(alink),fapropname,pinteger(fapropvalue)^);
+  end;
+  tkint64: begin
+   setint64val(iificlient(alink),fapropname,pint64(fapropvalue)^);
+  end;
+  {$ifdef FPC}tkbool{$else}tkenumeration{$endif}: begin
+   setbooleanval(iificlient(alink),fapropname,pboolean(fapropvalue)^);
+  end;
+  tkfloat: begin
+   setrealtyval(iificlient(alink),fapropname,prealty(fapropvalue)^);
+  end;
+  msestringtypekind: begin
+   setmsestringval(iificlient(alink),fapropname,pmsestring(fapropvalue)^);
   end;
  end;
 end;
@@ -2377,6 +2479,105 @@ begin
  result:= [dl_integer];
 end;
 
+{ tint64clientcontroller }
+
+constructor tint64clientcontroller.create(const aowner: tmsecomponent);
+begin
+ fmax:= maxint;
+ inherited create(aowner,tkint64);
+end;
+
+procedure tint64clientcontroller.setvalue1(const avalue: int64);
+begin
+ fvalue:= avalue;
+ change;
+end;
+
+procedure tint64clientcontroller.valuestoclient(const alink: pointer);
+begin
+ setint64val(iificlient(alink),'value',fvalue);
+ setint64val(iificlient(alink),'min',fmin);
+ setint64val(iificlient(alink),'max',fmax);
+ inherited;
+end;
+
+procedure tint64clientcontroller.clienttovalues(const alink: pointer);
+begin
+ inherited;
+ getint64val(iificlient(alink),'value',fvalue);
+end;
+
+procedure tint64clientcontroller.setvalue(const sender: iificlient;
+                                         var avalue; var accept: boolean);
+begin
+ if fowner.canevent(tmethod(fonclientsetvalue)) then begin
+  fonclientsetvalue(self,int64(avalue),accept);
+ end;
+ inherited;
+end;
+
+procedure tint64clientcontroller.setmin(const avalue: int64);
+begin
+ fmin:= avalue;
+ change;
+end;
+
+procedure tint64clientcontroller.setmax(const avalue: int64);
+begin
+ fmax:= avalue;
+ change;
+end;
+{
+function tint64clientcontroller.getgridvalues: int64arty;
+begin
+ result:= nil;
+ getvalar(@getint64valar,result);
+end;
+
+procedure tint64clientcontroller.setgridvalues(const avalue: int64arty);
+begin
+ setvalar(@setint64valar,avalue);
+end;
+
+function tint64clientcontroller.getgridvalue(const index: int64): int64;
+begin
+ result:= 0;
+ getitem(index,@getint64item,result);
+end;
+
+procedure tint64clientcontroller.setgridvalue(const index: int64;
+               const avalue: int64);
+begin
+ setitem(index,@setint64item,avalue);
+end;
+}
+function tint64clientcontroller.getgriddata: tifiint64datalist;
+begin
+ result:= tifiint64datalist(ifigriddata);
+end;
+
+procedure tint64clientcontroller.statreadvalue(const reader: tstatreader);
+begin
+ inherited;
+ value:= reader.readint64(valuevarname,value);
+end;
+
+procedure tint64clientcontroller.statwritevalue(const writer: tstatwriter);
+begin
+ inherited;
+ writer.writeint64(valuevarname,value);
+end;
+
+function tint64clientcontroller.createdatalist: tdatalist;
+begin
+ result:= tifiint64datalist.create(self);
+end;
+
+function tint64clientcontroller.getlistdatatypes: listdatatypesty;
+begin
+ result:= [dl_int64];
+end;
+
 { tbooleanclientcontroller }
 
 constructor tbooleanclientcontroller.create(const aowner: tmsecomponent);
@@ -2777,6 +2978,23 @@ begin
 end;
 
 procedure tifiintegerlinkcomp.setcontroller(const avalue: tintegerclientcontroller);
+begin
+ inherited setcontroller(avalue);
+end;
+
+{ tifiint64linkcomp }
+
+function tifiint64linkcomp.getcontrollerclass: ificlientcontrollerclassty;
+begin
+ result:= tint64clientcontroller;
+end;
+
+function tifiint64linkcomp.getcontroller: tint64clientcontroller;
+begin
+ result:= tint64clientcontroller(inherited controller);
+end;
+
+procedure tifiint64linkcomp.setcontroller(const avalue: tint64clientcontroller);
 begin
  inherited setcontroller(avalue);
 end;
@@ -3405,6 +3623,19 @@ begin
 end;
 
 function tifiintegerdatalist.getdefault: pointer;
+begin
+ result:= @fowner.valuedefault;
+end;
+
+{ tifiint64datalist }
+
+constructor tifiint64datalist.create(const aowner: tint64clientcontroller);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+function tifiint64datalist.getdefault: pointer;
 begin
  result:= @fowner.valuedefault;
 end;

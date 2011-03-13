@@ -96,7 +96,6 @@ type
    property value: colorty read getvalue write setvalue default cl_none;
    property valuedefault: colorty read getvaluedefault
                      write setvaluedefault default cl_none;
-   property dropdown;
    property onsetvalue: setcoloreventty read getonsetvalue write setonsetvalue;
    property frame: tellipsedropdownbuttonframe read getframe write setframe;
    property gridvalue[const index: integer]: colorty
@@ -108,6 +107,9 @@ type
   published
    property value;
    property valuedefault;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
    property dropdown;
    property onsetvalue;
    property frame;

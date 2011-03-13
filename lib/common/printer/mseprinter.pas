@@ -400,6 +400,9 @@ type
   public
    constructor create(aowner: tcomponent); override;
   published
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
    property dropdown;
    property printer: tcustomprinter read fprinter write setprinter;
  end;

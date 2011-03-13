@@ -48,6 +48,9 @@ type
    property min {stored false};
    property max {stored false};
    property kind;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
    property dropdown;
  end;
 

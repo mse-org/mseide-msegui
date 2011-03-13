@@ -72,17 +72,6 @@ type
    fempty_fontstyle: fontstylesty;
    fempty_color: colorty;
    fempty_options: emptyoptionsty;
-{$ifdef mse_with_ifi}
-   fifilink: tifivaluelinkcomp;
-   function getifidatalinkintf: iifidatalink; virtual;
-    //iifidatalink
-   procedure ifisetvalue(var avalue; var accept: boolean);
-   function getifilinkkind: ptypeinfo; virtual;
-   procedure setifilink(const avalue: tifilinkcomp);
-   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
-   function getgriddata: tdatalist;
-   function getvalueprop: ppropinfo;
-{$endif}
    procedure emptychanged;
    
    procedure setstatfile(const Value: tstatfile);
@@ -99,6 +88,17 @@ type
    fgridintf: iwidgetgrid;
    fdatalist: tdatalist;
    fcontrollerintf: idataeditcontroller;
+{$ifdef mse_with_ifi}
+   fifilink: tifivaluelinkcomp;
+   function getifidatalinkintf: iifidatalink; virtual;
+    //iifidatalink
+   procedure ifisetvalue(var avalue; var accept: boolean);
+   function getifilinkkind: ptypeinfo; virtual;
+   procedure setifilink(const avalue: tifilinkcomp);
+   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
+   function getgriddata: tdatalist;
+   function getvalueprop: ppropinfo;
+{$endif}
    procedure setisdb;
    procedure updateedittext(const force: boolean);
    function getgridintf: iwidgetgrid;
@@ -492,6 +492,9 @@ type
   published
    property value;
    property valuedefault;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
    property dropdown;
    property onsetvalue;
    property onbeforedropdown;
@@ -532,12 +535,12 @@ type
    property value;
    property valuedefault;
    property onsetvalue;
-   property dropdown;
-   property onbeforedropdown;
-   property onafterclosedropdown;
 {$ifdef mse_with_ifi}
    property ifilink;
 {$endif}
+   property dropdown;
+   property onbeforedropdown;
+   property onafterclosedropdown;
  end;
 
 const
@@ -589,6 +592,9 @@ type
    property value;
    property valuedefault;
    property onsetvalue;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
    property dropdown;
    property onbeforedropdown;
    property onafterclosedropdown;
@@ -777,6 +783,9 @@ type
    property value;
    property valuedefault;
    property onsetvalue;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
    property dropdown;
    property onbeforedropdown;
    property onafterclosedropdown;
@@ -880,13 +889,13 @@ type
    property min;
    property max;
    property onsetvalue;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
    property dropdown;
    property onbeforedropdown;
    property onafterclosedropdown;
    property oninit;
-{$ifdef mse_with_ifi}
-   property ifilink;
-{$endif}
  end;
  
  tenumtypeedit = class;
@@ -909,6 +918,9 @@ type
    property min;
    property max;
    property onsetvalue;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
    property dropdown;
    property onbeforedropdown;
    property onafterclosedropdown;
@@ -950,6 +962,9 @@ type
    property valueoffset; //before value
    property value;
    property onsetvalue;
+{$ifdef mse_with_ifi}
+   property ifilink;
+{$endif}
    property dropdown;
    property onbeforedropdown;
    property onafterclosedropdown;
@@ -4321,8 +4336,13 @@ begin
   accept:= false;
  end;
  if accept then begin
-  if not quiet and canevent(tmethod(fonsetvalue1)) then begin
-   fonsetvalue1(self,int1,accept);
+  if not quiet then begin
+   if canevent(tmethod(fonsetvalue1)) then begin
+    fonsetvalue1(self,int1,accept);
+   end;
+ {$ifdef mse_with_ifi}
+   ifisetvalue(int1,accept);
+ {$endif}
   end;
   if accept then begin
    value:= int1;
