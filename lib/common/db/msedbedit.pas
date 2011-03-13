@@ -161,7 +161,7 @@ type
    property shortcut_edit: shortcutty read fshortcuts[dbnb_edit]
                   write fshortcuts[dbnb_edit] default ord(key_f2);
    property shortcut_post: shortcutty read fshortcuts[dbnb_post] 
-                  write fshortcuts[dbnb_post] default ord(key_none);
+                  write fshortcuts[dbnb_post] default ord(key_f2);
    property shortcut_cancel: shortcutty read fshortcuts[dbnb_cancel] 
                   write fshortcuts[dbnb_cancel] default ord(key_none);
    property shortcut_refresh: shortcutty read fshortcuts[dbnb_refresh]
@@ -176,6 +176,8 @@ type
                   write fshortcuts[dbnb_filteronoff] default ord(key_none);
    property shortcut_find: shortcutty read fshortcuts[dbnb_find]
                   write fshortcuts[dbnb_find] default ord(key_none);
+   property shortcut_autoedit: shortcutty read fshortcuts[dbnb_autoedit]
+                  write fshortcuts[dbnb_autoedit] default ord(key_none);
    property shortcut_dialog: shortcutty read fshortcuts[dbnb_dialog]
                   write fshortcuts[dbnb_dialog] default ord(key_none);
    property options: dbnavigatoroptionsty read foptions write setoptions 
@@ -2405,6 +2407,7 @@ begin
  fshortcuts[dbnb_next]:= ord(key_pagedown);
  fshortcuts[dbnb_last]:= key_modctrl + ord(key_pagedown);
  fshortcuts[dbnb_edit]:= ord(key_f2);
+ fshortcuts[dbnb_post]:= ord(key_f2);
  inherited;
  include(fwidgetstate1,ws1_designactive);
  size:= makesize(defaultdbnavigatorwidth,defaultdbnavigatorheight);
@@ -2551,8 +2554,8 @@ begin
     if buttons[ord(bu1)].enabled then begin
      fdatalink.execbutton(bu1);
      include(info.eventstate,es_processed);
+     break;
     end;
-    break;
    end;
   end;
  end;
