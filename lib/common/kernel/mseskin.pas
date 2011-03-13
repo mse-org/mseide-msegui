@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2008-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2008-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -410,7 +410,8 @@ type
    fwidget_colorcaptionframe: colorty;
    ftabbar: tabbarskininfoty;
    ftabpage: tabpageskininfoty;
-   ftoolbar: toolbarskininfoty;
+   ftoolbar_horz: toolbarskininfoty;
+   ftoolbar_vert: toolbarskininfoty;
    fpopupmenu: menuskininfoty;
    fmainmenu: mainmenuskininfoty;
    fdataedit: dataeditskininfoty;
@@ -489,9 +490,13 @@ type
    procedure settabpage_face(const avalue: tfacecomp);
    procedure settabpage_frame(const avalue: tframecomp);
 
-   procedure settoolbar_face(const avalue: tfacecomp);
-   procedure settoolbar_frame(const avalue: tframecomp);
-   procedure settoolbar_buttonface(const avalue: tfacecomp);
+   procedure settoolbar_horz_face(const avalue: tfacecomp);
+   procedure settoolbar_horz_frame(const avalue: tframecomp);
+   procedure settoolbar_horz_buttonface(const avalue: tfacecomp);
+   procedure settoolbar_vert_face(const avalue: tfacecomp);
+   procedure settoolbar_vert_frame(const avalue: tframecomp);
+   procedure settoolbar_vert_buttonface(const avalue: tfacecomp);
+
    
    procedure setpopupmenu_face(const avalue: tfacecomp);
    procedure setpopupmenu_frame(const avalue: tframecomp);
@@ -705,10 +710,18 @@ type
    property tabbar_vertopo_tab_shift: integer read ftabbar.tavertopo.shift
                                write ftabbar.tavertopo.shift default defaulttabshift;
 
-   property toolbar_face: tfacecomp read ftoolbar.wi.fa write settoolbar_face;
-   property toolbar_frame: tframecomp read ftoolbar.wi.fra write settoolbar_frame;
-   property toolbar_buttonface: tfacecomp read ftoolbar.buttonface 
-                            write settoolbar_buttonface;
+   property toolbar_horz_face: tfacecomp read ftoolbar_horz.wi.fa 
+                                        write settoolbar_horz_face;
+   property toolbar_horz_frame: tframecomp read ftoolbar_horz.wi.fra 
+                                        write settoolbar_horz_frame;
+   property toolbar_horz_buttonface: tfacecomp read ftoolbar_horz.buttonface 
+                            write settoolbar_horz_buttonface;
+   property toolbar_vert_face: tfacecomp read ftoolbar_vert.wi.fa 
+                            write settoolbar_vert_face;
+   property toolbar_vert_frame: tframecomp read ftoolbar_vert.wi.fra
+                            write settoolbar_vert_frame;
+   property toolbar_vert_buttonface: tfacecomp read ftoolbar_vert.buttonface 
+                            write settoolbar_vert_buttonface;
 
    property tabpage_face: tfacecomp read ftabpage.wi.fa write settabpage_face;
    property tabpage_frame: tframecomp read ftabpage.wi.fra write settabpage_frame;
@@ -1151,7 +1164,9 @@ begin
   if (aface <> nil) and (optionsskin * 
                        [osk_framebuttononly,osk_noface] = []) then begin
    createface;
-   face.template:= aface;
+   if face.template = nil then begin
+    face.template:= aface;
+   end;
   end;
  end;
 end;
@@ -1181,6 +1196,9 @@ begin
    if fframe = nil then begin
     createframe;
     include(tcustomframe1(fframe).fstate,fs_paintposinited);
+   end;
+   if frame.template <> nil then begin
+    exit;
    end;
    col1:= frame.colorclient;
    size1:= clientsize;
@@ -2068,19 +2086,34 @@ begin
  setlinkedvar(avalue,tmsecomponent(ftabpage.wi.fra));
 end;
 
-procedure tskincontroller.settoolbar_face(const avalue: tfacecomp);
+procedure tskincontroller.settoolbar_horz_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar.wi.fa));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.wi.fa));
 end;
 
-procedure tskincontroller.settoolbar_frame(const avalue: tframecomp);
+procedure tskincontroller.settoolbar_horz_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar.wi.fra));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.wi.fra));
 end;
 
-procedure tskincontroller.settoolbar_buttonface(const avalue: tfacecomp);
+procedure tskincontroller.settoolbar_horz_buttonface(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftoolbar.buttonface));
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_horz.buttonface));
+end;
+
+procedure tskincontroller.settoolbar_vert_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.wi.fa));
+end;
+
+procedure tskincontroller.settoolbar_vert_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.wi.fra));
+end;
+
+procedure tskincontroller.settoolbar_vert_buttonface(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftoolbar_vert.buttonface));
 end;
 
 procedure tskincontroller.setpopupmenu_face(const avalue: tfacecomp);
@@ -2316,12 +2349,24 @@ var
 begin
  handlewidget(ainfo);
  tb1:= tcustomtoolbar(ainfo.instance);
- setwidgetskin(tb1,ftoolbar.wi);
- setstepbuttonskin(tb1.frame,fstepbutton);
- if ftoolbar.buttonface <> nil then begin
-  with tb1.buttons do begin
-   createface;
-   setfacetemplate(ftoolbar.buttonface,face);
+ if tb1.width >= tb1.height then begin
+  setwidgetskin(tb1,ftoolbar_horz.wi);
+  setstepbuttonskin(tb1.frame,fstepbutton);
+  if ftoolbar_horz.buttonface <> nil then begin
+   with tb1.buttons do begin
+    createface;
+    setfacetemplate(ftoolbar_horz.buttonface,face);
+   end;
+  end;
+ end
+ else begin
+  setwidgetskin(tb1,ftoolbar_vert.wi);
+  setstepbuttonskin(tb1.frame,fstepbutton);
+  if ftoolbar_vert.buttonface <> nil then begin
+   with tb1.buttons do begin
+    createface;
+    setfacetemplate(ftoolbar_vert.buttonface,face);
+   end;
   end;
  end;
 end;
