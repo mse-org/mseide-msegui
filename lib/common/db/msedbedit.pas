@@ -2774,6 +2774,9 @@ begin
           (datasource.AutoEdit or (fnavigator <> nil) and fnavigator.autoedit))) then begin
    include(aoptions,oe_readonly);
   end;
+  if (field <> nil) and field.required then begin
+   include(aoptions,oe_notnull);
+  end;
  end;
 end;
 
