@@ -224,8 +224,8 @@ type
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure objectchanged(const sender: tobject); override;
    //istatfile
-   procedure dostatread(const reader: tstatreader);
-   procedure dostatwrite(const writer: tstatwriter);
+   procedure dostatread(const reader: tstatreader); virtual;
+   procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;

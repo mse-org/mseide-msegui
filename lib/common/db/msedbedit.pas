@@ -29,9 +29,10 @@ uses
 type
 
  dbnavigbuttonty = (dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
-           dbnb_delete,dbnb_edit,dbnb_post,dbnb_cancel,dbnb_refresh,
+           dbnb_delete,dbnb_edit,
+           dbnb_post,dbnb_cancel,dbnb_refresh,
            dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,
-           dbnb_dialog);
+           dbnb_autoedit,dbnb_dialog);
  dbnavigbuttonsty = set of dbnavigbuttonty;
  
 const
@@ -118,12 +119,16 @@ type
 //   procedure setdialoghint(const avalue: msestring);
    function gettoolbutton: ttoolbutton;
    procedure settoolbutton(const avalue: ttoolbutton);
+   function getautoedit: boolean;
+   procedure setautoedit(const avalue: boolean);
   protected
    procedure inithints;
    procedure doexecute(const sender: tobject);
    procedure loaded; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure doasyncevent(var atag: integer); override;
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
   //idbnaviglink
    procedure setactivebuttons(const abuttons: dbnavigbuttonsty;
                              const afiltered: boolean);
@@ -133,6 +138,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override; 
   published
+   property statfile;
    property datasource: tdatasource read getdatasource write setdatasource;
    property visiblebuttons: dbnavigbuttonsty read fvisiblebuttons 
                  write setvisiblebuttons default defaultvisibledbnavigbuttons;
@@ -174,6 +180,7 @@ type
                   write fshortcuts[dbnb_dialog] default ord(key_none);
    property options: dbnavigatoroptionsty read foptions write setoptions 
                   default defaultdbnavigatoroptions;
+   property autoedit: boolean read getautoedit write setautoedit;
 //   property dialoghint: msestring read getdialoghint write setdialoghint;
 //   
    property dialogbutton: ttoolbutton read gettoolbutton write settoolbutton;
@@ -206,7 +213,7 @@ type
 //                              ewds_filtereditdisabled);
 // editwidgetdatalinkstatesty = set of editwidgetdatalinkstatety;
  
- tcustomeditwidgetdatalink = class(tfielddatalink,idbeditinfo)
+ tcustomeditwidgetdatalink = class(tfielddatalink,idbeditinfo,iobjectlink)
   private
 //   fstate: editwidgetdatalinkstatesty;
    frecordchange: integer;
@@ -216,6 +223,7 @@ type
    fonbeginedit: notifyeventty;
    fonendedit: notifyeventty;
    fondataentered: notifyeventty;
+   fnavigator: tdbnavigator;
    function canmodify: boolean;
    procedure setediting(avalue: boolean);
    function getasnullmsestring: msestring;
@@ -224,9 +232,12 @@ type
    procedure readdatafield(reader: treader);
    procedure readoptionsdb(reader: treader);
    function getownerwidget: twidget;
+   procedure setnavigator(const avalue: tdbnavigator);
   protected   
    fintf: idbeditfieldlink;
    foptions: optionseditdbty;
+   fobjectlinker: tobjectlinker;
+   function getobjectlinker: tobjectlinker;
    function getdatasource1: tdatasource;
    procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure activechanged; override;
@@ -234,12 +245,20 @@ type
    procedure focuscontrol(afield: tfieldref); override;
    procedure updatedata; override;
    procedure disabledstatechange; override;
-  //idbeditinfo
+   procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
+    //iobjectlink
+   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
+               ainterfacetype: pointer = nil; once: boolean = false);
+   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+   procedure objevent(const sender: iobjectlink; const event: objecteventty);
+   function getinstance: tobject;
+    //idbeditinfo
    function getdatasource(const aindex: integer): tdatasource;
    procedure getfieldtypes(out apropertynames: stringarty; 
                                      out afieldtypes: fieldtypesarty);
   public
    constructor create(const intf: idbeditfieldlink);
+   destructor destroy; override;
    procedure fixupproperties(filer: tfiler); //read moved properties
    procedure recordchanged(afield: tfield); override;
    procedure nullcheckneeded(var avalue: boolean);
@@ -255,6 +274,7 @@ type
    property asnullmsestring: msestring read getasnullmsestring 
                                               write setasnullmsestring;
                    //uses nulltext
+   property navigator: tdbnavigator read fnavigator write setnavigator;
    property onbeginedit: notifyeventty read fonbeginedit write fonbeginedit;
    property onendedit: notifyeventty read fonendedit write fonendedit;
    property ondataentered: notifyeventty read fondataentered 
@@ -267,6 +287,7 @@ type
   published
    property datasource: tdatasource read getdatasource1 
                                          write setwidgetdatasource;
+   property navigator;
    property fieldname;
    property options;
    property onbeginedit;
@@ -311,6 +332,7 @@ type
    property maxlength;
    property onsetvalue;
  end;
+
  
 {
  tdbdialogstringedit = class(tcustomdialogstringedit,idbeditfieldlink,ireccontrol)
@@ -2200,7 +2222,7 @@ var
  options1: dbnavigatoroptionsty;
 begin
  options1:= fintf.getnavigoptions;
- bu1:= [];
+ bu1:= [dbnb_autoedit];
  if dno_dialogifinactive in options1 then begin
   bu1:= bu1+[dbnb_dialog];
  end;
@@ -2341,6 +2363,13 @@ begin
      end;
      fintf.dodialogexecute;
     end;
+    dbnb_autoedit: begin
+     with twidget1(widget1) do begin
+      if fobjectlinker <> nil then begin
+       fobjectlinker.sendevent(oe_changed);
+      end;
+     end;
+    end;
    end;
    if fdscontroller <> nil then begin
     if state = dsfilter then begin
@@ -2389,6 +2418,10 @@ begin
    onexecute:= {$ifdef FPC}@{$endif}doexecute;
   end;
  end;
+ with buttons[ord(dbnb_autoedit)] do begin
+  imagenr:= ord(stg_triabig);
+  options:= options + [mao_checkbox];
+ end;
  buttons[ord(dbnb_dialog)].imagenr:= ord(stg_ellipsesmall);
   
  fdatalink:= tnavigdatalink.Create(idbnaviglink(self));
@@ -2397,6 +2430,7 @@ end;
 
 destructor tdbnavigator.destroy;
 begin
+// fdatalink.Free;
  inherited;
  fdatalink.Free;
 end;
@@ -2587,6 +2621,29 @@ begin
  buttons[ord(dbnb_dialog)]:= avalue;
 end;
 
+function tdbnavigator.getautoedit: boolean;
+begin
+ result:= buttons[ord(dbnb_autoedit)].checked;
+end;
+
+procedure tdbnavigator.setautoedit(const avalue: boolean);
+begin
+ buttons[ord(dbnb_autoedit)].checked:= avalue;
+ if fobjectlinker <> nil then begin
+  fobjectlinker.sendevent(oe_changed);
+ end;
+end;
+
+procedure tdbnavigator.dostatread(const reader: tstatreader);
+begin
+ autoedit:= reader.readboolean('autoedit',autoedit);
+end;
+
+procedure tdbnavigator.dostatwrite(const writer: tstatwriter);
+begin
+ writer.writeboolean('autoedit',autoedit);
+end;
+
 { tcustomeditwidgetdatalink }
 
 constructor tcustomeditwidgetdatalink.create(const intf: idbeditfieldlink);
@@ -2595,6 +2652,12 @@ begin
  inherited Create;
  visualcontrol:= true;
  fintf.setisdb;
+end;
+
+destructor tcustomeditwidgetdatalink.destroy;
+begin
+ inherited;
+ freeandnil(fobjectlinker);
 end;
 
 procedure tcustomeditwidgetdatalink.readdatasource(reader: treader);
@@ -2664,7 +2727,13 @@ end;
 function tcustomeditwidgetdatalink.edit: Boolean;
 begin
  if canmodify then begin
-  inherited edit;
+  if (fnavigator <> nil) and fnavigator.autoedit and active and (
+              dataset.state = dsbrowse) then begin
+   dataset.edit;
+  end
+  else begin
+   inherited edit;
+  end;
  end;
  result:= fds_editing in fstate;
 end;
@@ -2698,7 +2767,8 @@ begin
  if state1 * [cswriting,csdesigning] = [] then begin
   if not (fds_filterediting in fstate) and 
          ((datasource = nil) or
-           not editing and not (canmodify and datasource.AutoEdit)) then begin
+           not editing and not (canmodify and 
+          (datasource.AutoEdit or (fnavigator <> nil) and fnavigator.autoedit))) then begin
    include(aoptions,oe_readonly);
   end;
  end;
@@ -2982,6 +3052,49 @@ end;
 function tcustomeditwidgetdatalink.getownerwidget: twidget;
 begin
  result:= fintf.getwidget;
+end;
+
+procedure tcustomeditwidgetdatalink.setnavigator(const avalue: tdbnavigator);
+begin
+ getobjectlinker.setlinkedvar(iobjectlink(self),avalue,fnavigator);
+end;
+
+function tcustomeditwidgetdatalink.getobjectlinker: tobjectlinker;
+begin
+ createobjectlinker(self,{$ifdef FPC}@{$endif}objectevent,fobjectlinker);
+ result:= fobjectlinker;
+end;
+
+procedure tcustomeditwidgetdatalink.link(const source: iobjectlink;
+               const dest: iobjectlink; valuepo: pointer = nil;
+               ainterfacetype: pointer = nil; once: boolean = false);
+begin
+ getobjectlinker.link(source,dest,valuepo,ainterfacetype,once);
+end;
+
+procedure tcustomeditwidgetdatalink.unlink(const source: iobjectlink;
+               const dest: iobjectlink; valuepo: pointer = nil);
+begin
+ getobjectlinker.unlink(source,dest,valuepo);
+end;
+
+procedure tcustomeditwidgetdatalink.objevent(const sender: iobjectlink;
+               const event: objecteventty);
+begin
+ getobjectlinker.objevent(sender,event);
+end;
+
+function tcustomeditwidgetdatalink.getinstance: tobject;
+begin
+ result:= self;
+end;
+
+procedure tcustomeditwidgetdatalink.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ if (sender = fnavigator) and (event = oe_changed) then begin
+  fintf.updatereadonlystate;
+ end;
 end;
 
 { tdbstringedit }

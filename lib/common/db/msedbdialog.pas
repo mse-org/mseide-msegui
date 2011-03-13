@@ -97,12 +97,19 @@ type
    procedure setonexecute(const avalue: stringdialogexeceventty);
   protected
    fcontroller: tstringdialogcontroller;
+   function createdialogcontroller: tstringdialogcontroller; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
    property frame: tellipsebuttonframe read getframe write setframe;
    property onexecute: stringdialogexeceventty read getonexecute write setonexecute;
+ end;
+
+ tdbmemodialogedit = class(tdbdialogstringedit)
+  protected
+   function createdialogcontroller: tstringdialogcontroller; override;
+  public
  end;
 
  tdbdialogrealedit = class(tdbrealedit)
@@ -158,7 +165,7 @@ type
   
 implementation
 uses
- typinfo; 
+ typinfo,msememodialog; 
 type
  teditwidgetdatalink1 = class(teditwidgetdatalink);
  treader1 = class(treader);
@@ -404,7 +411,7 @@ constructor tdbdialogstringedit.create(aowner: tcomponent);
 begin
  inherited;
  if fcontroller = nil then begin
-  fcontroller:= tstringdialogcontroller.create(self);
+  fcontroller:= createdialogcontroller;
  end;
 end;
 
@@ -432,6 +439,18 @@ end;
 procedure tdbdialogstringedit.setonexecute(const avalue: stringdialogexeceventty);
 begin
  fcontroller.onexecute:= avalue;
+end;
+
+function tdbdialogstringedit.createdialogcontroller: tstringdialogcontroller;
+begin
+ result:= tstringdialogcontroller.create(self);
+end;
+
+{ tdbmemodialogedit }
+
+function tdbmemodialogedit.createdialogcontroller: tstringdialogcontroller;
+begin
+ result:= tmemodialogcontroller.create(self);
 end;
 
 { tdbdialogrealedit }
