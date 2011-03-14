@@ -1587,7 +1587,7 @@ type
    procedure sendwidgetevent(const event: twidgetevent);
                               //event will be destroyed
 
-   procedure release; override;
+   procedure release(const nomodaldefer: boolean=false); override;
    function show(const modal: boolean = false;
             const transientfor: twindow = nil): modalresultty; virtual;
    procedure hide;
@@ -7602,7 +7602,7 @@ begin
  end;
 end;
 
-procedure twidget.release;
+procedure twidget.release(const nomodaldefer: boolean=false);
 begin
  if ownswindow1 then begin
   window.endmodal;
@@ -12232,9 +12232,10 @@ begin
     end;
     if appinst.factivewindow = nil then begin
      if not (ws_active in fowner.fwidgetstate) then begin
+      inc(factivecount);
+      activecountbefore:= factivecount;
+      appinst.factivewindow:= self;
       if not (tws_activatelocked in fstate) then begin
-       inc(factivecount);
-       activecountbefore:= factivecount;
        if ffocusedwidget <> nil then begin
         widgetar:= ffocusedwidget.getrootwidgetpath;
         for int1:= high(widgetar) downto 0 do begin
@@ -12245,7 +12246,7 @@ begin
         end;
        end;
       end;
-      appinst.factivewindow:= self;
+//      appinst.factivewindow:= self;
       gui_setimefocus(fwindow);
       if not windowevent then begin
        setwinfoc;

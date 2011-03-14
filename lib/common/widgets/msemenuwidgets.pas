@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -95,14 +95,14 @@ type
    procedure showhint(var info: hintinfoty); override;   
    function trycancelmodal(const newactive: twindow): boolean; override;
    
-   procedure release(const acancelmodal: boolean); overload; virtual;
+   procedure release1(const acancelmodal: boolean); virtual;
   public
    constructor create(instance: ppopupmenuwidget;
        const amenu: tmenuitem; const transientfor: twindow;
        const aowner: tcomponent = nil; const menucomp: tcustommenu = nil); overload;
    destructor destroy; override;
    procedure menuchanged(const sender: tmenuitem);
-   procedure release; overload; override;
+   procedure release(const nomodaldefer: boolean=false); override;
    procedure updatetemplates;
    procedure assigntemplate(const source: menutemplatety); virtual;
    function showmenu(const aposrect: rectty; aposition: graphicdirectionty;
@@ -146,7 +146,7 @@ type
    procedure internalcreateframe; override;
    procedure loaded; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
-   procedure release(const acancelmodal: boolean); override;
+   procedure release1(const acancelmodal: boolean); override;
   public
  end;
 
@@ -857,7 +857,7 @@ begin
  flayout.itemfaceactive.free;
 end;
 
-procedure tpopupmenuwidget.release;
+procedure tpopupmenuwidget.release(const nomodaldefer: boolean=false);
 begin
  if finstancepo <> nil then begin
   finstancepo^:= nil;
@@ -1269,7 +1269,7 @@ begin
    fclickeditem:= -1;
    if (activeitem >= 0) and (activeitem < menu.submenu.count) then begin
     if (fnextpopup <> nil) then begin
-     fnextpopup.release;
+     fnextpopup.release(true);
     end;
     with cells[activeitem],buttoninfo do begin
      state:= state - [shs_clicked,{shs_mouse,}shs_active,shs_focused];
@@ -1561,7 +1561,7 @@ begin
   end;
  end;
  widget1.fselecteditem:= aselecteditem; //return value for procedure showmenu
- widget1.release(cancelmodal);
+ widget1.release1(cancelmodal);
 end;
 
 procedure tpopupmenuwidget.objectevent(const sender: tobject;
@@ -1655,7 +1655,7 @@ begin
  end; 
 end;
 
-procedure tpopupmenuwidget.release(const acancelmodal: boolean);
+procedure tpopupmenuwidget.release1(const acancelmodal: boolean);
 begin
  release;
 end;
@@ -1740,7 +1740,7 @@ begin
  end;
 end;
 
-procedure tcustommainmenuwidget.release(const acancelmodal: boolean);
+procedure tcustommainmenuwidget.release1(const acancelmodal: boolean);
 begin
  if acancelmodal then begin
   setlinkedvar(nil,tlinkedobject(factivewindowbefore));
@@ -1904,7 +1904,7 @@ begin
          pointinrect(apos,rootwidget.widgetrect);
  if result then begin
   capturemouse;
-  release(false);
+  release1(false);
  end;
 end;
 
