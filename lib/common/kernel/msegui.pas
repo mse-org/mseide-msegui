@@ -1594,6 +1594,8 @@ type
    function show(const modallevel: modallevelty;
             const transientfor: twindow = nil): modalresultty;
                                                     overload; virtual;
+   function show(const modallevel: modallevelty;
+            const transientfor: twidget): modalresultty; overload;
    function show(const modal: boolean = false;
             const transientfor: twindow = nil): modalresultty; overload;
    procedure hide;
@@ -1985,7 +1987,7 @@ type
    procedure lockactivate;
    procedure unlockactivate;
    procedure setzorder(const value: integer);
-   function toptransientfor: twindow;
+   function topmodaltransientfor: twindow;
   public
    procedure destroywindow;
    constructor create(aowner: twidget);
@@ -9704,6 +9706,17 @@ begin
  end;
 end;
 
+function twidget.show(const modallevel: modallevelty;
+            const transientfor: twidget): modalresultty; overload;
+begin
+ if transientfor = nil then begin
+  show(modallevel,twindow(nil));
+ end
+ else begin
+  show(modallevel,transientfor.window);
+ end;
+end;
+
 function twidget.show(const modal: boolean = false;
               const transientfor: twindow = nil): modalresultty;
 begin
@@ -12249,8 +12262,8 @@ begin
                          (ftransientfor = appinst.fmodalwindow);
    if bo1 then begin
     if hastransientfor then begin
-     window1:= toptransientfor;
-     if (window1 <> nil) and (tws_modalfor in window1.fstate) then begin
+     window1:= topmodaltransientfor;
+     if window1 <> nil then begin
       window1.internalactivate(false,force);
       exit;
      end;
@@ -13806,24 +13819,28 @@ begin
  result:= tws_modalfor in fstate;
 end;
 
-function twindow.toptransientfor: twindow;
+function twindow.topmodaltransientfor: twindow;
 var
  int1: integer;
- window1: twindow;
+ window1,window2: twindow;
 begin
- result:= self;
+ result:= nil;
  with appinst do begin
-  while (result <> nil) and result.hastransientfor do begin
-   window1:= result;
-   result:= nil;
+  window1:= self;
+  while (window1 <> nil) and window1.hastransientfor do begin
    for int1:= 0 to high(fwindows) do begin
+    window2:= nil;
     if fwindows[int1].ftransientfor = window1 then begin
-     result:= fwindows[int1];
-     if result = self then begin
-      result:= nil; //recursion
+     window2:= fwindows[int1];
+     if tws_modalfor in window2.fstate then begin
+      result:= window2;
+     end;
+     if window2 = self then begin
+      window2:= nil; //recursion
      end;
      break;
     end;
+    window1:= window2;
    end;
   end;
  end;
@@ -14186,7 +14203,7 @@ end;
 
 procedure tinternalapplication.processmouseevent(event: tmouseevent);
 var
- window: twindow;
+ window,window1: twindow;
  info: moeventinfoty;
  shift: shiftstatesty;
  abspos: pointty;
@@ -14199,6 +14216,14 @@ begin
  try
   with event do begin
    if findwindow(fwinid,window) then begin
+    if window.hastransientfor then begin
+     window1:= window.topmodaltransientfor;
+     if window1 <> nil then begin
+      fpos.x:= fpos.x - window.fowner.bounds_x + window1.fowner.bounds_x;
+      fpos.y:= fpos.y - window.fowner.bounds_y + window1.fowner.bounds_y;
+      window:= window1;
+     end;
+    end;
     fillchar(info,sizeof(info),0);
     with info.mouse do begin
      timestamp:= ftimestamp;
