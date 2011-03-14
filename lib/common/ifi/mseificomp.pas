@@ -34,7 +34,9 @@ type
 
  ifivaluelinkstatety = (ivs_linking,ivs_valuesetting,ivs_loadedproc);
  ifivaluelinkstatesty = set of ifivaluelinkstatety;
-
+ valueclientoptionty = (vco_datalist,vco_nosync);
+ valueclientoptionsty = set of valueclientoptionty;
+   
  tcustomificlientcontroller = class(tlinkedpersistent,iifiserver,istatfile)
   private
    fonclientvaluechanged: ificlienteventty;
@@ -58,6 +60,7 @@ type
   protected
    fkind: ttypekind;
    fstate: ifivaluelinkstatesty;
+   foptionsvalue: valueclientoptionsty;
    fwidgetstate: ifiwidgetstatesty;
    fwidgetstatebefore: ifiwidgetstatesty;
    fchangedclient: pointer;
@@ -187,9 +190,6 @@ type
  itemsetterty = procedure(const alink: pointer; var handled: boolean) of object; 
  itemgetterty = procedure(const alink: pointer; var handled: boolean) of object;
 
- valueclientoptionty = (vco_datalist);
- valueclientoptionsty = set of valueclientoptionty;
-   
  tifidatasource = class;
  ififieldnamety = type ansistring;       //type for property editor
  ifisourcefieldnamety = type ansistring; //type for property editor
@@ -215,7 +215,6 @@ type
    fitempo: pointer;
    fitemindex: integer;
    fonclientdataentered: notifyeventty;
-   foptionsvalue: valueclientoptionsty;
    fdatasource: tifidatasource;
    fdatafield: ififieldnamety;
    procedure setoptionsvalue(const avalue: valueclientoptionsty);
@@ -1238,9 +1237,11 @@ begin
   include(fstate,ivs_valuesetting);
   try
    clienttovalues(pointer(sender));
-   fchangedclient:= pointer(sender);
-   tmsecomponent1(fowner).getobjectlinker.forall(
-                          {$ifdef FPC}@{$endif}valuestootherclient,self);
+   if not (vco_nosync in foptionsvalue) then begin
+    fchangedclient:= pointer(sender);
+    tmsecomponent1(fowner).getobjectlinker.forall(
+                           {$ifdef FPC}@{$endif}valuestootherclient,self);
+   end;
   finally
    exclude(fstate,ivs_valuesetting);
   end;

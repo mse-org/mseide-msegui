@@ -11595,7 +11595,12 @@ begin
  if abringtofront then begin
   window.bringtofront;
  end;
- show;
+ if window.modalfor then begin
+  show(ml_window,window.transientfor);
+ end
+ else begin
+  show;
+ end;
  if not checkdescendent(window.ffocusedwidget) then begin
   setfocus;
  end
