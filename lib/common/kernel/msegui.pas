@@ -12187,6 +12187,7 @@ procedure twindow.internalactivate(const windowevent: boolean;
     guierror(gui_setwindowfocus(fwindow.id),self);
    end;
   end;
+//  gui_flushgdi;
  end;
  
 var
@@ -13310,7 +13311,7 @@ end;
 
 procedure twindow.activate;
 begin
- if fowner.visible then begin
+ if fowner.visible and not active then begin
   internalactivate(false);
  end;
 end;
