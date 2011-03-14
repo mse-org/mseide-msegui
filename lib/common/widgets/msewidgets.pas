@@ -1086,7 +1086,7 @@ type
    ftransientfor: twindow;
   protected
    procedure updatewindowinfo(var info: windowinfoty); override;
-   function internalshow(const modal: boolean; transientfor: twindow;
+   function internalshow(const modallevel: modallevelty; transientfor: twindow;
            const windowevent: boolean): modalresultty; override;
   public
    constructor create(aowner: tcomponent; transientfor: twindow); reintroduce; overload;
@@ -5309,14 +5309,14 @@ begin
  window.localshortcuts:= true;
 end;
 
-function tpopupwidget.internalshow(const modal: boolean; transientfor: twindow;
+function tpopupwidget.internalshow(const modallevel: modallevelty; transientfor: twindow;
                    const windowevent: boolean): modalresultty;
 begin
  if transientfor = nil then begin
-  result:=  inherited internalshow(modal,ftransientfor,windowevent);
+  result:=  inherited internalshow(modallevel,ftransientfor,windowevent);
  end
  else begin
-  result:= inherited internalshow(modal,transientfor,windowevent);
+  result:= inherited internalshow(modallevel,transientfor,windowevent);
  end;
 end;
 

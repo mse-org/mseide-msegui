@@ -1201,6 +1201,9 @@ type
  twidgetevent = class(tcomponentevent)
  end;
 
+ modallevelty = (ml_none,ml_application, //call eventloop
+                 ml_window);             //reflect window focus
+ 
  widgetalignmodety = (wam_none,wam_start,wam_center,wam_end);
  widgetclassty = class of twidget;
  navigrequesteventty = procedure(const sender: twidget;
@@ -1497,7 +1500,7 @@ type
    procedure setclientwidth(const avalue: integer);
    function getclientheight: integer;
    procedure setclientheight(const avalue: integer);
-   function internalshow(const modal: boolean; transientfor: twindow;
+   function internalshow(const modallevel: modallevelty; transientfor: twindow;
            const windowevent: boolean): modalresultty; virtual;
    procedure internalhide(const windowevent: boolean);
    function getnextfocus: twidget;
@@ -1588,8 +1591,11 @@ type
                               //event will be destroyed
 
    procedure release(const nomodaldefer: boolean=false); override;
+   function show(const modallevel: modallevelty;
+            const transientfor: twindow = nil): modalresultty;
+                                                    overload; virtual;
    function show(const modal: boolean = false;
-            const transientfor: twindow = nil): modalresultty; virtual;
+            const transientfor: twindow = nil): modalresultty; overload;
    procedure hide;
    procedure activate(const abringtofront: boolean = true); virtual;
                              //show and setfocus
@@ -1847,7 +1853,7 @@ type
  end;
 
  windowstatety = (tws_posvalid,tws_sizevalid,tws_windowvisible,
-                  tws_modal,tws_needsdefaultpos,
+                  tws_modal,tws_modalfor,tws_needsdefaultpos,
                   tws_closing,tws_painting,tws_activating,
                   tws_globalshortcuts,tws_localshortcuts,
                   tws_buttonendmodal,
@@ -1947,6 +1953,7 @@ type
    procedure setsyscontainer(const avalue: syswindowty);
    function getscreenpos: pointty;
    procedure setscreenpos(const avalue: pointty);
+   function getmodalfor: boolean;
   protected
    fwindow: windowty;
    fcontainer: winidty;
@@ -1978,6 +1985,7 @@ type
    procedure lockactivate;
    procedure unlockactivate;
    procedure setzorder(const value: integer);
+   function toptransientfor: twindow;
   public
    procedure destroywindow;
    constructor create(aowner: twidget);
@@ -2036,6 +2044,7 @@ type
    property owner: twidget read fowner;
    property focusedwidget: twidget read ffocusedwidget;
    property transientfor: twindow read ftransientfor;
+   property modalfor: boolean read getmodalfor;
    property modalresult: modalresultty read fmodalresult write setmodalresult;
    property buttonendmodal: boolean read getbuttonendmodal write setbuttonendmodal;
    property globalshortcuts: boolean read getglobalshortcuts write setglobalshortcuts;
@@ -2595,7 +2604,7 @@ type
   private
    fwidget: twidget;
    fmodalresult: modalresultty;
-   fmodal: boolean;
+   fmodallevel: modallevelty;
    ftransientfor: twindow;
   protected
    procedure execute; override;
@@ -9596,7 +9605,8 @@ begin
  end;
 end;
 
-function twidget.internalshow(const modal: boolean; transientfor: twindow;
+function twidget.internalshow(const modallevel: modallevelty;
+             transientfor: twindow;
              const windowevent: boolean): modalresultty;
 var
  bo1: boolean;
@@ -9607,7 +9617,7 @@ begin
   if not (csdesigning in componentstate) then begin
    include(fwidgetstate,ws_showproc);
    try
-    fparentwidget.show(modal,transientfor);
+    fparentwidget.show(modallevel,transientfor);
    finally
     exclude(fwidgetstate,ws_showproc);
    end;
@@ -9620,7 +9630,7 @@ begin
   end;
  end;
  if ownswindow1 then begin
-  if modal and (transientfor = nil) then begin
+  if (modallevel = ml_application) and (transientfor = nil) then begin
    if appinst.fmodalwindow = nil then begin
     if appinst.fwantedactivewindow <> nil then begin
      transientfor:= appinst.fwantedactivewindow;
@@ -9638,15 +9648,21 @@ begin
   end;
   if transientfor = window then begin
    transientfor:= nil;
-   end;
+  end;
+  exclude(fwindow.fstate,tws_modalfor);
   fwindow.show(windowevent);
-  if transientfor <> nil then begin
-   fwindow.settransientfor(transientfor,windowevent);
+  fwindow.settransientfor(transientfor,windowevent);
+  if (transientfor <> nil) and (modallevel = ml_window) then begin
+   include(fwindow.fstate,tws_modalfor);
   end;
   if bo1 then begin
    doshow;
   end;
-  if modal then begin
+  if (modallevel = ml_window) and (fwindow.modalfor) and
+                fwindow.ftransientfor.active then begin
+   fwindow.activate;             
+  end;
+  if modallevel = ml_application then begin
    if window.beginmodal then begin
     result:= mr_windowdestroyed;
     exit;
@@ -9666,15 +9682,15 @@ begin
  end;
 end;
 
-function twidget.show(const modal: boolean = false;
+function twidget.show(const modallevel: modallevelty;
               const transientfor: twindow = nil): modalresultty;
 var
  event: twidgetshowevent;
 begin
- if modal and not application.ismainthread then begin
+ if (modallevel = ml_application) and not application.ismainthread then begin
   event:= twidgetshowevent.create(false);
   event.fwidget:= self;
-  event.fmodal:= modal;
+  event.fmodallevel:= modallevel;
   event.ftransientfor:= transientfor;
   try
    synchronizeevent(event);
@@ -9684,7 +9700,18 @@ begin
   end;  
  end
  else begin
-  result:= internalshow(modal,transientfor,false);
+  result:= internalshow(modallevel,transientfor,false);
+ end;
+end;
+
+function twidget.show(const modal: boolean = false;
+              const transientfor: twindow = nil): modalresultty;
+begin
+ if modal then begin
+  show(ml_application,transientfor);
+ end
+ else begin
+  show(ml_none,transientfor);
  end;
 end;
 
@@ -12196,6 +12223,7 @@ var
  widgetar: widgetarty;
  int1: integer;
  bo1: boolean;
+ window1: twindow;
  
 begin
 {$ifdef mse_debugwindowfocus}
@@ -12220,6 +12248,13 @@ begin
    bo1:= force or (appinst.fmodalwindow = nil) or (appinst.fmodalwindow = self) or 
                          (ftransientfor = appinst.fmodalwindow);
    if bo1 then begin
+    if hastransientfor then begin
+     window1:= toptransientfor;
+     if (window1 <> nil) and (tws_modalfor in window1.fstate) then begin
+      window1.internalactivate(false,force);
+      exit;
+     end;
+    end;
     if (ffocusedwidget = nil) and fowner.canfocus and (ffocusing = 0) then begin
      fowner.setfocus(true);
      if windowevent and force and not active then begin
@@ -12372,6 +12407,7 @@ var
 begin
  releasemouse;
  if not(ws_visible in fowner.fwidgetstate) then begin
+  exclude(fstate,tws_modalfor);
   if fwindow.id <> 0 then begin
    if tws_windowvisible in fstate then begin
     if not windowevent or (appinst.factivewindow = self) then begin
@@ -13252,6 +13288,9 @@ end;
 procedure twindow.settransientfor(const Value: twindow; const windowevent: boolean);
 begin
  if not windowevent then begin
+  if value = nil then begin
+   exclude(fstate,tws_modalfor);
+  end;
   if ftransientfor <> value then begin
    checkrecursivetransientfor(value);
    if ftransientfor <> nil then begin
@@ -13290,7 +13329,7 @@ end;
 procedure twindow.showed;
 begin
  if not (tws_windowvisible in fstate) then begin
-  fowner.internalshow(false,nil,true);
+  fowner.internalshow(ml_none,nil,true);
  end;
 end;
 
@@ -13759,6 +13798,34 @@ begin
  result:= nil;
  if fmodalinfopo <> nil then begin
   result:= fmodalinfopo^.modalwindowbefore;
+ end;
+end;
+
+function twindow.getmodalfor: boolean;
+begin
+ result:= tws_modalfor in fstate;
+end;
+
+function twindow.toptransientfor: twindow;
+var
+ int1: integer;
+ window1: twindow;
+begin
+ result:= self;
+ with appinst do begin
+  while (result <> nil) and result.hastransientfor do begin
+   window1:= result;
+   result:= nil;
+   for int1:= 0 to high(fwindows) do begin
+    if fwindows[int1].ftransientfor = window1 then begin
+     result:= fwindows[int1];
+     if result = self then begin
+      result:= nil; //recursion
+     end;
+     break;
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -16848,7 +16915,7 @@ end;
 
 procedure twidgetshowevent.execute;
 begin
- fmodalresult:= fwidget.show(fmodal,ftransientfor);
+ fmodalresult:= fwidget.show(fmodallevel,ftransientfor);
 end;
 
 { tcreatewindowevent }

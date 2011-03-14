@@ -204,8 +204,8 @@ type
                           const acomponent: tcomponent): propertyeditorarty;
    procedure propertymodified(const sender: tpropertyeditor);
    function getmatchingmethods(const sender: tpropertyeditor; atype: ptypeinfo): msestringarty;
-   function show(const modal: boolean = false;
-           const transientfor: twindow = nil): modalresultty; override;
+//   function show(const modallevel: modallevelty;
+//           const transientfor: twindow = nil): modalresultty; override;
  end;
 
  tpropertyitem = class(ttreelistedititem)
@@ -1639,13 +1639,13 @@ procedure tobjectinspectorfo.closeobjecttext(const adesigner: idesigner;
 begin
  //dummy
 end;
-
-function tobjectinspectorfo.show(const modal: boolean = false;
+{
+function tobjectinspectorfo.show(const modallevel: modallevelty;
              const transientfor: twindow = nil): modalresultty;
 begin
- result:= inherited show(modal,transientfor);
+ result:= inherited show(modallevel,transientfor);
 end;
-
+}
 procedure tobjectinspectorfo.objectinspectoronchildscaled(const sender: TObject);
 begin
  placeyorder(0,[2],[compselector,grid]);
