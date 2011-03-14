@@ -13828,8 +13828,8 @@ begin
  with appinst do begin
   window1:= self;
   while (window1 <> nil) and window1.hastransientfor do begin
+   window2:= nil;
    for int1:= 0 to high(fwindows) do begin
-    window2:= nil;
     if fwindows[int1].ftransientfor = window1 then begin
      window2:= fwindows[int1];
      if tws_modalfor in window2.fstate then begin
@@ -13840,8 +13840,8 @@ begin
      end;
      break;
     end;
-    window1:= window2;
    end;
+   window1:= window2;
   end;
  end;
 end;
