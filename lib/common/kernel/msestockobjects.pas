@@ -101,10 +101,19 @@ type
                     sc_All,
                     sc_Confirmation,sc_Delete_record,
                     sc_close_page,
+{
+ dbnavigbuttonty = (dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
+           dbnb_delete,dbnb_edit,
+           dbnb_post,dbnb_cancel,dbnb_refresh,
+           dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,
+           dbnb_autoedit,dbnb_dialog);
+}
                     sc_first,sc_prior,sc_next,sc_last,
                     sc_append,sc_delete,sc_edit,sc_post,sc_cancel,sc_refresh,
                     sc_edit_filter,sc_edit_filter_min,sc_edit_filter_max,
-                    sc_filter_on,sc_search,sc_insert,sc_filter_off,
+                    sc_filter_on,sc_search,sc_autoedit,sc_dialog,
+                    sc_insert,sc_filter_off,
+                    
                     sc_portrait,sc_landscape,
                     sc_Delete_row_question,sc_selected_rows,
                     sc_Single_item_only,sc_Copy_Cells,sc_Paste_Cells

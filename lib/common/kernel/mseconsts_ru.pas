@@ -161,6 +161,8 @@ const
   'Edit filter maximum',//sc_filter_edit_max
   'Filter on',          //sc_filter_on
   'Search',             //sc_search
+  'Auto edit',          //sc_autoedit
+  'Dialog',             //sc_dialog
   'Insert',             //sc_insert
   'Filter off',         //sc_filter_off
   'Portrait',           //sc_portrait print orientation

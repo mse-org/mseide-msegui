@@ -178,8 +178,8 @@ type
                   write fshortcuts[dbnb_find] default ord(key_none);
    property shortcut_autoedit: shortcutty read fshortcuts[dbnb_autoedit]
                   write fshortcuts[dbnb_autoedit] default ord(key_none);
-   property shortcut_dialog: shortcutty read fshortcuts[dbnb_dialog]
-                  write fshortcuts[dbnb_dialog] default ord(key_none);
+//   property shortcut_dialog: shortcutty read fshortcuts[dbnb_dialog]
+//                  write fshortcuts[dbnb_dialog] default ord(key_f3);
    property options: dbnavigatoroptionsty read foptions write setoptions 
                   default defaultdbnavigatoroptions;
    property autoedit: boolean read getautoedit write setautoedit;
@@ -2408,6 +2408,7 @@ begin
  fshortcuts[dbnb_last]:= key_modctrl + ord(key_pagedown);
  fshortcuts[dbnb_edit]:= ord(key_f2);
  fshortcuts[dbnb_post]:= ord(key_f2);
+// fshortcuts[dbnb_dialog]:= ord(key_f3);
  inherited;
  include(fwidgetstate1,ws1_designactive);
  size:= makesize(defaultdbnavigatorwidth,defaultdbnavigatorheight);
@@ -2442,7 +2443,7 @@ procedure tdbnavigator.inithints;
 var
  int1: integer;
 begin
- for int1:= 0 to ord(high(dbnavigbuttonty)) do begin
+ for int1:= 0 to ord(dbnb_autoedit) do begin
   with buttons[int1] do begin
    hint:= stockobjects.captions[stockcaptionty(int1+ord(sc_first))];
    if (dno_shortcuthint in foptions) and 
@@ -2479,6 +2480,11 @@ begin
    else begin
     imagenr:= ord(stg_dbfilteron);
     hint:= stockobjects.captions[sc_filter_on];
+   end;
+   if (dno_shortcuthint in foptions) and 
+             (fshortcuts[dbnb_filteronoff] <> 0) then begin
+    hint:= hint + ' (' + 
+                  encodeshortcutname(fshortcuts[dbnb_filteronoff])+')';
    end;
   end;
   for bu1:= low(dbnavigbuttonty) to high(dbnavigbuttonty) do begin
@@ -2549,7 +2555,7 @@ var
  bu1: dbnavigbuttonty;
 begin
  if not (csdesigning in componentstate) then begin
-  for bu1:= low(dbnavigbuttonty) to high(dbnavigbuttonty) do begin
+  for bu1:= low(dbnavigbuttonty) to dbnb_autoedit do begin
    if checkshortcutcode(fshortcuts[bu1],info) then begin
     if buttons[ord(bu1)].enabled then begin
      fdatalink.execbutton(bu1);
@@ -2585,6 +2591,7 @@ procedure tdbnavigator.setoptions(const avalue: dbnavigatoroptionsty);
 begin
  if avalue <> foptions then begin
   foptions:= avalue;
+  inithints;
   with buttons[ord(dbnb_insert)] do begin
    if dno_append in self.options then begin
     hint:= stockobjects.captions[sc_append];
@@ -2592,8 +2599,12 @@ begin
    else begin
     hint:= stockobjects.captions[sc_insert];
    end;
+   if (dno_shortcuthint in foptions) and 
+             (fshortcuts[dbnb_insert] <> 0) then begin
+    hint:= hint + ' (' + 
+                  encodeshortcutname(fshortcuts[dbnb_insert])+')';
+   end;
   end;
-  inithints;
  end;
 end;
 

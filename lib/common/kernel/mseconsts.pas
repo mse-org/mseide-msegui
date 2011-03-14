@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -177,8 +177,11 @@ const
   'Edit filter maximum',//sc_filter_edit_max
   'Filter on',          //sc_filter_on
   'Search',             //sc_search
+  'Auto edit',          //sc_autoedit
+  'Dialog',             //sc_dialog
   'Insert',             //sc_insert
   'Filter off',         //sc_filter_off
+
   'Portrait',           //sc_portrait print orientation
   'Landscape',          //sc_landscape print orientation
   'Delete row?',        //sc_Delete_row_question

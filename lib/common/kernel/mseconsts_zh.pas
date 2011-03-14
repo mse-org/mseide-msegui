@@ -120,6 +120,8 @@ const
   'Edit filter maximum',               //sc_filter_edit_max
   #36807#28388#24320#21551,            //sc_filter_on
   #26597#25214,                        //sc_search
+  'Auto edit',          //sc_autoedit
+  'Dialog',             //sc_dialog
   #25554#20837,                        //sc_insert
   #36807#28388#20851#38381,            //sc_filter_off
   'Portrait',                          //sc_portrait print orientation
