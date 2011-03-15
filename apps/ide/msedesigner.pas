@@ -2514,13 +2514,23 @@ begin
 end;
 
 procedure tdesigner.deletecomponent(const acomponent: tcomponent);
+var
+ po1: pmoduleinfoty;
+ notifymodulebefore: tmsecomponent;
 begin
  if acomponent <> nil then begin
   fmodules.componentmodified(acomponent);
-  fnotifymodule:= fmodules.findmodulebycomponent(acomponent)^.instance;
-  notifydeleted(acomponent);
+  po1:= fmodules.findmodulebycomponent(acomponent);
+  if po1 <> nil then begin
+   fnotifymodule:= po1^.instance;
+   try
+    notifydeleted(acomponent);
 //  designnotifications.ItemDeleted(idesigner(self),
 //            fmodules.findmodulebycomponent(acomponent)^.instance,acomponent);
+   finally
+    fnotifymodule:= notifymodulebefore;
+   end;
+  end;
   acomponent.free;
  end;
 end;

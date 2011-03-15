@@ -1180,6 +1180,7 @@ type
    procedure insertrow(const index: integer; const acount: integer = 1); virtual;
    procedure deleterow(const index: integer; const acount: integer = 1); virtual;
    procedure rearange(const list: tintegerdatalist); virtual;
+   procedure resetpropwidth;
    property options: coloptionsty read foptions
                 write setoptions default [];
    property options1: coloptions1ty read foptions1
@@ -3595,16 +3596,19 @@ begin
 end;
 
 procedure tcol.invalidatelayout;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  if not (csreading in fgrid.componentstate) then begin
   fgrid.layoutchanged;
+  tcols(prop).resetpropwidth;
+  {
   with tgridarrayprop(prop) do begin //grid propewidthref is invalid
    for int1:= 0 to high(fitems) do begin
     tcol(fitems[int1]).fpropwidth:= 0;
    end;
   end;     
+  }
  end;
 end;
 
@@ -6927,6 +6931,15 @@ end;
 procedure tcols.enddataupdate;
 begin
  dec(fdataupdating);
+end;
+
+procedure tcols.resetpropwidth;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  tcol(fitems[int1]).fpropwidth:= 0;
+ end;
 end;
 
 { tdatacols }
@@ -11957,6 +11970,8 @@ var
  col1: tdatacol;
 begin
  inherited;
+ fdatacols.resetpropwidth;
+ ffixcols.resetpropwidth;
  checkneedsrowheight;
  fdatacols.checkindexrange;
  fdatacols.frowstate.sourcenamechanged(-1);

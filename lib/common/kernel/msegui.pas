@@ -1853,6 +1853,7 @@ type
    property onbeforeupdateskin;
    property onafterupdateskin;
  end;
+ pwidget = ^twidget;
 
  windowstatety = (tws_posvalid,tws_sizevalid,tws_windowvisible,
                   tws_modal,tws_modalfor,tws_needsdefaultpos,
