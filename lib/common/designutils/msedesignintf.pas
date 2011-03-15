@@ -1135,6 +1135,7 @@ begin
    items[int1].Free;
   end;
   count:= countbefore;
+  application.handleexception;
  end;
  result:= count - countbefore;
 end;
