@@ -33,7 +33,7 @@ uses
  msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,msesys,mserttistat,
  msedatanodes,mseedit,mseifiglob,mselistbrowser;
 const
- versiontext = '2.7 ustable';
+ versiontext = '2.7 unstable';
 {$ifdef linux}
  {$ifdef CPU64}
   hosttext = 'x86_64-linux';

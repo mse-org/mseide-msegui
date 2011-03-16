@@ -1469,13 +1469,15 @@ procedure tpopupmenuwidget.dokeydown(var info: keyeventinfoty);
 
 begin
  with info,flayout do begin
-  if (shiftstate = []) then begin
+  if (shiftstate*shiftstatesmask = []) then begin
    swapkeys;
    include(eventstate,es_processed);
    beginkeymode;
    case key of
     key_return,{key_enter,}key_space: begin
-     selectmenu(true);
+     if not (ss_repeat in shiftstate) then begin
+      selectmenu(true);
+     end;
     end;
     key_up: begin
      setactiveitem(prevmenuitem(flayout));
