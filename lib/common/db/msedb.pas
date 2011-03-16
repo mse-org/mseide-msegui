@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2004-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2004-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1122,7 +1122,7 @@ type
                          dso_cacheblobs,
                          dso_offline, //disconnect database after open
                          dso_local,   //do not connect database on open
-                         dso_noedit,
+                         dso_noedit,dso_canceloncheckbrowsemode,
                          dso_syncmasteredit,dso_syncmasterinsert,
                          dso_syncmasterdelete); 
  datasetoptionsty = set of datasetoptionty;
@@ -1175,6 +1175,7 @@ type
                                   const statebefore: tdatasetstate) of object;
  masterdataseteventty = procedure(const sender: tdataset;
                                  const master: tdataset) of object;
+ afterposteventty = procedure(const sender: tdataset; var ok: boolean) of object;
  epostcancel = class(eabort);
  
  tdscontroller = class(tactivatorcontroller,idsfieldcontroller)
@@ -1216,7 +1217,6 @@ type
   protected
    foptions: datasetoptionsty;
    procedure setoptions(const avalue: datasetoptionsty); virtual;
-   procedure modified;
    procedure setowneractive(const avalue: boolean); override;
    procedure fielddestroyed(const sender: ifieldcomponent);
    procedure doonidle(var again: boolean);
@@ -1241,6 +1241,7 @@ type
    procedure endfilteredit;
    function getcanmodify: boolean;
    
+   procedure modified;
    procedure dataevent(const event: tdataevent; info: ptrint);
    property recno: integer read getrecno write setrecno;
    property recnonullbased: integer read getrecnonullbased 
@@ -1259,8 +1260,9 @@ type
    procedure internalclose;
    procedure closequery(var amodalresult: modalresultty);
    function closequery: boolean; //true if ok
-   function post: boolean; //calls post if in edit or insert state,
-                           //returns false if nothing done
+   function post(const aafterpost: afterposteventty = nil): boolean;
+                           //calls post if in edit or insert state,
+                           //returns true if ok
    function posting: boolean; //true if in post procedure
    procedure postcancel; //can be called in BeforePost, calls cancel after abort
    procedure cancel;
@@ -6120,6 +6122,12 @@ begin
   defieldlistchange: begin
    updatelinkedfields;
   end;
+  decheckbrowsemode: begin
+   if (dso_canceloncheckbrowsemode in foptions) and 
+                    ([dscs_posting,dscs_canceling]*fstate = []) then begin
+    cancel;
+   end;
+  end;
 {$ifdef focuscontrolbug}
   defocuscontrol: begin
    field1:= tfield(info); //workaround for fpc bug 
@@ -6448,7 +6456,9 @@ begin
  result:= modres1 = mr_canclose;
 end;
 
-function tdscontroller.post: boolean;
+function tdscontroller.post(const aafterpost: afterposteventty = nil): boolean;
+var
+ bo1: boolean;
 begin
  with tdataset(fowner) do begin;
   if state in dseditmodes then begin
@@ -6469,8 +6479,15 @@ begin
    finally
     exclude(fstate,dscs_posting);
    end;
-   if result then begin
-    self.modified;
+   bo1:= result;
+   try
+    if result and assigned(aafterpost) then begin
+     aafterpost(tdataset(fowner),result);
+    end;
+   finally
+    if bo1 then begin
+     self.modified;
+    end;
    end;
   end
   else begin

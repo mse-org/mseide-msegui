@@ -96,6 +96,7 @@ type
 
 //   function wantblobfetch: boolean; override;
    function getdsoptions: datasetoptionsty; override;
+   procedure afterpost(const sender: tdataset; var ok: boolean);
 //   function cantransactionrefresh: boolean; override;
 //,   function refreshtransdatasets: boolean; override;
       
@@ -477,16 +478,22 @@ begin
  end;
 end;
 
-procedure tmsesqlquery.post;
+procedure tmsesqlquery.afterpost(const sender: tdataset; var ok: boolean);
 begin
- if fcontroller.post and 
-       (dso_autoapply in fcontroller.options) then begin
+ if (dso_autoapply in fcontroller.options) and 
+                       not(bs_noautoapply in fbstate) then begin
   try
    applyupdate;
   except
+   ok:= false;
    application.handleexception(self);
   end;
  end;
+end;
+
+procedure tmsesqlquery.post;
+begin
+ fcontroller.post(@afterpost);
 end;
 
 procedure tmsesqlquery.afterapply;
@@ -643,7 +650,8 @@ end;
 procedure tmsesqlquery.DoAfterDelete;
 begin
  inherited;
- if dso_autoapply in fcontroller.options then begin
+ if (dso_autoapply in fcontroller.options) and 
+                   not(bs_noautoapply in fbstate) then begin
   applyupdates;
  end;
 end;
@@ -776,7 +784,10 @@ begin
         fonaftersetparam(fowner);
        end;
        if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
-                             (destdataset.state = dsbrowse) then begin
+          not((destdataset.state = dsinsert) and (dataset.state = dsinsert) and
+                       (fplo_syncmasterinsert in foptions))and
+                   (destdataset.state in [dsbrowse,dsedit,dsinsert]) then begin
+        fdestdataset.cancel;
         if fdestcontroller <> nil then begin
          fdestcontroller.refresh(fplo_restorerecno in foptions,truedelayus);
         end
@@ -858,7 +869,8 @@ begin
       exit;
      end
      else begin
-      if destdataset.state = dsinsert then begin
+      if (destdataset.state = dsinsert) and 
+                           (fplo_syncmasterpost in foptions) then begin
        dataset.updaterecord;
        if dataset.modified then begin
         destdataset.post;

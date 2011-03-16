@@ -377,6 +377,15 @@ type
                 const partialstring: boolean = false;
                 const nocheckbrowsemode: boolean = false): boolean; overload;
                 //sets dataset cursor if found
+
+   function find(const avalues: array of tfield;
+               out abookmark: string;
+               const abigger: boolean = false;
+               const partialstring: boolean = false;
+               const nocheckbrowsemode: boolean = false): boolean; overload;
+                //true if found else nearest lower or bigger,
+                //abookmark = '' if no lower or bigger found
+
    function unique(const avalues: array of const): boolean;
    function getbookmark(const arecno: integer): string;
    property desc: boolean read getdesc write setdesc;
@@ -430,8 +439,8 @@ type
                       bs_editing,bs_append,bs_internalcalc,bs_startedit,
                       bs_utf8,
                       bs_hasfilter,bs_visiblerecordcountvalid,
-                      bs_refreshing,bs_restorerecno,bs_idle,bs_refreshfieldvalues
-                                            //used by tsqlquery
+                      bs_refreshing,bs_restorerecno,bs_idle,
+                      bs_noautoapply,bs_refreshfieldvalues  //used by tsqlquery
                       );
  bufdatasetstatesty = set of bufdatasetstatety;
 
@@ -767,7 +776,12 @@ type
 
     //imasterlink   
    function refreshing: boolean;
-   
+
+   procedure refreshrecord(const akeyfield: tfield;
+              const keyindex: integer = 0; const acancelupdate: boolean = true);
+          //keyindex must be unique, copies equally named visible fields,
+          //inserts record if key not found.   
+
    function isutf8: boolean; virtual;
    procedure bindfields(const bind: boolean);
    procedure fieldtoparam(const source: tfield; const dest: tparam);
@@ -812,7 +826,9 @@ type
    procedure applyupdate; virtual; overload;
                    //applies current record
    procedure cancelupdates; virtual;
-   procedure cancelupdate; virtual; //cancels current record
+   procedure cancelupdate(const norecordcancel: boolean = false); virtual; 
+                   //cancels current record,
+                   //if norecordcancel no restoring of old values
    function updatestatus: tupdatestatus; override;
    property changecount : integer read getchangecount;
    property bookmarkdata: bookmarkdataty read getbookmarkdata1;
@@ -2735,7 +2751,7 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.cancelupdate;
+procedure tmsebufdataset.cancelupdate(const norecordcancel: boolean = false);
 var 
  int1: integer;
 begin
@@ -2744,7 +2760,15 @@ begin
  if (fupdatebuffer <> nil) and (frecno >= 0) then begin
   for int1:= high(fupdatebuffer) downto 0 do begin
    if fupdatebuffer[int1].bookmark.recordpo = fcurrentbuf then begin
-    cancelrecupdate(fupdatebuffer[int1]);
+    if not norecordcancel then begin
+     cancelrecupdate(fupdatebuffer[int1]);
+    end
+    else begin
+     with fupdatebuffer[int1] do begin
+      intFreeRecord(OldValues);
+      bookmark.recordpo:= nil
+     end;
+    end;
     deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),int1);
     if int1 <= fapplyindex then begin
      dec(fapplyindex);
@@ -5841,6 +5865,53 @@ begin
  result:= fbrecordcount - 1;
 end;
 
+procedure tmsebufdataset.refreshrecord(const akeyfield: tfield;
+          const keyindex: integer = 0; const acancelupdate: boolean = true);
+var
+ field1,field2: tfield;
+ bm1,bm2: string;
+ int1: integer;
+ bo1: boolean;
+begin
+ checkbrowsemode;
+ disablecontrols;
+ bm2:= bookmark;
+ try
+  if indexlocal[keyindex].find([akeyfield],bm1) then begin
+   bookmark:= bm1;
+   edit;
+  end
+  else begin
+   insert;
+  end;
+  with akeyfield.dataset do begin
+   for int1:= 0 to fields.count-1 do begin
+    field1:= fields[int1];
+    if field1.visible then begin
+     field2:= self.findfield(field1.fieldname);
+     if (field2 <> nil) and not field2.readonly then begin
+      field2.value:= field1.value;
+     end;
+    end;
+   end;
+  end;
+  if acancelupdate then begin
+   include(fbstate,bs_noautoapply);
+   post;
+   cancelupdate(true);
+  end
+  else begin
+   post;
+  end;
+ finally
+  include(fbstate,bs_noautoapply);
+  bookmark:= bm2;
+  enablecontrols;
+  dataevent(dedatasetchange,0);
+  dataevent(tdataevent(de_modified),0);
+ end;
+end;
+
 { tlocalindexes }
 
 constructor tlocalindexes.create(const aowner: tmsebufdataset);
@@ -6569,6 +6640,80 @@ begin
  if result then begin
   tmsebufdataset(fowner).bookmark:= str1;
  end;
+end;
+
+function tlocalindex.find(const avalues: array of tfield;
+               out abookmark: string;
+               const abigger: boolean = false;
+               const partialstring: boolean = false;
+               const nocheckbrowsemode: boolean = false): boolean; overload;
+                //true if found else nearest lower or bigger,
+                //abookmark = '' if no lower or bigger found
+var
+ mstr1: msestring; 
+ str1: string;
+ consts1: array of tvarrec;
+ isnull1: array of boolean;
+ field1: tfield;
+ int1: integer;
+ rea1: extended;
+ cur1: currency;
+ lint1: int64;
+begin
+ setlength(consts1,length(avalues));
+ setlength(isnull1,length(avalues));
+ for int1:= 0 to high(avalues) do begin
+  field1:= avalues[int1];
+  with field1,consts1[int1] do begin
+   if isnull then begin
+    isnull1[int1]:= true;
+   end;
+   if field1 is tmsestringfield then begin
+    mstr1:= tmsestringfield(field1).asmsestring;
+    vtype:= vtwidestring;
+    vwidestring:= pointer(mstr1);
+   end
+   else begin
+    case datatype of
+     ftString,ftFixedChar,ftmemo,ftblob: begin
+      str1:= asstring;
+      vtype:= vtansistring;
+      vansistring:= pointer(str1);
+     end;
+     ftSmallint,ftInteger,ftWord: begin
+      vtype:= vinteger;
+      vinteger:= asinteger;
+     end;
+     ftBoolean: begin
+      vboolean:= asboolean;
+      vtype:= vtboolean
+     end; 
+     ftFloat,ftcurrency,ftDate,ftTime,ftDateTime,ftTimeStamp,ftFMTBcd: begin
+      rea1:= asfloat;
+      vtype:= vtextended;
+      vextended:= @rea1;
+     end;
+     ftBCD: begin
+      cur1:= ascurrency;
+      vtype:= vtcurrency;
+      vcurrency:= @cur1;
+     end;
+     ftWideString: begin
+      mstr1:= aswidestring;
+      vtype:= vtwidestring;
+      vwidestring:= pointer(mstr1);
+     end;
+     ftLargeint: begin
+      lint1:= aslargeint;
+      vtype:= vtint64;
+      vint64:= @lint1;
+     end;
+    end;
+   end;
+  end;
+ end; 
+ result:= find(consts1,isnull1,abookmark,abigger,
+                              partialstring,nocheckbrowsemode);
 end;
 
 function tlocalindex.unique(const avalues: array of const): boolean;

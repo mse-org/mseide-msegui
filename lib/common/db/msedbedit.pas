@@ -182,7 +182,7 @@ type
 //                  write fshortcuts[dbnb_dialog] default ord(key_f3);
    property options: dbnavigatoroptionsty read foptions write setoptions 
                   default defaultdbnavigatoroptions;
-   property autoedit: boolean read getautoedit write setautoedit;
+   property autoedit: boolean read getautoedit write setautoedit default false;
 //   property dialoghint: msestring read getdialoghint write setdialoghint;
 //   
    property dialogbutton: ttoolbutton read gettoolbutton write settoolbutton;
@@ -2642,9 +2642,11 @@ end;
 
 procedure tdbnavigator.setautoedit(const avalue: boolean);
 begin
- buttons[ord(dbnb_autoedit)].checked:= avalue;
- if fobjectlinker <> nil then begin
-  fobjectlinker.sendevent(oe_changed);
+ if buttons[ord(dbnb_autoedit)].checked <>  avalue then begin
+  buttons[ord(dbnb_autoedit)].checked:= avalue;
+  if fobjectlinker <> nil then begin
+   fobjectlinker.sendevent(oe_changed);
+  end;
  end;
 end;
 
@@ -3465,7 +3467,7 @@ function tdbkeystringedit.getoptionsedit: optionseditty;
 begin
  result:= inherited getoptionsedit;
  fdatalink.updateoptionsedit(result);
- frame.readonly:= oe_readonly in result;
+// frame.readonly:= oe_readonly in result;
 end;
 
 procedure tdbkeystringedit.valuetofield;
@@ -4749,7 +4751,7 @@ function tcustomdbenumedit.getoptionsedit: optionseditty;
 begin
  result:= inherited getoptionsedit;
  fdatalink.updateoptionsedit(result);
- frame.readonly:= oe_readonly in result;
+// frame.readonly:= oe_readonly in result;
 end;
 
 procedure tcustomdbenumedit.valuetofield;
@@ -8989,7 +8991,7 @@ function tdbenum64editlb.getoptionsedit: optionseditty;
 begin
  result:= inherited getoptionsedit;
  fdatalink.updateoptionsedit(result);
- frame.readonly:= oe_readonly in result;
+// frame.readonly:= oe_readonly in result;
 end;
 
 procedure tdbenum64editlb.valuetofield;
@@ -9100,7 +9102,7 @@ function tdbenum64editdb.getoptionsedit: optionseditty;
 begin
  result:= inherited getoptionsedit;
  fdatalink.updateoptionsedit(result);
- frame.readonly:= oe_readonly in result;
+// frame.readonly:= oe_readonly in result;
 end;
 
 procedure tdbenum64editdb.valuetofield;
