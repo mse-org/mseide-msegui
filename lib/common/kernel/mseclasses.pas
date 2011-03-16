@@ -664,6 +664,10 @@ function namepathowner(const acomponent: tcomponent): string;
                      //namepath from acomponent to root separated by '.'
 function getnumberedname(const acomp: tcomponent;
                                      const namebase: string): string;
+function ownercomponentpath(const acomponent: tcomponent): componentarty;
+                     //componentpath from root to acomponent
+function componentpathowner(const acomponent: tcomponent): componentarty;
+                     //componentpath from acomponent to root
 function rootcomponent(const acomponent: tcomponent): tcomponent;
 procedure setcomponentorder(const owner: tcomponent; const anames: msestringarty);
 function getcomponentchildren(const acomp: tcomponent;
@@ -1451,6 +1455,30 @@ begin
    end;
   end;
  end;
+end;
+
+function componentpathowner(const acomponent: tcomponent): componentarty;
+                     //componentpath from acomponent to root
+var
+ count: integer;
+ comp1: tcomponent;
+begin
+ count:= 0;
+ if acomponent <> nil then begin
+  comp1:= acomponent;
+  repeat
+   additem(pointerarty(result),pointer(comp1),count);
+   comp1:= comp1.owner;
+  until comp1 = nil;
+ end;
+ setlength(result,count);
+end;
+
+function ownercomponentpath(const acomponent: tcomponent): componentarty;
+                     //componentpath from root to acomponent
+begin
+ result:= componentarty(reversearray(pointerarty(
+                                         componentpathowner(acomponent))));
 end;
 
 function getnumberedname(const acomp: tcomponent;

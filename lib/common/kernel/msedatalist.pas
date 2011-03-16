@@ -1142,6 +1142,7 @@ procedure insertarray(const source: integerarty; var dest: integerarty); overloa
 procedure insertarray(const source: realarty; var dest: realarty); overload;
 function reversearray(const source: msestringarty): msestringarty; overload;
 function reversearray(const source: integerarty): integerarty; overload;
+function reversearray(const source: pointerarty): pointerarty; overload;
 procedure removearrayduplicates(var value: pointerarty);
 function packarray(source: pointerarty): pointerarty; overload;
                //remove nil items
@@ -2205,6 +2206,26 @@ begin
   dec(int2);
  end;
 end;
+
+function reversearray(const source: pointerarty): pointerarty; overload;
+var
+ ar1: pointerarty;
+ int1,int2: integer;
+begin
+ if pointer(source) = pointer(result) then begin
+  ar1:= copy(source);
+ end
+ else begin
+  ar1:= source;
+ end;
+ int2:= high(source);
+ setlength(result,int2+1);
+ for int1:= 0 to int2 do begin
+  result[int1]:= source[int2];
+  dec(int2);
+ end;
+end;
+
 procedure removearrayduplicates(var value: pointerarty);
 var
  int1,int2: integer;

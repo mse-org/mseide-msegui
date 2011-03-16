@@ -256,6 +256,7 @@ type
    fmodulemodifying: boolean;
    fmodifiedmodules: moduleinfopoarty;
    frefreshmethods: methodsarty;
+   fcomponentnamechanging: boolean;
    procedure delcomp(child: tcomponent);
    procedure addcomp(child: tcomponent);
    procedure domodulemodified(const amodule: pmoduleinfoty;
@@ -264,6 +265,8 @@ type
    procedure findrefreshmethod(reader: treader; const amethodname: string;
                           var address: pointer; var error: boolean);
    procedure modulemodified(const amodule: pmoduleinfoty);
+   procedure componentnamechanged(const amodule: pmoduleinfoty;
+                    const acomponent: tcomponent; const newname: string);
    procedure setnodefaultpos(const aroot: twidget);
    procedure restorepos(const aroot: twidget);
   public
@@ -1447,6 +1450,105 @@ begin
    finally
     fmodulemodifying:= false;
    end;
+  end;
+ end;
+end;
+
+procedure tdescendentinstancelist.componentnamechanged(
+                   const amodule: pmoduleinfoty;
+                   const acomponent: tcomponent; const newname: string);
+var
+ reclevel: integer;
+ namepath: string;
+ newpath: string;
+ 
+ procedure donamechange(aancestor: pmoduleinfoty);
+ var
+  int1: integer;
+  po1: pancestorinfoty;
+  comp1: tcomponent;
+ begin
+  if aancestor <> nil then begin
+   if reclevel >= 16 then begin
+    showmessage('Recursive form inheritance of "'+
+                                amodule^.filename+'".','ERROR');
+    sysutils.abort;
+   end;
+   inc(reclevel);
+   po1:= datapo;
+   for int1:= 0 to count-1 do begin
+    if po1^.ancestor = aancestor^.instance then begin
+     comp1:= findnestedcomponent(po1^.descendent,namepath);
+     if comp1 <> nil then begin
+      comp1.name:= newname;
+     end;
+     donamechange(fdesigner.modules.findmodule(po1^.descendent));
+    end;
+    inc(po1);
+   end;
+   dec(reclevel);
+  end;
+ end;
+ 
+ procedure docheckname(aancestor: pmoduleinfoty);
+ var
+  int1: integer;
+  po1: pancestorinfoty;
+  comp1: tcomponent;
+ begin
+  if aancestor <> nil then begin
+   if reclevel >= 16 then begin
+    showmessage('Recursive form inheritance of "'+
+                                amodule^.filename+'".','ERROR');
+    sysutils.abort;
+   end;
+   inc(reclevel);
+   po1:= datapo;
+   for int1:= 0 to count-1 do begin
+    if po1^.ancestor = aancestor^.instance then begin
+     comp1:= findnestedcomponent(po1^.descendent,newpath);
+     if comp1 <> nil then begin
+      raise exception.create(po1^.descendent.name+': Component "'+
+             newpath+'" exists.');
+     end;
+     donamechange(fdesigner.modules.findmodule(po1^.descendent));
+    end;
+    inc(po1);
+   end;
+   dec(reclevel);
+  end;
+ end;
+
+var
+ ar1: componentarty; 
+ int1: integer;
+begin
+ if not fcomponentnamechanging then begin
+  fcomponentnamechanging:= true;
+  try
+   ar1:= ownercomponentpath(acomponent);
+   if high(ar1) > 0 then begin
+    namepath:= ar1[1].name;
+    for int1:= 2 to high(ar1) do begin
+     namepath:= namepath+'.'+ar1[int1].name;
+    end;
+    if high(ar1) > 1 then begin
+     newpath:= ar1[1].name;
+     for int1:= 2 to high(ar1)-1 do begin
+      namepath:= namepath+'.'+ar1[int1].name;
+     end;
+     newpath:= newpath+'.'+newname;
+    end
+    else begin
+     newpath:= newname;
+    end;
+    reclevel:= 0;
+    docheckname(amodule);
+    reclevel:= 0;
+    donamechange(amodule);
+   end;
+  finally
+   fcomponentnamechanging:= false;
   end;
  end;
 end;
@@ -4827,6 +4929,8 @@ begin
      raise EComponentError.Createfmt(SDuplicateName,[newname]);
     end;
     po1^.components.namechanged(acomponent,newname);
+    fdescendentinstancelist.componentnamechanged(po1,acomponent,newname);
+    
     designnotifications.componentnamechanging(idesigner(self),po1^.instance,
                                        acomponent,newname);
     if acomponent is tmsecomponent then begin

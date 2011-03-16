@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -216,6 +216,11 @@ type
    fforcequote: boolean;
   public                //!!!!!!todo: correct encoding, (linebreaks, whitespaces ...)
    constructor create(ahandle: integer); override;
+   function readcsvstring(out value: msestring): boolean;
+                     //true if lineend
+   function readcsvvalues(out values: msestringarty): boolean;
+                     //true if lineend
+
    procedure writerecord(const fields: array of const); overload;
    procedure writerecord(const fields: msestringarty); overload;
    procedure writerecord(const fields: stringarty); overload;
@@ -1847,6 +1852,22 @@ begin
  writerecord(ar1);
 end;
 
+function ttextdatastream.readcsvstring(out value: msestring): boolean;
+var
+ mstr2: msestring;
+begin
+ result:= readln(value);
+ if odd(countchars(value,fquotechar)) then begin
+  while not eof do begin
+   result:= readln(mstr2);
+   value:= value+lineend+mstr2;
+   if odd(countchars(mstr2,fquotechar)) then begin
+    break;
+   end;
+  end;
+ end;
+end;
+
 function ttextdatastream.readrecord(fields: array of pointer; types: string): boolean;
                 // b -> boolean
                 // i -> integer
@@ -1855,19 +1876,18 @@ function ttextdatastream.readrecord(fields: array of pointer; types: string): bo
                 // S -> msestring
                 // r -> real
 var
- mstr1,mstr2: msestring;
+ mstr1: msestring;
 begin
- readln(mstr1);
- if odd(countchars(mstr1,fquotechar)) then begin
-  while not eof do begin
-   readln(mstr2);
-   mstr1:= mstr1+lineend+mstr2;
-   if odd(countchars(mstr2,fquotechar)) then begin
-    break;
-   end;
-  end;
- end;
+ readcsvstring(mstr1);
  result:= decoderecord(mstr1,fields,types,fquotechar,fseparator);
+end;
+
+function ttextdatastream.readcsvvalues(out values: msestringarty): boolean;
+var
+ mstr1: msestring;
+begin
+ result:= readcsvstring(mstr1);
+ splitstringquoted(mstr1,values,fquotechar,fseparator);
 end;
 
 { tcryptfilestream }
