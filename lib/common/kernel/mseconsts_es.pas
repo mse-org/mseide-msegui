@@ -120,8 +120,8 @@ const
   'Filtro edici'#243'n m'#225'ximo',   //sc_filter_edit_max
   'Filtro activo',                     //sc_filter_on
   'Buscar',                            //sc_search
-  'Auto edit',          //sc_autoedit
-  'Dialog',             //sc_dialog
+  'Edici'#243'n autom'#225'tica',          //sc_autoedit
+  'Di'#225'logo',             //sc_dialog
   'Insertar',                          //sc_insert
   'Filtro apagado',                    //sc_filter_off
   'Vertical',                          //sc_portrait print orientation
