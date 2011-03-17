@@ -128,7 +128,8 @@ type
                     scoe_lowercase,                    
                     scoe_hintclippedtext,                    
                     scoe_locate,
-                    scoe_casesensitive
+                    scoe_casesensitive,
+                    scoe_checkbox
                           );
 
  stringcoleditoptionsty = set of stringcoleditoptionty;
@@ -696,9 +697,11 @@ type
   private
    fgrid: tcustomgrid;
    fnoparagraph: integerarty;
+   fvaluedefault: msestring;
   protected
    procedure afterrowcountupdate;
    function getnoparagraphs(index: integer): boolean; override;
+   function getdefault: pointer; override;
   public
    constructor create(const agrid: tcustomgrid);
    function add(const avalue: msestring; const anoparagraph: boolean): integer; 
@@ -715,6 +718,9 @@ type
    fondataentered: notifyeventty;
    foncopytoclipboard: updatestringeventty;
    fonpastefromclipboard: updatestringeventty;
+   fvaluetrue: msestring;
+   fvaluefalse: msestring;
+   fcolorglyph: colorty;
    procedure settextflags(const avalue: textflagsty);
    function getdatalist: tstringcoldatalist;
    procedure setdatalist(const value: tstringcoldatalist);
@@ -722,6 +728,11 @@ type
    function geteditpos: gridcoordty;
    procedure seteditpos(const avalue: gridcoordty);
    procedure setpasswordchar(const avalue: msechar);
+   function getchecked(aindex: integer): boolean;
+   procedure setchecked(aindex: integer; const avalue: boolean);
+   function getvaluedefault: msestring;
+   procedure setvaluedefault(const avalue: msestring);
+   procedure setcolorglyph(const avalue: colorty);
   protected
    ftextinfo: drawtextinfoty;
    foptionsedit: stringcoleditoptionsty;
@@ -753,6 +764,8 @@ type
                       const processeditchars: boolean = false;
                       const maxchars: integer = 0); overload;
    property items[aindex: integer]: msestring read getitems write setitems; default;
+   property checked[index: integer]: boolean read getchecked write setchecked;
+
    property textflags: textflagsty read ftextinfo.flags write settextflags
                           default defaultcoltextflags;
    property textflagsactive: textflagsty read ftextflagsactive
@@ -766,13 +779,17 @@ type
    property font;
    property datalist: tstringcoldatalist read getdatalist write setdatalist;
    property editpos: gridcoordty read geteditpos write seteditpos;
+   property colorglyph: colorty read fcolorglyph write setcolorglyph
+                                                            default cl_glyph;
+   property valuedefault: msestring read getvaluedefault write setvaluedefault;
+   property valuetrue: msestring read fvaluetrue write fvaluetrue;
+   property valuefalse: msestring read fvaluefalse write fvaluefalse;
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
    property ondataentered: notifyeventty read fondataentered write fondataentered;
    property oncopytoclipboard: updatestringeventty read foncopytoclipboard 
                   write foncopytoclipboard;
    property onpastefromclipboard: updatestringeventty read fonpastefromclipboard 
-                  write fonpastefromclipboard;
-       
+                  write fonpastefromclipboard;       
  end;
 
  tstringcol = class(tcustomstringcol)
@@ -785,6 +802,9 @@ type
    property optionsedit1;
    property font;
    property datalist;
+   property valuedefault;
+   property valuefalse;
+   property valuetrue;
    property fontselect;
    property onsetvalue;
    property ondataentered;
@@ -2442,7 +2462,7 @@ function cellkeypress(const info: celleventinfoty): keyty;
 
 implementation
 uses
- mseguiintf,msestockobjects,mseact,mseactions,rtlconsts;
+ mseguiintf,msestockobjects,mseact,mseactions,rtlconsts,msegraphedits;
 type
  tframe1 = class(tcustomframe);
  tdatalist1 = class(tdatalist);
@@ -6142,11 +6162,24 @@ begin
  result:= fgrid.fdatacols.frowstate.flag1[index];
 end;
 
+function tstringcoldatalist.getdefault: pointer;
+begin
+ if fvaluedefault = '' then begin
+  result:= nil;       //use block fillchar()
+ end
+ else begin
+  result:= @fvaluedefault;
+ end;
+end;
+
 { tcustomstringcol }
 
 constructor tcustomstringcol.create(const agrid: tcustomgrid; 
                        const aowner: tgridarrayprop);
 begin
+ fvaluetrue:= '1';
+ fvaluefalse:= '0';
+ fcolorglyph:= cl_glyph;
  foptionsedit:= tstringcols(aowner).foptionsedit;
  foptionsedit1:= tstringcols(aowner).foptionsedit1;
  ftextinfo.flags:= tstringcols(aowner).ftextflags;
@@ -6183,13 +6216,6 @@ end;
 function tcustomstringcol.getinnerframe: framety;
 begin
  result:= inherited getinnerframe;
-{
- result.left:= tcustomstringgrid(fgrid).feditor.getinsertcaretwidth(
-                 fgrid.getcanvas,fgrid.getfont);
- result.top:= 0;
- result.right:= result.left;
- result.bottom:= 0;
-}
 end;
 
 function tcustomstringcol.getcursor(const arow: integer;
@@ -6277,28 +6303,48 @@ begin
  ftextinfo.text.format:= nil;
  with cellinfoty(canvas.drawinfopo^) do begin
   if cell.row < fgrid.rowcount then begin
-   ftextinfo.dest.cx:= innerrect.cx;
-   ftextinfo.dest.cy:= innerrect.cy;
-   ftextinfo.clip.cx:= rect.cx;
-   ftextinfo.clip.cy:= rect.cy;
-   ftextinfo.text.text:= getrowtext(cell.row);
-   updatedisptext(ftextinfo.text.text);
-   if passwordchar <> #0 then begin
-    ftextinfo.text.text:= charstring(passwordchar,length(ftextinfo.text.text));
-   end;
-   if calcautocellsize then begin
-    textrect(canvas,ftextinfo);
-    int1:= rect.cx - innerrect.cx + ftextinfo.res.cx;
-    if int1 > autocellsize.cx then begin
-     autocellsize.cx:= int1;
-    end;
-    int1:= rect.cy - innerrect.cy + ftextinfo.res.cy;
-    if int1 > autocellsize.cy then begin
-     autocellsize.cy:= int1;
+   if scoe_checkbox in foptionsedit then begin
+    if calcautocellsize then begin
+     textrect(canvas,ftextinfo);
+     int1:= rect.cx - innerrect.cx + ftextinfo.res.cx;
+     if defaultboxsize > autocellsize.cx then begin
+      autocellsize.cx:= defaultboxsize;
+     end;
+     if defaultboxsize > autocellsize.cy then begin
+      autocellsize.cy:= defaultboxsize;
+     end;
+    end
+    else begin
+     if checked[cell.row] then begin
+      stockobjects.paintglyph(canvas,stg_checked,innerrect,
+                 co_disabled in foptions,fcolorglyph);
+     end;
     end;
    end
    else begin
-    drawtext(canvas,ftextinfo);
+    ftextinfo.dest.cx:= innerrect.cx;
+    ftextinfo.dest.cy:= innerrect.cy;
+    ftextinfo.clip.cx:= rect.cx;
+    ftextinfo.clip.cy:= rect.cy;
+    ftextinfo.text.text:= getrowtext(cell.row);
+    updatedisptext(ftextinfo.text.text);
+    if passwordchar <> #0 then begin
+     ftextinfo.text.text:= charstring(passwordchar,length(ftextinfo.text.text));
+    end;
+    if calcautocellsize then begin
+     textrect(canvas,ftextinfo);
+     int1:= rect.cx - innerrect.cx + ftextinfo.res.cx;
+     if int1 > autocellsize.cx then begin
+      autocellsize.cx:= int1;
+     end;
+     int1:= rect.cy - innerrect.cy + ftextinfo.res.cy;
+     if int1 > autocellsize.cy then begin
+      autocellsize.cy:= int1;
+     end;
+    end
+    else begin
+     drawtext(canvas,ftextinfo);
+    end;
    end;
   end;
  end;
@@ -6312,8 +6358,34 @@ end;
 procedure tcustomstringcol.setitems(aindex: integer; const Value: msestring);
 begin
  tmsestringdatalist(fdata)[aindex]:= value;
- cellchanged(aindex); //??? already called?
+// cellchanged(aindex); //??? already called?
 end;
+
+function tcustomstringcol.getchecked(aindex: integer): boolean;
+begin
+ result:= tstringcoldatalist(fdata).items[aindex] = fvaluetrue;;
+end;
+
+procedure tcustomstringcol.setchecked(aindex: integer; const avalue: boolean);
+begin
+ if avalue then begin
+  tstringcoldatalist(fdata).items[aindex]:= fvaluetrue;
+ end
+ else begin
+  tstringcoldatalist(fdata).items[aindex]:= fvaluefalse;
+ end;
+end;
+
+function tcustomstringcol.getvaluedefault: msestring;
+begin
+ result:= tstringcoldatalist(fdata).fvaluedefault;
+end;
+
+procedure tcustomstringcol.setvaluedefault(const avalue: msestring);
+begin
+ tstringcoldatalist(fdata).fvaluedefault:= avalue;
+end;
+
 
 function tcustomstringcol.getdatalist: tstringcoldatalist;
 begin
@@ -6363,13 +6435,24 @@ procedure tcustomstringcol.docellevent(var info: celleventinfoty);
 var
  hintinfo: hintinfoty;
 begin
- if (scoe_hintclippedtext in foptionsedit) and 
-        (info.eventkind = cek_firstmousepark) and application.active and 
-         fgrid.getshowhint and
-         tcustomstringgrid(fgrid).textclipped(info.cell) then begin
-  application.inithintinfo(hintinfo,fgrid);
-  hintinfo.caption:= self[info.cell.row];
-  application.showhint(fgrid,hintinfo);
+ if scoe_checkbox in foptionsedit then begin
+  if not (co_readonly in foptions) and (info.cell.row >= 0) then begin
+   if iscellclick(info) or (info.eventkind = cek_keyup) and 
+        (info.keyeventinfopo^.key = key_space) and 
+        (info.keyeventinfopo^.shiftstate = []) then begin
+    checked[info.cell.row]:= not checked[info.cell.row];
+   end;
+  end;
+ end
+ else begin
+  if (scoe_hintclippedtext in foptionsedit) and 
+         (info.eventkind = cek_firstmousepark) and application.active and 
+          fgrid.getshowhint and
+          tcustomstringgrid(fgrid).textclipped(info.cell) then begin
+   application.inithintinfo(hintinfo,fgrid);
+   hintinfo.caption:= self[info.cell.row];
+   application.showhint(fgrid,hintinfo);
+  end;
  end;
  inherited;
 end;
@@ -6387,6 +6470,14 @@ end;
 function tcustomstringcol.edited: boolean;
 begin
  result:= gps_edited in fstate;
+end;
+
+procedure tcustomstringcol.setcolorglyph(const avalue: colorty);
+begin
+ if fcolorglyph <> avalue then begin
+  fcolorglyph:= avalue;
+  invalidate;
+ end;
 end;
 
 { tfixcol }
@@ -14243,23 +14334,29 @@ var
  int1: integer;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
-  if calcautocellsize then begin
-   rect1:= feditor.textrect;
-   int1:= rect.cx - innerrect.cx + rect1.cx;
-   if int1 > autocellsize.cx then begin
-    autocellsize.cx:= int1;
-   end;
-   int1:= rect.cy - innerrect.cy + rect1.cy;
-   if int1 > autocellsize.cy then begin
-    autocellsize.cy:= int1;
-   end;
+  if scoe_checkbox in tcustomstringcol(
+                  fdatacols.fitems[ffocusedcell.col]).foptionsedit then begin
+   inherited;
   end
   else begin
-   drawcellbackground(canvas);
-   po1:= cellrect(ffocusedcell,cil_paint).pos;
-   canvas.remove(po1);
-   feditor.dopaint(canvas);
-   canvas.move(po1);
+   if calcautocellsize then begin
+    rect1:= feditor.textrect;
+    int1:= rect.cx - innerrect.cx + rect1.cx;
+    if int1 > autocellsize.cx then begin
+     autocellsize.cx:= int1;
+    end;
+    int1:= rect.cy - innerrect.cy + rect1.cy;
+    if int1 > autocellsize.cy then begin
+     autocellsize.cy:= int1;
+    end;
+   end
+   else begin
+    drawcellbackground(canvas);
+    po1:= cellrect(ffocusedcell,cil_paint).pos;
+    canvas.remove(po1);
+    feditor.dopaint(canvas);
+    canvas.move(po1);
+   end;
   end;
  end;
 end;
@@ -14303,11 +14400,16 @@ begin
  feditor.textflags:= col1.textflags;
  feditor.textflagsactive:= col1.ftextflagsactive;
  feditor.passwordchar:= col1.passwordchar;
- if focusin then begin
-  feditor.dofocus;
- end;
- if active then begin
-  feditor.doactivate;
+ if scoe_checkbox in tcustomstringcol(fdatacols.fitems[acell.col]).optionsedit then begin
+  feditor.dodefocus;
+ end
+ else begin
+  if focusin then begin
+   feditor.dofocus;
+  end;
+  if active then begin
+   feditor.doactivate;
+  end;
  end;
 end;
 
@@ -14387,15 +14489,20 @@ begin
  inherited;
  if not (es_processed in info.eventstate) and focusedcellvalid and
          (info.eventkind in mouseposevents) and
-               (gridcoordisequal(ffocusedcell,fmousecell) or bo2) then begin
+               (gridcoordisequal(ffocusedcell,fmousecell) or bo2) and
+        not (scoe_checkbox in tcustomstringcol(
+                  fdatacols.fitems[ffocusedcell.col]).optionsedit) then begin
   feditor.mouseevent(info);
  end;
 end;
 
 procedure tcustomstringgrid.doactivate;
 begin
- if focusedcellvalid then begin
+ if focusedcellvalid and 
+          not (scoe_checkbox in tcustomstringcol(
+                  fdatacols.fitems[ffocusedcell.col]).optionsedit) then begin 
   feditor.doactivate;
+  
  end;
  inherited;
 end;
@@ -14410,7 +14517,8 @@ end;
 
 procedure tcustomstringgrid.dokeydown(var info: keyeventinfoty);
 begin
- if focusedcellvalid then begin
+ if focusedcellvalid and not (scoe_checkbox in tcustomstringcol(
+                  fdatacols.fitems[ffocusedcell.col]).optionsedit) then begin
   feditor.dokeydown(info);
  end;
  if not (es_processed in info.eventstate) then begin

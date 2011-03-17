@@ -4088,11 +4088,11 @@ begin
  end
  else begin
   mstr1:= mseuppercase(avalue);
-  if pos(mstr1,fdisplays[true,false]) = 1 then begin
+  if (mstr1 = '0') or (pos(mstr1,fdisplays[true,false]) = 1) then begin
    asboolean:= false;
   end
   else begin
-   if pos(mstr1,fdisplays[true,true]) = 1 then begin
+   if (mstr1 = '1') or (pos(mstr1,fdisplays[true,true]) = 1) then begin
     asboolean:= true;
    end
    else begin
