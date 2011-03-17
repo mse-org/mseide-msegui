@@ -1175,6 +1175,8 @@ type
                                   const statebefore: tdatasetstate) of object;
  masterdataseteventty = procedure(const sender: tdataset;
                                  const master: tdataset) of object;
+ slavedataseteventty = procedure(const sender: tdataset;
+                                 const slave: tdataset) of object;
  afterposteventty = procedure(const sender: tdataset; var ok: boolean) of object;
  epostcancel = class(eabort);
  
@@ -5479,7 +5481,7 @@ begin
   end;
   replacebits1(longword(fstate),longword(state1),longword(mask));
   fieldchanged;
-  editingchanged;
+  editingchanged; //???
  end;
 end;
 

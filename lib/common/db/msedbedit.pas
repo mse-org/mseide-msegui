@@ -51,7 +51,8 @@ type
                         dno_nodialogifnoeditmode,dno_nodialogifreadonly,
                         dno_postbeforedialog);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
- optioneditdbty = (oed_autopost,oed_nofilteredit,oed_nofilterminedit,
+ optioneditdbty = (oed_autopost,oed_syncedittonavigator,
+                   oed_nofilteredit,oed_nofilterminedit,
                    oed_nofiltermaxedit,oed_nofindedit,
                    oed_nonullset, //use TField.DefaultExpression for textedit
                    oed_nullset);  //don't use TField.DefaultExpression for
@@ -137,6 +138,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override; 
+   procedure edit;
   published
    property statfile;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -2660,6 +2662,26 @@ begin
  writer.writeboolean('autoedit',autoedit);
 end;
 
+procedure tdbnavigator.edit;
+var
+ int1: integer;
+begin
+ if fdatalink.active and (fdatalink.dataset.state = dsbrowse) then begin
+  int1:= -1;
+  if buttons[ord(dbnb_edit)].enabled then begin
+   int1:= ord(dbnb_edit);
+  end
+  else begin
+   if buttons[ord(dbnb_insert)].enabled then begin
+    int1:= ord(dbnb_insert);
+   end
+  end;
+  if int1 >= 0 then begin
+   fdatalink.execbutton(dbnavigbuttonty(int1));
+  end;
+ end;
+end;
+
 { tcustomeditwidgetdatalink }
 
 constructor tcustomeditwidgetdatalink.create(const intf: idbeditfieldlink);
@@ -2802,9 +2824,14 @@ begin
  end;
  setediting(inherited editing and canmodify);
  fintf.updatereadonlystate;
- if editing and assigned(fonbeginedit) and 
+ if editing then begin
+  if (fnavigator <> nil) and (oed_syncedittonavigator in foptions) then begin
+   fnavigator.edit;
+  end;
+  if assigned(fonbeginedit) and 
          fintf.getwidget.canevent(tmethod(fonbeginedit)) then begin
-  fonbeginedit(self);
+   fonbeginedit(self);
+  end;
  end;
 end;
 

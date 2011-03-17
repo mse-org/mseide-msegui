@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -154,10 +154,28 @@ type
    constructor create(const aowner: tfieldparamlink);
    procedure loaded;
  end;
- 
+
+ tparamdestdatalink = class(tmsedatalink)
+  private
+   fowner: tfieldparamlink;
+  protected
+   function cansync(out sourceds: tdataset): boolean;
+   procedure DataEvent(Event: TDataEvent; Info: Ptrint); override;
+   procedure CheckBrowseMode; override;
+  public
+   constructor create(const aowner: tfieldparamlink);
+ end;
+  
  fieldparamlinkoptionty = (fplo_autorefresh,fplo_restorerecno,
               fplo_syncmasterpost,
-              fplo_syncmasteredit,fplo_syncmasterinsert,fplo_syncmasterdelete);
+              fplo_syncmasteredit,
+              fplo_syncmasterinsert,
+              fplo_syncmasterdelete,
+              fplo_syncslavepost,
+              fplo_syncslaveedit,
+              fplo_syncslaveinsert,
+              fplo_syncslavedelete
+              );
  fieldparamlinkoptionsty = set of fieldparamlinkoptionty;
 const
  defaultfieldparamlinkoptions = [fplo_autorefresh];
@@ -168,6 +186,8 @@ type
    fsourcedatalink: tparamsourcedatalink;
 //   fdestdatasource: tlinkdatasource;
    fdestdataset: tsqlquery;
+   fdestdatasource: tdatasource;
+   fdestdatalink: tparamdestdatalink;
    fdestcontroller: tdscontroller;
    fparamname: string;
    fonsetparam: setparameventty;
@@ -177,6 +197,8 @@ type
    fnodelay: integer;
    fonupdatemasteredit: masterdataseteventty;
    fonupdatemasterinsert: masterdataseteventty;
+   fonupdateslaveedit: slavedataseteventty;
+   fonupdateslaveinsert: slavedataseteventty;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
    function getdatasource: tdatasource; overload;
@@ -221,6 +243,10 @@ type
    property onupdatemasteredit: masterdataseteventty read fonupdatemasteredit 
                      write fonupdatemasteredit;
    property onupdatemasterinsert: masterdataseteventty read fonupdatemasterinsert 
+                     write fonupdatemasterinsert;
+   property onupdateslaveedit: slavedataseteventty read fonupdateslaveedit 
+                     write fonupdatemasteredit;
+   property onupdateslaveinsert: slavedataseteventty read fonupdateslaveinsert 
                      write fonupdatemasterinsert;
  end;
 
@@ -880,7 +906,8 @@ begin
      end;
     end;
     if (fplo_syncmasterpost in foptions) then begin
-     destdataset.checkbrowsemode;
+     destdataset.post;
+//     destdataset.checkbrowsemode;
     end;
     inherited;
    endlab:
@@ -911,6 +938,9 @@ begin
  fdelayus:= -1;
  foptions:= defaultfieldparamlinkoptions;
  fsourcedatalink:= tparamsourcedatalink.create(self);
+ fdestdatasource:= tdatasource.create(nil);
+ fdestdatalink:= tparamdestdatalink.create(self);
+ fdestdatalink.datasource:= fdestdatasource;
 // fdestdatasource:= tlinkdatasource.create(nil);
  inherited;
 end;
@@ -920,6 +950,8 @@ begin
 // freeandnil(ftimer);
  inherited;
  fsourcedatalink.free;
+ fdestdatalink.free;
+ fdestdatasource.free;
 // fdestdatasource.free;
 end;
 {
@@ -967,7 +999,7 @@ procedure tfieldparamlink.setdestdataset(const avalue: tsqlquery);
 var
  intf: igetdscontroller;
 begin
-// fdestdatasource.dataset:= avalue;
+ fdestdatasource.dataset:= avalue;
  if fdestdataset <> nil then begin
   fdestdataset.removefreenotification(self);
  end;
@@ -1237,5 +1269,107 @@ function tsequencelink.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
 end;
+
+{ tparamdestdatalink }
+
+constructor tparamdestdatalink.create(const aowner: tfieldparamlink);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+function tparamdestdatalink.cansync(out sourceds: tdataset): boolean;
+begin
+ with fowner.fsourcedatalink do begin
+  result:= false;
+  sourceds:= dataset;
+  if sourceds <> nil then begin
+   result:= sourceds.active;
+  end;
+ end;
+end;
+
+procedure tparamdestdatalink.DataEvent(Event: TDataEvent; Info: Ptrint);
+var
+ sourceds: tdataset;
+begin
+ inherited;
+ with fowner do begin
+  if cansync(sourceds) then begin
+   case ord(event) of
+    ord(deupdatestate): begin
+     if (fplo_syncslaveedit in foptions) and (dataset.state = dsedit) and 
+                     not (sourceds.state = dsedit) then begin
+      sourceds.edit;
+     end;
+     if (fplo_syncslaveinsert in foptions) and(dataset.state = dsinsert) and
+                                  not (sourceds.state = dsinsert) then begin
+      sourceds.insert;
+     end;
+    end;
+    de_afterdelete: begin
+     if (fplo_syncslavedelete in foptions) then begin
+      sourceds.delete;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tparamdestdatalink.CheckBrowseMode;
+label
+ endlab;
+var
+ intf: igetdscontroller;
+ sourceds: tdataset;
+begin
+ if cansync(sourceds) then begin
+  with fowner do begin
+   inc(fsourcedatalink.frefreshlock);
+   try
+    if foptions * [fplo_syncslaveedit,fplo_syncslaveinsert] <> [] then begin
+     if mseclasses.getcorbainterface(dataset,typeinfo(igetdscontroller),intf) and
+                                        intf.getcontroller.canceling then begin
+      sourceds.cancel;
+      exit;
+     end
+     else begin
+      if (sourceds.state = dsinsert) and 
+                           (fplo_syncslavepost in foptions) then begin
+       dataset.updaterecord;
+       if dataset.modified then begin
+        destdataset.post;
+        goto endlab;
+       end;
+      end;
+     end;
+    end;
+    if (fplo_syncslavepost in foptions) then begin
+     sourceds.post;
+//     destdataset.checkbrowsemode;
+    end;
+    inherited;
+   endlab:
+    if (dataset.state in [dsedit,dsinsert]) and 
+      (foptions * [fplo_syncslaveedit,fplo_syncslaveinsert] <> []) then begin
+     dataset.updaterecord; //synchronize fields
+    end;
+    if (dataset.state = dsinsert) and assigned(onupdateslaveinsert) then begin
+     onupdateslaveinsert(destdataset,dataset);
+    end;
+    if (dataset.state = dsedit) and assigned(onupdateslaveedit) then begin
+     onupdateslaveedit(destdataset,dataset);
+    end;
+   finally
+    dec(fsourcedatalink.frefreshlock);
+   end;
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 
 end.
