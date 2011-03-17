@@ -475,6 +475,12 @@ type
 
    procedure setfontactivenum(const avalue: integer);
    procedure setfontfocusednum(const avalue: integer);
+   function getvisible: boolean;
+   procedure setvisible(const avalue: boolean);
+   function getenabled: boolean;
+   procedure setenabled(const avalue: boolean);
+   function getreadonly: boolean;
+   procedure setreadonly(const avalue: boolean);
   protected
    foptions1: coloptions1ty;
    fwidth: integer;
@@ -532,6 +538,9 @@ type
    function actualfont: tfont; virtual;
    property colindex: integer read getcolindex;
    function translatetocell(const arow: integer; const apos: pointty): pointty;
+   property visible: boolean read getvisible write setvisible;
+   property enabled: boolean read getenabled write setenabled;
+   property readonly: boolean read getreadonly write setreadonly;
   published
    property width: integer read fwidth write setwidth 
                  {stored iswidthstored} default griddefaultcolwidth;
@@ -3827,6 +3836,51 @@ end;
 procedure tcol.updatewidth(var avalue: integer);
 begin
  //dummy
+end;
+
+function tcol.getvisible: boolean;
+begin
+ result:= not (co_invisible in options);
+end;
+
+procedure tcol.setvisible(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options - [co_invisible];
+ end
+ else begin
+  options:= options + [co_invisible];
+ end; 
+end;
+
+function tcol.getenabled: boolean;
+begin
+ result:= not (co_disabled in options);
+end;
+
+procedure tcol.setenabled(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options - [co_disabled];
+ end
+ else begin
+  options:= options + [co_disabled];
+ end; 
+end;
+
+function tcol.getreadonly: boolean;
+begin
+ result:= co_readonly in options;
+end;
+
+procedure tcol.setreadonly(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [co_readonly];
+ end
+ else begin
+  options:= options - [co_readonly];
+ end; 
 end;
 
 { tcolheaderfont }
@@ -11089,7 +11143,8 @@ function tcustomgrid.showcaretrect(const arect: rectty;
 var
  rect1: rectty;
 begin
- if not window.activating and not (gs_cellexiting in fstate) and 
+ if not window.activating and 
+   ([gs_cellexiting,gs_layoutupdating] * fstate =[]) and 
    (fnoshowcaretrect = 0) and 
    not (frame.sbhorz.clicked or frame.sbvert.clicked) and
    intersectrect(inflaterect(arect,aframe),cellrect(ffocusedcell),rect1) then begin
@@ -14649,22 +14704,24 @@ begin
      end;
      if bo1 and (og_colchangeonreturnkey in fgrid.optionsgrid) then begin
       info.action:= ea_none;
-      fgrid.colstep(fca_focusin,1,true,false,true);
+      self.colstep(fca_focusin,1,true,false,true);
      end;
     end;
     ea_undo: begin
      exclude(fstate,gps_edited);
     end;
     ea_caretupdating: begin
-     frame1:= nullframe;
-     if fframe <> nil then begin
-      frame1:= fframe.innerframe;
-     end
-     else begin
-      frame1.left:= fcellinfo.innerrect.x;
+     if not (gs_layoutupdating in self.fstate) then begin
+      frame1:= nullframe;
+      if fframe <> nil then begin
+       frame1:= fframe.innerframe;
+      end
+      else begin
+       frame1.left:= fcellinfo.innerrect.x;
+      end;
+      addpoint1(info.caretrect.pos,
+           showcaretrect(info.caretrect,frame1));
      end;
-     addpoint1(info.caretrect.pos,
-          showcaretrect(info.caretrect,frame1));
     end;
     {
     ea_copyselection: begin
