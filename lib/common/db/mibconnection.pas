@@ -26,6 +26,8 @@ unit mibconnection;
 {$endif}
 interface
 
+//todo: use execute_immediate if possible
+
 uses
  Classes,SysUtils,msqldb,db,math,dbconst,msebufdataset,msedbevents,msesys,
  msestrings,msedb,msetypes,
@@ -328,7 +330,7 @@ begin
  feventcontroller:= tdbeventcontroller.create(idbeventcontroller(self));
  feventcontroller.eventinterval:= -1; //event driven
  inherited;
- FConnOptions := FConnOptions + [sco_SupportParams];
+ FConnOptions := FConnOptions + [sco_SupportParams,sco_nounprepared];
 end;
 
 destructor TIBConnection.destroy;
@@ -664,7 +666,7 @@ var dh    : pointer;
  int1: integer;
  by1: byte;
 begin
- with cursor as TIBcursor do begin
+ with TIBcursor(cursor) do begin
   ffetched:= false;
   fempty:= true;
   dh := GetHandle;
@@ -672,7 +674,6 @@ begin
    CheckError('PrepareStatement', Status);
   end;
   tr := aTransaction.Handle;
-  
   if assigned(AParams) and (AParams.count > 0) then begin
    str1:= todbstring(AParams.ParseSQL(asql,false,false,false,psInterbase,
                             paramBinding));

@@ -31,7 +31,7 @@ uses
 type 
  TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
                     stProcedureParams,stIndexes,stPackages);
- sqlconnoptionty = (sco_supportparams,sco_emulateretaining);
+ sqlconnoptionty = (sco_supportparams,sco_emulateretaining,sco_nounprepared);
  sqlconnoptionsty = set of sqlconnoptionty;
 
 type
@@ -365,6 +365,7 @@ type
     procedure setdatabase1(const avalue: tcustomsqlconnection);
     function docommit(const retaining: boolean): boolean;
    protected
+    fsavepointindex: integer;
     function GetHandle : Pointer; virtual;
     Procedure SetDatabase (Value : tmdatabase); override;
     procedure disconnect(const sender: tsqlquery);
@@ -383,6 +384,9 @@ type
     procedure StartTransaction; override;
     property Handle: Pointer read GetHandle;
     procedure EndTransaction; override;
+    function savepointbegin: msestring;
+    procedure savepointrollback(const aname: msestring);
+    procedure savepointrelease(const aname: msestring);
     property trans: tsqlhandle read ftrans;
    published
     property options: transactionoptionsty read foptions write foptions default [];
@@ -789,7 +793,7 @@ function splitsql(const asql: msestring; const term: msechar = ';';
 
 implementation
 uses 
- dbconst,strutils,msereal,msestream,msebits,msefileutils;
+ dbconst,strutils,msereal,msestream,msebits,msefileutils,mseformatstr;
 type
  tdataset1 = class(tdataset);
  tmdatabase1 = class(tmdatabase);
@@ -1576,7 +1580,8 @@ function tcustomsqlconnection.ExecuteDirect(const aSQL: mseString;
           const aisutf8: boolean = false;
           const anoprepare: boolean = false): integer;
 begin
- result:= internalexecutedirect(asql,atransaction,aparams,[],aisutf8,anoprepare);
+ result:= internalexecutedirect(asql,atransaction,aparams,[],aisutf8,
+              anoprepare and not (sco_nounprepared in fconnoptions));
 end;
 
 function tcustomsqlconnection.ExecuteDirect(const aSQL: mseString;
@@ -1585,7 +1590,8 @@ function tcustomsqlconnection.ExecuteDirect(const aSQL: mseString;
           const aisutf8: boolean = false;
           const anoprepare: boolean = false): integer;
 begin
- result:= internalexecutedirect(asql,atransaction,nil,aparams,aisutf8,anoprepare);
+ result:= internalexecutedirect(asql,atransaction,nil,aparams,aisutf8,
+               anoprepare and not (sco_nounprepared in fconnoptions));
 end;
 
 procedure tcustomsqlconnection.GetDBInfo(const SchemaType : TSchemaType; 
@@ -2408,6 +2414,26 @@ begin
  if (database <> nil) and (ftrans <> nil) then begin
   tsqlconnection(database).finalizetransaction(ftrans);
  end; 
+end;
+
+function TSQLTransaction.savepointbegin: msestring;
+begin
+ active:= true;
+ result:= 'sp'+inttostrmse(fsavepointindex);
+ inc(fsavepointindex);
+ database.executedirect('SAVEPOINT '+result,self,nil,false,true); 
+end;
+
+procedure TSQLTransaction.savepointrollback(const aname: msestring);
+begin
+ checkactive;
+ database.executedirect('ROLLBACK TO '+aname,self,nil,false,true); 
+end;
+
+procedure TSQLTransaction.savepointrelease(const aname: msestring);
+begin
+ checkactive;
+ database.executedirect('RELEASE SAVEPOINT '+aname,self,nil,false,true); 
 end;
 
 { TSQLQuery }

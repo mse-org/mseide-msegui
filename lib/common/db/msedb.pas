@@ -1584,6 +1584,8 @@ function varianttorealty(const value: variant):realty; overload;
 procedure realtytovariant(const value: realty; out dest: variant); overload;
 function realtytovariant(const value: realty): variant; overload;
 
+function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
+
 implementation
 uses
  rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,msebits,
@@ -1642,6 +1644,16 @@ type
   end;
   
  tdataset1 = class(tdataset);
+
+function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
+var
+ int1: integer;
+begin
+ setlength(result,length(items));
+ for int1:= 0 to high(items) do begin
+  result[int1]:= items[int1];
+ end;
+end;
 
 function getnumdisplaytext(const sender: tnumericfield; const avalue: double;
                            const adisplaytext: boolean; const acurrency: boolean): string;
