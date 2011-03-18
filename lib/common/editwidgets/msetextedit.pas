@@ -143,6 +143,7 @@ type
    function getdefaultvalue: pointer;
    function getrowdatapo(const info: cellinfoty): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid);
+   function getgridintf: iwidgetgrid;
    function getcellframe: framety; virtual;
    function getcellcursor(const arow: integer;
                           const acellzone: cellzonety): cursorshapety; virtual;
@@ -2149,6 +2150,11 @@ end;
 function tcustomtextedit.getinnerframe: framety;
 begin
  result:= minimaltextframe;
+end;
+
+function tcustomtextedit.getgridintf: iwidgetgrid;
+begin
+ result:= fgridintf;
 end;
 
 { tundotextedit }

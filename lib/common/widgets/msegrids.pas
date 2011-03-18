@@ -711,6 +711,7 @@ type
    procedure afterrowcountupdate;
    function getnoparagraphs(index: integer): boolean; override;
    function getdefault: pointer; override;
+   function empty(const index: integer): boolean; override;   //true wenn leer
   public
    constructor create(const agrid: tcustomgrid);
    function add(const avalue: msestring; const anoparagraph: boolean): integer; 
@@ -6226,6 +6227,11 @@ begin
  end;
 end;
 
+function tstringcoldatalist.empty(const index: integer): boolean;
+begin
+ result:=  pmsestring(getitempo(index))^ = fvaluedefault;
+end;
+
 { tcustomstringcol }
 
 constructor tcustomstringcol.create(const agrid: tcustomgrid; 
@@ -6277,7 +6283,7 @@ function tcustomstringcol.getcursor(const arow: integer;
 begin
  result:= inherited getcursor(arow,actcellzone);
  if result = cr_default then begin
-  if not isreadonly{(co_readonly in foptions)} then begin
+  if not isreadonly and not (scoe_checkbox in foptionsedit) then begin
    result:= cr_ibeam;
   end;
  end;

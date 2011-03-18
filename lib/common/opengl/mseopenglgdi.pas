@@ -573,12 +573,9 @@ procedure gdi_fillarc(var drawinfo: drawinfoty);
 begin
  gdinotimplemented;
 end;
-var
- testvar: pchar;
 
 procedure tesserror(err: glenum); {$ifdef mswindows}stdcall;{$else}cdecl;{$endif}
 begin
- testvar:= gluerrorstring(err);
 end;
 
 type
@@ -663,7 +660,6 @@ begin
   end;
   glutessendcontour(tess);
   glutessendpolygon(tess);
-  testvar:= gluerrorstring(glgeterror());
  end;
 end;
 

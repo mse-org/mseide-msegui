@@ -73,6 +73,7 @@ type
   function getrowdatapo(const info: cellinfoty): pointer;
   function getoptionsedit: optionseditty;
   procedure setgridintf(const intf: iwidgetgrid);
+  function getgridintf: iwidgetgrid;
   procedure drawcell(const canvas: tcanvas);
   procedure updateautocellsize(const canvas: tcanvas);
   procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -864,7 +865,9 @@ begin
     ar1:= ffixrowwidgets;
     setlength(ffixrowwidgets,self.count);
     for int2:= high(ar1) downto self.count do begin
-     freedesigncomponent(ar1[int2]);
+     if ar1[int2] <> nil then begin
+      freedesigncomponent(ar1[int2]); //inhibit deleting of inherited widget
+     end;
     end;
    end;
   end;
@@ -873,7 +876,9 @@ begin
     ar1:= ffixrowwidgets;
     setlength(ffixrowwidgets,self.count);
     for int2:= high(ar1) downto self.count do begin
-     freedesigncomponent(ar1[int2]);
+     if ar1[int2] <> nil then begin
+      freedesigncomponent(ar1[int2]); //inhibit deleting of inherited widget
+     end;
     end;
    end;
   end;
@@ -917,10 +922,19 @@ begin
    aintf:= fintf;
    fintf:= nil;
    aintf.setgridintf(nil);
-   freedesigncomponent(aintf.getwidget);
+   if not (csreading in fgrid.componentstate) then begin
+                           //refreshancestor otherwise
+    freedesigncomponent(aintf.getwidget); //inhibit deleting of inherited widget
+   end;
   end;
-  for int1:= 0 to high(ffixrowwidgets) do begin
-   freedesigncomponent(ffixrowwidgets[int1]);
+  if not (csreading in fgrid.componentstate) then begin
+                           //refreshancestor otherwise
+   for int1:= 0 to high(ffixrowwidgets) do begin
+    if ffixrowwidgets[int1] <> nil then begin
+     freedesigncomponent(ffixrowwidgets[int1]); 
+                      //inhibit deleting of inherited widget
+    end;
+   end;
   end;
  end;
 {$ifndef FPC}
@@ -985,7 +999,7 @@ begin
   accepted:= fintf.getwidget.canclose(nil);
  end;
 end;
-var testvar: twidgetgrid;
+
 procedure twidgetcol.docellfocuschanged(enter: boolean;
                      const cellbefore: gridcoordty; var newcell: gridcoordty;
                      const selectaction: focuscellactionty);
@@ -997,7 +1011,6 @@ var
  bo1: boolean;
  
 begin
-testvar:= twidgetgrid(fgrid);
  with twidgetgrid(fgrid) do begin
   if ffocuslock > 0 then begin
    if not enter then begin
@@ -1189,7 +1202,10 @@ var
 begin
  inherited;
  filer.defineproperty('widgetname',{$ifdef FPC}@{$endif}readwidgetname,
-                   {$ifdef FPC}@{$endif}writewidgetname,fintf <> nil);
+                   {$ifdef FPC}@{$endif}writewidgetname,
+                   (fintf <> nil) and 
+                   ((filer.ancestor = nil) or 
+                    (twidgetcol(filer.ancestor).fwidgetname <> fwidgetname)));
  filer.defineproperty('fixwidgetnames',{$ifdef FPC}@{$endif}readfixwidgetnames,
                    {$ifdef FPC}@{$endif}writefixwidgetnames,
      (filer.ancestor = nil) and needswidgetnamewriting(ffixrowwidgets) or
@@ -1245,6 +1261,7 @@ begin
 end;
 
 procedure twidgetcol.setwidget(const awidget: twidget);
+//todo: use widget datalist if inherited column position has changed !!!!!!!!!
 var
  po1: pointer;
  dl1: tdatalist;
@@ -1871,7 +1888,10 @@ var
 begin
  if not (csdestroying in fgrid.componentstate) then begin
   for int1:= 0 to high(ffixrowwidgets) do begin
-   freedesigncomponent(ffixrowwidgets[int1]);
+   if ffixrowwidgets[int1] <> nil then begin
+    freedesigncomponent(ffixrowwidgets[int1]);
+                     //inhibit deleting of inherited widget
+   end;
   end;
  end;
  inherited;
@@ -2721,7 +2741,9 @@ procedure tcustomwidgetgrid.loaded;
 var
  int1,int2,int3: integer;
  ar1: widgetarty;
+ ar2: array of igridwidget;
  str1: string;
+ intf1: igridwidget;
 begin
  inc(tcontainer(fcontainer2).flayoutupdating);
  try
@@ -2731,6 +2753,15 @@ begin
     for int2:= 0 to high(fwidgets) do begin
      additem(pointerarty(ar1),pointer(fwidgets[int2])); 
            //add children, possibly inherited
+    end;
+   end;
+  end;
+  if (csdesigning in componentstate) then begin
+   setlength(ar2,length(ar1)); //init check deleted widgets
+   for int1:= 0 to high(ar2) do begin
+    if ar1[int1].getcorbainterface(typeinfo(igridwidget),intf1) and
+                                (intf1.getgridintf <> nil) then begin
+     ar2[int1]:= intf1;
     end;
    end;
   end;
@@ -2745,6 +2776,9 @@ begin
       if str1 <> '' then begin
        if (str1 = fwidgetname) then begin
         ar1[int2].parentwidget:= fcontainer2;
+        if (csdesigning in componentstate) then begin
+         ar2[int2]:= nil; //linked
+        end;
         fintf:= nil;    
             //do not remove existing link, inherited order could be changed
         setwidget(ar1[int2]);
@@ -2763,8 +2797,15 @@ begin
       end;
      end;
     end;
-    fwidgetname:= '';
+//    fwidgetname:= '';
     ffixrowwidgetnames:= nil;
+   end;
+  end;
+  if csdesigning in componentstate then begin //check deleted inherited widgets
+   for int1:= 0 to high(ar2) do begin
+    if ar2[int1] <> nil then begin
+     ar2[int1].setgridintf(nil);
+    end;
    end;
   end;
   for int1:= 0 to fdatacols.count - 1 do begin

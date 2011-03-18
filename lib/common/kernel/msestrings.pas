@@ -332,8 +332,10 @@ function psubstr(const start,stop: pchar): string;
 
 function msePosEx(const SubStr, S: msestring; Offset: longword = 1): Integer;
 
-function mselowercase(const s: msestring): msestring;
-function mseuppercase(const s: msestring): msestring;
+function mselowercase(const s: msestring): msestring; overload;
+function mselowercase(const s: msestringarty): msestringarty; overload;
+function mseuppercase(const s: msestring): msestring; overload;
+function mseuppercase(const s: msestringarty): msestringarty; overload;
 
 function msestartstr(const atext: msestring; trenner: msechar): msestring;
 
@@ -4207,6 +4209,26 @@ begin
 {$else}
  result:= wideuppercase(s);    
 {$endif}
+end;
+
+function mselowercase(const s: msestringarty): msestringarty;
+var
+ int1: integer;
+begin
+ setlength(result,length(s));
+ for int1:= high(s) downto 0 do begin
+  result[int1]:= mselowercase(s[int1]);
+ end;
+end;
+
+function mseuppercase(const s: msestringarty): msestringarty;
+var
+ int1: integer;
+begin
+ setlength(result,length(s));
+ for int1:= high(s) downto 0 do begin
+  result[int1]:= mseuppercase(s[int1]);
+ end;
 end;
 
 function msestartstr(const atext: msestring; trenner: msechar): msestring;

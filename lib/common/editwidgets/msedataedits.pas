@@ -1440,9 +1440,10 @@ begin
   fgridintf.getcol.grid.datarowheight:= bounds_cy;
  end;
 end;
-
+var testvar3: pointer;
 function tcustomdataedit.actualcolor: colorty;
 begin
+testvar3:= getinterfacetable;
  if (fgridintf <> nil) and (fcolor = cl_default) and 
                               not (csdestroying in componentstate) then begin
   result:= fgridintf.getcol.rowcolor(fgridintf.getrow);

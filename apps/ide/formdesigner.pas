@@ -1456,7 +1456,7 @@ begin
   fdelobjs:= fselections.getobjinfoar;
   deletecomponents;
  end;
- domodified;
+// domodified;
  clientsizechanged;
 end;
 

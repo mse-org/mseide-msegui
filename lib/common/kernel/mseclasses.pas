@@ -2007,6 +2007,7 @@ var
       end;
      end;
      if (comp1 = nil) and (revert or (comp2 <> nil)) then begin
+//      freedesigncomponent(descendentar[int1]);
       descendentar[int1].free;
      end
      else begin
@@ -2126,7 +2127,10 @@ begin
    reader.onfindmethod:= onfindmethod;
    reader.onancestornotfound:= 
                 {$ifdef FPC}@{$endif}eventhandler.doancestornotfound;
-   reader.ReadRootComponent(descendent);
+ {$ifdef mse_debugrefresh}
+    writeln('*reading changes newancestor->descendent');
+ {$endif}
+   reader.ReadRootComponent(descendent); //changes
   finally
    if destmethodtab <> nil then begin
     swapmethodtable(descendent,tabbefore);
@@ -2147,7 +2151,10 @@ begin
     reader.onerror:= {$ifdef FPC}@{$endif}eventhandler.onerror;
     reader.onancestornotfound:= 
                 {$ifdef FPC}@{$endif}eventhandler.doancestornotfound;
-    reader.ReadRootComponent(descendent);
+ {$ifdef mse_debugrefresh}
+    writeln('*reading changes descendent->oldancestor');
+ {$endif}
+    reader.ReadRootComponent(descendent); //changes descendent->oldancestor
    {$ifdef mse_debugrefresh}
     dumpcomponent(descendent,'descendent');
    {$endif}
