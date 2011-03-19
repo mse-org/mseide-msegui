@@ -1113,7 +1113,7 @@ type
  datasetoptionty = (dso_utf8,dso_stringmemo,dso_numboolean,
                          dso_initinternalcalc,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,                         
-                         dso_autoapply,
+                         dso_autoapply,dso_postsavepoint,
                          dso_autocommitret,dso_autocommit,
                          dso_refreshafterapply,dso_recnoapplyrefresh,
                          dso_refreshtransaction,dso_refreshwaitcursor,
@@ -1204,6 +1204,8 @@ type
    fonupdatemasteredit: masterdataseteventty;
    fonupdatemasterinsert: masterdataseteventty;
    ftimer: tsimpletimer;
+   fonbeforepost: tdatasetnotifyevent;
+   fonafterpost: afterposteventty;
    procedure setfields(const avalue: tpersistentfields);
    function getcontroller: tdscontroller;
    procedure updatelinkedfields;
@@ -1216,6 +1218,7 @@ type
    procedure setdelayedapplycount(const avalue: integer);
    function getnoedit: boolean;
    procedure setnoedit(const avalue: boolean);
+   procedure nosavepoint;
   protected
    foptions: datasetoptionsty;
    procedure setoptions(const avalue: datasetoptionsty); virtual;
@@ -1223,6 +1226,10 @@ type
    procedure fielddestroyed(const sender: ifieldcomponent);
    procedure doonidle(var again: boolean);
    procedure dorefresh(const sender: tobject);
+   function savepointbegin: msestring; virtual;
+   procedure savepointrollback(const aname: msestring); virtual;
+   procedure savepointrelease(const aname: msestring); virtual;
+      
   public
    constructor create(const aowner: tdataset; const aintf: idscontroller;
                       const arecnooffset: integer = 0;
@@ -1242,7 +1249,7 @@ type
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
    function getcanmodify: boolean;
-   
+
    procedure modified;
    procedure dataevent(const event: tdataevent; info: ptrint);
    property recno: integer read getrecno write setrecno;
@@ -1298,6 +1305,10 @@ type
                      write fonupdatemasteredit;
    property onupdatemasterinsert: masterdataseteventty read fonupdatemasterinsert 
                      write fonupdatemasterinsert;
+   property onbeforepost: tdatasetnotifyevent read fonbeforepost
+                                                       write fonbeforepost;
+   property onafterpost: afterposteventty read fonafterpost write fonafterpost;
+                       //always called
  end;
  
  idbcontroller = interface(inullinterface)
@@ -6472,35 +6483,73 @@ end;
 
 function tdscontroller.post(const aafterpost: afterposteventty = nil): boolean;
 var
- bo1: boolean;
+ bo1,bo2: boolean;
+ mstr1: msestring;
 begin
  with tdataset(fowner) do begin;
   if state in dseditmodes then begin
-   result:= true;
-   include(fstate,dscs_posting);
-   try    
-    try
-     fintf.inheritedpost;
-    except
-     on epostcancel do begin
-      result:= false;
-      tdataset(fowner).cancel;
-     end
-     else begin
-      raise;
-     end;
-    end;      
-   finally
-    exclude(fstate,dscs_posting);
+   if checkcanevent(tdataset(fowner),tmethod(self.fonbeforepost)) then begin
+    fonbeforepost(tdataset(fowner));
    end;
-   bo1:= result;
    try
-    if result and assigned(aafterpost) then begin
-     aafterpost(tdataset(fowner),result);
+    bo1:= dso_postsavepoint in foptions;
+    try
+     if bo1 then begin
+      mstr1:= savepointbegin;
+     end;
+     result:= true;
+     include(fstate,dscs_posting);
+     try    
+      try
+       fintf.inheritedpost;
+      except
+       on epostcancel do begin
+        if bo1 then begin
+         bo1:= false;
+         savepointrollback(mstr1);
+        end;     
+        result:= false;
+        tdataset(fowner).cancel;
+       end
+       else begin
+        if bo1 then begin
+         bo1:= false;
+         savepointrollback(mstr1);
+        end;     
+        raise;
+       end;
+      end;      
+     finally
+      exclude(fstate,dscs_posting);
+     end;
+     bo2:= result;
+     try
+      if result and assigned(aafterpost) then begin
+       aafterpost(tdataset(fowner),result);
+      end;
+     finally
+      if bo2 then begin
+       self.modified;
+      end;
+     end;
+     if bo1 then begin
+      bo1:= false;
+      if result then begin
+       savepointrelease(mstr1);
+      end
+      else begin
+       savepointrollback(mstr1);
+      end;
+     end;     
+    except
+     if bo1 then begin
+      savepointrollback(mstr1);
+     end;     
+     raise;
     end;
    finally
-    if bo1 then begin
-     self.modified;
+    if checkcanevent(tdataset(fowner),tmethod(self.fonafterpost)) then begin
+     fonafterpost(tdataset(fowner),result);
     end;
    end;
   end
@@ -6742,6 +6791,27 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tdscontroller.nosavepoint;
+begin
+ raise exception.create('Savepoints not supported.');
+end;
+
+function tdscontroller.savepointbegin: msestring;
+begin
+ result:= '';
+ nosavepoint;
+end;
+
+procedure tdscontroller.savepointrollback(const aname: msestring);
+begin
+ nosavepoint;
+end;
+
+procedure tdscontroller.savepointrelease(const aname: msestring);
+begin
+ nosavepoint;
 end;
 
 { tmsedatasource }

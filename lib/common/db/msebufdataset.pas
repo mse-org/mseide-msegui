@@ -440,7 +440,8 @@ type
                       bs_utf8,
                       bs_hasfilter,bs_visiblerecordcountvalid,
                       bs_refreshing,bs_restorerecno,bs_idle,
-                      bs_noautoapply,bs_refreshfieldvalues  //used by tsqlquery
+                      bs_noautoapply,bs_refreshinsert,bs_refreshupdate
+                                          //used by tsqlquery
                       );
  bufdatasetstatesty = set of bufdatasetstatety;
 

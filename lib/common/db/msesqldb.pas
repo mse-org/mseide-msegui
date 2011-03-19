@@ -12,7 +12,7 @@ unit msesqldb;
 interface
 uses
  classes,db,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseglob,
- msedatabase,sysutils,msetimer;
+ msedatabase,sysutils,msetimer,msestrings;
   
 type
  tmsesqltransaction = class(tsqltransaction)
@@ -44,7 +44,14 @@ type
  updateerroreventty = procedure(const sender: tmsesqlquery;
                           const aupdatekind: tupdatekind;
                           var aupdateaction: tupdateaction) of object;
-                             
+
+ tsqldscontroller = class(tdscontroller)
+  protected
+   function savepointbegin: msestring; override;
+   procedure savepointrollback(const aname: msestring); override;
+   procedure savepointrelease(const aname: msestring); override;      
+ end;
+                              
  tmsesqlquery = class(tsqlquery,imselocate,idscontroller,igetdscontroller,
                               isqlpropertyeditor)
   private
@@ -172,6 +179,7 @@ type
               fplo_syncmasterinsert,
               fplo_syncmasterdelete,
               fplo_syncslavepost,
+              fplo_syncslavecancel,
               fplo_syncslaveedit,
               fplo_syncslaveinsert,
               fplo_syncslavedelete
@@ -305,7 +313,7 @@ type
  
 implementation
 uses
- msestrings,dbconst,msesysutils,typinfo,msedatalist,mseapplication,msesqlresult;
+ dbconst,msesysutils,typinfo,msedatalist,mseapplication,msesqlresult;
  
 { tmsesqltransaction }
 
@@ -352,7 +360,7 @@ begin
 // updatemode:= upwhereall;
  fsqlonchangebefore:= sql.onchange;
  sql.onchange:= {$ifdef FPC}@{$endif}sqlonchange;
- fcontroller:= tdscontroller.create(self,idscontroller(self),-1,false);
+ fcontroller:= tsqldscontroller.create(self,idscontroller(self),-1,false);
 end;
 
 destructor tmsesqlquery.destroy;
@@ -1328,10 +1336,13 @@ begin
   with fowner do begin
    inc(fsourcedatalink.frefreshlock);
    try
-    if foptions * [fplo_syncslaveedit,fplo_syncslaveinsert] <> [] then begin
+//    if foptions * [fplo_syncslaveedit,fplo_syncslaveinsert] <> [] then begin
+    if fplo_syncslavecancel in foptions then begin
      if mseclasses.getcorbainterface(dataset,typeinfo(igetdscontroller),intf) and
                                         intf.getcontroller.canceling then begin
-      sourceds.cancel;
+      if fsourcedatalink.frefreshlock = 1 then begin
+       sourceds.cancel;
+      end;
       exit;
      end
      else begin
@@ -1371,5 +1382,35 @@ begin
  end;
 end;
 
+
+{ tsqldscontroller }
+
+function tsqldscontroller.savepointbegin: msestring;
+begin
+ result:= '';
+ with tmsesqlquery(fowner) do begin
+  if writetransaction <> nil then begin
+   result:= writetransaction.savepointbegin;
+  end;
+ end;
+end;
+
+procedure tsqldscontroller.savepointrollback(const aname: msestring);
+begin
+ with tmsesqlquery(fowner) do begin
+  if writetransaction <> nil then begin
+   writetransaction.savepointrollback(aname);
+  end;
+ end;
+end;
+
+procedure tsqldscontroller.savepointrelease(const aname: msestring);
+begin
+ with tmsesqlquery(fowner) do begin
+  if writetransaction <> nil then begin
+   writetransaction.savepointrelease(aname);
+  end;
+ end;
+end;
 
 end.

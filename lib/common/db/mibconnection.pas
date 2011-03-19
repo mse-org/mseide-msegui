@@ -281,8 +281,8 @@ begin
   if isc_dsql_free_statement(@status, @statement, dsql_close) <> 0 then begin 
    fconnection.checkerror('close cursor', status{,fname});
   end;
-  fopen:= false;
  end;
+ fopen:= false;
 end;
 
 constructor TIBCursor.create(const aowner: icursorclient;

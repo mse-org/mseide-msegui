@@ -2421,19 +2421,19 @@ begin
  active:= true;
  result:= 'sp'+inttostrmse(fsavepointindex);
  inc(fsavepointindex);
- database.executedirect('SAVEPOINT '+result,self,nil,false,true); 
+ database.executedirect('SAVEPOINT '+result+';',self,nil,false,true); 
 end;
 
 procedure TSQLTransaction.savepointrollback(const aname: msestring);
 begin
  checkactive;
- database.executedirect('ROLLBACK TO '+aname,self,nil,false,true); 
+ database.executedirect('ROLLBACK TO '+aname+';',self,nil,false,true); 
 end;
 
 procedure TSQLTransaction.savepointrelease(const aname: msestring);
 begin
  checkactive;
- database.executedirect('RELEASE SAVEPOINT '+aname,self,nil,false,true); 
+ database.executedirect('RELEASE SAVEPOINT '+aname+';',self,nil,false,true); 
 end;
 
 { TSQLQuery }
@@ -2747,7 +2747,7 @@ end;
 
 procedure tsqlquery.freemodifyqueries;
 begin
- exclude(fbstate,bs_refreshfieldvalues);
+ fbstate:= fbstate - [bs_refreshinsert,bs_refreshupdate];
  FreeAndNil(FUpdateQry);
  FreeAndNil(FInsertQry);
  FreeAndNil(FDeleteQry);
@@ -3359,7 +3359,12 @@ begin
   end;
  end;
  if int2 > 0 then begin
-  include(fbstate,bs_refreshfieldvalues);
+  if update then begin
+   include(fbstate,bs_refreshupdate);
+  end
+  else begin
+   include(fbstate,bs_refreshinsert);
+  end;
   setlength(result,length(result)-1);
  end
  else begin
@@ -3421,6 +3426,7 @@ Procedure TSQLQuery.internalApplyRecUpdate(UpdateKind : TUpdateKind);
 var
  s: string;
  
+//todo: optimize, use tsqlstatement and tsqlresult instead of tsqlquery
 
 var
  qry: tsqlquery;
@@ -3432,6 +3438,7 @@ var
  str1: string;
  bo1: boolean;
  freeblobar: pointerarty;
+ statementtypebefore: tstatementtype;
 // refreshfieldvalues: boolean;
     
 begin
@@ -3516,13 +3523,16 @@ begin
      end;
     end;
    end;
-   if (updatekind in [ukmodify,ukinsert]) and 
-                          (bs_refreshfieldvalues in self.fbstate) then begin
+   if (updatekind = ukmodify) and 
+                          (bs_refreshupdate in self.fbstate) or
+      (updatekind = ukinsert) and 
+                          (bs_refreshinsert in self.fbstate) then begin
     parsesql:= false;
-    statementtype:= stselect;
-    active:= true;
-    if not eof then begin
-     try
+    statementtypebefore:= statementtype;
+    try
+     statementtype:= stselect;
+     active:= true;
+     if not eof then begin
       for int1:= 0 to qry.fieldcount - 1 do begin
        with fields[int1] do begin
         fld:= self.fields.fieldbyname(fieldname);
@@ -3531,15 +3541,16 @@ begin
 //        end;
        end;
       end;
-     finally
-      active:= false;
      end;
+    finally
+     active:= false;
+     statementtype:= statementtypebefore;
     end;
    end
    else begin
     execsql;
    end;
-   if not (bs_refreshfieldvalues in fbstate) and (updatekind = ukinsert) and 
+   if not (bs_refreshinsert in fbstate) and (updatekind = ukinsert) and 
                                         (self.fprimarykeyfield <> nil) then begin
     tcustomsqlconnection(database).updateprimarykeyfield(
                    self.fprimarykeyfield,qry.transaction);
