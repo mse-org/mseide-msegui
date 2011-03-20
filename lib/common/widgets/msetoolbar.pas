@@ -41,9 +41,9 @@ type
    function isimagenrstored: Boolean;
    function isimagenrdisabledstored: Boolean;
    function isimagecheckedoffsetstored: Boolean;
-   function isimageliststored: Boolean;
+   function isimageliststored: Boolean; virtual;
    function getimagelist: timagelist;
-   procedure setimagelist(const Value: timagelist);
+   procedure setimagelist(const Value: timagelist); virtual;
    function isgroupstored: Boolean;
    procedure setgroup(const Value: integer);
    procedure changed;
@@ -127,8 +127,18 @@ type
  end;
  ptoolbutton = ^ttoolbutton;
 
+ tstockglyphtoolbutton = class(ttoolbutton)
+  private
+   function isimageliststored: boolean; override;
+   procedure setimagelist(const Value: timagelist); override;
+  public
+   constructor create(const aowner: tobject;
+         const aprop: tindexpersistentarrayprop); overload; override;
+ end;
+ 
  toolbuttonsstatety = (tbs_nocandefocus);
  toolbuttonsstatesty = set of toolbuttonsstatety;
+ toolbuttonclassty = class of ttoolbutton;
  
  ttoolbuttons = class(tindexpersistentarrayprop)
   private
@@ -152,6 +162,7 @@ type
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure dochange(const index: integer); override;
    procedure objectchanged(const sender: tobject);
+   class function getbuttonclass: toolbuttonclassty; virtual;
   public
    constructor create(const aowner: tcustomtoolbar); reintroduce;
    destructor destroy; override;
@@ -170,6 +181,11 @@ type
    property face: tface read getface write setface;
  end;
 
+ tstockglyphtoolbuttons = class(ttoolbuttons)
+  protected
+   class function getbuttonclass: toolbuttonclassty; override;
+ end;
+ 
  toolbaroptionty = (tbo_dragsource,tbo_dragdest,
                     tbo_dragsourceenabledonly,tbo_dragdestenabledonly,
                     tbo_nohorz,tbo_novert,
@@ -193,7 +209,6 @@ type
 
  tcustomtoolbar = class(tcustomstepbox,istatfile)
   private
-   flayout: toolbarlayoutinfoty;
    flayoutok: boolean;
    foptions: toolbaroptionsty;
    fonbuttonchanged: toolbuttoneventty;
@@ -211,6 +226,7 @@ type
    procedure setstatfile(const Value: tstatfile);
    procedure setdragcontroller(const Value: tdragcontroller);
   protected
+   flayout: toolbarlayoutinfoty;
    class function classskininfo: skininfoty; override;
    procedure buttonchanged(sender: ttoolbutton);
    procedure checkvert(const asize: sizety);
@@ -265,7 +281,7 @@ type
 
 implementation
 uses
- sysutils,msebits,mseactions;
+ sysutils,msebits,mseactions,msestockobjects;
  
 const
  separatorwidth = 3;
@@ -606,7 +622,7 @@ constructor ttoolbuttons.create(const aowner: tcustomtoolbar);
 begin
  fcolorglyph:= cl_glyph;
  fcolor:= cl_transparent;
- inherited create(aowner,ttoolbutton);
+ inherited create(aowner,getbuttonclass);
 end;
 
 destructor ttoolbuttons.destroy;
@@ -784,11 +800,18 @@ begin
  end;
 end;
 
+class function ttoolbuttons.getbuttonclass: toolbuttonclassty;
+begin
+ result:= ttoolbutton;
+end;
+
 { tcustomtoolbar }
 
 constructor tcustomtoolbar.create(aowner: tcomponent);
 begin
- flayout.buttons:= ttoolbuttons.create(self);
+ if flayout.buttons = nil then begin
+  flayout.buttons:= ttoolbuttons.create(self);
+ end;
  flayout.buttons.onchange:= {$ifdef FPC}@{$endif}buttonschanged;
  fhintedbutton:= -2;
  inherited;
@@ -1475,4 +1498,37 @@ begin
  result:= innerpaintrect;
 end;
  }
+
+{ tstockglyphtoolbutton }
+
+constructor tstockglyphtoolbutton.create(const aowner: tobject;
+         const aprop: tindexpersistentarrayprop);
+begin
+ inherited;
+ finfo.imagelist:= stockobjects.glyphs;
+end;
+
+function tstockglyphtoolbutton.isimageliststored: boolean;
+begin
+ result:= inherited isimageliststored and 
+              (finfo.imagelist <> stockobjects.glyphs);
+end;
+
+procedure tstockglyphtoolbutton.setimagelist(const Value: timagelist);
+begin
+ if value = nil then begin
+  inherited setimagelist(stockobjects.glyphs);
+ end
+ else begin
+  inherited setimagelist(value);
+ end; 
+end;
+
+{ tstockglyphtoolbuttons }
+
+class function tstockglyphtoolbuttons.getbuttonclass: toolbuttonclassty;
+begin
+ result:= tstockglyphtoolbutton;
+end;
+
 end.

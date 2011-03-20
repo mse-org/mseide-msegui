@@ -2403,6 +2403,9 @@ constructor tdbnavigator.create(aowner: tcomponent);
 var
  int1: integer;
 begin
+ if flayout.buttons = nil then begin
+  flayout.buttons:= tstockglyphtoolbuttons.create(self);
+ end;
  foptions:= defaultdbnavigatoroptions;
  fshortcuts[dbnb_first]:= key_modctrl + ord(key_pageup);
  fshortcuts[dbnb_prior]:= ord(key_pageup);
