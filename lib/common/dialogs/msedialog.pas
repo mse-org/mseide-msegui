@@ -32,13 +32,13 @@ type
 
   tellipsebuttonframe = class(tbuttonframe)
   private
-   function getbutton: tframebutton;
-   procedure setbutton(const avalue: tframebutton);
+   function getbutton: tstockglyphframebutton;
+   procedure setbutton(const avalue: tstockglyphframebutton);
   public
    constructor create(const intf: icaptionframe;
                        const buttonintf: ibutton); reintroduce;
   published
-   property button: tframebutton read getbutton write setbutton;
+   property button: tstockglyphframebutton read getbutton write setbutton;
  end;
 
  tdataeditcontroller = class(teventpersistent)
@@ -267,12 +267,12 @@ begin
  buttons[0].imagenr:= ord(stg_ellipsesmall);
 end;
 
-function tellipsebuttonframe.getbutton: tframebutton;
+function tellipsebuttonframe.getbutton: tstockglyphframebutton;
 begin
- result:= buttons[0];
+ result:= tstockglyphframebutton(buttons[0]);
 end;
 
-procedure tellipsebuttonframe.setbutton(const avalue: tframebutton);
+procedure tellipsebuttonframe.setbutton(const avalue: tstockglyphframebutton);
 begin
  buttons[0].assign(avalue);
 end;
