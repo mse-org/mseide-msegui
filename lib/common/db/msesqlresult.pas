@@ -5,7 +5,7 @@ interface
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 uses
  classes,db,msqldb,mseclasses,msedb,msedatabase,msearrayprops,msestrings,msereal,
- msetypes,mselookupbuffer,mseglob,msedatalist;
+ msetypes,mselookupbuffer,mseglob,msedatalist,msevariants;
  
 type
  tsqlresult = class;
@@ -216,8 +216,6 @@ type
  sqlresultoptionty = (sro_utf8);
  sqlresultoptionsty = set of sqlresultoptionty;
 
- variantarty = array of variant;
- variantararty = array of variantarty;
  sqlresulteventty = procedure(const sender: tsqlresult) of object;  
  
  tsqlresult = class(tmsecomponent,isqlpropertyeditor,isqlclient,itransactionclient)

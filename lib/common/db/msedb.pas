@@ -34,7 +34,8 @@ interface
 
 uses
  classes,db,mseclasses,mseglob,msestrings,msetypes,msearrayprops,mseapplication,
- sysutils,msebintree,mseact,msetimer{$ifdef mse_fpc_2_4_3},maskutils{$endif};
+ sysutils,msebintree,mseact,msetimer{$ifdef mse_fpc_2_4_3},maskutils{$endif},
+ msevariants;
 
 type
  fieldtypearty = array of tfieldtype;
@@ -1397,6 +1398,8 @@ type
  
  {$define mse_withpublishedparamvalue}
  
+ tparamconnector = class;
+
  tmseparam = class(tparam)
  {$ifdef mse_withpublishedparamvalue}
   private
@@ -1405,13 +1408,30 @@ type
    property value : variant read getasvariant write setasvariant 
                                                   stored isparamstored;
  {$endif mse_withpublishedparamvalue}
+  private
+   fconnector: tparamconnector;
+   procedure setconnector(const avalue: tparamconnector);
+  public
+   destructor destroy; override;
+  published
+   property connector: tparamconnector read fconnector write setconnector;
  end;
-  
+
+ tparamconnector = class(tmsecomponent)
+  private
+   fparam: tmseparam;
+  public
+   destructor destroy; override;
+   property param: tmseparam read fparam;
+ end;
+    
  tmseparams = class(tparams)
   private
    fisutf8: boolean;
    function getitem(const index: integer): tmseparam;
    procedure setitem(const index: integer; const avalue: tmseparam);
+   function getvalues: variantarty;
+   procedure setvalues(const avalue: variantarty);
   public
    constructor create(aowner: tpersistent); overload;
    constructor create; overload;
@@ -1432,8 +1452,12 @@ type
                                 //sql parsed with psSimulated
    function expandvalues(const sql: msestring): msestring; overload;
    function asdbstring(const index: integer): string;
+   function bindnames(const anames: msestringarty): integerarty;
+                     //returns index in anames for paramnames, -1 if not found
+                     //case sensitive
    property isutf8: boolean read fisutf8 write fisutf8;
    property items[index: integer]: tmseparam read getitem write setitem; default;
+   property values: variantarty read getvalues write setvalues;
  end;
 
  TFieldcracker = class(TComponent)
@@ -7305,6 +7329,43 @@ begin
  inherited items[index]:= avalue;
 end;
 
+function tmseparams.bindnames(const anames: msestringarty): integerarty;
+var
+ mstr1: msestring;
+ int1,int2: integer;
+begin
+ setlength(result,count);
+ for int1:= high(result) downto 0 do begin
+  result[int1]:= -1;
+  mstr1:= items[int1].name;
+  for int2:= high(anames) downto 0 do begin
+   if anames[int2] = mstr1 then begin
+    result[int1]:= int2;
+    break;
+   end;
+  end;
+ end;
+end;
+
+function tmseparams.getvalues: variantarty;
+var
+ int1: integer;
+begin
+ setlength(result,count);
+ for int1:= high(result) downto 0 do begin
+  result[int1]:= items[int1].value;
+ end;
+end;
+
+procedure tmseparams.setvalues(const avalue: variantarty);
+var
+ int1: integer;
+begin
+ for int1:= high(avalue) downto 0 do begin
+  items[int1].value:= avalue[int1];
+ end;
+end;
+
 { tblobcachenode }
 
 constructor tblobcachenode.create(const akey: blobidty; const adata: string);
@@ -7364,6 +7425,25 @@ end;
 
 { tmseparam }
 
+destructor tmseparam.destroy;
+begin
+ connector:= nil;
+ inherited;
+end;
+
+procedure tmseparam.setconnector(const avalue: tparamconnector);
+begin
+ if fconnector <> avalue then begin
+  if fconnector <> nil then begin
+   fconnector.fparam:= nil;
+  end;
+  fconnector:= avalue;
+  if fconnector <> nil then begin
+   fconnector.fparam:= self;
+  end;
+ end;
+end;
+
 {$ifdef mse_withpublishedparamvalue}
 procedure tmseparam.setasvariant(const avalue: variant);
 begin
@@ -7371,5 +7451,15 @@ begin
  tparamcracker(self).fbound:= not varisclear(avalue);
 end;
 {$endif mse_withpublishedparamvalue}
+
+{ tparamconnector }
+
+destructor tparamconnector.destroy;
+begin
+ if fparam <> nil then begin
+  fparam.connector:= nil;
+ end;
+ inherited;
+end;
 
 end.

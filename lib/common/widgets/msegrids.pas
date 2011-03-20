@@ -305,7 +305,7 @@ type
 
  gridpropstatety = (gps_fix,gps_selected,gps_noinvalidate,gps_edited,
                gps_readonlyupdating,gps_selectionchanged,gps_changelock,
-               gps_datalistvalid,gps_needsrowheight);
+               gps_datalistvalid,gps_needsrowheight{,gps_sortclicked});
  gridpropstatesty = set of gridpropstatety;
 
  tgridprop = class(tindexpersistent,iframe,iface)
@@ -1393,6 +1393,7 @@ type
   private
    fselectedrow: integer; //-1 none, -2 more than one
    fsortcol: integer;
+   fsortcoldefault: integer;
    fnewrowcol: integer;
    fchangelock: integer;
    flastvisiblecol: integer;
@@ -1407,6 +1408,7 @@ type
    function roworderinvalid: boolean; //true if accepted
    procedure checkindexrange;
    procedure setsortcol(const avalue: integer);
+   procedure setsortcoldefault(const avalue: integer);
    procedure setnewrowcol(const avalue: integer);
    function getrowselected(const index: integer): boolean;
    procedure setrowselected(const index: integer; const avalue: boolean);
@@ -1489,6 +1491,9 @@ type
   published
    property sortcol: integer read fsortcol write setsortcol default -1;
                                       //-1 -> all
+   property sortcoldefault: integer read fsortcoldefault 
+                                     write setsortcoldefault default -1;
+                                      //-1 -> no
    property newrowcol: integer read fnewrowcol write setnewrowcol default -1;
                                       //-1 -> actual
    property width;
@@ -2464,7 +2469,8 @@ function iscellkeypress(const info: celleventinfoty;
              const shiftstatemustnotinclude: shiftstatesty = []): boolean;
 
 function iscellclick(const info: celleventinfoty;
-                        restrictions: cellclickrestrictionsty = []): boolean;
+                        const restrictions: cellclickrestrictionsty = [];
+                        const allowedshiftstates: shiftstatesty = []): boolean;
 function isrowenter(const info: celleventinfoty): boolean;
 function isrowexit(const info: celleventinfoty): boolean;
 function isrowchange(const info: celleventinfoty): boolean;
@@ -2514,7 +2520,8 @@ begin
 end;
 
 function iscellclick(const info: celleventinfoty;
-             restrictions: cellclickrestrictionsty = []): boolean;
+             const restrictions: cellclickrestrictionsty = [];
+             const allowedshiftstates: shiftstatesty = []): boolean;
 begin
  result:= false;
  with info do begin
@@ -2536,7 +2543,8 @@ begin
       if button = mb_left then begin
        if ((ccr_buttonpress in restrictions) and (eventkind = ek_buttonpress) or
           not (ccr_buttonpress in restrictions) and (eventkind = ek_buttonrelease)) and
-           (info.mouseeventinfopo^.shiftstate * keyshiftstatesmask = []) then begin
+           (info.mouseeventinfopo^.shiftstate * keyshiftstatesmask -
+                                        allowedshiftstates = []) then begin
         if ccr_dblclick in restrictions then begin
          result:= (ss_double in info.mouseeventinfopo^.shiftstate) and 
                    (grid.fclickedcellbefore.row = cell.row) and 
@@ -4226,7 +4234,8 @@ begin
   rect1:= adest;
   al1:= [al_right,al_ycentered];
   with tdatacol(fgrid.fdatacols.fitems[index]) do begin
-   if (co_nosort in options) or (fgrid.datacols.sortcol >= 0) and 
+   if not (og_sorted in fgrid.optionsgrid) or
+        (co_nosort in options) or (fgrid.datacols.sortcol >= 0) and 
                                 (fgrid.datacols.sortcol <> index) then begin
     include(al1,al_grayed);
    end;
@@ -4872,20 +4881,34 @@ procedure tfixrow.buttoncellevent(var info: celleventinfoty);
 begin
  if (info.cell.col >= 0) and (info.cell.col < fcaptions.count) and
           (dco_colsort in fcaptions[info.cell.col].options) and 
-          iscellclick(info,[ccr_nokeyreturn]) then begin
+          iscellclick(info,[ccr_nokeyreturn],[ss_ctrl]) then begin
   with fgrid.datacols[info.cell.col] do begin
    if (info.mouseeventinfopo^.pos.x > fwidth - 15) and 
        not (co_nosort in foptions) then begin
-    if fgrid.datacols.sortcol = info.cell.col then begin
-     if co_sortdescent in foptions then begin
-      options:= foptions - [co_sortdescent];
-     end
-     else begin
-      options:= foptions + [co_sortdescent];
-     end;
+    if (fgrid.datacols.sortcol = info.cell.col) and 
+              fgrid.sorted then begin
+//     if not (gps_sortclicked in fstate) then begin
+//      include(fstate,gps_sortclicked);
+      if ss_ctrl in info.mouseeventinfopo^.shiftstate then begin
+       fgrid.sorted:= false;
+      end
+      else begin
+       if co_sortdescent in foptions then begin
+        options:= foptions - [co_sortdescent];
+       end
+       else begin
+        options:= foptions + [co_sortdescent];
+       end;
+      end;
+//     end
+//     else begin
+//      fgrid.optionsgrid:= fgrid.optionsgrid-[og_sorted];
+//     end;
     end
     else begin
      fgrid.datacols.sortcol:= info.cell.col;
+     fgrid.sorted:= true;
+//     exclude(fstate,gps_sortclicked);
     end;
     {
     with tdatacolheader(fcaptions.fitems[info.cell.col]) do begin
@@ -7099,6 +7122,7 @@ constructor tdatacols.create(aowner: tcustomgrid; aclasstype: gridpropclassty);
 begin
  fselectedrow:= -1;
  fsortcol:= -1;
+ fsortcoldefault:= -1;
  fnewrowcol:= -1;
  flastvisiblecol:= -1;
  frowstate:= trowstatelist.create(aowner);
@@ -7250,6 +7274,9 @@ begin
   if fsortcol >= count then begin
    fsortcol:= count - 1;
   end;
+  if fsortcoldefault >= count then begin
+   fsortcoldefault:= count - 1;
+  end;
   if fnewrowcol >= count then begin
    fnewrowcol:= count - 1;
   end;
@@ -7260,6 +7287,15 @@ procedure tdatacols.setsortcol(const avalue: integer);
 begin
  if fsortcol <> avalue then begin
   fsortcol := avalue;
+  checkindexrange;
+  fgrid.sortchanged;
+ end;
+end;
+
+procedure tdatacols.setsortcoldefault(const avalue: integer);
+begin
+ if fsortcoldefault <> avalue then begin
+  fsortcoldefault:= avalue;
   checkindexrange;
   fgrid.sortchanged;
  end;
@@ -7784,7 +7820,7 @@ var
 begin
  if fsortcol < 0 then begin
   for int1:= 0 to count-1 do begin
-   with cols[int1] do begin
+   with tdatacol(fitems[int1]) do begin
     if not(co_nosort in foptions) then begin
      sortcompare(index1,index2,result);
      if result <> 0 then begin
@@ -7798,11 +7834,21 @@ begin
   end;
  end
  else begin
-  with cols[fsortcol] do begin
+  with tdatacol(fitems[fsortcol]) do begin
    if not(co_nosort in foptions) then begin
     sortcompare(index1,index2,result);
     if co_sortdescent in foptions then begin
      result:= - result;
+    end;
+   end;
+  end;
+  if (result = 0) and (fsortcoldefault >= 0) then begin
+   with tdatacol(fitems[fsortcoldefault]) do begin
+    if not(co_nosort in foptions) then begin
+     sortcompare(index1,index2,result);
+     if co_sortdescent in foptions then begin
+      result:= - result;
+     end;
     end;
    end;
   end;
@@ -7943,6 +7989,9 @@ begin
   end;
   if fsortcol = curindex then begin
    fsortcol:= newindex;
+  end;
+  if fsortcoldefault = curindex then begin
+   fsortcoldefault:= newindex;
   end;
  end;
 end;

@@ -11,6 +11,10 @@ unit msevariants;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 
+type
+ variantarty = array of variant;
+ variantararty = array of variantarty;
+ 
 function mseVarTypeIsValidArrayType(const aVarType: TVarType): Boolean;
 function mseVarArrayCreate(const Bounds: PVarArrayBoundArray; Dims : SizeInt; aVarType: TVarType): Variant;
 

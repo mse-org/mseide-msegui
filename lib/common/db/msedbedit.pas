@@ -6962,7 +6962,8 @@ end;
 
 function tgriddatalink.canautoinsert: boolean;
 begin
- result:= fgrid.focused and active and (recordcount = 0) and 
+// result:= fgrid.focused and active and (recordcount = 0) and 
+ result:= fgrid.entered and active and (recordcount = 0) and 
                                         (og_autofirstrow in fgrid.optionsgrid);
 end;
 
