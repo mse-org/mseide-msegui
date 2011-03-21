@@ -4810,12 +4810,13 @@ begin
   if griddatalink <> nil then begin
    result:= tgriddatalink(griddatalink).
                     getintegerbuffer(fdatalink.field,cell.row);
-   if result = nil then begin
-    result:= @fvaluedefault;
-   end;
+//   if result = nil then begin
+//    result:= @fvaluedefault1;
+//   end;
   end
   else begin
-   result:= @fvaluedefault;
+   result:= nil;
+//   result:= @fvaluedefault1;
   end;
  end;
 end;

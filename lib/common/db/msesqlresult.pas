@@ -13,6 +13,7 @@ type
  tdbcol = class(tvirtualpersistent)
   private
    function getassql1: msestring;
+   function getasid: int64;
   protected
    fuppername: ansistring;
    ffieldname: ansistring;
@@ -57,6 +58,7 @@ type
    property asstring: ansistring read getasstring;
    property asmsestring: msestring read getasmsestring;
    property assql: msestring read getassql1;
+   property asid: int64 read getasid;
    property isnull: boolean read getisnull;
    
  end;
@@ -658,6 +660,16 @@ begin
  if result then begin
   result:= fsqlresult.fdatabase.loadfield(fsqlresult.fcursor,
              fdatatype,ffieldnum,buffer,int1,futf8);
+ end;
+end;
+
+function tdbcol.getasid: int64;
+begin
+ if isnull then begin
+  result:= -1;
+ end
+ else begin
+  result:= getaslargeint;
  end;
 end;
 
