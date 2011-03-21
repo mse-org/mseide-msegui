@@ -6519,7 +6519,7 @@ var
  hintinfo: hintinfoty;
 begin
  if scoe_checkbox in foptionsedit then begin
-  if not (co_readonly in foptions) and (info.cell.row >= 0) then begin
+  if not isreadonly and (info.cell.row >= 0) then begin
    if iscellclick(info) or (info.eventkind = cek_keyup) and 
         (info.keyeventinfopo^.key = key_space) and 
         (info.keyeventinfopo^.shiftstate = []) then begin

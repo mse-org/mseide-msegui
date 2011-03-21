@@ -277,7 +277,8 @@ type
 procedure TIBCursor.close;
 begin
  inherited;
- if fopen and (fibstatementtype <> isc_info_sql_stmt_exec_procedure) then begin
+// if fopen and (fibstatementtype <> isc_info_sql_stmt_exec_procedure) then begin
+ if fopen and (fibstatementtype = isc_info_sql_stmt_select) then begin
   if isc_dsql_free_statement(@status, @statement, dsql_close) <> 0 then begin 
    fconnection.checkerror('close cursor', status{,fname});
   end;

@@ -322,6 +322,8 @@ type
    procedure setasenum(const avalue: integer);
     //imsefield
    function getproviderflags1: providerflags1ty;
+   function getasid: integer;
+   procedure setasid(const avalue: integer);
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -342,6 +344,7 @@ type
    function asoldsql: string;
    function sum: integer;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property asid: integer read getasid write setasid; //-1 -> NULL
    property asenum: integer read getaslongint write setasenum;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -364,6 +367,8 @@ type
    procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+   function getasid: int64;
+   procedure setasid(const avalue: int64);
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -382,6 +387,7 @@ type
    function asoldsql: string;
    function sum: int64;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property asid: int64 read getasid write setasid; //-1 -> NULL
    property Value: Largeint read GetAsLargeint write SetAsLargeint;
    property tagpo: pointer read ftagpo write ftagpo;
   published
@@ -1404,6 +1410,8 @@ type
  {$ifdef mse_withpublishedparamvalue}
   private
    procedure setasvariant(const avalue: variant);
+   function getasid: int64;
+   procedure setasid(const avalue: int64);
   published
    property value : variant read getasvariant write setasvariant 
                                                   stored isparamstored;
@@ -1413,6 +1421,7 @@ type
    procedure setconnector(const avalue: tparamconnector);
   public
    destructor destroy; override;
+   property asid: int64 read getasid write setasid; //-1 -> null
   published
    property connector: tparamconnector read fconnector write setconnector;
  end;
@@ -3558,6 +3567,26 @@ begin
  result:= fproviderflags1;
 end;
 
+function tmselongintfield.getasid: integer;
+begin
+ if isnull then begin
+  result:= -1;
+ end
+ else begin
+  result:= asinteger;
+ end;
+end;
+
+procedure tmselongintfield.setasid(const avalue: integer);
+begin
+ if avalue = -1 then begin
+  clear;
+ end
+ else begin
+  asinteger:= avalue;
+ end;
+end;
+
 { tmselargeintfield }
 
 function tmselargeintfield.HasParent: Boolean;
@@ -3674,6 +3703,26 @@ end;
 function tmselargeintfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
+end;
+
+function tmselargeintfield.getasid: int64;
+begin
+ if isnull then begin
+  result:= -1;
+ end
+ else begin
+  result:= aslargeint;
+ end;
+end;
+
+procedure tmselargeintfield.setasid(const avalue: int64);
+begin
+ if avalue = -1 then begin
+  clear;
+ end
+ else begin
+  aslargeint:= avalue;
+ end;
 end;
 
 { tmsesmallintfield }
@@ -7451,6 +7500,26 @@ begin
  tparamcracker(self).fbound:= not varisclear(avalue);
 end;
 {$endif mse_withpublishedparamvalue}
+
+function tmseparam.getasid: int64;
+begin
+ if isnull then begin
+  result:= -1;
+ end
+ else begin
+  result:= aslargeint;
+ end;
+end;
+
+procedure tmseparam.setasid(const avalue: int64);
+begin
+ if avalue = -1 then begin
+  clear;
+ end
+ else begin
+  aslargeint:= avalue;
+ end;
+end;
 
 { tparamconnector }
 
