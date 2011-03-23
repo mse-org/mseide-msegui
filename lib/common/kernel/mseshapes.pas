@@ -42,6 +42,7 @@ type
   imagedist: integer;
   imagedisttop: integer;
   imagedistbottom: integer;
+  captionclipped: boolean;
  end;
  
 
@@ -115,7 +116,7 @@ procedure checkbuttonhint(const awidget: twidget; info: mouseeventinfoty;
      const getbuttonhint: getbuttonhintty; 
      const gethintpos: getbuttonhintposty);
 
-procedure drawcaption(const acanvas: tcanvas; const ainfo: captioninfoty);
+procedure drawcaption(const acanvas: tcanvas; var ainfo: captioninfoty);
 procedure initcaptioninfo(var ainfo: captioninfoty);
 
 //var
@@ -1066,10 +1067,11 @@ begin
  end;
 end;
 
-procedure drawcaption(const acanvas: tcanvas; const ainfo: captioninfoty);
+procedure drawcaption(const acanvas: tcanvas; var ainfo: captioninfoty);
 var
  rect1,rect2: rectty;
  align1: alignmentsty;
+ info1: drawtextinfoty;
 begin
  with ainfo do begin
   rect2:= ainfo.dim;
@@ -1095,7 +1097,14 @@ begin
     dec(rect2.cy,captiondist);
    end;
   end;
-  drawtext(acanvas,caption,rect2,textflags,font);
+  info1.text:= caption;
+  info1.dest:= rect2;
+  info1.flags:= textflags - [tf_clipo];
+  info1.font:= font;
+  info1.tabulators:= nil;
+  drawtext(acanvas,info1);
+  captionclipped:= (info1.res.cx > rect2.cx) or (info1.res.cy > rect2.cy);
+  //drawtext(acanvas,caption,rect2,textflags,font);
  end;
 end;
 

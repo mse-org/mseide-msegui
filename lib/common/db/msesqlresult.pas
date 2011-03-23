@@ -5,7 +5,7 @@ interface
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 uses
  classes,db,msqldb,mseclasses,msedb,msedatabase,msearrayprops,msestrings,msereal,
- msetypes,mselookupbuffer,mseglob,msedatalist,msevariants;
+ msetypes,mselookupbuffer,mseglob,msedatalist,msevariants,mseevent;
  
 type
  tsqlresult = class;
@@ -210,9 +210,46 @@ type
    property items[const index: integer]: tdbcol read getitems; default;
  end;
 
+// tsqlresultfielddef = class;
+
+ dbcolnamety = string;
+  
+ tsqlresultconnector = class(tmsecomponent)
+  private
+   fcol: tdbcol;
+//   ffielddef: tsqlresultfielddef;
+   fsource: tsqlresult;
+   fcolname: dbcolnamety;
+   function getcol: tdbcol;
+   procedure setsource(const avalue: tsqlresult);
+   procedure setcolname(const avalue: dbcolnamety);
+   procedure objevent(const sender: iobjectlink;
+                             const event: objecteventty); override;
+  public
+   destructor destroy; override;
+   property col: tdbcol read getcol;
+  published
+   property source: tsqlresult read fsource write setsource;
+   property colname: dbcolnamety read fcolname write setcolname;
+ end;
+{
+ tsqlresultfielddef = class(tfielddef)
+  destructor destroy; override;
+  private
+   fconnector: tsqlresultconnector;
+   procedure setconnector(const avalue: tsqlresultconnector);
+  published
+   property connector: tsqlresultconnector read fconnector write setconnector;
+ end;
+}
  tsqlresultfielddefs = class(tfielddefs)
   private
+//   fsqlresult: tsqlresult;
    procedure setitemname(aitem: tcollectionitem); override;
+  protected
+//   procedure bindconnectors;
+//  public
+//   constructor create(const aowner: tsqlresult);
  end;
  
  sqlresultoptionty = (sro_utf8);
@@ -1021,10 +1058,10 @@ begin
  fbof:= true;
  feof:= true;
  fparams:= tmseparams.create(self);
+ fcols:= tdbcols.create(@getname);
  ffielddefs:= tsqlresultfielddefs.create(nil);
  fsql:= tsqlstringlist.create;
  fsql.onchange:= @onchangesql;
- fcols:= tdbcols.create(@getname);
  inherited;
 end;
 
@@ -1125,10 +1162,12 @@ begin
 // ffielddefs.clear;
  fdatabase.addfielddefs(fcursor,ffielddefs);
  fcols.initfields(self,fcursor,ffielddefs);
+// ffielddefs.bindconnectors;
  factive:= true;
  feof:= false;
  next;
  fbof:= true;
+ sendchangeevent(oe_bindfields);
  if fafteropen <> nil then begin
   fafteropen.execute;
  end;
@@ -1143,6 +1182,7 @@ begin
  factive:= false;
  feof:= true;
  fbof:= true;
+ sendchangeevent(oe_releasefields);
  freefldbuffers;
  unprepare;
 // ffielddefs.clear; //is now published
@@ -1901,7 +1941,13 @@ begin
 end;
 
 { tsqlresultfielddefs }
-
+{
+constructor tsqlresultfielddefs.create(const aowner: tsqlresult);
+begin
+ fsqlresult:= aowner;
+ tdefcollection(self).create(nil,owner,tsqlresultfielddef);
+end;
+}
 procedure tsqlresultfielddefs.setitemname(aitem: tcollectionitem);
 begin
  {$ifdef mse_FPC_2_2}
@@ -1921,6 +1967,118 @@ begin
  end
  else begin
   inherited;
+ end;
+end;
+{
+procedure tsqlresultfielddefs.bindconnectors;
+var
+ int1,int2: integer;
+ str1: string;
+ col1: tdbcol;
+begin
+ for int1:= 0 to count - 1 do begin
+  with tsqlresultfielddef(items[int1]) do begin
+   if fconnector <> nil then begin
+    str1:= uppercase(name);
+    fconnector.fcol:= nil;
+    for int2:= 0 to high(fsqlresult.fcols.fitems) do begin
+     col1:= tdbcol(fsqlresult.fcols.fitems[int2]);
+     if col1.fuppername = str1 then begin
+      fconnector.fcol:= col1;
+      break;
+     end;
+    end;
+//    if fconnector.fcol = nil then begin
+//     raise exception.create(fsqlresult.name+': Field "'+name+'" not found.');
+//    end;
+   end;
+  end;
+ end;
+end;
+}
+(*
+{ tsqlresultfielddef }
+
+destructor tsqlresultfielddef.destroy;
+begin
+ connector:= nil;
+ inherited;
+end;
+
+procedure tsqlresultfielddef.setconnector(const avalue: tsqlresultconnector);
+begin
+ if fconnector <> avalue then begin
+ if fconnector <> nil then begin
+   fconnector.fcol:= nil;
+   fconnector.ffielddef:= nil;
+  end;
+  fconnector:= avalue;
+  if fconnector <> nil then begin
+   fconnector.fcol:= nil;
+   fconnector.ffielddef:= self;
+  end;
+ end;
+end;
+*)
+{ tsqlresultconnector }
+
+destructor tsqlresultconnector.destroy;
+begin
+// if ffielddef <> nil then begin
+//  ffielddef.connector:= nil;
+// end;
+ inherited;
+end;
+
+function tsqlresultconnector.getcol: tdbcol;
+begin
+ result:= fcol;
+ if result = nil then begin
+  raise exception.create(name+': Connector not bound');
+ end;
+end;
+
+procedure tsqlresultconnector.setsource(const avalue: tsqlresult);
+begin
+ fcol:= nil;
+ setlinkedvar(avalue,fsource);
+end;
+
+procedure tsqlresultconnector.setcolname(const avalue: dbcolnamety);
+begin
+ fcolname:= avalue;
+ fcol:= nil;
+end;
+
+procedure tsqlresultconnector.objevent(const sender: iobjectlink;
+                                       const event: objecteventty);
+var
+ str1: string;
+ int1: integer;
+ col1: tdbcol;
+begin
+ inherited;
+ case event of
+  oe_bindfields: begin
+   if (fcolname <> '') and (sender.getinstance = fsource) then begin
+    fcol:= nil;
+    str1:= uppercase(fcolname);
+    with fsource.fcols do begin
+     for int1:= 0 to high(fitems) do begin
+      col1:= tdbcol(fitems[int1]);
+      if col1.fuppername = str1 then begin
+       fcol:= col1;
+       break;
+      end;
+     end;
+    end;
+   end;
+  end;
+  oe_releasefields: begin
+   if sender.getinstance = fsource then begin
+    fcol:= nil;
+   end;
+  end;
  end;
 end;
 

@@ -54,7 +54,7 @@ type
 // celloptionsty = set of celloptionty;
 
  coloption1ty = (co1_rowfont,co1_rowcolor,co1_zebracolor,
-                 co1_rowcoloractive,co1_rowcolorfocused,
+                 co1_rowcoloractive,co1_rowcolorfocused,co1_rowreadonly,
 //                 co1_active, //not used
                  co1_autorowheight);
  coloptions1ty = set of coloption1ty;
@@ -175,7 +175,8 @@ const
  defaultselectedcellcolor = cl_active;
  defaultdatacoloptions = [{co_selectedcolor,}co_savestate,co_savevalue,
                           {co_rowfont,co_rowcolor,co_zebracolor,}co_mousescrollrow];
- defaultdatacoloptions1 = [co1_rowfont,co1_rowcolor,co1_zebracolor];
+ defaultdatacoloptions1 = [co1_rowfont,co1_rowcolor,co1_zebracolor,
+                           co1_rowreadonly];
  defaultfixcoltextflags = [tf_ycentered,tf_xcentered];
  defaultstringcoleditoptions = [scoe_exitoncursor,scoe_undoonesc,scoe_autoselect,
                                   scoe_autoselectonfirstclick,scoe_eatreturn];
@@ -194,7 +195,7 @@ type
  gridstatety = (
       gs_layoutvalid,gs_layoutupdating,gs_updatelocked,gs_changelock,
 //      gs_visiblerowsupdating,
-      gs_sortvalid,gs_cellentered,gs_cellclicked,gs_emptyrowremoved,
+      gs_cellentered,gs_cellclicked,gs_emptyrowremoved,
       gs_rowcountinvalid,gs_rowreadonly,
       gs_scrollup,gs_scrolldown,gs_scrollleft,gs_scrollright,
       gs_selectionchanged,gs_rowdatachanged,gs_focusedcellchanged,gs_invalidated,
@@ -207,7 +208,8 @@ type
       gs_islist,//contiguous select blocks
       gs_isdb); //do not change rowcount
  gridstatesty = set of gridstatety;
- gridstate1ty = (gs1_showcellinvalid{,gs1_focusedcellchanged});
+ gridstate1ty = (gs1_showcellinvalid,gs1_sortvalid,gs1_rowsortinvalid,
+                                     gs1_sortmoving);
  gridstates1ty = set of gridstate1ty;
 
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
@@ -762,6 +764,7 @@ type
    function getcursor(const arow: integer;
                         const actcellzone: cellzonety): cursorshapety; override;
    procedure modified; virtual;
+   procedure checkcellvalue(var avalue: msestring; var accept: boolean);
   public
    constructor create(const agrid: tcustomgrid; 
                          const aowner: tgridarrayprop); override;
@@ -876,6 +879,8 @@ type
 
  cellmergeflagty = (cmf_h,cmf_v,cmf_rline);
  cellmergeflagsty = set of cellmergeflagty;
+// colheaderstatety = (chs_textclipped);
+// colheaderstatesty = set of colheaderstatety;
  
  tcolheader = class(tindexpersistent,iframe,iface,iimagelistinfo)
   private
@@ -914,6 +919,7 @@ type
    procedure setcaptiondist(const avalue: integer);
    procedure readcaptionpos(reader: treader);
   protected
+//   fstate: colheaderstatesty;
    fgrid: tcustomgrid;
    fframe: tfixcellframe;
    fface: tfixcellface;
@@ -980,18 +986,21 @@ type
                    //cl_none -> no no glyph
  end;
 
- datacolheaderoptionty = (dco_colsort);
+ datacolheaderoptionty = (dco_colsort,dco_hintclippedtext);
  datacolheaderoptionsty = set of datacolheaderoptionty;
- 
+
  tdatacolheader = class(tcolheader)
   private
    foptions: datacolheaderoptionsty;
    procedure setoptions(const avalue: datacolheaderoptionsty);
   protected
    procedure drawcell(const acanvas: tcanvas; const adest: rectty); override;
+  public
+   constructor create(const aowner: tobject;
+         const aprop: tindexpersistentarrayprop); override;
   published
    property options: datacolheaderoptionsty read foptions write setoptions
-                            default [];
+                            default [dco_hintclippedtext];
  end;
  
  tcolheaders = class(tindexpersistentarrayprop)
@@ -1923,8 +1932,8 @@ type
    procedure rowchanged(const arow: integer); virtual;
    procedure rowstatechanged(const arow: integer); virtual;
    procedure scrolled(const dist: pointty); virtual;
-   procedure sortchanged;
-   procedure sortinvalid;
+   procedure sortchanged(const all: boolean);
+   procedure sortinvalid(const acol: integer; const arow: integer);
    procedure checksort;
    procedure checkinvalidate;
    function startanchor: gridcoordty;
@@ -2028,6 +2037,7 @@ type
    procedure beginnocheckvalue;
    procedure endnocheckvalue;
    function nocheckvalue: boolean;
+   procedure reorderrow;
 
   public
    constructor create(aowner: tcomponent); override;
@@ -2134,8 +2144,13 @@ type
    procedure insertrow(aindex: integer; acount: integer = 1); virtual;
    procedure deleterow(aindex: integer; acount: integer = 1); virtual;
    procedure clear; //sets rowcount to 0
-   function appendrow(const checkautoappend: boolean = false): integer; //returns index of new row,
-                                //fast, does not call change events
+   function appendrow(const checkautoappend: boolean = false): integer; 
+   //returns index of new row, does not call change events, calls updatelayout.
+   //use for single visible append,
+   //do not use for multiple row append in a block.
+   function appenddatarow: integer; 
+   //returns index of new row, use it in a beginupdate/endupdate block
+   
    procedure sort;
    function copyselection: boolean; virtual;  //false if no copy
    function pasteselection: boolean; virtual; //false if no paste
@@ -2397,9 +2412,17 @@ type
    function textclipped(const acell: gridcoordty;
                  out acellrect: rectty): boolean; overload;
    function textclipped(const acell: gridcoordty): boolean; overload;
+   
    function appendrow(const value: array of msestring): integer; overload;
    function appendrow(const value: msestringarty): integer; overload;
    function appendrow(const value: msestring): integer; overload;
+         //for visible single row append
+
+   function appenddatarow(const value: array of msestring): integer; overload;
+   function appenddatarow(const value: msestringarty): integer; overload;
+   function appenddatarow(const value: msestring): integer; overload;
+        //for multiple data append in a beginupdate/endupdate block
+   
    function copyselection: boolean; override;
    function pasteselection: boolean; override;
    property items[const cell: gridcoordty]: msestring read getitems write setitems;
@@ -4219,6 +4242,13 @@ end;
 
 { tdatacolheader }
 
+constructor tdatacolheader.create(const aowner: tobject;
+               const aprop: tindexpersistentarrayprop);
+begin
+ foptions:= [dco_hintclippedtext];
+ inherited;
+end;
+
 procedure tdatacolheader.setoptions(const avalue: datacolheaderoptionsty);
 begin
  foptions:= avalue;
@@ -4228,7 +4258,7 @@ procedure tdatacolheader.drawcell(const acanvas: tcanvas; const adest: rectty);
 var
  rect1: rectty;
  al1: alignmentsty;
- int1: integer;
+ int1,int2: integer;
 begin
  if (dco_colsort in foptions) and (index < fgrid.datacols.count) then begin
   rect1:= adest;
@@ -4246,9 +4276,14 @@ begin
     int1:= ord(stg_arrowdownsmall);
    end;
   end;
-  inc(rect1.cx,(15-sortglyphwidth) div 2);
+  int2:= (15-sortglyphwidth) div 2;
+  inc(rect1.cx,int2);
   stockobjects.glyphs.paint(acanvas,int1,rect1,al1,finfo.colorglyph);
-  dec(rect1.cx,15);
+  int2:= sortglyphwidth+int2;
+  with rect1 do begin
+   acanvas.subcliprect(mr(x+cx-int2,y,int2,cy));
+  end;
+  dec(rect1.cx,int2);
   inherited drawcell(acanvas,rect1);
  end
  else begin
@@ -4283,6 +4318,7 @@ end;
 
 procedure tcolheaders.colcountchanged(const acount: integer);
 begin
+ //dummy
 end;
 
 procedure tcolheaders.updatelayout(const cols: tgridarrayprop);
@@ -4605,6 +4641,7 @@ begin
   canvas.move(po1);
   updatecellrect(frame1);
   ftextinfo.dest:= fcellinfo.innerrect;
+  ftextinfo.clip:= fcellinfo.rect;
   canvas.save;
   canvas.intersectcliprect(makerect(nullpoint,fcellrect.size));
   drawcellbackground(canvas,frame1,face1);
@@ -5787,7 +5824,7 @@ begin
   end;
  end;
  if not (co_nosort in foptions) then begin
-  fgrid.sortinvalid;
+  fgrid.sortinvalid(index,aindex);
  end;
  if not (gps_changelock in fstate) and 
                                 fgrid.canevent(tmethod(fonchange)) then begin
@@ -5894,7 +5931,7 @@ begin
          {$ifdef FPC}longword{$else}longword{$endif}(mask))));
  if coloptionsty(longword(optionsbefore) xor longword(foptions)) * 
           [co_nosort,co_sortdescent] <> [] then begin
-  fgrid.sortinvalid;
+  fgrid.sortinvalid(index,-1);
   fgrid.checksort;
  end;
  optionsplusdelta:= coloptionsty((longword(optionsbefore) xor longword(foptions)) and 
@@ -6145,7 +6182,8 @@ end;
 
 function tdatacol.isreadonly: boolean;
 begin
- result:= (gs_rowreadonly in fgrid.fstate) or (co_readonly in foptions);
+ result:= (co1_rowreadonly in foptions1) and (gs_rowreadonly in fgrid.fstate) or 
+                  (co_readonly in foptions);
 end;
 
 procedure tdatacol.clean(const start,stop: integer);
@@ -6318,6 +6356,22 @@ begin
  //dummy
 end;
 
+procedure tcustomstringcol.checkcellvalue(var avalue: msestring;
+                                                  var accept: boolean);
+begin
+ updatedisptext(avalue);
+ if fgrid.canevent(tmethod(fonsetvalue)) then begin
+  fonsetvalue(self,avalue,accept);
+ end;
+ if accept then begin                
+  items[fgrid.ffocusedcell.row]:= avalue;
+  if fgrid.canevent(tmethod(fondataentered)) then begin
+   fondataentered(self);
+  end;
+ end;
+ exclude(fstate,gps_edited);
+end;
+
 function tcustomstringcol.geteditpos: gridcoordty;
 begin
  result.row:= invalidaxis;
@@ -6435,27 +6489,40 @@ end;
 
 function tcustomstringcol.getitems(aindex: integer): msestring;
 begin
- result:= tmsestringdatalist(fdata)[aindex];
+ if aindex = -1 then begin
+  aindex:= fgrid.row;
+ end;
+ if aindex >= 0 then begin
+  result:= tmsestringdatalist(fdata)[aindex];
+ end
+ else begin
+  tdatalist1(fdata).getgriddefaultdata(result);
+ end;
 end;
 
 procedure tcustomstringcol.setitems(aindex: integer; const Value: msestring);
 begin
- tmsestringdatalist(fdata)[aindex]:= value;
+ if aindex = -1 then begin
+  aindex:= fgrid.row;
+ end;
+ if aindex >= 0 then begin
+  tmsestringdatalist(fdata)[aindex]:= value;
+ end;
 // cellchanged(aindex); //??? already called?
 end;
 
 function tcustomstringcol.getchecked(aindex: integer): boolean;
 begin
- result:= tstringcoldatalist(fdata).items[aindex] = fvaluetrue;;
+ result:= getitems(aindex) = fvaluetrue;;
 end;
 
 procedure tcustomstringcol.setchecked(aindex: integer; const avalue: boolean);
 begin
  if avalue then begin
-  tstringcoldatalist(fdata).items[aindex]:= fvaluetrue;
+  setitems(aindex,fvaluetrue);
  end
  else begin
-  tstringcoldatalist(fdata).items[aindex]:= fvaluefalse;
+  setitems(aindex,fvaluefalse);
  end;
 end;
 
@@ -6517,13 +6584,22 @@ end;
 procedure tcustomstringcol.docellevent(var info: celleventinfoty);
 var
  hintinfo: hintinfoty;
+ mstr1: msestring;
+ bo1: boolean;
 begin
  if scoe_checkbox in foptionsedit then begin
   if not isreadonly and (info.cell.row >= 0) then begin
    if iscellclick(info) or (info.eventkind = cek_keyup) and 
         (info.keyeventinfopo^.key = key_space) and 
         (info.keyeventinfopo^.shiftstate = []) then begin
-    checked[info.cell.row]:= not checked[info.cell.row];
+    if checked[info.cell.row] then begin
+     mstr1:= fvaluefalse;
+    end
+    else begin
+     mstr1:= fvaluetrue;
+    end;
+    bo1:= true;
+    checkcellvalue(mstr1,bo1);
    end;
   end;
  end
@@ -7288,7 +7364,7 @@ begin
  if fsortcol <> avalue then begin
   fsortcol := avalue;
   checkindexrange;
-  fgrid.sortchanged;
+  fgrid.sortchanged(true);
  end;
 end;
 
@@ -7297,7 +7373,7 @@ begin
  if fsortcoldefault <> avalue then begin
   fsortcoldefault:= avalue;
   checkindexrange;
-  fgrid.sortchanged;
+  fgrid.sortchanged(true);
  end;
 end;
 
@@ -10115,12 +10191,20 @@ begin
          with ffixrows[fmouseparkcell.row] do begin
           if fmouseparkcell.col >= 0 then begin
            if fmouseparkcell.col < fcaptions.count then begin
-            str1:= fcaptions[fmouseparkcell.col].hint;
+            with fcaptions[fmouseparkcell.col] do begin
+             str1:= hint;
+             if (str1 = '') and (dco_hintclippedtext in options) and
+                                        finfo.captionclipped then begin
+              str1:= caption;
+             end;
+            end;
            end;
           end
           else begin
            if -fmouseparkcell.row <= fcaptionsfix.count then begin
-            str1:= fcaptionsfix[fmouseparkcell.col].hint;
+            with fcaptionsfix[fmouseparkcell.col] do begin
+             str1:= hint;
+            end;
            end;
           end;
          end;
@@ -12866,14 +12950,9 @@ begin
    if factiverow >= 0 then begin
     factiverow:= ffocusedcell.row;
    end;
-//   if not (gs_changelock in fstate) then begin
-//    include(fstate,gs_changelock);
-//    fdatacols.beginchangelock;
-//   end;
-//   fdatacols.moverow(curindex,newindex,count);
    invalidate //for fixcols colorselect
   end;
-  endupdate;
+  endupdate(gs1_sortmoving in fstate1);
   dorowsmoved(curindex,newindex,count);
   if rowbefore <> ffocusedcell.row then begin
    dofocusedcellposchanged;
@@ -13091,6 +13170,12 @@ begin
  end;
 end;
 
+function tcustomgrid.appenddatarow: integer;
+begin
+ result:= rowcount;
+ rowcount:= rowcount+1;
+end;
+
 procedure tcustomgrid.beginupdate;
 begin
  if fupdating = 0 then begin
@@ -13235,7 +13320,7 @@ begin
   fdatacols.frowstate.folded:= og_folded in avalue;
   layoutchanged;
   if (og_sorted in avalue) and not(og_sorted in optionsbefore) then begin
-   exclude(fstate,gs_sortvalid);
+   exclude(fstate1,gs1_sortvalid);
    checksort;
   end;
  end;
@@ -13607,7 +13692,7 @@ function tcustomgrid.internalsort(sortfunc: gridsorteventty;
 var
  list: tintegerdatalist;
  bewegt: boolean;
-
+                                        //todo: use merge sort
  procedure quicksort(L, R: Integer);
  var
    I, J: Integer;
@@ -13705,12 +13790,86 @@ begin
  result:= bewegt;
 end;
 
+procedure tcustomgrid.reorderrow;
+var
+ lo,hi,pivot: integer;
+ sf: gridsorteventty;
+ bo1: boolean;
+ int1: integer;
+begin
+ exclude(fstate1,gs1_rowsortinvalid);
+ if not (gs_isdb in fstate) then begin
+  if assigned(fonsort) then begin
+   sf:= fonsort;
+  end
+  else begin
+   sf:= {$ifdef FPC}@{$endif}fdatacols.sortfunc;
+  end;
+  if frowcount > 1 then begin
+   bo1:= true;
+   if row > 0 then begin
+    int1:= 0;
+    sf(self,row-1,row,int1);
+    bo1:= int1 <= 0;
+   end;
+   if bo1 and (row < rowhigh) then begin
+    int1:= 0;
+    sf(self,row+1,row,int1);
+    bo1:= int1 >= 0;
+   end;
+   if not bo1 then begin
+                    //position changed
+    lo:= 0;
+    hi:= rowhigh;    
+    int1:= 0;
+    sf(self,hi,row,int1);
+    if int1 < 0 then begin   //last?
+     lo:= hi;
+    end
+    else begin
+     repeat
+      pivot:= (lo+hi) div 2;
+      if pivot = row then begin
+       dec(pivot);
+       if pivot < 0 then begin
+        pivot:= 2;
+       end;
+      end;
+      int1:= 0;
+      sf(self,row,pivot,int1);
+      if int1 = 0 then begin
+       int1:= row-pivot;
+      end;
+      if int1 <= 0 then begin
+       hi:= pivot;
+      end;
+      if int1 > 0 then begin
+       lo:= pivot;
+      end;
+     until hi-lo <= 1;
+    end;
+    bo1:= gs1_sortmoving in fstate1;
+    include(fstate1,gs1_sortmoving);
+    try
+     moverow(row,lo);
+     include(fstate1,gs1_sortvalid);
+    finally
+     if not bo1 then begin
+      exclude(fstate1,gs1_sortmoving);
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
 procedure tcustomgrid.sort;
 var
  int1: integer;
 begin
  if gs_isdb in fstate then begin
-  include(fstate,gs_sortvalid);
+  include(fstate1,gs1_sortvalid);
+  exclude(fstate1,gs1_rowsortinvalid);
  end
  else begin
   fdatacols.roworderinvalid;
@@ -13730,7 +13889,8 @@ begin
     ffocusedcell.row:= int1;
 //    updaterowdata; //for twidgetgrid
    end;
-   include(fstate,gs_sortvalid);
+   include(fstate1,gs1_sortvalid);
+   exclude(fstate1,gs1_rowsortinvalid);
    layoutchanged;
   finally
    endupdate;
@@ -13753,31 +13913,48 @@ begin
  result:= false;
 end;
 
-procedure tcustomgrid.sortchanged;
+procedure tcustomgrid.sortchanged(const all: boolean);
 begin
  if not(csloading in componentstate) then begin
   if assigned(fonsortchanged) then begin
    fonsortchanged(self);
   end;
   if (og_sorted in foptionsgrid) then begin
-   sort;
+   if not all and (gs1_sortvalid in fstate1) and 
+                                       (ffocusedcell.row >= 0) then begin
+    reorderrow;
+   end
+   else begin
+    sort;
+   end;
   end
   else begin
-   include(fstate,gs_sortvalid);
+   include(fstate1,gs1_sortvalid);
+   exclude(fstate1,gs1_rowsortinvalid);
    invalidate; //for sort indicator
   end;
  end;
 end;
 
-procedure tcustomgrid.sortinvalid;
+procedure tcustomgrid.sortinvalid(const acol: integer; const arow: integer);
 begin
- exclude(fstate,gs_sortvalid);
+ if (acol < 0) or (fdatacols.fsortcol < 0) or (acol = fdatacols.fsortcol) or 
+                          (acol = fdatacols.fsortcoldefault) or 
+          assigned(fonsort) then begin
+  if (arow < 0) or (arow <> ffocusedcell.row) then begin
+   exclude(fstate1,gs1_sortvalid);
+  end
+  else begin
+   include(fstate1,gs1_rowsortinvalid);
+  end;
+ end;
 end;
 
 procedure tcustomgrid.checksort;
 begin
- if not (gs_sortvalid in fstate) and (fupdating = 0) then begin
-  sortchanged;
+ if (fstate1 * [gs1_sortvalid,gs1_rowsortinvalid]<>[gs1_sortvalid]) and 
+                                                   (fupdating = 0) then begin
+  sortchanged(false);
  end;
 end;
 
@@ -14813,17 +14990,7 @@ begin
   strcol:= datacols[ffocusedcell.col];
   if gps_edited in strcol.fstate then begin
    mstr1:= feditor.text;
-   strcol.updatedisptext(mstr1);
-   if canevent(tmethod(strcol.fonsetvalue)) then begin
-    strcol.fonsetvalue(strcol,mstr1,accept);
-   end;
-   if accept then begin                
-    items[ffocusedcell]:= mstr1;
-    if canevent(tmethod(strcol.fondataentered)) then begin
-     strcol.fondataentered(strcol);
-    end;
-   end;
-   exclude(strcol.fstate,gps_edited);
+   strcol.checkcellvalue(mstr1,accept);
    feditor.dofocus;
   end;
  end;
@@ -14952,8 +15119,7 @@ function tcustomstringgrid.appendrow(const value: msestringarty): integer;
 var
  int1: integer;
 begin
- inherited appendrow;
- result:= frowcount-1;
+ result:= inherited appendrow;
  for int1:= 0 to high(value) do begin
   datacols[int1][result]:= value[int1];
  end;
@@ -14963,8 +15129,7 @@ function tcustomstringgrid.appendrow(const value: array of msestring): integer;
 var
  int1: integer;
 begin
- inherited appendrow;
- result:= frowcount-1;
+ result:= inherited appendrow;
  for int1:= 0 to high(value) do begin
   datacols[int1][result]:= value[int1];
  end;
@@ -14977,6 +15142,35 @@ begin
  setlength(ar1,1);
  ar1[0]:= value;
  result:= appendrow(ar1);
+end;
+
+function tcustomstringgrid.appenddatarow(const value: msestringarty): integer;
+var
+ int1: integer;
+begin
+ result:= inherited appenddatarow;
+ for int1:= 0 to high(value) do begin
+  datacols[int1][result]:= value[int1];
+ end;
+end;
+
+function tcustomstringgrid.appenddatarow(const value: array of msestring): integer;
+var
+ int1: integer;
+begin
+ result:= inherited appenddatarow;
+ for int1:= 0 to high(value) do begin
+  datacols[int1][result]:= value[int1];
+ end;
+end;
+
+function tcustomstringgrid.appenddatarow(const value: msestring): integer;
+var
+ ar1: msestringarty;
+begin
+ setlength(ar1,1);
+ ar1[0]:= value;
+ result:= appenddatarow(ar1);
 end;
 
 function tcustomstringgrid.getcaretcliprect: rectty;

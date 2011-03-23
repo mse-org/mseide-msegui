@@ -302,7 +302,7 @@ begin
  registercomponenttabhints(['DBe'],['Data edit Components']);
  registercomponents('DBf',[
       tfieldparamlink,tfieldlink,ttimestampfieldlink,tfieldfieldlink,
-      tsequencelink,tdbevent,tparamconnector,
+      tsequencelink,tdbevent,tparamconnector,tsqlresultconnector,
       tmsestringfield,tmselongintfield,tmselargeintfield,tmsesmallintfield,
       tmsewordfield,tmseautoincfield,tmsefloatfield,tmsecurrencyfield,
       tmsebooleanfield,tmsedatetimefield,tmsedatefield,tmsetimefield,
