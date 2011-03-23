@@ -78,6 +78,7 @@ type
   private
    finternalbuffer: string;
    fbuflen: integer;
+   fcachedposition: int64;
 
    fusewritebuffer: boolean;
    function getnotopen: boolean;
@@ -1047,8 +1048,14 @@ begin
 end;
 
 procedure tcustombufstream.internalwritebuffer(const buffer; count: longint);
+var
+ int1: integer;
 begin
- if inherited write(buffer,count) <> count then begin
+ int1:= inherited write(buffer,count);
+ if (int1 >= 0) and (fcachedposition >= 0) then begin
+  fcachedposition:= fcachedposition + int1;
+ end;
+ if int1 <> count then begin
   raise ewriteerror.create(swriteerror);
  end;
 end;
@@ -1070,6 +1077,9 @@ begin
    end
    else begin
     result:= inherited write(buffer,count);
+    if (result >= 0) and (fcachedposition >= 0) then begin
+     fcachedposition:= fcachedposition + result;
+    end;
    end;
   end
   else begin
@@ -1080,11 +1090,17 @@ begin
    end
    else begin
     result:= inherited write(buffer,count);
+    if (result >= 0) and (fcachedposition >= 0) then begin
+     fcachedposition:= fcachedposition + result;
+    end;
    end;
   end
  end
  else begin
   result:= inherited write(buffer,count);
+  if (result >= 0) and (fcachedposition >= 0) then begin
+   fcachedposition:= fcachedposition + result;
+  end;
  end;
 end;
 {
@@ -1115,6 +1131,9 @@ begin
  result:= inherited read(buf,fbuflen);
  if result > 0 then begin
   exclude(fstate,tss_eof);
+  if fcachedposition >= 0 then begin
+   fcachedposition:= fcachedposition + result;
+  end;
  end;
 end;
 
@@ -1137,14 +1156,16 @@ end;
 function tcustombufstream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
 begin
  if (origin = sobeginning) and (bufoffset <> nil) then begin
-  result:= inherited seek(0,socurrent);
+//  result:= inherited seek(0,socurrent);
+  result:= fcachedposition;
   if result >= 0 then begin
    result:= seek(offset-result+(bufend-bufoffset),socurrent);
   end;
  end
  else begin
   if (origin = socurrent) and (offset = 0) then begin
-   result:= inherited seek(offset,origin);
+   result:= fcachedposition;
+//   result:= inherited seek(offset,origin);
    if (bufoffset <> nil) and (result >= 0) then begin
     result:= result + (bufoffset-bufend);
    end;
@@ -1154,11 +1175,13 @@ begin
    if (origin = socurrent) and (bufoffset <> nil) then begin
     if (offset < fbuffer - bufoffset) or (offset >= bufend-bufoffset) then begin
      result:= inherited seek(offset-(bufend-bufoffset),origin);
+     fcachedposition:= result;
      bufoffset:= nil;
     end
     else begin
      bufoffset:= bufoffset + offset;
      result:= inherited seek(0,socurrent);
+     fcachedposition:= result;
      if result >= 0 then begin
       result:= result + (bufoffset-bufend);
      end;
@@ -1166,6 +1189,7 @@ begin
    end
    else begin
     result:= inherited seek(offset,origin);
+    fcachedposition:= result;
    end;
    exclude(fstate,tss_eof);
   end;
@@ -1196,6 +1220,9 @@ begin
    result:= inherited read(buffer,count);
    if result > 0 then begin
     exclude(fstate,tss_eof);
+    if fcachedposition >= 0 then begin
+     fcachedposition:= fcachedposition + result;
+    end;
    end;
    goto endlab;
   end

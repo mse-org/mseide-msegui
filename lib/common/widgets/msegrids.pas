@@ -176,7 +176,7 @@ const
  defaultdatacoloptions = [{co_selectedcolor,}co_savestate,co_savevalue,
                           {co_rowfont,co_rowcolor,co_zebracolor,}co_mousescrollrow];
  defaultdatacoloptions1 = [co1_rowfont,co1_rowcolor,co1_zebracolor,
-                           co1_rowreadonly];
+                           co1_rowcoloractive,co1_rowcolorfocused,co1_rowreadonly];
  defaultfixcoltextflags = [tf_ycentered,tf_xcentered];
  defaultstringcoleditoptions = [scoe_exitoncursor,scoe_undoonesc,scoe_autoselect,
                                   scoe_autoselectonfirstclick,scoe_eatreturn];
@@ -209,7 +209,7 @@ type
       gs_isdb); //do not change rowcount
  gridstatesty = set of gridstatety;
  gridstate1ty = (gs1_showcellinvalid,gs1_sortvalid,gs1_rowsortinvalid,
-                                     gs1_sortmoving);
+                                     gs1_sortmoving,gs1_sortchangelock);
  gridstates1ty = set of gridstate1ty;
 
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
@@ -776,6 +776,7 @@ type
    procedure readpipe(const text: string; 
                       const processeditchars: boolean = false;
                       const maxchars: integer = 0); overload;
+   procedure fillcol(const value: msestring);
    property items[aindex: integer]: msestring read getitems write setitems; default;
    property checked[index: integer]: boolean read getchecked write setchecked;
 
@@ -2074,6 +2075,7 @@ type
    function isautoappend: boolean; //true if last row is auto appended
    procedure removeappendedrow;
    function checkreautoappend: boolean; //true if row appended
+   function hasdata: boolean;
 
    function gridprop(const coord: gridcoordty): tgridprop;  //nil if none
    function isdatacell(const coord: gridcoordty): boolean;
@@ -6639,6 +6641,11 @@ begin
  end;
 end;
 
+procedure tcustomstringcol.fillcol(const value: msestring);
+begin
+ datalist.fill(datalist.count,value);
+end;
+
 { tfixcol }
 
 constructor tfixcol.create(const agrid: tcustomgrid; 
@@ -9291,22 +9298,28 @@ procedure tcustomgrid.dostatread(const reader: tstatreader);
 var
  po1: gridcoordty;
 begin
- if reader.canstate then begin
-  fpropcolwidthref:= reader.readinteger('propcolwidthref',fpropcolwidthref,0);
- end;
- fdatacols.dostatread(reader);
- if (og_savestate in foptionsgrid) and reader.canstate then begin
-  po1.col:= reader.readinteger('col',ffocusedcell.col);
-  if not (gs_isdb in fstate) then begin
-   po1.row:= reader.readinteger('row',ffocusedcell.row);
-  end
-  else begin
-   po1.row:= ffocusedcell.row;
+ beginupdate;
+ try
+  if reader.canstate then begin
+   fpropcolwidthref:= reader.readinteger('propcolwidthref',fpropcolwidthref,0);
   end;
-  if og_rowsizing in foptionsgrid then begin
-   datarowheight:= reader.readinteger('rowheight',datarowheight);
+  fdatacols.dostatread(reader);
+  if (og_savestate in foptionsgrid) and reader.canstate then begin
+   sorted:= reader.readboolean('sorted',sorted);
+   po1.col:= reader.readinteger('col',ffocusedcell.col);
+   if not (gs_isdb in fstate) then begin
+    po1.row:= reader.readinteger('row',ffocusedcell.row);
+   end
+   else begin
+    po1.row:= ffocusedcell.row;
+   end;
+   if og_rowsizing in foptionsgrid then begin
+    datarowheight:= reader.readinteger('rowheight',datarowheight);
+   end;
+   focuscell(po1);
   end;
-  focuscell(po1);
+ finally
+  endupdate;
  end;
 end;
 
@@ -9327,6 +9340,7 @@ begin
  fdatacols.dostatwrite(writer);
  row:= int1;
  if (og_savestate in foptionsgrid) and writer.canstate then begin
+  writer.writeboolean('sorted',sorted);
   writer.writeinteger('col',ffocusedcell.col);
   if not (gs_isdb in fstate) then begin
    writer.writeinteger('row',ffocusedcell.row);
@@ -10660,7 +10674,7 @@ function tcustomgrid.focuscell(cell: gridcoordty;
 var
  focuscount: integer;
  coord1,coord2: gridcoordty;
- bo1: boolean;
+ bo1,bo2: boolean;
  int1: integer;
  rect1: rectty;
  nullchecklocked: boolean;
@@ -10804,7 +10818,16 @@ begin     //focuscell
      if fdatacols.fnewrowcol >= 0 then begin
       cell.col:= fdatacols.fnewrowcol;
      end;
-     insertrow(frowcount);
+     bo2:= gs1_sortchangelock in  fstate1;
+     include(fstate1,gs1_sortchangelock);
+     try
+      insertrow(frowcount);
+      include(fstate1,gs1_rowsortinvalid);
+     finally
+      if not bo2 then begin
+       exclude(fstate1,gs1_sortchangelock);
+      end;
+     end;
     end
     else begin
      factiverow:= coord1.row;
@@ -10939,6 +10962,11 @@ begin
  ((frowcount = 1) and (og_autofirstrow in foptionsgrid) or
       (foptionsgrid * [og_autoappend,og_appendempty] = [og_autoappend])
      ) and fdatacols.rowempty(frowcount - 1);
+end;
+
+function tcustomgrid.hasdata: boolean;
+begin
+ result:= (rowcount > 1) or (rowcount = 1) and not isautoappend;
 end;
 
 function tcustomgrid.gridprop(const coord: gridcoordty): tgridprop;  //nil if none
@@ -13023,6 +13051,7 @@ var
  cellbefore: gridcoordty;
  countbefore: integer;
  defocused: boolean;
+ bo1: boolean;
 begin
  if acount > 0 then begin
   if (aindex >= 0) and (of_deletetree in foptionsfold) then begin
@@ -13067,7 +13096,15 @@ begin
      if of_shiftdeltoparent in foptionsfold then begin
       fdatacols.frowstate.movegrouptoparent(aindex,acount);
      end;
-     fdatacols.deleterow(aindex,acount);
+     bo1:= gs1_sortchangelock in fstate1;
+     include(fstate1,gs1_sortchangelock);
+     try
+      fdatacols.deleterow(aindex,acount);
+     finally
+      if not bo1 then begin
+       exclude(fstate1,gs1_sortchangelock);
+      end;
+     end;
      ffixcols.deleterow(aindex,acount);
      dec(frowcount,acount);
      dorowcountchanged(frowcount+acount,frowcount);
@@ -13796,6 +13833,22 @@ var
  sf: gridsorteventty;
  bo1: boolean;
  int1: integer;
+
+ function check1(const a,b: integer): integer;
+ begin
+  result:= 0;
+  sf(self,a,b,result);
+ end; //check1
+ 
+ function check(const a,b: integer): integer;
+ begin
+  result:= 0;
+  sf(self,a,b,result);
+  if result = 0 then begin
+   result:= a-b;
+  end;
+ end; //check
+
 begin
  exclude(fstate1,gs1_rowsortinvalid);
  if not (gs_isdb in fstate) then begin
@@ -13808,50 +13861,52 @@ begin
   if frowcount > 1 then begin
    bo1:= true;
    if row > 0 then begin
-    int1:= 0;
-    sf(self,row-1,row,int1);
-    bo1:= int1 <= 0;
+    bo1:= check1(row-1,row) <= 0;
    end;
    if bo1 and (row < rowhigh) then begin
-    int1:= 0;
-    sf(self,row+1,row,int1);
-    bo1:= int1 >= 0;
+    bo1:= check1(row+1,row) >= 0;
    end;
-   if not bo1 then begin
-                    //position changed
+   if not bo1 then begin   //position changed
     lo:= 0;
     hi:= rowhigh;    
     int1:= 0;
-    sf(self,hi,row,int1);
-    if int1 < 0 then begin   //last?
+    if check(hi,row) < 0 then begin   //last?
      lo:= hi;
     end
     else begin
-     repeat
-      pivot:= (lo+hi) div 2;
-      if pivot = row then begin
-       dec(pivot);
-       if pivot < 0 then begin
-        pivot:= 2;
+     int1:= 0;
+     if check(lo,row) > 0 then begin   //first?
+      hi:= lo;
+     end
+     else begin
+      while hi-lo > 1 do begin
+       pivot:= (lo+hi) div 2;
+       if pivot = row then begin
+        if row - lo > hi-row then begin
+         dec(pivot);
+        end
+        else begin
+         inc(pivot);
+        end;
+       end;
+       if check(row,pivot) <= 0 then begin
+        hi:= pivot;
+       end
+       else begin
+        lo:= pivot;
        end;
       end;
-      int1:= 0;
-      sf(self,row,pivot,int1);
-      if int1 = 0 then begin
-       int1:= row-pivot;
-      end;
-      if int1 <= 0 then begin
-       hi:= pivot;
-      end;
-      if int1 > 0 then begin
-       lo:= pivot;
-      end;
-     until hi-lo <= 1;
+     end;
     end;
     bo1:= gs1_sortmoving in fstate1;
     include(fstate1,gs1_sortmoving);
-    try
-     moverow(row,lo);
+    try 
+     if row < lo then begin
+      moverow(row,lo);
+     end
+     else begin
+      moverow(row,hi);
+     end;
      include(fstate1,gs1_sortvalid);
     finally
      if not bo1 then begin
@@ -13921,7 +13976,7 @@ begin
   end;
   if (og_sorted in foptionsgrid) then begin
    if not all and (gs1_sortvalid in fstate1) and 
-                                       (ffocusedcell.row >= 0) then begin
+           (ffocusedcell.row >= 0) then begin
     reorderrow;
    end
    else begin
@@ -13938,10 +13993,12 @@ end;
 
 procedure tcustomgrid.sortinvalid(const acol: integer; const arow: integer);
 begin
- if (acol < 0) or (fdatacols.fsortcol < 0) or (acol = fdatacols.fsortcol) or 
-                          (acol = fdatacols.fsortcoldefault) or 
-          assigned(fonsort) then begin
-  if (arow < 0) or (arow <> ffocusedcell.row) then begin
+ if not (gs1_sortchangelock in fstate1) and
+       ((acol < 0) or (fdatacols.fsortcol < 0) or 
+        (acol = fdatacols.fsortcol) or 
+        (acol = fdatacols.fsortcoldefault) or 
+         assigned(fonsort)) then begin
+  if ((arow < 0) or (arow <> ffocusedcell.row)) then begin
    exclude(fstate1,gs1_sortvalid);
   end
   else begin
@@ -13953,7 +14010,7 @@ end;
 procedure tcustomgrid.checksort;
 begin
  if (fstate1 * [gs1_sortvalid,gs1_rowsortinvalid]<>[gs1_sortvalid]) and 
-                                                   (fupdating = 0) then begin
+            not (gs1_sortchangelock in fstate1) and (fupdating = 0) then begin
   sortchanged(false);
  end;
 end;
@@ -14270,18 +14327,36 @@ end;
 procedure tcustomgrid.appinsrow(index: integer);
 var
  int1,int2: integer;
+ bo1: boolean;
 begin
- if index < 0 then begin
-  index:= 0;
+ if docheckcellvalue then begin
+  int1:= ffocusedcell.row;
+  checksort;
+  index:= index+ffocusedcell.row-int1;
+  if index < 0 then begin
+   index:= 0;
+  end;
+  if index > rowcount then begin
+   index:= rowcount;
+  end;  
+  bo1:= gs1_sortchangelock in fstate1;
+  include(fstate1,gs1_sortchangelock);
+  try
+   insertrow(index);
+   if fdatacols.fnewrowcol < 0 then begin
+    int1:= ffocusedcell.col;
+   end
+   else begin
+    int1:= fdatacols.fnewrowcol;
+   end;
+  finally
+   if not bo1 then begin
+    exclude(fstate1,gs1_sortchangelock);
+   end;
+  end;
+  focuscell(makegridcoord(int1,index));
+  include(fstate1,gs1_rowsortinvalid);
  end;
- insertrow(index);
- if fdatacols.fnewrowcol < 0 then begin
-  int1:= ffocusedcell.col;
- end
- else begin
-  int1:= fdatacols.fnewrowcol;
- end;
- focuscell(makegridcoord(int1,index));
 end;
 
 procedure tcustomgrid.doinsertrow(const sender: tobject);
