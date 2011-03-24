@@ -1599,7 +1599,8 @@ type
    function show(const modal: boolean = false;
             const transientfor: twindow = nil): modalresultty; overload;
    procedure hide;
-   procedure activate(const abringtofront: boolean = true); virtual;
+   procedure activate(const abringtofront: boolean = true;
+                      const aforce: boolean = false); virtual;
                              //show and setfocus
    procedure bringtofront;
    procedure sendtoback;
@@ -2264,7 +2265,7 @@ type
    function idle: boolean; override;
    function modallevel: integer; override;
    
-   procedure beginwait; override;
+   procedure beginwait(const aprocessmessages: boolean = false); override;
    procedure endwait; override;
    function waiting: boolean;
    function waitescaped: boolean; //true if escape pressed while waiting
@@ -6997,8 +6998,9 @@ begin
  if poscha and not (csloading in componentstate) then begin
   poschanged;
  end;
- if bo2 then begin
-  if ownswindow1 and (tws_windowvisible in fwindow.fstate) then begin
+ if ownswindow1 then begin
+  fwindow.fnormalwindowrect:= fwidgetrect;
+  if bo2 and (tws_windowvisible in fwindow.fstate) then begin
    fwindow.checkwindow(windowevent);
   end;
  end;
@@ -11591,7 +11593,8 @@ begin
  result:= self;
 end;
 
-procedure twidget.activate(const abringtofront: boolean = true);
+procedure twidget.activate(const abringtofront: boolean = true;
+                           const aforce: boolean = false);
 begin
  if abringtofront then begin
   window.bringtofront;
@@ -11601,6 +11604,9 @@ begin
  end
  else begin
   show;
+ end;
+ if aforce then begin
+  gui_setwindowfocus(window.winid);
  end;
  if not checkdescendent(window.ffocusedwidget) then begin
   setfocus;
@@ -12539,6 +12545,7 @@ var
 begin
  if (ws_visible in fowner.fwidgetstate) then begin
   if not visible then begin
+   include(fstate,tws_windowvisible);
    checkwindowid;
   {$ifdef mse_debugwindowfocus}
    debugwindow('show ',fwindow.id);
@@ -12549,7 +12556,6 @@ begin
      fwindowstack:= nil; //remove pending    
     end;
    end;
-   include(fstate,tws_windowvisible);
    if not (csdesigning in fowner.ComponentState) then begin
     if (fsyscontainer <> sywi_none) or (fcontainer <> 0) then begin
      if not windowevent then begin
@@ -16504,7 +16510,7 @@ begin
  end;
 end;
 
-procedure tguiapplication.beginwait;
+procedure tguiapplication.beginwait(const aprocessmessages: boolean = false);
 begin
  lock;
  try
@@ -16513,6 +16519,7 @@ begin
   end;
   inc(fwaitcount);
   mouse.shape:= cr_wait;
+  inherited;
  finally
   unlock;
  end;

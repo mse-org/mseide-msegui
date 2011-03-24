@@ -415,7 +415,8 @@ type
   public
    constructor create(aowner: tcomponent; load: boolean); override;
    destructor destroy; override;
-   procedure activate(const abringtofront: boolean = true); override;
+   procedure activate(const abringtofront: boolean = true;
+                               const aforce: boolean = false); override;
    function canfocus: boolean; override;
    procedure dragevent(var info: draginfoty); override;
   published
@@ -1970,7 +1971,8 @@ begin
  result:= inherited canfocus and (fdragdock.mdistate <> mds_minimized);
 end;
 
-procedure tcustomdockform.activate(const abringtofront: boolean = true);
+procedure tcustomdockform.activate(const abringtofront: boolean = true;
+                                        const aforce: boolean = false);
 begin
  if fdragdock.mdistate = mds_minimized then begin
   fdragdock.mdistate:= mds_normal;

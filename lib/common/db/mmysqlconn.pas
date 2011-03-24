@@ -726,6 +726,9 @@ begin
  openconnection(fmysql1);
  FServerInfo := strpas(mysql_get_server_info(FMYSQL1));
  FHostInfo := strpas(mysql_get_host_info(FMYSQL1));
+ if charset <> '' then begin
+  mysql_set_character_set(fmysql1,pchar(charset));
+ end;
 end;
 
 procedure tmysqlconnection.executeparams;

@@ -507,7 +507,7 @@ begin
  else begin
   sourcefo.hidesourcehint;
  end;
- activate(false); //get focus back
+ activate(false,true); //get focus back
 end;
 
 procedure tsourcepage.showprocheaders(const apos: gridcoordty);

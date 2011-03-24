@@ -309,7 +309,7 @@ type
    procedure waitforthread(athread: tmsethread); //does unlock-relock before waiting
    procedure wakeupmainthread;
    procedure langchanged; virtual;
-   procedure beginwait; virtual;
+   procedure beginwait(const aprocessmessages: boolean = false); virtual;
    procedure endwait; virtual;
    procedure idlesleep(const asleepus: integer);
                        //calls unlockall-relockall
@@ -1324,9 +1324,11 @@ begin
  //dummy
 end;
 
-procedure tcustomapplication.beginwait;
+procedure tcustomapplication.beginwait(const aprocessmessages: boolean = false);
 begin
- //dummy
+ if aprocessmessages then begin
+  processmessages;
+ end;
 end;
 
 procedure tcustomapplication.endwait;

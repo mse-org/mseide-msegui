@@ -102,8 +102,9 @@ type
    procedure setisdb;
    procedure updateedittext(const force: boolean);
    function getgridintf: iwidgetgrid;
-   function checkgrid: tdatalist; overload;
-   function checkgrid(var index: integer): tdatalist; overload; 
+   procedure checkgrid;
+   function checkgriddata: tdatalist; overload;
+   function checkgriddata(var index: integer): tdatalist; overload; 
                         //index -1 -> grid.row, nil if no focused row
    procedure internalgetgridvalue(index: integer; out value);
    procedure internalsetgridvalue(index: integer; const Value);
@@ -2013,7 +2014,7 @@ begin
  result:= fgridintf;
 end;
 
-function tcustomdataedit.checkgrid: tdatalist;
+function tcustomdataedit.checkgriddata: tdatalist;
 begin
  if fgridintf = nil then begin
   raise exception.Create('No grid.');
@@ -2024,10 +2025,17 @@ begin
  end;
 end;
 
-function tcustomdataedit.checkgrid(var index: integer): tdatalist;
+procedure tcustomdataedit.checkgrid;
+begin
+ if fgridintf = nil then begin
+  raise exception.Create('No grid.');
+ end;
+end;
+
+function tcustomdataedit.checkgriddata(var index: integer): tdatalist;
                         //index -1 -> grid.row, nil if no focused row
 begin
- result:= checkgrid();
+ result:= checkgriddata();
  if index = -1 then begin
   index:= fgridintf.getcol.grid.row;
  end;
