@@ -734,9 +734,21 @@ end;
 procedure tmysqlconnection.executeparams;
 var
  int1: integer;
+ bo1: boolean;
 begin
- for int1:= 0 to params.count-1 do begin
-  executedirect(params[int1]);
+ bo1:= transaction.active;
+ try
+  for int1:= 0 to params.count-1 do begin
+   executedirect(params[int1]);
+  end;
+  if not bo1 then begin
+   bo1:= true;
+   transaction.commit;
+  end;
+ finally
+  if not bo1 then begin
+   transaction.rollback;
+  end;
  end;
 end;
 
