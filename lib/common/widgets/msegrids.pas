@@ -11015,6 +11015,9 @@ begin
   end
   else begin
    result:= true;
+   if arow = frowcount-1 then begin
+    exclude(fstate1,gs1_rowsortinvalid);
+   end;
    deleterow(frowcount-1);
    include(fstate,gs_emptyrowremoved);
   end;
@@ -11023,7 +11026,7 @@ begin
   if not (gs_isdb in fstate) and 
     (gs1_rowinserted in fstate1) and (og_noinsertempty in foptionsgrid) and
     (arow >= 0) and fdatacols.rowempty(arow) then begin
-   exclude(fstate1,gs1_rowinserted);
+   fstate1:= fstate1-[gs1_rowinserted,gs1_rowsortinvalid];
    result:= true;
    deleterow(arow);
    exit;
