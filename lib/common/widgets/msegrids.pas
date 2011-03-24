@@ -93,7 +93,7 @@ type
                  og_rowsizing,og_rowmoving,og_keyrowmoving,
                  og_rowinserting,og_rowdeleting,og_selectedrowsdeleting,
                  og_focuscellonenter,og_containerfocusbackonesc,
-                 og_autofirstrow,og_autoappend,og_appendempty,
+                 og_autofirstrow,og_autoappend,og_appendempty,og_noinsertempty,
                  og_savestate,og_nosaveremoveappendedrow,og_sorted,
                  og_folded,og_colmerged,og_rowheight,
                  og_colchangeontabkey,og_colchangeonreturnkey,
@@ -209,7 +209,7 @@ type
       gs_isdb); //do not change rowcount
  gridstatesty = set of gridstatety;
  gridstate1ty = (gs1_showcellinvalid,gs1_sortvalid,gs1_rowsortinvalid,
-                                     gs1_sortmoving,gs1_sortchangelock);
+                 gs1_sortmoving,gs1_sortchangelock,gs1_rowinserted);
  gridstates1ty = set of gridstate1ty;
 
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
@@ -2005,6 +2005,8 @@ type
    procedure focusrow(const arow: integer; const action: focuscellactionty;
                       const noreadonly: boolean; 
                       const selectmode: selectcellmodety = scm_cell);
+   function doremoveappinsrow(const arow: integer): boolean;
+                    //true if removed
 
    
     //idragcontroller
@@ -10672,6 +10674,33 @@ function tcustomgrid.focuscell(cell: gridcoordty;
  end; //doselectaction()
 
 var
+ sortchecked: boolean;
+ 
+ procedure dosortcheck;
+ var
+  int1: integer;
+ begin
+  if not sortchecked and not isautoappend then begin
+   sortchecked:= true;
+   int1:= cell.row - ffocusedcell.row;
+   if (int1 <> 0) or (selectaction = fca_focusinforce) then begin
+    checksort;
+    if cell.row >= 0 then begin
+     if (cell.row >= 0) and (ffocusedcell.row >= 0) then begin
+      cell.row:= ffocusedcell.row + int1;
+      if cell.row < 0 then begin
+       cell.row:= 0;
+      end;
+      if cell.row > frowcount then begin
+       cell.row:= frowcount;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end; //dosortcheck
+
+var
  focuscount: integer;
  coord1,coord2: gridcoordty;
  bo1,bo2: boolean;
@@ -10794,7 +10823,7 @@ begin     //focuscell
    else begin
     coord1:= invalidcell;
    end;
- 
+{ -> after removeappenderdrow 
    int1:= cell.row - ffocusedcell.row;
    if (int1 <> 0) or (selectaction = fca_focusinforce) then begin
     checksort;
@@ -10810,8 +10839,10 @@ begin     //focuscell
      end;
     end;
    end;
-    
+}   
+   sortchecked:= false;
    if isappend(cell.row) then begin
+    dosortcheck;
     if (frowcount = 0) or (og_appendempty in foptionsgrid) or
             not fdatacols.rowempty(frowcount-1) then begin
      cell.row:= frowcount;
@@ -10846,10 +10877,13 @@ begin     //focuscell
    end;
    cellbefore:= ffocusedcell; 
    if (selectaction = fca_exitgrid) or ((coord1.row >= 0) and
-          (coord1.row >= frowcount-1) and (cell.row < coord1.row)) then begin
+          ((coord1.row >= frowcount-1) and (cell.row < coord1.row) or
+           (cell.row < frowcount-1))) then begin
     int1:= ffocusedcell.row;
     ffocusedcell.row:= invalidaxis;
-    removeappendedrow;
+    if doremoveappinsrow(int1) and (cell.row > int1) then begin
+     dec(cell.row);
+    end;
     if int1 = frowcount then begin
      dec(int1);
     end;
@@ -10858,6 +10892,8 @@ begin     //focuscell
      ffocusedcell.row:= int1;
     end;
    end;
+   dosortcheck;
+   
    if not (selectaction in [fca_exitgrid,fca_entergrid]) then begin
     ffocusedcell:= invalidcell;
    end;
@@ -10957,11 +10993,49 @@ end;
 
 function tcustomgrid.isautoappend: boolean; 
       //true if last row is auto appended
+      //todo: simplify, use gs1_rowinserted
 begin
  result:= not (gs_isdb in fstate) and (frowcount > 0) and 
  ((frowcount = 1) and (og_autofirstrow in foptionsgrid) or
       (foptionsgrid * [og_autoappend,og_appendempty] = [og_autoappend])
      ) and fdatacols.rowempty(frowcount - 1);
+end;
+
+function tcustomgrid.doremoveappinsrow(const arow: integer): boolean;
+begin
+ result:= false;
+ if isautoappend then begin
+  if row >= 0 then begin
+   if row = 0 then begin
+    row:= invalidaxis;
+   end
+   else begin
+    row:= arow-1;
+   end;
+  end
+  else begin
+   result:= true;
+   deleterow(frowcount-1);
+   include(fstate,gs_emptyrowremoved);
+  end;
+ end
+ else begin
+  if not (gs_isdb in fstate) and 
+    (gs1_rowinserted in fstate1) and (og_noinsertempty in foptionsgrid) and
+    (arow >= 0) and fdatacols.rowempty(arow) then begin
+   exclude(fstate1,gs1_rowinserted);
+   result:= true;
+   deleterow(arow);
+   exit;
+  end;
+ end;
+ exclude(fstate1,gs1_rowinserted);
+end;
+
+procedure tcustomgrid.removeappendedrow;
+begin
+ docheckcellvalue;
+ doremoveappinsrow(row);
 end;
 
 function tcustomgrid.hasdata: boolean;
@@ -13704,25 +13778,6 @@ begin
  end;
 end;
 
-procedure tcustomgrid.removeappendedrow;
-begin
- docheckcellvalue;
- if isautoappend then begin
-  if row >= 0 then begin
-   if row = 0 then begin
-    row:= invalidaxis;
-   end
-   else begin
-    row:= row-1;
-   end;
-  end
-  else begin
-   deleterow(frowcount-1);
-   include(fstate,gs_emptyrowremoved);
-  end;
- end;
-end;
-
 function tcustomgrid.internalsort(sortfunc: gridsorteventty;
   var refindex: integer): boolean;
           //true if rows moved, refindex is new indexpos
@@ -14355,7 +14410,8 @@ begin
    end;
   end;
   focuscell(makegridcoord(int1,index));
-  include(fstate1,gs1_rowsortinvalid);
+  fstate1:= fstate1 + [gs1_rowsortinvalid,gs1_rowinserted];
+//  include(fstate1,gs1_rowsortinvalid);
  end;
 end;
 
