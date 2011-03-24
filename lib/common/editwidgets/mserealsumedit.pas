@@ -169,7 +169,7 @@ function trealsumedit.getsumlevel(index: integer): integer;
 var
  list: tdatalist;
 begin
- list:= checkgrid(index);
+ list:= checkgriddata(index);
  if list <> nil then begin
   result:= tgridrealsumlist(list).sumlevel[index];
  end
@@ -182,7 +182,7 @@ procedure trealsumedit.setsumlevel(index: integer; const avalue: integer);
 var
  list: tdatalist;
 begin
- list:= checkgrid(index);
+ list:= checkgriddata(index);
  if list <> nil then begin
   tgridrealsumlist(list).sumlevel[index]:= avalue;
   fgridintf.datachange(index);

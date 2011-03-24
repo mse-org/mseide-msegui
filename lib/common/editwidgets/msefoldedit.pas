@@ -706,7 +706,7 @@ function tfoldedit.getgridimnr(index: integer): integer;
 var
  list: tdatalist;
 begin
- list:= checkgrid(index);
+ list:= checkgriddata(index);
  if list <> nil then begin
   result:= tmsestringintdatalist(list).itemsb[index];
  end
@@ -719,7 +719,7 @@ procedure tfoldedit.setgridimnr(index: integer; const avalue: integer);
 var
  list: tdatalist;
 begin
- list:= checkgrid(index);
+ list:= checkgriddata(index);
  if list <> nil then begin
   tmsestringintdatalist(list).itemsb[index]:= avalue;
  end;
