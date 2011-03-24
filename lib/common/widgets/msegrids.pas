@@ -2367,9 +2367,9 @@ type
    procedure setitems(const cell: gridcoordty; const Value: msestring);
    function getcaretwidth: integer;
    procedure setcaretwidth(const value: integer);
-   procedure setupeditor(const acell: gridcoordty; const focusin: boolean);
   protected
    feditor: tinplaceedit;
+   procedure setupeditor(const acell: gridcoordty; const focusin: boolean); virtual;
    function canclose(const newfocus: twidget): boolean; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure checkcellvalue(var accept: boolean); override;

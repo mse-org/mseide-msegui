@@ -55,8 +55,9 @@ type
                    oed_nofilteredit,oed_nofilterminedit,
                    oed_nofiltermaxedit,oed_nofindedit,
                    oed_nonullset, //use TField.DefaultExpression for textedit
-                   oed_nullset);  //don't use TField.DefaultExpression for
+                   oed_nullset,  //don't use TField.DefaultExpression for
                                   //empty edit value
+                   oed_limitcharlen);
  optionseditdbty = set of optioneditdbty;
 
  griddatalinkoptionty = (gdo_propscrollbar,gdo_thumbtrack,
@@ -209,6 +210,7 @@ type
   procedure updatereadonlystate;
   procedure getfieldtypes(var afieldtypes: fieldtypesty); //[] = all
   procedure setisdb;
+  procedure setmaxlength(const avalue: integer);
  end;
 
  tgriddatalink = class;
@@ -249,6 +251,8 @@ type
    procedure focuscontrol(afield: tfieldref); override;
    procedure updatedata; override;
    procedure disabledstatechange; override;
+   procedure fieldchanged; override;
+   procedure bindingchanged;
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
     //iobjectlink
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
@@ -310,7 +314,7 @@ type
    procedure setdatalink(const adatalink: tstringeditwidgetdatalink);
   protected   
    procedure defineproperties(filer: tfiler); override;
-   procedure editnotification(var info: editnotificationinfoty); override;
+//   procedure editnotification(var info: editnotificationinfoty); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
    procedure griddatasourcechanged; override;
    function getgriddatasource: tdatasource;
@@ -598,6 +602,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
+   procedure setmaxlength(const avalue: integer);
   //ireccontrol
    procedure recchanged;                          
   public
@@ -629,6 +634,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
+   procedure setmaxlength(const avalue: integer);
   //ireccontrol
    procedure recchanged;
   public
@@ -662,6 +668,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
+   procedure setmaxlength(const avalue: integer);
   //ireccontrol
    procedure recchanged;
   public
@@ -720,6 +727,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
+   procedure setmaxlength(const avalue: integer);
   //ireccontrol
    procedure recchanged;
   public
@@ -823,6 +831,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
+   procedure setmaxlength(const avalue: integer);
   //ireccontrol
    procedure recchanged;
   public
@@ -853,6 +862,7 @@ type
    function getgriddatasource: tdatasource;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
+   procedure setmaxlength(const avalue: integer);
   //ireccontrol
    procedure recchanged;
   public
@@ -1534,6 +1544,7 @@ type
  tdbstringcol = class(tcustomstringcol,idbeditfieldlink,idbeditinfo)
   private
    fdatalink: tstringcoldatalink;
+   fmaxlength: integer;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
   //idbeditinfo
@@ -1563,6 +1574,7 @@ type
    procedure fieldtovalue;
    procedure setnullvalue;
    procedure updatereadonlystate;
+   procedure setmaxlength(const avalue: integer);
   public
    constructor create(const agrid: tcustomgrid; 
                          const aowner: tgridarrayprop); override;
@@ -1682,11 +1694,12 @@ type
    function getfixcols: tdbstringfixcols;
    procedure setfixcols(const avalue: tdbstringfixcols);
   protected
+   procedure setupeditor(const acell: gridcoordty; const focusin: boolean); override;
    function getdbindicatorcol: integer;
    procedure setselected(const cell: gridcoordty;
                                        const avalue: boolean); override;
    procedure updatelayout; override;
-   procedure editnotification(var info: editnotificationinfoty); override;
+//   procedure editnotification(var info: editnotificationinfoty); override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
    procedure doasyncevent(var atag: integer); override;
    procedure internalcreateframe; override;
@@ -2876,6 +2889,34 @@ begin
  end;
 end;
 
+procedure tcustomeditwidgetdatalink.bindingchanged;
+begin
+ if active and (field <> nil) and isstringfield{
+                    (field.datatype in [ftstring,ftfixedchar])} then begin
+  if ismsestring then begin
+   fmaxlength:= tmsestringfield(field).characterlength;
+  end
+  else begin
+   fmaxlength:= field.size;
+  end;
+  if fmaxlength < 0 then begin
+   fmaxlength:= 0;
+  end;
+ end
+ else begin
+  fmaxlength:= 0;
+ end;
+
+ if oed_limitcharlen in foptions then begin
+  if fmaxlength = 0 then begin
+   fintf.setmaxlength(-1);
+  end
+  else begin
+   fintf.setmaxlength(fmaxlength);
+  end;
+ end;
+end;
+
 procedure tcustomeditwidgetdatalink.activechanged;
 begin
  if not active then begin
@@ -2890,16 +2931,7 @@ begin
    raise
   end;
  end;
- if active and (field <> nil) and 
-                    (field.datatype in [ftstring,ftfixedchar]) then begin
-  fmaxlength:= 0;
-  if fmaxlength < 0 then begin
-   fmaxlength:= 0;
-  end;
- end
- else begin
-  fmaxlength:= 0;
- end;
+ bindingchanged;
 end;
 
 procedure tcustomeditwidgetdatalink.disabledstatechange;
@@ -3146,6 +3178,12 @@ begin
  end;
 end;
 
+procedure tcustomeditwidgetdatalink.fieldchanged;
+begin
+ bindingchanged;
+ inherited;
+end;
+
 { tdbstringedit }
 
 constructor tdbstringedit.create(aowner: tcomponent);
@@ -3236,6 +3274,8 @@ begin
  fdatalink.fixupproperties(filer);  //move values to datalink
 end;
 
+ { repaced by oed_limitcharlen
+
 procedure tdbstringedit.editnotification(var info: editnotificationinfoty);
 var
  int1: integer;
@@ -3247,6 +3287,7 @@ begin
   end;
  end;
 end;
+ }
 
 procedure tdbstringedit.recchanged;
 begin
@@ -3907,6 +3948,11 @@ begin
  inherited;
 end;
 
+procedure tdbbooleanedit.setmaxlength(const avalue: integer);
+begin
+ //dummy
+end;
+
 { tdbdataicon }
 
 constructor tdbdataicon.create(aowner: tcomponent);
@@ -4008,6 +4054,11 @@ begin
  inherited;
 end;
 
+procedure tdbdataicon.setmaxlength(const avalue: integer);
+begin
+ //dummy
+end;
+
 { tdbdatabutton }
 
 constructor tdbdatabutton.create(aowner: tcomponent);
@@ -4107,6 +4158,11 @@ procedure tdbdatabutton.modified;
 begin
  fdatalink.modified;
  inherited;
+end;
+
+procedure tdbdatabutton.setmaxlength(const avalue: integer);
+begin
+ //dummy
 end;
 
 { tdbbooleaneditradio }
@@ -4223,6 +4279,11 @@ end;
 procedure tdbbooleaneditradio.recchanged;
 begin
  fdatalink.recordchanged(nil);
+end;
+
+procedure tdbbooleaneditradio.setmaxlength(const avalue: integer);
+begin
+ //dummy
 end;
 
 { tdbrealedit }
@@ -4554,6 +4615,11 @@ begin
  inherited;
 end;
 
+procedure tdbslider.setmaxlength(const avalue: integer);
+begin
+ //dummy
+end;
+
 { tdbprogressbar }
 
 constructor tdbprogressbar.create(aowner: tcomponent);
@@ -4645,6 +4711,11 @@ end;
 procedure tdbprogressbar.griddatasourcechanged;
 begin
  fdatalink.griddatasourcechanged;
+end;
+
+procedure tdbprogressbar.setmaxlength(const avalue: integer);
+begin
+ //dummy
 end;
 
 { tdbdatetimeedit }
@@ -7812,6 +7883,11 @@ begin
  result:= nil;
 end;
 
+procedure tdbstringcol.setmaxlength(const avalue: integer);
+begin
+ fmaxlength:= avalue;
+end;
+
 { tdropdowndbstringcol }
 
 { tdbstringcols }
@@ -8341,17 +8417,18 @@ begin
  fdatalink.beforefocuscell(cell,selectaction);
 end;
 
+{ replaced by oed_limitcharlen
 procedure tcustomdbstringgrid.editnotification(var info: editnotificationinfoty);
 var
  int1: integer;
 begin
  inherited;
- if isdatacell(ffocusedcell) and 
+ if isdatacell(ffocusedcell) and (info.action = ea_textedited) and
    datacols[ffocusedcell.col].fdatalink.cuttext(feditor.text,int1) then begin
   feditor.text:= copy(feditor.text,1,int1);
  end;
 end;
-
+}
 function tcustomdbstringgrid.focuscell(cell: gridcoordty;
                selectaction: focuscellactionty = fca_focusin;
                const selectmode: selectcellmodety = scm_cell;
@@ -8401,6 +8478,22 @@ procedure tcustomdbstringgrid.setselected(const cell: gridcoordty;
                const avalue: boolean);
 begin
  fdatalink.setselected(cell,avalue);
+end;
+
+procedure tcustomdbstringgrid.setupeditor(const acell: gridcoordty;
+               const focusin: boolean);
+begin
+ if acell.col >= 0 then begin
+  with tdbstringcol(tdatacols1(fdatacols).fitems[acell.col]) do begin
+   if (fmaxlength = 0){or not (oed_limitcharlen in fdatalink.foptions)} then begin
+    feditor.maxlength:= -1;
+   end
+   else begin
+    feditor.maxlength:= fmaxlength;
+   end;
+  end;
+ end;
+ inherited;
 end;
 
 { tlbdropdowncol }

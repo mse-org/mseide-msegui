@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -317,7 +317,6 @@ type
    fcursorreadonly: cursorshapety;
    function getmaxlength: integer;
    function getpasswordchar: msechar;
-   procedure setmaxlength(const Value: integer);
    procedure setpasswordchar(const Value: msechar);
    function gettext: msestring;
    function getoldtext: msestring;
@@ -332,6 +331,7 @@ type
   protected
    feditor: tinplaceedit;
    foptionsedit: optionseditty;
+   procedure setmaxlength(const avalue: integer);
    procedure updatetextflags; virtual;
    procedure updateflagtext(var avalue: msestring);
    function geteditor: tinplaceedit;
@@ -1326,9 +1326,9 @@ begin
  result:= feditor.passwordchar;
 end;
 
-procedure tcustomedit.setmaxlength(const Value: integer);
+procedure tcustomedit.setmaxlength(const avalue: integer);
 begin
- feditor.maxlength:= value;
+ feditor.maxlength:= avalue;
 end;
 
 procedure tcustomedit.setpasswordchar(const Value: msechar);

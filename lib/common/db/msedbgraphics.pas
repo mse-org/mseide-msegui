@@ -101,6 +101,7 @@ type
    procedure valuetofield;
    procedure updatereadonlystate;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
+   procedure setmaxlength(const avalue: integer);
   //idbgraphicfieldlink
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
@@ -273,6 +274,11 @@ begin
  finally
   fvaluebuffer:= bufferbefore;
  end; 
+end;
+
+procedure tdbdataimage.setmaxlength(const avalue: integer);
+begin
+ //dummy
 end;
 
 { tmsegraphicfield }
