@@ -1634,7 +1634,12 @@ begin
  fcontroller.updatedropdownpos;
  ffiltertext:= afiltertext;
  if aitemindex = -1 then begin
-  locate(ffiltertext);
+  application.beginnoignorewaitevents;
+  try
+   locate(ffiltertext);
+  finally
+   application.endnoignorewaitevents;
+  end;
  end
  else begin
   focuscell(makegridcoord(0,aitemindex));

@@ -2264,7 +2264,9 @@ type
    procedure processmessages; override; //handle with care!
    function idle: boolean; override;
    function modallevel: integer; override;
-   
+
+   procedure beginnoignorewaitevents;   
+   procedure endnoignorewaitevents;   
    procedure beginwait(const aprocessmessages: boolean = false); override;
    procedure endwait; override;
    function waiting: boolean;
@@ -14460,6 +14462,10 @@ var
  info: keyeventinfoty;
  shift: shiftstatesty;
 begin
+{$ifdef mse_debugkey}
+ debugwriteln('*'+getenumname(typeinfo(eventkindty),ord(event.kind))+
+       ' "'+event.fchars+'" '+inttostr(ord(event.fkey)));
+{$endif}
  try 
   fkeyeventinfo:= @info;
   exclude(fstate,aps_clearkeyhistory);
@@ -16534,7 +16540,7 @@ begin
  try
   if fwaitcount > 0 then begin
    dec(fwaitcount);
-   if fwaitcount = 0 then begin
+   if (fwaitcount = 0) and (fnoignorewaitevents = 0) then begin
     with tinternalapplication(self) do begin
      getevents;
      po1:= pointer(eventlist.datapo);
@@ -16928,6 +16934,16 @@ begin
   end; 
   unlock;
  end;
+end;
+
+procedure tguiapplication.beginnoignorewaitevents;
+begin
+ interlockedincrement(fnoignorewaitevents);
+end;
+
+procedure tguiapplication.endnoignorewaitevents;
+begin
+ interlockeddecrement(fnoignorewaitevents);
 end;
 
 { tasyncmessageevent }

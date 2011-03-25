@@ -440,7 +440,8 @@ implementation
 
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist
- {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi;
+ {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi
+ {$ifdef mse_debug},mseformatstr{$endif};
 
  
 var
@@ -4044,11 +4045,18 @@ eventrestart:
      xutf8lookupstring(aic,@xev.xkey,@buffer[1],length(buffer),@akey,@icstatus);
     end;
     chars:= utf8tostring(buffer);
+   {$ifdef mse_debugkey}
+    debugwriteln('*X11keypress window '+hextostr(window,8)+'"'+chars+'" '+
+                                                              inttostr(akey));
+   {$endif}
     case icstatus of
      xlookupnone: exit;
      xlookupchars: akey:= 0;
      xlookupkeysym_: chars:= '';
     end;
+   {$ifdef mse_debugkey}
+    debugwriteln('after icstatuscheck');
+   {$endif}
     shiftstate1:= [];
     key1:= xkeytokey(akey,shiftstate1);
     if key1 = key_escape then begin
@@ -4069,6 +4077,10 @@ eventrestart:
     lasteventtime:= time;
     int1:= keycode;
     xlookupstring(@xev.xkey,nil,0,@akey,nil);
+   {$ifdef mse_debugkey}
+    debugwriteln('*X11keyrelease window '+hextostr(window,8)+
+                                            ' key '+inttostr(akey));
+   {$endif}
     shiftstate1:= [];
     key1:= xkeytokey(akey,shiftstate1);
     key2:= getkeynomod(xev.xkey);
@@ -4079,6 +4091,9 @@ eventrestart:
                                                    (keycode = int1) then begin
       repeatkey:= int1;
       repeatkeytime:= time;
+   {$ifdef mse_debugkey}
+    debugwriteln('eventrestart');
+   {$endif}
       goto eventrestart;  //auto repeat key, don't send
      end;
     end;
