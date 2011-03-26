@@ -65,6 +65,7 @@ type
  griddatalinkoptionsty = set of griddatalinkoptionty;
 
 const
+ defaulteditwidgetdatalinkoptions = [oed_syncedittonavigator];
  defaultdbnavigatoroptions = [dno_confirmdelete,dno_append];
  designdbnavigbuttons = [dbnb_first,dbnb_prior,dbnb_next,dbnb_last];
  editnavigbuttons = [dbnb_insert,dbnb_delete,dbnb_edit];
@@ -278,7 +279,8 @@ type
    procedure updateoptionsedit(var aoptions: optionseditty);
    function cuttext(const atext: msestring; out maxlength: integer): boolean; 
              //true if text too long
-   property options: optionseditdbty read foptions write foptions default [];
+   property options: optionseditdbty read foptions write foptions 
+                         default defaulteditwidgetdatalinkoptions;
    property asnullmsestring: msestring read getasnullmsestring 
                                               write setasnullmsestring;
                    //uses nulltext
@@ -2702,6 +2704,7 @@ end;
 
 constructor tcustomeditwidgetdatalink.create(const intf: idbeditfieldlink);
 begin
+ foptions:= defaulteditwidgetdatalinkoptions;
  fintf:= intf;
  inherited Create;
  visualcontrol:= true;

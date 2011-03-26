@@ -26,7 +26,7 @@ interface
 
 uses 
  sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses,msedatabase,
- msestrings,msedatalist,mseapplication,mseglob;
+ msestrings,msedatalist,mseapplication,mseglob,msetimer;
 
 type 
  TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
@@ -570,14 +570,22 @@ type
  
  tsqlmasterparamsdatalink = class(tmasterparamsdatalink)
   private
+   fquery: tsqlquery;
    frefreshlock: integer;
+//   fdelayus: integer;
+   ftimer: tsimpletimer;
   protected
    procedure domasterdisable; override;
    procedure domasterchange; override;
    procedure CheckBrowseMode; override;
    procedure DataEvent(Event: TDataEvent; Info: Ptrint); override;
+   procedure checkrefresh; //makes pending delayed refresh
+   procedure dorefresh(const sender: tobject);
   public
    constructor create(const aowner: tsqlquery); reintroduce;
+   destructor destroy; override;
+//  published
+//   property delayus: integer read fdelayus write fdelayus default -1;
  end;
  
  isqlclient = interface(idatabaseclient)
@@ -614,6 +622,7 @@ type
    fblobintf: iblobconnection;   
    fbeforeexecute: tmsesqlscript;
    faftercursorclose: tmsesqlscript;
+   fmasterdelayus: integer;
    procedure FreeFldBuffers;
    function GetIndexDefs : TIndexDefs;
 //   function GetStatementType : TStatementType;
@@ -646,6 +655,8 @@ type
    procedure setsqltransactionwrite(const avalue: tsqltransaction);
    procedure resetparsing;
    procedure dorefresh;
+//   procedure setmasterlink(const avalue: tsqlmasterparamsdatalink);
+//   procedure setmasterdelayus(const avalue: integer);
   protected
    FTableName: string;
    FReadOnly: boolean;
@@ -679,12 +690,11 @@ type
    procedure freequery;
    procedure disconnect{(const aexecute: boolean)};
    procedure InternalOpen; override;
-//   function closetransactiononrefresh: boolean; virtual;
-//   function cantransactionrefresh: boolean; virtual;
-//   function recnotransactionrefresh: boolean; virtual;
-//   function refreshtransdatasets: boolean; virtual;
    procedure internalrefresh; override;
    procedure refreshtransaction; override;
+   procedure dobeforeedit; override;
+   procedure dobeforeinsert; override;
+//   procedure dataevent(event: tdataevent; info: ptrint); override;
    
    function  GetCanModify: Boolean; override;
    procedure updatewherepart(var sql_where : string; const afield: tfield);
@@ -747,6 +757,10 @@ type
     property StatementType : TStatementType read fstatementtype 
                            write setstatementtype default stnone;
     Property DataSource : TDatasource Read GetDataSource Write SetDatasource;
+    property masterdelayus: integer read fmasterdelayus
+                                write fmasterdelayus default -1;
+ //   property masterlink: tsqlmasterparamsdatalink read fmasterlink 
+ //                     write setmasterlink;
     property database: tcustomsqlconnection read getdatabase1 write setdatabase1;
     
 //    property SchemaInfo : TSchemaInfo read FSchemaInfo default stNoSchema;
@@ -2484,6 +2498,7 @@ end;
 
 constructor TSQLQuery.Create(AOwner : TComponent);
 begin
+ fmasterdelayus:= -1;
   inherited Create(AOwner);
   FParams := TmseParams.create(self);
   FSQL := TsqlStringList.Create;
@@ -4106,6 +4121,27 @@ begin
   include(fmasterlinkoptions,mdlo_syncdelete);
  end;
 end;
+{
+procedure TSQLQuery.setmasterlink(const avalue: tsqlmasterparamsdatalink);
+begin
+ fmasterlink.assign(avalue);
+end;
+}
+procedure TSQLQuery.dobeforeedit;
+begin
+ if (fmasterlink <> nil) then begin
+  fmasterlink.checkrefresh;
+ end;
+ inherited;
+end;
+
+procedure TSQLQuery.dobeforeinsert;
+begin
+ if (fmasterlink <> nil) then begin
+  fmasterlink.checkrefresh;
+ end;
+ inherited;
+end;
 
 { TSQLCursor }
 
@@ -4557,7 +4593,29 @@ end;
 
 constructor tsqlmasterparamsdatalink.create(const aowner: tsqlquery);
 begin
+ fquery:= aowner;
  inherited create(aowner);
+end;
+
+destructor tsqlmasterparamsdatalink.destroy;
+begin
+ freeandnil(ftimer);
+ inherited;
+end;
+
+procedure tsqlmasterparamsdatalink.dorefresh(const sender: tobject);
+begin
+ if Assigned(Params) and Assigned(DetailDataset) and 
+                                 DetailDataset.Active then begin
+  detaildataset.refresh;
+ end;
+end;
+
+procedure tsqlmasterparamsdatalink.checkrefresh;
+begin
+ if ftimer <> nil then begin
+  ftimer.firependingandstop; //cancel wait
+ end;
 end;
 
 procedure tsqlmasterparamsdatalink.domasterchange;
@@ -4572,7 +4630,20 @@ begin
   end;
   if assigned(params) and assigned(detaildataset) and 
                 (detaildataset.state = dsbrowse) then begin
-   detaildataset.refresh;
+   if fquery.masterdelayus < 0 then begin
+    freeandnil(ftimer);
+    dorefresh(nil);
+   end
+   else begin
+    if ftimer = nil then begin
+     ftimer:= tsimpletimer.create(fquery.masterdelayus,@dorefresh,true,
+                                                               [to_single]);
+    end
+    else begin
+     ftimer.interval:= fquery.masterdelayus; //single shot
+     ftimer.enabled:= true;
+    end;
+   end;
   end;
  end;
 end;
