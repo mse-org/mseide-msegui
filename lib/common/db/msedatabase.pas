@@ -3,7 +3,7 @@
     Copyright (c) 1999-2000 by Michael Van Canneyt, member of the
     Free Pascal development team
     
-    Modified 2007-2009 by Martin Schreiber
+    Modified 2007-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -70,6 +70,7 @@ type
 //    Function GetDataSetCount : Longint;
 //    Function GetDataset(Index : longint) : tmdbdataset;
    ftagpo: pointer;
+   fopencount: integer;
     procedure RegisterDataset (const DS: itransactionclient; const awrite: boolean);
     procedure UnRegisterDataset(const DS: itransactionclient; const awrite: boolean);
     procedure RemoveDataSets;
@@ -102,6 +103,7 @@ type
     property datasets: itransactionclientarty read fdatasets;
     property writedatasets: itransactionclientarty read fdatasets;
    property tagpo: pointer read ftagpo write ftagpo;
+   property opencount: integer read fopencount; //increments on every open
   published
     property Active : boolean read FActive write setactive;
   end;
@@ -778,6 +780,7 @@ end;
 Procedure tmdbtransaction.OpenTrans;
 
 begin
+ inc(fopencount);
   FActive := true;
 end;
 

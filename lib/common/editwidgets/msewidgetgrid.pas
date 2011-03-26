@@ -466,9 +466,16 @@ type
  twriter1 = class(twriter);
  treader1 = class(treader);
 
- tfixcontainer = class(twidget)
+ tcontainer1 = class(twidget)
   private
+  protected
    fgrid: tcustomwidgetgrid;
+   procedure doexit; override;
+   procedure doenter; override;
+  public
+ end;
+ 
+ tfixcontainer = class(tcontainer1)
   protected
    procedure unregisterchildwidget(const child: twidget); override;
    procedure widgetregionchanged(const sender: twidget); override;
@@ -491,15 +498,13 @@ type
    constructor create(aowner: tcustomwidgetgrid); reintroduce;
  end;
  
- tcontainer = class(twidget)
+ tgridcontainer = class(tcontainer1)
   private
    flayoutupdating: integer;
-   fgrid: tcustomwidgetgrid;
   protected
    procedure unregisterchildwidget(const child: twidget); override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure dofocus; override;
-   procedure doexit; override;
   public
    constructor create(aowner: tcustomwidgetgrid); reintroduce;
  end;
@@ -1977,6 +1982,24 @@ begin
  end;
 end;
 
+{ tcontainer }
+
+procedure tcontainer1.doexit;
+begin
+// if fgrid.factivewidget <> nil then begin
+//  fgrid.factivewidget.visible:= false;
+// end;
+ inherited;
+end;
+
+procedure tcontainer1.doenter;
+begin
+ if fgrid.factivewidget <> nil then begin
+  fgrid.factivewidget.visible:= true;
+ end;
+ inherited;
+end;
+
 { tfixcontainer }
 
 constructor tfixcontainer.create(aowner: tcustomwidgetgrid);
@@ -2213,9 +2236,9 @@ begin
  parentwidget:= aowner.fcontainer2;
 end;
 
-{ tcontainer }
+{ tgridcontainer }
 
-constructor tcontainer.create(aowner: tcustomwidgetgrid);
+constructor tgridcontainer.create(aowner: tcustomwidgetgrid);
 begin
  fgrid:= aowner;
  inherited create(nil{aowner});
@@ -2229,13 +2252,13 @@ begin
 // parentwidget:= aowner;
 end;
 
-procedure tcontainer.unregisterchildwidget(const child: twidget);
+procedure tgridcontainer.unregisterchildwidget(const child: twidget);
 begin
  twidgetcols(fgrid.fdatacols).unregisterchildwidget(child);
  inherited;
 end;
 
-procedure tcontainer.widgetregionchanged(const sender: twidget);
+procedure tgridcontainer.widgetregionchanged(const sender: twidget);
 var
  int1,int2,int3,int4: integer;
  po1: pointty;
@@ -2293,7 +2316,7 @@ begin
  end;
 end;
 
-procedure tcontainer.dofocus;
+procedure tgridcontainer.dofocus;
 begin
  if fgrid.factivewidget = nil then begin
   fgrid.setfocus;
@@ -2304,14 +2327,6 @@ begin
  end;
 end;
 
-procedure tcontainer.doexit;
-begin
- if fgrid.factivewidget <> nil then begin
-  fgrid.factivewidget.visible:= false;
- end;
- inherited;
-end;
-
 { tcustomwidgetgrid }
 
 constructor tcustomwidgetgrid.create(aowner: tcomponent);
@@ -2319,7 +2334,7 @@ begin
  fmousefocusedcell.col:= -1;
  inherited;
  fcontainer1:= ttopcontainer.create(self);
- fcontainer2:= tcontainer.create(self);
+ fcontainer2:= tgridcontainer.create(self);
  fcontainer3:= tbottomcontainer.create(self);
  fwidgetdummy:= tdummywidget.create(self);
  fwidgetdummy.setlockedparentwidget(fcontainer2);
@@ -2745,7 +2760,7 @@ var
  str1: string;
  intf1: igridwidget;
 begin
- inc(tcontainer(fcontainer2).flayoutupdating);
+ inc(tgridcontainer(fcontainer2).flayoutupdating);
  try
   ar1:= copy(fwidgets);
   for int1:= 0 to high(fwidgets) do begin
@@ -2831,7 +2846,7 @@ begin
    end;
   end;
  finally
-  dec(tcontainer(fcontainer2).flayoutupdating);
+  dec(tgridcontainer(fcontainer2).flayoutupdating);
  end;
  inherited;
 end;
@@ -3190,6 +3205,9 @@ end;
 procedure tcustomwidgetgrid.doexit;
 begin
  if canclose(nil) then begin
+  if factivewidget <> nil then begin
+   factivewidget.visible:= false;
+  end;
   inherited;
  end;
 end;

@@ -360,17 +360,21 @@ type
     fonbeforerollback: sqltransactioneventty;
     fonafterrollback: sqltransactioneventty;
     foncommiterror: commiterroreventty;
+   fonbeforestop: sqltransactioneventty;
+   fonafterstop: sqltransactioneventty;
     procedure setparams(const avalue: TStringList);
     function getdatabase: tcustomsqlconnection;
     procedure setdatabase1(const avalue: tcustomsqlconnection);
     function docommit(const retaining: boolean): boolean;
    protected
-    fsavepointindex: integer;
+    fsavepointlevel: integer;
     function GetHandle : Pointer; virtual;
     Procedure SetDatabase (Value : tmdatabase); override;
     procedure disconnect(const sender: tsqlquery);
     procedure finalizetransaction; override;
     procedure doendtransaction(const aaction: tcommitrollbackaction);
+    procedure dobeforestop;
+    procedure doafterstop;
    public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
@@ -384,9 +388,11 @@ type
     procedure StartTransaction; override;
     property Handle: Pointer read GetHandle;
     procedure EndTransaction; override;
-    function savepointbegin: msestring;
-    procedure savepointrollback(const aname: msestring);
-    procedure savepointrelease(const aname: msestring);
+    function savepointbegin: integer;
+    procedure savepointrollback(alevel: integer = -1);
+                     //-1 -> toplevel
+    procedure savepointrelease;
+    property savepointlevel: integer read fsavepointlevel;
     property trans: tsqlhandle read ftrans;
    published
     property options: transactionoptionsty read foptions write foptions default [];
@@ -399,6 +405,10 @@ type
                                      write fonbeforestart;
     property onafterstart: sqltransactioneventty read fonafterstart 
                                      write fonafterstart;
+    property onbeforestop: sqltransactioneventty read fonbeforestop 
+                                     write fonbeforestop;
+    property onafterstop: sqltransactioneventty read fonafterstop 
+                                     write fonafterstop;
     property onbeforecommit: sqltransactioneventty read fonbeforecommit
                                      write fonbeforecommit;
     property onaftercommit: sqltransactioneventty read fonaftercommit 
@@ -2259,6 +2269,7 @@ begin
   end;
  end;
  dofinish;
+ fsavepointlevel:= 0;
  result:= true;
 end;
 
@@ -2268,6 +2279,7 @@ var
 begin
  result:= true;
  if active then begin
+  dobeforestop;
   if checkcanevent(self,tmethod(fonbeforecommit)) then begin
    fonbeforecommit(self);
   end;
@@ -2275,6 +2287,7 @@ begin
   if result and checkcanevent(self,tmethod(fonaftercommit)) then begin
    fonaftercommit(self);
   end;
+  doafterstop;
  end;
 end;
 
@@ -2295,6 +2308,7 @@ end;
 procedure TSQLTransaction.Rollback;
 begin
  if active then begin
+  dobeforestop;
   if checkcanevent(self,tmethod(fonbeforerollback)) then begin
    fonbeforerollback(self);
   end;
@@ -2304,10 +2318,12 @@ begin
     tcustomsqlconnection(database).RollBack(FTrans);
    end;
   finally
+   fsavepointlevel:= 0;
    CloseTrans;
    if checkcanevent(self,tmethod(fonafterrollback)) then begin
     fonafterrollback(self);
    end;
+   doafterstop;
   end;
  end;
 end;
@@ -2318,8 +2334,12 @@ begin
   if checkcanevent(self,tmethod(fonbeforerollbackretaining)) then begin
    fonbeforerollback(self);
   end;
-  if not (tao_fake in foptions) then begin
-   tcustomsqlconnection(database).RollBackRetaining(FTrans);
+  try
+   if not (tao_fake in foptions) then begin
+    tcustomsqlconnection(database).RollBackRetaining(FTrans);
+   end;
+  finally
+   fsavepointlevel:= 0;
   end;
 //  if (tao_refreshdatasets in foptions) or
 //       (sco_emulateretaining in 
@@ -2416,24 +2436,48 @@ begin
  end; 
 end;
 
-function TSQLTransaction.savepointbegin: msestring;
+function TSQLTransaction.savepointbegin: integer;
+var
+ mstr1: msestring;
 begin
  active:= true;
- result:= 'sp'+inttostrmse(fsavepointindex);
- inc(fsavepointindex);
- database.executedirect('SAVEPOINT '+result+';',self,nil,false,true); 
+ result:= fsavepointlevel;
+ mstr1:= 'sp'+inttostrmse(result);
+ database.executedirect('SAVEPOINT '+mstr1+';',self,nil,false,true);
+ inc(fsavepointlevel);
 end;
 
-procedure TSQLTransaction.savepointrollback(const aname: msestring);
+procedure TSQLTransaction.savepointrollback(alevel: integer = -1);
 begin
  checkactive;
- database.executedirect('ROLLBACK TO '+aname+';',self,nil,false,true); 
+ if alevel = -1 then begin
+  alevel:= fsavepointlevel;
+ end;
+ database.executedirect('ROLLBACK TO '+'sp'+inttostrmse(alevel)+';',
+                                                    self,nil,false,true); 
+ fsavepointlevel:= alevel;
 end;
 
-procedure TSQLTransaction.savepointrelease(const aname: msestring);
+procedure TSQLTransaction.savepointrelease;
 begin
  checkactive;
- database.executedirect('RELEASE SAVEPOINT '+aname+';',self,nil,false,true); 
+ database.executedirect('RELEASE SAVEPOINT '+'sp'+
+            inttostrmse(fsavepointlevel-1)+';',self,nil,false,true); 
+ dec(fsavepointlevel);
+end;
+
+procedure TSQLTransaction.dobeforestop;
+begin
+ if checkcanevent(self,tmethod(fonbeforestop)) then begin
+  fonbeforestop(self);
+ end;
+end;
+
+procedure TSQLTransaction.doafterstop;
+begin
+ if checkcanevent(self,tmethod(fonafterstop)) then begin
+  fonafterstop(self);
+ end;
 end;
 
 { TSQLQuery }

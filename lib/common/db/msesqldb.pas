@@ -47,9 +47,9 @@ type
 
  tsqldscontroller = class(tdscontroller)
   protected
-   function savepointbegin: msestring; override;
-   procedure savepointrollback(const aname: msestring); override;
-   procedure savepointrelease(const aname: msestring); override;      
+   function savepointbegin: integer; override;
+   procedure savepointrollback(const alevel: integer = -1); override;
+   procedure savepointrelease; override;      
  end;
                               
  tmsesqlquery = class(tsqlquery,imselocate,idscontroller,igetdscontroller,
@@ -60,6 +60,7 @@ type
    fmstate: sqlquerystatesty;
    fonapplyrecupdate: applyrecupdateeventty;
    fafterapplyrecupdate: afterapplyrecupdateeventty;
+   ftransopenref: integer;
    procedure setcontroller(const avalue: tdscontroller);
    procedure setactive1(value : boolean);
    function getactive: boolean;
@@ -533,11 +534,14 @@ end;
 procedure tmsesqlquery.afterapply;
 begin
  if writetransaction <> nil then begin //can be nil in local mode
-  if dso_autocommitret in fcontroller.options then begin
-   writetransaction.commitretaining;
-  end;
-  if dso_autocommit in fcontroller.options then begin
-   writetransaction.commit;
+  if (writetransaction.savepointlevel = 0) and
+              (ftransopenref = writetransaction.opencount) then begin
+   if dso_autocommitret in fcontroller.options then begin
+    writetransaction.commitretaining;
+   end;
+   if dso_autocommit in fcontroller.options then begin
+    writetransaction.commit;
+   end;
   end;
  end;
  if dso_refreshafterapply in fcontroller.options then begin
@@ -549,6 +553,9 @@ procedure tmsesqlquery.checkcanupdate;
 begin
  if not islocal and (transactionwrite = nil) then begin
   checkconnected;
+ end;
+ if writetransaction <> nil then begin
+  ftransopenref:= writetransaction.opencount;
  end;
 end;
 
@@ -1385,9 +1392,9 @@ end;
 
 { tsqldscontroller }
 
-function tsqldscontroller.savepointbegin: msestring;
+function tsqldscontroller.savepointbegin: integer;
 begin
- result:= '';
+ result:= 0;
  with tmsesqlquery(fowner) do begin
   if writetransaction <> nil then begin
    result:= writetransaction.savepointbegin;
@@ -1395,20 +1402,20 @@ begin
  end;
 end;
 
-procedure tsqldscontroller.savepointrollback(const aname: msestring);
+procedure tsqldscontroller.savepointrollback(const alevel: integer = -1);
 begin
  with tmsesqlquery(fowner) do begin
   if writetransaction <> nil then begin
-   writetransaction.savepointrollback(aname);
+   writetransaction.savepointrollback(alevel);
   end;
  end;
 end;
 
-procedure tsqldscontroller.savepointrelease(const aname: msestring);
+procedure tsqldscontroller.savepointrelease;
 begin
  with tmsesqlquery(fowner) do begin
   if writetransaction <> nil then begin
-   writetransaction.savepointrelease(aname);
+   writetransaction.savepointrelease;
   end;
  end;
 end;

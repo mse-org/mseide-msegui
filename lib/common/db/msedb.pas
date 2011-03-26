@@ -1233,9 +1233,10 @@ type
    procedure fielddestroyed(const sender: ifieldcomponent);
    procedure doonidle(var again: boolean);
    procedure dorefresh(const sender: tobject);
-   function savepointbegin: msestring; virtual;
-   procedure savepointrollback(const aname: msestring); virtual;
-   procedure savepointrelease(const aname: msestring); virtual;
+   function savepointbegin: integer; virtual;
+   procedure savepointrollback(const aindex: integer = -1); virtual;
+                           //-1 = toplevel
+   procedure savepointrelease; virtual;
       
   public
    constructor create(const aowner: tdataset; const aintf: idscontroller;
@@ -6557,7 +6558,7 @@ end;
 function tdscontroller.post(const aafterpost: afterposteventty = nil): boolean;
 var
  bo1,bo2: boolean;
- mstr1: msestring;
+ int1: integer;
 begin
  with tdataset(fowner) do begin;
   if state in dseditmodes then begin
@@ -6568,7 +6569,7 @@ begin
     bo1:= dso_postsavepoint in foptions;
     try
      if bo1 then begin
-      mstr1:= savepointbegin;
+      int1:= savepointbegin;
      end;
      result:= true;
      include(fstate,dscs_posting);
@@ -6579,7 +6580,7 @@ begin
        on epostcancel do begin
         if bo1 then begin
          bo1:= false;
-         savepointrollback(mstr1);
+         savepointrollback(int1);
         end;     
         result:= false;
         tdataset(fowner).cancel;
@@ -6587,7 +6588,7 @@ begin
        else begin
         if bo1 then begin
          bo1:= false;
-         savepointrollback(mstr1);
+         savepointrollback(int1);
         end;     
         raise;
        end;
@@ -6608,15 +6609,15 @@ begin
      if bo1 then begin
       bo1:= false;
       if result then begin
-       savepointrelease(mstr1);
+       savepointrelease;
       end
       else begin
-       savepointrollback(mstr1);
+       savepointrollback(int1);
       end;
      end;     
     except
      if bo1 then begin
-      savepointrollback(mstr1);
+      savepointrollback;
      end;     
      raise;
     end;
@@ -6871,18 +6872,18 @@ begin
  raise exception.create('Savepoints not supported.');
 end;
 
-function tdscontroller.savepointbegin: msestring;
+function tdscontroller.savepointbegin: integer;
 begin
- result:= '';
+ result:= -1;
  nosavepoint;
 end;
 
-procedure tdscontroller.savepointrollback(const aname: msestring);
+procedure tdscontroller.savepointrollback(const aindex: integer);
 begin
  nosavepoint;
 end;
 
-procedure tdscontroller.savepointrelease(const aname: msestring);
+procedure tdscontroller.savepointrelease;
 begin
  nosavepoint;
 end;
