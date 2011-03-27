@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2011-03-26
+ tfieldparamlink.datafield -> fieldname.
 2011-03-13
  tskincontroller.toolbar_* -> toolar_horz_*, toolbar_vert_*.
 2011-03-12

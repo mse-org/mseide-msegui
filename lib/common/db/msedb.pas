@@ -1383,23 +1383,25 @@ type
  tfieldfieldlink = class(tfieldlink,idbeditinfo)
   private
    fsourcedatalink: tfielddatalink;
-   function getdatafield: string;
-   procedure setdatafield(const avalue: string);
+   function getfieldname: string;
+   procedure setfieldname(const avalue: string);
    function getdatasource: tdatasource; overload;
    function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
+   procedure readdatafield(reader: treader);
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
   protected
    procedure updatedata(const afield: tfield); override;
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function sourcefield: tfield;
   published
-   property datafield: string read getdatafield 
-                             write setdatafield;
+   property fieldname: string read getfieldname 
+                             write setfieldname;
    property datasource: tdatasource read getdatasource write setdatasource;
  end;
  
@@ -6989,12 +6991,12 @@ begin
  inherited;
 end;
 
-function tfieldfieldlink.getdatafield: string;
+function tfieldfieldlink.getfieldname: string;
 begin
  result:= fsourcedatalink.fieldname;
 end;
 
-procedure tfieldfieldlink.setdatafield(const avalue: string);
+procedure tfieldfieldlink.setfieldname(const avalue: string);
 begin
  fsourcedatalink.fieldname:= avalue;
 end;
@@ -7041,6 +7043,17 @@ begin
   field.value:= fsourcedatalink.field.value;
  end;
  inherited;
+end;
+
+procedure tfieldfieldlink.readdatafield(reader: treader);
+begin
+ fieldname:= reader.readstring;
+end;
+
+procedure tfieldfieldlink.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('datafield',@readdatafield,nil,false);
 end;
 
 { ttimestampfieldlink }

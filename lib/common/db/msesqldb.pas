@@ -12,7 +12,7 @@ unit msesqldb;
 interface
 uses
  classes,db,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseglob,
- msedatabase,sysutils,msetimer,msestrings;
+ msedatabase,sysutils,msetimer,msestrings,msearrayprops;
   
 type
  tmsesqltransaction = class(tsqltransaction)
@@ -190,6 +190,34 @@ const
  defaultfieldparamlinkoptions = [fplo_autorefresh];
  
 type  
+ tslaveparam = class(townedpersistent,idbeditinfo,idbparaminfo)
+  private
+   fdatalink: tfielddatalink;
+   fparamname: string;
+   function getdatasource: tdatasource;
+   procedure setdatasource(const avalue: tdatasource);
+   function getfieldname: string;
+   procedure setfieldname(const avalue: string);
+    //idbeditinfo
+   function getdatasource(const aindex: integer): tdatasource;
+   procedure getfieldtypes(out apropertynames: stringarty;
+                          out afieldtypes: fieldtypesarty);
+    //idbparaminfo
+   function getdestdataset: tsqlquery;
+  protected
+  public
+   constructor create(aowner: tobject); override;
+   destructor destroy; 
+  published
+   property datasource: tdatasource read getdatasource write setdatasource;
+   property fieldname: string read getfieldname write setfieldname;
+   property paramname: string read fparamname write fparamname;
+ end;
+ 
+ tslaveparams = class(townedpersistentarrayprop)
+  constructor create(const aowner: tfieldparamlink);
+ end;
+ 
  tfieldparamlink = class(tmsecomponent,idbeditinfo,idbparaminfo)
   private
    fsourcedatalink: tparamsourcedatalink;
@@ -208,8 +236,7 @@ type
    fonupdatemasterinsert: masterdataseteventty;
    fonupdateslaveedit: slavedataseteventty;
    fonupdateslaveinsert: slavedataseteventty;
-   function getdatafield: string;
-   procedure setdatafield(const avalue: string);
+   fslaveparams: tslaveparams;
    function getdatasource: tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
    function getvisualcontrol: boolean;
@@ -217,8 +244,13 @@ type
    function getdestdataset: tsqlquery;
    procedure setdestdataset(const avalue: tsqlquery);
    procedure setdelayus(const avalue: integer);
+   procedure setslaveparams(const avalue: tslaveparams);
+   function getfieldname: string;
+   procedure setfieldname(const avalue: string);
+   procedure readdatafield(reader: treader);
   protected
    procedure loaded; override;
+   procedure defineproperties(filer: tfiler); override;
   //idbeditinfo
    function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out propertynames: stringarty;
@@ -228,15 +260,16 @@ type
                                 operation: toperation); override;
    function truedelayus: integer;
    procedure checkrefresh;
+   function param(const aname: string): tparam;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function param: tparam;
+   function param: tparam; overload;
    function field: tfield;
    procedure delayoff;
    procedure delayon;
   published
-   property datafield: string read getdatafield write setdatafield;
+   property fieldname: string read getfieldname write setfieldname;
    property datasource: tdatasource read getdatasource write setdatasource;
    property visualcontrol: boolean read getvisualcontrol 
                     write setvisualcontrol default false;
@@ -246,6 +279,8 @@ type
                 //-1 -> off, 0 -> on idle
    property options: fieldparamlinkoptionsty read foptions write foptions
                       default defaultfieldparamlinkoptions;
+   property slaveparams: tslaveparams read fslaveparams 
+                                            write setslaveparams;
    property onsetparam: setparameventty read fonsetparam write fonsetparam;
    property onaftersetparam: notifyeventty read fonaftersetparam
                                   write fonaftersetparam;
@@ -800,6 +835,7 @@ end;
 procedure tparamsourcedatalink.recordchanged(afield: tfield);
 var
  bo1: boolean;
+ int1: integer;
 begin
  if not (csloading in fowner.componentstate) then begin
   inherited;
@@ -818,8 +854,19 @@ begin
        if assigned(fonsetparam) then begin
         fonsetparam(fowner,bo1);
        end;
-       if not bo1 and (fparamname <> '') and (dataset <> nil) then begin
-        fieldtoparam(self.field,param);
+       if not bo1 and (dataset <> nil) then begin
+        if fparamname <> '' then begin
+         fieldtoparam(self.field,param);
+        end;
+        with fslaveparams do begin
+         for int1:= 0 to high(fitems) do begin
+          with tslaveparam(fitems[int1]) do begin
+           if (fdatalink.field <> nil) and (fparamname <> '') then begin
+            fieldtoparam(fdatalink.field,param(fparamname));
+           end;
+          end;
+         end;
+        end;
        end;
        if assigned(fonaftersetparam) then begin
         fonaftersetparam(fowner);
@@ -956,6 +1003,7 @@ begin
  fdestdatasource:= tdatasource.create(nil);
  fdestdatalink:= tparamdestdatalink.create(self);
  fdestdatalink.datasource:= fdestdatasource;
+ fslaveparams:= tslaveparams.create(self);
 // fdestdatasource:= tlinkdatasource.create(nil);
  inherited;
 end;
@@ -967,6 +1015,7 @@ begin
  fsourcedatalink.free;
  fdestdatalink.free;
  fdestdatasource.free;
+ fslaveparams.free;
 // fdestdatasource.free;
 end;
 {
@@ -975,12 +1024,12 @@ begin
  fsourcedatalink.checkrefresh;
 end;
 }
-function tfieldparamlink.getdatafield: string;
+function tfieldparamlink.getfieldname: string;
 begin
  result:= fsourcedatalink.fieldname;
 end;
 
-procedure tfieldparamlink.setdatafield(const avalue: string);
+procedure tfieldparamlink.setfieldname(const avalue: string);
 begin
  fsourcedatalink.fieldname:= avalue;
 end;
@@ -1038,17 +1087,22 @@ begin
  inherited;
 end;
 
-function tfieldparamlink.param: tparam;
+function tfieldparamlink.param(const aname: string): tparam;
 begin
  if fdestdataset = nil then begin
   databaseerror(name+': No destdataset');
  end
  else begin
-  result:= fdestdataset.params.findparam(fparamname);
+  result:= fdestdataset.params.findparam(aname);
   if result = nil then begin
-   databaseerror(name+': param "'+fparamname+'" not found');
+   databaseerror(name+': param "'+aname+'" not found');
   end;
  end;
+end;
+
+function tfieldparamlink.param: tparam;
+begin
+ result:= param(fparamname);
 end;
 
 function tfieldparamlink.field: tfield;
@@ -1109,6 +1163,22 @@ end;
 procedure tfieldparamlink.delayon;
 begin
  dec(fnodelay);
+end;
+
+procedure tfieldparamlink.setslaveparams(const avalue: tslaveparams);
+begin
+ fslaveparams.assign(avalue);
+end;
+
+procedure tfieldparamlink.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('datafield',@readdatafield,nil,false);
+end;
+
+procedure tfieldparamlink.readdatafield(reader: treader);
+begin
+ fieldname:= reader.readstring;
 end;
 
 { tsequencedatalink }
@@ -1418,6 +1488,63 @@ begin
    writetransaction.savepointrelease;
   end;
  end;
+end;
+
+{ tslaveparams }
+
+constructor tslaveparams.create(const aowner: tfieldparamlink);
+begin
+ inherited create(aowner,tslaveparam);
+end;
+
+{ tslaveparam }
+
+constructor tslaveparam.create(aowner: tobject);
+begin
+ inherited;
+ fdatalink:= tfielddatalink.create;
+end;
+
+destructor tslaveparam.destroy;
+begin
+ fdatalink.free;
+end;
+
+function tslaveparam.getdatasource: tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure tslaveparam.setdatasource(const avalue: tdatasource);
+begin
+ fdatalink.datasource:= avalue;
+end;
+
+function tslaveparam.getfieldname: string;
+begin
+ result:= fdatalink.fieldname;
+end;
+
+procedure tslaveparam.setfieldname(const avalue: string);
+begin
+ fdatalink.fieldname:= avalue;
+end;
+
+function tslaveparam.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure tslaveparam.getfieldtypes(out apropertynames: stringarty;
+               out afieldtypes: fieldtypesarty);
+begin
+ apropertynames:= nil;
+ afieldtypes:= nil;
+end;
+
+function tslaveparam.getdestdataset: tsqlquery;
+begin
+ result:= tfieldparamlink(fowner).destdataset;
 end;
 
 end.

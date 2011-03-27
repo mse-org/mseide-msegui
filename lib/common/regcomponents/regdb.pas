@@ -236,6 +236,18 @@ type
    function geteditorclass: propertyeditorclassty; override;
  end;
 
+ tslaveparampropertyeditor = class(tclasselementeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   function getvalue: msestring; override;
+ end;
+
+ tslaveparamspropertyeditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+
  tlookupbufferfieldnopropertyeditor = class(tordinalpropertyeditor)
   private
    fintf: ilookupbufferfieldinfo;
@@ -324,11 +336,11 @@ begin
         tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),nil,'fieldname',
         tdbfieldnamepropertyeditor);
- registerpropertyeditor(typeinfo(string),tfieldfieldlink,'datafield',
+ registerpropertyeditor(typeinfo(string),tfieldfieldlink,'fieldname',
         tdbfieldnamenocalcpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldlink,'destdatafield',
         tdbfieldnamepropertyeditor);
- registerpropertyeditor(typeinfo(string),tfieldparamlink,'datafield',
+ registerpropertyeditor(typeinfo(string),tfieldparamlink,'fieldname',
         tdbfieldnamenocalcpropertyeditor);
  registerpropertyeditor(typeinfo(string),nil,'keyfield',
         tdbfieldnamepropertyeditor);
@@ -346,6 +358,10 @@ begin
         tfielddatasetpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldparamlink,'paramname',
         tdbparamnamepropertyeditor);
+ registerpropertyeditor(typeinfo(string),tslaveparam,'paramname',
+        tdbparamnamepropertyeditor);
+ registerpropertyeditor(typeinfo(tslaveparams),nil,'',
+        tslaveparamspropertyeditor);
  registerpropertyeditor(typeinfo(tstrings),nil,'SQL',
         tsqlpropertyeditor);
  registerpropertyeditor(typeinfo(tsqlstringlist),nil,'',
@@ -1330,6 +1346,31 @@ begin
    end;
   end;
  end;   
+end;
+
+{ tslaveparampropertyeditor }
+
+function tslaveparampropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate+[ps_refresh];
+end;
+
+function tslaveparampropertyeditor.getvalue: msestring;
+begin
+ with tslaveparam(getpointervalue) do begin
+  result:= '<';
+  if datasource <> nil then begin
+   result:= result + datasource.name;
+  end;
+  result:= result+'.'+fieldname+'>'+'<'+paramname+'>';
+ end;
+end;
+
+{ tslaveparamspropertyeditor }
+
+function tslaveparamspropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tslaveparampropertyeditor;
 end;
 
 initialization
