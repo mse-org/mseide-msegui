@@ -33,8 +33,6 @@ type
 
  tmsesqlquery = class;
  
- sqlquerystatety = (sqs_userapplayrecupdate,sqs_updateabort,sqs_updateerror);
- sqlquerystatesty = set of sqlquerystatety;
  applyrecupdateeventty = 
      procedure(const sender: tmsesqlquery; const updatekind: tupdatekind;
                         var asql: string; var done: boolean) of object;
@@ -57,14 +55,15 @@ type
   private
    fsqlonchangebefore: notifyeventty;
    fcontroller: tdscontroller;
-   fmstate: sqlquerystatesty;
    fonapplyrecupdate: applyrecupdateeventty;
+   fonapplyrecupdate2: afterapplyrecupdateeventty;
    fafterapplyrecupdate: afterapplyrecupdateeventty;
    ftransopenref: integer;
    procedure setcontroller(const avalue: tdscontroller);
    procedure setactive1(value : boolean);
    function getactive: boolean;
    procedure setonapplyrecupdate(const avalue: applyrecupdateeventty);
+   procedure setonapplyrecupdate2(const avalue: afterapplyrecupdateeventty);
    function getcontroller: tdscontroller;
    function getindexdefs: TIndexDefs;
    procedure setindexdefs(const avalue: TIndexDefs);
@@ -127,6 +126,10 @@ type
    property onapplyrecupdate: applyrecupdateeventty read fonapplyrecupdate
                                   write setonapplyrecupdate;
              //raise eupdateerror in order to skip update of the record
+   property onapplyrecupdate2: afterapplyrecupdateeventty 
+                                  read fonapplyrecupdate2
+                                  write setonapplyrecupdate2;
+             //called after inherited
    property afterapplyrecupdate: afterapplyrecupdateeventty read fafterapplyrecupdate 
                                   write fafterapplyrecupdate;
    property UpdateMode default upWhereKeyOnly;
@@ -500,19 +503,38 @@ begin
   checkinactive;
  end;
  if assigned(avalue) and not (csdesigning in componentstate) then begin
-  include(fmstate,sqs_userapplayrecupdate);
+  include(fmstate,sqs_userapplyrecupdate);
  end
  else begin
-  exclude(fmstate,sqs_userapplayrecupdate);
+  if not assigned(fonapplyrecupdate2) then begin
+   exclude(fmstate,sqs_userapplyrecupdate);
+  end;
  end;
  fonapplyrecupdate:= avalue;
+end;
+
+procedure tmsesqlquery.setonapplyrecupdate2(
+                        const avalue: afterapplyrecupdateeventty);
+begin
+ if not (csloading in componentstate) then begin
+  checkinactive;
+ end;
+ if assigned(avalue) and not (csdesigning in componentstate) then begin
+  include(fmstate,sqs_userapplyrecupdate);
+ end
+ else begin
+  if not assigned(fonapplyrecupdate) then begin
+   exclude(fmstate,sqs_userapplyrecupdate);
+  end;
+ end;
+ fonapplyrecupdate2:= avalue;
 end;
 
 function tmsesqlquery.getcanmodify: Boolean;
 begin
  result:= fcontroller.getcanmodify and 
               (inherited getcanmodify or not readonly and 
-                                    (sqs_userapplayrecupdate in fmstate));
+                                    (sqs_userapplyrecupdate in fmstate));
 end;
 
 procedure tmsesqlquery.applyrecupdate(updatekind: tupdatekind);
@@ -521,19 +543,27 @@ var
  str1: string;
 begin
  try
-  if sqs_userapplayrecupdate in fmstate then begin
-   bo1:= false;
-   fonapplyrecupdate(self,updatekind,str1,bo1);
-   if not bo1 then begin
-    if str1 = '' then begin
-     inherited;
-    end
-    else begin
- {$ifdef debugsqlquery}  
-     debugwriteln(getenumname(typeinfo(tupdatekind),ord(updatekind))+' '+str1);
- {$endif}  
-     tsqlconnection(database).executedirect(str1,writetransaction);
+  if sqs_userapplyrecupdate in fmstate then begin
+   if assigned(fonapplyrecupdate) then begin
+    bo1:= false;
+    fonapplyrecupdate(self,updatekind,str1,bo1);
+    if not bo1 then begin
+     if str1 = '' then begin
+      inherited;
+     end
+     else begin
+  {$ifdef debugsqlquery}  
+      debugwriteln(getenumname(typeinfo(tupdatekind),ord(updatekind))+' '+str1);
+  {$endif}  
+      tsqlconnection(database).executedirect(str1,writetransaction);
+     end;
     end;
+   end
+   else begin
+    inherited;
+   end;
+   if assigned(fonapplyrecupdate2) then begin
+    fonapplyrecupdate2(self,updatekind);
    end;
   end
   else begin
@@ -569,13 +599,22 @@ end;
 procedure tmsesqlquery.afterapply;
 begin
  if writetransaction <> nil then begin //can be nil in local mode
-  if (writetransaction.savepointlevel = 0) and
-              (ftransopenref = writetransaction.opencount) then begin
-   if dso_autocommitret in fcontroller.options then begin
-    writetransaction.commitretaining;
-   end;
-   if dso_autocommit in fcontroller.options then begin
-    writetransaction.commit;
+  if (ftransopenref = writetransaction.opencount) then begin
+   if (writetransaction.savepointlevel = 0) then begin
+    if dso_autocommitret in fcontroller.options then begin
+     writetransaction.commitretaining;
+    end;
+    if dso_autocommit in fcontroller.options then begin
+     writetransaction.commit;
+    end;
+   end
+   else begin
+    if dso_autocommitret in fcontroller.options then begin
+     writetransaction.pendingaction:= cacommitretaining;
+    end;
+    if dso_autocommit in fcontroller.options then begin
+     writetransaction.pendingaction:= cacommit;
+    end;
    end;
   end;
  end;

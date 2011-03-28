@@ -462,17 +462,15 @@ var
  int1,int2: integer;
 begin
  result:= inherited getdefaultstate;
- if fremote <> nil then begin
+ if (high(fprops) = 0) then begin
+  with fprops[0] do begin
+   getcorbainterface(instance,typeinfo(idbeditinfo),fdbeditinfointf);
+  end;
+ end;
+ if (fdbeditinfointf = nil) and (fremote <> nil) then begin
   obj1:= tobject(tpropertyeditor1(fremote.getparenteditor).getpointervalue);
   if obj1 <> nil then begin
    getcorbainterface(obj1,typeinfo(idbeditinfo),fdbeditinfointf);
-  end;
- end
- else begin
-  if (high(fprops) = 0) then begin
-   with fprops[0] do begin
-    getcorbainterface(instance,typeinfo(idbeditinfo),fdbeditinfointf);
-   end;
   end;
  end;
  if fdbeditinfointf <> nil then begin

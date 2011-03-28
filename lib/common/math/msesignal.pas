@@ -3507,7 +3507,7 @@ begin
    end;
    tab1:= tab1.master;
   end;
-  setlinkedvar(avalue,fmaster);
+  setlinkedvar(tmsecomponent(avalue),tmsecomponent(fmaster));
   if avalue <> nil then begin
    table:= avalue.table;
   end;
@@ -3763,7 +3763,7 @@ begin
    end;
    tab1:= tab1.master;
   end;
-  setlinkedvar(avalue,fmaster);
+  setlinkedvar(tmsecomponent(avalue),tmsecomponent(fmaster));
   if avalue <> nil then begin
    table:= avalue.table;
   end;
@@ -4473,7 +4473,7 @@ begin
    end;
    env1:= env1.master;
   end;
-  setlinkedvar(avalue,fmaster);
+  setlinkedvar(tmsecomponent(avalue),tmsecomponent(fmaster));
   if avalue <> nil then begin
    dosync;
   end;

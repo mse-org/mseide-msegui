@@ -778,7 +778,7 @@ type
                       const maxchars: integer = 0); overload;
    procedure fillcol(const value: msestring);
    property items[aindex: integer]: msestring read getitems write setitems; default;
-   property checked[index: integer]: boolean read getchecked write setchecked;
+   property checked[aindex: integer]: boolean read getchecked write setchecked;
 
    property textflags: textflagsty read ftextinfo.flags write settextflags
                           default defaultcoltextflags;

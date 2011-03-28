@@ -1409,24 +1409,37 @@ type
  
  tparamconnector = class;
 
- tmseparam = class(tparam)
+ tmseparam = class(tparam,idbeditinfo)
  {$ifdef mse_withpublishedparamvalue}
   private
    procedure setasvariant(const avalue: variant);
    function getasid: int64;
    procedure setasid(const avalue: int64);
+   function getdatasource: tdatasource; overload;
+   procedure setdatasource(const avalue: tdatasource);
+   function getfieldname: string;
+   procedure setfieldname(const avalue: string);
+    //idbeditinfo
+   function getdatasource(const aindex: integer): tdatasource; overload;
+   procedure getfieldtypes(out apropertynames: stringarty;
+                           out afieldtypes: fieldtypesarty);
+   function isparamstored: boolean;
   published
    property value : variant read getasvariant write setasvariant 
                                                   stored isparamstored;
  {$endif mse_withpublishedparamvalue}
   private
    fconnector: tparamconnector;
+   fdatalink: tfielddatalink;
    procedure setconnector(const avalue: tparamconnector);
   public
+   constructor Create(ACollection: TCollection); overload; override;
    destructor destroy; override;
    property asid: int64 read getasid write setasid; //-1 -> null
   published
    property connector: tparamconnector read fconnector write setconnector;
+   property datasource: tdatasource read getdatasource write setdatasource;
+   property fieldname: string read getfieldname write setfieldname;
  end;
 
  tparamconnector = class(tmsecomponent)
@@ -1447,6 +1460,7 @@ type
   public
    constructor create(aowner: tpersistent); overload;
    constructor create; overload;
+   procedure updatevalues;
    Function  ParseSQL(const SQL: mseString; const DoCreate: Boolean): mseString; overload;
    Function  ParseSQL(const SQL: mseString;
                       const DoCreate,EscapeSlash,EscapeRepeat: Boolean;
@@ -7429,6 +7443,19 @@ begin
  end;
 end;
 
+procedure tmseparams.updatevalues;
+var
+ int1: integer;
+begin
+ for int1:= 0 to count-1 do begin
+  with tmseparam(items[int1]) do begin
+   if fdatalink.field <> nil then begin
+    value:= fdatalink.field.value;
+   end;
+  end;
+ end;
+end;
+
 { tblobcachenode }
 
 constructor tblobcachenode.create(const akey: blobidty; const adata: string);
@@ -7487,10 +7514,16 @@ begin
 end;
 
 { tmseparam }
+constructor tmseparam.Create(ACollection: TCollection);
+begin
+ fdatalink:= tfielddatalink.create;
+ inherited;
+end;
 
 destructor tmseparam.destroy;
 begin
  connector:= nil;
+ fdatalink.free;
  inherited;
 end;
 
@@ -7533,6 +7566,43 @@ begin
  else begin
   aslargeint:= avalue;
  end;
+end;
+
+function tmseparam.getdatasource: tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure tmseparam.setdatasource(const avalue: tdatasource);
+begin
+ fdatalink.datasource:= avalue;
+end;
+
+function tmseparam.getfieldname: string;
+begin
+ result:= fdatalink.fieldname;
+end;
+
+procedure tmseparam.setfieldname(const avalue: string);
+begin
+ fdatalink.fieldname:= avalue;
+end;
+
+function tmseparam.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure tmseparam.getfieldtypes(out apropertynames: stringarty;
+               out afieldtypes: fieldtypesarty);
+begin
+ apropertynames:= nil;
+ afieldtypes:= nil;
+end;
+
+function tmseparam.isparamstored: boolean;
+begin
+ result:= bound;
 end;
 
 { tparamconnector }

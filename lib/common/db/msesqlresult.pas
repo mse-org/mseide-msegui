@@ -2041,7 +2041,7 @@ end;
 procedure tsqlresultconnector.setsource(const avalue: tsqlresult);
 begin
  fcol:= nil;
- setlinkedvar(avalue,fsource);
+ setlinkedvar(tmsecomponent(avalue),tmsecomponent(fsource));
 end;
 
 procedure tsqlresultconnector.setcolname(const avalue: dbcolnamety);

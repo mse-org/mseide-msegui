@@ -3140,7 +3140,8 @@ end;
 
 procedure tcustomeditwidgetdatalink.setnavigator(const avalue: tdbnavigator);
 begin
- getobjectlinker.setlinkedvar(iobjectlink(self),avalue,fnavigator);
+ getobjectlinker.setlinkedvar(iobjectlink(self),tmsecomponent(avalue),
+                  tmsecomponent(fnavigator));
 end;
 
 function tcustomeditwidgetdatalink.getobjectlinker: tobjectlinker;

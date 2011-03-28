@@ -17,7 +17,7 @@ unit msesigfftgui;
 interface
 uses
  msesignal,msechart,classes,msesigfft,msegui,msegraphutils,msemenus,msegraphics,
- mseguiglob;
+ mseguiglob,mseclasses;
  
 type
  tsigscopefft = class;
@@ -83,7 +83,7 @@ begin
   end;
   slave1:= slave1.slave;
  end;
- setlinkedvar(avalue,fslave);
+ setlinkedvar(tmsecomponent(avalue),tmsecomponent(fslave));
 end;
 
 { tscopesamplerfft }

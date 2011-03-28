@@ -1021,7 +1021,7 @@ end;
 procedure tsigmidimulticonnector.setsource(const avalue: tsigmidisource);
 begin
  if avalue <> fsource then begin
-  setlinkedvar(avalue,fsource);
+  setlinkedvar(tmsecomponent(avalue),tmsecomponent(fsource));
   updatesource;
  end;
 end;
