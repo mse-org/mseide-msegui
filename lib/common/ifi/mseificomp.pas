@@ -310,6 +310,7 @@ type
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
                               var avalue; var accept: boolean); override;
+   function createdatalist: tdatalist; override;
     //istatfile
    procedure statreadvalue(const reader: tstatreader); override;
    procedure statwritevalue(const writer: tstatwriter); override;
@@ -2379,6 +2380,11 @@ procedure tstringclientcontroller.statwritevalue(const writer: tstatwriter);
 begin
  inherited;
  writer.writemsestrings(valuevarname,value);
+end;
+
+function tstringclientcontroller.createdatalist: tdatalist;
+begin
+ result:= tifimsestringdatalist.create(self);
 end;
 
 { tintegerclientcontroller }

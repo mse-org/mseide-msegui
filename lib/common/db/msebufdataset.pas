@@ -33,7 +33,7 @@ interface
 
 uses
  db,classes,variants,msetypes,msearrayprops,mseclasses,mselist,msestrings,
- msedb,msedatabase,mseglob;
+ msedb,msedatabase,mseglob,msedatalist;
   
 const
  defaultpacketrecords = -1;
@@ -859,6 +859,8 @@ type
                   read getcurrentascurrency write setcurrentascurrency;
    property currentasmsestring[const afield: tfield; aindex: integer]: msestring
                   read getcurrentasmsestring write setcurrentasmsestring;
+   procedure getcoldata(const afield: tfield; const adatalist: tdatalist);
+   
   published
    property logfilename: filenamety read flogfilename write flogfilename;
    property packetrecords : integer read fpacketrecords write setpacketrecords 
@@ -892,7 +894,7 @@ procedure alignfieldpos(var avalue: integer);
 
 implementation
 uses
- rtlconsts,dbconst,msedatalist,sysutils,mseformatstr,msereal,msestream,msesys,
+ rtlconsts,dbconst,sysutils,mseformatstr,msereal,msestream,msesys,
  msefileutils,mseapplication;
 {$ifdef mse_FPC_2_2}
 const
@@ -2616,6 +2618,9 @@ begin
  po1:= getfieldbuffer(field,buffer = nil,datasize);
  if buffer <> nil then begin
   move(buffer^,po1^,datasize);
+ end
+ else begin
+  fillchar(po1^,datasize,0);
  end;
  fieldchanged(field);
 end;
@@ -5857,6 +5862,102 @@ begin
  if bo1 or (po1^ <> avalue) then begin
   po1^:= avalue;
   aftercurrentset(afield);
+ end;
+end;
+{
+dl_none,dl_integer,dl_int64,dl_currency,
+    dl_real,dl_realint,dl_realsum,
+    dl_datetime,
+    dl_ansistring,dl_msestring,dl_doublemsestring,dl_msestringint,
+    }
+procedure tmsebufdataset.getcoldata(const afield: tfield;
+               const adatalist: tdatalist);
+var
+ po1,po2: pointer;
+ offs: ptrint;
+ step: integer;
+ indexpo: ppointer;
+ 
+ procedure init(const afieldtype: tfieldtype);
+ var
+  int1: integer;
+ begin
+  currentcheckbrowsemode;
+  if afield.dataset <> self then begin
+   raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
+  end;
+  if afield.index < 0 then begin
+   raise ecurrentvalueaccess.create(self,afield,
+                                           'Field can not be be fkCalculated.');
+  end;
+  checkindex(false);
+  int1:= afield.fieldno-1;
+  with ffieldinfos[int1] do begin
+   if not (ext.basetype in fieldcompatibility[afieldtype]) then begin
+    raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
+   end;   
+   offs:= base.offset;
+  end;
+  po2:= adatalist.datapo;
+  step:= adatalist.size;
+  indexpo:= pointer(factindexpo^.ind);
+ end;
+
+var
+ int1: integer;
+begin
+ adatalist.beginupdate;
+ try
+  adatalist.clear;
+  adatalist.count:= recordcount;
+  if adatalist.count > 0 then begin
+   case adatalist.datatype of
+    dl_integer: begin
+     init(ftinteger);
+     for int1:= 0 to adatalist.count-1 do begin
+      pinteger(po2)^:= pinteger(indexpo[int1]+offs)^;
+      inc(po2,step);
+     end;
+    end;
+    dl_int64: begin
+     init(ftlargeint);
+     for int1:= 0 to adatalist.count-1 do begin
+      pint64(po2)^:= pint64(indexpo[int1]+offs)^;
+      inc(po2,step);
+     end;
+    end;
+    dl_currency: begin
+     init(ftcurrency);
+     for int1:= 0 to adatalist.count-1 do begin
+      pcurrency(po2)^:= pcurrency(indexpo[int1]+offs)^;
+      inc(po2,step);
+     end;
+    end;
+    dl_real,dl_realint,dl_realsum,dl_datetime: begin
+     init(ftcurrency);
+     for int1:= 0 to adatalist.count-1 do begin
+      prealty(po2)^:= pdouble(indexpo[int1]+offs)^;
+      inc(po2,step);
+     end;
+    end;
+    dl_ansistring: begin
+     init(ftstring);
+     for int1:= 0 to adatalist.count-1 do begin
+      pansistring(po2)^:= pmsestring(indexpo[int1]+offs)^;
+      inc(po2,step);
+     end;
+    end;
+    dl_msestring,dl_doublemsestring,dl_msestringint: begin
+     init(ftstring);
+     for int1:= 0 to adatalist.count-1 do begin
+      pmsestring(po2)^:= pmsestring(indexpo[int1]+offs)^;
+      inc(po2,step);
+     end;
+    end;
+   end;
+  end;
+ finally
+  adatalist.endupdate;
  end;
 end;
 
