@@ -6809,20 +6809,25 @@ begin
   application.beginwait;
  end;
  try
-  if dscs_restorerecno in fstate then begin
-   exclude(fstate,dscs_restorerecno);
-   bo1:= fintf.restorerecno;
-   fintf.restorerecno:= true;
-   try
-    tdataset(fowner).refresh;
-   finally
-    if not bo1 then begin
-     fintf.restorerecno:= false;
-    end;
-   end;
+  if not tdataset(fowner).active then begin
+   tdataset(fowner).open;
   end
   else begin
-   tdataset(fowner).refresh;
+   if dscs_restorerecno in fstate then begin
+    exclude(fstate,dscs_restorerecno);
+    bo1:= fintf.restorerecno;
+    fintf.restorerecno:= true;
+    try
+     tdataset(fowner).refresh;
+    finally
+     if not bo1 then begin
+      fintf.restorerecno:= false;
+     end;
+    end;
+   end
+   else begin
+    tdataset(fowner).refresh;
+   end;
   end;
  finally
   if bo2 then begin

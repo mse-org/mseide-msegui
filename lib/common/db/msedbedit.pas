@@ -1973,6 +1973,10 @@ type
   private
    function getdropdown: tlbdropdownlistcontroller;
    procedure setdropdown(const avalue: tlbdropdownlistcontroller);
+  {$ifdef mse_with_ifi}
+   function getifilink: tifiintegerlinkcomp;
+   procedure setifilink1(const avalue: tifiintegerlinkcomp);
+  {$endif}
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    function internaldatatotext(const data): msestring; override;
@@ -1982,6 +1986,9 @@ type
   public
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
+{$ifdef mse_with_ifi}
+   property ifilink: tifiintegerlinkcomp read getifilink write setifilink1;
+{$endif}
  end;
 
  tcustomenum64edit = class(tcustomdropdownlistedit)
@@ -8837,6 +8844,16 @@ end;
 function tenumeditlb.getlbkeydatakind: lbdatakindty;
 begin
  result:= lbdk_integer;
+end;
+
+function tenumeditlb.getifilink: tifiintegerlinkcomp;
+begin
+ result:= tifiintegerlinkcomp(fifilink);
+end;
+
+procedure tenumeditlb.setifilink1(const avalue: tifiintegerlinkcomp);
+begin
+ setifilink0(avalue);
 end;
 
 { tcustomenum64edit }

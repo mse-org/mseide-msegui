@@ -84,6 +84,22 @@ type
  setdatetimeeventty = procedure(const sender: tobject; var avalue: tdatetime;
                           var accept: boolean) of object;
 
+ setbooleanindexeventty = procedure(const sender: tobject; var avalue: boolean;
+                          var accept: boolean; const aindex: integer) of object;
+ setstringindexeventty = procedure(const sender: tobject; var avalue: msestring;
+                          var accept: boolean; const aindex: integer) of object;
+ setansistringindexeventty = procedure(const sender: tobject; var avalue: ansistring;
+                          var accept: boolean; const aindex: integer) of object;
+ setintegerindexeventty = procedure(const sender: tobject; var avalue: integer; 
+                          var accept: boolean; const aindex: integer) of object; 
+                          //equal parameters as setcoloreventty for tcoloredit!
+ setint64indexeventty = procedure(const sender: tobject; var avalue: int64; 
+                          var accept: boolean; const aindex: integer) of object; 
+ setrealindexeventty = procedure(const sender: tobject; var avalue: realty;
+                          var accept: boolean; const aindex: integer) of object;
+ setdatetimeindexeventty = procedure(const sender: tobject; var avalue: tdatetime;
+                          var accept: boolean; const aindex: integer) of object;
+
  progresseventty =  procedure(const sender: tobject; const avalue: real;
                                                var acancel: boolean) of object;
 

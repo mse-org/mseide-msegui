@@ -2308,8 +2308,8 @@ begin
    end;
   end;
  end;
- dofinish;
  fsavepointlevel:= 0;
+ dofinish;
  result:= true;
 end;
 
@@ -2814,6 +2814,7 @@ begin
     end;
 //    fupdateable:= not readonly;
    end;
+   fupdateable:= fupdateable or not readonly and (ftablename <> ''); 
   end;
  end;
 end;

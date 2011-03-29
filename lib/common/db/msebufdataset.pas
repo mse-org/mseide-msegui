@@ -5595,7 +5595,8 @@ begin
  end
  else begin
   with ffieldinfos[int1] do begin
-   if (afieldtype <> ftunknown) and (ext.basetype <> afieldtype) then begin
+   if (afieldtype <> ftunknown) and 
+        not (ext.basetype in fieldcompatibility[afieldtype]) then begin
     raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
    end;   
    result:= po1 + base.offset;
@@ -5630,7 +5631,8 @@ begin
  po1:= @flastcurrentrec^.header.fielddata.nullmask;
  int1:= afield.fieldno-1;
  with ffieldinfos[int1] do begin
-  if (afieldtype <> ftunknown) and (ext.basetype <> afieldtype) then begin
+  if (afieldtype <> ftunknown) and 
+           not (ext.basetype in fieldcompatibility[afieldtype]) then begin
    raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
   end;   
   changed:= not getfieldflag(po1,int1) xor isnull;

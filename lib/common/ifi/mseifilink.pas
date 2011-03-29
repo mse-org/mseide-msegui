@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.

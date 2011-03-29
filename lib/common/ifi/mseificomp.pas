@@ -130,7 +130,7 @@ type
    procedure statechanged(const sender: iificlient;
                             const astate: ifiwidgetstatesty); virtual;
    procedure setvalue(const sender: iificlient; var avalue;
-                                            var accept: boolean); virtual;
+                     var accept: boolean; const arow: integer); virtual;
    procedure sendmodalresult(const sender: iificlient; 
                              const amodalresult: modalresultty); virtual;
     //istatfile
@@ -207,19 +207,22 @@ type
   function ifigriddata: tdatalist;
   function ififieldname: string;
  end;
-  
+ 
+ indexeventty = procedure(const sender: tobject;
+                            const aindex: integer) of object;
+
  tvalueclientcontroller = class(tificlientcontroller,
                                          iififieldinfo,iifidatasourceclient)
   private
    fvalarpo: pointer;
    fitempo: pointer;
    fitemindex: integer;
-   fonclientdataentered: notifyeventty;
+   fonclientdataentered: indexeventty;
    fdatasource: tifidatasource;
-   fdatafield: ififieldnamety;
+   ffieldname: ififieldnamety;
    procedure setoptionsvalue(const avalue: valueclientoptionsty);
    procedure setdatasource(const avalue: tifidatasource);
-   procedure setdatafield(const avalue: ififieldnamety);
+   procedure setfieldname(const avalue: ififieldnamety);
    procedure linkdatalist1(const alink: pointer);
   protected
    fdatalist: tdatalist;
@@ -235,7 +238,7 @@ type
    function getifilinkkind: ptypeinfo; override;
    function canconnect(const acomponent: tcomponent): boolean; override;
    procedure setvalue(const sender: iificlient; var avalue;
-                                            var accept: boolean); override;
+                          var accept: boolean; const arow: integer); override;
    procedure loaded; override;
    procedure statreadvalue(const reader: tstatreader); virtual;
    procedure statwritevalue(const reader: tstatwriter); virtual;
@@ -284,12 +287,12 @@ type
    destructor destroy; override;
    property datalist: tdatalist read fdatalist;
   published 
-   property onclientdataentered: notifyeventty read fonclientdataentered 
+   property onclientdataentered: indexeventty read fonclientdataentered 
                                   write fonclientdataentered;
    property optionsvalue: valueclientoptionsty read foptionsvalue 
                                            write setoptionsvalue default [];
    property datasource: tifidatasource read fdatasource write setdatasource;
-   property datafield: ififieldnamety read fdatafield write setdatafield;
+   property fieldname: ififieldnamety read ffieldname write setfieldname;
  end;
  
  tifimsestringdatalist = class;
@@ -298,7 +301,7 @@ type
   private
    fvalue: msestring;
    fvaluedefault: msestring;
-   fonclientsetvalue: setstringeventty;
+   fonclientsetvalue: setstringindexeventty;
    procedure setvalue1(const avalue: msestring);
 //   function getgridvalues: msestringarty;
 //   procedure setgridvalues(const avalue: msestringarty);
@@ -309,8 +312,9 @@ type
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
-                              var avalue; var accept: boolean); override;
+           var avalue; var accept: boolean; const arow: integer); override;
    function createdatalist: tdatalist; override;
+   function getlistdatatypes: listdatatypesty; override;
     //istatfile
    procedure statreadvalue(const reader: tstatreader); override;
    procedure statwritevalue(const writer: tstatwriter); override;
@@ -323,7 +327,7 @@ type
   published
    property value: msestring read fvalue write setvalue1;
    property valuedefault: msestring read fvaluedefault write fvaluedefault;
-   property onclientsetvalue: setstringeventty 
+   property onclientsetvalue: setstringindexeventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
@@ -401,7 +405,7 @@ type
    fvaluedefault: integer;
    fmin: integer;
    fmax: integer;
-   fonclientsetvalue: setintegereventty;
+   fonclientsetvalue: setintegerindexeventty;
    procedure setvalue1(const avalue: integer);
    procedure setmin(const avalue: integer);
    procedure setmax(const avalue: integer);
@@ -410,7 +414,7 @@ type
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
-                              var avalue; var accept: boolean); override;
+               var avalue; var accept: boolean; const arow: integer); override;
    function createdatalist: tdatalist; override;
    function getlistdatatypes: listdatatypesty; override;
    
@@ -426,7 +430,7 @@ type
                                         write fvaluedefault default 0;
    property min: integer read fmin write setmin default 0;
    property max: integer read fmax write setmax default maxint;
-   property onclientsetvalue: setintegereventty 
+   property onclientsetvalue: setintegerindexeventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
@@ -438,7 +442,7 @@ type
    fvaluedefault: int64;
    fmin: int64;
    fmax: int64;
-   fonclientsetvalue: setint64eventty;
+   fonclientsetvalue: setint64indexeventty;
    procedure setvalue1(const avalue: int64);
    procedure setmin(const avalue: int64);
    procedure setmax(const avalue: int64);
@@ -447,7 +451,7 @@ type
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
-                              var avalue; var accept: boolean); override;
+               var avalue; var accept: boolean; const arow: integer); override;
    function createdatalist: tdatalist; override;
    function getlistdatatypes: listdatatypesty; override;
    
@@ -463,7 +467,7 @@ type
                                         write fvaluedefault default 0;
    property min: int64 read fmin write setmin default 0;
    property max: int64 read fmax write setmax default maxint;
-   property onclientsetvalue: setint64eventty 
+   property onclientsetvalue: setint64indexeventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
@@ -490,7 +494,7 @@ type
   private
    fvalue: longbool;
    fvaluedefault: longbool;
-   fonclientsetvalue: setbooleaneventty;
+   fonclientsetvalue: setbooleanindexeventty;
    function getvalue: boolean;
    procedure setvalue1(const avalue: boolean);
    function getvaluedefault: boolean;
@@ -504,7 +508,7 @@ type
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
-                              var avalue; var accept: boolean); override;
+            var avalue; var accept: boolean; const arow: integer); override;
    function createdatalist: tdatalist; override;
     //istatfile
    procedure statreadvalue(const reader: tstatreader); override;
@@ -519,7 +523,7 @@ type
    property value: boolean read getvalue write setvalue1 default false;
    property valuedefault: boolean read getvaluedefault write setvaluedefault 
                                                                 default false;
-   property onclientsetvalue: setbooleaneventty 
+   property onclientsetvalue: setbooleanindexeventty 
                 read fonclientsetvalue write fonclientsetvalue;
  end;
 
@@ -531,7 +535,7 @@ type
    fvaluedefault: realty;
    fmin: realty;
    fmax: realty;
-   fonclientsetvalue: setrealeventty;
+   fonclientsetvalue: setrealindexeventty;
    procedure setvalue1(const avalue: realty);
    procedure setmin(const avalue: realty);
    procedure setmax(const avalue: realty);
@@ -544,7 +548,7 @@ type
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
-                              var avalue; var accept: boolean); override;
+               var avalue; var accept: boolean; const arow: integer); override;
    function createdatalist: tdatalist; override;
    procedure defineproperties(filer: tfiler); override;
     //istatfile
@@ -562,7 +566,7 @@ type
                                           write fvaluedefault {stored false};
    property min: realty read fmin write setmin {stored false};
    property max: realty read fmax write setmax {stored false};
-   property onclientsetvalue: setrealeventty 
+   property onclientsetvalue: setrealindexeventty 
                        read fonclientsetvalue write fonclientsetvalue;
  end;
 
@@ -574,7 +578,7 @@ type
    fvaluedefault: tdatetime;
    fmin: tdatetime;
    fmax: tdatetime;
-   fonclientsetvalue: setrealeventty;
+   fonclientsetvalue: setdatetimeindexeventty;
    procedure setvalue1(const avalue: tdatetime);
    procedure setmin(const avalue: tdatetime);
    procedure setmax(const avalue: tdatetime);
@@ -587,7 +591,7 @@ type
    procedure valuestoclient(const alink: pointer); override;
    procedure clienttovalues(const alink: pointer); override;
    procedure setvalue(const sender: iificlient;
-                              var avalue; var accept: boolean); override;
+              var avalue; var accept: boolean; const arow: integer); override;
    function createdatalist: tdatalist; override;
    procedure defineproperties(filer: tfiler); override;
     //istatfile
@@ -602,7 +606,7 @@ type
                                              write fvaluedefault {stored false};
    property min: tdatetime read fmin write setmin {stored false};
    property max: tdatetime read fmax write setmax {stored false};
-   property onclientsetvalue: setrealeventty 
+   property onclientsetvalue: setdatetimeindexeventty 
                        read fonclientsetvalue write fonclientsetvalue;
  end;
  
@@ -1364,7 +1368,7 @@ begin
 end;
 
 procedure tcustomificlientcontroller.setvalue(const sender: iificlient;
-                   var avalue; var accept: boolean);
+                   var avalue; var accept: boolean; const arow: integer);
 begin
  //dummy
 end;
@@ -2171,11 +2175,11 @@ begin
 end;
 
 procedure tvalueclientcontroller.setvalue(const sender: iificlient; var avalue;
-               var accept: boolean);
+               var accept: boolean; const arow: integer);
 begin
  inherited;
  if accept and fowner.canevent(tmethod(fonclientdataentered)) then begin
-  fonclientdataentered(fowner);
+  fonclientdataentered(fowner,arow);
  end;
 end;
 
@@ -2233,10 +2237,10 @@ begin
  end;
 end;
 
-procedure tvalueclientcontroller.setdatafield(const avalue: ififieldnamety);
+procedure tvalueclientcontroller.setfieldname(const avalue: ififieldnamety);
 begin
- if avalue <> fdatafield then begin
-  fdatafield:= avalue;
+ if avalue <> ffieldname then begin
+  ffieldname:= avalue;
   bindingchanged;
  end;
 end;
@@ -2256,7 +2260,7 @@ end;
 
 function tvalueclientcontroller.ififieldname: string;
 begin
- result:= fdatafield;
+ result:= ffieldname;
 end;
 
 procedure tvalueclientcontroller.getfieldinfo(const apropname: ififieldnamety;
@@ -2334,10 +2338,10 @@ begin
 end;
 }
 procedure tstringclientcontroller.setvalue(const sender: iificlient;
-                                         var avalue; var accept: boolean);
+                   var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,msestring(avalue),accept);
+  fonclientsetvalue(self,msestring(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2387,6 +2391,11 @@ begin
  result:= tifimsestringdatalist.create(self);
 end;
 
+function tstringclientcontroller.getlistdatatypes: listdatatypesty;
+begin
+ result:= [dl_msestring];
+end;
+
 { tintegerclientcontroller }
 
 constructor tintegerclientcontroller.create(const aowner: tmsecomponent);
@@ -2416,10 +2425,10 @@ begin
 end;
 
 procedure tintegerclientcontroller.setvalue(const sender: iificlient;
-                                         var avalue; var accept: boolean);
+                      var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,integer(avalue),accept);
+  fonclientsetvalue(self,integer(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2515,10 +2524,10 @@ begin
 end;
 
 procedure tint64clientcontroller.setvalue(const sender: iificlient;
-                                         var avalue; var accept: boolean);
+                       var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,int64(avalue),accept);
+  fonclientsetvalue(self,int64(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2615,10 +2624,10 @@ begin
 end;
 
 procedure tbooleanclientcontroller.setvalue(const sender: iificlient;
-                                         var avalue; var accept: boolean);
+                   var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,boolean(avalue),accept);
+  fonclientsetvalue(self,boolean(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2716,10 +2725,10 @@ begin
 end;
 
 procedure trealclientcontroller.setvalue(const sender: iificlient;
-                                         var avalue; var accept: boolean);
+                        var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,realty(avalue),accept);
+  fonclientsetvalue(self,realty(avalue),accept,arow);
  end;
  inherited;
 end;
@@ -2821,10 +2830,10 @@ begin
 end;
 
 procedure tdatetimeclientcontroller.setvalue(const sender: iificlient;
-                                         var avalue; var accept: boolean);
+                       var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,realty(tdatetime(avalue)),accept);
+  fonclientsetvalue(self,realty(tdatetime(avalue)),accept,arow);
  end;
  inherited;
 end;

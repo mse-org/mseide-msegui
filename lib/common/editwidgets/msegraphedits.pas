@@ -206,7 +206,7 @@ type
    function edited: boolean;
    function actualcolor: colorty; override;
    function col: twidgetcol;
-   function row: integer;
+   function gridrow: integer;
    function griddata: tdatalist;
 
    function checkvalue: boolean; virtual; abstract;
@@ -1644,7 +1644,7 @@ begin
  end;
 end;
 
-function tgraphdataedit.row: integer;
+function tgraphdataedit.gridrow: integer;
 begin
  if fgridintf = nil then begin
   result:= -1;
@@ -1900,7 +1900,7 @@ end;
 procedure tgraphdataedit.ifisetvalue(var avalue; var accept: boolean);
 begin
  if accept and (fifiserverintf <> nil) then begin
-  fifiserverintf.setvalue(iifidatalink(self),avalue,accept);
+  fifiserverintf.setvalue(iifidatalink(self),avalue,accept,gridrow);
  end;
 end;
 
@@ -2103,23 +2103,27 @@ end;
 { tcustombooleanedit }
 
 procedure tcustombooleanedit.internalcheckvalue(var avalue; var accept: boolean);
+var
+ bo1: boolean;
 begin
  if canevent(tmethod(fonsetvalue)) then begin
+  bo1:= longbool(avalue);
   fonsetvalue(self,boolean(avalue),accept);
+  longbool(avalue):= bo1;
  end;
 {$ifdef mse_with_ifi}
  if accept then begin
-  ifisetvalue(fvalue,accept);
+  ifisetvalue(avalue,accept);
  end;
 {$endif}
  if accept then begin
-  value:= boolean(avalue);
+  value:= longbool(avalue);
  end;
 end;
 
 procedure tcustombooleanedit.togglevalue(const areadonly: boolean);
 var
- bo1: boolean;
+ bo1: longbool;
 begin
  if not areadonly then begin
   bo1:= not fvalue;
@@ -3669,7 +3673,7 @@ begin
  if canevent(tmethod(fonpaintglyph)) then begin
   if @avalue = nil then begin
    po1:= fvalue;
-   int1:= row;
+   int1:= gridrow;
   end
   else begin
    po1:= pointer(avalue);

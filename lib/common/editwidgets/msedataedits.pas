@@ -2559,7 +2559,7 @@ end;
 procedure tcustomdataedit.ifisetvalue(var avalue; var accept: boolean);
 begin
  if accept and (fifiserverintf <> nil) then begin
-  fifiserverintf.setvalue(getifidatalinkintf,avalue,accept);
+  fifiserverintf.setvalue(getifidatalinkintf,avalue,accept,gridrow);
  end;
 end;
 

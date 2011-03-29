@@ -322,7 +322,8 @@ type
    procedure insert(const index: integer; const item: integer);
    procedure number(const start,step: integer); //numeriert daten
    function find(value: integer): integer;  //bringt index, -1 wenn nicht gefunden
-   procedure fill(acount: integer; const defaultvalue: integer);
+   procedure fill(acount: integer; const defaultvalue: integer); overload;
+   procedure fill(const defaultvalue: integer); overload;
    function getastext(const index: integer): msestring; override;
    procedure setastext(const index: integer; const avalue: msestring); override;
 
@@ -338,6 +339,8 @@ type
    function getitems(const index: integer): boolean;
    procedure setitems(const index: integer; const avalue: boolean);
   public
+   procedure fill(acount: integer; const defaultvalue: boolean); overload;
+   procedure fill(const defaultvalue: boolean); overload;
    property asarray: longboolarty read getasarray 
                                                   write setasarray;
    property items[const index: integer]: boolean read Getitems write Setitems; default;
@@ -365,7 +368,8 @@ type
    function add(const avalue: int64): integer;
    procedure insert(const index: integer; const avalue: int64);
    function find(const avalue: int64): integer;  //bringt index, -1 wenn nicht gefunden
-   procedure fill(const acount: integer; const defaultvalue: int64);
+   procedure fill(const acount: integer; const defaultvalue: int64); overload;
+   procedure fill(const defaultvalue: int64); overload;
    function getastext(const index: integer): msestring; override;
    procedure setastext(const index: integer; const avalue: msestring); override;
 
@@ -395,7 +399,8 @@ type
    function add(const avalue: currency): integer;
    procedure insert(const index: integer; const avalue: currency);
    function find(const avalue: currency): integer;  //bringt index, -1 wenn nicht gefunden
-   procedure fill(const acount: integer; const defaultvalue: currency);
+   procedure fill(const acount: integer; const defaultvalue: currency); overload;
+   procedure fill(const defaultvalue: currency); overload;
    function getastext(const index: integer): msestring; override;
    procedure setastext(const index: integer; const avalue: msestring); override;
 
@@ -455,7 +460,8 @@ type
    function add(const value: real): integer;
    procedure insert(index: integer; const item: realty);
    procedure number(start,step: real);
-   procedure fill(acount: integer; const defaultvalue: realty);
+   procedure fill(acount: integer; const defaultvalue: realty); overload;
+   procedure fill(const defaultvalue: realty); overload;
    procedure minmax(out minval,maxval: realty);
    function getastext(const index: integer): msestring; override;
    procedure setastext(const index: integer; const avalue: msestring); override;
@@ -472,6 +478,7 @@ type
    function datatype: listdatatypety; override;
    function empty(const index: integer): boolean; override;   //true wenn leer
    procedure fill(acount: integer; const defaultvalue: tdatetime);
+   procedure fill(const defaultvalue: tdatetime); overload;
  end;
 
  tcomplexdatalist = class(tdatalist)
@@ -504,7 +511,8 @@ type
    function add(const value: complexty): integer;
    procedure insert(const index: integer; const item: complexty);
    function empty(const index: integer): boolean; override;   //true wenn leer
-   procedure fill(const acount: integer; const defaultvalue: complexty);
+   procedure fill(const acount: integer; const defaultvalue: complexty); overload;
+   procedure fill(const defaultvalue: complexty); overload;
 
    property asarray: complexarty read getasarray write setasarray;
    property items[const index: integer]: complexty read Getitems write Setitems; default;
@@ -551,7 +559,9 @@ type
    procedure insert(const index: integer; const item: realty;
                                const itemint: integer);
    procedure fill(const acount: integer; const defaultvalue: realty;
-                     const defaultint: integer);
+                     const defaultint: integer); overload;
+   procedure fill(const defaultvalue: realty;
+                     const defaultint: integer); overload;
 
    property asarray: realintarty read getasarray write setasarray;
    property asarraya: realarty read getasarraya write setasarraya;
@@ -4844,6 +4854,11 @@ begin
  end;
 end;
 
+procedure tintegerdatalist.fill(const defaultvalue: integer);
+begin
+ fill(count,defaultvalue);
+end;
+
 { tbooleandatalist }
 
 procedure tbooleandatalist.setasarray(const avalue: longboolarty);
@@ -4865,6 +4880,16 @@ procedure tbooleandatalist.setitems(const index: integer;
                const avalue: boolean);
 begin
  inherited items[index]:= longint(longbool(avalue));
+end;
+
+procedure tbooleandatalist.fill(acount: integer; const defaultvalue: boolean);
+begin
+ inherited fill(acount,ord(longbool(defaultvalue)));
+end;
+
+procedure tbooleandatalist.fill(const defaultvalue: boolean);
+begin
+ fill(count,defaultvalue);
 end;
 
 { tint64datalist }
@@ -4998,6 +5023,11 @@ begin
  if trystrtoint64(avalue,int1) then begin
   items[index]:= int1;
  end;
+end;
+
+procedure tint64datalist.fill(const defaultvalue: int64);
+begin
+ fill(count,defaultvalue);
 end;
 
 { tcurrencydatalist }
@@ -5142,6 +5172,11 @@ begin
  if trystrtocurr(avalue,cu1) then begin
   items[index]:= cu1;
  end;
+end;
+
+procedure tcurrencydatalist.fill(const defaultvalue: currency);
+begin
+ fill(count,defaultvalue);
 end;
 
 { tenumdatalist }
@@ -5392,6 +5427,11 @@ begin
  end;
 end;
 
+procedure trealdatalist.fill(const defaultvalue: realty);
+begin
+ fill(count,defaultvalue);
+end;
+
 { tdatetimedatalist }
 
 function tdatetimedatalist.datatype: listdatatypety;
@@ -5413,6 +5453,11 @@ end;
 function tdatetimedatalist.getdefault: pointer;
 begin
  result:= nil; //-> 0.0
+end;
+
+procedure tdatetimedatalist.fill(const defaultvalue: tdatetime);
+begin
+ fill(count,defaultvalue);
 end;
 
 { tcomplexdatalist }
@@ -5628,6 +5673,11 @@ end;
 function tcomplexdatalist.checkassigncompatibility(const source: tpersistent): boolean;
 begin
  result:= source.inheritsfrom(tcomplexdatalist);
+end;
+
+procedure tcomplexdatalist.fill(const defaultvalue: complexty);
+begin
+ fill(count,defaultvalue);
 end;
 
 { tpointerdatalist }
@@ -7685,6 +7735,12 @@ begin
  else begin
   result:= @fdefaultval1;
  end;
+end;
+
+procedure trealintdatalist.fill(const defaultvalue: realty;
+               const defaultint: integer);
+begin
+ fill(count,defaultvalue,defaultint);
 end;
 
 { tcustomrowstatelist }
