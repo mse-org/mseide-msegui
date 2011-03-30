@@ -4275,22 +4275,6 @@ begin
  include (fmsecomponentstate,cs_subcompref);
 end;
 
-{$ifdef mse_with_ifi}
-procedure tmsecomponent.setifiserverintf(const aintf: iifiserver);
-begin
- fifiserverintf:= aintf;
-end;
-{
-function tmsecomponent.getifiserverintf: iifiserver;
-begin
- result:= fifiserverintf;
-end;
-}
-procedure tmsecomponent.executeificommand(var acommand: ificommandcodety);
-begin
- //dummy
-end;
-
 procedure tmsecomponent.setchildorder(child: tcomponent; order: integer);
 var
  int1,int2: integer;
@@ -4305,6 +4289,22 @@ begin
    end;    
   end;
  end;
+end;
+
+{$ifdef mse_with_ifi}
+procedure tmsecomponent.setifiserverintf(const aintf: iifiserver);
+begin
+ fifiserverintf:= aintf;
+end;
+{
+function tmsecomponent.getifiserverintf: iifiserver;
+begin
+ result:= fifiserverintf;
+end;
+}
+procedure tmsecomponent.executeificommand(var acommand: ificommandcodety);
+begin
+ //dummy
 end;
 
 {$endif}

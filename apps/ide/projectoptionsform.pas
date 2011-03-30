@@ -18,6 +18,11 @@ unit projectoptionsform;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
+{$ifndef mse_no_ifi}
+  {$define mse_with_ifi}        
+     //MSEide needs mse_with_ifi, switch for compiling test only
+{$endif}
+
 interface
 uses
  mseforms,msefiledialog,msegui,msestat,msestatfile,msetabs,msesimplewidgets,
@@ -1594,7 +1599,9 @@ procedure projectoptionstoform(fo: tprojectoptionsfo);
 var
  int1,int2: integer;
 begin
+ {$ifdef mse_with_ifi}
  mainfo.statoptions.objtovalues(fo);
+ {$endif}
  fo.colgrid.rowcount:= usercolorcount;
  fo.colgrid.fixcols[-1].captions.count:= usercolorcount;
  with fo,projectoptions do begin
@@ -1796,7 +1803,9 @@ procedure formtoprojectoptions(fo: tprojectoptionsfo);
 var
  int1: integer;
 begin
+{$ifdef mse_with_ifi}
  mainfo.statoptions.valuestoobj(fo);
+{$endif}
  with projectoptions,t do begin
   setlength(sigsettings,fo.signalgrid.rowcount);
   for int1:= 0 to high(sigsettings) do begin

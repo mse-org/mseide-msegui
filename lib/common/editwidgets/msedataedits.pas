@@ -91,6 +91,8 @@ type
 {$ifdef mse_with_ifi}
    fifilink: tifivaluelinkcomp;
    function getifidatalinkintf: iifidatalink; virtual;
+   function getoptionsedit: optionseditty; override;
+   procedure dochange; override;
     //iifidatalink
    procedure ifisetvalue(var avalue; var accept: boolean);
    function getifilinkkind: ptypeinfo; virtual;
@@ -2556,6 +2558,14 @@ begin
  result:= iifidatalink(self);
 end;
 
+function tcustomdataedit.getoptionsedit: optionseditty;
+begin
+ result:= inherited getoptionsedit;
+ if fifiserverintf <> nil then begin
+  fifiserverintf.updateoptionsedit(result);
+ end;
+end;
+
 procedure tcustomdataedit.ifisetvalue(var avalue; var accept: boolean);
 begin
  if accept and (fifiserverintf <> nil) then begin
@@ -2566,6 +2576,16 @@ end;
 function tcustomdataedit.getifilink: tifilinkcomp;
 begin
  result:= fifilink;
+end;
+
+procedure tcustomdataedit.dochange;
+begin
+ inherited;
+ if not (ws_loadedproc in fwidgetstate) then begin
+  if fifiserverintf <> nil then begin
+   fifiserverintf.valuechanged(getifidatalinkintf);
+  end;
+ end;
 end;
 
 {$endif mse_with_ifi}

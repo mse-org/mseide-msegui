@@ -18,7 +18,7 @@ interface
 uses
  classes,mseguiglob,msegui,mseimage,msewidgetgrid,msegrids,msedatalist,msegraphutils,
  msegraphics,mseclasses,mseeditglob,msebitmap,msemenus,mseevent,msestrings,
- msepointer,msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif};
+ msepointer,msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif},mseglob;
  
 type
  tcustomdataimage = class(timage,igridwidget)

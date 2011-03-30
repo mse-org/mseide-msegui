@@ -1297,6 +1297,7 @@ type
    procedure ifisetvalue(var avalue; var accept: boolean);   
    function getgriddata: tdatalist;
    function getvalueprop: ppropinfo;
+   procedure updatereadonlystate;
   {$endif}
   protected
    procedure sethidden(const index: integer; const avalue: boolean); override;
@@ -13057,6 +13058,7 @@ begin
    end;
    invalidate //for fixcols colorselect
   end;
+  include(fstate,gs_rowdatachanged);
   endupdate(gs1_sortmoving in fstate1);
   dorowsmoved(curindex,newindex,count);
   if rowbefore <> ffocusedcell.row then begin
@@ -13326,9 +13328,12 @@ end;
 procedure tcustomgrid.endupdate(const nosort: boolean = false);
 var
  int1,int2: integer;
+ bo1: boolean;
 begin
  dec(fupdating);
  if fupdating = 0 then begin
+  bo1:= fstate * 
+         [gs_rowcountinvalid,gs_rowdatachanged,gs_selectionchanged] <> [];
   if gs_rowcountinvalid in fstate then begin
    int2:= bigint;
    for int1:= 0 to datacols.count - 1 do begin
@@ -13357,6 +13362,12 @@ begin
   if gs_selectionchanged in fstate then begin
    internalselectionchanged;
   end;
+ {$ifdef mse_with_ifi}
+  if bo1 and (fifiserverintf <> nil) and not(ws_loadedproc in fwidgetstate) and
+         not (gs_emptyrowremoved in fstate) and not isautoappend then begin
+   fifiserverintf.valuechanged(iifigridlink(self));
+  end;
+ {$endif}
   if (gs1_showcellinvalid in fstate1) then begin
    showcell(fshowcell,fshowcellmode);
    exclude(fstate1,gs1_showcellinvalid);
@@ -17044,6 +17055,11 @@ end;
 function trowstatelist.getvalueprop: ppropinfo;
 begin
  result:= nil;
+end;
+
+procedure trowstatelist.updatereadonlystate;
+begin
+ //dummy
 end;
 
 {$endif}

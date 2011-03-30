@@ -13,11 +13,11 @@ unit mseeditglob;
 
 interface
 uses
- mseglob,mseguiglob,msegui,msetypes,msegraphics,msegraphutils,msestat;
+ mseglob,mseguiglob,{msegui,}msetypes,{msegraphics,}msegraphutils;
 
 type
-
- optioneditty = (oe_readonly,oe_undoonesc,
+              //used in MSEifi
+ optioneditty = (oe_readonly,oe_undoonesc,            
                     oe_closequery,oe_checkmrcancel,
                     oe_nogray,
                     oe_linebreak, 
@@ -129,33 +129,7 @@ function mgr(const start,stop: gridcoordty): gridrectty;  overload;
 
 function gridcoordisequal(const a,b: gridcoordty): boolean;
 
-function canstatvalue(const editoptions: optionseditty;
-                         const stat: tstatfiler): boolean;
-function canstatstate(const editoptions: optionseditty;
-                         const stat: tstatfiler): boolean;
-function canstatoptions(const editoptions: optionseditty;
-                         const stat: tstatfiler): boolean;
-
 implementation
-
-function canstatvalue(const editoptions: optionseditty;
-                         const stat: tstatfiler): boolean;
-begin
- result:= (oe_savevalue in editoptions) and stat.candata;
-end;
-
-function canstatstate(const editoptions: optionseditty;
-                         const stat: tstatfiler): boolean;
-begin
- result:= (oe_savestate in editoptions) and stat.canstate;
-end;
-
-function canstatoptions(const editoptions: optionseditty;
-                         const stat: tstatfiler): boolean;
-begin
- result:= (oe_saveoptions in editoptions) and stat.canoptions;
-end;
-
 
 function makegridcoord(col: integer; row: integer): gridcoordty;
 begin

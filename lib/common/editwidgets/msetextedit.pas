@@ -21,7 +21,8 @@ uses
  mseeditglob,mseedit,msewidgetgrid,classes,msedatalist,msegraphics,msestream,
  msetypes,mserichstring,msestat,msestatfile,mseclasses,mseinplaceedit,msegrids,
  mseevent,mseguiglob,msegui,msegraphutils,msestrings,msedrawtext,msearrayprops,
- msemenus,msepointer,msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif};
+ msemenus,msepointer,msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif},
+ mseglob;
 
 const
  
@@ -116,7 +117,6 @@ type
    procedure tabulatorschanged(const sender: tarrayprop; const index: integer);
    procedure dobeforepaintforeground(const canvas: tcanvas); override;
    procedure dokeydown(var info: keyeventinfoty); override;
-   procedure dochange; override;
    procedure getstate(out state: texteditstatety); virtual;
    procedure setstate(const state: texteditstatety); virtual;
    procedure setfilename(const value: filenamety);
@@ -168,6 +168,7 @@ type
    procedure griddatasourcechanged;
    {$ifdef mse_with_ifi}
    function getifilink: tifilinkcomp;
+   procedure dochange; override;
    {$endif}
 
     //istatfile
@@ -660,7 +661,19 @@ function tcustomtextedit.getifilink: tifilinkcomp;
 begin
  result:= nil;
 end;
-{$endif}
+
+procedure tcustomtextedit.dochange;
+begin
+ inherited;
+ {
+ if not (ws_loadedproc in fwidgetstate) then begin
+  if fifiserverintf <> nil then begin
+   fifiserverintf.valuechanged(iificlient(self));
+  end;
+ end;
+ }
+end;
+{$endif mse_with_ifi}
 
 procedure tcustomtextedit.setoptionsedit(const avalue: optionseditty);
 begin
@@ -745,26 +758,6 @@ begin
    inherited;
   end;
  end;
-end;
-
-procedure tcustomtextedit.dochange;
-begin
- inherited;
-{
- if not (csdesigning in componentstate) then begin
-  if fupdating = 0 then begin
-   if fgridintf <> nil then begin
-    inc(fupdating);
-    try
-     valuetogrid(fgridintf.getrow);
-    finally
-     dec(fupdating);
-    end;
-   end;
-   inherited;
-  end;
- end;
- }
 end;
 
 procedure tcustomtextedit.reloadfile(restorestate: boolean = true);

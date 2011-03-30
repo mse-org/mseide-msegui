@@ -13,7 +13,7 @@ interface
 uses
  classes,msechart,mseguiglob,mseevent,mseeditglob,msegraphutils,msetypes,
  mseobjectpicker,msepointer,msegraphics,mseclasses,msestat,msestatfile,
- msestrings,msedial,msegui,msemenus;
+ msestrings,msedial,msegui,msemenus,mseglob;
  
 const
  defaultsnapdist = 4;

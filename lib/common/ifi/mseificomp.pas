@@ -16,7 +16,8 @@ unit mseificomp;
 interface
 uses
  classes,mseclasses,{msegui,}mseifiglob,mseglob,typinfo,msestrings,msetypes,
- mseificompglob,msearrayprops,msedatalist,msestat,msestatfile,mseapplication;
+ mseificompglob,msearrayprops,msedatalist,msestat,msestatfile,mseapplication,
+ mseeditglob;
 
 type
  tifilinkcomp = class;
@@ -34,7 +35,7 @@ type
 
  ifivaluelinkstatety = (ivs_linking,ivs_valuesetting,ivs_loadedproc);
  ifivaluelinkstatesty = set of ifivaluelinkstatety;
- valueclientoptionty = (vco_datalist,vco_nosync);
+ valueclientoptionty = (vco_datalist,vco_nosync,vco_readonly,vco_notnull);
  valueclientoptionsty = set of valueclientoptionty;
    
  tcustomificlientcontroller = class(tlinkedpersistent,iifiserver,istatfile)
@@ -133,6 +134,7 @@ type
                      var accept: boolean; const arow: integer); virtual;
    procedure sendmodalresult(const sender: iificlient; 
                              const amodalresult: modalresultty); virtual;
+   procedure updateoptionsedit(var avalue: optionseditty); virtual;
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
@@ -224,8 +226,10 @@ type
    procedure setdatasource(const avalue: tifidatasource);
    procedure setfieldname(const avalue: ififieldnamety);
    procedure linkdatalist1(const alink: pointer);
+   procedure updatereadonlystate1(const alink: pointer);
   protected
    fdatalist: tdatalist;
+   procedure updateoptionsedit(var avalue: optionseditty); override;
     //iifidatasourceclient
    procedure bindingchanged;
    function ifigriddata: tdatalist;
@@ -245,42 +249,11 @@ type
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
 
-//   procedure getdatalist1(const alink: pointer; var handled: boolean);
-//   function getfirstdatalist1: tdatalist;
-//   function getfirstdatalist: tdatalist;
    procedure linkdatalist;
+   procedure updatereadonlystate;
    procedure optionsvaluechanged; virtual;
    function createdatalist: tdatalist; virtual; abstract;
    function getlistdatatypes: listdatatypesty; virtual; abstract;
-{
-   procedure setmsestringvalar(const alink: pointer; var handled: boolean);
-   procedure getmsestringvalar(const alink: pointer; var handled: boolean);
-   procedure setintegervalar(const alink: pointer; var handled: boolean);
-   procedure getintegervalar(const alink: pointer; var handled: boolean);
-   procedure setrealtyvalar(const alink: pointer; var handled: boolean);
-   procedure getrealtyvalar(const alink: pointer; var handled: boolean);
-   procedure setdatetimevalar(const alink: pointer; var handled: boolean);
-   procedure getdatetimevalar(const alink: pointer; var handled: boolean);
-   procedure setbooleanvalar(const alink: pointer; var handled: boolean);
-   procedure getbooleanvalar(const alink: pointer; var handled: boolean);
-   procedure getvalar(const agetter: valargetterty; var avalue);
-   procedure setvalar(const asetter: valarsetterty; const avalue);
-
-   procedure setmsestringitem(const alink: pointer; var handled: boolean);
-   procedure getmsestringitem(const alink: pointer; var handled: boolean);
-   procedure setintegeritem(const alink: pointer; var handled: boolean);
-   procedure getintegeritem(const alink: pointer; var handled: boolean);
-   procedure setrealtyitem(const alink: pointer; var handled: boolean);
-   procedure getrealtyitem(const alink: pointer; var handled: boolean);
-   procedure setdatetimeitem(const alink: pointer; var handled: boolean);
-   procedure getdatetimeitem(const alink: pointer; var handled: boolean);
-   procedure setbooleanitem(const alink: pointer; var handled: boolean);
-   procedure getbooleanitem(const alink: pointer; var handled: boolean);
-   procedure getitem(const index: integer; const agetter: itemgetterty;
-                                                                 var avalue);
-   procedure setitem(const index: integer; const asetter: itemsetterty;
-                                                                 const avalue);
-}
    procedure statreadlist(const alink: pointer);
    procedure statwritelist(const alink: pointer; var handled: boolean);
   public
@@ -303,10 +276,6 @@ type
    fvaluedefault: msestring;
    fonclientsetvalue: setstringindexeventty;
    procedure setvalue1(const avalue: msestring);
-//   function getgridvalues: msestringarty;
-//   procedure setgridvalues(const avalue: msestringarty);
-//   function getgridvalue(const index: integer): msestring;
-//   procedure setgridvalue(const index: integer; const avalue: msestring);
    function getgriddata: tifimsestringdatalist;
   protected
    procedure valuestoclient(const alink: pointer); override;
@@ -657,6 +626,7 @@ type
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    function getgriddata: tdatalist;
    function getvalueprop: ppropinfo;
+   procedure updatereadonlystate;
    property ifilink: tifivaluelinkcomp read fifilink write setifilink;
   public
    constructor create(const aowner: tgridclientcontroller);
@@ -1762,6 +1732,11 @@ begin
  end;
 end;
 
+procedure tcustomificlientcontroller.updateoptionsedit(var avalue: optionseditty);
+begin
+ //dummy
+end;
+
 { tifilinkcomp }
 
 constructor tifilinkcomp.create(aowner: tcomponent);
@@ -2206,6 +2181,20 @@ begin
  end;
 end;
 
+procedure tvalueclientcontroller.updatereadonlystate1(const alink: pointer);
+begin
+ iifidatalink(alink).updatereadonlystate;
+end;
+
+procedure tvalueclientcontroller.updatereadonlystate;
+begin
+ with tmsecomponent1(fowner) do begin
+  if fobjectlinker <> nil then begin
+   fobjectlinker.forall({$ifdef FPC}@{$endif}self.updatereadonlystate1,self);
+  end;
+ end;
+end;
+
 procedure tvalueclientcontroller.optionsvaluechanged;
 begin
  if (vco_datalist in foptionsvalue) xor (fdatalist <> nil) then begin
@@ -2220,6 +2209,9 @@ begin
    freeandnil(fdatalist);
   end;
  end;
+ if not (csloading in fowner.componentstate) then begin
+  updatereadonlystate;
+ end;
 end;
 
 procedure tvalueclientcontroller.loaded;
@@ -2227,6 +2219,7 @@ begin
  if fdatalist <> nil then begin 
   linkdatalist;
  end;
+ updatereadonlystate;
  inherited;
 end;
 
@@ -2304,6 +2297,18 @@ end;
 procedure tvalueclientcontroller.statwritevalue(const reader: tstatwriter);
 begin
  //dummy
+end;
+
+procedure tvalueclientcontroller.updateoptionsedit(var avalue: optionseditty);
+begin
+ if not (csdesigning in fowner.componentstate) then begin
+  if vco_readonly in foptionsvalue then begin
+   include(avalue,oe_readonly);
+  end;
+  if vco_notnull in foptionsvalue then begin
+   include(avalue,oe_notnull);
+  end;
+ end;
 end;
 
 { tstringclientcontroller }
@@ -3808,6 +3813,11 @@ begin //todo: optimize
    exclude(fstate,dls_remotelock);
   end;
  end;
+end;
+
+procedure trowstatehandler.updatereadonlystate;
+begin
+ //dummy
 end;
 
 { trowstateintegerhandler }

@@ -15,7 +15,7 @@ interface
 uses
  msegrids,Classes,msestream,mseclasses,msepipestream,mseevent,mseinplaceedit,
  msetextedit,msestrings,msesys,mseeditglob,msemenus,msegui,mseguiglob,
- mseprocess,msegridsglob,mseedit;
+ mseprocess,msegridsglob,mseedit,mseglob;
 type
  sendtexteventty = procedure(const sender: tobject; 
                        var atext: msestring; var donotsend: boolean) of object;

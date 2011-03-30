@@ -14,7 +14,7 @@ unit msestat;
 interface
 uses
  Classes,mseclasses,mselist,msestream,mseglob,msereal,msetypes,msestrings,
- msehash,msedatalist,msesys;
+ msehash,msedatalist,msesys,mseeditglob;
 
 const
  defaultstatfilename = 'status.sta';
@@ -263,6 +263,13 @@ type
 procedure deletememorystatstream(const streamname: msestring);
 function memorystatstreams: tmemorystreams;
 
+function canstatvalue(const editoptions: optionseditty;
+                         const stat: tstatfiler): boolean;
+function canstatstate(const editoptions: optionseditty;
+                         const stat: tstatfiler): boolean;
+function canstatoptions(const editoptions: optionseditty;
+                         const stat: tstatfiler): boolean;
+
 implementation
 uses
  sysutils,mseformatstr,msefileutils;
@@ -273,6 +280,24 @@ type
   private
    fcapacity: longint;
  end;
+
+function canstatvalue(const editoptions: optionseditty;
+                         const stat: tstatfiler): boolean;
+begin
+ result:= (oe_savevalue in editoptions) and stat.candata;
+end;
+
+function canstatstate(const editoptions: optionseditty;
+                         const stat: tstatfiler): boolean;
+begin
+ result:= (oe_savestate in editoptions) and stat.canstate;
+end;
+
+function canstatoptions(const editoptions: optionseditty;
+                         const stat: tstatfiler): boolean;
+begin
+ result:= (oe_saveoptions in editoptions) and stat.canoptions;
+end;
 
 var
  fmemorystatstreams: tmemorystreams;

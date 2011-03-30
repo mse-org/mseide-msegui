@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit mseifiglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseglob,typinfo;
+ mseglob,mseeditglob,typinfo;
 const
  ifiwidgetstatename = '#widgestate#';
  ifiwidgetmodalresultname = '#modalres#';
@@ -37,6 +37,7 @@ type
                      var avalue; var accept: boolean; const arow: integer);
   procedure sendmodalresult(const sender: iificlient; 
                                          const amodalresult: modalresultty);
+  procedure updateoptionsedit(var avalue: optionseditty);
  end;
  
  iificlient = interface(iobjectlink)['{E3523E5B-604C-46CE-88D4-55C9970BCF9A}']

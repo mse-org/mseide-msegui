@@ -38,10 +38,10 @@ type
  end;
 
  iifidatalink = interface(iifilink) ['{FC6BF316-8347-4CAC-ABB7-FB171E14F52B}']
-//  function ifigriddata: tdatalist;
   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
   function getgriddata: tdatalist;
   function getvalueprop: ppropinfo;
+  procedure updatereadonlystate;
  end;
  
  iifigridlink = interface(iifilink)

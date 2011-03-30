@@ -1399,11 +1399,13 @@ begin
   if canevent(tmethod(fonchange)) then begin
    fonchange(self);
   end;
+  (*
 {$ifdef mse_with_ifi}
   if fifiserverintf <> nil then begin
    fifiserverintf.valuechanged(iificlient(self));
   end;
 {$endif}
+  *)
  end;
 end;
 

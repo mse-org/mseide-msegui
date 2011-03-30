@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1702,7 +1702,12 @@ end;
 
 function tgraphdataedit.getoptionsedit: optionseditty;
 begin
- result := foptionsedit;
+ result:= foptionsedit;
+{$ifdef mse_with_ifi}
+ if fifiserverintf <> nil then begin
+  fifiserverintf.updateoptionsedit(result);
+ end;
+{$endif}
 end;
 
 procedure tgraphdataedit.updateoptions;

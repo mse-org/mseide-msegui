@@ -126,6 +126,7 @@ type
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    function getgriddata: tdatalist;
    function getvalueprop: ppropinfo;
+   procedure updatereadonlystate;
 {$endif}
    procedure updatetextflags;
    procedure settextflags(const value: textflagsty);
@@ -476,6 +477,11 @@ end;
 function tdispwidget.getvalueprop: ppropinfo;
 begin
  result:= nil;
+end;
+
+procedure tdispwidget.updatereadonlystate;
+begin
+ //dummy
 end;
 
 {$endif}

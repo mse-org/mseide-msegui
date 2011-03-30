@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2011-03-30
+ optionseditty moved to mseeditglob.
 2011-03-29
  tvalueclientcontroller.datafield -> fieldname.
 2011-03-26

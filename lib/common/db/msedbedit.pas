@@ -8846,6 +8846,7 @@ begin
  result:= lbdk_integer;
 end;
 
+{$ifdef mse_with_ifi}
 function tenumeditlb.getifilink: tifiintegerlinkcomp;
 begin
  result:= tifiintegerlinkcomp(fifilink);
@@ -8855,6 +8856,7 @@ procedure tenumeditlb.setifilink1(const avalue: tifiintegerlinkcomp);
 begin
  setifilink0(avalue);
 end;
+{$endif mse_with_ifi}
 
 { tcustomenum64edit }
 
@@ -8965,6 +8967,7 @@ begin
  writer.writeint64(valuevarname,value);
 end;
 
+{$ifdef mse_with_ifi}
 function tcustomenum64edit.getifilink: tifiint64linkcomp;
 begin
  result:= tifiint64linkcomp(fifilink);
@@ -8984,6 +8987,7 @@ function tcustomenum64edit.getifilinkkind: ptypeinfo;
 begin
  result:= typeinfo(iifidatalink);
 end;
+{$endif mse_with_ifi}
 
  { tcustomenum64editlb }
  
