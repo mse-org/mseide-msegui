@@ -1355,6 +1355,11 @@ begin
      if not quiet and canevent(tmethod(fondataentered)) then begin
       fondataentered(self);
      end;
+    {$ifdef mse_with_ifi}
+     if fifiserverintf <> nil then begin
+      fifiserverintf.dataentered(getifidatalinkintf,gridrow);
+     end;
+    {$endif}
      if focused then begin
       initfocus;
      end;

@@ -3834,7 +3834,8 @@ procedure tdatalist.checkcapacity;
 var
  int1: integer;
 begin
- int1:= ((fcount*12) div 10) + 5;
+// int1:= ((fcount*12) div 10) + 5;
+ int1:= fcount*2 + 32;
  if fcapacity > int1 then begin
   capacity:= fcount;
  end;
@@ -3877,7 +3878,8 @@ begin
  end
  else begin
   if value > fcapacity then begin
-   capacity:= ((value*12) div 10) + 5; //in 20% schritten
+   capacity:= value*2 + 32; 
+//   capacity:= ((value*12) div 10) + 5; //in 20% schritten
   end;
   if value > countvorher then begin
    Fcount := Value;

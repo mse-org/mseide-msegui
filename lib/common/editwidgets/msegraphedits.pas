@@ -1108,6 +1108,9 @@ begin
  if canevent(tmethod(fonsetvalue)) then begin
   fonsetvalue(self,realty(avalue),accept);
  end;
+{$ifdef mse_with_ifi}
+ ifisetvalue(avalue,accept);
+{$endif} 
  if accept then begin
   value:= realty(avalue);
  end;
@@ -1492,6 +1495,11 @@ begin
   if canevent(tmethod(fondataentered)) then begin
    fondataentered(self);
   end;
+ {$ifdef mse_with_ifi}
+  if fifiserverintf <> nil then begin
+   fifiserverintf.dataentered(iifidatalink(self),gridrow);
+  end;
+ {$endif}
  end;
 end;
 
@@ -2117,9 +2125,7 @@ begin
   longbool(avalue):= bo1;
  end;
 {$ifdef mse_with_ifi}
- if accept then begin
-  ifisetvalue(avalue,accept);
- end;
+ ifisetvalue(avalue,accept);
 {$endif}
  if accept then begin
   value:= longbool(avalue);
@@ -2644,6 +2650,9 @@ begin
  if canevent(tmethod(fonsetvalue)) then begin
   fonsetvalue(self,integer(avalue),accept);
  end;
+{$ifdef mse_with_ifi}
+ ifisetvalue(avalue,accept);
+{$endif} 
  if accept then begin
   value:= integer(avalue);
  end;

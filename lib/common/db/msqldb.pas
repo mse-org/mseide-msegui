@@ -26,7 +26,7 @@ interface
 
 uses 
  sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses,msedatabase,
- msestrings,msedatalist,mseapplication,mseglob,msetimer;
+ msestrings,msedatalist,mseapplication,mseglob,msetimer,msesysenv;
 
 type 
  TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
@@ -35,24 +35,40 @@ type
  sqlconnoptionsty = set of sqlconnoptionty;
 
 type
-  tcustomsqlconnection = class;
-  TSQLTransaction = class;
-  TSQLQuery = class;
+ tcustomsqlconnection = class;
+ TSQLTransaction = class;
+ TSQLQuery = class;
 
-  TStatementType = (stNone, stSelect, stInsert, stUpdate, stDelete,
+ tmacroproperty = class(tdoublemsestringdatalist)
+  private
+   foptions: macrooptionsty;
+  public
+   constructor create; override;
+  published
+   property options: macrooptionsty read foptions write foptions 
+                                           default [mao_caseinsensitive];
+ end;
+  
+ TStatementType = (stNone, stSelect, stInsert, stUpdate, stDelete,
     stDDL, stGetSegment, stPutSegment, stExecProcedure,
     stStartTrans, stCommit, stRollback, stSelectForUpd);
 
  tsqlstringlist = class(tmsestringdatalist)
   private
+   fmacros: tmacroproperty;
    function gettext: msestring;
    procedure settext(const avalue: msestring);
    procedure readstrings(reader: treader);
    procedure writestrings(writer: twriter);
+   procedure setmacros(const avalue: tmacroproperty);
   protected
    procedure defineproperties(filer: tfiler); override;
   public
+   constructor create; override;
+   destructor destroy; override;
    property text: msestring read gettext write settext;
+  published
+   property macros: tmacroproperty read fmacros write setmacros;
  end;
 
 // updatesqloptionty = (uso_refresh);
@@ -1258,12 +1274,26 @@ end;
    
    { tsqlstringlist }
 
+constructor tsqlstringlist.create;
+begin
+ fmacros:= tmacroproperty.create;
+ inherited;
+end;
+
+destructor tsqlstringlist.destroy;
+begin
+ inherited;
+ fmacros.free;
+end;
+
 function tsqlstringlist.gettext: msestring;
 var
  int1,int2: integer;
  po1: pmsestring;
  po2: pmsechar;
  mstr1: msestring;
+ ar1: macroinfoarty;
+ po3: pdoublemsestringty;
 begin
  result:= '';
  if count > 0 then begin
@@ -1286,7 +1316,19 @@ begin
     inc(po1);
    end;
    move(po1^[1],po2^,length(po1^)*sizeof(msechar)); //last line
-  end; 
+  end;
+  if fmacros.count <> 0 then begin
+   setlength(ar1,fmacros.count);
+   po3:= fmacros.datapo;
+   for int1:= 0 to high(ar1) do begin
+    with ar1[int1] do begin
+     name:= po3^.a;
+     value:= po3^.b;
+    end;
+    inc(po3);
+   end;    
+   result:= expandmacros(result,ar1,fmacros.foptions);
+  end;
  end;
 end;
 
@@ -1333,6 +1375,11 @@ procedure tsqlstringlist.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('Strings',@readstrings,@writestrings,false);
+end;
+
+procedure tsqlstringlist.setmacros(const avalue: tmacroproperty);
+begin
+ fmacros.assign(avalue);
 end;
 
 { tdbcontroller }
@@ -2518,7 +2565,7 @@ procedure TSQLTransaction.savepointrollback(alevel: integer = -1);
 begin
  checkactive;
  if alevel = -1 then begin
-  alevel:= fsavepointlevel;
+  alevel:= fsavepointlevel-1;
  end;
  database.executedirect('ROLLBACK TO '+'sp'+inttostrmse(alevel)+';',
                                                     self,nil,false,true); 
@@ -4884,6 +4931,14 @@ begin
  ferror:= aerror;
  ferrormessage:= aerrormessage;
  inherited create(asender.name+': '+amessage);
+end;
+
+{ tmacroproperty }
+
+constructor tmacroproperty.create;
+begin
+ foptions:= [mao_caseinsensitive];
+ inherited;
 end;
 
 end.

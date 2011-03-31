@@ -816,7 +816,7 @@ end;
 
 function tmsesqlquery.islocal: boolean;
 begin
- result:= dso_local in fcontroller.options;
+ result:= (dso_local in fcontroller.options) and not connected;
 end;
 
 procedure tmsesqlquery.inheritedinternalclose;

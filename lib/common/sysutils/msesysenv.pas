@@ -215,13 +215,30 @@ type
    property options: macrooptionsty read foptions write foptions;
  end;
 
-function expandmacros(const value: msestring; const macros:macroinfoarty;
-                         const caseinsensitive: boolean = true): msestring;
+//function expandmacros(const value: msestring; const macros:macroinfoarty;
+//              const caseinsensitive: boolean = true): msestring; overload;
+function expandmacros(const value: msestring; const macros: macroinfoarty;
+          const options: macrooptionsty = [mao_caseinsensitive]): msestring;
  
 implementation
 uses
  msesysutils,RTLConsts,msestream,msesys{$ifdef UNIX},mselibc{$endif};
- 
+
+function expandmacros(const value: msestring; const macros:macroinfoarty;
+              const options: macrooptionsty = [mao_caseinsensitive]): msestring;
+var
+ list: tmacrolist;
+begin
+ list:= tmacrolist.create(options);
+ try
+  list.add(macros);
+  result:= value;
+  list.expandmacros(result);
+ finally
+  list.free;
+ end;
+end;
+{ 
 function expandmacros(const value: msestring; const macros:macroinfoarty;
                  const caseinsensitive: boolean = true): msestring;
 var
@@ -236,7 +253,7 @@ begin
   list.free;
  end;
 end;
-
+}
 { tsysenvmanager }
 
 constructor tsysenvmanager.create(aowner: tcomponent);

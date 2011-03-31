@@ -132,6 +132,7 @@ type
                             const astate: ifiwidgetstatesty); virtual;
    procedure setvalue(const sender: iificlient; var avalue;
                      var accept: boolean; const arow: integer); virtual;
+   procedure dataentered(const sender: iificlient; const arow: integer); virtual;
    procedure sendmodalresult(const sender: iificlient; 
                              const amodalresult: modalresultty); virtual;
    procedure updateoptionsedit(var avalue: optionseditty); virtual;
@@ -243,6 +244,8 @@ type
    function canconnect(const acomponent: tcomponent): boolean; override;
    procedure setvalue(const sender: iificlient; var avalue;
                           var accept: boolean; const arow: integer); override;
+   procedure dataentered(const sender: iificlient;
+                                              const arow: integer); override;
    procedure loaded; override;
    procedure statreadvalue(const reader: tstatreader); virtual;
    procedure statwritevalue(const reader: tstatwriter); virtual;
@@ -996,6 +999,7 @@ end;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure refresh;
   published
    property fields: tififields read ffields write setfields;
    property active: boolean read factive write setactive default false;
@@ -1339,6 +1343,12 @@ end;
 
 procedure tcustomificlientcontroller.setvalue(const sender: iificlient;
                    var avalue; var accept: boolean; const arow: integer);
+begin
+ //dummy
+end;
+
+procedure tcustomificlientcontroller.dataentered(const sender: iificlient;
+               const arow: integer);
 begin
  //dummy
 end;
@@ -2153,7 +2163,16 @@ procedure tvalueclientcontroller.setvalue(const sender: iificlient; var avalue;
                var accept: boolean; const arow: integer);
 begin
  inherited;
- if accept and fowner.canevent(tmethod(fonclientdataentered)) then begin
+// if accept and fowner.canevent(tmethod(fonclientdataentered)) then begin
+//  fonclientdataentered(fowner,arow);
+// end;
+end;
+
+procedure tvalueclientcontroller.dataentered(const sender: iificlient;
+                                              const arow: integer);
+begin
+ inherited;
+ if fowner.canevent(tmethod(fonclientdataentered)) then begin
   fonclientdataentered(fowner,arow);
  end;
 end;
@@ -3409,6 +3428,12 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tifidatasource.refresh;
+begin
+ active:= false;
+ active:= true;
 end;
 
 procedure tifidatasource.loaded;

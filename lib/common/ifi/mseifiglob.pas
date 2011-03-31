@@ -35,6 +35,7 @@ type
                            const astate: ifiwidgetstatesty);
   procedure setvalue(const sender: iificlient;
                      var avalue; var accept: boolean; const arow: integer);
+  procedure dataentered(const sender: iificlient; const arow: integer);
   procedure sendmodalresult(const sender: iificlient; 
                                          const amodalresult: modalresultty);
   procedure updateoptionsedit(var avalue: optionseditty);

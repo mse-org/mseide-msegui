@@ -6059,6 +6059,7 @@ begin
    with values[int1] do begin
     case vtype of
      vtInteger:    field1.asinteger:= VInteger;
+     vtInt64:      field1.aslargeint:= VInt64^;
      vtBoolean:    field1.asboolean:= VBoolean;
      vtChar:       field1.asstring:= VChar;
      vtWideChar:   field1.asstring:= VWideChar;

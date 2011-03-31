@@ -156,7 +156,8 @@ begin
  for int1:= 0 to high(ar2) do begin
   ar1[ar2[int1]]:= acols[int1];
  end;
- internalloaddatalists(acols);
+// internalloaddatalists(acols);
+ internalloaddatalists(ar1);
 end;
 
 end.
