@@ -122,6 +122,7 @@ type
    procedure setreadonly(const avalue: boolean);
   protected
    fgridintf: iwidgetgrid;
+   fgriddatalink: pointer;
  
    procedure setisdb;  
    function getoptionsedit: optionseditty; virtual;
@@ -159,7 +160,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
    function getdatatype: listdatatypety; virtual; abstract;
    function getdefaultvalue: pointer; virtual;
-   function getrowdatapo(const info: cellinfoty): pointer; virtual;
+   function getrowdatapo(const arow: integer): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid); virtual;
    function getcellframe: framety; virtual;
    function getcellcursor(const arow: integer; 
@@ -990,6 +991,7 @@ type
  twidgetcol1 = class(twidgetcol);
  twidget1 = class(twidget);
  tarrayprop1 = class(tarrayprop);
+ tcustomwidgetgrid1 = class(tcustomwidgetgrid);
 
 const
  valuevarname = 'value';
@@ -1420,6 +1422,12 @@ end;
 procedure tgraphdataedit.setgridintf(const intf: iwidgetgrid);
 begin
  fgridintf:= intf;
+ if fgridintf <> nil then begin
+  fgriddatalink:= tcustomwidgetgrid1(fgridintf.getgrid).getgriddatalink;
+ end
+ else begin
+  fgriddatalink:= nil;
+ end;
  {$ifdef mse_with_ifi}
 {
  if fgridintf <> nil then begin
@@ -1597,7 +1605,7 @@ begin
  result:= nil;
 end;
 
-function tgraphdataedit.getrowdatapo(const info: cellinfoty): pointer;
+function tgraphdataedit.getrowdatapo(const arow: integer): pointer;
 begin
  result:= nil;
 end;

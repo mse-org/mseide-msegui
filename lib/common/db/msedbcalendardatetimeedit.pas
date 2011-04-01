@@ -33,7 +33,7 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -105,15 +105,14 @@ begin
  end;
 end;
  
-function tdbcalendardatetimeedit.getrowdatapo(const info: cellinfoty): pointer;
+function tdbcalendardatetimeedit.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getdatetimebuffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getdatetimebuffer(
+                                                fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 

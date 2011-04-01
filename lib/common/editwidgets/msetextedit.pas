@@ -141,7 +141,7 @@ type
    function getdatatype: listdatatypety; virtual;
    function getinitvalue: pointer;
    function getdefaultvalue: pointer;
-   function getrowdatapo(const info: cellinfoty): pointer; virtual;
+   function getrowdatapo(const arow: integer): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid);
    function getgridintf: iwidgetgrid;
    function getcellframe: framety; virtual;
@@ -586,7 +586,7 @@ begin
  result:= nil;
 end;
 
-function tcustomtextedit.getrowdatapo(const info: cellinfoty): pointer;
+function tcustomtextedit.getrowdatapo(const arow: integer): pointer;
 begin
  result:= nil;
 end;

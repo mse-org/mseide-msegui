@@ -325,7 +325,7 @@ type
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
 
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
    function getnulltext: msestring; override;
   //idbeditfieldlink
    procedure valuetofield;
@@ -394,7 +394,7 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
    function getnulltext: msestring; override;
   //idbeditfieldlink
    procedure valuetofield;
@@ -497,7 +497,7 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
    function getnulltext: msestring; override;
   //idbeditfieldlink
    procedure valuetofield;
@@ -532,7 +532,7 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
    function getnulltext: msestring; override;
   //idbeditfieldlink
    procedure valuetofield;
@@ -566,7 +566,7 @@ type
    function internaldatatotext(const data): msestring; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure setnullvalue; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -599,7 +599,7 @@ type
    procedure dochange; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -631,7 +631,7 @@ type
    procedure modified; override;
    procedure dochange; override;
    function getoptionsedit: optionseditty; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -665,7 +665,7 @@ type
    procedure dochange; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -724,7 +724,7 @@ type
    procedure dochange; override;
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -756,7 +756,7 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -791,7 +791,7 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -828,7 +828,7 @@ type
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
    procedure modified; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -855,7 +855,7 @@ type
    procedure setdatalink(const avalue: teditwidgetdatalink);
   protected   
    procedure defineproperties(filer: tfiler); override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
    procedure griddatasourcechanged; override;
   //idbeditfieldlink
    procedure valuetofield;
@@ -887,7 +887,7 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
   //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -920,7 +920,7 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
   //idbeditfieldlink
    procedure valuetofield; virtual;
    procedure fieldtovalue; virtual;
@@ -960,7 +960,7 @@ type
    procedure settext_true(const avalue: msestring);
    procedure booltextchanged;
   protected
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
   //idbeditfieldlink
    procedure valuetofield; override;
    procedure fieldtovalue; override;
@@ -1450,7 +1450,7 @@ type
    procedure internalcreateframe; override;
    function createfixcols: tfixcols; override;
    procedure dolayoutchanged; override;
-   procedure initcellinfo(var info: cellinfoty); override;
+//   procedure initcellinfo(var info: cellinfoty); override;
    procedure docellevent(var info: celleventinfoty); override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); override;
    function getzebrastart: integer; override;
@@ -1708,7 +1708,7 @@ type
    function getoptionsedit: optionseditty; override;
    function createfixcols: tfixcols; override;
    function createdatacols: tdatacols; override;
-   procedure initcellinfo(var info: cellinfoty); override;
+//   procedure initcellinfo(var info: cellinfoty); override;
    function focuscell(cell: gridcoordty;
            selectaction: focuscellactionty = fca_focusin;
          const selectmode: selectcellmodety = scm_cell;
@@ -2076,7 +2076,7 @@ type
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
 
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
   //idbeditfieldlink
    procedure valuetofield; virtual;
    procedure fieldtovalue; virtual;
@@ -2129,7 +2129,7 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
   //idbeditfieldlink
    procedure valuetofield; virtual;
    procedure fieldtovalue; virtual;
@@ -3236,15 +3236,13 @@ begin
  result:= fdatalink.nullsymbol;
 end;
 
-function tdbstringedit.getrowdatapo(const info: cellinfoty): pointer;
+function tdbstringedit.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getstringbuffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getstringbuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -3458,15 +3456,13 @@ begin
  value:= fdatalink.asmsestring;
 end;
 
-function tcustomdbdropdownlistedit.getrowdatapo(const info: cellinfoty): pointer;
+function tcustomdbdropdownlistedit.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getstringbuffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getstringbuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -3567,15 +3563,13 @@ begin
  value:= fdatalink.asmsestring;
 end;
 
-function tdbkeystringedit.getrowdatapo(const info: cellinfoty): pointer;
+function tdbkeystringedit.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getstringbuffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getstringbuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -3673,15 +3667,13 @@ begin
  value:= fdatalink.asmsestring;
 end;
 
-function tdbmemoedit.getrowdatapo(const info: cellinfoty): pointer;
+function tdbmemoedit.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getstringbuffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getstringbuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -3803,15 +3795,13 @@ begin
  value:= fdatalink.field.asinteger;
 end;
 
-function tdbintegeredit.getrowdatapo(const info: cellinfoty): pointer;
+function tdbintegeredit.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getintegerbuffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getintegerbuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -3899,15 +3889,13 @@ begin
  value:= fdatalink.field.asboolean;
 end;
 
-function tdbbooleanedit.getrowdatapo(const info: cellinfoty): pointer;
+function tdbbooleanedit.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getbooleanbuffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getbooleanbuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -4005,15 +3993,13 @@ begin
  value:= fdatalink.field.asinteger;
 end;
 
-function tdbdataicon.getrowdatapo(const info: cellinfoty): pointer;
+function tdbdataicon.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getintegerbuffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getintegerbuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -4111,15 +4097,13 @@ begin
  value:= fdatalink.field.asinteger;
 end;
 
-function tdbdatabutton.getrowdatapo(const info: cellinfoty): pointer;
+function tdbdatabutton.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getintegerbuffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getintegerbuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -4244,15 +4228,13 @@ begin
  value:= fdatalink.field.asboolean;
 end;
 
-function tdbbooleaneditradio.getrowdatapo(const info: cellinfoty): pointer;
+function tdbbooleaneditradio.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getbooleanbuffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getbooleanbuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -4343,15 +4325,13 @@ begin
  end;
 end;
 
-function tdbrealedit.getrowdatapo(const info: cellinfoty): pointer;
+function tdbrealedit.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getrealtybuffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getrealtybuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -4449,15 +4429,13 @@ begin
  end;
 end;
 
-function tdbrealspinedit.getrowdatapo(const info: cellinfoty): pointer;
+function tdbrealspinedit.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getrealtybuffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getrealtybuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -4557,18 +4535,16 @@ begin
  end;
 end;
 
-function tdbslider.getrowdatapo(const info: cellinfoty): pointer;
+function tdbslider.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getrealtybuffer(fdatalink.field,cell.row);
-   if result <> nil then begin
-    preal(result)^:= reapplyrange(preal(result)^,valuerange,valuestart);
-   end;
-  end
-  else begin
-   result:= nil;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getrealtybuffer(fdatalink.field,arow);
+  if result <> nil then begin
+   preal(result)^:= reapplyrange(preal(result)^,valuerange,valuestart);
   end;
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -4646,18 +4622,16 @@ begin
  fdatalink.free;
 end;
 
-function tdbprogressbar.getrowdatapo(const info: cellinfoty): pointer;
+function tdbprogressbar.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getrealtybuffer(fdatalink.field,cell.row);
-   if result <> nil then begin
-    preal(result)^:= reapplyrange(preal(result)^,valuerange,valuestart);
-   end;
-  end
-  else begin
-   result:= nil;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getrealtybuffer(fdatalink.field,arow);
+  if result <> nil then begin
+   preal(result)^:= reapplyrange(preal(result)^,valuerange,valuestart);
   end;
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -4778,15 +4752,13 @@ begin
  end;
 end;
  
-function tdbdatetimeedit.getrowdatapo(const info: cellinfoty): pointer;
+function tdbdatetimeedit.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getdatetimebuffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getdatetimebuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -4886,20 +4858,14 @@ begin
  end;
 end;
 
-function tcustomdbenumedit.getrowdatapo(const info: cellinfoty): pointer;
+function tcustomdbenumedit.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).
-                    getintegerbuffer(fdatalink.field,cell.row);
-//   if result = nil then begin
-//    result:= @fvaluedefault1;
-//   end;
-  end
-  else begin
-   result:= nil;
-//   result:= @fvaluedefault1;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).
+                   getintegerbuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -5008,18 +4974,16 @@ begin
  afieldtypes:= booleanfields;
 end;
 
-function tdbbooleantextedit.getrowdatapo(const info: cellinfoty): pointer;
+function tdbbooleantextedit.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getbooleanbuffer(fdatalink.field,cell.row);
-   if result = nil then begin
-    result:= @fvaluedefault;
-   end;
-  end
-  else begin
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getbooleanbuffer(fdatalink.field,arow);
+  if result = nil then begin
    result:= @fvaluedefault;
   end;
+ end
+ else begin
+  result:= @fvaluedefault;
  end;
 end;
 
@@ -7495,13 +7459,13 @@ begin
  inherited;
  fdatalink.updatelayout;
 end;
-
+{
 procedure tcustomdbwidgetgrid.initcellinfo(var info: cellinfoty);
 begin
  inherited;
  info.griddatalink:= fdatalink;
 end;
-
+}
 procedure tcustomdbwidgetgrid.docellevent(var info: celleventinfoty);
 begin
  inherited;
@@ -8182,13 +8146,13 @@ begin
  inherited;
  fdatalink.updatelayout;
 end;
-
+{
 procedure tcustomdbstringgrid.initcellinfo(var info: cellinfoty);
 begin
  inherited;
  info.griddatalink:= fdatalink;
 end;
-
+}
 procedure tcustomdbstringgrid.docellevent(var info: celleventinfoty);
 begin
  inherited;
@@ -9164,19 +9128,17 @@ begin
  end;
 end;
 
-function tdbenum64editlb.getrowdatapo(const info: cellinfoty): pointer;
+function tdbenum64editlb.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).
-                    getint64buffer(fdatalink.field,cell.row);
-   if result = nil then begin
-    result:= @fvaluedefault;
-   end;
-  end
-  else begin
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).
+                   getint64buffer(fdatalink.field,arow);
+  if result = nil then begin
    result:= @fvaluedefault;
   end;
+ end
+ else begin
+  result:= @fvaluedefault;
  end;
 end;
 
@@ -9275,19 +9237,17 @@ begin
  end;
 end;
 
-function tdbenum64editdb.getrowdatapo(const info: cellinfoty): pointer;
+function tdbenum64editdb.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).
-                    getint64buffer(fdatalink.field,cell.row);
-   if result = nil then begin
-    result:= @fvaluedefault;
-   end;
-  end
-  else begin
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).
+                   getint64buffer(fdatalink.field,arow);
+  if result = nil then begin
    result:= @fvaluedefault;
   end;
+ end
+ else begin
+  result:= @fvaluedefault;
  end;
 end;
 

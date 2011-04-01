@@ -34,6 +34,7 @@ type
    procedure writevalue(stream: tstream);
   protected
    fgridintf: iwidgetgrid;
+   fgriddatalink: pointer;
    fvalue: string;   //in design mode only
    fcurformat: string;
    procedure setisdb;
@@ -49,7 +50,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; virtual;
    function getdatatype: listdatatypety;
    function getdefaultvalue: pointer;
-   function getrowdatapo(const info: cellinfoty): pointer; virtual;
+   function getrowdatapo(const arow: integer): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid);
    function getcellframe: framety;
    function getcellcursor(const arow: integer;
@@ -102,6 +103,7 @@ uses
  msestream,sysutils;
 type
  tsimplebitmap1 = class(tsimplebitmap);
+ tcustomwidgetgrid1 = class(tcustomwidgetgrid);
  
 { tcustomdataimage }
 
@@ -184,7 +186,7 @@ begin
  result:= nil;
 end;
 
-function tcustomdataimage.getrowdatapo(const info: cellinfoty): pointer;
+function tcustomdataimage.getrowdatapo(const arow: integer): pointer;
 begin
  result:= nil;
 end;
@@ -192,6 +194,12 @@ end;
 procedure tcustomdataimage.setgridintf(const intf: iwidgetgrid);
 begin
  fgridintf:= intf;
+ if fgridintf <> nil then begin
+  fgriddatalink:= tcustomwidgetgrid1(fgridintf.getgrid).getgriddatalink;
+ end
+ else begin
+  fgriddatalink:= nil;
+ end;
 end;
 
 function tcustomdataimage.getcellframe: framety;

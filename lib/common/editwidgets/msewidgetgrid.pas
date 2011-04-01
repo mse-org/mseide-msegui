@@ -70,7 +70,8 @@ type
   function createdatalist(const sender: twidgetcol): tdatalist;
   function getdatatype: listdatatypety;
   function getdefaultvalue: pointer;
-  function getrowdatapo(const info: cellinfoty): pointer;
+//  function getrowdatapo(const info: cellinfoty): pointer;
+  function getrowdatapo(const arow: integer): pointer;
   function getoptionsedit: optionseditty;
   procedure setgridintf(const intf: iwidgetgrid);
   function getgridintf: iwidgetgrid;
@@ -143,6 +144,7 @@ type
                const cellbefore: gridcoordty; var newcell: gridcoordty;
                const selectaction: focuscellactionty); override;
    procedure defineproperties(filer: tfiler); override;
+   function getdatapo(const arow: integer): pointer; override;
    procedure drawcell(const canvas: tcanvas); override;
    procedure drawfocusedcell(const acanvas: tcanvas); override;
    procedure drawfocus(const acanvas: tcanvas); override;
@@ -1374,8 +1376,8 @@ begin
    datatype:= fintf.getdatatype;
    if arow >= 0 then begin
     info.cell.row:= arow;
-    info.griddatalink:= tcustomwidgetgrid(fgrid).getgriddatalink;
-    po1:= fintf.getrowdatapo(info);
+//    info.griddatalink:= tcustomwidgetgrid(fgrid).getgriddatalink;
+    po1:= fintf.getrowdatapo(info.cell.row);
    end
    else begin
     po1:= nil;
@@ -1501,11 +1503,25 @@ begin
  end;
 end;
 
+function twidgetcol.getdatapo(const arow: integer): pointer;
+begin
+ if (fdata = nil) then begin
+  result:= nil;
+  if fintf <> nil then begin
+   result:= fintf.getrowdatapo(arow);
+  end;
+ end
+ else begin
+  result:= inherited getdatapo(arow);
+ end;
+end;
+
 procedure twidgetcol.drawcell(const canvas: tcanvas);
 var
  face1: tcustomface;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
+ {
   if (fdata <> nil) then begin
    if cell.row < fdata.count then begin
     datapo:= fdata.getitempo(cell.row);
@@ -1519,6 +1535,7 @@ begin
     datapo:= fintf.getrowdatapo(cellinfoty(canvas.drawinfopo^));
    end;
   end;
+  }
   inherited;
   if fintf <> nil then begin
    if calcautocellsize then begin

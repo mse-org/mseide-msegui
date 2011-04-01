@@ -91,7 +91,7 @@ type
    fvaluebuffer: string;
    procedure griddatasourcechanged; override;
    procedure loadcellbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap); override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
   //idbeditfieldlink
    function getgriddatasource: tdatasource;
@@ -204,18 +204,16 @@ begin
  //dummy
 end;
 
-function tdbdataimage.getrowdatapo(const info: cellinfoty): pointer;
+function tdbdataimage.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if (griddatalink <> nil) and not 
-     tgriddatalink(griddatalink).getrowfieldisnull(
-                                    fdatalink.field,cell.row) then begin
-   result:= tgriddatalink(griddatalink).getdummystringbuffer;
-   pstring(result)^:= ' ';
-  end
-  else begin
-   result:= nil;
-  end;
+ if (fgriddatalink <> nil) and not 
+    tgriddatalink(fgriddatalink).getrowfieldisnull(
+                                   fdatalink.field,arow) then begin
+  result:= tgriddatalink(fgriddatalink).getdummystringbuffer;
+  pstring(result)^:= ' ';
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -226,7 +224,7 @@ var
 begin
  with cellinfoty(acanvas.drawinfopo^) do begin
   if fdatalink.field is tmsegraphicfield then begin
-   with tgriddatalink(griddatalink) do begin
+   with tgriddatalink(fgriddatalink) do begin
     int1:= activerecord;
     activerecord:= cell.row;
     tmsegraphicfield(fdatalink.field).loadbitmap(abmp,format);
@@ -235,8 +233,8 @@ begin
   end
   else begin
    abmp.loadfromstring(
-   string(tgriddatalink(griddatalink).getansistringbuffer(fdatalink.field,cell.row)^),
-                format);
+   string(tgriddatalink(fgriddatalink).getansistringbuffer(
+                                  fdatalink.field,cell.row)^),format);
   end;
  end;
 end;

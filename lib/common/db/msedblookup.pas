@@ -99,7 +99,7 @@ type
   protected
    procedure updatelookupvalue; override;
    function internaldatatotext(const data): msestring; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
    function getkeylbdatakind: lbdatakindty; override;
   //idbeditfieldlink
    procedure fieldtovalue; override;
@@ -113,7 +113,7 @@ type
   protected
    procedure updatelookupvalue; override;
    function internaldatatotext(const data): msestring; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
    function getkeylbdatakind: lbdatakindty; override;
   //idbeditfieldlink
    procedure fieldtovalue; override;
@@ -127,7 +127,7 @@ type
   protected
    procedure updatelookupvalue; override;
    function internaldatatotext(const data): msestring; override;
-   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function getrowdatapo(const arow: integer): pointer; override;
    function getkeylbdatakind: lbdatakindty; override;
   //idbeditfieldlink
    procedure fieldtovalue; override;
@@ -553,15 +553,13 @@ begin
  inherited;
 end;
 
-function tdblookup32lb.getrowdatapo(const info: cellinfoty): pointer;
+function tdblookup32lb.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getintegerbuffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getintegerbuffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -623,15 +621,13 @@ begin
  inherited;
 end;
 
-function tdblookup64lb.getrowdatapo(const info: cellinfoty): pointer;
+function tdblookup64lb.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getint64buffer(fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getint64buffer(fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -693,16 +689,14 @@ begin
  inherited;
 end;
 
-function tdblookupstrlb.getrowdatapo(const info: cellinfoty): pointer;
+function tdblookupstrlb.getrowdatapo(const arow: integer): pointer;
 begin
- with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getstringbuffer(
-                                                 fdatalink.field,cell.row);
-  end
-  else begin
-   result:= nil;
-  end;
+ if fgriddatalink <> nil then begin
+  result:= tgriddatalink(fgriddatalink).getstringbuffer(
+                                                fdatalink.field,arow);
+ end
+ else begin
+  result:= nil;
  end;
 end;
 

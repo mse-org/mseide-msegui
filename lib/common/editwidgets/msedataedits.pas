@@ -86,6 +86,7 @@ type
   protected
    fstate: dataeditstatesty;
    fgridintf: iwidgetgrid;
+   fgriddatalink: pointer;
    fdatalist: tdatalist;
    fcontrollerintf: idataeditcontroller;
 {$ifdef mse_with_ifi}
@@ -163,7 +164,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
    function getdatatype: listdatatypety; virtual; abstract;
    function getdefaultvalue: pointer; virtual;
-   function getrowdatapo(const info: cellinfoty): pointer; virtual;
+   function getrowdatapo(const arow: integer): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid); virtual;
    function getcellframe: framety; virtual;
    function getcellcursor(const arow: integer;
@@ -171,6 +172,7 @@ type
    procedure updatecellzone(const row: integer; const apos: pointty;
                                            var result: cellzonety); virtual;
    function getnulltext: msestring; virtual;
+   function getcelltext(const datapo: pointer; out empty: boolean): msestring;
    procedure drawcell(const canvas: tcanvas); virtual;
    procedure updateautocellsize(const canvas: tcanvas); virtual;
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -1284,6 +1286,8 @@ type
  tdropdowncols1 = class(tdropdowncols);
  tcustomframe1 = class(tcustomframe);
  tcustomgrid1 = class(tcustomgrid);
+ tcustomwidgetgrid1 = class(tcustomwidgetgrid);
+ tdatacol1 = class(tdatacol);
 
 function realtytoint(const avalue: realty): integer;
 begin
@@ -1728,6 +1732,7 @@ begin
 }
 {$endif}
   fdatalist:= fgridintf.getcol.datalist;
+  fgriddatalink:= tcustomwidgetgrid1(fgridintf.getgrid).getgriddatalink;
   fgridintf.updateeditoptions(foptionsedit);
   if (ow_autoscale in foptionswidget) and
               (foptionswidget * [ow_fontglyphheight,ow_fontlineheight] <> []) then begin
@@ -1736,6 +1741,7 @@ begin
  end
  else begin
   fdatalist:= nil;
+  fgriddatalink:= nil;
  end;
 end;
 
@@ -1919,7 +1925,7 @@ begin
  result:= nil;
 end;
 
-function tcustomdataedit.getrowdatapo(const info: cellinfoty): pointer;
+function tcustomdataedit.getrowdatapo(const arow: integer): pointer;
 begin
  result:= nil;
 end;
@@ -1927,6 +1933,30 @@ end;
 function tcustomdataedit.getnulltext: msestring;
 begin
  result:= '';
+end;
+
+function tcustomdataedit.getcelltext(const datapo: pointer;
+                                   out empty: boolean): msestring;
+begin
+ empty:= false;
+ if datapo <> nil then begin
+  result:= internaldatatotext(datapo^);
+  if passwordchar <> #0 then begin
+   result:= charstring(passwordchar,length(result));
+  end;
+  if not (des_isdb in fstate) and (result = '') and 
+                                  (fempty_text <> '') then begin
+   empty:= true;
+   result:= fempty_text;
+  end;
+ end
+ else begin
+  empty:= true;
+  result:= fempty_text;
+ end;
+ if canevent(tmethod(fongettext)) then begin
+  fongettext(self,result,false);
+ end;
 end;
 
 procedure tcustomdataedit.drawcell(const canvas: tcanvas);
@@ -1938,26 +1968,8 @@ var
  rect1: rectty;
 begin
  atextflags:= textflags;
- bo1:= false;
  with cellinfoty(canvas.drawinfopo^) do begin
-  if datapo <> nil then begin
-   mstr1:= internaldatatotext(datapo^);
-   if passwordchar <> #0 then begin
-    mstr1:= charstring(passwordchar,length(mstr1));
-   end;
-   if not (des_isdb in fstate) and (mstr1 = '') and 
-                                   (fempty_text <> '') then begin
-    bo1:= true;
-    mstr1:= fempty_text;
-   end;
-  end
-  else begin
-   bo1:= true;
-   mstr1:= fempty_text;
-  end;
-  if canevent(tmethod(fongettext)) then begin
-   fongettext(self,mstr1,false);
-  end;
+  mstr1:= getcelltext(datapo,bo1);
   if bo1 then begin    
    if fempty_fontstyle <> [] then begin
     canvas.font.style:= fempty_fontstyle;
@@ -2111,15 +2123,17 @@ begin
  result:= fdatalist;
 end;
 
-function tcustomdataedit.textclipped(const arow: integer; out acellrect: rectty): boolean;
+function tcustomdataedit.textclipped(const arow: integer;
+                                        out acellrect: rectty): boolean;
 var
  rect2: rectty;
  canvas1: tcanvas;
  cell1: gridcoordty;
  grid1: tcustomgrid;
+ bo1: boolean;
 begin
  checkgrid;
- with fgridintf.getcol do begin
+ with twidgetcol1(fgridintf.getcol) do begin
   grid1:= grid;
   cell1.row:= arow;
   cell1.col:= colindex;
@@ -2127,7 +2141,7 @@ begin
   if result then begin
    acellrect:= grid1.clippedcellrect(cell1,cil_inner);
    canvas1:= getcanvas;
-   rect2:= textrect(canvas1,datatotext(datalist.getitempo(arow)^),
+   rect2:= textrect(canvas1,getcelltext(getdatapo(arow),bo1),
                    acellrect,feditor.textflags,font);
    result:= not rectinrect(rect2,acellrect);
   end
@@ -2160,7 +2174,7 @@ begin
          ((info.grid.row <> info.cell.row) or (info.grid.col <> info.cell.col)) and
          twidget1(info.grid).getshowhint then begin
    application.inithintinfo(hintinfo,info.grid);
-   hintinfo.caption:= datatotext(fgridintf.getcol.datalist.getitempo(info.cell.row)^);
+   hintinfo.caption:= datatotext(tdatacol1(fgridintf.getcol).getdatapo(info.cell.row)^);
    application.showhint(info.grid,hintinfo);
   end; 
  end;

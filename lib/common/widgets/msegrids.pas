@@ -292,7 +292,7 @@ type
   notext: boolean;
   ismousecell: boolean;
   datapo: pointer;
-  griddatalink: pointer;
+//  griddatalink: pointer;
   rowstate: prowstatety;
   foldinfo: prowfoldinfoty;
   calcautocellsize: boolean; // don't paint
@@ -6144,7 +6144,7 @@ end;
 
 function tdatacol.getdatapo(const arow: integer): pointer;
 begin
- if (fdata <> nil) then begin
+ if (fdata <> nil) and (arow < fdata.count) then begin
   result:= fdata.getitempo(arow);
  end
  else begin
