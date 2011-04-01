@@ -1158,88 +1158,98 @@ begin
   for SQLVarNr := 0 to High(ParamBinding){AParams.count-1} do begin
    ParNr:= ParamBinding[SQLVarNr];
    po1:= @in_sqlda^.SQLvar[SQLVarNr];
-   if AParams[ParNr].IsNull then begin
-    If Assigned(po1^.SQLInd) then begin
-     po1^.SQLInd^ := -1;
-    end;
-   end
-   else begin
-    if assigned(po1^.SQLInd) then begin
-     po1^.SQLInd^ := 0;
-    end;
-    case paramtypes[sqlvarnr] of
-     ftInteger,ftsmallint : begin
-       i := AParams[ParNr].AsInteger;
-       Move(i, po1^.SQLData^,po1^.SQLLen);
-//todo: byte order?
+   with AParams[ParNr] do begin
+    if IsNull then begin
+     If Assigned(po1^.SQLInd) then begin
+      po1^.SQLInd^ := -1;
      end;
-     ftbcd: begin
-      cur1:= AParams[ParNr].ascurrency;
-      with po1^ do begin
-       cur1:= scaleexp10(cur1,-(4+sqlscale));
-//       reallocmem(sqldata,sizeof(cur1));
-//       move(cur1,sqldata^,sizeof(cur1));
-       move(cur1,sqldata^,po1^.sqllen);
-      end;
+    end
+    else begin
+     if assigned(po1^.SQLInd) then begin
+      po1^.SQLInd^ := 0;
      end;
-     ftString,ftFixedChar,ftwidestring,ftbytes,ftvarbytes: begin
-      bo1:= paramtypes[sqlvarnr] in [ftbytes,ftvarbytes];
-      if bo1 then begin
-       s:= aparams[parnr].asstring;
-      end
-      else begin
-       s:= AParams.AsdbString(parnr);
+     case paramtypes[sqlvarnr] of
+      ftInteger,ftsmallint : begin
+        if datatype = ftboolean then begin
+         i:= 0;
+         if asboolean then begin
+          i:= 1;
+         end;
+        end
+        else begin
+         i:= AsInteger;
+        end;
+        Move(i, po1^.SQLData^,po1^.SQLLen);
+ //todo: byte order?
       end;
-      w:= length(s);
-      with po1^ do begin
-       if ((SQLType and not 1) = SQL_VARYING) then begin
-        SQLLen:= w;
-        ReAllocMem(SQLData,SQLLen+sizeof(w));
-        CurrBuff:= SQLData;
-        move(w,CurrBuff^,sizeof(w));
-        inc(CurrBuff,sizeof(w));
+      ftbcd: begin
+       cur1:= ascurrency;
+       with po1^ do begin
+        cur1:= scaleexp10(cur1,-(4+sqlscale));
+ //       reallocmem(sqldata,sizeof(cur1));
+ //       move(cur1,sqldata^,sizeof(cur1));
+        move(cur1,sqldata^,po1^.sqllen);
+       end;
+      end;
+      ftString,ftFixedChar,ftwidestring,ftbytes,ftvarbytes: begin
+       bo1:= paramtypes[sqlvarnr] in [ftbytes,ftvarbytes];
+       if bo1 then begin
+        s:= asstring;
        end
        else begin
-        if w > sqllen then begin
-         w:= sqllen;
-        end;
-        CurrBuff:= SQLData;
-        if w < sqllen then begin
-         if bo1 then begin
-          fillchar((currbuff+w)^,sqllen-w,0);
-         end
-         else begin
-          fillchar((currbuff+w)^,sqllen-w,' ');
+        s:= aparams.AsdbString(parnr);
+       end;
+       w:= length(s);
+       with po1^ do begin
+        if ((SQLType and not 1) = SQL_VARYING) then begin
+         SQLLen:= w;
+         ReAllocMem(SQLData,SQLLen+sizeof(w));
+         CurrBuff:= SQLData;
+         move(w,CurrBuff^,sizeof(w));
+         inc(CurrBuff,sizeof(w));
+        end
+        else begin
+         if w > sqllen then begin
+          w:= sqllen;
+         end;
+         CurrBuff:= SQLData;
+         if w < sqllen then begin
+          if bo1 then begin
+           fillchar((currbuff+w)^,sqllen-w,0);
+          end
+          else begin
+           fillchar((currbuff+w)^,sqllen-w,' ');
+          end;
          end;
         end;
        end;
+       Move(pointer(s)^,CurrBuff^,w);
       end;
-      Move(pointer(s)^,CurrBuff^,w);
-     end;
-     ftDate, ftTime, ftDateTime: begin
-      SetDateTime(po1^.SQLData,AParams[ParNr].AsDateTime, po1^.SQLType);
-     end;
-     ftLargeInt,ftblob,ftmemo: begin
-      li := AParams[ParNr].AsLargeInt;
-      Move(li, po1^.SQLData^,po1^.SQLLen);
-     end;
-     ftFloat,ftcurrency: begin
-      with po1^ do begin
-       if sqlscale < 0 then begin
-//        reallocmem(sqldata,sizeof(int64));
-        int64(cur1):= round(AParams[ParNr].asfloat * intexp10(-SQLScale));
-        move(cur1,sqldata^,po1^.sqllen);
-       end
-       else begin
-        SetFloat(po1^.SQLData, AParams[ParNr].AsFloat,po1^.SQLLen);
+      ftDate, ftTime, ftDateTime: begin
+       SetDateTime(po1^.SQLData,AsDateTime, po1^.SQLType);
+      end;
+      ftLargeInt,ftblob,ftmemo: begin
+       li := AsLargeInt;
+       Move(li, po1^.SQLData^,po1^.SQLLen);
+      end;
+      ftFloat,ftcurrency: begin
+       with po1^ do begin
+        if sqlscale < 0 then begin
+ //        reallocmem(sqldata,sizeof(int64));
+         int64(cur1):= round(asfloat * intexp10(-SQLScale));
+         move(cur1,sqldata^,po1^.sqllen);
+        end
+        else begin
+         SetFloat(po1^.SQLData,AsFloat,po1^.SQLLen);
+        end;
        end;
       end;
-     end;
-     else begin
-      DatabaseErrorFmt(SUnsupportedParameter,
-                    [Fieldtypenames[AParams[ParNr].DataType]],self);
-     end;
-    end; {case}
+      else begin
+       DatabaseErrorFmt(SUnsupportedParameter,
+                     [Fieldtypenames[AParams[ParNr].DataType]],self);
+      end;
+     end; {case}
+    end;
    end;
   end;
  end;

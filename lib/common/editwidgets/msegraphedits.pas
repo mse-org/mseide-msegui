@@ -2182,7 +2182,7 @@ begin
  else begin
   bo1:= boolean(avalue);
  end;
- if bo1 then begin
+ if bo1 xor (bo_reversed in foptions) then begin
    stockobjects.paintglyph(canvas,getglyph,arect,not isenabled,acolorglyph);
  end;
 end;
