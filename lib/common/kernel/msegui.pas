@@ -7001,7 +7001,9 @@ begin
   poschanged;
  end;
  if ownswindow1 then begin
-  fwindow.fnormalwindowrect:= fwidgetrect;
+  if not (windowevent and (fwindow.windowpos = wp_maximized)) then begin
+   fwindow.fnormalwindowrect:= fwidgetrect;
+  end;
   if bo2 and (tws_windowvisible in fwindow.fstate) then begin
    fwindow.checkwindow(windowevent);
   end;
@@ -12181,7 +12183,7 @@ begin
    if fstate * [tws_posvalid,tws_sizevalid] <>
            [tws_posvalid,tws_sizevalid] then begin
     if visible and not windowevent and not (tws_needsdefaultpos in fstate) and
-        (fmoving <= 0) then begin
+        (fmoving <= 0) and (windowpos <> wp_maximized) then begin
      fnormalwindowrect:= fowner.fwidgetrect;
      guierror(gui_reposwindow(fwindow.id,fnormalwindowrect),self);
      fstate:= fstate + [tws_posvalid,tws_sizevalid];
@@ -13516,7 +13518,9 @@ function twindow.getwindowpos: windowposty;
 var
  asize: windowsizety;
 begin
+ inc(fmoving);
  asize:= gui_getwindowsize(winid);
+ dec(fmoving);
  case asize of
   wsi_minimized: begin
    result:= wp_minimized;
