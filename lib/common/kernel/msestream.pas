@@ -1905,8 +1905,11 @@ function ttextdatastream.readrecord(fields: array of pointer; types: string): bo
 var
  mstr1: msestring;
 begin
- readcsvstring(mstr1);
- result:= decoderecord(mstr1,fields,types,fquotechar,fseparator);
+ result:= false;
+ if not (not readcsvstring(mstr1) and (mstr1 = '') and eof) then begin
+                //check terminating linefeed
+  result:= decoderecord(mstr1,fields,types,fquotechar,fseparator);
+ end;
 end;
 
 function ttextdatastream.readcsvvalues(out values: msestringarty): boolean;

@@ -1755,7 +1755,9 @@ begin
                                                (alist <> nil)} then begin
   freeandnil(fdata); //free internal datalist
  end;
- setremotedatalist(idatalistclient(self),alist,fdata);
+ if not (csdesigning in fgrid.componentstate) then begin
+  setremotedatalist(idatalistclient(self),alist,fdata);
+ end;
 end;
 {$endif}
 

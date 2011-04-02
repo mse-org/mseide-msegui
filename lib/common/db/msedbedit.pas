@@ -49,9 +49,10 @@ type
                         dno_norefreshrecno,
                         dno_dialogifinactive,dno_nodialogifempty,
                         dno_nodialogifnoeditmode,dno_nodialogifreadonly,
-                        dno_postbeforedialog);
+                        dno_postbeforedialog,dno_postoncanclose);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
- optioneditdbty = (oed_autopost,oed_syncedittonavigator,
+ optioneditdbty = (oed_autoedit,oed_noautoedit,oed_autopost,
+                   oed_syncedittonavigator,
                    oed_nofilteredit,oed_nofilterminedit,
                    oed_nofiltermaxedit,oed_nofindedit,
                    oed_nonullset, //use TField.DefaultExpression for textedit
@@ -132,7 +133,9 @@ type
    procedure doasyncevent(var atag: integer); override;
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
-  //idbnaviglink
+   function canclose(const newfocus: twidget = nil): boolean; override;
+   
+    //idbnaviglink
    procedure setactivebuttons(const abuttons: dbnavigbuttonsty;
                              const afiltered: boolean);
    function getnavigoptions: dbnavigatoroptionsty;
@@ -240,6 +243,7 @@ type
    procedure readoptionsdb(reader: treader);
    function getownerwidget: twidget;
    procedure setnavigator(const avalue: tdbnavigator);
+   procedure setoptions(const avalue: optionseditdbty);
   protected   
    fintf: idbeditfieldlink;
    foptions: optionseditdbty;
@@ -279,7 +283,7 @@ type
    procedure updateoptionsedit(var aoptions: optionseditty);
    function cuttext(const atext: msestring; out maxlength: integer): boolean; 
              //true if text too long
-   property options: optionseditdbty read foptions write foptions 
+   property options: optionseditdbty read foptions write setoptions 
                          default defaulteditwidgetdatalinkoptions;
    property asnullmsestring: msestring read getasnullmsestring 
                                               write setasnullmsestring;
@@ -2707,6 +2711,14 @@ begin
  end;
 end;
 
+function tdbnavigator.canclose(const newfocus: twidget = nil): boolean;
+begin
+ if fdatalink.active and (newfocus = nil) then begin
+  fdatalink.dataset.checkbrowsemode;
+ end;
+ result:= inherited canclose(newfocus);
+end;
+
 { tcustomeditwidgetdatalink }
 
 constructor tcustomeditwidgetdatalink.create(const intf: idbeditfieldlink);
@@ -2791,8 +2803,10 @@ end;
 function tcustomeditwidgetdatalink.edit: Boolean;
 begin
  if canmodify then begin
-  if (fnavigator <> nil) and fnavigator.autoedit and active and (
-              dataset.state = dsbrowse) then begin
+  if (dataset.state = dsbrowse) and 
+       ((oed_autoedit in foptions) or
+         (fnavigator <> nil) and fnavigator.autoedit
+       ) then begin
    dataset.edit;
   end
   else begin
@@ -2831,8 +2845,15 @@ begin
  if state1 * [cswriting,csdesigning] = [] then begin
   if not (fds_filterediting in fstate) and 
          ((datasource = nil) or
-           not editing and not (canmodify and 
-          (datasource.AutoEdit or (fnavigator <> nil) and fnavigator.autoedit))) then begin
+           not editing and 
+            not (canmodify and
+                    not (oed_noautoedit in foptions) and
+                    ((oed_autoedit in foptions) or
+                     datasource.AutoEdit or 
+                     (fnavigator <> nil) and fnavigator.autoedit
+                    )
+                )
+          ) then begin
    include(aoptions,oe_readonly);
   end;
   if (field <> nil) and field.required then begin
@@ -3193,6 +3214,14 @@ procedure tcustomeditwidgetdatalink.fieldchanged;
 begin
  bindingchanged;
  inherited;
+end;
+
+procedure tcustomeditwidgetdatalink.setoptions(const avalue: optionseditdbty);
+var
+ mask: optionseditdbty = [oed_autoedit,oed_noautoedit];
+begin
+ foptions:= optionseditdbty(
+        setsinglebit(longword(avalue),longword(foptions),longword(mask)));
 end;
 
 { tdbstringedit }
