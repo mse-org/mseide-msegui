@@ -386,8 +386,10 @@ type
    procedure valuechanged(const sender: iificlient); virtual;
    procedure statechanged(const sender: iificlient;
                              const astate: ifiwidgetstatesty); virtual;
-   procedure setvalue(const sender: iificlient; var avalue; 
-                                   var accept: boolean); virtual;
+   procedure setvalue(const sender: iificlient;
+                     var avalue; var accept: boolean; const arow: integer);
+   procedure dataentered(const sender: iificlient; const arow: integer);
+   procedure updateoptionsedit(var avalue: optionseditty);
    procedure sendmodalresult(const sender: iificlient; 
                                          const amodalresult: modalresultty); virtual;
   //imodulelink
@@ -2123,6 +2125,17 @@ begin
  //dummy
 end;
 
+procedure tcustommodulelink.dataentered(const sender: iificlient;
+               const arow: integer);
+begin
+ //dummy
+end;
+
+procedure tcustommodulelink.updateoptionsedit(var avalue: optionseditty);
+begin
+ //dummy
+end;
+
 procedure tcustommodulelink.statechanged(const sender: iificlient;
               const astate: ifiwidgetstatesty);
 begin
@@ -2130,7 +2143,7 @@ begin
 end;
 
 procedure tcustommodulelink.setvalue(const sender: iificlient; var avalue;
-                                                    var accept: boolean);
+                               var accept: boolean; const arow: integer);
 begin
  //dummy
 end;
