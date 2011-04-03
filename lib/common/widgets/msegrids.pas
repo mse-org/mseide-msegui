@@ -2341,6 +2341,7 @@ type
 
    property onbeforeupdatelayout;
    property onlayoutchanged;
+   property oncolmoved;
    property onrowcountchanged;
    property onrowsdatachanged;
    property onrowdatachanged;
@@ -2468,6 +2469,7 @@ type
 
    property onbeforeupdatelayout;
    property onlayoutchanged;
+   property oncolmoved;
    property onrowsmoved;
    property onrowsdatachanged;
    property onrowdatachanged;
@@ -12795,10 +12797,15 @@ var
  rect1: rectty;
  offset: pointty;
  apos: pointty;
+ ar1: integerarty;
 begin
  offset:= sender.pickoffset;
  apos:= sender.pos;
- decodepickobject(sender.currentobjects[0],kind,cell,col1,fixrow);
+ ar1:= sender.currentobjects;
+ if ar1 = nil then begin
+  exit;
+ end;
+ decodepickobject(ar1[0],kind,cell,col1,fixrow);
 // canvas.rasterop:= rop_xor;
  rect1:= cellrect(cell);
  with rect1 do begin

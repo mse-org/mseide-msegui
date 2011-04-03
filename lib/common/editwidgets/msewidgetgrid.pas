@@ -355,6 +355,7 @@ type
 
    property onbeforeupdatelayout;
    property onlayoutchanged;
+   property oncolmoved;
    property onrowcountchanged;
    property onrowdatachanged;
    property onrowsdatachanged;

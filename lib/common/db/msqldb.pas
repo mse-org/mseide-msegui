@@ -38,12 +38,16 @@ type
  tcustomsqlconnection = class;
  TSQLTransaction = class;
  TSQLQuery = class;
-
+ tsqlstringlist = class;
+ 
  tmacroproperty = class(tdoublemsestringdatalist)
   private
    foptions: macrooptionsty;
+   fowner: tsqlstringlist;
+  protected
+   procedure dochange; override;
   public
-   constructor create; override;
+   constructor create(const aowner: tsqlstringlist); reintroduce;
   published
    property options: macrooptionsty read foptions write foptions 
                                            default [mao_caseinsensitive];
@@ -1278,7 +1282,7 @@ end;
 
 constructor tsqlstringlist.create;
 begin
- fmacros:= tmacroproperty.create;
+ fmacros:= tmacroproperty.create(self);
  inherited;
 end;
 
@@ -4946,10 +4950,17 @@ end;
 
 { tmacroproperty }
 
-constructor tmacroproperty.create;
+constructor tmacroproperty.create(const aowner: tsqlstringlist);
 begin
+ fowner:= aowner;
  foptions:= [mao_caseinsensitive];
+ inherited create;
+end;
+
+procedure tmacroproperty.dochange;
+begin
  inherited;
+ fowner.dochange;
 end;
 
 end.
