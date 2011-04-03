@@ -120,7 +120,7 @@ type
     procedure FreeFldBuffers(cursor:TSQLCursor); override;
     // - UpdateIndexDefs
     procedure UpdateIndexDefs(var IndexDefs:TIndexDefs;
-                          const TableName:string); override;
+                          const aTableName:string); override;
     // - Schema info
     function GetSchemaInfoSQL(SchemaType:TSchemaType; SchemaObjectName, SchemaObjectPattern:string):string; override;
 
@@ -1320,7 +1320,8 @@ begin
   end;
 end;
 
-procedure TODBCConnection.UpdateIndexDefs(var IndexDefs: TIndexDefs; const TableName: string);
+procedure TODBCConnection.UpdateIndexDefs(var IndexDefs: TIndexDefs;
+                    const aTableName: string);
 var
   StmtHandle:SQLHSTMT;
   Res:SQLRETURN;
@@ -1368,11 +1369,11 @@ begin
         StmtHandle,
         nil, 0, // any catalog
         nil, 0, // any schema
-        PChar(TableName), Length(TableName)
+        PChar(aTableName), Length(aTableName)
       ),
       SQL_HANDLE_STMT, StmtHandle,
        'Could not retrieve primary key metadata for table %s using SQLPrimaryKeys.',
-        [TableName]
+        [aTableName]
     );
 
     // init key name & fields; we will set the IndexDefs.Option ixPrimary below when there is a match by IndexName=KeyName
@@ -1426,13 +1427,13 @@ begin
         StmtHandle,
         nil, 0, // catalog unkown; request for all catalogs
         nil, 0, // schema unkown; request for all schemas
-        PChar(TableName), Length(TableName), // request information for TableName
+        PChar(aTableName), Length(aTableName), // request information for TableName
         SQL_INDEX_ALL,
         SQL_QUICK
       ),
       SQL_HANDLE_STMT, StmtHandle,
        'Could not retrieve index metadata for table %s using SQLStatistics.',
-        [TableName]
+        [aTableName]
     );
 
     try

@@ -130,7 +130,7 @@ type
                        const acursor: tsqlcursor): TStream; override;
    procedure execsql(const asql: string);
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                               const TableName : string); override;
+                               const aTableName : string); override;
    function getprimarykeyfield(const atablename: string;
                                      const acursor: tsqlcursor): string; override;
    procedure updateprimarykeyfield(const afield: tfield;
@@ -964,12 +964,12 @@ begin
 end;
 
 procedure tsqlite3connection.UpdateIndexDefs(var IndexDefs: TIndexDefs;
-                              const TableName: string);
+                              const aTableName: string);
 var
  str1: string;
 begin
  try
-  str1:= getprimarykeyfield(tablename,nil);
+  str1:= getprimarykeyfield(atablename,nil);
  except
   str1:= '';
  end;

@@ -170,7 +170,7 @@ type
    procedure internalCommitRetaining(trans : TSQLHandle); override;
    procedure internalRollBackRetaining(trans : TSQLHandle); override;
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                                          const TableName : string); override;
+                                          const aTableName : string); override;
    function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                           const acursor: tsqlcursor): TStream; override;
@@ -1478,7 +1478,7 @@ end;
 
 
 procedure TIBConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                               const TableName : string);
+                               const aTableName : string);
 var 
  qry : TSQLQuery;
  str1: ansistring;
@@ -1508,7 +1508,7 @@ begin
               'rel_con.rdb$index_name = ind.rdb$index_name '+
             'where '+
               '(ind_seg.rdb$index_name = ind.rdb$index_name) and '+
-              '(ind.rdb$relation_name=''' +  UpperCase(TableName) +''') '+
+              '(ind.rdb$relation_name=''' +  UpperCase(aTableName) +''') '+
             'order by '+
               'ind.rdb$index_name;');
     open;

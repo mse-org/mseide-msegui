@@ -158,7 +158,7 @@ Type
     procedure internalCommitRetaining(trans : TSQLHandle); override;
     procedure internalRollBackRetaining(trans : TSQLHandle); override;
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                                          const TableName : string); override;
+                                          const aTableName : string); override;
 
    function getprimarykeyfield(const atablename: string;
                                  const acursor: tsqlcursor): string; override;
@@ -936,7 +936,7 @@ begin
 end;
 
 procedure TConnectionName.UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                     const TableName : string);
+                     const aTableName : string);
 var 
  qry: TSQLQuery;
  keynamef,filednamef,columnnamef,nonuniquef: tfield;
@@ -951,7 +951,7 @@ begin
   qry.database := Self;
   with qry do begin
    parsesql:= false;
-   sql.add('show index from ' +  TableName);
+   sql.add('show index from ' +  aTableName);
    open;
   end;
   keynamef:= qry.fieldbyname('Key_name');

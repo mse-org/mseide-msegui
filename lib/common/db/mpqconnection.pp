@@ -135,7 +135,7 @@ type
                 const AParams: tstringlist) : boolean; override;
    procedure internalRollBackRetaining(trans : TSQLHandle); override;
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                                 const TableName : string); override;
+                                 const aTableName : string); override;
    function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
    procedure dopqexec(const asql: ansistring); overload;
    procedure dopqexec(const asql: ansistring; const aconnection: ppgconn); overload;
@@ -1290,7 +1290,7 @@ begin
 end;
 
 procedure TPQConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                          const TableName : string);
+                          const aTableName : string);
 
 var qry : TSQLQuery;
 
@@ -1324,7 +1324,7 @@ begin
               '(ia.attrelid = i.indexrelid) and '+
               '(ic.oid = i.indexrelid) and '+
               '(ta.attnum = i.indkey[ia.attnum-1]) and '+
-              '(upper(tc.relname)=''' +  UpperCase(TableName) +''') '+
+              '(upper(tc.relname)=''' +  UpperCase(aTableName) +''') '+
             'order by '+
               'ic.relname;');
     open;
