@@ -466,7 +466,9 @@ type
              var handled: boolean) of object;
 
  sqlstatementoptionty = (sso_utf8,sso_autocommit,sso_autocommitret,
-                                                          sso_noprepare);
+                         sso_noprepare,
+                         sso_savepoint //for tmsesqlscript
+                         );
  sqlstatementoptionsty = set of sqlstatementoptionty;
 
  tcustomsqlstatement = class(tmsecomponent,itransactionclient,idatabaseclient)
@@ -4611,7 +4613,7 @@ procedure tmsesqlscript.execute(adatabase: tcustomsqlconnection = nil;
 var
  str1: msestring;
  ar1: msestringarty;
- int1: integer;
+ int1,int2: integer;
  bo1: boolean;
 begin
  if adatabase = nil then begin
@@ -4623,44 +4625,53 @@ begin
  if adatabase = nil then begin
   databaseerror(serrdatabasenassigned,self);
  end;
- dobeforeexecute(adatabase,atransaction);
- updateparams(fparams,isutf8{(adatabase)});
- str1:= fsql.text;
- ar1:= splitsql(str1,fterm,fcharescapement);
- fstatementcount:= length(ar1);
- if high(ar1) < 0 then begin
-  databaseerror(serrnostatement,self);
+ if sso_savepoint in foptions then begin
+  int2:= atransaction.savepointbegin;
  end;
- for int1:= 0 to high(ar1) do begin
-  fstatementnr:= int1;
-  if canevent(tmethod(fonbeforestatement)) then begin
-   fonbeforestatement(self);
+ try
+  dobeforeexecute(adatabase,atransaction);
+  updateparams(fparams,isutf8{(adatabase)});
+  str1:= fsql.text;
+  ar1:= splitsql(str1,fterm,fcharescapement);
+  fstatementcount:= length(ar1);
+  if high(ar1) < 0 then begin
+   databaseerror(serrnostatement,self);
   end;
-  try
-   adatabase.executedirect(ar1[int1],atransaction,fparams,isutf8,
-                          sso_noprepare in foptions);
-  except
-   on e: exception do begin  
-    bo1:= false;
-    doerror(adatabase,atransaction,e,bo1);
-    if not bo1 then begin
-     raise;
+  for int1:= 0 to high(ar1) do begin
+   fstatementnr:= int1;
+   if canevent(tmethod(fonbeforestatement)) then begin
+    fonbeforestatement(self);
+   end;
+   try
+    adatabase.executedirect(ar1[int1],atransaction,fparams,isutf8,
+                           sso_noprepare in foptions);
+   except
+    on e: exception do begin  
+     bo1:= false;
+     doerror(adatabase,atransaction,e,bo1);
+     if not bo1 then begin
+      raise;
+     end;
     end;
    end;
+   if canevent(tmethod(fonafterstatement)) then begin
+    fonafterstatement(self);
+   end;
   end;
-  if canevent(tmethod(fonafterstatement)) then begin
-   fonafterstatement(self);
+  if sso_autocommit in foptions then begin
+   atransaction.commit;
+  end
+  else begin
+   if sso_autocommitret in foptions then begin
+    atransaction.commitretaining;
+   end;
   end;
+  doafterexecute(adatabase,atransaction);
+  atransaction.savepointrelease;
+ except
+  atransaction.savepointrollback(int2);
+  raise;
  end;
- if sso_autocommit in foptions then begin
-  atransaction.commit;
- end
- else begin
-  if sso_autocommitret in foptions then begin
-   atransaction.commitretaining;
-  end;
- end;
- doafterexecute(adatabase,atransaction);
 end;
 
 { tsqlstatement }
