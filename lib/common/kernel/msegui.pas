@@ -99,7 +99,7 @@ type
  
  optionskinty = (osk_skin,osk_noskin,osk_framebuttononly,
                  osk_noframe,osk_noface,
-                 osk_container,
+                 osk_container,osk_noclientsize,
                  osk_colorcaptionframe, 
                    //use widget_colorcaptionframe independent of caption
                  osk_nocolorcaptionframe, 
@@ -186,7 +186,8 @@ const
  defaultoptionswidgetnofocus = defaultoptionswidget -
              [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
  defaultoptionsskin = [];
- defaultcontainerskinoptions = defaultoptionsskin + [osk_container];
+ defaultcontainerskinoptions = defaultoptionsskin + 
+                                    [osk_container,osk_noclientsize];
  
  defaultwidgetwidth = 50;
  defaultwidgetheight = 50;

@@ -1231,7 +1231,9 @@ begin
     size1.cx:= size1.cx - left - right;
     size1.cy:= size1.cy - top - bottom;
    end;
-   clientsize:= size1;      //same clientsize as before
+   if not (osk_noclientsize in optionsskin) then begin
+    clientsize:= size1;      //same clientsize as before
+   end;
   end;
  end;
 end;
