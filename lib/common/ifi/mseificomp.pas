@@ -2857,7 +2857,7 @@ procedure tdatetimeclientcontroller.setvalue(const sender: iificlient;
                        var avalue; var accept: boolean; const arow: integer);
 begin
  if fowner.canevent(tmethod(fonclientsetvalue)) then begin
-  fonclientsetvalue(self,realty(tdatetime(avalue)),accept,arow);
+  fonclientsetvalue(self,tdatetime(avalue),accept,arow);
  end;
  inherited;
 end;

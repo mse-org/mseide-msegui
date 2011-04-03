@@ -1483,7 +1483,11 @@ begin
  if acomponent <> nil then begin
   comp1:= acomponent;
   repeat
+  {$ifndef FPC}
+   addpointeritem(pointerarty(result),pointer(comp1),count);
+  {$else}
    additem(pointerarty(result),pointer(comp1),count);
+  {$endif}
    comp1:= comp1.owner;
   until comp1 = nil;
  end;

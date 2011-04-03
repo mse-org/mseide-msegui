@@ -13,7 +13,7 @@ interface
 uses
  msegraphics,msetypes,windows,msestrings,mseguiglob;
 
-procedure init; 
+procedure init;
 procedure deinit; 
 
 function gdi32getgdifuncs: pgdifunctionaty;
@@ -29,42 +29,6 @@ function CreateRectRgnIndirect(const _para1:tRECT):HRGN; stdcall;
              external gdi32 name 'CreateRectRgnIndirect';
 function winFillRect(hDC:HDC; const lprc:tRECT; hbr:HBRUSH):longint; stdcall;
              external user32 name 'FillRect';
-const
- rasterops2: array[rasteropty] of byte =
-               ($01,$09,$05,$0d,
-                $03,$0b,$07,$0f,
-                $02,$0a,$06,$0e,
-                $04,$0c,$08,$10);
-
- inverserops2: array[rasteropty] of byte =//for 1->foreground in monochromebitmaps
-                ($00,$04,$08,$0c,
-                 $01,$05,$09,$0d,
-                 $02,$06,$0a,$0e,
-                 $03,$07,$0b,$0f);
-
- firstrasterops2: array[rasteropty] of byte = //backgroudcolor = $ffffff,
-               ($09,$09,$09,$09,              //textcolor = $000000, and
-                $09,$09,$09,$09,
-                $09,$09,$09,$09,
-                $09,$09,$09,$09);
-
- secondrasterops2: array[rasteropty] of byte = //colorbackground = $000000,
-               ($0f,$0f,$0f,$0f,               //textcolor = $ffffff, or
-                $0f,$0f,$0f,$0f,
-                $0f,$0f,$0f,$0f,
-                $0f,$0f,$0f,$0f);
-
- rasterops3: array[rasteropty] of longword =
-               ($000042,$8800c6,$440328,$cc0020,
-                $220326,$aa0029,$660046,$ee0086,
-                $1100a6,$990066,$550009,$dd0228,
-                $330008,$bb0226,$7700e6,$ff0062);
-
- patrops3: array[rasteropty] of longword =
-               ($000042,$a000c9,$500325,$f00021,
-                $0a0329,$aa0029,$5a0049,$fa0089,
-                $0500a9,$a50065,$550009,$f50225,
-                $0f0001,$af0229,$5f00e2,$ff0062);
 
 type
   tTEXTMETRICW = record
@@ -111,7 +75,7 @@ type
     tmPitchAndFamily: Byte;
     tmCharSet: Byte;
   end;
-{$endif}
+
   tGCPRESULTSW = record
        lStructSize : DWORD;
        lpOutString : pwidechar;
@@ -123,6 +87,50 @@ type
        nGlyphs : UINT;
        nMaxFit : UINT;
     end;
+{$else}
+function GetCharacterPlacementW(DC: HDC; p2: PWideChar; p3, p4: Integer;
+  var p5: TGCPResultsw; p6: DWORD): DWORD; stdcall;
+                        external gdi32 name 'GetCharacterPlacementW';
+type
+ WINT = longint;
+{$endif}
+
+const
+ rasterops2: array[rasteropty] of byte =
+               ($01,$09,$05,$0d,
+                $03,$0b,$07,$0f,
+                $02,$0a,$06,$0e,
+                $04,$0c,$08,$10);
+
+ inverserops2: array[rasteropty] of byte =//for 1->foreground in monochromebitmaps
+                ($00,$04,$08,$0c,
+                 $01,$05,$09,$0d,
+                 $02,$06,$0a,$0e,
+                 $03,$07,$0b,$0f);
+
+ firstrasterops2: array[rasteropty] of byte = //backgroudcolor = $ffffff,
+               ($09,$09,$09,$09,              //textcolor = $000000, and
+                $09,$09,$09,$09,
+                $09,$09,$09,$09,
+                $09,$09,$09,$09);
+
+ secondrasterops2: array[rasteropty] of byte = //colorbackground = $000000,
+               ($0f,$0f,$0f,$0f,               //textcolor = $ffffff, or
+                $0f,$0f,$0f,$0f,
+                $0f,$0f,$0f,$0f,
+                $0f,$0f,$0f,$0f);
+
+ rasterops3: array[rasteropty] of longword =
+               ($000042,$8800c6,$440328,$cc0020,
+                $220326,$aa0029,$660046,$ee0086,
+                $1100a6,$990066,$550009,$dd0228,
+                $330008,$bb0226,$7700e6,$ff0062);
+
+ patrops3: array[rasteropty] of longword =
+               ($000042,$a000c9,$500325,$f00021,
+                $0a0329,$aa0029,$5a0049,$fa0089,
+                $0500a9,$a50065,$550009,$f50225,
+                $0f0001,$af0229,$5f00e2,$ff0062);
 
 implementation
 uses

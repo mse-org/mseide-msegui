@@ -9715,7 +9715,7 @@ begin
 end;
 
 function twidget.show(const modallevel: modallevelty;
-            const transientfor: twidget): modalresultty; overload;
+            const transientfor: twidget): modalresultty;
 begin
  if transientfor = nil then begin
   show(modallevel,twindow(nil));

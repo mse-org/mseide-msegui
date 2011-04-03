@@ -2009,8 +2009,8 @@ begin
  skipwhitespace;
  mark;
  value:= '';
- result:= true;
- repeat
+ result:= (fto^.kind = tk_operator) and ((fto^.op = '#') or (fto^.op = ''''));
+ while result do begin
   bo1:= false;
   while (fto^.kind = tk_operator) and (fto^.op = '#') do begin
    value:= value + getorigtoken;
@@ -2044,7 +2044,10 @@ begin
     end;
    end;
   end;
- until not result or not bo1;
+  if not bo1 then begin
+   break;
+  end;
+ end;
  if result then begin
   pop;
  end

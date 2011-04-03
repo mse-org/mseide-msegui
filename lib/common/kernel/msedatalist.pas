@@ -477,7 +477,7 @@ type
   public
    function datatype: listdatatypety; override;
    function empty(const index: integer): boolean; override;   //true wenn leer
-   procedure fill(acount: integer; const defaultvalue: tdatetime);
+   procedure fill(acount: integer; const defaultvalue: tdatetime); overload;
    procedure fill(const defaultvalue: tdatetime); overload;
  end;
 
@@ -1051,6 +1051,10 @@ procedure additem(var dest: realarty; const value: real;
                              var count: integer; step: integer = 32); overload;
 procedure additem(var dest: pointerarty; const value: pointer;
                              var count: integer; step: integer = 32); overload;
+{$ifndef FPC}
+procedure addpointeritem(var dest: pointerarty; const value: pointer;
+                             var count: integer; step: integer = 32);
+{$endif}
 procedure additem(var dest: winidarty; const value: winidty;
                              var count: integer; step: integer = 32); overload;
 
@@ -1684,6 +1688,18 @@ begin
  dest[count]:= value;
  inc(count);
 end;
+
+{$ifndef FPC}
+procedure addpointeritem(var dest: pointerarty; const value: pointer;
+                             var count: integer; step: integer = 32);
+begin
+ if length(dest) <= count then begin
+  setlength(dest,count+step+2*length(dest));
+ end;
+ dest[count]:= value;
+ inc(count);
+end;
+{$endif}
 
 procedure additem(var dest: winidarty; const value: winidty;
                              var count: integer; step: integer = 32);
