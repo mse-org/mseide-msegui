@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -44,9 +44,11 @@ type
    function add(const source: sourceposty): integer;
    property items[const index: integer]: psourceposty read getitems;
  end;
-
+ tokenstatety = (tos_linestart,tos_firstofline);
+ tokenstatesty = set of tokenstatety;
  tokenty = record
   value: lstringty;
+  state: tokenstatesty;
   case kind: tokenkindty of
    tk_operator: (op: char);
    tk_newline: (linenr: integer);
@@ -79,6 +81,8 @@ type
    fstartline: integer;
    fcount: integer;
    fincludecount: integer;
+   flinestart: boolean;
+   ffirstofline: boolean;
    procedure updatecase;
    procedure setsource(const Value: ansistring);
    procedure clear;
@@ -197,6 +201,7 @@ type
    function getscannerclass: scannerclassty; virtual;
 
   public
+   constructor create; overload;
    constructor create(const afilelist: tmseindexednamelist); overload; virtual;
    constructor create(const afilelist: tmseindexednamelist; const atext: string); overload;
    destructor destroy; override;
@@ -534,6 +539,16 @@ begin
   setlength(ftokens,(3*length(ftokens)) div 2 + 256);
  end;
  fscto:= @ftokens[ftokencount];
+ if flinestart then begin
+  include(fscto^.state,tos_linestart);
+  flinestart:= false;
+ end;
+ if ffirstofline then begin
+  include(fscto^.state,tos_firstofline);
+  if akind <> tk_whitespace then begin
+   ffirstofline:= false;
+  end;
+ end;  
  inc(ftokencount);
  fscto^.kind:= akind;
  fscto^.value.po:= fpo;
@@ -541,6 +556,8 @@ begin
   tk_newline: begin
    fscto^.linenr:= flinenr;
    inc(flinenr);
+   flinestart:= true;
+   ffirstofline:= true;
   end;
   tk_operator: begin
    fscto^.op:= fpo^;
@@ -612,6 +629,8 @@ begin
  clear;
  fpo:= pointer(fsource);
  if fpo <> nil then begin
+  flinestart:= true;
+  ffirstofline:= true;
   while fpo^ <> #0 do begin
    scantoken;
    endtoken;
@@ -697,6 +716,11 @@ begin
  ascanner:= getscannerclass.create;
  ascanner.source:= atext;
  scanner:= ascanner;
+end;
+
+constructor tparser.create;
+begin
+ create(nil);
 end;
 
 destructor tparser.destroy;
@@ -1777,6 +1801,31 @@ const
                   ('I','INCLUDE','DEFINE','UNDEF','IFDEF','IFNDEF',
                    'ELSE','ENDIF');
                   
+constructor tpascalparser.create(const afilelist: tmseindexednamelist);
+begin
+ inherited;
+ flastvalidident:= lastpascalnormalident;
+end;
+
+destructor tpascalparser.destroy;
+begin
+ inherited;
+end;
+
+procedure tpascalparser.clear;
+var
+ int1: integer;
+begin
+ inherited;
+ fdefstate:= def_none;
+ fdefstates:= nil;
+ fdefstatecount:= 0;
+ fdefines.clear;
+ for int1:= 0 to high(fstartdefines) do begin
+  fdefines.add(uppercase(fstartdefines[int1]));
+ end;
+end;
+
 procedure tpascalparser.parsecompilerswitch;
 
  procedure skiprest;
@@ -1858,7 +1907,7 @@ begin
       pskw_i,pskw_include: begin
        startpos:= sourcepos;
        nexttoken;
-       if checkoperator('''') then begin
+       if checkoperator('''') or checkoperator('#')then begin
         lasttoken;
         if getpascalstring(str1) then begin
          try
@@ -1955,40 +2004,47 @@ end;
 function tpascalparser.getpascalstring(var value: string): boolean;
 var
  int1: integer;
+ bo1: boolean;
 begin
  skipwhitespace;
  mark;
  value:= '';
- result:= false;
- while (fto^.kind = tk_operator) and (fto^.op = '''') do begin //'
-  result:= true;
-  int1:= 0;
-  while (fto^.kind = tk_operator) and (fto^.op = '''') do begin //','','''..
+ result:= true;
+ repeat
+  bo1:= false;
+  while (fto^.kind = tk_operator) and (fto^.op = '#') do begin
    value:= value + getorigtoken;
-   inc(int1);
-  end;
-  if odd(int1) then begin
-   while (fto^.kind <> tk_fileend1) and (fto^.kind <> tk_newline) and
-    not ((fto^.kind = tk_operator) and (fto^.op = '''')) do begin
+   if fto^.kind = tk_number then begin
     value:= value + getorigtoken;
-   end;
-   if (fto^.kind = tk_fileend1) or (fto^.kind = tk_newline) then begin
+    bo1:= true;
+   end
+   else begin
     result:= false;
     break;
    end;
-   value:= value + getorigtoken;
-   while (fto^.kind = tk_operator) and (fto^.op = '#') do begin
-    value:= value + getorigtoken;
-    if fto^.kind = tk_number then begin
+  end;
+  if result then begin
+   while (fto^.kind = tk_operator) and (fto^.op = '''') do begin //'
+    bo1:= true;
+    int1:= 0;
+    while (fto^.kind = tk_operator) and (fto^.op = '''') do begin //','','''..
      value:= value + getorigtoken;
-    end
-    else begin
-     result:= false;
-     break;
+     inc(int1);
+    end;
+    if odd(int1) then begin
+     while (fto^.kind <> tk_fileend1) and (fto^.kind <> tk_newline) and
+      not ((fto^.kind = tk_operator) and (fto^.op = '''')) do begin
+      value:= value + getorigtoken;
+     end;
+     if (fto^.kind = tk_fileend1) or (fto^.kind = tk_newline) then begin
+      result:= false;
+      break;
+     end;
+     value:= value + getorigtoken;
     end;
    end;
   end;
- end;
+ until not result or not bo1;
  if result then begin
   pop;
  end
@@ -2049,31 +2105,6 @@ end;
 procedure tpascalparser.initidents;
 begin
  setidents(pascalidents);
-end;
-
-constructor tpascalparser.create(const afilelist: tmseindexednamelist);
-begin
- inherited;
- flastvalidident:= lastpascalnormalident;
-end;
-
-destructor tpascalparser.destroy;
-begin
- inherited;
-end;
-
-procedure tpascalparser.clear;
-var
- int1: integer;
-begin
- inherited;
- fdefstate:= def_none;
- fdefstates:= nil;
- fdefstatecount:= 0;
- fdefines.clear;
- for int1:= 0 to high(fstartdefines) do begin
-  fdefines.add(uppercase(fstartdefines[int1]));
- end;
 end;
 
 function tpascalparser.checkclassident(const ident: pascalidentty): boolean;

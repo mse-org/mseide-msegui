@@ -1570,13 +1570,14 @@ begin
 {$endif}{$endif}
 
   updateprojectsettings(statfiler);
-
+{
   if not iswriter then begin
    if guitemplatesmo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
     macrogroup:= int1-1;
    end;
    expandprojectmacros;
   end;
+} 
   breakpointsfo.updatestat(statfiler);
   panelform.updatestat(statfiler); //uses section breakpoints!
   
@@ -1590,6 +1591,14 @@ begin
   selecteditpageform.updatestat(statfiler);
   programparametersform.updatestat(statfiler);
   projectoptionstofont(textpropertyfont);
+
+  if not iswriter then begin
+   if guitemplatesmo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
+    macrogroup:= int1-1;
+   end;
+   expandprojectmacros;
+  end;
+
   modified:= false;
   savechecked:= false;
  end;
