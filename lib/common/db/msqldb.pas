@@ -4671,9 +4671,13 @@ begin
    end;
   end;
   doafterexecute(adatabase,atransaction);
-  atransaction.savepointrelease;
+  if sso_savepoint in foptions then begin
+   atransaction.savepointrelease;
+  end;
  except
-  atransaction.savepointrollback(int2);
+  if sso_savepoint in foptions then begin
+   atransaction.savepointrollback(int2);
+  end;
   raise;
  end;
 end;

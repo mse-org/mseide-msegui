@@ -12989,28 +12989,30 @@ procedure tcustomgrid.movecol(const curindex, newindex: integer);
 var
  colbefore: integer;
 begin
- colbefore:= ffocusedcell.col;
- beginupdate;
- if curindex >= 0 then begin //datacols
-  if (ffocusedcell.col = curindex) then begin
-   ffocusedcell.col:= newindex;
-  end
-  else begin
-   if (ffocusedcell.col >= newindex) and (ffocusedcell.col < curindex) then begin
-    inc(ffocusedcell.col);
+ if curindex <> newindex then begin
+  colbefore:= ffocusedcell.col;
+  beginupdate;
+  if curindex >= 0 then begin //datacols
+   if (ffocusedcell.col = curindex) then begin
+    ffocusedcell.col:= newindex;
    end
    else begin
-    if (ffocusedcell.col <= newindex) and (ffocusedcell.col > curindex) then begin
-     dec(ffocusedcell.col);
+    if (ffocusedcell.col >= newindex) and (ffocusedcell.col < curindex) then begin
+     inc(ffocusedcell.col);
+    end
+    else begin
+     if (ffocusedcell.col <= newindex) and (ffocusedcell.col > curindex) then begin
+      dec(ffocusedcell.col);
+    end;
+    end;
    end;
-   end;
+   fdatacols.move(curindex,newindex);
   end;
-  fdatacols.move(curindex,newindex);
- end;
- endupdate;
- docolmoved(curindex,newindex);
- if colbefore <> ffocusedcell.col then begin
-  dofocusedcellposchanged;
+  endupdate;
+  docolmoved(curindex,newindex);
+  if colbefore <> ffocusedcell.col then begin
+   dofocusedcellposchanged;
+  end;
  end;
 end;
 
