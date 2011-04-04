@@ -209,7 +209,8 @@ type
       gs_isdb); //do not change rowcount
  gridstatesty = set of gridstatety;
  gridstate1ty = (gs1_showcellinvalid,gs1_sortvalid,gs1_rowsortinvalid,
-                 gs1_sortmoving,gs1_sortchangelock,gs1_rowinserted);
+                 gs1_sortmoving,gs1_sortchangelock,gs1_rowinserted,
+                 gs1_gridsorted,gs1_dbsorted);
  gridstates1ty = set of gridstate1ty;
 
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
@@ -1879,6 +1880,8 @@ type
                                        const avalue: boolean); virtual;
    procedure internalselectionchanged;
    procedure setoptionsgrid(const avalue: optionsgridty); virtual;
+   function updatesortcol(const avalue: integer): integer; virtual;
+   function getsortdescend(const acol: integer): boolean;
    procedure checkrowreadonlystate; virtual;
    procedure checkneedsrowheight;
    procedure updaterowheight(const arow: integer; var arowheight: integer);
@@ -2008,6 +2011,7 @@ type
                       const selectmode: selectcellmodety = scm_cell);
    function doremoveappinsrow(const arow: integer): boolean;
                     //true if removed
+   function hassort: boolean;
 
    
     //idragcontroller
@@ -4271,7 +4275,7 @@ begin
   rect1:= adest;
   al1:= [al_right,al_ycentered];
   with tdatacol(fgrid.fdatacols.fitems[index]) do begin
-   if not (og_sorted in fgrid.optionsgrid) or
+   if not (fgrid.hassort) or
         (co_nosort in options) or (fgrid.datacols.sortcol >= 0) and 
                                 (fgrid.datacols.sortcol <> index) then begin
     include(al1,al_grayed);
@@ -4930,11 +4934,12 @@ begin
    if (info.mouseeventinfopo^.pos.x > fwidth - 15) and 
        not (co_nosort in foptions) then begin
     if (fgrid.datacols.sortcol = info.cell.col) and 
-              fgrid.sorted then begin
+              fgrid.hassort then begin
 //     if not (gps_sortclicked in fstate) then begin
 //      include(fstate,gps_sortclicked);
       if ss_ctrl in info.mouseeventinfopo^.shiftstate then begin
        fgrid.sorted:= false;
+       fgrid.updatesortcol(-1);
       end
       else begin
        if co_sortdescent in foptions then begin
@@ -4943,6 +4948,7 @@ begin
        else begin
         options:= foptions + [co_sortdescent];
        end;
+       fgrid.updatesortcol(index);
       end;
 //     end
 //     else begin
@@ -4951,7 +4957,9 @@ begin
     end
     else begin
      fgrid.datacols.sortcol:= info.cell.col;
-     fgrid.sorted:= true;
+     if fgrid.datacols.sortcol = info.cell.col then begin
+      fgrid.sorted:= true;
+     end;
 //     exclude(fstate,gps_sortclicked);
     end;
     {
@@ -7372,8 +7380,14 @@ begin
 end;
 
 procedure tdatacols.setsortcol(const avalue: integer);
+var
+ int1: integer;
 begin
- if fsortcol <> avalue then begin
+ int1:= fgrid.updatesortcol(avalue);
+ if int1 <> avalue then begin
+  fgrid.sorted:= false;
+ end;
+ if fsortcol <> int1 then begin
   fsortcol := avalue;
   checkindexrange;
   fgrid.sortchanged(true);
@@ -7963,7 +7977,7 @@ begin
  fgrid.beginupdate;
  try
   if (og_savestate in fgrid.foptionsgrid) and reader.canstate then begin
-   sortcol:= reader.readinteger('sortcol',sortcol,-1,count-1);
+//   sortcol:= reader.readinteger('sortcol',sortcol,-1,count-1);
    if og_colmoving in fgrid.optionsgrid then begin
     ar1:= readorder(reader);
     if ar1 <> nil then begin
@@ -7975,6 +7989,7 @@ begin
   for int1:= 0 to count - 1 do begin
    cols[int1].dostatread(reader);
   end;
+  sortcol:= reader.readinteger('sortcol',sortcol,-1,count-1);
   if not (gs_isdb in fgrid.fstate) then begin
    int2:= 0;
    if (fgrid.foptionsgrid * [og_folded,og_colmerged,og_rowheight] <> []) and
@@ -9345,7 +9360,7 @@ begin
  fdatacols.dostatwrite(writer);
  row:= int1;
  if (og_savestate in foptionsgrid) and writer.canstate then begin
-  writer.writeboolean('sorted',sorted);
+  writer.writeboolean('sorted',hassort);
   writer.writeinteger('col',ffocusedcell.col);
   if not (gs_isdb in fstate) then begin
    writer.writeinteger('row',ffocusedcell.row);
@@ -13453,6 +13468,12 @@ begin
   end;
   fdatacols.frowstate.folded:= og_folded in avalue;
   layoutchanged;
+  if og_sorted in avalue then begin
+   include(fstate1,gs1_gridsorted);
+  end
+  else begin
+   exclude(fstate1,gs1_gridsorted);
+  end;
   if (og_sorted in avalue) and not(og_sorted in optionsbefore) then begin
    exclude(fstate1,gs1_sortvalid);
    checksort;
@@ -14684,6 +14705,25 @@ begin
 end;
 
 {$endif}
+
+function tcustomgrid.hassort: boolean;
+begin
+ result:= fstate1 * [gs1_gridsorted,gs1_dbsorted] <> [];
+end;
+
+function tcustomgrid.updatesortcol(const avalue: integer): integer;
+begin
+ result:= avalue;
+end;
+
+function tcustomgrid.getsortdescend(const acol: integer): boolean;
+begin
+ result:= false;
+ if (acol >= 0) and (acol < fdatacols.count) then begin
+  result:= co_sortdescent in tdatacol(fdatacols.fitems[acol]).foptions;
+ end;
+end;
+
 
 { tdrawgrid }
 

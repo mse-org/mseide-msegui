@@ -35,8 +35,8 @@ type
    procedure modified; override;
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
-
    function getrowdatapo(const arow: integer): pointer; override;
+   function getfieldlink: tfielddatalink;
    //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
@@ -77,6 +77,7 @@ type
    procedure valuetofield; virtual;
    procedure fieldtovalue; virtual;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
+   function getfieldlink: tfielddatalink;
    //ireccontrol
    procedure recchanged;
   public
@@ -281,6 +282,11 @@ begin
  teditwidgetdatalink1(fdatalink).recordchanged(nil);
 end;
 
+function tdbfilenameedit.getfieldlink: tfielddatalink;
+begin
+ result:= fdatalink;
+end;
+
 { tdbcoloredit }
 
 constructor tdbcoloredit.create(aowner: tcomponent);
@@ -399,6 +405,11 @@ begin
  else begin
   result:= inherited internaldatatotext1(avalue);
  end;
+end;
+
+function tdbcoloredit.getfieldlink: tfielddatalink;
+begin
+ result:= fdatalink;
 end;
 
 { tdbdialogstringedit }

@@ -1159,6 +1159,7 @@ type
   property restorerecno: boolean read getrestorerecno write setrestorerecno;
                           //for refresh
   function islastrecord: boolean;
+  function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
  end;
 
  igetdscontroller = interface(inullinterface)
@@ -1258,6 +1259,9 @@ type
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
    function getcanmodify: boolean;
+   function updatesortfield(const alink: tfielddatalink;
+                              const adescend: boolean): boolean;
+                      //true if index active
 
    procedure modified;
    procedure dataevent(const event: tdataevent; info: ptrint);
@@ -6909,6 +6913,18 @@ end;
 procedure tdscontroller.savepointrelease;
 begin
  nosavepoint;
+end;
+
+function tdscontroller.updatesortfield(const alink: tfielddatalink;
+               const adescend: boolean): boolean;
+var
+ field1: tfield;
+begin
+ field1:= nil;
+ if alink <> nil then begin
+  field1:= alink.field;
+ end;
+ result:= fintf.updatesortfield(field1,adescend);
 end;
 
 { tmsedatasource }

@@ -42,6 +42,7 @@ type
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
+   function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -111,6 +112,7 @@ type
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
+   function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -397,6 +399,12 @@ begin
  result:= eof or (recno = recordcount);
 end;
 
+function tmsefixedformatdataset.updatesortfield(const afield: tfield;
+               const adescend: boolean): boolean;
+begin
+ result:= false;
+end;
+
 { tmsesdfdataset }
 
 constructor tmsesdfdataset.create(aowner: tcomponent);
@@ -635,6 +643,12 @@ end;
 function tmsesdfdataset.islastrecord: boolean;
 begin
  result:= eof or (recno = recordcount);
+end;
+
+function tmsesdfdataset.updatesortfield(const afield: tfield;
+               const adescend: boolean): boolean;
+begin
+ result:= false;
 end;
 
 end.

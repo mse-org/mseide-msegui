@@ -243,6 +243,8 @@ type
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 
    //iifidscontroller
+   function updatesortfield(const afield: tfield;
+                                     const adescend: boolean): boolean;
    function getfielddefs: tfielddefs;
    function getfieldinfos: fieldinfoarty;
    procedure requestfielddefsreceived(const asequence: sequencety); virtual;
@@ -2666,6 +2668,12 @@ end;
 function tifidataset.islastrecord: boolean;
 begin
  result:= eof or (recno = recordcount);
+end;
+
+function tifidataset.updatesortfield(const afield: tfield;
+               const adescend: boolean): boolean;
+begin
+ result:= false;
 end;
 
 { trxdataset }

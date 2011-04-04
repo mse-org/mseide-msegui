@@ -102,6 +102,7 @@ type
    procedure updatereadonlystate;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    procedure setmaxlength(const avalue: integer);
+   function getfieldlink: tfielddatalink;
   //idbgraphicfieldlink
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
@@ -277,6 +278,11 @@ end;
 procedure tdbdataimage.setmaxlength(const avalue: integer);
 begin
  //dummy
+end;
+
+function tdbdataimage.getfieldlink: tfielddatalink;
+begin
+ result:= fdatalink;
 end;
 
 { tmsegraphicfield }

@@ -38,6 +38,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
+   function getfieldlink: tfielddatalink;
   //ireccontrol
    procedure recchanged;
   public
@@ -162,6 +163,11 @@ procedure tdbcalendardatetimeedit.dochange;
 begin
  fdatalink.dataentered;
  inherited;
+end;
+
+function tdbcalendardatetimeedit.getfieldlink: tfielddatalink;
+begin
+ result:= fdatalink;
 end;
 
 end.

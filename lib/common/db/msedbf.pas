@@ -42,6 +42,7 @@ type
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
+   function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
    procedure setactive (value : boolean); {override;}
    function getactive: boolean;
@@ -324,6 +325,12 @@ end;
 function tmsedbf.islastrecord: boolean;
 begin
  result:= eof or (recno = recordcount);
+end;
+
+function tmsedbf.updatesortfield(const afield: tfield;
+               const adescend: boolean): boolean;
+begin
+ result:= false;
 end;
 
 end.

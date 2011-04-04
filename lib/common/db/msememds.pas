@@ -39,6 +39,7 @@ type
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
+   function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -307,6 +308,12 @@ end;
 procedure tmsememdataset.dataevent(event: tdataevent; info: ptrint);
 begin
  fcontroller.dataevent(event,info);
+end;
+
+function tmsememdataset.updatesortfield(const afield: tfield;
+               const adescend: boolean): boolean;
+begin
+ result:= false;
 end;
 
 end.

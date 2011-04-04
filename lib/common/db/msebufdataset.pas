@@ -3,7 +3,7 @@
     Copyright (c) 1999-2000 by Michael Van Canneyt, member of the
     Free Pascal development team
     
-    Rewritten 2006-2010 by Martin Schreiber
+    Rewritten 2006-2011 by Martin Schreiber
     
     BufDataset implementation
 
@@ -395,9 +395,12 @@ type
                               write setoptions default [];
    property active: boolean read getactive write setactive default false;
  end;
- 
+
+ bufdataseteventty = procedure(const sender: tmsebufdataset) of object;
+  
  tlocalindexes = class(townedpersistentarrayprop)
   private
+   fonindexchanged: bufdataseteventty;
    function getitems(const index: integer): tlocalindex;
    procedure bindfields;
    function getactiveindex: integer;
@@ -405,6 +408,7 @@ type
   protected
    procedure checkinactive;
    procedure setcount1(acount: integer; doinit: boolean); override;
+   procedure doindexchanged;
  public
    constructor create(const aowner: tmsebufdataset); reintroduce;
    class function getitemclasstype: persistentclassty; override;
@@ -416,6 +420,9 @@ type
                    //true if field in active index
    function fieldmodified(const afield: tfield; const delayed: boolean): boolean;
    procedure preparefixup; //clear changed indexes
+  published
+   property onindexchanged: bufdataseteventty read fonindexchanged 
+                                                        write fonindexchanged;
  end;
   
 type
@@ -597,6 +604,9 @@ type
                    aindex: integer): msestring;
    procedure setcurrentasmsestring(const afield: tfield; aindex: integer;
                    const avalue: msestring);
+   function getcurrentasid(const afield: tfield; aindex: integer): int64;
+   procedure setcurrentasid(const afield: tfield; aindex: integer;
+                   const avalue: int64);
   protected
    fbrecordcount: integer;
    ffieldinfos: fieldinfoarty;
@@ -745,6 +755,7 @@ type
    procedure doafterapplyupdate; virtual;
    
    function islocal: boolean; virtual;
+   function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
 
  {abstracts, must be overidden by descendents}
    function fetch : boolean; virtual; abstract;
@@ -851,6 +862,8 @@ type
                   read getcurrentasinteger write setcurrentasinteger;
    property currentaslargeint[const afield: tfield; aindex: integer]: int64
                   read getcurrentaslargeint write setcurrentaslargeint;
+   property currentasid[const afield: tfield; aindex: integer]: int64
+                  read getcurrentasid write setcurrentasid; //-1 for null
    property currentasfloat[const afield: tfield; aindex: integer]: double
                   read getcurrentasfloat write setcurrentasfloat;
    property currentasdatetime[const afield: tfield; aindex: integer]: tdatetime
@@ -4066,6 +4079,7 @@ begin
    factindexpo:= @findexes[avalue];
    internalsetrecno(findrecord(fcurrentbuf));
    resync([]);
+   findexlocal.doindexchanged;
   end
   else begin
    factindex:= avalue;
@@ -5786,6 +5800,34 @@ begin
  end;
 end;
 
+function tmsebufdataset.getcurrentasid(const afield: tfield;
+               aindex: integer): int64;
+var
+ po1: pint64;
+begin
+ po1:= beforecurrentget(afield,ftlargeint,aindex);
+ if po1 = nil then begin
+  result:= -1;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+procedure tmsebufdataset.setcurrentasid(const afield: tfield; aindex: integer;
+               const avalue: int64);
+var
+ po1: pint64;
+ bo1: boolean;
+begin
+ po1:= beforecurrentset(afield,ftlargeint,aindex,avalue = -1,bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield);
+ end;
+end;
+
+
 function tmsebufdataset.getcurrentasdatetime(const afield: tfield;
                aindex: integer): tdatetime;
 var
@@ -6016,6 +6058,29 @@ begin
  end;
 end;
 
+function tmsebufdataset.updatesortfield(const afield: tfield;
+               const adescend: boolean): boolean;
+var
+ int1: integer;
+begin
+ result:= false;
+ if afield <> nil then begin
+  for int1:= 0 to findexlocal.count - 1 do begin
+   with tlocalindex(findexlocal.fitems[int1]) do begin
+    if (fields.count > 0) and (high(findexfieldinfos) >= 0) and
+            (findexfieldinfos[0].fieldinstance = afield) then begin
+     result:= true;
+     desc:= adescend;
+     active:= true;
+    end;
+   end;
+  end;
+ end;
+ if not result then begin
+  findexlocal.activeindex:= -1;
+ end;
+end;
+
 { tlocalindexes }
 
 constructor tlocalindexes.create(const aowner: tmsebufdataset);
@@ -6141,6 +6206,14 @@ begin
  end;
 end;
 
+procedure tlocalindexes.doindexchanged;
+begin
+ if checkcanevent(tmsebufdataset(fowner),
+                 tmethod(fonindexchanged)) then begin
+  fonindexchanged(tmsebufdataset(fowner));
+ end;
+end;
+
 { tlocalindex }
 
 constructor tlocalindex.create(aowner: tobject);
@@ -6178,6 +6251,7 @@ begin
      if factindex = int1 then begin
       internalsetrecno(findrecord(fcurrentbuf));
       resync([]);
+      findexlocal.doindexchanged;
      end;
     end;
    end;
