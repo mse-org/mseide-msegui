@@ -261,6 +261,7 @@ type
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    function oldmsestring(out aisnull: boolean): msestring;
+   property value: msestring read getasmsestring write setasmsestring;
    property characterlength: integer read fcharacterlength;
    property tagpo: pointer read ftagpo write ftagpo;
    property isftwidestring: boolean read fisftwidestring;
