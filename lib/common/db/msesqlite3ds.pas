@@ -45,6 +45,7 @@ type
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
+   function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
    procedure setactive (value : boolean);
    function getactive: boolean;
@@ -338,6 +339,12 @@ end;
 function tmsesqlite3dataset.getcanmodify: boolean;
 begin
  result:= fcontroller.getcanmodify and inherited getcanmodify;
+end;
+
+function tmsesqlite3dataset.updatesortfield(const afield: tfield;
+               const adescend: boolean): boolean;
+begin
+ result:= false;
 end;
 
 end.
