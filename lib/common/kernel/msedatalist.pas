@@ -1086,6 +1086,7 @@ procedure additem(var dest: winidarty; const value: winidty); overload;
 procedure deleteitem(var dest: stringarty; index: integer); overload;
 procedure deleteitem(var dest: msestringarty; index: integer); overload;
 procedure deleteitem(var dest: integerarty; index: integer); overload;
+procedure deleteitem(var dest: booleanarty; index: integer); overload;
 procedure deleteitem(var dest: realarty; index: integer); overload;
 procedure deleteitem(var dest: complexarty; index: integer); overload;
 procedure deleteitem(var dest: pointerarty; index: integer); overload;
@@ -1782,6 +1783,15 @@ begin
 end;
 
 procedure deleteitem(var dest: integerarty; index: integer);
+begin
+ if (index < 0) or (index > high(dest)) then begin
+  tlist.Error(SListIndexError, Index);
+ end;
+ move(dest[index+1],dest[index],sizeof(dest[0])*(high(dest)-index));
+ setlength(dest,high(dest));
+end;
+
+procedure deleteitem(var dest: booleanarty; index: integer);
 begin
  if (index < 0) or (index > high(dest)) then begin
   tlist.Error(SListIndexError, Index);

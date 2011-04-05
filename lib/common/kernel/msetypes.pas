@@ -91,6 +91,7 @@ type
  pmethod = ^tmethod;
 
  booleanarty = array of boolean;
+ pbooleanarty = ^booleanarty;
  longboolarty = array of longbool;
  bytearty = array of byte;
  pbytearty = ^bytearty;

@@ -1649,6 +1649,8 @@ procedure varianttorealty(const value: variant; out dest: realty); overload;
 function varianttorealty(const value: variant):realty; overload;
 procedure realtytovariant(const value: realty; out dest: variant); overload;
 function realtytovariant(const value: realty): variant; overload;
+function varianttoid(const value: variant): int64;
+function idtovariant(const value: int64): variant;
 
 function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
 
@@ -1773,6 +1775,26 @@ end;
 function realtytovariant(const value: realty): variant; overload;
 begin
  if isemptyreal(value) then begin
+  result:= null;
+ end
+ else begin
+  result:= value;
+ end;
+end;
+
+function varianttoid(const value: variant): int64;
+begin
+ if varisnull(value) or varisempty(value) then begin
+  result:= -1;
+ end
+ else begin
+  result:= value;
+ end;
+end;
+
+function idtovariant(const value: int64): variant;
+begin
+ if value = -1 then begin
   result:= null;
  end
  else begin

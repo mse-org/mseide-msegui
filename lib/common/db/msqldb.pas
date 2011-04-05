@@ -381,10 +381,10 @@ type
     fonbeforerollback: sqltransactioneventty;
     fonafterrollback: sqltransactioneventty;
     foncommiterror: commiterroreventty;
-   fonbeforestop: sqltransactioneventty;
-   fonafterstop: sqltransactioneventty;
-   fpendingaction: tcommitrollbackaction;
-   fpendingrefresh: boolean;
+    fonbeforestop: sqltransactioneventty;
+    fonafterstop: sqltransactioneventty;
+    fpendingaction: tcommitrollbackaction;
+    fpendingrefresh: boolean;
     procedure setparams(const avalue: TStringList);
     function getdatabase: tcustomsqlconnection;
     procedure setdatabase1(const avalue: tcustomsqlconnection);
@@ -498,6 +498,7 @@ type
    procedure setactive(avalue: boolean); virtual;
    procedure settransaction(const avalue: tmdbtransaction);
    procedure settransactionwrite(const avalue: tmdbtransaction);
+   procedure checkbrowsemode;
    procedure refreshtransaction;
    //idbclient
    procedure setdatabase(const avalue: tmdatabase);
@@ -2285,21 +2286,90 @@ end;
 procedure tsqltransaction.refresh(aaction: tcommitrollbackaction = canone);
                  //canone -> action property
                  //closes transaction, calls refreshdatasets
+var
+ int1: integer;
 begin
+ int1:= bigint;
+ while true do begin
+  if int1 > high(fdatasets) then begin
+   int1:= high(fdatasets);
+  end;
+  if int1 < 0 then begin
+   break;
+  end;
+  if fdatasets[int1].getactive then begin
+   fdatasets[int1].checkbrowsemode;
+  end;
+  dec(int1);
+ end;
+ int1:= bigint;
+ while true do begin
+  if int1 > high(fwritedatasets) then begin
+   int1:= high(fwritedatasets);
+  end;
+  if int1 < 0 then begin
+   break;
+  end;
+  if fwritedatasets[int1].getactive then begin
+   fwritedatasets[int1].checkbrowsemode;
+  end;
+  dec(int1);
+ end;
  if aaction = canone then begin
   aaction:= action;
  end;
+// if aaction in [cacommit,cacommitretaining] then begin
+//  aaction:= cacommitretaining;
+// end
+// else begin
+//  aaction:= carollbackretaining;
+// end;
  try
-  inc(fcloselock);
-  try
-   doendtransaction(aaction);
-  finally
-   dec(fcloselock);
-  end;
-  if not active then begin
-   starttransaction;
-  end;
-  refreshdatasets;
+//  inc(fcloselock);
+//  try
+   begintrackactivestate;
+   try
+    doendtransaction(aaction);
+//  finally
+//   dec(fcloselock);
+//  end;
+    if not active then begin
+     starttransaction;
+     int1:= bigint;
+     while true do begin
+      if int1 > high(fdatasetsactive) then begin
+       int1:= high(fdatasetsactive);
+      end;
+      if int1 < 0 then begin
+       break;
+      end;
+      if fdatasetsactive[int1] then begin
+       fdatasets[int1].setactive(true);
+      end;
+      dec(int1);
+     end;
+     int1:= bigint;
+     while true do begin
+      if int1 > high(fwritedatasetsactive) then begin
+       int1:= high(fwritedatasetsactive);
+      end;
+      if int1 < 0 then begin
+       break;
+      end;
+      if fwritedatasetsactive[int1] then begin
+       fwritedatasets[int1].setactive(true);
+      end;
+      dec(int1);
+     end;     
+    end
+    else begin
+     if (tao_refreshdatasets in foptions) or (aaction <> cacommit) then begin
+      refreshdatasets;
+     end;
+    end;
+   finally
+    endtrackactivestate;
+   end;
  except
   closedatasets;
   raise;
@@ -2320,7 +2390,7 @@ function tsqltransaction.docommit(const retaining: boolean): boolean;
    closedatasets;
   end
   else begin
-   if (fcloselock = 0) and //refresh will not be performed later
+   if //(fcloselock = 0) and //refresh will not be performed later
        ((tao_refreshdatasets in foptions) {or 
       (sco_emulateretaining in 
               tcustomsqlconnection(database).connoptions)} ) then begin
@@ -2437,9 +2507,9 @@ begin
 //  if (tao_refreshdatasets in foptions) or
 //       (sco_emulateretaining in 
 //             tcustomsqlconnection(database).connoptions) then begin
-  if fcloselock = 0 then begin //refresh will not be performed later
+//  if fcloselock = 0 then begin //refresh will not be performed later
    refreshdatasets;
-  end;
+//  end;
 //  end;
   if checkcanevent(self,tmethod(fonafterrollbackretaining)) then begin
    fonafterrollback(self);
@@ -4608,6 +4678,11 @@ end;
 function tcustomsqlstatement.moveby(distance: longint): longint;
 begin
  result:= 0;
+end;
+
+procedure tcustomsqlstatement.checkbrowsemode;
+begin
+ //dummy
 end;
 
 { tmsesqlscript }

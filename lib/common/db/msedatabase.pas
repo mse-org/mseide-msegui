@@ -49,6 +49,7 @@ type
   procedure settransaction(const avalue: tmdbtransaction);
   procedure settransactionwrite(const avalue: tmdbtransaction);
   function getactive: boolean;
+  procedure checkbrowsemode;
   procedure refreshtransaction;
   function getcomponentinstance: tcomponent;
  end;
@@ -77,9 +78,11 @@ type
     procedure SetActive(Value : boolean);
   Protected
 //    FDataSets      : TList;
-    fcloselock: integer;
+//    fcloselock: integer;
     fdatasets: itransactionclientarty;
+    fdatasetsactive: booleanarty;
     fwritedatasets: itransactionclientarty;
+    fwritedatasetsactive: booleanarty;
     Procedure SetDatabase (Value : tmdatabase); virtual;
     procedure CloseTrans;
     procedure openTrans;
@@ -92,6 +95,8 @@ type
                //called on connection closing
     procedure InternalHandleException; virtual;
     procedure Loaded; override;
+    procedure begintrackactivestate;
+    procedure endtrackactivestate;
   Public
     constructor Create(AOwner: TComponent); override;
     Destructor destroy; override;
@@ -816,14 +821,14 @@ procedure tmdbtransaction.CloseDataSets;
 var
  int1: integer;
 begin
- if fcloselock = 0 then begin
+// if fcloselock = 0 then begin
   for int1:= high(fdatasets) downto 0 do begin
    fdatasets[int1].setactive(false);
   end;
 //  for int1:= high(fwritedatasets) downto 0 do begin
 //   fwritedatasets[int1].setactive(false);
 //  end;
- end;
+// end;
 end;
 
 procedure tmdbtransaction.refreshdatasets(const awrite: boolean = true; 
@@ -885,15 +890,23 @@ procedure tmdbtransaction.UnRegisterDataset(const DS: itransactionclient;
                               const awrite: boolean);
 var
  ar1: pitransactionclientarty;
+ ar2: pbooleanarty;
+ int1: integer;
 begin
  if awrite then begin
   ar1:= @fwritedatasets;
+  ar2:= @fwritedatasetsactive;
  end
  else begin
   ar1:= @fdatasets;
+  ar2:= @fdatasetsactive;
  end;
- if removeitem(pointerarty(ar1^),ds) < 0 then begin
+ int1:= removeitem(pointerarty(ar1^),ds);
+ if int1 < 0 then begin
   DatabaseErrorFmt(SNoDatasetRegistered,[DS.getName]);
+ end;
+ if int1 <= high(ar2^) then begin
+  deleteitem(ar2^,int1);
  end;
 end;
 
@@ -918,6 +931,26 @@ end;
 procedure tmdbtransaction.finalizetransaction;
 begin
  //dummy
+end;
+
+procedure tmdbtransaction.begintrackactivestate;
+var
+ int1: integer;
+begin
+ setlength(fdatasetsactive,length(fdatasets));
+ for int1:= high(fdatasetsactive) downto 0 do begin
+  fdatasetsactive[int1]:= fdatasets[int1].getactive;
+ end;
+ setlength(fwritedatasetsactive,length(fwritedatasets));
+ for int1:= high(fwritedatasetsactive) downto 0 do begin
+  fwritedatasetsactive[int1]:= fwritedatasets[int1].getactive;
+ end;
+end;
+
+procedure tmdbtransaction.endtrackactivestate;
+begin
+ fdatasetsactive:= nil;
+ fwritedatasetsactive:= nil;
 end;
 {
 Function tmdbtransaction.GetDataset(Index : longint) : tmdbdataset;

@@ -324,6 +324,7 @@ type
    function moveby(distance: longint): longint;
    function getsqltransactionwrite: tsqltransaction;
    procedure setsqltransactionwrite(const avalue: tsqltransaction);
+   procedure checkbrowsemode;
    procedure refreshtransaction;
    procedure internalloaddatalists(const datalists: array of tdatalist);
   public
@@ -1755,6 +1756,11 @@ end;
 function tsqlresult.moveby(distance: longint): longint;
 begin
  result:= 0;
+end;
+
+procedure tsqlresult.checkbrowsemode;
+begin
+ //dummy
 end;
 
 { tdbcolnamearrayprop }
