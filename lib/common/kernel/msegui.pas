@@ -2002,6 +2002,8 @@ type
    procedure endmodal;
    function modal: boolean;
    function modalwindowbefore: twindow;
+   function transientforstackactive: boolean; 
+         //true if the window is member of the active transient for stack
    procedure activate;
    function active: boolean;
    function deactivateintermediate: boolean; 
@@ -13865,6 +13867,21 @@ begin
  end;
 end;
 
+function twindow.transientforstackactive: boolean;
+var
+ window1: twindow;
+begin
+ result:= false;
+ window1:= appinst.activewindow;
+ while window1 <> nil do begin
+  if window1 = self then begin
+   result:= true;
+   break;
+  end;
+  window1:= window1.ftransientfor;
+ end;
+end;
+
 { tonkeyeventlist}
 
 procedure tonkeyeventlist.dokeyevent(const sender: twidget; var info: keyeventinfoty);
@@ -15558,17 +15575,21 @@ begin
  if tws_modal in twindow(r).fstate then begin
   dec(result,modalweight);
  end;
- if twindow(l).ftransientfor <> nil then begin
-  inc(result,transientfornotnilweight);
- end;
- if twindow(r).ftransientfor <> nil then begin
-  dec(result,transientfornotnilweight);
- end;
- if twindow(l).ftransientforcount > 0 then begin
-  inc(result,transientforcountweight);
- end;
- if twindow(r).ftransientforcount > 0 then begin
-  dec(result,transientforcountweight);
+ if twindow(l).transientforstackactive then begin
+  if twindow(l).ftransientfor <> nil then begin
+   inc(result,transientfornotnilweight);
+  end;
+  if twindow(l).ftransientforcount > 0 then begin
+   inc(result,transientforcountweight);
+  end;
+ end; 
+ if twindow(r).transientforstackactive then begin
+  if twindow(r).ftransientfor <> nil then begin
+   dec(result,transientfornotnilweight);
+  end;
+  if twindow(r).ftransientforcount > 0 then begin
+   dec(result,transientforcountweight);
+  end;
  end;
  window1:= twindow(l);
  while window1.ftransientfor <> nil do begin
