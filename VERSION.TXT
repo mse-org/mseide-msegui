@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2011-04-06
+ dso_sync* options -> optionsmasterlink.
 2011-03-30
  optionseditty moved to mseeditglob.
 2011-03-29

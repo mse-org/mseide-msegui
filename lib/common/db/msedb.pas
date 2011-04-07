@@ -85,8 +85,10 @@ type
  
  fieldarty = array of tfield;
 
- masterlinkoptionty = (mdlo_syncedit,mdlo_syncinsert,mdlo_syncdelete); 
- masterlinkoptionsty = set of masterlinkoptionty;
+ optionmasterlinkty = (mdlo_syncedit,mdlo_syncinsert,mdlo_syncdelete,
+                       mdlo_delayeddetailpost,mdlo_syncfields,
+                       mdlo_inserttoupdate); 
+ optionsmasterlinkty = set of optionmasterlinkty;
 
  imasterlink = interface(inullinterface)
                       ['{2EC83B53-AF9E-4420-925A-C6CCD543D3C3}']
@@ -168,11 +170,15 @@ type
  imsefield = interface(inullinterface)['{259AB385-E638-49D6-8C0E-688BE164D130}']
   function getproviderflags1: providerflags1ty;
  end;
-   
+
+ fieldstatety = (fis_changing);
+ fieldstatesty = set of fieldstatety;
+    
  tmsefield = class(tfield,imsefield)
   private
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+   fstate: fieldstatesty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
     //imsefield
@@ -186,6 +192,7 @@ type
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
    function HasParent: Boolean; override;
+   procedure change; override;
   public
    procedure Clear; override;
    property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -211,6 +218,7 @@ type
  
  tmsestringfield = class(tstringfield,ifieldcomponent,imsefield)
   private
+   fstate: fieldstatesty;
    fdsintf: idsfieldcontroller;
    fgetmsestringdata: getmsestringdataty;
    fsetmsestringdata: setmsestringdataty;
@@ -253,6 +261,7 @@ type
    function GetAsVariant: variant; override;
    procedure SetAsString(const AValue: string); override;
    procedure SetVarValue(const AValue: Variant); override;
+   procedure change; override;
   public
    destructor destroy; override;
    function HasParent: Boolean; override;
@@ -282,6 +291,7 @@ type
 
  tmsenumericfield = class(tnumericfield,imsefield)
   private
+   fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
@@ -297,6 +307,7 @@ type
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
    function HasParent: Boolean; override;
+   procedure change; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -316,6 +327,7 @@ type
  end;
  tmselongintfield = class(tlongintfield,imsefield)
   private
+   fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
@@ -339,6 +351,7 @@ type
    procedure setaslargeint(avalue: largeint); override;
    function getaslargeint: largeint; override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
+   procedure change; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -362,6 +375,7 @@ type
  end;
  tmselargeintfield = class(tlargeintfield,imsefield)
   private
+   fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
@@ -382,6 +396,7 @@ type
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
+   procedure change; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -405,6 +420,7 @@ type
  end;
  tmsesmallintfield = class(tsmallintfield,imsefield)
   private
+   fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
@@ -424,6 +440,7 @@ type
    procedure setasboolean(avalue: boolean); override;
    procedure setaslargeint(avalue: largeint); override;
    function getaslargeint: largeint; override;
+   procedure change; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -444,6 +461,7 @@ type
  end;
  tmsewordfield = class(twordfield,imsefield)
   private
+   fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
@@ -463,6 +481,7 @@ type
    procedure setasboolean(avalue: boolean); override;
    procedure setaslargeint(avalue: largeint); override;
    function getaslargeint: largeint; override;
+   procedure change; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -483,6 +502,7 @@ type
  end;
  tmseautoincfield = class(tautoincfield,imsefield)
   private
+   fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
@@ -498,6 +518,7 @@ type
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
    function HasParent: Boolean; override;
+   procedure change; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -518,6 +539,7 @@ type
  end;
  tmsefloatfield = class(tfloatfield,imsefield)
   private
+   fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
@@ -538,6 +560,7 @@ type
    procedure setasfloat(avalue: double); override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
    function GetAsLongint: Longint; override;
+   procedure change; override;
    function GetAsLargeint: Largeint; override;
   public
    procedure Clear; override;
@@ -564,6 +587,7 @@ type
  end;
  tmsebooleanfield = class(tbooleanfield,imsefield)
   private
+   fstate: fieldstatesty;
    fdisplayvalues: msestring;
    fdisplays : array[boolean,boolean] of msestring;
    ftagpo: pointer;
@@ -595,6 +619,7 @@ type
    function GetAsLongint: Longint; override;
    procedure SetAsLongint(AValue: Longint); override;
    function GetAsVariant: variant; override;
+   procedure change; override;
   public
    constructor Create(AOwner: TComponent); override;
    procedure Clear; override;
@@ -623,6 +648,7 @@ type
                        
  tmsedatetimefield = class(tdatetimefield,imsefield)
   private
+   fstate: fieldstatesty;
    foptions: datetimefieldoptionsty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
@@ -644,6 +670,7 @@ type
    procedure setasdatetime(avalue: tdatetime); override;
    procedure setasstring(const avalue: string); override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
+   procedure change; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -674,6 +701,7 @@ type
  
  tmsebinaryfield = class(tbinaryfield,imsefield)
   private
+   fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
@@ -689,6 +717,7 @@ type
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
    function HasParent: Boolean; override;
+   procedure change; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -708,6 +737,7 @@ type
  end;
  tmsebytesfield = class(tbytesfield,imsefield)
   private
+   fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
@@ -726,6 +756,7 @@ type
    function getasvariant: variant; override;
    function getasstring: string; override;
    procedure setasstring(const avalue: string); override;
+   procedure change; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -745,6 +776,7 @@ type
  end;
  tmsevarbytesfield = class(tvarbytesfield,imsefield)
   private
+   fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
@@ -763,6 +795,7 @@ type
    function getasvariant: variant; override;
    procedure setasstring(const avalue: string); override;
    function getasstring: string; override;
+   procedure change; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -782,6 +815,7 @@ type
  end;
  tmsebcdfield = class(tbcdfield,imsefield)
   private
+   fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
    function getasmsestring: msestring;
@@ -801,6 +835,7 @@ type
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
    class procedure checktypesize(avalue: longint); override;
    property tagpo: pointer read ftagpo write ftagpo;
+   procedure change; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -1130,9 +1165,12 @@ type
                          dso_cacheblobs,
                          dso_offline, //disconnect database after open
                          dso_local,   //do not connect database on open
-                         dso_noedit,dso_canceloncheckbrowsemode,
-                         dso_syncmasteredit,dso_syncmasterinsert,
-                         dso_syncmasterdelete); 
+                         dso_noedit,dso_canceloncheckbrowsemode
+                         {,
+                         dso_syncmasteredit,dso_syncmasterinsert, 
+                                                     -> optionsmasterlink
+                         dso_syncmasterdelete,dso_delayeddetailpost,
+                         dso_inserttoupdate,dso_syncinsertfields}); 
  datasetoptionsty = set of datasetoptionty;
 
  idscontroller = interface(inullinterface)
@@ -1170,6 +1208,7 @@ type
 const
  de_modified = ord(high(tdataevent))+1;
  de_afterdelete = ord(high(tdataevent))+2;
+ de_afterpost = ord(high(tdataevent))+3;
 
  defaultdscontrolleroptions = [];
  allfieldkinds = [fkData,fkCalculated,fkLookup,fkInternalCalc];
@@ -1607,6 +1646,7 @@ function paramtosql(const aparam: tparam): msestring;
 function fieldchanged(const field: tfield): boolean;
 function curfieldchanged(const field: tfield): boolean;
 procedure fieldtoparam(const field: tfield; const param: tparam);
+procedure copyfieldvalues(const source: tdataset; const dest: tdataset);
 procedure msestringtoparam(const avalue: msestring; const param: tparam);
 //function getasmsestring(const field: tfield): msestring;
 function getasmsestring(const field: tfield; const utf8: boolean): msestring;
@@ -1908,6 +1948,23 @@ begin
   end;
  end;
  }
+end;
+
+procedure copyfieldvalues(const source: tdataset; const dest: tdataset);
+var
+ int1: integer;
+ df: tfield;
+begin
+ for int1:= 0 to source.fieldcount-1 do begin
+  with source.fields[int1] do begin
+   if visible then begin
+    df:= dest.findfield(fieldname);
+    if (df <> nil) and not df.readonly then begin
+     df.value:= value;
+    end;
+   end;
+  end;
+ end;
 end;
 
 function encodesqlstring(const avalue: msestring): msestring;
@@ -3101,6 +3158,18 @@ begin
  result:= fproviderflags1;
 end;
 
+procedure tmsefield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
+end;
+
 { tmsestringfield }
 
 destructor tmsestringfield.destroy;
@@ -3329,6 +3398,18 @@ begin
  result:= fproviderflags1;
 end;
 
+procedure tmsestringfield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
+end;
+
 { tmsememofield }
 
 constructor tmsememofield.create(aowner: tcomponent);
@@ -3468,6 +3549,18 @@ end;
 function tmsenumericfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
+end;
+
+procedure tmsenumericfield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
 end;
 
 { tmselongintfield }
@@ -3631,6 +3724,18 @@ begin
  end;
 end;
 
+procedure tmselongintfield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
+end;
+
 { tmselargeintfield }
 
 function tmselargeintfield.HasParent: Boolean;
@@ -3769,6 +3874,18 @@ begin
  end;
 end;
 
+procedure tmselargeintfield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
+end;
+
 { tmsesmallintfield }
 
 function tmsesmallintfield.HasParent: Boolean;
@@ -3855,6 +3972,18 @@ end;
 function tmsesmallintfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
+end;
+
+procedure tmsesmallintfield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
 end;
 
 { tmsewordfield }
@@ -3945,6 +4074,18 @@ begin
  result:= fproviderflags1;
 end;
 
+procedure tmsewordfield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
+end;
+
 { tmseautoincfield }
 
 function tmseautoincfield.HasParent: Boolean;
@@ -4003,6 +4144,18 @@ end;
 function tmseautoincfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
+end;
+
+procedure tmseautoincfield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
 end;
 
 { tmsefloatfield }
@@ -4139,6 +4292,18 @@ end;
 function tmsefloatfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
+end;
+
+procedure tmsefloatfield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
 end;
 
 { tmsecurrencyfield }
@@ -4436,6 +4601,18 @@ begin
  result:= fproviderflags1;
 end;
 
+procedure tmsebooleanfield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
+end;
+
 { tmsedatetimefield }
 
 function tmsedatetimefield.HasParent: Boolean;
@@ -4562,6 +4739,18 @@ end;
 function tmsedatetimefield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
+end;
+
+procedure tmsedatetimefield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
 end;
 
 { tmsedatefield }
@@ -4744,6 +4933,18 @@ begin
  result:= fproviderflags1;
 end;
 
+procedure tmsebinaryfield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
+end;
+
 { tmsebytesfield }
 
 function tmsebytesfield.HasParent: Boolean;
@@ -4833,6 +5034,18 @@ end;
 function tmsebytesfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
+end;
+
+procedure tmsebytesfield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
 end;
 
 { tmsevarbytesfield }
@@ -4929,6 +5142,18 @@ end;
 function tmsevarbytesfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
+end;
+
+procedure tmsevarbytesfield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
 end;
 
 { tmsebcdfield }
@@ -5049,6 +5274,18 @@ end;
 function tmsebcdfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
+end;
+
+procedure tmsebcdfield.change;
+begin
+ if not (fis_changing in fstate) then begin
+  include(fstate,fis_changing);
+  try
+   inherited;
+  finally
+   exclude(fstate,fis_changing);
+  end;
+ end;
 end;
 
 
@@ -6645,6 +6882,9 @@ begin
       if result and assigned(aafterpost) then begin
        aafterpost(tdataset(fowner),result);
       end;
+      if result then begin
+       tdataset1(fowner).dataevent(tdataevent(de_afterpost),0);
+      end;
      finally
       if bo2 then begin
        self.modified;
@@ -7495,7 +7735,12 @@ begin
  for int1:= 0 to count-1 do begin
   with tmseparam(items[int1]) do begin
    if fdatalink.field <> nil then begin
-    value:= fdatalink.field.value;
+    if pos('OLD_',name) = 1 then begin
+     value:= fdatalink.field.oldvalue;
+    end
+    else begin
+     value:= fdatalink.field.value;
+    end;
    end;
   end;
  end;

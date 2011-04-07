@@ -389,7 +389,7 @@ type
     function getdatabase: tcustomsqlconnection;
     procedure setdatabase1(const avalue: tcustomsqlconnection);
     function docommit(const retaining: boolean): boolean;
-   procedure setpendingaction(const avalue: tcommitrollbackaction);
+    procedure setpendingaction(const avalue: tcommitrollbackaction);
    protected
     fsavepointlevel: integer;
     function GetHandle : Pointer; virtual;
@@ -406,8 +406,8 @@ type
     procedure refresh(aaction: tcommitrollbackaction = canone);
                  //canone -> action property
                  //closes transaction, calls refreshdatasets
-    function Commit: boolean; virtual; //true if ok
-    function CommitRetaining: boolean; virtual;
+    function Commit(const checksavepoint: boolean = false): boolean; virtual; //true if ok
+    function CommitRetaining(const checksavepoint: boolean = false): boolean; virtual;
     procedure Rollback; virtual;
     procedure RollbackRetaining; virtual;
     procedure StartTransaction; override;
@@ -702,7 +702,7 @@ type
    FReadOnly: boolean;
    fprimarykeyfield: tfield;                   
    futf8: boolean;
-   fmasterlinkoptions: masterlinkoptionsty;
+   foptionsmasterlink: optionsmasterlinkty;
    procedure settransactionwrite(const avalue: tmdbtransaction); override;
    procedure checkpendingupdates; virtual;
    procedure notification(acomponent: tcomponent; operation: toperation); override;   
@@ -717,7 +717,7 @@ type
            const buffer: pointer; var bufsize: integer): boolean; override;
           //if bufsize < 0 -> buffer was to small, should be -bufsize
    // abstract & virtual methods of TDataset
-   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+//   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function isutf8: boolean; override;
    procedure UpdateIndexDefs; override;
    procedure SetDatabase(const Value: tmdatabase); override;
@@ -734,7 +734,7 @@ type
    procedure refreshtransaction; override;
    procedure dobeforeedit; override;
    procedure dobeforeinsert; override;
-//   procedure dataevent(event: tdataevent; info: ptrint); override;
+   procedure dataevent(event: tdataevent; info: ptrint); override;
    
    function  GetCanModify: Boolean; override;
    procedure updatewherepart(var sql_where : string; const afield: tfield);
@@ -802,6 +802,8 @@ type
     Property DataSource : TDatasource Read GetDataSource Write SetDatasource;
     property masterdelayus: integer read fmasterdelayus
                                 write fmasterdelayus default -1;
+    property optionsmasterlink: optionsmasterlinkty read foptionsmasterlink 
+                                      write foptionsmasterlink default [];
  //   property masterlink: tsqlmasterparamsdatalink read fmasterlink 
  //                     write setmasterlink;
     property database: tcustomsqlconnection read getdatabase1 write setdatabase1;
@@ -2436,12 +2438,16 @@ begin
  result:= true;
 end;
 
-function TSQLTransaction.Commit: boolean;
+function TSQLTransaction.Commit(const checksavepoint: boolean = false): boolean;
 var
  bo1: boolean;
 begin
  result:= true;
  if active then begin
+  if checksavepoint and (fsavepointlevel > 0) then begin
+   pendingaction:= cacommit;
+   exit;
+  end;
   dobeforestop;
   if checkcanevent(self,tmethod(fonbeforecommit)) then begin
    fonbeforecommit(self);
@@ -2454,10 +2460,14 @@ begin
  end;
 end;
 
-function TSQLTransaction.CommitRetaining: boolean;
+function TSQLTransaction.CommitRetaining(const checksavepoint: boolean = false): boolean;
 begin
  result:= true;
  if active then begin
+  if checksavepoint and (fsavepointlevel > 0) then begin
+   pendingaction:= cacommitretaining;
+   exit;
+  end;
   if checkcanevent(self,tmethod(fonbeforecommitretaining)) then begin
    fonbeforecommitretaining(self);
   end;
@@ -3740,8 +3750,13 @@ var
  freeblobar: pointerarty;
  statementtypebefore: tstatementtype;
 // refreshfieldvalues: boolean;
+ oldisnew: boolean;
     
 begin
+ oldisnew:= (updatekind = ukinsert) and (bs_inserttoupdate in fbstate);
+ if oldisnew then begin
+  updatekind:= ukmodify;
+ end;
  blobspo:= getintblobpo;
  if fapplyqueries[updatekind] = nil then begin
   databaseerror(name+': No rec apply query for '+
@@ -3793,17 +3808,22 @@ begin
    for x := 0 to Params.Count-1 do begin
     param1:= params[x];
     with param1 do begin
-     if leftstr(name,4)='OLD_' then begin
-      Fld:= self.FieldByName(copy(name,5,length(name)-4));
+     str1:= name;
+     bo1:= pos('OLD_',str1) = 1;
+     if bo1 then begin
+      str1:= copy(str1,5,bigint);
+     end;
+     if bo1 and not oldisnew then begin
+      Fld:= self.FieldByName(str1);
       oldfieldtoparam(fld,param1);
  //     AssignFieldValue(Fld,Fld.OldValue);
      end
      else begin
-      fld:= self.findfield(name);
+      fld:= self.findfield(str1);
       if fld = nil then begin     //search for param
-       param2:= self.params.findparam(name);
+       param2:= self.params.findparam(str1);
        if param2 = nil then begin
-        fieldbyname(name); //raise exception
+        fieldbyname(str1); //raise exception
        end
        else begin
         value:= param2.value;
@@ -4367,7 +4387,7 @@ begin
 //  tcustomsqlconnection(fdatabase).updateutf8(result);
 // end;
 end;
-
+{
 procedure TSQLQuery.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin
  fmasterlinkoptions:= [];
@@ -4380,7 +4400,14 @@ begin
  if dso_syncmasterdelete in aoptions then begin
   include(fmasterlinkoptions,mdlo_syncdelete);
  end;
+ if dso_delayeddetailpost in aoptions then begin
+  include(fmasterlinkoptions,mdlo_delayeddetailpost);
+ end;
+ if dso_syncinsertfields in aoptions then begin
+  include(fmasterlinkoptions,mdlo_syncinsertfields);
+ end;
 end;
+}
 {
 procedure TSQLQuery.setmasterlink(const avalue: tsqlmasterparamsdatalink);
 begin
@@ -4407,6 +4434,34 @@ procedure TSQLQuery.settablename(const avalue: string);
 begin
  checkinactive;
  ftablename:= avalue;
+end;
+
+procedure TSQLQuery.dataevent(event: tdataevent; info: ptrint);
+var
+ int1: integer;
+ sf,df: tfield;
+ str1: string;
+begin
+ case event of
+  deupdaterecord: begin
+   if (mdlo_syncfields in foptionsmasterlink) and (fmasterlink <> nil) and
+              fmasterlink.active then begin
+    for int1:= 0 to fparams.count - 1 do begin
+     str1:= fparams[int1].name;
+     if (str1 <> '') then begin
+      df:= findfield(str1);
+      if df <> nil then begin
+       sf:= fmasterlink.dataset.findfield(str1);
+       if sf <> nil then begin
+        df.value:= sf.value;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+ inherited;
 end;
 
 { TSQLCursor }
@@ -4950,20 +5005,46 @@ end;
 procedure tsqlmasterparamsdatalink.DataEvent(Event: TDataEvent; Info: Ptrint);
 begin
  inherited;
- case ord(event) of
-  ord(deupdatestate): begin
-   if (mdlo_syncedit in tsqlquery(detaildataset).fmasterlinkoptions) and
-       (dataset.state = dsedit) and not (detaildataset.state = dsedit) then begin
-    detaildataset.edit;
+ with tsqlquery(detaildataset) do begin
+  case ord(event) of
+   ord(deupdaterecord): begin
+    if state in [dsinsert] then begin
+     updaterecord;
+     if modified then begin
+      dataset.modified:= true;
+     end;
+    end;
    end;
-   if (mdlo_syncinsert in tsqlquery(detaildataset).fmasterlinkoptions) and
-       (dataset.state = dsinsert) and not (detaildataset.state = dsinsert) then begin
-    detaildataset.insert;
+   ord(deupdatestate): begin
+    if (mdlo_syncedit in foptionsmasterlink) and
+        (dataset.state = dsedit) and not (state = dsedit) then begin
+     edit;
+    end;
+    if (mdlo_syncinsert in foptionsmasterlink) and
+        (dataset.state = dsinsert) and not (state = dsinsert) then begin
+     insert;
+    end;
    end;
-  end;
-  de_afterdelete: begin
-   if (mdlo_syncdelete in tsqlquery(detaildataset).fmasterlinkoptions) then begin
-    detaildataset.delete;
+   de_afterdelete: begin
+    if (mdlo_syncdelete in foptionsmasterlink) then begin
+     delete;
+    end;
+   end;
+   de_afterpost: begin
+    if (mdlo_delayeddetailpost in foptionsmasterlink) then begin
+     if (mdlo_inserttoupdate in foptionsmasterlink) and
+      (state = dsinsert) then begin    
+      include(fbstate,bs_inserttoupdate);
+      try
+       detaildataset.checkbrowsemode;
+      finally
+       exclude(fbstate,bs_inserttoupdate);
+      end;
+     end
+     else begin
+      detaildataset.checkbrowsemode;
+     end;
+    end;
    end;
   end;
  end;
@@ -4974,17 +5055,22 @@ label
  endlab;
 var
  intf: igetdscontroller;
+ detailoptions: optionsmasterlinkty;
 begin
  inc(frefreshlock);
  try
-  if (tsqlquery(detaildataset).fmasterlinkoptions * 
-        [mdlo_syncedit,mdlo_syncinsert] <> []) then begin
+  detailoptions:= tsqlquery(detaildataset).foptionsmasterlink;
+  if detailoptions * 
+        [mdlo_syncedit,mdlo_syncinsert] <> [] then begin
    if getcorbainterface(dataset,typeinfo(igetdscontroller),intf) and
                                       intf.getcontroller.canceling then begin
     detaildataset.cancel;
     exit;
    end
    else begin
+    if mdlo_delayeddetailpost in detailoptions then begin
+     exit;
+    end;
     if detaildataset.state = dsinsert then begin
      dataset.updaterecord;
      if dataset.modified then begin
@@ -4997,8 +5083,7 @@ begin
   inherited;
  endlab:
   if (dataset.state in [dsedit,dsinsert]) and 
-        (tsqlquery(detaildataset).fmasterlinkoptions * 
-                       [mdlo_syncedit,mdlo_syncinsert] <> []) then begin
+        (detailoptions * [mdlo_syncedit,mdlo_syncinsert] <> []) then begin
    dataset.updaterecord; //synchronize fields
   end;
   if getcorbainterface(detaildataset,typeinfo(igetdscontroller),intf) then begin

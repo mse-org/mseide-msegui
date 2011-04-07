@@ -46,8 +46,12 @@ type
  notifyeventty = procedure (const sender: tobject) of object;
  componenteventty = procedure (const acomponent: tcomponent) of object;
  checkeventty = function (const sender: tobject): boolean of object;
- eventeventty = procedure (const sender: tobject; const aevent: tobjectevent) of object;
- asynceventeventty = procedure (const sender: tobject; var atag: integer) of object;
+ accepteventty = procedure (const sender: tobject;
+                                var accept: boolean) of object;
+ eventeventty = procedure (const sender: tobject;
+                              const aevent: tobjectevent) of object;
+ asynceventeventty = procedure (const sender: tobject;
+                                       var atag: integer) of object;
 
  booleanchangedeventty = procedure (const sender: tobject;
                             const avalue: boolean) of object;

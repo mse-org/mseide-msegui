@@ -100,6 +100,7 @@ type
    procedure inheritedinternalopen;
    procedure inheritedinternalclose;
    procedure doidleapplyupdates;
+   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 
 //   function wantblobfetch: boolean; override;
    function getdsoptions: datasetoptionsty; override;
@@ -832,6 +833,11 @@ end;
 function tmsesqlquery.stringmemo: boolean;
 begin
  result:= dso_stringmemo in fcontroller.options;
+end;
+
+procedure tmsesqlquery.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+begin
+ //dummy
 end;
 {
 function tmsesqlquery.cantransactionrefresh: boolean;

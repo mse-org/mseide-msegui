@@ -105,6 +105,7 @@ type
    procedure setitems(const index: integer; const Value: tmenuitem);
    procedure setaction(const avalue: tcustomaction);
    function isonexecutestored: Boolean;
+   function isonbeforeexecutestored: Boolean;
    function isshortcutstored: Boolean;
    procedure setshortcut(const avalue: shortcutty);
    function isshortcut1stored: Boolean;
@@ -114,6 +115,7 @@ type
    function getshortcut1: shortcutty;
    procedure setshortcut1(const avalue: shortcutty);
    procedure setonexecute(const avalue: notifyeventty);
+   procedure setonbeforeexecute(const avalue: accepteventty);
    procedure setoptions(const avalue: menuactionoptionsty);
    function istagstored: Boolean;
    procedure settag(const avalue: integer);
@@ -245,6 +247,8 @@ type
                             stored isfontactivestored;
    property onexecute: notifyeventty read finfo.onexecute
                      write setonexecute stored isonexecutestored;
+   property onbeforeexecute: accepteventty read finfo.onbeforeexecute
+                   write setonbeforeexecute stored isonbeforeexecutestored;
  end;
 
  pmenuitem = ^tmenuitem;
@@ -918,9 +922,20 @@ begin
                 (fowner <> nil) and (csloading in fowner.componentstate));
 end;
 
+procedure tmenuitem.setonbeforeexecute(const avalue: accepteventty);
+begin
+ setactiononbeforeexecute(iactionlink(self),avalue,
+                (fowner <> nil) and (csloading in fowner.componentstate));
+end;
+
 function tmenuitem.isonexecutestored: Boolean;
 begin
  result:= isactiononexecutestored(finfo);
+end;
+
+function tmenuitem.isonbeforeexecutestored: Boolean;
+begin
+ result:= isactiononbeforeexecutestored(finfo);
 end;
 
 procedure tmenuitem.setcoloractive(const avalue: colorty);

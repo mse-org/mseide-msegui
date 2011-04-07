@@ -50,7 +50,7 @@ type
                   as_localimagecheckedoffset,
                   as_localcolorglyph,as_localcolor,
                   as_localhint,as_localshortcut,as_localshortcut1,as_localtag,
-                  as_localgroup,as_localonexecute);
+                  as_localgroup,as_localonexecute,as_localonbeforeexecute);
  actionstatesty = set of actionstatety;
  actionstatesarty = array of actionstatesty;
 
@@ -79,7 +79,7 @@ const
              as_localimagecheckedoffset,
              as_localcolorglyph,as_localcolor,
              as_localhint,as_localshortcut,as_localshortcut1,as_localtag,
-             as_localgroup,as_localonexecute];
+             as_localgroup,as_localonexecute,as_localonbeforeexecute];
  localactionlshift = ord(as_localdisabled);
  localactionstatestates: actionstatesty =
           [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault,
@@ -113,6 +113,7 @@ type
   tag: integer;
   tagpointer: pointer;
   onexecute: notifyeventty;
+  onbeforeexecute: accepteventty;
  end;
  pactioninfoty = ^actioninfoty;
 
@@ -147,6 +148,7 @@ type
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    procedure setonexecute(const Value: notifyeventty);
+   procedure setonbeforeexecute(const avalue: accepteventty);
    procedure setimagenr(const Value: imagenrty);
    procedure setimagenrdisabled(const avalue: imagenrty);
    procedure setcolorglyph(const avalue: colorty);
@@ -215,6 +217,8 @@ type
 {$endif}
 
    property onexecute: notifyeventty read finfo.onexecute write setonexecute;
+   property onbeforeexecute: accepteventty read finfo.onbeforeexecute
+                       write setonbeforeexecute;
    property onexecuteaction: actioneventty read fonexecuteaction write fonexecuteaction;
    property onupdate: actioneventty read fonupdate write fonupdate;
    property onchange: notifyeventty read fonchange write fonchange;
@@ -240,6 +244,7 @@ type
    property statvarname;
    property options;
    property onexecute;
+   property onbeforeexecute;
    property onupdate;
    property onchange;
    property onasyncevent;
@@ -280,6 +285,9 @@ function isactiongroupstored(const info: actioninfoty): boolean;
 procedure setactiononexecute(const sender: iactionlink;
                              const value: notifyeventty; const aloading: boolean);
 function isactiononexecutestored(const info: actioninfoty): boolean;
+procedure setactiononbeforeexecute(const sender: iactionlink;
+                             const value: accepteventty; const aloading: boolean);
+function isactiononbeforeexecutestored(const info: actioninfoty): boolean;
 
 procedure actionbeginload(const sender: iactionlink);
 procedure actionendload(const sender: iactionlink);
@@ -330,6 +338,8 @@ function doactionexecute1(const sender: tobject; var info: actioninfoty;
                          const nocheckbox: boolean = false;
                          const nocandefocus: boolean = false): boolean;
           //true if not canceled
+var
+ bo1: boolean;
 begin
  result:= false;
  changed:= false;
@@ -337,8 +347,14 @@ begin
   if not (as_disabled in state) then begin
    if not nocandefocus and 
      ((action = nil) or not(ao_nocandefocus in action.options)) then begin
-    result:= application.candefocus;
-    if not result then begin
+    if not application.candefocus then begin
+     exit;
+    end;
+   end;
+   if assigned(info.onbeforeexecute) then begin
+    bo1:= true;
+    info.onbeforeexecute(sender,bo1);
+    if not bo1 then begin
      exit;
     end;
    end;
@@ -483,6 +499,9 @@ begin
      end;
      if not (as_localonexecute in state) then begin
       onexecute:= nil;
+     end;
+     if not (as_localonbeforeexecute in state) then begin
+      onbeforeexecute:= nil;
      end;
      state:= state - actionstatesty(
                   longword(localactionstatestates) shr localactionlshift);
@@ -807,6 +826,27 @@ begin
  end;
 end;
 
+procedure setactiononbeforeexecute(const sender: iactionlink;
+                    const value: accepteventty; const aloading: boolean);
+begin
+ with sender.getactioninfopo^ do begin
+  onbeforeexecute:= value;
+  if not aloading then begin //IDE sets csloading while method pointer swapping
+   include(state,as_localonbeforeexecute);
+  end;
+ end;
+ sender.actionchanged;
+end;
+
+function isactiononbeforeexecutestored(const info: actioninfoty): boolean;
+begin
+ with info do begin
+  result:= (as_localonbeforeexecute in state) and
+        not ((action = nil) and (tmethod(info.onexecute).Code = nil));
+                                 //assigned does not work
+ end;
+end;
+
  {tcustomaction}
 
 constructor tcustomaction.create(aowner: tcomponent);
@@ -943,6 +983,14 @@ begin
  end;
 end;
 
+procedure tcustomaction.setonbeforeexecute(const avalue: accepteventty);
+begin
+ if not issamemethod(tmethod(avalue),tmethod(finfo.onbeforeexecute)) then begin
+  finfo.onbeforeexecute := avalue;
+  changed;
+ end;
+end;
+
 procedure tcustomaction.loaded;
 begin
  inherited;
@@ -1025,6 +1073,12 @@ begin
   if not (as_localonexecute in state) and
          not issamemethod(tmethod(onexecute),tmethod(finfo.onexecute)) then begin
    onexecute:= finfo.onexecute;
+   bo1:= true;
+  end;
+  if not (as_localonbeforeexecute in state) and
+         not issamemethod(tmethod(onbeforeexecute),
+                     tmethod(finfo.onbeforeexecute)) then begin
+   onbeforeexecute:= finfo.onbeforeexecute;
    bo1:= true;
   end;
   mask:= actionstatesmask -

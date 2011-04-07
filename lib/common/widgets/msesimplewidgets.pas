@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -100,6 +100,8 @@ type
    function getcaption: captionty;
    procedure setonexecute(const value: notifyeventty);
    function isonexecutestored: boolean;
+   procedure setonbeforeexecute(const avalue: accepteventty);
+   function isonbeforeexecutestored: boolean;
    procedure setaction(const value: tcustomaction); virtual;
    function iscaptionstored: boolean;
    function getstate: actionstatesty;
@@ -201,7 +203,9 @@ type
    property shortcuts: shortcutarty read factioninfo.shortcut write setshortcuts;
    property shortcuts1: shortcutarty read factioninfo.shortcut1 write setshortcuts1;
    property onexecute: notifyeventty read factioninfo.onexecute
-                            write setonexecute stored isonexecutestored;
+              write setonexecute stored isonexecutestored;
+   property onbeforeexecute: accepteventty read factioninfo.onbeforeexecute 
+              write setonbeforeexecute stored isonbeforeexecutestored;
    property autosize_cx: integer read fautosize_cx write setautosize_cx default 0;
    property autosize_cy: integer read fautosize_cy write setautosize_cy default 0;
   published
@@ -232,6 +236,7 @@ type
    property options;
    property focusrectdist;
    property onexecute;
+   property onbeforeexecute;
  end;
 
  tstockglyphbutton = class(tcustombutton)
@@ -260,6 +265,7 @@ type
    property options;
    property focusrectdist;
    property onexecute;
+   property onbeforeexecute;
  end;
 
  tcustomrichbutton = class(tcustombutton)
@@ -339,6 +345,7 @@ type
    property options;
    property focusrectdist;
    property onexecute;
+   property onbeforeexecute;
  end;
 
  trichstockglyphbutton = class(tcustomrichbutton)
@@ -377,6 +384,7 @@ type
    property options;
    property focusrectdist;
    property onexecute;
+   property onbeforeexecute;
  end;
    
  labeloptionty = (lao_nogray);
@@ -901,6 +909,16 @@ end;
 function tcustombutton.isonexecutestored: boolean;
 begin
  result:= isactiononexecutestored(factioninfo);
+end;
+
+procedure tcustombutton.setonbeforeexecute(const avalue: accepteventty);
+begin
+ setactiononbeforeexecute(iactionlink(self),avalue,csloading in componentstate);
+end;
+
+function tcustombutton.isonbeforeexecutestored: boolean;
+begin
+ result:= isactiononbeforeexecutestored(factioninfo);
 end;
 
 function tcustombutton.getcaption: captionty;

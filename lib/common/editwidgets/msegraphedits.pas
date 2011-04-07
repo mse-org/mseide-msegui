@@ -747,6 +747,8 @@ type
    function isshortcut1stored: boolean;
    procedure setonexecute(const avalue: notifyeventty);
    function isonexecutestored: boolean;
+   procedure setonbeforeexecute(const avalue: accepteventty);
+   function isonbeforeexecutestored: boolean;
    procedure setstate(const avalue: actionstatesty);
    function isstatestored: boolean;
 
@@ -844,8 +846,8 @@ type
    property shortcuts1: shortcutarty read factioninfo.shortcut1 write setshortcuts1;
    property onexecute: notifyeventty read factioninfo.onexecute
                             write setonexecute stored isonexecutestored;
-
-
+   property onbeforeexecute: accepteventty read factioninfo.onbeforeexecute
+                   write setonbeforeexecute stored isonbeforeexecutestored;
 
    property imageoffset: integer read fimageoffset write setimageoffset default 0;
    property imageoffsetdisabled: integer read fimageoffsetdisabled
@@ -894,6 +896,7 @@ type
    property options;
    property focusrectdist;
    property onexecute;
+   property onbeforeexecute;
 
    property imageoffset;
    property imageoffsetdisabled;
@@ -930,6 +933,7 @@ type
    property imagedist;
    property focusrectdist;
    property onexecute;
+   property onbeforeexecute;
    property onsetvalue;
    property value;
    property valuedefault;
@@ -3334,6 +3338,16 @@ end;
 function tcustomdatabutton.isonexecutestored: boolean;
 begin
  result:= isactiononexecutestored(factioninfo);
+end;
+
+procedure tcustomdatabutton.setonbeforeexecute(const avalue: accepteventty);
+begin
+ setactiononbeforeexecute(iactionlink(self),avalue,csloading in componentstate);
+end;
+
+function tcustomdatabutton.isonbeforeexecutestored: boolean;
+begin
+ result:= isactiononbeforeexecutestored(factioninfo);
 end;
 
 procedure tcustomdatabutton.setimagedist(const avalue: integer);

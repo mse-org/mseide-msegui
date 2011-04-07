@@ -53,6 +53,8 @@ type
    function ishintstored: Boolean;
    procedure setonexecute(const Value: notifyeventty);
    function isonexecutestored: Boolean;
+   procedure setonbeforeexecute(const avalue: accepteventty);
+   function isonbeforeexecutestored: Boolean;
    procedure setoptions(const Value: menuactionoptionsty);
    procedure setshortcut(const value: shortcutty);
    function isshortcutstored: boolean;
@@ -123,6 +125,8 @@ type
                              stored isgroupstored default 0;
    property onexecute: notifyeventty read finfo.onexecute write setonexecute
                                stored isonexecutestored;
+   property onbeforeexecute: accepteventty read finfo.onbeforeexecute
+                   write setonbeforeexecute stored isonbeforeexecutestored;
    property onupdate: actioneventty read fonupdate write fonupdate;
  end;
  ptoolbutton = ^ttoolbutton;
@@ -476,6 +480,16 @@ end;
 function ttoolbutton.isonexecutestored: Boolean;
 begin
  result:= isactiononexecutestored(finfo);
+end;
+
+procedure ttoolbutton.setonbeforeexecute(const avalue: accepteventty);
+begin
+ setactiononbeforeexecute(iactionlink(self),avalue,csloading in toolbar.componentstate);
+end;
+
+function ttoolbutton.isonbeforeexecutestored: Boolean;
+begin
+ result:= isactiononbeforeexecutestored(finfo);
 end;
 
 procedure ttoolbutton.setgroup(const Value: integer);

@@ -71,6 +71,7 @@ type
  fieldinfoextty = record
   basetype: tfieldtype;
   field: tfield;
+  uppername: string;
  end;
  fieldinfoty = record
   base: fieldinfobasety;
@@ -367,6 +368,28 @@ type
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
+   function findvariant(const avalue: variant;
+               out abookmark: string;
+               const abigger: boolean = false;
+               const partialstring: boolean = false;
+               const nocheckbrowsemode: boolean = false): boolean; overload;
+                //true if found else nearest lower or bigger,
+                //abookmark = '' if no lower or bigger found
+                //string values must be msestring
+   function find(const avalues: array of tfield;
+               out abookmark: string;
+               const abigger: boolean = false;
+               const partialstring: boolean = false;
+               const nocheckbrowsemode: boolean = false): boolean; overload;
+                //true if found else nearest lower or bigger,
+                //abookmark = '' if no lower or bigger found
+   function find(const avalues: array of tfield;
+               out abookmark: bookmarkdataty;
+               const abigger: boolean = false;
+               const partialstring: boolean = false;
+               const nocheckbrowsemode: boolean = false): boolean; overload;
+                //true if found else nearest lower or bigger,
+
    function find(const avalues: array of const;
                  //nil -> NULL field
                 const aisnull: array of boolean;
@@ -377,14 +400,16 @@ type
                 const partialstring: boolean = false;
                 const nocheckbrowsemode: boolean = false): boolean; overload;
                 //sets dataset cursor if found
-
    function find(const avalues: array of tfield;
-               out abookmark: string;
                const abigger: boolean = false;
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false): boolean; overload;
-                //true if found else nearest lower or bigger,
-                //abookmark = '' if no lower or bigger found
+                //sets dataset cursor if found
+   function findvariant(const avalue: variant;
+               const abigger: boolean = false;
+               const partialstring: boolean = false;
+               const nocheckbrowsemode: boolean = false): boolean; overload;
+                //sets dataset cursor if found
 
    function unique(const avalues: array of const): boolean;
    function getbookmark(const arecno: integer): string;
@@ -447,7 +472,8 @@ type
                       bs_utf8,
                       bs_hasfilter,bs_visiblerecordcountvalid,
                       bs_refreshing,bs_restorerecno,bs_idle,
-                      bs_noautoapply,bs_refreshinsert,bs_refreshupdate
+                      bs_noautoapply,bs_refreshinsert,bs_refreshupdate,
+                      bs_inserttoupdate
                                           //used by tsqlquery
                       );
  bufdatasetstatesty = set of bufdatasetstatety;
@@ -607,6 +633,7 @@ type
    function getcurrentasid(const afield: tfield; aindex: integer): int64;
    procedure setcurrentasid(const afield: tfield; aindex: integer;
                    const avalue: int64);
+   procedure setbookmarkdata1(const avalue: bookmarkdataty);
   protected
    fbrecordcount: integer;
    ffieldinfos: fieldinfoarty;
@@ -790,7 +817,22 @@ type
    function refreshing: boolean;
 
    procedure refreshrecord(const akeyfield: tfield;
-              const keyindex: integer = 0; const acancelupdate: boolean = true);
+              const keyindex: integer = 0;
+              const acancelupdate: boolean = true); overload;
+   procedure refreshrecord(const asourcefields: array of tfield;
+              const akeyfield: tfield;
+              const keyindex: integer = 0;
+              const acancelupdate: boolean = true); overload;
+   procedure refreshrecord(const asourcefields: array of tfield;
+              const adestfields: array of tfield;
+              const akeyfield: tfield;
+              const keyindex: integer = 0;
+              const acancelupdate: boolean = true); overload;
+   procedure refreshrecord(const asourcevalues: array of variant;
+              const adestfields: array of tfield;
+              const akeyvalue: variant;
+              const keyindex: integer = 0;
+              const acancelupdate: boolean = true); overload;
           //keyindex must be unique, copies equally named visible fields,
           //inserts record if key not found.   
 
@@ -843,7 +885,8 @@ type
                    //if norecordcancel no restoring of old values
    function updatestatus: tupdatestatus; override;
    property changecount : integer read getchangecount;
-   property bookmarkdata: bookmarkdataty read getbookmarkdata1;
+   property bookmarkdata: bookmarkdataty read getbookmarkdata1
+                                             write setbookmarkdata1;
    property filtereditkind: filtereditkindty read ffiltereditkind write ffiltereditkind;
 
    procedure currentbeginupdate; virtual;
@@ -873,6 +916,8 @@ type
    property currentasmsestring[const afield: tfield; aindex: integer]: msestring
                   read getcurrentasmsestring write setcurrentasmsestring;
    procedure getcoldata(const afield: tfield; const adatalist: tdatalist);
+   procedure copyfieldvalues(const bm: bookmarkdataty; const dest: tdataset);
+                        //copies field values with same name
    
   published
    property logfilename: filenamety read flogfilename write flogfilename;
@@ -908,7 +953,7 @@ procedure alignfieldpos(var avalue: integer);
 implementation
 uses
  rtlconsts,dbconst,sysutils,mseformatstr,msereal,msestream,msesys,
- msefileutils,mseapplication;
+ msefileutils,mseapplication,msevariants;
 {$ifdef mse_FPC_2_2}
 const
  snotineditstate = 
@@ -3243,6 +3288,7 @@ procedure tmsebufdataset.calcrecordsize;
    end;
    base.fieldtype:= datatype;        //used for savetostream;
    ext.field:= afield;
+   ext.uppername:= uppercase(afield.fieldname);
    inc(frecordsize,base.size);
    alignfieldpos(frecordsize);
   end;
@@ -6004,6 +6050,88 @@ begin
   adatalist.endupdate;
  end;
 end;
+{
+ po1:= factindexpo^.ind[aindex]; //precheaderty
+ int1:= afield.fieldno-1;
+ if not getfieldflag(@precheaderty(po1)^.fielddata.nullmask,int1) then begin 
+  result:= nil;
+ end
+ else begin
+  with ffieldinfos[int1] do begin
+   if (afieldtype <> ftunknown) and 
+        not (ext.basetype in fieldcompatibility[afieldtype]) then begin
+    raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
+   end;   
+   result:= po1 + base.offset;
+  end;
+ end;
+}
+procedure tmsebufdataset.copyfieldvalues(const bm: bookmarkdataty;
+                                                    const dest: tdataset);
+                        //copies field values with same name
+var
+ df: tfield;
+ int1: integer;
+ int2: integer;
+ str1: string;
+ po1: pointer;
+begin
+ currentcheckbrowsemode;
+ for int1:= 0 to dest.fieldcount - 1 do begin
+  df:= dest.fields[int1];
+  if not df.readonly then begin
+   str1:= uppercase(df.fieldname);
+   for int2:= 0 to high(ffieldinfos)do begin
+    with ffieldinfos[int2] do begin
+     if (ext.uppername = str1) and (ext.basetype <> ftblob) and 
+                      ext.field.visible and 
+                     (ext.field.fieldkind <> fkcalculated) then begin
+      if not getfieldflag(@bm.recordpo^.header.fielddata.nullmask,int2) then begin 
+       df.clear;
+      end
+      else begin
+       po1:= pointer(bm.recordpo)+base.offset;
+       case ext.basetype of
+        ftwidestring: begin
+         if df is tmsestringfield then begin
+          tmsestringfield(df).asmsestring:= pmsestring(po1)^;
+         end
+         else begin
+          df.asstring:= pmsestring(po1)^;
+         end;
+        end;
+        ftinteger: begin
+         df.asinteger:= pinteger(po1)^;
+        end;
+        ftboolean: begin
+         df.asboolean:= plongbool(po1)^;
+        end;
+        ftbcd: begin
+         df.ascurrency:= pcurrency(po1)^;
+        end;
+        ftfloat: begin
+         df.asfloat:= pdouble(po1)^;
+        end;
+        ftlargeint: begin
+         df.aslargeint:= pint64(po1)^;
+        end;
+        ftdatetime: begin
+         df.asdatetime:= pdatetime(po1)^;
+        end;
+        ftvariant: begin
+         df.asvariant:= pvariant(po1)^;
+        end
+        else begin
+//         databaseerror(name+': Invalid datatype.');
+        end;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
 
 function tmsebufdataset.currentrecordhigh: integer;
 begin
@@ -6011,10 +6139,11 @@ begin
  result:= fbrecordcount - 1;
 end;
 
-procedure tmsebufdataset.refreshrecord(const akeyfield: tfield;
-          const keyindex: integer = 0; const acancelupdate: boolean = true);
+procedure tmsebufdataset.refreshrecord(const asourcevalues: array of variant;
+              const adestfields: array of tfield;
+              const akeyvalue: variant; const keyindex: integer = 0;
+              const acancelupdate: boolean = true);
 var
- field1,field2: tfield;
  bm1,bm2: string;
  int1: integer;
  bo1: boolean;
@@ -6023,23 +6152,18 @@ begin
  disablecontrols;
  bm2:= bookmark;
  try
-  if indexlocal[keyindex].find([akeyfield],bm1) then begin
+  if indexlocal[keyindex].findvariant(akeyvalue,bm1) then begin
    bookmark:= bm1;
    edit;
   end
   else begin
    insert;
   end;
-  with akeyfield.dataset do begin
-   for int1:= 0 to fields.count-1 do begin
-    field1:= fields[int1];
-    if field1.visible then begin
-     field2:= self.findfield(field1.fieldname);
-     if (field2 <> nil) and not field2.readonly then begin
-      field2.value:= field1.value;
-     end;
-    end;
+  for int1:= 0 to high(asourcevalues) do begin
+   if int1 > high(adestfields) then begin
+    break;
    end;
+   adestfields[int1].value:= asourcevalues[int1];
   end;
   if acancelupdate then begin
    include(fbstate,bs_noautoapply);
@@ -6050,12 +6174,69 @@ begin
    post;
   end;
  finally
-  include(fbstate,bs_noautoapply);
+  exclude(fbstate,bs_noautoapply);
   bookmark:= bm2;
   enablecontrols;
   dataevent(dedatasetchange,0);
   dataevent(tdataevent(de_modified),0);
  end;
+end;
+
+procedure tmsebufdataset.refreshrecord(const asourcefields: array of tfield;
+              const adestfields: array of tfield;
+              const akeyfield: tfield; const keyindex: integer = 0;
+              const acancelupdate: boolean = true);
+var
+ ar1: variantarty;
+ int1: integer;
+begin
+ setlength(ar1,length(asourcefields));
+ for int1:= 0 to high(ar1) do begin
+  ar1[int1]:= asourcefields[int1].asvariant;
+ end;
+ refreshrecord(ar1,adestfields,akeyfield.value,keyindex,acancelupdate);
+end;
+
+procedure tmsebufdataset.refreshrecord(const asourcefields: array of tfield;
+              const akeyfield: tfield; const keyindex: integer = 0;
+              const acancelupdate: boolean = true);
+var
+ int1: integer;
+ ar1: fieldarty;
+begin
+ setlength(ar1,length(asourcefields));
+ for int1:= 0 to high(asourcefields) do begin
+  ar1[int1]:= fieldbyname(asourcefields[int1].fieldname);
+ end;
+ refreshrecord(asourcefields,ar1,akeyfield,keyindex,acancelupdate);
+end;
+
+procedure tmsebufdataset.refreshrecord(const akeyfield: tfield;
+          const keyindex: integer = 0; const acancelupdate: boolean = true);
+var
+ int1,int2: integer;
+ field1,field2: tfield;
+ sf,df: fieldarty;
+begin
+ with akeyfield.dataset do begin
+  int2:= 0;
+  setlength(sf,fields.count); //max
+  setlength(df,fields.count); //max
+  for int1:= 0 to high(sf) do begin
+   field1:= fields[int1];
+   if field1.visible then begin
+    field2:= self.findfield(field1.fieldname);
+    if (field2 <> nil) and not field2.readonly then begin
+     sf[int2]:= field1;
+     df[int2]:= field2;
+     inc(int2);
+    end;
+   end;
+  end;
+ end;
+ setlength(sf,int2);
+ setlength(df,int2);
+ refreshrecord(sf,df,akeyfield,keyindex,acancelupdate);
 end;
 
 function tmsebufdataset.updatesortfield(const afield: tfield;
@@ -6079,6 +6260,11 @@ begin
  if not result then begin
   findexlocal.activeindex:= -1;
  end;
+end;
+
+procedure tmsebufdataset.setbookmarkdata1(const avalue: bookmarkdataty);
+begin
+ gotobookmark(@avalue);
 end;
 
 { tlocalindexes }
@@ -6821,7 +7007,94 @@ begin
 end;
 
 function tlocalindex.find(const avalues: array of tfield;
+               const abigger: boolean = false;
+               const partialstring: boolean = false;
+               const nocheckbrowsemode: boolean = false): boolean; overload;
+                //sets dataset cursor if found
+var
+ str1: string;
+begin
+ result:= find(avalues,str1,abigger,partialstring,nocheckbrowsemode);
+ if result then begin
+  tmsebufdataset(fowner).bookmark:= str1;
+ end;
+end;
+
+function tlocalindex.findvariant(const avalue: variant;
+                 //nil -> NULL field
+                 //itemcount of avalues
+                 //can be smaller than fields count in index
+                 //itemcount of aisnull can be smaller than itemcount of avalues
                out abookmark: string;
+               const abigger: boolean = false;
+               const partialstring: boolean = false;
+               const nocheckbrowsemode: boolean = false): boolean; overload;
+                //true if found else nearest lower or bigger,
+                //abookmark = '' if no lower or bigger found
+                //string values must be msestring
+var
+ int1: integer;
+ vt1: tvartype;
+begin
+ if varisnull(avalue) then begin
+  result:= find([nil],[],abigger,partialstring,nocheckbrowsemode);
+ end
+ else begin
+  vt1:= vartype(avalue);
+  if vt1 in ordinalvartypes then begin
+   if vt1 = varint64 then begin
+    result:= find([int64(avalue)],[],abigger,partialstring,
+                                                nocheckbrowsemode);
+   end
+   else begin
+    if vt1 = varboolean then begin
+     result:= find([boolean(avalue)],[],abigger,partialstring,
+                                                  nocheckbrowsemode);
+    end
+    else begin
+     result:= find([integer(avalue)],[],abigger,partialstring,
+                                                  nocheckbrowsemode);
+    end;
+   end;
+  end
+  else begin
+   case vt1 of
+    varcurrency: begin
+     result:= find([currency(avalue)],[],abigger,partialstring,
+                                                 nocheckbrowsemode);
+    end;
+    varsingle,vardouble,vardate: begin
+     result:= find([double(avalue)],[],abigger,partialstring,
+                                                 nocheckbrowsemode);
+    end;
+    varstring: begin
+     result:= find([msestring(avalue)],[],abigger,partialstring,
+                                                 nocheckbrowsemode);
+    end
+    else begin
+     paramerror;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tlocalindex.findvariant(const avalue: variant;
+               const abigger: boolean = false;
+               const partialstring: boolean = false;
+               const nocheckbrowsemode: boolean = false): boolean; overload;
+                //sets dataset cursor if found
+var
+ str1: string;
+begin
+ result:= findvariant(avalue,str1,abigger,partialstring,nocheckbrowsemode);
+ if result then begin
+  tmsebufdataset(fowner).bookmark:= str1;
+ end;
+end;
+
+function tlocalindex.find(const avalues: array of tfield;
+               out abookmark: bookmarkdataty;
                const abigger: boolean = false;
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false): boolean; overload;
@@ -6892,6 +7165,20 @@ begin
  end; 
  result:= find(consts1,isnull1,abookmark,abigger,
                               partialstring,nocheckbrowsemode);
+end;
+
+function tlocalindex.find(const avalues: array of tfield;
+               out abookmark: string;
+               const abigger: boolean = false;
+               const partialstring: boolean = false;
+               const nocheckbrowsemode: boolean = false): boolean; overload;
+                //true if found else nearest lower or bigger,
+                //abookmark = '' if no lower or bigger found
+var
+ bm: bookmarkdataty;
+begin
+ result:= find(avalues,bm,abigger,partialstring,nocheckbrowsemode);
+ abookmark:= tmsebufdataset(fowner).bookmarktostring(bm);
 end;
 
 function tlocalindex.unique(const avalues: array of const): boolean;

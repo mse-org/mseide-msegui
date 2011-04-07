@@ -79,6 +79,7 @@ type
    property statvarname;
    property options;
    property onexecute;
+   property onbeforeexecute;
    property onexecuteaction;
    property onupdate;
    property onchange;

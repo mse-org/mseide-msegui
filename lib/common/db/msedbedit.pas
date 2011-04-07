@@ -712,6 +712,7 @@ type
    property options;
    property focusrectdist;
    property onexecute;
+   property onbeforeexecute;
    property imageoffset;
    property imageoffsetdisabled;
    property imageoffsetmouse;
@@ -6567,7 +6568,10 @@ begin
   else begin
    int1:= 0;
   end;
-  fgrid.rowcount:= int1;
+  if fgrid.rowcount <> int1 then begin
+   gridinvalidate;
+   fgrid.rowcount:= int1;
+  end;
  end;
 end;
 
