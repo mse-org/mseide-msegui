@@ -889,6 +889,7 @@ begin
    checkvert(size1);
    if vert then begin
     defaultsize.cx:= buttonsize.cx;
+    defaultsize.cy:= 0;
     for int1:= 0 to buttons.count - 1 do begin
      with buttons[int1] do begin
       if not (as_invisible in state) then begin
@@ -904,6 +905,7 @@ begin
    end
    else begin
     defaultsize.cy:= buttonsize.cy;
+    defaultsize.cx:= 0;
     for int1:= 0 to buttons.count - 1 do begin
      with buttons[int1] do begin
       if not (as_invisible in state) then begin
