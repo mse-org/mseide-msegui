@@ -269,7 +269,8 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
-   function oldmsestring(out aisnull: boolean): msestring;
+   function oldmsestring(out aisnull: boolean): msestring; overload;
+   function oldmsestring: msestring; overload;
    property value: msestring read getasmsestring write setasmsestring;
    property characterlength: integer read fcharacterlength;
    property tagpo: pointer read ftagpo write ftagpo;
@@ -1131,6 +1132,8 @@ type
  fieldclasstypearty = array of fieldclasstypety; 
         
  tmsedatasource = class(tdatasource)
+  public
+   procedure bringtofront; //called first by dataset
  end;
  
  tpersistentfields = class(tpersistentarrayprop,ipersistentfieldsinfo)
@@ -1749,6 +1752,43 @@ type
     FBound: Boolean;
     FParamType: TParamType;
     FSize: Integer;
+  end;
+
+  TDataSetcracker = class(TComponent)
+  Private
+    FOpenAfterRead : boolean;
+    FActiveRecord: Longint;
+    FAfterCancel: TDataSetNotifyEvent;
+    FAfterClose: TDataSetNotifyEvent;
+    FAfterDelete: TDataSetNotifyEvent;
+    FAfterEdit: TDataSetNotifyEvent;
+    FAfterInsert: TDataSetNotifyEvent;
+    FAfterOpen: TDataSetNotifyEvent;
+    FAfterPost: TDataSetNotifyEvent;
+    FAfterRefresh: TDataSetNotifyEvent;
+    FAfterScroll: TDataSetNotifyEvent;
+    FAutoCalcFields: Boolean;
+    FBOF: Boolean;
+    FBeforeCancel: TDataSetNotifyEvent;
+    FBeforeClose: TDataSetNotifyEvent;
+    FBeforeDelete: TDataSetNotifyEvent;
+    FBeforeEdit: TDataSetNotifyEvent;
+    FBeforeInsert: TDataSetNotifyEvent;
+    FBeforeOpen: TDataSetNotifyEvent;
+    FBeforePost: TDataSetNotifyEvent;
+    FBeforeRefresh: TDataSetNotifyEvent;
+    FBeforeScroll: TDataSetNotifyEvent;
+    FBlobFieldCount: Longint;
+    FBookmarkSize: Longint;
+    FBuffers : TBufferArray;
+    FBufferCount: Longint;
+    FCalcBuffer: PChar;
+    FCalcFieldsSize: Longint;
+    FConstraints: TCheckConstraints;
+    FDisableControlsCount : Integer;
+    FDisableControlsState : TDatasetState;
+    FCurrentRecord: Longint;
+    FDataSources : TList;
   end;
   
  tdataset1 = class(tdataset);
@@ -3283,6 +3323,14 @@ begin
  result:= getasmsestring;
  tdataset1(dataset).restorestate(statebefore);
 end;
+
+function tmsestringfield.oldmsestring: msestring;
+var
+ bo1: boolean;
+begin
+ result:= oldmsestring(bo1);
+end;
+
 {
 function tmsestringfield.oldmsestring(out aisnull: boolean): msestring;
 var
@@ -7903,6 +7951,22 @@ begin
   fparam.connector:= nil;
  end;
  inherited;
+end;
+
+{ tmsedatasource }
+
+procedure tmsedatasource.bringtofront;
+var
+ int1: integer;
+begin
+ if (dataset <> nil) then begin
+  with tdatasetcracker(dataset) do begin
+   int1:= fdatasources.indexof(self);
+   if int1 >= 0 then begin
+    fdatasources.move(int1,0);
+   end;
+  end;
+ end;
 end;
 
 end.

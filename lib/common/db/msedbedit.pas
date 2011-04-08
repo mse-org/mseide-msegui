@@ -3060,11 +3060,14 @@ procedure tcustomeditwidgetdatalink.updatedata;
 begin
  inc(fcanclosing);
  try
-  if fintf.getwidget.canclose(nil) then begin
-   exclude(fstate,fds_modified);
-  end
-  else begin
-   raise eabort.create('');
+  with fintf.getwidget do begin
+   if canclose(nil) then begin
+    exclude(fstate,fds_modified);
+   end
+   else begin
+    activate;
+    raise eabort.create('');
+   end;
   end;
   if not (oed_nullset in foptions) and (field <> nil) then begin
    if ismsestring then begin

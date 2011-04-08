@@ -406,8 +406,8 @@ type
     procedure refresh(aaction: tcommitrollbackaction = canone);
                  //canone -> action property
                  //closes transaction, calls refreshdatasets
-    function Commit(const checksavepoint: boolean = false): boolean; virtual; //true if ok
-    function CommitRetaining(const checksavepoint: boolean = false): boolean; virtual;
+    function Commit(const checksavepoint: boolean = true): boolean; virtual; //true if ok
+    function CommitRetaining(const checksavepoint: boolean = true): boolean; virtual;
     procedure Rollback; virtual;
     procedure RollbackRetaining; virtual;
     procedure StartTransaction; override;
@@ -2438,7 +2438,7 @@ begin
  result:= true;
 end;
 
-function TSQLTransaction.Commit(const checksavepoint: boolean = false): boolean;
+function TSQLTransaction.Commit(const checksavepoint: boolean = true): boolean;
 var
  bo1: boolean;
 begin
@@ -2460,7 +2460,8 @@ begin
  end;
 end;
 
-function TSQLTransaction.CommitRetaining(const checksavepoint: boolean = false): boolean;
+function TSQLTransaction.CommitRetaining(
+                     const checksavepoint: boolean = true): boolean;
 begin
  result:= true;
  if active then begin
