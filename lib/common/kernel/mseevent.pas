@@ -30,7 +30,7 @@ type
                 ek_terminate,ek_abort,ek_destroy,ek_show,ek_hide,ek_close,
                 ek_activate,ek_loaded,
                 ek_keypress,ek_keyrelease,ek_timer,ek_wakeup,
-                ek_release,ek_releasedefer,ek_closeform,ek_childscaled,ek_resize,
+                ek_release,{ek_releasedefer,}ek_closeform,ek_childscaled,ek_resize,
                 ek_dropdown,ek_async,ek_execute,ek_component,ek_synchronize,
                 ek_connect,
                 ek_dbedit,ek_dbupdaterowdata,ek_data,ek_objectdata,ek_childproc,
@@ -94,7 +94,8 @@ type
    fstate: objeventstatesty;
    fmodallevel: integer;
   public
-   constructor create(akind: eventkindty; const dest: ievent);
+   constructor create(akind: eventkindty; const dest: ievent;
+                                           const modaldefer: boolean = false);
    destructor destroy; override;
    procedure deliver;
    property modallevel: integer read fmodallevel;
@@ -176,7 +177,8 @@ end;
 
 { tobjectevent }
 
-constructor tobjectevent.create(akind: eventkindty; const dest: ievent);
+constructor tobjectevent.create(akind: eventkindty; const dest: ievent;
+                                const modaldefer: boolean = false);
 {$ifndef FPC}
 var
  po1: pointer;
@@ -184,10 +186,10 @@ var
 begin
  finterface:= pointer(dest);
  fmodallevel:= -1;
- if akind = ek_releasedefer then begin
+// if akind = ek_releasedefer then begin
+ if modaldefer then begin
   include(fstate,oes_modaldeferred);
-  akind:= ek_release;
- end;
+	 end;
  if (finterface <> nil) then begin
   if application.locked then begin
    include(fstate,oes_islinked);

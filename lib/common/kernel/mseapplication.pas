@@ -553,16 +553,20 @@ begin
  end;
 end;
 
-procedure tactcomponent.release(const nomodaldefer: boolean=false);
+procedure tactcomponent.release(const nomodaldefer: boolean = false);
 begin
  if not (acs_releasing in fstate) and 
                        not (csdestroying in componentstate) then begin
+  appinst.postevent(tobjectevent.create(ek_release,ievent(self),
+                                                    not nomodaldefer));
+  {
   if nomodaldefer then begin
    appinst.postevent(tobjectevent.create(ek_release,ievent(self)));
   end
   else begin
    appinst.postevent(tobjectevent.create(ek_releasedefer,ievent(self)));
   end;
+  }
   include(fstate,acs_releasing);
  end;
 end;

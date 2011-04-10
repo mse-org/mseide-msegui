@@ -3028,7 +3028,8 @@ procedure tsqlquery.freemodifyqueries;
 var
  k1: tupdatekind;
 begin
- fbstate:= fbstate - [bs_refreshinsert,bs_refreshupdate];
+ fbstate:= fbstate - [bs_refreshinsert,bs_refreshupdate,
+                      bs_refreshinsertindex,bs_refreshupdateindex];
  for k1:= low(tupdatekind) to high(tupdatekind) do begin
   freeandnil(fapplyqueries[k1]);
  end;
@@ -3619,6 +3620,18 @@ begin
     end;
     result:= result + field1.fieldname + ',';
     inc(int2);
+    if update then begin
+     if not (bs_refreshupdateindex in fbstate) and
+                    indexlocal.hasfield(field1) then begin
+      include(fbstate,bs_refreshupdateindex);
+     end;
+    end
+    else begin
+     if not (bs_refreshinsertindex in fbstate) and
+                    indexlocal.hasfield(field1) then begin
+      include(fbstate,bs_refreshinsertindex);
+     end;
+    end;
    end;
   end;
  end;

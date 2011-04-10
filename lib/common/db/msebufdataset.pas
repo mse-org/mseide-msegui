@@ -443,6 +443,8 @@ type
                        //-1 > none
    function fieldactive(const afield: tfield): boolean;
                    //true if field in active index
+   function hasfield(const afield: tfield): boolean;
+                   //true if field in any index
    function fieldmodified(const afield: tfield; const delayed: boolean): boolean;
    procedure preparefixup; //clear changed indexes
   published
@@ -472,7 +474,9 @@ type
                       bs_utf8,
                       bs_hasfilter,bs_visiblerecordcountvalid,
                       bs_refreshing,bs_restorerecno,bs_idle,
-                      bs_noautoapply,bs_refreshinsert,bs_refreshupdate,
+                      bs_noautoapply,
+                      bs_refreshinsert,bs_refreshupdate,
+                      bs_refreshinsertindex,bs_refreshupdateindex,
                       bs_inserttoupdate
                                           //used by tsqlquery
                       );
@@ -751,6 +755,10 @@ type
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    function getnextpacket(const all: boolean) : integer;
    function getrecordsize: word; override;
+   procedure saveindex(const oldbuffer,newbuffer: pintrecordty;
+                                           var ar1,ar2,ar3: integerarty);
+   procedure relocateindex(const abuffer: pintrecordty;
+                                    const ar1,ar2,ar3: integerarty);
    procedure internalpost; override;
    procedure internaldelete; override;
    procedure internalfirst; override;
@@ -2086,7 +2094,8 @@ begin
     end;
    end;
    gmcurrent: begin
-    if (frecno < 0) or (frecno >= fbrecordcount) or (fcurrentbuf = nil) then begin
+    if (frecno < 0) or (frecno >= fbrecordcount) or 
+                                   (fcurrentbuf = nil) then begin
      result := grerror;
     end;
    end;
@@ -2899,6 +2908,8 @@ procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
 var
  by1: boolean;
  e1: exception;
+ ar1,ar2,ar3: integerarty;
+ int1: integer;
  
 begin
  include(fbstate,bs_recapplying);
@@ -2962,6 +2973,16 @@ begin
      end;
     finally
      if bs_curvaluemodified in fbstate then begin
+      if (updatekind = ukmodify) and 
+                          (bs_refreshupdateindex in fbstate) or
+      (updatekind = ukinsert) and 
+                          (bs_refreshinsertindex in fbstate) then begin
+       int1:= factindex;
+       factindex:= -1; //do not use recno
+       saveindex(bookmark.recordpo,@fnewvaluebuffer^.header,ar1,ar2,ar3);
+       relocateindex(bookmark.recordpo,ar1,ar2,ar3);
+       factindex:= int1;
+      end;
       move(fnewvaluebuffer^.header,bookmark.recordpo^.header,frecordsize);
      end;
     end;
@@ -3087,6 +3108,66 @@ begin
  applyupdate(false);
 end;
 
+procedure tmsebufdataset.saveindex(const oldbuffer,newbuffer: pintrecordty;
+                                            var ar1,ar2,ar3: integerarty);
+var
+ int1: integer;
+ lastind: integer;
+begin
+ if (bs_indexvalid in fbstate) then begin
+  setlength(ar1,findexlocal.count);
+  setlength(ar2,length(ar1));
+  setlength(ar3,length(ar1));
+  for int1:= high(ar1) downto 0 do begin
+   with findexlocal[int1] do begin
+    lastind:= high(findexfieldinfos);
+    ar2[int1]:= compare(oldbuffer,newbuffer,lastind,false);
+    if ar2[int1] <> 0 then begin
+     if int1 = factindex - 1 then begin
+      ar1[int1]:= frecno + 1; //for fast find of bufpo
+     end
+     else begin
+      ar1[int1]:= findboundary(oldbuffer,lastind,true); //old boundary
+     end;
+     ar3[int1]:= findboundary(newbuffer,lastind,true); //new boundary
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tmsebufdataset.relocateindex(const abuffer: pintrecordty;
+                                        const ar1,ar2,ar3: integerarty);
+var
+ int1,int2,int3: integer;
+begin
+ if bs_indexvalid in fbstate then begin
+//  with pdsrecordty(activebuffer)^ do begin
+   for int1:= high(ar1) downto 0 do begin
+    if ar2[int1] <> 0 then begin // position changed
+     int2:= ar3[int1];           //new boundary
+     with findexes[int1+1] do begin
+      for int3:= ar1[int1] - 1 downto 0 do begin
+       if ind[int3] = abuffer then begin //update indexes
+        move(ind[int3+1],ind[int3],(fbrecordcount-int3-1)*sizeof(pointer));
+        if int3 < int2 then begin
+         dec(int2);
+        end;
+        move(ind[int2],ind[int2+1],(fbrecordcount-int2-1)*sizeof(pointer));
+        ind[int2]:= abuffer;
+        if int1 = factindex - 1 then begin
+         frecno:= int2;
+        end;
+        break;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+// end;
+end;
+
 procedure tmsebufdataset.internalpost;
 var
  po1,po2: pblobinfoarty;
@@ -3094,7 +3175,6 @@ var
  int1,int2,int3: integer;
  bo1: boolean;
  ar1,ar2,ar3: integerarty;
- lastind: integer;
  newupdatebuffer: boolean;
  
 begin
@@ -3164,25 +3244,8 @@ begin
    end;
   end;
 
-  if (state = dsedit) and (bs_indexvalid in fbstate) then begin
-   setlength(ar1,findexlocal.count);
-   setlength(ar2,length(ar1));
-   setlength(ar3,length(ar1));
-   for int1:= high(ar1) downto 0 do begin
-    with findexlocal[int1] do begin
-     lastind:= high(findexfieldinfos);
-     ar2[int1]:= compare(fcurrentbuf,@header,lastind,false);
-     if ar2[int1] <> 0 then begin
-      if int1 = factindex - 1 then begin
-       ar1[int1]:= frecno + 1; //for fast find of bufpo
-      end
-      else begin
-       ar1[int1]:= findboundary(fcurrentbuf,lastind,true); //old boundary
-      end;
-      ar3[int1]:= findboundary(@header,lastind,true); //new boundary
-     end;
-    end;
-   end;
+  if (state = dsedit) then begin
+   saveindex(fcurrentbuf,@header,ar1,ar2,ar3);
   end;   
   if bo1 then begin
    fcurrentbuf^.header.blobinfo:= nil; //free old array
@@ -3208,28 +3271,8 @@ begin
    end;      
   end
   else begin
-   if (state = dsedit) and (bs_indexvalid in fbstate) then begin
-    for int1:= high(ar1) downto 0 do begin
-     if ar2[int1] <> 0 then begin // position changed
-      int2:= ar3[int1];           //new boundary
-      with findexes[int1+1] do begin
-       for int3:= ar1[int1] - 1 downto 0 do begin
-        if ind[int3] = fcurrentbuf then begin //update indexes
-         move(ind[int3+1],ind[int3],(fbrecordcount-int3-1)*sizeof(pointer));
-         if int3 < int2 then begin
-          dec(int2);
-         end;
-         move(ind[int2],ind[int2+1],(fbrecordcount-int2-1)*sizeof(pointer));
-         ind[int2]:= fcurrentbuf;
-         if int1 = factindex - 1 then begin
-          frecno:= int2;
-         end;
-         break;
-        end;
-       end;
-      end;
-     end;
-    end;
+   if (state = dsedit) then begin
+    relocateindex(fcurrentbuf,ar1,ar2,ar3);
     dsheader.bookmark.data.recno:= frecno;
    end;
   end;
@@ -6344,6 +6387,26 @@ begin
      break;
     end;
    end;
+  end;
+ end;
+end;
+
+function tlocalindexes.hasfield(const afield: tfield): boolean;
+var
+ int1,int2: integer;
+begin
+ result:= false;
+ for int2:= 0 to high(fitems) do begin
+  with items[int2] do begin
+   for int1:= 0 to high(findexfieldinfos) do begin
+    if findexfieldinfos[int1].fieldinstance = afield then begin
+     result:= true;
+     break;
+    end;
+   end;
+  end;
+  if result then begin
+   break;
   end;
  end;
 end;
