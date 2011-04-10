@@ -12459,11 +12459,8 @@ begin
      end;
     end
     else begin
-//     include(appinst.fstate,aps_needsupdatewindowstack);
      if (application.fmainwindow = self) and not appinst.terminated then begin
       bo1:= gui_grouphideminimizedwindows;
-//      gui_flushgdi;
-//      sys_schedyield;
       application.sortzorder;
       with appinst do begin
        setlength(fgroupzorder,length(fwindows));
@@ -15356,6 +15353,7 @@ begin
     fmodalinfopo^.modalend:= true;
    end;
    exclude(fstate,tws_modal);
+//   settransientfor(nil,false);
   end;
  end;
 end;
@@ -15511,22 +15509,25 @@ begin
   end;
  end;
 end;
-
+var testvar,testvar1: twidget;
 function compwindowzorder(const l,r): integer;
 const
  raiseweight =              1;
  lowerweight =              1;
  backgroundweight =         1 shl 2;
  topweight =                1 shl 2;
- popupweight =              1 shl 4;
+// popupweight =              1 shl 4;
  modalweight =              1 shl 5;
  transientforcountweight =  1 shl 6;
  transientfornotnilweight = 1 shl 7;
  transientforweight =       1 shl 8;
  invisibleweight =          1 shl 9;
+ popupweight =              1 shl 10;
 var
  window1: twindow;
 begin
+ testvar:= twindow(l).fowner;
+ testvar1:= twindow(r).fowner;
  result:= 0;
  if (tws_windowvisible in twindow(l).fstate) then begin
   if not (tws_windowvisible in twindow(r).fstate) then begin
