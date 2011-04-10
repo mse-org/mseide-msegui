@@ -10206,7 +10206,9 @@ var
  int1,int2: integer;
  caller1: twidget;
 begin
- if not (es_processed in info.eventstate) then begin
+ if not (es_processed in info.eventstate) and 
+            (fwidgetstate * [ws_visible, ws_enabled] = 
+                             [ws_visible,ws_enabled]) then begin
   if (sender <> nil) and (sender.fparentwidget = self) then begin
      //neighbors first
    int2:= indexofwidget(sender);
