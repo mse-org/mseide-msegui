@@ -1966,10 +1966,15 @@ begin
  end;
  if (flogfilename <> '') and findfile(flogfilename) then begin
   floadingstream:= tmsefilestream.create(flogfilename,fm_read);
+  bo1:= true;
+ end;
+ if floadingstream <> nil then begin
   try
    doloadfromstream;
   finally
-   floadingstream.free;
+   if bo1 then begin
+    freeandnil(floadingstream);
+   end;
   end;
  end
  else begin
