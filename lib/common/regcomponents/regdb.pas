@@ -124,6 +124,16 @@ type
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
+
+ tsqlmacroitemeditor = class(tclasselementeditor)
+  public
+   function getvalue: msestring; override;
+ end;
+ 
+ tsqlmacroseditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
   
 implementation
 uses
@@ -399,12 +409,16 @@ begin
  registerpropertyeditor(typeinfo(tdbstringcols),nil,'',tdbstringcolseditor);
  registerpropertyeditor(typeinfo(string),tindexfield,'fieldname',
                  tindexfieldnamepropertyeditor);
- registerpropertyeditor(typeinfo(tindexfields),nil,'',tindexfieldspropertyeditor);
- registerpropertyeditor(typeinfo(tlocalindexes),nil,'',tlocalindexespropertyeditor);
+ registerpropertyeditor(typeinfo(tindexfields),nil,'',
+                                                  tindexfieldspropertyeditor);
+ registerpropertyeditor(typeinfo(tlocalindexes),nil,'',
+                                                  tlocalindexespropertyeditor);
  registerpropertyeditor(typeinfo(lookupbufferfieldnoty),nil,'',
                      tlookupbufferfieldnopropertyeditor);
  registerpropertyeditor(typeinfo(tlbdropdowncols),nil,'',
                      tlbdropdowncolseditor);
+ registerpropertyeditor(typeinfo(tmacroproperty),nil,'',
+                                    tsqlmacroseditor);
 end;
 
 
@@ -735,7 +749,10 @@ begin
   fclass:= tfield(fprops[0].instance).classtype;
   for int1:= 0 to high(ar1) do begin
    if (ar1[int1] <> '') and 
-   fclass.inheritsfrom(ds.fielddefs[int1].fieldclass) then begin
+   (fclass.inheritsfrom(ds.fielddefs[int1].fieldclass) or 
+    (fclass is tmsebooleanfield) and 
+      (ds.fielddefs[int1].fieldclass is tlongintfield))
+                               then begin
     additem(result,ar3[int1]);
    end;
   end;
@@ -1369,6 +1386,22 @@ end;
 function tslaveparamspropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tslaveparampropertyeditor;
+end;
+
+{ tsqlmacroitemeditor }
+
+function tsqlmacroitemeditor.getvalue: msestring;
+begin
+ with tsqlmacroitem(getpointervalue) do begin
+  result:= '<'+name+'>';
+ end;
+end;
+
+{ tsqlmacroseditor }
+
+function tsqlmacroseditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tsqlmacroitemeditor;
 end;
 
 initialization

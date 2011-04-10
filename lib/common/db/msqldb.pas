@@ -26,7 +26,7 @@ interface
 
 uses 
  sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses,msedatabase,
- msestrings,msedatalist,mseapplication,mseglob,msetimer,msesysenv;
+ msestrings,msedatalist,mseapplication,mseglob,msetimer,msesysenv,msearrayprops;
 
 type 
  TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
@@ -38,21 +38,8 @@ type
  tcustomsqlconnection = class;
  TSQLTransaction = class;
  TSQLQuery = class;
- tsqlstringlist = class;
- 
- tmacroproperty = class(tdoublemsestringdatalist)
-  private
-   foptions: macrooptionsty;
-   fowner: tsqlstringlist;
-  protected
-   procedure dochange; override;
-  public
-   constructor create(const aowner: tsqlstringlist); reintroduce;
-  published
-   property options: macrooptionsty read foptions write foptions 
-                                           default [mao_caseinsensitive];
- end;
-  
+ tmacroproperty = class;
+
  TStatementType = (stNone, stSelect, stInsert, stUpdate, stDelete,
     stDDL, stGetSegment, stPutSegment, stExecProcedure,
     stStartTrans, stCommit, stRollback, stSelectForUpd);
@@ -63,7 +50,7 @@ type
    function gettext: msestring;
    procedure settext(const avalue: msestring);
    procedure readstrings(reader: treader);
-   procedure writestrings(writer: twriter);
+//   procedure writestrings(writer: twriter);
    procedure setmacros(const avalue: tmacroproperty);
   protected
    procedure defineproperties(filer: tfiler); override;
@@ -75,6 +62,50 @@ type
    property macros: tmacroproperty read fmacros write setmacros;
  end;
 
+ tsqlmacroitem = class;
+ 
+ tmacrostringlist = class(tsqlstringlist)
+  private
+   fowner: tsqlstringlist;
+  protected
+   procedure dochange; override;
+  public
+   constructor create(const aowner: tsqlstringlist);
+ end;
+ 
+ tsqlmacroitem = class(townedpersistent)
+  private
+   fname: msestring;
+   fvalue: tmacrostringlist;
+   factive: boolean;
+   procedure setvalue(const avalue: tmacrostringlist);
+   procedure setactive(const avalue: boolean);
+  protected
+  public
+   constructor create(aowner: tobject); override;
+   destructor destroy; override;
+  published
+   property name: msestring read fname write fname;
+   property value: tmacrostringlist read fvalue write setvalue;
+   property active: boolean read factive write setactive default true;
+ end;
+  
+ tmacroproperty = class(townedpersistentarrayprop)
+  private
+   foptions: macrooptionsty;
+   function getitems(const aindex: integer): tsqlmacroitem;
+   procedure setitems(const aindex: integer; const avalue: tsqlmacroitem);
+  protected
+   procedure dochange(const aindex: integer);
+  public
+   constructor create(const aowner: tsqlstringlist); reintroduce;
+   property items[const aindex: integer]: tsqlmacroitem read getitems 
+                     write setitems; default;
+  published
+   property options: macrooptionsty read foptions write foptions 
+                                           default [mao_caseinsensitive];
+ end;
+  
 // updatesqloptionty = (uso_refresh);
 // updatesqloptionsty = set of updatesqloptionty;
           //moved to field providerflags pf1_refresh 
@@ -1328,13 +1359,21 @@ begin
   end;
   if fmacros.count <> 0 then begin
    setlength(ar1,fmacros.count);
-   po3:= fmacros.datapo;
+//   po3:= fmacros.datapo;
    for int1:= 0 to high(ar1) do begin
-    with ar1[int1] do begin
-     name:= po3^.a;
-     value:= po3^.b;
+    with fmacros[int1] do begin
+     ar1[int1].name:= name;
+     if active then begin
+      ar1[int1].value:= value.text;
+     end
+     else begin
+      ar1[int1].value:= '';
+     end;
+//     value:= po3^.b;
+//     name:= po3^.a;
+//     value:= po3^.b;
     end;
-    inc(po3);
+//    inc(po3);
    end;    
    result:= expandmacros(result,ar1,fmacros.foptions);
   end;
@@ -1374,16 +1413,16 @@ begin
   add(ar1[int1]);
  end;
 end;
-
+{
 procedure tsqlstringlist.writestrings(writer: twriter);
 begin
  //dummy
 end;
-
+}
 procedure tsqlstringlist.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('Strings',@readstrings,@writestrings,false);
+ filer.defineproperty('Strings',@readstrings,nil{@writestrings},false);
 end;
 
 procedure tsqlstringlist.setmacros(const avalue: tmacroproperty);
@@ -5126,16 +5165,69 @@ begin
  inherited create(asender.name+': '+amessage);
 end;
 
+{ tsqlmacroitem }
+
+constructor tsqlmacroitem.create(aowner: tobject);
+begin
+ factive:= true;
+ fvalue:= tmacrostringlist.create(tsqlstringlist(aowner));
+ inherited;
+end;
+
+destructor tsqlmacroitem.destroy;
+begin
+ fvalue.free;
+ inherited;
+end;
+
+procedure tsqlmacroitem.setvalue(const avalue: tmacrostringlist);
+begin
+ fvalue.assign(avalue);
+end;
+
+procedure tsqlmacroitem.setactive(const avalue: boolean);
+begin
+ if factive <> avalue then begin
+  factive:= avalue;
+  tsqlstringlist(fowner).dochange;
+ end;
+end;
+
 { tmacroproperty }
 
 constructor tmacroproperty.create(const aowner: tsqlstringlist);
 begin
  fowner:= aowner;
  foptions:= [mao_caseinsensitive];
+ inherited create(aowner,tsqlmacroitem);
+end;
+
+procedure tmacroproperty.dochange(const aindex: integer);
+begin
+ inherited;
+ tsqlstringlist(fowner).dochange;
+end;
+
+function tmacroproperty.getitems(const aindex: integer): tsqlmacroitem;
+begin
+ result:= tsqlmacroitem(inherited getitems(aindex));
+end;
+
+procedure tmacroproperty.setitems(const aindex: integer;
+               const avalue: tsqlmacroitem);
+begin
+ inherited;
+end;
+
+{ tmacrostringlist }
+
+constructor tmacrostringlist.create(const aowner: tsqlstringlist);
+begin
+ fowner:= aowner;
  inherited create;
 end;
 
-procedure tmacroproperty.dochange;
+procedure tmacrostringlist.dochange;
 begin
  inherited;
  fowner.dochange;
