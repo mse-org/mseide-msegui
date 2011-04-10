@@ -1270,6 +1270,8 @@ type
    function getnoedit: boolean;
    procedure setnoedit(const avalue: boolean);
    procedure nosavepoint;
+   function getasmsestring(const afieldname: string): msestring;
+   procedure setasmsestring(const afieldname: string; const avalue: msestring);
   protected
    foptions: datasetoptionsty;
    procedure setoptions(const avalue: datasetoptionsty); virtual;
@@ -1346,6 +1348,8 @@ type
    function assqldate(const avalue: tdatetime): string;
    function assqltime(const avalue: tdatetime): string;
    property noedit: boolean read getnoedit write setnoedit;
+   property asmsestring[const afieldname: string]: msestring read getasmsestring 
+                                                         write setasmsestring;
    
   published
    property fields: tpersistentfields read ffields write setfields;
@@ -1651,8 +1655,7 @@ function curfieldchanged(const field: tfield): boolean;
 procedure fieldtoparam(const field: tfield; const param: tparam);
 procedure copyfieldvalues(const source: tdataset; const dest: tdataset);
 procedure msestringtoparam(const avalue: msestring; const param: tparam);
-//function getasmsestring(const field: tfield): msestring;
-function getasmsestring(const field: tfield; const utf8: boolean): msestring;
+function getasmsestring(const field: tfield; const utf8: boolean = true): msestring;
 function checkfieldcompatibility(const afield: tfield;
                      const adatatype: tfieldtype): boolean;
            //true if ok
@@ -1913,7 +1916,7 @@ begin
  end;
 end;
 }
-function getasmsestring(const field: tfield; const utf8: boolean): msestring;
+function getasmsestring(const field: tfield; const utf8: boolean = true): msestring;
 begin
  if field = nil then begin
   result:= '';
@@ -1923,11 +1926,16 @@ begin
    result:= tmsestringfield(field).asmsestring;
   end
   else begin
-   if utf8 then begin
-    result:= utf8tostring(field.asstring);
+   if field is tmsememofield then begin
+    result:= tmsememofield(field).asmsestring;
    end
    else begin
-    result:= field.asstring;
+    if utf8 then begin
+     result:= utf8tostring(field.asstring);
+    end
+    else begin
+     result:= field.asstring;
+    end;
    end;
   end;
  end;
@@ -7237,7 +7245,52 @@ begin
  result:= fintf.updatesortfield(field1,adescend);
 end;
 
-{ tmsedatasource }
+function tdscontroller.getasmsestring(const afieldname: string): msestring;
+var
+ field1: tfield;
+begin
+ field1:= tdataset(fowner).fieldbyname(afieldname);
+ if field1 is tmsestringfield then begin
+  result:= tmsestringfield(field1).asmsestring;
+ end
+ else begin
+  if field1 is tmsememofield then begin
+   result:= tmsememofield(field1).asmsestring;
+  end
+  else begin
+   if isutf8 then begin
+    result:= utf8tostring(field1.asstring);
+   end
+   else begin
+    result:= field1.asstring;
+   end;
+  end;
+ end;
+end;
+
+procedure tdscontroller.setasmsestring(const afieldname: string;
+                                                      const avalue: msestring);
+var
+ field1: tfield;
+begin
+ field1:= tdataset(fowner).fieldbyname(afieldname);
+ if field1 is tmsestringfield then begin
+  tmsestringfield(field1).asmsestring:= avalue;
+ end
+ else begin
+  if field1 is tmsememofield then begin
+   tmsememofield(field1).asmsestring:= avalue;
+  end
+  else begin
+   if isutf8 then begin
+    field1.asstring:= stringtoutf8(avalue);
+   end
+   else begin
+    field1.asstring:= avalue;
+   end;
+  end;
+ end;
+end;
 
 { tfieldlinkdatalink }
 
