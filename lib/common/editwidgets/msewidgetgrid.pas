@@ -353,6 +353,8 @@ type
    property statfile;
    property statvarname;
 
+   property oncopyselection;
+   property onpasteselection;
    property onbeforeupdatelayout;
    property onlayoutchanged;
    property oncolmoved;
@@ -2987,7 +2989,10 @@ var
  int1,int2: integer;
 
 begin
- result:= false;
+ result:= inherited copyselection;
+ if result then begin
+  exit;
+ end;
  ar1:= datacols.selectedcells;
  if ar1 <> nil then begin
   initcopyars(ar2,ar3);
@@ -3039,11 +3044,15 @@ var
  bo1,bo2: boolean;
 
 begin
+ result:= inherited pasteselection;
+ if result then begin
+  exit;
+ end;
  ar1:= nil; //compiler warning
  ar4:= nil;
  ar5:= nil;
  initcopyars(ar2,ar3);
- result:= false;
+// result:= false;
  bo1:= false;
  for int1:= 0 to datacols.count - 1 do begin
   if co_canpaste in datacols[int1].options then begin

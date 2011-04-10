@@ -750,9 +750,8 @@ begin
   for int1:= 0 to high(ar1) do begin
    if (ar1[int1] <> '') and 
    (fclass.inheritsfrom(ds.fielddefs[int1].fieldclass) or 
-    (fclass is tmsebooleanfield) and 
-      (ds.fielddefs[int1].fieldclass is tlongintfield))
-                               then begin
+    (fclass.inheritsfrom(tmsebooleanfield)) and 
+      (ds.fielddefs[int1].fieldclass.inheritsfrom(tlongintfield))) then begin
     additem(result,ar3[int1]);
    end;
   end;

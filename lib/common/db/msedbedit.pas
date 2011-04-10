@@ -1546,6 +1546,8 @@ type
    property statfile;
    property statvarname;
 
+   property oncopyselection;
+   property onpasteselection;
    property onbeforeupdatelayout;
    property onlayoutchanged;
    property oncolmoved;
@@ -1817,6 +1819,8 @@ type
    property statfile;
    property statvarname;
 
+   property oncopyselection;
+   property onpasteselection;
    property onbeforeupdatelayout;
    property onlayoutchanged;
    property oncolmoved;

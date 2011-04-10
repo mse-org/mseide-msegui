@@ -365,6 +365,8 @@ type
    property statvarname;
    property statfile;
    property onselectionchanged;
+   property oncopyselection;
+   property onpasteselection;
    property onbeforeupdatelayout;
    property onlayoutchanged;
    property onitemevent;

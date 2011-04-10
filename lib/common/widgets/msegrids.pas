@@ -1704,6 +1704,10 @@ type
 
  gridscrolleventty = procedure(const sender: tcustomgrid;
                                      var step: integer) of object; 
+ copyselectioneventty = procedure(const sender: tcustomgrid;
+                                        var handled: boolean) of object;
+ pasteselectioneventty = procedure(const sender: tcustomgrid;
+                                        var handled: boolean) of object;
  tcustomgrid = class(tpublishedwidget,iautoscrollframe,iobjectpicker,iscrollbar,
                     idragcontroller,istatfile
                     {$ifdef mse_with_ifi},iifigridlink{$endif})
@@ -1768,6 +1772,8 @@ type
 {$ifdef mse_with_ifi}
    fifilink: tifigridlinkcomp;
 //   procedure ifisetvalue(var avalue; var accept: boolean);
+   foncopyselection: copyselectioneventty;
+   fonpasteselection: pasteselectioneventty;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);
     //iifigridlink
@@ -2287,6 +2293,10 @@ type
    property oncellevent: celleventty read foncellevent write foncellevent;
    property onselectionchanged: notifyeventty read fonselectionchanged
                   write fonselectionchanged;
+   property oncopyselection: copyselectioneventty read foncopyselection
+                                      write foncopyselection;
+   property onpasteselection: pasteselectioneventty read fonpasteselection
+                                      write fonpasteselection;
 
    property drag: tdragcontroller read fdragcontroller write setdragcontroller;
 
@@ -2343,6 +2353,8 @@ type
    property statfile;
    property statvarname;
 
+   property oncopyselection;
+   property onpasteselection;
    property onbeforeupdatelayout;
    property onlayoutchanged;
    property oncolmoved;
@@ -2471,6 +2483,8 @@ type
    property statfile;
    property statvarname;
 
+   property oncopyselection;
+   property onpasteselection;
    property onbeforeupdatelayout;
    property onlayoutchanged;
    property oncolmoved;
@@ -14059,12 +14073,18 @@ function tcustomgrid.copyselection: boolean;
           //false if no copy
 begin
  result:= false;
+ if canevent(tmethod(foncopyselection)) then begin
+  foncopyselection(self,result);
+ end;
 end;
 
 function tcustomgrid.pasteselection: boolean;
           //false if no paste
 begin
  result:= false;
+ if canevent(tmethod(fonpasteselection)) then begin
+  fonpasteselection(self,result);
+ end;
 end;
 
 procedure tcustomgrid.sortchanged(const all: boolean);
@@ -15013,7 +15033,10 @@ var
  wstr1: msestring;
  int1,int2: integer;
 begin
- result:= false;
+ result:= inherited copyselection;
+ if result then begin
+  exit;
+ end;
  ar1:= nil; //compiler waring
 // if feditor.sellength = 0 then begin
   ar1:= datacols.selectedcells;
@@ -15045,7 +15068,10 @@ var
  ar4,ar5: msestringarty;
  {bo1,}bo2: boolean;
 begin
- result:= false;
+ result:= inherited pasteselection;
+ if result = true then begin
+  exit;
+ end;
 // bo1:= false;
  ar4:= nil; //compiler warning
  ar5:= nil; //compiler warning
