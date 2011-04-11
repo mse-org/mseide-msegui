@@ -15520,7 +15520,7 @@ begin
   end;
  end;
 end;
-var testvar,testvar1: twidget;
+
 function compwindowzorder(const l,r): integer;
 const
  raiseweight =              1;
@@ -15537,8 +15537,6 @@ const
 var
  window1: twindow;
 begin
- testvar:= twindow(l).fowner;
- testvar1:= twindow(r).fowner;
  result:= 0;
  if (tws_windowvisible in twindow(l).fstate) then begin
   if not (tws_windowvisible in twindow(r).fstate) then begin

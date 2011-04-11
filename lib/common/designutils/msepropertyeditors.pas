@@ -4812,6 +4812,8 @@ var
  int1: integer;
  utf8: boolean;
  str1: ansistring;
+ backup: string;
+ backupm: msestringarty;
 begin
  fmodalresult:= amodalresult;
  forigtext:= nil;
@@ -4819,45 +4821,64 @@ begin
   try
    with tmsetexteditorfo(sender) do begin
     forigtext:= textedit.datalist.asmsestringarray;
-    if ismsestring then begin
-     with tmsestringdatalist(getpointervalue) do begin
-      beginupdate;
-      try
-       clear;
-       for int1:= 0 to grid.rowcount-1 do begin
-        add(textedit[int1]);
+    try
+     if ismsestring then begin
+      with tmsestringdatalist(getpointervalue) do begin
+       backupm:= asarray;
+       beginupdate;
+       try
+        clear;
+        for int1:= 0 to grid.rowcount-1 do begin
+         add(textedit[int1]);
+        end;
+       finally
+        endupdate
        end;
-      finally
-       endupdate
+      end;
+     end
+     else begin
+      with tstrings(getpointervalue) do begin
+       backup:= text;
+       utf8:= getutf8;
+       beginupdate;
+       try
+        clear;
+        for int1:= 0 to grid.rowcount-1 do begin
+         if utf8 then begin
+          str1:= stringtoutf8(textedit[int1]);
+         end
+         else begin
+          str1:= textedit[int1];
+         end;
+         updateline(str1);
+         add(str1);
+        end;
+       finally
+        endupdate
+       end;
       end;
      end;
-    end
-    else begin
-     with tstrings(getpointervalue) do begin
-      utf8:= getutf8;
-      beginupdate;
-      try
-       clear;
-       for int1:= 0 to grid.rowcount-1 do begin
-        if utf8 then begin
-         str1:= stringtoutf8(textedit[int1]);
-        end
-        else begin
-         str1:= textedit[int1];
-        end;
-        updateline(str1);
-        add(str1);
+     doafterclosequery(amodalresult);
+    finally
+     if amodalresult = mr_canclose then begin
+      if ismsestring then begin
+       with tmsestringdatalist(getpointervalue) do begin
+        asarray:= backupm;
        end;
-      finally
-       endupdate
+      end
+      else begin
+       with tstrings(getpointervalue) do begin
+        text:= backup;
+       end;
       end;
      end;
     end;
    end;
-   doafterclosequery(amodalresult);
   except
    application.handleexception(nil);
-   amodalresult:= mr_none;
+//   if amodalresult = mr_canclose then begin
+    amodalresult:= mr_none;
+//   end;
   end;
  end;
 end;

@@ -20,7 +20,8 @@ unit regdb;
 
 interface
 uses
- classes,typinfo,msesqldb,msedbedit,msepropertyeditors,msedb,mseclasses,msetypes,msestrings,
+ classes,typinfo,msesqldb,msedbedit,msepropertyeditors,msedb,mseclasses,
+ msetypes,msestrings,
  mseglob,mseguiglob,msegui,msedatabase,msesqlresult,msedesignintf;
  
 type
@@ -973,10 +974,14 @@ end;
 
 procedure tmsesqlpropertyeditor.doafterclosequery(
                  var amodalresult: modalresultty);
+var
+ bo1: boolean;
 begin
  if amodalresult = mr_canclose then begin
   if fintf <> nil then begin
+   bo1:= fintf.getactive;
    fintf.setactive(true);
+   fintf.setactive(bo1);
   end;
  end;
 end;
