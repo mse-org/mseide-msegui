@@ -9556,7 +9556,7 @@ begin
    sepchar:= tcustommenu.getshortcutseparator(amenu);
   end;
   bo1:= false;
-  if fdatacols.cancopy then begin
+  if fdatacols.cancopy  or canevent(tmethod(foncopyselection)) then begin
    if fdatacols.hasselection then begin
     state1:= [];
    end
@@ -9569,7 +9569,7 @@ begin
                   [],[state1],[{$ifdef FPC}@{$endif}docopycells],not bo1);
    bo1:= true;
   end;
-  if fdatacols.canpaste then begin
+  if fdatacols.canpaste or canevent(tmethod(fonpasteselection)) then begin
    tpopupmenu.additems(amenu,self,mouseinfo,[
         stockobjects.captions[sc_paste_cells]+sepchar+
       '('+encodeshortcutname(sysshortcuts[sho_pastecells])+')'],
@@ -12197,12 +12197,14 @@ begin
   end;
   if not (es_processed in info.eventstate) then begin
    if {issysshortcut(sho_copy,info) or} 
-        issysshortcut(sho_copycells,info) and fdatacols.cancopy and
+        issysshortcut(sho_copycells,info) and 
+          (fdatacols.cancopy  or canevent(tmethod(foncopyselection))) and
                                                     copyselection then begin
     include(info.eventstate,es_processed);
    end
    else begin
-    if issysshortcut(sho_pastecells,info) and fdatacols.canpaste and
+    if issysshortcut(sho_pastecells,info) and 
+         (fdatacols.canpaste or canevent(tmethod(fonpasteselection))) and
                                                     pasteselection then begin
      include(info.eventstate,es_processed);
     end;
