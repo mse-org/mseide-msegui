@@ -1218,7 +1218,8 @@ const
   
 type
  fieldlinkarty = array of ifieldcomponent;
- dscontrollerstatety = (dscs_posting,dscs_canceling,dscs_onidleregistered,
+ dscontrollerstatety = (dscs_posting,dscs_posting1,dscs_canceling,
+                        dscs_onidleregistered,
                         dscs_restorerecno);
  dscontrollerstatesty = set of dscontrollerstatety;
 
@@ -1329,7 +1330,8 @@ type
    function post(const aafterpost: afterposteventty = nil): boolean;
                            //calls post if in edit or insert state,
                            //returns true if ok
-   function posting: boolean; //true if in post procedure
+   function posting: boolean; //true if in inner post procedure
+   function posting1: boolean; //true if in outer post procedure
    procedure postcancel; //can be called in BeforePost, calls cancel after abort
    procedure cancel;
    function canceling: boolean;
@@ -1646,6 +1648,7 @@ const
 
 function getmsefieldclass(const afieldtype: tfieldtype): tfieldclass; overload;
 function getmsefieldclass(const afieldtype: fieldclasstypety): tfieldclass; overload;
+function fieldvariants(const afields: array of tfield): variantarty;
 function fieldclasstoclasstyp(const fieldclass: fieldclassty): fieldclasstypety;
 function fieldtosql(const field: tfield): msestring;
 function fieldtooldsql(const field: tfield): msestring;
@@ -1898,6 +1901,16 @@ end;
 function getmsefieldclass(const afieldtype: fieldclasstypety): tfieldclass;
 begin
  result:= msefieldtypeclasses[afieldtype];
+end;
+
+function fieldvariants(const afields: array of tfield): variantarty;
+var
+ int1: integer;
+begin
+ setlength(result,length(afields));
+ for int1:= 0 to high(result) do begin
+  result[int1]:= afields[int1].asvariant;
+ end;
 end;
 
 {
@@ -6894,76 +6907,84 @@ end;
 
 function tdscontroller.post(const aafterpost: afterposteventty = nil): boolean;
 var
- bo1,bo2: boolean;
+ bo1,bo2,bo3: boolean;
  int1: integer;
 begin
  with tdataset(fowner) do begin;
   if state in dseditmodes then begin
-   if checkcanevent(tdataset(fowner),tmethod(self.fonbeforepost)) then begin
-    fonbeforepost(tdataset(fowner));
-   end;
+   bo3:= dscs_posting1 in fstate;
+   include(fstate,dscs_posting1);
    try
-    bo1:= dso_postsavepoint in foptions;
+    if checkcanevent(tdataset(fowner),tmethod(self.fonbeforepost)) then begin
+     fonbeforepost(tdataset(fowner));
+    end;
     try
-     if bo1 then begin
-      int1:= savepointbegin;
-     end;
-     result:= true;
-     include(fstate,dscs_posting);
-     try    
+     bo1:= dso_postsavepoint in foptions;
+     try
+      if bo1 then begin
+       int1:= savepointbegin;
+      end;
+      result:= true;
+      include(fstate,dscs_posting);
+      try    
+       try
+        fintf.inheritedpost;
+       except
+        on epostcancel do begin
+         if bo1 then begin
+          bo1:= false;
+          savepointrollback(int1);
+         end;     
+         result:= false;
+         tdataset(fowner).cancel;
+        end
+        else begin
+         if bo1 then begin
+          bo1:= false;
+          savepointrollback(int1);
+         end;     
+         raise;
+        end;
+       end;      
+      finally
+       exclude(fstate,dscs_posting);
+      end;
+      bo2:= result;
       try
-       fintf.inheritedpost;
-      except
-       on epostcancel do begin
-        if bo1 then begin
-         bo1:= false;
-         savepointrollback(int1);
-        end;     
-        result:= false;
-        tdataset(fowner).cancel;
+       if result and assigned(aafterpost) then begin
+        aafterpost(tdataset(fowner),result);
+       end;
+       if result then begin
+        tdataset1(fowner).dataevent(tdataevent(de_afterpost),0);
+       end;
+      finally
+       if bo2 then begin
+        self.modified;
+       end;
+      end;
+      if bo1 then begin
+       bo1:= false;
+       if result then begin
+        savepointrelease;
        end
        else begin
-        if bo1 then begin
-         bo1:= false;
-         savepointrollback(int1);
-        end;     
-        raise;
+        savepointrollback(int1);
        end;
-      end;      
-     finally
-      exclude(fstate,dscs_posting);
+      end;     
+     except
+      if bo1 then begin
+       savepointrollback;
+      end;     
+      raise;
      end;
-     bo2:= result;
-     try
-      if result and assigned(aafterpost) then begin
-       aafterpost(tdataset(fowner),result);
-      end;
-      if result then begin
-       tdataset1(fowner).dataevent(tdataevent(de_afterpost),0);
-      end;
-     finally
-      if bo2 then begin
-       self.modified;
-      end;
+    finally
+     if checkcanevent(tdataset(fowner),tmethod(self.fonafterpost)) then begin
+      fonafterpost(tdataset(fowner),result);
      end;
-     if bo1 then begin
-      bo1:= false;
-      if result then begin
-       savepointrelease;
-      end
-      else begin
-       savepointrollback(int1);
-      end;
-     end;     
-    except
-     if bo1 then begin
-      savepointrollback;
-     end;     
-     raise;
     end;
    finally
-    if checkcanevent(tdataset(fowner),tmethod(self.fonafterpost)) then begin
-     fonafterpost(tdataset(fowner),result);
+    if not bo3 then begin
+     exclude(fstate,dscs_posting1);
     end;
    end;
   end
@@ -6994,6 +7015,11 @@ end;
 function tdscontroller.posting: boolean;
 begin
  result:= dscs_posting in fstate;
+end;
+
+function tdscontroller.posting1: boolean;
+begin
+ result:= dscs_posting1 in fstate;
 end;
 
 procedure tdscontroller.modified;

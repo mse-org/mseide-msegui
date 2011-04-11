@@ -29,7 +29,7 @@ type
  
  tlocaldataset = class(tmsebufdataset,imselocate,idscontroller,igetdscontroller)
   private
-   fcontroller: tdscontroller;
+//   fcontroller: tdscontroller;
    ftagpo: pointer;
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;

@@ -54,7 +54,7 @@ type
                               isqlpropertyeditor)
   private
    fsqlonchangebefore: notifyeventty;
-   fcontroller: tdscontroller;
+//   fcontroller: tdscontroller;
    fonapplyrecupdate: applyrecupdateeventty;
    fonapplyrecupdate2: afterapplyrecupdateeventty;
    fafterapplyrecupdate: afterapplyrecupdateeventty;

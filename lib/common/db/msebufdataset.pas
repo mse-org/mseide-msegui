@@ -368,7 +368,7 @@ type
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
-   function findvariant(const avalue: variant;
+   function findvariant(const avalue: array of variant;
                out abookmark: string;
                const abigger: boolean = false;
                const partialstring: boolean = false;
@@ -639,6 +639,7 @@ type
                    const avalue: int64);
    procedure setbookmarkdata1(const avalue: bookmarkdataty);
   protected
+   fcontroller: tdscontroller;
    fbrecordcount: integer;
    ffieldinfos: fieldinfoarty;
    ffieldorder: integerarty;
@@ -824,21 +825,30 @@ type
     //imasterlink   
    function refreshing: boolean;
 
-   procedure refreshrecord(const akeyfield: tfield;
+   procedure refreshrecord(const akeyfield: array of tfield;
+              const keyindex: integer = 0;
+              const acancelupdate: boolean = true); overload;
+   procedure refreshrecord(const sourcedatasets: array of tdataset;
+              const akeyvalue: array of variant;
               const keyindex: integer = 0;
               const acancelupdate: boolean = true); overload;
    procedure refreshrecord(const asourcefields: array of tfield;
-              const akeyfield: tfield;
+              const akeyfield: array of tfield;
               const keyindex: integer = 0;
               const acancelupdate: boolean = true); overload;
    procedure refreshrecord(const asourcefields: array of tfield;
               const adestfields: array of tfield;
-              const akeyfield: tfield;
+              const akeyfield: array of tfield;
+              const keyindex: integer = 0;
+              const acancelupdate: boolean = true); overload;
+   procedure refreshrecord(const asourcefields: array of tfield;
+              const adestfields: array of tfield;
+              const akeyvalue: array of variant;
               const keyindex: integer = 0;
               const acancelupdate: boolean = true); overload;
    procedure refreshrecord(const asourcevalues: array of variant;
               const adestfields: array of tfield;
-              const akeyvalue: variant;
+              const akeyvalue: array of variant;
               const keyindex: integer = 0;
               const acancelupdate: boolean = true); overload;
           //keyindex must be unique, copies equally named visible fields,
@@ -6124,6 +6134,9 @@ var
  str1: string;
  po1: pointer;
 begin
+ if not active then begin
+  exit;
+ end;
  currentcheckbrowsemode;
  for int1:= 0 to dest.fieldcount - 1 do begin
   df:= dest.fields[int1];
@@ -6189,13 +6202,16 @@ end;
 
 procedure tmsebufdataset.refreshrecord(const asourcevalues: array of variant;
               const adestfields: array of tfield;
-              const akeyvalue: variant; const keyindex: integer = 0;
+              const akeyvalue: array of variant; const keyindex: integer = 0;
               const acancelupdate: boolean = true);
 var
  bm1,bm2: string;
  int1: integer;
  bo1: boolean;
 begin
+ if not active or fcontroller.posting1 then begin
+  exit;
+ end;
  checkbrowsemode;
  disablecontrols;
  bm2:= bookmark;
@@ -6232,21 +6248,23 @@ end;
 
 procedure tmsebufdataset.refreshrecord(const asourcefields: array of tfield;
               const adestfields: array of tfield;
-              const akeyfield: tfield; const keyindex: integer = 0;
+              const akeyfield: array of tfield; const keyindex: integer = 0;
               const acancelupdate: boolean = true);
-var
- ar1: variantarty;
- int1: integer;
 begin
- setlength(ar1,length(asourcefields));
- for int1:= 0 to high(ar1) do begin
-  ar1[int1]:= asourcefields[int1].asvariant;
- end;
- refreshrecord(ar1,adestfields,akeyfield.value,keyindex,acancelupdate);
+ refreshrecord(fieldvariants(asourcefields),adestfields,
+               fieldvariants(akeyfield),keyindex,acancelupdate);
 end;
 
 procedure tmsebufdataset.refreshrecord(const asourcefields: array of tfield;
-              const akeyfield: tfield; const keyindex: integer = 0;
+              const adestfields: array of tfield;
+              const akeyvalue: array of variant; const keyindex: integer = 0;
+              const acancelupdate: boolean = true);
+begin
+ refreshrecord(fieldvariants(asourcefields),adestfields,akeyvalue,keyindex,acancelupdate);
+end;
+
+procedure tmsebufdataset.refreshrecord(const asourcefields: array of tfield;
+              const akeyfield: array of tfield; const keyindex: integer = 0;
               const acancelupdate: boolean = true);
 var
  int1: integer;
@@ -6258,7 +6276,7 @@ begin
  end;
  refreshrecord(asourcefields,ar1,akeyfield,keyindex,acancelupdate);
 end;
-
+{
 procedure tmsebufdataset.refreshrecord(const akeyfield: tfield;
           const keyindex: integer = 0; const acancelupdate: boolean = true);
 var
@@ -6285,6 +6303,45 @@ begin
  setlength(sf,int2);
  setlength(df,int2);
  refreshrecord(sf,df,akeyfield,keyindex,acancelupdate);
+end;
+}
+procedure tmsebufdataset.refreshrecord(const sourcedatasets: array of tdataset;
+              const akeyvalue: array of variant;
+              const keyindex: integer = 0;
+              const acancelupdate: boolean = true);
+var
+ int1,int2,int3: integer;
+ field1,field2: tfield;
+ sf,df: fieldarty;
+begin
+ int2:= 0;
+ for int3:= 0 to high(sourcedatasets) do begin
+  with sourcedatasets[int3] do begin
+   setlength(sf,length(sf)+fields.count); //max
+   setlength(df,length(sf)); //max
+   for int1:= 0 to fields.count-1 do begin
+    field1:= fields[int1];
+    if field1.visible then begin
+     field2:= self.findfield(field1.fieldname);
+     if (field2 <> nil) and not field2.readonly then begin
+      sf[int2]:= field1;
+      df[int2]:= field2;
+      inc(int2);
+     end;
+    end;
+   end;
+  end;
+ end;
+ setlength(sf,int2);
+ setlength(df,int2);
+ refreshrecord(sf,df,akeyvalue,keyindex,acancelupdate);
+end;
+
+procedure tmsebufdataset.refreshrecord(const akeyfield: array of tfield;
+          const keyindex: integer = 0; const acancelupdate: boolean = true);
+begin
+ refreshrecord([akeyfield[0].dataset],fieldvariants(akeyfield),keyindex,
+                                                               acancelupdate);
 end;
 
 function tmsebufdataset.updatesortfield(const afield: tfield;
@@ -7088,7 +7145,7 @@ begin
  end;
 end;
 
-function tlocalindex.findvariant(const avalue: variant;
+function tlocalindex.findvariant(const avalue: array of variant;
                  //nil -> NULL field
                  //itemcount of avalues
                  //can be smaller than fields count in index
@@ -7103,48 +7160,61 @@ function tlocalindex.findvariant(const avalue: variant;
 var
  int1: integer;
  vt1: tvartype;
+ ar1: array of tvarrec;
+ ar2: msestringarty;
+ ar3: array of extended;
 begin
- if varisnull(avalue) then begin
-  result:= find([nil],[],abigger,partialstring,nocheckbrowsemode);
- end
- else begin
-  vt1:= vartype(avalue);
-  if vt1 in ordinalvartypes then begin
-   if vt1 = varint64 then begin
-    result:= find([int64(avalue)],[],abigger,partialstring,
-                                                nocheckbrowsemode);
+ setlength(ar1,length(avalue));
+ setlength(ar2,length(avalue));
+ for int1:= 0 to high(avalue) do begin
+  with ar1[int1] do begin
+   if varisnull(avalue[int1]) then begin
+    vtype:= vtpointer;
+ //   result:= find([nil],[],abigger,partialstring,nocheckbrowsemode);
    end
    else begin
-    if vt1 = varboolean then begin
-     result:= find([boolean(avalue)],[],abigger,partialstring,
-                                                  nocheckbrowsemode);
+    vt1:= vartype(avalue[int1]);
+    if vt1 in ordinalvartypes then begin
+     if vt1 = varint64 then begin
+      vtype:= vtint64;
+      vint64:= @tvardata(avalue[int1]).vint64;
+     end
+     else begin
+      if vt1 = varboolean then begin
+       vtype:= vtboolean;
+       vboolean:= avalue[int1];
+      end
+      else begin
+       vtype:= vtinteger;
+       vinteger:= avalue[int1];
+      end;
+     end;
     end
     else begin
-     result:= find([integer(avalue)],[],abigger,partialstring,
-                                                  nocheckbrowsemode);
-    end;
-   end;
-  end
-  else begin
-   case vt1 of
-    varcurrency: begin
-     result:= find([currency(avalue)],[],abigger,partialstring,
-                                                 nocheckbrowsemode);
-    end;
-    varsingle,vardouble,vardate: begin
-     result:= find([double(avalue)],[],abigger,partialstring,
-                                                 nocheckbrowsemode);
-    end;
-    varstring: begin
-     result:= find([msestring(avalue)],[],abigger,partialstring,
-                                                 nocheckbrowsemode);
-    end
-    else begin
-     paramerror;
+     case vt1 of
+      varcurrency: begin
+       vtype:= vtcurrency;
+       vcurrency:= @tvardata(avalue[int1]).vcurrency;
+      end;
+      varsingle,vardouble,vardate: begin
+       vtype:= vtextended;
+       ar3[int1]:= avalue[int1];
+       vextended:= @ar3[int1];
+      end;
+      varstring: begin
+       vtype:= vtwidestring;
+       ar2[int1]:= avalue[int1];
+       vwidestring:= @ar2[int1];
+      end
+      else begin
+       paramerror;
+      end;
+     end;
     end;
    end;
   end;
  end;
+ result:= find(ar1,[],abigger,partialstring,nocheckbrowsemode);
 end;
 
 function tlocalindex.findvariant(const avalue: variant;
