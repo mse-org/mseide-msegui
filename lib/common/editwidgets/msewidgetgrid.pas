@@ -1704,9 +1704,9 @@ var
  aoptions: coloptionsty;
 begin
  aoptions:= avalue;
- if co_nohscroll in aoptions then begin
-  include(aoptions,co_nofocus);
- end;
+// if co_nohscroll in aoptions then begin
+//  include(aoptions,co_nofocus);
+// end;
  inherited setoptions(aoptions);
  if fintf <> nil then begin
 //  fintf.updatecoloptions(aoptions);

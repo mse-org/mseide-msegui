@@ -9777,8 +9777,9 @@ end;
 
 function twidget.navigdistance(var info: naviginfoty): integer;
 const
- dirweightings = 20;
- dirweightingg = 30;
+ matchweighting = 1;
+ dirweightings = 20*matchweighting;
+ dirweightingg = 30*matchweighting;
 var
  rect1,rect2: rectty;
  dist: integer;
@@ -9799,22 +9800,31 @@ begin
    dwm:= -dirweightings;
   end;
   if direction in [gd_right,gd_left] then begin
+   result:= rect1.y + rect1.cy div 2 - (rect2.y + rect2.cy div 2);
    if (rect2.y >= rect1.y) and (rect2.y < rect1.y + rect1.cy) or
         (rect1.y >= rect2.y) and (rect1.y < rect2.y + rect2.cy) then begin
-    result:= 0;
+    if rect1.cy >= rect2.cy then begin
+     result:= 0;
+    end;
    end
    else begin
-    result:= rect1.y + rect1.cy div 2 - (rect2.y + rect2.cy div 2);
+    result:= result*matchweighting;
+//    result:= rect1.y + rect1.cy div 2 - (rect2.y + rect2.cy div 2);
    end;
-   dist:= (rect1.x + rect1.cx div 2) - (rect2.x + rect2.cx div 2);
+   dist:= rect1.x - rect2.x;
+//   dist:= (rect1.x + rect1.cx div 2) - (rect2.x + rect2.cx div 2);
   end
   else begin
+   result:= rect1.x - rect2.x;
    if (rect2.x >= rect1.x) and (rect2.x < rect1.x + rect1.cx) or
         (rect1.x >= rect2.x) and (rect1.x < rect2.x + rect2.cx) then begin
-    result:= 0;
+    if rect1.cx >= rect2.cx then begin
+     result:= 0;
+    end;
    end
    else begin
-    result:= rect1.x + rect1.cx div 2 - (rect2.x + rect2.cx div 2);
+    result:= result*matchweighting;
+//    result:= rect1.x + rect1.cx div 2 - (rect2.x + rect2.cx div 2);
    end;
    dist:= (rect1.y + rect1.cy div 2) - (rect2.y + rect2.cy div 2);
   end;
@@ -9844,6 +9854,7 @@ begin
     end;
    end;
   end;
+  dist:= dist * matchweighting;
   if dist < 0 then begin
    dist:= bigint div 2;
   end;
