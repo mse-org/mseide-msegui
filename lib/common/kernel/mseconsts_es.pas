@@ -67,7 +67,7 @@ const
   'Error de rango',             //sc_Range_error  
 
   '&Deshacer',                  //sc_Undo  ///              ///
-  '&Redo',                      //sc_Redo   //               //
+  '&Rehacer',                   //sc_Redo   //               //
   '&Copiar',                    //sc_Copy   // hotkeys       //
   'C&ortar',                    //sc_Cut    //               //
   '&Pegar',                     //sc_Paste ///               // hotkeys
@@ -75,32 +75,32 @@ const
   '&A'#241'adir fila',          //sc_append_row  // hotkeys  //
   '&Borrar fila',               //sc_delete_row ///         ///
 
-  '&Carpetas',                //sc_Dir               /// 
-  '&Principal',                      //sc_home               //
-  '&Subir un nivel',                     //sc_Up                 //
+  '&Carpetas',                    //sc_Dir               /// 
+  '&Principal',                   //sc_home               //
+  '&Subir un nivel',              //sc_Up                 //
   'Crear carpeta',                //sc_New_dir            // hotkeys
-  'N&ombre',                    //sc_Name               //
-  '&Mostrar archivos ocultos',  //sc_Show_hidden_files  //
-  '&Filtro',                    //sc_Filter            ///   
-  'Guardar',                    //sc_save 
-  'Abrir',                      //sc_open
-  'Nombre',                     //sc_name1
-  'Crear una carpeta nueva',  //sc_create_new_directory
-  'Archivo',                    //sc_file
+  'N&ombre',                      //sc_Name               //
+  '&Mostrar archivos ocultos',    //sc_Show_hidden_files  //
+  '&Filtro',                      //sc_Filter            ///   
+  'Guardar',                      //sc_save 
+  'Abrir',                        //sc_open
+  'Nombre',                       //sc_name1
+  'Crear una carpeta nueva',           //sc_create_new_directory
+  'Archivo',                           //sc_file
   'existe, '#191'quiere sobreescribirlo?', //sc_exists_overwrite
-  'ADVERTENCIA',                //sc_warningupper
-  'ERROR',                      //sc_errorupper
-  'no existe',                  //sc_does_not_exist
-  'No puedo leer la carpeta',       //sc_can_not_read_directory
+  'ADVERTENCIA',                       //sc_warningupper
+  'ERROR',                             //sc_errorupper
+  'no existe',                         //sc_does_not_exist
+  'No puedo leer la carpeta',          //sc_can_not_read_directory
   'Formato gr'#225'fico no soportado', //sc_graphic_not_supported
   'Error de formato gr'#225'fico',     //sc_graphic_format_error
-  'MS Bitmap',                         //sc_MS_Icon
-  'MS Icono',                          //sc_MS_Icon
-  'JPEG imagen',                       //sc_JPEG_Image 
-  'PNG imagen',                        //sc_PNG_Image
-  'XPM imagen',                        //sc_XPM_Image
-  'PNM imagen',                        //sc_PNM_Image
-  'TARGA imagen',                      //sc_TARGA_image
+  'Bitmap MS',                         //sc_MS_Icon
+  'Icono MS',                          //sc_MS_Icon
+  'Imagen JPEG',                       //sc_JPEG_Image 
+  'Imagen PNG',                        //sc_PNG_Image
+  'Imagen XPM',                        //sc_XPM_Image
+  'Imagen PNM',                        //sc_PNM_Image
+  'Imagen TARGA',                      //sc_TARGA_image
   'Todo',                              //sc_All
   'Confirme',                          //sc_Confirmation
   #191'Borrar el registro?',           //sc_Delete_record
@@ -120,8 +120,8 @@ const
   'Filtro edici'#243'n m'#225'ximo',   //sc_filter_edit_max
   'Filtro activo',                     //sc_filter_on
   'Buscar',                            //sc_search
-  'Edici'#243'n autom'#225'tica',          //sc_autoedit
-  'Di'#225'logo',             //sc_dialog
+  'Edici'#243'n autom'#225'tica',      //sc_autoedit
+  'Di'#225'logo',                      //sc_dialog
   'Insertar',                          //sc_insert
   'Filtro apagado',                    //sc_filter_off
   'Vertical',                          //sc_portrait print orientation
