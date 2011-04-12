@@ -193,6 +193,7 @@ type
   {$endif}
    function HasParent: Boolean; override;
    procedure change; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    procedure Clear; override;
    property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -262,6 +263,7 @@ type
    procedure SetAsString(const AValue: string); override;
    procedure SetVarValue(const AValue: Variant); override;
    procedure change; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    destructor destroy; override;
    function HasParent: Boolean; override;
@@ -309,6 +311,7 @@ type
   {$endif}
    function HasParent: Boolean; override;
    procedure change; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -398,6 +401,7 @@ type
    procedure setasboolean(avalue: boolean); override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
    procedure change; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -442,6 +446,7 @@ type
    procedure setaslargeint(avalue: largeint); override;
    function getaslargeint: largeint; override;
    procedure change; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -483,6 +488,7 @@ type
    procedure setaslargeint(avalue: largeint); override;
    function getaslargeint: largeint; override;
    procedure change; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -520,6 +526,7 @@ type
   {$endif}
    function HasParent: Boolean; override;
    procedure change; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -563,6 +570,7 @@ type
    function GetAsLongint: Longint; override;
    procedure change; override;
    function GetAsLargeint: Largeint; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -621,6 +629,7 @@ type
    procedure SetAsLongint(AValue: Longint); override;
    function GetAsVariant: variant; override;
    procedure change; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    constructor Create(AOwner: TComponent); override;
    procedure Clear; override;
@@ -672,6 +681,7 @@ type
    procedure setasstring(const avalue: string); override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
    procedure change; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -719,6 +729,7 @@ type
   {$endif}
    function HasParent: Boolean; override;
    procedure change; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -758,6 +769,7 @@ type
    function getasstring: string; override;
    procedure setasstring(const avalue: string); override;
    procedure change; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -797,6 +809,7 @@ type
    procedure setasstring(const avalue: string); override;
    function getasstring: string; override;
    procedure change; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -837,6 +850,7 @@ type
    class procedure checktypesize(avalue: longint); override;
    property tagpo: pointer read ftagpo write ftagpo;
    procedure change; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -911,6 +925,7 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
    procedure gettext(var atext: string; adisplaytext: boolean); override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    destructor destroy; override;
    procedure Clear; override;
@@ -998,6 +1013,7 @@ type
    procedure setaslargeint(avalue: largeint); override;
    function getascurrency: currency; override;
    procedure setascurrency(avalue: currency); override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    function assql: string;
    function asoldsql: string;
@@ -3231,6 +3247,21 @@ begin
  end;
 end;
 
+procedure tmsefield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 { tmsestringfield }
 
 destructor tmsestringfield.destroy;
@@ -3479,6 +3510,21 @@ begin
  end;
 end;
 
+procedure tmsestringfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 { tmsememofield }
 
 constructor tmsememofield.create(aowner: tcomponent);
@@ -3629,6 +3675,21 @@ begin
   finally
    exclude(fstate,fis_changing);
   end;
+ end;
+end;
+
+procedure tmsenumericfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
  end;
 end;
 
@@ -3955,6 +4016,21 @@ begin
  end;
 end;
 
+procedure tmselargeintfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 { tmsesmallintfield }
 
 function tmsesmallintfield.HasParent: Boolean;
@@ -4052,6 +4128,21 @@ begin
   finally
    exclude(fstate,fis_changing);
   end;
+ end;
+end;
+
+procedure tmsesmallintfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
  end;
 end;
 
@@ -4155,6 +4246,21 @@ begin
  end;
 end;
 
+procedure tmsewordfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 { tmseautoincfield }
 
 function tmseautoincfield.HasParent: Boolean;
@@ -4224,6 +4330,21 @@ begin
   finally
    exclude(fstate,fis_changing);
   end;
+ end;
+end;
+
+procedure tmseautoincfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
  end;
 end;
 
@@ -4372,6 +4493,21 @@ begin
   finally
    exclude(fstate,fis_changing);
   end;
+ end;
+end;
+
+procedure tmsefloatfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
  end;
 end;
 
@@ -4682,6 +4818,21 @@ begin
  end;
 end;
 
+procedure tmsebooleanfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 { tmsedatetimefield }
 
 function tmsedatetimefield.HasParent: Boolean;
@@ -4819,6 +4970,21 @@ begin
   finally
    exclude(fstate,fis_changing);
   end;
+ end;
+end;
+
+procedure tmsedatetimefield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
  end;
 end;
 
@@ -5014,6 +5180,21 @@ begin
  end;
 end;
 
+procedure tmsebinaryfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 { tmsebytesfield }
 
 function tmsebytesfield.HasParent: Boolean;
@@ -5114,6 +5295,21 @@ begin
   finally
    exclude(fstate,fis_changing);
   end;
+ end;
+end;
+
+procedure tmsebytesfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
  end;
 end;
 
@@ -5222,6 +5418,21 @@ begin
   finally
    exclude(fstate,fis_changing);
   end;
+ end;
+end;
+
+procedure tmsevarbytesfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
  end;
 end;
 
@@ -5354,6 +5565,21 @@ begin
   finally
    exclude(fstate,fis_changing);
   end;
+ end;
+end;
+
+procedure tmsebcdfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
  end;
 end;
 
@@ -5565,6 +5791,21 @@ begin
  result:= fproviderflags1;
 end;
 
+procedure tmseblobfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 { tmsevariantfield }
 
 function tmsevariantfield.getdatasize: integer;
@@ -5722,6 +5963,21 @@ end;
 function tmsevariantfield.getproviderflags1: providerflags1ty;
 begin
  result:= fproviderflags1;
+end;
+
+procedure tmsevariantfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= ';%)(mse'; //dummy
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
+ end;
 end;
 
 { tdbfieldnamearrayprop }
