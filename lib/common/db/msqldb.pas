@@ -5061,7 +5061,7 @@ begin
  with tsqlquery(detaildataset) do begin
   case ord(event) of
    ord(deupdaterecord): begin
-    if state in [dsinsert] then begin
+    if state in [dsinsert,dsedit] then begin
      updaterecord;
      if modified then begin
       dataset.modified:= true;
@@ -5110,47 +5110,49 @@ var
  intf: igetdscontroller;
  detailoptions: optionsmasterlinkty;
 begin
- inc(frefreshlock);
- try
-  detailoptions:= tsqlquery(detaildataset).foptionsmasterlink;
-  if detailoptions * 
-        [mdlo_syncedit,mdlo_syncinsert] <> [] then begin
-   if getcorbainterface(dataset,typeinfo(igetdscontroller),intf) and
-                                      intf.getcontroller.canceling then begin
-    detaildataset.cancel;
-    exit;
-   end
-   else begin
-    if mdlo_delayeddetailpost in detailoptions then begin
+ if detaildataset.active then begin
+  inc(frefreshlock);
+  try
+   detailoptions:= tsqlquery(detaildataset).foptionsmasterlink;
+   if detailoptions * 
+         [mdlo_syncedit,mdlo_syncinsert] <> [] then begin
+    if getcorbainterface(dataset,typeinfo(igetdscontroller),intf) and
+                                       intf.getcontroller.canceling then begin
+     detaildataset.cancel;
      exit;
-    end;
-    if detaildataset.state = dsinsert then begin
-     dataset.updaterecord;
-     if dataset.modified then begin
-      detaildataset.post;
-      goto endlab;
+    end
+    else begin
+     if mdlo_delayeddetailpost in detailoptions then begin
+      exit;
+     end;
+     if detaildataset.state = dsinsert then begin
+      dataset.updaterecord;
+      if dataset.modified then begin
+       detaildataset.post;
+       goto endlab;
+      end;
      end;
     end;
    end;
-  end;
-  inherited;
- endlab:
-  if (dataset.state in [dsedit,dsinsert]) and 
-        (detailoptions * [mdlo_syncedit,mdlo_syncinsert] <> []) then begin
-   dataset.updaterecord; //synchronize fields
-  end;
-  if getcorbainterface(detaildataset,typeinfo(igetdscontroller),intf) then begin
-   with intf.getcontroller do begin
-    if (dataset.state = dsinsert) and assigned(onupdatemasterinsert) then begin
-     onupdatemasterinsert(detaildataset,dataset);
-    end;
-    if (dataset.state = dsedit) and assigned(onupdatemasteredit) then begin
-     onupdatemasteredit(detaildataset,dataset);
+   inherited;
+  endlab:
+   if (dataset.state in [dsedit,dsinsert]) and 
+         (detailoptions * [mdlo_syncedit,mdlo_syncinsert] <> []) then begin
+    dataset.updaterecord; //synchronize fields
+   end;
+   if getcorbainterface(detaildataset,typeinfo(igetdscontroller),intf) then begin
+    with intf.getcontroller do begin
+     if (dataset.state = dsinsert) and assigned(onupdatemasterinsert) then begin
+      onupdatemasterinsert(detaildataset,dataset);
+     end;
+     if (dataset.state = dsedit) and assigned(onupdatemasteredit) then begin
+      onupdatemasteredit(detaildataset,dataset);
+     end;
     end;
    end;
+  finally
+   dec(frefreshlock);
   end;
- finally
-  dec(frefreshlock);
  end;
 end;
 
