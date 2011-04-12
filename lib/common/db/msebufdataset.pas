@@ -482,6 +482,9 @@ type
                       );
  bufdatasetstatesty = set of bufdatasetstatety;
 
+ bufdatasetstate1ty = (bs1_needsresync);
+ bufdatasetstates1ty = set of bufdatasetstate1ty;
+ 
  internalcalcfieldseventty = procedure(const sender: tmsebufdataset;
                                               const fetching: boolean) of object;
  iblobchache = interface(inullinterface)
@@ -645,6 +648,7 @@ type
    ffieldorder: integerarty;
    factindexpo: pindexty;    
    fbstate: bufdatasetstatesty;
+   fbstate1: bufdatasetstates1ty;
    fallpacketsfetched : boolean;
    fapplyindex: integer; //take care about canceled updates while applying
    ffailedcount: integer;
@@ -2988,16 +2992,16 @@ begin
      end;
     finally
      if bs_curvaluemodified in fbstate then begin
-      if (updatekind = ukmodify) and 
-                          (bs_refreshupdateindex in fbstate) or
-      (updatekind = ukinsert) and 
-                          (bs_refreshinsertindex in fbstate) then begin
-       int1:= factindex;
-       factindex:= -1; //do not use recno
+//      if (updatekind = ukmodify) and 
+//                          (bs_refreshupdateindex in fbstate) or
+//      (updatekind = ukinsert) and 
+//                          (bs_refreshinsertindex in fbstate) then begin
+//       int1:= factindex;
+ //      factindex:= -1; //do not use recno
        saveindex(bookmark.recordpo,@fnewvaluebuffer^.header,ar1,ar2,ar3);
        relocateindex(bookmark.recordpo,ar1,ar2,ar3);
-       factindex:= int1;
-      end;
+ //      factindex:= int1;
+//      end;
       move(fnewvaluebuffer^.header,bookmark.recordpo^.header,frecordsize);
      end;
     end;
@@ -3027,11 +3031,15 @@ begin
    checkbrowsemode;
    if getrecordupdatebuffer then begin
     ffailedcount:= 0;
+    exclude(fbstate1,bs1_needsresync);
     try
      internalapplyupdate(0,revertonerror,response);
     finally
      if FUpdateBuffer[fcurrentupdatebuffer].Bookmark.recordpo = nil then begin
       deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),fcurrentupdatebuffer);
+     end;
+     if bs1_needsresync in fbstate1 then begin
+      resync([]);
      end;
     end;
     if rr_applied in response then begin
@@ -3160,6 +3168,7 @@ begin
 //  with pdsrecordty(activebuffer)^ do begin
    for int1:= high(ar1) downto 0 do begin
     if ar2[int1] <> 0 then begin // position changed
+     include(fbstate1,bs1_needsresync);
      int2:= ar3[int1];           //new boundary
      with findexes[int1+1] do begin
       for int3:= ar1[int1] - 1 downto 0 do begin
@@ -3170,7 +3179,7 @@ begin
         end;
         move(ind[int2],ind[int2+1],(fbrecordcount-int2-1)*sizeof(pointer));
         ind[int2]:= abuffer;
-        if int1 = factindex - 1 then begin
+        if (int1 = factindex - 1) then begin
          frecno:= int2;
         end;
         break;
