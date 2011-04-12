@@ -10091,6 +10091,8 @@ var
  end;
 
  procedure checkrepeater(const drag: boolean);
+ var
+  bo1: boolean;
  begin     
   with info do begin
    if gs_cellclicked in fstate then begin
@@ -10111,7 +10113,7 @@ var
      end;
     end;
     if pos.y < fdatarect.y - mousescrolldist then begin
-     if (ffocusedcell.col >= 0) and 
+     if (ffocusedcell.col >= 0) and
               (co_mousescrollrow in datacols[ffocusedcell.col].options) then begin
       startrepeater(gs_scrolldown,fastrepeat);
      end;
@@ -10124,13 +10126,17 @@ var
       end;
      end
      else begin
-      if pos.x < fdatarect.x - mousescrolldist then begin
+      bo1:= not ((focusedcell.col >= 0) and 
+          (co_nohscroll in 
+                  tcol(fdatacols.fitems[ffocusedcell.col]).options));
+      if bo1 and (pos.x < fdatarect.x - mousescrolldist) then begin
        if og_mousescrollcol in foptionsgrid then begin
         startrepeater(gs_scrollleft,slowrepeat);
        end;
       end
       else begin
-       if pos.x - mousescrolldist >= fdatarect.x + fdatarect.cx then begin
+       if bo1 and (pos.x - mousescrolldist >= 
+                                    fdatarect.x + fdatarect.cx) then begin
         if og_mousescrollcol in foptionsgrid then begin
          startrepeater(gs_scrollright,slowrepeat);
         end;
@@ -10748,14 +10754,15 @@ begin     //focuscell
    with rect1 do begin
     bo1:= (cell.row >= 0);
     if bo1 then begin
-     int1:= fdatarect.x - x;
-     bo1:= (int1 > 0) and (int1 < fdatarect.cx);
+     int1:= fdatarect.y - y;
+     bo1:= (int1 > 0) and (int1 < fdatarect.cy);
     end;
     if not bo1 then begin
-     bo1:= (cell.col >= 0);
+     bo1:= (cell.col >= 0) and (cell.col < fdatacols.count) and
+             not (co_nohscroll in tcol(fdatacols.fitems[cell.col]).foptions);
      if bo1 then begin
-      int1:= fdatarect.y - y;
-      bo1:= (int1 > 0) and (int1 < fdatarect.cy);
+      int1:= fdatarect.x - x;
+      bo1:= (int1 > 0) and (int1 < fdatarect.cx);
      end;
     end;
     if bo1 then begin
@@ -12983,7 +12990,9 @@ begin
   else begin
    if gs_scrollleft in fstate then begin
     if bo1 then begin
-     if ffocusedcell.col > 0 then begin
+     if (ffocusedcell.col > 0) and 
+        not (co_nohscroll in 
+          tcol(fdatacols.fitems[ffocusedcell.col-1]).options) then begin
       colstep(frepeataction,-1,false,false,false);
      end;
     end
@@ -12994,7 +13003,9 @@ begin
    else begin
     if gs_scrollright in fstate then begin
      if bo1 then begin
-      if ffocusedcell.col < fdatacols.count - 1 then begin
+      if (ffocusedcell.col < fdatacols.count - 1) and
+        not (co_nohscroll in 
+          tcol(fdatacols.fitems[ffocusedcell.col+1]).options) then begin
        colstep(frepeataction,1,false,false,false);
       end;
      end

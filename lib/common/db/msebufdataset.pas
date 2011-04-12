@@ -4421,7 +4421,9 @@ begin
    exit;
   end;
  end;
- inherited;
+ if not ((bs_recapplying in fbstate) and (event = dedatasetchange)) then begin
+  inherited;
+ end;
  case event of
   deupdaterecord: begin
    if checkcanevent(self,tmethod(foninternalcalcfields)) then begin
