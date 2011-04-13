@@ -400,6 +400,7 @@ type
    procedure change(const index: integer); override;
    function getidentnum(const index: integer): integer;
    procedure dosizechanged; override;
+   function originalorder: integerarty; //restores original order, returns sort vector
   public
    constructor create(const aowner: tobject; aclasstype: indexpersistentclassty);
                    reintroduce; virtual;
@@ -695,12 +696,12 @@ var
  int1: integer;
 begin
  if sourceorder <> nil then begin
-  include(fstate,aps_moved);
   int1:= getcount;
   if int1 <> length(sourceorder) then begin
    raise exception.create('tarrayprop: Wrong length of neworder');
   end;
   if int1 > 0 then begin
+   include(fstate,aps_moved);
    orderarray(sourceorder,getdatapo^,getsize);
   end;
   change(-1);
@@ -1998,6 +1999,19 @@ begin
  setlength(result,count);
  for int1:= 0 to high(fitems) do begin
   result[int1]:= tindexpersistent(fitems[int1]).fident;
+ end;
+end;
+
+function tindexpersistentarrayprop.originalorder: integerarty;
+var
+ int1: integer;
+ ar1: integerarty;
+begin
+ ar1:= getidents;
+ sortarray(ar1,result);
+ orderarray(result,pointerarty(fitems));
+ for int1:= 0 to count -1 do begin
+  tindexpersistent(fitems[int1]).findex:= int1;
  end;
 end;
 

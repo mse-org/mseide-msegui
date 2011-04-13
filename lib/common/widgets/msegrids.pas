@@ -1079,7 +1079,8 @@ type
    procedure paint(const info: rowpaintinfoty); virtual;
    procedure drawcell(const canvas: tcanvas);{ virtual;}
    procedure movecol(const curindex,newindex: integer; const aisfix: boolean);
-   procedure orderdatacols(const neworder: integerarty);
+   procedure reorderdatacols(const neworder: integerarty);
+   procedure orderdatacols(const oldorder: integerarty);
    procedure buttoncellevent(var info: celleventinfoty);
   public
    constructor create(const agrid: tcustomgrid; 
@@ -1592,7 +1593,8 @@ type
    procedure movecol(const curindex,newindex: integer; const isfix: boolean);
    procedure datacolscountchanged;
    procedure fixcolscountchanged;
-   procedure orderdatacols(const neworder: integerarty);
+   procedure reorderdatacols(const neworder: integerarty);
+   procedure orderdatacols(const oldorder: integerarty);
    procedure dofontheightdelta(var delta: integer);
   public
    constructor create(aowner: tcustomgrid);
@@ -4576,9 +4578,14 @@ begin
 end;
 
 
-procedure tfixrow.orderdatacols(const neworder: integerarty);
+procedure tfixrow.reorderdatacols(const neworder: integerarty);
 begin
  fcaptions.reorder(neworder);
+end;
+
+procedure tfixrow.orderdatacols(const oldorder: integerarty);
+begin
+ fcaptions.order(oldorder);
 end;
 
 procedure tfixrow.synctofontheight;
@@ -7994,9 +8001,10 @@ begin
   if (og_savestate in fgrid.foptionsgrid) and reader.canstate then begin
 //   sortcol:= reader.readinteger('sortcol',sortcol,-1,count-1);
    if og_colmoving in fgrid.optionsgrid then begin
+    fgrid.ffixrows.orderdatacols(originalorder);
     ar1:= readorder(reader);
     if ar1 <> nil then begin
-     fgrid.fixrows.orderdatacols(ar1);
+     fgrid.fixrows.reorderdatacols(ar1);
      fgrid.layoutchanged;
     end;
    end;
@@ -8576,12 +8584,21 @@ begin
  end;
 end;
 
-procedure tfixrows.orderdatacols(const neworder: integerarty);
+procedure tfixrows.reorderdatacols(const neworder: integerarty);
 var
  int1: integer;
 begin
  for int1:= 0 to high(fitems) do begin
-  tfixrow(fitems[int1]).orderdatacols(neworder);
+  tfixrow(fitems[int1]).reorderdatacols(neworder);
+ end;
+end;
+
+procedure tfixrows.orderdatacols(const oldorder: integerarty);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  tfixrow(fitems[int1]).orderdatacols(oldorder);
  end;
 end;
 
