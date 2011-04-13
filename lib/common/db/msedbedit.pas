@@ -1266,6 +1266,7 @@ type
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); override;
    function locate(const filter: msestring): boolean; override;
    procedure dopaint(const acanvas: tcanvas); override;
+   procedure dohide; override;
   public
    constructor create(const acontroller: tcustomdbdropdownlistcontroller;
                              acols: tdropdowncols);
@@ -1482,6 +1483,7 @@ type
    function getzebrastart: integer; override;
    function getnumoffset: integer; override;
    procedure dopaint(const acanvas: tcanvas); override;
+   procedure dohide; override;
    procedure loaded; override;
 
    procedure setselected(const cell: gridcoordty;
@@ -1752,6 +1754,7 @@ type
    function getnumoffset: integer; override;
    procedure checkcellvalue(var accept: boolean); override;
    procedure dopaint(const acanvas: tcanvas); override;
+   procedure dohide; override;
    procedure loaded; override;
    function cangridcopy: boolean;
 
@@ -5531,6 +5534,12 @@ begin
  fdatalink.painted;
 end;
 
+procedure tdbdropdownlist.dohide;
+begin
+ fdatalink.painted;
+ inherited;
+end;
+
 function tdbdropdownlist.getdbindicatorcol: integer;
 begin
  result:= 0; //none
@@ -7666,6 +7675,12 @@ begin
  fdatalink.painted;
 end;
 
+procedure tcustomdbwidgetgrid.dohide;
+begin
+ fdatalink.painted;
+ inherited;
+end;
+
 procedure tcustomdbwidgetgrid.pagedown(const action: focuscellactionty = fca_focusin);
 begin
  fdatalink.MoveBy(rowcount-1);
@@ -8401,6 +8416,12 @@ procedure tcustomdbstringgrid.dopaint(const acanvas: tcanvas);
 begin
  inherited;
  fdatalink.painted;
+end;
+
+procedure tcustomdbstringgrid.dohide;
+begin
+ fdatalink.painted;
+ inherited;
 end;
 
 procedure tcustomdbstringgrid.pagedown(const action: focuscellactionty = fca_focusin);
