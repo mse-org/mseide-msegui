@@ -88,7 +88,8 @@ const
  cl_empty =                  cl_mapped + 15;
  cl_emptytext =              cl_mapped + 16;
  cl_emptytextbackground =    cl_mapped + 17;
- cl_lastmapped =             cl_mapped + 18;
+ cl_zebra =                  cl_mapped + 18;
+ cl_lastmapped =             cl_mapped + 19;
 
  cl_0 =                      cl_namedrgb + 0; //select colorbackground for monochrome bitmaps
  cl_1 =                      cl_namedrgb + 1; //select colorforeground
@@ -203,7 +204,8 @@ const
     (name: 'cl_activegrip'; rgb:             (blue: $90; green: $20; red: $20; res: $00)), //14
     (name: 'cl_empty';  rgb:                 (blue: $a0; green: $a0; red: $ff; res: $00)), //15
     (name: 'cl_emptytext';  rgb:             (blue: $ff; green: $ff; red: $ff; res: $00)), //16
-    (name: 'cl_emptytextbackground';  rgb:   (blue: $00; green: $00; red: $ff; res: $00))  //17
+    (name: 'cl_emptytextbackground';  rgb:   (blue: $00; green: $00; red: $ff; res: $00)), //17
+    (name: 'cl_zebra';  rgb:                 (blue: $ff; green: $ff; red: $e0; res: $00))  //18
    );
 
  defaultnamedrgb: array[0..namedrgbcolorcount-1]

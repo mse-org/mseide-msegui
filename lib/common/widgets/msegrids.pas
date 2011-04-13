@@ -2252,7 +2252,8 @@ type
    property ifilink: tifigridlinkcomp read fifilink write setifilink;
 {$endif}
                         
-   property zebra_color: colorty read fzebra_color write setzebra_color default cl_infobackground;
+   property zebra_color: colorty read fzebra_color write setzebra_color 
+                                                              default cl_zebra;
    property zebra_start: integer read fzebra_start write setzebra_start default 0;
    property zebra_height: integer read fzebra_height write setzebra_height default 0;
    property zebra_step: integer read fzebra_step write setzebra_step default 2;
@@ -8645,7 +8646,7 @@ begin
  ffixrows:= createfixrows;
 
  fdragcontroller:= tdragcontroller.create(idragcontroller(self));
- fzebra_color:= cl_infobackground;
+ fzebra_color:= cl_zebra;
  fzebra_step:= 2;
 
  inherited;
