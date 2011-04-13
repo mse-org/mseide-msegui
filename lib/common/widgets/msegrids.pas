@@ -4580,11 +4580,13 @@ end;
 
 procedure tfixrow.reorderdatacols(const neworder: integerarty);
 begin
+ fcaptions.count:= length(neworder);
  fcaptions.reorder(neworder);
 end;
 
 procedure tfixrow.orderdatacols(const oldorder: integerarty);
 begin
+ fcaptions.count:= length(oldorder);
  fcaptions.order(oldorder);
 end;
 
