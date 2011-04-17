@@ -976,6 +976,7 @@ implementation
 uses
  rtlconsts,dbconst,sysutils,mseformatstr,msereal,msestream,msesys,
  msefileutils,mseapplication,msevariants;
+ 
 {$ifdef mse_FPC_2_2}
 const
  snotineditstate = 
@@ -2688,7 +2689,7 @@ end;
 procedure tmsebufdataset.fieldchanged(const field: tfield);
 begin
  if {(field.fieldno > 0) and} not 
-                 (state in [dscalcfields,dsinternalcalc,{dsfilter,}dsnewvalue]) and
+       (state in [dscalcfields,dsinternalcalc,{dsfilter,}dsnewvalue]) and
                  not (bs_recapplying in fbstate) then begin
   dataevent(defieldchange, ptrint(field));
  end;
@@ -2902,7 +2903,7 @@ procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
    fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo:= nil;
 //   deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),fcurrentupdatebuffer);
 //   fcurrentupdatebuffer:= bigint; //invalid
-   resync([]);
+//   resync([]);
   end; //deleteupdateitem
  var
   po1: precupdatebufferty;
@@ -2929,13 +2930,16 @@ var
  e1: exception;
  ar1,ar2,ar3: integerarty;
  int1: integer;
+ origpo: pintrecordty;
  
 begin
  include(fbstate,bs_recapplying);
  by1:= not islocal;
  response:= [];
  with fupdatebuffer[fcurrentupdatebuffer] do begin
-  move(bookmark.recordpo^.header,fnewvaluebuffer^.header,frecordsize);
+  origpo:= bookmark.recordpo;
+  move(origpo^.header,fnewvaluebuffer^.header,frecordsize);
+  addrefvalues(fnewvaluebuffer^.header);
   try
    repeat
     exclude(fbstate,bs_curvaluemodified);
@@ -2998,17 +3002,25 @@ begin
 //                          (bs_refreshinsertindex in fbstate) then begin
 //       int1:= factindex;
  //      factindex:= -1; //do not use recno
-       saveindex(bookmark.recordpo,@fnewvaluebuffer^.header,ar1,ar2,ar3);
-       relocateindex(bookmark.recordpo,ar1,ar2,ar3);
+
+      saveindex(origpo,@fnewvaluebuffer^.header,ar1,ar2,ar3);
+      relocateindex(origpo,ar1,ar2,ar3);
  //      factindex:= int1;
 //      end;
-      move(fnewvaluebuffer^.header,bookmark.recordpo^.header,frecordsize);
      end;
     end;
    until response <> [rr_again];
    checkrevert;
   finally
    exclude(fbstate,bs_recapplying);
+   if bs_curvaluemodified in fbstate then begin
+    include(fbstate1,bs1_needsresync);
+    finalizevalues(origpo^.header);
+    move(fnewvaluebuffer^.header,origpo^.header,frecordsize);
+   end
+   else begin
+    finalizevalues(fnewvaluebuffer^.header);
+   end;
    finalizecalcvalues(fnewvaluebuffer^.header);
   end;
  end;
@@ -3166,29 +3178,34 @@ var
 begin
  if bs_indexvalid in fbstate then begin
 //  with pdsrecordty(activebuffer)^ do begin
-   for int1:= high(ar1) downto 0 do begin
-    if ar2[int1] <> 0 then begin // position changed
-     include(fbstate1,bs1_needsresync);
-     int2:= ar3[int1];           //new boundary
-     with findexes[int1+1] do begin
-      for int3:= ar1[int1] - 1 downto 0 do begin
-       if ind[int3] = abuffer then begin //update indexes
-        move(ind[int3+1],ind[int3],(fbrecordcount-int3-1)*sizeof(pointer));
-        if int3 < int2 then begin
-         dec(int2);
-        end;
-        move(ind[int2],ind[int2+1],(fbrecordcount-int2-1)*sizeof(pointer));
-        ind[int2]:= abuffer;
-        if (int1 = factindex - 1) then begin
-         frecno:= int2;
-        end;
-        break;
+  for int1:= high(ar1) downto 0 do begin
+   if ar2[int1] <> 0 then begin // position changed
+    include(fbstate1,bs1_needsresync);
+    int2:= ar3[int1];           //new boundary
+    with findexes[int1+1] do begin
+     for int3:= ar1[int1] - 1 downto 0 do begin
+      if ind[int3] = abuffer then begin //update indexes
+       move(ind[int3+1],ind[int3],(fbrecordcount-int3-1)*sizeof(pointer));
+       if int3 < int2 then begin
+        dec(int2);
        end;
+       move(ind[int2],ind[int2+1],(fbrecordcount-int2-1)*sizeof(pointer));
+       ind[int2]:= abuffer;
+       if (int1 = factindex - 1) then begin
+        frecno:= int2;
+       end;
+       break;
       end;
      end;
     end;
    end;
   end;
+ end
+ else begin
+//  if factindex > 0 then begin
+//   include(fbstate1,bs1_needsresync);
+//  end;
+ end;
 // end;
 end;
 
@@ -5668,11 +5685,16 @@ end;
 }
 procedure tmsebufdataset.fixupcurrentset;
 begin
- if factindexpo^.ind = nil then begin
-  bookmark:= bookmark; //possibly invalid recno
+ if not (bs_recapplying in fbstate) then begin
+  if factindexpo^.ind = nil then begin
+   bookmark:= bookmark; //possibly invalid recno
+  end
+  else begin
+   resync([]);
+  end;
  end
  else begin
-  resync([]);
+  include(fbstate1,bs1_needsresync);
  end;
 end;
 

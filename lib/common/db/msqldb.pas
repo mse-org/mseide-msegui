@@ -5086,7 +5086,8 @@ begin
    de_afterpost: begin
     if (mdlo_delayeddetailpost in foptionsmasterlink) then begin
      if (mdlo_inserttoupdate in foptionsmasterlink) and
-      (state = dsinsert) then begin    
+            (state = dsinsert) then begin
+      detaildataset.modified:= true;
       include(fbstate,bs_inserttoupdate);
       try
        detaildataset.checkbrowsemode;
