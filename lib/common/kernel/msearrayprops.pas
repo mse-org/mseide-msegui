@@ -395,6 +395,7 @@ type
   private
    fident: integer;
    function getidents: integerarty;
+   function getidentmap: integerarty;
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure change(const index: integer); override;
@@ -411,6 +412,7 @@ type
    procedure dostatread(const reader: tstatreader);
    function newident: integer;
    property idents: integerarty read getidents;
+   property identmap: integerarty read getidentmap;
  end;
 { 
  tsubcomponentitem = class(tindexpersistent)
@@ -1900,6 +1902,11 @@ begin
  if count = 0 then begin
   exclude(fstate,aps_needsindexing);
   fident:= 0;
+ end
+ else begin
+  if not (aps_needsindexing in fstate) then begin
+   fident:= count;
+  end;
  end;
  inherited;
 end;
@@ -2012,6 +2019,32 @@ begin
  orderarray(result,pointerarty(fitems));
  for int1:= 0 to count -1 do begin
   tindexpersistent(fitems[int1]).findex:= int1;
+ end;
+end;
+
+function tindexpersistentarrayprop.getidentmap: integerarty;
+ var
+  int1,int2: integer;
+begin
+ int2:= -1;
+ for int1:= 0 to high(fitems) do begin
+  with tindexpersistent(fitems[int1]) do begin
+   if fident > int2 then begin
+    int2:= fident;
+   end;
+  end;
+ end;
+ setlength(result,int2+1);
+ for int2:= 0 to high(result) do begin
+  result[int2]:= -1;
+  for int1:= 0 to high(fitems) do begin
+   with tindexpersistent(fitems[int1]) do begin
+    if fident = int2 then begin
+     result[int2]:= int1;
+     break;
+    end;
+   end;
+  end;
  end;
 end;
 
