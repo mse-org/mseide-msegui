@@ -49,6 +49,7 @@ type
                         dno_norefreshrecno,
                         dno_dialogifinactive,dno_nodialogifempty,
                         dno_nodialogifnoeditmode,dno_nodialogifreadonly,
+                        dno_customdialogupdate,
                         dno_postbeforedialog,dno_postoncanclose);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
  optioneditdbty = (oed_autoedit,oed_noautoedit,oed_autopost,
@@ -2555,7 +2556,7 @@ begin
    end;
   end;
   for bu1:= low(dbnavigbuttonty) to high(dbnavigbuttonty) do begin
-   if bu1 <> dbnb_dialog then begin
+   if (bu1 <> dbnb_dialog) or not (dno_customdialogupdate in foptions) then begin
     with buttons[ord(bu1)] do begin
      if bu1 in abuttons then begin
       state:= state - [as_disabled];

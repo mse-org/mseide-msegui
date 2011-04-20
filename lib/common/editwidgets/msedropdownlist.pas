@@ -1681,7 +1681,7 @@ begin
            (eventkind = cek_firstmousepark) and
             textclipped(cell) then begin
     application.inithintinfo(hintinfo,self);
-    hintinfo.caption:= self[cell.col][cell.row];
+    hintinfo.caption:= tdropdownstringcol(self[cell.col]).getrowtext(cell.row);
     application.showhint(self,hintinfo);
     include(mouseeventinfopo^.eventstate,es_processed);
    end

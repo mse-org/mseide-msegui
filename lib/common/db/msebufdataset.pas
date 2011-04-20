@@ -641,6 +641,48 @@ type
    procedure setcurrentasid(const afield: tfield; aindex: integer;
                    const avalue: int64);
    procedure setbookmarkdata1(const avalue: bookmarkdataty);
+   function getcurrentbmisnull(const afield: tfield;
+                                  const abm: bookmarkdataty): boolean;
+   function getcurrentbmasboolean(const afield: tfield;
+                                                           const abm: bookmarkdataty): boolean;
+   procedure setcurrentbmasboolean(const afield: tfield;
+                                                           const abm: bookmarkdataty;
+                   const avalue: boolean);
+   function getcurrentbmasinteger(const afield: tfield;
+                                     const abm: bookmarkdataty): integer;
+   procedure setcurrentbmasinteger(const afield: tfield;
+                                     const abm: bookmarkdataty;
+                   const avalue: integer);
+   function getcurrentbmaslargeint(const afield: tfield;
+                                     const abm: bookmarkdataty): int64;
+   procedure setcurrentbmaslargeint(const afield: tfield;
+                                     const abm: bookmarkdataty;
+                   const avalue: int64);
+   function getcurrentbmasid(const afield: tfield;
+                                     const abm: bookmarkdataty): int64;
+   procedure setcurrentbmasid(const afield: tfield;
+                                     const abm: bookmarkdataty;
+                   const avalue: int64);
+   function getcurrentbmasfloat(const afield: tfield;
+                                     const abm: bookmarkdataty): double;
+   procedure setcurrentbmasfloat(const afield: tfield;
+                                     const abm: bookmarkdataty;
+                   const avalue: double);
+   function getcurrentbmasdatetime(const afield: tfield;
+                                     const abm: bookmarkdataty): tdatetime;
+   procedure setcurrentbmasdatetime(const afield: tfield;
+                                     const abm: bookmarkdataty;
+                   const avalue: tdatetime);
+   function getcurrentbmascurrency(const afield: tfield;
+                                     const abm: bookmarkdataty): currency;
+   procedure setcurrentbmascurrency(const afield: tfield;
+                                     const abm: bookmarkdataty;
+                   const avalue: currency);
+   function getcurrentbmasmsestring(const afield: tfield;
+                                     const abm: bookmarkdataty): msestring;
+   procedure setcurrentbmasmsestring(const afield: tfield;
+                                     const abm: bookmarkdataty;
+                   const avalue: msestring);
   protected
    fcontroller: tdscontroller;
    fbrecordcount: integer;
@@ -660,7 +702,7 @@ type
    ffreedblobcount: integer;
    fcurrentbuf: pintrecordty;
    fcurrentupdating: integer;
-   flastcurrentrec: pintrecordty;
+//   flastcurrentrec: pintrecordty;
    flastcurrentindex: integer;
 
    procedure fixupcurrentset; virtual;
@@ -669,12 +711,22 @@ type
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
 
+   function getcurrentpo(const afield: tfield;
+        const afieldtype: tfieldtype; const arecord: precheaderty): pointer;
    function beforecurrentget(const afield: tfield;
               const afieldtype: tfieldtype; var aindex: integer): pointer;
+   function beforecurrentbmget(const afield: tfield;
+              const afieldtype: tfieldtype; const abm: bookmarkdataty): pointer;
+   function setcurrentpo(const afield: tfield;
+              const afieldtype: tfieldtype; const arecord: precheaderty;
+              const isnull: boolean; out changed: boolean): pointer;
    function beforecurrentset(const afield: tfield;
               const afieldtype: tfieldtype; var aindex: integer;
               const isnull: boolean; out changed: boolean): pointer;
    procedure aftercurrentset(const afield: tfield); virtual;
+   function beforecurrentbmset(const afield: tfield;
+              const afieldtype: tfieldtype; const abm: bookmarkdataty;
+              const isnull: boolean; out changed: boolean): pointer;
    
    function getfieldbuffer(const afield: tfield;
              out buffer: pointer; out datasize: integer): boolean; overload; 
@@ -864,6 +916,12 @@ type
           //keyindex must be unique, copies equally named visible fields,
           //inserts record if key not found.   
 
+   procedure copyfieldvalues(const bm: bookmarkdataty; const dest: tdataset);
+                        //copies field values with same name
+   procedure copyfieldvalues(const bm: bookmarkdataty;
+                const dest: tmsebufdataset; const acancelupdate: boolean);
+                        //copies field values with same name
+
    function isutf8: boolean; virtual;
    procedure bindfields(const bind: boolean);
    procedure fieldtoparam(const source: tfield; const dest: tparam);
@@ -923,7 +981,7 @@ type
    function currentrecordhigh: integer; //calls checkbrowsemode
 
        //calls checkbrowsemode, writing for fkInternalCalc only, 
-       //aindex -1 -> current record
+       //aindex = -1 -> current record
    procedure currentclear(const afield: tfield; aindex: integer);
    property currentisnull[const afield: tfield; aindex: integer]: boolean read
                  getcurrentisnull;
@@ -943,9 +1001,37 @@ type
                   read getcurrentascurrency write setcurrentascurrency;
    property currentasmsestring[const afield: tfield; aindex: integer]: msestring
                   read getcurrentasmsestring write setcurrentasmsestring;
+
+   procedure currentbmclear(const afield: tfield; const abm: bookmarkdataty);
+   property currentbmisnull[const afield: tfield;
+               const abm: bookmarkdataty]: boolean read getcurrentbmisnull;
+   property currentbmasboolean[const afield: tfield;
+                                        const abm: bookmarkdataty]: boolean
+                  read getcurrentbmasboolean write setcurrentbmasboolean;
+   property currentbmasinteger[const afield: tfield;
+                  const abm: bookmarkdataty]: integer
+                  read getcurrentbmasinteger write setcurrentbmasinteger;
+   property currentbmaslargeint[const afield: tfield;
+                  const abm: bookmarkdataty]: int64
+                  read getcurrentbmaslargeint write setcurrentbmaslargeint;
+   property currentbmasid[const afield: tfield;
+                  const abm: bookmarkdataty]: int64
+                  read getcurrentbmasid write setcurrentbmasid; //-1 for null
+   property currentbmasfloat[const afield: tfield;
+                  const abm: bookmarkdataty]: double
+                  read getcurrentbmasfloat write setcurrentbmasfloat;
+   property currentbmasdatetime[const afield: tfield;
+                  const abm: bookmarkdataty]: tdatetime
+                  read getcurrentbmasdatetime write setcurrentbmasdatetime;
+   property currentbmascurrency[const afield: tfield;
+                  const abm: bookmarkdataty]: currency
+                  read getcurrentbmascurrency write setcurrentbmascurrency;
+   property currentbmasmsestring[const afield: tfield;
+                  const abm: bookmarkdataty]: msestring
+                  read getcurrentbmasmsestring write setcurrentbmasmsestring;
+
+
    procedure getcoldata(const afield: tfield; const adatalist: tdatalist);
-   procedure copyfieldvalues(const bm: bookmarkdataty; const dest: tdataset);
-                        //copies field values with same name
    
   published
    property logfilename: filenamety read flogfilename write flogfilename;
@@ -5723,6 +5809,26 @@ begin
  end;
 end;
 
+function tmsebufdataset.getcurrentpo(const afield: tfield;
+        const afieldtype: tfieldtype; const arecord: precheaderty): pointer;
+var
+ int1: integer;
+begin
+ int1:= afield.fieldno-1;
+ if not getfieldflag(arecord^.fielddata.nullmask,int1) then begin 
+  result:= nil;
+ end
+ else begin
+  with ffieldinfos[int1] do begin
+   if (afieldtype <> ftunknown) and 
+        not (ext.basetype in fieldcompatibility[afieldtype]) then begin
+    raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
+   end;   
+   result:= pointer(arecord) + base.offset;
+  end;
+ end;
+end;
+
 function tmsebufdataset.beforecurrentget(const afield: tfield;
               const afieldtype: tfieldtype; var aindex: integer): pointer;
 var
@@ -5745,6 +5851,8 @@ begin
   raise ecurrentvalueaccess.create(self,afield,
                              'Invalid index '+inttostr(aindex)+'.');  
  end; 
+ result:= getcurrentpo(afield,afieldtype,factindexpo^.ind[aindex]);
+ {
  po1:= factindexpo^.ind[aindex]; //precheaderty
  int1:= afield.fieldno-1;
  if not getfieldflag(@precheaderty(po1)^.fielddata.nullmask,int1) then begin 
@@ -5759,14 +5867,54 @@ begin
    result:= po1 + base.offset;
   end;
  end;
+ }
+end;
+
+function tmsebufdataset.beforecurrentbmget(const afield: tfield;
+              const afieldtype: tfieldtype; const abm: bookmarkdataty): pointer;
+begin
+ currentcheckbrowsemode;
+ if afield.dataset <> self then begin
+  raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
+ end;
+ if afield.index < 0 then begin
+  raise ecurrentvalueaccess.create(self,afield,
+                                           'Field can not be be fkCalculated.');
+ end;
+ result:= getcurrentpo(afield,afieldtype,@abm.recordpo^.header);
+end;
+
+function tmsebufdataset.setcurrentpo(const afield: tfield;
+              const afieldtype: tfieldtype; const arecord: precheaderty;
+              const isnull: boolean; out changed: boolean): pointer;
+var
+ po1: pbyte;
+ int1: integer;
+begin
+// flastcurrentrec:= pointer(arecord) - sizeof(intrecordty.intheader);
+ po1:= arecord^.fielddata.nullmask;
+ int1:= afield.fieldno-1;
+ with ffieldinfos[int1] do begin
+  if (afieldtype <> ftunknown) and 
+           not (ext.basetype in fieldcompatibility[afieldtype]) then begin
+   raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
+  end;   
+  changed:= not getfieldflag(po1,int1) xor isnull;
+  if changed then begin
+   if isnull then begin
+    clearfieldflag(po1,int1);
+   end
+   else begin
+    setfieldflag(po1,int1);
+   end;
+  end;
+  result:= pointer(arecord) + base.offset;
+ end;
 end;
 
 function tmsebufdataset.beforecurrentset(const afield: tfield;
               const afieldtype: tfieldtype; var aindex: integer;
               const isnull: boolean; out changed: boolean): pointer;
-var
- po1: pbyte;
- int1: integer;
 begin
  currentcheckbrowsemode;
  if afield.dataset <> self then begin
@@ -5783,6 +5931,10 @@ begin
   raise ecurrentvalueaccess.create(self,afield,
                              'Invalid index '+inttostr(aindex)+'.');  
  end; 
+ flastcurrentindex:= aindex;
+ result:= setcurrentpo(afield,afieldtype,factindexpo^.ind[aindex],
+                                                      isnull,changed);
+ {
  flastcurrentrec:= factindexpo^.ind[aindex]; //precheaderty
  flastcurrentindex:= aindex;
  po1:= @flastcurrentrec^.header.fielddata.nullmask;
@@ -5803,6 +5955,22 @@ begin
   end;
   result:= pointer(@flastcurrentrec^.header) + base.offset;
  end;
+ }
+end;
+
+function tmsebufdataset.beforecurrentbmset(const afield: tfield;
+              const afieldtype: tfieldtype; const abm: bookmarkdataty;
+              const isnull: boolean; out changed: boolean): pointer;
+begin
+ currentcheckbrowsemode;
+ if afield.dataset <> self then begin
+  raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
+ end;
+ if (afield.fieldkind <> fkinternalcalc) then begin
+  raise ecurrentvalueaccess.create(self,afield,'Field must be fkInternalCalc.');
+ end;
+ flastcurrentindex:= -1;
+ result:= setcurrentpo(afield,afieldtype,@abm.recordpo^.header,isnull,changed);
 end;
 
 procedure tmsebufdataset.aftercurrentset(const afield: tfield);
@@ -5825,11 +5993,28 @@ begin
  result:= beforecurrentget(afield,ftunknown,aindex) = nil;
 end;
 
+function tmsebufdataset.getcurrentbmisnull(const afield: tfield;
+               const abm: bookmarkdataty): boolean;
+begin
+ result:= beforecurrentbmget(afield,ftunknown,abm) = nil;
+end;
+
 procedure tmsebufdataset.currentclear(const afield: tfield; aindex: integer);
 var
  bo1: boolean;
 begin
  beforecurrentset(afield,ftunknown,aindex,true,bo1);
+ if bo1 then begin
+  aftercurrentset(afield);
+ end;
+end;
+
+procedure tmsebufdataset.currentbmclear(const afield: tfield;
+               const abm: bookmarkdataty);
+var
+ bo1: boolean;
+begin
+ beforecurrentbmset(afield,ftunknown,abm,true,bo1);
  if bo1 then begin
   aftercurrentset(afield);
  end;
@@ -5841,6 +6026,20 @@ var
  po1: pdouble;
 begin
  po1:= beforecurrentget(afield,ftfloat,aindex);
+ if po1 = nil then begin
+  result:= emptyreal;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+function tmsebufdataset.getcurrentbmasfloat(const afield: tfield;
+               const abm: bookmarkdataty): double;
+var
+ po1: pdouble;
+begin
+ po1:= beforecurrentbmget(afield,ftfloat,abm);
  if po1 = nil then begin
   result:= emptyreal;
  end
@@ -5862,12 +6061,39 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.setcurrentbmasfloat(const afield: tfield;
+               const abm: bookmarkdataty; const avalue: double);
+var
+ po1: pdouble;
+ bo1: boolean;
+begin
+ po1:= beforecurrentbmset(afield,ftfloat,abm,isemptyreal(avalue),bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield);
+ end;
+end;
+
 function tmsebufdataset.getcurrentasboolean(const afield: tfield;
                aindex: integer): boolean;
 var
  po1: plongbool;
 begin
  po1:= beforecurrentget(afield,ftboolean,aindex);
+ if po1 = nil then begin
+  result:= false;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+function tmsebufdataset.getcurrentbmasboolean(const afield: tfield;
+               const abm: bookmarkdataty): boolean;
+var
+ po1: plongbool;
+begin
+ po1:= beforecurrentbmget(afield,ftboolean,abm);
  if po1 = nil then begin
   result:= false;
  end
@@ -5889,12 +6115,39 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.setcurrentbmasboolean(const afield: tfield;
+               const abm: bookmarkdataty; const avalue: boolean);
+var
+ po1: plongbool;
+ bo1: boolean;
+begin
+ po1:= beforecurrentbmset(afield,ftboolean,abm,false,bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield);
+ end;
+end;
+
 function tmsebufdataset.getcurrentasinteger(const afield: tfield;
                aindex: integer): integer;
 var
  po1: pinteger;
 begin
  po1:= beforecurrentget(afield,ftinteger,aindex);
+ if po1 = nil then begin
+  result:= 0;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+function tmsebufdataset.getcurrentbmasinteger(const afield: tfield;
+               const abm: bookmarkdataty): integer;
+var
+ po1: pinteger;
+begin
+ po1:= beforecurrentbmget(afield,ftinteger,abm);
  if po1 = nil then begin
   result:= 0;
  end
@@ -5916,12 +6169,39 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.setcurrentbmasinteger(const afield: tfield;
+               const abm: bookmarkdataty; const avalue: integer);
+var
+ po1: pinteger;
+ bo1: boolean;
+begin
+ po1:= beforecurrentbmset(afield,ftinteger,abm,false,bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield);
+ end;
+end;
+
 function tmsebufdataset.getcurrentaslargeint(const afield: tfield;
                aindex: integer): int64;
 var
  po1: pint64;
 begin
  po1:= beforecurrentget(afield,ftlargeint,aindex);
+ if po1 = nil then begin
+  result:= 0;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+function tmsebufdataset.getcurrentbmaslargeint(const afield: tfield;
+               const abm: bookmarkdataty): int64;
+var
+ po1: pint64;
+begin
+ po1:= beforecurrentbmget(afield,ftlargeint,abm);
  if po1 = nil then begin
   result:= 0;
  end
@@ -5943,12 +6223,39 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.setcurrentbmaslargeint(const afield: tfield;
+               const abm: bookmarkdataty; const avalue: int64);
+var
+ po1: pint64;
+ bo1: boolean;
+begin
+ po1:= beforecurrentbmset(afield,ftlargeint,abm,false,bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield);
+ end;
+end;
+
 function tmsebufdataset.getcurrentasid(const afield: tfield;
                aindex: integer): int64;
 var
  po1: pint64;
 begin
  po1:= beforecurrentget(afield,ftlargeint,aindex);
+ if po1 = nil then begin
+  result:= -1;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+function tmsebufdataset.getcurrentbmasid(const afield: tfield;
+               const abm: bookmarkdataty): int64;
+var
+ po1: pint64;
+begin
+ po1:= beforecurrentbmget(afield,ftlargeint,abm);
  if po1 = nil then begin
   result:= -1;
  end
@@ -5970,6 +6277,18 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.setcurrentbmasid(const afield: tfield;
+               const abm: bookmarkdataty; const avalue: int64);
+var
+ po1: pint64;
+ bo1: boolean;
+begin
+ po1:= beforecurrentbmset(afield,ftlargeint,abm,avalue = -1,bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield);
+ end;
+end;
 
 function tmsebufdataset.getcurrentasdatetime(const afield: tfield;
                aindex: integer): tdatetime;
@@ -5977,6 +6296,20 @@ var
  po1: pdatetime;
 begin
  po1:= beforecurrentget(afield,ftdatetime,aindex);
+ if po1 = nil then begin
+  result:= emptydatetime;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+function tmsebufdataset.getcurrentbmasdatetime(const afield: tfield;
+               const abm: bookmarkdataty): tdatetime;
+var
+ po1: pdatetime;
+begin
+ po1:= beforecurrentbmget(afield,ftdatetime,abm);
  if po1 = nil then begin
   result:= emptydatetime;
  end
@@ -5998,12 +6331,39 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.setcurrentbmasdatetime(const afield: tfield;
+               const abm: bookmarkdataty; const avalue: tdatetime);
+var
+ po1: pdouble;
+ bo1: boolean;
+begin
+ po1:= beforecurrentbmset(afield,ftdatetime,abm,isemptydatetime(avalue),bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield);
+ end;
+end;
+
 function tmsebufdataset.getcurrentascurrency(const afield: tfield;
                aindex: integer): currency;
 var
  po1: pcurrency;
 begin
  po1:= beforecurrentget(afield,ftbcd,aindex);
+ if po1 = nil then begin
+  result:= 0;
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+function tmsebufdataset.getcurrentbmascurrency(const afield: tfield;
+               const abm: bookmarkdataty): currency;
+var
+ po1: pcurrency;
+begin
+ po1:= beforecurrentbmget(afield,ftbcd,abm);
  if po1 = nil then begin
   result:= 0;
  end
@@ -6025,12 +6385,39 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.setcurrentbmascurrency(const afield: tfield;
+               const abm: bookmarkdataty; const avalue: currency);
+var
+ po1: pcurrency;
+ bo1: boolean;
+begin
+ po1:= beforecurrentbmset(afield,ftbcd,abm,false,bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield);
+ end;
+end;
+
 function tmsebufdataset.getcurrentasmsestring(const afield: tfield;
                aindex: integer): msestring;
 var
  po1: pmsestring;
 begin
  po1:= beforecurrentget(afield,ftwidestring,aindex);
+ if po1 = nil then begin
+  result:= '';
+ end
+ else begin
+  result:= po1^;
+ end;
+end;
+
+function tmsebufdataset.getcurrentbmasmsestring(const afield: tfield;
+               const abm: bookmarkdataty): msestring;
+var
+ po1: pmsestring;
+begin
+ po1:= beforecurrentbmget(afield,ftwidestring,abm);
  if po1 = nil then begin
   result:= '';
  end
@@ -6051,12 +6438,20 @@ begin
   aftercurrentset(afield);
  end;
 end;
-{
-dl_none,dl_integer,dl_int64,dl_currency,
-    dl_real,dl_realint,dl_realsum,
-    dl_datetime,
-    dl_ansistring,dl_msestring,dl_doublemsestring,dl_msestringint,
-    }
+
+procedure tmsebufdataset.setcurrentbmasmsestring(const afield: tfield;
+               const abm: bookmarkdataty; const avalue: msestring);
+var
+ po1: pmsestring;
+ bo1: boolean;
+begin
+ po1:= beforecurrentbmset(afield,ftwidestring,abm,false,bo1);
+ if bo1 or (po1^ <> avalue) then begin
+  po1^:= avalue;
+  aftercurrentset(afield);
+ end;
+end;
+
 procedure tmsebufdataset.getcoldata(const afield: tfield;
                const adatalist: tdatalist);
 var
@@ -6163,6 +6558,12 @@ end;
   end;
  end;
 }
+function tmsebufdataset.currentrecordhigh: integer;
+begin
+ currentcheckbrowsemode;
+ result:= fbrecordcount - 1;
+end;
+
 procedure tmsebufdataset.copyfieldvalues(const bm: bookmarkdataty;
                                                     const dest: tdataset);
                         //copies field values with same name
@@ -6233,10 +6634,39 @@ begin
  end;
 end;
 
-function tmsebufdataset.currentrecordhigh: integer;
+procedure tmsebufdataset.copyfieldvalues(const bm: bookmarkdataty;
+               const dest: tmsebufdataset; const acancelupdate: boolean);
+var
+ bo1: boolean;
 begin
- currentcheckbrowsemode;
- result:= fbrecordcount - 1;
+ with dest do begin
+  if not self.active or not active or fcontroller.posting1 then begin
+   exit;
+  end;
+  bo1:= state = dsbrowse;
+  disablecontrols;
+  try
+   edit;
+   self.copyfieldvalues(bm,dest);
+   if acancelupdate then begin
+    include(fbstate,bs_noautoapply);
+    post;
+    cancelupdate(true);
+   end
+   else begin
+    if bo1 then begin
+     post;
+    end;
+   end;
+  finally
+   exclude(fbstate,bs_noautoapply);
+   enablecontrols;
+   if bo1 or acancelupdate then begin
+    dataevent(dedatasetchange,0);
+    dataevent(tdataevent(de_modified),0);
+   end;
+  end;
+ end;
 end;
 
 procedure tmsebufdataset.refreshrecord(const asourcevalues: array of variant;
@@ -6425,6 +6855,7 @@ procedure tmsebufdataset.setbookmarkdata1(const avalue: bookmarkdataty);
 begin
  gotobookmark(@avalue);
 end;
+
 
 { tlocalindexes }
 

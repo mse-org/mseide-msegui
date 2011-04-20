@@ -15356,7 +15356,8 @@ begin
   acellrect:= clippedcellrect(acell,cil_inner);
   canvas1:= getcanvas;
   with datacols[acell.col] do begin
-   rect2:= textrect(canvas1,items[acell.row],acellrect,textflags,font);
+//   rect2:= textrect(canvas1,items[acell.row],acellrect,textflags,font);
+   rect2:= textrect(canvas1,getrowtext(acell.row),acellrect,textflags,font);
   end;
   result:= not rectinrect(rect2,acellrect);
  end

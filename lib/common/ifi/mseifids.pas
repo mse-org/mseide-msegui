@@ -2945,11 +2945,13 @@ end;
 procedure ttxsqlquery.aftercurrentset(const afield: tfield);
 begin
  inherited;
- if fcurrentupdating = 0 then begin
-  currentrecordupdated(flastcurrentindex);
- end
- else begin
-  fcurrentchanged.fieldchanged(afield,flastcurrentindex);
+ if flastcurrentindex >= 0 then begin
+  if fcurrentupdating = 0 then begin
+   currentrecordupdated(flastcurrentindex);
+  end
+  else begin
+   fcurrentchanged.fieldchanged(afield,flastcurrentindex);
+  end;
  end;
 end;
 
