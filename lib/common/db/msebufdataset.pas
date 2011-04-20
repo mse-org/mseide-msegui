@@ -831,30 +831,36 @@ type
 
    procedure refreshrecord(const akeyfield: array of tfield;
               const keyindex: integer = 0;
-              const acancelupdate: boolean = true); overload;
+              const acancelupdate: boolean = true;
+              const restorerecno: boolean = true); overload;
    procedure refreshrecord(const sourcedatasets: array of tdataset;
               const akeyvalue: array of variant;
               const keyindex: integer = 0;
-              const acancelupdate: boolean = true); overload;
+              const acancelupdate: boolean = true;
+              const restorerecno: boolean = true); overload;
    procedure refreshrecord(const asourcefields: array of tfield;
               const akeyfield: array of tfield;
               const keyindex: integer = 0;
-              const acancelupdate: boolean = true); overload;
+              const acancelupdate: boolean = true;
+              const restorerecno: boolean = true); overload;
    procedure refreshrecord(const asourcefields: array of tfield;
               const adestfields: array of tfield;
               const akeyfield: array of tfield;
               const keyindex: integer = 0;
-              const acancelupdate: boolean = true); overload;
+              const acancelupdate: boolean = true;
+              const restorerecno: boolean = true); overload;
    procedure refreshrecord(const asourcefields: array of tfield;
               const adestfields: array of tfield;
               const akeyvalue: array of variant;
               const keyindex: integer = 0;
-              const acancelupdate: boolean = true); overload;
+              const acancelupdate: boolean = true;
+              const restorerecno: boolean = true); overload;
    procedure refreshrecord(const asourcevalues: array of variant;
               const adestfields: array of tfield;
               const akeyvalue: array of variant;
               const keyindex: integer = 0;
-              const acancelupdate: boolean = true); overload;
+              const acancelupdate: boolean = true;
+              const restorerecno: boolean = true); overload;
           //keyindex must be unique, copies equally named visible fields,
           //inserts record if key not found.   
 
@@ -3013,7 +3019,7 @@ begin
    checkrevert;
   finally
    exclude(fbstate,bs_recapplying);
-   if bs_curvaluemodified in fbstate then begin
+   if (bs_curvaluemodified in fbstate) and (updatekind <> ukdelete) then begin
     include(fbstate1,bs1_needsresync);
     finalizevalues(origpo^.header);
     move(fnewvaluebuffer^.header,origpo^.header,frecordsize);
@@ -6236,7 +6242,8 @@ end;
 procedure tmsebufdataset.refreshrecord(const asourcevalues: array of variant;
               const adestfields: array of tfield;
               const akeyvalue: array of variant; const keyindex: integer = 0;
-              const acancelupdate: boolean = true);
+              const acancelupdate: boolean = true;
+              const restorerecno: boolean = true);
 var
  bm1,bm2: string;
  int1: integer;
@@ -6249,12 +6256,17 @@ begin
  disablecontrols;
  bm2:= bookmark;
  try
-  if indexlocal[keyindex].findvariant(akeyvalue,bm1) then begin
-   bookmark:= bm1;
+  if keyindex < 0 then begin
    edit;
   end
   else begin
-   insert;
+   if indexlocal[keyindex].findvariant(akeyvalue,bm1) then begin
+    bookmark:= bm1;
+    edit;
+   end
+   else begin
+    insert;
+   end;
   end;
   for int1:= 0 to high(asourcevalues) do begin
    if int1 > high(adestfields) then begin
@@ -6272,7 +6284,9 @@ begin
   end;
  finally
   exclude(fbstate,bs_noautoapply);
-  bookmark:= bm2;
+  if restorerecno and (keyindex >= 0) then begin
+   bookmark:= bm2;
+  end;
   enablecontrols;
   dataevent(dedatasetchange,0);
   dataevent(tdataevent(de_modified),0);
@@ -6282,23 +6296,27 @@ end;
 procedure tmsebufdataset.refreshrecord(const asourcefields: array of tfield;
               const adestfields: array of tfield;
               const akeyfield: array of tfield; const keyindex: integer = 0;
-              const acancelupdate: boolean = true);
+              const acancelupdate: boolean = true;
+              const restorerecno: boolean = true);
 begin
  refreshrecord(fieldvariants(asourcefields),adestfields,
-               fieldvariants(akeyfield),keyindex,acancelupdate);
+               fieldvariants(akeyfield),keyindex,acancelupdate,restorerecno);
 end;
 
 procedure tmsebufdataset.refreshrecord(const asourcefields: array of tfield;
               const adestfields: array of tfield;
               const akeyvalue: array of variant; const keyindex: integer = 0;
-              const acancelupdate: boolean = true);
+              const acancelupdate: boolean = true;
+              const restorerecno: boolean = true);
 begin
- refreshrecord(fieldvariants(asourcefields),adestfields,akeyvalue,keyindex,acancelupdate);
+ refreshrecord(fieldvariants(asourcefields),adestfields,akeyvalue,keyindex,
+                  acancelupdate,restorerecno);
 end;
 
 procedure tmsebufdataset.refreshrecord(const asourcefields: array of tfield;
               const akeyfield: array of tfield; const keyindex: integer = 0;
-              const acancelupdate: boolean = true);
+              const acancelupdate: boolean = true;
+              const restorerecno: boolean = true);
 var
  int1: integer;
  ar1: fieldarty;
@@ -6307,7 +6325,8 @@ begin
  for int1:= 0 to high(asourcefields) do begin
   ar1[int1]:= fieldbyname(asourcefields[int1].fieldname);
  end;
- refreshrecord(asourcefields,ar1,akeyfield,keyindex,acancelupdate);
+ refreshrecord(asourcefields,ar1,akeyfield,keyindex,
+                       acancelupdate,restorerecno);
 end;
 {
 procedure tmsebufdataset.refreshrecord(const akeyfield: tfield;
@@ -6341,7 +6360,8 @@ end;
 procedure tmsebufdataset.refreshrecord(const sourcedatasets: array of tdataset;
               const akeyvalue: array of variant;
               const keyindex: integer = 0;
-              const acancelupdate: boolean = true);
+              const acancelupdate: boolean = true;
+              const restorerecno: boolean = true);
 var
  int1,int2,int3: integer;
  field1,field2: tfield;
@@ -6367,14 +6387,15 @@ begin
  end;
  setlength(sf,int2);
  setlength(df,int2);
- refreshrecord(sf,df,akeyvalue,keyindex,acancelupdate);
+ refreshrecord(sf,df,akeyvalue,keyindex,acancelupdate,restorerecno);
 end;
 
 procedure tmsebufdataset.refreshrecord(const akeyfield: array of tfield;
-          const keyindex: integer = 0; const acancelupdate: boolean = true);
+          const keyindex: integer = 0; const acancelupdate: boolean = true;
+          const restorerecno: boolean = true);
 begin
  refreshrecord([akeyfield[0].dataset],fieldvariants(akeyfield),keyindex,
-                                                               acancelupdate);
+                                  acancelupdate,restorerecno);
 end;
 
 function tmsebufdataset.updatesortfield(const afield: tfield;

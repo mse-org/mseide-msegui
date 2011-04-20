@@ -170,6 +170,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
+   procedure doupdate;
 
    property bounds_cx default defaultbuttonwidth;
    property bounds_cy default defaultbuttonheight;
@@ -1285,6 +1286,13 @@ end;
 procedure tcustombutton.setshortcuts1(const avalue: shortcutarty);
 begin
  setactionshortcuts1(iactionlink(self),avalue);
+end;
+
+procedure tcustombutton.doupdate;
+begin
+ if factioninfo.action <> nil then begin
+  factioninfo.action.doupdate;
+ end;
 end;
 
 { tcustomrichbutton }

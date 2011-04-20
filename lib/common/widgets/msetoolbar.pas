@@ -26,7 +26,7 @@ type
  ttoolbutton = class(tindexpersistent,iactionlink,iimagelistinfo)
   private
    finfo: actioninfoty;
-   fonupdate: actioneventty;
+//   fonupdate: actioneventty;
    procedure setaction(const Value: tcustomaction);
    procedure setimagenr(const Value: imagenrty);
    procedure setimagenrdisabled(const Value: imagenrty);
@@ -91,6 +91,8 @@ type
    constructor create(aowner: tcustomtoolbar); reintroduce; overload;
    function toolbar: tcustomtoolbar;
    function index: integer;
+   procedure execute;
+   procedure doupdate;
    property checked: boolean read getchecked write setchecked;
    property visible: boolean read getvisible write setvisible default true;
    property enabled: boolean read getenabled write setenabled default true;
@@ -127,7 +129,7 @@ type
                                stored isonexecutestored;
    property onbeforeexecute: accepteventty read finfo.onbeforeexecute
                    write setonbeforeexecute stored isonbeforeexecutestored;
-   property onupdate: actioneventty read fonupdate write fonupdate;
+//   property onupdate: actioneventty read fonupdate write fonupdate;
  end;
  ptoolbutton = ^ttoolbutton;
 
@@ -172,6 +174,7 @@ type
    destructor destroy; override;
    class function getitemclasstype: persistentclassty; override;
    procedure createface;
+   procedure doupdate;
    procedure resetradioitems(const group: integer);
    function getcheckedradioitem(const group: integer): ttoolbutton;
    function add: ttoolbutton;
@@ -535,6 +538,11 @@ begin
  end;
 end;
 
+procedure ttoolbutton.execute;
+begin
+ doexecute(-1,pmouseeventinfoty(nil)^);
+end;
+
 procedure ttoolbutton.setoptions(const Value: menuactionoptionsty);
 begin
  if finfo.options <> value then begin
@@ -628,6 +636,13 @@ end;
 procedure ttoolbutton.setshortcuts1(const avalue: shortcutarty);
 begin
  setactionshortcuts1(iactionlink(self),avalue);
+end;
+
+procedure ttoolbutton.doupdate;
+begin
+ if finfo.action <> nil then begin
+  finfo.action.doupdate;
+ end;
 end;
 
 { ttoolbuttons }
@@ -817,6 +832,17 @@ end;
 class function ttoolbuttons.getbuttonclass: toolbuttonclassty;
 begin
  result:= ttoolbutton;
+end;
+
+procedure ttoolbuttons.doupdate;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  with ttoolbutton(fitems[int1]) do begin
+   doupdate;
+  end;
+ end;
 end;
 
 { tcustomtoolbar }

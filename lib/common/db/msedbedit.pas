@@ -2555,15 +2555,18 @@ begin
    end;
   end;
   for bu1:= low(dbnavigbuttonty) to high(dbnavigbuttonty) do begin
-   with buttons[ord(bu1)] do begin
-    if bu1 in abuttons then begin
-     state:= state - [as_disabled];
-    end
-    else begin
-     state:= state + [as_disabled];
+   if bu1 <> dbnb_dialog then begin
+    with buttons[ord(bu1)] do begin
+     if bu1 in abuttons then begin
+      state:= state - [as_disabled];
+     end
+     else begin
+      state:= state + [as_disabled];
+     end;
     end;
    end;
   end;
+  dialogbutton.doupdate;
  finally
   endupdate;
  end;
