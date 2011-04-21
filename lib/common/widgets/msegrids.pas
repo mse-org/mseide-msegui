@@ -980,7 +980,7 @@ type
    property captiondist: integer read finfo.captiondist write setcaptiondist
                                      default defaultshapecaptiondist;
    property imagepos: imageposty read finfo.imagepos write setimagepos 
-                                                     default ip_right;
+                                                     default ip_center;
 //   property captionpos: captionposty read finfo.captionpos write setcaptionpos 
 //                                                     default cp_left;
    property colorglyph: colorty read finfo.colorglyph
@@ -3959,7 +3959,7 @@ begin
  with finfo do begin
   imagenr:= -1;
   colorglyph:= cl_glyph;
-  imagepos:= ip_right;
+  imagepos:= ip_center;
  end;
 // finfo.textflags:= defaultcolheadertextflags;
  fcolor:= cl_parent;
