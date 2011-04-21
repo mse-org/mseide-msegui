@@ -196,7 +196,7 @@ type
    procedure recchanged;
 
                //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource;
+   function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out apropertynames: stringarty;
                            out afieldtypes: fieldtypesarty);
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
@@ -632,7 +632,7 @@ type
    function getvisigroupfield: string;
    procedure setvisigroupfield(const avalue: string);
               //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource; overload;
+   function getdataset(const aindex: integer): tdataset; overload;
    procedure getfieldtypes(out apropertynames: stringarty;
                            out afieldtypes: fieldtypesarty);
               //ireccontrol
@@ -1999,9 +1999,9 @@ begin
  fdatalink.fieldname:= avalue;
 end;
 
-function treptabulatoritem.getdatasource(const aindex: integer): tdatasource;
+function treptabulatoritem.getdataset(const aindex: integer): tdataset;
 begin
- result:= datasource;
+ result:= fdatalink.dataset;
 end;
 
 procedure treptabulatoritem.getfieldtypes(out apropertynames: stringarty;
@@ -4328,9 +4328,9 @@ begin
  fvisidatalink.fieldname:= avalue;
 end;
 
-function tcustomrecordband.getdatasource(const aindex: integer): tdatasource;
+function tcustomrecordband.getdataset(const aindex: integer): tdataset;
 begin
- result:= fvisidatalink.datasource;
+ result:= fvisidatalink.dataset;
 end;
 
 procedure tcustomrecordband.getfieldtypes(out apropertynames: stringarty;

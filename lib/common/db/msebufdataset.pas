@@ -405,7 +405,7 @@ type
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false): boolean; overload;
                 //sets dataset cursor if found
-   function findvariant(const avalue: variant;
+   function findvariant(const avalue: array of variant;
                const abigger: boolean = false;
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false): boolean; overload;
@@ -7686,10 +7686,10 @@ begin
        ar3[int1]:= avalue[int1];
        vextended:= @ar3[int1];
       end;
-      varstring: begin
+      varstring,varolestr: begin
        vtype:= vtwidestring;
        ar2[int1]:= avalue[int1];
-       vwidestring:= @ar2[int1];
+       vwidestring:= pointer(ar2[int1]);
       end
       else begin
        paramerror;
@@ -7702,7 +7702,7 @@ begin
  result:= find(ar1,[],abigger,partialstring,nocheckbrowsemode);
 end;
 
-function tlocalindex.findvariant(const avalue: variant;
+function tlocalindex.findvariant(const avalue: array of variant;
                const abigger: boolean = false;
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false): boolean; overload;

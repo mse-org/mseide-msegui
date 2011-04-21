@@ -21,7 +21,7 @@ type
   protected
    fintf: idbdispfieldlink;
    procedure activechanged; override;
-   function getdatasource(const aindex: integer): tdatasource;
+   function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out apropertynames: stringarty; 
                                      out afieldtypes: fieldtypesarty);
   public
@@ -298,9 +298,9 @@ begin
                //move values to datalink
 end;
 
-function tdispfielddatalink.getdatasource(const aindex: integer): tdatasource;
+function tdispfielddatalink.getdataset(const aindex: integer): tdataset;
 begin
- result:= datasource;
+ result:= dataset;
 end;
 
 procedure tdispfielddatalink.getfieldtypes(out apropertynames: stringarty;

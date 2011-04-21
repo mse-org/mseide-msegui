@@ -351,6 +351,8 @@ begin
         tdbfieldnamenocalcpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldlink,'destdatafield',
         tdbfieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(string),tslavefield,'destfieldname',
+        tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldparamlink,'fieldname',
         tdbfieldnamenocalcpropertyeditor);
  registerpropertyeditor(typeinfo(string),nil,'keyfield',
@@ -470,7 +472,6 @@ end;
 
 function tdbfieldnamepropertyeditor.getdefaultstate: propertystatesty;
 var
- datasource1: tdatasource;
  obj1: tobject;
  ar1: stringarty;
  ar2: fieldtypesarty;
@@ -497,8 +498,7 @@ begin
     break;
    end;
   end;
-  datasource1:= fdbeditinfointf.getdatasource(int2);
-  if (datasource1 <> nil) and (datasource1.dataset <> nil) then begin
+  if fdbeditinfointf.getdataset(int2) <> nil then begin
    result:= result + [ps_valuelist,ps_sortlist];
   end;
  end;
@@ -511,7 +511,6 @@ var
  ft: fieldtypesty;
  int1,int2: integer;
  ds: tdataset;
- dataso: tdatasource;
  
 begin
  result:= nil;
@@ -532,13 +531,7 @@ begin
   else begin
    ft:= [];
   end;
-  dataso:= fdbeditinfointf.getdatasource(int2);
-  if dataso <> nil then begin
-   ds:= dataso.dataset;
-  end
-  else begin
-   ds:= nil;
-  end;
+  ds:= fdbeditinfointf.getdataset(int2);
   if ds <> nil then begin
    if ds.active or (ds.fields.count > 0) then begin
     for int1:= 0 to ds.fields.count -1 do begin

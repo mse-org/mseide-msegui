@@ -269,7 +269,7 @@ type
    procedure objevent(const sender: iobjectlink; const event: objecteventty);
    function getinstance: tobject;
     //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource;
+   function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out apropertynames: stringarty; 
                                      out afieldtypes: fieldtypesarty);
   public
@@ -1011,7 +1011,7 @@ type
    fdatafield: string;
    procedure setdatafield(const avalue: string);
   //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource;
+   function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
   published
@@ -1142,7 +1142,7 @@ type
   //ievent
    procedure receiveevent(const event: tobjectevent);
   //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource;
+   function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
    function getdatasource1: tdatasource;
@@ -1288,7 +1288,7 @@ type
    foptionsdb: optionsdbty;
    fbookmarks: stringarty;
    function getdatasource: tdatasource; overload;
-   procedure setdatasource(const avalue: tdatasource); overload;
+   procedure setdatasource(const avalue: tdatasource);
    procedure setkeyfield(const avalue: string);
    function getkeyfield: string;
    function getcols: tdbdropdowncols;
@@ -1303,7 +1303,7 @@ type
    procedure itemselected(const index: integer; const akey: keyty); override;
    procedure doafterclosedropdown; override;
   //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource; overload;
+   function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
   public
@@ -1584,7 +1584,7 @@ type
   //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
-   function getdatasource(const aindex: integer): tdatasource;
+   function getdataset(const aindex: integer): tdataset;
    function getoptionsdb: optionseditdbty;
    procedure setoptionsdb(const avalue: optionseditdbty);
    function getnullsymbol: msestring;
@@ -3011,10 +3011,9 @@ begin
  fintf.updatereadonlystate;
 end;
 
-function tcustomeditwidgetdatalink.getdatasource(
-                                      const aindex: integer): tdatasource;
+function tcustomeditwidgetdatalink.getdataset(const aindex: integer): tdataset;
 begin
- result:= datasource;
+ result:= dataset;
 end;
 
 procedure tcustomeditwidgetdatalink.getfieldtypes(out apropertynames: stringarty; 
@@ -5159,10 +5158,10 @@ begin
  end;
 end;
 
-function tdbdropdowncol.getdatasource(const aindex: integer): tdatasource;
+function tdbdropdowncol.getdataset(const aindex: integer): tdataset;
 begin
  if fowner is tcustomdbdropdownlistcontroller then begin
-  result:= tcustomdbdropdownlistcontroller(fowner).datasource;
+  result:= tcustomdbdropdownlistcontroller(fowner).fdatalink.dataset;
  end
  else begin
   result:= nil;
@@ -5737,9 +5736,9 @@ begin
  end; 
 end;
 
-function tcustomdbdropdownlistcontroller.getdatasource(const aindex: integer): tdatasource;
+function tcustomdbdropdownlistcontroller.getdataset(const aindex: integer): tdataset;
 begin
- result:= datasource;
+ result:= fdatalink.dataset;
 end;
 
 procedure tcustomdbdropdownlistcontroller.setoptionsdb(const avalue: optionsdbty);
@@ -7153,9 +7152,9 @@ begin
  end;
 end;
 
-function tgriddatalink.getdatasource(const aindex: integer): tdatasource;
+function tgriddatalink.getdataset(const aindex: integer): tdataset;
 begin
- result:= datasource;
+ result:= dataset;
 end;
 
 procedure tgriddatalink.getfieldtypes(out propertynames: stringarty;
@@ -8044,9 +8043,9 @@ begin
  fieldtypes[0]:= stringfields;
 end;
 
-function tdbstringcol.getdatasource(const aindex: integer): tdatasource;
+function tdbstringcol.getdataset(const aindex: integer): tdataset;
 begin
- result:= getgriddatasource;
+ result:= tcustomdbstringgrid(fgrid).datalink.dataset;
 end;
 
 function tdbstringcol.getoptionsdb: optionseditdbty;

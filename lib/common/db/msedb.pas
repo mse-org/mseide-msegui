@@ -109,7 +109,8 @@ type
  end;
   
  idbeditinfo = interface(inullinterface)['{E63A9950-BFAE-DA11-83DF-00C0CA1308FF}']
-  function getdatasource(const aindex: integer): tdatasource;
+//  function getdatasource(const aindex: integer): tdatasource;
+  function getdataset(const aindex: integer): tdataset;
   procedure getfieldtypes(out apropertynames: stringarty;
                           out afieldtypes: fieldtypesarty);
     //propertynames = nil -> propertyname = 'datafield'
@@ -139,7 +140,7 @@ type
    fgetdatasource: getdatasourcefuncty;
   protected
    //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource;
+   function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out apropertynames: stringarty;
                           out afieldtypes: fieldtypesarty);
   public
@@ -1430,7 +1431,7 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
-   function getdatasource(const aindex: integer): tdatasource;
+   function getdataset(const aindex: integer): tdataset;
   protected
    procedure updatedata(const afield: tfield); virtual;
   public
@@ -1484,12 +1485,12 @@ type
    procedure setasvariant(const avalue: variant);
    function getasid: int64;
    procedure setasid(const avalue: int64);
-   function getdatasource: tdatasource; overload;
+   function getdatasource: tdatasource;
    procedure setdatasource(const avalue: tdatasource);
    function getfieldname: string;
    procedure setfieldname(const avalue: string);
     //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource; overload;
+   function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out apropertynames: stringarty;
                            out afieldtypes: fieldtypesarty);
    function isparamstored: boolean;
@@ -5990,9 +5991,15 @@ begin
  inherited create;
 end;
 
-function tdbfieldnamearrayprop.getdatasource(const aindex: integer): tdatasource;
+function tdbfieldnamearrayprop.getdataset(const aindex: integer): tdataset;
+var
+ dso1: tdatasource;
 begin
- result:= fgetdatasource();
+ result:= nil;
+ dso1:= fgetdatasource();
+ if dso1 <> nil then begin
+  result:= dso1.dataset;
+ end;
 end;
 
 procedure tdbfieldnamearrayprop.getfieldtypes(out apropertynames: stringarty;
@@ -7647,9 +7654,9 @@ begin
  fieldtypes:= nil;
 end;
 
-function tfieldlink.getdatasource(const aindex: integer): tdatasource;
+function tfieldlink.getdataset(const aindex: integer): tdataset;
 begin
- result:= fdestdatalink.datasource;
+ result:= fdestdatalink.dataset;
 end;
 
 procedure tfieldlink.updatedata(const afield: tfield);
@@ -8261,9 +8268,9 @@ begin
  fdatalink.fieldname:= avalue;
 end;
 
-function tmseparam.getdatasource(const aindex: integer): tdatasource;
+function tmseparam.getdataset(const aindex: integer): tdataset;
 begin
- result:= fdatalink.datasource;
+ result:= fdatalink.dataset;
 end;
 
 procedure tmseparam.getfieldtypes(out apropertynames: stringarty;
