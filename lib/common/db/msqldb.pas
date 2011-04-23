@@ -541,6 +541,7 @@ type
    function moveby(distance: longint): longint;
   protected
    
+   procedure execute; virtual; abstract;
    procedure dobeforeexecute(const adatabase: tcustomsqlconnection;
                               const atransaction: tsqltransaction);
    procedure doafterexecute(const adatabase: tcustomsqlconnection;
@@ -582,6 +583,7 @@ type
    fonbeforestatement: msesqlscripteventty;
    fonafterstatement: msesqlscripteventty;
   protected
+   procedure execute; override; overload;
   public
    procedure execute(adatabase: tcustomsqlconnection = nil;
                         atransaction: tsqltransaction = nil); overload;
@@ -607,7 +609,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure unprepare;
-   procedure execute; overload;
+   procedure execute; overload; override;
    procedure execute(const aparams: array of variant); overload;
    function rowsaffected: integer;
                   //-1 if not supported
@@ -689,8 +691,8 @@ type
 //   FUpdateQry,FDeleteQry,FInsertQry: TSQLQuery;
    fupdaterowsaffected: integer;
    fblobintf: iblobconnection;   
-   fbeforeexecute: tmsesqlscript;
-   faftercursorclose: tmsesqlscript;
+   fbeforeexecute: tcustomsqlstatement;
+   faftercursorclose: tcustomsqlstatement;
    fmasterdelayus: integer;
    procedure FreeFldBuffers;
    function GetIndexDefs : TIndexDefs;
@@ -716,8 +718,8 @@ type
    procedure setFSQLUpdate(const avalue: tsqlstringlist);
    procedure setFSQLInsert(const avalue: tsqlstringlist);
    procedure setFSQLDelete(const avalue: tsqlstringlist);
-   procedure setbeforeexecute(const avalue: tmsesqlscript);
-   procedure setaftercursorclose(const avalue: tmsesqlscript);
+   procedure setbeforeexecute(const avalue: tcustomsqlstatement);
+   procedure setaftercursorclose(const avalue: tcustomsqlstatement);
    function getsqltransaction: tsqltransaction;
    procedure setsqltransaction(const avalue: tsqltransaction);
    function getsqltransactionwrite: tsqltransaction;
@@ -821,8 +823,8 @@ type
                                                          write setFSQLInsert;
     property SQLDelete : tsqlstringlist read Fapplysql[ukdelete]
                                                          write setFSQLDelete;
-    property beforeexecute: tmsesqlscript read fbeforeexecute write setbeforeexecute;
-    property aftercursorclose: tmsesqlscript read faftercursorclose 
+    property beforeexecute: tcustomsqlstatement read fbeforeexecute write setbeforeexecute;
+    property aftercursorclose: tcustomsqlstatement read faftercursorclose 
                                                  write setaftercursorclose;
     property IndexDefs : TIndexDefs read GetIndexDefs;
     property UpdateMode : TUpdateMode read FUpdateMode write SetUpdateMode;
@@ -3099,15 +3101,13 @@ begin
   end;
   freequery;
   if not (bs_refreshing in fbstate) then begin
-//   freefldbuffers;
    database.deallocatecursorhandle(fcursor);
   end;
   exclude(fbstate,bs_connected);
-//  if aexecute then begin
    if faftercursorclose <> nil then begin
-    faftercursorclose.execute(database,tsqltransaction(transaction));
+    faftercursorclose.execute;
+//    faftercursorclose.execute(database,tsqltransaction(transaction));
    end;
-//  end;
  end;
 end;
 
@@ -3427,7 +3427,8 @@ begin
 
     if aexecute then begin
      if fbeforeexecute <> nil then begin
-      fbeforeexecute.execute(database,tsqltransaction(transaction));
+      fbeforeexecute.execute;
+//      fbeforeexecute.execute(database,tsqltransaction(transaction));
      end;
      Execute;
      if FCursor.FInitFieldDef and not (bs_refreshing in fbstate) then begin
@@ -4298,7 +4299,7 @@ begin
  fapplysql[ukdelete].assign(avalue);
 end;
 
-procedure TSQLQuery.setbeforeexecute(const avalue: tmsesqlscript);
+procedure TSQLQuery.setbeforeexecute(const avalue: tcustomsqlstatement);
 begin
  if fbeforeexecute <> nil then begin
   fbeforeexecute.removefreenotification(self);
@@ -4309,7 +4310,7 @@ begin
  end;
 end;
 
-procedure TSQLQuery.setaftercursorclose(const avalue: tmsesqlscript);
+procedure TSQLQuery.setaftercursorclose(const avalue: tcustomsqlstatement);
 begin
  if faftercursorclose <> nil then begin
   faftercursorclose.removefreenotification(self);
@@ -4863,6 +4864,11 @@ begin
   end;
   raise;
  end;
+end;
+
+procedure tmsesqlscript.execute;
+begin
+ execute(nil,nil);
 end;
 
 { tsqlstatement }

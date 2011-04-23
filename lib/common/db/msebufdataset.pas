@@ -965,6 +965,7 @@ type
    procedure applyupdate(const revertonerror: boolean); virtual; overload;
    procedure applyupdate; virtual; overload;
                    //applies current record
+   function recapplying: boolean;
    procedure cancelupdates; virtual;
    procedure cancelupdate(const norecordcancel: boolean = false); virtual; 
                    //cancels current record,
@@ -6854,6 +6855,11 @@ end;
 procedure tmsebufdataset.setbookmarkdata1(const avalue: bookmarkdataty);
 begin
  gotobookmark(@avalue);
+end;
+
+function tmsebufdataset.recapplying: boolean;
+begin
+ result:= bs_recapplying in fbstate;
 end;
 
 
