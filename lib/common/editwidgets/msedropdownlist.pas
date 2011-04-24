@@ -16,7 +16,7 @@ uses
  mseclasses,mseedit,mseevent,mseglob,mseguiglob,msegrids,msedatalist,msegui,
  mseinplaceedit,msearrayprops,classes,msegraphics,msedrawtext,msegraphutils,
  msetimer,mseforms,msetypes,msestrings,msestockobjects,msescrollbar,
- msekeyboard,msegridsglob,mseeditglob;
+ msekeyboard,msegridsglob,mseeditglob,msestat;
 
 const
  defaultdropdowncoloptions = [co_fill,co_readonly,co_focusselect,co_mousemovefocus,co_rowselect];
@@ -39,7 +39,7 @@ type
                         //edit.modified called before dropdown
                         deo_casesensitive,deo_posinsensitive,
                         deo_sorted,deo_disabled,deo_autosavehistory,
-                        deo_cliphint,deo_right);
+                        deo_cliphint,deo_right,deo_colsizing,deo_savestate);
  dropdowneditoptionsty = set of dropdowneditoptionty;
 
 const
@@ -202,6 +202,7 @@ type
    function locate(const filter: msestring): boolean; virtual;
    procedure dorepeat(const sender: tobject);
    procedure initcols(const acols: tdropdowncols); virtual;
+   procedure updatelayout; override;
   public
    constructor create(const acontroller: tcustomdropdownlistcontroller;
                              acols: tdropdowncols); reintroduce;
@@ -362,7 +363,8 @@ type
    procedure itemselected(const index: integer; const akey: keyty); virtual;
              //-2 -> no selection, -1 -> cancel
    procedure dropdownkeydown(var info: keyeventinfoty);
-
+ 
+   function getautowidth: integer;
    procedure updatedropdownbounds(var arect: rectty); override;
    procedure receiveevent(const event: tobjectevent); override;
    function createdropdownlist: tdropdownlist; virtual;
@@ -371,6 +373,8 @@ type
   public
    constructor create(const intf: idropdownlist);
    destructor destroy; override;
+   procedure dostatread(const reader: tstatreader);
+   procedure dostatwrite(const writer: tstatwriter);
    function valuelist: tmsestringdatalist;
    property cols: tdropdowncols read fcols write setcols;
    property valuecol: integer read fvaluecol write setvaluecol default 0;
@@ -424,6 +428,7 @@ type
  tcustombuttonframe1 = class(tcustombuttonframe);
  tstringcol1 = class(tstringcol);
  tframebutton1 = class(tframebutton);
+ tdatacols1 = class(tdatacols);
 const
  defaultdropdowncellinnerframe: framety = 
                       (left: 1; top: 0; right: 1; bottom: 0);
@@ -1189,7 +1194,38 @@ begin
   arect.cx:= fintf.getwidget.framesize.cx;
  end
  else begin
-  arect.cx:= fwidth;
+  if fwidth = -1 then begin
+   arect.cx:= getautowidth;
+  end
+  else begin
+   arect.cx:= fwidth;
+  end;
+ end;
+end;
+
+function tcustomdropdownlistcontroller.getautowidth: integer;
+var
+ int1: integer;
+begin
+ result:= 0;
+ if fdropdownlist = nil then begin
+  for int1:= 0 to high(fcols.fitems) do begin
+   with tdropdowncol(fcols.fitems[int1]) do begin
+    if not (co_invisible in foptions) then begin
+     result:= result+fwidth+flinewidth;
+    end;
+   end;
+  end;
+ end
+ else begin
+  for int1:= 0 to fdropdownlist.datacols.count -1 do begin
+   with tdatacol(tdatacols1(fdropdownlist.fdatacols).fitems[int1]) do begin
+    if not (co_invisible in options) then begin
+     result:= result+width+linewidth;
+    end;
+   end;
+  end;
+  result:= result + fdropdownlist.framewidth.cx;
  end;
 end;
 
@@ -1232,7 +1268,12 @@ begin
        int1:= self.fintf.getwidget.framesize.cx;
       end
       else begin
-       int1:= fwidth;
+       if fwidth = -1 then begin
+        int1:= getautowidth;
+       end
+       else begin
+        int1:= fwidth;
+       end;
       end;
       str1:= self.fintf.geteditor.text;
       int2:= fdropdownitems.fitemindex;
@@ -1250,10 +1291,14 @@ begin
      fintf.geteditor.forcecaret:= false;
      doafterclosedropdown;
     end;
+    if deo_colsizing in options then begin
+     for int1:= 0 to high(fcols.fitems) do begin
+      tdropdowncol(fcols.fitems[int1]).width:=
+         tdatacol(tdatacols1(fdropdownlist.fdatacols).fitems[int1]).width;
+     end;
+    end;
    finally
-//    fdropdownlist.release;
     fdropdownlist.free;
-//    fdropdownlist:= nil;
     freeandnil(fdropdownlist);
    end;
   end;
@@ -1390,6 +1435,36 @@ begin
  inherited;
 end;
 
+procedure tcustomdropdownlistcontroller.dostatread(const reader: tstatreader);
+var
+ ar1: integerarty;
+ int1: integer;
+begin
+ if deo_savestate in foptions then begin
+  ar1:= reader.readarray('dropdowncolwidths',integerarty(nil));
+  for int1:= 0 to high(ar1) do begin
+   if int1 > high(fcols.fitems) then begin
+    break;
+   end;
+   tdropdowncol(fcols.fitems[int1]).fwidth:= ar1[int1];
+  end;
+ end;
+end;
+
+procedure tcustomdropdownlistcontroller.dostatwrite(const writer: tstatwriter);
+var
+ int1: integer;
+ ar1: integerarty;
+begin
+ if deo_savestate in foptions then begin
+  setlength(ar1,fcols.count);
+  for int1:= 0 to high(ar1) do begin
+   ar1[int1]:= tdropdowncol(fcols.fitems[int1]).fwidth;
+  end;
+  writer.writearray('dropdowncolwidths',ar1);
+ end;
+end;
+
 { tnocolsdropdownlistcontroller }
 
 function tnocolsdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
@@ -1492,6 +1567,9 @@ var
  col1: tdropdowncol;
 begin
  if acols.count > 0 then begin
+  if deo_colsizing in fcontroller.options then begin
+   optionsgrid:= optionsgrid + [og_colsizing];
+  end;
   rowcount:= acols[0].count;
   fdatacols.count:= acols.count;
   int2:= acols.maxrowcount;
@@ -1802,6 +1880,20 @@ begin
  end
  else begin
   rowup(fca_focusin);
+ end;
+end;
+
+procedure tdropdownlist.updatelayout;
+var
+ int1: integer;
+begin
+ inherited;
+ if fcontroller.width = -1 then begin
+  int1:= fcontroller.getautowidth;
+  if width <> int1 then begin
+   width:= int1;
+   updatelayout;
+  end;
  end;
 end;
 

@@ -522,6 +522,8 @@ type
     //iifidatalink
    function getifilinkkind: ptypeinfo; override;
   {$endif}
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
     //idropdownlist
    function getdropdownitems: tdropdowncols; virtual;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
@@ -3471,6 +3473,18 @@ procedure tcustomdropdownlistedit.ifidropdownlistchanged(
                                    const acols: tifidropdowncols);
 begin
  dropdown.cols.assign(acols);
+end;
+
+procedure tcustomdropdownlistedit.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ tdropdownlistcontroller(fdropdown).dostatread(reader);
+end;
+
+procedure tcustomdropdownlistedit.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ tdropdownlistcontroller(fdropdown).dostatwrite(writer);
 end;
 
 {$endif}

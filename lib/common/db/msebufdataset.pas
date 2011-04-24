@@ -881,38 +881,44 @@ type
     //imasterlink   
    function refreshing: boolean;
 
-   procedure refreshrecord(const akeyfield: array of tfield;
+   function refreshrecord(const akeyfield: array of tfield;
               const keyindex: integer = 0;
               const acancelupdate: boolean = true;
-              const restorerecno: boolean = true); overload;
-   procedure refreshrecord(const sourcedatasets: array of tdataset;
+              const restorerecno: boolean = true;
+              const noinsert: boolean = false): bookmarkdataty; overload;
+   function refreshrecord(const sourcedatasets: array of tdataset;
               const akeyvalue: array of variant;
               const keyindex: integer = 0;
               const acancelupdate: boolean = true;
-              const restorerecno: boolean = true); overload;
-   procedure refreshrecord(const asourcefields: array of tfield;
+              const restorerecno: boolean = true;
+              const noinsert: boolean = false): bookmarkdataty; overload;
+   function refreshrecord(const asourcefields: array of tfield;
               const akeyfield: array of tfield;
               const keyindex: integer = 0;
               const acancelupdate: boolean = true;
-              const restorerecno: boolean = true); overload;
-   procedure refreshrecord(const asourcefields: array of tfield;
+              const restorerecno: boolean = true;
+              const noinsert: boolean = false): bookmarkdataty; overload;
+   function refreshrecord(const asourcefields: array of tfield;
               const adestfields: array of tfield;
               const akeyfield: array of tfield;
               const keyindex: integer = 0;
               const acancelupdate: boolean = true;
-              const restorerecno: boolean = true); overload;
-   procedure refreshrecord(const asourcefields: array of tfield;
+              const restorerecno: boolean = true;
+              const noinsert: boolean = false): bookmarkdataty; overload;
+   function refreshrecord(const asourcefields: array of tfield;
               const adestfields: array of tfield;
               const akeyvalue: array of variant;
               const keyindex: integer = 0;
               const acancelupdate: boolean = true;
-              const restorerecno: boolean = true); overload;
-   procedure refreshrecord(const asourcevalues: array of variant;
+              const restorerecno: boolean = true;
+              const noinsert: boolean = false): bookmarkdataty; overload;
+   function refreshrecord(const asourcevalues: array of variant;
               const adestfields: array of tfield;
               const akeyvalue: array of variant;
               const keyindex: integer = 0;
               const acancelupdate: boolean = true;
-              const restorerecno: boolean = true); overload;
+              const restorerecno: boolean = true;
+              const noinsert: boolean = false): bookmarkdataty; overload;
           //keyindex must be unique, copies equally named visible fields,
           //inserts record if key not found.   
 
@@ -6670,11 +6676,12 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.refreshrecord(const asourcevalues: array of variant;
+function tmsebufdataset.refreshrecord(const asourcevalues: array of variant;
               const adestfields: array of tfield;
               const akeyvalue: array of variant; const keyindex: integer = 0;
               const acancelupdate: boolean = true;
-              const restorerecno: boolean = true);
+              const restorerecno: boolean = true;
+              const noinsert: boolean = false): bookmarkdataty;
 var
  bm1,bm2: string;
  int1: integer;
@@ -6696,6 +6703,11 @@ begin
     edit;
    end
    else begin
+    if noinsert then begin
+     result.recno:= -1;
+     result.recordpo:= nil;
+     exit;
+    end;
     insert;
    end;
   end;
@@ -6713,6 +6725,8 @@ begin
   else begin
    post;
   end;
+  result.recno:= frecno;
+  result.recordpo:= fcurrentbuf;
  finally
   exclude(fbstate,bs_noautoapply);
   if restorerecno and (keyindex >= 0) then begin
@@ -6724,30 +6738,34 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.refreshrecord(const asourcefields: array of tfield;
+function tmsebufdataset.refreshrecord(const asourcefields: array of tfield;
               const adestfields: array of tfield;
               const akeyfield: array of tfield; const keyindex: integer = 0;
               const acancelupdate: boolean = true;
-              const restorerecno: boolean = true);
+              const restorerecno: boolean = true;
+              const noinsert: boolean = false): bookmarkdataty;
 begin
- refreshrecord(fieldvariants(asourcefields),adestfields,
-               fieldvariants(akeyfield),keyindex,acancelupdate,restorerecno);
+ result:= refreshrecord(fieldvariants(asourcefields),adestfields,
+               fieldvariants(akeyfield),keyindex,acancelupdate,restorerecno,
+               noinsert);
 end;
 
-procedure tmsebufdataset.refreshrecord(const asourcefields: array of tfield;
+function tmsebufdataset.refreshrecord(const asourcefields: array of tfield;
               const adestfields: array of tfield;
               const akeyvalue: array of variant; const keyindex: integer = 0;
               const acancelupdate: boolean = true;
-              const restorerecno: boolean = true);
+              const restorerecno: boolean = true;
+              const noinsert: boolean = false): bookmarkdataty;
 begin
- refreshrecord(fieldvariants(asourcefields),adestfields,akeyvalue,keyindex,
-                  acancelupdate,restorerecno);
+ result:= refreshrecord(fieldvariants(asourcefields),adestfields,akeyvalue,keyindex,
+                  acancelupdate,restorerecno,noinsert);
 end;
 
-procedure tmsebufdataset.refreshrecord(const asourcefields: array of tfield;
+function tmsebufdataset.refreshrecord(const asourcefields: array of tfield;
               const akeyfield: array of tfield; const keyindex: integer = 0;
               const acancelupdate: boolean = true;
-              const restorerecno: boolean = true);
+              const restorerecno: boolean = true;
+              const noinsert: boolean = false): bookmarkdataty;
 var
  int1: integer;
  ar1: fieldarty;
@@ -6756,8 +6774,8 @@ begin
  for int1:= 0 to high(asourcefields) do begin
   ar1[int1]:= fieldbyname(asourcefields[int1].fieldname);
  end;
- refreshrecord(asourcefields,ar1,akeyfield,keyindex,
-                       acancelupdate,restorerecno);
+ result:= refreshrecord(asourcefields,ar1,akeyfield,keyindex,
+                       acancelupdate,restorerecno,noinsert);
 end;
 {
 procedure tmsebufdataset.refreshrecord(const akeyfield: tfield;
@@ -6788,11 +6806,12 @@ begin
  refreshrecord(sf,df,akeyfield,keyindex,acancelupdate);
 end;
 }
-procedure tmsebufdataset.refreshrecord(const sourcedatasets: array of tdataset;
+function tmsebufdataset.refreshrecord(const sourcedatasets: array of tdataset;
               const akeyvalue: array of variant;
               const keyindex: integer = 0;
               const acancelupdate: boolean = true;
-              const restorerecno: boolean = true);
+              const restorerecno: boolean = true;
+              const noinsert: boolean = false): bookmarkdataty;
 var
  int1,int2,int3: integer;
  field1,field2: tfield;
@@ -6818,15 +6837,17 @@ begin
  end;
  setlength(sf,int2);
  setlength(df,int2);
- refreshrecord(sf,df,akeyvalue,keyindex,acancelupdate,restorerecno);
+ result:= refreshrecord(sf,df,akeyvalue,keyindex,acancelupdate,restorerecno,
+                         noinsert);
 end;
 
-procedure tmsebufdataset.refreshrecord(const akeyfield: array of tfield;
+function tmsebufdataset.refreshrecord(const akeyfield: array of tfield;
           const keyindex: integer = 0; const acancelupdate: boolean = true;
-          const restorerecno: boolean = true);
+          const restorerecno: boolean = true;
+              const noinsert: boolean = false): bookmarkdataty;
 begin
- refreshrecord([akeyfield[0].dataset],fieldvariants(akeyfield),keyindex,
-                                  acancelupdate,restorerecno);
+ result:= refreshrecord([akeyfield[0].dataset],fieldvariants(akeyfield),keyindex,
+                        acancelupdate,restorerecno,noinsert);
 end;
 
 function tmsebufdataset.updatesortfield(const afield: tfield;
