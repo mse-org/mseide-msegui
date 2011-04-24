@@ -1515,9 +1515,10 @@ type
  tparamconnector = class(tmsecomponent)
   private
    fparam: tmseparam;
+   function getparam: tmseparam;
   public
    destructor destroy; override;
-   property param: tmseparam read fparam;
+   property param: tmseparam read getparam;
  end;
     
  tmseparams = class(tparams)
@@ -8293,6 +8294,14 @@ begin
   fparam.connector:= nil;
  end;
  inherited;
+end;
+
+function tparamconnector.getparam: tmseparam;
+begin
+ if fparam = nil then begin
+  raise exception.create(name+': no param source.');
+ end;
+ result:= fparam;
 end;
 
 { tmsedatasource }
