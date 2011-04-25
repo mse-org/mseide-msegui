@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -66,6 +66,7 @@ type
    fmouseeventinfopo: pmouseeventinfoty;
    fkeyeventinfopo: pkeyeventinfoty;
    fcursorshape: cursorshapety;
+   fnewgrab: boolean;
    procedure dopaint(const acanvas: tcanvas);
    procedure dokeypress(const sender: twidget; var info: keyeventinfoty);
    procedure endmoving(const resetflag: boolean);
@@ -138,8 +139,10 @@ var
 begin
  application.unregisteronkeypress({$ifdef FPC}@{$endif}dokeypress);
  removexorpic;
- widget1:= twidget1(fintf.getwidget);
- widget1.releasemouse;
+ if fnewgrab then begin
+  widget1:= twidget1(fintf.getwidget);
+  widget1.releasemouse;
+ end;
  application.widgetcursorshape:= cr_default;
  if resetflag then begin
   addpoint1(fpickrect.pos,fpickoffset);
@@ -338,7 +341,7 @@ begin
        application.registeronkeypress({$ifdef FPC}@{$endif}dokeypress);
        include(fstate,ops_moving);
        widget1:= twidget1(fintf.getwidget);
-       widget1.capturemouse(true);
+       fnewgrab:= widget1.capturemouse(true);
        fintf.beginpickmove(self);
        paintxorpic;
        include(info.eventstate,es_processed);

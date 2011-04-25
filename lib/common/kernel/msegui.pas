@@ -1617,9 +1617,10 @@ type
    procedure getcaret;
    procedure scrollcaret(const dist: pointty);
    function mousecaptured: boolean;
-   procedure capturemouse(grab: boolean = true);
+   function capturemouse(grab: boolean = true): boolean;
+                    //true for new grab
    procedure releasemouse;
-   procedure capturekeyboard;
+   function capturekeyboard: boolean; //true for new grab
    procedure releasekeyboard;
    procedure synctofontheight; virtual;
 
@@ -10550,9 +10551,11 @@ begin
  result:= application.mousecapturewidget = self;
 end;
                      
-procedure twidget.capturemouse(grab: boolean = true);
+function twidget.capturemouse(grab: boolean = true): boolean;
 begin
+ result:= false;
  if appinst <> nil then begin
+  result:= appinst.fmousecapturewidget <> self;
   appinst.capturemouse(self,grab);
   include(fwidgetstate,ws_mousecaptured);
  end;
@@ -10566,9 +10569,11 @@ begin
  end;
 end;
 
-procedure twidget.capturekeyboard;
+function twidget.capturekeyboard: boolean;
 begin
+ result:= false;
  if appinst <> nil then begin
+  result:= appinst.fkeyboardcapturewidget <> self;
   appinst.fkeyboardcapturewidget:= self;
  end;
 end;
