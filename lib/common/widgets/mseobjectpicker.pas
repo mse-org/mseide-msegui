@@ -47,7 +47,8 @@ type
 
  objectpickerstatety = (ops_picking,ops_rectselecting,
                         ops_multiselecting,ops_moving,
-                        ops_xorpicpainted,ops_xorpicremoved);
+                        ops_xorpicpainted,ops_xorpicremoved,
+                        ops_newwidgetgrab,ops_newwindowgrab);
  objectpickerstatesty = set of objectpickerstatety;
  objectpickeroptionty = (opo_mousemoveobjectquery,opo_rectselect,
                          opo_multiselect,opo_thumbtrack);
@@ -66,7 +67,6 @@ type
    fmouseeventinfopo: pmouseeventinfoty;
    fkeyeventinfopo: pkeyeventinfoty;
    fcursorshape: cursorshapety;
-   fnewgrab: boolean;
    procedure dopaint(const acanvas: tcanvas);
    procedure dokeypress(const sender: twidget; var info: keyeventinfoty);
    procedure endmoving(const resetflag: boolean);
@@ -139,10 +139,8 @@ var
 begin
  application.unregisteronkeypress({$ifdef FPC}@{$endif}dokeypress);
  removexorpic;
- if fnewgrab then begin
-  widget1:= twidget1(fintf.getwidget);
-  widget1.releasemouse;
- end;
+ widget1:= twidget1(fintf.getwidget);
+ widget1.releasemouse(not (ops_newwindowgrab in fstate));
  application.widgetcursorshape:= cr_default;
  if resetflag then begin
   addpoint1(fpickrect.pos,fpickoffset);
@@ -341,7 +339,13 @@ begin
        application.registeronkeypress({$ifdef FPC}@{$endif}dokeypress);
        include(fstate,ops_moving);
        widget1:= twidget1(fintf.getwidget);
-       fnewgrab:= widget1.capturemouse(true);
+       fstate:= fstate - [ops_newwidgetgrab,ops_newwindowgrab];
+       if not widget1.window.mousecaptured then begin
+        include(fstate,ops_newwindowgrab);
+       end;
+       if widget1.capturemouse(true) then begin
+        include(fstate,ops_newwidgetgrab);
+       end;
        fintf.beginpickmove(self);
        paintxorpic;
        include(info.eventstate,es_processed);

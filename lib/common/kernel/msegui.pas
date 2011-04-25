@@ -1619,7 +1619,7 @@ type
    function mousecaptured: boolean;
    function capturemouse(grab: boolean = true): boolean;
                     //true for new grab
-   procedure releasemouse;
+   procedure releasemouse(const grab: boolean = false);
    function capturekeyboard: boolean; //true for new grab
    procedure releasekeyboard;
    procedure synctofontheight; virtual;
@@ -2030,8 +2030,10 @@ type
    function hastransientfor: boolean;
 //   procedure removefocuslock;
 
-   procedure capturemouse;
+   function capturemouse: boolean; //true for new grab
    procedure releasemouse;
+   function mousecaptured: boolean;
+   
    procedure postkeyevent(const akey: keyty; 
         const ashiftstate: shiftstatesty = []; const release: boolean = false;
                   const achars: msestring = '');
@@ -2227,7 +2229,7 @@ type
    function ungrabpointer: boolean;
    procedure setmousewidget(const widget: twidget);
    procedure setclientmousewidget(const widget: twidget; const apos: pointty);
-   procedure capturemouse(sender: twidget; grab: boolean);
+   procedure capturemouse(const sender: twidget; const grab: boolean);
                //sender = nil for release
    procedure activatehint;
    procedure deactivatehint;
@@ -10561,10 +10563,10 @@ begin
  end;
 end;
 
-procedure twidget.releasemouse;
+procedure twidget.releasemouse(const grab: boolean = false);
 begin
  if (appinst <> nil) and (appinst.fmousecapturewidget = self) then begin
-  appinst.capturemouse(nil,false);
+  appinst.capturemouse(nil,grab);
   exclude(fwidgetstate,ws_mousecaptured);
  end;
 end;
@@ -13304,8 +13306,9 @@ begin
  end;
 end;
 }
-procedure twindow.capturemouse;
+function twindow.capturemouse: boolean;
 begin
+ result:= not (tws_grab in fstate);
  if appinst.grabpointer(winid) then begin
   include(fstate,tws_grab);
  end;
@@ -13317,6 +13320,11 @@ begin
   exclude(fstate,tws_grab);
   appinst.ungrabpointer;
  end;
+end;
+
+function twindow.mousecaptured: boolean;
+begin
+ result:= tws_grab in fstate;
 end;
 
 procedure twindow.checkrecursivetransientfor(const value: twindow);
@@ -15900,7 +15908,8 @@ begin
  result:= true;
 end;
 
-procedure tguiapplication.capturemouse(sender: twidget; grab: boolean);
+procedure tguiapplication.capturemouse(const sender: twidget;
+                                                    const grab: boolean);
 var
  widget: twidget;
  info: mouseeventinfoty;
@@ -15932,7 +15941,9 @@ begin
    setmousewidget(fmousecapturewidget);
   end
   else begin
-   ungrabpointer;
+   if not grab then begin
+    ungrabpointer;
+   end;
   end;
  end;
 end;
