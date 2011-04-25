@@ -6849,6 +6849,11 @@ begin
 {$endif}
  end;
  if not fmovebylock or (event <> dedatasetchange) then begin
+  with tdataset(fowner) do begin
+   if (event = deupdaterecord) and not modified and (state = dsinsert) then begin
+    fintf.inheriteddataevent(event,info); //for second notnull check
+   end;
+  end;
   fintf.inheriteddataevent(event,info);
  end;
  state1:= tdataset(fowner).state;

@@ -3187,7 +3187,8 @@ end;
 
 procedure tcustomeditwidgetdatalink.nullcheckneeded(var avalue: boolean);
 begin
- avalue:= (avalue or fintf.edited and (oed_autopost in foptions)) and 
+ avalue:= (avalue or fintf.edited and (oed_autopost in foptions) or
+              (fcanclosing > 0)) and 
               ((dataset.state in [dsinsert,dsedit]) and
                       (dataset.modified or 
                        (dataset.state <> dsinsert) or 

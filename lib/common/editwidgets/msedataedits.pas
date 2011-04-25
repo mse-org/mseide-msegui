@@ -1384,7 +1384,7 @@ begin
  result:= true;
  if not (csdesigning in componentstate) and 
                         (oe_closequery in foptionsedit) and isenabled then begin
-  if (oe_notnull in foptionsedit) and (fnullchecking = 0) and 
+  if (oe_notnull in optionsedit) and (fnullchecking = 0) and 
                  nullcheckneeded(newfocus) and isempty(text) and
                  (not(ow1_nocancloseifhidden in foptionswidget1) or 
                                                     showing) then begin
