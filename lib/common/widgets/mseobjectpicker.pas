@@ -140,7 +140,14 @@ begin
  application.unregisteronkeypress({$ifdef FPC}@{$endif}dokeypress);
  removexorpic;
  widget1:= twidget1(fintf.getwidget);
- widget1.releasemouse(not (ops_newwindowgrab in fstate));
+ if ops_newwidgetgrab in fstate then begin
+  widget1.releasemouse(not (ops_newwindowgrab in fstate));
+ end
+ else begin
+  if ops_newwindowgrab in fstate then begin
+   widget1.window.releasemouse;
+  end;
+ end;
  application.widgetcursorshape:= cr_default;
  if resetflag then begin
   addpoint1(fpickrect.pos,fpickoffset);
@@ -343,9 +350,10 @@ begin
        if not widget1.window.mousecaptured then begin
         include(fstate,ops_newwindowgrab);
        end;
-       if widget1.capturemouse(true) then begin
+       if ws_newmousecapture in widget1.fwidgetstate then begin
         include(fstate,ops_newwidgetgrab);
        end;
+       widget1.capturemouse(true);
        fintf.beginpickmove(self);
        paintxorpic;
        include(info.eventstate,es_processed);

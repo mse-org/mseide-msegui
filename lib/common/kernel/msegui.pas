@@ -123,6 +123,7 @@ type
                   ws_opaque,ws_nopaint,
                   ws_lclicked,ws_mclicked,ws_rclicked,
                   ws_mousecaptured,ws_clientmousecaptured,
+                  ws_newmousecapture,
                   ws_loadlock,ws_loadedproc,ws_showproc,
                   ws_minclientsizevalid,
 //                  ws_showed,ws_hidden, //used in tcustomeventwidget
@@ -8742,6 +8743,7 @@ procedure twidget.mouseevent(var info: mouseeventinfoty);
 var
  clientoffset: pointty;
 begin
+ exclude(fwidgetstate,ws_newmousecapture);
  if info.eventstate * [es_child,es_processed] = [] then begin
   include(info.eventstate,es_child);
   try
@@ -8840,6 +8842,9 @@ begin
      end;
      if button = mb_right then begin
       include(fwidgetstate,ws_rclicked);
+     end;
+     if appinst.fmousecapturewidget <> self then begin
+      include(fwidgetstate,ws_newmousecapture);
      end;
      appinst.capturemouse(self,true);
      if isclientmouseevent(info) then begin
