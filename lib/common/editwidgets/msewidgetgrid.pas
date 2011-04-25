@@ -2410,6 +2410,8 @@ begin
   fcontainer3.widgetrect:= moverect(rect1,paintpos);
  end;
  if fcontainer2 <> nil then begin
+  fcontainer2.widgetrect:= moverect(fdatarect,paintpos);
+ {
   if csdesigning in componentstate then begin
    rect1:= fdatarect;
 //   dec(rect1.x,ffirstnohscroll);
@@ -2424,6 +2426,7 @@ begin
    end;
   end;
   fcontainer2.widgetrect:= moverect(rect1,paintpos);
+  }
  end;
 end;
  
