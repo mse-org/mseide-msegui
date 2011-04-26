@@ -4506,7 +4506,8 @@ begin
       df:= findfield(str1);
       if df <> nil then begin
        sf:= fmasterlink.dataset.findfield(str1);
-       if sf <> nil then begin
+       if (sf <> nil) and (df.value <> sf.value) then begin
+                          //no modified touch
         df.value:= sf.value;
        end;
       end;
