@@ -210,7 +210,7 @@ type
  gridstatesty = set of gridstatety;
  gridstate1ty = (gs1_showcellinvalid,gs1_sortvalid,gs1_rowsortinvalid,
                  gs1_sortmoving,gs1_sortchangelock,gs1_rowinserted,
-                 gs1_gridsorted,gs1_dbsorted);
+                 gs1_gridsorted,gs1_dbsorted,gs1_rowdeleting);
  gridstates1ty = set of gridstate1ty;
 
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
@@ -10821,7 +10821,8 @@ begin     //focuscell
    end;
    if ((cell.row <> ffocusedcell.row) or (selectaction = fca_focusinforce)) and 
                      (ffocusedcell.row >= 0) and container.entered and
-            not container.canclose(window.focusedwidget) then begin
+            not ((gs1_rowdeleting in fstate1) or
+                   container.canclose(window.focusedwidget)) then begin
     exit;        //for not null check in twidgetgrid
    end;
   end;
@@ -13205,7 +13206,7 @@ var
  cellbefore: gridcoordty;
  countbefore: integer;
  defocused: boolean;
- bo1: boolean;
+ bo1,bo2: boolean;
 begin
  if acount > 0 then begin
   if (aindex >= 0) and (of_deletetree in foptionsfold) then begin
@@ -13215,6 +13216,9 @@ begin
   defocused:= false;
   cellbefore:= ffocusedcell;
   beginupdate;
+  bo2:= gs1_rowdeleting in fstate1;
+  inc(fnonullcheck);
+  include(fstate1,gs1_rowdeleting);
   try
    if aindex >= 0 then begin //datarows
     if not fdatacols.roworderinvalid then begin
@@ -13265,6 +13269,10 @@ begin
     end;
    end;
   finally
+   dec(fnonullcheck);
+   if not bo2 then begin
+    exclude(fstate1,gs1_rowdeleting);
+   end;
    endupdate;
   end;
   dorowsdeleted(aindex,acount);
@@ -13863,7 +13871,8 @@ end;
 function tcustomgrid.docheckcellvalue: boolean;
 begin
  result:= true;
- if focusedcellvalid and (fnullchecking = 0) then begin
+ if focusedcellvalid and (fnullchecking = 0) and 
+                     not(gs1_rowdeleting in fstate1) then begin
   inc(fcellvaluechecking);
   try
    checkcellvalue(result);

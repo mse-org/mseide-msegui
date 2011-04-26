@@ -1037,7 +1037,9 @@ begin
   if not enter and (selectaction <> fca_exitgrid) then begin
    factivewidget:= nil;
    bo1:= true;
-   checkcanclose(bo1);
+   if not (gs1_rowdeleting in twidgetgrid(fgrid).fstate1) then begin
+    checkcanclose(bo1);
+   end;
    if bo1 then begin
     if (activewidgetbefore <> nil) and 
            activewidgetbefore.clicked then begin
@@ -1734,8 +1736,8 @@ end;
 function twidgetcol.nullcheckneeded(const newfocus: twidget): boolean;
 begin
  with tcustomgrid1(fgrid) do begin
-  result:= (fnonullcheck = 0) and (entered or not checkdescendent(newfocus)) and
-                       not ((row = rowhigh) and isautoappend);
+  result:= (fnonullcheck = 0) and (entered and {or} not checkdescendent(newfocus)) and
+             (row >= 0) and not ((row = rowhigh) and isautoappend);
  end;
 end;
 
@@ -1889,7 +1891,8 @@ procedure twidgetcols.updatedatastate(var accepted: boolean);
 var
  int1: integer;
 begin
- if not (csdestroying in fgrid.componentstate) then begin
+ if not (csdestroying in fgrid.componentstate) and 
+         not (gs1_rowdeleting in twidgetgrid(fgrid).fstate1)then begin
   for int1:= 0 to count - 1 do begin
    if not accepted then begin 
     break;

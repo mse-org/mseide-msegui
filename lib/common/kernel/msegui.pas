@@ -1534,6 +1534,7 @@ type
 
    function getclientrect: rectty;
    function windowpo: pwindowty;
+   function canclose1: boolean; 
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(const aowner: tcomponent; 
@@ -11994,6 +11995,11 @@ function twidget.canmouseinteract: boolean;
 begin
  result:= not (csdesigning in componentstate) or 
                                     (cssubcomponent in componentstyle);
+end;
+
+function twidget.canclose1: boolean;
+begin
+ result:= canclose;
 end;
 
 { twindow }

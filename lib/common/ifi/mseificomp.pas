@@ -729,6 +729,7 @@ type
    procedure clienttovalues(const alink: pointer); override;
    procedure itemappendrow(const alink: pointer);
    procedure getrowstate1(const alink: pointer; var handled: boolean);
+   procedure canclose1(const alink: pointer; var handled: boolean);
 
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
@@ -739,6 +740,7 @@ type
    procedure docellevent(var info: ificelleventinfoty);
    procedure appendrow(const avalues: array of const;
                          const checkautoappend: boolean = false);
+   function canclose: boolean;
    property rowstate: tcustomrowstatelist read getrowstate;
   published
    property rowcount: integer read frowcount write setrowcount default 0;
@@ -4359,6 +4361,21 @@ begin
    exclude(fgridstate,gcs_itemchangelock);
   end;
  end;
+end;
+
+procedure tgridclientcontroller.canclose1(const alink: pointer;
+                                                  var handled: boolean);
+begin
+ pboolean(fitempo)^:= iifigridlink(alink).canclose1;
+ handled:= not pboolean(fitempo)^;
+end;
+
+function tgridclientcontroller.canclose: boolean;
+begin
+ result:= true;
+ fitempo:= @result;
+ tmsecomponent1(fowner).getobjectlinker.forfirst(
+                                    {$ifdef FPC}@{$endif}canclose1,self);
 end;
 
 end.

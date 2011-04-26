@@ -50,6 +50,7 @@ type
   procedure rowchanged(const arow: integer);
   procedure rowstatechanged(const arow: integer);
   procedure layoutchanged;
+  function canclose1: boolean;
  end;
 
  iifigridserver = interface(iifiserver)
