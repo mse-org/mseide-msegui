@@ -1834,7 +1834,8 @@ end;
 
 procedure tcustomdataedit.dostatwrite(const writer: tstatwriter);
 begin
- if (fgridintf = nil) and canstatvalue(foptionsedit,writer) then begin
+ if not (des_isdb in fstate) and (fgridintf = nil) and 
+                        canstatvalue(foptionsedit,writer) then begin
   writestatvalue(writer);
  end;
  if canstatstate(foptionsedit,writer) then begin
@@ -1847,7 +1848,7 @@ end;
 
 procedure tcustomdataedit.dostatread(const reader: tstatreader);
 begin
- if canstatvalue(foptionsedit,reader) then begin
+ if not (des_isdb in fstate) and canstatvalue(foptionsedit,reader) then begin
   readstatvalue(reader);
  end;
  if canstatstate(foptionsedit,reader) then begin
