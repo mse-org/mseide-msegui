@@ -3445,7 +3445,7 @@ begin
   end;
  end
  else begin
-  inherited getasvariant;
+  result:= inherited getasvariant;
  end;
 end;
 

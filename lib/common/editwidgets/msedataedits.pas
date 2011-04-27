@@ -47,7 +47,7 @@ type
  textchangeeventty = procedure(const sender: tcustomdataedit;
                                       const atext: msestring) of object;
  dataeditstatety = (des_edited,des_emptytext,des_grayed,des_isdb,des_dbnull,
-                    des_actualcursor,des_updating);
+                    des_actualcursor,des_updating,des_valueread);
  dataeditstatesty = set of dataeditstatety;
 
  emptyoptionty = (eo_defaulttext); //use text of tfacecontroller
@@ -1848,9 +1848,11 @@ end;
 
 procedure tcustomdataedit.dostatread(const reader: tstatreader);
 begin
+ exclude(fstate,des_valueread);
  if not (des_isdb in fstate) and (fgridintf = nil)
                      and canstatvalue(foptionsedit,reader) then begin
   readstatvalue(reader);
+  include(fstate,des_valueread);
  end;
  if canstatstate(foptionsedit,reader) then begin
   readstatstate(reader);
@@ -1867,7 +1869,8 @@ end;
 
 procedure tcustomdataedit.statread;
 begin
- if oe_checkvaluepaststatread in foptionsedit then begin
+ if (oe_checkvaluepaststatread in foptionsedit) and 
+                      (des_valueread in fstate) then begin
   checkvalue;
  end;
 end;

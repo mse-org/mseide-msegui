@@ -104,6 +104,7 @@ type
    fstatfile: tstatfile;
    foptionsedit: optionseditty;
    fedited: boolean;
+   fvalueread: boolean;
 {$ifdef mse_with_ifi}
    fifilink: tifivaluelinkcomp;
    procedure ifisetvalue(var avalue; var accept: boolean);
@@ -1558,8 +1559,10 @@ end;
 
 procedure tgraphdataedit.dostatread(const reader: tstatreader);
 begin
+ fvalueread:= false;
  if not fisdb and (fgridintf = nil) and 
                         canstatvalue(foptionsedit,reader) then begin
+  fvalueread:= true;
   readstatvalue(reader);
  end;
  if canstatstate(foptionsedit,reader) then begin
@@ -1596,7 +1599,7 @@ end;
 
 procedure tgraphdataedit.statread;
 begin
- if oe_checkvaluepaststatread in foptionsedit then begin
+ if (oe_checkvaluepaststatread in foptionsedit) and fvalueread then begin
   checkvalue;
  end;
 end;
