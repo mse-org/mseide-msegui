@@ -42,6 +42,8 @@ const
  filterdbnavigbuttons = [dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_find];
  defaultdbnavigatorheight = 24;
  defaultdbnavigatorwidth = (ord(dbnb_refresh)+1)*defaultdbnavigatorheight;
+
+ defaultindicatorcoloptions = [fco_mousefocus];
  
 type
 
@@ -1416,6 +1418,7 @@ type
   published
    property colorindicator: colorty read fcolorindicator 
                    write setcolorindicator default cl_glyph;
+   property options default defaultindicatorcoloptions;
  end;
 
  tdbwidgetfixcols = class(twidgetfixcols)
@@ -1661,6 +1664,7 @@ type
   published
    property colorindicator: colorty read fcolorindicator 
                 write setcolorindicator default cl_glyph;
+   property options default defaultindicatorcoloptions;
  end;
 
  tdbstringfixcols = class(tfixcols)
@@ -7469,6 +7473,7 @@ constructor tdbwidgetindicatorcol.create(const agrid: tcustomgrid;
 begin
  fcolorindicator:= cl_glyph;
  inherited;
+ options:= defaultindicatorcoloptions;
  width:= 15;
 end;
 
@@ -8142,6 +8147,7 @@ constructor tdbstringindicatorcol.create(const agrid: tcustomgrid;
 begin
  fcolorindicator:= cl_glyph;
  inherited;
+ options:= defaultindicatorcoloptions;
  width:= 15;
 end;
 

@@ -123,6 +123,7 @@ type
   protected
    fgridintf: iwidgetgrid;
    fgriddatalink: pointer;
+   fisdb: boolean;
  
    procedure setisdb;  
    function getoptionsedit: optionseditty; virtual;
@@ -319,7 +320,6 @@ type
    procedure setgridvalues(const avalue: realarty);
   protected
    fvalue: realty;
-   fisdb: boolean;
    procedure setdirection(const avalue: graphicdirectionty); virtual;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
@@ -1558,7 +1558,8 @@ end;
 
 procedure tgraphdataedit.dostatread(const reader: tstatreader);
 begin
- if (fgridintf = nil) and canstatvalue(foptionsedit,reader) then begin
+ if not fisdb and (fgridintf = nil) and 
+                        canstatvalue(foptionsedit,reader) then begin
   readstatvalue(reader);
  end;
  if canstatstate(foptionsedit,reader) then begin
@@ -1571,7 +1572,8 @@ end;
 
 procedure tgraphdataedit.dostatwrite(const writer: tstatwriter);
 begin
- if (fgridintf = nil) and canstatvalue(foptionsedit,writer) then begin
+ if not fisdb and (fgridintf = nil) and 
+                                 canstatvalue(foptionsedit,writer) then begin
   writestatvalue(writer);
  end;
  if canstatstate(foptionsedit,writer) then begin
@@ -1717,7 +1719,7 @@ end;
 
 procedure tgraphdataedit.setisdb;
 begin
- //dummy
+ fisdb:= true;
 end;
 
 function tgraphdataedit.getoptionsedit: optionseditty;
