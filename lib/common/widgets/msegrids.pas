@@ -1456,6 +1456,7 @@ type
                        const index1,index2: integer; var result: integer);
    procedure updatedatastate(var accepted: boolean); virtual;
 
+   function hassortstat: boolean;
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    
@@ -8018,7 +8019,9 @@ begin
   for int1:= 0 to count - 1 do begin
    cols[int1].dostatread(reader);
   end;
-  sortcol:= reader.readinteger('sortcol',sortcol,-1,count-1);
+  if hassortstat then begin
+   sortcol:= reader.readinteger('sortcol',sortcol,-1,count-1);
+  end;
   if not (gs_isdb in fgrid.fstate) then begin
    int2:= 0;
    if (fgrid.foptionsgrid * [og_folded,og_colmerged,og_rowheight] <> []) and
@@ -8054,7 +8057,8 @@ end;
 procedure tdatacols.dostatwrite(const writer: tstatwriter);
 begin
  inherited;
- if (og_savestate in fgrid.foptionsgrid) and writer.canstate then begin
+ if (og_savestate in fgrid.foptionsgrid) and writer.canstate and
+                                                    hassortstat then begin
   writer.writeinteger('sortcol',sortcol);
  end;
  if (fgrid.foptionsgrid * [og_folded,og_colmerged,og_rowheight] <> []) and
@@ -8238,6 +8242,32 @@ begin
   fgrid.invalidaterow(arow);
  end;
  fgrid.rowstatechanged(arow);
+end;
+
+function tdatacols.hassortstat: boolean;
+var
+ int1,int2,int3: integer;
+begin
+ result:= false;
+ int3:= high(fitems);
+ for int1:= 0 to fgrid.ffixrows.count-1 do begin
+  with tfixrow(fgrid.ffixrows.fitems[int1]) do begin
+   for int2:= 0 to high(fcaptions.fitems) do begin
+    if int2 >= int3 then begin
+     break;
+    end;
+    with tdatacolheader(fcaptions.fitems[int2]) do begin
+     if dco_colsort in foptions then begin
+      result:= true;
+      break;
+     end;
+    end;
+   end;
+   if result then begin 
+    break;
+   end;
+  end;
+ end;
 end;
 
 { tdrawcols }
