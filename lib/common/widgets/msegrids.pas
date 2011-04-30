@@ -2994,15 +2994,17 @@ end;
 
 procedure tgridprop.drawcellbackground(const acanvas: tcanvas;
                 const aframe: tcustomframe; const aface: tcustomface);
+var
+ rect1: rectty;
+ pt1: pointty;
 begin
- acanvas.fillrect(fcellrect,fcellinfo.color);
+ rect1:= makerect(nullpoint,fcellrect.size);
+ acanvas.fillrect(rect1,fcellinfo.color);
  if aframe <> nil then begin
-//  aframe.paintbackground(acanvas,fcellinfo.rect);
-  aframe.paintbackground(acanvas,fcellrect);
+  aframe.paintbackground(acanvas,rect1);
  end;
  acanvas.rootbrushorigin:= fgrid.fbrushorigin;
  if aface <> nil then begin
-//  aface.paint(acanvas,fcellinfo.rect);
   aface.paint(acanvas,makerect(nullpoint,fcellinfo.rect.size));
  end;
 end;
@@ -3035,7 +3037,7 @@ end;
 
 procedure tgridprop.updatecellrect(const aframe: tcustomframe);
 begin
- fcellinfo.rect:= fcellrect;
+ fcellinfo.rect:= makerect(nullpoint,fcellrect.size);
  if aframe <> nil then begin
   deflaterect1(fcellinfo.rect,tframe1(aframe).fpaintframe);
   with tframe1(aframe).fi.innerframe do begin
@@ -4636,7 +4638,7 @@ var
  frame1: tcustomframe;
  face1: tcustomface;
  headers1: tcolheaders;
- po1: pointty;
+ pt1: pointty;
  sizebefore: sizety;
  linemerged: boolean;
 
@@ -4653,7 +4655,7 @@ begin
  
   frame1:= fframe;
   face1:= fface;
-  po1:= nullpoint;
+  pt1:= nullpoint;
   sizebefore:= fcellrect.size;
   linemerged:= false;
   if (int1 >= 0) and (int1 < headers1.count) then begin
@@ -4667,8 +4669,8 @@ begin
     end;
     inc(fcellrect.cx,fmergedcx);
     inc(fcellrect.cy,fmergedcy);
-    po1.x:= fmergedx;
-    po1.y:= fmergedy;
+    pt1.x:= fmergedx;
+    pt1.y:= fmergedy;
     if fframe <> nil then begin
      frame1:= fframe;
      tframe1(frame1).checkstate;
@@ -4678,7 +4680,7 @@ begin
     end;
    end;
   end;
-  canvas.move(po1);
+  canvas.move(pt1);
   updatecellrect(frame1);
   ftextinfo.dest:= fcellinfo.innerrect;
   ftextinfo.clip:= fcellinfo.rect;
@@ -4696,7 +4698,7 @@ begin
   end;
   canvas.restore;
   drawcelloverlay(canvas,frame1);
-  canvas.remove(makepoint(0,po1.y));
+  canvas.remove(makepoint(0,pt1.y));
 endlab:
   if (flinewidth > 0) and not linemerged then begin
    linewidthbefore:= canvas.linewidth;
@@ -4710,14 +4712,14 @@ endlab:
                      makepoint(fcellrect.x+fcellrect.cx{-1},flinepos),colorline);
    canvas.linewidth:= linewidthbefore;
   end;
-  canvas.remove(makepoint(po1.x,0));
+  canvas.remove(makepoint(pt1.x,0));
   fcellrect.size:= sizebefore;
  end;
 end;
 
 procedure tfixrow.paint(const info: rowpaintinfoty);
 var
- po1,po2: pointty;
+ pt1,pt2: pointty;
 
 var
  linewidthbefore: integer;
@@ -4753,7 +4755,7 @@ var
      if bo1 then begin
       self.fcellrect.cx:= fwidth;
       self.fcellinfo.cell.col:= fcellinfo.cell.col;
-      po2.x:= po1.x + fstart + fcellrect.x;
+      pt2.x:= pt1.x + fstart + fcellrect.x;
      end;
     end;
     if bo1 then begin
@@ -4773,7 +4775,7 @@ var
        end;
       end;
      end;
-     canvas.origin:= po2;
+     canvas.origin:= pt2;
      bo2:= false;
      if canbeforedrawcell then begin
       fonbeforedrawcell(self,canvas,fcellinfo,bo2);
@@ -4806,7 +4808,7 @@ begin
    else begin
     color1:= fgrid.actualopaquecolor;
    end;
-   po1:= canvas.origin;
+   pt1:= canvas.origin;
    linewidthbefore:= canvas.linewidth;
    if fix then begin
     fcellinfo.colorline:= flinecolorfix;
@@ -4814,12 +4816,12 @@ begin
    else begin
     fcellinfo.colorline:= flinecolor;
    end;
-   po2.y:= po1.y+fcellrect.y;
+   pt2.y:= pt1.y+fcellrect.y;
    canbeforedrawcell:= fgrid.canevent(tmethod(fonbeforedrawcell));
    canafterdrawcell:= fgrid.canevent(tmethod(fonafterdrawcell));
    paintcols(colrange.range1);
    paintcols(colrange.range2);
-   canvas.origin:= po1;
+   canvas.origin:= pt1;
   end;
  end;
 end;
@@ -4841,6 +4843,7 @@ begin
  if fcellinfo.cell.row <= tgridarrayprop(prop).ffirstopposite then begin
   flinepos:= -((flinewidth+1) div 2);
   fcellrect.y:= flinewidth;
+//  fcellrect.y:= 0;
  end
  else begin
   flinepos:= fheight + flinewidth div 2;
@@ -4960,7 +4963,9 @@ begin
           (dco_colsort in fcaptions[info.cell.col].options) and 
           iscellclick(info,[ccr_nokeyreturn],[ss_ctrl]) then begin
   with fgrid.datacols[info.cell.col] do begin
-   if (info.mouseeventinfopo^.pos.x > fwidth - 15) and 
+   if (info.mouseeventinfopo^.pos.x > 
+//           fgrid.cellrect(info.cell).cx - 15) and 
+           fwidth - 15) and    //button click of merged cells not supported
        not (co_nosort in foptions) then begin
     if (fgrid.datacols.sortcol = info.cell.col) and 
               fgrid.hassort then begin
