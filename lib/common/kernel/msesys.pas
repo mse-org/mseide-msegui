@@ -224,6 +224,8 @@ function getcommandlineargument(const index: integer): string;
 procedure deletecommandlineargument(const index: integer);
                 //index 1..argumentcount-1, no action otherwise
 
+function nowutc: tdatetime;
+
 function loadlib(const libnames: array of filenamety; 
                                       out libname: filenamety): tlibhandle;
 type
@@ -276,6 +278,11 @@ Procedure CatchUnhandledException (Obj : TObject; Addr: Pointer;
  //[public,alias:'FPC_BREAK_UNHANDLED_EXCEPTION'];
  {$endif}
 {$endif}
+
+function nowutc: tdatetime;
+begin
+ result:= sys_getutctime;
+end;
 
 procedure checkdirstreamdata(var adata: dirstreamty);
 var

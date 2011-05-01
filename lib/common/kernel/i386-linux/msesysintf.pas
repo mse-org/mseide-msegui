@@ -1244,6 +1244,11 @@ end;
 var
  lastlocaltime: integer;
  gmtoff: real;
+
+function sys_getutctime: tdatetime;
+begin
+ result:= 0;
+end;
  
 function sys_localtimeoffset: tdatetime;
 var

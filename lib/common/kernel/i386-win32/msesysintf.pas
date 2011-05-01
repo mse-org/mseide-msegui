@@ -1047,6 +1047,27 @@ begin
  end;
 end;
 
+function filetimetotime(const wtime: tfiletime): tdatetime;
+begin
+ with wtime do begin
+  if (dwLowDateTime = 0) and (dwhighdatetime = 0) then begin
+   result:= 0;
+  end
+  else begin
+   result:= (dwhighdatetime*twoexp32 + dwLowDateTime) /
+                   (24.0*60.0*60.0*1000000.0*10.0) + filetimeoffset;
+  end;
+ end;
+end;
+
+function sys_getutctime: tdatetime;
+var
+ ft1: tfiletime;
+begin
+ getsystemtimeasfiletime(ft1);
+ result:= filetimetotime(ft1);
+end;
+ 
 function sys_localtimeoffset: tdatetime;
 var                                  
  tinfo: time_zone_information;
@@ -1378,19 +1399,6 @@ begin
   if langs[l1].lang = id then begin
    result:= langs[l1].name;
    break;
-  end;
- end;
-end;
-
-function filetimetotime(const wtime: tfiletime): tdatetime;
-begin
- with wtime do begin
-  if (dwLowDateTime = 0) and (dwhighdatetime = 0) then begin
-   result:= 0;
-  end
-  else begin
-   result:= (dwhighdatetime*twoexp32 + dwLowDateTime) /
-                   (24.0*60.0*60.0*1000000.0*10.0) + filetimeoffset;
   end;
  end;
 end;
