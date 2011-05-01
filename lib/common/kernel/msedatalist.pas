@@ -580,6 +580,8 @@ type
   protected
    function checkassigncompatibility(
                             const source: tpersistent): boolean; override;
+   procedure readitem(const reader: treader; var value); override;
+   procedure writeitem(const writer: twriter; var value); override;
   public
    constructor create; override;
    property items[index: integer]: pointer read Getitems write Setitems; default;
@@ -5737,9 +5739,20 @@ begin
  internalsetasarray(pointer(data),sizeof(pointer),length(data));
 end;
 
-function tpointerdatalist.checkassigncompatibility(const source: tpersistent): boolean;
+function tpointerdatalist.checkassigncompatibility(
+                                   const source: tpersistent): boolean;
 begin
  result:= source.inheritsfrom(tpointerdatalist);
+end;
+
+procedure tpointerdatalist.readitem(const reader: treader; var value);
+begin
+ ptrint(value):= reader.ReadInt64;
+end;
+
+procedure tpointerdatalist.writeitem(const writer: twriter; var value);
+begin
+ writer.writeinteger(ptrint(value));
 end;
 
 { tdynamicdatalist }

@@ -117,7 +117,7 @@ type
    procedure writedataprops(writer: twriter);
   protected
    fintf: igridwidget;
-  //iwidgetgrid
+    //iwidgetgrid
    function getgrid: tcustomwidgetgrid;
    function getbrushorigin: pointty;
    function getcol: twidgetcol;
@@ -397,7 +397,7 @@ type
   private
    fowner: twidgetcol;
   protected
-//   function getdefault: pointer; override;
+   function getdefault: pointer; override;
   public
    constructor create(owner: twidgetcol); reintroduce;
  end;
@@ -630,6 +630,16 @@ begin
  fowner:= owner;
  inherited create;
  include(fstate,dls_nostreaming);
+end;
+
+function tgridpointerdatalist.getdefault: pointer;
+begin
+ if fowner.fintf <> nil then begin
+  result:= fowner.fintf.getdefaultvalue;
+ end
+ else begin
+  result:= inherited getdefault;
+ end;
 end;
 
 { tgridintegerdatalist }
@@ -1241,12 +1251,6 @@ begin
            ([dls_nogridstreaming,dls_remote] * fdata.state = []));
  filer.defineproperty('data',{$ifdef FPC}@{$endif}readdata,
                        {$ifdef FPC}@{$endif}writedata,bo1);
-// filer.defineproperty('datatype',{$ifdef FPC}@{$endif}readdatatype,
-//                       {$ifdef FPC}@{$endif}writedatatype,not bo1);
-// filer.defineproperty('dataprops',{$ifdef FPC}@{$endif}readdataprops,
-//                       {$ifdef FPC}@{$endif}writedataprops,
-//                (fdata <> nil) and 
-//                (ilo_propertystreaming in tdatalist1(fdata).fstate));
  if (fdata <> nil) and (dls_propertystreaming in 
         tdatalist1(fdata).fstate) and (filer is twriter) then begin
   with twriter1(filer) do begin
