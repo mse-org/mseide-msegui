@@ -355,6 +355,15 @@ begin
  result.tv_nsec:= (longword(ti.tv_usec) mod 1000000) * 1000;
 end;
 
+function sys_getutctime: tdatetime;
+var
+ ti: timeval;
+begin
+ gettimeofday(@ti,nil);
+ result:= ti.tv_sec / (double(24.0)*60.0*60.0) + 
+          ti.tv_usec / (double(24.0)*60.0*60.0*1e6) - datetimeoffset;
+end;
+ 
 procedure initmutex(out mutex: pthread_mutex_t);
 var
  attr: tmutexattribute;
@@ -1245,11 +1254,6 @@ var
  lastlocaltime: integer;
  gmtoff: real;
 
-function sys_getutctime: tdatetime;
-begin
- result:= 0;
-end;
- 
 function sys_localtimeoffset: tdatetime;
 var
  tm: tunixtime;
