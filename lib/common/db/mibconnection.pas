@@ -1169,6 +1169,9 @@ begin
       po1^.SQLInd^ := 0;
      end;
      case paramtypes[sqlvarnr] of
+      ftunknown: begin
+       //null flag only
+      end;
       ftInteger,ftsmallint : begin
         if datatype = ftboolean then begin
          i:= 0;
