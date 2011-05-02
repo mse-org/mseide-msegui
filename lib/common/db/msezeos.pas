@@ -37,6 +37,7 @@ type
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
+   function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -103,6 +104,7 @@ type
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
+   function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -167,6 +169,7 @@ type
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
+   function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -231,6 +234,7 @@ type
    procedure doidleapplyupdates;
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
+   function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -504,6 +508,12 @@ begin
  fcontroller.dataevent(event,info);
 end;
 
+function tmsezreadonlyquery.updatesortfield(const afield: tfield;
+               const adescend: boolean): boolean;
+begin
+ result:= false;
+end;
+
 { tmsezquery }
 
 constructor tmsezquery.create(aowner: tcomponent);
@@ -737,6 +747,12 @@ begin
  fcontroller.dataevent(event,info);
 end;
 
+function tmsezquery.updatesortfield(const afield: tfield;
+               const adescend: boolean): boolean;
+begin
+ result:= false;
+end;
+
 { tmseztable }
 
 constructor tmseztable.create(aowner: tcomponent);
@@ -965,6 +981,12 @@ begin
  fcontroller.dataevent(event,info);
 end;
 
+function tmseztable.updatesortfield(const afield: tfield;
+               const adescend: boolean): boolean;
+begin
+ result:= false;
+end;
+
 { tmsezstoredproc }
 
 constructor tmsezstoredproc.create(aowner: tcomponent);
@@ -1191,6 +1213,12 @@ end;
 procedure tmsezstoredproc.dataevent(event: tdataevent; info: ptrint);
 begin
  fcontroller.dataevent(event,info);
+end;
+
+function tmsezstoredproc.updatesortfield(const afield: tfield;
+               const adescend: boolean): boolean;
+begin
+ result:= false;
 end;
 
 { tmsezgraphicfield }

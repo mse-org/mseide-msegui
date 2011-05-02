@@ -903,13 +903,10 @@ type
    function getfont: tcolheaderfont;
    procedure setfont(const Value: tcolheaderfont);
    function isfontstored: Boolean;
-   procedure createfont;
    function getframe: tfixcellframe;
    procedure setframe(const avalue: tfixcellframe);
    function getface: tfixcellface;
    procedure setface(const avalue: tfixcellface);
-   procedure createframe;
-   procedure createface;
    procedure setcolor(const avalue: colorty);
    procedure setmergecols(const avalue: integer);
    procedure setmergerows(const avalue: integer);
@@ -958,6 +955,9 @@ type
    constructor create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop); override;
    destructor destroy; override;   
+   procedure createfont;
+   procedure createframe;
+   procedure createface;
    property mergedcx: integer read fmergedcx;
    property mergedx: integer read fmergedx;
    property mergedcy: integer read fmergedcy;
