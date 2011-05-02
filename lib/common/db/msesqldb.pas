@@ -1507,15 +1507,18 @@ label
 var
  intf: igetdscontroller;
  sourceds: tdataset;
+ canceling: boolean;
 begin
  if cansync(sourceds) then begin
   with fowner do begin
    inc(fsourcedatalink.frefreshlock);
    try
 //    if foptions * [fplo_syncslaveedit,fplo_syncslaveinsert] <> [] then begin
+    canceling:= mseclasses.getcorbainterface(
+                            dataset,typeinfo(igetdscontroller),intf) and
+                                        intf.getcontroller.canceling;
     if fplo_syncslavecancel in foptions then begin
-     if mseclasses.getcorbainterface(dataset,typeinfo(igetdscontroller),intf) and
-                                        intf.getcontroller.canceling then begin
+     if canceling then begin
       if fsourcedatalink.frefreshlock = 1 then begin
        sourceds.cancel;
       end;
@@ -1538,7 +1541,7 @@ begin
     end;
     inherited;
    endlab:
-    if (dataset.state in [dsedit,dsinsert]) and 
+    if (dataset.state in [dsedit,dsinsert]) and not canceling and
       (foptions * [fplo_syncslaveedit,fplo_syncslaveinsert] <> []) then begin
      dataset.updaterecord; //synchronize fields
     end;
