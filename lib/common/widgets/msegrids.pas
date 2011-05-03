@@ -14529,7 +14529,8 @@ var
  int1,int2: integer;
  bo1: boolean;
 begin
- if docheckcellvalue then begin
+ if docheckcellvalue and container.canclose(window.focusedwidget) then begin
+                         //for not null check in twidgetgrid
   int1:= ffocusedcell.row;
   checksort;
   index:= index+ffocusedcell.row-int1;
