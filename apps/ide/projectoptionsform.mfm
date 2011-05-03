@@ -900,10 +900,14 @@ object projectoptionsfo: tprojectoptionsfo
                 item
                   width = 112
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+                  valuefalse = '0'
+                  valuetrue = '1'
                 end              
                 item
                   width = 523
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+                  valuefalse = '0'
+                  valuetrue = '1'
                 end>
               fixcols.count = 1
               fixcols.items = <              
@@ -967,6 +971,8 @@ object projectoptionsfo: tprojectoptionsfo
                   datalist.data = (
                     'pascal.sdef'
                   )
+                  valuefalse = '0'
+                  valuetrue = '1'
                 end              
                 item
                   width = 416
@@ -974,6 +980,8 @@ object projectoptionsfo: tprojectoptionsfo
                   datalist.data = (
                     '"*.pas" "*.pp" "*.inc"'
                   )
+                  valuefalse = '0'
+                  valuetrue = '1'
                 end>
               fixcols.count = 1
               fixcols.items = <              
@@ -3859,7 +3867,7 @@ object projectoptionsfo: tprojectoptionsfo
             end          
             item
               width = 620
-              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste]
+              options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste]
               widgetname = 'groupcomment'
               dataclass = tgridmsestringdatalist
               data = (
