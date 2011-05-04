@@ -512,7 +512,7 @@ type
  
  filterediteventty = procedure(const sender: tmsebufdataset;
                              const akind: filtereditkindty) of object;
- tmsebufdataset = class(tmdbdataset,iblobchache,idatasetsum,imasterlink)
+ tmsebufdataset = class(tmdbdataset,iblobchache,idatasetsum,imasterlink,idbdata)
   private
    fpacketrecords: integer;
    fopen: boolean;
@@ -568,8 +568,6 @@ type
    function  intallocrecord: pintrecordty;    
    procedure finalizevalues(var header: recheaderty);
    procedure finalizecalcvalues(var header: recheaderty);
-//   procedure finalizechangedvalues(const tocompare: recheaderty; 
-//                                      var tofinalize: recheaderty);
    procedure addrefvalues(var header: recheaderty);
    procedure intfinalizerecord(const buffer: pintrecordty);
    procedure intfreerecord(var buffer: pintrecordty);
@@ -750,9 +748,6 @@ type
    procedure FreeFieldBuffers; override;
    procedure cancelrecupdate(var arec: recupdatebufferty);
    procedure setdatastringvalue(const afield: tfield; const avalue: string);
-//   procedure setcurvalue(const afield: tfield; const avalue: int64);
-
-//   function wantblobfetch: boolean; virtual;
    function getdsoptions: datasetoptionsty; virtual;
    procedure resetblobcache;
    procedure sortblobcache;   
@@ -848,7 +843,18 @@ type
    
    function islocal: boolean; virtual;
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
-
+    //idbdata
+   function getindex(const afield: tfield): integer; //-1 if none
+   function lookuptext(const indexnum: integer; const akey: integer;
+              const aisnull: boolean;
+              const valuefield: tmsestringfield): msestring; overload;
+   function lookuptext(const indexnum: integer; const akey: int64;
+              const aisnull: boolean;
+              const valuefield: tmsestringfield): msestring; overload;
+   function lookuptext(const indexnum: integer; const akey: msestring;
+              const aisnull: boolean;
+              const valuefield: tmsestringfield): msestring; overload;
+   
  {abstracts, must be overidden by descendents}
    function fetch : boolean; virtual; abstract;
    function getblobdatasize: integer; virtual; abstract;
@@ -944,12 +950,6 @@ type
                    const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
-                   {
-   function locate(const key: integer; const field: tfield;
-                   const options: locateoptionsty = []): locateresultty;
-   function locate(const key: msestring; const field: tfield; 
-                 const options: locateoptionsty = []): locateresultty;
-                 }
    function locaterecno(const arecno: integer): boolean;
         //moves to next valid recno, //returns true if resulting recno = arecno
    
@@ -984,7 +984,6 @@ type
 
    procedure currentbeginupdate; virtual;
    procedure currentendupdate; virtual;
-//   procedure currentdecupdate; virtual;
    function currentrecordhigh: integer; //calls checkbrowsemode
 
        //calls checkbrowsemode, writing for fkInternalCalc only, 
@@ -6850,6 +6849,22 @@ begin
                         acancelupdate,restorerecno,noinsert);
 end;
 
+function tmsebufdataset.getindex(const afield: tfield): integer;
+var
+ int1: integer;
+begin
+ result:= -1;
+ for int1:= 0 to findexlocal.count - 1 do begin
+  with tlocalindex(findexlocal.fitems[int1]) do begin
+   if (fields.count > 0) and (high(findexfieldinfos) >= 0) and
+           (findexfieldinfos[0].fieldinstance = afield) then begin
+    result:= int1;
+    break;
+   end;
+  end;
+ end;
+end;
+
 function tmsebufdataset.updatesortfield(const afield: tfield;
                const adescend: boolean): boolean;
 var
@@ -6883,6 +6898,38 @@ begin
  result:= bs_recapplying in fbstate;
 end;
 
+function tmsebufdataset.lookuptext(const indexnum: integer; const akey: integer;
+          const aisnull: boolean; const valuefield: tmsestringfield): msestring;
+var
+ bm1: bookmarkdataty;
+begin
+ result:= '';
+ if indexlocal[indexnum].find([akey],[aisnull],bm1) then begin
+  result:= currentbmasmsestring[valuefield,bm1];
+ end;
+end;
+
+function tmsebufdataset.lookuptext(const indexnum: integer; const akey: int64;
+          const aisnull: boolean; const valuefield: tmsestringfield): msestring;
+var
+ bm1: bookmarkdataty;
+begin
+ result:= '';
+ if indexlocal[indexnum].find([akey],[aisnull],bm1) then begin
+  result:= currentbmasmsestring[valuefield,bm1];
+ end;
+end;
+
+function tmsebufdataset.lookuptext(const indexnum: integer; const akey: msestring;
+          const aisnull: boolean; const valuefield: tmsestringfield): msestring;
+var
+ bm1: bookmarkdataty;
+begin
+ result:= '';
+ if indexlocal[indexnum].find([akey],[aisnull],bm1) then begin
+  result:= currentbmasmsestring[valuefield,bm1];
+ end;
+end;
 
 { tlocalindexes }
 

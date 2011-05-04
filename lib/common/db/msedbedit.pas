@@ -1045,6 +1045,8 @@ type
    function getvalueaslargeint: int64;
    function gettextasmsestring: msestring;
   protected
+   fdataintf: idbdata;
+   fkeyindex: integer;
    procedure layoutchanged; override;
    procedure activechanged; override;
    procedure editingchanged; override;
@@ -1282,7 +1284,8 @@ type
    procedure wheeldown(const action: focuscellactionty = fca_focusin);  override;
  end;
 
- tcustomdbdropdownlistcontroller = class(tcustomdropdownlistcontroller,idbeditinfo)
+ tcustomdbdropdownlistcontroller = class(tcustomdropdownlistcontroller,
+                                                              idbeditinfo)
   private
    fdatalink: tdropdowndatalink;
    fisstringkey: boolean;
@@ -1863,34 +1866,33 @@ type
    function locate(const filter: msestring): boolean; override;
  end;
  
- lbdstatety = (lbds_filtered,lbds_bof,lbds_eof);
- lbdstatesty = set of lbdstatety;
- 
- tlbdropdownlist = class(tdropdownlist)
+ eddstatety = (edds_filtered,edds_bof,edds_eof);
+ eddstatesty = set of eddstatety;
+
+ texterndatadropdownlistcontroller = class;
+  
+ texterndatadropdownlist = class(tdropdownlist)
   private
    ffirstrecord: integer;
    frecnums: integerarty;
-   fsortfieldno: integer;
-   flbdstate: lbdstatesty;
+   feddstate: eddstatesty;
    function getactiverecord: integer;
    procedure setactiverecord(const avalue: integer);
   protected
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure findprev(var recno: integer);
-   procedure findnext(var recno: integer);
+   procedure findnext(var recno: integer); virtual; abstract;
    function getrecno(const aindex: integer): integer;
    procedure dorowcountchanged(const countbefore,newcount: integer); override;
    procedure internalcreateframe; override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
-   procedure initcols(const acols: tdropdowncols); override;
    procedure docellevent(var info: celleventinfoty); override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); override;
-   function locate(const filter: msestring): boolean; override;
    procedure dbscrolled(distance: integer);
    procedure moveby(distance: integer);
    property activerecord: integer read getactiverecord write setactiverecord;
   public
-   constructor create(const acontroller: tcustomlbdropdownlistcontroller;
+   constructor create(const acontroller: texterndatadropdownlistcontroller;
                              acols: tdropdowncols);
    procedure rowup(const action: focuscellactionty = fca_focusin); override;
    procedure rowdown(const action: focuscellactionty = fca_focusin); override;
@@ -1899,7 +1901,18 @@ type
    procedure wheelup(const action: focuscellactionty = fca_focusin); override;
    procedure wheeldown(const action: focuscellactionty = fca_focusin);  override;
  end;
-     
+
+ tlbdropdownlist = class(texterndatadropdownlist)
+  private
+  protected
+   procedure initcols(const acols: tdropdowncols); override;
+   function locate(const filter: msestring): boolean; override;
+   procedure findnext(var recno: integer); override;
+  public
+   constructor create(const acontroller: tlbdropdownlistcontroller;
+                             acols: tdropdowncols);
+ end;
+      
  tlbdropdowncol = class(tdropdowncol,ilookupbufferfieldinfo)
   private
    ffieldno: lookupbufferfieldnoty;
@@ -1924,43 +1937,54 @@ type
  end;
 
 const
- defaultlbdropdownoptions = [deo_selectonly,deo_autodropdown,deo_keydropdown];
+ defaulteddropdownoptions = [deo_selectonly,deo_autodropdown,deo_keydropdown];
  
 type
 
  optionlbty = (olb_copyitems);
  optionslbty = set of optionlbty;
                                    
- tcustomlbdropdownlistcontroller = class(tcustomdropdownlistcontroller,
+ texterndatadropdownlistcontroller = class(tcustomdropdownlistcontroller)
+  private
+   fedrecnums: integerarty;
+  protected
+   procedure dofilter(var recno: integer; var accept: boolean); virtual; abstract;
+   procedure valuecolchanged; override;
+   function getbuttonframeclass: dropdownbuttonframeclassty; override;
+   function getdropdowncolsclass: dropdowncolsclassty; override;
+   function getrowcount: integer; virtual; abstract;
+  public
+   constructor create(const intf: ilbdropdownlist);
+   procedure dropdown; override;
+   property options default defaulteddropdownoptions;
+ end;
+
+ tcustomlbdropdownlistcontroller = class(texterndatadropdownlistcontroller,
                                         ilookupbufferfieldinfo)
   private
+   fsortfieldno: integer;
    flookupbuffer: tcustomlookupbuffer;
    fkeyfieldno: lookupbufferfieldnoty;
    fonfilter: lbfiltereventty;
    foptionslb: optionslbty;
-   flbrecnums: integerarty;
-   procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
    function getcols: tlbdropdowncols;
    procedure setcols(const avalue: tlbdropdowncols);
+   procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
   protected
-   procedure valuecolchanged; override;
-   function getbuttonframeclass: dropdownbuttonframeclassty; override;
-   function getdropdowncolsclass: dropdowncolsclassty; override;
+   procedure dofilter(var recno: integer; var accept: boolean); override;
    function createdropdownlist: tdropdownlist; override;
    function candropdown: boolean; override;
    procedure itemselected(const index: integer; const akey: keyty); override;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   function getrowcount: integer; override;
   //ilookupbufferfieldinfo
    function getlbdatakind(const apropname: string): lbdatakindty;
    function getlookupbuffer: tcustomlookupbuffer;
   public
-   constructor create(const intf: ilbdropdownlist);
-   procedure dropdown; override;
+   property optionslb: optionslbty read foptionslb write foptionslb default [];
+   property cols: tlbdropdowncols read getcols write setcols;
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
    property keyfieldno: lookupbufferfieldnoty read fkeyfieldno write fkeyfieldno default 0;
-   property optionslb: optionslbty read foptionslb write foptionslb default [];
-   property options default defaultlbdropdownoptions;
-   property cols: tlbdropdowncols read getcols write setcols;
    property onfilter: lbfiltereventty read fonfilter write fonfilter;
  end;
  
@@ -5242,6 +5266,14 @@ begin
    settextfield(nil);
   end;
  end;
+ fdataintf:= nil;
+ fkeyindex:= -1;
+ if active then begin
+  getcorbainterface(dataset,typeinfo(idbdata),fdataintf);
+  if fvaluefield <> nil then begin
+   fkeyindex:= fdataintf.getindex(fvaluefield);
+  end;
+ end;
 end;
 
 procedure tdropdowndatalink.updatelookupvalue;
@@ -5285,15 +5317,21 @@ begin
  result:= '';
  if active and (fdscontroller <> nil) and 
         (fvaluefield <> nil) and (ftextfield <> nil) then begin
-  dataset.disablecontrols;
-  try
-   str1:= dataset.bookmark;
-   if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
-    result:= getasmsestring(ftextfield,utf8);
+  if fkeyindex >= 0 then begin
+   result:= fdataintf.lookuptext(fkeyindex,key,false,
+                                  tmsestringfield(ftextfield));
+  end
+  else begin
+   dataset.disablecontrols;
+   try
+    str1:= dataset.bookmark;
+    if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
+     result:= getasmsestring(ftextfield,utf8);
+    end;
+    dataset.bookmark:= str1;
+   finally
+    dataset.enablecontrols;
    end;
-   dataset.bookmark:= str1;
-  finally
-   dataset.enablecontrols;
   end;
  end;
 end;
@@ -5305,15 +5343,21 @@ begin
  result:= '';
  if active and (fdscontroller <> nil) and 
         (fvaluefield <> nil) and (ftextfield <> nil) then begin
-  dataset.disablecontrols;
-  try
-   str1:= dataset.bookmark;
-   if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
-    result:= getasmsestring(ftextfield,utf8);
+  if fkeyindex >= 0 then begin
+   result:= fdataintf.lookuptext(fkeyindex,key,false,
+                                  tmsestringfield(ftextfield));
+  end
+  else begin
+   dataset.disablecontrols;
+   try
+    str1:= dataset.bookmark;
+    if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
+     result:= getasmsestring(ftextfield,utf8);
+    end;
+    dataset.bookmark:= str1;
+   finally
+    dataset.enablecontrols;
    end;
-   dataset.bookmark:= str1;
-  finally
-   dataset.enablecontrols;
   end;
  end;
 end;
@@ -5325,15 +5369,21 @@ begin
  result:= '';
  if active and (fdscontroller <> nil) and 
         (fvaluefield <> nil) and (ftextfield <> nil) then begin
-  dataset.disablecontrols;
-  try
-   str1:= dataset.bookmark;
-   if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
-    result:= getasmsestring(ftextfield,utf8);
+  if fkeyindex >= 0 then begin
+   result:= fdataintf.lookuptext(fkeyindex,key,false,
+                                  tmsestringfield(ftextfield));
+  end
+  else begin
+   dataset.disablecontrols;
+   try
+    str1:= dataset.bookmark;
+    if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
+     result:= getasmsestring(ftextfield,utf8);
+    end;
+    dataset.bookmark:= str1;
+   finally
+    dataset.enablecontrols;
    end;
-   dataset.bookmark:= str1;
-  finally
-   dataset.enablecontrols;
   end;
  end;
 end;
@@ -8758,164 +8808,34 @@ begin
  result:= tlbdropdowncol;
 end;
 
-{ tcustomlbdropdownlistcontroller }
+{ texterndatadropdownlistcontroller }
 
-constructor tcustomlbdropdownlistcontroller.create(const intf: ilbdropdownlist);
+constructor texterndatadropdownlistcontroller.create(const intf: ilbdropdownlist);
 begin
  inherited;
- options:= defaultlbdropdownoptions;
+ options:= defaulteddropdownoptions;
 end;
 
-procedure tcustomlbdropdownlistcontroller.valuecolchanged;
+procedure texterndatadropdownlistcontroller.valuecolchanged;
 begin
  //dummy
 end;
 
-function tcustomlbdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
+function texterndatadropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
 begin
  result:= tdropdownbuttonframe;
 end;
 
-function tcustomlbdropdownlistcontroller.getdropdowncolsclass: dropdowncolsclassty;
+function texterndatadropdownlistcontroller.getdropdowncolsclass: dropdowncolsclassty;
 begin
  result:= tlbdropdowncols;
 end;
 
-function  tcustomlbdropdownlistcontroller.createdropdownlist: tdropdownlist;
-var
- int1,int2,int3,int4: integer;
- sortfieldno: integer;
- bo1: boolean;
- po1: pmsestringaty;
- ar1: msestringarty;
-begin
- if olb_copyitems in foptionslb then begin
-  flookupbuffer.checkbuffer; //ev. load buffer
-  sortfieldno:= cols[0].fieldno;
-  setlength(flbrecnums,flookupbuffer.count);
-  if assigned(fonfilter) then begin
-   int3:= 0;
-   for int1:= 0 to high(flbrecnums) do begin
-    int4:= flookupbuffer.textindex(sortfieldno,int1,true);
-    bo1:= true;
-    fonfilter(flookupbuffer,int4,bo1);
-    if bo1 then begin
-     flbrecnums[int3]:= int4;
-     inc(int3);
-    end;
-   end;
-   setlength(flbrecnums,int3);
-  end
-  else begin
-   flbrecnums:= flookupbuffer.textindexar(sortfieldno,true);
-  end;
-  for int1:= 0 to fcols.count - 1 do begin
-   with cols[int1] do begin
-    count:= length(flbrecnums);
-    int2:= fieldno;
-    po1:= datapo;
-    ar1:= flookupbuffer.textar(int2);
-    for int3:= 0 to high(flbrecnums) do begin
-     po1^[int3]:= ar1[flbrecnums[int3]];
-    end;
-   end;
-  end;
-  result:= tcopydropdownlist.create(self,fcols);
- end
- else begin
-  result:= tlbdropdownlist.create(self,fcols);
- end;
-end;
 
-function tcustomlbdropdownlistcontroller.candropdown: boolean;
-begin
- result:= (flookupbuffer <> nil) and (flookupbuffer.count > 0) and
-                 (fcols.count > 0) and inherited candropdown;
-end;
-
-procedure tcustomlbdropdownlistcontroller.itemselected(const index: integer;
-                             const akey: keyty);
-var
- int1: integer;
-begin
- int1:= index;
- if index < 0 then begin
-  if index = -2 then begin
-   tdropdowncols1(fcols).fitemindex:= fintf.getvalueempty;
-  end;
- end
- else begin
-  if olb_copyitems in foptionslb then begin
-   int1:= flbrecnums[int1];
-   cols.clear;
-   flbrecnums:= nil;
-  end
-  else begin
-   int1:= tlbdropdownlist(fdropdownlist).getrecno(index);
-   int1:= flookupbuffer.textindex(cols[0].fieldno,int1,true)
-  end;
-  tdropdowncols1(fcols).fitemindex:= int1;
- end;
- if olb_copyitems in foptionslb then begin
-  cols.clear;
-  flbrecnums:= nil;
- end;
- ilbdropdownlist(fintf).recordselected(int1,akey);
-end;
-
-procedure tcustomlbdropdownlistcontroller.setlookupbuffer(
-                   const avalue: tcustomlookupbuffer);
-begin
- setlinkedvar(avalue,tmsecomponent(flookupbuffer));
-end;
-
-function tcustomlbdropdownlistcontroller.getcols: tlbdropdowncols;
-begin
- result:= tlbdropdowncols(fcols);
-end;
-
-procedure tcustomlbdropdownlistcontroller.setcols(const avalue: tlbdropdowncols);
-begin
- fcols.assign(avalue);
-end;
-
-procedure tcustomlbdropdownlistcontroller.objectevent(const sender: tobject;
-             const event: objecteventty);
-begin
- inherited;
- if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) 
-           and not (csloading in flookupbuffer.componentstate) then begin
-  with tdataedit1(fintf.getwidget) do begin
-   if fgridintf <> nil then begin
-    fgridintf.getcol.changed;
-  {$ifdef FPC} {$checkpointer off} {$endif}
-    feditor.text:= datatotext(nil^);
-  {$ifdef FPC} {$checkpointer default} {$endif}
-   end
-   else begin
- {$ifdef FPC} {$checkpointer off} {$endif}
-    feditor.text:= datatotext(nil^);
- {$ifdef FPC} {$checkpointer default} {$endif}
-   end;
-  end;
-  updatereadonlystate;
- end;
-end;
-
-procedure tcustomlbdropdownlistcontroller.dropdown;
+procedure texterndatadropdownlistcontroller.dropdown;
 begin
  tdropdowncols1(fcols).fitemindex:= -1;
  inherited; 
-end;
-
-function tcustomlbdropdownlistcontroller.getlbdatakind(const apropname: string): lbdatakindty;
-begin
- result:= ilbdropdownlist(fintf).getlbkeydatakind;
-end;
-
-function tcustomlbdropdownlistcontroller.getlookupbuffer: tcustomlookupbuffer;
-begin
- result:= flookupbuffer;
 end;
 
 { tdbenumeditlb }
@@ -9763,20 +9683,17 @@ begin
  end; 
 end;
 
-{ tlbdropdownlist }
+{ texterndatadropdownlist }
 
-constructor tlbdropdownlist.create(
-     const acontroller: tcustomlbdropdownlistcontroller; acols: tdropdowncols);
+constructor texterndatadropdownlist.create(
+     const acontroller: texterndatadropdownlistcontroller; acols: tdropdowncols);
 var
  int1,int2,int3: integer;
 begin
- if assigned(acontroller.fonfilter) then begin
-  include(flbdstate,lbds_filtered);
- end;
  inherited;
  include(fstate,gs_isdb);
  int1:= acontroller.dropdownrowcount;
- if (lbds_filtered in flbdstate) then begin
+ if (edds_filtered in feddstate) then begin
   rowcount:= int1; //init frecnums;
   int3:= -1;
   for int2:= 0 to int1 - 1 do begin
@@ -9794,8 +9711,8 @@ begin
   end;
  end
  else begin
-  if int1 > acontroller.flookupbuffer.count then begin
-   int1:= acontroller.flookupbuffer.count;
+  if int1 > acontroller.getrowcount then begin
+   int1:= acontroller.getrowcount;
    frame.sbvert.options:= frame.sbvert.options-[sbo_show];
   end;
   rowcount:= int1;
@@ -9805,13 +9722,13 @@ begin
  end;
  with frame.sbvert do begin
   buttonlength:= 0;
-  if acontroller.flookupbuffer.count > 0 then begin
-   pagesize:= rowcount / acontroller.flookupbuffer.count;
+  if acontroller.getrowcount > 0 then begin
+   pagesize:= rowcount / acontroller.getrowcount;
   end;
  end;
 end;
  
-procedure tlbdropdownlist.dbscrolled(distance: integer);
+procedure texterndatadropdownlist.dbscrolled(distance: integer);
 var
  rect1: rectty;
  int1: integer;
@@ -9828,7 +9745,7 @@ begin
  end;
 end;
 
-procedure tlbdropdownlist.moveby(distance: integer);
+procedure texterndatadropdownlist.moveby(distance: integer);
 var
  int1,int2,int3,int4,int5,int6: integer;
  rowbefore: integer;
@@ -9841,7 +9758,7 @@ begin
  rowbefore:= row;
  int1:= row + distance;
  if int1 < 0 then begin
-  if (lbds_filtered in flbdstate) then begin
+  if (edds_filtered in feddstate) then begin
    setlength(ar1,rowcount);
    int4:= 0;
    for int3:= -int1-1 downto 0 do begin
@@ -9857,7 +9774,7 @@ begin
     dec(int4);
    end;
    if int4 <> int1 then begin
-    include(flbdstate,lbds_bof);
+    include(feddstate,edds_bof);
     int2:= ffirstrecord;
     frecnums[0]:= int2;
     for int3:= 1 to rowhigh do begin
@@ -9872,7 +9789,7 @@ begin
     end; 
    end
    else begin
-    exclude(flbdstate,lbds_bof);
+    exclude(feddstate,edds_bof);
     if int4 <= - rowcount then begin
      frecnums:= ar1;
     end
@@ -9897,7 +9814,7 @@ begin
  else begin
   if int1 >= rowcount then begin
    int1:= int1 - rowcount + 1;
-   if (lbds_filtered in flbdstate) then begin
+   if (edds_filtered in feddstate) then begin
     setlength(ar1,rowcount);
     int5:= frecnums[rowcount-1];
     int4:= 0;
@@ -9915,7 +9832,7 @@ begin
      end;
     end;
     if int4 <> int1 then begin
-     include(flbdstate,lbds_eof);
+     include(feddstate,edds_eof);
      frecnums[rowhigh]:= int5;
      for int3:= rowhigh - 1 downto 0 do begin
       findprev(int5);
@@ -9929,7 +9846,7 @@ begin
      end;
     end
     else begin
-     exclude(flbdstate,lbds_eof);
+     exclude(feddstate,edds_eof);
      if int4 >= rowcount then begin
       frecnums:= ar1;
      end
@@ -9944,7 +9861,7 @@ begin
    else begin
     ffirstrecord:= ffirstrecord + int1;
     int2:= ffirstrecord + rowcount - 
-             tlbdropdownlistcontroller(fcontroller).flookupbuffer.count;
+             texterndatadropdownlistcontroller(fcontroller).getrowcount;
     if int2 > 0 then begin
      int1:= int1 - int2;
      ffirstrecord:= ffirstrecord - int2;
@@ -9966,17 +9883,17 @@ begin
  else begin
   feditor.text:= '';
  end;
- int1:= tlbdropdownlistcontroller(fcontroller).flookupbuffer.count - 1;
+ int1:= texterndatadropdownlistcontroller(fcontroller).getrowcount - 1;
  if int1 <= 0 then begin
   rea1:= 0.5;
  end
  else begin
-  if (lbds_filtered in flbdstate) then begin
-   if lbds_eof in flbdstate then begin
+  if (edds_filtered in feddstate) then begin
+   if edds_eof in feddstate then begin
     rea1:= 1;
    end
    else begin
-    if lbds_bof in flbdstate then begin
+    if edds_bof in feddstate then begin
      rea1:= 0;
     end
     else begin
@@ -9991,39 +9908,39 @@ begin
  frame.sbvert.value:= rea1;
 end;
 
-procedure tlbdropdownlist.pagedown(const action: focuscellactionty = fca_focusin);
+procedure texterndatadropdownlist.pagedown(const action: focuscellactionty = fca_focusin);
 begin
  moveby(rowcount-1);
 end;
 
-procedure tlbdropdownlist.pageup(const action: focuscellactionty = fca_focusin);
+procedure texterndatadropdownlist.pageup(const action: focuscellactionty = fca_focusin);
 begin
  moveby(-rowcount+1);
 end;
 
-procedure tlbdropdownlist.wheeldown(const action: focuscellactionty = fca_focusin);
+procedure texterndatadropdownlist.wheeldown(const action: focuscellactionty = fca_focusin);
 begin
  MoveBy(wheelheight);
 end;
 
-procedure tlbdropdownlist.wheelup(const action: focuscellactionty = fca_focusin);
+procedure texterndatadropdownlist.wheelup(const action: focuscellactionty = fca_focusin);
 begin
  MoveBy(-wheelheight);
 end;
 
-procedure tlbdropdownlist.rowdown(const action: focuscellactionty = fca_focusin);
+procedure texterndatadropdownlist.rowdown(const action: focuscellactionty = fca_focusin);
 begin
  moveby(1);
 end;
 
-procedure tlbdropdownlist.rowup(const action: focuscellactionty = fca_focusin);
+procedure texterndatadropdownlist.rowup(const action: focuscellactionty = fca_focusin);
 begin
  moveby(-1);
 end;
 
-function tlbdropdownlist.getactiverecord: integer;
+function texterndatadropdownlist.getactiverecord: integer;
 begin
- if (lbds_filtered in flbdstate) then begin
+ if (edds_filtered in feddstate) then begin
   result:= frecnums[row];
  end
  else begin
@@ -10031,20 +9948,20 @@ begin
  end;
 end;
 
-procedure tlbdropdownlist.setactiverecord(const avalue: integer);
+procedure texterndatadropdownlist.setactiverecord(const avalue: integer);
 var
  int1,int2,int3: integer;
 begin
  if rowcount > 0 then begin
-  if (lbds_filtered in flbdstate) then begin
+  if (edds_filtered in feddstate) then begin
    if ffirstrecord >= 0 then begin
     for int1:= 0 to high(frecnums) do begin
      if frecnums[int1] = avalue then begin
       if int1 > 0 then begin
-       exclude(flbdstate,lbds_bof);
+       exclude(feddstate,edds_bof);
       end; 
       if int1 < rowhigh then begin
-       exclude(flbdstate,lbds_eof);
+       exclude(feddstate,edds_eof);
       end; 
       moveby(int1-row);
       exit;
@@ -10076,7 +9993,7 @@ begin
   else begin
    if ffirstrecord < 0 then begin
     ffirstrecord:= avalue;   
-    int1:= tlbdropdownlistcontroller(fcontroller).flookupbuffer.count;
+    int1:= texterndatadropdownlistcontroller(fcontroller).getrowcount;
     if ffirstrecord + rowcount > int1 then begin
      ffirstrecord:= int1 - rowcount;
     end;
@@ -10090,41 +10007,22 @@ begin
  end;
 end;
 
-procedure tlbdropdownlist.internalcreateframe;
+procedure texterndatadropdownlist.internalcreateframe;
 begin
  tdbgridframe.create(iscrollframe(self),self,iautoscrollframe(self));
 end;
 
-procedure tlbdropdownlist.createdatacol(const index: integer; out item: tdatacol);
+procedure texterndatadropdownlist.createdatacol(const index: integer; out item: tdatacol);
 begin
  item:= tlbdropdownstringcol.create(self,fdatacols);
 end;
 
-procedure tlbdropdownlist.initcols(const acols: tdropdowncols);
-var
- int1: integer;
- lookupbuffer1: tcustomlookupbuffer;
-begin
- inherited;
- with tlbdropdownlistcontroller(fcontroller) do begin
-  lookupbuffer1:= lookupbuffer;
-  fsortfieldno:= cols[0].ffieldno;
- end;
- for int1:= 0 to fdatacols.count - 1 do begin
-  with tlbdropdownstringcol(fdatacols[int1]) do begin
-   flookupbuffer:= lookupbuffer1;
-   fsortfieldno:= self.fsortfieldno;
-   ffieldno:= tlbdropdowncol(acols[int1]).ffieldno;
-  end;
- end;
-end;
-
-procedure tlbdropdownlist.docellevent(var info: celleventinfoty);
+procedure texterndatadropdownlist.docellevent(var info: celleventinfoty);
 begin
  inherited;
  with info do begin
   if (eventkind = cek_enter) and active then begin
-   if (lbds_filtered in flbdstate) then begin
+   if (edds_filtered in feddstate) then begin
     activerecord:= frecnums[newcell.row];
    end
    else begin
@@ -10134,7 +10032,7 @@ begin
  end;
 end;
 
-procedure tlbdropdownlist.scrollevent(sender: tcustomscrollbar; event: scrolleventty);
+procedure texterndatadropdownlist.scrollevent(sender: tcustomscrollbar; event: scrolleventty);
 var
  int1: integer;
  bo1: boolean;
@@ -10150,9 +10048,9 @@ begin
    sbe_wheeldown: wheelup(fca_focusin);
    sbe_valuechanged: begin end;
    sbe_thumbtrack,sbe_thumbposition: begin
-    int1:= tlbdropdownlistcontroller(fcontroller).lookupbuffer.count - 1;
+    int1:= texterndatadropdownlistcontroller(fcontroller).getrowcount - 1;
     if int1 >= 0 then begin
-     if (lbds_filtered in flbdstate) then begin
+     if (edds_filtered in feddstate) then begin
       if event <> sbe_thumbtrack then begin
        if sender.value <= 0 then begin
         moveby(minint);
@@ -10193,6 +10091,100 @@ begin
  end;
 end;
 
+procedure texterndatadropdownlist.dorowcountchanged(const countbefore: integer;
+                                      const newcount: integer);
+var
+ int1: integer;
+begin
+ inherited;
+ setlength(frecnums,newcount);
+ for int1:= countbefore to newcount - 1 do begin
+  frecnums[int1]:= -1;
+ end;
+end;
+
+procedure texterndatadropdownlist.findprev(var recno: integer);
+var
+ bo1: boolean;
+begin
+ with texterndatadropdownlistcontroller(fcontroller) do begin
+  repeat
+   dec(recno);
+   if recno < 0 then begin
+    recno:= -1;
+    break;
+   end;
+   bo1:= true;
+   dofilter(recno,bo1);
+  until bo1;
+ end;
+end;
+
+function texterndatadropdownlist.getrecno(const aindex: integer): integer;
+var
+ int1,int2: integer;
+begin
+ if (edds_filtered in feddstate) then begin
+  result:= frecnums[aindex];
+ end
+ else begin
+  result:= ffirstrecord + aindex;
+ end;
+end;
+
+procedure texterndatadropdownlist.dokeydown(var info: keyeventinfoty);
+begin
+ with info do begin
+  if shiftstate = [ss_ctrl] then begin
+   include(info.eventstate,es_processed);
+   case key of
+    key_pageup: begin
+     moveby(-bigint);
+    end;
+    key_pagedown: begin
+     moveby(bigint);
+    end
+    else begin
+     exclude(eventstate,es_processed);
+    end;
+   end;
+  end;
+  if not (es_processed in eventstate) then begin
+   inherited;
+  end;
+ end;
+end;
+
+{ tlbdropdownlist }
+
+constructor tlbdropdownlist.create(const acontroller: tlbdropdownlistcontroller;
+               acols: tdropdowncols);
+begin
+ if assigned(acontroller.fonfilter) then begin
+  include(feddstate,edds_filtered);
+ end;
+ inherited create(acontroller,acols);
+end;
+
+procedure tlbdropdownlist.initcols(const acols: tdropdowncols);
+var
+ int1: integer;
+ lookupbuffer1: tcustomlookupbuffer;
+begin
+ inherited;
+ with tcustomlbdropdownlistcontroller(fcontroller) do begin
+  lookupbuffer1:= lookupbuffer;
+  fsortfieldno:= cols[0].ffieldno;
+ end;
+ for int1:= 0 to fdatacols.count - 1 do begin
+  with tlbdropdownstringcol(fdatacols[int1]) do begin
+   flookupbuffer:= lookupbuffer1;
+   fsortfieldno:= tcustomlbdropdownlistcontroller(fcontroller).fsortfieldno;
+   ffieldno:= tlbdropdowncol(acols[int1]).ffieldno;
+  end;
+ end;
+end;
+
 function tlbdropdownlist.locate(const filter: msestring): boolean;
 var
  int1: integer;
@@ -10201,7 +10193,7 @@ begin
  if (datacols.count > 0) then begin
   with tlbdropdownstringcol(datacols[0]) do begin
    result:= flookupbuffer.find(ffieldno,filter,int1,true,
-              tlbdropdownlistcontroller(fcontroller).fonfilter);
+              tcustomlbdropdownlistcontroller(fcontroller).fonfilter);
    if not result then begin
     result:= (int1 < flookupbuffer.count) and 
             (msecomparetextlen(filter,
@@ -10224,23 +10216,11 @@ begin
  end;
 end;
 
-procedure tlbdropdownlist.dorowcountchanged(const countbefore: integer;
-                                      const newcount: integer);
-var
- int1: integer;
-begin
- inherited;
- setlength(frecnums,newcount);
- for int1:= countbefore to newcount - 1 do begin
-  frecnums[int1]:= -1;
- end;
-end;
-
 procedure tlbdropdownlist.findnext(var recno: integer);
 var
  bo1: boolean;
 begin
- with tlbdropdownlistcontroller(fcontroller) do begin
+ with tcustomlbdropdownlistcontroller(fcontroller) do begin
   repeat
    inc(recno);
    if recno >= flookupbuffer.count then begin
@@ -10248,61 +10228,153 @@ begin
     break;
    end;
    bo1:= true;
-   fonfilter(flookupbuffer,flookupbuffer.textindex(fsortfieldno,recno,true),bo1);
+   dofilter(recno,bo1);
   until bo1;
  end;
 end;
 
-procedure tlbdropdownlist.findprev(var recno: integer);
+{ tcustomlbdropdownlistcontroller }
+
+function tcustomlbdropdownlistcontroller.getcols: tlbdropdowncols;
+begin
+ result:= tlbdropdowncols(fcols);
+end;
+
+procedure tcustomlbdropdownlistcontroller.setcols(const avalue: tlbdropdowncols);
+begin
+ fcols.assign(avalue);
+end;
+
+procedure tcustomlbdropdownlistcontroller.dofilter(var recno: integer;
+               var accept: boolean);
+begin
+ fonfilter(flookupbuffer,flookupbuffer.textindex(fsortfieldno,recno,true),accept);
+end;
+
+function  tcustomlbdropdownlistcontroller.createdropdownlist: tdropdownlist;
 var
+ int1,int2,int3,int4: integer;
+ sortfieldno: integer;
  bo1: boolean;
+ po1: pmsestringaty;
+ ar1: msestringarty;
 begin
- with tlbdropdownlistcontroller(fcontroller) do begin
-  repeat
-   dec(recno);
-   if recno < 0 then begin
-    recno:= -1;
-    break;
+ if olb_copyitems in foptionslb then begin
+  flookupbuffer.checkbuffer; //ev. load buffer
+  sortfieldno:= cols[0].fieldno;
+  setlength(fedrecnums,flookupbuffer.count);
+  if assigned(fonfilter) then begin
+   int3:= 0;
+   for int1:= 0 to high(fedrecnums) do begin
+    int4:= flookupbuffer.textindex(sortfieldno,int1,true);
+    bo1:= true;
+    fonfilter(flookupbuffer,int4,bo1);
+    if bo1 then begin
+     fedrecnums[int3]:= int4;
+     inc(int3);
+    end;
    end;
-   bo1:= true;
-   fonfilter(flookupbuffer,flookupbuffer.textindex(fsortfieldno,recno,true),bo1);
-  until bo1;
- end;
-end;
-
-function tlbdropdownlist.getrecno(const aindex: integer): integer;
-var
- int1,int2: integer;
-begin
- if (lbds_filtered in flbdstate) then begin
-  result:= frecnums[aindex];
+   setlength(fedrecnums,int3);
+  end
+  else begin
+   fedrecnums:= flookupbuffer.textindexar(sortfieldno,true);
+  end;
+  for int1:= 0 to fcols.count - 1 do begin
+   with cols[int1] do begin
+    count:= length(fedrecnums);
+    int2:= fieldno;
+    po1:= datapo;
+    ar1:= flookupbuffer.textar(int2);
+    for int3:= 0 to high(fedrecnums) do begin
+     po1^[int3]:= ar1[fedrecnums[int3]];
+    end;
+   end;
+  end;
+  result:= tcopydropdownlist.create(self,fcols);
  end
  else begin
-  result:= ffirstrecord + aindex;
+  result:= tlbdropdownlist.create(self,fcols);
  end;
 end;
 
-procedure tlbdropdownlist.dokeydown(var info: keyeventinfoty);
+function tcustomlbdropdownlistcontroller.candropdown: boolean;
 begin
- with info do begin
-  if shiftstate = [ss_ctrl] then begin
-   include(info.eventstate,es_processed);
-   case key of
-    key_pageup: begin
-     moveby(-bigint);
-    end;
-    key_pagedown: begin
-     moveby(bigint);
-    end
-    else begin
-     exclude(eventstate,es_processed);
-    end;
+ result:= (flookupbuffer <> nil) and (flookupbuffer.count > 0) and
+                 (fcols.count > 0) and inherited candropdown;
+end;
+
+procedure tcustomlbdropdownlistcontroller.itemselected(const index: integer;
+                             const akey: keyty);
+var
+ int1: integer;
+begin
+ int1:= index;
+ if index < 0 then begin
+  if index = -2 then begin
+   tdropdowncols1(fcols).fitemindex:= fintf.getvalueempty;
+  end;
+ end
+ else begin
+  if olb_copyitems in foptionslb then begin
+   int1:= fedrecnums[int1];
+   cols.clear;
+   fedrecnums:= nil;
+  end
+  else begin
+   int1:= tlbdropdownlist(fdropdownlist).getrecno(index);
+   int1:= flookupbuffer.textindex(cols[0].fieldno,int1,true)
+  end;
+  tdropdowncols1(fcols).fitemindex:= int1;
+ end;
+ if olb_copyitems in foptionslb then begin
+  cols.clear;
+  fedrecnums:= nil;
+ end;
+ ilbdropdownlist(fintf).recordselected(int1,akey);
+end;
+
+function tcustomlbdropdownlistcontroller.getrowcount: integer;
+begin
+ result:= flookupbuffer.count
+end;
+
+procedure tcustomlbdropdownlistcontroller.setlookupbuffer(
+                   const avalue: tcustomlookupbuffer);
+begin
+ setlinkedvar(avalue,tmsecomponent(flookupbuffer));
+end;
+
+procedure tcustomlbdropdownlistcontroller.objectevent(const sender: tobject;
+             const event: objecteventty);
+begin
+ inherited;
+ if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) 
+           and not (csloading in flookupbuffer.componentstate) then begin
+  with tdataedit1(fintf.getwidget) do begin
+   if fgridintf <> nil then begin
+    fgridintf.getcol.changed;
+  {$ifdef FPC} {$checkpointer off} {$endif}
+    feditor.text:= datatotext(nil^);
+  {$ifdef FPC} {$checkpointer default} {$endif}
+   end
+   else begin
+ {$ifdef FPC} {$checkpointer off} {$endif}
+    feditor.text:= datatotext(nil^);
+ {$ifdef FPC} {$checkpointer default} {$endif}
    end;
   end;
-  if not (es_processed in eventstate) then begin
-   inherited;
-  end;
+  updatereadonlystate;
  end;
+end;
+
+function tcustomlbdropdownlistcontroller.getlbdatakind(const apropname: string): lbdatakindty;
+begin
+ result:= ilbdropdownlist(fintf).getlbkeydatakind;
+end;
+
+function tcustomlbdropdownlistcontroller.getlookupbuffer: tcustomlookupbuffer;
+begin
+ result:= flookupbuffer;
 end;
 
 end.

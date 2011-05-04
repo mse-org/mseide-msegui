@@ -107,7 +107,18 @@ type
                  const options: locateoptionsty = []): locateresultty;
 }
  end;
-  
+
+ tmsestringfield = class;
+ idbdata = interface(inullinterface)['{636BE3DB-D558-48ED-8B62-89CC94FEAC0E}']
+  function getindex(const afield: tfield): integer; //-1 if none
+  function lookuptext(const indexnum: integer; const akey: integer;
+         const aisnull: boolean; const valuefield: tmsestringfield): msestring;
+  function lookuptext(const indexnum: integer; const akey: int64;
+         const aisnull: boolean; const valuefield: tmsestringfield): msestring;
+  function lookuptext(const indexnum: integer; const akey: msestring;
+         const aisnull: boolean; const valuefield: tmsestringfield): msestring;
+ end;
+   
  idbeditinfo = interface(inullinterface)['{E63A9950-BFAE-DA11-83DF-00C0CA1308FF}']
 //  function getdatasource(const aindex: integer): tdatasource;
   function getdataset(const aindex: integer): tdataset;
@@ -210,8 +221,6 @@ type
    property ReadOnly default false;
    property Required default false; 
  end;
- 
- tmsestringfield = class;
  
  getmsestringdataty = function(const sender: tmsestringfield;
                      out avalue: msestring): boolean of object; //false if null
