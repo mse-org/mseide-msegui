@@ -1267,6 +1267,8 @@ type
    procedure setcurrentrecord(const avalue: integer);
    procedure updatedatawindow;
   protected
+   function getrecordcount: integer; override; 
+           //workaround FPC bug 19290
    function  GetBufferCount: Integer; override;
    procedure SetBufferCount(Value: Integer); override;
    function getfirstrecord: integer; override;
@@ -5639,6 +5641,19 @@ begin
  else begin
   fmaxrowcount:= value;
  end;   
+end;
+
+function tdropdownlistdatalink.getrecordcount: integer;
+begin
+ if fdataintf = nil then begin
+  result:= inherited getrecordcount;
+ end
+ else begin
+  result:= dataset.recordcount;
+  if result > fmaxrowcount then begin
+   result:= fmaxrowcount;
+  end;
+ end;
 end;
 
 { tdbdropdownlist }
