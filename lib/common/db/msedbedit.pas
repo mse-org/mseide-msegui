@@ -81,7 +81,7 @@ type
  updaterowdataeventty = procedure(const sender: tcustomgrid; 
                         const arow: integer; const adataset: tdataset)of object;
 
- optiondbty = (odb_copyitems,odb_opendataset,odb_closedataset);
+ optiondbty = (odb_copyitems,odb_opendataset,odb_closedataset,odb_nodirectdata);
  optionsdbty = set of optiondbty;
  
  idbnaviglink = interface(inullinterface)
@@ -850,13 +850,13 @@ type
    procedure dochange; override;
    procedure modified; override;
    function getrowdatapo(const arow: integer): pointer; override;
-  //idbeditfieldlink
+    //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    procedure setmaxlength(const avalue: integer);
    function getfieldlink: tfielddatalink;
-  //ireccontrol
+    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
@@ -879,7 +879,7 @@ type
    procedure defineproperties(filer: tfiler); override;
    function getrowdatapo(const arow: integer): pointer; override;
    procedure griddatasourcechanged; override;
-  //idbeditfieldlink
+    //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
@@ -888,7 +888,7 @@ type
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
    procedure setmaxlength(const avalue: integer);
    function getfieldlink: tfielddatalink;
-  //ireccontrol
+    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
@@ -911,12 +911,12 @@ type
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
    function getrowdatapo(const arow: integer): pointer; override;
-  //idbeditfieldlink
+    //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    function getfieldlink: tfielddatalink;
-  //ireccontrol
+    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
@@ -945,12 +945,12 @@ type
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
    function getrowdatapo(const arow: integer): pointer; override;
-  //idbeditfieldlink
+    //idbeditfieldlink
    procedure valuetofield; virtual;
    procedure fieldtovalue; virtual;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    function getfieldlink: tfielddatalink;
-  //ireccontrol
+    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
@@ -986,7 +986,7 @@ type
    procedure booltextchanged;
   protected
    function getrowdatapo(const arow: integer): pointer; override;
-  //idbeditfieldlink
+    //idbeditfieldlink
    procedure valuetofield; override;
    procedure fieldtovalue; override;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
@@ -1012,7 +1012,7 @@ type
   private
    fdatafield: string;
    procedure setdatafield(const avalue: string);
-  //idbeditinfo
+    //idbeditinfo
    function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
@@ -1047,6 +1047,7 @@ type
   protected
    fdataintf: idbdata;
    fkeyindex: integer;
+   ftextindex: integer;
    procedure layoutchanged; override;
    procedure activechanged; override;
    procedure editingchanged; override;
@@ -1127,12 +1128,11 @@ type
    ffieldname_selected: string;
    procedure checkscroll;
    procedure checkscrollbar;
-   function getfirstrecord: integer;
    procedure doupdaterowdata(const row: integer);
    procedure beginnullchecking;
    procedure endnullchecking;
    procedure setfieldname_state(const avalue: string);
-   procedure forcecalcrange;   
+   procedure forcecalcrange;
    function getobjectlinker: tobjectlinker;
    function updateoptionsgrid(const avalue: optionsgridty): optionsgridty;
    function updatesortfield(const avalue: tfielddatalink;
@@ -1169,7 +1169,8 @@ type
    function checkvalue: boolean;
    procedure updatelayout;
    procedure updaterowcount;
-   procedure checkactiverecord;
+   function getfirstrecord: integer; virtual;
+   procedure checkactiverecord; virtual;
    procedure datasetscrolled(distance: integer); override;
    procedure fieldchanged; override;
    procedure activechanged; override;
@@ -1178,10 +1179,11 @@ type
    procedure datasetchanged; override;
    procedure updatedata; override;
    procedure updatefields; override;
-   procedure focuscell(var cell: gridcoordty);
+   procedure focuscell(var cell: gridcoordty); virtual;
    procedure cellevent(var info: celleventinfoty);
    procedure invalidateindicator;
-   function scrollevent(sender: tcustomscrollbar; event: scrolleventty): boolean;
+   function scrollevent(sender: tcustomscrollbar;
+                             event: scrolleventty): boolean; virtual;
              //true if processed
    procedure doinsertrow;
    procedure doappendrow;
@@ -1255,8 +1257,31 @@ type
  end;
 
  tdropdownlistdatalink = class(tgriddatalink)
+  private
+   fdataintf: idbdata;
+   fkeyindex: integer;
+   ftextindex: integer;
+   ffirstrecord: integer;
+   fcurrentrecord: integer;
+   fmaxrowcount: integer;
+   procedure setcurrentrecord(const avalue: integer);
+   procedure updatedatawindow;
   protected
+   function  GetBufferCount: Integer; override;
+   procedure SetBufferCount(Value: Integer); override;
+   function getfirstrecord: integer; override;
    procedure recordchanged(afield: tfield); override;
+   function  GetActiveRecord: Integer; override;
+   procedure SetActiveRecord(Value: Integer); override;
+   function moveby(distance: integer): integer; override;
+   function scrollevent(sender: tcustomscrollbar;
+                             event: scrolleventty): boolean; override;
+             //true if processed
+   procedure focuscell(var cell: gridcoordty); override;
+   property currentrecord: integer read fcurrentrecord write setcurrentrecord;
+  public
+   constructor create(const aowner: tcustomgrid; const aintf: igriddatalink;
+                  const adatalink: tdropdowndatalink);
  end;
  
  tdbdropdownlist = class(tdropdownlist,igriddatalink)
@@ -5268,12 +5293,20 @@ begin
  end;
  fdataintf:= nil;
  fkeyindex:= -1;
+ ftextindex:= -1;
+{$ifdef mse_withdirectdata}
  if active then begin
-  getcorbainterface(dataset,typeinfo(idbdata),fdataintf);
-  if fvaluefield <> nil then begin
-   fkeyindex:= fdataintf.getindex(fvaluefield);
+  if not (odb_nodirectdata in fowner.foptionsdb) and
+      getcorbainterface(dataset,typeinfo(idbdata),fdataintf) then begin
+   if fvaluefield <> nil then begin
+    fkeyindex:= fdataintf.getindex(fvaluefield);
+   end;
+   if ftextfield <> nil then begin
+    ftextindex:= fdataintf.gettextindex(ftextfield);
+   end;
   end;
  end;
+{$endif}
 end;
 
 procedure tdropdowndatalink.updatelookupvalue;
@@ -5438,23 +5471,43 @@ end;
 function tdbdropdownstringcol.getrowtext(const arow: integer): msestring;
 var
  int1: integer;
- griddatalink1: tgriddatalink;
 begin
- with fdatalink do begin
-  if active and (field <> nil) then begin
-   griddatalink1:= tdbdropdownlist(fgrid).fdatalink;
-   int1:= griddatalink1.activerecord;
-   griddatalink1.activerecord:= arow;
-   result:= asmsestring;
-   griddatalink1.activerecord:= int1;
-  end
-  else begin
-   result:= '';
+ if fdatalink.active and (fdatalink.field <> nil) then begin
+  with tdbdropdownlist(fgrid).fdatalink do begin
+   if fdataintf <> nil then begin
+    result:= fdataintf.getrowtext(ftextindex,arow+firstrecord,fdatalink.field);
+   end
+   else begin
+    int1:= activerecord;
+    activerecord:= arow;
+    result:= fdatalink.asmsestring;
+    activerecord:= int1;
+   end;
   end;
+ end
+ else begin
+  result:= '';
  end;
 end;
 
 { tdropdownlistdatalink }
+
+constructor tdropdownlistdatalink.create(const aowner: tcustomgrid;
+               const aintf: igriddatalink; const adatalink: tdropdowndatalink);
+begin
+ with adatalink do begin
+  if (ftextindex >= 0) and (fkeyindex >= 0) then begin
+   self.fdataintf:= fdataintf;
+   self.ftextindex:= ftextindex;
+   self.fkeyindex:= fkeyindex;
+  end
+  else begin
+   fkeyindex:= -1;
+   ftextindex:= -1;
+  end;
+ end;
+ inherited create(aowner,aintf);
+end;
 
 procedure tdropdownlistdatalink.recordchanged(afield: tfield);
 begin
@@ -5467,6 +5520,127 @@ begin
  end;
 end;
 
+function tdropdownlistdatalink.GetActiveRecord: Integer;
+begin
+ if fdataintf = nil then begin
+  result:= inherited getactiverecord;
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
+procedure tdropdownlistdatalink.SetActiveRecord(Value: Integer);
+begin
+ if fdataintf = nil then begin
+  inherited;
+ end
+ else begin
+ end;
+end;
+
+function tdropdownlistdatalink.moveby(distance: integer): integer;
+var
+ int1: integer;
+begin
+ if fdataintf = nil then begin
+  result:= inherited moveby(distance);
+ end
+ else begin
+  int1:= fcurrentrecord;
+  currentrecord:= fcurrentrecord+distance;
+  result:= fcurrentrecord-int1;
+ end;
+end;
+
+function tdropdownlistdatalink.scrollevent(sender: tcustomscrollbar;
+               event: scrolleventty): boolean;
+begin
+ if (fdataintf = nil) or (sender.tag <> 1) or 
+             not (event in [sbe_thumbtrack,sbe_thumbposition]) then begin
+  result:= inherited scrollevent(sender,event);
+ end
+ else begin
+  result:= false;
+  if (event <> sbe_thumbtrack) or (gdo_thumbtrack in foptions) then begin
+   if self.active then begin
+    result:= true;
+   end;
+  end;
+ end;
+end;
+
+procedure tdropdownlistdatalink.focuscell(var cell: gridcoordty);
+begin
+ if fdataintf = nil then begin
+  inherited;
+ end
+ else begin
+  if (cell.row >= 0) and (cell.row <> fgrid.row) then begin
+   moveby(cell.row-fgrid.row);
+  end;   
+ end;
+end;
+
+function tdropdownlistdatalink.getfirstrecord: integer;
+begin
+ if fdataintf = nil then begin
+  result:= inherited getfirstrecord;
+ end
+ else begin
+  result:= ffirstrecord;
+ end;
+end;
+
+procedure tdropdownlistdatalink.setcurrentrecord(const avalue: integer);
+var
+ int1: integer;
+begin
+ if active then begin
+  if avalue <> fcurrentrecord then begin
+   fcurrentrecord:= avalue;
+   if fcurrentrecord < 0 then begin
+    fcurrentrecord:= 0;
+   end;
+   int1:= dataset.recordcount;
+   if fcurrentrecord >= dataset.recordcount then begin
+    fcurrentrecord:= int1 - 1;
+   end;
+   updatedatawindow;
+  end;
+ end;
+end;
+
+procedure tdropdownlistdatalink.updatedatawindow;
+begin
+ if fcurrentrecord >= ffirstrecord+buffercount then begin
+  ffirstrecord:= fcurrentrecord - buffercount + 1;
+ end;
+ if fcurrentrecord < ffirstrecord then begin
+  ffirstrecord:= fcurrentrecord;
+ end;
+end;
+
+function tdropdownlistdatalink.GetBufferCount: Integer;
+begin
+ if fdataintf = nil then begin
+  result:= inherited getbuffercount;
+ end
+ else begin
+  result:= fmaxrowcount;
+ end;   
+end;
+
+procedure tdropdownlistdatalink.SetBufferCount(Value: Integer);
+begin
+ if fdataintf = nil then begin
+  inherited;
+ end
+ else begin
+  fmaxrowcount:= value;
+ end;   
+end;
+
 { tdbdropdownlist }
 
 constructor tdbdropdownlist.create(const acontroller: tcustomdbdropdownlistcontroller;
@@ -5474,7 +5648,8 @@ constructor tdbdropdownlist.create(const acontroller: tcustomdbdropdownlistcontr
 var
  int1: integer;
 begin
- fdatalink:= tdropdownlistdatalink.create(self,igriddatalink(self));
+ fdatalink:= tdropdownlistdatalink.create(self,igriddatalink(self),
+                                                    acontroller.fdatalink);
  inherited;
  include(fstate,gs_isdb);
  fzebra_step:= 0;
@@ -5564,19 +5739,31 @@ begin
 end;
 
 function tdbdropdownlist.locate(const filter: msestring): boolean;
+var
+ row1: integer;
 begin
  result:= false;
  if (datacols.count > 0) then begin
   with tdbdropdownstringcol(datacols[0]).fdatalink do begin
    if (dscontroller <> nil) and (field <> nil) then begin
-    result:= dscontroller.locate([field],[filter],[],
-                                   [[lko_caseinsensitive]]) = loc_ok;
-    if not result then begin
-     result:= dscontroller.locate([field],[filter],[],
-                        [[lko_caseinsensitive,lko_partialkey]]) = loc_ok;
-    end;
-    if result then begin
-     dataset.resync([rmcenter]);
+    with tcustomdbdropdownlistcontroller(fcontroller).fdatalink do begin
+     if ftextindex >= 0 then begin
+      result:= fdataintf.findtext(ftextindex,filter,row1);
+      if result then begin
+       fdatalink.currentrecord:= row1;
+      end;
+     end
+     else begin
+      result:= dscontroller.locate([field],[filter],[],
+                                     [[lko_caseinsensitive]]) = loc_ok;
+      if not result then begin
+       result:= dscontroller.locate([field],[filter],[],
+                          [[lko_caseinsensitive,lko_partialkey]]) = loc_ok;
+      end;
+      if result then begin
+       dataset.resync([rmcenter]);
+      end;
+     end;
     end;
    end;
   end;

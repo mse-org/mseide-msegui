@@ -845,6 +845,7 @@ type
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
     //idbdata
    function getindex(const afield: tfield): integer; //-1 if none
+   function gettextindex(const afield: tfield): integer; //-1 if none
    function lookuptext(const indexnum: integer; const akey: integer;
               const aisnull: boolean;
               const valuefield: tmsestringfield): msestring; overload;
@@ -854,6 +855,10 @@ type
    function lookuptext(const indexnum: integer; const akey: msestring;
               const aisnull: boolean;
               const valuefield: tmsestringfield): msestring; overload;
+  function findtext(const indexnum: integer; const searchtext: msestring;
+                    out arecord: integer): boolean;
+  function getrowtext(const indexnum: integer; const arecord: integer;
+                           const afield: tfield): msestring;
    
  {abstracts, must be overidden by descendents}
    function fetch : boolean; virtual; abstract;
@@ -1086,6 +1091,8 @@ type
  tmsestringfield1 = class(tmsestringfield); 
  tmseblobfield1 = class(tmseblobfield);
  tmsevariantfield1 = class(tmsevariantfield);
+ tmsebooleanfield1 = class(tmsebooleanfield);
+ tmsedatetimefield1 = class(tmsedatetimefield);
  { 
  TFieldcracker = class(TComponent)
   private
@@ -6865,6 +6872,23 @@ begin
  end;
 end;
 
+function tmsebufdataset.gettextindex(const afield: tfield): integer;
+var
+ int1: integer;
+begin
+ result:= -1;
+ for int1:= 0 to findexlocal.count - 1 do begin
+  with tlocalindex(findexlocal.fitems[int1]) do begin
+   if (fields.count > 0) and (high(findexfieldinfos) >= 0) and
+           (findexfieldinfos[0].fieldinstance = afield) and
+           findexfieldinfos[0].caseinsensitive then begin
+    result:= int1;
+    break;
+   end;
+  end;
+ end;
+end;
+
 function tmsebufdataset.updatesortfield(const afield: tfield;
                const adescend: boolean): boolean;
 var
@@ -6928,6 +6952,60 @@ begin
  result:= '';
  if indexlocal[indexnum].find([akey],[aisnull],bm1) then begin
   result:= currentbmasmsestring[valuefield,bm1];
+ end;
+end;
+
+function tmsebufdataset.findtext(const indexnum: integer; const searchtext: msestring;
+                    out arecord: integer): boolean;
+var
+ bm1: bookmarkdataty;
+begin
+ arecord:= -1;
+ result:= indexlocal[indexnum].find([searchtext],[false],bm1,false,true);
+ if result then begin
+  arecord:= bm1.recno;
+ end;
+end;
+
+function tmsebufdataset.getrowtext(const indexnum: integer;
+                 const arecord: integer; const afield: tfield): msestring;
+var
+ bm1: bookmarkdataty;
+begin
+ if indexnum >= 0 then begin
+  checkindex(true);
+ end;
+ bm1.recno:= arecord;
+ bm1.recordpo:= findexes[indexnum+1].ind[arecord];
+ if afield is tmsestringfield then begin
+  result:= currentbmasmsestring[afield,bm1];
+ end
+ else begin
+  case afield.datatype of
+   ftboolean: begin
+    result:= tmsebooleanfield1(afield).fdisplays[
+                         false,currentbmasboolean[afield,bm1]];
+   end;
+   ftsmallint,ftword,ftinteger: begin
+    result:= inttostrmse(currentbmasinteger[afield,bm1]);
+   end;
+   ftlargeint: begin
+    result:= inttostrmse(currentbmasinteger[afield,bm1]);
+   end;
+   ftfloat: begin
+    result:= formatfloatmse(currentbmasfloat[afield,bm1],'');
+   end;
+   fttime,ftdate,ftdatetime: begin
+    result:= tmsedatetimefield1(afield).gettext1(
+                                    currentbmasdatetime[afield,bm1],true);
+   end;
+   ftbcd: begin
+    result:= currtostr(currentbmascurrency[afield,bm1]);
+   end;
+   else begin
+    result:= '';
+   end;
+  end;  
  end;
 end;
 

@@ -111,12 +111,17 @@ type
  tmsestringfield = class;
  idbdata = interface(inullinterface)['{636BE3DB-D558-48ED-8B62-89CC94FEAC0E}']
   function getindex(const afield: tfield): integer; //-1 if none
+  function gettextindex(const afield: tfield): integer; //-1 if none
   function lookuptext(const indexnum: integer; const akey: integer;
          const aisnull: boolean; const valuefield: tmsestringfield): msestring;
   function lookuptext(const indexnum: integer; const akey: int64;
          const aisnull: boolean; const valuefield: tmsestringfield): msestring;
   function lookuptext(const indexnum: integer; const akey: msestring;
          const aisnull: boolean; const valuefield: tmsestringfield): msestring;
+  function findtext(const indexnum: integer; const searchtext: msestring;
+                    out arecord: integer): boolean;
+  function getrowtext(const indexnum: integer; const arecord: integer;
+                           const afield: tfield): msestring;
  end;
    
  idbeditinfo = interface(inullinterface)['{E63A9950-BFAE-DA11-83DF-00C0CA1308FF}']
@@ -608,7 +613,6 @@ type
   private
    fstate: fieldstatesty;
    fdisplayvalues: msestring;
-   fdisplays : array[boolean,boolean] of msestring;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
    procedure setdisplayvalues(const avalue: msestring);
@@ -617,6 +621,7 @@ type
     //imsefield
    function getproviderflags1: providerflags1ty;
   protected
+   fdisplays : array[boolean,boolean] of msestring;
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
    procedure defineproperties(filer: tfiler); override;
@@ -689,6 +694,7 @@ type
    function getasdatetime: tdatetime; override;
    procedure setasdatetime(avalue: tdatetime); override;
    procedure setasstring(const avalue: string); override;
+   function gettext1(const r: tdatetime; const adisplaytext: boolean): msestring;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
@@ -4943,27 +4949,34 @@ begin
  setasdatetime(strtodatetime(avalue));
 end;
 
+function tmsedatetimefield.gettext1(const r: tdatetime;
+                                  const adisplaytext: boolean): msestring;
+var
+ f: string;
+begin
+ if adisplaytext and (length(displayformat) <> 0) then begin
+  f:= displayformat;
+ end
+ else begin
+  case datatype of
+   fttime: f:= shorttimeformat;
+   ftdate: f:= shortdateformat;
+   else f:= 'c'
+  end;
+ end;
+ result:= formatdatetimemse(msestring(f),r);
+end;
+
 procedure tmsedatetimefield.gettext(var thetext: string; adisplaytext: boolean);
 var
  r: tdatetime;
  f: string;
 begin
  if isnull then begin
-  thetext:=''
+  thetext:= '';
  end
  else begin
-  r:= getasdatetime;
-  if adisplaytext and (length(displayformat) <> 0) then begin
-   f:= displayformat;
-  end
-  else begin
-   case datatype of
-    fttime: f:= shorttimeformat;
-    ftdate: f:= shortdateformat;
-    else f:= 'c'
-   end;
-  end;
-  thetext:= formatdatetimemse(msestring(f),r);
+  thetext:= gettext1(getasdatetime,adisplaytext);
  end;
 end;
 
