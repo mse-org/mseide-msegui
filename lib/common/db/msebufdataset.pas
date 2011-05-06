@@ -859,6 +859,10 @@ type
                     out arecord: integer): boolean;
   function getrowtext(const indexnum: integer; const arecord: integer;
                            const afield: tfield): msestring;
+  function getrowinteger(const indexnum: integer; const arecord: integer;
+                           const afield: tfield): integer;
+  function getrowlargeint(const indexnum: integer; const arecord: integer;
+                           const afield: tfield): int64;
    
  {abstracts, must be overidden by descendents}
    function fetch : boolean; virtual; abstract;
@@ -7007,6 +7011,32 @@ begin
    end;
   end;  
  end;
+end;
+
+function tmsebufdataset.getrowinteger(const indexnum: integer;
+                      const arecord: integer; const afield: tfield): integer;
+var
+ bm1: bookmarkdataty;
+begin
+ if indexnum >= 0 then begin
+  checkindex(true);
+ end;
+ bm1.recno:= arecord;
+ bm1.recordpo:= findexes[indexnum+1].ind[arecord];
+ result:= currentbmasinteger[afield,bm1];
+end;
+
+function tmsebufdataset.getrowlargeint(const indexnum: integer;
+                      const arecord: integer; const afield: tfield): int64;
+var
+ bm1: bookmarkdataty;
+begin
+ if indexnum >= 0 then begin
+  checkindex(true);
+ end;
+ bm1.recno:= arecord;
+ bm1.recordpo:= findexes[indexnum+1].ind[arecord];
+ result:= currentbmaslargeint[afield,bm1];
 end;
 
 { tlocalindexes }

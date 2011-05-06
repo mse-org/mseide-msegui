@@ -81,7 +81,7 @@ type
  updaterowdataeventty = procedure(const sender: tcustomgrid; 
                         const arow: integer; const adataset: tdataset)of object;
 
- optiondbty = (odb_copyitems,odb_opendataset,odb_closedataset,odb_nodirectdata);
+ optiondbty = (odb_copyitems,odb_opendataset,odb_closedataset,odb_directdata);
  optionsdbty = set of optiondbty;
  
  idbnaviglink = interface(inullinterface)
@@ -1029,6 +1029,8 @@ type
    property items[const index: integer]: tdbdropdowncol read getitems; default;
  end;
 
+ tdropdownlistdatalink = class;
+ 
  tdropdowndatalink = class(tmsedatalink)
   private
    fowner: tcustomdbdropdownlistcontroller;
@@ -1127,7 +1129,7 @@ type
    ffield_selected: tfield;
    ffieldname_selected: string;
    procedure checkscroll;
-   procedure checkscrollbar;
+   procedure checkscrollbar; virtual;
    procedure doupdaterowdata(const row: integer);
    procedure beginnullchecking;
    procedure endnullchecking;
@@ -1267,15 +1269,21 @@ type
    procedure setcurrentrecord(const avalue: integer);
    procedure updatedatawindow;
   protected
+   function getasmsestring(const afield: tfield): msestring;
+   function getasinteger(const afield: tfield): integer;
+   function getaslargeint(const afield: tfield): int64;
+
    function getrecordcount: integer; override; 
            //workaround FPC bug 19290
    function  GetBufferCount: Integer; override;
    procedure SetBufferCount(Value: Integer); override;
    function getfirstrecord: integer; override;
+   procedure updatefocustext;
    procedure recordchanged(afield: tfield); override;
    function  GetActiveRecord: Integer; override;
    procedure SetActiveRecord(Value: Integer); override;
    function moveby(distance: integer): integer; override;
+   procedure checkscrollbar; override;
    function scrollevent(sender: tcustomscrollbar;
                              event: scrolleventty): boolean; override;
              //true if processed
@@ -1299,6 +1307,7 @@ type
    function locate(const filter: msestring): boolean; override;
    procedure dopaint(const acanvas: tcanvas); override;
    procedure dohide; override;
+
   public
    constructor create(const acontroller: tcustomdbdropdownlistcontroller;
                              acols: tdropdowncols);
@@ -1334,6 +1343,11 @@ type
    function candropdown: boolean; override;
    procedure itemselected(const index: integer; const akey: keyty); override;
    procedure doafterclosedropdown; override;
+   
+   function getasmsestring(const afield: tfield; const utf8: boolean): msestring;
+   function getasinteger(const afield: tfield): integer;
+   function getaslargeint(const afield: tfield): int64;
+   
   //idbeditinfo
    function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out propertynames: stringarty;
@@ -5246,7 +5260,8 @@ end;
 
 { tdropdowndatalink }
 
-constructor tdropdowndatalink.create(const aowner: tcustomdbdropdownlistcontroller);
+constructor tdropdowndatalink.create(
+        const aowner: tcustomdbdropdownlistcontroller);
 begin
  fowner:= aowner;
 end;
@@ -5276,6 +5291,15 @@ begin
 end;
 
 procedure tdropdowndatalink.updatefields;
+
+ procedure doerror(const afield: tfield);
+ begin
+  if afield <> nil then begin
+   raise exception.create(dataset.name+
+             ': No local index for "'+afield.fieldname+'".');
+  end;
+ end; //doerror
+
 begin
  if Active and (fvaluefieldname <> '') then begin
   setvaluefield(datasource.dataset.fieldbyname(fvaluefieldname));
@@ -5296,19 +5320,24 @@ begin
  fdataintf:= nil;
  fkeyindex:= -1;
  ftextindex:= -1;
-{$ifdef mse_withdirectdata}
  if active then begin
-  if not (odb_nodirectdata in fowner.foptionsdb) and
-      getcorbainterface(dataset,typeinfo(idbdata),fdataintf) then begin
-   if fvaluefield <> nil then begin
-    fkeyindex:= fdataintf.getindex(fvaluefield);
+  if odb_directdata in fowner.foptionsdb then begin
+   if getcorbainterface(dataset,typeinfo(idbdata),fdataintf) then begin
+    if fvaluefield <> nil then begin
+     fkeyindex:= fdataintf.getindex(fvaluefield);
+    end;
+    if ftextfield <> nil then begin
+     ftextindex:= fdataintf.gettextindex(ftextfield);
+    end;
    end;
-   if ftextfield <> nil then begin
-    ftextindex:= fdataintf.gettextindex(ftextfield);
+   if fkeyindex < 0 then begin
+    doerror(fvaluefield);
+   end;
+   if ftextindex < 0 then begin
+    doerror(ftextfield);
    end;
   end;
  end;
-{$endif}
 end;
 
 procedure tdropdowndatalink.updatelookupvalue;
@@ -5451,7 +5480,14 @@ function tdropdowndatalink.gettextasmsestring: msestring;
 begin
  result:= '';
  if active and (ftextfield <> nil) then begin
-  result:= getasmsestring(ftextfield,utf8);
+//  with fgridlink do begin
+//   if fdataintf <> nil then begin
+//    result:= fdataintf.getrowtext(ftextindex,fcurrentrecord,ftextfield);
+//   end
+//   else begin
+    result:= getasmsestring(ftextfield,utf8);
+//   end;
+//  end;
  end;
 end;
 
@@ -5511,9 +5547,8 @@ begin
  inherited create(aowner,aintf);
 end;
 
-procedure tdropdownlistdatalink.recordchanged(afield: tfield);
+procedure tdropdownlistdatalink.updatefocustext;
 begin
- inherited;
  with tdbdropdownlist(fgrid) do begin
   if isdatacell(ffocusedcell) then begin
    feditor.text:= tdbdropdownstringcol(datacols[ffocusedcell.col]).
@@ -5522,13 +5557,19 @@ begin
  end;
 end;
 
+procedure tdropdownlistdatalink.recordchanged(afield: tfield);
+begin
+ inherited;
+ updatefocustext;
+end;
+
 function tdropdownlistdatalink.GetActiveRecord: Integer;
 begin
  if fdataintf = nil then begin
   result:= inherited getactiverecord;
  end
  else begin
-  result:= 0;
+  result:= fcurrentrecord-ffirstrecord;
  end;
 end;
 
@@ -5536,8 +5577,6 @@ procedure tdropdownlistdatalink.SetActiveRecord(Value: Integer);
 begin
  if fdataintf = nil then begin
   inherited;
- end
- else begin
  end;
 end;
 
@@ -5555,8 +5594,37 @@ begin
  end;
 end;
 
+procedure tdropdownlistdatalink.checkscrollbar;
+var
+ rea1: real;
+ int1: integer;
+begin
+ if fdataintf = nil then begin
+  inherited;
+ end
+ else begin
+  int1:= dataset.recordcount;
+  if int1 <= fgrid.rowcount then begin
+   rea1:= 1;
+  end
+  else begin
+   rea1:= fgrid.rowcount/int1;
+  end;
+  fgrid.frame.sbvert.pagesize:= rea1;
+  if int1 > 0 then begin
+   rea1:= fcurrentrecord/int1;
+  end
+  else begin
+   rea1:= 0;
+  end;
+  fgrid.frame.sbvert.value:= rea1;
+ end;
+end;
+
 function tdropdownlistdatalink.scrollevent(sender: tcustomscrollbar;
                event: scrolleventty): boolean;
+var
+ int1: integer;
 begin
  if (fdataintf = nil) or (sender.tag <> 1) or 
              not (event in [sbe_thumbtrack,sbe_thumbposition]) then begin
@@ -5566,6 +5634,7 @@ begin
   result:= false;
   if (event <> sbe_thumbtrack) or (gdo_thumbtrack in foptions) then begin
    if self.active then begin
+    currentrecord:= round(fgrid.frame.sbvert.value * dataset.recordcount);      
     result:= true;
    end;
   end;
@@ -5596,10 +5665,11 @@ end;
 
 procedure tdropdownlistdatalink.setcurrentrecord(const avalue: integer);
 var
- int1: integer;
+ int1,int2: integer;
 begin
  if active then begin
   if avalue <> fcurrentrecord then begin
+   int2:= fcurrentrecord;
    fcurrentrecord:= avalue;
    if fcurrentrecord < 0 then begin
     fcurrentrecord:= 0;
@@ -5609,14 +5679,16 @@ begin
     fcurrentrecord:= int1 - 1;
    end;
    updatedatawindow;
+   datasetscrolled(fcurrentrecord-int2);
+   updatefocustext;
   end;
  end;
 end;
 
 procedure tdropdownlistdatalink.updatedatawindow;
 begin
- if fcurrentrecord >= ffirstrecord+buffercount then begin
-  ffirstrecord:= fcurrentrecord - buffercount + 1;
+ if fcurrentrecord >= ffirstrecord+fmaxrowcount then begin
+  ffirstrecord:= fcurrentrecord - fmaxrowcount + 1;
  end;
  if fcurrentrecord < ffirstrecord then begin
   ffirstrecord:= fcurrentrecord;
@@ -5653,6 +5725,36 @@ begin
   if result > fmaxrowcount then begin
    result:= fmaxrowcount;
   end;
+ end;
+end;
+
+function tdropdownlistdatalink.getasmsestring(const afield: tfield): msestring;
+begin
+ if fdataintf = nil then begin
+  result:= msedb.getasmsestring(afield,utf8);
+ end
+ else begin
+  result:= fdataintf.getrowtext(ftextindex,fcurrentrecord,afield);
+ end;
+end;
+
+function tdropdownlistdatalink.getasinteger(const afield: tfield): integer;
+begin
+ if fdataintf = nil then begin
+  result:= afield.asinteger;
+ end
+ else begin
+  result:= fdataintf.getrowinteger(ftextindex,fcurrentrecord,afield);
+ end;
+end;
+
+function tdropdownlistdatalink.getaslargeint(const afield: tfield): int64;
+begin
+ if fdataintf = nil then begin
+  result:= afield.aslargeint;
+ end
+ else begin
+  result:= fdataintf.getrowlargeint(ftextindex,fcurrentrecord,afield);
  end;
 end;
 
@@ -5912,7 +6014,7 @@ begin
      while not datas.eof do begin
       fbookmarks[int2]:= datas.bookmark;
       for int1:= 0 to high(ar1) do begin
-       ar2[int1]^[int2]:= getasmsestring(ar1[int1],fdatalink.utf8);
+       ar2[int1]^[int2]:= msedb.getasmsestring(ar1[int1],fdatalink.utf8);
       end; 
       inc(int2);
       datas.next;
@@ -6008,6 +6110,52 @@ begin
  end; 
 end;
 
+function tcustomdbdropdownlistcontroller.getasmsestring(const afield: tfield;
+               const utf8: boolean): msestring;
+begin
+ if afield = nil then begin
+  result:= '';
+ end
+ else begin
+  if (fdropdownlist is tdbdropdownlist) then begin
+   result:= tdbdropdownlist(fdropdownlist).fdatalink.getasmsestring(afield);
+  end
+  else begin
+   result:= msedb.getasmsestring(afield,utf8);
+  end;
+ end;
+end;
+
+function tcustomdbdropdownlistcontroller.getasinteger(const afield: tfield): integer;
+begin
+ if afield = nil then begin
+  result:= 0;
+ end
+ else begin
+  if (fdropdownlist is tdbdropdownlist) then begin
+   result:= tdbdropdownlist(fdropdownlist).fdatalink.getasinteger(afield);
+  end
+  else begin
+   result:= afield.asinteger;
+  end;
+ end;
+end;
+
+function tcustomdbdropdownlistcontroller.getaslargeint(const afield: tfield): int64;
+begin
+ if afield = nil then begin
+  result:= 0;
+ end
+ else begin
+  if (fdropdownlist is tdbdropdownlist) then begin
+   result:= tdbdropdownlist(fdropdownlist).fdatalink.getaslargeint(afield);
+  end
+  else begin
+   result:= afield.aslargeint;
+  end;
+ end;
+end;
+
 { tdbenumeditdb }
 
 function tdbenumeditdb.getdropdown: tdbdropdownlistcontroller;
@@ -6033,8 +6181,10 @@ begin
  bo1:= false;
  if arecordnum >= 0 then begin
   with tdbdropdownlistcontroller(fdropdown) do begin
+//   text:= getasmsestring(fdatalink.textfield,fdatalink.utf8);
+//   tdropdowncols1(fcols).fitemindex:= fdatalink.valuefield.asinteger
    text:= getasmsestring(fdatalink.textfield,fdatalink.utf8);
-   tdropdowncols1(fcols).fitemindex:= fdatalink.valuefield.asinteger
+   tdropdowncols1(fcols).fitemindex:= getasinteger(fdatalink.valuefield);
   end; 
   bo1:= checkvalue;
  end
@@ -6277,7 +6427,7 @@ begin
  if arecordnum >= 0 then begin
   with tdbdropdownlistcontroller(fdropdown) do begin
    text:= getasmsestring(fdatalink.textfield,fdatalink.utf8);
-   tdropdowncols1(fcols).fitemindex:= fdatalink.valuefield.asinteger
+   tdropdowncols1(fcols).fitemindex:= getasinteger(fdatalink.valuefield);
   end; 
   bo1:= checkvalue;
  end
@@ -9429,7 +9579,7 @@ begin
  if arecordnum >= 0 then begin
   with tdbdropdownlistcontroller(fdropdown) do begin
    text:= getasmsestring(fdatalink.textfield,fdatalink.utf8);
-   tdropdowncols1(fcols).fkeyvalue64:= fdatalink.valuefield.aslargeint
+   tdropdowncols1(fcols).fkeyvalue64:= getaslargeint(fdatalink.valuefield)
   end; 
   bo1:= checkvalue;
  end
@@ -9448,7 +9598,7 @@ end;
 
 function tcustomenum64editdb.internaldatatotext(const data): msestring;
 var
- lint1: integer;
+ lint1: int64;
 begin
  if @data = nil then begin
   lint1:= value;  

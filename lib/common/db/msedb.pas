@@ -122,6 +122,10 @@ type
                     out arecord: integer): boolean;
   function getrowtext(const indexnum: integer; const arecord: integer;
                            const afield: tfield): msestring;
+  function getrowinteger(const indexnum: integer; const arecord: integer;
+                           const afield: tfield): integer;
+  function getrowlargeint(const indexnum: integer; const arecord: integer;
+                           const afield: tfield): int64;
  end;
    
  idbeditinfo = interface(inullinterface)['{E63A9950-BFAE-DA11-83DF-00C0CA1308FF}']

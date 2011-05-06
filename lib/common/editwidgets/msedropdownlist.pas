@@ -162,7 +162,7 @@ type
  tdropdownstringcol = class(tstringcol)
   protected
    function createdatalist: tdatalist; override;
- public
+  public
    destructor destroy; override;
    constructor create(const agrid: tcustomgrid; 
                              const aowner: tgridarrayprop); override;
