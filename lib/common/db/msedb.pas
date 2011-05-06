@@ -111,7 +111,8 @@ type
  tmsestringfield = class;
  idbdata = interface(inullinterface)['{636BE3DB-D558-48ED-8B62-89CC94FEAC0E}']
   function getindex(const afield: tfield): integer; //-1 if none
-  function gettextindex(const afield: tfield): integer; //-1 if none
+  function gettextindex(const afield: tfield;
+                 const acaseinsensitive: boolean): integer; //-1 if none
   function lookuptext(const indexnum: integer; const akey: integer;
          const aisnull: boolean; const valuefield: tmsestringfield): msestring;
   function lookuptext(const indexnum: integer; const akey: int64;

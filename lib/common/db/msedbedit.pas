@@ -5298,7 +5298,7 @@ procedure tdropdowndatalink.updatefields;
  begin
   if afield <> nil then begin
    raise exception.create(dataset.name+
-             ': No local index for "'+afield.fieldname+'".');
+             ': No matching local index for "'+afield.fieldname+'".');
   end;
  end; //doerror
 
@@ -5329,7 +5329,8 @@ begin
      fkeyindex:= fdataintf.getindex(fvaluefield);
     end;
     if ftextfield <> nil then begin
-     ftextindex:= fdataintf.gettextindex(ftextfield);
+     ftextindex:= fdataintf.gettextindex(ftextfield,
+              not (deo_casesensitive in fowner.foptions));
     end;
    end;
    if fkeyindex < 0 then begin

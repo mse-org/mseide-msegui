@@ -845,7 +845,8 @@ type
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
     //idbdata
    function getindex(const afield: tfield): integer; //-1 if none
-   function gettextindex(const afield: tfield): integer; //-1 if none
+   function gettextindex(const afield: tfield;
+                 const acaseinsensitive: boolean): integer; //-1 if none
    function lookuptext(const indexnum: integer; const akey: integer;
               const aisnull: boolean;
               const valuefield: tmsestringfield): msestring; overload;
@@ -6876,7 +6877,8 @@ begin
  end;
 end;
 
-function tmsebufdataset.gettextindex(const afield: tfield): integer;
+function tmsebufdataset.gettextindex(const afield: tfield;
+               const acaseinsensitive: boolean): integer;
 var
  int1: integer;
 begin
@@ -6885,7 +6887,8 @@ begin
   with tlocalindex(findexlocal.fitems[int1]) do begin
    if (fields.count > 0) and (high(findexfieldinfos) >= 0) and
            (findexfieldinfos[0].fieldinstance = afield) and
-           findexfieldinfos[0].caseinsensitive then begin
+                     not (findexfieldinfos[0].caseinsensitive xor 
+                                         acaseinsensitive) then begin
     result:= int1;
     break;
    end;
