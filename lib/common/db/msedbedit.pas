@@ -1222,6 +1222,7 @@ type
                                        const avalue: boolean);
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
+   function domoveby(const distance: integer): integer; virtual;
    function moveby(distance: integer): integer; override;
    function rowtorecnonullbased(const row: integer): integer;
    function isfirstrow: boolean;
@@ -1282,7 +1283,7 @@ type
    procedure recordchanged(afield: tfield); override;
    function  GetActiveRecord: Integer; override;
    procedure SetActiveRecord(Value: Integer); override;
-   function moveby(distance: integer): integer; override;
+   function domoveby(const distance: integer): integer; override;
    procedure checkscrollbar; override;
    function scrollevent(sender: tcustomscrollbar;
                              event: scrolleventty): boolean; override;
@@ -5513,7 +5514,7 @@ begin
  if fdatalink.active and (fdatalink.field <> nil) then begin
   with tdbdropdownlist(fgrid).fdatalink do begin
    if fdataintf <> nil then begin
-    result:= fdataintf.getrowtext(ftextindex,arow+firstrecord,fdatalink.field);
+    result:= fdataintf.getrowtext(ftextindex,arow+ffirstrecord,fdatalink.field);
    end
    else begin
     int1:= activerecord;
@@ -5580,12 +5581,12 @@ begin
  end;
 end;
 
-function tdropdownlistdatalink.moveby(distance: integer): integer;
+function tdropdownlistdatalink.domoveby(const distance: integer): integer;
 var
  int1: integer;
 begin
  if fdataintf = nil then begin
-  result:= inherited moveby(distance);
+  result:= inherited domoveby(distance);
  end
  else begin
   int1:= fcurrentrecord;
@@ -5603,12 +5604,12 @@ begin
   inherited;
  end
  else begin
-  int1:= dataset.recordcount;
+  int1:= dataset.recordcount-1;
   if int1 <= fgrid.rowcount then begin
    rea1:= 1;
   end
   else begin
-   rea1:= fgrid.rowcount/int1;
+   rea1:= fgrid.rowcount/(int1+1+fgrid.rowcount);
   end;
   fgrid.frame.sbvert.pagesize:= rea1;
   if int1 > 0 then begin
@@ -5653,16 +5654,6 @@ begin
  end;
 end;
 
-function tdropdownlistdatalink.getfirstrecord: integer;
-begin
- if fdataintf = nil then begin
-  result:= inherited getfirstrecord;
- end
- else begin
-  result:= ffirstrecord;
- end;
-end;
-
 procedure tdropdownlistdatalink.setcurrentrecord(const avalue: integer);
 var
  int1,int2: integer;
@@ -5679,9 +5670,8 @@ begin
     fcurrentrecord:= int1 - 1;
    end;
    updatedatawindow;
-   datasetscrolled(fcurrentrecord-int2);
-   updatefocustext;
   end;
+  recordchanged(nil);
  end;
 end;
 
@@ -5713,6 +5703,16 @@ begin
  else begin
   fmaxrowcount:= value;
  end;   
+end;
+
+function tdropdownlistdatalink.getfirstrecord: integer;
+begin
+ if fdataintf = nil then begin
+  result:= inherited getfirstrecord;
+ end
+ else begin
+  result:= ffirstrecord;
+ end;
 end;
 
 function tdropdownlistdatalink.getrecordcount: integer;
@@ -7099,10 +7099,6 @@ begin
    if (distance <> 0) then begin
     if not fgridinvalidated then begin
      rect1:= fdatarecty;
-//     rect1.cy:= rowhigh*ystep;
-//     if rowbefore = 0 then begin
-//      inc(rect1.y,ystep);
-//     end;
      if (og_rowheight in foptionsgrid) or testintersectrect(rect1,updaterect) then begin
       invalidaterect(rect1,org_client); //scrolling not possible
      end
@@ -7464,6 +7460,11 @@ begin
  dec(fnullchecking);
 end;
 
+function tgriddatalink.domoveby(const distance: integer): integer;
+begin
+ result:= inherited moveby(distance);
+end;
+
 function tgriddatalink.moveby(distance: integer): integer;
 begin
  invalidateindicator; //grid can be defocused
@@ -7472,7 +7473,7 @@ begin
   beginnullchecking;
   try
    if checkvalue then begin
-    result:= inherited moveby(distance);
+    result:= domoveby(distance);
    end
    else begin
     tcustomgrid1(fgrid).beginnonullcheck;
