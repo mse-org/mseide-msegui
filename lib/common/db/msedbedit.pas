@@ -1182,7 +1182,7 @@ type
    procedure updatedata; override;
    procedure updatefields; override;
    procedure focuscell(var cell: gridcoordty); virtual;
-   procedure cellevent(var info: celleventinfoty);
+   procedure cellevent(var info: celleventinfoty); virtual;
    procedure invalidateindicator;
    function scrollevent(sender: tcustomscrollbar;
                              event: scrolleventty): boolean; virtual;
@@ -1274,6 +1274,7 @@ type
    function getasinteger(const afield: tfield): integer;
    function getaslargeint(const afield: tfield): int64;
 
+   procedure cellevent(var info: celleventinfoty); override;
    function getrecordcount: integer; override; 
            //workaround FPC bug 19290
    function  GetBufferCount: Integer; override;
@@ -5755,6 +5756,20 @@ begin
  end
  else begin
   result:= fdataintf.getrowlargeint(ftextindex,fcurrentrecord,afield);
+ end;
+end;
+
+procedure tdropdownlistdatalink.cellevent(var info: celleventinfoty);
+var
+ int1: integer;
+begin
+ int1:= info.newcell.row-activerecord;
+ inherited;
+ with info do begin
+  if (eventkind = cek_enter) and active and (int1 = 0) and
+          (newcell.col >= 0) then begin
+   updatefocustext;
+  end;
  end;
 end;
 
