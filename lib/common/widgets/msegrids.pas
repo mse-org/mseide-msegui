@@ -881,8 +881,6 @@ type
 
  cellmergeflagty = (cmf_h,cmf_v,cmf_rline);
  cellmergeflagsty = set of cellmergeflagty;
-// colheaderstatety = (chs_textclipped);
-// colheaderstatesty = set of colheaderstatety;
  
  tcolheader = class(tindexpersistent,iframe,iface,iimagelistinfo)
   private
@@ -918,7 +916,6 @@ type
    procedure setcaptiondist(const avalue: integer);
    procedure readcaptionpos(reader: treader);
   protected
-//   fstate: colheaderstatesty;
    fgrid: tcustomgrid;
    fframe: tfixcellframe;
    fface: tfixcellface;
@@ -943,13 +940,13 @@ type
    procedure invalidaterect(const rect: rectty; const org: originty = org_client;
                               const noclip: boolean = false);
    function getframestateflags: framestateflagsty;
-   //iface
+    //iface
    function getclientrect: rectty;
    procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
               const linkintf: iobjectlink = nil);
    procedure widgetregioninvalid;
    function translatecolor(const acolor: colorty): colorty;
-   //iimagelistinfo
+    //iimagelistinfo
    function getimagelist: timagelist;   
   public
    constructor create(const aowner: tobject;
@@ -981,8 +978,6 @@ type
                                      default defaultshapecaptiondist;
    property imagepos: imageposty read finfo.imagepos write setimagepos 
                                                      default ip_center;
-//   property captionpos: captionposty read finfo.captionpos write setcaptionpos 
-//                                                     default cp_left;
    property colorglyph: colorty read finfo.colorglyph
                    write setcolorglyph default cl_glyph;
                    //cl_none -> no no glyph
@@ -4973,6 +4968,7 @@ begin
 //      include(fstate,gps_sortclicked);
       if ss_ctrl in info.mouseeventinfopo^.shiftstate then begin
        fgrid.sorted:= false;
+       fgrid.fdatacols.fsortcol:= -1;
        fgrid.updatesortcol(-1);
       end
       else begin

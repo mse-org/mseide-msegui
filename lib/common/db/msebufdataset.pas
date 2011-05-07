@@ -2597,7 +2597,13 @@ begin
    buffer:= @ffilterbuffer[ffiltereditkind]^.header;
   end;
   ord(dscurvalue): begin
-   buffer:= @fcurrentbuf^.header;
+   if pdsrecordty(activebuffer)^.dsheader.bookmark.data.recordpo <>
+                                                             nil then begin
+    buffer:= @fcurrentbuf^.header;
+   end
+   else begin
+    buffer:= @pdsrecordty(activebuffer)^.header; //insert
+   end;
   end;
   else begin
    if bs_internalcalc in fbstate then begin

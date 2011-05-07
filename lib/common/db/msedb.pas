@@ -293,6 +293,8 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
    function oldmsestring(out aisnull: boolean): msestring; overload;
    function oldmsestring: msestring; overload;
+   function curmsestring(out aisnull: boolean): msestring; overload;
+   function curmsestring: msestring; overload;
    property value: msestring read getasmsestring write setasmsestring;
    property characterlength: integer read fcharacterlength;
    property tagpo: pointer read ftagpo write ftagpo;
@@ -3402,7 +3404,25 @@ function tmsestringfield.oldmsestring: msestring;
 var
  bo1: boolean;
 begin
- result:= oldmsestring(bo1);
+ result:= curmsestring(bo1);
+end;
+
+function tmsestringfield.curmsestring(out aisnull: boolean): msestring;
+var
+ statebefore: tdatasetstate;
+begin
+ statebefore:= tdataset1(dataset).settempstate(dscurvalue);
+ aisnull:= not getdata(nil);
+ result:= getasmsestring;
+ tdataset1(dataset).restorestate(statebefore);
+end;
+
+
+function tmsestringfield.curmsestring: msestring;
+var
+ bo1: boolean;
+begin
+ result:= curmsestring(bo1);
 end;
 
 {
