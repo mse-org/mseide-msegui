@@ -1106,7 +1106,6 @@ type
    procedure setasmsestring(const avalue: msestring);
    function getmsedefaultexpression: msestring;
    procedure checkfield; 
-   procedure updatefields; override;
    function GetAsBoolean: Boolean;
    procedure SetAsBoolean(const avalue: Boolean);
    function GetAsCurrency: Currency;
@@ -1131,11 +1130,14 @@ type
   protected
    fstate: fielddatalinkstatesty;
    procedure setfield(const value: tfield); virtual;
+   procedure updatefields; override;
+   function getsortfield: tfield; virtual;
   public
    function assql: string;
    function fieldactive: boolean;
    procedure clear;
    property field: tfield read ffield;
+   property sortfield: tfield read getsortfield;
    property fieldname: string read ffieldname write setfieldname;
    property state: fielddatalinkstatesty read fstate;
    property islargeint: boolean read getislargeint;
@@ -1699,6 +1701,8 @@ procedure fieldtoparam(const field: tfield; const param: tparam);
 procedure copyfieldvalues(const source: tdataset; const dest: tdataset);
 procedure msestringtoparam(const avalue: msestring; const param: tparam);
 function getasmsestring(const field: tfield; const utf8: boolean = true): msestring;
+procedure setasmsestring(const avalue: msestring;
+              const field: tfield; const utf8: boolean = true);
 function checkfieldcompatibility(const afield: tfield;
                      const adatatype: tfieldtype): boolean;
            //true if ok
@@ -1988,6 +1992,29 @@ begin
     end
     else begin
      result:= field.asstring;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure setasmsestring(const avalue: msestring;
+              const field: tfield; const utf8: boolean = true);
+begin
+ if field <> nil then begin
+  if field is tmsestringfield then begin
+   tmsestringfield(field).asmsestring:= avalue;
+  end
+  else begin
+   if field is tmsememofield then begin
+    tmsememofield(field).asmsestring:= avalue;
+   end
+   else begin
+    if utf8 then begin
+     field.asstring:= stringtoutf8(avalue);
+    end
+    else begin
+     field.asstring:= avalue;
     end;
    end;
   end;
@@ -6498,6 +6525,11 @@ begin
  result:= fds_isstring in fstate;
 end;
 
+function tfielddatalink.getsortfield: tfield;
+begin
+ result:= ffield;
+end;
+
 { tpersistentfields }
 
 constructor tpersistentfields.create(const adataset: tdataset);
@@ -7582,7 +7614,7 @@ var
 begin
  field1:= nil;
  if alink <> nil then begin
-  field1:= alink.field;
+  field1:= alink.sortfield;
  end;
  result:= fintf.updatesortfield(field1,adescend);
 end;

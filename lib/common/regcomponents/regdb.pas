@@ -347,6 +347,8 @@ begin
         tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),nil,'fieldname',
         tdbfieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(string),teditwidgetdatalink,'fieldnametext',
+        tdbfieldnamenocalcpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldfieldlink,'fieldname',
         tdbfieldnamenocalcpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldlink,'destdatafield',

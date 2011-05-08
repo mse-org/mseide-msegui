@@ -273,7 +273,7 @@ type
     //idbeditinfo
    function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out apropertynames: stringarty; 
-                                     out afieldtypes: fieldtypesarty);
+                                     out afieldtypes: fieldtypesarty); virtual;
   public
    constructor create(const intf: idbeditfieldlink);
    destructor destroy; override;
@@ -314,7 +314,27 @@ type
    property ondataentered;
  end;
 
+ tlookupeditdatalink = class(teditwidgetdatalink)
+  private
+   ffieldnametext: string;
+   ffieldtext: tfield;
+   procedure setfieldnametext(const avalue: string);
+  protected
+   procedure updatefields; override;
+   function getsortfield: tfield; override;
+   property fieldtext: tfield read ffieldtext;
+   procedure getfieldtypes(out apropertynames: stringarty; 
+                                     out afieldtypes: fieldtypesarty); override;
+  published
+   property fieldnametext: string read ffieldnametext write setfieldnametext;
+ end;
+ 
  tstringeditwidgetdatalink = class(teditwidgetdatalink)
+  published
+   property nullsymbol;
+ end;
+
+ tstringlookupeditdatalink = class(tlookupeditdatalink)
   published
    property nullsymbol;
  end;
@@ -497,8 +517,8 @@ type
  
  tdbkeystringedit = class(tcustomkeystringedit,idbeditfieldlink,ireccontrol)
   private
-   fdatalink: tstringeditwidgetdatalink;
-   procedure setdatalink(const avalue: tstringeditwidgetdatalink);
+   fdatalink: tstringlookupeditdatalink;
+   procedure setdatalink(const avalue: tstringlookupeditdatalink);
   protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -521,7 +541,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property datalink: tstringeditwidgetdatalink read fdatalink write setdatalink;
+   property datalink: tstringlookupeditdatalink read fdatalink write setdatalink;
    property dropdown;
    property valuedefault;
    property onsetvalue;
@@ -933,8 +953,8 @@ type
 
  tcustomdbenumedit = class(tcustomenumedit,idbeditfieldlink,ireccontrol)
   private
-   fdatalink: teditwidgetdatalink;
-   procedure setdatalink(const avalue: teditwidgetdatalink);
+   fdatalink: tlookupeditdatalink;
+   procedure setdatalink(const avalue: tlookupeditdatalink);
   protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -955,7 +975,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property datalink: teditwidgetdatalink read fdatalink write setdatalink;
+   property datalink: tlookupeditdatalink read fdatalink write setdatalink;
  end;
  
  tdbenumedit = class(tcustomdbenumedit)
@@ -2173,8 +2193,8 @@ type
  
  tdbenum64editlb = class(tcustomenum64editlb,idbeditfieldlink,ireccontrol)
   private
-   fdatalink: teditwidgetdatalink;
-   procedure setdatalink(const avalue: teditwidgetdatalink);
+   fdatalink: tlookupeditdatalink;
+   procedure setdatalink(const avalue: tlookupeditdatalink);
   protected   
    procedure defineproperties(filer: tfiler); override;
 
@@ -2198,7 +2218,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property datalink: teditwidgetdatalink read fdatalink write setdatalink;
+   property datalink: tlookupeditdatalink read fdatalink write setdatalink;
    property dropdown;
    property onsetvalue;
  end;
@@ -2229,8 +2249,8 @@ type
  
  tdbenum64editdb = class(tcustomenum64editdb,idbeditfieldlink,ireccontrol)
   private
-   fdatalink: teditwidgetdatalink;
-   procedure setdatalink(const avalue: teditwidgetdatalink);
+   fdatalink: tlookupeditdatalink;
+   procedure setdatalink(const avalue: tlookupeditdatalink);
   protected   
    procedure defineproperties(filer: tfiler); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
@@ -2252,7 +2272,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property datalink: teditwidgetdatalink read fdatalink write setdatalink;
+   property datalink: tlookupeditdatalink read fdatalink write setdatalink;
    property dropdown;
    property onsetvalue;
  end;
@@ -3678,7 +3698,7 @@ end;
 
 constructor tdbkeystringedit.create(aowner: tcomponent);
 begin
- fdatalink:= tstringeditwidgetdatalink.Create(idbeditfieldlink(self));
+ fdatalink:= tstringlookupeditdatalink.Create(idbeditfieldlink(self));
  inherited;
 end;
 
@@ -3705,9 +3725,13 @@ procedure tdbkeystringedit.valuetofield;
 begin
  if value = '' then begin
   fdatalink.field.clear;
+  if fdatalink.fieldtext <> nil then begin
+   fdatalink.fieldtext.clear;
+  end;
  end
  else begin
   fdatalink.asmsestring:= value;
+  setasmsestring(text,fdatalink.fieldtext,fdatalink.utf8)
  end;
 end;
 
@@ -3757,7 +3781,7 @@ begin
  fdatalink.nullcheckneeded(result);
 end;
 
-procedure tdbkeystringedit.setdatalink(const avalue: tstringeditwidgetdatalink);
+procedure tdbkeystringedit.setdatalink(const avalue: tstringlookupeditdatalink);
 begin
  fdatalink.assign(avalue);
 end;
@@ -5028,7 +5052,7 @@ end;
 
 constructor tcustomdbenumedit.create(aowner: tcomponent);
 begin
- fdatalink:= teditwidgetdatalink.create(idbeditfieldlink(self));
+ fdatalink:= tlookupeditdatalink.create(idbeditfieldlink(self));
  inherited;
 end;
 
@@ -5055,9 +5079,13 @@ procedure tcustomdbenumedit.valuetofield;
 begin
  if value = fvalueempty then begin
   fdatalink.field.clear;
+  if fdatalink.fieldtext <> nil then begin
+   fdatalink.fieldtext.clear;
+  end;
  end
  else begin
   fdatalink.field.asinteger:= value;
+  setasmsestring(text,fdatalink.fieldtext,fdatalink.utf8)
  end;
 end;
 
@@ -5108,7 +5136,7 @@ begin
  fdatalink.nullcheckneeded(result);
 end;
 
-procedure tcustomdbenumedit.setdatalink(const avalue: teditwidgetdatalink);
+procedure tcustomdbenumedit.setdatalink(const avalue: tlookupeditdatalink);
 begin
  fdatalink.assign(avalue);
 end;
@@ -9630,7 +9658,7 @@ end;
 
 constructor tdbenum64editlb.create(aowner: tcomponent);
 begin
- fdatalink:= teditwidgetdatalink.create(idbeditfieldlink(self));
+ fdatalink:= tlookupeditdatalink.create(idbeditfieldlink(self));
  inherited;
 end;
 
@@ -9657,9 +9685,13 @@ procedure tdbenum64editlb.valuetofield;
 begin
  if value = -1 then begin
   fdatalink.field.clear;
+  if fdatalink.fieldtext <> nil then begin
+   fdatalink.fieldtext.clear;
+  end;
  end
  else begin
   fdatalink.field.aslargeint:= value;
+  setasmsestring(text,fdatalink.fieldtext,fdatalink.utf8)
  end;
 end;
 
@@ -9707,7 +9739,7 @@ begin
  afieldtypes:= integerfields;
 end;
 
-procedure tdbenum64editlb.setdatalink(const avalue: teditwidgetdatalink);
+procedure tdbenum64editlb.setdatalink(const avalue: tlookupeditdatalink);
 begin
  fdatalink.assign(avalue);
 end;
@@ -9744,7 +9776,7 @@ end;
 
 constructor tdbenum64editdb.create(aowner: tcomponent);
 begin
- fdatalink:= teditwidgetdatalink.create(idbeditfieldlink(self));
+ fdatalink:= tlookupeditdatalink.create(idbeditfieldlink(self));
  inherited;
 end;
 
@@ -9771,9 +9803,13 @@ procedure tdbenum64editdb.valuetofield;
 begin
  if value = -1 then begin
   fdatalink.field.clear;
+  if fdatalink.fieldtext <> nil then begin
+   fdatalink.fieldtext.clear;
+  end;
  end
  else begin
   fdatalink.field.aslargeint:= value;
+  setasmsestring(text,fdatalink.fieldtext,fdatalink.utf8)
  end;
 end;
 
@@ -9821,7 +9857,7 @@ begin
  afieldtypes:= integerfields;
 end;
 
-procedure tdbenum64editdb.setdatalink(const avalue: teditwidgetdatalink);
+procedure tdbenum64editdb.setdatalink(const avalue: tlookupeditdatalink);
 begin
  fdatalink.assign(avalue);
 end;
@@ -10744,6 +10780,46 @@ end;
 function tcustomlbdropdownlistcontroller.getlookupbuffer: tcustomlookupbuffer;
 begin
  result:= flookupbuffer;
+end;
+
+{ tlookupeditdatalink }
+
+procedure tlookupeditdatalink.setfieldnametext(const avalue: string);
+begin
+ if ffieldnametext <> avalue then begin
+  ffieldnametext :=  avalue;
+  updatefields;
+ end;
+end;
+
+procedure tlookupeditdatalink.updatefields;
+begin
+ if active and (ffieldnametext <> '') then begin
+  ffieldtext:= datasource.dataset.fieldbyname(ffieldnametext);
+ end
+ else begin
+  ffieldtext:= nil;
+ end;
+ inherited;
+end;
+
+procedure tlookupeditdatalink.getfieldtypes(out apropertynames: stringarty;
+               out afieldtypes: fieldtypesarty);
+begin
+ inherited;
+ setlength(apropertynames,2);
+ apropertynames[0]:= 'fieldname';
+ apropertynames[1]:= 'fieldnametext';
+ setlength(afieldtypes,2);
+ afieldtypes[1]:= textfields;
+end;
+
+function tlookupeditdatalink.getsortfield: tfield;
+begin
+ result:= ffieldtext;
+ if result = nil then begin
+  result:= inherited getsortfield;
+ end;
 end;
 
 end.

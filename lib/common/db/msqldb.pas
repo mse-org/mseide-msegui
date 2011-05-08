@@ -2934,7 +2934,8 @@ var
  db: tcustomsqlconnection;
  sqltr: tsqltransaction;
  int1: integer;
-
+const
+ endchars = ' '#$09#$0a#$0d;
 begin
  if not IsPrepared then begin
   db:= tcustomsqlconnection(database);
@@ -2983,7 +2984,7 @@ begin
    if fparsesql and (pos(',',FFromPart) <= 0) then begin
             //don't change tablename otherwise
     ftablename:= ffrompart;
-    int1:= pos(' ',ftablename);
+    int1:= findchars(ftablename,endchars);
     if int1 > 0 then begin
      setlength(ftablename,int1-1); //use real name only
     end;
