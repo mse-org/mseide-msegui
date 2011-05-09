@@ -74,6 +74,7 @@ type
  datetimekindty = (dtk_date,dtk_time,dtk_datetime);
 
 const
+ emptyreal = real(-1/0);
 
 // emptytime = 0.0;
 // nulltime = 1.0;        //fuer tdateeditmse

@@ -18,10 +18,11 @@ uses
 const
  emptyrealstring = '';   //stringsymbol for empty realty
  bigreal = 1e38;
-
+ 
 function cmprealty(const a,b: realty): integer;
-function emptyreal: realty;
-function isemptyreal(const val: realty): boolean; //true if empty
+//function emptyreal: realty;
+function isemptyreal(const val: realty): boolean; deprecated;
+            //use x = emptyreal instead
 function candiv(const val: realty): boolean; //true if not 0.0 or empty:
 
 function trystrtorealty(const ein: string; out value: realty;
@@ -143,23 +144,24 @@ begin
  end;
 end;
 
+function isemptyreal(const val: realty): boolean; //true wenn leer
+begin
+ result:= val = emptyreal;
+end;
+
+{
 function emptyreal: realty;
 begin
  move(co1,result,sizeof(realty));
 // doublepo:= @co1;
 // result:= doublepo^;
 end;
-{
-function isleerdouble(val: double): boolean; //true wenn leer
-begin
- result:= comparemem(@val,@co1,sizeof(double))
-end;
-}
+
 function isemptyreal(const val: realty): boolean; //true wenn leer
 begin
  result:= comparemem(@val,@co1,sizeof(realty))
 end;
-
+}
 function candiv(const val: realty): boolean; //true if not 0.0 or empty:
 begin
  result:= (val <> 0.0) and not comparemem(@val,@co1,sizeof(realty));

@@ -2975,7 +2975,7 @@ begin
  state1:= fintf.getwidget.ComponentState;
  if state1 * [cswriting,csdesigning] = [] then begin
   if not (fds_filterediting in fstate) and 
-         ((datasource = nil) or
+         (not canmodify or 
            not editing and 
             not (canmodify and
                     not (oed_noautoedit in foptions) and

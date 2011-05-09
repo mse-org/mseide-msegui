@@ -382,6 +382,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
+   function asoldid: integer;
    function sum: integer;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property asid: integer read getasid write setasid; //-1 -> NULL
@@ -428,6 +429,7 @@ type
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
+   function asoldid: int64;
    function sum: int64;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property asid: int64 read getasid write setasid; //-1 -> NULL
@@ -3935,6 +3937,15 @@ begin
  end;
 end;
 
+function tmselongintfield.asoldid: integer;
+var
+ stat1: tdatasetstate;
+begin
+ stat1:= tdataset1(dataset).settempstate(dsoldvalue);
+ result:= asid;
+ tdataset1(dataset).restorestate(stat1);
+end;
+
 { tmselargeintfield }
 
 function tmselargeintfield.HasParent: Boolean;
@@ -4003,6 +4014,15 @@ end;
 function tmselargeintfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
+end;
+
+function tmselargeintfield.asoldid: int64;
+var
+ stat1: tdatasetstate;
+begin
+ stat1:= tdataset1(dataset).settempstate(dsoldvalue);
+ result:= asid;
+ tdataset1(dataset).restorestate(stat1);
 end;
 
 procedure tmselargeintfield.gettext(var thetext: string; adisplaytext: boolean);

@@ -207,41 +207,40 @@ type
    function textar(const fieldno: integer): msestringarty;
    
    function lookupinteger(const integerkeyfieldno,integerfieldno,
-                                     keyvalue: integer): integer; overload;
-                           //0 if not found
+                            keyvalue: integer;
+                            const adefault: integer = 0): integer; overload;
    function lookupinteger(const int64keyfieldno,integerfieldno: integer;
-                               const keyvalue: int64): integer; overload;
-                           //0 if not found
+                            const keyvalue: int64;
+                            const adefault: integer = 0): integer; overload;
    function lookupinteger(const stringkeyfieldno,integerfieldno: integer;
-                         const keyvalue: msestring): integer; overload;
-                           //0 if not found
+                            const keyvalue: msestring;
+                            const adefault: integer = 0): integer; overload;
    function lookupint64(const integerkeyfieldno,int64fieldno,
-                                     keyvalue: integer): int64; overload;
-                           //0 if not found
+                            keyvalue: integer;
+                            const adefault: int64 = 0): int64; overload;
    function lookupint64(const int64keyfieldno,int64fieldno: integer;
-                               const keyvalue: int64): int64; overload;
-                           //0 if not found
+                            const keyvalue: int64;
+                            const adefault: int64 = 0): int64; overload;
    function lookupint64(const stringkeyfieldno,int64fieldno: integer;
-                         const keyvalue: msestring): int64; overload;
-                           //0 if not found
+                            const keyvalue: msestring;
+                            const adefault: int64 = 0): int64; overload;
    function lookuptext(const integerkeyfieldno,textfieldno,
-                                keyvalue: integer): msestring; overload;
-                           //'' if not found
+                          keyvalue: integer;
+                          const adefault: msestring = ''): msestring; overload;
    function lookuptext(const int64keyfieldno,textfieldno: integer;
-                               const keyvalue: int64): msestring; overload;
-                           //'' if not found
+                         const keyvalue: int64;
+                         const adefault: msestring = ''): msestring; overload;
    function lookuptext(const stringkeyfieldno,textfieldno: integer;
-                      const keyvalue: msestring): msestring; overload;
-                           //'' if not found
-   function lookupfloat(const integerkeyfieldno,floatfieldno,
-                                keyvalue: integer): realty; overload;
-                           //emptyreal if not found
+                         const keyvalue: msestring;
+                         const adefault: msestring = ''): msestring; overload;
+   function lookupfloat(const integerkeyfieldno,floatfieldno,keyvalue: integer;
+                        const adefault: realty = emptyreal): realty; overload;
    function lookupfloat(const int64keyfieldno,floatfieldno: integer;
-                                const keyvalue: int64): realty; overload;
-                           //emptyreal if not found
+                                const keyvalue: int64;
+                                const adefault: realty = emptyreal): realty; overload;
    function lookupfloat(const stringkeyfieldno,floatfieldno: integer;
-                              const keyvalue: msestring): realty; overload;
-                           //emptyreal if not found
+                              const keyvalue: msestring;
+                              const adefault: realty = emptyreal): realty; overload;
                            
    function count: integer; virtual;
    
@@ -1025,8 +1024,8 @@ begin
 end;
 
 function tcustomlookupbuffer.lookupinteger(const integerkeyfieldno,integerfieldno,
-                                keyvalue: integer): integer;
-                           //0 if not found
+                                keyvalue: integer;
+                                const adefault: integer = 0): integer;
 var
  int1: integer;
 begin
@@ -1034,13 +1033,13 @@ begin
   result:= integervaluephys(integerfieldno,int1);
  end
  else begin
-  result:= 0;
+  result:= adefault;
  end;
 end;
 
 function tcustomlookupbuffer.lookupinteger(const int64keyfieldno,
-                   integerfieldno: integer; const keyvalue: int64): integer;
-                           //0 if not found
+                            integerfieldno: integer; const keyvalue: int64;
+                            const adefault: integer = 0): integer;
 var
  int1: integer;
 begin
@@ -1048,13 +1047,14 @@ begin
   result:= integervaluephys(integerfieldno,int1);
  end
  else begin
-  result:= 0;
+  result:= adefault;
  end;
 end;
 
 function tcustomlookupbuffer.lookupinteger(const stringkeyfieldno: integer;
-               const integerfieldno: integer;
-               const keyvalue: msestring): integer;
+                         const integerfieldno: integer;
+                         const keyvalue: msestring;
+                         const adefault: integer = 0): integer;
 var
  int1: integer;
 begin
@@ -1062,13 +1062,13 @@ begin
   result:= integervaluephys(integerfieldno,int1);
  end
  else begin
-  result:= 0;
+  result:= adefault;
  end;
 end;
 
 function tcustomlookupbuffer.lookupint64(const integerkeyfieldno,int64fieldno,
-                                keyvalue: integer): int64;
-                           //0 if not found
+                                keyvalue: integer;
+                                const adefault: int64 = 0): int64;
 var
  int1: integer;
 begin
@@ -1076,13 +1076,13 @@ begin
   result:= int64valuephys(int64fieldno,int1);
  end
  else begin
-  result:= 0;
+  result:= adefault;
  end;
 end;
 
 function tcustomlookupbuffer.lookupint64(const int64keyfieldno,
-                   int64fieldno: integer; const keyvalue: int64): int64;
-                           //0 if not found
+                            int64fieldno: integer; const keyvalue: int64;
+                            const adefault: int64 = 0): int64;
 var
  int1: integer;
 begin
@@ -1090,13 +1090,14 @@ begin
   result:= int64valuephys(int64fieldno,int1);
  end
  else begin
-  result:= 0;
+  result:= adefault;
  end;
 end;
 
 function tcustomlookupbuffer.lookupint64(const stringkeyfieldno,
-                        int64fieldno: integer;
-                        const keyvalue: msestring): int64;
+                            int64fieldno: integer;
+                            const keyvalue: msestring;
+                            const adefault: int64 = 0): int64;
 var
  int1: integer;
 begin
@@ -1104,12 +1105,13 @@ begin
   result:= int64valuephys(int64fieldno,int1);
  end
  else begin
-  result:= 0;
+  result:= adefault;
  end;
 end;
 
 function tcustomlookupbuffer.lookuptext(const integerkeyfieldno: integer;
-               const textfieldno: integer; const keyvalue: integer): msestring;
+                          const textfieldno: integer; const keyvalue: integer;
+                          const adefault: msestring = ''): msestring;
 var
  int1: integer;
 begin
@@ -1117,12 +1119,13 @@ begin
   result:= textvaluephys(textfieldno,int1);
  end
  else begin
-  result:= '';
+  result:= adefault;
  end;
 end;
 
 function tcustomlookupbuffer.lookuptext(const int64keyfieldno: integer;
-               const textfieldno: integer; const keyvalue: int64): msestring;
+                          const textfieldno: integer; const keyvalue: int64;
+                          const adefault: msestring = ''): msestring;
 var
  int1: integer;
 begin
@@ -1130,13 +1133,14 @@ begin
   result:= textvaluephys(textfieldno,int1);
  end
  else begin
-  result:= '';
+  result:= adefault;
  end;
 end;
 
 function tcustomlookupbuffer.lookuptext(const stringkeyfieldno: integer;
-               const textfieldno: integer;
-               const keyvalue: msestring): msestring;
+                          const textfieldno: integer;
+                          const keyvalue: msestring;
+                          const adefault: msestring = ''): msestring;
 var
  int1: integer;
 begin
@@ -1144,12 +1148,13 @@ begin
   result:= textvaluephys(textfieldno,int1);
  end
  else begin
-  result:= '';
+  result:= adefault;
  end;
 end;
 
 function tcustomlookupbuffer.lookupfloat(const integerkeyfieldno: integer;
-               const floatfieldno: integer; const keyvalue: integer): realty;
+                        const floatfieldno: integer; const keyvalue: integer;
+                        const adefault: realty = emptyreal): realty;
 var
  int1: integer;
 begin
@@ -1157,12 +1162,13 @@ begin
   result:= floatvaluephys(floatfieldno,int1);
  end
  else begin
-  result:= emptyreal;
+  result:= adefault;
  end;
 end;
 
 function tcustomlookupbuffer.lookupfloat(const int64keyfieldno: integer;
-               const floatfieldno: integer; const keyvalue: int64): realty;
+                        const floatfieldno: integer; const keyvalue: int64;
+                        const adefault: realty = emptyreal): realty;
 var
  int1: integer;
 begin
@@ -1170,12 +1176,13 @@ begin
   result:= floatvaluephys(floatfieldno,int1);
  end
  else begin
-  result:= emptyreal;
+  result:= adefault;
  end;
 end;
 
 function tcustomlookupbuffer.lookupfloat(const stringkeyfieldno,
-                      floatfieldno: integer; const keyvalue: msestring): realty;
+                        floatfieldno: integer; const keyvalue: msestring;
+                        const adefault: realty = emptyreal): realty;
 var
  int1: integer;
 begin
@@ -1183,7 +1190,7 @@ begin
   result:= floatvaluephys(floatfieldno,int1);
  end
  else begin
-  result:= emptyreal;
+  result:= adefault;
  end;
 end;
 
