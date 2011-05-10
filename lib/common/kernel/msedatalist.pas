@@ -84,7 +84,7 @@ type
                     dls_remotelock
                     );
  dataliststatesty = set of dataliststatety;
-  
+
  tdatalist = class(tlinkedpersistent)
   private
    fbytelength: integer;   //pufferlaenge
@@ -797,7 +797,7 @@ type
    function add(const valuea: msestring; const valueb: integer = 0): integer; overload;
    function add(const value: msestringintty): integer; overload;
    procedure insert(const index: integer; const item: msestring;
-                               const itemint: integer);
+                               const itemint: integer); reintroduce;
    procedure fill(const acount: integer; const defaultvalue: msestring;
                      const defaultint: integer);
 
@@ -923,14 +923,12 @@ type
    procedure sethidden(const index: integer; const avalue: boolean); virtual;
    procedure setfoldissum(const index: integer; const avalue: boolean); virtual;
    procedure checkdirty(const arow: integer); virtual;
-   function checkwritedata(const filer: tfiler): boolean; override;
    function gethidden(const index: integer): boolean;
    function getfoldlevel(const index: integer): byte;
    function getfoldissum(const index: integer): boolean;
    function getheight(const index: integer): integer;
    function getlinewidth(const index: integer): integer;
    procedure checkinfolevel(const wantedlevel: rowinfolevelty);
-   procedure change(const aindex: integer); override;
    procedure initdirty; virtual;
    procedure recalchidden; virtual;
    function checkassigncompatibility(const source: tpersistent): boolean; override;
@@ -939,7 +937,9 @@ type
                                                             write setflag1;
   public
    constructor create; overload; override;
-   constructor create(const ainfolevel: rowinfolevelty); overload;
+   constructor create(const ainfolevel: rowinfolevelty); reintroduce; overload;
+   function checkwritedata(const filer: tfiler): boolean; override;
+   procedure change(const aindex: integer); override;
    procedure assign(source: tpersistent); override;
    property infolevel: rowinfolevelty read finfolevel;
 //   procedure assign(source: tpersistent); override;
@@ -2102,14 +2102,14 @@ begin
  min1:= bigreal;
  max1:= emptyreal;
  for int1:= high(ar) downto 0 do begin
-  if isemptyreal(ar[int1]) then begin
+  if ar[int1] = emptyreal then begin
    min1:= ar[int1];
   end
   else begin
-   if isemptyreal(max1) or (ar[int1] > max1) then begin
+   if (max1 = emptyreal) or (ar[int1] > max1) then begin
     max1:= ar[int1];
    end;
-   if not isemptyreal(min1) and (min1 > ar[int1]) then begin
+   if not (min1 = emptyreal) and (min1 > ar[int1]) then begin
     min1:= ar[int1];
    end;
   end;
@@ -5350,7 +5350,7 @@ var
  po1: preal;
 begin
  po1:= preal(getitempo(index));
- result:= isemptyreal(po1^);
+ result:= po1^ = emptyreal;
  if fdefaultzero then begin
   result:= result or (po1^ = 0);
  end;
@@ -5376,14 +5376,14 @@ begin
  max1:= emptyreal;
  po1:= datapo;
  for int1:= count-1 downto 0 do begin
-  if isemptyreal(po1^) then begin
+  if po1^ = emptyreal then begin
    min1:= po1^;
   end
   else begin
-   if isemptyreal(max1) or (po1^ > max1) then begin
+   if (max1 = emptyreal) or (po1^ > max1) then begin
     max1:= po1^;
    end;
-   if not isemptyreal(min1) and (min1 > po1^) then begin
+   if not (min1 = emptyreal) and (min1 > po1^) then begin
     min1:= po1^;
    end;
   end;
@@ -5436,7 +5436,7 @@ var
 begin
  result:= '';
  rea1:= items[index];
- if not isemptyreal(rea1) then begin
+ if not (rea1 = emptyreal) then begin
   result:= doubletostring(rea1,0,fsm_default,
                               defaultformatsettingsmse.decimalseparator);
  end;
@@ -5645,7 +5645,7 @@ var
  po1: pcomplexty;
 begin
  po1:= getitempo(index);
- result:= isemptyreal(po1^.re) and isemptyreal(po1^.im);
+ result:= (po1^.re = emptyreal) and (po1^.im = emptyreal);
  if fdefaultzero then begin
   result:= result or (po1^.re = 0) and (po1^.im = 0);
  end;

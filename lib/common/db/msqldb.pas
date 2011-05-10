@@ -944,7 +944,7 @@ begin
   for int1:= 0 to aparams.count - 1 do begin
    with aparams[int1] do begin
     if not isnull and (datatype in [ftFloat,ftcurrency,ftDate,ftTime,ftDateTime]) and
-                               isemptyreal(asfloat) then begin
+                               (asfloat = emptyreal) then begin
      clear;
     end;
    end;

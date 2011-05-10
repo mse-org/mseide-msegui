@@ -587,7 +587,7 @@ begin
     vtInteger:    mstr1:= inttostr(VInteger);
     vtBoolean:    if VBoolean then mstr1:= 'T' else mstr1:= 'F';
     vtChar:       mstr1:= VChar;
-    vtExtended:   if not isemptyreal(vextended^) then mstr1:= realtostr(VExtended^);
+    vtExtended:   if not (vextended^ = emptyreal) then mstr1:= realtostr(VExtended^);
     vtString:     mstr1:= VString^;
     vtWideChar:   mstr1:= VWideChar;
     vtPChar:      mstr1:= string(VPChar);

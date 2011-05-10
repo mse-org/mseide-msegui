@@ -614,7 +614,7 @@ procedure tdialmarker.checklayout;
 begin
  if not flayoutvalid then begin
   with finfo do begin
-   active:=  not isemptyreal(finfo.value);
+   active:=  not (finfo.value = emptyreal);
    if active then begin
     updatemarker;
    end;

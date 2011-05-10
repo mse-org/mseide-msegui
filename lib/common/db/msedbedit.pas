@@ -4519,7 +4519,7 @@ end;
 
 procedure tdbrealedit.valuetofield;
 begin
- if isemptyreal(value) then begin
+ if value = emptyreal then begin
   fdatalink.field.clear;
  end
  else begin
@@ -4628,7 +4628,7 @@ end;
 
 procedure tdbrealspinedit.valuetofield;
 begin
- if isemptyreal(value) then begin
+ if value = emptyreal then begin
   fdatalink.field.clear;
  end
  else begin
@@ -4739,7 +4739,7 @@ end;
 
 procedure tdbslider.valuetofield;
 begin
- if isemptyreal(value) then begin
+ if value = emptyreal then begin
   fdatalink.field.clear;
  end
  else begin
@@ -4866,7 +4866,7 @@ procedure tdbprogressbar.valuetofield;
 var
  rea1: real;
 begin
- if isemptyreal(value) then begin
+ if value = emptyreal then begin
   fdatalink.field.clear;
  end
  else begin

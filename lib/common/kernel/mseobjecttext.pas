@@ -486,7 +486,7 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
 {$ifndef FPUNONE}
         vaExtended: begin
             ext:=ReadExtended;
-            if isemptyreal(ext) then begin
+            if ext = emptyreal then begin
              s:= '-Inf';
             end
             else begin

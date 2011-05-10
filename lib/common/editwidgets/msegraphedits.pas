@@ -1090,7 +1090,7 @@ end;
 procedure tcustomrealgraphdataedit.setvalue(const avalue: realty);
 begin
  if fvalue <> avalue then begin
-  if not fisdb and isemptyreal(avalue) then begin
+  if not fisdb and (avalue = emptyreal) then begin
    fvalue:= 0;
   end
   else begin
@@ -1189,7 +1189,7 @@ end;
 
 function tcustomrealgraphdataedit.isnull: boolean;
 begin
- result:= isemptyreal(value);
+ result:= value = emptyreal;
 end;
 
 procedure tcustomrealgraphdataedit.setnullvalue;
@@ -1236,7 +1236,7 @@ begin
    canvas.move(innerrect.pos);
   end;
  end;
- if isemptyreal(rea1) then begin
+ if rea1 = emptyreal then begin
   rea1:= 0;
  end; 
  inc(fupdating);
@@ -3803,7 +3803,7 @@ procedure tcustomprogressbar.updatebarrect(const avalue: realty; const arect: re
 var
  int1,int2,int3: integer;
 begin
- if isemptyreal(avalue) then begin
+ if avalue = emptyreal then begin
   facedest:= nullrect;
   framebardest:= nullrect;
   facebardest:= nullrect;
@@ -3888,7 +3888,7 @@ begin
   rea1:= realty(avalue);
   updatebarrect(realty(avalue),arect,rect1,rect2,rect3);  
  end;
- if not isemptyreal(rea1) then begin
+ if not (rea1 = emptyreal) then begin
   canvas.save;
   fbar_frame.paintbackground(canvas,po2^); //moves origin to paintrect and sets cliprect
   canvas.intersectcliprect(po3^);

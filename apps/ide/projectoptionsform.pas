@@ -1840,7 +1840,7 @@ begin
   fontoptions:= fo.fontoptions.gridvalues;
   fontxscales:= fo.fontxscale.gridvalues;
   for int1:= high(fontxscales) downto 0 do begin
-   if isemptyreal(fontxscales[int1]) then begin
+   if fontxscales[int1] = emptyreal then begin
     fontxscales[int1]:= 1.0;
    end;   
   end;

@@ -144,6 +144,7 @@ type
    function getstatvarname: msestring;
   public
    constructor create(const aowner: tmsecomponent; const akind: ttypekind);
+                              reintroduce;
    function canconnect(const acomponent: tcomponent): boolean; virtual;
 
    property msestringprop[const aname: string]: msestring read getmsestringpro 
@@ -184,6 +185,7 @@ type
 
  texecclientcontroller = class(tificlientcontroller)
   protected
+  public
    function canconnect(const acomponent: tcomponent): boolean; override;
  end;
 
@@ -241,7 +243,6 @@ type
                          var atypes: listdatatypesty);
 
    function getifilinkkind: ptypeinfo; override;
-   function canconnect(const acomponent: tcomponent): boolean; override;
    procedure setvalue(const sender: iificlient; var avalue;
                           var accept: boolean; const arow: integer); override;
    procedure dataentered(const sender: iificlient;
@@ -261,11 +262,12 @@ type
    procedure statwritelist(const alink: pointer; var handled: boolean);
   public
    destructor destroy; override;
+   function canconnect(const acomponent: tcomponent): boolean; override;
    property datalist: tdatalist read fdatalist;
-  published 
-   property onclientdataentered: indexeventty read fonclientdataentered 
+  published
+   property onclientdataentered: indexeventty read fonclientdataentered
                                   write fonclientdataentered;
-   property optionsvalue: valueclientoptionsty read foptionsvalue 
+   property optionsvalue: valueclientoptionsty read foptionsvalue
                                            write setoptionsvalue default [];
    property datasource: tifidatasource read fdatasource write setdatasource;
    property fieldname: ififieldnamety read ffieldname write setfieldname;
@@ -349,7 +351,7 @@ type
    procedure setcols(const avalue: tifidropdowncols);
    procedure valuestoclient(const alink: pointer);
   public
-   constructor create(const aowner: tvalueclientcontroller);
+   constructor create(const aowner: tvalueclientcontroller); reintroduce;
    destructor destroy; override;
   published
    property cols: tifidropdowncols read fcols write setcols;
@@ -617,23 +619,23 @@ type
                                     const aindex: integer); virtual; abstract;
    procedure itemchanged(const sender: tcustomrowstatelist;
                                             const aindex: integer);
-   procedure listdestroyed(const sender: tdatalist); override;
-   procedure sourcechange(const sender: tdatalist; 
-                                         const aindex: integer); override;
-   function canlink(const asource: tdatalist;
-                                     const atag: integer): boolean; override;
     //iifidatalink
    procedure setifiserverintf(const aintf: iifiserver);
    procedure ifisetvalue(var avalue; var accept: boolean);
    function getifilinkkind: ptypeinfo;
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
-   function getgriddata: tdatalist;
+   function getgriddata: tdatalist; reintroduce; overload;
    function getvalueprop: ppropinfo;
    procedure updatereadonlystate;
    property ifilink: tifivaluelinkcomp read fifilink write setifilink;
   public
-   constructor create(const aowner: tgridclientcontroller);
+   constructor create(const aowner: tgridclientcontroller); reintroduce;
    destructor destroy; override;
+   procedure listdestroyed(const sender: tdatalist); override;
+   procedure sourcechange(const sender: tdatalist;
+                                         const aindex: integer); override;
+   function canlink(const asource: tdatalist;
+                                     const atag: integer): boolean; override;
  end;
 
  tifiintegerlinkcomp = class;
@@ -918,11 +920,11 @@ type
  tififields = class(tpersistentarrayprop,iififieldsource)
   protected
    function getififieldclass: ififieldclassty; virtual;
-   class function getitemclasstype: persistentclassty; override;
   public
    constructor create;
 //   function destdatalists: datalistarty;
     //iififieldsource
+   class function getitemclasstype: persistentclassty; override;
    function getfieldnames(const atypes: listdatatypesty): msestringarty;
  end;
 
@@ -1059,7 +1061,7 @@ end;
    fowner: tbooleanclientcontroller;
    function getdefault: pointer; override;
   public
-   constructor create(const aowner: tbooleanclientcontroller);
+   constructor create(const aowner: tbooleanclientcontroller); reintroduce;
  end;
    
  tifirealdatalist = class(trealdatalist)
@@ -1067,7 +1069,7 @@ end;
    fowner: trealclientcontroller;
    function getdefault: pointer; override;
   public
-   constructor create(const aowner: trealclientcontroller);
+   constructor create(const aowner: trealclientcontroller); reintroduce;
  end;
 
  tifidatetimedatalist = class(tdatetimedatalist)
@@ -1075,7 +1077,7 @@ end;
    fowner: tdatetimeclientcontroller;
    function getdefault: pointer; override;
   public
-   constructor create(const aowner: tdatetimeclientcontroller);
+   constructor create(const aowner: tdatetimeclientcontroller); reintroduce;
  end;
 
  tifimsestringdatalist = class(tmsestringdatalist)
@@ -1083,7 +1085,7 @@ end;
    fowner: tstringclientcontroller;
    function getdefault: pointer; override;
   public
-   constructor create(const aowner: tstringclientcontroller);
+   constructor create(const aowner: tstringclientcontroller); reintroduce;
  end;
 
 procedure setifilinkcomp(const alink: iifilink;
@@ -1790,7 +1792,6 @@ end;
 
 function tvalueclientcontroller.canconnect(const acomponent: tcomponent): boolean;
 var
- intf1: pointer;
  prop1: ppropinfo;
 begin
  result:= inherited canconnect(acomponent);

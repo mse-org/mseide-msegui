@@ -1293,7 +1293,7 @@ type
 
 function realtytoint(const avalue: realty): integer;
 begin
- if isemptyreal(avalue) then begin
+ if avalue = emptyreal then begin
   result:= emptyinteger;
  end
  else begin
@@ -4786,7 +4786,7 @@ begin
   except
   end;
   rea1:= reapplyrange(rea1,fvaluerange,fvaluestart);
-  if not ((des_isdb in fstate) and isemptyreal(rea1)) then begin
+  if not ((des_isdb in fstate) and (rea1 = emptyreal)) then begin
    if (cmprealty(fmin,rea1) > 0) or (cmprealty(fmax,rea1) < 0) then begin
     rangeerror(fmin,fmax,quiet);
     accept:= false;
@@ -5006,7 +5006,7 @@ end;
 
 function tcustomrealedit.isnull: boolean;
 begin
- result:= isemptyreal(value);
+ result:= value = emptyreal;
 end;
 
 {$ifdef mse_with_ifi}
@@ -5096,24 +5096,16 @@ begin
   end;
   sk_up: begin
    result:= fvalue;
-   if isemptyreal(fvalue) then begin
+   if fvalue = emptyreal then begin
     result:= initvalue;
-//    result:= fmin;
-//    if isemptyreal(result) then begin
-//     result:= 0;
-//    end;
     goto endlab;
    end;
    result:= result + fstep;
   end;
   sk_down: begin
    result:= fvalue;
-   if isemptyreal(fvalue) then begin
+   if fvalue = emptyreal then begin
     result:= initvalue;
-//    result:= fmax;
-//    if isemptyreal(result) then begin
-//     result:= 0;
-//    end;
     goto endlab;
    end;
    result:= result - fstep;
@@ -5237,7 +5229,7 @@ end;
 
 function tcustomdatetimeedit.checkkind(const avalue: tdatetime): tdatetime;
 begin
- if isemptydatetime(avalue) then begin
+ if avalue = emptydatetime then begin
   result:= avalue;
  end
  else begin
@@ -5286,10 +5278,10 @@ var
 begin
  dat1:= gettextvalue(accept,quiet);
  if accept then begin
-  if not ((des_isdb in fstate) and isemptydatetime(dat1)) then begin
+  if not ((des_isdb in fstate) and (dat1 = emptydatetime)) then begin
    if fkind = dtk_time then begin
-    if isemptydatetime(fmax) and not isemptydatetime(dat1) or
-         not isemptydatetime(fmin) and (dat1 < frac(fmin)) or 
+    if (fmax = emptydatetime) and not (dat1 = emptydatetime) or
+         not (fmin = emptydatetime) and (dat1 < frac(fmin)) or 
                     (dat1 > frac(fmax)) then begin
      rangeerror(fmin,fmax,quiet);
      accept:= false;
@@ -5469,7 +5461,7 @@ end;
 
 function tcustomdatetimeedit.isnull: boolean;
 begin
- result:= isemptydatetime(value);
+ result:= value = emptydatetime;
 end;
 
 function tcustomdatetimeedit.griddata: trealdatalist;

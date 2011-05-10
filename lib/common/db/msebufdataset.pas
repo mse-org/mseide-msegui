@@ -6078,7 +6078,7 @@ var
  po1: pdouble;
  bo1: boolean;
 begin
- po1:= beforecurrentset(afield,ftfloat,aindex,isemptyreal(avalue),bo1);
+ po1:= beforecurrentset(afield,ftfloat,aindex,avalue = emptyreal,bo1);
  if bo1 or (po1^ <> avalue) then begin
   po1^:= avalue;
   aftercurrentset(afield);
@@ -6091,7 +6091,7 @@ var
  po1: pdouble;
  bo1: boolean;
 begin
- po1:= beforecurrentbmset(afield,ftfloat,abm,isemptyreal(avalue),bo1);
+ po1:= beforecurrentbmset(afield,ftfloat,abm,avalue = emptyreal,bo1);
  if bo1 or (po1^ <> avalue) then begin
   po1^:= avalue;
   aftercurrentset(afield);
@@ -6348,7 +6348,7 @@ var
  po1: pdouble;
  bo1: boolean;
 begin
- po1:= beforecurrentset(afield,ftdatetime,aindex,isemptydatetime(avalue),bo1);
+ po1:= beforecurrentset(afield,ftdatetime,aindex,avalue = emptydatetime,bo1);
  if bo1 or (po1^ <> avalue) then begin
   po1^:= avalue;
   aftercurrentset(afield);
@@ -6361,7 +6361,7 @@ var
  po1: pdouble;
  bo1: boolean;
 begin
- po1:= beforecurrentbmset(afield,ftdatetime,abm,isemptydatetime(avalue),bo1);
+ po1:= beforecurrentbmset(afield,ftdatetime,abm,avalue = emptydatetime,bo1);
  if bo1 or (po1^ <> avalue) then begin
   po1^:= avalue;
   aftercurrentset(afield);
@@ -7670,7 +7670,7 @@ begin
      end;
      vtextended: begin
       pdouble(po2)^:= vextended^;
-      bo1:= isemptyreal(pdouble(po2)^);
+      bo1:= pdouble(po2)^ = emptyreal;
      end;
      vtcurrency: begin
       pcurrency(po2)^:= vcurrency^;

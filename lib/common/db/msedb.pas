@@ -1896,7 +1896,7 @@ end;
 
 procedure realtytovariant(const value: realty; out dest: variant);
 begin
- if isemptyreal(value) then begin
+ if value = emptyreal then begin
   dest:= null;
  end
  else begin
@@ -1906,7 +1906,7 @@ end;
 
 function realtytovariant(const value: realty): variant; overload;
 begin
- if isemptyreal(value) then begin
+ if value = emptyreal then begin
   result:= null;
  end
  else begin
@@ -3100,7 +3100,7 @@ begin
       comparefuncar[int1]:= @locateboolean;
      end;
      vtextended: begin
-      if isemptyreal(vextended^) then begin
+      if vextended^ = emptyreal then begin
        comparefuncar[int1]:= @locatenull;
       end
       else begin
@@ -4507,7 +4507,7 @@ end;
 
 procedure tmsefloatfield.setasfloat(avalue: double);
 begin
- if isemptyreal(avalue) then begin
+ if avalue = emptyreal then begin
   clear;
  end
  else begin
@@ -4608,59 +4608,6 @@ begin
  setdatatype(ftcurrency);
  currency:= true;
 end;
-(*
-function tmsecurrencyfield.HasParent: Boolean;
-begin
- result:= dataset <> nil;
-end;
-
-function tmsecurrencyfield.assql: string;
-begin
- result:= fieldtosql(self);
-end;
-
-procedure tmsecurrencyfield.setasmsestring(const avalue: msestring);
-begin
- asstring:= avalue;
-end;
-
-function tmsecurrencyfield.getasmsestring: msestring;
-begin
- result:= asstring;
-end;
-
-{$ifdef hasaswidestring}
-function tmsecurrencyfield.getaswidestring: widestring;
-begin
- result:= asmsestring;
-end;
-
-procedure tmsecurrencyfield.setaswidestring(const avalue: widestring);
-begin
- asmsestring:= avalue;
-end;
-{$endif}
-
-procedure tmsecurrencyfield.Clear;
-begin
- setdata(nil);
-end;
-
-function tmsecurrencyfield.asoldsql: string;
-begin
- result:= fieldtooldsql(self);
-end;
-
-procedure tmsecurrencyfield.setasfloat(avalue: double);
-begin
- if isemptyreal(avalue) then begin
-  clear;
- end
- else begin
-  inherited;
- end;
-end;
-*)
 
 { tmsebooleanfield }
 
@@ -4984,7 +4931,7 @@ end;
 
 procedure tmsedatetimefield.setasdatetime(avalue: tdatetime);
 begin
- if isemptydatetime(avalue) then begin
+ if avalue = emptydatetime then begin
   clear;
  end
  else begin
@@ -5092,58 +5039,6 @@ begin
  setdatatype(ftdate); 
 end;
 
-{
-function tmsedatefield.HasParent: Boolean;
-begin
- result:= dataset <> nil;
-end;
-
-function tmsedatefield.assql: string;
-begin
- result:= fieldtosql(self);
-end;
-
-procedure tmsedatefield.setasmsestring(const avalue: msestring);
-begin
- asstring:= avalue;
-end;
-
-function tmsedatefield.getasmsestring: msestring;
-begin
- result:= asstring;
-end;
-
-function tmsedatefield.getasdatetime: tdatetime;
-begin
- if isnull then begin
-  result:= emptydatetime;
- end
- else begin
-  result:= inherited getasdatetime;
- end;
-end;
-
-procedure tmsedatefield.setasdatetime(avalue: tdatetime);
-begin
- if isemptydatetime(avalue) then begin
-  clear;
- end
- else begin
-  inherited;
- end;
-end;
-
-procedure tmsedatefield.Clear;
-begin
- setdata(nil);
-end;
-
-function tmsedatefield.asoldsql: string;
-begin
- result:= fieldtooldsql(self);
-end;
-}
-
 { tmsetimefield }
 
 constructor tmsetimefield.create(aowner: tcomponent);
@@ -5151,58 +5046,6 @@ begin
  inherited;
  setdatatype(fttime); 
 end;
-
-{
-function tmsetimefield.HasParent: Boolean;
-begin
- result:= dataset <> nil;
-end;
-
-function tmsetimefield.assql: string;
-begin
- result:= fieldtosql(self);
-end;
-
-procedure tmsetimefield.setasmsestring(const avalue: msestring);
-begin
- asstring:= avalue;
-end;
-
-function tmsetimefield.getasmsestring: msestring;
-begin
- result:= asstring;
-end;
-
-function tmsetimefield.getasdatetime: tdatetime;
-begin
- if isnull then begin
-  result:= emptydatetime;
- end
- else begin
-  result:= inherited getasdatetime;
- end;
-end;
-
-procedure tmsetimefield.setasdatetime(avalue: tdatetime);
-begin
- if isemptydatetime(avalue) then begin
-  clear;
- end
- else begin
-  inherited;
- end;
-end;
-
-procedure tmsetimefield.Clear;
-begin
- setdata(nil);
-end;
-
-function tmsetimefield.asoldsql: string;
-begin
- result:= fieldtooldsql(self);
-end;
-}
 
 { tmsebinaryfield }
 
@@ -5589,7 +5432,7 @@ end;
 
 procedure tmsebcdfield.setasfloat(avalue: double);
 begin
- if isemptyreal(avalue) then begin
+ if avalue = emptyreal then begin
   clear;
  end
  else begin
@@ -7177,7 +7020,7 @@ end;
 
 function tdscontroller.assql(const avalue: realty): string;
 begin
- if isemptyreal(avalue) then begin
+ if avalue = emptyreal then begin
   result:= 'NULL';
  end
  else begin
@@ -7187,7 +7030,7 @@ end;
 
 function tdscontroller.assqlcurrency(const avalue: realty): string;
 begin
- if isemptyreal(avalue) then begin
+ if avalue = emptyreal then begin
   result:= 'NULL';
  end
  else begin
@@ -7207,7 +7050,7 @@ end;
 
 function tdscontroller.assql(const avalue: tdatetime): string;
 begin
- if isemptydatetime(avalue) then begin
+ if avalue = emptydatetime then begin
   result:= 'NULL';
  end
  else begin
@@ -7222,7 +7065,7 @@ end;
 
 function tdscontroller.assqldate(const avalue: tdatetime): string;
 begin
- if isemptydatetime(avalue) then begin
+ if avalue = emptydatetime then begin
   result:= 'NULL';
  end
  else begin
@@ -7237,7 +7080,7 @@ end;
 
 function tdscontroller.assqltime(const avalue: tdatetime): string;
 begin
- if isemptydatetime(avalue) then begin
+ if avalue = emptydatetime then begin
   result:= 'NULL';
  end
  else begin

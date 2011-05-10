@@ -267,7 +267,7 @@ end;
 procedure writerealty(const writer: twriter; const value: realty);
 begin
  with writer do begin
-  if isemptyreal(value) then begin
+  if value = emptyreal then begin
    writelistbegin;
    writefloat(0.0);
    writeboolean(true);

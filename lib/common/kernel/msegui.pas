@@ -9729,10 +9729,10 @@ function twidget.show(const modallevel: modallevelty;
             const transientfor: twidget): modalresultty;
 begin
  if transientfor = nil then begin
-  show(modallevel,twindow(nil));
+  result:= show(modallevel,twindow(nil));
  end
  else begin
-  show(modallevel,transientfor.window);
+  result:= show(modallevel,transientfor.window);
  end;
 end;
 
@@ -9740,10 +9740,10 @@ function twidget.show(const modal: boolean = false;
               const transientfor: twindow = nil): modalresultty;
 begin
  if modal then begin
-  show(ml_application,transientfor);
+  result:= show(ml_application,transientfor);
  end
  else begin
-  show(ml_none,transientfor);
+  result:= show(ml_none,transientfor);
  end;
 end;
 

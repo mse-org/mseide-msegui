@@ -74,7 +74,12 @@ type
  datetimekindty = (dtk_date,dtk_time,dtk_datetime);
 
 const
+{$ifndef FPC}
+ emptyreal = -1/0;
+{$else}
  emptyreal = real(-1/0);
+{$endif}
+ emptydatetime = emptyreal;
 
 // emptytime = 0.0;
 // nulltime = 1.0;        //fuer tdateeditmse
@@ -236,7 +241,9 @@ const
 function mergevarrec(a,b: array of const): varrecarty;
 function issamemethod(const method1,method2: tmethod): boolean;
 function isemptydatetime(const avalue: tdatetime): boolean;
-function emptydatetime: tdatetime;
+                         {$ifdef FPC}inline;{$endif} deprecated;
+            //use x = emptydatetime instead
+//function emptydatetime: tdatetime;
 function makecomplex(const are: real; aim: real): complexty;
 procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
 
@@ -249,15 +256,16 @@ const
 {$else}
  co1: array[0..7] of byte = ($0,0,0,0,0,0,$f0,$ff);      //- inf
 {$endif}
- 
+{
 function emptydatetime: tdatetime;
 begin
  result:= tdatetime(co1);
 end;
- 
+}
 function isemptydatetime(const avalue: tdatetime): boolean;
 begin
- result:= avalue = real(co1);
+ result:= avalue = emptydatetime;
+// result:= avalue = real(co1);
 end;
 
 function mergevarrec(a,b: array of const): varrecarty;

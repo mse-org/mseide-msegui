@@ -1582,7 +1582,7 @@ end;
 procedure tcustomtabulators.setdefaultdist(const avalue: real);
 begin
  fdefaultdist:= avalue;
- if {isemptyreal(fdefaultdist) or} (fdefaultdist < 0) then begin
+ if fdefaultdist < 0 then begin
   fdefaultdist:= 0;
  end;
  dochange(-1);

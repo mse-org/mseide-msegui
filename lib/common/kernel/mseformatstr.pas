@@ -1324,7 +1324,7 @@ end;
 
 function timetostring(const avalue: tdatetime; const format: msestring = 't'): msestring;
 begin
- if isemptydatetime(avalue) then begin
+ if avalue = emptydatetime then begin
   result:= '';
  end
  else begin
@@ -1339,7 +1339,7 @@ end;
 
 function datetimetostring(const avalue: tdatetime; const format: msestring = 'c'): msestring;
 begin
- if isemptydatetime(avalue) then begin
+ if avalue = emptydatetime then begin
   result:= '';
  end
  else begin
@@ -1364,7 +1364,7 @@ end;
 
 function datetostring(const avalue: tdatetime; const format: msestring = 'c'): msestring;
 begin
- if isemptydatetime(avalue) then begin
+ if avalue = emptydatetime then begin
   result:= '';
  end
  else begin

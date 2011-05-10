@@ -4434,7 +4434,7 @@ var
 begin
 // result:= datetimetostring(getfloatvalue,'dddddd t');
  rea1:= getfloatvalue;
- if isemptydatetime(rea1) then  begin
+ if rea1 = emptydatetime then  begin
   result:= '';
  end
  else begin

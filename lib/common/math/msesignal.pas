@@ -2637,8 +2637,8 @@ var
  begin
   sca.offset:= ainput.offset;
   sca.gain:= ainput.gain;
-  sca.hasmin:= not isemptyreal(ainput.min);
-  sca.hasmax:= not isemptyreal(ainput.max);
+  sca.hasmin:= not (ainput.min = emptyreal);
+  sca.hasmax:= not (ainput.max = emptyreal);
   sca.isexp:= (ainput.expstart > 0) and (ainput.expend > 0) and 
                    (ainput.expend > ainput.expstart);
   if sca.isexp then begin

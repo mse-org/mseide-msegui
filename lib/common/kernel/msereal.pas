@@ -21,7 +21,8 @@ const
  
 function cmprealty(const a,b: realty): integer;
 //function emptyreal: realty;
-function isemptyreal(const val: realty): boolean; deprecated;
+function isemptyreal(const val: realty): boolean; {$ifdef FPC}inline;{$endif}
+                        deprecated;
             //use x = emptyreal instead
 function candiv(const val: realty): boolean; //true if not 0.0 or empty:
 
@@ -72,7 +73,7 @@ end;
 function applyrange(const avalue: realty; const arange: real;
                                             const astart: real): realty;
 begin
- if isemptyreal(avalue) or (arange = 0) then begin
+ if (avalue = emptyreal) or (arange = 0) then begin
   result:= avalue;
  end
  else begin
@@ -83,7 +84,7 @@ end;
 function reapplyrange(const avalue: realty; const arange: real;
                                                const astart: real): realty;
 begin
- if isemptyreal(avalue) or (arange = 0) then begin
+ if (avalue = emptyreal) or (arange = 0) then begin
   result:= avalue;
  end
  else begin
@@ -101,11 +102,11 @@ end;
 
 function addrealty(const a,b: realty): realty; //result = a - b
 begin
- if isemptyreal(a) then begin
+ if a = emptyreal then begin
   result:= b;
  end
  else begin
-  if isemptyreal(b) then begin
+  if b = emptyreal then begin
    result:= a;
   end
   else begin
@@ -116,8 +117,8 @@ end;
 
 function subrealty(const a,b: realty): realty; //result = a + b
 begin
- if isemptyreal(a) then begin
-  if isemptyreal(b) then begin
+ if a = emptyreal then begin
+  if b = emptyreal then begin
    result:= emptyreal;
   end
   else begin
@@ -125,7 +126,7 @@ begin
   end;
  end
  else begin
-  if isemptyreal(b) then begin
+  if b = emptyreal then begin
    result:= a;
   end
   else begin
@@ -136,7 +137,7 @@ end;
 
 function mulrealty(const a,b: realty): realty; //result = a * b
 begin
- if not isemptyreal(a) and not isemptyreal(b) then begin
+ if not (a = emptyreal) and not (b = emptyreal) then begin
   result:= a * b;
  end
  else begin
@@ -170,14 +171,14 @@ end;
 function cmprealty(const a,b: realty): integer;
        //-1 wenn a < b, 0 wenn a = b, 1 wenn a > b
 begin
- if isemptyreal(b) then begin
+ if b = emptyreal then begin
   result:= 1;
-  if isemptyreal(a) then begin
+  if a = emptyreal then begin
    result:= 0;
   end;
  end
  else begin
-  if isemptyreal(a) then begin
+  if a = emptyreal then begin
    result:= -1;
   end
   else begin
@@ -195,23 +196,13 @@ begin
   end;
  end;
 end;
-{
-function realtytostr(const val: realty; const format: msestring = ''): msestring;
-begin
- if isemptyreal(val) then begin
-  result:= emptyrealstring;
- end
- else begin
-  result:= formatfloatmse(val,format,defaultformatsettingsmse);
- end;
-end;
-}
+
 function realtytostr(const val: realty; const format: msestring = '';
                                             const scale: real = 1): msestring;
 var
  rea1: real;
 begin
- if isemptyreal(val) then begin
+ if val = emptyreal then begin
   result:= emptyrealstring;
  end
  else begin
@@ -230,7 +221,7 @@ function realtytostrrange(const val: realty; const format: msestring = '';
 var
  rea1: real;
 begin
- if isemptyreal(val) then begin
+ if val = emptyreal then begin
   result:= emptyrealstring;
  end
  else begin
@@ -294,7 +285,7 @@ end;
 
 function realtytostrdot(const val: realty): string;
 begin
- if isemptyreal(val) then begin
+ if val = emptyreal then begin
   result:= emptyrealstring;
  end
  else begin
