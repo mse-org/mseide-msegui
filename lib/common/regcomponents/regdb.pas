@@ -281,6 +281,13 @@ type
    procedure setvalue(const value: msestring); override;
  end;
   
+ tlookupfieldnamepropertyeditor = class(tstringpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   function getvalues: msestringarty; override;
+ end;
+ 
 procedure Register;
 begin
  registercomponents('DB',[     
@@ -347,6 +354,12 @@ begin
         tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),nil,'fieldname',
         tdbfieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(string),tfield,'KeyFields',
+                                           tlookupfieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(string),tfield,'LookupKeyFields',
+                                           tlookupfieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(string),tfield,'LookupResultField',
+                                           tlookupfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),teditwidgetdatalink,'fieldnametext',
         tdbfieldnamenocalcpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldfieldlink,'fieldname',
@@ -1401,6 +1414,47 @@ end;
 function tsqlmacroseditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tsqlmacroitemeditor;
+end;
+
+{ tlookupfieldnamepropertyeditor }
+
+function tlookupfieldnamepropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_valuelist,ps_sortlist];
+end;
+
+function getfieldnames(const adataset: tdataset): msestringarty;
+var
+ int1: integer;
+begin
+ result:= nil;
+ if adataset <> nil then begin
+  with adataset.fields do begin
+   setlength(result,count);
+   for int1:= 0 to high(result) do begin
+    result[int1]:= fields[int1].fieldname;
+   end;
+  end;
+  if result = nil then begin
+   with adataset.fielddefs do begin
+    setlength(result,count);
+    for int1:= 0 to high(result) do begin
+     result[int1]:= items[int1].name;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tlookupfieldnamepropertyeditor.getvalues: msestringarty;
+begin
+ result:= nil;
+ if name = 'KeyFields' then begin
+  result:= getfieldnames(tfield(instance).dataset);
+ end
+ else begin
+  result:= getfieldnames(tfield(instance).lookupdataset);
+ end;
 end;
 
 initialization
