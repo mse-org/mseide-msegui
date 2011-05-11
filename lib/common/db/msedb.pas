@@ -179,7 +179,11 @@ type
   function getcontroller: tdscontroller;
   procedure fielddestroyed(const sender: ifieldcomponent);
  end;
- 
+{
+ lookupfieldinfoty = record
+ end;
+ plookupfieldinfoty = ^lookupfieldinfoty;
+}
  ifieldcomponent = interface(inullinterface)
                                ['{81BB6312-74BA-4B50-963D-F1DB908F7FB7}']
   procedure setdsintf(const avalue: idsfieldcontroller);
@@ -191,6 +195,7 @@ type
  
  imsefield = interface(inullinterface)['{259AB385-E638-49D6-8C0E-688BE164D130}']
   function getproviderflags1: providerflags1ty;
+//  function getlookupinfo: plookupfieldinfoty;
  end;
 
  fieldstatety = (fis_changing);
@@ -201,10 +206,12 @@ type
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
    fstate: fieldstatesty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader); 
          //workaround for breaking fix of FPC Mantis 12809
@@ -252,6 +259,7 @@ type
    fdefaultexpressionbefore: string; 
                   //synchronize with TField.DefaultExpression
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   //ifieldcomponent
@@ -261,6 +269,7 @@ type
    procedure setdefaultexpression(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -319,10 +328,12 @@ type
    fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -356,11 +367,14 @@ type
    fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    procedure setasenum(const avalue: integer);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
+
    function getasid: integer;
    procedure setasid(const avalue: integer);
   protected
@@ -405,10 +419,12 @@ type
    fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
    function getasid: int64;
    procedure setasid(const avalue: int64);
   protected
@@ -452,10 +468,12 @@ type
    fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -494,10 +512,12 @@ type
    fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -536,10 +556,12 @@ type
    fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -574,10 +596,12 @@ type
    fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -624,11 +648,13 @@ type
    fdisplayvalues: msestring;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    procedure setdisplayvalues(const avalue: msestring);
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    fdisplays : array[boolean,boolean] of msestring;
    procedure readlookup(reader: treader);
@@ -686,11 +712,13 @@ type
    foptions: datetimefieldoptionsty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    procedure setoptions(const avalue: datetimefieldoptionsty);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -740,10 +768,12 @@ type
    fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -777,10 +807,12 @@ type
    fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -817,10 +849,12 @@ type
    fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -857,10 +891,12 @@ type
    fstate: fieldstatesty;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -930,10 +966,12 @@ type
    fcache: tblobcache;
    ftagpo: pointer;
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    procedure setcachekb(const avalue: integer);
    function getcachekb: integer;
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    fgetblobid: getblobidfuncty;
    function getasmsestring: msestring; virtual;
@@ -1014,10 +1052,12 @@ type
  tmsevariantfield = class(tvariantfield,imsefield)
   private
    fproviderflags1: providerflags1ty;
+//   flookupinfo: lookupfieldinfoty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
     //imsefield
    function getproviderflags1: providerflags1ty;
+//   function getlookupinfo: plookupfieldinfoty;
   protected
    fgetvardata: getvardataty;
    fsetvardata: setvardataty;
@@ -1201,8 +1241,9 @@ type
 
  datasetoptionty = (dso_utf8,dso_stringmemo,dso_numboolean,
                          dso_initinternalcalc,
+                         dso_postsavepoint,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,                         
-                         dso_autoapply,dso_postsavepoint,
+                         dso_autoapply,
                          dso_autocommitret,dso_autocommit,
                          dso_refreshafterapply,dso_recnoapplyrefresh,
                          dso_refreshtransaction,dso_refreshwaitcursor,
@@ -3314,7 +3355,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmsefield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmsestringfield }
 
 destructor tmsestringfield.destroy;
@@ -3595,7 +3641,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmsestringfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmsememofield }
 
 constructor tmsememofield.create(aowner: tcomponent);
@@ -3763,7 +3814,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmsenumericfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmselongintfield }
 
 function tmselongintfield.HasParent: Boolean;
@@ -3945,7 +4001,12 @@ begin
  result:= asid;
  tdataset1(dataset).restorestate(stat1);
 end;
-
+{
+function tmselongintfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmselargeintfield }
 
 function tmselargeintfield.HasParent: Boolean;
@@ -4119,7 +4180,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmselargeintfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmsesmallintfield }
 
 function tmsesmallintfield.HasParent: Boolean;
@@ -4234,7 +4300,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmsesmallintfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmsewordfield }
 
 function tmsewordfield.HasParent: Boolean;
@@ -4349,7 +4420,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmsewordfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmseautoincfield }
 
 function tmseautoincfield.HasParent: Boolean;
@@ -4436,7 +4512,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmseautoincfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmsefloatfield }
 
 function tmsefloatfield.HasParent: Boolean;
@@ -4599,7 +4680,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmsefloatfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmsecurrencyfield }
 
 constructor tmsecurrencyfield.create(aowner: tcomponent);
@@ -4868,7 +4954,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmsebooleanfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmsedatetimefield }
 
 function tmsedatetimefield.HasParent: Boolean;
@@ -5030,7 +5121,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmsedatetimefield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmsedatefield }
 
 constructor tmsedatefield.create(aowner: tcomponent);
@@ -5133,7 +5229,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmsebinaryfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmsebytesfield }
 
 function tmsebytesfield.HasParent: Boolean;
@@ -5251,7 +5352,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmsebytesfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmsevarbytesfield }
 
 function tmsevarbytesfield.HasParent: Boolean;
@@ -5374,7 +5480,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmsevarbytesfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmsebcdfield }
 
 function tmsebcdfield.HasParent: Boolean;
@@ -5521,7 +5632,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmsebcdfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 
 { tmseblobfield }
 
@@ -5744,7 +5860,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmseblobfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tmsevariantfield }
 
 function tmsevariantfield.getdatasize: integer;
@@ -5918,7 +6039,12 @@ begin
   inherited;
  end;
 end;
-
+{
+function tmsevariantfield.getlookupinfo: plookupfieldinfoty;
+begin
+ result:= @flookupinfo;
+end;
+}
 { tdbfieldnamearrayprop }
 
 constructor tdbfieldnamearrayprop.create(const afieldtypes: fieldtypesty;

@@ -509,9 +509,18 @@ type
                                    const aresponse: resolverresponsesty = []);
    property response: resolverresponsesty read fresponse write fresponse;
  end;
- 
+
+ lookupfieldinfoty = record
+  keyfieldar: fieldarty;
+  indexnum: integer;
+  lookupvaluefield: tfield;
+ end;
+ lookupfieldinfoarty = array of lookupfieldinfoty;
+  
  filterediteventty = procedure(const sender: tmsebufdataset;
                              const akind: filtereditkindty) of object;
+ bufdatasetarty = array of tmsebufdataset;
+ 
  tmsebufdataset = class(tmdbdataset,iblobchache,idatasetsum,imasterlink,idbdata)
   private
    fpacketrecords: integer;
@@ -534,6 +543,9 @@ type
    fcalcfieldsizes: integerarty;
    fcalcstringpositions: integerarty;
    fcalcvarpositions: integerarty;
+   flookupfieldinfos: lookupfieldinfoarty;
+   flookupclients: bufdatasetarty;
+   flookupmasters: bufdatasetarty;
    
    fbuffercountbefore: integer;
    fonupdateerror: updateerroreventty;
@@ -542,6 +554,7 @@ type
    ffilterbuffer: array[filtereditkindty] of pdsrecordty;
    fcheckfilterbuffer: pdsrecordty;
    fnewvaluebuffer: pdsrecordty; //buffer for applyupdates
+   fcalcbuffer1: pchar;
    
    findexlocal: tlocalindexes;
    factindex: integer;
@@ -681,6 +694,9 @@ type
    procedure setcurrentbmasmsestring(const afield: tfield;
                                      const abm: bookmarkdataty;
                    const avalue: msestring);
+   procedure docurrentassign(const po1: pointer;
+                                  const ainfo: fieldinfoty; const df: tfield);
+   procedure notifylookupclients;
   protected
    fcontroller: tdscontroller;
    fbrecordcount: integer;
@@ -791,6 +807,7 @@ type
    procedure setfiltered(value: boolean); override;
    procedure setactive(value: boolean); override;
 
+   procedure CalculateFields(Buffer: PChar); override;
    procedure loaded; override;                              
    procedure OpenCursor(InfoQuery: Boolean); override;
    procedure internalopen; override;
@@ -946,6 +963,10 @@ type
 
    function isutf8: boolean; virtual;
    procedure bindfields(const bind: boolean);
+   function findfields(const anames: string): fieldarty; overload;
+   function findfields(const anames: string; out afields: fieldarty): boolean;
+                                                         overload;
+                           //true if all found
    procedure fieldtoparam(const source: tfield; const dest: tparam);
    procedure oldfieldtoparam(const source: tfield; const dest: tparam);
    procedure stringtoparam(const source: msestring; const dest: tparam);
@@ -999,6 +1020,8 @@ type
        //calls checkbrowsemode, writing for fkInternalCalc only, 
        //aindex = -1 -> current record
    procedure currentclear(const afield: tfield; aindex: integer);
+   procedure currentassign(const source: tfield; const dest: tfield;
+                              aindex: integer);
    property currentisnull[const afield: tfield; aindex: integer]: boolean read
                  getcurrentisnull;
    property currentasboolean[const afield: tfield; aindex: integer]: boolean
@@ -1019,6 +1042,8 @@ type
                   read getcurrentasmsestring write setcurrentasmsestring;
 
    procedure currentbmclear(const afield: tfield; const abm: bookmarkdataty);
+   procedure currentbmassign(const source: tfield; const dest: tfield;
+                              const abm: bookmarkdataty);
    property currentbmisnull[const afield: tfield;
                const abm: bookmarkdataty]: boolean read getcurrentbmisnull;
    property currentbmasboolean[const afield: tfield;
@@ -2151,6 +2176,11 @@ begin
  fstringpositions:= nil;
  fvarpositions:= nil;
  fcalcfieldbufpositions:= nil;
+ flookupfieldinfos:= nil;
+ for int1:= 0 to high(flookupmasters) do begin
+  removeitem(pointerarty(flookupmasters[int1].flookupclients),pointer(self));
+ end;
+ flookupmasters:= nil;
  fcalcfieldsizes:= nil;
  fcalcstringpositions:= nil;
  fcalcvarpositions:= nil;
@@ -2588,7 +2618,7 @@ begin
  int1:= afield.fieldno - 1;
  case ord(state) of
   ord(dscalcfields): begin
-   buffer:= @pdsrecordty(calcbuffer)^.header;
+   buffer:= @pdsrecordty(fcalcbuffer1)^.header;
   end;
   dscheckfilter: begin
    buffer:= @fcheckfilterbuffer^.header;
@@ -2736,7 +2766,9 @@ begin
         (afield.fieldkind = fkinternalcalc) and 
                                  (state = dsinternalcalc) or
         (afield.fieldkind = fkcalculated) and 
-                                 (state = dscalcfields) {or 
+                                 (state = dscalcfields) or
+        (afield.fieldkind = fklookup)
+                                 {or 
         (bs_curvaluesetting in fbstate) and (state = dscurvalue)}) then begin
    databaseerrorfmt(snotineditstate,[name],self);
   end;
@@ -2745,7 +2777,7 @@ begin
  int1:= afield.fieldno-1;
  case state1 of
   dscalcfields: begin
-   result:= @pdsrecordty(calcbuffer)^.header;
+   result:= @pdsrecordty(fcalcbuffer1)^.header;
   end;
   dsfilter:  begin 
    result:= @ffilterbuffer[ffiltereditkind]^.header;
@@ -3495,9 +3527,11 @@ procedure tmsebufdataset.calcrecordsize;
  end; //addfield
 
 var 
- int1,int2: integer;
+ int1,int2,int3,int4: integer;
  field1: tfield;
  ar1: fieldarty;
+ ar2: stringarty;
+ bo1: boolean;
 begin
  fcalcfieldcount:= 0;
  finternalcalcfieldcount:= 0;
@@ -3543,6 +3577,7 @@ begin
   end;
  end;
  setlength(fcalcfieldbufpositions,fcalcfieldcount);
+ setlength(flookupfieldinfos,fcalcfieldcount);
  setlength(fcalcfieldsizes,fcalcfieldcount);
  fcalcstringpositions:= nil;
  fcalcvarpositions:= nil;
@@ -3566,6 +3601,46 @@ begin
      additem(fcalcvarpositions,fcalcrecordsize);
     end;
     fcalcfieldsizes[int2]:= datasize;
+    if (fieldkind = fklookup) and (lookupdataset is tmsebufdataset) then begin
+     with flookupfieldinfos[int2] do begin
+      indexnum:= -1;
+      if findfields(field1.keyfields,keyfieldar) and 
+                                      (keyfieldar <> nil) then begin
+       with tmsebufdataset(lookupdataset) do begin
+        lookupvaluefield:= findfield(field1.lookupresultfield);
+        if lookupvaluefield <> nil then begin
+         ar2:= splitstring(lookupkeyfields,';',true);
+         if high(ar2) = high(keyfieldar) then begin
+          for int3:= 0 to indexlocal.count - 1 do begin
+           with indexlocal[int3] do begin
+            if fields.count > high(keyfieldar) then begin
+             bo1:= true;
+             for int4:= 0 to high(keyfieldar) do begin
+              if not sametext(fields[int4].fieldname,ar2[int4]) then begin
+               bo1:= false;
+               break;
+              end;
+             end;
+             if bo1 then begin
+              indexnum:= int3;
+              adduniqueitem(pointerarty(flookupclients),pointer(self));
+              adduniqueitem(pointerarty(self.flookupmasters),
+                                               pointer(lookupdataset));
+             end
+             else begin
+              databaseerror(name+': no loookup index for fields "'+
+                               lookupkeyfields+'".');
+             end;
+             break;
+            end;
+           end;
+          end;
+         end;
+        end;
+       end;
+      end;
+     end;
+    end;
     inc(fcalcrecordsize,fcalcfieldsizes[int2]);
     alignfieldpos(fcalcrecordsize);
     inc(int2);
@@ -4507,6 +4582,35 @@ begin
  inherited;
 end;
 
+function tmsebufdataset.findfields(const anames: string): fieldarty;
+var
+ ar1: stringarty;
+ int1: integer;
+begin
+ ar1:= splitstring(anames,';',true);
+ setlength(result,length(ar1));
+ for int1:= 0 to high(result) do begin
+  result[int1]:= findfield(ar1[int1]);
+ end;
+end;
+
+function tmsebufdataset.findfields(const anames: string; out afields: fieldarty): boolean;
+                           //true if all found
+var
+ ar1: stringarty;
+ int1: integer;
+begin
+ ar1:= splitstring(anames,';',true);
+ setlength(afields,length(ar1));
+ result:= true;
+ for int1:= 0 to high(afields) do begin
+  afields[int1]:= findfield(ar1[int1]);
+  if afields[int1] = nil then begin
+   result:= false;
+  end;  
+ end;
+end;
+
 function tmsebufdataset.refreshing: boolean;
 begin
  result:= bs_refreshing in fbstate;
@@ -4528,6 +4632,19 @@ procedure tmsebufdataset.setoninternalcalcfields(
 begin
  foninternalcalcfields:= avalue;
  updatestate;
+end;
+
+procedure tmsebufdataset.notifylookupclients;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(flookupclients) do begin
+  with flookupclients[int1] do begin
+   if active then begin
+    resync([]);
+   end;
+  end;
+ end;
 end;
 
 procedure tmsebufdataset.dataevent(event: tdataevent; info: ptrint);
@@ -4557,11 +4674,14 @@ begin
  if not ((bs_recapplying in fbstate) and (event = dedatasetchange)) then begin
   inherited;
  end;
- case event of
-  deupdaterecord: begin
+ case ord(event) of
+  ord(deupdaterecord): begin
    if checkcanevent(self,tmethod(foninternalcalcfields)) then begin
     foninternalcalcfields(self,false);
    end;
+  end;
+  de_modified: begin
+   notifylookupclients;
   end;
  end;
 end;
@@ -4618,6 +4738,7 @@ begin
  inherited;
  if bo1 <> active then begin
   notifycontrols;
+  notifylookupclients;
  end;
 end;
 
@@ -5865,7 +5986,7 @@ begin
  end;
  if afield.index < 0 then begin
   raise ecurrentvalueaccess.create(self,afield,
-                                           'Field can not be be fkCalculated.');
+               'Field can not be be fkCalculated or fkLookup.');
  end;
  checkindex(false);
  if aindex < 0 then begin
@@ -5903,7 +6024,7 @@ begin
  end;
  if afield.index < 0 then begin
   raise ecurrentvalueaccess.create(self,afield,
-                                           'Field can not be be fkCalculated.');
+                   'Field can not be be fkCalculated or fkLookup.');
  end;
  result:= getcurrentpo(afield,afieldtype,@abm.recordpo^.header);
 end;
@@ -6041,6 +6162,34 @@ begin
  beforecurrentbmset(afield,ftunknown,abm,true,bo1);
  if bo1 then begin
   aftercurrentset(afield);
+ end;
+end;
+
+procedure tmsebufdataset.currentassign(const source: tfield; const dest: tfield;
+                              aindex: integer);
+var
+ po1: pointer;
+begin
+ po1:= beforecurrentget(source,source.datatype,aindex);
+ if po1 = nil then begin
+  dest.clear;
+ end
+ else begin
+  docurrentassign(po1,ffieldinfos[source.fieldno-1],dest);
+ end;
+end;
+
+procedure tmsebufdataset.currentbmassign(const source: tfield; const dest: tfield;
+                              const abm: bookmarkdataty);
+var
+ po1: pointer;
+begin
+ po1:= beforecurrentbmget(source,source.datatype,abm);
+ if po1 = nil then begin
+  dest.clear;
+ end
+ else begin
+  docurrentassign(po1,ffieldinfos[source.fieldno-1],dest);
  end;
 end;
 
@@ -6494,7 +6643,7 @@ var
   end;
   if afield.index < 0 then begin
    raise ecurrentvalueaccess.create(self,afield,
-                                           'Field can not be be fkCalculated.');
+                  'Field can not be be fkCalculated or fkLookup.');
   end;
   checkindex(false);
   int1:= afield.fieldno-1;
@@ -6588,6 +6737,47 @@ begin
  result:= fbrecordcount - 1;
 end;
 
+procedure tmsebufdataset.docurrentassign(const po1: pointer;
+                                  const ainfo: fieldinfoty; const df: tfield);
+begin
+ with ainfo do begin
+  case ext.basetype of
+   ftwidestring: begin
+    if df is tmsestringfield then begin
+     tmsestringfield(df).asmsestring:= pmsestring(po1)^;
+    end
+    else begin
+     df.asstring:= pmsestring(po1)^;
+    end;
+   end;
+   ftinteger: begin
+    df.asinteger:= pinteger(po1)^;
+   end;
+   ftboolean: begin
+    df.asboolean:= plongbool(po1)^;
+   end;
+   ftbcd: begin
+    df.ascurrency:= pcurrency(po1)^;
+   end;
+   ftfloat: begin
+    df.asfloat:= pdouble(po1)^;
+   end;
+   ftlargeint: begin
+    df.aslargeint:= pint64(po1)^;
+   end;
+   ftdatetime: begin
+    df.asdatetime:= pdatetime(po1)^;
+   end;
+   ftvariant: begin
+    df.asvariant:= pvariant(po1)^;
+   end
+   else begin
+    df.clear;
+   end;
+  end;
+ end;
+end;
+
 procedure tmsebufdataset.copyfieldvalues(const bm: bookmarkdataty;
                                                     const dest: tdataset);
                         //copies field values with same name
@@ -6596,7 +6786,6 @@ var
  int1: integer;
  int2: integer;
  str1: string;
- po1: pointer;
 begin
  if not active then begin
   exit;
@@ -6610,12 +6799,14 @@ begin
     with ffieldinfos[int2] do begin
      if (ext.uppername = str1) and (ext.basetype <> ftblob) and 
                       ext.field.visible and 
-                     (ext.field.fieldkind <> fkcalculated) then begin
+                     (ext.field.fieldkind <> fkcalculated) and
+                     (ext.field.fieldkind <> fklookup) then begin
       if not getfieldflag(@bm.recordpo^.header.fielddata.nullmask,int2) then begin 
        df.clear;
       end
       else begin
-       po1:= pointer(bm.recordpo)+base.offset;
+       docurrentassign(pointer(bm.recordpo)+base.offset,ffieldinfos[int2],df);
+{
        case ext.basetype of
         ftwidestring: begin
          if df is tmsestringfield then begin
@@ -6650,6 +6841,7 @@ begin
 //         databaseerror(name+': Invalid datatype.');
         end;
        end;
+}
       end;
      end;
     end;
@@ -7046,6 +7238,58 @@ begin
  bm1.recno:= arecord;
  bm1.recordpo:= findexes[indexnum+1].ind[arecord];
  result:= currentbmaslargeint[afield,bm1];
+end;
+
+procedure CalcLookupValue(const afield: tfield);
+begin
+ with afield do begin
+  if LookupCache then begin
+    Value:= LookupList.ValueOfKey(DataSet.FieldValues[KeyFields])
+  end
+  else begin
+   if Assigned(LookupDataSet) and DataSet.Active then begin
+    Value:= LookupDataSet.Lookup(LookupKeyfields,
+                 DataSet.FieldValues[KeyFields], LookupresultField);
+   end;
+  end;  
+ end;
+end;
+
+procedure tmsebufdataset.CalculateFields(Buffer: PChar);
+var
+ i: Integer;
+ field1: tfield;
+ bm1: bookmarkdataty;
+begin
+ FCalcBuffer1 := Buffer;  
+ if not IsUniDirectional and (State <> dsInternalCalc) then begin
+  try
+   ClearCalcFields(FCalcBuffer1);
+   for i := 0 to Fields.Count - 1 do begin
+    field1:= fields[i];
+    if (field1.FieldKind = fkLookup) and 
+                      (field1.lookupdataset <> nil) then begin
+     with flookupfieldinfos[-1-field1.fieldno] do begin
+      if indexnum >= 0 then begin
+       with tmsebufdataset(field1.lookupdataset) do begin
+        if active and indexlocal[indexnum].find(keyfieldar,bm1) then begin
+         currentbmassign(lookupvaluefield,field1,bm1); 
+        end
+        else begin
+         field1.clear;
+        end;
+       end;
+      end
+      else begin
+       CalcLookupValue(field1);
+      end;
+     end;
+    end;
+   end;
+  finally
+   DoOnCalcFields;
+  end;
+ end;
 end;
 
 { tlocalindexes }
