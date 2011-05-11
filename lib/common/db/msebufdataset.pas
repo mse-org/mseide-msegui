@@ -3601,9 +3601,10 @@ begin
      additem(fcalcvarpositions,fcalcrecordsize);
     end;
     fcalcfieldsizes[int2]:= datasize;
-    if (fieldkind = fklookup) and (lookupdataset is tmsebufdataset) then begin
-     with flookupfieldinfos[int2] do begin
-      indexnum:= -1;
+    with flookupfieldinfos[int2] do begin
+     indexnum:= -1;
+     if (fieldkind = fklookup) and not lookupcache and 
+                             (lookupdataset is tmsebufdataset) then begin
       if findfields(field1.keyfields,keyfieldar) and 
                                       (keyfieldar <> nil) then begin
        with tmsebufdataset(lookupdataset) do begin
@@ -3626,18 +3627,18 @@ begin
               adduniqueitem(pointerarty(flookupclients),pointer(self));
               adduniqueitem(pointerarty(self.flookupmasters),
                                                pointer(lookupdataset));
+              break;
              end
-             else begin
-              databaseerror(name+': no loookup index for fields "'+
-                               lookupkeyfields+'".');
-             end;
-             break;
             end;
            end;
           end;
          end;
         end;
        end;
+      end;
+      if indexnum < 0 then begin
+       databaseerror(self.name+', '+name+': no loookup index for KeyFields "'+
+                         keyfields+'" LookupKeyFields "'+lookupkeyfields+'".');
       end;
      end;
     end;
