@@ -7520,36 +7520,40 @@ begin
  result:= 0;
  for int1:= 0 to alastindex do begin
   with findexfieldinfos[int1] do begin
-   if not getfieldflag(@l^.header.fielddata.nullmask,fieldindex) then begin
-    if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
-     continue;
-    end
-    else begin
-     dec(result);
-    end;
+   if islookup then begin
    end
    else begin
-    if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
-     inc(result);
+    if not getfieldflag(@l^.header.fielddata.nullmask,fieldindex) then begin
+     if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
+      continue;
+     end
+     else begin
+      dec(result);
+     end;
     end
-    else begin    
-     result:= comparefunc((pointer(l)+recoffset)^,(pointer(r)+recoffset)^);
+    else begin
+     if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
+      inc(result);
+     end
+     else begin    
+      result:= comparefunc((pointer(l)+recoffset)^,(pointer(r)+recoffset)^);
+     end;
     end;
-   end;
-   if desc then begin
-    result:= -result;
-   end;
-   if result <> 0 then begin
-    if apartialstring and canpartialstring and (int1 = alastindex) and
-     (caseinsensitive and 
-        mseissametextlen(pmsestring(pointer(l)+recoffset)^,
-                pmsestring(pointer(r)+recoffset)^) or
-      not caseinsensitive and 
-        mseissamestrlen(pmsestring(pointer(l)+recoffset)^,
-                pmsestring(pointer(r)+recoffset)^)) then begin
-     result:= 0;
-    end;               
-    break;
+    if desc then begin
+     result:= -result;
+    end;
+    if result <> 0 then begin
+     if apartialstring and canpartialstring and (int1 = alastindex) and
+      (caseinsensitive and 
+         mseissametextlen(pmsestring(pointer(l)+recoffset)^,
+                 pmsestring(pointer(r)+recoffset)^) or
+       not caseinsensitive and 
+         mseissamestrlen(pmsestring(pointer(l)+recoffset)^,
+                 pmsestring(pointer(r)+recoffset)^)) then begin
+      result:= 0;
+     end;               
+     break;
+    end;
    end;
   end;
  end;
