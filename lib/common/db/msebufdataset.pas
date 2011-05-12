@@ -1732,8 +1732,13 @@ begin
 end;
 
 destructor tmsebufdataset.destroy;
+var
+ int1: integer;
 begin
  inherited destroy;
+ for int1:= high(flookupclients) downto 0 do begin
+  removeitem(pointerarty(flookupclients[int1].flookupmasters),pointer(self));
+ end;
  findexlocal.free;
  closelogger;
 end;
@@ -2178,7 +2183,7 @@ begin
  fvarpositions:= nil;
  fcalcfieldbufpositions:= nil;
  flookupfieldinfos:= nil;
- for int1:= 0 to high(flookupmasters) do begin
+ for int1:= high(flookupmasters) downto 0 do begin
   removeitem(pointerarty(flookupmasters[int1].flookupclients),pointer(self));
  end;
  flookupmasters:= nil;
@@ -7844,7 +7849,7 @@ begin
     with field1 do begin
      if not((fieldkind in [fkdata,fkinternalcalc]) or 
             (fieldkind = fklookup) and 
-            (flookupfieldinfos[1-fieldno].indexnum >= 0))or 
+            (flookupfieldinfos[-1-fieldno].indexnum >= 0)) or 
                       not (datatype in indexfieldtypes) then begin
       databaseerror('Invalid index field "'+fieldname+'".',
                                                    tmsebufdataset(self.fowner));
