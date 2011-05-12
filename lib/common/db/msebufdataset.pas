@@ -574,8 +574,9 @@ type
    ffilterbuffer: array[filtereditkindty] of pdsrecordty;
    fcheckfilterbuffer: pdsrecordty;
    fnewvaluebuffer: pdsrecordty; //buffer for applyupdates
-   flookupbuffer: pdsrecordty;
+//   flookupbuffer: pdsrecordty;
    flookuppo: pintrecordty;
+   flookupresult: lookupdataty;
    fcalcbuffer1: pchar;
    
    findexlocal: tlocalindexes;
@@ -747,8 +748,10 @@ type
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
 
+   function getcurrentlookuppo(const afield: tfield;
+        const afieldtype: tfieldtype; const arecord: pintrecordty): pointer;
    function getcurrentpo(const afield: tfield;
-        const afieldtype: tfieldtype; const arecord: precheaderty): pointer;
+        const afieldtype: tfieldtype; const arecord: pintrecordty): pointer;
    function beforecurrentget(const afield: tfield;
               const afieldtype: tfieldtype; var aindex: integer): pointer;
    function beforecurrentbmget(const afield: tfield;
@@ -2128,7 +2131,7 @@ begin
   ffilterbuffer[kind1]:= pdsrecordty(allocrecordbuffer);
  end;
  fnewvaluebuffer:= pdsrecordty(allocrecordbuffer);
- flookupbuffer:= pdsrecordty(allocrecordbuffer);
+// flookupbuffer:= pdsrecordty(allocrecordbuffer);
  updatestate;
  fallpacketsfetched:= false;
  fopen:= true;
@@ -2204,7 +2207,7 @@ begin
  // pointer(fnewvaluebuffer^.header.blobinfo):= nil;
  // freerecordbuffer(pchar(fnewvaluebuffer));
   freemem(fnewvaluebuffer); //allways copied by move, needs no finalize
-  freemem(flookupbuffer);
+//  freemem(flookupbuffer);
   for int1:= 0 to high(fupdatebuffer) do begin
    with fupdatebuffer[int1] do begin
     if bookmark.recordpo <> nil then begin
@@ -6040,12 +6043,12 @@ begin
 end;
 
 function tmsebufdataset.getcurrentpo(const afield: tfield;
-        const afieldtype: tfieldtype; const arecord: precheaderty): pointer;
+        const afieldtype: tfieldtype; const arecord: pintrecordty): pointer;
 var
  int1: integer;
 begin
  int1:= afield.fieldno-1;
- if not getfieldflag(arecord^.fielddata.nullmask,int1) then begin 
+ if not getfieldflag(arecord^.header.fielddata.nullmask,int1) then begin 
   result:= nil;
  end
  else begin
@@ -6055,6 +6058,31 @@ begin
     raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
    end;   
    result:= pointer(arecord) + base.offset;
+  end;
+ end;
+end;
+
+function tmsebufdataset.getcurrentlookuppo(const afield: tfield;
+        const afieldtype: tfieldtype; const arecord: pintrecordty): pointer;
+var
+ po1: pointer;
+ bm1: bookmarkdataty;
+begin
+ result:= nil;
+ with flookupfieldinfos[-1-afield.fieldno] do begin
+  if indexnum < 0 then begin
+   raise ecurrentvalueaccess.create(self,afield,'No lookup index.');  
+  end;
+  po1:= flookuppo;
+  flookuppo:= arecord;
+  try   
+   if tmsebufdataset(afield.lookupdataset).indexlocal[indexnum].find(
+                                                    keyfieldar,bm1) then begin
+    getvalue(lookupvaluefield,bm1,flookupresult);     
+    result:= flookupresult.po;
+   end;
+  finally
+   flookuppo:= po1;
   end;
  end;
 end;
@@ -6070,7 +6098,7 @@ begin
  if afield.dataset <> self then begin
   raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
  end;
- bo1:= afield.index < 0;
+ bo1:= afield.fieldno < 0;
  if bo1 and (flookupfieldinfos[1-afield.fieldno].indexnum < 0) then begin
   raise ecurrentvalueaccess.create(self,afield,
                'Field can not be be fkCalculated or fkLookup.');
@@ -6084,27 +6112,11 @@ begin
                              'Invalid index '+inttostr(aindex)+'.');  
  end; 
  if bo1 then begin
-  result:= nil;
+  result:= getcurrentlookuppo(afield,afieldtype,factindexpo^.ind[aindex]);
  end
  else begin
   result:= getcurrentpo(afield,afieldtype,factindexpo^.ind[aindex]);
  end;
- {
- po1:= factindexpo^.ind[aindex]; //precheaderty
- int1:= afield.fieldno-1;
- if not getfieldflag(@precheaderty(po1)^.fielddata.nullmask,int1) then begin 
-  result:= nil;
- end
- else begin
-  with ffieldinfos[int1] do begin
-   if (afieldtype <> ftunknown) and 
-        not (ext.basetype in fieldcompatibility[afieldtype]) then begin
-    raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
-   end;   
-   result:= po1 + base.offset;
-  end;
- end;
- }
 end;
 
 function tmsebufdataset.beforecurrentbmget(const afield: tfield;
@@ -7982,7 +7994,7 @@ end;
 procedure tlocalindex.sort(var adata: pointerarty);
 begin
  if adata <> nil then begin
-  try
+//  try
    if lio_quicksort in foptions then begin
     fsortarray:= @adata[0];
     quicksort(0,tmsebufdataset(fowner).fbrecordcount - 1);
@@ -7990,13 +8002,13 @@ begin
    else begin
     mergesort(adata);
    end;
-  finally
-   if fhaslookup then begin
-    with tmsebufdataset(fowner) do begin
-     finalizecalcvalues(flookupbuffer^.header);
-    end;
-   end;
-  end;
+//  finally
+//   if fhaslookup then begin
+//    with tmsebufdataset(fowner) do begin
+//     finalizecalcvalues(flookupbuffer^.header);
+//    end;
+//   end;
+//  end;
  end;
 end;
 
@@ -8010,7 +8022,7 @@ begin
  result:= 0;
  with tmsebufdataset(fowner),findexes[findexlocal.indexof(self) + 1] do begin
   if fbrecordcount > 0 then begin
-   try
+//   try
     int1:= 0;
     checkindex(true);
     lo:= 0;
@@ -8047,13 +8059,13 @@ begin
      end;
      result:= up;
     end;
-   finally
-    if fhaslookup then begin
-     with tmsebufdataset(fowner) do begin
-      finalizecalcvalues(flookupbuffer^.header);
-     end;
-    end;
-   end;
+//   finally
+//    if fhaslookup then begin
+//     with tmsebufdataset(fowner) do begin
+//      finalizecalcvalues(flookupbuffer^.header);
+//     end;
+//    end;
+//   end;
   end;
  end;
 end;
