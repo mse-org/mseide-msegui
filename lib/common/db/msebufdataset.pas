@@ -320,8 +320,12 @@ type
    fsortarray: pintrecordpoaty;
    findexfieldinfos: indexfieldinfoarty;
    finvalid: boolean;
+   fhaslookup: boolean;
    procedure setoptions(const avalue: localindexoptionsty);
    procedure setfields(const avalue: tindexfields);
+   function dolookupcompare(const l,r: pintrecordty;
+                             const ainfo: indexfieldinfoty;
+                             const apartialstring: boolean): integer;
    function compare(l,r: pintrecordty; const alastindex: integer;
                     const apartialstring: boolean): integer; overload;
    function compare(l,r: pintrecordty): integer; overload;
@@ -511,7 +515,22 @@ type
    property response: resolverresponsesty read fresponse write fresponse;
  end;
 
+ lookupdataty = record
+  po: pointer;
+  int: integer;
+  lint: int64;
+  doub: double;
+  cur: currency;
+  mstr: msestring;
+  boo: longbool;
+  vari: variant;
+  dt: tdatetime;
+ end;
+  
+ getbmvalueeventty = procedure (const afield: tfield; const bm: bookmarkdataty;
+                                          var adata: lookupdataty) of object;
  lookupfieldinfoty = record
+  getvalue: getbmvalueeventty;
   keyfieldar: fieldarty;
   indexnum: integer;
   lookupvaluefield: tfield;
@@ -555,6 +574,8 @@ type
    ffilterbuffer: array[filtereditkindty] of pdsrecordty;
    fcheckfilterbuffer: pdsrecordty;
    fnewvaluebuffer: pdsrecordty; //buffer for applyupdates
+   flookupbuffer: pdsrecordty;
+   flookuppo: pintrecordty;
    fcalcbuffer1: pchar;
    
    findexlocal: tlocalindexes;
@@ -742,6 +763,22 @@ type
    function beforecurrentbmset(const afield: tfield;
               const afieldtype: tfieldtype; const abm: bookmarkdataty;
               const isnull: boolean; out changed: boolean): pointer;
+   procedure getbminteger(const afield: tfield; const bm: bookmarkdataty;
+                                          var adata: lookupdataty);
+   procedure getbmlargeint(const afield: tfield; const bm: bookmarkdataty;
+                                          var adata: lookupdataty);
+   procedure getbmcurrency(const afield: tfield; const bm: bookmarkdataty;
+                                          var adata: lookupdataty);
+   procedure getbmfloat(const afield: tfield; const bm: bookmarkdataty;
+                                          var adata: lookupdataty);
+   procedure getbmstring(const afield: tfield; const bm: bookmarkdataty;
+                                          var adata: lookupdataty);
+   procedure getbmboolean(const afield: tfield; const bm: bookmarkdataty;
+                                          var adata: lookupdataty);
+   procedure getbmdatetime(const afield: tfield; const bm: bookmarkdataty;
+                                          var adata: lookupdataty);
+   procedure getbmvariant(const afield: tfield; const bm: bookmarkdataty;
+                                          var adata: lookupdataty);
    
    function getfieldbuffer(const afield: tfield;
              out buffer: pointer; out datasize: integer): boolean; overload; 
@@ -2091,6 +2128,7 @@ begin
   ffilterbuffer[kind1]:= pdsrecordty(allocrecordbuffer);
  end;
  fnewvaluebuffer:= pdsrecordty(allocrecordbuffer);
+ flookupbuffer:= pdsrecordty(allocrecordbuffer);
  updatestate;
  fallpacketsfetched:= false;
  fopen:= true;
@@ -2166,6 +2204,7 @@ begin
  // pointer(fnewvaluebuffer^.header.blobinfo):= nil;
  // freerecordbuffer(pchar(fnewvaluebuffer));
   freemem(fnewvaluebuffer); //allways copied by move, needs no finalize
+  freemem(flookupbuffer);
   for int1:= 0 to high(fupdatebuffer) do begin
    with fupdatebuffer[int1] do begin
     if bookmark.recordpo <> nil then begin
@@ -2622,6 +2661,13 @@ begin
   exit;
  end;
  int1:= afield.fieldno - 1;
+ if (flookuppo <> nil) and (int1 >= 0) then begin
+  buffer:= flookuppo;
+  result:= getfieldflag(precheaderty(buffer)^.fielddata.nullmask,int1);
+  inc(buffer,ffieldinfos[int1].base.offset{ffieldbufpositions[int1]});
+  datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
+  exit;
+ end;
  case ord(state) of
   ord(dscalcfields): begin
    buffer:= @pdsrecordty(fcalcbuffer1)^.header;
@@ -3583,6 +3629,7 @@ begin
   end;
  end;
  setlength(fcalcfieldbufpositions,fcalcfieldcount);
+ flookupfieldinfos:= nil;
  setlength(flookupfieldinfos,fcalcfieldcount);
  setlength(fcalcfieldsizes,fcalcfieldcount);
  fcalcstringpositions:= nil;
@@ -3630,6 +3677,37 @@ begin
              end;
              if bo1 then begin
               indexnum:= int3;
+              if lookupvaluefield.fieldno > 0 then begin
+               case ffieldinfos[lookupvaluefield.fieldno-1].ext.basetype of
+                ftwidestring: begin
+                 getvalue:= @getbmstring;
+                end;
+                ftinteger: begin
+                 getvalue:= @getbminteger;
+                end;
+                ftboolean: begin
+                 getvalue:= @getbmboolean;
+                end;
+                ftbcd: begin
+                 getvalue:= @getbmcurrency;
+                end;
+                ftfloat: begin
+                 getvalue:= @getbmfloat;
+                end;
+                ftlargeint: begin
+                 getvalue:= @getbmlargeint;
+                end;
+                ftdatetime: begin
+                 getvalue:= @getbmdatetime;
+                end;
+                ftvariant: begin
+                 getvalue:= @getbmvariant;
+                end;
+                else begin
+                 indexnum:= -1;
+                end;
+               end;
+              end;
               adduniqueitem(pointerarty(flookupclients),pointer(self));
               adduniqueitem(pointerarty(self.flookupmasters),
                                                pointer(lookupdataset));
@@ -6639,6 +6717,103 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.getbminteger(const afield: tfield;
+               const bm: bookmarkdataty; var adata: lookupdataty);
+var
+ po1: pinteger;
+begin
+ po1:= getcurrentpo(afield,ftunknown,@bm.recordpo^.header);
+ if po1 <> nil then begin
+  adata.int:= po1^;
+  adata.po:= @adata.int;
+ end;
+end;
+
+procedure tmsebufdataset.getbmlargeint(const afield: tfield;
+               const bm: bookmarkdataty; var adata: lookupdataty);
+var
+ po1: pint64;
+begin
+ po1:= getcurrentpo(afield,ftunknown,@bm.recordpo^.header);
+ if po1 <> nil then begin
+  adata.lint:= po1^;
+  adata.po:= @adata.lint;
+ end;
+end;
+
+procedure tmsebufdataset.getbmcurrency(const afield: tfield;
+               const bm: bookmarkdataty; var adata: lookupdataty);
+var
+ po1: pcurrency;
+begin
+ po1:= getcurrentpo(afield,ftunknown,@bm.recordpo^.header);
+ if po1 <> nil then begin
+  adata.cur:= po1^;
+  adata.po:= @adata.cur;
+ end;
+end;
+
+procedure tmsebufdataset.getbmfloat(const afield: tfield;
+               const bm: bookmarkdataty; var adata: lookupdataty);
+var
+ po1: pdouble;
+begin
+ po1:= getcurrentpo(afield,ftunknown,@bm.recordpo^.header);
+ if po1 <> nil then begin
+  adata.doub:= po1^;
+  adata.po:= @adata.doub;
+ end;
+end;
+
+procedure tmsebufdataset.getbmstring(const afield: tfield;
+               const bm: bookmarkdataty; var adata: lookupdataty);
+var
+ po1: pmsestring;
+begin
+ po1:= getcurrentpo(afield,ftunknown,@bm.recordpo^.header);
+ if po1 <> nil then begin
+  adata.mstr:= po1^;
+  adata.po:= @adata.mstr;
+ end;
+end;
+
+procedure tmsebufdataset.getbmboolean(const afield: tfield;
+               const bm: bookmarkdataty; var adata: lookupdataty);
+var
+ po1: plongbool;
+begin
+ po1:= getcurrentpo(afield,ftunknown,@bm.recordpo^.header);
+ if po1 <> nil then begin
+  adata.boo:= po1^;
+  adata.po:= @adata.boo;
+ end;
+end;
+
+procedure tmsebufdataset.getbmdatetime(const afield: tfield;
+               const bm: bookmarkdataty; var adata: lookupdataty);
+var
+ po1: pdatetime;
+begin
+ po1:= getcurrentpo(afield,ftunknown,@bm.recordpo^.header);
+ if po1 <> nil then begin
+  adata.dt:= po1^;
+  adata.po:= @adata.dt;
+ end;
+end;
+
+procedure tmsebufdataset.getbmvariant(const afield: tfield;
+               const bm: bookmarkdataty; var adata: lookupdataty);
+var
+ po1: pvariant;
+begin
+ po1:= getcurrentpo(afield,ftunknown,@bm.recordpo^.header);
+ if po1 <> nil then begin
+  adata.vari:= po1^;
+  adata.po:= @adata.vari;
+ end;
+end;
+
+
 procedure tmsebufdataset.getcoldata(const afield: tfield;
                const adatalist: tdatalist);
 var
@@ -7512,6 +7687,66 @@ begin
  end;
 end;
 
+function tlocalindex.dolookupcompare(const l,r: pintrecordty;
+       const ainfo: indexfieldinfoty; const apartialstring: boolean): integer;
+
+ procedure lookup1(const apo: pintrecordty; var adata: lookupdataty);
+ var
+  bm1: bookmarkdataty;
+ begin
+  adata.po:= nil;
+  tmsebufdataset(self.fowner).flookuppo:= apo;
+  with tmsebufdataset(self.fowner).
+           flookupfieldinfos[-1-ainfo.fieldinstance.fieldno] do begin
+   with tmsebufdataset(ainfo.fieldinstance.lookupdataset) do begin
+    if indexlocal[indexnum].find(keyfieldar,bm1) then begin
+     getvalue(lookupvaluefield,bm1,adata);
+    end;
+   end;
+  end;
+ end;
+
+var
+ ldata,rdata: lookupdataty;
+  
+begin
+ result:= 0;
+ with tmsebufdataset(ainfo.fieldinstance.lookupdataset) do begin
+  if active then begin
+   try
+    lookup1(l,ldata);
+    lookup1(r,rdata);
+   finally
+    tmsebufdataset(self.fowner).flookuppo:= nil;
+   end;
+   if ldata.po = nil then begin
+    if rdata.po = nil then begin
+     exit;
+    end
+    else begin
+     dec(result);
+    end;
+   end
+   else begin
+    if rdata.po = nil then begin
+     inc(result);
+    end
+    else begin
+     result:= ainfo.comparefunc(ldata.po^,rdata.po^);
+     if (result <> 0) and apartialstring then begin
+      if ainfo.caseinsensitive and 
+         mseissametextlen(ldata.mstr,rdata.mstr) or
+       not ainfo.caseinsensitive and 
+         mseissamestrlen(ldata.mstr,rdata.mstr) then begin
+       result:= 0;
+      end;
+     end;
+    end;
+   end;    
+  end;
+ end;
+end;
+
 function tlocalindex.compare(l,r: pintrecordty; const alastindex: integer;
              const apartialstring: boolean): integer;
 var
@@ -7521,6 +7756,14 @@ begin
  for int1:= 0 to alastindex do begin
   with findexfieldinfos[int1] do begin
    if islookup then begin
+    result:= dolookupcompare(l,r,findexfieldinfos[int1],
+              apartialstring and canpartialstring and (int1 = alastindex));
+    if desc then begin
+     result:= -result;
+    end;
+    if result <> 0 then begin
+     break;
+    end;
    end
    else begin
     if not getfieldflag(@l^.header.fielddata.nullmask,fieldindex) then begin
@@ -7570,6 +7813,13 @@ begin
  for int1:= 0 to high(findexfieldinfos) do begin
   with findexfieldinfos[int1] do begin
    if islookup then begin
+    result:= dolookupcompare(l,r,findexfieldinfos[int1],false);    
+    if desc then begin
+     result:= -result;
+    end;
+    if result <> 0 then begin
+     break;
+    end;
    end
    else begin
     if not getfieldflag(@l^.header.fielddata.nullmask,fieldindex) then begin
@@ -7732,12 +7982,20 @@ end;
 procedure tlocalindex.sort(var adata: pointerarty);
 begin
  if adata <> nil then begin
-  if lio_quicksort in foptions then begin
-   fsortarray:= @adata[0];
-   quicksort(0,tmsebufdataset(fowner).fbrecordcount - 1);
-  end
-  else begin
-   mergesort(adata);
+  try
+   if lio_quicksort in foptions then begin
+    fsortarray:= @adata[0];
+    quicksort(0,tmsebufdataset(fowner).fbrecordcount - 1);
+   end
+   else begin
+    mergesort(adata);
+   end;
+  finally
+   if fhaslookup then begin
+    with tmsebufdataset(fowner) do begin
+     finalizecalcvalues(flookupbuffer^.header);
+    end;
+   end;
   end;
  end;
 end;
@@ -7752,41 +8010,49 @@ begin
  result:= 0;
  with tmsebufdataset(fowner),findexes[findexlocal.indexof(self) + 1] do begin
   if fbrecordcount > 0 then begin
-   int1:= 0;
-   checkindex(true);
-   lo:= 0;
-   up:= fbrecordcount - 1;
-   if abigger then begin
-    while lo <= up do begin
-     pivot:= (up + lo) div 2;
-     int1:= compare(arecord,ind[pivot],alastindex,false);
-     if int1 >= 0 then begin //pivot <= rev
-      lo:= pivot + 1;
-     end
-     else begin
-      up:= pivot;
-      if up = lo then begin
-       break;
+   try
+    int1:= 0;
+    checkindex(true);
+    lo:= 0;
+    up:= fbrecordcount - 1;
+    if abigger then begin
+     while lo <= up do begin
+      pivot:= (up + lo) div 2;
+      int1:= compare(arecord,ind[pivot],alastindex,false);
+      if int1 >= 0 then begin //pivot <= rev
+       lo:= pivot + 1;
+      end
+      else begin
+       up:= pivot;
+       if up = lo then begin
+        break;
+       end;
       end;
      end;
-    end;
-    result:= lo;
-   end
-   else begin
-    while lo <= up do begin
-     pivot:= (up + lo + 1) div 2;
-     int1:= compare(arecord,ind[pivot],alastindex,false);
-     if int1 <= 0 then begin //pivot >= rev
-      up:= pivot - 1;
-     end
-     else begin
-      lo:= pivot;
-      if up = lo then begin
-       break;
+     result:= lo;
+    end
+    else begin
+     while lo <= up do begin
+      pivot:= (up + lo + 1) div 2;
+      int1:= compare(arecord,ind[pivot],alastindex,false);
+      if int1 <= 0 then begin //pivot >= rev
+       up:= pivot - 1;
+      end
+      else begin
+       lo:= pivot;
+       if up = lo then begin
+        break;
+       end;
       end;
      end;
+     result:= up;
     end;
-    result:= up;
+   finally
+    if fhaslookup then begin
+     with tmsebufdataset(fowner) do begin
+      finalizecalcvalues(flookupbuffer^.header);
+     end;
+    end;
    end;
   end;
  end;
@@ -7841,6 +8107,7 @@ var
  kind1: fieldcomparekindty;
 begin
  setlength(findexfieldinfos,ffields.count);
+ fhaslookup:= false;
  with tmsebufdataset(fowner) do begin
   for int1:= 0 to high(findexfieldinfos) do begin
    with ffields.items[int1],findexfieldinfos[int1] do begin
@@ -7859,6 +8126,7 @@ begin
                                                    tmsebufdataset(self.fowner));
      end;
      islookup:= fieldkind = fklookup;
+     fhaslookup:= fhaslookup or islookup;
      for kind1:= low(fieldcomparekindty) to high(fieldcomparekindty) do begin
       with comparefuncs[kind1] do begin
        if datatype in datatypes then begin
