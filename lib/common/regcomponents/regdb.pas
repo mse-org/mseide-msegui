@@ -1146,7 +1146,7 @@ begin
     for int1:= 0 to fields.count -1 do begin
      with fields[int1] do begin
       if (datatype in indexfieldtypes) and 
-                           (fieldkind in [fkdata,fkinternalcalc]) then begin
+                  (fieldkind in [fkdata,fkinternalcalc,fklookup]) then begin
        additem(result,msestring(fieldname));
       end;
      end;

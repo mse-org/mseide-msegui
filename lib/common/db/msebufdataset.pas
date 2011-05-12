@@ -306,6 +306,7 @@ type
   vtype: integer;
   recoffset: integer;
   fieldindex: integer;
+  islookup: boolean;
   desc: boolean;
   caseinsensitive: boolean;
   canpartialstring: boolean;
@@ -5980,12 +5981,14 @@ function tmsebufdataset.beforecurrentget(const afield: tfield;
 var
  po1: pointer;
  int1: integer;
+ bo1: boolean;
 begin
  currentcheckbrowsemode;
  if afield.dataset <> self then begin
   raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
  end;
- if afield.index < 0 then begin
+ bo1:= afield.index < 0;
+ if bo1 and (flookupfieldinfos[1-afield.fieldno].indexnum < 0) then begin
   raise ecurrentvalueaccess.create(self,afield,
                'Field can not be be fkCalculated or fkLookup.');
  end;
@@ -5997,7 +6000,12 @@ begin
   raise ecurrentvalueaccess.create(self,afield,
                              'Invalid index '+inttostr(aindex)+'.');  
  end; 
- result:= getcurrentpo(afield,afieldtype,factindexpo^.ind[aindex]);
+ if bo1 then begin
+  result:= nil;
+ end
+ else begin
+  result:= getcurrentpo(afield,afieldtype,factindexpo^.ind[aindex]);
+ end;
  {
  po1:= factindexpo^.ind[aindex]; //precheaderty
  int1:= afield.fieldno-1;
@@ -7552,27 +7560,31 @@ begin
  result:= 0;
  for int1:= 0 to high(findexfieldinfos) do begin
   with findexfieldinfos[int1] do begin
-   if not getfieldflag(@l^.header.fielddata.nullmask,fieldindex) then begin
-    if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
-     continue;
-    end
-    else begin
-     dec(result);
-    end;
+   if islookup then begin
    end
    else begin
-    if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
-     inc(result);
+    if not getfieldflag(@l^.header.fielddata.nullmask,fieldindex) then begin
+     if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
+      continue;
+     end
+     else begin
+      dec(result);
+     end;
     end
-    else begin    
-     result:= comparefunc((pointer(l)+recoffset)^,(pointer(r)+recoffset)^);
+    else begin
+     if not getfieldflag(@r^.header.fielddata.nullmask,fieldindex) then begin
+      inc(result);
+     end
+     else begin    
+      result:= comparefunc((pointer(l)+recoffset)^,(pointer(r)+recoffset)^);
+     end;
     end;
-   end;
-   if desc then begin
-    result:= -result;
-   end;
-   if result <> 0 then begin
-    break;
+    if desc then begin
+     result:= -result;
+    end;
+    if result <> 0 then begin
+     break;
+    end;
    end;
   end;
  end;
@@ -7830,11 +7842,14 @@ begin
     end;
     fieldinstance:= field1;
     with field1 do begin
-     if not(fieldkind in [fkdata,fkinternalcalc]) or 
+     if not((fieldkind in [fkdata,fkinternalcalc]) or 
+            (fieldkind = fklookup) and 
+            (flookupfieldinfos[1-fieldno].indexnum >= 0))or 
                       not (datatype in indexfieldtypes) then begin
       databaseerror('Invalid index field "'+fieldname+'".',
                                                    tmsebufdataset(self.fowner));
      end;
+     islookup:= fieldkind = fklookup;
      for kind1:= low(fieldcomparekindty) to high(fieldcomparekindty) do begin
       with comparefuncs[kind1] do begin
        if datatype in datatypes then begin
