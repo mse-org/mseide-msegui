@@ -173,7 +173,7 @@ end;
 
 function tcustomdataimage.createdatalist(const sender: twidgetcol): tdatalist;
 begin
- result:= tansistringdatalist.create;
+ result:= tgridansistringdatalist.create(sender);
 end;
 
 function tcustomdataimage.getdatatype: listdatatypety;
