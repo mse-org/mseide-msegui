@@ -469,7 +469,8 @@ type
  recupdatebufferarty = array of recupdatebufferty;
  
  bufdatasetstatety = (bs_opening,bs_loading,bs_fetching,
-                      bs_applying,bs_recapplying,bs_curvaluemodified,
+                      bs_displaydata,bs_applying,bs_recapplying,
+                      bs_curvaluemodified,
                       bs_curvalueset,{bs_curindexinvalid,}
                       bs_connected,
                       bs_hasindex,bs_fetchall,bs_initinternalcalc,
@@ -901,6 +902,9 @@ type
    
    function islocal: boolean; virtual;
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
+    //idscontroller
+   procedure begindisplaydata;
+   procedure enddisplaydata;
     //idbdata
    function getindex(const afield: tfield): integer; //-1 if none
    function gettextindex(const afield: tfield;
@@ -2657,6 +2661,7 @@ function tmsebufdataset.getfieldbuffer(const afield: tfield;
               //true if not null
 var
  int1: integer;
+ st1: integer;
 begin 
  result:= false;
  buffer:= nil;
@@ -2671,7 +2676,11 @@ begin
   datasize:= ffieldinfos[int1].base.size{ffieldsizes[int1]};
   exit;
  end;
- case ord(state) of
+ st1:= ord(state);
+ if bs_displaydata in fbstate then begin
+  st1:= ord(dsbrowse);
+ end;
+ case st1 of
   ord(dscalcfields): begin
    buffer:= @pdsrecordty(fcalcbuffer1)^.header;
   end;
@@ -2691,7 +2700,7 @@ begin
    end;
   end;
   else begin
-   if bs_internalcalc in fbstate then begin
+   if fbstate * [bs_internalcalc,bs_displaydata] = [bs_internalcalc] then begin
     if int1 < 0 then begin//calc field
      buffer:= @pdsrecordty(activebuffer)^.header;
      //values invalid!
@@ -2701,7 +2710,7 @@ begin
     end;
    end
    else begin
-    if bs_recapplying in fbstate then begin
+    if fbstate*[bs_recapplying,bs_displaydata] = [bs_recapplying] then begin
      buffer:= @fnewvaluebuffer^.header;
     end
     else begin
@@ -7491,6 +7500,16 @@ begin
    DoOnCalcFields;
   end;
  end;
+end;
+
+procedure tmsebufdataset.begindisplaydata;
+begin
+ include(fbstate,bs_displaydata);
+end;
+
+procedure tmsebufdataset.enddisplaydata;
+begin
+ exclude(fbstate,bs_displaydata);
 end;
 
 { tlocalindexes }

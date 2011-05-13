@@ -1277,6 +1277,8 @@ type
   function getfiltereditkind: filtereditkindty;
   procedure beginfilteredit(const akind:filtereditkindty);
   procedure endfilteredit;
+  procedure begindisplaydata;
+  procedure enddisplaydata;
   procedure doidleapplyupdates;
   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
   function getrestorerecno: boolean;
@@ -1387,6 +1389,8 @@ type
    procedure getfieldclass(const fieldtype: tfieldtype; out result: tfieldclass);
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure begindisplaydata; inline;
+   procedure enddisplaydata; inline;
    function getcanmodify: boolean;
    function updatesortfield(const alink: tfielddatalink;
                               const adescend: boolean): boolean;
@@ -7653,6 +7657,16 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tdscontroller.begindisplaydata;
+begin
+ fintf.begindisplaydata;
+end;
+
+procedure tdscontroller.enddisplaydata;
+begin
+ fintf.enddisplaydata;
 end;
 
 { tfieldlinkdatalink }

@@ -1101,7 +1101,11 @@ type
  igriddatalink = interface(inullinterface)
   function getdbindicatorcol: integer;
  end;
- 
+
+ gridrowinfoty = record
+  row: integer;
+ end;
+  
  griddatalinkstatety = (gdls_hasrowstatefield,gdls_booleanmerged,
                         gdls_booleanselected); 
  griddatalinkstatesty = set of griddatalinkstatety; 
@@ -1191,6 +1195,8 @@ type
    function checkvalue: boolean;
    procedure updatelayout;
    procedure updaterowcount;
+   procedure begingridrow(const arow: integer; out ainfo: gridrowinfoty);
+   procedure endgridrow(const ainfo: gridrowinfoty);
    function getfirstrecord: integer; virtual;
    procedure checkactiverecord; virtual;
    procedure datasetscrolled(distance: integer); override;
@@ -6831,43 +6837,52 @@ end;
 function tgriddatalink.getrowfieldisnull(const afield: tfield; 
                              const row: integer): boolean;
 var
- int1: integer;
+ rowinfo: gridrowinfoty;
+// int1: integer;
 begin
  result:= true;
  if (afield <> nil) and hasdata then begin
-  int1:= activerecord;
-  activerecord:= row;
+  begingridrow(row,rowinfo);
+//  int1:= activerecord;
+//  activerecord:= row;
   result:= afield.isnull;
-  activerecord:= int1;
+  endgridrow(rowinfo);
+//  activerecord:= int1;
  end;
 end;
 
 function tgriddatalink.getansistringbuffer(const afield: tfield;
                                                   const row: integer): pointer;
 var
- int1: integer;
+ rowinfo: gridrowinfoty;
+// int1: integer;
 begin
  result:= nil;
  if (afield <> nil) and hasdata then begin
-  int1:= activerecord;
-  activerecord:= row;
+  begingridrow(row,rowinfo);
+//  int1:= activerecord;
+//  activerecord:= row;
+  begingridrow(row,rowinfo);
   if not afield.isnull then begin
    result:= @fansistringbuffer;
    fansistringbuffer:= afield.asstring;
   end;
-  activerecord:= int1;
+//  activerecord:= int1;
+  endgridrow(rowinfo);
  end;
 end;
 
 function tgriddatalink.getstringbuffer(const afield: tfield;
                       const row: integer): pointer;
 var
- int1: integer;
+ rowinfo: gridrowinfoty;
+// int1: integer;
 begin
  result:= nil;
  if (afield <> nil) and hasdata then begin
-  int1:= activerecord;
-  activerecord:= row;
+  begingridrow(row,rowinfo);
+//  int1:= activerecord;
+//  activerecord:= row;
   if not afield.isnull then begin
    result:= @fstringbuffer;
    if afield is tmsestringfield then begin
@@ -6882,20 +6897,23 @@ begin
     end;
    end;
   end;
-  activerecord:= int1;
+  endgridrow(rowinfo);
+//  activerecord:= int1;
  end;
 end;
 
 function tgriddatalink.getdisplaystringbuffer(const afield: tfield;
                       const row: integer{; const aedit: boolean}): pointer;
 var
- int1: integer;
+ rowinfo: gridrowinfoty;
+// int1: integer;
 // str1: ansistring;
 begin
  result:= nil;
  if (afield <> nil) and hasdata then begin
-  int1:= activerecord;
-  activerecord:= row;
+//  int1:= activerecord;
+//  activerecord:= row;
+  begingridrow(row,rowinfo);
   if not afield.isnull then begin
    result:= @fstringbuffer;
    if afield is tmsestringfield then begin
@@ -6915,92 +6933,108 @@ begin
     end;
    end;
   end;
-  activerecord:= int1;
+//  activerecord:= int1;
+  endgridrow(rowinfo);
  end;
 end;
 
 function tgriddatalink.getbooleanbuffer(const afield: tfield; 
                                              const row: integer): pointer;
 var
- int1: integer;
+ rowinfo: gridrowinfoty;
+// int1: integer;
 begin
  result:= nil;
  if (afield <> nil) and hasdata then begin
-  int1:= activerecord;
-  activerecord:= row;
+//  int1:= activerecord;
+//  activerecord:= row;
+  begingridrow(row,rowinfo);
   if not afield.isnull then begin
    result:= @fintegerbuffer;
    fintegerbuffer:= integer(afield.asboolean);
   end;
-  activerecord:= int1;
+//  activerecord:= int1;
+  endgridrow(rowinfo);
  end;
 end;
 
 function tgriddatalink.getintegerbuffer(const afield: tfield;
                      const row: integer): pointer;
 var
- int1: integer;
+// int1: integer;
+ rowinfo: gridrowinfoty;
 begin
  result:= nil;
  if (afield <> nil) and hasdata then begin
-  int1:= activerecord;
-  activerecord:= row;
+//  int1:= activerecord;
+//  activerecord:= row;
+  begingridrow(row,rowinfo);
   if not afield.isnull then begin
    result:= @fintegerbuffer;
    fintegerbuffer:= afield.asinteger;
   end;
-  activerecord:= int1;
+//  activerecord:= int1;
+  endgridrow(rowinfo);
  end;
 end;
 
 function tgriddatalink.getint64buffer(const afield: tfield;
                      const row: integer): pointer;
 var
- int1: integer;
+ rowinfo: gridrowinfoty;
+// int1: integer;
 begin
  result:= nil;
  if (afield <> nil) and hasdata then begin
-  int1:= activerecord;
-  activerecord:= row;
+//  int1:= activerecord;
+//  activerecord:= row;
+  begingridrow(row,rowinfo);
   if not afield.isnull then begin
    result:= @fint64buffer;
    fint64buffer:= afield.aslargeint;
   end;
-  activerecord:= int1;
+//  activerecord:= int1;
+  endgridrow(rowinfo);
  end;
 end;
 
 function tgriddatalink.getrealtybuffer(const afield: tfield; 
                                              const row: integer): pointer;
 var
- int1: integer;
+ rowinfo: gridrowinfoty;
+// int1: integer;
 begin
  result:= nil;
  if (afield <> nil) and hasdata then begin
-  int1:= activerecord;
-  activerecord:= row;
+//  int1:= activerecord;
+//  activerecord:= row;
+  begingridrow(row,rowinfo);
   if not afield.isnull then begin
    result:= @frealtybuffer;
    frealtybuffer:= afield.asfloat;
   end;
-  activerecord:= int1;
+//  activerecord:= int1;
+  endgridrow(rowinfo);
  end;
 end;
 
 function tgriddatalink.getdatetimebuffer(const afield: tfield;
                                               const row: integer): pointer;
 var
- int1: integer;
+ rowinfo: gridrowinfoty;
+// int1: integer;
 begin
  result:= nil;
  if (afield <> nil) and hasdata then begin
-  int1:= activerecord;
-  activerecord:= row;
+//  int1:= activerecord;
+//  activerecord:= row;
+  begingridrow(row,rowinfo);
   if not afield.isnull then begin
    result:= @frealtybuffer;
    frealtybuffer:= afield.asdatetime;
   end;
-  activerecord:= int1;
+//  activerecord:= int1;
+  endgridrow(rowinfo);
  end;
 end;
 
@@ -7912,6 +7946,25 @@ begin
   result:= fdscontroller.updatesortfield(avalue,adescend);
  end;
 end;
+
+procedure tgriddatalink.begingridrow(const arow: integer;
+               out ainfo: gridrowinfoty);
+begin
+ ainfo.row:= activerecord;
+ if fdscontroller <> nil then begin
+  fdscontroller.begindisplaydata;
+ end;
+ activerecord:= arow;
+end;
+
+procedure tgriddatalink.endgridrow(const ainfo: gridrowinfoty);
+begin
+ if fdscontroller <> nil then begin
+  fdscontroller.enddisplaydata;
+ end;
+ activerecord:= ainfo.row;
+end;
+
 
 { tdbwidgetindicatorcol }
 
