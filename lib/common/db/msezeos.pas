@@ -52,6 +52,8 @@ type
    function  getcanmodify: boolean; override;
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function islastrecord: boolean;
+   procedure begindisplaydata;
+   procedure enddisplaydata;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -119,6 +121,8 @@ type
    function  getcanmodify: boolean; override;
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function islastrecord: boolean;
+   procedure begindisplaydata;
+   procedure enddisplaydata;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -184,6 +188,8 @@ type
    function  getcanmodify: boolean; override;
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function islastrecord: boolean;
+   procedure begindisplaydata;
+   procedure enddisplaydata;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -249,6 +255,8 @@ type
    function  getcanmodify: boolean; override;
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function islastrecord: boolean;
+   procedure begindisplaydata;
+   procedure enddisplaydata;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -514,6 +522,16 @@ begin
  result:= false;
 end;
 
+procedure tmsezreadonlyquery.begindisplaydata;
+begin
+ //dummy
+end;
+
+procedure tmsezreadonlyquery.enddisplaydata;
+begin
+ //dummy
+end;
+
 { tmsezquery }
 
 constructor tmsezquery.create(aowner: tcomponent);
@@ -753,6 +771,16 @@ begin
  result:= false;
 end;
 
+procedure tmsezquery.begindisplaydata;
+begin
+ //dummy
+end;
+
+procedure tmsezquery.enddisplaydata;
+begin
+ //dummy
+end;
+
 { tmseztable }
 
 constructor tmseztable.create(aowner: tcomponent);
@@ -987,6 +1015,16 @@ begin
  result:= false;
 end;
 
+procedure tmseztable.begindisplaydata;
+begin
+ //dummy
+end;
+
+procedure tmseztable.enddisplaydata;
+begin
+ //dummy
+end;
+
 { tmsezstoredproc }
 
 constructor tmsezstoredproc.create(aowner: tcomponent);
@@ -1219,6 +1257,16 @@ function tmsezstoredproc.updatesortfield(const afield: tfield;
                const adescend: boolean): boolean;
 begin
  result:= false;
+end;
+
+procedure tmsezstoredproc.begindisplaydata;
+begin
+ //dummy
+end;
+
+procedure tmsezstoredproc.enddisplaydata;
+begin
+ //dummy
 end;
 
 { tmsezgraphicfield }

@@ -57,6 +57,8 @@ type
    function  getcanmodify: boolean; override;
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function islastrecord: boolean;
+   procedure begindisplaydata;
+   procedure enddisplaydata;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -331,6 +333,16 @@ function tmsedbf.updatesortfield(const afield: tfield;
                const adescend: boolean): boolean;
 begin
  result:= false;
+end;
+
+procedure tmsedbf.begindisplaydata;
+begin
+ //dummy
+end;
+
+procedure tmsedbf.enddisplaydata;
+begin
+ ///dummy
 end;
 
 end.

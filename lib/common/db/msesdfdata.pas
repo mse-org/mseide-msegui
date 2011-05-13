@@ -57,6 +57,8 @@ type
    function  getcanmodify: boolean; override;
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function islastrecord: boolean;
+   procedure begindisplaydata;
+   procedure enddisplaydata;   
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -127,6 +129,8 @@ type
    function  getcanmodify: boolean; override;
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
    function islastrecord: boolean;
+   procedure begindisplaydata;
+   procedure enddisplaydata;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -405,6 +409,16 @@ begin
  result:= false;
 end;
 
+procedure tmsefixedformatdataset.begindisplaydata;
+begin
+ //dummy
+end;
+
+procedure tmsefixedformatdataset.enddisplaydata;
+begin
+ //dummy
+end;
+
 { tmsesdfdataset }
 
 constructor tmsesdfdataset.create(aowner: tcomponent);
@@ -649,6 +663,16 @@ function tmsesdfdataset.updatesortfield(const afield: tfield;
                const adescend: boolean): boolean;
 begin
  result:= false;
+end;
+
+procedure tmsesdfdataset.begindisplaydata;
+begin
+ //dummy
+end;
+
+procedure tmsesdfdataset.enddisplaydata;
+begin
+ //dummy
 end;
 
 end.

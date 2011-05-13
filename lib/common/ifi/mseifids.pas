@@ -321,6 +321,8 @@ type
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    procedure openlocal;
    procedure internalinsert; override;
+   procedure begindisplaydata;
+   procedure enddisplaydata;
   //iifimodulelink
    procedure connectmodule(const sender: tcustommodulelink);
   public
@@ -2674,6 +2676,16 @@ function tifidataset.updatesortfield(const afield: tfield;
                const adescend: boolean): boolean;
 begin
  result:= false;
+end;
+
+procedure tifidataset.begindisplaydata;
+begin
+ //dummy
+end;
+
+procedure tifidataset.enddisplaydata;
+begin
+ //dummy
 end;
 
 { trxdataset }
