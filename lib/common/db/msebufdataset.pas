@@ -535,6 +535,7 @@ type
   keyfieldar: fieldarty;
   indexnum: integer;
   lookupvaluefield: tfield;
+  basedatatype: tfieldtype;
  end;
  lookupfieldinfoarty = array of lookupfieldinfoty;
   
@@ -719,7 +720,7 @@ type
                                      const abm: bookmarkdataty;
                    const avalue: msestring);
    procedure docurrentassign(const po1: pointer;
-                                  const ainfo: fieldinfoty; const df: tfield);
+                          const abasetype: tfieldtype; const df: tfield);
    procedure notifylookupclients;
   protected
    fcontroller: tdscontroller;
@@ -3590,6 +3591,31 @@ procedure tmsebufdataset.calcrecordsize;
   end;
  end; //addfield
 
+var
+ lookuprecursion: integer;
+ 
+ function getbasetype(const afield: tfield): tfieldtype;
+ begin
+  inc(lookuprecursion);
+  if lookuprecursion > 16 then begin
+   databaseerror(name+': Recursive lookup field "'+afield.fieldname+'".');
+  end;
+  result:= ftunknown;
+  if afield.dataset is tmsebufdataset then begin 
+   with tmsebufdataset(afield.dataset) do begin
+    if afield.fieldno > 0 then begin
+     result:= ffieldinfos[afield.fieldno-1].ext.basetype;
+    end
+    else begin
+     if afield.fieldno < 0 then begin
+      result:= getbasetype(
+                   flookupfieldinfos[-1-afield.fieldno].lookupvaluefield);
+     end;
+    end;
+   end;
+  end;
+ end; //getbasetype
+ 
 var 
  int1,int2,int3,int4: integer;
  field1: tfield;
@@ -3689,43 +3715,43 @@ begin
              end;
              if bo1 then begin
               indexnum:= int3;
-              if lookupvaluefield.fieldno > 0 then begin
-               case ffieldinfos[lookupvaluefield.fieldno-1].ext.basetype of
-                ftwidestring: begin
-                 getvalue:= @getbmstring;
-                end;
-                ftinteger: begin
-                 getvalue:= @getbminteger;
-                end;
-                ftboolean: begin
-                 getvalue:= @getbmboolean;
-                end;
-                ftbcd: begin
-                 getvalue:= @getbmcurrency;
-                end;
-                ftfloat: begin
-                 getvalue:= @getbmfloat;
-                end;
-                ftlargeint: begin
-                 getvalue:= @getbmlargeint;
-                end;
-                ftdatetime: begin
-                 getvalue:= @getbmdatetime;
-                end;
-                ftvariant: begin
-                 getvalue:= @getbmvariant;
-                end;
-                else begin
-                 indexnum:= -1;
-                end;
+              lookuprecursion:= 0;
+              basedatatype:= getbasetype(lookupvaluefield);
+              case basedatatype of
+               ftwidestring: begin
+                getvalue:= @getbmstring;
+               end;
+               ftinteger: begin
+                getvalue:= @getbminteger;
+               end;
+               ftboolean: begin
+                getvalue:= @getbmboolean;
+               end;
+               ftbcd: begin
+                getvalue:= @getbmcurrency;
+               end;
+               ftfloat: begin
+                getvalue:= @getbmfloat;
+               end;
+               ftlargeint: begin
+                getvalue:= @getbmlargeint;
+               end;
+               ftdatetime: begin
+                getvalue:= @getbmdatetime;
+               end;
+               ftvariant: begin
+                getvalue:= @getbmvariant;
+               end;
+               else begin
+                indexnum:= -1;
                end;
               end;
-              adduniqueitem(pointerarty(flookupclients),pointer(self));
-              adduniqueitem(pointerarty(self.flookupmasters),
-                                               pointer(lookupdataset));
-              break;
-             end
-            end;
+             end;
+             adduniqueitem(pointerarty(flookupclients),pointer(self));
+             adduniqueitem(pointerarty(self.flookupmasters),
+                                              pointer(lookupdataset));
+             break;
+            end
            end;
           end;
          end;
@@ -6082,13 +6108,27 @@ begin
   if indexnum < 0 then begin
    raise ecurrentvalueaccess.create(self,afield,'No lookup index.');  
   end;
+  if (afieldtype <> ftunknown) and 
+       not (basedatatype in fieldcompatibility[afieldtype]) then begin
+   raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
+  end;   
   po1:= flookuppo;
   flookuppo:= arecord;
   try   
    if tmsebufdataset(afield.lookupdataset).indexlocal[indexnum].find(
                                                     keyfieldar,bm1) then begin
-    getvalue(lookupvaluefield,bm1,flookupresult);     
-    result:= flookupresult.po;
+    if lookupvaluefield.fieldno > 0 then begin
+     getvalue(lookupvaluefield,bm1,flookupresult);     
+     result:= flookupresult.po;
+    end
+    else begin
+     if afield.lookupdataset <> nil then begin
+      with tmsebufdataset(afield.lookupdataset) do begin
+       currentcheckbrowsemode;
+       result:= getcurrentlookuppo(lookupvaluefield,afieldtype,bm1.recordpo);
+      end;
+     end;
+    end;
    end;
   finally
    flookuppo:= po1;
@@ -6098,19 +6138,10 @@ end;
 
 function tmsebufdataset.beforecurrentget(const afield: tfield;
               const afieldtype: tfieldtype; var aindex: integer): pointer;
-var
- po1: pointer;
- int1: integer;
- bo1: boolean;
 begin
  currentcheckbrowsemode;
  if afield.dataset <> self then begin
   raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
- end;
- bo1:= afield.fieldno < 0;
- if bo1 and (flookupfieldinfos[1-afield.fieldno].indexnum < 0) then begin
-  raise ecurrentvalueaccess.create(self,afield,
-               'Field can not be be fkCalculated or fkLookup.');
  end;
  checkindex(false);
  if aindex < 0 then begin
@@ -6120,7 +6151,11 @@ begin
   raise ecurrentvalueaccess.create(self,afield,
                              'Invalid index '+inttostr(aindex)+'.');  
  end; 
- if bo1 then begin
+ if afield.fieldkind = fkcalculated then begin
+  raise ecurrentvalueaccess.create(self,afield,
+               'Field can not be be fkCalculated.');
+ end;
+ if afield.fieldno < 0 then begin
   result:= getcurrentlookuppo(afield,afieldtype,factindexpo^.ind[aindex]);
  end
  else begin
@@ -6135,11 +6170,16 @@ begin
  if afield.dataset <> self then begin
   raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
  end;
- if afield.index < 0 then begin
+ if afield.fieldkind = fkcalculated then begin
   raise ecurrentvalueaccess.create(self,afield,
-                   'Field can not be be fkCalculated or fkLookup.');
+               'Field can not be be fkCalculated.');
  end;
- result:= getcurrentpo(afield,afieldtype,@abm.recordpo^.header);
+ if (afield.fieldno < 0) then begin
+  result:= getcurrentlookuppo(afield,afieldtype,abm.recordpo);
+ end
+ else begin
+  result:= getcurrentpo(afield,afieldtype,abm.recordpo);
+ end;
 end;
 
 function tmsebufdataset.setcurrentpo(const afield: tfield;
@@ -6284,11 +6324,16 @@ var
  po1: pointer;
 begin
  po1:= beforecurrentget(source,source.datatype,aindex);
- if po1 = nil then begin
+ if (po1 = nil) or (source.fieldno = 0) then begin
   dest.clear;
  end
  else begin
-  docurrentassign(po1,ffieldinfos[source.fieldno-1],dest);
+  if source.fieldno > 0 then begin
+   docurrentassign(po1,ffieldinfos[source.fieldno-1].ext.basetype,dest);
+  end
+  else begin
+   docurrentassign(po1,flookupfieldinfos[-1-source.fieldno].basedatatype,dest);   
+  end;
  end;
 end;
 
@@ -6298,11 +6343,16 @@ var
  po1: pointer;
 begin
  po1:= beforecurrentbmget(source,source.datatype,abm);
- if po1 = nil then begin
+ if (po1 = nil) or (source.fieldno = 0) then begin
   dest.clear;
  end
  else begin
-  docurrentassign(po1,ffieldinfos[source.fieldno-1],dest);
+  if source.fieldno > 0 then begin
+   docurrentassign(po1,ffieldinfos[source.fieldno-1].ext.basetype,dest);
+  end
+  else begin
+   docurrentassign(po1,flookupfieldinfos[-1-source.fieldno].basedatatype,dest);   
+  end;
  end;
 end;
 
@@ -6948,42 +6998,41 @@ begin
 end;
 
 procedure tmsebufdataset.docurrentassign(const po1: pointer;
-                                  const ainfo: fieldinfoty; const df: tfield);
+                                  const abasetype: tfieldtype;
+                                           const df: tfield);
 begin
- with ainfo do begin
-  case ext.basetype of
-   ftwidestring: begin
-    if df is tmsestringfield then begin
-     tmsestringfield(df).asmsestring:= pmsestring(po1)^;
-    end
-    else begin
-     df.asstring:= pmsestring(po1)^;
-    end;
-   end;
-   ftinteger: begin
-    df.asinteger:= pinteger(po1)^;
-   end;
-   ftboolean: begin
-    df.asboolean:= plongbool(po1)^;
-   end;
-   ftbcd: begin
-    df.ascurrency:= pcurrency(po1)^;
-   end;
-   ftfloat: begin
-    df.asfloat:= pdouble(po1)^;
-   end;
-   ftlargeint: begin
-    df.aslargeint:= pint64(po1)^;
-   end;
-   ftdatetime: begin
-    df.asdatetime:= pdatetime(po1)^;
-   end;
-   ftvariant: begin
-    df.asvariant:= pvariant(po1)^;
+ case abasetype of
+  ftwidestring: begin
+   if df is tmsestringfield then begin
+    tmsestringfield(df).asmsestring:= pmsestring(po1)^;
    end
    else begin
-    df.clear;
+    df.asstring:= pmsestring(po1)^;
    end;
+  end;
+  ftinteger: begin
+   df.asinteger:= pinteger(po1)^;
+  end;
+  ftboolean: begin
+   df.asboolean:= plongbool(po1)^;
+  end;
+  ftbcd: begin
+   df.ascurrency:= pcurrency(po1)^;
+  end;
+  ftfloat: begin
+   df.asfloat:= pdouble(po1)^;
+  end;
+  ftlargeint: begin
+   df.aslargeint:= pint64(po1)^;
+  end;
+  ftdatetime: begin
+   df.asdatetime:= pdatetime(po1)^;
+  end;
+  ftvariant: begin
+   df.asvariant:= pvariant(po1)^;
+  end
+  else begin
+   df.clear;
   end;
  end;
 end;
@@ -7015,7 +7064,8 @@ begin
        df.clear;
       end
       else begin
-       docurrentassign(pointer(bm.recordpo)+base.offset,ffieldinfos[int2],df);
+       docurrentassign(pointer(bm.recordpo)+base.offset,
+                          ffieldinfos[int2].ext.basetype,df);
 {
        case ext.basetype of
         ftwidestring: begin
