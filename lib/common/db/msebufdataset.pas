@@ -18,14 +18,7 @@
  
 unit msebufdataset;
 {$ifdef FPC}
-            //{$if xxx} makes compiling with delphi7 impossible
- {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
- {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
- {$ifdef VER2_3} {$define mse_FPC_2_2} {$endif}
- {$ifdef VER2_4} {$define mse_FPC_2_2} {$endif}
- {$ifdef VER2_5} {$define mse_FPC_2_2} {$endif}
- {$ifdef VER2_6} {$define mse_FPC_2_2} {$endif}
- {$ifdef VER2_7} {$define mse_FPC_2_2} {$endif}
+ {$define mse_FPC_2_2}
  {$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}
 {$endif}
 
@@ -570,6 +563,7 @@ type
    flookupfieldinfos: lookupfieldinfoarty;
    flookupclients: bufdatasetarty;
    flookupmasters: bufdatasetarty;
+   fnotifylookupclientcount: integer;
    
    fbuffercountbefore: integer;
    fonupdateerror: updateerroreventty;
@@ -4763,11 +4757,12 @@ end;
 
 procedure tmsebufdataset.lookupdschanged(const sender: tmsebufdataset);
 var
- int1: integer;
+ int1,int2: integer;
  bo1: boolean;
  bm1: bookmarkdataty;
 begin
  if active and not (csdestroying in componentstate) then begin
+  int2:= fnotifylookupclientcount;
   bo1:= false;
   bm1:= bookmarkdata;
   for int1:= 0 to high(flookupfieldinfos) do begin
@@ -4789,7 +4784,10 @@ begin
   else begin
    resync([]);
   end;
-  notifylookupclients;
+  if int2 = fnotifylookupclientcount then begin
+                  //already called by post otherwise
+   notifylookupclients;
+  end;
  end;
 end;
 
@@ -4798,6 +4796,7 @@ var
  int1: integer;
 begin
  if not (bs1_lookupnotifying in fbstate1) then begin
+  inc(fnotifylookupclientcount);
   include(fbstate1,bs1_lookupnotifying);
   try
    for int1:= 0 to high(flookupclients) do begin
@@ -8226,7 +8225,7 @@ begin
   end;
  end;   
 end;
-var testvar: integer;
+
 procedure tlocalindex.bindfields;
 var
  int1: integer;
@@ -8274,7 +8273,6 @@ begin
      end
      else begin
       recoffset:= offset; //calc field
-testvar:= -2-fieldindex;
       flookupfieldinfos[-2-fieldindex].hasindex:= true;
      end;
      desc:= ifo_desc in foptions;
