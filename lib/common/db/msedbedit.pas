@@ -1032,6 +1032,7 @@ type
   private
    fdatafield: string;
    procedure setdatafield(const avalue: string);
+  protected
     //idbeditinfo
    function getdataset(const aindex: integer): tdataset;
    procedure getfieldtypes(out propertynames: stringarty;

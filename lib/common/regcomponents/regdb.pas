@@ -126,6 +126,16 @@ type
    function geteditorclass: propertyeditorclassty; override;
  end;
 
+ tdbdropdowncolitemeditor = class(tclasselementeditor)
+  public
+   function getvalue: msestring; override;
+ end;
+ 
+ tdbdropdowncolseditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+
  tsqlmacroitemeditor = class(tclasselementeditor)
   public
    function getvalue: msestring; override;
@@ -435,6 +445,8 @@ begin
                      tlookupbufferfieldnopropertyeditor);
  registerpropertyeditor(typeinfo(tlbdropdowncols),nil,'',
                      tlbdropdowncolseditor);
+ registerpropertyeditor(typeinfo(tdbdropdowncols),nil,'',
+                     tdbdropdowncolseditor);
  registerpropertyeditor(typeinfo(tmacroproperty),nil,'',
                                     tsqlmacroseditor);
 end;
@@ -1346,6 +1358,20 @@ end;
 function tlbdropdowncolseditor.geteditorclass: propertyeditorclassty;
 begin    
  result:= tlbdropdowncolitemeditor;
+end;
+
+{ tdbdropdowncolitemeditor }
+
+function tdbdropdowncolitemeditor.getvalue: msestring;
+begin
+ result:= '<'+tdbdropdowncol(getpointervalue).datafield+'>';
+end;
+
+{ tdbdropdowncolseditor }
+
+function tdbdropdowncolseditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tdbdropdowncolitemeditor;
 end;
 
 { tparamvaluepropertyeditor }
