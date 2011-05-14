@@ -488,7 +488,7 @@ type
                       );
  bufdatasetstatesty = set of bufdatasetstatety;
 
- bufdatasetstate1ty = (bs1_needsresync);
+ bufdatasetstate1ty = (bs1_needsresync,bs1_lookupnotifying);
  bufdatasetstates1ty = set of bufdatasetstate1ty;
  
  internalcalcfieldseventty = procedure(const sender: tmsebufdataset;
@@ -534,8 +534,10 @@ type
   getvalue: getbmvalueeventty;
   keyfieldar: fieldarty;
   indexnum: integer;
+  valuefield: tfield;
   lookupvaluefield: tfield;
   basedatatype: tfieldtype;
+  hasindex: boolean;
  end;
  lookupfieldinfoarty = array of lookupfieldinfoty;
   
@@ -721,6 +723,7 @@ type
                    const avalue: msestring);
    procedure docurrentassign(const po1: pointer;
                           const abasetype: tfieldtype; const df: tfield);
+   procedure lookupdschanged(const sender: tmsebufdataset);
    procedure notifylookupclients;
   protected
    fcontroller: tdscontroller;
@@ -3693,6 +3696,7 @@ begin
     end;
     fcalcfieldsizes[int2]:= datasize;
     with flookupfieldinfos[int2] do begin
+     valuefield:= field1;
      indexnum:= -1;
      if (fieldkind = fklookup) and not lookupcache and 
                              (lookupdataset is tmsebufdataset) then begin
@@ -4757,15 +4761,50 @@ begin
  updatestate;
 end;
 
+procedure tmsebufdataset.lookupdschanged(const sender: tmsebufdataset);
+var
+ int1: integer;
+ bo1: boolean;
+ bm1: bookmarkdataty;
+begin
+ if active and not (csdestroying in componentstate) then begin
+  bo1:= false;
+  bm1:= bookmarkdata;
+  for int1:= 0 to high(flookupfieldinfos) do begin
+   with flookupfieldinfos[int1] do begin
+    if hasindex and (lookupvaluefield.dataset = sender) then begin
+     findexlocal.fieldmodified(valuefield,false);
+     bo1:= true;
+    end; 
+   end;
+  end;
+  if bo1 then begin
+   if state = dsinsert then begin
+    checkbrowsemode;
+   end
+   else begin
+    bookmarkdata:= bm1;   
+   end;
+  end
+  else begin
+   resync([]);
+  end;
+  notifylookupclients;
+ end;
+end;
+
 procedure tmsebufdataset.notifylookupclients;
 var
  int1: integer;
 begin
- for int1:= 0 to high(flookupclients) do begin
-  with flookupclients[int1] do begin
-   if active then begin
-    resync([]);
+ if not (bs1_lookupnotifying in fbstate1) then begin
+  include(fbstate1,bs1_lookupnotifying);
+  try
+   for int1:= 0 to high(flookupclients) do begin
+    flookupclients[int1].lookupdschanged(self);
    end;
+  finally
+   exclude(fbstate1,bs1_lookupnotifying);
   end;
  end;
 end;
@@ -6115,7 +6154,8 @@ begin
   po1:= flookuppo;
   flookuppo:= arecord;
   try   
-   if tmsebufdataset(afield.lookupdataset).indexlocal[indexnum].find(
+   if afield.lookupdataset.active and 
+      tmsebufdataset(afield.lookupdataset).indexlocal[indexnum].find(
                                                     keyfieldar,bm1) then begin
     if lookupvaluefield.fieldno > 0 then begin
      getvalue(lookupvaluefield,bm1,flookupresult);     
@@ -7672,7 +7712,8 @@ begin
  for int1:= 0 to count-1 do begin
   with tlocalindex(fitems[int1]) do begin
    for int2:= 0 to high(findexfieldinfos) do begin
-    if findexfieldinfos[int2].fieldinstance = afield then begin
+    if (afield = nil) or 
+           (findexfieldinfos[int2].fieldinstance = afield) then begin
      result:= true;
      if delayed then begin
       finvalid:= true;
@@ -7779,18 +7820,22 @@ begin
   flookuppo:= apo;
   with flookupfieldinfos[-1-afield.fieldno] do begin
    with tmsebufdataset(afield.lookupdataset) do begin
-    if indexlocal[indexnum].find(keyfieldar,bm1) then begin
-     if lookupvaluefield.fieldno > 0 then begin
-      getvalue(lookupvaluefield,bm1,adata);
-     end
-     else begin
-      if lookupvaluefield.lookupdataset is tmsebufdataset then begin
-       with tmsebufdataset(lookupvaluefield.dataset) do begin
-        po1:= flookuppo;
-        try
-         lookup1(lookupvaluefield,bm1.recordpo,adata);
-        finally
-         flookuppo:= po1;
+    if active then begin
+     if indexlocal[indexnum].find(keyfieldar,bm1) then begin
+      if lookupvaluefield.fieldno > 0 then begin
+       getvalue(lookupvaluefield,bm1,adata);
+      end
+      else begin
+       if lookupvaluefield.lookupdataset is tmsebufdataset then begin
+        with tmsebufdataset(lookupvaluefield.dataset) do begin
+         if active then begin
+          po1:= flookuppo;
+          try
+           lookup1(lookupvaluefield,bm1.recordpo,adata);
+          finally
+           flookuppo:= po1;
+          end;
+         end;
         end;
        end;
       end;
@@ -8080,21 +8125,13 @@ end;
 procedure tlocalindex.sort(var adata: pointerarty);
 begin
  if adata <> nil then begin
-//  try
-   if lio_quicksort in foptions then begin
-    fsortarray:= @adata[0];
-    quicksort(0,tmsebufdataset(fowner).fbrecordcount - 1);
-   end
-   else begin
-    mergesort(adata);
-   end;
-//  finally
-//   if fhaslookup then begin
-//    with tmsebufdataset(fowner) do begin
-//     finalizecalcvalues(flookupbuffer^.header);
-//    end;
-//   end;
-//  end;
+  if lio_quicksort in foptions then begin
+   fsortarray:= @adata[0];
+   quicksort(0,tmsebufdataset(fowner).fbrecordcount - 1);
+  end
+  else begin
+   mergesort(adata);
+  end;
  end;
 end;
 
@@ -8108,50 +8145,42 @@ begin
  result:= 0;
  with tmsebufdataset(fowner),findexes[findexlocal.indexof(self) + 1] do begin
   if fbrecordcount > 0 then begin
-//   try
-    int1:= 0;
-    checkindex(true);
-    lo:= 0;
-    up:= fbrecordcount - 1;
-    if abigger then begin
-     while lo <= up do begin
-      pivot:= (up + lo) div 2;
-      int1:= compare(arecord,ind[pivot],alastindex,false);
-      if int1 >= 0 then begin //pivot <= rev
-       lo:= pivot + 1;
-      end
-      else begin
-       up:= pivot;
-       if up = lo then begin
-        break;
-       end;
+   int1:= 0;
+   checkindex(true);
+   lo:= 0;
+   up:= fbrecordcount - 1;
+   if abigger then begin
+    while lo <= up do begin
+     pivot:= (up + lo) div 2;
+     int1:= compare(arecord,ind[pivot],alastindex,false);
+     if int1 >= 0 then begin //pivot <= rev
+      lo:= pivot + 1;
+     end
+     else begin
+      up:= pivot;
+      if up = lo then begin
+       break;
       end;
      end;
-     result:= lo;
-    end
-    else begin
-     while lo <= up do begin
-      pivot:= (up + lo + 1) div 2;
-      int1:= compare(arecord,ind[pivot],alastindex,false);
-      if int1 <= 0 then begin //pivot >= rev
-       up:= pivot - 1;
-      end
-      else begin
-       lo:= pivot;
-       if up = lo then begin
-        break;
-       end;
-      end;
-     end;
-     result:= up;
     end;
-//   finally
-//    if fhaslookup then begin
-//     with tmsebufdataset(fowner) do begin
-//      finalizecalcvalues(flookupbuffer^.header);
-//     end;
-//    end;
-//   end;
+    result:= lo;
+   end
+   else begin
+    while lo <= up do begin
+     pivot:= (up + lo + 1) div 2;
+     int1:= compare(arecord,ind[pivot],alastindex,false);
+     if int1 <= 0 then begin //pivot >= rev
+      up:= pivot - 1;
+     end
+     else begin
+      lo:= pivot;
+      if up = lo then begin
+       break;
+      end;
+     end;
+    end;
+    result:= up;
+   end;
   end;
  end;
 end;
@@ -8197,7 +8226,7 @@ begin
   end;
  end;   
 end;
-
+var testvar: integer;
 procedure tlocalindex.bindfields;
 var
  int1: integer;
@@ -8241,11 +8270,12 @@ begin
      end;
      fieldindex:= fieldno - 1;
      if fieldindex >= 0 then begin
-      recoffset:= ffieldinfos[fieldindex].base.offset+
-                          intheadersize;
+      recoffset:= ffieldinfos[fieldindex].base.offset + intheadersize;
      end
      else begin
       recoffset:= offset; //calc field
+testvar:= -2-fieldindex;
+      flookupfieldinfos[-2-fieldindex].hasindex:= true;
      end;
      desc:= ifo_desc in foptions;
      caseinsensitive:= ifo_caseinsensitive in foptions;
@@ -8301,7 +8331,6 @@ begin
      end;
      vtwidestring: begin
       ppointer(po2)^:= vwidestring;
- //     bo1:= vwidestring = nil;
      end;
      vtextended: begin
       pdouble(po2)^:= vextended^;
@@ -8335,7 +8364,6 @@ begin
   result:= false;
   abookmark.recordpo:= nil;
   abookmark.recno:= -1;
- // abookmark:= '';
   with tmsebufdataset(fowner) do begin
    with findexes[findexlocal.indexof(self) + 1] do begin
     if abigger then begin
@@ -8402,7 +8430,6 @@ begin
      end;          
      abookmark.recno:= int1;
      abookmark.recordpo:= ind[int1];
- //    abookmark:= bookmarktostring(bm1);
     end;
    end;
   end;
