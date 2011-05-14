@@ -7768,24 +7768,41 @@ begin
  end;
 end;
 
-function tlocalindex.dolookupcompare(const l,r: pintrecordty;
-       const ainfo: indexfieldinfoty; const apartialstring: boolean): integer;
-
- procedure lookup1(const apo: pintrecordty; var adata: lookupdataty);
- var
-  bm1: bookmarkdataty;
- begin
-  adata.po:= nil;
-  tmsebufdataset(self.fowner).flookuppo:= apo;
-  with tmsebufdataset(self.fowner).
-           flookupfieldinfos[-1-ainfo.fieldinstance.fieldno] do begin
-   with tmsebufdataset(ainfo.fieldinstance.lookupdataset) do begin
+procedure lookup1(const afield: tfield; const apo: pintrecordty;
+                                          var adata: lookupdataty);
+var
+ bm1: bookmarkdataty;
+ po1: pintrecordty;
+begin
+ adata.po:= nil;
+ with tmsebufdataset(afield.dataset) do begin
+  flookuppo:= apo;
+  with flookupfieldinfos[-1-afield.fieldno] do begin
+   with tmsebufdataset(afield.lookupdataset) do begin
     if indexlocal[indexnum].find(keyfieldar,bm1) then begin
-     getvalue(lookupvaluefield,bm1,adata);
+     if lookupvaluefield.fieldno > 0 then begin
+      getvalue(lookupvaluefield,bm1,adata);
+     end
+     else begin
+      if lookupvaluefield.lookupdataset is tmsebufdataset then begin
+       with tmsebufdataset(lookupvaluefield.dataset) do begin
+        po1:= flookuppo;
+        try
+         lookup1(lookupvaluefield,bm1.recordpo,adata);
+        finally
+         flookuppo:= po1;
+        end;
+       end;
+      end;
+     end;
     end;
    end;
   end;
  end;
+end;
+
+function tlocalindex.dolookupcompare(const l,r: pintrecordty;
+       const ainfo: indexfieldinfoty; const apartialstring: boolean): integer;
 
 var
  ldata,rdata: lookupdataty;
@@ -7795,8 +7812,8 @@ begin
  with tmsebufdataset(ainfo.fieldinstance.lookupdataset) do begin
   if active then begin
    try
-    lookup1(l,ldata);
-    lookup1(r,rdata);
+    lookup1(ainfo.fieldinstance,l,ldata);
+    lookup1(ainfo.fieldinstance,r,rdata);
    finally
     tmsebufdataset(self.fowner).flookuppo:= nil;
    end;
