@@ -1286,6 +1286,8 @@ type
    property onendedit: notifyeventty read fonendedit write fonendedit;
  end;
 
+ rowpositionty = (ropo_nearest,ropo_centeredif,ropo_bottom,
+                                          ropo_centered,ropo_top);
  tdropdownlistdatalink = class(tgriddatalink)
   private
    fdataintf: idbdata;
@@ -1294,8 +1296,9 @@ type
    ffirstrecord: integer;
    fcurrentrecord: integer;
    fmaxrowcount: integer;
-   procedure setcurrentrecord(const avalue: integer);
-   procedure updatedatawindow;
+   procedure setcurrentrecord(const avalue: integer;
+                                    const arowpos: rowpositionty);
+   procedure updatedatawindow(const arowpos: rowpositionty);
   protected
    function getasmsestring(const afield: tfield): msestring;
    function getasinteger(const afield: tfield): integer;
@@ -1317,7 +1320,7 @@ type
                              event: scrolleventty): boolean; override;
              //true if processed
    procedure focuscell(var cell: gridcoordty); override;
-   property currentrecord: integer read fcurrentrecord write setcurrentrecord;
+   property currentrecord: integer read fcurrentrecord{ write setcurrentrecord};
   public
    constructor create(const aowner: tcustomgrid; const aintf: igriddatalink;
                   const adatalink: tdropdowndatalink);
@@ -5627,7 +5630,7 @@ begin
  end
  else begin
   int1:= fcurrentrecord;
-  currentrecord:= fcurrentrecord+distance;
+  setcurrentrecord(fcurrentrecord+distance,ropo_nearest);
   result:= fcurrentrecord-int1;
  end;
 end;
@@ -5672,7 +5675,8 @@ begin
   result:= false;
   if (event <> sbe_thumbtrack) or (gdo_thumbtrack in foptions) then begin
    if self.active then begin
-    currentrecord:= round(fgrid.frame.sbvert.value * dataset.recordcount);      
+    setcurrentrecord(round(
+                 fgrid.frame.sbvert.value * dataset.recordcount),ropo_nearest);      
     result:= true;
    end;
   end;
@@ -5691,7 +5695,8 @@ begin
  end;
 end;
 
-procedure tdropdownlistdatalink.setcurrentrecord(const avalue: integer);
+procedure tdropdownlistdatalink.setcurrentrecord(const avalue: integer;
+                           const arowpos: rowpositionty);
 var
  int1,int2: integer;
 begin
@@ -5706,14 +5711,39 @@ begin
    if fcurrentrecord >= dataset.recordcount then begin
     fcurrentrecord:= int1 - 1;
    end;
-   updatedatawindow;
+   updatedatawindow(arowpos);
   end;
   recordchanged(nil);
  end;
 end;
 
-procedure tdropdownlistdatalink.updatedatawindow;
+procedure tdropdownlistdatalink.updatedatawindow(const arowpos: rowpositionty);
+var
+ int1,int2: integer;
 begin
+ int1:= recordcount;
+ case arowpos of
+  ropo_top: begin
+   ffirstrecord:= fcurrentrecord;
+  end;
+  ropo_bottom: begin
+   ffirstrecord:= fcurrentrecord-int1+1;
+  end;
+  ropo_centered,ropo_centeredif: begin
+   if (arowpos = ropo_centered) or 
+           (fcurrentrecord < ffirstrecord) or 
+           (fcurrentrecord >= ffirstrecord + int1) then begin
+    ffirstrecord:= fcurrentrecord - int1 div 2;
+   end;
+  end;
+ end;
+ int2:= dataset.recordcount;
+ if ffirstrecord + int1 > int2 then begin
+  ffirstrecord:= int2 - int1;
+ end;
+ if ffirstrecord < 0 then begin
+  ffirstrecord:= 0;
+ end;
  if fcurrentrecord >= ffirstrecord+fmaxrowcount then begin
   ffirstrecord:= fcurrentrecord - fmaxrowcount + 1;
  end;
@@ -5918,7 +5948,7 @@ begin
      if ftextindex >= 0 then begin
       result:= fdataintf.findtext(ftextindex,filter,row1);
       if result then begin
-       fdatalink.currentrecord:= row1;
+       fdatalink.setcurrentrecord(row1,ropo_top);
       end;
      end
      else begin
