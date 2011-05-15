@@ -297,6 +297,7 @@ type
    procedure navigrequest(var info: naviginfoty); override;
    procedure checkrowreadonlystate; override;
    procedure updaterowdata; override;
+   function cellhasfocus: boolean; override;
 
    function getcontainer: twidget; override;
    function getchildwidgets(const index: integer): twidget; override;
@@ -494,6 +495,7 @@ type
 //   procedure dokeydown(var info: keyeventinfoty); override;
   public
    constructor create(aowner: tcustomwidgetgrid); reintroduce;
+   function focusback(const aactivate: boolean = true): boolean; override;
  end;
  
  ttopcontainer = class(tfixcontainer)
@@ -514,6 +516,8 @@ type
    flayoutupdating: integer;
   protected
    procedure unregisterchildwidget(const child: twidget); override;
+   procedure doenter; override;
+   procedure doexit; override;   
    procedure dofocus; override;
   public
    constructor create(aowner: tcustomwidgetgrid); reintroduce;
@@ -2167,6 +2171,17 @@ begin
  fgrid.flastfocusedfixwidget:= self;
  inherited;
 end;
+
+function tfixcontainer.focusback(const aactivate: boolean = true): boolean;
+begin
+ if (fgrid.factivewidget <> nil) and 
+           (og_containerfocusbackonesc in fgrid.foptionsgrid) then begin
+  fgrid.factivewidget.activate;
+ end
+ else begin
+  inherited;
+ end;
+end;
 {
 procedure tfixcontainer.dokeydown(var info: keyeventinfoty);
 var
@@ -2337,6 +2352,18 @@ begin
  else begin
   result:= inherited focusback(aactivate);
  end;
+end;
+
+procedure tgridcontainer.doenter;
+begin
+ fgrid.invalidatefocusedcell;
+ inherited;
+end;
+
+procedure tgridcontainer.doexit;
+begin
+ fgrid.invalidatefocusedcell;
+ inherited;
 end;
 
 { tscrollgridcontainer }
@@ -3442,6 +3469,11 @@ begin
   flastfocusedfixwidget:= sender;
  end;
  inherited;
+end;
+
+function tcustomwidgetgrid.cellhasfocus: boolean;
+begin
+ result:= fcontainer2.entered or fcontainer0.entered or focused;
 end;
 
 procedure registergriddatalistclass(const tag: ansistring;

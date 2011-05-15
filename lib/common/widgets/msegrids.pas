@@ -1934,7 +1934,8 @@ type
    function createfixcols: tfixcols; virtual;
    function createfixrows: tfixrows; virtual;
    procedure initcellinfo(var info: cellinfoty); virtual;
-
+   function cellhasfocus: boolean; virtual;
+   
    procedure colchanged(const sender: tcol);
    procedure cellchanged(const sender: tcol; const row: integer);
    procedure focusedcellchanged; virtual;
@@ -3492,7 +3493,8 @@ begin
        drawcelloverlay(canvas,fframe);
       end;
       if isfocusedcol and (row1 = fgrid.ffocusedcell.row) and 
-                                   (co_drawfocus in foptions) then begin
+                          (co_drawfocus in foptions) and
+                           fgrid.cellhasfocus then begin
        if fframe <> nil then begin
         canvas.move(fframe.fpaintrect.pos);
        end;
@@ -14820,6 +14822,11 @@ begin
  if (acol >= 0) and (acol < fdatacols.count) then begin
   result:= co_sortdescent in tdatacol(fdatacols.fitems[acol]).foptions;
  end;
+end;
+
+function tcustomgrid.cellhasfocus: boolean;
+begin
+ result:= entered;
 end;
 
 
