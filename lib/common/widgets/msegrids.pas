@@ -1923,7 +1923,7 @@ type
    procedure internalcreateframe; override;
    function getscrollrect: rectty;
    procedure setscrollrect(const rect: rectty);
-   function scrollcaret: boolean; virtual;
+   function scrollcaret(const vertical: boolean): boolean; virtual;
    procedure firstcellclick(const cell: gridcoordty;
                                 const info: mouseeventinfoty); virtual;
    function getzebrastart: integer; virtual;
@@ -8822,13 +8822,13 @@ begin
   bo1:= fobjectpicker.removexorpic;
   po3.x:= 0;
   po3.y:= po2.y;
-  scrollrect(po3,fdatarecty,scrollcaret);
+  scrollrect(po3,fdatarecty,scrollcaret(true));
   fscrollrect.y:= rect.y;
   updatevisiblerows;
   scrolled(po3);
   po3.x:= po2.x;
   po3.y:= 0;
-  scrollrect(po3,fdatarectx,scrollcaret);
+  scrollrect(po3,fdatarectx,scrollcaret(false));
   fscrollrect.x:= rect.x;
   scrolled(po3);
   if bo1 then begin
@@ -13361,7 +13361,7 @@ begin
     if canscroll then begin
      updatelayout1;
      checkinvalidate;
-     scrollrect(po1,fdatarecty,scrollcaret);
+     scrollrect(po1,fdatarecty,scrollcaret(true));
     end
     else begin
      invalidate;
@@ -13571,7 +13571,7 @@ begin
  end;
 end;
 
-function tcustomgrid.scrollcaret: boolean;
+function tcustomgrid.scrollcaret(const vertical: boolean): boolean;
 begin
  result:= false;
 end;

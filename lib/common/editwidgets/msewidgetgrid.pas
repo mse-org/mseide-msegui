@@ -245,9 +245,11 @@ type
   
  tcustomwidgetgrid = class(tcustomgrid)
   private
+   fcontainer0: twidget; //for nohascroll widgets
    fcontainer1: twidget;
    fcontainer2: twidget;
    fcontainer3: twidget;
+   flastfocusedfixwidget: twidget;
    fwidgetdummy: tdummywidget;
    fmousefocusedcell: gridcoordty;
    fmouseactivewidget: twidget;
@@ -270,6 +272,7 @@ type
    procedure setoptionsgrid(const avalue: optionsgridty); override;
 //   procedure focusedcellchanged; override;
    procedure dofocus; override;
+   procedure dochildfocused(const sender: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure widgetregionchanged(const sender: twidget); override;
    function createdatacols: tdatacols; override;
@@ -281,7 +284,7 @@ type
    procedure updatelayout; override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    procedure loaded; override;
-   function scrollcaret: boolean; override;
+   function scrollcaret(const vertical: boolean): boolean; override;
    procedure docellevent(var info: celleventinfoty); override;
    procedure checkcellvalue(var accept: boolean); override; //store edited value to grid
    procedure dofocusedcellposchanged; override;
@@ -291,6 +294,7 @@ type
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure doexit; override;
+   procedure navigrequest(var info: naviginfoty); override;
    procedure checkrowreadonlystate; override;
    procedure updaterowdata; override;
 
@@ -308,7 +312,8 @@ type
    
    procedure focuslock; //beginupdate + no cell widget focus/defocus
    procedure focusunlock;
-   
+
+   procedure seteditfocus;   
    function editwidgetatpos(const apos: pointty; out cell: gridcoordty): twidget;
    function widgetcell(const awidget: twidget): gridcoordty;
    function cellwidget(const acell: gridcoordty): twidget;
@@ -485,6 +490,7 @@ type
    procedure unregisterchildwidget(const child: twidget); override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure dochildfocused(const sender: twidget); override;
+   procedure doenter; override;
 //   procedure dokeydown(var info: keyeventinfoty); override;
   public
    constructor create(aowner: tcustomwidgetgrid); reintroduce;
@@ -508,12 +514,22 @@ type
    flayoutupdating: integer;
   protected
    procedure unregisterchildwidget(const child: twidget); override;
-   procedure widgetregionchanged(const sender: twidget); override;
    procedure dofocus; override;
   public
    constructor create(aowner: tcustomwidgetgrid); reintroduce;
+   function focusback(const aactivate: boolean = true): boolean; override;
  end;
 
+ tscrollgridcontainer = class(tgridcontainer)
+  protected
+   procedure widgetregionchanged(const sender: twidget); override;
+ end;
+ 
+ tnoscrollgridcontainer = class(tgridcontainer)
+  public
+//   constructor create(aowner: tcustomwidgetgrid);
+ end;
+ 
 var
  griddatalists: tpointeransistringhashdatalist;
  
@@ -973,7 +989,8 @@ begin
   if (fintf <> nil) then begin //bug in fixes_2_0 2850 with checkpointer
    widget1:= fintf.getwidget;
    if co_nohscroll in foptions then begin
-    widget1.parentwidget:= fgrid;
+    widget1.parentwidget:= fcontainer0;
+//    widget1.parentwidget:= fgrid;
    end
    else begin
     widget1.parentwidget:= fcontainer2;
@@ -984,8 +1001,11 @@ begin
      rect1.cx:= rect1.cx + fdatacols.mergedwidth(index,row);
     end;
     if co_nohscroll in self.foptions then begin
-     rect1.y:= fdatarect.y;
-     widget1.widgetrect:= moverect(rect1,paintpos);
+//     rect1.y:= fdatarect.y;
+//     widget1.widgetrect:= moverect(rect1,paintpos);
+     rect1.y:= 0;
+     rect1.x:= rect1.x - fdatarecty.x;
+     widget1.widgetrect:= rect1;
     end
     else begin
      rect1.y:= 0;
@@ -997,7 +1017,8 @@ begin
     rect1:= cellrect(makegridcoord(colindex,ffocusedcell.row),cil_noline);
     if co_nohscroll in self.foptions then begin
 //     removerect1(rect1,fdatarecty.pos);
-     moverect1(rect1,paintpos);
+     removerect1(rect1,fdatarecty.pos);
+//     moverect1(rect1,subpoint(fcontainer2.pos,fcontainer0.pos));
     end
     else begin
      removerect1(rect1,fdatarect.pos);
@@ -1083,9 +1104,10 @@ begin
      with widget1 do begin
       visible:= true;
       if canfocus and tcustomwidgetgrid(fgrid).entered and 
-            not ({(fwindow.focusedwidget <> fwidgetdummy) and}
-             (fcontainer1.checkdescendent(fwindow.focusedwidget) or
-              fcontainer3.checkdescendent(fwindow.focusedwidget))) then begin
+       not fgrid.checkdescendent(fwindow.focusedwidget) or
+       (fwindow.focusedwidget = fgrid) or 
+       fcontainer2.checkdescendent(fwindow.focusedwidget) or
+       fcontainer0.checkdescendent(fwindow.focusedwidget) then begin
        setfocus(fgrid.active);
       end;
      end;
@@ -2139,6 +2161,12 @@ begin
  inherited;
  fgrid.showcell(fgrid.widgetcell(sender));
 end;
+
+procedure tfixcontainer.doenter;
+begin
+ fgrid.flastfocusedfixwidget:= self;
+ inherited;
+end;
 {
 procedure tfixcontainer.dokeydown(var info: keyeventinfoty);
 var
@@ -2289,7 +2317,31 @@ begin
  inherited;
 end;
 
-procedure tgridcontainer.widgetregionchanged(const sender: twidget);
+procedure tgridcontainer.dofocus;
+begin
+ if fgrid.factivewidget = nil then begin
+  fgrid.setfocus;
+ end
+ else begin
+  fgrid.factivewidget.visible:= true;
+  inherited;
+ end;
+end;
+
+function tgridcontainer.focusback(const aactivate: boolean = true): boolean;
+begin
+ if fgrid.flastfocusedfixwidget <> nil then begin
+  fgrid.flastfocusedfixwidget.setfocus(aactivate);
+  result:= true;
+ end
+ else begin
+  result:= inherited focusback(aactivate);
+ end;
+end;
+
+{ tscrollgridcontainer }
+
+procedure tscrollgridcontainer.widgetregionchanged(const sender: twidget);
 var
  int1,int2,int3,int4: integer;
  po1: pointty;
@@ -2347,26 +2399,28 @@ begin
  end;
 end;
 
-procedure tgridcontainer.dofocus;
+{ tnoscrollgridcontainer }
+{
+constructor tnoscrollgridcontainer.create(aowner: tcustomwidgetgrid);
 begin
- if fgrid.factivewidget = nil then begin
-  fgrid.setfocus;
- end
- else begin
-  fgrid.factivewidget.visible:= true;
-  inherited;
- end;
+ inherited;
+ optionswidget:= optionswidget - [ow_arrowfocusin];
 end;
-
+}
 { tcustomwidgetgrid }
 
 constructor tcustomwidgetgrid.create(aowner: tcomponent);
 begin
  fmousefocusedcell.col:= -1;
  inherited;
+ fcontainer0:= tnoscrollgridcontainer.create(self);
+ fcontainer0.name:= '_co0'; //debug purpose
  fcontainer1:= ttopcontainer.create(self);
- fcontainer2:= tgridcontainer.create(self);
+ fcontainer1.name:= '_co1'; //debug purpose
+ fcontainer2:= tscrollgridcontainer.create(self);
+ fcontainer2.name:= '_co2'; //debug purpose
  fcontainer3:= tbottomcontainer.create(self);
+ fcontainer3.name:= '_co3'; //debug purpose
  fwidgetdummy:= tdummywidget.create(self);
  fwidgetdummy.setlockedparentwidget(fcontainer2);
 // fwidgetdummy.parentwidget:= fcontainer2;
@@ -2376,9 +2430,11 @@ end;
 
 destructor tcustomwidgetgrid.destroy;
 begin
+ flastfocusedfixwidget:= nil;
  fwidgetdummy.free;
  fcontainer1.free;
  freeandnil(fcontainer2);
+ freeandnil(fcontainer0);
  fcontainer3.free;
  inherited;
 end;
@@ -2387,6 +2443,16 @@ procedure tcustomwidgetgrid.setoptionsgrid(const avalue: optionsgridty);
 begin
  if fcontainer2 <> nil then begin
   with fcontainer2 do begin
+   if og_containerfocusbackonesc in avalue then begin
+    optionswidget:= optionswidget + [ow_focusbackonesc];
+   end
+   else begin
+    optionswidget:= optionswidget - [ow_focusbackonesc];
+   end;
+  end;
+ end;
+ if fcontainer0 <> nil then begin
+  with fcontainer0 do begin
    if og_containerfocusbackonesc in avalue then begin
     optionswidget:= optionswidget + [ow_focusbackonesc];
    end
@@ -2408,6 +2474,11 @@ procedure tcustomwidgetgrid.updatecontainerrect;
 var
  rect1: rectty;
 begin
+ if fcontainer0 <> nil then begin
+  rect1:= fdatarecty;
+  fcontainer0.widgetrect:= moverect(rect1,paintpos);
+                      //for nohscroll widgets
+ end;
  rect1:= fdatarectx;
  if fcontainer1 <> nil then begin
   rect1.cy:= fdatarect.y - rect1.y;
@@ -2660,6 +2731,11 @@ begin
  end
  else begin
   int1:= index - int2;
+  int2:= fcontainer0.childrencount;
+  if int1 < int2 then begin
+   result:= fcontainer0.children[int1];
+  end;
+  int1:= index - int2;
   int2:= fcontainer1.childrencount;
   if int1 < int2 then begin
    result:= fcontainer1.children[int1];
@@ -2675,6 +2751,9 @@ var
  int1,int2: integer;
 begin
  if awidget <> nil then begin
+  if flastfocusedfixwidget = awidget then begin
+   flastfocusedfixwidget:= nil;
+  end;
   for int1:= 0 to high(twidgetcols(fdatacols).fitems) do begin
    with twidgetcol(twidgetcols(fdatacols).fitems[int1]) do begin
     for int2:= 0 to high(ffixrowwidgets) do begin
@@ -2698,8 +2777,8 @@ end;
 
 function tcustomwidgetgrid.childrencount: integer;
 begin
- result:= fcontainer2.childrencount + fcontainer1.childrencount + 
-                    fcontainer3.childrencount;
+ result:= fcontainer0.childrencount + fcontainer2.childrencount +
+          fcontainer1.childrencount + fcontainer3.childrencount;
 end;
 
 function tcustomwidgetgrid.getlogicalchildren: widgetarty;
@@ -2772,6 +2851,8 @@ begin
   po1.y:= 0;
  end;
  twidget1(fcontainer2).scrollwidgets(po1);
+ po1.x:= 0;
+ twidget1(fcontainer0).scrollwidgets(po1);
  if dist.x <> 0 then begin
   twidgetfixrows(ffixrows).updatewidgetrect;
  end;
@@ -2782,6 +2863,7 @@ procedure tcustomwidgetgrid.getchildren(proc: tgetchildproc; root: tcomponent);
 begin
  inherited;
  twidget1(fcontainer2).getchildren(proc,root);
+ twidget1(fcontainer0).getchildren(proc,root);
  twidget1(fcontainer1).getchildren(proc,root);
  twidget1(fcontainer3).getchildren(proc,root);
 end;
@@ -2890,9 +2972,11 @@ begin
  twidgetcols(fdatacols).unregisterchildwidget(child);
 end;
 }
-function tcustomwidgetgrid.scrollcaret: boolean;
+function tcustomwidgetgrid.scrollcaret(const vertical: boolean): boolean;
 begin
- result:= (factivewidget <> nil) and twidget1(factivewidget).hascaret;
+ result:= (factivewidget <> nil) and 
+            ((factivewidget.parentwidget = fcontainer2) or vertical) and
+                                 twidget1(factivewidget).hascaret;
 end;
 
 function tcustomwidgetgrid.checkreflectmouseevent(var info: mouseeventinfoty;
@@ -3235,6 +3319,14 @@ begin
          (factivewidget = nil) and 
           not (fcontainer1.entered or fcontainer3.entered) then begin
   inherited;
+ end
+ else begin
+  if (info.key = key_escape) and (info.shiftstate = []) and 
+   (og_containerfocusbackonesc in foptionsgrid) and 
+   (flastfocusedfixwidget <> nil) and (factivewidget <> nil) and
+   flastfocusedfixwidget.focused then begin
+   factivewidget.activate;
+  end;
  end;
 end;
 
@@ -3246,6 +3338,7 @@ end;
 procedure tcustomwidgetgrid.doexit;
 begin
  if canclose(nil) then begin
+  flastfocusedfixwidget:= nil;
   if factivewidget <> nil then begin
    factivewidget.visible:= false;
   end;
@@ -3321,6 +3414,32 @@ begin
     end;
    end;
   end;
+ end;
+ inherited;
+end;
+
+procedure tcustomwidgetgrid.seteditfocus;
+begin
+ if factivewidget <> nil then begin
+  factivewidget.activate;
+ end
+ else begin
+  activate;
+ end;
+end;
+
+procedure tcustomwidgetgrid.navigrequest(var info: naviginfoty);
+begin
+ inherited;
+ if (info.nearest = fcontainer0) or (info.nearest = fcontainer2) then begin
+  info.nearest:= factivewidget;
+ end;
+end;
+
+procedure tcustomwidgetgrid.dochildfocused(const sender: twidget);
+begin
+ if (sender <> fcontainer2) and (sender <> fcontainer0) then begin
+  flastfocusedfixwidget:= sender;
  end;
  inherited;
 end;

@@ -1321,7 +1321,7 @@ type
 
    function navigstartrect: rectty; virtual; //org = clientpos
    function navigrect: rectty; virtual;      //org = clientpos
-   procedure navigrequest(var info: naviginfoty);
+   procedure navigrequest(var info: naviginfoty); virtual;
    function navigdistance(var info: naviginfoty): integer; virtual;
 
    procedure setcolor(const avalue: colorty); virtual;
@@ -1580,7 +1580,7 @@ type
    function firsttabfocus: twidget;
    function lasttabfocus: twidget;
    function nexttaborder(const down: boolean = false): twidget;
-   function focusback(const aactivate: boolean = true): boolean;
+   function focusback(const aactivate: boolean = true): boolean; virtual;
                                //false if focus not changed
 
    function parentcolor: colorty;
