@@ -189,6 +189,7 @@ type
  thashdatalist = class
   private
    fmask: hashvaluety;
+   fhashshift: integer;
    fdatasize: integer;
    frecsize: integer;
    fcapacity: integer;
@@ -1274,7 +1275,7 @@ end;
 
 procedure thashdatalist.setcapacity(const avalue: integer);
 var
- int1: integer;
+ int1,int2: integer;
  po1: pointer;
  puint1: ptruint;
 begin
@@ -1285,6 +1286,7 @@ begin
   if longword(avalue) >= high(ptruint) div longword(frecsize) then begin
    raise exception.create('Capacity too big.');
   end;
+  
   if (avalue < fcapacity) and (fdeletedroot <> 0) and 
                                     (fcount > 0) then begin //packing necessary
    getmem(po1,(avalue+1)*frecsize);
@@ -1318,9 +1320,11 @@ begin
   phashdataty(fdata)^.header.nextlist:= 0; //end marker
          //first record is a dummy so offset = 0 -> not assigned
   fcapacity:= avalue;
-  int1:= bits[highestbit(avalue)];
+  int2:= highestbit(avalue);
+  int1:= bits[int2];
   if int1 < avalue then begin
    int1:= int1 * 2;
+   inc(int2);
   end;
   if int1 <> length(fhashtable) then begin
    if fhashtable <> nil then begin
@@ -1328,6 +1332,7 @@ begin
    end;
    setlength(fhashtable,int1); //additional length nulled by setlength
    fmask:= int1 - 1;
+   fhashshift:= sizeof(hashvaluety)*8 - int2;
    rehash;
   end;
  end; 
@@ -1888,13 +1893,24 @@ begin
 end;
 
 function tansistringhashdatalist.hashkey(const akey): hashvaluety;
+var
+ ha1: hashvaluety;
 begin
- result:= stringhash(ansistring(akey));
+ ha1:= stringhash(ansistring(akey));
+ result:= ha1 xor (ha1 shr fhashshift); 
 end;
 
 function tansistringhashdatalist.checkkey(const akey; const aitemdata): boolean;
+var
+ int1: integer;
 begin
- result:= ansistring(akey) = ansistringdataty(aitemdata).key;
+ result:= pointer(akey) = pointer(ansistringdataty(aitemdata).key);
+ if not result then begin
+  int1:= length(ansistring(akey));
+  result:= (int1 = length(ansistringdataty(aitemdata).key)) and
+      comparemem(pointer(akey),pointer(ansistringdataty(aitemdata).key),int1);
+ end;
+// pointer ansistring(akey) = ansistringdataty(aitemdata).key;
 end;
 
 function tansistringhashdatalist.delete(const akey: ansistring;
@@ -2045,13 +2061,25 @@ begin
 end;
 
 function tmsestringhashdatalist.hashkey(const akey): hashvaluety;
+var
+ ha1: hashvaluety;
 begin
- result:= stringhash(msestring(akey));
+ ha1:= stringhash(msestring(akey));
+ result:= ha1 xor (ha1 shr fhashshift); 
 end;
 
 function tmsestringhashdatalist.checkkey(const akey; const aitemdata): boolean;
+var
+ int1: integer;
 begin
- result:= msestring(akey) = msestringdataty(aitemdata).key;
+ result:= pointer(akey) = pointer(msestringdataty(aitemdata).key);
+ if not result then begin
+  int1:= length(msestring(akey));
+  result:= (int1 = length(msestringdataty(aitemdata).key)) and
+      comparemem(pointer(akey),pointer(msestringdataty(aitemdata).key),
+                               int1*sizeof(msechar));
+ end;
+// result:= msestring(akey) = msestringdataty(aitemdata).key;
 end;
 
 function tmsestringhashdatalist.delete(const akey: msestring;
