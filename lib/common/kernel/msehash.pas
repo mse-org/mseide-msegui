@@ -1729,8 +1729,11 @@ end;
 }
 function tptruinthashdatalist.hashkey(const akey): hashvaluety;
 // todo: optimize
+var
+ ha1: hashvaluety;
 begin
- result:= (ptruint(akey) xor (ptruint(akey) shr 2));
+ ha1:= (ptruint(akey) xor (ptruint(akey) shr 2));
+ result:= ha1 xor (ha1 shr fhashshift); 
 end;
 
 function tptruinthashdatalist.add(const akey: ptruint): pointer;
