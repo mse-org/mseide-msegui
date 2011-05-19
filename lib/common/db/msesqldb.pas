@@ -179,7 +179,8 @@ type
    constructor create(const aowner: tfieldparamlink);
  end;
   
- fieldparamlinkoptionty = (fplo_autorefresh,fplo_restorerecno,
+ fieldparamlinkoptionty = (
+              fplo_autorefresh,fplo_refreshifactiveonly,fplo_restorerecno,
               fplo_syncmasterpost,
               fplo_syncmasteredit,
               fplo_syncmasterinsert,
@@ -951,6 +952,8 @@ begin
         fonaftersetparam(fowner);
        end;
        if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
+          (destdataset.active or 
+                    not (fplo_refreshifactiveonly in foptions)) and
           not((destdataset.state = dsinsert) and (dataset.state = dsinsert) and
                        (fplo_syncmasterinsert in foptions))and
                    (destdataset.state in [dsbrowse,dsedit,dsinsert]) then begin
