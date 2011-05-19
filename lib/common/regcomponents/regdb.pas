@@ -376,7 +376,7 @@ begin
         tdbfieldnamenocalcpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldlink,'destdatafield',
         tdbfieldnamepropertyeditor);
- registerpropertyeditor(typeinfo(string),tslavefield,'destfieldname',
+ registerpropertyeditor(typeinfo(string),tdestfield,'destfieldname',
         tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldparamlink,'fieldname',
         tdbfieldnamenocalcpropertyeditor);
@@ -396,9 +396,9 @@ begin
         tfielddatasetpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldparamlink,'paramname',
         tdbparamnamepropertyeditor);
- registerpropertyeditor(typeinfo(string),tslaveparam,'paramname',
+ registerpropertyeditor(typeinfo(string),tdestparam,'paramname',
         tdbparamnamepropertyeditor);
- registerpropertyeditor(typeinfo(tslaveparams),nil,'',
+ registerpropertyeditor(typeinfo(tdestparams),nil,'',
         tslaveparamspropertyeditor);
  registerpropertyeditor(typeinfo(tstrings),nil,'SQL',
         tsqlpropertyeditor);
@@ -1410,7 +1410,7 @@ end;
 
 function tslaveparampropertyeditor.getvalue: msestring;
 begin
- with tslaveparam(getpointervalue) do begin
+ with tdestparam(getpointervalue) do begin
   result:= '<';
   if datasource <> nil then begin
    result:= result + datasource.name;

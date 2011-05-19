@@ -196,7 +196,7 @@ const
  defaultfieldparamlinkoptions = [fplo_autorefresh];
  
 type  
- tslavevalue = class(townedpersistent,idbeditinfo,idbparaminfo)
+ tdestvalue = class(townedpersistent,idbeditinfo,idbparaminfo)
   private
    fdatalink: tfielddatalink;
 //   fparamname: string;
@@ -220,20 +220,20 @@ type
 //   property paramname: string read fparamname write fparamname;
  end;
 
- tslaveparam = class(tslavevalue)
+ tdestparam = class(tdestvalue)
   private
    fparamname: string;
   published
    property paramname: string read fparamname write fparamname;
  end;
 
- slavefieldoptionty = (sfo_onlyifnull,sfo_notifunmodifiedinsert);
- slavefieldoptionsty = set of slavefieldoptionty;
+ destfieldoptionty = (dfo_onlyifnull,dfo_notifunmodifiedinsert);
+ destfieldoptionsty = set of destfieldoptionty;
  
- tslavefield = class(tslavevalue)
+ tdestfield = class(tdestvalue)
   private
    fdestfieldname: string;
-   foptions: slavefieldoptionsty;
+   foptions: destfieldoptionsty;
   protected
     //idbeditinfo
    function getdataset(const aindex: integer): tdataset; override;
@@ -241,14 +241,14 @@ type
                           out afieldtypes: fieldtypesarty); override;
   published
    property destfieldname: string read fdestfieldname write fdestfieldname;
-   property options: slavefieldoptionsty read foptions write foptions default [];
+   property options: destfieldoptionsty read foptions write foptions default [];
  end;
   
- tslaveparams = class(townedpersistentarrayprop)
+ tdestparams = class(townedpersistentarrayprop)
   constructor create(const aowner: tfieldparamlink);
  end;
 
- tslavefields = class(townedpersistentarrayprop)
+ tdestfields = class(townedpersistentarrayprop)
   constructor create(const aowner: tfieldparamlink);
  end;
  
@@ -270,8 +270,8 @@ type
    fonupdatemasterinsert: masterdataseteventty;
    fonupdateslaveedit: slavedataseteventty;
    fonupdateslaveinsert: slavedataseteventty;
-   fslaveparams: tslaveparams;
-   fslavefields: tslavefields;
+   fdestparams: tdestparams;
+   fdestfields: tdestfields;
    function getdatasource: tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
    function getvisualcontrol: boolean;
@@ -279,11 +279,11 @@ type
    function getdestdataset: tsqlquery;
    procedure setdestdataset(const avalue: tsqlquery);
    procedure setdelayus(const avalue: integer);
-   procedure setslaveparams(const avalue: tslaveparams);
+   procedure setdestparams(const avalue: tdestparams);
    function getfieldname: string;
    procedure setfieldname(const avalue: string);
    procedure readdatafield(reader: treader);
-   procedure setslavefields(const avalue: tslavefields);
+   procedure setdestfields(const avalue: tdestfields);
   protected
    procedure loaded; override;
    procedure defineproperties(filer: tfiler); override;
@@ -316,10 +316,10 @@ type
                 //-1 -> off, 0 -> on idle
    property options: fieldparamlinkoptionsty read foptions write foptions
                       default defaultfieldparamlinkoptions;
-   property slaveparams: tslaveparams read fslaveparams 
-                                            write setslaveparams;
-   property slavefields: tslavefields read fslavefields 
-                                            write setslavefields;
+   property destparams: tdestparams read fdestparams 
+                                            write setdestparams;
+   property destfields: tdestfields read fdestfields 
+                                            write setdestfields;
    property onsetparam: setparameventty read fonsetparam write fonsetparam;
    property onaftersetparam: notifyeventty read fonaftersetparam
                                   write fonaftersetparam;
@@ -938,9 +938,9 @@ begin
         if fparamname <> '' then begin
          fieldtoparam(self.field,param);
         end;
-        with fslaveparams do begin
+        with fdestparams do begin
          for int1:= 0 to high(fitems) do begin
-          with tslaveparam(fitems[int1]) do begin
+          with tdestparam(fitems[int1]) do begin
            if (fdatalink.field <> nil) and (fparamname <> '') then begin
             fieldtoparam(fdatalink.field,param(fparamname));
            end;
@@ -1085,8 +1085,8 @@ begin
  fdestdatasource:= tdatasource.create(nil);
  fdestdatalink:= tparamdestdatalink.create(self);
  fdestdatalink.datasource:= fdestdatasource;
- fslaveparams:= tslaveparams.create(self);
- fslavefields:= tslavefields.create(self);
+ fdestparams:= tdestparams.create(self);
+ fdestfields:= tdestfields.create(self);
 // fdestdatasource:= tlinkdatasource.create(nil);
  inherited;
 end;
@@ -1098,8 +1098,8 @@ begin
  fsourcedatalink.free;
  fdestdatalink.free;
  fdestdatasource.free;
- fslaveparams.free;
- fslavefields.free;
+ fdestparams.free;
+ fdestfields.free;
 // fdestdatasource.free;
 end;
 {
@@ -1262,9 +1262,9 @@ begin
  dec(fnodelay);
 end;
 
-procedure tfieldparamlink.setslaveparams(const avalue: tslaveparams);
+procedure tfieldparamlink.setdestparams(const avalue: tdestparams);
 begin
- fslaveparams.assign(avalue);
+ fdestparams.assign(avalue);
 end;
 
 procedure tfieldparamlink.defineproperties(filer: tfiler);
@@ -1278,9 +1278,9 @@ begin
  fieldname:= reader.readstring;
 end;
 
-procedure tfieldparamlink.setslavefields(const avalue: tslavefields);
+procedure tfieldparamlink.setdestfields(const avalue: tdestfields);
 begin
- fslavefields.assign(avalue);
+ fdestfields.assign(avalue);
 end;
 
 { tsequencedatalink }
@@ -1570,13 +1570,13 @@ var
  field1: tfield;
 begin
  with fowner do begin
-  with fslavefields do begin
+  with fdestfields do begin
    for int1:= 0 to high(fitems) do begin
-    with tslavefield(fitems[int1]) do begin
+    with tdestfield(fitems[int1]) do begin
      if (fdatalink.field <> nil) and (fdestfieldname <> '') then begin
       field1:= field(fdestfieldname);
-      if (not (sfo_onlyifnull in foptions) or (field1.isnull)) and 
-         (not (sfo_notifunmodifiedinsert in foptions) or 
+      if (not (dfo_onlyifnull in foptions) or (field1.isnull)) and 
+         (not (dfo_notifunmodifiedinsert in foptions) or 
                            dataset.modified) then begin
        field1.value:= fdatalink.field.value;
       end;
@@ -1618,73 +1618,73 @@ begin
  end;
 end;
 
-{ tslaveparams }
+{ tdestparams }
 
-constructor tslaveparams.create(const aowner: tfieldparamlink);
+constructor tdestparams.create(const aowner: tfieldparamlink);
 begin
- inherited create(aowner,tslaveparam);
+ inherited create(aowner,tdestparam);
 end;
 
-{ tslavefields }
+{ tdestfields }
 
-constructor tslavefields.create(const aowner: tfieldparamlink);
+constructor tdestfields.create(const aowner: tfieldparamlink);
 begin
- inherited create(aowner,tslavefield);
+ inherited create(aowner,tdestfield);
 end;
 
-{ tslavevalue }
+{ tdestvalue }
 
-constructor tslavevalue.create(aowner: tobject);
+constructor tdestvalue.create(aowner: tobject);
 begin
  inherited;
  fdatalink:= tfielddatalink.create;
 end;
 
-destructor tslavevalue.destroy;
+destructor tdestvalue.destroy;
 begin
  fdatalink.free;
 end;
 
-function tslavevalue.getdatasource: tdatasource;
+function tdestvalue.getdatasource: tdatasource;
 begin
  result:= fdatalink.datasource;
 end;
 
-procedure tslavevalue.setdatasource(const avalue: tdatasource);
+procedure tdestvalue.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.datasource:= avalue;
 end;
 
-function tslavevalue.getfieldname: string;
+function tdestvalue.getfieldname: string;
 begin
  result:= fdatalink.fieldname;
 end;
 
-procedure tslavevalue.setfieldname(const avalue: string);
+procedure tdestvalue.setfieldname(const avalue: string);
 begin
  fdatalink.fieldname:= avalue;
 end;
 
-function tslavevalue.getdataset(const aindex: integer): tdataset;
+function tdestvalue.getdataset(const aindex: integer): tdataset;
 begin
  result:= fdatalink.dataset;
 end;
 
-procedure tslavevalue.getfieldtypes(out apropertynames: stringarty;
+procedure tdestvalue.getfieldtypes(out apropertynames: stringarty;
                out afieldtypes: fieldtypesarty);
 begin
  apropertynames:= nil;
  afieldtypes:= nil;
 end;
 
-function tslavevalue.getdestdataset: tsqlquery;
+function tdestvalue.getdestdataset: tsqlquery;
 begin
  result:= tfieldparamlink(fowner).destdataset;
 end;
 
-{ tslavefield }
+{ tdestfield }
 
-function tslavefield.getdataset(const aindex: integer): tdataset;
+function tdestfield.getdataset(const aindex: integer): tdataset;
 begin
  case aindex of
   0: result:= fdatalink.dataset;
@@ -1692,7 +1692,7 @@ begin
  end;
 end;
 
-procedure tslavefield.getfieldtypes(out apropertynames: stringarty;
+procedure tdestfield.getfieldtypes(out apropertynames: stringarty;
                out afieldtypes: fieldtypesarty);
 begin
  setlength(apropertynames,2);
