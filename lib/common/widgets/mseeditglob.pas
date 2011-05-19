@@ -97,6 +97,7 @@ type
   
 const
  defaultoptionsedit = [oe_undoonesc,oe_closequery,oe_exitoncursor,
+                       oe_focusrectonreadonly,
                        oe_shiftreturn,oe_eatreturn,
                        oe_autoselect,oe_endonenter,
                        oe_autoselectonfirstclick,
