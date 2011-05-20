@@ -7208,6 +7208,17 @@ begin
    if (distance <> 0) then begin
     if not fgridinvalidated then begin
      rect1:= fdatarecty;
+     if (og_rowheight in foptionsgrid) then begin
+      invalidaterect(rect1,org_client); //scrolling not possible
+     end
+     else begin
+      if testintersectrect(rect1,updaterect) then begin
+       update; //draw old position
+      end;
+      dec(factiverecordbefore,distance);
+      scrollrect(makepoint(0,-distance*ystep),rect1,true);
+     end;
+    {
      if (og_rowheight in foptionsgrid) or testintersectrect(rect1,updaterect) then begin
       invalidaterect(rect1,org_client); //scrolling not possible
      end
@@ -7215,8 +7226,14 @@ begin
       dec(factiverecordbefore,distance);
       scrollrect(makepoint(0,-distance*ystep),rect1,true);
      end;
+    }
     end;
-    doupdaterowdata(-1);
+    inc(fnoinvalidate);
+    try
+     doupdaterowdata(-1);
+    finally
+     dec(fnoinvalidate);
+    end;
     if (gs_needsrowheight in fstate) then begin
      fdatacols.rowstate.change(-1);
     end;

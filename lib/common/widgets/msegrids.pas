@@ -2146,7 +2146,7 @@ type
    procedure showcell(const cell: gridcoordty; 
                       const position: cellpositionty = cep_nearest;
                       const force: boolean = false); 
-               //scrolls cell in view, force true -> if scrollbar clicked also
+               //scrolls cell into view, force true -> if scrollbar clicked also
    procedure showlastrow;
    procedure scrollrows(step: integer);
    procedure scrollleft;
@@ -9863,11 +9863,13 @@ procedure tcustomgrid.rowchanged(const arow: integer);
 var
  rect1: rectty;
 begin
- internalupdatelayout;
- rect1:= cellrect(makegridcoord(0,arow));
- rect1.x:= 0;
- rect1.cx:= tgridframe(fframe).fpaintrect.cx;
- invalidaterect(rect1);
+ if fnoinvalidate = 0 then begin
+  internalupdatelayout;
+  rect1:= cellrect(makegridcoord(0,arow));
+  rect1.x:= 0;
+  rect1.cx:= tgridframe(fframe).fpaintrect.cx;
+  invalidaterect(rect1);
+ end;
 end;
 
 procedure tcustomgrid.rowstatechanged(const arow: integer);

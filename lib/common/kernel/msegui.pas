@@ -10756,7 +10756,9 @@ end;
 
 procedure twidget.update;
 begin
- window.update;
+ if showing then begin
+  window.update;
+ end;
 end;
 
 procedure twidget.settaborder(const Value: integer);
