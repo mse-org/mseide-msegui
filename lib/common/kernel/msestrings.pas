@@ -225,9 +225,9 @@ function msestringicompupper(const a,upstr: msestring): integer;
 
 function comparestrlen(S1,S2: string): integer;
                 //case sensitiv, beruecksichtigt nur s1 laenge
-function msecomparestr(const S1, S2: msestring): Integer;
+function msecomparestr(const S1, S2: msestring): Integer; {$ifdef FPC} inline; {$endif}
                 //case sensitive
-function msecomparetext(const S1, S2: msestring): Integer;
+function msecomparetext(const S1, S2: msestring): Integer;{$ifdef FPC} inline; {$endif}
                 //case insensitive
 function msecomparestrlen(const S1, S2: msestring): Integer;
                 //case sensitiv, beruecksichtigt nur s1 laenge

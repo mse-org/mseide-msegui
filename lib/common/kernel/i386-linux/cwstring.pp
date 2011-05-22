@@ -45,7 +45,7 @@ Uses
   unix,
   unixtype,
 //  sysutils,
-  initc, msedatalist,msesysintf;
+  initc, msedatalist,msesysintf,msestrings;
 
 Const
 {$ifndef useiconv}
@@ -320,79 +320,190 @@ procedure Ansi2UCS4Move(source:pchar;var dest:UCS4String;len:SizeInt);
     setlength(dest,length(dest)-outleft div 4);
   end;
 
+const
+ colllen = 3;     //max len of collation element
+ bufferhigh = 2*colllen-1;
+ 
+function CompareWideString(const s1, s2 : WideString): PtrInt;
+var                   //no surrogate pair handling, no decomposition handling
+ w1,w2: array[0..bufferhigh] of ucs4char;
+ int1,int2: integer;
+ lena,lenb,max: integer;
+ pa,pb: pmsecharaty;
+begin
+ result:= 0;
+ if pointer(s1) <> pointer(s2) then begin
+  if s1 = '' then begin
+   result:= -1;
+  end
+  else begin
+   if s2 = '' then begin
+    result:= 1;
+   end
+   else begin
+    result:= 0;
+    lena:= length(s1);
+    lenb:= length(s2);
+    pa:= pointer(s1);
+    pb:= pointer(s2);
+    max:= lena;
+    if max < lenb then begin
+     max:= lenb;
+    end;
+    for int1:= 0 to max -1 do begin
+     if pa^[int1] <> pb^[int1] then begin
+      int2:= int1 - 2; //space for 2 multi char collations
+      if int2 < 0 then begin
+       int2:= 0;
+      end;
+      inc(pmsechar(pointer(pa)),int2);
+      inc(pmsechar(pointer(pb)),int2);
+      w1[high(w1)]:= 0;
+      w2[high(w1)]:= 0;
+      for int2:= 0 to high(w1)-1 do begin
+       w1[int2]:= word(pa^[0]);
+       if pa^[0] <> #0 then begin
+        inc(pmsechar(pointer(pa)));
+       end;
+       w2[int2]:= word(pb^[0]);
+       if pb^[0] <> #0 then begin
+        inc(pmsechar(pointer(pb)));
+       end;
+      end;
+      result:= wcscoll(pwchar_t(@w1),pwchar_t(@w2));
+      break;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function CompareTextWideString(const s1, s2 : WideString): PtrInt;
+var                   //no surrogate pair handling, no decomposition handling
+ w1,w2: array[0..bufferhigh] of ucs4char;
+ int1,int2: integer;
+ lena,lenb,max: integer;
+ pa,pb: pmsecharaty;
+begin
+ result:= 0;
+ if pointer(s1) <> pointer(s2) then begin
+  if s1 = '' then begin
+   result:= -1;
+  end
+  else begin
+   if s2 = '' then begin
+    result:= 1;
+   end
+   else begin
+    result:= 0;
+    lena:= length(s1);
+    lenb:= length(s2);
+    pa:= pointer(s1);
+    pb:= pointer(s2);
+    max:= lena;
+    if max < lenb then begin
+     max:= lenb;
+    end;
+    for int1:= 0 to max -1 do begin
+     if towupper(wint_t(word(pa^[int1]))) <> 
+                                towupper(wint_t(word(pb^[int1]))) then begin
+      int2:= int1 - 2; //space for 2 multi char collations
+      if int2 < 0 then begin
+       int2:= 0;
+      end;
+      inc(pmsechar(pointer(pa)),int2);
+      inc(pmsechar(pointer(pb)),int2);
+      w1[high(w1)]:= 0;
+      w2[high(w1)]:= 0;
+      for int2:= 0 to high(w1)-1 do begin
+       w1[int2]:= towupper(word(pa^[0]));
+       if pa^[0] <> #0 then begin
+        inc(pmsechar(pointer(pa)));
+       end;
+       w2[int2]:= towupper(word(pb^[0]));
+       if pb^[0] <> #0 then begin
+        inc(pmsechar(pointer(pb)));
+       end;
+      end;
+      result:= wcscoll(pwchar_t(@w1),pwchar_t(@w2));
+      break;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
 {
 function CompareWideString(const s1, s2 : WideString) : PtrInt;
-  var
-    hs1,hs2 : UCS4String;
-  begin
-    hs1:=WideStringToUCS4String(s1);
-    hs2:=WideStringToUCS4String(s2);
-    result:=wcscoll(pwchar_t(hs1),pwchar_t(hs2));
-  end;
-
+var                   //no surrogate pair handling
+ w1,w2: ucs4string;
+ int1: integer;
+ po1: pwidechar;
+ po2: pucs4char;
+begin
+ allocuninitedarray(length(s1)+1,sizeof(ucs4char),w1);
+ allocuninitedarray(length(s2)+1,sizeof(ucs4char),w2);
+ po1:= pwidechar(s1);
+ po2:= pointer(w1);
+ while po1^ <> #0 do begin
+  po2^:= word(po1^);
+  inc(po1);
+  inc(po2);
+ end;
+ po2^:= 0;
+ po1:= pwidechar(s2);
+ po2:= pointer(w2);
+ while po1^ <> #0 do begin
+  po2^:= word(po1^);
+  inc(po1);
+  inc(po2);
+ end;
+ po2^:= 0;
+ result:= wcscoll(pwchar_t(w1),pwchar_t(w2));
+end;
 
 function CompareTextWideString(const s1, s2 : WideString): PtrInt;
-  begin
-    result:=CompareWideString(UpperWideString(s1),UpperWideString(s2));
+var                   //no surrogate pair handling
+ w1,w2: ucs4string;
+ int1: integer;
+ po1: pwidechar;
+ po2: pucs4char;
+begin
+ result:= 0;
+ if pointer(s1) <> pointer(s2) then begin
+  if s1 = '' then begin
+   result:= -1;
+  end
+  else begin
+   if s2 = '' then begin
+    result:= 1;
+   end
+   else begin
+    allocuninitedarray(length(s1)+1,sizeof(ucs4char),w1);
+    allocuninitedarray(length(s2)+1,sizeof(ucs4char),w2);
+    po1:= pwidechar(s1);
+    po2:= pointer(w1);
+    while po1^ <> #0 do begin
+     po2^:= towupper(wint_t(po1^));
+     inc(po1);
+     inc(po2);
+    end;
+    po2^:= 0;
+    po1:= pwidechar(s2);
+    po2:= pointer(w2);
+    while po1^ <> #0 do begin
+     po2^:= towupper(wint_t(po1^));
+     inc(po1);
+     inc(po2);
+    end;
+    po2^:= 0;
+    result:= wcscoll(pwchar_t(w1),pwchar_t(w2));
+   end;
   end;
+ end;
+end;
 }
-
-function CompareWideString(const s1, s2 : WideString) : PtrInt;
-var                   //no surrogate pair handling
- w1,w2: ucs4string;
- int1: integer;
- po1: pwidechar;
- po2: pucs4char;
-begin
- allocuninitedarray(length(s1)+1,sizeof(ucs4char),w1);
- allocuninitedarray(length(s2)+1,sizeof(ucs4char),w2);
- po1:= pwidechar(s1);
- po2:= pointer(w1);
- while po1^ <> #0 do begin
-  po2^:= word(po1^);
-  inc(po1);
-  inc(po2);
- end;
- po2^:= 0;
- po1:= pwidechar(s2);
- po2:= pointer(w2);
- while po1^ <> #0 do begin
-  po2^:= word(po1^);
-  inc(po1);
-  inc(po2);
- end;
- po2^:= 0;
- result:= wcscoll(pwchar_t(w1),pwchar_t(w2));
-end;
-
-function CompareTextWideString(const s1, s2 : WideString): PtrInt;
-var                   //no surrogate pair handling
- w1,w2: ucs4string;
- int1: integer;
- po1: pwidechar;
- po2: pucs4char;
-begin
- allocuninitedarray(length(s1)+1,sizeof(ucs4char),w1);
- allocuninitedarray(length(s2)+1,sizeof(ucs4char),w2);
- po1:= pwidechar(s1);
- po2:= pointer(w1);
- while po1^ <> #0 do begin
-  po2^:= towupper(wint_t(po1^));
-  inc(po1);
-  inc(po2);
- end;
- po2^:= 0;
- po1:= pwidechar(s2);
- po2:= pointer(w2);
- while po1^ <> #0 do begin
-  po2^:= towupper(wint_t(po1^));
-  inc(po1);
-  inc(po2);
- end;
- po2^:= 0;
- result:= wcscoll(pwchar_t(w1),pwchar_t(w2));
-end;
-
 function StrCompAnsi(s1,s2 : PChar): PtrInt;
   begin
     result:=strcoll(s1,s2);
