@@ -612,7 +612,8 @@ begin
     end;
    end;
    if not fstream.eof then begin     
-    int1:= msestrscan(str1,msechar(']'));
+//    int1:= msestrscan(str1,msechar(']'));
+    int1:= findchar(str1,msechar(']'));
     if int1 > 0 then begin
      if int1 = 2 then begin
       fstatend:= fstream.position;
@@ -636,7 +637,8 @@ begin
        end;
        inc(count);
        if (length(str1) > 0) and (str1[1] <> ' ') then begin
-        int1:= msestrscan(str1,msechar('='));
+//        int1:= msestrscan(str1,msechar('='));
+        int1:= findchar(str1,msechar('='));
         if int1 > 0 then begin
          names.add(copy(str1,1,int1-1),pointer(ptruint(count)));
          values[count-1]:= copy(str1,int1+1,bigint);
@@ -688,7 +690,8 @@ begin
        break;
       end;
       if ch1 <> ' ' then begin
-       int2:= msestrscan(values[int1],msechar('='));
+//       int2:= msestrscan(values[int1],msechar('='));
+       int2:= findchar(values[int1],msechar('='));
        if (int2 > 0) and (msestrlcomp(pmsechar(values[int1])+flistlevel,
                pmsechar(name),length(name)) = 0) then begin
         factitem:= int1;

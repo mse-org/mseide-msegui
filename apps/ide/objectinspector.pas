@@ -708,7 +708,8 @@ begin
   int1:= 0;
   while int1 <= high(result) do begin
    str1:= result[int1].name;
-   int2:= msestrscan(str1,msechar('_'));
+//   int2:= msestrscan(str1,msechar('_'));
+   int2:= findchar(str1,msechar('_'));
    if int2 > 0 then begin
     int3:= int1+1;
     while (int3 <= high(result)) and

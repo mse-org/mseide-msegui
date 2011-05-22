@@ -1753,7 +1753,8 @@ begin
   ar1:= splitstring(avalue,',');
   setlength(ar2,length(ar1));
   for int1:= 0 to high(ar1) do begin
-   int2:= msestrings.strscan(ar1[int1],'.');
+//   int2:= msestrings.strscan(ar1[int1],'.');
+   int2:= msestrings.findchar(ar1[int1],'.');
    if int2 > 0 then begin
     ar2[int1].min:= strtoint(copy(ar1[int1],1,int2-1));
     if ar1[int1][int2+1] <> '.' then begin

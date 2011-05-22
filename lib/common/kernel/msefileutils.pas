@@ -1279,12 +1279,15 @@ begin
    int2:= findchar(pmsechar(@acommandline[2]),quotechar);//end of exe
    if int2 = 0 then begin
     int2:= length(acommandline);
+   end
+   else begin
+    inc(int2);
    end;
    int3:= int2+1; //start of params
   end
   else begin
-   int2:= findchar(pmsechar(@acommandline[1]),' ');//end of exe
-   if int2 = 0 then begin
+   int2:= findchar(acommandline,' ');//end of exe
+   if int2 < 0 then begin
     int2:= length(acommandline);
    end;
    int3:= int2;

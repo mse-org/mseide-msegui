@@ -265,6 +265,10 @@ function findchar(const str: string; achar: char): integer; overload;
   //bringt index des ersten vorkommens von zeichen in string, 0 wenn nicht gefunden
 function findchar(const str: msestring; achar: msechar): integer; overload;
   //bringt index des ersten vorkommens von zeichen in string, 0 wenn nicht gefunden
+function findchar(const str: pchar; achar: char): integer; overload;
+  //bringt index des ersten vorkommens von zeichen in string, 0 wenn nicht gefunden
+function findchar(const str: pmsechar; achar: msechar): integer; overload;
+  //bringt index des ersten vorkommens von zeichen in string, 0 wenn nicht gefunden
 function findchars(const str: string; const achars: string): integer; overload;
   //bringt index des ersten vorkommens von zeichen in string, 0 wenn nicht gefunden
 function findchars(const str: msestring; const achars: msestring): integer; overload;
@@ -278,9 +282,11 @@ function countchars(const str: msestring; achar: msechar): integer; overload;
 function getcharpos(const str: msestring; achar: msechar): integerarty;
 
 function strscan(const Str: PChar; Chr: Char): PChar; overload;
-function strscan(const str: string; chr: char): integer; overload;
+//function strscan(const str: string; chr: char): integer; overload; 
+           //use findchar()
 function msestrscan(const Str: PmseChar; Chr: mseChar): PmseChar; overload;
-function msestrscan(const str: msestring; chr: msechar): integer; overload;
+//function msestrscan(const str: msestring; chr: msechar): integer; overload;
+           //use findchar()
 
 function StrLScan(const Str: PChar; Chr: Char; len: integer): PChar;
 function mseStrLScan(const Str: PmseChar; Chr: mseChar; len: integer): PmseChar;
@@ -1346,7 +1352,12 @@ begin
    po:= strnscan(po,' ');
   end;
   if po <> nil then begin
-   dest[int2]:= strlcopy(po,po1-po);
+   if trim then begin
+    dest[int2]:= trimright(strlcopy(po,po1-po));
+   end
+   else begin
+    dest[int2]:= strlcopy(po,po1-po);
+   end;
   end;
   if trim and (separator = ' ') then begin
    po1:= strlnscan(po1,separator,int3);
@@ -1413,7 +1424,12 @@ begin
    po:= msestrnscan(po,' ');
   end;
   if po <> nil then begin
-   dest[int2]:= msestrlcopy(po,po1-po);
+   if trim then begin
+    dest[int2]:= trimright(msestrlcopy(po,po1-po));
+   end
+   else begin
+    dest[int2]:= msestrlcopy(po,po1-po);
+   end;
   end;
   if trim and (separator = ' ') then begin
    po1:= msestrlnscan(po1,separator,int3);
@@ -3116,6 +3132,42 @@ begin
  end;
 end;
 
+function findchar(const str: pchar; achar: char): integer;
+  //bringt erstes vorkommens von zeichen in string, -1 wenn nicht gefunden
+var
+ po1: pchar;
+begin
+ result:= 0;
+ if str <> nil then begin
+  po1:= str;
+  while po1^ <> #0 do begin
+   if po1^ = achar then begin
+    result:= (po1-pchar(pointer(str)))+1;
+    break;
+   end;
+   inc(po1);
+  end;
+ end;
+end;
+
+function findchar(const str: pmsechar; achar: msechar): integer;
+  //bringt erstes vorkommens von zeichen in string, 0 wenn nicht gefunden
+var
+ po1: pmsechar;
+begin
+ result:= 0;
+ if str <> nil then begin
+  po1:= str;
+  while po1^ <> #0 do begin
+   if po1^ = achar then begin
+    result:= (po1-pmsechar(pointer(str)))+1;
+    break;
+   end;
+   inc(po1);
+  end;
+ end;
+end;
+
 function findchars(const str: string; const achars: string): integer;
   //bringt index des ersten vorkommens von zeichen in string, 0 wenn nicht gefunden
 var
@@ -3249,7 +3301,7 @@ begin
   end;
  end;
 end;
-
+{
 function strscan(const str: string; chr: char): integer; overload;
 var
  int1: integer;
@@ -3275,7 +3327,7 @@ begin
   end;
  end;
 end;
-
+}
 function StrScan(const Str: PChar; Chr: Char): PChar;
 var
  po1: pchar;
