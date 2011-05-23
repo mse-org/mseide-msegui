@@ -352,7 +352,7 @@ begin
     end;
     for int1:= 0 to max -1 do begin
      if pa^[int1] <> pb^[int1] then begin
-      int2:= int1 - 2; //space for 2 multi char collations
+      int2:= int1 - (colllen-1); //space for multi char collation elements
       if int2 < 0 then begin
        int2:= 0;
       end;
@@ -408,7 +408,7 @@ begin
     for int1:= 0 to max -1 do begin
      if towupper(wint_t(word(pa^[int1]))) <> 
                                 towupper(wint_t(word(pb^[int1]))) then begin
-      int2:= int1 - 2; //space for 2 multi char collations
+      int2:= int1 - (colllen-1); //space for multi char collation elements
       if int2 < 0 then begin
        int2:= 0;
       end;
