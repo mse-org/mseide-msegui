@@ -2904,6 +2904,7 @@ var
  intf1: igridwidget;
 begin
  inc(tgridcontainer(fcontainer2).flayoutupdating);
+ include(fstate,gs_layoutupdating);
  try
   ar1:= copy(fwidgets);
   for int1:= 0 to high(fwidgets) do begin
@@ -2989,6 +2990,7 @@ begin
    end;
   end;
  finally
+  exclude(fstate,gs_layoutupdating);
   dec(tgridcontainer(fcontainer2).flayoutupdating);
  end;
  inherited;
