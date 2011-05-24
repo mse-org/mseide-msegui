@@ -8120,19 +8120,31 @@ begin
 end;
 
 procedure tdatacols.move(const curindex: integer; const newindex: integer);
+
+ procedure domove(var avalue: integer);
+ begin
+  if avalue >= 0 then begin
+   if avalue = curindex then begin
+    avalue:= newindex;
+   end
+   else begin
+    if (avalue > curindex) and (avalue <= newindex) then begin
+     dec(avalue);
+    end
+    else begin
+     if (avalue < curindex) and (avalue >= newindex) then begin
+      inc(avalue);
+     end;
+    end;
+   end;
+  end;
+ end; //domove
+ 
 begin
  inherited;
- with fgrid do begin
-  if fnewrowcol = curindex then begin
-   fnewrowcol:= newindex;
-  end;
-  if fsortcol = curindex then begin
-   fsortcol:= newindex;
-  end;
-  if fsortcoldefault = curindex then begin
-   fsortcoldefault:= newindex;
-  end;
- end;
+ domove(fnewrowcol);
+ domove(fsortcol);
+ domove(fsortcoldefault);
 end;
 
 procedure tdatacols.dosizechanged;
@@ -12836,7 +12848,9 @@ begin
   end;
   pok_datacol: begin
    cellkind:= cellatpos(makepoint(apos.x,fdatarect.y),cell1);
-   if cell1.col >= 0 then begin
+   if (cell1.col >= 0) and not 
+     ((co_nohscroll in tdatacol(fdatacols.fitems[cell1.col]).options) xor 
+     (co_nohscroll in tdatacol(fdatacols.fitems[cell.col]).options)) then begin
     movecol(cell.col,cell1.col);
    end
    else begin
@@ -12896,6 +12910,7 @@ var
  offset: pointty;
  apos: pointty;
  ar1: integerarty;
+ bo1: boolean;
 begin
  offset:= sender.pickoffset;
  apos:= sender.pos;
@@ -12967,6 +12982,8 @@ begin
     cellatpos(makepoint(apos.x,fdatarect.y),cell1);
 //    if cellkind = ck_data then begin
     if cell1.col >= 0 then begin
+     bo1:= (co_nohscroll in tdatacol(fdatacols.fitems[cell1.col]).options) xor 
+           (co_nohscroll in tdatacol(fdatacols.fitems[cell.col]).options);
      rect1:= cellrect(cell1);
      killrepeater;
      if cell1.col > cell.col then begin
@@ -12975,7 +12992,9 @@ begin
        startrepeater(gs_scrollright,slowrepeat);
       end
       else begin
-       drawvertline(int1);
+       if not bo1 then begin
+        drawvertline(int1);
+       end;
       end;
      end
      else begin
@@ -12983,7 +13002,9 @@ begin
        startrepeater(gs_scrollleft,slowrepeat);
       end
       else begin
-       drawvertline(rect1.x);
+       if not bo1 then begin
+        drawvertline(rect1.x);
+       end;
       end;
      end;
     end
