@@ -28,7 +28,7 @@ uses
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,{msedialog,}msestrings,
  regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit,msebitmap,mseglob,
  msestream,mserealsumedit,msedatalist,msegui,msegrids,msesumlist,mseclasses,
- sysutils;
+ sysutils,regkernel;
 
 type
  tdropdowncolpropertyeditor = class(tarraypropertyeditor)
@@ -51,18 +51,8 @@ type
    function geteditorclass: propertyeditorclassty; override;
  end;
 
- tstockglypheditor = class(tenumpropertyeditor)
-  protected
-   function gettypeinfo: ptypeinfo; override;
- end;
- 
- tstockglypharraypropertyeditor = class(tintegerarraypropertyeditor)
-  protected
-   function geteditorclass: propertyeditorclassty; override;
- end;
-
  tdataimagepropertyeditor = class(tstringpropertyeditor)
- protected
+  protected
    function getdefaultstate: propertystatesty; override;
    procedure edit; override;
   public
@@ -186,20 +176,6 @@ end;
 function twidgetcolspropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= twidgetcolelementeditor;
-end;
-
-{ tstockglypharraypropertyeditor }
-
-function tstockglypharraypropertyeditor.geteditorclass: propertyeditorclassty;
-begin
- result:= tstockglypheditor;
-end;
-
-{ tstockglypheditor }
-
-function tstockglypheditor.gettypeinfo: ptypeinfo;
-begin
- result:= typeinfo(stockglyphty);
 end;
 
 { tdataimagepropertyeditor }

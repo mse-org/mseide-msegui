@@ -117,8 +117,9 @@ const
   'Filter Maximum bearbeiten',//sc_filter_edit_max
   'Filter ein',               //sc_filter_on
   'Suchen',                   //sc_search
-  'Automatisch bearbeiten',          //sc_autoedit
-  'Dialog',             //sc_dialog
+  'Automatisch bearbeiten',   //sc_auto_edit
+  'Datensatz kopieren',       //sc_copy_record
+  'Dialog',                   //sc_dialog
   'Einfügen',                 //sc_insert
   'Filter aus',               //sc_filter_off
   'Hochformat',               //sc_portrait print orientation

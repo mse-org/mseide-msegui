@@ -19,18 +19,33 @@ unit regkernel;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
+uses
+ typinfo,msepropertyeditors;
+ 
+type
+ tstockglypheditor = class(tenumpropertyeditor)
+  protected
+   function gettypeinfo: ptypeinfo; override;
+   function getdefaultstate: propertystatesty; override;
+   procedure edit; override;
+  end;
+ 
+ tstockglypharraypropertyeditor = class(tintegerarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
 
 implementation
 
 uses
  classes,msethreadcomp,msebitmap,msetimer,msestatfile,mseact,mseactions,
  mseshapes,
- msedesignintf,msepropertyeditors,msemenus,msegui,msepipestream,sysutils,
+ msedesignintf,msemenus,msegui,msepipestream,sysutils,
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
- mseapplication,mseglob,mseguiglob,mseskin,msedesigner,typinfo,
+ mseapplication,mseglob,mseguiglob,mseskin,msedesigner,
  mseguithreadcomp,mseprocmonitorcomp,imageselectorform,msefadeedit,
- msearrayprops,msesumlist,mserttistat;
+ msearrayprops,msesumlist,mserttistat,msestockobjects;
 
 type
  twidget1 = class(twidget);
@@ -133,6 +148,7 @@ type
   public
    procedure edit; override;
  end;
+
 (* 
  tactionshortcutspropertyeditor = class(tshortcutpropertyeditor)
   public
@@ -170,7 +186,6 @@ begin
  registercomponenttabhints(['Gui'],['Non visual Components with GUI Dependence']);
  registercomponents('Dialog',[tpagesizeselector,tpageorientationselector]);
 
-// registerpropertyeditor(typeinfo(twidget),nil,'',tcomponentpropertyeditor);
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
  registerpropertyeditor(typeinfo(tshortcutactions),nil,'',
                            tshortcutactionspropertyeditor);
@@ -190,17 +205,10 @@ begin
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',tshapestatespropertyeditor);
  registerpropertyeditor(typeinfo(shortcutty),nil,'',tshortcutpropertyeditor);
-// registerpropertyeditor(typeinfo(shortcutty),taction,'',
-//                                   tactionshortcutspropertyeditor);
-// registerpropertyeditor(typeinfo(shortcutty),tshortcutaction,'',
-//                                   tshortcutactionitempropertyeditor);
  registerpropertyeditor(typeinfo(imagenrty),nil,'',timagenrpropertyeditor);
  registerpropertyeditor(typeinfo(facenrty),nil,'',tordinalpropertyeditor);
  registerpropertyeditor(typeinfo(tcollection),nil,'',tcollectionpropertyeditor);
  registerpropertyeditor(typeinfo(tmenuitems),nil,'',tmenuarraypropertyeditor);
-// registerpropertyeditor(typeinfo(tcustomframe),twidget,'frame',tframepropertyeditor);
-// registerpropertyeditor(typeinfo(tcustomface),twidget,'face',
-//                             toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(tcustomframe),nil,'',tframepropertyeditor);
  registerpropertyeditor(typeinfo(tcustomface),nil,'',
                              toptionalclasspropertyeditor);
@@ -228,6 +236,8 @@ begin
                          tactivatorclientspropertyeditor);
  registerpropertyeditor(typeinfo(integer),tskincontroller,'extenders',
                          tskincontrollerextenderspropertyeditor);
+ registerpropertyeditor(typeinfo(stockglyphty),nil,'',
+                                      tstockglypheditor);
  registerunitgroup(['msestatfile'],['msestat']);
  
  registerdesignmoduleclass(tmsedatamodule,@datamoduleintf);
@@ -431,6 +441,34 @@ begin
   timageselectorfo.create(nil,fintf.getimagelist,int1);
   setordvalue(int1);
  end;
+end;
+
+{ tstockglypharraypropertyeditor }
+
+function tstockglypharraypropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tstockglypheditor;
+end;
+
+{ tstockglypheditor }
+
+function tstockglypheditor.gettypeinfo: ptypeinfo;
+begin
+ result:= typeinfo(stockglyphty);
+end;
+
+function tstockglypheditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_dialog];
+end;
+
+procedure tstockglypheditor.edit;
+var
+ int1: integer;
+begin
+ int1:= getordvalue;
+ timageselectorfo.create(nil,stockobjects.glyphs,int1);
+ setordvalue(int1);
 end;
 
 { tlevelarraypropertyeditor }

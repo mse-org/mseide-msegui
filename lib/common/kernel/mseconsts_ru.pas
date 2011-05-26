@@ -162,6 +162,7 @@ const
   'Filter on',          //sc_filter_on
   'Search',             //sc_search
   'Auto edit',          //sc_autoedit
+  'Copy record',        //sc_copy_record
   'Dialog',             //sc_dialog
   'Insert',             //sc_insert
   'Filter off',         //sc_filter_off

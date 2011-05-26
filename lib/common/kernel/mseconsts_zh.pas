@@ -121,6 +121,7 @@ const
   #36807#28388#24320#21551,            //sc_filter_on
   #26597#25214,                        //sc_search
   'Auto edit',          //sc_autoedit
+  'Copy record',        //sc_copy_record
   'Dialog',             //sc_dialog
   #25554#20837,                        //sc_insert
   #36807#28388#20851#38381,            //sc_filter_off

@@ -82,7 +82,9 @@ type
  //    72         73
   stg_sound, stg_soundoff,
  //    74             75           76        77         78          79  
-  stg_fullscreen, stg_settings, stg_save, stg_rename, stg_list, stg_listbold
+  stg_fullscreen, stg_settings, stg_save, stg_rename, stg_list, stg_listbold,
+ //    80
+  stg_doublesquare
                  );
 
  stockcaptionty = (sc_none,sc_is_invalid,sc_Format_error,sc_Value_is_required,
@@ -106,12 +108,13 @@ type
            dbnb_delete,dbnb_edit,
            dbnb_post,dbnb_cancel,dbnb_refresh,
            dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,
-           dbnb_autoedit,dbnb_dialog);
+           dbnb_autoedit,dbnb_copyrecord,dbnb_dialog);
 }
                     sc_first,sc_prior,sc_next,sc_last,
                     sc_append,sc_delete,sc_edit,sc_post,sc_cancel,sc_refresh,
                     sc_edit_filter,sc_edit_filter_min,sc_edit_filter_max,
-                    sc_filter_on,sc_search,sc_autoedit,sc_dialog,
+                    sc_filter_on,sc_search,sc_auto_edit,sc_copy_record,
+                    sc_dialog,
                     sc_insert,sc_filter_off,
                     
                     sc_portrait,sc_landscape,

@@ -32,7 +32,7 @@ type
            dbnb_delete,dbnb_edit,
            dbnb_post,dbnb_cancel,dbnb_refresh,
            dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,
-           dbnb_autoedit,dbnb_dialog);
+           dbnb_autoedit,dbnb_copyrecord,dbnb_dialog);
  dbnavigbuttonsty = set of dbnavigbuttonty;
  
 const
@@ -2540,6 +2540,11 @@ begin
       end;
      end;
     end;
+    dbnb_copyrecord: begin
+     if dscontroller <> nil then begin
+      dscontroller.copyrecord;
+     end;
+    end;
    end;
    if fdscontroller <> nil then begin
     if state = dsfilter then begin
@@ -2598,6 +2603,7 @@ begin
   options:= options + [mao_checkbox];
  end;
  buttons[ord(dbnb_dialog)].imagenr:= ord(stg_ellipsesmall);
+ buttons[ord(dbnb_copyrecord)].imagenr:= ord(stg_doublesquare);
   
  fdatalink:= tnavigdatalink.Create(idbnaviglink(self));
  visiblebuttons:= defaultvisibledbnavigbuttons;

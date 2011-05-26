@@ -177,7 +177,8 @@ const
   'Edit filter maximum',//sc_filter_edit_max
   'Filter on',          //sc_filter_on
   'Search',             //sc_search
-  'Auto edit',          //sc_autoedit
+  'Auto edit',          //sc_auto_edit
+  'Copy record',        //sc_copy_record
   'Dialog',             //sc_dialog
   'Insert',             //sc_insert
   'Filter off',         //sc_filter_off

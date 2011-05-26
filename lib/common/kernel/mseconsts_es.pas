@@ -121,6 +121,7 @@ const
   'Filtro activo',                     //sc_filter_on
   'Buscar',                            //sc_search
   'Edici'#243'n autom'#225'tica',      //sc_autoedit
+  'Copy record',                       //sc_copy_record
   'Di'#225'logo',                      //sc_dialog
   'Insertar',                          //sc_insert
   'Filtro apagado',                    //sc_filter_off

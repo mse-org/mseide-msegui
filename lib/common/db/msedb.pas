@@ -190,7 +190,7 @@ type
   function getinstance: tfield;
  end;
 
- providerflag1ty = (pf1_refreshinsert,pf1_refreshupdate);
+ providerflag1ty = (pf1_refreshinsert,pf1_refreshupdate,pf1_nocopyrecord);
  providerflags1ty = set of providerflag1ty;
  
  imsefield = interface(inullinterface)['{259AB385-E638-49D6-8C0E-688BE164D130}']
@@ -1344,6 +1344,8 @@ type
    ftimer: tsimpletimer;
    fonbeforepost: tdatasetnotifyevent;
    fonafterpost: afterposteventty;
+   fonbeforecopyrecord: tdatasetnotifyevent;
+   fonaftercopyrecord: tdatasetnotifyevent;
    procedure setfields(const avalue: tpersistentfields);
    function getcontroller: tdscontroller;
    procedure updatelinkedfields;
@@ -1427,6 +1429,8 @@ type
    procedure refresh(const restorerecno: boolean; const delayus: integer = -1);
                            //-1 -> no delay, 0 -> in onidle
    procedure checkrefresh; //makes pending delayed refresh
+   procedure copyrecord;
+
    function assql(const avalue: boolean): string; overload;
    function assql(const avalue: msestring): string; overload;
    function assql(const avalue: integer): string; overload;
@@ -1458,6 +1462,10 @@ type
                                                        write fonbeforepost;
    property onafterpost: afterposteventty read fonafterpost write fonafterpost;
                        //always called
+   property onbeforecopyrecord: tdatasetnotifyevent read fonbeforecopyrecord
+                                                     write fonbeforecopyrecord;
+   property onaftercopyrecord: tdatasetnotifyevent read fonaftercopyrecord
+                                                     write fonaftercopyrecord;
  end;
  
  idbcontroller = interface(inullinterface)
@@ -7667,6 +7675,46 @@ end;
 procedure tdscontroller.enddisplaydata;
 begin
  fintf.enddisplaydata;
+end;
+
+procedure tdscontroller.copyrecord;
+var
+ ar1: variantarty;
+ ar2: booleanarty;
+ field1: tfield;
+ intf1: imsefield;
+ int1: integer;
+ bo1: boolean;
+begin
+ if checkcanevent(tdataset(fowner),tmethod(fonbeforecopyrecord)) then begin
+  fonbeforecopyrecord(tdataset(fowner));
+ end;
+ with tdataset(fowner) do begin
+  setlength(ar1,fields.count);
+  setlength(ar2,length(ar1));
+  for int1:= 0 to high(ar1) do begin
+   field1:= fields[int1];
+   bo1:= (field1.fieldkind in [fkdata,fkinternalcalc]) and
+               (not getcorbainterface(field1,typeinfo(imsefield),intf1) or
+               not (pf1_nocopyrecord in intf1.getproviderflags1));
+   if bo1 then begin
+    ar2[int1]:= true;
+    ar1[int1]:= field1.value;
+   end;
+  end;
+  insert;
+  for int1:= 0 to high(ar1) do begin
+   if ar2[int1] and not varisnull(ar1[int1]) then begin
+    field1:= fields[int1];
+    if field1.isnull then begin
+     field1.value:= ar1[int1];
+    end;
+   end;
+  end;
+ end;
+ if checkcanevent(tdataset(fowner),tmethod(fonaftercopyrecord)) then begin
+  fonaftercopyrecord(tdataset(fowner));
+ end;
 end;
 
 { tfieldlinkdatalink }

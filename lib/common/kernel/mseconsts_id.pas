@@ -116,8 +116,9 @@ const
   'Rubah filter maximum', //sc_filter_edit_max
   'Filter hidup',         //sc_filter_on
   'Cari',                 //sc_search
-  'Auto edit',          //sc_autoedit
-  'Dialog',             //sc_dialog
+  'Auto edit',            //sc_autoedit
+  'Copy record',          //sc_copy_record
+  'Dialog',               //sc_dialog
   'Sisipkan',             //sc_insert
   'Filter mati',          //sc_filter_off
   'Berdiri',              //sc_portrait print orientation
