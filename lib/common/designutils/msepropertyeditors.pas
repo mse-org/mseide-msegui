@@ -23,6 +23,9 @@ const
   
 type
 
+ defaultenumerationty = (null);
+ defaultsetty = set of defaultenumerationty;
+
  tpropertyeditor = class;
  propertyeditorarty = array of tpropertyeditor;
 
@@ -1216,6 +1219,10 @@ begin
     end
     else begin
      atypeclasslevel:= 1;
+     if (kind = tkset) and 
+                    (po1^.propertytype <> typeinfo(defaultsetty)) then begin
+      atypeclasslevel:= 2;
+     end;
     end;
    end;
 

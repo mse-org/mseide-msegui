@@ -239,8 +239,6 @@ const
  selectcolor = cl_ltred;
 
 type
- defaultenumerationty = (null);
- defaultsetty = set of defaultenumerationty;
  defaultmethodty = procedure of object;
 
  titemlist1 = class(tcustomitemlist);
