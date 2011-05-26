@@ -122,8 +122,6 @@ type
    procedure setoptions(const avalue: dbnavigatoroptionsty);
    function getbuttonface: tface;
    procedure setbuttonface(const avalue: tface);
-//   function getdialoghint: msestring;
-//   procedure setdialoghint(const avalue: msestring);
    function gettoolbutton: ttoolbutton;
    procedure settoolbutton(const avalue: ttoolbutton);
    function getautoedit: boolean;
@@ -2430,7 +2428,7 @@ begin
    end;
    else begin
     bu1:= bu1 + [dbnb_refresh,dbnb_insert,dbnb_delete,dbnb_edit,
-                 dbnb_filteronoff];
+                 dbnb_filteronoff,dbnb_copyrecord];
    end;
   end;
   if (fdscontroller <> nil) and fdscontroller.noedit then begin
@@ -2440,7 +2438,7 @@ begin
    bu1:= bu1 - [dbnb_delete];
   end;
   if not datasource.dataset.canmodify then begin
-   bu1:= bu1 - [dbnb_edit,dbnb_delete,dbnb_insert];
+   bu1:= bu1 - [dbnb_edit,dbnb_delete,dbnb_insert,dbnb_copyrecord];
   end;
   if csdesigning in dataset.componentstate then begin
    bu1:= bu1 * designdbnavigbuttons;
@@ -2542,7 +2540,7 @@ begin
     end;
     dbnb_copyrecord: begin
      if dscontroller <> nil then begin
-      dscontroller.copyrecord;
+      dscontroller.copyrecord(dno_append in options1);
      end;
     end;
    end;
@@ -2620,7 +2618,7 @@ procedure tdbnavigator.inithints;
 var
  int1: integer;
 begin
- for int1:= 0 to ord(dbnb_autoedit) do begin
+ for int1:= 0 to ord(dbnb_copyrecord) do begin
   with buttons[int1] do begin
    hint:= stockobjects.captions[stockcaptionty(int1+ord(sc_first))];
    if (dno_shortcuthint in foptions) and 
@@ -2628,6 +2626,19 @@ begin
     hint:= hint + ' (' + 
                   encodeshortcutname(fshortcuts[dbnavigbuttonty(int1)])+')';
    end;
+  end;
+ end;
+ with buttons[ord(dbnb_insert)] do begin
+  if dno_append in self.options then begin
+   hint:= stockobjects.captions[sc_append];
+  end
+  else begin
+   hint:= stockobjects.captions[sc_insert];
+  end;
+  if (dno_shortcuthint in foptions) and 
+            (fshortcuts[dbnb_insert] <> 0) then begin
+   hint:= hint + ' (' + 
+                 encodeshortcutname(fshortcuts[dbnb_insert])+')';
   end;
  end;
 end;
@@ -2728,6 +2739,7 @@ procedure tdbnavigator.loaded;
 begin
  inherited;
  colorglyph:= colorglyph;
+ inithints;
 end;
 
 procedure tdbnavigator.doshortcut(var info: keyeventinfoty; const sender: twidget);
@@ -2771,19 +2783,8 @@ procedure tdbnavigator.setoptions(const avalue: dbnavigatoroptionsty);
 begin
  if avalue <> foptions then begin
   foptions:= avalue;
-  inithints;
-  with buttons[ord(dbnb_insert)] do begin
-   if dno_append in self.options then begin
-    hint:= stockobjects.captions[sc_append];
-   end
-   else begin
-    hint:= stockobjects.captions[sc_insert];
-   end;
-   if (dno_shortcuthint in foptions) and 
-             (fshortcuts[dbnb_insert] <> 0) then begin
-    hint:= hint + ' (' + 
-                  encodeshortcutname(fshortcuts[dbnb_insert])+')';
-   end;
+  if not (csloading in componentstate) then begin
+   inithints;
   end;
  end;
 end;
@@ -2794,17 +2795,7 @@ begin
   fondialogexecute(self);
  end;
 end;
-{
-function tdbnavigator.getdialoghint: msestring;
-begin
- result:= buttons[ord(dbnb_dialog)].hint;
-end;
 
-procedure tdbnavigator.setdialoghint(const avalue: msestring);
-begin
- buttons[ord(dbnb_dialog)].hint:= avalue;
-end;
-}
 function tdbnavigator.gettoolbutton: ttoolbutton;
 begin
  result:= buttons[ord(dbnb_dialog)];

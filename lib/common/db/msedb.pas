@@ -1429,7 +1429,7 @@ type
    procedure refresh(const restorerecno: boolean; const delayus: integer = -1);
                            //-1 -> no delay, 0 -> in onidle
    procedure checkrefresh; //makes pending delayed refresh
-   procedure copyrecord;
+   procedure copyrecord(const aappend: boolean = false);
 
    function assql(const avalue: boolean): string; overload;
    function assql(const avalue: msestring): string; overload;
@@ -7677,7 +7677,7 @@ begin
  fintf.enddisplaydata;
 end;
 
-procedure tdscontroller.copyrecord;
+procedure tdscontroller.copyrecord(const aappend: boolean = false);
 var
  ar1: variantarty;
  ar2: booleanarty;
@@ -7702,7 +7702,12 @@ begin
     ar1[int1]:= field1.value;
    end;
   end;
-  insert;
+  if aappend then begin
+   append;
+  end
+  else begin
+   insert;
+  end;
   for int1:= 0 to high(ar1) do begin
    if ar2[int1] and not varisnull(ar1[int1]) then begin
     field1:= fields[int1];
