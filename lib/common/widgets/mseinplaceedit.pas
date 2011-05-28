@@ -458,15 +458,15 @@ begin
  end;
  if ies_cangroupundo in fstate then begin
   tpopupmenu.additems(amenu,fintf.getwidget,mouseinfo,
-     [stockobjects.captions[sc_Undo]+sepchar+
+     [stockobjects.captions[sc_Undohk]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_groupundo])+')',
-      stockobjects.captions[sc_Redo]+sepchar+
+      stockobjects.captions[sc_Redohk]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_groupredo])+')',
-      stockobjects.captions[sc_Copy]+sepchar+
+      stockobjects.captions[sc_Copyhk]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_copy])+')',
-      stockobjects.captions[sc_Cut]+sepchar+
+      stockobjects.captions[sc_Cuthk]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_cut])+')',
-      stockobjects.captions[sc_Paste]+sepchar+
+      stockobjects.captions[sc_Pastehk]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_paste])+')'],
      [[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus],
               [mao_nocandefocus]],
@@ -476,12 +476,12 @@ begin
  end
  else begin
   tpopupmenu.additems(amenu,fintf.getwidget,mouseinfo,
-     [stockobjects.captions[sc_Undo]+sepchar+'(Esc)',
-      stockobjects.captions[sc_Copy]+sepchar+
+     [stockobjects.captions[sc_Undohk]+sepchar+'(Esc)',
+      stockobjects.captions[sc_Copyhk]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_copy])+')',
-      stockobjects.captions[sc_Cut]+sepchar+
+      stockobjects.captions[sc_Cuthk]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_cut])+')',
-      stockobjects.captions[sc_Paste]+sepchar+
+      stockobjects.captions[sc_Pastehk]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_paste])+')'],
      [[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus]],
                states,[{$ifdef FPC}@{$endif}onundo,

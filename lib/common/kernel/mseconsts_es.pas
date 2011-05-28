@@ -103,7 +103,8 @@ const
   'Imagen TARGA',                      //sc_TARGA_image
   'Todo',                              //sc_All
   'Confirme',                          //sc_Confirmation
-  #191'Borrar el registro?',           //sc_Delete_record
+  #191'Borrar el registro?',           //sc_Delete_record_question
+  'Copy record?',                      //sc_Copy_record_question
   'Cerrar p'#225'gina',                //sc_close_page
   'Primero',                           //sc_first
   'Anterior',                          //sc_prior
@@ -124,6 +125,7 @@ const
   'Copy record',                       //sc_copy_record
   'Di'#225'logo',                      //sc_dialog
   'Insertar',                          //sc_insert
+  'Copy',                              //sc_copy
   'Filtro apagado',                    //sc_filter_off
   'Vertical',                          //sc_portrait print orientation
   'Apaisado',                          //sc_landscape print orientation

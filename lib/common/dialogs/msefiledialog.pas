@@ -1037,7 +1037,7 @@ var
 begin
  mstr1:= '';
  with stockobjects do begin
-  if stringenter(mstr1,captions[sc_name1],
+  if stringenter(mstr1,captions[sc_name],
                captions[sc_create_new_directory]) = mr_ok then begin
    mstr1:= filepath(listview.directory,mstr1,fk_file);
    msefileutils.createdir(mstr1);
@@ -1342,13 +1342,13 @@ end;
 procedure tfiledialogfo.formoncreate(const sender: TObject);
 begin
  with stockobjects do begin
-  dir.frame.caption:= captions[sc_dir];
-  home.caption:= captions[sc_home];
-  up.caption:= captions[sc_up];
-  createdir.caption:= captions[sc_new_dir];
-  filename.frame.caption:= captions[sc_name];
-  filter.frame.caption:= captions[sc_filter];
-  showhidden.frame.caption:= captions[sc_show_hidden_files];
+  dir.frame.caption:= captions[sc_dirhk];
+  home.caption:= captions[sc_homehk];
+  up.caption:= captions[sc_uphk];
+  createdir.caption:= captions[sc_new_dirhk];
+  filename.frame.caption:= captions[sc_namehk];
+  filter.frame.caption:= captions[sc_filterhk];
+  showhidden.frame.caption:= captions[sc_show_hidden_fileshk];
   ok.caption:= modalresulttext[mr_ok];
   cancel.caption:= modalresulttext[mr_cancel];  
  end;

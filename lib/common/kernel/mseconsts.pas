@@ -123,25 +123,25 @@ const
   'Max',                //sc_Max
   'Range error',        //sc_Range_error  
 
-  '&Undo',              //sc_Undo  ///              ///
-  '&Redo',              //sc_Redo   //               //
-  '&Copy',              //sc_Copy   // hotkeys       //
-  'Cu&t',               //sc_Cut    //               //
-  '&Paste',             //sc_Paste ///               // hotkeys
-  '&Insert Row',        //sc_insert_row ///          //
-  '&Append Row',        //sc_append_row  // hotkeys  //
-  '&Delete Row',        //sc_delete_row ///         ///
+  '&Undo',              //sc_Undohk  ///              ///
+  '&Redo',              //sc_Redohk   //               //
+  '&Copy',              //sc_Copyhk   // hotkeys       //
+  'Cu&t',               //sc_Cuthk    //               //
+  '&Paste',             //sc_Pastehk ///               // hotkeys
+  '&Insert Row',        //sc_insert_rowhk ///          //
+  '&Append Row',        //sc_append_rowhk  // hotkeys  //
+  '&Delete Row',        //sc_delete_rowhk ///         ///
 
-  '&Dir',               //sc_Dir               /// 
-  '&Home',              //sc_home               //
-  '&Up',                //sc_Up                 //
-  '&New dir',           //sc_New_dir            // hotkeys
-  '&Name',              //sc_Name               //
-  '&Show hidden files', //sc_Show_hidden_files  //
-  '&Filter',            //sc_Filter            /// 
+  '&Dir',               //sc_Dirhk               /// 
+  '&Home',              //sc_homehk               //
+  '&Up',                //sc_Uphk                 //
+  '&New dir',           //sc_New_dirhk            // hotkeys
+  '&Name',              //sc_Namehk               //
+  '&Show hidden files', //sc_Show_hidden_fileshk  //
+  '&Filter',            //sc_Filterhk            /// 
   'Save',               //sc_save 
   'Open',               //sc_open
-  'Name',                //sc_name1
+  'Name',                //sc_name
   'Create new directory',//sc_create_new_directory
   'File',               //sc_file
   'exists, do you want to overwrite?', //sc_exists_overwrite
@@ -160,7 +160,8 @@ const
   'TARGA Image',        //sc_TARGA_image
   'All',                //sc_All
   'Confirmation',       //sc_Confirmation
-  'Delete record?',     //sc_Delete_record
+  'Delete record?',     //sc_Delete_record_question
+  'Copy record?',       //sc_Copy_record_question
   'Close page',         //sc_close_page
   'First',              //sc_first
   'Prior',              //sc_prior
@@ -181,6 +182,7 @@ const
   'Copy record',        //sc_copy_record
   'Dialog',             //sc_dialog
   'Insert',             //sc_insert
+  'Copy',               //sc_copy
   'Filter off',         //sc_filter_off
 
   'Portrait',           //sc_portrait print orientation

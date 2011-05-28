@@ -66,27 +66,27 @@ const
   #26368#22823,                       //sc_Max
   #28322#20986#38169#35823,           //sc_Range_error  
 
-  '&u'#21462#28040,                   //sc_Undo  ///              ///
-  '&Redo',                            //sc_Redo   //               //
-  '&c'#22797#21046,                   //sc_Copy   // hotkeys       //
-  '&t'#21098#20999,                   //sc_Cut    //               //
-  '&p'#31896#36148,                   //sc_Paste ///               // hotkeys
-  '&I'#25554#20837#19968#34892,       //sc_insert_row ///          //
-  '&A'#22686#21152#19968#34892,       //sc_append_row  // hotkeys  //
-  '&D'#21024#38500#25152#36873#34892, //sc_delete_row ///         ///
+  '&u'#21462#28040,                   //sc_Undohk  ///              ///
+  '&Redo',                            //sc_Redohk   //               //
+  '&c'#22797#21046,                   //sc_Copyhk   // hotkeys       //
+  '&t'#21098#20999,                   //sc_Cuthk    //               //
+  '&p'#31896#36148,                   //sc_Pastehk ///               // hotkeys
+  '&I'#25554#20837#19968#34892,       //sc_insert_rowhk ///          //
+  '&A'#22686#21152#19968#34892,       //sc_append_rowhk  // hotkeys  //
+  '&D'#21024#38500#25152#36873#34892, //sc_delete_rowhk ///         ///
 
-  '&D'#25991#20214#22841,                    //sc_Dir               /// 
-  '&Home',                                   //sc_home               //
-  '&U'#21521#19978,                          //sc_Up                 //
-  '&N'#26032#25991#20214#22841,              //sc_New_dir            // hotkeys
-  '&N'#25991#20214#21517,                    //sc_Name               //
-  '&S'#26174#31034#38544#34255#25991#20214,  //sc_Show_hidden_files  //
-  '&F'#20445#23384#31867#22411,              //sc_Filter            /// 
+  '&D'#25991#20214#22841,                    //sc_Dirhk               /// 
+  '&Home',                                   //sc_homehk               //
+  '&U'#21521#19978,                          //sc_Uphk                 //
+  '&N'#26032#25991#20214#22841,              //sc_New_dirhk            // hotkeys
+  '&N'#25991#20214#21517,                    //sc_Namehk               //
+  '&S'#26174#31034#38544#34255#25991#20214,  //sc_Show_hidden_fileshk  //
+  '&F'#20445#23384#31867#22411,              //sc_Filterhk            /// 
   #20445#23384,                              //sc_save 
   'O'#25171#24320,                           //sc_open
-  #21517#31216,                              //sc_name1
+  #21517#31216,                              //sc_name
   #26032#24314#25991#20214#22841,            //sc_create_new_directory
-  #25991#20214,                              //sc_file
+  #25991#20214,                              //sc_filehk
   #25991#20214#24050#32463#23384#22312#65292#26159#21542#35206#30422#65311, //sc_exists_overwrite
   #35686#21578,                              //sc_warningupper
   #38169#35823,                              //sc_errorupper
@@ -103,7 +103,8 @@ const
   'TARGA Image',        //sc_TARGA_image
   #25152#26377,                        //sc_All
   #35777#26126,                        //sc_Confirmation
-  #21024#38500#35760#24405#65311,      //sc_Delete_record
+  #21024#38500#35760#24405#65311,      //sc_Delete_record_question
+  'Copy record?',                      //sc_Copy_record_question
   #20851#38381#39029,                  //sc_close_page
   #31532#19968#26465,                  //sc_first
   #21069#19968#26465,                  //sc_prior
@@ -124,6 +125,7 @@ const
   'Copy record',        //sc_copy_record
   'Dialog',             //sc_dialog
   #25554#20837,                        //sc_insert
+  'Copy',                              //sc_copy
   #36807#28388#20851#38381,            //sc_filter_off
   'Portrait',                          //sc_portrait print orientation
   'Landscape',                         //sc_landscape print orientation

@@ -9647,9 +9647,9 @@ begin
   end;
   if og_rowinserting in foptionsgrid then begin
    tpopupmenu.additems(amenu,self,mouseinfo,[
-              stockobjects.captions[sc_insert_row]+sepchar+
+              stockobjects.captions[sc_insert_rowhk]+sepchar+
          '('+encodeshortcutname(sysshortcuts[sho_rowinsert])+')',
-              stockobjects.captions[sc_append_row]+sepchar+
+              stockobjects.captions[sc_append_rowhk]+sepchar+
        '('+encodeshortcutname(sysshortcuts[sho_rowappend])+')'],[],[],
         [{$ifdef FPC}@{$endif}doinsertrow,{$ifdef FPC}@{$endif}doappendrow],
                                                                      not bo1);
@@ -9663,7 +9663,7 @@ begin
     state1:= [as_disabled];
    end;
    tpopupmenu.additems(amenu,self,mouseinfo,[
-         stockobjects.captions[sc_delete_row]+sepchar+
+         stockobjects.captions[sc_delete_rowhk]+sepchar+
        '('+encodeshortcutname(sysshortcuts[sho_rowdelete])+')'],
                   [],[state1],[{$ifdef FPC}@{$endif}dodeleterows],not bo1);
    bo1:= true;

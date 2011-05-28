@@ -29,10 +29,10 @@ uses
 type
 
  dbnavigbuttonty = (dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
-           dbnb_delete,dbnb_edit,
+           dbnb_delete,dbnb_copyrecord,dbnb_edit,
            dbnb_post,dbnb_cancel,dbnb_refresh,
            dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,
-           dbnb_autoedit,dbnb_copyrecord,dbnb_dialog);
+           dbnb_autoedit,dbnb_dialog);
  dbnavigbuttonsty = set of dbnavigbuttonty;
  
 const
@@ -41,13 +41,14 @@ const
            dbnb_delete,dbnb_edit,dbnb_post,dbnb_cancel,dbnb_refresh];
  filterdbnavigbuttons = [dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_find];
  defaultdbnavigatorheight = 24;
- defaultdbnavigatorwidth = (ord(dbnb_refresh)+1)*defaultdbnavigatorheight;
+ defaultdbnavigatorwidth = (ord(dbnb_refresh))*defaultdbnavigatorheight;
 
  defaultindicatorcoloptions = [fco_mousefocus];
  
 type
 
- dbnavigatoroptionty = (dno_confirmdelete,dno_append,dno_shortcuthint,
+ dbnavigatoroptionty = (dno_confirmdelete,dno_confirmcopy,
+                        dno_append,dno_shortcuthint,
                         dno_norefreshrecno,
                         dno_dialogifinactive,dno_nodialogifempty,
                         dno_nodialogifnoeditmode,dno_nodialogifreadonly,
@@ -70,7 +71,7 @@ type
 
 const
  defaulteditwidgetdatalinkoptions = [oed_syncedittonavigator];
- defaultdbnavigatoroptions = [dno_confirmdelete,dno_append];
+ defaultdbnavigatoroptions = [dno_confirmdelete,dno_confirmcopy,dno_append];
  designdbnavigbuttons = [dbnb_first,dbnb_prior,dbnb_next,dbnb_last];
  editnavigbuttons = [dbnb_insert,dbnb_delete,dbnb_edit];
 
@@ -2369,7 +2370,14 @@ end;
 function confirmdeleterecord: boolean;
 begin
  with stockobjects do begin
-  result:= askok(captions[sc_Delete_record],captions[sc_confirmation])
+  result:= askok(captions[sc_Delete_record_question],captions[sc_confirmation])
+ end;
+end;
+
+function confirmcopyrecord: boolean;
+begin
+ with stockobjects do begin
+  result:= askok(captions[sc_Copy_record_question],captions[sc_confirmation])
  end;
 end;
 
@@ -2539,7 +2547,8 @@ begin
      end;
     end;
     dbnb_copyrecord: begin
-     if dscontroller <> nil then begin
+     if (dscontroller <> nil) and
+      not (dno_confirmcopy in options1) or confirmcopyrecord then begin
       dscontroller.copyrecord(dno_append in options1);
      end;
     end;
@@ -2567,7 +2576,35 @@ begin
 end;
 
 { tdbnavigator }
+const
+ dbnavigimages: array[dbnavigbuttonty] of stockglyphty =
+  //dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
+  (stg_dbfirst,stg_dbprior,stg_dbnext,stg_dblast,stg_dbinsert,
+  
+// dbnb_delete,dbnb_copyrecord,dbnb_edit,
+   stg_dbdelete,stg_doublesquare,stg_dbedit,
+// dbnb_post,dbnb_cancel,dbnb_refresh,
+   stg_dbpost,stg_dbcancel,stg_dbrefresh,
+// dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,
+   stg_dbfilter,stg_dbfiltermin,stg_dbfiltermax,stg_dbfilteron,stg_dbfind,
+// dbnb_autoedit,dbnb_dialog
+   stg_triabig,stg_ellipsesmall
+);
 
+ dbnavighints: array[dbnavigbuttonty] of stockcaptionty =
+  //dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
+  (sc_first,sc_prior,sc_next,sc_last,sc_append,
+  
+// dbnb_delete,dbnb_copyrecord,dbnb_edit,
+   sc_delete,sc_copyxx,sc_edit,
+// dbnb_post,dbnb_cancel,dbnb_refresh,
+   sc_post,sc_cancel,sc_refresh,
+// dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,
+   sc_edit_filter,sc_edit_filter_min,sc_edit_filter_max,sc_filter_on,sc_search,
+// dbnb_autoedit,dbnb_dialog
+   sc_auto_edit,sc_dialog
+);
+  
 constructor tdbnavigator.create(aowner: tcomponent);
 var
  int1: integer;
@@ -2591,17 +2628,17 @@ begin
  for int1:= 0 to ord(high(dbnavigbuttonty)) do begin
   with buttons[int1] do begin
    imagelist:= stockobjects.glyphs;
-   imagenr:= int1 + ord(stg_dbfirst);
+   imagenr:= ord(dbnavigimages[dbnavigbuttonty(int1)]);
    tag:= int1;
    onexecute:= {$ifdef FPC}@{$endif}doexecute;
   end;
  end;
  with buttons[ord(dbnb_autoedit)] do begin
-  imagenr:= ord(stg_triabig);
+ // imagenr:= ord(stg_triabig);
   options:= options + [mao_checkbox];
  end;
- buttons[ord(dbnb_dialog)].imagenr:= ord(stg_ellipsesmall);
- buttons[ord(dbnb_copyrecord)].imagenr:= ord(stg_doublesquare);
+// buttons[ord(dbnb_dialog)].imagenr:= ord(stg_ellipsesmall);
+// buttons[ord(dbnb_copyrecord)].imagenr:= ord(stg_doublesquare);
   
  fdatalink:= tnavigdatalink.Create(idbnaviglink(self));
  visiblebuttons:= defaultvisibledbnavigbuttons;
@@ -2618,9 +2655,10 @@ procedure tdbnavigator.inithints;
 var
  int1: integer;
 begin
- for int1:= 0 to ord(dbnb_copyrecord) do begin
+ for int1:= 0 to ord(high(dbnavigbuttonty)) do begin
   with buttons[int1] do begin
-   hint:= stockobjects.captions[stockcaptionty(int1+ord(sc_first))];
+//   hint:= stockobjects.captions[stockcaptionty(int1+ord(sc_first))];
+   hint:= stockobjects.captions[dbnavighints[dbnavigbuttonty(int1)]];
    if (dno_shortcuthint in foptions) and 
              (fshortcuts[dbnavigbuttonty(int1)] <> 0) then begin
     hint:= hint + ' (' + 

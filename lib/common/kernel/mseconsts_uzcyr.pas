@@ -71,17 +71,17 @@ const
   #1053#1086#1090#1118#1171#1088#1080' '#1076#1080#1072#1087#1072#1079#1086#1085 , 
                              //sc_Range_error => Nesootvetstvie diapazonu
 
-  #1054#1083#1076#1080#1085#1075#1080 ,           //sc_Undo     => Vernut`
-  '&Redo',                                        //sc_Redo   //            //
-  #1050#1118#1095#1080#1088#1080#1096 ,           //sc_Copy   // hotkeys=> Skopirovat`
-  #1054#1083#1080#1073' '#1090#1072#1096#1083#1072#1096 ,      //sc_Cut      => Vyrezat`
-  #1025#1079#1080#1073' '#1179#1118#1081#1080#1096 ,           //sc_Paste    => Vstavit`
-  '&Insert Row',        //sc_insert_row ///          //
-  '&Append Row',        //sc_append_row  // hotkeys  //
-  '&Delete Row',        //sc_delete_row ///         ///
+  #1054#1083#1076#1080#1085#1075#1080 ,           //sc_Undohk     => Vernut`
+  '&Redo',                                        //sc_Redohk   //            //
+  #1050#1118#1095#1080#1088#1080#1096 ,           //sc_Copyhk   // hotkeys=> Skopirovat`
+  #1054#1083#1080#1073' '#1090#1072#1096#1083#1072#1096 ,      //sc_Cuthk      => Vyrezat`
+  #1025#1079#1080#1073' '#1179#1118#1081#1080#1096 ,           //sc_Pastehk    => Vstavit`
+  '&Insert Row',        //sc_insert_rowhk ///          //
+  '&Append Row',        //sc_append_rowhk  // hotkeys  //
+  '&Delete Row',        //sc_delete_rowhk ///         ///
 
-  #1050#1072#1090#1072#1083#1086#1075 ,        //sc_Dir      => Katalog
-  '&Home',              //sc_home               //
+  #1050#1072#1090#1072#1083#1086#1075 ,        //sc_Dirhk      => Katalog
+  '&Home',              //sc_homehk               //
   #1058#1077#1087#1087#1072#1075#1072 ,                  //sc_Up       => Vverh
   #1071#1085#1075#1080' '#1082#1072#1090'.' , //sc_New_dir  => Nov. kat-g
   #1053#1086#1084#1080 ,   ///sc_Name    => Nazvanie
@@ -89,7 +89,7 @@ const
   #1060#1080#1083#1100#1090#1088 ,             //sc_Filter   => Fil`tr
   #1057#1072#1082#1083#1072#1096 , //sc_save     =>  Sohranit`
   #1054#1095#1080#1096 ,            //sc_open     =>  Otkryt`
-  'Name',                //sc_name1
+  'Name',                //sc_name
   'Create new directory',//sc_create_new_directory
   'File',               //sc_file
   'exists, do you want to overwrite?', //sc_exists_overwrite
@@ -108,7 +108,8 @@ const
   'TARGA-'#1088#1072#1089#1084#1080 ,        //sc_TARGA_image
   #1041#1072#1088#1095#1072 ,                //sc_All
   #1058#1072#1089#1076#1080#1179#1083#1072#1096 ,       //sc_Confirmation
-  #1025#1079#1091#1074#1085#1080' '#1118#1095#1080#1088#1080#1096,     //sc_Delete_record
+  #1025#1079#1091#1074#1085#1080' '#1118#1095#1080#1088#1080#1096,     //sc_Delete_record_question
+  'Copy record?',       //sc_Copy_record_question
   'Close page',          //sc_close_page
   'First',              //sc_first
   'Prior',              //sc_prior
@@ -129,6 +130,7 @@ const
   'Copy record',        //sc_copy_record
   'Dialog',             //sc_dialog
   'Insert',             //sc_insert
+  'Copy',               //sc_copy
   'Filter off',         //sc_filter_off
   'Portrait',           //sc_portrait print orientation
   'Landscape',          //sc_landscape print orientation

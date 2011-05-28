@@ -63,25 +63,25 @@ const
   'Max',                     //sc_Max
   'Bereichs Fehler',         //sc_Range_error  
 
-  '&R'#252'ckg'#228'ngig',   //sc_Undo  ///              ///
-  '&Redo',                   //sc_Redo   //               //
-  '&Kopieren',               //sc_Copy   // hotkeys       //
-  '&Ausschneiden',           //sc_Cut    //               //
-  '&Einf'#252'gen',          //sc_Paste ///               // hotkeys
-  'Zeile e&inf'#252'gen',    //sc_insert_row ///          //
-  'Zeile a&nf'#252'gen',     //sc_append_row  // hotkeys  //
-  'Zeile &l'#246'schen',     //sc_delete_row ///         ///
+  '&R'#252'ckg'#228'ngig',   //sc_Undohk  ///              ///
+  '&Redo',                   //sc_Redohk   //               //
+  '&Kopieren',               //sc_Copyhk   // hotkeys       //
+  '&Ausschneiden',           //sc_Cuthk    //               //
+  '&Einf'#252'gen',          //sc_Pastehk ///               // hotkeys
+  'Zeile e&inf'#252'gen',    //sc_insert_rowhk ///          //
+  'Zeile a&nf'#252'gen',     //sc_append_rowhk  // hotkeys  //
+  'Zeile &l'#246'schen',     //sc_delete_rowhk ///         ///
 
-  '&Dir',                 //sc_Dir               /// 
-  '&Home',                //sc_home               //
-  '&Auf',                 //sc_Up                 //
-  'Dir &neu',             //sc_New_dir            // hotkeys
-  'N&ame',                //sc_Name               //
-  '&Verst.Dat.anzeigen',  //sc_Show_hidden_files  //
-  '&Filter',              //sc_Filter            ///   
+  '&Dir',                 //sc_Dirhk               /// 
+  '&Home',                //sc_homehk               //
+  '&Auf',                 //sc_Uphk                 //
+  'Dir &neu',             //sc_New_dirhk            // hotkeys
+  'N&ame',                //sc_Namehk               //
+  '&Verst.Dat.anzeigen',  //sc_Show_hidden_fileshk  //
+  '&Filter',              //sc_Filterhk            ///   
   'Speichern',            //sc_save 
   #214'ffnen',            //sc_open
-  'Name',                 //sc_name1
+  'Name',                 //sc_name
   'Verzeichnis erstellen',//sc_create_new_directory
   'Datei',                                     //sc_file
   'existiert, wollen Sie '#252'berschreiben?', //sc_exists_overwrite
@@ -100,7 +100,8 @@ const
   'TARGA Bild',           //sc_TARGA_image
   'Alle',                 //sc_All
   'Best'#228'tigung',     //sc_Confirmation
-  'Datensatz l'#246'schen?', //sc_Delete_record
+  'Datensatz l'#246'schen?', //sc_Delete_record_question
+  'Datensatz kopieren?',     //sc_Copy_record_question
   'Seite schliessen',        //sc_close_page
   'Erster',                  //sc_first
   'Vorheriger',              //sc_prior
@@ -120,7 +121,8 @@ const
   'Automatisch bearbeiten',   //sc_auto_edit
   'Datensatz kopieren',       //sc_copy_record
   'Dialog',                   //sc_dialog
-  'Einfügen',                 //sc_insert
+  'Einf'#252'gen',            //sc_insert
+  'Kopieren',                 //sc_copy
   'Filter aus',               //sc_filter_off
   'Hochformat',               //sc_portrait print orientation
   'Querformat',               //sc_landscape print orientation

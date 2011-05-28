@@ -63,24 +63,24 @@ const
   'Min',                   //sc_Min
   'Max',                   //sc_Max
   'Range salah',           //sc_Range_error  
-  '&Batal',                //sc_Undo  ///
-  '&Redo',                 //sc_Redo   //               //
-  '&Salin',                //sc_Copy   // hotkeys
-  'Po&tong',               //sc_Cut    //
-  '&Tempel',               //sc_Paste ///
-  '&Sisipkan Baris',       //sc_insert_row
-  '&Tambah Baris',         //sc_append_row
-  '&Hapus Baris',          //sc_delete_row
-  '&Direktori',            //sc_Dir               /// 
-  '&Home',                 //sc_home               //
-  '&Naik',                 //sc_Up                 //
-  'Dir &Baru',             //sc_New_dir            // hotkeys
-  '&Nama File',            //sc_Name               //
-  '&File tersembunyi',     //sc_Show_hidden_files  //
-  '&Filter',               //sc_Filter            /// 
+  '&Batal',                //sc_Undohk  ///
+  '&Redo',                 //sc_Redohk   //               //
+  '&Salin',                //sc_Copyhk   // hotkeys
+  'Po&tong',               //sc_Cuthk    //
+  '&Tempel',               //sc_Pastehk ///
+  '&Sisipkan Baris',       //sc_insert_rowhk
+  '&Tambah Baris',         //sc_append_rowhk
+  '&Hapus Baris',          //sc_delete_rowhk
+  '&Direktori',            //sc_Dirhk               /// 
+  '&Home',                 //sc_homehk               //
+  '&Naik',                 //sc_Uphk                 //
+  'Dir &Baru',             //sc_New_dirhk            // hotkeys
+  '&Nama File',            //sc_Namehk               //
+  '&File tersembunyi',     //sc_Show_hidden_fileshk  //
+  '&Filter',               //sc_Filterhk            /// 
   'Simpan',                //sc_save 
   'Buka',                  //sc_open
-  'Nama',                  //sc_name1
+  'Nama',                  //sc_name
   'Buat Direktori Baru',   //sc_create_new_directory
   'File',                  //sc_file
   'sudah ada, akan ditimpa?', //sc_exists_overwrite
@@ -99,7 +99,8 @@ const
   'TARGA Image',          //sc_TARGA_image
   'Semua',                //sc_All
   'Konfirmasi',           //sc_Confirmation
-  'Hapus Rekaman?',       //sc_Delete_record
+  'Hapus Rekaman?',       //sc_Delete_record_question
+  'Copy record?',         //sc_Copy_record_question
   'Tutup',                //sc_close_page
   'Awal',                 //sc_first
   'Sebelum',              //sc_prior
@@ -120,6 +121,7 @@ const
   'Copy record',          //sc_copy_record
   'Dialog',               //sc_dialog
   'Sisipkan',             //sc_insert
+  'Copy',                 //sc_copy
   'Filter mati',          //sc_filter_off
   'Berdiri',              //sc_portrait print orientation
   'Rebah',                //sc_landscape print orientation

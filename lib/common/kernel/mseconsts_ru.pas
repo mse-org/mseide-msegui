@@ -78,31 +78,31 @@ const
                                                   //Nesootvetstvie diapazonu
 
                                        // hotkeys///
-  #1042#1077#1088#1085#1091#1090#1100 ,           //sc_Undo     => Vernut`
-  '&Redo',                             //sc_Redo  //               //
+  #1042#1077#1088#1085#1091#1090#1100 ,           //sc_Undohk     => Vernut`
+  '&Redo',                             //sc_Redohk  //               //
   #1057#1082#1086#1087#1080#1088#1086#1074#1072#1090#1100 , 
-                                                  //sc_Copy    => Skopirovat`
-  #1042#1099#1088#1077#1079#1072#1090#1100 ,      //sc_Cut      => Vyrezat`
-  #1042#1089#1090#1072#1074#1080#1090#1100 ,     ///sc_Paste    => Vstavit`
-  '&Insert Row',        //sc_insert_row ///          //
-  '&Append Row',        //sc_append_row  // hotkeys  //
-  '&Delete Row',        //sc_delete_row ///         ///
+                                                  //sc_Copyhk    => Skopirovat`
+  #1042#1099#1088#1077#1079#1072#1090#1100 ,      //sc_Cuthk      => Vyrezat`
+  #1042#1089#1090#1072#1074#1080#1090#1100 ,     ///sc_Pastehk    => Vstavit`
+  '&Insert Row',        //sc_insert_rowhk ///          //
+  '&Append Row',        //sc_append_rowhk  // hotkeys  //
+  '&Delete Row',        //sc_delete_rowhk ///         ///
   
                                        // hotkeys///
-  '&'#1050#1072#1090#1072#1083#1086#1075 ,        //sc_Dir      => Katalog
-  '&Home',                //sc_home               //
-  '&'#1042#1074#1077#1088#1093 ,                  //sc_Up       => Vverh
-  '&'#1053#1086#1074'. '#1082#1072#1090'-'#1075 , //sc_New_dir  => Nov. kat-g
-  #1053#1072'&'#1079#1074#1072#1085#1080#1077 ,   //sc_Name     => Nazvanie
+  '&'#1050#1072#1090#1072#1083#1086#1075 ,        //sc_Dirhk      => Katalog
+  '&Home',                //sc_homehk               //
+  '&'#1042#1074#1077#1088#1093 ,                  //sc_Uphk       => Vverh
+  '&'#1053#1086#1074'. '#1082#1072#1090'-'#1075 , //sc_New_dirhk  => Nov. kat-g
+  #1053#1072'&'#1079#1074#1072#1085#1080#1077 ,   //sc_Namehk     => Nazvanie
   
   #1055#1086#1082#1072#1079'. &'#1089#1082#1088#1099#1090'. '+
-           #1092#1072#1081#1083#1099 ,            //sc_Show_hidden_files =>
+           #1092#1072#1081#1083#1099 ,            //sc_Show_hidden_fileshk =>
                                                   //Pokaz. skryt. faily
-  '&'#1060#1080#1083#1100#1090#1088 ,            ///sc_Filter   => Fil`tr
+  '&'#1060#1080#1083#1100#1090#1088 ,            ///sc_Filterhk   => Fil`tr
   
   #1057#1086#1093#1088#1072#1085#1080#1090#1100 , //sc_save     =>  Sohranit`
   #1054#1090#1082#1088#1099#1090#1100 ,           //sc_open     =>  Otkryt`
-  #1048#1084#1103,                                //sc_name1
+  #1048#1084#1103,                                //sc_name
   #1057#1086#1079#1076#1072#1090#1100' '#1085#1086#1074#1099#1081' '+
       #1082#1072#1090#1072#1083#1086#1075 ,       //sc_create_new_directory
   #1060#1072#1081#1083 ,                          //sc_file
@@ -144,7 +144,7 @@ const
   #1055#1086#1076#1090#1074#1077#1088#1078#1076#1077#1085#1080#1077 ,
                                                 //sc_Confirmation
   #1059#1076#1072#1083#1080#1090#1100' '#1079#1072#1087#1080#1089#1100'?',
-                                                //sc_Delete_record
+                                                //sc_Delete_record_question
   'Close page',         //sc_close_page
   'First',              //sc_first
   'Prior',              //sc_prior
@@ -163,8 +163,10 @@ const
   'Search',             //sc_search
   'Auto edit',          //sc_autoedit
   'Copy record',        //sc_copy_record
+  'Copy record?',       //sc_Copy_record_question
   'Dialog',             //sc_dialog
   'Insert',             //sc_insert
+  'Copy',               //sc_copy
   'Filter off',         //sc_filter_off
   'Portrait',           //sc_portrait print orientation
   'Landscape',          //sc_landscape print orientation
