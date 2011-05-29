@@ -2339,6 +2339,12 @@ type
  tcustomstringgrid1 = class(tcustomstringgrid);
  treader1 = class(treader);
 
+ hasactiveeditinfoty = record
+  field: tfield;
+  hasedit: boolean;
+ end;
+ phasactiveeditinfoty = ^hasactiveeditinfoty;
+ 
 function encoderowstate(const color: integer = -1; const font: integer = -1;
                             const readonly: boolean = false): integer;
 begin
@@ -3068,12 +3074,20 @@ var
  bo2: boolean;
 begin
  bo1:= fds_filterediting in fstate;
- if event = deupdatestate then begin
-  if (dataset <> nil) and (dataset.state = dsfilter) then begin
-   include(fstate,fds_filterediting);
-  end
-  else begin
-   exclude(fstate,fds_filterediting);
+ case ord(event) of
+  ord(deupdatestate): begin
+   if (dataset <> nil) and (dataset.state = dsfilter) then begin
+    include(fstate,fds_filterediting);
+   end
+   else begin
+    exclude(fstate,fds_filterediting);
+   end;
+  end;
+  de_hasactiveedit: begin
+   with phasactiveeditinfoty(info)^ do begin
+    hasedit:= hasedit or (field = self.field) and
+                  fintf.getwidget.window.active;
+   end;
   end;
  end;
  inherited;
@@ -3326,6 +3340,18 @@ begin
 end;
 
 procedure tcustomeditwidgetdatalink.nullcheckneeded(var avalue: boolean);
+ function findactivedatalink: boolean;
+ var
+  info1: hasactiveeditinfoty;
+ begin
+  with info1 do begin
+   hasedit:= false;
+   field:= self.field;
+   tdataset1(dataset).dataevent(tdataevent(de_hasactiveedit),ptruint(@info1));
+   result:= hasedit;
+  end;
+ end; //findactivedatalink
+ 
 begin
  avalue:= (avalue or fintf.edited and (oed_autopost in foptions) or
               (fcanclosing > 0)) and 
@@ -3335,6 +3361,7 @@ begin
                        (fdscontroller <> nil) and fdscontroller.posting
                       )
               );
+ avalue:= avalue and (fintf.getwidget.window.active or not findactivedatalink);
 end;
 
 function tcustomeditwidgetdatalink.cuttext(const atext: msestring;

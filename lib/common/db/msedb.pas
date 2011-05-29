@@ -72,9 +72,6 @@ type
 
  filtereditkindty = (fek_filter,fek_filtermin,fek_filtermax,fek_find);
  locateresultty = (loc_timeout,loc_notfound,loc_ok); 
-// locateoptionty = (loo_caseinsensitive,loo_partialkey,loo_posinsensitive,
-//                        loo_noforeward,loo_nobackward);
-// locateoptionsty = set of locateoptionty;
  recnosearchoptionty = (rso_backward);
  recnosearchoptionsty = set of recnosearchoptionty;
 
@@ -100,12 +97,6 @@ type
                    const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
-{
-   function locate(const key: integer; const field: tfield;
-                     const options: locateoptionsty = []): locateresultty;
-   function locate(const key: msestring; const field: tfield;
-                 const options: locateoptionsty = []): locateresultty;
-}
  end;
 
  tmsestringfield = class;
@@ -130,7 +121,6 @@ type
  end;
    
  idbeditinfo = interface(inullinterface)['{E63A9950-BFAE-DA11-83DF-00C0CA1308FF}']
-//  function getdatasource(const aindex: integer): tdatasource;
   function getdataset(const aindex: integer): tdataset;
   procedure getfieldtypes(out apropertynames: stringarty;
                           out afieldtypes: fieldtypesarty);
@@ -1298,6 +1288,7 @@ const
  de_modified = ord(high(tdataevent))+1;
  de_afterdelete = ord(high(tdataevent))+2;
  de_afterpost = ord(high(tdataevent))+3;
+ de_hasactiveedit = ord(high(tdataevent))+4;
 
  defaultdscontrolleroptions = [];
  allfieldkinds = [fkData,fkCalculated,fkLookup,fkInternalCalc];

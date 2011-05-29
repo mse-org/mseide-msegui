@@ -7201,9 +7201,18 @@ begin
   else begin
    fparentclientsize:= fwidgetrect.size;
   end;
+  int1:= high(fwidgets);
+  while int1 >= 0 do begin //keep track of deleted widgets
+   if int1 <= high(fwidgets) then begin
+    fwidgets[int1].initparentclientsize;
+   end;
+   dec(int1);
+  end;
+  {
   for int1:= 0 to high(fwidgets) do begin
    fwidgets[int1].initparentclientsize;
   end;
+  }
  end;
 end;
 

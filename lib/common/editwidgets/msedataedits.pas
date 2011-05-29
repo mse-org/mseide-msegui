@@ -1346,7 +1346,8 @@ begin
     foncheckvalue(self,quiet,result);
    end;
    if result then begin
-    if (oe_notnull in optionsedit) and nullcheckneeded(nil) and isempty(text) then begin
+    if (oe_notnull in optionsedit) and isempty(text) and
+                                          nullcheckneeded(nil) then begin
      result:= false;
      notnullerror(quiet);
      if fgridintf = nil then begin
