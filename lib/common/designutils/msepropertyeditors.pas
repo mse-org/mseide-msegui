@@ -1219,8 +1219,8 @@ begin
     end
     else begin
      atypeclasslevel:= 1;
-     if (kind = tkset) and 
-                    (po1^.propertytype <> typeinfo(defaultsetty)) then begin
+     if (kind = tkenumeration) and 
+                    (po1^.propertytype <> typeinfo(defaultenumerationty)) then begin
       atypeclasslevel:= 2;
      end;
     end;
