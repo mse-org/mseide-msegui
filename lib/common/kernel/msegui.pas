@@ -12227,7 +12227,7 @@ begin
   else begin
    if fstate * [tws_posvalid,tws_sizevalid] <>
            [tws_posvalid,tws_sizevalid] then begin
-    if visible and not windowevent and not (tws_needsdefaultpos in fstate) and
+    if {visible and} not windowevent and not (tws_needsdefaultpos in fstate) and
         (fmoving <= 0) and (windowpos <> wp_maximized) then begin
      fnormalwindowrect:= fowner.fwidgetrect;
      guierror(gui_reposwindow(fwindow.id,fnormalwindowrect),self);
