@@ -26,7 +26,7 @@ interface
 
 uses
  db,classes,variants,msetypes,msearrayprops,mseclasses,mselist,msestrings,
- msedb,msedatabase,mseglob,msedatalist;
+ msedb,msedatabase,mseglob,msedatalist,msevariants;
   
 const
  defaultpacketrecords = -1;
@@ -719,6 +719,9 @@ type
                           const abasetype: tfieldtype; const df: tfield);
    procedure lookupdschanged(const sender: tmsebufdataset);
    procedure notifylookupclients;
+   function getcurrentasvariant(const afield: tfield; aindex: integer): variant;
+   procedure setcurrentasvariant(const afield: tfield; aindex: integer;
+                   const avalue: variant);
   protected
    fcontroller: tdscontroller;
    fbrecordcount: integer;
@@ -1067,6 +1070,8 @@ type
                               aindex: integer);
    property currentisnull[const afield: tfield; aindex: integer]: boolean read
                  getcurrentisnull;
+   property currentasvariant[const afield: tfield; aindex: integer]: variant
+                  read getcurrentasvariant write setcurrentasvariant;
    property currentasboolean[const afield: tfield; aindex: integer]: boolean
                   read getcurrentasboolean write setcurrentasboolean;
    property currentasinteger[const afield: tfield; aindex: integer]: integer
@@ -1116,6 +1121,8 @@ type
 
 
    procedure getcoldata(const afield: tfield; const adatalist: tdatalist);
+   function getdata(const afields: array of tfield): variantararty;
+                             //[] -> all
    
   published
    property logfilename: filenamety read flogfilename write flogfilename;
@@ -1151,7 +1158,7 @@ procedure alignfieldpos(var avalue: integer);
 implementation
 uses
  rtlconsts,dbconst,sysutils,mseformatstr,msereal,msestream,msesys,
- msefileutils,mseapplication,msevariants;
+ msefileutils,mseapplication;
  
 {$ifdef mse_FPC_2_2}
 const
@@ -6395,6 +6402,80 @@ begin
  end;
 end;
 
+function tmsebufdataset.getcurrentasvariant(const afield: tfield;
+               aindex: integer): variant;
+begin
+ if currentisnull[afield,aindex] then begin
+  result:= null;
+ end
+ else begin
+  case afield.datatype of
+   ftboolean: begin
+    result:= getcurrentasboolean(afield,aindex);
+   end;
+   ftfloat: begin
+    result:= getcurrentasfloat(afield,aindex);
+   end;
+   ftdatetime,fttime,ftdate: begin
+    result:= getcurrentasdatetime(afield,aindex);
+   end;
+   ftbcd: begin
+    result:= getcurrentascurrency(afield,aindex);
+   end;
+   ftinteger,ftword,ftsmallint: begin
+    result:= getcurrentasinteger(afield,aindex);
+   end;
+   ftlargeint: begin
+    result:= getcurrentaslargeint(afield,aindex);
+   end;
+   ftstring: begin
+    result:= getcurrentasmsestring(afield,aindex);
+   end;
+   else begin
+    raise ecurrentvalueaccess.create(self,afield,
+                             'Invalid fieldtype field "'+afield.fieldname+'".');  
+   end;
+  end;
+ end; 
+end;
+
+procedure tmsebufdataset.setcurrentasvariant(const afield: tfield;
+               aindex: integer; const avalue: variant);
+begin
+ if varisnull(avalue) then begin
+  currentclear(afield,aindex)
+ end
+ else begin
+  case afield.datatype of
+   ftboolean: begin
+    setcurrentasboolean(afield,aindex,avalue);
+   end;
+   ftfloat: begin
+    setcurrentasfloat(afield,aindex,avalue);
+   end;
+   ftdatetime,fttime,ftdate: begin
+    setcurrentasdatetime(afield,aindex,avalue);
+   end;
+   ftbcd: begin
+    setcurrentascurrency(afield,aindex,avalue);
+   end;
+   ftinteger,ftword,ftsmallint: begin
+    setcurrentasinteger(afield,aindex,avalue);
+   end;
+   ftlargeint: begin
+    setcurrentaslargeint(afield,aindex,avalue);
+   end;
+   ftstring: begin
+    setcurrentasmsestring(afield,aindex,avalue);
+   end;  
+   else begin
+    raise ecurrentvalueaccess.create(self,afield,
+                             'Invalid fieldtype field "'+afield.fieldname+'".');  
+   end;
+  end;
+ end; 
+end;
+
 function tmsebufdataset.getcurrentasfloat(const afield: tfield;
                aindex: integer): double;
 var
@@ -7599,6 +7680,29 @@ end;
 procedure tmsebufdataset.enddisplaydata;
 begin
  exclude(fbstate,bs_displaydata);
+end;
+
+function tmsebufdataset.getdata(const afields: array of tfield): variantararty;
+var
+ ar1: fieldarty;
+ int1,int2: integer;
+ po1: pvariantaty;
+begin
+ checkbrowsemode;
+ ar1:= getdsfields(self,afields);
+ try
+  setlength(result,recordcount);
+  for int1:= 0 to high(result) do begin
+   setlength(result[int1],length(ar1));
+   po1:= pointer(result[int1]);
+   for int2:= 0 to high(ar1) do begin
+    po1^[int2]:= currentasvariant[ar1[int2],int1];
+   end;
+  end;
+ except
+  result:= nil;
+  raise;
+ end;
 end;
 
 { tlocalindexes }

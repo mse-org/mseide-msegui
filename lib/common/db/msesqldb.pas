@@ -919,66 +919,57 @@ var
 begin
  if not (csloading in fowner.componentstate) then begin
   inherited;
-  if frefreshlock = 0 then begin
-   if active and (field <> nil) and
-                 ((afield = nil) or (afield = self.field)) then begin
-    if fchangelock <> 0 then begin
-     databaseerror('Recursive recordchanged.',fowner);
-    end;
-    inc(fchangelock);
-    try
-     with fowner do begin
-      if not (csdesigning in componentstate) then begin
-       fparamset:= true;
-       bo1:= false;
-       if assigned(fonsetparam) then begin
-        fonsetparam(fowner,bo1);
+//  if frefreshlock = 0 then begin
+  if active and (field <> nil) and
+                ((afield = nil) or (afield = self.field)) then begin
+   if fchangelock <> 0 then begin
+    databaseerror('Recursive recordchanged.',fowner);
+   end;
+   inc(fchangelock);
+   try
+    with fowner do begin
+     if not (csdesigning in componentstate) then begin
+      fparamset:= true;
+      bo1:= false;
+      if assigned(fonsetparam) then begin
+       fonsetparam(fowner,bo1);
+      end;
+      if not bo1 and (dataset <> nil) then begin
+       if fparamname <> '' then begin
+        fieldtoparam(self.field,param);
        end;
-       if not bo1 and (dataset <> nil) then begin
-        if fparamname <> '' then begin
-         fieldtoparam(self.field,param);
-        end;
-        with fdestparams do begin
-         for int1:= 0 to high(fitems) do begin
-          with tdestparam(fitems[int1]) do begin
-           if (fdatalink.field <> nil) and (fparamname <> '') then begin
-            fieldtoparam(fdatalink.field,param(fparamname));
-           end;
+       with fdestparams do begin
+        for int1:= 0 to high(fitems) do begin
+         with tdestparam(fitems[int1]) do begin
+          if (fdatalink.field <> nil) and (fparamname <> '') then begin
+           fieldtoparam(fdatalink.field,param(fparamname));
           end;
          end;
         end;
        end;
-       if assigned(fonaftersetparam) then begin
-        fonaftersetparam(fowner);
-       end;
-       if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
-          (destdataset.active or 
-                    not (fplo_refreshifactiveonly in foptions)) and
-          not((destdataset.state = dsinsert) and (dataset.state = dsinsert) and
-                       (fplo_syncmasterinsert in foptions))and
-                   (destdataset.state in [dsbrowse,dsedit,dsinsert]) then begin
-        fdestdataset.cancel;
-        if fdestcontroller <> nil then begin
-         fdestcontroller.refresh(fplo_restorerecno in foptions,truedelayus);
-        end
-        else begin
-         fdestdataset.refresh;
-        end;
-       end;
-       {
-       if ftimer <> nil then begin
-        ftimer.interval:= ftimer.interval;
-        ftimer.enabled:= true;
+      end;
+      if assigned(fonaftersetparam) then begin
+       fonaftersetparam(fowner);
+      end;
+      if (frefreshlock = 0) and (fplo_autorefresh in foptions) and 
+                                              (destdataset <> nil) and 
+         (destdataset.active or 
+                   not (fplo_refreshifactiveonly in foptions)) and
+         not((destdataset.state = dsinsert) and (dataset.state = dsinsert) and
+                      (fplo_syncmasterinsert in foptions))and
+                  (destdataset.state in [dsbrowse,dsedit,dsinsert]) then begin
+       fdestdataset.cancel;
+       if fdestcontroller <> nil then begin
+        fdestcontroller.refresh(fplo_restorerecno in foptions,truedelayus);
        end
        else begin
-        checkrefresh;
+        fdestdataset.refresh;
        end;
-       }
       end;
      end;
-    finally
-     dec(fchangelock);
     end;
+   finally
+    dec(fchangelock);
    end;
   end;
  end;
@@ -1516,7 +1507,6 @@ begin
   with fowner do begin
    inc(fsourcedatalink.frefreshlock);
    try
-//    if foptions * [fplo_syncslaveedit,fplo_syncslaveinsert] <> [] then begin
     canceling:= mseclasses.getcorbainterface(
                             dataset,typeinfo(igetdscontroller),intf) and
                                         intf.getcontroller.canceling;
@@ -1528,19 +1518,20 @@ begin
       exit;
      end
      else begin
-      if (sourceds.state = dsinsert) and 
+      if (sourceds.state = dsinsert) and (dataset.state <> dsbrowse) and 
                            (fplo_syncslavepost in foptions) then begin
        dataset.updaterecord;
        if dataset.modified then begin
         destdataset.post;
+        updatedata;
         goto endlab;
        end;
       end;
      end;
     end;
-    if (fplo_syncslavepost in foptions) then begin
+    if (fplo_syncslavepost in foptions) and (dataset.state <> dsbrowse) then begin
      sourceds.post;
-//     destdataset.checkbrowsemode;
+     updatedata;
     end;
     inherited;
    endlab:

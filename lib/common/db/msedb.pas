@@ -1387,7 +1387,10 @@ type
                    const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
-   procedure appendrecord(const values: array of const);
+   procedure appendrecord(const values: array of const); overload;
+   procedure appendrecord(const values: variantarty); overload;
+   procedure appenddata(const adata: variantararty; const afields: array of tfield);
+                                                     //[] -> all
    procedure getfieldclass(const fieldtype: tfieldtype; out result: tfieldclass);
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
@@ -1743,6 +1746,10 @@ const
     {$endif}
       );
 
+function getdsfields(const adataset: tdataset;
+                  const afields: array of tfield): fieldarty;
+                     //[] -> all
+
 function getmsefieldclass(const afieldtype: tfieldtype): tfieldclass; overload;
 function getmsefieldclass(const afieldtype: fieldclasstypety): tfieldclass; overload;
 function fieldvariants(const afields: array of tfield): variantarty;
@@ -1984,6 +1991,27 @@ begin
  end
  else begin
   result:= value;
+ end;
+end;
+
+function getdsfields(const adataset: tdataset;
+             const afields: array of tfield): fieldarty;
+var
+ int1: integer;
+begin
+ if high(afields) >= 0 then begin
+  setlength(result,length(afields));
+  for int1:= 0 to high(result) do begin
+   result[int1]:= afields[int1];
+  end;
+ end
+ else begin
+  with adataset do begin
+   setlength(result,fields.count);
+   for int1:= 0 to high(result) do begin
+    result[int1]:= fields[int1];
+   end;
+  end;
  end;
 end;
 
@@ -6769,6 +6797,45 @@ begin
     end;
    end;
   end; 
+ end;
+end;
+
+procedure tdscontroller.appendrecord(const values: variantarty);
+var
+ int1: integer;
+begin
+ with tdataset(fowner) do begin
+  append;
+  for int1:= 0 to high(values) do begin
+   fields[int1].value:= values[int1];
+  end;
+ end;
+end;
+
+procedure tdscontroller.appenddata(const adata: variantararty; const afields: array of tfield);
+                                                     //[] -> all
+var
+ int1,int2,int3: integer;
+ ar1: fieldarty;
+begin
+ ar1:= getdsfields(tdataset(fowner),afields);
+ with tdataset(fowner) do begin
+  checkbrowsemode;
+  for int1:= 0 to high(adata) do begin
+   if state = dsinsert then begin
+    post;
+   end;
+   append;
+   for int2:= 0 to high(ar1) do begin
+    if int2 > high(adata[int1]) then begin
+     break;
+    end;
+    ar1[int2].value:= adata[int1][int2];
+   end;
+  end;
+  if state = dsinsert then begin
+   post;
+  end
  end;
 end;
 

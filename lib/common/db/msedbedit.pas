@@ -167,6 +167,8 @@ type
                   write fshortcuts[dbnb_insert] default ord(key_none);
    property shortcut_delete: shortcutty read fshortcuts[dbnb_delete] 
                   write fshortcuts[dbnb_delete] default ord(key_none);
+   property shortcut_copyrecord: shortcutty read fshortcuts[dbnb_copyrecord] 
+                  write fshortcuts[dbnb_copyrecord] default ord(key_none);
    property shortcut_edit: shortcutty read fshortcuts[dbnb_edit]
                   write fshortcuts[dbnb_edit] default ord(key_f2);
    property shortcut_post: shortcutty read fshortcuts[dbnb_post] 

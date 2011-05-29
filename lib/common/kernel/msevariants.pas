@@ -13,6 +13,8 @@ interface
 
 type
  variantarty = array of variant;
+ variantaty = array[0..0] of variant;
+ pvariantaty = ^variantaty;
  variantararty = array of variantarty;
  
 function mseVarTypeIsValidArrayType(const aVarType: TVarType): Boolean;
