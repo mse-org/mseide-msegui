@@ -20,7 +20,7 @@ if svn co https://mseide-msegui.svn.sourceforge.net/svnroot/mseide-msegui/trunk 
 then
 cd $DESTDIR
 if
-ppc386 apps/ide/mseide.pas -Fulib/common/* -B -Fulib/common/kernel/i386-linux -Fi/lib/common/kernel 
+ppc386 -B -Fulib/common/* -Fulib/common/kernel/i386-linux -Filib/common/kernel apps/ide/mseide.pas
 then
 echo Success:
 echo MSEide compiled to ${PWD}/apps/ide/mseide

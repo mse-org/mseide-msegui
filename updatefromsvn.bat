@@ -13,7 +13,7 @@
 svn co https://mseide-msegui.svn.sourceforge.net/svnroot/mseide-msegui/trunk %DESTDIR%
 @if errorlevel 1 goto err
 cd %DESTDIR%
-ppc386.exe apps\ide\mseide.pas -Fulib\common\* -B -Fulib\common\kernel\i386-win32 -Fi\lib\common\kernel
+ppc386.exe -Fulib\common\* -B -Fulib\common\kernel\i386-win32 -Filib\common\kernel apps\ide\mseide.pas
 @if errorlevel 1 goto err1
 @echo Success:
 @echo MSEide compiled to %DESTDIR%\apps\ide\mseide.exe
