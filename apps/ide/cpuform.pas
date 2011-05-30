@@ -185,21 +185,17 @@ end;
 
 procedure tcpufo.doregsetvalue(const sender: TObject; var avalue: Integer;
                     var accept: Boolean);
-//var
-// str1: string;
 begin
  if mainfo.gdb.cancommand then begin
   with tintegeredit(sender) do begin
    if mainfo.gdb.setregistervalue(fregisternames[tag],avalue) <> gdb_ok then begin
-//   if mainfo.gdb.writepascalvariable(
-//        '$'+fregisternames[tag],inttostr(avalue),str1) <> gdb_ok then begin
-    accept:= false;
+//    accept:= false;
    end;
   end;
- end
- else begin
-  accept:= false;
  end;
+// else begin
+//  accept:= false;
+// end;
 end;
 
 procedure tcpufo.doregset64value(const sender: TObject; var avalue: Int64;
