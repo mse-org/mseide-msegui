@@ -3,8 +3,8 @@ MSEide+MSEgui Pascal Cross Platform GUI Development System.
 2011-02-26 Version 2.6
 Copyright (c) 1999-2010 by Martin Schreiber
 
-- Compiles with FPC 2.4.2
-- Tested on i386-linux SuSE 9.0,10.3,11.3, x84_64-linux SuSE 11.1 and
+- Compiles with FPC 2.4.2 or FPC 2.4.4
+- Tested on i386-linux SuSE 9.0,10.3,11.4, x84_64-linux SuSE 11.1 and
   i386-win32 98, 2000, XP and Vista.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
@@ -48,6 +48,12 @@ If you wish to to compile the IDE:
 
 1. In 'Project'-'Open' select 'yourdirectory/msegui/apps/ide/mseide.prj'.
 2. 'Target'-'Continue'.
+
+Compiling MSEide from commandline on Linux:
+ppc386 -Fulib/common/* -Fulib/common/kernel/i386-linux -Filib/common/kernel apps/ide/mseide.pas
+On windows:
+ppc386.exe -Fulib\common\* -Fulib\common\kernel\i386-win32 -Filib\common\kernel apps\ide\mseide.pas
+
 
 Creating a new GUI project
 **************************
