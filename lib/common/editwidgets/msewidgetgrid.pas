@@ -2179,7 +2179,7 @@ begin
   fgrid.factivewidget.activate;
  end
  else begin
-  inherited;
+  result:= inherited focusback(aactivate);
  end;
 end;
 {

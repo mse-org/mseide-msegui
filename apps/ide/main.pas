@@ -289,8 +289,10 @@ implementation
 uses
  mseparser,msesysintf,memoryform,
  regwidgets,regeditwidgets,regkernel,regdialogs,regprinter,
- {$ifndef mse_no_math}{$ifdef FPC}regmath,{$endif}{$endif}
- {$ifdef FPC}regmm,{$endif}
+ {$ifndef mse_no_math}
+  {$ifdef FPC}regmath,{$endif}
+  {$ifdef FPC}regmm,{$endif}
+ {$endif}
  {$ifndef mse_no_db}{$ifdef FPC}regdb,regreport,{$endif}{$endif}
 {$ifdef mse_with_ifi}
  regifi,{$ifdef mse_with_ifirem}regifirem,{$endif}
