@@ -7,6 +7,8 @@ object sourcepage: tsourcepage
   bounds_cx = 311
   bounds_cy = 228
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   container.bounds = (
     0
@@ -57,18 +59,42 @@ object sourcepage: tsourcepage
         dataclass = tgridrichstringdatalist
       end>
     datarowlinewidth = 0
-    datarowheight = 21
+    datarowheight = 18
     onrowsinserted = gridonrowsinserted
     onrowsdeleted = gridonrowsdeleted
     oncellevent = gridoncellevent
-    reffontheight = 14
+    reffontheight = 13
+    object edit: tsyntaxedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 1
+      visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 2000
+      bounds_cy = 18
+      font.name = 'mseide_source'
+      font.xscale = 1
+      font.dummy = 0
+      optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_keyexecute, oe_savestate]
+      optionsedit1 = [oe1_noselectall]
+      tabulators.ppmm = 3
+      tabulators.defaultdist = 0
+      onkeydown = editonkeydown
+      onfontchanged = editonfontchanged
+      onmodifiedchanged = editonmodifiedchanged
+      ontextmouseevent = editontextmouseevent
+      oneditnotifcation = editoneditnotification
+      oncellevent = editoncellevent
+      maxundocount = 10000
+      reffontheight = 18
+    end
     object dataicon: tdataicon
       optionsskin = [osk_framebuttononly]
-      taborder = 3
-      bounds_x = 2
-      bounds_y = 2
+      bounds_x = 0
+      bounds_y = 0
       bounds_cx = 15
-      bounds_cy = 21
+      bounds_cy = 18
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       options = [bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey]
       visible = False
@@ -93,31 +119,6 @@ object sourcepage: tsourcepage
         13
       )
     end
-    object edit: tsyntaxedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight]
-      optionsskin = [osk_framebuttononly]
-      taborder = 1
-      visible = False
-      bounds_x = 0
-      bounds_y = 0
-      bounds_cx = 2000
-      bounds_cy = 21
-      font.name = 'mseide_source'
-      font.xscale =  1.0000000000000000E+0000
-      font.dummy = 0
-      optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_keyexecute, oe_savestate]
-      optionsedit1 = [oe1_noselectall]
-      tabulators.ppmm =  3.0000000000000000E+0000
-      tabulators.defaultdist =  0.0000000000000000E+0000
-      onkeydown = editonkeydown
-      onfontchanged = editonfontchanged
-      onmodifiedchanged = editonmodifiedchanged
-      ontextmouseevent = editontextmouseevent
-      oneditnotifcation = editoneditnotification
-      oncellevent = editoncellevent
-      maxundocount = 10000
-      reffontheight = 19
-    end
   end
   object linedisp: tstringdisp
     optionsskin = [osk_framebuttononly]
@@ -125,12 +126,12 @@ object sourcepage: tsourcepage
     frame.dummy = 0
     taborder = 2
     bounds_x = 0
-    bounds_y = 209
+    bounds_y = 210
     bounds_cx = 68
-    bounds_cy = 18
+    bounds_cy = 17
     anchors = [an_left, an_bottom]
     textflags = [tf_xcentered, tf_ycentered]
-    reffontheight = 14
+    reffontheight = 13
   end
   object pathdisp: tstringdisp
     optionsskin = [osk_framebuttononly]
@@ -138,12 +139,12 @@ object sourcepage: tsourcepage
     frame.dummy = 0
     taborder = 1
     bounds_x = 68
-    bounds_y = 209
+    bounds_y = 210
     bounds_cx = 243
-    bounds_cy = 18
+    bounds_cy = 17
     anchors = [an_left, an_right, an_bottom]
     textflags = [tf_ycentered, tf_ellipseleft]
     options = [dwo_hintclippedtext]
-    reffontheight = 14
+    reffontheight = 13
   end
 end
