@@ -408,10 +408,10 @@ begin
    with ar1[int1] do begin
     if valuetype = vawstring then begin
      if fpcformat then begin
-      int2:= msestrings.strscan(name,'.');
+      int2:= msestrings.findchar(name,'.');
      end
      else begin
-      int2:= msestrings.strscan(name,'_');
+      int2:= msestrings.findchar(name,'_');
      end;
      if int2 > 0 then begin
       str1:= copy(name,1,int2-1);
