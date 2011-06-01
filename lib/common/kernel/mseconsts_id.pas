@@ -100,7 +100,7 @@ const
   'Semua',                //sc_All
   'Konfirmasi',           //sc_Confirmation
   'Hapus Rekaman?',       //sc_Delete_record_question
-  'Copy record?',         //sc_Copy_record_question
+  'Salin record?',         //sc_Copy_record_question
   'Tutup',                //sc_close_page
   'Awal',                 //sc_first
   'Sebelum',              //sc_prior
@@ -117,11 +117,11 @@ const
   'Rubah filter maximum', //sc_filter_edit_max
   'Filter hidup',         //sc_filter_on
   'Cari',                 //sc_search
-  'Auto edit',            //sc_autoedit
-  'Copy record',          //sc_copy_record
-  'Dialog',               //sc_dialog
+  'Rubah Otomatis',          //sc_autoedit
+  'Salin record',          //sc_copy_record
+  'Dialog',             //sc_dialog
   'Sisipkan',             //sc_insert
-  'Copy',                 //sc_copy
+  'Salin',                 //sc_copy
   'Filter mati',          //sc_filter_off
   'Berdiri',              //sc_portrait print orientation
   'Rebah',                //sc_landscape print orientation
