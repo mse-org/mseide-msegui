@@ -104,7 +104,7 @@ const
   'Todo',                              //sc_All
   'Confirme',                          //sc_Confirmation
   #191'Borrar el registro?',           //sc_Delete_record_question
-  'Copy record?',                      //sc_Copy_record_question
+  #191'Copiar el registro?',           //sc_Copy_record_question
   'Cerrar p'#225'gina',                //sc_close_page
   'Primero',                           //sc_first
   'Anterior',                          //sc_prior
@@ -122,10 +122,10 @@ const
   'Filtro activo',                     //sc_filter_on
   'Buscar',                            //sc_search
   'Edici'#243'n autom'#225'tica',      //sc_autoedit
-  'Copy record',                       //sc_copy_record
+  'Copiar registro',                   //sc_copy_record
   'Di'#225'logo',                      //sc_dialog
   'Insertar',                          //sc_insert
-  'Copy',                              //sc_copy
+  'Copiar',                            //sc_copy
   'Filtro apagado',                    //sc_filter_off
   'Vertical',                          //sc_portrait print orientation
   'Apaisado',                          //sc_landscape print orientation
