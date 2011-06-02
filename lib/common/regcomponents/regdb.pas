@@ -333,6 +333,12 @@ begin
       tdbdatetimeedit,
       tdbcalendardatetimeedit,tdbfilenameedit,tdbcoloredit,
       tdbbooleanedit,tdbbooleaneditradio,
+      tdbstringlookupdb,tdbintegerlookupdb,tdbreallookupdb,
+                                                    tdbdatetimelookupdb,
+      tdbstringlookup64db,tdbintegerlookup64db,tdbreallookup64db,
+                                                    tdbdatetimelookup64db,
+      tdbstringlookupstrdb,tdbintegerlookupstrdb,tdbreallookupstrdb,
+                                                    tdbdatetimelookupstrdb,
       tdbstringlookuplb,tdbintegerlookuplb,tdbreallookuplb,tdbdatetimelookuplb,
       tdbstringlookup64lb,tdbintegerlookup64lb,tdbreallookup64lb,
       tdbdatetimelookup64lb,
@@ -374,6 +380,10 @@ begin
         tdbfieldnamenocalcpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldfieldlink,'fieldname',
         tdbfieldnamenocalcpropertyeditor);
+ registerpropertyeditor(typeinfo(string),tlookupdbdispfielddatalink,
+        'lookupkeyfield',tdbfieldnamenocalcpropertyeditor);
+ registerpropertyeditor(typeinfo(string),tlookupdbdispfielddatalink,
+        'lookupvaluefield',tdbfieldnamenocalcpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldlink,'destdatafield',
         tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),tdestfield,'destfieldname',

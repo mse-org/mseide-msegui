@@ -43,14 +43,18 @@ type
  fieldtypesarty = array of fieldtypesty;
  datasetarty = array of tdataset;
 const
+ int32fields = [ftsmallint,ftinteger,ftword];
+ int64fields = [ftlargeint];
+ doublefields = [ftfloat,ftcurrency];
+ datetimefields = [ftdate,fttime,ftdatetime];
  charfields = [ftstring,ftfixedchar];
+
  widecharfields = [ftwidestring,ftfixedwidechar,ftwidememo];
  textfields = [ftstring,ftfixedchar,ftwidestring,ftfixedwidechar,ftmemo];
  memofields = textfields+[ftmemo];
  integerfields = [ftsmallint,ftinteger,ftword,ftlargeint,ftbcd];
  booleanfields = [ftboolean,ftstring,ftfixedchar]+integerfields-[ftbcd];
  realfields = [ftfloat,ftcurrency,ftbcd];
- datetimefields = [ftdate,fttime,ftdatetime];
  stringfields = textfields + integerfields + booleanfields +
                 realfields + datetimefields;
  widestringfields = [ftwidestring,ftfixedwidechar,ftwidememo];
@@ -1129,9 +1133,6 @@ type
   private
    ffield: tfield;
    ffieldname: string;
-//   fismsestring: boolean;
-//   fislargeint: boolean;
-//   fisstringfield: boolean;
    fnullsymbol: msestring;
    procedure setfieldname(const Value: string);
    function getasmsestring: msestring;

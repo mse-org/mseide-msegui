@@ -21,9 +21,9 @@ type
   protected
    fintf: idbdispfieldlink;
    procedure activechanged; override;
-   function getdataset(const aindex: integer): tdataset;
+   function getdataset(const aindex: integer): tdataset; virtual;
    procedure getfieldtypes(out apropertynames: stringarty; 
-                                     out afieldtypes: fieldtypesarty);
+                                     out afieldtypes: fieldtypesarty); virtual;
   public
    constructor create(const intf: idbdispfieldlink);
    procedure fixupproperties(filer: tfiler); //read moved properties

@@ -1228,6 +1228,30 @@ type
     FDisableControlsState : TDatasetState;
   end;  
  }  
+const
+ fielddatacompatibility: array[tfieldtype] of fieldtypesty = (
+    //ftUnknown, ftString,    ftSmallint,    ftInteger,     ftWord,
+      [ftunknown],stringfcomp,longintfcomp,longintfcomp,longintfcomp,
+    //ftBoolean,   ftFloat,                ftCurrency,              ftBCD,
+      booleanfcomp,realfcomp+datetimefcomp,realfcomp+datetimefcomp,[ftbcd],
+    //ftDate,                      ftTime,                 tDateTime,
+      realfcomp+datetimefcomp,realfcomp+datetimefcomp,realfcomp+datetimefcomp,
+    //ftBytes,  ftVarBytes,  ftAutoInc,
+      [ftbytes],[ftvarbytes],[ftautoinc],
+    // ftBlob, ftMemo, ftGraphic, ftFmtMemo,
+      blobfcomp,memofcomp,blobfcomp,memofcomp,
+    //ftParadoxOle, ftDBaseOle, ftTypedBinary,     ftCursor, tFixedChar,
+      [ftParadoxOle],[ftDBaseOle],[ftTypedBinary],[ftCursor],stringfcomp,
+    //ftWideString, ftLargeint, ftADT, ftArray, ftReference,
+      stringfcomp,[ftLargeint],[ftADT],[ftArray],[ftReference],
+    //ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
+      [ftDataSet],[ftOraBlob],[ftOraClob],[ftVariant],[ftInterface],
+    //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
+      [ftIDispatch],[ftGuid],[ftTimeStamp],[ftFMTBcd],
+    //ftFixedWideChar,ftWideMemo
+      stringfcomp,   stringfcomp   
+      );
+
 function compblobcache(const a,b): integer;
 var
  lint1: int64;
@@ -6134,7 +6158,7 @@ begin
  else begin
   with ffieldinfos[int1] do begin
    if (afieldtype <> ftunknown) and 
-        not (ext.basetype in fieldcompatibility[afieldtype]) then begin
+        not (ext.basetype in fielddatacompatibility[afieldtype]) then begin
     raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
    end;   
    result:= pointer(arecord) + base.offset;
@@ -6154,7 +6178,7 @@ begin
    raise ecurrentvalueaccess.create(self,afield,'No lookup index.');  
   end;
   if (afieldtype <> ftunknown) and 
-       not (basedatatype in fieldcompatibility[afieldtype]) then begin
+       not (basedatatype in fielddatacompatibility[afieldtype]) then begin
    raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
   end;   
   po1:= flookuppo;
@@ -6240,7 +6264,7 @@ begin
  int1:= afield.fieldno-1;
  with ffieldinfos[int1] do begin
   if (afieldtype <> ftunknown) and 
-           not (ext.basetype in fieldcompatibility[afieldtype]) then begin
+           not (ext.basetype in fielddatacompatibility[afieldtype]) then begin
    raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
   end;   
   changed:= not getfieldflag(po1,int1) xor isnull;
@@ -6278,28 +6302,6 @@ begin
  flastcurrentindex:= aindex;
  result:= setcurrentpo(afield,afieldtype,factindexpo^.ind[aindex],
                                                       isnull,changed);
- {
- flastcurrentrec:= factindexpo^.ind[aindex]; //precheaderty
- flastcurrentindex:= aindex;
- po1:= @flastcurrentrec^.header.fielddata.nullmask;
- int1:= afield.fieldno-1;
- with ffieldinfos[int1] do begin
-  if (afieldtype <> ftunknown) and 
-           not (ext.basetype in fieldcompatibility[afieldtype]) then begin
-   raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
-  end;   
-  changed:= not getfieldflag(po1,int1) xor isnull;
-  if changed then begin
-   if isnull then begin
-    clearfieldflag(po1,int1);
-   end
-   else begin
-    setfieldflag(po1,int1);
-   end;
-  end;
-  result:= pointer(@flastcurrentrec^.header) + base.offset;
- end;
- }
 end;
 
 function tmsebufdataset.beforecurrentbmset(const afield: tfield;
@@ -7028,7 +7030,7 @@ var
   checkindex(false);
   int1:= afield.fieldno-1;
   with ffieldinfos[int1] do begin
-   if not (ext.basetype in fieldcompatibility[afieldtype]) then begin
+   if not (ext.basetype in fielddatacompatibility[afieldtype]) then begin
     raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
    end;   
    offs:= base.offset;
@@ -7095,22 +7097,7 @@ begin
   adatalist.endupdate;
  end;
 end;
-{
- po1:= factindexpo^.ind[aindex]; //precheaderty
- int1:= afield.fieldno-1;
- if not getfieldflag(@precheaderty(po1)^.fielddata.nullmask,int1) then begin 
-  result:= nil;
- end
- else begin
-  with ffieldinfos[int1] do begin
-   if (afieldtype <> ftunknown) and 
-        not (ext.basetype in fieldcompatibility[afieldtype]) then begin
-    raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
-   end;   
-   result:= po1 + base.offset;
-  end;
- end;
-}
+
 function tmsebufdataset.currentrecordhigh: integer;
 begin
  currentcheckbrowsemode;
