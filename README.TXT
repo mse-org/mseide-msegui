@@ -117,6 +117,15 @@ If the popup widgets are showed behind the forms, try to start the
 MSEgui program with the option '--TOPLEVELRAISE'. Do *not* use this option
 if is not necessary (KDE, Gnome... work well without).
 
+Display problems with Linux radeon driver
+*****************************************
+If the display is distorted or slow add 
+Option "EXAPixmaps" "off"
+to 
+Section "Device"
+of xorg.conf, see
+https://bugzilla.novell.com/show_bug.cgi?id=690766
+
 Flashing taskbar widgets in IceWM
 *********************************
 Newer revisions of IceWM let the taskbar icons of MSEgui applications flash.
