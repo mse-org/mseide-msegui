@@ -2802,7 +2802,7 @@ end;
 
 function getrootpath(id: winidty; out rootpath: longwordarty): boolean;
 var
- root,parent: {$ifdef FPC}dword{$else}xlib.twindow{$endif};
+ root,parent: winidty;//{$ifdef FPC}dword{$else}xlib.twindow{$endif};
  children: pwindow;
  count: integer;
  ca1: longword;
@@ -2835,7 +2835,7 @@ end;
 
 function gui_getchildren(const id: winidty; out children: winidarty): guierrorty;
 var
- root,parent: {$ifdef FPC}dword{$else}xlib.twindow{$endif};
+ root,parent: winidty;//{$ifdef FPC}dword{$else}xlib.twindow{$endif};
  chi: pwindow;
  count: integer;
  ca1: longword;
@@ -3290,7 +3290,7 @@ end;
 
 function gui_getparentwindow(const awindow: winidty): winidty;
 var
- root,parent: {$ifdef FPC}dword{$else}xlib.twindow{$endif};
+ root,parent: winidty;//{$ifdef FPC}dword{$else}xlib.twindow{$endif};
  children: pwindow;
  count: integer;
  ca1: longword;
@@ -4166,18 +4166,16 @@ eventrestart:
   configurenotify: begin
    with xev.xconfigure do begin
     w:= xwindow;
-    if longint(xchecktypedwindowevent(appdisp,w,destroynotify,@xev2)) <> 0 then begin
+    if xchecktypedwindowevent(appdisp,w,destroynotify,@xev2) then begin
      result:= twindowevent.create(ek_destroy,xwindow);
     end
     else begin
-      
-     while longint(xchecktypedwindowevent(appdisp,w,configurenotify,@xev))
-                   <> 0 do begin end;
+     while xchecktypedwindowevent(appdisp,w,configurenotify,@xev) do begin end;
       //gnome returns a different pos on window resizing than on window moving!
      if not application.deinitializing then begin //there can be an Xerror?
       getwindowrect(w,rect1,pt1);
      end;
-     result:= twindowrectevent.create(ek_configure,xwindow,rect1,pt1);
+     result:= twindowrectevent.create(ek_configure,w,rect1,pt1);
     end;
    end;
   end;
