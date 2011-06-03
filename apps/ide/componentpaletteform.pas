@@ -88,6 +88,7 @@ var
 begin
  resetselected;
  if init then begin
+  registeredcomponents.defaultorder:= true;
   with componentpages do begin
    beginupdate;
    try

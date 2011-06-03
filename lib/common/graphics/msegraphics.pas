@@ -1149,9 +1149,9 @@ end;
 
 procedure drawdottedlinesegments(const acanvas: tcanvas; const lines: segmentarty;
                      const colorline: colorty);
+ {$ifdef mswindows}
 var
  int1: integer;
- {$ifdef windows}
  int2: integer;
  {$endif}
 begin                         
@@ -1333,7 +1333,7 @@ end;
 
 function blendcolor(const weight: real; const a,b: colorty): colorty;
 var
- by1: byte;
+// by1: byte;
  ca,cb: rgbtriplety;
 begin
  ca:= colortorgb(a);
@@ -3112,7 +3112,7 @@ var
 // endcx,endcy: integer;
  stepx,stepy: integer;
  sourcex,sourcey: integer;
- int1,int2: integer;
+ int1{,int2}: integer;
 // bo1,bo2: boolean;
 
 begin
@@ -3754,7 +3754,7 @@ var
  afontnum: integer;
  po1: pfontinfoty;
  font1: tfont;
- int1: integer;
+// int1: integer;
 begin
  if cs_inactive in fstate then exit;
  with fdrawinfo do begin

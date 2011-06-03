@@ -1112,7 +1112,7 @@ procedure tpopupmenuwidget.mouseevent(var info: mouseeventinfoty);
 var
  bo1: boolean;
  itembefore: integer;
- int1: integer;
+// int1: integer;
  pt1,pt2: pointty;
 
  procedure resetmouseflag;
@@ -1631,7 +1631,7 @@ end;
 function tpopupmenuwidget.trycancelmodal(const newactive: twindow): boolean;
 var
  widget2: tpopupmenuwidget;
- window1: twindow;
+// window1: twindow;
  int1: integer;
 begin
  result:= false;

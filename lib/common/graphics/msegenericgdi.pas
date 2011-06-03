@@ -286,11 +286,11 @@ procedure insertemptystripe(var reg: regioninfoty;
                const stripe: pstripety; const astart,aheight: rectextentty; 
                                         out start: pstripety);
 var
- po1: pointer;
+// po1: pointer;
  ext1: rectextentty;
 begin
  with reg do begin
-  po1:= datapo;
+//  po1:= datapo;
   start:= stripe;
   insertmem(reg,sizeof(regionemptystripety),start);
   start^.header.height:= aheight;
@@ -312,12 +312,12 @@ end;
 procedure copystripe(var reg: regioninfoty;
                            const stripe: pstripety; out start,stop: pstripety);
 var
- po1: pointer;
+// po1: pointer;
  pui1: ptruint;
  int1: integer;
 begin
  with reg do begin
-  po1:= datapo;
+//  po1:= datapo;
   start:= stripe;
   int1:= stripe^.header.rectcount;
   pui1:= sizeof(stripeheaderty) + sizeof(rectdataty)*int1;  
@@ -535,12 +535,12 @@ var
  lastdeststripe: pstripety;
  psbbelowref: ptrint;
  po2,po3: prectextentaty;
- po4: pointer;
- po5: ppointer;
+// po4: pointer;
+// po5: ppointer;
  stripeco,rectco: integer;
  posa,posb,startb,startd,endb: rectextentty;
  ext1,ext2,ext3: rectextentty;
- int1,int2,int3: integer;
+ int1,{int2,}int3: integer;
  bo1: boolean;
  pui1,pui2: ptruint;
  opproc: regopprocty;
@@ -995,8 +995,8 @@ begin
 end;
 
 procedure gdi_createrectregion(var drawinfo: drawinfoty); //gdifunc
-var
- int1: ptruint;
+//var
+// int1: ptruint;
 begin
  with drawinfo.regionoperation do begin
   if (rect.cx = 0) or (rect.cy = 0) then begin
@@ -1039,8 +1039,8 @@ begin
 end;
 
 procedure gdi_copyregion(var drawinfo: drawinfoty); //gdifunc
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  with drawinfo.regionoperation do begin
   getmem(pointer(dest),sizeof(regioninfoty));
@@ -1171,6 +1171,7 @@ var
  do1: double;
  int1: integer;
 begin
+ po1:= nil; //compilerwarning
  with drawinfo,drawinfo.rect.rect^ do begin
   count:= 2;
   if cx = 0 then begin

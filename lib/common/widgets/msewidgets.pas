@@ -72,14 +72,14 @@ type
    procedure dopaintfocusrect(const canvas: tcanvas; const rect: rectty); override;
    function checkshortcut(var info: keyeventinfoty): boolean; override;
    function needsfocuspaint: boolean; override;
+   procedure updatemousestate(const sender: twidget;
+                               const info: mouseeventinfoty); override;
   public
    constructor create(const intf: icaptionframe);
    destructor destroy; override;
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure scale(const ascale: real); override;
    procedure createfont;
-   procedure updatemousestate(const sender: twidget;
-                               const info: mouseeventinfoty); override;
    function pointincaption(const point: pointty): boolean; override;
                 //origin = widgetrect
    procedure checkwidgetsize(var asize: sizety); override;
@@ -230,13 +230,13 @@ type
    procedure getpaintframe(var frame: framety); override;
    function getscrollbarclass(vert: boolean): framescrollbarclassty; virtual;
    procedure activechanged; override;
+   procedure updatemousestate(const sender: twidget; 
+                              const info: mouseeventinfoty); override;
  public
    constructor create(const intf: iscrollframe; const scrollintf: iscrollbar);
    destructor destroy; override;
    procedure checktemplate(const sender: tobject); override;
                  //true if match
-   procedure updatemousestate(const sender: twidget; 
-                              const info: mouseeventinfoty); override;
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty;
@@ -365,11 +365,11 @@ type
    procedure updatevisiblescrollbars; override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); virtual;
    procedure dokeydown(var info: keyeventinfoty); override;
-   procedure updatemousestate(const sender: twidget;
-                               const info: mouseeventinfoty); override;
    function getclientpos: pointty;
    procedure setclientpos(apos: pointty);
    procedure setscrollpos(apos: pointty);
+   procedure updatemousestate(const sender: twidget;
+                               const info: mouseeventinfoty); override;
   //iscrollbar
    function translatecolor(const acolor: colorty): colorty;
    procedure invalidaterect(const rect: rectty; const org: originty;
@@ -723,7 +723,6 @@ type
    procedure doloaded; override;
    procedure doenter; override;
    procedure doexit; override;
-   function canclose(const newfocus: twidget): boolean; override;
    procedure dofocus; override;
    procedure dodefocus; override;
    procedure dofocuschanged(const oldwidget: twidget; 
@@ -785,6 +784,8 @@ type
 
    property onevent: eventeventty read fonevent write fonevent;
    property onasyncevent: asynceventeventty read fonasyncevent write fonasyncevent;
+  public
+   function canclose(const newfocus: twidget = nil): boolean; override;
  end;
 
  tactionpublishedwidgetnwr = class(tactionwidget)
@@ -1043,7 +1044,6 @@ type
    procedure childmouseevent(const sender: twidget;
                               var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
-   procedure writestate(writer: twriter); override;
    procedure internalcreateface; override;
    function calcminscrollsize: sizety; override;
    procedure setclientsize(const asize: sizety); override;
@@ -1054,6 +1054,7 @@ type
  public
    constructor create(aowner: tcomponent); override;
    function maxclientsize: sizety; override;
+   procedure writestate(writer: twriter); override;
    procedure dolayout(const sender: twidget); override;
    property onscroll: pointeventty read fonscroll write fonscroll;
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
@@ -3083,7 +3084,8 @@ end;
 procedure tcustomstepframe.dorepeat(const sender: tobject);
 begin
  with tsimpletimer(sender) do begin
-  if interval < 0 then begin
+//  if interval < 0 then begin
+  if singleshot then begin
    interval:= repeatrepeattime;
    enabled:= true;
   end;
@@ -5114,8 +5116,8 @@ end;
 
 procedure tscrollingwidgetnwr.childmouseevent(const sender: twidget;
                               var info: mouseeventinfoty);
-var
- po1: pointty; 
+//var
+// po1: pointty; 
 begin
  frame.childmouseevent(sender,info);
  if not (es_processed in info.eventstate) then begin

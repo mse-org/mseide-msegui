@@ -25,6 +25,7 @@ type
   classtyp: tcomponentclass;
   icon: integer;
   page: integer;
+  defaultindex: integer;
  end;
  pcomponentclassinfoty = ^componentclassinfoty;
 
@@ -40,10 +41,13 @@ type
    fimagelist: timagelist;
    fpagenames: comppagearty;
    fpagecomporders: integerararty;
+   fdefaultindex: integer;
+   fdefaultorder: boolean;
    function getpagecomporders(const index: integer): integerarty;
    procedure setpagecomporders(const index: integer;
       const Value: integerarty);
    procedure checkpageindex(const index: integer);
+   procedure setdefaultorder(const avalue: boolean);
   protected
    function findpage(const pagename: msestring): integer;
    function addpage(const pagename: msestring): integer;
@@ -54,7 +58,7 @@ type
    constructor create;
    destructor destroy; override;
    function indexof(const value: tcomponentclass): integer;  //-1 if not found
-   function add(const value: componentclassinfoty): integer;
+   function add(var value: componentclassinfoty): integer;
            //-1 if allready registred
    function itempo(const index: integer): pcomponentclassinfoty;
    procedure registercomponents(const page: msestring;
@@ -71,6 +75,7 @@ type
    procedure updatestat(const filer: tstatfiler);
    property selectedclass: tcomponentclass read fselectedclass write fselectedclass;
    property imagelist: timagelist read fimagelist;
+   property defaultorder: boolean read fdefaultorder write setdefaultorder;
  //nil for unselect
  end;
 
@@ -468,9 +473,11 @@ begin
  inherited;
 end;
 
-function tcomponentclasslist.add(const value: componentclassinfoty): integer;
+function tcomponentclasslist.add(var value: componentclassinfoty): integer;
 begin
  if indexof(value.classtyp) < 0 then begin
+  value.defaultindex:= fdefaultindex;
+  inc(fdefaultindex);
   result:= inherited add(value);
  end
  else begin
@@ -655,9 +662,15 @@ begin
 end;
 
 procedure tcomponentclasslist.compare(const l, r; var result: integer);
-begin
- result:= integer(componentclassinfoty(l).classtyp) -
-              integer(componentclassinfoty(r).classtyp);
+begin 
+ if fdefaultorder then begin
+  result:= componentclassinfoty(l).defaultindex -
+              componentclassinfoty(r).defaultindex;
+ end
+ else begin
+  result:= ptruint(componentclassinfoty(l).classtyp) -
+              ptruint(componentclassinfoty(r).classtyp);
+ end;
 end;
 
 function tcomponentclasslist.getcompareproc: compareprocty;
@@ -684,6 +697,17 @@ procedure tcomponentclasslist.setpagecomporders(const index: integer;
 begin
  checkpageindex(index);
  fpagecomporders[index]:= value;
+end;
+
+procedure tcomponentclasslist.setdefaultorder(const avalue: boolean);
+begin
+ if fdefaultorder <> avalue then begin
+  fdefaultorder:= avalue;
+  if sorted then begin
+   sorted:= false;
+   sorted:= true;
+  end;
+ end;
 end;
 
 { tdesignerselections }

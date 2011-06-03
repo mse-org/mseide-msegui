@@ -332,20 +332,25 @@ begin
       tdbprogressbar,tdbslider,
       tdbdatetimeedit,
       tdbcalendardatetimeedit,tdbfilenameedit,tdbcoloredit,
-      tdbbooleanedit,tdbbooleaneditradio,
-      tdbstringlookupdb,tdbintegerlookupdb,tdbreallookupdb,
-                                                    tdbdatetimelookupdb,
-      tdbstringlookup64db,tdbintegerlookup64db,tdbreallookup64db,
-                                                    tdbdatetimelookup64db,
-      tdbstringlookupstrdb,tdbintegerlookupstrdb,tdbreallookupstrdb,
-                                                    tdbdatetimelookupstrdb,
-      tdbstringlookuplb,tdbintegerlookuplb,tdbreallookuplb,tdbdatetimelookuplb,
-      tdbstringlookup64lb,tdbintegerlookup64lb,tdbreallookup64lb,
-      tdbdatetimelookup64lb,
-      tdbstringlookupstrlb,tdbintegerlookupstrlb,tdbreallookupstrlb,
-      tdbdatetimelookupstrlb
+      tdbbooleanedit,tdbbooleaneditradio
       ]);
- registercomponenttabhints(['DBe'],['Data edit Components']);
+ registercomponenttabhints(['DBe'],['Data edit Widgets, can be placed in tdbwidgetgrid']);
+
+ registercomponents('DBl',[
+      tdbstringlookupdb,tdbintegerlookupdb,tdbreallookupdb,
+                                                tdbdatetimelookupdb,
+      tdbstringlookup64db,tdbintegerlookup64db,tdbreallookup64db,
+                                                tdbdatetimelookup64db,
+      tdbstringlookupstrdb,tdbintegerlookupstrdb,tdbreallookupstrdb,
+                                                tdbdatetimelookupstrdb,
+      tdbstringlookuplb,tdbintegerlookuplb,tdbreallookuplb,
+                                                tdbdatetimelookuplb,
+      tdbstringlookup64lb,tdbintegerlookup64lb,tdbreallookup64lb,
+                                                tdbdatetimelookup64lb,
+      tdbstringlookupstrlb,tdbintegerlookupstrlb,tdbreallookupstrlb,
+                                                tdbdatetimelookupstrlb]);
+ registercomponenttabhints(['DBl'],['Data lookup Widgets, can be placed in tdbwidgetgrid']);
+
  registercomponents('DBf',[
       tfieldparamlink,tfieldlink,ttimestampfieldlink,tfieldfieldlink,
       tsequencelink,tdbevent,tparamconnector,tsqlresultconnector,
