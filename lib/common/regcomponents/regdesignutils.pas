@@ -27,7 +27,7 @@ uses
 procedure Register;
 begin
  registercomponents('Design',[tgdbmi,tsyntaxedit,tsyntaxpainter]);
- registercomponenttabhints(['Design'],['Design Utils']);
+ registercomponenttabhints(['Design'],['Design utils']);
 end;
 
 initialization

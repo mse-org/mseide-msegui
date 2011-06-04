@@ -167,7 +167,7 @@ begin
    {$endif}
   ,ttraywidget,tdockpanelformcontroller]);
  registercomponenttabhints(['Widget'],
-         ['Display Widgets, Edit Widgets which can''t be placed into twidgetgrid']);
+         ['Display widgets, edit widgets which can''t be placed into twidgetgrid']);
  registerpropertyeditor(typeinfo(tcellframe),nil,'',
                             toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(tdatacols),nil,'',tdatacolseditor);

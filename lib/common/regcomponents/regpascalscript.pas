@@ -62,7 +62,7 @@ begin
                             tpascformeditor);
  registerdesignmoduleclass(tpascform,@pascformintf);
  registercomponenttabhints(['PaSc'],
-         ['Experimental Pascal Script Components']);
+         ['Experimental PascalScript Components']);
 end;
 
 procedure doupdateline(aline: pchar; const moduleprefix: ansistring);

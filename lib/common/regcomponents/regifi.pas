@@ -74,7 +74,7 @@ begin
        tconnectedifidatasource{,tifisqldatasource,}
        {$ifndef mse_no_db}{$ifdef FPC},tifisqlresult{$endif}{$endif}]);
  registercomponenttabhints(['Ifi'],
-   ['MSEifi Components (experimental).'+lineend+
+   ['MSEifi components (experimental).'+lineend+
    'Compile MSEide with -dmse_with_ifirem '+
    'in order to install MSEifi remote components,'+lineend+
    'compile with -dmse_with_pascalscript for PascalScript components.']);

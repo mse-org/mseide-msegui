@@ -112,7 +112,7 @@ begin
    trecordfieldedit,
    ttextedit,tundotextedit,tterminal]);
  registercomponenttabhints(['Edit'],
- ['Edit Widgets, twidgetgrid and Widgets'+c_linefeed+
+ ['Edit widgets, twidgetgrid and widgets'+c_linefeed+
   'which can be placed into twidgetgrid']);
  registerpropertyeditor(tdropdowncols.classinfo,nil,'',tdropdowncolpropertyeditor);
  registerpropertyeditor(ttabulators.classinfo,tcustomtextedit,'tabulators',

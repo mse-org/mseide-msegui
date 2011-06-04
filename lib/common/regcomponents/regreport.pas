@@ -48,7 +48,7 @@ begin
                     {trepstringdisplb,trepintegerdisplb,treprealdisplb,
                     trepdatetimedisplb,}
                     trepspacer]); 
- registercomponenttabhints(['Rep'],['Report Components']);
+ registercomponenttabhints(['Rep'],['Report components']);
 
  registerdesignmoduleclass(treport,@reportintf,treportdesignerfo);
  registerpropertyeditor(typeinfo(treptabulators),nil,'',treptabulatorseditor);

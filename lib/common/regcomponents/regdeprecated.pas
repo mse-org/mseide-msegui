@@ -31,7 +31,7 @@ begin
  registercomponents('Depr',[{$ifdef hasdb}
     tmsemysql40connection,tmsemysql41connection,tmsemysql50connection
                             {$endif}]);
- registercomponenttabhints(['Depr'],['Deprecated Components']);
+ registercomponenttabhints(['Depr'],['Deprecated components']);
 end;
 
 initialization

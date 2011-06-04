@@ -106,8 +106,6 @@ begin
                      tsocketstdio,tsocketclient,
                      tsocketserver,tsocketserverstdio,
                      tssl]); 
-// registercomponenttabhints(['Ifi'],
-//   ['Remote Internet Form Interpreter and PascalScript Components']);
  registerpropertyeditor(typeinfo(tmodulelinkarrayprop),nil,'',tmodulelinkeditor);
  registerpropertyeditor(typeinfo(tlinkactions),nil,'',tmodulelinkactionseditor);
  registerpropertyeditor(typeinfo(tvaluewidgetlinks),nil,'',tvaluewidgetlinkseditor);

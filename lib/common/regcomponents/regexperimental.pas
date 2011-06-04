@@ -24,7 +24,7 @@ uses
 procedure Register;
 begin
 // registercomponents('Exp',[]);
- registercomponenttabhints(['Exp'],['Experimental Components']);
+ registercomponenttabhints(['Exp'],['Experimental components']);
 end;
 initialization
  register;

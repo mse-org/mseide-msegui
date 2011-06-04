@@ -29,7 +29,7 @@ begin
  registercomponents('Comm',[tcommport,tasciicommport,tasciiprotport,
                             tsercommcomp,
                             tcommselector]);
- registercomponenttabhints(['Comm'],['Components for serial Port (RS232)']);
+ registercomponenttabhints(['Comm'],['Components for serial port (RS232)']);
 end;
 
 initialization

@@ -34,7 +34,7 @@ begin
                      tdialogrealedit,tdialogdatetimeedit,
                      tmemodialogedit,
                      tmemodialoghistoryedit]);
- registercomponenttabhints(['Dialog'],['User Dialogs']);
+ registercomponenttabhints(['Dialog'],['User dialogs']);
 end;
 
 initialization

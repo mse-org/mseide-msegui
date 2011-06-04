@@ -314,7 +314,7 @@ begin
        ,tmsesqlite3dataset 
       {$endif}
       ]);
- registercomponenttabhints(['DB'],['Database Components']);
+ registercomponenttabhints(['DB'],['Database components']);
  registercomponents('DBe',[tdbwidgetgrid,
       tenumeditdb,tenum64editdb,tkeystringeditdb,tenumeditlb,tenum64editlb,
       tkeystringeditlb,
@@ -334,7 +334,8 @@ begin
       tdbcalendardatetimeedit,tdbfilenameedit,tdbcoloredit,
       tdbbooleanedit,tdbbooleaneditradio
       ]);
- registercomponenttabhints(['DBe'],['Data edit Widgets, can be placed in tdbwidgetgrid']);
+ registercomponenttabhints(['DBe'],
+               ['Data edit widgets, can be placed in tdbwidgetgrid']);
 
  registercomponents('DBl',[
       tdbstringlookupdb,tdbintegerlookupdb,tdbreallookupdb,
@@ -349,7 +350,8 @@ begin
                                                 tdbdatetimelookup64lb,
       tdbstringlookupstrlb,tdbintegerlookupstrlb,tdbreallookupstrlb,
                                                 tdbdatetimelookupstrlb]);
- registercomponenttabhints(['DBl'],['Data lookup Widgets, can be placed in tdbwidgetgrid']);
+ registercomponenttabhints(['DBl'],
+                  ['Data lookup widgets, can be placed in tdbwidgetgrid']);
 
  registercomponents('DBf',[
       tfieldparamlink,tfieldlink,ttimestampfieldlink,tfieldfieldlink,
@@ -364,7 +366,7 @@ begin
       tdbrealdisp,tdbdatetimedisp,
       tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb
       ]);
- registercomponenttabhints(['DBf'],['Datafield and Data display Components']);
+ registercomponenttabhints(['DBf'],['Datafield and data display Components']);
  registerpropertyeditor(typeinfo(variant),tmseparam,'value',
                                                  tparamvaluepropertyeditor);
  registerpropertyeditor(typeinfo(tnolistdropdowncol),nil,'',

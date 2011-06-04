@@ -60,7 +60,7 @@ begin
                             ]);
  registercomponenttabhints(['Math'],
  ['Experimental mathematical and signal processing components.'+lineend+
-  'Needs writer.inc from "patch_fpc_2_4_2".']);
+  'Needs FPC 2.4.4 or writer.inc from "patch_fpc_2_4_2".']);
  registerpropertyeditor(typeinfo(tdoubleconn),tdoublezcomp,'',
                                                    tsubcomponentpropertyeditor);
 // registerpropertyeditor(typeinfo(tdoubleconn),tdoubleinpconnitem,'',

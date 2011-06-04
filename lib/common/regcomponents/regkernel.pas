@@ -177,13 +177,13 @@ begin
  registerclass(tmsedatamodule);
  registercomponents('NoGui',[tstatfile,trttistat,tnoguiaction,tactivator,
                              ttimer,tthreadcomp,tpipereadercomp,tprocessmonitor]);
- registercomponenttabhints(['NoGui'],['Components without GUI Dependence']);
+ registercomponenttabhints(['NoGui'],['Components without GUI dependence']);
  registercomponents('Gui',[tmainmenu,tpopupmenu,
                     tfacecomp,tfacelist,tframecomp,tskincontroller,
 //                    tskinextender,
                     tbitmapcomp,timagelist,tshortcutcontroller,thelpcontroller,
                     taction,tguithreadcomp]);
- registercomponenttabhints(['Gui'],['Non visual Components with GUI Dependence']);
+ registercomponenttabhints(['Gui'],['Non visual components with GUI dependence']);
  registercomponents('Dialog',[tpagesizeselector,tpageorientationselector]);
 
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
