@@ -652,8 +652,9 @@ const
 var
  procid: integer;
  topipehandles,frompipehandles,errorpipehandles: tpipedescriptors;
+{$ifndef FPC}
  params: array[0..3] of pchar;
-
+{$endif}
  procedure execerr;
  var
   errorbefore: integer;

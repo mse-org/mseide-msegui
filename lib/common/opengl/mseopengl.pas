@@ -32,7 +32,7 @@ type
   public
    constructor create(const user: tobject; const intf: icanvas);
    procedure linktopaintdevice(const aparent: winidty;
-                          const windowrect: rectty; out aid: winidty);
+             const windowrect: rectty; out aid: winidty); reintroduce;
    procedure init(const acolor: colorty = cl_none); //cl_none -> colorbackground
    procedure swapbuffers;
    property viewport: rectty read fviewport write setviewport;

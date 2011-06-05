@@ -119,7 +119,7 @@ type
    fmodule: tmsecomponent;
    fmoduleintf: pdesignmoduleintfty;
    fmodulesetting: integer;
-   fformsizesetting: integer;
+//   fformsizesetting: integer;
    procedure setmodule(const Value: tmsecomponent);
    function getselections: tformdesignerselections;
   protected
@@ -1216,9 +1216,9 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
   end;
  end;
  
-var
- int1: integer;
- rect1: rectty;
+//var
+// int1: integer;
+// rect1: rectty;
 begin
  if tformdesignerfo(fowner).fmodule <> nil then begin
   canvas.intersectcliprect(tformdesignerfo(fowner).gridrect);
@@ -2998,7 +2998,9 @@ end;
 procedure tformdesignerfo.setcomponentscrollsize(const avalue: sizety);
 begin
  if fform is tcustommseform then begin
+{$warnings off}
   with tscrollingwidget1(tcustommseform(fform).container) do begin
+{$warnings on}
    fminminclientsize:= avalue;
    clientsize:= clientsize;
   end;
@@ -3023,7 +3025,9 @@ end;
 procedure tformdesignerfo.recalcclientsize;
 begin
  if fform = nil then begin
+{$warnings off}
   with twidget1(container) do begin
+{$warnings on}
    exclude(fwidgetstate,ws_minclientsizevalid);
    tframe1(frame).updatestate;
   end;

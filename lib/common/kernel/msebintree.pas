@@ -445,7 +445,7 @@ end;
 
 procedure tavltree.addnode(const anode: tavlnode);
 var
- n1,n2: tavlnode;
+ n1{,n2}: tavlnode;
  
 begin
  inc(fcount);

@@ -76,8 +76,8 @@ begin
 end;
 
 procedure twatchfo.resultcellevent(const sender: TObject; var info: celleventinfoty);
-var
- rect1: rectty;
+//var
+// rect1: rectty;
 begin
 {
  with info,expresult do begin

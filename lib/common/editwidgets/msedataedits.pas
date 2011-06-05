@@ -114,7 +114,6 @@ type
    procedure internalfillcol(const value);
    procedure internalassigncol(const value);
    function getinnerframe: framety; override;
-   function actualcursor(const apos: pointty): cursorshapety; override;
    procedure valuechanged; virtual;
    procedure dotextchange; virtual;
    procedure modified; virtual; //for dbedits
@@ -133,7 +132,6 @@ type
    procedure loaded; override;
    procedure fontchanged; override;
    procedure dofontheightdelta(var delta: integer); override;
-   procedure initnewwidget(const ascale: real); override;
    function geteditfont: tfont; override;
    class function classskininfo: skininfoty; override;
    procedure dopaintbackground(const canvas: tcanvas); override;
@@ -221,9 +219,11 @@ type
   public
    constructor create(aowner: tcomponent); override;
    
+   procedure initnewwidget(const ascale: real); override;
    procedure initgridwidget; virtual;
    procedure synctofontheight; override;
    function actualcolor: colorty; override;
+   function actualcursor(const apos: pointty): cursorshapety; override;
    function widgetcol: twidgetcol;
    function gridrow: integer;
    function griddata: tdatalist;
@@ -327,9 +327,9 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure sortfunc(const l,r; var result: integer); override;
    function getdefaultvalue: pointer; override;
-   function checkvalue(const quiet: boolean = false): boolean; override;
 
   public
+   function checkvalue(const quiet: boolean = false): boolean; override;
    procedure dragevent(var info: draginfoty); override;
    procedure fillcol(const value: msestring);
    procedure assigncol(const value: tmsestringdatalist);
@@ -1396,20 +1396,28 @@ begin
     try
      if fgridintf <> nil then begin
       with fgridintf.getcol do begin
+  {$warnings off}
        tcustomgrid1(grid).beginnullchecking;
+  {$warnings on}
        try
         grid.col:= index;
         grid.show;
         if not focused then begin
+  {$warnings off}
          tcustomgrid1(grid).beginnonullcheck;
+  {$warnings on}
          try
           grid.setfocus;
          finally
+  {$warnings off}
           tcustomgrid1(grid).endnonullcheck;
+  {$warnings on}
          end;
         end;
        finally
+  {$warnings off}
         tcustomgrid1(grid).endnullchecking;
+  {$warnings on}
        end;        
       end;
      end;
@@ -2179,9 +2187,13 @@ begin
          (info.eventkind = cek_firstmousepark) and application.active and 
          textclipped(info.cell.row) and 
          ((info.grid.row <> info.cell.row) or (info.grid.col <> info.cell.col)) and
+  {$warnings off}
          twidget1(info.grid).getshowhint then begin
+  {$warnings on}
    application.inithintinfo(hintinfo,info.grid);
+  {$warnings off}
    hintinfo.caption:= datatotext(tdatacol1(fgridintf.getcol).getdatapo(info.cell.row)^);
+  {$warnings on}
    application.showhint(info.grid,hintinfo);
   end; 
  end;
@@ -4478,7 +4490,9 @@ begin
   inherited internalsort(acol,list);
   if enums <> nil then begin
    setlength(enum1,list.count);
+  {$warnings off}
    po1:= pinteger(tdatalist1(list).fdatapo);
+  {$warnings on}
    for int1:= 0 to high(enum1) do begin
     if po1^ > high(enums) then begin
      enum1[int1]:= -1;
@@ -4857,8 +4871,8 @@ begin
 end;
 
 procedure tcustomrealedit.defineproperties(filer: tfiler);
-var
- bo1,bo2,bo3,bo4: boolean;
+//var
+// bo1,bo2{,bo3,bo4}: boolean;
 begin
  inherited;
  
@@ -5275,7 +5289,7 @@ procedure tcustomdatetimeedit.texttovalue(var accept: boolean;
                                                  const quiet: boolean);
 var
  dat1: tdatetime;
- mstr1: msestring;
+// mstr1: msestring;
 begin
  dat1:= gettextvalue(accept,quiet);
  if accept then begin

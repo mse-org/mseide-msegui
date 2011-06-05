@@ -52,7 +52,9 @@ var
 begin
  edfo:= tmseificlienteditorfo.create(nil);
  try
+{$warnings off}
   ar1:= tmsecomponent1(acomponent).getobjectlinker.linkedobjects(acomponent.controller);
+{$warnings on}
   edfo.po.gridvalues:= pointerarty(ar1);
   edfo.fcomp:= acomponent;
   for int1:= 0 to high(ar1) do begin

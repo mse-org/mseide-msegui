@@ -18,7 +18,9 @@ type
  keyty = (
         key_none =               $0000,
         key_Space =              $0020,               // 7 bit printable ASCII
+{$notes off}
         key_Any = Key_Space,
+{$notes on}
         key_Exclam =             $0021,
         key_QuoteDbl =           $0022,
         key_NumberSign =         $0023,

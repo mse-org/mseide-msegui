@@ -1162,7 +1162,7 @@ var
  rect1: rectty;
  co1: colorty;
  bmp1,bmp2: tmaskedbitmap;
- margin: integer;
+// margin: integer;
  imli1: timagelist;
 begin
  if not visible then begin

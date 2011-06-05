@@ -447,8 +447,8 @@ end;
 
 procedure linktoaction(const sender: iactionlink; const aaction: tcustomaction;
                               var info: actioninfoty);
-var
- sepchar: msechar;
+//var
+// sepchar: msechar;
 begin
  with info do begin
   if aaction <> action then begin
@@ -458,7 +458,7 @@ begin
    end
    else begin
     if state * localactionstates <> localactionstates then begin
-     sepchar:= sender.shortcutseparator;
+ //    sepchar:= sender.shortcutseparator;
      if not (as_localcaption in state) then begin
       captiontext:= '';
       sender.calccaptiontext(info);
@@ -1002,12 +1002,12 @@ var
  bo1: boolean;
  mask: actionstatesty;
  po1: pactioninfoty;
- sepchar: msechar;
+// sepchar: msechar;
 begin
  bo1:= false;
  po1:= sender.getactioninfopo;
  with po1^ do begin
-  sepchar:= sender.shortcutseparator;
+//  sepchar:= sender.shortcutseparator;
   if not (as_localcaption in state) and
               (captiontext <> finfo.captiontext) then begin
    captiontext:= finfo.captiontext;

@@ -177,16 +177,16 @@ end;
 
 procedure tdisassfo.addpreviouslines(const asetrow: boolean);
 var
- rowcountbefore,rowbefore,activerowbefore,firstvisiblerowbefore: integer;
- int1: integer;
+ rowcountbefore,rowbefore,activerowbefore{,firstvisiblerowbefore}: integer;
+// int1: integer;
 begin
  with grid do begin
   rowcountbefore:= rowcount;
-  firstvisiblerowbefore:= firstvisiblerow;
+//  firstvisiblerowbefore:= firstvisiblerow;
   rowbefore:= row;
   activerowbefore:= factiverow;
   clear;
-  addlines((ffirstaddress and not $7)-$40,rowcountbefore+$48);
+  addlines((ffirstaddress and not qword($7))-$40,rowcountbefore+$48);
   if asetrow then begin
    row:= rowbefore + factiverow - activerowbefore;
   end

@@ -153,9 +153,9 @@ type
    fexecstamp: integer;
    fprojectname: filenamety;
    fcheckmodulelevel: integer;
-   fcheckmodulerecursion: boolean;
-   fuploadprocid: integer;
-   fuploadexitcode: integer;
+//   fcheckmodulerecursion: boolean;
+//   fuploadprocid: integer;
+//   fuploadexitcode: integer;
    fgdbserverprocid: integer;
    fgdbserverexitcode: integer;
    fgdbservertimeout: longword;
@@ -2034,8 +2034,8 @@ begin
 end;
 }
 procedure tmainfo.mainfoonterminate(var terminate: Boolean);
-var
- modres: modalresultty;
+//var
+// modres: modalresultty;
 begin
  if checksave = mr_cancel then begin
   terminate:= false;
@@ -2683,7 +2683,7 @@ var
  str1: ansistring;
  mstr1: msestring;
  macrolist: tmacrolist;
- gridcoord1: gridcoordty;
+// gridcoord1: gridcoordty;
  cursourcefile,curmodulefile,
  cursselection,cursword,cursdefinition: msestring;
  curcomponentclass,curproperty: msestring;

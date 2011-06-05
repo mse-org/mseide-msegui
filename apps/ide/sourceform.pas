@@ -1055,8 +1055,8 @@ begin
 end;
 }
 procedure tsourcefo.popupmonupdate(const sender: tcustommenu);
-var
- gc1: gridcoordty;
+//var
+// gc1: gridcoordty;
 begin
  if (activepage <> nil) and (sender.mouseinfopo <> nil) then begin
   popuprow:= activepage.grid.cellatpos(translateclientpoint(

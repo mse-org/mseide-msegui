@@ -689,8 +689,8 @@ end;
 
 procedure tbitmap.allocimagemem;
 var
- int1: integer;
- po1: plongword;
+// int1: integer;
+// po1: plongword;
  step: integer;
 begin
  if fimage.monochrome then begin
@@ -1505,9 +1505,13 @@ begin
    createmask(colormask);
 //   fmask:= tbitmap.create(true);
    fmask.size:= fsize;
+{$warnings off}
    if sizeisequal(fsize,tsimplebitmap1(value).fsize) and 
          (value.monochrome <> colormask) then begin
+{$warnings on}
+{$warnings off}
     tsimplebitmap1(fmask).handle:= tsimplebitmap1(value).handle;
+{$warnings on}
    end
    else begin
     if colormask then begin
@@ -1568,7 +1572,9 @@ begin
        fcolorforeground:= fmaskcolorforeground;
        fcolorbackground:= fmaskcolorbackground;
       end;
+{$warnings off}
       tsimplebitmap1(self.fmask).assign1(fmask,docopy);
+{$warnings on}
       include(self.fstate,pms_maskvalid);
       include(self.foptions,bmo_masked);
       if fmask.monochrome then begin

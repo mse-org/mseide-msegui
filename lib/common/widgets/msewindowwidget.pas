@@ -173,7 +173,7 @@ end;
 
 procedure tcustomwindowwidget.checkclientwinid;
 var
- options1: internalwindowoptionsty;
+// options1: internalwindowoptionsty;
  rect1: rectty;
 begin
  if fclientwindow.id = 0 then begin
@@ -209,7 +209,7 @@ end;
 
 procedure tcustomwindowwidget.checkwindowrect;
 var
- rect1,rect2,rect3: rectty;
+ rect1,rect2{,rect3}: rectty;
  bo1: boolean;
 begin
  if fclientwindow.id <> 0 then begin
@@ -382,7 +382,7 @@ procedure tcustomwindowwidget.clientmouseevent(var info: mouseeventinfoty);
   fonwindowmouseevent(self,info1);
  end;
 var
- pt1: pointty;
+// pt1: pointty;
  rect1: rectty;
 begin
  inherited;

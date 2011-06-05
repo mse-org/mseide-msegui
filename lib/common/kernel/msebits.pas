@@ -199,10 +199,10 @@ begin
 end;
 
 procedure updatebit1(var dest: byte; bitnum: integer; value: boolean);
-var
- by1: byte;
+//var
+// by1: byte;
 begin
- by1:= dest;
+// by1:= dest;
  if value then begin
   dest:= dest or bits[bitnum];
  end
@@ -212,10 +212,10 @@ begin
 end;
 
 procedure updatebit1(var dest: word; bitnum: integer; value: boolean);
-var
- wo1: word;
+//var
+// wo1: word;
 begin
- wo1:= dest;
+// wo1:= dest;
  if value then begin
   dest:= dest or bits[bitnum];
  end
@@ -225,10 +225,10 @@ begin
 end;
 
 procedure updatebit1(var dest: longword; bitnum: integer; value: boolean);
-var
- wo1: longword;
+//var
+// wo1: longword;
 begin
- wo1:= dest;
+// wo1:= dest;
  if value then begin
   dest:= dest or bits[bitnum];
  end

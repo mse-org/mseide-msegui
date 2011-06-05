@@ -481,7 +481,7 @@ function tmidistream.readtrackdata(out adata: trackeventinfoty): boolean;
 var
  stat1: byte;
  lwo1: longword;
- rea1: real;
+// rea1: real;
 begin
  fillchar(adata,sizeof(adata),0);
  adata.event.track:= ftracknum;

@@ -532,7 +532,7 @@ type
    procedure internalsenddata(const adata: ansistring); override;
    procedure doinputavailable(const sender: tpipereader);
    procedure dobeforedisconnect(const sender: tcustomcommpipes);
-   procedure unlink;
+   procedure unlink; reintroduce;
    function canconnect: boolean; override;
   public
    destructor destroy; override;
@@ -864,8 +864,9 @@ type
 var
  ar1: variantarty;
  po1: pchar;
- int1: integer;
+// int1: integer;
 begin
+ ar1:= nil; //compiler warning
  po1:= pchar(adata)+adata^.header.size;
  while adatapo < po1 do begin
   setlength(ar1,high(ar1)+2);
@@ -1293,6 +1294,7 @@ begin
  if fsequence = 0 then begin
   inc(fsequence);
  end;
+ result:= fsequence;
 end;
 
 procedure tcustomiochannel.localsenddata(const adata: ansistring);
@@ -1587,7 +1589,7 @@ end;
 
 function tstuffediochannel.unstuff(const adata: string): string;
 var
- int1: integer;
+// int1: integer;
  po1,po2,po3: pchar;
 begin
  setlength(result,length(adata)); //max

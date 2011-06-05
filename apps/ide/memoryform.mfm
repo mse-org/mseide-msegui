@@ -1,20 +1,22 @@
 object memoryfo: tmemoryfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
+  frame.dummy = 0
+  visible = False
   bounds_x = 100
   bounds_y = 100
   bounds_cx = 453
   bounds_cy = 354
-  frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
-  frame.dummy = 0
-  taborder = 1
-  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 443
-  container.bounds_cy = 354
-  container.frame.dummy = 0
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
+  container.bounds = (
+    0
+    0
+    443
+    354
+  )
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
@@ -66,23 +68,21 @@ object memoryfo: tmemoryfo
     BCBCBC01B2B2B20169696901A3A3A301FFFFFF017C7C7C01C0C0C0019D9D9D01
     7F7F7F01BEBEBE01A9A9A901E7E7E7018D8D8D01C7C7C701ABABAB01FFFFFF01
     A9A9A901FFFFFF01ABABAB01FFFFFF01ABABAB01FFFFFF01A9A9A901FFFFFF01
-    DADADA01C1C1C101A0A0A001ABABAB01FFFFFF017C7C7C01FFFFFF17FFFFFF08
-    FFFFFF08FFFFFFBFFFFFFF08FFFFFF00FFFFFF08FFFFFF02FFFFFFC0FFFFFF00
-    FFFFFF08FFFFFF00FFFFFF08FFFFFF08FFFFFF08FFFFFFBFFFFFFF08FFFFFF00
-    FFFFFF02FFFFFF08FFFFFF00FFFFFF00FFFFFFBFFFFFFF00FFFFFF08
+    DADADA01C1C1C101A0A0A001ABABAB01FFFFFF017C7C7C01FFFFFF17FFFFFF00
+    FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
   }
   onshow = formshow
   moduleclassname = 'tdockform'
   object grid: tstringgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 36
     bounds_cx = 443
     bounds_cy = 318
-    frame.dummy = 0
     anchors = [an_top, an_bottom]
     font.name = 'stf_fixed'
-    font.xscale =  1.0000000000000000E+0000
+    font.xscale = 1
     font.dummy = 0
     datacols.count = 16
     datacols.width = 20
@@ -100,6 +100,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
         onsetvalue = cellsetvalue
         ondataentered = adent
       end    
@@ -114,6 +116,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 20
@@ -126,6 +130,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 20
@@ -138,6 +144,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 20
@@ -150,6 +158,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 20
@@ -162,6 +172,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 20
@@ -174,6 +186,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 20
@@ -186,6 +200,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 20
@@ -198,6 +214,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 20
@@ -210,6 +228,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 20
@@ -222,6 +242,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 20
@@ -234,6 +256,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 20
@@ -246,6 +270,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 20
@@ -258,6 +284,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 20
@@ -270,6 +298,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 20
@@ -282,6 +312,8 @@ object memoryfo: tmemoryfo
           ''
           ''
         )
+        valuefalse = '0'
+        valuetrue = '1'
       end>
     fixcols.count = 1
     fixcols.items = <    
@@ -292,7 +324,7 @@ object memoryfo: tmemoryfo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 16
+        height = 17
         captions.count = 16
         captions.items = <        
           item
@@ -345,18 +377,18 @@ object memoryfo: tmemoryfo
           end>
       end>
     rowcount = 5
-    datarowheight = 16
-    reffontheight = 14
+    datarowheight = 17
+    reffontheight = 15
   end
   object tlayouter1: tlayouter
-    bounds_x = 0
-    bounds_y = 0
-    bounds_cx = 396
-    bounds_cy = 29
     frame.framei_left = 5
     frame.localprops = [frl_fileft]
     frame.dummy = 0
     taborder = 1
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 396
+    bounds_cy = 29
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
     linkbottom = grid
     dist_bottom = 7
@@ -364,10 +396,6 @@ object memoryfo: tmemoryfo
     place_mindist = 5
     place_maxdist = 5
     object add: tintegeredit
-      bounds_x = 5
-      bounds_y = 9
-      bounds_cx = 108
-      bounds_cy = 20
       frame.caption = 'Add'
       frame.captionpos = cp_right
       frame.dummy = 0
@@ -378,6 +406,9 @@ object memoryfo: tmemoryfo
         0
       )
       taborder = 3
+      bounds_x = 5
+      bounds_y = 9
+      bounds_cx = 108
       statfile = mainfo.projectstatfile
       ondataentered = adent
       base = nb_hex
@@ -385,10 +416,6 @@ object memoryfo: tmemoryfo
       reffontheight = 14
     end
     object memon: tbooleanedit
-      bounds_x = 320
-      bounds_y = 12
-      bounds_cx = 76
-      bounds_cy = 16
       frame.caption = 'Memory on'
       frame.dummy = 0
       frame.outerframe = (
@@ -397,18 +424,17 @@ object memoryfo: tmemoryfo
         63
         2
       )
+      bounds_x = 320
+      bounds_y = 12
+      bounds_cx = 76
+      bounds_cy = 16
       statfile = mainfo.projectstatfile
       ondataentered = adent
     end
     object bitwidth: tenumedit
-      bounds_x = 229
-      bounds_y = 9
-      bounds_cx = 86
-      bounds_cy = 20
       frame.caption = 'Width'
       frame.captionpos = cp_right
       frame.button.color = -2147483646
-      frame.dummy = 0
       frame.outerframe = (
         0
         0
@@ -416,9 +442,12 @@ object memoryfo: tmemoryfo
         0
       )
       taborder = 1
+      bounds_x = 229
+      bounds_y = 9
+      bounds_cx = 86
       statfile = mainfo.projectstatfile
       textflags = [tf_xcentered, tf_ycentered, tf_noselect]
-      ondataentered = updatelayout
+      ondataentered = updatelayoutexe
       value = 0
       dropdown.cols.count = 1
       dropdown.cols.items = <      
@@ -433,10 +462,6 @@ object memoryfo: tmemoryfo
       reffontheight = 14
     end
     object cnt: tintegeredit
-      bounds_x = 118
-      bounds_y = 9
-      bounds_cx = 106
-      bounds_cy = 20
       frame.caption = 'Cnt'
       frame.captionpos = cp_right
       frame.dummy = 0
@@ -447,6 +472,9 @@ object memoryfo: tmemoryfo
         0
       )
       taborder = 2
+      bounds_x = 118
+      bounds_y = 9
+      bounds_cx = 106
       statfile = mainfo.projectstatfile
       ondataentered = adent
       base = nb_hex

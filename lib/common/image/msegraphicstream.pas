@@ -412,7 +412,7 @@ var
  col1,col2,col3: tfpcolor;
  po1,po3: plongword;
  po2,po4: prgbtriplety;
- int1,int2,int3: integer;
+ int1,int2{,int3}: integer;
  lwo1: longword;
  masked1: boolean;
  colormask1: boolean;
@@ -628,7 +628,7 @@ var
  int1,int2: integer;
  po1: prgbtripleaty;
  col1: tfpcolor;
- by1: byte;
+// by1: byte;
  col2: colorty;
  bo1: boolean;
 begin

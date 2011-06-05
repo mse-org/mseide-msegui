@@ -1230,13 +1230,13 @@ var
  
  procedure updateplacement;
  var
-  rect1: rectty;
+//  rect1: rectty;
   widget1: twidget;
   int1: integer;
  begin
   widget1:= fintf.getwidget;
-  rect1.pos:= fplacementrect.pos;
-  rect1.size:= nullsize;         //update placementrect
+//  rect1.pos:= fplacementrect.pos;
+//  rect1.size:= nullsize;         //update placementrect
   int1:= minsize1 - fr^.size(fplacementrect);
   if (int1 > 0) then begin       //extend placementrect
    if not scalefixedalso and 
@@ -1264,7 +1264,7 @@ var
 var
  int1,int2: integer;
  widget1: twidget;
- rea2: real;
+// rea2: real;
  widget2: twidget;
  
 begin
@@ -1526,7 +1526,7 @@ var
  intf1: idocktarget;
  cont1: tdockcontroller;
  int1: integer;
- val1,val2,val3: optionsdockty;
+ val1,val2{,val3}: optionsdockty;
  bo1: boolean;
 begin
  if foptionsdock <> avalue then begin
@@ -1729,10 +1729,10 @@ end;
 procedure tdockcontroller.calclayout(const dragobject: tdockdragobject;
                                      const nonewplace: boolean);
 var
- rect1,rect2: rectty;
+ rect1{,rect2}: rectty;
  po1: pointty;
  ar1: widgetarty;
- int1,int2: integer;
+ int1{,int2}: integer;
  step,stepsum,pos: real;
  container1: twidget1;
  widget1,widget2: twidget;
@@ -2308,7 +2308,7 @@ begin
    pos:= translatewidgetpoint(apos,widget1,nil);
    addpoint1(pos,widget1.clientwidgetpos);
 //  addpoint1(dragobj.fxorrect.pos,dest.fplacementrect.pos);
-   dest.dockdrag(dragobj);
+   result:= dest.dockdrag(dragobj);
   end;
  finally
   dragobj.free;
@@ -2878,8 +2878,8 @@ var
    end;
   end;
   
- var
-  int1,int2: integer;
+// var
+//  int1,int2: integer;
   
  begin
   ar1:= nil; //compilerwarning
@@ -2913,7 +2913,7 @@ var
   int1,int2,int4: integer;
   movestart: integer;
   rect1: rectty;
-  bandindex,first,last: integer;
+  bandindex{,first,last}: integer;
  begin
   ar1:= checksplit(propsize,fixsize,prop,fix,false);
   if fsizeindex <= high(ar1) then begin
@@ -4281,7 +4281,7 @@ end;
 
 function tgripframe.getclientrect: rectty;
 begin
- fcontroller.fintf.getwidget.clientrect;
+ result:= fcontroller.fintf.getwidget.clientrect;
 end;
 
 procedure tgripframe.invalidate;
@@ -4292,7 +4292,9 @@ end;
 procedure tgripframe.setlinkedvar(const source: tmsecomponent;
                var dest: tmsecomponent; const linkintf: iobjectlink = nil);
 begin
+{$warnings off}
  twidget1(fcontroller.fintf).setlinkedvar(source,dest,linkintf);
+{$warnings on}
 end;
 
 function tgripframe.getcomponentstate: tcomponentstate;
@@ -4544,7 +4546,7 @@ procedure tdockhandle.dopaint(const canvas: tcanvas);
 var
  rect1: rectty;
  int1,int2,x,y: integer;
- po1: pointty;
+// po1: pointty;
 begin
  inherited;
  rect1:= innerclientrect;
@@ -4558,8 +4560,8 @@ begin
  else begin
   case fgrip_pos of
    cp_bottomright: begin
-    po1.x:= rect1.x + rect1.cx;
-    po1.y:= rect1.y + rect1.cy;
+ //   po1.x:= rect1.x + rect1.cx;
+ //   po1.y:= rect1.y + rect1.cy;
     x:= rect1.x + rect1.cx - 1;
     y:= rect1.y + rect1.cy - 1;
     if rect1.cy < rect1.cx then begin

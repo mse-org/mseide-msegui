@@ -353,7 +353,7 @@ var
  int1: integer;
  po1: pshapeinfoty;
  bo1: boolean;
- rect1: rectty;
+// rect1: rectty;
 
 begin
  result:= false;
@@ -464,7 +464,7 @@ function updatemouseshapestate(var infos: shapeinfoarty;
                  const widget: twidget; var focuseditem: integer;
                  const aframe: tcustomframe = nil): boolean;
 var
- int1,int2: integer;
+ int1{,int2}: integer;
 begin
  result:= false;
  for int1:= 0 to high(infos) do begin
@@ -1050,7 +1050,7 @@ end;
 procedure drawbutton(const canvas: tcanvas; const info: shapeinfoty);
 var
  rect1,rect2: rectty;
- pos: captionposty;
+// pos: captionposty;
 begin
  if not (shs_invisible in info.state) and 
                         drawbuttonframe(canvas,info,rect1) then begin

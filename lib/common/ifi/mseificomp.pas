@@ -219,9 +219,9 @@ type
  tvalueclientcontroller = class(tificlientcontroller,
                                          iififieldinfo,iifidatasourceclient)
   private
-   fvalarpo: pointer;
+//   fvalarpo: pointer;
    fitempo: pointer;
-   fitemindex: integer;
+//   fitemindex: integer;
    fonclientdataentered: indexeventty;
    fdatasource: tifidatasource;
    ffieldname: ififieldnamety;
@@ -3121,7 +3121,7 @@ end;
 
 function texecclientcontroller.canconnect(const acomponent: tcomponent): boolean;
 var
- intf1: pointer;
+// intf1: pointer;
  prop1: ppropinfo;
 begin
  result:= inherited canconnect(acomponent);
@@ -3646,7 +3646,7 @@ end;
 
 procedure tconnectedifidatasource.open;
 var
- ar1: stringarty;
+// ar1: stringarty;
  ar2: datalistarty;
 begin
  inherited;

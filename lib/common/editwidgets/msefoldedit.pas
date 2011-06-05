@@ -105,11 +105,11 @@ type
    procedure valuetogrid(arow: integer); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure readstatvalue(const reader: tstatreader); override;
-   procedure synctofontheight; override;
    procedure updatepopupmenu(var amenu: tpopupmenu; 
                                 var mouseinfo: mouseeventinfoty); override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure synctofontheight; override;
    property imagesize: sizety read fimagesize write setimagesize;
    property gridimnr[index: integer]: integer
                                     read getgridimnr write setgridimnr;
@@ -412,7 +412,9 @@ begin
  if not (es_processed in ainfo.eventstate) and (fgridintf <> nil) then begin
   with ainfo do begin
    if isleftbuttondown(ainfo,[]) then begin
+{$warnings off}
     with fgridintf.getcol.grid,tdatacols1(datacols).frowstate do begin
+{$warnings on}
      row1:= row;
      if row1 >= 0 then begin //no csdesigning
       getfoldstate(row1,isvisible1,foldlevel1,haschildren1,isopen1);

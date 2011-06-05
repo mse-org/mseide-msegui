@@ -618,8 +618,8 @@ procedure tesscombine(coords: pgluvertexty;
                       outdata: ppgluvertexty;
                       polygon_data: pointer);
                            {$ifdef mswindows}stdcall;{$else}cdecl;{$endif}
-var
- po1: pgluvertexty;
+//var
+// po1: pgluvertexty;
 begin
 // po1:= gettessbuffer; //not used
 // po1^:= coords^;
@@ -631,7 +631,7 @@ procedure gdi_fillpolygon(var drawinfo: drawinfoty);
 var
  int1: integer;
  do1: double;
- vertex: gluvertexty;
+// vertex: gluvertexty;
  po1: ppointty;
  po2: pgluvertexty;
 begin
@@ -642,7 +642,7 @@ begin
   glutesscallback(tess, glu_tess_combine_data, tcallback(@tesscombine));
   glutesscallback(tess, glu_tess_end, tcallback(glend));
   po1:= points;
-  allocbuffer(drawinfo.buffer,count*sizeof(po2^));
+  allocbuffer(drawinfo.buffer,count*sizeof(gluvertexty));
   tessbufferindex:= 0;
   po2:= drawinfo.buffer.buffer;
   do1:= sourceheight;
@@ -890,14 +890,14 @@ end;
 procedure tglfontcache.getchar16widths(var drawinfo: drawinfoty);
 var
  f1: cfloat;
- int1,int2: integer;
+ int1{,int2}: integer;
  po1: pmsechar;
  po2: pinteger;
 begin
  with drawinfo.getchar16widths do begin
   with pftglfontty(fontdata^.font)^ do begin
    f1:= 0;
-   int2:= 0;
+//   int2:= 0;
    po1:= text;
    po2:= resultpo;
    for int1:= count-1 downto 0 do begin

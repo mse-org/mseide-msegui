@@ -33,7 +33,7 @@ constructor tsetcreateorderfo.create(const amodule: tcomponent;
                          const acurrentcompname: string);
 var
  int1: integer;
- str1: string;
+// str1: string;
 begin
  inherited create(nil);
  caption:= 'Set Component create Order of '+amodule.name;
@@ -54,9 +54,9 @@ end;
 
 procedure tsetcreateorderfo.formonclosequery(const sender: tcustommseform;
                var amodalresult: modalresultty);
-var
- int1: integer;
- comp1: tcomponent;
+//var
+// int1: integer;
+// comp1: tcomponent;
 begin
  if amodalresult = mr_ok then begin
   setcomponentorder(fmodule,grid[0].datalist.asarray);

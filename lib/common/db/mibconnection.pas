@@ -140,28 +140,12 @@ type
    procedure DoInternalDisconnect; override;
    function GetHandle : pointer; override;
 
-   Function AllocateCursorHandle(const aowner: icursorclient;
-                      const aname: ansistring): TSQLCursor; override;
-   Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
    Function AllocateTransactionHandle : TSQLHandle; override;
 
-   procedure preparestatement(const cursor: tsqlcursor; 
-                 const atransaction : tsqltransaction;
-                 const asql: msestring; const aparams : tmseparams); override;
-   procedure UnPrepareStatement(cursor : TSQLCursor); override;
-   procedure FreeFldBuffers(cursor : TSQLCursor); override;
    procedure internalExecute(const cursor: TSQLCursor;
              const atransaction: tsqltransaction; const AParams : TmseParams;
              const autf8: boolean); override;
-   procedure AddFieldDefs(const cursor: TSQLCursor;
-                    const FieldDefs : TfieldDefs); override;
    function fetch1(const cursor: tibcursor) : boolean;
-   function Fetch(cursor : TSQLCursor) : boolean; override;
-   function loadfield(const cursor: tsqlcursor; 
-               const datatype: tfieldtype; const fieldnum: integer; //null based
-     const buffer: pointer; var bufsize: integer;
-                                const aisutf8: boolean): boolean; override;
-          //if bufsize < 0 -> buffer was to small, should be -bufsize
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
    function Commit(trans : TSQLHandle) : boolean; override;
    function RollBack(trans : TSQLHandle) : boolean; override;
@@ -194,8 +178,24 @@ type
    procedure dolisten(const sender: tdbevent);
    procedure dounlisten(const sender: tdbevent);
   public
-    constructor Create(AOwner : TComponent); override;
-    destructor destroy; override;
+   constructor Create(AOwner : TComponent); override;
+   destructor destroy; override;
+   Function AllocateCursorHandle(const aowner: icursorclient;
+                      const aname: ansistring): TSQLCursor; override;
+   Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
+   procedure preparestatement(const cursor: tsqlcursor; 
+                 const atransaction : tsqltransaction;
+                 const asql: msestring; const aparams : tmseparams); override;
+   procedure UnPrepareStatement(cursor : TSQLCursor); override;
+   procedure FreeFldBuffers(cursor : TSQLCursor); override;
+   procedure AddFieldDefs(const cursor: TSQLCursor;
+                    const FieldDefs : TfieldDefs); override;
+   function Fetch(cursor : TSQLCursor) : boolean; override;
+   function loadfield(const cursor: tsqlcursor; 
+               const datatype: tfieldtype; const fieldnum: integer; //null based
+     const buffer: pointer; var bufsize: integer;
+                                const aisutf8: boolean): boolean; override;
+          //if bufsize < 0 -> buffer was to small, should be -bufsize
     function fetchblob(const cursor: tsqlcursor;
                               const fieldnum: integer): ansistring; override;
                               //null based
@@ -301,7 +301,7 @@ var
   buf: array [0..1024] of char;
   p: pointer;
   Msg: msestring;
-  E: eiberror;
+//  E: eiberror;
   
 begin
  if ((Status[0] = 1) and (Status[1] <> 0)) then begin
@@ -372,7 +372,7 @@ function TIBConnection.StartDBTransaction(
 var
   DBHandle : pointer;
   tr       : TIBTrans;
-  i        : integer;
+//  i        : integer;
   s        : string;
   int1: integer;
 begin
@@ -656,10 +656,10 @@ procedure tibconnection.preparestatement(const cursor: tsqlcursor;
 
 var dh    : pointer;
     tr    : pointer;
-    p     : pchar;
+//    p     : pchar;
 //    x     : shortint;
     x     : integer;
-    i     : integer;
+//    i     : integer;
  TransLen: word;
  TransType: TFieldType;
  str1: string;
@@ -1035,7 +1035,7 @@ var
  TransType: TFieldType;
  FD: TFieldDef;
 // chlengetter: tcharlengthgetter;
- int1: integer;
+// int1: integer;
 begin
  fielddefs.clear;
 // chlengetter:= tcharlengthgetter.create(self);
@@ -1266,11 +1266,11 @@ function tibconnection.loadfield(const cursor: tsqlcursor;
 var
  VarcharLen: word;
  CurrBuff: pchar;
- b: longint;
- c: currency;
+// b: longint;
+// c: currency;
 // i64: int64;
  po1: pxsqlvar;
- do1: double;
+// do1: double;
  
  function getint64: int64;
  begin
@@ -1287,8 +1287,8 @@ var
   end;
  end;
 
-var
- int1: integer;
+//var
+// int1: integer;
  
 begin
  po1:= @TIBCursor(cursor).SQLDA^.SQLVar[fieldnum];
@@ -1685,7 +1685,7 @@ var
  step: word;
  po1: pointer;
  int1: integer;
- str1: string;
+// str1: string;
 begin
 {
  if alength = 0 then begin
@@ -1807,8 +1807,8 @@ end;
 
 procedure eventcallback(adata: pointer; alength: smallint; aupdated: pchar); 
                                                          cdecl;
-var
- status: statusvectorty; 
+//var
+// status: statusvectorty; 
 begin
  with pfbeventbufferty(adata)^,tibconnection(event.database) do begin
    sys_mutexlock(fmutex);

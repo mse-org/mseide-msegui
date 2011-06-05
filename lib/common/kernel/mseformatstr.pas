@@ -1987,7 +1987,7 @@ function formatfloatmse(const value: double; const format: msestring;
 
 var
  po1,po2: pmsechar;
- expsign,noexpsign: boolean;
+ expsign{,noexpsign}: boolean;
 
  procedure quote;
  begin
@@ -2031,7 +2031,7 @@ var
   end
   else begin
    if (po2+1)^ = '-' then begin
-    noexpsign:= true;
+//    noexpsign:= true;
     inc(po2);
    end;
   end;
@@ -2040,7 +2040,7 @@ var
 var
  int1,int2,int3: integer;
  decimalsep,thousandsep: msechar;
- mch1: msechar;
+// mch1: msechar;
  intopt,intmust,fracmust,fracopt,expopt,expmust: integer;
  decifound,thousandfound,numberprinted,expofound,engfound,engsymfound: boolean;
  mstr1: msestring;
@@ -2223,7 +2223,7 @@ begin
      engfound:= false;
      engsymfound:= false;
      expsign:= false;
-     noexpsign:= false;
+//     noexpsign:= false;
      while po2^ <> #0 do begin
       case po2^ of
        '.': begin

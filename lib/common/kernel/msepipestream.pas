@@ -92,7 +92,7 @@ type
    function readstrln(out value: string): boolean; override; 
            //bringt nur vollstaendige zeilen, sonst false
            //no decoding
-   procedure clear;
+   procedure clear; override;
    procedure terminate;
    procedure terminateandwait;
    function waitforresponse(timeoutusec: integer = 0;
@@ -178,7 +178,9 @@ function tpipewriter.releasehandle: integer;
 begin
  result:= handle;
 {$ifdef FPC}
+{$warnings off}
  thandlestreamcracker(self).fhandle:= invalidfilehandle;
+{$warnings on}
 {$else}
  fhandle:= invalidfilehandle;
 {$endif}
@@ -194,7 +196,9 @@ procedure tpipewriter.sethandle(value: integer);
 begin
  if fconnected then begin
  {$ifdef FPC}
+{$warnings off}
   thandlestreamcracker(self).fhandle:= invalidfilehandle;
+{$warnings on}
  {$else}
   fhandle:= invalidfilehandle;
  {$endif}

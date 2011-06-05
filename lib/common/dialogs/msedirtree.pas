@@ -114,7 +114,7 @@ var
  ar1: treelistedititemarty;
  int1: integer;
  item1: tdirlistitem;
- dirstream: dirstreamty;
+// dirstream: dirstreamty;
  excl: fileattributesty;
 begin
  clear;

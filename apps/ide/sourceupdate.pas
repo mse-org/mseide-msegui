@@ -371,7 +371,7 @@ var
  po1: punitinfoty;
  po2: psourceitemty;
  str1: msestring;
- coord1: gridcoordty;
+// coord1: gridcoordty;
  po3: pdefinfoty;
  int1: integer;
 
@@ -388,7 +388,8 @@ begin
      if po2 <> nil then begin
       case po2^.kind of
        sik_uses: begin
-        coord1:= edit.wordatpos(apos.pos,str1,defaultdelimchars + ',;{}/',[]);
+        {coord1:= }
+        edit.wordatpos(apos.pos,str1,defaultdelimchars + ',;{}/',[]);
         if str1 <> '' then begin
          definition:= str1;
          str1:= findunitfile(str1);
@@ -1037,8 +1038,8 @@ function tsourceupdater.findmethodpos(const amethod: tmethod;
 var
  moduleinfo: pmoduleinfoty;
  methodinfo: pmethodinfoty;
- unitinfo: punitinfoty;
- classinfo1: pclassinfoty;
+// unitinfo: punitinfoty;
+// classinfo1: pclassinfoty;
  procedureinfo: pprocedureinfoty;
  ar1: classinfopoarty;
  int1: integer;
@@ -2239,10 +2240,10 @@ function tsourceupdater.findcfunctionimplementation(const aname: ansistring;
                out headerstart: sourceposty;
                out headerstop: sourceposty): boolean;
 var
- int1: integer;
+// int1: integer;
  po3: pfunctioninfoty;
- int2: integer;
- mstr1: filenamety;
+// int2: integer;
+// mstr1: filenamety;
 begin
  result:= false;
  po3:= cglobals.findfunction(aname);

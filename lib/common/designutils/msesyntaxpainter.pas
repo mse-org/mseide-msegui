@@ -530,7 +530,7 @@ begin
          end;
          if po1 <> nil then begin
           changed:= setcharstyle(format,lstr1.po-startpo,lstr1.len,
-                                charstyles[integer(po1)-1]) or changed;
+                                charstyles[longword(po1)-1]) or changed;
           dec(alen,lstr1.len);
           keywordlen:= 0;
          end

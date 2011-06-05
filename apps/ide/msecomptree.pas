@@ -133,8 +133,8 @@ end;
 
 procedure tcompnametreefo.treeitemonitemnotification(const sender: tlistitem;
   var action: nodeactionty);
-var
- bo1: boolean;
+//var
+// bo1: boolean;
 begin
 {
  with tdirlistitem(sender) do begin

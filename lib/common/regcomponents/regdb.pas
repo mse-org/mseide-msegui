@@ -186,8 +186,8 @@ type
  tfieldfieldnamepropertyeditor = class(tstringpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
-   function getvalues: msestringarty; override;
   public
+   function getvalues: msestringarty; override;
    procedure setvalue(const value: msestring); override;
  end;
 
@@ -230,6 +230,7 @@ type
  tindexfieldnamepropertyeditor = class(tstringpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;   
+  public
    function getvalues: msestringarty; override;
  end;
  
@@ -287,7 +288,7 @@ type
  end;
 
  tparamvaluepropertyeditor = class(tvariantpropertyeditor)
-  protected
+  public
    procedure setvalue(const value: msestring); override;
  end;
   

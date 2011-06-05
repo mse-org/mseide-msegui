@@ -29,18 +29,18 @@ type
 
   TODBCCursor = class(TSQLCursor)
   protected
-    ffieldnames: stringarty;
-    FSTMTHandle:SQLHSTMT; // ODBC Statement Handle
-    FQuery:string;        // last prepared query, with :ParamName converted to ?
-    FParamIndex:TParamBinding; // maps the i-th parameter in the query to the TParams passed to PrepareStatement
-    FParamBuf:array of pointer; // buffers that can be used to bind the i-th parameter in the query
+   ffieldnames: stringarty;
+   FSTMTHandle:SQLHSTMT; // ODBC Statement Handle
+   FQuery:string;        // last prepared query, with :ParamName converted to ?
+   FParamIndex:TParamBinding; // maps the i-th parameter in the query to the TParams passed to PrepareStatement
+   FParamBuf:array of pointer; // buffers that can be used to bind the i-th parameter in the query
 //    FBlobStreams:TList;   // list of Blob TMemoryStreams stored in field buffers (we need this currently as we can't hook into the freeing of TBufDataset buffers)
-    fcurrentblobbuffer: ansistring;
-    procedure close; override;
+   fcurrentblobbuffer: ansistring;
   public
-    constructor Create(const aowner: icursorclient; const aname: ansistring;
+   constructor Create(const aowner: icursorclient; const aname: ansistring;
                                       const Connection:TODBCConnection);
-    destructor Destroy; override;
+   destructor Destroy; override;
+   procedure close; override;
   end;
 
   { TODBCHandle } // this name is a bit confusing, but follows the standards for naming classes in sqldb
@@ -79,16 +79,9 @@ type
     procedure DoInternalConnect; override;
     procedure DoInternalDisconnect; override;
     // - Handle (de)allocation
-    function AllocateCursorHandle(const aowner: icursorclient;
-                           const aname: ansistring): TSQLCursor; override;
-    procedure DeAllocateCursorHandle(var cursor:TSQLCursor); override;
     function AllocateTransactionHandle:TSQLHandle; override;
     // - Statement handling
 
-    procedure preparestatement(const cursor: tsqlcursor; 
-                  const atransaction : tsqltransaction;
-                  const asql: msestring; const aparams : tmseparams); override;
-    procedure UnPrepareStatement(cursor:TSQLCursor); override;
     // - Transaction handling
     function GetTransactionHandle(trans:TSQLHandle):pointer; override;
     function StartDBTransaction(const trans:TSQLHandle; 
@@ -106,18 +99,8 @@ type
                const asql: string); override;
 
 
-    // - Result retrieving
-    procedure AddFieldDefs(const cursor:TSQLCursor; 
-                              const FieldDefs:TFieldDefs); override;
-    function Fetch(cursor:TSQLCursor):boolean; override;
-    function loadfield(const cursor: tsqlcursor;
-      const datatype: tfieldtype; const fieldnum: integer; //null based
-      const buffer: pointer; var bufsize: integer;
-                                const aisutf8: boolean): boolean; override;
-           //if bufsize < 0 -> buffer was to small, should be -bufsize
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                  const acursor: tsqlcursor): TStream; override;
-    procedure FreeFldBuffers(cursor:TSQLCursor); override;
     // - UpdateIndexDefs
     procedure UpdateIndexDefs(var IndexDefs:TIndexDefs;
                           const aTableName:string); override;
@@ -138,6 +121,23 @@ type
                                    const aparam: tparam);
    function blobscached: boolean;
   public
+   function AllocateCursorHandle(const aowner: icursorclient;
+                           const aname: ansistring): TSQLCursor; override;
+   procedure DeAllocateCursorHandle(var cursor:TSQLCursor); override;
+   procedure preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams); override;
+   procedure UnPrepareStatement(cursor:TSQLCursor); override;
+    // - Result retrieving
+   procedure AddFieldDefs(const cursor:TSQLCursor; 
+                              const FieldDefs:TFieldDefs); override;
+   function Fetch(cursor:TSQLCursor):boolean; override;
+   function loadfield(const cursor: tsqlcursor;
+      const datatype: tfieldtype; const fieldnum: integer; //null based
+      const buffer: pointer; var bufsize: integer;
+                                const aisutf8: boolean): boolean; override;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
+    procedure FreeFldBuffers(cursor:TSQLCursor); override;
     property Environment:TODBCEnvironment read FEnvironment;
   published
     property Driver:string read FDriver write FDriver;    // will be passed as DRIVER connection parameter
@@ -515,13 +515,13 @@ var
   ParamIndex:integer;
   Buf:pointer;
   I:integer;
-  IntVal:longint;
-  largeintval: int64;
+//  IntVal:longint;
+//  largeintval: int64;
   StrVal:string;
-  wideStrVal: msestring;
-  doubleval: double;
-  StrLen,buflen: SQLINTEGER;
-  isnull1: boolean;
+//  wideStrVal: msestring;
+//  doubleval: double;
+  StrLen{,buflen}: SQLINTEGER;
+//  isnull1: boolean;
   datatype1: tfieldtype;
 
 begin
@@ -543,7 +543,7 @@ begin
      'Parameter %d in query does not have a matching parameter set',[i]);
   end;
   with AParams[ParamIndex] do begin
-   isnull1:= isnull;
+//   isnull1:= isnull;
    datatype1:= datatype;
    case datatype1 of
     ftInteger,ftboolean,ftword,ftsmallint: begin
@@ -808,22 +808,26 @@ end;
 
 function TODBCConnection.GetTransactionHandle(trans: TSQLHandle): pointer;
 begin
+ result:= nil;
   // Tranactions not implemented yet
 end;
 
 function TODBCConnection.StartDBTransaction(const trans: TSQLHandle; 
                    const AParams: tstringlist): boolean;
 begin
+ result:= true;
   // Tranactions not implemented yet
 end;
 
 function TODBCConnection.Commit(trans: TSQLHandle): boolean;
 begin
+ result:= true;
   // Tranactions not implemented yet
 end;
 
 function TODBCConnection.Rollback(trans: TSQLHandle): boolean;
 begin
+ result:= true;
   // Tranactions not implemented yet
 end;
 
@@ -907,9 +911,9 @@ var
   ODBCTimeStruct:SQL_TIME_STRUCT;
   ODBCTimeStampStruct:SQL_TIMESTAMP_STRUCT;
   DateTime:TDateTime;
-  BlobBuffer:pointer;
+//  BlobBuffer:pointer;
   BlobBufferSize,BytesRead:SQLINTEGER;
-  BlobMemoryStream:TMemoryStream;
+//  BlobMemoryStream:TMemoryStream;
   Res:SQLRETURN;
   fno: integer;
   int1: integer;
@@ -1098,9 +1102,9 @@ function TODBCConnection.CreateBlobStream(const Field: TField; const Mode: TBlob
                  const acursor: tsqlcursor): TStream;
 var
  blobid: integer;
- int1,int2: integer;
- str1: string;
- bo1: boolean;
+// int1,int2: integer;
+// str1: string;
+// bo1: boolean;
 begin
  result:= nil;
  if mode = bmread then begin
@@ -1113,7 +1117,7 @@ end;
 procedure TODBCConnection.FreeFldBuffers(cursor: TSQLCursor);
 var
   ODBCCursor:TODBCCursor;
-  i: integer;
+//  i: integer;
 begin
   ODBCCursor:=cursor as TODBCCursor;
 {  
@@ -1137,9 +1141,9 @@ var
   ODBCCursor:TODBCCursor;
   ColumnCount:SQLSMALLINT;
   i:integer;
-  ColNameLength,TypeNameLength,DataType,DecimalDigits,Nullable:SQLSMALLINT;
+  ColNameLength,{TypeNameLength,}DataType,DecimalDigits,Nullable:SQLSMALLINT;
   ColumnSize:SQLUINTEGER;
-  ColName,TypeName:string;
+  ColName{,TypeName}:string;
   FieldType:TFieldType;
   FieldSize: integer;
   fd: tfielddef;

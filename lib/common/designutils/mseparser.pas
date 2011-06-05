@@ -1661,6 +1661,7 @@ var
 begin
  skipwhitespace;
  result:= vk_none;
+ str1:= '';
  case fto^.kind of
   tk_number: begin
    mark;
@@ -1847,11 +1848,11 @@ procedure tpascalparser.parsecompilerswitch;
  end;
  
 var
- int1,int2: integer;
+ int1{,int2}: integer;
  str1: string;
  filename: filenamety;
  anum: longword;
- startpos,endpos: sourceposty;
+ startpos{,endpos}: sourceposty;
  lstr1: lstringty;
 begin
  anum:= ftokennum;
@@ -1926,10 +1927,10 @@ begin
         filename:= str1;
        end;
        if findoperator('}') then begin
-        endpos:= lasttokenpos;
+//        endpos:= lasttokenpos;
        end
        else begin
-        endpos:= sourcepos;
+//        endpos:= sourcepos;
        end;
        if filename <> '' then begin
         callincludefile(filename,startpos,anum);
@@ -2341,8 +2342,8 @@ end;
 function tcparser.skipcomment: boolean;
 var
  int1: integer;
- bo1: boolean;
- str1: ansistring;
+// bo1: boolean;
+// str1: ansistring;
 begin
  result:= false;
  if fincomment = 0 then begin
@@ -2395,11 +2396,11 @@ end;
 
 function tcparser.skipstatement: boolean;
 var
- int1: integer;
+// int1: integer;
  ch1: char;
 begin
  result:= false;
- int1:= 0;
+// int1:= 0;
  repeat
   ch1:= getnextoperator;
   case ch1 of

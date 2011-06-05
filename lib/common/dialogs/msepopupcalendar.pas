@@ -26,9 +26,9 @@ type
  tcalendarcontroller = class(tdropdownwidgetcontroller)
   protected
    procedure dropdownkeydown(var info: keyeventinfoty);
-   procedure editnotification(var info: editnotificationinfoty); override;
   public
    constructor create(const intf: idropdowncalendar);
+   procedure editnotification(var info: editnotificationinfoty); override;
   published
    property bounds_cx default popupcalendarwidth;
  end;
@@ -73,7 +73,7 @@ type
 
 implementation
 uses
- mseformatstr,msepopupcalendar_mfm,sysutils,
+ mseformatstr,msepopupcalendar_mfm,sysutils,msesys,
                                {$ifndef UNIX}
                                  dateutils,
                                {$else}
@@ -164,9 +164,9 @@ var
 begin
  with grid.fixrows[-1] do begin
   for int1:= 2 to 7 do begin
-   captions[int1-2].caption:= shortdaynames[int1];
+   captions[int1-2].caption:= defaultformatsettingsmse.shortdaynames[int1];
   end;
-  captions[6].caption:= shortdaynames[1];
+  captions[6].caption:= defaultformatsettingsmse.shortdaynames[1];
  end;
  value:= fvalue;
 end;

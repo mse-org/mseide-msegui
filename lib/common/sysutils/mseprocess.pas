@@ -70,6 +70,8 @@ type
    procedure processdied(const aprochandle: prochandlety;
                  const aexecresult: integer; const adata: pointer);
   public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
    function running: boolean;
    procedure terminate;
    procedure kill;
@@ -82,8 +84,6 @@ type
    property prochandle: prochandlety read fprochandle;
    property exitcode: integer read fexitcode;
   published
-   constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
    property filename: filenamety read ffilename write ffilename;
    property parameter: msestring read fparameter write fparameter;
    property active: boolean read getactive write setactive default false;
@@ -220,7 +220,7 @@ var
  outp: tpipereader;
  erroroutp: tpipereader;
  inp: tpipewriter;
- bo1: boolean;
+// bo1: boolean;
 begin
  outp:= nil;
  erroroutp:= nil;
@@ -278,7 +278,7 @@ end;
 function tmseprocess.waitforprocess(const atimeoutus: integer): boolean;
                                               //true if process finished
 var
- int1: integer;
+// int1: integer;
  bo1: boolean;
 begin
  result:= false;

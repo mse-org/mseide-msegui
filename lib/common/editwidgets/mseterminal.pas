@@ -173,7 +173,7 @@ var
  mstr1: msestring;
  bo1: boolean;
  ar1: msestringarty;
- co1: gridcoordty;
+// co1: gridcoordty;
  int1: integer;
 begin
  if fgridintf <> nil then begin

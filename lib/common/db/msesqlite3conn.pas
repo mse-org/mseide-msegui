@@ -62,10 +62,9 @@ type
    flasterrormessage: msestring;
    function getdatabasename: filenamety;
    procedure setdatabasename(const avalue: filenamety);
-   procedure loaded; override;
    procedure setcontroller(const avalue: tdbcontroller);
-   function getconnected: boolean;
-   procedure setconnected(const avalue: boolean);
+   function getconnected: boolean; reintroduce;
+   procedure setconnected(const avalue: boolean); reintroduce;
    
           //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
@@ -81,6 +80,7 @@ type
    procedure setbusytimeoutms(const avalue: integer);
    procedure checkbusytimeout;
   protected
+   procedure loaded; override;
    function getfloatdate: boolean; override;
    function getint64currency: boolean; override;
    
@@ -95,28 +95,11 @@ type
    procedure DoInternalDisconnect; override;
    function GetHandle : pointer; override;
 
-   Function AllocateCursorHandle(const aowner: icursorclient;
-                           const aname: ansistring) : TSQLCursor; override;
-                       //aowner used as blob cache
-   Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
    Function AllocateTransactionHandle : TSQLHandle; override;
 
-   procedure preparestatement(const cursor: tsqlcursor; 
-                  const atransaction : tsqltransaction;
-                  const asql: msestring; const aparams : tmseparams); override;
    procedure internalExecute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                      const AParams : TmseParams; const autf8: boolean); override;
-   function Fetch(cursor : TSQLCursor) : boolean; override;
-   procedure AddFieldDefs(const cursor: TSQLCursor;
-                   const FieldDefs : TfieldDefs); override;
-   procedure UnPrepareStatement(cursor : TSQLCursor); override;
 
-   procedure FreeFldBuffers(cursor : TSQLCursor); override;
-   function loadfield(const cursor: tsqlcursor;
-     const datatype: tfieldtype; const fieldnum: integer; //null based
-     const buffer: pointer; var bufsize: integer;
-                                const aisutf8: boolean): boolean; override;
-          //if bufsize < 0 -> buffer was to small, should be -bufsize
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
    function Commit(trans : TSQLHandle) : boolean; override;
    function RollBack(trans : TSQLHandle) : boolean; override;
@@ -139,6 +122,23 @@ type
    procedure endupdate; override;
   public
    constructor create(aowner: tcomponent); override;
+   Function AllocateCursorHandle(const aowner: icursorclient;
+                           const aname: ansistring) : TSQLCursor; override;
+                       //aowner used as blob cache
+   Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
+   procedure preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams); override;
+   function Fetch(cursor : TSQLCursor) : boolean; override;
+   procedure AddFieldDefs(const cursor: TSQLCursor;
+                   const FieldDefs : TfieldDefs); override;
+   procedure UnPrepareStatement(cursor : TSQLCursor); override;
+   procedure FreeFldBuffers(cursor : TSQLCursor); override;
+   function loadfield(const cursor: tsqlcursor;
+     const datatype: tfieldtype; const fieldnum: integer; //null based
+     const buffer: pointer; var bufsize: integer;
+                                const aisutf8: boolean): boolean; override;
+          //if bufsize < 0 -> buffer was to small, should be -bufsize
    procedure updateutf8(var autf8: boolean); override;
    function getinsertid(const atransaction: tsqltransaction): int64; override;
    function fetchblob(const cursor: tsqlcursor;
@@ -249,9 +249,9 @@ function tsqlite3connection.CreateBlobStream(const Field: TField;
                const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
 var
  blobid: integer;
- int1,int2: integer;
- str1: string;
- bo1: boolean;
+// int1,int2: integer;
+// str1: string;
+// bo1: boolean;
 begin
  if (mode = bmwrite) and (field.dataset is tmsesqlquery) then begin
   result:= tmsebufdataset(field.dataset).createblobbuffer(field);
@@ -303,11 +303,12 @@ begin
 end;
 
 procedure tsqlite3connection.UnPrepareStatement(cursor: TSQLCursor);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  with tsqlite3cursor(cursor) do begin
-  int1:= sqlite3_finalize(fstatement);
+//  int1:= sqlite3_finalize(fstatement);
+  sqlite3_finalize(fstatement);
   fprepared:= false;
   fopen:= false;
  end;
@@ -352,7 +353,8 @@ var
  int1,int2,int3: integer;
  str1,str2: string;
  ft1: tfieldtype;
- size1: word;
+// size1: word;
+ size1: integer;
  ar1: stringarty;
  defsbefore: array of defbeforety;
  fd: tfielddef;
@@ -586,8 +588,8 @@ function tsqlite3connection.loadfield(const cursor: tsqlcursor;
 var
  st1: storagetypety;
  fnum: integer;
- i: integer;
- i64: int64;
+// i: integer;
+// i64: int64;
  int1,int2: integer;
  str1: string;
  ar1,ar2: stringarty;
@@ -814,11 +816,12 @@ begin
 end;
 
 procedure tsqlite3connection.DoInternalDisconnect;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  if fhandle <> nil then begin
-  int1:= sqlite3_close(fhandle);
+//  int1:= sqlite3_close(fhandle);
+  sqlite3_close(fhandle);
 //  if int1 = sqlite_busy then begin
 //   checkerror(int1);
 //  end;
@@ -944,9 +947,9 @@ end;
 function tsqlite3connection.getprimarykeyfield(const atablename: string;
                                 const acursor: tsqlcursor): string;
 var
- int1,int2: integer;
+ int1{,int2}: integer;
  ar1: stringararty;
- str1: string;
+// str1: string;
 begin
  result:= '';
  if atablename <> '' then begin

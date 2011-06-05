@@ -2016,7 +2016,9 @@ type
    function candefocus: boolean;
    procedure nofocus;
    property focuscount: longword read ffocuscount;
-   function close: boolean; //true if ok
+   function close: boolean; reintroduce; //true if ok
+   function close(const amodalresult: modalresultty): boolean; 
+                            reintroduce;//true if ok
    procedure beginmoving; //lock window rect modification
    procedure endmoving;
    procedure bringtofront;
@@ -8575,8 +8577,8 @@ begin
 end;
 
 function twidget.getsortxchildren(const banded: boolean = false): widgetarty;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  result:= copy(container.fwidgets);
  if banded then begin
@@ -10863,8 +10865,8 @@ begin
 end;
 
 procedure twidget.setchildorder(child: tcomponent; order: integer);
-var
- comp1: tcomponent;
+//var
+// comp1: tcomponent;
 begin
  if not fixupsetchildorder(self,child,order) then begin
   with container do begin
@@ -10888,7 +10890,7 @@ procedure twidget.getchildren(proc: tgetchildproc; root: tcomponent);
 var
  int1: integer;
  widget: twidget;
- ev1: getchildreneventty; 
+// ev1: getchildreneventty; 
 begin
  for int1:= 0 to high(fwidgets) do begin
   widget:= fwidgets[int1];
@@ -11512,7 +11514,9 @@ begin
   end;
   widget1:= widget1.fparentwidget;
  until widget1 = nil;
+{$warnings off}
  result:= twidgetfontempty(stockobjects.fonts[stf_empty]);
+{$warnings on}
 end;
 
 function twidget.getfontempty: twidgetfontempty;
@@ -12167,8 +12171,8 @@ begin
 end;
 
 procedure twindow.destroywindow;
-var
- event: tdestroywindowevent;
+//var
+// event: tdestroywindowevent;
 begin
  releasemouse;
 // endmodal;
@@ -13476,9 +13480,19 @@ begin
 // end;
 end;
 
+function twindow.close(const amodalresult: modalresultty): boolean; 
+                            //true if ok
+begin
+ fmodalresult:= amodalresult;
+ result:= false;
+ if (amodalresult <> mr_none) {and (tws_modal in fstate)} then begin
+  result:= close;
+ end;
+end;
+
 procedure twindow.setmodalresult(const Value: modalresultty);
 begin
- fmodalresult := Value;
+ fmodalresult:= Value;
  if (value <> mr_none) {and (tws_modal in fstate)} then begin
   close;
  end;
@@ -14003,8 +14017,8 @@ end;
 
 procedure tonsyseventlist.doevent(const awindow: winidty; 
                                var aevent: syseventty; var handled: boolean);
-var
- bo1: boolean;
+//var
+// bo1: boolean;
 begin
  factitem:= 0;
  while (factitem < fcount) and not handled do begin
@@ -14262,7 +14276,7 @@ end;
 procedure tinternalapplication.processwindowcrossingevent(event: twindowevent);
 var
  window: twindow;
- info: mouseeventinfoty;
+// info: mouseeventinfoty;
 begin
  if findwindow(event.fwinid,window) then begin
   if event.kind = ek_leavewindow then begin
@@ -14290,7 +14304,7 @@ var
  abspos: pointty;
  int1: integer;
  bo1: boolean;
- ek1: eventkindty;
+// ek1: eventkindty;
  widget1: twidget;
  pt1: pointty;
 begin
@@ -16824,7 +16838,7 @@ function tguiapplication.waitdialog(const athread: tthreadcomp = nil;
                const aexecuteaction: notifyeventty = nil;
                const aidleaction: waitidleeventty = nil): boolean;
 var
- res1: modalresultty;
+// res1: modalresultty;
  wo1: longword;
 begin
  if not ismainthread then begin

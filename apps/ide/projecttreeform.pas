@@ -94,7 +94,7 @@ type
    fkind: projectnodety;
    ferror: boolean;
   public
-   constructor create(const akind: projectnodety);
+   constructor create(const akind: projectnodety); reintroduce;
  end;
 
  tfilenode = class(tprojectnode)
@@ -184,7 +184,8 @@ type
  tcmodulesnode = class(tfilesnode)
   protected
    function createsubnode: ttreelistitem; override;
-   function createnode(const afilename: filenamety): tfilenode; virtual;
+   function createnode(const afilename: filenamety): tfilenode; 
+                                                virtual; reintroduce;
   public
    constructor create;
    procedure parse(const astopcheckproc: stopcheckprocty = nil);
@@ -439,8 +440,8 @@ begin
 end;
 
 function tfilesnode.findfile(const filename: filenamety): tfilenode;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  result:= tfilenode(fhashlist.find(filename));
 end;

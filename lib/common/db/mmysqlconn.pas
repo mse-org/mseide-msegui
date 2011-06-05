@@ -148,17 +148,9 @@ Type
 //    function GetAsSQLText(Field : TField) : string; overload; override;
 //    function GetAsSQLText(Param : TParam) : string; overload; override;
 
-    Function AllocateCursorHandle(const aowner: icursorclient;
-                           const aname: ansistring): TSQLCursor; override;
-    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
     Function AllocateTransactionHandle : TSQLHandle; override;
     procedure finalizetransaction(const atransaction: tsqlhandle); override; 
 
-    procedure preparestatement(const cursor: tsqlcursor; 
-                  const atransaction : tsqltransaction;
-                  const asql: msestring; const aparams : tmseparams); override;
-    procedure UnPrepareStatement(cursor:TSQLCursor); override;
-    procedure FreeFldBuffers(cursor : TSQLCursor); override;
     procedure doexecuteunprepared(const c: tmysqlcursor;
                    const atransaction: tsqltransaction; const asql: string);
     procedure internalExecute(const cursor: TSQLCursor;
@@ -168,14 +160,6 @@ Type
                const atransaction: tsqltransaction;
                const asql: string); override;
 
-    procedure AddFieldDefs(const cursor: TSQLCursor; 
-                   const FieldDefs : TfieldDefs); override;
-    function Fetch(cursor : TSQLCursor) : boolean; override;
-    function loadfield(const cursor: tsqlcursor;
-      const datatype: tfieldtype; const fieldnum: integer; //null based
-      const abuffer: pointer; var abufsize: integer;
-                                const aisutf8: boolean): boolean; override;
-           //if bufsize < 0 -> buffer was to small, should be -bufsize
     function GetTransactionHandle(trans : TSQLHandle): pointer; override;
     function Commit(trans : TSQLHandle) : boolean; override;
     function RollBack(trans : TSQLHandle) : boolean; override;
@@ -206,6 +190,22 @@ Type
    
   Public
    constructor create(aowner: tcomponent); override;
+   Function AllocateCursorHandle(const aowner: icursorclient;
+                           const aname: ansistring): TSQLCursor; override;
+   Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
+   procedure preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams); override;
+   procedure UnPrepareStatement(cursor:TSQLCursor); override;
+   procedure FreeFldBuffers(cursor : TSQLCursor); override;
+   procedure AddFieldDefs(const cursor: TSQLCursor; 
+                   const FieldDefs : TfieldDefs); override;
+   function Fetch(cursor : TSQLCursor) : boolean; override;
+   function loadfield(const cursor: tsqlcursor;
+      const datatype: tfieldtype; const fieldnum: integer; //null based
+      const abuffer: pointer; var abufsize: integer;
+                                const aisutf8: boolean): boolean; override;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
    function fetchblob(const cursor: tsqlcursor;
                               const fieldnum: integer): ansistring; override;
                               //null based
@@ -578,8 +578,8 @@ end;
 
 function tmysqlconnection.GetClientInfo: string;
 
-Var
-  B : Boolean;
+//Var
+//  B : Boolean;
 
 begin
   // To make it possible to call this if there's no connection yet
@@ -807,7 +807,7 @@ procedure tmysqlconnection.preparestatement(const cursor: tsqlcursor;
 var
  mstr1: msestring;
  str1: ansistring;
- fieldcount: integer;
+// fieldcount: integer;
 begin
  With tmysqlcursor(cursor) do begin
   fconn:= tmysqltrans(atransaction.trans).fconn;
@@ -937,9 +937,9 @@ procedure tmysqlconnection.internalExecute(const  cursor: TSQLCursor;
 
 var
  C: tmysqlcursor;
- i: integer;
+// i: integer;
  str1: ansistring;
- par1: tparam;
+// par1: tparam;
  int1: integer;
  inputparambindings: bindinginfoarty;
  paramdata: pointer;
@@ -1429,7 +1429,7 @@ begin
   for I := 1 to Length(S) do
     begin
     if not (S[I] in ['0'..'9', '+', '-', 'E', 'e']) then
-      Tmp := Tmp + DecimalSeparator
+      Tmp := Tmp + defaultformatsettings.DecimalSeparator
     else
       Tmp := Tmp + S[I];
     end;
@@ -1447,7 +1447,7 @@ begin
   for I := 1 to Length(S) do
     begin
     if not (S[I] in ['0'..'9', '+', '-', 'E', 'e']) then
-      Tmp := Tmp + DecimalSeparator
+      Tmp := Tmp + defaultformatsettings.DecimalSeparator
     else
       Tmp := Tmp + S[I];
     end;
@@ -1647,7 +1647,7 @@ procedure tmysqlconnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
                      const aTableName : string);
 var 
  qry: TSQLQuery;
- keynamef,filednamef,columnnamef,nonuniquef: tfield;
+ keynamef,{filednamef,}columnnamef,nonuniquef: tfield;
  str1: string;
 begin
  if not assigned(Transaction) then begin
@@ -1711,6 +1711,7 @@ begin
    checkerror(serrcommittransaction,fconn);
   end;
  end;
+ result:= true;
 end;
 
 function tmysqlconnection.RollBack(trans: TSQLHandle): boolean;
@@ -1720,6 +1721,7 @@ begin
    checkerror(serrrollbacktransaction,fconn);
   end;
  end;
+ result:= true;
 end;
 
 procedure tmysqlconnection.internalCommitRetaining(trans: TSQLHandle);
@@ -1762,9 +1764,9 @@ function tmysqlconnection.CreateBlobStream(const Field: TField;
                const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
 var
  blobid: integer;
- int1,int2: integer;
- str1: string;
- bo1: boolean;
+// int1,int2: integer;
+// str1: string;
+// bo1: boolean;
 begin
  result:= nil;
  if mode = bmread then begin

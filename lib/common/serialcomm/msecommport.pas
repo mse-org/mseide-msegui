@@ -598,7 +598,7 @@ begin
  {$else}
  hcomm:= mselibc.open(PChar('/dev/'+commname[commnr]), o_rdwr or o_nonblock
              {,FileAccessRights});
- if hcomm = invalidfilehandle then begin
+ if hcomm = thandle(invalidfilehandle) then begin
   result:= false;
  end
  else begin
@@ -1874,7 +1874,7 @@ end;
 function tasciicommport.send(const commandstrings: array of string): integer;
 var
  int1: integer;
- str1: string;
+// str1: string;
 begin
  result:= cpf_none;
  for int1:= 0 to high(commandstrings) do begin

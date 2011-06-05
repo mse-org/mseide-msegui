@@ -74,7 +74,7 @@ type
 
  twmfprintcanvas = class(tgdiprintcanvas)
   private
-   ffilehandle: henhmetafile;
+//   ffilehandle: henhmetafile;
    function getenhmetafile: henhmetafile;
   protected
    function didprint: boolean; override;
@@ -246,7 +246,9 @@ end;
 constructor tcustomgdiprinter.create(aowner: tcomponent);
 begin
  if fcanvas = nil then begin
+{$warnings off}
   fcanvas:= tgdiprintcanvas.create(self,icanvas(self));
+{$warnings on}
  end;
  inherited;
  fcanvas.ppmm:= defaultgdiprintppmm;
@@ -361,6 +363,7 @@ end;
 function defaultprinter: msestring;
 begin
  checkgdiprint;
+ result:= '';
 end;
 
 function tcustomgdiprinter.actprintername: msestring;
@@ -522,7 +525,9 @@ end;
 constructor twmfprinter.create(aowner: tcomponent);
 begin
  if fcanvas = nil then begin
+{$warnings off}
   fcanvas:= twmfprintcanvas.create(self,icanvas(self));
+{$warnings on}
  end;
  inherited;
 end;

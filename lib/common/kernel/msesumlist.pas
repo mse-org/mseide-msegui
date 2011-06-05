@@ -40,7 +40,7 @@ type
    function newsum(const alevel: integer; const asum: realty;
                                      const aindex: integer): realty;
   public
-   constructor create(const aowner: tdatalist);
+   constructor create(const aowner: tdatalist); reintroduce;
  end;
 
  tsumuparrayprop = class(tsumarrayprop)
@@ -71,9 +71,6 @@ type
    procedure setsourcevalue(const avalue: string); virtual;
    procedure setsourcelevel(const avalue: string); virtual;
    procedure setsourceissum(const avalue: string); virtual;
-   procedure listdestroyed(const sender: tdatalist); override;
-   procedure clean(const start,stop: integer); override;
-   function datatype: listdatatypety; override;
    procedure getgriddefaultdata(var dest); override;
    procedure getgriddata(index: integer; var dest); override;
    procedure setgriddata(index: integer; const source); override;
@@ -82,7 +79,10 @@ type
   public
    constructor create; override;
    destructor destroy; override;
+   procedure listdestroyed(const sender: tdatalist); override;
+   procedure clean(const start,stop: integer); override;
    procedure change(const index: integer); override;
+   function datatype: listdatatypety; override;
    procedure sourcechange(const sender: tdatalist; 
                                          const index: integer); override;
    function getsourcecount: integer; override;
@@ -126,8 +126,12 @@ begin
  initsource(flinkissum);
  inherited;
  fsize:= sizeof(realsumty);
+{$warnings off}
  fsumsup:= tsumuparrayprop.create(self);
+{$warnings on}
+{$warnings off}
  fsumsdown:= tsumdownarrayprop.create(self);
+{$warnings on}
  fillchar(fdefaultval,sizeof(fdefaultval),0);
  fdefaultval.data.rea:= emptyreal;
 end;
@@ -161,8 +165,8 @@ begin
 end;
 
 procedure trealsumlist.getgriddata(index: integer; var dest);
-var
- po1: prealsumty;
+//var
+// po1: prealsumty;
 begin
  clean(index,index);
  checkindex(index);
@@ -288,8 +292,8 @@ end;
 procedure trealsumlist.clean(const start,stop: integer);
 var
  po1: prealsumty;
- po2: prowstatety;
- po3: pinteger;
+// po2: prowstatety;
+// po3: pinteger;
  int1,int2: integer;
  rea1: realty;
 begin

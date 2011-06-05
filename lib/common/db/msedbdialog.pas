@@ -251,7 +251,9 @@ end;
 function tdbfilenameedit.nullcheckneeded(const newfocus: twidget): boolean;
 begin
  result:= inherited nullcheckneeded(newfocus);
+{$warnings off}
  teditwidgetdatalink1(fdatalink).nullcheckneeded(result);
+{$warnings on}
 end;
 
 procedure tdbfilenameedit.setdatalink(const avalue: tstringeditwidgetdatalink);
@@ -279,7 +281,9 @@ end;
 
 procedure tdbfilenameedit.recchanged;
 begin
+{$warnings off}
  teditwidgetdatalink1(fdatalink).recordchanged(nil);
+{$warnings on}
 end;
 
 function tdbfilenameedit.getfieldlink: tfielddatalink;

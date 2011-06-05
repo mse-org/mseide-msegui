@@ -30,7 +30,7 @@ type
  tlocaldataset = class(tmsebufdataset,imselocate,idscontroller,igetdscontroller)
   private
 //   fcontroller: tdscontroller;
-   ftagpo: pointer;
+//   ftagpo: pointer;
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
        //idscontroller
@@ -52,7 +52,7 @@ type
    procedure endfilteredit;
    procedure doidleapplyupdates;
   protected
-   procedure setactive (value : boolean);{ override;}
+   procedure setactive (value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -66,7 +66,6 @@ type
    function islocal: boolean; override;
    procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 
-   function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
    function fetch : boolean; override;
    function getblobdatasize: integer; override;
    function blobscached: boolean; override;
@@ -90,6 +89,7 @@ type
    function locate(const key: msestring; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
 }
+   function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
    procedure post; override;
@@ -366,7 +366,7 @@ function tlocaldataset.CreateBlobStream(Field: TField;
                Mode: TBlobStreamMode): TStream;
 var
  info: blobcacheinfoty; 
- int1: integer;
+// int1: integer;
  blob1: blobinfoty;
 begin
  result:= inherited createblobstream(field,mode);

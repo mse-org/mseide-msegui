@@ -412,7 +412,6 @@ type
    procedure setlinkedvar(const source: tlinkedpersistent;
               var dest: tlinkedpersistent;
               const linkintf: iobjectlink = nil); overload;
-   procedure writestate(writer: twriter); override;
    function getactualclassname: string;
    class function getmoduleclassname: string; virtual;
    class function hasresource: boolean; virtual;
@@ -426,6 +425,7 @@ type
 //                                      const root: tcomponent); virtual;
   public
    destructor destroy; override;
+   procedure writestate(writer: twriter); override;
    procedure updateskin(const recursive: boolean = false); virtual;
 //   procedure removeskin(const recursive: boolean = false); virtual;
    function loading: boolean; reintroduce;
@@ -628,7 +628,7 @@ type
 
  twritermse = class(twriter)
   private
-   fgetchildrenbefore: getchildreneventty;
+//   fgetchildrenbefore: getchildreneventty;
    fancestorlookuplevel: integer;
    fchildlevel: integer;
    fnoancestor: boolean; //used for copy paste of inherited components
@@ -1108,12 +1108,16 @@ end;
 
 function getfproppath(const writer:twriter): string;
 begin
+{$warnings off}
  result:= twritercracker(writer).fproppath;
+{$warnings on}
 end;
 
 procedure setfproppath(const writer:twriter; const value: string);
 begin
+{$warnings off}
  twritercracker(writer).fproppath:= value;
+{$warnings on}
 end;
 
 function modules: tmodulelist;
@@ -1130,7 +1134,9 @@ function getcomponentlist(const acomponent: tcomponent): tfplist;
 function getcomponentlist(const acomponent: tcomponent): tlist;
 {$endif}
 begin
+{$warnings off}
  with tcomponentcracker(acomponent) do begin
+{$warnings on}
   if fcomponents = nil then begin
    {$ifdef mse_fpc_2_4_3}
    fcomponents:= tfplist.create;
@@ -1144,7 +1150,9 @@ end;
 
 procedure clearcomponentlist(const acomponent: tcomponent);
 begin
+{$warnings off}
  freeandnil(tcomponentcracker(acomponent).fcomponents);
+{$warnings on}
 end;
 
 type
@@ -1198,7 +1206,9 @@ end;
 function setloading(const acomponent: tcomponent; const avalue: boolean): boolean;
 begin
  result:= csdesigning in acomponent.componentstate;
+{$warnings off}
  with tcomponentcracker(acomponent) do begin
+{$warnings on}
   if avalue then begin
    include(fcomponentstate,csloading);
   end
@@ -1225,7 +1235,9 @@ var
  int1: integer;
  comp1: tcomponent;
 begin
+{$warnings off}
  with tcomponentcracker(acomponent) do begin
+{$warnings on}
   exclude(fcomponentstate,csancestor);
   include(fcomponentstate,csinline);   
  end; 
@@ -1242,7 +1254,9 @@ var
  comp1: tcomponent1;
 begin
  if csinline in acomponent.componentstate then begin
+{$warnings off}
   with tcomponentcracker(acomponent) do begin
+{$warnings on}
    exclude(fcomponentstate,csancestor);
   end;
   for int1:= 0 to acomponent.componentcount - 1 do begin
@@ -1285,7 +1299,7 @@ end;
 procedure writeset(const writer: twriter; const value: tintegerset;
                             const atypeinfo: ptypeinfo);
 var
- i: integer;
+// i: integer;
  basetype: ptypeinfo;
 begin
  basetype:= gettypedata(atypeinfo)^.comptype{$ifndef FPC}^{$endif};
@@ -1338,6 +1352,7 @@ var
  po1,po2: ptypeinfo;
 begin
  reader.checkvalue(vaset);
+ set1:= [];
  set2:= [];
  result:= false;
  with info do begin
@@ -1533,7 +1548,9 @@ var
 begin
  for int1:= 0 to high(anames) do begin
   comp1:= owner.findcomponent(anames[int1]);
+{$warnings off}
   with tcomponentcracker(owner).fcomponents do begin
+{$warnings on}
    remove(comp1);
    add(comp1);
   end;
@@ -1617,7 +1634,9 @@ var
  int1: integer;
 begin
  result:= nil;
+{$warnings off}
  with tcomponentcracker(acomponent) do begin
+{$warnings on}
   if ffreenotifies <> nil then begin
    for int1:= 0 to ffreenotifies.count - 1 do begin
     additem(pointerarty(result),ffreenotifies[int1]);
@@ -1948,7 +1967,7 @@ type
   protected
    procedure notification(acomponent: tcomponent; operation: toperation); override;
   public
-   constructor create(const acomponents: componentarty);
+   constructor create(const acomponents: componentarty); reintroduce;
  end;
 
 { tcomponentdeleter }
@@ -2058,16 +2077,16 @@ var
  writer: twritermse;
  reader: treader;
 // comp1: tcomponent;
- comp1,comp2: tcomponent;
- int1: integer;
+// comp1,comp2: tcomponent;
+// int1: integer;
  eventhandler: trefresheventhandler;
  inl{,anc}: boolean;
  tabbefore: pointer;
  {$ifdef mse_debugrefresh}
  stream3: ttextstream;
  {$endif}
- ar1,ar2: componentarty;
- bo1: boolean;
+// ar1,ar2: componentarty;
+// bo1: boolean;
  
 begin
  {$ifdef mse_debugrefresh}
@@ -3707,7 +3726,9 @@ end;
 
 procedure tmsecomponent.setinline(value: boolean);
 begin
+{$warnings off}
  with tcomponentcracker(self) do begin
+{$warnings on}
   if value then begin
    include(fcomponentstate,csinline);
   end
@@ -3719,7 +3740,9 @@ end;
 
 procedure tmsecomponent.setancestor(value: boolean);
 begin
+{$warnings off}
  with tcomponentcracker(self) do begin
+{$warnings on}
   if value then begin
    include(fcomponentstate,csancestor);
   end
@@ -4769,7 +4792,9 @@ end;
 // Used as argument for calls to TComponent.GetChildren:
 procedure TWritermse.AddToAncestorList(Component: TComponent);
 begin
+{$warnings off}
  with twritercracker(self) do begin
+{$warnings on}
   FAncestors.AddObject(rootcompname(Component,fancestorlookuplevel),
                         TPosComponent.Create(FAncestors.Count,Component));
  end;
@@ -4784,7 +4809,9 @@ Var
  int1: integer;
 begin
   // Should be set only when we write an inherited with children.
+{$warnings off}
  with twritercracker(self) do begin
+{$warnings on}
   if Not Assigned(FAncestors) then
     exit;
   comp1:= froot;
@@ -4815,7 +4842,9 @@ Var
   C : TComponent;
 
 begin
+{$warnings off}
  with twritercracker(self) do begin
+{$warnings on}
   if Assigned(FOnFindAncestor) then
     if (Ancestor=Nil) or (Ancestor is TComponent) then
       begin
@@ -4835,14 +4864,18 @@ var
   SA : TPersistent;
   SR, SRA : TComponent;
 begin
+{$warnings off}
  with twritercracker(self) do begin
+{$warnings on}
   SR:=FRoot;
   SA:=FAncestor;
   SRA:=FRootAncestor;
   inc(fchildlevel);
   Try
+{$warnings off}
     tcomponentcracker(Component).FComponentState:=
                tcomponentcracker(Component).FComponentState+[csWriting];
+{$warnings on}
     Try
      if not fnoancestor or (csinline in component.componentstate) or
                                                  (fchildlevel > 1) then begin
@@ -4859,8 +4892,10 @@ begin
      writelistend;
     {$endif}
     Finally
+{$warnings off}
       tcomponentcracker(Component).FComponentState:=
                    tcomponentcracker(Component).FComponentState-[csWriting];
+{$warnings on}
     end;
   Finally
    dec(fchildlevel);
@@ -4882,7 +4917,9 @@ Var
   rootrootancestorbefore: tcomponent;
   
 begin
+{$warnings off}
  with twritercracker(self) do begin
+{$warnings on}
   // Write children list. 
   // While writing children, the ancestor environment must be saved
   // This is recursive...
@@ -4962,7 +4999,9 @@ procedure TWritermse.WriteComponentData(Instance: TComponent);
 var
   Flags: TFilerFlags;
 begin
+{$warnings off}
  with twritercracker(self) do begin
+{$warnings on}
   Flags := [];
   If (Assigned(FAncestor)) and  //has ancestor
      (not (csInline in Instance.ComponentState) or // no inline component
@@ -5025,7 +5064,7 @@ procedure twritermse.getchildren1(const acomp: tcomponent;
                const proc: tgetchildproc; const aroot: tcomponent);
    //support for added components to submodules
 var
- root1: tcomponent;
+// root1: tcomponent;
  comp1,comp2: tcomponent;
  int1: integer;
 begin
@@ -5060,7 +5099,9 @@ procedure twritermse.writedescendent(const aroot: tcomponent;
 begin
  frootrootancestor:= aancestor;
  frootroot:= aroot;
+{$warnings off}
  with twritercracker(self) do begin
+{$warnings on}
   FRoot := ARoot;
   FAncestor := AAncestor;
   FRootAncestor := AAncestor;

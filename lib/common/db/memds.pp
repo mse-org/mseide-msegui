@@ -81,7 +81,6 @@ type
     procedure FreeRecordBuffer(var Buffer: PChar); override;
     procedure GetBookmarkData(Buffer: PChar; Data: Pointer); override;
     function  GetBookmarkFlag(Buffer: PChar): TBookmarkFlag; override;
-    function  GetFieldData(Field: TField; Buffer: Pointer): Boolean; override;
     function  GetRecord(Buffer: PChar; GetMode: TGetMode; DoCheck: Boolean): TGetResult; override;
     function  GetRecordSize: Word; override;
     procedure InternalAddRecord(Buffer: Pointer; DoAppend: Boolean); override;
@@ -98,7 +97,6 @@ type
     function  IsCursorOpen: Boolean; override;
     procedure SetBookmarkFlag(Buffer: PChar; Value: TBookmarkFlag); override;
     procedure SetBookmarkData(Buffer: PChar; Data: Pointer); override;
-    procedure SetFieldData(Field: TField; Buffer: Pointer); override;
 
     // Optional.
     function GetRecordCount: Integer; override;
@@ -125,6 +123,8 @@ type
 
     Function  DataSize : Integer;
 
+    function  GetFieldData(Field: TField; Buffer: Pointer): Boolean; override;
+    procedure SetFieldData(Field: TField; Buffer: Pointer); override;
     procedure Clear(ClearDefs : Boolean);
     procedure Clear;
     Procedure SaveToFile(AFileName : String);
@@ -183,8 +183,8 @@ const
                                  %11101111,%11011111,%10111111,%01111111);
           
 procedure unsetfieldisnull(nullmask: pbyte; const x: integer);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  inc(nullmask,(x shr 3));
  nullmask^:= nullmask^ or ormask[x and 7];
@@ -364,8 +364,8 @@ end;
 
 procedure TMemDataset.InternalInitRecord(Buffer: PChar);
 
-var
-  I : integer;
+//var
+//  I : integer;
 
 begin
  fillchar(buffer^,frecsize,0);
@@ -375,7 +375,7 @@ procedure TMemDataset.InternalDelete;
 
 Var
   TS : TMemoryStream;
-  OldPos,NewPos,CopySize1,CopySize2 : longword;
+//  OldPos,NewPos,CopySize1,CopySize2 : longword;
 
 begin
   if (FCurrRecNo<0) or (FCurrRecNo>=FRecCount) then
@@ -576,11 +576,11 @@ end;
 Procedure TMemDataset.SaveFieldDefsToStream(F : TStream);
 
 Var
-  I,ACount : Integer;
-  FN : String;
-  FS : Integer;
-  B : Boolean;
-  FT : TFieldType;
+  I{,ACount} : Integer;
+//  FN : String;
+//  FS : Integer;
+//  B : Boolean;
+//  FT : TFieldType;
   FD : TFieldDef;
 
 begin

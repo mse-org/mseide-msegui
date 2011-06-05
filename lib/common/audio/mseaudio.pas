@@ -236,11 +236,11 @@ begin
  fillchar(ss,sizeof(ss),0);
  fillchar(buattr,sizeof(buattr),0);
  with buattr do begin
-  maxlength:= -1; 
-  tlength:= -1;
-  prebuf:= -1;
-  minreq:= -1;
-  fragsize:= -1;
+  maxlength:= longword(-1); 
+  tlength:= longword(-1);
+  prebuf:= longword(-1);
+  minreq:= longword(-1);
+  fragsize:= longword(-1);
  end;
  if flatency > 0 then begin
   int1:= round(flatency*frate*samplebuffersizematrix[fformat]*fchannels);

@@ -209,6 +209,7 @@ begin
    clear;
   end;
  end;
+ result:= nil; //todo
 end;
 
 procedure tfft.setinpreal(const avalue: realarty);

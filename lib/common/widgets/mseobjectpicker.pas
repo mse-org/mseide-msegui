@@ -614,8 +614,8 @@ begin
 end;
 
 function tobjectpicker.getcurrentobjects: integerarty;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
 {
  if ops_multiselecting in fstate then begin

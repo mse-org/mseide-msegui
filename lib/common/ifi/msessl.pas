@@ -40,7 +40,6 @@ type
    procedure ctxchanged;
    procedure setcipherlist(const avalue: tstringlist);
   protected
-   procedure link(const arxfd,atxfd: integer; out ainfo: cryptioinfoty); override;
    class procedure internalunlink(var ainfo: cryptioinfoty); override;
    class procedure internalthreadterminate; override;
    class procedure connect(var ainfo: cryptioinfoty; const atimeoutms: integer);  override;
@@ -52,6 +51,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure link(const arxfd,atxfd: integer; out ainfo: cryptioinfoty); override;
   published
    property protocols: sslprotocolsty read fprotocols write fprotocols default
                                    defaultsslprotocols;
@@ -233,9 +233,9 @@ begin
 end;
 
 class procedure tssl.connect(var ainfo: cryptioinfoty; const atimeoutms: integer);
-var
- int1,int2: integer;
- err1: syserrorty;
+//var
+// int1,int2: integer;
+// err1: syserrorty;
 begin
  with ainfo,sslinfoty(cryptdata) do begin
   repeat
@@ -245,9 +245,9 @@ begin
 end;
 
 class procedure tssl.accept(var ainfo: cryptioinfoty; const atimeoutms: integer);
-var
- int1,int2: integer;
- err1: syserrorty;
+//var
+// int1{,int2}: integer;
+// err1: syserrorty;
 begin
  with ainfo,sslinfoty(cryptdata) do begin
   repeat

@@ -616,8 +616,8 @@ end;
 function tcustomlookupbuffer.find(const fieldno: integer; const avalue: msestring;
                         out aindex: integer; const caseinsensitive: boolean;
                              const filter: lbfiltereventty = nil): boolean;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
 // checkbuffer;
  checkarrayindex(ftextdata,fieldno);

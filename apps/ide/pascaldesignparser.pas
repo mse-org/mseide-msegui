@@ -858,7 +858,7 @@ var
  statementstart: tokenidty;
  ident1: pascalidentty;
  lstr1: lstringty;
- bo1: boolean;
+// bo1: boolean;
 begin
  while not eof do begin
   skipwhitespace;

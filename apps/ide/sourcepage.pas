@@ -1233,8 +1233,8 @@ end;
 
 procedure tsourcepage.gridoncellevent(const sender: TObject; 
              var info: celleventinfoty);
-var
- shiftstate1: shiftstatesty;
+//var
+// shiftstate1: shiftstatesty;
 begin
 {
  if (info.eventkind = cek_keydown) then begin
@@ -1479,7 +1479,7 @@ end;
 procedure tsourcepage.inserttemplate;
 var
  mstr1,mstr2: msestring;
- po1: pmsechar;
+// po1: pmsechar;
  po2: ptemplateinfoty;
  gc1,gc2: gridcoordty;
  int1: integer;

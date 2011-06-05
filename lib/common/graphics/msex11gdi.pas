@@ -271,55 +271,55 @@ type
      (name: 'SLANT'; isstring: true),
      (name: 'SETWIDTH_NAME'; isstring: true),
      (name: 'ADD_STYLE_NAME'; isstring: true),
-     (name: 'PIXEL_SIZE'),
-     (name: 'POINT_SIZE'),
-     (name: 'RESOLUTION_X'),
-     (name: 'RESOLUTION_Y'),
+     (name: 'PIXEL_SIZE'; isstring: false),
+     (name: 'POINT_SIZE'; isstring: false),
+     (name: 'RESOLUTION_X'; isstring: false),
+     (name: 'RESOLUTION_Y'; isstring: false),
      (name: 'SPACING'; isstring: true),
-     (name: 'AVERAGE_WIDTH'),
+     (name: 'AVERAGE_WIDTH'; isstring: false),
      (name: 'CHARSET_REGISTRY'; isstring: true),
      (name: 'CHARSET_ENCODING'; isstring: true),
      {'QUAD_WIDTH','RESOLUTION',}
-     (name: 'MIN_SPACE'),
-     (name: 'NORM_SPACE'),
-     (name: 'MAX_SPACE'),
-     (name: 'END_SPACE'),
-     (name: 'SUPERSCRIPT_X'),
-     (name: 'SUPERSCRIPT_Y'),
-     (name: 'SUBSCRIPT_X'),
-     (name: 'SUBSCRIPT_Y'),
-     (name: 'UNDERLINE_POSITION'),
-     (name: 'UNDERLINE_THICKNESS'),
-     (name: 'STRIKEOUT_ASCENT'),
-     (name: 'STRIKEOUT_DESCENT'),
-     (name: 'ITALIC_ANGLE'),
-     (name: 'X_HEIGHT'),
-     (name: 'WEIGHT'),
+     (name: 'MIN_SPACE'; isstring: false),
+     (name: 'NORM_SPACE'; isstring: false),
+     (name: 'MAX_SPACE'; isstring: false),
+     (name: 'END_SPACE'; isstring: false),
+     (name: 'SUPERSCRIPT_X'; isstring: false),
+     (name: 'SUPERSCRIPT_Y'; isstring: false),
+     (name: 'SUBSCRIPT_X'; isstring: false),
+     (name: 'SUBSCRIPT_Y'; isstring: false),
+     (name: 'UNDERLINE_POSITION'; isstring: false),
+     (name: 'UNDERLINE_THICKNESS'; isstring: false),
+     (name: 'STRIKEOUT_ASCENT'; isstring: false),
+     (name: 'STRIKEOUT_DESCENT'; isstring: false),
+     (name: 'ITALIC_ANGLE'; isstring: false),
+     (name: 'X_HEIGHT'; isstring: false),
+     (name: 'WEIGHT'; isstring: false),
      (name: 'FACE_NAME'; isstring: true),
      {'FULL_NAME',}
      (name: 'FONT'; isstring: true),
      (name: 'COPYRIGHT'; isstring: true),
-     (name: 'AVG_CAPITAL_WIDTH'),
-     (name: 'AVG_LOWERCASE_WIDTH'),
-     (name: 'RELATIVE_SETWIDTH'),
-     (name: 'RELATIVE_WEIGHT'),
-     (name: 'CAP_HEIGHT'),
-     (name: 'SUPERSCRIPT_SIZE'),
-     (name: 'FIGURE_WIDTH'),
-     (name: 'SUBSCRIPT_SIZE'),
-     (name: 'SMALL_CAP_SIZE'),
+     (name: 'AVG_CAPITAL_WIDTH'; isstring: false),
+     (name: 'AVG_LOWERCASE_WIDTH'; isstring: false),
+     (name: 'RELATIVE_SETWIDTH'; isstring: false),
+     (name: 'RELATIVE_WEIGHT'; isstring: false),
+     (name: 'CAP_HEIGHT'; isstring: false),
+     (name: 'SUPERSCRIPT_SIZE'; isstring: false),
+     (name: 'FIGURE_WIDTH'; isstring: false),
+     (name: 'SUBSCRIPT_SIZE'; isstring: false),
+     (name: 'SMALL_CAP_SIZE'; isstring: false),
      (name: 'NOTICE'; isstring: true),
-     (name: 'DESTINATION'),
+     (name: 'DESTINATION'; isstring: false),
      (name: 'FONT_TYPE'; isstring: true),
      (name: 'FONT_VERSION'; isstring: true),
      (name: 'RASTERIZER_NAME'; isstring: true),
      (name: 'RASTERIZER_VERSION'; isstring: true),
-     (name: 'RAW_ASCENT'),
-     (name: 'RAW_DESCENT'),
+     (name: 'RAW_ASCENT'; isstring: false),
+     (name: 'RAW_DESCENT'; isstring: false),
      (name: 'AXIS_NAMES'; isstring: true),
      (name: 'AXIS_LIMITS'; isstring: true),
      (name: 'AXIS_TYPES'; isstring: true),
-     (name: '')
+     (name: ''; isstring: false)
      );
 
 var
@@ -1465,7 +1465,7 @@ procedure gdi_getfonthighres(var drawinfo: drawinfoty);
 var
  pat1,pat2: pfcpattern;
  res1: tfcresult;
- po1: pxftfont;
+// po1: pxftfont;
 begin
  gdi_lock;
  if fhasxft then begin
@@ -1718,10 +1718,10 @@ begin
   end;
  end;
 end;
-
+{
 const
  rgbwhite: rgbtriplety = (blue: $ff; green: $ff; red: $ff; res: $00);
-
+}
 procedure gdi_copyarea(var drawinfo: drawinfoty); //gdifunc
 
 const
@@ -1743,14 +1743,14 @@ var
  transform: txtransform;
  ax,ay: integer;
  aformat: pxrenderpictformat;
- color1: txrendercolor;
- pixmap1,pixmap2: pixmapty;
- areg: region;
- arect: xrectangle;
+// color1: txrendercolor;
+ {pixmap1,}pixmap2: pixmapty;
+// areg: region;
+// arect: xrectangle;
  needstransform: boolean;
  pictop: integer;
  colormask: boolean;
- bo1: boolean;
+// bo1: boolean;
 label
  endlab,endlab2;
   
@@ -1766,8 +1766,8 @@ label
 
  function getscale(const sourcesize,destsize,sourcepos: integer;
                                     out destpos: integer): txfixed;
- var
-  int1: integer;
+// var
+//  int1: integer;
  begin
   if (sourcesize > 0) and (sourcesize <> destsize) then begin
    result:= (sourcesize * $10000) div destsize;

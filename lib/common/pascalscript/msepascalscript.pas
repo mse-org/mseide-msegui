@@ -17,7 +17,7 @@ type
   private
    fprop: string;
   public
-   constructor create;
+   constructor create; reintroduce;
    procedure testproc;
    procedure testproc1; virtual;
    property prop: string read fprop write fprop;
@@ -33,7 +33,7 @@ type
                                       x: TPSRuntimeClassImporter);
    procedure doexecute(sender: tpsscript);
   public
-   constructor create(aowner: tmsecomponent);
+   constructor create(aowner: tmsecomponent); reintroduce;
  end;
  
  methpropinfoty = record
@@ -97,7 +97,7 @@ function loadpascform(const filename: filenamety): tpascform;
 var
  stream1: ttextstream;
  stream2: tmemorystream;
- reader1: treader;
+// reader1: treader;
 begin
  stream1:= nil;
  stream2:= nil;

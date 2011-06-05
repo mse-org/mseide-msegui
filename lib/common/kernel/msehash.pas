@@ -218,7 +218,7 @@ type
    function internalfindexact(const akey): phashdataty; overload;
    function internalfindexact(const akey;
                            out acount: integer): phashdataty; overload;
-   procedure checkexact(const aitemdata; var accept: boolean); virtual; abstract;
+   procedure checkexact(const aitemdata; var accept: boolean); virtual;
    function hashkey(const akey): hashvaluety; virtual; abstract;
    function checkkey(const akey; const aitemdata): boolean; virtual; abstract;
    procedure rehash;
@@ -1714,6 +1714,11 @@ begin
  end;
 end;
 
+procedure thashdatalist.checkexact(const aitemdata; var accept: boolean);
+begin
+ accept:= false; //dummy
+end;
+
 { tptruinthasdatalist }
 
 constructor tptruinthashdatalist.create(const datasize: integer);
@@ -1746,9 +1751,9 @@ begin
 end;
 
 function tptruinthashdatalist.find(const akey: ptruint): pointer;
-var
- uint1: ptruint;
- po1: pptruinthashdataty;
+//var
+// uint1: ptruint;
+// po1: pptruinthashdataty;
 begin
  result:= internalfind(akey);
  if result <> nil then begin
@@ -1829,8 +1834,8 @@ end;
 
 procedure tpointerptruinthashdatalist.delete(const akey: ptruint;
                const avalue: pointer);
-var
- po1: phashdataty;
+//var
+// po1: phashdataty;
 begin
  fpointerparam:= avalue;
  internaldeleteitem(internalfindexact(akey));
@@ -1988,8 +1993,8 @@ end;
 
 procedure tpointeransistringhashdatalist.delete(const akey: ansistring;
                const avalue: pointer);
-var
- po1: phashdataty;
+//var
+// po1: phashdataty;
 begin
  fpointerparam:= avalue;
  internaldeleteitem(internalfindexact(akey));
@@ -2157,8 +2162,8 @@ end;
 
 procedure tpointermsestringhashdatalist.delete(const akey: msestring;
                const avalue: pointer);
-var
- po1: phashdataty;
+//var
+// po1: phashdataty;
 begin
  fpointerparam:= avalue;
  internaldeleteitem(internalfindexact(akey));

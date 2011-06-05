@@ -261,7 +261,7 @@ begin
   value:= emptyreal;
  end
  else begin
-  removechar(str1,thousandseparator);
+  removechar(str1,{$ifdef FPC}defaultformatsettings.{$endif}thousandseparator);
   if length(str1) > 0 then begin
    ch1:= str1[length(str1)];
    if (ch1 >= 'A') and (ch1 <= 'z') then begin

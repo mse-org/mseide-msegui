@@ -18,18 +18,16 @@ type
   private
    function getdatabasename: filenamety;
    procedure setdatabasename(const avalue: filenamety);
-   procedure loaded; override;
    procedure setcontroller(const avalue: tdbcontroller);
-   function getconnected: boolean;
-   procedure setconnected(const avalue: boolean);
-   
+   function getconnected: boolean; reintroduce;
+   procedure setconnected(const avalue: boolean); reintroduce;
+  protected
+   procedure loaded; override;
    //idbcontroller
    function readsequence(const sequencename: string): string; override;
    function sequencecurrvalue(const sequencename: string): string; override;
    function writesequence(const sequencename: string;
                     const avalue: largeint): string; override;
-                    
-  protected
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode; 
                        const acursor: tsqlcursor): TStream; override;
   public

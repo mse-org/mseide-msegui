@@ -177,7 +177,7 @@ function buildmakecommandline(const atag: integer): string;
 var
  int1,int2: integer;
  str1,str2,str3: msestring;
- wstr1: filenamety;
+// wstr1: filenamety;
 begin
  with projectoptions,texp do begin
   str3:= quotefilename(tosysfilepath(makecommand));

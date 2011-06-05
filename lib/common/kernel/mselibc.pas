@@ -2181,43 +2181,43 @@ end;
 
 function stat(__file:Pchar; __buf: Pstat): longint;
 begin
- __xstat(_STAT_VER,__file,__buf);
+ result:= __xstat(_STAT_VER,__file,__buf);
 end;
 
 function fstat(__fd:longint; __buf: Pstat): longint;
 begin
- __fxstat(_STAT_VER,__fd,__buf);
+ result:= __fxstat(_STAT_VER,__fd,__buf);
 end;
 
 function lstat(__file:Pchar; __buf: Pstat): longint;
 begin
- __lxstat(_STAT_VER,__file,__buf);
+ result:= __lxstat(_STAT_VER,__file,__buf);
 end;
 
 function stat64(__file:Pchar; __buf:Pstat64):longint;
 begin
 {$ifdef CPU64}
- __xstat(_STAT_VER,__file,__buf);
+ result:= __xstat(_STAT_VER,__file,__buf);
 {$else}
- __xstat64(_STAT_VER,__file,__buf);
+ result:= __xstat64(_STAT_VER,__file,__buf);
 {$endif}
 end;
 
 function fstat64(__fd:longint; __buf:Pstat64):longint;
 begin
 {$ifdef CPU64}
- __fxstat(_STAT_VER,__fd,__buf);
+ result:= __fxstat(_STAT_VER,__fd,__buf);
 {$else}
- __fxstat64(_STAT_VER,__fd,__buf);
+ result:= __fxstat64(_STAT_VER,__fd,__buf);
 {$endif}
 end;
 
 function lstat64(__file:Pchar; __buf:Pstat64):longint;
 begin
 {$ifdef CPU64}
- __lxstat(_STAT_VER,__file,__buf);
+ result:= __lxstat(_STAT_VER,__file,__buf);
 {$else}
- __lxstat64(_STAT_VER,__file,__buf);
+ result:= __lxstat64(_STAT_VER,__file,__buf);
 {$endif}
 end;
 

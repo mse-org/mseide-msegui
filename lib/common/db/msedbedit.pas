@@ -135,7 +135,6 @@ type
    procedure doasyncevent(var atag: integer); override;
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
-   function canclose(const newfocus: twidget = nil): boolean; override;
    
     //idbnaviglink
    procedure setactivebuttons(const abuttons: dbnavigbuttonsty;
@@ -145,6 +144,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override; 
+   function canclose(const newfocus: twidget = nil): boolean; override;
    procedure edit;
   published
    property statfile;
@@ -1134,8 +1134,8 @@ type
    fnullchecking: integer;
    fdatasetchangedlock: integer;
    fobjectlinker: tobjectlinker;
-   fcolordatalink: tfielddatalink;
-   ffontdatalink: tfielddatalink;
+//   fcolordatalink: tfielddatalink;
+//   ffontdatalink: tfielddatalink;
    frowexited: integer;
    feditingbefore: boolean;
    fautoinserting: boolean;
@@ -1317,7 +1317,6 @@ type
    procedure recordchanged(afield: tfield); override;
    function  GetActiveRecord: Integer; override;
    procedure SetActiveRecord(Value: Integer); override;
-   function domoveby(const distance: integer): integer; override;
    procedure checkscrollbar; override;
    function scrollevent(sender: tcustomscrollbar;
                              event: scrolleventty): boolean; override;
@@ -1327,6 +1326,7 @@ type
   public
    constructor create(const aowner: tcustomgrid; const aintf: igriddatalink;
                   const adatalink: tdropdowndatalink);
+   function domoveby(const distance: integer): integer; override;
  end;
  
  tdbdropdownlist = class(tdropdownlist,igriddatalink)
@@ -1462,7 +1462,7 @@ type
  
  tdbkeystringeditdb = class(tdbkeystringedit,idbdropdownlist,ireccontrol)
   private
-   fkeyvalue: msestring;
+//   fkeyvalue: msestring;
    function getdropdown: tdbdropdownlistcontroller;
    procedure setdropdown(const avalue: tdbdropdownlistcontroller);
   protected
@@ -1576,17 +1576,17 @@ type
    procedure dodeleterow(const sender: tobject); override;
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty); override;
-   function focuscell(cell: gridcoordty;
-           selectaction: focuscellactionty = fca_focusin;
-         const selectmode: selectcellmodety = scm_cell;
-         const noshowcell: boolean = false): boolean; override;
-                                 //true if ok
    function isfirstrow: boolean; override;
    function islastrow: boolean; override;
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function focuscell(cell: gridcoordty;
+           selectaction: focuscellactionty = fca_focusin;
+         const selectmode: selectcellmodety = scm_cell;
+         const noshowcell: boolean = false): boolean; override;
+                                 //true if ok
    function canclose(const newfocus: twidget): boolean; override;
    procedure rowup(const action: focuscellactionty = fca_focusin); override;
    procedure rowdown(const action: focuscellactionty = fca_focusin); override;
@@ -1651,7 +1651,7 @@ type
 
  tstringcoldatalink = class(tcustomeditwidgetdatalink)
   private
-   fowner: tcustomstringcol;
+//   fowner: tcustomstringcol;
   protected
    procedure updatedata; override;
    procedure layoutchanged; override;
@@ -1827,12 +1827,6 @@ type
    function createfixcols: tfixcols; override;
    function createdatacols: tdatacols; override;
 //   procedure initcellinfo(var info: cellinfoty); override;
-   function focuscell(cell: gridcoordty;
-           selectaction: focuscellactionty = fca_focusin;
-         const selectmode: selectcellmodety = scm_cell;
-         const noshowcell: boolean = false): boolean; override;
-                                 //true if ok
-   procedure docellevent(var info: celleventinfoty); override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); override;
    function getzebrastart: integer; override;
    function getnumoffset: integer; override;
@@ -1854,6 +1848,12 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function focuscell(cell: gridcoordty;
+           selectaction: focuscellactionty = fca_focusin;
+         const selectmode: selectcellmodety = scm_cell;
+         const noshowcell: boolean = false): boolean; override;
+                                 //true if ok
+   procedure docellevent(var info: celleventinfoty); override;
    function canclose(const newfocus: twidget): boolean; override;
    procedure rowup(const action: focuscellactionty = fca_focusin); override;
    procedure rowdown(const action: focuscellactionty = fca_focusin); override;
@@ -4939,8 +4939,8 @@ begin
 end;
 
 procedure tdbprogressbar.valuetofield;
-var
- rea1: real;
+//var
+// rea1: real;
 begin
  if value = emptyreal then begin
   fdatalink.field.clear;
@@ -5730,8 +5730,8 @@ end;
 
 function tdropdownlistdatalink.scrollevent(sender: tcustomscrollbar;
                event: scrolleventty): boolean;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  if (fdataintf = nil) or (sender.tag <> 1) or 
              not (event in [sbe_thumbtrack,sbe_thumbposition]) then begin
@@ -5764,11 +5764,11 @@ end;
 procedure tdropdownlistdatalink.setcurrentrecord(const avalue: integer;
                            const arowpos: rowpositionty);
 var
- int1,int2: integer;
+ int1{,int2}: integer;
 begin
  if active then begin
   if avalue <> fcurrentrecord then begin
-   int2:= fcurrentrecord;
+//   int2:= fcurrentrecord;
    fcurrentrecord:= avalue;
    if fcurrentrecord < 0 then begin
     fcurrentrecord:= 0;
@@ -6248,8 +6248,8 @@ begin
 end;
 
 procedure tcustomdbdropdownlistcontroller.setoptionsdb(const avalue: optionsdbty);
-var
- optionsbefore: optionsdbty;
+//var
+// optionsbefore: optionsdbty;
 begin
  if avalue <> foptionsdb then begin
   foptionsdb:= avalue;
@@ -6307,7 +6307,9 @@ end;
 
 function tdbenumeditdb.getdropdown: tdbdropdownlistcontroller;
 begin
+{$warnings off}
  result:= tdbdropdownlistcontroller(inherited dropdown);
+{$warnings on}
 end;
 
 procedure tdbenumeditdb.setdropdown(const avalue: tdbdropdownlistcontroller);
@@ -6365,7 +6367,9 @@ end;
 
 function tdbdropdownlisteditdb.getdropdown: tdropdownlistcontrollerdb;
 begin
+{$warnings off}
  result:= tdropdownlistcontrollerdb(inherited dropdown);
+{$warnings on}
 end;
 
 procedure tdbdropdownlisteditdb.setdropdown(const avalue: tdropdownlistcontrollerdb);
@@ -6409,7 +6413,9 @@ end;
 
 function tdropdownlisteditdb.getdropdown: tdropdownlistcontrollerdb;
 begin
+{$warnings off}
  result:= tdropdownlistcontrollerdb(inherited dropdown);
+{$warnings on}
 end;
 
 procedure tdropdownlisteditdb.setdropdown(const avalue: tdropdownlistcontrollerdb);
@@ -6453,7 +6459,9 @@ end;
 
 function tdbdropdownlisteditlb.getdropdown: tdropdownlistcontrollerlb;
 begin
+{$warnings off}
  result:= tdropdownlistcontrollerlb(inherited dropdown);
+{$warnings on}
 end;
 
 procedure tdbdropdownlisteditlb.setdropdown(
@@ -6503,7 +6511,9 @@ end;
 
 function tdropdownlisteditlb.getdropdown: tdropdownlistcontrollerlb;
 begin
+{$warnings off}
  result:= tdropdownlistcontrollerlb(inherited dropdown);
+{$warnings on}
 end;
 
 procedure tdropdownlisteditlb.setdropdown(
@@ -6553,7 +6563,9 @@ end;
 
 function tenumeditdb.getdropdown: tdbdropdownlistcontroller;
 begin
+{$warnings off}
  result:= tdbdropdownlistcontroller(inherited dropdown);
+{$warnings on}
 end;
 
 procedure tenumeditdb.setdropdown(const avalue: tdbdropdownlistcontroller);
@@ -6608,7 +6620,9 @@ end;
 
 function tdbkeystringeditdb.getdropdown: tdbdropdownlistcontroller;
 begin
+{$warnings off}
  result:= tdbdropdownlistcontroller(inherited dropdown);
+{$warnings on}
 end;
 
 procedure tdbkeystringeditdb.setdropdown(const avalue: tdbdropdownlistcontroller);
@@ -6665,7 +6679,9 @@ end;
 
 function tkeystringeditdb.getdropdown: tdbdropdownlistcontroller;
 begin
+{$warnings off}
  result:= tdbdropdownlistcontroller(inherited dropdown);
+{$warnings on}
 end;
 
 procedure tkeystringeditdb.setdropdown(const avalue: tdbdropdownlistcontroller);
@@ -7090,7 +7106,7 @@ end;
 
 procedure tgriddatalink.updatelayout;
 var
- ar1: integerarty;
+// ar1: integerarty;
  int1: integer;
 begin
  with tcustomgrid1(fgrid) do begin
@@ -7133,8 +7149,8 @@ begin
 end;
 
 procedure tgriddatalink.datasetchanged;
-var
- state1: tdatasetstate;
+//var
+// state1: tdatasetstate;
 begin
  if fdatasetchangedlock = 0 then begin
   finserting:= (dataset <> nil) and (dataset.state = dsinsert);
@@ -7203,7 +7219,7 @@ procedure tgriddatalink.checkscroll;
 var
  rect1,rect2: rectty;
  distance: integer;
- rowbefore: integer;
+// rowbefore: integer;
  int1: integer;
  
 begin
@@ -7216,7 +7232,7 @@ begin
  distance:= firstrecord - ffirstrecordbefore;
  ffirstrecordbefore:= firstrecord;
  with tcustomgrid1(fgrid) do begin
-  rowbefore:= row;
+//  rowbefore:= row;
   if distance <> 0 then begin
    inc(frowexited);
    row:= invalidaxis;
@@ -7979,7 +7995,7 @@ begin
   else begin
    if cell.col < 0 then begin
     if avalue then begin
-     ffield_selected.asinteger:= wholerowselectedmask;
+     ffield_selected.asinteger:= integer(wholerowselectedmask);
     end
     else begin
      ffield_selected.asinteger:= 0;
@@ -9579,8 +9595,10 @@ end;
 
 procedure tcustomenum64edit.setvalue(const avalue: int64);
 begin
+{$warnings off}
  tdropdowncols1(tlbdropdownlistcontroller(fdropdown).cols).fkeyvalue64:= 
                          avalue;
+{$warnings on}
  fvalue1:= avalue;
  valuechanged;
 end;
@@ -9598,7 +9616,9 @@ begin
   lint1:= valuedefault;
  end
  else begin
+{$warnings off}
   lint1:= tdropdowncols1(tlbdropdownlistcontroller(fdropdown).cols).fkeyvalue64;
+{$warnings on}
  end;
    //no checktext call
  if accept then begin
@@ -10279,7 +10299,7 @@ end;
 procedure texterndatadropdownlist.dbscrolled(distance: integer);
 var
  rect1: rectty;
- int1: integer;
+// int1: integer;
 begin
  if abs(distance) >= rowcount then begin
   invalidate;
@@ -10669,8 +10689,8 @@ begin
 end;
 
 function texterndatadropdownlist.getrecno(const aindex: integer): integer;
-var
- int1,int2: integer;
+//var
+// int1{,int2}: integer;
 begin
  if (edds_filtered in feddstate) then begin
   result:= frecnums[aindex];

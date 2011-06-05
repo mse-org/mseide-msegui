@@ -70,7 +70,7 @@ type
   protected
    procedure dochange; override;
   public
-   constructor create(const aowner: tsqlstringlist);
+   constructor create(const aowner: tsqlstringlist); reintroduce;
  end;
  
  tsqlmacroitem = class(townedpersistent)
@@ -96,7 +96,7 @@ type
    function getitems(const aindex: integer): tsqlmacroitem;
    procedure setitems(const aindex: integer; const avalue: tsqlmacroitem);
   protected
-   procedure dochange(const aindex: integer);
+   procedure dochange(const aindex: integer); override;
   public
    constructor create(const aowner: tsqlstringlist); reintroduce;
    property items[const aindex: integer]: tsqlmacroitem read getitems 
@@ -183,8 +183,8 @@ type
    fdatabasename: filenamety;
    fintf: idbcontroller;
    foptions: databaseoptionsty;
-   factioncount: integer;
-   factionwait: boolean;   
+//   factioncount: integer;
+//   factionwait: boolean;   
    procedure setoptions(const avalue: databaseoptionsty);
   protected
    procedure setowneractive(const avalue: boolean); override;
@@ -209,7 +209,7 @@ type
    fafterconnect: tmsesqlscript;
    fbeforedisconnect: tmsesqlscript;
 //   fdatasets1: datasetarty;
-   frecnos: integerarty;
+//   frecnos: integerarty;
    ftransactionwrite: tsqltransaction;
    procedure setcontroller(const avalue: tdbcontroller);
    procedure settransaction(const avalue : tsqltransaction);
@@ -751,7 +751,6 @@ type
           //if bufsize < 0 -> buffer was to small, should be -bufsize
    // abstract & virtual methods of TDataset
 //   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
-   function isutf8: boolean; override;
    procedure UpdateIndexDefs; override;
    procedure SetDatabase(const Value: tmdatabase); override;
    Procedure SetTransaction(const Value : tmdbtransaction); override;
@@ -784,98 +783,98 @@ type
    function stringmemo: boolean; virtual;
         //memo fields are text(0) fields
   public
-    constructor Create(AOwner : TComponent); override;
-    destructor Destroy; override;
-    procedure applyupdate(const cancelonerror: boolean); override;
-    procedure applyupdates(const maxerrors: integer;
+   constructor Create(AOwner : TComponent); override;
+   destructor Destroy; override;
+   function isutf8: boolean; override;
+   procedure applyupdate(const cancelonerror: boolean); override;
+   procedure applyupdates(const maxerrors: integer;
                    const cancelonerror: boolean); override;
-    function refreshrecquery(const update: boolean): string;
-    procedure checktablename;
-    function updaterecquery{(const refreshfieldvalues: boolean)} : string;
-    function insertrecquery{(const refreshfieldvalues: boolean)} : string;
-    function deleterecquery : string;
-    function writetransaction: tsqltransaction;
-                   //self.transaction if self.transactionwrite = nil
-    procedure Prepare; virtual;
-    procedure UnPrepare; virtual;
-    procedure ExecSQL; virtual;
-    function executedirect(const asql: string): integer; 
-              //uses writetransaction of tsqlquery
-
-    function rowsreturned: integer; //-1 if not supported
-    function rowsaffected: integer; //-1 if not supported
-    property updaterowsaffected: integer read fupdaterowsaffected;
-    procedure SetSchemaInfo( SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string); virtual;
-    function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
-    property Prepared : boolean read IsPrepared;
-    property connected: boolean read getconnected write setconnected;
-              //sum of rowsaffected of insert, update and delete query,
-              //reset by close, applyupdate and applyupdates, -1 if not supported.
+   function refreshrecquery(const update: boolean): string;
+   procedure checktablename;
+   function updaterecquery{(const refreshfieldvalues: boolean)} : string;
+   function insertrecquery{(const refreshfieldvalues: boolean)} : string;
+   function deleterecquery : string;
+   function writetransaction: tsqltransaction;
+                  //self.transaction if self.transactionwrite = nil
+   procedure Prepare; virtual;
+   procedure UnPrepare; virtual;
+   procedure ExecSQL; virtual;
+   function executedirect(const asql: string): integer; 
+             //uses writetransaction of tsqlquery
+   function rowsreturned: integer; //-1 if not supported
+   function rowsaffected: integer; //-1 if not supported
+   property updaterowsaffected: integer read fupdaterowsaffected;
+   procedure SetSchemaInfo( SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string); virtual;
+   function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
+   property Prepared : boolean read IsPrepared;
+   property connected: boolean read getconnected write setconnected;
+             //sum of rowsaffected of insert, update and delete query,
+             //reset by close, applyupdate and applyupdates, -1 if not supported.
   published
-    property ReadOnly : Boolean read FReadOnly write SetReadOnly default false;
-    property ParseSQL : Boolean read FParseSQL write SetParseSQL default true;
-    property params : tmseparams read fparams write setparams;
+   property ReadOnly : Boolean read FReadOnly write SetReadOnly default false;
+   property ParseSQL : Boolean read FParseSQL write SetParseSQL default true;
+   property params : tmseparams read fparams write setparams;
                        //before SQL
-    property SQL : tsqlstringlist read FSQL write setFSQL;
-    property SQLUpdate : tsqlstringlist read Fapplysql[ukmodify] 
+   property SQL : tsqlstringlist read FSQL write setFSQL;
+   property SQLUpdate : tsqlstringlist read Fapplysql[ukmodify] 
                                                          write setFSQLUpdate;
-    property SQLInsert : tsqlstringlist read Fapplysql[ukinsert] 
+   property SQLInsert : tsqlstringlist read Fapplysql[ukinsert] 
                                                          write setFSQLInsert;
-    property SQLDelete : tsqlstringlist read Fapplysql[ukdelete]
+   property SQLDelete : tsqlstringlist read Fapplysql[ukdelete]
                                                          write setFSQLDelete;
-    property beforeexecute: tcustomsqlstatement read fbeforeexecute write setbeforeexecute;
-    property aftercursorclose: tcustomsqlstatement read faftercursorclose 
-                                                 write setaftercursorclose;
-    property IndexDefs : TIndexDefs read GetIndexDefs;
-    property UpdateMode : TUpdateMode read FUpdateMode write SetUpdateMode;
-    property UsePrimaryKeyAsKey : boolean read FUsePrimaryKeyAsKey write SetUsePrimaryKeyAsKey;
-    property tablename: string read ftablename write settablename;
-    property StatementType : TStatementType read fstatementtype 
+   property beforeexecute: tcustomsqlstatement read fbeforeexecute write setbeforeexecute;
+   property aftercursorclose: tcustomsqlstatement read faftercursorclose 
+                                                write setaftercursorclose;
+   property IndexDefs : TIndexDefs read GetIndexDefs;
+   property UpdateMode : TUpdateMode read FUpdateMode write SetUpdateMode;
+   property UsePrimaryKeyAsKey : boolean read FUsePrimaryKeyAsKey write SetUsePrimaryKeyAsKey;
+   property tablename: string read ftablename write settablename;
+   property StatementType : TStatementType read fstatementtype 
                            write setstatementtype default stnone;
-    Property DataSource : TDatasource Read GetDataSource Write SetDatasource;
-    property masterdelayus: integer read fmasterdelayus
+   Property DataSource : TDatasource Read GetDataSource Write SetDatasource;
+   property masterdelayus: integer read fmasterdelayus
                                 write fmasterdelayus default -1;
-    property optionsmasterlink: optionsmasterlinkty read foptionsmasterlink 
-                                      write foptionsmasterlink default [];
+   property optionsmasterlink: optionsmasterlinkty read foptionsmasterlink 
+                                     write foptionsmasterlink default [];
  //   property masterlink: tsqlmasterparamsdatalink read fmasterlink 
  //                     write setmasterlink;
-    property database: tcustomsqlconnection read getdatabase1 write setdatabase1;
+   property database: tcustomsqlconnection read getdatabase1 write setdatabase1;
     
 //    property SchemaInfo : TSchemaInfo read FSchemaInfo default stNoSchema;
     // redeclared data set properties
-    property Active;
-    property Filter;
-    property Filtered;
+   property Active;
+   property Filter;
+   property Filtered;
 //    property FilterOptions;
-    property BeforeOpen;
-    property AfterOpen;
-    property BeforeClose;
-    property AfterClose;
-    property BeforeInsert;
-    property AfterInsert;
-    property BeforeEdit;
-    property AfterEdit;
-    property BeforePost;
-    property AfterPost;
-    property BeforeCancel;
-    property AfterCancel;
-    property BeforeDelete;
-    property AfterDelete;
-    property BeforeScroll;
-    property AfterScroll;
-    property BeforeRefresh;
-    property AfterRefresh;
-    property OnCalcFields;
-    property OnDeleteError;
-    property OnEditError;
-    property OnFilterRecord;
-    property OnNewRecord;
-    property OnPostError;
-    property AutoCalcFields;
+   property BeforeOpen;
+   property AfterOpen;
+   property BeforeClose;
+   property AfterClose;
+   property BeforeInsert;
+   property AfterInsert;
+   property BeforeEdit;
+   property AfterEdit;
+   property BeforePost;
+   property AfterPost;
+   property BeforeCancel;
+   property AfterCancel;
+   property BeforeDelete;
+   property AfterDelete;
+   property BeforeScroll;
+   property AfterScroll;
+   property BeforeRefresh;
+   property AfterRefresh;
+   property OnCalcFields;
+   property OnDeleteError;
+   property OnEditError;
+   property OnFilterRecord;
+   property OnNewRecord;
+   property OnPostError;
+   property AutoCalcFields;
 //    property Database;
 
-    property Transaction: tsqltransaction read getsqltransaction write setsqltransaction;
-    property transactionwrite: tsqltransaction read getsqltransactionwrite
+   property Transaction: tsqltransaction read getsqltransaction write setsqltransaction;
+   property transactionwrite: tsqltransaction read getsqltransactionwrite
                                     write setsqltransactionwrite;
   end;
 
@@ -1199,9 +1198,8 @@ var
   end;
  end;
 
-var
- po3: pmsechar;
-  
+//var
+// po3: pmsechar;
 begin
  result:= nil;
  po1:= pmsechar(asql);
@@ -1335,7 +1333,7 @@ var
  po2: pmsechar;
  mstr1: msestring;
  ar1: macroinfoarty;
- po3: pdoublemsestringty;
+// po3: pdoublemsestringty;
 begin
  result:= '';
  if count > 0 then begin
@@ -1441,8 +1439,8 @@ begin
 end;
 
 procedure tdbcontroller.setowneractive(const avalue: boolean);
-var
- bo1: boolean;
+//var
+// bo1: boolean;
 begin
  fintf.setinheritedconnected(avalue);
  {
@@ -1658,7 +1656,7 @@ var
  params1: tmseparams;
  bo1: boolean; 
  int1: integer;
- str1: ansistring;
+// str1: ansistring;
 begin
  if atransaction = nil then begin
   atransaction:= ftransaction;
@@ -2028,8 +2026,8 @@ end;
 
 procedure tcustomsqlconnection.notification(acomponent: tcomponent;
                operation: toperation);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  if operation = opremove then begin
   if acomponent = fafterconnect then begin
@@ -2480,8 +2478,8 @@ begin
 end;
 
 function TSQLTransaction.Commit(const checksavepoint: boolean = true): boolean;
-var
- bo1: boolean;
+//var
+// bo1: boolean;
 begin
  result:= true;
  if active then begin
@@ -2796,8 +2794,7 @@ end;
 
 procedure TSQLQuery.OnChangeSQL(const Sender : TObject);
 
-var ParamName : String;
-
+//var ParamName : String;
 begin
   UnPrepare;
   if (FSQL <> nil) then
@@ -2869,8 +2866,8 @@ begin
 end;
 
 procedure tsqlquery.applyfilter;
-var
- s: string;
+//var
+// s: string;
 begin
  freefldbuffers;
  tcustomsqlconnection(database).unpreparestatement(fcursor);
@@ -3394,9 +3391,9 @@ procedure TSQLQuery.connect(const aexecute: boolean);
   end; //initialisemodifyquery
 
 var
- tel,fieldc: integer;
+ tel{,fieldc}: integer;
  f: TField;
- s: string;
+// s: string;
  ar1: stringarty;
  IndexFields: stringarty;
  str1: string;
@@ -3788,8 +3785,8 @@ begin
 end;
 
 Procedure TSQLQuery.internalApplyRecUpdate(UpdateKind : TUpdateKind);
-var
- s: string;
+//var
+// s: string;
  
 //todo: optimize, use tsqlstatement and tsqlresult instead of tsqlquery
 
@@ -4128,7 +4125,7 @@ end;
 function TSQLQuery.CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream;
 var
  info: blobcacheinfoty; 
- int1: integer;
+// int1: integer;
  blob1: blobinfoty;
 begin
  result:= inherited createblobstream(field,mode);

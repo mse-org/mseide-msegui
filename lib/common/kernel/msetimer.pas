@@ -30,7 +30,7 @@ type
    finterval: longword;
    fontimer: notifyeventty;
    foptions: timeroptionsty;
-   fpending: boolean;
+//   fpending: boolean;
    procedure setenabled(const Value: boolean);
    procedure setinterval(const avalue: longword);
    function getsingleshot: boolean;
@@ -59,7 +59,7 @@ type
   private
    ftimer: tsimpletimer;
    fenabled: boolean; //for design
-   foptions: timeroptionsty;
+//   foptions: timeroptionsty;
    function getenabled: boolean;
    procedure setenabled(const avalue: boolean);
    function getinterval: integer;
@@ -176,7 +176,7 @@ end;
 
 procedure killtimertick(aontimer: proceventty);
 var
- po1,po2: ptimerinfoty;
+ po1{,po2}: ptimerinfoty;
 begin
  sys_mutexlock(mutex);
  po1:= first;

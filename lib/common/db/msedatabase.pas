@@ -48,17 +48,17 @@ type
  itransactionclient = interface(idbclient)
   procedure settransaction(const avalue: tmdbtransaction);
   procedure settransactionwrite(const avalue: tmdbtransaction);
-  function getactive: boolean;
+//  function getactive: boolean;
   procedure checkbrowsemode;
   procedure refreshtransaction;
-  function getcomponentinstance: tcomponent;
+//  function getcomponentinstance: tcomponent;
  end;
  itransactionclientarty = array of itransactionclient;
  pitransactionclientarty = ^itransactionclientarty;
  
  idatabaseclient = interface(idbclient)
   procedure setdatabase(const sender: tmdatabase);
-  procedure setactive(avalue: boolean);
+///  procedure setactive(avalue: boolean);
  end;
  idatabaseclientarty = array of idatabaseclient;
  
@@ -395,7 +395,7 @@ end;
 
 procedure tmdatabase.setconnected(const avalue: boolean);
 var
- int1: integer;
+// int1: integer;
  bo1: boolean;
 begin
  if avalue <> fconnected then begin

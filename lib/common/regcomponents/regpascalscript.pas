@@ -40,9 +40,10 @@ type
    fmoduleprefix: ansistring;
   protected
    function getscript: tpasc; override;  
-   procedure edit; override;
    procedure doafterclosequery(var amodalresult: modalresultty); override;
    procedure updateline(var aline: ansistring); override;
+  public
+   procedure edit; override;
  end;
 
 function sourcetoformscript(const amodule: tmsecomponent;

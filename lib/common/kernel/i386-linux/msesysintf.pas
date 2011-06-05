@@ -697,7 +697,7 @@ function sys_semwait(var sem: semty;  timeoutusec: integer): syserrorty;
           //timeoutus = 0 -> no timeout;
 var
  time1: ttimespec;
- err: integer;
+// err: integer;
 begin
  result:= sye_semaphore;
  with linuxsemty(sem) do begin

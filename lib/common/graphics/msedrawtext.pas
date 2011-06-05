@@ -191,7 +191,7 @@ function textindextopos(const canvas: tcanvas; var info: drawtextinfoty;
 implementation
 uses
  mseguiintf,msebits,msedatalist,{$ifdef FPC}math{$else}Math{$endif},msereal,
- sysutils,msefont;
+ sysutils,msefont,msesys;
 
 type
  tcanvas1 = class(tcanvas);
@@ -342,7 +342,7 @@ var
  po1: pmsecharaty;
  bo1: boolean;
  wch1: widechar;
- ar1: integerarty;
+// ar1: integerarty;
 
  procedure checksofthyphen(const alineinfo: integer);
  begin
@@ -376,7 +376,7 @@ var
  end;
 
 var
- spacewidth: integer;
+// spacewidth: integer;
  y1,orig1: integer;
    
 begin
@@ -534,7 +534,8 @@ begin
            end;
            tak_decimal: begin
             charwidths[int1-1]:= tabs[nexttab].textpos - awidth - 
-                                    tabitemwidth(int1,widechar(decimalseparator));
+                                  tabitemwidth(int1,
+                                    defaultformatsettingsmse.decimalseparator);
            end;
            else begin //tak_left
             charwidths[int1-1]:= tabs[nexttab].textpos - awidth;

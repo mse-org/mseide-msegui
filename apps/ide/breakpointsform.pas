@@ -162,7 +162,7 @@ var
  int1: integer;
  lineinfo: bkptlineinfoty;
  info1: breakpointinfoty;
- bo1: boolean;
+// bo1: boolean;
 begin
  if gdb.execloaded and not gdb.running then begin
   gdb.infobreakpoint(info,info.addressbreakpoint);

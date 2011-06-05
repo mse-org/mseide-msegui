@@ -55,11 +55,11 @@ Const
 {$endif}
 
 { Case-mapping "arrays" }
-var
-  AnsiUpperChars: AnsiString; // 1..255
-  AnsiLowerChars: AnsiString; // 1..255
-  WideUpperChars: WideString; // 1..65535
-  WideLowerChars: WideString; // 1..65535
+//var
+//  AnsiUpperChars: AnsiString; // 1..255
+//  AnsiLowerChars: AnsiString; // 1..255
+//  WideUpperChars: WideString; // 1..65535
+//  WideLowerChars: WideString; // 1..65535
 
 { the following declarations are from the libc unit for linux so they
   might be very linux centric
@@ -123,7 +123,7 @@ var
   iconv_wide2ansi : iconv_t;
   
   lock_ansi2ucs4 : integer = -1;
-  lock_ucs42ansi : integer = -1;
+//  lock_ucs42ansi : integer = -1;
   lock_ansi2wide : integer = -1;
   lock_wide2ansi : integer = -1;
 
@@ -282,11 +282,11 @@ procedure Ansi2UCS4Move(source:pchar;var dest:UCS4String;len:SizeInt);
     outleft : size_t;
     srcpos,
     destpos: pchar;
-    mynil : pchar;
-    my0 : size_t;
+//    mynil : pchar;
+//    my0 : size_t;
   begin
-    mynil:=nil;
-    my0:=0;
+//    mynil:=nil;
+//    my0:=0;
     // extra space
     outlength:=len+1;
     setlength(dest,outlength);

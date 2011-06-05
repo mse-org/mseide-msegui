@@ -117,7 +117,8 @@ type
 
 //** Sample format */
  pa_sample_format_t = (
-    PA_SAMPLE_U8,   //**< Unsigned 8 Bit PCM */
+    PA_SAMPLE_INVALID = -1,//**< An invalid value */
+    PA_SAMPLE_U8 = 0,   //**< Unsigned 8 Bit PCM */
     PA_SAMPLE_ALAW, //**< 8 Bit a-Law */
     PA_SAMPLE_ULAW, //**< 8 Bit mu-Law */
     PA_SAMPLE_S16LE,//**< Signed 16 Bit PCM, little endian (PC) */
@@ -130,8 +131,7 @@ type
     PA_SAMPLE_S24BE,//**< Signed 24 Bit PCM packed, big endian. \since 0.9.15 */
     PA_SAMPLE_S24_32LE,//**< Signed 24 Bit PCM in LSB of 32 Bit words, little endian (PC). \since 0.9.15 */
     PA_SAMPLE_S24_32BE,//**< Signed 24 Bit PCM in LSB of 32 Bit words, big endian. \since 0.9.15 */
-    PA_SAMPLE_MAX,//**< Upper limit of valid sample types */
-    PA_SAMPLE_INVALID = -1//**< An invalid value */
+    PA_SAMPLE_MAX//**< Upper limit of valid sample types */
  );
  
 const
@@ -195,6 +195,7 @@ type
 
 //** A list of channel labels */
  pa_channel_position_t = (
+    PA_CHANNEL_POSITION_INVALID = -1,
     PA_CHANNEL_POSITION_MONO = 0,
     PA_CHANNEL_POSITION_FRONT_LEFT,     //* Apple, Dolby call this 'Left' */
     PA_CHANNEL_POSITION_FRONT_RIGHT,    //* Apple, Dolby call this 'Right' */
@@ -246,8 +247,7 @@ type
     PA_CHANNEL_POSITION_TOP_REAR_LEFT,            //* Microsoft and Apple call this 'Top Back Left' */
     PA_CHANNEL_POSITION_TOP_REAR_RIGHT,           //* Microsoft and Apple call this 'Top Back Right' */
     PA_CHANNEL_POSITION_TOP_REAR_CENTER,          //* Microsoft and Apple call this 'Top Back Center' */
-    PA_CHANNEL_POSITION_MAX,
-    PA_CHANNEL_POSITION_INVALID = -1
+    PA_CHANNEL_POSITION_MAX
  );
 
 const

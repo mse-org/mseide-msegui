@@ -204,7 +204,8 @@ type
    procedure dodeactivate; virtual;
   public
    destructor  destroy; override;
-   procedure updateskin(const ainfo: skininfoty; var handled: boolean); virtual;
+   procedure updateskin(const ainfo: skininfoty; var handled: boolean);
+                                       virtual; reintroduce;
    procedure removeskin(const ainfo: skininfoty; var handled: boolean); virtual;
   published
    property master: tcustomskincontroller read fmaster write setmaster;
@@ -359,7 +360,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure updateskin(const ainfo: skininfoty);
+   procedure updateskin(const ainfo: skininfoty); reintroduce;
  //  procedure removeskin(const ainfo: skininfoty);
 //   property removing: boolean read fremoving;
   published
@@ -1303,7 +1304,7 @@ end;
 procedure tcustomskincontroller.setgridskin(const instance: tcustomgrid;
                                             const ainfo: gridskininfoty);
 var
- int1,int2: integer;
+ int1{,int2}: integer;
 begin
  setwidgetskin(instance,ainfo.wi);
 // setwidgetface(instance,ainfo.face);
@@ -1555,7 +1556,9 @@ end;
 procedure tcustomskincontroller.setmainmenuskin(const instance: tcustommainmenu;
                              const ainfo: mainmenuskininfoty);
 begin
+{$warnings off}
  setpopupmenuskin(tpopupmenu(instance),ainfo.ma);
+{$warnings on}
  with instance,ainfo do begin
   if (pop.face <> nil) and (popupfacetemplate = nil) then begin
    popupfacetemplate:= pop.face;

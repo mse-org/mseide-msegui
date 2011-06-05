@@ -1790,7 +1790,7 @@ function tpostscriptcanvas.createpattern(const sourcerect,destrect: rectty;
 var
  ar1: bytearty;
  str1: string;
- components: integer;
+// components: integer;
  rowbytes: integer;
  varname: string;
  image: imagety;
@@ -1806,7 +1806,7 @@ begin
   if not result then begin
    exit;
   end;
-  components:= 1;
+//  components:= 1;
   if acanvas.monochrome then begin
    convertmono(sourcerect,image,ar1,rowbytes);
   end
@@ -1815,7 +1815,7 @@ begin
     convertgray(sourcerect,image,ar1,rowbytes);
    end
    else begin
-    components:= 3;
+//    components:= 3;
     convertrgb(sourcerect,image,ar1,rowbytes);
    end;
   end;
@@ -1925,7 +1925,7 @@ var
 var 
  ar1,ar2,ar3: bytearty;
  str1: string;
- components: integer;
+// components: integer;
  rowbytes,maskrowbytes: integer;
  masked: boolean;
  maskcopy: boolean;
@@ -2112,7 +2112,7 @@ begin
       end;
       gdi_unlock;
      end;
-     components:= 1;
+//     components:= 1;
      if mono{image.monochrome} then begin
       convertmono(sourcerect^,image,ar1,rowbytes);
      end
@@ -2121,7 +2121,7 @@ begin
        convertgray(sourcerect^,image,ar1,rowbytes);
       end
       else begin
-       components:= 3;
+//       components:= 3;
        convertrgb(sourcerect^,image,ar1,rowbytes);
       end;
      end;

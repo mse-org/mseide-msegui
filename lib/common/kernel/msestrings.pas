@@ -2364,7 +2364,7 @@ procedure wordatindex(const value: msestring; const index: integer;
 
  function checknodelimstringsdown(var po1: pmsechar; var int1: integer): boolean;
  var
-  bo1,bo2: boolean;
+  {bo1,}bo2: boolean;
   int2,int3,int4: integer;
   po2: pmsechar;
  begin
@@ -2423,7 +2423,7 @@ procedure wordatindex(const value: msestring; const index: integer;
 var
  int1: integer;
  po1: pmsechar;
- bo1,bo2: boolean;
+// bo1{,bo2}: boolean;
 begin
  first:= nil;
  pastlast:= nil;
@@ -2663,7 +2663,7 @@ function replacestring(const s: msestring; oldsub: msestring;
                            const options: searchoptionsty = []): msestring;
 var
  po1,po2,po3,poend: pmsechar;
- pold: pmsechar;
+// pold: pmsechar;
  oldhigh,newhigh: integer;
  int1,int2: integer;
  ch1: msechar;
@@ -2740,7 +2740,7 @@ function replacestring(const s: string; oldsub: string;
                            const options: searchoptionsty = []): string;
 var
  po1,po2,po3,poend: pchar;
- pold: pchar;
+// pold: pchar;
  oldhigh,newhigh: integer;
  int1,int2: integer;
  ch1: char;

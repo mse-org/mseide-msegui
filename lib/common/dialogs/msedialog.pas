@@ -59,7 +59,7 @@ type
    procedure internalcreateframe; virtual;
    procedure editnotification(var info: editnotificationinfoty); virtual;
   public
-   constructor create(const aowner: tcustomdataedit);
+   constructor create(const aowner: tcustomdataedit); reintroduce;
  end;
 
  stringdialogexeceventty = procedure(const sender: tcustomdataedit;

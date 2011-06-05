@@ -262,7 +262,7 @@ type
    fconnectorname: string;
    finputcount: integer;
    fpendinginputcount: integer;
-   foutputcount: integer;
+//   foutputcount: integer;
    fvoices: msedatamodulearty;
    fconnectors: sigmidiconnectorarty;
    foninitvoice: initvoiceeventty;

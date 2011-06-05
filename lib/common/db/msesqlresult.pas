@@ -238,6 +238,7 @@ type
    function getcol: tdbcol;
    procedure setsource(const avalue: tsqlresult);
    procedure setcolname(const avalue: dbcolnamety);
+  protected
    procedure objevent(const sender: iobjectlink;
                              const event: objecteventty); override;
   public
@@ -260,8 +261,8 @@ type
  tsqlresultfielddefs = class(tfielddefs)
   private
 //   fsqlresult: tsqlresult;
-   procedure setitemname(aitem: tcollectionitem); override;
   protected
+   procedure setitemname(aitem: tcollectionitem); override;
 //   procedure bindconnectors;
 //  public
 //   constructor create(const aowner: tsqlresult);
@@ -414,16 +415,16 @@ type
    procedure setfieldcountinteger(const avalue: integer); override;
    procedure setfieldcountint64(const avalue: integer); override;
    procedure setfieldcountfloat(const avalue: integer); override;
-   function fieldnamestext: stringarty; override;
-   function fieldnamesfloat: stringarty; override;
-   function fieldnamesinteger: stringarty; override;
-   function fieldnamesint64: stringarty; override;
-   procedure loadbuffer; override;
    procedure objectevent(const sender: tobject;
                        const event: objecteventty); override;
   public 
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function fieldnamestext: stringarty; override;
+   function fieldnamesfloat: stringarty; override;
+   function fieldnamesinteger: stringarty; override;
+   function fieldnamesint64: stringarty; override;
+   procedure loadbuffer; override;
    procedure clearbuffer; override;
   published
    property source: tsqlresult read fsource write setsource;
@@ -610,6 +611,7 @@ end;
 function tdbcol.getvariantvar: variant;
 begin
  raise accesserror('variant');
+ result:= 0; //compiler warning;
 end;
 
 function tdbcol.getasvariant: variant;
@@ -640,6 +642,7 @@ end;
 function tdbcol.getasdatetime: tdatetime;
 begin
  raise accesserror(sdatetime);
+ result:= 0; //compiler warning;
 end;
 
 function tdbcol.getasfloat: double;
@@ -650,11 +653,13 @@ end;
 function tdbcol.getasinteger: longint;
 begin
  raise accesserror(sinteger);
+ result:= 0; //compiler warning;
 end;
 
 function tdbcol.getasstring: string;
 begin
  raise accesserror(sstring);
+ result:= ''; //compiler warning;
 end;
 
 function tdbcol.getasmsestring: msestring;
@@ -673,6 +678,7 @@ end;
 function tdbcol.getassql: msestring;
 begin
  raise accesserror('SQL');
+ result:= ''; //compiler warning;
 end;
 
 function tdbcol.getassql1: msestring;
@@ -801,12 +807,12 @@ end;
 
 function tlargeintdbcol.getasstring: string;
 begin
- inttostr(aslargeint);
+ result:= inttostr(aslargeint);
 end;
 
 function tlargeintdbcol.getasmsestring: msestring;
 begin
- inttostrmse(aslargeint);
+ result:= inttostrmse(aslargeint);
 end;
 
 { tsmallintdbcol }

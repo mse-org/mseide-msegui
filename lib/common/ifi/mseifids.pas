@@ -147,6 +147,7 @@ type
                                    const amodifiedfields: pbyte);
    procedure receiveevent(const event: tobjectevent);
    procedure sendchangedrecord(const aitem: pptruintdataty);
+   procedure setowneractive(const avalue: boolean); override;
   public
    constructor create(const aowner: tdataset; const aintf: iifidscontroller);
    destructor destroy; override;
@@ -178,8 +179,8 @@ type
 //   property ifimodulelink: iifimodulelink read fifimodulelink 
 //                                   implements iifimodulelink;
          //compiler crash
-   fstrings: integerarty;
-   fmsestrings: integerarty;
+//   fstrings: integerarty;
+//   fmsestrings: integerarty;
    fcontroller: tdscontroller;
    fificontroller: tifidscontroller;
    fmsestringpositions: integerarty;
@@ -196,7 +197,7 @@ type
    fbufs: pointerarty;
    fopen: boolean;
 
-   fremotedatachange: notifyeventty;
+//   fremotedatachange: notifyeventty;
 //   foptions: ifirxoptionsty;
    fupdating: integer;
    procedure initmodifiedfields;   
@@ -226,7 +227,7 @@ type
    procedure intfinalizerecord(const buffer: pintrecordty);
    procedure intfreerecord(var buffer: pintrecordty);
    procedure internalsetrecno(const avalue: integer);
-   function findrecord(arecordpo: pintrecordty): integer;
+   function findrecord(arecordpo: pintrecordty): integer; reintroduce;
                          //returns index, -1 if not found
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
@@ -283,12 +284,6 @@ type
                                out avalue: msestring): boolean;
    procedure setmsestringdata(const sender: tmsestringfield; const avalue: msestring);
 
-   function getfielddata(field: tfield; buffer: pointer;
-                       nativeformat: boolean): boolean; override;
-   function getfielddata(field: tfield; buffer: pointer): boolean; override;
-   procedure setfielddata(field: tfield; buffer: pointer;
-                                    nativeformat: boolean); override;
-   procedure setfielddata(field: tfield; buffer: pointer); override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
 
    procedure InternalCancel; override;
@@ -315,7 +310,7 @@ type
    procedure cancelconnection;
    procedure calcrecordsize;
    
-   procedure setactive (value : boolean);{ override;}
+   procedure setactive (value : boolean);{ override;} reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -336,12 +331,19 @@ type
                    const akeys: array of const; const aisnull: array of boolean;
                    const akeyoptions: array of locatekeyoptionsty;
                    const aoptions: locaterecordoptionsty = []): locateresultty;
+                                                 reintroduce;
 {
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
    function locate(const key: string; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
 }
+   function getfielddata(field: tfield; buffer: pointer;
+                       nativeformat: boolean): boolean; override;
+   function getfielddata(field: tfield; buffer: pointer): boolean; override;
+   procedure setfielddata(field: tfield; buffer: pointer); override;
+   procedure setfielddata(field: tfield; buffer: pointer;
+                                    nativeformat: boolean); override;
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
    procedure post; override;
@@ -857,8 +859,8 @@ begin
 end;
 
 procedure tifidscontroller.sendchangedrecords(const alist: tcurrentchangedlist);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  if alist.count > 0 then begin
   fdscontroller.beginupdate;
@@ -976,7 +978,7 @@ var
  index1: integer;
  po1: pchar;
  str1: string; 
- field1: tfield;
+// field1: tfield;
  bo1: boolean;
  bm: ansistring;
  ar1: fieldinfoarty;
@@ -1095,7 +1097,7 @@ begin
    ik_coldatachange: begin
     int1:= pcolitemdataty(adatapo)^.header.row;
     ifinametostring(@pcolitemdataty(adatapo)^.header.name,str1);
-    adatapo:= @pcolitemdataty(adatapo)^.data+length(str1);
+    adatapo:= pchar(@pcolitemdataty(adatapo)^.data)+length(str1);
     with tdataset(fowner) do begin
      field1:= findfield(str1);
      if field1 <> nil then begin
@@ -1346,6 +1348,11 @@ procedure tifidscontroller.closed;
 begin
  frxbindings:= nil;
  ftxbindings:= nil;
+end;
+
+procedure tifidscontroller.setowneractive(const avalue: boolean);
+begin
+ tdataset(fowner).active:= avalue;
 end;
 
 { tifidataset }

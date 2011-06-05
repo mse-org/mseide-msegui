@@ -125,22 +125,22 @@ type
 const
  mseformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmseform;
-     initnewcomponent: nil; getscale: nil);
+     initnewcomponent: nil; getscale: nil; sourcetoform: nil);
  mainformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmainform;
-     initnewcomponent: nil; getscale: nil);
+     initnewcomponent: nil; getscale: nil; sourcetoform: nil);
  dockpanelformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createdockpanelform;
-     initnewcomponent: nil; getscale: nil);
+     initnewcomponent: nil; getscale: nil; sourcetoform: nil);
  subformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createsubform;
-     initnewcomponent: nil; getscale: nil);
+     initnewcomponent: nil; getscale: nil; sourcetoform: nil);
  scrollboxformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createscrollboxform;
-     initnewcomponent: nil; getscale: nil);
+     initnewcomponent: nil; getscale: nil; sourcetoform: nil);
  tabformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createtabform;
-     initnewcomponent: nil; getscale: nil);
+     initnewcomponent: nil; getscale: nil; sourcetoform: nil);
 
 procedure Register;
 begin

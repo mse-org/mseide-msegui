@@ -342,9 +342,9 @@ var
  po3: ptypedata;
  int1: integer;
  obj1: tobject;
- intf1: istatfile;
- intar: integerarty;
- realar: realarty;
+// intf1: istatfile;
+// intar: integerarty;
+// realar: realarty;
  str1: string;
 begin
  with aobj do begin
@@ -529,7 +529,7 @@ var
  ar1: propinfopoarty; 
  po1,po4: ppropinfo;
  po2: ptypeinfo;
- po3: ptypedata;
+// po3: ptypedata;
  int1: integer;
  intf1: iifidatalink;
  obj1: tobject;
@@ -619,7 +619,7 @@ begin
        {$else}
         po2:= gettypedata(proptype^)^.eltype2^;
        {$endif}
-        po3:= gettypedata(po2);
+//        po3:= gettypedata(po2);
         case po2^.kind of
          tkinteger: begin
           if list1 is tintegerdatalist then begin

@@ -1948,7 +1948,9 @@ begin
  fmenucomp.setsubcomponent(true);
  inherited create(nil,fmenucomp.menu,nil,aowner,fmenucomp);
  if csdesigning in componentstate then begin
+{$warnings off}
   tmsecomponent1(fmenucomp).setdesigning(true);
+{$warnings on}
  end;
  freeandnil(fframe);
  flayout.options:= [mlo_horz,mlo_main,mlo_childreninactive];

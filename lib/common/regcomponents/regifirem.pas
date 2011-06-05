@@ -27,6 +27,7 @@ type
  tmodulelinkitemeditor = class(tclasselementeditor)
   protected
    function getdefaultstate: propertystatesty; override;
+  public
    function getvalue: msestring; override;
  end;
  
@@ -36,7 +37,7 @@ type
  end;
  
  tmodulelinkactionitemeditor = class(tmodulelinkitemeditor)
-  protected
+  public
    function getvalue: msestring; override;
  end;
  
@@ -53,7 +54,7 @@ type
  end;
 
  tvaluewidgetlinkitemeditor = class(tmodulelinkitemeditor)
-  protected
+  public
    function getvalue: msestring; override;
  end;
  
@@ -85,7 +86,7 @@ type
  end;
 
  tifidatacolsitemeditor = class(tmodulelinkitemeditor)
-  protected
+  public
    function getvalue: msestring; override;
  end;
  
@@ -122,8 +123,8 @@ end;
 { tmodulelinkitemeditor }
 
 function tmodulelinkitemeditor.getvalue: msestring;
-var
- mstr1: msestring;
+//var
+// mstr1: msestring;
 begin
  with tmodulelinkprop(getordvalue) do begin
   result:= '<'+name+'>';

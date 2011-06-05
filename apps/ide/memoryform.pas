@@ -17,7 +17,7 @@ type
    procedure adent(const sender: TObject);
    procedure drawfixcol(const sender: tcol; const canvas: tcanvas;
                    const cellinfo: cellinfoty);
-   procedure updatelayout(const sender: TObject);
+   procedure updatelayoutexe(const sender: TObject);
    procedure formshow(const sender: TObject);
    procedure cellsetvalue(const sender: TObject; var avalue: msestring;
                    var accept: Boolean);
@@ -120,7 +120,7 @@ begin
  drawtext(canvas,hextostr(longword(firstadd+cellinfo.cell.row*16),8),cellinfo.innerrect);
 end;
 
-procedure tmemoryfo.updatelayout(const sender: TObject);
+procedure tmemoryfo.updatelayoutexe(const sender: TObject);
 var
  int1: integer;
  mstr1: msestring;

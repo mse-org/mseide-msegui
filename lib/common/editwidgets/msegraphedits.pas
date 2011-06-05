@@ -155,7 +155,6 @@ type
    
    procedure updatereadonlystate; virtual;
    procedure initeditfocus;
-   procedure initnewwidget(const ascale: real); override;
    
    //igridwidget
    procedure setfirstclick;
@@ -204,6 +203,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
+   procedure initnewwidget(const ascale: real); override;
    procedure initgridwidget; virtual;
 
    function edited: boolean;
@@ -379,10 +379,10 @@ type
    procedure dochange; override;
    procedure paintglyph(const canvas: tcanvas;  const acolorglyph: colorty;
                   const avalue; const arect: rectty); override;
-   procedure initgridwidget; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure initgridwidget; override;
    property scrollbar: tsliderscrollbar read fscrollbar write setscrollbar;
   published
    property optionswidget default defaultslideroptionswidget;
@@ -711,7 +711,7 @@ type
  
  tcustomdatabutton = class(tcustomintegergraphdataedit,iactionlink,iimagelistinfo)
   private
-   fonexecute: notifyeventty;
+//   fonexecute: notifyeventty;
    fvaluefaces: tvaluefacearrayprop;
    fimageoffset: integer;
    fimagenums: tintegerarrayprop;
@@ -1199,7 +1199,7 @@ end;
 
 function tcustomrealgraphdataedit.checkvalue: boolean;
 begin
- docheckvalue(fvalue);
+ result:= docheckvalue(fvalue);
 end;
 
 { tcustomslider }
@@ -3620,7 +3620,9 @@ begin
   end
   else begin
    if (int1 <> -1) and (longword(int1) <> $80000000) then begin
+   {$warnings off}
     po1:= pintegeraty(tarrayprop1(fimagenums).getdatapo^);
+   {$warnings on}
     for int2:= 0 to fimagenums.count-1 do begin
      if int1 and bits[int2] <> 0 then begin
       fimagelist.paint(canvas,po1^[int2],arect,[al_ycentered,al_xcentered]);

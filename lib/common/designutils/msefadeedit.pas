@@ -316,7 +316,7 @@ end;
 procedure tfadeeditfo.change;
 var
  int1: integer;
- rea1: real;
+// rea1: real;
  rect1: rectty;
 begin
  if reverse.value then begin
@@ -372,8 +372,8 @@ procedure tfadeeditfo.getcursorshapeev(const sender: tcustompickwidget;
                          const picker: tobjectpicker;
                          var shape: cursorshapety; var found: Boolean);
 var
- rect1: rectty;
- int1,int2,int3: integer;
+// rect1: rectty;
+ int1{,int2,int3}: integer;
 begin
 // if picker.shiftstate = [] then begin
   int1:= findmarker(picker.pos);

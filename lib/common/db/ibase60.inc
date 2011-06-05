@@ -2320,8 +2320,10 @@ var
   isc_encode_sql_date : procedure (_para1:pointer; _para2:PISC_DATE); extdecl;
   isc_encode_sql_time : procedure (_para1:pointer; _para2:PISC_TIME); extdecl;
   isc_encode_timestamp : procedure (_para1:pointer; _para2:PISC_TIMESTAMP); extdecl;
+{$warnings off}
   isc_event_block : function (_para1:PPchar; _para2:PPchar; _para3:word;
                             args: array of const):ISC_LONG; extdeclvararg; {varargs;}
+{$warnings on}
   isc_event_counts: procedure (_para1: PISC_STATUS; _para2: short;
                      _para3: pchar; _para4: pchar); extdecl;
 {!!MVC
@@ -2330,8 +2332,10 @@ var
   char   ,
   char   ); extdecl; external gdslib;
 !!MVC }
+{$warnings off}
   isc_expand_dpb : procedure (_para1:PPchar; _para2:Psmallint;
                 args:array of const); extdeclvararg;
+{$warnings on}
   isc_modify_dpb : function (_para1:PPchar; _para2:Psmallint; _para3:word; _para4:Pchar; _para5:smallint):longint; extdecl;
   isc_free : function (_para1:Pchar):ISC_LONG; extdecl;
   isc_get_segment : function (_para1:PISC_STATUS; _para2:Pisc_blob_handle; _para3:Pword; _para4:word; _para5:Pchar):ISC_STATUS; extdecl;
@@ -2348,9 +2352,11 @@ var
   isc_rollback_retaining : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; extdecl;
   isc_rollback_transaction : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle):ISC_STATUS; extdecl;
   isc_start_multiple : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:pointer):ISC_STATUS; extdecl;
+{$warnings off}
   isc_start_transaction : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle;
          _para3:smallint; args:array of const):ISC_STATUS; 
                                      extdeclvararg;
+{$warnings on}
   isc_sqlcode : function (_para1:PISC_STATUS):ISC_LONG; extdecl;
   isc_sql_interprete : procedure (_para1:smallint; _para2:Pchar; _para3:smallint); extdecl;
   isc_transaction_info : function (_para1:PISC_STATUS; _para2:Pisc_tr_handle; _para3:smallint; _para4:Pchar; _para5:smallint;_para6:Pchar):ISC_STATUS; extdecl;

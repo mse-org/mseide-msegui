@@ -528,7 +528,9 @@ begin
   result:= fli.font;
  end
  else begin
+{$warnings off}
   result:= tdialpropfont(tcustomdialcontroller(fowner).getfont);
+{$warnings on}
  end;
 end;
 
@@ -1170,8 +1172,8 @@ const
  tolerance = 0.000001;
  
  function getico(const interval: real; const intervalcount: integer): integer;
- var
-  int1: integer;
+// var
+//  int1: integer;
  begin
   result:= intervalcount - 
          floor((1/interval) * intervalcount * (1 + tolerance)); 
@@ -1201,7 +1203,7 @@ const
  function getlogn(const avalue: real; const interval: real;
                             const intervalcount: integer): integer;
  var
-  rea1,rea2: real;
+  rea1{,rea2}: real;
   ico: integer;
  begin
   result:= floor(logn(interval,avalue) + tolerance);
@@ -1799,7 +1801,9 @@ begin
   result:= ffont;
  end
  else begin
+{$warnings off}
   result:= tdialfont(twidget1(fintf.getwidget).getfont);
+{$warnings on}
  end;
 end;
 

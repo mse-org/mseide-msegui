@@ -601,14 +601,14 @@ type
    procedure setreadonly(const avalue: boolean);
    function getselectedcells: integerarty;
    procedure setselectedcells(const avalue: integerarty);
-   function getmerged(const row: integer): boolean; override;
-   procedure setmerged(const row: integer; const avalue: boolean); override;
    procedure setdata(const avalue: tdatalist);
   protected
    fdata: tdatalist;
    fname: string;
    fnameb: string;
    fonchange: datacolchangeeventty;
+   function getmerged(const row: integer): boolean; override;
+   procedure setmerged(const row: integer; const avalue: boolean); override;
    procedure beginselect;
    procedure endselect;
    function getdatapo(const arow: integer): pointer; override;
@@ -714,11 +714,11 @@ type
    procedure afterrowcountupdate;
    function getnoparagraphs(index: integer): boolean; override;
    function getdefault: pointer; override;
-   function empty(const index: integer): boolean; override;   //true wenn leer
   public
-   constructor create(const agrid: tcustomgrid);
+   constructor create(const agrid: tcustomgrid); reintroduce;
    function add(const avalue: msestring; const anoparagraph: boolean): integer; 
                                                               override;
+   function empty(const index: integer): boolean; override;   //true wenn leer
    function getparagraph(const index: integer;
                                const aseparator: msestring = ''): msestring;   
  end;
@@ -1292,7 +1292,7 @@ type
     //iifidatalink
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    procedure ifisetvalue(var avalue; var accept: boolean);   
-   function getgriddata: tdatalist;
+   function getgriddata: tdatalist; reintroduce;
    function getvalueprop: ppropinfo;
    procedure updatereadonlystate;
   {$endif}
@@ -1300,9 +1300,6 @@ type
    procedure sethidden(const index: integer; const avalue: boolean); override;
    procedure setfoldissum(const index: integer; const avalue: boolean); override;
    function getlinkdatatypes(const atag: integer): listdatatypesty; override;
-   procedure sourcechange(const sender: tdatalist; 
-                                         const index: integer); override;
-   procedure foldleveltosource(const index: integer; const acount: integer);
    procedure checksyncfoldlevelsource(const index: integer;
                                  const acount: integer);
    procedure foldissumtosource(const index: integer; const acount: integer);
@@ -1322,7 +1319,7 @@ type
    procedure hide(const aindex: integer);
    procedure initdirty; override;
    procedure cleanvisible(visibleindex: integer);
-   procedure clean(arow: integer);
+   procedure clean(arow: integer); reintroduce;
    procedure cleanrowheight(const aindex: integer);
    procedure checkdirty(const arow: integer); override;
    procedure checkdirtyautorowheight(const arow: integer);
@@ -1345,6 +1342,9 @@ type
    function getsourcecount: integer; override;
    function getsourceinfo(const atag: integer): plistlinkinfoty; override;
    procedure linksource(const source: tdatalist; const atag: integer); override;
+   procedure sourcechange(const sender: tdatalist; 
+                                         const index: integer); override;
+   procedure foldleveltosource(const index: integer; const acount: integer);
 
    procedure clearmemberitem(const subitem: integer; 
                                     const index: integer); override;
@@ -1915,7 +1915,6 @@ type
    procedure error(aerror: griderrorty; text: string = '');
    procedure indexerror(row: boolean; index: integer; text: string = '');
 
-   function actualcursor(const apos: pointty): cursorshapety; override;
    function getdisprect: rectty; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure fontchanged; override;
@@ -2059,10 +2058,11 @@ type
    procedure initnewcomponent(const ascale: real); override;
    procedure synctofontheight; override;
    procedure dragevent(var info: draginfoty); override;
+   function actualcursor(const apos: pointty): cursorshapety; override;
 
    procedure beginupdate;
    procedure endupdate(const nosort: boolean = false);
-   function updating: boolean;
+   function updating: boolean; reintroduce;
    function calcminscrollsize: sizety; override;
    procedure layoutchanged;
    function cellclicked: boolean;
@@ -2388,7 +2388,6 @@ type
   protected
    feditor: tinplaceedit;
    procedure setupeditor(const acell: gridcoordty; const focusin: boolean); virtual;
-   function canclose(const newfocus: twidget): boolean; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure checkcellvalue(var accept: boolean); override;
    procedure rootchanged; override;
@@ -2431,6 +2430,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure synctofontheight; override;
+   function canclose(const newfocus: twidget): boolean; override;
    function textclipped(const acell: gridcoordty;
                  out acellrect: rectty): boolean; overload;
    function textclipped(const acell: gridcoordty): boolean; overload;
@@ -2992,7 +2992,7 @@ procedure tgridprop.drawcellbackground(const acanvas: tcanvas;
                 const aframe: tcustomframe; const aface: tcustomface);
 var
  rect1: rectty;
- pt1: pointty;
+// pt1: pointty;
 begin
  rect1:= makerect(nullpoint,fcellrect.size);
  acanvas.fillrect(rect1,fcellinfo.color);
@@ -4818,6 +4818,7 @@ begin
    canafterdrawcell:= fgrid.canevent(tmethod(fonafterdrawcell));
    paintcols(colrange.range1);
    paintcols(colrange.range2);
+   canvas.linewidth:= linewidthbefore; //???
    canvas.origin:= pt1;
   end;
  end;
@@ -5779,7 +5780,7 @@ end;
 
 function tdatacol.selectedcellcount: integer;
 var
- int1,int2: integer;
+ int1{,int2}: integer;
 begin
  result:= 0;
  if fselectedrow <> -1 then begin
@@ -6300,7 +6301,7 @@ function tstringcoldatalist.getparagraph(const index: integer;
                const aseparator: msestring = ''): msestring;
 var
  int1: integer;
- start,stop: integer;
+ start{,stop}: integer;
 begin
  start:= index;
  with fgrid.fdatacols.frowstate do begin
@@ -6664,8 +6665,8 @@ begin
 end;
 
 procedure tcustomstringcol.afterrowcountupdate;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  inherited;
  if fdata <> nil then begin
@@ -6943,7 +6944,7 @@ var
  pt1,pt2: pointty;
  int1,int2,int3,int4: integer;
  ar1: integerarty;
- po1: prowstatety;
+// po1: prowstatety;
 begin
  with info do begin
   pt1:= canvas.origin;
@@ -8913,7 +8914,7 @@ end;
 procedure tcustomgrid.updatelayout;
 var
  scrollstate: framestatesty;
- int1,int2,int3: integer;
+ int1,int2{,int3}: integer;
  bo1: boolean;
 begin
  bo1:= fobjectpicker.removexorpic;
@@ -9713,7 +9714,9 @@ end;
 
 function tcustomgrid.createdatacols: tdatacols;
 begin
+{$warnings off}
  result:= tdatacols.create(self,tdatacol);
+{$warnings on}
 end;
 
 function tcustomgrid.createfixcols: tfixcols;
@@ -9952,8 +9955,8 @@ begin
 end;
 
 function tcustomgrid.rowatpos(y: integer): integer;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  result:= invalidaxis;
  if y >= 0 then begin
@@ -11910,8 +11913,8 @@ begin
 end;
 
 procedure tcustomgrid.rowdown(const action: focuscellactionty = fca_focusin);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  with fdatacols.frowstate do begin
   if visiblerowcount > 0 then begin
@@ -12789,7 +12792,7 @@ var
  cell,cell1: gridcoordty;
  col1: tcol;
  fixrow: tfixrow;
- cellkind: cellkindty;
+// cellkind: cellkindty;
  int1,int2: integer;
  offset: pointty;
  apos: pointty;
@@ -12847,7 +12850,8 @@ begin
    end;
   end;
   pok_datacol: begin
-   cellkind:= cellatpos(makepoint(apos.x,fdatarect.y),cell1);
+   //cellkind:= 
+   cellatpos(makepoint(apos.x,fdatarect.y),cell1);
    if (cell1.col >= 0) and not 
      ((co_nohscroll in tdatacol(fdatacols.fitems[cell1.col]).options) xor 
      (co_nohscroll in tdatacol(fdatacols.fitems[cell.col]).options)) then begin
@@ -12857,7 +12861,8 @@ begin
    end;
   end;
   pok_datarow: begin
-   cellkind:= cellatpos(makepoint(fdatarect.x,apos.y),cell1);
+//   cellkind:= 
+   cellatpos(makepoint(fdatarect.x,apos.y),cell1);
    if cell1.row >= 0 then begin
     moverow(cell.row,cell1.row);
    end
@@ -13202,7 +13207,7 @@ end;
 procedure tcustomgrid.insertrow(aindex: integer; acount: integer = 1);
 var
  rowbefore: integer;
- int1,int2: integer;
+// int1{,int2}: integer;
 begin
  if acount > 0 then begin
   dorowsinserting(aindex,acount);
@@ -13862,7 +13867,7 @@ function tcustomgrid.nextfocusablecol(const acol: integer;
                const aleft: boolean; const arow: integer;
                const noreadonly: boolean): integer;
 var
- int1,int2: integer;
+ int1{,int2}: integer;
  loopcount: integer;
  bo1: boolean;
  col1: integer;
@@ -14047,7 +14052,7 @@ var
  lo,hi,pivot: integer;
  sf: gridsorteventty;
  bo1: boolean;
- int1: integer;
+// int1: integer;
 
  function check1(const a,b: integer): integer;
  begin
@@ -14084,12 +14089,12 @@ begin
    if not bo1 then begin   //position changed
     lo:= 0;
     hi:= rowhigh;    
-    int1:= 0;
+//    int1:= 0;
     if check(hi,row) < 0 then begin   //last?
      lo:= hi;
     end
     else begin
-     int1:= 0;
+//     int1:= 0;
      if check(lo,row) > 0 then begin   //first?
       hi:= lo;
      end
@@ -14547,7 +14552,7 @@ end;
 
 procedure tcustomgrid.appinsrow(index: integer);
 var
- int1,int2: integer;
+ int1{,int2}: integer;
  bo1: boolean;
 begin
  if docheckcellvalue and container.canclose(window.focusedwidget) then begin
@@ -14583,8 +14588,8 @@ begin
 end;
 
 procedure tcustomgrid.doinsertrow(const sender: tobject);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  appinsrow(ffocusedcell.row);
 end;
@@ -15332,7 +15337,7 @@ end;
 
 procedure tcustomstringgrid.updatelayout;
 var
- rect1,rect2: rectty;
+ {rect1,}rect2: rectty;
 begin
 // rect1:= cellrect(ffocusedcell,cil_inner);
  inherited;
@@ -15548,8 +15553,8 @@ var
 begin
  result:= '';
  list1:= currentdatalist;
- if currentdatalist <> nil then begin
-  result:= currentdatalist[aindex];
+ if list1 <> nil then begin
+  result:= list1[aindex];
  end;
 end;
 
@@ -15605,7 +15610,7 @@ end;
 
 function trowstatelist.isvisible(const arow: integer): boolean;
 var
- po1: pintegeraty;
+// po1: pintegeraty;
  po2: prowstatety;
  int1: integer;
  by1: byte;
@@ -15769,7 +15774,7 @@ end;
 
 procedure trowstatelist.hidechildren(const arow: integer);
 var
- int1,int2: integer; 
+ int1{,int2}: integer; 
  po0: pchar;
  po1: prowstatety;
  level1,level2: byte;
@@ -16286,7 +16291,7 @@ procedure trowstatelist.cleanrowheight(const aindex: integer);
 var
  int1,int2,int3,int4,int5: integer;
  po1: prowstaterowheightty;
- po2: pintegeraty;
+// po2: pintegeraty;
  needsrowheightupdate: boolean;
 begin
  if aindex >= fdirtyrowheight then begin
@@ -16298,7 +16303,7 @@ begin
    int3:= po1^.rowheight.ypos;
    if ffolded then begin
     cleanvisible(aindex);
-    po2:= fvisiblerowmap.datapo;
+ //   po2:= fvisiblerowmap.datapo;
    end;
    for int1:= fdirtyrowheight to aindex do begin
     if po1^.rowheight.linewidth = 0 then begin
@@ -16405,7 +16410,7 @@ var
  po3: prowfoldinfoty;
  level1,level2: byte;
  lastrow: integer;
- visible1: boolean;
+// visible1: boolean;
  ar1: booleanarty;
 begin
  setlength(infos,length(rows));

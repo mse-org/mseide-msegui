@@ -636,7 +636,6 @@ type
    function getitemclass: treelistedititemclassty;
    procedure setitemclass(const avalue: treelistedititemclassty);
   protected
-   procedure change(const index: integer); override;
    procedure freedata(var data); override;
    procedure docreateobject(var instance: tobject); override;
    procedure createitem(out item: tlistitem); override;
@@ -655,6 +654,7 @@ type
    constructor create(const intf: iitemlist; const aowner: ttreeitemedit);
    procedure beginupdate; override;
    procedure endupdate; override;
+   procedure change(const index: integer); override;
    procedure assign(const root: ttreelistedititem); reintroduce; overload;
                  //root is freed
    procedure assign(const aitems: treelistedititemarty); reintroduce; overload;
@@ -822,9 +822,11 @@ begin
                                                              self,flayoutinfo);
   end
   else begin
+{$warnings off}
    tlistitem.calcitemlayout(subsize(makesize(cellwidth,cellheight),
                                        fcellframe.paintframewidth),
                            tframe1(fcellframe).fi.innerframe,self,flayoutinfo);
+{$warnings on}
   end;
   layoutchanged;
  end;
@@ -1943,7 +1945,7 @@ procedure tcustomlistview.dokeydown(var info: keyeventinfoty);
 var
  item: tlistitem;
  int1: integer;
- str1: msestring;
+// str1: msestring;
  action1: focuscellactionty;
 begin
  with info do begin
@@ -2535,7 +2537,7 @@ end;
 procedure titemedit.clientmouseevent(var info: mouseeventinfoty);
 var
  po1: pointty;
- cursor1: cursorshapety;
+// cursor1: cursorshapety;
  zone1: cellzonety;
 begin
  if (fvalue <> nil) and (info.eventkind in mouseposevents) then begin
@@ -2663,8 +2665,8 @@ begin
 end;
 
 procedure titemedit.dokeydown(var info: keyeventinfoty);
-var
- str1: msestring;
+//var
+// str1: msestring;
 begin
  doonkeydown(info);
  with info do begin
@@ -3415,7 +3417,9 @@ var
  ar1: treelistedititemarty;
  int1: integer;
 begin
+{$warnings off}
  with ttreelistitem1(root) do begin
+{$warnings on}
   if fcount > 0 then begin
    setlength(ar1,fcount);
    for int1:= fcount-1 downto 0 do begin
@@ -3548,7 +3552,7 @@ procedure ttreeitemeditlist.nodenotification(const sender: tlistitem;
  end;
 
 var
- po1: ^ttreelistitem1;
+// po1: ^ttreelistitem1;
  int1,int2: integer;
 
 begin
@@ -3824,7 +3828,7 @@ var
  bo1: boolean;
  item1: ttreelistitem;
  zone1: cellzonety;
- rect1: rectty;
+// rect1: rectty;
 begin
  item1:= ttreelistitem(items[arow]);
  case ainfo.eventkind of
@@ -3889,8 +3893,12 @@ procedure ttreeitemeditlist.moverow(const source: integer; const dest: integer);
 var
  so,de: ttreelistitem1;
 begin
+{$warnings off}
  so:= ttreelistitem1(items[source]);
+{$warnings on}
+{$warnings off}
  de:= ttreelistitem1(items[dest]);
+{$warnings on}
  if so.parent = de.parent then begin
   if so.parent <> nil then begin
    ttreelistitem1(so.parent).move(so.parentindex,de.parentindex);

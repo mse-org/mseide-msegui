@@ -108,10 +108,10 @@ type
    procedure setshortcuts1(const avalue: shortcutarty);
   //iactionlink
    function getactioninfopo: pactioninfoty;
-  procedure actionchanged;
-  function loading: boolean;
-  function shortcutseparator: msechar;
-  procedure calccaptiontext(var ainfo: actioninfoty);
+   procedure actionchanged;
+   function loading: boolean;
+   function shortcutseparator: msechar;
+   procedure calccaptiontext(var ainfo: actioninfoty);
 
   protected
    function getshortcutdefault: shortcutty;
@@ -470,10 +470,10 @@ end;
 
 procedure getshortcutlist(out keys: integerarty; out names: msestringarty);
 var
- int1: integer;
+// int1: integer;
  bo1: boolean;
  bottom: integer;
- akey: keyty;
+// akey: keyty;
 begin
  bo1:= false;
  if shortcutkeys = nil then begin
@@ -1050,7 +1050,7 @@ function doactionshortcut(const sender: tobject; var info: actioninfoty;
  end; //check
 
 var
- bo1,bo2: boolean;
+ bo1{,bo2}: boolean;
 begin
  bo1:= check(1,result);
  if not bo1 then begin
@@ -1630,10 +1630,12 @@ end;
 
 function tshortcutaction.shortcutseparator: msechar;
 begin
+ result:= ' '; //not used
 end;
 
 procedure tshortcutaction.calccaptiontext(var ainfo: actioninfoty);
 begin
+ mseactions.calccaptiontext(ainfo,shortcutseparator);
 end;
 
 { tsysshortcuts }

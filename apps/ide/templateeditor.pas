@@ -61,7 +61,7 @@ end;
 
 procedure ttemplateeditorfo.onlo(const sender: TObject);
 var
- int1: integer;
+// int1: integer;
  dir1: filenamety;
 begin
  if savefiledialog.controller.lastdir = '' then begin

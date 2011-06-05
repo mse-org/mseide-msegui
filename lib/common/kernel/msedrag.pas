@@ -103,7 +103,7 @@ type
   private
    fonbefore,fonafter: drageventsty;
    function dodragevent(const events: drageventsty; var info: draginfoty): boolean;
-  protected
+  public
    function beforedragevent(var info: draginfoty): boolean; override;
     //true if processed
    function afterdragevent(var info: draginfoty): boolean; override;

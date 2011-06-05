@@ -32,15 +32,16 @@ type
    procedure showexecute(const sender: tobject);
   protected
    procedure updatecaption(acaption: msestring);
-   procedure doonclose; override;
    procedure dolayoutchanged(const sender: tdockcontroller); override;
    class function hasresource: boolean; override;
    class function getmoduleclassname: string; override;
-   constructor docreate(aowner: tcomponent); override;
+//   constructor docreate(aowner: tcomponent); override;
+   procedure docreate(aowner: tcomponent); override;
   public
    constructor create(aowner: tcomponent; load: boolean); override;
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure doonclose; override;
    function canclose(const newfocus: twidget): boolean; override;
   published
    property visible default false;
@@ -136,7 +137,9 @@ function createdockpanelform(const aclass: tclass;
 
 begin
  result:= tmsecomponent(aclass.newinstance);
+{$warnings off}
  tcomponent1(result).setdesigning(true); //used for wo_groupleader
+{$warnings on}
  tdockpanelform(result).create(nil,false);
  tmsecomponent1(result).factualclassname:= aclassname;
 end;
@@ -324,7 +327,8 @@ begin
  inherited;
 end;
 
-constructor tdockpanelform.docreate(aowner: tcomponent);
+//constructor tdockpanelform.docreate(aowner: tcomponent);
+procedure tdockpanelform.docreate(aowner: tcomponent);
 begin
  inherited;
  visible:= false;

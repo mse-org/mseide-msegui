@@ -555,7 +555,8 @@ type
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
    class function hasresource: boolean; override;
-   constructor docreate(aowner: tcomponent); override;
+//   constructor docreate(aowner: tcomponent); override;
+   procedure docreate(aowner: tcomponent); override;
   public
    destructor destroy; override;
    procedure createfonttab;
@@ -2184,7 +2185,7 @@ var
  int1,int2,int3: integer;
  color1: colorty;
  rect1: rectty;
- bo1: boolean;
+// bo1: boolean;
 begin
  inherited;
  with flayoutinfo do begin
@@ -2346,8 +2347,8 @@ begin
 end;
 
 procedure tcustomtabbar.getautopaintsize(var asize: sizety);
-var
- int1,int2: integer;
+//var
+// int1{,int2}: integer;
 begin
  inherited;
  asize.cx:= flayoutinfo.totsize.cx;
@@ -3122,7 +3123,8 @@ end;
 
 { ttabform }
 
-constructor ttabform.docreate(aowner: tcomponent);
+//constructor ttabform.docreate(aowner: tcomponent);
+procedure ttabform.docreate(aowner: tcomponent);
 begin
  fcolortab:= cl_default;
  fcoloractivetab:= cl_active;
@@ -4592,12 +4594,16 @@ end;
 
 function tcustomtabwidget.gettab_font: ttab_font;
 begin
+{$warnings off}
  result:= ttab_font(ftabs.font);
+{$warnings on}
 end;
 
 procedure tcustomtabwidget.settab_font(const avalue: ttab_font);
 begin
+{$warnings off}
  ftabs.font:= twidgetfont(avalue);
+{$warnings on}
 end;
 
 function tcustomtabwidget.istab_fontstored: boolean;
@@ -4607,12 +4613,16 @@ end;
 
 function tcustomtabwidget.gettab_fonttab: ttab_fonttab;
 begin
+{$warnings off}
  result:= ttab_fonttab(ftabs.tabs.font);
+{$warnings on}
 end;
 
 procedure tcustomtabwidget.settab_fonttab(const avalue: ttab_fonttab);
 begin
+{$warnings off}
  ftabs.tabs.font:= ttabsfont(avalue);
+{$warnings on}
 end;
 
 function tcustomtabwidget.istab_fonttabstored: boolean;
@@ -4622,12 +4632,16 @@ end;
 
 function tcustomtabwidget.gettab_fontactivetab: ttab_fontactivetab;
 begin
+{$warnings off}
  result:= ttab_fontactivetab(ftabs.tabs.fontactive);
+{$warnings on}
 end;
 
 procedure tcustomtabwidget.set_tabfontactivetab(const avalue: ttab_fontactivetab);
 begin
+{$warnings off}
  ftabs.tabs.fontactive:= ttabsfontactive(avalue);
+{$warnings on}
 end;
 
 function tcustomtabwidget.istab_fontactivetabstored: boolean;

@@ -42,7 +42,6 @@ type
    function getfreeonterminate: boolean;
    procedure setfreeonterminate(const avalue: boolean);
   protected
-   procedure afterconstruction; override;
    function execute(thread: tmsethread): integer; virtual;
   public
    constructor create; overload;
@@ -52,6 +51,7 @@ type
                 const afreeonterminate: boolean = false;
                 const astacksizekb: integer = 0); overload; virtual;
    destructor destroy; override;
+   procedure afterconstruction; override;
    function waitfor: integer; virtual;
    procedure terminate; virtual;
    procedure kill; //killing a running thread will loose resources!

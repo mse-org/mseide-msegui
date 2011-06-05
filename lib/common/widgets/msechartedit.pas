@@ -41,7 +41,7 @@ type
    fsnapdist: integer;
    foffsetmin: pointty;
    foffsetmax: pointty;
-   fvaluechecking: integer;
+//   fvaluechecking: integer;
    fonchange: notifyeventty;
    fondataentered: notifyeventty;
    foptions: charteditoptionsty;
@@ -490,7 +490,7 @@ var
  datahigh: integer;
  px,py: preal;
  pxy: pcomplexty;
- pt1: pointty;
+// pt1: pointty;
 begin
  result:= -1;
  if hasactivetrace then begin
@@ -934,7 +934,7 @@ var
  int1,int2,int3: integer;
  offs: pointty;
  objs: integerarty;
- pt1: pointty;
+// pt1: pointty;
  rect1: rectty;
 begin
  with sender do begin

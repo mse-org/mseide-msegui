@@ -37,7 +37,7 @@ type
  end;
 
  tificolitempropertyeditor = class(tclasselementeditor)
-  protected
+  public
    function getvalue: msestring; override;
  end;
  
@@ -49,12 +49,14 @@ type
  tififieldnamepropertyeditor = class(tstringpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
+  public
    function getvalues: msestringarty; override;
  end;
   
  tifisourcefieldnamepropertyeditor = class(tstringpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
+  public
    function getvalues: msestringarty; override;
  end;
 

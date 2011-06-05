@@ -889,7 +889,7 @@ function tstatreader.readmsestrings(const name: msestring;
 var
  ar1: msestringarty;
 begin
- ar1:= readarray(name+'ar',ar1);
+ ar1:= readarray(name+'ar',msestringarty(nil){ar1});
  if high(ar1) >= 0 then begin
   result:= concatstrings(ar1,lineend);
  end
@@ -1658,12 +1658,20 @@ begin
             //on delphi memory is not on normal heap
    freemem(info.data);
   {$else}
+{$warnings off}
    tmemorystreamcracker(fmemorystream).setpointer(info.data,info.size);
+{$warnings on}
+{$warnings off}
    tmemorystreamcracker(fmemorystream).fcapacity:= info.size;
+{$warnings on}
   {$endif}
  {$else}
+{$warnings off}
    tmemorystreamcracker(fmemorystream).setpointer(info.data,info.size);
+{$warnings on}
+{$warnings off}
    tmemorystreamcracker(fmemorystream).fcapacity:= info.size;
+{$warnings on}
  {$endif} 
   end
   else begin
@@ -1694,7 +1702,9 @@ begin
  {$endif}
 {$else}
    data:= fmemorystream.memory;
+{$warnings off}
    tmemorystreamcracker(fmemorystream).setpointer(nil,0);
+{$warnings on}
    reallocmem(data,size);
 {$endif}
    stream:= nil;

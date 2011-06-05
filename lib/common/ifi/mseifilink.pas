@@ -573,10 +573,10 @@ type
   
  ttxdatagrid = class;
  tifirowstatelist = class(tcustomrowstatelist)
-  private
-   procedure sethidden(const index: integer; const avalue: boolean);
+  protected
+   procedure sethidden(const index: integer; const avalue: boolean); override;
    procedure setfoldlevel(const index: integer; const avalue: byte);
-   procedure setfoldissum(const index: integer; const avalue: boolean);
+   procedure setfoldissum(const index: integer; const avalue: boolean); override;
   public
    property hidden[const index: integer]: boolean read gethidden write sethidden;
    property foldlevel[const index: integer]: byte read getfoldlevel 
@@ -598,7 +598,7 @@ type
    procedure beginselect;
    procedure endselect;
   public 
-   constructor create(const aowner: ttxdatagrid);
+   constructor create(const aowner: ttxdatagrid); reintroduce;
    destructor destroy; override;
    class function getitemclasstype: persistentclassty; override;
    function colbyname(const aname: ansistring): tifidatacol;
@@ -1813,7 +1813,7 @@ procedure tcustommodulelink.objectevent(const sender: tobject;
                const event: objecteventty);
 var
  po1: pifirecty;
- str1: string;
+// str1: string;
 begin
  if (event = oe_dataready) and (sender = fchannel) then begin
   if (length(fchannel.rxdata) >= sizeof(ifiheaderty)) then begin
@@ -1900,7 +1900,7 @@ end;
 
 procedure tcustommodulelink.receiveevent(const event: tobjectevent);
 var
- comp1: tmsecomponent;
+// comp1: tmsecomponent;
  stream1: tmemorycopystream;
  po1: pchar;
  str1: string;
@@ -1935,7 +1935,7 @@ function tcustommodulelink.actionreceived(const adata: pifirecty;
         var adatapo: pchar; const atag: integer; const aname: string): boolean;
 var
  act1: trxlinkaction;
- int1: integer;
+// int1: integer;
  var1: variant;
 begin
  result:= false;
@@ -2304,11 +2304,11 @@ procedure tificontroller.objectevent(const sender: tobject;
                const event: objecteventty);
 var
  po1: pifirecty;
- tag1: integer;
+// tag1: integer;
  str1: string;
  po2: pchar;
- int1: integer;
- mstr1: msestring;
+// int1: integer;
+// mstr1: msestring;
 begin
  if (event = oe_dataready) and (sender = fchannel) then begin
   if (length(fchannel.rxdata) >= sizeof(ifiheaderty)) then begin
@@ -2317,7 +2317,7 @@ begin
     with po1^,header do begin
      if (size = length(rxdata)) and (kind in getifireckinds) then begin
       with itemheader do begin 
-       tag1:= tag;
+//       tag1:= tag;
        po2:= @name;
       end;
       inc(po2,ifinametostring(pifinamety(po2),str1));
@@ -2867,7 +2867,7 @@ procedure tifidatacols.Setselected(const cell: gridcoordty;
                const avalue: boolean);
 var
  lwo1: longword;
- bo1: boolean;
+// bo1: boolean;
  po1: prowstatety;
  int1: integer;
 begin
@@ -2887,7 +2887,7 @@ begin
   else begin
    lwo1:= 0;
   end;
-  bo1:= false;
+//  bo1:= false;
   if cell.row >= 0 then begin
    po1:= frowstate.getitempo(cell.row);
    if lwo1 <> po1^.selected then begin
@@ -2906,7 +2906,7 @@ begin
     end;
     po1^.selected:= lwo1;
 //     fgrid.invalidaterow(cell.row); //for fixcols
-    bo1:= true;
+//    bo1:= true;
    end;
   end
   else begin
@@ -2926,14 +2926,14 @@ begin
      if fselectedrow >= 0 then begin
       prowstateaty(po1)^[fselectedrow].selected:= lwo1;
 //       fgrid.invalidaterow(fselectedrow); //for fixcols
-      bo1:= true;
+//      bo1:= true;
      end
      else begin
       for int1:= 0 to frowstate.count - 1 do begin
        if lwo1 <> po1^.selected then begin
         po1^.selected:= lwo1;
 //         fgrid.invalidaterow(int1); //for fixcols
-        bo1:= true;
+//        bo1:= true;
        end;
        inc(po1);
       end;
@@ -3814,10 +3814,10 @@ end;
 function ttxdatagridcontroller.encodegriddata(
                      const asequence: sequencety): ansistring;
 var
- po1,po4: pchar;
- int1,int2,int3,int4: integer;
- po2: pmsestring;
- po3: pansistring;
+ po1{,po4}: pchar;
+ int1,int2{,int3,int4}: integer;
+// po2: pmsestring;
+// po3: pansistring;
  ar1: booleanarty;
 begin
  with ttxdatagrid(fowner) do begin

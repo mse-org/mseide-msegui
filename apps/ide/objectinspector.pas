@@ -536,7 +536,9 @@ var
  po1: ppropertyvalue;
 begin
  result:= -1;
+{$warnings off}
  po1:= ppropertyvalue(titemlist1(values.itemlist).fdatapo);
+{$warnings on}
  for int1:= 0 to values.itemlist.count - 1 do begin
   if po1^.feditor = editor then begin
    result:= int1;
@@ -1785,7 +1787,7 @@ end;
 procedure tobjectinspectorfo.valuescellevent(const sender: TObject;
                var info: celleventinfoty);
 var
- editor1: tpropertyeditor1;
+// editor1: tpropertyeditor1;
  comp1: tcomponent;
 begin
  if iscellclick(info,[ccr_dblclick,ccr_nokeyreturn]) then begin

@@ -227,7 +227,7 @@ type
    procedure decupdate;
     // idesignerselections
    function Add(const Item: Tcomponent): Integer;
-   function Equals(const List: IDesignerSelections): Boolean;
+   function Equals(const List: IDesignerSelections): Boolean; reintroduce;
    function Get(Index: Integer): Tcomponent;
    function GetCount: Integer;
    function getarray: componentarty;
@@ -349,11 +349,13 @@ uses
  
 type
  {$ifdef FPC}
+ {$notes off}
   TFilercracker = class(TObject)
   private
-    FRoot: TComponent;
-    FLookupRoot: TComponent;
+//    FRoot: TComponent;
+//    FLookupRoot: TComponent;
   end;
+ {$notes on}
   {$else}
   TFilercracker = class(TObject)
   private
@@ -1471,7 +1473,7 @@ var
  ar1,ar2: stringarty;
  ar3: integerarty;
  ar4,ar5n,ar5u: stringarty;
- int1,int2,int3,int4: integer;
+ int1,int2{,int3,int4}: integer;
  str1: string;
  level: integer;
  highbefore: integer;
@@ -1522,7 +1524,9 @@ begin
  comp1.designinfo:= 1;
  stream1:= tmemorystream.create;
  writer1:= twritermse.create(stream1,256,false);
+{$warnings off}
  twriter1(writer1).writeproperties(comp1);
+{$warnings on}
  writer1.free;
  stream1.position:= 0;
  reader1:= treader.create(stream1,256);

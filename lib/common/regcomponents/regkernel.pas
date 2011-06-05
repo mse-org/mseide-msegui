@@ -27,6 +27,7 @@ type
   protected
    function gettypeinfo: ptypeinfo; override;
    function getdefaultstate: propertystatesty; override;
+  public
    procedure edit; override;
   end;
  
@@ -58,7 +59,7 @@ type
  end;
  
  tshortcutactionpropertyeditor = class(tclasselementeditor)
-  protected
+  public
    function getvalue: msestring; override;
  end;
  
@@ -170,7 +171,9 @@ type
  *)
 const   
  datamoduleintf: designmoduleintfty = 
-  (createfunc: {$ifdef FPC}@{$endif}createmsedatamodule);
+  (createfunc: {$ifdef FPC}@{$endif}createmsedatamodule;
+   initnewcomponent: nil; getscale: nil; sourcetoform: nil;
+   );
 
 procedure Register;
 begin

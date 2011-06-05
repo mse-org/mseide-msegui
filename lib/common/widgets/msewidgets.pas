@@ -1507,9 +1507,13 @@ begin
    bmp:= abitmap;
   end;
   if not bmp.isempty then begin
+{$warnings off}
    aicon:= tbitmap1(bmp).handle;
+{$warnings on}
    if bmp.masked then begin
+{$warnings off}
     amask:= tbitmap1(bmp.mask).handle;
+{$warnings on}
    end;
   end;
  end;

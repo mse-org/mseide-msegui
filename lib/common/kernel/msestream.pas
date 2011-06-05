@@ -867,7 +867,9 @@ begin
    closehandle(handle);
   end;
   {$ifdef FPC}
+{$warnings off}
   thandlestreamcracker(self).fhandle:= value;
+{$warnings on}
   {$else}
   fhandle:= value;
   {$endif}
@@ -924,8 +926,10 @@ begin
   result:= fmemorystream.Read(buffer,count);
  end
  else begin
+{$warnings off}
   result:= sys_read({$ifdef FPC}thandlestreamcracker(self).{$endif}fhandle,
                                       @buffer,count);
+{$warnings on}
   if result = - 1 then begin
    result:= 0;
   end;
@@ -948,8 +952,10 @@ begin
   result:= fmemorystream.Write(Buffer,count);
  end
  else begin
+{$warnings off}
   result:= sys_write({$ifdef FPC}thandlestreamcracker(self).{$endif}fhandle,
                              @buffer,count);
+{$warnings on}
   if result = -1 then begin
    result:= 0;
   end;
@@ -1209,8 +1215,8 @@ function tcustombufstream.Read(var Buffer; Count: Longint): Longint;
   bufoffset:= fbuffer;
  end;
  
-var
- int1: integer;
+//var
+// int1: integer;
 label
  endlab;
 begin
@@ -1835,7 +1841,7 @@ var
  ar1: varrecarty;
  ar2: array of extended;
  int1: integer;
- ext1: extended;
+// ext1: extended;
 begin
  setlength(ar1,length(fields));
  setlength(ar2,length(fields));

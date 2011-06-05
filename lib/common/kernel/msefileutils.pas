@@ -391,6 +391,7 @@ var
  int1: integer;
 begin
  ar1:= splitrootpath(path);
+ mstr1:= '';
  for int1:= 0 to high(ar1) do begin
   mstr1:= mstr1+'/'+ar1[int1];
   if not finddir(mstr1) then begin
@@ -560,7 +561,7 @@ function checkfilename(const filename: filenamety;
                         const dirstream: dirstreamty): boolean;
                           //mask must be uppercase if case sensitive
 var
- str1,str2: msestring;
+ str1{,str2}: msestring;
  int1: integer;
 begin
  with dirstream,dirinfo do begin
@@ -628,7 +629,7 @@ end;
 function searchfile(const afilename: filenamety;
                                      const adirname: filenamety): filenamety;
 var
- ar1,ar2: filenamearty;
+ ar1{,ar2}: filenamearty;
  int1: integer;
  dirstream: dirstreamty;
  fileinfo: fileinfoty;
@@ -743,7 +744,7 @@ end;
 function searchfiles(const afilename: filenamety;
                                      const adirname: filenamety): filenamearty;
 var
- ar1,ar2: filenamearty;
+ ar1{,ar2}: filenamearty;
  int1,int2: integer;
  dirstream: dirstreamty;
  fileinfo: fileinfoty;
@@ -879,8 +880,8 @@ end;
 function findfile(const filename: filenamety; const dirnames: array of filenamety;
                         out path: filenamety): boolean;
             //true if found
-var
- str1: filenamety;
+//var
+// str1: filenamety;
 begin
  path:= searchfile(filename,dirnames);
  if path <> '' then begin

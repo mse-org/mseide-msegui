@@ -165,13 +165,13 @@ type
                                 var processed: boolean); override;
    procedure afterdragevent(var ainfo: draginfoty; const arow: integer;
                                 var processed: boolean); override;
-   procedure updatecellzone(const row: integer; const pos: pointty; var result: cellzonety); override;
 
   public
    constructor create(const agrid: tcustomgrid;
                      const aowner: tgridarrayprop); override;
    destructor destroy; override;
    procedure sourcenamechanged(const atag: integer);
+   procedure updatecellzone(const row: integer; const pos: pointty; var result: cellzonety); override;
    function actualfont: tfont; override;
 //   procedure cellchanged(const row: integer); override;
    property editwidget: twidget read geteditwidget write seteditwidget;
@@ -2674,7 +2674,7 @@ end;
 
 function tcustomwidgetgrid.widgetcell(const awidget: twidget): gridcoordty;
 var
- int1,int2,int3: integer;
+ int1,int2{,int3}: integer;
 begin
  if awidget <> nil then begin
   for int1:= 0 to fdatacols.count - 1 do begin

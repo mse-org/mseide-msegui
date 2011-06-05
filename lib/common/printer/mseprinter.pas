@@ -443,7 +443,7 @@ function stringtopages(const avalue: msestring): pagerangearty;
 
 implementation
 uses
- mseprocutils,msepipestream,msesysintf,msestockobjects,mseconsts;
+ mseprocutils,msepipestream,msesysintf,msestockobjects,mseconsts,msesys;
  
 type
  tfont1 = class(tfont);
@@ -1169,7 +1169,8 @@ begin
           tak_centered: flags1:= flags1 + [tf_xcentered];
          end;
          if kind = tak_decimal then begin
-          int2:= msestrrscan(ar1[int1].text,widechar(decimalseparator));
+          int2:= msestrrscan(ar1[int1].text,
+                         defaultformatsettingsmse.decimalseparator);
           if int2 > 0 then begin
            dotextout(richcopy(ar1[int1],1,int2-1),
                    makerect(round(pos*ppmm),dest.y,0,

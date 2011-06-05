@@ -250,12 +250,14 @@ procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
 implementation
 uses
  msedatalist;
+(*
 const
 {$ifdef FPC_DOUBLE_HILO_SWAPPED}
  co1: array[0..7] of byte = (0,0,$f0,$ff,$0,0,0,0);      //- inf
 {$else}
  co1: array[0..7] of byte = ($0,0,0,0,0,0,$f0,$ff);      //- inf
 {$endif}
+*)
 {
 function emptydatetime: tdatetime;
 begin
@@ -295,6 +297,8 @@ procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
 var
  int1: integer;
 begin
+ re:= nil; //compiler warning
+ im:= nil; //compiler warning
  int1:= length(acomplex);
  if int1 > 0 then begin
   allocuninitedarray(int1,sizeof(re[0]),re);

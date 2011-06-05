@@ -225,7 +225,7 @@ function tformlink.processdataitem(const adata: pifirecty;
            var adatapo: pchar; const atag: integer; const aname: string): boolean;
 var
  command1: ifiwidgetcommandty;
- str2: string;
+// str2: string;
 begin
  with adata^ do begin
   case header.kind of
@@ -384,12 +384,12 @@ end;
 function tifiwidgetgridcontroller.encodegriddata(
                      const asequence: sequencety): ansistring;
 var
- po1,po4: pchar;
- int1,int2,int3,int4: integer;
- po2: pmsestring;
- po3: pansistring;
+ po1{,po4}: pchar;
+ int1,int2,int3{,int4}: integer;
+// po2: pmsestring;
+// po3: pansistring;
  ar1: booleanarty;
- ar2: bytearty;
+// ar2: bytearty;
 begin
  with trxwidgetgrid(fowner) do begin
   setlength(ar1,datacols.count);
@@ -406,7 +406,9 @@ begin
     end;
    end;
   end;
+{$warnings off}
   int2:= int2 + datalisttoifidata(tdatacols1(datacols).frowstate);
+{$warnings on}
 //  if tdatacols1(datacols).frowstate.folded then begin
 //   int2:= int2 + rowcount * sizeof(byte);
 //  end;
@@ -427,7 +429,9 @@ begin
      end;
     end;
    end;
+{$warnings off}
    datalisttoifidata(tdatacols1(datacols).frowstate,po1);
+{$warnings on}
 {
    if tdatacols1(datacols).frowstate.folded then begin
     ar2:= tdatacols1(datacols).frowstate.foldinfoar;
@@ -449,12 +453,12 @@ var
  kind1: listdatatypety;
  po1: pchar;
  str1: ansistring;
- po2: pointer;
+// po2: pointer;
  ckind1: gridcommandkindty;
  source1,dest1,count1: integer;
  rowstate1: rowstaterowheightty;
  select1: selectdataty;
- lwo1: longword;
+// lwo1: longword;
  datalist1: subdatainfoty;
  po3: prowstaterowheightty;
  ifikind1: ifidatakindty;
@@ -485,8 +489,10 @@ begin
                    datacols.colsubdatainfo(str1)));
         end;
        end;
+{$warnings off}
        inc(po1,ifidatatodatalist(dl_rowstate,rows1,po1,
                                     tdatacols1(datacols).frowstate));
+{$warnings on}
        include(fistate,rws_datareceived);
       finally
        endupdate;

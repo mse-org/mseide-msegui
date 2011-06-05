@@ -960,7 +960,7 @@ var
  rect1,rect2: rectty;
  endxy: integer;
  buttonsizecxy: integer;
- bu1: stepbuttonposty;
+// bu1: stepbuttonposty;
  loopcount: integer;
  size1: sizety; 
 begin
@@ -980,7 +980,7 @@ begin
     with flayout do begin
      defaultsize:= nullsize;
      checkvert(rect1.size);
-     bu1:= frame.buttonpos;
+//     bu1:= frame.buttonpos;
      if frame.buttonpos in [sbp_top,sbp_right] then begin
       if vert then begin
        frame.buttonpos:= sbp_top;

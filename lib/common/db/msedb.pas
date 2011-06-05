@@ -214,10 +214,10 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
-   function HasParent: Boolean; override;
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
+   function HasParent: Boolean; override;
    procedure Clear; override;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property tagpo: pointer read ftagpo write ftagpo;
@@ -246,8 +246,8 @@ type
    fsetmsestringdata: setmsestringdataty;
    fcharacterlength: integer;
    ftagpo: pointer;
-   fvaluebuffer: msestring;
-   fvalidating: boolean;
+//   fvaluebuffer: msestring;
+//   fvalidating: boolean;
    fisftwidestring: boolean;
    fdefaultexpression: msestring;
    fdefaultexpressionbefore: string; 
@@ -336,10 +336,10 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
-   function HasParent: Boolean; override;
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
+   function HasParent: Boolean; override;
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
@@ -379,7 +379,6 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
-   function HasParent: Boolean; override;
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
    procedure setaslargeint(avalue: largeint); override;
@@ -387,6 +386,7 @@ type
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
    procedure change; override;
   public
+   function HasParent: Boolean; override;
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
@@ -429,13 +429,13 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
-   function HasParent: Boolean; override;
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
+   function HasParent: Boolean; override;
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
@@ -476,7 +476,6 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
-   function HasParent: Boolean; override;
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
    procedure setaslargeint(avalue: largeint); override;
@@ -484,6 +483,7 @@ type
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
+   function HasParent: Boolean; override;
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
@@ -520,7 +520,6 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
-   function HasParent: Boolean; override;
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
    procedure setaslargeint(avalue: largeint); override;
@@ -528,6 +527,7 @@ type
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
+   function HasParent: Boolean; override;
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
@@ -564,10 +564,10 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
-   function HasParent: Boolean; override;
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
+   function HasParent: Boolean; override;
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
@@ -604,7 +604,6 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
-   function HasParent: Boolean; override;
    function getasfloat: double; override;
    function getascurrency: currency; override;
    procedure setasfloat(avalue: double); override;
@@ -614,6 +613,7 @@ type
    function GetAsLargeint: Largeint; override;
    procedure SetDataset(AValue : TDataset); override;
   public
+   function HasParent: Boolean; override;
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
@@ -658,7 +658,6 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
-   function HasParent: Boolean; override;
    {$ifdef integergetdatasize}
    function GetDataSize: integer; override;
    {$else}
@@ -675,6 +674,7 @@ type
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
+   function HasParent: Boolean; override;
    constructor Create(AOwner: TComponent); override;
    procedure Clear; override;
    function assql: string;
@@ -721,7 +721,6 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
-   function HasParent: Boolean; override;
    function getasdatetime: tdatetime; override;
    procedure setasdatetime(avalue: tdatetime); override;
    procedure setasstring(const avalue: string); override;
@@ -730,6 +729,7 @@ type
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
+   function HasParent: Boolean; override;
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
@@ -776,10 +776,10 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
-   function HasParent: Boolean; override;
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
+   function HasParent: Boolean; override;
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
@@ -815,13 +815,13 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
-   function HasParent: Boolean; override;
    function getasvariant: variant; override;
    function getasstring: string; override;
    procedure setasstring(const avalue: string); override;
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
+   function HasParent: Boolean; override;
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
@@ -857,13 +857,13 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
-   function HasParent: Boolean; override;
    function getasvariant: variant; override;
    procedure setasstring(const avalue: string); override;
    function getasstring: string; override;
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
+   function HasParent: Boolean; override;
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
@@ -899,7 +899,6 @@ type
    function getaswidestring: widestring; override;
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
-   function HasParent: Boolean; override;
    procedure setasfloat(avalue: double); override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
    class procedure checktypesize(avalue: longint); override;
@@ -907,6 +906,7 @@ type
    procedure change; override;
    procedure SetDataset(AValue : TDataset); override;
   public
+   function HasParent: Boolean; override;
    procedure Clear; override;
    function assql: string;
    function asoldsql: string;
@@ -975,7 +975,6 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure removecache(const aid: blobidty); virtual; overload;
    procedure removecache; overload;
-   function HasParent: Boolean; override;
    function getasvariant: variant; override;
    function getasstring: string; override;
    procedure setasstring(const avalue: string); override;
@@ -985,6 +984,7 @@ type
    procedure SetDataset(AValue : TDataset); override;
   public
    destructor destroy; override;
+   function HasParent: Boolean; override;
    procedure Clear; override;
    procedure clearcache; virtual;
    function assql: string;
@@ -1314,7 +1314,7 @@ type
   private
    ffields: tpersistentfields;
    fintf: idscontroller;
-   fneedsrefresh: integer;
+//   fneedsrefresh: integer;
    frecno: integer;
    frecnovalid: boolean;
    fscrollsum: integer;
@@ -1839,12 +1839,21 @@ type
     FRequired : Boolean;
     FSize : integer;
  end;
+
+ tfielddefcracker1 = class(tfielddefcracker) //no "not used" compiler messages 
+  public
+   property DataType : TFieldType read FDataType;
+   property FieldNo : Longint read FFieldNo;
+   property InternalCalcField : Boolean read FInternalCalcField;
+   property Precision : Longint read FPrecision;
+   property Required : Boolean read FRequired;
+   property Size : integer read FSize;
+ end;
  
   TCollectioncracker = class(TPersistent)
    private
     FItemClass: TCollectionItemClass;
   end;
-  
   TParamcracker = class(TCollectionItem)
   private
     FNativeStr: string;
@@ -1857,9 +1866,22 @@ type
     FParamType: TParamType;
     FSize: Integer;
   end;
-
+  
+  TParamcracker1 = class(tparamcracker) //no "not used" compiler messages
+  public
+    property NativeStr: string read FNativeStr;
+    property Value: Variant read FValue;
+    property Precision: Integer read FPrecision;
+    property NumericScale: Integer read FNumericScale;
+    property Name: string read FName;
+    property DataType: TFieldType read FDataType;
+    property Bound: Boolean read FBound;
+    property ParamType: TParamType read FParamType;
+    property Size: Integer read FSize;
+  end;
+  
   TDataSetcracker = class(TComponent)
-  Private
+   Private
     FOpenAfterRead : boolean;
     FActiveRecord: Longint;
     FAfterCancel: TDataSetNotifyEvent;
@@ -1893,6 +1915,43 @@ type
     FDisableControlsState : TDatasetState;
     FCurrentRecord: Longint;
     FDataSources : TList;
+  end;
+
+  TDataSetcracker1 = class(TDataSetcracker) //avoid "not used note"
+   public
+    property OpenAfterRead : boolean read FOpenAfterRead;
+    property ActiveRecord: Longint read FActiveRecord;
+    property AfterCancel: TDataSetNotifyEvent read FAfterCancel;
+    property AfterClose: TDataSetNotifyEvent read FAfterClose;
+    property AfterDelete: TDataSetNotifyEvent read FAfterDelete;
+    property AfterEdit: TDataSetNotifyEvent read FAfterEdit;
+    property AfterInsert: TDataSetNotifyEvent read FAfterInsert;
+    property AfterOpen: TDataSetNotifyEvent read FAfterOpen;
+    property AfterPost: TDataSetNotifyEvent read FAfterPost;
+    property AfterRefresh: TDataSetNotifyEvent read FAfterRefresh;
+    property AfterScroll: TDataSetNotifyEvent read FAfterScroll;
+    property AutoCalcFields: Boolean read FAutoCalcFields;
+    property BOF: Boolean read FBOF;
+    property BeforeCancel: TDataSetNotifyEvent read FBeforeCancel;
+    property BeforeClose: TDataSetNotifyEvent read FBeforeClose;
+    property BeforeDelete: TDataSetNotifyEvent read FBeforeDelete;
+    property BeforeEdit: TDataSetNotifyEvent read FBeforeEdit;
+    property BeforeInsert: TDataSetNotifyEvent read FBeforeInsert;
+    property BeforeOpen: TDataSetNotifyEvent read FBeforeOpen;
+    property BeforePost: TDataSetNotifyEvent read FBeforePost;
+    property BeforeRefresh: TDataSetNotifyEvent read FBeforeRefresh;
+    property BeforeScroll: TDataSetNotifyEvent read FBeforeScroll;
+    property BlobFieldCount: Longint read FBlobFieldCount;
+    property BookmarkSize: Longint read FBookmarkSize;
+    property Buffers : TBufferArray read FBuffers;
+    property BufferCount: Longint read FBufferCount;
+    property CalcBuffer: PChar read FCalcBuffer;
+    property CalcFieldsSize: Longint read FCalcFieldsSize;
+    property Constraints: TCheckConstraints read FConstraints;
+    property DisableControlsCount : Integer read FDisableControlsCount;
+    property DisableControlsState : TDatasetState read FDisableControlsState;
+    property CurrentRecord: Longint read Fcurrentrecord;
+    property DataSources : TList read FDataSources;
   end;
   
  tdataset1 = class(tdataset);
@@ -2292,13 +2351,15 @@ end;
 
 function encodesqlfloat(const avalue: real): msestring;
 begin
- result:= replacechar(floattostr(avalue),decimalseparator,'.');
+ result:= replacechar(floattostr(avalue),
+                    defaultformatsettings.decimalseparator,'.');
 //( result:= formatfloatmse(avalue,'');
 end;
 
 function encodesqlcurrency(const avalue: currency): msestring;
 begin
- result:= replacechar(formatfloat('0.####',avalue),decimalseparator,'.')
+ result:= replacechar(formatfloat('0.####',avalue),
+                         defaultformatsettings.decimalseparator,'.')
 // result:= formatfloatmse(avalue,'0.####');
 end;
 
@@ -3429,7 +3490,9 @@ end;
 }
 function tmsestringfield.getasmsestring: msestring;
 begin
+{$warnings off}
  with tfieldcracker(self) do begin
+{$warnings on}
   if assigned(fgetmsestringdata) then begin
    if fvalidating then begin
     if fvaluebuffer = nil then begin
@@ -4924,7 +4987,7 @@ end;
 function tmsebooleanfield.sum: integer;
 var
  bm: string;
- int1: integer;
+// int1: integer;
  intf1: idatasetsum;
  bo1: wordbool;
 begin
@@ -5101,8 +5164,8 @@ begin
  end
  else begin
   case datatype of
-   fttime: f:= shorttimeformat;
-   ftdate: f:= shortdateformat;
+   fttime: f:= defaultformatsettings.shorttimeformat;
+   ftdate: f:= defaultformatsettings.shortdateformat;
    else f:= 'c'
   end;
  end;
@@ -5110,9 +5173,9 @@ begin
 end;
 
 procedure tmsedatetimefield.gettext(var thetext: string; adisplaytext: boolean);
-var
- r: tdatetime;
- f: string;
+//var
+// r: tdatetime;
+// f: string;
 begin
  if isnull then begin
   thetext:= '';
@@ -6622,8 +6685,8 @@ begin
 end;
 
 procedure tpersistentfields.defineproperties(filer: tfiler);
-var
- int1: integer; 
+//var
+// int1: integer; 
 begin
  filer.defineproperty('fields',{$ifdef FPC}@{$endif}readfields,
                                    {$ifdef FPC}@{$endif}writefields,count > 0);
@@ -6807,7 +6870,7 @@ end;
 procedure tdscontroller.appenddata(const adata: variantararty; const afields: array of tfield);
                                                      //[] -> all
 var
- int1,int2,int3: integer;
+ int1,int2{,int3}: integer;
  ar1: fieldarty;
 begin
  ar1:= getdsfields(tdataset(fowner),afields);
@@ -6960,7 +7023,7 @@ end;
 
 procedure tdscontroller.dataevent(const event: tdataevent; info: ptrint);
 var
- field1: tfield;
+// field1: tfield;
  state1,state2: tdatasetstate;
 begin
  case event of
@@ -7096,7 +7159,9 @@ begin
   end;
   }
   for int1:= 0 to fielddefs.count - 1 do begin
+{$warnings off}
    with tfielddefcracker(fielddefs[int1]) do begin
+{$warnings on}
     if ffieldno = 0 then begin
      ffieldno:= int1 + 1;
     end;
@@ -7958,7 +8023,9 @@ end;
 constructor tmseparams.create(aowner: tpersistent);
 begin
  inherited create(aowner);
+{$warnings off}
  tcollectioncracker(self).fitemclass:= tmseparam;
+{$warnings on}
 end;
 
 constructor tmseparams.create;
@@ -8424,7 +8491,9 @@ end;
 procedure tmseparam.setasvariant(const avalue: variant);
 begin
  inherited setasvariant(avalue);
+{$warnings off}
  tparamcracker(self).fbound:= not varisclear(avalue);
+{$warnings on}
 end;
 {$endif mse_withpublishedparamvalue}
 
@@ -8510,7 +8579,9 @@ var
  int1: integer;
 begin
  if (dataset <> nil) then begin
+{$warnings off}
   with tdatasetcracker(dataset) do begin
+{$warnings on}
    int1:= fdatasources.indexof(self);
    if int1 >= 0 then begin
     fdatasources.move(int1,0);

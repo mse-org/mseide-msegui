@@ -131,7 +131,7 @@ type
                                                       write foncommbroken;
   public
    constructor create(const aowner: tcustomcommcomp;
-                                 const acryptkind: cryptiokindty);
+                                 const acryptkind: cryptiokindty); reintroduce;
    destructor destroy; override;
    procedure close;
    procedure release;
@@ -558,8 +558,8 @@ begin
 end;
 
 procedure tcustomcommpipes.sethandle(const avalue: integer);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  ftx.releasehandle;
  ftx.handle:= avalue;
@@ -1036,7 +1036,7 @@ var
  bo1: boolean;
  int1,int2: integer;
  err: syserrorty;
- cryptioinfo: cryptioinfoty;
+// cryptioinfo: cryptioinfoty;
 begin
 {$ifdef mse_debugsockets}
  debugout(self,'server execthread');

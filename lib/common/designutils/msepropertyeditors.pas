@@ -421,9 +421,10 @@ type
   private
    fintfinfo: ptypeinfo;
   protected
-   procedure updatedefaultvalue; override;
    function filtercomponent(const acomponent: tcomponent): boolean; override;
    function getintfinfo: ptypeinfo; virtual; abstract;
+  public
+   procedure updatedefaultvalue; override;
  end;
  
  tsisterwidgetpropertyeditor = class(tcomponentpropertyeditor)
@@ -994,9 +995,9 @@ end;
 function  getpointerprop1(instance: tobject; propinfo : ppropinfo): pointer;
 begin
 {$ifdef CPU64}
-  result:= pointer(getint64prop(instance,propinfo));
+  result:= pointer(ptruint(getint64prop(instance,propinfo)));
 {$else}
-  result:= pointer(getordprop(instance,propinfo));
+  result:= pointer(ptruint(getordprop(instance,propinfo)));
 {$endif}
 end;
 
@@ -1594,9 +1595,9 @@ begin
  else begin
   with fprops[index] do begin
 {$ifdef CPU64}
-   result:= pointer(Getint64Prop(instance,propinfo));
+   result:= pointer(ptruint(Getint64Prop(instance,propinfo)));
 {$else}
-   result:= pointer(GetOrdProp(instance,propinfo));
+   result:= pointer(ptruint(GetOrdProp(instance,propinfo)));
 {$endif}
   end;
  end;
@@ -2585,7 +2586,7 @@ function tclasspropertyeditor.subproperties: propertyeditorarty;
 var
  ar1: objectarty;
  int1: integer;
- prop1: tpropertyeditor;
+// prop1: tpropertyeditor;
 begin
  setlength(ar1,count);
  for int1:= 0 to high(fprops) do begin
@@ -2737,8 +2738,8 @@ begin
 end;
 
 function tcomponentpropertyeditor.getvalue: msestring;
-var
- comp1: tcomponent;
+//var
+// comp1: tcomponent;
 begin
  if issubcomponent then begin
   result:= inherited getvalue;
@@ -5244,7 +5245,9 @@ begin
  if amodalresult = mr_ok then begin
   try
    with tdoublestringlisteditor(sender) do begin
+   {$warnings off}
     list:= tdoublemsestringdatalist.create;
+   {$warnings on}
     try
      list.assign(texta.griddata);
      list.assignb(textb.griddata);
@@ -5303,7 +5306,9 @@ begin
  if amodalresult = mr_ok then begin
   try
    with tmsestringintlisteditor(sender) do begin
+{$warnings off}
     list:= tmsestringintdatalist.create;
+{$warnings on}
     try
      list.assign(texta.griddata);
      list.assignb(textb.griddata);

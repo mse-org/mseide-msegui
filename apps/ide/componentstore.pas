@@ -83,10 +83,10 @@ type
    addfileact: taction;
    compfiledialog: tfiledialog;
    sel: tdatabutton;
-   procedure docreate(const sender: TObject);
+   procedure createex(const sender: TObject);
    procedure dopastecomponent(const sender: TObject);
-   procedure dostatread(const sender: TObject; const reader: tstatreader);
-   procedure dostatwrite(const sender: TObject; const writer: tstatwriter);
+   procedure statreadexe(const sender: TObject; const reader: tstatreader);
+   procedure statwriteexe(const sender: TObject; const writer: tstatwriter);
    procedure dostatreaditem(const sender: TObject; const reader: tstatreader;
                    var aitem: ttreelistitem);
    procedure doupdaterowvalues(const sender: TObject; const aindex: Integer;
@@ -283,7 +283,7 @@ end;
 
 { tcomponentstorefo }
 
-procedure tcomponentstorefo.docreate(const sender: TObject);
+procedure tcomponentstorefo.createex(const sender: TObject);
 begin
 {
  frootnode:= tstoredcomponent.create(true);
@@ -309,7 +309,7 @@ var
  info: storedcomponentinfoty;
  flags: tfilerflags;
  int1: integer;
- compname1: string;
+// compname1: string;
  node1: tstoredcomponent;
  statwriter1: tstatwriter;
  dialogfo: tstoredcomponentinfodialogfo;
@@ -454,13 +454,13 @@ begin
  copytoclipboard(copycomponent);
 end;
 
-procedure tcomponentstorefo.dostatread(const sender: TObject;
+procedure tcomponentstorefo.statreadexe(const sender: TObject;
                const reader: tstatreader);
 begin
 // frootnode.dostatread(reader);
 end;
 
-procedure tcomponentstorefo.dostatwrite(const sender: TObject;
+procedure tcomponentstorefo.statwriteexe(const sender: TObject;
                const writer: tstatwriter);
 begin
 // frootnode.dostatwrite(writer);
@@ -579,7 +579,7 @@ end;
 function tcomponentstorefo.readstoregroup(const afilename: filenamety): boolean;
 var
  int1: integer;
- reader1,reader2: tstatreader;
+ {reader1,}reader2: tstatreader;
  item1: tstoredcomponent;
  storedir1: filenamety;
 begin
@@ -773,7 +773,7 @@ end;
 //todo: check duplicates
 procedure tcomponentstorefo.addstoreex(const sender: TObject);
 var
- stream1: ttextstream;
+// stream1: ttextstream;
  node1: tstoredcomponent;
 begin
  with storefiledialog do begin
@@ -882,8 +882,8 @@ end;
 procedure tcomponentstorefo.beforedrag(const sender: TObject;
                const apos: pointty; var dragobject: tdragobject;
                var processed: Boolean);
-var
- widget1: twidget;
+//var
+// widget1: twidget;
 begin
 end;
 

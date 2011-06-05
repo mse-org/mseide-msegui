@@ -344,8 +344,8 @@ end;
 
 procedure treportdesignerfo.reportchildmouseevent(const sender: twidget;
                var info: mouseeventinfoty);
-var
- pt1: pointty;
+//var
+// pt1: pointty;
 begin
  with info do begin
   case eventkind of

@@ -26,7 +26,8 @@ const
  reportintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createreport;
    initnewcomponent: {$ifdef FPC}@{$endif}initreportcomponent;
-   getscale: {$ifdef FPC}@{$endif}getreportscale);
+   getscale: {$ifdef FPC}@{$endif}getreportscale;
+   sourcetoform: nil);
 type
  treptabulatoreditor = class(tclasselementeditor)
   public

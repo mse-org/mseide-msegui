@@ -746,6 +746,7 @@ type
    procedure assigntob(const dest: tdatalist); override;
 
    function datatype: listdatatypety; override;
+   function add(const value: msestring): integer; override; overload;
    function add(const valuea: msestring; const valueb: msestring = ''): integer; overload;
    function add(const value: doublemsestringty): integer; overload;
    procedure insert(const index: integer; const item: msestring); override;
@@ -794,10 +795,13 @@ type
    procedure assigntob(const dest: tdatalist); override;
 
    function datatype: listdatatypety; override;
-   function add(const valuea: msestring; const valueb: integer = 0): integer; overload;
+   function add(const value: msestring): integer; override;
+   function add(const valuea: msestring; const valueb: integer): integer; overload;
    function add(const value: msestringintty): integer; overload;
+   procedure insert(const index: integer; const item: msestring);
+                                                     override; overload;
    procedure insert(const index: integer; const item: msestring;
-                               const itemint: integer); reintroduce;
+                            const itemint: integer); overload;
    procedure fill(const acount: integer; const defaultvalue: msestring;
                      const defaultint: integer);
 
@@ -844,7 +848,7 @@ type
 
  colmergety = packed record
   merged: longword; //bitset lsb = col 1, msb = col32, 
-                    //$ffffffff = first col fills whole row
+                    // $ffffffff = first col fills whole row
                     //addressed by column index
  end;
  rowstatecolmergety = packed record
@@ -1585,11 +1589,13 @@ begin
 end;
 
 procedure allocuninitedarray(count,itemsize: integer; out dynamicarray);
-                 //does not init memory, dynamicarray has to be nil!
+                 //does not init memory, dynamicarray must be nil!
 var
  po1: psizeint;
 begin
+{$warnings off}
  if pointer(dynamicarray) <> nil then begin
+{$warnings on}
   raise exception.Create('allocunitedarray: dynamicarray not nil');
  end;
  getmem(po1,count * itemsize + 2 * sizeof(sizeint));
@@ -2212,16 +2218,18 @@ var
  ar1: msestringarty;
  int1,int2: integer;
 begin
+{$warnings off}
  if pointer(source) = pointer(result) then begin
+{$warnings on}
   ar1:= copy(source);
  end
  else begin
   ar1:= source;
  end;
- int2:= high(source);
+ int2:= high(ar1);
  setlength(result,int2+1);
  for int1:= 0 to int2 do begin
-  result[int1]:= source[int2];
+  result[int1]:= ar1[int2];
   dec(int2);
  end;
 end;
@@ -2231,16 +2239,18 @@ var
  ar1: integerarty;
  int1,int2: integer;
 begin
+{$warnings off}
  if pointer(source) = pointer(result) then begin
+{$warnings on}
   ar1:= copy(source);
  end
  else begin
   ar1:= source;
  end;
- int2:= high(source);
+ int2:= high(ar1);
  setlength(result,int2+1);
  for int1:= 0 to int2 do begin
-  result[int1]:= source[int2];
+  result[int1]:= ar1[int2];
   dec(int2);
  end;
 end;
@@ -2250,16 +2260,18 @@ var
  ar1: pointerarty;
  int1,int2: integer;
 begin
+{$warnings off}
  if pointer(source) = pointer(result) then begin
+{$warnings on}
   ar1:= copy(source);
  end
  else begin
   ar1:= source;
  end;
- int2:= high(source);
+ int2:= high(ar1);
  setlength(result,int2+1);
  for int1:= 0 to int2 do begin
-  result[int1]:= source[int2];
+  result[int1]:= ar1[int2];
   dec(int2);
  end;
 end;
@@ -5817,8 +5829,8 @@ end;
 procedure tansistringdatalist.assign(source: tpersistent);
 var
  int1: integer;
- po1,po2: pansistring;
- s1,s2: integer;
+ po1{,po2}: pansistring;
+ s1{,s2}: integer;
 begin
  if not assigndata(source) then begin
   if source is tstringlist then begin
@@ -6087,9 +6099,10 @@ var
 begin
  setlength(result,fcount);
  po1:= datapo;
+ s1:= size;
  for int1:= 0 to fcount - 1 do begin
   result[int1]:= po1^;
-  inc(pchar(po1),s1);
+  inc(pchar(pointer(po1)),s1);
  end;
 end;
 
@@ -6155,9 +6168,11 @@ begin
  int2:= int2 + count * length(lineend);
  setlength(result,int2);
  ch1:= string(lineend)[1];
+{$warnings off}
  if length(lineend) > 1 then begin
   ch2:= string(lineend)[2];
  end;
+{$warnings on}
  po1:= datapo;
  po2:= pointer(result);
  for int1:= count-1 downto 0 do begin
@@ -6168,10 +6183,12 @@ begin
   end;
   po2^:= ch1;
   inc(po2);
+{$warnings off}
   if length(lineend) > 1 then begin
    po2^:= ch2;
    inc(po2);
   end;
+{$warnings on}
   inc(pchar(po1),fsize);
  end;
  setlength(result,length(result)-length(lineend)); //remove last lineend
@@ -6209,7 +6226,7 @@ end;
 function tpoorstringdatalist.add(const avalue: msestring;
                                  const anoparagraph: boolean): integer; 
 begin
- add(avalue);
+ result:= add(avalue);
 end;                                                              
 
 function tpoorstringdatalist.addchars(const value: msestring;
@@ -6394,7 +6411,7 @@ end;
 procedure tpoorstringdatalist.assign(source: tpersistent);
 var
  int1: integer;
- po1,po2: pmsestring;
+ po1{,po2}: pmsestring;
  po3: pstring;
  s1,s2: integer;
 begin
@@ -6470,11 +6487,11 @@ procedure tpoorstringdatalist.assignto(dest: tpersistent);
 var
  int1: integer;
  po1: pmsestring;
- s1: integer;
+// s1: integer;
 begin
  if dest is tstringlist then begin
   normalizering;
-  s1:= size;
+//  s1:= size;
   with tstringlist(dest) do begin
    clear;
    capacity:= self.fcount;
@@ -6828,9 +6845,11 @@ begin
  int2:= int2 + count * length(lineend);
  setlength(result,int2);
  ch1:= msechar(byte(string(lineend)[1]));
+{$warnings off}
  if length(lineend) > 1 then begin
   ch2:= msechar(byte(string(lineend)[2]));
  end;
+{$warnings on}
  po1:= datapo;
  po2:= pointer(result);
  for int1:= count-1 downto 0 do begin
@@ -6841,10 +6860,12 @@ begin
   end;
   po2^:= ch1;
   inc(po2);
+{$warnings off}
   if length(lineend) > 1 then begin
    po2^:= ch2;
    inc(po2);
   end;
+{$warnings on}
   inc(pchar(po1),fsize);
  end;
  setlength(result,length(result)-length(lineend)); //remove last lineend
@@ -6884,7 +6905,13 @@ end;
 
 { tdoublemsestringdatalist }
 
-function tdoublemsestringdatalist.add(const valuea: msestring; const valueb: msestring = ''): integer;
+function tdoublemsestringdatalist.add(const value: msestring): integer;
+begin
+ result:= add(value,'');
+end;
+
+function tdoublemsestringdatalist.add(const valuea: msestring;
+                                   const valueb: msestring = ''): integer;
 var
  dstr1: doublemsestringty;
 begin
@@ -7207,7 +7234,13 @@ begin
  result:= dl_msestringint;
 end;
 
-function tmsestringintdatalist.add(const valuea: msestring; const valueb: integer = 0): integer;
+function tmsestringintdatalist.add(const value: msestring): integer;
+begin
+ result:= add(value,0);
+end;
+
+function tmsestringintdatalist.add(const valuea: msestring;
+                                        const valueb: integer): integer;
 var
  dstr1: msestringintty;
 begin
@@ -7253,6 +7286,12 @@ procedure tmsestringintdatalist.Setdoubleitems(index: integer;
 begin
  pmsestringintty(getitempo(index))^:= value;
  change(index);
+end;
+
+procedure tmsestringintdatalist.insert(const index: integer;
+                        const item: msestring);
+begin
+ insert(index,item,0);
 end;
 
 procedure tmsestringintdatalist.insert(const index: integer;

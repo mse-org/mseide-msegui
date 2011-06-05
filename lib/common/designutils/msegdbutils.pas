@@ -806,8 +806,8 @@ begin
 end;
 
 procedure tgdbmi.closegdb;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  if not (gs_closing in fstate) then begin
   include(fstate,gs_closing);
@@ -4072,9 +4072,9 @@ end;
 
 function tgdbmi.currentlang: string;
 var
- str1: string;
+// str1: string;
  ar1: stringarty;
- int1,int2: integer;
+// int1{,int2}: integer;
 begin
  result:= 'pascal'; //default
  if getcliresult('show language',ar1) = gdb_ok then begin
@@ -4098,7 +4098,7 @@ function tgdbmi.readpascalvariable(const varname: string;
                                           out aresult: msestring): gdbresultty;
 var
  str1,str2: string;
- int1,int2: integer;
+ int1{,int2}: integer;
  ar1: stringarty;
 begin
  if running then begin
@@ -4270,7 +4270,7 @@ var
  ar1,ar2,ar3,ar4: resultinfoarty;
  int1,int2: integer;
  str1: string;
- lint1: int64;
+// lint1: int64;
 begin
  result:= synccommand('-stack-info-depth '+ inttostr(last));
  if result = gdb_ok then begin

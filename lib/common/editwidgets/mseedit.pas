@@ -277,12 +277,12 @@ type
    fbuttonintf: ibutton;
    procedure getpaintframe(var aframe: framety); override;
    function getbuttonclass: framebuttonclassty; virtual;
-   procedure checktemplate(const sender: tobject); override;
    procedure updatestate; override;
   public
    constructor create(const intf: icaptionframe; const buttonintf: ibutton);
                                                    reintroduce; virtual;
    destructor destroy; override;
+   procedure checktemplate(const sender: tobject); override;
    function buttonframe: framety;
    procedure updatemousestate(const sender: twidget;
                                  const info: mouseeventinfoty); override;
@@ -344,7 +344,6 @@ type
    procedure fontchanged; override;
    procedure enabledchanged; override;
    procedure dragstarted; override;
-   function actualcursor(const apos: pointty): cursorshapety; override;
 
    class function classskininfo: skininfoty; override;
   //iedit
@@ -389,6 +388,7 @@ type
    procedure changed;
    procedure initfocus;
    procedure synctofontheight; override;
+   function actualcursor(const apos: pointty): cursorshapety; override;
 
    property editor: tinplaceedit read feditor;
    property optionsedit: optionseditty read getoptionsedit write setoptionsedit
@@ -1281,7 +1281,7 @@ end;
 
 procedure tcustomedit.synctofontheight;
 var
- int1: integer;
+// int1: integer;
  fram1: framety;
 begin
  inherited;

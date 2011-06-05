@@ -9,6 +9,8 @@ object componentstorefo: tcomponentstorefo
   bounds_cx = 445
   bounds_cy = 354
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -85,7 +87,7 @@ object componentstorefo: tcomponentstorefo
     DDDDDD01DBDBDB01DADADA01D8D8D801D7D7D701D5D5D501D3D3D301D2D2D201
     D1D1D101D4D4D402D3D3D301D2D2D201D0D0D001
   }
-  oncreate = docreate
+  oncreate = createex
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
     popupmenu = tpopupmenu1
@@ -190,8 +192,8 @@ object componentstorefo: tcomponentstorefo
         item
           fade_pos.count = 2
           fade_pos.items = (
-             0.0000000000000000E+0000
-             1.0000000000000000E+0000
+            0
+            1
           )
           fade_color.count = 2
           fade_color.items = (
@@ -365,8 +367,8 @@ object componentstorefo: tcomponentstorefo
   end
   object storefile: tstatfile
     filename = 'store.sta'
-    onstatread = dostatread
-    onstatwrite = dostatwrite
+    onstatread = statreadexe
+    onstatwrite = statwriteexe
     left = 296
     top = 88
   end

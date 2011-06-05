@@ -95,8 +95,8 @@ end;
 
 procedure tcpuavr32fo.regsetvalue(const sender: TObject; var avalue: Integer;
                var accept: Boolean);
-var
- str1: string;
+//var
+// str1: string;
 begin
  if mainfo.gdb.cancommand then begin
   with tintegeredit(sender) do begin

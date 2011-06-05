@@ -129,27 +129,10 @@ Type
 //    function GetAsSQLText(Field : TField) : string; overload; override;
 //    function GetAsSQLText(Param : TParam) : string; overload; override;
 
-    Function AllocateCursorHandle(const aowner: icursorclient;
-                           const aname: ansistring): TSQLCursor; override;
-    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
-    Function AllocateTransactionHandle : TSQLHandle; override;
 
-    procedure preparestatement(const cursor: tsqlcursor; 
-                  const atransaction : tsqltransaction;
-                  const asql: msestring; const aparams : tmseparams); override;
-    procedure UnPrepareStatement(cursor:TSQLCursor); override;
-    procedure FreeFldBuffers(cursor : TSQLCursor); override;
     procedure internalExecute(const cursor: TSQLCursor;
              const atransaction:tSQLtransaction; const AParams : TmseParams;
              const autf8: boolean); override;
-    procedure AddFieldDefs(const cursor: TSQLCursor; 
-                   const FieldDefs : TfieldDefs); override;
-    function Fetch(cursor : TSQLCursor) : boolean; override;
-    function loadfield(const cursor: tsqlcursor;
-      const datatype: tfieldtype; const fieldnum: integer; //null based
-      const buffer: pointer; var bufsize: integer;
-                                const aisutf8: boolean): boolean; override;
-           //if bufsize < 0 -> buffer was to small, should be -bufsize
     function GetTransactionHandle(trans : TSQLHandle): pointer; override;
     function Commit(trans : TSQLHandle) : boolean; override;
     function RollBack(trans : TSQLHandle) : boolean; override;
@@ -179,6 +162,23 @@ Type
    function identquotechar: ansistring; override;
    
   Public
+    Function AllocateTransactionHandle : TSQLHandle; override;
+    Function AllocateCursorHandle(const aowner: icursorclient;
+                           const aname: ansistring): TSQLCursor; override;
+    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
+    procedure preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams); override;
+    procedure UnPrepareStatement(cursor:TSQLCursor); override;
+    procedure FreeFldBuffers(cursor : TSQLCursor); override;
+    procedure AddFieldDefs(const cursor: TSQLCursor; 
+                   const FieldDefs : TfieldDefs); override;
+    function Fetch(cursor : TSQLCursor) : boolean; override;
+    function loadfield(const cursor: tsqlcursor;
+      const datatype: tfieldtype; const fieldnum: integer; //null based
+      const buffer: pointer; var bufsize: integer;
+                                const aisutf8: boolean): boolean; override;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
    function fetchblob(const cursor: tsqlcursor;
                               const fieldnum: integer): ansistring; override;
                               //null based
@@ -248,8 +248,8 @@ end;
 
 function TConnectionName.GetClientInfo: string;
 
-Var
-  B : Boolean;
+//Var
+//  B : Boolean;
 
 begin
 {$if fpc_fullversion >= 20401}
@@ -473,9 +473,9 @@ procedure TConnectionName.internalExecute(const  cursor: TSQLCursor;
 
 var
  C: TCursorName;
- i: integer;
+// i: integer;
  str1: ansistring;
- par1: tparam;
+// par1: tparam;
  mstr1: msestring;
 begin
   C:= TCursorName(cursor);
@@ -721,7 +721,7 @@ begin
   for I := 1 to Length(S) do
     begin
     if not (S[I] in ['0'..'9', '+', '-', 'E', 'e']) then
-      Tmp := Tmp + DecimalSeparator
+      Tmp := Tmp + {$ifdef FPC}defaultformatsettings.{$endif}DecimalSeparator
     else
       Tmp := Tmp + S[I];
     end;
@@ -739,7 +739,7 @@ begin
   for I := 1 to Length(S) do
     begin
     if not (S[I] in ['0'..'9', '+', '-', 'E', 'e']) then
-      Tmp := Tmp + DecimalSeparator
+      Tmp := Tmp + {$ifdef FPC}defaultformatsettings.{$endif}DecimalSeparator
     else
       Tmp := Tmp + S[I];
     end;
@@ -939,7 +939,7 @@ procedure TConnectionName.UpdateIndexDefs(var IndexDefs : TIndexDefs;
                      const aTableName : string);
 var 
  qry: TSQLQuery;
- keynamef,filednamef,columnnamef,nonuniquef: tfield;
+ keynamef,{filednamef,}columnnamef,nonuniquef: tfield;
  str1: string;
 begin
  if not assigned(Transaction) then begin
@@ -988,17 +988,20 @@ end;
 
 function TConnectionName.Commit(trans: TSQLHandle): boolean;
 begin
+ result:= true;
   // Do nothing.
 end;
 
 function TConnectionName.RollBack(trans: TSQLHandle): boolean;
 begin
+ result:= true;
   // Do nothing
 end;
 
 function TConnectionName.StartdbTransaction(const trans: TSQLHandle;
               const AParams: tstringlist): boolean;
 begin
+ result:= true;
   // Do nothing
 end;
 
@@ -1016,9 +1019,9 @@ function TConnectionName.CreateBlobStream(const Field: TField;
                const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
 var
  blobid: integer;
- int1,int2: integer;
- str1: string;
- bo1: boolean;
+// int1,int2: integer;
+// str1: string;
+// bo1: boolean;
 begin
  result:= nil;
  if mode = bmread then begin

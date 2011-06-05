@@ -1059,12 +1059,12 @@ var
 {$endif}
 begin
  {$ifdef FPC}
- ch1:= decimalseparator;
- decimalseparator:= '.';
+ ch1:= defaultformatsettings.decimalseparator;
+ defaultformatsettings.decimalseparator:= '.';
  try
   objectbinarytotext(input,output);
  finally
-  decimalseparator:= ch1;
+  defaultformatsettings.decimalseparator:= ch1;
  end;
  {$else}
   objectbinarytotext(input,output);

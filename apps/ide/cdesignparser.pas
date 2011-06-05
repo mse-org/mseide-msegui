@@ -25,21 +25,18 @@ type
  tcdesignparser = class(tcparser,idesignparser)
   private
    funitinfopo: punitinfoty;
-   fimplementation: boolean;
-   finterface: boolean;
+//   fimplementation: boolean;
+//   finterface: boolean;
    finterfaceonly: boolean;
    fnoautoparse: boolean;
    ffunctionlevel: integer;
   protected
-   procedure initidents; override;
    function parsefunction: boolean;
    function parsefunctionparams: boolean;
    function parseblock: boolean;
    function parsetypedef: boolean;
    function parsevardef: boolean;
    function parsestatement: boolean;
-   function dogetincludefile(const afilename: filenamety;
-                     const astatementstart,astatementend: sourceposty): tscanner; override;
   public
    constructor create(unitinfopo: punitinfoty;
               const afilelist: tmseindexednamelist;
@@ -47,6 +44,9 @@ type
               const ainterfaceonly: boolean); overload;
    constructor create(const afilelist: tmseindexednamelist; 
                  const atext: string); overload;
+   procedure initidents; override;
+   function dogetincludefile(const afilename: filenamety;
+                     const astatementstart,astatementend: sourceposty): tscanner; override;
    procedure parse; override;  
    procedure clear; override;
  end;
@@ -81,6 +81,7 @@ type
    procedure checkfindname(var stop: boolean);
   protected
    procedure add(const alist: tcrootdeflist; const aid: integer);
+//   procedure checkexact(const aitemdata; var accept: boolean); override;
    function hashkey(const akey): hashvaluety; override;
    function checkkey(const akey; const aitemdata): boolean; override;
    procedure delete(const alist: tcrootdeflist; const aid: integer);
@@ -286,11 +287,11 @@ end;
 
 function tcdesignparser.parsefunction: boolean; //todo: optimize
 var
- lstr1,lstr2: lstringty;
+ {lstr1,}lstr2: lstringty;
  str1: string;
- ch1: char;
+// ch1: char;
  pos1: sourceposty;
- po1: pfunctioninfoty;
+// po1: pfunctioninfoty;
  po2: pfunctionheaderinfoty;
  static: boolean;
  bo1: boolean;
@@ -374,7 +375,7 @@ end;
 
 function tcdesignparser.parsestatement: boolean;
 var
- lstr1,lstr2: lstringty;
+ lstr1{,lstr2}: lstringty;
  ch1: char;
  bo1: boolean;
  pos1: sourceposty;
@@ -435,9 +436,9 @@ begin
 end;
 
 procedure tcdesignparser.parse;
-var
- po1: pfunctioninfoty;
- int1: integer;
+//var
+// po1: pfunctioninfoty;
+// int1: integer;
 begin
  inherited;
  if fnoautoparse then begin
@@ -488,9 +489,9 @@ begin
 end;
 
 destructor tcunitinfo.destroy;
-var
- int1: integer;
- po1: pfunctioninfoty;
+//var
+// int1: integer;
+// po1: pfunctioninfoty;
 begin
  with info do begin
   c.functionheaders.free;

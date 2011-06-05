@@ -1945,8 +1945,8 @@ end;
 
 procedure tscrollbox.childmouseevent(const sender: twidget;
                               var info: mouseeventinfoty);
-var
- po1: pointty; 
+//var
+// po1: pointty; 
 begin
  frame.childmouseevent(sender,info);
  if not (es_processed in info.eventstate) then begin

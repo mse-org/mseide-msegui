@@ -838,10 +838,10 @@ end;
 function tcharstyledatalist.add(const value: string): integer;
 
  function getcolor(const name: string): colorty;
- var
-  col1: colorty;
-  int1,int2: integer;
-  po1: pcolorty;
+// var
+//  col1: colorty;
+//  int1,int2: integer;
+//  po1: pcolorty;
  begin
   if name = '' then begin
    result:= 0;
@@ -1001,7 +1001,7 @@ function trichstringdatalist.getparagraph(const index: integer;
                           const aseparator: msestring = ''): msestring;
 var
  int1,int2: integer;
- start,stop: integer;
+ start{,stop}: integer;
 begin
  start:= index;
  while start >= 0 do begin
@@ -1155,7 +1155,7 @@ begin
    end
    else begin
     result:= false;
-    int1:= length(text)-(value.po - @text[1]);
+    int1:= length(text)-(value.po - pmsechar(pointer(text)));
     po1:= msestrlscan(value.po,' ',int1);
     if po1 = nil then begin
      value.len:= int1;
@@ -1163,7 +1163,7 @@ begin
     else begin
      value.len:= po1-value.po;
     end;
-    fposition.X:= (value.po - @text[1]) + value.len;
+    fposition.X:= (value.po - pmsechar(pointer(text))) + value.len;
    end;
   end;
  end;

@@ -54,8 +54,8 @@ type
  tdataimagepropertyeditor = class(tstringpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
-   procedure edit; override;
   public
+   procedure edit; override;
    function getvalue: msestring; override;
  end;
  
@@ -63,14 +63,16 @@ type
   protected
    function gettag: integer; virtual;
    function getdefaultstate: propertystatesty; override;
+  public
    function getvalues: msestringarty; override;  
  end;
 
  tsumlistsourcelevelpropertyeditor = 
                    class(tdatalistsourcepropertyeditor)
   protected
-   function getvalues: msestringarty; override;  
    function gettag: integer; override;
+  public
+   function getvalues: msestringarty; override;  
  end;
 
  tsumlistsourceissumpropertyeditor = 

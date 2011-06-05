@@ -110,7 +110,9 @@ type
 constructor tcustomdataimage.create(aowner: tcomponent);
 begin
  inherited;
+{$warnings off}
  include(tsimplebitmap1(bitmap).fstate,pms_nosave);
+{$warnings on}
 end;
 
 procedure tcustomdataimage.setvalue(const avalue: string);
@@ -437,8 +439,8 @@ begin
 end;
 
 function tcustomdataimage.loadfromstream(const astream: tstream): string;
-var
- str1: string;
+//var
+// str1: string;
 begin
  fcurformat:= '';
  value:= readstreamdatastring(astream);

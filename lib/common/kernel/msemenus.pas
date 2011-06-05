@@ -726,7 +726,9 @@ function tcustommenu.gettemplatefont(const sender: tmenuitem): tmenufont;
 begin
  result:= nil;
  if itemframetemplate <> nil then begin
+{$warnings off}
   result:= tmenufont(itemframetemplate.template.font);
+{$warnings on}
  end;
  if result = nil then begin
   result:= tmenufont(pointer(stockobjects.fonts[stf_menu]));
@@ -1983,10 +1985,14 @@ begin
                             //in popup
   result:= nil;
   if popupitemframetemplate <> nil then begin
+{$warnings off}
    result:= tmenufont(popupitemframetemplate.template.font);
+{$warnings on}
   end;
   if result = nil then begin
+{$warnings off}
    result:= tmenufont(pointer(stockobjects.fonts[stf_menu]));
+{$warnings on}
   end;
  end
  else begin

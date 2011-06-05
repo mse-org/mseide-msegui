@@ -325,8 +325,6 @@ type
    procedure setimnr_checked(const Value: integer);
    procedure setimnr_subitems(const Value: integer);
 //   function getobjectlinker: tobjectlinker;
-   procedure objectevent(const sender: tobject;
-                          const event: objecteventty); override;
    procedure setimagelist(const Value: timagelist);
    procedure setoptions(const Value: nodeoptionsty);
    procedure setcaptionpos(const Value: captionposty);
@@ -346,6 +344,8 @@ type
    foptions: nodeoptionsty;
    fcaptionpos: captionposty;
    fitemstate: itemliststatesty;
+   procedure objectevent(const sender: tobject;
+                          const event: objecteventty); override;
    function getitems1(const index: integer): tlistitem;
    procedure setitems(const index: integer; const Value: tlistitem); 
    procedure freedata(var data); override;
@@ -703,8 +703,8 @@ begin
 end;
 
 procedure tlistitem.mouseevent(var info: mouseeventinfoty);
-var
- bo1: boolean;
+//var
+// bo1: boolean;
 begin
  with info do begin
   if eventkind in mouseposevents then begin
@@ -1311,6 +1311,7 @@ end;
 
 function tcustomitemlist.add(const aitem: msestring): integer;
 begin
+ result:= count;
  add([aitem]);
 end;
 
@@ -2443,7 +2444,7 @@ end;
 
 procedure ttreelistitem.dostatread(const reader: tstatreader);
 var
- int1,int2: integer;
+ int1{,int2}: integer;
  node1: ttreelistitem;
  bo1: boolean;
 begin

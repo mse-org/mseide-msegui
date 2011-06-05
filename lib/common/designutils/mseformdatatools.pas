@@ -145,11 +145,11 @@ procedure writeobjdata(datastream: tmemorystream; outstream: ttextstream;
 var
  int1: integer;
  po1: pbyte;
- str1: string;
+// str1: string;
 begin
  int1:= datastream.Size;
  po1:= datastream.Memory;
- str1:= getnameext(name);
+// str1:= getnameext(name);
  writeconstdata(po1,int1,objdataname+getnameext(name),outstream);
 end;
 

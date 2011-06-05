@@ -573,7 +573,7 @@ type
  wmstatety = (wms_none,wms_withdrawn,wms_normal,wms_invalid,wms_iconic);
 
 var
- xlockerror: integer; 
+ xlockerror: integer = 0; 
  appdisp: pdisplay;
  appid: winidty;
  defscreen: pscreen;
@@ -682,6 +682,7 @@ var
  sigtimerbefore: sighandler_t;
  sigtermbefore: sighandler_t;
  sigchldbefore: sighandler_t;
+ 
  timerevent: boolean;
  terminated: boolean;
  childevent: boolean;
@@ -690,7 +691,7 @@ var
  im: xim;
  appic: xic;
  appicmask: longword;
- icwindow: windowty;
+// icwindow: windowty;
  imewinid: winidty;
  errorhandlerbefore: xerrorhandler;
  lasteventtime: ttime;
@@ -698,6 +699,12 @@ var
  clipboard: msestring;
  clipboardtimestamp: ttime; 
  fidnum: integer;
+
+procedure usevariables;
+begin
+ if (multipleatom = 0) and (wmnameatom = 0) and (defcolormap = 0) then begin
+ end;
+end;
 
 function getidnum: longword;
 begin
@@ -742,6 +749,7 @@ begin
  gdi_lock;
  clipboard:= value;
  clipboardtimestamp:= lasteventtime;
+ clipboardtimestamp:= clipboardtimestamp; //no "not used" compiler message
  xsetselectionowner(appdisp,clipboardatom,appid,lasteventtime);
  result:= gue_ok;
  gdi_unlock;
@@ -773,7 +781,7 @@ var
   longoffset: clong;
   time1: longword;
   int1: integer;
-  bo1,bo2: boolean;
+  bo1{,bo2}: boolean;
  begin
   result:= gue_clipboard;
   charoffset:= 1;
@@ -1008,7 +1016,7 @@ var
  nitems: clong;
  bytesafter: culong;
  prop: pchar;
- int1: integer;
+// int1: integer;
  {$ifdef CPU64}
  po1: pculong;
  po2: plongword;
@@ -1048,7 +1056,7 @@ var
  nitems: clong;
  bytesafter: culong;
  prop: pchar;
- int1: integer;
+// int1: integer;
  {$ifdef CPU64}
  po1: pculong;
  po2: plongword;
@@ -1617,7 +1625,7 @@ end;
 function stackwindow(id: winidty; predecessor: winidty;
                                    stackmode: integer): guierrorty;
 var
- changes: xwindowchanges;
+// changes: xwindowchanges;
  ar1: winidarty;
  int1: integer;
  idindex,pindex: integer;
@@ -1782,11 +1790,11 @@ function getwindowframe(id: winidty): framety;
 var
  bo1: boolean;
  ar1: array[0..3] of integer;
- win1: winidty;
- root: winidty;
+// win1: winidty;
+// root: winidty;
  rect1,rect2: rectty;
- int1: integer;
- pt1: pointty;
+// int1: integer;
+// pt1: pointty;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2550,8 +2558,8 @@ begin
  end;
 end;
 
-var
- messcount: integer;
+//var
+// messcount: integer;
 
 procedure freeclientevents;
 var
@@ -2837,7 +2845,7 @@ function gui_getchildren(const id: winidty; out children: winidarty): guierrorty
 var
  root,parent: winidty;//{$ifdef FPC}dword{$else}xlib.twindow{$endif};
  chi: pwindow;
- count: integer;
+// count: integer;
  ca1: longword;
  int1: integer;
 begin
@@ -3142,7 +3150,7 @@ end;
 
 function gui_getwindowrect(id: winidty; out rect: rectty): guierrorty;
 var
- int1: integer;
+// int1: integer;
  po1: pointty;
 begin
  gdi_lock;
@@ -3156,7 +3164,7 @@ end;
 function gui_getwindowpos(id: winidty; out pos: pointty): guierrorty;
 var
  int1: integer;
- po1: pointty;
+// po1: pointty;
 begin
  gdi_lock;
  result:= gue_error;
@@ -3213,8 +3221,8 @@ begin
 end;
 
 function gui_getdecoratedwindowrect(id: winidty; out arect: rectty): guierrorty;
-var
- frame1: framety;
+//var
+// frame1: framety;
 begin
  gdi_lock;
  result:= gui_getwindowrect(id,arect);
@@ -3292,7 +3300,7 @@ function gui_getparentwindow(const awindow: winidty): winidty;
 var
  root,parent: winidty;//{$ifdef FPC}dword{$else}xlib.twindow{$endif};
  children: pwindow;
- count: integer;
+// count: integer;
  ca1: longword;
 begin
  gdi_lock;
@@ -3691,9 +3699,9 @@ function getkeynomod(var xev: {$ifdef FPC}txkeyevent{$else}
                                                   xkeyevent{$endif}): keyty;
 var
 // keysym1: pkeysym;
- int1,int2: integer;
+// int1{,int2}: integer;
  ss1: shiftstatesty;
- po1: pcuint;
+// po1: pcuint;
  statebefore: cuint;
  keysym1: cuint;
 begin
@@ -4283,8 +4291,8 @@ begin
 end;
 }
 function createappic: boolean;
-var
- xiccallback: txiccallback;
+//var
+// xiccallback: txiccallback;
 begin
  appic:= xcreateic(im,pchar(xninputstyle),ximstatusnothing or ximpreeditnothing,nil);
  result:= appic <> nil;
@@ -4713,6 +4721,8 @@ begin
    appdisp:= nil;
   end;
   signal(sigalrm,sigtimerbefore);
+  signal(sigterm,sigtermbefore);
+  signal(sigchld,sigchldbefore);
   xseterrorhandler(errorhandlerbefore);
  finally
   gdi_unlock;

@@ -953,9 +953,10 @@ type
  
  tsigcontroller = class(tmsecomponent)
   private
+{$notes off}
    finphash: tsiginfohash;
    foutphash: tsiginfohash;
-   fvaluedummy: double;
+//   fvaluedummy: double;
    fmutex: mutexty;
    flockcount: integer;
    flockapplocks: integer;
@@ -968,6 +969,7 @@ type
    fonafterupdatemodel: notifyeventty;
    fonafterstep: afterstepeventty;
    fsamplefrequ: real;
+{$notes on}
    procedure settickdiv(const avalue: integer);
    procedure setonbeforetick(const avalue: notifyeventty);
    procedure setonaftertick(const avalue: notifyeventty);
@@ -3206,7 +3208,7 @@ procedure tsigcontroller.internalexecevent(const ainfopo: psiginfoty);
 var
 // po1: psiginfoty;
  handlerinfo: sighandlerinfoty;
- do1: double;
+// do1: double;
  int1: integer;
 begin
  with ainfopo^ do begin

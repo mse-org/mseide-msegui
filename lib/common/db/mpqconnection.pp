@@ -104,29 +104,13 @@ type
    procedure DoInternalDisconnect; override;
    function GetHandle : pointer; override;
 
-   Function AllocateCursorHandle(const aowner: icursorclient;
-                           const aname: ansistring) : TSQLCursor; override;
-   Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
    Function AllocateTransactionHandle : TSQLHandle; override;
 
-   procedure preparestatement(const cursor: tsqlcursor; 
-                  const atransaction : tsqltransaction;
-                  const asql: msestring; const aparams : tmseparams); override;
-   procedure FreeFldBuffers(cursor : TSQLCursor); override;
    procedure internalExecute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                      const AParams : TmseParams; const autf8: boolean); override;
    procedure internalexecuteunprepared(const cursor: tsqlcursor;
                const atransaction: tsqltransaction;
                const asql: string); override;
-   procedure AddFieldDefs(const cursor: TSQLCursor;
-                  const FieldDefs : TfieldDefs); override;
-   function Fetch(cursor : TSQLCursor) : boolean; override;
-   procedure UnPrepareStatement(cursor : TSQLCursor); override;
-   function loadfield(const cursor: tsqlcursor;
-            const datatype: tfieldtype; const fieldnum: integer; //null based
-              const buffer: pointer; var bufsize: integer;
-              const aisutf8: boolean): boolean; override;
-           //if bufsize < 0 -> buffer was to small, should be -bufsize
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
    function RollBack(trans : TSQLHandle) : boolean; override;
    function Commit(trans : TSQLHandle) : boolean; override;
@@ -167,6 +151,22 @@ type
   public
    constructor Create(AOwner : TComponent); override;
    destructor destroy; override;
+   Function AllocateCursorHandle(const aowner: icursorclient;
+                           const aname: ansistring) : TSQLCursor; override;
+   Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
+   procedure preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams); override;
+   procedure FreeFldBuffers(cursor : TSQLCursor); override;
+   procedure AddFieldDefs(const cursor: TSQLCursor;
+                  const FieldDefs : TfieldDefs); override;
+   procedure UnPrepareStatement(cursor : TSQLCursor); override;
+   function Fetch(cursor : TSQLCursor) : boolean; override;
+   function loadfield(const cursor: tsqlcursor;
+            const datatype: tfieldtype; const fieldnum: integer; //null based
+              const buffer: pointer; var bufsize: integer;
+              const aisutf8: boolean): boolean; override;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
    function fetchblob(const cursor: tsqlcursor;
                               const fieldnum: integer): ansistring; override;
                               //null based
@@ -290,7 +290,7 @@ end;
 procedure TPQConnection.checkerror(const aconnection: ppgconn;
          var ares: ppgresult; const amessage: ansistring);
 var
- err: integer;
+// err: integer;
  res: texecstatustype;
 begin
  res:= PQresultStatus(ares);
@@ -421,9 +421,9 @@ end;
 
 procedure TPQConnection.DoInternalConnect;
 var 
- msg: string;
+// msg: string;
  bo1: boolean;
- int1: integer;
+// int1: integer;
 begin
 {$IfDef LinkDynamically}
  InitializePostgres3([]);
@@ -436,7 +436,9 @@ begin
  if pqparameterstatus <> nil then begin
   FIntegerDatetimes := pqparameterstatus(FHandle,'integer_datetimes') = 'on';
  end;
+{$warnings off}
  with tdatabasecracker(self) do begin
+{$warnings on}
   bo1:= fconnected;
   fconnected:= true;
   feventcontroller.connect;
@@ -445,8 +447,8 @@ begin
 end;
 
 procedure TPQConnection.DoInternalDisconnect;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  feventcontroller.disconnect;
  inherited;
@@ -885,7 +887,7 @@ procedure TPQConnection.AddFieldDefs(const cursor: TSQLCursor;
 var
  i: integer;
  size: integer;
- st: string;
+// st: string;
  fieldtype: tfieldtype;
  nFields: integer;
  fd: tfielddef;
@@ -970,7 +972,7 @@ end;
 
 function TPQConnection.Fetch(cursor : TSQLCursor) : boolean;
 
-var st : string;
+//var st : string;
 
 begin
   with cursor as TPQCursor do
@@ -1058,10 +1060,10 @@ var
                const asize: integer; const atype: integer; var buffer: pchar);
   var
    li            : Longint;
-   dbl           : pdouble;
+//   dbl           : pdouble;
    cur           : currency;
    lint1: int64;
-   sint1: smallint;
+//   sint1: smallint;
    wbo1: wordbool;
    do1: double;
    int1: integer;
@@ -1387,9 +1389,9 @@ function TPQConnection.CreateBlobStream(const Field: TField;
         const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
 var
  blobid: integer;
- int1,int2: integer;
- str1: string;
- bo1: boolean;
+// int1,int2: integer;
+// str1: string;
+// bo1: boolean;
 begin
  result:= nil;
  if mode = bmread then begin

@@ -65,9 +65,9 @@ type
    fboundsread: boolean;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
    procedure defineproperties(filer: tfiler); override;
-   procedure dolayout(const sender: twidget); override;
   public
    constructor create(aowner: tcustommseform); reintroduce;
+   procedure dolayout(const sender: twidget); override;
   published
    property onscroll;
    property onresize;
@@ -213,7 +213,8 @@ type
    procedure executeificommand(var acommand: ificommandcodety); override;
    {$endif}
    
-   constructor docreate(aowner: tcomponent); virtual;
+//   constructor docreate(aowner: tcomponent); virtual;
+   procedure docreate(aowner: tcomponent); virtual;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;  virtual;
@@ -574,7 +575,9 @@ function createmainform(const aclass: tclass;
 
 begin
  result:= tmsecomponent(aclass.newinstance);
+{$warnings off}
  tcomponent1(result).setdesigning(true); //used for wo_groupleader
+{$warnings on}
  tcustommseform(result).create(nil,false);
  tmsecomponent1(result).factualclassname:= aclassname;
 end;
@@ -750,7 +753,8 @@ end;
 
 { tcustommseform }
 
-constructor tcustommseform.docreate(aowner: tcomponent);
+//constructor tcustommseform.docreate(aowner: tcomponent);
+procedure tcustommseform.docreate(aowner: tcomponent);
 begin
  inherited create(aowner);
  fwidgetrect.cx:= 100;
@@ -945,10 +949,11 @@ function tcustommseform.close(
                 //simulates mr_windowclose, true if ok
 begin
  if ownswindow then begin
-  window.modalresult:= amodalresult;
+  result:= window.close(amodalresult);
+//  window.modalresult:= amodalresult;
  end
  else begin
-  simulatemodalresult(self,amodalresult);
+  result:= simulatemodalresult(self,amodalresult);
  end;
 end;
 
@@ -1109,7 +1114,9 @@ begin
   setlinkedvar(value,tmsecomponent(fmainmenu));
   if value <> nil then begin
    fmainmenuwidget:= createmainmenuwidget;
+{$warnings off}
    twidget1(fmainmenuwidget).setdesigning(csdesigning in componentstate);
+{$warnings on}
    updatemainmenutemplates;
   end
   else begin
@@ -1233,7 +1240,7 @@ end;
 
 procedure tcustommseform.dostatread1(const reader: tstatreader);
 var
- rect1,rect2: rectty;
+ rect1{,rect2}: rectty;
  str1: string;
  widget1: twidget;
 begin
@@ -1378,8 +1385,10 @@ begin
                         not fscrollbox.fboundsread) then begin
   rect1:= innerwidgetrect;
   if fmainmenuwidget <> nil then begin
+{$warnings off}
    twidget1(fmainmenuwidget).setwidgetrect(
          makerect(paintpos,makesize(paintsize.cx,fmainmenuwidget.bounds_cy)));
+{$warnings on}
    inc(rect1.y,fmainmenuwidget.bounds_cy);
    dec(rect1.cy,fmainmenuwidget.bounds_cy);
   end;
@@ -1444,23 +1453,31 @@ var
 begin
  include(fscrollbox.fwidgetstate,ws_loadlock);
  bo1:= false;
+{$warnings off}
  with treadercracker(reader) do begin
+{$warnings on}
   if floaded <> nil then begin
    if floaded.IndexOf(fscrollbox) < 0 then begin
     floaded.add(fscrollbox);
+{$warnings off}
     tcomponentcracker(fscrollbox).FComponentState:=
      tcomponentcracker(fscrollbox).FComponentState + [csloading];
+{$warnings on}
    end;
   end;
   bo1:= not (csreading in fscrollbox.componentstate);
   if bo1 then begin
+{$warnings off}
    tcomponentcracker(fscrollbox).FComponentState:=
              tcomponentcracker(fscrollbox).FComponentState + [csreading];
+{$warnings on}
   end;
  end;
  inherited;
  if bo1 then begin
+{$warnings off}
   exclude(tcomponentcracker(fscrollbox).FComponentState,csreading);
+{$warnings on}
  end;
 end;
 

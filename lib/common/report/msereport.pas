@@ -84,10 +84,10 @@ type
  
  treptabfont = class(tparentfont)
   protected
-   class function getinstancepo(owner: tobject): pfont; override;
    procedure setname(const avalue: string); override;
   public
    constructor create; override;
+   class function getinstancepo(owner: tobject): pfont; override;
   published
    property color default defaultrepfontcolor;
  end;
@@ -653,11 +653,9 @@ type
                           const event: objecteventty); override;
    procedure fontchanged; override;
    procedure inheritedpaint(const acanvas: tcanvas);
-   procedure paint(const canvas: tcanvas); override;
    procedure parentchanged; override; //update fparentintf
    function getminbandsize: sizety; virtual;
    function calcminscrollsize: sizety; override;
-   function actualcolor: colorty; override;
    procedure render(const acanvas: tcanvas; var empty: boolean); virtual;
    procedure init; virtual;
    procedure initpage; virtual;
@@ -674,7 +672,6 @@ type
    function rendering: boolean;
    function bandheight: integer;
    procedure dobeforerender(var empty: boolean); virtual;
-   procedure synctofontheight; override;
    function bandisvisible(const checklast: boolean): boolean;
    function getvisibility: boolean;
    procedure updatevisibility; virtual;
@@ -697,6 +694,9 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure paint(const canvas: tcanvas); override;
+   function actualcolor: colorty; override;
+   procedure synctofontheight; override;
    procedure scale(const ascale: real); override;
    procedure beginupdate;
    procedure endupdate;
@@ -900,9 +900,9 @@ type
    function pageprintstarttime: tdatetime;
    function repprintstarttime: tdatetime;
    function getreppage: tcustomreportpage;
+  protected
    procedure dobeforenextrecord(const adatasource: tdatasource); override;
    procedure dosyncnextrecord; override;
-  protected
    function getppmm: real;
    procedure setparentwidget(const avalue: twidget); override;   
    procedure registerchildwidget(const child: twidget); override;
@@ -984,7 +984,6 @@ type
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure setparentwidget(const avalue: twidget); override;   
-   procedure paint(const canvas: tcanvas); override;
    procedure renderbackground(const acanvas: tcanvas);
    function render(const acanvas: tcanvas): boolean; virtual;
           //true if finished
@@ -1020,6 +1019,7 @@ type
    function getfont: trepwidgetfont;
    function getfontclass: widgetfontclassty; override;
   public
+   procedure paint(const canvas: tcanvas); override;
    function isfirstrecord: boolean;
    function islastrecord: boolean;
    function istopband: boolean; virtual;
@@ -1369,7 +1369,6 @@ type
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure setparentwidget(const avalue: twidget); override;   
-   procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    procedure sizechanged; override;
 
    procedure setfont(const avalue: trepwidgetfont);
@@ -1424,6 +1423,7 @@ type
 
    function isfirstrecord: boolean;
    function islastrecord: boolean;
+   procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    
    procedure recordchanged;   
    property report: tcustomreport read freport;
@@ -1589,7 +1589,6 @@ type
    procedure dopageafterpaint(const sender: tcustomreportpage;
                               const acanvas: tcanvas);
    
-   procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    procedure internalrender(const acanvas: tcanvas; const aprinter: tcustomprinter;
                   const acommand: string; const astream: ttextstream;
                   const anilstream: boolean; const onafterrender: reporteventty);
@@ -1604,11 +1603,12 @@ type
    procedure setfont(const avalue: trepfont);
    function getfont: trepfont;
    function getfontclass: widgetfontclassty; override;
-   procedure beforedestruction; override;
    procedure doloaded; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure beforedestruction; override;
+   procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    procedure render(const acanvas: tcanvas;
                         const onafterrender: reporteventty = nil); overload;
    procedure render(const aprinter: tstreamprinter; const command: string = '';
@@ -1718,7 +1718,7 @@ function getreportscale(const amodule: tcomponent): real;
 
 implementation
 uses
- msedatalist,sysutils,msestreaming,msebits,msereal,math;
+ msedatalist,sysutils,msestreaming,msebits,msereal,math,msesysintf,msesys;
 type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
@@ -1772,7 +1772,7 @@ end;
 function checkislastrecord(const adatalink: tmsedatalink; 
                                const syncproc: synceventty): boolean;
 var
- bm: string;
+// bm: string;
  int1: integer;
 begin                     
  result:= false;
@@ -1920,7 +1920,9 @@ begin
   result:= ffont;
  end
  else begin
+{$warnings off}
   result:= treptabfont(treptabulators(fowner).fband.getfont);
+{$warnings on}
  end;
 end;
 
@@ -2652,7 +2654,7 @@ var
  int1,int2,int3,int4: integer;
  moved: boolean;
  rstr1: richstringty;
- rect1: rectty;
+// rect1: rectty;
  isdecimal: boolean;
  cellrect: rectty;
  
@@ -2759,7 +2761,7 @@ begin
      end;
     end;
     if isdecimal then begin
-     int2:= findlastchar(text.text,msechar(decimalseparator));
+     int2:= findlastchar(text.text,defaultformatsettingsmse.decimalseparator);
      if int2 > 0 then begin
       rstr1:= text;
       text:= richcopy(rstr1,1,int2-1);
@@ -4266,7 +4268,7 @@ end;
 function tcustomrecordband.remainingbands: integer;
 var
  widget1,widget2,widget3: twidget;
- int1,int2: integer;
+ {int1,}int2: integer;
 begin
  result:= 0;
  if fparentintf <> nil then begin
@@ -4944,6 +4946,7 @@ end;
 
 function tbasebandarea.render(const acanvas: tcanvas): boolean;
 begin
+ result:= false;
  //dummy
 end;
 
@@ -5379,7 +5382,7 @@ var
  bo1,bo2,bo4: boolean;
  customdataempty: boolean;
  backgroundrendered: boolean;
- hascustomdata: boolean;
+// hascustomdata: boolean;
  
  procedure renderband(const aband: tcustomrecordband);
  begin
@@ -5970,7 +5973,9 @@ begin
  inherited;
  visible:= false;
  color:= cl_transparent;
+{$warnings off}
  ffont:= twidgetfont(trepfont.create);
+{$warnings on}
  ffont.height:= round(defaultrepfontheight * (fppmm/defaultrepppmm));
  ffont.onchange:= {$ifdef FPC}@{$endif}dofontchanged;
  //createfont;
@@ -6643,7 +6648,9 @@ end;
 
 function tcustomreport.getfont: trepfont;
 begin
+{$warnings off}
  result:= trepfont(ffont);      //has no parent font
+{$warnings on}
 end;
 
 function tcustomreport.getfontclass: widgetfontclassty;
@@ -7530,11 +7537,11 @@ end;
 function tcustomtilearea.render(const acanvas: tcanvas): boolean;
 var                     //true if finished
  bo1,bo2: boolean;
- int1,int2: integer;
+ int1{,int2}: integer;
  isfinished: boolean;
  col,row: integer;
  cellwidthmm1,cellheightmm1: real;
- y: real;
+// y: real;
 begin
  result:= true;
  if not (bas_inited in fstate) then begin

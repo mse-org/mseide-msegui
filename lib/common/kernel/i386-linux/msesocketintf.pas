@@ -118,7 +118,7 @@ function soc_connect(const handle: integer; const addr: socketaddrty;
 var
  str1: string;
  po1: plocsockaddrty;
- int1,int2: integer;
+ int1{,int2}: integer;
  pollres: pollkindsty;
 begin
  result:= sye_ok;
@@ -320,8 +320,8 @@ function soc_urltoaddr(var addr: socketaddrty): syserrorty;
 var
  str1: string;
  int1: integer;
- str2: string;
- err: integer;
+// str2: string;
+// err: integer;
  info1: addrinfo;
  po1: paddrinfo;
 begin

@@ -89,10 +89,6 @@ type
   private
    fdatalink: tgraphicdatalink;
    fvaluebuffer: string;
-   procedure griddatasourcechanged; override;
-   procedure loadcellbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap); override;
-   function getrowdatapo(const arow: integer): pointer; override;
-   function createdatalist(const sender: twidgetcol): tdatalist; override;
   //idbeditfieldlink
    function getgriddatasource: tdatasource;
    function edited: boolean;
@@ -110,6 +106,10 @@ type
    procedure recchanged;
    procedure setdatalink(const avalue: tgraphicdatalink);
   protected   
+   procedure griddatasourcechanged; override;
+   procedure loadcellbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap); override;
+   function getrowdatapo(const arow: integer): pointer; override;
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
    procedure defineproperties(filer: tfiler); override;
    procedure setvalue(const avalue: string); override;
    procedure gridtovalue(row: integer); override;
@@ -135,7 +135,9 @@ constructor tdbdataimage.create(aowner: tcomponent);
 begin
  fdatalink:= tgraphicdatalink.create(idbgraphicfieldlink(self));
  inherited;
+{$warnings off}
  include(tsimplebitmap1(bitmap).fstate,pms_nosave);
+{$warnings on}
 end;
 
 destructor tdbdataimage.destroy;

@@ -245,11 +245,11 @@ type
  end;
   
  tdestparams = class(townedpersistentarrayprop)
-  constructor create(const aowner: tfieldparamlink);
+  constructor create(const aowner: tfieldparamlink); reintroduce;
  end;
 
  tdestfields = class(townedpersistentarrayprop)
-  constructor create(const aowner: tfieldparamlink);
+  constructor create(const aowner: tfieldparamlink); reintroduce;
  end;
  
  tfieldparamlink = class(tmsecomponent,idbeditinfo,idbparaminfo)

@@ -16,9 +16,9 @@ type
    procedure setsourcevalue(const avalue: string); override;
    procedure setsourcelevel(const avalue: string); override;
    procedure setsourceissum(const avalue: string); override;
-   procedure linksource(const source: tdatalist; const atag: integer); override;
   public
    constructor create(owner: twidgetcol); reintroduce;
+   procedure linksource(const source: tdatalist; const atag: integer); override;
   published
    property sourcevalue;
    property sourcelevel;
@@ -124,9 +124,9 @@ end;
 function trealsumedit.getoptionsedit: optionseditty;
 var
  po1: prealsumty;
- datacol1: tdatacol;
- data1: tgridrealsumlist;
- int1: integer;
+// datacol1: tdatacol;
+// data1: tgridrealsumlist;
+// int1: integer;
 begin
  result:= inherited getoptionsedit;
  if fgridintf <> nil then begin

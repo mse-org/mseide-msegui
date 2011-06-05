@@ -22,6 +22,7 @@ type
  tasinheritedobjectreader = class(tbinaryobjectreader)
   protected
    freader: tasinheritedreader;
+  public
    procedure begincomponent(var flags: tfilerflags; var achildpos: integer;
       var compclassname, compname: string); override;
   public
@@ -360,7 +361,9 @@ begin
  try
   writer:= twritermse.Create(stream,1024,false);
   writer.WriteListBegin;
+{$warnings off}
   twriter1(writer).WriteProperties(source);
+{$warnings on}
   writer.WriteListEnd;
   freeandnil(writer);
   stream.Position:= 0;

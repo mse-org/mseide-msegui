@@ -537,7 +537,7 @@ const
  paramname = '--FONTALIAS=';
 var
  ar1,ar2: stringarty;
- int1,{int2,}int3,int4,int5: integer;
+ int1,{int2,}int3,int4{,int5}: integer;
  ar3: array[0..1] of integer;
  options1: fontoptionsty;
  xscale1: real;

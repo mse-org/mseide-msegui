@@ -249,7 +249,7 @@ type
  
  tdescendentinstancelist = class(tdesignerancestorlist)
   private
-   ferrorhandler: treaderrorhandler;
+//   ferrorhandler: treaderrorhandler;
    fdelcomps:componentarty;
    froot: tcomponent;
    fmodule: pmoduleinfoty;
@@ -1200,7 +1200,7 @@ end;
 procedure tdescendentinstancelist.findrefreshmethod(reader: treader;
        const amethodname: string; var address: pointer; var error: boolean);
 var
- method: tmethod;
+// method: tmethod;
  po1: pmethodinfoty;
  int1: integer;
 begin
@@ -1247,6 +1247,7 @@ begin
                               amodule^.filename+'".','ERROR');
   sysutils.abort;
  end;
+ dependentmodules:= nil; //compilerwarning
  inc(modifylevel);
  {$ifdef mse_debugsubmodule}
   debugwriteln('***modulemodified '+inttostr(modifylevel)+' '+
@@ -2233,7 +2234,9 @@ begin
     end;
     moduleintf:= po1^.moduleintf;
     designformclass:= po1^.designformclass;
+{$warnings off}
     tcomponent1(instance).setancestor(true);
+{$warnings on}
     additem(pointerarty(fdesigner.floadedsubmodules),instance);
     fdesigner.fdescendentinstancelist.add(tmsecomponent(instance),po1^.instance,
                                           fdesigner.fsubmodulelist);
@@ -2245,7 +2248,9 @@ begin
    else begin
     instance:= createdesignmodule(@result.info,designmoduleclassname,@moduleclassname);
    end;
+{$warnings off}
    tcomponent1(instance).setdesigning(true{$ifndef FPC},true{$endif});
+{$warnings on}
   except
    result.Free;
    raise;
@@ -2624,6 +2629,7 @@ begin
   fmodules.componentmodified(acomponent);
   po1:= fmodules.findmodulebycomponent(acomponent);
   if po1 <> nil then begin
+   notifymodulebefore:= fnotifymodule;
    fnotifymodule:= po1^.instance;
    try
     notifydeleted(acomponent);
@@ -2711,7 +2717,7 @@ end;
 
 function tdesigner.findancestorcomponent(const acomponent: tcomponent): tcomponent;
 var
- ancestormodule: tmsecomponent;
+// ancestormodule: tmsecomponent;
  comp1: tcomponent;
  ar1: stringarty;
  int1: integer;
@@ -2959,8 +2965,8 @@ var
  ar2: componentarty;
  int1,int2: integer;
  obj1: tobject;
- bo1,bo2: boolean;
- rootbefore: tcomponent;
+ bo1{,bo2}: boolean;
+// rootbefore: tcomponent;
 begin
  if ainstance is tcomponent then begin
   bo1:= not (csloading in tcomponent(ainstance).componentstate);
@@ -3048,7 +3054,9 @@ var
 begin
  po1:= fmodules.findmodule(tmsecomponent(amodule));
  if po1 <> nil then begin
+{$warnings off}
   twidget1(po1^.designform).sizechanged;
+{$warnings on}
  end;
 end;
 
@@ -3223,7 +3231,9 @@ begin
  try
   begingloballoading;
   result:= tmsecomponent(source.newinstance);
+{$warnings off}
   tcomponent1(result).setdesigning(true);
+{$warnings on}
   result.create(nil);
   stream1:= tmemorystream.create;
   try
@@ -3304,8 +3314,8 @@ end;
 procedure tdesigner.revert(const acomponent: tcomponent);
 var
  comp1: tcomponent;
- msecomp1: tmsecomponent;
- po1: pancestorinfoty;
+// msecomp1: tmsecomponent;
+// po1: pancestorinfoty;
  po2,po4: pmoduleinfoty;
  po3: pointer;
  bo1,bo2,bo3: boolean;
@@ -3719,7 +3729,7 @@ function tdesigner.getancestorclassinfo(const ainstance: tcomponent;
 var
  ar1: componentarty;
  ar2: classinfopoarty;
- int1,int2: integer;
+ int1{,int2}: integer;
  po1: punitinfoty;
  po2: pmoduleinfoty;
 begin
@@ -3745,7 +3755,7 @@ function tdesigner.getancestorclassinfo(const ainstance: tcomponent;
 var
  ar1: componentarty;
  ar2: classinfopoarty;
- int1,int2: integer;
+ int1{,int2}: integer;
  po1: punitinfoty;
  po2: pmoduleinfoty;
 begin
@@ -4622,7 +4632,7 @@ var
  po1,po2: pmoduleinfoty;
  int1,int2: integer;
  bo1: boolean;
- str1: string;
+// str1: string;
 begin
  if floadingmodulepo <> nil then begin
   splitstring(aname,ar2,':');
@@ -4755,8 +4765,8 @@ var
  end;
  
 var
- int1,int2,int3: integer;
- comp1,comp2: tcomponent;
+ int1,int2{,int3}: integer;
+ comp1{,comp2}: tcomponent;
  po1: pmoduleinfoty;
 begin
  result:= nil;
@@ -4788,7 +4798,8 @@ type
   private
    fcomp: tcomponent;
   public
-   constructor create(const acomp: tcomponent; const aisvalue: boolean);
+   constructor create(const acomp: tcomponent;
+                            const aisvalue: boolean); reintroduce;
    function findcomp(const acomp: tcomponent): tdesigncompnameitem;
  end;
 
@@ -4871,8 +4882,8 @@ function tdesigner.getcomponentnametree(const acomponentclass: tcomponentclass;
  end;
  
 var
- int1,int2,int3: integer;
- comp1,comp2: tcomponent;
+ int1,int2{,int3}: integer;
+ comp1{,comp2}: tcomponent;
  po1: pmoduleinfoty;
 begin
  result:= tdesigncompnameitem.create(nil,false);

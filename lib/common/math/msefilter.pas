@@ -133,10 +133,10 @@ type
     //isigclient
    function getinputar: inputconnarty; override;
    function gethandler: sighandlerprocty; override;
-   procedure clear; override;
    procedure initmodel; override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure clear; override;
   published
    property frequency: tdoubleinputconn read ffrequency 
                                                  write setfrequency;   
@@ -221,10 +221,10 @@ type
    function getinputar: inputconnarty; override;
    function gethandler: sighandlerprocty; override;
    procedure sighandler(const ainfo: psighandlerinfoty);
-   procedure clear; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure clear; override;
   published
    property frequency: tdoubleinputconn read ffrequency write setfrequency;
    property amplitude: tdoubleinputconn read famplitude write setamplitude;
@@ -924,7 +924,7 @@ end;
 
 procedure tfilterbanksections.getinputar(var inputs: inputconnarty);
 var
- int1,int2,int3: integer;
+ int1,int2{,int3}: integer;
 begin
  int1:= length(inputs);
  setlength(inputs,int1+count*3);

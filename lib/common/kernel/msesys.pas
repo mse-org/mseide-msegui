@@ -579,34 +579,54 @@ var
 begin
  if not defaultformatset then begin
   defaultformatset:= true;
-  defaultformatsettingsmse.CurrencyFormat:= CurrencyFormat;
-  defaultformatsettingsmse.NegCurrFormat:= NegCurrFormat;
-  defaultformatsettingsmse.ThousandSeparator:= widechar(ThousandSeparator);
-  defaultformatsettingsmse.DecimalSeparator:= widechar(DecimalSeparator);
-  defaultformatsettingsmse.CurrencyDecimals:= CurrencyDecimals;
-  defaultformatsettingsmse.DateSeparator:= widechar(DateSeparator);
-  defaultformatsettingsmse.TimeSeparator:= widechar(TimeSeparator);
-  defaultformatsettingsmse.ListSeparator:= widechar(ListSeparator);
-  defaultformatsettingsmse.CurrencyString:= CurrencyString;
-  defaultformatsettingsmse.ShortDateFormat:= ShortDateFormat;
-  defaultformatsettingsmse.LongDateFormat:= LongDateFormat;
-  defaultformatsettingsmse.TimeAMString:= TimeAMString;
-  defaultformatsettingsmse.TimePMString:= TimePMString;
-  defaultformatsettingsmse.ShortTimeFormat:= ShortTimeFormat;
-  defaultformatsettingsmse.LongTimeFormat:= LongTimeFormat;
+  defaultformatsettingsmse.CurrencyFormat:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}CurrencyFormat;
+  defaultformatsettingsmse.NegCurrFormat:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}NegCurrFormat;
+  defaultformatsettingsmse.ThousandSeparator:= widechar(
+     {$ifdef FPC}defaultformatsettings.{$endif}ThousandSeparator);
+  defaultformatsettingsmse.DecimalSeparator:= widechar(
+     {$ifdef FPC}defaultformatsettings.{$endif}DecimalSeparator);
+  defaultformatsettingsmse.CurrencyDecimals:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}CurrencyDecimals;
+  defaultformatsettingsmse.DateSeparator:= widechar(
+     {$ifdef FPC}defaultformatsettings.{$endif}DateSeparator);
+  defaultformatsettingsmse.TimeSeparator:= widechar(
+     {$ifdef FPC}defaultformatsettings.{$endif}TimeSeparator);
+  defaultformatsettingsmse.ListSeparator:= widechar(
+     {$ifdef FPC}defaultformatsettings.{$endif}ListSeparator);
+  defaultformatsettingsmse.CurrencyString:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}CurrencyString;
+  defaultformatsettingsmse.ShortDateFormat:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}ShortDateFormat;
+  defaultformatsettingsmse.LongDateFormat:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}LongDateFormat;
+  defaultformatsettingsmse.TimeAMString:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}TimeAMString;
+  defaultformatsettingsmse.TimePMString:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}TimePMString;
+  defaultformatsettingsmse.ShortTimeFormat:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}ShortTimeFormat;
+  defaultformatsettingsmse.LongTimeFormat:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}LongTimeFormat;
   for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
-   defaultformatsettingsmse.ShortMonthNames[int1]:= ShortMonthNames[int1];
+   defaultformatsettingsmse.ShortMonthNames[int1]:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}ShortMonthNames[int1];
   end;
   for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
-   defaultformatsettingsmse.LongMonthNames[int1]:= LongMonthNames[int1];
+   defaultformatsettingsmse.LongMonthNames[int1]:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}LongMonthNames[int1];
   end;
   for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
-   defaultformatsettingsmse.ShortDayNames[int1]:= ShortDayNames[int1];
+   defaultformatsettingsmse.ShortDayNames[int1]:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}ShortDayNames[int1];
   end;
   for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
-   defaultformatsettingsmse.LongDayNames[int1]:= LongDayNames[int1];
+   defaultformatsettingsmse.LongDayNames[int1]:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}LongDayNames[int1];
   end;
-  defaultformatsettingsmse.TwoDigitYearCenturyWindow:= TwoDigitYearCenturyWindow;
+  defaultformatsettingsmse.TwoDigitYearCenturyWindow:= 
+     {$ifdef FPC}defaultformatsettings.{$endif}TwoDigitYearCenturyWindow;
  end;
 end;
 
@@ -614,34 +634,54 @@ procedure saveformatsettings;
 var
  int1: integer;
 begin
- CurrencyFormat:= defaultformatsettingsmse.CurrencyFormat;
- NegCurrFormat:= defaultformatsettingsmse.NegCurrFormat;
- ThousandSeparator:= char(defaultformatsettingsmse.ThousandSeparator);
- DecimalSeparator:= char(defaultformatsettingsmse.DecimalSeparator);
- CurrencyDecimals:= defaultformatsettingsmse.CurrencyDecimals;
- DateSeparator:= char(defaultformatsettingsmse.DateSeparator);
- TimeSeparator:= char(defaultformatsettingsmse.TimeSeparator);
- ListSeparator:= char(defaultformatsettingsmse.ListSeparator);
- CurrencyString:= defaultformatsettingsmse.CurrencyString;
- ShortDateFormat:= defaultformatsettingsmse.ShortDateFormat;
- LongDateFormat:= defaultformatsettingsmse.LongDateFormat;
- TimeAMString:= defaultformatsettingsmse.TimeAMString;
- TimePMString:= defaultformatsettingsmse.TimePMString;
- ShortTimeFormat:= defaultformatsettingsmse.ShortTimeFormat;
- LongTimeFormat:= defaultformatsettingsmse.LongTimeFormat;
+ {$ifdef FPC}defaultformatsettings.{$endif}CurrencyFormat:=
+                      defaultformatsettingsmse.CurrencyFormat;
+ {$ifdef FPC}defaultformatsettings.{$endif}NegCurrFormat:= 
+                      defaultformatsettingsmse.NegCurrFormat;
+ {$ifdef FPC}defaultformatsettings.{$endif}ThousandSeparator:=
+                      char(defaultformatsettingsmse.ThousandSeparator);
+ {$ifdef FPC}defaultformatsettings.{$endif}DecimalSeparator:= 
+                      char(defaultformatsettingsmse.DecimalSeparator);
+ {$ifdef FPC}defaultformatsettings.{$endif}CurrencyDecimals:= 
+                      defaultformatsettingsmse.CurrencyDecimals;
+ {$ifdef FPC}defaultformatsettings.{$endif}DateSeparator:= 
+                      char(defaultformatsettingsmse.DateSeparator);
+ {$ifdef FPC}defaultformatsettings.{$endif}TimeSeparator:= 
+                      char(defaultformatsettingsmse.TimeSeparator);
+ {$ifdef FPC}defaultformatsettings.{$endif}ListSeparator:= 
+                      char(defaultformatsettingsmse.ListSeparator);
+ {$ifdef FPC}defaultformatsettings.{$endif}CurrencyString:= 
+                      defaultformatsettingsmse.CurrencyString;
+ {$ifdef FPC}defaultformatsettings.{$endif}ShortDateFormat:= 
+                      defaultformatsettingsmse.ShortDateFormat;
+ {$ifdef FPC}defaultformatsettings.{$endif}LongDateFormat:= 
+                      defaultformatsettingsmse.LongDateFormat;
+ {$ifdef FPC}defaultformatsettings.{$endif}TimeAMString:= 
+                      defaultformatsettingsmse.TimeAMString;
+ {$ifdef FPC}defaultformatsettings.{$endif}TimePMString:= 
+                      defaultformatsettingsmse.TimePMString;
+ {$ifdef FPC}defaultformatsettings.{$endif}ShortTimeFormat:= 
+                      defaultformatsettingsmse.ShortTimeFormat;
+ {$ifdef FPC}defaultformatsettings.{$endif}LongTimeFormat:= 
+                      defaultformatsettingsmse.LongTimeFormat;
  for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
-  ShortMonthNames[int1]:= defaultformatsettingsmse.ShortMonthNames[int1];
+  {$ifdef FPC}defaultformatsettings.{$endif}ShortMonthNames[int1]:=
+                      defaultformatsettingsmse.ShortMonthNames[int1];
  end;
  for int1:= low(tmonthnamearraymse) to high(tmonthnamearraymse) do begin
-  LongMonthNames[int1]:= defaultformatsettingsmse.LongMonthNames[int1];
+  {$ifdef FPC}defaultformatsettings.{$endif}LongMonthNames[int1]:=
+                      defaultformatsettingsmse.LongMonthNames[int1];
  end;
  for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
-  ShortDayNames[int1]:= defaultformatsettingsmse.ShortDayNames[int1];
+  {$ifdef FPC}defaultformatsettings.{$endif}ShortDayNames[int1]:=
+                      defaultformatsettingsmse.ShortDayNames[int1];
  end;
  for int1:= low(tweeknamearraymse) to high(tweeknamearraymse) do begin
-  LongDayNames[int1]:= defaultformatsettingsmse.LongDayNames[int1];
+  {$ifdef FPC}defaultformatsettings.{$endif}LongDayNames[int1]:=
+                      defaultformatsettingsmse.LongDayNames[int1];
  end;
- TwoDigitYearCenturyWindow:= defaultformatsettingsmse.TwoDigitYearCenturyWindow;
+ {$ifdef FPC}defaultformatsettings.{$endif}TwoDigitYearCenturyWindow:=
+                      defaultformatsettingsmse.TwoDigitYearCenturyWindow;
 end;
 
 {$ifdef FPC}

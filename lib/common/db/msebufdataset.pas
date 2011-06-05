@@ -544,8 +544,8 @@ type
    fopen: boolean;
    fupdatebuffer: recupdatebufferarty;
    fcurrentupdatebuffer: integer;
-   fstatebefore: tdatasetstate;
-   fcurrentbufbefore: pintrecordty;
+//   fstatebefore: tdatasetstate;
+//   fcurrentbufbefore: pintrecordty;
 
    frecordsize: integer;
    fnullmasksize: integer;
@@ -817,8 +817,6 @@ type
    procedure setofflineblob(const adata: precheaderty; const aindex: integer;
                                    const ainfo: blobstreaminfoty);
    function getblobrecpo: precheaderty;
-   function createblobstream(field: tfield;
-                                     mode: tblobstreammode): tstream; override;
    procedure internalapplyupdate(const maxerrors: integer;
                const revertonerror: boolean; out response: resolverresponsesty);
    procedure afterapply; virtual;
@@ -882,14 +880,8 @@ type
    procedure getbookmarkdata(buffer: pchar; data: pointer); override;
    function getbookmarkdata1: bookmarkdataty;
    function getbookmarkflag(buffer: pchar): tbookmarkflag; override;
-   function getfielddata(field: tfield; buffer: pointer;
-                       nativeformat: boolean): boolean; override;
-   function getfielddata(field: tfield; buffer: pointer): boolean; override;
    function getfieldblobid(const field: tfield; out aid: blobidty): boolean;
                     //false if null
-   procedure setfielddata(field: tfield; buffer: pointer;
-                                    nativeformat: boolean); override;
-   procedure setfielddata(field: tfield; buffer: pointer); override;
    function iscursoropen: boolean; override;
    function  getrecordcount: longint; override;
    procedure applyrecupdate(updatekind : tupdatekind); virtual;
@@ -941,6 +933,14 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function createblobstream(field: tfield;
+                                     mode: tblobstreammode): tstream; override;
+   function getfielddata(field: tfield; buffer: pointer;
+                       nativeformat: boolean): boolean; override;
+   function getfielddata(field: tfield; buffer: pointer): boolean; override;
+   procedure setfielddata(field: tfield; buffer: pointer;
+                                    nativeformat: boolean); override;
+   procedure setfielddata(field: tfield; buffer: pointer); override;
    procedure Append;
    procedure notifycontrols; //calls enablecontrols/disablecontrols
 
@@ -1024,9 +1024,9 @@ type
    function fieldfiltervalueisnull(const afield: tfield): boolean;
    procedure filterchanged;
    function locate(const afields: array of tfield;
-                   const akeys: array of const; const aisnull: array of boolean;
-                   const akeyoptions: array of locatekeyoptionsty;
-                   const aoptions: locaterecordoptionsty = []): locateresultty;
+       const akeys: array of const; const aisnull: array of boolean;
+       const akeyoptions: array of locatekeyoptionsty;
+       const aoptions: locaterecordoptionsty = []): locateresultty; reintroduce;
    function locaterecno(const arecno: integer): boolean;
         //moves to next valid recno, //returns true if resulting recno = arecno
    
@@ -1359,8 +1359,8 @@ const
                                  %11101111,%11011111,%10111111,%01111111);
           
 procedure setfieldflag(nullmask: pbyte; const x: integer);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  inc(nullmask,(x shr 3));
  nullmask^:= nullmask^ or ormask[x and 7];
@@ -1961,9 +1961,9 @@ begin
 end;
 
 procedure tmsebufdataset.freerecordbuffer(var buffer: pchar);
-var
- int1: integer;
- bo1: boolean;
+//var
+// int1: integer;
+// bo1: boolean;
 begin
  if buffer <> nil then begin
   with pdsrecordty(buffer)^,header do begin
@@ -3170,7 +3170,7 @@ var
  by1: boolean;
  e1: exception;
  ar1,ar2,ar3: integerarty;
- int1: integer;
+// int1: integer;
  origpo: pintrecordty;
  
 begin
@@ -3454,7 +3454,7 @@ procedure tmsebufdataset.internalpost;
 var
  po1,po2: pblobinfoarty;
  po3: pointer;
- int1,int2,int3: integer;
+ int1{,int2,int3}: integer;
  bo1: boolean;
  ar1,ar2,ar3: integerarty;
  newupdatebuffer: boolean;
@@ -3677,7 +3677,9 @@ begin
    field1:= fields.findfield(name);
    if (field1 <> nil) and (field1.fieldkind = fkdata) then begin
     if fieldno = 0 then begin
+{$warnings off}
      tfieldcracker(field1).ffieldno:= int1 + 1; //local mode without connection
+{$warnings on}
     end;
     addfield(int1,datatype,size,field1);
    end;
@@ -3689,7 +3691,9 @@ begin
   with field1 do begin
    if fieldkind = fkinternalcalc then begin
     addfield(int2,datatype,size,field1);
+{$warnings off}
     tfieldcracker(field1).ffieldno:= int2 + 1;
+{$warnings on}
     inc(int2);
    end;
   end;
@@ -3711,7 +3715,9 @@ begin
   ar1[int1]:= field1;
   with field1 do begin
    if fieldkind in dsbuffieldkinds then begin
+{$warnings off}
     tfieldcracker(field1).ffieldno:= -1 - int2;
+{$warnings on}
     fcalcfieldbufpositions[int2]:= fcalcrecordsize;
     if field1 is tmsestringfield then begin
      additem(fcalcstringpositions,fcalcrecordsize);
@@ -4177,7 +4183,7 @@ var
  fieldar1: fieldarty;
  ar1: integerarty;
  stream1: tmemorystream;
- id: int64;
+// id: int64;
 begin
  if not blobscached and not (bs_blobsfetched in fbstate) then begin
   setlength(fieldar1,fields.count);
@@ -4447,7 +4453,7 @@ end;
 procedure tmsebufdataset.deleterecord(const arecno: integer);
 var
  po1: pintrecordty;
- int1: integer;
+// int1: integer;
 begin
  po1:= factindexpo^.ind[arecno];
  if bs_indexvalid in fbstate then begin
@@ -4479,7 +4485,7 @@ end;
 
 procedure tmsebufdataset.checkindex(const force: boolean);
 var
- int1,int2,int3: integer;
+ int1,int2{,int3}: integer;
 begin
  if (force or (factindex <> 0)) and not (bs_indexvalid in fbstate) then begin
   int2:= length(findexes[0].ind);
@@ -4542,8 +4548,8 @@ begin
 end;
 
 procedure tmsebufdataset.setactindex(const avalue: integer);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  if factindex <> avalue then begin
   if active then begin
@@ -4579,7 +4585,7 @@ end;
 
 procedure tmsebufdataset.fieldtoparam(const source: tfield; const dest: tparam);
 var
- int1: integer;
+// int1: integer;
  mstr1: msestring;
 begin
  if source is tmsestringfield then begin
@@ -5360,8 +5366,8 @@ end;
 
 function tmsebufdataset.countvisiblerecords: integer;
 var
- int1,int2: integer;
- getresult: tgetresult;
+ int1{,int2}: integer;
+// getresult: tgetresult;
 begin
  if not (state in [dsinactive,dsfilter]) then begin
   checkbrowsemode;
@@ -5466,9 +5472,9 @@ end;
 procedure tmsebufdataset.savestate(const awriter: tbufstreamwriter);
 var
  header: tbsfheaderty;
- writer: tbufstreamwriter;
+// writer: tbufstreamwriter;
  fieldco: integer;
- int1,int2: integer;
+ int1{,int2}: integer;
 begin
  fieldco:= length(ffieldinfos);
  with header do begin
@@ -5579,12 +5585,13 @@ var
 var
  actindexbefore: integer; 
  oldupdatepointers: pointerarty;
- bo1: boolean;
+// bo1: boolean;
  int1,int2,int3: integer;
  header1: logbufferheaderty;
  updabuf: recupdatebufferarty;
  
 begin
+ updabuf:= nil; //compilerwarning
  actindexbefore:= factindex;
  factindex:= 0;
  factindexpo:= @findexes[0];
@@ -6320,8 +6327,8 @@ begin
 end;
 
 procedure tmsebufdataset.aftercurrentset(const afield: tfield);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  if fcurrentupdating = 0 then begin
   findexlocal.fieldmodified(afield,false);
@@ -7010,7 +7017,7 @@ end;
 procedure tmsebufdataset.getcoldata(const afield: tfield;
                const adatalist: tdatalist);
 var
- po1,po2: pointer;
+ {po1,}po2: pointer;
  offs: ptrint;
  step: integer;
  indexpo: ppointer;
@@ -7261,7 +7268,7 @@ function tmsebufdataset.refreshrecord(const asourcevalues: array of variant;
 var
  bm1,bm2: string;
  int1: integer;
- bo1: boolean;
+// bo1: boolean;
 begin
  if not active or fcontroller.posting1 then begin
   exit;
@@ -7394,6 +7401,7 @@ var
  sf,df: fieldarty;
 begin
  int2:= 0;
+ sf:= nil; //compilerwarning
  for int3:= 0 to high(sourcedatasets) do begin
   with sourcedatasets[int3] do begin
    setlength(sf,length(sf)+fields.count); //max
@@ -8089,7 +8097,7 @@ procedure tlocalindex.quicksort(l,r: integer);
 var
   i,j: integer;
   p: integer;
-  int1: integer;
+//  int1: integer;
   po1: pintrecordty;
 begin
  repeat
@@ -8387,7 +8395,7 @@ function tlocalindex.find(const avalues: array of const;
              const nocheckbrowsemode: boolean = false): boolean;
 var
  int1: integer; 
- v: tvarrec;
+// v: tvarrec;
  po1: pintrecordty;
  po2: pointer;
  bo1: boolean;
@@ -8593,6 +8601,7 @@ var
 begin
  setlength(ar1,length(avalue));
  setlength(ar2,length(avalue));
+ setlength(ar3,length(avalue));
  for int1:= 0 to high(avalue) do begin
   with ar1[int1] do begin
    if varisnull(avalue[int1]) then begin

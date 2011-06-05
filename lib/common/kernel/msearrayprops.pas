@@ -292,7 +292,7 @@ type
    function displayname(const index: integer): msestring; virtual;
    procedure add(const item: tpersistent);
    function indexof(const aitem: tpersistent): integer; //-1 if not found
-   class function getitemclasstype: persistentclassty; virtual; abstract;
+   class function getitemclasstype: persistentclassty; virtual;
                //used in dumpunitgroups
    property itemclasstype: virtualpersistentclassty read fitemclasstype;
    property items[const index: integer]: tpersistent read getitems; default;
@@ -1481,7 +1481,7 @@ end;
 
 procedure tpersistentarrayprop.setcount1(acount: integer; doinit: boolean);
 var
- lengthvorher,int1: integer;
+ {lengthvorher,}int1: integer;
  ar1: persistentarty;
 begin
  checkcount(acount);
@@ -1760,6 +1760,11 @@ begin
  else begin
   inherited;
  end;
+end;
+
+class function tpersistentarrayprop.getitemclasstype: persistentclassty;
+begin
+ result:= nil; //dummy
 end;
 
 { townedpersistentarrayprop }
