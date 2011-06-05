@@ -74,7 +74,9 @@ type
 
  twmfprintcanvas = class(tgdiprintcanvas)
   private
+  {$ifdef mswindows}
    ffilehandle: henhmetafile;
+  {$endif}
    function getenhmetafile: henhmetafile;
   protected
    function didprint: boolean; override;
@@ -87,9 +89,7 @@ type
 
  twmfprinter = class(tcustomgdiprinter)
   private
-   {$ifdef mswindows}
    frefprintername: msestring;
-   {$endif}
    function getcanvas: twmfprintcanvas;
    procedure setcanvas(const avalue: twmfprintcanvas);
   protected
