@@ -458,7 +458,7 @@ const           // fuer tdcb.flags
     fRtsControltoggle = $3000;
     fAbortOnError =     $4000;  // abort reads/writes on error
 //    DWORD fDummy2:17;         // reserved
-
+{
  defaultdcb: tdcb = (
     DCBlength: sizeof(tdcb);
     BaudRate: 9600;
@@ -475,8 +475,8 @@ const           // fuer tdcb.flags
     EofChar: #0;
     EvtChar: #0;
     wReserved1: 0;
-
  );
+ }
  {$endif}
 
 {/* Table of CRC values for high-order byte */}

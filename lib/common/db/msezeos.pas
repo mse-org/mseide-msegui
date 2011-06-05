@@ -39,7 +39,7 @@ type
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
-   procedure setactive (value : boolean);{ override;}
+   procedure setactive (value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -58,9 +58,9 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function locate(const afields: array of tfield;
-                   const akeys: array of const; const aisnull: array of boolean;
-                   const akeyoptions: array of locatekeyoptionsty;
-                   const aoptions: locaterecordoptionsty = []): locateresultty;
+       const akeys: array of const; const aisnull: array of boolean;
+       const akeyoptions: array of locatekeyoptionsty;
+       const aoptions: locaterecordoptionsty = []): locateresultty; reintroduce;
 {
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
@@ -108,7 +108,7 @@ type
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
-   procedure setactive (value : boolean);{ override;}
+   procedure setactive (value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -127,9 +127,9 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function locate(const afields: array of tfield;
-                   const akeys: array of const; const aisnull: array of boolean;
-                   const akeyoptions: array of locatekeyoptionsty;
-                   const aoptions: locaterecordoptionsty = []): locateresultty;
+      const akeys: array of const; const aisnull: array of boolean;
+      const akeyoptions: array of locatekeyoptionsty;
+      const aoptions: locaterecordoptionsty = []): locateresultty; reintroduce;
 {
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
@@ -175,7 +175,7 @@ type
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
-   procedure setactive (value : boolean);{ override;}
+   procedure setactive (value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -194,9 +194,9 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function locate(const afields: array of tfield;
-                   const akeys: array of const; const aisnull: array of boolean;
-                   const akeyoptions: array of locatekeyoptionsty;
-                   const aoptions: locaterecordoptionsty = []): locateresultty;
+       const akeys: array of const; const aisnull: array of boolean;
+       const akeyoptions: array of locatekeyoptionsty;
+       const aoptions: locaterecordoptionsty = []): locateresultty; reintroduce;
 {
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
@@ -242,7 +242,7 @@ type
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
-   procedure setactive (value : boolean);{ override;}
+   procedure setactive (value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -261,9 +261,9 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function locate(const afields: array of tfield;
-                   const akeys: array of const; const aisnull: array of boolean;
-                   const akeyoptions: array of locatekeyoptionsty;
-                   const aoptions: locaterecordoptionsty = []): locateresultty;
+      const akeys: array of const; const aisnull: array of boolean;
+      const akeyoptions: array of locatekeyoptionsty;
+      const aoptions: locaterecordoptionsty = []): locateresultty; reintroduce;
 {
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;

@@ -102,7 +102,7 @@ function soc_open(const kind: socketkindty; const nonblock: boolean;
 var
  af1: integer;
  type1: integer;
- protocol1: integer;
+// protocol1: integer;
  
 begin
  result:= sye_ok;
@@ -161,8 +161,8 @@ end;
 function soc_connect(const handle: integer; const addr: socketaddrty;
                                const timeoutms: integer): syserrorty;
 var
- str1: string;
- int1,int2: integer;
+// str1: string;
+ int1{,int2}: integer;
  pollres: pollkindsty;
 begin
  result:= sye_ok;
@@ -195,7 +195,7 @@ function soc_read(const fd: longint; const buf: pointer;
             const timeoutms: integer): syserrorty;
 var
  pollres: pollkindsty;
- err: integer;
+// err: integer;
 begin
  result:= sye_ok;
  if timeoutms >= 0 then begin
@@ -314,10 +314,12 @@ end;
 
 function soc_getaddr(const addr: socketaddrty): string;
 begin
+ result:= ''; //todo
 end;
 
 function soc_getport(const addr: socketaddrty): integer;
 begin
+ result:= 0; //todo
 end;
 
 function soc_setnonblock(const handle: integer; const nonblock: boolean): syserrorty;

@@ -1602,7 +1602,7 @@ var
  int1: integer;
  colormask: tsimplebitmap1;
  bufferbmpback: hbitmap;
- point1: tpoint;
+// point1: tpoint;
  maskbefore: tsimplebitmap; 
 begin
  with drawinfo,copyarea,gc,win32gcty(platformdata).d do begin
@@ -1906,7 +1906,7 @@ var
  textmetricsa: ttextmetrica;
  str1: string;
  int1: integer;
- ar1: array[0..255] of abc;
+// ar1: array[0..255] of abc;
  height1,width1: integer;
  rea1: real;
 
@@ -2068,6 +2068,7 @@ begin
     end;
     if iswin95 then begin
      new(charwidths);
+    (*
      if false {getcharabcwidths(dc1,0,255,ar1)} then begin
       for int1:= 0 to high(ar1) do begin
        with ar1[int1] do begin
@@ -2076,6 +2077,7 @@ begin
       end;
      end
      else begin      //no truetype font
+     *)
       if not getcharwidthw(dc1,0,255,charwidths^) then begin
        dispose(charwidths);
        goto endlab;
@@ -2085,7 +2087,7 @@ begin
         dec(charwidths^[int1],Overhang);
        end;
       end;
-     end;
+//     end;
     end
     else begin
     {
@@ -2234,7 +2236,7 @@ var
  ahandle: thandle;
  gc1: hdc;
  gcpresults: tgcpresultsw;
- fo1: hfont;
+// fo1: hfont;
  hires: boolean;
 begin
 // result:= gde_fontmetrics;

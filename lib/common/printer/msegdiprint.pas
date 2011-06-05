@@ -289,7 +289,7 @@ end;
 procedure tcustomgdiprinter.gcneeded(const sender: tcanvas);
 var
  gc1: gcty;
- mat1: txform;
+// mat1: txform;
  mstr1: msestring;
 begin
  checkgdiprint;

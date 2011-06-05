@@ -321,8 +321,10 @@ end;
 
 function tpipereader.doread(var buf; const acount: integer;
                              const nonblocked: boolean = false): integer;
+{$ifndef mswindows}
 var
  bo1: boolean;
+{$endif}
 begin
 {$ifdef mswindows}
  result:= fileRead(Handle,buf,acount)

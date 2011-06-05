@@ -30,7 +30,7 @@ type
    fhandles: handlearty;
    fcallbacks: array of iprocmonitor;
    fdata: pointerarty;
-   fcount: integer;
+//   fcount: integer;
    procedure wakeup;
   public
    constructor create(const athreadproc: threadprocty;

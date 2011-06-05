@@ -14721,9 +14721,11 @@ begin
 {$ifdef mse_debugwindowfocus}
      debugwriteln('call trycancelmodal '+window.fowner.name+' '+hextostr(winid,8));
 {$endif}
+{$warnings on}
      if {$ifdef mswindows}false{$else}
          fmodalwindow.fowner.trycancelmodal(window)
          {$endif} then begin
+{$warnings off}
  {$ifdef mse_debugwindowfocus}
       debugwriteln('trycancelmodal true '+window.fowner.name+' '+hextostr(winid,8));
  {$endif}

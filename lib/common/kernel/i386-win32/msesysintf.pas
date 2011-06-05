@@ -765,7 +765,7 @@ end;
 
 function lockmutex(var mutex: mutexty; const noblock: boolean): syserrorty;
 var
- bo1: boolean;
+// bo1: boolean;
  id: threadty;
 begin
  with win32mutexty(mutex) do begin
@@ -1914,7 +1914,7 @@ function sys_gettempdir: filenamety;
 var
  int1: integer;
  fna1: filenamety;
- po1: pfilenamechar;
+// po1: pfilenamechar;
 begin
  setlength(fna1,max_path+10);
  fna1[1]:= #0;

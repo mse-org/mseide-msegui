@@ -62,7 +62,7 @@ var
  usemmtimer: boolean = false;
  hasmmtimer: boolean = false;
  mmtimerchecked: boolean = false;
- mmtimershift: longword;
+// mmtimershift: longword;
  ticaps: ttimecaps;
 // perfref: qword;
 // perffrequ: qword;

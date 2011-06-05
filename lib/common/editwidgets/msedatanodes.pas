@@ -2041,7 +2041,7 @@ var
  boxno: integer;
  int1: integer;
  {$ifdef mswindows}
- int2: integer;
+/// int2: integer;
  {$endif}
  item1: ttreelistitem;
  seg: segmentty;

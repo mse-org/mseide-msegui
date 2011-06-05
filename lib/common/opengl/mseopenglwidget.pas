@@ -41,7 +41,9 @@ type
    {$endif}
    fwin: winidty;
    fonrender: openglrendereventty;
+  {$ifdef unix}
    fvisualattributes: integerarty;
+  {$endif}
    fattrib_buffersize: integer;
    fattrib_level: integer;
    fattrib_rgba: boolean;

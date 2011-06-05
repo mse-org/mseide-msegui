@@ -1152,7 +1152,7 @@ procedure drawdottedlinesegments(const acanvas: tcanvas; const lines: segmentart
  {$ifdef mswindows}
 var
  int1: integer;
- int2: integer;
+// int2: integer;
  {$endif}
 begin                         
  acanvas.save;

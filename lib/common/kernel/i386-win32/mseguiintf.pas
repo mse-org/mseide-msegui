@@ -364,6 +364,13 @@ begin
  result:= shellinterfaceerror;
 end;
 }
+
+procedure useproc; //no "not used" message
+begin
+ if (childwidgetclass = 0) and (desktopwindow = 0) then begin
+ end;
+end;
+
 function checkshellinterface: guierrorty;
 begin
  result:= gue_ok;
@@ -1156,7 +1163,7 @@ end;
 function gui_settimer(us: longword): guierrorty;
                //send et_timer event after delay or us (micro seconds)
 begin
- setsystimer(us);
+ result:= setsystimer(us);
 end;
 
 procedure gui_beep;
@@ -1853,7 +1860,7 @@ end;
 procedure getwindowrectpa(id: winidty; out rect: rectty; out origin: pointty);
              //parent origin
 var
- rect1: rectty;
+// rect1: rectty;
  win1: winidty;
 begin
  rect:= getclientrect(id);
@@ -1918,8 +1925,8 @@ end;
 
 function gui_setdecoratedwindowrect(id: winidty; const rect: rectty; 
                                     out clientrect: rectty): guierrorty;
-var
- rect1: rectty;
+//var
+// rect1: rectty;
 begin
  result:= gue_resizewindow;
  clientrect:= rect;
@@ -2039,12 +2046,12 @@ const
  wheelstep = 120;
 var
  rect1,rect2,rect3: rectty;
- pt1,pt2: pointty;
+ pt1{,pt2}: pointty;
  size1: sizety;
  button: mousebuttonty;
  key1: keyty;
  str1: string;
- int1: integer;
+// int1: integer;
  bo1: boolean;
  sysevent: syseventty;
  shiftstate1: uint;
@@ -2765,9 +2772,9 @@ function traycommand(var child: windowty;
  end;
  
 var
- dataa: notifyicondataa;
+// dataa: notifyicondataa;
  dataw: notifyicondataw_2;
- int1: integer;
+// int1: integer;
 begin
  result:= checkshellinterface;
  if result = gue_ok then begin
@@ -2879,7 +2886,7 @@ end;
 function gui_settrayicon(var awindow: windowty;
                                      const icon,mask: pixmapty): guierrorty;
 var
- ico,ico1: hicon;
+ ico{,ico1}: hicon;
 begin
  ico:= 0;
  if icon <> 0 then begin

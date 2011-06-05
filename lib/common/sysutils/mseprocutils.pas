@@ -495,8 +495,8 @@ function execwaitmse(const commandline: string;
 //startet programm, wartet auf ende, bring exitcode, -1 wenn start nicht moeglich
 var
  prochandle: prochandlety;
- bo1: boolean;
- dwo1: dword;
+// bo1: boolean;
+// dwo1: dword;
 begin
  result:= -1;
    //programm wurde nicht gestartet oder getexitcodeprozessproblem

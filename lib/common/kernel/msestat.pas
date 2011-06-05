@@ -1697,7 +1697,9 @@ begin
            //on delphi memory is not on normal heap
  {$else}
    data:= fmemorystream.memory;
+{$warnings off}
    tmemorystreamcracker(fmemorystream).setpointer(nil,0);
+{$warnings on}
    reallocmem(data,size);
  {$endif}
 {$else}

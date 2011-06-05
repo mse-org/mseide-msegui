@@ -27,6 +27,7 @@ type
  tzprotocolpropertyeditor = class(tstringpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
+  public
    function getvalues: msestringarty; override;
  end;
  
@@ -55,6 +56,7 @@ type
  tzcatalogpropertyeditor = class(tstringpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
+  public
    function getvalues: msestringarty; override;
  end;
 
