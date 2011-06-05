@@ -518,7 +518,10 @@ var
 //  IntVal:longint;
 //  largeintval: int64;
   StrVal:string;
-//  wideStrVal: msestring;
+{$ifdef mswindows}
+  wideStrVal: msestring;
+  buflen: SQLINTEGER;
+{$endif}
 //  doubleval: double;
   StrLen{,buflen}: SQLINTEGER;
 //  isnull1: boolean;

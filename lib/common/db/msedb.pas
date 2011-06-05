@@ -1840,7 +1840,7 @@ type
     FSize : integer;
  end;
 
- tfielddefcracker1 = class(tfielddefcracker) //no "not used" compiler messages 
+ tfielddefcrackerxx = class(tfielddefcracker) //no "not used" compiler messages 
   public
    property DataType : TFieldType read FDataType;
    property FieldNo : Longint read FFieldNo;
@@ -1867,7 +1867,7 @@ type
     FSize: Integer;
   end;
   
-  TParamcracker1 = class(tparamcracker) //no "not used" compiler messages
+  TParamcrackerxx = class(tparamcracker) //no "not used" compiler messages
   public
     property NativeStr: string read FNativeStr;
     property Value: Variant read FValue;
@@ -1917,7 +1917,7 @@ type
     FDataSources : TList;
   end;
 
-  TDataSetcracker1 = class(TDataSetcracker) //avoid "not used note"
+  TDataSetcrackerxx = class(TDataSetcracker) //no "not used note"
    public
     property OpenAfterRead : boolean read FOpenAfterRead;
     property ActiveRecord: Longint read FActiveRecord;

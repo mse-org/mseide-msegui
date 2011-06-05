@@ -806,8 +806,10 @@ begin
 end;
 
 procedure tgdbmi.closegdb;
-//var
-// int1: integer;
+{$ifdef mswindows}
+var
+ int1: integer;
+{$endif}
 begin
  if not (gs_closing in fstate) then begin
   include(fstate,gs_closing);
