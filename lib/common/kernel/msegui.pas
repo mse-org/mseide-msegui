@@ -2016,9 +2016,9 @@ type
    function candefocus: boolean;
    procedure nofocus;
    property focuscount: longword read ffocuscount;
-   function close: boolean; reintroduce; //true if ok
+   function close: boolean; overload; //true if ok
    function close(const amodalresult: modalresultty): boolean; 
-                            reintroduce;//true if ok
+                            overload;//true if ok
    procedure beginmoving; //lock window rect modification
    procedure endmoving;
    procedure bringtofront;
@@ -13486,7 +13486,7 @@ begin
  fmodalresult:= amodalresult;
  result:= false;
  if (amodalresult <> mr_none) {and (tws_modal in fstate)} then begin
-  result:= close;
+  result:= close();
  end;
 end;
 
@@ -13494,7 +13494,7 @@ procedure twindow.setmodalresult(const Value: modalresultty);
 begin
  fmodalresult:= Value;
  if (value <> mr_none) {and (tws_modal in fstate)} then begin
-  close;
+  close();
  end;
 end;
 
