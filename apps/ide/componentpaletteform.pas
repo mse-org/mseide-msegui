@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -88,7 +88,6 @@ var
 begin
  resetselected;
  if init then begin
-  registeredcomponents.defaultorder:= true;
   with componentpages do begin
    beginupdate;
    try
@@ -113,6 +112,7 @@ begin
  end;
 
  componentpalette.beginupdate;
+ registeredcomponents.defaultorder:= true;
  try
   int2:= componentpages.activetag - 1;
   componentpalette.buttons.count:= 0;
@@ -135,6 +135,7 @@ begin
    end;
   end;
  finally
+  registeredcomponents.defaultorder:= false;
   componentpalette.endupdate;
  end;
 end;
