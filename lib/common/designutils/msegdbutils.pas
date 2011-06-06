@@ -4272,7 +4272,9 @@ var
  ar1,ar2,ar3,ar4: resultinfoarty;
  int1,int2: integer;
  str1: string;
-// lint1: int64;
+ {$ifndef FPC}
+ lint1: int64;
+ {$endif}
 begin
  result:= synccommand('-stack-info-depth '+ inttostr(last));
  if result = gdb_ok then begin

@@ -1299,7 +1299,9 @@ end;
 procedure writeset(const writer: twriter; const value: tintegerset;
                             const atypeinfo: ptypeinfo);
 var
-// i: integer;
+{$ifndef FPC}
+ i: integer;
+{$endif}
  basetype: ptypeinfo;
 begin
  basetype:= gettypedata(atypeinfo)^.comptype{$ifndef FPC}^{$endif};

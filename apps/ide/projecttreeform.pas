@@ -185,7 +185,7 @@ type
   protected
    function createsubnode: ttreelistitem; override;
    function createnode(const afilename: filenamety): tfilenode; 
-                                                virtual; reintroduce;
+                                                reintroduce; virtual;
   public
    constructor create;
    procedure parse(const astopcheckproc: stopcheckprocty = nil);

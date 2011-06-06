@@ -746,7 +746,7 @@ type
    procedure assigntob(const dest: tdatalist); override;
 
    function datatype: listdatatypety; override;
-   function add(const value: msestring): integer; override; overload;
+   function add(const value: msestring): integer; overload; override;
    function add(const valuea: msestring; const valueb: msestring = ''): integer; overload;
    function add(const value: doublemsestringty): integer; overload;
    procedure insert(const index: integer; const item: msestring); override;
@@ -799,7 +799,7 @@ type
    function add(const valuea: msestring; const valueb: integer): integer; overload;
    function add(const value: msestringintty): integer; overload;
    procedure insert(const index: integer; const item: msestring);
-                                                     override; overload;
+                                                      overload; override;
    procedure insert(const index: integer; const item: msestring;
                             const itemint: integer); overload;
    procedure fill(const acount: integer; const defaultvalue: msestring;

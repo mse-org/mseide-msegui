@@ -18,9 +18,9 @@ type
  keyty = (
         key_none =               $0000,
         key_Space =              $0020,               // 7 bit printable ASCII
-{$notes off}
+{$ifdef FPC}{$notes off}{$endif}
         key_Any = Key_Space,
-{$notes on}
+{$ifdef FPC}{$notes on}{$endif}
         key_Exclam =             $0021,
         key_QuoteDbl =           $0022,
         key_NumberSign =         $0023,

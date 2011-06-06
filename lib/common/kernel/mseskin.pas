@@ -205,7 +205,7 @@ type
   public
    destructor  destroy; override;
    procedure updateskin(const ainfo: skininfoty; var handled: boolean);
-                                       virtual; reintroduce;
+                                        reintroduce; virtual;
    procedure removeskin(const ainfo: skininfoty; var handled: boolean); virtual;
   published
    property master: tcustomskincontroller read fmaster write setmaster;
