@@ -255,7 +255,7 @@ function TryStrToQWord(const S: string; out Value: QWord): Boolean;
 
 //{$ifdef withformatsettings}
 var
- defaultformatsettings: tformatsettings; //mit '.' als dezitrenner
+ defaultformatsettingsdot: tformatsettings; //mit '.' als dezitrenner
 //{$endif}
 
 const
@@ -2534,7 +2534,7 @@ end;
 function realToStr(const value: double): string;     //immer'.' als separator
 begin
 // {$ifdef withformatsettings}
- result:= floattostr(value,defaultformatsettings)
+ result:= floattostr(value,defaultformatsettingsdot)
 // {$else}
 // result:= replacechar(floattostr(value),decimalseparator,'.');
 // {$endif}
@@ -2543,7 +2543,7 @@ end;
 function StrToreal(const S: string): double;   //immer'.' als separator
 begin
 // {$ifdef withformatsettings}
- result:= strtofloat(s,defaultformatsettings);
+ result:= strtofloat(s,defaultformatsettingsdot);
 // {$else}
 // result:= strtofloat(replacechar(s,'.',decimalseparator));
 // {$endif}
@@ -2552,7 +2552,7 @@ end;
 function trystrtoreal(const s: string; out value: real): boolean;
 begin
 // {$ifdef withformatsettings}
- result:= trystrtofloat(s,double(value),defaultformatsettings);
+ result:= trystrtofloat(s,double(value),defaultformatsettingsdot);
 // {$else}
 // result:= trystrtofloat(replacechar(s,'.',decimalseparator),double(value));
 // {$endif}
@@ -3410,10 +3410,10 @@ end;
 //{$ifdef withformatsettings}
 initialization
 {$ifndef FPC}
- getlocaleformatsettings(0,defaultformatsettings);
+ getlocaleformatsettings(0,defaultformatsettingsdot);
 {$else}
- defaultformatsettings:= sysutils.defaultformatsettings;
+ defaultformatsettingsdot:= sysutils.defaultformatsettings;
 {$endif}
- defaultformatsettings.DecimalSeparator:= '.';
+ defaultformatsettingsdot.DecimalSeparator:= '.';
 //{$endif}
 end.

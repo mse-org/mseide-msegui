@@ -2351,15 +2351,17 @@ end;
 
 function encodesqlfloat(const avalue: real): msestring;
 begin
- result:= replacechar(floattostr(avalue),
-                    defaultformatsettings.decimalseparator,'.');
+ result:= floattostr(avalue,defaultformatsettingsdot);
+// result:= replacechar(floattostr(avalue),
+//                    defaultformatsettings.decimalseparator,'.');
 //( result:= formatfloatmse(avalue,'');
 end;
 
 function encodesqlcurrency(const avalue: currency): msestring;
 begin
- result:= replacechar(formatfloat('0.####',avalue),
-                         defaultformatsettings.decimalseparator,'.')
+ result:= formatfloat('0.####',avalue,defaultformatsettingsdot);
+// result:= replacechar(formatfloat('0.####',avalue),
+//                         defaultformatsettings.decimalseparator,'.')
 // result:= formatfloatmse(avalue,'0.####');
 end;
 

@@ -290,7 +290,7 @@ begin
  end
  else begin
 // {$ifdef withformatsettings}
-  result:= floattostr(val,defaultformatsettings);
+  result:= floattostr(val,defaultformatsettingsdot);
 // {$else}
 //  result:= replacechar(floattostr(val),decimalseparator,'.');
 // {$endif}
@@ -305,7 +305,7 @@ begin
  end
  else begin
 // {$ifdef withformatsettings}
-  result:= strtofloat(ein,defaultformatsettings);
+  result:= strtofloat(ein,defaultformatsettingsdot);
 // {$else}
 //  result:= strtofloat(replacechar(ein,'.',decimalseparator));
 // {$endif}
@@ -320,7 +320,7 @@ begin
  end
  else begin
 // {$ifdef withformatsettings}
-  result:= trystrtofloat(ein,double(value),defaultformatsettings);
+  result:= trystrtofloat(ein,double(value),defaultformatsettingsdot);
 // {$else}
 //  result:= trystrtofloat(replacechar(ein,'.',decimalseparator),double(value));
 // {$endif}
