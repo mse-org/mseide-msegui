@@ -1224,6 +1224,10 @@ begin
                     (po1^.propertytype <> typeinfo(defaultsetty)) then begin
       atypeclasslevel:= 2;
      end;
+     if (kind = tkenumeration) and 
+            (po1^.propertytype <> typeinfo(defaultenumerationty)) then begin
+      atypeclasslevel:= 2;
+     end;
     end;
    end;
 
