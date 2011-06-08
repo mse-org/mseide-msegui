@@ -74,6 +74,9 @@ type
    property activator: tactivator read factivator write setactivator;
  end;
 
+ activatorabortactionty = (aaa_abortexception,aaa_abort,aaa_retry);
+ activatoraborteventty = procedure(const sender: tactivator;
+                          var aaction: activatorabortactionty) of object;
  tactivator = class(tactcomponent)
   private
    foptions: activatoroptionsty;
@@ -84,6 +87,8 @@ type
    factive: boolean;
    factivated: boolean;
    fonactivateerror: activateerroreventty;
+   fonabort: activatoraborteventty;
+   fabortaction: activatorabortactionty;
    procedure readclientnames(reader: treader);
    procedure writeclientnames(writer: twriter);
    function getclients: integer;
@@ -118,10 +123,13 @@ type
    property options: activatoroptionsty read foptions write setoptions 
                     default defaultactivatoroptions;
    property active: boolean read factive write setactive default false;
+   property abortaction: activatorabortactionty read fabortaction 
+                           write fabortaction default aaa_abortexception;
    property onbeforeactivate: notifyeventty read fonbeforeactivate
                            write fonbeforeactivate;
    property onactivateerror: activateerroreventty read fonactivateerror 
                                    write fonactivateerror;                              
+   property onabort: activatoraborteventty read fonabort write fonabort;
    property onafteractivate: notifyeventty read fonafteractivate 
                            write fonafteractivate;
    property onbeforedeactivate: notifyeventty read fonbeforedeactivate 
@@ -689,6 +697,7 @@ begin
      activateclients;
     except
      application.handleexception(self);
+     factivated:= false; //do not activate in clients.loaded
     end;
    end
    else begin
@@ -788,6 +797,7 @@ procedure tactivator.activateclients;
 var
  int1: integer;
  bo1,bo2: boolean;
+ act1: activatorabortactionty;
 begin
  factive:= true;
  factivated:= true;
@@ -807,16 +817,33 @@ begin
       fonactivateerror(self,iobjectlink(fclients[int1]).getinstance,e,bo1);
      end;
      if not bo1 then begin
-      if avo_handleexceptions in foptions then begin
+      if (avo_handleexceptions in foptions) and 
+                     not (csdesigning in componentstate) then begin
        if not (avo_quietexceptions in foptions) then begin
         application.showexception(e);
        end;
       end
       else begin
+//       factive:= false;
        raise;
       end;
      end;
      if avo_abortonexception in foptions then begin
+      act1:= fabortaction;
+      if canevent(tmethod(fonabort)) then begin
+       fonabort(self,act1);
+      end;
+      factivated:= false; //no activation in clients.loaded
+      case act1 of
+       aaa_retry: begin
+        deactivateclients;
+        activateclients;
+        exit;
+       end;
+       aaa_abortexception: begin
+        abort;
+       end;
+      end;
       break;
      end;
     end;
