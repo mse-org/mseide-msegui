@@ -27,12 +27,17 @@ uses
  {$ifdef mse_with_ifi},mseifiglob,mseificompglob,mseificomp{$endif};
 
 type
-
+                         //0       1         2         3          4    
  dbnavigbuttonty = (dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
+ //             5             6            7
            dbnb_delete,dbnb_copyrecord,dbnb_edit,
+ //             8          9          10
            dbnb_post,dbnb_cancel,dbnb_refresh,
+ //            11           12             13              14             15
            dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,
+ //            16           17
            dbnb_autoedit,dbnb_dialog);
+           
  dbnavigbuttonsty = set of dbnavigbuttonty;
  
 const
@@ -107,7 +112,36 @@ type
    constructor create(const intf: idbnaviglink);
    procedure execbutton(const abutton: dbnavigbuttonty);
  end;
- 
+
+ tdbnavigbutton = class(tcustomstockglyphtoolbutton)
+  private
+   procedure readtag(reader: treader);
+  protected
+   procedure defineproperties(filer: tfiler); override;
+  published
+   property imagelist;
+   property imagenr;
+   property imagenrdisabled;
+   property colorglyph;
+   property color;
+   property imagecheckedoffset;
+   property hint;
+   property action;
+   property state;
+   property shortcut;
+   property shortcut1;
+//   property tag;
+   property options;
+   property group;
+//   property onexecute;
+//   property onbeforeexecute;
+ end;
+
+ tdbnavigbuttons = class(tstockglyphtoolbuttons)
+  protected
+   class function getbuttonclass: toolbuttonclassty; override;
+ end;
+  
  tdbnavigator = class(tcustomtoolbar,idbnaviglink)
   private
    fdatalink: tnavigdatalink;
@@ -123,8 +157,8 @@ type
    procedure setoptions(const avalue: dbnavigatoroptionsty);
    function getbuttonface: tface;
    procedure setbuttonface(const avalue: tface);
-   function gettoolbutton: ttoolbutton;
-   procedure settoolbutton(const avalue: ttoolbutton);
+   function gettoolbutton: tdbnavigbutton;
+   procedure settoolbutton(const avalue: tdbnavigbutton);
    function getautoedit: boolean;
    procedure setautoedit(const avalue: boolean);
   protected
@@ -196,7 +230,7 @@ type
    property autoedit: boolean read getautoedit write setautoedit default false;
 //   property dialoghint: msestring read getdialoghint write setdialoghint;
 //   
-   property dialogbutton: ttoolbutton read gettoolbutton write settoolbutton;
+   property dialogbutton: tdbnavigbutton read gettoolbutton write settoolbutton;
    property ondialogexecute: notifyeventty read fondialogexecute 
                            write fondialogexecute;
  end;
@@ -1553,6 +1587,7 @@ type
    function getfixcols: tdbwidgetfixcols;
    procedure setfixcols(const avalue: tdbwidgetfixcols);
   protected
+   function canautoappend: boolean; override;
    function getdbindicatorcol: integer;
    function getgriddatalink: pointer; override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
@@ -1812,6 +1847,7 @@ type
    function getfixcols: tdbstringfixcols;
    procedure setfixcols(const avalue: tdbstringfixcols);
   protected
+   function canautoappend: boolean; override;
    procedure setupeditor(const acell: gridcoordty; const focusin: boolean); override;
    function getdbindicatorcol: integer;
    procedure setselected(const cell: gridcoordty;
@@ -2613,12 +2649,19 @@ const
    sc_auto_edit,sc_dialog
 );
   
+{ tdbnavigbuttons }
+
+class function tdbnavigbuttons.getbuttonclass: toolbuttonclassty;
+begin
+ result:= tdbnavigbutton;
+end;
+
 constructor tdbnavigator.create(aowner: tcomponent);
 var
  int1: integer;
 begin
  if flayout.buttons = nil then begin
-  flayout.buttons:= tstockglyphtoolbuttons.create(self);
+  flayout.buttons:= tdbnavigbuttons.create(self);
  end;
  foptions:= defaultdbnavigatoroptions;
  fshortcuts[dbnb_first]:= key_modctrl + ord(key_pageup);
@@ -2842,12 +2885,12 @@ begin
  end;
 end;
 
-function tdbnavigator.gettoolbutton: ttoolbutton;
+function tdbnavigator.gettoolbutton: tdbnavigbutton;
 begin
- result:= buttons[ord(dbnb_dialog)];
+ result:= tdbnavigbutton(buttons[ord(dbnb_dialog)]);
 end;
 
-procedure tdbnavigator.settoolbutton(const avalue: ttoolbutton);
+procedure tdbnavigator.settoolbutton(const avalue: tdbnavigbutton);
 begin
  buttons[ord(dbnb_dialog)]:= avalue;
 end;
@@ -8454,6 +8497,11 @@ begin
  end;
 end;
 
+function tcustomdbwidgetgrid.canautoappend: boolean;
+begin
+ result:= inherited canautoappend and fdatalink.canautoinsert;
+end;
+
 { tstringcoldatalink }
 
 procedure tstringcoldatalink.layoutchanged;
@@ -9331,6 +9379,11 @@ begin
  else begin
   result:= tdbstringcol(tdbstringcols(fdatacols).fitems[acol]).fdatalink;
  end;
+end;
+
+function tcustomdbstringgrid.canautoappend: boolean;
+begin
+ result:= inherited canautoappend and fdatalink.canautoinsert;
 end;
 
 { tlbdropdowncol }
@@ -10983,6 +11036,19 @@ begin
  if result = nil then begin
   result:= inherited getsortfield;
  end;
+end;
+
+{ tdbnavigbutton }
+
+procedure tdbnavigbutton.readtag(reader: treader);
+begin
+ reader.readinteger; //dummy
+end;
+
+procedure tdbnavigbutton.defineproperties(filer: tfiler);
+begin
+ inherited;              //backward compatibility
+ filer.defineproperty('tag',@readtag,nil,false);
 end;
 
 end.

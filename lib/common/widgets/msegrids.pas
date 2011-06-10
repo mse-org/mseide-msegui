@@ -2016,6 +2016,7 @@ type
    function doremoveappinsrow(const arow: integer): boolean;
                     //true if removed
    function hassort: boolean;
+   function canautoappend: boolean; virtual;
 
    
     //idragcontroller
@@ -12013,11 +12014,14 @@ begin
  inherited;
 end;
 
+function tcustomgrid.canautoappend: boolean;
+begin
+ result:= (rowcount = 0) and (og_autofirstrow in foptionsgrid);
+end;
+
 function tcustomgrid.checkreautoappend: boolean;
 begin
- result:= (rowcount = 0) and 
-         (foptionsgrid * [og_autofirstrow,og_focuscellonenter] = 
-                     [og_autofirstrow,og_focuscellonenter]);
+ result:= (og_focuscellonenter in foptionsgrid) and canautoappend;
  if result then begin
   row:= 0;
  end;

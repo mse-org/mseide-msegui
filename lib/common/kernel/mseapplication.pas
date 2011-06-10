@@ -33,6 +33,9 @@ type
                 avo_handleexceptions,avo_quietexceptions,
                 avo_abortonexception);
  activatoroptionsty = set of activatoroptionty;
+ activatorabortactionty = (aaa_abortexception,aaa_abort,aaa_deactivate,
+                           aaa_retry);
+ 
 const
  defaultactivatoroptions = [avo_handleexceptions,avo_quietexceptions];
  
@@ -74,7 +77,6 @@ type
    property activator: tactivator read factivator write setactivator;
  end;
 
- activatorabortactionty = (aaa_abortexception,aaa_abort,aaa_retry);
  activatoraborteventty = procedure(const sender: tactivator;
                           var aaction: activatorabortactionty) of object;
  tactivator = class(tactcomponent)
@@ -835,9 +837,11 @@ begin
       end;
       factivated:= false; //no activation in clients.loaded
       case act1 of
-       aaa_retry: begin
+       aaa_retry,aaa_deactivate: begin
         deactivateclients;
-        activateclients;
+        if act1 = aaa_retry then begin
+         activateclients;
+        end;
         exit;
        end;
        aaa_abortexception: begin

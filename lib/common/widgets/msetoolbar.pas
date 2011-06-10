@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -23,7 +23,7 @@ type
 
  tcustomtoolbar = class;
 
- ttoolbutton = class(tindexpersistent,iactionlink,iimagelistinfo)
+ tcustomtoolbutton = class(tindexpersistent,iactionlink,iimagelistinfo)
   private
    finfo: actioninfoty;
 //   fonupdate: actioneventty;
@@ -99,13 +99,14 @@ type
    property tagpointer: pointer read ftagpointer write ftagpointer;
    property shortcuts: shortcutarty read finfo.shortcut write setshortcuts;
    property shortcuts1: shortcutarty read finfo.shortcut1 write setshortcuts1;
-  published
+  public
    property imagelist: timagelist read getimagelist write setimagelist
                     stored isimageliststored;
    property imagenr: imagenrty read finfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
-   property imagenrdisabled: imagenrty read finfo.imagenrdisabled write setimagenrdisabled
-                            stored isimagenrdisabledstored default -2;
+   property imagenrdisabled: imagenrty read finfo.imagenrdisabled 
+                                     write setimagenrdisabled
+                                     stored isimagenrdisabledstored default -2;
    property colorglyph: colorty read finfo.colorglyph write setcolorglyph 
                        stored iscolorglyphstored default cl_glyph;
    property color: colorty read finfo.color write setcolor 
@@ -131,9 +132,29 @@ type
                    write setonbeforeexecute stored isonbeforeexecutestored;
 //   property onupdate: actioneventty read fonupdate write fonupdate;
  end;
+ 
+ ttoolbutton = class(tcustomtoolbutton)
+  published
+   property imagelist;
+   property imagenr;
+   property imagenrdisabled;
+   property colorglyph;
+   property color;
+   property imagecheckedoffset;
+   property hint;
+   property action;
+   property state;
+   property shortcut;
+   property shortcut1;
+   property tag;
+   property options;
+   property group;
+   property onexecute;
+   property onbeforeexecute;
+ end;
  ptoolbutton = ^ttoolbutton;
 
- tstockglyphtoolbutton = class(ttoolbutton)
+ tcustomstockglyphtoolbutton = class(tcustomtoolbutton)
   private
    function isimageliststored: boolean; override;
    procedure setimagelist(const Value: timagelist); override;
@@ -142,11 +163,31 @@ type
          const aprop: tindexpersistentarrayprop); overload; override;
  end;
  
+ tstockglyphtoolbutton = class(tcustomstockglyphtoolbutton)
+  published
+   property imagelist;
+   property imagenr;
+   property imagenrdisabled;
+   property colorglyph;
+   property color;
+   property imagecheckedoffset;
+   property hint;
+   property action;
+   property state;
+   property shortcut;
+   property shortcut1;
+   property tag;
+   property options;
+   property group;
+   property onexecute;
+   property onbeforeexecute; 
+ end;
+  
  toolbuttonsstatety = (tbs_nocandefocus);
  toolbuttonsstatesty = set of toolbuttonsstatety;
- toolbuttonclassty = class of ttoolbutton;
+ toolbuttonclassty = class of tcustomtoolbutton;
  
- ttoolbuttons = class(tindexpersistentarrayprop)
+ tcustomtoolbuttons = class(tindexpersistentarrayprop)
   private
    fheight: integer;
    fwidth: integer;
@@ -154,8 +195,8 @@ type
    fcolorglyph: colorty;
    fcolor: colorty;
    fface: tface;
-   procedure setitems(const index: integer; const Value: ttoolbutton);
-   function getitems(const index: integer): ttoolbutton; reintroduce;
+   procedure setitems(const index: integer; const Value: tcustomtoolbutton);
+   function getitems(const index: integer): tcustomtoolbutton; reintroduce;
    procedure setheight(const Value: integer);
    procedure setwidth(const Value: integer);
    procedure setimagelist(const avalue: timagelist);
@@ -176,9 +217,9 @@ type
    procedure createface;
    procedure doupdate;
    procedure resetradioitems(const group: integer);
-   function getcheckedradioitem(const group: integer): ttoolbutton;
-   function add: ttoolbutton;
-   property items[const index: integer]: ttoolbutton read getitems write setitems; default;
+   function getcheckedradioitem(const group: integer): tcustomtoolbutton;
+   function add: tcustomtoolbutton;
+   property items[const index: integer]: tcustomtoolbutton read getitems write setitems; default;
   published
    property width: integer read fwidth write setwidth default 0;
    property height: integer read fheight write setheight default 0;
@@ -188,6 +229,18 @@ type
    property face: tface read getface write setface;
  end;
 
+ ttoolbuttons = class(tcustomtoolbuttons)
+  protected
+   class function getbuttonclass: toolbuttonclassty; override;
+  published
+   property width;
+   property height;
+   property imagelist;
+   property colorglyph;
+   property color;
+   property face;
+ end;
+ 
  tstockglyphtoolbuttons = class(ttoolbuttons)
   protected
    class function getbuttonclass: toolbuttonclassty; override;
@@ -212,7 +265,7 @@ type
  end;
 
  toolbuttoneventty = procedure(const sender: tobject;
-              const button: ttoolbutton) of object;
+              const button: tcustomtoolbutton) of object;
 
  tcustomtoolbar = class(tcustomstepbox,istatfile)
   private
@@ -235,7 +288,7 @@ type
   protected
    flayout: toolbarlayoutinfoty;
    class function classskininfo: skininfoty; override;
-   procedure buttonchanged(sender: ttoolbutton);
+   procedure buttonchanged(sender: tcustomtoolbutton);
    procedure checkvert(const asize: sizety);
    procedure getautopaintsize(var asize: sizety); override;
    procedure updatelayout;
@@ -258,7 +311,7 @@ type
    procedure dragevent(var info: draginfoty); override;
    procedure beginupdate;
    procedure endupdate;
-   function buttonatpos(const apos: pointty; const enabledonly: boolean = false): ttoolbutton;
+   function buttonatpos(const apos: pointty; const enabledonly: boolean = false): tcustomtoolbutton;
 
    property buttons: ttoolbuttons read flayout.buttons write setbuttons;
    property firstbutton: integer read ffirstbutton write setfirstbutton default 0;
@@ -309,9 +362,9 @@ begin
  end;
 end;
 
-{ ttoolbutton }
+{ tcustomtoolbutton }
 
-constructor ttoolbutton.create(const aowner: tobject;
+constructor tcustomtoolbutton.create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop);
 begin
  initactioninfo(finfo);
@@ -319,12 +372,12 @@ begin
  inherited;
 end;
 
-constructor ttoolbutton.create(aowner: tcustomtoolbar);
+constructor tcustomtoolbutton.create(aowner: tcustomtoolbar);
 begin
  create(aowner,aowner.buttons);
 end;
 
-procedure ttoolbutton.objectevent(const sender: tobject; const event: objecteventty);
+procedure tcustomtoolbutton.objectevent(const sender: tobject; const event: objecteventty);
 begin
  inherited;
  if sender = finfo.imagelist then begin
@@ -335,192 +388,192 @@ begin
  end;
 end;
 
-procedure ttoolbutton.actionchanged;
+procedure tcustomtoolbutton.actionchanged;
 begin
  changed;
 end;
 
-function ttoolbutton.getactioninfopo: pactioninfoty;
+function tcustomtoolbutton.getactioninfopo: pactioninfoty;
 begin
  result:= @finfo;
 end;
 
-function ttoolbutton.toolbar: tcustomtoolbar;
+function tcustomtoolbutton.toolbar: tcustomtoolbar;
 begin
  result:= tcustomtoolbar(fowner);
 end;
 
-procedure ttoolbutton.setaction(const Value: tcustomaction);
+procedure tcustomtoolbutton.setaction(const Value: tcustomaction);
 begin
  linktoaction(iactionlink(self),value,finfo);
 end;
 
-function ttoolbutton.getstate: actionstatesty;
+function tcustomtoolbutton.getstate: actionstatesty;
 begin
  result:= finfo.state;
 end;
 
-procedure ttoolbutton.setstate(const Value: actionstatesty);
+procedure tcustomtoolbutton.setstate(const Value: actionstatesty);
 begin
  setactionstate(iactionlink(self),value);
 end;
 
-function ttoolbutton.isstatestored: Boolean;
+function tcustomtoolbutton.isstatestored: Boolean;
 begin
  result:= isactionstatestored(finfo);
 end;
 
-function ttoolbutton.getimagelist: timagelist;
+function tcustomtoolbutton.getimagelist: timagelist;
 begin
  result:= timagelist(finfo.imagelist);
 end;
 
-procedure ttoolbutton.setimagelist(const Value: timagelist);
+procedure tcustomtoolbutton.setimagelist(const Value: timagelist);
 begin
  setactionimagelist(iactionlink(self),value);
 end;
 
-function ttoolbutton.isimageliststored: Boolean;
+function tcustomtoolbutton.isimageliststored: Boolean;
 begin
  result:= isactionimageliststored(finfo);
 end;
 
-function ttoolbutton.getshortcut: shortcutty;
+function tcustomtoolbutton.getshortcut: shortcutty;
 begin
  result:= getsimpleshortcut(finfo);
 end;
 
-function ttoolbutton.getshortcut1: shortcutty;
+function tcustomtoolbutton.getshortcut1: shortcutty;
 begin
  result:= getsimpleshortcut1(finfo);
 end;
 
-procedure ttoolbutton.setshortcut(const Value: shortcutty);
+procedure tcustomtoolbutton.setshortcut(const Value: shortcutty);
 begin
  setactionshortcut(iactionlink(self),value);
 end;
 
-function ttoolbutton.isshortcutstored: Boolean;
+function tcustomtoolbutton.isshortcutstored: Boolean;
 begin
  result:= isactionshortcutstored(finfo);
 end;
 
-procedure ttoolbutton.setshortcut1(const Value: shortcutty);
+procedure tcustomtoolbutton.setshortcut1(const Value: shortcutty);
 begin
  setactionshortcut1(iactionlink(self),value);
 end;
 
-function ttoolbutton.isshortcut1stored: Boolean;
+function tcustomtoolbutton.isshortcut1stored: Boolean;
 begin
  result:= isactionshortcut1stored(finfo);
 end;
 
-procedure ttoolbutton.setimagenr(const Value: imagenrty);
+procedure tcustomtoolbutton.setimagenr(const Value: imagenrty);
 begin
  setactionimagenr(iactionlink(self),value);
 end;
 
-procedure ttoolbutton.setimagenrdisabled(const Value: imagenrty);
+procedure tcustomtoolbutton.setimagenrdisabled(const Value: imagenrty);
 begin
  setactionimagenrdisabled(iactionlink(self),value);
 end;
 
-procedure ttoolbutton.setcolorglyph(const avalue: colorty);
+procedure tcustomtoolbutton.setcolorglyph(const avalue: colorty);
 begin
  setactioncolorglyph(iactionlink(self),avalue);
 end;
 
-function ttoolbutton.iscolorglyphstored: boolean;
+function tcustomtoolbutton.iscolorglyphstored: boolean;
 begin
  result:= isactioncolorglyphstored(finfo);
 end;
 
-procedure ttoolbutton.setcolor(const avalue: colorty);
+procedure tcustomtoolbutton.setcolor(const avalue: colorty);
 begin
  setactioncolor(iactionlink(self),avalue);
 end;
 
-function ttoolbutton.iscolorstored: boolean;
+function tcustomtoolbutton.iscolorstored: boolean;
 begin
  result:= isactioncolorstored(finfo);
 end;
 
-procedure ttoolbutton.setimagecheckedoffset(const Value: integer);
+procedure tcustomtoolbutton.setimagecheckedoffset(const Value: integer);
 begin
  setactionimagecheckedoffset(iactionlink(self),value);
 end;
 
-function ttoolbutton.isimagenrstored: Boolean;
+function tcustomtoolbutton.isimagenrstored: Boolean;
 begin
  result:= isactionimagenrstored(finfo);
 end;
 
-function ttoolbutton.isimagenrdisabledstored: Boolean;
+function tcustomtoolbutton.isimagenrdisabledstored: Boolean;
 begin
  result:= isactionimagenrdisabledstored(finfo);
 end;
 
-function ttoolbutton.isimagecheckedoffsetstored: Boolean;
+function tcustomtoolbutton.isimagecheckedoffsetstored: Boolean;
 begin
  result:= isactionimagecheckedoffsetstored(finfo);
 end;
 
-procedure ttoolbutton.sethint(const Value: msestring);
+procedure tcustomtoolbutton.sethint(const Value: msestring);
 begin
  setactionhint(iactionlink(self),value);
 end;
 
-function ttoolbutton.ishintstored: Boolean;
+function tcustomtoolbutton.ishintstored: Boolean;
 begin
  result:= isactionhintstored(finfo);
 end;
 
-procedure ttoolbutton.setonexecute(const Value: notifyeventty);
+procedure tcustomtoolbutton.setonexecute(const Value: notifyeventty);
 begin
  setactiononexecute(iactionlink(self),value,csloading in toolbar.componentstate);
 end;
 
-function ttoolbutton.isonexecutestored: Boolean;
+function tcustomtoolbutton.isonexecutestored: Boolean;
 begin
  result:= isactiononexecutestored(finfo);
 end;
 
-procedure ttoolbutton.setonbeforeexecute(const avalue: accepteventty);
+procedure tcustomtoolbutton.setonbeforeexecute(const avalue: accepteventty);
 begin
  setactiononbeforeexecute(iactionlink(self),avalue,csloading in toolbar.componentstate);
 end;
 
-function ttoolbutton.isonbeforeexecutestored: Boolean;
+function tcustomtoolbutton.isonbeforeexecutestored: Boolean;
 begin
  result:= isactiononbeforeexecutestored(finfo);
 end;
 
-procedure ttoolbutton.setgroup(const Value: integer);
+procedure tcustomtoolbutton.setgroup(const Value: integer);
 begin
  setactiongroup(iactionlink(self),value);
 end;
 
-function ttoolbutton.isgroupstored: Boolean;
+function tcustomtoolbutton.isgroupstored: Boolean;
 begin
  result:= isactiongroupstored(finfo);
 end;
 
-procedure ttoolbutton.changed;
+procedure tcustomtoolbutton.changed;
 begin
  tcustomtoolbar(fowner).buttonchanged(self);
 end;
 
-function ttoolbutton.index: integer;
+function tcustomtoolbutton.index: integer;
 begin
  result:= findex;
 end;
 
-function ttoolbutton.getchecked: boolean;
+function tcustomtoolbutton.getchecked: boolean;
 begin
  result:= as_checked in finfo.state;
 end;
 
-procedure ttoolbutton.setchecked(const Value: boolean);
+procedure tcustomtoolbutton.setchecked(const Value: boolean);
 begin
  if value then begin
   state:= state + [as_checked];
@@ -530,7 +583,7 @@ begin
  end;
 end;
 
-procedure ttoolbutton.doexecute(const tag: integer; const info: mouseeventinfoty);
+procedure tcustomtoolbutton.doexecute(const tag: integer; const info: mouseeventinfoty);
 begin
  if doactionexecute(self,finfo,false,
       tbs_nocandefocus in ttoolbuttons(prop).fbuttonstate) then begin
@@ -538,12 +591,12 @@ begin
  end;
 end;
 
-procedure ttoolbutton.execute;
+procedure tcustomtoolbutton.execute;
 begin
  doexecute(-1,pmouseeventinfoty(nil)^);
 end;
 
-procedure ttoolbutton.setoptions(const Value: menuactionoptionsty);
+procedure tcustomtoolbutton.setoptions(const Value: menuactionoptionsty);
 begin
  if finfo.options <> value then begin
   finfo.options := Value;
@@ -551,19 +604,19 @@ begin
  end;
 end;
 
-procedure ttoolbutton.doshortcut(var info: keyeventinfoty);
+procedure tcustomtoolbutton.doshortcut(var info: keyeventinfoty);
 begin
  if doactionshortcut(self,finfo,info) then begin
   changed;
  end;
 end;
 
-function ttoolbutton.getenabled: boolean;
+function tcustomtoolbutton.getenabled: boolean;
 begin
  result:= not (as_disabled in finfo.state);
 end;
 
-procedure ttoolbutton.setenabled(const avalue: boolean);
+procedure tcustomtoolbutton.setenabled(const avalue: boolean);
 begin
  if avalue then begin
   state:= state - [as_disabled];
@@ -573,12 +626,12 @@ begin
  end;
 end;
 
-function ttoolbutton.getvisible: boolean;
+function tcustomtoolbutton.getvisible: boolean;
 begin
  result:= not (as_invisible in finfo.state);
 end;
 
-procedure ttoolbutton.setvisible(const avalue: boolean);
+procedure tcustomtoolbutton.setvisible(const avalue: boolean);
 begin
  if avalue then begin
   state:= state - [as_invisible];
@@ -588,38 +641,38 @@ begin
  end;
 end;
 
-function ttoolbutton.getinstance: tobject;
+function tcustomtoolbutton.getinstance: tobject;
 begin
  result:= fowner;
 end;
 
-function ttoolbutton.loading: boolean;
+function tcustomtoolbutton.loading: boolean;
 begin
  result:= (fowner is tcomponent) and 
                (csloading in tcomponent(fowner).componentstate);
 end;
 
-function ttoolbutton.shortcutseparator: msechar;
+function tcustomtoolbutton.shortcutseparator: msechar;
 begin
  result:= ' ';
 end;
 
-procedure ttoolbutton.calccaptiontext(var ainfo: actioninfoty);
+procedure tcustomtoolbutton.calccaptiontext(var ainfo: actioninfoty);
 begin
  mseactions.calccaptiontext(ainfo,shortcutseparator);
 end;
 
-procedure ttoolbutton.readbool(reader: treader);
+procedure tcustomtoolbutton.readbool(reader: treader);
 begin
  reader.readboolean; //dummy
 end;
 
-procedure ttoolbutton.writebool(writer: twriter);
+procedure tcustomtoolbutton.writebool(writer: twriter);
 begin
  //dummy
 end;
 
-procedure ttoolbutton.defineproperties(filer: tfiler);
+procedure tcustomtoolbutton.defineproperties(filer: tfiler);
 begin
  inherited;
  filer.defineproperty('visible',{$ifdef FPC}@{$endif}readbool,
@@ -628,54 +681,54 @@ begin
                                 {$ifdef FPC}@{$endif}writebool,false);
 end;
 
-procedure ttoolbutton.setshortcuts(const avalue: shortcutarty);
+procedure tcustomtoolbutton.setshortcuts(const avalue: shortcutarty);
 begin
  setactionshortcuts(iactionlink(self),avalue);
 end;
 
-procedure ttoolbutton.setshortcuts1(const avalue: shortcutarty);
+procedure tcustomtoolbutton.setshortcuts1(const avalue: shortcutarty);
 begin
  setactionshortcuts1(iactionlink(self),avalue);
 end;
 
-procedure ttoolbutton.doupdate;
+procedure tcustomtoolbutton.doupdate;
 begin
  if finfo.action <> nil then begin
   finfo.action.doupdate;
  end;
 end;
 
-{ ttoolbuttons }
+{ tcustomtoolbuttons }
 
-constructor ttoolbuttons.create(const aowner: tcustomtoolbar);
+constructor tcustomtoolbuttons.create(const aowner: tcustomtoolbar);
 begin
  fcolorglyph:= cl_glyph;
  fcolor:= cl_transparent;
  inherited create(aowner,getbuttonclass);
 end;
 
-destructor ttoolbuttons.destroy;
+destructor tcustomtoolbuttons.destroy;
 begin
  inherited;
  fface.free;
 end;
 
-class function ttoolbuttons.getitemclasstype: persistentclassty;
+class function tcustomtoolbuttons.getitemclasstype: persistentclassty;
 begin
  result:= ttoolbutton;
 end;
 
-function ttoolbuttons.add: ttoolbutton;
+function tcustomtoolbuttons.add: tcustomtoolbutton;
 begin
  count:= count + 1;
  result:= items[count-1];
 end;
 
-procedure ttoolbuttons.createitem(const index: integer; var item: tpersistent);
+procedure tcustomtoolbuttons.createitem(const index: integer; var item: tpersistent);
 begin
  inherited;
  if not (csloading in tcustomtoolbar(fowner).componentstate) then begin
-  with ttoolbutton(item) do begin
+  with tcustomtoolbutton(item) do begin
    if fimagelist <> nil then begin
     imagelist:= fimagelist;
    end;
@@ -690,7 +743,7 @@ begin
  end;
 end;
 
-procedure ttoolbuttons.dochange(const index: integer);
+procedure tcustomtoolbuttons.dochange(const index: integer);
 var
  int1: integer;
  po1: ptoolbutton;
@@ -703,13 +756,13 @@ begin
   end;
  end
  else begin
-  ttoolbutton(fitems[index]).findex:= index;
+  tcustomtoolbutton(fitems[index]).findex:= index;
  end;
  inherited;
 end;
 
-function ttoolbuttons.getcheckedradioitem(
-  const group: integer): ttoolbutton;
+function tcustomtoolbuttons.getcheckedradioitem(
+  const group: integer): tcustomtoolbutton;
 var
  int1: integer;
 begin
@@ -725,7 +778,7 @@ begin
  end;
 end;
 
-procedure ttoolbuttons.resetradioitems(const group: integer);
+procedure tcustomtoolbuttons.resetradioitems(const group: integer);
 var
  int1: integer;
 begin
@@ -738,18 +791,18 @@ begin
  end;
 end;
 
-function ttoolbuttons.getitems(const index: integer): ttoolbutton;
+function tcustomtoolbuttons.getitems(const index: integer): tcustomtoolbutton;
 begin
- result:= ttoolbutton(inherited items[index]);
+ result:= tcustomtoolbutton(inherited items[index]);
 end;
 
-procedure ttoolbuttons.setitems(const index: integer;
-  const Value: ttoolbutton);
+procedure tcustomtoolbuttons.setitems(const index: integer;
+  const Value: tcustomtoolbutton);
 begin
  inherited items[index].assign(value);
 end;
 
-procedure ttoolbuttons.setheight(const Value: integer);
+procedure tcustomtoolbuttons.setheight(const Value: integer);
 begin
  if fheight <> value then begin
   fheight:= Value;
@@ -757,7 +810,7 @@ begin
  end;
 end;
 
-procedure ttoolbuttons.setwidth(const Value: integer);
+procedure tcustomtoolbuttons.setwidth(const Value: integer);
 begin
  if fwidth <> value then begin
   fwidth:= Value;
@@ -765,7 +818,7 @@ begin
  end;
 end;
 
-procedure ttoolbuttons.setimagelist(const avalue: timagelist);
+procedure tcustomtoolbuttons.setimagelist(const avalue: timagelist);
 var
  int1: integer;
 begin
@@ -777,7 +830,7 @@ begin
  end;
 end;
 
-procedure ttoolbuttons.setcolorglyph(const avalue: colorty);
+procedure tcustomtoolbuttons.setcolorglyph(const avalue: colorty);
 var
  int1: integer;
 begin
@@ -789,7 +842,7 @@ begin
  end;
 end;
 
-procedure ttoolbuttons.setcolor(const avalue: colorty);
+procedure tcustomtoolbuttons.setcolor(const avalue: colorty);
 var
  int1: integer;
 begin
@@ -801,48 +854,55 @@ begin
  end;
 end;
 
-procedure ttoolbuttons.createface;
+procedure tcustomtoolbuttons.createface;
 begin
  if fface = nil then begin
   fface:= tface.create(iface(tcustomtoolbar(fowner)));
  end;
 end;
 
-function ttoolbuttons.getface: tface;
+function tcustomtoolbuttons.getface: tface;
 begin
  tcustomtoolbar(fowner).getoptionalobject(fface,
                                {$ifdef FPC}@{$endif}createface);
  result:= fface;
 end;
 
-procedure ttoolbuttons.setface(const avalue: tface);
+procedure tcustomtoolbuttons.setface(const avalue: tface);
 begin
  tcustomtoolbar(fowner).setoptionalobject(avalue,fface,
                                {$ifdef FPC}@{$endif}createface);
  tcustomtoolbar(fowner).invalidate;
 end;
 
-procedure ttoolbuttons.objectchanged(const sender: tobject);
+procedure tcustomtoolbuttons.objectchanged(const sender: tobject);
 begin
  if fface <> nil then begin
   fface.checktemplate(sender);
  end;
 end;
 
-class function ttoolbuttons.getbuttonclass: toolbuttonclassty;
+class function tcustomtoolbuttons.getbuttonclass: toolbuttonclassty;
 begin
- result:= ttoolbutton;
+ result:= tcustomtoolbutton;
 end;
 
-procedure ttoolbuttons.doupdate;
+procedure tcustomtoolbuttons.doupdate;
 var
  int1: integer;
 begin
  for int1:= 0 to high(fitems) do begin
-  with ttoolbutton(fitems[int1]) do begin
+  with tcustomtoolbutton(fitems[int1]) do begin
    doupdate;
   end;
  end;
+end;
+
+{ ttoolbuttons }
+
+class function ttoolbuttons.getbuttonclass: toolbuttonclassty;
+begin
+ result:= ttoolbutton;
 end;
 
 { tcustomtoolbar }
@@ -1170,10 +1230,10 @@ begin
  result.objectkind:= sok_toolbar;
 end;
 
-procedure tcustomtoolbar.buttonchanged(sender: ttoolbutton);
+procedure tcustomtoolbar.buttonchanged(sender: tcustomtoolbutton);
 var
  int1: integer;
- button1: ttoolbutton;
+ button1: tcustomtoolbutton;
  bo1: boolean;
 begin
  with flayout do begin
@@ -1349,7 +1409,7 @@ begin
  end;
 end;
 }
-function tcustomtoolbar.buttonatpos(const apos: pointty; const enabledonly: boolean = false): ttoolbutton;
+function tcustomtoolbar.buttonatpos(const apos: pointty; const enabledonly: boolean = false): tcustomtoolbutton;
 var
  int1: integer;
 begin
@@ -1371,7 +1431,7 @@ end;
 
 procedure tcustomtoolbar.dragevent(var info: draginfoty);
 var
- button1: ttoolbutton;
+ button1: tcustomtoolbutton;
 
  function candest: boolean;
  begin
@@ -1409,7 +1469,7 @@ begin
     end;
     dek_drop: begin
      if candest then begin
-      buttons.move(ttoolbutton(tobjectdragobject(dragobjectpo^).data).index,button1.index);
+      buttons.move(tcustomtoolbutton(tobjectdragobject(dragobjectpo^).data).index,button1.index);
      end
      else begin
       inherited;
@@ -1541,22 +1601,22 @@ begin
 end;
  }
 
-{ tstockglyphtoolbutton }
+{ tcustomstockglyphtoolbutton }
 
-constructor tstockglyphtoolbutton.create(const aowner: tobject;
+constructor tcustomstockglyphtoolbutton.create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop);
 begin
  inherited;
  finfo.imagelist:= stockobjects.glyphs;
 end;
 
-function tstockglyphtoolbutton.isimageliststored: boolean;
+function tcustomstockglyphtoolbutton.isimageliststored: boolean;
 begin
  result:= inherited isimageliststored and 
               (finfo.imagelist <> stockobjects.glyphs);
 end;
 
-procedure tstockglyphtoolbutton.setimagelist(const Value: timagelist);
+procedure tcustomstockglyphtoolbutton.setimagelist(const Value: timagelist);
 begin
  if value = nil then begin
   inherited setimagelist(stockobjects.glyphs);

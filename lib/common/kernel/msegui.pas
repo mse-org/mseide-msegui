@@ -1568,7 +1568,7 @@ type
                    //called on top level window
    function canclose(const newfocus: twidget = nil): boolean; virtual;
    function canparentclose(const newfocus: twidget): boolean; overload;
-                   //window.focusedwidget is first checked of it is descendant
+                   //window.focusedwidget is first checked if it is descendant
    function canparentclose: boolean; overload;
                    //newfocus = window.focusedwidget      
    function canfocus: boolean; virtual;
