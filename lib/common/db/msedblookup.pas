@@ -2662,6 +2662,7 @@ end;
 
 procedure tdblookuplb.defineproperties(filer: tfiler);
 begin
+ inherited;
  filer.defineproperty('lookupkeyfieldno',@readlookupkeyfieldno,nil,false);
  filer.defineproperty('lookupvaluefieldno',@readlookupvaluefieldno,nil,false);
 end;
