@@ -1,5 +1,5 @@
 object watchfo: twatchfo
-  optionswidget = [ow_tabfocus, ow_subfocus, ow_destroywidgets]
+  optionswidget = [ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets]
   frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
@@ -9,8 +9,10 @@ object watchfo: twatchfo
   bounds_y = 247
   bounds_cx = 310
   bounds_cy = 245
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.color = -2147483645
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   container.bounds = (
     0
@@ -104,7 +106,7 @@ object watchfo: twatchfo
       item
         color = -1610612729
         name = 'stf_default'
-        xscale =  1.0000000000000000E+0000
+        xscale = 1
         dummy = 0
       end>
     datacols.count = 5

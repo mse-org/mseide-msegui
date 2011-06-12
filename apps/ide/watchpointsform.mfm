@@ -1,5 +1,4 @@
 object watchpointsfo: twatchpointsfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
@@ -9,7 +8,8 @@ object watchpointsfo: twatchpointsfo
   bounds_y = 368
   bounds_cx = 483
   bounds_cy = 210
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
   container.bounds = (
     0
@@ -131,44 +131,44 @@ object watchpointsfo: twatchpointsfo
     datacols.items = <    
       item
         width = 16
-        options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_drawfocus, co_savestate]
         widgetname = 'wpton'
         dataclass = tgridintegerdatalist
       end    
       item
         width = 33
-        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_savevalue, co_savestate]
         widgetname = 'wptkind'
         dataclass = tgridenumdatalist
       end    
       item
         width = 158
-        options = [co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_proportional, co_savevalue, co_savestate]
         widgetname = 'wptexpression'
         dataclass = tgridmsestringdatalist
       end    
       item
         width = 9
-        options = [co_invisible, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_invisible]
         widgetname = 'wptno'
         dataclass = tgridintegerdatalist
       end    
       item
         color = -1879048185
         width = 34
-        options = [co_readonly, co_nofocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_readonly, co_nofocus, co_savestate]
         widgetname = 'wptcount'
         dataclass = tgridintegerdatalist
       end    
       item
         width = 38
-        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_savevalue, co_savestate]
         widgetname = 'wptignore'
         dataclass = tgridintegerdatalist
       end    
       item
         width = 174
-        options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_fill, co_savevalue, co_savestate]
         widgetname = 'wptcondition'
         dataclass = tgridmsestringdatalist
       end>
@@ -187,7 +187,7 @@ object watchpointsfo: twatchpointsfo
       bounds_y = 0
       bounds_cx = 16
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       visible = False
       onsetvalue = wptononsetvalue
     end
@@ -251,7 +251,7 @@ object watchpointsfo: twatchpointsfo
       bounds_y = 0
       bounds_cx = 9
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       reffontheight = 14
     end
     object wptcount: tintegeredit
@@ -267,7 +267,7 @@ object watchpointsfo: twatchpointsfo
       bounds_y = 0
       bounds_cx = 34
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       reffontheight = 14
     end
     object wptignore: tintegeredit
@@ -283,7 +283,7 @@ object watchpointsfo: twatchpointsfo
       bounds_y = 0
       bounds_cx = 38
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       ondataentered = wptondataentered
       reffontheight = 14
     end

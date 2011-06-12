@@ -1,5 +1,5 @@
 object threadsfo: tthreadsfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
@@ -8,7 +8,9 @@ object threadsfo: tthreadsfo
   bounds_y = 270
   bounds_cx = 349
   bounds_cy = 276
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets]
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -115,17 +117,23 @@ object threadsfo: tthreadsfo
         textflags = [tf_right, tf_ycentered]
         textflagsactive = [tf_right, tf_ycentered]
         optionsedit = [scoe_undoonesc, scoe_eatreturn, scoe_exitoncursor, scoe_autoselect, scoe_autoselectonfirstclick, scoe_hintclippedtext]
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 56
         options = [co_readonly, co_focusselect, co_rowselect, co_savestate]
         textflags = [tf_xcentered, tf_ycentered]
         optionsedit = [scoe_undoonesc, scoe_eatreturn, scoe_exitoncursor, scoe_autoselect, scoe_autoselectonfirstclick, scoe_hintclippedtext]
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 201
         options = [co_readonly, co_focusselect, co_rowselect, co_fill, co_savestate]
         optionsedit = [scoe_undoonesc, scoe_eatreturn, scoe_exitoncursor, scoe_autoselect, scoe_autoselectonfirstclick, scoe_hintclippedtext]
+        valuefalse = '0'
+        valuetrue = '1'
       end>
     fixcols.count = 1
     fixcols.items = <    

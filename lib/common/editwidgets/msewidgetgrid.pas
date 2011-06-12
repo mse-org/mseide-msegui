@@ -3461,7 +3461,10 @@ procedure tcustomwidgetgrid.navigrequest(var info: naviginfoty);
 begin
  inherited;
  if (info.nearest = fcontainer0) or (info.nearest = fcontainer2) then begin
-  info.nearest:= factivewidget;
+  if factivewidget <> nil then begin
+   factivewidget.show;
+   info.nearest:= factivewidget;
+  end;
  end;
 end;
 

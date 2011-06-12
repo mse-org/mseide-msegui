@@ -1,5 +1,5 @@
 object memoryfo: tmemoryfo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
@@ -8,7 +8,6 @@ object memoryfo: tmemoryfo
   bounds_y = 100
   bounds_cx = 453
   bounds_cy = 354
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
   container.bounds = (
@@ -68,8 +67,8 @@ object memoryfo: tmemoryfo
     BCBCBC01B2B2B20169696901A3A3A301FFFFFF017C7C7C01C0C0C0019D9D9D01
     7F7F7F01BEBEBE01A9A9A901E7E7E7018D8D8D01C7C7C701ABABAB01FFFFFF01
     A9A9A901FFFFFF01ABABAB01FFFFFF01ABABAB01FFFFFF01A9A9A901FFFFFF01
-    DADADA01C1C1C101A0A0A001ABABAB01FFFFFF017C7C7C01FFFFFF17FFFFFF00
-    FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    DADADA01C1C1C101A0A0A001ABABAB01FFFFFF017C7C7C01FFFFFF17FFFFFFB7
+    FFFFFF08FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
     FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
     FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
   }
@@ -324,7 +323,7 @@ object memoryfo: tmemoryfo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 17
+        height = 16
         captions.count = 16
         captions.items = <        
           item
@@ -377,8 +376,8 @@ object memoryfo: tmemoryfo
           end>
       end>
     rowcount = 5
-    datarowheight = 17
-    reffontheight = 15
+    datarowheight = 16
+    reffontheight = 14
   end
   object tlayouter1: tlayouter
     frame.framei_left = 5

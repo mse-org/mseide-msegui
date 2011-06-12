@@ -100,19 +100,25 @@ type
   
 procedure Register;
 begin
- registercomponents('Edit',[twidgetgrid,tedit,tslider,tprogressbar,
+ registercomponents('Edit',[twidgetgrid,
+   tstringedit,
+   tdropdownlistedit,thistoryedit,
+   tmemoedit,
+   tintegeredit,tint64edit,trealedit,trealspinedit,trealsumedit,
+   tdatetimeedit,
+   tcalendardatetimeedit,
    tbooleanedit,tbooleaneditradio,
-   tdatabutton,tstockglyphdatabutton,tdataicon,tdataimage,
-   tpointeredit,
-   tstringedit,tdropdownlistedit,thistoryedit,
-   thexstringedit,tmemoedit,tfoldedit,
-   tintegeredit,tint64edit,trealedit,trealspinedit,trealsumedit,tdatetimeedit,
-   tcalendardatetimeedit,tkeystringedit,
+   thexstringedit,tpointeredit,
+   tkeystringedit,
    tenumedit,tenumtypeedit,tselector,
    {tstringlistedit,}
+   tfoldedit,
    titemedit,tdropdownitemedit,tmbdropdownitemedit,ttreeitemedit,
    trecordfieldedit,
-   ttextedit,tundotextedit,tterminal]);
+   ttextedit,tundotextedit,tterminal,
+   tdatabutton,tstockglyphdatabutton,tdataicon,tdataimage,
+   tslider,tprogressbar
+]);
  registercomponenttabhints(['Edit'],
  ['Edit widgets, twidgetgrid and widgets'+c_linefeed+
   'which can be placed into twidgetgrid']);

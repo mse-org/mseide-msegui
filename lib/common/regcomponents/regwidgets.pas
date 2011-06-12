@@ -47,7 +47,7 @@ uses
  msetoolbar,msetabs,msedesignintf,regwidgets_bmp,mselistbrowser,
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
- msepolygon,msepickwidget,msetraywidget,msedockpanelform,msechartedit
+ msepolygon,msepickwidget,msetraywidget,msedockpanelform,msechartedit,mseedit
  {$ifndef mse_no_opengl}
   {$ifdef FPC}
      ,mseopenglwidget
@@ -153,6 +153,7 @@ begin
   tdrawgrid,tstringgrid,tlistview,
   tlabel,tpaintbox,tpolygon,tpickwidget,timage,
   tintegerdisp,trealdisp,tdatetimedisp,tstringdisp,tbytestringdisp,tbooleandisp,
+  tedit,
   tgroupbox,tscrollbox,tstepbox,tdockpanel,tdockhandle,tmseformwidget,
   tdockformwidget,tmainmenuwidget,
   tsplitter,tspacer,tlayouter,ttoolbar,ttabbar,ttabwidget,ttabpage,

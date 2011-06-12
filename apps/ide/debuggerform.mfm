@@ -1,20 +1,20 @@
 object debuggerfo: tdebuggerfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton]
+  frame.dummy = 0
+  visible = False
   bounds_x = 116
   bounds_y = 131
   bounds_cx = 441
   bounds_cy = 100
-  frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton]
-  frame.dummy = 0
-  taborder = 1
-  visible = False
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 431
-  container.bounds_cy = 100
-  container.frame.dummy = 0
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
+  container.bounds = (
+    0
+    0
+    431
+    100
+  )
   dragdock.caption = 'Debugger'
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
@@ -97,12 +97,11 @@ object debuggerfo: tdebuggerfo
   moduleclassname = 'tdockform'
   object gdbtoolbar: ttoolbar
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_timedhint]
+    color = -2147483645
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 431
     bounds_cy = 100
-    color = -2147483645
-    frame.dummy = 0
     anchors = []
     buttons.count = 13
     buttons.width = 24

@@ -1,5 +1,5 @@
 object stackfo: tstackfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
@@ -9,10 +9,17 @@ object stackfo: tstackfo
   bounds_y = 349
   bounds_cx = 254
   bounds_cy = 180
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
   container.frame.framei_right = 0
   container.frame.localprops = [frl_firight]
-  container.onchildscaled = formonchildscaled
+  container.onlayout = formonchildscaled
+  container.bounds = (
+    0
+    0
+    244
+    180
+  )
   dragdock.splitter_size = 0
   dragdock.caption = 'Stack'
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
@@ -94,7 +101,7 @@ object stackfo: tstackfo
     D2D2D201D0D0D001
   }
   onshow = stackfoonshow
-  onchildscaled = formonchildscaled
+  onlayout = formonchildscaled
   moduleclassname = 'tdockform'
   object grid: tstringgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -113,22 +120,32 @@ object stackfo: tstackfo
         width = 31
         options = [co_readonly, co_nofocus, co_focusselect, co_rowselect, co_savestate]
         textflags = [tf_xcentered, tf_ycentered]
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         colorselect = -1879048185
         width = 54
         options = [co_readonly, co_focusselect, co_rowselect, co_fill]
         optionsedit = [scoe_eatreturn, scoe_homeonenter]
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         options = [co_invisible, co_savestate]
         optionsedit = [scoe_eatreturn]
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         options = [co_invisible, co_savestate]
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         options = [co_invisible, co_savestate]
+        valuefalse = '0'
+        valuetrue = '1'
       end>
     datarowheight = 16
     oncellevent = gridoncellevent

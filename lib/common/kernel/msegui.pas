@@ -9913,7 +9913,7 @@ begin
     if ow_arrowfocusin in widget1.foptionswidget then begin
      widget1.navigrequest(info);
     end;
-    if nearest = widget2 then begin
+    if (nearest = widget2) then begin
      int2:= widget1.navigdistance(info);
      if int2 < distance then begin
       nearest:= widget1;

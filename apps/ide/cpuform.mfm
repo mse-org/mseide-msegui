@@ -1,5 +1,5 @@
 object cpufo: tcpufo
-  optionswidget = [ow_mousefocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_mousefocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
@@ -8,7 +8,15 @@ object cpufo: tcpufo
   bounds_y = 451
   bounds_cx = 387
   bounds_cy = 207
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets]
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
+  container.bounds = (
+    0
+    0
+    377
+    207
+  )
   dragdock.splitter_size = 0
   dragdock.caption = 'CPU'
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
@@ -82,6 +90,7 @@ object cpufo: tcpufo
     textflags = [tf_xcentered, tf_right, tf_ycentered]
     format = 'yy-mm-dd hh:mm:ss'
     kind = dtk_datetime
+    value = -Inf
     reffontheight = 14
   end
 end

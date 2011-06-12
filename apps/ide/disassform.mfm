@@ -1,5 +1,5 @@
 object disassfo: tdisassfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
@@ -10,7 +10,8 @@ object disassfo: tdisassfo
   bounds_y = 502
   bounds_cx = 564
   bounds_cy = 210
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
@@ -106,21 +107,25 @@ object disassfo: tdisassfo
       item
         width = 76
         onbeforedrawcell = befdrawcell
-        options = [co_readonly, co_drawfocus, co_savestate, co_rowcolor]
+        options = [co_readonly, co_drawfocus, co_savestate]
         oncellevent = addrcellevent
         textflags = [tf_right, tf_ycentered, tf_noselect]
         textflagsactive = [tf_right, tf_ycentered]
         optionsedit = [scoe_eatreturn, scoe_hintclippedtext]
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
+        valuefalse = '0'
+        valuetrue = '1'
       end    
       item
         width = 472
-        options = [co_readonly, co_drawfocus, co_fill, co_savestate, co_rowcolor]
+        options = [co_readonly, co_drawfocus, co_fill, co_savestate]
         textflags = [tf_ycentered, tf_noselect, tf_tabtospace]
         textflagsactive = [tf_ycentered, tf_tabtospace]
         optionsedit = [scoe_eatreturn, scoe_hintclippedtext]
+        valuefalse = '0'
+        valuetrue = '1'
       end>
     rowcolors.count = 2
     rowcolors.items = (
