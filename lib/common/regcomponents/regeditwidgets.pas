@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -108,13 +108,13 @@ begin
    tdatetimeedit,
    tcalendardatetimeedit,
    tbooleanedit,tbooleaneditradio,
-   thexstringedit,tpointeredit,
    tkeystringedit,
    tenumedit,tenumtypeedit,tselector,
    {tstringlistedit,}
    tfoldedit,
    titemedit,tdropdownitemedit,tmbdropdownitemedit,ttreeitemedit,
    trecordfieldedit,
+   thexstringedit,tpointeredit,
    ttextedit,tundotextedit,tterminal,
    tdatabutton,tstockglyphdatabutton,tdataicon,tdataimage,
    tslider,tprogressbar
