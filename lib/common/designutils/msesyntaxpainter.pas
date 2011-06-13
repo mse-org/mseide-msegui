@@ -530,7 +530,7 @@ begin
          end;
          if po1 <> nil then begin
           changed:= setcharstyle(format,lstr1.po-startpo,lstr1.len,
-                                charstyles[longword(po1)-1]) or changed;
+                                charstyles[ptruint(po1)-1]) or changed;
           dec(alen,lstr1.len);
           keywordlen:= 0;
          end
@@ -918,7 +918,7 @@ var
 
  function findname(list: thashedstrings; const name: lstringty): integer;
  begin
-  result:= integer(list.findi(name));
+  result:= ptrint(list.findi(name));
   if result = 0 then begin
    namenotfound;
   end;
@@ -973,7 +973,7 @@ begin
     if (strlnscan(pointer(line),' ',length(line)) <> nil) and (checkfirstchar(line,'#') = nil) then begin
      stringtolstring(line,lstr1);
      nextword(lstr1,lstr2);
-     int1:= integer(keys.findi(lstr2));
+     int1:= ptrint(keys.findi(lstr2));
      if int1 <> 0 then begin
       akttoken:= tokennrty(int1-1);
       if akttoken in (flags - tn_canmultiple) then begin

@@ -1016,8 +1016,8 @@ var
  nitems: clong;
  bytesafter: culong;
  prop: pchar;
-// int1: integer;
  {$ifdef CPU64}
+ int1: integer;
  po1: pculong;
  po2: plongword;
  {$endif}
@@ -1056,8 +1056,8 @@ var
  nitems: clong;
  bytesafter: culong;
  prop: pchar;
-// int1: integer;
  {$ifdef CPU64}
+ int1: integer;
  po1: pculong;
  po2: plongword;
  {$endif}

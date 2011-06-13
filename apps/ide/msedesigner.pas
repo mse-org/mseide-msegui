@@ -519,7 +519,7 @@ type
 var
  fdesigner: tdesigner;
  loadingdesigner: tdesigner;
- methodaddressdummy: longword;
+ methodaddressdummy: ptruint;
  submodulecopy: integer;
 
 function designer: tdesigner;

@@ -1283,7 +1283,8 @@ begin
   if avalue < fcount then begin
    raise exception.create('Capacity < count.');
   end;
-  if longword(avalue) >= high(ptruint) div longword(frecsize) then begin
+  if longword(avalue) >= {high(ptruint)}
+                       high(longword) div longword(frecsize) then begin
    raise exception.create('Capacity too big.');
   end;
   
