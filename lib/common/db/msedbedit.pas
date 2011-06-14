@@ -3396,14 +3396,14 @@ procedure tcustomeditwidgetdatalink.nullcheckneeded(var avalue: boolean);
  end; //findactivedatalink
  
 begin
- avalue:= (avalue or fintf.edited and (oed_autopost in foptions) or
+ avalue:= active and ((avalue or fintf.edited and (oed_autopost in foptions) or
               (fcanclosing > 0)) and 
               ((dataset.state in [dsinsert,dsedit]) and
                       (dataset.modified or 
                        (dataset.state <> dsinsert) or 
                        (fdscontroller <> nil) and fdscontroller.posting
                       )
-              );
+              ));
  avalue:= avalue and (fintf.getwidget.window.active or not findactivedatalink);
 end;
 
