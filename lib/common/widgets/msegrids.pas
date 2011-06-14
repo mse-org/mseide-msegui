@@ -12483,6 +12483,7 @@ begin
  fdatacols.resetpropwidth;
  ffixcols.resetpropwidth;
  checkneedsrowheight;
+ updatelayout; //set propwidthref of cols
  fdatacols.checkindexrange;
  fdatacols.frowstate.sourcenamechanged(-1);
  checksort;
