@@ -248,8 +248,10 @@ end;
 
 function TConnectionName.GetClientInfo: string;
 
-//Var
-//  B : Boolean;
+{$if fpc_fullversion < 20401}
+Var
+  B : Boolean;
+{$endif}
 
 begin
 {$if fpc_fullversion >= 20401}
