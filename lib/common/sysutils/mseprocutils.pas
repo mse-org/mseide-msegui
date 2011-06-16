@@ -107,6 +107,8 @@ function activateprocesswindow(const procid: integer;
                     const araise: boolean = true): boolean;
          //true if ok
 }
+function pipe(out desc: pipedescriptorty; write: boolean): boolean;
+            //true if ok
 
  {$ifdef UNIX}
 type
@@ -156,8 +158,6 @@ function getprocinfo(pid: procidty): procinfoty;
 function getchildpid(pid: procidty): procidarty;
 function getinnerstpid(pid: procidty): procidty;
 function getppid2(pid: procidty): procidty;
-function pipe(out desc: pipedescriptorty; write: boolean): boolean;
-            //true if ok
 
  {$endif}
 type
@@ -633,6 +633,14 @@ function pipe(out desc: pipedescriptorty; write: boolean): boolean;
             //returns errorcode, 0 if ok
 begin
  result:= mselibc.pipe(tpipedescriptors(desc)) = 0;
+ if result then begin
+  if write then begin
+   setcloexec(desc.writedes);
+  end
+  else begin
+   setcloexec(desc.readdes);
+  end;
+ end;
 end;
 
 function execmse0(const commandline: string; topipe: pinteger = nil;

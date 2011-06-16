@@ -114,6 +114,7 @@ const
                                 s_ifchr,s_ifreg,s_iflnk,s_ifsock,s_ififo);
 // timeoffset = 0.0;
  datetimeoffset = -25569;
+ o_cloexec = $080000;
  
 type
  linuxmutexty = record
@@ -449,12 +450,14 @@ var
  str1: string;
  str2: msestring;
  stat1: _stat;
- 
+const
+ defaultopenflags = o_cloexec; 
 begin
  str2:= path;
  sys_tosysfilepath(str2);
  str1:= str2;
- handle:= Integer(mselibc.open(PChar(str1), openmodes[openmode],
+ handle:= Integer(mselibc.open(PChar(str1), openmodes[openmode] or 
+                            defaultopenflags,
         {$ifdef FPC}[{$endif}getfilerights(rights){$ifdef FPC}]{$endif}));
  if handle >= 0 then begin
   if fstat(handle,@stat1) = 0 then begin  
