@@ -172,6 +172,7 @@ object objectinspectorfo: tobjectinspectorfo
         width = 90
         onbeforedrawcell = befdrawcell
         options = [co_readonly, co_drawfocus, co_mouseselect, co_keyselect, co_multiselect, co_proportional, co_savestate]
+        options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor]
         widthmin = 10
         onshowhint = col0onshowhint
         onselectionchanged = selchanged
