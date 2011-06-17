@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,21 +21,7 @@ unit regkernel;
 interface
 uses
  typinfo,msepropertyeditors;
- 
-type
- tstockglypheditor = class(tenumpropertyeditor)
-  protected
-   function gettypeinfo: ptypeinfo; override;
-   function getdefaultstate: propertystatesty; override;
-  public
-   procedure edit; override;
-  end;
- 
- tstockglypharraypropertyeditor = class(tintegerarraypropertyeditor)
-  protected
-   function geteditorclass: propertyeditorclassty; override;
- end;
-
+  
 implementation
 
 uses
@@ -45,8 +31,8 @@ uses
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
  mseapplication,mseglob,mseguiglob,mseskin,msedesigner,
- mseguithreadcomp,mseprocmonitorcomp,imageselectorform,msefadeedit,
- msearrayprops,msesumlist,mserttistat,msestockobjects;
+ mseguithreadcomp,mseprocmonitorcomp,msefadeedit,
+ msearrayprops,msesumlist,mserttistat,msestockobjects,regglob;
 
 type
  twidget1 = class(twidget);
@@ -141,15 +127,6 @@ type
   public
  end;
  
- timagenrpropertyeditor = class(tordinalpropertyeditor)
-  private
-   fintf: iimagelistinfo;
-  protected
-   function getdefaultstate: propertystatesty; override;
-  public
-   procedure edit; override;
- end;
-
 (* 
  tactionshortcutspropertyeditor = class(tshortcutpropertyeditor)
   public
@@ -178,16 +155,16 @@ const
 procedure Register;
 begin
  registerclass(tmsedatamodule);
- registercomponents('NoGui',[tstatfile,trttistat,tnoguiaction,tactivator,
-                             ttimer,tthreadcomp,tpipereadercomp,tprocessmonitor]);
- registercomponenttabhints(['NoGui'],['Components without GUI dependence']);
  registercomponents('Gui',[tmainmenu,tpopupmenu,
                     tfacecomp,tfacelist,tframecomp,tskincontroller,
 //                    tskinextender,
                     tbitmapcomp,timagelist,tshortcutcontroller,thelpcontroller,
                     taction,tguithreadcomp]);
  registercomponenttabhints(['Gui'],['Non visual components with GUI dependence']);
- registercomponents('Dialog',[tpagesizeselector,tpageorientationselector]);
+
+ registercomponents('NoGui',[tstatfile,trttistat,tnoguiaction,tactivator,
+                             ttimer,tthreadcomp,tpipereadercomp,tprocessmonitor]);
+ registercomponenttabhints(['NoGui'],['Components without GUI dependence']);
 
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
  registerpropertyeditor(typeinfo(tshortcutactions),nil,'',
@@ -422,56 +399,6 @@ end;
 function tsysshortcutelementeditor.name: msestring;
 begin
  result:= getenumname(typeinfo(sysshortcutty),findex);
-end;
-
-{ timagenrpropertyeditor }
-
-function timagenrpropertyeditor.getdefaultstate: propertystatesty;
-begin
- result:= inherited getdefaultstate;
- if getcorbainterface(fprops[0].instance,typeinfo(iimagelistinfo),fintf) and 
-                     (fintf.getimagelist <> nil) then begin
-  result:= result + [ps_dialog];
- end;
-end;
-
-procedure timagenrpropertyeditor.edit;
-var
- int1: integer;
-begin
- if fintf <> nil then begin
-  int1:= getordvalue;
-  timageselectorfo.create(nil,fintf.getimagelist,int1);
-  setordvalue(int1);
- end;
-end;
-
-{ tstockglypharraypropertyeditor }
-
-function tstockglypharraypropertyeditor.geteditorclass: propertyeditorclassty;
-begin
- result:= tstockglypheditor;
-end;
-
-{ tstockglypheditor }
-
-function tstockglypheditor.gettypeinfo: ptypeinfo;
-begin
- result:= typeinfo(stockglyphty);
-end;
-
-function tstockglypheditor.getdefaultstate: propertystatesty;
-begin
- result:= inherited getdefaultstate + [ps_dialog];
-end;
-
-procedure tstockglypheditor.edit;
-var
- int1: integer;
-begin
- int1:= getordvalue;
- timageselectorfo.create(nil,stockobjects.glyphs,int1);
- setordvalue(int1);
 end;
 
 { tlevelarraypropertyeditor }

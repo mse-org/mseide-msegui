@@ -28,7 +28,7 @@ uses
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,{msedialog,}msestrings,
  regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit,msebitmap,mseglob,
  msestream,mserealsumedit,msedatalist,msegui,msegrids,msesumlist,mseclasses,
- sysutils,regkernel;
+ sysutils,regglob;
 
 type
  tdropdowncolpropertyeditor = class(tarraypropertyeditor)
@@ -108,6 +108,7 @@ begin
    tdatetimeedit,
    tcalendardatetimeedit,
    tbooleanedit,tbooleaneditradio,
+   tdatabutton,tstockglyphdatabutton,
    tkeystringedit,
    tenumedit,tenumtypeedit,tselector,
    {tstringlistedit,}
@@ -116,7 +117,7 @@ begin
    trecordfieldedit,
    thexstringedit,tpointeredit,
    ttextedit,tundotextedit,tterminal,
-   tdatabutton,tstockglyphdatabutton,tdataicon,tdataimage,
+   tdataicon,tdataimage,
    tslider,tprogressbar
 ]);
  registercomponenttabhints(['Edit'],

@@ -19,11 +19,12 @@ unit regprinter;
 interface
 implementation
 uses
- msepostscriptprinter,msegdiprint,msedesignintf;
+ mseprinter,msepostscriptprinter,msegdiprint,msedesignintf;
  
 procedure Register;
 begin
  registercomponents('Gui',[tpostscriptprinter,tgdiprinter,twmfprinter]);
+ registercomponents('Dialog',[tpagesizeselector,tpageorientationselector]);
 end;
 
 initialization

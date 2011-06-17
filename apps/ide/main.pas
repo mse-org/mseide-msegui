@@ -287,23 +287,24 @@ procedure handleerror(const e: exception; const text: string);
 
 implementation
 uses
- mseparser,msesysintf,memoryform,
- regwidgets,regeditwidgets,regkernel,regdialogs,regprinter,
+ regwidgets,regeditwidgets,regdialogs,regkernel,regprinter,
  {$ifndef mse_no_math}
   {$ifdef FPC}regmath,{$endif}
   {$ifdef FPC}regmm,{$endif}
  {$endif}
  {$ifndef mse_no_db}{$ifdef FPC}regdb,regreport,{$endif}{$endif}
-{$ifdef mse_with_ifi}
- regifi,{$ifdef mse_with_ifirem}regifirem,{$endif}
-{$endif}
+ {$ifdef mse_with_ifi}
+  regifi,{$ifdef mse_with_ifirem}regifirem,{$endif}
+ {$endif}
  {$ifdef mse_with_zeoslib}regzeoslib,{$endif}
  {$ifdef mse_with_pascalscript}regpascalscript,{$endif}
  regdesignutils,regsysutils,regserialcomm,regexperimental,
  regdeprecated,
-{$ifdef morecomponents}
-{$include regcomponents.inc}
-{$endif}
+ {$ifdef morecomponents}
+  {$include regcomponents.inc}
+ {$endif}
+
+ mseparser,msesysintf,memoryform,
  main_mfm,sourceform,watchform,breakpointsform,stackform,
  guitemplates,projectoptionsform,make,msewidgets,msepropertyeditors,
  skeletons,msedatamodules,mseact,

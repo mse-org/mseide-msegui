@@ -148,16 +148,22 @@ begin
  registerclass(tdockform);
  registerclass(tsubform);
  registerclass(tdockpanelform);
- registercomponents('Widget',[tsimplewidget,teventwidget,tbutton,trichbutton,
-  tstockglyphbutton,trichstockglyphbutton,
-  tdrawgrid,tstringgrid,tlistview,
-  tlabel,tpaintbox,tpolygon,tpickwidget,timage,
-  tintegerdisp,trealdisp,tdatetimedisp,tstringdisp,tbytestringdisp,tbooleandisp,
+ registercomponents('Widget',[
+  tlabel,tintegerdisp,trealdisp,tdatetimedisp,tstringdisp,tbytestringdisp,
+  tbooleandisp,
   tedit,
+  tbutton,trichbutton,tstockglyphbutton,trichstockglyphbutton,
+  tsimplewidget,teventwidget,
   tgroupbox,tscrollbox,tstepbox,tdockpanel,tdockhandle,tmseformwidget,
-  tdockformwidget,tmainmenuwidget,
-  tsplitter,tspacer,tlayouter,ttoolbar,ttabbar,ttabwidget,ttabpage,
-  tdial,tchart,txychartedit,txserieschartedit,tchartrecorder,twindowwidget
+  tdockformwidget,
+  tsplitter,tspacer,tlayouter,
+  tmainmenuwidget,
+  ttoolbar,
+  ttabbar,ttabwidget,ttabpage,
+  tdrawgrid,tstringgrid,tlistview,
+  tpaintbox,tpolygon,tpickwidget,timage,
+  tdial,tchart,txychartedit,txserieschartedit,tchartrecorder,
+  twindowwidget
    {$ifndef mse_no_opengl}
     {$ifdef FPC}
      ,topenglwidget
@@ -166,7 +172,8 @@ begin
      {$endif}
     {$endif}
    {$endif}
-  ,ttraywidget,tdockpanelformcontroller]);
+  ,ttraywidget,tdockpanelformcontroller
+  ]);
  registercomponenttabhints(['Widget'],
          ['Display widgets, edit widgets which can''t be placed into twidgetgrid']);
  registerpropertyeditor(typeinfo(tcellframe),nil,'',
