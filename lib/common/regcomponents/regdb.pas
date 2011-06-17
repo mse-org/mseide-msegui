@@ -316,6 +316,7 @@ begin
       {$endif}
       ]);
  registercomponenttabhints(['DB'],['Database components']);
+
  registercomponents('DBe',[tdbwidgetgrid,
       tenumeditdb,tenum64editdb,tkeystringeditdb,tenumeditlb,tenum64editlb,
       tkeystringeditlb,
@@ -355,19 +356,20 @@ begin
                   ['Data lookup widgets, can be placed in tdbwidgetgrid']);
 
  registercomponents('DBf',[
-      tfieldparamlink,tfieldlink,ttimestampfieldlink,tfieldfieldlink,
-      tsequencelink,tdbevent,tparamconnector,tsqlresultconnector,
       tmsestringfield,tmselongintfield,tmselargeintfield,tmsesmallintfield,
       tmsewordfield,tmseautoincfield,tmsefloatfield,tmsecurrencyfield,
       tmsebooleanfield,tmsedatetimefield,tmsedatefield,tmsetimefield,
       tmsebinaryfield,tmsebytesfield,tmsevarbytesfield,
       tmsebcdfield,tmseblobfield,tmsememofield,tmsegraphicfield,
       tmsevariantfield,
+      tfieldparamlink,tfieldlink,ttimestampfieldlink,tfieldfieldlink,
+      tsequencelink,tdbevent,tparamconnector,tsqlresultconnector,
       tdblabel,tdbstringdisp,tdbintegerdisp,tdbbooleandisp,
       tdbrealdisp,tdbdatetimedisp,
       tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb
       ]);
- registercomponenttabhints(['DBf'],['Datafield and data display Components']);
+ registercomponenttabhints(['DBf'],['Datafield and data display components']);
+
  registerpropertyeditor(typeinfo(variant),tmseparam,'value',
                                                  tparamvaluepropertyeditor);
  registerpropertyeditor(typeinfo(tnolistdropdowncol),nil,'',
