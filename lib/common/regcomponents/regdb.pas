@@ -302,39 +302,51 @@ type
 procedure Register;
 begin
  registercomponents('DB',[     
-      tdbnavigator,tdbstringgrid,
-      tlookupbuffer,tdblookupbuffer,tdbmemolookupbuffer,
-      tmsedatasource,
-      tmsedbf,tmsefixedformatdataset,tmsesdfdataset,tmsememdataset,
-      tlocaldataset,
-      tmsesqlquery,tmsesqltransaction,
-      tsqlstatement,tmsesqlscript,tsqlresult,tsqllookupbuffer,
       tmseibconnection,tmsepqconnection,tsqlite3connection,tmseodbcconnection,
-      tmsemysqlconnection
-      {$ifdef mse_with_sqlite}
-       ,tmsesqlite3dataset 
-      {$endif}
+      tmsemysqlconnection,
+      
+      tmsesqltransaction,
+      
+      tmsedbf,tmsefixedformatdataset,tmsesdfdataset,tmsememdataset,
+      tlocaldataset,tmsesqlquery,
+     {$ifdef mse_with_sqlite}
+      tmsesqlite3dataset,
+     {$endif}
+      tmsedatasource,
+
+      tsqlstatement,tmsesqlscript,tsqlresult,
+      tsqllookupbuffer,tlookupbuffer,tdblookupbuffer,tdbmemolookupbuffer,
+
+      tdbnavigator,tdbstringgrid
       ]);
  registercomponenttabhints(['DB'],['Database components']);
 
  registercomponents('DBe',[tdbwidgetgrid,
-      tenumeditdb,tenum64editdb,tkeystringeditdb,tenumeditlb,tenum64editlb,
-      tkeystringeditlb,
-      tdbmemoedit,tdbstringedit,
-      tdropdownlisteditdb,tdropdownlisteditlb,
+      tdbstringedit,tdbmemoedit,
+      tdbintegeredit,tdbrealedit,tdbrealspinedit,
+      tdbdatetimeedit,tdbcalendardatetimeedit,
+      tdbbooleantextedit,
+      tdbbooleanedit,tdbbooleaneditradio,
+      tdbdatabutton,
+      tdbdataicon,tdbdataimage,
+      tdbprogressbar,tdbslider,
+      
       tdbdropdownlistedit,tdbdropdownlisteditdb,tdbdropdownlisteditlb,
+
+      tdbenumedit,tdbenumeditdb,tdbenumeditlb,
+      tdbenum64editdb,tdbenum64editlb,
+      tdbkeystringedit,tdbkeystringeditdb,tdbkeystringeditlb,
+
       tdbdialogstringedit,tdbmemodialogedit,
       tdbdialogintegeredit,tdbdialogrealedit,
       tdbdialogdatetimeedit,
-      tdbbooleantextedit,
-      tdbkeystringedit,tdbkeystringeditdb,tdbkeystringeditlb,
-      tdbintegeredit,tdbenumedit,tdbenumeditdb,tdbenum64editdb,
-      tdbenumeditlb,tdbenum64editlb,
-      tdbdataicon,tdbdataimage,tdbdatabutton,tdbrealedit,tdbrealspinedit,
-      tdbprogressbar,tdbslider,
-      tdbdatetimeedit,
-      tdbcalendardatetimeedit,tdbfilenameedit,tdbcoloredit,
-      tdbbooleanedit,tdbbooleaneditradio
+      tdbfilenameedit,tdbcoloredit,
+
+      tdropdownlisteditdb,tdropdownlisteditlb,
+      tenumeditdb,tenumeditlb,
+      tenum64editdb,tenum64editlb,
+      tkeystringeditdb,tkeystringeditlb
+      
       ]);
  registercomponenttabhints(['DBe'],
                ['Data edit widgets, can be placed in tdbwidgetgrid']);
