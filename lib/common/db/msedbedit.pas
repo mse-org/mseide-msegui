@@ -234,7 +234,9 @@ type
    property ondialogexecute: notifyeventty read fondialogexecute 
                            write fondialogexecute;
  end;
-
+ 
+ tcustomeditwidgetdatalink = class;
+ 
  idbeditfieldlink = interface(inullinterface)
                        ['{7EED89A6-32B3-4C8F-9F59-E91A0E95ADDB}']
   function getwidget: twidget;
@@ -254,7 +256,7 @@ type
   procedure getfieldtypes(var afieldtypes: fieldtypesty); //[] = all
   procedure setisdb;
   procedure setmaxlength(const avalue: integer);
-  function getfieldlink: tfielddatalink;
+  function getfieldlink: tcustomeditwidgetdatalink;
  end;
 
  tgriddatalink = class;
@@ -395,7 +397,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
   //ireccontrol
    procedure recchanged;
   public
@@ -465,7 +467,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
   //ireccontrol
    procedure recchanged;
   public
@@ -569,7 +571,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
   //ireccontrol
    procedure recchanged;
   public
@@ -605,7 +607,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
   //ireccontrol
    procedure recchanged;
   public
@@ -639,7 +641,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
     //ireccontrol
    procedure recchanged;
   public
@@ -674,7 +676,7 @@ type
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    procedure setmaxlength(const avalue: integer);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
     //ireccontrol
    procedure recchanged;                          
   public
@@ -707,7 +709,7 @@ type
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    procedure setmaxlength(const avalue: integer);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
     //ireccontrol
    procedure recchanged;
   public
@@ -742,7 +744,7 @@ type
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    procedure setmaxlength(const avalue: integer);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
     //ireccontrol
    procedure recchanged;
   public
@@ -803,7 +805,7 @@ type
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    procedure setmaxlength(const avalue: integer);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
     //ireccontrol
    procedure recchanged;
   public
@@ -835,7 +837,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
     //ireccontrol
    procedure recchanged;
   public
@@ -871,7 +873,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
   //ireccontrol
    procedure recchanged;
   public
@@ -910,7 +912,7 @@ type
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    procedure setmaxlength(const avalue: integer);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
     //ireccontrol
    procedure recchanged;
   public
@@ -942,7 +944,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function checkvalue(const quiet: boolean = false): boolean; reintroduce;
    procedure setmaxlength(const avalue: integer);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
     //ireccontrol
    procedure recchanged;
   public
@@ -970,7 +972,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
     //ireccontrol
    procedure recchanged;
   public
@@ -1004,7 +1006,7 @@ type
    procedure valuetofield; virtual;
    procedure fieldtovalue; virtual;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
     //ireccontrol
    procedure recchanged;
   public
@@ -1136,6 +1138,7 @@ type
 
  igriddatalink = interface(inullinterface)
   function getdbindicatorcol: integer;
+  procedure setnavigator(const avalue: tdbnavigator);
  end;
 
  gridrowinfoty = record
@@ -1146,7 +1149,7 @@ type
                         gdls_booleanselected); 
  griddatalinkstatesty = set of griddatalinkstatety; 
 
- tgriddatalink = class(tfieldsdatalink,ievent,idbeditinfo)
+ tgriddatalink = class(tfieldsdatalink,ievent,idbeditinfo,iobjectlink)
   private
    fintf: igriddatalink;
    fgrid: tcustomgrid;
@@ -1189,6 +1192,7 @@ type
    ffieldname_merged: string;
    ffield_selected: tfield;
    ffieldname_selected: string;
+   fnavigator: tdbnavigator;
    procedure checkscroll;
    procedure checkscrollbar; virtual;
    procedure doupdaterowdata(const row: integer);
@@ -1226,6 +1230,7 @@ type
    procedure setfieldname_color(const avalue: string);
    procedure setfieldname_font(const avalue: string);
    procedure setfieldname_readonly(const avalue: string);
+   procedure setnavigator(const avalue: tdbnavigator);
   protected
    function canautoinsert: boolean;
    procedure checkdelayedautoinsert;
@@ -1319,6 +1324,7 @@ type
                                        write setfieldname_merged;
    property fieldname_selected: string read ffieldname_selected 
                                        write setfieldname_selected;
+   property navigator: tdbnavigator read fnavigator write setnavigator;
    property onbeginedit: notifyeventty read fonbeginedit write fonbeginedit;
    property onendedit: notifyeventty read fonendedit write fonendedit;
  end;
@@ -1366,7 +1372,9 @@ type
  tdbdropdownlist = class(tdropdownlist,igriddatalink)
   private
    fdatalink: tdropdownlistdatalink;
+    //igriddatalink
    function getdbindicatorcol: integer;
+   procedure setnavigator(const avalue: tdbnavigator);
   protected
    procedure internalcreateframe; override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
@@ -1577,7 +1585,17 @@ type
    constructor create(const intf: iscrollframe; const owner: twidget;
                              const autoscrollintf: iautoscrollframe);
  end;
+
+ tdbwidgetcol = class(twidgetcol)
+  protected
+   procedure setwidget(const awidget: twidget); override;
+ end;
  
+ tdbwidgetcols = class(twidgetcols)
+  protected
+   class function getitemclasstype: persistentclassty; override;
+ end;
+  
  tcustomdbwidgetgrid = class(tcustomwidgetgrid,igriddatalink)
   private
    fdatalink: tgriddatalink;
@@ -1587,11 +1605,11 @@ type
    function getfixcols: tdbwidgetfixcols;
    procedure setfixcols(const avalue: tdbwidgetfixcols);
   protected
+   function createdatacols: tdatacols; override;
    function canautoappend: boolean; override;
-   function getdbindicatorcol: integer;
    function getgriddatalink: pointer; override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
-   function getfieldlink(const acol: integer): tfielddatalink;
+   function getfieldlink(const acol: integer): tcustomeditwidgetdatalink;
    function updatesortcol(const avalue: integer): integer; override;
    procedure internalcreateframe; override;
    function createfixcols: tfixcols; override;
@@ -1614,6 +1632,9 @@ type
    function isfirstrow: boolean; override;
    function islastrow: boolean; override;
    procedure defineproperties(filer: tfiler); override;
+    //igriddatalink
+   function getdbindicatorcol: integer;
+   procedure setnavigator(const avalue: tdbnavigator);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1698,7 +1719,7 @@ type
    fmaxlength: integer;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-  //idbeditinfo
+    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
    function getdataset(const aindex: integer): tdataset;
@@ -1712,7 +1733,7 @@ type
    procedure modified; override;
    function getrowtext(const arow: integer): msestring; override;
    function createdatalist: tdatalist; override;
-  //idbeditfieldlink
+    //idbeditfieldlink
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    function getgriddatasource: tdatasource; virtual;
    function getgridintf: iwidgetgrid;
@@ -1726,7 +1747,7 @@ type
    procedure setnullvalue;
    procedure updatereadonlystate;
    procedure setmaxlength(const avalue: integer);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
   public
    constructor create(const agrid: tcustomgrid; 
                          const aowner: tgridarrayprop); override;
@@ -1819,7 +1840,7 @@ type
 //   procedure setdatasource(const Value: tdatasource);
    function getdatacols: tdbstringcols;
    procedure setdatacols(const avalue: tdbstringcols);
-  //iwidgetgrid (dummy)
+    //iwidgetgrid (dummy)
    function getbrushorigin: pointty;
    function getcol: twidgetcol;
    procedure getdata(var index: integer; var dest);
@@ -1849,7 +1870,10 @@ type
   protected
    function canautoappend: boolean; override;
    procedure setupeditor(const acell: gridcoordty; const focusin: boolean); override;
+    //igriddatalink
    function getdbindicatorcol: integer;
+   procedure setnavigator(const avalue: tdbnavigator);
+
    procedure setselected(const cell: gridcoordty;
                                        const avalue: boolean); override;
    procedure updatelayout; override;
@@ -2260,7 +2284,7 @@ type
    procedure valuetofield; virtual;
    procedure fieldtovalue; virtual;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
   //ireccontrol
    procedure recchanged;
   public
@@ -2314,7 +2338,7 @@ type
    procedure valuetofield; virtual;
    procedure fieldtovalue; virtual;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-   function getfieldlink: tfielddatalink;
+   function getfieldlink: tcustomeditwidgetdatalink;
   //ireccontrol
    procedure recchanged;
   public
@@ -3591,7 +3615,7 @@ begin
  inherited;
 end;
 
-function tdbstringedit.getfieldlink: tfielddatalink;
+function tdbstringedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -3808,7 +3832,7 @@ begin
  inherited;
 end;
 
-function tcustomdbdropdownlistedit.getfieldlink: tfielddatalink;
+function tcustomdbdropdownlistedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -3922,7 +3946,7 @@ begin
  inherited;
 end;
 
-function tdbkeystringedit.getfieldlink: tfielddatalink;
+function tdbkeystringedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -4031,7 +4055,7 @@ begin
  inherited;
 end;
 
-function tdbmemoedit.getfieldlink: tfielddatalink;
+function tdbmemoedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -4159,7 +4183,7 @@ begin
  inherited;
 end;
 
-function tdbintegeredit.getfieldlink: tfielddatalink;
+function tdbintegeredit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -4263,7 +4287,7 @@ begin
  //dummy
 end;
 
-function tdbbooleanedit.getfieldlink: tfielddatalink;
+function tdbbooleanedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -4372,7 +4396,7 @@ begin
  //dummy
 end;
 
-function tdbdataicon.getfieldlink: tfielddatalink;
+function tdbdataicon.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -4481,7 +4505,7 @@ begin
  //dummy
 end;
 
-function tdbdatabutton.getfieldlink: tfielddatalink;
+function tdbdatabutton.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -4605,7 +4629,7 @@ begin
  //dummy
 end;
 
-function tdbbooleaneditradio.getfieldlink: tfielddatalink;
+function tdbbooleaneditradio.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -4714,7 +4738,7 @@ begin
  inherited;
 end;
 
-function tdbrealedit.getfieldlink: tfielddatalink;
+function tdbrealedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -4823,7 +4847,7 @@ begin
  inherited;
 end;
 
-function tdbrealspinedit.getfieldlink: tfielddatalink;
+function tdbrealspinedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -4948,7 +4972,7 @@ begin
  //dummy
 end;
 
-function tdbslider.getfieldlink: tfielddatalink;
+function tdbslider.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -5049,7 +5073,7 @@ begin
  //dummy
 end;
 
-function tdbprogressbar.getfieldlink: tfielddatalink;
+function tdbprogressbar.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -5161,7 +5185,7 @@ begin
  inherited;
 end;
 
-function tdbdatetimeedit.getfieldlink: tfielddatalink;
+function tdbdatetimeedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -5277,7 +5301,7 @@ begin
  inherited;
 end;
 
-function tcustomdbenumedit.getfieldlink: tfielddatalink;
+function tcustomdbenumedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -6095,6 +6119,11 @@ end;
 function tdbdropdownlist.getdbindicatorcol: integer;
 begin
  result:= 0; //none
+end;
+
+procedure tdbdropdownlist.setnavigator(const avalue: tdbnavigator);
+begin
+ //dummy
 end;
 
 { tcustomdbdropdownlistcontroller }
@@ -7610,7 +7639,9 @@ procedure tgriddatalink.rowdown;
 begin
  if checkvalue then begin
   moveby(1);
-  if (og_autoappend in tcustomgrid1(fgrid).foptionsgrid) and active and eof then begin
+  if (og_autoappend in tcustomgrid1(fgrid).foptionsgrid) and active and eof and
+                         (datasource.autoedit or 
+                           (navigator <> nil) and navigator.autoedit) then begin
    dataset.append;
    with fgrid,datacols do begin
     if newrowcol >= 0 then begin
@@ -7801,7 +7832,9 @@ function tgriddatalink.canautoinsert: boolean;
 begin
 // result:= fgrid.focused and active and (recordcount = 0) and 
  result:= fgrid.entered and active and (recordcount = 0) and 
-                                        (og_autofirstrow in fgrid.optionsgrid);
+                 (og_autofirstrow in fgrid.optionsgrid) and 
+                 (datasource.autoedit or 
+                  (navigator <> nil) and navigator.autoedit);
 end;
 
 procedure tgriddatalink.checkdelayedautoinsert;
@@ -8112,6 +8145,12 @@ begin
   fdscontroller.enddisplaydata;
  end;
  activerecord:= ainfo.row;
+end;
+
+procedure tgriddatalink.setnavigator(const avalue: tdbnavigator);
+begin
+ getobjectlinker.setlinkedvar(iobjectlink(self),tmsecomponent(avalue),
+                  tmsecomponent(fnavigator));
 end;
 
 
@@ -8482,7 +8521,8 @@ begin
  end;
 end;
 
-function tcustomdbwidgetgrid.getfieldlink(const acol: integer): tfielddatalink;
+function tcustomdbwidgetgrid.getfieldlink(
+                         const acol: integer): tcustomeditwidgetdatalink;
 var
  widget1: twidget;
  intf1: idbeditfieldlink;
@@ -8500,6 +8540,26 @@ end;
 function tcustomdbwidgetgrid.canautoappend: boolean;
 begin
  result:= inherited canautoappend and fdatalink.canautoinsert;
+end;
+
+procedure tcustomdbwidgetgrid.setnavigator(const avalue: tdbnavigator);
+var
+ int1: integer;
+ fieldlink1: tcustomeditwidgetdatalink;
+begin
+ if not (csloading in componentstate) then begin
+  for int1:= 0 to fdatacols.count - 1 do begin
+   fieldlink1:= getfieldlink(int1);
+   if fieldlink1 <> nil then begin
+    fieldlink1.navigator:= avalue;
+   end;
+  end;
+ end;
+end;
+
+function tcustomdbwidgetgrid.createdatacols: tdatacols;
+begin
+ result:= tdbwidgetcols.create(self);
 end;
 
 { tstringcoldatalink }
@@ -8530,6 +8590,7 @@ constructor tdbstringcol.create(const agrid: tcustomgrid;
 begin
  fdatalink:= tstringcoldatalink.create(idbeditfieldlink(self));
  fdatalink.options:= tdbstringcols(aowner).foptionsdb;
+ fdatalink.navigator:= tcustomdbstringgrid(agrid).datalink.navigator;
  inherited;
  fdatalink.griddatasourcechanged;
 end;
@@ -8741,7 +8802,7 @@ begin
  fmaxlength:= avalue;
 end;
 
-function tdbstringcol.getfieldlink: tfielddatalink;
+function tdbstringcol.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -9386,6 +9447,15 @@ begin
  result:= inherited canautoappend and fdatalink.canautoinsert;
 end;
 
+procedure tcustomdbstringgrid.setnavigator(const avalue: tdbnavigator);
+var
+ int1: integer;
+begin
+ for int1:= 0 to fdatacols.count - 1 do begin
+  tdbstringcol(tdbstringcols(fdatacols).fitems[int1]).fdatalink.navigator:= avalue;
+ end;
+end;
+
 { tlbdropdowncol }
 
 procedure tlbdropdowncol.setfieldno(const avalue: lookupbufferfieldnoty);
@@ -9983,7 +10053,7 @@ begin
  inherited;
 end;
 
-function tdbenum64editlb.getfieldlink: tfielddatalink;
+function tdbenum64editlb.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -10101,7 +10171,7 @@ begin
  inherited;
 end;
 
-function tdbenum64editdb.getfieldlink: tfielddatalink;
+function tdbenum64editdb.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -11049,6 +11119,30 @@ procedure tdbnavigbutton.defineproperties(filer: tfiler);
 begin
  inherited;              //backward compatibility
  filer.defineproperty('tag',@readtag,nil,false);
+end;
+
+{ tdbwidgetcols }
+
+class function tdbwidgetcols.getitemclasstype: persistentclassty;
+begin
+ result:= tdbwidgetcol;
+end;
+
+{ tdbwidgetcol }
+
+procedure tdbwidgetcol.setwidget(const awidget: twidget);
+var
+ intf1: idbeditfieldlink;
+ link1: tcustomeditwidgetdatalink;
+begin
+ inherited;
+ if (awidget <> nil) and 
+      awidget.getcorbainterface(typeinfo(idbeditfieldlink),intf1) then begin
+  link1:= intf1.getfieldlink;
+  if link1 <> nil then begin
+   link1.navigator:= tdbwidgetgrid(fgrid).fdatalink.navigator;
+  end;
+ end;
 end;
 
 end.

@@ -152,7 +152,7 @@ type
                                   var result: integer); override;
    procedure itemchanged(const sender: tdatalist; 
                                   const aindex: integer); override;
-   procedure setwidget(const awidget: twidget);
+   procedure setwidget(const awidget: twidget); virtual;
    procedure seteditwidget(const value: twidget);
    procedure setfixrowwidget(const awidget: twidget; const rowindex: integer);
    function geteditwidget: twidget;

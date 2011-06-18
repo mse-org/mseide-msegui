@@ -34,12 +34,12 @@ type
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
    function getrowdatapo(const arow: integer): pointer; override;
-  //idbeditfieldlink
+    //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-   function getfieldlink: tfielddatalink;
-  //ireccontrol
+   function getfieldlink: tcustomeditwidgetdatalink;
+    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
@@ -165,7 +165,7 @@ begin
  inherited;
 end;
 
-function tdbcalendardatetimeedit.getfieldlink: tfielddatalink;
+function tdbcalendardatetimeedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;

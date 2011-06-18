@@ -89,7 +89,7 @@ type
   private
    fdatalink: tgraphicdatalink;
    fvaluebuffer: string;
-  //idbeditfieldlink
+    //idbeditfieldlink
    function getgriddatasource: tdatasource;
    function edited: boolean;
    procedure initeditfocus;
@@ -98,11 +98,11 @@ type
    procedure updatereadonlystate;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
    procedure setmaxlength(const avalue: integer);
-   function getfieldlink: tfielddatalink;
-  //idbgraphicfieldlink
+   function getfieldlink: tcustomeditwidgetdatalink;
+    //idbgraphicfieldlink
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
-  //ireccontrol
+    //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tgraphicdatalink);
   protected   
@@ -282,7 +282,7 @@ begin
  //dummy
 end;
 
-function tdbdataimage.getfieldlink: tfielddatalink;
+function tdbdataimage.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;

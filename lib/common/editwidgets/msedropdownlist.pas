@@ -90,9 +90,25 @@ type
    fonitemchange: indexeventty;
    fnostreaming: boolean;
 //   maxrowcount: integer;
+   fwidth: integer;
+   foptions: coloptionsty;
+   ftextflags: textflagsty;
+   flinewidth: integer;
+   flinecolor: colorty;
+   fcolor: colorty;
+   fcolorselect: colorty;
+   ffontcolorselect: colorty;
    function getitems(const index: integer): tdropdowncol;
    procedure setrowcount(const avalue: integer);
    procedure setnostreaming(const avalue: boolean);
+   procedure setwidth(const avalue: integer);
+   procedure setoptions(const avalue: coloptionsty);
+   procedure settextflags(const avalue: textflagsty);
+   procedure setlinewidth(const avalue: integer);
+   procedure setlinecolor(const avalue: colorty);
+   procedure setcolor(const avalue: colorty);
+   procedure setcolorselect(const avalue: colorty);
+   procedure setfontcolorselect(const avalue: colorty);
   protected
    fitemindex: integer;
    fkeyvalue64: integer;
@@ -120,6 +136,19 @@ type
    property rowcount: integer read maxrowcount write setrowcount;
    property onitemchange: indexeventty read fonitemchange write fonitemchange;
    property items[const index: integer]: tdropdowncol read getitems; default;
+  published
+   property width: integer read fwidth write setwidth default griddefaultcolwidth;
+   property options: coloptionsty read foptions write setoptions
+                   default defaultdropdowncoloptions;
+   property textflags: textflagsty read ftextflags write settextflags 
+                                           default defaultdropdowncoltextflags;
+   property linewidth: integer read flinewidth write setlinewidth default 0;
+   property linecolor: colorty read flinecolor write setlinecolor default cl_gray;
+   property color: colorty read fcolor write setcolor default cl_default;
+   property colorselect: colorty read fcolorselect write setcolorselect 
+                                           default cl_default;
+   property fontcolorselect: colorty read ffontcolorselect 
+                                      write setfontcolorselect default cl_default;
  end;
 
  dropdowncolsclassty = class of tdropdowncols;
@@ -281,6 +310,7 @@ type
              //true if selected
    function candropdown: boolean; virtual;
    procedure selectnone(const akey: keyty); virtual;
+   function isloading: boolean;
    //ibutton
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
    
@@ -421,7 +451,7 @@ type
 
 implementation
 uses
- sysutils,msewidgets,mseguiintf,rtlconsts;
+ sysutils,msewidgets,mseguiintf,rtlconsts,msebits;
 
 type
  twidget1 = class(twidget);
@@ -457,6 +487,14 @@ end;
 
 constructor tdropdowncols.create(const aowner: tcustomdropdownlistcontroller);
 begin
+ fwidth:= griddefaultcolwidth;
+ foptions:= defaultdropdowncoloptions;
+ flinecolor:= cl_gray;
+ ftextflags:= defaultdropdowncoltextflags;
+ fcolor:= cl_default;
+ fcolorselect:= cl_default;
+ ffontcolorselect:= cl_default;
+
  inherited create(aowner,nil);
  count:= 1;
 // items[0].options:= items[0].options + [co_fill];
@@ -480,9 +518,14 @@ begin
   if fnostreaming then begin
    include(fstate,dls_nostreaming);
   end;
-//  if index = 0 then begin
-//   foptions:= foptions + [co_fill];
-//  end;
+  fwidth:= self.fwidth;
+  foptions:= self.foptions;
+  ftextflags:= self.ftextflags;
+  flinewidth:= self.flinewidth;
+  flinecolor:= self.flinecolor;
+  fcolor:= self.fcolor;
+  fcolorselect:= self.fcolorselect;
+  ffontcolorselect:= self.ffontcolorselect;
  end;
 end;
 
@@ -682,6 +725,126 @@ begin
   end;
  finally
   endupdate;
+ end;
+end;
+
+procedure tdropdowncols.setwidth(const avalue: integer);
+var
+ int1: integer;
+begin
+ if fwidth <> avalue then begin
+  fwidth:= avalue;
+  if not tcustomdropdownlistcontroller(fowner).isloading then begin
+   for int1:= 0 to count - 1 do begin
+    tdropdowncol(fitems[int1]).width:= avalue;
+   end;
+  end;
+ end;
+end;
+
+procedure tdropdowncols.setoptions(const avalue: coloptionsty);
+var
+ int1: integer;
+ mask: longword;
+begin
+ if foptions <> avalue then begin
+  mask:= longword(avalue) xor longword(foptions);
+  foptions:= avalue;
+  if not tcustomdropdownlistcontroller(fowner).isloading then begin
+   for int1:= 0 to count - 1 do begin
+    tdropdowncol(fitems[int1]).options:= 
+                     coloptionsty(replacebits(longword(foptions),
+                        longword(tdropdowncol(fitems[int1]).options),mask));
+   end;
+  end;
+ end;
+end;
+
+procedure tdropdowncols.settextflags(const avalue: textflagsty);
+var
+ int1: integer;
+ mask: longword;
+begin
+ if ftextflags <> avalue then begin
+  mask:= longword(avalue) xor longword(ftextflags);
+  ftextflags:= avalue;
+  if not tcustomdropdownlistcontroller(fowner).isloading then begin
+   for int1:= 0 to count - 1 do begin
+    tdropdowncol(fitems[int1]).textflags:= 
+                     textflagsty(replacebits(longword(ftextflags),
+                        longword(tdropdowncol(fitems[int1]).textflags),mask));
+   end;
+  end;
+ end;
+end;
+
+procedure tdropdowncols.setlinewidth(const avalue: integer);
+var
+ int1: integer;
+begin
+ if fwidth <> avalue then begin
+  flinewidth:= avalue;
+  if not tcustomdropdownlistcontroller(fowner).isloading then begin
+   for int1:= 0 to count - 1 do begin
+    tdropdowncol(fitems[int1]).linewidth:= avalue;
+   end;
+  end;
+ end;
+end;
+
+procedure tdropdowncols.setlinecolor(const avalue: colorty);
+var
+ int1: integer;
+begin
+ if flinecolor <> avalue then begin
+  flinecolor:= avalue;
+  if not tcustomdropdownlistcontroller(fowner).isloading then begin
+   for int1:= 0 to count - 1 do begin
+    tdropdowncol(fitems[int1]).linecolor:= avalue;
+   end;
+  end;
+ end;
+end;
+
+procedure tdropdowncols.setcolor(const avalue: colorty);
+var
+ int1: integer;
+begin
+ if fcolor <> avalue then begin
+  fcolor:= avalue;
+  if not tcustomdropdownlistcontroller(fowner).isloading then begin
+   for int1:= 0 to count - 1 do begin
+    tdropdowncol(fitems[int1]).color:= avalue;
+   end;
+  end;
+ end;
+end;
+
+procedure tdropdowncols.setcolorselect(const avalue: colorty);
+var
+ int1: integer;
+begin
+ if fcolorselect <> avalue then begin
+  fcolorselect:= avalue;
+  if not tcustomdropdownlistcontroller(fowner).isloading then begin
+   for int1:= 0 to count - 1 do begin
+    tdropdowncol(fitems[int1]).colorselect:= avalue;
+   end;
+  end;
+ end;
+end;
+
+procedure tdropdowncols.setfontcolorselect(const avalue: colorty);
+var
+ int1: integer;
+begin
+ if ffontcolorselect <> avalue then begin
+  ffontcolorselect:= avalue;
+  if not tcustomdropdownlistcontroller(fowner).isloading then begin
+   for int1:= 0 to count - 1 do begin
+    tdropdowncol(fitems[int1]).fontcolorselect:= avalue;
+   end;
+  end;
  end;
 end;
 
@@ -1006,6 +1169,11 @@ begin
  if fforcecaret then begin
   fintf.geteditor.dodeactivate;
  end;
+end;
+
+function tcustomdropdowncontroller.isloading: boolean;
+begin
+ result:= csloading in fintf.getwidget.componentstate;
 end;
 
 { tdropdowncontroller }

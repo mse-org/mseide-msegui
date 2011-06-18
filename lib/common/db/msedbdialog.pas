@@ -36,12 +36,12 @@ type
    function getoptionsedit: optionseditty; override;
    procedure dochange; override;
    function getrowdatapo(const arow: integer): pointer; override;
-   function getfieldlink: tfielddatalink;
-   //idbeditfieldlink
+   function getfieldlink: tcustomeditwidgetdatalink;
+    //idbeditfieldlink
    procedure valuetofield;
    procedure fieldtovalue;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-   //ireccontrol
+    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
@@ -73,12 +73,12 @@ type
    procedure dochange; override;
 
    function getrowdatapo(const arow: integer): pointer; override;
-   //idbeditfieldlink
+    //idbeditfieldlink
    procedure valuetofield; virtual;
    procedure fieldtovalue; virtual;
    procedure getfieldtypes(var afieldtypes: fieldtypesty);
-   function getfieldlink: tfielddatalink;
-   //ireccontrol
+   function getfieldlink: tcustomeditwidgetdatalink;
+    //ireccontrol
    procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
@@ -286,7 +286,7 @@ begin
 {$warnings on}
 end;
 
-function tdbfilenameedit.getfieldlink: tfielddatalink;
+function tdbfilenameedit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
@@ -411,7 +411,7 @@ begin
  end;
 end;
 
-function tdbcoloredit.getfieldlink: tfielddatalink;
+function tdbcoloredit.getfieldlink: tcustomeditwidgetdatalink;
 begin
  result:= fdatalink;
 end;
