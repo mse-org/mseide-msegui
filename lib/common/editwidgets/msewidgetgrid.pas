@@ -2872,6 +2872,7 @@ end;
 procedure tcustomwidgetgrid.scrolled(const dist: pointty);
 var
  po1: pointty;
+ bo1: boolean;
 begin
  po1:= dist;
  if csdesigning in componentstate then begin
@@ -2881,7 +2882,20 @@ begin
  po1.x:= 0;
  twidget1(fcontainer0).scrollwidgets(po1);
  if dist.x <> 0 then begin
-  twidgetfixrows(ffixrows).updatewidgetrect;
+  if csdesigning in componentstate then begin
+   bo1:= gs_layoutupdating in fstate;
+   include(fstate,gs_layoutupdating);
+   try
+    twidgetfixrows(ffixrows).updatewidgetrect;
+   finally
+    if not bo1 then begin
+     exclude(fstate,gs_layoutupdating);
+    end;
+   end;
+  end
+  else begin
+   twidgetfixrows(ffixrows).updatewidgetrect;
+  end;
  end;
  inherited;
 end;
