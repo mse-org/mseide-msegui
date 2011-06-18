@@ -8149,8 +8149,11 @@ end;
 
 procedure tgriddatalink.setnavigator(const avalue: tdbnavigator);
 begin
- getobjectlinker.setlinkedvar(iobjectlink(self),tmsecomponent(avalue),
+ if fnavigator <> avalue then begin
+  getobjectlinker.setlinkedvar(iobjectlink(self),tmsecomponent(avalue),
                   tmsecomponent(fnavigator));
+  fintf.setnavigator(avalue);
+ end;
 end;
 
 
