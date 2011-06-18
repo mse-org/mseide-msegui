@@ -212,9 +212,11 @@ type
   rect: prectty;              //
  end;                         // same layout!
  arcinfoty = record           //
-  rect: prectty;             ///
-  startang: real;
-  extentang: real;
+  rect: prectty;             ///  //rect^.pos = center of ellipse
+                                  //rect^.size = dimensions of ellipse
+  startang: real;                 //in radiant CCW, 0 = horizontal to the right,
+                                  //2*pi = full circle
+  extentang: real;                //in radiant CCW, 2*pi = full circle
   pieslice: boolean;
  end;
  posinfoty = record          ///
