@@ -6251,11 +6251,13 @@ begin
   raise ecurrentvalueaccess.create(self,afield,
                'Field can not be be fkCalculated.');
  end;
- if (afield.fieldno < 0) then begin
-  result:= getcurrentlookuppo(afield,afieldtype,abm.recordpo);
- end
- else begin
-  result:= getcurrentpo(afield,afieldtype,abm.recordpo);
+ if abm.recordpo <> nil then begin
+  if (afield.fieldno < 0) then begin
+   result:= getcurrentlookuppo(afield,afieldtype,abm.recordpo);
+  end
+  else begin
+   result:= getcurrentpo(afield,afieldtype,abm.recordpo);
+  end;
  end;
 end;
 
