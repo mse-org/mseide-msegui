@@ -627,7 +627,9 @@ type
    fstatvarname: msestring;
    procedure setstatfile(const value: tstatfile);
    function getitems(const index: integer): twidget;
+   function getactivepageindex: integer;
    procedure setactivepageindex(value: integer);
+   procedure setactivepageindex1(const avalue: integer);
    function getactivepage: twidget;
    procedure setactivepage(const value: twidget);
    procedure updatesize(const page: twidget);
@@ -693,6 +695,7 @@ type
    procedure settab_widthmax(const avalue: integer);
   protected
    fpopuptab: integer;
+   factivepageindexdesign: integer;
    procedure defineproperties(filer: tfiler); override;
    procedure internaladd(const page: itabpage; aindex: integer);
    procedure internalremove(const page: itabpage);
@@ -752,8 +755,8 @@ type
    property items[const index: integer]: twidget read getitems; default;
    property activepage: twidget read getactivepage write setactivepage;
    property idents: integerarty read getidents;
-   property activepageindex: integer read factivepageindex 
-                      write setactivepageindex default -1;
+   property activepageindex: integer read getactivepageindex 
+                      write setactivepageindex1 default -1;
    property onactivepagechanged: notifyeventty read fonactivepagechanged write fonactivepagechanged;
    property onpageadded: widgeteventty read fonpageadded write fonpageadded;
    property onpageremoved: widgeteventty read fonpageremoved write fonpageremoved;
@@ -3473,6 +3476,7 @@ end;
 constructor tcustomtabwidget.create(aowner: tcomponent);
 begin
  factivepageindex:= -1;
+ factivepageindexdesign:= -1;
  ftab_sizemin:= defaulttabsizemin;
  ftab_sizemax:= defaulttabsizemax;
  inherited;
@@ -3584,12 +3588,19 @@ var
  int1: integer;
 begin
  inc(fdesignchangedlock);
+ if factivepageindexdesign >= count then begin
+  factivepageindex:= -1;
+  factivepageindexdesign:= -1;
+ end;
  inherited;
  ftabs.loaded;
  updatesize(nil);
- int1:= factivepageindex;
+// int1:= factivepageindex;
+// factivepageindexdesign:= int1;
  factivepageindex:= -1;
- activepageindex:= int1;
+ setactivepageindex(factivepageindexdesign);
+// setactivepageindex(int1);
+// activepageindex:= int1;
  dec(fdesignchangedlock);
 end;
 
@@ -3718,7 +3729,8 @@ begin
   page.settabwidget(self);
   pagechanged(page);
   if not (csloading in componentstate) then begin
-   activepageindex:= aindex;
+//   activepageindex:= aindex;
+   setactivepageindex(aindex);
   end;
   dopageadded(widget1);
  end;
@@ -3729,6 +3741,21 @@ var
  int1: integer;
  widget1: twidget1;
  activebefore: integer;
+
+ procedure check(var aindex: integer);
+ begin
+  if aindex >= 0 then begin
+   if aindex > int1 then begin
+    dec(aindex);
+   end
+   else begin
+    if aindex = int1 then begin
+     aindex:= -1;
+    end;
+   end;
+  end;
+ end; //check
+ 
 begin
  if ftabs <> nil then begin
   widget1:= twidget1(page.getwidget);
@@ -3736,16 +3763,8 @@ begin
   if int1 >= 0 then begin
    exclude(widget1.fmsecomponentstate,cs_parentwidgetrect);
    activebefore:= factivepageindex;
-   if factivepageindex >= 0 then begin
-    if factivepageindex > int1 then begin
-     dec(factivepageindex);
-    end
-    else begin
-     if factivepageindex = int1 then begin
-      factivepageindex:= -1;
-     end;
-    end;
-   end;
+   check(factivepageindex);
+   check(factivepageindexdesign);
    ftabs.flayoutinfo.activetab:= factivepageindex;
    ftabs.tabs.delete(int1);
    with widget1 do begin
@@ -3860,12 +3879,6 @@ begin
      ftabs.tabs[factivepageindex].active:= true;
      exit;
     end;
-    {
-    if not canparentclose(items[factivepageindex]) then begin
-     ftabs.tabs[factivepageindex].active:= true;
-     exit;
-    end;
-    }
     int1:= factivepageindex;
     factivepageindex:= -1;
     if not (csloading in componentstate) then begin
@@ -3916,7 +3929,8 @@ end;
 
 procedure tcustomtabwidget.tabchanged;
 begin
- activepageindex:= ftabs.activetab;
+ setactivepageindex(ftabs.activetab);
+// activepageindex:= ftabs.activetab;
 end;
 
 function tcustomtabwidget.count: integer;
@@ -4038,7 +4052,7 @@ end;
 
 procedure tcustomtabwidget.changepage(step: integer);
 begin
- nextpage(activepageindex+step,step < 0);
+ nextpage(factivepageindex+step,step < 0);
 end;
 
 procedure tcustomtabwidget.movepage(const curindex,newindex: integer);
@@ -4099,14 +4113,7 @@ begin
   tab_size:= ftabs.bounds_cy;
  end;
 end;
-{
-procedure tcustomtabwidget.dofontheightdelta(var delta: integer);
-begin
- if not (tabo_vertical in options) then begin
-  synctofontheight;
- end;
-end;
-}
+
 function tcustomtabwidget.checktabsizingpos(const apos: pointty): boolean;
 begin
  with ftabs,moverect(ftabs.paintrect,ftabs.fwidgetrect.pos) do begin
@@ -4697,6 +4704,20 @@ end;
 procedure tcustomtabwidget.cancelpickmove(const sender: tobjectpicker);
 begin
  //dummy
+end;
+
+function tcustomtabwidget.getactivepageindex: integer;
+begin
+ result:= factivepageindex;
+ if csdesigning in componentstate then begin
+  result:= factivepageindexdesign;
+ end;
+end;
+
+procedure tcustomtabwidget.setactivepageindex1(const avalue: integer);
+begin
+ setactivepageindex(avalue);
+ factivepageindexdesign:= factivepageindex;
 end;
 
 { tpagetab }
