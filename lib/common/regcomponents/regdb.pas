@@ -305,10 +305,10 @@ begin
       tmseibconnection,tmsepqconnection,tsqlite3connection,tmseodbcconnection,
       tmsemysqlconnection,
       
-      tmsesqltransaction,
+      tmsesqltransaction,tmsesqlquery,
+      tlocaldataset,
       
       tmsedbf,tmsefixedformatdataset,tmsesdfdataset,tmsememdataset,
-      tlocaldataset,tmsesqlquery,
      {$ifdef mse_with_sqlite}
       tmsesqlite3dataset,
      {$endif}
