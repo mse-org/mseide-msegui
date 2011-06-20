@@ -3623,13 +3623,27 @@ var
  lookuprecursion: integer;
  
  function getbasetype(const afield: tfield): tfieldtype;
+ var
+  field1: tfield;
  begin
   inc(lookuprecursion);
   if lookuprecursion > 16 then begin
    databaseerror(name+': Recursive lookup field "'+afield.fieldname+'".');
   end;
   result:= ftunknown;
-  if afield.dataset is tmsebufdataset then begin 
+  if afield.dataset is tmsebufdataset then begin
+   if (afield.fieldkind = fklookup) and 
+                 (afield.lookupdataset <> nil) and 
+                          (afield.lookupresultfield <> '') then begin
+    field1:= afield.lookupdataset.findfield(afield.lookupresultfield);
+    if field1 <> nil then begin
+     result:= getbasetype(field1);
+    end;
+   end
+   else begin
+    getfieldsize(afield.datatype,0,result);
+   end;
+ {   
    with tmsebufdataset(afield.dataset) do begin
     if afield.fieldno > 0 then begin
      result:= ffieldinfos[afield.fieldno-1].ext.basetype;
@@ -3641,6 +3655,7 @@ var
      end;
     end;
    end;
+  }
   end;
  end; //getbasetype
  
