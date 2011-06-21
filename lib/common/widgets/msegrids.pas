@@ -1212,6 +1212,7 @@ type
    function totwidth: integer;
    procedure rowcountchanged(const newcount: integer); virtual;
    procedure updatelayout; override;
+   procedure countchanged; override;
    procedure moverow(const curindex,newindex: integer;
                 const acount: integer = 1); virtual;
    procedure insertrow(const index: integer; const acount: integer = 1); virtual;
@@ -7244,6 +7245,12 @@ begin
  for int1:= 0 to high(fitems) do begin
   tcol(fitems[int1]).fpropwidth:= 0;
  end;
+end;
+
+procedure tcols.countchanged;
+begin
+ resetpropwidth;
+ inherited;
 end;
 
 { tdatacols }

@@ -1593,6 +1593,7 @@ type
  
  tdbwidgetcols = class(twidgetcols)
   protected
+  public
    class function getitemclasstype: persistentclassty; override;
  end;
   

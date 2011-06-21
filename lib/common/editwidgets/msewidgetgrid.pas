@@ -2449,7 +2449,9 @@ begin
  fcontainer3:= tbottomcontainer.create(self);
  fcontainer3.name:= '_co3'; //debug purpose
  fwidgetdummy:= tdummywidget.create(self);
+ include(fstate,gs_layoutupdating);
  fwidgetdummy.setlockedparentwidget(fcontainer2);
+ exclude(fstate,gs_layoutupdating);
 // fwidgetdummy.parentwidget:= fcontainer2;
  setoptionsgrid(foptionsgrid); //synchronize container
 // fcontainer.Name:= 'container';
