@@ -1947,15 +1947,17 @@ procedure tdropdownlist.clientmouseevent(var info: mouseeventinfoty);
 begin
  if info.eventkind = ek_mousemove then begin
   if dls_mousemoved in fdropdownstate then begin
-   if (info.pos.y < mouseautoscrollheight) then begin
-    startrepeater(false);
-   end
-   else begin
-    if info.pos.y >= clientrect.cy - mouseautoscrollheight then begin
-     startrepeater(true);
+   with fdatarecty do begin
+    if (info.pos.y < y + mouseautoscrollheight) and (info.pos.y >= y) then begin
+     startrepeater(false);
     end
     else begin
-     killrepeater;
+     if info.pos.y >= y + cy - mouseautoscrollheight then begin
+      startrepeater(true);
+     end
+     else begin
+      killrepeater;
+     end;
     end;
    end;
   end
