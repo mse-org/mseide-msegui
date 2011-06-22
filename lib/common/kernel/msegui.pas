@@ -14314,8 +14314,8 @@ begin
     if window.hastransientfor then begin
      window1:= window.topmodaltransientfor;
      if window1 <> nil then begin
-      fpos.x:= fpos.x - window.fowner.bounds_x + window1.fowner.bounds_x;
-      fpos.y:= fpos.y - window.fowner.bounds_y + window1.fowner.bounds_y;
+      fpos.x:= fpos.x + window.fowner.bounds_x - window1.fowner.bounds_x;
+      fpos.y:= fpos.y + window.fowner.bounds_y - window1.fowner.bounds_y;
       window:= window1;
      end;
     end;
@@ -15986,7 +15986,8 @@ begin
  end;
 end;
 
-procedure tguiapplication.createform(instanceclass: widgetclassty; var reference);
+procedure tguiapplication.createform(
+                                  instanceclass: widgetclassty; var reference);
 begin
  mseclasses.createmodule(self,instanceclass,reference);
 end;
@@ -16298,7 +16299,8 @@ begin
  end;
 end;
 
-procedure tguiapplication.inithintinfo(var info: hintinfoty; const ahintedwidget: twidget);
+procedure tguiapplication.inithintinfo(var info: hintinfoty;
+                                                 const ahintedwidget: twidget);
 begin
  finalize(info);
  fillchar(info,sizeof(info),0);
@@ -16521,22 +16523,26 @@ begin
  tinternalapplication(self).fonshortcutlist.remove(tmethod(method));
 end;
 
-procedure tguiapplication.registeronactivechanged(const method: activechangeeventty);
+procedure tguiapplication.registeronactivechanged(
+                                           const method: activechangeeventty);
 begin
  tinternalapplication(self).fonactivechangelist.add(tmethod(method));
 end;
 
-procedure tguiapplication.unregisteronactivechanged(const method: activechangeeventty);
+procedure tguiapplication.unregisteronactivechanged(
+                                            const method: activechangeeventty);
 begin
  tinternalapplication(self).fonactivechangelist.remove(tmethod(method));
 end;
 
-procedure tguiapplication.registeronwindowdestroyed(const method: windoweventty);
+procedure tguiapplication.registeronwindowdestroyed(
+                                                 const method: windoweventty);
 begin
  tinternalapplication(self).fonwindowdestroyedlist.add(tmethod(method));
 end;
 
-procedure tguiapplication.unregisteronwindowdestroyed(const method: windoweventty);
+procedure tguiapplication.unregisteronwindowdestroyed(
+                                                 const method: windoweventty);
 begin
  tinternalapplication(self).fonwindowdestroyedlist.remove(tmethod(method));
 end;
@@ -16546,32 +16552,40 @@ begin
  tinternalapplication(self).fonwiniddestroyedlist.add(tmethod(method));
 end;
 
-procedure tguiapplication.unregisteronwiniddestroyed(const method: winideventty);
+procedure tguiapplication.unregisteronwiniddestroyed(
+                                                   const method: winideventty);
 begin
  tinternalapplication(self).fonwiniddestroyedlist.remove(tmethod(method));
 end;
 
-procedure tguiapplication.registeronapplicationactivechanged(const method: booleaneventty);
+procedure tguiapplication.registeronapplicationactivechanged(
+                                                 const method: booleaneventty);
 begin
- tinternalapplication(self).fonapplicationactivechangedlist.add(tmethod(method));
+ tinternalapplication(self).fonapplicationactivechangedlist.add(
+                                                           tmethod(method));
 end;
 
-procedure tguiapplication.unregisteronapplicationactivechanged(const method: booleaneventty);
+procedure tguiapplication.unregisteronapplicationactivechanged(
+                                                const method: booleaneventty);
 begin
- tinternalapplication(self).fonapplicationactivechangedlist.remove(tmethod(method));
+ tinternalapplication(self).fonapplicationactivechangedlist.remove(
+                                                             tmethod(method));
 end;
 
-procedure tguiapplication.registersyseventhandler(const method: syseventhandlereventty);
+procedure tguiapplication.registersyseventhandler(
+                                      const method: syseventhandlereventty);
 begin
  tinternalapplication(self).fonsyseventlist.add(tmethod(method)); 
 end;
 
-procedure tguiapplication.unregistersyseventhandler(const method: syseventhandlereventty);
+procedure tguiapplication.unregistersyseventhandler(
+                                      const method: syseventhandlereventty);
 begin
  tinternalapplication(self).fonsyseventlist.remove(tmethod(method)); 
 end;
 
-procedure tguiapplication.updatecursorshape; //restores cursorshape of mousewidget
+procedure tguiapplication.updatecursorshape;
+                           //restores cursorshape of mousewidget
 begin
  if fclientmousewidget <> nil then begin
   fclientmousewidget.updatecursorshape(fmousewidgetpos){(true)};
