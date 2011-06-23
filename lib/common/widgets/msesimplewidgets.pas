@@ -618,7 +618,8 @@ type
  
  stepdirty = (sd_right,sd_up,sd_left,sd_down);
 
- stepeventty = procedure (const sender: tobject; const stepkind: stepkindty) of object;
+ stepeventty = procedure (const sender: tobject; const stepkind: stepkindty;
+                              var handled: boolean) of object;
 
  tcustomstepbox = class(tpublishedwidget,istepbar,idragcontroller)
   private
@@ -632,7 +633,7 @@ type
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure mousewheelevent(var info: mousewheeleventinfoty); override;
-   procedure dostep(const event: stepkindty); virtual;
+   function dostep(const event: stepkindty): boolean; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2046,10 +2047,12 @@ begin
  tscrollboxframe(fframe).updateclientrect;
 end;
 
-procedure tcustomstepbox.dostep(const event: stepkindty);
+function tcustomstepbox.dostep(const event: stepkindty): boolean;
 begin
+ result:= false;
  if canevent(tmethod(fonstep)) then begin
-  fonstep(self,event);
+  result:= true;
+  fonstep(self,event,result);
  end;
 end;
 

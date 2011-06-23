@@ -294,7 +294,7 @@ type
   protected
    foptions: tabbaroptionsty;
    class function classskininfo: skininfoty; override;
-   procedure dostep(const event: stepkindty); override;
+   function dostep(const event: stepkindty): boolean; override;
    procedure doactivetabchanged;
    procedure tabchanged(const sender: ttab);
    procedure tabclicked(const sender: ttab; const info: mouseeventinfoty);
@@ -2439,9 +2439,14 @@ begin
  end;
 end;
 
-procedure tcustomtabbar.dostep(const event: stepkindty);
+function tcustomtabbar.dostep(const event: stepkindty): boolean;
 begin
- firsttab:= frame.executestepevent(event,flayoutinfo.stepinfo,flayoutinfo.firsttab);
+ result:= false;
+ if frame.canstep then begin
+  firsttab:= frame.executestepevent(event,flayoutinfo.stepinfo,
+                                                flayoutinfo.firsttab);
+  result:= true;
+ end;
 end;
 
 procedure tcustomtabbar.setfirsttab(Value: integer);
@@ -3584,8 +3589,8 @@ begin
 end;
 
 procedure tcustomtabwidget.loaded;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  inc(fdesignchangedlock);
  if factivepageindexdesign >= count then begin

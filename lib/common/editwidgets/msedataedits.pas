@@ -1172,7 +1172,7 @@ type
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure updatereadonlystate; override;
   //istepbar
-   procedure dostep(const event: stepkindty);
+   function dostep(const event: stepkindty): boolean;
   public
    constructor create(aowner: tcomponent); override;
    property step: real read fstep write fstep; //default 1
@@ -5141,10 +5141,12 @@ endlab1:
  fstepflag:= stepkindty(-1);
 end;
 
-procedure tcustomrealspinedit.dostep(const event: stepkindty);
+function tcustomrealspinedit.dostep(const event: stepkindty): boolean;
 begin
+ result:= false;
  if not (csdesigning in componentstate) then begin
   if event in [sk_up,sk_down,sk_first,sk_last] then begin
+   result:= true;
    if edited then begin
     if not checkvalue then begin
      exit;

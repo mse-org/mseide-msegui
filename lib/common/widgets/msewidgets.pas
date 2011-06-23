@@ -482,7 +482,7 @@ type
   function translatecolor(const aclor: colorty): colorty;
   procedure invalidaterect(const rect: rectty; const org: originty;
                                const noclip: boolean = false);
-  procedure dostep(const event: stepkindty);
+  function dostep(const event: stepkindty): boolean; //true on action
  end;
  stepbuttonposty = (sbp_right,sbp_top,sbp_left,sbp_bottom);
 
@@ -494,7 +494,7 @@ const
  defaultstepbuttonsize = 13;
 
 type
- stepframestatety = (sfs_spinedit);
+ stepframestatety = (sfs_spinedit,sfs_canstep);
  stepframestatesty = set of stepframestatety;
  
  tcustomstepframe = class(tcustomcaptionframe,iframe)
@@ -568,6 +568,7 @@ type
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure checktemplate(const sender: tobject); override;
    procedure updatebuttonstate(const first,delta,count: integer);
+   function canstep: boolean;
    function executestepevent(const event: stepkindty; const stepinfo: framestepinfoty;
                const aindex: integer): integer;
    property buttonsize: integer read fbuttonsize write setbuttonsize default defaultstepbuttonsize;
@@ -3051,7 +3052,8 @@ begin
  frepeatedbutton:= -1;
 end;
 
-procedure tcustomstepframe.execute(const tag: integer; const info: mouseeventinfoty);
+procedure tcustomstepframe.execute(const tag: integer; 
+                                      const info: mouseeventinfoty);
 begin
  fstepintf.dostep(stepkindty(tag));
 end;
@@ -3479,6 +3481,12 @@ begin             //updatelayout
    fdim.cy:= acy * b;
   end;
  end;
+ if (buttoncount > 0) or (fneededbuttons <> []) then begin
+  include(fstepstate,sfs_canstep);
+ end
+ else begin
+  exclude(fstepstate,sfs_canstep);
+ end;
 end;
 
 procedure tcustomstepframe.updaterects;
@@ -3509,16 +3517,23 @@ const
  stepdirspin: array[boolean] of stepkindty = (sk_down,sk_up);
 
 procedure tcustomstepframe.domousewheelevent(var info: mousewheeleventinfoty);
+var
+ sk1: stepkindty;
 begin
  if fmousewheel and (info.wheel <> mw_none) and 
                        not (es_transientfor in info.eventstate)then begin
   if sfs_spinedit in fstepstate then begin
-   fstepintf.dostep(stepdirspin[info.wheel = mw_up]);
+   sk1:= stepdirspin[info.wheel = mw_up];
   end
   else begin
-   fstepintf.dostep(stepdirstep[fbuttonpos][info.wheel = mw_up]);
+   if fneededbuttons = [] then begin
+    exit;
+   end;
+   sk1:= stepdirstep[fbuttonpos][info.wheel = mw_up]
   end;
-  include(info.eventstate,es_processed);
+  if canstep and fstepintf.dostep(sk1) then begin
+   include(info.eventstate,es_processed);
+  end;
  end;
 end;
 
@@ -3648,6 +3663,11 @@ end;
 function tcustomstepframe.getframestateflags: framestateflagsty;
 begin
  result:= shapestatetoframestate(factbuttonindex,fbuttons);
+end;
+
+function tcustomstepframe.canstep: boolean;
+begin
+ result:= sfs_canstep in fstepstate;
 end;
 
 { tscrollboxscrollbar }

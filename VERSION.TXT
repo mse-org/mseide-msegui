@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2011-06-23
+ handled parameter for stepeventty.
 2011-06-01
  tdb*lookuplb.lookupbuffer, lookupkeyfieldno, lookupvaluefieldno moved to
  datalink.
