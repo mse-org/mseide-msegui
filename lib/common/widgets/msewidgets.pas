@@ -1089,7 +1089,7 @@ type
   protected
    procedure updatewindowinfo(var info: windowinfoty); override;
    function internalshow(const modallevel: modallevelty; transientfor: twindow;
-           const windowevent: boolean): modalresultty; override;
+           const windowevent,transientforshow: boolean): modalresultty; override;
   public
    constructor create(aowner: tcomponent; transientfor: twindow); reintroduce; overload;
  end;
@@ -5337,13 +5337,15 @@ begin
 end;
 
 function tpopupwidget.internalshow(const modallevel: modallevelty; transientfor: twindow;
-                   const windowevent: boolean): modalresultty;
+                   const windowevent,transientforshow: boolean): modalresultty;
 begin
  if transientfor = nil then begin
-  result:=  inherited internalshow(modallevel,ftransientfor,windowevent);
+  result:=  inherited internalshow(modallevel,ftransientfor,windowevent,
+                                                             transientforshow);
  end
  else begin
-  result:= inherited internalshow(modallevel,transientfor,windowevent);
+  result:= inherited internalshow(modallevel,transientfor,windowevent,
+                                                             transientforshow);
  end;
 end;
 

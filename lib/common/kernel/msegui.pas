@@ -1503,7 +1503,7 @@ type
    function getclientheight: integer;
    procedure setclientheight(const avalue: integer);
    function internalshow(const modallevel: modallevelty; transientfor: twindow;
-           const windowevent: boolean): modalresultty; virtual;
+           const windowevent,nomodalforreset: boolean): modalresultty; virtual;
    procedure internalhide(const windowevent: boolean);
    function getnextfocus: twidget;
    function cantabfocus: boolean;
@@ -1866,6 +1866,7 @@ type
                   tws_globalshortcuts,tws_localshortcuts,
                   tws_buttonendmodal,
                   tws_grouphidden,tws_groupminimized,tws_groupmaximized,
+                  tws_transientforminimized,
                   tws_grab,tws_activatelocked,
                   tws_canvasoverride,tws_destroying,
                   tws_raise,tws_lower);
@@ -9639,7 +9640,7 @@ end;
 
 function twidget.internalshow(const modallevel: modallevelty;
              transientfor: twindow;
-             const windowevent: boolean): modalresultty;
+             const windowevent,nomodalforreset: boolean): modalresultty;
 var
  bo1: boolean;
 begin
@@ -9681,12 +9682,21 @@ begin
   if transientfor = window then begin
    transientfor:= nil;
   end;
-  exclude(fwindow.fstate,tws_modalfor);
-  fwindow.show(windowevent);
-  fwindow.settransientfor(transientfor,windowevent);
   if (transientfor <> nil) and (modallevel = ml_window) then begin
    include(fwindow.fstate,tws_modalfor);
+  end
+  else begin
+   if not nomodalforreset then begin
+    exclude(fwindow.fstate,tws_modalfor);
+   end;
   end;
+  fwindow.show(windowevent);
+  if not nomodalforreset then begin
+   fwindow.settransientfor(transientfor,windowevent);
+  end;
+//  if (transientfor <> nil) and (modallevel = ml_window) then begin
+//   include(fwindow.fstate,tws_modalfor);
+//  end;
   if bo1 then begin
    doshow;
   end;
@@ -9732,7 +9742,7 @@ begin
   end;  
  end
  else begin
-  result:= internalshow(modallevel,transientfor,false);
+  result:= internalshow(modallevel,transientfor,false,false);
  end;
 end;
 
@@ -12322,13 +12332,16 @@ begin
   activewindowbefore:= appinst.factivewindow;
   show(windowevent);
   widgetar:= nil; //compilerwarning
-  if  activewindowbefore <> self then begin
+  if activewindowbefore <> self then begin
    bo1:= force or (appinst.fmodalwindow = nil) or (appinst.fmodalwindow = self) or 
                          (ftransientfor = appinst.fmodalwindow);
    if bo1 then begin
     if hastransientfor then begin
      window1:= topmodaltransientfor;
      if window1 <> nil then begin
+//      if not window1.fowner.visible then begin
+//       window1.fowner.internalshow(ml_none,nil,false,true);
+//      end;
       window1.internalactivate(false,force);
       exit;
      end;
@@ -12482,12 +12495,17 @@ var
  int1,int2: integer;
  window1: twindow;
  bo1: boolean;
+ mini1: boolean;
 begin
  releasemouse;
  if not(ws_visible in fowner.fwidgetstate) then begin
-  exclude(fstate,tws_modalfor);
+  mini1:= windowpos = wp_minimized;
+  if not mini1 then begin
+   exclude(fstate,tws_modalfor);
+  end;
   if fwindow.id <> 0 then begin
    if tws_windowvisible in fstate then begin
+    exclude(fstate,tws_transientforminimized);
     if not windowevent or (appinst.factivewindow = self) then begin
      endmodal;
     end;
@@ -12575,6 +12593,11 @@ begin
      end
      else begin
       exclude(fstate,tws_windowvisible);
+      if mini1 and (tws_modalfor in fstate) and (ftransientfor <> nil) and
+               ftransientfor.visible then begin
+       ftransientfor.windowpos:= wp_minimized;
+       include(fstate,tws_transientforminimized);
+      end;      
      end;
      if not windowevent then begin
       exclude(fstate,tws_grouphidden);
@@ -12606,6 +12629,12 @@ begin
      fwindowstack:= nil; //remove pending    
     end;
    end;
+   if (fstate * [tws_transientforminimized,tws_modalfor] = 
+            [tws_transientforminimized,tws_modalfor]) and
+                                     (ftransientfor <> nil) then begin
+    ftransientfor.fowner.internalshow(ml_none,nil,false,true);
+   end;    
+   exclude(fstate,tws_transientforminimized);
    if not (csdesigning in fowner.ComponentState) then begin
     if (fsyscontainer <> sywi_none) or (fcontainer <> 0) then begin
      if not windowevent then begin
@@ -13410,7 +13439,7 @@ end;
 procedure twindow.showed;
 begin
  if not (tws_windowvisible in fstate) then begin
-  fowner.internalshow(ml_none,nil,true);
+  fowner.internalshow(ml_none,nil,true,true);
  end;
 end;
 

@@ -2480,7 +2480,7 @@ end;
 
 function gui_settransientfor(id: winidty; transientfor: winidty): guierrorty;
 begin
- setwindowlong(id,gwl_hwndparent,transientfor);
+// setwindowlong(id,gwl_hwndparent,transientfor); //no taskbar widget if called!
  result:= gue_ok;
 end;
 

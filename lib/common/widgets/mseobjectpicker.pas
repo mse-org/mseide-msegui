@@ -350,7 +350,8 @@ begin
        if not widget1.window.mousecaptured then begin
         include(fstate,ops_newwindowgrab);
        end;
-       if ws_newmousecapture in widget1.fwidgetstate then begin
+       if (ws_newmousecapture in widget1.fwidgetstate) or 
+                                 not widget1.mousecaptured then begin
         include(fstate,ops_newwidgetgrab);
        end;
        widget1.capturemouse(true);

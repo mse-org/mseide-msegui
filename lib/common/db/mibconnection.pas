@@ -317,7 +317,8 @@ begin
  end;
 end;
 
-procedure tibconnection.CheckError(const ProcName : string; const Status: integer);
+procedure tibconnection.CheckError(const ProcName : string;
+                                                     const Status: integer);
 begin
  if status <> 0 then begin
   checkerror(procname,fstatus);
