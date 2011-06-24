@@ -2910,16 +2910,17 @@ begin
  result:= gue_ok;
 end;
 
-function gui_settransientfor(id: winidty; transientfor: winidty): guierrorty;
+function gui_settransientfor(var awindow: windowty;
+                                     const transientfor: winidty): guierrorty;
 var
  attributes: xwindowattributes;
 begin
  gdi_lock;
- result:= settransientforhint(id,transientfor);
+ result:= settransientforhint(awindow.id,transientfor);
  if result = gue_ok then begin
-  if xgetwindowattributes(appdisp,id,@attributes) <> 0 then begin
+  if xgetwindowattributes(appdisp,awindow.id,@attributes) <> 0 then begin
    if attributes.override_redirect{$ifndef xboolean} <> 0 {$endif}then begin
-    gui_stackunderwindow(transientfor,id);
+    gui_stackunderwindow(transientfor,awindow.id);
    end;
   end;
  end;

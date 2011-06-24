@@ -72,6 +72,7 @@ type
  end; 
  win32windowdty = record
   trayinfo: trayinfoty;
+  istaskbar: boolean;
  end;
  win32windowty = record
   case integer of
@@ -2478,9 +2479,13 @@ begin
  end;
 end;
 
-function gui_settransientfor(id: winidty; transientfor: winidty): guierrorty;
+function gui_settransientfor(var awindow: windowty; const transientfor: winidty): guierrorty;
 begin
-// setwindowlong(id,gwl_hwndparent,transientfor); //no taskbar widget if called!
+ with awindow,win32windowty(platformdata).d do begin
+  if not istaskbar then begin
+   setwindowlong(id,gwl_hwndparent,transientfor); //no taskbar widget if called!
+  end;
+ end;
  result:= gue_ok;
 end;
 
@@ -2499,7 +2504,8 @@ begin
  result:= gue_ok;
 end;
 
-function gui_createwindow(const rect: rectty; const options: internalwindowoptionsty;
+function gui_createwindow(const rect: rectty;
+                             const options: internalwindowoptionsty;
                              var awindow: windowty): guierrorty;
 var
  windowstyle,windowstyleex,ca2: longword;
@@ -2507,7 +2513,8 @@ var
  classname: string;
  ownerwindow: winidty;
 begin
- with awindow,options do begin
+ fillchar(awindow,sizeof(awindow),0);
+ with awindow,win32windowty(awindow.platformdata).d,options do begin
   ownerwindow:= applicationwindow;
   windowstyleex:= 0;
   if wo_popup in options then begin
@@ -2522,6 +2529,7 @@ begin
    else begin
     windowstyle:= ws_overlappedwindow;
     if wo_taskbar in options then begin
+     istaskbar:= true;
      windowstyleex:= windowstyleex or ws_ex_appwindow;
      showwindow(applicationwindow,sw_hide);
      ownerwindow:= 0;

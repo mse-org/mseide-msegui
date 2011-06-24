@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -90,7 +90,8 @@ function gui_windowloosefocus(var awindow: windowty): guierrorty;
 function gui_setappfocus(id: winidty): guierrorty;
 function gui_minimizeapplication: guierrorty;
 function gui_setwindowgroup(id: winidty; group: winidty): guierrorty;
-function gui_settransientfor(id: winidty; transientfor: winidty): guierrorty;
+function gui_settransientfor(var awindow: windowty; 
+                                  const transientfor: winidty): guierrorty;
 function gui_movewindowrect(id: winidty; const dist: pointty; 
                                          const rect: rectty): guierrorty;
 function gui_windowatpos(const pos: pointty): winidty;

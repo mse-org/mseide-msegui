@@ -13413,10 +13413,10 @@ begin
 //   getobjectlinker.setlinkedvar(iobjectlink(self),value,tlinkedobject(ftransientfor));
    if fwindow.id <> 0 then begin
     if value <> nil then begin
-     gui_settransientfor(fwindow.id,value.winid);
+     gui_settransientfor(fwindow,value.winid);
     end
     else begin
-     gui_settransientfor(fwindow.id,0);
+     gui_settransientfor(fwindow,0);
     end;
    end;
   end;
