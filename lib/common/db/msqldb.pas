@@ -894,7 +894,8 @@ function splitsql(const asql: msestring; const term: msechar = ';';
 
 implementation
 uses 
- dbconst,strutils,msereal,msestream,msebits,msefileutils,mseformatstr,typinfo;
+ dbconst,strutils,msereal,msestream,msebits,msefileutils,mseformatstr,typinfo,
+ msesysutils;
 type
  tdataset1 = class(tdataset);
  tmdatabase1 = class(tmdatabase);
@@ -3480,9 +3481,25 @@ begin
 end;
 
 procedure tsqlquery.internalopen;
+{$ifdef mse_debugdataset}
+var
+ ts: longword;
+{$endif}
 begin
+{$ifdef mse_debugdataset}
+ debugoutstart(ts,self,'connect');
+{$endif}
  connect(true);
+{$ifdef mse_debugdataset}
+ debugoutend(ts,self,'connect');
+{$endif}
+{$ifdef mse_debugdataset}
+ debugoutstart(ts,self,'internalopen');
+{$endif}
  inherited;
+{$ifdef mse_debugdataset}
+ debugoutend(ts,self,'internalopen');
+{$endif}
 end;
 
 procedure tsqlquery.dorefresh;

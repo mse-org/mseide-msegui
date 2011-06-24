@@ -47,6 +47,10 @@ procedure debugwriteln(const value: string);
 procedure debugwritestack(const acount: integer = 30);
 procedure debugout(const sender: tcomponent; const atext: ansistring); overload;
 procedure debugout(const sender: tobject; const atext: ansistring); overload;
+procedure debugoutstart(out ts: longword;
+                   const sender: tcomponent; const atext: ansistring); overload;
+procedure debugoutend(const ts: longword;
+                   const sender: tcomponent; const atext: ansistring); overload;
 procedure internalerror(const text: string);
 
 function getlasterror: integer;
@@ -297,6 +301,20 @@ procedure debugout(const sender: tobject; const atext: ansistring);
 begin
  debugwriteln(hextostr(ptruint(sender),8)+' '+
                       sender.classname+' '+atext);
+end;
+
+procedure debugoutstart(out ts: longword;
+                   const sender: tcomponent; const atext: ansistring);
+begin
+ ts:= timestamp;
+ debugout(sender,'*start '+atext);
+end;
+
+procedure debugoutend(const ts: longword;
+                   const sender: tcomponent; const atext: ansistring);
+begin
+ debugout(sender,'**end '+formatfloatmse(
+                           (timestamp-ts)/1000000,'0.000000')+'s '+atext);
 end;
 
 procedure internalerror(const text: string);

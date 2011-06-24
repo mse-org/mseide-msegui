@@ -21,11 +21,12 @@ object mainfo: tmainfo
   container.onlayout = onscale
   container.bounds = (
     0
-    16
+    15
     427
-    122
+    123
   )
   dragdock.optionsdock = [od_savepos, od_savezorder, od_savechildren, od_canmove, od_cansize, od_canfloat, od_candock]
+  optionswindow = [wo_taskbar]
   mainmenu = mainmenu1
   options = [fo_main, fo_terminateonclose, fo_globalshortcuts, fo_savepos, fo_savezorder, fo_savestate]
   statfile = projectstatfile
@@ -45,7 +46,7 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 21
     bounds_cx = 427
-    bounds_cy = 164
+    bounds_cy = 165
     anchors = [an_left, an_top, an_right, an_bottom]
     dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_fixsize, od_background]
     statfile = projectstatfile
@@ -58,13 +59,13 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 427
-    bounds_cy = 18
+    bounds_cy = 17
     anchors = [an_top]
     font.name = 'stf_default'
     font.xscale = 1
     font.dummy = 0
     options = [dwo_hintclippedtext]
-    reffontheight = 14
+    reffontheight = 13
   end
   object gdb: tgdbmi
     gdbdownload = False

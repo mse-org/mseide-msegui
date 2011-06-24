@@ -1158,7 +1158,7 @@ procedure alignfieldpos(var avalue: integer);
 implementation
 uses
  rtlconsts,dbconst,sysutils,mseformatstr,msereal,msestream,msesys,
- msefileutils,mseapplication;
+ msefileutils,mseapplication,msesysutils;
  
 {$ifdef mse_FPC_2_2}
 const
@@ -2492,6 +2492,9 @@ var
  bo1,bo2: boolean;
  ar1: fieldarty;
  field1: tfield;
+ {$ifdef mse_debugdataset}
+ ts: longword;
+ {$endif}
  
 begin
  result:= 0;
@@ -2501,6 +2504,14 @@ begin
  int2:= fbrecordcount;
  database.beforeaction;
  try
+{$ifdef mse_debugdataset}
+  if all then begin
+   debugoutstart(ts,self,'getnextpacket all');
+  end
+  else begin
+   debugoutstart(ts,self,'getnextpacket');
+  end;
+{$endif}
   while ((result < fpacketrecords) or all) and 
                               (loadbuffer(femptybuffer^.header) = grok) do begin
    appendrecord(femptybuffer);
@@ -2551,6 +2562,9 @@ begin
    end;
   end;
   exclude(fbstate,bs_opening);
+ {$ifdef mse_debugdataset}
+  debugoutend(ts,self,'getnextpacket');
+ {$endif}
  finally
   database.afteraction;
  end;
