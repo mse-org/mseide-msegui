@@ -2039,6 +2039,9 @@ end;
 
 procedure tlookupdatalink.activechanged;
 begin
+ if not active then begin
+  fcanlookup:= false;
+ end;
  inherited;
  fdisplink.lookupchange;
 end;
