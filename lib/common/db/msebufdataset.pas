@@ -276,7 +276,8 @@ type
                                     write setoptions default [];
  end;
 
- localindexoptionty = (lio_desc,lio_quicksort); //default is mergesort
+ localindexoptionty = (lio_desc,lio_default,
+                           lio_quicksort); //default is mergesort
  
  localindexoptionsty = set of localindexoptionty;
 
@@ -335,6 +336,8 @@ type
                          //returns index, -1 if not found
    function getdesc: boolean;
    procedure setdesc(const avalue: boolean);
+   function getdefault: boolean;
+   procedure setdefault(const avalue: boolean);
   protected
    procedure change;
   public
@@ -412,6 +415,7 @@ type
    function unique(const avalues: array of const): boolean;
    function getbookmark(const arecno: integer): string;
    property desc: boolean read getdesc write setdesc;
+   property default: boolean read getdefault write setdefault;
   published
    property fields: tindexfields read ffields write setfields;
    property options: localindexoptionsty read foptions 
@@ -428,6 +432,8 @@ type
    procedure bindfields;
    function getactiveindex: integer;
    procedure setactiveindex(const avalue: integer);
+   function getdefaultindex: integer;
+   procedure setdefaultindex(const avalue: integer);
   protected
    procedure checkinactive;
    procedure setcount1(acount: integer; doinit: boolean); override;
@@ -438,6 +444,8 @@ type
    procedure move(const curindex,newindex: integer); override;
    property items[const index: integer]: tlocalindex read getitems; default;
    property activeindex: integer read getactiveindex write setactiveindex;
+                       //-1 > none
+   property defaultindex: integer read getdefaultindex write setdefaultindex;
                        //-1 > none
    function fieldactive(const afield: tfield): boolean;
                    //true if field in active index
@@ -7519,7 +7527,8 @@ begin
   end;
  end;
  if not result then begin
-  findexlocal.activeindex:= -1;
+//  findexlocal.activeindex:= -1;
+  findexlocal.activeindex:= findexlocal.defaultindex;
  end;
 end;
 
@@ -7885,6 +7894,34 @@ begin
  end;
 end;
 
+function tlocalindexes.getdefaultindex: integer;
+var
+ int1: integer;
+begin
+ result:= -1;
+ for int1:= high(fitems) downto 0 do begin
+  if lio_default in tlocalindex(fitems[int1]).foptions then begin
+   result:= int1;
+   break;
+  end;
+ end;
+end;
+
+procedure tlocalindexes.setdefaultindex(const avalue: integer);
+var
+ int1: integer;
+begin
+ if avalue < 0 then begin
+  int1:= defaultindex;
+  if int1 >= 0 then begin
+   tlocalindex(fitems[int1]).default:= false;
+  end
+  else begin
+   tlocalindex(fitems[avalue]).default:= true;
+  end;
+ end;
+end;
+
 { tlocalindex }
 
 constructor tlocalindex.create(aowner: tobject);
@@ -7931,9 +7968,21 @@ begin
 end;
 
 procedure tlocalindex.setoptions(const avalue: localindexoptionsty);
+var
+ bo1: boolean;
+ int1: integer;
 begin
  if foptions <> avalue then begin
+  bo1:= lio_default in foptions;
   foptions:= avalue;
+  if not bo1 and (lio_default in foptions) then begin
+   with tmsebufdataset(fowner).findexlocal do begin
+    for int1:= 0 to high(fitems) do begin
+     exclude(tlocalindex(fitems[int1]).foptions,lio_default);
+    end;
+   end;
+  end;
+  include(foptions,lio_default);
   change;
  end;
 end;
@@ -8819,6 +8868,21 @@ begin
  end
  else begin
   options:= options - [lio_desc];
+ end;
+end;
+
+function tlocalindex.getdefault: boolean;
+begin
+ result:= lio_default in foptions;
+end;
+
+procedure tlocalindex.setdefault(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [lio_default];
+ end
+ else begin
+  options:= options - [lio_default];
  end;
 end;
 
