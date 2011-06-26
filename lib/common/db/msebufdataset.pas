@@ -3310,7 +3310,8 @@ begin
     try
      internalapplyupdate(0,revertonerror,response);
     finally
-     if FUpdateBuffer[fcurrentupdatebuffer].Bookmark.recordpo = nil then begin
+     if (fcurrentupdatebuffer <= high(fupdatebuffer)) and //???
+      (FUpdateBuffer[fcurrentupdatebuffer].Bookmark.recordpo = nil) then begin
       deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),fcurrentupdatebuffer);
      end;
      if bs1_needsresync in fbstate1 then begin
