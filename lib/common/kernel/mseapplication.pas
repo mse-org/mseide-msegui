@@ -31,7 +31,7 @@ type
  activatoroptionty = (avo_activateonloaded,avo_activatedelayed,
                 avo_deactivateonterminated,
                 avo_handleexceptions,avo_quietexceptions,
-                avo_abortonexception);
+                avo_abortonexception,avo_waitcursor);
  activatoroptionsty = set of activatoroptionty;
  activatorabortactionty = (aaa_abortexception,aaa_abort,aaa_deactivate,
                            aaa_retry);
@@ -801,60 +801,69 @@ var
  bo1,bo2: boolean;
  act1: activatorabortactionty;
 begin
- factive:= true;
- factivated:= true;
- if canevent(tmethod(fonbeforeactivate)) then begin
-  fonbeforeactivate(self);
- end;
- if factive then begin
-  updateorder;
-  bo2:= canevent(tmethod(fonactivateerror));
-  for int1:= 0 to high(fclients) do begin
-   try
-    iobjectlink(fclients[int1]).objevent(ievent(self),oe_activate);
-   except
-    on e: exception do begin
-     bo1:= false;
-     if bo2 then begin
-      fonactivateerror(self,iobjectlink(fclients[int1]).getinstance,e,bo1);
-     end;
-     if not bo1 then begin
-      if (avo_handleexceptions in foptions) and 
-                     not (csdesigning in componentstate) then begin
-       if not (avo_quietexceptions in foptions) then begin
-        application.showexception(e);
-       end;
-      end
-      else begin
-//       factive:= false;
-       raise;
+ try
+  if avo_waitcursor in foptions then begin
+   application.beginwait;
+  end;
+  factive:= true;
+  factivated:= true;
+  if canevent(tmethod(fonbeforeactivate)) then begin
+   fonbeforeactivate(self);
+  end;
+  if factive then begin
+   updateorder;
+   bo2:= canevent(tmethod(fonactivateerror));
+   for int1:= 0 to high(fclients) do begin
+    try
+     iobjectlink(fclients[int1]).objevent(ievent(self),oe_activate);
+    except
+     on e: exception do begin
+      bo1:= false;
+      if bo2 then begin
+       fonactivateerror(self,iobjectlink(fclients[int1]).getinstance,e,bo1);
       end;
-     end;
-     if avo_abortonexception in foptions then begin
-      act1:= fabortaction;
-      if canevent(tmethod(fonabort)) then begin
-       fonabort(self,act1);
-      end;
-      factivated:= false; //no activation in clients.loaded
-      case act1 of
-       aaa_retry,aaa_deactivate: begin
-        deactivateclients;
-        if act1 = aaa_retry then begin
-         activateclients;
+      if not bo1 then begin
+       if (avo_handleexceptions in foptions) and 
+                      not (csdesigning in componentstate) then begin
+        if not (avo_quietexceptions in foptions) then begin
+         application.showexception(e);
         end;
-        exit;
-       end;
-       aaa_abortexception: begin
-        abort;
+       end
+       else begin
+ //       factive:= false;
+        raise;
        end;
       end;
-      break;
+      if avo_abortonexception in foptions then begin
+       act1:= fabortaction;
+       if canevent(tmethod(fonabort)) then begin
+        fonabort(self,act1);
+       end;
+       factivated:= false; //no activation in clients.loaded
+       case act1 of
+        aaa_retry,aaa_deactivate: begin
+         deactivateclients;
+         if act1 = aaa_retry then begin
+          activateclients;
+         end;
+         exit;
+        end;
+        aaa_abortexception: begin
+         abort;
+        end;
+       end;
+       break;
+      end;
      end;
     end;
    end;
+   if canevent(tmethod(fonafteractivate)) then begin
+    fonafteractivate(self);
+   end;
   end;
-  if canevent(tmethod(fonafteractivate)) then begin
-   fonafteractivate(self);
+ finally
+  if avo_waitcursor in foptions then begin
+   application.endwait;
   end;
  end;
 end;

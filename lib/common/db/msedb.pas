@@ -1231,6 +1231,7 @@ type
  end;
 
  datasetoptionty = (dso_utf8,dso_stringmemo,dso_numboolean,
+                         dso_waitcursor,
                          dso_initinternalcalc,
                          dso_postsavepoint,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,                         
@@ -7147,6 +7148,7 @@ end;
 procedure tdscontroller.internalopen;
 var
  int1,int2: integer;
+ bo1: boolean;
 // blobdatasize: integer;
 begin
 // blobdatasize:= fintf.getblobdatasize;
@@ -7173,11 +7175,21 @@ begin
    end;
   end;
   updatelinkedfields;
-  if dso_local in foptions then begin
-   fintf.openlocal;
-  end
-  else begin
-   fintf.inheritedinternalopen;
+  bo1:= dso_waitcursor in foptions;
+  if bo1 then begin
+   application.beginwait;
+  end;
+  try
+   if dso_local in foptions then begin
+    fintf.openlocal;
+   end
+   else begin
+    fintf.inheritedinternalopen;
+   end;
+  finally
+   if bo1 then begin
+    application.endwait;
+   end;
   end;
   for int1:= 0 to fields.count - 1 do begin
    with fields[int1] do begin
@@ -7506,14 +7518,18 @@ procedure tdscontroller.setoptions(const avalue: datasetoptionsty);
 const
  mask: datasetoptionsty = [dso_autocommitret,dso_autocommit];
 var
- options1,optionsbefore: datasetoptionsty;
+ opt,options1,optionsbefore: datasetoptionsty;
 begin
  optionsbefore:= foptions;
- options1:= datasetoptionsty(longword(foptions) xor longword(avalue));
- foptions:= datasetoptionsty(setsinglebit(longword(avalue),longword(foptions),
+ opt:= avalue - [dso_refreshwaitcursor];
+ if dso_refreshwaitcursor in avalue then begin
+  include(opt,dso_waitcursor);
+ end;
+ options1:= datasetoptionsty(longword(foptions) xor longword(opt));
+ foptions:= datasetoptionsty(setsinglebit(longword(opt),longword(foptions),
                     longword(mask)));
  if dso_noedit in options1 then begin
-  if (dso_noedit in avalue) and tdataset(fowner).active then begin
+  if (dso_noedit in opt) and tdataset(fowner).active then begin
    tdataset(fowner).checkbrowsemode;
   end;
   tdataset1(fowner).dataevent(dedisabledstatechange,0);
@@ -7629,7 +7645,7 @@ procedure tdscontroller.dorefresh(const sender: tobject);
 var
  bo1,bo2: boolean;
 begin
- bo2:= dso_refreshwaitcursor in foptions;
+ bo2:= dso_waitcursor in foptions;
  if bo2 then begin
   application.beginwait;
  end;

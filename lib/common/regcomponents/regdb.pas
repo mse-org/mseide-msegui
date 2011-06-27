@@ -298,7 +298,13 @@ type
   public
    function getvalues: msestringarty; override;
  end;
- 
+
+ tdatasetoptionspropertyeditor = class(tsetpropertyeditor)
+  protected
+   function getinvisibleitems: tintegerset; override;
+  public
+ end;
+  
 procedure Register;
 begin
  registercomponents('DB',[     
@@ -382,6 +388,8 @@ begin
       ]);
  registercomponenttabhints(['DBf'],['Datafield and data display components']);
 
+ registerpropertyeditor(typeinfo(datasetoptionsty),nil,'',
+                                           tdatasetoptionspropertyeditor);
  registerpropertyeditor(typeinfo(variant),tmseparam,'value',
                                                  tparamvaluepropertyeditor);
  registerpropertyeditor(typeinfo(tnolistdropdowncol),nil,'',
@@ -1513,6 +1521,13 @@ begin
  else begin
   result:= getfieldnames(tfield(instance).lookupdataset);
  end;
+end;
+
+{ tdatasetoptionspropertyeditor }
+
+function tdatasetoptionspropertyeditor.getinvisibleitems: tintegerset;
+begin
+ result:= tintegerset(longword([dso_refreshwaitcursor]));
 end;
 
 initialization
