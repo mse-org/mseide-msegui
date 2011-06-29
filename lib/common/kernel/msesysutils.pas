@@ -294,7 +294,7 @@ end;
 procedure debugout(const sender: tcomponent; const atext: ansistring);
 begin
  debugwriteln(hextostr(ptruint(sender),8)+' '+
-                      sender.classname+':'+sender.name+' '+atext);
+                      sender.name+':'+sender.classname+' '+atext);
 end;
 
 procedure debugout(const sender: tobject; const atext: ansistring);

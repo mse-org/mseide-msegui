@@ -489,7 +489,7 @@ type
                       );
  bufdatasetstatesty = set of bufdatasetstatety;
 
- bufdatasetstate1ty = (bs1_needsresync,bs1_lookupnotifying);
+ bufdatasetstate1ty = (bs1_needsresync,bs1_lookupnotifying,bs1_posting);
  bufdatasetstates1ty = set of bufdatasetstate1ty;
  
  internalcalcfieldseventty = procedure(const sender: tmsebufdataset;
@@ -941,6 +941,9 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   
+   procedure post; override;
+   
    function createblobstream(field: tfield;
                                      mode: tblobstreammode): tstream; override;
    function getfielddata(field: tfield; buffer: pointer;
@@ -7741,6 +7744,19 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.post;
+begin
+ if (bs1_posting in fbstate1) and (state in [dsedit,dsinsert]) then begin
+  databaseerror('Recursive post.',self);
+ end;
+ include(fbstate1,bs1_posting);
+ try
+  inherited;
+ finally
+  exclude(fbstate1,bs1_posting);
+ end;
+end;
+
 { tlocalindexes }
 
 constructor tlocalindexes.create(const aowner: tmsebufdataset);
@@ -8302,8 +8318,15 @@ endstep:
 end;
 
 procedure tlocalindex.sort(var adata: pointerarty);
+{$ifdef mse_debugdataset}
+var
+ ts1: longword;
+{$endif}
 begin
  if adata <> nil then begin
+{$ifdef mse_debugdataset}
+  ts1:= timestamp;
+{$endif}
   if lio_quicksort in foptions then begin
    fsortarray:= @adata[0];
    quicksort(0,tmsebufdataset(fowner).fbrecordcount - 1);
@@ -8312,6 +8335,10 @@ begin
    mergesort(adata);
   end;
  end;
+{$ifdef mse_debugdataset}
+  debugoutend(ts1,tmsebufdataset(fowner),'Sort index '+
+                inttostr(tmsebufdataset(fowner).findexlocal.indexof(self)));
+{$endif}
 end;
 
 function tlocalindex.findboundary(const arecord: pintrecordty;

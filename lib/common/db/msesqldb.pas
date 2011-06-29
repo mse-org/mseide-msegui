@@ -180,7 +180,9 @@ type
  end;
   
  fieldparamlinkoptionty = (
-              fplo_autorefresh,fplo_refreshifactiveonly,fplo_restorerecno,
+              fplo_autorefresh,fplo_refreshifactiveonly,
+              fplo_refreshifchangedonly,
+              fplo_restorerecno,
               fplo_syncmasterpost,
               fplo_syncmasteredit,
               fplo_syncmasterinsert,
@@ -193,7 +195,7 @@ type
               );
  fieldparamlinkoptionsty = set of fieldparamlinkoptionty;
 const
- defaultfieldparamlinkoptions = [fplo_autorefresh];
+ defaultfieldparamlinkoptions = [fplo_autorefresh,fplo_refreshifchangedonly];
  
 type  
  tdestvalue = class(townedpersistent,idbeditinfo,idbparaminfo)
@@ -914,8 +916,9 @@ end;
 }
 procedure tparamsourcedatalink.recordchanged(afield: tfield);
 var
- bo1: boolean;
+ bo1,bo2: boolean;
  int1: integer;
+ var1: variant;
 begin
  if not (csloading in fowner.componentstate) then begin
   inherited;
@@ -931,6 +934,11 @@ begin
      if not (csdesigning in componentstate) then begin
       fparamset:= true;
       bo1:= false;
+      bo2:= not (fplo_refreshifchangedonly in foptions) or 
+                                         not fdestdataset.active;
+      if not bo2 then begin
+       var1:= self.field.value;
+      end;
       if assigned(fonsetparam) then begin
        fonsetparam(fowner,bo1);
       end;
@@ -951,8 +959,9 @@ begin
       if assigned(fonaftersetparam) then begin
        fonaftersetparam(fowner);
       end;
+      bo2:= bo2 or (var1 <> param.value);
       if (frefreshlock = 0) and (fplo_autorefresh in foptions) and 
-                                              (destdataset <> nil) and 
+                                              (destdataset <> nil) and bo2 and
          (destdataset.active or 
                    not (fplo_refreshifactiveonly in foptions)) and
          not((destdataset.state = dsinsert) and (dataset.state = dsinsert) and

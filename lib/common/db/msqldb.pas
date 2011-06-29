@@ -5081,44 +5081,46 @@ procedure tsqlmasterparamsdatalink.DataEvent(Event: TDataEvent; Info: Ptrint);
 begin
  inherited;
  with tsqlquery(detaildataset) do begin
-  case ord(event) of
-   ord(deupdaterecord): begin
-    if state in [dsinsert,dsedit] then begin
-     updaterecord;
-     if modified then begin
-      dataset.modified:= true;
+  if active then begin
+   case ord(event) of
+    ord(deupdaterecord): begin
+     if state in [dsinsert,dsedit] then begin
+      updaterecord;
+      if modified then begin
+       dataset.modified:= true;
+      end;
      end;
     end;
-   end;
-   ord(deupdatestate): begin
-    if (mdlo_syncedit in foptionsmasterlink) and
-        (dataset.state = dsedit) and not (state = dsedit) then begin
-     edit;
+    ord(deupdatestate): begin
+     if (mdlo_syncedit in foptionsmasterlink) and
+         (dataset.state = dsedit) and not (state = dsedit) then begin
+      edit;
+     end;
+     if (mdlo_syncinsert in foptionsmasterlink) and
+         (dataset.state = dsinsert) and not (state = dsinsert) then begin
+      insert;
+     end;
     end;
-    if (mdlo_syncinsert in foptionsmasterlink) and
-        (dataset.state = dsinsert) and not (state = dsinsert) then begin
-     insert;
+    de_afterdelete: begin
+     if (mdlo_syncdelete in foptionsmasterlink) then begin
+      delete;
+     end;
     end;
-   end;
-   de_afterdelete: begin
-    if (mdlo_syncdelete in foptionsmasterlink) then begin
-     delete;
-    end;
-   end;
-   de_afterpost: begin
-    if (mdlo_delayeddetailpost in foptionsmasterlink) then begin
-     if (mdlo_inserttoupdate in foptionsmasterlink) and
-            (state = dsinsert) then begin
-      detaildataset.modified:= true;
-      include(fbstate,bs_inserttoupdate);
-      try
+    de_afterpost: begin
+     if (mdlo_delayeddetailpost in foptionsmasterlink) then begin
+      if (mdlo_inserttoupdate in foptionsmasterlink) and
+             (state = dsinsert) then begin
+       detaildataset.modified:= true;
+       include(fbstate,bs_inserttoupdate);
+       try
+        detaildataset.checkbrowsemode;
+       finally
+        exclude(fbstate,bs_inserttoupdate);
+       end;
+      end
+      else begin
        detaildataset.checkbrowsemode;
-      finally
-       exclude(fbstate,bs_inserttoupdate);
       end;
-     end
-     else begin
-      detaildataset.checkbrowsemode;
      end;
     end;
    end;
