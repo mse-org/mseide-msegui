@@ -937,7 +937,7 @@ begin
       bo2:= not (fplo_refreshifchangedonly in foptions) or 
                                          not fdestdataset.active;
       if not bo2 then begin
-       var1:= self.field.value;
+       var1:= param.value;
       end;
       if assigned(fonsetparam) then begin
        fonsetparam(fowner,bo1);
