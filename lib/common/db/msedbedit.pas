@@ -1193,6 +1193,8 @@ type
    ffield_selected: tfield;
    ffieldname_selected: string;
    fnavigator: tdbnavigator;
+   fdescend: boolean;
+   fsortdatalink: tfielddatalink;
    procedure checkscroll;
    procedure checkscrollbar; virtual;
    procedure doupdaterowdata(const row: integer);
@@ -7268,6 +7270,11 @@ begin
   fdatasetstatebefore:= dsinactive;
   fdscontroller:= nil;
   inherited firstrecord:= 0;
+ end
+ else begin
+  if (fsortdatalink <> nil) and (fdscontroller <> nil) then begin
+   fdscontroller.updatesortfield(fsortdatalink,fdescend);
+  end;
  end;
  updaterowcount;
  checkscroll;
@@ -8118,9 +8125,14 @@ end;
 function tgriddatalink.updatesortfield(const avalue: tfielddatalink;
                               const adescend: boolean): boolean;
 begin
- result:= false;
- if fdscontroller <> nil then begin
-  result:= fdscontroller.updatesortfield(avalue,adescend);
+ fdescend:= adescend;
+ fsortdatalink:= avalue;
+ result:= true;
+ if active then begin
+  result:= false;
+  if fdscontroller <> nil then begin
+   result:= fdscontroller.updatesortfield(avalue,adescend);
+  end;
  end;
 end;
 
@@ -11106,6 +11118,9 @@ end;
 
 function tlookupeditdatalink.getsortfield: tfield;
 begin
+ if ffieldtext = nil then begin
+  updatefields;
+ end;
  result:= ffieldtext;
  if result = nil then begin
   result:= inherited getsortfield;

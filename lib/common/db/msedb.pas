@@ -385,6 +385,7 @@ type
    function getaslargeint: largeint; override;
    procedure gettext(var thetext: string; adisplaytext: boolean); override;
    procedure change; override;
+   procedure SetDataset(AValue : TDataset); override;
   public
    function HasParent: Boolean; override;
    procedure Clear; override;
@@ -1097,6 +1098,7 @@ type
   protected
    fcanclosing: integer;
    fdscontroller: tdscontroller;
+   procedure checkcontroller;
    procedure activechanged; override;
    function getdataset: tdataset;
    function getutf8: boolean;
@@ -1806,7 +1808,8 @@ implementation
 uses
  rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,msebits,
  msereal,variants,msedate{,msedbgraphics}{$ifdef unix},cwstring{$endif};
-
+const
+ fieldnamedummy = ';%)(mse';
 var
  msefieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
          // ft_unknown, ft_string,       ft_numeric,
@@ -3440,7 +3443,7 @@ end;
 procedure tmsefield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -3728,7 +3731,7 @@ end;
 procedure tmsestringfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -3901,7 +3904,7 @@ end;
 procedure tmsenumericfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -4099,6 +4102,21 @@ begin
  result:= asid;
  tdataset1(dataset).restorestate(stat1);
 end;
+
+procedure tmselongintfield.SetDataset(AValue: TDataset);
+begin
+ if fieldname = '' then begin
+  fieldname:= fieldnamedummy;
+  try
+   inherited;
+  finally
+   fieldname:= '';
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
 {
 function tmselongintfield.getlookupinfo: plookupfieldinfoty;
 begin
@@ -4267,7 +4285,7 @@ end;
 procedure tmselargeintfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -4387,7 +4405,7 @@ end;
 procedure tmsesmallintfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -4507,7 +4525,7 @@ end;
 procedure tmsewordfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -4599,7 +4617,7 @@ end;
 procedure tmseautoincfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -4767,7 +4785,7 @@ end;
 procedure tmsefloatfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -5041,7 +5059,7 @@ end;
 procedure tmsebooleanfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -5208,7 +5226,7 @@ end;
 procedure tmsedatetimefield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -5316,7 +5334,7 @@ end;
 procedure tmsebinaryfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -5439,7 +5457,7 @@ end;
 procedure tmsebytesfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -5567,7 +5585,7 @@ end;
 procedure tmsevarbytesfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -5719,7 +5737,7 @@ end;
 procedure tmsebcdfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -5947,7 +5965,7 @@ end;
 procedure tmseblobfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -6126,7 +6144,7 @@ end;
 procedure tmsevariantfield.SetDataset(AValue: TDataset);
 begin
  if fieldname = '' then begin
-  fieldname:= ';%)(mse'; //dummy
+  fieldname:= fieldnamedummy;
   try
    inherited;
   finally
@@ -6174,7 +6192,7 @@ end;
 
 { tmsedatalink }
 
-procedure tmsedatalink.activechanged;
+procedure tmsedatalink.checkcontroller;
 var
  intf1: igetdscontroller;
 begin
@@ -6184,6 +6202,13 @@ begin
    fdscontroller:= intf1.getcontroller;
   end;   
  end;
+end;
+
+procedure tmsedatalink.activechanged;
+var
+ intf1: igetdscontroller;
+begin
+ checkcontroller;
  inherited;
 end;
 
@@ -6358,7 +6383,9 @@ end;
 
 procedure tfielddatalink.updatefields;
 begin
- if active and (ffieldname <> '') then begin
+ if (datasource <> nil) and (datasource.dataset <> nil) and 
+                 datasource.dataset.active and (ffieldname <> '') then begin
+// if active and (ffieldname <> '') then begin
   setfield(datasource.dataset.fieldbyname(ffieldname));
  end
  else begin
@@ -6614,6 +6641,9 @@ end;
 
 function tfielddatalink.getsortfield: tfield;
 begin
+ if ffield = nil then begin
+  updatefields;
+ end;
  result:= ffield;
 end;
 
