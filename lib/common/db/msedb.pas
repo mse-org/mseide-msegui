@@ -7460,7 +7460,7 @@ begin
       end;     
      except
       if bo1 then begin
-       savepointrollback;
+       savepointrollback(int1);
       end;     
       raise;
      end;
