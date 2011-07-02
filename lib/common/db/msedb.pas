@@ -6205,8 +6205,8 @@ begin
 end;
 
 procedure tmsedatalink.activechanged;
-var
- intf1: igetdscontroller;
+//var
+// intf1: igetdscontroller;
 begin
  checkcontroller;
  inherited;
