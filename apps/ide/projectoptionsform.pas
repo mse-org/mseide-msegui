@@ -1584,9 +1584,10 @@ begin
   projecttree.updatestat(statfiler);
   componentstorefo.updatestat(statfiler);
 
-  setsection('layout');
-  mainfo.projectstatfile.updatestat('windowlayout',statfiler);
-  sourcefo.updatestat(statfiler);
+//  setsection('layout');
+//  mainfo.projectstatfile.updatestat('windowlayout',statfiler);
+//  sourcefo.updatestat(statfiler);
+
   setsection('components');
   selecteditpageform.updatestat(statfiler);
   programparametersform.updatestat(statfiler);
@@ -1598,6 +1599,10 @@ begin
    end;
    expandprojectmacros;
   end;
+
+  setsection('layout');       
+  mainfo.projectstatfile.updatestat('windowlayout',statfiler);
+  sourcefo.updatestat(statfiler);   //needs actual fontalias
 
   modified:= false;
   savechecked:= false;
