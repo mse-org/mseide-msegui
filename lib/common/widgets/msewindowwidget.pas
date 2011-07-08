@@ -57,6 +57,7 @@ type
                   var aid: winidty); virtual;
    procedure dodestroywinid; virtual;
    procedure doclientrectchanged; virtual;
+   function canclientpaint: boolean; virtual;
    procedure doclientpaint(const aupdaterect: rectty); virtual;
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doloaded; override;
@@ -301,6 +302,11 @@ begin
  end;
 end;
 
+function tcustomwindowwidget.canclientpaint: boolean;
+begin
+ result:= assigned(fonclientpaint);
+end;
+
 procedure tcustomwindowwidget.doclientpaint(const aupdaterect: rectty);
 begin
  if canevent(tmethod(fonclientpaint)) then begin
@@ -310,7 +316,7 @@ end;
 
 procedure tcustomwindowwidget.doonpaint(const acanvas: tcanvas);
 begin
- if not (csdesigning in componentstate) then begin
+ if not (csdesigning in componentstate) and canclientpaint then begin
   checkclientwinid;   
   checkwindowrect;
   doclientpaint(acanvas.clipbox);

@@ -57,6 +57,7 @@ type
    procedure docreatewinid(const aparent: winidty; const awidgetrect: rectty;
                   var aid: winidty); override;
    procedure dodestroywinid; override;
+   function canclientpaint: boolean; override;
    procedure doclientpaint(const aupdaterect: rectty); override;
    procedure updateviewport(const arect: rectty); override;
      //icanvas
@@ -168,6 +169,11 @@ begin
   fonrender(self,aupdaterect);
   fcanvas.swapbuffers;
  end;
+end;
+
+function topenglcanvaswidget.canclientpaint: boolean;
+begin
+ result:= assigned(fonrender);
 end;
 
 end.

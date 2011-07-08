@@ -65,6 +65,7 @@ type
    procedure docreatewinid(const aparent: winidty; const awidgetrect: rectty;
                   var aid: winidty); override;
    procedure dodestroywinid; override;
+   function canclientpaint: boolean; override;
    procedure doclientpaint(const aupdaterect: rectty); override;
    procedure updateviewport(const arect: rectty); override;
   public
@@ -136,7 +137,7 @@ type
    property visible;
    property oncreatewinid;
    property ondestroywinid;
-   property onclientpaint;
+//   property onclientpaint;
    property onclientrectchanged;
    property onwindowmouseevent;
    property onwindowmousewheelevent;
@@ -345,6 +346,11 @@ procedure tcustomopenglwidget.doclientrectchanged;
 begin
  setcurrent;
  inherited;
+end;
+
+function tcustomopenglwidget.canclientpaint: boolean;
+begin
+ result:= assigned(fonrender);
 end;
 
 end.
