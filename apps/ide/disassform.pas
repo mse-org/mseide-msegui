@@ -58,7 +58,7 @@ implementation
 
 uses
  disassform_mfm,sourceform,sourcepage,mseformatstr,sysutils,msekeyboard,mseglob,
- actionsmodule,breakpointsform,msegraphutils,mseeditglob;
+ actionsmodule,breakpointsform,msegraphutils,mseeditglob,msegridsglob;
 
 { tdisassfo }
 

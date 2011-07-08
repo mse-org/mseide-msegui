@@ -219,10 +219,6 @@ type
  griderrorty = (gre_ok,gre_invaliddatacell,gre_differentrowcount,
                 gre_rowindex,gre_colindex,gre_invalidwidget);
 
- cellpositionty = (cep_nearest,cep_topleft,cep_top,cep_topright,cep_bottomright,
-                   cep_bottom,cep_bottomleft,cep_left,
-                   cep_rowcentered,cep_rowcenteredif);
-
 const
  mousecellevents = [cek_mousemove,cek_mousepark,cek_firstmousepark,
                     cek_buttonpress,cek_buttonrelease];
@@ -2128,7 +2124,7 @@ type
    function focuscell(cell: gridcoordty;
               selectaction: focuscellactionty = fca_focusin;
               const selectmode: selectcellmodety = scm_cell;
-              const noshowcell: boolean = false): boolean; virtual;
+              const ashowcell: cellpositionty = cep_nearest): boolean; virtual;
                                                //true if ok
    procedure focuscolbyname(const aname: string);
                  //case sensitive
@@ -10070,6 +10066,7 @@ var
   bo1,bo2: boolean;
   cell1: gridcoordty;
   rowfocus: boolean;
+  pos1: cellpositionty;
  begin      //checkfocuscell
   po1:= fscrollrect.pos;
   action:= fca_focusin;
@@ -10110,7 +10107,11 @@ var
         action:= fca_focusinshift;
        end;
       end;
-      focuscell(cell1,action,scm_cell,not bo2);
+      pos1:= cep_nearest;
+      if not bo2 then begin
+       pos1:= cep_none;
+      end;
+      focuscell(cell1,action,scm_cell,pos1);
       if not bo2 then begin
        showcell(fmousecell);
       end
@@ -10592,7 +10593,7 @@ end;
 function tcustomgrid.focuscell(cell: gridcoordty;
           selectaction: focuscellactionty = fca_focusin;
           const selectmode: selectcellmodety = scm_cell;
-          const noshowcell: boolean = false): boolean;
+          const ashowcell: cellpositionty = cep_nearest): boolean;
 
  function isappend(const arow: integer): boolean;
  begin
@@ -10934,7 +10935,7 @@ begin     //focuscell
    cell.col:= mergestart(cell.col,cell.row);
   end;
   bo1:= ((cell.col <> invalidaxis) or (cell.row <> invalidaxis)) and 
-                                not noshowcell;
+                                                    (ashowcell <> cep_none);
   if (cell.col <> ffocusedcell.col) or (cell.row <> ffocusedcell.row) or
         (selectaction in [fca_entergrid,fca_focusinforce]) or 
         (gs_restorerow in fstate) then begin
@@ -11043,7 +11044,7 @@ begin     //focuscell
     ffocusedcell:= cell;
    end;
    if bo1 then begin
-    showcell(cell);
+    showcell(cell,ashowcell);
    end;
    if isdatacell(cell) then begin
     checkrowreadonlystate;
@@ -11072,7 +11073,7 @@ begin     //focuscell
   else begin
    cellbefore:= ffocusedcell;
    if bo1 then begin
-    showcell(cell);
+    showcell(cell,ashowcell);
    end;
    if not (selectaction in [fca_focusin,fca_focusinrepeater,
                             fca_setfocusedcell,fca_none]) then begin
@@ -11564,6 +11565,9 @@ var
  rect1: rectty;
  po1: pointty;
 begin
+ if position = cep_none then begin
+  exit;
+ end;
  if (fupdating > 0) then begin
   include(fstate1,gs1_showcellinvalid);
   fshowcell:= cell;

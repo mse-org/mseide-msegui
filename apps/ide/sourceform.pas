@@ -26,7 +26,7 @@ uses
  msetypes,msestrings,mseguiglob,msegui,msesyntaxpainter,msemenus,
  mseactions,msesyntaxedit,msestat,finddialogform,msestream,msefilechange,
  breakpointsform,mseparser,msesimplewidgets,msegrids,msegraphutils,
- mseact;
+ mseact,msegridsglob;
 
 type
  tsourcefo = class;

@@ -180,7 +180,8 @@ type
    procedure checkgrid;
 
    procedure setedpos(const Value: gridcoordty; const select: boolean;
-                     const donotify: boolean);
+                     const donotify: boolean;
+                     const ashowcell: cellpositionty);
    procedure normalizeselectedrows(var start,stop: integer);
    procedure internalclearselection;
 
@@ -203,7 +204,8 @@ type
    procedure clear;
    function filename: filenamety;
 
-   procedure seteditpos(const Value: gridcoordty; const select: boolean = false);
+   procedure seteditpos(const Value: gridcoordty; const select: boolean = false;
+                        const ashowcell: cellpositionty = cep_nearest);
    procedure inserttext(const apos: gridcoordty; const atext: msestring;
                            out aendpos: gridcoordty;
                            selected: boolean = false;
@@ -225,7 +227,9 @@ type
                                const astyle: fontstylety; const aset: boolean);
    property selectstart: gridcoordty read fselectstart;
    property selectend: gridcoordty read fselectend;
-   procedure setselection(const start,stop: gridcoordty; aseteditpos: boolean = false);
+   procedure setselection(const start,stop: gridcoordty;
+                                const aseteditpos: boolean = false;
+                                const ashowcell: cellpositionty = cep_nearest);
    procedure clearselection;
    procedure copyselection;
    procedure cutselection;
@@ -236,7 +240,8 @@ type
 
    function find(const atext: msestring; options: searchoptionsty;
               var textpos: gridcoordty; const endpos: gridcoordty; 
-              selectfound: boolean = false): boolean;
+              selectfound: boolean = false;
+              const ashowcell: cellpositionty = cep_nearest): boolean;
 
    function gettext(const start, stop: gridcoordty): msestring; overload;
    function gettext: msestring; overload;
@@ -1180,7 +1185,8 @@ begin
 end;
 
 procedure tcustomtextedit.setselection(const start,stop: gridcoordty;
-                         aseteditpos: boolean = false);
+                         const aseteditpos: boolean = false;
+                         const ashowcell: cellpositionty = cep_nearest);
 var
  astart,astop: gridcoordty;
 
@@ -1250,8 +1256,10 @@ begin
   exit;
  end;
  if aseteditpos then begin
-  seteditpos(start,false);
-  seteditpos(stop,true);
+  if ashowcell <> cep_none then begin
+   seteditpos(start,false);
+  end;
+  seteditpos(stop,true,ashowcell);
  end
  else begin
   col1:= fgridintf.getcol;
@@ -1729,7 +1737,8 @@ begin
 end;
 
 procedure tcustomtextedit.setedpos(const Value: gridcoordty;
-                              const select: boolean; const donotify: boolean);
+                              const select: boolean; const donotify: boolean;
+                              const ashowcell: cellpositionty);
 var
  po1: gridcoordty;
 begin
@@ -1737,10 +1746,10 @@ begin
  po1.row:= value.row;
  po1.col:= fgridintf.getcol.colindex;
  if select then begin
-  fgridintf.getcol.grid.focuscell(po1,fca_focusinshift);
+  fgridintf.getcol.grid.focuscell(po1,fca_focusinshift,scm_cell,ashowcell);
  end
  else begin
-  fgridintf.getcol.grid.focuscell(po1,fca_focusin);
+  fgridintf.getcol.grid.focuscell(po1,fca_focusin,scm_cell,ashowcell);
  end;
  feditor.moveindex(value.col,select,donotify);
  if donotify then begin
@@ -1755,14 +1764,15 @@ begin
 end;
 
 procedure tcustomtextedit.seteditpos(const Value: gridcoordty; 
-                                          const select: boolean = false);
+                      const select: boolean = false;
+                      const ashowcell: cellpositionty = cep_nearest);
 begin
- setedpos(value,select,true);
+ setedpos(value,select,true,ashowcell);
 end;
 
 procedure tcustomtextedit.seteditpos1(const Value: gridcoordty);
 begin
- seteditpos(value,false);
+ seteditpos(value,false,cep_nearest);
 end;
 
 function tcustomtextedit.geteditpos: gridcoordty;
@@ -1906,7 +1916,8 @@ end;
 
 function tcustomtextedit.find(const atext: msestring; options: searchoptionsty;
               var textpos: gridcoordty; const endpos: gridcoordty;
-              selectfound: boolean = false): boolean;
+              selectfound: boolean = false;
+              const ashowcell: cellpositionty = cep_nearest): boolean;
 var
  int1,int2: integer;
  endrow: integer;
@@ -1920,7 +1931,8 @@ var
    textpos.col:= int1-1;
    result:= true;
    if selectfound then begin
-    setselection(textpos,makegridcoord(textpos.col + length(atext),textpos.row),true);
+    setselection(textpos,makegridcoord(textpos.col + length(atext),textpos.row),
+                                   true,ashowcell);
    end;
   end
   else begin

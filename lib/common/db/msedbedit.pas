@@ -1644,7 +1644,7 @@ type
    function focuscell(cell: gridcoordty;
            selectaction: focuscellactionty = fca_focusin;
          const selectmode: selectcellmodety = scm_cell;
-         const noshowcell: boolean = false): boolean; override;
+         const ashowcell: cellpositionty = cep_nearest): boolean; override;
                                  //true if ok
    function canclose(const newfocus: twidget): boolean; override;
    procedure rowup(const action: focuscellactionty = fca_focusin); override;
@@ -1915,7 +1915,7 @@ type
    function focuscell(cell: gridcoordty;
            selectaction: focuscellactionty = fca_focusin;
          const selectmode: selectcellmodety = scm_cell;
-         const noshowcell: boolean = false): boolean; override;
+         const ashowcell: cellpositionty = cep_nearest): boolean; override;
                                  //true if ok
    procedure docellevent(var info: celleventinfoty); override;
    function canclose(const newfocus: twidget): boolean; override;
@@ -8485,10 +8485,10 @@ end;
 function tcustomdbwidgetgrid.focuscell(cell: gridcoordty;
                selectaction: focuscellactionty = fca_focusin;
                const selectmode: selectcellmodety = scm_cell;
-               const noshowcell: boolean = false): boolean;
+               const ashowcell: cellpositionty = cep_nearest): boolean;
 begin
  fdatalink.focuscell(cell);
- result:= inherited focuscell(cell,selectaction,selectmode,noshowcell);
+ result:= inherited focuscell(cell,selectaction,selectmode,ashowcell);
 end;
 
 function tcustomdbwidgetgrid.isfirstrow: boolean;
@@ -9376,10 +9376,10 @@ end;
 function tcustomdbstringgrid.focuscell(cell: gridcoordty;
                selectaction: focuscellactionty = fca_focusin;
                const selectmode: selectcellmodety = scm_cell;
-               const noshowcell: boolean = false): boolean;
+               const ashowcell: cellpositionty = cep_nearest): boolean;
 begin
  fdatalink.focuscell(cell);
- result:= inherited focuscell(cell,selectaction,selectmode,noshowcell);
+ result:= inherited focuscell(cell,selectaction,selectmode,ashowcell);
 end;
 
 function tcustomdbstringgrid.getfixcols: tdbstringfixcols;

@@ -12,6 +12,11 @@ unit msegridsglob;
 interface
 
 type
+ cellpositionty = (cep_none,cep_nearest,cep_topleft,cep_top,cep_topright,
+                   cep_bottomright,
+                   cep_bottom,cep_bottomleft,cep_left,
+                   cep_rowcentered,cep_rowcenteredif);
+
  celleventkindty = (cek_none,cek_enter,cek_exit,cek_select,
                     cek_focusedcellchanged,
                     cek_mousemove,cek_mousepark,cek_firstmousepark,

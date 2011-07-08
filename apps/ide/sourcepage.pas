@@ -172,6 +172,7 @@ const
  nodelimstrings: array[0..0] of msestring = ('->'); //for c
  bmbitshift = 4;
  bmbitmask = integer($3ff0);
+ findshowpos = cep_rowcentered;
 
 function getpascalvarname(const edit: tsyntaxedit; pos: gridcoordty;
                           out startpos: gridcoordty): msestring;
@@ -869,7 +870,7 @@ begin
   else begin
    ffindpos:= edit.editpos;
 //   dec(ffindpos.col);
-   if not edit.find(text,options,ffindpos,bigcoord,true) then begin
+   if not edit.find(text,options,ffindpos,bigcoord,true,findshowpos) then begin
     if (ffindpos.row = 0) and (ffindpos.col = 0) then begin
      textnotfound;
     end
@@ -877,7 +878,7 @@ begin
      if askok('Text '''+text+
               ''' not found. Restart from begin of file?') then begin
       ffindpos:= nullcoord;
-      if not edit.find(text,options,ffindpos,edit.editpos,true) then begin
+      if not edit.find(text,options,ffindpos,edit.editpos,true,findshowpos) then begin
        textnotfound;
       end;
      end;
@@ -938,7 +939,7 @@ begin
     ffindpos:= edit.editpos;
     pos1:= bigcoord;
    end;
-   if not edit.find(text,options,ffindpos,pos1,true) then begin
+   if not edit.find(text,options,ffindpos,pos1,true,findshowpos) then begin
     textnotfound;
    end
    else begin
@@ -974,8 +975,9 @@ begin
        exit;
       end;
      end;
-    until not all or not edit.find(text,options,ffindpos,pos1,true) or
-                                              updatedisabled and checkescape;
+    until not all or 
+              not edit.find(text,options,ffindpos,pos1,true,findshowpos) or
+              updatedisabled and checkescape;
    end;
   finally
    if updatedisabled then begin

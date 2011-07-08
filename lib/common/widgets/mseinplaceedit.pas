@@ -15,7 +15,7 @@ interface
 uses
  msegui,mseguiglob,msegraphics,msedrawtext,msegraphutils,
  mserichstring,msetimer,mseevent,msetypes,msestrings,mseeditglob,msedatalist,
- msemenus,mseactions,mseact,mseglob;
+ msemenus,mseactions,mseact,mseglob,msegridsglob;
 
 const
  defaultundomaxcount = 256;
@@ -242,7 +242,7 @@ type
 
  iundo = interface(inullinterface)
   procedure setedpos(const Value: gridcoordty; const select: boolean;
-                               const donotify: boolean);
+                     const donotify: boolean; const ashowcell: cellpositionty);
   procedure deletetext(const startpos,endpos: gridcoordty);
   procedure inserttext(const pos: gridcoordty; const text: msestring;
                              selected: boolean;
@@ -2283,7 +2283,7 @@ begin
         if uf_selected in flags then begin
          fintf.setselectstart(selectstartpos);
         end;
-        fintf.setedpos(endpos,uf_selected in flags,false);
+        fintf.setedpos(endpos,uf_selected in flags,false,cep_nearest);
        end;
       end;
      end;
@@ -2299,7 +2299,7 @@ begin
      end;
     end;
     if utype <> ut_setpos then begin
-     fintf.setedpos(startpos,uf_selected in flags,false);
+     fintf.setedpos(startpos,uf_selected in flags,false,cep_nearest);
     end;
     linked:= (fundopo > 0) and items[fundopo-1]^.link;
    end;
@@ -2323,7 +2323,7 @@ begin
     with items[fundopo]^ do begin
      case utype of
       ut_setpos: begin
-       fintf.setedpos(endpos,uf_selected in flags,false);
+       fintf.setedpos(endpos,uf_selected in flags,false,cep_nearest);
       end;
       ut_inserttext: begin
        fintf.inserttext(startpos,text,uf_selected in flags,false);
@@ -2337,7 +2337,7 @@ begin
       end;
      end;
      if utype <> ut_setpos then begin
-      fintf.setedpos(endpos,uf_selected in flags,false);
+      fintf.setedpos(endpos,uf_selected in flags,false,cep_nearest);
      end;
      inc(fundopo);
      linked:= (fundopo < fcount) and items[fundopo-1]^.link;
