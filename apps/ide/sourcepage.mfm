@@ -63,7 +63,7 @@ object sourcepage: tsourcepage
     onrowsinserted = gridonrowsinserted
     onrowsdeleted = gridonrowsdeleted
     oncellevent = gridoncellevent
-    reffontheight = 13
+    reffontheight = 14
     object edit: tsyntaxedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight]
       optionsskin = [osk_framebuttononly]
@@ -87,7 +87,7 @@ object sourcepage: tsourcepage
       oneditnotifcation = editoneditnotification
       oncellevent = editoncellevent
       maxundocount = 10000
-      reffontheight = 18
+      reffontheight = 19
     end
     object dataicon: tdataicon
       optionsskin = [osk_framebuttononly]
@@ -126,12 +126,12 @@ object sourcepage: tsourcepage
     frame.dummy = 0
     taborder = 2
     bounds_x = 0
-    bounds_y = 210
+    bounds_y = 209
     bounds_cx = 68
-    bounds_cy = 17
+    bounds_cy = 18
     anchors = [an_left, an_bottom]
     textflags = [tf_xcentered, tf_ycentered]
-    reffontheight = 13
+    reffontheight = 14
   end
   object pathdisp: tstringdisp
     optionsskin = [osk_framebuttononly]
@@ -139,12 +139,12 @@ object sourcepage: tsourcepage
     frame.dummy = 0
     taborder = 1
     bounds_x = 68
-    bounds_y = 210
+    bounds_y = 209
     bounds_cx = 243
-    bounds_cy = 17
+    bounds_cy = 18
     anchors = [an_left, an_right, an_bottom]
     textflags = [tf_ycentered, tf_ellipseleft]
     options = [dwo_hintclippedtext]
-    reffontheight = 13
+    reffontheight = 14
   end
 end

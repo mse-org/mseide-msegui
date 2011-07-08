@@ -330,6 +330,7 @@ type
  twidgetgrid = class(tcustomwidgetgrid)
   published
    property optionsgrid;
+   property optionsgrid1;
    property optionsfold;
    property rowstatelist;
    property fixcols;

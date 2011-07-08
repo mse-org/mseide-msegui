@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -356,7 +356,7 @@ procedure normalizetextrect(const po1,po2: gridcoordty; out start,stop: gridcoor
 implementation
 uses
  msefileutils,sysutils,msesysutils,msesys,msewidgets,
- msekeyboard;
+ msekeyboard,mseactions;
 
 const
  valuevarname = 'value';
@@ -687,6 +687,7 @@ var
  int1,int2: integer;
  indexbefore: integer;
  rect1: rectty;
+ bo1,bo2: boolean;
 begin
  with info do begin
   shiftstate1:= shiftstate * shiftstatesmask;
@@ -752,6 +753,54 @@ begin
                                              then begin
     insertlinebreak;
     include(eventstate,es_processed);
+   end;
+  end;
+  if flines <> nil then begin
+   if not (es_processed in eventstate) and 
+                   issysshortcut(sho_rowdelete,info) then begin
+    int1:= col;
+    feditor.begingroup;
+    try
+     deletetext(mgc(0,row),mgc(0,row+1));
+     col:= int1;
+    finally
+     feditor.endgroup;
+    end;
+    include(eventstate,es_processed);
+   end;
+   if not (es_processed in eventstate) then begin
+    bo1:= issysshortcut(sho_rowappend,info);
+    if bo1 or issysshortcut(sho_rowinsert,info) then begin
+     feditor.begingroup;
+     try
+      bo2:= false;
+      int1:= col;
+      clearselection;
+      if bo1 then begin //append
+       col:= length(flines[row]);
+      end
+      else begin
+       if row = 0 then begin
+        bo2:= true;
+        col:= 0;
+       end
+       else begin
+        editpos:= mgc(length(flines[row-1]),row-1);
+       end;
+      end;
+      insertlinebreak;
+      if not bo1 then begin //insert
+       int2:= row;
+       if not bo2 then begin
+        inc(int2);
+       end;
+       editpos:= mgc(int1,int2);
+      end;
+     finally
+      feditor.endgroup;
+     end;
+     include(eventstate,es_processed);
+    end;
    end;
   end;
   if not (es_processed in eventstate) then begin
@@ -1374,7 +1423,6 @@ begin
     end;
     ea_indexmoved: begin
      fxpos:= feditor.caretpos.x;
-//     fcolindex:= feditor.curindex;
      updateindex(eas_shift in state);
     end;
     ea_textsizechanged: begin
@@ -1485,7 +1533,6 @@ var
  textinfo: drawtextinfoty;
 begin
  textinfo.text:= flines.richitems[row];
-// textinfo.font:= fgridintf.getcol.getgridfont(row);
  textinfo.font:= fgridintf.getcol.rowfont(row);
  textinfo.flags:= feditor.textflags;
  textinfo.dest:= innerclientrect;
@@ -1541,7 +1588,6 @@ var
  textinfo: drawtextinfoty;
 begin
  textinfo.text:= flines.richitems[textpos.row];
-// textinfo.font:= fgridintf.getcol.getgridfont(textpos.row);
  textinfo.font:= fgridintf.getcol.rowfont(textpos.row);
  textinfo.flags:= feditor.textflags;
  textinfo.dest:= innerclientrect;
@@ -1571,15 +1617,7 @@ begin
   fontextmouseevent(self,info);
  end;
 end;
-{
-procedure tcustomtextedit.clientmouseevent(var info: mouseeventinfoty);
-begin
- if fgridintf <> nil then begin
-  twidgetcol1(fgridintf.getcol).childmouseevent(self,info);
- end;
- inherited;
-end;
-}
+
 procedure tcustomtextedit.docellevent(const ownedcol: boolean; 
                                                         var info: celleventinfoty);
 var
@@ -1643,7 +1681,6 @@ begin
        (info.mouseeventinfopo^.shiftstate = [ss_left]) and 
                                                 grid.cellclicked then begin
        fxpos:= textpostomousepos(textinfo.pos).x;
-//       fcolindex:= textinfo.pos.col;
        
        fgridintf.getcol.grid.focuscell(cell,fca_focusinshift);       
        setclientclick;
@@ -1699,7 +1736,6 @@ begin
  tinplaceedit1(feditor).frow:= value.row;
  po1.row:= value.row;
  po1.col:= fgridintf.getcol.colindex;
-// fcolindex:= feditor.curindex;
  if select then begin
   fgridintf.getcol.grid.focuscell(po1,fca_focusinshift);
  end

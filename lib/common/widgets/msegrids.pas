@@ -102,6 +102,8 @@ type
                  og_autopopup,
                  og_mousescrollcol,og_noresetselect);
  optionsgridty = set of optiongridty;
+ optiongrid1ty = (og1_norowdeletequery);
+ optionsgrid1ty = set of optiongrid1ty;
 
 const
  rowstateoptions = [og_colmerged,og_rowheight]; //variable rowstate size
@@ -1853,6 +1855,7 @@ type
    factiverow: integer;
    fstartanchor,fendanchor: gridcoordty;
    foptionsgrid: optionsgridty;
+   foptionsgrid1: optionsgrid1ty;
    fstate: gridstatesty;
    fstate1: gridstates1ty;
    fshowcell: gridcoordty;
@@ -2173,6 +2176,8 @@ type
 
    property optionsgrid: optionsgridty read foptionsgrid write setoptionsgrid
                 default defaultoptionsgrid; //first!
+   property optionsgrid1: optionsgrid1ty read foptionsgrid1 write foptionsgrid1
+                default [];
    property optionsfold: optionsfoldty read foptionsfold 
                                            write foptionsfold default [];
    property sorted: boolean read getsorted write setsorted;
@@ -2329,6 +2334,7 @@ type
    property cols[index: integer]: tdrawcol read getcols write setcols; default;
   published
    property optionsgrid;
+   property optionsgrid1;
    property optionsfold;
    property datacols: tdrawcols read getdatacols write setdatacols;
    property rowstatelist;
@@ -14624,7 +14630,8 @@ end;
 procedure tcustomgrid.dodeleterow(const sender: tobject);
 begin
  with stockobjects do begin
-  if askok(captions[sc_Delete_row_question],captions[sc_Confirmation]) then begin
+  if (og1_norowdeletequery in foptionsgrid1) or
+    askok(captions[sc_Delete_row_question],captions[sc_Confirmation]) then begin
    deleterow(ffocusedcell.row);
   end;
  end;

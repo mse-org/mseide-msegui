@@ -354,6 +354,7 @@ type
    property fixcols;
    property fixrows;
    property optionsgrid;
+   property optionsgrid1;
    property options;
    property gridframewidth;
    property gridframecolor;

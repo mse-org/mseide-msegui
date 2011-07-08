@@ -1665,6 +1665,7 @@ type
   published
 //   property datasource;
    property optionsgrid;
+   property optionsgrid1;
    property fixcols;
    property fixrows;
 //   property font;
@@ -1945,6 +1946,7 @@ type
    property fieldnamedisplayfixrow;
    
    property optionsgrid;
+   property optionsgrid1;
    property datacols;
    property datalink;
    property fixcols;
