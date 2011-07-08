@@ -2423,7 +2423,8 @@ end;
 procedure tlookuplbdispfielddatalink.setlookupbuffer(const avalue: tcustomlookupbuffer);
 begin
  if avalue <> flookupbuffer then begin
-  fobjectlinker.setlinkedvar(iobjectlink(self),avalue,flookupbuffer);
+  fobjectlinker.setlinkedvar(iobjectlink(self),avalue,
+                tmsecomponent(flookupbuffer));
   lookupchange;
  end;
 end;
