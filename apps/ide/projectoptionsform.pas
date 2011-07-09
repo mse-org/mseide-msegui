@@ -32,7 +32,7 @@ uses
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
  msemenus,sysutils,mseglob,mseedit,db,msedialog,msescrollbar,msememodialog,
- msecodetemplates,mseifiglob;
+ msecodetemplates,mseifiglob,mseapplication;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -172,6 +172,8 @@ type
    fsettingseditor: boolean;
 //   fwindowlayoutfile: filenamety;
 //   fwindowlayouthistory: filenamearty;
+   fsettingsautoload: boolean;
+   fsettingsautosave: boolean;
    function limitgridsize(const avalue: integer): integer;
    procedure setgridsizex(const avalue: integer);
    procedure setgridsizey(const avalue: integer);
@@ -242,6 +244,10 @@ type
                                                  write fexceptignore;
    property settingsfile: filenamety read fsettingsfile write fsettingsfile;
    property settingseditor: boolean read fsettingseditor write fsettingseditor;
+   property settingsautoload: boolean read fsettingsautoload
+                                          write fsettingsautoload;
+   property settingsautosave: boolean read fsettingsautosave
+                                          write fsettingsautosave;
    
 //   property windowlayoutfile: filenamety read fwindowlayoutfile 
 //                                                write fwindowlayoutfile;
@@ -540,11 +546,14 @@ type
    twidgetgrid5: twidgetgrid;
    codetemplatedirs: tfilenameedit;
    nogdbserverexit: tbooleanedit;
-   settingsfile: tfilenameedit;
-   tsimplewidget1: tsimplewidget;
-   loadbu: tbutton;
-   savebu: tbutton;
+   ttabpage20: ttabpage;
    settingseditor: tbooleanedit;
+   settingsautoload: tbooleanedit;
+   settingsautosave: tbooleanedit;
+   tlayouter6: tlayouter;
+   savebu: tbutton;
+   loadbu: tbutton;
+   settingsfile: tfilenameedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1518,6 +1527,9 @@ begin
  end;
 end;
 
+procedure doloadexe(const sender: tprojectoptionsfo); forward;
+procedure dosaveexe(const sender: tprojectoptionsfo); forward;
+
 procedure updateprojectoptions(const statfiler: tstatfiler;
                   const afilename: filenamety);
 var
@@ -1606,6 +1618,17 @@ begin
 
   modified:= false;
   savechecked:= false;
+
+  if iswriter then begin
+   if o.settingsautosave then begin
+    dosaveexe(nil);
+   end;
+  end
+  else begin
+   if o.settingsautoload then begin
+    doloadexe(nil);
+   end;
+  end;
  end;
 end;
 
@@ -1792,8 +1815,8 @@ begin
   fo.toolparam.gridvalues:= toolparams;
   fo.def.gridvalues:= defines;
   fo.defon.gridvalues:= defineson;
+  fo.settingsdataent(nil);
  end;
- fo.settingsdataent(nil);
 end;
 
 procedure storemacros(fo: tprojectoptionsfo);
@@ -2295,6 +2318,8 @@ type
  valuebufferty = record
   settingsfile: filenamety;
   settingseditor: boolean;
+  settingsautoload: boolean;
+  settingsautosave: boolean;
   projectfilename: filenamety;
   projectdir: filenamety;
 
@@ -2333,41 +2358,82 @@ type
 procedure savevalues(fo: tprojectoptionsfo; out buffer: valuebufferty);
 begin
  with buffer do begin
-  settingsfile:= fo.settingsfile.value;
-  settingseditor:= fo.settingseditor.value;
   projectfilename:= projectoptions.projectfilename;
   projectdir:= projectoptions.projectdir;
-
-  showgrid:= fo.showgrid.value;
-  snaptogrid:= fo.snaptogrid.value;
-  moveonfirstclick:= fo.moveonfirstclick.value;
-  gridsizex:= fo.gridsizex.value;
-  gridsizey:= fo.gridsizey.value;
-  autoindent:= fo.autoindent.value;
-  blockindent:= fo.blockindent.value;
-  rightmarginon:= fo.rightmarginon.value;
-  rightmarginchars:= fo.rightmarginchars.value;
-  scrollheight:= fo.scrollheight.value;
-  tabstops:= fo.tabstops.value;
-  spacetabs:= fo.spacetabs.value;
-  tabindent:= fo.tabindent.value;
-  editfontname:= fo.editfontname.value;
-  editfontheight:= fo.editfontheight.value;
-  editfontwidth:= fo.editfontwidth.value;
-  editfontextraspace:= fo.editfontextraspace.value;
-  editfontcolor:= fo.editfontcolor.value;
-  editbkcolor:= fo.editbkcolor.value;
-  statementcolor:= fo.statementcolor.value;
-  editfontantialiased:= fo.editfontantialiased.value;
-  editmarkbrackets:= fo.editmarkbrackets.value;
-  backupfilecount:= fo.backupfilecount.value;
-  encoding:= fo.encoding.value;
-  codetemplatedirs:= fo.codetemplatedirs.gridvalues;
-
-  sourcefilemasks:= fo.filefiltergrid[0].datalist.asarray;
-  syntaxdeffiles:= fo.grid[0].datalist.asarray;
-  filemasknames:= fo.filefiltergrid[1].datalist.asarray;
-  filemasks:= fo.grid[1].datalist.asarray;
+  if fo <> nil then begin
+   settingsfile:= fo.settingsfile.value;
+   settingseditor:= fo.settingseditor.value;
+   settingsautoload:= fo.settingsautoload.value; 
+   settingsautosave:= fo.settingsautosave.value; 
+ 
+   showgrid:= fo.showgrid.value;
+   snaptogrid:= fo.snaptogrid.value;
+   moveonfirstclick:= fo.moveonfirstclick.value;
+   gridsizex:= fo.gridsizex.value;
+   gridsizey:= fo.gridsizey.value;
+   autoindent:= fo.autoindent.value;
+   blockindent:= fo.blockindent.value;
+   rightmarginon:= fo.rightmarginon.value;
+   rightmarginchars:= fo.rightmarginchars.value;
+   scrollheight:= fo.scrollheight.value;
+   tabstops:= fo.tabstops.value;
+   spacetabs:= fo.spacetabs.value;
+   tabindent:= fo.tabindent.value;
+   editfontname:= fo.editfontname.value;
+   editfontheight:= fo.editfontheight.value;
+   editfontwidth:= fo.editfontwidth.value;
+   editfontextraspace:= fo.editfontextraspace.value;
+   editfontcolor:= fo.editfontcolor.value;
+   editbkcolor:= fo.editbkcolor.value;
+   statementcolor:= fo.statementcolor.value;
+   editfontantialiased:= fo.editfontantialiased.value;
+   editmarkbrackets:= fo.editmarkbrackets.value;
+   backupfilecount:= fo.backupfilecount.value;
+   encoding:= fo.encoding.value;
+   codetemplatedirs:= fo.codetemplatedirs.gridvalues;
+ 
+   sourcefilemasks:= fo.filefiltergrid[0].datalist.asarray;
+   syntaxdeffiles:= fo.grid[0].datalist.asarray;
+   filemasknames:= fo.filefiltergrid[1].datalist.asarray;
+   filemasks:= fo.grid[1].datalist.asarray;
+  end
+  else begin
+   settingsfile:= projectoptions.o.settingsfile;
+   settingseditor:= projectoptions.o.settingseditor;
+   settingsautoload:= projectoptions.o.settingsautoload; 
+   settingsautosave:= projectoptions.o.settingsautosave; 
+ 
+   showgrid:= projectoptions.o.showgrid;
+   snaptogrid:= projectoptions.o.snaptogrid;
+   moveonfirstclick:= projectoptions.o.moveonfirstclick;
+   gridsizex:= projectoptions.o.gridsizex;
+   gridsizey:= projectoptions.o.gridsizey;
+   autoindent:= projectoptions.o.autoindent;
+   blockindent:= projectoptions.o.blockindent;
+   rightmarginon:= projectoptions.o.rightmarginon;
+   rightmarginchars:= projectoptions.o.rightmarginchars;
+   scrollheight:= projectoptions.o.scrollheight;
+   tabstops:= projectoptions.o.tabstops;
+   spacetabs:= projectoptions.o.spacetabs;
+   tabindent:= projectoptions.o.tabindent;
+   editfontname:= projectoptions.o.editfontname;
+   editfontheight:= projectoptions.o.editfontheight;
+   editfontwidth:= projectoptions.o.editfontwidth;
+   editfontextraspace:= projectoptions.o.editfontextraspace;
+   editfontcolor:= projectoptions.o.editfontcolor;
+   editbkcolor:= projectoptions.o.editbkcolor;
+   statementcolor:= projectoptions.o.statementcolor;
+   editfontantialiased:= projectoptions.o.editfontantialiased;
+   editmarkbrackets:= projectoptions.o.editmarkbrackets;
+   backupfilecount:= projectoptions.o.backupfilecount;
+   encoding:= projectoptions.o.encoding;
+   codetemplatedirs:= projectoptions.o.codetemplatedirs;
+ 
+   sourcefilemasks:= projectoptions.t.sourcefilemasks;
+   syntaxdeffiles:= projectoptions.t.syntaxdeffiles;
+   filemasknames:= projectoptions.t.filemasknames;
+   filemasks:= projectoptions.t.filemasks;
+  end;
  end;
 end;
 
@@ -2375,46 +2441,87 @@ procedure restorevalues(fo: tprojectoptionsfo; const buffer: valuebufferty;
                           const noeditor: boolean);
 begin
  with buffer do begin
-  fo.settingsfile.value:= settingsfile;
-  fo.settingseditor.value:= settingseditor;
   projectoptions.projectfilename:= projectfilename;
   projectoptions.projectdir:= projectdir;
-
-  if not noeditor then begin
-   fo.showgrid.value:= showgrid;
-   fo.snaptogrid.value:= snaptogrid;
-   fo.moveonfirstclick.value:= moveonfirstclick;
-   fo.gridsizex.value:= gridsizex;
-   fo.gridsizey.value:= gridsizey;
-   fo.autoindent.value:= autoindent;
-   fo.blockindent.value:= blockindent;
-   fo.rightmarginon.value:= rightmarginon;
-   fo.rightmarginchars.value:= rightmarginchars;
-   fo.scrollheight.value:= scrollheight;
-   fo.tabstops.value:= tabstops;
-   fo.spacetabs.value:= spacetabs;
-   fo.tabindent.value:= tabindent;
-   fo.editfontname.value:= editfontname;
-   fo.editfontheight.value:= editfontheight;
-   fo.editfontwidth.value:= editfontwidth;
-   fo.editfontextraspace.value:= editfontextraspace;
-   fo.editfontcolor.value:= editfontcolor;
-   fo.editbkcolor.value:= editbkcolor;
-   fo.statementcolor.value:= statementcolor;
-   fo.editfontantialiased.value:= editfontantialiased;
-   fo.editmarkbrackets.value:= editmarkbrackets;
-   fo.backupfilecount.value:= backupfilecount;
-   fo.encoding.value:= encoding;
-   fo.codetemplatedirs.gridvalues:= codetemplatedirs;
- 
-   fo.filefiltergrid[0].datalist.asarray:= sourcefilemasks;
-   fo.grid[0].datalist.asarray:= syntaxdeffiles;
-   fo.filefiltergrid[1].datalist.asarray:= filemasknames;
-   fo.grid[1].datalist.asarray:= filemasks;
+  if fo <> nil then begin
+   fo.settingsfile.value:= settingsfile;
+   fo.settingseditor.value:= settingseditor; 
+   fo.settingsautoload.value:= settingsautoload; 
+   fo.settingsautosave.value:= settingsautosave; 
+   if not noeditor then begin
+    fo.showgrid.value:= showgrid;
+    fo.snaptogrid.value:= snaptogrid;
+    fo.moveonfirstclick.value:= moveonfirstclick;
+    fo.gridsizex.value:= gridsizex;
+    fo.gridsizey.value:= gridsizey;
+    fo.autoindent.value:= autoindent;
+    fo.blockindent.value:= blockindent;
+    fo.rightmarginon.value:= rightmarginon;
+    fo.rightmarginchars.value:= rightmarginchars;
+    fo.scrollheight.value:= scrollheight;
+    fo.tabstops.value:= tabstops;
+    fo.spacetabs.value:= spacetabs;
+    fo.tabindent.value:= tabindent;
+    fo.editfontname.value:= editfontname;
+    fo.editfontheight.value:= editfontheight;
+    fo.editfontwidth.value:= editfontwidth;
+    fo.editfontextraspace.value:= editfontextraspace;
+    fo.editfontcolor.value:= editfontcolor;
+    fo.editbkcolor.value:= editbkcolor;
+    fo.statementcolor.value:= statementcolor;
+    fo.editfontantialiased.value:= editfontantialiased;
+    fo.editmarkbrackets.value:= editmarkbrackets;
+    fo.backupfilecount.value:= backupfilecount;
+    fo.encoding.value:= encoding;
+    fo.codetemplatedirs.gridvalues:= codetemplatedirs;
+  
+    fo.filefiltergrid[0].datalist.asarray:= sourcefilemasks;
+    fo.grid[0].datalist.asarray:= syntaxdeffiles;
+    fo.filefiltergrid[1].datalist.asarray:= filemasknames;
+    fo.grid[1].datalist.asarray:= filemasks;
+   end;
+   fo.fontondataentered(nil);
+   fo.settingsdataent(nil);
+  end
+  else begin
+   projectoptions.o.settingsfile:= settingsfile;
+   projectoptions.o.settingseditor:= settingseditor; 
+   projectoptions.o.settingsautoload:= settingsautoload; 
+   projectoptions.o.settingsautosave:= settingsautosave; 
+   if not noeditor then begin
+    projectoptions.o.showgrid:= showgrid;
+    projectoptions.o.snaptogrid:= snaptogrid;
+    projectoptions.o.moveonfirstclick:= moveonfirstclick;
+    projectoptions.o.gridsizex:= gridsizex;
+    projectoptions.o.gridsizey:= gridsizey;
+    projectoptions.o.autoindent:= autoindent;
+    projectoptions.o.blockindent:= blockindent;
+    projectoptions.o.rightmarginon:= rightmarginon;
+    projectoptions.o.rightmarginchars:= rightmarginchars;
+    projectoptions.o.scrollheight:= scrollheight;
+    projectoptions.o.tabstops:= tabstops;
+    projectoptions.o.spacetabs:= spacetabs;
+    projectoptions.o.tabindent:= tabindent;
+    projectoptions.o.editfontname:= editfontname;
+    projectoptions.o.editfontheight:= editfontheight;
+    projectoptions.o.editfontwidth:= editfontwidth;
+    projectoptions.o.editfontextraspace:= editfontextraspace;
+    projectoptions.o.editfontcolor:= editfontcolor;
+    projectoptions.o.editbkcolor:= editbkcolor;
+    projectoptions.o.statementcolor:= statementcolor;
+    projectoptions.o.editfontantialiased:= editfontantialiased;
+    projectoptions.o.editmarkbrackets:= editmarkbrackets;
+    projectoptions.o.backupfilecount:= backupfilecount;
+    projectoptions.o.encoding:= encoding;
+    projectoptions.o.codetemplatedirs:= codetemplatedirs;
+  
+    projectoptions.t.sourcefilemasks:= sourcefilemasks;
+    projectoptions.t.syntaxdeffiles:= syntaxdeffiles;
+    projectoptions.t.filemasknames:= filemasknames;
+    projectoptions.t.filemasks:= filemasks;
+   end;
   end;
  end;
- fo.fontondataentered(nil);
- fo.settingsdataent(nil);
 end;
 
 procedure savestat(out astream: ttextstream);
@@ -2446,17 +2553,28 @@ begin
  end;
 end;
 
-procedure tprojectoptionsfo.loadexe(const sender: TObject);
+procedure doloadexe(const sender: tprojectoptionsfo);
 var
  read1: tstatreader;
  buffer: valuebufferty;
  stream1: ttextstream;
  bo1: boolean;
+ fname1: filenamety;
 begin
- if askyesno('Do you want to replace the settings by'+lineend+
-              '"'+settingsfile.value+'"?','WARNING') then begin
-  bo1:= settingseditor.value;
-  savevalues(self,buffer);
+ if (sender <> nil) then begin
+  fname1:= sender.settingsfile.value;
+  if not askyesno('Do you want to replace the settings by'+lineend+
+              '"'+fname1+'"?','WARNING') then begin
+   exit;
+  end;
+  bo1:= sender.settingseditor.value;
+ end
+ else begin
+  fname1:= projectoptions.o.settingsfile;
+  bo1:= projectoptions.o.settingseditor;
+ end;
+ if fname1 <> '' then begin
+  savevalues(sender,buffer);
   savestat(stream1);
   try
    read1:= tstatreader.create(buffer.settingsfile,ce_utf8n);
@@ -2467,35 +2585,63 @@ begin
    finally
     read1.free;
    end;
-   projectoptionstoform(self);
-   restorevalues(self,buffer,bo1);
+   if sender <> nil then begin
+    projectoptionstoform(sender);
+   end;
+   restorevalues(sender,buffer,bo1);
+  except
+   application.handleexception;
+  end;
+  if sender <> nil then begin
+   restorestat(stream1);
+  end
+  else begin
+   stream1.free;
+   expandprojectmacros;
+  end;
+ end;
+end;
+
+procedure tprojectoptionsfo.loadexe(const sender: TObject);
+begin
+ doloadexe(self);
+end;
+
+procedure dosaveexe(const sender: tprojectoptionsfo);
+var
+ stat1: tstatwriter;
+ stream1: ttextstream;
+ fname1: filenamety;
+begin
+ if sender <> nil then begin
+  fname1:= sender.settingsfile.value;
+  if findfile(fname1) and not askyesno('File "'+fname1+'" exists.'+lineend+
+    'Do you want to overwrite?','WARNING') then begin
+   exit;
+  end;
+ end
+ else begin
+  fname1:= projectoptions.o.settingsfile;
+ end;
+ if fname1 <> '' then begin
+  stat1:= tstatwriter.create(fname1,ce_utf8n,true);
+  try
+   savestat(stream1);
+   if sender <> nil then begin
+    formtoprojectoptions(sender);
+   end;
+   stat1.setsection('projectoptions');
+   updateprojectsettings(stat1);
   finally
+   stat1.free;
    restorestat(stream1);
   end;
  end;
 end;
 
 procedure tprojectoptionsfo.saveexe(const sender: TObject);
-var
- stat1: tstatwriter;
- stream1: ttextstream;
 begin
- if findfile(settingsfile.value) then begin
-  if not askyesno('File "'+settingsfile.value+'" exists.'+lineend+
-   'Do you want to overwrite?','WARNING') then begin
-   exit;
-  end;
- end;
- stat1:= tstatwriter.create(settingsfile.value,ce_utf8n,true);
- try
-  savestat(stream1);
-  formtoprojectoptions(self);
-  stat1.setsection('projectoptions');
-  updateprojectsettings(stat1);
- finally
-  stat1.free;
-  restorestat(stream1);
- end;
+ dosaveexe(self);
 end;
 
 procedure tprojectoptionsfo.settingsdataent(const sender: TObject);

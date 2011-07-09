@@ -1770,5 +1770,4 @@ end;
 initialization
  sysshortcuts:= defaultsysshortcuts; 
  sysshortcuts1:= defaultsysshortcuts1; 
-finalization
 end.

@@ -53,7 +53,7 @@ object projectoptionsfo: tprojectoptionsfo
       place_mindist = 5
       place_maxdist = 5
       place_mode = wam_end
-      place_options = [plo_endmargin, plo_propmargin, plo_syncmaxautosize]
+      place_options = [plo_propmargin, plo_syncmaxautosize]
       object cancel: tbutton
         optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
         color = -2147483645
@@ -78,83 +78,6 @@ object projectoptionsfo: tprojectoptionsfo
         caption = 'Ok'
         modalresult = mr_ok
         reffontheight = 14
-      end
-      object settingsfile: tfilenameedit
-        optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
-        frame.caption = 'Settings'
-        frame.captionpos = cp_right
-        frame.button.color = -2147483646
-        frame.button.imagenr = 17
-        frame.outerframe = (
-          0
-          0
-          48
-          0
-        )
-        taborder = 2
-        bounds_x = 5
-        bounds_y = 5
-        bounds_cx = 368
-        anchors = [an_left, an_top, an_right]
-        ondataentered = settingsdataent
-        controller.filterlist.data = (
-          (
-            'Project Files'
-            '*.prj'
-          )
-          (
-            'All Files'
-            '*'
-          )
-        )
-        controller.defaultext = 'prj'
-        controller.captionopen = 'Enter Settings File'
-        reffontheight = 14
-      end
-      object tsimplewidget1: tsimplewidget
-        optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
-        taborder = 3
-        bounds_x = 540
-        bounds_y = 5
-        bounds_cx = 18
-        bounds_cy = 20
-      end
-      object loadbu: tbutton
-        taborder = 4
-        bounds_x = 432
-        bounds_y = 5
-        bounds_cx = 49
-        bounds_cy = 20
-        state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
-        caption = 'Load'
-        onexecute = loadexe
-      end
-      object savebu: tbutton
-        taborder = 5
-        bounds_x = 486
-        bounds_y = 5
-        bounds_cx = 49
-        bounds_cy = 20
-        state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
-        caption = 'Save'
-        onexecute = saveexe
-      end
-      object settingseditor: tbooleanedit
-        optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
-        frame.caption = 'Editor'
-        frame.dummy = 0
-        frame.outerframe = (
-          0
-          1
-          35
-          2
-        )
-        taborder = 6
-        hint = 'Load/Save editor settings also.'
-        bounds_x = 378
-        bounds_y = 8
-        bounds_cx = 49
-        bounds_cy = 16
       end
     end
     object tabwidget: ttabwidget
@@ -1649,7 +1572,7 @@ object projectoptionsfo: tprojectoptionsfo
               color = -2147483645
               taborder = 2
               bounds_x = 0
-              bounds_y = 71
+              bounds_y = 74
               bounds_cx = 669
               bounds_cy = 37
               anchors = [an_top]
@@ -1717,7 +1640,7 @@ object projectoptionsfo: tprojectoptionsfo
               hint = '"--tty DEVICE" to set target terminal'
               onshowhint = hintexpandedmacros
               bounds_x = 1
-              bounds_y = 107
+              bounds_y = 111
               bounds_cx = 667
               bounds_cy = 37
               anchors = [an_left, an_top, an_right]
@@ -1730,7 +1653,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 5
               bounds_x = 0
-              bounds_y = 184
+              bounds_y = 188
               bounds_cx = 669
               bounds_cy = 37
               anchors = [an_top]
@@ -1816,7 +1739,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 6
               bounds_x = 0
-              bounds_y = 220
+              bounds_y = 225
               bounds_cx = 669
               bounds_cy = 37
               anchors = [an_top]
@@ -1871,7 +1794,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 1
               bounds_x = 0
-              bounds_y = 36
+              bounds_y = 37
               bounds_cx = 669
               bounds_cy = 37
               anchors = [an_top]
@@ -1968,7 +1891,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 4
               bounds_x = 0
-              bounds_y = 147
+              bounds_y = 151
               bounds_cx = 555
               bounds_cy = 37
               optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
@@ -2281,7 +2204,6 @@ object projectoptionsfo: tprojectoptionsfo
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 6
-        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669
@@ -5021,6 +4943,136 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cx = 260
             bounds_cy = 16
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+            reffontheight = 14
+          end
+        end
+      end
+      object ttabpage20: ttabpage
+        frame.zoomwidthstep = 1
+        frame.zoomheightstep = 1
+        taborder = 9
+        visible = True
+        bounds_x = 1
+        bounds_y = 19
+        bounds_cx = 669
+        bounds_cy = 517
+        anchors = [an_left, an_top, an_right, an_bottom]
+        caption = 'Storage'
+        object settingseditor: tbooleanedit
+          optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
+          frame.caption = 'Load editor settings'
+          frame.dummy = 0
+          frame.outerframe = (
+            0
+            1
+            112
+            2
+          )
+          bounds_x = 15
+          bounds_y = 52
+          bounds_cx = 126
+          bounds_cy = 16
+        end
+        object settingsautoload: tbooleanedit
+          frame.caption = 'Auto load'
+          frame.dummy = 0
+          frame.outerframe = (
+            0
+            1
+            54
+            2
+          )
+          taborder = 1
+          bounds_x = 15
+          bounds_y = 76
+          bounds_cx = 67
+          bounds_cy = 16
+        end
+        object settingsautosave: tbooleanedit
+          frame.caption = 'Auto save'
+          frame.dummy = 0
+          frame.outerframe = (
+            0
+            1
+            56
+            2
+          )
+          taborder = 2
+          bounds_x = 15
+          bounds_y = 100
+          bounds_cx = 69
+          bounds_cy = 16
+        end
+        object tlayouter6: tlayouter
+          frame.framei_left = 5
+          frame.framei_top = 5
+          frame.framei_right = 5
+          frame.framei_bottom = 5
+          frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
+          frame.dummy = 0
+          taborder = 3
+          bounds_x = 0
+          bounds_y = 13
+          bounds_cx = 669
+          bounds_cy = 30
+          anchors = [an_top]
+          optionsscale = [osc_expandy, osc_shrinky]
+          optionslayout = [lao_placex, lao_aligny]
+          align_glue = wam_center
+          place_mindist = 5
+          place_maxdist = 5
+          place_options = [plo_endmargin]
+          object savebu: tbutton
+            bounds_x = 615
+            bounds_y = 5
+            bounds_cx = 49
+            bounds_cy = 20
+            anchors = [an_top, an_right]
+            state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
+            caption = 'Save'
+            onexecute = saveexe
+          end
+          object loadbu: tbutton
+            taborder = 1
+            bounds_x = 561
+            bounds_y = 5
+            bounds_cx = 49
+            bounds_cy = 20
+            anchors = [an_top, an_right]
+            state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
+            caption = 'Load'
+            onexecute = loadexe
+          end
+          object settingsfile: tfilenameedit
+            optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
+            frame.caption = 'Settings File'
+            frame.captionpos = cp_right
+            frame.button.color = -2147483646
+            frame.button.imagenr = 17
+            frame.outerframe = (
+              0
+              0
+              71
+              0
+            )
+            taborder = 2
+            bounds_x = 5
+            bounds_y = 5
+            bounds_cx = 551
+            anchors = [an_left, an_top, an_right]
+            ondataentered = settingsdataent
+            controller.filterlist.data = (
+              (
+                'Project Files'
+                '*.prj'
+              )
+              (
+                'All Files'
+                '*'
+              )
+            )
+            controller.defaultext = 'prj'
+            controller.captionopen = 'Enter Settings File'
             reffontheight = 14
           end
         end
