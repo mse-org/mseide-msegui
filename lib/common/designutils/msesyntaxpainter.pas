@@ -501,7 +501,7 @@ begin
                                0,bigint,charstyles[scopeinfopo^.fontinfonr]) or changed;
      if alen > 0 then begin
       repeat
-       if keywordlen <= 0 then begin
+       if (keywordlen <= 0) and not scopeinfopo^.return then begin
         lstr1.po:= wpo1;
         while char(byte(wpo1^)) in keywordchars do begin
          inc(wpo1);
