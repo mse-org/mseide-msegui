@@ -41,11 +41,11 @@ type
    fwindowmouseentered: boolean;
    fonwindowmousewheelevent: mousewheeleventty;
    function getclientwinid: winidty;
-   procedure checkwindowrect;
    procedure windowscrolled(const sender: tobject);
    function getchildrect: rectty;
    function getviewport: rectty;
   protected
+   procedure checkwindowrect;
    procedure checkclientwinid;
    procedure checkclientvisible;
    procedure destroyclientwindow;
