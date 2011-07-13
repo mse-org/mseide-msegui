@@ -141,9 +141,9 @@ type
    procedure runprocdied(const sender: TObject; const prochandle: prochandlety;
                    const execresult: Integer; const data: Pointer);
    procedure statbefread(const sender: TObject);
-   procedure getstatobj(const sender: TObject; var aobject: TObject);
    procedure viewsymbolsonexecute(const sender: TObject);
    procedure loadwindowlayoutexe(const sender: TObject);
+   procedure getstatobjs(const sender: TObject; var aobjects: objectinfoarty);
   private
    fstartcommand: startcommandty;
    fnoremakecheck: boolean;
@@ -389,9 +389,9 @@ var
   for int1:= 0 to high(modulenames) do begin
    if modulenames[int1] = wstr2 then begin
     if int1 <= high(modulefilenames) then begin
-     if findfile(modulefilenames[int1],projectoptions.texp.sourcedirs,wstr1) or
+     if findfile(modulefilenames[int1],projectoptions.d.texp.sourcedirs,wstr1) or
             findfile(filename(modulefilenames[int1]),
-            projectoptions.texp.sourcedirs,wstr1) then begin
+            projectoptions.d.texp.sourcedirs,wstr1) then begin
       try
        po1:= openformfile(wstr1,false,false,false,false);
        result:= (po1 <> nil) and (struppercase(po1^.instancevarname) = wstr2);
@@ -417,7 +417,7 @@ begin
   setlength(wstr2,int1-1); //main name only
  end;
  with projectoptions do begin
-  bo1:= dofind(modulenames,modulefilenames);
+  bo1:= dofind(o.modulenames,o.modulefiles);
  end;
  if not bo1 then begin
   with projecttree.units do begin
@@ -457,8 +457,8 @@ var
   wstr1: filenamety;
  begin
   with projectoptions do begin
-   if findfile(fname,texp.sourcedirs,wstr1) or
-          findfile(fname,texp.sourcedirs,wstr1) then begin
+   if findfile(fname,d.texp.sourcedirs,wstr1) or
+          findfile(fname,d.texp.sourcedirs,wstr1) then begin
     try
      po1:= openformfile(wstr1,false,false,false,false);
     except
@@ -488,10 +488,10 @@ begin
   with projectoptions do begin
    po1:= nil;
    wstr2:= struppercase(atypename);
-   for int1:= 0 to high(moduletypes) do begin
-    if moduletypes[int1] = wstr2 then begin
-     if int1 <= high(modulefilenames) then begin
-      checkmodule(modulefilenames[int1]);
+   for int1:= 0 to high(o.moduletypes) do begin
+    if o.moduletypes[int1] = wstr2 then begin
+     if int1 <= high(o.modulefiles) then begin
+      checkmodule(o.modulefiles[int1]);
      end;
      break;
     end;
@@ -591,7 +591,7 @@ begin
   if result <> mr_cancel then begin
    result:= componentstorefo.saveall(false);
    if result <> mr_cancel then begin
-    with projectoptions,texp do begin
+    with projectoptions,o,texp do begin
      if modified and not savechecked then begin
       result:= showmessage('Project '+fprojectname+' is modified. Save?','Confirmation',
                      [mr_yes,mr_no,mr_cancel],mr_yes);
@@ -851,7 +851,7 @@ begin
   if reason in [sr_exited,sr_exited_normally,sr_detached] then begin
    programfinished;
   end;
-  if projectoptions.o.activateonbreak then begin
+  if projectoptions.d.activateonbreak then begin
    if flastform <> nil then begin
     flastform.activate;
    end
@@ -930,7 +930,7 @@ begin
  sys_schedyield;
  if timeout(fgdbservertimeout) and 
      (getprocessexitcode(fgdbserverprocid,fgdbserverexitcode,100000) or
-      projectoptions.o.nogdbserverexit) then begin
+      projectoptions.d.nogdbserverexit) then begin
   sender.terminatewait;
  end
  else begin
@@ -964,7 +964,7 @@ var
  mstr1: msestring;
 begin
  result:= false;
- with projectoptions,texp do begin
+ with projectoptions,d.texp do begin
   if attach then begin
    mstr1:= gdbservercommandattach;
   end
@@ -975,13 +975,13 @@ begin
    terminategdbserver;
    fgdbserverprocid:= execmse1(syscommandline(mstr1));
    if fgdbserverprocid <> invalidprochandle then begin
-    fgdbservertimeout:= timestep(round(1000000*o.gdbserverwait));
+    fgdbservertimeout:= timestep(round(1000000*d.gdbserverwait));
     if application.waitdialog(nil,'Start gdb server command "'+
                            mstr1+'" running.','Start gdb Server',
               {$ifdef FPC}@{$endif}gdbservercancel,nil,
               {$ifdef FPC}@{$endif}gdbserverexe) then begin
      if (fgdbserverexitcode <> 0) and 
-                     not (projectoptions.o.nogdbserverexit and 
+                     not (projectoptions.d.nogdbserverexit and 
                                (fgdbserverexitcode = -1)) then begin
       setstattext('gdb server start error '+inttostr(fgdbserverexitcode)+'.',
                 mtk_error);
@@ -1034,7 +1034,7 @@ begin
    gdb.interrupttarget;
   end;
   gdb.ignoreexceptionclasses:= projectoptions.ignoreexceptionclasses;
-  gdb.stoponexception:= projectoptions.o.stoponexception;
+  gdb.stoponexception:= projectoptions.d.stoponexception;
   str1:= '';
   {$ifndef mswindows}
   for int1:= sigrtmin to sigrtmax do begin
@@ -1080,12 +1080,12 @@ end;
 
 function tmainfo.needsdownload: boolean;
 begin
- result:= ftargetfilemodified or projectoptions.o.downloadalways;
+ result:= ftargetfilemodified or projectoptions.d.downloadalways;
 end;
 
 function tmainfo.candebug: boolean; //run command empty or process attached
 begin
- result:= (projectoptions.texp.runcommand = '') or gdb.started;
+ result:= (projectoptions.d.texp.runcommand = '') or gdb.started;
 end;
 
 procedure tmainfo.downloaded;
@@ -1098,7 +1098,7 @@ procedure tmainfo.updatetargetenvironment;
 var
  int1: integer;
 begin
- with projectoptions,texp do begin
+ with projectoptions,d.texp do begin
   gdb.progparameters:= progparameters;
   gdb.workingdirectory:= progworkingdirectory;
   gdb.clearenvvars;
@@ -1134,14 +1134,14 @@ begin
     startgdbonexecute(nil);
    end;
    str1:= gettargetfile;
-   with projectoptions,texp do begin
+   with projectoptions,d.texp do begin
 //    if debugtarget <> '' then begin
 //     str1:= debugtarget;
 //    end
 //    else begin
 //     str1:= makedir+targetfile;
 //    end; 
-    if not o.gdbdownload and not o.gdbsimulator and (uploadcommand <> '') and 
+    if not d.gdbdownload and not d.gdbsimulator and (uploadcommand <> '') and 
                    (needsdownload or force) then begin
      dodownload;
      if application.waitdialog(nil,'Uploadcommand "'+uploadcommand+'" running.',
@@ -1193,10 +1193,10 @@ begin
   updatetargetenvironment;
   watchpointsfo.clear;
   targetconsolefo.clear;
-  if projectoptions.o.showconsole then begin
+  if projectoptions.d.showconsole then begin
    targetconsolefo.activate;
   end;
-  if force and projectoptions.o.gdbdownload then begin
+  if force and projectoptions.d.gdbdownload then begin
    if startgdbconnection(false) then begin
     gdb.download(false);
    end;
@@ -1216,16 +1216,16 @@ end;
 procedure tmainfo.startgdbonexecute(const sender: tobject);
 begin
  terminategdbserver;
- with projectoptions,texp do begin
+ with projectoptions,d.texp do begin
   gdb.remoteconnection:= remoteconnection;
-  gdb.gdbdownload:= o.gdbdownload;
-  gdb.simulator:= o.gdbsimulator;
+  gdb.gdbdownload:= d.gdbdownload;
+  gdb.simulator:= d.gdbsimulator;
   gdb.processorname:= gdbprocessor;
   gdb.beforeload:= beforeload;  
   gdb.beforerun:= beforerun;
   gdb.afterload:= afterload;
-  gdb.startupbkpt:= o.startupbkpt;
-  gdb.startupbkpton:= o.startupbkpton;
+  gdb.startupbkpt:= d.startupbkpt;
+  gdb.startupbkpton:= d.startupbkpton;
   gdb.startgdb(quotefilename(debugcommand)+ ' ' + debugoptions);
  end;
  updatesigsettings;
@@ -1302,10 +1302,10 @@ procedure tmainfo.mainmenuonupdate(const sender: tcustommenu);
 var
  bo1: boolean;
 begin
- with projectoptions,texp,actionsmo do begin
+ with projectoptions,d.texp,actionsmo do begin
   detachtarget.enabled:= gdb.execloaded;
   download.enabled:= not gdb.started and not gdb.downloading and 
-               ((uploadcommand <> '') or o.gdbdownload);
+               ((uploadcommand <> '') or d.gdbdownload);
   attachprocess.enabled:= not (gdb.execloaded or gdb.attached);
   attachtarget.enabled:= attachprocess.enabled;
   run.enabled:= not gdb.running and not gdb.downloading;
@@ -1448,7 +1448,7 @@ begin
    wstr1:= filename;
   end
   else begin
-   wstr1:= searchfile(wstr2,projectoptions.texp.sourcedirs);
+   wstr1:= searchfile(wstr2,projectoptions.d.texp.sourcedirs);
    if wstr1 = '' then begin
     wstr1:= filename; //to raise exception
    end
@@ -1796,7 +1796,7 @@ var
 begin
  str1:= '';
  int1:= tmenuitem(sender).tag;
- with projectoptions.texp do begin
+ with projectoptions.o.texp do begin
   if newfisources[int1] = '' then begin
    sourcefo.newpage;
   end
@@ -1869,7 +1869,7 @@ var
  
 begin
 // if formkindty(tmenuitem(sender).tag) = fok_inherited then begin
- if projectoptions.newinheritedforms[tmenuitem(sender).tag] then begin
+ if projectoptions.o.newinheritedforms[tmenuitem(sender).tag] then begin
   po1:= selectinheritedmodule(nil,'Select ancestor');
   if po1 = nil then begin
    exit;
@@ -1885,7 +1885,7 @@ begin
  str1:= '';
  if filedialog(str1,[fdo_save,fdo_checkexist],'New form',['Pascal Files'],
          ['"*.pas" "*.pp"'],'pas') = mr_ok then begin
-  with projectoptions.texp do begin
+  with projectoptions.o.texp do begin
    str4:= newfonamebases[tmenuitem(sender).tag];
    str2:= newfosources[tmenuitem(sender).tag];
    str3:= newfoforms[tmenuitem(sender).tag];
@@ -2179,7 +2179,7 @@ begin
             ['Program files','All files'],['"*.pas" "*.pp"','*'],'pas') = mr_ok then begin
     setcurrentdir(filedir(aname));
     with projectoptions do begin
-     with t do begin
+     with o.t do begin
       mainfile:= filename(aname);
       aname:= removefileext(mainfile);
       targetfile:= aname+'${EXEEXT}'
@@ -2195,7 +2195,7 @@ begin
    setcurrentdir(curdir);
    if not fromprogram then begin
     mstr1:= removefileext(filename(aname));
-    with projectoptions do begin
+    with projectoptions,o do begin
      projectfilename:= aname;
      projectdir:= curdir;
      expandprojectmacros;
@@ -2269,7 +2269,7 @@ begin
    end
    else begin
     saveproject(aname);
-    sourcefo.openfile(projectoptions.texp.mainfile,true);
+    sourcefo.openfile(projectoptions.o.texp.mainfile,true);
    end;
   end
   else begin
@@ -2408,15 +2408,15 @@ var
  mstr1: msestring;
  pwdbefore: msestring;
 begin
- if projectoptions.texp.runcommand = '' then begin
+ if projectoptions.d.texp.runcommand = '' then begin
   if startgdbconnection(false) then begin
-   gdb.gdbdownload:= projectoptions.o.gdbdownload and 
-                         (needsdownload or projectoptions.o.downloadalways);
+   gdb.gdbdownload:= projectoptions.d.gdbdownload and 
+                         (needsdownload or projectoptions.d.downloadalways);
    checkgdberror(gdb.run);
   end;
  end
  else begin
-  with projectoptions,texp do begin
+  with projectoptions,d.texp do begin
    mstr1:= runcommand;
    if progparameters <> '' then begin
     mstr1:= mstr1 + ' ' + progparameters;
@@ -2463,7 +2463,7 @@ function tmainfo.runtarget: boolean;
 begin
  result:= true;
  if not gdb.attached then begin
-  if projectoptions.texp.runcommand = '' then begin
+  if projectoptions.d.texp.runcommand = '' then begin
    if not gdb.started then begin
     if loadexec(false,false) then begin
      result:= false;
@@ -2632,7 +2632,7 @@ end;
 
 procedure tmainfo.viewprojectsourceonexecute(const sender: TObject);
 begin
- sourcefo.openfile(projectoptions.texp.mainfile,true);
+ sourcefo.openfile(projectoptions.o.texp.mainfile,true);
 end;
 
 procedure tmainfo.viewthreadsonexecute(const sender: TObject);
@@ -2693,7 +2693,7 @@ var
  propit: tpropertyitem;
  
 begin
- with tmenuitem(sender),projectoptions,texp do begin
+ with tmenuitem(sender),projectoptions,o,texp do begin
   str1:= tosysfilepath(toolfiles[index]);
   if str1 <> '' then begin
    if (index <= high(toolfiles)) and (toolparams[index] <> '') then begin
@@ -2765,10 +2765,20 @@ begin
  createcpufo;
 end;
 
-procedure tmainfo.getstatobj(const sender: TObject; var aobject: TObject);
+procedure tmainfo.getstatobjs(const sender: TObject;
+               var aobjects: objectinfoarty);
 begin
- aobject:= projectoptions.o;
+ with projectoptions do begin
+  addobjectinfoitem(aobjects,o);
+  if not (sg_editor in disabled) then begin
+   addobjectinfoitem(aobjects,e);
+  end;
+  if not (sg_debugger in disabled) then begin
+   addobjectinfoitem(aobjects,d);
+  end;
+ end;
 end;
+
 
 procedure tmainfo.loadwindowlayoutexe(const sender: TObject);
 var

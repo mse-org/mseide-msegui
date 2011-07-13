@@ -4960,17 +4960,18 @@ object projectoptionsfo: tprojectoptionsfo
         caption = 'Storage'
         object settingseditor: tbooleanedit
           optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
-          frame.caption = 'Load editor settings'
+          frame.caption = 'Load/save editor settings'
           frame.dummy = 0
           frame.outerframe = (
             0
             1
-            112
+            141
             2
           )
+          taborder = 3
           bounds_x = 15
-          bounds_y = 52
-          bounds_cx = 126
+          bounds_y = 100
+          bounds_cx = 155
           bounds_cy = 16
         end
         object settingsautoload: tbooleanedit
@@ -4984,7 +4985,7 @@ object projectoptionsfo: tprojectoptionsfo
           )
           taborder = 1
           bounds_x = 15
-          bounds_y = 76
+          bounds_y = 52
           bounds_cx = 67
           bounds_cy = 16
         end
@@ -4999,7 +5000,7 @@ object projectoptionsfo: tprojectoptionsfo
           )
           taborder = 2
           bounds_x = 15
-          bounds_y = 100
+          bounds_y = 76
           bounds_cx = 69
           bounds_cy = 16
         end
@@ -5010,7 +5011,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.framei_bottom = 5
           frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
           frame.dummy = 0
-          taborder = 3
           bounds_x = 0
           bounds_y = 13
           bounds_cx = 669
@@ -5023,6 +5023,7 @@ object projectoptionsfo: tprojectoptionsfo
           place_maxdist = 5
           place_options = [plo_endmargin]
           object savebu: tbutton
+            taborder = 2
             bounds_x = 615
             bounds_y = 5
             bounds_cx = 49
@@ -5055,7 +5056,6 @@ object projectoptionsfo: tprojectoptionsfo
               71
               0
             )
-            taborder = 2
             bounds_x = 5
             bounds_y = 5
             bounds_cx = 551
@@ -5075,6 +5075,22 @@ object projectoptionsfo: tprojectoptionsfo
             controller.captionopen = 'Enter Settings File'
             reffontheight = 14
           end
+        end
+        object settingsdebugger: tbooleanedit
+          optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
+          frame.caption = 'Load/save debugger settings'
+          frame.dummy = 0
+          frame.outerframe = (
+            0
+            1
+            163
+            2
+          )
+          taborder = 4
+          bounds_x = 15
+          bounds_y = 124
+          bounds_cx = 177
+          bounds_cy = 16
         end
       end
     end

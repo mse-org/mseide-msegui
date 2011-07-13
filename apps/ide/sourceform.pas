@@ -671,8 +671,10 @@ begin
    end;
   end;
   if result = nil then begin
-   if bo1 and findfile(msefileutils.filename(filename),projectoptions.texp.sourcedirs,str1) or
-      not bo1 and findfile(filename,projectoptions.texp.sourcedirs,str1) then begin
+   if bo1 and findfile(msefileutils.filename(filename),
+                       projectoptions.d.texp.sourcedirs,str1) or
+      not bo1 and 
+         findfile(filename,projectoptions.d.texp.sourcedirs,str1) then begin
     result:= findsourcepage(str1);
     if result = nil then begin
      result:= loadfile(str1);
@@ -729,7 +731,7 @@ function tsourcefo.locate(const info: stopinfoty): tsourcepage;
 begin
  resetactiverow;
  if info.filename <> '' then begin
-  result:= openfile(filepath(projectoptions.texp.makedir,info.filename));
+  result:= openfile(filepath(projectoptions.o.texp.makedir,info.filename));
   if result <> nil then begin
    result.activerow:= info.line-1;
    result.show;

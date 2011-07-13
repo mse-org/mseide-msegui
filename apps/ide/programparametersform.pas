@@ -53,7 +53,7 @@ var
 begin
  fo:= tprogramparametersfo.create(nil);
  try
-  with projectoptions,t do begin
+  with projectoptions,d.t do begin
    fo.parameters.value:= progparameters;
    fo.parameters.dropdown.valuelist.asarray:= propgparamhistory;
    fo.workingdirectory.value:= progworkingdirectory;
@@ -63,7 +63,7 @@ begin
   end;
   if fo.show(true,nil) = mr_ok then begin
    fo.grid.removeappendedrow;
-   with projectoptions,t do begin
+   with projectoptions,d.t do begin
     progparameters:= fo.parameters.value;
     propgparamhistory:= fo.parameters.dropdown.valuelist.asarray;
     progworkingdirectory:= fo.workingdirectory.value;
@@ -80,14 +80,25 @@ end;
 
 procedure updatestat(const filer: tstatfiler);
 begin
- filer.setsection('progparams');
- with projectoptions,t do begin
-  filer.updatevalue('parameters',progparameters);
+ filer.setsection('progparams');       //backward  compatibility
+ with projectoptions,d,tstatreader(filer) do begin
+  if not filer.iswriter then begin
+   with t do begin
+    progparameters:= readstring('parameters',progparameters);
+//   progparamhistory:= readarray('progparamhistory',propgparamhistory);
+    progworkingdirectory:= readstring('workingdirectory',progworkingdirectory);
+//    envvarons:= readarray('envvarons',envvarons);
+    envvarnames:= readarray('envvarnames',envvarnames);
+    envvarvalues:= readarray('envvarvalues',envvarvalues);
+   end;
+  end;
+  
+//   filer.updatevalue('parameters',progparameters);
   filer.updatevalue('progparamhistory',propgparamhistory);
-  filer.updatevalue('workingdirectory',progworkingdirectory);
+//   filer.updatevalue('workingdirectory',progworkingdirectory);
   filer.updatevalue('envvarons',envvarons);
-  filer.updatevalue('envvarnames',envvarnames);
-  filer.updatevalue('envvarvalues',envvarvalues);
+ //  filer.updatevalue('envvarnames',envvarnames);
+//   filer.updatevalue('envvarvalues',envvarvalues);
  end;
 end;
 

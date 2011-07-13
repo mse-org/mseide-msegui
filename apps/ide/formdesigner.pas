@@ -1884,7 +1884,7 @@ begin
         if (component = form) and (fselections.count > 1) or 
                (fselections.indexof(component) < 0) then begin
          selectcomponent(component,sm_select);
-         if projectoptions.o.moveonfirstclick then begin
+         if projectoptions.e.moveonfirstclick then begin
           factarea:= ar_component;
          end;
         end;
@@ -2450,10 +2450,10 @@ end;
 
 procedure tdesignwindow.updateprojectoptions;
 begin
- showgrid:= projectoptions.o.showgrid;
- snaptogrid:= projectoptions.o.snaptogrid;
- gridsizex:= projectoptions.o.gridsizex;
- gridsizey:= projectoptions.o.gridsizey;
+ showgrid:= projectoptions.e.showgrid;
+ snaptogrid:= projectoptions.e.snaptogrid;
+ gridsizex:= projectoptions.e.gridsizex;
+ gridsizey:= projectoptions.e.gridsizey;
  fowner.invalidate;
 end;
 

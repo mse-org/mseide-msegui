@@ -4330,7 +4330,7 @@ begin
  result:= true;
  with modulepo^ do begin
   createbackupfile(afilename,filename,
-                          backupcreated,projectoptions.o.backupfilecount);
+                          backupcreated,projectoptions.e.backupfilecount);
   stream1:= tmemorystream.Create;
   try
    writemodule(modulepo,stream1);

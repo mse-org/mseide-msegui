@@ -41,6 +41,9 @@ const
  maxdefaultmake = $40-1;
  
 type
+ settinggroupty = (sg_editor,sg_debugger);
+ settinggroupsty = set of settinggroupty;
+ 
  findinfoty = record
   text: msestring;
   options: searchoptionsty;
@@ -60,9 +63,10 @@ type
   flags: sigflagsty;
  end;
  sigsetinfoarty = array of sigsetinfoty;
-
+(*
  projecttextty = record
-  mainfile: filenamety;
+//  mainfile: filenamety;
+{
   targetfile: filenamety;
   messageoutputfile: filenamety;
   makecommand: filenamety;
@@ -120,13 +124,174 @@ type
   progworkingdirectory: filenamety;
   envvarnames: msestringarty;
   envvarvalues: msestringarty;
+}
+ end;
+*)
+{$M+} //tprojectoptions needs RTTI
+ toptions = class
+  protected
+   function gett: tobject; virtual;
+   function gettexp: tobject; virtual;
+  public
+   destructor destroy; override;
+   procedure expandmacros(const amacrolist: tmacrolist);  
  end;
  
-{$M+} //tprojectoptions needs RTTI
- tprojectoptions = class
+ ttextprojectoptions = class
   private
-   fcopymessages: boolean;
-   fcheckmethods: boolean;
+   fmainfile: filenamety;
+   ftargetfile: filenamety;
+   fmessageoutputfile: filenamety;
+   fmakecommand: filenamety;
+   fmakedir: filenamety;
+{
+   fdebugcommand: filenamety;
+   fdebugoptions: msestring;
+   fdebugtarget: filenamety;
+   fruncommand: filenamety;
+   fremoteconnection: msestring;
+   fuploadcommand: filenamety;
+   fgdbprocessor: msestring;
+   fgdbservercommand: filenamety;
+   fgdbservercommandattach: filenamety;
+   fbeforeload: filenamety;
+   fafterload: filenamety;
+   fbeforerun: filenamety;
+   fsourcedirs: msestringarty;
+   fdefines: msestringarty;
+}
+   funitdirs: msestringarty;
+   funitpref: msestring;
+   fincpref: msestring;
+   flibpref: msestring;
+   fobjpref: msestring;
+   ftargpref: msestring;
+   fbefcommand: msestringarty;
+   faftcommand: msestringarty;
+   fmakeoptions: msestringarty;
+   ftoolmenus: msestringarty;
+   ftoolfiles: msestringarty;
+   ftoolparams: msestringarty;
+   ffontnames: msestringarty;
+   fscriptbeforecopy: msestring;
+   fscriptaftercopy: msestring;
+   fnewprojectfiles: filenamearty;
+   fnewprojectfilesdest: filenamearty;
+   fnewfinames: msestringarty;
+   fnewfifilters: msestringarty;
+   fnewfiexts: msestringarty;
+   fnewfisources: filenamearty;
+   fnewfonames: msestringarty;
+   fnewfonamebases: msestringarty;
+   fnewfosources: msestringarty;
+   fnewfoforms: msestringarty;
+   {
+   fprogparameters: msestring;
+   fprogworkingdirectory: filenamety;
+   fenvvarnames: msestringarty;
+   fenvvarvalues: msestringarty;
+   }
+  public
+   fcodetemplatedirs: msestringarty;
+//   procedure expandmacros(const source: ttextprojectoptions;
+//                                      const amacrolist: tmacrolist);
+  published
+   property mainfile: filenamety read fmainfile write fmainfile;
+   property targetfile: filenamety read ftargetfile write ftargetfile;
+   property messageoutputfile: filenamety read fmessageoutputfile
+                                               write fmessageoutputfile;
+   property makecommand: filenamety read fmakecommand write fmakecommand;
+   property makedir: filenamety read fmakedir write fmakedir;
+{
+   property debugcommand: filenamety read fdebugcommand write fdebugcommand;
+   property debugoptions: msestring read fdebugoptions write fdebugoptions;
+   property debugtarget: filenamety read fdebugtarget write fdebugtarget;
+   property runcommand: filenamety read fruncommand write fruncommand;
+   property remoteconnection: msestring read fremoteconnection 
+                                        write fremoteconnection;
+   property uploadcommand: filenamety read fuploadcommand 
+                                            write fuploadcommand;
+   property gdbprocessor: msestring read fgdbprocessor write fgdbprocessor;
+   property gdbservercommand: filenamety read fgdbservercommand
+                                              write fgdbservercommand;
+   property gdbservercommandattach: filenamety read fgdbservercommandattach
+                                                write fgdbservercommandattach;
+   property beforeload: filenamety read fbeforeload write fbeforeload;
+   property afterload: filenamety read fafterload write fafterload;
+   property beforerun: filenamety read fbeforerun write fbeforerun;
+   property sourcedirs: msestringarty read fsourcedirs write fsourcedirs;
+   property defines: msestringarty read fdefines write fdefines;
+ }
+   property unitdirs: msestringarty read funitdirs write funitdirs;
+   property unitpref: msestring read funitpref write funitpref;
+   property incpref: msestring read fincpref write fincpref;
+   property libpref: msestring read flibpref write flibpref;
+   property objpref: msestring read fobjpref write fobjpref;
+   property targpref: msestring read ftargpref write ftargpref;
+  
+   property befcommand: msestringarty read fbefcommand write fbefcommand;
+   property aftcommand: msestringarty read faftcommand write faftcommand;
+   property makeoptions: msestringarty read fmakeoptions write fmakeoptions;
+
+   property codetemplatedirs: msestringarty read fcodetemplatedirs
+                                                     write fcodetemplatedirs;
+
+   property toolmenus: msestringarty read ftoolmenus write ftoolmenus;
+   property toolfiles: msestringarty read ftoolfiles write ftoolfiles;
+   property toolparams: msestringarty read ftoolparams write ftoolparams;
+    
+   property fontnames: msestringarty read ffontnames write ffontnames;
+   property scriptbeforecopy: msestring read fscriptbeforecopy
+                                               write fscriptbeforecopy;
+   property scriptaftercopy: msestring read fscriptaftercopy 
+                                           write fscriptaftercopy;
+   property newprojectfiles: filenamearty read fnewprojectfiles
+                                               write fnewprojectfiles;
+   property newprojectfilesdest: filenamearty read fnewprojectfilesdest
+                                                  write fnewprojectfilesdest;
+   property newfinames: msestringarty read fnewfinames write fnewfinames;
+   property newfifilters: msestringarty read fnewfifilters
+                                              write fnewfifilters;
+   property newfiexts: msestringarty read fnewfiexts write fnewfiexts;
+   property newfisources: filenamearty read fnewfisources write fnewfisources;
+  
+   property newfonames: msestringarty read fnewfonames write fnewfonames;
+   property newfonamebases: msestringarty read fnewfonamebases
+                                                   write fnewfonamebases;
+   property newfosources: msestringarty read fnewfosources 
+                                        write fnewfosources;
+   property newfoforms: msestringarty read fnewfoforms write fnewfoforms;
+{
+   property progparameters: msestring read fprogparameters 
+                                   write fprogparameters;
+   property progworkingdirectory: filenamety read fprogworkingdirectory 
+                                               write fprogworkingdirectory;
+   property envvarnames: msestringarty read fenvvarnames write fenvvarnames;
+   property envvarvalues: msestringarty read fenvvarvalues write fenvvarvalues;
+}
+ end;
+
+ ttexteditoptions = class
+  private
+   fsourcefilemasks: msestringarty;
+   fsyntaxdeffiles: msestringarty;
+   ffilemasknames: msestringarty;
+   ffilemasks: msestringarty;
+  published
+   property sourcefilemasks: msestringarty read fsourcefilemasks 
+                                                write fsourcefilemasks;
+   property syntaxdeffiles: msestringarty read fsyntaxdeffiles 
+                                                write fsyntaxdeffiles;
+   property filemasknames: msestringarty read ffilemasknames 
+                                                  write ffilemasknames;
+   property filemasks: msestringarty read ffilemasks write ffilemasks;
+ end;
+
+ teditoptions = class(toptions)
+  private
+   ft: ttexteditoptions;
+   ftexp: ttexteditoptions;
+   
    fshowgrid: boolean;
    fsnaptogrid: boolean;
    fmoveonfirstclick: boolean;
@@ -151,40 +316,19 @@ type
    feditmarkbrackets: boolean;
    fbackupfilecount: integer;
    fencoding: integer;
-   fclosemessages: boolean;
-   fusercolors: colorarty;
-   fusercolorcomment: msestringarty;
-   fstoponexception: boolean;
-   fvaluehints: boolean;
-   factivateonbreak: boolean;
-   fshowconsole: boolean;
-   fexternalconsole: boolean;
-   fgdbdownload: boolean;
-   fdownloadalways: boolean;
-   fstartupbkpt: integer;
-   fstartupbkpton: boolean;
-   fgdbsimulator: boolean;
-   fgdbserverwait: real;
-   fexceptclassnames: msestringarty;
-   fexceptignore: booleanarty;
-   fnogdbserverexit: boolean;
-   fsettingsfile: filenamety;
-   fsettingseditor: boolean;
-//   fwindowlayoutfile: filenamety;
-//   fwindowlayouthistory: filenamearty;
-   fsettingsautoload: boolean;
-   fsettingsautosave: boolean;
    function limitgridsize(const avalue: integer): integer;
    procedure setgridsizex(const avalue: integer);
    procedure setgridsizey(const avalue: integer);
    function getcodetemplatedirs: msestringarty;
    procedure setcodetemplatedirs(const avalue: msestringarty);
+  protected
+   function gett: tobject; override;
+   function gettexp: tobject; override;
   public
    constructor create;
+   property texp: ttexteditoptions read ftexp;
   published
-   property copymessages: boolean read fcopymessages write fcopymessages;
-   property closemessages: boolean read fclosemessages write fclosemessages;
-   property checkmethods: boolean read fcheckmethods write fcheckmethods;
+   property t: ttexteditoptions read ft;
 
    property showgrid: boolean read fshowgrid write fshowgrid;
    property snaptogrid: boolean read fsnaptogrid write fsnaptogrid;
@@ -219,11 +363,86 @@ type
    property encoding: integer read fencoding write fencoding;
    property codetemplatedirs: msestringarty read getcodetemplatedirs write
                   setcodetemplatedirs;
+ end;
 
-   property usercolors: colorarty read fusercolors write fusercolors;
-   property usercolorcomment: msestringarty read fusercolorcomment 
-                                                 write fusercolorcomment;
+ ttextdebugoptions = class
+  private
+   fdebugcommand: filenamety;
+   fdebugoptions: msestring;
+   fdebugtarget: filenamety;
+   fruncommand: filenamety;
+   fremoteconnection: msestring;
+   fuploadcommand: filenamety;
+   fgdbprocessor: msestring;
+   fgdbservercommand: filenamety;
+   fgdbservercommandattach: filenamety;
+   fbeforeload: filenamety;
+   fafterload: filenamety;
+   fbeforerun: filenamety;
+   fsourcedirs: msestringarty;
+   fdefines: msestringarty;
 
+   fprogparameters: msestring;
+   fprogworkingdirectory: filenamety;
+   fenvvarnames: msestringarty;
+   fenvvarvalues: msestringarty;
+  protected
+  published
+   property debugcommand: filenamety read fdebugcommand write fdebugcommand;
+   property debugoptions: msestring read fdebugoptions write fdebugoptions;
+   property debugtarget: filenamety read fdebugtarget write fdebugtarget;
+   property runcommand: filenamety read fruncommand write fruncommand;
+   property remoteconnection: msestring read fremoteconnection 
+                                        write fremoteconnection;
+   property uploadcommand: filenamety read fuploadcommand 
+                                            write fuploadcommand;
+   property gdbprocessor: msestring read fgdbprocessor write fgdbprocessor;
+   property gdbservercommand: filenamety read fgdbservercommand
+                                              write fgdbservercommand;
+   property gdbservercommandattach: filenamety read fgdbservercommandattach
+                                                write fgdbservercommandattach;
+   property beforeload: filenamety read fbeforeload write fbeforeload;
+   property afterload: filenamety read fafterload write fafterload;
+   property beforerun: filenamety read fbeforerun write fbeforerun;
+   property sourcedirs: msestringarty read fsourcedirs write fsourcedirs;
+   property defines: msestringarty read fdefines write fdefines;
+
+   property progparameters: msestring read fprogparameters 
+                                   write fprogparameters;
+   property progworkingdirectory: filenamety read fprogworkingdirectory 
+                                               write fprogworkingdirectory;
+   property envvarnames: msestringarty read fenvvarnames write fenvvarnames;
+   property envvarvalues: msestringarty read fenvvarvalues write fenvvarvalues;
+ end;
+ 
+ tdebugoptions = class(toptions)
+  private
+   ft: ttextdebugoptions;
+   ftexp: ttextdebugoptions;
+   fdefineson: longboolarty;
+    fstoponexception: boolean;
+   fvaluehints: boolean;
+   factivateonbreak: boolean;
+   fshowconsole: boolean;
+   fexternalconsole: boolean;
+   fgdbdownload: boolean;
+   fdownloadalways: boolean;
+   fstartupbkpt: integer;
+   fstartupbkpton: boolean;
+   fgdbsimulator: boolean;
+   fgdbserverwait: real;
+   fexceptclassnames: msestringarty;
+   fexceptignore: booleanarty;
+   fnogdbserverexit: boolean;
+ protected
+   function gett: tobject; override;
+   function gettexp: tobject; override;
+  public
+   constructor create;
+   property texp: ttextdebugoptions read ftexp;
+  published
+   property t: ttextdebugoptions read ft;
+   property defineson: longboolarty read fdefineson write fdefineson;
    property stoponexception: boolean read fstoponexception write fstoponexception;
    property valuehints: boolean read fvaluehints write fvaluehints;
    property activateonbreak: boolean read factivateonbreak write factivateonbreak;
@@ -237,17 +456,182 @@ type
    property gdbserverwait: real read fgdbserverwait write fgdbserverwait;
    property nogdbserverexit: boolean read fnogdbserverexit 
                                                    write fnogdbserverexit;
-
    property exceptclassnames: msestringarty read fexceptclassnames 
                                                  write fexceptclassnames;
    property exceptignore: booleanarty read fexceptignore 
                                                  write fexceptignore;
+ end;
+   
+ tprojectoptions = class(toptions)
+  private
+   ft: ttextprojectoptions;
+   ftexp: ttextprojectoptions;
+   
+   fcopymessages: boolean;
+   fcheckmethods: boolean;
+   fclosemessages: boolean;
+   fusercolors: colorarty;
+   fusercolorcomment: msestringarty;
+{
+   fstoponexception: boolean;
+   fvaluehints: boolean;
+   factivateonbreak: boolean;
+   fshowconsole: boolean;
+   fexternalconsole: boolean;
+   fgdbdownload: boolean;
+   fdownloadalways: boolean;
+   fstartupbkpt: integer;
+   fstartupbkpton: boolean;
+   fgdbsimulator: boolean;
+   fgdbserverwait: real;
+   fexceptclassnames: msestringarty;
+   fexceptignore: booleanarty;
+   fnogdbserverexit: boolean;
+}
+   fsettingsfile: filenamety;
+   fsettingseditor: boolean;
+   fsettingsdebugger: boolean;
+//   fwindowlayoutfile: filenamety;
+//   fwindowlayouthistory: filenamearty;
+   fsettingsautoload: boolean;
+   fsettingsautosave: boolean;
+   fmodulenames: msestringarty;
+   fmoduletypes: msestringarty;
+   fmodulefiles: filenamearty;
+//   fdefaultmake: integer;
+   fbefcommandon: integerarty;
+   fmakeoptionson: integerarty;
+   faftcommandon: integerarty;
+   funitdirson: integerarty;
+   fmacroon: integerarty;
+   fmacronames: msestringarty;
+   fmacrovalues: msestringarty;
+   fmacrogroup: integer;
+   fgroupcomments: msestringarty;
+ 
+//   fbreakpointpaths: msestringarty;
+//   fbreakpointlines: integerarty;
+//   fbreakpointaddress: int64arty;
+//   faddressbreakpoints: longboolarty;
+//   fbreakpointons: longboolarty;
+//   fbreakpointignore: integerarty;
+//   fbreakpointconditions: msestringarty;
+
+//   fdefineson: longboolarty;
+   ftoolsave: longboolarty;
+   ftoolhide: longboolarty;
+   ftoolparse: longboolarty;
+   ffontalias: msestringarty;
+   ffontancestors: msestringarty;
+   ffontheights: integerarty;
+   ffontwidths: integerarty;
+   ffontoptions: msestringarty;
+   ffontxscales: realarty;
+   fexpandprojectfilemacros: longboolarty;
+   floadprojectfile: longboolarty;
+//   fprojectfilename: filenamety;
+//   fprojectdir: filenamety;
+   fnewinheritedforms: longboolarty;
+  protected
+   function gett: tobject; override;
+   function gettexp: tobject; override;
+  public
+   constructor create;
+   property texp: ttextprojectoptions read ftexp;
+  published
+   property t: ttextprojectoptions read ft;
+
+//   property projectfilename: filenamety read fprojectfilename 
+//                                                  write fprojectfilename;
+//   property projectdir: filenamety read fprojectdir write fprojectdir;
+   
+   property copymessages: boolean read fcopymessages write fcopymessages;
+   property closemessages: boolean read fclosemessages write fclosemessages;
+   property checkmethods: boolean read fcheckmethods write fcheckmethods;
+
+
+   property usercolors: colorarty read fusercolors write fusercolors;
+   property usercolorcomment: msestringarty read fusercolorcomment 
+                                                 write fusercolorcomment;
+
+{
+   property stoponexception: boolean read fstoponexception write fstoponexception;
+   property valuehints: boolean read fvaluehints write fvaluehints;
+   property activateonbreak: boolean read factivateonbreak write factivateonbreak;
+   property showconsole: boolean read fshowconsole write fshowconsole;
+   property externalconsole: boolean read fexternalconsole write fexternalconsole;
+   property gdbdownload: boolean read fgdbdownload write fgdbdownload;
+   property downloadalways: boolean read fdownloadalways write fdownloadalways;
+   property startupbkpt: integer read fstartupbkpt write fstartupbkpt;
+   property startupbkpton: boolean read fstartupbkpton write fstartupbkpton;
+   property gdbsimulator: boolean read fgdbsimulator write fgdbsimulator;
+   property gdbserverwait: real read fgdbserverwait write fgdbserverwait;
+   property nogdbserverexit: boolean read fnogdbserverexit 
+                                                   write fnogdbserverexit;
+   property exceptclassnames: msestringarty read fexceptclassnames 
+                                                 write fexceptclassnames;
+   property exceptignore: booleanarty read fexceptignore 
+                                                 write fexceptignore;
+}
    property settingsfile: filenamety read fsettingsfile write fsettingsfile;
    property settingseditor: boolean read fsettingseditor write fsettingseditor;
+   property settingsdebugger: boolean read fsettingsdebugger 
+                                               write fsettingsdebugger;
    property settingsautoload: boolean read fsettingsautoload
                                           write fsettingsautoload;
    property settingsautosave: boolean read fsettingsautosave
                                           write fsettingsautosave;
+  
+//   property defineson: longboolarty read fdefineson write fdefineson;
+   property modulenames: msestringarty read fmodulenames write fmodulenames;
+   property moduletypes: msestringarty read fmoduletypes write fmoduletypes;
+   property modulefiles: filenamearty read fmodulefiles write fmodulefiles;
+
+//   property defaultmake: integer read fdefaultmake write fdefaultmake;
+   property befcommandon: integerarty read fbefcommandon write fbefcommandon;
+   property makeoptionson: integerarty read fmakeoptionson write fmakeoptionson;
+   property aftcommandon: integerarty read faftcommandon write faftcommandon;
+   property unitdirson: integerarty read funitdirson write funitdirson;
+
+   property macroon: integerarty read fmacroon write fmacroon;
+   property macronames: msestringarty read fmacronames write fmacronames;
+   property macrovalues: msestringarty read fmacrovalues write fmacrovalues;
+   property macrogroup: integer read fmacrogroup write fmacrogroup;
+   property groupcomments: msestringarty read fgroupcomments write fgroupcomments;
+
+//   property breakpointpaths: msestringarty read fbreakpointpaths 
+//                                   write fbreakpointpaths;
+//   property breakpointlines: integerarty read fbreakpointlines
+//                                             write fbreakpointlines;
+//   property breakpointaddress: int64arty read fbreakpointaddress
+//                                              write fbreakpointaddress;
+//   property addressbreakpoints: longboolarty read faddressbreakpoints 
+//                                                    write faddressbreakpoints;
+//   property breakpointons: longboolarty read fbreakpointons
+//                                                write fbreakpointons;
+//   property breakpointignore: integerarty read fbreakpointignore
+//                                               write fbreakpointignore;
+//   property breakpointconditions: msestringarty read fbreakpointconditions
+//                                                    write fbreakpointconditions;
+
+   property toolsave: longboolarty read ftoolsave write ftoolsave;
+   property toolhide: longboolarty read ftoolhide write ftoolhide;
+   property toolparse: longboolarty read ftoolparse write ftoolparse;
+
+   property fontalias: msestringarty read ffontalias write ffontalias;
+   property fontancestors: msestringarty read ffontancestors 
+                                         write ffontancestors;
+   property fontheights: integerarty read ffontheights write ffontheights;
+   property fontwidths: integerarty read ffontwidths write ffontwidths;
+   property fontoptions: msestringarty read ffontoptions write ffontoptions;
+   property fontxscales: realarty read ffontxscales write ffontxscales;
+
+   property expandprojectfilemacros: longboolarty read fexpandprojectfilemacros
+                                               write fexpandprojectfilemacros;
+   property loadprojectfile: longboolarty read floadprojectfile 
+                                                 write floadprojectfile;
+   property newinheritedforms: longboolarty read fnewinheritedforms
+                                              write fnewinheritedforms;
    
 //   property windowlayoutfile: filenamety read fwindowlayoutfile 
 //                                                write fwindowlayoutfile;
@@ -257,45 +641,49 @@ type
 {$M-}
  
  projectoptionsty = record
+  disabled: settinggroupsty;
   o: tprojectoptions;
+  e: teditoptions;
+  d: tdebugoptions;
   modified: boolean;
   savechecked: boolean;
   ignoreexceptionclasses: stringarty;
-  t: projecttextty;
-  texp: projecttextty;
+//  t: projecttextty;
+//  texp: projecttextty;
   projectfilename: filenamety;
   projectdir: filenamety;
-  fontalias: msestringarty;
-  fontancestors: msestringarty;
-  fontheights: integerarty;
-  fontwidths: integerarty;
-  fontoptions: msestringarty;
-  fontxscales: realarty;
+
+//  fontalias: msestringarty;
+//  fontancestors: msestringarty;
+//  fontheights: integerarty;
+//  fontwidths: integerarty;
+//  fontoptions: msestringarty;
+//  fontxscales: realarty;
   
-  defineson: longboolarty;
+//  defineson: longboolarty;
   
-  modulenames: msestringarty;
-  moduletypes: msestringarty;
-  modulefilenames: filenamearty;
+//  modulenames: msestringarty;
+//  moduletypes: msestringarty;
+//  modulefilenames: filenamearty;
 
   defaultmake: integer;
-  befcommandon: integerarty;
-  makeoptionson: integerarty;
-  aftcommandon: integerarty;
-  unitdirson: integerarty;
+//  befcommandon: integerarty;
+//  makeoptionson: integerarty;
+//  aftcommandon: integerarty;
+//  unitdirson: integerarty;
 
-  macroon: integerarty;
-  macronames,macrovalues: msestringarty;
-  macrogroup: integer;
-  groupcomments: msestringarty;
+//  macroon: integerarty;
+//  macronames,macrovalues: msestringarty;
+//  macrogroup: integer;
+//  groupcomments: msestringarty;
 
-  breakpointpaths: msestringarty;
-  breakpointlines: integerarty;
-  breakpointaddress: int64arty;
-  addressbreakpoints: longboolarty;
-  breakpointons: longboolarty;
-  breakpointignore: integerarty;
-  breakpointconditions: msestringarty;
+//  breakpointpaths: msestringarty;
+//  breakpointlines: integerarty;
+//  breakpointaddress: int64arty;
+//  addressbreakpoints: longboolarty;
+//  breakpointons: longboolarty;
+//  breakpointignore: integerarty;
+//  breakpointconditions: msestringarty;
 
   sigsettings: sigsetinfoarty;
   //programparameters
@@ -306,16 +694,16 @@ type
   findreplaceinfo: replaceinfoty;
   
   //templates
-  expandprojectfilemacros: longboolarty;
-  loadprojectfile: longboolarty;
+//  expandprojectfilemacros: longboolarty;
+//  loadprojectfile: longboolarty;
 
   //newform  
-  newinheritedforms: longboolarty;
+//  newinheritedforms: longboolarty;
   
   //tools
-  toolsave: longboolarty;
-  toolhide: longboolarty;
-  toolparse: longboolarty;
+//  toolsave: longboolarty;
+//  toolhide: longboolarty;
+//  toolparse: longboolarty;
  end;
 
  tprojectoptionsfo = class(tmseform)
@@ -554,6 +942,7 @@ type
    savebu: tbutton;
    loadbu: tbutton;
    settingsfile: tfilenameedit;
+   settingsdebugger: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -632,7 +1021,7 @@ uses
  msedesigner,panelform,watchpointsform,commandlineform,msestream,
  componentpaletteform,mserichstring,msesettings,formdesigner,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
- componentstore,cpuform,msesysutils,msecomptree,msefont
+ componentstore,cpuform,msesysutils,msecomptree,msefont,typinfo,mserttistat
  {$ifndef mse_no_db}{$ifdef FPC},msedbfieldeditor{$endif}{$endif};
 
 var
@@ -716,14 +1105,14 @@ function objpath(const aname: filenamety): filenamety;
 begin
  result:= '';
  if aname <> '' then begin
-  result:= filepath(projectoptions.texp.makedir,aname);
+  result:= filepath(projectoptions.o.texp.makedir,aname);
  end;
 end;
 
 function getprojectmacros: macroinfoarty;
 begin
  setlength(result,4);
- with projectoptions do begin
+ with projectoptions,o do begin
   with result[0] do begin
    name:= 'PROJECTNAME';
    value:= removefileext(filename(projectfilename))
@@ -755,12 +1144,12 @@ end;
 
 function gettargetfile: filenamety;
 begin
- with projectoptions.texp do begin
+ with projectoptions,d.texp do begin
   if trim(debugtarget) <> '' then begin
    result:= objpath(debugtarget);
   end
   else begin
-   result:= objpath(targetfile);
+   result:= objpath(o.texp.targetfile);
   end;
  end;
 end;
@@ -768,17 +1157,17 @@ end;
 procedure projectoptionstofont(const afont: tfont);
 begin
  with projectoptions,afont do begin
-  name:= o.editfontname;
-  height:= o.editfontheight;
-  width:= o.editfontwidth;
-  extraspace:= o.editfontextraspace;
-  if o.editfontantialiased then begin
+  name:= e.editfontname;
+  height:= e.editfontheight;
+  width:= e.editfontwidth;
+  extraspace:= e.editfontextraspace;
+  if e.editfontantialiased then begin
    options:= options + [foo_antialiased2];
   end
   else begin
    options:= options + [foo_nonantialiased];
   end;
-  color:= o.editfontcolor;
+  color:= e.editfontcolor;
  end;
 end;
 
@@ -832,13 +1221,13 @@ var
  mask: integer;
  
 begin
- with projectoptions do begin
+ with projectoptions.o do begin
   result:= tmacrolist.create([mao_caseinsensitive]);
   result.add(getsettingsmacros);
   result.add(getcommandlinemacros);
   result.add(getprojectmacros);
   mask:= bits[macrogroup];
-  setlength(macrovalues,length(macronames));
+  setlength(fmacrovalues,length(macronames));
   setlength(ar1,length(macronames)); //max
   int2:= 0;
   for int1:= 0 to high(ar1) do begin
@@ -885,6 +1274,10 @@ var
 begin
  li:= getmacros;
  with projectoptions do begin
+  o.expandmacros(li);
+  e.expandmacros(li);
+  d.expandmacros(li);
+ {
   texp:= t;
   with texp do begin
    li.expandmacros(mainfile);
@@ -942,7 +1335,8 @@ begin
    li.expandmacros(progworkingdirectory);
    li.expandmacros(envvarnames);
    li.expandmacros(envvarvalues);
-
+}
+  with o,texp do begin
    if initfontaliascount = 0 then begin
     initfontaliascount:= fontaliascount;
    end;
@@ -950,7 +1344,7 @@ begin
 //   clearfontalias;
    int2:= high(fontalias);
    int1:= high(fontancestors);
-   setlength(fontancestors,int2+1); //additional field
+   setlength(ffontancestors,int2+1); //additional field
    for int1:= int1+1 to int2 do begin
     fontancestors[int1]:= 'sft_default';
    end;
@@ -980,14 +1374,14 @@ begin
     end;
    end;
    if sourceupdater <> nil then begin
-    sourceupdater.maxlinelength:= o.rightmarginchars;
+    sourceupdater.maxlinelength:= e.rightmarginchars;
    end;
    fontaliasnames:= fontalias;
    with sourcefo.syntaxpainter do begin
-    bo1:= not cmparray(defdefs.asarraya,texp.sourcefilemasks) or
-       not cmparray(defdefs.asarrayb,texp.syntaxdeffiles);
-    defdefs.asarraya:= texp.sourcefilemasks;
-    defdefs.asarrayb:= texp.syntaxdeffiles;
+    bo1:= not cmparray(defdefs.asarraya,e.texp.sourcefilemasks) or
+       not cmparray(defdefs.asarrayb,e.texp.syntaxdeffiles);
+    defdefs.asarraya:= e.texp.sourcefilemasks;
+    defdefs.asarrayb:= e.texp.syntaxdeffiles;
     if bo1 then begin
      sourcefo.syntaxpainter.clear;
      for int1:= 0 to sourcefo.count - 1 do begin
@@ -999,8 +1393,8 @@ begin
     sourcefo.items[int1].updatestatvalues;
    end;
    with mainfo.openfile.controller.filterlist do begin
-    asarraya:= filemasknames;
-    asarrayb:= filemasks;
+    asarraya:= e.texp.filemasknames;
+    asarrayb:= e.texp.filemasks;
    end;
    item1:= mainfo.mainmenu1.menu.itembynames(['file','new']);
    item1.submenu.count:= 1;
@@ -1067,12 +1461,12 @@ begin
    end;
   end;
   ignoreexceptionclasses:= nil;
-  for int1:= 0 to high(o.exceptignore) do begin
-   if int1 > high(o.exceptclassnames) then begin
+  for int1:= 0 to high(d.exceptignore) do begin
+   if int1 > high(d.exceptclassnames) then begin
     break;
    end;
-   if o.exceptignore[int1] then begin
-    additem(ignoreexceptionclasses,o.exceptclassnames[int1]);
+   if d.exceptignore[int1] then begin
+    additem(ignoreexceptionclasses,d.exceptclassnames[int1]);
    end;
   end;
   for int1:= 0 to usercolorcount - 1 do begin
@@ -1081,7 +1475,7 @@ begin
    end;
    setcolormapvalue(cl_user + longword(int1),o.usercolors[int1]);
   end;
-  codetemplates.scan(texp.codetemplatedirs);
+  codetemplates.scan(o.texp.codetemplatedirs);
  end;
  li.free;
  mainfo.updatesigsettings;
@@ -1115,11 +1509,15 @@ var
  int1: integer;
 begin
  projectoptions.o.free;
+ projectoptions.e.free;
+ projectoptions.d.free;
  codetemplates.clear;
  finalize(projectoptions);
  fillchar(projectoptions,sizeof(projectoptions),0);
  projectoptions.o:= tprojectoptions.create;
- with projectoptions,t do begin
+ projectoptions.e:= teditoptions.create;
+ projectoptions.d:= tdebugoptions.create;
+ with projectoptions,o,t do begin
   if expand then begin
    deletememorystatstream(findinfiledialogstatname);
    deletememorystatstream(finddialogstatname);
@@ -1149,48 +1547,48 @@ begin
   sigsettings:= defaultsigsettings;
   ignoreexceptionclasses:= nil;
 
-  befcommand:= nil;
-  aftcommand:= nil;
-  befcommandon:= nil;
-  aftcommandon:= nil;
-  
-  makeoptions:= nil;
-  additem(makeoptions,'-l -Mobjfpc -Sh -Fcutf8');
-  additem(makeoptions,'-gl');
-  additem(makeoptions,'-B');
-  additem(makeoptions,'-O2 -XX -CX -Xs');
-  setlength(makeoptionson,length(makeoptions));
-  for int1:= 0 to high(makeoptionson) do begin
-   makeoptionson[int1]:= alloptionson;
+//  befcommand:= nil;
+//  aftcommand:= nil;
+//  befcommandon:= nil;
+//  aftcommandon:= nil;
+
+//   makeoptions:= nil;
+  additem(fmakeoptions,'-l -Mobjfpc -Sh -Fcutf8');
+  additem(fmakeoptions,'-gl');
+  additem(fmakeoptions,'-B');
+  additem(fmakeoptions,'-O2 -XX -CX -Xs');
+  setlength(fmakeoptionson,length(fmakeoptions));
+  for int1:= 0 to high(fmakeoptionson) do begin
+   fmakeoptionson[int1]:= alloptionson;
   end;
-  makeoptionson[1]:= alloptionson and not bits[5]; 
+  fmakeoptionson[1]:= alloptionson and not bits[5]; 
                      //all but make 4
-  makeoptionson[2]:= bits[1] or bits[5]; //build + make 4
-  makeoptionson[3]:= bits[5]; //make 4
-  unitdirson:= nil;
-  macroon:= nil;
-  macronames:= nil;
-  macrovalues:= nil;
-  mainfile:= '';
-  targetfile:= '';
-  messageoutputfile:= '';
+  fmakeoptionson[2]:= bits[1] or bits[5]; //build + make 4
+  fmakeoptionson[3]:= bits[5]; //make 4
+//  unitdirson:= nil;
+//  macroon:= nil;
+//  macronames:= nil;
+ // macrovalues:= nil;
+//  mainfile:= '';
+//  targetfile:= '';
+//  messageoutputfile:= '';
   defaultmake:= 1; //make
-  sourcedirs:= nil;
-  additem(sourcedirs,'./');
-  additem(sourcedirs,'${MSELIBDIR}*/');
-  additem(sourcedirs,'${MSELIBDIR}kernel/$TARGET/');
-  sourcedirs:= reversearray(sourcedirs);
-  defines:= nil;
-  defineson:= nil;
-  unitdirs:= nil;
-  additem(unitdirs,'${MSELIBDIR}*/');
-  additem(unitdirs,'${MSELIBDIR}kernel/');
-  additem(unitdirs,'${MSELIBDIR}kernel/$TARGET/');
-  setlength(unitdirson,length(unitdirs));
-  for int1:= 0 to high(unitdirson) do begin
-   unitdirson[int1]:= unitson;
+//  sourcedirs:= nil;
+//  additem(fsourcedirs,'./');
+//  additem(fsourcedirs,'${MSELIBDIR}*/');
+//  additem(fsourcedirs,'${MSELIBDIR}kernel/$TARGET/');
+//  sourcedirs:= reversearray(sourcedirs);
+//  defines:= nil;
+//  defineson:= nil;
+//  unitdirs:= nil;
+  additem(funitdirs,'${MSELIBDIR}*/');
+  additem(funitdirs,'${MSELIBDIR}kernel/');
+  additem(funitdirs,'${MSELIBDIR}kernel/$TARGET/');
+  setlength(funitdirson,length(unitdirs));
+  for int1:= 0 to high(funitdirson) do begin
+   funitdirson[int1]:= unitson;
   end;
-  unitdirson[1]:= unitson + $20000; //kernel include
+  funitdirson[1]:= unitson + $20000; //kernel include
   unitdirs:= reversearray(unitdirs);
   unitdirson:= reversearray(unitdirson);
   unitpref:= '-Fu';
@@ -1199,60 +1597,40 @@ begin
   objpref:= '-Fo';
   targpref:= '-o';
   makecommand:= '${COMPILER}';
-  makedir:= '';
-  debugcommand:= '${DEBUGGER}';
-  debugoptions:= '';
-  debugtarget:= '';
-  runcommand:= '';
-  remoteconnection:= '';
-  uploadcommand:= '';
-  gdbprocessor:= 'auto';
-  gdbservercommand:= '';
-  gdbservercommandattach:= '';
-  beforeload:= '';
-  afterload:= '';
-  beforerun:= '';
-  sourcefilemasks:= nil;
-  syntaxdeffiles:= nil;
-  filemasknames:= nil;
-  filemasks:= nil;
-  toolsave:= nil;
-  toolhide:= nil;
-  toolparse:= nil;
-  toolmenus:= nil;
-  toolfiles:= nil;
-  toolparams:= nil;
-  fontalias:= nil;
-  fontancestors:= nil;
-  fontnames:= nil;
-  fontheights:= nil;
-  fontwidths:= nil;
-  fontoptions:= nil;
-  fontxscales:= nil;
-  additem(sourcefilemasks,'"*.pas" "*.dpr" "*.pp" "*.inc"');
-  additem(syntaxdeffiles,'${SYNTAXDEFDIR}pascal.sdef');
-  additem(sourcefilemasks,'"*.c" "*.cc" "*.h"');
-  additem(syntaxdeffiles,'${SYNTAXDEFDIR}cpp.sdef');
-  additem(sourcefilemasks,'"*.mfm"');
-  additem(syntaxdeffiles,'${SYNTAXDEFDIR}objecttext.sdef');
-
-  additem(filemasknames,'Source');
-  additem(filemasks,'"*.pp" "*.pas" "*.inc" "*.dpr"');
-  additem(filemasknames,'Forms');
-  additem(filemasks,'*.mfm');
-  additem(filemasknames,'All Files');
-  additem(filemasks,'*');
-
-  scriptbeforecopy:= '';
-  scriptaftercopy:= '';  
-  newprojectfiles:= nil;
-  newprojectfilesdest:= nil;
-  expandprojectfilemacros:= nil;
-  loadprojectfile:= nil;
-  setlength(newfinames,3);
-  setlength(newfifilters,3);
-  setlength(newfiexts,3);
-  setlength(newfisources,3);
+//  makedir:= '';
+//  debugcommand:= '${DEBUGGER}';
+//  debugoptions:= '';
+//  debugtarget:= '';
+//  runcommand:= '';
+//  remoteconnection:= '';
+//  uploadcommand:= '';
+//  gdbprocessor:= 'auto';
+//  gdbservercommand:= '';
+//  gdbservercommandattach:= '';
+//  beforeload:= '';
+//  afterload:= '';
+//  beforerun:= '';
+//  sourcefilemasks:= nil;
+//  syntaxdeffiles:= nil;
+//  filemasknames:= nil;
+//  filemasks:= nil;
+//  toolsave:= nil;
+//  toolhide:= nil;
+//  toolparse:= nil;
+//  toolmenus:= nil;
+//  toolfiles:= nil;
+//  toolparams:= nil;
+//  fontalias:= nil;
+//  fontancestors:= nil;
+//  fontnames:= nil;
+//  fontheights:= nil;
+//  fontwidths:= nil;
+//  fontoptions:= nil;
+//  fontxscales:= nil;
+  setlength(fnewfinames,3);
+  setlength(fnewfifilters,3);
+  setlength(fnewfiexts,3);
+  setlength(fnewfisources,3);
   
   newfinames[0]:= 'Program';
   newfifilters[0]:= '"*.pas" "*.pp"';
@@ -1269,11 +1647,11 @@ begin
   newfiexts[2]:= '';
   newfisources[2]:= '';
   
-  setlength(newfonames,11);
-  setlength(newfonamebases,11);
-  setlength(newinheritedforms,11);
-  setlength(newfosources,11);
-  setlength(newfoforms,11);
+  setlength(fnewfonames,11);
+  setlength(fnewfonamebases,11);
+  setlength(fnewinheritedforms,11);
+  setlength(fnewfosources,11);
+  setlength(fnewfoforms,11);
 
   newfonames[0]:= 'Mainform';
   newfonamebases[0]:= 'form';
@@ -1342,6 +1720,37 @@ begin
   newfoforms[10]:= '${TEMPLATEDIR}default/inheritedform.mfm';
  
  end;
+ with projectoptions,e,t do begin
+
+  additem(fsourcefilemasks,'"*.pas" "*.dpr" "*.pp" "*.inc"');
+  additem(fsyntaxdeffiles,'${SYNTAXDEFDIR}pascal.sdef');
+  additem(fsourcefilemasks,'"*.c" "*.cc" "*.h"');
+  additem(fsyntaxdeffiles,'${SYNTAXDEFDIR}cpp.sdef');
+  additem(fsourcefilemasks,'"*.mfm"');
+  additem(fsyntaxdeffiles,'${SYNTAXDEFDIR}objecttext.sdef');
+
+  additem(ffilemasknames,'Source');
+  additem(ffilemasks,'"*.pp" "*.pas" "*.inc" "*.dpr"');
+  additem(ffilemasknames,'Forms');
+  additem(ffilemasks,'*.mfm');
+  additem(ffilemasknames,'All Files');
+  additem(ffilemasks,'*');
+
+//  scriptbeforecopy:= '';
+//  scriptaftercopy:= '';  
+//  newprojectfiles:= nil;
+//  newprojectfilesdest:= nil;
+//  expandprojectfilemacros:= nil;
+//  loadprojectfile:= nil;
+ end;
+ with projectoptions,d,t do begin
+  debugcommand:= '${DEBUGGER}';
+  gdbprocessor:= 'auto';
+  additem(fsourcedirs,'./');
+  additem(fsourcedirs,'${MSELIBDIR}*/');
+  additem(fsourcedirs,'${MSELIBDIR}kernel/$TARGET/');
+  sourcedirs:= reversearray(sourcedirs);
+ end;
  if expand then begin 
   expandprojectmacros;
  end;
@@ -1395,7 +1804,7 @@ procedure updateprojectsettings(const statfiler: tstatfiler);
 var
  int1: integer;
 begin
- with statfiler,projectoptions,t do begin
+ with statfiler,projectoptions,o,t do begin
   
   if iswriter then begin
    mainfo.statoptions.writestat(tstatwriter(statfiler));
@@ -1411,77 +1820,77 @@ begin
              {$ifdef FPC}@{$endif}storesignalinforec);
    end;
   end;
-  updatevalue('modulenames',modulenames);
-  updatevalue('moduletypes',moduletypes);
-  updatevalue('modulefiles',modulefilenames);
-  updatevalue('mainfile',mainfile);
-  updatevalue('targetfile',targetfile);
-  updatevalue('messageoutputfile',messageoutputfile);
-  updatevalue('makecommand',makecommand);
-  updatevalue('makedir',makedir);
-  updatevalue('debugcommand',debugcommand);
-  updatevalue('debugoptions',debugoptions);
-  updatevalue('debugtarget',debugtarget);
-  updatevalue('runcommand',runcommand);
-  updatevalue('remoteconnection',remoteconnection);
-  updatevalue('uploadcommand',uploadcommand);
-  updatevalue('gdbprocessor',gdbprocessor);
-  updatevalue('gdbservercommand',gdbservercommand);
-  updatevalue('gdbservercommandattach',gdbservercommandattach);
-  updatevalue('beforeload',beforeload);
-  updatevalue('afterload',afterload);
-  updatevalue('beforerun',beforerun);
+//  updatevalue('modulenames',modulenames);
+//  updatevalue('moduletypes',moduletypes);
+//  updatevalue('modulefiles',modulefilenames);
+//  updatevalue('mainfile',mainfile);
+//  updatevalue('targetfile',targetfile);
+//  updatevalue('messageoutputfile',messageoutputfile);
+//  updatevalue('makecommand',makecommand);
+//  updatevalue('makedir',makedir);
+//  updatevalue('debugcommand',debugcommand);
+//  updatevalue('debugoptions',debugoptions);
+//  updatevalue('debugtarget',debugtarget);
+//  updatevalue('runcommand',runcommand);
+//  updatevalue('remoteconnection',remoteconnection);
+//  updatevalue('uploadcommand',uploadcommand);
+//  updatevalue('gdbprocessor',gdbprocessor);
+//  updatevalue('gdbservercommand',gdbservercommand);
+//  updatevalue('gdbservercommandattach',gdbservercommandattach);
+//  updatevalue('beforeload',beforeload);
+//  updatevalue('afterload',afterload);
+//  updatevalue('beforerun',beforerun);
   updatevalue('defaultmake',defaultmake,1,maxdefaultmake+1);
-  updatevalue('befcommand',befcommand);
-  updatevalue('befcommandon',befcommandon);
-  updatevalue('aftcommand',aftcommand);
-  updatevalue('aftcommandon',aftcommandon);
-  updatevalue('makeoptions',makeoptions);
-  updatevalue('makeoptionson',makeoptionson);
-  updatevalue('macroon',macroon);
-  updatevalue('macronames',macronames);
-  updatevalue('macrovalues',macrovalues);
-  updatevalue('macrogroup',macrogroup,0,5);
-  updatevalue('groupcomments',groupcomments);
-  updatevalue('sourcedirs',sourcedirs);
-  updatevalue('defines',defines);
-  updatevalue('defineson',defineson);
-  updatevalue('unitdirs',unitdirs);
-  updatevalue('unitdirson',unitdirson);
-  updatevalue('unitpref',unitpref);
-  updatevalue('incpref',incpref);
-  updatevalue('libpref',libpref);
-  updatevalue('objpref',objpref);
-  updatevalue('targpref',targpref);
-  updatevalue('sourcefilemasks',sourcefilemasks);
-  updatevalue('syntaxdeffiles',syntaxdeffiles);
-  updatevalue('filemasknames',filemasknames);
-  updatevalue('filemasks',filemasks);
-  updatevalue('toolsave',toolsave);
-  updatevalue('toolhide',toolhide);
-  updatevalue('toolparse',toolparse);
-  updatevalue('toolmenus',toolmenus);
-  updatevalue('toolfiles',toolfiles);
-  updatevalue('toolparams',toolparams);
-  updatevalue('fontalias',fontalias);
-  updatevalue('fontancestors',fontancestors);
-  updatevalue('fontnames',fontnames);
-  updatevalue('fontheights',fontheights);
-  updatevalue('fontwidths',fontwidths);
-  updatevalue('fontoptions',fontoptions);
-  updatevalue('fontxscales',fontxscales);
+//  updatevalue('befcommand',befcommand);
+//  updatevalue('befcommandon',befcommandon);
+//  updatevalue('aftcommand',aftcommand);
+//  updatevalue('aftcommandon',aftcommandon);
+//  updatevalue('makeoptions',makeoptions);
+//  updatevalue('makeoptionson',makeoptionson);
+//  updatevalue('macroon',macroon);
+//  updatevalue('macronames',macronames);
+//  updatevalue('macrovalues',macrovalues);
+//  updatevalue('macrogroup',macrogroup,0,5);
+//  updatevalue('groupcomments',groupcomments);
+//  updatevalue('sourcedirs',sourcedirs);
+//  updatevalue('defines',defines);
+//  updatevalue('defineson',defineson);
+//  updatevalue('unitdirs',unitdirs);
+//  updatevalue('unitdirson',unitdirson);
+//  updatevalue('unitpref',unitpref);
+//  updatevalue('incpref',incpref);
+//  updatevalue('libpref',libpref);
+//  updatevalue('objpref',objpref);
+//  updatevalue('targpref',targpref);
+//  updatevalue('sourcefilemasks',sourcefilemasks);
+//  updatevalue('syntaxdeffiles',syntaxdeffiles);
+//  updatevalue('filemasknames',filemasknames);
+//  updatevalue('filemasks',filemasks);
+//  updatevalue('toolsave',toolsave);
+//  updatevalue('toolhide',toolhide);
+//  updatevalue('toolparse',toolparse);
+//  updatevalue('toolmenus',toolmenus);
+//  updatevalue('toolfiles',toolfiles);
+//  updatevalue('toolparams',toolparams);
+//  updatevalue('fontalias',fontalias);
+//  updatevalue('fontancestors',fontancestors);
+//  updatevalue('fontnames',fontnames);
+//  updatevalue('fontheights',fontheights);
+//  updatevalue('fontwidths',fontwidths);
+//  updatevalue('fontoptions',fontoptions);
+//  updatevalue('fontxscales',fontxscales);
   
-  updatevalue('scriptbeforecopy',scriptbeforecopy);
-  updatevalue('scriptaftercopy',scriptaftercopy);
-  updatevalue('newprojectfiles',newprojectfiles);
-  updatevalue('newprojectfilesdest',newprojectfilesdest);
-  updatevalue('expandprojectfilemacros',expandprojectfilemacros);
-  updatevalue('loadprojectfile',loadprojectfile);
+//  updatevalue('scriptbeforecopy',scriptbeforecopy);
+//  updatevalue('scriptaftercopy',scriptaftercopy);
+//  updatevalue('newprojectfiles',newprojectfiles);
+//  updatevalue('newprojectfilesdest',newprojectfilesdest);
+//  updatevalue('expandprojectfilemacros',expandprojectfilemacros);
+//  updatevalue('loadprojectfile',loadprojectfile);
   
-  updatevalue('newfinames',newfinames);
-  updatevalue('newfinfilters',newfifilters);
-  updatevalue('newfiexts',newfiexts);
-  updatevalue('newfisources',newfisources);
+//  updatevalue('newfinames',newfinames);
+//  updatevalue('newfinfilters',newfifilters);
+//  updatevalue('newfiexts',newfiexts);
+//  updatevalue('newfisources',newfisources);
   if not iswriter then begin
    int1:= length(newfinames);
    if int1 > length(newfifilters) then begin
@@ -1493,17 +1902,17 @@ begin
    if int1 > length(newfisources) then begin
     int1:= length(newfisources);
    end;
-   setlength(newfinames,int1);
-   setlength(newfifilters,int1);
-   setlength(newfiexts,int1);
-   setlength(newfisources,int1);
+   setlength(fnewfinames,int1);
+   setlength(fnewfifilters,int1);
+   setlength(fnewfiexts,int1);
+   setlength(fnewfisources,int1);
   end;
     
-  updatevalue('newfonames',newfonames);
-  updatevalue('newfonamebases',newfonamebases);
-  updatevalue('newinheritedforms',newinheritedforms);
-  updatevalue('newfosources',newfosources);
-  updatevalue('newfoforms',newfoforms);
+//  updatevalue('newfonames',newfonames);
+//  updatevalue('newfonamebases',newfonamebases);
+//  updatevalue('newinheritedforms',newinheritedforms);
+//  updatevalue('newfosources',newfosources);
+//  updatevalue('newfoforms',newfoforms);
   if not iswriter then begin
    int1:= length(newfonames);
    if int1 > length(newfonamebases) then begin
@@ -1518,11 +1927,11 @@ begin
    if int1 > length(newfoforms) then begin
     int1:= length(newfoforms);
    end;
-   setlength(newfonames,int1);
-   setlength(newfonamebases,int1);
-   setlength(newinheritedforms,int1);
-   setlength(newfosources,int1);
-   setlength(newfoforms,int1);
+   setlength(fnewfonames,int1);
+   setlength(fnewfonamebases,int1);
+   setlength(fnewinheritedforms,int1);
+   setlength(fnewfosources,int1);
+   setlength(fnewfoforms,int1);
   end;
  end;
 end;
@@ -1534,23 +1943,29 @@ procedure updateprojectoptions(const statfiler: tstatfiler;
                   const afilename: filenamety);
 var
  int1,int2,int3: integer;
+ modulenames1: msestringarty;
+ moduletypes1: msestringarty;
+ modulefiles1: filenamearty;
 begin
- with statfiler,projectoptions,t do begin
+ with statfiler,projectoptions do begin
   if iswriter then begin
    projectdir:= msefileutils.getcurrentdir;
    with mainfo,mainmenu1.menu.itembyname('view') do begin
     int3:= formmenuitemstart;
     int2:= count - int3;
-    setlength(modulenames,int2);
-    setlength(moduletypes,int2);
-    setlength(modulefilenames,int2);
-    for int1:= 0 to high(modulenames) do begin
+    setlength(modulenames1,int2);
+    setlength(moduletypes1,int2);
+    setlength(modulefiles1,int2);
+    for int1:= 0 to high(modulenames1) do begin
      with pmoduleinfoty(submenu[int1+int3].tagpointer)^ do begin
-      modulenames[int1]:= struppercase(instance.name);
-      moduletypes[int1]:= struppercase(string(moduleclassname));
-      modulefilenames[int1]:= filename;
+      modulenames1[int1]:= struppercase(instance.name);
+      moduletypes1[int1]:= struppercase(string(moduleclassname));
+      modulefiles1[int1]:= filename;
      end;
     end;
+    o.modulenames:= modulenames1;
+    o.moduletypes:= moduletypes1;
+    o.modulefiles:= modulefiles1;
    end;
   end;
   registeredcomponents.updatestat(statfiler);
@@ -1607,7 +2022,7 @@ begin
 
   if not iswriter then begin
    if guitemplatesmo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
-    macrogroup:= int1-1;
+    o.macrogroup:= int1-1;
    end;
    expandprojectmacros;
   end;
@@ -1661,7 +2076,7 @@ begin
   end;
   setlength(enums,int2);
  end;
- with projectoptions,t do begin
+ with projectoptions{,t} do begin
   fo.signalgrid.rowcount:= length(sigsettings);
   for int1:= 0 to high(sigsettings) do begin
    with sigsettings[int1] do begin
@@ -1677,144 +2092,144 @@ begin
     fo.sighandle[int1]:= sfl_handle in flags;
    end;
   end;
-  fo.mainfile.value:= mainfile;
-  fo.targetfile.value:= targetfile;
-  fo.messageoutputfile.value:= messageoutputfile;
-  fo.fontalias.gridvalues:= fontalias;
-  fo.fontancestors.gridvalues:= fontancestors;
-  fo.fontname.gridvalues:= fontnames;
-  fo.fontheight.gridvalues:= fontheights;
-  fo.fontwidth.gridvalues:= fontwidths;
-  fo.fontoptions.gridvalues:= fontoptions;
-  fo.fontxscale.gridvalues:= fontxscales;
+//  fo.mainfile.value:= mainfile;
+//  fo.targetfile.value:= targetfile;
+//  fo.messageoutputfile.value:= messageoutputfile;
+//  fo.fontalias.gridvalues:= fontalias;
+//  fo.fontancestors.gridvalues:= fontancestors;
+//  fo.fontname.gridvalues:= fontnames;
+//  fo.fontheight.gridvalues:= fontheights;
+//  fo.fontwidth.gridvalues:= fontwidths;
+//  fo.fontoptions.gridvalues:= fontoptions;
+//  fo.fontxscale.gridvalues:= fontxscales;
   fo.fontondataentered(nil);
 
-  fo.scriptbeforecopy.value:= scriptbeforecopy;
-  fo.scriptaftercopy.value:= scriptaftercopy;
-  fo.newprojectfiles.gridvalues:= newprojectfiles;
-  fo.newprojectfilesdest.gridvalues:= newprojectfilesdest;
-  fo.expandprojectfilemacros.gridvalues:= expandprojectfilemacros;
-  fo.loadprojectfile.gridvalues:= loadprojectfile;
+//  fo.scriptbeforecopy.value:= scriptbeforecopy;
+//  fo.scriptaftercopy.value:= scriptaftercopy;
+//  fo.newprojectfiles.gridvalues:= newprojectfiles;
+//  fo.newprojectfilesdest.gridvalues:= newprojectfilesdest;
+//  fo.expandprojectfilemacros.gridvalues:= expandprojectfilemacros;
+//  fo.loadprojectfile.gridvalues:= loadprojectfile;
   
-  fo.newfiname.gridvalues:= newfinames;
-  fo.newfifilter.gridvalues:= newfifilters;
-  fo.newfiext.gridvalues:= newfiexts;
-  fo.newfisource.gridvalues:= newfisources;
+//  fo.newfiname.gridvalues:= newfinames;
+//  fo.newfifilter.gridvalues:= newfifilters;
+//  fo.newfiext.gridvalues:= newfiexts;
+//  fo.newfisource.gridvalues:= newfisources;
   
-  fo.newformname.gridvalues:= newfonames;
-  fo.newinheritedform.gridvalues:= newinheritedforms;
-  fo.newformnamebase.gridvalues:= newfonamebases;
-  fo.newformsourcefile.gridvalues:= newfosources;
-  fo.newformformfile.gridvalues:= newfoforms;
-  fo.makecommand.value:= makecommand;
-  fo.makedir.value:= makedir;
-  fo.debugcommand.value:= debugcommand;
-  fo.debugoptions.value:= debugoptions;
-  fo.debugtarget.value:= debugtarget;
-  fo.runcommand.value:= runcommand;
-  fo.remoteconnection.value:= remoteconnection;
-  fo.uploadcommand.value:= uploadcommand;
-  fo.gdbprocessor.value:= gdbprocessor;
-  fo.gdbservercommand.value:= gdbservercommand;
-  fo.gdbservercommandattach.value:= gdbservercommandattach;
-  fo.gdbbeforeload.value:= beforeload;
-  fo.gdbafterload.value:= afterload;
-  fo.gdbbeforerun.value:= beforerun;
+//  fo.newformname.gridvalues:= newfonames;
+//  fo.newinheritedform.gridvalues:= newinheritedforms;
+//  fo.newformnamebase.gridvalues:= newfonamebases;
+//  fo.newformsourcefile.gridvalues:= newfosources;
+//  fo.newformformfile.gridvalues:= newfoforms;
+//  fo.makecommand.value:= makecommand;
+//  fo.makedir.value:= makedir;
+//  fo.debugcommand.value:= debugcommand;
+//  fo.debugoptions.value:= debugoptions;
+//  fo.debugtarget.value:= debugtarget;
+//  fo.runcommand.value:= runcommand;
+//  fo.remoteconnection.value:= remoteconnection;
+//  fo.uploadcommand.value:= uploadcommand;
+//  fo.gdbprocessor.value:= gdbprocessor;
+//  fo.gdbservercommand.value:= gdbservercommand;
+//  fo.gdbservercommandattach.value:= gdbservercommandattach;
+//  fo.gdbbeforeload.value:= beforeload;
+//  fo.gdbafterload.value:= afterload;
+//  fo.gdbbeforerun.value:= beforerun;
   fo.defaultmake.value:= lowestbit(defaultmake);
-  fo.makeoptions.gridvalues:= makeoptions;
+//  fo.makeoptions.gridvalues:= makeoptions;
   for int1:= 0 to fo.makeoptionsgrid.rowhigh do begin
-   if int1 > high(makeoptionson) then begin
+   if int1 > high(o.makeoptionson) then begin
     break;
    end;
-   fo.makeon.gridupdatetagvalue(int1,makeoptionson[int1]);
-   fo.buildon.gridupdatetagvalue(int1,makeoptionson[int1]);
-   fo.make1on.gridupdatetagvalue(int1,makeoptionson[int1]);
-   fo.make2on.gridupdatetagvalue(int1,makeoptionson[int1]);
-   fo.make3on.gridupdatetagvalue(int1,makeoptionson[int1]);
-   fo.make4on.gridupdatetagvalue(int1,makeoptionson[int1]);
+   fo.makeon.gridupdatetagvalue(int1,o.makeoptionson[int1]);
+   fo.buildon.gridupdatetagvalue(int1,o.makeoptionson[int1]);
+   fo.make1on.gridupdatetagvalue(int1,o.makeoptionson[int1]);
+   fo.make2on.gridupdatetagvalue(int1,o.makeoptionson[int1]);
+   fo.make3on.gridupdatetagvalue(int1,o.makeoptionson[int1]);
+   fo.make4on.gridupdatetagvalue(int1,o.makeoptionson[int1]);
   end;
 
-  fo.befcommand.gridvalues:= befcommand;
+//  fo.befcommand.gridvalues:= befcommand;
   for int1:= 0 to fo.befcommandgrid.rowhigh do begin
-   if int1 > high(befcommandon) then begin
+   if int1 > high(o.befcommandon) then begin
     break;
    end;
-   fo.befmakeon.gridupdatetagvalue(int1,befcommandon[int1]);
-   fo.befbuildon.gridupdatetagvalue(int1,befcommandon[int1]);
-   fo.befmake1on.gridupdatetagvalue(int1,befcommandon[int1]);
-   fo.befmake2on.gridupdatetagvalue(int1,befcommandon[int1]);
-   fo.befmake3on.gridupdatetagvalue(int1,befcommandon[int1]);
-   fo.befmake4on.gridupdatetagvalue(int1,befcommandon[int1]);
+   fo.befmakeon.gridupdatetagvalue(int1,o.befcommandon[int1]);
+   fo.befbuildon.gridupdatetagvalue(int1,o.befcommandon[int1]);
+   fo.befmake1on.gridupdatetagvalue(int1,o.befcommandon[int1]);
+   fo.befmake2on.gridupdatetagvalue(int1,o.befcommandon[int1]);
+   fo.befmake3on.gridupdatetagvalue(int1,o.befcommandon[int1]);
+   fo.befmake4on.gridupdatetagvalue(int1,o.befcommandon[int1]);
   end;
 
-  fo.aftcommand.gridvalues:= aftcommand;
+//  fo.aftcommand.gridvalues:= aftcommand;
   for int1:= 0 to fo.aftcommandgrid.rowhigh do begin
-   if int1 > high(aftcommandon) then begin
+   if int1 > high(o.aftcommandon) then begin
     break;
    end;
-   fo.aftmakeon.gridupdatetagvalue(int1,aftcommandon[int1]);
-   fo.aftbuildon.gridupdatetagvalue(int1,aftcommandon[int1]);
-   fo.aftmake1on.gridupdatetagvalue(int1,aftcommandon[int1]);
-   fo.aftmake2on.gridupdatetagvalue(int1,aftcommandon[int1]);
-   fo.aftmake3on.gridupdatetagvalue(int1,aftcommandon[int1]);
-   fo.aftmake4on.gridupdatetagvalue(int1,aftcommandon[int1]);
+   fo.aftmakeon.gridupdatetagvalue(int1,o.aftcommandon[int1]);
+   fo.aftbuildon.gridupdatetagvalue(int1,o.aftcommandon[int1]);
+   fo.aftmake1on.gridupdatetagvalue(int1,o.aftcommandon[int1]);
+   fo.aftmake2on.gridupdatetagvalue(int1,o.aftcommandon[int1]);
+   fo.aftmake3on.gridupdatetagvalue(int1,o.aftcommandon[int1]);
+   fo.aftmake4on.gridupdatetagvalue(int1,o.aftcommandon[int1]);
   end;
 
-  fo.unitdirs.gridvalues:= reversearray(unitdirs);
-  int2:= high(unitdirs);
+//  fo.unitdirs.gridvalues:= reversearray(unitdirs);
+  int2:= high(o.t.unitdirs);
   for int1:= 0 to int2 do begin
-   if int1 > high(unitdirson) then begin
+   if int1 > high(o.unitdirson) then begin
     break;
    end;
-   fo.dmakeon.gridupdatetagvalue(int2,unitdirson[int1]);
-   fo.dbuildon.gridupdatetagvalue(int2,unitdirson[int1]);
-   fo.dmake1on.gridupdatetagvalue(int2,unitdirson[int1]);
-   fo.dmake2on.gridupdatetagvalue(int2,unitdirson[int1]);
-   fo.dmake3on.gridupdatetagvalue(int2,unitdirson[int1]);
-   fo.dmake4on.gridupdatetagvalue(int2,unitdirson[int1]);
-   fo.duniton.gridupdatetagvalue(int2,unitdirson[int1]);
-   fo.dincludeon.gridupdatetagvalue(int2,unitdirson[int1]);
-   fo.dlibon.gridupdatetagvalue(int2,unitdirson[int1]);
-   fo.dobjon.gridupdatetagvalue(int2,unitdirson[int1]);
+   fo.dmakeon.gridupdatetagvalue(int2,o.unitdirson[int1]);
+   fo.dbuildon.gridupdatetagvalue(int2,o.unitdirson[int1]);
+   fo.dmake1on.gridupdatetagvalue(int2,o.unitdirson[int1]);
+   fo.dmake2on.gridupdatetagvalue(int2,o.unitdirson[int1]);
+   fo.dmake3on.gridupdatetagvalue(int2,o.unitdirson[int1]);
+   fo.dmake4on.gridupdatetagvalue(int2,o.unitdirson[int1]);
+   fo.duniton.gridupdatetagvalue(int2,o.unitdirson[int1]);
+   fo.dincludeon.gridupdatetagvalue(int2,o.unitdirson[int1]);
+   fo.dlibon.gridupdatetagvalue(int2,o.unitdirson[int1]);
+   fo.dobjon.gridupdatetagvalue(int2,o.unitdirson[int1]);
    dec(int2);
   end;
-  fo.unitpref.value:= unitpref;
-  fo.incpref.value:= incpref;
-  fo.libpref.value:= libpref;
-  fo.objpref.value:= objpref;
-  fo.targpref.value:= targpref;
-  fo.activemacroselect[macrogroup]:= true;
+//  fo.unitpref.value:= unitpref;
+//  fo.incpref.value:= incpref;
+//  fo.libpref.value:= libpref;
+//  fo.objpref.value:= objpref;
+//  fo.targpref.value:= targpref;
+  fo.activemacroselect[o.macrogroup]:= true;
   fo.activegroupchanged;
-  fo.macronames.gridvalues:= macronames;
-  fo.macrovalues.gridvalues:= macrovalues;
-  setlength(groupcomments,6);
-  fo.groupcomment.gridvalues:= groupcomments;
+//  fo.macronames.gridvalues:= macronames;
+//  fo.macrovalues.gridvalues:= macrovalues;
+  setlength(o.fgroupcomments,6);
+  fo.groupcomment.gridvalues:= o.groupcomments;
 
   for int1:= 0 to fo.macrogrid.rowhigh do begin
-   if int1 > high(macroon) then begin
+   if int1 > high(o.macroon) then begin
     break;
    end;
-   fo.e0.gridupdatetagvalue(int1,macroon[int1]);
-   fo.e1.gridupdatetagvalue(int1,macroon[int1]);
-   fo.e2.gridupdatetagvalue(int1,macroon[int1]);
-   fo.e3.gridupdatetagvalue(int1,macroon[int1]);
-   fo.e4.gridupdatetagvalue(int1,macroon[int1]);
-   fo.e5.gridupdatetagvalue(int1,macroon[int1]);
+   fo.e0.gridupdatetagvalue(int1,o.macroon[int1]);
+   fo.e1.gridupdatetagvalue(int1,o.macroon[int1]);
+   fo.e2.gridupdatetagvalue(int1,o.macroon[int1]);
+   fo.e3.gridupdatetagvalue(int1,o.macroon[int1]);
+   fo.e4.gridupdatetagvalue(int1,o.macroon[int1]);
+   fo.e5.gridupdatetagvalue(int1,o.macroon[int1]);
   end;
 
-  fo.sourcedirs.gridvalues:= reversearray(sourcedirs);
-  fo.grid[0].datalist.asarray:= syntaxdeffiles;
-  fo.grid[1].datalist.asarray:= sourcefilemasks;
-  fo.filefiltergrid[0].datalist.asarray:= filemasknames;
-  fo.filefiltergrid[1].datalist.asarray:= filemasks;
-  fo.toolsave.gridvalues:= toolsave;
-  fo.toolhide.gridvalues:= toolhide;
-  fo.toolparse.gridvalues:= toolparse;
-  fo.toolmenu.gridvalues:= toolmenus;
-  fo.toolfile.gridvalues:= toolfiles;
-  fo.toolparam.gridvalues:= toolparams;
-  fo.def.gridvalues:= defines;
-  fo.defon.gridvalues:= defineson;
+  fo.sourcedirs.gridvalues:= reversearray(d.t.sourcedirs);
+  fo.grid[0].datalist.asarray:= e.t.syntaxdeffiles;
+  fo.grid[1].datalist.asarray:= e.t.sourcefilemasks;
+  fo.filefiltergrid[0].datalist.asarray:= e.t.filemasknames;
+  fo.filefiltergrid[1].datalist.asarray:= e.t.filemasks;
+//  fo.toolsave.gridvalues:= toolsave;
+//  fo.toolhide.gridvalues:= toolhide;
+//  fo.toolparse.gridvalues:= toolparse;
+//  fo.toolmenu.gridvalues:= toolmenus;
+//  fo.toolfile.gridvalues:= toolfiles;
+//  fo.toolparam.gridvalues:= toolparams;
+//  fo.def.gridvalues:= defines;
+//  fo.defon.gridvalues:= defineson;
   fo.settingsdataent(nil);
  end;
 end;
@@ -1823,10 +2238,10 @@ procedure storemacros(fo: tprojectoptionsfo);
 var
  int1: integer;
 begin
- with projectoptions,t do begin
+ with projectoptions,o do begin
   macronames:= fo.macronames.gridvalues;
   macrovalues:= fo.macrovalues.gridvalues;
-  setlength(macroon,fo.macrogrid.rowcount);
+  setlength(fmacroon,fo.macrogrid.rowcount);
   for int1:= 0 to high(macroon) do begin
    macroon[int1]:= fo.e0.gridvaluetag(int1,0) or fo.e1.gridvaluetag(int1,0) or
                     fo.e2.gridvaluetag(int1,0) or fo.e3.gridvaluetag(int1,0) or
@@ -1843,7 +2258,7 @@ begin
 {$ifdef mse_with_ifi}
  mainfo.statoptions.valuestoobj(fo);
 {$endif}
- with projectoptions,t do begin
+ with projectoptions do begin
   setlength(sigsettings,fo.signalgrid.rowcount);
   for int1:= 0 to high(sigsettings) do begin
    with sigsettings[int1] do begin
@@ -1856,109 +2271,109 @@ begin
    end;
   end;
   
-  mainfile:= fo.mainfile.value;
-  targetfile:= fo.targetfile.value;
-  messageoutputfile:= fo.messageoutputfile.value;
+//  mainfile:= fo.mainfile.value;
+//  targetfile:= fo.targetfile.value;
+//  messageoutputfile:= fo.messageoutputfile.value;
 
-  fontalias:= fo.fontalias.gridvalues;
-  fontancestors:= fo.fontancestors.gridvalues;
-  fontnames:= fo.fontname.gridvalues;
-  fontheights:= fo.fontheight.gridvalues;
-  fontwidths:= fo.fontwidth.gridvalues;
-  fontoptions:= fo.fontoptions.gridvalues;
-  fontxscales:= fo.fontxscale.gridvalues;
-  for int1:= high(fontxscales) downto 0 do begin
-   if fontxscales[int1] = emptyreal then begin
-    fontxscales[int1]:= 1.0;
+//  fontalias:= fo.fontalias.gridvalues;
+//  fontancestors:= fo.fontancestors.gridvalues;
+//  fontnames:= fo.fontname.gridvalues;
+//  fontheights:= fo.fontheight.gridvalues;
+//  fontwidths:= fo.fontwidth.gridvalues;
+//  fontoptions:= fo.fontoptions.gridvalues;
+//  fontxscales:= fo.fontxscale.gridvalues;
+  for int1:= high(o.fontxscales) downto 0 do begin
+   if o.fontxscales[int1] = emptyreal then begin
+    o.fontxscales[int1]:= 1.0;
    end;   
   end;
 
-  scriptbeforecopy:= fo.scriptbeforecopy.value;
-  scriptaftercopy:= fo.scriptaftercopy.value;
-  newprojectfiles:= fo.newprojectfiles.gridvalues;
-  newprojectfilesdest:= fo.newprojectfilesdest.gridvalues;
-  expandprojectfilemacros:= fo.expandprojectfilemacros.gridvalues;
-  loadprojectfile:= fo.loadprojectfile.gridvalues;
-  newfinames:= fo.newfiname.gridvalues;
-  newfifilters:= fo.newfifilter.gridvalues;
-  newfiexts:= fo.newfiext.gridvalues;
-  newfisources:= fo.newfisource.gridvalues;
+//  scriptbeforecopy:= fo.scriptbeforecopy.value;
+//  scriptaftercopy:= fo.scriptaftercopy.value;
+//  newprojectfiles:= fo.newprojectfiles.gridvalues;
+//  newprojectfilesdest:= fo.newprojectfilesdest.gridvalues;
+//  expandprojectfilemacros:= fo.expandprojectfilemacros.gridvalues;
+//  loadprojectfile:= fo.loadprojectfile.gridvalues;
+//  newfinames:= fo.newfiname.gridvalues;
+//  newfifilters:= fo.newfifilter.gridvalues;
+//  newfiexts:= fo.newfiext.gridvalues;
+//  newfisources:= fo.newfisource.gridvalues;
 
-  newfonames:= fo.newformname.gridvalues;
-  newinheritedforms:= fo.newinheritedform.gridvalues;
-  newfonamebases:= fo.newformnamebase.gridvalues;
-  newfosources:= fo.newformsourcefile.gridvalues;
-  newfoforms:= fo.newformformfile.gridvalues;
-  makecommand:= fo.makecommand.value;
-  makedir:= fo.makedir.value;
-  debugcommand:= fo.debugcommand.value;
-  debugoptions:= fo.debugoptions.value;
-  debugtarget:= fo.debugtarget.value;
-  runcommand:= fo.runcommand.value;
-  remoteconnection:= fo.remoteconnection.value;
-  uploadcommand:= fo.uploadcommand.value;
-  gdbprocessor:= fo.gdbprocessor.value;
-  gdbservercommand:= fo.gdbservercommand.value;
-  gdbservercommandattach:= fo.gdbservercommandattach.value;
-  beforeload:= fo.gdbbeforeload.value;
-  afterload:= fo.gdbafterload.value;
-  beforerun:= fo.gdbbeforerun.value;
+//  newfonames:= fo.newformname.gridvalues;
+//  newinheritedforms:= fo.newinheritedform.gridvalues;
+//  newfonamebases:= fo.newformnamebase.gridvalues;
+//  newfosources:= fo.newformsourcefile.gridvalues;
+//  newfoforms:= fo.newformformfile.gridvalues;
+//  makecommand:= fo.makecommand.value;
+//  makedir:= fo.makedir.value;
+//  debugcommand:= fo.debugcommand.value;
+//  debugoptions:= fo.debugoptions.value;
+//  debugtarget:= fo.debugtarget.value;
+//  runcommand:= fo.runcommand.value;
+//  remoteconnection:= fo.remoteconnection.value;
+//  uploadcommand:= fo.uploadcommand.value;
+//  gdbprocessor:= fo.gdbprocessor.value;
+//  gdbservercommand:= fo.gdbservercommand.value;
+//  gdbservercommandattach:= fo.gdbservercommandattach.value;
+//  beforeload:= fo.gdbbeforeload.value;
+//  afterload:= fo.gdbafterload.value;
+//  beforerun:= fo.gdbbeforerun.value;
   defaultmake:= 1 shl fo.defaultmake.value;
-  makeoptions:= fo.makeoptions.gridvalues;
-  setlength(makeoptionson,fo.makeoptionsgrid.rowcount);
-  for int1:= 0 to high(makeoptionson) do begin
-   makeoptionson[int1]:=
+//  makeoptions:= fo.makeoptions.gridvalues;
+  setlength(o.fmakeoptionson,fo.makeoptionsgrid.rowcount);
+  for int1:= 0 to high(o.fmakeoptionson) do begin
+   o.fmakeoptionson[int1]:=
       fo.makeon.gridvaluetag(int1,0) or fo.buildon.gridvaluetag(int1,0) or
       fo.make1on.gridvaluetag(int1,0) or fo.make2on.gridvaluetag(int1,0) or
       fo.make3on.gridvaluetag(int1,0) or fo.make4on.gridvaluetag(int1,0);
   end;
 
-  befcommand:= fo.befcommand.gridvalues;
-  setlength(befcommandon,fo.befcommandgrid.rowcount);
-  for int1:= 0 to high(befcommandon) do begin
-   befcommandon[int1]:=
+//  befcommand:= fo.befcommand.gridvalues;
+  setlength(o.fbefcommandon,fo.befcommandgrid.rowcount);
+  for int1:= 0 to high(o.fbefcommandon) do begin
+   o.fbefcommandon[int1]:=
       fo.befmakeon.gridvaluetag(int1,0) or fo.befbuildon.gridvaluetag(int1,0) or
       fo.befmake1on.gridvaluetag(int1,0) or fo.befmake2on.gridvaluetag(int1,0) or
       fo.befmake3on.gridvaluetag(int1,0) or fo.befmake4on.gridvaluetag(int1,0);
   end;
-  aftcommand:= fo.aftcommand.gridvalues;
-  setlength(aftcommandon,fo.aftcommandgrid.rowcount);
-  for int1:= 0 to high(aftcommandon) do begin
-   aftcommandon[int1]:=
+//  aftcommand:= fo.aftcommand.gridvalues;
+  setlength(o.faftcommandon,fo.aftcommandgrid.rowcount);
+  for int1:= 0 to high(o.faftcommandon) do begin
+   o.faftcommandon[int1]:=
       fo.aftmakeon.gridvaluetag(int1,0) or fo.aftbuildon.gridvaluetag(int1,0) or
       fo.aftmake1on.gridvaluetag(int1,0) or fo.aftmake2on.gridvaluetag(int1,0) or
       fo.aftmake3on.gridvaluetag(int1,0) or fo.aftmake4on.gridvaluetag(int1,0);
   end;
 
-  unitdirs:= reversearray(fo.unitdirs.gridvalues);
-  setlength(unitdirson,length(unitdirs));
-  for int1:= 0 to high(unitdirson) do begin
-   unitdirson[high(unitdirson)-int1]:=
+  o.t.unitdirs:= reversearray(fo.unitdirs.gridvalues);
+  setlength(o.funitdirson,length(o.t.unitdirs));
+  for int1:= 0 to high(o.funitdirson) do begin
+   o.funitdirson[high(o.funitdirson)-int1]:=
       fo.dmakeon.gridvaluetag(int1,0) or fo.dbuildon.gridvaluetag(int1,0) or
       fo.dmake1on.gridvaluetag(int1,0) or fo.dmake2on.gridvaluetag(int1,0) or
       fo.dmake3on.gridvaluetag(int1,0) or fo.dmake4on.gridvaluetag(int1,0) or
       fo.duniton.gridvaluetag(int1,0) or fo.dincludeon.gridvaluetag(int1,0) or
       fo.dlibon.gridvaluetag(int1,0) or fo.dobjon.gridvaluetag(int1,0);
   end;
-  unitpref:= fo.unitpref.value;
-  incpref:= fo.incpref.value;
-  libpref:= fo.libpref.value;
-  objpref:= fo.objpref.value;
-  targpref:= fo.targpref.value;
+//  unitpref:= fo.unitpref.value;
+//  incpref:= fo.incpref.value;
+//  libpref:= fo.libpref.value;
+//  objpref:= fo.objpref.value;
+//  targpref:= fo.targpref.value;
   storemacros(fo);
-  sourcedirs:= reversearray(fo.sourcedirs.gridvalues);
-  defines:= fo.def.gridvalues;
-  defineson:= fo.defon.gridvalues;
-  syntaxdeffiles:= fo.grid[0].datalist.asarray;
-  sourcefilemasks:= fo.grid[1].datalist.asarray;
-  filemasknames:= fo.filefiltergrid[0].datalist.asarray;
-  filemasks:= fo.filefiltergrid[1].datalist.asarray;
-  toolsave:= fo.toolsave.gridvalues;
-  toolhide:= fo.toolhide.gridvalues;
-  toolparse:= fo.toolparse.gridvalues;
-  toolmenus:= fo.toolmenu.gridvalues;
-  toolfiles:= fo.toolfile.gridvalues;
-  toolparams:= fo.toolparam.gridvalues;  
+  d.t.sourcedirs:= reversearray(fo.sourcedirs.gridvalues);
+//  defines:= fo.def.gridvalues;
+//  defineson:= fo.defon.gridvalues;
+  e.t.syntaxdeffiles:= fo.grid[0].datalist.asarray;
+  e.t.sourcefilemasks:= fo.grid[1].datalist.asarray;
+  e.t.filemasknames:= fo.filefiltergrid[0].datalist.asarray;
+  e.t.filemasks:= fo.filefiltergrid[1].datalist.asarray;
+//  toolsave:= fo.toolsave.gridvalues;
+//  toolhide:= fo.toolhide.gridvalues;
+//  toolparse:= fo.toolparse.gridvalues;
+//  toolmenus:= fo.toolmenu.gridvalues;
+//  toolfiles:= fo.toolfile.gridvalues;
+//  toolparams:= fo.toolparam.gridvalues;  
  end;
  expandprojectmacros;
 end;
@@ -2058,7 +2473,7 @@ begin
    macrogrid.datacols[int1].color:= cl_default;
   end;
  end;
- projectoptions.macrogroup:= int2;
+ projectoptions.o.macrogroup:= int2;
 end;
 
 procedure tprojectoptionsfo.acttiveselectondataentered(const sender: TObject);
@@ -2070,7 +2485,7 @@ begin
  end;
  tbooleaneditradio(sender).value:= true;
  activegroupchanged;
- projectoptions.macrogroup:= selectactivegroupgrid.row;
+ projectoptions.o.macrogroup:= selectactivegroupgrid.row;
 end;
 
 procedure tprojectoptionsfo.colonshowhint(const sender: tdatacol; 
@@ -2318,11 +2733,12 @@ type
  valuebufferty = record
   settingsfile: filenamety;
   settingseditor: boolean;
+  settingsdebugger: boolean;
   settingsautoload: boolean;
   settingsautosave: boolean;
   projectfilename: filenamety;
   projectdir: filenamety;
-
+{
   showgrid: boolean;
   snaptogrid: boolean;
   moveonfirstclick: boolean;
@@ -2353,6 +2769,7 @@ type
   syntaxdeffiles: msestringarty;
   filemasknames: msestringarty;
   filemasks: msestringarty;
+  }
  end;
 
 procedure savevalues(fo: tprojectoptionsfo; out buffer: valuebufferty);
@@ -2363,9 +2780,10 @@ begin
   if fo <> nil then begin
    settingsfile:= fo.settingsfile.value;
    settingseditor:= fo.settingseditor.value;
+   settingsdebugger:= fo.settingsdebugger.value;
    settingsautoload:= fo.settingsautoload.value; 
    settingsautosave:= fo.settingsautosave.value; 
- 
+{ 
    showgrid:= fo.showgrid.value;
    snaptogrid:= fo.snaptogrid.value;
    moveonfirstclick:= fo.moveonfirstclick.value;
@@ -2391,54 +2809,55 @@ begin
    backupfilecount:= fo.backupfilecount.value;
    encoding:= fo.encoding.value;
    codetemplatedirs:= fo.codetemplatedirs.gridvalues;
- 
-   sourcefilemasks:= fo.filefiltergrid[0].datalist.asarray;
-   syntaxdeffiles:= fo.grid[0].datalist.asarray;
-   filemasknames:= fo.filefiltergrid[1].datalist.asarray;
-   filemasks:= fo.grid[1].datalist.asarray;
+}
+//   sourcefilemasks:= fo.filefiltergrid[0].datalist.asarray;
+//   syntaxdeffiles:= fo.grid[0].datalist.asarray;
+//   filemasknames:= fo.filefiltergrid[1].datalist.asarray;
+//   filemasks:= fo.grid[1].datalist.asarray;
   end
   else begin
    settingsfile:= projectoptions.o.settingsfile;
    settingseditor:= projectoptions.o.settingseditor;
+   settingsdebugger:= projectoptions.o.settingsdebugger;
    settingsautoload:= projectoptions.o.settingsautoload; 
    settingsautosave:= projectoptions.o.settingsautosave; 
  
-   showgrid:= projectoptions.o.showgrid;
-   snaptogrid:= projectoptions.o.snaptogrid;
-   moveonfirstclick:= projectoptions.o.moveonfirstclick;
-   gridsizex:= projectoptions.o.gridsizex;
-   gridsizey:= projectoptions.o.gridsizey;
-   autoindent:= projectoptions.o.autoindent;
-   blockindent:= projectoptions.o.blockindent;
-   rightmarginon:= projectoptions.o.rightmarginon;
-   rightmarginchars:= projectoptions.o.rightmarginchars;
-   scrollheight:= projectoptions.o.scrollheight;
-   tabstops:= projectoptions.o.tabstops;
-   spacetabs:= projectoptions.o.spacetabs;
-   tabindent:= projectoptions.o.tabindent;
-   editfontname:= projectoptions.o.editfontname;
-   editfontheight:= projectoptions.o.editfontheight;
-   editfontwidth:= projectoptions.o.editfontwidth;
-   editfontextraspace:= projectoptions.o.editfontextraspace;
-   editfontcolor:= projectoptions.o.editfontcolor;
-   editbkcolor:= projectoptions.o.editbkcolor;
-   statementcolor:= projectoptions.o.statementcolor;
-   editfontantialiased:= projectoptions.o.editfontantialiased;
-   editmarkbrackets:= projectoptions.o.editmarkbrackets;
-   backupfilecount:= projectoptions.o.backupfilecount;
-   encoding:= projectoptions.o.encoding;
-   codetemplatedirs:= projectoptions.o.codetemplatedirs;
+//   showgrid:= projectoptions.o.showgrid;
+//   snaptogrid:= projectoptions.o.snaptogrid;
+//   moveonfirstclick:= projectoptions.o.moveonfirstclick;
+//   gridsizex:= projectoptions.o.gridsizex;
+//   gridsizey:= projectoptions.o.gridsizey;
+//   autoindent:= projectoptions.o.autoindent;
+//   blockindent:= projectoptions.o.blockindent;
+//   rightmarginon:= projectoptions.o.rightmarginon;
+//   rightmarginchars:= projectoptions.o.rightmarginchars;
+//   scrollheight:= projectoptions.o.scrollheight;
+//   tabstops:= projectoptions.o.tabstops;
+//   spacetabs:= projectoptions.o.spacetabs;
+//   tabindent:= projectoptions.o.tabindent;
+//   editfontname:= projectoptions.o.editfontname;
+//   editfontheight:= projectoptions.o.editfontheight;
+//   editfontwidth:= projectoptions.o.editfontwidth;
+//   editfontextraspace:= projectoptions.o.editfontextraspace;
+//   editfontcolor:= projectoptions.o.editfontcolor;
+//   editbkcolor:= projectoptions.o.editbkcolor;
+//   statementcolor:= projectoptions.o.statementcolor;
+//   editfontantialiased:= projectoptions.o.editfontantialiased;
+//   editmarkbrackets:= projectoptions.o.editmarkbrackets;
+//   backupfilecount:= projectoptions.o.backupfilecount;
+//   encoding:= projectoptions.o.encoding;
+//   codetemplatedirs:= projectoptions.o.codetemplatedirs;
  
-   sourcefilemasks:= projectoptions.t.sourcefilemasks;
-   syntaxdeffiles:= projectoptions.t.syntaxdeffiles;
-   filemasknames:= projectoptions.t.filemasknames;
-   filemasks:= projectoptions.t.filemasks;
+//   sourcefilemasks:= projectoptions.o.t.sourcefilemasks;
+//   syntaxdeffiles:= projectoptions.o.t.syntaxdeffiles;
+//   filemasknames:= projectoptions.o.t.filemasknames;
+//   filemasks:= projectoptions.o.t.filemasks;
   end;
  end;
 end;
 
-procedure restorevalues(fo: tprojectoptionsfo; const buffer: valuebufferty;
-                          const noeditor: boolean);
+procedure restorevalues(fo: tprojectoptionsfo; const buffer: valuebufferty{;
+                          const noeditor: boolean});
 begin
  with buffer do begin
   projectoptions.projectfilename:= projectfilename;
@@ -2446,9 +2865,12 @@ begin
   if fo <> nil then begin
    fo.settingsfile.value:= settingsfile;
    fo.settingseditor.value:= settingseditor; 
+   fo.settingsdebugger.value:= settingsdebugger; 
    fo.settingsautoload.value:= settingsautoload; 
    fo.settingsautosave.value:= settingsautosave; 
+(*
    if not noeditor then begin
+{
     fo.showgrid.value:= showgrid;
     fo.snaptogrid.value:= snaptogrid;
     fo.moveonfirstclick.value:= moveonfirstclick;
@@ -2474,52 +2896,54 @@ begin
     fo.backupfilecount.value:= backupfilecount;
     fo.encoding.value:= encoding;
     fo.codetemplatedirs.gridvalues:= codetemplatedirs;
-  
-    fo.filefiltergrid[0].datalist.asarray:= sourcefilemasks;
-    fo.grid[0].datalist.asarray:= syntaxdeffiles;
-    fo.filefiltergrid[1].datalist.asarray:= filemasknames;
-    fo.grid[1].datalist.asarray:= filemasks;
+}  
+//    fo.filefiltergrid[0].datalist.asarray:= sourcefilemasks;
+//    fo.grid[0].datalist.asarray:= syntaxdeffiles;
+//    fo.filefiltergrid[1].datalist.asarray:= filemasknames;
+//    fo.grid[1].datalist.asarray:= filemasks;
    end;
+*)
    fo.fontondataentered(nil);
    fo.settingsdataent(nil);
   end
   else begin
    projectoptions.o.settingsfile:= settingsfile;
    projectoptions.o.settingseditor:= settingseditor; 
+   projectoptions.o.settingsdebugger:= settingsdebugger; 
    projectoptions.o.settingsautoload:= settingsautoload; 
    projectoptions.o.settingsautosave:= settingsautosave; 
-   if not noeditor then begin
-    projectoptions.o.showgrid:= showgrid;
-    projectoptions.o.snaptogrid:= snaptogrid;
-    projectoptions.o.moveonfirstclick:= moveonfirstclick;
-    projectoptions.o.gridsizex:= gridsizex;
-    projectoptions.o.gridsizey:= gridsizey;
-    projectoptions.o.autoindent:= autoindent;
-    projectoptions.o.blockindent:= blockindent;
-    projectoptions.o.rightmarginon:= rightmarginon;
-    projectoptions.o.rightmarginchars:= rightmarginchars;
-    projectoptions.o.scrollheight:= scrollheight;
-    projectoptions.o.tabstops:= tabstops;
-    projectoptions.o.spacetabs:= spacetabs;
-    projectoptions.o.tabindent:= tabindent;
-    projectoptions.o.editfontname:= editfontname;
-    projectoptions.o.editfontheight:= editfontheight;
-    projectoptions.o.editfontwidth:= editfontwidth;
-    projectoptions.o.editfontextraspace:= editfontextraspace;
-    projectoptions.o.editfontcolor:= editfontcolor;
-    projectoptions.o.editbkcolor:= editbkcolor;
-    projectoptions.o.statementcolor:= statementcolor;
-    projectoptions.o.editfontantialiased:= editfontantialiased;
-    projectoptions.o.editmarkbrackets:= editmarkbrackets;
-    projectoptions.o.backupfilecount:= backupfilecount;
-    projectoptions.o.encoding:= encoding;
-    projectoptions.o.codetemplatedirs:= codetemplatedirs;
+//   if not noeditor then begin
+//    projectoptions.o.showgrid:= showgrid;
+//    projectoptions.o.snaptogrid:= snaptogrid;
+//    projectoptions.o.moveonfirstclick:= moveonfirstclick;
+//    projectoptions.o.gridsizex:= gridsizex;
+//    projectoptions.o.gridsizey:= gridsizey;
+//    projectoptions.o.autoindent:= autoindent;
+//    projectoptions.o.blockindent:= blockindent;
+//    projectoptions.o.rightmarginon:= rightmarginon;
+//    projectoptions.o.rightmarginchars:= rightmarginchars;
+//    projectoptions.o.scrollheight:= scrollheight;
+//    projectoptions.o.tabstops:= tabstops;
+//    projectoptions.o.spacetabs:= spacetabs;
+//    projectoptions.o.tabindent:= tabindent;
+//    projectoptions.o.editfontname:= editfontname;
+//    projectoptions.o.editfontheight:= editfontheight;
+//    projectoptions.o.editfontwidth:= editfontwidth;
+//    projectoptions.o.editfontextraspace:= editfontextraspace;
+//    projectoptions.o.editfontcolor:= editfontcolor;
+//    projectoptions.o.editbkcolor:= editbkcolor;
+//    projectoptions.o.statementcolor:= statementcolor;
+//    projectoptions.o.editfontantialiased:= editfontantialiased;
+//    projectoptions.o.editmarkbrackets:= editmarkbrackets;
+//    projectoptions.o.backupfilecount:= backupfilecount;
+//    projectoptions.o.encoding:= encoding;
+//    projectoptions.o.codetemplatedirs:= codetemplatedirs;
   
-    projectoptions.t.sourcefilemasks:= sourcefilemasks;
-    projectoptions.t.syntaxdeffiles:= syntaxdeffiles;
-    projectoptions.t.filemasknames:= filemasknames;
-    projectoptions.t.filemasks:= filemasks;
-   end;
+//    projectoptions.o.t.sourcefilemasks:= sourcefilemasks;
+//    projectoptions.o.t.syntaxdeffiles:= syntaxdeffiles;
+//    projectoptions.o.t.filemasknames:= filemasknames;
+//    projectoptions.o.t.filemasks:= filemasks;
+//   end;
   end;
  end;
 end;
@@ -2553,12 +2977,25 @@ begin
  end;
 end;
 
+function getdisabledoptions: settinggroupsty;
+begin
+ result:= [];
+ with projectoptions do begin
+  if not o.settingseditor then begin
+   include(result,sg_editor);
+  end;
+  if not o.settingsdebugger then begin
+   include(result,sg_debugger);
+  end;
+ end;
+end;
+
 procedure doloadexe(const sender: tprojectoptionsfo);
 var
  read1: tstatreader;
  buffer: valuebufferty;
  stream1: ttextstream;
- bo1: boolean;
+// bo1: boolean;
  fname1: filenamety;
 begin
  if (sender <> nil) then begin
@@ -2567,19 +3004,23 @@ begin
               '"'+fname1+'"?','WARNING') then begin
    exit;
   end;
-  bo1:= sender.settingseditor.value;
+//  bo1:= sender.settingseditor.value;
  end
  else begin
   fname1:= projectoptions.o.settingsfile;
-  bo1:= projectoptions.o.settingseditor;
+//  bo1:= projectoptions.o.settingseditor;
  end;
  if fname1 <> '' then begin
   savevalues(sender,buffer);
   savestat(stream1);
+  if sender <> nil then begin
+   formtoprojectoptions(sender);
+  end;
+  projectoptions.disabled:= getdisabledoptions;
   try
    read1:= tstatreader.create(buffer.settingsfile,ce_utf8n);
    try
-    initpr(false);
+//    initpr(false);
     read1.setsection('projectoptions');
     updateprojectsettings(read1);
    finally
@@ -2588,10 +3029,11 @@ begin
    if sender <> nil then begin
     projectoptionstoform(sender);
    end;
-   restorevalues(sender,buffer,bo1);
+   restorevalues(sender,buffer);
   except
    application.handleexception;
   end;
+  projectoptions.disabled:= [];
   if sender <> nil then begin
    restorestat(stream1);
   end
@@ -2625,16 +3067,20 @@ begin
  end;
  if fname1 <> '' then begin
   stat1:= tstatwriter.create(fname1,ce_utf8n,true);
-  try
-   savestat(stream1);
-   if sender <> nil then begin
-    formtoprojectoptions(sender);
+  with projectoptions do begin
+   try
+    savestat(stream1);
+    if sender <> nil then begin
+     formtoprojectoptions(sender);
+    end;
+    disabled:= getdisabledoptions;
+    stat1.setsection('projectoptions');
+    updateprojectsettings(stat1);
+   finally
+    disabled:= [];
+    stat1.free;
+    restorestat(stream1);
    end;
-   stat1.setsection('projectoptions');
-   updateprojectsettings(stat1);
-  finally
-   stat1.free;
-   restorestat(stream1);
   end;
  end;
 end;
@@ -2653,14 +3099,81 @@ begin
  loadbu.enabled:= bo1;
 end;
 
+{ toptions }
+
+destructor toptions.destroy;
+begin
+ gett.free;
+ gettexp.free;
+ inherited;
+end;
+
+procedure toptions.expandmacros(const amacrolist: tmacrolist);
+var
+ ar1: propinfopoarty;
+ int1,int2: integer;
+ po1: ptypedata;
+ mstr1: msestring;
+ ar2: msestringarty;
+ t,texp: tobject;
+begin
+ t:= gett;
+ texp:= gettexp;
+ if (t <> nil) and (texp <> nil) then begin
+  ar1:= getpropinfoar(t);
+  for int1:= 0 to high(ar1) do begin
+   po1:= gettypedata(ar1[int1]^.proptype);
+   case ar1[int1]^.proptype^.kind of
+    tkustring: begin
+     mstr1:= getunicodestrprop(t,ar1[int1]);
+     amacrolist.expandmacros(mstr1);
+     setunicodestrprop(texp,ar1[int1],mstr1);
+    end;
+    tkdynarray: begin
+    {$ifdef FPC}
+     if ptypeinfo(pointer(po1^.eltype2))^.kind = tkustring then begin
+                           //wrong define in ttypedata
+    {$else}
+     if po1^.eltype2^^.kind = tkustring then begin
+    {$endif}
+      ar2:= getmsestringar(t,ar1[int1]);
+      for int2:= 0 to high(ar2) do begin
+       amacrolist.expandmacros(ar2[int2]);
+      end;
+      setmsestringar(texp,ar1[int1],ar2);
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function toptions.gett: tobject;
+begin
+ result:= nil;
+end;
+
+function toptions.gettexp: tobject;
+begin
+ result:= nil;
+end;
+
 { tprojectoptions }
 
 constructor tprojectoptions.create;
-var
- ar1: msestringarty;
 begin
+ ft:= ttextprojectoptions.create;
+ ftexp:= ttextprojectoptions.create;
+ 
  closemessages:= true;
  checkmethods:= true;
+{
+ valuehints:= true;
+ activateonbreak:= true;
+ additem(fexceptclassnames,'EconvertError');
+ additem(fexceptignore,false);
+}
+(*
  showgrid:= true;
  snaptogrid:= true;
  moveonfirstclick:= true;
@@ -2686,9 +3199,61 @@ begin
  setlength(ar1,1);
  ar1[0]:= '${TEMPLATEDIR}';
  codetemplatedirs:= ar1;
+*)
+ inherited;
+end;
+{
+destructor tprojectoptions.destroy;
+begin
+ ft.free;
+ ftexp.free;
+ inherited;
+end;
+}
+function tprojectoptions.gett: tobject;
+begin
+ result:= ft;
 end;
 
-function tprojectoptions.limitgridsize(const avalue: integer): integer;
+function tprojectoptions.gettexp: tobject;
+begin
+ result:= ftexp;
+end;
+
+{ ttextprojectoptions }
+
+constructor teditoptions.create;
+var
+ ar1: msestringarty;
+begin
+ ft:= ttexteditoptions.create;
+ ftexp:= ttexteditoptions.create;
+
+ showgrid:= true;
+ snaptogrid:= true;
+ moveonfirstclick:= true;
+ gridsizex:= defaultgridsizex;
+ gridsizey:= defaultgridsizey;
+ encoding:= 1; //utf8n
+ autoindent:= true;
+ blockindent:= 1;
+ rightmarginon:= true;
+ rightmarginchars:= 80;
+ tabstops:= 4;
+ editfontname:= 'mseide_source';
+ editfontcolor:= integer(cl_text);
+ editbkcolor:= integer(cl_foreground);
+ statementcolor:= $E0FFFF;
+ editfontantialiased:= true;
+ editmarkbrackets:= true;
+ backupfilecount:= 2;
+ setlength(ar1,1);
+ ar1[0]:= '${TEMPLATEDIR}';
+ codetemplatedirs:= ar1;
+ inherited;
+end;
+
+function teditoptions.limitgridsize(const avalue: integer): integer;
 begin
  result:= avalue;
  if result < 1 then begin
@@ -2699,29 +3264,66 @@ begin
  end;
 end;
 
-procedure tprojectoptions.setgridsizex(const avalue: integer);
+procedure teditoptions.setgridsizex(const avalue: integer);
 begin
  fgridsizex:= limitgridsize(avalue);
 end;
 
-procedure tprojectoptions.setgridsizey(const avalue: integer);
+procedure teditoptions.setgridsizey(const avalue: integer);
 begin
  fgridsizey:= limitgridsize(avalue);
 end;
 
-function tprojectoptions.getcodetemplatedirs: msestringarty;
+function teditoptions.getcodetemplatedirs: msestringarty;
 begin
- result:= projectoptions.t.codetemplatedirs;
+ result:= projectoptions.o.t.codetemplatedirs;
 end;
 
-procedure tprojectoptions.setcodetemplatedirs(const avalue: msestringarty);
+procedure teditoptions.setcodetemplatedirs(const avalue: msestringarty);
 begin
- projectoptions.t.codetemplatedirs:= avalue;
+ projectoptions.o.t.codetemplatedirs:= avalue;
+end;
+
+function teditoptions.gett: tobject;
+begin
+ result:= ft;
+end;
+
+function teditoptions.gettexp: tobject;
+begin
+ result:= ftexp;
+end;
+
+{ tdebugoptions }
+
+constructor tdebugoptions.create;
+begin
+ ft:= ttextdebugoptions.create;
+ ftexp:= ttextdebugoptions.create;
+
+ valuehints:= true;
+ activateonbreak:= true;
+ additem(fexceptclassnames,'EconvertError');
+ additem(fexceptignore,false);
+
+ inherited;
+end;
+
+function tdebugoptions.gett: tobject;
+begin
+ result:= ft;
+end;
+
+function tdebugoptions.gettexp: tobject;
+begin
+ result:= ftexp;
 end;
 
 initialization
  codetemplates:= tcodetemplates.create;
 finalization
  projectoptions.o.free;
+ projectoptions.e.free;
+ projectoptions.d.free;
  freeandnil(codetemplates);
 end.

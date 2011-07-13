@@ -104,6 +104,12 @@ type
 
 function opentodynarray(const objs: array of tobject;
                      const prefixes: array of string): objectinfoarty;
+function getmsestringar(const aobj: tobject;
+                           const aprop: ppropinfo): msestringarty;
+procedure setmsestringar(const aobj: tobject; const aprop: ppropinfo;
+                                                 const avalue: msestringarty);
+procedure addobjectinfoitem(var dest: objectinfoarty; const aobj: tobject;
+                                            const aprefix: string = '');
                      
 implementation
 uses
@@ -114,6 +120,16 @@ type
                                      //dummy type
  dynarraygetter = function: pointerarty of object;
                                      //dummy type
+
+procedure addobjectinfoitem(var dest: objectinfoarty; const aobj: tobject;
+                                            const aprefix: string = '');
+begin
+ setlength(dest,high(dest)+2);
+ with dest[high(dest)] do begin
+  obj:= aobj;
+  prefix:= aprefix;
+ end;
+end;
 
 function opentodynarray(const objs: array of tobject;
                      const prefixes: array of string): objectinfoarty;
@@ -342,6 +358,7 @@ var
  po3: ptypedata;
  int1: integer;
  obj1: tobject;
+ info1: objectinfoty;
 // intf1: istatfile;
 // intar: integerarty;
 // realar: realarty;
@@ -423,6 +440,11 @@ begin
       obj1:= tobject(ptruint(getordprop(obj,po1)));
       if obj1 is tdatalist then begin
        reader.readdatalist(str1,tdatalist(obj1));
+      end
+      else begin
+       info1.obj:= obj1;
+       info1.prefix:= aobj.prefix;
+       readobjectstat(reader,info1);
       end;
      end;
     end;
@@ -442,6 +464,7 @@ var
  obj1: tobject;
 // intf1: istatfile;
  str1: string;
+ info1: objectinfoty;
 begin
  with aobj do begin
   ar1:= getpropinfoar(obj);
@@ -510,6 +533,11 @@ begin
       obj1:= tobject(ptruint(getordprop(obj,po1)));
       if obj1 is tdatalist then begin
        writer.writedatalist(str1,tdatalist(obj1));
+      end
+      else begin
+       info1.obj:= obj1;
+       info1.prefix:= aobj.prefix;
+       writeobjectstat(writer,info1);
       end;
      end;
     end;
@@ -533,6 +561,8 @@ var
  int1: integer;
  intf1: iifidatalink;
  obj1: tobject;
+ info1: objectinfoty;
+ bo1: boolean;
  list1: tdatalist;
 // arpo: pointer;
 begin
@@ -540,115 +570,127 @@ begin
  for int1 := 0 to high(ar1) do begin
   po1:= ar1[int1];
   with po1^ do begin
-   comp1:= findtarget(dest.prefix+name);
-   if (comp1 <> nil) and 
-     mseclasses.getcorbainterface(comp1,typeinfo(iifidatalink),
-                                                      intf1)  then begin
-    po4:= intf1.getvalueprop;
-    if po4 <> nil then begin
-     case proptype^.kind of
-      tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
-       if po4^.proptype^.kind in 
-             [tkInteger,tkChar,tkEnumeration,tkWChar,tkSet] then begin
-        setordprop(dest.obj,po1,getordprop(comp1,po4));
-       end;
-      end;
-      tkint64: begin
-       if po4^.proptype^.kind in
-             [tkint64] then begin
-        setint64prop(dest.obj,po1,getint64prop(comp1,po4));
-       end;
-      end;
-      tkfloat: begin
-       if po4^.proptype^.kind in 
-             [tkfloat] then begin
-        setfloatprop(dest.obj,po1,getfloatprop(comp1,po4));
-       end;
-      end;
-     {$ifdef FPC}
-      tkbool: begin
-       if po4^.proptype^.kind in
-             [tkbool] then begin
-        setordprop(dest.obj,po1,getordprop(comp1,po4));
-       end;
-      end;
-      tkustring: begin
-       if po4^.proptype^.kind in [tkustring] then begin
-        setunicodestrprop(dest.obj,po1,getunicodestrprop(comp1,po4));
-       end;
-      end;
-     {$endif}
-      tkwstring: begin
-      {$ifdef FPC}
-       if po4^.proptype^.kind = tkustring then begin
-        setwidestrprop(dest.obj,po1,getunicodestrprop(comp1,po4));
-       end;
-      {$else}
-       if po4^.proptype^.kind = tkwstring then begin
-        setwidestrprop(dest.obj,po1,getwidestrprop(comp1,po4));
-       end;
-      {$endif}
-      end;
-      {$ifdef FPC}tkastring,{$endif}tklstring,tkstring: begin
-      {$ifdef FPC}
-       if po4^.proptype^.kind = tkustring then begin
-        setstrprop(dest.obj,po1,getunicodestrprop(comp1,po4));
-       end;
-      {$else}
-       if po4^.proptype^.kind = tkwstring then begin
-        setstrprop(dest.obj,po1,getwidestrprop(comp1,po4));
-       end;
-      {$endif}
-      end;
-      tkclass: begin
-       obj1:= tobject(ptruint(getordprop(dest.obj,po1)));
-       if (obj1 is tdatalist) then begin
-        list1:= intf1.getgriddata;
-        if list1 <> nil then begin
-         tdatalist(obj1).assign(list1);
+   bo1:= true;
+   if po1^.proptype^.kind = tkclass then begin
+    obj1:= tobject(ptruint(getordprop(dest.obj,po1)));
+    if not (obj1 is tdatalist) then begin
+     bo1:= false;
+     info1.obj:= obj1;
+     info1.prefix:= dest.prefix;
+     valuestoobject(info1,findtarget);
+    end;
+   end;
+   if bo1 then begin
+    comp1:= findtarget(dest.prefix+name);
+    if (comp1 <> nil) and 
+      mseclasses.getcorbainterface(comp1,typeinfo(iifidatalink),
+                                                       intf1)  then begin
+     po4:= intf1.getvalueprop;
+     if po4 <> nil then begin
+      case proptype^.kind of
+       tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
+        if po4^.proptype^.kind in 
+              [tkInteger,tkChar,tkEnumeration,tkWChar,tkSet] then begin
+         setordprop(dest.obj,po1,getordprop(comp1,po4));
         end;
        end;
-      end;
-      tkdynarray: begin
-       list1:= intf1.getgriddata;
-       if list1 <> nil then begin
-//        arpo:= pointer(ptruint(getordprop(dest.obj,po1)));
+       tkint64: begin
+        if po4^.proptype^.kind in
+              [tkint64] then begin
+         setint64prop(dest.obj,po1,getint64prop(comp1,po4));
+        end;
+       end;
+       tkfloat: begin
+        if po4^.proptype^.kind in 
+              [tkfloat] then begin
+         setfloatprop(dest.obj,po1,getfloatprop(comp1,po4));
+        end;
+       end;
+      {$ifdef FPC}
+       tkbool: begin
+        if po4^.proptype^.kind in
+              [tkbool] then begin
+         setordprop(dest.obj,po1,getordprop(comp1,po4));
+        end;
+       end;
+       tkustring: begin
+        if po4^.proptype^.kind in [tkustring] then begin
+         setunicodestrprop(dest.obj,po1,getunicodestrprop(comp1,po4));
+        end;
+       end;
+      {$endif}
+       tkwstring: begin
        {$ifdef FPC}
-        po2:= pointer(gettypedata(proptype)^.eltype2);
-                            //wrong define in ttypedata
+        if po4^.proptype^.kind = tkustring then begin
+         setwidestrprop(dest.obj,po1,getunicodestrprop(comp1,po4));
+        end;
        {$else}
-        po2:= gettypedata(proptype^)^.eltype2^;
+        if po4^.proptype^.kind = tkwstring then begin
+         setwidestrprop(dest.obj,po1,getwidestrprop(comp1,po4));
+        end;
        {$endif}
-//        po3:= gettypedata(po2);
-        case po2^.kind of
-         tkinteger: begin
-          if list1 is tintegerdatalist then begin
-           setintegerar(dest.obj,po1,tintegerdatalist(list1).asarray);
-          end;
+       end;
+       {$ifdef FPC}tkastring,{$endif}tklstring,tkstring: begin
+       {$ifdef FPC}
+        if po4^.proptype^.kind = tkustring then begin
+         setstrprop(dest.obj,po1,getunicodestrprop(comp1,po4));
+        end;
+       {$else}
+        if po4^.proptype^.kind = tkwstring then begin
+         setstrprop(dest.obj,po1,getwidestrprop(comp1,po4));
+        end;
+       {$endif}
+       end;
+       tkclass: begin
+//        obj1:= tobject(ptruint(getordprop(dest.obj,po1)));
+//        if (obj1 is tdatalist) then begin
+         list1:= intf1.getgriddata;
+         if list1 <> nil then begin
+          tdatalist(obj1).assign(list1);
          end;
-         tkint64: begin
-          if list1 is tint64datalist then begin
-           setint64ar(dest.obj,po1,tint64datalist(list1).asarray);
+//        end;
+       end;
+       tkdynarray: begin
+        list1:= intf1.getgriddata;
+        if list1 <> nil then begin
+ //        arpo:= pointer(ptruint(getordprop(dest.obj,po1)));
+        {$ifdef FPC}
+         po2:= pointer(gettypedata(proptype)^.eltype2);
+                             //wrong define in ttypedata
+        {$else}
+         po2:= gettypedata(proptype^)^.eltype2^;
+        {$endif}
+ //        po3:= gettypedata(po2);
+         case po2^.kind of
+          tkinteger: begin
+           if list1 is tintegerdatalist then begin
+            setintegerar(dest.obj,po1,tintegerdatalist(list1).asarray);
+           end;
           end;
-         end;
-         tkfloat: begin
-          if list1 is trealdatalist then begin
-           setrealar(dest.obj,po1,trealdatalist(list1).asarray);
+          tkint64: begin
+           if list1 is tint64datalist then begin
+            setint64ar(dest.obj,po1,tint64datalist(list1).asarray);
+           end;
           end;
-         end;
-         {$ifdef FPC}tkustring{$else}tkwstring{$endif}: begin
-          if list1 is tpoorstringdatalist then begin
-           setmsestringar(dest.obj,po1,tpoorstringdatalist(list1).asarray);
+          tkfloat: begin
+           if list1 is trealdatalist then begin
+            setrealar(dest.obj,po1,trealdatalist(list1).asarray);
+           end;
           end;
-         end;
-         {$ifdef FPC}tkastring{$else}tklstring{$endif}: begin
-          if list1 is tansistringdatalist then begin
-           setstringar(dest.obj,po1,tansistringdatalist(list1).asarray);
+          {$ifdef FPC}tkustring{$else}tkwstring{$endif}: begin
+           if list1 is tpoorstringdatalist then begin
+            setmsestringar(dest.obj,po1,tpoorstringdatalist(list1).asarray);
+           end;
           end;
-         end;
-         {$ifdef FPC}tkbool{$else}tkenumeration{$endif}: begin
-          if list1 is tintegerdatalist then begin
-           setbooleanar(dest.obj,po1,tintegerdatalist(list1).asbooleanarray);
+          {$ifdef FPC}tkastring{$else}tklstring{$endif}: begin
+           if list1 is tansistringdatalist then begin
+            setstringar(dest.obj,po1,tansistringdatalist(list1).asarray);
+           end;
+          end;
+          {$ifdef FPC}tkbool{$else}tkenumeration{$endif}: begin
+           if list1 is tintegerdatalist then begin
+            setbooleanar(dest.obj,po1,tintegerdatalist(list1).asbooleanarray);
+           end;
           end;
          end;
         end;
@@ -673,122 +715,136 @@ var
  intf1: iifidatalink;
  obj1: tobject;
  list1: tdatalist;
+ bo1: boolean;
+ info1: objectinfoty;
 begin
  ar1:= getpropinfoar(source.obj);
  for int1 := 0 to high(ar1) do begin
   po1:= ar1[int1];
   with po1^ do begin
-   comp1:= findtarget(source.prefix+name);
-   if (comp1 <> nil) and
-     mseclasses.getcorbainterface(comp1,typeinfo(iifidatalink),
-                                                      intf1)  then begin
-    po4:= intf1.getvalueprop;
-    if po4 <> nil then begin
-     case proptype^.kind of
-      tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
-       if po4^.proptype^.kind in 
-             [tkInteger,tkChar,tkEnumeration,tkWChar,tkSet] then begin
-        setordprop(comp1,po4,getordprop(source.obj,po1));
-       end;
-      end;
-      tkint64: begin
-       if po4^.proptype^.kind in
-             [tkint64] then begin
-        setint64prop(comp1,po4,getint64prop(source.obj,po1));
-       end;
-      end;
-      tkfloat: begin
-       if po4^.proptype^.kind in
-             [tkfloat] then begin
-        setfloatprop(comp1,po4,getfloatprop(source.obj,po1));
-       end;
-      end;
-      {$ifdef FPC}
-      tkbool: begin
-       if po4^.proptype^.kind in
-             [tkbool] then begin
-        setordprop(comp1,po4,getordprop(source.obj,po1));
-       end;
-      end;
-      tkustring: begin
-       if po4^.proptype^.kind in [tkustring] then begin
-        setunicodestrprop(comp1,po4,getunicodestrprop(source.obj,po1));
-       end;
-      end;
-      {$endif}
-      tkwstring: begin
-      {$ifdef FPC}
-       if po4^.proptype^.kind = tkustring then begin
-        setunicodestrprop(comp1,po4,getwidestrprop(source.obj,po1));
-       end;
-      {$else}
-       if po4^.proptype^.kind = tkwstring then begin
-        setwidestrprop(comp1,po4,getwidestrprop(source.obj,po1));
-       end;
-      {$endif}
-      end;
-      {$ifdef FPC}tkastring,{$endif}tklstring,tkstring: begin
-     {$ifdef FPC}
-       if po4^.proptype^.kind = tkustring then begin
-        setunicodestrprop(comp1,po4,getstrprop(source.obj,po1));
-       end;
-      {$else}
-       if po4^.proptype^.kind = tkwstring then begin
-        setwidestrprop(comp1,po4,getstrprop(source.obj,po1));
-       end;
-      {$endif}
-      end;
-      tkdynarray: begin
-       list1:= intf1.getgriddata;
-       if list1 <> nil then begin
-       {$ifdef FPC}
-        po2:= pointer(gettypedata(proptype)^.eltype2);
-                            //wrong define in ttypedata
-       {$else}
-        po2:= gettypedata(proptype^)^.eltype2^;
-       {$endif}
-        po3:= gettypedata(po2);
-        case po2^.kind of
-         tkinteger: begin
-          if list1 is tintegerdatalist then begin
-           tintegerdatalist(list1).asarray:= getintegerar(source.obj,po1);
-          end;
-         end;
-         tkint64: begin
-          if list1 is tint64datalist then begin
-           tint64datalist(list1).asarray:= getint64ar(source.obj,po1);
-          end;
-         end;
-         tkfloat: begin
-          if (po3^.floattype = ftdouble) and (list1 is trealdatalist) then begin
-           trealdatalist(list1).asarray:=  getrealar(source.obj,po1);
-          end;
-         end;
-         {$ifdef FPC}tkustring{$else}tkwstring{$endif}: begin
-          if list1 is tpoorstringdatalist then begin
-           tpoorstringdatalist(list1).asarray:= getmsestringar(source.obj,po1);
-          end;
-         end;
-         {$ifdef FPC}tkastring{$else}tklstring{$endif}: begin
-          if list1 is tansistringdatalist then begin
-           tansistringdatalist(list1).asarray:= getstringar(source.obj,po1);
-          end;
-         end;
-         {$ifdef FPC}tkbool{$else}tkenumeration{$endif}: begin
-          if list1 is tintegerdatalist then begin
-           tintegerdatalist(list1).asbooleanarray:= getbooleanar(source.obj,po1);
-          end;
-         end;
+   bo1:= true;
+   if po1^.proptype^.kind = tkclass then begin
+    obj1:= tobject(ptruint(getordprop(source.obj,po1)));
+    if not (obj1 is tdatalist) then begin
+     bo1:= false;
+     info1.obj:= obj1;
+     info1.prefix:= source.prefix;
+     objecttovalues(info1,findtarget);
+    end;
+   end;
+   if bo1 then begin
+    comp1:= findtarget(source.prefix+name);
+    if (comp1 <> nil) and
+      mseclasses.getcorbainterface(comp1,typeinfo(iifidatalink),
+                                                       intf1)  then begin
+     po4:= intf1.getvalueprop;
+     if po4 <> nil then begin
+      case proptype^.kind of
+       tkInteger,tkChar,tkEnumeration,tkWChar,tkSet: begin
+        if po4^.proptype^.kind in 
+              [tkInteger,tkChar,tkEnumeration,tkWChar,tkSet] then begin
+         setordprop(comp1,po4,getordprop(source.obj,po1));
         end;
        end;
-      end;
-      tkclass: begin
-       obj1:= tobject(ptruint(getordprop(source.obj,po1)));
-       if (obj1 is tdatalist) then begin
+       tkint64: begin
+        if po4^.proptype^.kind in
+              [tkint64] then begin
+         setint64prop(comp1,po4,getint64prop(source.obj,po1));
+        end;
+       end;
+       tkfloat: begin
+        if po4^.proptype^.kind in
+              [tkfloat] then begin
+         setfloatprop(comp1,po4,getfloatprop(source.obj,po1));
+        end;
+       end;
+       {$ifdef FPC}
+       tkbool: begin
+        if po4^.proptype^.kind in
+              [tkbool] then begin
+         setordprop(comp1,po4,getordprop(source.obj,po1));
+        end;
+       end;
+       tkustring: begin
+        if po4^.proptype^.kind in [tkustring] then begin
+         setunicodestrprop(comp1,po4,getunicodestrprop(source.obj,po1));
+        end;
+       end;
+       {$endif}
+       tkwstring: begin
+       {$ifdef FPC}
+        if po4^.proptype^.kind = tkustring then begin
+         setunicodestrprop(comp1,po4,getwidestrprop(source.obj,po1));
+        end;
+       {$else}
+        if po4^.proptype^.kind = tkwstring then begin
+         setwidestrprop(comp1,po4,getwidestrprop(source.obj,po1));
+        end;
+       {$endif}
+       end;
+       {$ifdef FPC}tkastring,{$endif}tklstring,tkstring: begin
+      {$ifdef FPC}
+        if po4^.proptype^.kind = tkustring then begin
+         setunicodestrprop(comp1,po4,getstrprop(source.obj,po1));
+        end;
+       {$else}
+        if po4^.proptype^.kind = tkwstring then begin
+         setwidestrprop(comp1,po4,getstrprop(source.obj,po1));
+        end;
+       {$endif}
+       end;
+       tkdynarray: begin
         list1:= intf1.getgriddata;
         if list1 <> nil then begin
-         list1.assign(tdatalist(obj1));
+        {$ifdef FPC}
+         po2:= pointer(gettypedata(proptype)^.eltype2);
+                             //wrong define in ttypedata
+        {$else}
+         po2:= gettypedata(proptype^)^.eltype2^;
+        {$endif}
+         po3:= gettypedata(po2);
+         case po2^.kind of
+          tkinteger: begin
+           if list1 is tintegerdatalist then begin
+            tintegerdatalist(list1).asarray:= getintegerar(source.obj,po1);
+           end;
+          end;
+          tkint64: begin
+           if list1 is tint64datalist then begin
+            tint64datalist(list1).asarray:= getint64ar(source.obj,po1);
+           end;
+          end;
+          tkfloat: begin
+           if (po3^.floattype = ftdouble) and (list1 is trealdatalist) then begin
+            trealdatalist(list1).asarray:=  getrealar(source.obj,po1);
+           end;
+          end;
+          {$ifdef FPC}tkustring{$else}tkwstring{$endif}: begin
+           if list1 is tpoorstringdatalist then begin
+            tpoorstringdatalist(list1).asarray:= getmsestringar(source.obj,po1);
+           end;
+          end;
+          {$ifdef FPC}tkastring{$else}tklstring{$endif}: begin
+           if list1 is tansistringdatalist then begin
+            tansistringdatalist(list1).asarray:= getstringar(source.obj,po1);
+           end;
+          end;
+          {$ifdef FPC}tkbool{$else}tkenumeration{$endif}: begin
+           if list1 is tintegerdatalist then begin
+            tintegerdatalist(list1).asbooleanarray:= getbooleanar(source.obj,po1);
+           end;
+          end;
+         end;
         end;
+       end;
+       tkclass: begin
+//        obj1:= tobject(ptruint(getordprop(source.obj,po1)));
+//        if (obj1 is tdatalist) then begin
+         list1:= intf1.getgriddata;
+         if list1 <> nil then begin
+          list1.assign(tdatalist(obj1));
+         end;
+//        end;
        end;
       end;
      end;

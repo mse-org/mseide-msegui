@@ -70,7 +70,7 @@ var
   
 procedure createcpufo;
 begin
- mainfo.gdb.processorname:= projectoptions.texp.gdbprocessor;
+ mainfo.gdb.processorname:= projectoptions.d.texp.gdbprocessor;
  if (cpufo = nil) or (currentproc <> mainfo.gdb.processor) then begin
   freeandnil(cpufo);
   currentproc:= mainfo.gdb.processor;

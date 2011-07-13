@@ -179,7 +179,7 @@ var
  str1,str2,str3: msestring;
 // wstr1: filenamety;
 begin
- with projectoptions,texp do begin
+ with projectoptions,o,texp do begin
   str3:= quotefilename(tosysfilepath(makecommand));
   str1:= str3;
   if targetfile <> '' then begin
@@ -255,7 +255,7 @@ constructor tprogrunner.create(const aowner: tcomponent;
                               const clearscreen,setmakedir: boolean);
 begin
  inherited create(aowner);
- with projectoptions,texp do begin
+ with projectoptions,o.texp do begin
   if o.copymessages and (messageoutputfile <> '') and not fnofilecopy then begin
    fmessagefile:= ttextstream.create(messageoutputfile,fm_create);
   end;
@@ -300,7 +300,7 @@ begin
  ffinished:= false;
  
  procid:= invalidprochandle;
- with projectoptions,texp do begin
+ with projectoptions,o.texp do begin
   if fsetmakedir and (makedir <> '') then begin
    wdbefore:= getcurrentdir;
    setcurrentdir(makedir);
@@ -413,12 +413,12 @@ end;
 function tmaker.getcommandline: ansistring;
 begin
  result:= '';
- with projectoptions do begin
+ with projectoptions,o do begin
   if fstep = maks_before then begin
    while fscriptnum <= high(befcommandon) do begin
     if (befcommandon[fscriptnum] and fmaketag <> 0) and 
                            (fscriptnum <= high(texp.befcommand)) then begin
-     result:= texp.befcommand[fscriptnum];
+     result:= o.texp.befcommand[fscriptnum];
      break;
     end;
     inc(fscriptnum);
@@ -440,8 +440,8 @@ begin
   if fstep = maks_after then begin
    while fscriptnum <= high(aftcommandon) do begin
     if (aftcommandon[fscriptnum] and fmaketag <> 0) and 
-                           (fscriptnum <= high(texp.aftcommand)) then begin
-     result:= texp.aftcommand[fscriptnum];
+                           (fscriptnum <= high(o.texp.aftcommand)) then begin
+     result:= o.texp.aftcommand[fscriptnum];
      break;
     end;
     inc(fscriptnum);
@@ -504,7 +504,7 @@ end;
 
 function tloader.getcommandline: ansistring;
 begin
- result:= projectoptions.texp.uploadcommand;
+ result:= projectoptions.d.texp.uploadcommand;
 end;
 
 { tscriptrunner }

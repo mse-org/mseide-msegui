@@ -93,6 +93,15 @@ type
    procedure insertbkpt(index: integer; withcondition,witherrormessage: boolean);
   public
    gdb: tgdbmi;
+   
+   breakpointpaths: msestringarty;
+   breakpointlines: integerarty;
+   breakpointaddress: int64arty;
+   addressbreakpoints: longboolarty;
+   breakpointons: longboolarty;
+   breakpointignore: integerarty;
+   breakpointconditions: msestringarty;
+   
    procedure clear;
    procedure refresh;
    procedure updatestat(const statfiler: tstatfiler);

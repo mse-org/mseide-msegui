@@ -297,7 +297,7 @@ end;
 procedure init(const adesigner: tdesigner);
 begin
  sourceupdater:= tsourceupdater.Create(adesigner);
- sourceupdater.maxlinelength:= projectoptions.o.rightmarginchars;
+ sourceupdater.maxlinelength:= projectoptions.e.rightmarginchars;
 end;
 
 procedure deinit(const adesigner: tdesigner);
@@ -1004,7 +1004,7 @@ function tsourceupdater.findunitfile(const aunitname: msestring): msestring;
   end
   else begin
    result:= '';
-   findfile(aname,projectoptions.texp.sourcedirs,result);
+   findfile(aname,projectoptions.d.texp.sourcedirs,result);
   end;
  end;
 
@@ -2035,15 +2035,15 @@ begin
    parser:= tpascaldesignparser.create(infopo,designer.designfiles,
                {$ifdef FPC}@{$endif}getincludefile,interfaceonly);
    try
-    parser.includefiledirs:= projectoptions.texp.sourcedirs;
+    parser.includefiledirs:= projectoptions.d.texp.sourcedirs;
     ar1:= nil;
     int3:= 0;
-    for int1:= 0 to high(projectoptions.texp.defines) do begin
-     if int1 > high(projectoptions.defineson) then begin
+    for int1:= 0 to high(projectoptions.d.texp.defines) do begin
+     if int1 > high(projectoptions.d.defineson) then begin
       break;
      end;
-     if projectoptions.defineson[int1] then begin
-      ar3:= splitstring(projectoptions.texp.defines[int1],msechar(' '));
+     if projectoptions.d.defineson[int1] then begin
+      ar3:= splitstring(projectoptions.d.texp.defines[int1],msechar(' '));
       for int2:= 0 to high(ar3) do begin
        additem(ar1,string(ar3[int2]),int3);
       end;
@@ -2091,15 +2091,15 @@ begin
    parser:= tcdesignparser.create(infopo,designer.designfiles,
                {$ifdef FPC}@{$endif}getincludefile,interfaceonly);
    try
-    parser.includefiledirs:= projectoptions.texp.sourcedirs;
+    parser.includefiledirs:= projectoptions.d.texp.sourcedirs;
     ar1:= nil;
     int3:= 0;
-    for int1:= 0 to high(projectoptions.texp.defines) do begin
-     if int1 > high(projectoptions.defineson) then begin
+    for int1:= 0 to high(projectoptions.d.texp.defines) do begin
+     if int1 > high(projectoptions.d.defineson) then begin
       break;
      end;
-     if projectoptions.defineson[int1] then begin
-      ar3:= splitstring(projectoptions.texp.defines[int1],msechar(' '));
+     if projectoptions.d.defineson[int1] then begin
+      ar3:= splitstring(projectoptions.d.texp.defines[int1],msechar(' '));
       for int2:= 0 to high(ar3) do begin
        additem(ar1,string(ar3[int2]),int3);
       end;
