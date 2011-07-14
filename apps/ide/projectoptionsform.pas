@@ -3136,7 +3136,7 @@ begin
     {$else}
      if po1^.eltype2^^.kind = tkustring then begin
     {$endif}
-      ar2:= getmsestringar(t,ar1[int1]);
+      ar2:= copy(getmsestringar(t,ar1[int1]));
       for int2:= 0 to high(ar2) do begin
        amacrolist.expandmacros(ar2[int2]);
       end;
