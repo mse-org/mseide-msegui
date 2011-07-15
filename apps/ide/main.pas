@@ -1057,7 +1057,7 @@ begin
   end;
  end;
  {$ifdef mswindows}
- gdb.newconsole:= projectoptions.o.externalconsole;
+ gdb.newconsole:= projectoptions.d.externalconsole;
  {$endif}
 end;
 
