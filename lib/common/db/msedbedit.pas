@@ -1088,6 +1088,9 @@ type
  end;
 
  tdropdownlistdatalink = class;
+
+ dropdowndatalinkstatety = (ddlnks_lookupvalid);
+ dropdowndatalinkstatesty = set of dropdowndatalinkstatety;
  
  tdropdowndatalink = class(tmsedatalink)
   private
@@ -1108,6 +1111,11 @@ type
    fdataintf: idbdata;
    fkeyindex: integer;
    ftextindex: integer;
+   flookuptext: msestring;
+   flastintegerkey: integer;
+   flastint64key: int64;
+   flaststringkey: msestring;
+   fstate: dropdowndatalinkstatesty;
    procedure layoutchanged; override;
    procedure activechanged; override;
    procedure editingchanged; override;
@@ -1399,11 +1407,13 @@ type
    procedure wheeldown(const action: focuscellactionty = fca_focusin);  override;
  end;
 
+ dbdropdownliststatety = (ddls_isstringkey);
+ dbdropdownliststatesty = set of dbdropdownliststatety;
  tcustomdbdropdownlistcontroller = class(tcustomdropdownlistcontroller,
                                                               idbeditinfo)
   private
    fdatalink: tdropdowndatalink;
-   fisstringkey: boolean;
+//   fisstringkey: boolean;
    foptionsdatalink: griddatalinkoptionsty;
    foptionsdb: optionsdbty;
    fbookmarks: stringarty;
@@ -1415,6 +1425,7 @@ type
    procedure setcols(const avalue: tdbdropdowncols);
    procedure setoptionsdb(const avalue: optionsdbty);
   protected
+   fstate: dbdropdownliststatesty;
    procedure valuecolchanged; override;
    function getbuttonframeclass: dropdownbuttonframeclassty; override;
    function getdropdowncolsclass: dropdowncolsclassty; override;
@@ -5521,6 +5532,7 @@ end;
 
 procedure tdropdowndatalink.updatelookupvalue;
 begin
+ exclude(fstate,ddlnks_lookupvalid);
  with tdataedit1(fowner.fintf.getwidget) do begin
   if fgridintf <> nil then begin
    fgridintf.getcol.changed;
@@ -5557,25 +5569,36 @@ function tdropdowndatalink.getlookuptext(const key: integer): msestring;
 var
  str1: string;
 begin
- result:= '';
- if active and (fdscontroller <> nil) and 
-        (fvaluefield <> nil) and (ftextfield <> nil) then begin
-  if fkeyindex >= 0 then begin
-   result:= fdataintf.lookuptext(fkeyindex,key,false,
-                                  tmsestringfield(ftextfield));
-  end
-  else begin
-   dataset.disablecontrols;
-   try
-    str1:= dataset.bookmark;
-    if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
-     result:= getasmsestring(ftextfield,utf8);
+ if flastintegerkey <> key then begin
+  exclude(fstate,ddlnks_lookupvalid);
+ end;
+ if ddlnks_lookupvalid in fstate then begin
+  result:= flookuptext;
+ end
+ else begin
+  result:= '';
+  if active and (fdscontroller <> nil) and 
+         (fvaluefield <> nil) and (ftextfield <> nil) then begin
+   flastintegerkey:= key;
+   if fkeyindex >= 0 then begin
+    result:= fdataintf.lookuptext(fkeyindex,key,false,
+                                   tmsestringfield(ftextfield));
+   end
+   else begin
+    dataset.disablecontrols;
+    try
+     str1:= dataset.bookmark;
+     if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
+      result:= getasmsestring(ftextfield,utf8);
+     end;
+     dataset.bookmark:= str1;
+    finally
+     dataset.enablecontrols;
     end;
-    dataset.bookmark:= str1;
-   finally
-    dataset.enablecontrols;
    end;
+   include(fstate,ddlnks_lookupvalid);
   end;
+  flookuptext:= result;
  end;
 end;
 
@@ -5583,25 +5606,36 @@ function tdropdowndatalink.getlookuptext(const key: int64): msestring;
 var
  str1: string;
 begin
- result:= '';
- if active and (fdscontroller <> nil) and 
-        (fvaluefield <> nil) and (ftextfield <> nil) then begin
-  if fkeyindex >= 0 then begin
-   result:= fdataintf.lookuptext(fkeyindex,key,false,
-                                  tmsestringfield(ftextfield));
-  end
-  else begin
-   dataset.disablecontrols;
-   try
-    str1:= dataset.bookmark;
-    if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
-     result:= getasmsestring(ftextfield,utf8);
+ if flastint64key <> key then begin
+  exclude(fstate,ddlnks_lookupvalid);
+ end;
+ if ddlnks_lookupvalid in fstate then begin
+  result:= flookuptext;
+ end
+ else begin
+  result:= '';
+  if active and (fdscontroller <> nil) and 
+         (fvaluefield <> nil) and (ftextfield <> nil) then begin
+   flastint64key:= key;
+   if fkeyindex >= 0 then begin
+    result:= fdataintf.lookuptext(fkeyindex,key,false,
+                                   tmsestringfield(ftextfield));
+   end
+   else begin
+    dataset.disablecontrols;
+    try
+     str1:= dataset.bookmark;
+     if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
+      result:= getasmsestring(ftextfield,utf8);
+     end;
+     dataset.bookmark:= str1;
+    finally
+     dataset.enablecontrols;
     end;
-    dataset.bookmark:= str1;
-   finally
-    dataset.enablecontrols;
    end;
+   include(fstate,ddlnks_lookupvalid);
   end;
+  flookuptext:= result;
  end;
 end;
 
@@ -5609,25 +5643,36 @@ function tdropdowndatalink.getlookuptext(const key: msestring): msestring;
 var
  str1: string;
 begin
- result:= '';
- if active and (fdscontroller <> nil) and 
-        (fvaluefield <> nil) and (ftextfield <> nil) then begin
-  if fkeyindex >= 0 then begin
-   result:= fdataintf.lookuptext(fkeyindex,key,false,
-                                  tmsestringfield(ftextfield));
-  end
-  else begin
-   dataset.disablecontrols;
-   try
-    str1:= dataset.bookmark;
-    if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
-     result:= getasmsestring(ftextfield,utf8);
+ if flaststringkey <> key then begin
+  exclude(fstate,ddlnks_lookupvalid);
+ end;
+ if ddlnks_lookupvalid in fstate then begin
+  result:= flookuptext;
+ end
+ else begin
+  result:= '';
+  if active and (fdscontroller <> nil) and 
+         (fvaluefield <> nil) and (ftextfield <> nil) then begin
+   flaststringkey:= key;
+   if fkeyindex >= 0 then begin
+    result:= fdataintf.lookuptext(fkeyindex,key,false,
+                                   tmsestringfield(ftextfield));
+   end
+   else begin
+    dataset.disablecontrols;
+    try
+     str1:= dataset.bookmark;
+     if fdscontroller.locate([fvaluefield],[key],[],[]) = loc_ok then begin
+      result:= getasmsestring(ftextfield,utf8);
+     end;
+     dataset.bookmark:= str1;
+    finally
+     dataset.enablecontrols;
     end;
-    dataset.bookmark:= str1;
-   finally
-    dataset.enablecontrols;
    end;
+   include(fstate,ddlnks_lookupvalid);
   end;
+  flookuptext:= result;
  end;
 end;
 
@@ -6136,7 +6181,10 @@ end;
 constructor tcustomdbdropdownlistcontroller.create(const intf: idbdropdownlist;
                       const aisstringkey: boolean);
 begin
- fisstringkey:= aisstringkey;
+ if aisstringkey then begin
+  include(fstate,ddls_isstringkey);
+ end;
+// fisstringkey:= aisstringkey;
  foptionsdatalink:= defaultdropdowndatalinkoptions;
  fdatalink:= tdropdowndatalink.create(self);
  inherited create(intf);
@@ -6311,7 +6359,7 @@ begin
  setlength(propertynames,1);
  propertynames[0]:= 'keyfield';
  setlength(fieldtypes,1);
- if fisstringkey then begin
+ if ddls_isstringkey in fstate then begin
   fieldtypes[0]:= textfields;
  end
  else begin
