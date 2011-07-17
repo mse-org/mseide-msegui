@@ -379,7 +379,7 @@ begin
    doclientpaint(acanvas.clipbox); 
   end
   else begin
-   doclientpaint(nullrect); //called from timer
+   doclientpaint(clientrect); //called from timer
   end;
  end;
  if acanvas <> nil then begin
