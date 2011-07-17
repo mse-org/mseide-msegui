@@ -87,6 +87,7 @@ type
             //elapsed secods since last paint
    function createchildwindow: winidty;
    function hasclientwinid: boolean;
+   procedure invalidateviewpointrect(arect: rectty);
    property clientwinid: winidty read getclientwinid;
    property childrect: rectty read getchildrect;
    property viewport: rectty read getviewport;
@@ -245,7 +246,6 @@ begin
    bo1:= true;
    fchildrect:= rect2;
    gui_setembeddedwindowrect(fclientwindow.id,rect2);
-//   gui_reposwindow(fclientwindow.id,rect2,true);
   end;
   if not rectisequal(rect1,fviewport) then begin
    bo1:= true;
@@ -364,6 +364,7 @@ end;
 procedure tcustomwindowwidget.doonpaint(const acanvas: tcanvas);
 var
  lwo1: longword;
+ rect1: rectty;
 begin
  if not (csdesigning in componentstate) and canclientpaint then begin
   checkclientwinid;   
@@ -376,10 +377,13 @@ begin
   frendered:= true;
   inc(frendercount);
   if acanvas <> nil then begin
-   doclientpaint(acanvas.clipbox); 
+   rect1:= acanvas.clipbox;
+   rect1.y:= rect1.y+rect1.cy;
+   clienttoviewport(rect1.pos,innerclientrect);
+   doclientpaint(rect1); 
   end
   else begin
-   doclientpaint(clientrect); //called from timer
+   doclientpaint(makerect(nullpoint,fviewport.size)); //called from timer
   end;
  end;
  if acanvas <> nil then begin
@@ -444,7 +448,6 @@ procedure tcustomwindowwidget.clientmouseevent(var info: mouseeventinfoty);
   fonwindowmouseevent(self,info1);
  end;
 var
-// pt1: pointty;
  rect1: rectty;
 begin
  inherited;
@@ -520,8 +523,6 @@ begin
    else begin
     ftimer.interval:= round(1000000/ffpsmax);
    end;
-//   frendercount:= 0;
-//   ftimerrendercount:= 0;
    ftimer.enabled:= true;
   end
   else begin
@@ -532,10 +533,14 @@ end;
 
 procedure tcustomwindowwidget.dotimer(const sender: tobject);
 begin
-// inc(ftimerrendercount);
-// if integer(ftimerrendercount-frendercount) > 0 then begin
-  doonpaint(nil);
-// end;
+ doonpaint(nil);
+end;
+
+procedure tcustomwindowwidget.invalidateviewpointrect(arect: rectty);
+begin //todo: test
+ arect.x:= arect.x + fviewport.x;
+ arect.y:= fviewport.y + fviewport.cy - (arect.y + arect.cy); 
+ invalidaterect(arect,org_inner);
 end;
 
 end.
