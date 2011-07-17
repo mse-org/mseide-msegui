@@ -1572,7 +1572,7 @@ object projectoptionsfo: tprojectoptionsfo
               color = -2147483645
               taborder = 2
               bounds_x = 0
-              bounds_y = 74
+              bounds_y = 70
               bounds_cx = 669
               bounds_cy = 35
               anchors = [an_top]
@@ -1640,7 +1640,7 @@ object projectoptionsfo: tprojectoptionsfo
               hint = '"--tty DEVICE" to set target terminal'
               onshowhint = hintexpandedmacros
               bounds_x = 1
-              bounds_y = 110
+              bounds_y = 105
               bounds_cx = 667
               bounds_cy = 35
               anchors = [an_left, an_top, an_right]
@@ -1653,7 +1653,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 5
               bounds_x = 0
-              bounds_y = 183
+              bounds_y = 178
               bounds_cx = 669
               bounds_cy = 35
               anchors = [an_top]
@@ -1739,7 +1739,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 6
               bounds_x = 0
-              bounds_y = 223
+              bounds_y = 213
               bounds_cx = 669
               bounds_cy = 35
               anchors = [an_top]
@@ -1794,7 +1794,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 1
               bounds_x = 0
-              bounds_y = 36
+              bounds_y = 35
               bounds_cx = 669
               bounds_cy = 35
               anchors = [an_top]
@@ -1891,7 +1891,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 4
               bounds_x = 0
-              bounds_y = 148
+              bounds_y = 143
               bounds_cx = 518
               bounds_cy = 35
               optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
@@ -2204,7 +2204,6 @@ object projectoptionsfo: tprojectoptionsfo
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 6
-        visible = True
         bounds_x = 1
         bounds_y = 18
         bounds_cx = 669
@@ -4952,6 +4951,7 @@ object projectoptionsfo: tprojectoptionsfo
         frame.zoomwidthstep = 1
         frame.zoomheightstep = 1
         taborder = 9
+        visible = True
         bounds_x = 1
         bounds_y = 18
         bounds_cx = 669
@@ -5091,6 +5091,22 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 15
           bounds_y = 124
           bounds_cx = 157
+          bounds_cy = 15
+        end
+        object settingsstorage: tbooleanedit
+          optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
+          frame.caption = 'Load/save storage settings'
+          frame.dummy = 0
+          frame.outerframe = (
+            0
+            1
+            134
+            1
+          )
+          taborder = 5
+          bounds_x = 15
+          bounds_y = 148
+          bounds_cx = 148
           bounds_cy = 15
         end
       end

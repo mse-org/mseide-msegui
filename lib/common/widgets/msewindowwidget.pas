@@ -12,7 +12,7 @@ unit msewindowwidget;
 interface
 uses
  classes,msegui,msetypes,msegraphutils,mseguiintf,msewidgets,msegraphics,
- msesimplewidgets,mseevent,msemenus,mseguiglob;
+ msesimplewidgets,mseevent,msemenus,mseguiglob,msetimer;
  
 type
  tcustomwindowwidget = class;
@@ -40,11 +40,22 @@ type
    fonwindowmouseevent: mouseeventty;
    fwindowmouseentered: boolean;
    fonwindowmousewheelevent: mousewheeleventty;
+   frenderstep: real;
+   frendertimestampus: longword;
+   frendered: boolean;
+   frendercount: longword;
+//   ftimerrendercount: longword;
+   ftimer: tsimpletimer;
+   ffpsmax: real;
    function getclientwinid: winidty;
    procedure windowscrolled(const sender: tobject);
    function getchildrect: rectty;
    function getviewport: rectty;
+   procedure setfpsmax(const avalue: real);
   protected
+   procedure resetrenderstep;
+   procedure dotimer(const sender: tobject);
+   procedure checktimer;
    procedure checkwindowrect;
    procedure checkclientwinid;
    procedure checkclientvisible;
@@ -71,12 +82,17 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   property rendertimestampus: longword read frendertimestampus; //us
+   property renderstep: real read frenderstep; 
+            //elapsed secods since last paint
    function createchildwindow: winidty;
    function hasclientwinid: boolean;
    property clientwinid: winidty read getclientwinid;
    property childrect: rectty read getchildrect;
    property viewport: rectty read getviewport;
    property aspect: real read faspect;
+   property fpsmax: real read ffpsmax write setfpsmax; //default -1 -> none
+                                              //0 -> as fast as possible
    
    property oncreatewinid: createwinideventty read foncreatewinid 
                                      write foncreatewinid;
@@ -118,6 +134,7 @@ type
    property onshowhint;
    property enabled;
    property visible;
+   property fpsmax;
    property oncreatewinid;
    property ondestroywinid;
    property onclientpaint;
@@ -128,7 +145,8 @@ type
  end;
  
 implementation
-
+uses
+ msesysutils;
 type
  twindow1 = class(twindow);
   
@@ -136,12 +154,15 @@ type
 
 constructor tcustomwindowwidget.create(aowner: tcomponent);
 begin
+ ffpsmax:= -1;
  application.registeronwiniddestroyed({$ifdef FPC}@{$endif}winiddestroyed);
  inherited;
+ ftimer:= tsimpletimer.create(0,@dotimer,false,[to_leak]);
 end;
 
 destructor tcustomwindowwidget.destroy;
 begin
+ ftimer.free;
  if fwindow <> nil then begin
   fwindow.unregisteronscroll({$ifdef FPC}@{$endif}windowscrolled);
  end;
@@ -258,10 +279,33 @@ begin
  inherited;
 end;
 }
+
+procedure tcustomwindowwidget.resetrenderstep;
+begin
+ frenderstep:= 0;
+ frendered:= false;
+ frendercount:= 0;
+// ftimerrendercount:= 0;
+ ftimer.enabled:= false;
+end;
+
 procedure tcustomwindowwidget.visiblechanged;
 begin
+ resetrenderstep;
  inherited;
  checkclientvisible;
+ checktimer;
+end;
+
+procedure tcustomwindowwidget.doloaded;
+begin
+ resetrenderstep;
+ checkclientvisible;
+ checktimer;
+ inherited;
+ if canevent(tmethod(fonloaded)) then begin
+  fonloaded(self);
+ end;
 end;
 
 procedure tcustomwindowwidget.checkclientvisible;
@@ -290,6 +334,8 @@ end;
 procedure tcustomwindowwidget.docreatewinid(const aparent: winidty;
                const awidgetrect: rectty; var aid: winidty);
 begin
+ resetrenderstep;
+ checktimer;
  if canevent(tmethod(foncreatewinid)) then begin
   foncreatewinid(self,aparent,awidgetrect,aid);
  end;
@@ -297,6 +343,7 @@ end;
 
 procedure tcustomwindowwidget.dodestroywinid;
 begin
+ resetrenderstep;
  if canevent(tmethod(fondestroywinid)) then begin
   fondestroywinid(self,fclientwindow.id);
  end;
@@ -315,26 +362,35 @@ begin
 end;
 
 procedure tcustomwindowwidget.doonpaint(const acanvas: tcanvas);
+var
+ lwo1: longword;
 begin
  if not (csdesigning in componentstate) and canclientpaint then begin
   checkclientwinid;   
   checkwindowrect;
-  doclientpaint(acanvas.clipbox);
+  lwo1:= timestamp;
+  if frendered then begin
+   frenderstep:= (lwo1-frendertimestampus)/1000000;
+  end;
+  frendertimestampus:= lwo1;
+  frendered:= true;
+  inc(frendercount);
+  if acanvas <> nil then begin
+   doclientpaint(acanvas.clipbox); 
+  end
+  else begin
+   doclientpaint(nullrect); //called from timer
+  end;
  end;
- inherited;
+ if acanvas <> nil then begin
+  ftimer.interval:= ftimer.interval;
+  inherited;
+ end;
 end;
 
 function tcustomwindowwidget.hasclientwinid: boolean;
 begin
  result:= fclientwindow.id <> 0;
-end;
-
-procedure tcustomwindowwidget.doloaded;
-begin
- inherited;
- if canevent(tmethod(fonloaded)) then begin
-  fonloaded(self);
- end;
 end;
 
 function tcustomwindowwidget.getchildrect: rectty;
@@ -443,6 +499,43 @@ end;
 procedure tcustomwindowwidget.windowscrolled(const sender: tobject);
 begin
  checkwindowrect;
+end;
+
+procedure tcustomwindowwidget.setfpsmax(const avalue: real);
+begin
+ ffpsmax:= avalue;
+ checktimer;
+end;
+
+procedure tcustomwindowwidget.checktimer;
+begin
+ if componentstate * [csloading,csdesigning,csdestroying] <> [] then begin
+  ftimer.enabled:= false;
+ end
+ else begin
+  if (ffpsmax >= 0) and showing then begin
+   if ffpsmax = 0 then begin
+    ftimer.interval:= 0;
+   end
+   else begin
+    ftimer.interval:= round(1000000/ffpsmax);
+   end;
+//   frendercount:= 0;
+//   ftimerrendercount:= 0;
+   ftimer.enabled:= true;
+  end
+  else begin
+   ftimer.enabled:= false;
+  end;
+ end;
+end;
+
+procedure tcustomwindowwidget.dotimer(const sender: tobject);
+begin
+// inc(ftimerrendercount);
+// if integer(ftimerrendercount-frendercount) > 0 then begin
+  doonpaint(nil);
+// end;
 end;
 
 end.

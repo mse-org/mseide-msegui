@@ -280,7 +280,10 @@ begin
    else begin
     if to_leak in po^.options then begin
      int1:= 1;
-     po^.nexttime:= time + po^.interval;
+     inc(po^.nexttime,po^.interval);
+     if later(po^.nexttime,time) then begin
+      po^.nexttime:= time + po^.interval;
+     end;
     end
     else begin
      int1:= 0;

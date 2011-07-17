@@ -135,6 +135,7 @@ type
    property onshowhint;
    property enabled;
    property visible;
+   property fpsmax;
    property oncreatewinid;
    property ondestroywinid;
 //   property onclientpaint;
@@ -299,6 +300,7 @@ begin
 {$endif}
   raise exception.create('Could not create an OpenGL rendering context.');
  end;
+ setcurrent;
  inherited;
 // checkviewport;
 end;
