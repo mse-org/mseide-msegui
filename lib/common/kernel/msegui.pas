@@ -13609,28 +13609,33 @@ function twindow.getwindowpos: windowposty;
 var
  asize: windowsizety;
 begin
- inc(fmoving);
- asize:= gui_getwindowsize(winid);
- dec(fmoving);
- case asize of
-  wsi_minimized: begin
-   result:= wp_minimized;
-  end;
-  wsi_maximized: begin
-   result:= wp_maximized;
-  end;
-  wsi_fullscreen: begin
-   result:= wp_fullscreen;
-  end;
-  wsi_fullscreenvirt: begin
-   result:= wp_fullscreenvirt;
-  end;
-  else begin //wsi_normal
-   if fwindowpos in [wp_minimized,wp_maximized,wp_fullscreen,wp_screencentered] then begin
-    result:= wp_normal;
-   end
-   else begin
-    result:= fwindowpos;
+ if fwindow.id = 0 then begin
+  result:= fwindowpos;
+ end
+ else begin
+  inc(fmoving);
+  asize:= gui_getwindowsize(winid);
+  dec(fmoving);
+  case asize of
+   wsi_minimized: begin
+    result:= wp_minimized;
+   end;
+   wsi_maximized: begin
+    result:= wp_maximized;
+   end;
+   wsi_fullscreen: begin
+    result:= wp_fullscreen;
+   end;
+   wsi_fullscreenvirt: begin
+    result:= wp_fullscreenvirt;
+   end;
+   else begin //wsi_normal
+    if fwindowpos in [wp_minimized,wp_maximized,wp_fullscreen,wp_screencentered] then begin
+     result:= wp_normal;
+    end
+    else begin
+     result:= fwindowpos;
+    end;
    end;
   end;
  end;
@@ -13658,6 +13663,7 @@ begin
   end;
   case value of
    wp_screencentered,wp_screencenteredvirt: begin
+    checkwindowid;
     rect1:= fnormalwindowrect;
     gui_setwindowstate(winid,wsi_normal,bo1);
     if value = wp_screencenteredvirt then begin
