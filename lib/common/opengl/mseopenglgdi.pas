@@ -99,6 +99,7 @@ type
    function find(const afont: fontdataty): pglfontdataty;
   public
    constructor create;
+   destructor destroy; override;
  
    procedure getfont(var drawinfo: drawinfoty);
    procedure freefontdata(var drawinfo: drawinfoty);
@@ -727,7 +728,9 @@ end;
 
 procedure gdi_freefontdata(var drawinfo: drawinfoty);
 begin
- fontcache.freefontdata(drawinfo);
+ if ffontcache <> nil then begin
+  fontcache.freefontdata(drawinfo);
+ end;
 end;
 
 procedure gdi_gettext16width(var drawinfo: drawinfoty);
@@ -797,8 +800,15 @@ end;
 
 constructor tglfontcache.create;
 begin
+ initializeftgl([]);
  inherited create(sizeof(glfontdataty));
  fstate:= fstate + [hls_needsnull,hls_needsfinalize];
+end;
+
+destructor tglfontcache.destroy;
+begin
+ inherited;
+ releaseftgl;
 end;
 
 procedure tglfontcache.finalizeitem(var aitemdata);
@@ -831,17 +841,26 @@ end;
 procedure tglfontcache.getfont(var drawinfo: drawinfoty);
 var
  po1: pglfontdataty;
+ po2: pftglfont;
 begin
  with drawinfo.getfont do begin
+  ok:= true;
   po1:= find(fontdata^);
   with fontdata^ do begin 
    getmem(pointer(font),sizeof(ftglfontty));
    with pftglfontty(font)^ do begin
     if po1 = nil then begin
+     po2:= ftglcreatepixmapfont('/usr/share/fonts/truetype/arial.ttf');
+     if po2 = nil then begin
+      freemem(pointer(font));
+      pointer(font):= nil;
+      ok:= false;
+      exit;
+     end;
      po1:= @((internaladd(fontdata^)^.data));
      po1^.h.name:= fontdata^.h.name;
      po1^.h.height:= fontdata^.h.d.height;
-     po1^.handle:= ftglcreatepixmapfont('/usr/share/fonts/truetype/arial.ttf');
+     po1^.handle:= po2;
      ftglsetfontcharmap(po1^.handle,ft_encoding_unicode);
      ftglsetfontfacesize(po1^.handle,20,72);
     end;
@@ -931,9 +950,6 @@ end;
 
 initialization
  gdinumber:= registergdi(openglgetgdifuncs);
-// fontcache:= tglfontcache.create;
-//finalization           
-// fontcache.free;  //finalization order not guaranteed
 finalization
  freetessbuffer;
 end.

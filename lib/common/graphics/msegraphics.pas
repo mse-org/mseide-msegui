@@ -703,9 +703,9 @@ type
    function active: boolean;
 
    procedure reset; virtual;//clears savestack, origin and clipregion
-   function save: integer; //returns actual saveindex
+   function save: integer; //returns current saveindex
    function restore(index: integer = -1): integer; //-1 -> pop from stack
-                     //returns actual saveindex
+                     //returns current saveindex
    procedure resetpaintedflag;
 
    procedure move(const dist: pointty);   //add dist to origin

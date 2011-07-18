@@ -115,8 +115,8 @@ end;
 
 destructor topenglcanvaswidget.destroy;
 begin
- fcanvas.free;
  inherited;
+ fcanvas.free;
 end;
 
 procedure topenglcanvaswidget.setcanvas(const avalue: topenglwidgetcanvas);
