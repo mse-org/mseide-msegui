@@ -592,7 +592,6 @@ type
    fcliporigin: pointty;
    fgclinksto: canvasarty;
    fgclinksfrom: canvasarty;
-//   fppmm: real;
    procedure adjustrectar(po: prectty; count: integer);
    procedure readjustrectar(po: prectty; count: integer);
    procedure error(nr: gdierrorty; const text: string);
