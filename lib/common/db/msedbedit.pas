@@ -3118,7 +3118,7 @@ begin
             not (canmodify and
                     not (oed_noautoedit in foptions) and
                     ((oed_autoedit in foptions) or
-                     datasource.AutoEdit or 
+                     (datasource <> nil) and datasource.AutoEdit or 
                      (fnavigator <> nil) and fnavigator.autoedit
                     )
                 )

@@ -3,7 +3,8 @@ unit msedbdispwidgets;
 interface
 uses
  db,classes,msesimplewidgets,msedb,msetypes,mseclasses,mseguiglob,mseglob,
- msedispwidgets,msestrings,mselookupbuffer,msegui,msemenus,mseevent;
+ msedispwidgets,msestrings,mselookupbuffer,msegui,msemenus,mseevent,
+ msebarcode;
  
 type 
 
@@ -263,6 +264,30 @@ type
    property lookupkeyfieldno: lookupbufferfieldnoty read flookupkeyfieldno write flookupkeyfieldno default 0;
    property lookupvaluefieldno: lookupbufferfieldnoty read flookupvaluefieldno write flookupvaluefieldno default 0;
  end;
+
+ tdbbarcode = class(tcustombarcode1,idbdispfieldlink,ireccontrol)
+  private
+   fdatalink: tdispfielddatalink;
+   //idbdispfieldlink
+   procedure getfieldtypes(var fieldtypes: fieldtypesty); virtual;
+   procedure fieldtovalue; virtual;
+   procedure setnullvalue;
+   //ireccontrol
+   procedure recchanged;
+   procedure setdatalink(const avalue: tdispfielddatalink);
+  protected   
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property datalink: tdispfielddatalink read fdatalink write setdatalink;
+  published
+   property kind;
+   property direction;
+   property colorbar;
+   property colorspace;
+   property fontbar;
+ end;
  
 implementation
 uses
@@ -432,6 +457,45 @@ procedure tdbstringdisp.defineproperties(filer: tfiler);
 begin
  inherited;
  fdatalink.fixupproperties(filer);  //move values to datalink
+end;
+
+{ tdbbarcode }
+
+constructor tdbbarcode.create(aowner: tcomponent);
+begin
+ fdatalink:= tdispfielddatalink.create(idbdispfieldlink(self));
+ inherited;
+end;
+
+destructor tdbbarcode.destroy;
+begin
+ inherited;
+ fdatalink.free;
+end;
+
+procedure tdbbarcode.getfieldtypes(var fieldtypes: fieldtypesty);
+begin
+ fieldtypes:= textfields;
+end;
+
+procedure tdbbarcode.fieldtovalue;
+begin
+ value:= datalink.asmsestring;
+end;
+
+procedure tdbbarcode.setnullvalue;
+begin
+ value:= '';
+end;
+
+procedure tdbbarcode.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
+procedure tdbbarcode.setdatalink(const avalue: tdispfielddatalink);
+begin
+ fdatalink.assign(avalue);
 end;
 
 { tdbstringdisplb }

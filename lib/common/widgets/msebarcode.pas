@@ -42,14 +42,14 @@ type
    fcelldata2: pbyte;
    fcolorbar: colorty;
    fcolorspace: colorty;
-   fcode: msestring;
+   fvalue: msestring;
    fcoderect: rectty;
    fsubcliprects: rectarty;
    ffontbar: tbarcodefont;
    fdirection: graphicdirectionty;
    procedure setcolorbar(const avalue: colorty);
    procedure setcolorspace(const avalue: colorty);
-   procedure setcode(const avalue: msestring);
+   procedure setvalue(const avalue: msestring);
    procedure setcell1(const adata: pbyte; const aindex: integer;
                const avalue: boolean);
    procedure setfontbar(const avalue: tbarcodefont);
@@ -61,8 +61,8 @@ type
    procedure adjustrect(var arect: rectty);
    procedure checkbitmap;
    procedure calcbitmap; virtual; abstract;
-   procedure updatelayout(const asize: sizety; var acellcount: integer); virtual;
-   procedure checkcode; virtual;
+   procedure updatelayout(const asize: sizety); virtual;
+   procedure checkvalue; virtual;
    procedure dopaint2(const acanvas: tcanvas); virtual;
    procedure dopaint(const acanvas: tcanvas); override;
    procedure clientrectchanged; override;
@@ -83,13 +83,13 @@ type
                                                default cl_black;
    property colorspace: colorty read fcolorspace write setcolorspace 
                                                default cl_transparent;
-   property code: msestring read fcode write setcode;
+   property value: msestring read fvalue write setvalue;
    property fontbar: tbarcodefont read ffontbar write setfontbar;
  end;
 
  barcodekindty = (bk_none,bk_gtin_13);
  
- tbarcode = class(tcustombarcode)
+ tcustombarcode1 = class(tcustombarcode)
   private
    fkind: barcodekindty;
    procedure setkind(const avalue: barcodekindty);
@@ -98,20 +98,24 @@ type
    frect1: rectty;
    frect2: rectty;
    frect3: rectty;
-   procedure checkcode; override;
+   procedure checkvalue; override;
    procedure calcbitmap; override;
-   procedure updatelayout(const asize: sizety;
-                                       var acellcount: integer); override;
+   procedure updatelayout(const asize: sizety); override;
    procedure dopaint2(const acanvas: tcanvas); override;
-  published
+  public
    property kind: barcodekindty read fkind write setkind default bk_none;
+ end;
+
+ tbarcode = class(tcustombarcode1)
+  published
+   property kind;
    property direction;
    property colorbar;
    property colorspace;
-   property code;
+   property value;
    property fontbar;
- end;
- 
+ end;  
+
 implementation
 uses
  rtlconsts,msebits,msedrawtext;
@@ -207,10 +211,10 @@ begin
    end;
    fbarrect2:= fbarrect1;
    if fdirection in [gd_up,gd_down] then begin
-    updatelayout(ms(fcoderect.cy,fcoderect.cx),fcellcount);
+    updatelayout(ms(fcoderect.cy,fcoderect.cx));
    end
    else begin
-    updatelayout(fcoderect.size,fcellcount);
+    updatelayout(fcoderect.size);
    end;
    adjustrect(fbarrect1);
    adjustrect(fbarrect2);
@@ -220,7 +224,7 @@ begin
   end;
   fcelldata1:= nil;
   fcelldata2:= nil;
-  if (fcode = '') or (fcellcount <= 0) then begin
+  if (fvalue = '') or (fcellcount <= 0) then begin
    fbitmap1.clear;
    fbitmap2.clear;
   end
@@ -359,24 +363,23 @@ begin
  end;
 end;
 
-procedure tcustombarcode.setcode(const avalue: msestring);
+procedure tcustombarcode.setvalue(const avalue: msestring);
 begin
- if fcode <> avalue then begin
-  fcode:= avalue;
-  if fcode <> '' then begin
-   checkcode;
+ if fvalue <> avalue then begin
+  fvalue:= avalue;
+  if fvalue <> '' then begin
+   checkvalue;
   end;
   change(false);
  end;
 end;
 
-procedure tcustombarcode.checkcode;
+procedure tcustombarcode.checkvalue;
 begin
  //dummy
 end;
 
-procedure tcustombarcode.updatelayout(const asize: sizety;
-                                          var acellcount: integer);
+procedure tcustombarcode.updatelayout(const asize: sizety);
 begin
  //dummy
 end;
@@ -464,9 +467,9 @@ begin
  arect.pos:= pt1;
 end;
 
-{ tbarcode }
+{ tcustombarcode1 }
 
-procedure tbarcode.calcbitmap;
+procedure tcustombarcode1.calcbitmap;
 var
  cellindex: integer;
  
@@ -493,7 +496,7 @@ begin
   bk_gtin_13: begin
    setcell(bmn_1,[0,2,46,48,92,94]); //start, center, stop
    for int1:= 2 to 13 do begin
-    digits[int1-2]:= ord(fcode[int1])-ord('0');
+    digits[int1-2]:= ord(fvalue[int1])-ord('0');
    end;
    {
    int2:= 0;
@@ -511,7 +514,7 @@ begin
     by1:= 10-by1;         //controllsum
    end;
    }
-   by2:= patterngtin13[pgt13_13,ord(fcode[1])-ord('0')];
+   by2:= patterngtin13[pgt13_13,ord(fvalue[1])-ord('0')];
    cellindex:= 3;
    for int1:= 0 to 5 do begin
     pat1:= pgt13_l0;
@@ -528,7 +531,7 @@ begin
  end;
 end;
 
-procedure tbarcode.setkind(const avalue: barcodekindty);
+procedure tcustombarcode1.setkind(const avalue: barcodekindty);
 begin
  if fkind <> avalue then begin
   fkind:= avalue;
@@ -536,87 +539,88 @@ begin
  end;
 end;
 
-procedure tbarcode.checkcode;
+procedure tcustombarcode1.checkvalue;
 var
  int1: integer;
 begin
  case fkind of
   bk_gtin_13: begin
-   if length(fcode) > 13 then begin
-    setlength(fcode,13);
+   if length(fvalue) > 13 then begin
+    setlength(fvalue,13);
    end;
-   for int1:= 1 to length(fcode) do begin
-    if (fcode[int1] < '0') or (fcode[int1] > '9') then begin
-     fcode[int1]:= '0';
+   for int1:= 1 to length(fvalue) do begin
+    if (fvalue[int1] < '0') or (fvalue[int1] > '9') then begin
+     fvalue[int1]:= '0';
     end;     
    end;
-   if length(fcode) < 13 then begin
-    fcode:= charstring(msechar('0'),13-length(fcode))+fcode;
+   if length(fvalue) < 13 then begin
+    fvalue:= charstring(msechar('0'),13-length(fvalue))+fvalue;
    end;
   end;
  end;
 end;
 
-procedure tbarcode.updatelayout(const asize: sizety; var acellcount: integer);
+procedure tcustombarcode1.updatelayout(const asize: sizety);
 var
  cellsize1: real;
  charwidth1: real;
  framesize1: integer;
  int1: integer;
 begin
- acellcount:= cellcounts[fkind];
- framesize1:= framesizes[fkind];
- cellsize1:= asize.cx / (acellcount+framesize1);
- charwidth1:= charwidths[fkind]*cellsize1;
- with fbarrect1 do begin //center barrect
-  cx:= round(acellcount*cellsize1);
-  x:= (asize.cx-cx) div 2;
- end;
- fbarrect2:= fbarrect1;
- if ffontbar.height = 0 then begin
-  ffontheight:= round(charwidth1*1.5);
- end
- else begin
-  ffontheight:= ffontbar.height;
- end;
- fbarrect2.cy:= fbarrect2.cy - ffontheight;
- case fkind of
-  bk_gtin_13: begin
-   with frect1 do begin
-    int1:= round(charwidth1);
-    x:= fbarrect1.x - int1;
-    y:= asize.cy - ffontheight;
-    cx:= int1;
-    cy:= ffontheight;
+ fcellcount:= cellcounts[fkind];
+ if fcellcount > 0 then begin 
+  framesize1:= framesizes[fkind];
+  cellsize1:= asize.cx / (fcellcount+framesize1);
+  charwidth1:= charwidths[fkind]*cellsize1;
+  with fbarrect1 do begin //center barrect
+   cx:= round(fcellcount*cellsize1);
+   x:= ((asize.cx-cx)+1) div 2;
+  end;
+  fbarrect2:= fbarrect1;
+  if ffontbar.height = 0 then begin
+   ffontheight:= round(charwidth1*1.5);
+  end
+  else begin
+   ffontheight:= ffontbar.height;
+  end;
+  fbarrect2.cy:= fbarrect2.cy - ffontheight;
+  case fkind of
+   bk_gtin_13: begin
+    with frect1 do begin
+     int1:= round(charwidth1);
+     x:= fbarrect1.x - int1;
+     y:= asize.cy - ffontheight;
+     cx:= int1;
+     cy:= ffontheight;
+    end;
+    with frect2 do begin
+     y:= frect1.y;
+     cy:= frect1.cy;
+     x:= fbarrect1.x + round(3*cellsize1);
+     cx:= round(6*charwidth1);
+    end;
+    frect3:= frect2;
+    with frect3 do begin
+     x:= fbarrect1.x + round((3+42+5)*cellsize1);
+    end;
+    adjustrect(frect1);
+    adjustrect(frect2);
+    adjustrect(frect3);
    end;
-   with frect2 do begin
-    y:= frect1.y;
-    cy:= frect1.cy;
-    x:= fbarrect1.x + round(3*cellsize1)+1;
-    cx:= round(6*charwidth1)-1;
-   end;
-   frect3:= frect2;
-   with frect3 do begin
-    x:= fbarrect1.x + round((3+42+5)*cellsize1)-1;
-   end;
-   adjustrect(frect1);
-   adjustrect(frect2);
-   adjustrect(frect3);
   end;
  end;
-// textwidth:= asize.cx - spacecounts[fkind]*cellsize;
-// ffontheight:= round(textwidth / charcounts[fkind] * 1.5);
- 
 end;
 
-procedure tbarcode.dopaint2(const acanvas: tcanvas);
+procedure tcustombarcode1.dopaint2(const acanvas: tcanvas);
 begin
  inherited;
- case fkind of
-  bk_gtin_13: begin
-   drawtext(acanvas,fcode[1],frect1,ffontheight);
-   drawtext(acanvas,copy(fcode,2,6),frect2,ffontheight);
-   drawtext(acanvas,copy(fcode,8,6),frect3,ffontheight);
+ if fvalue <> '' then begin
+  case fkind of
+   bk_gtin_13: begin
+    drawtext(acanvas,fvalue[1],frect1,ffontheight);
+    drawtext(acanvas,copy(fvalue,2,6),frect2,ffontheight);
+    drawtext(acanvas,copy(fvalue,8,6),frect3,ffontheight);
+   end;
   end;
  end;
 end;

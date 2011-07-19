@@ -384,7 +384,8 @@ begin
       tsequencelink,tdbevent,tparamconnector,tsqlresultconnector,
       tdblabel,tdbstringdisp,tdbintegerdisp,tdbbooleandisp,
       tdbrealdisp,tdbdatetimedisp,
-      tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb
+      tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb,
+      tdbbarcode
       ]);
  registercomponenttabhints(['DBf'],['Datafield and data display components']);
 
