@@ -574,7 +574,7 @@ begin
   charwidth1:= charwidths[fkind]*cellsize1;
   with fbarrect1 do begin //center barrect
    cx:= round(fcellcount*cellsize1);
-   x:= ((asize.cx-cx)+1) div 2;
+   x:= (asize.cx-cx) div 2;
   end;
   fbarrect2:= fbarrect1;
   if ffontbar.height = 0 then begin
