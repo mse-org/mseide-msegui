@@ -400,15 +400,13 @@ type
    function getlineheight: integer;
    function getcaretshift: integer;
    procedure updatehandlepo;
-   procedure dochanged(const changed: canvasstatesty; 
-                                    const nochange: boolean); virtual;
    procedure releasehandles(const nochanged: boolean = false);
    function getcharset: string;
    function getname: string;
    procedure setcharset(const Value: string);
    function getoptions: fontoptionsty;
    procedure setoptions(const avalue: fontoptionsty);
-  //icanvas
+    //icanvas
    procedure gcneeded(const sender: tcanvas);
    function getmonochrome: boolean;
    function getsize: sizety;
@@ -431,6 +429,8 @@ type
   protected
    finfo: fontinfoty;
    fhandlepo: ^fontnumty;
+   procedure dochanged(const changed: canvasstatesty; 
+                                    const nochange: boolean); virtual;
    function getfont(var drawinfo: drawinfoty): boolean; virtual;
    procedure setname(const Value: string); virtual;
    function gethandle: fontnumty; virtual;
@@ -504,9 +504,9 @@ type
  tcanvasfont = class(tfont)
   private
    fcanvas: tcanvas;
+  protected   
    procedure dochanged(const changed: canvasstatesty;
                               const nochange: boolean); override;
-  protected
    function gethandle: fontnumty; override;
   public
    constructor create(const acanvas: tcanvas); reintroduce;
