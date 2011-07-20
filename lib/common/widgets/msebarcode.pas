@@ -205,6 +205,7 @@ var
 begin
  if fstate * [bcs_bitmapvalid,bcs_layoutvalid] <> 
                         [bcs_bitmapvalid,bcs_layoutvalid] then begin
+  checkvalue;
   if not (bcs_layoutvalid in fstate) then begin
    fsubcliprects:= nil;
    fcellcount:= 0;
@@ -374,7 +375,7 @@ procedure tcustombarcode.setvalue(const avalue: msestring);
 begin
  if fvalue <> avalue then begin
   fvalue:= avalue;
-  checkvalue;
+//  checkvalue;
   change(false);
  end;
 end;
@@ -477,7 +478,7 @@ begin
  if foptions <> avalue then begin
   foptions:= avalue;
   change(false);
-  checkvalue;
+//  checkvalue;
  end;
 end;
 
