@@ -567,10 +567,10 @@ begin
      int3:= 0;
      for int1:= 12 downto 1 do begin
       if odd(int1) then begin
-       int3:= int3 + ord((po1+int1)^) - ord('0');  //*3
+       int2:= int2 + ord((po1+int1)^) - ord('0');  //*1
       end
       else begin
-       int2:= int2 + ord((po1+int1)^) - ord('0');  //*1
+       int3:= int3 + ord((po1+int1)^) - ord('0');  //*3
       end;
      end;
      by1:= (3*int3+int2) mod 10;
