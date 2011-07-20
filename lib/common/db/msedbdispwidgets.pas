@@ -282,6 +282,7 @@ type
   published
    property datalink: tdispfielddatalink read fdatalink write setdatalink;
   published
+   property options;
    property kind;
    property direction;
    property colorbar;
@@ -475,7 +476,7 @@ end;
 
 procedure tdbbarcode.getfieldtypes(var fieldtypes: fieldtypesty);
 begin
- fieldtypes:= textfields;
+ fieldtypes:= textfields+integerfields;
 end;
 
 procedure tdbbarcode.fieldtovalue;

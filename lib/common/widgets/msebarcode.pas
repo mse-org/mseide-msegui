@@ -8,7 +8,6 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msebarcode;
-//under construction
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
@@ -32,6 +31,9 @@ type
   public
    constructor create(const aowner: tcustombarcode); reintroduce;
  end;
+
+ barcodeoptionty = (bco_calcchecksum);
+ barcodeoptionsty = set of barcodeoptionty;
  
  tcustombarcode = class(tpublishedwidget)
   private
@@ -43,10 +45,12 @@ type
    fcolorbar: colorty;
    fcolorspace: colorty;
    fvalue: msestring;
+   fcode: msestring;
    fcoderect: rectty;
    fsubcliprects: rectarty;
    ffontbar: tbarcodefont;
    fdirection: graphicdirectionty;
+   foptions: barcodeoptionsty;
    procedure setcolorbar(const avalue: colorty);
    procedure setcolorspace(const avalue: colorty);
    procedure setvalue(const avalue: msestring);
@@ -54,6 +58,7 @@ type
                const avalue: boolean);
    procedure setfontbar(const avalue: tbarcodefont);
    procedure setdirection(const avalue: graphicdirectionty);
+   procedure setoptions(const avalue: barcodeoptionsty);
   protected
    fbarrect1: rectty;
    fbarrect2: rectty;
@@ -85,6 +90,7 @@ type
                                                default cl_transparent;
    property value: msestring read fvalue write setvalue;
    property fontbar: tbarcodefont read ffontbar write setfontbar;
+   property options: barcodeoptionsty read foptions write setoptions default [];
  end;
 
  barcodekindty = (bk_none,bk_gtin_13);
@@ -108,6 +114,7 @@ type
 
  tbarcode = class(tcustombarcode1)
   published
+   property options;
    property kind;
    property direction;
    property colorbar;
@@ -224,7 +231,7 @@ begin
   end;
   fcelldata1:= nil;
   fcelldata2:= nil;
-  if (fvalue = '') or (fcellcount <= 0) then begin
+  if (fcode = '') or (fcellcount <= 0) then begin
    fbitmap1.clear;
    fbitmap2.clear;
   end
@@ -367,16 +374,14 @@ procedure tcustombarcode.setvalue(const avalue: msestring);
 begin
  if fvalue <> avalue then begin
   fvalue:= avalue;
-  if fvalue <> '' then begin
-   checkvalue;
-  end;
+  checkvalue;
   change(false);
  end;
 end;
 
 procedure tcustombarcode.checkvalue;
 begin
- //dummy
+ fcode:= fvalue;
 end;
 
 procedure tcustombarcode.updatelayout(const asize: sizety);
@@ -467,6 +472,15 @@ begin
  arect.pos:= pt1;
 end;
 
+procedure tcustombarcode.setoptions(const avalue: barcodeoptionsty);
+begin
+ if foptions <> avalue then begin
+  foptions:= avalue;
+  change(false);
+  checkvalue;
+ end;
+end;
+
 { tcustombarcode1 }
 
 procedure tcustombarcode1.calcbitmap;
@@ -487,34 +501,17 @@ var
  
 var
  int1: integer;
-// int2,int3: integer;
  digits: array[0..11] of byte;
- {by1,}by2: byte;
+ by2: byte;
  pat1: patterngtin13ty;
 begin
  case fkind of
   bk_gtin_13: begin
    setcell(bmn_1,[0,2,46,48,92,94]); //start, center, stop
    for int1:= 2 to 13 do begin
-    digits[int1-2]:= ord(fvalue[int1])-ord('0');
+    digits[int1-2]:= ord(fcode[int1])-ord('0');
    end;
-   {
-   int2:= 0;
-   int3:= 0;
-   for int1:= 0 to high(digits) do begin
-    if odd(int1) then begin
-     int3:= int3 + digits[int1];  //*3
-    end
-    else begin
-     int2:= int2 + digits[int1];  //*1
-    end;
-   end;
-   by1:= (3*int3+int2) mod 10;
-   if by1 <> 0 then begin
-    by1:= 10-by1;         //controllsum
-   end;
-   }
-   by2:= patterngtin13[pgt13_13,ord(fvalue[1])-ord('0')];
+   by2:= patterngtin13[pgt13_13,ord(fcode[1])-ord('0')];
    cellindex:= 3;
    for int1:= 0 to 5 do begin
     pat1:= pgt13_l0;
@@ -541,20 +538,48 @@ end;
 
 procedure tcustombarcode1.checkvalue;
 var
- int1: integer;
+ int1,int2,int3: integer;
+ by1: byte;
+ po1: pmsechar;
+ mch1: msechar;
 begin
- case fkind of
-  bk_gtin_13: begin
-   if length(fvalue) > 13 then begin
-    setlength(fvalue,13);
-   end;
-   for int1:= 1 to length(fvalue) do begin
-    if (fvalue[int1] < '0') or (fvalue[int1] > '9') then begin
-     fvalue[int1]:= '0';
-    end;     
-   end;
-   if length(fvalue) < 13 then begin
-    fvalue:= charstring(msechar('0'),13-length(fvalue))+fvalue;
+ inherited;
+ if fcode <> '' then begin
+  case fkind of
+   bk_gtin_13: begin
+    int2:= length(fcode);
+    setlength(fcode,13); //unique instance
+    po1:= pointer(fcode);
+    for int1:= 0 to int2-1 do begin
+     mch1:= (po1+int1)^;
+     if (mch1 < '0') or (mch1 > '9') then begin
+      (po1+int1)^:= '0';
+     end;     
+    end;
+    if int2 < 13 then begin
+     move(po1^,(po1+13-int2)^,int2*sizeof(msechar));
+     for int1:= 0 to 12-int2 do begin
+      (po1+int1)^:= '0';
+     end;
+    end;
+    if bco_calcchecksum in foptions then begin
+     int2:= 0;
+     int3:= 0;
+     for int1:= 12 downto 1 do begin
+      if odd(int1) then begin
+       int3:= int3 + ord((po1+int1)^) - ord('0');  //*3
+      end
+      else begin
+       int2:= int2 + ord((po1+int1)^) - ord('0');  //*1
+      end;
+     end;
+     by1:= (3*int3+int2) mod 10;
+     if by1 <> 0 then begin
+      by1:= 10-by1;         //controllsum
+     end;
+     move((po1+1)^,po1^,12*sizeof(msechar));
+     (po1+12)^:= msechar(by1+ord('0'));
+    end;
    end;
   end;
  end;
@@ -584,6 +609,7 @@ begin
    ffontheight:= ffontbar.height;
   end;
   fbarrect2.cy:= fbarrect2.cy - ffontheight;
+
   case fkind of
    bk_gtin_13: begin
     with frect1 do begin
@@ -614,12 +640,12 @@ end;
 procedure tcustombarcode1.dopaint2(const acanvas: tcanvas);
 begin
  inherited;
- if fvalue <> '' then begin
+ if fcode <> '' then begin
   case fkind of
    bk_gtin_13: begin
-    drawtext(acanvas,fvalue[1],frect1,ffontheight);
-    drawtext(acanvas,copy(fvalue,2,6),frect2,ffontheight);
-    drawtext(acanvas,copy(fvalue,8,6),frect3,ffontheight);
+    drawtext(acanvas,fcode[1],frect1,ffontheight);
+    drawtext(acanvas,copy(fcode,2,6),frect2,ffontheight);
+    drawtext(acanvas,copy(fcode,8,6),frect3,ffontheight);
    end;
   end;
  end;
