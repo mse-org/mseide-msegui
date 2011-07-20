@@ -482,7 +482,6 @@ begin
 end;
 
 { tcustombarcode1 }
-var testvar: array[0..11] of byte;
 
 procedure tcustombarcode1.calcbitmap;
 var
@@ -512,7 +511,6 @@ begin
    for int1:= 6 to 13 do begin
     digits[int1-6]:= ord(fcode[int1])-ord('0');
    end;
-   testvar:= digits;
    cellindex:= 3;
    for int1:= 0 to 3 do begin
     putcells(patterngtin13[pgt13_l0,digits[int1]]);
