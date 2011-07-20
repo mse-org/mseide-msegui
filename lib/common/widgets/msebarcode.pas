@@ -93,7 +93,7 @@ type
    property options: barcodeoptionsty read foptions write setoptions default [];
  end;
 
- barcodekindty = (bk_none,bk_gtin_13);
+ barcodekindty = (bk_none,bk_gtin_13,bk_gtin_8);
  
  tcustombarcode1 = class(tcustombarcode)
   private
@@ -144,14 +144,14 @@ const
              [tf_xcentered,tf_ycentered]);
              
  cellcounts: array[barcodekindty] of integer =
-  //bk_none,bk_gtin_13
-  (0,       95);
+  //bk_none,bk_gtin_13,    bk_gtin_8
+  (0,       3+6*7+5+6*7+3, 3+4*7+5+4*7+3 );
  framesizes: array[barcodekindty] of integer =
-  //bk_none,bk_gtin_13
-  (0,       2*7);
+  //bk_none,bk_gtin_13,    bk_gtin_8
+  (0,       2*7,           2*7);
  charwidths: array[barcodekindty] of integer =
-  //bk_none,bk_gtin_13
-  (0,       7);
+  //bk_none,bk_gtin_13,    bk_gtin_8
+  (0,       7,             7);
   {
  spacecounts: array[barcodekindty] of integer =
   //bk_none,bk_gtin_13
@@ -482,6 +482,7 @@ begin
 end;
 
 { tcustombarcode1 }
+var testvar: array[0..11] of byte;
 
 procedure tcustombarcode1.calcbitmap;
 var
@@ -506,6 +507,21 @@ var
  pat1: patterngtin13ty;
 begin
  case fkind of
+  bk_gtin_8: begin
+   setcell(bmn_1,[0,2,32,34,64,66]); //start, center, stop
+   for int1:= 6 to 13 do begin
+    digits[int1-6]:= ord(fcode[int1])-ord('0');
+   end;
+   testvar:= digits;
+   cellindex:= 3;
+   for int1:= 0 to 3 do begin
+    putcells(patterngtin13[pgt13_l0,digits[int1]]);
+   end;
+   cellindex:= 36;
+   for int1:= 4 to 7 do begin
+    putcells(patterngtin13[pgt13_r,digits[int1]]);
+   end;
+  end;
   bk_gtin_13: begin
    setcell(bmn_1,[0,2,46,48,92,94]); //start, center, stop
    for int1:= 2 to 13 do begin
@@ -546,7 +562,7 @@ begin
  inherited;
  if fcode <> '' then begin
   case fkind of
-   bk_gtin_13: begin
+   bk_gtin_13,bk_gtin_8: begin
     int2:= length(fcode);
     setlength(fcode,13); //unique instance
     po1:= pointer(fcode);
@@ -611,7 +627,7 @@ begin
   fbarrect2.cy:= fbarrect2.cy - ffontheight;
 
   case fkind of
-   bk_gtin_13: begin
+   bk_gtin_13,bk_gtin_8: begin
     with frect1 do begin
      int1:= round(charwidth1);
      x:= fbarrect1.x - int1;
@@ -623,11 +639,15 @@ begin
      y:= frect1.y;
      cy:= frect1.cy;
      x:= fbarrect1.x + round(3*cellsize1);
-     cx:= round(6*charwidth1);
+     int1:= 6;
+     if fkind = bk_gtin_8 then begin
+      int1:= 4;
+     end;
+     cx:= round(int1*charwidth1);
     end;
     frect3:= frect2;
     with frect3 do begin
-     x:= fbarrect1.x + round((3+42+5)*cellsize1);
+     x:= fbarrect1.x + round((3+int1*7+5)*cellsize1);
     end;
     adjustrect(frect1);
     adjustrect(frect2);
@@ -646,6 +666,10 @@ begin
     drawtext(acanvas,fcode[1],frect1,ffontheight);
     drawtext(acanvas,copy(fcode,2,6),frect2,ffontheight);
     drawtext(acanvas,copy(fcode,8,6),frect3,ffontheight);
+   end;
+   bk_gtin_8: begin
+    drawtext(acanvas,copy(fcode,6,4),frect2,ffontheight);
+    drawtext(acanvas,copy(fcode,10,4),frect3,ffontheight);
    end;
   end;
  end;
