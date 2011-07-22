@@ -20,8 +20,9 @@ uses
 type
 
  topenglwidgetcanvas = class(topenglcanvas)
- {
   published
+   property lineoptions;
+ {
    property monochrome;
    property color;
    property colorbackground;
