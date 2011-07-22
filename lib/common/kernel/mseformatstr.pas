@@ -234,7 +234,9 @@ function timemse(const value: tdatetime): tdatetime;
 function cstringtostring(inp: pchar): string; overload;
 function cstringtostring(const inp: string): string; overload;
 function cstringtostringvar(var inp: pchar): string;
-function stringtocstring(const inp: msestring): string;
+function stringtocstring(const inp: msestring): string; overload;
+function stringtocstring(const inp: pmsechar;
+                               const count: integer): string; overload;
 function stringtopascalstring(const value: msestring): string;
 function pascalstringtostring(const value: string): msestring;
                                     //increments inputpointer
@@ -1136,16 +1138,19 @@ begin
  result:= cstringtostringvar(po1);
 end;
 
-function stringtocstring(const inp: msestring): string;
+function stringtocstring(const inp: pmsechar;
+                               const count: integer): string; overload;
 var
  po1: pmsechar;
  innum: boolean;
+ int1: integer;
 begin
  result:= '"';
- po1:= pmsechar(inp);
+ po1:= inp;
  innum:= false;
- while po1^ <> #0 do begin
-  if (po1^ < #$20) or (po1^ > #$ff) or (po1^ = #$7f) then begin
+ for int1:= count - 1 downto 0 do begin
+//  if (po1^ < #$20) or (po1^ > #$ff) or (po1^ = #$7f) then begin
+  if (po1^ < #$20) or (po1^ >= #$7f) then begin
    innum:= true;
    if po1^ < #$100 then begin
     result:= result + '\x'+hextostr(ord(po1^),2);
@@ -1172,6 +1177,11 @@ begin
   inc(po1);
  end;
  result:= result + '"';
+end;
+
+function stringtocstring(const inp: msestring): string;
+begin
+ result:= stringtocstring(pmsechar(pointer(inp)),length(inp));
 end;
 
 function stringtopascalstring(const value: msestring): string;

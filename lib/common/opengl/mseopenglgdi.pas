@@ -58,7 +58,8 @@ procedure gdi_clear(var drawinfo: drawinfoty);
 
 implementation
 uses
- mseguiintf,mseftgl,msegenericgdi,msestrings,msectypes,msehash,sysutils;
+ mseguiintf,mseftgl,msegenericgdi,msestrings,msectypes,msehash,sysutils,
+ mseformatstr;
 type
  tcanvas1 = class(tcanvas);
  
