@@ -2,7 +2,7 @@ unit msedynload;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msesys,{$ifdef FPC}dynlibs,{$endif}msestrings,sysutils;
+ msesys,{$ifdef FPC}dynlibs,{$endif}msestrings,sysutils,msetypes;
  
 type
  dynlibinfoty = record
@@ -18,8 +18,12 @@ procedure finalizelibinfo(var info: dynlibinfoty);
 procedure initializedynlib(var info: dynlibinfoty;
                              const alibnames: array of filenamety;
                              const funcs: array of funcinfoty;
-                             const funcsopt: array of funcinfoty);
-procedure releasedynlib(var info: dynlibinfoty);
+                             const funcsopt: array of funcinfoty;
+                             const callback: procedurety = nil);
+                               //called after lib load
+procedure releasedynlib(var info: dynlibinfoty;
+                             const callback: procedurety = nil);
+                               //called before lib unload
 
 implementation
 
@@ -34,10 +38,12 @@ begin
  result:= freelibrary(lib);
 end;
 {$endif}
+
 procedure initializedynlib(var info: dynlibinfoty;
                               const alibnames: array of filenamety;
                               const funcs: array of funcinfoty;
-                              const funcsopt: array of funcinfoty);
+                              const funcsopt: array of funcinfoty;
+                              const callback: procedurety = nil);
 begin
  with info do begin
   sys_mutexlock(lock);
@@ -58,26 +64,41 @@ begin
    end;
    getprocaddresses(libhandle,funcsopt,true);
    inc(refcount);
+   if callback <> nil then begin
+    callback;
+   end;
   finally
    sys_mutexunlock(lock);
   end;
  end;
 end;
 
-procedure releasedynlib(var info: dynlibinfoty);
+procedure releasedynlib(var info: dynlibinfoty;
+                      const callback: procedurety = nil);
 begin
  with info do begin
-  if refcount > 1 then begin
-   dec(refcount);
-  end
-  else begin
-   if refcount = 1 then begin //not initialized otherwise
-    if unloadlibrary(libhandle) then begin
-     dec(refcount);
-     libhandle:= nilhandle;
+  sys_mutexlock(lock);
+  try
+   if refcount > 1 then begin
+    dec(refcount);
+   end
+   else begin
+    if refcount = 1 then begin //not initialized otherwise
+     try
+      if callback <> nil then begin
+       callback;
+      end;
+     finally
+      if unloadlibrary(libhandle) then begin
+       dec(refcount);
+       libhandle:= nilhandle;
+      end;
+     end;
     end;
    end;
-  end;
+  finally
+   sys_mutexunlock(lock);
+  end;  
  end;
 end;
 

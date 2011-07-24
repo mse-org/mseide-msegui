@@ -21,7 +21,7 @@ unit msefreetype;
 
 interface
 uses
- msestrings;
+ msestrings,sysutils;
  
 const
 
@@ -35,6 +35,9 @@ const
 
 type
   FT_Encoding = array[0..3] of char;
+  
+  efreetype = class(exception)
+  end;
 
 const
   FT_FACE_FLAG_SCALABLE = 1 shl 0;
@@ -338,7 +341,9 @@ type
   end;
 
  function FT_IS_SCALABLE(face: PFT_Face): boolean;
+ 
 var
+ ftlib: pft_library;
 //Base Interface
  FT_Done_Face: function(face: PFT_Face): integer; cdecl;
  FT_Done_FreeType: function(alibrary: PFT_Library): integer; cdecl;
@@ -383,16 +388,36 @@ var
 
 procedure initializefreetype(const sonames: array of filenamety);
 procedure releasefreetype;
+procedure ftcheckerror(const aerror: ft_error; const amessage: msestring = '');
 
 implementation
 uses
- msesys,msedynload,sysutils;
+ msesys,msedynload;
 var
  libinfo: dynlibinfoty;
 
 function FT_IS_SCALABLE(face: PFT_Face): boolean;
 begin
   Result := (face^.face_flags and FT_FACE_FLAG_SCALABLE) = 1;
+end;
+
+procedure ftcheckerror(const aerror: integer; const amessage: msestring);
+begin
+ if aerror <> 0 then begin
+  raise efreetype.create('Freetype error '+inttostr(aerror)+':'+lineend+
+                                amessage);
+ end;
+end;
+
+procedure initft;
+begin
+ ftcheckerror(ft_init_freetype(ftlib),'Init freetype library.');
+end;
+
+procedure deinitft;
+begin
+ ftcheckerror(ft_done_freetype(ftlib),'Deinit freetype library.');
+ ftlib:= nil;
 end;
 
 procedure initializefreetype(const sonames: array of filenamety);
@@ -422,10 +447,10 @@ const
 begin
  try
   if length(sonames) = 0 then begin
-   initializedynlib(libinfo,sqlite3lib,funcs,[]);
+   initializedynlib(libinfo,sqlite3lib,funcs,[],@initft);
   end
   else begin
-   initializedynlib(libinfo,sonames,funcs,[]);
+   initializedynlib(libinfo,sonames,funcs,[],@initft);
   end;
  except
   on e: exception do begin
@@ -437,7 +462,7 @@ end;
 
 procedure releasefreetype;
 begin
- releasedynlib(libinfo);
+ releasedynlib(libinfo,@deinitft);
 end;
 
 initialization

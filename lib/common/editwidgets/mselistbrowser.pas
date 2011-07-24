@@ -82,6 +82,8 @@ type
        //source remains owner of items, parent of items is unchanged
    procedure add(const aitem: ttreelistedititem); overload; //nil ignored
    procedure add(const aitems: treelistedititemarty); overload;
+   function add(const itemclass: treelistedititemclassty = nil):
+                                             ttreelistedititem; overload;
    procedure add(const acount: integer; 
                const itemclass: treelistedititemclassty = nil); overload;
    procedure add(const captions: array of msestring; 
@@ -3177,6 +3179,12 @@ end;
 procedure ttreelistedititem.add(const aitem: ttreelistedititem);
 begin
  inherited add(aitem);
+end;
+
+function ttreelistedititem.add(
+           const itemclass: treelistedititemclassty = nil): ttreelistedititem;
+begin
+ result:= ttreelistedititem(inherited add(itemclass));
 end;
 
 procedure ttreelistedititem.add(const aitems: treelistedititemarty);

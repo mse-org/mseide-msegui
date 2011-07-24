@@ -234,6 +234,8 @@ type
  pwinidaty = ^winidaty;
  winidararty = array of winidarty;
 
+ procedurety = procedure;
+ 
 const
  nullcomplex: complexty = (re: 0; im: 0);
  bigdatetime = 401768.99999; //2999-12-31

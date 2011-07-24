@@ -255,6 +255,8 @@ type
    function add(const aitem: ttreelistitem): integer; overload; 
                    //returns index, nil ignored
    procedure add(const aitems: treelistitemarty); overload;
+   function add(const itemclass: treelistitemclassty = nil):
+                                                 ttreelistitem; overload;
    procedure add(const acount: integer;
                             const itemclass: treelistitemclassty = nil;
                             const defaultstate: nodestatesty = []); overload;
@@ -1590,6 +1592,17 @@ begin
    fitems[int1].fparentindex:= int1;
   end;
  end;
+end;
+
+function ttreelistitem.add(const itemclass: treelistitemclassty = nil): ttreelistitem;
+begin
+ if itemclass <> nil then begin
+  result:= itemclass.create;
+ end
+ else begin
+  result:= createsubnode;
+ end;
+ add(result);
 end;
 
 procedure ttreelistitem.add(const acount: integer;
