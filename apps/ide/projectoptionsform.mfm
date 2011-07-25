@@ -1070,6 +1070,7 @@ object projectoptionsfo: tprojectoptionsfo
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
         taborder = 4
+        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669
@@ -1151,7 +1152,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 4
-            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
@@ -1219,6 +1219,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 1
+            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 669
@@ -1255,19 +1256,19 @@ object projectoptionsfo: tprojectoptionsfo
                 item
                   width = 22
                   options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
-                  widgetname = 'defon'
+                  widgetname = 'defineson'
                   dataclass = tgridintegerdatalist
                 end              
                 item
                   width = 641
                   options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
                   onshowhint = colonshowhint
-                  widgetname = 'def'
+                  widgetname = 'defines'
                   dataclass = tgridmsestringdatalist
                 end>
               datarowheight = 16
               reffontheight = 14
-              object defon: tbooleanedit
+              object defineson: tbooleanedit
                 optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets]
                 optionsskin = [osk_framebuttononly]
                 frame.levelo = 0
@@ -1284,7 +1285,7 @@ object projectoptionsfo: tprojectoptionsfo
                 visible = False
                 valuedefault = True
               end
-              object def: tstringedit
+              object defines: tstringedit
                 optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
                 optionsskin = [osk_framebuttononly]
                 frame.levelo = 0
@@ -1572,7 +1573,7 @@ object projectoptionsfo: tprojectoptionsfo
               color = -2147483645
               taborder = 2
               bounds_x = 0
-              bounds_y = 73
+              bounds_y = 74
               bounds_cx = 669
               bounds_cy = 37
               anchors = [an_top]
@@ -1640,7 +1641,7 @@ object projectoptionsfo: tprojectoptionsfo
               hint = '"--tty DEVICE" to set target terminal'
               onshowhint = hintexpandedmacros
               bounds_x = 1
-              bounds_y = 110
+              bounds_y = 111
               bounds_cx = 667
               bounds_cy = 37
               anchors = [an_left, an_top, an_right]
@@ -1653,7 +1654,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 5
               bounds_x = 0
-              bounds_y = 187
+              bounds_y = 188
               bounds_cx = 669
               bounds_cy = 37
               anchors = [an_top]
@@ -1739,7 +1740,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 6
               bounds_x = 0
-              bounds_y = 220
+              bounds_y = 224
               bounds_cx = 669
               bounds_cy = 37
               anchors = [an_top]
@@ -1891,7 +1892,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 4
               bounds_x = 0
-              bounds_y = 150
+              bounds_y = 151
               bounds_cx = 555
               bounds_cy = 37
               optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
@@ -4951,7 +4952,6 @@ object projectoptionsfo: tprojectoptionsfo
         frame.zoomwidthstep = 1
         frame.zoomheightstep = 1
         taborder = 9
-        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669

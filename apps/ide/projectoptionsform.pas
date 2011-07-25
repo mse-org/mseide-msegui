@@ -733,8 +733,8 @@ type
    sourcedirs: tfilenameedit;
    ttabpage9: ttabpage;
    twidgetgrid2: twidgetgrid;
-   defon: tbooleanedit;
-   def: tstringedit;
+   defineson: tbooleanedit;
+   defines: tstringedit;
    ttabpage7: ttabpage;
    signalgrid: twidgetgrid;
    sigstop: tbooleanedit;
