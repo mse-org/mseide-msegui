@@ -14,7 +14,7 @@ uses
  {$ifdef FPC}xlib{$else}Xlib{$endif},xft,
  {$ifdef FPC}x,xutil,dynlibs{$endif},
  msegraphics,mseguiglob,msestrings,msegraphutils,mseguiintf,msetypes,
- msectypes,xrender;
+ msectypes,xrender,msefontconfig;
 
 procedure init(const adisp: pdisplay; const avisual: msepvisual;
                  const adepth: integer);
@@ -107,44 +107,6 @@ type
 
 {$ifndef staticxft}
 var //xft functions
- FcPatternDestroy: procedure(p:PFcPattern);cdecl;
- FcFontSetDestroy: procedure(s:PFcFontSet);cdecl;
- FcObjectSetCreate: function: PFcObjectSet;cdecl;
- FcObjectSetAdd: function(os: PFcObjectSet; aobject:Pchar):TFcBool;cdecl;
- FcObjectSetDestroy: procedure(os: PFcObjectSet);cdecl;
- FcFontList: function(config: PFcConfig; p:PFcPattern; 
-                      os:PFcObjectSet): PFcFontSet;cdecl;
- FcCharSetCreate: function: PFcCharSet;cdecl;
- FcCharSetDestroy: procedure(fcs:PFcCharSet);cdecl;
- FcCharSetAddChar: function(fcs:PFcCharSet; ucs4:TFcChar32):TFcBool;cdecl;
- FcPatternAdd: function(p:PFcPattern; aobject:Pchar; value:TFcValue;
-                           append:TFcBool):TFcBool;cdecl;
- FcPatternCreate: function: PFcPattern;cdecl;
- FcConfigSubstitute: function(config:PFcConfig; p:PFcPattern;
-                   kind:TFcMatchKind):TFcBool;cdecl;
- FcDefaultSubstitute: procedure (pattern:PFcPattern);cdecl;
- FcFontSort: function (config:PFcConfig; p:PFcPattern; trim:TFcBool;
-            csp:PPFcCharSet; result:PFcResult): PFcFontSet;cdecl;
- FcCharSetHasChar: function(fcs:PFcCharSet; ucs4:TFcChar32):TFcBool;cdecl;
- FcPatternDuplicate: function (p:PFcPattern): PFcPattern;cdecl;
- FcPatternGetCharSet: function (p:PFcPattern; aobject:Pchar; n:longint;
-               c:PPFcCharSet):TFcResult;cdecl;
- FcFontRenderPrepare: function(config:PFcConfig; pat:PFcPattern;
-                    font:PFcPattern): PFcPattern;cdecl;
- FcMatrixRotate: procedure(m:PFcMatrix; c:Tdouble; s:Tdouble);cdecl;
- FcMatrixScale: procedure(m:PFcMatrix; sx:Tdouble; sy:Tdouble);cdecl;
- FcPatternAddInteger: function(p:PFcPattern; aobject:Pchar; i:longint):TFcBool; cdecl;
- FcPatternAddDouble: function(p:PFcPattern; aobject:Pchar; d:Tdouble):TFcBool; cdecl;
- FcPatternAddString: function(p:PFcPattern; aobject:Pchar; s: pansichar):TFcBool; cdecl;
- FcPatternAddMatrix: function(p:PFcPattern; aobject:Pchar; s:PFcMatrix):TFcBool; cdecl;
- FcPatternAddCharSet: function(p:PFcPattern;
-                       aobject:Pchar; c:PFcCharSet):TFcBool;cdecl;
- FcPatternAddBool: function(p:PFcPattern; aobject:Pchar; b:TFcBool):TFcBool; cdecl;
- FcPatternAddLangSet: function(p:PFcPattern; aobject:Pchar; 
-                         ls:PFcLangSet):TFcBool;cdecl;
- 
- FcPatternGetString: function(p: PFcPattern; aobject: Pchar; n: integer; 
-                                s: ppchar): tfcresult; cdecl;
  XftDrawDestroy: procedure(draw:PXftDraw); cdecl;
  XftDrawSetClipRectangles: function (draw:PXftDraw; xOrigin:longint;
          yOrigin:longint; rects:PXRectangle; n:longint):TFcBool;cdecl;
@@ -2524,72 +2486,16 @@ begin
  result:= fhasxft;
 end;
 
+var
+ fhasfontconfig: boolean;
+ 
 function getxftlib: boolean;
 begin
 {$ifndef staticxft}
  result:= false;
  try
-  getprocaddresses(fontconfignames,
-     [
-     'FcPatternDestroy',         //0
-     'FcFontSetDestroy',         //1
-     'FcObjectSetCreate',        //2
-     'FcObjectSetAdd',           //3
-     'FcObjectSetDestroy',       //4
-     'FcFontList',               //5
-     'FcCharSetCreate',          //6
-     'FcCharSetDestroy',         //7
-     'FcCharSetAddChar',         //8
-     'FcPatternAdd',             //9
-     'FcPatternCreate',          //10
-     'FcConfigSubstitute',       //11
-     'FcDefaultSubstitute',      //12
-     'FcFontSort',               //13
-     'FcCharSetHasChar',         //14
-     'FcPatternDuplicate',       //15
-     'FcPatternGetCharSet',      //16
-     'FcFontRenderPrepare',      //17
-     'FcMatrixRotate',           //18
-     'FcMatrixScale',            //19
-     'FcPatternAddInteger',      //20
-     'FcPatternAddDouble',       //21
-     'FcPatternAddString',       //22
-     'FcPatternAddMatrix',       //23
-     'FcPatternAddCharSet',      //24
-     'FcPatternAddBool',         //25
-     'FcPatternAddLangSet',      //26
-     'FcPatternGetString'        //27
-     ],
-     [
-     {$ifndef FPC}@{$endif}@FcPatternDestroy,          //0
-     {$ifndef FPC}@{$endif}@FcFontSetDestroy,          //1
-     {$ifndef FPC}@{$endif}@FcObjectSetCreate,         //2
-     {$ifndef FPC}@{$endif}@FcObjectSetAdd,            //3
-     {$ifndef FPC}@{$endif}@FcObjectSetDestroy,        //4
-     {$ifndef FPC}@{$endif}@FcFontList,                //5
-     {$ifndef FPC}@{$endif}@FcCharSetCreate,           //6
-     {$ifndef FPC}@{$endif}@FcCharSetDestroy,          //7
-     {$ifndef FPC}@{$endif}@FcCharSetAddChar,          //8
-     {$ifndef FPC}@{$endif}@FcPatternAdd,              //9
-     {$ifndef FPC}@{$endif}@FcPatternCreate,           //10
-     {$ifndef FPC}@{$endif}@FcConfigSubstitute,        //11
-     {$ifndef FPC}@{$endif}@FcDefaultSubstitute,       //12
-     {$ifndef FPC}@{$endif}@FcFontSort,                //13
-     {$ifndef FPC}@{$endif}@FcCharSetHasChar,          //14
-     {$ifndef FPC}@{$endif}@FcPatternDuplicate,        //15
-     {$ifndef FPC}@{$endif}@FcPatternGetCharSet,       //16
-     {$ifndef FPC}@{$endif}@FcFontRenderPrepare,       //17
-     {$ifndef FPC}@{$endif}@FcMatrixRotate,            //18
-     {$ifndef FPC}@{$endif}@FcMatrixScale,             //19
-     {$ifndef FPC}@{$endif}@FcPatternAddInteger,       //20
-     {$ifndef FPC}@{$endif}@FcPatternAddDouble,        //21
-     {$ifndef FPC}@{$endif}@FcPatternAddString,        //22
-     {$ifndef FPC}@{$endif}@FcPatternAddMatrix,        //23
-     {$ifndef FPC}@{$endif}@FcPatternAddCharSet,       //24
-     {$ifndef FPC}@{$endif}@FcPatternAddBool,          //25
-     {$ifndef FPC}@{$endif}@FcPatternAddLangSet,       //26
-     {$ifndef FPC}@{$endif}@FcPatternGetString         //27
-     ]);
+  initializefontconfig([]);
+  fhasfontconfig:= true;
   getprocaddresses(xftnames,[
     'XftDrawDestroy',            //0
     'XftDrawSetClipRectangles',  //1
@@ -2716,4 +2622,8 @@ end;
 initialization
  fhasxft:= getxftlib;
  hasxrender:= getxrenderlib;
+finalization
+ if fhasfontconfig then begin
+  releasefontconfig;
+ end;
 end.

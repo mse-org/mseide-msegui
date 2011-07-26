@@ -2,7 +2,7 @@ unit xft;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- {$ifdef FPC}x,{$endif}Xlib,xrender,mselibc,msectypes;
+ {$ifdef FPC}x,{$endif}Xlib,xrender,mselibc,msectypes,msefontconfig;
 
 {
   Automatically converted by H2Pas 0.99.16 from Xft.h
@@ -87,17 +87,6 @@ const
 
        TFT_UInt = longword;       //from fttypes.h
 
-       TFcChar8 = byte;           //from fontconfig.h
-       PFcChar8 = ^TFcChar8;
-       TFcChar16 = word;
-       PFcChar16 = ^TFcChar16;
-       TFcChar32 = dword;
-       PFcChar32 = ^TFcChar32;
-       TFcBool = longbool; //integer;
-       PFcBool = ^TFcBool;
-       TFcEndian = (FcEndianBig, FcEndianLittle);
-       TFcResult = (FcResultMatch, FcResultNoMatch, FcResultTypeMismatch, FcResultNoId);
-       PFcResult = ^TFcResult;
 
 //    PDisplay  = ^Display;
     PFT_UInt  = ^TFT_UInt;
@@ -144,70 +133,11 @@ const
          _XftFTlibrary : TFT_Library;cvar;external;
 }
     type
-     TFcType = (FcTypeVoid,FcTypeInteger,FcTypeDouble,
-         FcTypeString,FcTypeBool,FcTypeMatrix,
-         FcTypeCharSet,FcTypeFTFace,FcTypeLangSet
-         );
-     TFcMatchKind = (FcMatchPattern,FcMatchFont);
          
     TXftDraw =  record
      //dummy
     end;
     PXftDraw  = ^TXftDraw;
-    TFcMatrix = record
-     xx: Tdouble;
-     xy: Tdouble;
-     yx: Tdouble;
-     yy: Tdouble;
-    end;
-    PFcMatrix = ^TFcMatrix;
-
-    TFcLangSet = record
-     //dummy
-    end;
-    PFcLangSet = ^TFcLangset;
-
-    TFcCharset =  record
-     //dummy
-    end;
-    PFcCharset = ^TFcCharset;
-    PPFcCharset = ^PFcCharset;
-
-    TFcPattern =  record
-     //dummy
-    end;
-    PFcPattern  = ^TFcPattern;
-    PPFcPattern = ^PFcPattern;
-    pfcpatternpoaty = array[0..0] of PFcPattern;
-
-    TFcValue = record
-     _type: TFcType;
-     u: record
-      case longint of
-       0 : ( s : ^TFcChar8 );
-       1 : ( i : longint );
-       2 : ( b : TFcBool );
-       3 : ( d : Tdouble );
-       4 : ( m : ^TFcMatrix );
-       5 : ( c : ^TFcCharSet );
-       6 : ( f : pointer );
-       7 : ( p : ^TFcPattern );
-       8 : ( l : ^TFcLangSet );
-     end;
-    end;
-
-    TFcObjectSet = record
-     nobject: longint;
-     sobject: longint;
-     objects: ppchar;
-    end;
-    PFcObjectSet = ^TFcObjectSet;
-
-    TFcConfig = record
-     //dummy
-    end;
-    PFcConfig = ^TFcConfig;
-
     
        TXftFont =  record
             ascent : longint;
@@ -260,14 +190,6 @@ const
          end;
        PXftGlyphFontSpec = ^TXftGlyphFontSpec;
 
-  TFcFontSet =  record
-    nfont : integer;
-    sfont : integer;
-    fonts : PPFcPattern;
-  end;
-  PFcFontSet = ^TFcFontSet;
-  
-  procedure FcMatrixInit(var m: TFcMatrix);
   
 {$ifdef staticxft}
     { fccharset.c  }
@@ -565,14 +487,6 @@ const
 {$endif staticxft}
 
 implementation
-
-procedure FcMatrixInit(var m: TFcMatrix);
-begin
- m.xx:= 1;
- m.yy:= 1;
- m.xy:= 0;
- m.yx:= 0;
-end;
 
 
 end.

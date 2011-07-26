@@ -23,8 +23,6 @@ const
 // fbcgdslib: array[0..1] of filenamety = ('fbclient.dll','gds32.dll');
 {$else}
  xrendernames: array[0..1] of filenamety = ('libXrender.so.1','libXrender.so');
- fontconfignames: array[0..1] of filenamety = 
-                                     ('libfontconfig.so.1','libfontconfig.so');
  xftnames: array[0..1] of filenamety = ('libXft.so.2','libXft.so');
  icenames: array[0..1] of filenamety = ('libICE.so.6','libICE.so');
  smnames: array[0..1] of filenamety = ('libSM.so.6','libSM.so');
