@@ -150,6 +150,7 @@ type
 //  ftglfont: ftglfontty;
   ftglfont: pftglfont;
   tess: pglutesselator;
+  glcolorforeground: rgbtriplety;
  end;
 
  {$if sizeof(oglgcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$endif}
@@ -436,7 +437,8 @@ var
 begin
  with drawinfo.gcvalues^,oglgcty(drawinfo.gc.platformdata).d do begin
   if gvm_colorforeground in mask then begin
-   with rgbtriplety(colorforeground) do begin
+   glcolorforeground:= rgbtriplety(colorforeground);
+   with glcolorforeground do begin
     glcolor3ub(red,green,blue);
    end;
   end;
@@ -940,11 +942,21 @@ procedure tglftfontcache.drawstring16(var drawinfo: drawinfoty;
                const afont: fontty);
 begin
  glpushclientattrib(gl_client_pixel_store_bit);
- glpushattrib(gl_pixel_mode_bit or gl_color_buffer_bit);
+ glpushattrib(gl_pixel_mode_bit or gl_color_buffer_bit or gl_pixel_mode_bit);
  glpixelstorei(gl_unpack_row_length, 0);
  glpixelstorei(gl_unpack_alignment, 1);
  glenable(gl_blend);
  glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
+ with oglgcty(drawinfo.gc.platformdata).d do begin
+  with glcolorforeground do begin
+   glpixeltransferf(gl_red_scale,0);
+   glpixeltransferf(gl_red_bias,red/255);
+   glpixeltransferf(gl_green_scale,0);
+   glpixeltransferf(gl_green_bias,green/255);
+   glpixeltransferf(gl_blue_scale,0);
+   glpixeltransferf(gl_blue_bias,blue/255);
+  end;
+ end;
  inherited;
  glpopattrib;
  glpopclientattrib;
