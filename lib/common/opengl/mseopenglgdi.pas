@@ -12,6 +12,7 @@ unit mseopenglgdi;
 //under construction
 //
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$define mse_useftfont}
 
 interface
 uses
@@ -697,6 +698,9 @@ begin
   with destrect^ do begin
    glwindowpos2i(x,sourceheight-y);
   end;
+  glpushclientattrib(gl_client_pixel_store_bit);
+  glpushattrib(gl_pixel_mode_bit);
+  
   glpixeltransferf(gl_alpha_scale,0);
   glpixeltransferf(gl_alpha_bias,1);
   with sourcerect^ do begin
@@ -706,12 +710,16 @@ begin
    glpixelstorei(gl_unpack_skip_pixels,y);
    gldrawpixels(cx,cy,gl_rgba,gl_unsigned_byte,im1.pixels);
   end;
+  glpopclientattrib;
+  glpopattrib;
+  {
   glpixeltransferf(gl_alpha_scale,1);
   glpixeltransferf(gl_alpha_bias,0);
   glpixelzoom(1,1);
   glpixelstorei(gl_unpack_row_length,0);
   glpixelstorei(gl_unpack_skip_rows,0);
   glpixelstorei(gl_unpack_skip_pixels,0);
+  }
  end;
 end;
 
@@ -916,64 +924,30 @@ end;
 {$else}
 
 { tglftfontcache }
-(*
-    // Protect GL_TEXTURE_2D and glPixelTransferf()
-    glPushAttrib(GL_ENABLE_BIT | GL_PIXEL_MODE_BIT | GL_COLOR_BUFFER_BIT
-                  | GL_POLYGON_BIT);
-
-    // Protect glPixelStorei() calls (made by FTPixmapGlyphImpl::RenderImpl).
-    glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-
-    // Needed on OSX
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-    glDisable(GL_TEXTURE_2D);
-
-    GLfloat ftglColour[4];
-    glGetFloatv(GL_CURRENT_RASTER_COLOR, ftglColour);
-
-    glPixelTransferf(GL_RED_SCALE, ftglColour[0]);
-    glPixelTransferf(GL_GREEN_SCALE, ftglColour[1]);
-    glPixelTransferf(GL_BLUE_SCALE, ftglColour[2]);
-    glPixelTransferf(GL_ALPHA_SCALE, ftglColour[3]);
-
-    FTPoint tmp = FTFontImpl::Render(string, len,
-                                     position, spacing, renderMode);
-
-    glPopClientAttrib();
-    glPopAttrib();
-*)
-{
-        glBitmap(0, 0, 0.0f, 0.0f, dx, dy, (const GLubyte*)0);
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
-
-        glDrawPixels(destWidth, destHeight, GL_LUMINANCE_ALPHA,
-                     GL_UNSIGNED_BYTE, (const GLvoid*)data);
-        glBitmap(0, 0, 0.0f, 0.0f, -dx, -dy, (const GLubyte*)0);
-}
 
 procedure tglftfontcache.drawglyph(var drawinfo: drawinfoty; const pos: pointty;
                const bitmap: pbitmapdataty);
 begin
  with bitmap^ do begin
-  gldrawpixels(width,height, gl_luminance_alpha,gl_unsigned_byte,@data);
+  with oglgcty(drawinfo.gc.platformdata).d do begin
+   glwindowpos2i(pos.x,sourceheight-pos.y);
+  end;
+  gldrawpixels(width,height,gl_alpha,gl_unsigned_byte,@data);
  end;
 end;
 
 procedure tglftfontcache.drawstring16(var drawinfo: drawinfoty;
                const afont: fontty);
 begin
+ glpushclientattrib(gl_client_pixel_store_bit);
+ glpushattrib(gl_pixel_mode_bit or gl_color_buffer_bit);
+ glpixelstorei(gl_unpack_row_length, 0);
+ glpixelstorei(gl_unpack_alignment, 1);
+ glenable(gl_blend);
+ glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
  inherited;
- {
- with drawinfo.text16pos,oglgcty(drawinfo.gc.platformdata).d do begin
-  glpushmatrix;
-  gltranslatef(pos^.x,sourceheight-pos^.y,0);
-//  glrasterpos2i(pos^.x,sourceheight-pos^.y);
-  glwindowpos2i(pos^.x,sourceheight-pos^.y);
-  inherited;
-  glpopmatrix;
-  }
+ glpopattrib;
+ glpopclientattrib;
 end;
 
 {$endif} // mse_useftfont
