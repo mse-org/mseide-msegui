@@ -14,15 +14,16 @@ unit msefontcache;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msehash,msegraphics;
+ msehash,msegraphics,mseguiglob;
  
 type
  fontcachedataty = record
 //  h: fontcachehdataty;
-  height: integer;
-  name: string;
+  keyname: string;
+  keyheight: integer;
   refcount: integer;
 
+  height: integer;
   ascent: integer;
   descent: integer;
   linespacing: integer;
@@ -48,8 +49,10 @@ type
    function checkkey(const akey; const aitemdata): boolean; override;
    procedure finalizeitem(var aitemdata); override;
    function find(const afont: fontdataty): pfontcachedataty;
+
    procedure internalfreefont(const afont: ptruint); virtual;
-   function internalgetfont(const ainfo: getfontinfoty): boolean;
+   function internalgetfont(const ainfo: getfontinfoty;
+                                      var aheight: integer): boolean;
                                                     virtual; abstract;
    procedure updatefontinfo(var adata: fontcachedataty); virtual; abstract;
   public
@@ -59,6 +62,8 @@ type
    procedure gettext16width(var drawinfo: drawinfoty); virtual; abstract;
    procedure getchar16widths(var drawinfo: drawinfoty); virtual; abstract;
    procedure getfontmetrics(var drawinfo: drawinfoty); virtual; abstract;
+   procedure drawstring16(var drawinfo: drawinfoty;
+                                   const afont: fontty); virtual; abstract;
  end;
 
 implementation
@@ -90,7 +95,7 @@ end;
 function tfontcache.checkkey(const akey; const aitemdata): boolean;
 begin
  with fontdataty(akey),fontcachedataty(aitemdata) do begin
-  result:= (h.name = name) and (h.d.height = height);
+  result:= (h.name = keyname) and (h.d.height = keyheight);
  end;
 end;
 
@@ -105,6 +110,7 @@ end;
 procedure tfontcache.getfont(var drawinfo: drawinfoty);
 var
  po1: pfontcachedataty;
+ h1: integer;
 begin
  with drawinfo.getfont do begin
   ok:= true;
@@ -112,13 +118,15 @@ begin
   with fontdata^ do begin 
    font:= 0;
    if po1 = nil then begin
-    if not internalgetfont(drawinfo.getfont) then begin
+    h1:= fontdata^.h.d.height;
+    if not internalgetfont(drawinfo.getfont,h1) then begin
      ok:= false;
      exit;
     end;
     po1:= @((internaladd(fontdata^)^.data));
-    po1^.name:= fontdata^.h.name;
-    po1^.height:= fontdata^.h.d.height;
+    po1^.keyname:= fontdata^.h.name;
+    po1^.keyheight:= fontdata^.h.d.height;
+    po1^.height:= h1;
     po1^.font:= font;
     updatefontinfo(po1^);
    end;

@@ -59,7 +59,7 @@ procedure gdi_clear(var drawinfo: drawinfoty);
 implementation
 uses
  mseguiintf,mseftgl,msegenericgdi,msestrings,msectypes,msehash,sysutils,
- mseformatstr,msefontcache;
+ mseformatstr,msefontcache{$ifdef mse_useftfont},mseftfontcache{$endif};
 type
  tcanvas1 = class(tcanvas);
  
@@ -87,11 +87,12 @@ type
   name: string;
  end;
 }
-
+{$ifndef mse_useftfont}
  tglfontcache = class(tfontcache)
   protected
    procedure internalfreefont(const afont: ptruint); override;
-   function internalgetfont(const ainfo: getfontinfoty): boolean; override;
+   function internalgetfont(const ainfo: getfontinfoty;
+                  var aheight: integer): boolean; override;
    procedure updatefontinfo(var adata: fontcachedataty); override;
   public
    constructor create(var ainstance: tglfontcache);
@@ -99,16 +100,34 @@ type
    procedure gettext16width(var drawinfo: drawinfoty); override;
    procedure getchar16widths(var drawinfo: drawinfoty); override;
    procedure getfontmetrics(var drawinfo: drawinfoty); override;
+   procedure drawstring16(var drawinfo: drawinfoty;
+                                 const afont: ptruint); override;
  end;
+{$else}
+ tglftfontcache = class(tftfontcache)
+  protected
+   procedure drawglyph(var drawinfo: drawinfoty; const pos: pointty;
+                                      const bitmap: pbitmapdataty); override;
+  public
+   procedure drawstring16(var drawinfo: drawinfoty;
+                                    const afont: fontty); override;
+ end;
+{$endif} //mse_useftfont
    
 var
+{$ifdef mse_useftfont}
+ ffontcache: tglftfontcache;
+{$else}
  ffontcache: tglfontcache;
+{$endif}
  gdinumber: integer;
 
-function fontcache: tglfontcache;
+function fontcache: 
+ {$ifdef mse_useftfont}tglftfontcache{$else}tglfontcache{$endif};
 begin
  if ffontcache = nil then begin
-  tglfontcache.create(ffontcache);
+  {$ifdef mse_useftfont}tglftfontcache{$else}tglfontcache{$endif}.create(
+                                                                  ffontcache);
  end;
  result:= ffontcache;
 end;
@@ -660,19 +679,9 @@ begin
 end;
 
 procedure gdi_drawstring16(var drawinfo: drawinfoty);
-var
- str1: string;
 begin
- with drawinfo.text16pos,oglgcty(drawinfo.gc.platformdata).d do begin
-  str1:= stringtoutf8(text,count);
-//  glmatrixmode(gl_projection);
-  glpushmatrix;
-  gltranslatef(pos^.x,sourceheight-pos^.y,0);
-//  glrasterpos2i(pos^.x,sourceheight-pos^.y);
-  glwindowpos2i(pos^.x,sourceheight-pos^.y);
-  ftglrenderfont(ftglfont,pchar(str1),ftgl_render_all);
-  glpopmatrix;
- end;
+ fontcache.drawstring16(drawinfo,
+         ptruint(oglgcty(drawinfo.gc.platformdata).d.ftglfont));
 end;
 
 procedure gdi_setcliporigin(var drawinfo: drawinfoty);
@@ -791,6 +800,8 @@ begin
  result:= gdinumber;
 end;
 
+{$ifndef mse_useftfont}
+
 { tglfontcache }
 
 constructor tglfontcache.create(var ainstance: tglfontcache);
@@ -810,13 +821,17 @@ begin
  ftgldestroyfont(pointer(afont));
 end;
 
-function tglfontcache.internalgetfont(const ainfo: getfontinfoty): boolean;
+function tglfontcache.internalgetfont(const ainfo: getfontinfoty;
+                             var aheight: integer): boolean;
 var
  po1: pftglfont;
 begin
  result:= false;
  po1:= ftglcreatepixmapfont('/usr/share/fonts/truetype/arial.ttf');
  if po1 <> nil then begin
+  if aheight <= 0 then begin
+   aheight:= 20;
+  end;
   ftglsetfontcharmap(po1,ft_encoding_unicode);
   ftglsetfontfacesize(po1,20,72);
   ainfo.fontdata^.font:= ptruint(po1);
@@ -880,6 +895,88 @@ begin
   end;
  end;
 end;
+
+procedure tglfontcache.drawstring16(var drawinfo: drawinfoty;
+                                           const afont: ptruint);
+var
+ str1: string;
+begin
+ with drawinfo.text16pos,oglgcty(drawinfo.gc.platformdata).d do begin
+  str1:= stringtoutf8(text,count);
+//  glmatrixmode(gl_projection);
+  glpushmatrix;
+  gltranslatef(pos^.x,sourceheight-pos^.y,0);
+//  glrasterpos2i(pos^.x,sourceheight-pos^.y);
+  glwindowpos2i(pos^.x,sourceheight-pos^.y);
+  ftglrenderfont(ftglfont,pchar(str1),ftgl_render_all);
+  glpopmatrix;
+ end;
+end;
+
+{$else}
+
+{ tglftfontcache }
+(*
+    // Protect GL_TEXTURE_2D and glPixelTransferf()
+    glPushAttrib(GL_ENABLE_BIT | GL_PIXEL_MODE_BIT | GL_COLOR_BUFFER_BIT
+                  | GL_POLYGON_BIT);
+
+    // Protect glPixelStorei() calls (made by FTPixmapGlyphImpl::RenderImpl).
+    glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
+
+    // Needed on OSX
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    glDisable(GL_TEXTURE_2D);
+
+    GLfloat ftglColour[4];
+    glGetFloatv(GL_CURRENT_RASTER_COLOR, ftglColour);
+
+    glPixelTransferf(GL_RED_SCALE, ftglColour[0]);
+    glPixelTransferf(GL_GREEN_SCALE, ftglColour[1]);
+    glPixelTransferf(GL_BLUE_SCALE, ftglColour[2]);
+    glPixelTransferf(GL_ALPHA_SCALE, ftglColour[3]);
+
+    FTPoint tmp = FTFontImpl::Render(string, len,
+                                     position, spacing, renderMode);
+
+    glPopClientAttrib();
+    glPopAttrib();
+*)
+{
+        glBitmap(0, 0, 0.0f, 0.0f, dx, dy, (const GLubyte*)0);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+
+        glDrawPixels(destWidth, destHeight, GL_LUMINANCE_ALPHA,
+                     GL_UNSIGNED_BYTE, (const GLvoid*)data);
+        glBitmap(0, 0, 0.0f, 0.0f, -dx, -dy, (const GLubyte*)0);
+}
+
+procedure tglftfontcache.drawglyph(var drawinfo: drawinfoty; const pos: pointty;
+               const bitmap: pbitmapdataty);
+begin
+ with bitmap^ do begin
+  gldrawpixels(width,height, gl_luminance_alpha,gl_unsigned_byte,@data);
+ end;
+end;
+
+procedure tglftfontcache.drawstring16(var drawinfo: drawinfoty;
+               const afont: fontty);
+begin
+ inherited;
+ {
+ with drawinfo.text16pos,oglgcty(drawinfo.gc.platformdata).d do begin
+  glpushmatrix;
+  gltranslatef(pos^.x,sourceheight-pos^.y,0);
+//  glrasterpos2i(pos^.x,sourceheight-pos^.y);
+  glwindowpos2i(pos^.x,sourceheight-pos^.y);
+  inherited;
+  glpopmatrix;
+  }
+end;
+
+{$endif} // mse_useftfont
 
 initialization
  gdinumber:= registergdi(openglgetgdifuncs);

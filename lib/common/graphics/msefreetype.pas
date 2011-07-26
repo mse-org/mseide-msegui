@@ -389,12 +389,22 @@ var
 procedure initializefreetype(const sonames: array of filenamety);
 procedure releasefreetype;
 procedure ftcheckerror(const aerror: ft_error; const amessage: msestring = '');
+function ftpostopixel(const apos: ft_pos): integer; inline;
 
 implementation
+
 uses
  msesys,msedynload;
 var
  libinfo: dynlibinfoty;
+const
+ ftposshift = 6;
+ ftposhalf = (1 shl ftposshift) div 2;
+ 
+function ftpostopixel(const apos: ft_pos): integer; inline;
+begin
+ result:= (apos + ftposhalf) shr ftposshift;
+end;
 
 function FT_IS_SCALABLE(face: PFT_Face): boolean;
 begin
