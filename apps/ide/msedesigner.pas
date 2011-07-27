@@ -314,6 +314,7 @@ type
    fcomponentmodifying: integer;
    floadedsubmodules: componentarty;
    fformloadlevel: integer;
+   fformloadlocklevel: integer;
 //   flookupmodule: pmoduleinfoty;
    fnotifydeletedlock: integer;
    fallsaved: boolean;
@@ -3152,14 +3153,16 @@ end;
 
 procedure tdesigner.componentmodified(const component: tobject);
 begin
- fallsaved:= false;
- if component <> nil then begin
-  fmodules.componentmodified(component);
+ if fformloadlocklevel = 0 then begin
+  fallsaved:= false;
+  if component <> nil then begin
+   fmodules.componentmodified(component);
+  end;
+  if fcomponentmodifying = 0 then begin
+   postcomponentevent(
+          tcomponentevent.create(component,ord(me_componentmodified),false));
+  end
  end;
- if fcomponentmodifying = 0 then begin
-  postcomponentevent(
-         tcomponentevent.create(component,ord(me_componentmodified),false));
- end
 end;
 
 procedure tdesigner.begincomponentmodify;
@@ -4018,6 +4021,7 @@ begin //loadformfile
      stream2.Position:= 0;
      loadingdesignerbefore:= loadingdesigner;
      loadingdesigner:= self;
+     inc(fformloadlocklevel);
      begingloballoading;
      try
       try
@@ -4146,6 +4150,7 @@ begin //loadformfile
      finally
       loadingdesigner:= loadingdesignerbefore;
       endgloballoading;
+      dec(fformloadlocklevel);
      end;
     except
      on e: exception do begin
