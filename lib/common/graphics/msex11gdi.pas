@@ -27,7 +27,6 @@ function x11creategc(paintdevice: paintdevicety; const akind: gckindty;
      var gc: gcty; const aprintername: msestring): guierrorty;
 function x11regiontorects(const aregion: regionty): rectarty;
 function x11getdefaultfontnames: defaultfontnamesty;
-procedure x11initdefaultfont;
 
 {$ifdef FPC}
  {$macro on}
@@ -284,11 +283,6 @@ var
 var
  fontpropertyatoms: array[fontpropertiesty] of atom;
  
-var
- simpledefaultfont: boolean;
- hasdefaultfontarg: boolean;//true if -fn
- noxft: boolean; 
-
 procedure init(const adisp: pdisplay; const avisual: msepvisual;
                const adepth: integer);
 var
@@ -340,67 +334,6 @@ begin
   result:= result + '-' + info[en1];
  end;
 end;
-
-procedure x11initdefaultfont;
-var
- int1,int2: integer;
- str1: string;
- av: pcharpoaty;
- ac: pinteger;
- ar1: stringarty;
- en1: fontnamety;
-begin
- ar1:= nil; //compiler warning
- simpledefaultfont:= false;
- for en1:= low(fontnamety) to high(fontnamety) do begin
-  defaultfontinfo[en1]:= '*';
- end;
- defaultfontinfo[fn_family_name]:= 'helvetica';
- defaultfontinfo[fn_weight_name]:= 'medium';
- defaultfontinfo[fn_slant]:= 'r';
- defaultfontinfo[fn_pixel_size]:= '12';
- defaultfontinfo[fn_charset_registry]:= 'iso10646';
- defaultfontinfo[fn_encoding]:= '1';
- ac:= {$ifdef FPC}@argc{$else}@argcount{$endif};
- av:= pcharpoaty({$ifdef FPC}argv{$else}argvalues{$endif});
- for int1:= ac^ - 1 downto 1 do begin
-  if (av^[int1] = '-fn') or (av^[int1] = '-font') then begin
-   hasdefaultfontarg:= true;
-   if int1 < ac^ - 1 then begin
-    str1:= av^[int1+1];
-    if (length(str1) > 0) then begin
-     if str1[1] = '-' then begin
-      ar1:= splitstring(str1,'-');
-      for int2:= 1 to high(ar1) do begin
-       str1:= trim(ar1[int2]);
-       if str1 <> '*' then begin
-        defaultfontinfo[fontnamety(int2-1)]:= str1;
-       end;
-       if int2 = ord(high(fontnamety)) then begin
-        break;
-       end;
-      end;
-      noxft:=
-       (high(ar1) > ord(high(fontnamety))+1) and
-             (ar1[ord(high(fontnamety))+2] ='noxft');
-     end
-     else begin
-      setfontinfoname(str1,defaultfontinfo);
-//      defaultfontinfo[fn_family_name]:= str1;
-      simpledefaultfont:= true;
-     end;
-     dec(ac^,2); //remove font arguments
-     if int1 < ac^ then begin
-      move(av^[int1+2],av^[int1],(ac^-int1)*sizeof(av^[0]));
-     end;
-     av^[ac^]:= nil;
-    end;
-   end;
-   break;
-  end;
- end;
-end;
-
 
 
 procedure getxftfontdata(po: pxftfont; var drawinfo: drawinfoty);

@@ -4773,6 +4773,6 @@ end;
 
 initialization
  hassm:= geticelib and getsmlib;
- x11initdefaultfont;
+// x11initdefaultfont;
 end.
 

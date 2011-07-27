@@ -67,7 +67,7 @@ type
 
 implementation
 uses
- sysutils;
+ sysutils,msedynload; //release dynload needed in finalization
  
 { tfontcache }
 

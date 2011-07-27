@@ -28,7 +28,7 @@ const
 {$packrecords c}
 
 {$ifdef mswindows}
- freetypelib: array[0..1] of filenamety = ('freetype6.dll','freetype-6.dll');  
+ freetypelib: array[0..1] of filenamety = ('libfreetype-6.dll','freetype6.dll');  
 {$else}
  freetypelib: array[0..1] of filenamety = ('libfreetype.so.6','libfreetype.so'); 
 {$endif}

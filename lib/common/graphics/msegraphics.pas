@@ -1061,7 +1061,8 @@ procedure checkgdiunlocked;
 implementation
 uses
  SysUtils,msegui,mseguiintf,msestreaming,mseformatstr,msestockobjects,
- msedatalist,mselist,msebits,msewidgets,msesysintf,msesysutils,msefont;
+ msedatalist,mselist,msebits,msewidgets,msesysintf,msesysutils,msefont,
+ msedynload; //because of release dynlib in finalization
 
 var
  gdilockcount: integer;

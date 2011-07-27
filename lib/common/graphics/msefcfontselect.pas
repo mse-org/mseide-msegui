@@ -35,6 +35,9 @@ function getfcfontfile(const ainfo: getfontinfoty; out filename: string;
 
 var
  defaultfontinfo: fontinfoty;
+ simpledefaultfont: boolean;
+ hasdefaultfontarg: boolean;//true if -fn
+ noxft: boolean; 
  
 implementation
 uses
@@ -106,16 +109,16 @@ begin
  checkgdilock;
 {$endif} 
  with fontdata do begin
-  if fontinfo[fn_charset_registry] <> '*' then begin
-   str1:= fontinfo[fn_charset_registry];
-   if fontinfo[fn_encoding] <> '*' then begin
-    str1:= str1 +'-'+fontinfo[fn_encoding];
-   end;
-   result:= fcnameparse(pansichar(str1));
-  end
-  else begin
+//  if fontinfo[fn_charset_registry] <> '*' then begin
+//   str1:= fontinfo[fn_charset_registry];
+//   if fontinfo[fn_encoding] <> '*' then begin
+//    str1:= str1 +'-'+fontinfo[fn_encoding];
+//   end;
+//   result:= fcnameparse(pansichar(str1));
+//  end
+//  else begin
    result:= fcpatterncreate();
-  end;
+//  end;
   if fontinfo[fn_foundry] <> '*' then begin
    fcpatternaddstring(result,fc_foundry,pansichar(fontinfo[fn_foundry]));
   end;
@@ -238,4 +241,70 @@ begin
  fcpatterndestroy(po1);
 end;
 
+procedure x11initdefaultfont;
+var
+ int1,int2: integer;
+ str1: string;
+ av: pcharpoaty;
+ ac: pinteger;
+ ar1: stringarty;
+ en1: fontnamety;
+begin
+ ar1:= nil; //compiler warning
+ simpledefaultfont:= false;
+ for en1:= low(fontnamety) to high(fontnamety) do begin
+  defaultfontinfo[en1]:= '*';
+ end;
+ defaultfontinfo[fn_family_name]:= 'helvetica';
+ defaultfontinfo[fn_weight_name]:= 'medium';
+ defaultfontinfo[fn_slant]:= 'r';
+ defaultfontinfo[fn_pixel_size]:= '12';
+ defaultfontinfo[fn_charset_registry]:= 'iso10646';
+ defaultfontinfo[fn_encoding]:= '1';
+ ac:= {$ifdef FPC}@argc{$else}@argcount{$endif};
+ av:= pcharpoaty({$ifdef FPC}argv{$else}argvalues{$endif});
+ for int1:= ac^ - 1 downto 1 do begin
+  if (av^[int1] = '-fn') or (av^[int1] = '-font') then begin
+   hasdefaultfontarg:= true;
+   if int1 < ac^ - 1 then begin
+    str1:= av^[int1+1];
+    if (length(str1) > 0) then begin
+     if str1[1] = '-' then begin
+      ar1:= splitstring(str1,'-');
+      for int2:= 1 to high(ar1) do begin
+       str1:= trim(ar1[int2]);
+       if str1 <> '*' then begin
+        defaultfontinfo[fontnamety(int2-1)]:= str1;
+       end;
+       if int2 = ord(high(fontnamety)) then begin
+        break;
+       end;
+      end;
+      noxft:=
+       (high(ar1) > ord(high(fontnamety))+1) and
+             (ar1[ord(high(fontnamety))+2] ='noxft');
+     end
+     else begin
+      setfontinfoname(str1,defaultfontinfo);
+//      defaultfontinfo[fn_family_name]:= str1;
+      simpledefaultfont:= true;
+     end;
+     dec(ac^,2); //remove font arguments
+     if int1 < ac^ then begin
+      move(av^[int1+2],av^[int1],(ac^-int1)*sizeof(av^[0]));
+     end;
+     av^[ac^]:= nil;
+    end;
+   end;
+   break;
+  end;
+ end;
+end;
+
+initialization
+ x11initdefaultfont;
+{$ifdef mswindows}
+// defaultfontinfo[fn_family_name]:= 'Tahoma';
+ defaultfontinfo[fn_family_name]:= 'Arial';
+{$endif}
 end.

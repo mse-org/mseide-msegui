@@ -9,7 +9,6 @@ type
   libhandle: tlibhandle;
   libname: filenamety;
   refcount: integer;
-  lock: mutexty;
  end;
 
 procedure initializelibinfo(var info: dynlibinfoty);
@@ -38,6 +37,9 @@ begin
  result:= freelibrary(lib);
 end;
 {$endif}
+
+var
+ lock: mutexty;
 
 procedure initializedynlib(var info: dynlibinfoty;
                               const alibnames: array of filenamety;
@@ -104,8 +106,8 @@ end;
 
 procedure initializelibinfo(var info: dynlibinfoty);
 begin
+ sys_mutexcreate(lock);
  with info do begin
-  sys_mutexcreate(lock);
   libname:= '';
   refcount:= 0;
   libhandle:= 0;
@@ -115,8 +117,11 @@ end;
 procedure finalizelibinfo(var info: dynlibinfoty);
 begin
  with info do begin
-  sys_mutexdestroy(lock);
  end;
 end;
 
+initialization
+ sys_mutexcreate(lock);
+finalization
+ sys_mutexdestroy(lock);
 end.

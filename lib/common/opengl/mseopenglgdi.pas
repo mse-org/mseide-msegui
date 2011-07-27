@@ -792,7 +792,12 @@ procedure tglftfontcache.drawglyph(var drawinfo: drawinfoty; const pos: pointty;
 begin
  with bitmap^ do begin
   with oglgcty(drawinfo.gc.platformdata).d do begin
-   glwindowpos2i(pos.x,sourceheight-pos.y);
+   if glwindowpos2i = nil then begin
+    glrasterpos2i(pos.x,sourceheight-pos.y); //todo: fix transformation
+   end
+   else begin
+    glwindowpos2i(pos.x,sourceheight-pos.y);
+   end;
   end;
   gldrawpixels(width,height,gl_alpha,gl_unsigned_byte,@data);
  end;
