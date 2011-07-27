@@ -239,7 +239,7 @@ Type
 
 implementation
 uses 
- dbconst,msebufdataset,typinfo,dateutils,msefileutils,msedatabase;
+ dbconst,msebufdataset,typinfo,dateutils,msefileutils,msedatabase,msedynload;
 type
  tmsebufdataset1 = class(tmsebufdataset);
 var
@@ -606,9 +606,9 @@ var
  hmysql1: pmysql;
  actcipher: pchar;
 begin
- mysqllock;
+ dynloadlock;
  HMySQL := mysql_init(HMySQL);
- mysqlunlock;
+ dynloadunlock;
  if myo_ssl in foptions then begin
   key:= tosysfilepath(fssl_key);
   cert:= tosysfilepath(fssl_cert);

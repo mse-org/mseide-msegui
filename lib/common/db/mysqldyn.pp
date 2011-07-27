@@ -69,9 +69,6 @@ procedure initializemysql(const sonames: array of filenamety);
                                             //[] = default
 procedure releasemysql;
 
-procedure mysqllock;
-procedure mysqlunlock;
-
 {$IFDEF Unix}
   {$DEFINE extdecl:=cdecl}
 (*
@@ -2101,20 +2098,7 @@ begin
     end;
 end;
 }
-var
- lock: mutexty;
  
-procedure mysqllock;
-begin
- sys_mutexlock(lock);
-end;
-
-procedure mysqlunlock;
-begin
- sys_mutexunlock(lock);
-end;
-
-
 procedure releasemysql;
 begin
  releasedynlib(libinfo);
@@ -2241,10 +2225,8 @@ end;
 {$ENDIF}
 
 initialization
- sys_mutexcreate(lock);
  initializelibinfo(libinfo);
 finalization
  finalizelibinfo(libinfo);
- sys_mutexdestroy(lock);
 end.
 

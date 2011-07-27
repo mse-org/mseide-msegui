@@ -23,6 +23,8 @@ procedure initializedynlib(var info: dynlibinfoty;
 procedure releasedynlib(var info: dynlibinfoty;
                              const callback: procedurety = nil);
                                //called before lib unload
+procedure dynloadlock;
+procedure dynloadunlock;
 
 implementation
 
@@ -119,6 +121,17 @@ begin
  with info do begin
  end;
 end;
+
+procedure dynloadlock;
+begin
+ sys_mutexlock(lock);
+end;
+
+procedure dynloadunlock;
+begin
+ sys_mutexunlock(lock);
+end;
+
 
 initialization
  sys_mutexcreate(lock);
