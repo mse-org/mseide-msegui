@@ -30,7 +30,7 @@ const
 {$ifdef mswindows}
  freetypelib: array[0..1] of filenamety = ('freetype6.dll','freetype-6.dll');  
 {$else}
- sqlite3lib: array[0..1] of filenamety = ('libfreetype.so.6','libfreetype.so'); 
+ freetypelib: array[0..1] of filenamety = ('libfreetype.so.6','libfreetype.so'); 
 {$endif}
 
 type
@@ -457,7 +457,7 @@ const
 begin
  try
   if length(sonames) = 0 then begin
-   initializedynlib(libinfo,sqlite3lib,funcs,[],@initft);
+   initializedynlib(libinfo,freetypelib,funcs,[],@initft);
   end
   else begin
    initializedynlib(libinfo,sonames,funcs,[],@initft);
