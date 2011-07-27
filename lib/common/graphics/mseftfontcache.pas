@@ -33,8 +33,7 @@ type
  tftfontcache = class(tfontcache)
   protected
    procedure internalfreefont(const afont: ptruint); override;
-   function internalgetfont(const ainfo: getfontinfoty;
-                   var aheight: integer): boolean; override;
+   function internalgetfont(const ainfo: getfontinfoty): boolean; override;
    procedure updatefontinfo(var adata: fontcachedataty); override;
    procedure drawglyph(var drawinfo: drawinfoty; const pos: pointty;
                        const bitmap: pbitmapdataty); virtual; abstract;
@@ -50,7 +49,7 @@ type
  
 implementation
 uses
- msefreetype;
+ msefreetype,msefontconfig,msefcfontselect;
 
 const
  charcount = $10000; //UCS2
@@ -93,6 +92,7 @@ type
 constructor tftfontcache.create(var ainstance: tftfontcache);
 begin
  initializefreetype([]);
+ initializefontconfig([]);
  inherited create(tfontcache(ainstance));
 end;
 
@@ -100,6 +100,7 @@ destructor tftfontcache.destroy;
 begin
  inherited;
  releasefreetype;
+ releasefontconfig;
 end;
 
 procedure tftfontcache.internalfreefont(const afont: ptruint);
@@ -107,21 +108,21 @@ begin
  tftface(pointer(afont)).free;
 end;
 
-function tftfontcache.internalgetfont(const ainfo: getfontinfoty;
-                                            var aheight: integer): boolean;
+function tftfontcache.internalgetfont(const ainfo: getfontinfoty): boolean;
 var
  ftface: pft_face;
+ str1: string;
+ int1: integer;
+ h1: integer;
 begin
  result:= false;
  with ainfo do begin
-  if ft_new_face(ftlib,
-               '/usr/share/fonts/truetype/arial.ttf',0,ftface) = 0 then begin
-   if aheight <= 0 then begin
-    aheight:= 14;
-   end;
-   if ft_set_pixel_sizes(ftface,0,aheight) = 0 then begin
-    pointer(fontdata^.font):= tftface.create(ftface);
-    result:= true;
+  if getfcfontfile(ainfo,str1,int1,h1) then begin
+   if ft_new_face(ftlib,pchar(str1),int1,ftface) = 0 then begin
+    if ft_set_pixel_sizes(ftface,0,h1) = 0 then begin
+     pointer(fontdata^.font):= tftface.create(ftface);
+     result:= true;
+    end;
    end;
   end;
  end;
@@ -135,7 +136,7 @@ begin
   scale:= adata.height/units_per_em;
   adata.ascent:= round(ascender*scale);
   adata.descent:= -round(descender*scale);
-//  adata.height:= height;
+  adata.height:= height;
   adata.linespacing:= adata.ascent + adata.descent;
   adata.caretshift:= 0;
  end;

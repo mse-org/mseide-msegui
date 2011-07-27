@@ -12,7 +12,6 @@ unit mseopenglgdi;
 //under construction
 //
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-{$define mse_useftfont}
 
 interface
 uses
@@ -60,7 +59,7 @@ procedure gdi_clear(var drawinfo: drawinfoty);
 implementation
 uses
  mseguiintf,mseftgl,msegenericgdi,msestrings,msectypes,msehash,sysutils,
- mseformatstr,msefontcache{$ifdef mse_useftfont},mseftfontcache{$endif};
+ mseformatstr,msefontcache,mseftfontcache;
 type
  tcanvas1 = class(tcanvas);
  
@@ -88,23 +87,6 @@ type
   name: string;
  end;
 }
-{$ifndef mse_useftfont}
- tglfontcache = class(tfontcache)
-  protected
-   procedure internalfreefont(const afont: ptruint); override;
-   function internalgetfont(const ainfo: getfontinfoty;
-                  var aheight: integer): boolean; override;
-   procedure updatefontinfo(var adata: fontcachedataty); override;
-  public
-   constructor create(var ainstance: tglfontcache);
-   destructor destroy; override;
-   procedure gettext16width(var drawinfo: drawinfoty); override;
-   procedure getchar16widths(var drawinfo: drawinfoty); override;
-   procedure getfontmetrics(var drawinfo: drawinfoty); override;
-   procedure drawstring16(var drawinfo: drawinfoty;
-                                 const afont: ptruint); override;
- end;
-{$else}
  tglftfontcache = class(tftfontcache)
   protected
    procedure drawglyph(var drawinfo: drawinfoty; const pos: pointty;
@@ -113,22 +95,15 @@ type
    procedure drawstring16(var drawinfo: drawinfoty;
                                     const afont: fontty); override;
  end;
-{$endif} //mse_useftfont
    
 var
-{$ifdef mse_useftfont}
  ffontcache: tglftfontcache;
-{$else}
- ffontcache: tglfontcache;
-{$endif}
  gdinumber: integer;
 
-function fontcache: 
- {$ifdef mse_useftfont}tglftfontcache{$else}tglfontcache{$endif};
+function fontcache: tglftfontcache;
 begin
  if ffontcache = nil then begin
-  {$ifdef mse_useftfont}tglftfontcache{$else}tglfontcache{$endif}.create(
-                                                                  ffontcache);
+  tglftfontcache.create(ffontcache);
  end;
  result:= ffontcache;
 end;
@@ -810,121 +785,6 @@ begin
  result:= gdinumber;
 end;
 
-{$ifndef mse_useftfont}
-
-{ tglfontcache }
-
-constructor tglfontcache.create(var ainstance: tglfontcache);
-begin
- initializeftgl([]);
- inherited create(tfontcache(ainstance));
-end;
-
-destructor tglfontcache.destroy;
-begin
- inherited;
- releaseftgl;
-end;
-
-procedure tglfontcache.internalfreefont(const afont: ptruint);
-begin
- ftgldestroyfont(pointer(afont));
-end;
-
-function tglfontcache.internalgetfont(const ainfo: getfontinfoty;
-                             var aheight: integer): boolean;
-var
- po1: pftglfont;
-begin
- result:= false;
- po1:= ftglcreatepixmapfont('/usr/share/fonts/truetype/arial.ttf');
- if po1 <> nil then begin
-  if aheight <= 0 then begin
-   aheight:= 20;
-  end;
-  ftglsetfontcharmap(po1,ft_encoding_unicode);
-  ftglsetfontfacesize(po1,20,72);
-  ainfo.fontdata^.font:= ptruint(po1);
-  result:= true;
- end;
-end;
-
-
-procedure tglfontcache.updatefontinfo(var adata: fontcachedataty);
-begin
- with adata do begin
-  ascent:= round(ftglgetfontascender(pointer(font)));
-  descent:= -round(ftglgetfontdescender(pointer(font)));
-  linespacing:= round(ftglgetfontlineheight(pointer(font)));
-  caretshift:= 0;
- end;
-end;
-
-procedure tglfontcache.gettext16width(var drawinfo: drawinfoty);
-begin
- with drawinfo.gettext16width do begin
-  result:= round(ftglgetfontadvance(pointer(fontdata^.font),
-                                            pchar(stringtoutf8(text))));
- end;
-end;
-
-procedure tglfontcache.getchar16widths(var drawinfo: drawinfoty);
-var
- f1: cfloat;
- int1: integer;
- po1: pmsechar;
- po2: pinteger;
-begin
- with drawinfo.getchar16widths do begin
-  f1:= 0;
-  po1:= text;
-  po2:= resultpo;
-  for int1:= count-1 downto 0 do begin
-   f1:= f1 + ftglgetfontadvance(pointer(fontdata^.font),
-                                  pchar(stringtoutf8(po1^)));
-   po2^:= round(f1);
-   f1:= f1-po2^;
-   inc(po1);
-   inc(po2);
-  end;
- end;
-end;
-
-procedure tglfontcache.getfontmetrics(var drawinfo: drawinfoty);
-var
- bbox: boundsty;
- str1: string;
-begin
- with drawinfo.getfontmetrics do begin
-  str1:= stringtoutf8(char);
-  with resultpo^ do begin
-   width:= round(ftglgetfontadvance(pointer(fontdata^.font),pchar(str1)));
-   ftglgetfontbbox(pointer(fontdata^.font),pchar(str1),length(str1),bbox);
-   leftbearing:= round(bbox.left);
-   rightbearing:= width-round(bbox.right); //correct???
-  end;
- end;
-end;
-
-procedure tglfontcache.drawstring16(var drawinfo: drawinfoty;
-                                           const afont: ptruint);
-var
- str1: string;
-begin
- with drawinfo.text16pos,oglgcty(drawinfo.gc.platformdata).d do begin
-  str1:= stringtoutf8(text,count);
-//  glmatrixmode(gl_projection);
-  glpushmatrix;
-  gltranslatef(pos^.x,sourceheight-pos^.y,0);
-//  glrasterpos2i(pos^.x,sourceheight-pos^.y);
-  glwindowpos2i(pos^.x,sourceheight-pos^.y);
-  ftglrenderfont(ftglfont,pchar(str1),ftgl_render_all);
-  glpopmatrix;
- end;
-end;
-
-{$else}
-
 { tglftfontcache }
 
 procedure tglftfontcache.drawglyph(var drawinfo: drawinfoty; const pos: pointty;
@@ -961,8 +821,6 @@ begin
  glpopattrib;
  glpopclientattrib;
 end;
-
-{$endif} // mse_useftfont
 
 initialization
  gdinumber:= registergdi(openglgetgdifuncs);

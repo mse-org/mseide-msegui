@@ -16,6 +16,43 @@ uses
 const
  fontconfiglib: array[0..1] of filenamety = 
                                      ('libfontconfig.so.1','libfontconfig.so');
+ FC_FAMILY =          'family';	//* String */
+ FC_STYLE =           'style';		//* String */
+ FC_SLANT =           'slant';		//* Int */
+ FC_WEIGHT =	       'weight';	//* Int */
+ FC_SIZE =	           'size';      //* Double */
+ FC_ASPECT =	       'aspect';	//* Double */
+ FC_PIXEL_SIZE =      'pixelsize';     //* Double */
+ FC_SPACING =	       'spacing';	//* Int */
+ FC_FOUNDRY =	       'foundry';	//* String */
+ FC_ANTIALIAS =       'antialias';	//* Bool (depends) */
+ FC_HINTING =	       'hinting';	//* Bool (true) */
+ FC_VERTICAL_LAYOUT = 'verticallayout';//* Bool (false) */
+ FC_AUTOHINT =	       'autohint';	//* Bool (false) */
+ FC_GLOBAL_ADVANCE =  'globaladvance';	//* Bool (true) */
+ FC_FILE =	       'file';		//* String */
+ FC_INDEX =	       'index';		//* Int */
+ FC_FT_FACE =	       'ftface';	//* FT_Face */
+ FC_RASTERIZER =      'rasterizer';	//* String */
+ FC_OUTLINE =	       'outline';	//* Bool */
+ FC_SCALABLE =	       'scalable';	//* Bool */
+ FC_SCALE =	       'scale';		//* double */
+ FC_DPI =             'dpi';		//* double */
+ FC_RGBA =            'rgba';		//* Int */
+ FC_MINSPACE =	       'minspace';	//* Bool use minimum line spacing */
+ FC_SOURCE =	       'source';	//* String (X11, freetype) */
+ FC_CHARSET =	       'charset';	//* CharSet */
+ FC_LANG =            'lang';		//* String RFC 3066 langs */
+ FC_FONTVERSION =     'fontversion';	//* Int from 'head' table */
+
+ FC_MATRIX =          'matrix';
+ FC_CHAR_WIDTH =      'charwidth';
+ 
+ FC_WEIGHT_BOLD = 200;
+ FC_SLANT_ITALIC = 100;
+ FC_PROPORTIONAL = 0;
+ FC_MONO = 100;
+
 
 type
 
@@ -124,6 +161,8 @@ var
                c:PPFcCharSet):TFcResult;cdecl;
  FcFontRenderPrepare: function(config:PFcConfig; pat:PFcPattern;
                     font:PFcPattern): PFcPattern;cdecl;
+ FcFontMatch: function(config: PFcConfig; p: PFcPattern; 
+                                 result: PFcResult): PFcPattern;cdecl;
  FcMatrixRotate: procedure(m:PFcMatrix; c:cdouble; s:cdouble);cdecl;
  FcMatrixScale: procedure(m:PFcMatrix; sx:cdouble; sy:cdouble);cdecl;
  FcPatternAddInteger: function(p:PFcPattern; aobject:Pchar; i:longint):TFcBool; cdecl;
@@ -138,7 +177,12 @@ var
  
  FcPatternGetString: function(p: PFcPattern; aobject: Pchar; n: integer; 
                                 s: ppchar): tfcresult; cdecl;
-
+ FcPatternGetInteger: function(p: PFcPattern; aobject: Pchar; n: integer; 
+                                i: pinteger): tfcresult; cdecl;
+ FcPatternGetDouble: function(p: PFcPattern; aobject: Pchar; n: integer; 
+                                i: pcdouble): tfcresult; cdecl;
+ FcNameParse: function(name: pchar): PFcPattern; cdecl;
+ 
 procedure FcMatrixInit(var m: TFcMatrix);     
 
 procedure initializefontconfig(const sonames: array of filenamety);
@@ -171,7 +215,7 @@ end;
 
 procedure initializefontconfig(const sonames: array of filenamety);
 const
- funcs: array[0..29] of funcinfoty = (
+ funcs: array[0..33] of funcinfoty = (
   (n: 'FcPatternDestroy'; d: @FcPatternDestroy),           //0
   (n: 'FcFontSetDestroy'; d: @FcFontSetDestroy),           //1
   (n: 'FcObjectSetCreate'; d: @FcObjectSetCreate),         //2
@@ -201,7 +245,11 @@ const
   (n: 'FcPatternAddLangSet'; d: @FcPatternAddLangSet),     //26
   (n: 'FcPatternGetString'; d: @FcPatternGetString),       //27
   (n: 'FcInit'; d: @FcInit),                               //28
-  (n: 'FcFini'; d: @FcFini)                                //29
+  (n: 'FcFini'; d: @FcFini),                               //29
+  (n: 'FcNameParse'; d: @FcNameParse),                     //30
+  (n: 'FcFontMatch'; d: @FcFontMatch),                     //31
+  (n: 'FcPatternGetInteger'; d: @FcPatternGetInteger),     //32
+  (n: 'FcPatternGetDouble'; d: @FcPatternGetDouble)        //33
  );
  
 begin

@@ -241,13 +241,11 @@ var
 begin
  ffonthashlist.delete(index);
  with fonts[index] do begin
-  finalize(data^);
-//  data^.h.name:= '';
-//  data^.h.charset:= '';
+//  finalize(data^);
   gdi_lock;
   drawinfo.getfont.fontdata:= data;
   freefontdata(drawinfo);
-//  gui_freefontdata(data^);
+  finalize(data^);
   gdi_unlock;
   refcount:= 0;
  end;

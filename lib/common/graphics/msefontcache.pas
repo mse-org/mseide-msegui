@@ -51,8 +51,7 @@ type
    function find(const afont: fontdataty): pfontcachedataty;
 
    procedure internalfreefont(const afont: ptruint); virtual;
-   function internalgetfont(const ainfo: getfontinfoty;
-                                      var aheight: integer): boolean;
+   function internalgetfont(const ainfo: getfontinfoty): boolean;
                                                     virtual; abstract;
    procedure updatefontinfo(var adata: fontcachedataty); virtual; abstract;
   public
@@ -110,7 +109,6 @@ end;
 procedure tfontcache.getfont(var drawinfo: drawinfoty);
 var
  po1: pfontcachedataty;
- h1: integer;
 begin
  with drawinfo.getfont do begin
   ok:= true;
@@ -118,19 +116,18 @@ begin
   with fontdata^ do begin 
    font:= 0;
    if po1 = nil then begin
-    h1:= fontdata^.h.d.height;
-    if not internalgetfont(drawinfo.getfont,h1) then begin
+    if not internalgetfont(drawinfo.getfont) then begin
      ok:= false;
      exit;
     end;
     po1:= @((internaladd(fontdata^)^.data));
     po1^.keyname:= fontdata^.h.name;
     po1^.keyheight:= fontdata^.h.d.height;
-    po1^.height:= h1;
     po1^.font:= font;
     updatefontinfo(po1^);
    end;
    inc(po1^.refcount);
+//   height:= po1^.height;
    ascent:= po1^.ascent;
    descent:= po1^.descent;
    linespacing:= po1^.linespacing;
