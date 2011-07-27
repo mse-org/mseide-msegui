@@ -2101,15 +2101,17 @@ begin
     end;
 end;
 }
-
+var
+ lock: mutexty;
+ 
 procedure mysqllock;
 begin
- sys_mutexlock(libinfo.lock);
+ sys_mutexlock(lock);
 end;
 
 procedure mysqlunlock;
 begin
- sys_mutexunlock(libinfo.lock);
+ sys_mutexunlock(lock);
 end;
 
 
@@ -2239,8 +2241,10 @@ end;
 {$ENDIF}
 
 initialization
+ sys_mutexcreate(lock);
  initializelibinfo(libinfo);
 finalization
  finalizelibinfo(libinfo);
+ sys_mutexdestroy(lock);
 end.
 
