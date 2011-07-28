@@ -1019,12 +1019,13 @@ begin
   clearselection;
   ar1:= breaklines(atext);
   with fgridintf.getcol do begin
-   aendpos.row:= apos.row + high(ar1);
    if ar1 = nil then begin
     aendpos.col:= 0;
+    aendpos.row:= apos.row;
    end
    else begin
     aendpos.col:= length(ar1[high(ar1)]);
+    aendpos.row:= apos.row + high(ar1);
    end;
    if length(ar1) > 1 then begin
     ar1[high(ar1)]:= ar1[high(ar1)] + copy(flines[apos.row],apos.col + 1,bigint);
