@@ -435,7 +435,8 @@ type
    procedure setname(const Value: string); virtual;
    function gethandle: fontnumty; virtual;
    function getdatapo: pfontdataty;
-   procedure assignproperties(const source: tfont; const handles: boolean);
+   procedure assignproperties(const source: tfont;
+                                      const ahandles: boolean); virtual;
    property rotation: real read getrotation write setrotation; 
                                  //0..2*pi-> 0degree..360degree CCW
    procedure defineproperties(filer: tfiler); override;
@@ -503,11 +504,14 @@ type
 
  tcanvasfont = class(tfont)
   private
-   fcanvas: tcanvas;
   protected   
+   fcanvas: tcanvas;
+   fgdifuncs: pgdifunctionaty;
    procedure dochanged(const changed: canvasstatesty;
                               const nochange: boolean); override;
    function gethandle: fontnumty; override;
+   procedure assignproperties(const source: tfont;
+                                      const ahandles: boolean); override;
   public
    constructor create(const acanvas: tcanvas); reintroduce;
  end;
@@ -1993,11 +1997,24 @@ begin
 end;
 
 procedure tfont.createhandle(const canvas: tcanvas);
+var
+ int1: integer;
 begin
  if (canvas <> nil) then begin
-  releasefont(fhandlepo^);
   canvas.checkgcstate([cs_gc]); //windows needs gc
-  finfopo^.gdifuncs:= gdifuncs[canvas.fgdinum];
+  if finfopo^.gdifuncs <> nil then begin
+   if finfopo^.gdifuncs <> canvas.fdrawinfo.gc.gdifuncs then begin
+    for int1:= 0 to high(finfopo^.handles) do begin
+     releasefont(finfopo^.handles[int1]);
+     finfopo^.handles[int1]:= 0;
+    end;
+   end
+   else begin
+    releasefont(fhandlepo^);
+   end;
+  end;
+  finfopo^.gdifuncs:= canvas.fdrawinfo.gc.gdifuncs;
+//  finfopo^.gdifuncs:= gdifuncs[canvas.fgdinum];
   fhandlepo^:= getfontnum(finfopo^,canvas.fdrawinfo,
                                          {$ifdef FPC}@{$endif}getfont);
   if fhandlepo^ = 0 then begin
@@ -2006,6 +2023,7 @@ begin
  end
  else begin
   fhandlepo^:= 0;
+  finfopo^.gdifuncs:= nil;
  end;
 end;
 
@@ -2209,75 +2227,87 @@ begin
  end;
 end;
 
-procedure tfont.assignproperties(const source: tfont; const handles: boolean);
+procedure tfont.assignproperties(const source: tfont; const ahandles: boolean);
 var
  int1: integer;
+ bo1: boolean;
  changed: canvasstatesty;
 begin
  changed:= [];
- with tfont(source) do begin
-  if finfopo^.colorbackground <> self.finfopo^.colorbackground then begin
-   self.finfopo^.colorbackground:= finfopo^.colorbackground;
+ with tfont(source),self.finfopo^ do begin
+  if finfopo^.colorbackground <> colorbackground then begin
+   colorbackground:= finfopo^.colorbackground;
    include(changed,cs_fontcolorbackground);
   end;
 
-  if finfopo^.shadow_color <> self.finfopo^.shadow_color then begin
-   self.finfopo^.shadow_color:= finfopo^.shadow_color;
+  if shadow_color <> finfopo^.shadow_color then begin
+   shadow_color:= finfopo^.shadow_color;
    include(changed,cs_fonteffect);
   end;
-  if finfopo^.shadow_shiftx <> self.finfopo^.shadow_shiftx then begin
-   self.finfopo^.shadow_shiftx:= finfopo^.shadow_shiftx;
+  if shadow_shiftx <> finfopo^.shadow_shiftx then begin
+   shadow_shiftx:= finfopo^.shadow_shiftx;
    include(changed,cs_fonteffect);
   end;
-  if finfopo^.shadow_shifty <> self.finfopo^.shadow_shifty then begin
-   self.finfopo^.shadow_shifty:= finfopo^.shadow_shifty;
-   include(changed,cs_fonteffect);
-  end;
-  
-  if finfopo^.gloss_color <> self.finfopo^.gloss_color then begin
-   self.finfopo^.gloss_color:= finfopo^.gloss_color;
-   include(changed,cs_fonteffect);
-  end;
-  if finfopo^.gloss_shiftx <> self.finfopo^.gloss_shiftx then begin
-   self.finfopo^.gloss_shiftx:= finfopo^.gloss_shiftx;
-   include(changed,cs_fonteffect);
-  end;
-  if finfopo^.gloss_shifty <> self.finfopo^.gloss_shifty then begin
-   self.finfopo^.gloss_shifty:= finfopo^.gloss_shifty;
+  if shadow_shifty <> finfopo^.shadow_shifty then begin
+   shadow_shifty:= finfopo^.shadow_shifty;
    include(changed,cs_fonteffect);
   end;
   
-  if finfopo^.color <> self.finfopo^.color then begin
-   self.finfopo^.color:= finfopo^.color;
+  if gloss_color <> finfopo^.gloss_color then begin
+   gloss_color:= finfopo^.gloss_color;
+   include(changed,cs_fonteffect);
+  end;
+  if gloss_shiftx <> finfopo^.gloss_shiftx then begin
+   gloss_shiftx:= finfopo^.gloss_shiftx;
+   include(changed,cs_fonteffect);
+  end;
+  if gloss_shifty <> finfopo^.gloss_shifty then begin
+   gloss_shifty:= finfopo^.gloss_shifty;
+   include(changed,cs_fonteffect);
+  end;
+  
+  if color <> finfopo^.color then begin
+   color:= finfopo^.color;
    include(changed,cs_fontcolor);
   end;
-  if self.finfopo^.style <> finfopo^.style then begin
-   self.finfopo^.style:= finfopo^.style;
+  if style <> finfopo^.style then begin
+   style:= finfopo^.style;
    self.updatehandlepo;
    include(changed,cs_font);
   end;
-  if self.finfopo^.extraspace <> finfopo^.extraspace then begin
-   self.finfopo^.extraspace:= finfopo^.extraspace;
+  if extraspace <> finfopo^.extraspace then begin
+   extraspace:= finfopo^.extraspace;
    include(changed,cs_font);
   end;
-  self.finfopo^.height:= finfopo^.height;
-  self.finfopo^.width:= finfopo^.width;
-  self.finfopo^.name:= finfopo^.name;
-  self.finfopo^.charset:= finfopo^.charset;
-  self.finfopo^.options:= finfopo^.options;
-  self.finfopo^.xscale:= finfopo^.xscale;
-  if handles then begin
-   for int1:= 0 to high(self.finfopo^.handles) do begin
-    if self.finfopo^.handles[int1] <> finfopo^.handles[int1] then begin
-     releasefont(self.finfopo^.handles[int1]);
-     self.finfopo^.handles[int1]:= finfopo^.handles[int1];
-     addreffont(self.finfopo^.handles[int1]);
-     changed:= changed + [cs_font,cs_fonthandle];
+  height:= finfopo^.height;
+  width:= finfopo^.width;
+  name:= finfopo^.name;
+  charset:= finfopo^.charset;
+  options:= finfopo^.options;
+  xscale:= finfopo^.xscale;
+  bo1:= false;
+  if ahandles then begin
+   for int1:= 0 to high(handles) do begin
+    if handles[int1] <> finfopo^.handles[int1] then begin
+     bo1:= true;
+     releasefont(handles[int1]);
+     handles[int1]:= finfopo^.handles[int1];
+     addreffont(handles[int1]);
     end;
    end;
+   gdifuncs:= finfopo^.gdifuncs;
   end
   else begin
-   releasehandles;
+   for int1:= 0 to high(handles) do begin
+    if handles[int1] <> 0 then begin
+     bo1:= true;
+     releasefont(handles[int1]);
+     handles[int1]:= 0;
+    end;
+   end;
+  end;
+  if bo1 then begin
+   changed:= changed + [cs_font,cs_fonthandle];
   end;
  end;
  if changed <> [] then begin
@@ -2328,12 +2358,21 @@ end;
 procedure tfont.releasehandles(const nochanged: boolean = false);
 var
  int1: integer;
+ bo1: boolean;
+ fo1: fontnumty;
 begin
+ bo1:= false;
  for int1:= 0 to high(finfopo^.handles) do begin
-  releasefont(finfopo^.handles[int1]);
+  fo1:= finfopo^.handles[int1];
+  if fo1 <> 0 then begin
+   bo1:= true;
+   releasefont(fo1);
+  end;
  end;
- fillchar(finfopo^.handles,sizeof(finfopo^.handles),0);
- dochanged([cs_font,cs_fonthandle],nochanged);
+ if bo1 then begin
+  fillchar(finfopo^.handles,sizeof(finfopo^.handles),0);
+  dochanged([cs_font,cs_fonthandle],nochanged);
+ end;
 end;
 
 function tfont.getcolor: colorty;
@@ -2538,6 +2577,7 @@ end;
 constructor tcanvasfont.create(const acanvas: tcanvas);
 begin
  fcanvas:= acanvas;
+ fgdifuncs:= fcanvas.getgdifuncs;
  finfopo:= @fcanvas.fvaluepo^.font;
  inherited create;
 end;
@@ -2556,6 +2596,13 @@ begin
  end;
  result:= fhandlepo^;
 // result:= gethandleforcanvas(fcanvas);
+end;
+
+procedure tcanvasfont.assignproperties(const source: tfont;
+               const ahandles: boolean);
+begin
+ inherited assignproperties(source,ahandles and 
+                           (source.finfopo^.gdifuncs = fgdifuncs));
 end;
 
 { tcanvas }
@@ -2891,10 +2938,11 @@ end;
 procedure tcanvas.setfont(const Value: tfont);
 begin
  if ffont <> nil then begin
-  if value.fhandlepo^ = 0 then begin
-   value.createhandle(self);
-  end;
-  ffont.assign(Value);
+//  if value.fhandlepo^ = 0 then begin
+//   value.createhandle(self);
+//  end;
+  ffont.assignproperties(value,true);
+//  ffont.assign(Value);
  end;
 end;
 

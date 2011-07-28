@@ -204,6 +204,8 @@ type
    procedure moveitem(const aitem: phashdataty);
   protected
    fstate: hashliststatesty;
+   function getdatapo(const aoffset: longword): pointer;
+   function getdataoffset(const adata: pointer): longword;
    function internaladd(const akey): phashdataty;
    procedure internaldeleteitem(const aitem: phashdataty); overload;
    procedure internaldeleteitem(const aitem: phashdatadataty); overload;
@@ -1718,6 +1720,16 @@ end;
 procedure thashdatalist.checkexact(const aitemdata; var accept: boolean);
 begin
  accept:= false; //dummy
+end;
+
+function thashdatalist.getdatapo(const aoffset: longword): pointer;
+begin
+ result:= pchar(fdata)+aoffset;
+end;
+
+function thashdatalist.getdataoffset(const adata: pointer): longword;
+begin
+ result:= pchar(adata)-pchar(fdata);
 end;
 
 { tptruinthasdatalist }

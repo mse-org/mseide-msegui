@@ -1044,7 +1044,7 @@ procedure gdi_copyregion(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.regionoperation do begin
   getmem(pointer(dest),sizeof(regioninfoty));
-  move(pointer(dest)^,pointer(source)^,sizeof(regioninfoty));
+  move(pointer(source)^,pointer(dest)^,sizeof(regioninfoty));
   with pregioninfoty(dest)^ do begin
    if datasize > 0 then begin
     getmem(datapo,datasize);

@@ -51,9 +51,11 @@ type
    function find(const afont: fontdataty): pfontcachedataty;
 
    procedure internalfreefont(const afont: ptruint); virtual;
-   function internalgetfont(const ainfo: getfontinfoty): boolean;
-                                                    virtual; abstract;
-   procedure updatefontinfo(var adata: fontcachedataty); virtual; abstract;
+   function internalgetfont(
+                    const ainfo: getfontinfoty): boolean; virtual; abstract;
+   procedure updatefontinfo(const adataoffset: longword;
+                     var adata: fontcachedataty); virtual; abstract;
+   function getdataoffs(const afont: fontty): longword; virtual; abstract;
   public
    constructor create(var ainstance: tfontcache); 
    procedure getfont(var drawinfo: drawinfoty);
@@ -124,7 +126,7 @@ begin
     po1^.keyname:= fontdata^.h.name;
     po1^.keyheight:= fontdata^.h.d.height;
     po1^.font:= font;
-    updatefontinfo(po1^);
+    updatefontinfo(getdataoffset(po1),po1^);
    end;
    inc(po1^.refcount);
 //   height:= po1^.height;
@@ -183,10 +185,10 @@ procedure tfontcache.freefontdata(var drawinfo: drawinfoty);
 var
  po1: pfontcachedataty;
 begin
- with drawinfo.getfont do begin
-  po1:= find(fontdata^);
-  dec(po1^.refcount);
-  with fontdata^ do begin 
+ with drawinfo.getfont.fontdata^ do begin
+  if font <> 0 then begin
+   po1:= getdatapo(getdataoffs(font));
+   dec(po1^.refcount);
    if po1^.refcount = 0 then begin
     internalfreefont(font);
    end;

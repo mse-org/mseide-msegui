@@ -34,9 +34,11 @@ type
   protected
    procedure internalfreefont(const afont: ptruint); override;
    function internalgetfont(const ainfo: getfontinfoty): boolean; override;
-   procedure updatefontinfo(var adata: fontcachedataty); override;
+   procedure updatefontinfo(const adataoffset: longword;
+                                var adata: fontcachedataty); override;
    procedure drawglyph(var drawinfo: drawinfoty; const pos: pointty;
                        const bitmap: pbitmapdataty); virtual; abstract;
+   function getdataoffs(const afont: fontty): longword; override;
   public
    constructor create(var ainstance: tftfontcache);
    destructor destroy; override;
@@ -79,6 +81,7 @@ type
    fsize: longword;
    fcapacity: longword;
   protected
+   fdataoffset: longword;
    function getbuffer(const asize: integer; const ainit: boolean): longword;
   public
    constructor create(const aface: pft_face);
@@ -128,11 +131,13 @@ begin
  end;
 end;
 
-procedure tftfontcache.updatefontinfo(var adata: fontcachedataty);
+procedure tftfontcache.updatefontinfo(const adataoffset: longword;
+                                              var adata: fontcachedataty);
 var
  scale: real;
 begin
- with tftface(pointer(adata.font)).fface^ do begin
+ with tftface(pointer(adata.font)),fface^ do begin
+  fdataoffset:= adataoffset;
   scale:= adata.height/units_per_em;
   adata.ascent:= round(ascender*scale);
   adata.descent:= -round(descender*scale);
@@ -215,6 +220,11 @@ begin
    end;
   end;
  end;
+end;
+
+function tftfontcache.getdataoffs(const afont: fontty): longword;
+begin
+ result:= tftface(pointer(afont)).fdataoffset;
 end;
 
 { tftface }

@@ -101,7 +101,7 @@ function buildxftpat(const fontdata: fontdataty;
                   const fontinfo: fontinfoty; const highres: boolean): pfcpattern;
 var
  int1: integer;
- str1: ansistring;
+// str1: ansistring;
  mat1: tfcmatrix;
  rea1: real;
 begin
