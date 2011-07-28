@@ -147,9 +147,12 @@ end;
 function topenglcanvas.lock: boolean;
 begin
  result:= inherited lock;
- if fdrawinfo.gc.handle <> 0 then begin
+ if fdrawinfo.gc.handle = 0 then begin
+  checkgcstate([cs_gc]);
+ end; 
+// if fdrawinfo.gc.handle <> 0 then begin
   gdi_makecurrent(fdrawinfo);
- end;
+// end;
 end;
 {
 procedure topenglcanvas.unlock;
