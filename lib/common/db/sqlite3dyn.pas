@@ -562,7 +562,7 @@ var
 
  sqlite3_libversion: function:PChar;cdecl;
 //Alias for allowing better code portability (win32 is not working with external variables) 
- sqlite3_version: function:PChar;cdecl;
+// sqlite3_version: function:PChar;cdecl; macro in 3.7.7
 
 // Not published functions
  sqlite3_libversion_number: function:longint;cdecl;
@@ -572,6 +572,8 @@ var
 // sqlite3_expired: function(_para1:Psqlite3_stmt):longint;cdecl;
 // sqlite3_global_recover: function:longint;cdecl;
 
+function sqlite3_version: PChar;
+
 {$endif} //not mse_sqlite3static
 implementation
 uses
@@ -579,6 +581,12 @@ uses
 {$ifndef mse_sqlite3static}
 var
  libinfo: dynlibinfoty;
+
+function sqlite3_version: PChar;
+begin
+ result:= sqlite3_libversion();
+end;
+
 (*  
 function tryinitialisesqlite3(const alibnames: array of filenamety): boolean;
 var
@@ -809,7 +817,7 @@ end;
 
 procedure initializesqlite3(const sonames: array of filenamety);
 const
- funcs: array[0..94] of funcinfoty = (
+ funcs: array[0..93] of funcinfoty = (
   (n: 'sqlite3_close'; d: @sqlite3_close),
   (n: 'sqlite3_exec'; d: @sqlite3_exec),
   (n: 'sqlite3_last_insert_rowid'; d: @sqlite3_last_insert_rowid),
@@ -902,7 +910,7 @@ const
   (n: 'sqlite3_collation_needed'; d: @sqlite3_collation_needed),
   (n: 'sqlite3_collation_needed16'; d: @sqlite3_collation_needed16),
   (n: 'sqlite3_libversion'; d: @sqlite3_libversion),
-  (n: 'sqlite3_version'; d: @sqlite3_version),
+//  (n: 'sqlite3_version'; d: @sqlite3_version),
   (n: 'sqlite3_libversion_number'; d: @sqlite3_libversion_number),
   (n: 'sqlite3_clear_bindings'; d: @sqlite3_clear_bindings)
  );
