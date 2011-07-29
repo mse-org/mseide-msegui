@@ -399,17 +399,20 @@ type
                  //itemcount of aisnull can be smaller than itemcount of avalues
                 const alast: boolean = false;
                 const partialstring: boolean = false;
-                const nocheckbrowsemode: boolean = false): boolean; overload;
+                const nocheckbrowsemode: boolean = false;
+                const exact: boolean = true): boolean; overload;
                 //sets dataset cursor if found
    function find(const avalues: array of tfield;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean; overload;
+               const nocheckbrowsemode: boolean = false;
+               const exact: boolean = true): boolean; overload;
                 //sets dataset cursor if found
    function findvariant(const avalue: array of variant;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean; overload;
+               const nocheckbrowsemode: boolean = false;
+               const exact: boolean = true): boolean; overload;
                 //sets dataset cursor if found
 
    function unique(const avalues: array of const): boolean;
@@ -8072,12 +8075,20 @@ begin
     else begin
      result:= ainfo.comparefunc(ldata.po^,rdata.po^);
      if (result <> 0) and apartialstring then begin
+      if ainfo.caseinsensitive then begin
+       result:=  msepartialcomparetext(ldata.mstr,rdata.mstr);
+      end
+      else begin
+       result:=  msepartialcomparestr(ldata.mstr,rdata.mstr);
+      end;
+{
       if ainfo.caseinsensitive and 
          mseissametextlen(ldata.mstr,rdata.mstr) or
        not ainfo.caseinsensitive and 
          mseissamestrlen(ldata.mstr,rdata.mstr) then begin
        result:= 0;
       end;
+}
      end;
     end;
    end;    
@@ -8120,21 +8131,42 @@ begin
       result:= comparefunc((pointer(l)+recoffset)^,(pointer(r)+recoffset)^);
      end;
     end;
-    if desc then begin
-     result:= -result;
+    if (result <> 0) then begin
+     if apartialstring and canpartialstring and (int1 = alastindex) then begin
+      if caseinsensitive then begin
+       result:=  msepartialcomparetext(pmsestring(pointer(l)+recoffset)^,
+                 pmsestring(pointer(r)+recoffset)^);
+      end
+      else begin
+       result:=  msepartialcomparestr(pmsestring(pointer(l)+recoffset)^,
+                 pmsestring(pointer(r)+recoffset)^);
+      end;
+     end;
+     if desc then begin
+      result:= -result;
+     end;
+     break;
     end;
-    if result <> 0 then begin
+     
+//    if result <> 0 then begin
+    {
      if apartialstring and canpartialstring and (int1 = alastindex) and
       (caseinsensitive and 
-         mseissametextlen(pmsestring(pointer(l)+recoffset)^,
-                 pmsestring(pointer(r)+recoffset)^) or
+//         mseissametextlen(pmsestring(pointer(l)+recoffset)^,
+//                 pmsestring(pointer(r)+recoffset)^) or
+         (msecomparetextlen(pmsestring(pointer(l)+recoffset)^,
+                 pmsestring(pointer(r)+recoffset)^) = 0) or
        not caseinsensitive and 
-         mseissamestrlen(pmsestring(pointer(l)+recoffset)^,
-                 pmsestring(pointer(r)+recoffset)^)) then begin
+//         mseissamestrlen(pmsestring(pointer(l)+recoffset)^,
+//                 pmsestring(pointer(r)+recoffset)^)
+         (msecomparestrlen(pmsestring(pointer(l)+recoffset)^,
+                 pmsestring(pointer(r)+recoffset)^) = 0)
+      )                                                   then begin
       result:= 0;
      end;               
      break;
     end;
+      }
    end;
   end;
  end;
@@ -8491,9 +8523,15 @@ begin
  end;
 end;
 
-procedure paramerror;
+procedure paramerror(const amessage: msestring = '');
+var
+ mstr1: msestring;
 begin
- databaseerror('Invalid find parameters.');
+ mstr1:= 'Invalid find parameters.';
+ if amessage <> '' then begin
+  mstr1:= mstr1 + lineend+amessage;
+ end;
+ databaseerror(mstr1);
 end;
 
 function tlocalindex.find(const avalues: array of const;
@@ -8521,7 +8559,10 @@ begin
  for int1:= lastind downto 0 do begin
   if (avalues[int1].vtype <> vtpointer) and 
               (avalues[int1].vtype <> findexfieldinfos[int1].vtype) then begin
-   paramerror;
+   paramerror(tmsebufdataset(fowner).name+
+    'field '+ findexfieldinfos[int1].fieldinstance.fieldname+
+    ' wanted vtype: '+ inttostr(findexfieldinfos[int1].vtype)+
+    ' actual vtype: '+ inttostr(avalues[int1].vtype));
   end;
  end;
  po1:= tmsebufdataset(fowner).intallocrecord;
@@ -8572,10 +8613,10 @@ begin
   with tmsebufdataset(fowner) do begin
    with findexes[findexlocal.indexof(self) + 1] do begin
     if abigger then begin
-     if int1 <= 0 then begin
+     if int1 < 0 then begin
       goto endlab;
      end;
-     if compare(po1,ind[int1-1],lastind,false) = 0 then begin
+     if (int1 > 0) and (compare(po1,ind[int1-1],lastind,false) = 0) then begin
       result:= true;
       dec(int1);
      end;
@@ -8663,13 +8704,14 @@ end;
 function tlocalindex.find(const avalues: array of const;
     const aisnull: array of boolean;
     const alast: boolean = false; const partialstring: boolean = false;
-    const nocheckbrowsemode: boolean = false): boolean;
+    const nocheckbrowsemode: boolean = false;
+    const exact: boolean = true): boolean;
                 //sets dataset cursor if found
 var
  str1: string;
 begin
  result:= find(avalues,aisnull,str1,alast,partialstring,nocheckbrowsemode);
- if result then begin
+ if result or not exact then begin
   tmsebufdataset(fowner).bookmark:= str1;
  end;
 end;
@@ -8677,13 +8719,14 @@ end;
 function tlocalindex.find(const avalues: array of tfield;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean; overload;
+               const nocheckbrowsemode: boolean = false;
+               const exact: boolean = true): boolean; overload;
                 //sets dataset cursor if found
 var
  str1: string;
 begin
  result:= find(avalues,str1,abigger,partialstring,nocheckbrowsemode);
- if result then begin
+ if result or not exact then begin
   tmsebufdataset(fowner).bookmark:= str1;
  end;
 end;
@@ -8764,13 +8807,14 @@ end;
 function tlocalindex.findvariant(const avalue: array of variant;
                const abigger: boolean = false;
                const partialstring: boolean = false;
-               const nocheckbrowsemode: boolean = false): boolean; overload;
+               const nocheckbrowsemode: boolean = false;
+               const exact: boolean = true): boolean; overload;
                 //sets dataset cursor if found
 var
  str1: string;
 begin
  result:= findvariant(avalue,str1,abigger,partialstring,nocheckbrowsemode);
- if result then begin
+ if result or not exact then begin
   tmsebufdataset(fowner).bookmark:= str1;
  end;
 end;

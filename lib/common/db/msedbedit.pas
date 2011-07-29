@@ -1409,8 +1409,9 @@ type
 
  dbdropdownliststatety = (ddls_isstringkey);
  dbdropdownliststatesty = set of dbdropdownliststatety;
- tcustomdbdropdownlistcontroller = class(tcustomdropdownlistcontroller,
-                                                              idbeditinfo)
+
+ tcustomdbdropdownlistcontroller = class(
+                                 tcustomdropdownlistcontroller,idbeditinfo)
   private
    fdatalink: tdropdowndatalink;
 //   fisstringkey: boolean;

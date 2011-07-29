@@ -235,6 +235,8 @@ function mseCompareTextlen(const S1, S2: msestring): Integer;
                 //case insensitiv, beruecksichtigt nur s1 laenge
 function mseCompareTextlenupper(const S1, S2: msestring): Integer;
                 //case insensitiv, checks length s1 only, s1 must be uppercase
+function msepartialcomparetext(const s1,s2: msestring): integer;
+function msepartialcomparestr(const s1,s2: msestring): integer;
 
 function mseissamestrlen(const apartstring,astring: msestring): boolean;
 function mseissametextlen(const apartstring,astring: msestring): boolean;
@@ -4191,6 +4193,22 @@ var
 begin
  str1:= copy(s2,1,length(s1));  //todo: optimize
  result:= msecomparetext(s1,str1);
+end;
+
+function msepartialcomparetext(const s1,s2: msestring): integer;
+var
+ mstr1: msestring;
+begin
+ mstr1:= s1 + copy(s2,length(s1)+1,bigint);
+ result:= msecomparetext(mstr1,s2);
+end;
+
+function msepartialcomparestr(const s1,s2: msestring): integer;
+var
+ mstr1: msestring;
+begin
+ mstr1:= s1 + copy(s2,length(s1)+1,bigint);
+ result:= msecomparestr(mstr1,s2);
 end;
 
 function mseCompareTextlenupper(const S1, S2: msestring): Integer;

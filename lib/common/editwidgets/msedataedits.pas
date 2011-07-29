@@ -3733,8 +3733,13 @@ begin
    end;
   end;
   if accept then begin
-   if not quiet and canevent(tmethod(fonsetvalue)) then begin
-    fonsetvalue(self,int1,accept);
+   if not quiet then begin
+    if canevent(tmethod(fonsetvalue)) then begin
+     fonsetvalue(self,int1,accept);
+    end;
+  {$ifdef mse_with_ifi}
+    ifisetvalue(int1,accept);
+  {$endif}
    end;
    if accept then begin
     value:= int1;
@@ -3941,8 +3946,13 @@ begin
    end;
   end;
   if accept then begin
-   if not quiet and canevent(tmethod(fonsetvalue)) then begin
-    fonsetvalue(self,int1,accept);
+   if not quiet then begin
+    if canevent(tmethod(fonsetvalue)) then begin
+     fonsetvalue(self,int1,accept);
+    end;
+  {$ifdef mse_with_ifi}
+    ifisetvalue(int1,accept);
+  {$endif}
    end;
    if accept then begin
     value:= int1;
@@ -4141,8 +4151,13 @@ begin
  if not accept then begin
   exit;
  end;
- if not quiet and canevent(tmethod(fonsetvalue)) then begin
-  fonsetvalue(self,mstr1,accept);
+ if not quiet then begin
+  if canevent(tmethod(fonsetvalue)) then begin
+   fonsetvalue(self,mstr1,accept);
+  end;
+{$ifdef mse_with_ifi}
+  ifisetvalue(mstr1,accept);
+{$endif}
  end;
  if accept then begin
   value:= mstr1;
@@ -4654,8 +4669,13 @@ begin
    end;
   end;
   fdropdownenums:= nil;
-  if not quiet and canevent(tmethod(fonsetvalue1)) then begin
-   fonsetvalue1(self,int1,accept);
+  if not quiet then begin
+   if canevent(tmethod(fonsetvalue1)) then begin
+    fonsetvalue1(self,int1,accept);
+   end;
+ {$ifdef mse_with_ifi}
+   ifisetvalue(int1,accept);
+ {$endif}
   end;
   if accept then begin
    value:= int1;
@@ -4819,6 +4839,9 @@ begin
       fonsetvalue(self,rea1,accept);
      end;
     end;
+  {$ifdef mse_with_ifi}
+    ifisetvalue(rea1,accept);
+  {$endif}
    end;
    if accept then begin
     value:= rea1;
@@ -5312,8 +5335,13 @@ begin
    end;
   end;
   if accept then begin
-   if not quiet and canevent(tmethod(fonsetvalue)) then begin
-    fonsetvalue(self,dat1,accept);
+   if not quiet then begin
+    if canevent(tmethod(fonsetvalue)) then begin
+     fonsetvalue(self,dat1,accept);
+    end;
+  {$ifdef mse_with_ifi}
+    ifisetvalue(dat1,accept);
+  {$endif}
    end;
    if accept then begin
     value:= dat1;
