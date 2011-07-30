@@ -844,9 +844,9 @@ type
    function  getrecno: longint; override;
    function getchangecount: integer; virtual;
    function  allocrecordbuffer: pchar; override;
+   procedure internalinitrecord(buffer: pchar); override;
    procedure clearcalcfields(buffer: pchar); override;
    procedure freerecordbuffer(var buffer: pchar); override;
-   procedure internalinitrecord(buffer: pchar); override;
    function  getcanmodify: boolean; override;
    function getrecord(buffer: pchar; getmode: tgetmode;
                                    docheck: boolean): tgetresult; override;
@@ -1957,8 +1957,12 @@ begin
 end;
 
 function tmsebufdataset.allocrecordbuffer: pchar;
+var
+ int1: integer;
 begin
- result := allocmem(dsheadersize+fcalcrecordsize);
+ int1:= dsheadersize+fcalcrecordsize;
+ result:= allocmem(int1);
+ fillchar(result^,int1,0); //init for refcounted calcdata
  initrecord(result);
 end;
 
@@ -1970,10 +1974,30 @@ begin
   for int1:= high(fcalcstringpositions) downto 0 do begin
    pmsestring(pointer(@header)+fcalcstringpositions[int1])^:= '';
   end;
+  for int1:= high(fcalcvarpositions) downto 0 do begin
+   freedbvariant(pvariant(pointer(@header)+fcalcvarpositions[int1])^)
+  end;
   fillchar((pointer(@header)+frecordsize)^,fcalcrecordsize-frecordsize,0);
  end;
 end;
 
+procedure tmsebufdataset.internalinitrecord(buffer: pchar);
+begin
+ with pdsrecordty(buffer)^ do begin
+  finalizecalcvalues(precheaderty(@header)^);
+  fillchar(header,fcalcrecordsize,#0); //zero the whole buffer
+ end;
+end;
+{
+procedure tmsebufdataset.internalinitrecord(buffer: pchar);
+
+begin
+ freecalcfields(buffer);
+// with pdsrecordty(buffer)^ do begin
+//  fillchar(header,fcalcrecordsize, #0);
+// end;
+end;
+}
 procedure tmsebufdataset.freerecordbuffer(var buffer: pchar);
 //var
 // int1: integer;
@@ -3862,14 +3886,6 @@ end;
 function tmsebufdataset.getchangecount: integer;
 begin
  result:= length(fupdatebuffer);
-end;
-
-procedure tmsebufdataset.internalinitrecord(buffer: pchar);
-
-begin
- with pdsrecordty(buffer)^ do begin
-  fillchar(header,fcalcrecordsize, #0);
- end;
 end;
 
 procedure tmsebufdataset.setrecno1(value: longint; const nocheck: boolean);
