@@ -2187,6 +2187,7 @@ begin
   end;
 
 //  fo.unitdirs.gridvalues:= reversearray(unitdirs);
+  fo.unitdirs.gridvalues:= reversearray(fo.unitdirs.gridvalues);
   int2:= high(o.t.unitdirs);
   for int1:= 0 to int2 do begin
    if int1 > high(o.unitdirson) then begin
