@@ -1008,6 +1008,7 @@ procedure projectoptionstofont(const afont: tfont);
 function objpath(const aname: filenamety): filenamety;
 function gettargetfile: filenamety;
 function getmacros: tmacrolist;
+procedure hintmacros(const sender: tcustomedit; var info: hintinfoty);
 
 var
  projectoptions: projectoptionsty;
@@ -1146,6 +1147,12 @@ begin
  end;
 end;
 
+procedure hintmacros(const sender: tcustomedit; var info: hintinfoty);
+begin
+ info.caption:= tcustomedit(sender).text;
+ expandprmacros1(info.caption);
+ include(info.flags,hfl_show); //show empty caption
+end;
 function gettargetfile: filenamety;
 begin
  with projectoptions,d.texp do begin
@@ -2510,9 +2517,7 @@ procedure tprojectoptionsfo.hintexpandedmacros(const sender: TObject;
                            var info: hintinfoty);
 begin
  storemacros(self);
- info.caption:= tcustomedit(sender).text;
- expandprmacros1(info.caption);
- include(info.flags,hfl_show); //show empty caption
+ hintmacros(tcustomedit(sender),info);
 end;
 
 procedure tprojectoptionsfo.selectactiveonrowsmoved(const sender: tcustomgrid;

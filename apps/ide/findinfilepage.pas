@@ -225,6 +225,7 @@ var
  int1: integer;
  stream1: ttextstream;
  bo1: boolean;
+ mstr1: filenamety;
   
 begin
  if finfo.source = fs_inopenfiles then begin
@@ -265,7 +266,11 @@ begin
   end;
  end
  else begin
-  searchdirectory(filepath(tfindinfilepagefo(sender.datapo).finfo.directory,fk_file));
+  mstr1:= tfindinfilepagefo(sender.datapo).finfo.directory;
+  application.lock;
+  expandprmacros1(mstr1);
+  application.unlock;
+  searchdirectory(filepath(mstr1,fk_file));
  end;
 end;
 

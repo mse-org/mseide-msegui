@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,7 +22,8 @@ interface
 uses
  finddialogform,findinfileform,mseforms,msedataedits,msesimplewidgets,
  msegraphedits,msefiledialog,msetypes,mseglob,mseguiglob,msegui,msestat,
- msestatfile,mseevent,msemenus,msesplitter,msegraphics,msegraphutils,msewidgets;
+ msestatfile,mseevent,msemenus,msesplitter,msegraphics,msegraphutils,msewidgets,
+ msestrings;
 
 type
 
@@ -47,16 +48,19 @@ type
    procedure dirshowhint(const sender: TObject; var info: hintinfoty);
    procedure chaindirectories(const sender: TObject);
    procedure chainopenfiles(const sender: TObject);
+   procedure dirgetfilenameexe(const sender: TObject; var avalue: msestring;
+                   var accept: Boolean);
   private
    procedure valuestoinfo(out info: findinfileinfoty);
    procedure infotovalues(const info: findinfileinfoty);
  end;
 
-function findinfiledialogexecute(var info: findinfileinfoty; const useinfo: boolean): boolean;
+function findinfiledialogexecute(var info: findinfileinfoty;
+                                        const useinfo: boolean): boolean;
 
 implementation
 uses
- msestrings,msebits,findinfiledialogform_mfm;
+ msebits,findinfiledialogform_mfm,projectoptionsform;
 
 function findinfiledialogexecute(var info: findinfileinfoty; const useinfo: boolean): boolean;
 var
@@ -148,9 +152,12 @@ end;
 procedure tfindinfiledialogfo.dirshowhint(const sender: TObject;
                var info: hintinfoty);
 begin
+ hintmacros(tcustomstringedit(sender),info);
+{
  if dir.editor.textclipped then begin
   info.caption:= dir.value;
  end;
+}
 end;
 
 procedure tfindinfiledialogfo.chaindirectories(const sender: TObject);
@@ -171,6 +178,12 @@ begin
   mask.enabled:= false;
   subdirs.enabled:= false;
  end;
+end;
+
+procedure tfindinfiledialogfo.dirgetfilenameexe(const sender: TObject;
+               var avalue: msestring; var accept: Boolean);
+begin
+ expandprmacros1(avalue);
 end;
 
 end.
