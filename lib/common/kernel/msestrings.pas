@@ -4195,20 +4195,32 @@ begin
  result:= msecomparetext(s1,str1);
 end;
 
-function msepartialcomparetext(const s1,s2: msestring): integer;
-var
- mstr1: msestring;
-begin
- mstr1:= s1 + copy(s2,length(s1)+1,bigint);
- result:= msecomparetext(mstr1,s2);
-end;
-
 function msepartialcomparestr(const s1,s2: msestring): integer;
 var
  mstr1: msestring;
 begin
- mstr1:= s1 + copy(s2,length(s1)+1,bigint);
- result:= msecomparestr(mstr1,s2);
+ mstr1:= copy(s2,1,length(s1));
+ result:= msecomparestr(s1,mstr1);
+ if (result <> 0) and (length(s2) > length(s1)) then begin
+  if msecomparestr(s1+'A',mstr1+'Z') < 
+                     msecomparestr(s1+'Z',mstr1+'A') then begin
+   result:= 0;
+  end;
+ end;
+end;
+
+function msepartialcomparetext(const s1,s2: msestring): integer;
+var
+ mstr1: msestring;
+begin
+ mstr1:= copy(s2,1,length(s1));
+ result:= msecomparetext(s1,mstr1);
+ if (result <> 0) and (length(s2) > length(s1)) then begin
+  if msecomparetext(s1+'A',mstr1+'Z') < 
+                     msecomparetext(s1+'Z',mstr1+'A') then begin
+   result:= 0;
+  end;
+ end;
 end;
 
 function mseCompareTextlenupper(const S1, S2: msestring): Integer;
