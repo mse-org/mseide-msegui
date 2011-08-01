@@ -1,11 +1,9 @@
 object actionsmo: tactionsmo
+  bounds_cx = 474
+  bounds_cy = 439
   left = 7
   top = 160
   moduleclassname = 'tmsedatamodule'
-  size = (
-    474
-    523
-  )
   object makeact: taction
     Tag = 1
     caption = '&Make'

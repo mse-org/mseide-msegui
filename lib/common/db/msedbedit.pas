@@ -75,6 +75,7 @@ type
  griddatalinkoptionsty = set of griddatalinkoptionty;
 
 const
+ defaultgriddatalinkoptions = [gdo_propscrollbar,gdo_thumbtrack];
  defaulteditwidgetdatalinkoptions = [oed_syncedittonavigator];
  defaultdbnavigatoroptions = [dno_confirmdelete,dno_confirmcopy,dno_append];
  designdbnavigbuttons = [dbnb_first,dbnb_prior,dbnb_next,dbnb_last];
@@ -1314,7 +1315,8 @@ type
    property field_merged: tfield read ffield_merged;
    property field_selected: tfield read ffield_selected;
   published
-   property options: griddatalinkoptionsty read foptions write foptions default [];
+   property options: griddatalinkoptionsty read foptions write foptions 
+                   default defaultgriddatalinkoptions;
    property onupdaterowdata: updaterowdataeventty read fonupdaterowdata 
                                 write fonupdaterowdata;
    property datasource: tdatasource read getdatasource1 write settadasource1;
@@ -6867,6 +6869,7 @@ begin
  fgrid:= aowner;
  include(tcustomgrid1(fgrid).fstate,gs_isdb);
  inherited create;
+ options:= defaultgriddatalinkoptions;
 // visualcontrol:= true; 
 end;
 
