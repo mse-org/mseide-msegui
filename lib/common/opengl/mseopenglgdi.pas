@@ -321,14 +321,15 @@ begin
  dest.a:= 0;
 end;
 
-procedure sendrect(const gc: oglgcdty; const arect: rectty);
+procedure sendrect(const drawinfo: drawinfoty; const arect: rectty);
 var
- starty,endx,endy: integer;
+ startx,starty,endx,endy: integer;
  
 begin
- with arect do begin
-  endx:= x+cx-1;
-  starty:= gc.sourceheight-y;
+ with drawinfo,oglgcty(gc.platformdata).d,arect do begin
+  startx:= x+origin.x;
+  endx:= startx+cx-1;
+  starty:= sourceheight-(y+origin.y);
   endy:= starty-cy+1;
 //  glvertex2iv(@pos);
   glvertex2i(x,starty);
@@ -485,7 +486,7 @@ var
  int1,int2: integer;
 begin
  int2:= oglgcty(drawinfo.gc.platformdata).d.sourceheight;
- with drawinfo.points do begin
+ with drawinfo,points do begin
   if closed then begin
    glbegin(gl_line_loop);
   end
@@ -494,7 +495,7 @@ begin
   end;
   po1:= points;
   for int1:= count-1 downto 0 do begin
-   glvertex2i(po1^.x,int2-po1^.y);
+   glvertex2i(po1^.x+origin.x,int2-(po1^.y+origin.y));
    inc(po1);
   end;
  end;
@@ -508,10 +509,10 @@ var
 begin
  int2:= oglgcty(drawinfo.gc.platformdata).d.sourceheight;
  glbegin(gl_lines);
- with drawinfo.points do begin
+ with drawinfo,points do begin
   po1:= points;
   for int1:= count-1 downto 0 do begin
-   glvertex2i(po1^.x,int2-po1^.y);
+   glvertex2i(po1^.x+origin.x,int2-(po1^.y+origin.y));
    inc(po1);
   end;
  end;
@@ -553,7 +554,7 @@ end;
 procedure gdi_fillrect(var drawinfo: drawinfoty);
 begin 
  glbegin(gl_quads);
- sendrect(oglgcty(drawinfo.gc.platformdata).d,drawinfo.rect.rect^);
+ sendrect(drawinfo,drawinfo.rect.rect^);
  glend;
 end;
 
@@ -628,7 +629,7 @@ var
  po1: ppointty;
  po2: pgluvertexty;
 begin
- with drawinfo.points,oglgcty(drawinfo.gc.platformdata).d do begin
+ with drawinfo,points,oglgcty(drawinfo.gc.platformdata).d do begin
   glutesscallback(tess, glu_tess_error, tcallback(@tesserror));
   glutesscallback(tess, glu_tess_begin, tcallback(glbegin));
   glutesscallback(tess, glu_tess_vertex, tcallback(glvertex3dv));
@@ -643,8 +644,8 @@ begin
   glutessbegincontour(tess);
   for int1:= count-1 downto 0 do begin
    with po2^ do begin
-    x:= po1^.x;
-    y:= do1-po1^.y;
+    x:= po1^.x+origin.x;
+    y:= do1-(po1^.y+origin.y);
     z:= 0;
    end;
    glutessvertex(tess,p3darray(po2)^,po2);

@@ -144,6 +144,7 @@ procedure topenglcanvaswidget.docreatewinid(const aparent: winidty;
                const awidgetrect: rectty; var aid: winidty);
 begin
  fcanvas.linktopaintdevice(aparent,awidgetrect,aid);
+ checkwindowrect;
 end;
 
 procedure topenglcanvaswidget.updateviewport(const arect: rectty);

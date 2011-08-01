@@ -206,15 +206,17 @@ var
  po2: pmsecharaty;
  int1: integer;
  pt1: pointty;
+ y1: integer;
 begin
- with drawinfo.text16pos do begin
-  pt1:= pos^;
+ with drawinfo,text16pos do begin
+  pt1.x:= pos^.x + origin.x;
+  y1:= pos^.y + origin.y;
   face:= tftface(pointer(afont));
   po2:= pointer(text);
   for int1:= 0 to count-1 do begin
    if face.getglyph(po2^[int1],po1) then begin
     pt1.x:= pt1.x + po1^.bitmap.left;
-    pt1.y:= pos^.y - po1^.bitmap.top;
+    pt1.y:= y1 - po1^.bitmap.top;
     drawglyph(drawinfo,pt1,@po1^.bitmap);
     pt1.x:= pt1.x - po1^.bitmap.left + po1^.width;
    end;
