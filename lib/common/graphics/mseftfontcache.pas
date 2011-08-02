@@ -149,7 +149,24 @@ begin
 end;
 
 procedure tftfontcache.gettext16width(var drawinfo: drawinfoty);
+var
+ po1: pmsecharaty;
+ po3: pglyphinfoty;
+ face1: tftface;
+ int1,int2: integer;
 begin
+ with drawinfo.gettext16width do begin
+  face1:= tftface(pointer(fontdata^.font));
+  po1:= pointer(text);
+  face1:= tftface(pointer(fontdata^.font));
+  int2:= 0;
+  for int1:= count-1 downto 0 do begin
+   if face1.getglyph(po1^[int1],po3) then begin
+    int2:= int2 + po3^.width;
+   end
+  end;
+  result:= int2;
+ end;
 end;
 
 procedure tftfontcache.getchar16widths(var drawinfo: drawinfoty);
