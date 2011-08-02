@@ -33,7 +33,8 @@ type
  tftfontcache = class(tfontcache)
   protected
    procedure internalfreefont(const afont: ptruint); override;
-   function internalgetfont(const ainfo: getfontinfoty): boolean; override;
+   function internalgetfont(const ainfo: getfontinfoty;
+                              out aheight: integer): boolean; override;
    procedure updatefontinfo(const adataoffset: longword;
                                 var adata: fontcachedataty); override;
    procedure drawglyph(var drawinfo: drawinfoty; const pos: pointty;
@@ -111,18 +112,18 @@ begin
  tftface(pointer(afont)).free;
 end;
 
-function tftfontcache.internalgetfont(const ainfo: getfontinfoty): boolean;
+function tftfontcache.internalgetfont(const ainfo: getfontinfoty;
+                                            out aheight: integer): boolean;
 var
  ftface: pft_face;
  str1: string;
  int1: integer;
- h1: integer;
 begin
  result:= false;
  with ainfo do begin
-  if getfcfontfile(ainfo,str1,int1,h1) then begin
+  if getfcfontfile(ainfo,str1,int1,aheight) then begin
    if ft_new_face(ftlib,pchar(str1),int1,ftface) = 0 then begin
-    if ft_set_pixel_sizes(ftface,0,h1) = 0 then begin
+    if ft_set_pixel_sizes(ftface,0,aheight) = 0 then begin
      pointer(fontdata^.font):= tftface.create(ftface);
      result:= true;
     end;
