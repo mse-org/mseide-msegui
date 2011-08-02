@@ -52,7 +52,7 @@ type
  
 implementation
 uses
- msefreetype,msefontconfig,msefcfontselect;
+ msefreetype,msefontconfig,msefcfontselect,math;
 
 const
  charcount = $10000; //UCS2
@@ -142,8 +142,8 @@ begin
   scale:= adata.height/units_per_em;
   adata.ascent:= round(ascender*scale);
   adata.descent:= -round(descender*scale);
-  adata.height:= height;
-  adata.linespacing:= adata.ascent + adata.descent;
+  adata.height:= adata.ascent + adata.descent;
+  adata.linespacing:= ceil(height*scale);
   adata.caretshift:= 0;
  end;
 end;
