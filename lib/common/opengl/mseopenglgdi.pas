@@ -678,7 +678,8 @@ begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
   im1:= tcanvas1(source).getimage(true);
   with destrect^ do begin
-   glwindowpos2i(x,sourceheight-y);
+//   glwindowpos2i(x,sourceheight-y);
+   glrasterpos2i(x,sourceheight-y);
   end;
   glpushclientattrib(gl_client_pixel_store_bit);
   glpushattrib(gl_pixel_mode_bit);
@@ -797,7 +798,7 @@ procedure tglftfontcache.drawglyph(var drawinfo: drawinfoty; const pos: pointty;
 begin
  with bitmap^ do begin
   with oglgcty(drawinfo.gc.platformdata).d do begin
-   if glwindowpos2i = nil then begin
+   if true {glwindowpos2i = nil} then begin
     glrasterpos2i(pos.x,sourceheight-pos.y); //todo: fix transformation
    end
    else begin
@@ -807,7 +808,7 @@ begin
   gldrawpixels(width,height,gl_alpha,gl_unsigned_byte,@data);
  end;
 end;
-var testvar: oglgcdty;
+
 procedure tglftfontcache.drawstring16(var drawinfo: drawinfoty;
                const afont: fontty);
 var
@@ -816,7 +817,6 @@ begin
  with oglgcty(drawinfo.gc.platformdata).d do begin
   if df_opaque in drawinfo.gc.drawingflags then begin
    if textbackgroundrect(drawinfo,afont,rect1) then begin
-testvar:= oglgcty(drawinfo.gc.platformdata).d;
     with glcolorbackground do begin
      glcolor3ub(red,green,blue);
     end;
