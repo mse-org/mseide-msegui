@@ -355,6 +355,8 @@ var
                                  load_flags: longint): integer; cdecl;
  FT_Load_Glyph: function(face: PFT_Face; glyph_index: FT_UInt;
                                      load_flags: longint): integer; cdecl;
+ FT_Render_Glyph: function(slot: PFT_GlyphSlot;
+                                   render_mode: FT_Render_Mode): integer; cdecl;
  FT_New_Face: function(alibrary: PFT_Library; filepathname: PChar;
                  face_index: integer; var aface: PFT_Face): integer; cdecl;
  FT_Set_Char_Size: function(face: PFT_Face; char_width, char_height: FT_F26dot6;
@@ -432,7 +434,7 @@ end;
 
 procedure initializefreetype(const sonames: array of filenamety);
 const
- funcs: array[0..18] of funcinfoty = (
+ funcs: array[0..19] of funcinfoty = (
   (n: 'FT_Done_Face'; d: @FT_Done_Face),                //0
   (n: 'FT_Done_FreeType'; d: @FT_Done_FreeType),        //1
   (n: 'FT_Get_Char_Index'; d: @FT_Get_Char_Index),      //2
@@ -451,7 +453,8 @@ const
   (n: 'FT_Glyph_To_Bitmap'; d: @FT_Glyph_To_Bitmap),    //15
   (n: 'FT_Glyph_Transform'; d: @FT_Glyph_Transform),    //16
   (n: 'FT_Done_Glyph'; d: @FT_Done_Glyph),              //17
-  (n: 'FT_Glyph_Get_CBox'; d: @FT_Glyph_Get_CBox)       //18
+  (n: 'FT_Glyph_Get_CBox'; d: @FT_Glyph_Get_CBox),      //18
+  (n: 'FT_Render_Glyph'; d: @FT_Render_Glyph)           //19
  );
  
 begin

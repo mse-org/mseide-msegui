@@ -66,7 +66,7 @@ type
   width: smallint;
   leftbearing: smallint;
   rightbearing: smallint;
-  bitmap: bitmapdataty;
+  bitmap: longword; //buffer offset to bitmapdatatyty 0->not rendered yet
  end;
  
  pglyphinfoty = ^glyphinfoty;
@@ -87,8 +87,10 @@ type
   public
    constructor create(const aface: pft_face);
    destructor destroy; override;
-   function getglyph(const achar: msechar; out ainfo: pglyphinfoty): boolean;
+   function getglyph(const achar: msechar; out ainfo: pglyphinfoty;
+               const forceload: boolean): boolean;
                             //true if found
+   procedure renderglyph(var ainfo: pglyphinfoty);
  end;
 
 { tftfontcache }
@@ -161,7 +163,7 @@ begin
   face1:= tftface(pointer(fontdata^.font));
   int2:= 0;
   for int1:= count-1 downto 0 do begin
-   if face1.getglyph(po1^[int1],po3) then begin
+   if face1.getglyph(po1^[int1],po3,false) then begin
     int2:= int2 + po3^.width;
    end
   end;
@@ -182,7 +184,7 @@ begin
   po1:= pointer(text);
   po2:= pointer(resultpo);
   for int1:= count-1 downto 0 do begin
-   if face1.getglyph(po1^[int1],po3) then begin
+   if face1.getglyph(po1^[int1],po3,false) then begin
     po2^[int1]:= po3^.width;
    end
    else begin
@@ -199,7 +201,7 @@ var
 begin
  with drawinfo.getfontmetrics do begin
   face:= tftface(pointer(fontdata^.font));
-  if face.getglyph(char,po1) then begin
+  if face.getglyph(char,po1,false) then begin
    with resultpo^ do begin
     width:= po1^.width;
     leftbearing:= po1^.leftbearing;
@@ -222,6 +224,7 @@ var
  face: tftface;
  po1: pglyphinfoty;
  po2: pmsecharaty;
+ po3: pbitmapdataty;
  int1: integer;
  pt1: pointty;
  y1: integer;
@@ -232,11 +235,17 @@ begin
   face:= tftface(pointer(afont));
   po2:= pointer(text);
   for int1:= 0 to count-1 do begin
-   if face.getglyph(po2^[int1],po1) then begin
-    pt1.x:= pt1.x + po1^.bitmap.left;
-    pt1.y:= y1 - po1^.bitmap.top;
-    drawglyph(drawinfo,pt1,@po1^.bitmap);
-    pt1.x:= pt1.x - po1^.bitmap.left + po1^.width;
+   if face.getglyph(po2^[int1],po1,true) then begin
+    if po1^.bitmap = 0 then begin
+     face.renderglyph(po1);
+    end;
+    if po1^.bitmap <> 0 then begin //render error otherwise
+     po3:= pointer(pchar(face.fbuffer)+po1^.bitmap);
+     pt1.x:= pt1.x + po3^.left;
+     pt1.y:= y1 - po3^.top;
+     drawglyph(drawinfo,pt1,po3);
+    end;
+    pt1.x:= pt1.x - po3^.left + po1^.width;
    end;
   end;
  end;
@@ -278,12 +287,50 @@ begin
  end;
 end;
 
-function tftface.getglyph(const achar: msechar; 
-                                         out ainfo: pglyphinfoty): boolean;
+procedure tftface.renderglyph(var ainfo: pglyphinfoty); 
+           //must be called after getglyph
 var
- int1,int2,int3,int4: integer;
- po1: pcharrowty;
+ po1: pchar;
  so,de: pbyteaty;
+ int1,int2,int3: integer;
+ bm1: pbitmapdataty;
+begin
+ if ft_render_glyph(fface^.glyph,ft_render_mode_normal) = 0 then begin
+  with fface^.glyph^,bitmap do begin
+//todo: check bitmap format
+   po1:= fbuffer;
+   int3:= getbuffer(sizeof(bitmapdataty) + width * rows,false);
+   ainfo:= pointer(pchar(ainfo) + 
+                     (pchar(fbuffer) - pchar(po1)));
+   ainfo^.bitmap:= int3;
+   bm1:= pointer(pchar(fbuffer)+int3);
+   bm1^.width:= width;
+   bm1^.height:= rows;
+   bm1^.left:= bitmap_left;
+   bm1^.top:= bitmap_top-rows;
+   de:= @bm1^.data;
+   if pitch < 0 then begin
+    so:= buffer;
+   end
+   else begin
+    so:= pointer(pchar(buffer)+(rows-1)*pitch);
+   end;
+   for int1:= rows - 1 downto 0 do begin
+    for int2:= width-1 downto 0 do begin
+     de[int2]:= so[int2];
+    end;
+    de:= pointer(pchar(de)+width);
+    so:= pointer(pchar(so)-pitch);
+   end;
+  end;
+ end
+end;
+
+function tftface.getglyph(const achar: msechar; out ainfo: pglyphinfoty; 
+                        const forceload: boolean): boolean;
+var
+ int1,int2,int3: integer;
+ po1: pcharrowty;
 begin
  result:= true;
  int1:= word(achar) shr bucketshift;
@@ -295,37 +342,16 @@ begin
  int3:= po1^[int2];
  if int3 = 0 then begin
   if ft_load_glyph(fface,ft_get_char_index(fface,ord(achar)),
-                                          ft_load_render) = 0 then begin
+                                          ft_load_default) = 0 then begin
+   int3:= getbuffer(sizeof(glyphinfoty),false);
+   po1^[int2]:= int3;
+   ainfo:= pglyphinfoty(pchar(fbuffer)+int3);
    with fface^.glyph^ do begin
- //todo: check bitmap format
-    int4:= bitmap.width * bitmap.rows;
-    int3:= getbuffer(sizeof(glyphinfoty)+int4,false);
-    po1^[int2]:= int3;
-    ainfo:= pglyphinfoty(pchar(fbuffer)+int3);
     ainfo^.width:= ftpostopixel(advance.x);
     ainfo^.leftbearing:= ftpostopixel(metrics.horibearingx);
     ainfo^.rightbearing:= ftpostopixel(metrics.horiadvance-metrics.width);
-    with bitmap do begin
-     ainfo^.bitmap.width:= width;
-     ainfo^.bitmap.height:= rows;
-     ainfo^.bitmap.left:= bitmap_left;
-     ainfo^.bitmap.top:= bitmap_top-rows;
-     de:= @ainfo^.bitmap.data;
-     if pitch < 0 then begin
-      so:= buffer;
-     end
-     else begin
-      so:= pointer(pchar(buffer)+(rows-1)*pitch);
-     end;
-     for int1:= rows - 1 downto 0 do begin
-      for int2:= width-1 downto 0 do begin
-       de[int2]:= so[int2];
-      end;
-      de:= pointer(pchar(de)+width);
-      so:= pointer(pchar(so)-pitch);
-     end;
-    end;
    end;
+   ainfo^.bitmap:= 0; //not rendered yet
   end
   else begin
    ainfo:= nil;
@@ -333,6 +359,12 @@ begin
   end;
  end
  else begin
+  if forceload then begin
+   if ft_load_glyph(fface,ft_get_char_index(fface,ord(achar)),
+                                              ft_load_default) <> 0 then begin
+    result:= false;
+   end;                                   
+  end;
   ainfo:= pglyphinfoty(pchar(fbuffer)+int3);
  end;
 end;
