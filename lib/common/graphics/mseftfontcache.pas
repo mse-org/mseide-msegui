@@ -40,6 +40,8 @@ type
    procedure drawglyph(var drawinfo: drawinfoty; const pos: pointty;
                        const bitmap: pbitmapdataty); virtual; abstract;
    function getdataoffs(const afont: fontty): longword; override;
+   function textbackgroundrect(const drawinfo: drawinfoty;
+                        const afont: fontty; out arect: rectty): boolean;
   public
    constructor create(var ainstance: tftfontcache);
    destructor destroy; override;
@@ -83,6 +85,10 @@ type
    fcapacity: longword;
   protected
    fdataoffset: longword;
+   fascent: integer;
+   fdescent: integer;
+   fglyphheight: integer;
+   flinespacing: integer;
    function getbuffer(const asize: integer; const ainit: boolean): longword;
   public
    constructor create(const aface: pft_face);
@@ -142,10 +148,14 @@ begin
  with tftface(pointer(adata.font)),fface^ do begin
   fdataoffset:= adataoffset;
   scale:= adata.height/units_per_em;
-  adata.ascent:= round(ascender*scale);
-  adata.descent:= -round(descender*scale);
-  adata.height:= adata.ascent + adata.descent;
-  adata.linespacing:= ceil(height*scale);
+  fascent:= round(ascender*scale);
+  fdescent:= -round(descender*scale);
+  fglyphheight:= fascent+fdescent;
+  flinespacing:= ceil(height*scale);
+  adata.ascent:= fascent;
+  adata.descent:= fdescent;
+  adata.height:= fglyphheight;
+  adata.linespacing:= flinespacing;
   adata.caretshift:= 0;
  end;
 end;
@@ -218,6 +228,41 @@ begin
  end;
 end;
 
+function tftfontcache.textbackgroundrect(const drawinfo: drawinfoty;
+                               const afont: fontty; out arect: rectty): boolean;
+                          
+var
+ face: tftface;
+ po1: pglyphinfoty;
+ po2: pmsecharaty;
+ int1,int2: integer;
+begin
+ result:= false;
+ with drawinfo,text16pos do begin
+  if count = 0 then begin
+   arect:= nullrect;
+   exit;
+  end;
+  face:= tftface(pointer(afont));
+  po2:= pointer(text);
+  if face.getglyph(po2^[0],po1,false) then begin
+   with arect do begin
+    x:= text16pos.pos^.x + po1^.leftbearing;
+    int2:= x + po1^.width;
+    for int1:= 1 to count - 1 do begin
+     if face.getglyph(po2^[int1],po1,false) then begin
+      int2:= int2+po1^.width;
+     end;
+    end;
+    cx:= int2 + po1^.rightbearing;
+    y:= text16pos.pos^.y - face.fascent;
+    cy:= face.fglyphheight;
+   end;
+   result:= true;
+  end;
+ end;
+end;
+
 procedure tftfontcache.drawstring16(var drawinfo: drawinfoty;
                                                      const afont: fontty);
 var
@@ -226,10 +271,14 @@ var
  po2: pmsecharaty;
  po3: pbitmapdataty;
  int1: integer;
+ rect1: rectty;
  pt1: pointty;
  y1: integer;
 begin
  with drawinfo,text16pos do begin
+  if count = 0 then begin
+   exit;
+  end;
   pt1.x:= pos^.x + origin.x;
   y1:= pos^.y + origin.y;
   face:= tftface(pointer(afont));

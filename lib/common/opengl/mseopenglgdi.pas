@@ -126,6 +126,7 @@ type
   ftglfont: pftglfont;
   tess: pglutesselator;
   glcolorforeground: rgbtriplety;
+  glcolorbackground: rgbtriplety;
  end;
 
  {$if sizeof(oglgcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$endif}
@@ -417,6 +418,9 @@ begin
    with glcolorforeground do begin
     glcolor3ub(red,green,blue);
    end;
+  end;
+  if gvm_colorbackground in mask then begin
+   glcolorbackground:= rgbtriplety(colorbackground);
   end;
   if gvm_lineoptions in mask then begin
    if (lio_antialias in lineinfo.options) xor 
@@ -803,17 +807,30 @@ begin
   gldrawpixels(width,height,gl_alpha,gl_unsigned_byte,@data);
  end;
 end;
-
+var testvar: oglgcdty;
 procedure tglftfontcache.drawstring16(var drawinfo: drawinfoty;
                const afont: fontty);
+var
+ rect1: rectty;
 begin
- glpushclientattrib(gl_client_pixel_store_bit);
- glpushattrib(gl_pixel_mode_bit or gl_color_buffer_bit or gl_pixel_mode_bit);
- glpixelstorei(gl_unpack_row_length, 0);
- glpixelstorei(gl_unpack_alignment, 1);
- glenable(gl_blend);
- glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
  with oglgcty(drawinfo.gc.platformdata).d do begin
+  if df_opaque in drawinfo.gc.drawingflags then begin
+   if textbackgroundrect(drawinfo,afont,rect1) then begin
+testvar:= oglgcty(drawinfo.gc.platformdata).d;
+    with glcolorbackground do begin
+     glcolor3ub(red,green,blue);
+    end;
+    glbegin(gl_quads);
+    sendrect(drawinfo,rect1);
+    glend;
+   end;
+  end;
+  glpushclientattrib(gl_client_pixel_store_bit);
+  glpushattrib(gl_pixel_mode_bit or gl_color_buffer_bit or gl_pixel_mode_bit);
+  glpixelstorei(gl_unpack_row_length, 0);
+  glpixelstorei(gl_unpack_alignment, 1);
+  glenable(gl_blend);
+  glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
   with glcolorforeground do begin
    glpixeltransferf(gl_red_scale,0);
    glpixeltransferf(gl_red_bias,red/255);
