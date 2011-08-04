@@ -58,6 +58,7 @@ type
    //icanvas
    procedure gcneeded(const sender: tcanvas);
    function getmonochrome: boolean;
+   procedure getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
   public
    constructor create(aowner: tcomponent); override;
    procedure beginprint(const adryrun: boolean = false); override;
@@ -409,6 +410,12 @@ begin
   end;
  end;
  inherited;
+end;
+
+procedure tcustomgdiprinter.getcanvasimage(const bgr: boolean;
+               var aimage: maskedimagety);
+begin
+ //dummy
 end;
 
 procedure doinit;

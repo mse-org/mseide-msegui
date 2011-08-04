@@ -1923,6 +1923,7 @@ type
    procedure gcneeded(const sender: tcanvas);
    function getmonochrome: boolean;
    function getsize: sizety;
+   procedure getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
 
    procedure checkrecursivetransientfor(const value: twindow);
    procedure settransientfor(const Value: twindow; const windowevent: boolean);
@@ -12160,12 +12161,12 @@ begin
   sizeconstraintschanged;
   fstate:= fstate - [tws_posvalid,tws_sizevalid];
   fillchar(gc,sizeof(gcty),0);
-  guierror(gui_creategc(fwindow.id,gck_screen,gc),self);
+  gdierror(fcanvas.creategc(fwindow.id,gck_screen,gc),self);
   gc.paintdevicesize:= fowner.fwidgetrect.size;
   fcanvas.linktopaintdevice(fwindow.id,gc{,fowner.fwidgetrect.size},nullpoint);
 //  finalize(gc);
 //  fillchar(gc,sizeof(gcty),0);
-  guierror(gui_creategc(fwindow.id,gck_screen,gc),self);
+  gdierror(fasynccanvas.creategc(fwindow.id,gck_screen,gc),self);
   fasynccanvas.linktopaintdevice(fwindow.id,gc,{fowner.fwidgetrect.size,}nullpoint);
   if appinst <> nil then begin
    tinternalapplication(application).registerwindow(self);
@@ -13974,6 +13975,11 @@ begin
   end;
   window1:= window1.ftransientfor;
  end;
+end;
+
+procedure twindow.getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
+begin
+ //dummy
 end;
 
 { tonkeyeventlist}

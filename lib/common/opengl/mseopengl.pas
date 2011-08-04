@@ -31,13 +31,14 @@ type
 //   procedure gdi(const func: gdifuncty); override;
   public
    constructor create(const user: tobject; const intf: icanvas);
-   procedure linktopaintdevice(const aparent: winidty;
-             const windowrect: rectty; out aid: winidty); reintroduce;
    procedure init(const acolor: colorty = cl_none); //cl_none -> colorbackground
    procedure swapbuffers;
    property viewport: rectty read fviewport write setviewport;
  end;
  
+ topenglbitmapcanvas = class(topenglcanvas)
+ end;
+  
 implementation
 uses
  mseguiintf;
@@ -80,17 +81,6 @@ end;
 function topenglcanvas.getgdifuncs: pgdifunctionaty;
 begin
  result:= openglgetgdifuncs;
-end;
-
-procedure topenglcanvas.linktopaintdevice(const aparent: winidty;
-               const windowrect: rectty; out aid: winidty);
-var
- gc1: gcty;
-begin
- fillchar(gc1,sizeof(gc1),0);
- guierror(createrendercontext(aparent,windowrect,fcontextinfo,gc1,aid));
- gc1.paintdevicesize:= windowrect.size;
- inherited linktopaintdevice(paintdevicety(aid),gc1,nullpoint);
 end;
 
 procedure topenglcanvas.setviewport(const avalue: rectty);

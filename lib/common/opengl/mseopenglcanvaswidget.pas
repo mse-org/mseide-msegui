@@ -20,6 +20,9 @@ uses
 type
 
  topenglwidgetcanvas = class(topenglcanvas)
+  protected
+   procedure linktopaintdevice(const aparent: winidty;
+             const windowrect: rectty; out aid: winidty); reintroduce;
   published
    property lineoptions;
  {
@@ -65,6 +68,7 @@ type
    procedure gcneeded(const sender: tcanvas);
    function getmonochrome: boolean;
    function getsize: sizety;
+   procedure getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -103,6 +107,9 @@ type
  end;
  
 implementation
+uses
+ mseopenglgdi;
+ 
 type
  topenglcanvas1 = class(topenglcanvas);
  
@@ -177,5 +184,25 @@ function topenglcanvaswidget.canclientpaint: boolean;
 begin
  result:= assigned(fonrender);
 end;
+
+procedure topenglcanvaswidget.getcanvasimage(const bgr: boolean;
+               var aimage: maskedimagety);
+begin
+ //dummy
+end;
+
+{ topenglwidgetcanvas }
+
+procedure topenglwidgetcanvas.linktopaintdevice(const aparent: winidty;
+               const windowrect: rectty; out aid: winidty);
+var
+ gc1: gcty;
+begin
+ fillchar(gc1,sizeof(gc1),0);
+ guierror(createrendercontext(aparent,windowrect,fcontextinfo,gc1,aid));
+ gc1.paintdevicesize:= windowrect.size;
+ inherited linktopaintdevice(paintdevicety(aid),gc1,nullpoint);
+end;
+
 
 end.

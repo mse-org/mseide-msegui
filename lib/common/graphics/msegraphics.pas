@@ -183,10 +183,25 @@ type
  end;
  pfontinfoty = ^fontinfoty;
 
+ imagety = record
+  monochrome: boolean;
+  bgr: boolean;
+  size: sizety;
+  length: integer;  //number of longword
+  pixels: plongwordaty;
+ end;
+ pimagety = ^imagety;
+
+ maskedimagety = record
+  image: imagety;
+  mask: imagety;
+ end;
+ 
  icanvas = interface(inullinterface)
   procedure gcneeded(const sender: tcanvas);
   function getmonochrome: boolean;
   function getsize: sizety;
+  procedure getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
  end;
  
  gcpty = array[0..31] of pointer;
@@ -200,7 +215,7 @@ type
   ppmm: real;
   platformdata: gcpty; //platform dependent
  end;
- gcpoty = ^gcty;
+ pgcty = ^gcty;
 
  bufferty = record
   size: integer;
@@ -302,7 +317,14 @@ type
   rectspo:  prectsty;
   rectscount: integer;
  end;
- 
+
+ creategcinfoty = record
+  paintdevice: paintdevicety;
+  printernamepo: pmsestring;
+  gcpo: pgcty;
+  error: gdierrorty;
+ end;
+  
  gcvaluemaskty = (gvm_clipregion,gvm_colorbackground,gvm_colorforeground,
                   gvm_dashes,gvm_linewidth,gvm_capstyle,gvm_joinstyle,
                   gvm_lineoptions,
@@ -359,6 +381,7 @@ type
   13: (copyarea: copyareainfoty);
   14: (regionoperation: regionoperationinfoty);
   15: (fonthasglyph: fonthasglyphinfoty);
+  16: (creategc: creategcinfoty);
  end;
 
  getfontfuncty = function (var drawinfo: drawinfoty): boolean of object;
@@ -406,10 +429,6 @@ type
    procedure setcharset(const Value: string);
    function getoptions: fontoptionsty;
    procedure setoptions(const avalue: fontoptionsty);
-    //icanvas
-   procedure gcneeded(const sender: tcanvas);
-   function getmonochrome: boolean;
-   function getsize: sizety;
    function getbold: boolean;
    procedure setbold(const avalue: boolean);
    function getitalic: boolean;
@@ -426,6 +445,12 @@ type
    
    procedure readcolorshadow(reader: treader);
    function getlinewidth: integer;
+
+    //icanvas
+   procedure gcneeded(const sender: tcanvas);
+   function getmonochrome: boolean;
+   function getsize: sizety;
+   procedure getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
   protected
    finfo: fontinfoty;
    fhandlepo: ^fontnumty;
@@ -518,7 +543,7 @@ type
 
  gdifunctionty = procedure(var drawinfo: drawinfoty);
 
- gdifuncty = (gdf_destroygc,gdf_changegc,
+ gdifuncty = (gdf_creategc,gdf_destroygc,gdf_changegc,
               gdf_drawlines,gdf_drawlinesegments,gdf_drawellipse,gdf_drawarc,
               gdf_fillrect,
               gdf_fillelipse,gdf_fillarc,gdf_fillpolygon,{gdf_drawstring,}
@@ -571,16 +596,6 @@ type
   frame: colorty;
   hiddenedges: edgesty;
  end;
-
- imagety = record
-  monochrome: boolean;
-  bgr: boolean;
-  size: sizety;
-  length: integer;  //number of longword
-  pixels: plongwordaty;
- end;
- pimagety = ^imagety;
-
 
  edgeinfoty = (kin_dark,kin_reverseend,kin_reversestart);
  edgeinfosty = set of edgeinfoty;
@@ -681,7 +696,7 @@ type
    procedure setcliporigin(const Value: pointty);
                //value not saved!
    function getgchandle: ptruint;
-   function getimage(const bgr: boolean): imagety; virtual;
+   function getimage(const bgr: boolean): maskedimagety;
    
    procedure fillarc(const def: rectty; const startang,extentang: real; 
                               const acolor: colorty; const pieslice: boolean);
@@ -696,6 +711,8 @@ type
    drawinfopo: pointer; //used to transport additional drawing information
    constructor create(const user: tobject; const intf: icanvas);
    destructor destroy; override;
+   function creategc(const apaintdevice: paintdevicety; const akind: gckindty;
+                var gc: gcty; const aprintername: msestring = ''): gdierrorty;
    procedure linktopaintdevice(apaintdevice: paintdevicety; const gc: gcty;
                 {const size: sizety;} const cliporigin: pointty); virtual;
          //calls reset, resets cliporigin, canvas owns the gc!
@@ -915,7 +932,9 @@ type
    property statestamp: longword read fdrawinfo.statestamp; 
                  //incremented by drawing operations
  end;
-
+ 
+ canvasclassty = class of tcanvas;
+ 
  pixmapstatety = (pms_monochrome,pms_ownshandle,pms_maskvalid,pms_nosave);
  pixmapstatesty = set of pixmapstatety;
 
@@ -929,11 +948,11 @@ type
   private
    function gethandle: pixmapty;
    procedure sethandle(const Value: pixmapty);
-   procedure gcneeded(const sender: tcanvas);
    function getcanvas: tcanvas;
    procedure switchtomonochrome;
-   function getsize: sizety;
+
   protected
+   fcanvasclass: canvasclassty;
    fcanvas: tcanvas;
    fhandle: pixmapty;
    fsize: sizety;
@@ -960,8 +979,15 @@ type
    procedure setsize(const Value: sizety); virtual;
    function normalizeinitcolor(const acolor: colorty): colorty;
    procedure assign1(const source: tsimplebitmap; const docopy: boolean); virtual;
+    //icanvas
+   procedure gcneeded(const sender: tcanvas);
+   function getsize: sizety;
+   procedure getcanvasimage(const bgr: boolean;
+                                    var aimage: maskedimagety); virtual;
   public
-   constructor create(monochrome: boolean); reintroduce;
+   constructor create(const monochrome: boolean;
+                    const acanvasclass: canvasclassty = nil); reintroduce;
+                                  //nil -> default
    destructor destroy; override;
 
    procedure copyhandle;
@@ -1458,8 +1484,15 @@ end;
 
  { tsimplebitmap }
 
-constructor tsimplebitmap.create(monochrome: boolean);
+constructor tsimplebitmap.create(const monochrome: boolean;
+                                const acanvasclass: canvasclassty = nil);
 begin
+ if acanvasclass <> nil then begin
+  fcanvasclass:= acanvasclass;
+ end;
+ if fcanvasclass = nil then begin
+  fcanvasclass:= tcanvas;
+ end;
  if monochrome then begin
   include(fstate,pms_monochrome);
  end;
@@ -1547,7 +1580,7 @@ end;
 procedure tsimplebitmap.creategc;
 var
  gc: gcty;
- err: guierrorty;
+ err: gdierrorty;
 begin
  if fcanvas <> nil then begin
   fillchar(gc,sizeof(gcty),0);
@@ -1557,16 +1590,16 @@ begin
    include(gc.drawingflags,df_canvasismonochrome);
   end;
   gdi_lock;
-  err:= gui_creategc(fhandle,gck_pixmap,gc);
+  err:= fcanvas.creategc(fhandle,gck_pixmap,gc);
   gdi_unlock;
-  guierror(err,self);
+  gdierror(err,self);
   fcanvas.linktopaintdevice(fhandle,gc,fdefaultcliporigin);
  end;
 end;
 
 function tsimplebitmap.createcanvas: tcanvas;
 begin
- result:= tcanvas.create(self,icanvas(self));
+ result:= fcanvasclass.create(self,icanvas(self));
 end;
 
 function tsimplebitmap.getcanvas: tcanvas;
@@ -1951,6 +1984,12 @@ begin
    allocuninitedarray(int1,sizeof(longword),pixels);
   end;
  end;
+end;
+
+procedure tsimplebitmap.getcanvasimage(const bgr: boolean;
+                                                var aimage: maskedimagety);
+begin
+ //dummy
 end;
 
 { tfont }
@@ -2486,13 +2525,13 @@ end;
 procedure tfont.gcneeded(const sender: tcanvas);
 var
  gc: gcty;
- err: guierrorty;
+ err: gdierrorty;
 begin
  fillchar(gc,sizeof(gcty),0);
- gdi_lock;
- err:= gui_creategc(0,gck_screen,gc);
- gdi_unlock;
- guierror(err,self);
+// gdi_lock;
+ err:= sender.creategc(0,gck_screen,gc);
+// gdi_unlock;
+ gdierror(err,self);
  sender.linktopaintdevice(0,gc,{nullsize,}nullpoint);
 end;
 
@@ -2572,6 +2611,11 @@ begin
  width:= round(width * ascale);
 end;
 
+procedure tfont.getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
+begin
+ //dummy
+end;
+
 { tcanvasfont }
 
 constructor tcanvasfont.create(const acanvas: tcanvas);
@@ -2635,6 +2679,19 @@ begin
  end;
  for int1:= 0 to high(fgclinksfrom) do begin
   removeitem(pointerarty(tcanvas(fgclinksfrom[int1]).fgclinksto),self);
+ end;
+end;
+
+function tcanvas.creategc(const apaintdevice: paintdevicety;
+               const akind: gckindty;
+               var gc: gcty; const aprintername: msestring = ''): gdierrorty;
+begin
+ with fdrawinfo.creategc do begin
+  paintdevice:= apaintdevice;
+  printernamepo:= @aprintername;
+  gcpo:= @gc;
+  gdi(gdf_creategc);
+  result:= error;
  end;
 end;
 
@@ -3100,9 +3157,10 @@ begin
  result:= fdrawinfo.gc.handle;
 end;
 
-function tcanvas.getimage(const bgr: boolean): imagety;
+function tcanvas.getimage(const bgr: boolean): maskedimagety;
 begin
  fillchar(result,sizeof(result),0);
+ icanvas(fintf).getcanvasimage(bgr,result);
 end;
 
 function tcanvas.checkforeground(acolor: colorty; lineinfo: boolean): boolean;

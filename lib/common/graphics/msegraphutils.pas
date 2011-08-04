@@ -344,6 +344,7 @@ const
 
 type
  gdierrorty = (gde_ok,
+               gde_creategc,gde_createprintergc,gde_createmetafilegc,
                gde_invalidgc,
                gde_notruecolor,
                gde_invalidcolor,
@@ -579,6 +580,9 @@ const
  errortexts: array[gdierrorty] of string = (
    '',
    'Invalid GC',
+   'Can not create gc',
+   'Can not create printer gc',
+   'Can not create metafile gc',
    'Color mode must be truecolor',
    'Invalid color',
    'Invalid saveindex',

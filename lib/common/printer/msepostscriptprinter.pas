@@ -41,6 +41,7 @@ type
    //icanvas
    procedure gcneeded(const sender: tcanvas);
    function getmonochrome: boolean;
+   procedure getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
   public
    constructor create(aowner: tcomponent); override;
    property canvas: tpostscriptcanvas read getcanvas;
@@ -2468,6 +2469,12 @@ end;
 function tpostscriptprinter.getmonochrome: boolean;
 begin
  result:= false;
+end;
+
+procedure tpostscriptprinter.getcanvasimage(const bgr: boolean;
+               var aimage: maskedimagety);
+begin
+ //dummy
 end;
 
 initialization

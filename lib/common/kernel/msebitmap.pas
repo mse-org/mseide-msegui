@@ -56,7 +56,9 @@ type
    procedure setcolorbackground(const Value: colorty);
    procedure setcolorforeground(const Value: colorty);
   protected
-   function createcanvas: tcanvas; override;
+   procedure getcanvasimage(const bgr: boolean;
+                            var aimage: maskedimagety); override;
+//   function createcanvas: tcanvas; override;
    procedure setsize(const Value: sizety); override;
    function getasize: sizety; virtual;
    procedure destroyhandle; override;
@@ -67,7 +69,9 @@ type
                     //calls change
    procedure dochange; virtual;
   public
-   constructor create(amonochrome: boolean);
+   constructor create(const amonochrome: boolean;
+                              const acanvasclass: canvasclassty = nil);
+                                        //nil -> default
 
    procedure savetoimage(out aimage: imagety);
    procedure loadfromimage(const aimage: imagety);
@@ -136,14 +140,14 @@ type
   datasize: integer;
   reserve: array[0..7] of longword;
  end;
-
+{
  tbitmapcanvas = class(tcanvas)
   protected
    function getimage(const bgr: boolean): imagety; override;
   public
    constructor create(const user: tbitmap);
  end;
- 
+}
  bitmapoptionty = (bmo_monochrome,bmo_masked,bmo_colormask);
  bitmapoptionsty = set of bitmapoptionty;
 
@@ -189,8 +193,12 @@ type
    function getmask: tsimplebitmap; override;
    function getsource: tbitmapcomp; override;
    procedure assign1(const source: tsimplebitmap; const docopy: boolean); override;
+   procedure getcanvasimage(const bgr: boolean;
+                            var aimage: maskedimagety); override;
   public
-   constructor create(amonochrome: boolean);
+   constructor create(const amonochrome: boolean;
+                     const acanvasclass: canvasclassty = nil);
+                                        //nil -> default
    destructor destroy; override;
    class procedure freeimageinfo(var ainfo: imagebufferinfoty);
    procedure loadfromimagebuffer(const abuffer: imagebufferinfoty);
@@ -442,7 +450,8 @@ end;
 
 { tbitmap }
 
-constructor tbitmap.create(amonochrome: boolean);
+constructor tbitmap.create(const amonochrome: boolean;
+                                  const acanvasclass: canvasclassty = nil);
 begin
  ftransparency:= cl_none;
  inherited;
@@ -1227,15 +1236,23 @@ function tbitmap.scanhigh: integer;
 begin
  result:= fsize.cx * fsize.cy - 1;
 end;
-
+{
 function tbitmap.createcanvas: tcanvas;
 begin
  result:= tbitmapcanvas.create(self);
 end;
+}
+procedure tbitmap.getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
+begin
+ checkimage(bgr);
+ aimage.image:= fimage;
+end;
 
 { tmaskedbitmap }
 
-constructor tmaskedbitmap.create(amonochrome: boolean);
+constructor tmaskedbitmap.create(const amonochrome: boolean;
+                                    const acanvasclass: canvasclassty = nil);
+                                        //nil -> default
 begin
  ftransparentcolor:= cl_default;
  fmaskcolorbackground:= $000000; //max transparent
@@ -1977,6 +1994,16 @@ begin
  end;
 end;
 
+procedure tmaskedbitmap.getcanvasimage(const bgr: boolean;
+               var aimage: maskedimagety);
+begin
+ inherited;
+ if fmask <> nil then begin
+  fmask.checkimage(bgr);
+  aimage.mask:= fmask.fimage;
+ end;
+end;
+
 {
 procedure tmaskedbitmap.loadfromresourcename(instance: longword;
   const resname: string);
@@ -2531,7 +2558,7 @@ begin
 end;
 
 { tbitmapcanvas }
-
+{
 constructor tbitmapcanvas.create(const user: tbitmap);
 begin
  inherited create(user,icanvas(user));
@@ -2544,5 +2571,5 @@ begin
   result:= fimage;
  end;
 end;
-
+}
 end.

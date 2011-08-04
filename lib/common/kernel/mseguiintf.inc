@@ -56,8 +56,8 @@ function gui_settrayicon(var awindow: windowty;
 function gui_settrayhint(var awindow: windowty;
                                      const hint: msestring): guierrorty;
 
-function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
-                var gc: gcty; const aprintername: msestring = ''): guierrorty;
+//function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
+//                var gc: gcty; const aprintername: msestring = ''): guierrorty;
 //function gui_destroygc(winid: winidty; var gc: gcty): guierrorty;
 function gui_flushgdi(const synchronize: boolean = false): guierrorty;
 function gui_showwindow(id: winidty): guierrorty;
@@ -148,6 +148,7 @@ function gui_canpastefromclipboard: boolean;
 
 function gui_getgdifuncs: pgdifunctionaty;
 (*
+procedure gdi_creategc(var drawinfo: drawinfoty);
 procedure gdi_destroygc(var drawinfo: drawinfoty);
 procedure gdi_changegc(var drawinfo: drawinfoty);
 procedure gdi_drawlines(var drawinfo: drawinfoty);

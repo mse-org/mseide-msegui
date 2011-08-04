@@ -351,6 +351,13 @@ begin
  end;
 end;
 
+procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
+begin
+ with drawinfo.creategc do begin
+  error:= gde_notimplemented;
+ end;
+end;
+
 procedure gdi_destroygc(var drawinfo: drawinfoty); //gdifunc
 begin
  with oglgcty(drawinfo.gc.platformdata).d do begin
@@ -673,10 +680,13 @@ end;
 
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
- im1: imagety;
+ im1: maskedimagety;
 begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
   im1:= tcanvas1(source).getimage(true);
+  if (im1.image.size.cx = 0) or (im1.image.size.cy = 0) then begin
+   exit; //not supported;
+  end;
   with destrect^ do begin
 //   glwindowpos2i(x,sourceheight-y);
    glrasterpos2i(x,sourceheight-y);
@@ -688,10 +698,10 @@ begin
   glpixeltransferf(gl_alpha_bias,1);
   with sourcerect^ do begin
    glpixelzoom(destrect^.cx/cx,-destrect^.cy/cy);
-   glpixelstorei(gl_unpack_row_length,im1.size.cx);
+   glpixelstorei(gl_unpack_row_length,im1.image.size.cx);
    glpixelstorei(gl_unpack_skip_rows,x);
    glpixelstorei(gl_unpack_skip_pixels,y);
-   gldrawpixels(cx,cy,gl_rgba,gl_unsigned_byte,im1.pixels);
+   gldrawpixels(cx,cy,gl_rgba,gl_unsigned_byte,im1.image.pixels);
   end;
   glpopclientattrib;
   glpopattrib;
@@ -745,6 +755,7 @@ end;
 
 const
  gdifunctions: gdifunctionaty = (
+   {$ifdef FPC}@{$endif}gdi_creategc,
    {$ifdef FPC}@{$endif}gdi_destroygc,
    {$ifdef FPC}@{$endif}gdi_changegc,
    {$ifdef FPC}@{$endif}gdi_drawlines,

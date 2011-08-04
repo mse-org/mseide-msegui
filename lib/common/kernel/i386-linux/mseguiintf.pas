@@ -3522,13 +3522,13 @@ function gui_settrayhint(var awindow: windowty;
 begin
  result:= gue_ok; //dummy
 end;
-
+{
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
      var gc: gcty; const aprintername: msestring = ''): guierrorty;
 begin
  result:= x11creategc(paintdevice,akind,gc,aprintername);
 end;
-
+}
 {$ifndef FPC}
 type
  tlibhandle = longword;

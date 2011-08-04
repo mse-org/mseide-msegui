@@ -23,8 +23,8 @@ function fontdatatoxftpat(const fontdata: fontdataty; const highres: boolean): p
 procedure getxftfontdata(po: pxftfont; var drawinfo: drawinfoty);
  
 function x11getgdifuncs: pgdifunctionaty;
-function x11creategc(paintdevice: paintdevicety; const akind: gckindty;
-     var gc: gcty; const aprintername: msestring): guierrorty;
+//function x11creategc(paintdevice: paintdevicety; const akind: gckindty;
+//     var gc: gcty; const aprintername: msestring): guierrorty;
 function x11regiontorects(const aregion: regionty): rectarty;
 function x11getdefaultfontnames: defaultfontnamesty;
 
@@ -462,26 +462,29 @@ begin
 end;
 
 
-function x11creategc(paintdevice: paintdevicety; const akind: gckindty;
-     var gc: gcty; const aprintername: msestring): guierrorty;
+//function x11creategc(paintdevice: paintdevicety; const akind: gckindty;
+//     var gc: gcty; const aprintername: msestring): guierrorty;
+procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
 begin
- gdi_lock;
- gc.gdifuncs:= gui_getgdifuncs;
- if paintdevice = 0 then begin
-  paintdevice:= mserootwindow;
- end;
- gc.handle:= ptruint(xcreategc(appdisp,paintdevice,0,nil));
- if gc.handle = 0 then begin
-  result:= gue_creategc;
- end
- else begin
-  xsetgraphicsexposures(appdisp,tgc(gc.handle),{$ifdef xboolean}false{$else}0{$endif});
-  with x11gcty(gc.platformdata) do begin
-   //nothing to do, gc is nulled
+// gdi_lock;
+ with drawinfo.creategc do begin
+  gcpo^.gdifuncs:= gui_getgdifuncs;
+  if paintdevice = 0 then begin
+   paintdevice:= mserootwindow;
   end;
-  result:= gue_ok;
+  gcpo^.handle:= ptruint(xcreategc(appdisp,paintdevice,0,nil));
+  if gcpo^.handle = 0 then begin
+   error:= gde_creategc;
+  end
+  else begin
+   xsetgraphicsexposures(appdisp,tgc(gcpo^.handle),{$ifdef xboolean}false{$else}0{$endif});
+   with x11gcty(gcpo^.platformdata) do begin
+    //nothing to do, gc is nulled
+   end;
+   error:= gde_ok;
+  end;
  end;
- gdi_unlock;
+// gdi_unlock;
 end;
 
 procedure transformpoints(var drawinfo: drawinfoty; const aclose: boolean);
@@ -2344,6 +2347,7 @@ end;
 
 const
  gdifunctions: gdifunctionaty = (
+   {$ifdef FPC}@{$endif}gdi_creategc,
    {$ifdef FPC}@{$endif}gdi_destroygc,
    {$ifdef FPC}@{$endif}gdi_changegc,
    {$ifdef FPC}@{$endif}gdi_drawlines,
