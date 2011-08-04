@@ -709,9 +709,10 @@ type
    procedure drawfontline(const startpoint,endpoint: pointty); 
                            //draws line with font color 
    procedure nextpage; virtual; //used by tcustomprintercanvas
+   function getcontextinfopo: pointer; virtual;
   public
    drawinfopo: pointer; //used to transport additional drawing information
-   constructor create(const user: tobject; const intf: icanvas);
+   constructor create(const user: tobject; const intf: icanvas); virtual;
    destructor destroy; override;
    function creategc(const apaintdevice: paintdevicety; const akind: gckindty;
                 var gc: gcty; const aprintername: msestring = ''): gdierrorty;
@@ -2692,9 +2693,11 @@ begin
   paintdevice:= apaintdevice;
   kind:= akind;
   printernamepo:= @aprintername;
-  contextinfopo:= nil;
+  contextinfopo:= getcontextinfopo;
   gcpo:= @gc;
-  gdi(gdf_creategc);
+//  gdi_lock; //already locked
+  fdrawinfo.gc.gdifuncs^[gdf_creategc](fdrawinfo);
+//  gdi_unlock;
   result:= error;
  end;
 end;
@@ -5224,6 +5227,11 @@ end;
 function tcanvas.getmonochrome: boolean;
 begin
  result:= icanvas(fintf).getmonochrome;
+end;
+
+function tcanvas.getcontextinfopo: pointer;
+begin
+ result:= nil; //dummy
 end;
 
 initialization

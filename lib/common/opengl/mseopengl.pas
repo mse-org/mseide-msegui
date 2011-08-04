@@ -29,8 +29,9 @@ type
    function lock: boolean; override;
 //   procedure unlock; override;
 //   procedure gdi(const func: gdifuncty); override;
+   function getcontextinfopo: pointer; override;
   public
-   constructor create(const user: tobject; const intf: icanvas);
+   constructor create(const user: tobject; const intf: icanvas); override;
    procedure init(const acolor: colorty = cl_none); //cl_none -> colorbackground
    procedure swapbuffers;
    property viewport: rectty read fviewport write setviewport;
@@ -143,6 +144,11 @@ begin
 // if fdrawinfo.gc.handle <> 0 then begin
   gdi_makecurrent(fdrawinfo);
 // end;
+end;
+
+function topenglcanvas.getcontextinfopo: pointer;
+begin
+ result:= @fcontextinfo;
 end;
 {
 procedure topenglcanvas.unlock;

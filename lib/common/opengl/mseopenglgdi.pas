@@ -117,6 +117,7 @@ type
   fdpy: pdisplay;
   fcolormap: tcolormap;
   fscreen: integer;
+  fkind: gckindty;
   {$else}
   fdc: hdc;
   fcontext: hglrc;
@@ -185,7 +186,7 @@ procedure initcontext(const winid: winidty; var gc: gcty;
 begin
  gc.gdifuncs:= openglgetgdifuncs; 
  with oglgcty(gc.platformdata).d do begin
-  pd:= winid;
+//  pd:= winid;
   sourceheight:= sourceviewport.cy;
   tess:= glunewtess();
  end;
@@ -261,6 +262,7 @@ begin
     result:= gue_createwindow;
     exit;
    end;
+   pd:= aid;
   // fwin:= aid;
   finally
    xfree(visinfo);
@@ -290,6 +292,7 @@ begin
   exit;
  end;
  with oglgcty(gc.platformdata).d do begin
+  pd:= aid;
   fdc:= getdc(aid);
   fillchar(pixeldesc,sizeof(pixeldesc),0);
   with pixeldesc do begin
@@ -352,7 +355,7 @@ begin
 {$endif}
  end;
 end;
-
+var testvar: pcontextinfoty;
 procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
 {$ifdef unix}
 var
@@ -377,6 +380,7 @@ begin
     exit;
    end;
    index:= 0;
+testvar:= pcontextinfoty(contextinfopo);
    with pcontextinfoty(contextinfopo)^.attrib do begin
     putboolean(ar1,index,glx_doublebuffer,true);
     putvalue(ar1,index,glx_buffer_size,buffersize,-1);
@@ -408,9 +412,21 @@ begin
      exit;
     end;
     gcpo^.handle:= ptruint(fcontext);
+    fkind:= kind;
+    if kind = gck_pixmap then begin
+     pd:= 0;
+     pd:= glxcreateglxpixmap(fdpy,visinfo,paintdevice);
+     if pd = 0 then begin
+      error:= gde_glxpixmap;
+      exit;
+     end;
+    end
+    else begin
+     pd:= paintdevice;
+    end;
+{
     fcolormap:= xcreatecolormap(fdpy,mserootwindow,visinfo^.visual,allocnone);
     attributes.colormap:= fcolormap;
-{
     with windowrect do begin
      aid:= xcreatewindow(fdpy,aparent,x,y,cx,cy,0,visinfo^.depth,
            inputoutput,visinfo^.visual,cwcolormap,@attributes);
@@ -440,6 +456,10 @@ begin
 {$ifdef unix}
   glxmakecurrent(fdpy,0,nil);
   glxdestroycontext(fdpy,fcontext);
+  if fkind = gck_pixmap then begin
+   glxdestroyglxpixmap(fdpy,pd);
+   pd:= 0;
+  end;
   xfreecolormap(fdpy,fcolormap);
 {$else}
   wglmakecurrent(0,0);
