@@ -38,11 +38,13 @@ type
  end;
 
  contextinfoty = record
+  viewport: rectty;
   attrib: contextattributesty;
  {$ifdef unix}
   visualattributes: integerarty;
  {$endif}
  end;
+ pcontextinfoty = ^contextinfoty;
  
  
 function createrendercontext(const aparent: winidty; const windowrect: rectty;
@@ -352,9 +354,82 @@ begin
 end;
 
 procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
+{$ifdef unix}
+var
+ index: integer;
+ ar1: integerarty;
+ int1,int2: integer;
+ visinfo: pxvisualinfo;
+ attributes: txsetwindowattributes;
+{$endif}
 begin
  with drawinfo.creategc do begin
+ {$ifdef unix}
+  error:= gde_ok;
+  if not glxinitialized then begin
+   initGlx();
+  end;
+  with oglgcty(gcpo^.platformdata).d do begin
+   fdpy:= msedisplay;
+   fscreen:= defaultscreen(fdpy);
+   if not glxqueryextension(fdpy,int1,int2) then begin
+    error:= gde_noglx;
+    exit;
+   end;
+   index:= 0;
+   with pcontextinfoty(contextinfopo)^.attrib do begin
+    putboolean(ar1,index,glx_doublebuffer,true);
+    putvalue(ar1,index,glx_buffer_size,buffersize,-1);
+    putvalue(ar1,index,glx_level,level,0);
+    putboolean(ar1,index,glx_rgba,rgba);
+    putboolean(ar1,index,glx_stereo,stereo);
+    putvalue(ar1,index,glx_aux_buffers,auxbuffers,-1);
+    putvalue(ar1,index,glx_red_size,redsize,-1);
+    putvalue(ar1,index,glx_green_size,greensize,-1);
+    putvalue(ar1,index,glx_blue_size,bluesize,-1);
+    putvalue(ar1,index,glx_alpha_size,alphasize,-1);
+    putvalue(ar1,index,glx_depth_size,depthsize,-1);
+    putvalue(ar1,index,glx_stencil_size,stencilsize,-1);
+    putvalue(ar1,index,glx_accum_red_size,accumredsize,-1);
+    putvalue(ar1,index,glx_accum_green_size,accumgreensize,-1);
+    putvalue(ar1,index,glx_accum_blue_size,accumbluesize,-1);
+    putvalue(ar1,index,glx_accum_alpha_size,accumalphasize,-1);
+    setlength(ar1,index+1); //none
+   end;
+   visinfo:= glxchoosevisual(fdpy,fscreen,pinteger(ar1));
+   if visinfo = nil then begin
+    error:= gde_novisual;
+    exit;
+   end;
+   try
+    fcontext:= glxcreatecontext(fdpy,visinfo,nil,true);
+    if fcontext = nil then begin
+     error:= gde_rendercontext;
+     exit;
+    end;
+    gcpo^.handle:= ptruint(fcontext);
+    fcolormap:= xcreatecolormap(fdpy,mserootwindow,visinfo^.visual,allocnone);
+    attributes.colormap:= fcolormap;
+{
+    with windowrect do begin
+     aid:= xcreatewindow(fdpy,aparent,x,y,cx,cy,0,visinfo^.depth,
+           inputoutput,visinfo^.visual,cwcolormap,@attributes);
+     xselectinput(fdpy,aid,exposuremask); //will be mapped to parent
+    end;
+    if aid = 0 then begin
+     result:= gue_createwindow;
+     exit;
+    end;
+}
+   // fwin:= aid;
+   finally
+    xfree(visinfo);
+   end;
+  end;
+  initcontext(paintdevice,gcpo^,pcontextinfoty(contextinfopo)^.viewport);
+ {$else}
   error:= gde_notimplemented;
+ {$endif}
  end;
 end;
 

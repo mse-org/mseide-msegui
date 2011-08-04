@@ -322,6 +322,7 @@ type
   paintdevice: paintdevicety;
   kind: gckindty;
   printernamepo: pmsestring;
+  contextinfopo: pointer;
   gcpo: pgcty;
   error: gdierrorty;
  end;
@@ -2691,6 +2692,7 @@ begin
   paintdevice:= apaintdevice;
   kind:= akind;
   printernamepo:= @aprintername;
+  contextinfopo:= nil;
   gcpo:= @gc;
   gdi(gdf_creategc);
   result:= error;
