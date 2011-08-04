@@ -4245,7 +4245,7 @@ begin
      bmp.transparency:= bmp1.transparency;
      bmp.transparentcolor:= bmp1.transparentcolor;
     end;
-    setordvalue(int1,ptruint(bmp));
+    setpointervalue(int1,bmp);
    end;
    modified;
   finally
