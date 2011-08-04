@@ -542,19 +542,20 @@ begin
  if aindex < grid.rowhigh then begin
   if aindex = 0 then begin
    colored[0]:= colored[1]; //pos = 0
-  end
-  else begin
-   colored[0]:= blendcolor(0.5,colored[aindex+1],colored[aindex]);
-   posed[0]:= (posed[aindex+1] + posed[aindex]) / 2;
-  end
- end
- else begin
-  colored[0]:= colored[grid.rowhigh];
-  if grid.rowhigh = 0 then begin
    posed[0]:= 0;
   end
   else begin
-   posed[0]:= 1;
+   colored[aindex]:= blendcolor(0.5,colored[aindex+1],colored[aindex-1]);
+   posed[aindex]:= (posed[aindex+1] + posed[aindex-1]) / 2;
+  end
+ end
+ else begin
+  if grid.rowhigh = 0 then begin
+   posed[aindex]:= 0;
+  end
+  else begin
+   colored[aindex]:= colored[grid.rowhigh-1];
+   posed[aindex]:= 1;
   end;
  end;
  grid.endupdate;
