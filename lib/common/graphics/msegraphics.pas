@@ -320,6 +320,7 @@ type
 
  creategcinfoty = record
   paintdevice: paintdevicety;
+  kind: gckindty;
   printernamepo: pmsestring;
   gcpo: pgcty;
   error: gdierrorty;
@@ -2688,6 +2689,7 @@ function tcanvas.creategc(const apaintdevice: paintdevicety;
 begin
  with fdrawinfo.creategc do begin
   paintdevice:= apaintdevice;
+  kind:= akind;
   printernamepo:= @aprintername;
   gcpo:= @gc;
   gdi(gdf_creategc);

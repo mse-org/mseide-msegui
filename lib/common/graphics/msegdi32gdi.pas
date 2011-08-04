@@ -19,8 +19,8 @@ procedure deinit;
 function gdi32getgdifuncs: pgdifunctionaty;
 procedure gdi32initdefaultfont;
 function gdi32getdefaultfontnames: defaultfontnamesty;
-function gdi32creategc(paintdevice: paintdevicety; const akind: gckindty; 
-              var gc: gcty; const aprintername: msestring): guierrorty;
+//function gdi32creategc(paintdevice: paintdevicety; const akind: gckindty; 
+//              var gc: gcty; const aprintername: msestring): guierrorty;
 
 {$ifdef FPC}
 function GetNextWindow(hWnd: HWND; uCmd: UINT): HWND; stdcall;
@@ -215,55 +215,58 @@ begin
  result:= defaultfontnames;
 end;
 
-function gdi32creategc(paintdevice: paintdevicety; const akind: gckindty; 
-              var gc: gcty; const aprintername: msestring): guierrorty;
+//function gdi32creategc(paintdevice: paintdevicety; const akind: gckindty; 
+//              var gc: gcty; const aprintername: msestring): guierrorty;
+procedure gdi_creategc(var drawinfo: drawinfoty);
 var
  wrect1: trect;
 begin
- gc.gdifuncs:= gui_getgdifuncs;
- case akind of
-  gck_pixmap: begin
-   result:= gue_creategc;
-   gc.handle:= createcompatibledc(0);
-   if gc.handle <> 0 then begin
-    selectobject(gc.handle,paintdevice);
-    win32gcty(gc.platformdata).d.kind:= akind;
+ with drawinfo.creategc do begin
+  gcpo^.gdifuncs:= gui_getgdifuncs;
+  case kind of
+   gck_pixmap: begin
+    error:= gde_creategc;
+    gcpo^.handle:= createcompatibledc(0);
+    if gcpo^.handle <> 0 then begin
+     selectobject(gcpo^.handle,paintdevice);
+     win32gcty(gcpo^.platformdata).d.kind:= kind;
+    end;
    end;
-  end;
-  gck_printer: begin
-   result:= gue_createprintergc;
-   gc.handle:= createdc('WINSPOOL',pansichar(ansistring(aprintername)),nil,nil);
-   setmapperflags(gc.handle,1); //match font-device aspectratio
-  end;
-  gck_metafile: begin
-   result:= gue_createmetafilegc;
-   wrect1.left:= 0;
-   wrect1.top:= 0;
-   wrect1.right:= round((gc.paintdevicesize.cx*100)/gc.ppmm);
-   wrect1.bottom:= round((gc.paintdevicesize.cy*100)/gc.ppmm);
-   if aprintername = '' then begin
-    gc.handle:= createenhmetafilew(gc.refgc,nil,@wrect1,nil); //memory
-   end
+   gck_printer: begin
+    error:= gde_createprintergc;
+    gcpo^.handle:= createdc('WINSPOOL',pansichar(ansistring(printernamepo^)),nil,nil);
+    setmapperflags(gcpo^.handle,1); //match font-device aspectratio
+   end;
+   gck_metafile: begin
+    error:= gde_createmetafilegc;
+    wrect1.left:= 0;
+    wrect1.top:= 0;
+    wrect1.right:= round((gcpo^.paintdevicesize.cx*100)/gcpo^.ppmm);
+    wrect1.bottom:= round((gcpo^.paintdevicesize.cy*100)/gcpo^.ppmm);
+    if printernamepo^ = '' then begin
+     gcpo^.handle:= createenhmetafilew(gcpo^.refgc,nil,@wrect1,nil); //memory
+    end
+    else begin
+     gcpo^.handle:= createenhmetafilew(gcpo^.refgc,pmsechar(printernamepo^),@wrect1,nil); 
+                                                    //file
+    end;
+    setmapperflags(gcpo^.handle,1); //match font-device aspectratio
+   end;
    else begin
-    gc.handle:= createenhmetafilew(gc.refgc,pmsechar(aprintername),@wrect1,nil); 
-                                                   //file
+    error:= gde_creategc;
+    gcpo^.handle:= getdc(paintdevice);
    end;
-   setmapperflags(gc.handle,1); //match font-device aspectratio
   end;
-  else begin
-   result:= gue_creategc;
-   gc.handle:= getdc(paintdevice);
+  if gcpo^.handle <> 0 then begin
+ {$ifdef mse_debuggdi}
+   inc(gccount);
+ {$endif}
+   win32gcty(gcpo^.platformdata).d.kind:= kind;
+   settextalign(gcpo^.handle,ta_left or ta_baseline or ta_noupdatecp);
+   setbkmode(gcpo^.handle,transparent);
+   setmapmode(gcpo^.handle,mm_text);
+   error:= gde_ok;
   end;
- end;
- if gc.handle <> 0 then begin
-{$ifdef mse_debuggdi}
-  inc(gccount);
-{$endif}
-  win32gcty(gc.platformdata).d.kind:= akind;
-  settextalign(gc.handle,ta_left or ta_baseline or ta_noupdatecp);
-  setbkmode(gc.handle,transparent);
-  setmapmode(gc.handle,mm_text);
-  result:= gue_ok;
  end;
 end;
 
@@ -2392,6 +2395,7 @@ end;
 
 const
  gdifunctions: gdifunctionaty = (
+   {$ifdef FPC}@{$endif}gdi_creategc,
    {$ifdef FPC}@{$endif}gdi_destroygc,
    {$ifdef FPC}@{$endif}gdi_changegc,
    {$ifdef FPC}@{$endif}gdi_drawlines,

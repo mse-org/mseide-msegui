@@ -1203,13 +1203,13 @@ begin
   dec(count);
  end;
 end;
-
+{
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty; 
               var gc: gcty; const aprintername: msestring = ''): guierrorty;
 begin
  result:= gdi32creategc(paintdevice,akind,gc,aprintername);
 end;
-
+}
 function gui_flushgdi(const synchronize: boolean = false): guierrorty;
 begin
  gui_hasevent; //dispachevents

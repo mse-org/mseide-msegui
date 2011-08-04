@@ -276,7 +276,8 @@ end;
 
 procedure tcustomgdiprinter.creategc(var agc: gcty; const aname: msestring);
 begin
- guierror(gui_creategc(0,gck_printer,agc,aname),'for "'+aname+'"');
+ gdierror(fcanvas.creategc(0,gck_printer,agc,aname),'for "'+aname+'"');
+// gdierror(gui_creategc(0,gck_printer,agc,aname),'for "'+aname+'"');
 end;
 
 procedure tcustomgdiprinter.initdevicecaps(const agc: gcty);
@@ -304,7 +305,7 @@ begin
   gc1.paintdevicesize:= getwindowsize;
   gc1.ppmm:= ppmm; 
   include(gc1.drawingflags,df_highresfont);
-  creategc(gc1,mstr1);
+  self.creategc(gc1,mstr1);
   checkprinterror(setgraphicsmode(gc1.handle,gm_advanced));
   initdevicecaps(gc1);
   linktopaintdevice(ptrint(self),gc1,{getwindowsize,}nullpoint);
@@ -591,7 +592,8 @@ begin
  agc.refgc:= createdc('WINSPOOL',pansichar(str1),nil,nil);
 // agc.refgc:= getdc(0);        
  try
-  guierror(gui_creategc(0,gck_metafile,agc,aname),'for "'+aname+'"');
+//  guierror(gui_creategc(0,gck_metafile,agc,aname),'for "'+aname+'"');
+  gdierror(fcanvas.creategc(0,gck_metafile,agc,aname),'for "'+aname+'"');
  finally
   if agc.refgc <> 0 then begin
 //   releasedc(0,agc.refgc);
