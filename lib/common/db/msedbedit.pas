@@ -10957,6 +10957,10 @@ begin
               tcustomlbdropdownlistcontroller(fcontroller).fonfilter);
    if not result then begin
     result:= (int1 < flookupbuffer.count) and 
+            (msepartialcomparetext(filter,
+             flookupbuffer.textvaluelog(ffieldno,int1,true)) = 0);
+   {
+    result:= (int1 < flookupbuffer.count) and 
             (msecomparetextlen(filter,
              flookupbuffer.textvaluelog(ffieldno,int1,true)) = 0);
     if not result then begin
@@ -10965,6 +10969,7 @@ begin
     result:= (int1 < flookupbuffer.count) and 
           (msecomparetextlen(filter,
             flookupbuffer.textvaluelog(ffieldno,int1,true)) = 0);
+   }
    end;
   end;
  end;

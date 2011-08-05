@@ -181,7 +181,7 @@ type
   
  fieldparamlinkoptionty = (
               fplo_autorefresh,fplo_refreshifactiveonly,
-              fplo_refreshifchangedonly,
+              fplo_refreshifchangedonly,fplo_checkbrowsemodeonrefresh,
               fplo_restorerecno,
               fplo_syncmasterpost,fplo_syncmastercheckbrowsemode,
               fplo_syncmasteredit,
@@ -967,7 +967,12 @@ begin
          not((destdataset.state = dsinsert) and (dataset.state = dsinsert) and
                       (fplo_syncmasterinsert in foptions))and
                   (destdataset.state in [dsbrowse,dsedit,dsinsert]) then begin
-       fdestdataset.cancel;
+       if fplo_checkbrowsemodeonrefresh in foptions then begin
+        fdestdataset.checkbrowsemode;
+       end
+       else begin
+        fdestdataset.cancel;
+       end;
        if fdestcontroller <> nil then begin
         fdestcontroller.refresh(fplo_restorerecno in foptions,truedelayus);
        end
