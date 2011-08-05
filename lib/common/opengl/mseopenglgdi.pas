@@ -349,7 +349,8 @@ procedure gdi_makecurrent(var drawinfo: drawinfoty);
 begin
  with oglgcty(drawinfo.gc.platformdata).d do begin
 {$ifdef unix}
-  glxmakecurrent(fdpy,drawinfo.paintdevice,fcontext);
+//  glxmakecurrent(fdpy,drawinfo.paintdevice,fcontext);
+  glxmakecurrent(fdpy,pd,fcontext);
 {$else}
   wglmakecurrent(fdc,fcontext);
 {$endif}
@@ -422,10 +423,11 @@ testvar:= pcontextinfoty(contextinfopo);
      end;
     end
     else begin
+     fcolormap:= xcreatecolormap(fdpy,mserootwindow,visinfo^.visual,allocnone);
+     xsetwindowcolormap(fdpy,paintdevice,fcolormap);
      pd:= paintdevice;
     end;
 {
-    fcolormap:= xcreatecolormap(fdpy,mserootwindow,visinfo^.visual,allocnone);
     attributes.colormap:= fcolormap;
     with windowrect do begin
      aid:= xcreatewindow(fdpy,aparent,x,y,cx,cy,0,visinfo^.depth,
@@ -459,8 +461,10 @@ begin
   if fkind = gck_pixmap then begin
    glxdestroyglxpixmap(fdpy,pd);
    pd:= 0;
+  end
+  else begin
+   xfreecolormap(fdpy,fcolormap);
   end;
-  xfreecolormap(fdpy,fcolormap);
 {$else}
   wglmakecurrent(0,0);
   wgldeletecontext(fcontext);
