@@ -183,7 +183,7 @@ type
               fplo_autorefresh,fplo_refreshifactiveonly,
               fplo_refreshifchangedonly,
               fplo_restorerecno,
-              fplo_syncmasterpost,
+              fplo_syncmasterpost,fplo_syncmastercheckbrowsemode,
               fplo_syncmasteredit,
               fplo_syncmasterinsert,
               fplo_syncmasterdelete,
@@ -1052,6 +1052,11 @@ begin
     if (fplo_syncmasterpost in foptions) then begin
      destdataset.post;
 //     destdataset.checkbrowsemode;
+    end
+    else begin
+     if (fplo_syncmastercheckbrowsemode in foptions) then begin
+      destdataset.checkbrowsemode;
+     end;
     end;
     inherited;
    endlab:

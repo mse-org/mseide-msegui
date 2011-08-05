@@ -88,7 +88,7 @@ type
 
  optionmasterlinkty = (mdlo_syncedit,mdlo_syncinsert,mdlo_syncdelete,
                        mdlo_delayeddetailpost,mdlo_syncfields,
-                       mdlo_inserttoupdate); 
+                       mdlo_inserttoupdate,mdlo_norefresh); 
  optionsmasterlinkty = set of optionmasterlinkty;
 
  imasterlink = interface(inullinterface)

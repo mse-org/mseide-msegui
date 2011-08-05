@@ -647,6 +647,8 @@ type
    procedure DataEvent(Event: TDataEvent; Info: Ptrint); override;
    procedure checkrefresh; //makes pending delayed refresh
    procedure dorefresh(const sender: tobject);
+   Procedure CopyParamsFromMaster(CopyBound : Boolean); override;
+   Procedure RefreshParamNames; override;
   public
    constructor create(const aowner: tsqlquery); reintroduce;
    destructor destroy; override;
@@ -5043,7 +5045,8 @@ begin
    onmasterchange(self); 
   end;
   if assigned(params) and assigned(detaildataset) and 
-                (detaildataset.state = dsbrowse) then begin
+                (detaildataset.state = dsbrowse) and 
+                 not (mdlo_norefresh in fquery.foptionsmasterlink) then begin
    if fquery.masterdelayus < 0 then begin
     freeandnil(ftimer);
     dorefresh(nil);
@@ -5178,6 +5181,23 @@ begin
   finally
    dec(frefreshlock);
   end;
+ end;
+end;
+
+procedure tsqlmasterparamsdatalink.CopyParamsFromMaster(CopyBound: Boolean);
+begin
+ if not (mdlo_norefresh in fquery.foptionsmasterlink) then begin
+  inherited;
+ end;
+end;
+
+procedure tsqlmasterparamsdatalink.RefreshParamNames;
+begin
+ if not (mdlo_norefresh in fquery.foptionsmasterlink) then begin
+  inherited;
+ end
+ else begin
+  fieldnames:= '';
  end;
 end;
 
