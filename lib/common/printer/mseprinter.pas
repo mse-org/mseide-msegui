@@ -311,7 +311,8 @@ type
    procedure internaldrawtext(var info); override;
                        //info = drawtextinfoty
   public
-   constructor create(const user: tcustomprinter; const intf: icanvas);
+   constructor create(const user: tcustomprinter;
+                                   const intf: icanvas); reintroduce;
    procedure initflags(const dest: tcanvas); override;
       
    // if cy of destrect = 0 and tf_ycentered in textflags -> place on baseline

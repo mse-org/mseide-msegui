@@ -356,7 +356,7 @@ begin
 {$endif}
  end;
 end;
-var testvar: pcontextinfoty;
+
 procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
 {$ifdef unix}
 var
@@ -364,7 +364,7 @@ var
  ar1: integerarty;
  int1,int2: integer;
  visinfo: pxvisualinfo;
- attributes: txsetwindowattributes;
+// attributes: txsetwindowattributes;
 {$endif}
 begin
  with drawinfo.creategc do begin
@@ -381,7 +381,6 @@ begin
     exit;
    end;
    index:= 0;
-testvar:= pcontextinfoty(contextinfopo);
    with pcontextinfoty(contextinfopo)^.attrib do begin
     putboolean(ar1,index,glx_doublebuffer,true);
     putvalue(ar1,index,glx_buffer_size,buffersize,-1);
@@ -815,6 +814,12 @@ begin
  end;
 end;
 
+procedure gdi_getimage(var drawinfo: drawinfoty);
+begin
+ with drawinfo.getimage do begin
+ end;
+end;
+
 procedure gdi_fonthasglyph(var drawinfo: drawinfoty);
 begin
  gdinotimplemented;
@@ -882,6 +887,7 @@ const
    {$ifdef FPC}@{$endif}msegenericgdi.gdi_regintersectrect,
    {$ifdef FPC}@{$endif}msegenericgdi.gdi_regintersectregion,
    {$ifdef FPC}@{$endif}gdi_copyarea,
+   {$ifdef FPC}@{$endif}gdi_getimage,
    {$ifdef FPC}@{$endif}gdi_fonthasglyph,
    {$ifdef FPC}@{$endif}gdi_getfont,
    {$ifdef FPC}@{$endif}gdi_getfonthighres,
@@ -908,12 +914,12 @@ procedure tglftfontcache.drawglyph(var drawinfo: drawinfoty; const pos: pointty;
 begin
  with bitmap^ do begin
   with oglgcty(drawinfo.gc.platformdata).d do begin
-   if true {glwindowpos2i = nil} then begin
+//   if true {glwindowpos2i = nil} then begin
     glrasterpos2i(pos.x,sourceheight-pos.y); //todo: fix transformation
-   end
-   else begin
-    glwindowpos2i(pos.x,sourceheight-pos.y);
-   end;
+//   end
+//   else begin
+//    glwindowpos2i(pos.x,sourceheight-pos.y);
+//   end;
   end;
   gldrawpixels(width,height,gl_alpha,gl_unsigned_byte,@data);
  end;

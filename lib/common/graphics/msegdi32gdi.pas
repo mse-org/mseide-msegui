@@ -1810,6 +1810,11 @@ begin
  end;
 end;
 
+procedure gdi_getimage(var drawinfo: drawinfoty); //gdifunc
+begin
+ //dummy
+end;
+
 procedure gdi_fonthasglyph(var drawinfo: drawinfoty);
 begin
  with drawinfo,fonthasglyph do begin
@@ -2424,6 +2429,7 @@ const
    {$ifdef FPC}@{$endif}gdi_regintersectrect,
    {$ifdef FPC}@{$endif}gdi_regintersectregion,
    {$ifdef FPC}@{$endif}gdi_copyarea,
+   {$ifdef FPC}@{$endif}gdi_getimage,
    {$ifdef FPC}@{$endif}gdi_fonthasglyph,
    {$ifdef FPC}@{$endif}gdi_getfont,
    {$ifdef FPC}@{$endif}gdi_getfonthighres,

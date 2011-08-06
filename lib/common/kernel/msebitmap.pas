@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -458,15 +458,24 @@ begin
 end;
 
 procedure tbitmap.assign1(const source: tsimplebitmap; const docopy: boolean);
+var
+ bo1: boolean;
 begin
  if source is tbitmap then begin
+  bo1:= tbitmap(source).hasimage and (tbitmap(source).fimage.pixels = nil) and
+           (getgdiintf <> tbitmap(source).getgdiintf);
   with tbitmap(source) do begin
-   if fimage.pixels <> nil then begin
+   if (fimage.pixels <> nil) or bo1 then begin
     self.clear;
-    self.fimage:= fimage;
-    self.fimage.pixels:= gui_allocimagemem(fimage.length);
-    move(fimage.pixels^,self.fimage.pixels^,fimage.length*sizeof(longword));
-    self.fsize:= fimage.size;
+    if bo1 then begin
+     self.fimage:= tcanvas1(canvas).getcanvasimage;
+    end
+    else begin
+     self.fimage:= fimage;
+     self.fimage.pixels:= gui_allocimagemem(fimage.length);
+     move(fimage.pixels^,self.fimage.pixels^,fimage.length*sizeof(longword));
+    end;
+    self.fsize:= self.fimage.size;
     if monochrome then begin
      include(self.fstate,pms_monochrome);
     end

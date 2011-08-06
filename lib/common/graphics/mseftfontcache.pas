@@ -271,7 +271,7 @@ var
  po2: pmsecharaty;
  po3: pbitmapdataty;
  int1: integer;
- rect1: rectty;
+// rect1: rectty;
  pt1: pointty;
  y1: integer;
 begin

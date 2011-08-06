@@ -25,7 +25,8 @@ type
    procedure setviewport(const avalue: rectty);
   protected
    fcontextinfo: contextinfoty;
-   function getgdifuncs: pgdifunctionaty; override;
+   class function getclassgdifuncs: pgdifunctionaty; override;
+//   function getgdifuncs: pgdifunctionaty; override;
    function lock: boolean; override;
 //   procedure unlock; override;
 //   procedure gdi(const func: gdifuncty); override;
@@ -79,11 +80,16 @@ begin
  inherited;
 end;
 
+class function topenglcanvas.getclassgdifuncs: pgdifunctionaty;
+begin
+ result:= openglgetgdifuncs;
+end;
+{
 function topenglcanvas.getgdifuncs: pgdifunctionaty;
 begin
  result:= openglgetgdifuncs;
 end;
-
+}
 procedure topenglcanvas.setviewport(const avalue: rectty);
 var
  bo1: boolean;
@@ -150,6 +156,7 @@ function topenglcanvas.getcontextinfopo: pointer;
 begin
  result:= @fcontextinfo;
 end;
+
 {
 procedure topenglcanvas.unlock;
 begin

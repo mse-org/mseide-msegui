@@ -8,6 +8,9 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msegraphics;
+//
+//todo: simplify and optimize multi backend handling
+//
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
 
@@ -326,6 +329,11 @@ type
   gcpo: pgcty;
   error: gdierrorty;
  end;
+ 
+ getimageinfoty = record
+  error: gdierrorty;
+  image: maskedimagety;
+ end;
   
  gcvaluemaskty = (gvm_clipregion,gvm_colorbackground,gvm_colorforeground,
                   gvm_dashes,gvm_linewidth,gvm_capstyle,gvm_joinstyle,
@@ -384,6 +392,7 @@ type
   14: (regionoperation: regionoperationinfoty);
   15: (fonthasglyph: fonthasglyphinfoty);
   16: (creategc: creategcinfoty);
+  17: (getimage: getimageinfoty);
  end;
 
  getfontfuncty = function (var drawinfo: drawinfoty): boolean of object;
@@ -557,7 +566,8 @@ type
               gdf_regsubrect,gdf_regsubregion,
               gdf_regaddrect,gdf_regaddregion,gdf_regintersectrect,
               gdf_regintersectregion,
-              gdf_copyarea,gdf_fonthasglyph,
+              gdf_copyarea,gdf_getimage,
+              gdf_fonthasglyph,
               gdf_getfont,gdf_getfonthighres,gdf_freefontdata,
               gdf_gettext16width,gdf_getchar16widths,gdf_getfontmetrics
               );
@@ -667,6 +677,7 @@ type
    afonthandle1: fontnumty;
    ffont: tfont;
 
+   class function getclassgdifuncs: pgdifunctionaty; virtual;
    function getgdifuncs: pgdifunctionaty; virtual;
    procedure registergclink(const dest: tcanvas);
    procedure unregistergclink(const dest: tcanvas);
@@ -698,6 +709,7 @@ type
    procedure setcliporigin(const Value: pointty);
                //value not saved!
    function getgchandle: ptruint;
+   function getcanvasimage: imagety;
    function getimage(const bgr: boolean): maskedimagety;
    
    procedure fillarc(const def: rectty; const startang,extentang: real; 
@@ -982,6 +994,7 @@ type
    procedure setsize(const Value: sizety); virtual;
    function normalizeinitcolor(const acolor: colorty): colorty;
    procedure assign1(const source: tsimplebitmap; const docopy: boolean); virtual;
+   function getgdiintf: pgdifunctionaty;
     //icanvas
    procedure gcneeded(const sender: tcanvas);
    function getsize: sizety;
@@ -1995,6 +2008,16 @@ begin
  //dummy
 end;
 
+function tsimplebitmap.getgdiintf: pgdifunctionaty;
+begin
+ if fcanvas <> nil then begin
+  result:= fcanvas.fdrawinfo.gc.gdifuncs;
+ end
+ else begin
+  result:= fcanvasclass.getclassgdifuncs;
+ end;
+end;
+
 { tfont }
 
 constructor tfont.create;
@@ -2724,9 +2747,15 @@ begin
  result:= tcanvasfont.create(self);
 end;
 
-function tcanvas.getgdifuncs: pgdifunctionaty;
+class function tcanvas.getclassgdifuncs: pgdifunctionaty;
 begin
  result:= gui_getgdifuncs;
+end;
+
+function tcanvas.getgdifuncs: pgdifunctionaty;
+begin
+ result:= getclassgdifuncs;
+// result:= gui_getgdifuncs;
 end;
 
 procedure tcanvas.error(nr: gdierrorty; const text: string);
@@ -5232,6 +5261,18 @@ end;
 function tcanvas.getcontextinfopo: pointer;
 begin
  result:= nil; //dummy
+end;
+
+function tcanvas.getcanvasimage: imagety;
+begin
+ fillchar(fdrawinfo.getimage,sizeof(fdrawinfo.getimage),0);
+ with fdrawinfo.getimage do begin
+  if fdrawinfo.gc.handle <> 0 then begin
+   error:= gde_notimplemented;
+   gdi(gdf_getimage);
+  end;
+  result:= image.image;
+ end;
 end;
 
 initialization
