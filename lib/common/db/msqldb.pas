@@ -647,11 +647,11 @@ type
    procedure DataEvent(Event: TDataEvent; Info: Ptrint); override;
    procedure checkrefresh; //makes pending delayed refresh
    procedure dorefresh(const sender: tobject);
-   Procedure CopyParamsFromMaster(CopyBound : Boolean); override;
-   Procedure RefreshParamNames; override;
   public
    constructor create(const aowner: tsqlquery); reintroduce;
    destructor destroy; override;
+   Procedure RefreshParamNames; override;
+   Procedure CopyParamsFromMaster(CopyBound : Boolean); override;
 //  published
 //   property delayus: integer read fdelayus write fdelayus default -1;
  end;
