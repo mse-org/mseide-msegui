@@ -3202,8 +3202,8 @@ begin
   sizehints:= xallocsizehints;
   xgetwmnormalhints(appdisp,id,sizehints,@int1);
   with sizehints^ do begin
-   flags:= flags or pposition or psize or usposition or ussize {or pbasesize} or
-                                           pwingravity;
+   flags:= flags or pposition or psize or usposition or ussize 
+               or pbasesize {or pbasesize} or pwingravity;
    x:= changes.x;
    y:= changes.y;
    width:= changes.width;

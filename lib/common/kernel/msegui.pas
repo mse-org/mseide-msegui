@@ -14677,10 +14677,15 @@ begin
 end;
 
 function tinternalapplication.getevents: integer;
+var
+ ev1: tmseevent;
 begin
  gdi_lock;
  while gui_hasevent do begin
-  eventlist.add(gui_getevent);
+  ev1:= gui_getevent;
+  if ev1 <> nil then begin
+   eventlist.add(ev1);
+  end;
  end;
  result:= eventlist.count;
  gdi_unlock;
