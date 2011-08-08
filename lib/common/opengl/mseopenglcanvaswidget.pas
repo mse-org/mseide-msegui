@@ -204,5 +204,4 @@ begin
  inherited linktopaintdevice(paintdevicety(aid),gc1,nullpoint);
 end;
 
-
 end.

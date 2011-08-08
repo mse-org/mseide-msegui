@@ -18,6 +18,9 @@ uses
  msegl,mseglu,{$ifdef unix}mseglx,x,xlib,xutil,{$else}windows,{$endif}
  msegraphics,msetypes,msegraphutils,mseguiglob;
 
+const
+ GL_BGRA = GL_BGRA_EXT;
+ 
 type
  contextattributesty = record
   buffersize: integer;
@@ -38,7 +41,7 @@ type
  end;
 
  contextinfoty = record
-  viewport: rectty;
+//  viewport: rectty;
   attrib: contextattributesty;
  {$ifdef unix}
   visualattributes: integerarty;
@@ -181,6 +184,26 @@ begin
  end;
 end;
 
+procedure setviewport(const agc: gcty; const arect: rectty);
+var
+ int1: integer;
+begin
+ with arect do begin
+  int1:= oglgcty(agc.platformdata).d.sourceheight;
+  glviewport(x,int1-y-cy,cx,cy);
+  glloadidentity;
+  if (cx > 0) and (cy > 0) then begin
+   glortho(-0.5,cx-0.5,-0.5,cy-1,-1,1);
+//   glortho(-1,cx-1,cy-1,-1,-1,1);
+  end;
+ end;
+end;
+
+procedure gdi_setviewport(var drawinfo: drawinfoty);
+begin
+ setviewport(drawinfo.gc,drawinfo.rect.rect^);
+end;
+
 procedure initcontext(const winid: winidty; var gc: gcty;
               const sourceviewport: rectty);
 begin
@@ -193,6 +216,7 @@ begin
  makecurrent(gc);
  glclearstencil(0);
  glclear(gl_stencil_buffer_bit);
+ setviewport(gc,sourceviewport);
 end;
  
 {$ifdef unix}
@@ -443,7 +467,8 @@ begin
     xfree(visinfo);
    end;
   end;
-  initcontext(paintdevice,gcpo^,pcontextinfoty(contextinfopo)^.viewport);
+//  initcontext(paintdevice,gcpo^,pcontextinfoty(contextinfopo)^.viewport);
+  initcontext(paintdevice,gcpo^,mr(nullpoint,gcpo^.paintdevicesize));
  {$else}
   error:= gde_notimplemented;
  {$endif}
@@ -469,21 +494,6 @@ begin
   wgldeletecontext(fcontext);
   releasedc(drawinfo.paintdevice,fdc);
 {$endif}
- end;
-end;
-
-procedure gdi_setviewport(var drawinfo: drawinfoty);
-var
- int1: integer;
-begin
- with drawinfo.rect.rect^ do begin
-  int1:= oglgcty(drawinfo.gc.platformdata).d.sourceheight;
-  glviewport(x,int1-y-cy,cx,cy);
-  glloadidentity;
-  if (cx > 0) and (cy > 0) then begin
-   glortho(-0.5,cx-0.5,-0.5,cy-1,-1,1);
-//   glortho(-1,cx-1,cy-1,-1,-1,1);
-  end;
  end;
 end;
 
@@ -781,9 +791,9 @@ var
  im1: maskedimagety;
 begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
-  im1:= tcanvas1(source).getimage(true);
+  im1:= tcanvas1(source).getimage(false);
   if (im1.image.size.cx = 0) or (im1.image.size.cy = 0) then begin
-   exit; //not supported;
+   exit;
   end;
   with destrect^ do begin
 //   glwindowpos2i(x,sourceheight-y);
@@ -799,7 +809,7 @@ begin
    glpixelstorei(gl_unpack_row_length,im1.image.size.cx);
    glpixelstorei(gl_unpack_skip_rows,x);
    glpixelstorei(gl_unpack_skip_pixels,y);
-   gldrawpixels(cx,cy,gl_rgba,gl_unsigned_byte,im1.image.pixels);
+   gldrawpixels(cx,cy,gl_bgra,gl_unsigned_byte,im1.image.pixels);
   end;
   glpopclientattrib;
   glpopattrib;
@@ -813,10 +823,35 @@ begin
   }
  end;
 end;
-
+ 
 procedure gdi_getimage(var drawinfo: drawinfoty);
+//todo: optimize
+var
+ int1,int2: integer;
+ po1,ps1,pd1: pchar;
 begin
- with drawinfo.getimage do begin
+ with drawinfo,getimage,oglgcty(drawinfo.gc.platformdata).d do begin
+  glpushclientattrib(gl_client_pixel_store_bit);
+  glpushattrib(gl_pixel_mode_bit);
+  
+  glpixeltransferf(gl_alpha_scale,0);
+  glpixeltransferf(gl_alpha_bias,0);
+  with image.image do begin
+   getmem(po1,length*sizeof(rgbtriplety));
+   glreadpixels(0,0,size.cx,size.cy,gl_bgra,gl_unsigned_byte,po1);
+   int2:= sizeof(rgbtriplety)*size.cx;
+   ps1:= pointer(pchar(po1)+(size.cy-1)*int2); //top row
+   pd1:= pointer(pixels);
+   for int1:= size.cy-1 downto 0 do begin
+    move(ps1^,pd1^,int2);
+    dec(ps1,int2);
+    inc(pd1,int2);
+   end;
+   freemem(po1);
+   error:= gde_ok;
+  end;
+  glpopclientattrib;
+  glpopattrib;
  end;
 end;
 

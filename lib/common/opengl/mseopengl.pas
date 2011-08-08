@@ -17,7 +17,7 @@ interface
 uses
  msegl,{$ifdef unix}mseglx,x,xlib,xutil,{$else}windows,{$endif}
  msegraphics,msetypes,mseguiglob,msegraphutils,mseopenglgdi;
- 
+
 type  
  topenglcanvas = class(tcanvas)
   private
@@ -31,6 +31,8 @@ type
 //   procedure unlock; override;
 //   procedure gdi(const func: gdifuncty); override;
    function getcontextinfopo: pointer; override;
+//   procedure linktopaintdevice(apaintdevice: paintdevicety; const gc: gcty;
+//                {const size: sizety;} const cliporigin: pointty); override;
   public
    constructor create(const user: tobject; const intf: icanvas); override;
    procedure init(const acolor: colorty = cl_none); //cl_none -> colorbackground
@@ -155,7 +157,16 @@ end;
 function topenglcanvas.getcontextinfopo: pointer;
 begin
  result:= @fcontextinfo;
+// fcontextinfo.viewport:= viewport;
 end;
+{
+procedure topenglcanvas.linktopaintdevice(apaintdevice: paintdevicety;
+               const gc: gcty; const cliporigin: pointty);
+begin
+ inherited;
+ viewport:= mr(nullpoint,gc.paintdevicesize);
+end;
+}
 
 {
 procedure topenglcanvas.unlock;

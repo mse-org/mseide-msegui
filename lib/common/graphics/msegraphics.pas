@@ -5264,12 +5264,25 @@ begin
 end;
 
 function tcanvas.getcanvasimage: imagety;
+ //todo: handle monochrome and mask
+var
+ int1: integer;
 begin
  fillchar(fdrawinfo.getimage,sizeof(fdrawinfo.getimage),0);
- with fdrawinfo.getimage do begin
-  if fdrawinfo.gc.handle <> 0 then begin
-   error:= gde_notimplemented;
-   gdi(gdf_getimage);
+ with fdrawinfo,getimage do begin
+  if gc.handle <> 0 then begin
+   int1:= gc.paintdevicesize.cx * gc.paintdevicesize.cy;
+   if int1 > 0 then begin
+    with image.image do begin
+     pixels:= gui_allocimagemem(int1);
+     if pixels <> nil then begin
+      size:= gc.paintdevicesize;
+      length:= int1;
+      error:= gde_notimplemented;
+      gdi(gdf_getimage);
+     end;
+    end;
+   end;
   end;
   result:= image.image;
  end;
