@@ -5,6 +5,8 @@
   These units are free to use
 }
 
+{ modified 2011 by Martin Schreiber }
+
 (*++ BUILD Version: 0004    // Increment this if a change has global effects
 
 Copyright (c) 1985-96, Microsoft Corporation
@@ -61,7 +63,7 @@ unit msegl;
 interface
 
 uses
-  SysUtils,
+  SysUtils,msestrings,
   {$IFDEF Windows}
   Windows, dynlibs
   {$ELSE Windows}
@@ -71,6 +73,14 @@ uses
   dynlibs
   {$ENDIF MorphOS}
   {$ENDIF Windows};
+
+const
+{$ifdef mswindows}
+ opengllib: array[0..0] of filenamety = ('opengl32.dll');  
+{$else}
+ opengllib: array[0..1] of filenamety = ('libGL.so.1','libGL.so'); 
+{$endif}
+
 
 {$IFNDEF MORPHOS}
 var
@@ -1571,12 +1581,15 @@ type
 procedure LoadOpenGL(const dll: String);
 procedure FreeOpenGL;
 
-implementation
+procedure initializeopengl(const sonames: array of filenamety); //[] = default
+procedure releaseopengl;
 
-{$if defined(cpui386) or defined(cpux86_64)}
+implementation
 uses
-  math;
+{$if defined(cpui386) or defined(cpux86_64)}
+  math,
 {$endif}
+  msedynload,mseglext;
 
 {$ifdef windows}
 function WinChoosePixelFormat(DC: HDC; p2: PPixelFormatDescriptor): Integer; extdecl; external 'gdi32' name 'ChoosePixelFormat';
@@ -2316,8 +2329,11 @@ begin
 end;
 {$ENDIF MORPHOS}
 
-initialization
-
+var
+ has_1_5: boolean;
+ 
+procedure init;
+begin
   { according to bug 7570, this is necessary on all x86 platforms,
     maybe we've to fix the sse control word as well }
   { Yes, at least for darwin/x86_64 (JM) }
@@ -2342,9 +2358,29 @@ initialization
   {$ENDIF}
   {$endif}
   {$ENDIF}
+ has_1_5:= load_gl_version_1_5;
+end;
 
+procedure deinit;
+begin
+ FreeOpenGL;
+end;
+
+var
+ libinfo: dynlibinfoty;
+
+procedure initializeopengl(const sonames: array of filenamety); //[] = default
+begin
+ initializedynlib(libinfo,sonames,[],[],@init);
+end;
+
+procedure releaseopengl;
+begin
+ releasedynlib(libinfo,@deinit);
+end;
+
+initialization
+ initializelibinfo(libinfo);
 finalization
-
-  FreeOpenGL;
-
+ finalizelibinfo(libinfo);
 end.

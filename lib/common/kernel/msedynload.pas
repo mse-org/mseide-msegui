@@ -53,24 +53,26 @@ begin
   sys_mutexlock(lock);
   try
    if refcount = 0 then begin
-    libhandle:= loadlib(alibnames,libname);
-    try
-     getprocaddresses(libhandle,funcs,false);
-    except
-     on e: exception do begin
-      e.message:= 'Library "'+libname+'": '+e.message;
-      if unloadlibrary(libhandle) then begin
-       libhandle:= nilhandle;
+    if high(alibnames) >= 0 then begin
+     libhandle:= loadlib(alibnames,libname);
+     try
+      getprocaddresses(libhandle,funcs,false);
+     except
+      on e: exception do begin
+       e.message:= 'Library "'+libname+'": '+e.message;
+       if unloadlibrary(libhandle) then begin
+        libhandle:= nilhandle;
+       end;
+       raise;
       end;
-      raise;
      end;
+     getprocaddresses(libhandle,funcsopt,true);
+    end;
+    if (callback <> nil) then begin
+     callback;
     end;
    end;
-   getprocaddresses(libhandle,funcsopt,true);
    inc(refcount);
-   if callback <> nil then begin
-    callback;
-   end;
   finally
    sys_mutexunlock(lock);
   end;
@@ -93,7 +95,7 @@ begin
        callback;
       end;
      finally
-      if unloadlibrary(libhandle) then begin
+      if (libhandle = nilhandle) or unloadlibrary(libhandle) then begin
        dec(refcount);
        libhandle:= nilhandle;
       end;

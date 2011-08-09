@@ -108,7 +108,7 @@ type
  
 implementation
 uses
- mseopenglgdi;
+ mseopenglgdi,msegl;
  
 type
  topenglcanvas1 = class(topenglcanvas);
@@ -150,6 +150,7 @@ end;
 procedure topenglcanvaswidget.docreatewinid(const aparent: winidty;
                const awidgetrect: rectty; var aid: winidty);
 begin
+ initializeopengl([]);
  fcanvas.linktopaintdevice(aparent,awidgetrect,aid);
  checkwindowrect;
 end;
@@ -169,6 +170,7 @@ procedure topenglcanvaswidget.dodestroywinid;
 begin
  fcanvas.unlink;
  inherited;
+ releaseopengl;
 end;
 
 procedure topenglcanvaswidget.doclientpaint(const aupdaterect: rectty);

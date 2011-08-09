@@ -188,6 +188,7 @@ begin
  end;
  {$endif}
  inherited;
+ releaseopengl;
 end;
 
 {
@@ -228,6 +229,7 @@ var
  attributes: txsetwindowattributes;
  
 begin
+ initilizeopengl([]);
  if not glxinitialized then begin
   initGlx();
  end;
@@ -281,6 +283,7 @@ var
  pixeldesc: tpixelformatdescriptor;
  int1: integer; 
 begin
+ initializeopengl([]);
  aid:= createchildwindow;
  fwin:= aid;
  fdc:= getdc(fwin);

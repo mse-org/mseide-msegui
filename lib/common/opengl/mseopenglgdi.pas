@@ -381,6 +381,12 @@ begin
  end;
 end;
 
+{$ifdef unix}
+var
+ lastgc: glxcontext;
+ gccount: integer;
+{$endif}
+
 procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
 {$ifdef unix}
 var
@@ -430,11 +436,13 @@ begin
     exit;
    end;
    try
-    fcontext:= glxcreatecontext(fdpy,visinfo,nil,true);
+    fcontext:= glxcreatecontext(fdpy,visinfo,lastgc,kind <> gck_pixmap{true});
+                                        //crashes on suse 11.1 with true
     if fcontext = nil then begin
      error:= gde_rendercontext;
      exit;
     end;
+    inc(gccount);
     gcpo^.handle:= ptruint(fcontext);
     fkind:= kind;
     if kind = gck_pixmap then begin
@@ -489,6 +497,10 @@ begin
   else begin
    xfreecolormap(fdpy,fcolormap);
   end;
+  dec(gccount);
+  if gccount = 0 then begin
+   lastgc:= nil;
+  end;
 {$else}
   wglmakecurrent(0,0);
   wgldeletecontext(fcontext);
@@ -516,6 +528,7 @@ begin
   colortogl(drawinfo.color.color,co1);
   glclearcolor(co1.r,co1.g,co1.b,co1.a);
   glclear(gl_color_buffer_bit);
+  
  end;
 end;
 
@@ -806,10 +819,13 @@ begin
 end;
 
 procedure copyareagl(var drawinfo: drawinfoty);
+//todo: use persistent pixmap or texture buffer
 var
  buf: gluint;
+ xscale,yscale: real;
 begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
+  makecurrent(tcanvas1(source).fdrawinfo.gc);
   glgenbuffers(1,@buf);
   glpushclientattrib(gl_client_pixel_store_bit);
   glpushattrib(gl_pixel_mode_bit);
@@ -817,10 +833,23 @@ begin
   glpixeltransferf(gl_alpha_bias,1);
   glbindbuffer(gl_pixel_pack_buffer,buf);
   with sourcerect^ do begin
+   glbufferdata(gl_pixel_pack_buffer,cx*cy*sizeof(rgbtriplety),nil,gl_stream_draw);
    glreadpixels(x,sourceheight-y-cy,cx,cy,gl_bgra,gl_unsigned_byte,nil);
   end;
-
   glbindbuffer(gl_pixel_pack_buffer,0);
+  makecurrent(drawinfo.gc);
+  glbindbuffer(gl_pixel_unpack_buffer,buf);
+  with destrect^ do begin
+   xscale:= cx/sourcerect^.cx;
+   yscale:= cy/sourcerect^.cy;
+   glrasterpos2i(x,(sourceheight-y-cy));
+   glpixelzoom(xscale,yscale);
+  end;
+  with sourcerect^ do begin
+   gldrawpixels(cx,cy,gl_bgra,gl_unsigned_byte,nil);
+  end;
+  glbindbuffer(gl_pixel_unpack_buffer,0);
+  
   glpopclientattrib;
   glpopattrib;
   gldeletebuffers(1,@buf);
@@ -833,7 +862,6 @@ var
 begin
  if tcanvas1(drawinfo.copyarea.source).fdrawinfo.gc.handle = 
                                               drawinfo.gc.handle then begin
-//  copyareagl(drawinfo);
   copyareaself(drawinfo);
  end
  else begin
@@ -851,7 +879,6 @@ begin
     glpushattrib(gl_pixel_mode_bit);
     
     with destrect^ do begin
-  //   glwindowpos2i(x,sourceheight-y);
      glrasterpos2i(x,sourceheight-y);
     end;
     glpixeltransferf(gl_alpha_scale,0);

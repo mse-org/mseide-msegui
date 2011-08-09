@@ -5,6 +5,8 @@
   These units are free to use
 }
 
+{ modified 2011 by Martin Schreiber }
+
 {$MACRO ON}
 {$MODE Delphi}
 {$IFDEF Windows}
@@ -5219,12 +5221,12 @@ begin
 end;
 
 function Load_GL_version_1_3: Boolean;
-var
-  extstring: String;
+//var
+//  extstring: String;
 begin
 
   Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
+//  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
 
     glActiveTexture := wglGetProcAddress('glActiveTexture');
     if not Assigned(glActiveTexture) then Exit;
@@ -10402,12 +10404,12 @@ begin
 end;
 
 function Load_GL_version_1_4: Boolean;
-var
-  extstring: String;
+//var
+//  extstring: String;
 begin
 
   Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
+//  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
 
     glBlendFuncSeparate := wglGetProcAddress('glBlendFuncSeparate');
     if not Assigned(glBlendFuncSeparate) then Exit;
@@ -10504,12 +10506,12 @@ begin
 end;
 
 function Load_GL_version_1_5: Boolean;
-var
-  extstring: String;
+//var
+//  extstring: String;
 begin
 
   Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
+//  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
 
     glGenQueries := wglGetProcAddress('glGenQueries');
     if not Assigned(glGenQueries) then Exit;
@@ -10554,12 +10556,12 @@ begin
 end;
 
 function Load_GL_version_2_0: Boolean;
-var
-  extstring: String;
+//var
+//  extstring: String;
 begin
 
   Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
+//  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
 
     glBlendEquationSeparate := wglGetProcAddress('glBlendEquationSeparate');
     if not Assigned(glBlendEquationSeparate) then Exit;
