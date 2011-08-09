@@ -229,7 +229,7 @@ var
  attributes: txsetwindowattributes;
  
 begin
- initilizeopengl([]);
+ initializeopengl([]);
  if not glxinitialized then begin
   initGlx();
  end;
