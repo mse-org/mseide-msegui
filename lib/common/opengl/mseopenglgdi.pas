@@ -381,10 +381,12 @@ begin
  end;
 end;
 
+var
+ gccount: integer;
+
 {$ifdef unix}
 var
  lastgc: glxcontext;
- gccount: integer;
 {$endif}
 
 procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
@@ -397,6 +399,9 @@ var
 // attributes: txsetwindowattributes;
 {$endif}
 begin
+ if gccount = 0 then begin
+  initializeopengl([]);
+ end;
  with drawinfo.creategc do begin
  {$ifdef unix}
   error:= gde_ok;
@@ -506,6 +511,9 @@ begin
   wgldeletecontext(fcontext);
   releasedc(drawinfo.paintdevice,fdc);
 {$endif}
+  if gccount = 0 then begin
+   releaseopengl();
+  end;
  end;
 end;
 
