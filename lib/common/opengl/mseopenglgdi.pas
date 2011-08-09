@@ -15,12 +15,12 @@ unit mseopenglgdi;
 
 interface
 uses
- msegl,mseglu,{$ifdef unix}mseglx,x,xlib,xutil,{$else}windows,{$endif}
+ msegl,mseglext,mseglu,{$ifdef unix}mseglx,x,xlib,xutil,{$else}windows,{$endif}
  msegraphics,msetypes,msegraphutils,mseguiglob;
-
+{
 const
  GL_BGRA = GL_BGRA_EXT;
- 
+}
 type
  contextattributesty = record
   buffersize: integer;
@@ -786,41 +786,95 @@ procedure gdi_setcliporigin(var drawinfo: drawinfoty);
 begin
 end;
 
+procedure copyareaself(var drawinfo: drawinfoty);
+var
+ xscale,yscale: real;
+begin
+ with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
+  with destrect^ do begin
+   glpushattrib(gl_pixel_mode_bit);
+   xscale:= cx/sourcerect^.cx;
+   yscale:= cy/sourcerect^.cy;
+   glrasterpos2i(x,(sourceheight-y-cy));
+   glpixelzoom(xscale,yscale);
+   with sourcerect^ do begin
+    glcopypixels(x,sourceheight-y-cy,cx,cy,gl_color);
+   end;
+   glpopattrib;
+  end;
+ end;
+end;
+
+procedure copyareagl(var drawinfo: drawinfoty);
+var
+ buf: gluint;
+begin
+ with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
+  glgenbuffers(1,@buf);
+  glpushclientattrib(gl_client_pixel_store_bit);
+  glpushattrib(gl_pixel_mode_bit);
+  glpixeltransferf(gl_alpha_scale,0);
+  glpixeltransferf(gl_alpha_bias,1);
+  glbindbuffer(gl_pixel_pack_buffer,buf);
+  with sourcerect^ do begin
+   glreadpixels(x,sourceheight-y-cy,cx,cy,gl_bgra,gl_unsigned_byte,nil);
+  end;
+
+  glbindbuffer(gl_pixel_pack_buffer,0);
+  glpopclientattrib;
+  glpopattrib;
+  gldeletebuffers(1,@buf);
+ end;
+end;
+
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
  im1: maskedimagety;
 begin
- with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
-  im1:= tcanvas1(source).getimage(false);
-  if (im1.image.size.cx = 0) or (im1.image.size.cy = 0) then begin
-   exit;
+ if tcanvas1(drawinfo.copyarea.source).fdrawinfo.gc.handle = 
+                                              drawinfo.gc.handle then begin
+//  copyareagl(drawinfo);
+  copyareaself(drawinfo);
+ end
+ else begin
+  if tcanvas1(drawinfo.copyarea.source).fdrawinfo.gc.gdifuncs =
+                                           drawinfo.gc.gdifuncs then begin
+   copyareagl(drawinfo);
+  end
+  else begin   //foreign gdi
+   with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
+    im1:= tcanvas1(source).getimage(false);
+    if (im1.image.size.cx = 0) or (im1.image.size.cy = 0) then begin
+     exit;
+    end;
+    glpushclientattrib(gl_client_pixel_store_bit);
+    glpushattrib(gl_pixel_mode_bit);
+    
+    with destrect^ do begin
+  //   glwindowpos2i(x,sourceheight-y);
+     glrasterpos2i(x,sourceheight-y);
+    end;
+    glpixeltransferf(gl_alpha_scale,0);
+    glpixeltransferf(gl_alpha_bias,1);
+    with sourcerect^ do begin
+     glpixelzoom(destrect^.cx/cx,-destrect^.cy/cy);
+     glpixelstorei(gl_unpack_row_length,im1.image.size.cx);
+     glpixelstorei(gl_unpack_skip_rows,x);
+     glpixelstorei(gl_unpack_skip_pixels,y);
+     gldrawpixels(cx,cy,gl_bgra,gl_unsigned_byte,im1.image.pixels);
+    end;
+    glpopclientattrib;
+    glpopattrib;
+    {
+    glpixeltransferf(gl_alpha_scale,1);
+    glpixeltransferf(gl_alpha_bias,0);
+    glpixelzoom(1,1);
+    glpixelstorei(gl_unpack_row_length,0);
+    glpixelstorei(gl_unpack_skip_rows,0);
+    glpixelstorei(gl_unpack_skip_pixels,0);
+    }
+   end;
   end;
-  with destrect^ do begin
-//   glwindowpos2i(x,sourceheight-y);
-   glrasterpos2i(x,sourceheight-y);
-  end;
-  glpushclientattrib(gl_client_pixel_store_bit);
-  glpushattrib(gl_pixel_mode_bit);
-  
-  glpixeltransferf(gl_alpha_scale,0);
-  glpixeltransferf(gl_alpha_bias,1);
-  with sourcerect^ do begin
-   glpixelzoom(destrect^.cx/cx,-destrect^.cy/cy);
-   glpixelstorei(gl_unpack_row_length,im1.image.size.cx);
-   glpixelstorei(gl_unpack_skip_rows,x);
-   glpixelstorei(gl_unpack_skip_pixels,y);
-   gldrawpixels(cx,cy,gl_bgra,gl_unsigned_byte,im1.image.pixels);
-  end;
-  glpopclientattrib;
-  glpopattrib;
-  {
-  glpixeltransferf(gl_alpha_scale,1);
-  glpixeltransferf(gl_alpha_bias,0);
-  glpixelzoom(1,1);
-  glpixelstorei(gl_unpack_row_length,0);
-  glpixelstorei(gl_unpack_skip_rows,0);
-  glpixelstorei(gl_unpack_skip_pixels,0);
-  }
  end;
 end;
  
