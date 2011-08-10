@@ -948,6 +948,7 @@ var testvar: glenum;
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
  im1: maskedimagety;
+ mode: glenum;
 begin
  if tcanvas1(drawinfo.copyarea.source).fdrawinfo.gc.handle = 
                                               drawinfo.gc.handle then begin
@@ -960,7 +961,11 @@ begin
   end
   else begin   //foreign gdi
    with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
-    im1:= tcanvas1(source).getimage(false);
+    mode:= gl_rgba;
+    if gle_gl_ext_bgra in extensions then begin
+     mode:= gl_bgra;
+    end;
+    im1:= tcanvas1(source).getimage(mode = gl_rgba);
     if (im1.image.size.cx = 0) or (im1.image.size.cy = 0) then begin
      exit;
     end;
@@ -977,18 +982,10 @@ begin
      glpixelstorei(gl_unpack_row_length,im1.image.size.cx);
      glpixelstorei(gl_unpack_skip_rows,x);
      glpixelstorei(gl_unpack_skip_pixels,y);
-     gldrawpixels(cx,cy,gl_bgra,gl_unsigned_byte,im1.image.pixels);
+     gldrawpixels(cx,cy,mode,gl_unsigned_byte,im1.image.pixels);
     end;
     glpopclientattrib;
     glpopattrib;
-    {
-    glpixeltransferf(gl_alpha_scale,1);
-    glpixeltransferf(gl_alpha_bias,0);
-    glpixelzoom(1,1);
-    glpixelstorei(gl_unpack_row_length,0);
-    glpixelstorei(gl_unpack_skip_rows,0);
-    glpixelstorei(gl_unpack_skip_pixels,0);
-    }
    end;
   end;
  end;
