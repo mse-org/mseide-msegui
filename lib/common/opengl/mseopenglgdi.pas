@@ -63,8 +63,8 @@ procedure gdi_clear(var drawinfo: drawinfoty);
 
 implementation
 uses
- mseguiintf,mseftgl,msegenericgdi,msestrings,msectypes,msehash,sysutils,
- mseformatstr,msefontcache,mseftfontcache;
+ mseguiintf,{mseftgl,}msegenericgdi,msestrings,msectypes,msehash,sysutils,
+ mseformatstr,msefontcache,mseftfontcache,mseglextglob;
 type
  tcanvas1 = class(tcanvas);
  
@@ -126,10 +126,12 @@ type
   fcontext: hglrc;
   {$endif}
   pd: paintdevicety;
+  extensions: glextensionsty;
   gclineoptions: lineoptionsty;
   sourceheight: integer;
 //  ftglfont: ftglfontty;
-  ftglfont: pftglfont;
+//  ftglfont: pftglfont;
+  glfont: fontty;
   tess: pglutesselator;
   glcolorforeground: rgbtriplety;
   glcolorbackground: rgbtriplety;
@@ -388,7 +390,12 @@ var
 var
  linkgc: glxcontext;
 {$endif}
-
+var
+ screenextensions: glextensionsty;
+ screenextensionschecked: boolean;
+ pixmapextensions: glextensionsty;
+ pixmapextensionschecked: boolean;
+ 
 procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
 {$ifdef unix}
 var
@@ -401,112 +408,130 @@ var
 begin
  if gccount = 0 then begin
   initializeopengl([]);
- end;
- with drawinfo.creategc do begin
  {$ifdef unix}
-  error:= gde_ok;
   if not glxinitialized then begin
    initGlx();
   end;
-  with oglgcty(gcpo^.platformdata).d do begin
-   fdpy:= msedisplay;
-   fscreen:= defaultscreen(fdpy);
-   if not glxqueryextension(fdpy,int1,int2) then begin
-    error:= gde_noglx;
+ {$endif}
+ end;
+ with drawinfo.creategc,oglgcty(gcpo^.platformdata).d do begin
+ {$ifdef unix}
+  error:= gde_ok;
+  fdpy:= msedisplay;
+  fscreen:= defaultscreen(fdpy);
+  if not glxqueryextension(fdpy,int1,int2) then begin
+   error:= gde_noglx;
+   exit;
+  end;
+  index:= 0;
+  with pcontextinfoty(contextinfopo)^.attrib do begin
+   putboolean(ar1,index,glx_doublebuffer,true);
+   putvalue(ar1,index,glx_buffer_size,buffersize,-1);
+   putvalue(ar1,index,glx_level,level,0);
+   putboolean(ar1,index,glx_rgba,rgba);
+   putboolean(ar1,index,glx_stereo,stereo);
+   putvalue(ar1,index,glx_aux_buffers,auxbuffers,-1);
+   putvalue(ar1,index,glx_red_size,redsize,-1);
+   putvalue(ar1,index,glx_green_size,greensize,-1);
+   putvalue(ar1,index,glx_blue_size,bluesize,-1);
+   putvalue(ar1,index,glx_alpha_size,alphasize,-1);
+   putvalue(ar1,index,glx_depth_size,depthsize,-1);
+   putvalue(ar1,index,glx_stencil_size,stencilsize,-1);
+   putvalue(ar1,index,glx_accum_red_size,accumredsize,-1);
+   putvalue(ar1,index,glx_accum_green_size,accumgreensize,-1);
+   putvalue(ar1,index,glx_accum_blue_size,accumbluesize,-1);
+   putvalue(ar1,index,glx_accum_alpha_size,accumalphasize,-1);
+   setlength(ar1,index+1); //none
+  end;
+  visinfo:= glxchoosevisual(fdpy,fscreen,pinteger(ar1));
+  if visinfo = nil then begin
+   error:= gde_novisual;
+   exit;
+  end;
+  if linkgc = nil then begin
+   linkgc:= glxcreatecontext(fdpy,visinfo,nil,true);
+  end;
+  try
+   fcontext:= glxcreatecontext(fdpy,visinfo,nil,kind <> gck_pixmap{true});
+  (*
+   fcontext:= glxcreatecontext(fdpy,visinfo,linkgc,false{kind <> gck_pixmap}{true});
+                                       //crashes on suse 11.1 with true
+   *)
+   if fcontext = nil then begin
+    error:= gde_rendercontext;
     exit;
    end;
-   index:= 0;
-   with pcontextinfoty(contextinfopo)^.attrib do begin
-    putboolean(ar1,index,glx_doublebuffer,true);
-    putvalue(ar1,index,glx_buffer_size,buffersize,-1);
-    putvalue(ar1,index,glx_level,level,0);
-    putboolean(ar1,index,glx_rgba,rgba);
-    putboolean(ar1,index,glx_stereo,stereo);
-    putvalue(ar1,index,glx_aux_buffers,auxbuffers,-1);
-    putvalue(ar1,index,glx_red_size,redsize,-1);
-    putvalue(ar1,index,glx_green_size,greensize,-1);
-    putvalue(ar1,index,glx_blue_size,bluesize,-1);
-    putvalue(ar1,index,glx_alpha_size,alphasize,-1);
-    putvalue(ar1,index,glx_depth_size,depthsize,-1);
-    putvalue(ar1,index,glx_stencil_size,stencilsize,-1);
-    putvalue(ar1,index,glx_accum_red_size,accumredsize,-1);
-    putvalue(ar1,index,glx_accum_green_size,accumgreensize,-1);
-    putvalue(ar1,index,glx_accum_blue_size,accumbluesize,-1);
-    putvalue(ar1,index,glx_accum_alpha_size,accumalphasize,-1);
-    setlength(ar1,index+1); //none
-   end;
-   visinfo:= glxchoosevisual(fdpy,fscreen,pinteger(ar1));
-   if visinfo = nil then begin
-    error:= gde_novisual;
-    exit;
-   end;
-   if linkgc = nil then begin
-    linkgc:= glxcreatecontext(fdpy,visinfo,nil,false{true});
-   end;
-   try
-    fcontext:= glxcreatecontext(fdpy,visinfo,nil,true{kind <> gck_pixmap}{true});
-   (*
-    fcontext:= glxcreatecontext(fdpy,visinfo,linkgc,false{kind <> gck_pixmap}{true});
-                                        //crashes on suse 11.1 with true
-    *)
-    if fcontext = nil then begin
-     error:= gde_rendercontext;
+   inc(gccount);
+   gcpo^.handle:= ptruint(fcontext);
+   fkind:= kind;
+   if kind = gck_pixmap then begin
+    pd:= 0;
+    pd:= glxcreateglxpixmap(fdpy,visinfo,paintdevice);
+    if pd = 0 then begin
+     error:= gde_glxpixmap;
      exit;
     end;
-    inc(gccount);
-    gcpo^.handle:= ptruint(fcontext);
-    fkind:= kind;
-    if kind = gck_pixmap then begin
-     pd:= 0;
-     pd:= glxcreateglxpixmap(fdpy,visinfo,paintdevice);
-     if pd = 0 then begin
-      error:= gde_glxpixmap;
-      exit;
+   end
+   else begin
+    if paintdevice = 0 then begin
+     with windowrect^ do begin
+      fcolormap:= xcreatecolormap(fdpy,mserootwindow,visinfo^.visual,allocnone);
+      attributes.colormap:= fcolormap;
+      paintdevice:= xcreatewindow(fdpy,parent,x,y,cx,cy,0,visinfo^.depth,
+            inputoutput,visinfo^.visual,cwcolormap,@attributes);
+      if paintdevice = 0 then begin
+       error:= gde_createwindow;
+       exit;
+      end;
+      gcpo^.paintdevicesize:= size;
+      xselectinput(fdpy,paintdevice,exposuremask); //will be mapped to parent
      end;
     end
     else begin
-     if paintdevice = 0 then begin
-      with windowrect^ do begin
-       fcolormap:= xcreatecolormap(fdpy,mserootwindow,visinfo^.visual,allocnone);
-       attributes.colormap:= fcolormap;
-       paintdevice:= xcreatewindow(fdpy,parent,x,y,cx,cy,0,visinfo^.depth,
-             inputoutput,visinfo^.visual,cwcolormap,@attributes);
-       if paintdevice = 0 then begin
-        error:= gde_createwindow;
-        exit;
-       end;
-       gcpo^.paintdevicesize:= size;
-       xselectinput(fdpy,paintdevice,exposuremask); //will be mapped to parent
-      end;
-     end
-     else begin
-      fcolormap:= xcreatecolormap(fdpy,mserootwindow,visinfo^.visual,allocnone);
-      xsetwindowcolormap(fdpy,paintdevice,fcolormap);
-     end;
-     pd:= paintdevice;
+     fcolormap:= xcreatecolormap(fdpy,mserootwindow,visinfo^.visual,allocnone);
+     xsetwindowcolormap(fdpy,paintdevice,fcolormap);
     end;
-{
-    attributes.colormap:= fcolormap;
-    with windowrect do begin
-     aid:= xcreatewindow(fdpy,aparent,x,y,cx,cy,0,visinfo^.depth,
-           inputoutput,visinfo^.visual,cwcolormap,@attributes);
-     xselectinput(fdpy,aid,exposuremask); //will be mapped to parent
-    end;
-    if aid = 0 then begin
-     result:= gue_createwindow;
-     exit;
-    end;
-}
-   // fwin:= aid;
-   finally
-    xfree(visinfo);
+    pd:= paintdevice;
    end;
+{
+   attributes.colormap:= fcolormap;
+   with windowrect do begin
+    aid:= xcreatewindow(fdpy,aparent,x,y,cx,cy,0,visinfo^.depth,
+          inputoutput,visinfo^.visual,cwcolormap,@attributes);
+    xselectinput(fdpy,aid,exposuremask); //will be mapped to parent
+   end;
+   if aid = 0 then begin
+    result:= gue_createwindow;
+    exit;
+   end;
+}
+  // fwin:= aid;
+  finally
+   xfree(visinfo);
   end;
 //  initcontext(paintdevice,gcpo^,pcontextinfoty(contextinfopo)^.viewport);
   initcontext(paintdevice,gcpo^,mr(nullpoint,gcpo^.paintdevicesize));
  {$else}
   error:= gde_notimplemented;
  {$endif}
+  if error = gde_ok then begin
+   if (kind = gck_pixmap) then begin
+    if not pixmapextensionschecked then begin
+     makecurrent(gcpo^);
+     pixmapextensions:= mseglparseextensions(glgetstring(gl_extensions));
+     pixmapextensionschecked:= true;
+    end;
+    extensions:= pixmapextensions;
+   end
+   else begin
+    if not screenextensionschecked then begin
+     makecurrent(gcpo^);
+     screenextensions:= mseglparseextensions(glgetstring(gl_extensions));
+     screenextensionschecked:= true;
+    end;
+    extensions:= screenextensions;
+   end;
+  end;
  end;
 end;
 
@@ -536,6 +561,8 @@ begin
 {$endif}
   if gccount = 0 then begin
    releaseopengl();
+   screenextensionschecked:= false;
+   pixmapextensionschecked:= false;
   end;
  end;
 end;
@@ -598,7 +625,7 @@ begin
   end;
   if gvm_font in mask then begin
 //   ftglfont:= pftglfontty(font)^;
-   ftglfont:= pointer(font);
+   glfont:= font;
   end;
   if gvm_clipregion in mask then begin
    if clipregion = 0 then begin
@@ -823,7 +850,7 @@ end;
 procedure gdi_drawstring16(var drawinfo: drawinfoty);
 begin
  fontcache.drawstring16(drawinfo,
-         ptruint(oglgcty(drawinfo.gc.platformdata).d.ftglfont));
+         oglgcty(drawinfo.gc.platformdata).d.glfont);
 end;
 
 procedure gdi_setcliporigin(var drawinfo: drawinfoty);

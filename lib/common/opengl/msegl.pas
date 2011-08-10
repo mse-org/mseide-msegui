@@ -2331,7 +2331,7 @@ end;
 
 var
  linkedextensions: glextensionsty;
- 
+
 procedure init;
 begin
   { according to bug 7570, this is necessary on all x86 platforms,
