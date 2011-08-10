@@ -1589,7 +1589,7 @@ uses
 {$if defined(cpui386) or defined(cpux86_64)}
   math,
 {$endif}
-  msedynload,mseglext;
+  msedynload,mseglext,mseglextglob;
 
 {$ifdef windows}
 function WinChoosePixelFormat(DC: HDC; p2: PPixelFormatDescriptor): Integer; extdecl; external 'gdi32' name 'ChoosePixelFormat';
@@ -2330,7 +2330,7 @@ end;
 {$ENDIF MORPHOS}
 
 var
- has_1_5: boolean;
+ linkedextensions: glextensionsty;
  
 procedure init;
 begin
@@ -2358,7 +2358,7 @@ begin
   {$ENDIF}
   {$endif}
   {$ENDIF}
- has_1_5:= load_gl_version_1_5;
+ {has_1_5:=} load_gl_version_1_5;
 end;
 
 procedure deinit;

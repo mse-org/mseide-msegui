@@ -327,6 +327,8 @@ type
   printernamepo: pmsestring;
   contextinfopo: pointer;
   gcpo: pgcty;
+  windowrect: prectty;
+  parent: winidty;
   error: gdierrorty;
  end;
  

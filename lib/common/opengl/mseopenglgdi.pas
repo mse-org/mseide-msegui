@@ -386,7 +386,7 @@ var
 
 {$ifdef unix}
 var
- lastgc: glxcontext;
+ linkgc: glxcontext;
 {$endif}
 
 procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
@@ -396,7 +396,7 @@ var
  ar1: integerarty;
  int1,int2: integer;
  visinfo: pxvisualinfo;
-// attributes: txsetwindowattributes;
+ attributes: txsetwindowattributes;
 {$endif}
 begin
  if gccount = 0 then begin
@@ -440,9 +440,15 @@ begin
     error:= gde_novisual;
     exit;
    end;
+   if linkgc = nil then begin
+    linkgc:= glxcreatecontext(fdpy,visinfo,nil,false{true});
+   end;
    try
-    fcontext:= glxcreatecontext(fdpy,visinfo,lastgc,kind <> gck_pixmap{true});
+    fcontext:= glxcreatecontext(fdpy,visinfo,nil,true{kind <> gck_pixmap}{true});
+   (*
+    fcontext:= glxcreatecontext(fdpy,visinfo,linkgc,false{kind <> gck_pixmap}{true});
                                         //crashes on suse 11.1 with true
+    *)
     if fcontext = nil then begin
      error:= gde_rendercontext;
      exit;
@@ -459,8 +465,24 @@ begin
      end;
     end
     else begin
-     fcolormap:= xcreatecolormap(fdpy,mserootwindow,visinfo^.visual,allocnone);
-     xsetwindowcolormap(fdpy,paintdevice,fcolormap);
+     if paintdevice = 0 then begin
+      with windowrect^ do begin
+       fcolormap:= xcreatecolormap(fdpy,mserootwindow,visinfo^.visual,allocnone);
+       attributes.colormap:= fcolormap;
+       paintdevice:= xcreatewindow(fdpy,parent,x,y,cx,cy,0,visinfo^.depth,
+             inputoutput,visinfo^.visual,cwcolormap,@attributes);
+       if paintdevice = 0 then begin
+        error:= gde_createwindow;
+        exit;
+       end;
+       gcpo^.paintdevicesize:= size;
+       xselectinput(fdpy,paintdevice,exposuremask); //will be mapped to parent
+      end;
+     end
+     else begin
+      fcolormap:= xcreatecolormap(fdpy,mserootwindow,visinfo^.visual,allocnone);
+      xsetwindowcolormap(fdpy,paintdevice,fcolormap);
+     end;
      pd:= paintdevice;
     end;
 {
@@ -503,8 +525,9 @@ begin
    xfreecolormap(fdpy,fcolormap);
   end;
   dec(gccount);
-  if gccount = 0 then begin
-   lastgc:= nil;
+  if (gccount = 0) and (linkgc <> nil) then begin
+   glxdestroycontext(fdpy,linkgc);
+   linkgc:= nil;
   end;
 {$else}
   wglmakecurrent(0,0);
@@ -825,9 +848,13 @@ begin
   end;
  end;
 end;
-
+var testvar: glenum; testvar1: pchar;
 procedure copyareagl(var drawinfo: drawinfoty);
 //todo: use persistent pixmap or texture buffer
+//suse 11.4 crashes with dri shared buffers and does 
+//not support non dri shared buffers...
+//suse 11.1 crashes with dri pixmaps...
+
 var
  buf: gluint;
  xscale,yscale: real;
@@ -835,18 +862,25 @@ begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
   makecurrent(tcanvas1(source).fdrawinfo.gc);
   glgenbuffers(1,@buf);
+testvar1:= glgetstring(gl_version);
+testvar1:= glgetstring(gl_renderer);
+testvar1:= glgetstring(gl_shading_language_version);
+testvar1:= glgetstring(gl_extensions);
+exit;
   glpushclientattrib(gl_client_pixel_store_bit);
   glpushattrib(gl_pixel_mode_bit);
   glpixeltransferf(gl_alpha_scale,0);
   glpixeltransferf(gl_alpha_bias,1);
-  glbindbuffer(gl_pixel_pack_buffer,buf);
   with sourcerect^ do begin
    glbufferdata(gl_pixel_pack_buffer,cx*cy*sizeof(rgbtriplety),nil,gl_stream_draw);
+   glbindbuffer(gl_pixel_pack_buffer,buf);
+testvar:= glgeterror();
    glreadpixels(x,sourceheight-y-cy,cx,cy,gl_bgra,gl_unsigned_byte,nil);
   end;
   glbindbuffer(gl_pixel_pack_buffer,0);
   makecurrent(drawinfo.gc);
   glbindbuffer(gl_pixel_unpack_buffer,buf);
+testvar:= glgeterror();
   with destrect^ do begin
    xscale:= cx/sourcerect^.cx;
    yscale:= cy/sourcerect^.cy;
@@ -854,7 +888,16 @@ begin
    glpixelzoom(xscale,yscale);
   end;
   with sourcerect^ do begin
+buf:= 0;
+glgenbuffers(1,@buf);
+testvar:= glgeterror();
+glbindbuffer(gl_pixel_unpack_buffer,buf);
+glbufferdata(gl_pixel_pack_buffer,cx*cy*sizeof(rgbtriplety),nil,gl_stream_draw);
+testvar:= glgeterror();
+//glbindbuffer(gl_pixel_unpack_buffer,0);
+
    gldrawpixels(cx,cy,gl_bgra,gl_unsigned_byte,nil);
+testvar:= glgeterror();
   end;
   glbindbuffer(gl_pixel_unpack_buffer,0);
   

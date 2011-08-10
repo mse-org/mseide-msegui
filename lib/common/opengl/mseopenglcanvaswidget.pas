@@ -22,7 +22,7 @@ type
  topenglwidgetcanvas = class(topenglcanvas)
   protected
    procedure linktopaintdevice(const aparent: winidty;
-             const windowrect: rectty; out aid: winidty); reintroduce;
+             const awindowrect: rectty; out aid: winidty); reintroduce;
   published
    property lineoptions;
  {
@@ -196,14 +196,33 @@ end;
 { topenglwidgetcanvas }
 
 procedure topenglwidgetcanvas.linktopaintdevice(const aparent: winidty;
-               const windowrect: rectty; out aid: winidty);
+               const awindowrect: rectty; out aid: winidty);
 var
  gc1: gcty;
+ info: drawinfoty;
 begin
+
  fillchar(gc1,sizeof(gc1),0);
- guierror(createrendercontext(aparent,windowrect,fcontextinfo,gc1,aid));
- gc1.paintdevicesize:= windowrect.size;
+ fillchar(info,sizeof(info),0);
+ with info.creategc do begin
+  gcpo:= @gc1;
+  contextinfopo:= @fcontextinfo;
+  windowrect:= @awindowrect;
+  parent:= aparent;
+  kind:= gck_screen;
+  gdi_lock;
+  fdrawinfo.gc.gdifuncs^[gdf_creategc](info);
+  gdi_unlock;
+  aid:= paintdevice;
+ end;
+ gc1.paintdevicesize:= awindowrect.size;
  inherited linktopaintdevice(paintdevicety(aid),gc1,nullpoint);
+
+{ 
+ guierror(createrendercontext(aparent,awindowrect,fcontextinfo,gc1,aid));
+ gc1.paintdevicesize:= awindowrect.size;
+ inherited linktopaintdevice(paintdevicety(aid),gc1,nullpoint);
+}
 end;
 
 end.

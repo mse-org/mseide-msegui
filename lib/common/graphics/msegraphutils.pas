@@ -357,7 +357,8 @@ type
                gde_fontmetrics,gde_image,gde_invalidrect,gde_invalidfileformat,
                gde_invalidindex,
                gde_notimplemented,
-               gde_noglx,gde_novisual,gde_rendercontext,gde_glxpixmap
+               gde_noglx,gde_novisual,gde_rendercontext,gde_glxpixmap,
+               gde_createwindow
               );
               
  egdi = class(eerror)
@@ -604,7 +605,8 @@ const
    'GLX extension not supported.',
    'Could not find visual.',
    'Could not create a rendering context.',
-   'Could not create a GLXPixmap.'
+   'Could not create a GLXPixmap.',
+   'Could not create canvas window.'
  );
 
 procedure removeduplicatedpoints(var vect: pointarty);
