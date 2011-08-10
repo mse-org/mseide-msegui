@@ -904,7 +904,7 @@ begin
    glpixelzoom(xscale,yscale);
   end;
   with sourcerect^ do begin
-   gldrawpixels(cx,cy,gl_bgra,gl_unsigned_byte,pointer(ar1));
+   gldrawpixels(cx,cy,gl_rgba,gl_unsigned_byte,pointer(ar1));
   end;
   glpopattrib;
  end;
@@ -1002,13 +1002,11 @@ var
  mode: glenum;
 begin
  with drawinfo,getimage,oglgcty(drawinfo.gc.platformdata).d do begin
-  glpushclientattrib(gl_client_pixel_store_bit);
   glpushattrib(gl_pixel_mode_bit);
   
   glpixeltransferf(gl_alpha_scale,0);
   glpixeltransferf(gl_alpha_bias,0);
   with image.image do begin
-   getmem(po1,length*sizeof(rgbtriplety));
    if not bgr and (gle_GL_EXT_bgra in extensions) then begin
     mode:= gl_bgra;
    end
@@ -1016,22 +1014,28 @@ begin
     mode:= gl_rgba;
     bgr:= true;
    end;
-testvar:= glgeterror();
-   glreadpixels(0,0,size.cx,size.cy,mode,gl_unsigned_byte,po1);
-testvar:= glgeterror();
-   int2:= sizeof(rgbtriplety)*size.cx;
-   ps1:= pointer(pchar(po1)+(size.cy-1)*int2); //top row
-   pd1:= pointer(pixels);
-   for int1:= size.cy-1 downto 0 do begin
-    move(ps1^,pd1^,int2);
-    dec(ps1,int2);
-    inc(pd1,int2);
+   if gle_gl_mesa_pack_invert in extensions then begin
+    glpushclientattrib(gl_client_pixel_store_bit);
+    glpixelstorei(gl_pack_invert_mesa,1);
+    glreadpixels(0,0,size.cx,size.cy,mode,gl_unsigned_byte,pixels);
+    glpopclientattrib;    
+   end
+   else begin
+    getmem(po1,length*sizeof(rgbtriplety));
+    glreadpixels(0,0,size.cx,size.cy,mode,gl_unsigned_byte,po1);
+    int2:= sizeof(rgbtriplety)*size.cx;
+    ps1:= pointer(pchar(po1)+(size.cy-1)*int2); //top row
+    pd1:= pointer(pixels);
+    for int1:= size.cy-1 downto 0 do begin
+     move(ps1^,pd1^,int2);
+     dec(ps1,int2);
+     inc(pd1,int2);
+    end;
+    freemem(po1);
    end;
-   freemem(po1);
 
    error:= gde_ok;
   end;
-  glpopclientattrib;
   glpopattrib;
  end;
 end;

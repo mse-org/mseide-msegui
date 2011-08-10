@@ -37,7 +37,7 @@ type
    ftransparency: colorty;
    fnochange: integer;
    function getscanline(index: integer): pointer;
-   procedure checkimagebgr(const bgr: boolean);
+//   procedure checkimagebgr(const bgr: boolean);
    procedure checkimage(const bgr: boolean);
    procedure getimage;
    procedure putimage;
@@ -755,31 +755,13 @@ begin
  end;
 end;
 
-procedure tbitmap.checkimagebgr(const bgr: boolean);
-var
- by1: byte;
- int1: integer;
- po1: prgbtriplety;
-begin
- if not fimage.monochrome and (fimage.bgr xor bgr) then begin
-  po1:= prgbtriplety(fimage.pixels);
-  for int1:= fimage.length-1 downto 0 do begin
-   by1:= po1^.red;
-   po1^.red:= po1^.blue;
-   po1^.blue:= by1;
-   inc(po1);
-  end;
-  fimage.bgr:= bgr;
- end;
-end;
-
 procedure tbitmap.checkimage(const bgr: boolean);
 begin
  if fimage.pixels = nil then begin
   getimage;
   internaldestroyhandle;
  end;
- checkimagebgr(bgr);
+ checkimagebgr(fimage,bgr);
 end;
 
 procedure tbitmap.putimage;
@@ -794,7 +776,7 @@ begin
   ca1:= 0;
  end;
  gdi_lock;
- checkimagebgr(false);
+ checkimagebgr(fimage,false);
  if gui_imagetopixmap(fimage,pixmap,ca1) = gde_ok then begin
   handle:= pixmap;
   include(fstate,pms_ownshandle);

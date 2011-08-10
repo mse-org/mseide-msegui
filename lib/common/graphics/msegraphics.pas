@@ -711,7 +711,7 @@ type
    procedure setcliporigin(const Value: pointty);
                //value not saved!
    function getgchandle: ptruint;
-   function getcanvasimage: imagety;
+   function getcanvasimage(const abgr: boolean = false): imagety;
    function getimage(const bgr: boolean): maskedimagety;
    
    procedure fillarc(const def: rectty; const startang,extentang: real; 
@@ -1099,6 +1099,8 @@ function isvalidmapcolor(index: colorty): boolean;
 procedure drawdottedlinesegments(const acanvas: tcanvas; const lines: segmentarty;
              const colorline: colorty);
 
+procedure checkimagebgr(var aimage: imagety; const bgr: boolean);
+
 var
  flushgdi: boolean;
 {$ifdef mse_debuggdisync}
@@ -1151,6 +1153,24 @@ begin
  end;
 end;
 {$endif}
+
+procedure checkimagebgr(var aimage: imagety; const bgr: boolean);
+var
+ by1: byte;
+ int1: integer;
+ po1: prgbtriplety;
+begin
+ if not aimage.monochrome and (aimage.bgr xor bgr) then begin
+  po1:= prgbtriplety(aimage.pixels);
+  for int1:= aimage.length-1 downto 0 do begin
+   by1:= po1^.red;
+   po1^.red:= po1^.blue;
+   po1^.blue:= by1;
+   inc(po1);
+  end;
+  aimage.bgr:= bgr;
+ end;
+end;
 
 procedure gdi_lock;
 begin
@@ -5265,7 +5285,7 @@ begin
  result:= nil; //dummy
 end;
 
-function tcanvas.getcanvasimage: imagety;
+function tcanvas.getcanvasimage(const abgr: boolean = false): imagety;
  //todo: handle monochrome and mask
 var
  int1: integer;
@@ -5273,6 +5293,7 @@ begin
  fillchar(fdrawinfo.getimage,sizeof(fdrawinfo.getimage),0);
  with fdrawinfo,getimage do begin
   if gc.handle <> 0 then begin
+   image.image.bgr:= abgr;
    int1:= gc.paintdevicesize.cx * gc.paintdevicesize.cy;
    if int1 > 0 then begin
     with image.image do begin
@@ -5286,6 +5307,7 @@ begin
     end;
    end;
   end;
+  checkimagebgr(image.image,abgr);
   result:= image.image;
  end;
 end;
