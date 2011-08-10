@@ -37,6 +37,7 @@ type
   res: byte;
  end;
  prgbtriplety = ^rgbtriplety;
+ rgbtriplearty = array of rgbtriplety;
  rgbtripleaty = array[0..0] of rgbtriplety;
  prgbtripleaty = ^rgbtripleaty;
 

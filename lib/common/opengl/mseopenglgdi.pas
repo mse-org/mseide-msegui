@@ -452,10 +452,10 @@ begin
    linkgc:= glxcreatecontext(fdpy,visinfo,nil,true);
   end;
   try
-   fcontext:= glxcreatecontext(fdpy,visinfo,nil,kind <> gck_pixmap{true});
+   fcontext:= glxcreatecontext(fdpy,visinfo,nil,true);
   (*
    fcontext:= glxcreatecontext(fdpy,visinfo,linkgc,false{kind <> gck_pixmap}{true});
-                                       //crashes on suse 11.1 with true
+                      //crashes on suse 11.1 with true on pixmap
    *)
    if fcontext = nil then begin
     error:= gde_rendercontext;
@@ -875,7 +875,7 @@ begin
   end;
  end;
 end;
-var testvar: glenum; testvar1: pchar;
+
 procedure copyareagl(var drawinfo: drawinfoty);
 //todo: use persistent pixmap or texture buffer
 //suse 11.4 crashes with dri shared buffers and does 
@@ -883,31 +883,20 @@ procedure copyareagl(var drawinfo: drawinfoty);
 //suse 11.1 crashes with dri pixmaps...
 
 var
- buf: gluint;
+// buf: gluint;
  xscale,yscale: real;
+ ar1: rgbtriplearty;
 begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
   makecurrent(tcanvas1(source).fdrawinfo.gc);
-  glgenbuffers(1,@buf);
-testvar1:= glgetstring(gl_version);
-testvar1:= glgetstring(gl_renderer);
-testvar1:= glgetstring(gl_shading_language_version);
-testvar1:= glgetstring(gl_extensions);
-exit;
-  glpushclientattrib(gl_client_pixel_store_bit);
-  glpushattrib(gl_pixel_mode_bit);
-  glpixeltransferf(gl_alpha_scale,0);
-  glpixeltransferf(gl_alpha_bias,1);
   with sourcerect^ do begin
-   glbufferdata(gl_pixel_pack_buffer,cx*cy*sizeof(rgbtriplety),nil,gl_stream_draw);
-   glbindbuffer(gl_pixel_pack_buffer,buf);
-testvar:= glgeterror();
-   glreadpixels(x,sourceheight-y-cy,cx,cy,gl_bgra,gl_unsigned_byte,nil);
+   setlength(ar1,cx*cy);
+   glreadpixels(x,
+      oglgcty(tcanvas1(source).fdrawinfo.gc.platformdata).d.sourceheight-y-cy,
+                          cx,cy,gl_rgba,gl_unsigned_byte,pointer(ar1));
   end;
-  glbindbuffer(gl_pixel_pack_buffer,0);
   makecurrent(drawinfo.gc);
-  glbindbuffer(gl_pixel_unpack_buffer,buf);
-testvar:= glgeterror();
+  glpushattrib(gl_pixel_mode_bit);
   with destrect^ do begin
    xscale:= cx/sourcerect^.cx;
    yscale:= cy/sourcerect^.cy;
@@ -915,16 +904,37 @@ testvar:= glgeterror();
    glpixelzoom(xscale,yscale);
   end;
   with sourcerect^ do begin
-buf:= 0;
-glgenbuffers(1,@buf);
-testvar:= glgeterror();
-glbindbuffer(gl_pixel_unpack_buffer,buf);
-glbufferdata(gl_pixel_pack_buffer,cx*cy*sizeof(rgbtriplety),nil,gl_stream_draw);
-testvar:= glgeterror();
+   gldrawpixels(cx,cy,gl_bgra,gl_unsigned_byte,pointer(ar1));
+  end;
+  glpopattrib;
+ end;
+ 
+(* buffer objects are unreliable
+ with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
+  makecurrent(tcanvas1(source).fdrawinfo.gc);
+  glgenbuffers(1,@buf);
+  glpushclientattrib(gl_client_pixel_store_bit);
+  glpushattrib(gl_pixel_mode_bit);
+  glpixeltransferf(gl_alpha_scale,0);
+  glpixeltransferf(gl_alpha_bias,1);
+  with sourcerect^ do begin
+   glbufferdata(gl_pixel_pack_buffer,cx*cy*sizeof(rgbtriplety),nil,gl_stream_draw);
+   glbindbuffer(gl_pixel_pack_buffer,buf);
+   glreadpixels(x,sourceheight-y-cy,cx,cy,gl_bgra,gl_unsigned_byte,nil);
+  end;
+  glbindbuffer(gl_pixel_pack_buffer,0);
+  makecurrent(drawinfo.gc);
+  glbindbuffer(gl_pixel_unpack_buffer,buf);
+  with destrect^ do begin
+   xscale:= cx/sourcerect^.cx;
+   yscale:= cy/sourcerect^.cy;
+   glrasterpos2i(x,(sourceheight-y-cy));
+   glpixelzoom(xscale,yscale);
+  end;
+  with sourcerect^ do begin
 //glbindbuffer(gl_pixel_unpack_buffer,0);
 
    gldrawpixels(cx,cy,gl_bgra,gl_unsigned_byte,nil);
-testvar:= glgeterror();
   end;
   glbindbuffer(gl_pixel_unpack_buffer,0);
   
@@ -932,8 +942,9 @@ testvar:= glgeterror();
   glpopattrib;
   gldeletebuffers(1,@buf);
  end;
+ *)
 end;
-
+var testvar: glenum;
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
  im1: maskedimagety;
@@ -988,6 +999,7 @@ procedure gdi_getimage(var drawinfo: drawinfoty);
 var
  int1,int2: integer;
  po1,ps1,pd1: pchar;
+ mode: glenum;
 begin
  with drawinfo,getimage,oglgcty(drawinfo.gc.platformdata).d do begin
   glpushclientattrib(gl_client_pixel_store_bit);
@@ -997,7 +1009,16 @@ begin
   glpixeltransferf(gl_alpha_bias,0);
   with image.image do begin
    getmem(po1,length*sizeof(rgbtriplety));
-   glreadpixels(0,0,size.cx,size.cy,gl_bgra,gl_unsigned_byte,po1);
+   if not bgr and (gle_GL_EXT_bgra in extensions) then begin
+    mode:= gl_bgra;
+   end
+   else begin
+    mode:= gl_rgba;
+    bgr:= true;
+   end;
+testvar:= glgeterror();
+   glreadpixels(0,0,size.cx,size.cy,mode,gl_unsigned_byte,po1);
+testvar:= glgeterror();
    int2:= sizeof(rgbtriplety)*size.cx;
    ps1:= pointer(pchar(po1)+(size.cy-1)*int2); //top row
    pd1:= pointer(pixels);
@@ -1007,6 +1028,7 @@ begin
     inc(pd1,int2);
    end;
    freemem(po1);
+
    error:= gde_ok;
   end;
   glpopclientattrib;
