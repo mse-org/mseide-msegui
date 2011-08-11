@@ -226,8 +226,8 @@ procedure deletecommandlineargument(const index: integer);
 
 function nowutc: tdatetime;
 
-function loadlib(const libnames: array of filenamety; 
-                                      out libname: filenamety): tlibhandle;
+function loadlib(const libnames: array of filenamety; out libname: filenamety;
+                        const errormessage: msestring = ''): tlibhandle;
 type
  funcinfoty = record
                n: string;      //name
@@ -378,8 +378,8 @@ begin
  end;
 end;
 
-function loadlib(const libnames: array of filenamety;
-                           out libname: filenamety): tlibhandle;
+function loadlib(const libnames: array of filenamety; out libname: filenamety; 
+                                const errormessage: msestring = ''): tlibhandle;
 var
  int1: integer;
 begin
@@ -397,7 +397,8 @@ begin
   end;
  end;
  if result = 0 then begin
-  raise exception.create('Library '+quotelibnames(libnames)+' not found.');
+  raise exception.create(errormessage+
+                   'Library '+quotelibnames(libnames)+' not found.');
  end;
 end;
 

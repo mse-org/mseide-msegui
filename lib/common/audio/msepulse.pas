@@ -41,21 +41,9 @@ const
  funcs: array[0..0] of funcinfoty = (
    (n: 'pa_strerror'; d: @pa_strerror)          //0
    );
-   
+ errormessage = 'Can not load Pulseaudio simple library. ';
 begin
- try
-  if length(sonames) = 0 then begin
-   initializedynlib(libinfo,pulsesimplelib,funcs,[]);
-  end
-  else begin
-   initializedynlib(libinfo,sonames,funcs,[]);
-  end;
- except
-  on e: exception do begin
-   e.message:= 'Can not load Pulseaudio simple library. '+e.message;
-   raise;
-  end;  
- end;
+ initializedynlib(libinfo,sonames,pulsesimplelib,funcs,[],errormessage);
 end;
 
 procedure releasepulse;

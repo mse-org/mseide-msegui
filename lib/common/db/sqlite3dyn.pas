@@ -914,20 +914,9 @@ const
   (n: 'sqlite3_libversion_number'; d: @sqlite3_libversion_number),
   (n: 'sqlite3_clear_bindings'; d: @sqlite3_clear_bindings)
  );
+ errormessage = 'Can not load Sqlite3 library. ';
 begin
- try
-  if length(sonames) = 0 then begin
-   initializedynlib(libinfo,sqlite3lib,funcs,[]);
-  end
-  else begin
-   initializedynlib(libinfo,sonames,funcs,[]);
-  end;
- except
-  on e: exception do begin
-   e.message:= 'Can not load Sqlite3 library. '+e.message;
-   raise;
-  end;  
- end;
+ initializedynlib(libinfo,sonames,sqlite3lib,funcs,[],errormessage);
 end;
 
 procedure releasesqlite3;

@@ -573,21 +573,9 @@ const
   (n: 'DLAddTail'; d: @DLAddTail),
   (n: 'DLRemHead'; d: @DLRemHead)
  );
-  
+ errormessage = 'Can not load Postgres library. ';
 begin
- try
-  if length(sonames) = 0 then begin
-   initializedynlib(libinfo,postgreslib,funcs,funcsopt);
-  end
-  else begin
-   initializedynlib(libinfo,sonames,funcs,funcsopt);
-  end;
- except
-  on e: exception do begin
-   e.message:= 'Can not load Postgres library. '+e.message;
-   raise;
-  end;  
- end;
+ initializedynlib(libinfo,sonames,postgreslib,funcs,funcsopt,errormessage);
 end;
 
 procedure releasepostgres3;

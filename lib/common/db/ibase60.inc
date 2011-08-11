@@ -3082,59 +3082,23 @@ const
   (n: 'isc_suspend_window'; d: @isc_suspend_window)
 {$ENDIF} 
   );
- 
+ errormessage = 'Can not load Firebird library. ';
 begin
- try
-  if length(sonames) = 0 then begin
-   if useembeddedfirebird then begin
-    initializedynlib(libinfo,fbembedlib,[],funcs); //accept missing entries
-   end
-   else begin
-    initializedynlib(libinfo,fbcgdslib,[],funcs); //accept missing entries
-   end;
+ if length(sonames) = 0 then begin
+  if useembeddedfirebird then begin
+   initializedynlib(libinfo,fbembedlib,[],[],funcs,errormessage);
+                                       //accept missing entries
   end
   else begin
-   initializedynlib(libinfo,sonames,[],funcs); //accept missing entries
-  end;
- except
-  on e: exception do begin
-   e.message:= 'Can not load Firebird library. '+e.message;
-   raise;
-  end;  
- end;
-(* 
- if libname <> '' then begin
-  If Not TryInitialiseIBase60(libname) then begin
-   checkloaded;
-   Raise EInOutError.CreateFmt(SErrLoadFailed,[libname]);
+   initializedynlib(libinfo,fbcgdslib,[],[],funcs,errormessage);
+                                      //accept missing entries
   end;
  end
  else begin
-  If UseEmbeddedFirebird then begin
-   If Not TryInitialiseIBase60(fbembedlib) then begin
-    checkloaded;
-    Raise EInOutError.CreateFmt(SErrEmbeddedFailed,[quotelibnames(fbembedlib)]);
-   end;
-  end
-  else begin
-   If (Not TryInitialiseIBase60(fbcgdslib)) then begin
-    checkloaded;
-    Raise EInOutError.CreateFmt(SErrDefaultsFailed,[quotelibnames(fbcgdslib)]);
-   end;
-  end;    
- end;
- *)
-end;
-(*
-Procedure InitialiseIBase60(Const LibraryNames : array of filenamety);
-
-begin
- If Not TryInitialiseIbase60(LibraryNames) then begin
-  checkloaded;
-  Raise EInOutError.CreateFmt(SErrLoadFailed,[quotelibnames(LibraryNames)]);
+  initializedynlib(libinfo,sonames,[],[],funcs,errormessage);
+                                      //accept missing entries
  end;
 end;
-*)
 
 Procedure ReleaseIBase60;
 

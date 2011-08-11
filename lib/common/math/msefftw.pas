@@ -198,7 +198,8 @@ const
    (n: 'fftw_destroy_plan'; d: @fftw_destroy_plan),
    (n: 'fftw_execute'; d: @fftw_execute));
 {$endif}
-
+const
+ errormessage = 'Can not load FFTW library. ';
 begin
 {$ifndef FPC}
  funcs[0].d:= @fftw_plan_dft_1d;
@@ -216,19 +217,8 @@ begin
  funcs[12].d:= @fftw_destroy_plan;
  funcs[13].d:= @fftw_execute;
 {$endif}
- try
-  if length(sonames) = 0 then begin
-   initializedynlib(libinfo,fftwlib,funcs,[]);
-  end
-  else begin
-   initializedynlib(libinfo,sonames,funcs,[]);
-  end;
- except
-  on e: exception do begin
-   e.message:= 'Can not load FFTW library. '+e.message;
-   raise;
-  end;  
- end;
+
+ initializedynlib(libinfo,sonames,fftwlib,funcs,[],errormessage);
 end;
 
 procedure releasefftw;

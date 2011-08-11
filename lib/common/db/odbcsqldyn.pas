@@ -1743,21 +1743,9 @@ const
     (n: 'SQLProcedureColumns'; d: @SQLProcedureColumns),
     (n: 'SQLStatistics'; d: @SQLStatistics)
    );
-
+ errormessage = 'Can not load ODBC library. ';
 begin
- try
-  if length(sonames) = 0 then begin
-   initializedynlib(libinfo,odbclib,funcs,[]);
-  end
-  else begin
-   initializedynlib(libinfo,sonames,funcs,[]);
-  end;
- except
-  on e: exception do begin
-   e.message:= 'Can not load ODBC library. '+e.message;
-   raise;
-  end;  
- end;
+ initializedynlib(libinfo,sonames,odbclib,funcs,[],errormessage);
 end;
 
 procedure releaseodbc;

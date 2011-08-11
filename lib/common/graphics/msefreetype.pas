@@ -456,21 +456,9 @@ const
   (n: 'FT_Glyph_Get_CBox'; d: @FT_Glyph_Get_CBox),      //18
   (n: 'FT_Render_Glyph'; d: @FT_Render_Glyph)           //19
  );
- 
+ errormessage = 'Can not load Freetype library. ';
 begin
- try
-  if length(sonames) = 0 then begin
-   initializedynlib(libinfo,freetypelib,funcs,[],@initft);
-  end
-  else begin
-   initializedynlib(libinfo,sonames,funcs,[],@initft);
-  end;
- except
-  on e: exception do begin
-   e.message:= 'Can not load Freetype library. '+e.message;
-   raise;
-  end;  
- end;
+ initializedynlib(libinfo,sonames,freetypelib,funcs,[],errormessage,@initft);
 end;
 
 procedure releasefreetype;

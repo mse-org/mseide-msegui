@@ -407,21 +407,10 @@ const
   (n: 'ftglRenderFont'; d: @ftglRenderFont),
   (n: 'ftglGetFontError'; d: @ftglGetFontError)
  );
-
+ errormessage = 'Can not load FTGL library. ';
+ 
 begin
- try
-  if length(sonames) = 0 then begin
-   initializedynlib(libinfo,ftgllib,funcs,[]);
-  end
-  else begin
-   initializedynlib(libinfo,sonames,funcs,[]);
-  end;
- except
-  on e: exception do begin
-   e.message:= 'Can not load FTGL library. '+e.message;
-   raise;
-  end;  
- end;
+ initializedynlib(libinfo,sonames,ftgllib,funcs,[],errormessage);
 end;
 
 initialization

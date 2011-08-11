@@ -14,12 +14,15 @@ type
 procedure initializelibinfo(var info: dynlibinfoty);
 procedure finalizelibinfo(var info: dynlibinfoty);
 
-procedure initializedynlib(var info: dynlibinfoty;
-                             const alibnames: array of filenamety;
-                             const funcs: array of funcinfoty;
-                             const funcsopt: array of funcinfoty;
-                             const callback: procedurety = nil);
-                               //called after lib load
+function initializedynlib(var info: dynlibinfoty;
+                              const libnames: array of filenamety;
+                              const libnamesdefault: array of filenamety;
+                              const funcs: array of funcinfoty;
+                              const funcsopt: array of funcinfoty;
+                              const errormessage: msestring = '';
+                              const callback: procedurety = nil): boolean;
+                                        //called after lib load
+                              //returns true if all funcsopt found
 procedure releasedynlib(var info: dynlibinfoty;
                              const callback: procedurety = nil);
                                //called before lib unload
@@ -43,30 +46,39 @@ end;
 var
  lock: mutexty;
 
-procedure initializedynlib(var info: dynlibinfoty;
-                              const alibnames: array of filenamety;
+function initializedynlib(var info: dynlibinfoty;
+                              const libnames: array of filenamety;
+                              const libnamesdefault: array of filenamety;
                               const funcs: array of funcinfoty;
                               const funcsopt: array of funcinfoty;
-                              const callback: procedurety = nil);
+                              const errormessage: msestring = '';
+                              const callback: procedurety = nil): boolean;
+                              //true if all funcsopt found
 begin
  with info do begin
   sys_mutexlock(lock);
   try
+   result:= true;
    if refcount = 0 then begin
-    if high(alibnames) >= 0 then begin
-     libhandle:= loadlib(alibnames,libname);
+    if (high(libnames) >= 0) or (high(libnamesdefault) >= 0) then begin
+     if (high(libnames) >= 0) then begin
+      libhandle:= loadlib(libnames,libname,errormessage);
+     end
+     else begin
+      libhandle:= loadlib(libnamesdefault,libname,errormessage);
+     end;
      try
       getprocaddresses(libhandle,funcs,false);
      except
       on e: exception do begin
-       e.message:= 'Library "'+libname+'": '+e.message;
+       e.message:= errormessage+'Library "'+libname+'": '+e.message;
        if unloadlibrary(libhandle) then begin
         libhandle:= nilhandle;
        end;
        raise;
       end;
      end;
-     getprocaddresses(libhandle,funcsopt,true);
+     result:= getprocaddresses(libhandle,funcsopt,true);
     end;
     if (callback <> nil) then begin
      callback;

@@ -312,21 +312,9 @@ const
   (n: 'FcConfigBuildFonts'; d: @FcConfigBuildFonts),        //41
   (n: 'FcConfigGetCurrent'; d: @FcConfigGetCurrent)         //42
  );
- 
+ errormessage = 'Can not load FontConfig library. ';
 begin
- try
-  if length(sonames) = 0 then begin
-   initializedynlib(libinfo,fontconfiglib,funcs,[],@init);
-  end
-  else begin
-   initializedynlib(libinfo,sonames,funcs,[],@init);
-  end;
- except
-  on e: exception do begin
-   e.message:= 'Can not load FontConfig library. '+e.message;
-   raise;
-  end;  
- end;
+ initializedynlib(libinfo,sonames,fontconfiglib,funcs,[],errormessage,@init);
 end;
 
 procedure releasefontconfig;

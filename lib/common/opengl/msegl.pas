@@ -44,35 +44,21 @@ Abstract:
 { For the latest updates, visit Delphi3D: http://www.delphi3d.net              }
 {******************************************************************************}
 
-{$MODE Delphi}
-{$MACRO ON}
-{$IFDEF Windows}
-  {$DEFINE extdecl := stdcall}
-{$ELSE}
-  {$DEFINE extdecl := cdecl}
-  {$IFDEF MorphOS}
-    {$INLINE ON}
-    {$DEFINE GL_UNIT}
-  {$ELSE}
-    {$LINKLIB c}
-  {$ENDIF}
-{$ENDIF}
+//{$MODE Delphi}
+{$mode objfpc} {$h+}
+{$macro on}
+{$ifdef mswindows}
+  {$define extdecl := stdcall}
+{$else}
+  {$define extdecl := cdecl}
+{$endif}
 
 unit msegl;
 
 interface
 
 uses
-  SysUtils,msestrings,
-  {$IFDEF Windows}
-  Windows, dynlibs
-  {$ELSE Windows}
-  {$IFDEF MorphOS}
-  TinyGL
-  {$ELSE MorphOS}
-  dynlibs
-  {$ENDIF MorphOS}
-  {$ENDIF Windows};
+  SysUtils,msestrings;
 
 const
 {$ifdef mswindows}
@@ -84,7 +70,7 @@ const
 
 {$IFNDEF MORPHOS}
 var
-  LibGL: TLibHandle;
+  LibGL: THandle;
 {$ENDIF MORPHOS}
 
 type
@@ -1578,8 +1564,8 @@ type
   PFNGLGETCOLORTABLEPARAMETERIVEXTPROC = procedure(target, pname: GLenum; params: PGLint); extdecl;
   PFNGLGETCOLORTABLEPARAMETERFVEXTPROC = procedure(target, pname: GLenum; params: PGLfloat); extdecl;
 
-procedure LoadOpenGL(const dll: String);
-procedure FreeOpenGL;
+//procedure LoadOpenGL(const dll: String);
+//procedure FreeOpenGL;
 
 procedure initializeopengl(const sonames: array of filenamety); //[] = default
 procedure releaseopengl;
@@ -1589,789 +1575,390 @@ uses
 {$if defined(cpui386) or defined(cpux86_64)}
   math,
 {$endif}
-  msedynload,mseglext,mseglextglob;
+  msedynload,mseglext,mseglextglob,msesys;
 
-{$ifdef windows}
-function WinChoosePixelFormat(DC: HDC; p2: PPixelFormatDescriptor): Integer; extdecl; external 'gdi32' name 'ChoosePixelFormat';
+{$ifdef mswindows}
+function WinChoosePixelFormat(DC: HDC; p2: PPixelFormatDescriptor): Integer;
+                           extdecl; external 'gdi32' name 'ChoosePixelFormat';
 {$endif}
 
-{$IFDEF MORPHOS}
-
-{ MorphOS GL works differently due to different dynamic-library handling on Amiga-like }
-{ systems, so its functions are included here. }
-{$INCLUDE tinygl.inc}
-
-{$ENDIF MORPHOS}
-
-procedure FreeOpenGL;
-begin
-{$IFDEF MORPHOS}
-
-  // MorphOS's GL will closed down by TinyGL unit, nothing is needed here.
-
-{$ELSE MORPHOS}
-  @glAccum := nil;
-  @glAlphaFunc := nil;
-  @glAreTexturesResident := nil;
-  @glArrayElement := nil;
-  @glBegin := nil;
-  @glBindTexture := nil;
-  @glBitmap := nil;
-  @glBlendFunc := nil;
-  @glCallList := nil;
-  @glCallLists := nil;
-  @glClear := nil;
-  @glClearAccum := nil;
-  @glClearColor := nil;
-  @glClearDepth := nil;
-  @glClearIndex := nil;
-  @glClearStencil := nil;
-  @glClipPlane := nil;
-  @glColor3b := nil;
-  @glColor3bv := nil;
-  @glColor3d := nil;
-  @glColor3dv := nil;
-  @glColor3f := nil;
-  @glColor3fv := nil;
-  @glColor3i := nil;
-  @glColor3iv := nil;
-  @glColor3s := nil;
-  @glColor3sv := nil;
-  @glColor3ub := nil;
-  @glColor3ubv := nil;
-  @glColor3ui := nil;
-  @glColor3uiv := nil;
-  @glColor3us := nil;
-  @glColor3usv := nil;
-  @glColor4b := nil;
-  @glColor4bv := nil;
-  @glColor4d := nil;
-  @glColor4dv := nil;
-  @glColor4f := nil;
-  @glColor4fv := nil;
-  @glColor4i := nil;
-  @glColor4iv := nil;
-  @glColor4s := nil;
-  @glColor4sv := nil;
-  @glColor4ub := nil;
-  @glColor4ubv := nil;
-  @glColor4ui := nil;
-  @glColor4uiv := nil;
-  @glColor4us := nil;
-  @glColor4usv := nil;
-  @glColorMask := nil;
-  @glColorMaterial := nil;
-  @glColorPointer := nil;
-  @glCopyPixels := nil;
-  @glCopyTexImage1D := nil;
-  @glCopyTexImage2D := nil;
-  @glCopyTexSubImage1D := nil;
-  @glCopyTexSubImage2D := nil;
-  @glCullFace := nil;
-  @glDeleteLists := nil;
-  @glDeleteTextures := nil;
-  @glDepthFunc := nil;
-  @glDepthMask := nil;
-  @glDepthRange := nil;
-  @glDisable := nil;
-  @glDisableClientState := nil;
-  @glDrawArrays := nil;
-  @glDrawBuffer := nil;
-  @glDrawElements := nil;
-  @glDrawPixels := nil;
-  @glEdgeFlag := nil;
-  @glEdgeFlagPointer := nil;
-  @glEdgeFlagv := nil;
-  @glEnable := nil;
-  @glEnableClientState := nil;
-  @glEnd := nil;
-  @glEndList := nil;
-  @glEvalCoord1d := nil;
-  @glEvalCoord1dv := nil;
-  @glEvalCoord1f := nil;
-  @glEvalCoord1fv := nil;
-  @glEvalCoord2d := nil;
-  @glEvalCoord2dv := nil;
-  @glEvalCoord2f := nil;
-  @glEvalCoord2fv := nil;
-  @glEvalMesh1 := nil;
-  @glEvalMesh2 := nil;
-  @glEvalPoint1 := nil;
-  @glEvalPoint2 := nil;
-  @glFeedbackBuffer := nil;
-  @glFinish := nil;
-  @glFlush := nil;
-  @glFogf := nil;
-  @glFogfv := nil;
-  @glFogi := nil;
-  @glFogiv := nil;
-  @glFrontFace := nil;
-  @glFrustum := nil;
-  @glGenLists := nil;
-  @glGenTextures := nil;
-  @glGetBooleanv := nil;
-  @glGetClipPlane := nil;
-  @glGetDoublev := nil;
-  @glGetError := nil;
-  @glGetFloatv := nil;
-  @glGetIntegerv := nil;
-  @glGetLightfv := nil;
-  @glGetLightiv := nil;
-  @glGetMapdv := nil;
-  @glGetMapfv := nil;
-  @glGetMapiv := nil;
-  @glGetMaterialfv := nil;
-  @glGetMaterialiv := nil;
-  @glGetPixelMapfv := nil;
-  @glGetPixelMapuiv := nil;
-  @glGetPixelMapusv := nil;
-  @glGetPointerv := nil;
-  @glGetPolygonStipple := nil;
-  @glGetString := nil;
-  @glGetTexEnvfv := nil;
-  @glGetTexEnviv := nil;
-  @glGetTexGendv := nil;
-  @glGetTexGenfv := nil;
-  @glGetTexGeniv := nil;
-  @glGetTexImage := nil;
-  @glGetTexLevelParameterfv := nil;
-  @glGetTexLevelParameteriv := nil;
-  @glGetTexParameterfv := nil;
-  @glGetTexParameteriv := nil;
-  @glHint := nil;
-  @glIndexMask := nil;
-  @glIndexPointer := nil;
-  @glIndexd := nil;
-  @glIndexdv := nil;
-  @glIndexf := nil;
-  @glIndexfv := nil;
-  @glIndexi := nil;
-  @glIndexiv := nil;
-  @glIndexs := nil;
-  @glIndexsv := nil;
-  @glIndexub := nil;
-  @glIndexubv := nil;
-  @glInitNames := nil;
-  @glInterleavedArrays := nil;
-  @glIsEnabled := nil;
-  @glIsList := nil;
-  @glIsTexture := nil;
-  @glLightModelf := nil;
-  @glLightModelfv := nil;
-  @glLightModeli := nil;
-  @glLightModeliv := nil;
-  @glLightf := nil;
-  @glLightfv := nil;
-  @glLighti := nil;
-  @glLightiv := nil;
-  @glLineStipple := nil;
-  @glLineWidth := nil;
-  @glListBase := nil;
-  @glLoadIdentity := nil;
-  @glLoadMatrixd := nil;
-  @glLoadMatrixf := nil;
-  @glLoadName := nil;
-  @glLogicOp := nil;
-  @glMap1d := nil;
-  @glMap1f := nil;
-  @glMap2d := nil;
-  @glMap2f := nil;
-  @glMapGrid1d := nil;
-  @glMapGrid1f := nil;
-  @glMapGrid2d := nil;
-  @glMapGrid2f := nil;
-  @glMaterialf := nil;
-  @glMaterialfv := nil;
-  @glMateriali := nil;
-  @glMaterialiv := nil;
-  @glMatrixMode := nil;
-  @glMultMatrixd := nil;
-  @glMultMatrixf := nil;
-  @glNewList := nil;
-  @glNormal3b := nil;
-  @glNormal3bv := nil;
-  @glNormal3d := nil;
-  @glNormal3dv := nil;
-  @glNormal3f := nil;
-  @glNormal3fv := nil;
-  @glNormal3i := nil;
-  @glNormal3iv := nil;
-  @glNormal3s := nil;
-  @glNormal3sv := nil;
-  @glNormalPointer := nil;
-  @glOrtho := nil;
-  @glPassThrough := nil;
-  @glPixelMapfv := nil;
-  @glPixelMapuiv := nil;
-  @glPixelMapusv := nil;
-  @glPixelStoref := nil;
-  @glPixelStorei := nil;
-  @glPixelTransferf := nil;
-  @glPixelTransferi := nil;
-  @glPixelZoom := nil;
-  @glPointSize := nil;
-  @glPolygonMode := nil;
-  @glPolygonOffset := nil;
-  @glPolygonStipple := nil;
-  @glPopAttrib := nil;
-  @glPopClientAttrib := nil;
-  @glPopMatrix := nil;
-  @glPopName := nil;
-  @glPrioritizeTextures := nil;
-  @glPushAttrib := nil;
-  @glPushClientAttrib := nil;
-  @glPushMatrix := nil;
-  @glPushName := nil;
-  @glRasterPos2d := nil;
-  @glRasterPos2dv := nil;
-  @glRasterPos2f := nil;
-  @glRasterPos2fv := nil;
-  @glRasterPos2i := nil;
-  @glRasterPos2iv := nil;
-  @glRasterPos2s := nil;
-  @glRasterPos2sv := nil;
-  @glRasterPos3d := nil;
-  @glRasterPos3dv := nil;
-  @glRasterPos3f := nil;
-  @glRasterPos3fv := nil;
-  @glRasterPos3i := nil;
-  @glRasterPos3iv := nil;
-  @glRasterPos3s := nil;
-  @glRasterPos3sv := nil;
-  @glRasterPos4d := nil;
-  @glRasterPos4dv := nil;
-  @glRasterPos4f := nil;
-  @glRasterPos4fv := nil;
-  @glRasterPos4i := nil;
-  @glRasterPos4iv := nil;
-  @glRasterPos4s := nil;
-  @glRasterPos4sv := nil;
-  @glReadBuffer := nil;
-  @glReadPixels := nil;
-  @glRectd := nil;
-  @glRectdv := nil;
-  @glRectf := nil;
-  @glRectfv := nil;
-  @glRecti := nil;
-  @glRectiv := nil;
-  @glRects := nil;
-  @glRectsv := nil;
-  @glRenderMode := nil;
-  @glRotated := nil;
-  @glRotatef := nil;
-  @glScaled := nil;
-  @glScalef := nil;
-  @glScissor := nil;
-  @glSelectBuffer := nil;
-  @glShadeModel := nil;
-  @glStencilFunc := nil;
-  @glStencilMask := nil;
-  @glStencilOp := nil;
-  @glTexCoord1d := nil;
-  @glTexCoord1dv := nil;
-  @glTexCoord1f := nil;
-  @glTexCoord1fv := nil;
-  @glTexCoord1i := nil;
-  @glTexCoord1iv := nil;
-  @glTexCoord1s := nil;
-  @glTexCoord1sv := nil;
-  @glTexCoord2d := nil;
-  @glTexCoord2dv := nil;
-  @glTexCoord2f := nil;
-  @glTexCoord2fv := nil;
-  @glTexCoord2i := nil;
-  @glTexCoord2iv := nil;
-  @glTexCoord2s := nil;
-  @glTexCoord2sv := nil;
-  @glTexCoord3d := nil;
-  @glTexCoord3dv := nil;
-  @glTexCoord3f := nil;
-  @glTexCoord3fv := nil;
-  @glTexCoord3i := nil;
-  @glTexCoord3iv := nil;
-  @glTexCoord3s := nil;
-  @glTexCoord3sv := nil;
-  @glTexCoord4d := nil;
-  @glTexCoord4dv := nil;
-  @glTexCoord4f := nil;
-  @glTexCoord4fv := nil;
-  @glTexCoord4i := nil;
-  @glTexCoord4iv := nil;
-  @glTexCoord4s := nil;
-  @glTexCoord4sv := nil;
-  @glTexCoordPointer := nil;
-  @glTexEnvf := nil;
-  @glTexEnvfv := nil;
-  @glTexEnvi := nil;
-  @glTexEnviv := nil;
-  @glTexGend := nil;
-  @glTexGendv := nil;
-  @glTexGenf := nil;
-  @glTexGenfv := nil;
-  @glTexGeni := nil;
-  @glTexGeniv := nil;
-  @glTexImage1D := nil;
-  @glTexImage2D := nil;
-  @glTexParameterf := nil;
-  @glTexParameterfv := nil;
-  @glTexParameteri := nil;
-  @glTexParameteriv := nil;
-  @glTexSubImage1D := nil;
-  @glTexSubImage2D := nil;
-  @glTranslated := nil;
-  @glTranslatef := nil;
-  @glVertex2d := nil;
-  @glVertex2dv := nil;
-  @glVertex2f := nil;
-  @glVertex2fv := nil;
-  @glVertex2i := nil;
-  @glVertex2iv := nil;
-  @glVertex2s := nil;
-  @glVertex2sv := nil;
-  @glVertex3d := nil;
-  @glVertex3dv := nil;
-  @glVertex3f := nil;
-  @glVertex3fv := nil;
-  @glVertex3i := nil;
-  @glVertex3iv := nil;
-  @glVertex3s := nil;
-  @glVertex3sv := nil;
-  @glVertex4d := nil;
-  @glVertex4dv := nil;
-  @glVertex4f := nil;
-  @glVertex4fv := nil;
-  @glVertex4i := nil;
-  @glVertex4iv := nil;
-  @glVertex4s := nil;
-  @glVertex4sv := nil;
-  @glVertexPointer := nil;
-  @glViewport := nil;
-  {$IFDEF Windows}
-  @ChoosePixelFormat := nil;
-  {$ENDIF}
-
-  if (LibGL <> 0) then
-    FreeLibrary(LibGL);
-{$ENDIF MORPHOS}
-end;
-
-procedure LoadOpenGL(const dll: String);
-{$IFDEF MORPHOS}
-begin
-  // MorphOS's GL has own initialization in TinyGL unit, nothing is needed here.
-end;
-{$ELSE MORPHOS}
 var
-  MethodName: string = '';
-
-  function GetGLProcAddress(Lib: PtrInt; ProcName: PChar): Pointer;
-  begin
-    MethodName:=ProcName;
-    Result:=GetProcAddress(Lib, ProcName);
-  end;
-
-begin
-
-  FreeOpenGL;
-
-  LibGL := LoadLibrary(PChar(dll));
-  if LibGL = 0 then raise Exception.Create('Could not load OpenGL from ' + dll);
-  try
-    @glAccum := GetGLProcAddress(LibGL, 'glAccum');
-    @glAlphaFunc := GetGLProcAddress(LibGL, 'glAlphaFunc');
-    @glAreTexturesResident := GetGLProcAddress(LibGL, 'glAreTexturesResident');
-    @glArrayElement := GetGLProcAddress(LibGL, 'glArrayElement');
-    @glBegin := GetGLProcAddress(LibGL, 'glBegin');
-    @glBindTexture := GetGLProcAddress(LibGL, 'glBindTexture');
-    @glBitmap := GetGLProcAddress(LibGL, 'glBitmap');
-    @glBlendFunc := GetGLProcAddress(LibGL, 'glBlendFunc');
-    @glCallList := GetGLProcAddress(LibGL, 'glCallList');
-    @glCallLists := GetGLProcAddress(LibGL, 'glCallLists');
-    @glClear := GetGLProcAddress(LibGL, 'glClear');
-    @glClearAccum := GetGLProcAddress(LibGL, 'glClearAccum');
-    @glClearColor := GetGLProcAddress(LibGL, 'glClearColor');
-    @glClearDepth := GetGLProcAddress(LibGL, 'glClearDepth');
-    @glClearIndex := GetGLProcAddress(LibGL, 'glClearIndex');
-    @glClearStencil := GetGLProcAddress(LibGL, 'glClearStencil');
-    @glClipPlane := GetGLProcAddress(LibGL, 'glClipPlane');
-    @glColor3b := GetGLProcAddress(LibGL, 'glColor3b');
-    @glColor3bv := GetGLProcAddress(LibGL, 'glColor3bv');
-    @glColor3d := GetGLProcAddress(LibGL, 'glColor3d');
-    @glColor3dv := GetGLProcAddress(LibGL, 'glColor3dv');
-    @glColor3f := GetGLProcAddress(LibGL, 'glColor3f');
-    @glColor3fv := GetGLProcAddress(LibGL, 'glColor3fv');
-    @glColor3i := GetGLProcAddress(LibGL, 'glColor3i');
-    @glColor3iv := GetGLProcAddress(LibGL, 'glColor3iv');
-    @glColor3s := GetGLProcAddress(LibGL, 'glColor3s');
-    @glColor3sv := GetGLProcAddress(LibGL, 'glColor3sv');
-    @glColor3ub := GetGLProcAddress(LibGL, 'glColor3ub');
-    @glColor3ubv := GetGLProcAddress(LibGL, 'glColor3ubv');
-    @glColor3ui := GetGLProcAddress(LibGL, 'glColor3ui');
-    @glColor3uiv := GetGLProcAddress(LibGL, 'glColor3uiv');
-    @glColor3us := GetGLProcAddress(LibGL, 'glColor3us');
-    @glColor3usv := GetGLProcAddress(LibGL, 'glColor3usv');
-    @glColor4b := GetGLProcAddress(LibGL, 'glColor4b');
-    @glColor4bv := GetGLProcAddress(LibGL, 'glColor4bv');
-    @glColor4d := GetGLProcAddress(LibGL, 'glColor4d');
-    @glColor4dv := GetGLProcAddress(LibGL, 'glColor4dv');
-    @glColor4f := GetGLProcAddress(LibGL, 'glColor4f');
-    @glColor4fv := GetGLProcAddress(LibGL, 'glColor4fv');
-    @glColor4i := GetGLProcAddress(LibGL, 'glColor4i');
-    @glColor4iv := GetGLProcAddress(LibGL, 'glColor4iv');
-    @glColor4s := GetGLProcAddress(LibGL, 'glColor4s');
-    @glColor4sv := GetGLProcAddress(LibGL, 'glColor4sv');
-    @glColor4ub := GetGLProcAddress(LibGL, 'glColor4ub');
-    @glColor4ubv := GetGLProcAddress(LibGL, 'glColor4ubv');
-    @glColor4ui := GetGLProcAddress(LibGL, 'glColor4ui');
-    @glColor4uiv := GetGLProcAddress(LibGL, 'glColor4uiv');
-    @glColor4us := GetGLProcAddress(LibGL, 'glColor4us');
-    @glColor4usv := GetGLProcAddress(LibGL, 'glColor4usv');
-    @glColorMask := GetGLProcAddress(LibGL, 'glColorMask');
-    @glColorMaterial := GetGLProcAddress(LibGL, 'glColorMaterial');
-    @glColorPointer := GetGLProcAddress(LibGL, 'glColorPointer');
-    @glCopyPixels := GetGLProcAddress(LibGL, 'glCopyPixels');
-    @glCopyTexImage1D := GetGLProcAddress(LibGL, 'glCopyTexImage1D');
-    @glCopyTexImage2D := GetGLProcAddress(LibGL, 'glCopyTexImage2D');
-    @glCopyTexSubImage1D := GetGLProcAddress(LibGL, 'glCopyTexSubImage1D');
-    @glCopyTexSubImage2D := GetGLProcAddress(LibGL, 'glCopyTexSubImage2D');
-    @glCullFace := GetGLProcAddress(LibGL, 'glCullFace');
-    @glDeleteLists := GetGLProcAddress(LibGL, 'glDeleteLists');
-    @glDeleteTextures := GetGLProcAddress(LibGL, 'glDeleteTextures');
-    @glDepthFunc := GetGLProcAddress(LibGL, 'glDepthFunc');
-    @glDepthMask := GetGLProcAddress(LibGL, 'glDepthMask');
-    @glDepthRange := GetGLProcAddress(LibGL, 'glDepthRange');
-    @glDisable := GetGLProcAddress(LibGL, 'glDisable');
-    @glDisableClientState := GetGLProcAddress(LibGL, 'glDisableClientState');
-    @glDrawArrays := GetGLProcAddress(LibGL, 'glDrawArrays');
-    @glDrawBuffer := GetGLProcAddress(LibGL, 'glDrawBuffer');
-    @glDrawElements := GetGLProcAddress(LibGL, 'glDrawElements');
-    @glDrawPixels := GetGLProcAddress(LibGL, 'glDrawPixels');
-    @glEdgeFlag := GetGLProcAddress(LibGL, 'glEdgeFlag');
-    @glEdgeFlagPointer := GetGLProcAddress(LibGL, 'glEdgeFlagPointer');
-    @glEdgeFlagv := GetGLProcAddress(LibGL, 'glEdgeFlagv');
-    @glEnable := GetGLProcAddress(LibGL, 'glEnable');
-    @glEnableClientState := GetGLProcAddress(LibGL, 'glEnableClientState');
-    @glEnd := GetGLProcAddress(LibGL, 'glEnd');
-    @glEndList := GetGLProcAddress(LibGL, 'glEndList');
-    @glEvalCoord1d := GetGLProcAddress(LibGL, 'glEvalCoord1d');
-    @glEvalCoord1dv := GetGLProcAddress(LibGL, 'glEvalCoord1dv');
-    @glEvalCoord1f := GetGLProcAddress(LibGL, 'glEvalCoord1f');
-    @glEvalCoord1fv := GetGLProcAddress(LibGL, 'glEvalCoord1fv');
-    @glEvalCoord2d := GetGLProcAddress(LibGL, 'glEvalCoord2d');
-    @glEvalCoord2dv := GetGLProcAddress(LibGL, 'glEvalCoord2dv');
-    @glEvalCoord2f := GetGLProcAddress(LibGL, 'glEvalCoord2f');
-    @glEvalCoord2fv := GetGLProcAddress(LibGL, 'glEvalCoord2fv');
-    @glEvalMesh1 := GetGLProcAddress(LibGL, 'glEvalMesh1');
-    @glEvalMesh2 := GetGLProcAddress(LibGL, 'glEvalMesh2');
-    @glEvalPoint1 := GetGLProcAddress(LibGL, 'glEvalPoint1');
-    @glEvalPoint2 := GetGLProcAddress(LibGL, 'glEvalPoint2');
-    @glFeedbackBuffer := GetGLProcAddress(LibGL, 'glFeedbackBuffer');
-    @glFinish := GetGLProcAddress(LibGL, 'glFinish');
-    @glFlush := GetGLProcAddress(LibGL, 'glFlush');
-    @glFogf := GetGLProcAddress(LibGL, 'glFogf');
-    @glFogfv := GetGLProcAddress(LibGL, 'glFogfv');
-    @glFogi := GetGLProcAddress(LibGL, 'glFogi');
-    @glFogiv := GetGLProcAddress(LibGL, 'glFogiv');
-    @glFrontFace := GetGLProcAddress(LibGL, 'glFrontFace');
-    @glFrustum := GetGLProcAddress(LibGL, 'glFrustum');
-    @glGenLists := GetGLProcAddress(LibGL, 'glGenLists');
-    @glGenTextures := GetGLProcAddress(LibGL, 'glGenTextures');
-    @glGetBooleanv := GetGLProcAddress(LibGL, 'glGetBooleanv');
-    @glGetClipPlane := GetGLProcAddress(LibGL, 'glGetClipPlane');
-    @glGetDoublev := GetGLProcAddress(LibGL, 'glGetDoublev');
-    @glGetError := GetGLProcAddress(LibGL, 'glGetError');
-    @glGetFloatv := GetGLProcAddress(LibGL, 'glGetFloatv');
-    @glGetIntegerv := GetGLProcAddress(LibGL, 'glGetIntegerv');
-    @glGetLightfv := GetGLProcAddress(LibGL, 'glGetLightfv');
-    @glGetLightiv := GetGLProcAddress(LibGL, 'glGetLightiv');
-    @glGetMapdv := GetGLProcAddress(LibGL, 'glGetMapdv');
-    @glGetMapfv := GetGLProcAddress(LibGL, 'glGetMapfv');
-    @glGetMapiv := GetGLProcAddress(LibGL, 'glGetMapiv');
-    @glGetMaterialfv := GetGLProcAddress(LibGL, 'glGetMaterialfv');
-    @glGetMaterialiv := GetGLProcAddress(LibGL, 'glGetMaterialiv');
-    @glGetPixelMapfv := GetGLProcAddress(LibGL, 'glGetPixelMapfv');
-    @glGetPixelMapuiv := GetGLProcAddress(LibGL, 'glGetPixelMapuiv');
-    @glGetPixelMapusv := GetGLProcAddress(LibGL, 'glGetPixelMapusv');
-    @glGetPointerv := GetGLProcAddress(LibGL, 'glGetPointerv');
-    @glGetPolygonStipple := GetGLProcAddress(LibGL, 'glGetPolygonStipple');
-    @glGetString := GetGLProcAddress(LibGL, 'glGetString');
-    @glGetTexEnvfv := GetGLProcAddress(LibGL, 'glGetTexEnvfv');
-    @glGetTexEnviv := GetGLProcAddress(LibGL, 'glGetTexEnviv');
-    @glGetTexGendv := GetGLProcAddress(LibGL, 'glGetTexGendv');
-    @glGetTexGenfv := GetGLProcAddress(LibGL, 'glGetTexGenfv');
-    @glGetTexGeniv := GetGLProcAddress(LibGL, 'glGetTexGeniv');
-    @glGetTexImage := GetGLProcAddress(LibGL, 'glGetTexImage');
-    @glGetTexLevelParameterfv := GetGLProcAddress(LibGL, 'glGetTexLevelParameterfv');
-    @glGetTexLevelParameteriv := GetGLProcAddress(LibGL, 'glGetTexLevelParameteriv');
-    @glGetTexParameterfv := GetGLProcAddress(LibGL, 'glGetTexParameterfv');
-    @glGetTexParameteriv := GetGLProcAddress(LibGL, 'glGetTexParameteriv');
-    @glHint := GetGLProcAddress(LibGL, 'glHint');
-    @glIndexMask := GetGLProcAddress(LibGL, 'glIndexMask');
-    @glIndexPointer := GetGLProcAddress(LibGL, 'glIndexPointer');
-    @glIndexd := GetGLProcAddress(LibGL, 'glIndexd');
-    @glIndexdv := GetGLProcAddress(LibGL, 'glIndexdv');
-    @glIndexf := GetGLProcAddress(LibGL, 'glIndexf');
-    @glIndexfv := GetGLProcAddress(LibGL, 'glIndexfv');
-    @glIndexi := GetGLProcAddress(LibGL, 'glIndexi');
-    @glIndexiv := GetGLProcAddress(LibGL, 'glIndexiv');
-    @glIndexs := GetGLProcAddress(LibGL, 'glIndexs');
-    @glIndexsv := GetGLProcAddress(LibGL, 'glIndexsv');
-    @glIndexub := GetGLProcAddress(LibGL, 'glIndexub');
-    @glIndexubv := GetGLProcAddress(LibGL, 'glIndexubv');
-    @glInitNames := GetGLProcAddress(LibGL, 'glInitNames');
-    @glInterleavedArrays := GetGLProcAddress(LibGL, 'glInterleavedArrays');
-    @glIsEnabled := GetGLProcAddress(LibGL, 'glIsEnabled');
-    @glIsList := GetGLProcAddress(LibGL, 'glIsList');
-    @glIsTexture := GetGLProcAddress(LibGL, 'glIsTexture');
-    @glLightModelf := GetGLProcAddress(LibGL, 'glLightModelf');
-    @glLightModelfv := GetGLProcAddress(LibGL, 'glLightModelfv');
-    @glLightModeli := GetGLProcAddress(LibGL, 'glLightModeli');
-    @glLightModeliv := GetGLProcAddress(LibGL, 'glLightModeliv');
-    @glLightf := GetGLProcAddress(LibGL, 'glLightf');
-    @glLightfv := GetGLProcAddress(LibGL, 'glLightfv');
-    @glLighti := GetGLProcAddress(LibGL, 'glLighti');
-    @glLightiv := GetGLProcAddress(LibGL, 'glLightiv');
-    @glLineStipple := GetGLProcAddress(LibGL, 'glLineStipple');
-    @glLineWidth := GetGLProcAddress(LibGL, 'glLineWidth');
-    @glListBase := GetGLProcAddress(LibGL, 'glListBase');
-    @glLoadIdentity := GetGLProcAddress(LibGL, 'glLoadIdentity');
-    @glLoadMatrixd := GetGLProcAddress(LibGL, 'glLoadMatrixd');
-    @glLoadMatrixf := GetGLProcAddress(LibGL, 'glLoadMatrixf');
-    @glLoadName := GetGLProcAddress(LibGL, 'glLoadName');
-    @glLogicOp := GetGLProcAddress(LibGL, 'glLogicOp');
-    @glMap1d := GetGLProcAddress(LibGL, 'glMap1d');
-    @glMap1f := GetGLProcAddress(LibGL, 'glMap1f');
-    @glMap2d := GetGLProcAddress(LibGL, 'glMap2d');
-    @glMap2f := GetGLProcAddress(LibGL, 'glMap2f');
-    @glMapGrid1d := GetGLProcAddress(LibGL, 'glMapGrid1d');
-    @glMapGrid1f := GetGLProcAddress(LibGL, 'glMapGrid1f');
-    @glMapGrid2d := GetGLProcAddress(LibGL, 'glMapGrid2d');
-    @glMapGrid2f := GetGLProcAddress(LibGL, 'glMapGrid2f');
-    @glMaterialf := GetGLProcAddress(LibGL, 'glMaterialf');
-    @glMaterialfv := GetGLProcAddress(LibGL, 'glMaterialfv');
-    @glMateriali := GetGLProcAddress(LibGL, 'glMateriali');
-    @glMaterialiv := GetGLProcAddress(LibGL, 'glMaterialiv');
-    @glMatrixMode := GetGLProcAddress(LibGL, 'glMatrixMode');
-    @glMultMatrixd := GetGLProcAddress(LibGL, 'glMultMatrixd');
-    @glMultMatrixf := GetGLProcAddress(LibGL, 'glMultMatrixf');
-    @glNewList := GetGLProcAddress(LibGL, 'glNewList');
-    @glNormal3b := GetGLProcAddress(LibGL, 'glNormal3b');
-    @glNormal3bv := GetGLProcAddress(LibGL, 'glNormal3bv');
-    @glNormal3d := GetGLProcAddress(LibGL, 'glNormal3d');
-    @glNormal3dv := GetGLProcAddress(LibGL, 'glNormal3dv');
-    @glNormal3f := GetGLProcAddress(LibGL, 'glNormal3f');
-    @glNormal3fv := GetGLProcAddress(LibGL, 'glNormal3fv');
-    @glNormal3i := GetGLProcAddress(LibGL, 'glNormal3i');
-    @glNormal3iv := GetGLProcAddress(LibGL, 'glNormal3iv');
-    @glNormal3s := GetGLProcAddress(LibGL, 'glNormal3s');
-    @glNormal3sv := GetGLProcAddress(LibGL, 'glNormal3sv');
-    @glNormalPointer := GetGLProcAddress(LibGL, 'glNormalPointer');
-    @glOrtho := GetGLProcAddress(LibGL, 'glOrtho');
-    @glPassThrough := GetGLProcAddress(LibGL, 'glPassThrough');
-    @glPixelMapfv := GetGLProcAddress(LibGL, 'glPixelMapfv');
-    @glPixelMapuiv := GetGLProcAddress(LibGL, 'glPixelMapuiv');
-    @glPixelMapusv := GetGLProcAddress(LibGL, 'glPixelMapusv');
-    @glPixelStoref := GetGLProcAddress(LibGL, 'glPixelStoref');
-    @glPixelStorei := GetGLProcAddress(LibGL, 'glPixelStorei');
-    @glPixelTransferf := GetGLProcAddress(LibGL, 'glPixelTransferf');
-    @glPixelTransferi := GetGLProcAddress(LibGL, 'glPixelTransferi');
-    @glPixelZoom := GetGLProcAddress(LibGL, 'glPixelZoom');
-    @glPointSize := GetGLProcAddress(LibGL, 'glPointSize');
-    @glPolygonMode := GetGLProcAddress(LibGL, 'glPolygonMode');
-    @glPolygonOffset := GetGLProcAddress(LibGL, 'glPolygonOffset');
-    @glPolygonStipple := GetGLProcAddress(LibGL, 'glPolygonStipple');
-    @glPopAttrib := GetGLProcAddress(LibGL, 'glPopAttrib');
-    @glPopClientAttrib := GetGLProcAddress(LibGL, 'glPopClientAttrib');
-    @glPopMatrix := GetGLProcAddress(LibGL, 'glPopMatrix');
-    @glPopName := GetGLProcAddress(LibGL, 'glPopName');
-    @glPrioritizeTextures := GetGLProcAddress(LibGL, 'glPrioritizeTextures');
-    @glPushAttrib := GetGLProcAddress(LibGL, 'glPushAttrib');
-    @glPushClientAttrib := GetGLProcAddress(LibGL, 'glPushClientAttrib');
-    @glPushMatrix := GetGLProcAddress(LibGL, 'glPushMatrix');
-    @glPushName := GetGLProcAddress(LibGL, 'glPushName');
-    @glRasterPos2d := GetGLProcAddress(LibGL, 'glRasterPos2d');
-    @glRasterPos2dv := GetGLProcAddress(LibGL, 'glRasterPos2dv');
-    @glRasterPos2f := GetGLProcAddress(LibGL, 'glRasterPos2f');
-    @glRasterPos2fv := GetGLProcAddress(LibGL, 'glRasterPos2fv');
-    @glRasterPos2i := GetGLProcAddress(LibGL, 'glRasterPos2i');
-    @glRasterPos2iv := GetGLProcAddress(LibGL, 'glRasterPos2iv');
-    @glRasterPos2s := GetGLProcAddress(LibGL, 'glRasterPos2s');
-    @glRasterPos2sv := GetGLProcAddress(LibGL, 'glRasterPos2sv');
-    @glRasterPos3d := GetGLProcAddress(LibGL, 'glRasterPos3d');
-    @glRasterPos3dv := GetGLProcAddress(LibGL, 'glRasterPos3dv');
-    @glRasterPos3f := GetGLProcAddress(LibGL, 'glRasterPos3f');
-    @glRasterPos3fv := GetGLProcAddress(LibGL, 'glRasterPos3fv');
-    @glRasterPos3i := GetGLProcAddress(LibGL, 'glRasterPos3i');
-    @glRasterPos3iv := GetGLProcAddress(LibGL, 'glRasterPos3iv');
-    @glRasterPos3s := GetGLProcAddress(LibGL, 'glRasterPos3s');
-    @glRasterPos3sv := GetGLProcAddress(LibGL, 'glRasterPos3sv');
-    @glRasterPos4d := GetGLProcAddress(LibGL, 'glRasterPos4d');
-    @glRasterPos4dv := GetGLProcAddress(LibGL, 'glRasterPos4dv');
-    @glRasterPos4f := GetGLProcAddress(LibGL, 'glRasterPos4f');
-    @glRasterPos4fv := GetGLProcAddress(LibGL, 'glRasterPos4fv');
-    @glRasterPos4i := GetGLProcAddress(LibGL, 'glRasterPos4i');
-    @glRasterPos4iv := GetGLProcAddress(LibGL, 'glRasterPos4iv');
-    @glRasterPos4s := GetGLProcAddress(LibGL, 'glRasterPos4s');
-    @glRasterPos4sv := GetGLProcAddress(LibGL, 'glRasterPos4sv');
-    @glReadBuffer := GetGLProcAddress(LibGL, 'glReadBuffer');
-    @glReadPixels := GetGLProcAddress(LibGL, 'glReadPixels');
-    @glRectd := GetGLProcAddress(LibGL, 'glRectd');
-    @glRectdv := GetGLProcAddress(LibGL, 'glRectdv');
-    @glRectf := GetGLProcAddress(LibGL, 'glRectf');
-    @glRectfv := GetGLProcAddress(LibGL, 'glRectfv');
-    @glRecti := GetGLProcAddress(LibGL, 'glRecti');
-    @glRectiv := GetGLProcAddress(LibGL, 'glRectiv');
-    @glRects := GetGLProcAddress(LibGL, 'glRects');
-    @glRectsv := GetGLProcAddress(LibGL, 'glRectsv');
-    @glRenderMode := GetGLProcAddress(LibGL, 'glRenderMode');
-    @glRotated := GetGLProcAddress(LibGL, 'glRotated');
-    @glRotatef := GetGLProcAddress(LibGL, 'glRotatef');
-    @glScaled := GetGLProcAddress(LibGL, 'glScaled');
-    @glScalef := GetGLProcAddress(LibGL, 'glScalef');
-    @glScissor := GetGLProcAddress(LibGL, 'glScissor');
-    @glSelectBuffer := GetGLProcAddress(LibGL, 'glSelectBuffer');
-    @glShadeModel := GetGLProcAddress(LibGL, 'glShadeModel');
-    @glStencilFunc := GetGLProcAddress(LibGL, 'glStencilFunc');
-    @glStencilMask := GetGLProcAddress(LibGL, 'glStencilMask');
-    @glStencilOp := GetGLProcAddress(LibGL, 'glStencilOp');
-    @glTexCoord1d := GetGLProcAddress(LibGL, 'glTexCoord1d');
-    @glTexCoord1dv := GetGLProcAddress(LibGL, 'glTexCoord1dv');
-    @glTexCoord1f := GetGLProcAddress(LibGL, 'glTexCoord1f');
-    @glTexCoord1fv := GetGLProcAddress(LibGL, 'glTexCoord1fv');
-    @glTexCoord1i := GetGLProcAddress(LibGL, 'glTexCoord1i');
-    @glTexCoord1iv := GetGLProcAddress(LibGL, 'glTexCoord1iv');
-    @glTexCoord1s := GetGLProcAddress(LibGL, 'glTexCoord1s');
-    @glTexCoord1sv := GetGLProcAddress(LibGL, 'glTexCoord1sv');
-    @glTexCoord2d := GetGLProcAddress(LibGL, 'glTexCoord2d');
-    @glTexCoord2dv := GetGLProcAddress(LibGL, 'glTexCoord2dv');
-    @glTexCoord2f := GetGLProcAddress(LibGL, 'glTexCoord2f');
-    @glTexCoord2fv := GetGLProcAddress(LibGL, 'glTexCoord2fv');
-    @glTexCoord2i := GetGLProcAddress(LibGL, 'glTexCoord2i');
-    @glTexCoord2iv := GetGLProcAddress(LibGL, 'glTexCoord2iv');
-    @glTexCoord2s := GetGLProcAddress(LibGL, 'glTexCoord2s');
-    @glTexCoord2sv := GetGLProcAddress(LibGL, 'glTexCoord2sv');
-    @glTexCoord3d := GetGLProcAddress(LibGL, 'glTexCoord3d');
-    @glTexCoord3dv := GetGLProcAddress(LibGL, 'glTexCoord3dv');
-    @glTexCoord3f := GetGLProcAddress(LibGL, 'glTexCoord3f');
-    @glTexCoord3fv := GetGLProcAddress(LibGL, 'glTexCoord3fv');
-    @glTexCoord3i := GetGLProcAddress(LibGL, 'glTexCoord3i');
-    @glTexCoord3iv := GetGLProcAddress(LibGL, 'glTexCoord3iv');
-    @glTexCoord3s := GetGLProcAddress(LibGL, 'glTexCoord3s');
-    @glTexCoord3sv := GetGLProcAddress(LibGL, 'glTexCoord3sv');
-    @glTexCoord4d := GetGLProcAddress(LibGL, 'glTexCoord4d');
-    @glTexCoord4dv := GetGLProcAddress(LibGL, 'glTexCoord4dv');
-    @glTexCoord4f := GetGLProcAddress(LibGL, 'glTexCoord4f');
-    @glTexCoord4fv := GetGLProcAddress(LibGL, 'glTexCoord4fv');
-    @glTexCoord4i := GetGLProcAddress(LibGL, 'glTexCoord4i');
-    @glTexCoord4iv := GetGLProcAddress(LibGL, 'glTexCoord4iv');
-    @glTexCoord4s := GetGLProcAddress(LibGL, 'glTexCoord4s');
-    @glTexCoord4sv := GetGLProcAddress(LibGL, 'glTexCoord4sv');
-    @glTexCoordPointer := GetGLProcAddress(LibGL, 'glTexCoordPointer');
-    @glTexEnvf := GetGLProcAddress(LibGL, 'glTexEnvf');
-    @glTexEnvfv := GetGLProcAddress(LibGL, 'glTexEnvfv');
-    @glTexEnvi := GetGLProcAddress(LibGL, 'glTexEnvi');
-    @glTexEnviv := GetGLProcAddress(LibGL, 'glTexEnviv');
-    @glTexGend := GetGLProcAddress(LibGL, 'glTexGend');
-    @glTexGendv := GetGLProcAddress(LibGL, 'glTexGendv');
-    @glTexGenf := GetGLProcAddress(LibGL, 'glTexGenf');
-    @glTexGenfv := GetGLProcAddress(LibGL, 'glTexGenfv');
-    @glTexGeni := GetGLProcAddress(LibGL, 'glTexGeni');
-    @glTexGeniv := GetGLProcAddress(LibGL, 'glTexGeniv');
-    @glTexImage1D := GetGLProcAddress(LibGL, 'glTexImage1D');
-    @glTexImage2D := GetGLProcAddress(LibGL, 'glTexImage2D');
-    @glTexParameterf := GetGLProcAddress(LibGL, 'glTexParameterf');
-    @glTexParameterfv := GetGLProcAddress(LibGL, 'glTexParameterfv');
-    @glTexParameteri := GetGLProcAddress(LibGL, 'glTexParameteri');
-    @glTexParameteriv := GetGLProcAddress(LibGL, 'glTexParameteriv');
-    @glTexSubImage1D := GetGLProcAddress(LibGL, 'glTexSubImage1D');
-    @glTexSubImage2D := GetGLProcAddress(LibGL, 'glTexSubImage2D');
-    @glTranslated := GetGLProcAddress(LibGL, 'glTranslated');
-    @glTranslatef := GetGLProcAddress(LibGL, 'glTranslatef');
-    @glVertex2d := GetGLProcAddress(LibGL, 'glVertex2d');
-    @glVertex2dv := GetGLProcAddress(LibGL, 'glVertex2dv');
-    @glVertex2f := GetGLProcAddress(LibGL, 'glVertex2f');
-    @glVertex2fv := GetGLProcAddress(LibGL, 'glVertex2fv');
-    @glVertex2i := GetGLProcAddress(LibGL, 'glVertex2i');
-    @glVertex2iv := GetGLProcAddress(LibGL, 'glVertex2iv');
-    @glVertex2s := GetGLProcAddress(LibGL, 'glVertex2s');
-    @glVertex2sv := GetGLProcAddress(LibGL, 'glVertex2sv');
-    @glVertex3d := GetGLProcAddress(LibGL, 'glVertex3d');
-    @glVertex3dv := GetGLProcAddress(LibGL, 'glVertex3dv');
-    @glVertex3f := GetGLProcAddress(LibGL, 'glVertex3f');
-    @glVertex3fv := GetGLProcAddress(LibGL, 'glVertex3fv');
-    @glVertex3i := GetGLProcAddress(LibGL, 'glVertex3i');
-    @glVertex3iv := GetGLProcAddress(LibGL, 'glVertex3iv');
-    @glVertex3s := GetGLProcAddress(LibGL, 'glVertex3s');
-    @glVertex3sv := GetGLProcAddress(LibGL, 'glVertex3sv');
-    @glVertex4d := GetGLProcAddress(LibGL, 'glVertex4d');
-    @glVertex4dv := GetGLProcAddress(LibGL, 'glVertex4dv');
-    @glVertex4f := GetGLProcAddress(LibGL, 'glVertex4f');
-    @glVertex4fv := GetGLProcAddress(LibGL, 'glVertex4fv');
-    @glVertex4i := GetGLProcAddress(LibGL, 'glVertex4i');
-    @glVertex4iv := GetGLProcAddress(LibGL, 'glVertex4iv');
-    @glVertex4s := GetGLProcAddress(LibGL, 'glVertex4s');
-    @glVertex4sv := GetGLProcAddress(LibGL, 'glVertex4sv');
-    @glVertexPointer := GetGLProcAddress(LibGL, 'glVertexPointer');
-    @glViewport := GetGLProcAddress(LibGL, 'glViewport');
-  except
-    raise Exception.Create('Failed loading ' + MethodName +' from ' + dll);
-  end;
-
-  {$IFDEF Windows}
-  try
-    @ChoosePixelFormat := GetGLProcAddress(LibGL, 'ChoosePixelFormat');
-    if not Assigned(ChoosePixelFormat) then
-      @ChoosePixelFormat := @WinChoosePixelFormat;
-  except
-    raise Exception.Create('Unable to select pixel format');
-  end;
-  {$ENDIF}
-end;
-{$ENDIF MORPHOS}
-
-var
+ libinfo: dynlibinfoty;
  linkedextensions: glextensionsty;
+ 
 
 procedure init;
 begin
   { according to bug 7570, this is necessary on all x86 platforms,
     maybe we've to fix the sse control word as well }
   { Yes, at least for darwin/x86_64 (JM) }
-  {$if defined(cpui386) or defined(cpux86_64)}
-  SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide,exOverflow, exUnderflow, exPrecision]);
-  {$endif}
-
-  {$IFDEF Windows}
-  LoadOpenGL('opengl32.dll');
-  {$ELSE}
-  {$ifdef darwin}
-  LoadOpenGL('/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib');
-  {$ELSE}
-  {$IFDEF MorphOS}
-  InitTinyGLLibrary;
-  {$ELSE}
-  {$ifdef haiku}
-  LoadOpenGL('libGL.so');
-  {$else}
-  LoadOpenGL('libGL.so.1');
-  {$endif}
-  {$ENDIF}
-  {$endif}
-  {$ENDIF}
+{$if defined(cpui386) or defined(cpux86_64)}
+ SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide,exOverflow,
+                                                    exUnderflow, exPrecision]);
+{$endif}
+ libgl:= libinfo.libhandle;
  {has_1_5:=} load_gl_version_1_5;
 end;
 
 procedure deinit;
 begin
- FreeOpenGL;
 end;
 
-var
- libinfo: dynlibinfoty;
-
 procedure initializeopengl(const sonames: array of filenamety); //[] = default
+const
+ funcs: array[0..335] of funcinfoty = (
+    (n: 'glAccum'; d: @glAccum),
+    (n: 'glAlphaFunc'; d: @glAlphaFunc),
+    (n: 'glAreTexturesResident'; d: @glAreTexturesResident),
+    (n: 'glArrayElement'; d: @glArrayElement),
+    (n: 'glBegin'; d: @glBegin),
+    (n: 'glBindTexture'; d: @glBindTexture),
+    (n: 'glBitmap'; d: @glBitmap),
+    (n: 'glBlendFunc'; d: @glBlendFunc),
+    (n: 'glCallList'; d: @glCallList),
+    (n: 'glCallLists'; d: @glCallLists),
+    (n: 'glClear'; d: @glClear),
+    (n: 'glClearAccum'; d: @glClearAccum),
+    (n: 'glClearColor'; d: @glClearColor),
+    (n: 'glClearDepth'; d: @glClearDepth),
+    (n: 'glClearIndex'; d: @glClearIndex),
+    (n: 'glClearStencil'; d: @glClearStencil),
+    (n: 'glClipPlane'; d: @glClipPlane),
+    (n: 'glColor3b'; d: @glColor3b),
+    (n: 'glColor3bv'; d: @glColor3bv),
+    (n: 'glColor3d'; d: @glColor3d),
+    (n: 'glColor3dv'; d: @glColor3dv),
+    (n: 'glColor3f'; d: @glColor3f),
+    (n: 'glColor3fv'; d: @glColor3fv),
+    (n: 'glColor3i'; d: @glColor3i),
+    (n: 'glColor3iv'; d: @glColor3iv),
+    (n: 'glColor3s'; d: @glColor3s),
+    (n: 'glColor3sv'; d: @glColor3sv),
+    (n: 'glColor3ub'; d: @glColor3ub),
+    (n: 'glColor3ubv'; d: @glColor3ubv),
+    (n: 'glColor3ui'; d: @glColor3ui),
+    (n: 'glColor3uiv'; d: @glColor3uiv),
+    (n: 'glColor3us'; d: @glColor3us),
+    (n: 'glColor3usv'; d: @glColor3usv),
+    (n: 'glColor4b'; d: @glColor4b),
+    (n: 'glColor4bv'; d: @glColor4bv),
+    (n: 'glColor4d'; d: @glColor4d),
+    (n: 'glColor4dv'; d: @glColor4dv),
+    (n: 'glColor4f'; d: @glColor4f),
+    (n: 'glColor4fv'; d: @glColor4fv),
+    (n: 'glColor4i'; d: @glColor4i),
+    (n: 'glColor4iv'; d: @glColor4iv),
+    (n: 'glColor4s'; d: @glColor4s),
+    (n: 'glColor4sv'; d: @glColor4sv),
+    (n: 'glColor4ub'; d: @glColor4ub),
+    (n: 'glColor4ubv'; d: @glColor4ubv),
+    (n: 'glColor4ui'; d: @glColor4ui),
+    (n: 'glColor4uiv'; d: @glColor4uiv),
+    (n: 'glColor4us'; d: @glColor4us),
+    (n: 'glColor4usv'; d: @glColor4usv),
+    (n: 'glColorMask'; d: @glColorMask),
+    (n: 'glColorMaterial'; d: @glColorMaterial),
+    (n: 'glColorPointer'; d: @glColorPointer),
+    (n: 'glCopyPixels'; d: @glCopyPixels),
+    (n: 'glCopyTexImage1D'; d: @glCopyTexImage1D),
+    (n: 'glCopyTexImage2D'; d: @glCopyTexImage2D),
+    (n: 'glCopyTexSubImage1D'; d: @glCopyTexSubImage1D),
+    (n: 'glCopyTexSubImage2D'; d: @glCopyTexSubImage2D),
+    (n: 'glCullFace'; d: @glCullFace),
+    (n: 'glDeleteLists'; d: @glDeleteLists),
+    (n: 'glDeleteTextures'; d: @glDeleteTextures),
+    (n: 'glDepthFunc'; d: @glDepthFunc),
+    (n: 'glDepthMask'; d: @glDepthMask),
+    (n: 'glDepthRange'; d: @glDepthRange),
+    (n: 'glDisable'; d: @glDisable),
+    (n: 'glDisableClientState'; d: @glDisableClientState),
+    (n: 'glDrawArrays'; d: @glDrawArrays),
+    (n: 'glDrawBuffer'; d: @glDrawBuffer),
+    (n: 'glDrawElements'; d: @glDrawElements),
+    (n: 'glDrawPixels'; d: @glDrawPixels),
+    (n: 'glEdgeFlag'; d: @glEdgeFlag),
+    (n: 'glEdgeFlagPointer'; d: @glEdgeFlagPointer),
+    (n: 'glEdgeFlagv'; d: @glEdgeFlagv),
+    (n: 'glEnable'; d: @glEnable),
+    (n: 'glEnableClientState'; d: @glEnableClientState),
+    (n: 'glEnd'; d: @glEnd),
+    (n: 'glEndList'; d: @glEndList),
+    (n: 'glEvalCoord1d'; d: @glEvalCoord1d),
+    (n: 'glEvalCoord1dv'; d: @glEvalCoord1dv),
+    (n: 'glEvalCoord1f'; d: @glEvalCoord1f),
+    (n: 'glEvalCoord1fv'; d: @glEvalCoord1fv),
+    (n: 'glEvalCoord2d'; d: @glEvalCoord2d),
+    (n: 'glEvalCoord2dv'; d: @glEvalCoord2dv),
+    (n: 'glEvalCoord2f'; d: @glEvalCoord2f),
+    (n: 'glEvalCoord2fv'; d: @glEvalCoord2fv),
+    (n: 'glEvalMesh1'; d: @glEvalMesh1),
+    (n: 'glEvalMesh2'; d: @glEvalMesh2),
+    (n: 'glEvalPoint1'; d: @glEvalPoint1),
+    (n: 'glEvalPoint2'; d: @glEvalPoint2),
+    (n: 'glFeedbackBuffer'; d: @glFeedbackBuffer),
+    (n: 'glFinish'; d: @glFinish),
+    (n: 'glFlush'; d: @glFlush),
+    (n: 'glFogf'; d: @glFogf),
+    (n: 'glFogfv'; d: @glFogfv),
+    (n: 'glFogi'; d: @glFogi),
+    (n: 'glFogiv'; d: @glFogiv),
+    (n: 'glFrontFace'; d: @glFrontFace),
+    (n: 'glFrustum'; d: @glFrustum),
+    (n: 'glGenLists'; d: @glGenLists),
+    (n: 'glGenTextures'; d: @glGenTextures),
+    (n: 'glGetBooleanv'; d: @glGetBooleanv),
+    (n: 'glGetClipPlane'; d: @glGetClipPlane),
+    (n: 'glGetDoublev'; d: @glGetDoublev),
+    (n: 'glGetError'; d: @glGetError),
+    (n: 'glGetFloatv'; d: @glGetFloatv),
+    (n: 'glGetIntegerv'; d: @glGetIntegerv),
+    (n: 'glGetLightfv'; d: @glGetLightfv),
+    (n: 'glGetLightiv'; d: @glGetLightiv),
+    (n: 'glGetMapdv'; d: @glGetMapdv),
+    (n: 'glGetMapfv'; d: @glGetMapfv),
+    (n: 'glGetMapiv'; d: @glGetMapiv),
+    (n: 'glGetMaterialfv'; d: @glGetMaterialfv),
+    (n: 'glGetMaterialiv'; d: @glGetMaterialiv),
+    (n: 'glGetPixelMapfv'; d: @glGetPixelMapfv),
+    (n: 'glGetPixelMapuiv'; d: @glGetPixelMapuiv),
+    (n: 'glGetPixelMapusv'; d: @glGetPixelMapusv),
+    (n: 'glGetPointerv'; d: @glGetPointerv),
+    (n: 'glGetPolygonStipple'; d: @glGetPolygonStipple),
+    (n: 'glGetString'; d: @glGetString),
+    (n: 'glGetTexEnvfv'; d: @glGetTexEnvfv),
+    (n: 'glGetTexEnviv'; d: @glGetTexEnviv),
+    (n: 'glGetTexGendv'; d: @glGetTexGendv),
+    (n: 'glGetTexGenfv'; d: @glGetTexGenfv),
+    (n: 'glGetTexGeniv'; d: @glGetTexGeniv),
+    (n: 'glGetTexImage'; d: @glGetTexImage),
+    (n: 'glGetTexLevelParameterfv'; d: @glGetTexLevelParameterfv),
+    (n: 'glGetTexLevelParameteriv'; d: @glGetTexLevelParameteriv),
+    (n: 'glGetTexParameterfv'; d: @glGetTexParameterfv),
+    (n: 'glGetTexParameteriv'; d: @glGetTexParameteriv),
+    (n: 'glHint'; d: @glHint),
+    (n: 'glIndexMask'; d: @glIndexMask),
+    (n: 'glIndexPointer'; d: @glIndexPointer),
+    (n: 'glIndexd'; d: @glIndexd),
+    (n: 'glIndexdv'; d: @glIndexdv),
+    (n: 'glIndexf'; d: @glIndexf),
+    (n: 'glIndexfv'; d: @glIndexfv),
+    (n: 'glIndexi'; d: @glIndexi),
+    (n: 'glIndexiv'; d: @glIndexiv),
+    (n: 'glIndexs'; d: @glIndexs),
+    (n: 'glIndexsv'; d: @glIndexsv),
+    (n: 'glIndexub'; d: @glIndexub),
+    (n: 'glIndexubv'; d: @glIndexubv),
+    (n: 'glInitNames'; d: @glInitNames),
+    (n: 'glInterleavedArrays'; d: @glInterleavedArrays),
+    (n: 'glIsEnabled'; d: @glIsEnabled),
+    (n: 'glIsList'; d: @glIsList),
+    (n: 'glIsTexture'; d: @glIsTexture),
+    (n: 'glLightModelf'; d: @glLightModelf),
+    (n: 'glLightModelfv'; d: @glLightModelfv),
+    (n: 'glLightModeli'; d: @glLightModeli),
+    (n: 'glLightModeliv'; d: @glLightModeliv),
+    (n: 'glLightf'; d: @glLightf),
+    (n: 'glLightfv'; d: @glLightfv),
+    (n: 'glLighti'; d: @glLighti),
+    (n: 'glLightiv'; d: @glLightiv),
+    (n: 'glLineStipple'; d: @glLineStipple),
+    (n: 'glLineWidth'; d: @glLineWidth),
+    (n: 'glListBase'; d: @glListBase),
+    (n: 'glLoadIdentity'; d: @glLoadIdentity),
+    (n: 'glLoadMatrixd'; d: @glLoadMatrixd),
+    (n: 'glLoadMatrixf'; d: @glLoadMatrixf),
+    (n: 'glLoadName'; d: @glLoadName),
+    (n: 'glLogicOp'; d: @glLogicOp),
+    (n: 'glMap1d'; d: @glMap1d),
+    (n: 'glMap1f'; d: @glMap1f),
+    (n: 'glMap2d'; d: @glMap2d),
+    (n: 'glMap2f'; d: @glMap2f),
+    (n: 'glMapGrid1d'; d: @glMapGrid1d),
+    (n: 'glMapGrid1f'; d: @glMapGrid1f),
+    (n: 'glMapGrid2d'; d: @glMapGrid2d),
+    (n: 'glMapGrid2f'; d: @glMapGrid2f),
+    (n: 'glMaterialf'; d: @glMaterialf),
+    (n: 'glMaterialfv'; d: @glMaterialfv),
+    (n: 'glMateriali'; d: @glMateriali),
+    (n: 'glMaterialiv'; d: @glMaterialiv),
+    (n: 'glMatrixMode'; d: @glMatrixMode),
+    (n: 'glMultMatrixd'; d: @glMultMatrixd),
+    (n: 'glMultMatrixf'; d: @glMultMatrixf),
+    (n: 'glNewList'; d: @glNewList),
+    (n: 'glNormal3b'; d: @glNormal3b),
+    (n: 'glNormal3bv'; d: @glNormal3bv),
+    (n: 'glNormal3d'; d: @glNormal3d),
+    (n: 'glNormal3dv'; d: @glNormal3dv),
+    (n: 'glNormal3f'; d: @glNormal3f),
+    (n: 'glNormal3fv'; d: @glNormal3fv),
+    (n: 'glNormal3i'; d: @glNormal3i),
+    (n: 'glNormal3iv'; d: @glNormal3iv),
+    (n: 'glNormal3s'; d: @glNormal3s),
+    (n: 'glNormal3sv'; d: @glNormal3sv),
+    (n: 'glNormalPointer'; d: @glNormalPointer),
+    (n: 'glOrtho'; d: @glOrtho),
+    (n: 'glPassThrough'; d: @glPassThrough),
+    (n: 'glPixelMapfv'; d: @glPixelMapfv),
+    (n: 'glPixelMapuiv'; d: @glPixelMapuiv),
+    (n: 'glPixelMapusv'; d: @glPixelMapusv),
+    (n: 'glPixelStoref'; d: @glPixelStoref),
+    (n: 'glPixelStorei'; d: @glPixelStorei),
+    (n: 'glPixelTransferf'; d: @glPixelTransferf),
+    (n: 'glPixelTransferi'; d: @glPixelTransferi),
+    (n: 'glPixelZoom'; d: @glPixelZoom),
+    (n: 'glPointSize'; d: @glPointSize),
+    (n: 'glPolygonMode'; d: @glPolygonMode),
+    (n: 'glPolygonOffset'; d: @glPolygonOffset),
+    (n: 'glPolygonStipple'; d: @glPolygonStipple),
+    (n: 'glPopAttrib'; d: @glPopAttrib),
+    (n: 'glPopClientAttrib'; d: @glPopClientAttrib),
+    (n: 'glPopMatrix'; d: @glPopMatrix),
+    (n: 'glPopName'; d: @glPopName),
+    (n: 'glPrioritizeTextures'; d: @glPrioritizeTextures),
+    (n: 'glPushAttrib'; d: @glPushAttrib),
+    (n: 'glPushClientAttrib'; d: @glPushClientAttrib),
+    (n: 'glPushMatrix'; d: @glPushMatrix),
+    (n: 'glPushName'; d: @glPushName),
+    (n: 'glRasterPos2d'; d: @glRasterPos2d),
+    (n: 'glRasterPos2dv'; d: @glRasterPos2dv),
+    (n: 'glRasterPos2f'; d: @glRasterPos2f),
+    (n: 'glRasterPos2fv'; d: @glRasterPos2fv),
+    (n: 'glRasterPos2i'; d: @glRasterPos2i),
+    (n: 'glRasterPos2iv'; d: @glRasterPos2iv),
+    (n: 'glRasterPos2s'; d: @glRasterPos2s),
+    (n: 'glRasterPos2sv'; d: @glRasterPos2sv),
+    (n: 'glRasterPos3d'; d: @glRasterPos3d),
+    (n: 'glRasterPos3dv'; d: @glRasterPos3dv),
+    (n: 'glRasterPos3f'; d: @glRasterPos3f),
+    (n: 'glRasterPos3fv'; d: @glRasterPos3fv),
+    (n: 'glRasterPos3i'; d: @glRasterPos3i),
+    (n: 'glRasterPos3iv'; d: @glRasterPos3iv),
+    (n: 'glRasterPos3s'; d: @glRasterPos3s),
+    (n: 'glRasterPos3sv'; d: @glRasterPos3sv),
+    (n: 'glRasterPos4d'; d: @glRasterPos4d),
+    (n: 'glRasterPos4dv'; d: @glRasterPos4dv),
+    (n: 'glRasterPos4f'; d: @glRasterPos4f),
+    (n: 'glRasterPos4fv'; d: @glRasterPos4fv),
+    (n: 'glRasterPos4i'; d: @glRasterPos4i),
+    (n: 'glRasterPos4iv'; d: @glRasterPos4iv),
+    (n: 'glRasterPos4s'; d: @glRasterPos4s),
+    (n: 'glRasterPos4sv'; d: @glRasterPos4sv),
+    (n: 'glReadBuffer'; d: @glReadBuffer),
+    (n: 'glReadPixels'; d: @glReadPixels),
+    (n: 'glRectd'; d: @glRectd),
+    (n: 'glRectdv'; d: @glRectdv),
+    (n: 'glRectf'; d: @glRectf),
+    (n: 'glRectfv'; d: @glRectfv),
+    (n: 'glRecti'; d: @glRecti),
+    (n: 'glRectiv'; d: @glRectiv),
+    (n: 'glRects'; d: @glRects),
+    (n: 'glRectsv'; d: @glRectsv),
+    (n: 'glRenderMode'; d: @glRenderMode),
+    (n: 'glRotated'; d: @glRotated),
+    (n: 'glRotatef'; d: @glRotatef),
+    (n: 'glScaled'; d: @glScaled),
+    (n: 'glScalef'; d: @glScalef),
+    (n: 'glScissor'; d: @glScissor),
+    (n: 'glSelectBuffer'; d: @glSelectBuffer),
+    (n: 'glShadeModel'; d: @glShadeModel),
+    (n: 'glStencilFunc'; d: @glStencilFunc),
+    (n: 'glStencilMask'; d: @glStencilMask),
+    (n: 'glStencilOp'; d: @glStencilOp),
+    (n: 'glTexCoord1d'; d: @glTexCoord1d),
+    (n: 'glTexCoord1dv'; d: @glTexCoord1dv),
+    (n: 'glTexCoord1f'; d: @glTexCoord1f),
+    (n: 'glTexCoord1fv'; d: @glTexCoord1fv),
+    (n: 'glTexCoord1i'; d: @glTexCoord1i),
+    (n: 'glTexCoord1iv'; d: @glTexCoord1iv),
+    (n: 'glTexCoord1s'; d: @glTexCoord1s),
+    (n: 'glTexCoord1sv'; d: @glTexCoord1sv),
+    (n: 'glTexCoord2d'; d: @glTexCoord2d),
+    (n: 'glTexCoord2dv'; d: @glTexCoord2dv),
+    (n: 'glTexCoord2f'; d: @glTexCoord2f),
+    (n: 'glTexCoord2fv'; d: @glTexCoord2fv),
+    (n: 'glTexCoord2i'; d: @glTexCoord2i),
+    (n: 'glTexCoord2iv'; d: @glTexCoord2iv),
+    (n: 'glTexCoord2s'; d: @glTexCoord2s),
+    (n: 'glTexCoord2sv'; d: @glTexCoord2sv),
+    (n: 'glTexCoord3d'; d: @glTexCoord3d),
+    (n: 'glTexCoord3dv'; d: @glTexCoord3dv),
+    (n: 'glTexCoord3f'; d: @glTexCoord3f),
+    (n: 'glTexCoord3fv'; d: @glTexCoord3fv),
+    (n: 'glTexCoord3i'; d: @glTexCoord3i),
+    (n: 'glTexCoord3iv'; d: @glTexCoord3iv),
+    (n: 'glTexCoord3s'; d: @glTexCoord3s),
+    (n: 'glTexCoord3sv'; d: @glTexCoord3sv),
+    (n: 'glTexCoord4d'; d: @glTexCoord4d),
+    (n: 'glTexCoord4dv'; d: @glTexCoord4dv),
+    (n: 'glTexCoord4f'; d: @glTexCoord4f),
+    (n: 'glTexCoord4fv'; d: @glTexCoord4fv),
+    (n: 'glTexCoord4i'; d: @glTexCoord4i),
+    (n: 'glTexCoord4iv'; d: @glTexCoord4iv),
+    (n: 'glTexCoord4s'; d: @glTexCoord4s),
+    (n: 'glTexCoord4sv'; d: @glTexCoord4sv),
+    (n: 'glTexCoordPointer'; d: @glTexCoordPointer),
+    (n: 'glTexEnvf'; d: @glTexEnvf),
+    (n: 'glTexEnvfv'; d: @glTexEnvfv),
+    (n: 'glTexEnvi'; d: @glTexEnvi),
+    (n: 'glTexEnviv'; d: @glTexEnviv),
+    (n: 'glTexGend'; d: @glTexGend),
+    (n: 'glTexGendv'; d: @glTexGendv),
+    (n: 'glTexGenf'; d: @glTexGenf),
+    (n: 'glTexGenfv'; d: @glTexGenfv),
+    (n: 'glTexGeni'; d: @glTexGeni),
+    (n: 'glTexGeniv'; d: @glTexGeniv),
+    (n: 'glTexImage1D'; d: @glTexImage1D),
+    (n: 'glTexImage2D'; d: @glTexImage2D),
+    (n: 'glTexParameterf'; d: @glTexParameterf),
+    (n: 'glTexParameterfv'; d: @glTexParameterfv),
+    (n: 'glTexParameteri'; d: @glTexParameteri),
+    (n: 'glTexParameteriv'; d: @glTexParameteriv),
+    (n: 'glTexSubImage1D'; d: @glTexSubImage1D),
+    (n: 'glTexSubImage2D'; d: @glTexSubImage2D),
+    (n: 'glTranslated'; d: @glTranslated),
+    (n: 'glTranslatef'; d: @glTranslatef),
+    (n: 'glVertex2d'; d: @glVertex2d),
+    (n: 'glVertex2dv'; d: @glVertex2dv),
+    (n: 'glVertex2f'; d: @glVertex2f),
+    (n: 'glVertex2fv'; d: @glVertex2fv),
+    (n: 'glVertex2i'; d: @glVertex2i),
+    (n: 'glVertex2iv'; d: @glVertex2iv),
+    (n: 'glVertex2s'; d: @glVertex2s),
+    (n: 'glVertex2sv'; d: @glVertex2sv),
+    (n: 'glVertex3d'; d: @glVertex3d),
+    (n: 'glVertex3dv'; d: @glVertex3dv),
+    (n: 'glVertex3f'; d: @glVertex3f),
+    (n: 'glVertex3fv'; d: @glVertex3fv),
+    (n: 'glVertex3i'; d: @glVertex3i),
+    (n: 'glVertex3iv'; d: @glVertex3iv),
+    (n: 'glVertex3s'; d: @glVertex3s),
+    (n: 'glVertex3sv'; d: @glVertex3sv),
+    (n: 'glVertex4d'; d: @glVertex4d),
+    (n: 'glVertex4dv'; d: @glVertex4dv),
+    (n: 'glVertex4f'; d: @glVertex4f),
+    (n: 'glVertex4fv'; d: @glVertex4fv),
+    (n: 'glVertex4i'; d: @glVertex4i),
+    (n: 'glVertex4iv'; d: @glVertex4iv),
+    (n: 'glVertex4s'; d: @glVertex4s),
+    (n: 'glVertex4sv'; d: @glVertex4sv),
+    (n: 'glVertexPointer'; d: @glVertexPointer),
+    (n: 'glViewport'; d: @glViewport)
+    );
+{$ifdef mswindows}
+ funcsopt: array[0..0] of funcinfoty = (
+    (n: 'ChoosePixelFormat'; d: @ChoosePixelFormat)
+    );
+{$endif}
+const
+ errormessage = 'Can not load OpenGL library. ';
 begin
- initializedynlib(libinfo,sonames,[],[],@init);
+ initializedynlib(libinfo,sonames,opengllib,funcs,
+            {$ifdef mswindows}funcsopt{$else}[]{$endif},errormessage,@init);
+{$ifdef mswindows}
+ if ChoosePixelFormat = nil then begin
+  ChoosePixelFormat:= @WinChoosePixelFormat;
+ end;
+{$endif}
 end;
 
 procedure releaseopengl;

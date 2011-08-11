@@ -182,21 +182,9 @@ const
    (n: 'pa_simple_get_latency'; d: @pa_simple_get_latency), //5
    (n: 'pa_simple_flush'; d: @pa_simple_flush)  //6
    );
-   
+ errormessage = 'Can not load Pulseaudio simple library. ';
 begin
- try
-  if length(sonames) = 0 then begin
-   initializedynlib(libinfo,pulsesimplelib,funcs,[]);
-  end
-  else begin
-   initializedynlib(libinfo,sonames,funcs,[]);
-  end;
- except
-  on e: exception do begin
-   e.message:= 'Can not load Pulseaudio simple library. '+e.message;
-   raise;
-  end;  
- end;
+ initializedynlib(libinfo,sonames,pulsesimplelib,funcs,[],errormessage);
  initializepulse([]);
 end;
 

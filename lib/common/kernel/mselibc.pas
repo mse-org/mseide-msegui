@@ -2233,7 +2233,8 @@ const
    );    
 begin
  try
-  initializedynlib(rtlibinfo,['librt.so.1','librt.so','libc.so.6'],[],funcs);
+  initializedynlib(rtlibinfo,['librt.so.1','librt.so','libc.so.6'],[],
+                                 [],funcs);
  except
  end;
 end;
