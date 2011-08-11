@@ -58,7 +58,7 @@ unit msegl;
 interface
 
 uses
-  SysUtils,msestrings;
+  SysUtils,msestrings{$ifdef mswindows},windows{$endif};
 
 const
 {$ifdef mswindows}
