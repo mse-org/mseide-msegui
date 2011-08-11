@@ -8,7 +8,8 @@
 { modified 2011 by Martin Schreiber }
 
 {$MACRO ON}
-{$MODE Delphi}
+//{$MODE Delphi}
+{$mode objfpc} {$h+}
 {$IFDEF Windows}
   {$DEFINE extdecl:=stdcall }
 {$ELSE}
@@ -29,27 +30,25 @@ interface
 
 uses
   SysUtils,
-  {$IFDEF Windows}
+  {$IFDEF msWindows}
   Windows,
   {$ELSE}
   dynlibs,
   {$ENDIF}
   msegl,mseglextglob;
 
-{$IFDEF Windows}
+{$IFDEF msWindows}
 { Declared in Windows unit as well in FPC; but declared here as well, to be
   fully compatible to upstream version  - sg }
 function wglGetProcAddress(proc: PChar): Pointer; extdecl; external 'OpenGL32.dll';
-{$ELSE}
-function wglGetProcAddress(proc: PChar): Pointer;
 {$ENDIF}
-
+(*
 // Test if the given extension name is present in the given extension string.
 function glext_ExtensionSupported(const extension: String; const searchIn: String): Boolean;
 
 // Load the extension with the given name.
 function glext_LoadExtension(ext: String): Boolean;
-
+*)
 type
   GLcharARB = Char;
   TGLcharARB = GLcharARB;
@@ -5077,14 +5076,29 @@ function Load_GL_VERSION_3_3(): Boolean;
 function Load_GL_VERSION_4_0(): Boolean;
 
 implementation
-
-{$IFNDEF Windows}
-function wglGetProcAddress(proc: PChar): Pointer;
+uses
+ msedynload,msesys;
+ 
+function getprocaddresses(const lib: tlibhandle;
+                          const procedures: array of funcinfoty): boolean;
+var
+ int1: integer;
 begin
-  Result := GetProcAddress(LibGL, proc);
+ result:= true;
+ for int1:= 0 to high(procedures) do begin
+  with procedures[int1] do begin
+  {$ifdef mswindows}
+   d^:= wglgetprocaddress(pansichar(n));
+  {$else}
+   d^:= getprocaddress(libgl,pansichar(n));
+  {$endif}
+   if (d^ = nil) then begin
+    result:= false;
+   end;
+  end;
+ end;
 end;
-{$ENDIF}
-
+(*
 function glext_ExtensionSupported(const extension: String; const searchIn: String): Boolean;
 var
   extensions: PChar;
@@ -5119,5644 +5133,2791 @@ begin
   Result := FALSE;
 
 end;
+*)
 
 function Load_GL_version_1_2: Boolean;
+const
+ funcs: array[0..5] of funcinfoty =
+   (
+    (n: 'glBlendColor'; d: @glBlendColor),
+    (n: 'glBlendEquation'; d: @glBlendEquation),
+    (n: 'glDrawRangeElements'; d: @glDrawRangeElements),
+    (n: 'glTexImage3D'; d: @glTexImage3D),
+    (n: 'glTexSubImage3D'; d: @glTexSubImage3D),
+    (n: 'glCopyTexSubImage3D'; d: @glCopyTexSubImage3D)
+    ); 
 begin
-
-  Result := FALSE;
-
-    glBlendColor := wglGetProcAddress('glBlendColor');
-    if not Assigned(glBlendColor) then Exit;
-    glBlendEquation := wglGetProcAddress('glBlendEquation');
-    if not Assigned(glBlendEquation) then Exit;
-    glDrawRangeElements := wglGetProcAddress('glDrawRangeElements');
-    if not Assigned(glDrawRangeElements) then Exit;
-    glTexImage3D := wglGetProcAddress('glTexImage3D');
-    if not Assigned(glTexImage3D) then Exit;
-    glTexSubImage3D := wglGetProcAddress('glTexSubImage3D');
-    if not Assigned(glTexSubImage3D) then Exit;
-    glCopyTexSubImage3D := wglGetProcAddress('glCopyTexSubImage3D');
-    if not Assigned(glCopyTexSubImage3D) then Exit;
-    Result := TRUE;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_imaging: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..31] of funcinfoty =
+   (
+    (n: 'glColorTable'; d: @glColorTable),
+    (n: 'glColorTableParameterfv'; d: @glColorTableParameterfv),
+    (n: 'glColorTableParameteriv'; d: @glColorTableParameteriv),
+    (n: 'glCopyColorTable'; d: @glCopyColorTable),
+    (n: 'glGetColorTable'; d: @glGetColorTable),
+    (n: 'glGetColorTableParameterfv'; d: @glGetColorTableParameterfv),
+    (n: 'glGetColorTableParameteriv'; d: @glGetColorTableParameteriv),
+    (n: 'glColorSubTable'; d: @glColorSubTable),
+    (n: 'glCopyColorSubTable'; d: @glCopyColorSubTable),
+    (n: 'glConvolutionFilter1D'; d: @glConvolutionFilter1D),
+    (n: 'glConvolutionFilter2D'; d: @glConvolutionFilter2D),
+    (n: 'glConvolutionParameterf'; d: @glConvolutionParameterf),
+    (n: 'glConvolutionParameterfv'; d: @glConvolutionParameterfv),
+    (n: 'glConvolutionParameteri'; d: @glConvolutionParameteri),
+    (n: 'glConvolutionParameteriv'; d: @glConvolutionParameteriv),
+    (n: 'glCopyConvolutionFilter1D'; d: @glCopyConvolutionFilter1D),
+    (n: 'glCopyConvolutionFilter2D'; d: @glCopyConvolutionFilter2D),
+    (n: 'glGetConvolutionFilter'; d: @glGetConvolutionFilter),
+    (n: 'glGetConvolutionParameterfv'; d: @glGetConvolutionParameterfv),
+    (n: 'glGetConvolutionParameteriv'; d: @glGetConvolutionParameteriv),
+    (n: 'glGetSeparableFilter'; d: @glGetSeparableFilter),
+    (n: 'glSeparableFilter2D'; d: @glSeparableFilter2D),
+    (n: 'glGetHistogram'; d: @glGetHistogram),
+    (n: 'glGetHistogramParameterfv'; d: @glGetHistogramParameterfv),
+    (n: 'glGetHistogramParameteriv'; d: @glGetHistogramParameteriv),
+    (n: 'glGetMinmax'; d: @glGetMinmax),
+    (n: 'glGetMinmaxParameterfv'; d: @glGetMinmaxParameterfv),
+    (n: 'glGetMinmaxParameteriv'; d: @glGetMinmaxParameteriv),
+    (n: 'glHistogram'; d: @glHistogram),
+    (n: 'glMinmax'; d: @glMinmax),
+    (n: 'glResetHistogram'; d: @glResetHistogram),
+    (n: 'glResetMinmax'; d: @glResetMinmax)
+    );
+
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_imaging', extstring) then
-  begin
-    glColorTable := wglGetProcAddress('glColorTable');
-    if not Assigned(glColorTable) then Exit;
-    glColorTableParameterfv := wglGetProcAddress('glColorTableParameterfv');
-    if not Assigned(glColorTableParameterfv) then Exit;
-    glColorTableParameteriv := wglGetProcAddress('glColorTableParameteriv');
-    if not Assigned(glColorTableParameteriv) then Exit;
-    glCopyColorTable := wglGetProcAddress('glCopyColorTable');
-    if not Assigned(glCopyColorTable) then Exit;
-    glGetColorTable := wglGetProcAddress('glGetColorTable');
-    if not Assigned(glGetColorTable) then Exit;
-    glGetColorTableParameterfv := wglGetProcAddress('glGetColorTableParameterfv');
-    if not Assigned(glGetColorTableParameterfv) then Exit;
-    glGetColorTableParameteriv := wglGetProcAddress('glGetColorTableParameteriv');
-    if not Assigned(glGetColorTableParameteriv) then Exit;
-    glColorSubTable := wglGetProcAddress('glColorSubTable');
-    if not Assigned(glColorSubTable) then Exit;
-    glCopyColorSubTable := wglGetProcAddress('glCopyColorSubTable');
-    if not Assigned(glCopyColorSubTable) then Exit;
-    glConvolutionFilter1D := wglGetProcAddress('glConvolutionFilter1D');
-    if not Assigned(glConvolutionFilter1D) then Exit;
-    glConvolutionFilter2D := wglGetProcAddress('glConvolutionFilter2D');
-    if not Assigned(glConvolutionFilter2D) then Exit;
-    glConvolutionParameterf := wglGetProcAddress('glConvolutionParameterf');
-    if not Assigned(glConvolutionParameterf) then Exit;
-    glConvolutionParameterfv := wglGetProcAddress('glConvolutionParameterfv');
-    if not Assigned(glConvolutionParameterfv) then Exit;
-    glConvolutionParameteri := wglGetProcAddress('glConvolutionParameteri');
-    if not Assigned(glConvolutionParameteri) then Exit;
-    glConvolutionParameteriv := wglGetProcAddress('glConvolutionParameteriv');
-    if not Assigned(glConvolutionParameteriv) then Exit;
-    glCopyConvolutionFilter1D := wglGetProcAddress('glCopyConvolutionFilter1D');
-    if not Assigned(glCopyConvolutionFilter1D) then Exit;
-    glCopyConvolutionFilter2D := wglGetProcAddress('glCopyConvolutionFilter2D');
-    if not Assigned(glCopyConvolutionFilter2D) then Exit;
-    glGetConvolutionFilter := wglGetProcAddress('glGetConvolutionFilter');
-    if not Assigned(glGetConvolutionFilter) then Exit;
-    glGetConvolutionParameterfv := wglGetProcAddress('glGetConvolutionParameterfv');
-    if not Assigned(glGetConvolutionParameterfv) then Exit;
-    glGetConvolutionParameteriv := wglGetProcAddress('glGetConvolutionParameteriv');
-    if not Assigned(glGetConvolutionParameteriv) then Exit;
-    glGetSeparableFilter := wglGetProcAddress('glGetSeparableFilter');
-    if not Assigned(glGetSeparableFilter) then Exit;
-    glSeparableFilter2D := wglGetProcAddress('glSeparableFilter2D');
-    if not Assigned(glSeparableFilter2D) then Exit;
-    glGetHistogram := wglGetProcAddress('glGetHistogram');
-    if not Assigned(glGetHistogram) then Exit;
-    glGetHistogramParameterfv := wglGetProcAddress('glGetHistogramParameterfv');
-    if not Assigned(glGetHistogramParameterfv) then Exit;
-    glGetHistogramParameteriv := wglGetProcAddress('glGetHistogramParameteriv');
-    if not Assigned(glGetHistogramParameteriv) then Exit;
-    glGetMinmax := wglGetProcAddress('glGetMinmax');
-    if not Assigned(glGetMinmax) then Exit;
-    glGetMinmaxParameterfv := wglGetProcAddress('glGetMinmaxParameterfv');
-    if not Assigned(glGetMinmaxParameterfv) then Exit;
-    glGetMinmaxParameteriv := wglGetProcAddress('glGetMinmaxParameteriv');
-    if not Assigned(glGetMinmaxParameteriv) then Exit;
-    glHistogram := wglGetProcAddress('glHistogram');
-    if not Assigned(glHistogram) then Exit;
-    glMinmax := wglGetProcAddress('glMinmax');
-    if not Assigned(glMinmax) then Exit;
-    glResetHistogram := wglGetProcAddress('glResetHistogram');
-    if not Assigned(glResetHistogram) then Exit;
-    glResetMinmax := wglGetProcAddress('glResetMinmax');
-    if not Assigned(glResetMinmax) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_version_1_3: Boolean;
-//var
-//  extstring: String;
+const
+ funcs: array[0..45] of funcinfoty =
+   (
+    (n: 'glActiveTexture'; d: @glActiveTexture),
+    (n: 'glClientActiveTexture'; d: @glClientActiveTexture),
+    (n: 'glMultiTexCoord1d'; d: @glMultiTexCoord1d),
+    (n: 'glMultiTexCoord1dv'; d: @glMultiTexCoord1dv),
+    (n: 'glMultiTexCoord1f'; d: @glMultiTexCoord1f),
+    (n: 'glMultiTexCoord1fv'; d: @glMultiTexCoord1fv),
+    (n: 'glMultiTexCoord1i'; d: @glMultiTexCoord1i),
+    (n: 'glMultiTexCoord1iv'; d: @glMultiTexCoord1iv),
+    (n: 'glMultiTexCoord1s'; d: @glMultiTexCoord1s),
+    (n: 'glMultiTexCoord1sv'; d: @glMultiTexCoord1sv),
+    (n: 'glMultiTexCoord2d'; d: @glMultiTexCoord2d),
+    (n: 'glMultiTexCoord2dv'; d: @glMultiTexCoord2dv),
+    (n: 'glMultiTexCoord2f'; d: @glMultiTexCoord2f),
+    (n: 'glMultiTexCoord2fv'; d: @glMultiTexCoord2fv),
+    (n: 'glMultiTexCoord2i'; d: @glMultiTexCoord2i),
+    (n: 'glMultiTexCoord2iv'; d: @glMultiTexCoord2iv),
+    (n: 'glMultiTexCoord2s'; d: @glMultiTexCoord2s),
+    (n: 'glMultiTexCoord2sv'; d: @glMultiTexCoord2sv),
+    (n: 'glMultiTexCoord3d'; d: @glMultiTexCoord3d),
+    (n: 'glMultiTexCoord3dv'; d: @glMultiTexCoord3dv),
+    (n: 'glMultiTexCoord3f'; d: @glMultiTexCoord3f),
+    (n: 'glMultiTexCoord3fv'; d: @glMultiTexCoord3fv),
+    (n: 'glMultiTexCoord3i'; d: @glMultiTexCoord3i),
+    (n: 'glMultiTexCoord3iv'; d: @glMultiTexCoord3iv),
+    (n: 'glMultiTexCoord3s'; d: @glMultiTexCoord3s),
+    (n: 'glMultiTexCoord3sv'; d: @glMultiTexCoord3sv),
+    (n: 'glMultiTexCoord4d'; d: @glMultiTexCoord4d),
+    (n: 'glMultiTexCoord4dv'; d: @glMultiTexCoord4dv),
+    (n: 'glMultiTexCoord4f'; d: @glMultiTexCoord4f),
+    (n: 'glMultiTexCoord4fv'; d: @glMultiTexCoord4fv),
+    (n: 'glMultiTexCoord4i'; d: @glMultiTexCoord4i),
+    (n: 'glMultiTexCoord4iv'; d: @glMultiTexCoord4iv),
+    (n: 'glMultiTexCoord4s'; d: @glMultiTexCoord4s),
+    (n: 'glMultiTexCoord4sv'; d: @glMultiTexCoord4sv),
+    (n: 'glLoadTransposeMatrixf'; d: @glLoadTransposeMatrixf),
+    (n: 'glLoadTransposeMatrixd'; d: @glLoadTransposeMatrixd),
+    (n: 'glMultTransposeMatrixf'; d: @glMultTransposeMatrixf),
+    (n: 'glMultTransposeMatrixd'; d: @glMultTransposeMatrixd),
+    (n: 'glSampleCoverage'; d: @glSampleCoverage),
+    (n: 'glCompressedTexImage3D'; d: @glCompressedTexImage3D),
+    (n: 'glCompressedTexImage2D'; d: @glCompressedTexImage2D),
+    (n: 'glCompressedTexImage1D'; d: @glCompressedTexImage1D),
+    (n: 'glCompressedTexSubImage3D'; d: @glCompressedTexSubImage3D),
+    (n: 'glCompressedTexSubImage2D'; d: @glCompressedTexSubImage2D),
+    (n: 'glCompressedTexSubImage1D'; d: @glCompressedTexSubImage1D),
+    (n: 'glGetCompressedTexImage'; d: @glGetCompressedTexImage)
+   );
 begin
-
-  Result := FALSE;
-//  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-    glActiveTexture := wglGetProcAddress('glActiveTexture');
-    if not Assigned(glActiveTexture) then Exit;
-    glClientActiveTexture := wglGetProcAddress('glClientActiveTexture');
-    if not Assigned(glClientActiveTexture) then Exit;
-    glMultiTexCoord1d := wglGetProcAddress('glMultiTexCoord1d');
-    if not Assigned(glMultiTexCoord1d) then Exit;
-    glMultiTexCoord1dv := wglGetProcAddress('glMultiTexCoord1dv');
-    if not Assigned(glMultiTexCoord1dv) then Exit;
-    glMultiTexCoord1f := wglGetProcAddress('glMultiTexCoord1f');
-    if not Assigned(glMultiTexCoord1f) then Exit;
-    glMultiTexCoord1fv := wglGetProcAddress('glMultiTexCoord1fv');
-    if not Assigned(glMultiTexCoord1fv) then Exit;
-    glMultiTexCoord1i := wglGetProcAddress('glMultiTexCoord1i');
-    if not Assigned(glMultiTexCoord1i) then Exit;
-    glMultiTexCoord1iv := wglGetProcAddress('glMultiTexCoord1iv');
-    if not Assigned(glMultiTexCoord1iv) then Exit;
-    glMultiTexCoord1s := wglGetProcAddress('glMultiTexCoord1s');
-    if not Assigned(glMultiTexCoord1s) then Exit;
-    glMultiTexCoord1sv := wglGetProcAddress('glMultiTexCoord1sv');
-    if not Assigned(glMultiTexCoord1sv) then Exit;
-    glMultiTexCoord2d := wglGetProcAddress('glMultiTexCoord2d');
-    if not Assigned(glMultiTexCoord2d) then Exit;
-    glMultiTexCoord2dv := wglGetProcAddress('glMultiTexCoord2dv');
-    if not Assigned(glMultiTexCoord2dv) then Exit;
-    glMultiTexCoord2f := wglGetProcAddress('glMultiTexCoord2f');
-    if not Assigned(glMultiTexCoord2f) then Exit;
-    glMultiTexCoord2fv := wglGetProcAddress('glMultiTexCoord2fv');
-    if not Assigned(glMultiTexCoord2fv) then Exit;
-    glMultiTexCoord2i := wglGetProcAddress('glMultiTexCoord2i');
-    if not Assigned(glMultiTexCoord2i) then Exit;
-    glMultiTexCoord2iv := wglGetProcAddress('glMultiTexCoord2iv');
-    if not Assigned(glMultiTexCoord2iv) then Exit;
-    glMultiTexCoord2s := wglGetProcAddress('glMultiTexCoord2s');
-    if not Assigned(glMultiTexCoord2s) then Exit;
-    glMultiTexCoord2sv := wglGetProcAddress('glMultiTexCoord2sv');
-    if not Assigned(glMultiTexCoord2sv) then Exit;
-    glMultiTexCoord3d := wglGetProcAddress('glMultiTexCoord3d');
-    if not Assigned(glMultiTexCoord3d) then Exit;
-    glMultiTexCoord3dv := wglGetProcAddress('glMultiTexCoord3dv');
-    if not Assigned(glMultiTexCoord3dv) then Exit;
-    glMultiTexCoord3f := wglGetProcAddress('glMultiTexCoord3f');
-    if not Assigned(glMultiTexCoord3f) then Exit;
-    glMultiTexCoord3fv := wglGetProcAddress('glMultiTexCoord3fv');
-    if not Assigned(glMultiTexCoord3fv) then Exit;
-    glMultiTexCoord3i := wglGetProcAddress('glMultiTexCoord3i');
-    if not Assigned(glMultiTexCoord3i) then Exit;
-    glMultiTexCoord3iv := wglGetProcAddress('glMultiTexCoord3iv');
-    if not Assigned(glMultiTexCoord3iv) then Exit;
-    glMultiTexCoord3s := wglGetProcAddress('glMultiTexCoord3s');
-    if not Assigned(glMultiTexCoord3s) then Exit;
-    glMultiTexCoord3sv := wglGetProcAddress('glMultiTexCoord3sv');
-    if not Assigned(glMultiTexCoord3sv) then Exit;
-    glMultiTexCoord4d := wglGetProcAddress('glMultiTexCoord4d');
-    if not Assigned(glMultiTexCoord4d) then Exit;
-    glMultiTexCoord4dv := wglGetProcAddress('glMultiTexCoord4dv');
-    if not Assigned(glMultiTexCoord4dv) then Exit;
-    glMultiTexCoord4f := wglGetProcAddress('glMultiTexCoord4f');
-    if not Assigned(glMultiTexCoord4f) then Exit;
-    glMultiTexCoord4fv := wglGetProcAddress('glMultiTexCoord4fv');
-    if not Assigned(glMultiTexCoord4fv) then Exit;
-    glMultiTexCoord4i := wglGetProcAddress('glMultiTexCoord4i');
-    if not Assigned(glMultiTexCoord4i) then Exit;
-    glMultiTexCoord4iv := wglGetProcAddress('glMultiTexCoord4iv');
-    if not Assigned(glMultiTexCoord4iv) then Exit;
-    glMultiTexCoord4s := wglGetProcAddress('glMultiTexCoord4s');
-    if not Assigned(glMultiTexCoord4s) then Exit;
-    glMultiTexCoord4sv := wglGetProcAddress('glMultiTexCoord4sv');
-    if not Assigned(glMultiTexCoord4sv) then Exit;
-    glLoadTransposeMatrixf := wglGetProcAddress('glLoadTransposeMatrixf');
-    if not Assigned(glLoadTransposeMatrixf) then Exit;
-    glLoadTransposeMatrixd := wglGetProcAddress('glLoadTransposeMatrixd');
-    if not Assigned(glLoadTransposeMatrixd) then Exit;
-    glMultTransposeMatrixf := wglGetProcAddress('glMultTransposeMatrixf');
-    if not Assigned(glMultTransposeMatrixf) then Exit;
-    glMultTransposeMatrixd := wglGetProcAddress('glMultTransposeMatrixd');
-    if not Assigned(glMultTransposeMatrixd) then Exit;
-    glSampleCoverage := wglGetProcAddress('glSampleCoverage');
-    if not Assigned(glSampleCoverage) then Exit;
-    glCompressedTexImage3D := wglGetProcAddress('glCompressedTexImage3D');
-    if not Assigned(glCompressedTexImage3D) then Exit;
-    glCompressedTexImage2D := wglGetProcAddress('glCompressedTexImage2D');
-    if not Assigned(glCompressedTexImage2D) then Exit;
-    glCompressedTexImage1D := wglGetProcAddress('glCompressedTexImage1D');
-    if not Assigned(glCompressedTexImage1D) then Exit;
-    glCompressedTexSubImage3D := wglGetProcAddress('glCompressedTexSubImage3D');
-    if not Assigned(glCompressedTexSubImage3D) then Exit;
-    glCompressedTexSubImage2D := wglGetProcAddress('glCompressedTexSubImage2D');
-    if not Assigned(glCompressedTexSubImage2D) then Exit;
-    glCompressedTexSubImage1D := wglGetProcAddress('glCompressedTexSubImage1D');
-    if not Assigned(glCompressedTexSubImage1D) then Exit;
-    glGetCompressedTexImage := wglGetProcAddress('glGetCompressedTexImage');
-    if not Assigned(glGetCompressedTexImage) then Exit;
-    result:= true;
-//    Result := Load_GL_version_1_2;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_multitexture: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..33] of funcinfoty =
+   (
+    (n: 'glActiveTextureARB'; d: @glActiveTextureARB),
+    (n: 'glClientActiveTextureARB'; d: @glClientActiveTextureARB),
+    (n: 'glMultiTexCoord1dARB'; d: @glMultiTexCoord1dARB),
+    (n: 'glMultiTexCoord1dvARB'; d: @glMultiTexCoord1dvARB),
+    (n: 'glMultiTexCoord1fARB'; d: @glMultiTexCoord1fARB),
+    (n: 'glMultiTexCoord1fvARB'; d: @glMultiTexCoord1fvARB),
+    (n: 'glMultiTexCoord1iARB'; d: @glMultiTexCoord1iARB),
+    (n: 'glMultiTexCoord1ivARB'; d: @glMultiTexCoord1ivARB),
+    (n: 'glMultiTexCoord1sARB'; d: @glMultiTexCoord1sARB),
+    (n: 'glMultiTexCoord1svARB'; d: @glMultiTexCoord1svARB),
+    (n: 'glMultiTexCoord2dARB'; d: @glMultiTexCoord2dARB),
+    (n: 'glMultiTexCoord2dvARB'; d: @glMultiTexCoord2dvARB),
+    (n: 'glMultiTexCoord2fARB'; d: @glMultiTexCoord2fARB),
+    (n: 'glMultiTexCoord2fvARB'; d: @glMultiTexCoord2fvARB),
+    (n: 'glMultiTexCoord2iARB'; d: @glMultiTexCoord2iARB),
+    (n: 'glMultiTexCoord2ivARB'; d: @glMultiTexCoord2ivARB),
+    (n: 'glMultiTexCoord2sARB'; d: @glMultiTexCoord2sARB),
+    (n: 'glMultiTexCoord2svARB'; d: @glMultiTexCoord2svARB),
+    (n: 'glMultiTexCoord3dARB'; d: @glMultiTexCoord3dARB),
+    (n: 'glMultiTexCoord3dvARB'; d: @glMultiTexCoord3dvARB),
+    (n: 'glMultiTexCoord3fARB'; d: @glMultiTexCoord3fARB),
+    (n: 'glMultiTexCoord3fvARB'; d: @glMultiTexCoord3fvARB),
+    (n: 'glMultiTexCoord3iARB'; d: @glMultiTexCoord3iARB),
+    (n: 'glMultiTexCoord3ivARB'; d: @glMultiTexCoord3ivARB),
+    (n: 'glMultiTexCoord3sARB'; d: @glMultiTexCoord3sARB),
+    (n: 'glMultiTexCoord3svARB'; d: @glMultiTexCoord3svARB),
+    (n: 'glMultiTexCoord4dARB'; d: @glMultiTexCoord4dARB),
+    (n: 'glMultiTexCoord4dvARB'; d: @glMultiTexCoord4dvARB),
+    (n: 'glMultiTexCoord4fARB'; d: @glMultiTexCoord4fARB),
+    (n: 'glMultiTexCoord4fvARB'; d: @glMultiTexCoord4fvARB),
+    (n: 'glMultiTexCoord4iARB'; d: @glMultiTexCoord4iARB),
+    (n: 'glMultiTexCoord4ivARB'; d: @glMultiTexCoord4ivARB),
+    (n: 'glMultiTexCoord4sARB'; d: @glMultiTexCoord4sARB),
+    (n: 'glMultiTexCoord4svARB'; d: @glMultiTexCoord4svARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_multitexture', extstring) then
-  begin
-    glActiveTextureARB := wglGetProcAddress('glActiveTextureARB');
-    if not Assigned(glActiveTextureARB) then Exit;
-    glClientActiveTextureARB := wglGetProcAddress('glClientActiveTextureARB');
-    if not Assigned(glClientActiveTextureARB) then Exit;
-    glMultiTexCoord1dARB := wglGetProcAddress('glMultiTexCoord1dARB');
-    if not Assigned(glMultiTexCoord1dARB) then Exit;
-    glMultiTexCoord1dvARB := wglGetProcAddress('glMultiTexCoord1dvARB');
-    if not Assigned(glMultiTexCoord1dvARB) then Exit;
-    glMultiTexCoord1fARB := wglGetProcAddress('glMultiTexCoord1fARB');
-    if not Assigned(glMultiTexCoord1fARB) then Exit;
-    glMultiTexCoord1fvARB := wglGetProcAddress('glMultiTexCoord1fvARB');
-    if not Assigned(glMultiTexCoord1fvARB) then Exit;
-    glMultiTexCoord1iARB := wglGetProcAddress('glMultiTexCoord1iARB');
-    if not Assigned(glMultiTexCoord1iARB) then Exit;
-    glMultiTexCoord1ivARB := wglGetProcAddress('glMultiTexCoord1ivARB');
-    if not Assigned(glMultiTexCoord1ivARB) then Exit;
-    glMultiTexCoord1sARB := wglGetProcAddress('glMultiTexCoord1sARB');
-    if not Assigned(glMultiTexCoord1sARB) then Exit;
-    glMultiTexCoord1svARB := wglGetProcAddress('glMultiTexCoord1svARB');
-    if not Assigned(glMultiTexCoord1svARB) then Exit;
-    glMultiTexCoord2dARB := wglGetProcAddress('glMultiTexCoord2dARB');
-    if not Assigned(glMultiTexCoord2dARB) then Exit;
-    glMultiTexCoord2dvARB := wglGetProcAddress('glMultiTexCoord2dvARB');
-    if not Assigned(glMultiTexCoord2dvARB) then Exit;
-    glMultiTexCoord2fARB := wglGetProcAddress('glMultiTexCoord2fARB');
-    if not Assigned(glMultiTexCoord2fARB) then Exit;
-    glMultiTexCoord2fvARB := wglGetProcAddress('glMultiTexCoord2fvARB');
-    if not Assigned(glMultiTexCoord2fvARB) then Exit;
-    glMultiTexCoord2iARB := wglGetProcAddress('glMultiTexCoord2iARB');
-    if not Assigned(glMultiTexCoord2iARB) then Exit;
-    glMultiTexCoord2ivARB := wglGetProcAddress('glMultiTexCoord2ivARB');
-    if not Assigned(glMultiTexCoord2ivARB) then Exit;
-    glMultiTexCoord2sARB := wglGetProcAddress('glMultiTexCoord2sARB');
-    if not Assigned(glMultiTexCoord2sARB) then Exit;
-    glMultiTexCoord2svARB := wglGetProcAddress('glMultiTexCoord2svARB');
-    if not Assigned(glMultiTexCoord2svARB) then Exit;
-    glMultiTexCoord3dARB := wglGetProcAddress('glMultiTexCoord3dARB');
-    if not Assigned(glMultiTexCoord3dARB) then Exit;
-    glMultiTexCoord3dvARB := wglGetProcAddress('glMultiTexCoord3dvARB');
-    if not Assigned(glMultiTexCoord3dvARB) then Exit;
-    glMultiTexCoord3fARB := wglGetProcAddress('glMultiTexCoord3fARB');
-    if not Assigned(glMultiTexCoord3fARB) then Exit;
-    glMultiTexCoord3fvARB := wglGetProcAddress('glMultiTexCoord3fvARB');
-    if not Assigned(glMultiTexCoord3fvARB) then Exit;
-    glMultiTexCoord3iARB := wglGetProcAddress('glMultiTexCoord3iARB');
-    if not Assigned(glMultiTexCoord3iARB) then Exit;
-    glMultiTexCoord3ivARB := wglGetProcAddress('glMultiTexCoord3ivARB');
-    if not Assigned(glMultiTexCoord3ivARB) then Exit;
-    glMultiTexCoord3sARB := wglGetProcAddress('glMultiTexCoord3sARB');
-    if not Assigned(glMultiTexCoord3sARB) then Exit;
-    glMultiTexCoord3svARB := wglGetProcAddress('glMultiTexCoord3svARB');
-    if not Assigned(glMultiTexCoord3svARB) then Exit;
-    glMultiTexCoord4dARB := wglGetProcAddress('glMultiTexCoord4dARB');
-    if not Assigned(glMultiTexCoord4dARB) then Exit;
-    glMultiTexCoord4dvARB := wglGetProcAddress('glMultiTexCoord4dvARB');
-    if not Assigned(glMultiTexCoord4dvARB) then Exit;
-    glMultiTexCoord4fARB := wglGetProcAddress('glMultiTexCoord4fARB');
-    if not Assigned(glMultiTexCoord4fARB) then Exit;
-    glMultiTexCoord4fvARB := wglGetProcAddress('glMultiTexCoord4fvARB');
-    if not Assigned(glMultiTexCoord4fvARB) then Exit;
-    glMultiTexCoord4iARB := wglGetProcAddress('glMultiTexCoord4iARB');
-    if not Assigned(glMultiTexCoord4iARB) then Exit;
-    glMultiTexCoord4ivARB := wglGetProcAddress('glMultiTexCoord4ivARB');
-    if not Assigned(glMultiTexCoord4ivARB) then Exit;
-    glMultiTexCoord4sARB := wglGetProcAddress('glMultiTexCoord4sARB');
-    if not Assigned(glMultiTexCoord4sARB) then Exit;
-    glMultiTexCoord4svARB := wglGetProcAddress('glMultiTexCoord4svARB');
-    if not Assigned(glMultiTexCoord4svARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_transpose_matrix: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..3] of funcinfoty =
+   (
+    (n: 'glLoadTransposeMatrixfARB'; d: @glLoadTransposeMatrixfARB),
+    (n: 'glLoadTransposeMatrixdARB'; d: @glLoadTransposeMatrixdARB),
+    (n: 'glMultTransposeMatrixfARB'; d: @glMultTransposeMatrixfARB),
+    (n: 'glMultTransposeMatrixdARB'; d: @glMultTransposeMatrixdARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_transpose_matrix', extstring) then
-  begin
-    glLoadTransposeMatrixfARB := wglGetProcAddress('glLoadTransposeMatrixfARB');
-    if not Assigned(glLoadTransposeMatrixfARB) then Exit;
-    glLoadTransposeMatrixdARB := wglGetProcAddress('glLoadTransposeMatrixdARB');
-    if not Assigned(glLoadTransposeMatrixdARB) then Exit;
-    glMultTransposeMatrixfARB := wglGetProcAddress('glMultTransposeMatrixfARB');
-    if not Assigned(glMultTransposeMatrixfARB) then Exit;
-    glMultTransposeMatrixdARB := wglGetProcAddress('glMultTransposeMatrixdARB');
-    if not Assigned(glMultTransposeMatrixdARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_multisample: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glSampleCoverageARB'; d: @glSampleCoverageARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_multisample', extstring) then
-  begin
-    glSampleCoverageARB := wglGetProcAddress('glSampleCoverageARB');
-    if not Assigned(glSampleCoverageARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_texture_env_add: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_texture_env_add', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
-{$IFDEF Windows}
+{$IFDEF msWindows}
 function Load_WGL_ARB_extensions_string: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'wglGetExtensionsStringARB'; d: @wglGetExtensionsStringARB)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_ARB_extensions_string', extstring) then
-  begin
-    wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-    if not Assigned(wglGetExtensionsStringARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_WGL_ARB_buffer_region: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..3] of funcinfoty =
+   (
+    (n: 'wglCreateBufferRegionARB'; d: @wglCreateBufferRegionARB),
+    (n: 'wglDeleteBufferRegionARB'; d: @wglDeleteBufferRegionARB),
+    (n: 'wglSaveBufferRegionARB'; d: @wglSaveBufferRegionARB),
+    (n: 'wglRestoreBufferRegionARB'; d: @wglRestoreBufferRegionARB)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_ARB_buffer_region', extstring) then
-  begin
-    wglCreateBufferRegionARB := wglGetProcAddress('wglCreateBufferRegionARB');
-    if not Assigned(wglCreateBufferRegionARB) then Exit;
-    wglDeleteBufferRegionARB := wglGetProcAddress('wglDeleteBufferRegionARB');
-    if not Assigned(wglDeleteBufferRegionARB) then Exit;
-    wglSaveBufferRegionARB := wglGetProcAddress('wglSaveBufferRegionARB');
-    if not Assigned(wglSaveBufferRegionARB) then Exit;
-    wglRestoreBufferRegionARB := wglGetProcAddress('wglRestoreBufferRegionARB');
-    if not Assigned(wglRestoreBufferRegionARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 {$ENDIF}
 
 function Load_GL_ARB_texture_cube_map: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_texture_cube_map', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_depth_texture: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_depth_texture', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_point_parameters: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glPointParameterfARB'; d: @glPointParameterfARB),
+    (n: 'glPointParameterfvARB'; d: @glPointParameterfvARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_point_parameters', extstring) then
-  begin
-    glPointParameterfARB := wglGetProcAddress('glPointParameterfARB');
-    if not Assigned(glPointParameterfARB) then Exit;
-    glPointParameterfvARB := wglGetProcAddress('glPointParameterfvARB');
-    if not Assigned(glPointParameterfvARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_shadow: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_shadow', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_shadow_ambient: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_shadow_ambient', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_texture_border_clamp: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_texture_border_clamp', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_texture_compression: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..6] of funcinfoty =
+   (
+    (n: 'glCompressedTexImage3DARB'; d: @glCompressedTexImage3DARB),
+    (n: 'glCompressedTexImage2DARB'; d: @glCompressedTexImage2DARB),
+    (n: 'glCompressedTexImage1DARB'; d: @glCompressedTexImage1DARB),
+    (n: 'glCompressedTexSubImage3DARB'; d: @glCompressedTexSubImage3DARB),
+    (n: 'glCompressedTexSubImage2DARB'; d: @glCompressedTexSubImage2DARB),
+    (n: 'glCompressedTexSubImage1DARB'; d: @glCompressedTexSubImage1DARB),
+    (n: 'glGetCompressedTexImageARB'; d: @glGetCompressedTexImageARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_texture_compression', extstring) then
-  begin
-    glCompressedTexImage3DARB := wglGetProcAddress('glCompressedTexImage3DARB');
-    if not Assigned(glCompressedTexImage3DARB) then Exit;
-    glCompressedTexImage2DARB := wglGetProcAddress('glCompressedTexImage2DARB');
-    if not Assigned(glCompressedTexImage2DARB) then Exit;
-    glCompressedTexImage1DARB := wglGetProcAddress('glCompressedTexImage1DARB');
-    if not Assigned(glCompressedTexImage1DARB) then Exit;
-    glCompressedTexSubImage3DARB := wglGetProcAddress('glCompressedTexSubImage3DARB');
-    if not Assigned(glCompressedTexSubImage3DARB) then Exit;
-    glCompressedTexSubImage2DARB := wglGetProcAddress('glCompressedTexSubImage2DARB');
-    if not Assigned(glCompressedTexSubImage2DARB) then Exit;
-    glCompressedTexSubImage1DARB := wglGetProcAddress('glCompressedTexSubImage1DARB');
-    if not Assigned(glCompressedTexSubImage1DARB) then Exit;
-    glGetCompressedTexImageARB := wglGetProcAddress('glGetCompressedTexImageARB');
-    if not Assigned(glGetCompressedTexImageARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_texture_env_combine: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_texture_env_combine', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_texture_env_crossbar: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_texture_env_crossbar', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_texture_env_dot3: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_texture_env_dot3', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_texture_mirrored_repeat: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_texture_mirrored_repeat', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_vertex_blend: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..10] of funcinfoty =
+   (
+    (n: 'glWeightbvARB'; d: @glWeightbvARB),
+    (n: 'glWeightsvARB'; d: @glWeightsvARB),
+    (n: 'glWeightivARB'; d: @glWeightivARB),
+    (n: 'glWeightfvARB'; d: @glWeightfvARB),
+    (n: 'glWeightdvARB'; d: @glWeightdvARB),
+    (n: 'glWeightvARB'; d: @glWeightvARB),
+    (n: 'glWeightubvARB'; d: @glWeightubvARB),
+    (n: 'glWeightusvARB'; d: @glWeightusvARB),
+    (n: 'glWeightuivARB'; d: @glWeightuivARB),
+    (n: 'glWeightPointerARB'; d: @glWeightPointerARB),
+    (n: 'glVertexBlendARB'; d: @glVertexBlendARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_vertex_blend', extstring) then
-  begin
-    glWeightbvARB := wglGetProcAddress('glWeightbvARB');
-    if not Assigned(glWeightbvARB) then Exit;
-    glWeightsvARB := wglGetProcAddress('glWeightsvARB');
-    if not Assigned(glWeightsvARB) then Exit;
-    glWeightivARB := wglGetProcAddress('glWeightivARB');
-    if not Assigned(glWeightivARB) then Exit;
-    glWeightfvARB := wglGetProcAddress('glWeightfvARB');
-    if not Assigned(glWeightfvARB) then Exit;
-    glWeightdvARB := wglGetProcAddress('glWeightdvARB');
-    if not Assigned(glWeightdvARB) then Exit;
-    glWeightvARB := wglGetProcAddress('glWeightvARB');
-    if not Assigned(glWeightvARB) then Exit;
-    glWeightubvARB := wglGetProcAddress('glWeightubvARB');
-    if not Assigned(glWeightubvARB) then Exit;
-    glWeightusvARB := wglGetProcAddress('glWeightusvARB');
-    if not Assigned(glWeightusvARB) then Exit;
-    glWeightuivARB := wglGetProcAddress('glWeightuivARB');
-    if not Assigned(glWeightuivARB) then Exit;
-    glWeightPointerARB := wglGetProcAddress('glWeightPointerARB');
-    if not Assigned(glWeightPointerARB) then Exit;
-    glVertexBlendARB := wglGetProcAddress('glVertexBlendARB');
-    if not Assigned(glVertexBlendARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_vertex_program: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..61] of funcinfoty =
+   (
+    (n: 'glVertexAttrib1sARB'; d: @glVertexAttrib1sARB),
+    (n: 'glVertexAttrib1fARB'; d: @glVertexAttrib1fARB),
+    (n: 'glVertexAttrib1dARB'; d: @glVertexAttrib1dARB),
+    (n: 'glVertexAttrib2sARB'; d: @glVertexAttrib2sARB),
+    (n: 'glVertexAttrib2fARB'; d: @glVertexAttrib2fARB),
+    (n: 'glVertexAttrib2dARB'; d: @glVertexAttrib2dARB),
+    (n: 'glVertexAttrib3sARB'; d: @glVertexAttrib3sARB),
+    (n: 'glVertexAttrib3fARB'; d: @glVertexAttrib3fARB),
+    (n: 'glVertexAttrib3dARB'; d: @glVertexAttrib3dARB),
+    (n: 'glVertexAttrib4sARB'; d: @glVertexAttrib4sARB),
+    (n: 'glVertexAttrib4fARB'; d: @glVertexAttrib4fARB),
+    (n: 'glVertexAttrib4dARB'; d: @glVertexAttrib4dARB),
+    (n: 'glVertexAttrib4NubARB'; d: @glVertexAttrib4NubARB),
+    (n: 'glVertexAttrib1svARB'; d: @glVertexAttrib1svARB),
+    (n: 'glVertexAttrib1fvARB'; d: @glVertexAttrib1fvARB),
+    (n: 'glVertexAttrib1dvARB'; d: @glVertexAttrib1dvARB),
+    (n: 'glVertexAttrib2svARB'; d: @glVertexAttrib2svARB),
+    (n: 'glVertexAttrib2fvARB'; d: @glVertexAttrib2fvARB),
+    (n: 'glVertexAttrib2dvARB'; d: @glVertexAttrib2dvARB),
+    (n: 'glVertexAttrib3svARB'; d: @glVertexAttrib3svARB),
+    (n: 'glVertexAttrib3fvARB'; d: @glVertexAttrib3fvARB),
+    (n: 'glVertexAttrib3dvARB'; d: @glVertexAttrib3dvARB),
+    (n: 'glVertexAttrib4bvARB'; d: @glVertexAttrib4bvARB),
+    (n: 'glVertexAttrib4svARB'; d: @glVertexAttrib4svARB),
+    (n: 'glVertexAttrib4ivARB'; d: @glVertexAttrib4ivARB),
+    (n: 'glVertexAttrib4ubvARB'; d: @glVertexAttrib4ubvARB),
+    (n: 'glVertexAttrib4usvARB'; d: @glVertexAttrib4usvARB),
+    (n: 'glVertexAttrib4uivARB'; d: @glVertexAttrib4uivARB),
+    (n: 'glVertexAttrib4fvARB'; d: @glVertexAttrib4fvARB),
+    (n: 'glVertexAttrib4dvARB'; d: @glVertexAttrib4dvARB),
+    (n: 'glVertexAttrib4NbvARB'; d: @glVertexAttrib4NbvARB),
+    (n: 'glVertexAttrib4NsvARB'; d: @glVertexAttrib4NsvARB),
+    (n: 'glVertexAttrib4NivARB'; d: @glVertexAttrib4NivARB),
+    (n: 'glVertexAttrib4NubvARB'; d: @glVertexAttrib4NubvARB),
+    (n: 'glVertexAttrib4NusvARB'; d: @glVertexAttrib4NusvARB),
+    (n: 'glVertexAttrib4NuivARB'; d: @glVertexAttrib4NuivARB),
+    (n: 'glVertexAttribPointerARB'; d: @glVertexAttribPointerARB),
+    (n: 'glEnableVertexAttribArrayARB'; d: @glEnableVertexAttribArrayARB),
+    (n: 'glDisableVertexAttribArrayARB'; d: @glDisableVertexAttribArrayARB),
+    (n: 'glProgramStringARB'; d: @glProgramStringARB),
+    (n: 'glBindProgramARB'; d: @glBindProgramARB),
+    (n: 'glDeleteProgramsARB'; d: @glDeleteProgramsARB),
+    (n: 'glGenProgramsARB'; d: @glGenProgramsARB),
+    (n: 'glProgramEnvParameter4dARB'; d: @glProgramEnvParameter4dARB),
+    (n: 'glProgramEnvParameter4dvARB'; d: @glProgramEnvParameter4dvARB),
+    (n: 'glProgramEnvParameter4fARB'; d: @glProgramEnvParameter4fARB),
+    (n: 'glProgramEnvParameter4fvARB'; d: @glProgramEnvParameter4fvARB),
+    (n: 'glProgramLocalParameter4dARB'; d: @glProgramLocalParameter4dARB),
+    (n: 'glProgramLocalParameter4dvARB'; d: @glProgramLocalParameter4dvARB),
+    (n: 'glProgramLocalParameter4fARB'; d: @glProgramLocalParameter4fARB),
+    (n: 'glProgramLocalParameter4fvARB'; d: @glProgramLocalParameter4fvARB),
+    (n: 'glGetProgramEnvParameterdvARB'; d: @glGetProgramEnvParameterdvARB),
+    (n: 'glGetProgramEnvParameterfvARB'; d: @glGetProgramEnvParameterfvARB),
+    (n: 'glGetProgramLocalParameterdvARB'; d: @glGetProgramLocalParameterdvARB),
+    (n: 'glGetProgramLocalParameterfvARB'; d: @glGetProgramLocalParameterfvARB),
+    (n: 'glGetProgramivARB'; d: @glGetProgramivARB),
+    (n: 'glGetProgramStringARB'; d: @glGetProgramStringARB),
+    (n: 'glGetVertexAttribdvARB'; d: @glGetVertexAttribdvARB),
+    (n: 'glGetVertexAttribfvARB'; d: @glGetVertexAttribfvARB),
+    (n: 'glGetVertexAttribivARB'; d: @glGetVertexAttribivARB),
+    (n: 'glGetVertexAttribPointervARB'; d: @glGetVertexAttribPointervARB),
+    (n: 'glIsProgramARB'; d: @glIsProgramARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_vertex_program', extstring) then
-  begin
-    glVertexAttrib1sARB := wglGetProcAddress('glVertexAttrib1sARB');
-    if not Assigned(glVertexAttrib1sARB) then Exit;
-    glVertexAttrib1fARB := wglGetProcAddress('glVertexAttrib1fARB');
-    if not Assigned(glVertexAttrib1fARB) then Exit;
-    glVertexAttrib1dARB := wglGetProcAddress('glVertexAttrib1dARB');
-    if not Assigned(glVertexAttrib1dARB) then Exit;
-    glVertexAttrib2sARB := wglGetProcAddress('glVertexAttrib2sARB');
-    if not Assigned(glVertexAttrib2sARB) then Exit;
-    glVertexAttrib2fARB := wglGetProcAddress('glVertexAttrib2fARB');
-    if not Assigned(glVertexAttrib2fARB) then Exit;
-    glVertexAttrib2dARB := wglGetProcAddress('glVertexAttrib2dARB');
-    if not Assigned(glVertexAttrib2dARB) then Exit;
-    glVertexAttrib3sARB := wglGetProcAddress('glVertexAttrib3sARB');
-    if not Assigned(glVertexAttrib3sARB) then Exit;
-    glVertexAttrib3fARB := wglGetProcAddress('glVertexAttrib3fARB');
-    if not Assigned(glVertexAttrib3fARB) then Exit;
-    glVertexAttrib3dARB := wglGetProcAddress('glVertexAttrib3dARB');
-    if not Assigned(glVertexAttrib3dARB) then Exit;
-    glVertexAttrib4sARB := wglGetProcAddress('glVertexAttrib4sARB');
-    if not Assigned(glVertexAttrib4sARB) then Exit;
-    glVertexAttrib4fARB := wglGetProcAddress('glVertexAttrib4fARB');
-    if not Assigned(glVertexAttrib4fARB) then Exit;
-    glVertexAttrib4dARB := wglGetProcAddress('glVertexAttrib4dARB');
-    if not Assigned(glVertexAttrib4dARB) then Exit;
-    glVertexAttrib4NubARB := wglGetProcAddress('glVertexAttrib4NubARB');
-    if not Assigned(glVertexAttrib4NubARB) then Exit;
-    glVertexAttrib1svARB := wglGetProcAddress('glVertexAttrib1svARB');
-    if not Assigned(glVertexAttrib1svARB) then Exit;
-    glVertexAttrib1fvARB := wglGetProcAddress('glVertexAttrib1fvARB');
-    if not Assigned(glVertexAttrib1fvARB) then Exit;
-    glVertexAttrib1dvARB := wglGetProcAddress('glVertexAttrib1dvARB');
-    if not Assigned(glVertexAttrib1dvARB) then Exit;
-    glVertexAttrib2svARB := wglGetProcAddress('glVertexAttrib2svARB');
-    if not Assigned(glVertexAttrib2svARB) then Exit;
-    glVertexAttrib2fvARB := wglGetProcAddress('glVertexAttrib2fvARB');
-    if not Assigned(glVertexAttrib2fvARB) then Exit;
-    glVertexAttrib2dvARB := wglGetProcAddress('glVertexAttrib2dvARB');
-    if not Assigned(glVertexAttrib2dvARB) then Exit;
-    glVertexAttrib3svARB := wglGetProcAddress('glVertexAttrib3svARB');
-    if not Assigned(glVertexAttrib3svARB) then Exit;
-    glVertexAttrib3fvARB := wglGetProcAddress('glVertexAttrib3fvARB');
-    if not Assigned(glVertexAttrib3fvARB) then Exit;
-    glVertexAttrib3dvARB := wglGetProcAddress('glVertexAttrib3dvARB');
-    if not Assigned(glVertexAttrib3dvARB) then Exit;
-    glVertexAttrib4bvARB := wglGetProcAddress('glVertexAttrib4bvARB');
-    if not Assigned(glVertexAttrib4bvARB) then Exit;
-    glVertexAttrib4svARB := wglGetProcAddress('glVertexAttrib4svARB');
-    if not Assigned(glVertexAttrib4svARB) then Exit;
-    glVertexAttrib4ivARB := wglGetProcAddress('glVertexAttrib4ivARB');
-    if not Assigned(glVertexAttrib4ivARB) then Exit;
-    glVertexAttrib4ubvARB := wglGetProcAddress('glVertexAttrib4ubvARB');
-    if not Assigned(glVertexAttrib4ubvARB) then Exit;
-    glVertexAttrib4usvARB := wglGetProcAddress('glVertexAttrib4usvARB');
-    if not Assigned(glVertexAttrib4usvARB) then Exit;
-    glVertexAttrib4uivARB := wglGetProcAddress('glVertexAttrib4uivARB');
-    if not Assigned(glVertexAttrib4uivARB) then Exit;
-    glVertexAttrib4fvARB := wglGetProcAddress('glVertexAttrib4fvARB');
-    if not Assigned(glVertexAttrib4fvARB) then Exit;
-    glVertexAttrib4dvARB := wglGetProcAddress('glVertexAttrib4dvARB');
-    if not Assigned(glVertexAttrib4dvARB) then Exit;
-    glVertexAttrib4NbvARB := wglGetProcAddress('glVertexAttrib4NbvARB');
-    if not Assigned(glVertexAttrib4NbvARB) then Exit;
-    glVertexAttrib4NsvARB := wglGetProcAddress('glVertexAttrib4NsvARB');
-    if not Assigned(glVertexAttrib4NsvARB) then Exit;
-    glVertexAttrib4NivARB := wglGetProcAddress('glVertexAttrib4NivARB');
-    if not Assigned(glVertexAttrib4NivARB) then Exit;
-    glVertexAttrib4NubvARB := wglGetProcAddress('glVertexAttrib4NubvARB');
-    if not Assigned(glVertexAttrib4NubvARB) then Exit;
-    glVertexAttrib4NusvARB := wglGetProcAddress('glVertexAttrib4NusvARB');
-    if not Assigned(glVertexAttrib4NusvARB) then Exit;
-    glVertexAttrib4NuivARB := wglGetProcAddress('glVertexAttrib4NuivARB');
-    if not Assigned(glVertexAttrib4NuivARB) then Exit;
-    glVertexAttribPointerARB := wglGetProcAddress('glVertexAttribPointerARB');
-    if not Assigned(glVertexAttribPointerARB) then Exit;
-    glEnableVertexAttribArrayARB := wglGetProcAddress('glEnableVertexAttribArrayARB');
-    if not Assigned(glEnableVertexAttribArrayARB) then Exit;
-    glDisableVertexAttribArrayARB := wglGetProcAddress('glDisableVertexAttribArrayARB');
-    if not Assigned(glDisableVertexAttribArrayARB) then Exit;
-    glProgramStringARB := wglGetProcAddress('glProgramStringARB');
-    if not Assigned(glProgramStringARB) then Exit;
-    glBindProgramARB := wglGetProcAddress('glBindProgramARB');
-    if not Assigned(glBindProgramARB) then Exit;
-    glDeleteProgramsARB := wglGetProcAddress('glDeleteProgramsARB');
-    if not Assigned(glDeleteProgramsARB) then Exit;
-    glGenProgramsARB := wglGetProcAddress('glGenProgramsARB');
-    if not Assigned(glGenProgramsARB) then Exit;
-    glProgramEnvParameter4dARB := wglGetProcAddress('glProgramEnvParameter4dARB');
-    if not Assigned(glProgramEnvParameter4dARB) then Exit;
-    glProgramEnvParameter4dvARB := wglGetProcAddress('glProgramEnvParameter4dvARB');
-    if not Assigned(glProgramEnvParameter4dvARB) then Exit;
-    glProgramEnvParameter4fARB := wglGetProcAddress('glProgramEnvParameter4fARB');
-    if not Assigned(glProgramEnvParameter4fARB) then Exit;
-    glProgramEnvParameter4fvARB := wglGetProcAddress('glProgramEnvParameter4fvARB');
-    if not Assigned(glProgramEnvParameter4fvARB) then Exit;
-    glProgramLocalParameter4dARB := wglGetProcAddress('glProgramLocalParameter4dARB');
-    if not Assigned(glProgramLocalParameter4dARB) then Exit;
-    glProgramLocalParameter4dvARB := wglGetProcAddress('glProgramLocalParameter4dvARB');
-    if not Assigned(glProgramLocalParameter4dvARB) then Exit;
-    glProgramLocalParameter4fARB := wglGetProcAddress('glProgramLocalParameter4fARB');
-    if not Assigned(glProgramLocalParameter4fARB) then Exit;
-    glProgramLocalParameter4fvARB := wglGetProcAddress('glProgramLocalParameter4fvARB');
-    if not Assigned(glProgramLocalParameter4fvARB) then Exit;
-    glGetProgramEnvParameterdvARB := wglGetProcAddress('glGetProgramEnvParameterdvARB');
-    if not Assigned(glGetProgramEnvParameterdvARB) then Exit;
-    glGetProgramEnvParameterfvARB := wglGetProcAddress('glGetProgramEnvParameterfvARB');
-    if not Assigned(glGetProgramEnvParameterfvARB) then Exit;
-    glGetProgramLocalParameterdvARB := wglGetProcAddress('glGetProgramLocalParameterdvARB');
-    if not Assigned(glGetProgramLocalParameterdvARB) then Exit;
-    glGetProgramLocalParameterfvARB := wglGetProcAddress('glGetProgramLocalParameterfvARB');
-    if not Assigned(glGetProgramLocalParameterfvARB) then Exit;
-    glGetProgramivARB := wglGetProcAddress('glGetProgramivARB');
-    if not Assigned(glGetProgramivARB) then Exit;
-    glGetProgramStringARB := wglGetProcAddress('glGetProgramStringARB');
-    if not Assigned(glGetProgramStringARB) then Exit;
-    glGetVertexAttribdvARB := wglGetProcAddress('glGetVertexAttribdvARB');
-    if not Assigned(glGetVertexAttribdvARB) then Exit;
-    glGetVertexAttribfvARB := wglGetProcAddress('glGetVertexAttribfvARB');
-    if not Assigned(glGetVertexAttribfvARB) then Exit;
-    glGetVertexAttribivARB := wglGetProcAddress('glGetVertexAttribivARB');
-    if not Assigned(glGetVertexAttribivARB) then Exit;
-    glGetVertexAttribPointervARB := wglGetProcAddress('glGetVertexAttribPointervARB');
-    if not Assigned(glGetVertexAttribPointervARB) then Exit;
-    glIsProgramARB := wglGetProcAddress('glIsProgramARB');
-    if not Assigned(glIsProgramARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_window_pos: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..15] of funcinfoty =
+   (
+    (n: 'glWindowPos2dARB'; d: @glWindowPos2dARB),
+    (n: 'glWindowPos2fARB'; d: @glWindowPos2fARB),
+    (n: 'glWindowPos2iARB'; d: @glWindowPos2iARB),
+    (n: 'glWindowPos2sARB'; d: @glWindowPos2sARB),
+    (n: 'glWindowPos2dvARB'; d: @glWindowPos2dvARB),
+    (n: 'glWindowPos2fvARB'; d: @glWindowPos2fvARB),
+    (n: 'glWindowPos2ivARB'; d: @glWindowPos2ivARB),
+    (n: 'glWindowPos2svARB'; d: @glWindowPos2svARB),
+    (n: 'glWindowPos3dARB'; d: @glWindowPos3dARB),
+    (n: 'glWindowPos3fARB'; d: @glWindowPos3fARB),
+    (n: 'glWindowPos3iARB'; d: @glWindowPos3iARB),
+    (n: 'glWindowPos3sARB'; d: @glWindowPos3sARB),
+    (n: 'glWindowPos3dvARB'; d: @glWindowPos3dvARB),
+    (n: 'glWindowPos3fvARB'; d: @glWindowPos3fvARB),
+    (n: 'glWindowPos3ivARB'; d: @glWindowPos3ivARB),
+    (n: 'glWindowPos3svARB'; d: @glWindowPos3svARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_window_pos', extstring) then
-  begin
-    glWindowPos2dARB := wglGetProcAddress('glWindowPos2dARB');
-    if not Assigned(glWindowPos2dARB) then Exit;
-    glWindowPos2fARB := wglGetProcAddress('glWindowPos2fARB');
-    if not Assigned(glWindowPos2fARB) then Exit;
-    glWindowPos2iARB := wglGetProcAddress('glWindowPos2iARB');
-    if not Assigned(glWindowPos2iARB) then Exit;
-    glWindowPos2sARB := wglGetProcAddress('glWindowPos2sARB');
-    if not Assigned(glWindowPos2sARB) then Exit;
-    glWindowPos2dvARB := wglGetProcAddress('glWindowPos2dvARB');
-    if not Assigned(glWindowPos2dvARB) then Exit;
-    glWindowPos2fvARB := wglGetProcAddress('glWindowPos2fvARB');
-    if not Assigned(glWindowPos2fvARB) then Exit;
-    glWindowPos2ivARB := wglGetProcAddress('glWindowPos2ivARB');
-    if not Assigned(glWindowPos2ivARB) then Exit;
-    glWindowPos2svARB := wglGetProcAddress('glWindowPos2svARB');
-    if not Assigned(glWindowPos2svARB) then Exit;
-    glWindowPos3dARB := wglGetProcAddress('glWindowPos3dARB');
-    if not Assigned(glWindowPos3dARB) then Exit;
-    glWindowPos3fARB := wglGetProcAddress('glWindowPos3fARB');
-    if not Assigned(glWindowPos3fARB) then Exit;
-    glWindowPos3iARB := wglGetProcAddress('glWindowPos3iARB');
-    if not Assigned(glWindowPos3iARB) then Exit;
-    glWindowPos3sARB := wglGetProcAddress('glWindowPos3sARB');
-    if not Assigned(glWindowPos3sARB) then Exit;
-    glWindowPos3dvARB := wglGetProcAddress('glWindowPos3dvARB');
-    if not Assigned(glWindowPos3dvARB) then Exit;
-    glWindowPos3fvARB := wglGetProcAddress('glWindowPos3fvARB');
-    if not Assigned(glWindowPos3fvARB) then Exit;
-    glWindowPos3ivARB := wglGetProcAddress('glWindowPos3ivARB');
-    if not Assigned(glWindowPos3ivARB) then Exit;
-    glWindowPos3svARB := wglGetProcAddress('glWindowPos3svARB');
-    if not Assigned(glWindowPos3svARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_422_pixels: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_422_pixels', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_abgr: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_abgr', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_bgra: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_bgra', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_blend_color: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glBlendColorEXT'; d: @glBlendColorEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_blend_color', extstring) then
-  begin
-    glBlendColorEXT := wglGetProcAddress('glBlendColorEXT');
-    if not Assigned(glBlendColorEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_blend_func_separate: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glBlendFuncSeparateEXT'; d: @glBlendFuncSeparateEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_blend_func_separate', extstring) then
-  begin
-    glBlendFuncSeparateEXT := wglGetProcAddress('glBlendFuncSeparateEXT');
-    if not Assigned(glBlendFuncSeparateEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_blend_logic_op: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_blend_logic_op', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_blend_minmax: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glBlendEquationEXT'; d: @glBlendEquationEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_blend_minmax', extstring) then
-  begin
-    glBlendEquationEXT := wglGetProcAddress('glBlendEquationEXT');
-    if not Assigned(glBlendEquationEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_blend_subtract: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_blend_subtract', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_clip_volume_hint: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_clip_volume_hint', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_color_subtable: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glColorSubTableEXT'; d: @glColorSubTableEXT),
+    (n: 'glCopyColorSubTableEXT'; d: @glCopyColorSubTableEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_color_subtable', extstring) then
-  begin
-    glColorSubTableEXT := wglGetProcAddress('glColorSubTableEXT');
-    if not Assigned(glColorSubTableEXT) then Exit;
-    glCopyColorSubTableEXT := wglGetProcAddress('glCopyColorSubTableEXT');
-    if not Assigned(glCopyColorSubTableEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_compiled_vertex_array: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glLockArraysEXT'; d: @glLockArraysEXT),
+    (n: 'glUnlockArraysEXT'; d: @glUnlockArraysEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_compiled_vertex_array', extstring) then
-  begin
-    glLockArraysEXT := wglGetProcAddress('glLockArraysEXT');
-    if not Assigned(glLockArraysEXT) then Exit;
-    glUnlockArraysEXT := wglGetProcAddress('glUnlockArraysEXT');
-    if not Assigned(glUnlockArraysEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_convolution: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..12] of funcinfoty =
+   (
+    (n: 'glConvolutionFilter1DEXT'; d: @glConvolutionFilter1DEXT),
+    (n: 'glConvolutionFilter2DEXT'; d: @glConvolutionFilter2DEXT),
+    (n: 'glCopyConvolutionFilter1DEXT'; d: @glCopyConvolutionFilter1DEXT),
+    (n: 'glCopyConvolutionFilter2DEXT'; d: @glCopyConvolutionFilter2DEXT),
+    (n: 'glGetConvolutionFilterEXT'; d: @glGetConvolutionFilterEXT),
+    (n: 'glSeparableFilter2DEXT'; d: @glSeparableFilter2DEXT),
+    (n: 'glGetSeparableFilterEXT'; d: @glGetSeparableFilterEXT),
+    (n: 'glConvolutionParameteriEXT'; d: @glConvolutionParameteriEXT),
+    (n: 'glConvolutionParameterivEXT'; d: @glConvolutionParameterivEXT),
+    (n: 'glConvolutionParameterfEXT'; d: @glConvolutionParameterfEXT),
+    (n: 'glConvolutionParameterfvEXT'; d: @glConvolutionParameterfvEXT),
+    (n: 'glGetConvolutionParameterivEXT'; d: @glGetConvolutionParameterivEXT),
+    (n: 'glGetConvolutionParameterfvEXT'; d: @glGetConvolutionParameterfvEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_convolution', extstring) then
-  begin
-    glConvolutionFilter1DEXT := wglGetProcAddress('glConvolutionFilter1DEXT');
-    if not Assigned(glConvolutionFilter1DEXT) then Exit;
-    glConvolutionFilter2DEXT := wglGetProcAddress('glConvolutionFilter2DEXT');
-    if not Assigned(glConvolutionFilter2DEXT) then Exit;
-    glCopyConvolutionFilter1DEXT := wglGetProcAddress('glCopyConvolutionFilter1DEXT');
-    if not Assigned(glCopyConvolutionFilter1DEXT) then Exit;
-    glCopyConvolutionFilter2DEXT := wglGetProcAddress('glCopyConvolutionFilter2DEXT');
-    if not Assigned(glCopyConvolutionFilter2DEXT) then Exit;
-    glGetConvolutionFilterEXT := wglGetProcAddress('glGetConvolutionFilterEXT');
-    if not Assigned(glGetConvolutionFilterEXT) then Exit;
-    glSeparableFilter2DEXT := wglGetProcAddress('glSeparableFilter2DEXT');
-    if not Assigned(glSeparableFilter2DEXT) then Exit;
-    glGetSeparableFilterEXT := wglGetProcAddress('glGetSeparableFilterEXT');
-    if not Assigned(glGetSeparableFilterEXT) then Exit;
-    glConvolutionParameteriEXT := wglGetProcAddress('glConvolutionParameteriEXT');
-    if not Assigned(glConvolutionParameteriEXT) then Exit;
-    glConvolutionParameterivEXT := wglGetProcAddress('glConvolutionParameterivEXT');
-    if not Assigned(glConvolutionParameterivEXT) then Exit;
-    glConvolutionParameterfEXT := wglGetProcAddress('glConvolutionParameterfEXT');
-    if not Assigned(glConvolutionParameterfEXT) then Exit;
-    glConvolutionParameterfvEXT := wglGetProcAddress('glConvolutionParameterfvEXT');
-    if not Assigned(glConvolutionParameterfvEXT) then Exit;
-    glGetConvolutionParameterivEXT := wglGetProcAddress('glGetConvolutionParameterivEXT');
-    if not Assigned(glGetConvolutionParameterivEXT) then Exit;
-    glGetConvolutionParameterfvEXT := wglGetProcAddress('glGetConvolutionParameterfvEXT');
-    if not Assigned(glGetConvolutionParameterfvEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_fog_coord: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..4] of funcinfoty =
+   (
+    (n: 'glFogCoordfEXT'; d: @glFogCoordfEXT),
+    (n: 'glFogCoorddEXT'; d: @glFogCoorddEXT),
+    (n: 'glFogCoordfvEXT'; d: @glFogCoordfvEXT),
+    (n: 'glFogCoorddvEXT'; d: @glFogCoorddvEXT),
+    (n: 'glFogCoordPointerEXT'; d: @glFogCoordPointerEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_fog_coord', extstring) then
-  begin
-    glFogCoordfEXT := wglGetProcAddress('glFogCoordfEXT');
-    if not Assigned(glFogCoordfEXT) then Exit;
-    glFogCoorddEXT := wglGetProcAddress('glFogCoorddEXT');
-    if not Assigned(glFogCoorddEXT) then Exit;
-    glFogCoordfvEXT := wglGetProcAddress('glFogCoordfvEXT');
-    if not Assigned(glFogCoordfvEXT) then Exit;
-    glFogCoorddvEXT := wglGetProcAddress('glFogCoorddvEXT');
-    if not Assigned(glFogCoorddvEXT) then Exit;
-    glFogCoordPointerEXT := wglGetProcAddress('glFogCoordPointerEXT');
-    if not Assigned(glFogCoordPointerEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_histogram: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..9] of funcinfoty =
+   (
+    (n: 'glHistogramEXT'; d: @glHistogramEXT),
+    (n: 'glResetHistogramEXT'; d: @glResetHistogramEXT),
+    (n: 'glGetHistogramEXT'; d: @glGetHistogramEXT),
+    (n: 'glGetHistogramParameterivEXT'; d: @glGetHistogramParameterivEXT),
+    (n: 'glGetHistogramParameterfvEXT'; d: @glGetHistogramParameterfvEXT),
+    (n: 'glMinmaxEXT'; d: @glMinmaxEXT),
+    (n: 'glResetMinmaxEXT'; d: @glResetMinmaxEXT),
+    (n: 'glGetMinmaxEXT'; d: @glGetMinmaxEXT),
+    (n: 'glGetMinmaxParameterivEXT'; d: @glGetMinmaxParameterivEXT),
+    (n: 'glGetMinmaxParameterfvEXT'; d: @glGetMinmaxParameterfvEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_histogram', extstring) then
-  begin
-    glHistogramEXT := wglGetProcAddress('glHistogramEXT');
-    if not Assigned(glHistogramEXT) then Exit;
-    glResetHistogramEXT := wglGetProcAddress('glResetHistogramEXT');
-    if not Assigned(glResetHistogramEXT) then Exit;
-    glGetHistogramEXT := wglGetProcAddress('glGetHistogramEXT');
-    if not Assigned(glGetHistogramEXT) then Exit;
-    glGetHistogramParameterivEXT := wglGetProcAddress('glGetHistogramParameterivEXT');
-    if not Assigned(glGetHistogramParameterivEXT) then Exit;
-    glGetHistogramParameterfvEXT := wglGetProcAddress('glGetHistogramParameterfvEXT');
-    if not Assigned(glGetHistogramParameterfvEXT) then Exit;
-    glMinmaxEXT := wglGetProcAddress('glMinmaxEXT');
-    if not Assigned(glMinmaxEXT) then Exit;
-    glResetMinmaxEXT := wglGetProcAddress('glResetMinmaxEXT');
-    if not Assigned(glResetMinmaxEXT) then Exit;
-    glGetMinmaxEXT := wglGetProcAddress('glGetMinmaxEXT');
-    if not Assigned(glGetMinmaxEXT) then Exit;
-    glGetMinmaxParameterivEXT := wglGetProcAddress('glGetMinmaxParameterivEXT');
-    if not Assigned(glGetMinmaxParameterivEXT) then Exit;
-    glGetMinmaxParameterfvEXT := wglGetProcAddress('glGetMinmaxParameterfvEXT');
-    if not Assigned(glGetMinmaxParameterfvEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_multi_draw_arrays: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glMultiDrawArraysEXT'; d: @glMultiDrawArraysEXT),
+    (n: 'glMultiDrawElementsEXT'; d: @glMultiDrawElementsEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_multi_draw_arrays', extstring) then
-  begin
-    glMultiDrawArraysEXT := wglGetProcAddress('glMultiDrawArraysEXT');
-    if not Assigned(glMultiDrawArraysEXT) then Exit;
-    glMultiDrawElementsEXT := wglGetProcAddress('glMultiDrawElementsEXT');
-    if not Assigned(glMultiDrawElementsEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_packed_depth_stencil: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_packed_depth_stencil', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_packed_pixels: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_packed_pixels', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_paletted_texture: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..4] of funcinfoty =
+   (
+    (n: 'glColorTableEXT'; d: @glColorTableEXT),
+    (n: 'glColorSubTableEXT'; d: @glColorSubTableEXT),
+    (n: 'glGetColorTableEXT'; d: @glGetColorTableEXT),
+    (n: 'glGetColorTableParameterivEXT'; d: @glGetColorTableParameterivEXT),
+    (n: 'glGetColorTableParameterfvEXT'; d: @glGetColorTableParameterfvEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_paletted_texture', extstring) then
-  begin
-    glColorTableEXT := wglGetProcAddress('glColorTableEXT');
-    if not Assigned(glColorTableEXT) then Exit;
-    glColorSubTableEXT := wglGetProcAddress('glColorSubTableEXT');
-    if not Assigned(glColorSubTableEXT) then Exit;
-    glGetColorTableEXT := wglGetProcAddress('glGetColorTableEXT');
-    if not Assigned(glGetColorTableEXT) then Exit;
-    glGetColorTableParameterivEXT := wglGetProcAddress('glGetColorTableParameterivEXT');
-    if not Assigned(glGetColorTableParameterivEXT) then Exit;
-    glGetColorTableParameterfvEXT := wglGetProcAddress('glGetColorTableParameterfvEXT');
-    if not Assigned(glGetColorTableParameterfvEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_point_parameters: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glPointParameterfEXT'; d: @glPointParameterfEXT),
+    (n: 'glPointParameterfvEXT'; d: @glPointParameterfvEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_point_parameters', extstring) then
-  begin
-    glPointParameterfEXT := wglGetProcAddress('glPointParameterfEXT');
-    if not Assigned(glPointParameterfEXT) then Exit;
-    glPointParameterfvEXT := wglGetProcAddress('glPointParameterfvEXT');
-    if not Assigned(glPointParameterfvEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_polygon_offset: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glPolygonOffsetEXT'; d: @glPolygonOffsetEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_polygon_offset', extstring) then
-  begin
-    glPolygonOffsetEXT := wglGetProcAddress('glPolygonOffsetEXT');
-    if not Assigned(glPolygonOffsetEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_secondary_color: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..16] of funcinfoty =
+   (
+    (n: 'glSecondaryColor3bEXT'; d: @glSecondaryColor3bEXT),
+    (n: 'glSecondaryColor3sEXT'; d: @glSecondaryColor3sEXT),
+    (n: 'glSecondaryColor3iEXT'; d: @glSecondaryColor3iEXT),
+    (n: 'glSecondaryColor3fEXT'; d: @glSecondaryColor3fEXT),
+    (n: 'glSecondaryColor3dEXT'; d: @glSecondaryColor3dEXT),
+    (n: 'glSecondaryColor3ubEXT'; d: @glSecondaryColor3ubEXT),
+    (n: 'glSecondaryColor3usEXT'; d: @glSecondaryColor3usEXT),
+    (n: 'glSecondaryColor3uiEXT'; d: @glSecondaryColor3uiEXT),
+    (n: 'glSecondaryColor3bvEXT'; d: @glSecondaryColor3bvEXT),
+    (n: 'glSecondaryColor3svEXT'; d: @glSecondaryColor3svEXT),
+    (n: 'glSecondaryColor3ivEXT'; d: @glSecondaryColor3ivEXT),
+    (n: 'glSecondaryColor3fvEXT'; d: @glSecondaryColor3fvEXT),
+    (n: 'glSecondaryColor3dvEXT'; d: @glSecondaryColor3dvEXT),
+    (n: 'glSecondaryColor3ubvEXT'; d: @glSecondaryColor3ubvEXT),
+    (n: 'glSecondaryColor3usvEXT'; d: @glSecondaryColor3usvEXT),
+    (n: 'glSecondaryColor3uivEXT'; d: @glSecondaryColor3uivEXT),
+    (n: 'glSecondaryColorPointerEXT'; d: @glSecondaryColorPointerEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_secondary_color', extstring) then
-  begin
-    glSecondaryColor3bEXT := wglGetProcAddress('glSecondaryColor3bEXT');
-    if not Assigned(glSecondaryColor3bEXT) then Exit;
-    glSecondaryColor3sEXT := wglGetProcAddress('glSecondaryColor3sEXT');
-    if not Assigned(glSecondaryColor3sEXT) then Exit;
-    glSecondaryColor3iEXT := wglGetProcAddress('glSecondaryColor3iEXT');
-    if not Assigned(glSecondaryColor3iEXT) then Exit;
-    glSecondaryColor3fEXT := wglGetProcAddress('glSecondaryColor3fEXT');
-    if not Assigned(glSecondaryColor3fEXT) then Exit;
-    glSecondaryColor3dEXT := wglGetProcAddress('glSecondaryColor3dEXT');
-    if not Assigned(glSecondaryColor3dEXT) then Exit;
-    glSecondaryColor3ubEXT := wglGetProcAddress('glSecondaryColor3ubEXT');
-    if not Assigned(glSecondaryColor3ubEXT) then Exit;
-    glSecondaryColor3usEXT := wglGetProcAddress('glSecondaryColor3usEXT');
-    if not Assigned(glSecondaryColor3usEXT) then Exit;
-    glSecondaryColor3uiEXT := wglGetProcAddress('glSecondaryColor3uiEXT');
-    if not Assigned(glSecondaryColor3uiEXT) then Exit;
-    glSecondaryColor3bvEXT := wglGetProcAddress('glSecondaryColor3bvEXT');
-    if not Assigned(glSecondaryColor3bvEXT) then Exit;
-    glSecondaryColor3svEXT := wglGetProcAddress('glSecondaryColor3svEXT');
-    if not Assigned(glSecondaryColor3svEXT) then Exit;
-    glSecondaryColor3ivEXT := wglGetProcAddress('glSecondaryColor3ivEXT');
-    if not Assigned(glSecondaryColor3ivEXT) then Exit;
-    glSecondaryColor3fvEXT := wglGetProcAddress('glSecondaryColor3fvEXT');
-    if not Assigned(glSecondaryColor3fvEXT) then Exit;
-    glSecondaryColor3dvEXT := wglGetProcAddress('glSecondaryColor3dvEXT');
-    if not Assigned(glSecondaryColor3dvEXT) then Exit;
-    glSecondaryColor3ubvEXT := wglGetProcAddress('glSecondaryColor3ubvEXT');
-    if not Assigned(glSecondaryColor3ubvEXT) then Exit;
-    glSecondaryColor3usvEXT := wglGetProcAddress('glSecondaryColor3usvEXT');
-    if not Assigned(glSecondaryColor3usvEXT) then Exit;
-    glSecondaryColor3uivEXT := wglGetProcAddress('glSecondaryColor3uivEXT');
-    if not Assigned(glSecondaryColor3uivEXT) then Exit;
-    glSecondaryColorPointerEXT := wglGetProcAddress('glSecondaryColorPointerEXT');
-    if not Assigned(glSecondaryColorPointerEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_separate_specular_color: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_separate_specular_color', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_shadow_funcs: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_shadow_funcs', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_shared_texture_palette: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_shared_texture_palette', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_stencil_two_side: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glActiveStencilFaceEXT'; d: @glActiveStencilFaceEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_stencil_two_side', extstring) then
-  begin
-    glActiveStencilFaceEXT := wglGetProcAddress('glActiveStencilFaceEXT');
-    if not Assigned(glActiveStencilFaceEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_stencil_wrap: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_stencil_wrap', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_subtexture: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..2] of funcinfoty =
+   (
+    (n: 'glTexSubImage1DEXT'; d: @glTexSubImage1DEXT),
+    (n: 'glTexSubImage2DEXT'; d: @glTexSubImage2DEXT),
+    (n: 'glTexSubImage3DEXT'; d: @glTexSubImage3DEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_subtexture', extstring) then
-  begin
-    glTexSubImage1DEXT := wglGetProcAddress('glTexSubImage1DEXT');
-    if not Assigned(glTexSubImage1DEXT) then Exit;
-    glTexSubImage2DEXT := wglGetProcAddress('glTexSubImage2DEXT');
-    if not Assigned(glTexSubImage2DEXT) then Exit;
-    glTexSubImage3DEXT := wglGetProcAddress('glTexSubImage3DEXT');
-    if not Assigned(glTexSubImage3DEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_texture3D: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glTexImage3DEXT'; d: @glTexImage3DEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_texture3D', extstring) then
-  begin
-    glTexImage3DEXT := wglGetProcAddress('glTexImage3DEXT');
-    if not Assigned(glTexImage3DEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_texture_compression_s3tc: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_texture_compression_s3tc', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_texture_env_add: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_texture_env_add', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_texture_env_combine: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_texture_env_combine', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_texture_env_dot3: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_texture_env_dot3', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_texture_filter_anisotropic: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_texture_filter_anisotropic', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_texture_lod_bias: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_texture_lod_bias', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_texture_object: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..5] of funcinfoty =
+   (
+    (n: 'glGenTexturesEXT'; d: @glGenTexturesEXT),
+    (n: 'glDeleteTexturesEXT'; d: @glDeleteTexturesEXT),
+    (n: 'glBindTextureEXT'; d: @glBindTextureEXT),
+    (n: 'glPrioritizeTexturesEXT'; d: @glPrioritizeTexturesEXT),
+    (n: 'glAreTexturesResidentEXT'; d: @glAreTexturesResidentEXT),
+    (n: 'glIsTextureEXT'; d: @glIsTextureEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_texture_object', extstring) then
-  begin
-    glGenTexturesEXT := wglGetProcAddress('glGenTexturesEXT');
-    if not Assigned(glGenTexturesEXT) then Exit;
-    glDeleteTexturesEXT := wglGetProcAddress('glDeleteTexturesEXT');
-    if not Assigned(glDeleteTexturesEXT) then Exit;
-    glBindTextureEXT := wglGetProcAddress('glBindTextureEXT');
-    if not Assigned(glBindTextureEXT) then Exit;
-    glPrioritizeTexturesEXT := wglGetProcAddress('glPrioritizeTexturesEXT');
-    if not Assigned(glPrioritizeTexturesEXT) then Exit;
-    glAreTexturesResidentEXT := wglGetProcAddress('glAreTexturesResidentEXT');
-    if not Assigned(glAreTexturesResidentEXT) then Exit;
-    glIsTextureEXT := wglGetProcAddress('glIsTextureEXT');
-    if not Assigned(glIsTextureEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_vertex_array: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..8] of funcinfoty =
+   (
+    (n: 'glArrayElementEXT'; d: @glArrayElementEXT),
+    (n: 'glDrawArraysEXT'; d: @glDrawArraysEXT),
+    (n: 'glVertexPointerEXT'; d: @glVertexPointerEXT),
+    (n: 'glNormalPointerEXT'; d: @glNormalPointerEXT),
+    (n: 'glColorPointerEXT'; d: @glColorPointerEXT),
+    (n: 'glIndexPointerEXT'; d: @glIndexPointerEXT),
+    (n: 'glTexCoordPointerEXT'; d: @glTexCoordPointerEXT),
+    (n: 'glEdgeFlagPointerEXT'; d: @glEdgeFlagPointerEXT),
+    (n: 'glGetPointervEXT'; d: @glGetPointervEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_vertex_array', extstring) then
-  begin
-    glArrayElementEXT := wglGetProcAddress('glArrayElementEXT');
-    if not Assigned(glArrayElementEXT) then Exit;
-    glDrawArraysEXT := wglGetProcAddress('glDrawArraysEXT');
-    if not Assigned(glDrawArraysEXT) then Exit;
-    glVertexPointerEXT := wglGetProcAddress('glVertexPointerEXT');
-    if not Assigned(glVertexPointerEXT) then Exit;
-    glNormalPointerEXT := wglGetProcAddress('glNormalPointerEXT');
-    if not Assigned(glNormalPointerEXT) then Exit;
-    glColorPointerEXT := wglGetProcAddress('glColorPointerEXT');
-    if not Assigned(glColorPointerEXT) then Exit;
-    glIndexPointerEXT := wglGetProcAddress('glIndexPointerEXT');
-    if not Assigned(glIndexPointerEXT) then Exit;
-    glTexCoordPointerEXT := wglGetProcAddress('glTexCoordPointerEXT');
-    if not Assigned(glTexCoordPointerEXT) then Exit;
-    glEdgeFlagPointerEXT := wglGetProcAddress('glEdgeFlagPointerEXT');
-    if not Assigned(glEdgeFlagPointerEXT) then Exit;
-    glGetPointervEXT := wglGetProcAddress('glGetPointervEXT');
-    if not Assigned(glGetPointervEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_vertex_shader: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..41] of funcinfoty =
+   (
+    (n: 'glBeginVertexShaderEXT'; d: @glBeginVertexShaderEXT),
+    (n: 'glEndVertexShaderEXT'; d: @glEndVertexShaderEXT),
+    (n: 'glBindVertexShaderEXT'; d: @glBindVertexShaderEXT),
+    (n: 'glGenVertexShadersEXT'; d: @glGenVertexShadersEXT),
+    (n: 'glDeleteVertexShaderEXT'; d: @glDeleteVertexShaderEXT),
+    (n: 'glShaderOp1EXT'; d: @glShaderOp1EXT),
+    (n: 'glShaderOp2EXT'; d: @glShaderOp2EXT),
+    (n: 'glShaderOp3EXT'; d: @glShaderOp3EXT),
+    (n: 'glSwizzleEXT'; d: @glSwizzleEXT),
+    (n: 'glWriteMaskEXT'; d: @glWriteMaskEXT),
+    (n: 'glInsertComponentEXT'; d: @glInsertComponentEXT),
+    (n: 'glExtractComponentEXT'; d: @glExtractComponentEXT),
+    (n: 'glGenSymbolsEXT'; d: @glGenSymbolsEXT),
+    (n: 'glSetInvariantEXT'; d: @glSetInvariantEXT),
+    (n: 'glSetLocalConstantEXT'; d: @glSetLocalConstantEXT),
+    (n: 'glVariantbvEXT'; d: @glVariantbvEXT),
+    (n: 'glVariantsvEXT'; d: @glVariantsvEXT),
+    (n: 'glVariantivEXT'; d: @glVariantivEXT),
+    (n: 'glVariantfvEXT'; d: @glVariantfvEXT),
+    (n: 'glVariantdvEXT'; d: @glVariantdvEXT),
+    (n: 'glVariantubvEXT'; d: @glVariantubvEXT),
+    (n: 'glVariantusvEXT'; d: @glVariantusvEXT),
+    (n: 'glVariantuivEXT'; d: @glVariantuivEXT),
+    (n: 'glVariantPointerEXT'; d: @glVariantPointerEXT),
+    (n: 'glEnableVariantClientStateEXT'; d: @glEnableVariantClientStateEXT),
+    (n: 'glDisableVariantClientStateEXT'; d: @glDisableVariantClientStateEXT),
+    (n: 'glBindLightParameterEXT'; d: @glBindLightParameterEXT),
+    (n: 'glBindMaterialParameterEXT'; d: @glBindMaterialParameterEXT),
+    (n: 'glBindTexGenParameterEXT'; d: @glBindTexGenParameterEXT),
+    (n: 'glBindTextureUnitParameterEXT'; d: @glBindTextureUnitParameterEXT),
+    (n: 'glBindParameterEXT'; d: @glBindParameterEXT),
+    (n: 'glIsVariantEnabledEXT'; d: @glIsVariantEnabledEXT),
+    (n: 'glGetVariantBooleanvEXT'; d: @glGetVariantBooleanvEXT),
+    (n: 'glGetVariantIntegervEXT'; d: @glGetVariantIntegervEXT),
+    (n: 'glGetVariantFloatvEXT'; d: @glGetVariantFloatvEXT),
+    (n: 'glGetVariantPointervEXT'; d: @glGetVariantPointervEXT),
+    (n: 'glGetInvariantBooleanvEXT'; d: @glGetInvariantBooleanvEXT),
+    (n: 'glGetInvariantIntegervEXT'; d: @glGetInvariantIntegervEXT),
+    (n: 'glGetInvariantFloatvEXT'; d: @glGetInvariantFloatvEXT),
+    (n: 'glGetLocalConstantBooleanvEXT'; d: @glGetLocalConstantBooleanvEXT),
+    (n: 'glGetLocalConstantIntegervEXT'; d: @glGetLocalConstantIntegervEXT),
+    (n: 'glGetLocalConstantFloatvEXT'; d: @glGetLocalConstantFloatvEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_vertex_shader', extstring) then
-  begin
-    glBeginVertexShaderEXT := wglGetProcAddress('glBeginVertexShaderEXT');
-    if not Assigned(glBeginVertexShaderEXT) then Exit;
-    glEndVertexShaderEXT := wglGetProcAddress('glEndVertexShaderEXT');
-    if not Assigned(glEndVertexShaderEXT) then Exit;
-    glBindVertexShaderEXT := wglGetProcAddress('glBindVertexShaderEXT');
-    if not Assigned(glBindVertexShaderEXT) then Exit;
-    glGenVertexShadersEXT := wglGetProcAddress('glGenVertexShadersEXT');
-    if not Assigned(glGenVertexShadersEXT) then Exit;
-    glDeleteVertexShaderEXT := wglGetProcAddress('glDeleteVertexShaderEXT');
-    if not Assigned(glDeleteVertexShaderEXT) then Exit;
-    glShaderOp1EXT := wglGetProcAddress('glShaderOp1EXT');
-    if not Assigned(glShaderOp1EXT) then Exit;
-    glShaderOp2EXT := wglGetProcAddress('glShaderOp2EXT');
-    if not Assigned(glShaderOp2EXT) then Exit;
-    glShaderOp3EXT := wglGetProcAddress('glShaderOp3EXT');
-    if not Assigned(glShaderOp3EXT) then Exit;
-    glSwizzleEXT := wglGetProcAddress('glSwizzleEXT');
-    if not Assigned(glSwizzleEXT) then Exit;
-    glWriteMaskEXT := wglGetProcAddress('glWriteMaskEXT');
-    if not Assigned(glWriteMaskEXT) then Exit;
-    glInsertComponentEXT := wglGetProcAddress('glInsertComponentEXT');
-    if not Assigned(glInsertComponentEXT) then Exit;
-    glExtractComponentEXT := wglGetProcAddress('glExtractComponentEXT');
-    if not Assigned(glExtractComponentEXT) then Exit;
-    glGenSymbolsEXT := wglGetProcAddress('glGenSymbolsEXT');
-    if not Assigned(glGenSymbolsEXT) then Exit;
-    glSetInvariantEXT := wglGetProcAddress('glSetInvariantEXT');
-    if not Assigned(glSetInvariantEXT) then Exit;
-    glSetLocalConstantEXT := wglGetProcAddress('glSetLocalConstantEXT');
-    if not Assigned(glSetLocalConstantEXT) then Exit;
-    glVariantbvEXT := wglGetProcAddress('glVariantbvEXT');
-    if not Assigned(glVariantbvEXT) then Exit;
-    glVariantsvEXT := wglGetProcAddress('glVariantsvEXT');
-    if not Assigned(glVariantsvEXT) then Exit;
-    glVariantivEXT := wglGetProcAddress('glVariantivEXT');
-    if not Assigned(glVariantivEXT) then Exit;
-    glVariantfvEXT := wglGetProcAddress('glVariantfvEXT');
-    if not Assigned(glVariantfvEXT) then Exit;
-    glVariantdvEXT := wglGetProcAddress('glVariantdvEXT');
-    if not Assigned(glVariantdvEXT) then Exit;
-    glVariantubvEXT := wglGetProcAddress('glVariantubvEXT');
-    if not Assigned(glVariantubvEXT) then Exit;
-    glVariantusvEXT := wglGetProcAddress('glVariantusvEXT');
-    if not Assigned(glVariantusvEXT) then Exit;
-    glVariantuivEXT := wglGetProcAddress('glVariantuivEXT');
-    if not Assigned(glVariantuivEXT) then Exit;
-    glVariantPointerEXT := wglGetProcAddress('glVariantPointerEXT');
-    if not Assigned(glVariantPointerEXT) then Exit;
-    glEnableVariantClientStateEXT := wglGetProcAddress('glEnableVariantClientStateEXT');
-    if not Assigned(glEnableVariantClientStateEXT) then Exit;
-    glDisableVariantClientStateEXT := wglGetProcAddress('glDisableVariantClientStateEXT');
-    if not Assigned(glDisableVariantClientStateEXT) then Exit;
-    glBindLightParameterEXT := wglGetProcAddress('glBindLightParameterEXT');
-    if not Assigned(glBindLightParameterEXT) then Exit;
-    glBindMaterialParameterEXT := wglGetProcAddress('glBindMaterialParameterEXT');
-    if not Assigned(glBindMaterialParameterEXT) then Exit;
-    glBindTexGenParameterEXT := wglGetProcAddress('glBindTexGenParameterEXT');
-    if not Assigned(glBindTexGenParameterEXT) then Exit;
-    glBindTextureUnitParameterEXT := wglGetProcAddress('glBindTextureUnitParameterEXT');
-    if not Assigned(glBindTextureUnitParameterEXT) then Exit;
-    glBindParameterEXT := wglGetProcAddress('glBindParameterEXT');
-    if not Assigned(glBindParameterEXT) then Exit;
-    glIsVariantEnabledEXT := wglGetProcAddress('glIsVariantEnabledEXT');
-    if not Assigned(glIsVariantEnabledEXT) then Exit;
-    glGetVariantBooleanvEXT := wglGetProcAddress('glGetVariantBooleanvEXT');
-    if not Assigned(glGetVariantBooleanvEXT) then Exit;
-    glGetVariantIntegervEXT := wglGetProcAddress('glGetVariantIntegervEXT');
-    if not Assigned(glGetVariantIntegervEXT) then Exit;
-    glGetVariantFloatvEXT := wglGetProcAddress('glGetVariantFloatvEXT');
-    if not Assigned(glGetVariantFloatvEXT) then Exit;
-    glGetVariantPointervEXT := wglGetProcAddress('glGetVariantPointervEXT');
-    if not Assigned(glGetVariantPointervEXT) then Exit;
-    glGetInvariantBooleanvEXT := wglGetProcAddress('glGetInvariantBooleanvEXT');
-    if not Assigned(glGetInvariantBooleanvEXT) then Exit;
-    glGetInvariantIntegervEXT := wglGetProcAddress('glGetInvariantIntegervEXT');
-    if not Assigned(glGetInvariantIntegervEXT) then Exit;
-    glGetInvariantFloatvEXT := wglGetProcAddress('glGetInvariantFloatvEXT');
-    if not Assigned(glGetInvariantFloatvEXT) then Exit;
-    glGetLocalConstantBooleanvEXT := wglGetProcAddress('glGetLocalConstantBooleanvEXT');
-    if not Assigned(glGetLocalConstantBooleanvEXT) then Exit;
-    glGetLocalConstantIntegervEXT := wglGetProcAddress('glGetLocalConstantIntegervEXT');
-    if not Assigned(glGetLocalConstantIntegervEXT) then Exit;
-    glGetLocalConstantFloatvEXT := wglGetProcAddress('glGetLocalConstantFloatvEXT');
-    if not Assigned(glGetLocalConstantFloatvEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_vertex_weighting: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..2] of funcinfoty =
+   (
+    (n: 'glVertexWeightfEXT'; d: @glVertexWeightfEXT),
+    (n: 'glVertexWeightfvEXT'; d: @glVertexWeightfvEXT),
+    (n: 'glVertexWeightPointerEXT'; d: @glVertexWeightPointerEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_vertex_weighting', extstring) then
-  begin
-    glVertexWeightfEXT := wglGetProcAddress('glVertexWeightfEXT');
-    if not Assigned(glVertexWeightfEXT) then Exit;
-    glVertexWeightfvEXT := wglGetProcAddress('glVertexWeightfvEXT');
-    if not Assigned(glVertexWeightfvEXT) then Exit;
-    glVertexWeightPointerEXT := wglGetProcAddress('glVertexWeightPointerEXT');
-    if not Assigned(glVertexWeightPointerEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_HP_occlusion_test: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_HP_occlusion_test', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_blend_square: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_blend_square', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_copy_depth_to_color: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_copy_depth_to_color', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_depth_clamp: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_depth_clamp', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_evaluators: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..8] of funcinfoty =
+   (
+    (n: 'glMapControlPointsNV'; d: @glMapControlPointsNV),
+    (n: 'glMapParameterivNV'; d: @glMapParameterivNV),
+    (n: 'glMapParameterfvNV'; d: @glMapParameterfvNV),
+    (n: 'glGetMapControlPointsNV'; d: @glGetMapControlPointsNV),
+    (n: 'glGetMapParameterivNV'; d: @glGetMapParameterivNV),
+    (n: 'glGetMapParameterfvNV'; d: @glGetMapParameterfvNV),
+    (n: 'glGetMapAttribParameterivNV'; d: @glGetMapAttribParameterivNV),
+    (n: 'glGetMapAttribParameterfvNV'; d: @glGetMapAttribParameterfvNV),
+    (n: 'glEvalMapsNV'; d: @glEvalMapsNV)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_evaluators', extstring) then
-  begin
-    glMapControlPointsNV := wglGetProcAddress('glMapControlPointsNV');
-    if not Assigned(glMapControlPointsNV) then Exit;
-    glMapParameterivNV := wglGetProcAddress('glMapParameterivNV');
-    if not Assigned(glMapParameterivNV) then Exit;
-    glMapParameterfvNV := wglGetProcAddress('glMapParameterfvNV');
-    if not Assigned(glMapParameterfvNV) then Exit;
-    glGetMapControlPointsNV := wglGetProcAddress('glGetMapControlPointsNV');
-    if not Assigned(glGetMapControlPointsNV) then Exit;
-    glGetMapParameterivNV := wglGetProcAddress('glGetMapParameterivNV');
-    if not Assigned(glGetMapParameterivNV) then Exit;
-    glGetMapParameterfvNV := wglGetProcAddress('glGetMapParameterfvNV');
-    if not Assigned(glGetMapParameterfvNV) then Exit;
-    glGetMapAttribParameterivNV := wglGetProcAddress('glGetMapAttribParameterivNV');
-    if not Assigned(glGetMapAttribParameterivNV) then Exit;
-    glGetMapAttribParameterfvNV := wglGetProcAddress('glGetMapAttribParameterfvNV');
-    if not Assigned(glGetMapAttribParameterfvNV) then Exit;
-    glEvalMapsNV := wglGetProcAddress('glEvalMapsNV');
-    if not Assigned(glEvalMapsNV) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_NV_fence: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..6] of funcinfoty =
+   (
+    (n: 'glGenFencesNV'; d: @glGenFencesNV),
+    (n: 'glDeleteFencesNV'; d: @glDeleteFencesNV),
+    (n: 'glSetFenceNV'; d: @glSetFenceNV),
+    (n: 'glTestFenceNV'; d: @glTestFenceNV),
+    (n: 'glFinishFenceNV'; d: @glFinishFenceNV),
+    (n: 'glIsFenceNV'; d: @glIsFenceNV),
+    (n: 'glGetFenceivNV'; d: @glGetFenceivNV)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_fence', extstring) then
-  begin
-    glGenFencesNV := wglGetProcAddress('glGenFencesNV');
-    if not Assigned(glGenFencesNV) then Exit;
-    glDeleteFencesNV := wglGetProcAddress('glDeleteFencesNV');
-    if not Assigned(glDeleteFencesNV) then Exit;
-    glSetFenceNV := wglGetProcAddress('glSetFenceNV');
-    if not Assigned(glSetFenceNV) then Exit;
-    glTestFenceNV := wglGetProcAddress('glTestFenceNV');
-    if not Assigned(glTestFenceNV) then Exit;
-    glFinishFenceNV := wglGetProcAddress('glFinishFenceNV');
-    if not Assigned(glFinishFenceNV) then Exit;
-    glIsFenceNV := wglGetProcAddress('glIsFenceNV');
-    if not Assigned(glIsFenceNV) then Exit;
-    glGetFenceivNV := wglGetProcAddress('glGetFenceivNV');
-    if not Assigned(glGetFenceivNV) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_NV_fog_distance: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_fog_distance', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_light_max_exponent: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_light_max_exponent', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_multisample_filter_hint: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_multisample_filter_hint', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_occlusion_query: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..6] of funcinfoty =
+   (
+    (n: 'glGenOcclusionQueriesNV'; d: @glGenOcclusionQueriesNV),
+    (n: 'glDeleteOcclusionQueriesNV'; d: @glDeleteOcclusionQueriesNV),
+    (n: 'glIsOcclusionQueryNV'; d: @glIsOcclusionQueryNV),
+    (n: 'glBeginOcclusionQueryNV'; d: @glBeginOcclusionQueryNV),
+    (n: 'glEndOcclusionQueryNV'; d: @glEndOcclusionQueryNV),
+    (n: 'glGetOcclusionQueryivNV'; d: @glGetOcclusionQueryivNV),
+    (n: 'glGetOcclusionQueryuivNV'; d: @glGetOcclusionQueryuivNV)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_occlusion_query', extstring) then
-  begin
-    glGenOcclusionQueriesNV := wglGetProcAddress('glGenOcclusionQueriesNV');
-    if not Assigned(glGenOcclusionQueriesNV) then Exit;
-    glDeleteOcclusionQueriesNV := wglGetProcAddress('glDeleteOcclusionQueriesNV');
-    if not Assigned(glDeleteOcclusionQueriesNV) then Exit;
-    glIsOcclusionQueryNV := wglGetProcAddress('glIsOcclusionQueryNV');
-    if not Assigned(glIsOcclusionQueryNV) then Exit;
-    glBeginOcclusionQueryNV := wglGetProcAddress('glBeginOcclusionQueryNV');
-    if not Assigned(glBeginOcclusionQueryNV) then Exit;
-    glEndOcclusionQueryNV := wglGetProcAddress('glEndOcclusionQueryNV');
-    if not Assigned(glEndOcclusionQueryNV) then Exit;
-    glGetOcclusionQueryivNV := wglGetProcAddress('glGetOcclusionQueryivNV');
-    if not Assigned(glGetOcclusionQueryivNV) then Exit;
-    glGetOcclusionQueryuivNV := wglGetProcAddress('glGetOcclusionQueryuivNV');
-    if not Assigned(glGetOcclusionQueryuivNV) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_NV_packed_depth_stencil: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_packed_depth_stencil', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_point_sprite: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glPointParameteriNV'; d: @glPointParameteriNV),
+    (n: 'glPointParameterivNV'; d: @glPointParameterivNV)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_point_sprite', extstring) then
-  begin
-    glPointParameteriNV := wglGetProcAddress('glPointParameteriNV');
-    if not Assigned(glPointParameteriNV) then Exit;
-    glPointParameterivNV := wglGetProcAddress('glPointParameterivNV');
-    if not Assigned(glPointParameterivNV) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_NV_register_combiners: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..12] of funcinfoty =
+   (
+    (n: 'glCombinerParameterfvNV'; d: @glCombinerParameterfvNV),
+    (n: 'glCombinerParameterivNV'; d: @glCombinerParameterivNV),
+    (n: 'glCombinerParameterfNV'; d: @glCombinerParameterfNV),
+    (n: 'glCombinerParameteriNV'; d: @glCombinerParameteriNV),
+    (n: 'glCombinerInputNV'; d: @glCombinerInputNV),
+    (n: 'glCombinerOutputNV'; d: @glCombinerOutputNV),
+    (n: 'glFinalCombinerInputNV'; d: @glFinalCombinerInputNV),
+    (n: 'glGetCombinerInputParameterfvNV'; d: @glGetCombinerInputParameterfvNV),
+    (n: 'glGetCombinerInputParameterivNV'; d: @glGetCombinerInputParameterivNV),
+    (n: 'glGetCombinerOutputParameterfvNV'; d: @glGetCombinerOutputParameterfvNV),
+    (n: 'glGetCombinerOutputParameterivNV'; d: @glGetCombinerOutputParameterivNV),
+    (n: 'glGetFinalCombinerInputParameterfvNV'; d: @glGetFinalCombinerInputParameterfvNV),
+    (n: 'glGetFinalCombinerInputParameterivNV'; d: @glGetFinalCombinerInputParameterivNV)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_register_combiners', extstring) then
-  begin
-    glCombinerParameterfvNV := wglGetProcAddress('glCombinerParameterfvNV');
-    if not Assigned(glCombinerParameterfvNV) then Exit;
-    glCombinerParameterivNV := wglGetProcAddress('glCombinerParameterivNV');
-    if not Assigned(glCombinerParameterivNV) then Exit;
-    glCombinerParameterfNV := wglGetProcAddress('glCombinerParameterfNV');
-    if not Assigned(glCombinerParameterfNV) then Exit;
-    glCombinerParameteriNV := wglGetProcAddress('glCombinerParameteriNV');
-    if not Assigned(glCombinerParameteriNV) then Exit;
-    glCombinerInputNV := wglGetProcAddress('glCombinerInputNV');
-    if not Assigned(glCombinerInputNV) then Exit;
-    glCombinerOutputNV := wglGetProcAddress('glCombinerOutputNV');
-    if not Assigned(glCombinerOutputNV) then Exit;
-    glFinalCombinerInputNV := wglGetProcAddress('glFinalCombinerInputNV');
-    if not Assigned(glFinalCombinerInputNV) then Exit;
-    glGetCombinerInputParameterfvNV := wglGetProcAddress('glGetCombinerInputParameterfvNV');
-    if not Assigned(glGetCombinerInputParameterfvNV) then Exit;
-    glGetCombinerInputParameterivNV := wglGetProcAddress('glGetCombinerInputParameterivNV');
-    if not Assigned(glGetCombinerInputParameterivNV) then Exit;
-    glGetCombinerOutputParameterfvNV := wglGetProcAddress('glGetCombinerOutputParameterfvNV');
-    if not Assigned(glGetCombinerOutputParameterfvNV) then Exit;
-    glGetCombinerOutputParameterivNV := wglGetProcAddress('glGetCombinerOutputParameterivNV');
-    if not Assigned(glGetCombinerOutputParameterivNV) then Exit;
-    glGetFinalCombinerInputParameterfvNV := wglGetProcAddress('glGetFinalCombinerInputParameterfvNV');
-    if not Assigned(glGetFinalCombinerInputParameterfvNV) then Exit;
-    glGetFinalCombinerInputParameterivNV := wglGetProcAddress('glGetFinalCombinerInputParameterivNV');
-    if not Assigned(glGetFinalCombinerInputParameterivNV) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_NV_register_combiners2: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glCombinerStageParameterfvNV'; d: @glCombinerStageParameterfvNV),
+    (n: 'glGetCombinerStageParameterfvNV'; d: @glGetCombinerStageParameterfvNV)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_register_combiners2', extstring) then
-  begin
-    glCombinerStageParameterfvNV := wglGetProcAddress('glCombinerStageParameterfvNV');
-    if not Assigned(glCombinerStageParameterfvNV) then Exit;
-    glGetCombinerStageParameterfvNV := wglGetProcAddress('glGetCombinerStageParameterfvNV');
-    if not Assigned(glGetCombinerStageParameterfvNV) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_NV_texgen_emboss: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_texgen_emboss', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_texgen_reflection: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_texgen_reflection', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_texture_compression_vtc: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_texture_compression_vtc', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_texture_env_combine4: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_texture_env_combine4', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_texture_rectangle: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_texture_rectangle', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_texture_shader: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_texture_shader', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_texture_shader2: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_texture_shader2', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_texture_shader3: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_texture_shader3', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_vertex_array_range: Boolean;
-var
-  extstring: String;
-begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_vertex_array_range', extstring) then
-  begin
-    glVertexArrayRangeNV := wglGetProcAddress('glVertexArrayRangeNV');
-    if not Assigned(glVertexArrayRangeNV) then Exit;
-    glFlushVertexArrayRangeNV := wglGetProcAddress('glFlushVertexArrayRangeNV');
-    if not Assigned(glFlushVertexArrayRangeNV) then Exit;
-{$IFDEF Windows}
-    wglAllocateMemoryNV := wglGetProcAddress('wglAllocateMemoryNV');
-    if not Assigned(wglAllocateMemoryNV) then Exit;
-    wglFreeMemoryNV := wglGetProcAddress('wglFreeMemoryNV');
-    if not Assigned(wglFreeMemoryNV) then Exit;
+const
+ funcs: array[0..{$ifdef mswindows}3{$else}1{$endif}] of funcinfoty =
+   (
+    (n: 'glVertexArrayRangeNV'; d: @glVertexArrayRangeNV),
+    (n: 'glFlushVertexArrayRangeNV'; d: @glFlushVertexArrayRangeNV)
+{$IFDEF msWindows}
+    ,
+    (n: 'wglAllocateMemoryNV'; d: @wglAllocateMemoryNV),
+    (n: 'wglFreeMemoryNV'; d: @wglFreeMemoryNV)
 {$ENDIF}
-    Result := TRUE;
-  end;
-
+   );
+begin
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_NV_vertex_array_range2: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_vertex_array_range2', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_vertex_program: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..61] of funcinfoty =
+   (
+    (n: 'glBindProgramNV'; d: @glBindProgramNV),
+    (n: 'glDeleteProgramsNV'; d: @glDeleteProgramsNV),
+    (n: 'glExecuteProgramNV'; d: @glExecuteProgramNV),
+    (n: 'glGenProgramsNV'; d: @glGenProgramsNV),
+    (n: 'glAreProgramsResidentNV'; d: @glAreProgramsResidentNV),
+    (n: 'glRequestResidentProgramsNV'; d: @glRequestResidentProgramsNV),
+    (n: 'glGetProgramParameterfvNV'; d: @glGetProgramParameterfvNV),
+    (n: 'glGetProgramParameterdvNV'; d: @glGetProgramParameterdvNV),
+    (n: 'glGetProgramivNV'; d: @glGetProgramivNV),
+    (n: 'glGetProgramStringNV'; d: @glGetProgramStringNV),
+    (n: 'glGetTrackMatrixivNV'; d: @glGetTrackMatrixivNV),
+    (n: 'glGetVertexAttribdvNV'; d: @glGetVertexAttribdvNV),
+    (n: 'glGetVertexAttribfvNV'; d: @glGetVertexAttribfvNV),
+    (n: 'glGetVertexAttribivNV'; d: @glGetVertexAttribivNV),
+    (n: 'glGetVertexAttribPointervNV'; d: @glGetVertexAttribPointervNV),
+    (n: 'glIsProgramNV'; d: @glIsProgramNV),
+    (n: 'glLoadProgramNV'; d: @glLoadProgramNV),
+    (n: 'glProgramParameter4fNV'; d: @glProgramParameter4fNV),
+    (n: 'glProgramParameter4fvNV'; d: @glProgramParameter4fvNV),
+    (n: 'glProgramParameters4dvNV'; d: @glProgramParameters4dvNV),
+    (n: 'glProgramParameters4fvNV'; d: @glProgramParameters4fvNV),
+    (n: 'glTrackMatrixNV'; d: @glTrackMatrixNV),
+    (n: 'glVertexAttribPointerNV'; d: @glVertexAttribPointerNV),
+    (n: 'glVertexAttrib1sNV'; d: @glVertexAttrib1sNV),
+    (n: 'glVertexAttrib1fNV'; d: @glVertexAttrib1fNV),
+    (n: 'glVertexAttrib1dNV'; d: @glVertexAttrib1dNV),
+    (n: 'glVertexAttrib2sNV'; d: @glVertexAttrib2sNV),
+    (n: 'glVertexAttrib2fNV'; d: @glVertexAttrib2fNV),
+    (n: 'glVertexAttrib2dNV'; d: @glVertexAttrib2dNV),
+    (n: 'glVertexAttrib3sNV'; d: @glVertexAttrib3sNV),
+    (n: 'glVertexAttrib3fNV'; d: @glVertexAttrib3fNV),
+    (n: 'glVertexAttrib3dNV'; d: @glVertexAttrib3dNV),
+    (n: 'glVertexAttrib4sNV'; d: @glVertexAttrib4sNV),
+    (n: 'glVertexAttrib4fNV'; d: @glVertexAttrib4fNV),
+    (n: 'glVertexAttrib4dNV'; d: @glVertexAttrib4dNV),
+    (n: 'glVertexAttrib4ubNV'; d: @glVertexAttrib4ubNV),
+    (n: 'glVertexAttrib1svNV'; d: @glVertexAttrib1svNV),
+    (n: 'glVertexAttrib1fvNV'; d: @glVertexAttrib1fvNV),
+    (n: 'glVertexAttrib1dvNV'; d: @glVertexAttrib1dvNV),
+    (n: 'glVertexAttrib2svNV'; d: @glVertexAttrib2svNV),
+    (n: 'glVertexAttrib2fvNV'; d: @glVertexAttrib2fvNV),
+    (n: 'glVertexAttrib2dvNV'; d: @glVertexAttrib2dvNV),
+    (n: 'glVertexAttrib3svNV'; d: @glVertexAttrib3svNV),
+    (n: 'glVertexAttrib3fvNV'; d: @glVertexAttrib3fvNV),
+    (n: 'glVertexAttrib3dvNV'; d: @glVertexAttrib3dvNV),
+    (n: 'glVertexAttrib4svNV'; d: @glVertexAttrib4svNV),
+    (n: 'glVertexAttrib4fvNV'; d: @glVertexAttrib4fvNV),
+    (n: 'glVertexAttrib4dvNV'; d: @glVertexAttrib4dvNV),
+    (n: 'glVertexAttrib4ubvNV'; d: @glVertexAttrib4ubvNV),
+    (n: 'glVertexAttribs1svNV'; d: @glVertexAttribs1svNV),
+    (n: 'glVertexAttribs1fvNV'; d: @glVertexAttribs1fvNV),
+    (n: 'glVertexAttribs1dvNV'; d: @glVertexAttribs1dvNV),
+    (n: 'glVertexAttribs2svNV'; d: @glVertexAttribs2svNV),
+    (n: 'glVertexAttribs2fvNV'; d: @glVertexAttribs2fvNV),
+    (n: 'glVertexAttribs2dvNV'; d: @glVertexAttribs2dvNV),
+    (n: 'glVertexAttribs3svNV'; d: @glVertexAttribs3svNV),
+    (n: 'glVertexAttribs3fvNV'; d: @glVertexAttribs3fvNV),
+    (n: 'glVertexAttribs3dvNV'; d: @glVertexAttribs3dvNV),
+    (n: 'glVertexAttribs4svNV'; d: @glVertexAttribs4svNV),
+    (n: 'glVertexAttribs4fvNV'; d: @glVertexAttribs4fvNV),
+    (n: 'glVertexAttribs4dvNV'; d: @glVertexAttribs4dvNV),
+    (n: 'glVertexAttribs4ubvNV'; d: @glVertexAttribs4ubvNV)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_vertex_program', extstring) then
-  begin
-    glBindProgramNV := wglGetProcAddress('glBindProgramNV');
-    if not Assigned(glBindProgramNV) then Exit;
-    glDeleteProgramsNV := wglGetProcAddress('glDeleteProgramsNV');
-    if not Assigned(glDeleteProgramsNV) then Exit;
-    glExecuteProgramNV := wglGetProcAddress('glExecuteProgramNV');
-    if not Assigned(glExecuteProgramNV) then Exit;
-    glGenProgramsNV := wglGetProcAddress('glGenProgramsNV');
-    if not Assigned(glGenProgramsNV) then Exit;
-    glAreProgramsResidentNV := wglGetProcAddress('glAreProgramsResidentNV');
-    if not Assigned(glAreProgramsResidentNV) then Exit;
-    glRequestResidentProgramsNV := wglGetProcAddress('glRequestResidentProgramsNV');
-    if not Assigned(glRequestResidentProgramsNV) then Exit;
-    glGetProgramParameterfvNV := wglGetProcAddress('glGetProgramParameterfvNV');
-    if not Assigned(glGetProgramParameterfvNV) then Exit;
-    glGetProgramParameterdvNV := wglGetProcAddress('glGetProgramParameterdvNV');
-    if not Assigned(glGetProgramParameterdvNV) then Exit;
-    glGetProgramivNV := wglGetProcAddress('glGetProgramivNV');
-    if not Assigned(glGetProgramivNV) then Exit;
-    glGetProgramStringNV := wglGetProcAddress('glGetProgramStringNV');
-    if not Assigned(glGetProgramStringNV) then Exit;
-    glGetTrackMatrixivNV := wglGetProcAddress('glGetTrackMatrixivNV');
-    if not Assigned(glGetTrackMatrixivNV) then Exit;
-    glGetVertexAttribdvNV := wglGetProcAddress('glGetVertexAttribdvNV');
-    if not Assigned(glGetVertexAttribdvNV) then Exit;
-    glGetVertexAttribfvNV := wglGetProcAddress('glGetVertexAttribfvNV');
-    if not Assigned(glGetVertexAttribfvNV) then Exit;
-    glGetVertexAttribivNV := wglGetProcAddress('glGetVertexAttribivNV');
-    if not Assigned(glGetVertexAttribivNV) then Exit;
-    glGetVertexAttribPointervNV := wglGetProcAddress('glGetVertexAttribPointervNV');
-    if not Assigned(glGetVertexAttribPointervNV) then Exit;
-    glIsProgramNV := wglGetProcAddress('glIsProgramNV');
-    if not Assigned(glIsProgramNV) then Exit;
-    glLoadProgramNV := wglGetProcAddress('glLoadProgramNV');
-    if not Assigned(glLoadProgramNV) then Exit;
-    glProgramParameter4fNV := wglGetProcAddress('glProgramParameter4fNV');
-    if not Assigned(glProgramParameter4fNV) then Exit;
-    glProgramParameter4fvNV := wglGetProcAddress('glProgramParameter4fvNV');
-    if not Assigned(glProgramParameter4fvNV) then Exit;
-    glProgramParameters4dvNV := wglGetProcAddress('glProgramParameters4dvNV');
-    if not Assigned(glProgramParameters4dvNV) then Exit;
-    glProgramParameters4fvNV := wglGetProcAddress('glProgramParameters4fvNV');
-    if not Assigned(glProgramParameters4fvNV) then Exit;
-    glTrackMatrixNV := wglGetProcAddress('glTrackMatrixNV');
-    if not Assigned(glTrackMatrixNV) then Exit;
-    glVertexAttribPointerNV := wglGetProcAddress('glVertexAttribPointerNV');
-    if not Assigned(glVertexAttribPointerNV) then Exit;
-    glVertexAttrib1sNV := wglGetProcAddress('glVertexAttrib1sNV');
-    if not Assigned(glVertexAttrib1sNV) then Exit;
-    glVertexAttrib1fNV := wglGetProcAddress('glVertexAttrib1fNV');
-    if not Assigned(glVertexAttrib1fNV) then Exit;
-    glVertexAttrib1dNV := wglGetProcAddress('glVertexAttrib1dNV');
-    if not Assigned(glVertexAttrib1dNV) then Exit;
-    glVertexAttrib2sNV := wglGetProcAddress('glVertexAttrib2sNV');
-    if not Assigned(glVertexAttrib2sNV) then Exit;
-    glVertexAttrib2fNV := wglGetProcAddress('glVertexAttrib2fNV');
-    if not Assigned(glVertexAttrib2fNV) then Exit;
-    glVertexAttrib2dNV := wglGetProcAddress('glVertexAttrib2dNV');
-    if not Assigned(glVertexAttrib2dNV) then Exit;
-    glVertexAttrib3sNV := wglGetProcAddress('glVertexAttrib3sNV');
-    if not Assigned(glVertexAttrib3sNV) then Exit;
-    glVertexAttrib3fNV := wglGetProcAddress('glVertexAttrib3fNV');
-    if not Assigned(glVertexAttrib3fNV) then Exit;
-    glVertexAttrib3dNV := wglGetProcAddress('glVertexAttrib3dNV');
-    if not Assigned(glVertexAttrib3dNV) then Exit;
-    glVertexAttrib4sNV := wglGetProcAddress('glVertexAttrib4sNV');
-    if not Assigned(glVertexAttrib4sNV) then Exit;
-    glVertexAttrib4fNV := wglGetProcAddress('glVertexAttrib4fNV');
-    if not Assigned(glVertexAttrib4fNV) then Exit;
-    glVertexAttrib4dNV := wglGetProcAddress('glVertexAttrib4dNV');
-    if not Assigned(glVertexAttrib4dNV) then Exit;
-    glVertexAttrib4ubNV := wglGetProcAddress('glVertexAttrib4ubNV');
-    if not Assigned(glVertexAttrib4ubNV) then Exit;
-    glVertexAttrib1svNV := wglGetProcAddress('glVertexAttrib1svNV');
-    if not Assigned(glVertexAttrib1svNV) then Exit;
-    glVertexAttrib1fvNV := wglGetProcAddress('glVertexAttrib1fvNV');
-    if not Assigned(glVertexAttrib1fvNV) then Exit;
-    glVertexAttrib1dvNV := wglGetProcAddress('glVertexAttrib1dvNV');
-    if not Assigned(glVertexAttrib1dvNV) then Exit;
-    glVertexAttrib2svNV := wglGetProcAddress('glVertexAttrib2svNV');
-    if not Assigned(glVertexAttrib2svNV) then Exit;
-    glVertexAttrib2fvNV := wglGetProcAddress('glVertexAttrib2fvNV');
-    if not Assigned(glVertexAttrib2fvNV) then Exit;
-    glVertexAttrib2dvNV := wglGetProcAddress('glVertexAttrib2dvNV');
-    if not Assigned(glVertexAttrib2dvNV) then Exit;
-    glVertexAttrib3svNV := wglGetProcAddress('glVertexAttrib3svNV');
-    if not Assigned(glVertexAttrib3svNV) then Exit;
-    glVertexAttrib3fvNV := wglGetProcAddress('glVertexAttrib3fvNV');
-    if not Assigned(glVertexAttrib3fvNV) then Exit;
-    glVertexAttrib3dvNV := wglGetProcAddress('glVertexAttrib3dvNV');
-    if not Assigned(glVertexAttrib3dvNV) then Exit;
-    glVertexAttrib4svNV := wglGetProcAddress('glVertexAttrib4svNV');
-    if not Assigned(glVertexAttrib4svNV) then Exit;
-    glVertexAttrib4fvNV := wglGetProcAddress('glVertexAttrib4fvNV');
-    if not Assigned(glVertexAttrib4fvNV) then Exit;
-    glVertexAttrib4dvNV := wglGetProcAddress('glVertexAttrib4dvNV');
-    if not Assigned(glVertexAttrib4dvNV) then Exit;
-    glVertexAttrib4ubvNV := wglGetProcAddress('glVertexAttrib4ubvNV');
-    if not Assigned(glVertexAttrib4ubvNV) then Exit;
-    glVertexAttribs1svNV := wglGetProcAddress('glVertexAttribs1svNV');
-    if not Assigned(glVertexAttribs1svNV) then Exit;
-    glVertexAttribs1fvNV := wglGetProcAddress('glVertexAttribs1fvNV');
-    if not Assigned(glVertexAttribs1fvNV) then Exit;
-    glVertexAttribs1dvNV := wglGetProcAddress('glVertexAttribs1dvNV');
-    if not Assigned(glVertexAttribs1dvNV) then Exit;
-    glVertexAttribs2svNV := wglGetProcAddress('glVertexAttribs2svNV');
-    if not Assigned(glVertexAttribs2svNV) then Exit;
-    glVertexAttribs2fvNV := wglGetProcAddress('glVertexAttribs2fvNV');
-    if not Assigned(glVertexAttribs2fvNV) then Exit;
-    glVertexAttribs2dvNV := wglGetProcAddress('glVertexAttribs2dvNV');
-    if not Assigned(glVertexAttribs2dvNV) then Exit;
-    glVertexAttribs3svNV := wglGetProcAddress('glVertexAttribs3svNV');
-    if not Assigned(glVertexAttribs3svNV) then Exit;
-    glVertexAttribs3fvNV := wglGetProcAddress('glVertexAttribs3fvNV');
-    if not Assigned(glVertexAttribs3fvNV) then Exit;
-    glVertexAttribs3dvNV := wglGetProcAddress('glVertexAttribs3dvNV');
-    if not Assigned(glVertexAttribs3dvNV) then Exit;
-    glVertexAttribs4svNV := wglGetProcAddress('glVertexAttribs4svNV');
-    if not Assigned(glVertexAttribs4svNV) then Exit;
-    glVertexAttribs4fvNV := wglGetProcAddress('glVertexAttribs4fvNV');
-    if not Assigned(glVertexAttribs4fvNV) then Exit;
-    glVertexAttribs4dvNV := wglGetProcAddress('glVertexAttribs4dvNV');
-    if not Assigned(glVertexAttribs4dvNV) then Exit;
-    glVertexAttribs4ubvNV := wglGetProcAddress('glVertexAttribs4ubvNV');
-    if not Assigned(glVertexAttribs4ubvNV) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_NV_vertex_program1_1: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_vertex_program1_1', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ATI_element_array: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..2] of funcinfoty =
+   (
+    (n: 'glElementPointerATI'; d: @glElementPointerATI),
+    (n: 'glDrawElementArrayATI'; d: @glDrawElementArrayATI),
+    (n: 'glDrawRangeElementArrayATI'; d: @glDrawRangeElementArrayATI)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ATI_element_array', extstring) then
-  begin
-    glElementPointerATI := wglGetProcAddress('glElementPointerATI');
-    if not Assigned(glElementPointerATI) then Exit;
-    glDrawElementArrayATI := wglGetProcAddress('glDrawElementArrayATI');
-    if not Assigned(glDrawElementArrayATI) then Exit;
-    glDrawRangeElementArrayATI := wglGetProcAddress('glDrawRangeElementArrayATI');
-    if not Assigned(glDrawRangeElementArrayATI) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ATI_envmap_bumpmap: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..3] of funcinfoty =
+   (
+    (n: 'glTexBumpParameterivATI'; d: @glTexBumpParameterivATI),
+    (n: 'glTexBumpParameterfvATI'; d: @glTexBumpParameterfvATI),
+    (n: 'glGetTexBumpParameterivATI'; d: @glGetTexBumpParameterivATI),
+    (n: 'glGetTexBumpParameterfvATI'; d: @glGetTexBumpParameterfvATI)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ATI_envmap_bumpmap', extstring) then
-  begin
-    glTexBumpParameterivATI := wglGetProcAddress('glTexBumpParameterivATI');
-    if not Assigned(glTexBumpParameterivATI) then Exit;
-    glTexBumpParameterfvATI := wglGetProcAddress('glTexBumpParameterfvATI');
-    if not Assigned(glTexBumpParameterfvATI) then Exit;
-    glGetTexBumpParameterivATI := wglGetProcAddress('glGetTexBumpParameterivATI');
-    if not Assigned(glGetTexBumpParameterivATI) then Exit;
-    glGetTexBumpParameterfvATI := wglGetProcAddress('glGetTexBumpParameterfvATI');
-    if not Assigned(glGetTexBumpParameterfvATI) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ATI_fragment_shader: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..13] of funcinfoty =
+   (
+    (n: 'glGenFragmentShadersATI'; d: @glGenFragmentShadersATI),
+    (n: 'glBindFragmentShaderATI'; d: @glBindFragmentShaderATI),
+    (n: 'glDeleteFragmentShaderATI'; d: @glDeleteFragmentShaderATI),
+    (n: 'glBeginFragmentShaderATI'; d: @glBeginFragmentShaderATI),
+    (n: 'glEndFragmentShaderATI'; d: @glEndFragmentShaderATI),
+    (n: 'glPassTexCoordATI'; d: @glPassTexCoordATI),
+    (n: 'glSampleMapATI'; d: @glSampleMapATI),
+    (n: 'glColorFragmentOp1ATI'; d: @glColorFragmentOp1ATI),
+    (n: 'glColorFragmentOp2ATI'; d: @glColorFragmentOp2ATI),
+    (n: 'glColorFragmentOp3ATI'; d: @glColorFragmentOp3ATI),
+    (n: 'glAlphaFragmentOp1ATI'; d: @glAlphaFragmentOp1ATI),
+    (n: 'glAlphaFragmentOp2ATI'; d: @glAlphaFragmentOp2ATI),
+    (n: 'glAlphaFragmentOp3ATI'; d: @glAlphaFragmentOp3ATI),
+    (n: 'glSetFragmentShaderConstantATI'; d: @glSetFragmentShaderConstantATI)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ATI_fragment_shader', extstring) then
-  begin
-    glGenFragmentShadersATI := wglGetProcAddress('glGenFragmentShadersATI');
-    if not Assigned(glGenFragmentShadersATI) then Exit;
-    glBindFragmentShaderATI := wglGetProcAddress('glBindFragmentShaderATI');
-    if not Assigned(glBindFragmentShaderATI) then Exit;
-    glDeleteFragmentShaderATI := wglGetProcAddress('glDeleteFragmentShaderATI');
-    if not Assigned(glDeleteFragmentShaderATI) then Exit;
-    glBeginFragmentShaderATI := wglGetProcAddress('glBeginFragmentShaderATI');
-    if not Assigned(glBeginFragmentShaderATI) then Exit;
-    glEndFragmentShaderATI := wglGetProcAddress('glEndFragmentShaderATI');
-    if not Assigned(glEndFragmentShaderATI) then Exit;
-    glPassTexCoordATI := wglGetProcAddress('glPassTexCoordATI');
-    if not Assigned(glPassTexCoordATI) then Exit;
-    glSampleMapATI := wglGetProcAddress('glSampleMapATI');
-    if not Assigned(glSampleMapATI) then Exit;
-    glColorFragmentOp1ATI := wglGetProcAddress('glColorFragmentOp1ATI');
-    if not Assigned(glColorFragmentOp1ATI) then Exit;
-    glColorFragmentOp2ATI := wglGetProcAddress('glColorFragmentOp2ATI');
-    if not Assigned(glColorFragmentOp2ATI) then Exit;
-    glColorFragmentOp3ATI := wglGetProcAddress('glColorFragmentOp3ATI');
-    if not Assigned(glColorFragmentOp3ATI) then Exit;
-    glAlphaFragmentOp1ATI := wglGetProcAddress('glAlphaFragmentOp1ATI');
-    if not Assigned(glAlphaFragmentOp1ATI) then Exit;
-    glAlphaFragmentOp2ATI := wglGetProcAddress('glAlphaFragmentOp2ATI');
-    if not Assigned(glAlphaFragmentOp2ATI) then Exit;
-    glAlphaFragmentOp3ATI := wglGetProcAddress('glAlphaFragmentOp3ATI');
-    if not Assigned(glAlphaFragmentOp3ATI) then Exit;
-    glSetFragmentShaderConstantATI := wglGetProcAddress('glSetFragmentShaderConstantATI');
-    if not Assigned(glSetFragmentShaderConstantATI) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ATI_pn_triangles: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glPNTrianglesiATI'; d: @glPNTrianglesiATI),
+    (n: 'glPNTrianglesfATI'; d: @glPNTrianglesfATI)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ATI_pn_triangles', extstring) then
-  begin
-    glPNTrianglesiATI := wglGetProcAddress('glPNTrianglesiATI');
-    if not Assigned(glPNTrianglesiATI) then Exit;
-    glPNTrianglesfATI := wglGetProcAddress('glPNTrianglesfATI');
-    if not Assigned(glPNTrianglesfATI) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ATI_texture_mirror_once: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ATI_texture_mirror_once', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ATI_vertex_array_object: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..11] of funcinfoty =
+   (
+    (n: 'glNewObjectBufferATI'; d: @glNewObjectBufferATI),
+    (n: 'glIsObjectBufferATI'; d: @glIsObjectBufferATI),
+    (n: 'glUpdateObjectBufferATI'; d: @glUpdateObjectBufferATI),
+    (n: 'glGetObjectBufferfvATI'; d: @glGetObjectBufferfvATI),
+    (n: 'glGetObjectBufferivATI'; d: @glGetObjectBufferivATI),
+    (n: 'glDeleteObjectBufferATI'; d: @glDeleteObjectBufferATI),
+    (n: 'glArrayObjectATI'; d: @glArrayObjectATI),
+    (n: 'glGetArrayObjectfvATI'; d: @glGetArrayObjectfvATI),
+    (n: 'glGetArrayObjectivATI'; d: @glGetArrayObjectivATI),
+    (n: 'glVariantArrayObjectATI'; d: @glVariantArrayObjectATI),
+    (n: 'glGetVariantArrayObjectfvATI'; d: @glGetVariantArrayObjectfvATI),
+    (n: 'glGetVariantArrayObjectivATI'; d: @glGetVariantArrayObjectivATI)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ATI_vertex_array_object', extstring) then
-  begin
-    glNewObjectBufferATI := wglGetProcAddress('glNewObjectBufferATI');
-    if not Assigned(glNewObjectBufferATI) then Exit;
-    glIsObjectBufferATI := wglGetProcAddress('glIsObjectBufferATI');
-    if not Assigned(glIsObjectBufferATI) then Exit;
-    glUpdateObjectBufferATI := wglGetProcAddress('glUpdateObjectBufferATI');
-    if not Assigned(glUpdateObjectBufferATI) then Exit;
-    glGetObjectBufferfvATI := wglGetProcAddress('glGetObjectBufferfvATI');
-    if not Assigned(glGetObjectBufferfvATI) then Exit;
-    glGetObjectBufferivATI := wglGetProcAddress('glGetObjectBufferivATI');
-    if not Assigned(glGetObjectBufferivATI) then Exit;
-    glDeleteObjectBufferATI := wglGetProcAddress('glDeleteObjectBufferATI');
-    if not Assigned(glDeleteObjectBufferATI) then Exit;
-    glArrayObjectATI := wglGetProcAddress('glArrayObjectATI');
-    if not Assigned(glArrayObjectATI) then Exit;
-    glGetArrayObjectfvATI := wglGetProcAddress('glGetArrayObjectfvATI');
-    if not Assigned(glGetArrayObjectfvATI) then Exit;
-    glGetArrayObjectivATI := wglGetProcAddress('glGetArrayObjectivATI');
-    if not Assigned(glGetArrayObjectivATI) then Exit;
-    glVariantArrayObjectATI := wglGetProcAddress('glVariantArrayObjectATI');
-    if not Assigned(glVariantArrayObjectATI) then Exit;
-    glGetVariantArrayObjectfvATI := wglGetProcAddress('glGetVariantArrayObjectfvATI');
-    if not Assigned(glGetVariantArrayObjectfvATI) then Exit;
-    glGetVariantArrayObjectivATI := wglGetProcAddress('glGetVariantArrayObjectivATI');
-    if not Assigned(glGetVariantArrayObjectivATI) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ATI_vertex_streams: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..44] of funcinfoty =
+   (
+    (n: 'glVertexStream1s'; d: @glVertexStream1s),
+    (n: 'glVertexStream1i'; d: @glVertexStream1i),
+    (n: 'glVertexStream1f'; d: @glVertexStream1f),
+    (n: 'glVertexStream1d'; d: @glVertexStream1d),
+    (n: 'glVertexStream1sv'; d: @glVertexStream1sv),
+    (n: 'glVertexStream1iv'; d: @glVertexStream1iv),
+    (n: 'glVertexStream1fv'; d: @glVertexStream1fv),
+    (n: 'glVertexStream1dv'; d: @glVertexStream1dv),
+    (n: 'glVertexStream2s'; d: @glVertexStream2s),
+    (n: 'glVertexStream2i'; d: @glVertexStream2i),
+    (n: 'glVertexStream2f'; d: @glVertexStream2f),
+    (n: 'glVertexStream2d'; d: @glVertexStream2d),
+    (n: 'glVertexStream2sv'; d: @glVertexStream2sv),
+    (n: 'glVertexStream2iv'; d: @glVertexStream2iv),
+    (n: 'glVertexStream2fv'; d: @glVertexStream2fv),
+    (n: 'glVertexStream2dv'; d: @glVertexStream2dv),
+    (n: 'glVertexStream3s'; d: @glVertexStream3s),
+    (n: 'glVertexStream3i'; d: @glVertexStream3i),
+    (n: 'glVertexStream3f'; d: @glVertexStream3f),
+    (n: 'glVertexStream3d'; d: @glVertexStream3d),
+    (n: 'glVertexStream3sv'; d: @glVertexStream3sv),
+    (n: 'glVertexStream3iv'; d: @glVertexStream3iv),
+    (n: 'glVertexStream3fv'; d: @glVertexStream3fv),
+    (n: 'glVertexStream3dv'; d: @glVertexStream3dv),
+    (n: 'glVertexStream4s'; d: @glVertexStream4s),
+    (n: 'glVertexStream4i'; d: @glVertexStream4i),
+    (n: 'glVertexStream4f'; d: @glVertexStream4f),
+    (n: 'glVertexStream4d'; d: @glVertexStream4d),
+    (n: 'glVertexStream4sv'; d: @glVertexStream4sv),
+    (n: 'glVertexStream4iv'; d: @glVertexStream4iv),
+    (n: 'glVertexStream4fv'; d: @glVertexStream4fv),
+    (n: 'glVertexStream4dv'; d: @glVertexStream4dv),
+    (n: 'glNormalStream3b'; d: @glNormalStream3b),
+    (n: 'glNormalStream3s'; d: @glNormalStream3s),
+    (n: 'glNormalStream3i'; d: @glNormalStream3i),
+    (n: 'glNormalStream3f'; d: @glNormalStream3f),
+    (n: 'glNormalStream3d'; d: @glNormalStream3d),
+    (n: 'glNormalStream3bv'; d: @glNormalStream3bv),
+    (n: 'glNormalStream3sv'; d: @glNormalStream3sv),
+    (n: 'glNormalStream3iv'; d: @glNormalStream3iv),
+    (n: 'glNormalStream3fv'; d: @glNormalStream3fv),
+    (n: 'glNormalStream3dv'; d: @glNormalStream3dv),
+    (n: 'glClientActiveVertexStream'; d: @glClientActiveVertexStream),
+    (n: 'glVertexBlendEnvi'; d: @glVertexBlendEnvi),
+    (n: 'glVertexBlendEnvf'; d: @glVertexBlendEnvf)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ATI_vertex_streams', extstring) then
-  begin
-    glVertexStream1s := wglGetProcAddress('glVertexStream1s');
-    if not Assigned(glVertexStream1s) then Exit;
-    glVertexStream1i := wglGetProcAddress('glVertexStream1i');
-    if not Assigned(glVertexStream1i) then Exit;
-    glVertexStream1f := wglGetProcAddress('glVertexStream1f');
-    if not Assigned(glVertexStream1f) then Exit;
-    glVertexStream1d := wglGetProcAddress('glVertexStream1d');
-    if not Assigned(glVertexStream1d) then Exit;
-    glVertexStream1sv := wglGetProcAddress('glVertexStream1sv');
-    if not Assigned(glVertexStream1sv) then Exit;
-    glVertexStream1iv := wglGetProcAddress('glVertexStream1iv');
-    if not Assigned(glVertexStream1iv) then Exit;
-    glVertexStream1fv := wglGetProcAddress('glVertexStream1fv');
-    if not Assigned(glVertexStream1fv) then Exit;
-    glVertexStream1dv := wglGetProcAddress('glVertexStream1dv');
-    if not Assigned(glVertexStream1dv) then Exit;
-    glVertexStream2s := wglGetProcAddress('glVertexStream2s');
-    if not Assigned(glVertexStream2s) then Exit;
-    glVertexStream2i := wglGetProcAddress('glVertexStream2i');
-    if not Assigned(glVertexStream2i) then Exit;
-    glVertexStream2f := wglGetProcAddress('glVertexStream2f');
-    if not Assigned(glVertexStream2f) then Exit;
-    glVertexStream2d := wglGetProcAddress('glVertexStream2d');
-    if not Assigned(glVertexStream2d) then Exit;
-    glVertexStream2sv := wglGetProcAddress('glVertexStream2sv');
-    if not Assigned(glVertexStream2sv) then Exit;
-    glVertexStream2iv := wglGetProcAddress('glVertexStream2iv');
-    if not Assigned(glVertexStream2iv) then Exit;
-    glVertexStream2fv := wglGetProcAddress('glVertexStream2fv');
-    if not Assigned(glVertexStream2fv) then Exit;
-    glVertexStream2dv := wglGetProcAddress('glVertexStream2dv');
-    if not Assigned(glVertexStream2dv) then Exit;
-    glVertexStream3s := wglGetProcAddress('glVertexStream3s');
-    if not Assigned(glVertexStream3s) then Exit;
-    glVertexStream3i := wglGetProcAddress('glVertexStream3i');
-    if not Assigned(glVertexStream3i) then Exit;
-    glVertexStream3f := wglGetProcAddress('glVertexStream3f');
-    if not Assigned(glVertexStream3f) then Exit;
-    glVertexStream3d := wglGetProcAddress('glVertexStream3d');
-    if not Assigned(glVertexStream3d) then Exit;
-    glVertexStream3sv := wglGetProcAddress('glVertexStream3sv');
-    if not Assigned(glVertexStream3sv) then Exit;
-    glVertexStream3iv := wglGetProcAddress('glVertexStream3iv');
-    if not Assigned(glVertexStream3iv) then Exit;
-    glVertexStream3fv := wglGetProcAddress('glVertexStream3fv');
-    if not Assigned(glVertexStream3fv) then Exit;
-    glVertexStream3dv := wglGetProcAddress('glVertexStream3dv');
-    if not Assigned(glVertexStream3dv) then Exit;
-    glVertexStream4s := wglGetProcAddress('glVertexStream4s');
-    if not Assigned(glVertexStream4s) then Exit;
-    glVertexStream4i := wglGetProcAddress('glVertexStream4i');
-    if not Assigned(glVertexStream4i) then Exit;
-    glVertexStream4f := wglGetProcAddress('glVertexStream4f');
-    if not Assigned(glVertexStream4f) then Exit;
-    glVertexStream4d := wglGetProcAddress('glVertexStream4d');
-    if not Assigned(glVertexStream4d) then Exit;
-    glVertexStream4sv := wglGetProcAddress('glVertexStream4sv');
-    if not Assigned(glVertexStream4sv) then Exit;
-    glVertexStream4iv := wglGetProcAddress('glVertexStream4iv');
-    if not Assigned(glVertexStream4iv) then Exit;
-    glVertexStream4fv := wglGetProcAddress('glVertexStream4fv');
-    if not Assigned(glVertexStream4fv) then Exit;
-    glVertexStream4dv := wglGetProcAddress('glVertexStream4dv');
-    if not Assigned(glVertexStream4dv) then Exit;
-    glNormalStream3b := wglGetProcAddress('glNormalStream3b');
-    if not Assigned(glNormalStream3b) then Exit;
-    glNormalStream3s := wglGetProcAddress('glNormalStream3s');
-    if not Assigned(glNormalStream3s) then Exit;
-    glNormalStream3i := wglGetProcAddress('glNormalStream3i');
-    if not Assigned(glNormalStream3i) then Exit;
-    glNormalStream3f := wglGetProcAddress('glNormalStream3f');
-    if not Assigned(glNormalStream3f) then Exit;
-    glNormalStream3d := wglGetProcAddress('glNormalStream3d');
-    if not Assigned(glNormalStream3d) then Exit;
-    glNormalStream3bv := wglGetProcAddress('glNormalStream3bv');
-    if not Assigned(glNormalStream3bv) then Exit;
-    glNormalStream3sv := wglGetProcAddress('glNormalStream3sv');
-    if not Assigned(glNormalStream3sv) then Exit;
-    glNormalStream3iv := wglGetProcAddress('glNormalStream3iv');
-    if not Assigned(glNormalStream3iv) then Exit;
-    glNormalStream3fv := wglGetProcAddress('glNormalStream3fv');
-    if not Assigned(glNormalStream3fv) then Exit;
-    glNormalStream3dv := wglGetProcAddress('glNormalStream3dv');
-    if not Assigned(glNormalStream3dv) then Exit;
-    glClientActiveVertexStream := wglGetProcAddress('glClientActiveVertexStream');
-    if not Assigned(glClientActiveVertexStream) then Exit;
-    glVertexBlendEnvi := wglGetProcAddress('glVertexBlendEnvi');
-    if not Assigned(glVertexBlendEnvi) then Exit;
-    glVertexBlendEnvf := wglGetProcAddress('glVertexBlendEnvf');
-    if not Assigned(glVertexBlendEnvf) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
-{$IFDEF Windows}
+{$IFDEF msWindows}
 function Load_WGL_I3D_image_buffer: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..3] of funcinfoty =
+   (
+    (n: 'wglCreateImageBufferI3D'; d: @wglCreateImageBufferI3D),
+    (n: 'wglDestroyImageBufferI3D'; d: @wglDestroyImageBufferI3D),
+    (n: 'wglAssociateImageBufferEventsI3D'; d: @wglAssociateImageBufferEventsI3D),
+    (n: 'wglReleaseImageBufferEventsI3D'; d: @wglReleaseImageBufferEventsI3D)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_I3D_image_buffer', extstring) then
-  begin
-    wglCreateImageBufferI3D := wglGetProcAddress('wglCreateImageBufferI3D');
-    if not Assigned(wglCreateImageBufferI3D) then Exit;
-    wglDestroyImageBufferI3D := wglGetProcAddress('wglDestroyImageBufferI3D');
-    if not Assigned(wglDestroyImageBufferI3D) then Exit;
-    wglAssociateImageBufferEventsI3D := wglGetProcAddress('wglAssociateImageBufferEventsI3D');
-    if not Assigned(wglAssociateImageBufferEventsI3D) then Exit;
-    wglReleaseImageBufferEventsI3D := wglGetProcAddress('wglReleaseImageBufferEventsI3D');
-    if not Assigned(wglReleaseImageBufferEventsI3D) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_WGL_I3D_swap_frame_lock: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..3] of funcinfoty =
+   (
+    (n: 'wglEnableFrameLockI3D'; d: @wglEnableFrameLockI3D),
+    (n: 'wglDisableFrameLockI3D'; d: @wglDisableFrameLockI3D),
+    (n: 'wglIsEnabledFrameLockI3D'; d: @wglIsEnabledFrameLockI3D),
+    (n: 'wglQueryFrameLockMasterI3D'; d: @wglQueryFrameLockMasterI3D)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_I3D_swap_frame_lock', extstring) then
-  begin
-    wglEnableFrameLockI3D := wglGetProcAddress('wglEnableFrameLockI3D');
-    if not Assigned(wglEnableFrameLockI3D) then Exit;
-    wglDisableFrameLockI3D := wglGetProcAddress('wglDisableFrameLockI3D');
-    if not Assigned(wglDisableFrameLockI3D) then Exit;
-    wglIsEnabledFrameLockI3D := wglGetProcAddress('wglIsEnabledFrameLockI3D');
-    if not Assigned(wglIsEnabledFrameLockI3D) then Exit;
-    wglQueryFrameLockMasterI3D := wglGetProcAddress('wglQueryFrameLockMasterI3D');
-    if not Assigned(wglQueryFrameLockMasterI3D) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_WGL_I3D_swap_frame_usage: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..11] of funcinfoty =
+   (
+    (n: 'wglGetFrameUsageI3D'; d: @wglGetFrameUsageI3D),
+    (n: 'wglBeginFrameTrackingI3D'; d: @wglBeginFrameTrackingI3D),
+    (n: 'wglEndFrameTrackingI3D'; d: @wglEndFrameTrackingI3D),
+    (n: 'wglQueryFrameTrackingI3D'; d: @wglQueryFrameTrackingI3D)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_I3D_swap_frame_usage', extstring) then
-  begin
-    wglGetFrameUsageI3D := wglGetProcAddress('wglGetFrameUsageI3D');
-    if not Assigned(wglGetFrameUsageI3D) then Exit;
-    wglBeginFrameTrackingI3D := wglGetProcAddress('wglBeginFrameTrackingI3D');
-    if not Assigned(wglBeginFrameTrackingI3D) then Exit;
-    wglEndFrameTrackingI3D := wglGetProcAddress('wglEndFrameTrackingI3D');
-    if not Assigned(wglEndFrameTrackingI3D) then Exit;
-    wglQueryFrameTrackingI3D := wglGetProcAddress('wglQueryFrameTrackingI3D');
-    if not Assigned(wglQueryFrameTrackingI3D) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 {$ENDIF}
 
 function Load_GL_3DFX_texture_compression_FXT1: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_3DFX_texture_compression_FXT1', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_IBM_cull_vertex: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_IBM_cull_vertex', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_IBM_multimode_draw_arrays: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glMultiModeDrawArraysIBM'; d: @glMultiModeDrawArraysIBM),
+    (n: 'glMultiModeDrawElementsIBM'; d: @glMultiModeDrawElementsIBM)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_IBM_multimode_draw_arrays', extstring) then
-  begin
-    glMultiModeDrawArraysIBM := wglGetProcAddress('glMultiModeDrawArraysIBM');
-    if not Assigned(glMultiModeDrawArraysIBM) then Exit;
-    glMultiModeDrawElementsIBM := wglGetProcAddress('glMultiModeDrawElementsIBM');
-    if not Assigned(glMultiModeDrawElementsIBM) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_IBM_raster_pos_clip: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_IBM_raster_pos_clip', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_IBM_texture_mirrored_repeat: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_IBM_texture_mirrored_repeat', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_IBM_vertex_array_lists: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..6] of funcinfoty =
+   (
+    (n: 'glColorPointerListIBM'; d: @glColorPointerListIBM),
+    (n: 'glSecondaryColorPointerListIBM'; d: @glSecondaryColorPointerListIBM),
+    (n: 'glEdgeFlagPointerListIBM'; d: @glEdgeFlagPointerListIBM),
+    (n: 'glFogCoordPointerListIBM'; d: @glFogCoordPointerListIBM),
+    (n: 'glNormalPointerListIBM'; d: @glNormalPointerListIBM),
+    (n: 'glTexCoordPointerListIBM'; d: @glTexCoordPointerListIBM),
+    (n: 'glVertexPointerListIBM'; d: @glVertexPointerListIBM)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_IBM_vertex_array_lists', extstring) then
-  begin
-    glColorPointerListIBM := wglGetProcAddress('glColorPointerListIBM');
-    if not Assigned(glColorPointerListIBM) then Exit;
-    glSecondaryColorPointerListIBM := wglGetProcAddress('glSecondaryColorPointerListIBM');
-    if not Assigned(glSecondaryColorPointerListIBM) then Exit;
-    glEdgeFlagPointerListIBM := wglGetProcAddress('glEdgeFlagPointerListIBM');
-    if not Assigned(glEdgeFlagPointerListIBM) then Exit;
-    glFogCoordPointerListIBM := wglGetProcAddress('glFogCoordPointerListIBM');
-    if not Assigned(glFogCoordPointerListIBM) then Exit;
-    glNormalPointerListIBM := wglGetProcAddress('glNormalPointerListIBM');
-    if not Assigned(glNormalPointerListIBM) then Exit;
-    glTexCoordPointerListIBM := wglGetProcAddress('glTexCoordPointerListIBM');
-    if not Assigned(glTexCoordPointerListIBM) then Exit;
-    glVertexPointerListIBM := wglGetProcAddress('glVertexPointerListIBM');
-    if not Assigned(glVertexPointerListIBM) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_MESA_resize_buffers: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glResizeBuffersMESA'; d: @glResizeBuffersMESA)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_MESA_resize_buffers', extstring) then
-  begin
-    glResizeBuffersMESA := wglGetProcAddress('glResizeBuffersMESA');
-    if not Assigned(glResizeBuffersMESA) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_MESA_window_pos: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..23] of funcinfoty =
+   (
+    (n: 'glWindowPos2dMESA'; d: @glWindowPos2dMESA),
+    (n: 'glWindowPos2fMESA'; d: @glWindowPos2fMESA),
+    (n: 'glWindowPos2iMESA'; d: @glWindowPos2iMESA),
+    (n: 'glWindowPos2sMESA'; d: @glWindowPos2sMESA),
+    (n: 'glWindowPos2ivMESA'; d: @glWindowPos2ivMESA),
+    (n: 'glWindowPos2svMESA'; d: @glWindowPos2svMESA),
+    (n: 'glWindowPos2fvMESA'; d: @glWindowPos2fvMESA),
+    (n: 'glWindowPos2dvMESA'; d: @glWindowPos2dvMESA),
+    (n: 'glWindowPos3iMESA'; d: @glWindowPos3iMESA),
+    (n: 'glWindowPos3sMESA'; d: @glWindowPos3sMESA),
+    (n: 'glWindowPos3fMESA'; d: @glWindowPos3fMESA),
+    (n: 'glWindowPos3dMESA'; d: @glWindowPos3dMESA),
+    (n: 'glWindowPos3ivMESA'; d: @glWindowPos3ivMESA),
+    (n: 'glWindowPos3svMESA'; d: @glWindowPos3svMESA),
+    (n: 'glWindowPos3fvMESA'; d: @glWindowPos3fvMESA),
+    (n: 'glWindowPos3dvMESA'; d: @glWindowPos3dvMESA),
+    (n: 'glWindowPos4iMESA'; d: @glWindowPos4iMESA),
+    (n: 'glWindowPos4sMESA'; d: @glWindowPos4sMESA),
+    (n: 'glWindowPos4fMESA'; d: @glWindowPos4fMESA),
+    (n: 'glWindowPos4dMESA'; d: @glWindowPos4dMESA),
+    (n: 'glWindowPos4ivMESA'; d: @glWindowPos4ivMESA),
+    (n: 'glWindowPos4svMESA'; d: @glWindowPos4svMESA),
+    (n: 'glWindowPos4fvMESA'; d: @glWindowPos4fvMESA),
+    (n: 'glWindowPos4dvMESA'; d: @glWindowPos4dvMESA)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_MESA_window_pos', extstring) then
-  begin
-    glWindowPos2dMESA := wglGetProcAddress('glWindowPos2dMESA');
-    if not Assigned(glWindowPos2dMESA) then Exit;
-    glWindowPos2fMESA := wglGetProcAddress('glWindowPos2fMESA');
-    if not Assigned(glWindowPos2fMESA) then Exit;
-    glWindowPos2iMESA := wglGetProcAddress('glWindowPos2iMESA');
-    if not Assigned(glWindowPos2iMESA) then Exit;
-    glWindowPos2sMESA := wglGetProcAddress('glWindowPos2sMESA');
-    if not Assigned(glWindowPos2sMESA) then Exit;
-    glWindowPos2ivMESA := wglGetProcAddress('glWindowPos2ivMESA');
-    if not Assigned(glWindowPos2ivMESA) then Exit;
-    glWindowPos2svMESA := wglGetProcAddress('glWindowPos2svMESA');
-    if not Assigned(glWindowPos2svMESA) then Exit;
-    glWindowPos2fvMESA := wglGetProcAddress('glWindowPos2fvMESA');
-    if not Assigned(glWindowPos2fvMESA) then Exit;
-    glWindowPos2dvMESA := wglGetProcAddress('glWindowPos2dvMESA');
-    if not Assigned(glWindowPos2dvMESA) then Exit;
-    glWindowPos3iMESA := wglGetProcAddress('glWindowPos3iMESA');
-    if not Assigned(glWindowPos3iMESA) then Exit;
-    glWindowPos3sMESA := wglGetProcAddress('glWindowPos3sMESA');
-    if not Assigned(glWindowPos3sMESA) then Exit;
-    glWindowPos3fMESA := wglGetProcAddress('glWindowPos3fMESA');
-    if not Assigned(glWindowPos3fMESA) then Exit;
-    glWindowPos3dMESA := wglGetProcAddress('glWindowPos3dMESA');
-    if not Assigned(glWindowPos3dMESA) then Exit;
-    glWindowPos3ivMESA := wglGetProcAddress('glWindowPos3ivMESA');
-    if not Assigned(glWindowPos3ivMESA) then Exit;
-    glWindowPos3svMESA := wglGetProcAddress('glWindowPos3svMESA');
-    if not Assigned(glWindowPos3svMESA) then Exit;
-    glWindowPos3fvMESA := wglGetProcAddress('glWindowPos3fvMESA');
-    if not Assigned(glWindowPos3fvMESA) then Exit;
-    glWindowPos3dvMESA := wglGetProcAddress('glWindowPos3dvMESA');
-    if not Assigned(glWindowPos3dvMESA) then Exit;
-    glWindowPos4iMESA := wglGetProcAddress('glWindowPos4iMESA');
-    if not Assigned(glWindowPos4iMESA) then Exit;
-    glWindowPos4sMESA := wglGetProcAddress('glWindowPos4sMESA');
-    if not Assigned(glWindowPos4sMESA) then Exit;
-    glWindowPos4fMESA := wglGetProcAddress('glWindowPos4fMESA');
-    if not Assigned(glWindowPos4fMESA) then Exit;
-    glWindowPos4dMESA := wglGetProcAddress('glWindowPos4dMESA');
-    if not Assigned(glWindowPos4dMESA) then Exit;
-    glWindowPos4ivMESA := wglGetProcAddress('glWindowPos4ivMESA');
-    if not Assigned(glWindowPos4ivMESA) then Exit;
-    glWindowPos4svMESA := wglGetProcAddress('glWindowPos4svMESA');
-    if not Assigned(glWindowPos4svMESA) then Exit;
-    glWindowPos4fvMESA := wglGetProcAddress('glWindowPos4fvMESA');
-    if not Assigned(glWindowPos4fvMESA) then Exit;
-    glWindowPos4dvMESA := wglGetProcAddress('glWindowPos4dvMESA');
-    if not Assigned(glWindowPos4dvMESA) then Exit;
-    Result := TRUE;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 
 end;
 
 function Load_GL_OML_interlace: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_OML_interlace', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_OML_resample: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_OML_resample', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_OML_subsample: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_OML_subsample', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_SGIS_generate_mipmap: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SGIS_generate_mipmap', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_SGIS_multisample: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glSampleMaskSGIS'; d: @glSampleMaskSGIS),
+    (n: 'glSamplePatternSGIS'; d: @glSamplePatternSGIS)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SGIS_multisample', extstring) then
-  begin
-    glSampleMaskSGIS := wglGetProcAddress('glSampleMaskSGIS');
-    if not Assigned(glSampleMaskSGIS) then Exit;
-    glSamplePatternSGIS := wglGetProcAddress('glSamplePatternSGIS');
-    if not Assigned(glSamplePatternSGIS) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_SGIS_pixel_texture: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..3] of funcinfoty =
+   (
+    (n: 'glPixelTexGenParameteriSGIS'; d: @glPixelTexGenParameteriSGIS),
+    (n: 'glPixelTexGenParameterfSGIS'; d: @glPixelTexGenParameterfSGIS),
+    (n: 'glGetPixelTexGenParameterivSGIS'; d: @glGetPixelTexGenParameterivSGIS),
+    (n: 'glGetPixelTexGenParameterfvSGIS'; d: @glGetPixelTexGenParameterfvSGIS)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SGIS_pixel_texture', extstring) then
-  begin
-    glPixelTexGenParameteriSGIS := wglGetProcAddress('glPixelTexGenParameteriSGIS');
-    if not Assigned(glPixelTexGenParameteriSGIS) then Exit;
-    glPixelTexGenParameterfSGIS := wglGetProcAddress('glPixelTexGenParameterfSGIS');
-    if not Assigned(glPixelTexGenParameterfSGIS) then Exit;
-    glGetPixelTexGenParameterivSGIS := wglGetProcAddress('glGetPixelTexGenParameterivSGIS');
-    if not Assigned(glGetPixelTexGenParameterivSGIS) then Exit;
-    glGetPixelTexGenParameterfvSGIS := wglGetProcAddress('glGetPixelTexGenParameterfvSGIS');
-    if not Assigned(glGetPixelTexGenParameterfvSGIS) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_SGIS_texture_border_clamp: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SGIS_texture_border_clamp', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_SGIS_texture_color_mask: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glTextureColorMaskSGIS'; d: @glTextureColorMaskSGIS)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SGIS_texture_color_mask', extstring) then
-  begin
-    glTextureColorMaskSGIS := wglGetProcAddress('glTextureColorMaskSGIS');
-    if not Assigned(glTextureColorMaskSGIS) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_SGIS_texture_edge_clamp: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SGIS_texture_edge_clamp', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_SGIS_texture_lod: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SGIS_texture_lod', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_SGIS_depth_texture: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SGIS_depth_texture', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_SGIX_fog_offset: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SGIX_fog_offset', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_SGIX_interlace: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SGIX_interlace', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_SGIX_shadow_ambient: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SGIX_shadow_ambient', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_SGI_color_matrix: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SGI_color_matrix', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_SGI_color_table: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..6] of funcinfoty =
+   (
+    (n: 'glColorTableSGI'; d: @glColorTableSGI),
+    (n: 'glCopyColorTableSGI'; d: @glCopyColorTableSGI),
+    (n: 'glColorTableParameterivSGI'; d: @glColorTableParameterivSGI),
+    (n: 'glColorTableParameterfvSGI'; d: @glColorTableParameterfvSGI),
+    (n: 'glGetColorTableSGI'; d: @glGetColorTableSGI),
+    (n: 'glGetColorTableParameterivSGI'; d: @glGetColorTableParameterivSGI),
+    (n: 'glGetColorTableParameterfvSGI'; d: @glGetColorTableParameterfvSGI)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SGI_color_table', extstring) then
-  begin
-    glColorTableSGI := wglGetProcAddress('glColorTableSGI');
-    if not Assigned(glColorTableSGI) then Exit;
-    glCopyColorTableSGI := wglGetProcAddress('glCopyColorTableSGI');
-    if not Assigned(glCopyColorTableSGI) then Exit;
-    glColorTableParameterivSGI := wglGetProcAddress('glColorTableParameterivSGI');
-    if not Assigned(glColorTableParameterivSGI) then Exit;
-    glColorTableParameterfvSGI := wglGetProcAddress('glColorTableParameterfvSGI');
-    if not Assigned(glColorTableParameterfvSGI) then Exit;
-    glGetColorTableSGI := wglGetProcAddress('glGetColorTableSGI');
-    if not Assigned(glGetColorTableSGI) then Exit;
-    glGetColorTableParameterivSGI := wglGetProcAddress('glGetColorTableParameterivSGI');
-    if not Assigned(glGetColorTableParameterivSGI) then Exit;
-    glGetColorTableParameterfvSGI := wglGetProcAddress('glGetColorTableParameterfvSGI');
-    if not Assigned(glGetColorTableParameterfvSGI) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_SGI_texture_color_table: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SGI_texture_color_table', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_SUN_vertex: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..39] of funcinfoty =
+   (
+    (n: 'glColor4ubVertex2fSUN'; d: @glColor4ubVertex2fSUN),
+    (n: 'glColor4ubVertex2fvSUN'; d: @glColor4ubVertex2fvSUN),
+    (n: 'glColor4ubVertex3fSUN'; d: @glColor4ubVertex3fSUN),
+    (n: 'glColor4ubVertex3fvSUN'; d: @glColor4ubVertex3fvSUN),
+    (n: 'glColor3fVertex3fSUN'; d: @glColor3fVertex3fSUN),
+    (n: 'glColor3fVertex3fvSUN'; d: @glColor3fVertex3fvSUN),
+    (n: 'glNormal3fVertex3fSUN'; d: @glNormal3fVertex3fSUN),
+    (n: 'glNormal3fVertex3fvSUN'; d: @glNormal3fVertex3fvSUN),
+    (n: 'glColor4fNormal3fVertex3fSUN'; d: @glColor4fNormal3fVertex3fSUN),
+    (n: 'glColor4fNormal3fVertex3fvSUN'; d: @glColor4fNormal3fVertex3fvSUN),
+    (n: 'glTexCoord2fVertex3fSUN'; d: @glTexCoord2fVertex3fSUN),
+    (n: 'glTexCoord2fVertex3fvSUN'; d: @glTexCoord2fVertex3fvSUN),
+    (n: 'glTexCoord4fVertex4fSUN'; d: @glTexCoord4fVertex4fSUN),
+    (n: 'glTexCoord4fVertex4fvSUN'; d: @glTexCoord4fVertex4fvSUN),
+    (n: 'glTexCoord2fColor4ubVertex3fSUN'; d: @glTexCoord2fColor4ubVertex3fSUN),
+    (n: 'glTexCoord2fColor4ubVertex3fvSUN'; d: @glTexCoord2fColor4ubVertex3fvSUN),
+    (n: 'glTexCoord2fColor3fVertex3fSUN'; d: @glTexCoord2fColor3fVertex3fSUN),
+    (n: 'glTexCoord2fColor3fVertex3fvSUN'; d: @glTexCoord2fColor3fVertex3fvSUN),
+    (n: 'glTexCoord2fNormal3fVertex3fSUN'; d: @glTexCoord2fNormal3fVertex3fSUN),
+    (n: 'glTexCoord2fNormal3fVertex3fvSUN'; d: @glTexCoord2fNormal3fVertex3fvSUN),
+    (n: 'glTexCoord2fColor4fNormal3fVertex3fSUN'; d: @glTexCoord2fColor4fNormal3fVertex3fSUN),
+    (n: 'glTexCoord2fColor4fNormal3fVertex3fvSUN'; d: @glTexCoord2fColor4fNormal3fVertex3fvSUN),
+    (n: 'glTexCoord4fColor4fNormal3fVertex4fSUN'; d: @glTexCoord4fColor4fNormal3fVertex4fSUN),
+    (n: 'glTexCoord4fColor4fNormal3fVertex4fvSUN'; d: @glTexCoord4fColor4fNormal3fVertex4fvSUN),
+    (n: 'glReplacementCodeuiVertex3fSUN'; d: @glReplacementCodeuiVertex3fSUN),
+    (n: 'glReplacementCodeuiVertex3fvSUN'; d: @glReplacementCodeuiVertex3fvSUN),
+    (n: 'glReplacementCodeuiColor4ubVertex3fSUN'; d: @glReplacementCodeuiColor4ubVertex3fSUN),
+    (n: 'glReplacementCodeuiColor4ubVertex3fvSUN'; d: @glReplacementCodeuiColor4ubVertex3fvSUN),
+    (n: 'glReplacementCodeuiColor3fVertex3fSUN'; d: @glReplacementCodeuiColor3fVertex3fSUN),
+    (n: 'glReplacementCodeuiColor3fVertex3fvSUN'; d: @glReplacementCodeuiColor3fVertex3fvSUN),
+    (n: 'glReplacementCodeuiNormal3fVertex3fSUN'; d: @glReplacementCodeuiNormal3fVertex3fSUN),
+    (n: 'glReplacementCodeuiNormal3fVertex3fvSUN'; d: @glReplacementCodeuiNormal3fVertex3fvSUN),
+    (n: 'glReplacementCodeuiColor4fNormal3fVertex3fSUN'; d: @glReplacementCodeuiColor4fNormal3fVertex3fSUN),
+    (n: 'glReplacementCodeuiColor4fNormal3fVertex3fvSUN'; d: @glReplacementCodeuiColor4fNormal3fVertex3fvSUN),
+    (n: 'glReplacementCodeuiTexCoord2fVertex3fSUN'; d: @glReplacementCodeuiTexCoord2fVertex3fSUN),
+    (n: 'glReplacementCodeuiTexCoord2fVertex3fvSUN'; d: @glReplacementCodeuiTexCoord2fVertex3fvSUN),
+    (n: 'glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN'; d: @glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN),
+    (n: 'glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN'; d: @glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN),
+    (n: 'glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN'; d: @glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN),
+    (n: 'glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN'; d: @glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_SUN_vertex', extstring) then
-  begin
-    glColor4ubVertex2fSUN := wglGetProcAddress('glColor4ubVertex2fSUN');
-    if not Assigned(glColor4ubVertex2fSUN) then Exit;
-    glColor4ubVertex2fvSUN := wglGetProcAddress('glColor4ubVertex2fvSUN');
-    if not Assigned(glColor4ubVertex2fvSUN) then Exit;
-    glColor4ubVertex3fSUN := wglGetProcAddress('glColor4ubVertex3fSUN');
-    if not Assigned(glColor4ubVertex3fSUN) then Exit;
-    glColor4ubVertex3fvSUN := wglGetProcAddress('glColor4ubVertex3fvSUN');
-    if not Assigned(glColor4ubVertex3fvSUN) then Exit;
-    glColor3fVertex3fSUN := wglGetProcAddress('glColor3fVertex3fSUN');
-    if not Assigned(glColor3fVertex3fSUN) then Exit;
-    glColor3fVertex3fvSUN := wglGetProcAddress('glColor3fVertex3fvSUN');
-    if not Assigned(glColor3fVertex3fvSUN) then Exit;
-    glNormal3fVertex3fSUN := wglGetProcAddress('glNormal3fVertex3fSUN');
-    if not Assigned(glNormal3fVertex3fSUN) then Exit;
-    glNormal3fVertex3fvSUN := wglGetProcAddress('glNormal3fVertex3fvSUN');
-    if not Assigned(glNormal3fVertex3fvSUN) then Exit;
-    glColor4fNormal3fVertex3fSUN := wglGetProcAddress('glColor4fNormal3fVertex3fSUN');
-    if not Assigned(glColor4fNormal3fVertex3fSUN) then Exit;
-    glColor4fNormal3fVertex3fvSUN := wglGetProcAddress('glColor4fNormal3fVertex3fvSUN');
-    if not Assigned(glColor4fNormal3fVertex3fvSUN) then Exit;
-    glTexCoord2fVertex3fSUN := wglGetProcAddress('glTexCoord2fVertex3fSUN');
-    if not Assigned(glTexCoord2fVertex3fSUN) then Exit;
-    glTexCoord2fVertex3fvSUN := wglGetProcAddress('glTexCoord2fVertex3fvSUN');
-    if not Assigned(glTexCoord2fVertex3fvSUN) then Exit;
-    glTexCoord4fVertex4fSUN := wglGetProcAddress('glTexCoord4fVertex4fSUN');
-    if not Assigned(glTexCoord4fVertex4fSUN) then Exit;
-    glTexCoord4fVertex4fvSUN := wglGetProcAddress('glTexCoord4fVertex4fvSUN');
-    if not Assigned(glTexCoord4fVertex4fvSUN) then Exit;
-    glTexCoord2fColor4ubVertex3fSUN := wglGetProcAddress('glTexCoord2fColor4ubVertex3fSUN');
-    if not Assigned(glTexCoord2fColor4ubVertex3fSUN) then Exit;
-    glTexCoord2fColor4ubVertex3fvSUN := wglGetProcAddress('glTexCoord2fColor4ubVertex3fvSUN');
-    if not Assigned(glTexCoord2fColor4ubVertex3fvSUN) then Exit;
-    glTexCoord2fColor3fVertex3fSUN := wglGetProcAddress('glTexCoord2fColor3fVertex3fSUN');
-    if not Assigned(glTexCoord2fColor3fVertex3fSUN) then Exit;
-    glTexCoord2fColor3fVertex3fvSUN := wglGetProcAddress('glTexCoord2fColor3fVertex3fvSUN');
-    if not Assigned(glTexCoord2fColor3fVertex3fvSUN) then Exit;
-    glTexCoord2fNormal3fVertex3fSUN := wglGetProcAddress('glTexCoord2fNormal3fVertex3fSUN');
-    if not Assigned(glTexCoord2fNormal3fVertex3fSUN) then Exit;
-    glTexCoord2fNormal3fVertex3fvSUN := wglGetProcAddress('glTexCoord2fNormal3fVertex3fvSUN');
-    if not Assigned(glTexCoord2fNormal3fVertex3fvSUN) then Exit;
-    glTexCoord2fColor4fNormal3fVertex3fSUN := wglGetProcAddress('glTexCoord2fColor4fNormal3fVertex3fSUN');
-    if not Assigned(glTexCoord2fColor4fNormal3fVertex3fSUN) then Exit;
-    glTexCoord2fColor4fNormal3fVertex3fvSUN := wglGetProcAddress('glTexCoord2fColor4fNormal3fVertex3fvSUN');
-    if not Assigned(glTexCoord2fColor4fNormal3fVertex3fvSUN) then Exit;
-    glTexCoord4fColor4fNormal3fVertex4fSUN := wglGetProcAddress('glTexCoord4fColor4fNormal3fVertex4fSUN');
-    if not Assigned(glTexCoord4fColor4fNormal3fVertex4fSUN) then Exit;
-    glTexCoord4fColor4fNormal3fVertex4fvSUN := wglGetProcAddress('glTexCoord4fColor4fNormal3fVertex4fvSUN');
-    if not Assigned(glTexCoord4fColor4fNormal3fVertex4fvSUN) then Exit;
-    glReplacementCodeuiVertex3fSUN := wglGetProcAddress('glReplacementCodeuiVertex3fSUN');
-    if not Assigned(glReplacementCodeuiVertex3fSUN) then Exit;
-    glReplacementCodeuiVertex3fvSUN := wglGetProcAddress('glReplacementCodeuiVertex3fvSUN');
-    if not Assigned(glReplacementCodeuiVertex3fvSUN) then Exit;
-    glReplacementCodeuiColor4ubVertex3fSUN := wglGetProcAddress('glReplacementCodeuiColor4ubVertex3fSUN');
-    if not Assigned(glReplacementCodeuiColor4ubVertex3fSUN) then Exit;
-    glReplacementCodeuiColor4ubVertex3fvSUN := wglGetProcAddress('glReplacementCodeuiColor4ubVertex3fvSUN');
-    if not Assigned(glReplacementCodeuiColor4ubVertex3fvSUN) then Exit;
-    glReplacementCodeuiColor3fVertex3fSUN := wglGetProcAddress('glReplacementCodeuiColor3fVertex3fSUN');
-    if not Assigned(glReplacementCodeuiColor3fVertex3fSUN) then Exit;
-    glReplacementCodeuiColor3fVertex3fvSUN := wglGetProcAddress('glReplacementCodeuiColor3fVertex3fvSUN');
-    if not Assigned(glReplacementCodeuiColor3fVertex3fvSUN) then Exit;
-    glReplacementCodeuiNormal3fVertex3fSUN := wglGetProcAddress('glReplacementCodeuiNormal3fVertex3fSUN');
-    if not Assigned(glReplacementCodeuiNormal3fVertex3fSUN) then Exit;
-    glReplacementCodeuiNormal3fVertex3fvSUN := wglGetProcAddress('glReplacementCodeuiNormal3fVertex3fvSUN');
-    if not Assigned(glReplacementCodeuiNormal3fVertex3fvSUN) then Exit;
-    glReplacementCodeuiColor4fNormal3fVertex3fSUN := wglGetProcAddress('glReplacementCodeuiColor4fNormal3fVertex3fSUN');
-    if not Assigned(glReplacementCodeuiColor4fNormal3fVertex3fSUN) then Exit;
-    glReplacementCodeuiColor4fNormal3fVertex3fvSUN := wglGetProcAddress('glReplacementCodeuiColor4fNormal3fVertex3fvSUN');
-    if not Assigned(glReplacementCodeuiColor4fNormal3fVertex3fvSUN) then Exit;
-    glReplacementCodeuiTexCoord2fVertex3fSUN := wglGetProcAddress('glReplacementCodeuiTexCoord2fVertex3fSUN');
-    if not Assigned(glReplacementCodeuiTexCoord2fVertex3fSUN) then Exit;
-    glReplacementCodeuiTexCoord2fVertex3fvSUN := wglGetProcAddress('glReplacementCodeuiTexCoord2fVertex3fvSUN');
-    if not Assigned(glReplacementCodeuiTexCoord2fVertex3fvSUN) then Exit;
-    glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN := wglGetProcAddress('glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN');
-    if not Assigned(glReplacementCodeuiTexCoord2fNormal3fVertex3fSUN) then Exit;
-    glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN := wglGetProcAddress('glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN');
-    if not Assigned(glReplacementCodeuiTexCoord2fNormal3fVertex3fvSUN) then Exit;
-    glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN := wglGetProcAddress('glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN');
-    if not Assigned(glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fSUN) then Exit;
-    glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN := wglGetProcAddress('glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN');
-    if not Assigned(glReplacementCodeuiTexCoord2fColor4fNormal3fVertex3fvSUN) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_fragment_program: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..18] of funcinfoty =
+   (
+    (n: 'glProgramStringARB'; d: @glProgramStringARB),
+    (n: 'glBindProgramARB'; d: @glBindProgramARB),
+    (n: 'glDeleteProgramsARB'; d: @glDeleteProgramsARB),
+    (n: 'glGenProgramsARB'; d: @glGenProgramsARB),
+    (n: 'glProgramEnvParameter4dARB'; d: @glProgramEnvParameter4dARB),
+    (n: 'glProgramEnvParameter4dvARB'; d: @glProgramEnvParameter4dvARB),
+    (n: 'glProgramEnvParameter4fARB'; d: @glProgramEnvParameter4fARB),
+    (n: 'glProgramEnvParameter4fvARB'; d: @glProgramEnvParameter4fvARB),
+    (n: 'glProgramLocalParameter4dARB'; d: @glProgramLocalParameter4dARB),
+    (n: 'glProgramLocalParameter4dvARB'; d: @glProgramLocalParameter4dvARB),
+    (n: 'glProgramLocalParameter4fARB'; d: @glProgramLocalParameter4fARB),
+    (n: 'glProgramLocalParameter4fvARB'; d: @glProgramLocalParameter4fvARB),
+    (n: 'glGetProgramEnvParameterdvARB'; d: @glGetProgramEnvParameterdvARB),
+    (n: 'glGetProgramEnvParameterfvARB'; d: @glGetProgramEnvParameterfvARB),
+    (n: 'glGetProgramLocalParameterdvARB'; d: @glGetProgramLocalParameterdvARB),
+    (n: 'glGetProgramLocalParameterfvARB'; d: @glGetProgramLocalParameterfvARB),
+    (n: 'glGetProgramivARB'; d: @glGetProgramivARB),
+    (n: 'glGetProgramStringARB'; d: @glGetProgramStringARB),
+    (n: 'glIsProgramARB'; d: @glIsProgramARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_fragment_program', extstring) then
-  begin
-    glProgramStringARB := wglGetProcAddress('glProgramStringARB');
-    if not Assigned(glProgramStringARB) then Exit;
-    glBindProgramARB := wglGetProcAddress('glBindProgramARB');
-    if not Assigned(glBindProgramARB) then Exit;
-    glDeleteProgramsARB := wglGetProcAddress('glDeleteProgramsARB');
-    if not Assigned(glDeleteProgramsARB) then Exit;
-    glGenProgramsARB := wglGetProcAddress('glGenProgramsARB');
-    if not Assigned(glGenProgramsARB) then Exit;
-    glProgramEnvParameter4dARB := wglGetProcAddress('glProgramEnvParameter4dARB');
-    if not Assigned(glProgramEnvParameter4dARB) then Exit;
-    glProgramEnvParameter4dvARB := wglGetProcAddress('glProgramEnvParameter4dvARB');
-    if not Assigned(glProgramEnvParameter4dvARB) then Exit;
-    glProgramEnvParameter4fARB := wglGetProcAddress('glProgramEnvParameter4fARB');
-    if not Assigned(glProgramEnvParameter4fARB) then Exit;
-    glProgramEnvParameter4fvARB := wglGetProcAddress('glProgramEnvParameter4fvARB');
-    if not Assigned(glProgramEnvParameter4fvARB) then Exit;
-    glProgramLocalParameter4dARB := wglGetProcAddress('glProgramLocalParameter4dARB');
-    if not Assigned(glProgramLocalParameter4dARB) then Exit;
-    glProgramLocalParameter4dvARB := wglGetProcAddress('glProgramLocalParameter4dvARB');
-    if not Assigned(glProgramLocalParameter4dvARB) then Exit;
-    glProgramLocalParameter4fARB := wglGetProcAddress('glProgramLocalParameter4fARB');
-    if not Assigned(glProgramLocalParameter4fARB) then Exit;
-    glProgramLocalParameter4fvARB := wglGetProcAddress('glProgramLocalParameter4fvARB');
-    if not Assigned(glProgramLocalParameter4fvARB) then Exit;
-    glGetProgramEnvParameterdvARB := wglGetProcAddress('glGetProgramEnvParameterdvARB');
-    if not Assigned(glGetProgramEnvParameterdvARB) then Exit;
-    glGetProgramEnvParameterfvARB := wglGetProcAddress('glGetProgramEnvParameterfvARB');
-    if not Assigned(glGetProgramEnvParameterfvARB) then Exit;
-    glGetProgramLocalParameterdvARB := wglGetProcAddress('glGetProgramLocalParameterdvARB');
-    if not Assigned(glGetProgramLocalParameterdvARB) then Exit;
-    glGetProgramLocalParameterfvARB := wglGetProcAddress('glGetProgramLocalParameterfvARB');
-    if not Assigned(glGetProgramLocalParameterfvARB) then Exit;
-    glGetProgramivARB := wglGetProcAddress('glGetProgramivARB');
-    if not Assigned(glGetProgramivARB) then Exit;
-    glGetProgramStringARB := wglGetProcAddress('glGetProgramStringARB');
-    if not Assigned(glGetProgramStringARB) then Exit;
-    glIsProgramARB := wglGetProcAddress('glIsProgramARB');
-    if not Assigned(glIsProgramARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ATI_text_fragment_shader: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ATI_text_fragment_shader', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_APPLE_client_storage: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_APPLE_client_storage', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_APPLE_element_array: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..4] of funcinfoty =
+   (
+    (n: 'glElementPointerAPPLE'; d: @glElementPointerAPPLE),
+    (n: 'glDrawElementArrayAPPLE'; d: @glDrawElementArrayAPPLE),
+    (n: 'glDrawRangeElementArrayAPPLE'; d: @glDrawRangeElementArrayAPPLE),
+    (n: 'glMultiDrawElementArrayAPPLE'; d: @glMultiDrawElementArrayAPPLE),
+    (n: 'glMultiDrawRangeElementArrayAPPLE'; d: @glMultiDrawRangeElementArrayAPPLE)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_APPLE_element_array', extstring) then
-  begin
-    glElementPointerAPPLE := wglGetProcAddress('glElementPointerAPPLE');
-    if not Assigned(glElementPointerAPPLE) then Exit;
-    glDrawElementArrayAPPLE := wglGetProcAddress('glDrawElementArrayAPPLE');
-    if not Assigned(glDrawElementArrayAPPLE) then Exit;
-    glDrawRangeElementArrayAPPLE := wglGetProcAddress('glDrawRangeElementArrayAPPLE');
-    if not Assigned(glDrawRangeElementArrayAPPLE) then Exit;
-    glMultiDrawElementArrayAPPLE := wglGetProcAddress('glMultiDrawElementArrayAPPLE');
-    if not Assigned(glMultiDrawElementArrayAPPLE) then Exit;
-    glMultiDrawRangeElementArrayAPPLE := wglGetProcAddress('glMultiDrawRangeElementArrayAPPLE');
-    if not Assigned(glMultiDrawRangeElementArrayAPPLE) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_APPLE_fence: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..7] of funcinfoty =
+   (
+    (n: 'glGenFencesAPPLE'; d: @glGenFencesAPPLE),
+    (n: 'glDeleteFencesAPPLE'; d: @glDeleteFencesAPPLE),
+    (n: 'glSetFenceAPPLE'; d: @glSetFenceAPPLE),
+    (n: 'glIsFenceAPPLE'; d: @glIsFenceAPPLE),
+    (n: 'glTestFenceAPPLE'; d: @glTestFenceAPPLE),
+    (n: 'glFinishFenceAPPLE'; d: @glFinishFenceAPPLE),
+    (n: 'glTestObjectAPPLE'; d: @glTestObjectAPPLE),
+    (n: 'glFinishObjectAPPLE'; d: @glFinishObjectAPPLE)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_APPLE_fence', extstring) then
-  begin
-    glGenFencesAPPLE := wglGetProcAddress('glGenFencesAPPLE');
-    if not Assigned(glGenFencesAPPLE) then Exit;
-    glDeleteFencesAPPLE := wglGetProcAddress('glDeleteFencesAPPLE');
-    if not Assigned(glDeleteFencesAPPLE) then Exit;
-    glSetFenceAPPLE := wglGetProcAddress('glSetFenceAPPLE');
-    if not Assigned(glSetFenceAPPLE) then Exit;
-    glIsFenceAPPLE := wglGetProcAddress('glIsFenceAPPLE');
-    if not Assigned(glIsFenceAPPLE) then Exit;
-    glTestFenceAPPLE := wglGetProcAddress('glTestFenceAPPLE');
-    if not Assigned(glTestFenceAPPLE) then Exit;
-    glFinishFenceAPPLE := wglGetProcAddress('glFinishFenceAPPLE');
-    if not Assigned(glFinishFenceAPPLE) then Exit;
-    glTestObjectAPPLE := wglGetProcAddress('glTestObjectAPPLE');
-    if not Assigned(glTestObjectAPPLE) then Exit;
-    glFinishObjectAPPLE := wglGetProcAddress('glFinishObjectAPPLE');
-    if not Assigned(glFinishObjectAPPLE) then Exit;
-    Result := TRUE;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 
 end;
 
 function Load_GL_APPLE_vertex_array_object: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..3] of funcinfoty =
+   (
+    (n: 'glBindVertexArrayAPPLE'; d: @glBindVertexArrayAPPLE),
+    (n: 'glDeleteVertexArraysAPPLE'; d: @glDeleteVertexArraysAPPLE),
+    (n: 'glGenVertexArraysAPPLE'; d: @glGenVertexArraysAPPLE),
+    (n: 'glIsVertexArrayAPPLE'; d: @glIsVertexArrayAPPLE)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_APPLE_vertex_array_object', extstring) then
-  begin
-    glBindVertexArrayAPPLE := wglGetProcAddress('glBindVertexArrayAPPLE');
-    if not Assigned(glBindVertexArrayAPPLE) then Exit;
-    glDeleteVertexArraysAPPLE := wglGetProcAddress('glDeleteVertexArraysAPPLE');
-    if not Assigned(glDeleteVertexArraysAPPLE) then Exit;
-    glGenVertexArraysAPPLE := wglGetProcAddress('glGenVertexArraysAPPLE');
-    if not Assigned(glGenVertexArraysAPPLE) then Exit;
-    glIsVertexArrayAPPLE := wglGetProcAddress('glIsVertexArrayAPPLE');
-    if not Assigned(glIsVertexArrayAPPLE) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_APPLE_vertex_array_range: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..2] of funcinfoty =
+   (
+    (n: 'glVertexArrayRangeAPPLE'; d: @glVertexArrayRangeAPPLE),
+    (n: 'glFlushVertexArrayRangeAPPLE'; d: @glFlushVertexArrayRangeAPPLE),
+    (n: 'glVertexArrayParameteriAPPLE'; d: @glVertexArrayParameteriAPPLE)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_APPLE_vertex_array_range', extstring) then
-  begin
-    glVertexArrayRangeAPPLE := wglGetProcAddress('glVertexArrayRangeAPPLE');
-    if not Assigned(glVertexArrayRangeAPPLE) then Exit;
-    glFlushVertexArrayRangeAPPLE := wglGetProcAddress('glFlushVertexArrayRangeAPPLE');
-    if not Assigned(glFlushVertexArrayRangeAPPLE) then Exit;
-    glVertexArrayParameteriAPPLE := wglGetProcAddress('glVertexArrayParameteriAPPLE');
-    if not Assigned(glVertexArrayParameteriAPPLE) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 
 function load_GL_ARB_vertex_buffer_object : boolean;
-
-var extstring:string;
-
+const
+ funcs: array[0..10] of funcinfoty =
+   (
+    (n: 'glBindBufferARB'; d: @glBindBufferARB),
+    (n: 'glDeleteBuffersARB'; d: @glDeleteBuffersARB),
+    (n: 'glGenBuffersARB'; d: @glGenBuffersARB),
+    (n: 'glIsBufferARB'; d: @glIsBufferARB),
+    (n: 'glBufferDataARB'; d: @glBufferDataARB),
+    (n: 'glBufferSubDataARB'; d: @glBufferSubDataARB),
+    (n: 'glGetBufferSubDataARB'; d: @glGetBufferSubDataARB),
+    (n: 'glMapBufferARB'; d: @glMapBufferARB),
+    (n: 'glUnmapBufferARB'; d: @glUnmapBufferARB),
+    (n: 'glGetBufferParameterivARB'; d: @glGetBufferParameterivARB),
+    (n: 'glGetBufferPointervARB'; d: @glGetBufferPointervARB)
+   );
 begin
-  Result:=false;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-  if glext_ExtensionSupported('GL_ARB_vertex_buffer_object',extstring) then
-    begin
-      glBindBufferARB := wglGetProcAddress('glBindBufferARB');
-      if not Assigned(glBindBufferARB) then Exit;
-      glDeleteBuffersARB := wglGetProcAddress('glDeleteBuffersARB');
-      if not Assigned(glDeleteBuffersARB) then Exit;
-      glGenBuffersARB := wglGetProcAddress('glGenBuffersARB');
-      if not Assigned(glGenBuffersARB) then Exit;
-      glIsBufferARB := wglGetProcAddress('glIsBufferARB');
-      if not Assigned(glIsBufferARB) then Exit;
-      glBufferDataARB := wglGetProcAddress('glBufferDataARB');
-      if not Assigned(glBufferDataARB) then Exit;
-      glBufferSubDataARB := wglGetProcAddress('glBufferSubDataARB');
-      if not Assigned(glBufferSubDataARB) then Exit;
-      glGetBufferSubDataARB := wglGetProcAddress('glGetBufferSubDataARB');
-      if not Assigned(glGetBufferSubDataARB) then Exit;
-      glMapBufferARB := wglGetProcAddress('glMapBufferARB');
-      if not Assigned(glMapBufferARB) then Exit;
-      glUnmapBufferARB := wglGetProcAddress('glUnmapBufferARB');
-      if not Assigned(glMapBufferARB) then Exit;
-      glGetBufferParameterivARB := wglGetProcAddress('glGetBufferParameterivARB');
-      if not Assigned(glGetBufferParameterivARB) then Exit;
-      glGetBufferPointervARB := wglGetProcAddress('glGetBufferPointervARB');
-      if not Assigned(glGetBufferPointervARB) then Exit;
-      Result:=true;
-    end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
-{$IFDEF Windows}
+{$IFDEF msWindows}
 function Load_WGL_ARB_pixel_format: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..2] of funcinfoty =
+   (
+    (n: 'wglGetPixelFormatAttribivARB'; d: @wglGetPixelFormatAttribivARB),
+    (n: 'wglGetPixelFormatAttribfvARB'; d: @wglGetPixelFormatAttribfvARB),
+    (n: 'wglChoosePixelFormatARB'; d: @wglChoosePixelFormatARB)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_ARB_pixel_format', extstring) then
-  begin
-    wglGetPixelFormatAttribivARB := wglGetProcAddress('wglGetPixelFormatAttribivARB');
-    if not Assigned(wglGetPixelFormatAttribivARB) then Exit;
-    wglGetPixelFormatAttribfvARB := wglGetProcAddress('wglGetPixelFormatAttribfvARB');
-    if not Assigned(wglGetPixelFormatAttribfvARB) then Exit;
-    wglChoosePixelFormatARB := wglGetProcAddress('wglChoosePixelFormatARB');
-    if not Assigned(wglChoosePixelFormatARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_WGL_ARB_make_current_read: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'wglMakeContextCurrentARB'; d: @wglMakeContextCurrentARB),
+    (n: 'wglGetCurrentReadDCARB'; d: @wglGetCurrentReadDCARB)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_ARB_make_current_read', extstring) then
-  begin
-    wglMakeContextCurrentARB := wglGetProcAddress('wglMakeContextCurrentARB');
-    if not Assigned(wglMakeContextCurrentARB) then Exit;
-    wglGetCurrentReadDCARB := wglGetProcAddress('wglGetCurrentReadDCARB');
-    if not Assigned(wglGetCurrentReadDCARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_WGL_ARB_pbuffer: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..4] of funcinfoty =
+   (
+    (n: 'wglCreatePbufferARB'; d: @wglCreatePbufferARB),
+    (n: 'wglGetPbufferDCARB'; d: @wglGetPbufferDCARB),
+    (n: 'wglReleasePbufferDCARB'; d: @wglReleasePbufferDCARB),
+    (n: 'wglDestroyPbufferARB'; d: @wglDestroyPbufferARB),
+    (n: 'wglQueryPbufferARB'; d: @wglQueryPbufferARB)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_ARB_pbuffer', extstring) then
-  begin
-    wglCreatePbufferARB := wglGetProcAddress('wglCreatePbufferARB');
-    if not Assigned(wglCreatePbufferARB) then Exit;
-    wglGetPbufferDCARB := wglGetProcAddress('wglGetPbufferDCARB');
-    if not Assigned(wglGetPbufferDCARB) then Exit;
-    wglReleasePbufferDCARB := wglGetProcAddress('wglReleasePbufferDCARB');
-    if not Assigned(wglReleasePbufferDCARB) then Exit;
-    wglDestroyPbufferARB := wglGetProcAddress('wglDestroyPbufferARB');
-    if not Assigned(wglDestroyPbufferARB) then Exit;
-    wglQueryPbufferARB := wglGetProcAddress('wglQueryPbufferARB');
-    if not Assigned(wglQueryPbufferARB) then Exit;
-    Result := TRUE;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 
 end;
 
 function Load_WGL_EXT_swap_control: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'wglSwapIntervalEXT'; d: @wglSwapIntervalEXT),
+    (n: 'wglGetSwapIntervalEXT'; d: @wglGetSwapIntervalEXT)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_EXT_swap_control', extstring) then
-  begin
-    wglSwapIntervalEXT := wglGetProcAddress('wglSwapIntervalEXT');
-    if not Assigned(wglSwapIntervalEXT) then Exit;
-    wglGetSwapIntervalEXT := wglGetProcAddress('wglGetSwapIntervalEXT');
-    if not Assigned(wglGetSwapIntervalEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_WGL_ARB_render_texture: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..2] of funcinfoty =
+   (
+    (n: 'wglBindTexImageARB'; d: @wglBindTexImageARB),
+    (n: 'wglReleaseTexImageARB'; d: @wglReleaseTexImageARB),
+    (n: 'wglSetPbufferAttribARB'; d: @wglSetPbufferAttribARB)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_ARB_render_texture', extstring) then
-  begin
-    wglBindTexImageARB := wglGetProcAddress('wglBindTexImageARB');
-    if not Assigned(wglBindTexImageARB) then Exit;
-    wglReleaseTexImageARB := wglGetProcAddress('wglReleaseTexImageARB');
-    if not Assigned(wglReleaseTexImageARB) then Exit;
-    wglSetPbufferAttribARB := wglGetProcAddress('wglSetPbufferAttribARB');
-    if not Assigned(wglSetPbufferAttribARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_WGL_EXT_extensions_string: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'wglGetExtensionsStringEXT'; d: @wglGetExtensionsStringEXT)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_EXT_extensions_string', extstring) then
-  begin
-    wglGetExtensionsStringEXT := wglGetProcAddress('wglGetExtensionsStringEXT');
-    if not Assigned(wglGetExtensionsStringEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_WGL_EXT_make_current_read: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'wglMakeContextCurrentEXT'; d: @wglMakeContextCurrentEXT),
+    (n: 'wglGetCurrentReadDCEXT'; d: @wglGetCurrentReadDCEXT)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_EXT_make_current_read', extstring) then
-  begin
-    wglMakeContextCurrentEXT := wglGetProcAddress('wglMakeContextCurrentEXT');
-    if not Assigned(wglMakeContextCurrentEXT) then Exit;
-    wglGetCurrentReadDCEXT := wglGetProcAddress('wglGetCurrentReadDCEXT');
-    if not Assigned(wglGetCurrentReadDCEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_WGL_EXT_pbuffer: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..4] of funcinfoty =
+   (
+    (n: 'wglCreatePbufferEXT'; d: @wglCreatePbufferEXT),
+    (n: 'wglGetPbufferDCEXT'; d: @wglGetPbufferDCEXT),
+    (n: 'wglReleasePbufferDCEXT'; d: @wglReleasePbufferDCEXT),
+    (n: 'wglDestroyPbufferEXT'; d: @wglDestroyPbufferEXT),
+    (n: 'wglQueryPbufferEXT'; d: @wglQueryPbufferEXT)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_EXT_pbuffer', extstring) then
-  begin
-    wglCreatePbufferEXT := wglGetProcAddress('wglCreatePbufferEXT');
-    if not Assigned(wglCreatePbufferEXT) then Exit;
-    wglGetPbufferDCEXT := wglGetProcAddress('wglGetPbufferDCEXT');
-    if not Assigned(wglGetPbufferDCEXT) then Exit;
-    wglReleasePbufferDCEXT := wglGetProcAddress('wglReleasePbufferDCEXT');
-    if not Assigned(wglReleasePbufferDCEXT) then Exit;
-    wglDestroyPbufferEXT := wglGetProcAddress('wglDestroyPbufferEXT');
-    if not Assigned(wglDestroyPbufferEXT) then Exit;
-    wglQueryPbufferEXT := wglGetProcAddress('wglQueryPbufferEXT');
-    if not Assigned(wglQueryPbufferEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_WGL_EXT_pixel_format: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..2] of funcinfoty =
+   (
+    (n: 'wglGetPixelFormatAttribivEXT'; d: @wglGetPixelFormatAttribivEXT),
+    (n: 'wglGetPixelFormatAttribfvEXT'; d: @wglGetPixelFormatAttribfvEXT),
+    (n: 'wglChoosePixelFormatEXT'; d: @wglChoosePixelFormatEXT)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_EXT_pixel_format', extstring) then
-  begin
-    wglGetPixelFormatAttribivEXT := wglGetProcAddress('wglGetPixelFormatAttribivEXT');
-    if not Assigned(wglGetPixelFormatAttribivEXT) then Exit;
-    wglGetPixelFormatAttribfvEXT := wglGetProcAddress('wglGetPixelFormatAttribfvEXT');
-    if not Assigned(wglGetPixelFormatAttribfvEXT) then Exit;
-    wglChoosePixelFormatEXT := wglGetProcAddress('wglChoosePixelFormatEXT');
-    if not Assigned(wglChoosePixelFormatEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_WGL_I3D_digital_video_control: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'wglGetDigitalVideoParametersI3D'; d: @wglGetDigitalVideoParametersI3D),
+    (n: 'wglSetDigitalVideoParametersI3D'; d: @wglSetDigitalVideoParametersI3D)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_I3D_digital_video_control', extstring) then
-  begin
-    wglGetDigitalVideoParametersI3D := wglGetProcAddress('wglGetDigitalVideoParametersI3D');
-    if not Assigned(wglGetDigitalVideoParametersI3D) then Exit;
-    wglSetDigitalVideoParametersI3D := wglGetProcAddress('wglSetDigitalVideoParametersI3D');
-    if not Assigned(wglSetDigitalVideoParametersI3D) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_WGL_I3D_gamma: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..3] of funcinfoty =
+   (
+    (n: 'wglGetGammaTableParametersI3D'; d: @wglGetGammaTableParametersI3D),
+    (n: 'wglSetGammaTableParametersI3D'; d: @wglSetGammaTableParametersI3D),
+    (n: 'wglGetGammaTableI3D'; d: @wglGetGammaTableI3D),
+    (n: 'wglSetGammaTableI3D'; d: @wglSetGammaTableI3D)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_I3D_gamma', extstring) then
-  begin
-    wglGetGammaTableParametersI3D := wglGetProcAddress('wglGetGammaTableParametersI3D');
-    if not Assigned(wglGetGammaTableParametersI3D) then Exit;
-    wglSetGammaTableParametersI3D := wglGetProcAddress('wglSetGammaTableParametersI3D');
-    if not Assigned(wglSetGammaTableParametersI3D) then Exit;
-    wglGetGammaTableI3D := wglGetProcAddress('wglGetGammaTableI3D');
-    if not Assigned(wglGetGammaTableI3D) then Exit;
-    wglSetGammaTableI3D := wglGetProcAddress('wglSetGammaTableI3D');
-    if not Assigned(wglSetGammaTableI3D) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_WGL_I3D_genlock: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..11] of funcinfoty =
+   (
+    (n: 'wglEnableGenlockI3D'; d: @wglEnableGenlockI3D),
+    (n: 'wglDisableGenlockI3D'; d: @wglDisableGenlockI3D),
+    (n: 'wglIsEnabledGenlockI3D'; d: @wglIsEnabledGenlockI3D),
+    (n: 'wglGenlockSourceI3D'; d: @wglGenlockSourceI3D),
+    (n: 'wglGetGenlockSourceI3D'; d: @wglGetGenlockSourceI3D),
+    (n: 'wglGenlockSourceEdgeI3D'; d: @wglGenlockSourceEdgeI3D),
+    (n: 'wglGetGenlockSourceEdgeI3D'; d: @wglGetGenlockSourceEdgeI3D),
+    (n: 'wglGenlockSampleRateI3D'; d: @wglGenlockSampleRateI3D),
+    (n: 'wglGetGenlockSampleRateI3D'; d: @wglGetGenlockSampleRateI3D),
+    (n: 'wglGenlockSourceDelayI3D'; d: @wglGenlockSourceDelayI3D),
+    (n: 'wglGetGenlockSourceDelayI3D'; d: @wglGetGenlockSourceDelayI3D),
+    (n: 'wglQueryGenlockMaxSourceDelayI3D'; d: @wglQueryGenlockMaxSourceDelayI3D)
+   );
 begin
-
-  Result := FALSE;
-  wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := String(PChar(wglGetExtensionsStringARB(wglGetCurrentDC)));
-
-  if glext_ExtensionSupported('WGL_I3D_genlock', extstring) then
-  begin
-    wglEnableGenlockI3D := wglGetProcAddress('wglEnableGenlockI3D');
-    if not Assigned(wglEnableGenlockI3D) then Exit;
-    wglDisableGenlockI3D := wglGetProcAddress('wglDisableGenlockI3D');
-    if not Assigned(wglDisableGenlockI3D) then Exit;
-    wglIsEnabledGenlockI3D := wglGetProcAddress('wglIsEnabledGenlockI3D');
-    if not Assigned(wglIsEnabledGenlockI3D) then Exit;
-    wglGenlockSourceI3D := wglGetProcAddress('wglGenlockSourceI3D');
-    if not Assigned(wglGenlockSourceI3D) then Exit;
-    wglGetGenlockSourceI3D := wglGetProcAddress('wglGetGenlockSourceI3D');
-    if not Assigned(wglGetGenlockSourceI3D) then Exit;
-    wglGenlockSourceEdgeI3D := wglGetProcAddress('wglGenlockSourceEdgeI3D');
-    if not Assigned(wglGenlockSourceEdgeI3D) then Exit;
-    wglGetGenlockSourceEdgeI3D := wglGetProcAddress('wglGetGenlockSourceEdgeI3D');
-    if not Assigned(wglGetGenlockSourceEdgeI3D) then Exit;
-    wglGenlockSampleRateI3D := wglGetProcAddress('wglGenlockSampleRateI3D');
-    if not Assigned(wglGenlockSampleRateI3D) then Exit;
-    wglGetGenlockSampleRateI3D := wglGetProcAddress('wglGetGenlockSampleRateI3D');
-    if not Assigned(wglGetGenlockSampleRateI3D) then Exit;
-    wglGenlockSourceDelayI3D := wglGetProcAddress('wglGenlockSourceDelayI3D');
-    if not Assigned(wglGenlockSourceDelayI3D) then Exit;
-    wglGetGenlockSourceDelayI3D := wglGetProcAddress('wglGetGenlockSourceDelayI3D');
-    if not Assigned(wglGetGenlockSourceDelayI3D) then Exit;
-    wglQueryGenlockMaxSourceDelayI3D := wglGetProcAddress('wglQueryGenlockMaxSourceDelayI3D');
-    if not Assigned(wglQueryGenlockMaxSourceDelayI3D) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 {$ENDIF}
 
 function Load_GL_ARB_matrix_palette: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..4] of funcinfoty =
+   (
+    (n: 'glCurrentPaletteMatrixARB'; d: @glCurrentPaletteMatrixARB),
+    (n: 'glMatrixIndexubvARB'; d: @glMatrixIndexubvARB),
+    (n: 'glMatrixIndexusvARB'; d: @glMatrixIndexusvARB),
+    (n: 'glMatrixIndexuivARB'; d: @glMatrixIndexuivARB),
+    (n: 'glMatrixIndexPointerARB'; d: @glMatrixIndexPointerARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_matrix_palette', extstring) then
-  begin
-    glCurrentPaletteMatrixARB := wglGetProcAddress('glCurrentPaletteMatrixARB');
-    if not Assigned(glCurrentPaletteMatrixARB) then Exit;
-    glMatrixIndexubvARB := wglGetProcAddress('glMatrixIndexubvARB');
-    if not Assigned(glMatrixIndexubvARB) then Exit;
-    glMatrixIndexusvARB := wglGetProcAddress('glMatrixIndexusvARB');
-    if not Assigned(glMatrixIndexusvARB) then Exit;
-    glMatrixIndexuivARB := wglGetProcAddress('glMatrixIndexuivARB');
-    if not Assigned(glMatrixIndexuivARB) then Exit;
-    glMatrixIndexPointerARB := wglGetProcAddress('glMatrixIndexPointerARB');
-    if not Assigned(glMatrixIndexPointerARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_NV_element_array: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..4] of funcinfoty =
+   (
+    (n: 'glElementPointerNV'; d: @glElementPointerNV),
+    (n: 'glDrawElementArrayNV'; d: @glDrawElementArrayNV),
+    (n: 'glDrawRangeElementArrayNV'; d: @glDrawRangeElementArrayNV),
+    (n: 'glMultiDrawElementArrayNV'; d: @glMultiDrawElementArrayNV),
+    (n: 'glMultiDrawRangeElementArrayNV'; d: @glMultiDrawRangeElementArrayNV)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_element_array', extstring) then
-  begin
-    glElementPointerNV := wglGetProcAddress('glElementPointerNV');
-    if not Assigned(glElementPointerNV) then Exit;
-    glDrawElementArrayNV := wglGetProcAddress('glDrawElementArrayNV');
-    if not Assigned(glDrawElementArrayNV) then Exit;
-    glDrawRangeElementArrayNV := wglGetProcAddress('glDrawRangeElementArrayNV');
-    if not Assigned(glDrawRangeElementArrayNV) then Exit;
-    glMultiDrawElementArrayNV := wglGetProcAddress('glMultiDrawElementArrayNV');
-    if not Assigned(glMultiDrawElementArrayNV) then Exit;
-    glMultiDrawRangeElementArrayNV := wglGetProcAddress('glMultiDrawRangeElementArrayNV');
-    if not Assigned(glMultiDrawRangeElementArrayNV) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_NV_float_buffer: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_float_buffer', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_fragment_program: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..9] of funcinfoty =
+   (
+    (n: 'glProgramNamedParameter4fNV'; d: @glProgramNamedParameter4fNV),
+    (n: 'glProgramNamedParameter4dNV'; d: @glProgramNamedParameter4dNV),
+    (n: 'glGetProgramNamedParameterfvNV'; d: @glGetProgramNamedParameterfvNV),
+    (n: 'glGetProgramNamedParameterdvNV'; d: @glGetProgramNamedParameterdvNV),
+    (n: 'glProgramLocalParameter4dARB'; d: @glProgramLocalParameter4dARB),
+    (n: 'glProgramLocalParameter4dvARB'; d: @glProgramLocalParameter4dvARB),
+    (n: 'glProgramLocalParameter4fARB'; d: @glProgramLocalParameter4fARB),
+    (n: 'glProgramLocalParameter4fvARB'; d: @glProgramLocalParameter4fvARB),
+    (n: 'glGetProgramLocalParameterdvARB'; d: @glGetProgramLocalParameterdvARB),
+    (n: 'glGetProgramLocalParameterfvARB'; d: @glGetProgramLocalParameterfvARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_fragment_program', extstring) then
-  begin
-    glProgramNamedParameter4fNV := wglGetProcAddress('glProgramNamedParameter4fNV');
-    if not Assigned(glProgramNamedParameter4fNV) then Exit;
-    glProgramNamedParameter4dNV := wglGetProcAddress('glProgramNamedParameter4dNV');
-    if not Assigned(glProgramNamedParameter4dNV) then Exit;
-    glGetProgramNamedParameterfvNV := wglGetProcAddress('glGetProgramNamedParameterfvNV');
-    if not Assigned(glGetProgramNamedParameterfvNV) then Exit;
-    glGetProgramNamedParameterdvNV := wglGetProcAddress('glGetProgramNamedParameterdvNV');
-    if not Assigned(glGetProgramNamedParameterdvNV) then Exit;
-    glProgramLocalParameter4dARB := wglGetProcAddress('glProgramLocalParameter4dARB');
-    if not Assigned(glProgramLocalParameter4dARB) then Exit;
-    glProgramLocalParameter4dvARB := wglGetProcAddress('glProgramLocalParameter4dvARB');
-    if not Assigned(glProgramLocalParameter4dvARB) then Exit;
-    glProgramLocalParameter4fARB := wglGetProcAddress('glProgramLocalParameter4fARB');
-    if not Assigned(glProgramLocalParameter4fARB) then Exit;
-    glProgramLocalParameter4fvARB := wglGetProcAddress('glProgramLocalParameter4fvARB');
-    if not Assigned(glProgramLocalParameter4fvARB) then Exit;
-    glGetProgramLocalParameterdvARB := wglGetProcAddress('glGetProgramLocalParameterdvARB');
-    if not Assigned(glGetProgramLocalParameterdvARB) then Exit;
-    glGetProgramLocalParameterfvARB := wglGetProcAddress('glGetProgramLocalParameterfvARB');
-    if not Assigned(glGetProgramLocalParameterfvARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_NV_primitive_restart: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glPrimitiveRestartNV'; d: @glPrimitiveRestartNV),
+    (n: 'glPrimitiveRestartIndexNV'; d: @glPrimitiveRestartIndexNV)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_primitive_restart', extstring) then
-  begin
-    glPrimitiveRestartNV := wglGetProcAddress('glPrimitiveRestartNV');
-    if not Assigned(glPrimitiveRestartNV) then Exit;
-    glPrimitiveRestartIndexNV := wglGetProcAddress('glPrimitiveRestartIndexNV');
-    if not Assigned(glPrimitiveRestartIndexNV) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_NV_vertex_program2: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_vertex_program2', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 {$IFDEF Windows}
 function Load_WGL_NV_render_texture_rectangle: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  @wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := wglGetExtensionsStringARB(wglGetCurrentDC);
-
-  if glext_ExtensionSupported('WGL_NV_render_texture_rectangle', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 {$ENDIF}
 
 function Load_GL_NV_pixel_data_range: Boolean;
-var
-  extstring: String;
-begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_pixel_data_range', extstring) then
-  begin
-    @glPixelDataRangeNV := wglGetProcAddress('glPixelDataRangeNV');
-    if not Assigned(glPixelDataRangeNV) then Exit;
-    @glFlushPixelDataRangeNV := wglGetProcAddress('glFlushPixelDataRangeNV');
-    if not Assigned(glFlushPixelDataRangeNV) then Exit;
-    {$IFDEF Windows}
-    @wglAllocateMemoryNV := wglGetProcAddress('wglAllocateMemoryNV');
-    if not Assigned(wglAllocateMemoryNV) then Exit;
-    @wglFreeMemoryNV := wglGetProcAddress('wglFreeMemoryNV');
-    if not Assigned(wglFreeMemoryNV) then Exit;
+const
+ funcs: array[0..{$ifdef mswindows}3{$else}1{$endif}] of funcinfoty =
+   (
+    (n: 'glPixelDataRangeNV'; d: @glPixelDataRangeNV),
+    (n: 'glFlushPixelDataRangeNV'; d: @glFlushPixelDataRangeNV)
+    {$IFDEF msWindows}
+    ,
+    (n: 'wglAllocateMemoryNV'; d: @wglAllocateMemoryNV),
+    (n: 'wglFreeMemoryNV'; d: @wglFreeMemoryNV)
     {$ENDIF}
-    Result := TRUE;
-  end;
-
+   );
+begin
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_texture_rectangle: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_texture_rectangle', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_S3_s3tc: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_S3_s3tc', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ATI_draw_buffers: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glDrawBuffersATI'; d: @glDrawBuffersATI)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ATI_draw_buffers', extstring) then
-  begin
-    @glDrawBuffersATI := wglGetProcAddress('glDrawBuffersATI');
-    if not Assigned(glDrawBuffersATI) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 {$IFDEF Windows}
 function Load_WGL_ATI_pixel_format_float: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  @wglGetExtensionsStringARB := wglGetProcAddress('wglGetExtensionsStringARB');
-  if not Assigned(wglGetExtensionsStringARB) then Exit;
-  extstring := wglGetExtensionsStringARB(wglGetCurrentDC);
-
-  if glext_ExtensionSupported('WGL_ATI_pixel_format_float', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 {$ENDIF}
 
 function Load_GL_ATI_texture_env_combine3: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ATI_texture_env_combine3', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ATI_texture_float: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ATI_texture_float', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_texture_expand_normal: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_texture_expand_normal', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_half_float: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..45] of funcinfoty =
+   (
+    (n: 'glVertex2hNV'; d: @glVertex2hNV),
+    (n: 'glVertex2hvNV'; d: @glVertex2hvNV),
+    (n: 'glVertex3hNV'; d: @glVertex3hNV),
+    (n: 'glVertex3hvNV'; d: @glVertex3hvNV),
+    (n: 'glVertex4hNV'; d: @glVertex4hNV),
+    (n: 'glVertex4hvNV'; d: @glVertex4hvNV),
+    (n: 'glNormal3hNV'; d: @glNormal3hNV),
+    (n: 'glNormal3hvNV'; d: @glNormal3hvNV),
+    (n: 'glColor3hNV'; d: @glColor3hNV),
+    (n: 'glColor3hvNV'; d: @glColor3hvNV),
+    (n: 'glColor4hNV'; d: @glColor4hNV),
+    (n: 'glColor4hvNV'; d: @glColor4hvNV),
+    (n: 'glTexCoord1hNV'; d: @glTexCoord1hNV),
+    (n: 'glTexCoord1hvNV'; d: @glTexCoord1hvNV),
+    (n: 'glTexCoord2hNV'; d: @glTexCoord2hNV),
+    (n: 'glTexCoord2hvNV'; d: @glTexCoord2hvNV),
+    (n: 'glTexCoord3hNV'; d: @glTexCoord3hNV),
+    (n: 'glTexCoord3hvNV'; d: @glTexCoord3hvNV),
+    (n: 'glTexCoord4hNV'; d: @glTexCoord4hNV),
+    (n: 'glTexCoord4hvNV'; d: @glTexCoord4hvNV),
+    (n: 'glMultiTexCoord1hNV'; d: @glMultiTexCoord1hNV),
+    (n: 'glMultiTexCoord1hvNV'; d: @glMultiTexCoord1hvNV),
+    (n: 'glMultiTexCoord2hNV'; d: @glMultiTexCoord2hNV),
+    (n: 'glMultiTexCoord2hvNV'; d: @glMultiTexCoord2hvNV),
+    (n: 'glMultiTexCoord3hNV'; d: @glMultiTexCoord3hNV),
+    (n: 'glMultiTexCoord3hvNV'; d: @glMultiTexCoord3hvNV),
+    (n: 'glMultiTexCoord4hNV'; d: @glMultiTexCoord4hNV),
+    (n: 'glMultiTexCoord4hvNV'; d: @glMultiTexCoord4hvNV),
+    (n: 'glFogCoordhNV'; d: @glFogCoordhNV),
+    (n: 'glFogCoordhvNV'; d: @glFogCoordhvNV),
+    (n: 'glSecondaryColor3hNV'; d: @glSecondaryColor3hNV),
+    (n: 'glSecondaryColor3hvNV'; d: @glSecondaryColor3hvNV),
+    (n: 'glVertexWeighthNV'; d: @glVertexWeighthNV),
+    (n: 'glVertexWeighthvNV'; d: @glVertexWeighthvNV),
+    (n: 'glVertexAttrib1hNV'; d: @glVertexAttrib1hNV),
+    (n: 'glVertexAttrib1hvNV'; d: @glVertexAttrib1hvNV),
+    (n: 'glVertexAttrib2hNV'; d: @glVertexAttrib2hNV),
+    (n: 'glVertexAttrib2hvNV'; d: @glVertexAttrib2hvNV),
+    (n: 'glVertexAttrib3hNV'; d: @glVertexAttrib3hNV),
+    (n: 'glVertexAttrib3hvNV'; d: @glVertexAttrib3hvNV),
+    (n: 'glVertexAttrib4hNV'; d: @glVertexAttrib4hNV),
+    (n: 'glVertexAttrib4hvNV'; d: @glVertexAttrib4hvNV),
+    (n: 'glVertexAttribs1hvNV'; d: @glVertexAttribs1hvNV),
+    (n: 'glVertexAttribs2hvNV'; d: @glVertexAttribs2hvNV),
+    (n: 'glVertexAttribs3hvNV'; d: @glVertexAttribs3hvNV),
+    (n: 'glVertexAttribs4hvNV'; d: @glVertexAttribs4hvNV)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_half_float', extstring) then
-  begin
-    @glVertex2hNV := wglGetProcAddress('glVertex2hNV');
-    if not Assigned(glVertex2hNV) then Exit;
-    @glVertex2hvNV := wglGetProcAddress('glVertex2hvNV');
-    if not Assigned(glVertex2hvNV) then Exit;
-    @glVertex3hNV := wglGetProcAddress('glVertex3hNV');
-    if not Assigned(glVertex3hNV) then Exit;
-    @glVertex3hvNV := wglGetProcAddress('glVertex3hvNV');
-    if not Assigned(glVertex3hvNV) then Exit;
-    @glVertex4hNV := wglGetProcAddress('glVertex4hNV');
-    if not Assigned(glVertex4hNV) then Exit;
-    @glVertex4hvNV := wglGetProcAddress('glVertex4hvNV');
-    if not Assigned(glVertex4hvNV) then Exit;
-    @glNormal3hNV := wglGetProcAddress('glNormal3hNV');
-    if not Assigned(glNormal3hNV) then Exit;
-    @glNormal3hvNV := wglGetProcAddress('glNormal3hvNV');
-    if not Assigned(glNormal3hvNV) then Exit;
-    @glColor3hNV := wglGetProcAddress('glColor3hNV');
-    if not Assigned(glColor3hNV) then Exit;
-    @glColor3hvNV := wglGetProcAddress('glColor3hvNV');
-    if not Assigned(glColor3hvNV) then Exit;
-    @glColor4hNV := wglGetProcAddress('glColor4hNV');
-    if not Assigned(glColor4hNV) then Exit;
-    @glColor4hvNV := wglGetProcAddress('glColor4hvNV');
-    if not Assigned(glColor4hvNV) then Exit;
-    @glTexCoord1hNV := wglGetProcAddress('glTexCoord1hNV');
-    if not Assigned(glTexCoord1hNV) then Exit;
-    @glTexCoord1hvNV := wglGetProcAddress('glTexCoord1hvNV');
-    if not Assigned(glTexCoord1hvNV) then Exit;
-    @glTexCoord2hNV := wglGetProcAddress('glTexCoord2hNV');
-    if not Assigned(glTexCoord2hNV) then Exit;
-    @glTexCoord2hvNV := wglGetProcAddress('glTexCoord2hvNV');
-    if not Assigned(glTexCoord2hvNV) then Exit;
-    @glTexCoord3hNV := wglGetProcAddress('glTexCoord3hNV');
-    if not Assigned(glTexCoord3hNV) then Exit;
-    @glTexCoord3hvNV := wglGetProcAddress('glTexCoord3hvNV');
-    if not Assigned(glTexCoord3hvNV) then Exit;
-    @glTexCoord4hNV := wglGetProcAddress('glTexCoord4hNV');
-    if not Assigned(glTexCoord4hNV) then Exit;
-    @glTexCoord4hvNV := wglGetProcAddress('glTexCoord4hvNV');
-    if not Assigned(glTexCoord4hvNV) then Exit;
-    @glMultiTexCoord1hNV := wglGetProcAddress('glMultiTexCoord1hNV');
-    if not Assigned(glMultiTexCoord1hNV) then Exit;
-    @glMultiTexCoord1hvNV := wglGetProcAddress('glMultiTexCoord1hvNV');
-    if not Assigned(glMultiTexCoord1hvNV) then Exit;
-    @glMultiTexCoord2hNV := wglGetProcAddress('glMultiTexCoord2hNV');
-    if not Assigned(glMultiTexCoord2hNV) then Exit;
-    @glMultiTexCoord2hvNV := wglGetProcAddress('glMultiTexCoord2hvNV');
-    if not Assigned(glMultiTexCoord2hvNV) then Exit;
-    @glMultiTexCoord3hNV := wglGetProcAddress('glMultiTexCoord3hNV');
-    if not Assigned(glMultiTexCoord3hNV) then Exit;
-    @glMultiTexCoord3hvNV := wglGetProcAddress('glMultiTexCoord3hvNV');
-    if not Assigned(glMultiTexCoord3hvNV) then Exit;
-    @glMultiTexCoord4hNV := wglGetProcAddress('glMultiTexCoord4hNV');
-    if not Assigned(glMultiTexCoord4hNV) then Exit;
-    @glMultiTexCoord4hvNV := wglGetProcAddress('glMultiTexCoord4hvNV');
-    if not Assigned(glMultiTexCoord4hvNV) then Exit;
-    @glFogCoordhNV := wglGetProcAddress('glFogCoordhNV');
-    if not Assigned(glFogCoordhNV) then Exit;
-    @glFogCoordhvNV := wglGetProcAddress('glFogCoordhvNV');
-    if not Assigned(glFogCoordhvNV) then Exit;
-    @glSecondaryColor3hNV := wglGetProcAddress('glSecondaryColor3hNV');
-    if not Assigned(glSecondaryColor3hNV) then Exit;
-    @glSecondaryColor3hvNV := wglGetProcAddress('glSecondaryColor3hvNV');
-    if not Assigned(glSecondaryColor3hvNV) then Exit;
-    @glVertexWeighthNV := wglGetProcAddress('glVertexWeighthNV');
-    if not Assigned(glVertexWeighthNV) then Exit;
-    @glVertexWeighthvNV := wglGetProcAddress('glVertexWeighthvNV');
-    if not Assigned(glVertexWeighthvNV) then Exit;
-    @glVertexAttrib1hNV := wglGetProcAddress('glVertexAttrib1hNV');
-    if not Assigned(glVertexAttrib1hNV) then Exit;
-    @glVertexAttrib1hvNV := wglGetProcAddress('glVertexAttrib1hvNV');
-    if not Assigned(glVertexAttrib1hvNV) then Exit;
-    @glVertexAttrib2hNV := wglGetProcAddress('glVertexAttrib2hNV');
-    if not Assigned(glVertexAttrib2hNV) then Exit;
-    @glVertexAttrib2hvNV := wglGetProcAddress('glVertexAttrib2hvNV');
-    if not Assigned(glVertexAttrib2hvNV) then Exit;
-    @glVertexAttrib3hNV := wglGetProcAddress('glVertexAttrib3hNV');
-    if not Assigned(glVertexAttrib3hNV) then Exit;
-    @glVertexAttrib3hvNV := wglGetProcAddress('glVertexAttrib3hvNV');
-    if not Assigned(glVertexAttrib3hvNV) then Exit;
-    @glVertexAttrib4hNV := wglGetProcAddress('glVertexAttrib4hNV');
-    if not Assigned(glVertexAttrib4hNV) then Exit;
-    @glVertexAttrib4hvNV := wglGetProcAddress('glVertexAttrib4hvNV');
-    if not Assigned(glVertexAttrib4hvNV) then Exit;
-    @glVertexAttribs1hvNV := wglGetProcAddress('glVertexAttribs1hvNV');
-    if not Assigned(glVertexAttribs1hvNV) then Exit;
-    @glVertexAttribs2hvNV := wglGetProcAddress('glVertexAttribs2hvNV');
-    if not Assigned(glVertexAttribs2hvNV) then Exit;
-    @glVertexAttribs3hvNV := wglGetProcAddress('glVertexAttribs3hvNV');
-    if not Assigned(glVertexAttribs3hvNV) then Exit;
-    @glVertexAttribs4hvNV := wglGetProcAddress('glVertexAttribs4hvNV');
-    if not Assigned(glVertexAttribs4hvNV) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ATI_map_object_buffer: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glMapObjectBufferATI'; d: @glMapObjectBufferATI),
+    (n: 'glUnmapObjectBufferATI'; d: @glUnmapObjectBufferATI)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ATI_map_object_buffer', extstring) then
-  begin
-    @glMapObjectBufferATI := wglGetProcAddress('glMapObjectBufferATI');
-    if not Assigned(glMapObjectBufferATI) then Exit;
-    @glUnmapObjectBufferATI := wglGetProcAddress('glUnmapObjectBufferATI');
-    if not Assigned(glUnmapObjectBufferATI) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ATI_separate_stencil: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glStencilOpSeparateATI'; d: @glStencilOpSeparateATI),
+    (n: 'glStencilFuncSeparateATI'; d: @glStencilFuncSeparateATI)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ATI_separate_stencil', extstring) then
-  begin
-    @glStencilOpSeparateATI := wglGetProcAddress('glStencilOpSeparateATI');
-    if not Assigned(glStencilOpSeparateATI) then Exit;
-    @glStencilFuncSeparateATI := wglGetProcAddress('glStencilFuncSeparateATI');
-    if not Assigned(glStencilFuncSeparateATI) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ATI_vertex_attrib_array_object: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..2] of funcinfoty =
+   (
+    (n: 'glVertexAttribArrayObjectATI'; d: @glVertexAttribArrayObjectATI),
+    (n: 'glGetVertexAttribArrayObjectfvATI'; d: @glGetVertexAttribArrayObjectfvATI),
+    (n: 'glGetVertexAttribArrayObjectivATI'; d: @glGetVertexAttribArrayObjectivATI)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ATI_vertex_attrib_array_object', extstring) then
-  begin
-    @glVertexAttribArrayObjectATI := wglGetProcAddress('glVertexAttribArrayObjectATI');
-    if not Assigned(glVertexAttribArrayObjectATI) then Exit;
-    @glGetVertexAttribArrayObjectfvATI := wglGetProcAddress('glGetVertexAttribArrayObjectfvATI');
-    if not Assigned(glGetVertexAttribArrayObjectfvATI) then Exit;
-    @glGetVertexAttribArrayObjectivATI := wglGetProcAddress('glGetVertexAttribArrayObjectivATI');
-    if not Assigned(glGetVertexAttribArrayObjectivATI) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_occlusion_query: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..7] of funcinfoty =
+   (
+    (n: 'glGenQueriesARB'; d: @glGenQueriesARB),
+    (n: 'glDeleteQueriesARB'; d: @glDeleteQueriesARB),
+    (n: 'glIsQueryARB'; d: @glIsQueryARB),
+    (n: 'glBeginQueryARB'; d: @glBeginQueryARB),
+    (n: 'glEndQueryARB'; d: @glEndQueryARB),
+    (n: 'glGetQueryivARB'; d: @glGetQueryivARB),
+    (n: 'glGetQueryObjectivARB'; d: @glGetQueryObjectivARB),
+    (n: 'glGetQueryObjectuivARB'; d: @glGetQueryObjectuivARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_occlusion_query', extstring) then
-  begin
-    @glGenQueriesARB := wglGetProcAddress('glGenQueriesARB');
-    if not Assigned(glGenQueriesARB) then Exit;
-    @glDeleteQueriesARB := wglGetProcAddress('glDeleteQueriesARB');
-    if not Assigned(glDeleteQueriesARB) then Exit;
-    @glIsQueryARB := wglGetProcAddress('glIsQueryARB');
-    if not Assigned(glIsQueryARB) then Exit;
-    @glBeginQueryARB := wglGetProcAddress('glBeginQueryARB');
-    if not Assigned(glBeginQueryARB) then Exit;
-    @glEndQueryARB := wglGetProcAddress('glEndQueryARB');
-    if not Assigned(glEndQueryARB) then Exit;
-    @glGetQueryivARB := wglGetProcAddress('glGetQueryivARB');
-    if not Assigned(glGetQueryivARB) then Exit;
-    @glGetQueryObjectivARB := wglGetProcAddress('glGetQueryObjectivARB');
-    if not Assigned(glGetQueryObjectivARB) then Exit;
-    @glGetQueryObjectuivARB := wglGetProcAddress('glGetQueryObjectuivARB');
-    if not Assigned(glGetQueryObjectuivARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_shader_objects: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..38] of funcinfoty =
+   (
+    (n: 'glDeleteObjectARB'; d: @glDeleteObjectARB),
+    (n: 'glGetHandleARB'; d: @glGetHandleARB),
+    (n: 'glDetachObjectARB'; d: @glDetachObjectARB),
+    (n: 'glCreateShaderObjectARB'; d: @glCreateShaderObjectARB),
+    (n: 'glShaderSourceARB'; d: @glShaderSourceARB),
+    (n: 'glCompileShaderARB'; d: @glCompileShaderARB),
+    (n: 'glCreateProgramObjectARB'; d: @glCreateProgramObjectARB),
+    (n: 'glAttachObjectARB'; d: @glAttachObjectARB),
+    (n: 'glLinkProgramARB'; d: @glLinkProgramARB),
+    (n: 'glUseProgramObjectARB'; d: @glUseProgramObjectARB),
+    (n: 'glValidateProgramARB'; d: @glValidateProgramARB),
+    (n: 'glUniform1fARB'; d: @glUniform1fARB),
+    (n: 'glUniform2fARB'; d: @glUniform2fARB),
+    (n: 'glUniform3fARB'; d: @glUniform3fARB),
+    (n: 'glUniform4fARB'; d: @glUniform4fARB),
+    (n: 'glUniform1iARB'; d: @glUniform1iARB),
+    (n: 'glUniform2iARB'; d: @glUniform2iARB),
+    (n: 'glUniform3iARB'; d: @glUniform3iARB),
+    (n: 'glUniform4iARB'; d: @glUniform4iARB),
+    (n: 'glUniform1fvARB'; d: @glUniform1fvARB),
+    (n: 'glUniform2fvARB'; d: @glUniform2fvARB),
+    (n: 'glUniform3fvARB'; d: @glUniform3fvARB),
+    (n: 'glUniform4fvARB'; d: @glUniform4fvARB),
+    (n: 'glUniform1ivARB'; d: @glUniform1ivARB),
+    (n: 'glUniform2ivARB'; d: @glUniform2ivARB),
+    (n: 'glUniform3ivARB'; d: @glUniform3ivARB),
+    (n: 'glUniform4ivARB'; d: @glUniform4ivARB),
+    (n: 'glUniformMatrix2fvARB'; d: @glUniformMatrix2fvARB),
+    (n: 'glUniformMatrix3fvARB'; d: @glUniformMatrix3fvARB),
+    (n: 'glUniformMatrix4fvARB'; d: @glUniformMatrix4fvARB),
+    (n: 'glGetObjectParameterfvARB'; d: @glGetObjectParameterfvARB),
+    (n: 'glGetObjectParameterivARB'; d: @glGetObjectParameterivARB),
+    (n: 'glGetInfoLogARB'; d: @glGetInfoLogARB),
+    (n: 'glGetAttachedObjectsARB'; d: @glGetAttachedObjectsARB),
+    (n: 'glGetUniformLocationARB'; d: @glGetUniformLocationARB),
+    (n: 'glGetActiveUniformARB'; d: @glGetActiveUniformARB),
+    (n: 'glGetUniformfvARB'; d: @glGetUniformfvARB),
+    (n: 'glGetUniformivARB'; d: @glGetUniformivARB),
+    (n: 'glGetShaderSourceARB'; d: @glGetShaderSourceARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_shader_objects', extstring) then
-  begin
-    @glDeleteObjectARB := wglGetProcAddress('glDeleteObjectARB');
-    if not Assigned(glDeleteObjectARB) then Exit;
-    @glGetHandleARB := wglGetProcAddress('glGetHandleARB');
-    if not Assigned(glGetHandleARB) then Exit;
-    @glDetachObjectARB := wglGetProcAddress('glDetachObjectARB');
-    if not Assigned(glDetachObjectARB) then Exit;
-    @glCreateShaderObjectARB := wglGetProcAddress('glCreateShaderObjectARB');
-    if not Assigned(glCreateShaderObjectARB) then Exit;
-    @glShaderSourceARB := wglGetProcAddress('glShaderSourceARB');
-    if not Assigned(glShaderSourceARB) then Exit;
-    @glCompileShaderARB := wglGetProcAddress('glCompileShaderARB');
-    if not Assigned(glCompileShaderARB) then Exit;
-    @glCreateProgramObjectARB := wglGetProcAddress('glCreateProgramObjectARB');
-    if not Assigned(glCreateProgramObjectARB) then Exit;
-    @glAttachObjectARB := wglGetProcAddress('glAttachObjectARB');
-    if not Assigned(glAttachObjectARB) then Exit;
-    @glLinkProgramARB := wglGetProcAddress('glLinkProgramARB');
-    if not Assigned(glLinkProgramARB) then Exit;
-    @glUseProgramObjectARB := wglGetProcAddress('glUseProgramObjectARB');
-    if not Assigned(glUseProgramObjectARB) then Exit;
-    @glValidateProgramARB := wglGetProcAddress('glValidateProgramARB');
-    if not Assigned(glValidateProgramARB) then Exit;
-    @glUniform1fARB := wglGetProcAddress('glUniform1fARB');
-    if not Assigned(glUniform1fARB) then Exit;
-    @glUniform2fARB := wglGetProcAddress('glUniform2fARB');
-    if not Assigned(glUniform2fARB) then Exit;
-    @glUniform3fARB := wglGetProcAddress('glUniform3fARB');
-    if not Assigned(glUniform3fARB) then Exit;
-    @glUniform4fARB := wglGetProcAddress('glUniform4fARB');
-    if not Assigned(glUniform4fARB) then Exit;
-    @glUniform1iARB := wglGetProcAddress('glUniform1iARB');
-    if not Assigned(glUniform1iARB) then Exit;
-    @glUniform2iARB := wglGetProcAddress('glUniform2iARB');
-    if not Assigned(glUniform2iARB) then Exit;
-    @glUniform3iARB := wglGetProcAddress('glUniform3iARB');
-    if not Assigned(glUniform3iARB) then Exit;
-    @glUniform4iARB := wglGetProcAddress('glUniform4iARB');
-    if not Assigned(glUniform4iARB) then Exit;
-    @glUniform1fvARB := wglGetProcAddress('glUniform1fvARB');
-    if not Assigned(glUniform1fvARB) then Exit;
-    @glUniform2fvARB := wglGetProcAddress('glUniform2fvARB');
-    if not Assigned(glUniform2fvARB) then Exit;
-    @glUniform3fvARB := wglGetProcAddress('glUniform3fvARB');
-    if not Assigned(glUniform3fvARB) then Exit;
-    @glUniform4fvARB := wglGetProcAddress('glUniform4fvARB');
-    if not Assigned(glUniform4fvARB) then Exit;
-    @glUniform1ivARB := wglGetProcAddress('glUniform1ivARB');
-    if not Assigned(glUniform1ivARB) then Exit;
-    @glUniform2ivARB := wglGetProcAddress('glUniform2ivARB');
-    if not Assigned(glUniform2ivARB) then Exit;
-    @glUniform3ivARB := wglGetProcAddress('glUniform3ivARB');
-    if not Assigned(glUniform3ivARB) then Exit;
-    @glUniform4ivARB := wglGetProcAddress('glUniform4ivARB');
-    if not Assigned(glUniform4ivARB) then Exit;
-    @glUniformMatrix2fvARB := wglGetProcAddress('glUniformMatrix2fvARB');
-    if not Assigned(glUniformMatrix2fvARB) then Exit;
-    @glUniformMatrix3fvARB := wglGetProcAddress('glUniformMatrix3fvARB');
-    if not Assigned(glUniformMatrix3fvARB) then Exit;
-    @glUniformMatrix4fvARB := wglGetProcAddress('glUniformMatrix4fvARB');
-    if not Assigned(glUniformMatrix4fvARB) then Exit;
-    @glGetObjectParameterfvARB := wglGetProcAddress('glGetObjectParameterfvARB');
-    if not Assigned(glGetObjectParameterfvARB) then Exit;
-    @glGetObjectParameterivARB := wglGetProcAddress('glGetObjectParameterivARB');
-    if not Assigned(glGetObjectParameterivARB) then Exit;
-    @glGetInfoLogARB := wglGetProcAddress('glGetInfoLogARB');
-    if not Assigned(glGetInfoLogARB) then Exit;
-    @glGetAttachedObjectsARB := wglGetProcAddress('glGetAttachedObjectsARB');
-    if not Assigned(glGetAttachedObjectsARB) then Exit;
-    @glGetUniformLocationARB := wglGetProcAddress('glGetUniformLocationARB');
-    if not Assigned(glGetUniformLocationARB) then Exit;
-    @glGetActiveUniformARB := wglGetProcAddress('glGetActiveUniformARB');
-    if not Assigned(glGetActiveUniformARB) then Exit;
-    @glGetUniformfvARB := wglGetProcAddress('glGetUniformfvARB');
-    if not Assigned(glGetUniformfvARB) then Exit;
-    @glGetUniformivARB := wglGetProcAddress('glGetUniformivARB');
-    if not Assigned(glGetUniformivARB) then Exit;
-    @glGetShaderSourceARB := wglGetProcAddress('glGetShaderSourceARB');
-    if not Assigned(glGetShaderSourceARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_vertex_shader: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..45] of funcinfoty =
+   (
+    (n: 'glVertexAttrib1fARB'; d: @glVertexAttrib1fARB),
+    (n: 'glVertexAttrib1sARB'; d: @glVertexAttrib1sARB),
+    (n: 'glVertexAttrib1dARB'; d: @glVertexAttrib1dARB),
+    (n: 'glVertexAttrib2fARB'; d: @glVertexAttrib2fARB),
+    (n: 'glVertexAttrib2sARB'; d: @glVertexAttrib2sARB),
+    (n: 'glVertexAttrib2dARB'; d: @glVertexAttrib2dARB),
+    (n: 'glVertexAttrib3fARB'; d: @glVertexAttrib3fARB),
+    (n: 'glVertexAttrib3sARB'; d: @glVertexAttrib3sARB),
+    (n: 'glVertexAttrib3dARB'; d: @glVertexAttrib3dARB),
+    (n: 'glVertexAttrib4fARB'; d: @glVertexAttrib4fARB),
+    (n: 'glVertexAttrib4sARB'; d: @glVertexAttrib4sARB),
+    (n: 'glVertexAttrib4dARB'; d: @glVertexAttrib4dARB),
+    (n: 'glVertexAttrib4NubARB'; d: @glVertexAttrib4NubARB),
+    (n: 'glVertexAttrib1fvARB'; d: @glVertexAttrib1fvARB),
+    (n: 'glVertexAttrib1svARB'; d: @glVertexAttrib1svARB),
+    (n: 'glVertexAttrib1dvARB'; d: @glVertexAttrib1dvARB),
+    (n: 'glVertexAttrib2fvARB'; d: @glVertexAttrib2fvARB),
+    (n: 'glVertexAttrib2svARB'; d: @glVertexAttrib2svARB),
+    (n: 'glVertexAttrib2dvARB'; d: @glVertexAttrib2dvARB),
+    (n: 'glVertexAttrib3fvARB'; d: @glVertexAttrib3fvARB),
+    (n: 'glVertexAttrib3svARB'; d: @glVertexAttrib3svARB),
+    (n: 'glVertexAttrib3dvARB'; d: @glVertexAttrib3dvARB),
+    (n: 'glVertexAttrib4fvARB'; d: @glVertexAttrib4fvARB),
+    (n: 'glVertexAttrib4svARB'; d: @glVertexAttrib4svARB),
+    (n: 'glVertexAttrib4dvARB'; d: @glVertexAttrib4dvARB),
+    (n: 'glVertexAttrib4ivARB'; d: @glVertexAttrib4ivARB),
+    (n: 'glVertexAttrib4bvARB'; d: @glVertexAttrib4bvARB),
+    (n: 'glVertexAttrib4ubvARB'; d: @glVertexAttrib4ubvARB),
+    (n: 'glVertexAttrib4usvARB'; d: @glVertexAttrib4usvARB),
+    (n: 'glVertexAttrib4uivARB'; d: @glVertexAttrib4uivARB),
+    (n: 'glVertexAttrib4NbvARB'; d: @glVertexAttrib4NbvARB),
+    (n: 'glVertexAttrib4NsvARB'; d: @glVertexAttrib4NsvARB),
+    (n: 'glVertexAttrib4NivARB'; d: @glVertexAttrib4NivARB),
+    (n: 'glVertexAttrib4NubvARB'; d: @glVertexAttrib4NubvARB),
+    (n: 'glVertexAttrib4NusvARB'; d: @glVertexAttrib4NusvARB),
+    (n: 'glVertexAttrib4NuivARB'; d: @glVertexAttrib4NuivARB),
+    (n: 'glVertexAttribPointerARB'; d: @glVertexAttribPointerARB),
+    (n: 'glEnableVertexAttribArrayARB'; d: @glEnableVertexAttribArrayARB),
+    (n: 'glDisableVertexAttribArrayARB'; d: @glDisableVertexAttribArrayARB),
+    (n: 'glBindAttribLocationARB'; d: @glBindAttribLocationARB),
+    (n: 'glGetActiveAttribARB'; d: @glGetActiveAttribARB),
+    (n: 'glGetAttribLocationARB'; d: @glGetAttribLocationARB),
+    (n: 'glGetVertexAttribdvARB'; d: @glGetVertexAttribdvARB),
+    (n: 'glGetVertexAttribfvARB'; d: @glGetVertexAttribfvARB),
+    (n: 'glGetVertexAttribivARB'; d: @glGetVertexAttribivARB),
+    (n: 'glGetVertexAttribPointervARB'; d: @glGetVertexAttribPointervARB)
+   );
+
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_vertex_shader', extstring) then
-  begin
-    @glVertexAttrib1fARB := wglGetProcAddress('glVertexAttrib1fARB');
-    if not Assigned(glVertexAttrib1fARB) then Exit;
-    @glVertexAttrib1sARB := wglGetProcAddress('glVertexAttrib1sARB');
-    if not Assigned(glVertexAttrib1sARB) then Exit;
-    @glVertexAttrib1dARB := wglGetProcAddress('glVertexAttrib1dARB');
-    if not Assigned(glVertexAttrib1dARB) then Exit;
-    @glVertexAttrib2fARB := wglGetProcAddress('glVertexAttrib2fARB');
-    if not Assigned(glVertexAttrib2fARB) then Exit;
-    @glVertexAttrib2sARB := wglGetProcAddress('glVertexAttrib2sARB');
-    if not Assigned(glVertexAttrib2sARB) then Exit;
-    @glVertexAttrib2dARB := wglGetProcAddress('glVertexAttrib2dARB');
-    if not Assigned(glVertexAttrib2dARB) then Exit;
-    @glVertexAttrib3fARB := wglGetProcAddress('glVertexAttrib3fARB');
-    if not Assigned(glVertexAttrib3fARB) then Exit;
-    @glVertexAttrib3sARB := wglGetProcAddress('glVertexAttrib3sARB');
-    if not Assigned(glVertexAttrib3sARB) then Exit;
-    @glVertexAttrib3dARB := wglGetProcAddress('glVertexAttrib3dARB');
-    if not Assigned(glVertexAttrib3dARB) then Exit;
-    @glVertexAttrib4fARB := wglGetProcAddress('glVertexAttrib4fARB');
-    if not Assigned(glVertexAttrib4fARB) then Exit;
-    @glVertexAttrib4sARB := wglGetProcAddress('glVertexAttrib4sARB');
-    if not Assigned(glVertexAttrib4sARB) then Exit;
-    @glVertexAttrib4dARB := wglGetProcAddress('glVertexAttrib4dARB');
-    if not Assigned(glVertexAttrib4dARB) then Exit;
-    @glVertexAttrib4NubARB := wglGetProcAddress('glVertexAttrib4NubARB');
-    if not Assigned(glVertexAttrib4NubARB) then Exit;
-    @glVertexAttrib1fvARB := wglGetProcAddress('glVertexAttrib1fvARB');
-    if not Assigned(glVertexAttrib1fvARB) then Exit;
-    @glVertexAttrib1svARB := wglGetProcAddress('glVertexAttrib1svARB');
-    if not Assigned(glVertexAttrib1svARB) then Exit;
-    @glVertexAttrib1dvARB := wglGetProcAddress('glVertexAttrib1dvARB');
-    if not Assigned(glVertexAttrib1dvARB) then Exit;
-    @glVertexAttrib2fvARB := wglGetProcAddress('glVertexAttrib2fvARB');
-    if not Assigned(glVertexAttrib2fvARB) then Exit;
-    @glVertexAttrib2svARB := wglGetProcAddress('glVertexAttrib2svARB');
-    if not Assigned(glVertexAttrib2svARB) then Exit;
-    @glVertexAttrib2dvARB := wglGetProcAddress('glVertexAttrib2dvARB');
-    if not Assigned(glVertexAttrib2dvARB) then Exit;
-    @glVertexAttrib3fvARB := wglGetProcAddress('glVertexAttrib3fvARB');
-    if not Assigned(glVertexAttrib3fvARB) then Exit;
-    @glVertexAttrib3svARB := wglGetProcAddress('glVertexAttrib3svARB');
-    if not Assigned(glVertexAttrib3svARB) then Exit;
-    @glVertexAttrib3dvARB := wglGetProcAddress('glVertexAttrib3dvARB');
-    if not Assigned(glVertexAttrib3dvARB) then Exit;
-    @glVertexAttrib4fvARB := wglGetProcAddress('glVertexAttrib4fvARB');
-    if not Assigned(glVertexAttrib4fvARB) then Exit;
-    @glVertexAttrib4svARB := wglGetProcAddress('glVertexAttrib4svARB');
-    if not Assigned(glVertexAttrib4svARB) then Exit;
-    @glVertexAttrib4dvARB := wglGetProcAddress('glVertexAttrib4dvARB');
-    if not Assigned(glVertexAttrib4dvARB) then Exit;
-    @glVertexAttrib4ivARB := wglGetProcAddress('glVertexAttrib4ivARB');
-    if not Assigned(glVertexAttrib4ivARB) then Exit;
-    @glVertexAttrib4bvARB := wglGetProcAddress('glVertexAttrib4bvARB');
-    if not Assigned(glVertexAttrib4bvARB) then Exit;
-    @glVertexAttrib4ubvARB := wglGetProcAddress('glVertexAttrib4ubvARB');
-    if not Assigned(glVertexAttrib4ubvARB) then Exit;
-    @glVertexAttrib4usvARB := wglGetProcAddress('glVertexAttrib4usvARB');
-    if not Assigned(glVertexAttrib4usvARB) then Exit;
-    @glVertexAttrib4uivARB := wglGetProcAddress('glVertexAttrib4uivARB');
-    if not Assigned(glVertexAttrib4uivARB) then Exit;
-    @glVertexAttrib4NbvARB := wglGetProcAddress('glVertexAttrib4NbvARB');
-    if not Assigned(glVertexAttrib4NbvARB) then Exit;
-    @glVertexAttrib4NsvARB := wglGetProcAddress('glVertexAttrib4NsvARB');
-    if not Assigned(glVertexAttrib4NsvARB) then Exit;
-    @glVertexAttrib4NivARB := wglGetProcAddress('glVertexAttrib4NivARB');
-    if not Assigned(glVertexAttrib4NivARB) then Exit;
-    @glVertexAttrib4NubvARB := wglGetProcAddress('glVertexAttrib4NubvARB');
-    if not Assigned(glVertexAttrib4NubvARB) then Exit;
-    @glVertexAttrib4NusvARB := wglGetProcAddress('glVertexAttrib4NusvARB');
-    if not Assigned(glVertexAttrib4NusvARB) then Exit;
-    @glVertexAttrib4NuivARB := wglGetProcAddress('glVertexAttrib4NuivARB');
-    if not Assigned(glVertexAttrib4NuivARB) then Exit;
-    @glVertexAttribPointerARB := wglGetProcAddress('glVertexAttribPointerARB');
-    if not Assigned(glVertexAttribPointerARB) then Exit;
-    @glEnableVertexAttribArrayARB := wglGetProcAddress('glEnableVertexAttribArrayARB');
-    if not Assigned(glEnableVertexAttribArrayARB) then Exit;
-    @glDisableVertexAttribArrayARB := wglGetProcAddress('glDisableVertexAttribArrayARB');
-    if not Assigned(glDisableVertexAttribArrayARB) then Exit;
-    @glBindAttribLocationARB := wglGetProcAddress('glBindAttribLocationARB');
-    if not Assigned(glBindAttribLocationARB) then Exit;
-    @glGetActiveAttribARB := wglGetProcAddress('glGetActiveAttribARB');
-    if not Assigned(glGetActiveAttribARB) then Exit;
-    @glGetAttribLocationARB := wglGetProcAddress('glGetAttribLocationARB');
-    if not Assigned(glGetAttribLocationARB) then Exit;
-    @glGetVertexAttribdvARB := wglGetProcAddress('glGetVertexAttribdvARB');
-    if not Assigned(glGetVertexAttribdvARB) then Exit;
-    @glGetVertexAttribfvARB := wglGetProcAddress('glGetVertexAttribfvARB');
-    if not Assigned(glGetVertexAttribfvARB) then Exit;
-    @glGetVertexAttribivARB := wglGetProcAddress('glGetVertexAttribivARB');
-    if not Assigned(glGetVertexAttribivARB) then Exit;
-    @glGetVertexAttribPointervARB := wglGetProcAddress('glGetVertexAttribPointervARB');
-    if not Assigned(glGetVertexAttribPointervARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_fragment_shader: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_fragment_shader', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_shading_language_100: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_shading_language_100', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_texture_non_power_of_two: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_texture_non_power_of_two', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_point_sprite: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_point_sprite', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_depth_bounds_test: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glDepthBoundsEXT'; d: @glDepthBoundsEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_depth_bounds_test', extstring) then
-  begin
-    @glDepthBoundsEXT := wglGetProcAddress('glDepthBoundsEXT');
-    if not Assigned(glDepthBoundsEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_EXT_texture_mirror_clamp: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_texture_mirror_clamp', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_blend_equation_separate: Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glBlendEquationSeparateEXT'; d: @glBlendEquationSeparateEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_blend_equation_separate', extstring) then
-  begin
-    @glBlendEquationSeparateEXT := wglGetProcAddress('glBlendEquationSeparateEXT');
-    if not Assigned(glBlendEquationSeparateEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_MESA_pack_invert: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_MESA_pack_invert', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_MESA_ycbcr_texture: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_MESA_ycbcr_texture', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_fragment_program_shadow: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_fragment_program_shadow', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_fragment_program_option: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_fragment_program_option', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_pixel_buffer_object: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_EXT_pixel_buffer_object', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_fragment_program2: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_fragment_program2', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_vertex_program2_option: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_vertex_program2_option', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_NV_vertex_program3: Boolean;
-var
-  extstring: String;
 begin
-
-  Result := FALSE;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_NV_vertex_program3', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_draw_buffers: Boolean;
-var
-  extstring: PChar;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glDrawBuffersARB'; d: @glDrawBuffersARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := glGetString(GL_EXTENSIONS);
-
-  if glext_ExtensionSupported('GL_ARB_draw_buffers', extstring) then
-  begin
-    glDrawBuffersARB := wglGetProcAddress('glDrawBuffersARB');
-    if not Assigned(glDrawBuffersARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_texture_rectangle: Boolean;
-var
-  extstring: PChar;
 begin
-
-  Result := FALSE;
-  extstring := glGetString(GL_EXTENSIONS);
-
-  if glext_ExtensionSupported('GL_ARB_texture_rectangle', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_color_buffer_float: Boolean;
-var
-  extstring: PChar;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glClampColorARB'; d: @glClampColorARB)
+   );
 begin
-
-  Result := FALSE;
-  extstring := glGetString(GL_EXTENSIONS);
-
-  if glext_ExtensionSupported('GL_ARB_color_buffer_float', extstring) then
-  begin
-    glClampColorARB := wglGetProcAddress('glClampColorARB');
-    if not Assigned(glClampColorARB) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_half_float_pixel: Boolean;
-var
-  extstring: PChar;
 begin
-
-  Result := FALSE;
-  extstring := glGetString(GL_EXTENSIONS);
-
-  if glext_ExtensionSupported('GL_ARB_half_float_pixel', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_texture_float: Boolean;
-var
-  extstring: PChar;
 begin
-
-  Result := FALSE;
-  extstring := glGetString(GL_EXTENSIONS);
-
-  if glext_ExtensionSupported('GL_ARB_texture_float', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_texture_compression_dxt1: Boolean;
-var
-  extstring: PChar;
 begin
-
-  Result := FALSE;
-  extstring := glGetString(GL_EXTENSIONS);
-
-  if glext_ExtensionSupported('GL_EXT_texture_compression_dxt1', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_ARB_pixel_buffer_object: Boolean;
-var
-  extstring: PChar;
 begin
-
-  Result := FALSE;
-  extstring := glGetString(GL_EXTENSIONS);
-
-  if glext_ExtensionSupported('GL_ARB_pixel_buffer_object', extstring) then
-  begin
-    Result := TRUE;
-  end;
-
+ result:= true; //no procs
 end;
 
 function Load_GL_EXT_framebuffer_object: Boolean;
-var
-  extstring: PChar;
+const
+ funcs: array[0..16] of funcinfoty =
+   (
+    (n: 'glIsRenderbufferEXT'; d: @glIsRenderbufferEXT),
+    (n: 'glBindRenderbufferEXT'; d: @glBindRenderbufferEXT),
+    (n: 'glDeleteRenderbuffersEXT'; d: @glDeleteRenderbuffersEXT),
+    (n: 'glGenRenderbuffersEXT'; d: @glGenRenderbuffersEXT),
+    (n: 'glRenderbufferStorageEXT'; d: @glRenderbufferStorageEXT),
+    (n: 'glGetRenderbufferParameterivEXT'; d: @glGetRenderbufferParameterivEXT),
+    (n: 'glIsFramebufferEXT'; d: @glIsFramebufferEXT),
+    (n: 'glBindFramebufferEXT'; d: @glBindFramebufferEXT),
+    (n: 'glDeleteFramebuffersEXT'; d: @glDeleteFramebuffersEXT),
+    (n: 'glGenFramebuffersEXT'; d: @glGenFramebuffersEXT),
+    (n: 'glCheckFramebufferStatusEXT'; d: @glCheckFramebufferStatusEXT),
+    (n: 'glFramebufferTexture1DEXT'; d: @glFramebufferTexture1DEXT),
+    (n: 'glFramebufferTexture2DEXT'; d: @glFramebufferTexture2DEXT),
+    (n: 'glFramebufferTexture3DEXT'; d: @glFramebufferTexture3DEXT),
+    (n: 'glFramebufferRenderbufferEXT'; d: @glFramebufferRenderbufferEXT),
+    (n: 'glGetFramebufferAttachmentParameterivEXT'; d: @glGetFramebufferAttachmentParameterivEXT),
+    (n: 'glGenerateMipmapEXT'; d: @glGenerateMipmapEXT)
+   );
 begin
-
-  Result := FALSE;
-  extstring := glGetString(GL_EXTENSIONS);
-
-  if glext_ExtensionSupported('GL_EXT_framebuffer_object', extstring) then
-  begin
-    glIsRenderbufferEXT := wglGetProcAddress('glIsRenderbufferEXT');
-    if not Assigned(glIsRenderbufferEXT) then Exit;
-    glBindRenderbufferEXT := wglGetProcAddress('glBindRenderbufferEXT');
-    if not Assigned(glBindRenderbufferEXT) then Exit;
-    glDeleteRenderbuffersEXT := wglGetProcAddress('glDeleteRenderbuffersEXT');
-    if not Assigned(glDeleteRenderbuffersEXT) then Exit;
-    glGenRenderbuffersEXT := wglGetProcAddress('glGenRenderbuffersEXT');
-    if not Assigned(glGenRenderbuffersEXT) then Exit;
-    glRenderbufferStorageEXT := wglGetProcAddress('glRenderbufferStorageEXT');
-    if not Assigned(glRenderbufferStorageEXT) then Exit;
-    glGetRenderbufferParameterivEXT := wglGetProcAddress('glGetRenderbufferParameterivEXT');
-    if not Assigned(glGetRenderbufferParameterivEXT) then Exit;
-    glIsFramebufferEXT := wglGetProcAddress('glIsFramebufferEXT');
-    if not Assigned(glIsFramebufferEXT) then Exit;
-    glBindFramebufferEXT := wglGetProcAddress('glBindFramebufferEXT');
-    if not Assigned(glBindFramebufferEXT) then Exit;
-    glDeleteFramebuffersEXT := wglGetProcAddress('glDeleteFramebuffersEXT');
-    if not Assigned(glDeleteFramebuffersEXT) then Exit;
-    glGenFramebuffersEXT := wglGetProcAddress('glGenFramebuffersEXT');
-    if not Assigned(glGenFramebuffersEXT) then Exit;
-    glCheckFramebufferStatusEXT := wglGetProcAddress('glCheckFramebufferStatusEXT');
-    if not Assigned(glCheckFramebufferStatusEXT) then Exit;
-    glFramebufferTexture1DEXT := wglGetProcAddress('glFramebufferTexture1DEXT');
-    if not Assigned(glFramebufferTexture1DEXT) then Exit;
-    glFramebufferTexture2DEXT := wglGetProcAddress('glFramebufferTexture2DEXT');
-    if not Assigned(glFramebufferTexture2DEXT) then Exit;
-    glFramebufferTexture3DEXT := wglGetProcAddress('glFramebufferTexture3DEXT');
-    if not Assigned(glFramebufferTexture3DEXT) then Exit;
-    glFramebufferRenderbufferEXT := wglGetProcAddress('glFramebufferRenderbufferEXT');
-    if not Assigned(glFramebufferRenderbufferEXT) then Exit;
-    glGetFramebufferAttachmentParameterivEXT := wglGetProcAddress('glGetFramebufferAttachmentParameterivEXT');
-    if not Assigned(glGetFramebufferAttachmentParameterivEXT) then Exit;
-    glGenerateMipmapEXT := wglGetProcAddress('glGenerateMipmapEXT');
-    if not Assigned(glGenerateMipmapEXT) then Exit;
-    Result := TRUE;
-  end;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_framebuffer_object(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..19] of funcinfoty =
+   (
+    (n: 'glIsRenderbuffer'; d: @glIsRenderbuffer),
+    (n: 'glBindRenderbuffer'; d: @glBindRenderbuffer),
+    (n: 'glDeleteRenderbuffers'; d: @glDeleteRenderbuffers),
+    (n: 'glGenRenderbuffers'; d: @glGenRenderbuffers),
+    (n: 'glRenderbufferStorage'; d: @glRenderbufferStorage),
+    (n: 'glGetRenderbufferParameteriv'; d: @glGetRenderbufferParameteriv),
+    (n: 'glIsFramebuffer'; d: @glIsFramebuffer),
+    (n: 'glBindFramebuffer'; d: @glBindFramebuffer),
+    (n: 'glDeleteFramebuffers'; d: @glDeleteFramebuffers),
+    (n: 'glGenFramebuffers'; d: @glGenFramebuffers),
+    (n: 'glCheckFramebufferStatus'; d: @glCheckFramebufferStatus),
+    (n: 'glFramebufferTexture1D'; d: @glFramebufferTexture1D),
+    (n: 'glFramebufferTexture2D'; d: @glFramebufferTexture2D),
+    (n: 'glFramebufferTexture3D'; d: @glFramebufferTexture3D),
+    (n: 'glFramebufferRenderbuffer'; d: @glFramebufferRenderbuffer),
+    (n: 'glGetFramebufferAttachmentParameteriv'; d: @glGetFramebufferAttachmentParameteriv),
+    (n: 'glGenerateMipmap'; d: @glGenerateMipmap),
+    (n: 'glBlitFramebuffer'; d: @glBlitFramebuffer),
+    (n: 'glRenderbufferStorageMultisample'; d: @glRenderbufferStorageMultisample),
+    (n: 'glFramebufferTextureLayer'; d: @glFramebufferTextureLayer)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_framebuffer_object', extstring) then
-  begin
-    glIsRenderbuffer := wglGetProcAddress('glIsRenderbuffer');
-    if not Assigned(glIsRenderbuffer) then Exit;
-    glBindRenderbuffer := wglGetProcAddress('glBindRenderbuffer');
-    if not Assigned(glBindRenderbuffer) then Exit;
-    glDeleteRenderbuffers := wglGetProcAddress('glDeleteRenderbuffers');
-    if not Assigned(glDeleteRenderbuffers) then Exit;
-    glGenRenderbuffers := wglGetProcAddress('glGenRenderbuffers');
-    if not Assigned(glGenRenderbuffers) then Exit;
-    glRenderbufferStorage := wglGetProcAddress('glRenderbufferStorage');
-    if not Assigned(glRenderbufferStorage) then Exit;
-    glGetRenderbufferParameteriv := wglGetProcAddress('glGetRenderbufferParameteriv');
-    if not Assigned(glGetRenderbufferParameteriv) then Exit;
-    glIsFramebuffer := wglGetProcAddress('glIsFramebuffer');
-    if not Assigned(glIsFramebuffer) then Exit;
-    glBindFramebuffer := wglGetProcAddress('glBindFramebuffer');
-    if not Assigned(glBindFramebuffer) then Exit;
-    glDeleteFramebuffers := wglGetProcAddress('glDeleteFramebuffers');
-    if not Assigned(glDeleteFramebuffers) then Exit;
-    glGenFramebuffers := wglGetProcAddress('glGenFramebuffers');
-    if not Assigned(glGenFramebuffers) then Exit;
-    glCheckFramebufferStatus := wglGetProcAddress('glCheckFramebufferStatus');
-    if not Assigned(glCheckFramebufferStatus) then Exit;
-    glFramebufferTexture1D := wglGetProcAddress('glFramebufferTexture1D');
-    if not Assigned(glFramebufferTexture1D) then Exit;
-    glFramebufferTexture2D := wglGetProcAddress('glFramebufferTexture2D');
-    if not Assigned(glFramebufferTexture2D) then Exit;
-    glFramebufferTexture3D := wglGetProcAddress('glFramebufferTexture3D');
-    if not Assigned(glFramebufferTexture3D) then Exit;
-    glFramebufferRenderbuffer := wglGetProcAddress('glFramebufferRenderbuffer');
-    if not Assigned(glFramebufferRenderbuffer) then Exit;
-    glGetFramebufferAttachmentParameteriv := wglGetProcAddress('glGetFramebufferAttachmentParameteriv');
-    if not Assigned(glGetFramebufferAttachmentParameteriv) then Exit;
-    glGenerateMipmap := wglGetProcAddress('glGenerateMipmap');
-    if not Assigned(glGenerateMipmap) then Exit;
-    glBlitFramebuffer := wglGetProcAddress('glBlitFramebuffer');
-    if not Assigned(glBlitFramebuffer) then Exit;
-    glRenderbufferStorageMultisample := wglGetProcAddress('glRenderbufferStorageMultisample');
-    if not Assigned(glRenderbufferStorageMultisample) then Exit;
-    glFramebufferTextureLayer := wglGetProcAddress('glFramebufferTextureLayer');
-    if not Assigned(glFramebufferTextureLayer) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_map_buffer_range(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glMapBufferRange'; d: @glMapBufferRange),
+    (n: 'glFlushMappedBufferRange'; d: @glFlushMappedBufferRange)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_map_buffer_range', extstring) then
-  begin
-    glMapBufferRange := wglGetProcAddress('glMapBufferRange');
-    if not Assigned(glMapBufferRange) then Exit;
-    glFlushMappedBufferRange := wglGetProcAddress('glFlushMappedBufferRange');
-    if not Assigned(glFlushMappedBufferRange) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_vertex_array_object(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..3] of funcinfoty =
+   (
+    (n: 'glBindVertexArray'; d: @glBindVertexArray),
+    (n: 'glDeleteVertexArrays'; d: @glDeleteVertexArrays),
+    (n: 'glGenVertexArrays'; d: @glGenVertexArrays),
+    (n: 'glIsVertexArray'; d: @glIsVertexArray)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_vertex_array_object', extstring) then
-  begin
-    glBindVertexArray := wglGetProcAddress('glBindVertexArray');
-    if not Assigned(glBindVertexArray) then Exit;
-    glDeleteVertexArrays := wglGetProcAddress('glDeleteVertexArrays');
-    if not Assigned(glDeleteVertexArrays) then Exit;
-    glGenVertexArrays := wglGetProcAddress('glGenVertexArrays');
-    if not Assigned(glGenVertexArrays) then Exit;
-    glIsVertexArray := wglGetProcAddress('glIsVertexArray');
-    if not Assigned(glIsVertexArray) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_copy_buffer(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glCopyBufferSubData'; d: @glCopyBufferSubData)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_copy_buffer', extstring) then
-  begin
-    glCopyBufferSubData := wglGetProcAddress('glCopyBufferSubData');
-    if not Assigned(glCopyBufferSubData) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_uniform_buffer_object(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..9] of funcinfoty =
+   (
+    (n: 'glGetUniformIndices'; d: @glGetUniformIndices),
+    (n: 'glGetActiveUniformsiv'; d: @glGetActiveUniformsiv),
+    (n: 'glGetActiveUniformName'; d: @glGetActiveUniformName),
+    (n: 'glGetUniformBlockIndex'; d: @glGetUniformBlockIndex),
+    (n: 'glGetActiveUniformBlockiv'; d: @glGetActiveUniformBlockiv),
+    (n: 'glGetActiveUniformBlockName'; d: @glGetActiveUniformBlockName),
+    (n: 'glUniformBlockBinding'; d: @glUniformBlockBinding),
+    (n: 'glBindBufferRange'; d: @glBindBufferRange),
+    (n: 'glBindBufferBase'; d: @glBindBufferBase),
+    (n: 'glGetIntegeri_v'; d: @glGetIntegeri_v)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_uniform_buffer_object', extstring) then
-  begin
-    glGetUniformIndices := wglGetProcAddress('glGetUniformIndices');
-    if not Assigned(glGetUniformIndices) then Exit;
-    glGetActiveUniformsiv := wglGetProcAddress('glGetActiveUniformsiv');
-    if not Assigned(glGetActiveUniformsiv) then Exit;
-    glGetActiveUniformName := wglGetProcAddress('glGetActiveUniformName');
-    if not Assigned(glGetActiveUniformName) then Exit;
-    glGetUniformBlockIndex := wglGetProcAddress('glGetUniformBlockIndex');
-    if not Assigned(glGetUniformBlockIndex) then Exit;
-    glGetActiveUniformBlockiv := wglGetProcAddress('glGetActiveUniformBlockiv');
-    if not Assigned(glGetActiveUniformBlockiv) then Exit;
-    glGetActiveUniformBlockName := wglGetProcAddress('glGetActiveUniformBlockName');
-    if not Assigned(glGetActiveUniformBlockName) then Exit;
-    glUniformBlockBinding := wglGetProcAddress('glUniformBlockBinding');
-    if not Assigned(glUniformBlockBinding) then Exit;
-    (* Shared entry points *)
-    glBindBufferRange := wglGetProcAddress('glBindBufferRange');
-    if not Assigned(glBindBufferRange) then Exit;
-    glBindBufferBase := wglGetProcAddress('glBindBufferBase');
-    if not Assigned(glBindBufferBase) then Exit;
-    glGetIntegeri_v := wglGetProcAddress('glGetIntegeri_v');
-    if not Assigned(glGetIntegeri_v) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_draw_elements_base_vertex(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..3] of funcinfoty =
+   (
+    (n: 'glDrawElementsBaseVertex'; d: @glDrawElementsBaseVertex),
+    (n: 'glDrawRangeElementsBaseVertex'; d: @glDrawRangeElementsBaseVertex),
+    (n: 'glDrawElementsInstancedBaseVertex'; d: @glDrawElementsInstancedBaseVertex),
+    (n: 'glMultiDrawElementsBaseVertex'; d: @glMultiDrawElementsBaseVertex)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_draw_elements_base_vertex', extstring) then
-  begin
-    glDrawElementsBaseVertex := wglGetProcAddress('glDrawElementsBaseVertex');
-    if not Assigned(glDrawElementsBaseVertex) then Exit;
-    glDrawRangeElementsBaseVertex := wglGetProcAddress('glDrawRangeElementsBaseVertex');
-    if not Assigned(glDrawRangeElementsBaseVertex) then Exit;
-    glDrawElementsInstancedBaseVertex := wglGetProcAddress('glDrawElementsInstancedBaseVertex');
-    if not Assigned(glDrawElementsInstancedBaseVertex) then Exit;
-    glMultiDrawElementsBaseVertex := wglGetProcAddress('glMultiDrawElementsBaseVertex');
-    if not Assigned(glMultiDrawElementsBaseVertex) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_provoking_vertex(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..0] of funcinfoty =
+   (
+    (n: 'glProvokingVertex'; d: @glProvokingVertex)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_provoking_vertex', extstring) then
-  begin
-    glProvokingVertex := wglGetProcAddress('glProvokingVertex');
-    if not Assigned(glProvokingVertex) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_sync(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..6] of funcinfoty =
+   (
+    (n: 'glFenceSync'; d: @glFenceSync),
+    (n: 'glIsSync'; d: @glIsSync),
+    (n: 'glDeleteSync'; d: @glDeleteSync),
+    (n: 'glClientWaitSync'; d: @glClientWaitSync),
+    (n: 'glWaitSync'; d: @glWaitSync),
+    (n: 'glGetInteger64v'; d: @glGetInteger64v),
+    (n: 'glGetSynciv'; d: @glGetSynciv)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_sync', extstring) then
-  begin
-    glFenceSync := wglGetProcAddress('glFenceSync');
-    if not Assigned(glFenceSync) then Exit;
-    glIsSync := wglGetProcAddress('glIsSync');
-    if not Assigned(glIsSync) then Exit;
-    glDeleteSync := wglGetProcAddress('glDeleteSync');
-    if not Assigned(glDeleteSync) then Exit;
-    glClientWaitSync := wglGetProcAddress('glClientWaitSync');
-    if not Assigned(glClientWaitSync) then Exit;
-    glWaitSync := wglGetProcAddress('glWaitSync');
-    if not Assigned(glWaitSync) then Exit;
-    glGetInteger64v := wglGetProcAddress('glGetInteger64v');
-    if not Assigned(glGetInteger64v) then Exit;
-    glGetSynciv := wglGetProcAddress('glGetSynciv');
-    if not Assigned(glGetSynciv) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_texture_multisample(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..3] of funcinfoty =
+   (
+    (n: 'glTexImage2DMultisample'; d: @glTexImage2DMultisample),
+    (n: 'glTexImage3DMultisample'; d: @glTexImage3DMultisample),
+    (n: 'glGetMultisamplefv'; d: @glGetMultisamplefv),
+    (n: 'glSampleMaski'; d: @glSampleMaski)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_texture_multisample', extstring) then
-  begin
-    glTexImage2DMultisample := wglGetProcAddress('glTexImage2DMultisample');
-    if not Assigned(glTexImage2DMultisample) then Exit;
-    glTexImage3DMultisample := wglGetProcAddress('glTexImage3DMultisample');
-    if not Assigned(glTexImage3DMultisample) then Exit;
-    glGetMultisamplefv := wglGetProcAddress('glGetMultisamplefv');
-    if not Assigned(glGetMultisamplefv) then Exit;
-    glSampleMaski := wglGetProcAddress('glSampleMaski');
-    if not Assigned(glSampleMaski) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_sampler_objects(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..13] of funcinfoty =
+   (
+    (n: 'glGenSamplers'; d: @glGenSamplers),
+    (n: 'glDeleteSamplers'; d: @glDeleteSamplers),
+    (n: 'glIsSampler'; d: @glIsSampler),
+    (n: 'glBindSampler'; d: @glBindSampler),
+    (n: 'glSamplerParameteri'; d: @glSamplerParameteri),
+    (n: 'glSamplerParameteriv'; d: @glSamplerParameteriv),
+    (n: 'glSamplerParameterf'; d: @glSamplerParameterf),
+    (n: 'glSamplerParameterfv'; d: @glSamplerParameterfv),
+    (n: 'glSamplerParameterIiv'; d: @glSamplerParameterIiv),
+    (n: 'glSamplerParameterIuiv'; d: @glSamplerParameterIuiv),
+    (n: 'glGetSamplerParameteriv'; d: @glGetSamplerParameteriv),
+    (n: 'glGetSamplerParameterIiv'; d: @glGetSamplerParameterIiv),
+    (n: 'glGetSamplerParameterfv'; d: @glGetSamplerParameterfv),
+    (n: 'glGetSamplerParameterIfv'; d: @glGetSamplerParameterIfv)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_sampler_objects', extstring) then
-  begin
-    glGenSamplers := wglGetProcAddress('glGenSamplers');
-    if not Assigned(glGenSamplers) then Exit;
-    glDeleteSamplers := wglGetProcAddress('glDeleteSamplers');
-    if not Assigned(glDeleteSamplers) then Exit;
-    glIsSampler := wglGetProcAddress('glIsSampler');
-    if not Assigned(glIsSampler) then Exit;
-    glBindSampler := wglGetProcAddress('glBindSampler');
-    if not Assigned(glBindSampler) then Exit;
-    glSamplerParameteri := wglGetProcAddress('glSamplerParameteri');
-    if not Assigned(glSamplerParameteri) then Exit;
-    glSamplerParameteriv := wglGetProcAddress('glSamplerParameteriv');
-    if not Assigned(glSamplerParameteriv) then Exit;
-    glSamplerParameterf := wglGetProcAddress('glSamplerParameterf');
-    if not Assigned(glSamplerParameterf) then Exit;
-    glSamplerParameterfv := wglGetProcAddress('glSamplerParameterfv');
-    if not Assigned(glSamplerParameterfv) then Exit;
-    glSamplerParameterIiv := wglGetProcAddress('glSamplerParameterIiv');
-    if not Assigned(glSamplerParameterIiv) then Exit;
-    glSamplerParameterIuiv := wglGetProcAddress('glSamplerParameterIuiv');
-    if not Assigned(glSamplerParameterIuiv) then Exit;
-    glGetSamplerParameteriv := wglGetProcAddress('glGetSamplerParameteriv');
-    if not Assigned(glGetSamplerParameteriv) then Exit;
-    glGetSamplerParameterIiv := wglGetProcAddress('glGetSamplerParameterIiv');
-    if not Assigned(glGetSamplerParameterIiv) then Exit;
-    glGetSamplerParameterfv := wglGetProcAddress('glGetSamplerParameterfv');
-    if not Assigned(glGetSamplerParameterfv) then Exit;
-    glGetSamplerParameterIfv := wglGetProcAddress('glGetSamplerParameterIfv');
-    if not Assigned(glGetSamplerParameterIfv) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_blend_func_extended(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glBindFragDataLocationIndexed'; d: @glBindFragDataLocationIndexed),
+    (n: 'glGetFragDataIndex'; d: @glGetFragDataIndex)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_blend_func_extended', extstring) then
-  begin
-    glBindFragDataLocationIndexed := wglGetProcAddress('glBindFragDataLocationIndexed');
-    if not Assigned(glBindFragDataLocationIndexed) then Exit;
-    glGetFragDataIndex := wglGetProcAddress('glGetFragDataIndex');
-    if not Assigned(glGetFragDataIndex) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_timer_query(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..2] of funcinfoty =
+   (
+    (n: 'glQueryCounter'; d: @glQueryCounter),
+    (n: 'glGetQueryObjecti64v'; d: @glGetQueryObjecti64v),
+    (n: 'glGetQueryObjectui64v'; d: @glGetQueryObjectui64v)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_timer_query', extstring) then
-  begin
-    glQueryCounter := wglGetProcAddress('glQueryCounter');
-    if not Assigned(glQueryCounter) then Exit;
-    glGetQueryObjecti64v := wglGetProcAddress('glGetQueryObjecti64v');
-    if not Assigned(glGetQueryObjecti64v) then Exit;
-    glGetQueryObjectui64v := wglGetProcAddress('glGetQueryObjectui64v');
-    if not Assigned(glGetQueryObjectui64v) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_vertex_type_2_10_10_10_rev(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..37] of funcinfoty =
+   (
+    (n: 'glVertexP2ui'; d: @glVertexP2ui),
+    (n: 'glVertexP2uiv'; d: @glVertexP2uiv),
+    (n: 'glVertexP3ui'; d: @glVertexP3ui),
+    (n: 'glVertexP3uiv'; d: @glVertexP3uiv),
+    (n: 'glVertexP4ui'; d: @glVertexP4ui),
+    (n: 'glVertexP4uiv'; d: @glVertexP4uiv),
+    (n: 'glTexCoordP1ui'; d: @glTexCoordP1ui),
+    (n: 'glTexCoordP1uiv'; d: @glTexCoordP1uiv),
+    (n: 'glTexCoordP2ui'; d: @glTexCoordP2ui),
+    (n: 'glTexCoordP2uiv'; d: @glTexCoordP2uiv),
+    (n: 'glTexCoordP3ui'; d: @glTexCoordP3ui),
+    (n: 'glTexCoordP3uiv'; d: @glTexCoordP3uiv),
+    (n: 'glTexCoordP4ui'; d: @glTexCoordP4ui),
+    (n: 'glTexCoordP4uiv'; d: @glTexCoordP4uiv),
+    (n: 'glMultiTexCoordP1ui'; d: @glMultiTexCoordP1ui),
+    (n: 'glMultiTexCoordP1uiv'; d: @glMultiTexCoordP1uiv),
+    (n: 'glMultiTexCoordP2ui'; d: @glMultiTexCoordP2ui),
+    (n: 'glMultiTexCoordP2uiv'; d: @glMultiTexCoordP2uiv),
+    (n: 'glMultiTexCoordP3ui'; d: @glMultiTexCoordP3ui),
+    (n: 'glMultiTexCoordP3uiv'; d: @glMultiTexCoordP3uiv),
+    (n: 'glMultiTexCoordP4ui'; d: @glMultiTexCoordP4ui),
+    (n: 'glMultiTexCoordP4uiv'; d: @glMultiTexCoordP4uiv),
+    (n: 'glNormalP3ui'; d: @glNormalP3ui),
+    (n: 'glNormalP3uiv'; d: @glNormalP3uiv),
+    (n: 'glColorP3ui'; d: @glColorP3ui),
+    (n: 'glColorP3uiv'; d: @glColorP3uiv),
+    (n: 'glColorP4ui'; d: @glColorP4ui),
+    (n: 'glColorP4uiv'; d: @glColorP4uiv),
+    (n: 'glSecondaryColorP3ui'; d: @glSecondaryColorP3ui),
+    (n: 'glSecondaryColorP3uiv'; d: @glSecondaryColorP3uiv),
+    (n: 'glVertexAttribP1ui'; d: @glVertexAttribP1ui),
+    (n: 'glVertexAttribP1uiv'; d: @glVertexAttribP1uiv),
+    (n: 'glVertexAttribP2ui'; d: @glVertexAttribP2ui),
+    (n: 'glVertexAttribP2uiv'; d: @glVertexAttribP2uiv),
+    (n: 'glVertexAttribP3ui'; d: @glVertexAttribP3ui),
+    (n: 'glVertexAttribP3uiv'; d: @glVertexAttribP3uiv),
+    (n: 'glVertexAttribP4ui'; d: @glVertexAttribP4ui),
+    (n: 'glVertexAttribP4uiv'; d: @glVertexAttribP4uiv)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_vertex_type_2_10_10_10_rev', extstring) then
-  begin
-    glVertexP2ui := wglGetProcAddress('glVertexP2ui');
-    if not Assigned(glVertexP2ui) then Exit;
-    glVertexP2uiv := wglGetProcAddress('glVertexP2uiv');
-    if not Assigned(glVertexP2uiv) then Exit;
-    glVertexP3ui := wglGetProcAddress('glVertexP3ui');
-    if not Assigned(glVertexP3ui) then Exit;
-    glVertexP3uiv := wglGetProcAddress('glVertexP3uiv');
-    if not Assigned(glVertexP3uiv) then Exit;
-    glVertexP4ui := wglGetProcAddress('glVertexP4ui');
-    if not Assigned(glVertexP4ui) then Exit;
-    glVertexP4uiv := wglGetProcAddress('glVertexP4uiv');
-    if not Assigned(glVertexP4uiv) then Exit;
-    glTexCoordP1ui := wglGetProcAddress('glTexCoordP1ui');
-    if not Assigned(glTexCoordP1ui) then Exit;
-    glTexCoordP1uiv := wglGetProcAddress('glTexCoordP1uiv');
-    if not Assigned(glTexCoordP1uiv) then Exit;
-    glTexCoordP2ui := wglGetProcAddress('glTexCoordP2ui');
-    if not Assigned(glTexCoordP2ui) then Exit;
-    glTexCoordP2uiv := wglGetProcAddress('glTexCoordP2uiv');
-    if not Assigned(glTexCoordP2uiv) then Exit;
-    glTexCoordP3ui := wglGetProcAddress('glTexCoordP3ui');
-    if not Assigned(glTexCoordP3ui) then Exit;
-    glTexCoordP3uiv := wglGetProcAddress('glTexCoordP3uiv');
-    if not Assigned(glTexCoordP3uiv) then Exit;
-    glTexCoordP4ui := wglGetProcAddress('glTexCoordP4ui');
-    if not Assigned(glTexCoordP4ui) then Exit;
-    glTexCoordP4uiv := wglGetProcAddress('glTexCoordP4uiv');
-    if not Assigned(glTexCoordP4uiv) then Exit;
-    glMultiTexCoordP1ui := wglGetProcAddress('glMultiTexCoordP1ui');
-    if not Assigned(glMultiTexCoordP1ui) then Exit;
-    glMultiTexCoordP1uiv := wglGetProcAddress('glMultiTexCoordP1uiv');
-    if not Assigned(glMultiTexCoordP1uiv) then Exit;
-    glMultiTexCoordP2ui := wglGetProcAddress('glMultiTexCoordP2ui');
-    if not Assigned(glMultiTexCoordP2ui) then Exit;
-    glMultiTexCoordP2uiv := wglGetProcAddress('glMultiTexCoordP2uiv');
-    if not Assigned(glMultiTexCoordP2uiv) then Exit;
-    glMultiTexCoordP3ui := wglGetProcAddress('glMultiTexCoordP3ui');
-    if not Assigned(glMultiTexCoordP3ui) then Exit;
-    glMultiTexCoordP3uiv := wglGetProcAddress('glMultiTexCoordP3uiv');
-    if not Assigned(glMultiTexCoordP3uiv) then Exit;
-    glMultiTexCoordP4ui := wglGetProcAddress('glMultiTexCoordP4ui');
-    if not Assigned(glMultiTexCoordP4ui) then Exit;
-    glMultiTexCoordP4uiv := wglGetProcAddress('glMultiTexCoordP4uiv');
-    if not Assigned(glMultiTexCoordP4uiv) then Exit;
-    glNormalP3ui := wglGetProcAddress('glNormalP3ui');
-    if not Assigned(glNormalP3ui) then Exit;
-    glNormalP3uiv := wglGetProcAddress('glNormalP3uiv');
-    if not Assigned(glNormalP3uiv) then Exit;
-    glColorP3ui := wglGetProcAddress('glColorP3ui');
-    if not Assigned(glColorP3ui) then Exit;
-    glColorP3uiv := wglGetProcAddress('glColorP3uiv');
-    if not Assigned(glColorP3uiv) then Exit;
-    glColorP4ui := wglGetProcAddress('glColorP4ui');
-    if not Assigned(glColorP4ui) then Exit;
-    glColorP4uiv := wglGetProcAddress('glColorP4uiv');
-    if not Assigned(glColorP4uiv) then Exit;
-    glSecondaryColorP3ui := wglGetProcAddress('glSecondaryColorP3ui');
-    if not Assigned(glSecondaryColorP3ui) then Exit;
-    glSecondaryColorP3uiv := wglGetProcAddress('glSecondaryColorP3uiv');
-    if not Assigned(glSecondaryColorP3uiv) then Exit;
-    glVertexAttribP1ui := wglGetProcAddress('glVertexAttribP1ui');
-    if not Assigned(glVertexAttribP1ui) then Exit;
-    glVertexAttribP1uiv := wglGetProcAddress('glVertexAttribP1uiv');
-    if not Assigned(glVertexAttribP1uiv) then Exit;
-    glVertexAttribP2ui := wglGetProcAddress('glVertexAttribP2ui');
-    if not Assigned(glVertexAttribP2ui) then Exit;
-    glVertexAttribP2uiv := wglGetProcAddress('glVertexAttribP2uiv');
-    if not Assigned(glVertexAttribP2uiv) then Exit;
-    glVertexAttribP3ui := wglGetProcAddress('glVertexAttribP3ui');
-    if not Assigned(glVertexAttribP3ui) then Exit;
-    glVertexAttribP3uiv := wglGetProcAddress('glVertexAttribP3uiv');
-    if not Assigned(glVertexAttribP3uiv) then Exit;
-    glVertexAttribP4ui := wglGetProcAddress('glVertexAttribP4ui');
-    if not Assigned(glVertexAttribP4ui) then Exit;
-    glVertexAttribP4uiv := wglGetProcAddress('glVertexAttribP4uiv');
-    if not Assigned(glVertexAttribP4uiv) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_gpu_shader_fp64(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..34] of funcinfoty =
+   (
+    (n: 'glUniform1d'; d: @glUniform1d),
+    (n: 'glUniform2d'; d: @glUniform2d),
+    (n: 'glUniform3d'; d: @glUniform3d),
+    (n: 'glUniform4d'; d: @glUniform4d),
+    (n: 'glUniform1dv'; d: @glUniform1dv),
+    (n: 'glUniform2dv'; d: @glUniform2dv),
+    (n: 'glUniform3dv'; d: @glUniform3dv),
+    (n: 'glUniform4dv'; d: @glUniform4dv),
+    (n: 'glUniformMatrix2dv'; d: @glUniformMatrix2dv),
+    (n: 'glUniformMatrix3dv'; d: @glUniformMatrix3dv),
+    (n: 'glUniformMatrix4dv'; d: @glUniformMatrix4dv),
+    (n: 'glUniformMatrix2x3dv'; d: @glUniformMatrix2x3dv),
+    (n: 'glUniformMatrix2x4dv'; d: @glUniformMatrix2x4dv),
+    (n: 'glUniformMatrix3x2dv'; d: @glUniformMatrix3x2dv),
+    (n: 'glUniformMatrix3x4dv'; d: @glUniformMatrix3x4dv),
+    (n: 'glUniformMatrix4x2dv'; d: @glUniformMatrix4x2dv),
+    (n: 'glUniformMatrix4x3dv'; d: @glUniformMatrix4x3dv),
+    (n: 'glGetUniformdv'; d: @glGetUniformdv),
+    (n: 'glProgramUniform1dEXT'; d: @glProgramUniform1dEXT),
+    (n: 'glProgramUniform2dEXT'; d: @glProgramUniform2dEXT),
+    (n: 'glProgramUniform3dEXT'; d: @glProgramUniform3dEXT),
+    (n: 'glProgramUniform4dEXT'; d: @glProgramUniform4dEXT),
+    (n: 'glProgramUniform1dvEXT'; d: @glProgramUniform1dvEXT),
+    (n: 'glProgramUniform2dvEXT'; d: @glProgramUniform2dvEXT),
+    (n: 'glProgramUniform3dvEXT'; d: @glProgramUniform3dvEXT),
+    (n: 'glProgramUniform4dvEXT'; d: @glProgramUniform4dvEXT),
+    (n: 'glProgramUniformMatrix2dvEXT'; d: @glProgramUniformMatrix2dvEXT),
+    (n: 'glProgramUniformMatrix3dvEXT'; d: @glProgramUniformMatrix3dvEXT),
+    (n: 'glProgramUniformMatrix4dvEXT'; d: @glProgramUniformMatrix4dvEXT),
+    (n: 'glProgramUniformMatrix2x3dvEXT'; d: @glProgramUniformMatrix2x3dvEXT),
+    (n: 'glProgramUniformMatrix2x4dvEXT'; d: @glProgramUniformMatrix2x4dvEXT),
+    (n: 'glProgramUniformMatrix3x2dvEXT'; d: @glProgramUniformMatrix3x2dvEXT),
+    (n: 'glProgramUniformMatrix3x4dvEXT'; d: @glProgramUniformMatrix3x4dvEXT),
+    (n: 'glProgramUniformMatrix4x2dvEXT'; d: @glProgramUniformMatrix4x2dvEXT),
+    (n: 'glProgramUniformMatrix4x3dvEXT'; d: @glProgramUniformMatrix4x3dvEXT)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_gpu_shader_fp64', extstring) then
-  begin
-    glUniform1d := wglGetProcAddress('glUniform1d');
-    if not Assigned(glUniform1d) then Exit;
-    glUniform2d := wglGetProcAddress('glUniform2d');
-    if not Assigned(glUniform2d) then Exit;
-    glUniform3d := wglGetProcAddress('glUniform3d');
-    if not Assigned(glUniform3d) then Exit;
-    glUniform4d := wglGetProcAddress('glUniform4d');
-    if not Assigned(glUniform4d) then Exit;
-    glUniform1dv := wglGetProcAddress('glUniform1dv');
-    if not Assigned(glUniform1dv) then Exit;
-    glUniform2dv := wglGetProcAddress('glUniform2dv');
-    if not Assigned(glUniform2dv) then Exit;
-    glUniform3dv := wglGetProcAddress('glUniform3dv');
-    if not Assigned(glUniform3dv) then Exit;
-    glUniform4dv := wglGetProcAddress('glUniform4dv');
-    if not Assigned(glUniform4dv) then Exit;
-    glUniformMatrix2dv := wglGetProcAddress('glUniformMatrix2dv');
-    if not Assigned(glUniformMatrix2dv) then Exit;
-    glUniformMatrix3dv := wglGetProcAddress('glUniformMatrix3dv');
-    if not Assigned(glUniformMatrix3dv) then Exit;
-    glUniformMatrix4dv := wglGetProcAddress('glUniformMatrix4dv');
-    if not Assigned(glUniformMatrix4dv) then Exit;
-    glUniformMatrix2x3dv := wglGetProcAddress('glUniformMatrix2x3dv');
-    if not Assigned(glUniformMatrix2x3dv) then Exit;
-    glUniformMatrix2x4dv := wglGetProcAddress('glUniformMatrix2x4dv');
-    if not Assigned(glUniformMatrix2x4dv) then Exit;
-    glUniformMatrix3x2dv := wglGetProcAddress('glUniformMatrix3x2dv');
-    if not Assigned(glUniformMatrix3x2dv) then Exit;
-    glUniformMatrix3x4dv := wglGetProcAddress('glUniformMatrix3x4dv');
-    if not Assigned(glUniformMatrix3x4dv) then Exit;
-    glUniformMatrix4x2dv := wglGetProcAddress('glUniformMatrix4x2dv');
-    if not Assigned(glUniformMatrix4x2dv) then Exit;
-    glUniformMatrix4x3dv := wglGetProcAddress('glUniformMatrix4x3dv');
-    if not Assigned(glUniformMatrix4x3dv) then Exit;
-    glGetUniformdv := wglGetProcAddress('glGetUniformdv');
-    if not Assigned(glGetUniformdv) then Exit;
-    glProgramUniform1dEXT := wglGetProcAddress('glProgramUniform1dEXT');
-    if not Assigned(glProgramUniform1dEXT) then Exit;
-    glProgramUniform2dEXT := wglGetProcAddress('glProgramUniform2dEXT');
-    if not Assigned(glProgramUniform2dEXT) then Exit;
-    glProgramUniform3dEXT := wglGetProcAddress('glProgramUniform3dEXT');
-    if not Assigned(glProgramUniform3dEXT) then Exit;
-    glProgramUniform4dEXT := wglGetProcAddress('glProgramUniform4dEXT');
-    if not Assigned(glProgramUniform4dEXT) then Exit;
-    glProgramUniform1dvEXT := wglGetProcAddress('glProgramUniform1dvEXT');
-    if not Assigned(glProgramUniform1dvEXT) then Exit;
-    glProgramUniform2dvEXT := wglGetProcAddress('glProgramUniform2dvEXT');
-    if not Assigned(glProgramUniform2dvEXT) then Exit;
-    glProgramUniform3dvEXT := wglGetProcAddress('glProgramUniform3dvEXT');
-    if not Assigned(glProgramUniform3dvEXT) then Exit;
-    glProgramUniform4dvEXT := wglGetProcAddress('glProgramUniform4dvEXT');
-    if not Assigned(glProgramUniform4dvEXT) then Exit;
-    glProgramUniformMatrix2dvEXT := wglGetProcAddress('glProgramUniformMatrix2dvEXT');
-    if not Assigned(glProgramUniformMatrix2dvEXT) then Exit;
-    glProgramUniformMatrix3dvEXT := wglGetProcAddress('glProgramUniformMatrix3dvEXT');
-    if not Assigned(glProgramUniformMatrix3dvEXT) then Exit;
-    glProgramUniformMatrix4dvEXT := wglGetProcAddress('glProgramUniformMatrix4dvEXT');
-    if not Assigned(glProgramUniformMatrix4dvEXT) then Exit;
-    glProgramUniformMatrix2x3dvEXT := wglGetProcAddress('glProgramUniformMatrix2x3dvEXT');
-    if not Assigned(glProgramUniformMatrix2x3dvEXT) then Exit;
-    glProgramUniformMatrix2x4dvEXT := wglGetProcAddress('glProgramUniformMatrix2x4dvEXT');
-    if not Assigned(glProgramUniformMatrix2x4dvEXT) then Exit;
-    glProgramUniformMatrix3x2dvEXT := wglGetProcAddress('glProgramUniformMatrix3x2dvEXT');
-    if not Assigned(glProgramUniformMatrix3x2dvEXT) then Exit;
-    glProgramUniformMatrix3x4dvEXT := wglGetProcAddress('glProgramUniformMatrix3x4dvEXT');
-    if not Assigned(glProgramUniformMatrix3x4dvEXT) then Exit;
-    glProgramUniformMatrix4x2dvEXT := wglGetProcAddress('glProgramUniformMatrix4x2dvEXT');
-    if not Assigned(glProgramUniformMatrix4x2dvEXT) then Exit;
-    glProgramUniformMatrix4x3dvEXT := wglGetProcAddress('glProgramUniformMatrix4x3dvEXT');
-    if not Assigned(glProgramUniformMatrix4x3dvEXT) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_shader_subroutine(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..7] of funcinfoty =
+   (
+    (n: 'glGetSubroutineUniformLocation'; d: @glGetSubroutineUniformLocation),
+    (n: 'glGetSubroutineIndex'; d: @glGetSubroutineIndex),
+    (n: 'glGetActiveSubroutineUniformiv'; d: @glGetActiveSubroutineUniformiv),
+    (n: 'glGetActiveSubroutineUniformName'; d: @glGetActiveSubroutineUniformName),
+    (n: 'glGetActiveSubroutineName'; d: @glGetActiveSubroutineName),
+    (n: 'glUniformSubroutinesuiv'; d: @glUniformSubroutinesuiv),
+    (n: 'glGetUniformSubroutineuiv'; d: @glGetUniformSubroutineuiv),
+    (n: 'glGetProgramStageiv'; d: @glGetProgramStageiv)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_shader_subroutine', extstring) then
-  begin
-    glGetSubroutineUniformLocation := wglGetProcAddress('glGetSubroutineUniformLocation');
-    if not Assigned(glGetSubroutineUniformLocation) then Exit;
-    glGetSubroutineIndex := wglGetProcAddress('glGetSubroutineIndex');
-    if not Assigned(glGetSubroutineIndex) then Exit;
-    glGetActiveSubroutineUniformiv := wglGetProcAddress('glGetActiveSubroutineUniformiv');
-    if not Assigned(glGetActiveSubroutineUniformiv) then Exit;
-    glGetActiveSubroutineUniformName := wglGetProcAddress('glGetActiveSubroutineUniformName');
-    if not Assigned(glGetActiveSubroutineUniformName) then Exit;
-    glGetActiveSubroutineName := wglGetProcAddress('glGetActiveSubroutineName');
-    if not Assigned(glGetActiveSubroutineName) then Exit;
-    glUniformSubroutinesuiv := wglGetProcAddress('glUniformSubroutinesuiv');
-    if not Assigned(glUniformSubroutinesuiv) then Exit;
-    glGetUniformSubroutineuiv := wglGetProcAddress('glGetUniformSubroutineuiv');
-    if not Assigned(glGetUniformSubroutineuiv) then Exit;
-    glGetProgramStageiv := wglGetProcAddress('glGetProgramStageiv');
-    if not Assigned(glGetProgramStageiv) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_tessellation_shader(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..1] of funcinfoty =
+   (
+    (n: 'glPatchParameteri'; d: @glPatchParameteri),
+    (n: 'glPatchParameterfv'; d: @glPatchParameterfv)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_tessellation_shader', extstring) then
-  begin
-    glPatchParameteri := wglGetProcAddress('glPatchParameteri');
-    if not Assigned(glPatchParameteri) then Exit;
-    glPatchParameterfv := wglGetProcAddress('glPatchParameterfv');
-    if not Assigned(glPatchParameterfv) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_transform_feedback2(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..6] of funcinfoty =
+   (
+    (n: 'glBindTransformFeedback'; d: @glBindTransformFeedback),
+    (n: 'glDeleteTransformFeedbacks'; d: @glDeleteTransformFeedbacks),
+    (n: 'glGenTransformFeedbacks'; d: @glGenTransformFeedbacks),
+    (n: 'glIsTransformFeedback'; d: @glIsTransformFeedback),
+    (n: 'glPauseTransformFeedback'; d: @glPauseTransformFeedback),
+    (n: 'glResumeTransformFeedback'; d: @glResumeTransformFeedback),
+    (n: 'glDrawTransformFeedback'; d: @glDrawTransformFeedback)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_transform_feedback2', extstring) then
-  begin
-    glBindTransformFeedback := wglGetProcAddress('glBindTransformFeedback');
-    if not Assigned(glBindTransformFeedback) then Exit;
-    glDeleteTransformFeedbacks := wglGetProcAddress('glDeleteTransformFeedbacks');
-    if not Assigned(glDeleteTransformFeedbacks) then Exit;
-    glGenTransformFeedbacks := wglGetProcAddress('glGenTransformFeedbacks');
-    if not Assigned(glGenTransformFeedbacks) then Exit;
-    glIsTransformFeedback := wglGetProcAddress('glIsTransformFeedback');
-    if not Assigned(glIsTransformFeedback) then Exit;
-    glPauseTransformFeedback := wglGetProcAddress('glPauseTransformFeedback');
-    if not Assigned(glPauseTransformFeedback) then Exit;
-    glResumeTransformFeedback := wglGetProcAddress('glResumeTransformFeedback');
-    if not Assigned(glResumeTransformFeedback) then Exit;
-    glDrawTransformFeedback := wglGetProcAddress('glDrawTransformFeedback');
-    if not Assigned(glDrawTransformFeedback) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_ARB_transform_feedback3(): Boolean;
-var
-  extstring: String;
+const
+ funcs: array[0..3] of funcinfoty =
+   (
+    (n: 'glDrawTransformFeedbackStream'; d: @glDrawTransformFeedbackStream),
+    (n: 'glBeginQueryIndexed'; d: @glBeginQueryIndexed),
+    (n: 'glEndQueryIndexed'; d: @glEndQueryIndexed),
+    (n: 'glGetQueryIndexediv'; d: @glGetQueryIndexediv)
+   );
 begin
-  Result := False;
-  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-  if glext_ExtensionSupported('GL_ARB_transform_feedback3', extstring) then
-  begin
-    glDrawTransformFeedbackStream := wglGetProcAddress('glDrawTransformFeedbackStream');
-    if not Assigned(glDrawTransformFeedbackStream) then Exit;
-    glBeginQueryIndexed := wglGetProcAddress('glBeginQueryIndexed');
-    if not Assigned(glBeginQueryIndexed) then Exit;
-    glEndQueryIndexed := wglGetProcAddress('glEndQueryIndexed');
-    if not Assigned(glEndQueryIndexed) then Exit;
-    glGetQueryIndexediv := wglGetProcAddress('glGetQueryIndexediv');
-    if not Assigned(glGetQueryIndexediv) then Exit;
-    Result := True;
-  end;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_version_1_4: Boolean;
-//var
-//  extstring: String;
+const
+ funcs: array[0..44] of funcinfoty =
+   (
+    (n: 'glBlendFuncSeparate'; d: @glBlendFuncSeparate),
+    (n: 'glFogCoordf'; d: @glFogCoordf),
+    (n: 'glFogCoordfv'; d: @glFogCoordfv),
+    (n: 'glFogCoordd'; d: @glFogCoordd),
+    (n: 'glFogCoorddv'; d: @glFogCoorddv),
+    (n: 'glFogCoordPointer'; d: @glFogCoordPointer),
+    (n: 'glMultiDrawArrays'; d: @glMultiDrawArrays),
+    (n: 'glMultiDrawElements'; d: @glMultiDrawElements),
+    (n: 'glPointParameterf'; d: @glPointParameterf),
+    (n: 'glPointParameterfv'; d: @glPointParameterfv),
+    (n: 'glPointParameteri'; d: @glPointParameteri),
+    (n: 'glPointParameteriv'; d: @glPointParameteriv),
+    (n: 'glSecondaryColor3b'; d: @glSecondaryColor3b),
+    (n: 'glSecondaryColor3bv'; d: @glSecondaryColor3bv),
+    (n: 'glSecondaryColor3d'; d: @glSecondaryColor3d),
+    (n: 'glSecondaryColor3dv'; d: @glSecondaryColor3dv),
+    (n: 'glSecondaryColor3f'; d: @glSecondaryColor3f),
+    (n: 'glSecondaryColor3fv'; d: @glSecondaryColor3fv),
+    (n: 'glSecondaryColor3i'; d: @glSecondaryColor3i),
+    (n: 'glSecondaryColor3iv'; d: @glSecondaryColor3iv),
+    (n: 'glSecondaryColor3s'; d: @glSecondaryColor3s),
+    (n: 'glSecondaryColor3sv'; d: @glSecondaryColor3sv),
+    (n: 'glSecondaryColor3ub'; d: @glSecondaryColor3ub),
+    (n: 'glSecondaryColor3ubv'; d: @glSecondaryColor3ubv),
+    (n: 'glSecondaryColor3ui'; d: @glSecondaryColor3ui),
+    (n: 'glSecondaryColor3uiv'; d: @glSecondaryColor3uiv),
+    (n: 'glSecondaryColor3us'; d: @glSecondaryColor3us),
+    (n: 'glSecondaryColor3usv'; d: @glSecondaryColor3usv),
+    (n: 'glSecondaryColorPointer'; d: @glSecondaryColorPointer),
+    (n: 'glWindowPos2d'; d: @glWindowPos2d),
+    (n: 'glWindowPos2dv'; d: @glWindowPos2dv),
+    (n: 'glWindowPos2f'; d: @glWindowPos2f),
+    (n: 'glWindowPos2fv'; d: @glWindowPos2fv),
+    (n: 'glWindowPos2i'; d: @glWindowPos2i),
+    (n: 'glWindowPos2iv'; d: @glWindowPos2iv),
+    (n: 'glWindowPos2s'; d: @glWindowPos2s),
+    (n: 'glWindowPos2sv'; d: @glWindowPos2sv),
+    (n: 'glWindowPos3d'; d: @glWindowPos3d),
+    (n: 'glWindowPos3dv'; d: @glWindowPos3dv),
+    (n: 'glWindowPos3f'; d: @glWindowPos3f),
+    (n: 'glWindowPos3fv'; d: @glWindowPos3fv),
+    (n: 'glWindowPos3i'; d: @glWindowPos3i),
+    (n: 'glWindowPos3iv'; d: @glWindowPos3iv),
+    (n: 'glWindowPos3s'; d: @glWindowPos3s),
+    (n: 'glWindowPos3sv'; d: @glWindowPos3sv)
+   );
 begin
-
-  Result := FALSE;
-//  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-    glBlendFuncSeparate := wglGetProcAddress('glBlendFuncSeparate');
-    if not Assigned(glBlendFuncSeparate) then Exit;
-    glFogCoordf := wglGetProcAddress('glFogCoordf');
-    if not Assigned(glFogCoordf) then Exit;
-    glFogCoordfv := wglGetProcAddress('glFogCoordfv');
-    if not Assigned(glFogCoordfv) then Exit;
-    glFogCoordd := wglGetProcAddress('glFogCoordd');
-    if not Assigned(glFogCoordd) then Exit;
-    glFogCoorddv := wglGetProcAddress('glFogCoorddv');
-    if not Assigned(glFogCoorddv) then Exit;
-    glFogCoordPointer := wglGetProcAddress('glFogCoordPointer');
-    if not Assigned(glFogCoordPointer) then Exit;
-    glMultiDrawArrays := wglGetProcAddress('glMultiDrawArrays');
-    if not Assigned(glMultiDrawArrays) then Exit;
-    glMultiDrawElements := wglGetProcAddress('glMultiDrawElements');
-    if not Assigned(glMultiDrawElements) then Exit;
-    glPointParameterf := wglGetProcAddress('glPointParameterf');
-    if not Assigned(glPointParameterf) then Exit;
-    glPointParameterfv := wglGetProcAddress('glPointParameterfv');
-    if not Assigned(glPointParameterfv) then Exit;
-    glPointParameteri := wglGetProcAddress('glPointParameteri');
-    if not Assigned(glPointParameteri) then Exit;
-    glPointParameteriv := wglGetProcAddress('glPointParameteriv');
-    if not Assigned(glPointParameteriv) then Exit;
-    glSecondaryColor3b := wglGetProcAddress('glSecondaryColor3b');
-    if not Assigned(glSecondaryColor3b) then Exit;
-    glSecondaryColor3bv := wglGetProcAddress('glSecondaryColor3bv');
-    if not Assigned(glSecondaryColor3bv) then Exit;
-    glSecondaryColor3d := wglGetProcAddress('glSecondaryColor3d');
-    if not Assigned(glSecondaryColor3d) then Exit;
-    glSecondaryColor3dv := wglGetProcAddress('glSecondaryColor3dv');
-    if not Assigned(glSecondaryColor3dv) then Exit;
-    glSecondaryColor3f := wglGetProcAddress('glSecondaryColor3f');
-    if not Assigned(glSecondaryColor3f) then Exit;
-    glSecondaryColor3fv := wglGetProcAddress('glSecondaryColor3fv');
-    if not Assigned(glSecondaryColor3fv) then Exit;
-    glSecondaryColor3i := wglGetProcAddress('glSecondaryColor3i');
-    if not Assigned(glSecondaryColor3i) then Exit;
-    glSecondaryColor3iv := wglGetProcAddress('glSecondaryColor3iv');
-    if not Assigned(glSecondaryColor3iv) then Exit;
-    glSecondaryColor3s := wglGetProcAddress('glSecondaryColor3s');
-    if not Assigned(glSecondaryColor3s) then Exit;
-    glSecondaryColor3sv := wglGetProcAddress('glSecondaryColor3sv');
-    if not Assigned(glSecondaryColor3sv) then Exit;
-    glSecondaryColor3ub := wglGetProcAddress('glSecondaryColor3ub');
-    if not Assigned(glSecondaryColor3ub) then Exit;
-    glSecondaryColor3ubv := wglGetProcAddress('glSecondaryColor3ubv');
-    if not Assigned(glSecondaryColor3ubv) then Exit;
-    glSecondaryColor3ui := wglGetProcAddress('glSecondaryColor3ui');
-    if not Assigned(glSecondaryColor3ui) then Exit;
-    glSecondaryColor3uiv := wglGetProcAddress('glSecondaryColor3uiv');
-    if not Assigned(glSecondaryColor3uiv) then Exit;
-    glSecondaryColor3us := wglGetProcAddress('glSecondaryColor3us');
-    if not Assigned(glSecondaryColor3us) then Exit;
-    glSecondaryColor3usv := wglGetProcAddress('glSecondaryColor3usv');
-    if not Assigned(glSecondaryColor3usv) then Exit;
-    glSecondaryColorPointer := wglGetProcAddress('glSecondaryColorPointer');
-    if not Assigned(glSecondaryColorPointer) then Exit;
-    glWindowPos2d := wglGetProcAddress('glWindowPos2d');
-    if not Assigned(glWindowPos2d) then Exit;
-    glWindowPos2dv := wglGetProcAddress('glWindowPos2dv');
-    if not Assigned(glWindowPos2dv) then Exit;
-    glWindowPos2f := wglGetProcAddress('glWindowPos2f');
-    if not Assigned(glWindowPos2f) then Exit;
-    glWindowPos2fv := wglGetProcAddress('glWindowPos2fv');
-    if not Assigned(glWindowPos2fv) then Exit;
-    glWindowPos2i := wglGetProcAddress('glWindowPos2i');
-    if not Assigned(glWindowPos2i) then Exit;
-    glWindowPos2iv := wglGetProcAddress('glWindowPos2iv');
-    if not Assigned(glWindowPos2iv) then Exit;
-    glWindowPos2s := wglGetProcAddress('glWindowPos2s');
-    if not Assigned(glWindowPos2s) then Exit;
-    glWindowPos2sv := wglGetProcAddress('glWindowPos2sv');
-    if not Assigned(glWindowPos2sv) then Exit;
-    glWindowPos3d := wglGetProcAddress('glWindowPos3d');
-    if not Assigned(glWindowPos3d) then Exit;
-    glWindowPos3dv := wglGetProcAddress('glWindowPos3dv');
-    if not Assigned(glWindowPos3dv) then Exit;
-    glWindowPos3f := wglGetProcAddress('glWindowPos3f');
-    if not Assigned(glWindowPos3f) then Exit;
-    glWindowPos3fv := wglGetProcAddress('glWindowPos3fv');
-    if not Assigned(glWindowPos3fv) then Exit;
-    glWindowPos3i := wglGetProcAddress('glWindowPos3i');
-    if not Assigned(glWindowPos3i) then Exit;
-    glWindowPos3iv := wglGetProcAddress('glWindowPos3iv');
-    if not Assigned(glWindowPos3iv) then Exit;
-    glWindowPos3s := wglGetProcAddress('glWindowPos3s');
-    if not Assigned(glWindowPos3s) then Exit;
-    glWindowPos3sv := wglGetProcAddress('glWindowPos3sv');
-    if not Assigned(glWindowPos3sv) then Exit;
-    result:= true;
-//    Result := Load_GL_version_1_3;
+ result:= getprocaddresses(libgl,funcs);
 
 end;
 
 function Load_GL_version_1_5: Boolean;
-//var
-//  extstring: String;
+const
+ funcs: array[0..18] of funcinfoty =
+   (
+    (n: 'glGenQueries'; d: @glGenQueries),
+    (n: 'glDeleteQueries'; d: @glDeleteQueries),
+    (n: 'glIsQuery'; d: @glIsQuery),
+    (n: 'glBeginQuery'; d: @glBeginQuery),
+    (n: 'glEndQuery'; d: @glEndQuery),
+    (n: 'glGetQueryiv'; d: @glGetQueryiv),
+    (n: 'glGetQueryObjectiv'; d: @glGetQueryObjectiv),
+    (n: 'glGetQueryObjectuiv'; d: @glGetQueryObjectuiv),
+    (n: 'glBindBuffer'; d: @glBindBuffer),
+    (n: 'glDeleteBuffers'; d: @glDeleteBuffers),
+    (n: 'glGenBuffers'; d: @glGenBuffers),
+    (n: 'glIsBuffer'; d: @glIsBuffer),
+    (n: 'glBufferData'; d: @glBufferData),
+    (n: 'glBufferSubData'; d: @glBufferSubData),
+    (n: 'glGetBufferSubData'; d: @glGetBufferSubData),
+    (n: 'glMapBuffer'; d: @glMapBuffer),
+    (n: 'glUnmapBuffer'; d: @glUnmapBuffer),
+    (n: 'glGetBufferParameteriv'; d: @glGetBufferParameteriv),
+    (n: 'glGetBufferPointerv'; d: @glGetBufferPointerv)
+   );
 begin
-
-  Result := FALSE;
-//  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-    glGenQueries := wglGetProcAddress('glGenQueries');
-    if not Assigned(glGenQueries) then Exit;
-    glDeleteQueries := wglGetProcAddress('glDeleteQueries');
-    if not Assigned(glDeleteQueries) then Exit;
-    glIsQuery := wglGetProcAddress('glIsQuery');
-    if not Assigned(glIsQuery) then Exit;
-    glBeginQuery := wglGetProcAddress('glBeginQuery');
-    if not Assigned(glBeginQuery) then Exit;
-    glEndQuery := wglGetProcAddress('glEndQuery');
-    if not Assigned(glEndQuery) then Exit;
-    glGetQueryiv := wglGetProcAddress('glGetQueryiv');
-    if not Assigned(glGetQueryiv) then Exit;
-    glGetQueryObjectiv := wglGetProcAddress('glGetQueryObjectiv');
-    if not Assigned(glGetQueryObjectiv) then Exit;
-    glGetQueryObjectuiv := wglGetProcAddress('glGetQueryObjectuiv');
-    if not Assigned(glGetQueryObjectuiv) then Exit;
-    glBindBuffer := wglGetProcAddress('glBindBuffer');
-    if not Assigned(glBindBuffer) then Exit;
-    glDeleteBuffers := wglGetProcAddress('glDeleteBuffers');
-    if not Assigned(glDeleteBuffers) then Exit;
-    glGenBuffers := wglGetProcAddress('glGenBuffers');
-    if not Assigned(glGenBuffers) then Exit;
-    glIsBuffer := wglGetProcAddress('glIsBuffer');
-    if not Assigned(glIsBuffer) then Exit;
-    glBufferData := wglGetProcAddress('glBufferData');
-    if not Assigned(glBufferData) then Exit;
-    glBufferSubData := wglGetProcAddress('glBufferSubData');
-    if not Assigned(glBufferSubData) then Exit;
-    glGetBufferSubData := wglGetProcAddress('glGetBufferSubData');
-    if not Assigned(glGetBufferSubData) then Exit;
-    glMapBuffer := wglGetProcAddress('glMapBuffer');
-    if not Assigned(glMapBuffer) then Exit;
-    glUnmapBuffer := wglGetProcAddress('glUnmapBuffer');
-    if not Assigned(glUnmapBuffer) then Exit;
-    glGetBufferParameteriv := wglGetProcAddress('glGetBufferParameteriv');
-    if not Assigned(glGetBufferParameteriv) then Exit;
-    glGetBufferPointerv := wglGetProcAddress('glGetBufferPointerv');
-    if not Assigned(glGetBufferPointerv) then Exit;
-    result:= true;
-//    Result := Load_GL_version_1_4;
-
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_version_2_0: Boolean;
-//var
-//  extstring: String;
+const
+ funcs: array[0..92] of funcinfoty =
+   (
+    (n: 'glBlendEquationSeparate'; d: @glBlendEquationSeparate),
+    (n: 'glDrawBuffers'; d: @glDrawBuffers),
+    (n: 'glStencilOpSeparate'; d: @glStencilOpSeparate),
+    (n: 'glStencilFuncSeparate'; d: @glStencilFuncSeparate),
+    (n: 'glStencilMaskSeparate'; d: @glStencilMaskSeparate),
+    (n: 'glAttachShader'; d: @glAttachShader),
+    (n: 'glBindAttribLocation'; d: @glBindAttribLocation),
+    (n: 'glCompileShader'; d: @glCompileShader),
+    (n: 'glCreateProgram'; d: @glCreateProgram),
+    (n: 'glCreateShader'; d: @glCreateShader),
+    (n: 'glDeleteProgram'; d: @glDeleteProgram),
+    (n: 'glDeleteShader'; d: @glDeleteShader),
+    (n: 'glDetachShader'; d: @glDetachShader),
+    (n: 'glDisableVertexAttribArray'; d: @glDisableVertexAttribArray),
+    (n: 'glEnableVertexAttribArray'; d: @glEnableVertexAttribArray),
+    (n: 'glGetActiveAttrib'; d: @glGetActiveAttrib),
+    (n: 'glGetActiveUniform'; d: @glGetActiveUniform),
+    (n: 'glGetAttachedShaders'; d: @glGetAttachedShaders),
+    (n: 'glGetAttribLocation'; d: @glGetAttribLocation),
+    (n: 'glGetProgramiv'; d: @glGetProgramiv),
+    (n: 'glGetProgramInfoLog'; d: @glGetProgramInfoLog),
+    (n: 'glGetShaderiv'; d: @glGetShaderiv),
+    (n: 'glGetShaderInfoLog'; d: @glGetShaderInfoLog),
+    (n: 'glGetShaderSource'; d: @glGetShaderSource),
+    (n: 'glGetUniformLocation'; d: @glGetUniformLocation),
+    (n: 'glGetUniformfv'; d: @glGetUniformfv),
+    (n: 'glGetUniformiv'; d: @glGetUniformiv),
+    (n: 'glGetVertexAttribdv'; d: @glGetVertexAttribdv),
+    (n: 'glGetVertexAttribfv'; d: @glGetVertexAttribfv),
+    (n: 'glGetVertexAttribiv'; d: @glGetVertexAttribiv),
+    (n: 'glGetVertexAttribPointerv'; d: @glGetVertexAttribPointerv),
+    (n: 'glIsProgram'; d: @glIsProgram),
+    (n: 'glIsShader'; d: @glIsShader),
+    (n: 'glLinkProgram'; d: @glLinkProgram),
+    (n: 'glShaderSource'; d: @glShaderSource),
+    (n: 'glUseProgram'; d: @glUseProgram),
+    (n: 'glUniform1f'; d: @glUniform1f),
+    (n: 'glUniform2f'; d: @glUniform2f),
+    (n: 'glUniform3f'; d: @glUniform3f),
+    (n: 'glUniform4f'; d: @glUniform4f),
+    (n: 'glUniform1i'; d: @glUniform1i),
+    (n: 'glUniform2i'; d: @glUniform2i),
+    (n: 'glUniform3i'; d: @glUniform3i),
+    (n: 'glUniform4i'; d: @glUniform4i),
+    (n: 'glUniform1fv'; d: @glUniform1fv),
+    (n: 'glUniform2fv'; d: @glUniform2fv),
+    (n: 'glUniform3fv'; d: @glUniform3fv),
+    (n: 'glUniform4fv'; d: @glUniform4fv),
+    (n: 'glUniform1iv'; d: @glUniform1iv),
+    (n: 'glUniform2iv'; d: @glUniform2iv),
+    (n: 'glUniform3iv'; d: @glUniform3iv),
+    (n: 'glUniform4iv'; d: @glUniform4iv),
+    (n: 'glUniformMatrix2fv'; d: @glUniformMatrix2fv),
+    (n: 'glUniformMatrix3fv'; d: @glUniformMatrix3fv),
+    (n: 'glUniformMatrix4fv'; d: @glUniformMatrix4fv),
+    (n: 'glValidateProgram'; d: @glValidateProgram),
+    (n: 'glVertexAttrib1d'; d: @glVertexAttrib1d),
+    (n: 'glVertexAttrib1dv'; d: @glVertexAttrib1dv),
+    (n: 'glVertexAttrib1f'; d: @glVertexAttrib1f),
+    (n: 'glVertexAttrib1fv'; d: @glVertexAttrib1fv),
+    (n: 'glVertexAttrib1s'; d: @glVertexAttrib1s),
+    (n: 'glVertexAttrib1sv'; d: @glVertexAttrib1sv),
+    (n: 'glVertexAttrib2d'; d: @glVertexAttrib2d),
+    (n: 'glVertexAttrib2dv'; d: @glVertexAttrib2dv),
+    (n: 'glVertexAttrib2f'; d: @glVertexAttrib2f),
+    (n: 'glVertexAttrib2fv'; d: @glVertexAttrib2fv),
+    (n: 'glVertexAttrib2s'; d: @glVertexAttrib2s),
+    (n: 'glVertexAttrib2sv'; d: @glVertexAttrib2sv),
+    (n: 'glVertexAttrib3d'; d: @glVertexAttrib3d),
+    (n: 'glVertexAttrib3dv'; d: @glVertexAttrib3dv),
+    (n: 'glVertexAttrib3f'; d: @glVertexAttrib3f),
+    (n: 'glVertexAttrib3fv'; d: @glVertexAttrib3fv),
+    (n: 'glVertexAttrib3s'; d: @glVertexAttrib3s),
+    (n: 'glVertexAttrib3sv'; d: @glVertexAttrib3sv),
+    (n: 'glVertexAttrib4Nbv'; d: @glVertexAttrib4Nbv),
+    (n: 'glVertexAttrib4Niv'; d: @glVertexAttrib4Niv),
+    (n: 'glVertexAttrib4Nsv'; d: @glVertexAttrib4Nsv),
+    (n: 'glVertexAttrib4Nub'; d: @glVertexAttrib4Nub),
+    (n: 'glVertexAttrib4Nubv'; d: @glVertexAttrib4Nubv),
+    (n: 'glVertexAttrib4Nuiv'; d: @glVertexAttrib4Nuiv),
+    (n: 'glVertexAttrib4Nusv'; d: @glVertexAttrib4Nusv),
+    (n: 'glVertexAttrib4bv'; d: @glVertexAttrib4bv),
+    (n: 'glVertexAttrib4d'; d: @glVertexAttrib4d),
+    (n: 'glVertexAttrib4dv'; d: @glVertexAttrib4dv),
+    (n: 'glVertexAttrib4f'; d: @glVertexAttrib4f),
+    (n: 'glVertexAttrib4fv'; d: @glVertexAttrib4fv),
+    (n: 'glVertexAttrib4iv'; d: @glVertexAttrib4iv),
+    (n: 'glVertexAttrib4s'; d: @glVertexAttrib4s),
+    (n: 'glVertexAttrib4sv'; d: @glVertexAttrib4sv),
+    (n: 'glVertexAttrib4ubv'; d: @glVertexAttrib4ubv),
+    (n: 'glVertexAttrib4uiv'; d: @glVertexAttrib4uiv),
+    (n: 'glVertexAttrib4usv'; d: @glVertexAttrib4usv),
+    (n: 'glVertexAttribPointer'; d: @glVertexAttribPointer)
+   );
 begin
-
-  Result := FALSE;
-//  extstring := String(PChar(glGetString(GL_EXTENSIONS)));
-
-    glBlendEquationSeparate := wglGetProcAddress('glBlendEquationSeparate');
-    if not Assigned(glBlendEquationSeparate) then Exit;
-    glDrawBuffers := wglGetProcAddress('glDrawBuffers');
-    if not Assigned(glDrawBuffers) then Exit;
-    glStencilOpSeparate := wglGetProcAddress('glStencilOpSeparate');
-    if not Assigned(glStencilOpSeparate) then Exit;
-    glStencilFuncSeparate := wglGetProcAddress('glStencilFuncSeparate');
-    if not Assigned(glStencilFuncSeparate) then Exit;
-    glStencilMaskSeparate := wglGetProcAddress('glStencilMaskSeparate');
-    if not Assigned(glStencilMaskSeparate) then Exit;
-    glAttachShader := wglGetProcAddress('glAttachShader');
-    if not Assigned(glAttachShader) then Exit;
-    glBindAttribLocation := wglGetProcAddress('glBindAttribLocation');
-    if not Assigned(glBindAttribLocation) then Exit;
-    glCompileShader := wglGetProcAddress('glCompileShader');
-    if not Assigned(glCompileShader) then Exit;
-    glCreateProgram := wglGetProcAddress('glCreateProgram');
-    if not Assigned(glCreateProgram) then Exit;
-    glCreateShader := wglGetProcAddress('glCreateShader');
-    if not Assigned(glCreateShader) then Exit;
-    glDeleteProgram := wglGetProcAddress('glDeleteProgram');
-    if not Assigned(glDeleteProgram) then Exit;
-    glDeleteShader := wglGetProcAddress('glDeleteShader');
-    if not Assigned(glDeleteShader) then Exit;
-    glDetachShader := wglGetProcAddress('glDetachShader');
-    if not Assigned(glDetachShader) then Exit;
-    glDisableVertexAttribArray := wglGetProcAddress('glDisableVertexAttribArray');
-    if not Assigned(glDisableVertexAttribArray) then Exit;
-    glEnableVertexAttribArray := wglGetProcAddress('glEnableVertexAttribArray');
-    if not Assigned(glEnableVertexAttribArray) then Exit;
-    glGetActiveAttrib := wglGetProcAddress('glGetActiveAttrib');
-    if not Assigned(glGetActiveAttrib) then Exit;
-    glGetActiveUniform := wglGetProcAddress('glGetActiveUniform');
-    if not Assigned(glGetActiveUniform) then Exit;
-    glGetAttachedShaders := wglGetProcAddress('glGetAttachedShaders');
-    if not Assigned(glGetAttachedShaders) then Exit;
-    glGetAttribLocation := wglGetProcAddress('glGetAttribLocation');
-    if not Assigned(glGetAttribLocation) then Exit;
-    glGetProgramiv := wglGetProcAddress('glGetProgramiv');
-    if not Assigned(glGetProgramiv) then Exit;
-    glGetProgramInfoLog := wglGetProcAddress('glGetProgramInfoLog');
-    if not Assigned(glGetProgramInfoLog) then Exit;
-    glGetShaderiv := wglGetProcAddress('glGetShaderiv');
-    if not Assigned(glGetShaderiv) then Exit;
-    glGetShaderInfoLog := wglGetProcAddress('glGetShaderInfoLog');
-    if not Assigned(glGetShaderInfoLog) then Exit;
-    glGetShaderSource := wglGetProcAddress('glGetShaderSource');
-    if not Assigned(glGetShaderSource) then Exit;
-    glGetUniformLocation := wglGetProcAddress('glGetUniformLocation');
-    if not Assigned(glGetUniformLocation) then Exit;
-    glGetUniformfv := wglGetProcAddress('glGetUniformfv');
-    if not Assigned(glGetUniformfv) then Exit;
-    glGetUniformiv := wglGetProcAddress('glGetUniformiv');
-    if not Assigned(glGetUniformiv) then Exit;
-    glGetVertexAttribdv := wglGetProcAddress('glGetVertexAttribdv');
-    if not Assigned(glGetVertexAttribdv) then Exit;
-    glGetVertexAttribfv := wglGetProcAddress('glGetVertexAttribfv');
-    if not Assigned(glGetVertexAttribfv) then Exit;
-    glGetVertexAttribiv := wglGetProcAddress('glGetVertexAttribiv');
-    if not Assigned(glGetVertexAttribiv) then Exit;
-    glGetVertexAttribPointerv := wglGetProcAddress('glGetVertexAttribPointerv');
-    if not Assigned(glGetVertexAttribPointerv) then Exit;
-    glIsProgram := wglGetProcAddress('glIsProgram');
-    if not Assigned(glIsProgram) then Exit;
-    glIsShader := wglGetProcAddress('glIsShader');
-    if not Assigned(glIsShader) then Exit;
-    glLinkProgram := wglGetProcAddress('glLinkProgram');
-    if not Assigned(glLinkProgram) then Exit;
-    glShaderSource := wglGetProcAddress('glShaderSource');
-    if not Assigned(glShaderSource) then Exit;
-    glUseProgram := wglGetProcAddress('glUseProgram');
-    if not Assigned(glUseProgram) then Exit;
-    glUniform1f := wglGetProcAddress('glUniform1f');
-    if not Assigned(glUniform1f) then Exit;
-    glUniform2f := wglGetProcAddress('glUniform2f');
-    if not Assigned(glUniform2f) then Exit;
-    glUniform3f := wglGetProcAddress('glUniform3f');
-    if not Assigned(glUniform3f) then Exit;
-    glUniform4f := wglGetProcAddress('glUniform4f');
-    if not Assigned(glUniform4f) then Exit;
-    glUniform1i := wglGetProcAddress('glUniform1i');
-    if not Assigned(glUniform1i) then Exit;
-    glUniform2i := wglGetProcAddress('glUniform2i');
-    if not Assigned(glUniform2i) then Exit;
-    glUniform3i := wglGetProcAddress('glUniform3i');
-    if not Assigned(glUniform3i) then Exit;
-    glUniform4i := wglGetProcAddress('glUniform4i');
-    if not Assigned(glUniform4i) then Exit;
-    glUniform1fv := wglGetProcAddress('glUniform1fv');
-    if not Assigned(glUniform1fv) then Exit;
-    glUniform2fv := wglGetProcAddress('glUniform2fv');
-    if not Assigned(glUniform2fv) then Exit;
-    glUniform3fv := wglGetProcAddress('glUniform3fv');
-    if not Assigned(glUniform3fv) then Exit;
-    glUniform4fv := wglGetProcAddress('glUniform4fv');
-    if not Assigned(glUniform4fv) then Exit;
-    glUniform1iv := wglGetProcAddress('glUniform1iv');
-    if not Assigned(glUniform1iv) then Exit;
-    glUniform2iv := wglGetProcAddress('glUniform2iv');
-    if not Assigned(glUniform2iv) then Exit;
-    glUniform3iv := wglGetProcAddress('glUniform3iv');
-    if not Assigned(glUniform3iv) then Exit;
-    glUniform4iv := wglGetProcAddress('glUniform4iv');
-    if not Assigned(glUniform4iv) then Exit;
-    glUniformMatrix2fv := wglGetProcAddress('glUniformMatrix2fv');
-    if not Assigned(glUniformMatrix2fv) then Exit;
-    glUniformMatrix3fv := wglGetProcAddress('glUniformMatrix3fv');
-    if not Assigned(glUniformMatrix3fv) then Exit;
-    glUniformMatrix4fv := wglGetProcAddress('glUniformMatrix4fv');
-    if not Assigned(glUniformMatrix4fv) then Exit;
-    glValidateProgram := wglGetProcAddress('glValidateProgram');
-    if not Assigned(glValidateProgram) then Exit;
-    glVertexAttrib1d := wglGetProcAddress('glVertexAttrib1d');
-    if not Assigned(glVertexAttrib1d) then Exit;
-    glVertexAttrib1dv := wglGetProcAddress('glVertexAttrib1dv');
-    if not Assigned(glVertexAttrib1dv) then Exit;
-    glVertexAttrib1f := wglGetProcAddress('glVertexAttrib1f');
-    if not Assigned(glVertexAttrib1f) then Exit;
-    glVertexAttrib1fv := wglGetProcAddress('glVertexAttrib1fv');
-    if not Assigned(glVertexAttrib1fv) then Exit;
-    glVertexAttrib1s := wglGetProcAddress('glVertexAttrib1s');
-    if not Assigned(glVertexAttrib1s) then Exit;
-    glVertexAttrib1sv := wglGetProcAddress('glVertexAttrib1sv');
-    if not Assigned(glVertexAttrib1sv) then Exit;
-    glVertexAttrib2d := wglGetProcAddress('glVertexAttrib2d');
-    if not Assigned(glVertexAttrib2d) then Exit;
-    glVertexAttrib2dv := wglGetProcAddress('glVertexAttrib2dv');
-    if not Assigned(glVertexAttrib2dv) then Exit;
-    glVertexAttrib2f := wglGetProcAddress('glVertexAttrib2f');
-    if not Assigned(glVertexAttrib2f) then Exit;
-    glVertexAttrib2fv := wglGetProcAddress('glVertexAttrib2fv');
-    if not Assigned(glVertexAttrib2fv) then Exit;
-    glVertexAttrib2s := wglGetProcAddress('glVertexAttrib2s');
-    if not Assigned(glVertexAttrib2s) then Exit;
-    glVertexAttrib2sv := wglGetProcAddress('glVertexAttrib2sv');
-    if not Assigned(glVertexAttrib2sv) then Exit;
-    glVertexAttrib3d := wglGetProcAddress('glVertexAttrib3d');
-    if not Assigned(glVertexAttrib3d) then Exit;
-    glVertexAttrib3dv := wglGetProcAddress('glVertexAttrib3dv');
-    if not Assigned(glVertexAttrib3dv) then Exit;
-    glVertexAttrib3f := wglGetProcAddress('glVertexAttrib3f');
-    if not Assigned(glVertexAttrib3f) then Exit;
-    glVertexAttrib3fv := wglGetProcAddress('glVertexAttrib3fv');
-    if not Assigned(glVertexAttrib3fv) then Exit;
-    glVertexAttrib3s := wglGetProcAddress('glVertexAttrib3s');
-    if not Assigned(glVertexAttrib3s) then Exit;
-    glVertexAttrib3sv := wglGetProcAddress('glVertexAttrib3sv');
-    if not Assigned(glVertexAttrib3sv) then Exit;
-    glVertexAttrib4Nbv := wglGetProcAddress('glVertexAttrib4Nbv');
-    if not Assigned(glVertexAttrib4Nbv) then Exit;
-    glVertexAttrib4Niv := wglGetProcAddress('glVertexAttrib4Niv');
-    if not Assigned(glVertexAttrib4Niv) then Exit;
-    glVertexAttrib4Nsv := wglGetProcAddress('glVertexAttrib4Nsv');
-    if not Assigned(glVertexAttrib4Nsv) then Exit;
-    glVertexAttrib4Nub := wglGetProcAddress('glVertexAttrib4Nub');
-    if not Assigned(glVertexAttrib4Nub) then Exit;
-    glVertexAttrib4Nubv := wglGetProcAddress('glVertexAttrib4Nubv');
-    if not Assigned(glVertexAttrib4Nubv) then Exit;
-    glVertexAttrib4Nuiv := wglGetProcAddress('glVertexAttrib4Nuiv');
-    if not Assigned(glVertexAttrib4Nuiv) then Exit;
-    glVertexAttrib4Nusv := wglGetProcAddress('glVertexAttrib4Nusv');
-    if not Assigned(glVertexAttrib4Nusv) then Exit;
-    glVertexAttrib4bv := wglGetProcAddress('glVertexAttrib4bv');
-    if not Assigned(glVertexAttrib4bv) then Exit;
-    glVertexAttrib4d := wglGetProcAddress('glVertexAttrib4d');
-    if not Assigned(glVertexAttrib4d) then Exit;
-    glVertexAttrib4dv := wglGetProcAddress('glVertexAttrib4dv');
-    if not Assigned(glVertexAttrib4dv) then Exit;
-    glVertexAttrib4f := wglGetProcAddress('glVertexAttrib4f');
-    if not Assigned(glVertexAttrib4f) then Exit;
-    glVertexAttrib4fv := wglGetProcAddress('glVertexAttrib4fv');
-    if not Assigned(glVertexAttrib4fv) then Exit;
-    glVertexAttrib4iv := wglGetProcAddress('glVertexAttrib4iv');
-    if not Assigned(glVertexAttrib4iv) then Exit;
-    glVertexAttrib4s := wglGetProcAddress('glVertexAttrib4s');
-    if not Assigned(glVertexAttrib4s) then Exit;
-    glVertexAttrib4sv := wglGetProcAddress('glVertexAttrib4sv');
-    if not Assigned(glVertexAttrib4sv) then Exit;
-    glVertexAttrib4ubv := wglGetProcAddress('glVertexAttrib4ubv');
-    if not Assigned(glVertexAttrib4ubv) then Exit;
-    glVertexAttrib4uiv := wglGetProcAddress('glVertexAttrib4uiv');
-    if not Assigned(glVertexAttrib4uiv) then Exit;
-    glVertexAttrib4usv := wglGetProcAddress('glVertexAttrib4usv');
-    if not Assigned(glVertexAttrib4usv) then Exit;
-    glVertexAttribPointer := wglGetProcAddress('glVertexAttribPointer');
-    if not Assigned(glVertexAttribPointer) then Exit;
-    result:= true;
-//    Result := Load_GL_version_1_5;
+ result:= getprocaddresses(libgl,funcs);
 
 end;
-
+(*
 function glext_LoadExtension(ext: String): Boolean;
 begin
 
@@ -10964,209 +8125,145 @@ begin
   else if ext = 'GL_version_2_0' then Result := Load_GL_version_2_0
 
 end;
+*)
 
 function Load_GL_VERSION_2_1(): Boolean;
+const
+ funcs: array[0..5] of funcinfoty =
+   (
+    (n: 'glUniformMatrix2x3fv'; d: @glUniformMatrix2x3fv),
+    (n: 'glUniformMatrix3x2fv'; d: @glUniformMatrix3x2fv),
+    (n: 'glUniformMatrix2x4fv'; d: @glUniformMatrix2x4fv),
+    (n: 'glUniformMatrix4x2fv'; d: @glUniformMatrix4x2fv),
+    (n: 'glUniformMatrix3x4fv'; d: @glUniformMatrix3x4fv),
+    (n: 'glUniformMatrix4x3fv'; d: @glUniformMatrix4x3fv)
+   );
 begin
-  Result := False;
-  glUniformMatrix2x3fv := wglGetProcAddress('glUniformMatrix2x3fv');
-  if not Assigned(glUniformMatrix2x3fv) then Exit;
-  glUniformMatrix3x2fv := wglGetProcAddress('glUniformMatrix3x2fv');
-  if not Assigned(glUniformMatrix3x2fv) then Exit;
-  glUniformMatrix2x4fv := wglGetProcAddress('glUniformMatrix2x4fv');
-  if not Assigned(glUniformMatrix2x4fv) then Exit;
-  glUniformMatrix4x2fv := wglGetProcAddress('glUniformMatrix4x2fv');
-  if not Assigned(glUniformMatrix4x2fv) then Exit;
-  glUniformMatrix3x4fv := wglGetProcAddress('glUniformMatrix3x4fv');
-  if not Assigned(glUniformMatrix3x4fv) then Exit;
-  glUniformMatrix4x3fv := wglGetProcAddress('glUniformMatrix4x3fv');
-  if not Assigned(glUniformMatrix4x3fv) then Exit;
-    result:= true;
-//  Result := Load_GL_VERSION_2_0();
+ result:= getprocaddresses(libgl,funcs);
 end;
 
 function Load_GL_VERSION_3_0(): Boolean;
+const
+ funcs: array[0..57] of funcinfoty =
+   (
+    (n: 'glColorMaski'; d: @glColorMaski),
+    (n: 'glGetBooleani_v'; d: @glGetBooleani_v),
+    (n: 'glGetIntegeri_v'; d: @glGetIntegeri_v),
+    (n: 'glEnablei'; d: @glEnablei),
+    (n: 'glDisablei'; d: @glDisablei),
+    (n: 'glIsEnabledi'; d: @glIsEnabledi),
+    (n: 'glBeginTransformFeedback'; d: @glBeginTransformFeedback),
+    (n: 'glEndTransformFeedback'; d: @glEndTransformFeedback),
+    (n: 'glBindBufferRange'; d: @glBindBufferRange),
+    (n: 'glBindBufferBase'; d: @glBindBufferBase),
+    (n: 'glTransformFeedbackVaryings'; d: @glTransformFeedbackVaryings),
+    (n: 'glGetTransformFeedbackVarying'; d: @glGetTransformFeedbackVarying),
+    (n: 'glClampColor'; d: @glClampColor),
+    (n: 'glBeginConditionalRender'; d: @glBeginConditionalRender),
+    (n: 'glEndConditionalRender'; d: @glEndConditionalRender),
+    (n: 'glVertexAttribIPointer'; d: @glVertexAttribIPointer),
+    (n: 'glGetVertexAttribIiv'; d: @glGetVertexAttribIiv),
+    (n: 'glGetVertexAttribIuiv'; d: @glGetVertexAttribIuiv),
+    (n: 'glVertexAttribI1i'; d: @glVertexAttribI1i),
+    (n: 'glVertexAttribI2i'; d: @glVertexAttribI2i),
+    (n: 'glVertexAttribI3i'; d: @glVertexAttribI3i),
+    (n: 'glVertexAttribI4i'; d: @glVertexAttribI4i),
+    (n: 'glVertexAttribI1ui'; d: @glVertexAttribI1ui),
+    (n: 'glVertexAttribI2ui'; d: @glVertexAttribI2ui),
+    (n: 'glVertexAttribI3ui'; d: @glVertexAttribI3ui),
+    (n: 'glVertexAttribI4ui'; d: @glVertexAttribI4ui),
+    (n: 'glVertexAttribI1iv'; d: @glVertexAttribI1iv),
+    (n: 'glVertexAttribI2iv'; d: @glVertexAttribI2iv),
+    (n: 'glVertexAttribI3iv'; d: @glVertexAttribI3iv),
+    (n: 'glVertexAttribI4iv'; d: @glVertexAttribI4iv),
+    (n: 'glVertexAttribI1uiv'; d: @glVertexAttribI1uiv),
+    (n: 'glVertexAttribI2uiv'; d: @glVertexAttribI2uiv),
+    (n: 'glVertexAttribI3uiv'; d: @glVertexAttribI3uiv),
+    (n: 'glVertexAttribI4uiv'; d: @glVertexAttribI4uiv),
+    (n: 'glVertexAttribI4bv'; d: @glVertexAttribI4bv),
+    (n: 'glVertexAttribI4sv'; d: @glVertexAttribI4sv),
+    (n: 'glVertexAttribI4ubv'; d: @glVertexAttribI4ubv),
+    (n: 'glVertexAttribI4usv'; d: @glVertexAttribI4usv),
+    (n: 'glGetUniformuiv'; d: @glGetUniformuiv),
+    (n: 'glBindFragDataLocation'; d: @glBindFragDataLocation),
+    (n: 'glGetFragDataLocation'; d: @glGetFragDataLocation),
+    (n: 'glUniform1ui'; d: @glUniform1ui),
+    (n: 'glUniform2ui'; d: @glUniform2ui),
+    (n: 'glUniform3ui'; d: @glUniform3ui),
+    (n: 'glUniform4ui'; d: @glUniform4ui),
+    (n: 'glUniform1uiv'; d: @glUniform1uiv),
+    (n: 'glUniform2uiv'; d: @glUniform2uiv),
+    (n: 'glUniform3uiv'; d: @glUniform3uiv),
+    (n: 'glUniform4uiv'; d: @glUniform4uiv),
+    (n: 'glTexParameterIiv'; d: @glTexParameterIiv),
+    (n: 'glTexParameterIuiv'; d: @glTexParameterIuiv),
+    (n: 'glGetTexParameterIiv'; d: @glGetTexParameterIiv),
+    (n: 'glGetTexParameterIuiv'; d: @glGetTexParameterIuiv),
+    (n: 'glClearBufferiv'; d: @glClearBufferiv),
+    (n: 'glClearBufferuiv'; d: @glClearBufferuiv),
+    (n: 'glClearBufferfv'; d: @glClearBufferfv),
+    (n: 'glClearBufferfi'; d: @glClearBufferfi),
+    (n: 'glGetStringi'; d: @glGetStringi)
+  );
 begin
-  Result := False;
-  glColorMaski := wglGetProcAddress('glColorMaski');
-  if not Assigned(glColorMaski) then Exit;
-  glGetBooleani_v := wglGetProcAddress('glGetBooleani_v');
-  if not Assigned(glGetBooleani_v) then Exit;
-  glGetIntegeri_v := wglGetProcAddress('glGetIntegeri_v');
-  if not Assigned(glGetIntegeri_v) then Exit;
-  glEnablei := wglGetProcAddress('glEnablei');
-  if not Assigned(glEnablei) then Exit;
-  glDisablei := wglGetProcAddress('glDisablei');
-  if not Assigned(glDisablei) then Exit;
-  glIsEnabledi := wglGetProcAddress('glIsEnabledi');
-  if not Assigned(glIsEnabledi) then Exit;
-  glBeginTransformFeedback := wglGetProcAddress('glBeginTransformFeedback');
-  if not Assigned(glBeginTransformFeedback) then Exit;
-  glEndTransformFeedback := wglGetProcAddress('glEndTransformFeedback');
-  if not Assigned(glEndTransformFeedback) then Exit;
-  glBindBufferRange := wglGetProcAddress('glBindBufferRange');
-  if not Assigned(glBindBufferRange) then Exit;
-  glBindBufferBase := wglGetProcAddress('glBindBufferBase');
-  if not Assigned(glBindBufferBase) then Exit;
-  glTransformFeedbackVaryings := wglGetProcAddress('glTransformFeedbackVaryings');
-  if not Assigned(glTransformFeedbackVaryings) then Exit;
-  glGetTransformFeedbackVarying := wglGetProcAddress('glGetTransformFeedbackVarying');
-  if not Assigned(glGetTransformFeedbackVarying) then Exit;
-  glClampColor := wglGetProcAddress('glClampColor');
-  if not Assigned(glClampColor) then Exit;
-  glBeginConditionalRender := wglGetProcAddress('glBeginConditionalRender');
-  if not Assigned(glBeginConditionalRender) then Exit;
-  glEndConditionalRender := wglGetProcAddress('glEndConditionalRender');
-  if not Assigned(glEndConditionalRender) then Exit;
-  glVertexAttribIPointer := wglGetProcAddress('glVertexAttribIPointer');
-  if not Assigned(glVertexAttribIPointer) then Exit;
-  glGetVertexAttribIiv := wglGetProcAddress('glGetVertexAttribIiv');
-  if not Assigned(glGetVertexAttribIiv) then Exit;
-  glGetVertexAttribIuiv := wglGetProcAddress('glGetVertexAttribIuiv');
-  if not Assigned(glGetVertexAttribIuiv) then Exit;
-  glVertexAttribI1i := wglGetProcAddress('glVertexAttribI1i');
-  if not Assigned(glVertexAttribI1i) then Exit;
-  glVertexAttribI2i := wglGetProcAddress('glVertexAttribI2i');
-  if not Assigned(glVertexAttribI2i) then Exit;
-  glVertexAttribI3i := wglGetProcAddress('glVertexAttribI3i');
-  if not Assigned(glVertexAttribI3i) then Exit;
-  glVertexAttribI4i := wglGetProcAddress('glVertexAttribI4i');
-  if not Assigned(glVertexAttribI4i) then Exit;
-  glVertexAttribI1ui := wglGetProcAddress('glVertexAttribI1ui');
-  if not Assigned(glVertexAttribI1ui) then Exit;
-  glVertexAttribI2ui := wglGetProcAddress('glVertexAttribI2ui');
-  if not Assigned(glVertexAttribI2ui) then Exit;
-  glVertexAttribI3ui := wglGetProcAddress('glVertexAttribI3ui');
-  if not Assigned(glVertexAttribI3ui) then Exit;
-  glVertexAttribI4ui := wglGetProcAddress('glVertexAttribI4ui');
-  if not Assigned(glVertexAttribI4ui) then Exit;
-  glVertexAttribI1iv := wglGetProcAddress('glVertexAttribI1iv');
-  if not Assigned(glVertexAttribI1iv) then Exit;
-  glVertexAttribI2iv := wglGetProcAddress('glVertexAttribI2iv');
-  if not Assigned(glVertexAttribI2iv) then Exit;
-  glVertexAttribI3iv := wglGetProcAddress('glVertexAttribI3iv');
-  if not Assigned(glVertexAttribI3iv) then Exit;
-  glVertexAttribI4iv := wglGetProcAddress('glVertexAttribI4iv');
-  if not Assigned(glVertexAttribI4iv) then Exit;
-  glVertexAttribI1uiv := wglGetProcAddress('glVertexAttribI1uiv');
-  if not Assigned(glVertexAttribI1uiv) then Exit;
-  glVertexAttribI2uiv := wglGetProcAddress('glVertexAttribI2uiv');
-  if not Assigned(glVertexAttribI2uiv) then Exit;
-  glVertexAttribI3uiv := wglGetProcAddress('glVertexAttribI3uiv');
-  if not Assigned(glVertexAttribI3uiv) then Exit;
-  glVertexAttribI4uiv := wglGetProcAddress('glVertexAttribI4uiv');
-  if not Assigned(glVertexAttribI4uiv) then Exit;
-  glVertexAttribI4bv := wglGetProcAddress('glVertexAttribI4bv');
-  if not Assigned(glVertexAttribI4bv) then Exit;
-  glVertexAttribI4sv := wglGetProcAddress('glVertexAttribI4sv');
-  if not Assigned(glVertexAttribI4sv) then Exit;
-  glVertexAttribI4ubv := wglGetProcAddress('glVertexAttribI4ubv');
-  if not Assigned(glVertexAttribI4ubv) then Exit;
-  glVertexAttribI4usv := wglGetProcAddress('glVertexAttribI4usv');
-  if not Assigned(glVertexAttribI4usv) then Exit;
-  glGetUniformuiv := wglGetProcAddress('glGetUniformuiv');
-  if not Assigned(glGetUniformuiv) then Exit;
-  glBindFragDataLocation := wglGetProcAddress('glBindFragDataLocation');
-  if not Assigned(glBindFragDataLocation) then Exit;
-  glGetFragDataLocation := wglGetProcAddress('glGetFragDataLocation');
-  if not Assigned(glGetFragDataLocation) then Exit;
-  glUniform1ui := wglGetProcAddress('glUniform1ui');
-  if not Assigned(glUniform1ui) then Exit;
-  glUniform2ui := wglGetProcAddress('glUniform2ui');
-  if not Assigned(glUniform2ui) then Exit;
-  glUniform3ui := wglGetProcAddress('glUniform3ui');
-  if not Assigned(glUniform3ui) then Exit;
-  glUniform4ui := wglGetProcAddress('glUniform4ui');
-  if not Assigned(glUniform4ui) then Exit;
-  glUniform1uiv := wglGetProcAddress('glUniform1uiv');
-  if not Assigned(glUniform1uiv) then Exit;
-  glUniform2uiv := wglGetProcAddress('glUniform2uiv');
-  if not Assigned(glUniform2uiv) then Exit;
-  glUniform3uiv := wglGetProcAddress('glUniform3uiv');
-  if not Assigned(glUniform3uiv) then Exit;
-  glUniform4uiv := wglGetProcAddress('glUniform4uiv');
-  if not Assigned(glUniform4uiv) then Exit;
-  glTexParameterIiv := wglGetProcAddress('glTexParameterIiv');
-  if not Assigned(glTexParameterIiv) then Exit;
-  glTexParameterIuiv := wglGetProcAddress('glTexParameterIuiv');
-  if not Assigned(glTexParameterIuiv) then Exit;
-  glGetTexParameterIiv := wglGetProcAddress('glGetTexParameterIiv');
-  if not Assigned(glGetTexParameterIiv) then Exit;
-  glGetTexParameterIuiv := wglGetProcAddress('glGetTexParameterIuiv');
-  if not Assigned(glGetTexParameterIuiv) then Exit;
-  glClearBufferiv := wglGetProcAddress('glClearBufferiv');
-  if not Assigned(glClearBufferiv) then Exit;
-  glClearBufferuiv := wglGetProcAddress('glClearBufferuiv');
-  if not Assigned(glClearBufferuiv) then Exit;
-  glClearBufferfv := wglGetProcAddress('glClearBufferfv');
-  if not Assigned(glClearBufferfv) then Exit;
-  glClearBufferfi := wglGetProcAddress('glClearBufferfi');
-  if not Assigned(glClearBufferfi) then Exit;
-  glGetStringi := wglGetProcAddress('glGetStringi');
-  if not Assigned(glGetStringi) then Exit;
-  if not Load_GL_ARB_framebuffer_object() then Exit;
-  if not Load_GL_ARB_map_buffer_range() then Exit;
-  if not Load_GL_ARB_vertex_array_object() then Exit;
-    result:= true;
-//  Result := Load_GL_VERSION_2_1();
+ result:= getprocaddresses(libgl,funcs);
+ result:= result and mseglloadextensions([
+                                   gle_GL_ARB_framebuffer_object,
+                                   gle_GL_ARB_map_buffer_range,
+                                   gle_GL_ARB_vertex_array_object]);
 end;
 
 function Load_GL_VERSION_3_1(): Boolean;
+const
+ funcs: array[0..3] of funcinfoty =
+   (
+    (n: 'glDrawArraysInstanced'; d: @glDrawArraysInstanced),
+    (n: 'glDrawElementsInstanced'; d: @glDrawElementsInstanced),
+    (n: 'glTexBuffer'; d: @glTexBuffer),
+    (n: 'glPrimitiveRestartIndex'; d: @glPrimitiveRestartIndex)
+   );
 begin
-  Result := False;
-  glDrawArraysInstanced := wglGetProcAddress('glDrawArraysInstanced');
-  if not Assigned(glDrawArraysInstanced) then Exit;
-  glDrawElementsInstanced := wglGetProcAddress('glDrawElementsInstanced');
-  if not Assigned(glDrawElementsInstanced) then Exit;
-  glTexBuffer := wglGetProcAddress('glTexBuffer');
-  if not Assigned(glTexBuffer) then Exit;
-  glPrimitiveRestartIndex := wglGetProcAddress('glPrimitiveRestartIndex');
-  if not Assigned(glPrimitiveRestartIndex) then Exit;
-  if not Load_GL_ARB_copy_buffer() then Exit;
-  if not Load_GL_ARB_uniform_buffer_object() then Exit;
-    result:= true;
-//  Result := Load_GL_VERSION_3_0();
+ result:= getprocaddresses(libgl,funcs);
+ result:= result and mseglloadextensions([
+                             gle_GL_ARB_copy_buffer,
+                             gle_GL_ARB_uniform_buffer_object]);
 end;
 
 function Load_GL_VERSION_3_2(): Boolean;
+const
+ funcs: array[0..3] of funcinfoty =
+   (
+    (n: 'glGetInteger64i_v'; d: @glGetInteger64i_v),
+    (n: 'glGetBufferParameteri64v'; d: @glGetBufferParameteri64v),
+    (n: 'glProgramParameteri'; d: @glProgramParameteri),
+    (n: 'glFramebufferTexture'; d: @glFramebufferTexture)
+   );
 begin
-  Result := False;
-  glGetInteger64i_v := wglGetProcAddress('glGetInteger64i_v');
-  if not Assigned(glGetInteger64i_v) then Exit;
-  glGetBufferParameteri64v := wglGetProcAddress('glGetBufferParameteri64v');
-  if not Assigned(glGetBufferParameteri64v) then Exit;
-  glProgramParameteri := wglGetProcAddress('glProgramParameteri');
-  if not Assigned(glProgramParameteri) then Exit;
-  glFramebufferTexture := wglGetProcAddress('glFramebufferTexture');
-  if not Assigned(glFramebufferTexture) then Exit;
-  if not Load_GL_ARB_draw_elements_base_vertex() then Exit;
-  if not Load_GL_ARB_provoking_vertex() then Exit;
-  if not Load_GL_ARB_sync() then Exit;
-  if not Load_GL_ARB_texture_multisample() then Exit;
-    result:= true;
-//  Result := Load_GL_VERSION_3_1();
+ result:= getprocaddresses(libgl,funcs);
+ result:= result and mseglloadextensions([
+                             gle_GL_ARB_draw_elements_base_vertex,
+                             gle_GL_ARB_provoking_vertex,
+                             gle_GL_ARB_sync,
+                             gle_GL_ARB_texture_multisample]);
 end;
 
 function Load_GL_VERSION_3_3(): Boolean;
 begin
-  Result := False;
-  if not Load_GL_ARB_blend_func_extended() then Exit;
-  if not Load_GL_ARB_sampler_objects() then Exit;
-  if not Load_GL_ARB_timer_query() then Exit;
-  if not Load_GL_ARB_vertex_type_2_10_10_10_rev() then Exit;
-    result:= true;
-//  Result := Load_GL_VERSION_3_2();
+ result:= mseglloadextensions([
+                             gle_GL_ARB_blend_func_extended,
+                             gle_GL_ARB_sampler_objects,
+                             gle_GL_ARB_timer_query,
+                             gle_GL_ARB_vertex_type_2_10_10_10_rev]);
 end;
 
 function Load_GL_VERSION_4_0(): Boolean;
 begin
-  Result := False;
-  if not Load_GL_ARB_gpu_shader_fp64() then Exit;
-  if not Load_GL_ARB_shader_subroutine() then Exit;
-  if not Load_GL_ARB_tessellation_shader() then Exit;
-  if not Load_GL_ARB_transform_feedback2() then Exit;
-  if not Load_GL_ARB_transform_feedback3() then Exit;
-    result:= true;
-//  Result := Load_GL_VERSION_3_3();
+ result:= mseglloadextensions([
+                             gle_GL_ARB_gpu_shader_fp64,
+                             gle_GL_ARB_shader_subroutine,
+                             gle_GL_ARB_tessellation_shader,
+                             gle_GL_ARB_transform_feedback2,
+                             gle_GL_ARB_transform_feedback3]);
 end;
 
 end.

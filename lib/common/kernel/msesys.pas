@@ -338,19 +338,19 @@ begin
  result:= true;
  for int1:= 0 to high(procedures) do begin
   with procedures[int1] do begin
- {$ifdef FPC}
-  d^:= getprocedureaddress(lib,n);
+  {$ifdef FPC}
+   d^:= getprocedureaddress(lib,n);
   {$else}
-  d^:= getprocaddress(lib,pansichar(n));
+   d^:= getprocaddress(lib,pansichar(n));
   {$endif}
-  if (d^ = nil) then begin
-   result:= false;
-   if not noexception then begin
-    raise exception.create('Function "'+n+'" not found.');
+   if (d^ = nil) then begin
+    result:= false;
+    if not noexception then begin
+     raise exception.create('Function "'+n+'" not found.');
+    end;
    end;
   end;
  end;
-end;
 end;
 
 function getprocaddresses(const lib: tlibhandle; const anames: array of string; 

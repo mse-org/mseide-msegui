@@ -54,12 +54,16 @@ var
 
 procedure regdynlibinit(var info: dynlibinfoty; const initproc: dynlibprocty);
 begin
+ sys_mutexlock(lock);
  adduniqueitem(info.inithooks,pointer(initproc));
+ sys_mutexunlock(lock);
 end;
 
 procedure regdynlibdeinit(var info: dynlibinfoty; const initproc: dynlibprocty);
 begin
+ sys_mutexlock(lock);
  adduniqueitem(info.deinithooks,pointer(initproc));
+ sys_mutexunlock(lock);
 end;
 
 function initializedynlib(var info: dynlibinfoty;
