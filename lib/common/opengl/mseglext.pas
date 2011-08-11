@@ -5077,7 +5077,7 @@ function Load_GL_VERSION_4_0(): Boolean;
 
 implementation
 uses
- msedynload,msesys;
+ msedynload,msesys{$ifdef mswindows},dynlibs{$endif};
  
 function getprocaddresses(const lib: tlibhandle;
                           const procedures: array of funcinfoty): boolean;
@@ -6367,7 +6367,7 @@ end;
 
 function Load_WGL_I3D_swap_frame_usage: Boolean;
 const
- funcs: array[0..11] of funcinfoty =
+ funcs: array[0..3] of funcinfoty =
    (
     (n: 'wglGetFrameUsageI3D'; d: @wglGetFrameUsageI3D),
     (n: 'wglBeginFrameTrackingI3D'; d: @wglBeginFrameTrackingI3D),
