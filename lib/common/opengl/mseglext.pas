@@ -34,7 +34,7 @@ uses
   {$ELSE}
   dynlibs,
   {$ENDIF}
-  msegl;
+  msegl,mseglextglob;
 
 {$IFDEF Windows}
 { Declared in Windows unit as well in FPC; but declared here as well, to be

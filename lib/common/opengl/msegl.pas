@@ -58,7 +58,8 @@ unit msegl;
 interface
 
 uses
-  SysUtils,msestrings{$ifdef mswindows},windows{$endif};
+ SysUtils,msestrings{$ifdef mswindows},windows{$endif},msedynload,
+ mseglextglob;
 
 const
 {$ifdef mswindows}
@@ -66,12 +67,6 @@ const
 {$else}
  opengllib: array[0..1] of filenamety = ('libGL.so.1','libGL.so'); 
 {$endif}
-
-
-{$IFNDEF MORPHOS}
-var
-  LibGL: THandle;
-{$ENDIF MORPHOS}
 
 type
   GLenum     = Cardinal;      PGLenum     = ^GLenum;
@@ -1569,13 +1564,15 @@ type
 
 procedure initializeopengl(const sonames: array of filenamety); //[] = default
 procedure releaseopengl;
-
+procedure regglinit(const initproc: dynlibprocty);
+procedure reggldeinit(const deinitproc: dynlibprocty);
+ 
 implementation
 uses
 {$if defined(cpui386) or defined(cpux86_64)}
   math,
 {$endif}
-  msedynload,mseglext,mseglextglob,msesys;
+  mseglext,msesys,msetypes,msedatalist;
 
 {$ifdef mswindows}
 function WinChoosePixelFormat(DC: HDC; p2: PPixelFormatDescriptor): Integer;
@@ -1584,9 +1581,18 @@ function WinChoosePixelFormat(DC: HDC; p2: PPixelFormatDescriptor): Integer;
 
 var
  libinfo: dynlibinfoty;
- linkedextensions: glextensionsty;
- 
+ inithooks: array of dynlibprocty;
 
+procedure regglinit(const initproc: dynlibprocty);
+begin
+ regdynlibinit(libinfo,initproc);
+end;
+
+procedure reggldeinit(const deinitproc: dynlibprocty);
+begin
+ regdynlibdeinit(libinfo,deinitproc);
+end;
+ 
 procedure init;
 begin
   { according to bug 7570, this is necessary on all x86 platforms,
@@ -1596,7 +1602,6 @@ begin
  SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide,exOverflow,
                                                     exUnderflow, exPrecision]);
 {$endif}
- libgl:= libinfo.libhandle;
  {has_1_5:=} load_gl_version_1_5;
 end;
 

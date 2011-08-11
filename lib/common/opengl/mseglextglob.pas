@@ -12,7 +12,9 @@ unit mseglextglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
-
+uses
+ msesys,{$ifdef FPC}dynlibs,{$endif}msedynload;
+ 
 type
  glextensionty = (
   gle_GL_version_1_2,
@@ -218,11 +220,15 @@ type
  );
  glextensionsty = set of glextensionty;
 
-function mseglparseextensions(const astr: pchar): glextensionsty; 
+function mseglparseextensions(const astr: pchar): glextensionsty;
+function mseglloadextensions(const extensions: array of glextensionty): boolean;
+                  //true if ok
+var
+ libgl: tlibhandle;
  
 implementation
 uses
- mseglext,msetypes,msestrings;
+ msegl,mseglext,msetypes,msestrings;
  
 type
  glextloaderty = function: boolean;
@@ -231,6 +237,20 @@ type
   name: string;
   loader: glextloaderty;
  end;
+var
+ linkedextensions: glextensionsty;
+ badextensions: glextensionsty;
+ 
+procedure initglext(const ainfo: dynlibinfoty);
+begin
+ libgl:= ainfo.libhandle;
+end;
+
+procedure deinitglext(const ainfo: dynlibinfoty);
+begin
+ linkedextensions:= [];
+ badextensions:= [];
+end;
  
 const
  glextensions: array[glextensionty] of glextensioninfoty = 
@@ -457,4 +477,12 @@ begin
  end;
 end;
 
+function mseglloadextensions(const extensions: array of glextensionty): boolean;
+begin
+ result:= false;
+end;
+
+initialization
+ regglinit(@initglext);
+ reggldeinit(@deinitglext);
 end.

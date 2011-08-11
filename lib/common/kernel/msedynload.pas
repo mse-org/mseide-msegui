@@ -9,8 +9,11 @@ type
   libhandle: tlibhandle;
   libname: filenamety;
   refcount: integer;
+  inithooks: pointerarty;   //array of dynlibprocty
+  deinithooks: pointerarty; //array of dynlibprocty
  end;
-
+ dynlibprocty = procedure(const dynlib: dynlibinfoty);
+ 
 procedure initializelibinfo(var info: dynlibinfoty);
 procedure finalizelibinfo(var info: dynlibinfoty);
 
@@ -26,13 +29,16 @@ function initializedynlib(var info: dynlibinfoty;
 procedure releasedynlib(var info: dynlibinfoty;
                              const callback: procedurety = nil);
                                //called before lib unload
+procedure regdynlibinit(var info: dynlibinfoty; const initproc: dynlibprocty);
+procedure regdynlibdeinit(var info: dynlibinfoty; const initproc: dynlibprocty);
+
 procedure dynloadlock;
 procedure dynloadunlock;
 
 implementation
 
 uses
- msesysintf{$ifndef FPC},windows{$endif};
+ msesysintf{$ifndef FPC},windows{$endif},msedatalist;
 
 {$ifndef FPC}
 const
@@ -46,6 +52,16 @@ end;
 var
  lock: mutexty;
 
+procedure regdynlibinit(var info: dynlibinfoty; const initproc: dynlibprocty);
+begin
+ adduniqueitem(info.inithooks,pointer(initproc));
+end;
+
+procedure regdynlibdeinit(var info: dynlibinfoty; const initproc: dynlibprocty);
+begin
+ adduniqueitem(info.deinithooks,pointer(initproc));
+end;
+
 function initializedynlib(var info: dynlibinfoty;
                               const libnames: array of filenamety;
                               const libnamesdefault: array of filenamety;
@@ -54,6 +70,8 @@ function initializedynlib(var info: dynlibinfoty;
                               const errormessage: msestring = '';
                               const callback: procedurety = nil): boolean;
                               //true if all funcsopt found
+var
+ int1: integer;
 begin
  with info do begin
   sys_mutexlock(lock);
@@ -80,6 +98,9 @@ begin
      end;
      result:= getprocaddresses(libhandle,funcsopt,true);
     end;
+    for int1:= 0 to high(inithooks) do begin
+     dynlibprocty(inithooks[int1])(info);
+    end;
     if (callback <> nil) then begin
      callback;
     end;
@@ -93,6 +114,8 @@ end;
 
 procedure releasedynlib(var info: dynlibinfoty;
                       const callback: procedurety = nil);
+var
+ int1: integer;
 begin
  with info do begin
   sys_mutexlock(lock);
@@ -105,6 +128,9 @@ begin
      try
       if callback <> nil then begin
        callback;
+      end;
+      for int1:= 0 to high(deinithooks) do begin
+       dynlibprocty(deinithooks[int1])(info);
       end;
      finally
       if (libhandle = nilhandle) or unloadlibrary(libhandle) then begin

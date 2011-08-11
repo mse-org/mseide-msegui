@@ -37,7 +37,7 @@ interface
 
 {$IFDEF Unix}
   uses
-    X, XLib, XUtil;
+    X, XLib, XUtil,mseglextglob;
   {$DEFINE HasGLX}  // Activate GLX stuff
 {$ELSE}
   {$MESSAGE Unsupported platform.}
