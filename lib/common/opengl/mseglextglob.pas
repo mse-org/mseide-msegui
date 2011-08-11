@@ -216,7 +216,13 @@ type
   gle_GL_EXT_framebuffer_object,
   gle_GL_version_1_4,
   gle_GL_version_1_5,
-  gle_GL_version_2_0
+  gle_GL_version_2_0,
+  gle_GL_version_2_1,
+  gle_GL_version_3_0,
+  gle_GL_version_3_1,
+  gle_GL_version_3_2,
+  gle_GL_version_3_3,
+  gle_GL_version_4_0
  );
  glextensionsty = set of glextensionty;
 
@@ -238,7 +244,7 @@ type
   loader: glextloaderty;
  end;
 var
- linkedextensions: glextensionsty;
+ loadedextensions: glextensionsty;
  badextensions: glextensionsty;
  
 procedure initglext(const ainfo: dynlibinfoty);
@@ -248,16 +254,71 @@ end;
 
 procedure deinitglext(const ainfo: dynlibinfoty);
 begin
- linkedextensions:= [];
+ loadedextensions:= [];
  badextensions:= [];
 end;
- 
+
+function l_GL_version_1_2: boolean;
+begin
+ result:= load_GL_version_1_2;
+end;
+
+function l_GL_version_1_3: boolean;
+begin
+ result:= mseglloadextensions([gle_GL_version_1_2]) and load_GL_version_1_3;
+end;
+
+function l_GL_version_1_4: boolean;
+begin
+ result:= mseglloadextensions([gle_GL_version_1_3]) and load_GL_version_1_4;
+end;
+
+function l_GL_version_1_5: boolean;
+begin
+ result:= mseglloadextensions([gle_GL_version_1_4]) and load_GL_version_1_5;
+end;
+
+function l_GL_version_2_0: boolean;
+begin
+ result:= mseglloadextensions([gle_GL_version_1_5]) and load_GL_version_2_0;
+end;
+
+function l_GL_version_2_1: boolean;
+begin
+ result:= mseglloadextensions([gle_GL_version_2_0]) and load_GL_version_2_1;
+end;
+
+function l_GL_version_3_0: boolean;
+begin
+ result:= mseglloadextensions([gle_GL_version_2_1]) and load_GL_version_3_0;
+end;
+
+function l_GL_version_3_1: boolean;
+begin
+ result:= mseglloadextensions([gle_GL_version_3_0]) and load_GL_version_3_1;
+end;
+
+function l_GL_version_3_2: boolean;
+begin
+ result:= mseglloadextensions([gle_GL_version_3_1]) and load_GL_version_3_2;
+end;
+
+function l_GL_version_3_3: boolean;
+begin
+ result:= mseglloadextensions([gle_GL_version_3_2]) and load_GL_version_3_3;
+end;
+
+function l_GL_version_4_0: boolean;
+begin
+ result:= mseglloadextensions([gle_GL_version_3_3]) and load_GL_version_4_0;
+end;
+
 const
  glextensions: array[glextensionty] of glextensioninfoty = 
  (
-  (name: 'GL_version_1_2'; loader: @load_GL_version_1_2),
+  (name: 'GL_version_1_2'; loader: @l_GL_version_1_2),
    (name: 'GL_ARB_imaging'; loader: @load_GL_ARB_imaging),
-   (name: 'GL_version_1_3'; loader: @load_GL_version_1_3),
+   (name: 'GL_version_1_3'; loader: @l_GL_version_1_3),
    (name: 'GL_ARB_multitexture'; loader: @load_GL_ARB_multitexture),
    (name: 'GL_ARB_transpose_matrix'; loader: @load_GL_ARB_transpose_matrix),
    (name: 'GL_ARB_multisample'; loader: @load_GL_ARB_multisample),
@@ -452,9 +513,15 @@ const
    (name: 'GL_EXT_texture_compression_dxt1'; loader: @load_GL_EXT_texture_compression_dxt1),
    (name: 'GL_ARB_pixel_buffer_object'; loader: @load_GL_ARB_pixel_buffer_object),
    (name: 'GL_EXT_framebuffer_object'; loader: @load_GL_EXT_framebuffer_object),
-   (name: 'GL_version_1_4'; loader: @load_GL_version_1_4),
-   (name: 'GL_version_1_5'; loader: @load_GL_version_1_5),
-   (name: 'GL_version_2_0'; loader: @load_GL_version_2_0)
+   (name: 'GL_version_1_4'; loader: @l_GL_version_1_4),
+   (name: 'GL_version_1_5'; loader: @l_GL_version_1_5),
+   (name: 'GL_version_2_0'; loader: @l_GL_version_2_0),
+   (name: 'GL_version_2_1'; loader: @l_GL_version_2_1),
+   (name: 'GL_version_3_0'; loader: @l_GL_version_3_0),
+   (name: 'GL_version_3_1'; loader: @l_GL_version_3_1),
+   (name: 'GL_version_3_2'; loader: @l_GL_version_3_2),
+   (name: 'GL_version_3_3'; loader: @l_GL_version_3_3),
+   (name: 'GL_version_4_0'; loader: @l_GL_version_4_0)
    );
 
 function mseglparseextensions(const astr: pchar): glextensionsty; 
@@ -478,8 +545,28 @@ begin
 end;
 
 function mseglloadextensions(const extensions: array of glextensionty): boolean;
+var
+ int1: integer;
+ ext: glextensionty;
 begin
- result:= false;
+ result:= true;
+ for int1:= 0 to high(extensions) do begin
+  ext:= extensions[int1];
+  if ext in badextensions then begin
+   result:= false;
+  end
+  else begin
+   if not (ext in loadedextensions) then begin
+    if glextensions[ext].loader() then begin
+     include(loadedextensions,ext);
+    end
+    else begin
+     include(badextensions,ext);
+     result:= false;
+    end;
+   end;
+  end;
+ end;
 end;
 
 initialization

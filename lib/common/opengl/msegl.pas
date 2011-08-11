@@ -1572,7 +1572,7 @@ uses
 {$if defined(cpui386) or defined(cpux86_64)}
   math,
 {$endif}
-  mseglext,msesys,msetypes,msedatalist;
+  msesys,msetypes,msedatalist;
 
 {$ifdef mswindows}
 function WinChoosePixelFormat(DC: HDC; p2: PPixelFormatDescriptor): Integer;
@@ -1602,7 +1602,7 @@ begin
  SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide,exOverflow,
                                                     exUnderflow, exPrecision]);
 {$endif}
- {has_1_5:=} load_gl_version_1_5;
+ mseglloadextensions([gle_gl_version_1_5]);
 end;
 
 procedure deinit;

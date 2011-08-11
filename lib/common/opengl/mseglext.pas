@@ -5320,7 +5320,8 @@ begin
     if not Assigned(glCompressedTexSubImage1D) then Exit;
     glGetCompressedTexImage := wglGetProcAddress('glGetCompressedTexImage');
     if not Assigned(glGetCompressedTexImage) then Exit;
-    Result := Load_GL_version_1_2;
+    result:= true;
+//    Result := Load_GL_version_1_2;
 
 end;
 
@@ -10501,7 +10502,8 @@ begin
     if not Assigned(glWindowPos3s) then Exit;
     glWindowPos3sv := wglGetProcAddress('glWindowPos3sv');
     if not Assigned(glWindowPos3sv) then Exit;
-    Result := Load_GL_version_1_3;
+    result:= true;
+//    Result := Load_GL_version_1_3;
 
 end;
 
@@ -10551,7 +10553,8 @@ begin
     if not Assigned(glGetBufferParameteriv) then Exit;
     glGetBufferPointerv := wglGetProcAddress('glGetBufferPointerv');
     if not Assigned(glGetBufferPointerv) then Exit;
-    Result := Load_GL_version_1_4;
+    result:= true;
+//    Result := Load_GL_version_1_4;
 
 end;
 
@@ -10749,7 +10752,8 @@ begin
     if not Assigned(glVertexAttrib4usv) then Exit;
     glVertexAttribPointer := wglGetProcAddress('glVertexAttribPointer');
     if not Assigned(glVertexAttribPointer) then Exit;
-    Result := Load_GL_version_1_5;
+    result:= true;
+//    Result := Load_GL_version_1_5;
 
 end;
 
@@ -10976,7 +10980,8 @@ begin
   if not Assigned(glUniformMatrix3x4fv) then Exit;
   glUniformMatrix4x3fv := wglGetProcAddress('glUniformMatrix4x3fv');
   if not Assigned(glUniformMatrix4x3fv) then Exit;
-  Result := Load_GL_VERSION_2_0();
+    result:= true;
+//  Result := Load_GL_VERSION_2_0();
 end;
 
 function Load_GL_VERSION_3_0(): Boolean;
@@ -11101,7 +11106,8 @@ begin
   if not Load_GL_ARB_framebuffer_object() then Exit;
   if not Load_GL_ARB_map_buffer_range() then Exit;
   if not Load_GL_ARB_vertex_array_object() then Exit;
-  Result := Load_GL_VERSION_2_1();
+    result:= true;
+//  Result := Load_GL_VERSION_2_1();
 end;
 
 function Load_GL_VERSION_3_1(): Boolean;
@@ -11117,7 +11123,8 @@ begin
   if not Assigned(glPrimitiveRestartIndex) then Exit;
   if not Load_GL_ARB_copy_buffer() then Exit;
   if not Load_GL_ARB_uniform_buffer_object() then Exit;
-  Result := Load_GL_VERSION_3_0();
+    result:= true;
+//  Result := Load_GL_VERSION_3_0();
 end;
 
 function Load_GL_VERSION_3_2(): Boolean;
@@ -11135,7 +11142,8 @@ begin
   if not Load_GL_ARB_provoking_vertex() then Exit;
   if not Load_GL_ARB_sync() then Exit;
   if not Load_GL_ARB_texture_multisample() then Exit;
-  Result := Load_GL_VERSION_3_1();
+    result:= true;
+//  Result := Load_GL_VERSION_3_1();
 end;
 
 function Load_GL_VERSION_3_3(): Boolean;
@@ -11145,7 +11153,8 @@ begin
   if not Load_GL_ARB_sampler_objects() then Exit;
   if not Load_GL_ARB_timer_query() then Exit;
   if not Load_GL_ARB_vertex_type_2_10_10_10_rev() then Exit;
-  Result := Load_GL_VERSION_3_2();
+    result:= true;
+//  Result := Load_GL_VERSION_3_2();
 end;
 
 function Load_GL_VERSION_4_0(): Boolean;
@@ -11156,7 +11165,8 @@ begin
   if not Load_GL_ARB_tessellation_shader() then Exit;
   if not Load_GL_ARB_transform_feedback2() then Exit;
   if not Load_GL_ARB_transform_feedback3() then Exit;
-  Result := Load_GL_VERSION_3_3();
+    result:= true;
+//  Result := Load_GL_VERSION_3_3();
 end;
 
 end.
