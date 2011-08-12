@@ -13,7 +13,7 @@ unit mseglextglob;
 
 interface
 uses
- msesys,{$ifdef FPC}dynlibs,{$endif}msedynload;
+ msesys,{$ifdef FPC}dynlibs,{$endif}msedynload,msegraphics;
  
 type
  glextensionty = (
@@ -250,7 +250,7 @@ type
  glextensionsty = set of glextensionty;
 
 function mseglparseextensions(const astr: pchar): glextensionsty;
-function glplatformextensions: glextensionsty;
+function gldeviceextensions(const device: ptruint): glextensionsty;
 function mseglloadextensions(const extensions: array of glextensionty): boolean;
                   //true if ok
 var
@@ -273,10 +273,16 @@ var
  loadedextensions: glextensionsty;
  badextensions: glextensionsty;
 
-function glplatformextensions: glextensionsty;
+function gldeviceextensions(const device: ptruint): glextensionsty;
 begin
  result:= [];
 {$ifdef mswindows}
+ if mseglloadextensions([gle_WGL_EXT_extensions_string]) then begin
+  result:= result + mseglparseextensions(wglGetExtensionsStringEXT());
+ end;
+ if mseglloadextensions([gle_WGL_ARB_extensions_string]) then begin
+  result:= result + mseglparseextensions(wglGetExtensionsStringARB(device));
+ end;
 {$else}
  if glxqueryextensionsstring <> nil then begin
   result:= mseglparseextensions(

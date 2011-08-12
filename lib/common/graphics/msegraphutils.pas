@@ -509,10 +509,14 @@ function subpoint(const a,b: pointty): pointty; //result:= a-b
 procedure subpoint1(var dest: pointty; const point: pointty);
 function distance(const a,b: pointty): integer;
 
-function addsize(const a,b: sizety): sizety; //result:= a+b
+function addsize(const a,b: sizety): sizety;{$ifdef FPC}inline;{$endif}
+                          //result:= a+b
 procedure addsize1(var dest: sizety; const size: sizety);
-function subsize(const a,b: sizety): sizety; //result:= a-b
+                                    {$ifdef FPC}inline;{$endif}
+function subsize(const a,b: sizety): sizety; {$ifdef FPC}inline;{$endif}
+                                     //result:= a-b
 procedure subsize1(var dest: sizety; const size: sizety);
+                                      {$ifdef FPC}inline;{$endif}
 
 function fitsize(const asize: sizety; const maxsize: sizety): sizety;
 
@@ -567,7 +571,7 @@ function pointinellipse(const point: pointty; const rect: rectty): boolean;
 function rectinrect(const inner,outer: rectty): boolean;
      //true if inner in outer
 
-function segment(const a,b: pointty): segmentty;
+function segment(const a,b: pointty): segmentty; {$ifdef FPC}inline;{$endif}
 
 procedure vectortoline(const vector: graphicvectorty; out a,b: pointty);
 
@@ -995,31 +999,35 @@ begin
  result:= abs(a.x-b.x) + abs(a.y-b.y);
 end;
 
-function addsize(const a,b: sizety): sizety; //result:= a+b
+function addsize(const a,b: sizety): sizety;{$ifdef FPC}inline;{$endif}
+                                //result:= a+b
 begin
  result.cx:= a.cx+b.cx;
  result.cy:= a.cy+b.cy;
 end;
 
 procedure addsize1(var dest: sizety; const size: sizety);
+                         {$ifdef FPC}inline;{$endif}
 begin
  inc(dest.cx,size.cx);
  inc(dest.cy,size.cy);
 end;
 
-function subsize(const a,b: sizety): sizety; //result:= a-b
+function subsize(const a,b: sizety): sizety;{$ifdef FPC}inline;{$endif}
+                     //result:= a-b
 begin
  result.cx:= a.cx-b.cx;
  result.cy:= a.cy-b.cy;
 end;
 
 procedure subsize1(var dest: sizety; const size: sizety);
+                                        {$ifdef FPC}inline;{$endif}
 begin
  dec(dest.cx,size.cx);
  dec(dest.cy,size.cy);
 end;
 
-function segment(const a,b: pointty): segmentty;
+function segment(const a,b: pointty): segmentty; {$ifdef FPC}inline;{$endif}
 begin
  result.a:= a;
  result.b:= b;

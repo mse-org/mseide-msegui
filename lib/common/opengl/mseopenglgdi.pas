@@ -394,13 +394,20 @@ var
  pixmapextensionschecked: boolean;
  
 procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
-{$ifdef unix}
 var
+ device1: ptruint; //used for extension query
+ 
+{$ifdef unix}
  index: integer;
  ar1: integerarty;
  int1,int2: integer;
  visinfo: pxvisualinfo;
  attributes: txsetwindowattributes;
+{$else}
+ pixeldesc: tpixelformatdescriptor;
+ int1: integer; 
+ options1: internalwindowoptionsty;
+ wi1: windowty;
 {$endif}
 begin
  if gccount = 0 then begin
@@ -453,6 +460,7 @@ begin
     error:= gde_rendercontext;
     exit;
    end;
+   device1:= 0; //not used
    inc(gccount);
    gcpo^.handle:= ptruint(fcontext);
    fkind:= kind;
@@ -461,7 +469,6 @@ begin
     pd:= glxcreateglxpixmap(fdpy,visinfo,paintdevice);
     if pd = 0 then begin
      error:= gde_glxpixmap;
-     exit;
     end;
    end
    else begin
@@ -475,7 +482,6 @@ begin
        error:= gde_createwindow;
        exit;
       end;
-      gcpo^.paintdevicesize:= size;
       xselectinput(fdpy,paintdevice,exposuremask); //will be mapped to parent
      end;
     end
@@ -485,32 +491,50 @@ begin
     end;
     pd:= paintdevice;
    end;
-{
-   attributes.colormap:= fcolormap;
-   with windowrect do begin
-    aid:= xcreatewindow(fdpy,aparent,x,y,cx,cy,0,visinfo^.depth,
-          inputoutput,visinfo^.visual,cwcolormap,@attributes);
-    xselectinput(fdpy,aid,exposuremask); //will be mapped to parent
-   end;
-   if aid = 0 then begin
-    result:= gue_createwindow;
-    exit;
-   end;
-}
-  // fwin:= aid;
   finally
    xfree(visinfo);
   end;
-//  initcontext(paintdevice,gcpo^,pcontextinfoty(contextinfopo)^.viewport);
-  initcontext(paintdevice,gcpo^,mr(nullpoint,gcpo^.paintdevicesize));
  {$else}
-  error:= gde_notimplemented;
+  error:= gde_ok;
+//  fkind:= kind;
+  if paintdevice = 0 then begin
+   fillchar(options1,sizeof(options1),0);
+   options1.parent:= parent;
+   if gui_createwindow(windowrect^,options1,wi1) <> gue_ok then begin
+    error:= gde_createwindow;
+    exit;
+   end;
+   paintdevice:= wi1.id;
+  end;
+  pd:= paintdevice;
+  fdc:= getdc(pd);
+  device1:= fdc;
+  fillchar(pixeldesc,sizeof(pixeldesc),0);
+  with pixeldesc do begin
+   nsize:= sizeof(pixeldesc);
+   nversion:= 1;
+   dwflags:= pfd_draw_to_window or pfd_support_opengl or pfd_doublebuffer;
+   ipixeltype:= pfd_type_rgba;
+   ccolorbits:= 24;
+   cdepthbits:= 32;
+  end;
+  int1:= choosepixelformat(fdc,@pixeldesc);
+  setpixelformat(fdc,int1,@pixeldesc);
+  fcontext:= wglcreatecontext(fdc);
+  if fcontext = 0 then begin
+   error:= gde_rendercontext;
+   exit;
+  end;
+  inc(gccount);
+  gcpo^.handle:= ptruint(fcontext);
  {$endif}
   if error = gde_ok then begin
+   gcpo^.paintdevicesize:= windowrect^.size;
+   initcontext(paintdevice,gcpo^,mr(nullpoint,gcpo^.paintdevicesize));
    if (kind = gck_pixmap) then begin
     if not pixmapextensionschecked then begin
      makecurrent(gcpo^);
-     pixmapextensions:= glplatformextensions +
+     pixmapextensions:= gldeviceextensions(device1) +
                            mseglparseextensions(glgetstring(gl_extensions));
      pixmapextensionschecked:= true;
     end;
@@ -519,7 +543,7 @@ begin
    else begin
     if not screenextensionschecked then begin
      makecurrent(gcpo^);
-     screenextensions:= glplatformextensions +
+     screenextensions:= gldeviceextensions(device1) +
                        mseglparseextensions(glgetstring(gl_extensions));
      screenextensionschecked:= true;
     end;
@@ -552,6 +576,7 @@ begin
   wglmakecurrent(0,0);
   wgldeletecontext(fcontext);
   releasedc(drawinfo.paintdevice,fdc);
+  dec(gccount);
 {$endif}
   if gccount = 0 then begin
    releaseopengl();

@@ -229,7 +229,7 @@ var
  li: pfcstrlist;
  bo1: boolean;
  str1: string;
- conf1,conf2: pfcconfig;
+ conf1{,conf2}: pfcconfig;
 {$endif}
 begin
  if not fcinit() then begin
