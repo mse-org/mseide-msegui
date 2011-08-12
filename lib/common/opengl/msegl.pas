@@ -1581,7 +1581,6 @@ function WinChoosePixelFormat(DC: HDC; p2: PPixelFormatDescriptor): Integer;
 
 var
  libinfo: dynlibinfoty;
- inithooks: array of dynlibprocty;
 
 procedure regglinit(const initproc: dynlibprocty);
 begin
@@ -1601,6 +1600,12 @@ begin
 {$if defined(cpui386) or defined(cpux86_64)}
  SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide,exOverflow,
                                                     exUnderflow, exPrecision]);
+{$endif}
+{$ifdef mswindows}
+{$else}
+ if not mseglloadextensions([gle_glx]) then begin
+  raise exception.create('Can not load glx.');
+ end;
 {$endif}
  mseglloadextensions([gle_gl_version_1_5]);
 end;
@@ -1956,6 +1961,7 @@ const
 {$endif}
 const
  errormessage = 'Can not load OpenGL library. ';
+ 
 begin
  initializedynlib(libinfo,sonames,opengllib,funcs,
             {$ifdef mswindows}funcsopt{$else}[]{$endif},errormessage,@init);

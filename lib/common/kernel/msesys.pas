@@ -364,11 +364,11 @@ begin
  end;
  result:= true;
  for int1:= 0 to high(anames) do begin
- {$ifdef FPC}
-  adest[int1]^:= getprocedureaddress(lib,anames[int1]);
-  {$else}
+// {$ifdef FPC}
+//  adest[int1]^:= getprocedureaddress(lib,anames[int1]);
+//  {$else}
   adest[int1]^:= getprocaddress(lib,pansichar(anames[int1]));
-  {$endif}
+//  {$endif}
   if (adest[int1]^ = nil) then begin
    result:= false;
    if not noexception then begin

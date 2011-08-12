@@ -4,7 +4,9 @@
   Sebastian Guenther (sg@freepascal.org) in 2002
   These units are free to use
 }
-
+//
+// modified 2011 by Martin Schreiber
+//
 {*++ BUILD Version: 0004    // Increment this if a change has global effects
 
 Copyright (c) 1985-95, Microsoft Corporation
@@ -52,8 +54,9 @@ Abstract:
 { For the latest updates, visit Delphi3D: http://www.delphi3d.net              }
 {******************************************************************************}
 
+{$mode objfpc} {$h+}
 {$MACRO ON}
-{$MODE Delphi}
+//{$MODE Delphi}
 {$IFDEF Windows}
   {$DEFINE extdecl := stdcall}
 {$ELSE}
@@ -78,7 +81,14 @@ uses
   TinyGL,
   {$ENDIF}
   {$ENDIF}
-  msegl;
+  msegl,msestrings;
+
+const
+{$ifdef mswindows}
+ glulib: array[0..0] of filenamety = ('glu32.dll');  
+{$else}
+ glulib: array[0..1] of filenamety = ('libGLU.so.1','libGLU.so.'); 
+{$endif}
 
 type
   TViewPortArray = array [0..3] of GLint;
@@ -120,6 +130,7 @@ type
 var
   gluErrorString: function(errCode: GLenum): PChar; extdecl;
   gluErrorUnicodeStringEXT: function(errCode: GLenum): PWideChar; extdecl;
+                            //not on linux
   gluGetString: function(name: GLenum): PChar; extdecl;
   gluOrtho2D: procedure(left,right, bottom, top: GLdouble); extdecl;
   gluPerspective: procedure(fovy, aspect, zNear, zFar: GLdouble); extdecl;
@@ -388,186 +399,89 @@ const
   GLU_ERROR       = GLU_TESS_ERROR;
   GLU_EDGE_FLAG   = GLU_TESS_EDGE_FLAG;
 
-procedure LoadGLu(const dll: String);
-procedure FreeGLu;
+//procedure LoadGLu(const dll: String);
+//procedure FreeGLu;
+
+procedure initializeglu(const sonames: array of filenamety); //[] = default
+procedure releaseglu;
 
 implementation
-
-{$IFDEF MORPHOS}
-
-{ MorphOS GL works differently due to different dynamic-library handling on Amiga-like }
-{ systems, so its functions are included here. }
-{$INCLUDE tinygl.inc}
-
-{$ELSE MORPHOS}
 uses
-  dynlibs;
-
+ msedynload,msesys;
 var
-  hDLL: TLibHandle;
+ libinfo: dynlibinfoty;
 
-{$ENDIF MORPHOS}
-
-procedure FreeGLu;
+procedure initializeglu(const sonames: array of filenamety); //[] = default
+const
+ funcs: array[0..50] of funcinfoty = (
+    (n: 'gluErrorString'; d: @gluErrorString),
+    (n: 'gluGetString'; d: @gluGetString),
+    (n: 'gluOrtho2D'; d: @gluOrtho2D),
+    (n: 'gluPerspective'; d: @gluPerspective),
+    (n: 'gluPickMatrix'; d: @gluPickMatrix),
+    (n: 'gluLookAt'; d: @gluLookAt),
+    (n: 'gluProject'; d: @gluProject),
+    (n: 'gluUnProject'; d: @gluUnProject),
+    (n: 'gluScaleImage'; d: @gluScaleImage),
+    (n: 'gluBuild1DMipmaps'; d: @gluBuild1DMipmaps),
+    (n: 'gluBuild2DMipmaps'; d: @gluBuild2DMipmaps),
+    (n: 'gluNewQuadric'; d: @gluNewQuadric),
+    (n: 'gluDeleteQuadric'; d: @gluDeleteQuadric),
+    (n: 'gluQuadricNormals'; d: @gluQuadricNormals),
+    (n: 'gluQuadricTexture'; d: @gluQuadricTexture),
+    (n: 'gluQuadricOrientation'; d: @gluQuadricOrientation),
+    (n: 'gluQuadricDrawStyle'; d: @gluQuadricDrawStyle),
+    (n: 'gluCylinder'; d: @gluCylinder),
+    (n: 'gluDisk'; d: @gluDisk),
+    (n: 'gluPartialDisk'; d: @gluPartialDisk),
+    (n: 'gluSphere'; d: @gluSphere),
+    (n: 'gluQuadricCallback'; d: @gluQuadricCallback),
+    (n: 'gluNewTess'; d: @gluNewTess),
+    (n: 'gluDeleteTess'; d: @gluDeleteTess),
+    (n: 'gluTessBeginPolygon'; d: @gluTessBeginPolygon),
+    (n: 'gluTessBeginContour'; d: @gluTessBeginContour),
+    (n: 'gluTessVertex'; d: @gluTessVertex),
+    (n: 'gluTessEndContour'; d: @gluTessEndContour),
+    (n: 'gluTessEndPolygon'; d: @gluTessEndPolygon),
+    (n: 'gluTessProperty'; d: @gluTessProperty),
+    (n: 'gluTessNormal'; d: @gluTessNormal),
+    (n: 'gluTessCallback'; d: @gluTessCallback),
+    (n: 'gluGetTessProperty'; d: @gluGetTessProperty),
+    (n: 'gluNewNurbsRenderer'; d: @gluNewNurbsRenderer),
+    (n: 'gluDeleteNurbsRenderer'; d: @gluDeleteNurbsRenderer),
+    (n: 'gluBeginSurface'; d: @gluBeginSurface),
+    (n: 'gluBeginCurve'; d: @gluBeginCurve),
+    (n: 'gluEndCurve'; d: @gluEndCurve),
+    (n: 'gluEndSurface'; d: @gluEndSurface),
+    (n: 'gluBeginTrim'; d: @gluBeginTrim),
+    (n: 'gluEndTrim'; d: @gluEndTrim),
+    (n: 'gluPwlCurve'; d: @gluPwlCurve),
+    (n: 'gluNurbsCurve'; d: @gluNurbsCurve),
+    (n: 'gluNurbsSurface'; d: @gluNurbsSurface),
+    (n: 'gluLoadSamplingMatrices'; d: @gluLoadSamplingMatrices),
+    (n: 'gluNurbsProperty'; d: @gluNurbsProperty),
+    (n: 'gluGetNurbsProperty'; d: @gluGetNurbsProperty),
+    (n: 'gluNurbsCallback'; d: @gluNurbsCallback),
+    (n: 'gluBeginPolygon'; d: @gluBeginPolygon),
+    (n: 'gluNextContour'; d: @gluNextContour),
+    (n: 'gluEndPolygon'; d: @gluEndPolygon)
+   );
+ funcsopt: array[0..0] of funcinfoty = (
+    (n: 'gluErrorUnicodeStringEXT'; d: @gluErrorUnicodeStringEXT)
+   );
+ errormessage = 'Can not load glu library';
 begin
-{$IFDEF MORPHOS}
-  // MorphOS's GL will closed down by TinyGL unit, nothing is needed here.
-{$ELSE MORPHOS}
-  @gluErrorString := nil;
-  @gluErrorUnicodeStringEXT := nil;
-  @gluGetString := nil;
-  @gluOrtho2D := nil;
-  @gluPerspective := nil;
-  @gluPickMatrix := nil;
-  @gluLookAt := nil;
-  @gluProject := nil;
-  @gluUnProject := nil;
-  @gluScaleImage := nil;
-  @gluBuild1DMipmaps := nil;
-  @gluBuild2DMipmaps := nil;
-  @gluNewQuadric := nil;
-  @gluDeleteQuadric := nil;
-  @gluQuadricNormals := nil;
-  @gluQuadricTexture := nil;
-  @gluQuadricOrientation := nil;
-  @gluQuadricDrawStyle := nil;
-  @gluCylinder := nil;
-  @gluDisk := nil;
-  @gluPartialDisk := nil;
-  @gluSphere := nil;
-  @gluQuadricCallback := nil;
-  @gluNewTess := nil;
-  @gluDeleteTess := nil;
-  @gluTessBeginPolygon := nil;
-  @gluTessBeginContour := nil;
-  @gluTessVertex := nil;
-  @gluTessEndContour := nil;
-  @gluTessEndPolygon := nil;
-  @gluTessProperty := nil;
-  @gluTessNormal := nil;
-  @gluTessCallback := nil;
-  @gluGetTessProperty := nil;
-  @gluNewNurbsRenderer := nil;
-  @gluDeleteNurbsRenderer := nil;
-  @gluBeginSurface := nil;
-  @gluBeginCurve := nil;
-  @gluEndCurve := nil;
-  @gluEndSurface := nil;
-  @gluBeginTrim := nil;
-  @gluEndTrim := nil;
-  @gluPwlCurve := nil;
-  @gluNurbsCurve := nil;
-  @gluNurbsSurface := nil;
-  @gluLoadSamplingMatrices := nil;
-  @gluNurbsProperty := nil;
-  @gluGetNurbsProperty := nil;
-  @gluNurbsCallback := nil;
-  @gluBeginPolygon := nil;
-  @gluNextContour := nil;
-  @gluEndPolygon := nil;
-
-  if (hDLL <> 0) then
-    FreeLibrary(hDLL);
-{$ENDIF MORPHOS}
+ initializedynlib(libinfo,sonames,glulib,funcs,funcsopt,errormessage);
 end;
 
-procedure LoadGLu(const dll: String);
-{$IFDEF MORPHOS}
+procedure releaseglu;
 begin
-  // MorphOS's GL has own initialization in TinyGL unit, nothing is needed here.
+ releasedynlib(libinfo,nil,true);
+//used in xclosedisplay?
 end;
-{$ELSE MORPHOS}
-var
-  MethodName: string = '';
-
-  function GetGLuProcAddress(Lib: PtrInt; ProcName: PChar): Pointer;
-  begin
-    MethodName:=ProcName;
-    Result:=GetProcAddress(Lib, ProcName);
-  end;
-
-begin
-
-  FreeGLu;
-
-  hDLL := LoadLibrary(PChar(dll));
-  if hDLL = 0 then raise Exception.Create('Could not load GLu from ' + dll);
-  try
-    @gluErrorString := GetGLuProcAddress(hDLL, 'gluErrorString');
-    @gluErrorUnicodeStringEXT := GetGLuProcAddress(hDLL, 'gluErrorUnicodeStringEXT');
-    @gluGetString := GetGLuProcAddress(hDLL, 'gluGetString');
-    @gluOrtho2D := GetGLuProcAddress(hDLL, 'gluOrtho2D');
-    @gluPerspective := GetGLuProcAddress(hDLL, 'gluPerspective');
-    @gluPickMatrix := GetGLuProcAddress(hDLL, 'gluPickMatrix');
-    @gluLookAt := GetGLuProcAddress(hDLL, 'gluLookAt');
-    @gluProject := GetGLuProcAddress(hDLL, 'gluProject');
-    @gluUnProject := GetGLuProcAddress(hDLL, 'gluUnProject');
-    @gluScaleImage := GetGLuProcAddress(hDLL, 'gluScaleImage');
-    @gluBuild1DMipmaps := GetGLuProcAddress(hDLL, 'gluBuild1DMipmaps');
-    @gluBuild2DMipmaps := GetGLuProcAddress(hDLL, 'gluBuild2DMipmaps');
-    @gluNewQuadric := GetGLuProcAddress(hDLL, 'gluNewQuadric');
-    @gluDeleteQuadric := GetGLuProcAddress(hDLL, 'gluDeleteQuadric');
-    @gluQuadricNormals := GetGLuProcAddress(hDLL, 'gluQuadricNormals');
-    @gluQuadricTexture := GetGLuProcAddress(hDLL, 'gluQuadricTexture');
-    @gluQuadricOrientation := GetGLuProcAddress(hDLL, 'gluQuadricOrientation');
-    @gluQuadricDrawStyle := GetGLuProcAddress(hDLL, 'gluQuadricDrawStyle');
-    @gluCylinder := GetGLuProcAddress(hDLL, 'gluCylinder');
-    @gluDisk := GetGLuProcAddress(hDLL, 'gluDisk');
-    @gluPartialDisk := GetGLuProcAddress(hDLL, 'gluPartialDisk');
-    @gluSphere := GetGLuProcAddress(hDLL, 'gluSphere');
-    @gluQuadricCallback := GetGLuProcAddress(hDLL, 'gluQuadricCallback');
-    @gluNewTess := GetGLuProcAddress(hDLL, 'gluNewTess');
-    @gluDeleteTess := GetGLuProcAddress(hDLL, 'gluDeleteTess');
-    @gluTessBeginPolygon := GetGLuProcAddress(hDLL, 'gluTessBeginPolygon');
-    @gluTessBeginContour := GetGLuProcAddress(hDLL, 'gluTessBeginContour');
-    @gluTessVertex := GetGLuProcAddress(hDLL, 'gluTessVertex');
-    @gluTessEndContour := GetGLuProcAddress(hDLL, 'gluTessEndContour');
-    @gluTessEndPolygon := GetGLuProcAddress(hDLL, 'gluTessEndPolygon');
-    @gluTessProperty := GetGLuProcAddress(hDLL, 'gluTessProperty');
-    @gluTessNormal := GetGLuProcAddress(hDLL, 'gluTessNormal');
-    @gluTessCallback := GetGLuProcAddress(hDLL, 'gluTessCallback');
-    @gluGetTessProperty := GetGLuProcAddress(hDLL, 'gluGetTessProperty');
-    @gluNewNurbsRenderer := GetGLuProcAddress(hDLL, 'gluNewNurbsRenderer');
-    @gluDeleteNurbsRenderer := GetGLuProcAddress(hDLL, 'gluDeleteNurbsRenderer');
-    @gluBeginSurface := GetGLuProcAddress(hDLL, 'gluBeginSurface');
-    @gluBeginCurve := GetGLuProcAddress(hDLL, 'gluBeginCurve');
-    @gluEndCurve := GetGLuProcAddress(hDLL, 'gluEndCurve');
-    @gluEndSurface := GetGLuProcAddress(hDLL, 'gluEndSurface');
-    @gluBeginTrim := GetGLuProcAddress(hDLL, 'gluBeginTrim');
-    @gluEndTrim := GetGLuProcAddress(hDLL, 'gluEndTrim');
-    @gluPwlCurve := GetGLuProcAddress(hDLL, 'gluPwlCurve');
-    @gluNurbsCurve := GetGLuProcAddress(hDLL, 'gluNurbsCurve');
-    @gluNurbsSurface := GetGLuProcAddress(hDLL, 'gluNurbsSurface');
-    @gluLoadSamplingMatrices := GetGLuProcAddress(hDLL, 'gluLoadSamplingMatrices');
-    @gluNurbsProperty := GetGLuProcAddress(hDLL, 'gluNurbsProperty');
-    @gluGetNurbsProperty := GetGLuProcAddress(hDLL, 'gluGetNurbsProperty');
-    @gluNurbsCallback := GetGLuProcAddress(hDLL, 'gluNurbsCallback');
-
-    @gluBeginPolygon := GetGLuProcAddress(hDLL, 'gluBeginPolygon');
-    @gluNextContour := GetGLuProcAddress(hDLL, 'gluNextContour');
-    @gluEndPolygon := GetGLuProcAddress(hDLL, 'gluEndPolygon');
-  except
-    raise Exception.Create('Could not load ' + MethodName + ' from ' + dll);
-  end;
-end;
-{$ENDIF MORPHOS}
 
 initialization
-
-  {$IFDEF Windows}
-  LoadGLu('glu32.dll');
-  {$ELSE}
-  {$ifdef darwin}
-  LoadGLu('/System/Library/Frameworks/OpenGL.framework/Libraries/libGLU.dylib');
-  {$else}
-  {$ifndef MorphOS}
-  LoadGLu('libGLU.so.1');
-  {$endif}
-  {$ENDIF}
-  {$endif}
-
+ initializelibinfo(libinfo);
 finalization
-
-//  FreeGLu; library needed by finalization
-
+ finalizelibinfo(libinfo);
 end.

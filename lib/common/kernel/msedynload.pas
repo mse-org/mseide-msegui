@@ -27,7 +27,8 @@ function initializedynlib(var info: dynlibinfoty;
                                         //called after lib load
                               //returns true if all funcsopt found
 procedure releasedynlib(var info: dynlibinfoty;
-                             const callback: procedurety = nil);
+                         const callback: procedurety = nil;
+                         const nodlunload: boolean = false);
                                //called before lib unload
 procedure regdynlibinit(var info: dynlibinfoty; const initproc: dynlibprocty);
 procedure regdynlibdeinit(var info: dynlibinfoty; const initproc: dynlibprocty);
@@ -117,7 +118,8 @@ begin
 end;
 
 procedure releasedynlib(var info: dynlibinfoty;
-                      const callback: procedurety = nil);
+                      const callback: procedurety = nil;
+                      const nodlunload: boolean = false);
 var
  int1: integer;
 begin
@@ -137,9 +139,14 @@ begin
        dynlibprocty(deinithooks[int1])(info);
       end;
      finally
-      if (libhandle = nilhandle) or unloadlibrary(libhandle) then begin
+      if nodlunload then begin
        dec(refcount);
-       libhandle:= nilhandle;
+      end
+      else begin
+       if (libhandle = nilhandle) or unloadlibrary(libhandle) then begin
+        dec(refcount);
+        libhandle:= nilhandle;
+       end;
       end;
      end;
     end;

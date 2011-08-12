@@ -235,9 +235,6 @@ var
  
 begin
  result:= gue_ok;
- if not glxinitialized then begin
-  initGlx();
- end;
  with oglgcty(gc.platformdata).d do begin
   fdpy:= msedisplay;
   fscreen:= defaultscreen(fdpy);
@@ -408,11 +405,6 @@ var
 begin
  if gccount = 0 then begin
   initializeopengl([]);
- {$ifdef unix}
-  if not glxinitialized then begin
-   initGlx();
-  end;
- {$endif}
  end;
  with drawinfo.creategc,oglgcty(gcpo^.platformdata).d do begin
  {$ifdef unix}

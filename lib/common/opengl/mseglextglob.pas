@@ -17,6 +17,11 @@ uses
  
 type
  glextensionty = (
+  {$ifdef mswindows}
+  {$else}
+  gle_glx,
+  gle_glx_mesa,
+  {$endif}
   gle_GL_version_1_2,
   gle_GL_ARB_imaging,
   gle_GL_version_1_3,
@@ -252,7 +257,8 @@ var
  
 implementation
 uses
- msegl,mseglext,msetypes,msestrings;
+ msegl,mseglext,msetypes,msestrings{$ifdef mswindows}{$else},mseglx{$endif},
+ mseglu;
  
 type
  glextloaderty = function: boolean;
@@ -268,12 +274,14 @@ var
 procedure initglext(const ainfo: dynlibinfoty);
 begin
  libgl:= ainfo.libhandle;
+ initializeglu([]);
 end;
 
 procedure deinitglext(const ainfo: dynlibinfoty);
 begin
  loadedextensions:= [];
  badextensions:= [];
+ releaseglu;
 end;
 
 function l_GL_version_1_2: boolean;
@@ -334,7 +342,12 @@ end;
 const
  glextensions: array[glextensionty] of glextensioninfoty = 
  (
-  (name: 'GL_version_1_2'; loader: @l_GL_version_1_2),
+  {$ifdef mswindows}
+  {$else}
+   (name: 'glx'; loader: @load_glx),
+   (name: 'glx_mesa'; loader: @load_glx_mesa),
+  {$endif}
+   (name: 'GL_version_1_2'; loader: @l_GL_version_1_2),
    (name: 'GL_ARB_imaging'; loader: @load_GL_ARB_imaging),
    (name: 'GL_version_1_3'; loader: @l_GL_version_1_3),
    (name: 'GL_ARB_multitexture'; loader: @load_GL_ARB_multitexture),

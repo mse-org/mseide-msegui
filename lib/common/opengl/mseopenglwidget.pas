@@ -147,7 +147,7 @@ type
   
 implementation
 uses
- sysutils{$ifdef unix},xutil{$endif};
+ sysutils{$ifdef unix},xutil{$endif},mseglextglob;
  
 { tcustomopenglwidget }
 
@@ -229,12 +229,9 @@ var
  attributes: txsetwindowattributes;
  
 begin
- initializeopengl([]);
- if not glxinitialized then begin
-  initGlx();
- end;
  fdpy:= msedisplay;
  fscreen:= defaultscreen(fdpy);
+ initializeopengl([]);
  if not glxqueryextension(fdpy,int1,int2) then begin
   raise exception.create('GLX extension not supported.');
  end;

@@ -22,18 +22,20 @@
   License along with this library; if not, write to the Free
   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 }
-
-{$MODE delphi}  // objfpc would not work because of direct proc var assignments
+//
+// modified 2011 by Martin Schreiber
+//
+//{$MODE delphi}  // objfpc would not work because of direct proc var assignments
 
 {You have to enable Macros (compiler switch "-Sm") for compiling this unit!
  This is necessary for supporting different platforms with different calling
  conventions via a single unit.}
 
+{$mode objfpc} {$h+}
+
 unit mseglx;
 
 interface
-
-{$MACRO ON}
 
 {$IFDEF Unix}
   uses
@@ -48,18 +50,7 @@ interface
 {$ENDIF}
 
 
-// =======================================================
-//   Unit specific extensions
-// =======================================================
-
-// Note: Requires that the GL library has already been initialized
-function InitGLX: Boolean;
-
-var
-  GLXDumpUnresolvedFunctions,
-  GLXInitialized: Boolean;
-
-
+//*)
 // =======================================================
 //   GLX consts, types and functions
 // =======================================================
@@ -175,66 +166,57 @@ var
 //
 // =======================================================
 
+function load_glx: boolean;
+function load_glx_mesa: boolean;
+
 implementation
-
-uses msegl, dynlibs;
-
 {$LINKLIB m}
 
-function GetProc(handle: PtrInt; name: PChar): Pointer;
+uses 
+ msegl,msedynload,msesys,dynlibs;
+
+function load_glx: boolean;
+const
+ funcs: array[0..19] of funcinfoty =
+   (
+    (n: 'glXChooseVisual'; d: @glXChooseVisual),
+    (n: 'glXCreateContext'; d: @glXCreateContext),
+    (n: 'glXDestroyContext'; d: @glXDestroyContext),
+    (n: 'glXMakeCurrent'; d: @glXMakeCurrent),
+    (n: 'glXCopyContext'; d: @glXCopyContext),
+    (n: 'glXSwapBuffers'; d: @glXSwapBuffers),
+    (n: 'glXCreateGLXPixmap'; d: @glXCreateGLXPixmap),
+    (n: 'glXDestroyGLXPixmap'; d: @glXDestroyGLXPixmap),
+    (n: 'glXQueryExtension'; d: @glXQueryExtension),
+    (n: 'glXQueryVersion'; d: @glXQueryVersion),
+    (n: 'glXIsDirect'; d: @glXIsDirect),
+    (n: 'glXGetConfig'; d: @glXGetConfig),
+    (n: 'glXGetCurrentContext'; d: @glXGetCurrentContext),
+    (n: 'glXGetCurrentDrawable'; d: @glXGetCurrentDrawable),
+    (n: 'glXWaitGL'; d: @glXWaitGL),
+    (n: 'glXWaitX'; d: @glXWaitX),
+    (n: 'glXUseXFont'; d: @glXUseXFont),
+    // GLX 1.1 and later
+    (n: 'glXQueryExtensionsString'; d: @glXQueryExtensionsString),
+    (n: 'glXQueryServerString'; d: @glXQueryServerString),
+    (n: 'glXGetClientString'; d: @glXGetClientString)
+   );
 begin
-  Result := GetProcAddress(handle, name);
-  if (Result = nil) and GLXDumpUnresolvedFunctions then
-    WriteLn('Unresolved: ', name);
+ result:= getprocaddresses(libgl,funcs,true);
 end;
 
-function InitGLX: Boolean;
-var
-  OurLibGL: TLibHandle;
+function load_glx_mesa: boolean;
+const
+ funcs: array[0..4] of funcinfoty =
+   (
+    (n: 'glXCreateGLXPixmapMESA'; d: @glXCreateGLXPixmapMESA),
+    (n: 'glXReleaseBufferMESA'; d: @glXReleaseBufferMESA),
+    (n: 'glXCopySubBufferMESA'; d: @glXCopySubBufferMESA),
+    (n: 'glXGetVideoSyncSGI'; d: @glXGetVideoSyncSGI),
+    (n: 'glXWaitVideoSyncSGI'; d: @glXWaitVideoSyncSGI)
+   );
 begin
-  Result := False;
-
-{$ifndef darwin}
-  OurLibGL := libGl;
-{$else darwin}
-  OurLibGL := LoadLibrary('/usr/X11R6/lib/libGL.dylib');
-{$endif darwin}
-
-  if OurLibGL = 0 then
-    exit;
-
-  glXChooseVisual := GetProc(OurLibGL, 'glXChooseVisual');
-  glXCreateContext := GetProc(OurLibGL, 'glXCreateContext');
-  glXDestroyContext := GetProc(OurLibGL, 'glXDestroyContext');
-  glXMakeCurrent := GetProc(OurLibGL, 'glXMakeCurrent');
-  glXCopyContext := GetProc(OurLibGL, 'glXCopyContext');
-  glXSwapBuffers := GetProc(OurLibGL, 'glXSwapBuffers');
-  glXCreateGLXPixmap := GetProc(OurLibGL, 'glXCreateGLXPixmap');
-  glXDestroyGLXPixmap := GetProc(OurLibGL, 'glXDestroyGLXPixmap');
-  glXQueryExtension := GetProc(OurLibGL, 'glXQueryExtension');
-  glXQueryVersion := GetProc(OurLibGL, 'glXQueryVersion');
-  glXIsDirect := GetProc(OurLibGL, 'glXIsDirect');
-  glXGetConfig := GetProc(OurLibGL, 'glXGetConfig');
-  glXGetCurrentContext := GetProc(OurLibGL, 'glXGetCurrentContext');
-  glXGetCurrentDrawable := GetProc(OurLibGL, 'glXGetCurrentDrawable');
-  glXWaitGL := GetProc(OurLibGL, 'glXWaitGL');
-  glXWaitX := GetProc(OurLibGL, 'glXWaitX');
-  glXUseXFont := GetProc(OurLibGL, 'glXUseXFont');
-  // GLX 1.1 and later
-  glXQueryExtensionsString := GetProc(OurLibGL, 'glXQueryExtensionsString');
-  glXQueryServerString := GetProc(OurLibGL, 'glXQueryServerString');
-  glXGetClientString := GetProc(OurLibGL, 'glXGetClientString');
-  // Mesa GLX Extensions
-  glXCreateGLXPixmapMESA := GetProc(OurLibGL, 'glXCreateGLXPixmapMESA');
-  glXReleaseBufferMESA := GetProc(OurLibGL, 'glXReleaseBufferMESA');
-  glXCopySubBufferMESA := GetProc(OurLibGL, 'glXCopySubBufferMESA');
-  glXGetVideoSyncSGI := GetProc(OurLibGL, 'glXGetVideoSyncSGI');
-  glXWaitVideoSyncSGI := GetProc(OurLibGL, 'glXWaitVideoSyncSGI');
-
-  GLXInitialized := True;
-  Result := True;
+ result:= getprocaddresses(libgl,funcs);
 end;
 
-initialization
-  InitGLX;
 end.
