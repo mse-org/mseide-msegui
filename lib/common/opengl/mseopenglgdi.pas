@@ -483,6 +483,7 @@ begin
        exit;
       end;
       xselectinput(fdpy,paintdevice,exposuremask); //will be mapped to parent
+      gcpo^.paintdevicesize:= size;
      end;
     end
     else begin
@@ -505,6 +506,7 @@ begin
     exit;
    end;
    paintdevice:= wi1.id;
+   gcpo^.paintdevicesize:= windowrect^.size;
   end;
   pd:= paintdevice;
   fdc:= getdc(pd);
@@ -529,7 +531,6 @@ begin
   gcpo^.handle:= ptruint(fcontext);
  {$endif}
   if error = gde_ok then begin
-   gcpo^.paintdevicesize:= windowrect^.size;
    initcontext(paintdevice,gcpo^,mr(nullpoint,gcpo^.paintdevicesize));
    if (kind = gck_pixmap) then begin
     if not pixmapextensionschecked then begin
