@@ -250,6 +250,7 @@ type
  glextensionsty = set of glextensionty;
 
 function mseglparseextensions(const astr: pchar): glextensionsty;
+function glplatformextensions: glextensionsty;
 function mseglloadextensions(const extensions: array of glextensionty): boolean;
                   //true if ok
 var
@@ -257,7 +258,8 @@ var
  
 implementation
 uses
- msegl,mseglext,msetypes,msestrings{$ifdef mswindows}{$else},mseglx{$endif},
+ msegl,mseglext,msetypes,msestrings{$ifdef mswindows}{$else},
+                                          mseglx,mseguiintf{$endif},
  mseglu;
  
 type
@@ -270,6 +272,18 @@ type
 var
  loadedextensions: glextensionsty;
  badextensions: glextensionsty;
+
+function glplatformextensions: glextensionsty;
+begin
+ result:= [];
+{$ifdef mswindows}
+{$else}
+ if glxqueryextensionsstring <> nil then begin
+  result:= mseglparseextensions(
+       glxqueryextensionsstring(msedisplay,msedefaultscreenno));
+ end;
+{$endif}
+end;
  
 procedure initglext(const ainfo: dynlibinfoty);
 begin

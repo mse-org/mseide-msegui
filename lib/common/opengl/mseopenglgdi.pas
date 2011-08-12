@@ -510,7 +510,8 @@ begin
    if (kind = gck_pixmap) then begin
     if not pixmapextensionschecked then begin
      makecurrent(gcpo^);
-     pixmapextensions:= mseglparseextensions(glgetstring(gl_extensions));
+     pixmapextensions:= glplatformextensions +
+                           mseglparseextensions(glgetstring(gl_extensions));
      pixmapextensionschecked:= true;
     end;
     extensions:= pixmapextensions;
@@ -518,7 +519,8 @@ begin
    else begin
     if not screenextensionschecked then begin
      makecurrent(gcpo^);
-     screenextensions:= mseglparseextensions(glgetstring(gl_extensions));
+     screenextensions:= glplatformextensions +
+                       mseglparseextensions(glgetstring(gl_extensions));
      screenextensionschecked:= true;
     end;
     extensions:= screenextensions;

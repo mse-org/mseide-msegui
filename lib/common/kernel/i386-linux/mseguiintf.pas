@@ -307,6 +307,7 @@ function msedisplay: pdisplay;
 function msevisual: pvisual;
 function mserootwindow(id: winidty = 0): winidty;
 function msedefaultscreen: pscreen;
+function msedefaultscreenno: integer;
 
 type
  _XIM = record end;
@@ -3592,6 +3593,11 @@ end;
 function msedefaultscreen: pscreen;
 begin
  result:= defscreen;
+end;
+
+function msedefaultscreenno: integer;
+begin
+ result:= xscreennumberofscreen(defscreen);
 end;
 
 {$ifdef with_sm}

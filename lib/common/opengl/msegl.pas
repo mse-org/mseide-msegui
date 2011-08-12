@@ -1572,7 +1572,7 @@ uses
 {$if defined(cpui386) or defined(cpux86_64)}
   math,
 {$endif}
-  msesys,msetypes,msedatalist;
+  msesys,msetypes,msedatalist{$ifdef mswindows}{$else}{$endif};
 
 {$ifdef mswindows}
 function WinChoosePixelFormat(DC: HDC; p2: PPixelFormatDescriptor): Integer;
