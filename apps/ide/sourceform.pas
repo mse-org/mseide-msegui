@@ -442,53 +442,58 @@ begin
   if not iswriter then begin
    tabwidget.window.nofocus;
    tabwidget.clear;
-   for int1:= 0 to high(filenames) do begin
-    page1:= tsourcepage1(createnewpage(''));
-    if (page1 <> nil) then begin
-     page1.finitialfilepath:= filenames[int1];
-     if int1 <= high(relpaths) then begin
-      page1.relpath:= relpaths[int1];
-     end;
-     if int1 <= high(ismod) then begin
-      page1.ismoduletext:= ismod[int1];
-     end;
-     if int1 <= high(feditposar) then begin
-      page1.finitialeditpos:= feditposar[int1];
-      if page1.finitialeditpos.col < 0 then begin
-       page1.finitialeditpos.col:= 0;
+   tabwidget.beginupdate;
+   try
+    for int1:= 0 to high(filenames) do begin
+     page1:= tsourcepage1(createnewpage(''));
+     if (page1 <> nil) then begin
+      page1.finitialfilepath:= filenames[int1];
+      if int1 <= high(relpaths) then begin
+       page1.relpath:= relpaths[int1];
       end;
-      if page1.finitialeditpos.row < 0 then begin
-       page1.finitialeditpos.row:= 0;
+      if int1 <= high(ismod) then begin
+       page1.ismoduletext:= ismod[int1];
       end;
-     end;
-     if int1 <= high(fbookmarkar) then begin
-      page1.finitialbookmarks:= fbookmarkar[int1];
-     end;
-     page1.updatecaption(false);
-    end;
-   end;
-   mainfo.errorformfilename:= '';
-   for int1:= 0 to high(modulenames) do begin
-    try
-     if int1 > high(ar1) then begin
-      bo1:= true;
-     end
-     else begin
-      bo1:= ar1[int1];
-     end;
-     mstr1:= relativepath(modulenames[int1],projectoptions.projectdir);
-     if findfile(mstr1) then begin
-      mainfo.openformfile(filepath(mstr1),bo1,false,false,true);
-     end
-     else begin
-      mainfo.openformfile(modulenames[int1],bo1,false,false,true);
-     end;
-    except
-     if checkprojectloadabort then begin
-      break; //do not load more modules
+      if int1 <= high(feditposar) then begin
+       page1.finitialeditpos:= feditposar[int1];
+       if page1.finitialeditpos.col < 0 then begin
+        page1.finitialeditpos.col:= 0;
+       end;
+       if page1.finitialeditpos.row < 0 then begin
+        page1.finitialeditpos.row:= 0;
+       end;
+      end;
+      if int1 <= high(fbookmarkar) then begin
+       page1.finitialbookmarks:= fbookmarkar[int1];
+      end;
+      page1.updatecaption(false);
      end;
     end;
-   end;
+    mainfo.errorformfilename:= '';
+    for int1:= 0 to high(modulenames) do begin
+     try
+      if int1 > high(ar1) then begin
+       bo1:= true;
+      end
+      else begin
+       bo1:= ar1[int1];
+      end;
+      mstr1:= relativepath(modulenames[int1],projectoptions.projectdir);
+      if findfile(mstr1) then begin
+       mainfo.openformfile(filepath(mstr1),bo1,false,false,true);
+      end
+      else begin
+       mainfo.openformfile(modulenames[int1],bo1,false,false,true);
+      end;
+     except
+      if checkprojectloadabort then begin
+       break; //do not load more modules
+      end;
+     end;
+    end;
+   finally
+    tabwidget.endupdate;
+   end; 
   end;
   if visible and (activepage <> nil) then begin
    activepage.sourcefoonshow(nil);

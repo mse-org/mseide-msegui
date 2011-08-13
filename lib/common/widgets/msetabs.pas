@@ -694,6 +694,7 @@ type
    function gettab_widthmax: integer;
    procedure settab_widthmax(const avalue: integer);
   protected
+   fupdating: integer;
    fpopuptab: integer;
    factivepageindexdesign: integer;
    procedure defineproperties(filer: tfiler); override;
@@ -741,6 +742,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure beginupdate;
+   procedure endupdate;
    procedure synctofontheight; override;
    function indexof(const page: twidget): integer;
    function count: integer;
@@ -2052,8 +2055,11 @@ end;
 
 procedure tcustomtabbar.layoutchanged;
 begin
- if not (csloading in componentstate)  and
-     not ((owner <> nil) and (csloading in owner.ComponentState)) then begin
+ if not (csloading in componentstate) and
+                        not (ws_loadedproc in fwidgetstate) and
+     not ((owner <> nil) and (csloading in owner.ComponentState)) and
+     not ((fparentwidget <> nil) and 
+          (ws_loadedproc in twidget1(fparentwidget).fwidgetstate)) then begin
            //todo: support for cssubcomponent in fpc
 //  checkautosize;
   updatelayout;
@@ -3523,12 +3529,15 @@ var
  int1: integer;
  activepageindexbefore: integer;
  bo1: boolean;
+ updatingbefore: boolean;
 begin
  if not (ws_destroying in fwidgetstate) then begin
   widget1:= twidget1(sender.getwidget);
   int1:= indexof(widget1);
   with ftabs.tabs[int1] do begin
-   if not (csloading in componentstate) then begin
+   updatingbefore:= ts_updating in fstate;
+   include(fstate,ts_updating);
+   if not (csloading in componentstate)  and (fupdating <= 0) then begin
     activepageindexbefore:= factivepageindex;
     caption:= sender.getcaption;
     hint:= sender.gettabhint;
@@ -3578,11 +3587,16 @@ begin
       end;
      end;
     end;
+    if not updatingbefore then begin
+     exclude(fstate,ts_updating);
+     changed;
+    end;
    end
    else begin
-    include(fstate,ts_updating);
     caption:= sender.getcaption; //no updatelayout
-    exclude(fstate,ts_updating);
+    if not updatingbefore then begin
+     exclude(fstate,ts_updating);
+    end;
    end;
   end;
  end;
@@ -4723,6 +4737,29 @@ procedure tcustomtabwidget.setactivepageindex1(const avalue: integer);
 begin
  setactivepageindex(avalue);
  factivepageindexdesign:= factivepageindex;
+end;
+
+procedure tcustomtabwidget.beginupdate;
+begin
+ inc(fupdating);
+ ftabs.beginupdate;
+end;
+
+procedure tcustomtabwidget.endupdate;
+var
+ int1: integer;
+begin
+ dec(fupdating);
+ if fupdating = 0 then begin
+  with ftabs.tabs do begin
+   for int1:= 0 to high(fitems) do begin
+    with tpagetab(fitems[int1]) do begin
+     self.pagechanged(fpageintf);
+    end;
+   end;
+  end;
+ end;
+ ftabs.endupdate;
 end;
 
 { tpagetab }
