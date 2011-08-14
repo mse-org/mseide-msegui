@@ -110,7 +110,10 @@ type
    property tag: integer read ftag write ftag default 0;
    property hint: msestring read fhint write fhint;
  end;
-
+ tabarty = array of ttab;
+ tabaty = array[0..0] of ttab;
+ ptabaty = ^tabaty;
+ 
  ttabs = class;
 
  createtabeventty = procedure(const sender: tcustomtabbar; const index: integer;
@@ -271,6 +274,9 @@ type
  movedeventty = procedure(const sender: tobject; const curindex: integer;
                                        const newindex: integer) of object;
 
+ tabbarstatety = (tbs_layoutvalid,tbs_designdrag);
+ tabbarstatesty = set of tabbarstatety;
+ 
  tcustomtabbar = class(tcustomstepbox)
   private
    flayoutinfo: tabbarlayoutinfoty;
@@ -283,6 +289,7 @@ type
    fonclientmouseevent: mouseeventty;
    procedure settabs(const Value: ttabs);
    procedure layoutchanged;
+   procedure checklayout;
    procedure updatelayout;
    function getactivetab: integer;
    procedure setactivetab(const Value: integer);
@@ -292,6 +299,7 @@ type
    function gethintpos(const aindex: integer): rectty;
    function getbuttonhint(const aindex: integer): msestring;
   protected
+   fstate: tabbarstatesty;
    foptions: tabbaroptionsty;
    class function classskininfo: skininfoty; override;
    function dostep(const event: stepkindty): boolean; override;
@@ -596,6 +604,8 @@ type
    constructor create(const aowner: tcustomtabbar; const apage: itabpage);
    function page: twidget;
  end;
+ pagetabaty = array[0..0] of tpagetab;
+ ppagetabaty = ^pagetabaty;
 
  ttab_font = class(tparentfont)
   public
@@ -625,6 +635,7 @@ type
    ftab_sizemax: integer;
    fstatfile: tstatfile;
    fstatvarname: msestring;
+   fvisiblepage: integer;
    procedure setstatfile(const value: tstatfile);
    function getitems(const index: integer): twidget;
    function getactivepageindex: integer;
@@ -893,7 +904,7 @@ uses
 type
  twidget1 = class(twidget);
  tmsecomponent1 = class(tmsecomponent);
- tcustomframe1 = class(tcustomframe);
+ tcustomstepframe1 = class(tcustomstepframe);
 
 function createtabform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
@@ -1043,6 +1054,7 @@ begin
   end
   else begin
    aval:= dim.x;
+   asize:= aval;
    endval:= dim.x + dim.cx;
    totsize.cy:= 0;
    for int1:= 0 to high(cells) do begin
@@ -2014,10 +2026,9 @@ end;
 
 procedure tcustomtabbar.updatelayout;
 var
- int1,int2: integer;
+ int1,int2,int3,int4: integer;
 begin
  with flayoutinfo do begin
-  dim:= innerclientrect;
   options:= [];
   if tabo_vertical in foptions then begin
    include(options,shs_vert);
@@ -2025,7 +2036,6 @@ begin
   if tabo_opposite in foptions then begin
    include(options,shs_opposite);
   end;
-  calctablayout(flayoutinfo,getcanvas,focused);
   if tabo_vertical in foptions then begin
    frame.buttonpos:= sbp_top;
    frame.buttonslast:= ((tabo_opposite in foptions) xor
@@ -2036,36 +2046,66 @@ begin
    frame.buttonslast:= ((tabo_opposite in foptions) xor
                    (tabo_buttonsoutside in foptions));
   end;
-  int2:= tabs.count;
-  for int1:= int2 - 1 downto 0 do begin
-   if not (ts_invisible in tabs[int1].fstate) then begin
-    int2:= int1+1; //count to last visible
-    break;
-   end
-   else begin
-    if int1 = 0 then begin
-     int2:= 0;
+  for int3:= 7 downto 0 do begin;
+   dim:= innerclientrect;
+   calctablayout(flayoutinfo,getcanvas,focused);
+
+   int2:= tabs.count;
+   for int1:= int2 - 1 downto 0 do begin
+    if not (ts_invisible in tabs[int1].fstate) then begin
+     int2:= int1+1; //count to last visible
+     break;
+    end
+    else begin
+     if int1 = 0 then begin
+      int2:= 0;
+     end;
     end;
    end;
+
+   if shs_vert in options then begin
+    int4:= dim.size.cy - totsize.cy + tcustomstepframe1(fframe).fdim.cy;
+   end
+   else begin
+    int4:= dim.size.cx - totsize.cx + tcustomstepframe1(fframe).fdim.cx;
+   end;
+   if (firsttab = 0) and (int4 >= 0) then begin
+    int2:= 0;
+   end;
+   frame.updatebuttonstate(firsttab,stepinfo.pageup,int2);
+   include(fstate,tbs_layoutvalid); 
+   checkautosize;
+   if sizeisequal(dim.size,innerclientsize) then begin
+    break;
+   end;
   end;
-  frame.updatebuttonstate(firsttab,stepinfo.pageup,int2);
  end;
- invalidate;
+end;
+
+procedure tcustomtabbar.checklayout;
+begin
+ if not (tbs_layoutvalid in fstate) then begin
+  updatelayout;
+ end;
 end;
 
 procedure tcustomtabbar.layoutchanged;
 begin
+ exclude(fstate,tbs_layoutvalid);
+ invalidate;
+ {
  if not (csloading in componentstate) and
                         not (ws_loadedproc in fwidgetstate) and
-     not ((owner <> nil) and (csloading in owner.ComponentState)) and
+     not ((owner <> nil) and 
+          ([csloading,csdestroying]*owner.ComponentState <> [])) and
      not ((fparentwidget <> nil) and 
           (ws_loadedproc in twidget1(fparentwidget).fwidgetstate)) then begin
            //todo: support for cssubcomponent in fpc
+//  updatelayout;
 //  checkautosize;
-  updatelayout;
-  checkautosize;
   invalidate;
  end;
+ }
 end;
 
 function comptabs(const l,r): integer;
@@ -2185,7 +2225,7 @@ end;
 procedure tcustomtabbar.loaded;
 begin
  inherited;
- updatelayout;
+// updatelayout;
  doactivetabchanged;
 end;
 
@@ -2197,6 +2237,7 @@ var
 // bo1: boolean;
 begin
  inherited;
+ checklayout;
  with flayoutinfo do begin
   int1:= high(cells);
   rect1:= innerclientrect;
@@ -2282,7 +2323,9 @@ begin
  end;
  inherited;
  if updatemouseshapestate(flayoutinfo.cells,info,self,
-                            flayoutinfo.focusedtab,flayoutinfo.tabs.fframe) then begin
+        flayoutinfo.focusedtab,flayoutinfo.tabs.fframe) and
+      (not (csdesigning in componentstate) or 
+                        (tbs_designdrag in fstate)) then begin
   include(info.eventstate,es_processed);
  end;
  if not (csdesigning in componentstate) or 
@@ -2356,37 +2399,12 @@ begin
 end;
 
 procedure tcustomtabbar.getautopaintsize(var asize: sizety);
-//var
-// int1{,int2}: integer;
 begin
  inherited;
+ checklayout;
  asize.cx:= flayoutinfo.totsize.cx;
  asize.cy:= flayoutinfo.totsize.cy;
  addsize1(asize,innerframewidth);
- {
- if not (tabo_vertical in options) then begin
-  with flayoutinfo.tabs.fcaptionframe do begin
-   int2:= font.glyphheight + top + bottom;
-  end;
-  for int1:= 0 to flayoutinfo.tabs.count - 1 do begin
-   with flayoutinfo.tabs[int1] do begin
-    if (imagelist <> nil) and (imagelist.height > int2) then begin
-     int2:= imagelist.height;
-    end;
-   end;
-  end;
-  asize.cy:= int2 + 2 + 
-          tcustomframe1(fframe).fi.innerframe.top + 
-          tcustomframe1(fframe).fi.innerframe.bottom;
-  if flayoutinfo.tabs.fframe <> nil then begin
-   asize.cy:= asize.cy + flayoutinfo.tabs.fframe.paintframewidth.cy;
-  end;
-  asize.cx:= flayoutinfo.totsize.cx;
- end
- else begin
-  asize.cy:= flayoutinfo.totsize.cy;
- end;
- }
 end;
 
 procedure tcustomtabbar.synctofontheight;
@@ -2541,7 +2559,8 @@ begin
   with info do begin
    case eventkind of
     dek_begin: begin
-     if (dragobjectpo^ = nil) and not (tabo_sorted in foptions) and
+     if (not (csdesigning in componentstate) or (tbs_designdrag in fstate)) and
+                (dragobjectpo^ = nil) and not (tabo_sorted in foptions) and
       ((tabo_dragsource in foptions) or (csdesigning in componentstate)) then begin
       int1:= tabatpos(pos,(tabo_dragsourceenabledonly in foptions) and
                   not (csdesigning in componentstate));
@@ -2793,7 +2812,7 @@ end;
 
 procedure ttabpage.changed;
 begin
- if ftabwidget <> nil then begin
+ if (ftabwidget <> nil) then begin
   ftabwidget.pagechanged(itabpage(self));
  end;
 end;
@@ -3494,6 +3513,7 @@ begin
  foptionswidget:= defaulttaboptionswidget;
  optionsskin:= defaulttaboptionsskin;
  ftabs:= tcustomtabbar1.create(self,nil);
+ include(ftabs.fstate,tbs_designdrag);
  ftabs.fanchors:= [an_left,an_top,an_right];
  ftab_size:= ftabs.size.cy;
  ftabs.SetSubComponent(true);
@@ -3534,16 +3554,17 @@ begin
  if not (ws_destroying in fwidgetstate) then begin
   widget1:= twidget1(sender.getwidget);
   int1:= indexof(widget1);
+  if widget1.visible then begin
+   fvisiblepage:= int1;
+  end;
   with ftabs.tabs[int1] do begin
    updatingbefore:= ts_updating in fstate;
    include(fstate,ts_updating);
-   if not (csloading in componentstate)  and (fupdating <= 0) then begin
+   if not (csloading in componentstate) and 
+            not (ws_loadedproc in fwidgetstate) and (fupdating <= 0) then begin
     activepageindexbefore:= factivepageindex;
     caption:= sender.getcaption;
     hint:= sender.gettabhint;
-//    width:= sender.gettabwidth;
-//    widthmin:= sender.gettabwidthmin;
-//    widthmax:= sender.gettabwidthmax;
     color:= sender.getcolortab;
     coloractive:= sender.getcoloractivetab;
     font:= ttabfont(sender.getfonttab);
@@ -3598,28 +3619,40 @@ begin
      exclude(fstate,ts_updating);
     end;
    end;
-  end;
+  end; 
  end;
 end;
 
 procedure tcustomtabwidget.loaded;
-//var
-// int1: integer;
+var
+ int1: integer;
+ po1: ppagetabaty;
 begin
  inc(fdesignchangedlock);
  if factivepageindexdesign >= count then begin
   factivepageindex:= -1;
   factivepageindexdesign:= -1;
  end;
+ if not (csdesigning in componentstate) and (factivepageindexdesign >= 0) then begin
+  if (fvisiblepage >= 0) and  (fvisiblepage <> factivepageindexdesign) and
+                       (fvisiblepage < count) then begin
+   items[fvisiblepage].visible:= false;
+  end;
+  items[factivepageindexdesign].visible:= true;
+ end;
  inherited;
  ftabs.loaded;
  updatesize(nil);
 // int1:= factivepageindex;
-// factivepageindexdesign:= int1;
  factivepageindex:= -1;
- setactivepageindex(factivepageindexdesign);
 // setactivepageindex(int1);
-// activepageindex:= int1;
+ with ftabs.flayoutinfo.tabs do begin
+  po1:= pointer(fitems);
+  for int1:= 0 to high(fitems) do begin
+   pagechanged(po1^[int1].fpageintf);
+  end;
+ end;  
+// ftabs.loaded;
  dec(fdesignchangedlock);
 end;
 
@@ -3718,7 +3751,7 @@ begin
                              {$ifdef FPC}@{$endif}readoptions,nil,false);
 end;
 
-procedure tcustomtabwidget.internaladd(const page: itabpage; aindex: integer);
+procedure tcustomtabwidget.internaladd(const page: itabpage; aindex: integer);	
 var
  tab: tpagetab;
  widget1: twidget1;
@@ -3813,7 +3846,8 @@ begin
  end;
 end;
 
-procedure tcustomtabwidget.add(const aitem: itabpage; const aindex: integer = bigint);
+procedure tcustomtabwidget.add(const aitem: itabpage; 
+                                      const aindex: integer = bigint);
 begin
  internaladd(aitem,aindex);
 end;

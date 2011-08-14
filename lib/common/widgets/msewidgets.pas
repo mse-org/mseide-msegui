@@ -502,7 +502,6 @@ type
    fstepintf: istepbar;
    fbuttonsize: integer;
    fbuttons: shapeinfoarty;
-   fdim: rectty;
    fcolorbutton: colorty;
    fbuttonpos: stepbuttonposty;
    fbuttonslast: boolean;
@@ -532,6 +531,7 @@ type
    fforceinvisiblebuttons: stepkindsty;
    fforcevisiblebuttons: stepkindsty;
    fstepstate: stepframestatesty;
+   fdim: rectty;
    procedure dorepeat(const sender: tobject);
    procedure killrepeater;
    procedure layoutchanged;
