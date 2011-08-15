@@ -3924,29 +3924,31 @@ begin
   try
    if factivepageindex >= 0 then begin
     widget1:= items[factivepageindex];
-    widget2:= widget1;
-    if ow1_canclosenil in widget1.optionswidget1 then begin
-     widget2:= nil;
-    end;
-    if not widget1.canparentclose(widget2) then begin
-     ftabs.tabs[factivepageindex].active:= true;
-     exit;
-    end;
     int1:= factivepageindex;
-    factivepageindex:= -1;
-    if not (csloading in componentstate) then begin
-     tpagetab(ftabs.tabs[int1]).fpageintf.dodeselect;
-     if (factivepageindex <> -1) then begin
+    if not (csdestroying in widget1.componentstate) then begin
+     widget2:= widget1;
+     if ow1_canclosenil in widget1.optionswidget1 then begin
+      widget2:= nil;
+     end;
+     if not widget1.canparentclose(widget2) then begin
+      ftabs.tabs[factivepageindex].active:= true;
+      exit;
+     end;
+     factivepageindex:= -1;
+     if not (csloading in componentstate) then begin
+      tpagetab(ftabs.tabs[int1]).fpageintf.dodeselect;
+      if (factivepageindex <> -1) then begin
+       exit;
+      end;
+     end;
+     items[int1].visible:= false;
+     if (factivepageindex <> -1) or items[int1].visible then begin
       exit;
      end;
     end;
-    items[int1].visible:= false;
-    if (factivepageindex <> -1) or items[int1].visible then begin
-     exit;
-    end;
     ftabs.tabs[int1].active:= false; //if items[int1] was already invisible
    end;
-   factivepageindex := Value;
+   factivepageindex:= Value;
    if value >= 0 then begin
     defaultfocuschild:= items[value];
     if not (csloading in componentstate) then begin
@@ -3957,7 +3959,12 @@ begin
     end;
     with items[value] do begin
      bringtofront; //needed in design mode where all widgets are visible
-     visible:= true;
+     inc(fupdating);
+     try
+      visible:= true;
+     finally
+      dec(fupdating);
+     end;
      if self.entered and canfocus and not ftabs.focused then begin
       setfocus(false);
      end;
