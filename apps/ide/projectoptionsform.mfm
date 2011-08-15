@@ -4748,7 +4748,6 @@ object projectoptionsfo: tprojectoptionsfo
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 8
-        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669
@@ -4958,6 +4957,7 @@ object projectoptionsfo: tprojectoptionsfo
         frame.zoomwidthstep = 1
         frame.zoomheightstep = 1
         taborder = 9
+        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669
@@ -4974,9 +4974,9 @@ object projectoptionsfo: tprojectoptionsfo
             141
             2
           )
-          taborder = 3
+          taborder = 4
           bounds_x = 15
-          bounds_y = 100
+          bounds_y = 124
           bounds_cx = 155
           bounds_cy = 16
         end
@@ -5092,9 +5092,9 @@ object projectoptionsfo: tprojectoptionsfo
             163
             2
           )
-          taborder = 4
+          taborder = 5
           bounds_x = 15
-          bounds_y = 124
+          bounds_y = 148
           bounds_cx = 177
           bounds_cy = 16
         end
@@ -5108,10 +5108,26 @@ object projectoptionsfo: tprojectoptionsfo
             152
             2
           )
-          taborder = 5
+          taborder = 3
           bounds_x = 15
-          bounds_y = 148
+          bounds_y = 100
           bounds_cx = 166
+          bounds_cy = 16
+        end
+        object settingsprojecttree: tbooleanedit
+          optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
+          frame.caption = 'Load/save project tree'
+          frame.dummy = 0
+          frame.outerframe = (
+            0
+            1
+            124
+            2
+          )
+          taborder = 6
+          bounds_x = 15
+          bounds_y = 172
+          bounds_cx = 138
           bounds_cy = 16
         end
       end

@@ -492,6 +492,7 @@ type
    fsettingseditor: boolean;
    fsettingsdebugger: boolean;
    fsettingsstorage: boolean;
+   fsettingsprojecttree: boolean;
 //   fwindowlayoutfile: filenamety;
 //   fwindowlayouthistory: filenamearty;
    fsettingsautoload: boolean;
@@ -580,6 +581,8 @@ type
                                                write fsettingsdebugger;
    property settingsstorage: boolean read fsettingsstorage 
                                                write fsettingsstorage;
+   property settingsprojecttree: boolean read fsettingsprojecttree 
+                                               write fsettingsprojecttree;
    property settingsautoload: boolean read fsettingsautoload
                                           write fsettingsautoload;
    property settingsautosave: boolean read fsettingsautosave
@@ -947,6 +950,7 @@ type
    settingsfile: tfilenameedit;
    settingsdebugger: tbooleanedit;
    settingsstorage: tbooleanedit;
+   settingsprojecttree: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1831,77 +1835,7 @@ begin
              {$ifdef FPC}@{$endif}storesignalinforec);
    end;
   end;
-//  updatevalue('modulenames',modulenames);
-//  updatevalue('moduletypes',moduletypes);
-//  updatevalue('modulefiles',modulefilenames);
-//  updatevalue('mainfile',mainfile);
-//  updatevalue('targetfile',targetfile);
-//  updatevalue('messageoutputfile',messageoutputfile);
-//  updatevalue('makecommand',makecommand);
-//  updatevalue('makedir',makedir);
-//  updatevalue('debugcommand',debugcommand);
-//  updatevalue('debugoptions',debugoptions);
-//  updatevalue('debugtarget',debugtarget);
-//  updatevalue('runcommand',runcommand);
-//  updatevalue('remoteconnection',remoteconnection);
-//  updatevalue('uploadcommand',uploadcommand);
-//  updatevalue('gdbprocessor',gdbprocessor);
-//  updatevalue('gdbservercommand',gdbservercommand);
-//  updatevalue('gdbservercommandattach',gdbservercommandattach);
-//  updatevalue('beforeload',beforeload);
-//  updatevalue('afterload',afterload);
-//  updatevalue('beforerun',beforerun);
   updatevalue('defaultmake',defaultmake,1,maxdefaultmake+1);
-//  updatevalue('befcommand',befcommand);
-//  updatevalue('befcommandon',befcommandon);
-//  updatevalue('aftcommand',aftcommand);
-//  updatevalue('aftcommandon',aftcommandon);
-//  updatevalue('makeoptions',makeoptions);
-//  updatevalue('makeoptionson',makeoptionson);
-//  updatevalue('macroon',macroon);
-//  updatevalue('macronames',macronames);
-//  updatevalue('macrovalues',macrovalues);
-//  updatevalue('macrogroup',macrogroup,0,5);
-//  updatevalue('groupcomments',groupcomments);
-//  updatevalue('sourcedirs',sourcedirs);
-//  updatevalue('defines',defines);
-//  updatevalue('defineson',defineson);
-//  updatevalue('unitdirs',unitdirs);
-//  updatevalue('unitdirson',unitdirson);
-//  updatevalue('unitpref',unitpref);
-//  updatevalue('incpref',incpref);
-//  updatevalue('libpref',libpref);
-//  updatevalue('objpref',objpref);
-//  updatevalue('targpref',targpref);
-//  updatevalue('sourcefilemasks',sourcefilemasks);
-//  updatevalue('syntaxdeffiles',syntaxdeffiles);
-//  updatevalue('filemasknames',filemasknames);
-//  updatevalue('filemasks',filemasks);
-//  updatevalue('toolsave',toolsave);
-//  updatevalue('toolhide',toolhide);
-//  updatevalue('toolparse',toolparse);
-//  updatevalue('toolmenus',toolmenus);
-//  updatevalue('toolfiles',toolfiles);
-//  updatevalue('toolparams',toolparams);
-//  updatevalue('fontalias',fontalias);
-//  updatevalue('fontancestors',fontancestors);
-//  updatevalue('fontnames',fontnames);
-//  updatevalue('fontheights',fontheights);
-//  updatevalue('fontwidths',fontwidths);
-//  updatevalue('fontoptions',fontoptions);
-//  updatevalue('fontxscales',fontxscales);
-  
-//  updatevalue('scriptbeforecopy',scriptbeforecopy);
-//  updatevalue('scriptaftercopy',scriptaftercopy);
-//  updatevalue('newprojectfiles',newprojectfiles);
-//  updatevalue('newprojectfilesdest',newprojectfilesdest);
-//  updatevalue('expandprojectfilemacros',expandprojectfilemacros);
-//  updatevalue('loadprojectfile',loadprojectfile);
-  
-//  updatevalue('newfinames',newfinames);
-//  updatevalue('newfinfilters',newfifilters);
-//  updatevalue('newfiexts',newfiexts);
-//  updatevalue('newfisources',newfisources);
   if not iswriter then begin
    int1:= length(newfinames);
    if int1 > length(newfifilters) then begin
@@ -1919,11 +1853,6 @@ begin
    setlength(fnewfisources,int1);
   end;
     
-//  updatevalue('newfonames',newfonames);
-//  updatevalue('newfonamebases',newfonamebases);
-//  updatevalue('newinheritedforms',newinheritedforms);
-//  updatevalue('newfosources',newfosources);
-//  updatevalue('newfoforms',newfoforms);
   if not iswriter then begin
    int1:= length(newfonames);
    if int1 > length(newfonamebases) then begin
@@ -2008,23 +1937,11 @@ begin
 {$endif}{$endif}
 
   updateprojectsettings(statfiler);
-{
-  if not iswriter then begin
-   if guitemplatesmo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
-    macrogroup:= int1-1;
-   end;
-   expandprojectmacros;
-  end;
-} 
   breakpointsfo.updatestat(statfiler);
   panelform.updatestat(statfiler); //uses section breakpoints!
   
   projecttree.updatestat(statfiler);
   componentstorefo.updatestat(statfiler);
-
-//  setsection('layout');
-//  mainfo.projectstatfile.updatestat('windowlayout',statfiler);
-//  sourcefo.updatestat(statfiler);
 
   setsection('components');
   selecteditpageform.updatestat(statfiler);
@@ -2745,6 +2662,7 @@ type
   settingseditor: boolean;
   settingsdebugger: boolean;
   settingsstorage: boolean;
+  settingsprojecttree: boolean;
   settingsautoload: boolean;
   settingsautosave: boolean;
   projectfilename: filenamety;
@@ -2761,6 +2679,7 @@ begin
    settingseditor:= fo.settingseditor.value;
    settingsdebugger:= fo.settingsdebugger.value;
    settingsstorage:= fo.settingsstorage.value;
+   settingsprojecttree:= fo.settingsprojecttree.value;
    settingsautoload:= fo.settingsautoload.value; 
    settingsautosave:= fo.settingsautosave.value; 
   end
@@ -2769,6 +2688,7 @@ begin
    settingseditor:= projectoptions.o.settingseditor;
    settingsdebugger:= projectoptions.o.settingsdebugger;
    settingsstorage:= projectoptions.o.settingsstorage;
+   settingsprojecttree:= projectoptions.o.settingsprojecttree;
    settingsautoload:= projectoptions.o.settingsautoload; 
    settingsautosave:= projectoptions.o.settingsautosave; 
   end;
@@ -2786,6 +2706,7 @@ begin
     fo.settingseditor.value:= settingseditor; 
     fo.settingsdebugger.value:= settingsdebugger; 
     fo.settingsstorage.value:= settingsstorage; 
+    fo.settingsprojecttree.value:= settingsprojecttree; 
     fo.settingsautoload.value:= settingsautoload; 
     fo.settingsautosave.value:= settingsautosave; 
    end;
@@ -2798,6 +2719,7 @@ begin
     projectoptions.o.settingseditor:= settingseditor; 
     projectoptions.o.settingsdebugger:= settingsdebugger; 
     projectoptions.o.settingsstorage:= settingsstorage; 
+    projectoptions.o.settingsprojecttree:= settingsprojecttree; 
     projectoptions.o.settingsautoload:= settingsautoload; 
     projectoptions.o.settingsautosave:= settingsautosave; 
    end;
@@ -2875,6 +2797,9 @@ begin
    read1:= tstatreader.create(buffer.settingsfile,ce_utf8n);
    try
     read1.setsection('projectoptions');
+    if projectoptions.o.settingsprojecttree then begin
+     projecttree.updatestat(read1);
+    end;
     updateprojectsettings(read1);
    finally
     read1.free;
@@ -2926,16 +2851,20 @@ begin
     if sender <> nil then begin
      formtoprojectoptions(sender);
     end;
+    disabled:= getdisabledoptions;
+    stat1.setsection('projectoptions');
+    if o.settingsprojecttree then begin
+     projecttree.updatestat(stat1);
+    end;
     if not o.settingsstorage then begin
      o.settingsfile:= '';
      o.settingseditor:= false; 
      o.settingsdebugger:= false; 
      o.settingsstorage:= false; 
+     o.settingsprojecttree:= false; 
      o.settingsautoload:= false; 
      o.settingsautosave:= false; 
     end;
-    disabled:= getdisabledoptions;
-    stat1.setsection('projectoptions');
     updateprojectsettings(stat1);
    finally
     disabled:= [];
