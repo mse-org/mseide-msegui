@@ -188,6 +188,9 @@ type
                   dialogkind: filedialogkindty = fdk_none): boolean; overload;
    function execute(var avalue: filenamety; const  dialogkind: filedialogkindty;
                   const acaption: msestring): boolean; overload;
+   function execute(var avalue: filenamety; const  dialogkind: filedialogkindty;
+                           const acaption: msestring; 
+                            aoptions: filedialogoptionsty): boolean; overload;
    procedure clear;
    procedure componentevent(const event: tcomponentevent);
    property history: msestringarty read fhistory write fhistory;
@@ -1613,8 +1616,8 @@ begin
 end;
 
 function tfiledialogcontroller.execute(var avalue: filenamety;
-                  const dialogkind: filedialogkindty;
-                  const acaption: msestring): boolean;
+       const  dialogkind: filedialogkindty; const acaption: msestring; 
+                            aoptions: filedialogoptionsty): boolean; overload;
 var
  wstr1: filenamety;
 begin
@@ -1627,7 +1630,7 @@ begin
   end;
  end;
  filename:= avalue;
- result:= execute(dialogkind,acaption) = mr_ok;
+ result:= execute(dialogkind,acaption,aoptions) = mr_ok;
  if result then begin
   avalue:= filename;
   checklink;
@@ -1635,6 +1638,13 @@ begin
  else begin
   filename:= wstr1;
  end;
+end;
+
+function tfiledialogcontroller.execute(var avalue: filenamety;
+                  const dialogkind: filedialogkindty;
+                  const acaption: msestring): boolean;
+begin
+ result:= execute(avalue,dialogkind,acaption,foptions);
 end;
 
 function tfiledialogcontroller.getfilename: filenamety;

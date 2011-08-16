@@ -302,6 +302,7 @@ type
                       const acaption: msestring); reintroduce;
    function getvaluetext: msestring; override;
    procedure setvaluetext(var avalue: msestring); override;
+   property fieldindex: integer read ffieldindex;
 //   property valuetext: msestring read getvaluetext write setvaluetext;
  end;
 

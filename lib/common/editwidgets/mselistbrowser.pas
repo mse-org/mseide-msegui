@@ -436,6 +436,8 @@ type
 
  itemindexeventty = procedure(const sender: tobject; const aindex: integer;
                      const aitem: tlistitem) of object;
+ itemcanediteventty = procedure(const sender: tobject;
+                  const aitem: tlistitem; var canedit: boolean) of object;
 
 // itemeditstatety = (ies_updating);
 // itemeditstatesty = set of itemeditstatety;
@@ -453,6 +455,7 @@ type
 //   fstate: itemeditstatesty;
 
    fediting: boolean;
+   foncheckcanedit: itemcanediteventty;
    function getitemlist: titemeditlist;
    procedure setitemlist(const Value: titemeditlist);
    function getitems(const index: integer): tlistitem;
@@ -462,6 +465,8 @@ type
   protected
    flayoutinfo: listitemlayoutinfoty;
    fvalue: tlistitem;
+
+   function fieldcanedit: boolean;
 
 //   procedure setfiltertext(const value: msestring); virtual;
   //igridwidget
@@ -491,6 +496,7 @@ type
    procedure gridtovalue(arow: integer); override;
    function internaldatatotext(const data): msestring; override;
    procedure dosetvalue(var avalue: msestring; var accept: boolean); virtual;
+   procedure storevalue(var avalue: msestring); virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure clientrectchanged; override;
    procedure updatelayout; virtual;
@@ -545,6 +551,8 @@ type
    property onupdaterowvalues: itemindexeventty read fonupdaterowvalues 
                                        write fonupdaterowvalues;
    property oncellevent: celleventty read foncellevent write foncellevent;
+   property oncheckcanedit: itemcanediteventty read foncheckcanedit 
+                                                         write foncheckcanedit;
  end;
 
  tdropdownitemedit = class(titemedit,idropdownlist)
@@ -716,11 +724,12 @@ type
 
  checkmoveeventty = procedure(const curindex,newindex: integer; var accept: boolean) of object;
 
- trecordfieldedit = class(titemedit)
+ trecordfieldedit = class(tmbdropdownitemedit)
   private
    fitemedit: ttreeitemedit;
   protected
-   procedure dosetvalue(var avalue: msestring; var accept: boolean); override;
+   procedure storevalue(var avalue: msestring); override;
+//   procedure dosetvalue(var avalue: msestring; var accept: boolean); override;
    function getoptionsedit: optionseditty; override;
  end;
  
@@ -752,7 +761,6 @@ type
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); override;
    function checkrowmove(const curindex,newindex: integer): boolean;
    procedure updateitemvalues(const index: integer; const count: integer); override;
-   function fieldcanedit: boolean;
    procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
                                var processed: boolean); override;
    procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
@@ -2491,6 +2499,11 @@ begin
  end;
 end;
 
+procedure titemedit.storevalue(var avalue: msestring);
+begin
+ fvalue.caption:= avalue;
+end;
+
 procedure titemedit.texttovalue(var accept: boolean; const quiet: boolean);
 var
  mstr1: msestring;
@@ -2504,7 +2517,7 @@ begin
   dosetvalue(mstr1,accept);
  end;
  if accept and (fvalue <> nil) then begin
-  fvalue.caption:= mstr1;
+  storevalue(mstr1);
  end;
 end;
 
@@ -2938,6 +2951,14 @@ end;
 procedure titemedit.endedit;
 begin
  editing:= false;
+end;
+
+function titemedit.fieldcanedit: boolean;
+begin
+ result:= (fvalue <> nil) and not (ns_readonly in fvalue.state);
+ if (fvalue <> nil) and canevent(tmethod(foncheckcanedit)) then begin
+  foncheckcanedit(self,fvalue,result);
+ end;
 end;
 
 function titemedit.getcellcursor(const arow: integer;
@@ -3950,10 +3971,9 @@ begin
  end;
 end;
 
-procedure trecordfieldedit.dosetvalue(var avalue: msestring; var accept: boolean);
+procedure trecordfieldedit.storevalue(var avalue: msestring);
 begin
- inherited;
- if accept and (fitemedit <> nil) then begin
+ if fitemedit <> nil then begin
   fitemedit.setvaluetext(avalue);
  end;
 end;
@@ -4286,11 +4306,6 @@ begin
   end;
  end;
  inherited;
-end;
-
-function ttreeitemedit.fieldcanedit: boolean;
-begin
- result:= (fvalue <> nil) and not (ns_readonly in fvalue.state);
 end;
 
 procedure ttreeitemedit.dokeydown(var info: keyeventinfoty);
