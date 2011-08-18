@@ -160,6 +160,10 @@ function trystrtohex64(const inp: string; out value: qword): boolean;
 function strtohex64(const inp: string): qword;
 
 
+function trystrtointmse(const text: msestring; out value: integer): boolean;
+function trystrtoint64mse(const text: msestring; out value: int64): boolean;
+function trystrtoqwordmse(const text: msestring; out value: qword): boolean;
+
 function trystrtointvalue(const inp: string;
                             out value: longword): boolean; overload;
    //% prefix -> bin, & -> oct, # -> dez, $ -> hex 0x -> hex
@@ -2970,6 +2974,150 @@ end;
 procedure formaterror(const value: string);
 begin
  raise exception.Create('Invalid number '''+value+'''.');
+end;
+
+function trystrtointmse(const text: msestring; out value: integer): boolean;
+const
+ max = maxint div 10;
+var
+ po1: pmsechar;
+ neg: boolean;
+begin
+ result:= false;
+ value:= 0;
+ if text <> '' then begin
+  po1:= pointer(text);
+  while (po1^ = ' ') or (po1^ = c_tab) do begin
+   inc(po1);
+  end;
+  neg:= po1^ = msechar('-');
+  if not neg then begin
+   if po1^ = '+' then begin
+    inc(po1);
+   end;
+  end
+  else begin
+   inc(po1);
+  end;
+  if po1^ = #0 then begin
+   exit;
+  end;
+  while po1^ <> #0 do begin
+   if (po1^ < '0') or (po1^ > '9')  then begin
+    exit;
+   end;
+   if value < 0 then begin
+    exit;
+   end;
+   if value > max then begin
+    exit;
+   end;
+   value:= value * 10 + (ord(po1^) - ord('0'));
+   inc(po1);
+  end;
+ end;
+ if neg then begin
+  if (value < 0) and (value <> minint) then begin
+   exit;
+  end;  
+  value:= -value;
+ end
+ else begin
+  if value < 0 then begin
+   exit;
+  end;
+ end;
+ result:= true;
+end;
+
+function trystrtoint64mse(const text: msestring; out value: int64): boolean;
+const
+ max = maxint64 div 10;
+var
+ po1: pmsechar;
+ neg: boolean;
+begin
+ result:= false;
+ value:= 0;
+ if text <> '' then begin
+  po1:= pointer(text);
+  while (po1^ = ' ') or (po1^ = c_tab) do begin
+   inc(po1);
+  end;
+  neg:= po1^ = msechar('-');
+  if not neg then begin
+   if po1^ = '+' then begin
+    inc(po1);
+   end;
+  end
+  else begin
+   inc(po1);
+  end;
+  if po1^ = #0 then begin
+   exit;
+  end;
+  while po1^ <> #0 do begin
+   if (po1^ < '0') or (po1^ > '9')  then begin
+    exit;
+   end;
+   if value < 0 then begin
+    exit;
+   end;
+   if value > max then begin
+    exit;
+   end;
+   value:= value * 10 + (ord(po1^) - ord('0'));
+   inc(po1);
+  end;
+ end;
+ if neg then begin
+  if (value < 0) and (value <> $8000000000000000) then begin
+   exit;
+  end;  
+  value:= -value;
+ end
+ else begin
+  if value < 0 then begin
+   exit;
+  end;
+ end;
+ result:= true;
+end;
+
+function trystrtoqwordmse(const text: msestring; out value: qword): boolean;
+const
+ max = 1844674407370955161;
+var
+ po1: pmsechar;
+ bo1: boolean;
+begin
+ result:= false;
+ value:= 0;
+ if text <> '' then begin
+  po1:= pointer(text);
+  while (po1^ = ' ') or (po1^ = c_tab) do begin
+   inc(po1);
+  end;
+  if po1^ = #0 then begin
+   exit;
+  end;
+  while po1^ <> #0 do begin
+   if (po1^ < '0') or (po1^ > '9')  then begin
+    exit;
+   end;
+   if value > max then begin
+    exit;
+   end;
+   value:= value * 10;
+   bo1:= int64(value) < 0;
+   value:= value + (ord(po1^) - ord('0'));
+   if bo1 and (int64(value) >= 0) then begin
+    exit;
+   end;
+   inc(po1);
+  end;
+ end;
+ result:= true;
 end;
 
 function trystrtointvalue(const text: msestring; base: numbasety;
