@@ -330,7 +330,7 @@ end;
 
 function tstatfiler.arrayname(const name: msestring; index: integer): msestring;
 begin
- result:= name + '_'+inttostr(index);
+ result:= name + '_'+inttostrmse(index);
 end;
 
 destructor tstatfiler.destroy;
@@ -806,7 +806,7 @@ begin
   result:= default;
  end
  else begin
-  if trystrtoint(str1,result) then begin
+  if trystrtointmse(str1,result) then begin
    checkintegerrange(result,min,max);
   end
   else begin
@@ -824,7 +824,7 @@ begin
   result:= default;
  end
  else begin
-  if trystrtoint64(str1,result) then begin
+  if trystrtoint64mse(str1,result) then begin
    checkint64range(result,min,max);
   end
   else begin
@@ -920,13 +920,16 @@ end;
 procedure tstatreader.readdatalist(const name: msestring;  const value: tdatalist);
 var
  str1: msestring;
+ int1: integer;
 begin
  if findvar(name,str1) then begin
   try
    value.beginupdate;
    try
-    tdatalist1(value).readstate(self,strtoint(str1));
-    tdatalist1(value).readappendix(self,name);
+    if trystrtointmse(str1,int1) then begin
+     tdatalist1(value).readstate(self,int1);
+     tdatalist1(value).readappendix(self,name);
+    end;
    finally
     value.endupdate;
    end;
@@ -971,8 +974,7 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) then begin
-  int2:= strtoint(str1);
+ if findvar(name,str1) and trystrtointmse(str1,int2)then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
    result[int1]:= readlistitem;
@@ -990,8 +992,7 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) then begin
-  int2:= strtoint(str1);
+ if findvar(name,str1) and trystrtointmse(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
    result[int1]:= readlistitem;
@@ -1009,8 +1010,7 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) then begin
-  int2:= strtoint(str1);
+ if findvar(name,str1) and trystrtointmse(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
    result[int1]:= readlistitem;
@@ -1027,11 +1027,10 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) then begin
-  int2:= strtoint(str1);
+ if findvar(name,str1) and trystrtointmse(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
-   if not trystrtoint(readlistitem,result[int1]) then begin
+   if not trystrtointmse(readlistitem,result[int1]) then begin
     result:= default;
     break;
    end;
@@ -1048,11 +1047,10 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) then begin
-  int2:= strtoint(str1);
+ if findvar(name,str1) and trystrtointmse(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
-   if not trystrtoint64(readlistitem,result[int1]) then begin
+   if not trystrtoint64mse(readlistitem,result[int1]) then begin
     result:= default;
     break;
    end;
@@ -1069,11 +1067,10 @@ var
  str1: msestring;
  int1,int2,int3: integer;
 begin
- if findvar(name,str1) then begin
-  int2:= strtoint(str1);
+ if findvar(name,str1) and trystrtointmse(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
-   if not trystrtoint(readlistitem,int3) then begin
+   if not trystrtointmse(readlistitem,int3) then begin
     result:= default;
     break;
    end;
@@ -1091,11 +1088,10 @@ var
  str1: msestring;
  int1,int2,int3: integer;
 begin
- if findvar(name,str1) then begin
-  int2:= strtoint(str1);
+ if findvar(name,str1) and trystrtointmse(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
-   if not trystrtoint(readlistitem,int3) then begin
+   if not trystrtointmse(readlistitem,int3) then begin
     result:= default;
     break;
    end;
@@ -1113,8 +1109,7 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) then begin
-  int2:= strtoint(str1);
+ if findvar(name,str1) and trystrtointmse(str1,int2) then begin
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
    if not trystrtorealtydot(readlistitem,result[int1]) then begin
@@ -1134,8 +1129,7 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) then begin   
-  int2:= strtoint(str1);
+ if findvar(name,str1) and trystrtointmse(str1,int2) then begin   
   setlength(result,int2);
   for int1:= 0 to int2-1 do begin
    if not decoderecord(
@@ -1171,9 +1165,8 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) then begin
+ if findvar(name,str1) and trystrtointmse(str1,int2) then begin
   try
-   int2:= strtoint(str1);
    setcount(int2);
    for int1:= 0 to int2-1 do begin
     store(int1,readlistitem);
@@ -1193,9 +1186,8 @@ var
  str1: msestring;
  int1,int2: integer;
 begin
- if findvar(name,str1) then begin
+ if findvar(name,str1) and trystrtointmse(str1,int2) then begin
   try
-   int2:= strtoint(str1);
    setcount(int2);
    for int1:= 0 to int2-1 do begin
     store(int1,readlistitem);
@@ -1379,12 +1371,12 @@ end;
 
 procedure tstatwriter.writeinteger(const name: msestring; const value: integer);
 begin
- writeval(name,inttostr(value));
+ writeval(name,inttostrmse(value));
 end;
 
 procedure tstatwriter.writeint64(const name: msestring; const value: int64);
 begin
- writeval(name,inttostr(value));
+ writeval(name,inttostrmse(value));
 end;
 
 procedure tstatwriter.writeboolean(const name: msestring; const value: boolean);
@@ -1472,7 +1464,7 @@ end;
 
 procedure tstatwriter.writelistitem(const value: integer);
 begin
- writelistval(inttostr(value));
+ writelistval(inttostrmse(value));
 end;
 
 procedure tstatwriter.writelistitem(const value: realty);
