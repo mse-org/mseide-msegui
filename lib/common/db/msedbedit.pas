@@ -2985,7 +2985,8 @@ end;
 
 function tdbnavigator.canclose(const newfocus: twidget = nil): boolean;
 begin
- if fdatalink.active and (newfocus = nil) then begin
+ if (dno_postoncanclose in foptions) and fdatalink.active and 
+                                               (newfocus = nil) then begin
   fdatalink.dataset.checkbrowsemode;
  end;
  result:= inherited canclose(newfocus);
