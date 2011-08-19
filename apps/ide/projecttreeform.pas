@@ -1134,7 +1134,7 @@ begin
   end;
   n2.parent.insert(n1,n2.parentindex);
  end;
- n1.filename:= aname;
+ n1.filename:= relativepath(aname,n1.parentpath);
 end;
 
 procedure tprojecttreefo.projecteditonupdaterowvalues(const sender: TObject;
@@ -1346,10 +1346,10 @@ var
  no1: tfilenode;
 begin
  no1:= tfilenode(projectedit.item);
- fn1:= no1.filename;
+ fn1:= no1.path;
  with mainfo.openfile.controller do begin
   if execute(fn1,fdk_open,'Select Directory',[fdo_directory]) then begin
-   no1.filename:= fn1;
+   no1.filename:= relativepath(fn1,no1.parentpath);
   end;
  end;
 end;
@@ -1435,7 +1435,7 @@ end;
 
 procedure tdirnode.setfilename(const value: filenamety);
 begin
- inherited;
+ ffilename:= value;
  projecttree.updatelist;
 end;
 
