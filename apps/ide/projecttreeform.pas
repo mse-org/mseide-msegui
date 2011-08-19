@@ -47,6 +47,7 @@ type
    adddirectoryact: taction;
    removedirectoryact: taction;
    nodeicons: timagelist;
+   dummyimage: timagelist;
    procedure projecteditonchange(const sender: TObject);
    procedure projecteditonstatreaditem(const sender: TObject; 
                 const reader: tstatreader; var aitem: ttreelistitem);
@@ -285,9 +286,9 @@ const
  filescaption = 'Text Files';
  mainico = -1;
  fileico = 0;
- unitico = 1;
- formico = 2;
- dirico = 3;
+ unitico = 2;
+ formico = 4;
+ dirico = 6;
  
 function isformfile(const aname: filenamety): boolean;
 begin
@@ -425,9 +426,12 @@ begin
  inherited create(pnk_form);
  include(fstate,ns_nosubnodestat);
 // filename:= afilename;
- add(trecordfielditem.create(irecordfield(self),0,'classtype'));
- add(trecordfielditem.create(irecordfield(self),1,'name'));
- add(trecordfielditem.create(irecordfield(self),2,'instancevarname'));
+ add(trecordfielditem.create(irecordfield(self),0,'classtype',-1,
+                                 projecttreefo.dummyimage));
+ add(trecordfielditem.create(irecordfield(self),1,'name',-1,
+                                 projecttreefo.dummyimage));
+ add(trecordfielditem.create(irecordfield(self),2,'instancevarname',-1,
+                                 projecttreefo.dummyimage));
 end;
 
 procedure tformnode.dostatread(const reader: tstatreader);

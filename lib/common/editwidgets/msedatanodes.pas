@@ -134,6 +134,7 @@ type
    procedure change;
    procedure updatecellzone(const pos: pointty; var zone: cellzonety); virtual;
    procedure drawimage(const acanvas: tcanvas); virtual;
+   procedure updatecaption(var ainfo: drawtextinfoty); virtual;
    procedure drawcell(const acanvas: tcanvas); virtual;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    property index: integer read findex;
@@ -300,7 +301,9 @@ type
   protected
   public
    constructor create(const intf: irecordfield; const afieldindex: integer;
-                      const acaption: msestring); reintroduce;
+                      const acaption: msestring;
+                      const aimagenr: integer = 0;
+                      const aimagelist: timagelist = nil); reintroduce;
    function getvaluetext: msestring; override;
    procedure setvaluetext(var avalue: msestring); override;
    property fieldindex: integer read ffieldindex;
@@ -614,12 +617,32 @@ begin
  end;
 end;
 
+procedure tlistitem.updatecaption(var ainfo: drawtextinfoty);
+var
+ int1: integer;
+begin
+//toto: check captionpos and the like
+ if fimagelist <> nil then begin
+  with fowner.fintf.getlayoutinfo^ do begin
+   int1:= fimagelist.width - imagerect.cx;
+   with ainfo.dest do begin
+    x:= x+int1;
+    cx:= cx-int1;
+   end;
+   with ainfo.clip do begin
+    x:= x+int1;
+    cx:= cx-int1;
+   end;
+  end;
+ end;
+end;
+
 procedure tlistitem.drawcell(const acanvas: tcanvas);
 var
  info: drawtextinfoty;
- po1: pointty;
+ pt1: pointty;
 begin
- po1:= acanvas.origin;
+ pt1:= acanvas.origin;
  drawimage(acanvas); //ttreelistitem shifts origin
  with fowner.fintf.getlayoutinfo^ do begin
   info.text.text:= fcaption;
@@ -628,9 +651,16 @@ begin
   info.flags:= textflags - [tf_clipo];
   info.font:= nil;
   info.tabulators:= nil;
+  updatecaption(info);
   drawtext(acanvas,info);
+  with info.res do begin
+   x:= x + captioninnerrect.x - info.dest.x;
+   y:= y + captioninnerrect.y - info.dest.y;
+   cx:= cx + captioninnerrect.cx - info.dest.cx;
+   cy:= cy + captioninnerrect.cy - info.dest.cy;
+  end;
   if not rectinrect(info.res,
-      moverect(captioninnerrect,subpoint(po1,acanvas.origin))) then begin
+      moverect(captioninnerrect,subpoint(pt1,acanvas.origin))) then begin
    include(fstate1,ns1_captionclipped);
   end
   else begin
@@ -665,9 +695,21 @@ begin
 end;
 
 procedure tlistitem.setupeditor(const editor: tinplaceedit; const font: tfont);
+var
+ info1: drawtextinfoty;
 begin
  with fowner.fintf.getlayoutinfo^ do begin
-  editor.setup(fcaption,editor.curindex,false,captioninnerrect,captionrect,nil,nil,font);
+  info1.font:= font;
+  with info1 do begin
+   tabulators:= nil;
+   dest:= captioninnerrect;
+   clip:= captionrect;
+   text.text:= fcaption;
+   flags:= textflags;
+   updatecaption(info1);
+   editor.setup(text.text,editor.curindex,false,dest,clip,nil,nil,font);
+  end;
+//  editor.setup(fcaption,editor.curindex,false,captioninnerrect,captionrect,nil,nil,font);
  end;
 end;
 
@@ -2152,22 +2194,29 @@ end;
 
 procedure ttreelistitem.setupeditor(const editor: tinplaceedit; const font: tfont);
 var
- str1: msestring;
- rect1,rect2: rectty;
+// str1: msestring;
+// rect1,rect2: rectty;
  int1: integer;
+ info1: drawtextinfoty;
 begin
  if fowner <> nil then begin
-  str1:= fcaption;            //!!!!todo fpcerror 3197
   with fowner.fintf.getlayoutinfo^ do begin
-   rect1:= captionrect;
-   rect2:= captioninnerrect;
+   info1.font:= font;
+   with info1 do begin
+    tabulators:= nil;
+    dest:= captioninnerrect;
+    clip:= captionrect;
+    text.text:= fcaption;
+    flags:= textflags;
+    int1:= levelshift;
+    inc(dest.x,int1);
+    dec(dest.cx,int1);
+    inc(clip.x,int1);
+    dec(clip.cx,int1);
+    updatecaption(info1);
+    editor.setup(text.text,editor.curindex,false,dest,clip,nil,nil,font);
+   end;
   end;
-  int1:= levelshift;
-  inc(rect1.x,int1);
-  dec(rect1.cx,int1);
-  inc(rect2.x,int1);
-  dec(rect2.cx,int1);
-  editor.setup(str1,editor.curindex,false,rect2,rect1,nil,nil,font);
  end;
 end;
 
@@ -2534,12 +2583,16 @@ end;
 { trecordfielditem }
 
 constructor trecordfielditem.create(const intf: irecordfield;
-               const afieldindex: integer; const acaption: msestring);
+               const afieldindex: integer; const acaption: msestring;
+                                    const aimagenr: integer = 0;
+                                    const aimagelist: timagelist = nil);
 begin
  fintf:= intf;
  ffieldindex:= afieldindex;
  inherited create;
  fcaption:= acaption;
+ fimagenr:= aimagenr;
+ imagelist:= aimagelist;
 end;
 
 function trecordfielditem.getvaluetext: msestring;
