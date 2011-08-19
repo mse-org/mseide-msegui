@@ -1271,7 +1271,7 @@ procedure tprojecttreefo.remdirexe(const sender: TObject);
 begin
  if askyesno('Do you want to remove '+lineend+
     tfilenode(projectedit.item).fpath+lineend+
-    ' and all the sub-items from project?') then begin
+    'with the sub-items from project?') then begin
   tfilesnode(projectedit.item.rootnode).removefile(tdirnode(projectedit.item));
   projectedit.item.free;
  end;
