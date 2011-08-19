@@ -38,7 +38,7 @@ type
  nodestatesty = set of nodestatty;
  nodestate1ty = (ns1_statechanged,ns1_rootchange,ns1_candrag,
                  ns1_destroying,ns1_updating,ns1_noowner,ns1_captionclipped,
-                 ns1_childchecked,ns1_checkboxclicked
+                 ns1_childchecked,ns1_checkboxclicked,ns1_customsort
                 );
  nodestates1ty = set of nodestate1ty;
  
@@ -207,6 +207,7 @@ type
    procedure internalgetnodes(var aresult: treelistitemarty; var acount: integer;
                        const must: nodestatesty; const mustnot: nodestatesty;
                        const amode: getnodemodety; const addself: boolean);
+  function compare(const l,r: ttreelistitem): integer; virtual;
 
   public
    constructor create(const aowner: tcustomitemlist = nil;
@@ -1910,13 +1911,11 @@ end;
 
 function comparetreelistitemcasesensitive(const l,r): integer;
 begin
-// result:= msecomparetext(ttreelistitem(l).caption,ttreelistitem(r).caption);
  result:= msestringcomp(ttreelistitem(l).caption,ttreelistitem(r).caption);
 end;
 
 function comparetreelistitemcaseinsensitive(const l,r): integer;
 begin
-// result:= msecomparestr(ttreelistitem(l).caption,ttreelistitem(r).caption);
  result:= msestringicomp(ttreelistitem(l).caption,ttreelistitem(r).caption);
 end;
 
@@ -1925,18 +1924,23 @@ procedure ttreelistitem.sort(const casesensitive: boolean;
 var
  int1: integer;
 begin
- setlength(fitems,fcount);
- if casesensitive then begin
-  sortarray(pointerarty(fitems),{$ifdef FPC}@{$endif}comparetreelistitemcasesensitive);
+ if ns1_customsort in fstate1 then begin
+  mergesort(pointerarty(fitems),fcount,pointercomparemethodty(@compare));
  end
  else begin
-  sortarray(pointerarty(fitems),{$ifdef FPC}@{$endif}comparetreelistitemcaseinsensitive);
+  setlength(fitems,fcount);
+  if casesensitive then begin
+   sortarray(pointerarty(fitems),{$ifdef FPC}@{$endif}comparetreelistitemcasesensitive);
+  end
+  else begin
+   sortarray(pointerarty(fitems),{$ifdef FPC}@{$endif}comparetreelistitemcaseinsensitive);
+  end;
  end;
- for int1:= 0 to high(fitems) do begin
+ for int1:= 0 to fcount-1 do begin
   fitems[int1].fparentindex:= int1;
  end;
  if recursive then begin
-  for int1:= 0 to high(fitems) do begin
+  for int1:= 0 to fcount-1 do begin
    fitems[int1].sort(casesensitive,true);
   end;
  end;
@@ -2519,6 +2523,12 @@ end;
 function ttreelistitem.candrop(const source: ttreelistitem): boolean;
 begin
  result:= false;
+end;
+
+function ttreelistitem.compare(const l: ttreelistitem;
+                                       const r: ttreelistitem): integer;
+begin
+ result:= 0; //dummy
 end;
 
 { trecordfielditem }

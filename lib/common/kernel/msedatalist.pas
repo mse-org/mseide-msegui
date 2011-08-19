@@ -9,7 +9,7 @@
 }
 unit msedatalist;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 
 interface
 
@@ -1039,6 +1039,7 @@ type
  end;
 
  stringsortmodety = (sms_none,sms_upascii,sms_up,sms_upi);
+ pointercomparemethodty = function(l,r:pointer): integer of object; 
 
 function firstitem(const source: stringarty): string; overload;
 function firstitem(const source: msestringarty): msestring; overload;
@@ -1197,6 +1198,12 @@ procedure quicksortarray(var asortlist; const acompare: arraysortcomparety;
                             asize,alength: integer; order: boolean;
                             out aindexlist: integerarty);
                             //asortlist = array of type
+procedure mergesortarray(var asortlist; const acompare: arraysortcomparety;
+                            asize,alength: integer; order: boolean;
+                            out aindexlist: integerarty);
+                            //asortlist = array of type
+procedure mergesort(var adata: pointerarty; const acount: integer;
+                                   compare: pointercomparemethodty);
 
 function findarrayitem(const item; const ar;
                compare: arraysortcomparety; size: integer;
@@ -2478,6 +2485,278 @@ begin
  result:= int64(l) - int64(r);
 end;
 
+procedure mergesortarray(var asortlist; const acompare: arraysortcomparety;
+                            asize,alength: integer; order: boolean;
+                            out aindexlist: integerarty);
+                            //asortlist = array of type
+        //todo: optimize
+var
+ ar1: integerarty;
+ step: integer;
+ l,r,d: pinteger;
+ stopl,stopr,stops: pinteger;
+ source,dest: pinteger;
+ int1: integer;
+ po1: pchar;
+label
+ endstep;
+begin
+ if alength = 0 then begin
+  aindexlist:= nil;
+  exit;
+ end;
+ po1:= pointer(asortlist);
+ allocuninitedarray(alength,sizeof(integer),ar1);
+ allocuninitedarray(alength,sizeof(integer),aindexlist);
+ for int1:= alength-1 downto 0 do begin
+  aindexlist[int1]:= int1;
+ end;
+ source:= pointer(aindexlist);
+ dest:= pointer(ar1);
+ step:= 1;
+ while step < alength do begin
+  d:= dest;
+  l:= source;
+  r:= source + step;
+  stopl:= r;
+  stopr:= r+step;
+  stops:= source + alength;
+  if stopr > stops then begin
+   stopr:= stops;
+  end;
+  while true do begin //runs
+   while true do begin //steps
+    while acompare((po1+l^*asize)^,(po1+r^*asize)^) <= 0 do begin 
+                                                           //merge from left
+     d^:= l^;
+     inc(l);
+     inc(d);
+     if l = stopl then begin
+      while r <> stopr do begin
+       d^:= r^;   //copy rest
+       inc(d);
+       inc(r);
+      end;
+      goto endstep;
+     end;
+    end;
+    while acompare((po1+l^*asize)^,(po1+r^*asize)^) > 0 do begin
+                                                         //merge from right;
+     d^:= r^;
+     inc(r);
+     inc(d);
+     if r = stopr then begin
+      while l <> stopl do begin
+       d^:= l^;   //copy rest
+       inc(d);
+       inc(l);
+      end;
+      goto endstep;
+     end; 
+    end;
+   end;
+endstep:
+   if stopr = stops then begin
+    break;  //run finished
+   end;
+   l:= stopr; //next step
+   r:= l + step;
+   if r >= stops then begin
+    r:= stops-1;
+   end;
+   if r = l then begin
+    d^:= l^;
+    break;
+   end;
+   stopl:= r;
+   stopr:= r + step;
+   if stopr > stops then begin
+    stopr:= stops;
+   end;
+  end;
+  d:= source;     //swap buffer
+  source:= dest;
+  dest:= d;
+  step:= step*2;
+ end;
+
+ if source <> pointer(aindexlist) then begin
+  aindexlist:= ar1;
+ end;
+ if order then begin
+  orderarray(aindexlist,asortlist,asize);
+ end;
+end;
+(*
+procedure mergesort(var adata: pointerarty; const acount: integer;
+                                   const compare: pointercomparemethodty);
+        //todo: optimize
+var
+ ar1: pointerarty;
+ step: integer;
+ l,r,d: ppointer;
+ stopl,stopr,stops: ppointer;
+ source,dest: ppointer;
+label
+ endstep;
+begin
+ allocuninitedarray(length(adata),sizeof(pointer),ar1);
+ source:= pointer(adata);
+ dest:= pointer(ar1);
+ step:= 1;
+ while step < acount do begin
+  d:= dest;
+  l:= source;
+  r:= source + step;
+  stopl:= r;
+  stopr:= r+step;
+  stops:= source + acount;
+  if stopr > stops then begin
+   stopr:= stops;
+  end;
+  while true do begin //runs
+   while true do begin //steps
+    while compare(l^,r^) <= 0 do begin //merge from left
+     d^:= l^;
+     inc(l);
+     inc(d);
+     if l = stopl then begin
+      while r <> stopr do begin
+       d^:= r^;   //copy rest
+       inc(d);
+       inc(r);
+      end;
+      goto endstep;
+     end;
+    end;
+    while compare(l^,r^) > 0 do begin //merge from right;
+     d^:= r^;
+     inc(r);
+     inc(d);
+     if r = stopr then begin
+      while l <> stopl do begin
+       d^:= l^;   //copy rest
+       inc(d);
+       inc(l);
+      end;
+      goto endstep;
+     end; 
+    end;
+   end;
+endstep:
+   if stopr = stops then begin
+    break;  //run finished
+   end;
+   l:= stopr; //next step
+   r:= l + step;
+   if r >= stops then begin
+    r:= stops-1;
+   end;
+   if r = l then begin
+    d^:= l^;
+    break;
+   end;
+   stopl:= r;
+   stopr:= r + step;
+   if stopr > stops then begin
+    stopr:= stops;
+   end;
+  end;
+  d:= source;     //swap buffer
+  source:= dest;
+  dest:= d;
+  step:= step*2;
+ end;
+
+ if source <> pointer(adata) then begin
+  adata:= ar1;
+ end;
+end;
+*)
+
+procedure mergesort(var adata: pointerarty; const acount: integer;
+                                   compare: pointercomparemethodty);
+var
+ ar1: pointerarty;
+ step: integer;
+ l,r,d: ppointer;
+ stopl,stopr,stops: ppointer;
+ source,dest: ppointer;
+label
+ endstep;
+begin
+ allocuninitedarray(length(adata),sizeof(pointer),ar1);
+ source:= pointer(adata);
+ dest:= pointer(ar1);
+ step:= 1;
+ while step < acount do begin
+  d:= dest;
+  l:= source;
+  r:= source + step;
+  stopl:= r;
+  stopr:= r+step;
+  stops:= source + acount;
+  if stopr > stops then begin
+   stopr:= stops;
+  end;
+  while true do begin //runs
+   while true do begin //steps
+    while compare(l^,r^) <= 0 do begin //merge from left
+     d^:= l^;
+     inc(l);
+     inc(d);
+     if l = stopl then begin
+      while r <> stopr do begin
+       d^:= r^;   //copy rest
+       inc(d);
+       inc(r);
+      end;
+      goto endstep;
+     end;
+    end;
+    while compare(l^,r^) > 0 do begin //merge from right;
+     d^:= r^;
+     inc(r);
+     inc(d);
+     if r = stopr then begin
+      while l <> stopl do begin
+       d^:= l^;   //copy rest
+       inc(d);
+       inc(l);
+      end;
+      goto endstep;
+     end; 
+    end;
+   end;
+endstep:
+   if stopr = stops then begin
+    break;  //run finished
+   end;
+   l:= stopr; //next step
+   r:= l + step;
+   if r >= stops then begin
+    r:= stops-1;
+   end;
+   if r = l then begin
+    d^:= l^;
+    break;
+   end;
+   stopl:= r;
+   stopr:= r + step;
+   if stopr > stops then begin
+    stopr:= stops;
+   end;
+  end;
+  d:= source;     //swap buffer
+  source:= dest;
+  dest:= d;
+  step:= step*2;
+ end;
+ if source <> pointer(adata) then begin
+  adata:= ar1;
+ end;
+end;
+
 procedure doquicksortarray(var info: sortinfoty; l, r: Integer);
 var
   i, j: Integer;
@@ -2736,7 +3015,7 @@ end;
 procedure sortarray(var sortlist; compare: arraysortcomparety; size: integer;
                        out indexlist: integerarty);
 begin
- quicksortarray(sortlist,compare,size,length(bytearty(sortlist)),true,indexlist);
+ mergesortarray(sortlist,compare,size,length(bytearty(sortlist)),true,indexlist);
 end;
 
 procedure sortarray(var sortlist; compare: arraysortcomparety; size: integer);
@@ -2749,7 +3028,7 @@ end;
 procedure sortarray(var dest: pointerarty; compare: arraysortcomparety;
                     out indexlist: integerarty);
 begin
- quicksortarray(dest,compare,sizeof(pointer),length(dest),false,indexlist);
+ mergesortarray(dest,compare,sizeof(pointer),length(dest),false,indexlist);
  orderarray(indexlist,dest);
 end;
 
@@ -2763,7 +3042,7 @@ end;
 procedure sortarray(var dest: msestringarty; compare: arraysortcomparety;
                     out indexlist: integerarty);
 begin
- quicksortarray(dest,compare,sizeof(pointer),length(dest),false,indexlist);
+ mergesortarray(dest,compare,sizeof(pointer),length(dest),false,indexlist);
  orderarray(indexlist,dest);
 end;
 
@@ -2777,7 +3056,7 @@ end;
 procedure sortarray(var dest: stringarty; compare: arraysortcomparety;
                     out indexlist: integerarty);
 begin
- quicksortarray(dest,compare,sizeof(pointer),length(dest),false,indexlist);
+ mergesortarray(dest,compare,sizeof(pointer),length(dest),false,indexlist);
  orderarray(indexlist,dest);
 end;
 
@@ -2915,7 +3194,7 @@ begin
  case sortmode of
   sms_up: sortarray(dest,{$ifdef FPC}@{$endif}comparemsestring,sizeof(msestring),indexlist);
   sms_upi: sortarray(dest,{$ifdef FPC}@{$endif}compareimsestring,sizeof(msestring),indexlist);
-//   sms_upi: quicksortarray(ziel,0,length(ziel)-1,compareimsestring,sizeof(msestring));
+//   sms_upi: mergesortarray(ziel,0,length(ziel)-1,compareimsestring,sizeof(msestring));
  end;
 end;
 
@@ -2925,9 +3204,9 @@ begin
  case sortmode of
   sms_up: sortarray(dest,{$ifdef FPC}@{$endif}compareansistring,sizeof(string));
   sms_upi: sortarray(dest,{$ifdef FPC}@{$endif}compareiansistring,sizeof(string));
-//   sms_upi: quicksortarray(ziel,0,length(ziel)-1,compareistringansi,sizeof(string));
+//   sms_upi: mergesortarray(ziel,0,length(ziel)-1,compareistringansi,sizeof(string));
   sms_upascii: sortarray(dest,{$ifdef FPC}@{$endif}compareasciistring,sizeof(string));
-//   sms_upiascii: quicksortarray(ziel,0,length(ziel)-1,compareistringascii,sizeof(string));
+//   sms_upiascii: mergesortarray(ziel,0,length(ziel)-1,compareistringascii,sizeof(string));
  end;
 end;
 
@@ -2938,32 +3217,12 @@ begin
  case sortmode of
   sms_up: sortarray(dest,{$ifdef FPC}@{$endif}compareansistring,sizeof(string),indexlist);
   sms_upi: sortarray(dest,{$ifdef FPC}@{$endif}compareiansistring,sizeof(string),indexlist);
-//   sms_upi: quicksortarray(ziel,0,length(ziel)-1,compareistringansi,sizeof(string));
+//   sms_upi: mergesortarray(ziel,0,length(ziel)-1,compareistringansi,sizeof(string));
   sms_upascii: sortarray(dest,{$ifdef FPC}@{$endif}compareasciistring,sizeof(string),indexlist);
-//   sms_upiascii: quicksortarray(ziel,0,length(ziel)-1,compareistringascii,sizeof(string));
+//   sms_upiascii: mergesortarray(ziel,0,length(ziel)-1,compareistringascii,sizeof(string));
  end;
 end;
-{
-procedure sortarray(var dest: pointeraty; length: integer; acompare: arraysortcomparety); overload;
-var
- info: sortinfoty;
- int1: integer;
-begin
- if length > 0 then begin
-  with info do begin
-   setlength(indexlist,length);
-   for int1:= 0 to high(indexlist) do begin
-    indexlist[int1]:= int1;
-   end;
-   sortlist:= @dest;
-   compare:= acompare;
-   size:= sizeof(pointer);
-   doquicksortarray(info,0,high(indexlist));
-   orderarray(indexlist,dest);
-  end;
- end;
-end;
-}
+
 function cmparray(const a,b: msestringarty): boolean;
                //true if equal
 var

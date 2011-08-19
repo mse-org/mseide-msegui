@@ -974,7 +974,7 @@ end;
 procedure tpointerlist.sort(compare: arraysortcomparety;
                     out indexlist: integerarty);
 begin
- quicksortarray(fitems,compare,sizeof(pointer),fcount,false,indexlist);
+ mergesortarray(fitems,compare,sizeof(pointer),fcount,false,indexlist);
  order(indexlist);
 end;
 

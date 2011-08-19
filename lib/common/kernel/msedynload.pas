@@ -11,6 +11,7 @@ type
   refcount: integer;
   inithooks: pointerarty;   //array of dynlibprocty
   deinithooks: pointerarty; //array of dynlibprocty
+  cw8087: word;             //fpu control word after lib load
  end;
  dynlibprocty = procedure(const dynlib: dynlibinfoty);
  
@@ -77,6 +78,7 @@ function initializedynlib(var info: dynlibinfoty;
                               //true if all funcsopt found
 var
  int1: integer;
+ wo1: word;
 begin
  with info do begin
   sys_mutexlock(lock);
@@ -84,12 +86,15 @@ begin
    result:= true;
    if refcount = 0 then begin
     if (high(libnames) >= 0) or (high(libnamesdefault) >= 0) then begin
+     wo1:= get8087cw;
      if (high(libnames) >= 0) then begin
       libhandle:= loadlib(libnames,libname,errormessage);
      end
      else begin
       libhandle:= loadlib(libnamesdefault,libname,errormessage);
      end;
+     cw8087:= get8087cw;
+     set8087cw(wo1);
      try
       getprocaddresses(libhandle,funcs,false);
      except
@@ -102,7 +107,10 @@ begin
       end;
      end;
      result:= getprocaddresses(libhandle,funcsopt,true);
-    end;
+    end
+    else begin
+     cw8087:= get8087cw;
+    end;    
     for int1:= 0 to high(inithooks) do begin
      dynlibprocty(inithooks[int1])(info);
     end;

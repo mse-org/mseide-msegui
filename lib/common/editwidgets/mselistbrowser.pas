@@ -674,6 +674,12 @@ type
    procedure add(const anodes: treelistedititemarty); overload;
    procedure add(const acount: integer; 
                              aitemclass: treelistedititemclassty = nil); overload;
+   procedure readnode(const aname: msestring; const reader: tstatreader;
+                                            const anode: ttreelistitem);
+   procedure writenode(const aname: msestring; const writer: tstatwriter;
+                                            const anode: ttreelistitem);
+   procedure updatenode(const aname: msestring; const filer: tstatfiler;
+                                            const anode: ttreelistitem);
    function toplevelnodes: treelistedititemarty;
    function getnodes(const must: nodestatesty; const mustnot: nodestatesty;
                  const amode: getnodemodety = gno_matching): treelistitemarty;
@@ -3264,7 +3270,8 @@ end;
 
 { ttreeitemeditlist }
 
-constructor ttreeitemeditlist.create(const intf: iitemlist; const aowner: ttreeitemedit);
+constructor ttreeitemeditlist.create(const intf: iitemlist;
+                                               const aowner: ttreeitemedit);
 begin
  fcolorline:= cl_dkgray;
  inherited create(intf,aowner);
@@ -3439,6 +3446,40 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+procedure ttreeitemeditlist.readnode(const aname: msestring; 
+                       const reader: tstatreader; const anode: ttreelistitem);
+begin
+ if reader.beginlist(aname) then begin
+  anode.expanded:= false; //remove existing bindings
+  beginupdate;
+  try
+   anode.dostatread(reader);
+   reader.endlist;
+  finally
+   endupdate;
+  end;
+ end;
+end;
+
+procedure ttreeitemeditlist.writenode(const aname: msestring;
+               const writer: tstatwriter; const anode: ttreelistitem);
+begin
+ writer.beginlist(aname);
+ anode.dostatwrite(writer);
+ writer.endlist;
+end;
+
+procedure ttreeitemeditlist.updatenode(const aname: msestring;
+               const filer: tstatfiler; const anode: ttreelistitem);
+begin
+ if filer.iswriter then begin
+  writenode(aname,tstatwriter(filer),anode);
+ end
+ else begin
+  readnode(aname,tstatreader(filer),anode);
  end;
 end;
 

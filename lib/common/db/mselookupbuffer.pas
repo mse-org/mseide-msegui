@@ -511,7 +511,7 @@ begin
   if (index = nil) and (data <> nil) then begin
    application.beginwait;
    try
-    quicksortarray(data,@compareinteger,sizeof(integer),length(data),
+    mergesortarray(data,@compareinteger,sizeof(integer),length(data),
                       false,index);
    finally
     application.endwait;
@@ -538,7 +538,7 @@ begin
   if (index = nil) and (data <> nil) then begin
    application.beginwait;
    try
-    quicksortarray(data,@comparerealty,sizeof(realty),length(data),
+    mergesortarray(data,@comparerealty,sizeof(realty),length(data),
                       false,index);
    finally
     application.endwait;
@@ -564,7 +564,7 @@ begin
   if (index = nil) and (data <> nil) then begin
    application.beginwait;
    try
-    quicksortarray(data,@compareint64,sizeof(int64),length(data),
+    mergesortarray(data,@compareint64,sizeof(int64),length(data),
                       false,index);
    finally
     application.endwait;
@@ -592,7 +592,7 @@ begin
    if (indexcaseinsensitive = nil) and (data <> nil) then begin
     application.beginwait;
     try
-     quicksortarray(data,@compareimsestring,sizeof(msestring),length(data),
+     mergesortarray(data,@compareimsestring,sizeof(msestring),length(data),
                        false,indexcaseinsensitive);
     finally
      application.endwait;
@@ -603,7 +603,7 @@ begin
    if (indexcasesensitive = nil) and (data <> nil) then begin
     application.beginwait;
     try
-     quicksortarray(data,@comparemsestring,sizeof(msestring),length(data),
+     mergesortarray(data,@comparemsestring,sizeof(msestring),length(data),
                        false,indexcasesensitive);
     finally
      application.endwait;

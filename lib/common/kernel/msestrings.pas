@@ -1941,7 +1941,7 @@ var
 begin
  int1:= length(s);
  setlength(result,int1);
- for int2:= 0 to int1 - 1 do begin
+ for int2:= int1 - 1 downto 0 do begin
   pcharaty(result)^[int2]:= upperchars[pcharaty(s)^[int2]];
  end;
 end;
@@ -1955,7 +1955,7 @@ begin
  setlength(result,length(s));
  po1:= pointer(s);
  po2:= pointer(result);
- for int1:= 0 to length(s) - 1 do begin
+ for int1:= length(s) - 1 downto 0 do begin
   ch1:= po1^[int1];
   if (ch1 >= 'a') and (ch1 <= 'z') then begin
    inc(ch1,ord('A') - ord('a'));

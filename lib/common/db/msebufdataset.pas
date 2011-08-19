@@ -320,9 +320,9 @@ type
    function dolookupcompare(const l,r: pintrecordty;
                              const ainfo: indexfieldinfoty;
                              const apartialstring: boolean): integer;
-   function compare(l,r: pintrecordty; const alastindex: integer;
-                    const apartialstring: boolean): integer; overload;
-   function compare(l,r: pintrecordty): integer; overload;
+   function compare1(l,r: pintrecordty; const alastindex: integer;
+                    const apartialstring: boolean): integer;
+   function compare2(l,r: pintrecordty): integer;
    procedure quicksort(l,r: integer);
    procedure mergesort(var adata: pointerarty);
    procedure sort(var adata: pointerarty);
@@ -3450,7 +3450,7 @@ begin
   for int1:= high(ar1) downto 0 do begin
    with findexlocal[int1] do begin
     lastind:= high(findexfieldinfos);
-    ar2[int1]:= compare(oldbuffer,newbuffer,lastind,false);
+    ar2[int1]:= compare1(oldbuffer,newbuffer,lastind,false);
     if ar2[int1] <> 0 then begin
      if int1 = factindex - 1 then begin
       ar1[int1]:= frecno + 1; //for fast find of bufpo
@@ -3873,7 +3873,7 @@ begin
    end;
   end;
  end; 
- quicksortarray(ar1,@comparefieldnum,sizeof(ar1[0]),
+ mergesortarray(ar1,@comparefieldnum,sizeof(ar1[0]),
                 length(ar1),false,ffieldorder);
    //MS SQL ODBC needs ordered load field
 end;
@@ -8112,7 +8112,7 @@ begin
  end;
 end;
 
-function tlocalindex.compare(l,r: pintrecordty; const alastindex: integer;
+function tlocalindex.compare1(l,r: pintrecordty; const alastindex: integer;
              const apartialstring: boolean): integer;
 var
  int1: integer;
@@ -8191,7 +8191,7 @@ begin
  end;
 end;
 
-function tlocalindex.compare(l,r: pintrecordty): integer;
+function tlocalindex.compare2(l,r: pintrecordty): integer;
 var
  int1: integer;
 begin
@@ -8250,10 +8250,10 @@ begin
   j:= r;
   p:= (l + r) shr 1;
   repeat
-   while compare(fsortarray^[i],fsortarray^[p]) < 0 do begin
+   while compare2(fsortarray^[i],fsortarray^[p]) < 0 do begin
     inc(i);
    end;
-   while compare(fsortarray^[j],fsortarray^[p]) > 0 do begin
+   while compare2(fsortarray^[j],fsortarray^[p]) > 0 do begin
     dec(j);
    end;
    if i <= j then begin
@@ -8308,7 +8308,7 @@ begin
   end;
   while true do begin //runs
    while true do begin //steps
-    while compare(l^,r^) <= 0 do begin //merge from left
+    while compare2(l^,r^) <= 0 do begin //merge from left
      d^:= l^;
      inc(l);
      inc(d);
@@ -8321,7 +8321,7 @@ begin
       goto endstep;
      end;
     end;
-    while compare(l^,r^) > 0 do begin //merge from right;
+    while compare2(l^,r^) > 0 do begin //merge from right;
      d^:= r^;
      inc(r);
      inc(d);
@@ -8380,7 +8380,9 @@ begin
    quicksort(0,tmsebufdataset(fowner).fbrecordcount - 1);
   end
   else begin
-   mergesort(adata);
+   msedatalist.mergesort(adata,tmsebufdataset(fowner).fbrecordcount,
+                 pointercomparemethodty(@compare2));
+//   mergesort(adata);
   end;
  end;
 {$ifdef mse_debugdataset}
@@ -8406,7 +8408,7 @@ begin
    if abigger then begin
     while lo <= up do begin
      pivot:= (up + lo) div 2;
-     int1:= compare(arecord,ind[pivot],alastindex,false);
+     int1:= compare1(arecord,ind[pivot],alastindex,false);
      if int1 >= 0 then begin //pivot <= rev
       lo:= pivot + 1;
      end
@@ -8422,7 +8424,7 @@ begin
    else begin
     while lo <= up do begin
      pivot:= (up + lo + 1) div 2;
-     int1:= compare(arecord,ind[pivot],alastindex,false);
+     int1:= compare1(arecord,ind[pivot],alastindex,false);
      if int1 <= 0 then begin //pivot >= rev
       up:= pivot - 1;
      end
@@ -8632,7 +8634,7 @@ begin
      if int1 < 0 then begin
       goto endlab;
      end;
-     if (int1 > 0) and (compare(po1,ind[int1-1],lastind,false) = 0) then begin
+     if (int1 > 0) and (compare1(po1,ind[int1-1],lastind,false) = 0) then begin
       result:= true;
       dec(int1);
      end;
@@ -8640,14 +8642,14 @@ begin
     else begin
      if int1 >= fbrecordcount - 1 then begin
       if partialstring and (int1 > 0) and (int1 = fbrecordcount - 1) then begin
-       result:= compare(po1,ind[int1],lastind,true) = 0;
+       result:= compare1(po1,ind[int1],lastind,true) = 0;
       end;
       if not result then begin
        goto endlab;
       end;
      end;     
      if not result then begin
-      if compare(po1,ind[int1+1],lastind,false) = 0 then begin
+      if compare1(po1,ind[int1+1],lastind,false) = 0 then begin
        result:= true;
        inc(int1);
       end;
@@ -8657,18 +8659,18 @@ begin
      if not result then begin
       if partialstring then begin
        if int1 >= 0 then begin
-        result:= compare(po1,ind[int1],lastind,true) = 0;
+        result:= compare1(po1,ind[int1],lastind,true) = 0;
        end;
        if not result then begin
         inc(int1);
         if (int1 >= fbrecordcount) or 
-                       (compare(po1,ind[int1],lastind,true) <> 0) then begin
+                       (compare1(po1,ind[int1],lastind,true) <> 0) then begin
          dec(int1,2);         //for reversed order
          if (int1 < 0) or 
-                       (compare(po1,ind[int1],lastind,true) <> 0) then begin
+                       (compare1(po1,ind[int1],lastind,true) <> 0) then begin
           dec(int1);
           if (int1 < 0) or 
-                       (compare(po1,ind[int1],lastind,true) <> 0) then begin
+                       (compare1(po1,ind[int1],lastind,true) <> 0) then begin
            inc(int1,2);
           end
           else begin

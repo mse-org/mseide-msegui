@@ -31,7 +31,7 @@ uses
  msegrids,msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,
  classes,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
  msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,msesys,mserttistat,
- msedatanodes,mseedit,mseifiglob,mselistbrowser;
+ msedatanodes,mseedit,mseifiglob,mselistbrowser,projecttreeform;
 const
  versiontext = '2.7 unstable';
 {$ifdef linux}
@@ -257,7 +257,8 @@ type
    procedure saveproject(aname: filenamety; const ascopy: boolean = false);
    procedure sourcechanged(const sender: tsourcepage);
    function opensource(const filekind: filekindty; const addtoproject: boolean;
-                        const aactivate: boolean = true): boolean;
+                        const aactivate: boolean = true;
+                        const currentnode: tprojectnode = nil): boolean;
             //true if filedialog not canceled
    function openformfile(const filename: filenamety; 
                 const ashow,aactivate,showsource,createmenu: boolean): pmoduleinfoty;
@@ -308,7 +309,7 @@ uses
  main_mfm,sourceform,watchform,breakpointsform,stackform,
  guitemplates,projectoptionsform,make,msewidgets,msepropertyeditors,
  skeletons,msedatamodules,mseact,
- mseformdatatools,mseshapes,msefileutils,projecttreeform,mseeditglob,
+ mseformdatatools,mseshapes,msefileutils,mseeditglob,
  findinfileform,formdesigner,sourceupdate,actionsmodule,programparametersform,
  objectinspector,msesysutils,msestream,cpuform,disassform,
  panelform,watchpointsform,threadsform,targetconsole,
@@ -379,7 +380,8 @@ procedure tmainfo.dofindmodulebyname(const amodule: pmoduleinfoty; const aname: 
 var
  wstr2: msestring;
 
- function dofind(const modulenames: msestringarty; const modulefilenames: filenamearty): boolean;
+ function dofind(const modulenames: array of msestring;
+                           const modulefilenames: array of filenamety): boolean;
  var
   int1: integer;
   wstr1: msestring;
@@ -409,6 +411,7 @@ var
 var
  bo1: boolean;
  int1: integer;
+ mstr1: filenamety;
 
 begin
  wstr2:= struppercase(aname);
@@ -419,10 +422,13 @@ begin
  with projectoptions do begin
   bo1:= dofind(o.modulenames,o.modulefiles);
  end;
- if not bo1 then begin
+ if not bo1 and projecttree.units.findformbyname(wstr2,mstr1) then begin
+  bo1:= dofind([wstr2],[mstr1]);
+ {
   with projecttree.units do begin
    bo1:= dofind(modulenames,modulefilenames);
   end;
+ }
  end;
  if bo1 then begin
   action:= mr_ok;
@@ -475,10 +481,11 @@ var
  end;
  
 var
- ar1: msestringarty;
- 
+// ar1: msestringarty;
+ mstr1: filenamety;
+  
 begin
- ar1:= nil; //compilerwarning
+// ar1:= nil; //compilerwarning
  if fcheckmodulelevel >= 16 then begin
   showmessage('Recursive form hierarchy for "'+atypename+'"','ERROR');
   sysutils.abort;
@@ -498,6 +505,10 @@ begin
    end;
   end;
   if po1 = nil then begin
+   if projecttree.units.findformbyclass(wstr2,mstr1) then begin
+    checkmodule(mstr1);
+   end;
+  {
    ar1:= projecttree.units.moduleclassnames;
    for int1:= 0 to high(ar1) do begin
     if ar1[int1] = wstr2 then begin
@@ -505,6 +516,7 @@ begin
      break;
     end;
    end;
+   }
   end;
   if (po1 = nil) or 
              (stringicomp(po1^.moduleclassname,atypename) <> 0) then begin
@@ -1535,7 +1547,8 @@ begin
 end;
 
 function tmainfo.opensource(const filekind: filekindty; const addtoproject: boolean;
-                              const aactivate: boolean = true): boolean;
+               const aactivate: boolean = true;
+                   const currentnode: tprojectnode = nil): boolean;
 
 var
  unitnode: tunitnode;
@@ -1563,7 +1576,7 @@ begin //opensourceactonexecute
     else begin
      page:= sourcefo.openfile(filenames[int1]);
      if addtoproject then begin
-      unitnode:= projecttree.units.addfile(filenames[int1]);
+      unitnode:= projecttree.units.addfile(currentnode,filenames[int1]);
      end;
      str1:= designer.sourcenametoformname(filenames[int1]);
      if findfile(str1) then begin

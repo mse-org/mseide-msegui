@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ uses
  mseforms,msewidgetgrid,mselistbrowser,msedatanodes,msetypes,msemenus,mseevent,
  mseactions,msefiledialog,msestat,msegrids,msedesigner,msedataedits,
  msegraphutils,msegui,msestrings,mseact,mseguiglob,mseclasses,msebitmap,mseedit,
- mseglob,msegraphics,msescrollbar,msesys,msehash;
+ mseglob,msegraphics,msescrollbar,msesys,msehash,mseifiglob;
 
 type
 
@@ -44,6 +44,9 @@ type
    removecmoduleact: taction;
    addcmoduleact: taction;
    cmoduledialog: tfiledialog;
+   adddirectoryact: taction;
+   removedirectoryact: taction;
+   nodeicons: timagelist;
    procedure projecteditonchange(const sender: TObject);
    procedure projecteditonstatreaditem(const sender: TObject; 
                 const reader: tstatreader; var aitem: ttreelistitem);
@@ -55,7 +58,6 @@ type
    procedure projecteditonpopup(const sender: tobject; var amenu: tpopupmenu;
                       var mouseinfo: mouseeventinfoty);
 
-   procedure unitpopuponupdate(const sender: tcustommenu);
    procedure addunitfileonexecute(const sender: tobject);
    procedure removeunitfileonexecute(const sender: tobject);
 
@@ -67,8 +69,7 @@ type
    procedure itemoncheckrowmove(const curindex: Integer; const newindex: Integer;
                     var accept: Boolean);
 
-   procedure filepopuponupdate(const sender: tcustommenu);
-   procedure addfileonexecute(const sender: TObject);
+   procedure addfileexe(const sender: TObject);
    procedure editdragbegin(const sender: ttreeitemedit;
                    const aitem: ttreelistitem; var candrag: Boolean;
                    var dragobject: ttreeitemdragobject; var processed: Boolean);
@@ -83,16 +84,36 @@ type
    procedure removefileonexecute(const sender: TObject);
    procedure addcmoduleonexecute(const sender: TObject);
    procedure removecmoduleonexecute(const sender: TObject);
+   procedure adddirexe(const sender: TObject);
+   procedure receditdialogexe(const sender: TObject);
+   procedure gridcellevent(const sender: TObject; var info: celleventinfoty);
+   procedure edithintexe(const sender: TObject; var info: hintinfoty);
+   procedure colshowhintexe(const sender: tdatacol; const arow: Integer;
+                   var info: hintinfoty);
+   procedure updateremdirexe(const sender: tcustomaction);
+   procedure updateadddirexe(const sender: tcustomaction);
+   procedure remdirexe(const sender: TObject);
+   procedure remfileupdateexe(const sender: tcustomaction);
+  private
+   funitloading: boolean;
   protected
+   procedure addirectory(const aname: filenamety);
+   function gettreedir: filenamety;
   public
    procedure clear;
  end;
 
- projectnodety = (pnk_none,pnk_source,pnk_form,pnk_files);
+ projectnodety = (pnk_none,pnk_source,pnk_form,pnk_files,pnk_dir);
+const
+ filenodes = [pnk_source,pnk_dir,pnk_form]; 
+type
 
  tprojectnode = class(ttreelistedititem)
    fkind: projectnodety;
    ferror: boolean;
+  protected
+   function getcurrentimagenr: integer; virtual;
+   function compare(const l,r: ttreelistitem): integer; override;
   public
    constructor create(const akind: projectnodety); reintroduce;
  end;
@@ -100,18 +121,32 @@ type
  tfilenode = class(tprojectnode)
   private
    ffilename: filenamety;
-   fcurrent: boolean; //node compiled
-   procedure setfilename(const value: filenamety); virtual;
+   fpath: filenamety;
+   fmodified: boolean;
   protected
+   function getcurrentimagenr: integer; override;
+   procedure setfilename(const value: filenamety); virtual;
+   function parentpath: msestring;
+   procedure updatepath;
   public
-   constructor create(const akind: projectnodety; const afilename: filenamety);
+   constructor create(const akind: projectnodety);
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
    function getvaluetext: msestring; override;
 
    property filename: filenamety read ffilename write setfilename;
+   property path: filenamety read fpath;
  end;
 
+ tdirnode = class(tfilenode)
+  protected
+   procedure setfilename(const value: filenamety); override;
+   function getcurrentimagenr: integer; override;
+  public
+   constructor create;
+   procedure setvaluetext(var avalue: msestring); override;
+ end;
+ 
  tcmodulenode = class(tfilenode)
  end;
  
@@ -121,11 +156,12 @@ type
    fformname: msestring;
    finstancevarname: msestring;
   protected
+   function getcurrentimagenr: integer; override;
    procedure setfilename(const value: filenamety); override;
    function getfieldtext(const fieldindex: integer): msestring;
    procedure setfieldtext(const fieldindex: integer; var avalue: msestring);
   public
-   constructor create(const afilename: filenamety);
+   constructor create;
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
  end;
@@ -133,6 +169,8 @@ type
  tunitnode = class(tfilenode)
   private
    fformfile: tformnode;
+  protected
+   function getcurrentimagenr: integer; override;
   public
    procedure dostatread(const reader: tstatreader); override;
    function setformfile(afilename: filenamety): tformnode;
@@ -145,39 +183,60 @@ type
 
  tfilenodehashlist = class(tpointermsestringhashdatalist)
  end;
+
+ tnamehashlist = class(tpointeransistringhashdatalist)
+ end;
  
  tfilesnode = class(tprojectrootnode)
   private
    fhashlist: tfilenodehashlist;
    fchangedcount: integer;
   protected
+   function getcurrentimagenr: integer; override;
    function createsubnode: ttreelistitem; override;
-   function createnode(const afilename: filenamety): tfilenode; virtual;
+   function createnode: tfilenode; virtual;
+   procedure removefilehash(const anode: tfilenode); virtual;
+   procedure addfilehash(const anode: tfilenode); virtual;
   public
    constructor create;
    destructor destroy; override;
    procedure clear; override;
-   function addfile(const afilename: filenamety): tfilenode;
-   procedure addfiles(const afilenames: filenamearty);
+   procedure loadlist; virtual;
+   function addfile(const currentnode: tprojectnode;
+                             const afilename: filenamety): tfilenode;
+   procedure addfiles(const currentnode: tprojectnode;
+                                 const afilenames: filenamearty);
    procedure removefile(const anode: tfilenode);
    function findfile(const filename: filenamety): tfilenode;
  end;
 
  tunitsnode = class(tfilesnode)
   private
-   fmoduleclassnames: filenamearty;
-   fmodulenames: filenamearty;
-   fmodulefilenames: filenamearty;
-   fstatreading: boolean;
+//   fmoduleclassnames: filenamearty;
+//   fmodulenames: filenamearty;
+//   fmodulefilenames: filenamearty;
+//   fstatreading: boolean;
+   fnamelist: tnamehashlist;
+   fclasstypelist: tnamehashlist;   
   protected
    function createsubnode: ttreelistitem; override;
-   function createnode(const afilename: filenamety): tfilenode; override;
+   function createnode: tfilenode; override;
+   procedure removefilehash(const anode: tfilenode); override;
+   procedure addfilehash(const anode: tfilenode); override;
   public
    constructor create;
-   function addfile(const afilename: filenamety): tunitnode;
-   function moduleclassnames: msestringarty;
-   function modulenames: msestringarty;
-   function modulefilenames: filenamearty;
+   destructor destroy; override;
+   procedure clear; override;
+   procedure loadlist; override;
+   function addfile(const currentnode: tprojectnode; 
+                                      const afilename: filenamety): tunitnode;
+//   function moduleclassnames: msestringarty;
+//   function modulenames: msestringarty;
+//   function modulefilenames(const aname: string): filenamearty;
+   function findformbyname(const aname: string;
+                                    out afilename: filenamety): boolean;
+   function findformbyclass(const aclassname: string;
+                                    out afilename: filenamety): boolean;
  end;
 
  stopcheckprocty = procedure (var astop: boolean) of object;
@@ -200,12 +259,14 @@ type
    ffiles: tfilesnode;
    procedure docellevent(const projectedit: ttreeitemedit;
                     var info: celleventinfoty);
+  protected
   public
    constructor create;
    function units: tunitsnode;
    function cmodules: tcmodulesnode;
    function files: tfilesnode;
    procedure updatestat(const filer: tstatfiler);
+   procedure updatelist;
  end;
 
 var
@@ -216,12 +277,17 @@ function isformfile(const aname: filenamety): boolean;
 
 implementation
 uses
- projecttreeform_mfm,msefileutils,sysutils,main,sourceform,msewidgets,
- msedatalist,msedrag,sourceupdate;
+ sysutils,projecttreeform_mfm,msefileutils,main,sourceform,msewidgets,
+ msedatalist,msedrag,sourceupdate,msesysenv,projectoptionsform;
 const
  unitscaption = 'Pascal Units';
  cmodulescaption = 'C Modules';
  filescaption = 'Text Files';
+ mainico = -1;
+ fileico = 0;
+ unitico = 1;
+ formico = 2;
+ dirico = 3;
  
 function isformfile(const aname: filenamety): boolean;
 begin
@@ -234,24 +300,45 @@ constructor tprojectnode.create(const akind: projectnodety);
 begin
  fkind:= akind;
  inherited create;
+ include(fstate1,ns1_customsort);
  fstate:= fstate + [ns_sorted];
+end;
+
+function tprojectnode.compare(const l: ttreelistitem;
+               const r: ttreelistitem): integer;
+begin
+ result:= 0;
+ if tprojectnode(l).fkind = pnk_dir then begin
+  dec(result);
+ end;
+ if tprojectnode(r).fkind = pnk_dir then begin
+  inc(result);
+ end;
+ if result = 0 then begin
+  result:= msestringicomp(l.caption,r.caption);
+ end;
+end;
+
+function tprojectnode.getcurrentimagenr: integer;
+begin
+ result:= -1;
 end;
 
 { tfilenode }
 
-constructor tfilenode.create(const akind: projectnodety; 
-                                             const afilename: filenamety);
+constructor tfilenode.create(const akind: projectnodety);
 begin
  fkind:= akind;
  inherited create(akind);
- filename:= afilename;
+// filename:= afilename;
  include(fstate,ns_readonly);
 end;
 
 procedure tfilenode.dostatread(const reader: tstatreader);
 begin
  ffilename:= reader.readmsestring('file',ffilename);
- tfilesnode(rootnode).fhashlist.add(ffilename,self);
+// ffilenamerel:= reader.readmsestring('filerel',ffilename);
+// tfilesnode(rootnode).fhashlist.add(ffilename,self);
  inherited;
 end;
 
@@ -264,22 +351,80 @@ end;
 
 procedure tfilenode.setfilename(const value: filenamety);
 begin
- ffilename:= value;
- caption:= msefileutils.filename(value);
+ ffilename:= relativepath(value,parentpath);
+ if fkind <> pnk_dir then begin
+  caption:= msefileutils.filename(value);
+ end;
+ with tfilesnode(rootnode) do begin
+  removefilehash(self);
+  self.updatepath;
+  addfilehash(self);
+ end;
 end;
 
 function tfilenode.getvaluetext: msestring;
 begin
  result:= ffilename;
 end;
+{
+function tfilenode.getpath: filenamety;
+begin
+ result:= ffilename;
+end;
+}
+function tfilenode.parentpath: msestring;
+var
+ n1: tprojectnode;
+begin
+ n1:= self;
+ repeat
+  n1:= tprojectnode(n1.fparent);
+ until (n1 = nil) or (n1.fkind = pnk_dir);
+ if n1 <> nil then begin
+  result:= tfilenode(n1).path;
+ end
+ else begin
+  result:= getcurrentdir;
+ end;
+end;
+
+procedure tfilenode.updatepath;
+var
+ mstr1,mstr2: msestring;
+begin
+ mstr1:= filename;
+ if fkind = pnk_dir then begin
+  expandprmacros1(mstr1);    
+ end;
+ mstr2:= parentpath;
+ fpath:= filepath(mstr2,mstr1);
+ case fkind of
+  pnk_dir: begin
+   if (mstr1 <> '') and (mstr1[1] = '/') then begin
+    caption:= fpath;
+   end
+   else begin
+    caption:= relativepath(fpath,mstr2);
+   end;
+  end;
+  pnk_source,pnk_form: begin
+   caption:= msefileutils.filename(fpath);
+  end;
+ end;
+end;
+
+function tfilenode.getcurrentimagenr: integer;
+begin
+ result:= fileico;
+end;
 
 { tformnode }
 
-constructor tformnode.create(const afilename: filenamety);
+constructor tformnode.create;
 begin
- inherited create(pnk_form,'');
+ inherited create(pnk_form);
  include(fstate,ns_nosubnodestat);
- filename:= afilename;
+// filename:= afilename;
  add(trecordfielditem.create(irecordfield(self),0,'classtype'));
  add(trecordfielditem.create(irecordfield(self),1,'name'));
  add(trecordfielditem.create(irecordfield(self),2,'instancevarname'));
@@ -336,21 +481,31 @@ begin
 end;
 
 procedure tformnode.setfieldtext(const fieldindex: integer; var avalue: msestring);
+var
+ n1: tfilesnode;
 begin
+ n1:= tfilesnode(rootnode);
+ n1.removefilehash(self);
  case fieldindex of
   0: begin
-   fclasstype:= designer.changemoduleclassname(ffilename,avalue);
+   fclasstype:= designer.changemoduleclassname(fpath,avalue);
    avalue:= fclasstype;
   end;
   1: begin
-   fformname:= designer.changemodulename(ffilename,avalue);
+   fformname:= designer.changemodulename(fpath,avalue);
    avalue:= fformname;
   end;
   2: begin
-   finstancevarname:= designer.changeinstancevarname(ffilename,avalue);
+   finstancevarname:= designer.changeinstancevarname(fpath,avalue);
    avalue:= finstancevarname;
   end;
  end;
+ n1.addfilehash(self);
+end;
+
+function tformnode.getcurrentimagenr: integer;
+begin
+ result:= formico;
 end;
 
 { tunitnode }
@@ -365,6 +520,14 @@ begin
  }
 end;
 
+function tunitnode.getcurrentimagenr: integer;
+begin
+ result:= fileico;
+ if fcount > 0 then begin
+  result:= unitico;
+ end;
+end;
+
 function tunitnode.setformfile(afilename: filenamety): tformnode;
 begin
  if afilename = '' then begin
@@ -373,14 +536,13 @@ begin
  end
  else begin
   if fformfile = nil then begin
-   fformfile:= tformnode.create(afilename);
+   fformfile:= tformnode.create;
    add(ttreelistitem(fformfile));
-  end
-  else begin
-   fformfile.filename:= afilename;
   end;
+  fformfile.filename:= afilename;
  end;
  result:= fformfile;
+ imagenr:= getcurrentimagenr;
 end;
 
 { tprojectrootnode }
@@ -406,25 +568,59 @@ begin
  fhashlist.free;
 end;
 
-function tfilesnode.addfile(const afilename: filenamety): tfilenode;
+function tfilesnode.addfile(const currentnode: tprojectnode;
+                                   const afilename: filenamety): tfilenode;
+var
+ n1: tprojectnode;
+ ind1: integer;
 begin
  result:= findfile(afilename);
  if result = nil then begin
-  result:= createnode(afilename);
-  add(ttreelistedititem(result));
-  fhashlist.add(afilename,result);
+  projecttreefo.projectedit.itemlist.beginupdate;
+  n1:= currentnode;
+  if n1 <> nil then begin
+   ind1:= n1.count;
+  end;  
+  while (n1 <> nil) and (n1.fkind <> pnk_dir) do begin
+   ind1:= n1.parentindex;
+   n1:= tprojectnode(n1.parent);
+  end;
+  if (n1 = nil) then begin
+   n1:= self;
+   ind1:= count;   
+  end;
+  result:= createnode;   
+  n1.insert(result,ind1);
+  result.filename:= afilename;
+  fhashlist.add(result.fpath,result);
   inc(fchangedcount);
+  projecttreefo.projectedit.itemlist.endupdate;
  end;
 end;
 
-procedure tfilesnode.addfiles(const afilenames: filenamearty);
+procedure tfilesnode.removefilehash(const anode: tfilenode);
+begin
+ if anode.fkind <> pnk_dir then begin
+  fhashlist.delete(anode.fpath,anode);
+ end;
+end;
+
+procedure tfilesnode.addfilehash(const anode: tfilenode);
+begin
+ if anode.fkind <> pnk_dir then begin
+  fhashlist.add(anode.fpath,anode);
+ end;
+end;
+
+procedure tfilesnode.addfiles(const currentnode: tprojectnode;
+                                     const afilenames: filenamearty);
 var
  int1: integer;
 begin
  beginupdate;
  try
   for int1:= 0 to high(afilenames) do begin
-   addfile(afilenames[int1]);
+   addfile(currentnode,afilenames[int1]);
   end;
  finally
   endupdate;
@@ -432,11 +628,23 @@ begin
 end;
 
 procedure tfilesnode.removefile(const anode: tfilenode);
+var
+ int1: integer;
 begin
- if not anode.fcurrent then begin
-  dec(fchangedcount);
+ with anode do begin
+  if fkind <> pnk_dir then begin
+   if fmodified then begin
+    dec(fchangedcount);
+   end;
+   removefilehash(anode);
+  end;
+  for int1:= 0 to count - 1 do begin
+   if tprojectnode(fitems[int1]).fkind in [pnk_source,pnk_dir] then begin
+    removefile(tfilenode(fitems[int1]));
+   end;
+  end;
  end;
- fhashlist.delete(anode.ffilename,anode);
+// fhashlist.delete(anode.fpath,anode);
 end;
 
 function tfilesnode.findfile(const filename: filenamety): tfilenode;
@@ -446,14 +654,14 @@ begin
  result:= tfilenode(fhashlist.find(filename));
 end;
 
-function tfilesnode.createnode(const afilename: filenamety): tfilenode;
+function tfilesnode.createnode: tfilenode;
 begin
- result:= tfilenode.create(pnk_source,afilename);
+ result:= tfilenode.create(pnk_source);
 end;
 
 function tfilesnode.createsubnode: ttreelistitem;
 begin
- result:= tfilenode.create(pnk_none,'');
+ result:= tfilenode.create(pnk_none);
 end;
 
 procedure tfilesnode.clear;
@@ -463,29 +671,168 @@ begin
  fchangedcount:= 0;
 end;
 
+procedure tfilesnode.loadlist;
+var
+ li: tmacrolist;
+
+ procedure scan(const anode: tprojectnode; const apath: filenamety);
+ var
+  int1: integer;
+  mstr1: filenamety;
+ begin
+  with tfilenode(anode) do begin
+   if fkind in filenodes then begin
+    mstr1:= filename;
+    if fkind = pnk_dir then begin
+     li.expandmacros(mstr1);    
+    end;
+    fpath:= filepath(apath,mstr1);
+    case fkind of
+     pnk_dir: begin
+      if (mstr1 <> '') and (mstr1[1] = '/') then begin
+       fcaption:= fpath;
+      end
+      else begin
+       fcaption:= relativepath(fpath,apath);
+      end;
+      for int1:= 0 to fcount-1 do begin
+       scan(tprojectnode(fitems[int1]),fpath);
+      end;
+     end;
+     pnk_source,pnk_form: begin
+//      fhashlist.add(fpath,anode);
+      addfilehash(tfilenode(anode));
+      if fkind = pnk_source then begin
+       for int1:= 0 to fcount-1 do begin
+        scan(tprojectnode(fitems[int1]),apath);
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+  anode.imagenr:= anode.getcurrentimagenr;
+ end; //scan
+
+var
+ int1: integer;
+ mstr1: msestring;
+
+begin
+ li:= getmacros;
+ beginupdate;
+ try
+  fhashlist.clear;
+  mstr1:= getcurrentdir;
+  for int1:= 0 to fcount-1 do begin
+   scan(tprojectnode(fitems[int1]),mstr1);
+  end;
+  imagenr:= getcurrentimagenr;
+ finally
+  fchangedcount:= fhashlist.count;
+  li.Free;
+  endupdate;
+ end;
+end;
+
+function tfilesnode.getcurrentimagenr: integer;
+begin
+ result:= dirico;
+end;
+
 { tunitsnode }
 
 constructor tunitsnode.create;
 begin
  inherited create;
  caption:= unitscaption;
+ fnamelist:= tnamehashlist.create;
+ fclasstypelist:= tnamehashlist.create;
 end;
 
-function tunitsnode.addfile(const afilename: filenamety): tunitnode;
+destructor tunitsnode.destroy;
 begin
- result:= tunitnode(inherited addfile(afilename));
+ inherited;
+ fnamelist.free;
+ fclasstypelist.free;
 end;
 
-function tunitsnode.createnode(const afilename: filenamety): tfilenode;
+function tunitsnode.addfile(const currentnode: tprojectnode;
+                                 const afilename: filenamety): tunitnode;
 begin
- result:= tunitnode.create(pnk_source,afilename);
+ result:= tunitnode(inherited addfile(currentnode,afilename));
+end;
+
+function tunitsnode.createnode: tfilenode;
+begin
+ result:= tunitnode.create(pnk_source);
 end;
 
 function tunitsnode.createsubnode: ttreelistitem;
 begin
- result:= tunitnode.create(pnk_none,'');
+ result:= tunitnode.create(pnk_none);
 end;
 
+function tunitsnode.findformbyclass(const aclassname: string;
+                                    out afilename: filenamety): boolean;
+var
+ n1: tformnode;
+begin
+ afilename:= '';
+ result:= fclasstypelist.find(aclassname,pointer(n1));
+ if result then begin
+  afilename:= n1.path;
+ end;
+end;
+
+function tunitsnode.findformbyname(const aname: string;
+                                    out afilename: filenamety): boolean;
+var
+ n1: tformnode;
+begin
+ afilename:= '';
+ result:= fnamelist.find(aname,pointer(n1));
+ if result then begin
+  afilename:= n1.path;
+ end;
+end;
+
+procedure tunitsnode.clear;
+begin
+ fnamelist.clear;
+ fclasstypelist.clear;
+ inherited;
+end;
+
+procedure tunitsnode.removefilehash(const anode: tfilenode);
+begin
+ if anode.fkind = pnk_form then begin
+  with tformnode(anode) do begin
+   fnamelist.delete(struppercase(string(fformname)),anode);
+   fclasstypelist.delete(struppercase(string(fclasstype)),anode);
+  end;
+ end;
+ inherited;
+end;
+
+procedure tunitsnode.addfilehash(const anode: tfilenode);
+begin
+ if anode.fkind = pnk_form then begin
+  with tformnode(anode) do begin
+   fnamelist.add(struppercase(string(fformname)),anode);
+   fclasstypelist.add(struppercase(string(fclasstype)),anode);
+  end;
+ end;
+end;
+
+procedure tunitsnode.loadlist;
+begin
+ fnamelist.clear;
+ fclasstypelist.clear;
+ inherited;
+end;
+
+{
 function tunitsnode.modulefilenames: filenamearty;
 var
  int1,int2,int3: integer;
@@ -557,7 +904,7 @@ begin
   setlength(result,int2);
  end;
 end;
-
+}
 { tcmodulesnode }
 
 constructor tcmodulesnode.create;
@@ -577,7 +924,7 @@ begin
    bo1:= false;
    for int1:= 0 to count - 1 do begin
     with tcmodulenode(fitems[int1]) do begin
-     if not fcurrent then begin
+     if fmodified then begin
       if application.waitescaped then begin
        break;
       end;
@@ -599,12 +946,12 @@ end;
 
 function tcmodulesnode.createsubnode: ttreelistitem;
 begin
- result:= tcmodulenode.create(pnk_none,'');
+ result:= tcmodulenode.create(pnk_none);
 end;
 
 function tcmodulesnode.createnode(const afilename: filenamety): tfilenode;
 begin
- result:= tcmodulenode.create(pnk_source,afilename);
+ result:= tcmodulenode.create(pnk_source);
 end;
 
 procedure tcmodulesnode.modulechanged(const aname: filenamety);
@@ -612,8 +959,8 @@ var
  node1: tcmodulenode;
 begin
  node1:= tcmodulenode(fhashlist.find(aname));
- if (node1 <> nil) and node1.fcurrent then begin
-  node1.fcurrent:= false;
+ if (node1 <> nil) and not node1.fmodified then begin
+  node1.fmodified:= true;
   inc(fchangedcount);
  end;
 end;
@@ -623,8 +970,8 @@ var
  node1: tcmodulenode;
 begin
  node1:= tcmodulenode(fhashlist.find(aname));
- if (node1 <> nil) and not node1.fcurrent then begin
-  node1.fcurrent:= true;
+ if (node1 <> nil) and node1.fmodified then begin
+  node1.fmodified:= false;
   dec(fchangedcount);
  end;
 end;
@@ -653,7 +1000,33 @@ begin
  result:= fcmodules;
 end;
 
+procedure tprojecttree.updatelist;
+begin
+ funits.loadlist;
+ fcmodules.loadlist;
+ ffiles.loadlist;
+ projecttreefo.grid.invalidate;
+end;
+
 procedure tprojecttree.updatestat(const filer: tstatfiler);
+
+ procedure scan(const anode: tprojectnode);
+ var
+  int1: integer;
+ begin
+  with anode do begin
+   if fkind = pnk_form then begin
+    with tformnode(anode) do begin
+     funits.fnamelist.add(struppercase(string(fformname)),anode);
+     funits.fclasstypelist.add(struppercase(string(fclasstype)),anode);
+    end;
+   end;
+   for int1:= 0 to count-1 do begin
+    scan(tprojectnode(fitems[int1]));
+   end;
+  end;
+ end;
+ 
 begin
  if not filer.candata then begin
   exit;
@@ -662,54 +1035,20 @@ begin
   funits.clear;
   fcmodules.clear;
   ffiles.clear;
-  funits.beginupdate;
-  fcmodules.beginupdate;
-  ffiles.beginupdate;
- end
- else begin
-  funits.fmodulefilenames:= funits.modulefilenames;
-  funits.fmodulenames:= funits.modulenames;
-  funits.fmoduleclassnames:= funits.moduleclassnames;
  end;
+ projecttreefo.projectedit.itemlist.beginupdate;
  try
-  funits.fstatreading:= true;
-  try
-   if filer.beginlist('units') then begin
-    filer.updatevalue('modulefilenames',funits.fmodulefilenames);
-    filer.updatevalue('modulenames',funits.fmodulenames);
-    filer.updatevalue('moduleclassnames',funits.fmoduleclassnames);
-    funits.dostatupdate(filer);
-    filer.endlist;
-    funits.caption:= unitscaption;
-   end;
-  finally
-   funits.fstatreading:= false;
-  end;
-  if filer.beginlist('cmodules') then begin
-   fcmodules.dostatupdate(filer);
-   filer.endlist;
-   fcmodules.caption:= cmodulescaption;
-  end;
-  if filer.beginlist('files') then begin
-   ffiles.dostatupdate(filer);
-   filer.endlist;
-   ffiles.caption:= filescaption;
-  end;
+  projecttreefo.funitloading:= true;
+  projecttreefo.projectedit.itemlist.updatenode('units',filer,funits);
+  scan(funits);
+  projecttreefo.funitloading:= false;
+  projecttreefo.projectedit.itemlist.updatenode('cmodules',filer,fcmodules);
+  projecttreefo.projectedit.itemlist.updatenode('files',filer,ffiles);
+  funits.caption:= unitscaption;
+  fcmodules.caption:= cmodulescaption;
+  ffiles.caption:= filescaption;
  finally
-  if not filer.iswriter then begin
-   with funits do begin
-    endupdate;
-    fchangedcount:= count;
-   end;
-   with fcmodules do begin
-    endupdate;
-    fchangedcount:= count;
-   end;
-   with ffiles do begin
-    endupdate;
-    fchangedcount:= count;
-   end;
-  end;
+  projecttreefo.projectedit.itemlist.endupdate;
  end;
 end;
 
@@ -726,10 +1065,10 @@ begin
     with tunitnode(node1) do begin
      case fkind of
       pnk_form: begin
-       mainfo.openformfile(ffilename,true,true,true,true);
+       mainfo.openformfile(fpath,true,true,true,true);
       end;
       pnk_source: begin
-       sourcefo.openfile(ffilename,true);
+       sourcefo.openfile(fpath,true);
       end;
      end;
     end;
@@ -737,7 +1076,9 @@ begin
    else begin
     if (node2 = ffiles) or (node2 = fcmodules) then begin
      with tfilenode(node1) do begin
-      sourcefo.openfile(ffilename,true);
+      if fkind <> pnk_dir then begin
+       sourcefo.openfile(fpath,true);
+      end;
      end;
     end;
    end;
@@ -756,12 +1097,40 @@ begin
                   ord(high(projectnodety))));
  case kind of
   pnk_form: begin
-   aitem:= tformnode.create('');
+   aitem:= tformnode.create;
   end;
-  pnk_source,pnk_files: begin
-   aitem:= tfilenode.create(kind,'');
+  pnk_source: begin
+   if funitloading then begin
+    aitem:= tunitnode.create(kind);
+   end
+   else begin
+    aitem:= tfilenode.create(kind);
+   end;
+  end;
+  pnk_dir: begin
+   aitem:= tdirnode.create;
   end;
  end;
+end;
+
+procedure tprojecttreefo.addirectory(const aname: filenamety);
+var
+ n1: tdirnode;
+ n2: tprojectnode;
+begin
+ n1:= tdirnode.create;
+ n2:= tprojectnode(projectedit.item);
+ if (n2.fkind = pnk_dir) or (n2.parent = nil) then begin
+  n2.insert(n1,0);
+ end
+ else begin
+  while (n2.treelevel > 1) and
+                     (tprojectnode(n2.parent).fkind <> pnk_dir) do begin
+   n2:= tprojectnode(n2.parent);
+  end;
+  n2.parent.insert(n1,n2.parentindex);
+ end;
+ n1.filename:= aname;
 end;
 
 procedure tprojecttreefo.projecteditonupdaterowvalues(const sender: TObject;
@@ -832,7 +1201,8 @@ end;
 
 procedure tprojecttreefo.addunitfileonexecute(const sender: tobject);
 begin
- mainfo.opensource(fk_unit,true,false);
+ mainfo.openfile.controller.filename:= gettreedir;
+ mainfo.opensource(fk_unit,true,false,tprojectnode(projectedit.item));
  activate; //windowmanager can activate new form window
 end;
 
@@ -844,7 +1214,7 @@ begin
  with tfilenode(projectedit.item) do begin
   if askok('Do you wish to remove "'+ ffilename +
             '"?','') then begin
-   if sourcefo.closepage(ffilename) then begin
+   if sourcefo.closepage(fpath) then begin
     rowbefore:= grid.row;
     rnode:= rootnode;
     if rnode is tfilesnode then begin
@@ -858,16 +1228,11 @@ begin
 end;
 
 procedure tprojecttreefo.addcmoduleonexecute(const sender: TObject);
-var
- int1: integer;
 begin
+ cmoduledialog.controller.filename:= gettreedir;
  if cmoduledialog.execute = mr_ok then begin
-  with cmoduledialog.controller do begin
-   for int1:= 0 to high(filenames) do begin
-//    sourcefo.openfile(filenames[int1]);
-    projecttree.cmodules.addfile(filenames[int1]);
-   end;
-  end;
+  projecttree.cmodules.addfiles(tprojectnode(projectedit.item),
+                                  cmoduledialog.controller.filenames);
  end;
 end;
 
@@ -876,29 +1241,36 @@ begin
  removeunitfileonexecute(sender);
 end;
 
-procedure tprojecttreefo.addfileonexecute(const sender: TObject);
-var
- int1: integer;
+procedure tprojecttreefo.addfileexe(const sender: TObject);
 begin
  with mainfo.openfile do begin
+  controller.filename:= gettreedir;
   if execute = mr_ok then begin
-   with controller do begin
-    for int1:= 0 to high(filenames) do begin
-     projecttree.files.addfile(filenames[int1]);
-    end;
-   end;
+   projecttree.files.addfiles(tprojectnode(projectedit.item),
+                                                        controller.filenames);
   end;
  end;
-{
- if filedialog.execute = mr_ok then begin
-  with filedialog.controller do begin
-   for int1:= 0 to high(filenames) do begin
-//    sourcefo.openfile(filenames[int1]);
-    projecttree.files.addfile(filenames[int1]);
-   end;
+end;
+
+procedure tprojecttreefo.adddirexe(const sender: TObject);
+begin
+ with mainfo.openfile.controller do begin
+  filename:= gettreedir;
+  if execute(fdk_open,'Select Directory',[fdo_directory]) = mr_ok then begin
+   addirectory(filename);
   end;
  end;
-}
+end;
+
+procedure tprojecttreefo.remdirexe(const sender: TObject);
+ 
+begin
+ if askyesno('Do you want to remove '+lineend+
+    tfilenode(projectedit.item).fpath+lineend+
+    ' and all the sub-items from project?') then begin
+  tfilesnode(projectedit.item.rootnode).removefile(tdirnode(projectedit.item));
+  projectedit.item.free;
+ end;
 end;
 
 procedure tprojecttreefo.removefileonexecute(const sender: TObject);
@@ -937,16 +1309,6 @@ begin
  end;
 end;
 
-procedure tprojecttreefo.unitpopuponupdate(const sender: tcustommenu);
-begin
- removeunitfileact.enabled:= projectedit.item.treelevel = 1;
-end;
-
-procedure tprojecttreefo.filepopuponupdate(const sender: tcustommenu);
-begin
- removefileact.enabled:= projectedit.item.treelevel = 1;
-end;
-
 procedure tprojecttreefo.projecteditonchange(const sender: TObject);
 begin
 // updatesubmodules;
@@ -972,6 +1334,110 @@ procedure tprojecttreefo.editdragrop(const sender: ttreeitemedit;
                var dragobject: ttreeitemdragobject; var processed: Boolean);
 begin
  sender.dragdrop(dragobject);
+end;
+
+procedure tprojecttreefo.receditdialogexe(const sender: TObject);
+var
+ fn1: filenamety;
+ no1: tfilenode;
+begin
+ no1:= tfilenode(projectedit.item);
+ fn1:= no1.filename;
+ with mainfo.openfile.controller do begin
+  if execute(fn1,fdk_open,'Select Directory',[fdo_directory]) then begin
+   no1.filename:= fn1;
+  end;
+ end;
+end;
+
+procedure tprojecttreefo.gridcellevent(const sender: TObject;
+               var info: celleventinfoty);
+begin
+ if isrowenter(info) then begin
+  edit.frame.buttons[1].visible:= 
+                            tprojectnode(projectedit.item).fkind = pnk_dir;
+ end;
+end;
+
+procedure tprojecttreefo.colshowhintexe(const sender: tdatacol;
+               const arow: Integer; var info: hintinfoty);
+begin
+ if projectedit.items[arow] is tfilenode then begin
+  info.caption:= tfilenode(projectedit.items[arow]).path;
+ end;
+end;
+
+procedure tprojecttreefo.edithintexe(const sender: TObject;
+               var info: hintinfoty);
+begin
+ if projectedit.item is tfilenode then begin
+  info.caption:= tfilenode(projectedit.item).path;
+ end;
+end;
+
+function tprojecttreefo.gettreedir: filenamety;
+var
+ n1: tprojectnode;
+begin
+ result:= '';
+ n1:= tprojectnode(projectedit.item);
+ while (n1 <> nil) and not (n1.fkind in [pnk_dir,pnk_source]) do begin
+  n1:= tprojectnode(n1.parent);
+ end;
+ if n1 <> nil then begin
+  case n1.fkind of
+   pnk_dir: begin
+    result:= tfilenode(n1).path;
+   end;
+   pnk_source: begin
+    result:= tfilenode(n1).parentpath;
+   end;
+  end;
+ end;
+ if result = '' then begin
+  result:= getcurrentdir;
+ end;
+end;
+
+procedure tprojecttreefo.updateremdirexe(const sender: tcustomaction);
+begin
+ sender.enabled:= (projectedit.item <> nil) and 
+                    (tprojectnode(projectedit.item).fkind = pnk_dir);
+end;
+
+procedure tprojecttreefo.updateadddirexe(const sender: tcustomaction);
+begin
+ sender.enabled:= (projectedit.item <> nil) and 
+     (tprojectnode(projectedit.item).fkind in [pnk_source,pnk_dir,pnk_files]);
+end;
+
+procedure tprojecttreefo.remfileupdateexe(const sender: tcustomaction);
+begin
+ sender.enabled:= tprojectnode(projectedit.item).fkind = pnk_source;
+end;
+
+{ tdirnode }
+
+constructor tdirnode.create;
+begin
+ inherited create(pnk_dir);
+ exclude(fstate,ns_readonly);
+end;
+
+procedure tdirnode.setvaluetext(var avalue: msestring);
+begin
+ setfilename(avalue);
+end;
+
+procedure tdirnode.setfilename(const value: filenamety);
+begin
+ inherited;
+ projecttree.updatelist;
+end;
+
+function tdirnode.getcurrentimagenr: integer;
+begin
+ result:= dirico;
 end;
 
 end.

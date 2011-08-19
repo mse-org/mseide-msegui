@@ -2204,6 +2204,7 @@ object projectoptionsfo: tprojectoptionsfo
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 6
+        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669
@@ -4957,7 +4958,6 @@ object projectoptionsfo: tprojectoptionsfo
         frame.zoomwidthstep = 1
         frame.zoomheightstep = 1
         taborder = 9
-        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 669

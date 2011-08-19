@@ -1953,6 +1953,7 @@ begin
     o.macrogroup:= int1-1;
    end;
    expandprojectmacros;
+   projecttree.updatelist;
   end;
 
   setsection('layout');       
@@ -2799,6 +2800,7 @@ begin
     read1.setsection('projectoptions');
     if projectoptions.o.settingsprojecttree then begin
      projecttree.updatestat(read1);
+     projecttree.updatelist;
     end;
     updateprojectsettings(read1);
    finally
