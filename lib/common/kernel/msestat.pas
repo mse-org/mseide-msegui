@@ -692,7 +692,8 @@ begin
       if ch1 <> ' ' then begin
 //       int2:= msestrscan(values[int1],msechar('='));
        int2:= findchar(values[int1],msechar('='));
-       if (int2 > 0) and (msestrlcomp(pmsechar(values[int1])+flistlevel,
+       if (int2 = flistlevel+length(name)+1) and (msestrlcomp(pmsechar(values[int1])+flistlevel,
+//       if (int2 > 0) and (msestrlcomp(pmsechar(values[int1])+flistlevel,
                pmsechar(name),length(name)) = 0) then begin
         factitem:= int1;
         value:= copy(values[int1],int2+1,bigint);
