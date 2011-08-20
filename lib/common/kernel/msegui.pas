@@ -133,7 +133,7 @@ type
                  );
  widgetstatesty = set of widgetstatety;
  widgetstate1ty = (ws1_childscaled,ws1_childrectchanged,
-                   {ws1_fontheightlock,}ws1_scaling,
+                   ws1_scaling,ws1_painting,
                    ws1_widgetregionvalid,ws1_rootvalid,
                    ws1_anchorsizing,ws1_anchorsetting,ws1_parentclientsizeinited,
                    ws1_parentupdating, //set while setparentwidget
@@ -7779,9 +7779,11 @@ var
  reg1: regionty;
  rect1: rectty;
  widget1: twidget;
- bo1: boolean;
+ bo1,bo2: boolean;
  face1: tcustomface;
 begin
+ bo2:= ws1_painting in fwidgetstate1;
+ include(fwidgetstate1,ws1_painting);
  canvas.save;
  rect1.pos:= nullpoint;
  rect1.size:= fwidgetrect.size;
@@ -7881,6 +7883,9 @@ begin
  doafterpaint(canvas);
 endlab:
  canvas.restore;
+ if not bo2 then begin
+  exclude(fwidgetstate1,ws1_painting);
+ end;
 end;
 
 procedure twidget.parentwidgetregionchanged(const sender: twidget);

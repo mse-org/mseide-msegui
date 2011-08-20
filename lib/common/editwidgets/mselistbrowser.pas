@@ -463,7 +463,8 @@ type
 //   procedure updatefilterselect;
    procedure setediting(const avalue: boolean);
   protected
-   flayoutinfo: listitemlayoutinfoty;
+   flayoutinfofocused: listitemlayoutinfoty;
+   flayoutinfocell: listitemlayoutinfoty;
    fvalue: tlistitem;
 
    function fieldcanedit: boolean;
@@ -482,7 +483,10 @@ type
    procedure itemchanged(const index: integer); virtual;
    procedure createnode(var item: tlistitem); virtual;
 
-  //iitemlist
+   procedure doupdatelayout; virtual;
+   procedure doupdatecelllayout; virtual;
+
+    //iitemlist
    function getlayoutinfo: plistitemlayoutinfoty;
    procedure itemcountchanged;
    procedure updateitemvalues(const index: integer; const count: integer); virtual;
@@ -499,7 +503,7 @@ type
    procedure storevalue(var avalue: msestring); virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    procedure clientrectchanged; override;
-   procedure updatelayout; virtual;
+   procedure updatelayout;
    procedure doitembuttonpress(var info: mouseeventinfoty); virtual;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    function getitemclass: listitemclassty; virtual;
@@ -562,6 +566,7 @@ type
    fonafterclosedropdown: notifyeventty;
    procedure setdropdown(const Value: tcustomdropdownlistcontroller);
   protected
+   procedure doupdatecelllayout; override;
    function getframe: tdropdownbuttonframe;
    procedure setframe(const Value: tdropdownbuttonframe);
    function getdropdowncontrollerclass: dropdownlistcontrollerclassty; virtual;
@@ -761,7 +766,7 @@ type
 
 //   function getkeystring1(const aindex: integer): msestring;
 //   function getkeystring2(const aindex: integer): msestring;
-   procedure updatelayout; override;
+   procedure doupdatelayout; override;
    function getitemclass: listitemclassty; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); override;
@@ -2382,7 +2387,12 @@ end;
 
 function titemedit.getlayoutinfo: plistitemlayoutinfoty;
 begin
- result:= @flayoutinfo;
+ if ws1_painting in fwidgetstate1 then begin
+  result:= @flayoutinfofocused;
+ end
+ else begin
+  result:= @flayoutinfocell;
+ end;
 end;
 
 procedure titemedit.updateitemvalues(const index: integer; const count: integer);
@@ -2475,7 +2485,7 @@ end;
 procedure titemedit.drawcell(const canvas: tcanvas);
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
-  flayoutinfo.textflags:= textflags;
+  flayoutinfofocused.textflags:= textflags;
   tlistitem(datapo^).drawcell(canvas);
  end;
 end;
@@ -2527,22 +2537,33 @@ begin
  end;
 end;
 
-procedure titemedit.updatelayout;
+procedure titemedit.doupdatelayout;
 begin
  if fgridintf <> nil then begin
   if fframe <> nil then begin
    getitemclass.calcitemlayout(paintrect.size,tframe1(fframe).fi.innerframe,
-                                                        fitemlist,flayoutinfo);
+                                              fitemlist,flayoutinfofocused);
   end
   else begin
    getitemclass.calcitemlayout(paintrect.size,minimalframe,fitemlist,
-                                                                  flayoutinfo);
+                                              flayoutinfofocused);
   end;
   invalidate;
   if not fitemlist.updating then begin
    fgridintf.getcol.changed;
   end;
  end;
+end;
+
+procedure titemedit.doupdatecelllayout;
+begin
+ flayoutinfocell:= flayoutinfofocused;
+end;
+
+procedure titemedit.updatelayout;
+begin
+ doupdatelayout;
+ doupdatecelllayout;
 end;
 
 procedure titemedit.clientrectchanged;
@@ -2614,7 +2635,7 @@ procedure titemedit.setupeditor;
 begin
  if not (csloading in componentstate) then begin
   if fvalue = nil then begin
-   with feditor,flayoutinfo do begin
+   with feditor,flayoutinfofocused do begin
     feditor.setup(text,curindex,false,captioninnerrect,captionrect,nil,nil,
               geteditfont);
    end;
@@ -3122,6 +3143,17 @@ end;
 function tdropdownitemedit.getvalueempty: integer;
 begin
  result:= -1;
+end;
+
+procedure tdropdownitemedit.doupdatecelllayout;
+begin
+ inherited;
+ if fframe <> nil then begin
+  with tframe1(fframe) do begin
+   inflaterect(flayoutinfocell.captionrect,fpaintframe); //remove buttons
+   inflaterect(flayoutinfocell.captioninnerrect,fpaintframe); //remove buttons
+  end;
+ end;
 end;
 {
 function tdropdownitemedit.setdropdowntext(const value: msestring;
@@ -4212,10 +4244,10 @@ begin
 end;
 *)
 
-procedure ttreeitemedit.updatelayout;
+procedure ttreeitemedit.doupdatelayout;
 begin
  inherited;
- flayoutinfo.colorline:= ttreeitemeditlist(fitemlist).fcolorline;
+ flayoutinfofocused.colorline:= ttreeitemeditlist(fitemlist).fcolorline;
 end;
 
 {
