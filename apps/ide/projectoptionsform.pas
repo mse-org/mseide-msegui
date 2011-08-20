@@ -1399,8 +1399,12 @@ begin
     defdefs.asarrayb:= e.texp.syntaxdeffiles;
     if bo1 then begin
      sourcefo.syntaxpainter.clear;
-     for int1:= 0 to sourcefo.count - 1 do begin
-      sourcefo.items[int1].edit.setsyntaxdef(sourcefo.items[int1].edit.filename);
+     try
+      for int1:= 0 to sourcefo.count - 1 do begin
+       sourcefo.items[int1].edit.setsyntaxdef(sourcefo.items[int1].edit.filename);
+      end;
+     except
+      application.handleexception;
      end;
     end;
    end;
@@ -2312,11 +2316,12 @@ procedure projectoptionschanged;
 var
  int1: integer;
 begin
+ projecttree.updatelist;
+ createcpufo;
  sourceupdater.unitchanged;
  for int1:= 0 to designer.modules.count - 1 do begin
   tdesignwindow(designer.modules[int1]^.designform.window).updateprojectoptions;
  end;
- createcpufo;
 end;
 
 function readprojectoptions(const filename: filenamety): boolean;
