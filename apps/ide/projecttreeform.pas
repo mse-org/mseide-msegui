@@ -44,10 +44,11 @@ type
    removecmoduleact: taction;
    addcmoduleact: taction;
    cmoduledialog: tfiledialog;
-   adddirectoryact: taction;
-   removedirectoryact: taction;
+   adddiract: taction;
+   removediract: taction;
    nodeicons: timagelist;
    dummyimage: timagelist;
+   editdiract: taction;
    procedure projecteditonchange(const sender: TObject);
    procedure projecteditonstatreaditem(const sender: TObject; 
                 const reader: tstatreader; var aitem: ttreelistitem);
@@ -95,6 +96,10 @@ type
    procedure updateadddirexe(const sender: tcustomaction);
    procedure remdirexe(const sender: TObject);
    procedure remfileupdateexe(const sender: tcustomaction);
+   procedure udateeditdirexe(const sender: tcustomaction);
+   procedure editdirexe(const sender: TObject);
+   procedure captionset(const sender: TObject; var avalue: msestring;
+                   var accept: Boolean);
   private
    funitloading: boolean;
   protected
@@ -141,11 +146,15 @@ type
 
  tdirnode = class(tfilenode)
   protected
+   fcustomcaption: msestring;
    procedure setfilename(const value: filenamety); override;
    function getcurrentimagenr: integer; override;
+   function calccaption: msestring;
   public
    constructor create;
    procedure setvaluetext(var avalue: msestring); override;
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
  end;
  
  tcmodulenode = class(tfilenode)
@@ -401,11 +410,18 @@ begin
  fpath:= filepath(mstr2,mstr1);
  case fkind of
   pnk_dir: begin
-   if (mstr1 <> '') and (mstr1[1] = '/') then begin
-    caption:= fpath;
-   end
-   else begin
-    caption:= relativepath(fpath,mstr2);
+   with tdirnode(self) do begin
+    if fcustomcaption <> '' then begin
+     caption:= fcustomcaption;
+    end
+    else begin
+     if (mstr1 <> '') and (mstr1[1] = '/') then begin
+      caption:= fpath;
+     end
+     else begin
+      caption:= relativepath(fpath,mstr2);
+     end;
+    end;
    end;
   end;
   pnk_source,pnk_form: begin
@@ -693,11 +709,18 @@ var
     fpath:= filepath(apath,mstr1);
     case fkind of
      pnk_dir: begin
-      if (mstr1 <> '') and (mstr1[1] = '/') then begin
-       fcaption:= fpath;
-      end
-      else begin
-       fcaption:= relativepath(fpath,apath);
+      with tdirnode(anode) do begin
+       if fcustomcaption <> '' then begin
+        fcaption:= fcustomcaption;
+       end
+       else begin
+        if (mstr1 <> '') and (mstr1[1] = '/') then begin
+         fcaption:= fpath;
+        end
+        else begin
+         fcaption:= relativepath(fpath,apath);
+        end;
+       end;
       end;
       for int1:= 0 to fcount-1 do begin
        scan(tprojectnode(fitems[int1]),fpath);
@@ -1361,6 +1384,9 @@ begin
   edit.frame.buttons[1].visible:= 
                             tprojectnode(projectedit.item).fkind = pnk_dir;
  end;
+ if isrowexit(info) then begin
+  projectedit.readonly:= true;
+ end;
 end;
 
 procedure tprojecttreefo.colshowhintexe(const sender: tdatacol;
@@ -1420,6 +1446,30 @@ begin
  sender.enabled:= tprojectnode(projectedit.item).fkind = pnk_source;
 end;
 
+procedure tprojecttreefo.udateeditdirexe(const sender: tcustomaction);
+begin
+ sender.enabled:= tprojectnode(projectedit.item).fkind = pnk_dir;
+end;
+
+procedure tprojecttreefo.editdirexe(const sender: TObject);
+begin
+ projectedit.readonly:= false;
+ projectedit.beginedit;
+end;
+
+procedure tprojecttreefo.captionset(const sender: TObject;
+               var avalue: msestring; var accept: Boolean);
+begin
+ if projectedit.item is tdirnode then begin
+  with tdirnode(projectedit.item) do begin
+   fcustomcaption:= avalue;
+   if avalue = '' then begin
+    avalue:= calccaption;
+   end;
+  end;
+ end;
+end;
+
 { tdirnode }
 
 constructor tdirnode.create;
@@ -1442,6 +1492,30 @@ end;
 function tdirnode.getcurrentimagenr: integer;
 begin
  result:= dirico;
+end;
+
+procedure tdirnode.dostatread(const reader: tstatreader);
+begin
+ fcustomcaption:= reader.readmsestring('capt','');
+ inherited;
+end;
+
+procedure tdirnode.dostatwrite(const writer: tstatwriter);
+begin
+ writer.writemsestring('capt',fcustomcaption);
+ inherited;
+end;
+
+function tdirnode.calccaption: msestring;
+begin
+ result:= filename;
+ expandprmacros(result);
+ if (result <> '') and (result[1] = '/') then begin
+  result:= fpath;
+ end
+ else begin
+  result:= relativepath(fpath,parentpath);
+ end;
 end;
 
 end.

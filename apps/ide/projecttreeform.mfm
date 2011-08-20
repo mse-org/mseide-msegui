@@ -79,6 +79,7 @@ object projecttreefo: tprojecttreefo
       itemlist.ondragbegin = editdragbegin
       itemlist.ondragover = editdragover
       itemlist.ondragdrop = editdragrop
+      onsetvalue = captionset
       onupdaterowvalues = projecteditonupdaterowvalues
       fieldedit = edit
       options = [teo_treecolnavig, teo_keyrowmoving]
@@ -123,7 +124,7 @@ object projecttreefo: tprojecttreefo
   end
   object unitpopup: tpopupmenu
     menu.action = addunitfileact
-    menu.submenu.count = 4
+    menu.submenu.count = 6
     menu.submenu.items = <    
       item
         action = addunitfileact
@@ -132,10 +133,16 @@ object projecttreefo: tprojecttreefo
         action = removeunitfileact
       end    
       item
-        action = adddirectoryact
+        options = [mao_separator, mao_shortcutcaption]
       end    
       item
-        action = removedirectoryact
+        action = adddiract
+      end    
+      item
+        action = removediract
+      end    
+      item
+        action = editdiract
       end>
     left = 8
     top = 8
@@ -160,7 +167,7 @@ object projecttreefo: tprojecttreefo
     top = 24
   end
   object filepopup: tpopupmenu
-    menu.submenu.count = 4
+    menu.submenu.count = 6
     menu.submenu.items = <    
       item
         action = addfileact
@@ -169,14 +176,20 @@ object projecttreefo: tprojecttreefo
         action = removefileact
       end    
       item
-        action = adddirectoryact
+        options = [mao_separator, mao_shortcutcaption]
       end    
       item
-        action = removedirectoryact
+        action = adddiract
+      end    
+      item
+        action = removediract
+      end    
+      item
+        action = editdiract
       end>
     menu.state = [as_localhint]
     left = 8
-    top = 48
+    top = 40
   end
   object addfileact: taction
     caption = 'Add Text File'
@@ -192,7 +205,7 @@ object projecttreefo: tprojecttreefo
     top = 64
   end
   object cmodulepopup: tpopupmenu
-    menu.submenu.count = 4
+    menu.submenu.count = 6
     menu.submenu.items = <    
       item
         action = addcmoduleact
@@ -201,14 +214,20 @@ object projecttreefo: tprojecttreefo
         action = removecmoduleact
       end    
       item
-        action = adddirectoryact
+        options = [mao_separator, mao_shortcutcaption]
       end    
       item
-        action = removedirectoryact
+        action = adddiract
+      end    
+      item
+        action = removediract
+      end    
+      item
+        action = editdiract
       end>
     menu.state = [as_localhint]
     left = 8
-    top = 88
+    top = 72
   end
   object removecmoduleact: taction
     caption = 'Remove C-File'
@@ -235,17 +254,17 @@ object projecttreefo: tprojecttreefo
     left = 96
     top = 168
   end
-  object adddirectoryact: taction
+  object adddiract: taction
     caption = 'Add Directory'
     onexecute = adddirexe
     onupdate = updateadddirexe
-    top = 120
+    top = 104
   end
-  object removedirectoryact: taction
+  object removediract: taction
     caption = 'Remove Directory'
     onexecute = remdirexe
     onupdate = updateremdirexe
-    top = 136
+    top = 120
   end
   object nodeicons: timagelist
     count = 8
@@ -355,5 +374,11 @@ object projecttreefo: tprojecttreefo
     height = 0
     left = 144
     top = 144
+  end
+  object editdiract: taction
+    caption = 'Edit Directory Caption'
+    onexecute = editdirexe
+    onupdate = udateeditdirexe
+    top = 136
   end
 end

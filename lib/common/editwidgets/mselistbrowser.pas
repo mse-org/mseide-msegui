@@ -3623,7 +3623,30 @@ procedure ttreeitemeditlist.nodenotification(const sender: tlistitem;
  end;
 
 var
-// po1: ^ttreelistitem1;
+ curnode: ttreelistedititem;
+ newrow: integer;
+ ind1: integer;
+ po1: ptreelistitem;
+ 
+ procedure scan(const anode: ttreelistedititem);
+ var
+  int1: integer;
+ begin
+  po1^:= anode;
+  anode.findex:= ind1;
+  if anode = curnode then begin
+   newrow:= ind1;
+  end;
+  inc(po1);
+  inc(ind1);
+  if ns_expanded in anode.fstate then begin
+   for int1:= 0 to anode.count-1 do begin
+    scan(ttreelistedititem(anode.fitems[int1]));
+   end;
+  end;
+ end;
+
+var
  int1,int2: integer;
 
 begin
@@ -3653,16 +3676,6 @@ begin
       if ns_expanded in fstate then begin
        int1:= findex+1;
        if (findex < self.fcount-1)  then begin
-       {
-        po1:= getitempo(int1);
-        int1:= findex+1;
-        po1:= getitempo(int1);
-        while (int1 < self.fcount) and (po1^.ftreelevel > ftreelevel) do begin
-         inc(int1);
-         inc(po1);
-        end;
-        self.fowner.fgridintf.getcol.grid.deleterow(findex+1,int1-findex-1);
-        }
         int2:= ainfo.treeheightbefore;
         if int2 > 0 then begin
          include(self.fitemstate,ils_freelock);
@@ -3674,13 +3687,6 @@ begin
         end;
        end;
        expand;
-       {
-       po1:= getitempo(int1);
-       for int1:= int1 to self.fcount-1 do begin
-        po1^.findex:= int1;
-        inc(po1);
-       end;
-       }
       end;
      end;
     end
@@ -3707,6 +3713,27 @@ begin
     end
     else begin
      include(fitemstate,ils_subnodecountinvalid);
+    end;
+   end;
+   na_aftersort: begin
+    if not updating and ttreelistedititem(sender).rootexpanded then begin
+     curnode:= ttreelistedititem(ttreeitemedit(fowner).item);
+     newrow:= -1;
+     po1:= datapo;
+     ind1:= ttreelistedititem(sender).findex;
+     int2:= ind1+1;
+     inc(po1,ind1);
+     scan(ttreelistedititem(sender));
+     fintf.updateitemvalues(int2,ind1-int2);
+     if newrow >= 0 then begin
+{$warnings off}
+      with tcustomgrid1(fowner.fgridintf.getcol.grid) do begin
+{$warnings on}
+       ffocusedcell.row:= newrow;
+       layoutchanged;
+      end;
+     end;
+     change(-1);
     end;
    end;
   end;

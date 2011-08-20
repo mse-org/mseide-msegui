@@ -71,7 +71,8 @@ type
  end;
  plistitemlayoutinfoty = ^listitemlayoutinfoty;
 
- nodeactionty = (na_none,na_change,na_expand,na_collapse,na_countchange,na_destroying);
+ nodeactionty = (na_none,na_change,na_expand,na_collapse,na_countchange,
+                 na_destroying,na_aftersort);
  nodeactioninfoty = record
   case action: nodeactionty of
    na_countchange: (
@@ -191,7 +192,7 @@ type
    fcount: integer;
    ftreelevel: integer;
    procedure statechanged;
-   procedure checksort;
+   procedure checksort; virtual;
    procedure setcaption(const avalue: msestring); override;
    procedure setowner(const aowner: tcustomitemlist); override;
    procedure setchecked(const avalue: boolean); override;
@@ -285,6 +286,7 @@ type
                            const recursive: boolean = false); overload;
    property count: integer read fcount;
    procedure setupeditor(const editor: tinplaceedit; const font: tfont); override;
+   function rootexpanded: boolean;
    property expanded: boolean read getexpanded write setexpanded;
    property items[const aindex: integer]: ttreelistitem read getitems; default;
  end;
@@ -2011,6 +2013,7 @@ procedure ttreelistitem.checksort;
 begin
  if ns_sorted in fstate then begin
   sort(ns_casesensitive in fstate);
+  checkaction(na_aftersort);
  end;
 end;
 
@@ -2284,6 +2287,21 @@ end;
 function ttreelistitem.getexpanded: boolean;
 begin
  result:= ns_expanded in fstate;
+end;
+
+function ttreelistitem.rootexpanded: boolean;
+var
+ n1: ttreelistitem;
+begin
+ result:= true;
+ n1:= self;
+ while (n1 <> nil) and (n1.fowner <> nil) do begin
+  if not (ns_expanded in fstate) then begin
+   result:= false;
+   break;
+  end;
+  n1:= n1.fparent;
+ end;
 end;
 
 procedure ttreelistitem.statechanged;
