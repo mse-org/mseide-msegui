@@ -3364,17 +3364,18 @@ end;
 
 procedure ttreeitemeditlist.freedata(var data);
 var
- int1: integer;
+ int1,int2: integer;
  po1: ptreelistitem;
 begin
  if not (ils_freelock in fitemstate) then begin
   if pointer(data) <> nil then begin
    with ttreelistitem1(data) do begin
+    int2:= findex;
     if fowner <> nil then begin
-     ttreelistitem1(data).setowner(nil);
+     setowner(nil);
     end;
     if fparent = nil then begin
-     for int1:= findex + 1 to self.fcount - 1 do begin
+     for int1:= int2 + 1 to self.fcount - 1 do begin
       po1:= ptreelistitem(getitempo(int1));
       if ttreelistitem1(po1^).ftreelevel = 0 then begin
        break; //next root node
