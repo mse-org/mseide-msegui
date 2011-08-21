@@ -28,7 +28,7 @@ uses
  mseglob,msegraphics,msescrollbar,msesys,msehash,mseifiglob;
 
 type
-
+ tdirnode = class;
  tprojecttreefo = class(tdockform)
    grid: twidgetgrid;
    projectedit: ttreeitemedit;
@@ -103,7 +103,7 @@ type
   private
    funitloading: boolean;
   protected
-   procedure addirectory(const aname: filenamety);
+   function addirectory(const aname: filenamety): tdirnode;
    function gettreedir: filenamety;
   public
    procedure clear;
@@ -313,10 +313,12 @@ begin
  include(fstate1,ns1_customsort);
  fstate:= fstate + [ns_sorted];
 end;
-
+var testvar2,testvar3: tfilenode;
 function tprojectnode.compare(const l: ttreelistitem;
                const r: ttreelistitem): integer;
 begin
+testvar2:= tfilenode(l);
+testvar3:= tfilenode(r);
  result:= 0;
  if tprojectnode(l).fkind = pnk_dir then begin
   dec(result);
@@ -1140,24 +1142,24 @@ begin
  end;
 end;
 
-procedure tprojecttreefo.addirectory(const aname: filenamety);
+function tprojecttreefo.addirectory(const aname: filenamety): tdirnode;
 var
- n1: tdirnode;
  n2: tprojectnode;
 begin
- n1:= tdirnode.create;
+ result:= tdirnode.create;
+ result.filename:= relativepath(aname,gettreedir);
  n2:= tprojectnode(projectedit.item);
  if (n2.fkind = pnk_dir) or (n2.parent = nil) then begin
-  n2.insert(n1,0);
+  n2.insert(result,0);
  end
  else begin
   while (n2.treelevel > 1) and
                      (tprojectnode(n2.parent).fkind <> pnk_dir) do begin
    n2:= tprojectnode(n2.parent);
   end;
-  n2.parent.insert(n1,n2.parentindex);
+  n2.parent.insert(result,n2.parentindex);
  end;
- n1.filename:= relativepath(aname,n1.parentpath);
+ tfilesnode(n2.rootnode).loadlist;
 end;
 
 procedure tprojecttreefo.projecteditonupdaterowvalues(const sender: TObject;
@@ -1280,11 +1282,16 @@ begin
 end;
 
 procedure tprojecttreefo.adddirexe(const sender: TObject);
+var
+ int1: integer;
 begin
  with mainfo.openfile.controller do begin
   filename:= gettreedir;
   if execute(fdk_open,'Select Directory',[fdo_directory]) = mr_ok then begin
-   addirectory(filename);
+   int1:= addirectory(filename).index;
+   if int1 >= 0 then begin
+    grid.row:= int1;
+   end;
   end;
  end;
 end;
@@ -1486,7 +1493,9 @@ end;
 procedure tdirnode.setfilename(const value: filenamety);
 begin
  ffilename:= value;
- projecttree.updatelist;
+ if fowner <> nil then begin
+  tfilesnode(rootnode).loadlist;
+ end;
 end;
 
 function tdirnode.getcurrentimagenr: integer;

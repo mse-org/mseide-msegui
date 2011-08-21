@@ -180,6 +180,7 @@ type
    function getexpanded: boolean;
    procedure setexpanded(const Value: boolean);
    function getitems(const aindex: integer): ttreelistitem;
+   procedure dosetitems(const aindex: integer; const value: ttreelistitem);
    procedure setitems(const aindex: integer; const value: ttreelistitem);
    procedure unsetitem(const aindex: integer);
    procedure internalcheckitems(const checkdelete: checktreelistitemprocty);
@@ -223,13 +224,13 @@ type
    procedure dostatwrite(const writer: tstatwriter); override;
 
    procedure updatechildcheckedstate; //updates ancestors
-   procedure updatechildcheckedtree; //updates self and descendents
+   procedure updatechildcheckedtree;  //updates self and descendents
    function parent: ttreelistitem;
    function parentindex: integer;
    function treelevel: integer;
    function levelshift: integer;
-   function treeheight: integer; //total hight of children
-   function rowheight: integer;  //toatal needed grid rows
+   function treeheight: integer;     //total hight of children
+   function rowheight: integer;      //toatal needed grid rows
    function isroot: boolean;
    function issinglerootrow: boolean; //keyrowmove can be used
    function checkdescendent(node: ttreelistitem): boolean;
@@ -468,6 +469,7 @@ uses
 
 constructor tlistitem.create(const aowner: tcustomitemlist);
 begin
+ findex:= -1;
  if aowner <> nil then begin
   setowner(aowner);
  end;
@@ -919,6 +921,7 @@ end;
 procedure tlistitem.setowner(const aowner: tcustomitemlist);
 begin
  if aowner <> fowner then begin
+  findex:= -1;
   if (fowner <> nil) and (fimagelist <> nil) then begin
    fowner.unregisterobject(ievent(fimagelist));
   end;
@@ -1518,14 +1521,20 @@ begin
  result:= fitems[aindex];
 end;
 
-procedure ttreelistitem.setitems(const aindex: integer; const value: ttreelistitem);
- //for internal use
+procedure ttreelistitem.dosetitems(const aindex: integer;
+                                    const value: ttreelistitem);
 begin
  fitems[aindex]:= value;
  value.fparentindex:= aindex;
  value.fparent:= self;
  value.settreelevel(ftreelevel+1);
  value.setowner(fowner);
+end;
+
+procedure ttreelistitem.setitems(const aindex: integer; const value: ttreelistitem);
+ //for internal use
+begin
+ dosetitems(aindex,value);
  checksort;
 end;
 
@@ -1552,6 +1561,7 @@ function ttreelistitem.add(const aitem: ttreelistitem): integer;
 var
  int1: integer;
 begin
+ result:= -1;
  if aitem <> nil then begin
   if aitem.parent = self then begin
    move(aitem.parentindex,fcount-1);
@@ -1561,10 +1571,12 @@ begin
     aitem.fparent.remove(aitem.fparentindex);
    end;
    int1:= treeheight;
-   result:= fcount;
-   setitems(inccount,aitem);
+//   result:= fcount;
+   dosetitems(inccount,aitem);
    countchange(int1);
   end;
+  checksort;
+  result:= aitem.fparentindex;
  end;
 end;
 
@@ -1572,9 +1584,11 @@ procedure ttreelistitem.insert(const aitem: ttreelistitem; const aindex: integer
 begin
  if aitem.parent = self then begin
   move(aitem.parentindex,aindex);
+  checksort;
  end
  else begin
   move(add(aitem),aindex);
+  checksort;
  end;
 end;
 
@@ -1588,10 +1602,11 @@ begin
    setlength(fitems,fcount + length(aitems));
   end;
   for int1:= 0 to high(aitems) do begin
-   setitems(fcount,aitems[int1]);
+   dosetitems(fcount,aitems[int1]);
    inc(fcount);
   end;
   countchange(int2);
+  checksort;
  end;
 end;
 
@@ -1663,7 +1678,7 @@ begin
  end;
  if itemclass <> nil then begin
   for int1:= 0 to acount-1 do begin
-   setitems(fcount,itemclass.create);
+   dosetitems(fcount,itemclass.create);
    if defaultstate <> [] then begin
     fitems[count].fstate:= defaultstate;
    end;
@@ -1672,7 +1687,7 @@ begin
  end
  else begin
   for int1:= 0 to acount-1 do begin
-   setitems(fcount,createsubnode);
+   dosetitems(fcount,createsubnode);
    if defaultstate <> [] then begin
     fitems[count].fstate:= defaultstate;
    end;
@@ -1680,6 +1695,7 @@ begin
   end;
  end;
  countchange(int2);
+ checksort;
 end;
 
 procedure ttreelistitem.setdestroying;
@@ -1988,6 +2004,7 @@ begin
    fitems[int1].sort(casesensitive,true);
   end;
  end;
+ checkaction(na_aftersort);
  change;
 end;
 
@@ -2006,6 +2023,7 @@ begin
    fitems[int1].sort(sortfunc,true);
   end;
  end;
+ checkaction(na_aftersort);
  change; 
 end;
 
@@ -2013,7 +2031,6 @@ procedure ttreelistitem.checksort;
 begin
  if ns_sorted in fstate then begin
   sort(ns_casesensitive in fstate);
-  checkaction(na_aftersort);
  end;
 end;
 
@@ -2547,7 +2564,7 @@ begin
     node1:= nil;
     statreadsubnode(reader,node1);
     if node1 <> nil then begin
-     setitems(inccount,node1);
+     dosetitems(inccount,node1);
      node1.dostatread(reader);
     end;
     reader.endlist;

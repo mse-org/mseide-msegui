@@ -261,7 +261,7 @@ type
    procedure moveitem(const source,dest: tlistitem; focus: boolean);
    procedure scrolled(const dist: pointty); override;
 
-  //iedit
+    //iedit
    function getoptionsedit: optionseditty;
    procedure editnotification(var info: editnotificationinfoty);
    function hasselection: boolean;
@@ -317,7 +317,6 @@ type
                             default defaultlistviewoptions;
    property cellfocusrectdist: integer read getcellfocusrectdist 
                                         write setcellfocusrectdist default 0;
-//   property filtertext: msestring read ffiltertext write setfiltertext;
    property datacollinewidth: integer read getdatacollinewidth
                     write setdatacollinewidth default defaultgridlinewidth;
    property datacollinecolor: colorty read getdatacollinecolor
@@ -439,9 +438,6 @@ type
  itemcanediteventty = procedure(const sender: tobject;
                   const aitem: tlistitem; var canedit: boolean) of object;
 
-// itemeditstatety = (ies_updating);
-// itemeditstatesty = set of itemeditstatety;
-
  titemedit = class(tdataedit,iitemlist,ibutton)
   private
    fitemlist: tcustomitemeditlist;
@@ -451,16 +447,12 @@ type
    fonupdaterowvalues: itemindexeventty;
    foncellevent: celleventty;
    factiverow: integer;
-//   ffiltertext: msestring;
-//   fstate: itemeditstatesty;
-
    fediting: boolean;
    foncheckcanedit: itemcanediteventty;
    function getitemlist: titemeditlist;
    procedure setitemlist(const Value: titemeditlist);
    function getitems(const index: integer): tlistitem;
    procedure setitems(const index: integer; const Value: tlistitem);
-//   procedure updatefilterselect;
    procedure setediting(const avalue: boolean);
   protected
    flayoutinfofocused: listitemlayoutinfoty;
@@ -468,15 +460,12 @@ type
    fvalue: tlistitem;
 
    function fieldcanedit: boolean;
-
-//   procedure setfiltertext(const value: msestring); virtual;
-  //igridwidget
+    //igridwidget
    function getcellcursor(const arow: integer; 
                          const acellzone: cellzonety): cursorshapety; override;
    procedure updatecellzone(const row: integer; const apos: pointty;
                             var result: cellzonety); override;
-//   function actualcursor(const apos: pointty): cursorshapety; override;
-  //iedit
+    //iedit
    function locatecount: integer; override;        //number of locate values
    function getkeystring(const index: integer): msestring; override;
 
@@ -514,7 +503,7 @@ type
    procedure getitemvalues; virtual;
    procedure internalcreateframe; override;
 
-  //ibuttonaction
+    //ibuttonaction
    procedure buttonaction(var action: buttonactionty;
          const buttonindex: integer); virtual;
 
@@ -522,7 +511,6 @@ type
    procedure docellevent(const ownedcol: boolean;
                                          var info: celleventinfoty); override;
 
-//   function islocating: boolean;
    function getoptionsedit: optionseditty; override;
    property editing: boolean read fediting write setediting;
   public
@@ -2265,8 +2253,8 @@ begin
  beginupdate;
  try
   int1:= internaladddata(anode,false);
-  tlistitem1(anode).findex:= int1;
   tlistitem1(anode).setowner(self);
+  tlistitem1(anode).findex:= int1;
   fintf.itemcountchanged;
   fintf.updateitemvalues(int1,1);
  finally
@@ -3399,6 +3387,9 @@ begin
     end
    end;
   end;
+ end
+ else begin
+  ttreelistitem1(data).findex:= -1;
  end;
 end;
 
