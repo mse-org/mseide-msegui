@@ -3138,8 +3138,8 @@ begin
  inherited;
  if fframe <> nil then begin
   with tframe1(fframe) do begin
-   inflaterect(flayoutinfocell.captionrect,fpaintframe); //remove buttons
-   inflaterect(flayoutinfocell.captioninnerrect,fpaintframe); //remove buttons
+   inflaterect1(flayoutinfocell.captionrect,fpaintframe); //remove buttons
+   inflaterect1(flayoutinfocell.captioninnerrect,fpaintframe); //remove buttons
   end;
  end;
 end;
