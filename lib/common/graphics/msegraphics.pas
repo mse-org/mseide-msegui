@@ -206,6 +206,8 @@ type
   function getsize: sizety;
   procedure getcanvasimage(const bgr: boolean; var aimage: maskedimagety);
  end;
+
+ canvasclassty = class of tcanvas; 
  
  gcpty = array[0..31] of pointer;
  gcty = record
@@ -336,6 +338,10 @@ type
   error: gdierrorty;
   image: maskedimagety;
  end;
+ 
+ getcanvasclassinfoty = record
+  canvasclass: canvasclassty;
+ end;
   
  gcvaluemaskty = (gvm_clipregion,gvm_colorbackground,gvm_colorforeground,
                   gvm_dashes,gvm_linewidth,gvm_capstyle,gvm_joinstyle,
@@ -395,6 +401,7 @@ type
   15: (fonthasglyph: fonthasglyphinfoty);
   16: (creategc: creategcinfoty);
   17: (getimage: getimageinfoty);
+  18: (getcanvasclass: getcanvasclassinfoty);
  end;
 
  getfontfuncty = function (var drawinfo: drawinfoty): boolean of object;
@@ -557,6 +564,7 @@ type
  gdifunctionty = procedure(var drawinfo: drawinfoty);
 
  gdifuncty = (gdf_creategc,gdf_destroygc,gdf_changegc,
+              gdf_getcanvasclass,
               gdf_drawlines,gdf_drawlinesegments,gdf_drawellipse,gdf_drawarc,
               gdf_fillrect,
               gdf_fillelipse,gdf_fillarc,gdf_fillpolygon,{gdf_drawstring,}
@@ -950,8 +958,6 @@ type
                  //incremented by drawing operations
  end;
  
- canvasclassty = class of tcanvas;
- 
  pixmapstatety = (pms_monochrome,pms_ownshandle,pms_maskvalid,pms_nosave);
  pixmapstatesty = set of pixmapstatety;
 
@@ -1076,6 +1082,9 @@ procedure gdi_unlock; //unlocks only if not mainthread
 procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty);
 function registergdi(const agdifuncs: pgdifunctionaty): integer;
                                             //returns unique number
+function creategdicanvas(const agdi: pgdifunctionaty;
+                            const user: tobject; const intf: icanvas): tcanvas;
+
 procedure freefontdata(var drawinfo: drawinfoty);
 
 procedure allocbuffer(var buffer: bufferty; size: integer);
@@ -1486,6 +1495,18 @@ begin
  setlength(gdifuncs,gdinum+1); //item 0 = system default
  gdifuncs[gdinum]:= agdifuncs;
  result:= gdinum;
+end;
+
+function creategdicanvas(const agdi: pgdifunctionaty;
+                            const user: tobject; const intf: icanvas): tcanvas;
+var
+ info1: drawinfoty;
+begin
+ with info1.getcanvasclass do begin
+  canvasclass:= tcanvas; //default
+  agdi^[gdf_getcanvasclass](info1);
+  result:= canvasclass.create(user,intf);
+ end;
 end;
 
 procedure freefontdata(var drawinfo: drawinfoty);

@@ -64,7 +64,7 @@ procedure gdi_clear(var drawinfo: drawinfoty);
 implementation
 uses
  mseguiintf,{mseftgl,}msegenericgdi,msestrings,msectypes,msehash,sysutils,
- mseformatstr,msefontcache,mseftfontcache,mseglextglob;
+ mseformatstr,msefontcache,mseftfontcache,mseglextglob,mseopengl;
 type
  tcanvas1 = class(tcanvas);
  
@@ -690,6 +690,11 @@ begin
  end;
 end;
 
+procedure gdi_getcanvasclass(var drawinfo: drawinfoty); //gdifunc
+begin
+ drawinfo.getcanvasclass.canvasclass:= topenglcanvas;
+end;
+
 procedure gdi_drawlines(var drawinfo: drawinfoty);
 var
  po1: ppointty;
@@ -1099,6 +1104,7 @@ const
    {$ifdef FPC}@{$endif}gdi_creategc,
    {$ifdef FPC}@{$endif}gdi_destroygc,
    {$ifdef FPC}@{$endif}gdi_changegc,
+   {$ifdef FPC}@{$endif}gdi_getcanvasclass,
    {$ifdef FPC}@{$endif}gdi_drawlines,
    {$ifdef FPC}@{$endif}gdi_drawlinesegments,
    {$ifdef FPC}@{$endif}gdi_drawellipse,

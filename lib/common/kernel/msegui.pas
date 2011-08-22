@@ -1965,6 +1965,7 @@ type
    procedure setscreenpos(const avalue: pointty);
    function getmodalfor: boolean;
   protected
+   fgdi: pgdifunctionaty;
    fwindow: windowty;
    fcontainer: winidty;
    fowner: twidget;
@@ -1997,9 +1998,10 @@ type
    procedure setzorder(const value: integer);
    function topmodaltransientfor: twindow;
   public
-   procedure destroywindow;
-   constructor create(aowner: twidget);
+   constructor create(const aowner: twidget; const agdi: pgdifunctionaty = nil);
+                                                 //nil = platform default
    destructor destroy; override;
+   procedure destroywindow;
    procedure registeronscroll(const method: notifyeventty);
    procedure unregisteronscroll(const method: notifyeventty);
    
@@ -12035,12 +12037,18 @@ end;
 
 { twindow }
 
-constructor twindow.create(aowner: twidget);
+constructor twindow.create(const aowner: twidget; const agdi: pgdifunctionaty);
 begin
+ fgdi:= agdi;
+ if fgdi = nil then begin
+  fgdi:= gui_getgdifuncs;
+ end;
  fowner:= aowner;
  fowner.fwindow:= self;
- fcanvas:= tcanvas.create(self,icanvas(self));
- fasynccanvas:= tcanvas.create(self,icanvas(self));
+ fcanvas:= creategdicanvas(fgdi,self,icanvas(self));
+ fasynccanvas:= creategdicanvas(fgdi,self,icanvas(self));
+// fcanvas:= tcanvas.create(self,icanvas(self));
+// fasynccanvas:= tcanvas.create(self,icanvas(self));
  fscrollnotifylist:= tnotifylist.create;
  inherited create;
  fowner.rootchanged; //nil all references

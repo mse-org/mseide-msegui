@@ -904,6 +904,11 @@ begin
  end;
 end;
 
+procedure gdi_getcanvasclass(var drawinfo: drawinfoty); //gdifunc
+begin
+ //dummy
+end;
+
 procedure gdi_drawlines(var drawinfo: drawinfoty);
 var
  po1: ppointty;
@@ -2403,6 +2408,7 @@ const
    {$ifdef FPC}@{$endif}gdi_creategc,
    {$ifdef FPC}@{$endif}gdi_destroygc,
    {$ifdef FPC}@{$endif}gdi_changegc,
+   {$ifdef FPC}@{$endif}gdi_getcanvasclass,
    {$ifdef FPC}@{$endif}gdi_drawlines,
    {$ifdef FPC}@{$endif}gdi_drawlinesegments,
    {$ifdef FPC}@{$endif}gdi_drawellipse,

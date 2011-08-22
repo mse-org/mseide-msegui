@@ -808,6 +808,11 @@ begin
  end;
 end;
 
+procedure gdi_getcanvasclass(var drawinfo: drawinfoty); //gdifunc
+begin
+ //dummy
+end;
+
 procedure checkxftdraw(var drawinfo: drawinfoty);
 begin
 {$ifdef mse_debuggdisync}
@@ -2355,6 +2360,7 @@ const
    {$ifdef FPC}@{$endif}gdi_creategc,
    {$ifdef FPC}@{$endif}gdi_destroygc,
    {$ifdef FPC}@{$endif}gdi_changegc,
+   {$ifdef FPC}@{$endif}gdi_getcanvasclass,
    {$ifdef FPC}@{$endif}gdi_drawlines,
    {$ifdef FPC}@{$endif}gdi_drawlinesegments,
    {$ifdef FPC}@{$endif}gdi_drawellipse,
