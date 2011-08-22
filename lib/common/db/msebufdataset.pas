@@ -761,6 +761,8 @@ type
    function getrestorerecno: boolean;
    procedure setrestorerecno(const avalue: boolean);
 
+   procedure dogetcoldata(const afield: tfield; const afieldtype: tfieldtype;
+                           const step: integer; const data: pointer);
    function getcurrentlookuppo(const afield: tfield;
         const afieldtype: tfieldtype; const arecord: pintrecordty): pointer;
    function getcurrentpo(const afield: tfield;
@@ -1044,14 +1046,6 @@ type
    function locaterecno(const arecno: integer): boolean;
         //moves to next valid recno, //returns true if resulting recno = arecno
    
-   procedure sumfield(const afield: tfield; out asum: double);
-   procedure sumfield(const afield: tfield; out asum: currency);
-   procedure sumfield(const afield: tfield; out asum: integer);
-   procedure sumfield(const afield: tfield; out asum: int64);
-   function sumfielddouble(const afield: tfield): double;
-   function sumfieldcurrency(const afield: tfield): currency;
-   function sumfieldinteger(const afield: tfield): integer;
-   function sumfieldint64(const afield: tfield): int64;
    function countvisiblerecords: integer;
    procedure fetchall;
    procedure resetindex; //deactivates all indexes
@@ -1133,10 +1127,27 @@ type
                   const abm: bookmarkdataty]: msestring
                   read getcurrentbmasmsestring write setcurrentbmasmsestring;
 
-
    procedure getcoldata(const afield: tfield; const adatalist: tdatalist);
+   procedure asarray(const afield: tfield; out avalue: int64arty); overload;
+   procedure asarray(const afield: tfield; out avalue: integerarty); overload;
+   procedure asarray(const afield: tfield; out avalue: stringarty); overload;
+   procedure asarray(const afield: tfield; out avalue: msestringarty); overload;
+   procedure asarray(const afield: tfield; out avalue: currencyarty); overload;
+   procedure asarray(const afield: tfield; out avalue: realarty); overload;
+   procedure asarray(const afield: tfield; out avalue: datetimearty); overload;
+   procedure asarray(const afield: tfield; out avalue: booleanarty); overload;
+   
    function getdata(const afields: array of tfield): variantararty;
                              //[] -> all
+   procedure sumfield(const afield: tfield; out asum: double);
+   procedure sumfield(const afield: tfield; out asum: currency);
+   procedure sumfield(const afield: tfield; out asum: integer);
+   procedure sumfield(const afield: tfield; out asum: int64);
+   function sumfielddouble(const afield: tfield): double;
+   function sumfieldcurrency(const afield: tfield): currency;
+   function sumfieldinteger(const afield: tfield): integer;
+   function sumfieldint64(const afield: tfield): int64;
+
    
   published
    property logfilename: filenamety read flogfilename write flogfilename;
@@ -7075,96 +7086,188 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.dogetcoldata(const afield: tfield;
+                       const afieldtype: tfieldtype; const step: integer;
+                                                      const data: pointer);
+var
+ po2: pointer;
+ offs: ptrint;
+ indexpo: ppointer;
+ int1: integer;
+ ft1: tfieldtype;
+ 
+begin
+ if afield.dataset <> self then begin
+  raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
+ end;
+ if afield.index < 0 then begin
+  raise ecurrentvalueaccess.create(self,afield,
+                 'Field can not be be fkCalculated or fkLookup.');
+ end;
+ ft1:= afieldtype;
+ if ft1 = ftwidestring then begin 
+  ft1:= ftstring
+ end;
+ checkindex(false);
+ int1:= afield.fieldno-1;
+ with ffieldinfos[int1] do begin
+  if not (ext.basetype in fielddatacompatibility[ft1]) then begin
+   raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
+  end;   
+  offs:= base.offset;
+ end;
+ po2:= data;
+ indexpo:= pointer(factindexpo^.ind);
+ case afieldtype of
+  ftinteger: begin
+   for int1:= 0 to fbrecordcount-1 do begin
+    pinteger(po2)^:= pinteger(indexpo[int1]+offs)^;
+    inc(po2,step);
+   end;
+  end;
+  ftlargeint: begin
+   for int1:= 0 to fbrecordcount-1 do begin
+    pint64(po2)^:= pint64(indexpo[int1]+offs)^;
+    inc(po2,step);
+   end;
+  end;
+  ftboolean: begin
+   for int1:= 0 to fbrecordcount-1 do begin
+    pboolean(po2)^:= plongbool(indexpo[int1]+offs)^;
+    inc(po2,step);
+   end;
+  end;
+  ftcurrency: begin
+   for int1:= 0 to fbrecordcount-1 do begin
+    pcurrency(po2)^:= pcurrency(indexpo[int1]+offs)^;
+    inc(po2,step);
+   end;
+  end;
+  ftfloat,ftdatetime: begin
+   for int1:= 0 to fbrecordcount-1 do begin
+    prealty(po2)^:= pdouble(indexpo[int1]+offs)^;
+    inc(po2,step);
+   end;
+  end;
+  ftstring: begin
+   for int1:= 0 to fbrecordcount-1 do begin
+    pansistring(po2)^:= pmsestring(indexpo[int1]+offs)^;
+    inc(po2,step);
+   end;
+  end;
+  ftwidestring: begin
+   for int1:= 0 to fbrecordcount-1 do begin
+    pmsestring(po2)^:= pmsestring(indexpo[int1]+offs)^;
+    inc(po2,step);
+   end;
+  end;
+ end;
+end;
 
 procedure tmsebufdataset.getcoldata(const afield: tfield;
                const adatalist: tdatalist);
 var
- {po1,}po2: pointer;
- offs: ptrint;
- step: integer;
- indexpo: ppointer;
- 
- procedure init(const afieldtype: tfieldtype);
- var
-  int1: integer;
- begin
-  currentcheckbrowsemode;
-  if afield.dataset <> self then begin
-   raise ecurrentvalueaccess.create(self,afield,'Wrong dataset.');
-  end;
-  if afield.index < 0 then begin
-   raise ecurrentvalueaccess.create(self,afield,
-                  'Field can not be be fkCalculated or fkLookup.');
-  end;
-  checkindex(false);
-  int1:= afield.fieldno-1;
-  with ffieldinfos[int1] do begin
-   if not (ext.basetype in fielddatacompatibility[afieldtype]) then begin
-    raise ecurrentvalueaccess.create(self,afield,'Invalid fieldtype.');  
-   end;   
-   offs:= base.offset;
-  end;
-  po2:= adatalist.datapo;
-  step:= adatalist.size;
-  indexpo:= pointer(factindexpo^.ind);
- end;
-
-var
- int1: integer;
+ type1: tfieldtype;
 begin
- adatalist.beginupdate;
- try
-  adatalist.clear;
-  adatalist.count:= recordcount;
-  if adatalist.count > 0 then begin
-   case adatalist.datatype of
-    dl_integer: begin
-     init(ftinteger);
-     for int1:= 0 to adatalist.count-1 do begin
-      pinteger(po2)^:= pinteger(indexpo[int1]+offs)^;
-      inc(po2,step);
-     end;
-    end;
-    dl_int64: begin
-     init(ftlargeint);
-     for int1:= 0 to adatalist.count-1 do begin
-      pint64(po2)^:= pint64(indexpo[int1]+offs)^;
-      inc(po2,step);
-     end;
-    end;
-    dl_currency: begin
-     init(ftcurrency);
-     for int1:= 0 to adatalist.count-1 do begin
-      pcurrency(po2)^:= pcurrency(indexpo[int1]+offs)^;
-      inc(po2,step);
-     end;
-    end;
-    dl_real,dl_realint,dl_realsum,dl_datetime: begin
-     init(ftcurrency);
-     for int1:= 0 to adatalist.count-1 do begin
-      prealty(po2)^:= pdouble(indexpo[int1]+offs)^;
-      inc(po2,step);
-     end;
-    end;
-    dl_ansistring: begin
-     init(ftstring);
-     for int1:= 0 to adatalist.count-1 do begin
-      pansistring(po2)^:= pmsestring(indexpo[int1]+offs)^;
-      inc(po2,step);
-     end;
-    end;
-    dl_msestring,dl_doublemsestring,dl_msestringint: begin
-     init(ftstring);
-     for int1:= 0 to adatalist.count-1 do begin
-      pmsestring(po2)^:= pmsestring(indexpo[int1]+offs)^;
-      inc(po2,step);
-     end;
-    end;
+ currentcheckbrowsemode;
+ with adatalist do begin
+  type1:= ftunknown;
+  case adatalist.datatype of
+   dl_integer: begin
+    type1:= ftinteger;
+   end;
+   dl_int64: begin
+    type1:= ftlargeint;
+   end;
+   dl_currency: begin
+    type1:= ftcurrency;
+   end;
+   dl_real,dl_realint,dl_realsum,dl_datetime: begin
+    type1:= ftfloat;
+   end;
+   dl_ansistring: begin
+    type1:= ftstring;
+   end;
+   dl_msestring,dl_doublemsestring,dl_msestringint: begin
+    type1:= ftwidestring;
    end;
   end;
- finally
-  adatalist.endupdate;
+  if type1 <> ftunknown then begin
+   beginupdate;
+   try
+    clear;
+    count:= fbrecordcount;
+    dogetcoldata(afield,type1,size,datapo);
+   finally
+    endupdate;
+   end;
+  end
+  else begin
+   raise ecurrentvalueaccess.create(self,afield,
+                'Invalid datalist.');
+  end;
  end;
+end;
+
+procedure tmsebufdataset.asarray(const afield: tfield;
+                                      out avalue: int64arty); overload;
+begin
+ currentcheckbrowsemode;
+ setlength(avalue,fbrecordcount);
+ dogetcoldata(afield,ftlargeint,sizeof(avalue[0]),pointer(avalue)); 
+end;
+
+procedure tmsebufdataset.asarray(const afield: tfield; out avalue: integerarty);
+begin
+ currentcheckbrowsemode;
+ setlength(avalue,fbrecordcount);
+ dogetcoldata(afield,ftinteger,sizeof(avalue[0]),pointer(avalue)); 
+end;
+
+procedure tmsebufdataset.asarray(const afield: tfield; out avalue: stringarty);
+begin
+ currentcheckbrowsemode;
+ setlength(avalue,fbrecordcount);
+ dogetcoldata(afield,ftstring,sizeof(avalue[0]),pointer(avalue)); 
+end;
+
+procedure tmsebufdataset.asarray(const afield: tfield;
+               out avalue: msestringarty);
+begin
+ currentcheckbrowsemode;
+ setlength(avalue,fbrecordcount);
+ dogetcoldata(afield,ftwidestring,sizeof(avalue[0]),pointer(avalue)); 
+end;
+
+procedure tmsebufdataset.asarray(const afield: tfield;
+               out avalue: currencyarty);
+begin
+ currentcheckbrowsemode;
+ setlength(avalue,fbrecordcount);
+ dogetcoldata(afield,ftcurrency,sizeof(avalue[0]),pointer(avalue)); 
+end;
+
+procedure tmsebufdataset.asarray(const afield: tfield; out avalue: realarty);
+begin
+ currentcheckbrowsemode;
+ setlength(avalue,fbrecordcount);
+ dogetcoldata(afield,ftfloat,sizeof(avalue[0]),pointer(avalue)); 
+end;
+
+procedure tmsebufdataset.asarray(const afield: tfield;
+                                         out avalue: datetimearty);
+begin
+ currentcheckbrowsemode;
+ setlength(avalue,fbrecordcount);
+ dogetcoldata(afield,ftdatetime,sizeof(avalue[0]),pointer(avalue)); 
+end;
+
+procedure tmsebufdataset.asarray(const afield: tfield;
+                                         out avalue: booleanarty);
+begin
+ currentcheckbrowsemode;
+ setlength(avalue,fbrecordcount);
+ dogetcoldata(afield,ftboolean,sizeof(avalue[0]),pointer(avalue)); 
 end;
 
 function tmsebufdataset.currentrecordhigh: integer;
