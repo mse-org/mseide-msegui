@@ -261,7 +261,9 @@ type
                         const currentnode: tprojectnode = nil): boolean;
             //true if filedialog not canceled
    function openformfile(const filename: filenamety; 
-                const ashow,aactivate,showsource,createmenu: boolean): pmoduleinfoty;
+                const ashow,aactivate,showsource,createmenu,
+                                skipexisting: boolean): pmoduleinfoty;
+   procedure createmodulemenuitem(const amodule: pmoduleinfoty);   
    function formmenuitemstart: integer;
    procedure loadformbysource(const sourcefilename: filenamety);
    procedure loadsourcebyform(const formfilename: filenamety; 
@@ -395,7 +397,7 @@ var
             findfile(filename(modulefilenames[int1]),
             projectoptions.d.texp.sourcedirs,wstr1) then begin
       try
-       po1:= openformfile(wstr1,false,false,false,false);
+       po1:= openformfile(wstr1,false,false,false,false,false);
        result:= (po1 <> nil) and (struppercase(po1^.instancevarname) = wstr2);
       except
        application.handleexception;
@@ -445,7 +447,7 @@ begin
                  ['Formfiles'],['*.mfm'],'',nil,nil,nil,[fa_all],[fa_hidden]);
                  //defaultvalues don't work on kylix
     if action = mr_ok then begin
-     openformfile(wstr2,false,false,true,true);
+     openformfile(wstr2,false,false,true,true,false);
     end;
    end;
   end;
@@ -466,7 +468,7 @@ var
    if findfile(fname,d.texp.sourcedirs,wstr1) or
           findfile(fname,d.texp.sourcedirs,wstr1) then begin
     try
-     po1:= openformfile(wstr1,false,false,false,false);
+     po1:= openformfile(wstr1,false,false,false,false,false);
     except
      on e: eabort do begin
       raise;
@@ -526,7 +528,7 @@ begin
     wstr2:= '';
     if filedialog(wstr2,[fdo_checkexist],'Formfile for '+ atypename,
                    ['Formfiles'],['*.mfm']) = mr_ok then begin
-     openformfile(wstr2,false,false,false,false);
+     openformfile(wstr2,false,false,false,false,false);
     end;
    end;
   end;
@@ -749,7 +751,7 @@ begin
     else begin
      page1:= sourcefo.findsourcepage(str1);
      if page1 = nil then begin //mfm not loaded in editor
-      po1:= designer.loadformfile(str1);      
+      po1:= designer.loadformfile(str1,false);      
       if po1 <> nil then begin
        po1^.designform.activate(true);
       end;
@@ -1445,8 +1447,38 @@ begin
                'formmenuitemstart').index + 1;
 end;
 
+procedure tmainfo.createmodulemenuitem(const amodule: pmoduleinfoty);
+var
+ int1: integer;
+ item1: tmenuitem;
+begin
+ with mainmenu1.menu.itembyname('view') do begin
+  for int1:= formmenuitemstart to submenu.count-1 do begin
+   if submenu[int1].tagpointer = amodule then begin
+    exit;
+   end;
+  end;
+  amodule^.hasmenuitem:= true;
+  item1:= tmenuitem.create;
+  with item1 do begin
+   caption:= msefileutils.filename(amodule^.filename);
+   onexecute:= {$ifdef FPC}@{$endif}doshowform;
+   tagpointer:= amodule;
+   options:= options + [mao_asyncexecute];
+  end;
+  for int1:= formmenuitemstart to submenu.count-1 do begin
+   if submenu[int1].caption > item1.caption then begin
+    submenu.insert(int1,item1);
+    exit;
+   end;
+  end;
+  submenu.insert(bigint,item1);
+ end;
+end;
+
 function tmainfo.openformfile(const filename: filenamety;
-       const ashow,aactivate,showsource,createmenu: boolean): pmoduleinfoty;
+       const ashow,aactivate,showsource,createmenu,
+                              skipexisting: boolean): pmoduleinfoty;
 var
  item1: tmenuitem;
  wstr1,wstr2: filenamety;
@@ -1469,7 +1501,7 @@ begin
    end;
   end;
   try
-   result:= designer.loadformfile(wstr1);
+   result:= designer.loadformfile(wstr1,skipexisting);
   except
    showobjecttext(nil,wstr1,false);
    errorformfilename:= wstr1;
@@ -1483,35 +1515,7 @@ begin
  end;
  if result <> nil then begin
   if createmenu then begin
-   with mainmenu1.menu.itembyname('view') do begin
-    bo1:= false;
-    for int1:= formmenuitemstart to submenu.count-1 do begin
-     if submenu[int1].tagpointer = result then begin
-      bo1:= true;
-      break;
-     end;
-    end;
-    if not bo1 then begin
-     item1:= tmenuitem.create;
-     with item1 do begin
-      caption:= msefileutils.filename(result^.filename);
-      onexecute:= {$ifdef FPC}@{$endif}doshowform;
-      tagpointer:= result;
-      options:= options + [mao_asyncexecute];
-     end;
-     bo1:= false;
-     for int1:= formmenuitemstart to submenu.count-1 do begin
-      if submenu[int1].caption > item1.caption then begin
-       submenu.insert(int1,item1);
-       bo1:= true;
-       break;
-      end;
-     end;
-     if not bo1 then begin
-      submenu.insert(bigint,item1);
-     end;
-    end;
-   end;
+   createmodulemenuitem(result);
   end;
   if ashow then begin
    result^.designform.show;
@@ -1532,7 +1536,7 @@ begin
   if findfile(str1) then begin
    activebefore:= factivedesignmodule;
    try
-    openformfile(str1,true,false,false,true);
+    openformfile(str1,true,false,false,true,false);
    finally
     factivedesignmodule:= activebefore;
    end;
@@ -1570,7 +1574,7 @@ begin //opensourceactonexecute
     if checkfileext(filenames[int1],[formfileext]) then begin
      page:= sourcefo.findsourcepage(filenames[int1]);
      if page = nil then begin
-      po1:= openformfile(filenames[int1],true,false,false,true);
+      po1:= openformfile(filenames[int1],true,false,false,true,false);
      end;
     end
     else begin
@@ -1580,7 +1584,7 @@ begin //opensourceactonexecute
      end;
      str1:= designer.sourcenametoformname(filenames[int1]);
      if findfile(str1) then begin
-      po1:= openformfile(str1,true,false,false,true);
+      po1:= openformfile(str1,true,false,false,true,false);
       if addtoproject then begin
        unitnode.setformfile(str1);
       end;
@@ -1715,7 +1719,7 @@ begin
   finally
    stream1.Free;
   end;
-  po1:= openformfile(str1,true,false,true,true);
+  po1:= openformfile(str1,true,false,true,true,false);
 {
   if kind = fok_main then begin
    with tmseform(po1^.instance) do begin
@@ -1927,7 +1931,7 @@ begin
     sourcefo.openfile(str1,true);
    end;
    if (str3 <> '') then begin
-    openformfile(str5,true,false,false,true);
+    openformfile(str5,true,false,false,true,false);
     po1:= designer.modules.findmodule(str5);
     if po1 <> nil then begin
      po1^.modified:= true; //initial create of ..._mfm.pas
@@ -1966,12 +1970,10 @@ begin
    result:= designer.closemodule(amodule,achecksave);
   end
   else begin
-//   showerror('Form '+ amodule^.filename +
-//       ' can not be closed, it is used by '+str1+'.');
-//   result:= false;
    amodule^.designform.hide;
    result:= true;
    removemodulemenuitem(amodule);
+   amodule^.hasmenuitem:= false;
   end;
   if result then begin
    if factivedesignmodule = amodule then begin
@@ -2270,7 +2272,7 @@ begin
       end;
       if loadprojectfile[int1] then begin
        if checkfileext(copiedfiles[int1],[formfileext])then begin
-        openformfile(copiedfiles[int1],true,false,false,true);
+        openformfile(copiedfiles[int1],true,false,false,true,false);
        end
        else begin
         sourcefo.openfile(copiedfiles[int1],bo1);

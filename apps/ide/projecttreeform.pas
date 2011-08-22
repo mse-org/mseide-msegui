@@ -313,12 +313,10 @@ begin
  include(fstate1,ns1_customsort);
  fstate:= fstate + [ns_sorted];
 end;
-var testvar2,testvar3: tfilenode;
+
 function tprojectnode.compare(const l: ttreelistitem;
                const r: ttreelistitem): integer;
 begin
-testvar2:= tfilenode(l);
-testvar3:= tfilenode(r);
  result:= 0;
  if tprojectnode(l).fkind = pnk_dir then begin
   dec(result);
@@ -475,7 +473,7 @@ begin
  if value <> '' then begin
   po1:= nil;
   try
-   po1:= mainfo.openformfile(value,false,false,false,true);
+   po1:= mainfo.openformfile(value,false,false,false,true,false);
   except
   end;
   if po1 <> nil then begin
@@ -1094,7 +1092,7 @@ begin
     with tunitnode(node1) do begin
      case fkind of
       pnk_form: begin
-       mainfo.openformfile(fpath,true,true,true,true);
+       mainfo.openformfile(fpath,true,true,true,true,false);
       end;
       pnk_source: begin
        sourcefo.openfile(fpath,true);

@@ -232,7 +232,7 @@ begin
   spat_showasform: begin
    mstr1:= filepath;
    if sourcefo.closepage(self) then begin
-    po1:= mainfo.openformfile(mstr1,true,false,false,true);
+    po1:= mainfo.openformfile(mstr1,true,false,false,true,false);
     if po1 <> nil then begin
      po1^.backupcreated:= fbackupcreated;
      designer.modulechanged(po1);

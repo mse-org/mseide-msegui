@@ -363,11 +363,12 @@ var
  int1: integer;
  filenames,relpaths,modulenames: filenamearty;
  ismod: longboolarty;
- ar1: longboolarty;
+ ar1,ar2: longboolarty;
  page1: tsourcepage1;
  intar1,intar2: integerarty;
  mstr1: filenamety;
  bo1: boolean;
+ po1: pmoduleinfoty;
  
 begin
  with statfiler do begin
@@ -375,11 +376,6 @@ begin
   updatevalue('hintwidth',hintsize.cx);
   updatevalue('hintheight',hintsize.cy);
   with projectoptions do begin
-//   updatevalue('autoindent',autoindent);
-//   updatevalue('blockindent',blockindent);
-//   updatevalue('rightmarginon',rightmarginon);
-//   updatevalue('rightmarginchars',rightmarginchars);
-//   updatevalue('tabstops',tabstops);
    with findreplaceinfo do begin
     updatevalue('finddtext',find.text);
     updatevalue('findhistory',find.history);
@@ -407,10 +403,12 @@ begin
    end;
    setlength(modulenames,designer.modules.count);
    setlength(ar1,length(modulenames));
+   setlength(ar2,length(modulenames));
    for int1:= 0 to designer.modules.count - 1 do begin
     with designer.modules[int1]^ do begin
      modulenames[int1]:= filename;
      ar1[int1]:= designform.visible;
+     ar2[int1]:= not hasmenuitem;
     end;
    end;
    tstatwriter(statfiler).writerecordarray('editpos',length(feditposar),
@@ -439,6 +437,7 @@ begin
   updatevalue('ismoduletexts',ismod);
   updatevalue('modules',modulenames);
   updatevalue('visiblemodules',ar1);
+  updatevalue('nomenumodules',ar2);
   if not iswriter then begin
    tabwidget.window.nofocus;
    tabwidget.clear;
@@ -470,6 +469,7 @@ begin
      end;
     end;
     mainfo.errorformfilename:= '';
+    setlength(ar2,length(modulenames));
     for int1:= 0 to high(modulenames) do begin
      try
       if int1 > high(ar1) then begin
@@ -480,10 +480,12 @@ begin
       end;
       mstr1:= relativepath(modulenames[int1],projectoptions.projectdir);
       if findfile(mstr1) then begin
-       mainfo.openformfile(filepath(mstr1),bo1,false,false,true);
+       mainfo.openformfile(filepath(mstr1),bo1,false,false,
+                                                         not ar2[int1],true);
       end
       else begin
-       mainfo.openformfile(modulenames[int1],bo1,false,false,true);
+       mainfo.openformfile(modulenames[int1],bo1,false,false,
+                                                         not ar2[int1],true);
       end;
      except
       if checkprojectloadabort then begin

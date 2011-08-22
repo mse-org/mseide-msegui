@@ -969,7 +969,7 @@ begin
  end;
  *)
 end;
-var testvar: glenum;
+
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
  im1: maskedimagety;

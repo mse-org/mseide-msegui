@@ -92,6 +92,7 @@ type
   components: tcomponents;
   designform: tmseform;
   modified: boolean;
+  hasmenuitem: boolean;
   referencedmodules: stringarty;
   methodtablebefore: pointer;
   resolved: boolean;
@@ -456,7 +457,8 @@ type
                       out methodinfo: pmethodinfoty);
    function getmodules: tmodulelist;
 
-   function loadformfile(filename: msestring): pmoduleinfoty;
+   function loadformfile(filename: msestring;
+                                const skipexisting: boolean): pmoduleinfoty;
    function saveformfile(const modulepo: pmoduleinfoty;
                  const afilename: msestring; createdatafile: boolean): boolean;
                         //false if canceled
@@ -506,7 +508,7 @@ uses
  designer_bmp,msesys,msewidgets,formdesigner,mseevent,objectinspector,
  msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
  pascaldesignparser,msearrayprops,rtlconsts,msedatamodules,
- msesimplewidgets,msesysutils,mseobjecttext,msestreaming,msedatanodes;
+ msesimplewidgets,msesysutils,mseobjecttext,msestreaming,msedatanodes,main;
 
 type
  tcomponent1 = class(tcomponent);
@@ -3621,6 +3623,7 @@ end;
 procedure tdesigner.showformdesigner(const amodule: pmoduleinfoty);
 begin
  amodule^.designform.activate;
+ mainfo.createmodulemenuitem(amodule);
 end;
 
 procedure tdesigner.showastext(const amodule: pmoduleinfoty);
@@ -3919,7 +3922,8 @@ begin
  end;
 end;
 
-function tdesigner.loadformfile(filename: msestring): pmoduleinfoty;
+function tdesigner.loadformfile(filename: msestring;
+                         const skipexisting: boolean): pmoduleinfoty;
 var
  module: tmsecomponent;
  loadedsubmodulesindex: integer;
@@ -4015,7 +4019,12 @@ begin //loadformfile
      finally
       reader.free;
      end;
-     if modules.findmodulebyname(modulename) <> nil then begin
+     result:= modules.findmodulebyname(modulename);
+     if result <> nil then begin
+      stream2.free; //not listed in loadingstreams
+      if skipexisting then begin
+       exit;
+      end;
       raise exception.create('A module "'+modulename+'" is already open.');
      end;
      stream2.Position:= 0;
