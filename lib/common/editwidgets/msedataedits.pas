@@ -1162,6 +1162,8 @@ type
   private
    fstep: real;
    fstepflag: stepkindty;
+   fstepfact: integer;
+   fwheelsensitivity: real;
    function getframe: tspineditframe;
    procedure setframe(const avalue: tspineditframe);
   protected
@@ -1172,10 +1174,12 @@ type
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure updatereadonlystate; override;
   //istepbar
-   function dostep(const event: stepkindty): boolean;
+   function dostep(const event: stepkindty; const adelta: real): boolean;
   public
    constructor create(aowner: tcomponent); override;
    property step: real read fstep write fstep; //default 1
+   property wheelsensitivity: real read fwheelsensitivity 
+                                               write fwheelsensitivity;
   published
    property frame: tspineditframe read getframe write setframe;
  end;
@@ -1192,6 +1196,7 @@ type
    property min;
    property max;
    property step;
+   property wheelsensitivity;
  end;
 
  tcustomdatetimeedit = class(tnumedit)
@@ -5101,6 +5106,7 @@ end;
 constructor tcustomrealspinedit.create(aowner: tcomponent);
 begin
  fstep:= 1;
+ fwheelsensitivity:= 1;
  inherited;
 end;
 
@@ -5138,7 +5144,7 @@ begin
     result:= initvalue;
     goto endlab;
    end;
-   result:= result + fstep;
+   result:= result + fstep*fstepfact;
   end;
   sk_down: begin
    result:= fvalue;
@@ -5146,7 +5152,7 @@ begin
     result:= initvalue;
     goto endlab;
    end;
-   result:= result - fstep;
+   result:= result - fstep*fstepfact;
   end;
   else begin
    result:= inherited gettextvalue(accept,quiet);
@@ -5164,7 +5170,8 @@ endlab1:
  fstepflag:= stepkindty(-1);
 end;
 
-function tcustomrealspinedit.dostep(const event: stepkindty): boolean;
+function tcustomrealspinedit.dostep(const event: stepkindty;
+                                               const adelta: real): boolean;
 begin
  result:= false;
  if not (csdesigning in componentstate) then begin
@@ -5175,7 +5182,17 @@ begin
      exit;
     end;
    end;
-   fstepflag:= event; 
+   fstepflag:= event;
+   if (adelta = 0) or (application.mousewheeldeltamin <= 0) then begin
+    fstepfact:= 1;
+   end
+   else begin
+    fstepfact:= round(0.03 * fwheelsensitivity *
+                              abs(adelta/application.mousewheeldeltamin));
+   end;
+   if fstepfact < 1 then begin
+    fstepfact:= 1;
+   end;
    checkvalue;
   end;
  end;

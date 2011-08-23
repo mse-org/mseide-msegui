@@ -1480,10 +1480,10 @@ function tmainfo.openformfile(const filename: filenamety;
        const ashow,aactivate,showsource,createmenu,
                               skipexisting: boolean): pmoduleinfoty;
 var
- item1: tmenuitem;
+// item1: tmenuitem;
  wstr1,wstr2: filenamety;
- bo1: boolean;
- int1: integer;
+// bo1: boolean;
+// int1: integer;
 begin
  result:= designer.modules.findmodule(filename);
  if result = nil then begin

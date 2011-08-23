@@ -368,7 +368,7 @@ var
  intar1,intar2: integerarty;
  mstr1: filenamety;
  bo1: boolean;
- po1: pmoduleinfoty;
+// po1: pmoduleinfoty;
  
 begin
  with statfiler do begin

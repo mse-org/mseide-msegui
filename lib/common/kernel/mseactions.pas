@@ -281,6 +281,8 @@ function checkshortcutcode(const shortcut: shortcutty;
                     const apreview: boolean = false): boolean; overload;
 function checkshortcutcode(const shortcut: shortcutty;
           const info: keyinfoty): boolean; overload;
+function checkactionshortcut(var info: actioninfoty;
+                        var keyinfo: keyeventinfoty): boolean; //true if done
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
                         var keyinfo: keyeventinfoty): boolean; 
                         //true if executed
@@ -983,7 +985,7 @@ begin
 end;
 }
 
-function doactionshortcut(const sender: tobject; var info: actioninfoty;
+function checkactionshortcut(var info: actioninfoty;
                         var keyinfo: keyeventinfoty): boolean; //true if done
  function check(const anum: integer; out exec: boolean): boolean;
  var
@@ -1058,10 +1060,23 @@ begin
  end;
  if bo1 then begin
   include(keyinfo.eventstate,es_processed);
+  {
   if result then begin
    result:= doactionexecute1(sender,info,bo1,false,false);
 //   changed;
   end;
+  }
+ end;
+end;
+
+function doactionshortcut(const sender: tobject; var info: actioninfoty;
+                        var keyinfo: keyeventinfoty): boolean; //true if done
+var
+ bo1: boolean;
+begin
+ result:= checkactionshortcut(info,keyinfo);
+ if result then begin
+  result:= doactionexecute1(sender,info,bo1,false,false);
  end;
 end;
 

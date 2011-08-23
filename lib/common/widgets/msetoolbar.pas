@@ -296,7 +296,7 @@ type
    procedure dopaint(const canvas: tcanvas); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure showhint(var info: hintinfoty); override;
-   function dostep(const event: stepkindty): boolean; override;
+   function dostep(const event: stepkindty; const adelta: real): boolean; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure objectchanged(const sender: tobject); override;
    //istatfile
@@ -1385,7 +1385,8 @@ begin
  inherited;
 end;
 
-function tcustomtoolbar.dostep(const event: stepkindty): boolean;
+function tcustomtoolbar.dostep(const event: stepkindty;
+                                       const adelta: real): boolean;
 begin
  result:= false;
  if frame.canstep then begin

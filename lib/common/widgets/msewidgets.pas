@@ -482,7 +482,8 @@ type
   function translatecolor(const aclor: colorty): colorty;
   procedure invalidaterect(const rect: rectty; const org: originty;
                                const noclip: boolean = false);
-  function dostep(const event: stepkindty): boolean; //true on action
+  function dostep(const event: stepkindty; const adelta: real): boolean; 
+                                                 //true on action
  end;
  stepbuttonposty = (sbp_right,sbp_top,sbp_left,sbp_bottom);
 
@@ -1126,6 +1127,7 @@ type
                    bo_executedefaultonenterkey,
                    bo_asyncexecute,
                    bo_focusonshortcut, //for tcustombutton
+                   bo_updateonidle,
                    bo_shortcutcaption,bo_altshortcut,
                    {bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect,}
                    bo_nodefaultframeactive,
@@ -1144,9 +1146,9 @@ const
 type
  tactionsimplebutton = class(tactionpublishedwidget)
   private
-   foptions: buttonoptionsty;
    procedure setcolorglyph(const value: colorty);
   protected
+   foptions: buttonoptionsty;
    finfo: shapeinfoty;
    class function classskininfo: skininfoty; override;
    procedure setoptions(const avalue: buttonoptionsty); virtual;
@@ -3055,7 +3057,7 @@ end;
 procedure tcustomstepframe.execute(const tag: integer; 
                                       const info: mouseeventinfoty);
 begin
- fstepintf.dostep(stepkindty(tag));
+ fstepintf.dostep(stepkindty(tag),0);
 end;
 
 procedure tcustomstepframe.getpaintframe(var frame: framety);
@@ -3531,7 +3533,7 @@ begin
    end;
    sk1:= stepdirstep[fbuttonpos][info.wheel = mw_up]
   end;
-  if canstep and fstepintf.dostep(sk1) then begin
+  if canstep and fstepintf.dostep(sk1,info.delta) then begin
    include(info.eventstate,es_processed);
   end;
  end;

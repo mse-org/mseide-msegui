@@ -541,9 +541,6 @@ begin
   doactionexecute(fexecitem,fexecitem.finfo,true,
          mao_nocandefocus in fexecitem.options);
  end;
-// if result and canevent(tmethod(fexecitem.onexecute)) then begin
-//  fexecitem.onexecute(fexecitem);
-// end;
  fexecitem:= nil;
 end;
 
@@ -653,12 +650,7 @@ begin
   sendchangeevent;
  end;
 end;
-{
-procedure tcustommenu.templatechanged(const sender: tobject);
-begin
- sendchangeevent;
-end;
-}
+
 procedure tcustommenu.objectevent(const sender: tobject; const event: objecteventty);
 begin
  case event of

@@ -772,6 +772,7 @@ type
    property colorglyph;
    property options;
    property focusrectdist;
+   property onupdate;
    property onexecute;
    property onbeforeexecute;
    property imageoffset;

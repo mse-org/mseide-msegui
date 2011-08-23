@@ -88,12 +88,16 @@ type
 
  end;
 
+ tcustombutton = class;
+ buttoneventty = procedure(const sender: tcustombutton) of object;
+ 
  tcustombutton = class(tactionsimplebutton,iactionlink,iimagelistinfo)
   private
    fmodalresult: modalresultty;
    factioninfo: actioninfoty;
    fautosize_cx: integer;
    fautosize_cy: integer;
+   fonupdate: buttoneventty;
    procedure setcaption(const Value: captionty);
    function getframe: tframe;
    procedure setframe(const Value: tframe);
@@ -141,6 +145,7 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure fontchanged; override;
    procedure setcolor(const avalue: colorty); override;
+   procedure doidle(var again: boolean);
    //iactionlink
    function getactioninfopo: pactioninfoty;
    function shortcutseparator: msechar;
@@ -169,6 +174,7 @@ type
    function verticalfontheightdelta: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
    procedure synctofontheight; override;
    procedure doupdate;
 
@@ -203,6 +209,7 @@ type
                                     stored false default 0;
    property shortcuts: shortcutarty read factioninfo.shortcut write setshortcuts;
    property shortcuts1: shortcutarty read factioninfo.shortcut1 write setshortcuts1;
+   property onupdate: buttoneventty read fonupdate write fonupdate;
    property onexecute: notifyeventty read factioninfo.onexecute
               write setonexecute stored isonexecutestored;
    property onbeforeexecute: accepteventty read factioninfo.onbeforeexecute 
@@ -236,6 +243,7 @@ type
    property colorglyph;
    property options;
    property focusrectdist;
+   property onupdate;
    property onexecute;
    property onbeforeexecute;
  end;
@@ -265,6 +273,7 @@ type
    property imagedist;
    property options;
    property focusrectdist;
+   property onupdate;
    property onexecute;
    property onbeforeexecute;
  end;
@@ -345,6 +354,7 @@ type
    property colorglyph;
    property options;
    property focusrectdist;
+   property onupdate;
    property onexecute;
    property onbeforeexecute;
  end;
@@ -384,6 +394,7 @@ type
    property colorglyph;
    property options;
    property focusrectdist;
+   property onupdate;
    property onexecute;
    property onbeforeexecute;
  end;
@@ -633,7 +644,7 @@ type
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure mousewheelevent(var info: mousewheeleventinfoty); override;
-   function dostep(const event: stepkindty): boolean; virtual;
+   function dostep(const event: stepkindty; const adelta: real): boolean; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -664,8 +675,31 @@ begin
  size:= makesize(defaultbuttonwidth,defaultbuttonheight);
 end;
 
-procedure tcustombutton.setoptions(const avalue: buttonoptionsty);
+destructor tcustombutton.destroy;
 begin
+ if bo_updateonidle in foptions then begin
+  application.unregisteronidle({$ifdef FPC}@{$endif}doidle); 
+ end;
+ inherited;
+end;
+
+procedure tcustombutton.setoptions(const avalue: buttonoptionsty);
+var
+ delta: buttonoptionsty;
+begin
+ if avalue <> foptions then begin
+  delta:= buttonoptionsty(
+        {$ifdef FPC}longword{$else}byte{$endif}(foptions) xor
+        {$ifdef FPC}longword{$else}byte{$endif}(avalue));
+  if bo_updateonidle in delta then begin
+   if bo_updateonidle in avalue then begin
+    application.registeronidle({$ifdef FPC}@{$endif}doidle); 
+   end
+   else begin
+    application.unregisteronidle({$ifdef FPC}@{$endif}doidle); 
+   end;
+  end;
+ end;
  inherited;
  if bo_shortcutcaption in avalue then begin
   setactionoptions(iactionlink(self),factioninfo.options + [mao_shortcutcaption]);
@@ -1294,6 +1328,14 @@ begin
  if factioninfo.action <> nil then begin
   factioninfo.action.doupdate;
  end;
+ if canevent(tmethod(fonupdate)) then begin
+  fonupdate(self);
+ end;
+end;
+
+procedure tcustombutton.doidle(var again: boolean);
+begin
+ doupdate;
 end;
 
 { tcustomrichbutton }
@@ -2047,7 +2089,7 @@ begin
  tscrollboxframe(fframe).updateclientrect;
 end;
 
-function tcustomstepbox.dostep(const event: stepkindty): boolean;
+function tcustomstepbox.dostep(const event: stepkindty; const adelta: real): boolean;
 begin
  result:= false;
  if canevent(tmethod(fonstep)) then begin

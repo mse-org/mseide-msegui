@@ -2422,11 +2422,11 @@ type
    property buttonreleasewidgetbefore: twidget read fbuttonreleasewidgetbefore;
    property dblclicktime: integer read fdblclicktime write fdblclicktime default
                  defaultdblclicktime; //us
-   property mousewhweelfrequmin: real read fmousewheelfrequmin write fmousewheelfrequmin;
-   property mousewhweelfrequmax: real read fmousewheelfrequmax write fmousewheelfrequmax;
-   property mousewhweeldeltamin: real read fmousewheeldeltamin write fmousewheeldeltamin;
-   property mousewhweeldeltamax: real read fmousewheeldeltamax write fmousewheeldeltamax;
-   property mousewhweelaccelerationmax: real read fmousewheelaccelerationmax 
+   property mousewheelfrequmin: real read fmousewheelfrequmin write fmousewheelfrequmin;
+   property mousewheelfrequmax: real read fmousewheelfrequmax write fmousewheelfrequmax;
+   property mousewheeldeltamin: real read fmousewheeldeltamin write fmousewheeldeltamin;
+   property mousewheeldeltamax: real read fmousewheeldeltamax write fmousewheeldeltamax;
+   property mousewheelaccelerationmax: real read fmousewheelaccelerationmax 
                                   write fmousewheelaccelerationmax;
  end;
 

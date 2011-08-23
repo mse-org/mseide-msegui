@@ -302,7 +302,7 @@ type
    fstate: tabbarstatesty;
    foptions: tabbaroptionsty;
    class function classskininfo: skininfoty; override;
-   function dostep(const event: stepkindty): boolean; override;
+   function dostep(const event: stepkindty; const adelta: real): boolean; override;
    procedure doactivetabchanged;
    procedure tabchanged(const sender: ttab);
    procedure tabclicked(const sender: ttab; const info: mouseeventinfoty);
@@ -2463,7 +2463,7 @@ begin
  end;
 end;
 
-function tcustomtabbar.dostep(const event: stepkindty): boolean;
+function tcustomtabbar.dostep(const event: stepkindty; const adelta: real): boolean;
 begin
  result:= false;
  if frame.canstep then begin
