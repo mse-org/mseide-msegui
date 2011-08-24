@@ -703,7 +703,8 @@ begin
    fmenu.updatecaption;
   end;
   if mo_updateonidle in delta then begin
-   if mo_updateonidle in foptions then begin
+   if (mo_updateonidle in foptions) and 
+                            not (csdesigning in componentstate) then begin
     application.registeronidle({$ifdef FPC}@{$endif}doidle); 
    end
    else begin
@@ -1907,7 +1908,9 @@ constructor tcustommainmenu.create(aowner: tcomponent);
 begin
  inherited;
  include(foptions,mo_updateonidle);
- application.registeronidle({$ifdef FPC}@{$endif}doidle); 
+ if not (csdesigning in componentstate) then begin
+  application.registeronidle({$ifdef FPC}@{$endif}doidle); 
+ end;
  fmenu.onchange:= {$ifdef FPC}@{$endif}menuchanged;
 end;
 

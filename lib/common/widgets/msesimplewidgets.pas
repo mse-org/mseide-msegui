@@ -692,7 +692,8 @@ begin
         {$ifdef FPC}longword{$else}byte{$endif}(foptions) xor
         {$ifdef FPC}longword{$else}byte{$endif}(avalue));
   if bo_updateonidle in delta then begin
-   if bo_updateonidle in avalue then begin
+   if (bo_updateonidle in avalue) and 
+                            not (csdesigning in componentstate) then begin
     application.registeronidle({$ifdef FPC}@{$endif}doidle); 
    end
    else begin

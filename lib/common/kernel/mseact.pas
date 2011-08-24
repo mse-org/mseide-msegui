@@ -1194,7 +1194,8 @@ begin
   foptions := Value;
   if not (csdesigning in componentstate) then begin
    if ao_updateonidle in delta then begin
-    if ao_updateonidle in value then begin
+    if (ao_updateonidle in value) and 
+                          not (csdesigning in componentstate) then begin
      application.registeronidle({$ifdef FPC}@{$endif}doidle);
     end
     else begin
