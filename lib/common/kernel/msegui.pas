@@ -39,6 +39,11 @@ const
  mousebuttons = [ss_left,ss_right,ss_middle];
 
 type
+ gdiregionty = record
+  gdi: pgdifunctionaty;
+  region: regionty;
+ end;
+
  frameskinoptionty = (fso_flat,
                       fso_noanim,fso_nomouseanim,fso_noclickanim,fso_nofocusanim,
                       fso_nofocusrect,fso_nodefaultrect,fso_noinnerrect);
@@ -1212,7 +1217,7 @@ type
                                 var ainfo: naviginfoty) of object; 
  twidget = class(tactcomponent,iscrollframe,iface)
   private
-   fwidgetregion: regionty;
+   fwidgetregion: gdiregionty;
    frootpos: pointty;   //position in rootwindow
    fcursor: cursorshapety;
    ftaborder: integer;
@@ -1252,7 +1257,7 @@ type
 
    function invalidateneeded: boolean;
    procedure updateroot;
-   procedure addopaquechildren(var region: regionty);
+   procedure addopaquechildren(var region: gdiregionty);
    procedure updatewidgetregion;
    function isclientmouseevent(var info: mouseeventinfoty): boolean;
    procedure internaldofocus;
@@ -1363,6 +1368,7 @@ type
    function getface: tcustomface;
    procedure setface(const avalue: tcustomface);
 
+   function getgdi: pgdifunctionaty; virtual;
    procedure createwindow; virtual;
    procedure objectchanged(const sender: tobject); virtual;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
@@ -1637,7 +1643,6 @@ type
    procedure invalidateframestaterect(const rect: rectty;
                const aframe: tcustomframe; const org: originty = org_client);   
    function hasoverlappingsiblings(arect: rectty): boolean; //origin = pos
-
 
    function window: twindow;
    function rootwidget: twidget;
@@ -1972,7 +1977,7 @@ type
    fcanvas: tcanvas;
    fasynccanvas: tcanvas;
    fmodalresult: modalresultty;
-   fupdateregion: regionty;
+   fupdateregion: gdiregionty;
    procedure setasynccanvas(const acanvas: tcanvas);
            //used from treport
    procedure releaseasynccanvas;
@@ -2052,7 +2057,7 @@ type
    function visible: boolean;
    function activating: boolean; //in internalactivate proc
    function normalwindowrect: rectty;
-   property updateregion: regionty read fupdateregion;
+   property updateregion: regionty read fupdateregion.region;
    function updaterect: rectty;
 
    procedure registermovenotification(sender: iobjectlink);
@@ -3380,39 +3385,45 @@ begin
           ({(key = key_enter) or} (key = key_return));
 end;
 
-procedure destroyregion(var region: regionty);
+procedure destroyregion(var region: gdiregionty);
 var
  info: drawinfoty;
 begin
- if region <> 0 then begin
-  info.regionoperation.source:= region;
-  gdi_call(gdf_destroyregion,info);
-  region:= 0;
+ with region do begin
+  if region <> 0 then begin
+   info.regionoperation.source:= region;
+   gdi_call(gdf_destroyregion,info,gdi);
+   region:= 0;
+  end;
  end;
 end;
 
-function createregion: regionty; overload;
+function createregion(const gdi: pgdifunctionaty): gdiregionty; overload; 
 var
  info: drawinfoty;
 begin
  with info.regionoperation do begin
-  gdi_call(gdf_createemptyregion,info);
-  result:= dest;
+  gdi_call(gdf_createemptyregion,info,gdi);
+  result.region:= dest;
+  result.gdi:= gdi;
  end;
 end;
 
-function createregion(const arect: rectty): regionty; overload;
+function createregion(const arect: rectty;
+                          const gdi: pgdifunctionaty): gdiregionty; overload;
 var
  info: drawinfoty;
 begin
  with info.regionoperation do begin
   rect:= arect;
-  gdi_call(gdf_createrectregion,info);
-  result:= dest;
+  gdi_call(gdf_createrectregion,info,gdi);
+  result.region:= dest;
+  result.gdi:= gdi;
  end;
 end;
 
-function createregion(const rects: rectarty): regionty; overload;
+function createregion(const rects: rectarty;
+                           const gdi: pgdifunctionaty): gdiregionty; overload;
 var
  info: drawinfoty;
 begin
@@ -3420,8 +3431,9 @@ begin
   rectscount:= length(rects);
   if rectscount > 0 then begin
    rectspo:= @rects[0];
-   gdi_call(gdf_createrectsregion,info);
-   result:= dest;
+   gdi_call(gdf_createrectsregion,info,gdi);
+   result.region:= dest;
+   result.gdi:= gdi;
   end
   else begin
    result:= createregion;
@@ -3429,25 +3441,25 @@ begin
  end;
 end;
 
-procedure regintersectrect(const region: regionty; const arect: rectty);
+procedure regintersectrect(const region: gdiregionty; const arect: rectty);
 var
  info: drawinfoty;
 begin
- with info.regionoperation do begin
+ with region,info.regionoperation do begin
   dest:= region;
   rect:= arect;
-  gdi_call(gdf_regintersectrect,info);
+  gdi_call(gdf_regintersectrect,info,gdi);
  end;
 end;
 
-procedure regaddrect(const region: regionty; const arect: rectty);
+procedure regaddrect(const region: gdiregionty; const arect: rectty);
 var
  info: drawinfoty;
 begin
- with info.regionoperation do begin
+ with region,info.regionoperation do begin
   dest:= region;
   rect:= arect;
-  gdi_call(gdf_regaddrect,info);
+  gdi_call(gdf_regaddrect,info,gdi);
  end;
 end;
 
@@ -7778,7 +7790,7 @@ var
  saveindex: integer;
  actcolor: colorty;
  col1: colorty;
- reg1: regionty;
+ reg1: gdiregionty;
  rect1: rectty;
  widget1: twidget;
  bo1,bo2: boolean;
@@ -7801,7 +7813,7 @@ begin
   dobeforepaint(canvas);
   if (high(fwidgets) >= 0) and not (ws1_noclipchildren in fwidgetstate1) then begin
    updatewidgetregion;
-   canvas.subclipregion(fwidgetregion);
+   canvas.subclipregion(fwidgetregion.region);
   end;
   bo1:= not canvas.clipregionisempty;
   if bo1 then begin
@@ -7852,10 +7864,10 @@ begin
          subcliprect(fwidgetrect);
         end
         else begin
-         reg1:= createregion;
+         reg1:= msegui.createregion(self.window.fgdi);
          addopaquechildren(reg1);
-         subclipregion(reg1);
-         destroyregion(reg1);
+         subclipregion(reg1.region);
+         msegui.destroyregion(reg1);
         end;
        end;
       end;
@@ -7910,7 +7922,7 @@ begin
  end;
 end;
 
-procedure twidget.addopaquechildren(var region: regionty);
+procedure twidget.addopaquechildren(var region: gdiregionty);
 var
  int1: integer;
  widget: twidget;
@@ -7923,7 +7935,8 @@ begin
    for int1:= 0 to widgetcount - 1 do begin
     widget:= twidget(fwidgets[int1]);
     if ws_opaque in widget.fwidgetstate then begin
-     regaddrect(region,moverect(intersectrect(rect1,widget.fwidgetrect),frootpos));
+     regaddrect(region,moverect(intersectrect(rect1,widget.fwidgetrect),
+                                                                    frootpos));
     end
     else begin
      widget.addopaquechildren(region);
@@ -7936,11 +7949,9 @@ end;
 procedure twidget.updatewidgetregion;
 begin
  if not (ws1_widgetregionvalid in fwidgetstate1) then begin
-  if fwidgetregion <> 0 then begin
-   destroyregion(fwidgetregion);
-  end;
+  destroyregion(fwidgetregion);
   if widgetcount > 0 then begin
-   fwidgetregion:= createregion;
+   fwidgetregion:= createregion(window.fgdi);
    addopaquechildren(fwidgetregion);
    if fframe <> nil then begin
     frame.checkstate;
@@ -7951,17 +7962,19 @@ begin
    else begin
     regintersectrect(fwidgetregion,makerect(frootpos,fwidgetrect.size));
    end;
-  end
-  else begin
-   fwidgetregion:= 0;
   end;
   include(fwidgetstate1,ws1_widgetregionvalid);
  end;
 end;
 
+function twidget.getgdi: pgdifunctionaty;
+begin
+ result:= gui_getgdifuncs;
+end;
+
 procedure twidget.createwindow;
 begin
- twindow.create(self); //sets fwindow
+ twindow.create(self,getgdi); //sets fwindow
 end;
 
 procedure twidget.updateroot;
@@ -12864,10 +12877,10 @@ var
  po1: pointty;
 begin
  result:= false;
- if (ws_visible in fowner.fwidgetstate) and (fupdateregion <> 0) then begin
+ if (ws_visible in fowner.fwidgetstate) and (fupdateregion.region <> 0) then begin
   checkwindow(false); //ev. reposition window
   fcanvas.reset;
-  fcanvas.clipregion:= fupdateregion;
+  fcanvas.clipregion:= fupdateregion.region;
   bo1:= appinst.caret.islinkedto(fcanvas) and
    testintersectrect(fcanvas.clipbox,appinst.caret.rootcliprect);
   if bo1 then begin
@@ -12876,7 +12889,7 @@ begin
   include(fstate,tws_painting);
   if flushgdi then begin
    try
-    fupdateregion:= 0;
+    fupdateregion.region:= 0;
     result:= true;
     fowner.paint(fcanvas);
    finally
@@ -12892,18 +12905,18 @@ begin
             makerect(nullpoint,fowner.widgetrect.size),rect1) then begin
      bmp.size:= rect1.size;
 
-     bmp.canvas.clipregion:= bmp.canvas.createregion(fupdateregion);
+     bmp.canvas.clipregion:= bmp.canvas.createregion(fupdateregion.region);
      po1.x:= -rect1.x;
      po1.y:= -rect1.y;
      tcanvas1(bmp.canvas).setcliporigin(po1);
      bmp.canvas.origin:= nullpoint;
-     fupdateregion:= 0;
+     fupdateregion.region:= 0;
      result:= true;
      fowner.paint(bmp.canvas);
      bmp.paint(fcanvas,rect1);
     end
     else begin
-     fupdateregion:= 0;
+     fupdateregion.region:= 0;
     end;
    finally
     bmp.Free;
@@ -13130,8 +13143,8 @@ begin
    arect:= intersectrect(arect,moverect(sender.fparentwidget.paintrect,
                                         sender.fparentwidget.rootpos));
   end;
-  if fupdateregion = 0 then begin
-   fupdateregion:= createregion(arect);
+  if fupdateregion.region = 0 then begin
+   fupdateregion:= createregion(arect,fgdi);
   end
   else begin
    regaddrect(fupdateregion,arect);
@@ -13721,7 +13734,7 @@ end;
 
 function twindow.updaterect: rectty;
 begin
- result:= fcanvas.regionclipbox(fupdateregion);
+ result:= fcanvas.regionclipbox(fupdateregion.region);
 end;
 
 procedure twindow.postkeyevent(const akey: keyty; 

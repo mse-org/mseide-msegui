@@ -1079,7 +1079,8 @@ procedure init;
 procedure deinit;
 procedure gdi_lock;   //locks only if not mainthread
 procedure gdi_unlock; //unlocks only if not mainthread
-procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty);
+procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty;
+                                   gdi: pgdifunctionaty = nil);
 function registergdi(const agdifuncs: pgdifunctionaty): integer;
                                             //returns unique number
 function creategdicanvas(const agdi: pgdifunctionaty;
@@ -1092,7 +1093,8 @@ function replacebuffer(var buffer: bufferty; size: integer): pointer;
 procedure freebuffer(var buffer: bufferty);
 
 procedure gdierrorlocked(error: gdierrorty; const text: string = ''); overload;
-procedure gdierrorlocked(error: gdierrorty; sender: tobject; text: string = ''); overload;
+procedure gdierrorlocked(error: gdierrorty; sender: tobject;
+                                               text: string = ''); overload;
 
 function colortorgb(color: colorty): rgbtriplety;
 function colortopixel(color: colorty): pixelty;
@@ -1203,13 +1205,17 @@ begin
  end;
 end;
 
-procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty);
+procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty;
+                                 gdi: pgdifunctionaty = nil);
 begin
  with application do begin
+  if gdi = nil then begin
+   gdi:= gui_getgdifuncs;
+  end;
   if not locked then begin
    lock;
    try
-    gui_getgdifuncs^[func](drawinfo);
+    gdi^[func](drawinfo);
     if flushgdi then begin
      gui_flushgdi;
     end;
@@ -1218,7 +1224,7 @@ begin
    end;
   end
   else begin
-   gui_getgdifuncs^[func](drawinfo);
+   gdi^[func](drawinfo);
    if flushgdi then begin
     gui_flushgdi;
    end;
