@@ -101,6 +101,8 @@ type
    constructor create(const aowner: tsqlstringlist); reintroduce;
    property items[const aindex: integer]: tsqlmacroitem read getitems 
                      write setitems; default;
+   class function getitemclasstype: persistentclassty; override;
+               //used in dumpunitgroups
   published
    property options: macrooptionsty read foptions write foptions 
                                            default [mao_caseinsensitive];
@@ -5264,6 +5266,11 @@ procedure tmacroproperty.setitems(const aindex: integer;
                const avalue: tsqlmacroitem);
 begin
  inherited;
+end;
+
+class function tmacroproperty.getitemclasstype: persistentclassty;
+begin
+ result:= tsqlmacroitem;
 end;
 
 { tmacrostringlist }

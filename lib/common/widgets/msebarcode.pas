@@ -13,7 +13,7 @@ unit msebarcode;
 interface
 uses
  classes,msewidgets,msebitmap,msegraphics,mseclasses,msegraphutils,msestrings,
- mseguiglob;
+ msegui,msemenus,mseguiglob;
  
 type
  barcodestatety = (bcs_bitmapvalid,bcs_layoutvalid,bcs_painting);

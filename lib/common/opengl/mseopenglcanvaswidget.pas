@@ -15,7 +15,8 @@ unit mseopenglcanvaswidget;
 
 interface
 uses
- msewindowwidget,msegraphics,mseopengl,classes,msegraphutils,mseguiglob,msetypes;
+ msewindowwidget,msegraphics,mseopengl,classes,msegraphutils,
+ msegui,msemenus,mseguiglob,msetypes;
  
 type
 

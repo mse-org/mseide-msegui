@@ -247,11 +247,17 @@ type
  end;
   
  tdestparams = class(townedpersistentarrayprop)
-  constructor create(const aowner: tfieldparamlink); reintroduce;
+  public
+   constructor create(const aowner: tfieldparamlink); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
+               //used in dumpunitgroups
  end;
 
  tdestfields = class(townedpersistentarrayprop)
-  constructor create(const aowner: tfieldparamlink); reintroduce;
+  public
+   constructor create(const aowner: tfieldparamlink); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
+               //used in dumpunitgroups   
  end;
  
  tfieldparamlink = class(tmsecomponent,idbeditinfo,idbparaminfo)
@@ -1635,11 +1641,21 @@ begin
  inherited create(aowner,tdestparam);
 end;
 
+class function tdestparams.getitemclasstype: persistentclassty;
+begin
+ result:= tdestparam;
+end;
+
 { tdestfields }
 
 constructor tdestfields.create(const aowner: tfieldparamlink);
 begin
  inherited create(aowner,tdestfield);
+end;
+
+class function tdestfields.getitemclasstype: persistentclassty;
+begin
+ result:= tdestfield;
 end;
 
 { tdestvalue }

@@ -178,6 +178,8 @@ type
    procedure dosizechanged; override;
   public
    constructor create(const aowner: tcomponent); reintroduce;
+   class function getitemclasstype: persistentclassty; override;
+               //used in dumpunitgroups
   published
  end;
 
@@ -944,6 +946,11 @@ procedure tfilterbanksections.dosizechanged;
 begin
  inherited;
  tsigfilterbank(fowner).modelchange;
+end;
+
+class function tfilterbanksections.getitemclasstype: persistentclassty;
+begin
+ result:= tfilterbanksection;
 end;
 
 { tsigfilterbank }
