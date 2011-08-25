@@ -12896,6 +12896,7 @@ begin
     if bo1 then begin
      tcaret1(appinst.fcaret).restore;
     end;
+    fcanvas.endpaint;
    end;
   end
   else begin

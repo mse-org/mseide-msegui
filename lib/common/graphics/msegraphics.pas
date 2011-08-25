@@ -564,7 +564,7 @@ type
  gdifunctionty = procedure(var drawinfo: drawinfoty);
 
  gdifuncty = (gdf_creategc,gdf_destroygc,gdf_changegc,
-              gdf_getcanvasclass,
+              gdf_getcanvasclass,gdf_endpaint,
               gdf_drawlines,gdf_drawlinesegments,gdf_drawellipse,gdf_drawarc,
               gdf_fillrect,
               gdf_fillelipse,gdf_fillarc,gdf_fillpolygon,{gdf_drawstring,}
@@ -752,6 +752,7 @@ type
    function restore(index: integer = -1): integer; //-1 -> pop from stack
                      //returns current saveindex
    procedure resetpaintedflag;
+   procedure endpaint; //opengl swap buffer
 
    procedure move(const dist: pointty);   //add dist to origin
    procedure remove(const dist: pointty); //sub dist from origin
@@ -5336,6 +5337,13 @@ begin
   end;
   checkimagebgr(image.image,abgr);
   result:= image.image;
+ end;
+end;
+
+procedure tcanvas.endpaint;
+begin
+ if fdrawinfo.gc.handle <> 0 then begin
+  gdi(gdf_endpaint);
  end;
 end;
 

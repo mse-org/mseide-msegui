@@ -695,6 +695,11 @@ begin
  drawinfo.getcanvasclass.canvasclass:= topenglcanvas;
 end;
 
+procedure gdi_endpaint(var drawinfo: drawinfoty); //gdifunc
+begin
+ gdi_swapbuffers(drawinfo);
+end;
+
 procedure gdi_drawlines(var drawinfo: drawinfoty);
 var
  po1: ppointty;
@@ -1105,6 +1110,7 @@ const
    {$ifdef FPC}@{$endif}gdi_destroygc,
    {$ifdef FPC}@{$endif}gdi_changegc,
    {$ifdef FPC}@{$endif}gdi_getcanvasclass,
+   {$ifdef FPC}@{$endif}gdi_endpaint,
    {$ifdef FPC}@{$endif}gdi_drawlines,
    {$ifdef FPC}@{$endif}gdi_drawlinesegments,
    {$ifdef FPC}@{$endif}gdi_drawellipse,
