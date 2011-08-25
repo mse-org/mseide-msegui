@@ -1,33 +1,34 @@
 object selecteditpagefo: tselecteditpagefo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  visible = False
   bounds_x = 160
   bounds_y = 124
   bounds_cx = 704
   bounds_cy = 473
-  taborder = 1
-  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 704
-  container.bounds_cy = 473
-  container.frame.dummy = 0
-  container.onchildscaled = formonchildscaled
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
+  container.onlayout = formonchildscaled
+  container.bounds = (
+    0
+    0
+    704
+    473
+  )
   options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
   caption = 'Select edit page (Ctrl+E)'
   icon.transparentcolor = -2147483648
   oneventloopstart = fooncreate
-  onchildscaled = formonchildscaled
+  onlayout = formonchildscaled
   moduleclassname = 'tmseform'
   object list: tlistview
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_multiplehint]
+    frame.colorclient = -1879048187
+    frame.localprops = [frl_colorclient]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 704
     bounds_cy = 451
-    frame.colorclient = -1879048187
-    frame.localprops = [frl_colorclient]
-    frame.dummy = 0
     anchors = [an_top, an_bottom]
     datarowlinewidth = 0
     datacollinewidth = 0
@@ -35,36 +36,33 @@ object selecteditpagefo: tselecteditpagefo
     cellheight = 20
     cellframe.leveli = 1
     cellframe.localprops = [frl_leveli]
-    cellframe.dummy = 0
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wraprow, og_wrapcol, og_autopopup]
-    options = [lvo_readonly, lvo_drawfocus, lvo_mousemovefocus, lvo_focusselect, lvo_mouseselect, lvo_locate]
+    options = [lvo_readonly, lvo_drawfocus, lvo_mousemovefocus, lvo_focusselect, lvo_mouseselect, lvo_locate, lvo_hintclippedtext]
     onitemevent = doonitemevent
   end
   object pathdisp: tstringdisp
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 0
-    bounds_y = 454
-    bounds_cx = 650
-    bounds_cy = 18
     frame.dummy = 0
-    anchors = [an_left, an_right, an_bottom]
     taborder = 2
+    bounds_x = 0
+    bounds_y = 455
+    bounds_cx = 650
+    bounds_cy = 17
+    anchors = [an_left, an_right, an_bottom]
     textflags = [tf_ycentered, tf_ellipseleft]
-    reffontheight = 14
+    reffontheight = 13
   end
   object openfilebutton: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 652
-    bounds_y = 454
-    bounds_cx = 50
-    bounds_cy = 18
-    anchors = [an_right, an_bottom]
     taborder = 1
+    bounds_x = 652
+    bounds_y = 455
+    bounds_cx = 50
+    bounds_cy = 17
+    anchors = [an_right, an_bottom]
     state = [as_localcaption, as_localonexecute]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = '&open'
     onexecute = openfileonexecute
-    reffontheight = 14
+    reffontheight = 13
   end
 end

@@ -11,6 +11,8 @@ object sourcefo: tsourcefo
   bounds_cx = 433
   bounds_cy = 327
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
   container.frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
   container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
   container.frame.sbvert.options = [sbo_moveauto, sbo_showauto]
@@ -103,7 +105,7 @@ object sourcefo: tsourcefo
     popupmenu = formpopup
     onactivepagechanged = tabwidgetonactivepagechanged
     onpageremoved = tabwidgetpageremoved
-    tab_options = [tabo_dragsource, tabo_dragdest, tabo_vertical, tabo_opposite, tabo_tabsizing, tabo_dblclickedtabfirst]
+    tab_options = [tabo_dragsource, tabo_dragdest, tabo_vertical, tabo_opposite, tabo_tabsizing, tabo_dblclickedtabfirst, tabo_hintclippedtext]
     tab_frame.buttonpos = sbp_top
     tab_frame.buttonslast = True
     tab_frame.buttonsvisible = [sk_right, sk_up, sk_left, sk_down, sk_first, sk_last]
