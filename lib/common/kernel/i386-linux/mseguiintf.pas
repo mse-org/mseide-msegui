@@ -7,7 +7,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit mseguiintf; //i386-linux
+unit mseguiintf; //i386-linux, X11
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
@@ -49,6 +49,22 @@ var
  { $define with_saveyourself}
 {$endif}
 type
+
+ x11internalwindowoptionsdty = record
+  depth: cint;
+  visual: pvisual;
+ end;
+ 
+ x11internalwindowoptionsty =  record
+  case integer of
+   0: (d: x11internalwindowoptionsdty;);
+   1: (_bufferspace: internalwindowoptionspty;);
+ end;
+  
+ {$if sizeof(x11internalwindowoptionsdty) > sizeof(internalwindowoptionspty)}
+  {$error 'buffer overflow'}
+ {$endif}
+
  syseventty = type txevent;
 const
  //from keysymdef.h
@@ -3003,6 +3019,8 @@ var
  width,height: integer;
  id1: winidty;
  icmask: longword;
+ vis1: xlib.pvisual;
+ dep1: cint;
 begin
  gdi_lock;
  with awindow,x11windowty(platformdata).d do begin
@@ -3033,9 +3051,17 @@ begin
   else begin
    id1:= rootid;
   end;
-  id:= xcreatewindow(appdisp,id1,rect.x,rect.y,width,height,0,
-      copyfromparent,copyfromparent,xlib.pvisual(copyfromparent),
+  with x11internalwindowoptionsty(options.platformdata).d do begin
+   if depth = 0 then begin
+    depth:= copyfromparent;
+   end;
+   if visual = nil then begin
+    visual:= pvisual(copyfromparent);
+   end;
+   id:= xcreatewindow(appdisp,id1,rect.x,rect.y,width,height,0,
+      depth,copyfromparent,visual,
       valuemask,@attributes);
+  end;
   if id = 0 then begin
    result:= gue_createwindow;
    gdi_unlock;

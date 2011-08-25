@@ -26,15 +26,14 @@ type
   protected
    fcontextinfo: contextinfoty;
    class function getclassgdifuncs: pgdifunctionaty; override;
-//   function getgdifuncs: pgdifunctionaty; override;
    function lock: boolean; override;
-//   procedure unlock; override;
-//   procedure gdi(const func: gdifuncty); override;
    function getcontextinfopo: pointer; override;
 //   procedure linktopaintdevice(apaintdevice: paintdevicety; const gc: gcty;
 //                {const size: sizety;} const cliporigin: pointty); override;
   public
    constructor create(const user: tobject; const intf: icanvas); override;
+   destructor destroy; override;
+   procedure updatewindowoptions(var aoptions: internalwindowoptionsty); override;
    procedure init(const acolor: colorty = cl_none); //cl_none -> colorbackground
    procedure swapbuffers;
    property viewport: rectty read fviewport write setviewport;
@@ -42,7 +41,13 @@ type
  
  topenglbitmapcanvas = class(topenglcanvas)
  end;
-  
+
+ topenglwindowcanvas = class(topenglcanvas)
+  public
+   procedure linktopaintdevice(apaintdevice: paintdevicety; const gc: gcty;
+              {const size: sizety;} const cliporigin: pointty); override;
+ end;
+   
 implementation
 uses
  mseguiintf;
@@ -74,6 +79,7 @@ const
 
 constructor topenglcanvas.create(const user: tobject; const intf: icanvas);
 begin
+ initializeopengl([]);
  fgdinum:= openglgetgdinum;
  fcontextinfo.attrib:= defaultcontextattributes;
 {$ifdef unix}
@@ -82,16 +88,17 @@ begin
  inherited;
 end;
 
+destructor topenglcanvas.destroy;
+begin
+ inherited;
+ releaseopengl;
+end;
+
 class function topenglcanvas.getclassgdifuncs: pgdifunctionaty;
 begin
  result:= openglgetgdifuncs;
 end;
-{
-function topenglcanvas.getgdifuncs: pgdifunctionaty;
-begin
- result:= openglgetgdifuncs;
-end;
-}
+
 procedure topenglcanvas.setviewport(const avalue: rectty);
 var
  bo1: boolean;
@@ -135,43 +142,52 @@ begin
   unlock;
  end;
 end;
-{
-procedure topenglcanvas.gdi(const func: gdifuncty);
-begin
- lock;
- fdrawinfo.gc.gdifuncs^[func](fdrawinfo);
- unlock;
-end;
-}
+
 function topenglcanvas.lock: boolean;
 begin
  result:= inherited lock;
  if fdrawinfo.gc.handle = 0 then begin
   checkgcstate([cs_gc]);
  end; 
-// if fdrawinfo.gc.handle <> 0 then begin
-  gdi_makecurrent(fdrawinfo);
-// end;
+ gdi_makecurrent(fdrawinfo);
 end;
 
 function topenglcanvas.getcontextinfopo: pointer;
 begin
  result:= @fcontextinfo;
-// fcontextinfo.viewport:= viewport;
 end;
-{
-procedure topenglcanvas.linktopaintdevice(apaintdevice: paintdevicety;
+
+procedure topenglcanvas.updatewindowoptions(var aoptions: internalwindowoptionsty);
+var
+ gc1: gcty;
+begin
+ inherited;
+ fillchar(gc1,sizeof(gc1),0);
+ gdi_choosevisual(gc1,fcontextinfo);
+{$ifdef unix}
+ with x11internalwindowoptionsty(aoptions.platformdata).d,
+                                oglgcty(gc1.platformdata).d do begin
+  if fvisinfo <> nil then begin
+   depth:= fvisinfo^.depth;
+   visual:= fvisinfo^.visual;
+   xfree(fvisinfo);
+   fvisinfo:= nil;
+  end
+  else begin
+   depth:= 0;
+   visual:= nil;
+  end;
+ end;
+{$endif}
+end;
+
+{ topenglwindowcanvas }
+
+procedure topenglwindowcanvas.linktopaintdevice(apaintdevice: paintdevicety;
                const gc: gcty; const cliporigin: pointty);
 begin
  inherited;
  viewport:= mr(nullpoint,gc.paintdevicesize);
 end;
-}
 
-{
-procedure topenglcanvas.unlock;
-begin
- inherited;
-end;
-}
 end.

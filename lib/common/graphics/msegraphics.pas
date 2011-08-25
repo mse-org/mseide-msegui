@@ -736,6 +736,7 @@ type
    drawinfopo: pointer; //used to transport additional drawing information
    constructor create(const user: tobject; const intf: icanvas); virtual;
    destructor destroy; override;
+   procedure updatewindowoptions(var aoptions: internalwindowoptionsty); virtual;
    function creategc(const apaintdevice: paintdevicety; const akind: gckindty;
                 var gc: gcty; const aprintername: msestring = ''): gdierrorty;
    procedure linktopaintdevice(apaintdevice: paintdevicety; const gc: gcty;
@@ -5345,6 +5346,12 @@ begin
  if fdrawinfo.gc.handle <> 0 then begin
   gdi(gdf_endpaint);
  end;
+end;
+
+procedure tcanvas.updatewindowoptions(var aoptions: internalwindowoptionsty);
+begin
+ //dummy
+// fillchar(aoptions.platformdata,sizeof(aoptions.platformdata),0);
 end;
 
 initialization

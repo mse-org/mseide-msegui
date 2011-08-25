@@ -122,7 +122,9 @@ type
   platformdata: windowpty;
  end;
  pwindowty = ^windowty;
- 
+
+ internalwindowoptionspty = array[0..3] of pointer; //buffer
+  
  internalwindowoptionsty = record
   parent: winidty;
   options: windowoptionsty;
@@ -131,6 +133,7 @@ type
   setgroup: boolean;
   groupleader: winidty;
   icon,iconmask: pixmapty;
+  platformdata: internalwindowoptionspty;
  end;
  pinternalwindowoptionsty = ^internalwindowoptionsty;
 

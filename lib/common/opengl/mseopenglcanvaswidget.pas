@@ -218,12 +218,6 @@ begin
  end;
  gc1.paintdevicesize:= awindowrect.size;
  inherited linktopaintdevice(paintdevicety(aid),gc1,nullpoint);
-
-{ 
- guierror(createrendercontext(aparent,awindowrect,fcontextinfo,gc1,aid));
- gc1.paintdevicesize:= awindowrect.size;
- inherited linktopaintdevice(paintdevicety(aid),gc1,nullpoint);
-}
 end;
 
 end.

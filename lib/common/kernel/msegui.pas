@@ -12060,8 +12060,6 @@ begin
  fowner.fwindow:= self;
  fcanvas:= creategdicanvas(fgdi,self,icanvas(self));
  fasynccanvas:= creategdicanvas(fgdi,self,icanvas(self));
-// fcanvas:= tcanvas.create(self,icanvas(self));
-// fasynccanvas:= tcanvas.create(self,icanvas(self));
  fscrollnotifylist:= tnotifylist.create;
  inherited create;
  fowner.rootchanged; //nil all references
@@ -12144,21 +12142,10 @@ begin
      inc(ftransientfor.ftransientforcount);
      aoptions1.transientfor:= transientfor.winid;
     end;
-    {
-    else begin
-     aoptions1.transientfor:= 0;
-    end;
-    }
    end;
    aoptions1.icon:= icon;
    aoptions1.iconmask:= iconmask;
   end;
-  {
-  if (aoptions1.transientfor = 0) and (ftransientfor <> nil) then begin
-   inc(ftransientfor.ftransientforcount);
-   aoptions1.transientfor:= ftransientfor.winid;
-  end;
-  }
   if (aoptions.groupleader <> nil) and
           aoptions.groupleader.fowner.isgroupleader then begin
    aoptions1.setgroup:= true;
@@ -12168,6 +12155,7 @@ begin
    end;
   end;
   if application.ismainthread then begin
+   fcanvas.updatewindowoptions(aoptions1);
    guierror(gui_createwindow(fowner.fwidgetrect,aoptions1,fwindow),self);
   end
   else begin //needed for win32
@@ -12187,11 +12175,10 @@ begin
   sizeconstraintschanged;
   fstate:= fstate - [tws_posvalid,tws_sizevalid];
   fillchar(gc,sizeof(gcty),0);
+  gc.paintdevicesize:= fowner.fwidgetrect.size;
   gdierror(fcanvas.creategc(fwindow.id,gck_screen,gc),self);
   gc.paintdevicesize:= fowner.fwidgetrect.size;
   fcanvas.linktopaintdevice(fwindow.id,gc{,fowner.fwidgetrect.size},nullpoint);
-//  finalize(gc);
-//  fillchar(gc,sizeof(gcty),0);
   gdierror(fasynccanvas.creategc(fwindow.id,gck_screen,gc),self);
   fasynccanvas.linktopaintdevice(fwindow.id,gc,{fowner.fwidgetrect.size,}nullpoint);
   if appinst <> nil then begin
@@ -12208,15 +12195,11 @@ begin
 end;
 
 procedure twindow.destroywindow;
-//var
-// event: tdestroywindowevent;
 begin
  releasemouse;
-// endmodal;
  if appinst <> nil then begin
   if appinst.caret.islinkedto(fcanvas) then begin
    appinst.caret.hide;
-//   tcaret1(app.fcaret).remove;
   end;
   appinst.unregisterwindow(self);
  end;
@@ -12252,11 +12235,6 @@ end;
 procedure twindow.checkwindowid;
 begin
  checkwindow(false);
- {
- if fwindow.id = 0 then begin
-  createwindow;
- end
- }
 end;
 
 procedure twindow.checkwindow(windowevent: boolean);
@@ -12268,7 +12246,7 @@ begin
   else begin
    if fstate * [tws_posvalid,tws_sizevalid] <>
            [tws_posvalid,tws_sizevalid] then begin
-    if {visible and} not windowevent and not (tws_needsdefaultpos in fstate) and
+    if not windowevent and not (tws_needsdefaultpos in fstate) and
         (fmoving <= 0) and (windowpos <> wp_maximized) then begin
      fnormalwindowrect:= fowner.fwidgetrect;
      guierror(gui_reposwindow(fwindow.id,fnormalwindowrect),self);
@@ -12329,7 +12307,6 @@ procedure twindow.internalactivate(const windowevent: boolean;
     guierror(gui_setwindowfocus(fwindow.id),self);
    end;
   end;
-//  gui_flushgdi;
  end;
  
 var
@@ -17155,6 +17132,7 @@ end;
 
 procedure tcreatewindowevent.execute;
 begin
+ fsender.fcanvas.updatewindowoptions(foptionspo^);
  guierror(gui_createwindow(frect,foptionspo^,fwindowpo^),fsender);
 end;
 
