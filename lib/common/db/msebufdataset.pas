@@ -4890,6 +4890,7 @@ begin
    end;
   end
   else begin
+   checkbrowsemode;
    resync([]);
   end;
   if int2 = fnotifylookupclientcount then begin

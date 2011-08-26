@@ -226,10 +226,12 @@ var
 
 function gdi_choosevisual(var gc: gcty;
                                  const contextinfo: contextinfoty): gdierrorty;
+{$ifdef unix}
 var
  index: integer;
  ar1: integerarty;
  int1,int2: integer;
+{$endif}
 begin
  result:= gde_ok;
 {$ifdef unix}
