@@ -57,8 +57,6 @@ type
   fscreen: integer;
   fkind: gckindty;
   fvisinfo: pxvisualinfo;
-//  fdepth: cint;
-//  fvisual: pvisual;
   {$else}
   fdc: hdc;
   fcontext: hglrc;
@@ -67,8 +65,6 @@ type
   extensions: glextensionsty;
   gclineoptions: lineoptionsty;
   sourceheight: integer;
-//  ftglfont: ftglfontty;
-//  ftglfont: pftglfont;
   glfont: fontty;
   tess: pglutesselator;
   glcolorforeground: rgbtriplety;

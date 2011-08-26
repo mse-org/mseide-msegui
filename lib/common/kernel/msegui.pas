@@ -12803,6 +12803,8 @@ end;
 procedure twindow.sizechanged;
 begin
  exclude(fstate,tws_sizevalid);
+ tcanvas1(fcanvas).updatesize(fowner.fwidgetrect.size);
+ tcanvas1(fasynccanvas).updatesize(fowner.fwidgetrect.size);
  if fobjectlinker <> nil then begin
   fobjectlinker.sendevent(oe_changed);
  end;

@@ -732,6 +732,7 @@ type
                            //draws line with font color 
    procedure nextpage; virtual; //used by tcustomprintercanvas
    function getcontextinfopo: pointer; virtual;
+   procedure updatesize(const asize: sizety); virtual;
   public
    drawinfopo: pointer; //used to transport additional drawing information
    constructor create(const user: tobject; const intf: icanvas); virtual;
@@ -740,7 +741,7 @@ type
    function creategc(const apaintdevice: paintdevicety; const akind: gckindty;
                 var gc: gcty; const aprintername: msestring = ''): gdierrorty;
    procedure linktopaintdevice(apaintdevice: paintdevicety; const gc: gcty;
-                {const size: sizety;} const cliporigin: pointty); virtual;
+                                           const cliporigin: pointty); virtual;
          //calls reset, resets cliporigin, canvas owns the gc!
    function highresdevice: boolean;
    procedure initflags(const dest: tcanvas); virtual;
@@ -5351,7 +5352,11 @@ end;
 procedure tcanvas.updatewindowoptions(var aoptions: internalwindowoptionsty);
 begin
  //dummy
-// fillchar(aoptions.platformdata,sizeof(aoptions.platformdata),0);
+end;
+
+procedure tcanvas.updatesize(const asize: sizety);
+begin
+ fdrawinfo.gc.paintdevicesize:= asize;
 end;
 
 initialization

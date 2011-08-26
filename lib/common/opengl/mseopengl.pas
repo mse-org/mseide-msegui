@@ -28,6 +28,7 @@ type
    class function getclassgdifuncs: pgdifunctionaty; override;
    function lock: boolean; override;
    function getcontextinfopo: pointer; override;
+   procedure updatesize(const asize: sizety); override;
 //   procedure linktopaintdevice(apaintdevice: paintdevicety; const gc: gcty;
 //                {const size: sizety;} const cliporigin: pointty); override;
   public
@@ -179,6 +180,24 @@ begin
   end;
  end;
 {$endif}
+end;
+
+procedure topenglcanvas.updatesize(const asize: sizety);
+var
+ gc1: gcty;
+begin
+ with fdrawinfo.gc do begin
+  if (handle <> 0) and not sizeisequal(asize,paintdevicesize) then begin
+   fillchar(gc1,sizeof(gc1),0);
+   gc1.paintdevicesize:= asize;
+   linktopaintdevice(fdrawinfo.paintdevice,gc1,nullpoint);
+   creategc(fdrawinfo.paintdevice,gck_screen,fdrawinfo.gc,'');
+  end
+  else begin
+   inherited;
+   oglgcty(platformdata).d.sourceheight:= asize.cy;
+  end;
+ end;
 end;
 
 { topenglwindowcanvas }

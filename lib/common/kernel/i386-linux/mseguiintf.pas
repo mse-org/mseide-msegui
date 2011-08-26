@@ -3019,8 +3019,6 @@ var
  width,height: integer;
  id1: winidty;
  icmask: longword;
- vis1: xlib.pvisual;
- dep1: cint;
 begin
  gdi_lock;
  with awindow,x11windowty(platformdata).d do begin

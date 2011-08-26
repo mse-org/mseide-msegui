@@ -493,21 +493,24 @@ function mr(const x,y,cx,cy: integer): rectty; overload;
 function mr(const pos: pointty; const size: sizety): rectty; overload;
                                {$ifdef FPC}inline;{$endif}
 
-function bottomright(const rect: rectty): pointty;
-function isnullpoint(const point: pointty): boolean;
-function isnullsize(const size: sizety): boolean;
-function isnullrect(const rect: rectty): boolean;
-function isnullframe(const frame: framety): boolean;
-function pointisequal(const a,b: pointty): boolean;
-function sizeisequal(const a,b: sizety): boolean;
-function rectisequal(const a,b: rectty): boolean;
-function frameisequal(const a,b: framety): boolean;
+function bottomright(const rect: rectty): pointty; {$ifdef FPC}inline;{$endif}
+function isnullpoint(const point: pointty): boolean; {$ifdef FPC}inline;{$endif}
+function isnullsize(const size: sizety): boolean; {$ifdef FPC}inline;{$endif}
+function isnullrect(const rect: rectty): boolean; {$ifdef FPC}inline;{$endif}
+function isnullframe(const frame: framety): boolean; {$ifdef FPC}inline;{$endif}
+function pointisequal(const a,b: pointty): boolean; {$ifdef FPC}inline;{$endif}
+function sizeisequal(const a,b: sizety): boolean; {$ifdef FPC}inline;{$endif}
+function rectisequal(const a,b: rectty): boolean; {$ifdef FPC}inline;{$endif}
+function frameisequal(const a,b: framety): boolean; {$ifdef FPC}inline;{$endif}
 
-function addpoint(const a,b: pointty): pointty; //result:= a+b
-procedure addpoint1(var dest: pointty; const point: pointty);
-function subpoint(const a,b: pointty): pointty; //result:= a-b
+function addpoint(const a,b: pointty): pointty;{$ifdef FPC}inline;{$endif}
+                       //result:= a+b
+procedure addpoint1(var dest: pointty; const point: pointty);{$ifdef FPC}inline;{$endif}
+function subpoint(const a,b: pointty): pointty; {$ifdef FPC}inline;{$endif}
+                       //result:= a-b
 procedure subpoint1(var dest: pointty; const point: pointty);
-function distance(const a,b: pointty): integer;
+                                                {$ifdef FPC}inline;{$endif}
+function distance(const a,b: pointty): integer;{$ifdef FPC}inline;{$endif}
 
 function addsize(const a,b: sizety): sizety;{$ifdef FPC}inline;{$endif}
                           //result:= a+b
@@ -916,85 +919,91 @@ begin
  result.size:= size;
 end;
 
-function bottomright(const rect: rectty): pointty;
+function bottomright(const rect: rectty): pointty; {$ifdef FPC}inline;{$endif}
 begin
  result.x:= rect.x + rect.cx;
  result.y:= rect.y + rect.cy;
 end;
 
-function isnullpoint(const point: pointty): boolean;
+function isnullpoint(const point: pointty): boolean;{$ifdef FPC}inline;{$endif}
 begin
  with point do begin
   result:= (x = 0) and (y = 0);
  end;
 end;
 
-function isnullsize(const size: sizety): boolean;
+function isnullsize(const size: sizety): boolean;{$ifdef FPC}inline;{$endif}
 begin
  with size do begin
   result:= (cx = 0) and (cy = 0);
  end;
 end;
 
-function isnullrect(const rect: rectty): boolean;
+function isnullrect(const rect: rectty): boolean;{$ifdef FPC}inline;{$endif}
 begin
  with rect do begin
   result:= (x = 0) and (y = 0) and (cx = 0) and (cy = 0);
  end;
 end;
 
-function isnullframe(const frame: framety): boolean;
+function isnullframe(const frame: framety): boolean;{$ifdef FPC}inline;{$endif}
 begin
  with frame do begin
   result:= (left = 0) and (top = 0) and (right = 0) and (bottom = 0);
  end;
 end;
 
-function pointisequal(const a,b: pointty): boolean;
+function pointisequal(const a,b: pointty): boolean;{$ifdef FPC}inline;{$endif}
 begin
- result:= comparemem(@a,@b,sizeof(pointty));
+ result:= (a.x = b.x) and (a.y = b.y);
 end;
 
-function sizeisequal(const a,b: sizety): boolean;
+function sizeisequal(const a,b: sizety): boolean; {$ifdef FPC}inline;{$endif}
 begin
- result:= comparemem(@a,@b,sizeof(sizety));
+ result:= (a.cx = b.cx) and (a.cy = b.cy);
 end;
 
-function rectisequal(const a,b: rectty): boolean;
+function rectisequal(const a,b: rectty): boolean; {$ifdef FPC}inline;{$endif}
 begin
- result:= comparemem(@a,@b,sizeof(rectty));
+ result:= (a.x = b.x) and (a.y = b.y) and
+                    (a.cx = b.cx) and (a.cy = b.cy);
 end;
 
-function frameisequal(const a,b: framety): boolean;
+function frameisequal(const a,b: framety): boolean;{$ifdef FPC}inline;{$endif}
 begin
- result:= comparemem(@a,@b,sizeof(framety));
+ result:= (a.left = b.left) and (a.top = b.top) and
+                  (a.right = b.right) and (a.bottom = b.bottom);
 end;
 
-function addpoint(const a,b: pointty): pointty; //result:= a-b
+function addpoint(const a,b: pointty): pointty;{$ifdef FPC}inline;{$endif}
+                                                     //result:= a-b
 begin
  result.x:= a.x+b.x;
  result.y:= a.y+b.y;
 end;
 
 procedure addpoint1(var dest: pointty; const point: pointty);
+                                              {$ifdef FPC}inline;{$endif}
 begin
  inc(dest.x,point.x);
  inc(dest.y,point.y);
 end;
 
-function subpoint(const a,b: pointty): pointty; //result:= a-b
+function subpoint(const a,b: pointty): pointty;{$ifdef FPC}inline;{$endif}
+                                      //result:= a-b
 begin
  result.x:= a.x-b.x;
  result.y:= a.y-b.y;
 end;
 
 procedure subpoint1(var dest: pointty; const point: pointty);
+                                                  {$ifdef FPC}inline;{$endif}
 begin
  dec(dest.x,point.x);
  dec(dest.y,point.y);
 end;
 
-function distance(const a,b: pointty): integer;
+function distance(const a,b: pointty): integer;{$ifdef FPC}inline;{$endif}
 begin
  result:= abs(a.x-b.x) + abs(a.y-b.y);
 end;

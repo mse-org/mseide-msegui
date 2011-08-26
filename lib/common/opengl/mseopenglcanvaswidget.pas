@@ -164,6 +164,7 @@ end;
 
 procedure topenglcanvaswidget.doclientrectchanged;
 begin
+ fcanvas.updatesize(innerpaintrect.size);
  inherited;
 end;
 
@@ -202,7 +203,6 @@ var
  gc1: gcty;
  info: drawinfoty;
 begin
-
  fillchar(gc1,sizeof(gc1),0);
  fillchar(info,sizeof(info),0);
  with info.creategc do begin
