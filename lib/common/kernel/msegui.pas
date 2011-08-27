@@ -2601,8 +2601,7 @@ implementation
 uses
  msesysintf,typinfo,msestreaming,msetimer,msebits,msewidgets,
  mseshapes,msestockobjects,msefileutils,msedatalist,Math,msesysutils,
- {$ifdef FPCc} rtlconst {$else} RtlConsts{$endif},mseformatstr,
- mseprocutils;
+ {$ifdef FPCc} rtlconst {$else} RtlConsts{$endif},mseformatstr,mseprocutils;
 
 const
  faceoptionsmask: faceoptionsty = [fao_alphafadeimage,fao_alphafadenochildren,
@@ -7969,7 +7968,7 @@ end;
 
 function twidget.getgdi: pgdifunctionaty;
 begin
- result:= gui_getgdifuncs;
+ result:= getdefaultgdifuncs;
 end;
 
 procedure twidget.createwindow;
@@ -12054,7 +12053,7 @@ constructor twindow.create(const aowner: twidget; const agdi: pgdifunctionaty);
 begin
  fgdi:= agdi;
  if fgdi = nil then begin
-  fgdi:= gui_getgdifuncs;
+  fgdi:= getdefaultgdifuncs;
  end;
  fowner:= aowner;
  fowner.fwindow:= self;
@@ -15860,6 +15859,7 @@ begin
  fmousewheeldeltamin:= 0.05;
  fmousewheeldeltamax:= 30;
  fmousewheelaccelerationmax:= 30;
+ gui_registergdi;
  inherited;
 end;
 

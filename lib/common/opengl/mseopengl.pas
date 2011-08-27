@@ -81,7 +81,7 @@ const
 constructor topenglcanvas.create(const user: tobject; const intf: icanvas);
 begin
  initializeopengl([]);
- fgdinum:= openglgetgdinum;
+// fgdinum:= openglgetgdinum;
  fcontextinfo.attrib:= defaultcontextattributes;
 {$ifdef unix}
  fcontextinfo.visualattributes:= defaultvisualattributes;
@@ -171,12 +171,14 @@ begin
   if fvisinfo <> nil then begin
    depth:= fvisinfo^.depth;
    visual:= fvisinfo^.visual;
+   colormap:= fcolormap;
    xfree(fvisinfo);
    fvisinfo:= nil;
   end
   else begin
    depth:= 0;
    visual:= nil;
+   colormap:= 0;
   end;
  end;
 {$endif}

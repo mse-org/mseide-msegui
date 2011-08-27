@@ -23,6 +23,8 @@ function fontdatatoxftpat(const fontdata: fontdataty; const highres: boolean): p
 procedure getxftfontdata(po: pxftfont; var drawinfo: drawinfoty);
  
 function x11getgdifuncs: pgdifunctionaty;
+//function x11getgdinum: integer;
+
 //function x11creategc(paintdevice: paintdevicety; const akind: gckindty;
 //     var gc: gcty; const aprintername: msestring): guierrorty;
 function x11regiontorects(const aregion: regionty): rectarty;
@@ -468,7 +470,7 @@ procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
 begin
 // gdi_lock;
  with drawinfo.creategc do begin
-  gcpo^.gdifuncs:= gui_getgdifuncs;
+  gcpo^.gdifuncs:= getdefaultgdifuncs;//gui_getgdifuncs;
   if paintdevice = 0 then begin
    paintdevice:= mserootwindow;
   end;
@@ -2402,14 +2404,23 @@ const
    {$ifdef FPC}@{$endif}gdi_getfontmetrics
 );
 
+//var
+// gdinumber: integer;
+
 function x11getgdifuncs: pgdifunctionaty;
 begin
  result:= @gdifunctions;
 end;
-
+{
+function x11getgdinum: integer;
+begin
+ result:= gdinumber;
+end;
+}
 initialization
  fhasxft:= getxftlib;
  hasxrender:= getxrenderlib;
+// gdinumber:= registergdi(x11getgdifuncs);
 finalization
  if fhasfontconfig then begin
   releasefontconfig;

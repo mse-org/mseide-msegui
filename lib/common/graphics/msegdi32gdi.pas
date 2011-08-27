@@ -17,6 +17,7 @@ procedure init;
 procedure deinit; 
 
 function gdi32getgdifuncs: pgdifunctionaty;
+//function gdi32getgdinum: integer;
 procedure gdi32initdefaultfont;
 function gdi32getdefaultfontnames: defaultfontnamesty;
 //function gdi32creategc(paintdevice: paintdevicety; const akind: gckindty; 
@@ -2451,9 +2452,20 @@ const
    {$ifdef FPC}@{$endif}gdi_getfontmetrics
 );
 
+//var
+// gdinumber: integer;
+
 function gdi32getgdifuncs: pgdifunctionaty;
 begin
  result:= @gdifunctions;
 end;
+{
+function gdi32getgdinum: integer;
+begin
+ result:= gdinumber;
+end;
 
+initialization
+ gdinumber:= registergdi(gdi32getgdifuncs);
+}
 end.

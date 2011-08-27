@@ -53,6 +53,7 @@ type
  x11internalwindowoptionsdty = record
   depth: cint;
   visual: pvisual;
+  colormap: tcolormap;
  end;
  
  x11internalwindowoptionsty =  record
@@ -3019,6 +3020,7 @@ var
  width,height: integer;
  id1: winidty;
  icmask: longword;
+ colormap1: tcolormap;
 begin
  gdi_lock;
  with awindow,x11windowty(platformdata).d do begin
@@ -3039,10 +3041,6 @@ begin
   else begin
    height:= rect.cy;
   end;
-  if msecolormap <> 0 then begin
-   attributes.colormap:= msecolormap;
-   valuemask:= valuemask or cwcolormap;
-  end;
   if options.parent <> 0 then begin
    id1:= options.parent;
   end
@@ -3050,6 +3048,16 @@ begin
    id1:= rootid;
   end;
   with x11internalwindowoptionsty(options.platformdata).d do begin
+   if colormap <> 0 then begin
+    colormap1:= colormap;
+   end
+   else begin
+    colormap1:= msecolormap;
+   end;
+   if colormap1 <> 0 then begin
+    attributes.colormap:= colormap1;
+    valuemask:= valuemask or cwcolormap;
+   end;
    if depth = 0 then begin
     depth:= copyfromparent;
    end;
@@ -3059,6 +3067,10 @@ begin
    id:= xcreatewindow(appdisp,id1,rect.x,rect.y,width,height,0,
       depth,copyfromparent,visual,
       valuemask,@attributes);
+   if colormap <> 0 then begin
+    xfreecolormap(appdisp,colormap);
+    colormap:= 0;
+   end;
   end;
   if id = 0 then begin
    result:= gue_createwindow;
@@ -4766,6 +4778,7 @@ begin
  gdifunctions[func](drawinfo);
 end; 
 }
+
 function gui_getgdifuncs: pgdifunctionaty;
 begin
  result:= x11getgdifuncs;
@@ -4799,6 +4812,12 @@ begin
   sys_setlasterror(int1);
   debugungrabbed:= false;
  end;
+end;
+
+function gui_registergdi: guierrorty;
+begin
+ registergdi(x11getgdifuncs);
+ result:= gue_ok;
 end;
 
 initialization

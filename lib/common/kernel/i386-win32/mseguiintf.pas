@@ -3034,6 +3034,12 @@ procedure GUI_DEBUGEND;
 begin
 end;
 
+function gui_registergdi: guierrorty;
+begin
+ registergdi(gdi32getgdifuncs);
+ result:= gue_ok;
+end;
+
 procedure initlibs;
 begin
  hasimm32:= checkprocaddresses(['Imm32.dll'],

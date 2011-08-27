@@ -679,7 +679,7 @@ type
   protected
    fuser: tobject;
    fintf: pointer; //icanvas;
-   fgdinum: integer;
+//   fgdinum: integer;
    fstate: canvasstatesty;
    fvaluepo: canvasvaluespoty;
    fdrawinfo: drawinfoty;
@@ -1084,6 +1084,7 @@ procedure gdi_lock;   //locks only if not mainthread
 procedure gdi_unlock; //unlocks only if not mainthread
 procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty;
                                    gdi: pgdifunctionaty = nil);
+function getdefaultgdifuncs: pgdifunctionaty;{$ifdef FPC}inline;{$endif}
 function registergdi(const agdifuncs: pgdifunctionaty): integer;
                                             //returns unique number
 function creategdicanvas(const agdi: pgdifunctionaty;
@@ -1186,6 +1187,35 @@ begin
  end;
 end;
 
+var
+ gdinum: integer;
+ gdifuncs: array of pgdifunctionaty;
+
+function getdefaultgdifuncs: pgdifunctionaty; {$ifdef FPC}inline;{$endif}
+begin
+ if gdifuncs = nil then begin
+  gui_registergdi;
+ end;
+ result:= gdifuncs[0];
+end;
+ 
+function registergdi(const agdifuncs: pgdifunctionaty): integer; 
+                         //returns unique number
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(gdifuncs) do begin
+  if gdifuncs[int1] = agdifuncs then begin
+   result:= int1;
+   exit;
+  end;
+ end;
+ setlength(gdifuncs,gdinum+1); //item 0 = system default
+ gdifuncs[gdinum]:= agdifuncs;
+ result:= gdinum;
+ inc(gdinum);
+end;
+
 procedure gdi_lock;
 begin
  with application do begin
@@ -1213,7 +1243,7 @@ procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty;
 begin
  with application do begin
   if gdi = nil then begin
-   gdi:= gui_getgdifuncs;
+   gdi:= gdifuncs[0];//gui_getgdifuncs;
   end;
   if not locked then begin
    lock;
@@ -1491,19 +1521,6 @@ var
 begin
  rgb1:= colortorgb(acolor);
  setcolormapvalue(index,rgb1.red,rgb1.green,rgb1.blue);
-end;
-
-var
- gdinum: integer;
- gdifuncs: array of pgdifunctionaty;
- 
-function registergdi(const agdifuncs: pgdifunctionaty): integer; 
-                         //returns unique number
-begin
- inc(gdinum);
- setlength(gdifuncs,gdinum+1); //item 0 = system default
- gdifuncs[gdinum]:= agdifuncs;
- result:= gdinum;
 end;
 
 function creategdicanvas(const agdi: pgdifunctionaty;
@@ -2770,9 +2787,8 @@ begin
   printernamepo:= @aprintername;
   contextinfopo:= getcontextinfopo;
   gcpo:= @gc;
-//  gdi_lock; //already locked
-  fdrawinfo.gc.gdifuncs^[gdf_creategc](fdrawinfo);
-//  gdi_unlock;
+  getgdifuncs^[gdf_creategc](fdrawinfo);
+//  fdrawinfo.gc.gdifuncs^[gdf_creategc](fdrawinfo);
   result:= error;
  end;
 end;
@@ -2801,7 +2817,7 @@ end;
 
 class function tcanvas.getclassgdifuncs: pgdifunctionaty;
 begin
- result:= gui_getgdifuncs;
+ result:= getdefaultgdifuncs;
 end;
 
 function tcanvas.getgdifuncs: pgdifunctionaty;
@@ -2900,7 +2916,7 @@ begin
  fdrawinfo.paintdevice:= apaintdevice;
  rea1:= fdrawinfo.gc.ppmm;
  fdrawinfo.gc:= gc;
- if fdrawinfo.gc.gdifuncs = nil then begin
+ if (apaintdevice <> 0) and (fdrawinfo.gc.gdifuncs = nil) then begin
   fdrawinfo.gc.gdifuncs:= getgdifuncs; //default
  end;
  fdrawinfo.gc.ppmm:= rea1;
@@ -5363,8 +5379,8 @@ initialization
 {$ifdef mse_flushgdi}
  flushgdi:= true;
 {$endif}
- setlength(gdifuncs,1); //item 0 = system default
- gdifuncs[0]:= gui_getgdifuncs;
+// setlength(gdifuncs,1); //item 0 = system default
+// gdifuncs[0]:= gui_getgdifuncs;
 finalization
  deinit;
 end.

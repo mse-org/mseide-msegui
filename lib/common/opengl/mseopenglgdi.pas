@@ -83,7 +83,7 @@ function createrendercontext(const aparent: winidty; const windowrect: rectty;
                                    const ainfo: contextinfoty;
                                    var gc: gcty; out aid: winidty): guierrorty;
 function openglgetgdifuncs: pgdifunctionaty;
-function openglgetgdinum: integer;
+//function openglgetgdinum: integer;
 
 function gdi_choosevisual(var gc: gcty;
                                  const contextinfo: contextinfoty): gdierrorty;
@@ -134,7 +134,7 @@ type
    
 var
  ffontcache: tglftfontcache;
- gdinumber: integer;
+// gdinumber: integer;
 
 function fontcache: tglftfontcache;
 begin
@@ -264,6 +264,11 @@ begin
    setlength(ar1,index+1); //none
   end;
   fvisinfo:= glxchoosevisual(fdpy,fscreen,pinteger(ar1));
+  if fvisinfo = nil then begin
+   result:= gde_novisual;
+   exit;
+  end;
+  fcolormap:= xcreatecolormap(fdpy,mserootwindow,fvisinfo^.visual,allocnone);
  end;
 {$endif}
 end;
@@ -289,35 +294,6 @@ begin
    end;
    exit;
   end;
-  {
-  fdpy:= msedisplay;
-  fscreen:= defaultscreen(fdpy);
-  if not glxqueryextension(fdpy,int1,int2) then begin
-   result:= gue_noglx;
-   exit;
-  end;
-  index:= 0;
-  with ainfo.attrib do begin
-   putboolean(ar1,index,glx_doublebuffer,true);
-   putvalue(ar1,index,glx_buffer_size,buffersize,-1);
-   putvalue(ar1,index,glx_level,level,0);
-   putboolean(ar1,index,glx_rgba,rgba);
-   putboolean(ar1,index,glx_stereo,stereo);
-   putvalue(ar1,index,glx_aux_buffers,auxbuffers,-1);
-   putvalue(ar1,index,glx_red_size,redsize,-1);
-   putvalue(ar1,index,glx_green_size,greensize,-1);
-   putvalue(ar1,index,glx_blue_size,bluesize,-1);
-   putvalue(ar1,index,glx_alpha_size,alphasize,-1);
-   putvalue(ar1,index,glx_depth_size,depthsize,-1);
-   putvalue(ar1,index,glx_stencil_size,stencilsize,-1);
-   putvalue(ar1,index,glx_accum_red_size,accumredsize,-1);
-   putvalue(ar1,index,glx_accum_green_size,accumgreensize,-1);
-   putvalue(ar1,index,glx_accum_blue_size,accumbluesize,-1);
-   putvalue(ar1,index,glx_accum_alpha_size,accumalphasize,-1);
-   setlength(ar1,index+1); //none
-  end;
-  visinfo:= glxchoosevisual(fdpy,fscreen,pinteger(ar1));
-  }
   if fvisinfo = nil then begin
    result:= gue_novisual;
    exit;
@@ -329,7 +305,7 @@ begin
     exit;
    end;
    gc.handle:= ptruint(fcontext);
-   fcolormap:= xcreatecolormap(fdpy,mserootwindow,fvisinfo^.visual,allocnone);
+//   fcolormap:= xcreatecolormap(fdpy,mserootwindow,fvisinfo^.visual,allocnone);
    attributes.colormap:= fcolormap;
    with windowrect do begin
     aid:= xcreatewindow(fdpy,aparent,x,y,cx,cy,0,fvisinfo^.depth,
@@ -1174,12 +1150,12 @@ function openglgetgdifuncs: pgdifunctionaty;
 begin
  result:= @gdifunctions;
 end;
-
+{
 function openglgetgdinum: integer;
 begin
  result:= gdinumber;
 end;
-
+}
 { tglftfontcache }
 
 procedure tglftfontcache.drawglyph(var drawinfo: drawinfoty; const pos: pointty;
@@ -1233,9 +1209,10 @@ begin
  glpopattrib;
  glpopclientattrib;
 end;
-
+{
 initialization
  gdinumber:= registergdi(openglgetgdifuncs);
+}
 finalization
  freetessbuffer;
 end.

@@ -13,6 +13,7 @@ procedure gui_cancelshutdown;
 procedure GUI_DEBUGBEGIN; export;
 procedure GUI_DEBUGEND; export;
 
+function gui_registergdi: guierrorty;
 function gui_setmainthread: guierrorty; //set mainthread to currentthread
 function gui_sethighrestimer(const avalue: boolean): guierrorty;
 function gui_grouphideminimizedwindows: boolean; //true for win32
@@ -147,6 +148,7 @@ function gui_pastefromclipboard(out value: msestring): guierrorty;
 function gui_canpastefromclipboard: boolean;
 
 function gui_getgdifuncs: pgdifunctionaty;
+                 
 (*
 procedure gdi_creategc(var drawinfo: drawinfoty);
 procedure gdi_destroygc(var drawinfo: drawinfoty);

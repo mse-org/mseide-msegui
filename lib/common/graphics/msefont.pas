@@ -502,7 +502,7 @@ begin
   with fonts[int1],data^ do begin
    if (refcount >= 0) and (basefont = abasefont) then begin
     info.fonthasglyph.font:= font;
-    gui_getgdifuncs^[gdf_fonthasglyph](info);    
+    getdefaultgdifuncs^[gdf_fonthasglyph](info);    
     if info.fonthasglyph.hasglyph then begin
      result:= int1 + 1;
     end;
