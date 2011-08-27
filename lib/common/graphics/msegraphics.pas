@@ -2905,6 +2905,7 @@ procedure tcanvas.linktopaintdevice(apaintdevice: paintdevicety;
 var
  rea1: real;
  int1: integer;
+ func1: pgdifunctionaty;
 begin
  resetpaintedflag;
  if (fdrawinfo.gc.handle <> 0) then begin
@@ -2915,11 +2916,10 @@ begin
  end;
  fdrawinfo.paintdevice:= apaintdevice;
  rea1:= fdrawinfo.gc.ppmm;
+ func1:= fdrawinfo.gc.gdifuncs;
  fdrawinfo.gc:= gc;
- if (apaintdevice <> 0) and (fdrawinfo.gc.gdifuncs = nil) then begin
-  fdrawinfo.gc.gdifuncs:= getgdifuncs; //default
- end;
- fdrawinfo.gc.ppmm:= rea1;
+ fdrawinfo.gc.ppmm:= rea1;                //restore
+ fdrawinfo.gc.gdifuncs:= func1;           //restore
  updatecliporigin(cliporigin);
  if gc.handle <> 0 then begin
   gdi(gdf_setcliporigin);
