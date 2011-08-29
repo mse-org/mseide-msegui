@@ -77,6 +77,7 @@ type
    function readbytes(var buf): integer; override;
    procedure doinputavailable;
    procedure dochange; virtual;
+   function readbuf: string;
   public
    constructor create;
    destructor destroy; override;
@@ -86,6 +87,7 @@ type
                    //no seek, result always 0
    function readdatastring: string; override;
          //bringt alle erhaeltlichen zeichen, keine lineauswertung
+   function readbuffer: string; //does not try to get additional data
    function readuln(out value: string): boolean;
            //bringt auch unvollstaendige zeilen, false wenn unvollstaendig
            //no decoding
@@ -502,17 +504,26 @@ begin
  fdatastatus:= pr_empty;
 end;
 
-function tpipereader.readdatastring: string;
+function tpipereader.readbuf: string;
 var
- int1,int2: integer;
+ int1: integer;
 begin
- result:= '';
  if bufoffset <> nil then begin
   int1:= bufend-bufoffset;
   setlength(result,int1);
   move(bufoffset^,result[1],int1);
   bufoffset:= nil;
+ end
+ else begin
+  result:= '';
  end;
+end;
+
+function tpipereader.readdatastring: string;
+var
+ int1,int2: integer;
+begin
+ result:= readbuffer;
  while true do begin
   int1:= readbytes(fbuffer^);
   if int1 > 0 then begin
@@ -523,6 +534,21 @@ begin
   else begin
    break;
   end;
+ end;
+end;
+
+function tpipereader.readbuffer: string;
+var
+ int1: integer;
+begin
+ result:= readbuf;
+ if fmsbufcount > 0 then begin
+  int1:= length(result);
+  setlength(result,int1+fmsbufcount);
+  move(fmsbuf,result[int1+1],fmsbufcount);
+  fmsbufcount:= 0;
+  exclude(fstate,tss_pipeactive);
+  fthread.sempost;
  end;
 end;
 

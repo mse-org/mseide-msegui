@@ -21,13 +21,13 @@ type
                        var atext: msestring; var donotsend: boolean) of object;
  receivetexteventty = procedure(const sender: tobject; 
                        var atext: ansistring; const errorinput: boolean) of object;
- terminaloptionty = (teo_readonly{,teo_tty});
+ terminaloptionty = (teo_readonly,teo_bufferchunks);
  terminaloptionsty = set of terminaloptionty;
 const
  defaultterminaleditoptions = (defaulttexteditoptions + [oe_caretonreadonly])-
                             [oe_linebreak];
  defaultterminaloptions = [{teo_tty}];
- defaultoptionsprocess = [pro_output,pro_erroroutput,pro_input,pro_tty];
+ defaultoptionsprocess = [pro_output,pro_errorouttoout,pro_input,pro_tty];
 type 
 // terminalstatety = ({ts_running,}ts_listening);
 // terminalstatesty = set of terminalstatety;
@@ -275,14 +275,25 @@ end;
 procedure tterminal.doinputavailable(const sender: tpipereader);
 var
  str1: string;
+ int1: integer;
 begin
  try
-  str1:= sender.readdatastring;
+  if teo_bufferchunks in foptions then begin
+   str1:= sender.readbuffer;
+  end
+  else begin
+   str1:= sender.readdatastring;
+  end;
   if not (csdestroying in componentstate) then begin
    if canevent(tmethod(fonreceivetext)) then begin
     fonreceivetext(self,str1,sender = fprocess.erroroutput.pipereader);
    end;
    addchars(str1);
+   if teo_bufferchunks in foptions then begin
+    int1:= application.unlockall;
+    sleepus(0); //sched_yield
+    application.relockall(int1);
+   end;
   end;
  except
  end;

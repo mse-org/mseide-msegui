@@ -16,7 +16,7 @@ uses
 type
  processstatety = (prs_listening);
  processstatesty = set of processstatety;
- processoptionty = (pro_output,pro_erroroutput,pro_input,
+ processoptionty = (pro_output,pro_erroroutput,pro_input,pro_errorouttoout,
                     pro_tty, //linux only
                     pro_nowaitforpipeeof,pro_nopipeterminate,
                     pro_inactive,pro_nostdhandle //windows only
@@ -49,6 +49,7 @@ type
    function getcommandline: string;
    procedure setcommandline(const avalue: string);
    procedure procend;
+   procedure setoptions(const avalue: processoptionsty);
   protected
    fstate: processstatesty;
    procedure loaded; override;
@@ -87,7 +88,7 @@ type
    property filename: filenamety read ffilename write ffilename;
    property parameter: msestring read fparameter write fparameter;
    property active: boolean read getactive write setactive default false;
-   property options: processoptionsty read foptions write foptions default [];
+   property options: processoptionsty read foptions write setoptions default [];
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
    property output: tpipereaderpers read foutput write setoutput;
@@ -102,7 +103,7 @@ function getprocessoutput(const acommandline: string; const todata: string;
 
 implementation
 uses
- mseprocutils,msefileutils,mseapplication,sysutils,msesysintf;
+ mseprocutils,msefileutils,mseapplication,sysutils,msesysintf,msebits;
 type
  tstringprocess = class(tmseprocess)
   private
@@ -222,14 +223,14 @@ var
  inp: tpipewriter;
 // bo1: boolean;
 begin
- outp:= nil;
- erroroutp:= nil;
- inp:= nil;
  if componentstate * [csloading,csdesigning] <> [] then begin
   factive:= avalue;
  end
  else begin
   if avalue <> active then begin
+   outp:= nil;
+   erroroutp:= nil;
+   inp:= nil;
    finalizeexec;
    if avalue then begin
     application.lock;
@@ -240,6 +241,11 @@ begin
      end;
      if pro_erroroutput in foptions then begin
       erroroutp:= ferroroutput.pipereader;
+     end
+     else begin
+      if pro_errorouttoout in foptions then begin
+       erroroutp:= foutput.pipereader;
+      end;
      end;
      if pro_input in foptions then begin
       inp:= finput;
@@ -517,6 +523,14 @@ begin
  finally
   application.unlock;
  end;
+end;
+
+procedure tmseprocess.setoptions(const avalue: processoptionsty);
+const
+ mask: processoptionsty = [pro_erroroutput,pro_errorouttoout];
+begin
+ foptions:= processoptionsty(setsinglebit(longword(avalue),
+                                        longword(foptions),longword(mask)));
 end;
 
 { tstringprocess }

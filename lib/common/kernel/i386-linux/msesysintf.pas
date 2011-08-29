@@ -254,7 +254,12 @@ end;
 
 procedure sys_usleep(const us: longword);
 begin
- mselibc.usleep(us);
+ if us = 0 then begin
+  sched_yield;
+ end
+ else begin
+  mselibc.usleep(us);
+ end;
 end;
 
 function sys_getlasterror: Integer;
