@@ -214,15 +214,17 @@ procedure initcontext(const winid: winidty; var gc: gcty;
               const sourceviewport: rectty);
 begin
  gc.gdifuncs:= openglgetgdifuncs; 
- with oglgcty(gc.platformdata).d do begin
-//  pd:= winid;
-  sourceheight:= sourceviewport.cy;
-  tess:= glunewtess();
+ if winid <> 0 then begin
+  with oglgcty(gc.platformdata).d do begin
+ //  pd:= winid;
+   sourceheight:= sourceviewport.cy;
+   tess:= glunewtess();
+  end;
+  makecurrent(gc);
+  glclearstencil(0);
+  glclear(gl_stencil_buffer_bit);
+  setviewport(gc,sourceviewport);
  end;
- makecurrent(gc);
- glclearstencil(0);
- glclear(gl_stencil_buffer_bit);
- setviewport(gc,sourceviewport);
 end;
  
 var
@@ -254,7 +256,7 @@ begin
     putvalue(ar1,index,glx_buffer_size,1,-1);
    end
    else begin
-    if not (df_canvasispixmap in gc.drawingflags) then begin
+    if not (df_canvasispixmap in gc.drawingflags) and not flushgdi then begin
      putboolean(ar1,index,glx_doublebuffer,doublebuffer);
     end;
     putvalue(ar1,index,glx_buffer_size,buffersize,-1);
@@ -551,23 +553,25 @@ begin
  {$endif}
   if error = gde_ok then begin
    initcontext(paintdevice,gcpo^,mr(nullpoint,gcpo^.paintdevicesize));
-   if (kind = gck_pixmap) then begin
-    if not pixmapextensionschecked then begin
-     makecurrent(gcpo^);
-     pixmapextensions:= gldeviceextensions(device1) +
-                           mseglparseextensions(glgetstring(gl_extensions));
-     pixmapextensionschecked:= true;
+   if paintdevice <> 0 then begin
+    if (kind = gck_pixmap) then begin
+     if not pixmapextensionschecked then begin
+      makecurrent(gcpo^);
+      pixmapextensions:= gldeviceextensions(device1) +
+                            mseglparseextensions(glgetstring(gl_extensions));
+      pixmapextensionschecked:= true;
+     end;
+     extensions:= pixmapextensions;
+    end
+    else begin
+     if not screenextensionschecked then begin
+      makecurrent(gcpo^);
+      screenextensions:= gldeviceextensions(device1) +
+                        mseglparseextensions(glgetstring(gl_extensions));
+      screenextensionschecked:= true;
+     end;
+     extensions:= screenextensions;
     end;
-    extensions:= pixmapextensions;
-   end
-   else begin
-    if not screenextensionschecked then begin
-     makecurrent(gcpo^);
-     screenextensions:= gldeviceextensions(device1) +
-                       mseglparseextensions(glgetstring(gl_extensions));
-     screenextensionschecked:= true;
-    end;
-    extensions:= screenextensions;
    end;
   end;
  end;
@@ -576,16 +580,20 @@ end;
 procedure gdi_destroygc(var drawinfo: drawinfoty); //gdifunc
 begin
  with oglgcty(drawinfo.gc.platformdata).d do begin
-  gludeletetess(tess);
+  if tess <> nil then begin
+   gludeletetess(tess);
+  end;
 {$ifdef unix}
   glxmakecurrent(fdpy,0,nil);
   glxdestroycontext(fdpy,fcontext);
-  if fkind = gck_pixmap then begin
-   glxdestroyglxpixmap(fdpy,pd);
-   pd:= 0;
-  end
-  else begin
-   xfreecolormap(fdpy,fcolormap);
+  if drawinfo.paintdevice <> 0 then begin
+   if fkind = gck_pixmap then begin
+    glxdestroyglxpixmap(fdpy,pd);
+    pd:= 0;
+   end
+   else begin
+    xfreecolormap(fdpy,fcolormap);
+   end;
   end;
   dec(gccount);
   if (gccount = 0) and (linkgc <> nil) then begin
@@ -758,7 +766,9 @@ end;
 
 procedure gdi_endpaint(var drawinfo: drawinfoty); //gdifunc
 begin
- gdi_swapbuffers(drawinfo);
+ if not flushgdi then begin
+  gdi_swapbuffers(drawinfo);
+ end;
 end;
 
 procedure gdi_flush(var drawinfo: drawinfoty); //gdifunc

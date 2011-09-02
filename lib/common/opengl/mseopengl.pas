@@ -151,7 +151,9 @@ begin
  if fdrawinfo.gc.handle = 0 then begin
   checkgcstate([cs_gc]);
  end; 
- gdi_makecurrent(fdrawinfo);
+ if fdrawinfo.paintdevice <> 0 then begin
+  gdi_makecurrent(fdrawinfo);
+ end;
 end;
 
 function topenglcanvas.getcontextinfopo: pointer;
