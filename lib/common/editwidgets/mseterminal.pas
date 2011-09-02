@@ -133,7 +133,6 @@ begin
  inherited;
  optionsedit:= defaultterminaleditoptions;
  fprocess:= tmseprocess.create(nil);
- fprocess.options:= defaultoptionsprocess;
  with fprocess do begin
   output.oninputavailable:= {$ifdef FPC}@{$endif}doinputavailable;
   output.onpipebroken:= {$ifdef FPC}@{$endif}dopipebroken;
@@ -142,7 +141,8 @@ begin
   onprocfinished:= {$ifdef FPC}@{$endif}doprocfinished;
   output.overloadsleepus:= 50000;
   erroroutput.overloadsleepus:= 50000;
-  options:= [pro_output,pro_erroroutput,pro_input,pro_tty];
+  options:= defaultoptionsprocess;
+//  options:= [pro_output,pro_erroroutput,pro_input,pro_tty];
  end
 end;
 
