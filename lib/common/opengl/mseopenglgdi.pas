@@ -226,7 +226,7 @@ end;
  
 var
  gccount: integer;
-testvar: pxvisualinfo;
+
 function gdi_choosevisual(var gc: gcty;
                                  const contextinfo: contextinfoty): gdierrorty;
 {$ifdef unix}
@@ -276,7 +276,6 @@ begin
   setlength(ar1,index+1); //none
   fvisinfo:= glxchoosevisual(fdpy,fscreen,pinteger(ar1));
 //  fvisinfo:= glxchoosevisual(fdpy,fscreen,pinteger(ar1));
-testvar:= fvisinfo;
   if fvisinfo = nil then begin
    result:= gde_novisual;
    exit;
