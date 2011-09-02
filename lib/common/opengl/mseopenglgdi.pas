@@ -70,6 +70,7 @@ type
   tess: pglutesselator;
   glcolorforeground: rgbtriplety;
   glcolorbackground: rgbtriplety;
+  gcrasterop: rasteropty;
  end;
 
  {$if sizeof(oglgcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$endif}
@@ -642,6 +643,27 @@ const
    gl_copy_inverted, gl_or_inverted, gl_nand,   gl_set
  );
  
+procedure setlogicop(const rasterop: rasteropty; const gc: gcty);
+begin
+ if rasterop = rop_copy then begin
+  gllogicop(gl_copy);
+  if df_canvasismonochrome in gc.drawingflags then begin
+   gldisable(gl_index_logic_op);
+  end
+  else begin
+   gldisable(gl_color_logic_op);
+  end;
+ end
+ else begin
+  if df_canvasismonochrome in gc.drawingflags then begin
+   glenable(gl_index_logic_op);
+  end
+  else begin
+   glenable(gl_color_logic_op);
+  end;
+  gllogicop(rops[rasterop]);
+ end;
+end;
  
 procedure gdi_changegc(var drawinfo: drawinfoty);
 var
@@ -660,24 +682,8 @@ begin
    glcolorbackground:= rgbtriplety(colorbackground);
   end;
   if gvm_rasterop in mask then begin
-   if rasterop = rop_copy then begin
-    gllogicop(gl_copy);
-    if df_canvasismonochrome in drawinfo.gc.drawingflags then begin
-     gldisable(gl_index_logic_op);
-    end
-    else begin
-     gldisable(gl_color_logic_op);
-    end;
-   end
-   else begin
-    if df_canvasismonochrome in drawinfo.gc.drawingflags then begin
-     glenable(gl_index_logic_op);
-    end
-    else begin
-     glenable(gl_color_logic_op);
-    end;
-    gllogicop(rops[rasterop]);
-   end;
+   setlogicop(rasterop,drawinfo.gc);
+   gcrasterop:= rasterop;
   end;
   if gvm_lineoptions in mask then begin
    if (lio_antialias in lineinfo.options) xor 
@@ -1041,6 +1047,12 @@ var
  im1: maskedimagety;
  mode: glenum;
 begin
+ with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
+  if copymode <> gcrasterop then begin
+   setlogicop(copymode,drawinfo.gc);
+  end;
+ end;
+ 
  if tcanvas1(drawinfo.copyarea.source).fdrawinfo.gc.handle = 
                                               drawinfo.gc.handle then begin
   copyareaself(drawinfo);
@@ -1078,6 +1090,11 @@ begin
     glpopclientattrib;
     glpopattrib;
    end;
+  end;
+ end;
+ with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
+  if copymode <> gcrasterop then begin
+   setlogicop(gcrasterop,drawinfo.gc);
   end;
  end;
 end;
