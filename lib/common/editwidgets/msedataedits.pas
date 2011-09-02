@@ -3498,6 +3498,8 @@ begin
  dropdown.cols.assign(acols);
 end;
 
+{$endif}
+
 procedure tcustomdropdownlistedit.dostatread(const reader: tstatreader);
 begin
  inherited;
@@ -3509,8 +3511,6 @@ begin
  inherited;
  tdropdownlistcontroller(fdropdown).dostatwrite(writer);
 end;
-
-{$endif}
 
 { thistorycontroller }
 

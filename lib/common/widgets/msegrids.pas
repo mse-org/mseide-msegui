@@ -1766,11 +1766,11 @@ type
    fdatarowheightmin: integer;
    fdatarowheightmax: integer;
    foptionsfold: optionsfoldty;
+   foncopyselection: copyselectioneventty;
+   fonpasteselection: pasteselectioneventty;
 {$ifdef mse_with_ifi}
    fifilink: tifigridlinkcomp;
 //   procedure ifisetvalue(var avalue; var accept: boolean);
-   foncopyselection: copyselectioneventty;
-   fonpasteselection: pasteselectioneventty;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);
     //iifigridlink

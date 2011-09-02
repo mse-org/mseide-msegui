@@ -470,7 +470,8 @@ procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
 begin
 // gdi_lock;
  with drawinfo.creategc do begin
-  gcpo^.gdifuncs:= getdefaultgdifuncs;//gui_getgdifuncs;
+//  gcpo^.gdifuncs:= getdefaultgdifuncs;
+  gcpo^.gdifuncs:= x11getgdifuncs;
   if paintdevice = 0 then begin
    paintdevice:= mserootwindow;
   end;
@@ -816,6 +817,11 @@ begin
 end;
 
 procedure gdi_endpaint(var drawinfo: drawinfoty); //gdifunc
+begin
+ //dummy
+end;
+
+procedure gdi_flush(var drawinfo: drawinfoty); //gdifunc
 begin
  //dummy
 end;
@@ -2369,6 +2375,7 @@ const
    {$ifdef FPC}@{$endif}gdi_changegc,
    {$ifdef FPC}@{$endif}gdi_getcanvasclass,
    {$ifdef FPC}@{$endif}gdi_endpaint,
+   {$ifdef FPC}@{$endif}gdi_flush,
    {$ifdef FPC}@{$endif}gdi_drawlines,
    {$ifdef FPC}@{$endif}gdi_drawlinesegments,
    {$ifdef FPC}@{$endif}gdi_drawellipse,

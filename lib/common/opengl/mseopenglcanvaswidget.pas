@@ -24,6 +24,8 @@ type
   protected
    procedure linktopaintdevice(const aparent: winidty;
              const awindowrect: rectty; out aid: winidty); reintroduce;
+  public
+   constructor create(const user: tobject; const intf: icanvas); override;
   published
    property lineoptions;
  {
@@ -211,6 +213,7 @@ begin
   windowrect:= @awindowrect;
   parent:= aparent;
   kind:= gck_screen;
+  createpaintdevice:= true;
   gdi_lock;
   fdrawinfo.gc.gdifuncs^[gdf_creategc](info);
   gdi_unlock;
@@ -218,6 +221,13 @@ begin
  end;
  gc1.paintdevicesize:= awindowrect.size;
  inherited linktopaintdevice(paintdevicety(aid),gc1,nullpoint);
+end;
+
+constructor topenglwidgetcanvas.create(const user: tobject;
+               const intf: icanvas);
+begin
+ inherited;
+// fcontextinfo.attrib.doublebuffer:= true;
 end;
 
 end.

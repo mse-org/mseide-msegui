@@ -56,6 +56,7 @@ const
  defaultcontextattributes: contextattributesty =
   (buffersize: -1;
    level: 0;
+   doublebuffer: false;
    rgba: true;
    stereo: false;
    auxbuffers: -1;

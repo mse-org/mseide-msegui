@@ -47,6 +47,8 @@ type
    fattrib_buffersize: integer;
    fattrib_level: integer;
    fattrib_rgba: boolean;
+   fattrib_doublebuffer: boolean;
+   fattrib_dri: boolean;
    fattrib_stereo: boolean;
    fattrib_auxbuffers: integer;
    fattrib_redsize: integer;
@@ -82,8 +84,10 @@ type
                   write fattrib_level default 0;
    property attrib_rgba: boolean read fattrib_rgba 
                   write fattrib_rgba default true;
-//   property attrib_doublebuffer: boolean read fattrib_doublebuffer 
-//                  write fattrib_doublebuffer default true;
+   property attrib_doublebuffer: boolean read fattrib_doublebuffer 
+                  write fattrib_doublebuffer default true;
+   property attrib_dri: boolean read fattrib_dri 
+                  write fattrib_dri default true;
    property attrib_stereo: boolean read fattrib_stereo 
                   write fattrib_stereo default false;
    property attrib_auxbuffers: integer read fattrib_auxbuffers
@@ -156,6 +160,8 @@ begin
  fattrib_buffersize:= -1;
  fattrib_level:= 0;
  fattrib_rgba:= true;
+ fattrib_doublebuffer:= true;
+ fattrib_dri:= true;
  fattrib_stereo:= false;
  fattrib_auxbuffers:= -1;
  fattrib_redsize:= 8;
@@ -207,6 +213,9 @@ var
 
  procedure putboolean(const atag: integer; avalue: boolean);
  begin
+  if index > high(ar1) then begin
+   setlength(ar1,19+high(ar1)*2);
+  end;
   if avalue then begin
    ar1[index]:= atag;
    inc(index);
@@ -215,6 +224,9 @@ var
  
  procedure putvalue(const atag,avalue,defaultvalue: integer);
  begin
+  if index > high(ar1) then begin
+   setlength(ar1,19+high(ar1)*2);
+  end;
   if avalue <> defaultvalue then begin
    ar1[index]:= atag;
    inc(index);
@@ -238,7 +250,7 @@ begin
  if fvisualattributes = nil then begin
   setlength(ar1,34);
   index:= 0;
-  putboolean(glx_doublebuffer,true);
+  putboolean(glx_doublebuffer,fattrib_doublebuffer);
   putvalue(glx_buffer_size,fattrib_buffersize,-1);
   putvalue(glx_level,fattrib_level,0);
   putboolean(glx_rgba,fattrib_rgba);
@@ -288,7 +300,10 @@ begin
  with pixeldesc do begin
   nsize:= sizeof(pixeldesc);
   nversion:= 1;
-  dwflags:= pfd_draw_to_window or pfd_support_opengl or pfd_doublebuffer;
+  dwflags:= pfd_draw_to_window or pfd_support_opengl;
+  if fattrib_doublebuffer then begin
+   dwflags:= dwflags or pfd_doublebuffer;
+  end;
   ipixeltype:= pfd_type_rgba;
   ccolorbits:= 24;
   cdepthbits:= 32;
@@ -337,11 +352,17 @@ begin
   fonrender(self,aupdaterect);
  end;
 // glflush;
- {$ifdef unix}
- glxswapbuffers(fdpy,fwin);
- {$else}
- swapbuffers(fdc);
- {$endif}
+ if fattrib_doublebuffer then begin
+  {$ifdef unix}
+  glxswapbuffers(fdpy,fwin);
+  {$else}
+  swapbuffers(fdc);
+  {$endif}
+ end
+ else begin
+  glflush;
+//  glfinish;
+ end;
 end;
 
 procedure tcustomopenglwidget.doclientrectchanged;

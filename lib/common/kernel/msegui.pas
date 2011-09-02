@@ -12057,8 +12057,8 @@ begin
  end;
  fowner:= aowner;
  fowner.fwindow:= self;
- fcanvas:= creategdicanvas(fgdi,self,icanvas(self));
- fasynccanvas:= creategdicanvas(fgdi,self,icanvas(self));
+ fcanvas:= creategdicanvas(fgdi,false,self,icanvas(self));
+ fasynccanvas:= creategdicanvas(fgdi,false,self,icanvas(self));
  fscrollnotifylist:= tnotifylist.create;
  inherited create;
  fowner.rootchanged; //nil all references

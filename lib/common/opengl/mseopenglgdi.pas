@@ -25,6 +25,7 @@ type
  contextattributesty = record
   buffersize: integer;
   level: integer;
+  doublebuffer: boolean;
   rgba: boolean;
   stereo: boolean;
   auxbuffers: integer;
@@ -78,10 +79,11 @@ type
    0: (d: oglgcdty;);
    1: (_bufferspace: gcpty;);
  end;
- 
+{ 
 function createrendercontext(const aparent: winidty; const windowrect: rectty;
                                    const ainfo: contextinfoty;
                                    var gc: gcty; out aid: winidty): guierrorty;
+}
 function openglgetgdifuncs: pgdifunctionaty;
 //function openglgetgdinum: integer;
 
@@ -195,7 +197,8 @@ begin
   glviewport(x,int1-y-cy,cx,cy);
   glloadidentity;
   if (cx > 0) and (cy > 0) then begin
-   glortho(-0.5,cx-0.5,-0.5,cy-1,-1,1);
+   glortho(0,cx,0,cy,-1,1);
+//   glortho(-0.5,cx-0.5,-0.5,cy-1,-1,1);
 //   glortho(-1,cx-1,cy-1,-1,-1,1);
   end;
  end;
@@ -223,7 +226,7 @@ end;
  
 var
  gccount: integer;
-
+testvar: pxvisualinfo;
 function gdi_choosevisual(var gc: gcty;
                                  const contextinfo: contextinfoty): gdierrorty;
 {$ifdef unix}
@@ -245,25 +248,35 @@ begin
   end;
   index:= 0;
   with contextinfo.attrib do begin
-   putboolean(ar1,index,glx_doublebuffer,true);
-   putvalue(ar1,index,glx_buffer_size,buffersize,-1);
    putvalue(ar1,index,glx_level,level,0);
-   putboolean(ar1,index,glx_rgba,rgba);
-   putboolean(ar1,index,glx_stereo,stereo);
-   putvalue(ar1,index,glx_aux_buffers,auxbuffers,-1);
-   putvalue(ar1,index,glx_red_size,redsize,-1);
-   putvalue(ar1,index,glx_green_size,greensize,-1);
-   putvalue(ar1,index,glx_blue_size,bluesize,-1);
-   putvalue(ar1,index,glx_alpha_size,alphasize,-1);
-   putvalue(ar1,index,glx_depth_size,depthsize,-1);
-   putvalue(ar1,index,glx_stencil_size,stencilsize,-1);
-   putvalue(ar1,index,glx_accum_red_size,accumredsize,-1);
-   putvalue(ar1,index,glx_accum_green_size,accumgreensize,-1);
-   putvalue(ar1,index,glx_accum_blue_size,accumbluesize,-1);
-   putvalue(ar1,index,glx_accum_alpha_size,accumalphasize,-1);
-   setlength(ar1,index+1); //none
+   if df_canvasismonochrome in gc.drawingflags then begin
+    putvalue(ar1,index,glx_buffer_size,1,-1);
+   end
+   else begin
+    if not (df_canvasispixmap in gc.drawingflags) then begin
+     putboolean(ar1,index,glx_doublebuffer,doublebuffer);
+    end;
+    putvalue(ar1,index,glx_buffer_size,buffersize,-1);
+//    putvalue(ar1,index,glx_level,level,0);
+    putboolean(ar1,index,glx_rgba,rgba);
+    putboolean(ar1,index,glx_stereo,stereo);
+    putvalue(ar1,index,glx_aux_buffers,auxbuffers,-1);
+    putvalue(ar1,index,glx_red_size,redsize,-1);
+    putvalue(ar1,index,glx_green_size,greensize,-1);
+    putvalue(ar1,index,glx_blue_size,bluesize,-1);
+    putvalue(ar1,index,glx_alpha_size,alphasize,-1);
+    putvalue(ar1,index,glx_depth_size,depthsize,-1);
+    putvalue(ar1,index,glx_stencil_size,stencilsize,-1);
+    putvalue(ar1,index,glx_accum_red_size,accumredsize,-1);
+    putvalue(ar1,index,glx_accum_green_size,accumgreensize,-1);
+    putvalue(ar1,index,glx_accum_blue_size,accumbluesize,-1);
+    putvalue(ar1,index,glx_accum_alpha_size,accumalphasize,-1);
+   end;
   end;
+  setlength(ar1,index+1); //none
   fvisinfo:= glxchoosevisual(fdpy,fscreen,pinteger(ar1));
+//  fvisinfo:= glxchoosevisual(fdpy,fscreen,pinteger(ar1));
+testvar:= fvisinfo;
   if fvisinfo = nil then begin
    result:= gde_novisual;
    exit;
@@ -272,7 +285,7 @@ begin
  end;
 {$endif}
 end;
- 
+(* 
 {$ifdef unix}
 
 function createrendercontext(const aparent: winidty; const windowrect: rectty;
@@ -370,6 +383,7 @@ begin
  initcontext(aid,gc,windowrect);
 end;
 {$endif}
+*)
 
 procedure colortogl(const source: colorty; out dest: glcolorty);
 var
@@ -473,17 +487,20 @@ begin
    end
    else begin
     if paintdevice = 0 then begin
-     with windowrect^ do begin
-      fcolormap:= xcreatecolormap(fdpy,mserootwindow,fvisinfo^.visual,allocnone);
-      attributes.colormap:= fcolormap;
-      paintdevice:= xcreatewindow(fdpy,parent,x,y,cx,cy,0,fvisinfo^.depth,
-            inputoutput,fvisinfo^.visual,cwcolormap,@attributes);
-      if paintdevice = 0 then begin
-       error:= gde_createwindow;
-       exit;
+     if createpaintdevice then begin
+      with windowrect^ do begin
+       fcolormap:= xcreatecolormap(fdpy,mserootwindow,fvisinfo^.visual,
+                                                                 allocnone);
+       attributes.colormap:= fcolormap;
+       paintdevice:= xcreatewindow(fdpy,parent,x,y,cx,cy,0,fvisinfo^.depth,
+             inputoutput,fvisinfo^.visual,cwcolormap,@attributes);
+       if paintdevice = 0 then begin
+        error:= gde_createwindow;
+        exit;
+       end;
+       xselectinput(fdpy,paintdevice,exposuremask); //will be mapped to parent
+       gcpo^.paintdevicesize:= size;
       end;
-      xselectinput(fdpy,paintdevice,exposuremask); //will be mapped to parent
-      gcpo^.paintdevicesize:= size;
      end;
     end
     else begin
@@ -499,14 +516,16 @@ begin
   error:= gde_ok;
 //  fkind:= kind;
   if paintdevice = 0 then begin
-   fillchar(options1,sizeof(options1),0);
-   options1.parent:= parent;
-   if gui_createwindow(windowrect^,options1,wi1) <> gue_ok then begin
-    error:= gde_createwindow;
-    exit;
+   if createpaintdevice then begin
+    fillchar(options1,sizeof(options1),0);
+    options1.parent:= parent;
+    if gui_createwindow(windowrect^,options1,wi1) <> gue_ok then begin
+     error:= gde_createwindow;
+     exit;
+    end;
+    paintdevice:= wi1.id;
+    gcpo^.paintdevicesize:= windowrect^.size;
    end;
-   paintdevice:= wi1.id;
-   gcpo^.paintdevicesize:= windowrect^.size;
   end;
   pd:= paintdevice;
   fdc:= getdc(pd);
@@ -612,6 +631,19 @@ end;
 
 {***************}
 
+const
+ rops: array[rasteropty] of integer = (
+ //rop_clear, rop_and, rop_andnot,     rop_copy,
+   gl_clear,  gl_and,  gl_and_reverse, gl_copy,
+ //rop_notand,      rop_nop, rop_xor, rop_or,
+   gl_and_inverted, gl_noop, gl_xor,  gl_or,
+ //rop_nor, rop_notxor, rop_not,   rop_ornot,
+   gl_nor,  gl_equiv,   gl_invert, gl_or_reverse,
+ //rop_notcopy,      rop_notor,      rop_nand, rop_set
+   gl_copy_inverted, gl_or_inverted, gl_nand,   gl_set
+ );
+ 
+ 
 procedure gdi_changegc(var drawinfo: drawinfoty);
 var
  po1: pstripety;
@@ -627,6 +659,26 @@ begin
   end;
   if gvm_colorbackground in mask then begin
    glcolorbackground:= rgbtriplety(colorbackground);
+  end;
+  if gvm_rasterop in mask then begin
+   if rasterop = rop_copy then begin
+    gllogicop(gl_copy);
+    if df_canvasismonochrome in drawinfo.gc.drawingflags then begin
+     gldisable(gl_index_logic_op);
+    end
+    else begin
+     gldisable(gl_color_logic_op);
+    end;
+   end
+   else begin
+    if df_canvasismonochrome in drawinfo.gc.drawingflags then begin
+     glenable(gl_index_logic_op);
+    end
+    else begin
+     glenable(gl_color_logic_op);
+    end;
+    gllogicop(rops[rasterop]);
+   end;
   end;
   if gvm_lineoptions in mask then begin
    if (lio_antialias in lineinfo.options) xor 
@@ -692,12 +744,21 @@ end;
 
 procedure gdi_getcanvasclass(var drawinfo: drawinfoty); //gdifunc
 begin
- drawinfo.getcanvasclass.canvasclass:= topenglwindowcanvas;
+ with drawinfo.getcanvasclass do begin
+  if not monochrome then begin
+   canvasclass:= topenglwindowcanvas;
+  end;
+ end;
 end;
 
 procedure gdi_endpaint(var drawinfo: drawinfoty); //gdifunc
 begin
  gdi_swapbuffers(drawinfo);
+end;
+
+procedure gdi_flush(var drawinfo: drawinfoty); //gdifunc
+begin
+ glflush();
 end;
 
 procedure gdi_drawlines(var drawinfo: drawinfoty);
@@ -930,6 +991,7 @@ begin
   with destrect^ do begin
    xscale:= cx/sourcerect^.cx;
    yscale:= cy/sourcerect^.cy;
+//   glrasterpos2i(x,(sourceheight-y-cy));
    glrasterpos2i(x,(sourceheight-y-cy));
    glpixelzoom(xscale,yscale);
   end;
@@ -1111,6 +1173,7 @@ const
    {$ifdef FPC}@{$endif}gdi_changegc,
    {$ifdef FPC}@{$endif}gdi_getcanvasclass,
    {$ifdef FPC}@{$endif}gdi_endpaint,
+   {$ifdef FPC}@{$endif}gdi_flush,
    {$ifdef FPC}@{$endif}gdi_drawlines,
    {$ifdef FPC}@{$endif}gdi_drawlinesegments,
    {$ifdef FPC}@{$endif}gdi_drawellipse,

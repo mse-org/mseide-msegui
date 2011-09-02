@@ -216,7 +216,7 @@ const
     (n: 'glXWaitVideoSyncSGI'; d: @glXWaitVideoSyncSGI)
    );
 begin
- result:= getprocaddresses(libgl,funcs);
+ result:= getprocaddresses(libgl,funcs,true);
 end;
 
 end.

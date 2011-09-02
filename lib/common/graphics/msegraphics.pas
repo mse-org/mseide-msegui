@@ -331,6 +331,7 @@ type
   gcpo: pgcty;
   windowrect: prectty;
   parent: winidty;
+  createpaintdevice: boolean;
   error: gdierrorty;
  end;
  
@@ -341,6 +342,7 @@ type
  
  getcanvasclassinfoty = record
   canvasclass: canvasclassty;
+  monochrome: boolean;
  end;
   
  gcvaluemaskty = (gvm_clipregion,gvm_colorbackground,gvm_colorforeground,
@@ -564,7 +566,7 @@ type
  gdifunctionty = procedure(var drawinfo: drawinfoty);
 
  gdifuncty = (gdf_creategc,gdf_destroygc,gdf_changegc,
-              gdf_getcanvasclass,gdf_endpaint,
+              gdf_getcanvasclass,gdf_endpaint,gdf_flush,
               gdf_drawlines,gdf_drawlinesegments,gdf_drawellipse,gdf_drawarc,
               gdf_fillrect,
               gdf_fillelipse,gdf_fillarc,gdf_fillpolygon,{gdf_drawstring,}
@@ -1087,7 +1089,10 @@ procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty;
 function getdefaultgdifuncs: pgdifunctionaty;{$ifdef FPC}inline;{$endif}
 function registergdi(const agdifuncs: pgdifunctionaty): integer;
                                             //returns unique number
+function getgdicanvasclass(const agdi: pgdifunctionaty;
+                              const amonochrome: boolean): canvasclassty;
 function creategdicanvas(const agdi: pgdifunctionaty;
+                            const amonochrome: boolean;
                             const user: tobject; const intf: icanvas): tcanvas;
 
 procedure freefontdata(var drawinfo: drawinfoty);
@@ -1523,16 +1528,24 @@ begin
  setcolormapvalue(index,rgb1.red,rgb1.green,rgb1.blue);
 end;
 
-function creategdicanvas(const agdi: pgdifunctionaty;
-                            const user: tobject; const intf: icanvas): tcanvas;
+function getgdicanvasclass(const agdi: pgdifunctionaty;
+                                  const amonochrome: boolean): canvasclassty;
 var
  info1: drawinfoty;
 begin
  with info1.getcanvasclass do begin
+  monochrome:= amonochrome;
   canvasclass:= tcanvas; //default
   agdi^[gdf_getcanvasclass](info1);
-  result:= canvasclass.create(user,intf);
+  result:= canvasclass;
  end;
+end;
+
+function creategdicanvas(const agdi: pgdifunctionaty;
+                  const amonochrome: boolean; const user: tobject;
+                                           const intf: icanvas): tcanvas;
+begin
+ result:= getgdicanvasclass(agdi,amonochrome).create(user,intf);
 end;
 
 procedure freefontdata(var drawinfo: drawinfoty);
@@ -1576,7 +1589,7 @@ begin
   fcanvasclass:= acanvasclass;
  end;
  if fcanvasclass = nil then begin
-  fcanvasclass:= tcanvas;
+  fcanvasclass:= getgdicanvasclass(getdefaultgdifuncs,monochrome);
  end;
  if monochrome then begin
   include(fstate,pms_monochrome);
@@ -2174,7 +2187,8 @@ var
  canvas: tcanvas;
 begin
  if fhandlepo^ = 0 then begin
-  canvas:= tcanvas.create(self,icanvas(self));
+  canvas:= creategdicanvas(getdefaultgdifuncs,false,self,icanvas(self));
+//  canvas:= tcanvas.create(self,icanvas(self));
   try
    createhandle(canvas);
   finally
@@ -2787,7 +2801,12 @@ begin
   printernamepo:= @aprintername;
   contextinfopo:= getcontextinfopo;
   gcpo:= @gc;
-  getgdifuncs^[gdf_creategc](fdrawinfo);
+  if df_canvasismonochrome in gc.drawingflags then begin
+   gui_getgdifuncs^[gdf_creategc](fdrawinfo); //todo: fix the workaround
+  end
+  else begin
+   getgdifuncs^[gdf_creategc](fdrawinfo);
+  end;
 //  fdrawinfo.gc.gdifuncs^[gdf_creategc](fdrawinfo);
   result:= error;
  end;
@@ -2852,6 +2871,7 @@ begin
   try
    fdrawinfo.gc.gdifuncs^[func](fdrawinfo);
    if flushgdi then begin
+    fdrawinfo.gc.gdifuncs^[gdf_flush](fdrawinfo);
     gui_flushgdi;
    end;
   finally
@@ -2861,6 +2881,7 @@ begin
  else begin
   fdrawinfo.gc.gdifuncs^[func](fdrawinfo);
   if flushgdi then begin
+   fdrawinfo.gc.gdifuncs^[gdf_flush](fdrawinfo);
    gui_flushgdi;
   end;
  end;
@@ -2905,7 +2926,7 @@ procedure tcanvas.linktopaintdevice(apaintdevice: paintdevicety;
 var
  rea1: real;
  int1: integer;
- func1: pgdifunctionaty;
+// func1: pgdifunctionaty;
 begin
  resetpaintedflag;
  if (fdrawinfo.gc.handle <> 0) then begin
@@ -2916,10 +2937,10 @@ begin
  end;
  fdrawinfo.paintdevice:= apaintdevice;
  rea1:= fdrawinfo.gc.ppmm;
- func1:= fdrawinfo.gc.gdifuncs;
+// func1:= fdrawinfo.gc.gdifuncs;
  fdrawinfo.gc:= gc;
  fdrawinfo.gc.ppmm:= rea1;                //restore
- fdrawinfo.gc.gdifuncs:= func1;           //restore
+// fdrawinfo.gc.gdifuncs:= func1;           //restore
  updatecliporigin(cliporigin);
  if gc.handle <> 0 then begin
   gdi(gdf_setcliporigin);
