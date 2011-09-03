@@ -256,8 +256,11 @@ begin
     putvalue(ar1,index,glx_buffer_size,1,-1);
    end
    else begin
-    if not (df_canvasispixmap in gc.drawingflags) and not flushgdi then begin
-     putboolean(ar1,index,glx_doublebuffer,doublebuffer);
+    if not (df_canvasispixmap in gc.drawingflags) then begin
+     if doublebuffer then begin
+      include(gc.drawingflags,df_doublebuffer);
+      putboolean(ar1,index,glx_doublebuffer,doublebuffer);
+     end;
     end;
     putvalue(ar1,index,glx_buffer_size,buffersize,-1);
 //    putvalue(ar1,index,glx_level,level,0);
@@ -766,7 +769,7 @@ end;
 
 procedure gdi_endpaint(var drawinfo: drawinfoty); //gdifunc
 begin
- if not flushgdi then begin
+ if df_doublebuffer in drawinfo.gc.drawingflags then begin
   gdi_swapbuffers(drawinfo);
  end;
 end;

@@ -193,15 +193,18 @@ var
 begin
  with fdrawinfo.gc do begin
   if (handle <> 0) and not sizeisequal(asize,paintdevicesize) then begin
+   viewport:= mr(fviewport.pos,asize);
+   {
    fillchar(gc1,sizeof(gc1),0);
    gc1.paintdevicesize:= asize;
    linktopaintdevice(fdrawinfo.paintdevice,gc1,nullpoint);
    creategc(fdrawinfo.paintdevice,gck_screen,fdrawinfo.gc,'');
+   }
   end
   else begin
    inherited;
-   oglgcty(platformdata).d.sourceheight:= asize.cy;
   end;
+  oglgcty(platformdata).d.sourceheight:= asize.cy;
  end;
 end;
 

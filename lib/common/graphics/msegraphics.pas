@@ -39,6 +39,7 @@ type
  alignmentsty = set of alignmentty;
 
  drawingflagty = (df_canvasispixmap,df_canvasismonochrome,df_highresfont,
+                  df_doublebuffer,
                   df_colorconvert,
                   df_opaque,df_monochrome,df_brush{,df_dashed},df_last = 31);
  drawingflagsty = set of drawingflagty;
