@@ -410,14 +410,14 @@ var
 begin
  with drawinfo,oglgcty(gc.platformdata).d,arect do begin
   startx:= x+origin.x;
-  endx:= startx+cx-1;
+  endx:= startx+cx;
   starty:= sourceheight-(y+origin.y);
-  endy:= starty-cy+1;
+  endy:= starty-cy;
 //  glvertex2iv(@pos);
-  glvertex2i(x,starty);
+  glvertex2i(startx,starty);
   glvertex2i(endx,starty);
   glvertex2i(endx,endy);
-  glvertex2i(x,endy);
+  glvertex2i(startx,endy);
  end;
 end;
 
