@@ -708,6 +708,7 @@ type
    function defaultcliprect: rectty; virtual;
    function lock: boolean; virtual;
    procedure unlock; virtual;
+   procedure doflush;
    procedure gdi(const func: gdifuncty); virtual;
    procedure init;
    procedure internalcopyarea(asource: tcanvas; const asourcerect: rectty;
@@ -2866,6 +2867,12 @@ begin
  application.unlock;
 end;
 
+procedure tcanvas.doflush;
+begin
+ fdrawinfo.gc.gdifuncs^[gdf_flush](fdrawinfo);
+ gui_flushgdi;
+end;
+
 procedure tcanvas.gdi(const func: gdifuncty);
 begin
  if lock then begin
@@ -2882,8 +2889,7 @@ begin
  else begin
   fdrawinfo.gc.gdifuncs^[func](fdrawinfo);
   if flushgdi then begin
-   fdrawinfo.gc.gdifuncs^[gdf_flush](fdrawinfo);
-   gui_flushgdi;
+   doflush;
   end;
  end;
 end;

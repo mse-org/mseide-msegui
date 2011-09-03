@@ -140,6 +140,9 @@ begin
   fdrawinfo.color.color:= acolor;
  end;
  gdi_clear(fdrawinfo);
+ if flushgdi then begin
+  doflush;
+ end;
  if bo1 then begin
   unlock;
  end;
@@ -188,8 +191,8 @@ begin
 end;
 
 procedure topenglcanvas.updatesize(const asize: sizety);
-var
- gc1: gcty;
+//var
+// gc1: gcty;
 begin
  with fdrawinfo.gc do begin
   if (handle <> 0) and not sizeisequal(asize,paintdevicesize) then begin

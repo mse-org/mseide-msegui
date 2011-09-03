@@ -224,6 +224,8 @@ begin
   glclearstencil(0);
   glclear(gl_stencil_buffer_bit);
   setviewport(gc,sourceviewport);
+  glpushattrib(gl_color_buffer_bit); //no mesa glflush until the first glpopattrib?
+  glpopattrib();
  end;
 end;
  
@@ -771,6 +773,9 @@ procedure gdi_endpaint(var drawinfo: drawinfoty); //gdifunc
 begin
  if df_doublebuffer in drawinfo.gc.drawingflags then begin
   gdi_swapbuffers(drawinfo);
+ end
+ else begin
+  glflush();
  end;
 end;
 
@@ -1283,7 +1288,7 @@ begin
    end;
   end;
   glpushclientattrib(gl_client_pixel_store_bit);
-  glpushattrib(gl_pixel_mode_bit or gl_color_buffer_bit or gl_pixel_mode_bit);
+  glpushattrib(gl_pixel_mode_bit or gl_color_buffer_bit);
   glpixelstorei(gl_unpack_row_length, 0);
   glpixelstorei(gl_unpack_alignment, 1);
   glenable(gl_blend);
