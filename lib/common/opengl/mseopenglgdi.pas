@@ -21,6 +21,10 @@ uses
 const
  GL_BGRA = GL_BGRA_EXT;
 }
+const
+ glpixelshift = -0.5;
+ gltopshift = -1;
+ 
 type
  contextattributesty = record
   buffersize: integer;
@@ -65,7 +69,7 @@ type
   pd: paintdevicety;
   extensions: glextensionsty;
   gclineoptions: lineoptionsty;
-  sourceheight: integer;
+  top: integer; //y 0 coord value
   glfont: fontty;
   tess: pglutesselator;
   glcolorforeground: rgbtriplety;
@@ -194,11 +198,11 @@ var
  int1: integer;
 begin
  with arect do begin
-  int1:= oglgcty(agc.platformdata).d.sourceheight;
-  glviewport(x,int1-y-cy,cx,cy);
+  glviewport(x,oglgcty(agc.platformdata).d.top-gltopshift-y-cy,cx,cy);
   glloadidentity;
   if (cx > 0) and (cy > 0) then begin
-   glortho(0,cx,0,cy,-1,1);
+   glortho(glpixelshift,cx+glpixelshift,glpixelshift,cy+glpixelshift,-1,1);
+//   glortho(0,cx,0,cy,-1,1);
 //   glortho(-0.5,cx-0.5,-0.5,cy-1,-1,1);
 //   glortho(-1,cx-1,cy-1,-1,-1,1);
   end;
@@ -217,7 +221,7 @@ begin
  if winid <> 0 then begin
   with oglgcty(gc.platformdata).d do begin
  //  pd:= winid;
-   sourceheight:= sourceviewport.cy;
+   top:= sourceviewport.cy+gltopshift;
    tess:= glunewtess();
   end;
   makecurrent(gc);
@@ -405,19 +409,19 @@ end;
 
 procedure sendrect(const drawinfo: drawinfoty; const arect: rectty);
 var
- startx,starty,endx,endy: integer;
+ startx,starty,endx,endy: real;
  
 begin
  with drawinfo,oglgcty(gc.platformdata).d,arect do begin
-  startx:= x+origin.x;
+  startx:= (x+origin.x)+glpixelshift;
   endx:= startx+cx;
-  starty:= sourceheight-(y+origin.y);
+  starty:= (top-gltopshift-(y+origin.y))+glpixelshift;
   endy:= starty-cy;
 //  glvertex2iv(@pos);
-  glvertex2i(startx,starty);
-  glvertex2i(endx,starty);
-  glvertex2i(endx,endy);
-  glvertex2i(startx,endy);
+  glvertex2f(startx,starty);
+  glvertex2f(endx,starty);
+  glvertex2f(endx,endy);
+  glvertex2f(startx,endy);
  end;
 end;
 
@@ -730,7 +734,7 @@ begin
     with pregioninfoty(clipregion)^ do begin
      if rectcount > 0 then begin
       glbegin(gl_quads);
-      y1:= sourceheight-stripestart;
+      y1:= top-stripestart;
       po1:= datapo;      
       for int1:= stripecount-1 downto 0 do begin
        int3:= y1;
@@ -789,7 +793,7 @@ var
  po1: ppointty;
  int1,int2: integer;
 begin
- int2:= oglgcty(drawinfo.gc.platformdata).d.sourceheight;
+ int2:= oglgcty(drawinfo.gc.platformdata).d.top;
  with drawinfo,points do begin
   if closed then begin
    glbegin(gl_line_loop);
@@ -811,7 +815,7 @@ var
  po1: ppointty;
  int1,int2: integer;
 begin
- int2:= oglgcty(drawinfo.gc.platformdata).d.sourceheight;
+ int2:= oglgcty(drawinfo.gc.platformdata).d.top;
  glbegin(gl_lines);
  with drawinfo,points do begin
   po1:= points;
@@ -829,7 +833,7 @@ var
  po1: pfpointty;
  int1,int2: integer;
 begin
- int2:= oglgcty(gc.platformdata).d.sourceheight;
+ int2:= oglgcty(gc.platformdata).d.top;
  if close then begin
   int1:= gl_line_loop;
  end
@@ -943,7 +947,7 @@ begin
   allocbuffer(drawinfo.buffer,count*sizeof(gluvertexty));
   tessbufferindex:= 0;
   po2:= drawinfo.buffer.buffer;
-  do1:= sourceheight;
+  do1:= top;
   glutessbeginpolygon(tess,@drawinfo.gc);
   glutessbegincontour(tess);
   for int1:= count-1 downto 0 do begin
@@ -980,16 +984,16 @@ begin
    glpushattrib(gl_pixel_mode_bit);
    xscale:= cx/sourcerect^.cx;
    yscale:= cy/sourcerect^.cy;
-   glrasterpos2i(x,(sourceheight-y-cy));
+   glrasterpos2i(x,(top-y-cy));
    glpixelzoom(xscale,yscale);
    with sourcerect^ do begin
-    glcopypixels(x,sourceheight-y-cy,cx,cy,gl_color);
+    glcopypixels(x,top-y-cy,cx,cy,gl_color);
    end;
    glpopattrib;
   end;
  end;
 end;
-
+var testvar: integer;
 procedure copyareagl(var drawinfo: drawinfoty);
 //todo: use persistent pixmap or texture buffer
 //suse 11.4 crashes with dri shared buffers and does 
@@ -1000,28 +1004,60 @@ var
 // buf: gluint;
  xscale,yscale: real;
  ar1: rgbtriplearty;
+ l,t,r,b,w,h: integer;
+ pt1: pointty;
+ int1: integer;
+ 
 begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
   makecurrent(tcanvas1(source).fdrawinfo.gc);
   with sourcerect^ do begin
-   setlength(ar1,cx*cy);
-   glreadpixels(x,
-      oglgcty(tcanvas1(source).fdrawinfo.gc.platformdata).d.sourceheight-y-cy,
-                          cx,cy,gl_rgba,gl_unsigned_byte,pointer(ar1));
+   l:= x;
+   t:= y;
+   r:= x + cx;
+   b:= y + cy;
   end;
-  makecurrent(drawinfo.gc);
-  glpushattrib(gl_pixel_mode_bit);
   with destrect^ do begin
-   xscale:= cx/sourcerect^.cx;
-   yscale:= cy/sourcerect^.cy;
-//   glrasterpos2i(x,(sourceheight-y-cy));
-   glrasterpos2i(x,(sourceheight-y-cy));
-   glpixelzoom(xscale,yscale);
+   pt1:= pos;
+   if x < 0 then begin
+    pt1.x:= 0;
+    l:= l + (cx div 2 + (x * sourcerect^.cx)) div cx;
+   end;
+   if y < 0 then begin
+    pt1.y:= 0;
+    t:= t + (cy div 2 + (y * sourcerect^.cy)) div cy;
+   end;
+   int1:= drawinfo.gc.paintdevicesize.cx - (x+cx);
+   if int1 < 0 then begin
+    r:= r + (cx div 2 + int1 * sourcerect^.cx) div cx;
+   end;
+   pt1.y:= top-gltopshift-pt1.y-cy;
+   int1:= drawinfo.gc.paintdevicesize.cy - (y+cy);
+   if int1 < 0 then begin
+    pt1.y:= 0;
+    b:= b + (cy div 2 + int1 * sourcerect^.cy) div cy;
+   end;
   end;
-  with sourcerect^ do begin
-   gldrawpixels(cx,cy,gl_rgba,gl_unsigned_byte,pointer(ar1));
+  w:= r-l;
+  h:= b-t;
+  if (w > 0) and (h > 0) then begin   
+   setlength(ar1,w*h);
+   b:= oglgcty(tcanvas1(source).fdrawinfo.gc.platformdata).d.top-gltopshift-b;
+   glreadpixels(l,b,w,h,gl_rgba,gl_unsigned_byte,pointer(ar1));
+   makecurrent(drawinfo.gc);
+   glpushattrib(gl_pixel_mode_bit);
+   with destrect^ do begin
+    xscale:= cx/sourcerect^.cx;
+    yscale:= cy/sourcerect^.cy;
+ //   glrasterpos2i(x,(sourceheight-y-cy));
+    glrasterpos2f(pt1.x+glpixelshift,pt1.y+glpixelshift);
+    glpixelzoom(xscale,yscale);
+   end;
+   with sourcerect^ do begin
+    gldrawpixels(w,h,gl_rgba,gl_unsigned_byte,pointer(ar1));
+   end;
+   glpopattrib;
   end;
-  glpopattrib;
  end;
  
 (* buffer objects are unreliable
@@ -1094,7 +1130,7 @@ begin
     glpushattrib(gl_pixel_mode_bit);
     
     with destrect^ do begin
-     glrasterpos2i(x,sourceheight-y);
+     glrasterpos2i(x,top-y);
     end;
     glpixeltransferf(gl_alpha_scale,0);
     glpixeltransferf(gl_alpha_bias,1);
@@ -1261,7 +1297,7 @@ begin
  with bitmap^ do begin
   with oglgcty(drawinfo.gc.platformdata).d do begin
 //   if true {glwindowpos2i = nil} then begin
-    glrasterpos2i(pos.x,sourceheight-pos.y); //todo: fix transformation
+    glrasterpos2i(pos.x,top-pos.y); //todo: fix transformation
 //   end
 //   else begin
 //    glwindowpos2i(pos.x,sourceheight-pos.y);

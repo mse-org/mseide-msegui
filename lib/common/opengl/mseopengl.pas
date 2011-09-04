@@ -195,6 +195,7 @@ procedure topenglcanvas.updatesize(const asize: sizety);
 // gc1: gcty;
 begin
  with fdrawinfo.gc do begin
+  oglgcty(platformdata).d.top:= asize.cy+gltopshift;
   if (handle <> 0) and not sizeisequal(asize,paintdevicesize) then begin
    viewport:= mr(fviewport.pos,asize);
    {
@@ -207,7 +208,6 @@ begin
   else begin
    inherited;
   end;
-  oglgcty(platformdata).d.sourceheight:= asize.cy;
  end;
 end;
 
