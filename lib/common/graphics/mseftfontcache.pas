@@ -280,7 +280,7 @@ begin
    exit;
   end;
   pt1.x:= pos^.x + origin.x;
-  y1:= pos^.y + origin.y;
+  y1:= pos^.y + origin.y - 1;
   face:= tftface(pointer(afont));
   po2:= pointer(text);
   for int1:= 0 to count-1 do begin
