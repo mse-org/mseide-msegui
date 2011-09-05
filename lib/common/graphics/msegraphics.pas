@@ -1006,7 +1006,7 @@ type
    procedure initimage(alloc: boolean; out aimage: imagety);
                   //sets inf in aimage acording to self,
                   //allocates memory if alloc = true, no clear
-   procedure setsize(const Value: sizety); virtual;
+   procedure setsize(const avalue: sizety); virtual;
    function normalizeinitcolor(const acolor: colorty): colorty;
    procedure assign1(const source: tsimplebitmap; const docopy: boolean); virtual;
    function getgdiintf: pgdifunctionaty;
@@ -1780,10 +1780,10 @@ begin
  result:= fsize;
 end;
 
-procedure tsimplebitmap.setsize(const Value: sizety);
+procedure tsimplebitmap.setsize(const avalue: sizety);
 begin
  destroyhandle;
- fsize := Value;
+ fsize:= avalue;
 end;
 
 function tsimplebitmap.isempty: boolean;

@@ -993,7 +993,12 @@ begin
   end;
  end;
 end;
-var testvar: integer;
+
+procedure setrasterpos(const agc: gcty; const apos: pointty);
+begin
+ glrasterpos2f(0.999*glpixelshift,0.999*glpixelshift);
+ glbitmap(0,0,0,0,apos.x,oglgcty(agc.platformdata).d.top-apos.y,nil);
+end;
 procedure copyareagl(var drawinfo: drawinfoty);
 //todo: use persistent pixmap or texture buffer
 //suse 11.4 crashes with dri shared buffers and does 
@@ -1012,54 +1017,23 @@ begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
   makecurrent(tcanvas1(source).fdrawinfo.gc);
   with sourcerect^ do begin
-   l:= x;
-   t:= y;
-   r:= x + cx;
-   b:= y + cy;
+   setlength(ar1,cx*cy);
+   glreadpixels(x,
+          oglgcty(tcanvas1(source).fdrawinfo.gc.platformdata).d.top-y-cy+1,
+                                  cx,cy,gl_rgba,gl_unsigned_byte,pointer(ar1));
   end;
+  makecurrent(drawinfo.gc);
+  glpushattrib(gl_pixel_mode_bit);
   with destrect^ do begin
-   pt1:= pos;
-   if x < 0 then begin
-    pt1.x:= 0;
-    l:= l + (cx div 2 + (x * sourcerect^.cx)) div cx;
-   end;
-   if y < 0 then begin
-    pt1.y:= 0;
-    t:= t + (cy div 2 + (y * sourcerect^.cy)) div cy;
-   end;
-   int1:= drawinfo.gc.paintdevicesize.cx - (x+cx);
-   if int1 < 0 then begin
-    r:= r + (cx div 2 + int1 * sourcerect^.cx) div cx;
-   end;
-   pt1.y:= top-gltopshift-pt1.y-cy;
-   int1:= drawinfo.gc.paintdevicesize.cy - (y+cy);
-   if int1 < 0 then begin
-    pt1.y:= 0;
-    b:= b + (cy div 2 + int1 * sourcerect^.cy) div cy;
-   end;
+   xscale:= cx/sourcerect^.cx;
+   yscale:= cy/sourcerect^.cy;
+   glpixelzoom(xscale,yscale);
+   setrasterpos(drawinfo.gc,mp(x,y+cy-1));
+   gldrawpixels(sourcerect^.cx,sourcerect^.cy,gl_rgba,gl_unsigned_byte,
+                                                                 pointer(ar1));
   end;
-  w:= r-l;
-  h:= b-t;
-  if (w > 0) and (h > 0) then begin   
-   setlength(ar1,w*h);
-   b:= oglgcty(tcanvas1(source).fdrawinfo.gc.platformdata).d.top-gltopshift-b;
-   glreadpixels(l,b,w,h,gl_rgba,gl_unsigned_byte,pointer(ar1));
-   makecurrent(drawinfo.gc);
-   glpushattrib(gl_pixel_mode_bit);
-   with destrect^ do begin
-    xscale:= cx/sourcerect^.cx;
-    yscale:= cy/sourcerect^.cy;
- //   glrasterpos2i(x,(sourceheight-y-cy));
-    glrasterpos2f(pt1.x+glpixelshift,pt1.y+glpixelshift);
-    glpixelzoom(xscale,yscale);
-   end;
-   with sourcerect^ do begin
-    gldrawpixels(w,h,gl_rgba,gl_unsigned_byte,pointer(ar1));
-   end;
-   glpopattrib;
-  end;
+  glpopattrib;
  end;
- 
 (* buffer objects are unreliable
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
   makecurrent(tcanvas1(source).fdrawinfo.gc);
@@ -1283,26 +1257,14 @@ function openglgetgdifuncs: pgdifunctionaty;
 begin
  result:= @gdifunctions;
 end;
-{
-function openglgetgdinum: integer;
-begin
- result:= gdinumber;
-end;
-}
+
 { tglftfontcache }
 
 procedure tglftfontcache.drawglyph(var drawinfo: drawinfoty; const pos: pointty;
                const bitmap: pbitmapdataty);
 begin
+ setrasterpos(drawinfo.gc,pos); 
  with bitmap^ do begin
-  with oglgcty(drawinfo.gc.platformdata).d do begin
-//   if true {glwindowpos2i = nil} then begin
-    glrasterpos2i(pos.x,top-pos.y); //todo: fix transformation
-//   end
-//   else begin
-//    glwindowpos2i(pos.x,sourceheight-pos.y);
-//   end;
-  end;
   gldrawpixels(width,height,gl_alpha,gl_unsigned_byte,@data);
  end;
 end;
