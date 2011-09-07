@@ -95,21 +95,26 @@ type
                            overload;
    procedure paint(const acanvas: tcanvas; const dest: pointty;
                          const acolorforeground: colorty = cl_default;
-                         const acolorbackground: colorty = cl_default); overload;
+                         const acolorbackground: colorty = cl_default;
+                         const atransparency: colorty = cl_default
+                         ); overload;
                  //useses self.size and self.alignment
    procedure paint(const acanvas: tcanvas; const dest: pointty;
                           const aalignment: alignmentsty;
                           const acolorforeground: colorty = cl_default;
-                          const acolorbackground: colorty = cl_default); overload;
+                          const acolorbackground: colorty = cl_default;
+                          const atransparency: colorty = cl_default); overload;
                  //useses self.size
    procedure paint(const acanvas: tcanvas; const dest: rectty;
                          const acolorforeground: colorty = cl_default;
-                         const acolorbackground: colorty = cl_default); overload;
+                         const acolorbackground: colorty = cl_default;
+                         const atransparency: colorty = cl_default); overload;
                  //useses self.size and self.alignment
    procedure paint(const acanvas: tcanvas; const dest: rectty;
                           const aalignment: alignmentsty;
                           const acolorforeground: colorty = cl_default;
-                          const acolorbackground: colorty = cl_default); overload;
+                          const acolorbackground: colorty = cl_default;
+                          const atransparency: colorty = cl_default); overload;
                  //useses self.size
 
    procedure init(const acolor: colorty); override;
@@ -316,21 +321,21 @@ type
 
    procedure paint(const acanvas: tcanvas; const index: integer;
                    const dest: pointty; const acolor: colorty = cl_default;
-                   const acolorbackground: colorty = cl_default
-               //used for monochrome bitmaps, cl_default-> acanvas.color
+                   const acolorbackground: colorty = cl_default;
+                   const atransparency: colorty = cl_default
             ); overload;
    procedure paint(const acanvas: tcanvas; const index: integer;
                    const dest: rectty; const alignment: alignmentsty = [];
                    const acolor: colorty = cl_default;
-                   const acolorbackground: colorty = cl_default
-               //used for monochrome bitmaps, cl_default-> acanvas.color
+                   const acolorbackground: colorty = cl_default;
+                   const atransparency: colorty = cl_default
             ); overload;
    procedure paint(const acanvas: tcanvas; const index: integer;
                    const dest: rectty; source: rectty;
                    const alignment: alignmentsty = [];
                    const acolor: colorty = cl_default;
-                   const acolorbackground: colorty = cl_default
-               //used for monochrome bitmaps, cl_default-> acanvas.color
+                   const acolorbackground: colorty = cl_default;
+                   const atransparency: colorty = cl_default
             ); overload;
    procedure assign(sender: tpersistent); override;
 
@@ -641,43 +646,47 @@ end;
 
 procedure tbitmap.paint(const acanvas: tcanvas; const dest: rectty;
                          const acolorforeground: colorty = cl_default;
-                         const acolorbackground: colorty = cl_default);
+                         const acolorbackground: colorty = cl_default;
+                         const atransparency: colorty = cl_default);
 begin
  with tcanvas1(canvas).fvaluepo^.origin do begin
   paint(acanvas,dest,makerect(makepoint(-x,-y),getasize),falignment,
-               acolorforeground,acolorbackground);
+               acolorforeground,acolorbackground,atransparency);
  end;
 end;
 
 procedure tbitmap.paint(const acanvas: tcanvas; const dest: rectty;
                          const aalignment: alignmentsty;
                          const acolorforeground: colorty = cl_default;
-                         const acolorbackground: colorty = cl_default);
+                         const acolorbackground: colorty = cl_default;
+                         const atransparency: colorty = cl_default);
 begin
  with tcanvas1(canvas).fvaluepo^.origin do begin
   paint(acanvas,dest,makerect(makepoint(-x,-y),getasize),aalignment,
-               acolorforeground,acolorbackground);
+               acolorforeground,acolorbackground,atransparency);
  end;
 end;
 
 procedure tbitmap.paint(const acanvas: tcanvas; const dest: pointty;
                          const acolorforeground: colorty = cl_default;
-                         const acolorbackground: colorty = cl_default);
+                         const acolorbackground: colorty = cl_default;
+                         const atransparency: colorty = cl_default);
 begin
  with tcanvas1(canvas).fvaluepo^.origin do begin
   paint(acanvas,makerect(dest,fsize),makerect(makepoint(-x,-y),getasize),
-            falignment,acolorforeground,acolorbackground);
+            falignment,acolorforeground,acolorbackground,atransparency);
  end;
 end;
 
 procedure tbitmap.paint(const acanvas: tcanvas; const dest: pointty;
                          const aalignment: alignmentsty;
                          const acolorforeground: colorty = cl_default;
-                         const acolorbackground: colorty = cl_default);
+                         const acolorbackground: colorty = cl_default;
+                         const atransparency: colorty = cl_default);
 begin
  with tcanvas1(canvas).fvaluepo^.origin do begin
   paint(acanvas,makerect(dest,getasize),makerect(makepoint(-x,-y),getasize),
-            aalignment,acolorforeground,acolorbackground);
+            aalignment,acolorforeground,acolorbackground,atransparency);
  end;
 end;
 
@@ -2173,13 +2182,13 @@ end;
 procedure timagelist.paint(const acanvas: tcanvas; const index: integer; 
          const dest: rectty;  const alignment: alignmentsty = [];
          const acolor: colorty = cl_default;
-        const acolorbackground: colorty = cl_default
-  //used for monochrome bitmaps, cl_default-> acanvas.color
+         const acolorbackground: colorty = cl_default;
+                         const atransparency: colorty = cl_default
   );
 begin
  if (index >= 0) and (index < count) then begin
   fbitmap.paint(acanvas,dest,makerect(indextoorg(index),fsize),alignment,acolor,
-                                          acolorbackground);
+                                          acolorbackground,atransparency);
  end;
 end;
 
@@ -2187,24 +2196,26 @@ procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
          const dest: rectty; source: rectty;
          const alignment: alignmentsty = [];
          const acolor: colorty = cl_default;
-        const acolorbackground: colorty = cl_default 
-  //used for monochrome bitmaps, cl_default-> acanvas.color
+        const acolorbackground: colorty = cl_default;
+                         const atransparency: colorty = cl_default
                                                                );
 
 begin
  addpoint1(source.pos,indextoorg(index));
  if (index >= 0) and (index < count) then begin
-  fbitmap.paint(acanvas,dest,source,alignment,acolor,acolorbackground);
+  fbitmap.paint(acanvas,dest,source,alignment,acolor,acolorbackground,
+                              atransparency);
  end;
 end;
 
 procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
                    const dest: pointty; const acolor: colorty = cl_default;
-                   const acolorbackground: colorty = cl_default
-               //used for monochrome bitmaps, cl_default-> acanvas.color
+                   const acolorbackground: colorty = cl_default;
+                         const atransparency: colorty = cl_default
             );
 begin
- paint(acanvas,index,makerect(dest,size),[],acolor,acolorbackground);
+ paint(acanvas,index,makerect(dest,size),[],acolor,acolorbackground,
+                              atransparency);
 end;
 
 function timagelist.gettransparentcolor: colorty;

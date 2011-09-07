@@ -1222,6 +1222,7 @@ var
  im1: maskedimagety;
  mode,datatype: glenum;
  map: array[0..1] of glfloat;
+ opacity: glfloat;
 begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
   if copymode <> gcrasterop then begin
@@ -1250,6 +1251,9 @@ begin
     end;
     glpushclientattrib(gl_client_pixel_store_bit);
     glpushattrib(gl_pixel_mode_bit or gl_color_buffer_bit);
+    opacity:= 1-
+      (transparency.red+transparency.blue+transparency.red+transparency.blue) / 
+      (3*255);
     if im1.image.monochrome then begin
      datatype:= gl_bitmap;
      mode:= gl_color_index;
@@ -1263,14 +1267,18 @@ begin
      map[1]:= glcolorforeground.blue/255;
      glpixelmapfv(gl_pixel_map_i_to_b,2,@map);
      if df_opaque in drawinfo.gc.drawingflags then begin
-      map[0]:= 1;
+      map[0]:= opacity;
+      if opacity < 1 then begin
+       glenable(gl_blend);
+       glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
+      end;
      end
      else begin
       map[0]:= 0;
       glenable(gl_blend);
       glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
      end;
-     map[1]:= 1;
+     map[1]:= opacity;
      glpixelmapfv(gl_pixel_map_i_to_a,2,@map);
      glpixelstorei(gl_unpack_lsb_first,1);
     end
