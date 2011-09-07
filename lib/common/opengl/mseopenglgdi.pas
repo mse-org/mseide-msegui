@@ -1224,6 +1224,8 @@ var
  map: array[0..1] of glfloat;
  opacity: glfloat;
  monomask: boolean;
+ ps1,pd1: prgbtripleaty;
+ int1: integer;
 begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
   if copymode <> gcrasterop then begin
@@ -1274,9 +1276,6 @@ begin
      glstencilfunc(gl_equal,3,3);
     end;
     if im1.image.monochrome then begin
-//     if monomask then begin
-//      readstencil(
-//     end;
      datatype:= gl_bitmap;
      mode:= gl_color_index;
      map[0]:= glcolorbackground.red/255;
@@ -1304,9 +1303,22 @@ begin
      glpixelmapfv(gl_pixel_map_i_to_a,2,@map);
     end
     else begin
+     if (im1.mask.pixels <> nil) and not im1.mask.monochrome then begin
+      ps1:= prgbtripleaty(im1.mask.pixels);
+      pd1:= prgbtripleaty(im1.image.pixels);
+      for int1:= im1.image.length-1 downto 0 do begin
+       with ps1^[int1] do begin
+        pd1^[int1].res:= (word(red)+green+blue) div 3;
+       end;
+      end;
+      glenable(gl_blend);
+      glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
+     end
+     else begin
+      glpixeltransferf(gl_alpha_scale,0);
+      glpixeltransferf(gl_alpha_bias,1);
+     end;
      datatype:= gl_unsigned_byte;
-     glpixeltransferf(gl_alpha_scale,0);
-     glpixeltransferf(gl_alpha_bias,1);
     end;
     with sourcerect^ do begin
      gldrawpixels(cx,cy,mode,datatype,im1.image.pixels);
