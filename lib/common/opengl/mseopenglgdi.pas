@@ -68,13 +68,18 @@ type
   {$endif}
   pd: paintdevicety;
   extensions: glextensionsty;
-  gclineoptions: lineoptionsty;
   top: integer; //y 0 coord value
   glfont: fontty;
   tess: pglutesselator;
+  texture: gluint;
+  brushsize: sizety;
+  hastexture: boolean;
   glcolorforeground: rgbtriplety;
   glcolorbackground: rgbtriplety;
   gcrasterop: rasteropty;
+  gclineoptions: lineoptionsty;
+  gcdrawingflags: drawingflagsty;
+  gcbrushorigin: pointty;
  end;
 
  {$if sizeof(oglgcdty) > sizeof(gcpty)} {$error 'buffer overflow'}{$endif}
@@ -102,7 +107,7 @@ procedure gdi_clear(var drawinfo: drawinfoty);
 implementation
 uses
  mseguiintf,{mseftgl,}msegenericgdi,msestrings,msehash,sysutils,
- mseformatstr,msefontcache,mseftfontcache,mseopengl;
+ mseformatstr,msefontcache,mseftfontcache,mseopengl,msebits;
 type
  tcanvas1 = class(tcanvas);
  
@@ -143,6 +148,16 @@ var
  ffontcache: tglftfontcache;
 // gdinumber: integer;
 
+function checkerror: glenum;
+begin
+ glfinish();
+ result:= glgeterror();
+ if result <> gl_no_error then begin
+  repeat
+  until glgeterror() = gl_no_error;
+ end;
+end;
+ 
 function fontcache: tglftfontcache;
 begin
  if ffontcache = nil then begin
@@ -194,8 +209,8 @@ begin
 end;
 
 procedure setviewport(const agc: gcty; const arect: rectty);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  with arect do begin
   glviewport(x,oglgcty(agc.platformdata).d.top-gltopshift-y-cy,cx,cy);
@@ -223,13 +238,14 @@ begin
  //  pd:= winid;
    top:= sourceviewport.cy+gltopshift;
    tess:= glunewtess();
+   makecurrent(gc);
+   glclearstencil(0);
+   glclear(gl_stencil_buffer_bit);
+   setviewport(gc,sourceviewport);
+   glpushattrib(gl_color_buffer_bit); //no mesa glflush until the first glpopattrib?
+   glpopattrib();
+   glgentextures(1,@texture);
   end;
-  makecurrent(gc);
-  glclearstencil(0);
-  glclear(gl_stencil_buffer_bit);
-  setviewport(gc,sourceviewport);
-  glpushattrib(gl_color_buffer_bit); //no mesa glflush until the first glpopattrib?
-  glpopattrib();
  end;
 end;
  
@@ -410,6 +426,7 @@ end;
 procedure sendrect(const drawinfo: drawinfoty; const arect: rectty);
 var
  startx,starty,endx,endy: real;
+ texstartx,texstarty,texendx,texendy: real;
  
 begin
  with drawinfo,oglgcty(gc.platformdata).d,arect do begin
@@ -417,11 +434,30 @@ begin
   endx:= startx+cx;
   starty:= (top-gltopshift-(y+origin.y))+glpixelshift;
   endy:= starty-cy;
-//  glvertex2iv(@pos);
-  glvertex2f(startx,starty);
-  glvertex2f(endx,starty);
-  glvertex2f(endx,endy);
-  glvertex2f(startx,endy);
+  if hastexture then begin
+   texstartx:= (x+origin.x+gcbrushorigin.x)/brushsize.cx;
+   texendx:= texstartx + cx/brushsize.cx;
+   texstarty:= (y+origin.y+gcbrushorigin.y)/brushsize.cy;
+   texendy:= texstarty + cy/brushsize.cy;
+//   texstartx:= 0;
+//   texendx:= 1;
+//   texstarty:= -1;
+//   texendy:= 0;
+   gltexcoord2d(texstartx,texstarty);
+   glvertex2d(startx,starty);
+   gltexcoord2d(texendx,texstarty);
+   glvertex2d(endx,starty);
+   gltexcoord2d(texendx,texendy);
+   glvertex2d(endx,endy);
+   gltexcoord2d(texstartx,texendy);
+   glvertex2d(startx,endy);
+  end
+  else begin
+   glvertex2f(startx,starty);
+   glvertex2f(endx,starty);
+   glvertex2f(endx,endy);
+   glvertex2f(startx,endy);
+  end;
  end;
 end;
 
@@ -594,6 +630,7 @@ begin
   end;
 {$ifdef unix}
   glxmakecurrent(fdpy,0,nil);
+  gldeletetextures(1,@texture);
   glxdestroycontext(fdpy,fcontext);
   if drawinfo.paintdevice <> 0 then begin
    if fkind = gck_pixmap then begin
@@ -611,6 +648,7 @@ begin
   end;
 {$else}
   wglmakecurrent(0,0);
+  gldeletetextures(1,@texture);
   wgldeletecontext(fcontext);
   releasedc(drawinfo.paintdevice,fdc);
   dec(gccount);
@@ -681,14 +719,104 @@ begin
   gllogicop(rops[rasterop]);
  end;
 end;
- 
+
+function scaletopowerof2(const source: imagety;
+                               out dest: imagety): boolean;
+//true if data copied
+var
+ ps,pd: plongword;
+ int1,int2: integer;
+ scx,dcx,scy,dcy: integer;
+ xintp,yintp: integer;
+begin
+ dest:= source;
+ result:= false;
+ if source.length > 0 then begin
+  with dest do begin
+   size.cx:= nextpowerof2(source.size.cx);
+   size.cy:= nextpowerof2(source.size.cy);
+   result:= (size.cx <> source.size.cx) or (size.cy <> source.size.cy);
+   if result then begin
+    dcx:= size.cx;
+    dcy:= size.cy;
+    scx:= source.size.cx;
+    scy:= source.size.cy;    
+    dest.pixels:= gui_allocimagemem(dcx*dcy);
+    ps:= pointer(source.pixels);
+    pd:= pointer(dest.pixels);
+    yintp:= dcy;
+    for int1:= dcy-1 downto 0 do begin
+     xintp:= dcx;
+     for int2:= dcx-1 downto 0 do begin
+      pd^:= ps^;
+      inc(pd);
+      dec(xintp,scx);
+      if xintp <= 0 then begin
+       inc(ps);
+       inc(xintp,dcx);
+      end;
+     end;
+     dec(yintp,scy);
+     if yintp <= 0 then begin
+      inc(yintp,dcy);
+     end
+     else begin
+      dec(ps,scx); //duplicate row
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+var testvar: integer;
+procedure settexture(const gc: gcty; const apixmap: tsimplebitmap);
+var
+ mode: glenum;
+ im1: maskedimagety;
+ im2: imagety;
+ bo1: boolean;
+begin
+ with oglgcty(gc.platformdata).d do begin
+  glbindtexture(gl_texture_2d,texture);
+  mode:= gl_rgba;
+  if gle_gl_ext_bgra in extensions then begin
+   mode:= gl_bgra;
+  end;
+  im1:= tcanvas1(apixmap.canvas).getimage(mode = gl_rgba);
+  makecurrent(gc);
+  brushsize:= im1.image.size;
+  if (brushsize.cx = 0) or (brushsize.cy = 0) then begin
+   glteximage2d(gl_texture_2d,0,4,0,0,0,mode,gl_unsigned_byte,nil);
+   gldisable(gl_texture_2d);
+   hastexture:= false;
+   exit;
+  end;
+  bo1:= scaletopowerof2(im1.image,im2);
+  glpushattrib(gl_pixel_mode_bit);
+  glpixeltransferf(gl_alpha_scale,0);
+  glpixeltransferf(gl_alpha_bias,1);
+  with im2 do begin
+   glteximage2d(gl_texture_2d,0,4,size.cx,size.cy,0,mode,gl_unsigned_byte,pixels);
+  end;
+  if bo1 then begin
+   gui_freeimagemem(im2.pixels);
+  end;
+  glpopattrib;
+  gltexenvi(gl_texture_env,gl_texture_env_mode,gl_replace);
+  gltexparameteri(gl_texture_2d, gl_texture_wrap_s, gl_repeat);
+  gltexparameteri (gl_texture_2d, gl_texture_wrap_t, gl_repeat);
+  gltexparameteri (gl_texture_2d, gl_texture_mag_filter, gl_nearest);
+  gltexparameteri (gl_texture_2d, gl_texture_min_filter, gl_nearest);
+ end;
+end;
+
 procedure gdi_changegc(var drawinfo: drawinfoty);
 var
  po1: pstripety;
  int1,int2,int3,int4: integer;
  y1,x1: integer;
 begin
- with drawinfo.gcvalues^,oglgcty(drawinfo.gc.platformdata).d do begin
+ with drawinfo.gcvalues^,drawinfo.gc,oglgcty(platformdata).d do begin
   if gvm_colorforeground in mask then begin
    glcolorforeground:= rgbtriplety(colorforeground);
    with glcolorforeground do begin
@@ -702,6 +830,24 @@ begin
    setlogicop(rasterop,drawinfo.gc);
    gcrasterop:= rasterop;
   end;
+  if gvm_brush in mask then begin
+   settexture(drawinfo.gc,brush);
+  end;
+  if gvm_brushorigin in mask then begin
+   gcbrushorigin:= brushorigin;
+  end;
+  if drawingflagsty((longword(drawingflags) xor 
+     longword(gcdrawingflags))) * [df_brush]{fillmodeinfoflags} <> [] then begin
+   hastexture:= (df_brush in drawingflags) and 
+                              (brushsize.cx > 0) and (brushsize.cy > 0);
+   if hastexture then begin
+    glenable(gl_texture_2d);
+   end
+   else begin
+    gldisable(gl_texture_2d);
+   end;
+  end;
+  gcdrawingflags:= drawingflags;
   if gvm_lineoptions in mask then begin
    if (lio_antialias in lineinfo.options) xor 
                 (lio_antialias in gclineoptions) then begin
@@ -999,6 +1145,7 @@ begin
  glrasterpos2f(0.999*glpixelshift,0.999*glpixelshift);
  glbitmap(0,0,0,0,apos.x,oglgcty(agc.platformdata).d.top-apos.y,nil);
 end;
+
 procedure copyareagl(var drawinfo: drawinfoty);
 //todo: use persistent pixmap or texture buffer
 //suse 11.4 crashes with dri shared buffers and does 
@@ -1009,9 +1156,9 @@ var
 // buf: gluint;
  xscale,yscale: real;
  ar1: rgbtriplearty;
- l,t,r,b,w,h: integer;
- pt1: pointty;
- int1: integer;
+// l,t,r,b,w,h: integer;
+// pt1: pointty;
+// int1: integer;
  
 begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
@@ -1073,7 +1220,8 @@ end;
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
  im1: maskedimagety;
- mode: glenum;
+ mode,datatype: glenum;
+ map: array[0..1] of glfloat;
 begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
   if copymode <> gcrasterop then begin
@@ -1102,18 +1250,44 @@ begin
     end;
     glpushclientattrib(gl_client_pixel_store_bit);
     glpushattrib(gl_pixel_mode_bit);
+    if im1.image.monochrome then begin
+     datatype:= gl_bitmap;
+     mode:= gl_color_index;
+     map[0]:= glcolorbackground.red/255;
+     map[1]:= glcolorforeground.red/255;
+     glpixelmapfv(gl_pixel_map_i_to_r,2,@map);
+     map[0]:= glcolorbackground.green/255;
+     map[1]:= glcolorforeground.green/255;
+     glpixelmapfv(gl_pixel_map_i_to_g,2,@map);
+     map[0]:= glcolorbackground.blue/255;
+     map[1]:= glcolorforeground.blue/255;
+     glpixelmapfv(gl_pixel_map_i_to_b,2,@map);
+     if df_opaque in drawinfo.gc.drawingflags then begin
+      map[0]:= 0;
+     end
+     else begin
+      map[0]:= 1;
+     end;
+     map[1]:= 1;
+     glpixelmapfv(gl_pixel_map_i_to_a,2,@map);
+     glpixelstorei(gl_unpack_lsb_first,1);
+    end
+    else begin
+     datatype:= gl_unsigned_byte;
+     glpixeltransferf(gl_alpha_scale,0);
+     glpixeltransferf(gl_alpha_bias,1);
+    end;
     
     with destrect^ do begin
      glrasterpos2i(x,top-y);
     end;
-    glpixeltransferf(gl_alpha_scale,0);
-    glpixeltransferf(gl_alpha_bias,1);
     with sourcerect^ do begin
      glpixelzoom(destrect^.cx/cx,-destrect^.cy/cy);
      glpixelstorei(gl_unpack_row_length,im1.image.size.cx);
-     glpixelstorei(gl_unpack_skip_rows,x);
-     glpixelstorei(gl_unpack_skip_pixels,y);
-     gldrawpixels(cx,cy,mode,gl_unsigned_byte,im1.image.pixels);
+     glpixelstorei(gl_unpack_skip_pixels,x);
+     glpixelstorei(gl_unpack_skip_rows,y);
+     gldrawpixels(cx,cy,mode,datatype,im1.image.pixels);
+testvar:= checkerror;
     end;
     glpopclientattrib;
     glpopattrib;

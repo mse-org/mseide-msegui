@@ -78,6 +78,7 @@ function highestbit(value: longword): integer;
 //0-> first, 31-> last($80000000), -1-> none ($00000000)
 function lowestbit(value: longword): integer;
 //0-> first, 31-> last($80000000), -1-> none ($00000000)
+function nextpowerof2(const avalue: longword): longword;
 
 function highestbit64(value: qword): integer;
 //0-> first, 63-> last($8000000000000000), -1-> none ($0000000000000000)
@@ -643,6 +644,19 @@ begin
    dec(result);
    value:= value shl 1;
   end;
+ end;
+end;
+
+function nextpowerof2(const avalue: longword): longword;
+var
+ int1: integer;
+begin
+ int1:= highestbit(avalue);
+ if avalue - bits[int1] <> 0 then begin
+  result:= bits[int1+1];
+ end
+ else begin
+  result:= avalue;
  end;
 end;
 
