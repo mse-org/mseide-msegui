@@ -1249,7 +1249,7 @@ begin
      exit;
     end;
     glpushclientattrib(gl_client_pixel_store_bit);
-    glpushattrib(gl_pixel_mode_bit);
+    glpushattrib(gl_pixel_mode_bit or gl_color_buffer_bit);
     if im1.image.monochrome then begin
      datatype:= gl_bitmap;
      mode:= gl_color_index;
@@ -1263,10 +1263,12 @@ begin
      map[1]:= glcolorforeground.blue/255;
      glpixelmapfv(gl_pixel_map_i_to_b,2,@map);
      if df_opaque in drawinfo.gc.drawingflags then begin
-      map[0]:= 0;
+      map[0]:= 1;
      end
      else begin
-      map[0]:= 1;
+      map[0]:= 0;
+      glenable(gl_blend);
+      glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
      end;
      map[1]:= 1;
      glpixelmapfv(gl_pixel_map_i_to_a,2,@map);

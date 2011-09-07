@@ -307,25 +307,29 @@ type
    procedure clear;
    procedure deleteimage(const index: integer);
    procedure moveimage(const fromindex: integer; const toindex: integer);
-   procedure setimage(index: integer; image: tmaskedbitmap; const source: rectty); overload;
+   procedure setimage(index: integer; image: tmaskedbitmap;
+                                            const source: rectty); overload;
    procedure setimage(index: integer; image: tmaskedbitmap); overload;
    procedure getimage(const index: integer; const dest: tmaskedbitmap);
    function addimage(const image: tmaskedbitmap; 
                               const stretch: boolean = false): integer;
 
    procedure paint(const acanvas: tcanvas; const index: integer;
-                   const dest: pointty; const acolor: colorty = cl_default
+                   const dest: pointty; const acolor: colorty = cl_default;
+                   const acolorbackground: colorty = cl_default
                //used for monochrome bitmaps, cl_default-> acanvas.color
             ); overload;
    procedure paint(const acanvas: tcanvas; const index: integer;
                    const dest: rectty; const alignment: alignmentsty = [];
-                   const acolor: colorty = cl_default
+                   const acolor: colorty = cl_default;
+                   const acolorbackground: colorty = cl_default
                //used for monochrome bitmaps, cl_default-> acanvas.color
             ); overload;
    procedure paint(const acanvas: tcanvas; const index: integer;
                    const dest: rectty; source: rectty;
                    const alignment: alignmentsty = [];
-                   const acolor: colorty = cl_default
+                   const acolor: colorty = cl_default;
+                   const acolorbackground: colorty = cl_default
                //used for monochrome bitmaps, cl_default-> acanvas.color
             ); overload;
    procedure assign(sender: tpersistent); override;
@@ -2168,35 +2172,39 @@ end;
 
 procedure timagelist.paint(const acanvas: tcanvas; const index: integer; 
          const dest: rectty;  const alignment: alignmentsty = [];
-         const acolor: colorty = cl_default 
+         const acolor: colorty = cl_default;
+        const acolorbackground: colorty = cl_default
   //used for monochrome bitmaps, cl_default-> acanvas.color
   );
 begin
  if (index >= 0) and (index < count) then begin
-  fbitmap.paint(acanvas,dest,makerect(indextoorg(index),fsize),alignment,acolor);
+  fbitmap.paint(acanvas,dest,makerect(indextoorg(index),fsize),alignment,acolor,
+                                          acolorbackground);
  end;
 end;
 
 procedure timagelist.paint(const acanvas: tcanvas; const index: integer; 
          const dest: rectty; source: rectty;
          const alignment: alignmentsty = [];
-         const acolor: colorty = cl_default 
+         const acolor: colorty = cl_default;
+        const acolorbackground: colorty = cl_default 
   //used for monochrome bitmaps, cl_default-> acanvas.color
                                                                );
 
 begin
  addpoint1(source.pos,indextoorg(index));
  if (index >= 0) and (index < count) then begin
-  fbitmap.paint(acanvas,dest,source,alignment,acolor);
+  fbitmap.paint(acanvas,dest,source,alignment,acolor,acolorbackground);
  end;
 end;
 
 procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
-                   const dest: pointty; const acolor: colorty = cl_default
+                   const dest: pointty; const acolor: colorty = cl_default;
+                   const acolorbackground: colorty = cl_default
                //used for monochrome bitmaps, cl_default-> acanvas.color
             );
 begin
- paint(acanvas,index,makerect(dest,size),[],acolor);
+ paint(acanvas,index,makerect(dest,size),[],acolor,acolorbackground);
 end;
 
 function timagelist.gettransparentcolor: colorty;
