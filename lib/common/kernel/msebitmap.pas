@@ -2321,7 +2321,12 @@ begin
                dest.fmaskcolorforeground,dest.fmaskcolorbackground);
   end;
   if dest.masked and not masked then begin
-   dest.mask.init(dest.fmaskcolorbackground);
+   if dest.mask.monochrome then begin
+    dest.mask.init(cl_1);
+   end
+   else begin
+    dest.mask.init(dest.fmaskcolorforeground);
+   end;
   end;
  end;
 end;

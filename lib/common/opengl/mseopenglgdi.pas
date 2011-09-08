@@ -57,8 +57,8 @@ type
  end;
  pcontextinfoty = ^contextinfoty;
 
- oglgcflagty = (ogcf_hastexture,ogcf_needsblend);
- oglgcflagsty = set of oglgcflagty; 
+ oglgcstatety = (ogcs_hastexture,ogcs_needsblend,ogcs_hasclipreg);
+ oglgcstatesty = set of oglgcstatety; 
  oglgcdty = record
   {$ifdef unix}
   fcontext: glxcontext;
@@ -78,7 +78,7 @@ type
   tess: pglutesselator;
   texture: gluint;
   brushsize: sizety;
-  gcflags: oglgcflagsty;
+  gcstate: oglgcstatesty;
   glcolorforeground: rgbtriplety;
   glcolorbackground: rgbtriplety;
   gcrasterop: rasteropty;
@@ -439,7 +439,7 @@ begin
   endx:= startx+cx;
   starty:= (top-gltopshift-(y+origin.y))+glpixelshift;
   endy:= starty-cy;
-  if ogcf_hastexture in gcflags then begin
+  if ogcs_hastexture in gcstate then begin
    texstartx:= (x+origin.x+gcbrushorigin.x)/brushsize.cx;
    texendx:= texstartx + cx/brushsize.cx;
    texstarty:= (y+origin.y+gcbrushorigin.y)/brushsize.cy;
@@ -805,7 +805,6 @@ begin
  end;
 end;
 
-var testvar: integer;
 procedure settexture(const gc: gcty; const apixmap: tsimplebitmap);
 var
  mode,datatype: glenum;
@@ -826,12 +825,12 @@ begin
   if (brushsize.cx = 0) or (brushsize.cy = 0) then begin
    glteximage2d(gl_texture_2d,0,4,0,0,0,mode,gl_unsigned_byte,nil);
    gldisable(gl_texture_2d);
-   exclude(gcflags,ogcf_hastexture);
+   exclude(gcstate,ogcs_hastexture);
    exit;
   end;
   bo1:= scaletopowerof2(im1,im2);
   if im1.mask.pixels <> nil then begin
-   include(gcflags,ogcf_needsblend);
+   include(gcstate,ogcs_needsblend);
   end;
   glpushattrib(gl_pixel_mode_bit);
   if im2.monochrome then begin
@@ -849,7 +848,7 @@ begin
    end
    else begin
     map[0]:= 0;
-    include(gcflags,ogcf_needsblend);
+    include(gcstate,ogcs_needsblend);
    end;
    map[1]:= 1;
    glpixelmapfv(gl_pixel_map_i_to_a,2,@map);
@@ -883,10 +882,10 @@ var
  po1: pstripety;
  int1,int2,int3,int4: integer;
  y1,x1: integer;
- flagsbefore: oglgcflagsty;
+ statebefore: oglgcstatesty;
 begin
  with drawinfo.gcvalues^,drawinfo.gc,oglgcty(platformdata).d do begin
-  flagsbefore:= gcflags;
+  statebefore:= gcstate;
   if gvm_colorforeground in mask then begin
    glcolorforeground:= rgbtriplety(colorforeground);
    with glcolorforeground do begin
@@ -908,7 +907,7 @@ begin
   end;
   if drawingflagsty((longword(drawingflags) xor 
      longword(gcdrawingflags))) * [df_brush]{fillmodeinfoflags} <> [] then begin
-   updatebit1(longword(gcflags),ord(ogcf_hastexture),
+   updatebit1(longword(gcstate),ord(ogcs_hastexture),
                                 (df_brush in drawingflags) and 
                               (brushsize.cx > 0) and (brushsize.cy > 0));
   end;
@@ -935,8 +934,10 @@ begin
   if gvm_clipregion in mask then begin
    if clipregion = 0 then begin
     gldisable(gl_stencil_test);
+    exclude(gcstate,ogcs_hasclipreg);
    end
    else begin
+    include(gcstate,ogcs_hasclipreg);
     glclearstencil(0);
     glclear(gl_stencil_buffer_bit);
     glenable(gl_stencil_test);
@@ -972,17 +973,17 @@ begin
     glstencilfunc(gl_equal,1,1);
    end;
   end;
-  flagsbefore:= oglgcflagsty(longword(flagsbefore) xor longword(gcflags));
-  if ogcf_hastexture in flagsbefore then begin
-   if ogcf_hastexture in gcflags then begin
+  statebefore:= oglgcstatesty(longword(statebefore) xor longword(gcstate));
+  if ogcs_hastexture in statebefore then begin
+   if ogcs_hastexture in gcstate then begin
     glenable(gl_texture_2d);
    end
    else begin
     gldisable(gl_texture_2d);
    end;
   end;
-  if ogcf_needsblend in flagsbefore then begin
-   if ogcf_needsblend in gcflags then begin
+  if ogcs_needsblend in statebefore then begin
+   if ogcs_needsblend in gcstate then begin
     glenable(gl_blend);
     glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
    end
@@ -1338,6 +1339,7 @@ begin
      mode:= gl_bgra;
     end;
     im1:= tcanvas1(source).getimage(mode = gl_rgba);
+    makecurrent(drawinfo.gc);
     if (im1.image.size.cx = 0) or (im1.image.size.cy = 0) then begin
      exit;
     end;
@@ -1362,7 +1364,14 @@ begin
       gldrawpixels(cx,cy,gl_stencil_index,gl_bitmap,im1.mask.pixels);
      end;
      glpixeltransferi(gl_index_shift,0);
-     glstencilfunc(gl_equal,3,3);
+     if ogcs_hasclipreg in gcstate then begin
+      int1:= 3;        //combine mask and clipregion
+     end
+     else begin
+      int1:= 2;
+      glenable(gl_stencil_test);
+     end;
+     glstencilfunc(gl_equal,int1,int1);
     end;
     if im1.image.monochrome then begin
      datatype:= gl_bitmap;
@@ -1426,7 +1435,6 @@ begin
         pd1^[int1].res:= (word(red)+green+blue) div 3;
        end;
       end;
-//      end;
       glenable(gl_blend);
       glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
      end
