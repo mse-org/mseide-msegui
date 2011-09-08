@@ -11,6 +11,9 @@ unit mseopenglgdi;
 //
 //under construction
 //
+
+//todo: optimize pixmap and brush handling, use server side buffers
+
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
@@ -53,7 +56,9 @@ type
  {$endif}
  end;
  pcontextinfoty = ^contextinfoty;
- 
+
+ oglgcflagty = (ogcf_hastexture,ogcf_needsblend);
+ oglgcflagsty = set of oglgcflagty; 
  oglgcdty = record
   {$ifdef unix}
   fcontext: glxcontext;
@@ -73,7 +78,7 @@ type
   tess: pglutesselator;
   texture: gluint;
   brushsize: sizety;
-  hastexture: boolean;
+  gcflags: oglgcflagsty;
   glcolorforeground: rgbtriplety;
   glcolorbackground: rgbtriplety;
   gcrasterop: rasteropty;
@@ -434,7 +439,7 @@ begin
   endx:= startx+cx;
   starty:= (top-gltopshift-(y+origin.y))+glpixelshift;
   endy:= starty-cy;
-  if hastexture then begin
+  if ogcf_hastexture in gcflags then begin
    texstartx:= (x+origin.x+gcbrushorigin.x)/brushsize.cx;
    texendx:= texstartx + cx/brushsize.cx;
    texstarty:= (y+origin.y+gcbrushorigin.y)/brushsize.cy;
@@ -720,61 +725,94 @@ begin
  end;
 end;
 
-function scaletopowerof2(const source: imagety;
+//todo: optimize
+function scaletopowerof2(const source: maskedimagety;
                                out dest: imagety): boolean;
 //true if data copied
 var
  ps,pd: plongword;
+ pm: prgbtriplety;
  int1,int2: integer;
  scx,dcx,scy,dcy: integer;
  xintp,yintp: integer;
 begin
- dest:= source;
+ dest:= source.image;
  result:= false;
- if source.length > 0 then begin
+ if source.image.length > 0 then begin
   with dest do begin
-   size.cx:= nextpowerof2(source.size.cx);
-   size.cy:= nextpowerof2(source.size.cy);
-   result:= (size.cx <> source.size.cx) or (size.cy <> source.size.cy);
+   size.cx:= nextpowerof2(source.image.size.cx);
+   size.cy:= nextpowerof2(source.image.size.cy);
+   result:= (source.mask.pixels <> nil) and not source.mask.monochrome
+                    or (size.cx <> source.image.size.cx) or 
+                                       (size.cy <> source.image.size.cy);
    if result then begin
     dcx:= size.cx;
     dcy:= size.cy;
-    scx:= source.size.cx;
-    scy:= source.size.cy;    
+    scx:= source.image.size.cx;
+    scy:= source.image.size.cy;    
     dest.pixels:= gui_allocimagemem(dcx*dcy);
-    ps:= pointer(source.pixels);
+    ps:= pointer(source.image.pixels);
     pd:= pointer(dest.pixels);
     yintp:= dcy;
-    for int1:= dcy-1 downto 0 do begin
-     xintp:= dcx;
-     for int2:= dcx-1 downto 0 do begin
-      pd^:= ps^;
-      inc(pd);
-      dec(xintp,scx);
-      if xintp <= 0 then begin
-       inc(ps);
-       inc(xintp,dcx);
+    if (source.mask.pixels <> nil) and not source.mask.monochrome then begin
+     pm:= pointer(source.mask.pixels);
+     for int1:= dcy-1 downto 0 do begin
+      xintp:= dcx;
+      for int2:= dcx-1 downto 0 do begin
+       pd^:= ps^;
+       prgbtriplety(pd)^.res:= (word(pm^.red)+pm^.green+pm^.blue) div 3;
+       inc(pd);
+       dec(xintp,scx);
+       if xintp <= 0 then begin
+        inc(ps);
+        inc(pm);
+        inc(xintp,dcx);
+       end;
+      end;
+      dec(yintp,scy);
+      if yintp <= 0 then begin
+       inc(yintp,dcy);
+      end
+      else begin
+       dec(ps,scx); //duplicate row
+       dec(pm,scx); //duplicate row
       end;
      end;
-     dec(yintp,scy);
-     if yintp <= 0 then begin
-      inc(yintp,dcy);
-     end
-     else begin
-      dec(ps,scx); //duplicate row
+    end
+    else begin
+     for int1:= dcy-1 downto 0 do begin
+      xintp:= dcx;
+      for int2:= dcx-1 downto 0 do begin
+       pd^:= ps^;
+       inc(pd);
+       dec(xintp,scx);
+       if xintp <= 0 then begin
+        inc(ps);
+        inc(xintp,dcx);
+       end;
+      end;
+      dec(yintp,scy);
+      if yintp <= 0 then begin
+       inc(yintp,dcy);
+      end
+      else begin
+       dec(ps,scx); //duplicate row
+      end;
      end;
     end;
    end;
   end;
  end;
 end;
+
 var testvar: integer;
 procedure settexture(const gc: gcty; const apixmap: tsimplebitmap);
 var
- mode: glenum;
+ mode,datatype: glenum;
  im1: maskedimagety;
  im2: imagety;
  bo1: boolean;
+ map: array[0..1] of glfloat;
 begin
  with oglgcty(gc.platformdata).d do begin
   glbindtexture(gl_texture_2d,texture);
@@ -788,15 +826,45 @@ begin
   if (brushsize.cx = 0) or (brushsize.cy = 0) then begin
    glteximage2d(gl_texture_2d,0,4,0,0,0,mode,gl_unsigned_byte,nil);
    gldisable(gl_texture_2d);
-   hastexture:= false;
+   exclude(gcflags,ogcf_hastexture);
    exit;
   end;
-  bo1:= scaletopowerof2(im1.image,im2);
+  bo1:= scaletopowerof2(im1,im2);
+  if im1.mask.pixels <> nil then begin
+   include(gcflags,ogcf_needsblend);
+  end;
   glpushattrib(gl_pixel_mode_bit);
-  glpixeltransferf(gl_alpha_scale,0);
-  glpixeltransferf(gl_alpha_bias,1);
+  if im2.monochrome then begin
+   map[0]:= glcolorbackground.red/255;
+   map[1]:= glcolorforeground.red/255;
+   glpixelmapfv(gl_pixel_map_i_to_r,2,@map);
+   map[0]:= glcolorbackground.green/255;
+   map[1]:= glcolorforeground.green/255;
+   glpixelmapfv(gl_pixel_map_i_to_g,2,@map);
+   map[0]:= glcolorbackground.blue/255;
+   map[1]:= glcolorforeground.blue/255;
+   glpixelmapfv(gl_pixel_map_i_to_b,2,@map);
+   if df_opaque in gc.drawingflags then begin
+    map[0]:= 1;
+   end
+   else begin
+    map[0]:= 0;
+    include(gcflags,ogcf_needsblend);
+   end;
+   map[1]:= 1;
+   glpixelmapfv(gl_pixel_map_i_to_a,2,@map);
+   mode:= gl_color_index;
+   datatype:= gl_bitmap;
+  end
+  else begin
+   datatype:= gl_unsigned_byte;
+   if im1.mask.pixels = nil then begin
+    glpixeltransferf(gl_alpha_scale,0);
+    glpixeltransferf(gl_alpha_bias,1);
+   end;
+  end;
   with im2 do begin
-   glteximage2d(gl_texture_2d,0,4,size.cx,size.cy,0,mode,gl_unsigned_byte,pixels);
+   glteximage2d(gl_texture_2d,0,4,size.cx,size.cy,0,mode,datatype,pixels);
   end;
   if bo1 then begin
    gui_freeimagemem(im2.pixels);
@@ -815,8 +883,10 @@ var
  po1: pstripety;
  int1,int2,int3,int4: integer;
  y1,x1: integer;
+ flagsbefore: oglgcflagsty;
 begin
  with drawinfo.gcvalues^,drawinfo.gc,oglgcty(platformdata).d do begin
+  flagsbefore:= gcflags;
   if gvm_colorforeground in mask then begin
    glcolorforeground:= rgbtriplety(colorforeground);
    with glcolorforeground do begin
@@ -838,14 +908,9 @@ begin
   end;
   if drawingflagsty((longword(drawingflags) xor 
      longword(gcdrawingflags))) * [df_brush]{fillmodeinfoflags} <> [] then begin
-   hastexture:= (df_brush in drawingflags) and 
-                              (brushsize.cx > 0) and (brushsize.cy > 0);
-   if hastexture then begin
-    glenable(gl_texture_2d);
-   end
-   else begin
-    gldisable(gl_texture_2d);
-   end;
+   updatebit1(longword(gcflags),ord(ogcf_hastexture),
+                                (df_brush in drawingflags) and 
+                              (brushsize.cx > 0) and (brushsize.cy > 0));
   end;
   gcdrawingflags:= drawingflags;
   if gvm_lineoptions in mask then begin
@@ -905,6 +970,24 @@ begin
     end;
     glstencilop(gl_keep,gl_keep,gl_keep);
     glstencilfunc(gl_equal,1,1);
+   end;
+  end;
+  flagsbefore:= oglgcflagsty(longword(flagsbefore) xor longword(gcflags));
+  if ogcf_hastexture in flagsbefore then begin
+   if ogcf_hastexture in gcflags then begin
+    glenable(gl_texture_2d);
+   end
+   else begin
+    gldisable(gl_texture_2d);
+   end;
+  end;
+  if ogcf_needsblend in flagsbefore then begin
+   if ogcf_needsblend in gcflags then begin
+    glenable(gl_blend);
+    glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
+   end
+   else begin
+    gldisable(gl_blend);
    end;
   end;
  end;
@@ -1217,6 +1300,8 @@ begin
  *)
 end;
 
+//todo: optimize, use data window
+
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
  im1: maskedimagety;
@@ -1225,7 +1310,11 @@ var
  opacity: glfloat;
  monomask: boolean;
  ps1,pd1: prgbtripleaty;
- int1: integer;
+ ps2: plongword;
+ pd2: prgbtriplety;
+ int1,int2: integer;
+ lwo1: longword;
+ 
 begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
   if copymode <> gcrasterop then begin
@@ -1304,13 +1393,40 @@ begin
     end
     else begin
      if (im1.mask.pixels <> nil) and not im1.mask.monochrome then begin
-      ps1:= prgbtripleaty(im1.mask.pixels);
+     {
+      if im1.mask.monochrome then begin
+       pd2:= prgbtriplety(im1.image.pixels);
+       ps2:= plongword(im1.mask.pixels);
+       for int1:= 0 to im1.image.size.cy - 1 do begin
+        lwo1:= 1;
+        for int2:= 0 to im1.image.size.cx - 1 do begin
+         if ps2^ and lwo1 <> 0 then begin
+          pd2^.res:= $ff;
+         end
+         else begin
+          pd2^.res:= $00;
+         end;
+         lwo1:= lwo1 shl 1;
+         if lwo1 = 0 then begin
+          inc(ps2);
+          lwo1:= 1;
+         end;
+        end;
+        if lwo1 <> 1 then begin
+         inc(ps2);
+        end;
+       end;
+      end
+      else begin
+      }
       pd1:= prgbtripleaty(im1.image.pixels);
+      ps1:= prgbtripleaty(im1.mask.pixels);
       for int1:= im1.image.length-1 downto 0 do begin
        with ps1^[int1] do begin
         pd1^[int1].res:= (word(red)+green+blue) div 3;
        end;
       end;
+//      end;
       glenable(gl_blend);
       glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
      end
