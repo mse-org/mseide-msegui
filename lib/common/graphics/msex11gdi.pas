@@ -337,7 +337,6 @@ begin
  end;
 end;
 
-
 procedure getxftfontdata(po: pxftfont; var drawinfo: drawinfoty);
 begin
 {$ifdef mse_debuggdisync}
@@ -463,6 +462,26 @@ begin
  result:= buildxftpat(fontdata,fontinfo,highres);
 end;
 
+procedure gdi_createpixmap(var drawinfo: drawinfoty); //gdifunc
+begin
+ with drawinfo.createpixmap do begin
+  pixmap:= gui_createpixmap(size,0,monochrome,copyfrom);
+ end;
+end;
+
+procedure gdi_pixmaptoimage(var drawinfo: drawinfoty); //gdifunc
+begin
+ with drawinfo.pixmapimage do begin
+  gui_pixmaptoimage(pixmap,image,drawinfo.gc.handle);
+ end;
+end;
+
+procedure gdi_imagetopixmap(var drawinfo: drawinfoty); //gdifunc
+begin
+ with drawinfo.pixmapimage do begin
+  error:= gui_imagetopixmap(image,pixmap,drawinfo.gc.handle);
+ end;
+end;
 
 //function x11creategc(paintdevice: paintdevicety; const akind: gckindty;
 //     var gc: gcty; const aprintername: msestring): guierrorty;
@@ -2373,6 +2392,9 @@ const
    {$ifdef FPC}@{$endif}gdi_creategc,
    {$ifdef FPC}@{$endif}gdi_destroygc,
    {$ifdef FPC}@{$endif}gdi_changegc,
+   {$ifdef FPC}@{$endif}gdi_createpixmap,
+   {$ifdef FPC}@{$endif}gdi_pixmaptoimage,
+   {$ifdef FPC}@{$endif}gdi_imagetopixmap,
    {$ifdef FPC}@{$endif}gdi_getcanvasclass,
    {$ifdef FPC}@{$endif}gdi_endpaint,
    {$ifdef FPC}@{$endif}gdi_flush,

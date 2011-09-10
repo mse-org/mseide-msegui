@@ -324,6 +324,19 @@ type
   rectscount: integer;
  end;
 
+ createpixmapinfoty = record
+  size: sizety;
+  monochrome: boolean;
+  copyfrom: pixmapty;
+  pixmap: pixmapty;
+ end;
+ 
+ pixmapimageinfoty = record
+  pixmap: pixmapty;
+  image: imagety;
+  error: gdierrorty;
+ end;
+  
  creategcinfoty = record
   paintdevice: paintdevicety;
   kind: gckindty;
@@ -405,6 +418,8 @@ type
   16: (creategc: creategcinfoty);
   17: (getimage: getimageinfoty);
   18: (getcanvasclass: getcanvasclassinfoty);
+  19: (createpixmap: createpixmapinfoty);
+  20: (pixmapimage: pixmapimageinfoty)
  end;
 
  getfontfuncty = function (var drawinfo: drawinfoty): boolean of object;
@@ -566,7 +581,8 @@ type
 
  gdifunctionty = procedure(var drawinfo: drawinfoty);
 
- gdifuncty = (gdf_creategc,gdf_destroygc,gdf_changegc,
+ gdifuncty = (gdf_creategc,gdf_destroygc,gdf_changegc,gdf_createpixmap,
+              gdf_pixmaptoimage,gdf_imagetopixmap,
               gdf_getcanvasclass,gdf_endpaint,gdf_flush,
               gdf_drawlines,gdf_drawlinesegments,gdf_drawellipse,gdf_drawarc,
               gdf_fillrect,
@@ -994,7 +1010,7 @@ type
    procedure creategc;
    procedure internaldestroyhandle;
    procedure destroyhandle; virtual;
-   procedure createhandle(copyfrom: pixmapty); virtual;
+   procedure createhandle(acopyfrom: pixmapty); virtual;
    function getmonochrome: boolean;
    procedure setmonochrome(const avalue: boolean); virtual;
    function getconverttomonochromecolorbackground: colorty; virtual;
@@ -1003,7 +1019,7 @@ type
                   //gc handle is invalid if result = 0,
                   //gc handle can be 0
 //   function getimagepo: pimagety; virtual;
-   procedure initimage(alloc: boolean; out aimage: imagety);
+//   procedure initimage(alloc: boolean; out aimage: imagety);
                   //sets inf in aimage acording to self,
                   //allocates memory if alloc = true, no clear
    procedure setsize(const avalue: sizety); virtual;
@@ -1121,6 +1137,9 @@ function isvalidmapcolor(index: colorty): boolean;
 procedure drawdottedlinesegments(const acanvas: tcanvas; const lines: segmentarty;
              const colorline: colorty);
 
+procedure allocimage(out image: imagety; const asize: sizety;
+                                             const amonochrome: boolean);
+procedure freeimage(var image: imagety);
 procedure checkimagebgr(var aimage: imagety; const bgr: boolean);
 
 var
@@ -1175,6 +1194,39 @@ begin
  end;
 end;
 {$endif}
+
+procedure allocimage(out image: imagety; const asize: sizety;
+                                                   const amonochrome: boolean);
+begin
+ with image do begin
+  monochrome:= amonochrome;
+  bgr:= false;
+  pixels:= nil;
+  size:= asize;
+  length:= 0;
+  if (size.cx <> 0) and (size.cy <> 0) then begin
+   if monochrome then begin
+    length:= size.cy * ((size.cx+31) div 32);
+   end
+   else begin
+    length:= size.cy * size.cx;
+   end;
+   pixels:= gui_allocimagemem(length);
+  end;
+ end;
+end;
+
+procedure freeimage(var image: imagety);
+begin
+ with image do begin
+  if pixels <> nil then begin
+   gui_freeimagemem(pixels);
+   pixels:= nil;
+   length:= 0;
+   size:= nullsize;
+  end;
+ end;
+end;
 
 procedure checkimagebgr(var aimage: imagety; const bgr: boolean);
 var
@@ -1648,13 +1700,13 @@ begin
   end
   else begin
    if avalue then begin
-    bmp:= tsimplebitmap.create(true);
+    bmp:= tsimplebitmap.create(true,fcanvasclass);
     bmp.size:= fsize;
     bmp.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint,rop_copy,
        getconverttomonochromecolorbackground);
    end
    else begin
-    bmp:= tsimplebitmap.create(false);
+    bmp:= tsimplebitmap.create(false,fcanvasclass);
     bmp.size:= fsize;
     bmp.canvas.colorbackground:= fcolorbackground;
     bmp.canvas.color:= fcolorforeground;
@@ -1710,14 +1762,25 @@ begin
  result:= fcanvas;
 end;
 
-procedure tsimplebitmap.createhandle(copyfrom: pixmapty);
-      //copyfrom does not work on windws with in dc selected bmp!
+procedure tsimplebitmap.createhandle(acopyfrom: pixmapty);
+      //copyfrom does not work on windows with in dc selected bmp!
+var
+ info: drawinfoty;
 begin
  if (fsize.cx > 0) and (fsize.cy > 0) then begin
   if fhandle = 0 then begin
-   gdi_lock;
-   fhandle:= gui_createpixmap(fsize,0,pms_monochrome in fstate,copyfrom);
-   gdi_unlock;
+   with info.createpixmap do begin
+    size:= fsize;
+    monochrome:= (pms_monochrome in fstate);
+    copyfrom:= acopyfrom;
+    handle:= 0;
+    gdi_call(gdf_createpixmap,info,getgdiintf);
+    fhandle:= pixmap;
+   end;
+//   gdi_lock;
+//   fhandle:= gui_createpixmap(fsize,0,(pms_monochrome in fstate) and 
+//                  (fcanvasclass = nil,copyfrom);
+//   gdi_unlock;
    if fhandle = 0 then begin
     gdierror(gde_pixmap);
    end;
@@ -2065,6 +2128,7 @@ begin
  result:= nil; //dummy
 end;
 }
+{
 procedure tsimplebitmap.initimage(alloc: boolean; out aimage: imagety);
                   //allocates memory, no clear
 var
@@ -2085,7 +2149,7 @@ begin
   end;
  end;
 end;
-
+}
 procedure tsimplebitmap.getcanvasimage(const bgr: boolean;
                                                 var aimage: maskedimagety);
 begin
@@ -2094,10 +2158,11 @@ end;
 
 function tsimplebitmap.getgdiintf: pgdifunctionaty;
 begin
+ result:= nil;
  if fcanvas <> nil then begin
   result:= fcanvas.fdrawinfo.gc.gdifuncs;
- end
- else begin
+ end;
+ if result = nil then begin
   result:= fcanvasclass.getclassgdifuncs;
  end;
 end;
@@ -2803,12 +2868,12 @@ begin
   printernamepo:= @aprintername;
   contextinfopo:= getcontextinfopo;
   gcpo:= @gc;
-  if df_canvasismonochrome in gc.drawingflags then begin
-   gui_getgdifuncs^[gdf_creategc](fdrawinfo); //todo: fix the workaround
-  end
-  else begin
+//  if df_canvasismonochrome in gc.drawingflags then begin
+//   gui_getgdifuncs^[gdf_creategc](fdrawinfo); //todo: fix the workaround
+//  end
+//  else begin
    getgdifuncs^[gdf_creategc](fdrawinfo);
-  end;
+//  end;
 //  fdrawinfo.gc.gdifuncs^[gdf_creategc](fdrawinfo);
   result:= error;
  end;

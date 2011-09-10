@@ -18,7 +18,8 @@ unit mseopenglgdi;
 
 interface
 uses
- msegl,mseglext,mseglu,{$ifdef unix}mseglx,x,xlib,xutil,msectypes,{$else}windows,{$endif}
+ msegl,mseglext,mseglu,{$ifdef unix}mseglx,x,xlib,xutil,msectypes,
+ {$else}windows,{$endif}
  msegraphics,msetypes,msegraphutils,mseguiglob,mseglextglob;
 {
 const
@@ -151,6 +152,7 @@ type
    
 var
  ffontcache: tglftfontcache;
+// stockgc: gcty;
 // gdinumber: integer;
 
 function checkerror: glenum;
@@ -271,7 +273,7 @@ begin
  with oglgcty(gc.platformdata).d do begin
   fvisinfo:= nil;
   fdpy:= msedisplay;
-  fscreen:= defaultscreen(fdpy);
+  fscreen:= msedefaultscreenno;//defaultscreen(fdpy);
   if not glxqueryextension(fdpy,int1,int2) then begin
    result:= gde_noglx;
    exit;
@@ -279,35 +281,30 @@ begin
   index:= 0;
   with contextinfo.attrib do begin
    putvalue(ar1,index,glx_level,level,0);
-   if df_canvasismonochrome in gc.drawingflags then begin
-    putvalue(ar1,index,glx_buffer_size,1,-1);
-   end
-   else begin
-    if not (df_canvasispixmap in gc.drawingflags) then begin
-     if doublebuffer then begin
-      include(gc.drawingflags,df_doublebuffer);
-      putboolean(ar1,index,glx_doublebuffer,doublebuffer);
-     end;
+   if not (df_canvasispixmap in gc.drawingflags) then begin
+    if doublebuffer then begin
+     include(gc.drawingflags,df_doublebuffer);
+     putboolean(ar1,index,glx_doublebuffer,doublebuffer);
     end;
-    putvalue(ar1,index,glx_buffer_size,buffersize,-1);
-//    putvalue(ar1,index,glx_level,level,0);
-    putboolean(ar1,index,glx_rgba,rgba);
-    putboolean(ar1,index,glx_stereo,stereo);
-    putvalue(ar1,index,glx_aux_buffers,auxbuffers,-1);
-    putvalue(ar1,index,glx_red_size,redsize,-1);
-    putvalue(ar1,index,glx_green_size,greensize,-1);
-    putvalue(ar1,index,glx_blue_size,bluesize,-1);
-    putvalue(ar1,index,glx_alpha_size,alphasize,-1);
-    putvalue(ar1,index,glx_depth_size,depthsize,-1);
-    putvalue(ar1,index,glx_stencil_size,stencilsize,-1);
-    putvalue(ar1,index,glx_accum_red_size,accumredsize,-1);
-    putvalue(ar1,index,glx_accum_green_size,accumgreensize,-1);
-    putvalue(ar1,index,glx_accum_blue_size,accumbluesize,-1);
-    putvalue(ar1,index,glx_accum_alpha_size,accumalphasize,-1);
    end;
+   putvalue(ar1,index,glx_buffer_size,buffersize,-1);
+//    putvalue(ar1,index,glx_level,level,0);
+   putboolean(ar1,index,glx_rgba,rgba);
+   putboolean(ar1,index,glx_stereo,stereo);
+   putvalue(ar1,index,glx_aux_buffers,auxbuffers,-1);
+   putvalue(ar1,index,glx_red_size,redsize,-1);
+   putvalue(ar1,index,glx_green_size,greensize,-1);
+   putvalue(ar1,index,glx_blue_size,bluesize,-1);
+   putvalue(ar1,index,glx_alpha_size,alphasize,-1);
+   putvalue(ar1,index,glx_depth_size,depthsize,-1);
+   putvalue(ar1,index,glx_stencil_size,stencilsize,-1);
+   putvalue(ar1,index,glx_accum_red_size,accumredsize,-1);
+   putvalue(ar1,index,glx_accum_green_size,accumgreensize,-1);
+   putvalue(ar1,index,glx_accum_blue_size,accumbluesize,-1);
+   putvalue(ar1,index,glx_accum_alpha_size,accumalphasize,-1);
+   setlength(ar1,index+1); //none
+   fvisinfo:= glxchoosevisual(fdpy,fscreen,pinteger(ar1));
   end;
-  setlength(ar1,index+1); //none
-  fvisinfo:= glxchoosevisual(fdpy,fscreen,pinteger(ar1));
 //  fvisinfo:= glxchoosevisual(fdpy,fscreen,pinteger(ar1));
   if fvisinfo = nil then begin
    result:= gde_novisual;
@@ -488,6 +485,14 @@ var
  pixmapextensions: glextensionsty;
  pixmapextensionschecked: boolean;
 
+procedure gdi_createpixmap(var drawinfo: drawinfoty); //gdifunc
+begin
+ with drawinfo.createpixmap do begin
+  pixmap:= gui_createpixmap(size,0,false,copyfrom); 
+         //depht 1 not supported by glx ???
+ end;
+end;
+
 procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
 var
  device1: ptruint; //used for extension query 
@@ -627,9 +632,9 @@ begin
  end;
 end;
 
-procedure gdi_destroygc(var drawinfo: drawinfoty); //gdifunc
+procedure destroygc(var gc: gcty; const paintdevice: paintdevicety);
 begin
- with oglgcty(drawinfo.gc.platformdata).d do begin
+ with oglgcty(gc.platformdata).d do begin
   if tess <> nil then begin
    gludeletetess(tess);
   end;
@@ -637,7 +642,7 @@ begin
   glxmakecurrent(fdpy,0,nil);
   gldeletetextures(1,@texture);
   glxdestroycontext(fdpy,fcontext);
-  if drawinfo.paintdevice <> 0 then begin
+  if paintdevice <> 0 then begin
    if fkind = gck_pixmap then begin
     glxdestroyglxpixmap(fdpy,pd);
     pd:= 0;
@@ -664,6 +669,12 @@ begin
    pixmapextensionschecked:= false;
   end;
  end;
+end;
+
+
+procedure gdi_destroygc(var drawinfo: drawinfoty); //gdifunc
+begin
+ destroygc(drawinfo.gc,drawinfo.paintdevice);
 end;
 
 procedure gdi_swapbuffers(var drawinfo: drawinfoty);
@@ -1135,15 +1146,32 @@ begin
  inc(tessbufferindex);
 end;
 
-procedure freetessbuffer;
+procedure freebuffers;
 var
  int1: integer;
 begin
  for int1:= high(tessbuffer) downto 0 do begin
   freemem(tessbuffer[int1]);
  end;
+ {
+ if stockpixmapgc <> 0 then begin
+  glxdestroycontext(msedisplay,stockpixmapgc);
+ end;
+ }
 end; 
-
+{
+procedure checkstockpixmapgc;
+begin
+ if stockpixmapgc = 0 then begin
+  
+  fillchar(stockgc,sizeof(stockgc),0);
+  fillchar(info,sizeof(drawinfoty),0);
+  with info.creategc do begin
+   kind:= gck_pixmap;
+   contextinfopo:= @defaultcontextattributes;
+ end;
+end;
+}
 procedure tesscombine(coords: pgluvertexty;
                       vertex_data: pvertexpoar4ty;
                       weight: pglfloatar4ty;
@@ -1239,31 +1267,72 @@ procedure copyareagl(var drawinfo: drawinfoty);
 var
 // buf: gluint;
  xscale,yscale: real;
- ar1: rgbtriplearty;
+// ar1: rgbtriplearty;
 // l,t,r,b,w,h: integer;
 // pt1: pointty;
-// int1: integer;
- 
+ int1: integer;
+ po1: prgbtriplety;
+ po2: pbyte;
 begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
   makecurrent(tcanvas1(source).fdrawinfo.gc);
   with sourcerect^ do begin
-   setlength(ar1,cx*cy);
+   getmem(po1,cx*cy*sizeof(rgbtriplety));
+//   setlength(ar1,cx*cy);
    glreadpixels(x,
           oglgcty(tcanvas1(source).fdrawinfo.gc.platformdata).d.top-y-cy+1,
-                                  cx,cy,gl_rgba,gl_unsigned_byte,pointer(ar1));
+                                  cx,cy,gl_rgba,gl_unsigned_byte,po1);
+   if mask <> nil then begin
+    with tcanvas1(mask.canvas) do begin
+     checkgcstate([cs_gc]);
+     makecurrent(tcanvas1(mask.canvas).fdrawinfo.gc);
+    end;
+    getmem(po2,cx*cy);
+    glpushclientattrib(gl_client_pixel_store_bit);
+    glpixelstorei(gl_pack_alignment,1);
+    glreadpixels(x,
+          oglgcty(tcanvas1(source).fdrawinfo.gc.platformdata).d.top-y-cy+1,
+                                  cx,cy,gl_luminance,gl_unsigned_byte,po2);
+    glpopclientattrib;
+    for int1:= cx*cy-1 downto 0 do begin
+     prgbtripleaty(po1)^[int1].res:= pbyteaty(po2)^[int1];
+    end;
+   end;
   end;
   makecurrent(drawinfo.gc);
-  glpushattrib(gl_pixel_mode_bit);
+  int1:= gl_pixel_mode_bit;
+  if mask <> nil then begin
+   int1:= int1 or gl_color_buffer_bit;
+  end;
+  glpushattrib(int1);
+  if df_canvasismonochrome in 
+                       tcanvas1(source).fdrawinfo.gc.drawingflags then begin
+   glpixeltransferf(gl_red_bias,glcolorbackground.red/255);
+   glpixeltransferf(gl_red_scale,
+                         (glcolorforeground.red-glcolorbackground.red)/255);
+   glpixeltransferf(gl_green_bias,glcolorbackground.green/255);
+   glpixeltransferf(gl_green_scale,
+                         (glcolorforeground.green-glcolorbackground.green)/255);
+   glpixeltransferf(gl_blue_bias,glcolorbackground.blue/255);
+   glpixeltransferf(gl_blue_scale,
+                         (glcolorforeground.blue-glcolorbackground.blue)/255);
+  end;
+  if mask <> nil then begin
+   glenable(gl_blend);
+   glblendfunc(gl_src_alpha,gl_one_minus_src_alpha);
+  end;
   with destrect^ do begin
    xscale:= cx/sourcerect^.cx;
    yscale:= cy/sourcerect^.cy;
    glpixelzoom(xscale,yscale);
    setrasterpos(drawinfo.gc,mp(x,y+cy-1));
-   gldrawpixels(sourcerect^.cx,sourcerect^.cy,gl_rgba,gl_unsigned_byte,
-                                                                 pointer(ar1));
+   gldrawpixels(sourcerect^.cx,sourcerect^.cy,gl_rgba,gl_unsigned_byte,po1);
   end;
   glpopattrib;
+  freemem(po1);
+  if mask <> nil then begin
+   freemem(po2);
+  end;
  end;
 (* buffer objects are unreliable
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
@@ -1309,12 +1378,12 @@ var
  mode,datatype: glenum;
  map: array[0..1] of glfloat;
  opacity: glfloat;
- monomask: boolean;
+// monomask: boolean;
  ps1,pd1: prgbtripleaty;
- ps2: plongword;
- pd2: prgbtriplety;
- int1,int2: integer;
- lwo1: longword;
+// ps2: plongword;
+// pd2: prgbtriplety;
+ int1: integer;
+// lwo1: longword;
  
 begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
@@ -1458,50 +1527,150 @@ begin
   end;
  end;
 end;
+
+procedure getimage(var drawinfo: drawinfoty; var image: imagety);
  
-procedure gdi_getimage(var drawinfo: drawinfoty);
 //todo: optimize
 var
- int1,int2: integer;
+ int1,int2,int3: integer;
  po1,ps1,pd1: pchar;
- mode: glenum;
+ pd2: plongword;
+ lwo1: longword;
+ mode,datatype: glenum;
 begin
- with drawinfo,getimage,oglgcty(drawinfo.gc.platformdata).d do begin
-  glpushattrib(gl_pixel_mode_bit);
-  
-  glpixeltransferf(gl_alpha_scale,0);
-  glpixeltransferf(gl_alpha_bias,0);
-  with image.image do begin
-   if not bgr and (gle_GL_EXT_bgra in extensions) then begin
-    mode:= gl_bgra;
-   end
-   else begin
-    mode:= gl_rgba;
-    bgr:= true;
-   end;
-   if gle_gl_mesa_pack_invert in extensions then begin
+ with drawinfo,oglgcty(drawinfo.gc.platformdata).d do begin
+  with image do begin
+   if monochrome then begin
+    datatype:= gl_unsigned_byte;
+    mode:= gl_luminance;
+    getmem(po1,size.cx*size.cy);
     glpushclientattrib(gl_client_pixel_store_bit);
-    glpixelstorei(gl_pack_invert_mesa,1);
-    glreadpixels(0,0,size.cx,size.cy,mode,gl_unsigned_byte,pixels);
-    glpopclientattrib;    
-   end
-   else begin
-    getmem(po1,length*sizeof(rgbtriplety));
-    glreadpixels(0,0,size.cx,size.cy,mode,gl_unsigned_byte,po1);
-    int2:= sizeof(rgbtriplety)*size.cx;
-    ps1:= pointer(pchar(po1)+(size.cy-1)*int2); //top row
-    pd1:= pointer(pixels);
+    glpixelstorei(gl_pack_alignment,1);
+    glreadpixels(0,0,size.cx,size.cy,mode,datatype,po1);
+    glpopclientattrib;
+    ps1:= pointer(pchar(po1)+(size.cy-1)*size.cx); //top row
+    pd2:= pointer(pixels);
     for int1:= size.cy-1 downto 0 do begin
-     move(ps1^,pd1^,int2);
-     dec(ps1,int2);
-     inc(pd1,int2);
+     pd2^:= 0;
+     lwo1:= 1;
+     for int3:= size.cx-1 downto 0 do begin
+      if ps1^ <> #0 then begin
+       pd2^:= pd2^ or lwo1;
+      end;
+      inc(ps1);
+      lwo1:= lwo1 shl 1;
+      if lwo1 = 0 then begin
+       inc(pd2);
+       lwo1:= 1;
+      end;
+     end;
+     dec(ps1,2*size.cx); //next row
+     if lwo1 <> 1 then begin
+      inc(pd2);
+     end;
     end;
     freemem(po1);
+   end
+   else begin
+    glpushattrib(gl_pixel_mode_bit);
+    
+    glpixeltransferf(gl_alpha_scale,0);
+    glpixeltransferf(gl_alpha_bias,0);
+    datatype:= gl_unsigned_byte;
+    if not bgr and (gle_GL_EXT_bgra in extensions) then begin
+     mode:= gl_bgra;
+    end
+    else begin
+     mode:= gl_rgba;
+     bgr:= true;
+    end;
+    if gle_gl_mesa_pack_invert in extensions then begin
+     glpushclientattrib(gl_client_pixel_store_bit);
+     glpixelstorei(gl_pack_invert_mesa,1);
+     glreadpixels(0,0,size.cx,size.cy,mode,datatype,pixels);
+     glpopclientattrib;    
+    end
+    else begin
+     getmem(po1,length*sizeof(rgbtriplety));
+     glreadpixels(0,0,size.cx,size.cy,mode,datatype,po1);
+     int2:= sizeof(rgbtriplety)*size.cx;
+     ps1:= pointer(pchar(po1)+(size.cy-1)*int2); //top row
+     pd1:= pointer(pixels);
+     for int1:= size.cy-1 downto 0 do begin
+      move(ps1^,pd1^,int2);
+      dec(ps1,int2);
+      inc(pd1,int2);
+     end;
+     freemem(po1);
+    end;
+    glpopattrib;
    end;
-
-   error:= gde_ok;
   end;
-  glpopattrib;
+ end;
+end;
+
+procedure gdi_getimage(var drawinfo: drawinfoty);
+begin
+ getimage(drawinfo,drawinfo.getimage.image.image);
+ drawinfo.getimage.error:= gde_ok;
+end;
+
+procedure gdi_pixmaptoimage(var drawinfo: drawinfoty); //gdifunc
+begin
+ with drawinfo.pixmapimage do begin
+  if drawinfo.gc.handle <> 0 then begin
+   allocimage(image,drawinfo.gc.paintdevicesize,
+                        df_canvasismonochrome in drawinfo.gc.drawingflags);
+   getimage(drawinfo,image);
+  end
+  else begin
+   gui_pixmaptoimage(pixmap,image,drawinfo.gc.handle);
+  end;
+ end;
+end;
+
+procedure gdi_imagetopixmap(var drawinfo: drawinfoty); //gdifunc
+var
+ im1: imagety; 
+ ps1,pd1: plongword;
+ int1,int2: integer;
+ lwo1: longword;
+begin
+ with drawinfo.pixmapimage do begin
+  if image.monochrome then begin
+   with image do begin
+    allocimage(im1,size,false);
+    ps1:= pointer(pixels);
+//    pd1:= plongword(im1.pixels)+(size.cy-1)*size.cx; //top row
+    pd1:= pointer(im1.pixels);
+    for int1:= size.cy-1 downto 0 do begin
+     lwo1:= 1;
+     for int2:= size.cx-1 downto 0 do begin
+      if ps1^ and lwo1 <> 0 then begin
+       pd1^:= $00ffffff;
+      end
+      else begin
+       pd1^:= $00000000;
+      end;
+      inc(pd1);
+      lwo1:= lwo1 shl 1;
+      if lwo1 = 0 then begin
+       inc(ps1);
+       lwo1:= 1;
+      end;
+     end;
+//     dec(pd1,2*size.cx); //next row
+     if lwo1 <> 1 then begin
+      inc(ps1);
+     end;
+    end;
+   end;
+   error:= gui_imagetopixmap(im1,pixmap,0);  
+   gui_freeimagemem(im1.pixels);
+  end
+  else begin
+   error:= gui_imagetopixmap(image,pixmap,0);  
+  end;
  end;
 end;
 
@@ -1547,6 +1716,9 @@ const
    {$ifdef FPC}@{$endif}gdi_creategc,
    {$ifdef FPC}@{$endif}gdi_destroygc,
    {$ifdef FPC}@{$endif}gdi_changegc,
+   {$ifdef FPC}@{$endif}gdi_createpixmap,
+   {$ifdef FPC}@{$endif}gdi_pixmaptoimage,
+   {$ifdef FPC}@{$endif}gdi_imagetopixmap,
    {$ifdef FPC}@{$endif}gdi_getcanvasclass,
    {$ifdef FPC}@{$endif}gdi_endpaint,
    {$ifdef FPC}@{$endif}gdi_flush,
@@ -1641,5 +1813,5 @@ initialization
  gdinumber:= registergdi(openglgetgdifuncs);
 }
 finalization
- freetessbuffer;
+ freebuffers;
 end.

@@ -71,6 +71,24 @@ const
    accumbluesize: -1;
    accumalphasize: -1
   );
+ defaultmonocontextattributes: contextattributesty =
+  (buffersize: -1;
+   level: 0;
+   doublebuffer: false;
+   rgba: true;
+   stereo: false;
+   auxbuffers: -1;
+   redsize: 8;
+   greensize: 8;
+   bluesize: 8;
+   alphasize: -1;
+   depthsize: -1;
+   stencilsize: 2;
+   accumredsize: -1;
+   accumgreensize: -1;
+   accumbluesize: -1;
+   accumalphasize: -1
+  );
 {$ifdef unix}
   defaultvisualattributes: array[0..8] of integer = 
   (GLX_RGBA,GLX_RED_SIZE,8,GLX_GREEN_SIZE,8,GLX_BLUE_SIZE,8,
@@ -161,7 +179,12 @@ end;
 
 function topenglcanvas.getcontextinfopo: pointer;
 begin
- result:= @fcontextinfo;
+ if df_canvasismonochrome in fdrawinfo.gc.drawingflags then begin
+  result:= @defaultmonocontextattributes;
+ end
+ else begin
+  result:= @fcontextinfo;
+ end;
 end;
 
 procedure topenglcanvas.updatewindowoptions(var aoptions: internalwindowoptionsty);

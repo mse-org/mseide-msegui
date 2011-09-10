@@ -1612,6 +1612,7 @@ end;
 
 procedure deinit;
 begin
+ //dummy
 end;
 
 procedure initializeopengl(const sonames: array of filenamety); //[] = default

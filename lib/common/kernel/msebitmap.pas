@@ -477,7 +477,8 @@ begin
    if (fimage.pixels <> nil) or bo1 then begin
     self.clear;
     if bo1 then begin
-     self.fimage:= tcanvas1(canvas).getcanvasimage;
+//     self.fimage:= tcanvas1(canvas).getcanvasimage;
+     savetoimage(self.fimage);
     end
     else begin
      self.fimage:= fimage;
@@ -750,8 +751,28 @@ begin
 end;
 
 procedure tbitmap.getimage;
+var
+ info1: drawinfoty;
 begin
  if fhandle <> 0 then begin
+  if fcanvas <> nil then begin
+   with tcanvas1(fcanvas),fdrawinfo.pixmapimage do begin
+    fillchar(image,sizeof(image),0);
+    pixmap:= fhandle;
+    gdi(gdf_pixmaptoimage);
+    fimage:= image;
+   end;
+  end
+  else begin
+   with info1,pixmapimage do begin
+    fillchar(image,sizeof(image),0);
+    gc.handle:= 0;
+    pixmap:= fhandle;
+    gdi_call(gdf_pixmaptoimage,info1,getgdiintf);
+    fimage:= image;
+   end;    
+  end;
+  {
   gdi_lock;
   if fcanvas <> nil then begin
    gdierrorlocked(gui_pixmaptoimage(fhandle,fimage,
@@ -760,6 +781,7 @@ begin
   else begin
    gdierrorlocked(gui_pixmaptoimage(fhandle,fimage,0));
   end;
+  }
  end
  else begin
   fimage.size:= fsize;
@@ -779,22 +801,51 @@ end;
 
 procedure tbitmap.putimage;
 var
- pixmap: pixmapty;
- ca1: longword;
+// pixmap: pixmapty;
+// ca1: ptruint;
+ info1: drawinfoty;
 begin
+{
  if fcanvas <> nil then begin
   ca1:= tcanvas1(fcanvas).fdrawinfo.gc.handle;
  end
  else begin
   ca1:= 0;
  end;
- gdi_lock;
+}
+// gdi_lock;
  checkimagebgr(fimage,false);
+ {
+ if fcanvas <> nil then begin
+  with tcanvas1(fcanvas),fdrawinfo.pixmapimage do begin
+   image:= fimage;
+   gdi(gdf_imagetopixmap);
+   if error = gde_ok then begin
+    handle:= pixmap;
+   end;
+  end;
+ end
+ else begin
+ }
+  with info1,pixmapimage do begin
+   image:= fimage;
+   gc.handle:= 0;
+   gdi_call(gdf_imagetopixmap,info1,getgdiintf);
+   if error = gde_ok then begin
+    handle:= pixmap;
+    if fimage.monochrome then begin
+     include(fstate,pms_monochrome);
+    end;
+   end;
+  end;    
+// end;
+{
  if gui_imagetopixmap(fimage,pixmap,ca1) = gde_ok then begin
   handle:= pixmap;
   include(fstate,pms_ownshandle);
  end;
  gdi_unlock;
+ }
 end;
 
 function tbitmap.checkindex(const index: pointty): integer;
@@ -1306,7 +1357,7 @@ end;
 procedure tmaskedbitmap.createmask(const acolormask: boolean);
 begin
  if fmask = nil then begin
-  fmask:= tbitmap.create(true);
+  fmask:= tbitmap.create(true,fcanvasclass);
   with fmask do begin
    fcolorforeground:= fmaskcolorforeground;
    fcolorbackground:= fmaskcolorbackground;
@@ -1588,7 +1639,7 @@ begin
      inherited;
      self.freemask;
      if fmask <> nil then begin
-      self.fmask:= tbitmap.create(fmask.monochrome);
+      self.fmask:= tbitmap.create(fmask.monochrome,self.fcanvasclass);
       with self,fmask do begin
        fcolorforeground:= fmaskcolorforeground;
        fcolorbackground:= fmaskcolorbackground;
