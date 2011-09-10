@@ -491,10 +491,30 @@ var
  pixmapextensionschecked: boolean;
 
 procedure gdi_createpixmap(var drawinfo: drawinfoty); //gdifunc
+{$ifdef mswindows}
+var
+ info: tbitmapinfoheader;
+{$endif}
 begin
  with drawinfo.createpixmap do begin
+ {$ifdef mswindows}
+  with info do begin
+   bisize:= sizeof(info);
+   biwidth:= size.cx;
+   biheight:= size.cy;
+   biplanes:= 1;
+   bibitcount:= 32;
+   bicompression:= bi_rgb;
+   bisizeimage:= 0;
+   bixpelspermeter:= 3000;
+   biypelspermeter:= 3000;
+   biclrused:= 0;
+   biclrimportant:= 0;
+  end;
+ {$else}
   pixmap:= gui_createpixmap(size,0,false,copyfrom); 
          //depht 1 not supported by glx ???
+  {$endif}
  end;
 end;
 

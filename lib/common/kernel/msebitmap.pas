@@ -822,6 +822,10 @@ begin
    gdi(gdf_imagetopixmap);
    if error = gde_ok then begin
     handle:= pixmap;
+    if fimage.monochrome then begin
+     include(fstate,pms_monochrome);
+    end;
+    include(fstate,pms_ownshandle);
    end;
   end;
  end
@@ -836,6 +840,7 @@ begin
     if fimage.monochrome then begin
      include(fstate,pms_monochrome);
     end;
+    include(fstate,pms_ownshandle);
    end;
   end;    
 // end;
