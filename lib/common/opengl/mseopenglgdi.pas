@@ -660,7 +660,7 @@ begin
   wglmakecurrent(0,0);
   gldeletetextures(1,@texture);
   wgldeletecontext(fcontext);
-  releasedc(drawinfo.paintdevice,fdc);
+  releasedc(paintdevice,fdc);
   dec(gccount);
 {$endif}
   if gccount = 0 then begin
