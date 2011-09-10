@@ -71,6 +71,7 @@ type
   {$else}
   fdc: hdc;
   fcontext: hglrc;
+  doublebuf: boolean;
   {$endif}
   pd: paintdevicety;
   extensions: glextensionsty;
@@ -269,8 +270,8 @@ var
 {$endif}
 begin
  result:= gde_ok;
-{$ifdef unix}
  with oglgcty(gc.platformdata).d do begin
+{$ifdef unix}
   fvisinfo:= nil;
   fdpy:= msedisplay;
   fscreen:= msedefaultscreenno;//defaultscreen(fdpy);
@@ -311,8 +312,12 @@ begin
    exit;
   end;
   fcolormap:= xcreatecolormap(fdpy,mserootwindow,fvisinfo^.visual,allocnone);
- end;
+{$else}
+  with contextinfo.attrib do begin
+   doublebuf:= doublebuffer;
+  end;
 {$endif}
+ end;
 end;
 (* 
 {$ifdef unix}
@@ -591,7 +596,10 @@ begin
   with pixeldesc do begin
    nsize:= sizeof(pixeldesc);
    nversion:= 1;
-   dwflags:= pfd_draw_to_window or pfd_support_opengl or pfd_doublebuffer;
+   dwflags:= pfd_draw_to_window or pfd_support_opengl;
+   if doublebuf then begin
+    dwflags:= dwflags or pfd_doublebuffer;
+   end;
    ipixeltype:= pfd_type_rgba;
    ccolorbits:= 24;
    cdepthbits:= 32;
