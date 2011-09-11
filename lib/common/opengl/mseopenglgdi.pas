@@ -61,12 +61,12 @@ type
  oglgcstatety = (ogcs_hastexture,ogcs_needsblend,ogcs_hasclipreg);
  oglgcstatesty = set of oglgcstatety; 
  oglgcdty = record
+  fkind: gckindty;
   {$ifdef unix}
   fcontext: glxcontext;
   fdpy: pdisplay;
   fcolormap: tcolormap;
   fscreen: integer;
-  fkind: gckindty;
   fvisinfo: pxvisualinfo;
   {$else}
   fdc: hdc;
@@ -169,7 +169,7 @@ end;
 function fontcache: tglftfontcache;
 begin
  if ffontcache = nil then begin
-  tglftfontcache.create(ffontcache);
+  tglftfontcache.create(tftfontcache(ffontcache));
  end;
  result:= ffontcache;
 end;
@@ -493,15 +493,17 @@ var
 procedure gdi_createpixmap(var drawinfo: drawinfoty); //gdifunc
 {$ifdef mswindows}
 var
- info: tbitmapinfoheader;
+ info: tbitmapinfo;
+ dc: hdc;
+ po1: pointer;
 {$endif}
 begin
  with drawinfo.createpixmap do begin
  {$ifdef mswindows}
-  with info do begin
-   bisize:= sizeof(info);
+  with info.bmiheader do begin
+   bisize:= sizeof(info.bmiheader);
    biwidth:= size.cx;
-   biheight:= size.cy;
+   biheight:= -size.cy;
    biplanes:= 1;
    bibitcount:= 32;
    bicompression:= bi_rgb;
@@ -511,13 +513,17 @@ begin
    biclrused:= 0;
    biclrimportant:= 0;
   end;
+  dc:= getdc(0);    
+//  pixmap:= createdibsection(dc,info,dib_rgb_colors,po1,0,0);
+  pixmap:= createdibitmap(dc,info.bmiheader,0,nil,info,dib_rgb_colors);
+  releasedc(0,dc);
  {$else}
   pixmap:= gui_createpixmap(size,0,false,copyfrom); 
          //depht 1 not supported by glx ???
   {$endif}
  end;
 end;
-
+var testvar: integer;
 procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
 var
  device1: ptruint; //used for extension query 
@@ -610,23 +616,44 @@ begin
    end;
   end;
   pd:= paintdevice;
-  fdc:= getdc(pd);
+  fkind:= kind;
+  if kind = gck_pixmap then begin
+   fdc:= createcompatibledc(0);
+   selectobject(fdc,paintdevice);
+  end
+  else begin
+   fdc:= getdc(pd);
+  end;
   device1:= fdc;
   fillchar(pixeldesc,sizeof(pixeldesc),0);
   with pixeldesc do begin
    nsize:= sizeof(pixeldesc);
    nversion:= 1;
-   dwflags:= pfd_draw_to_window or pfd_support_opengl;
+   dwflags:= pfd_support_opengl;
    if doublebuf then begin
     dwflags:= dwflags or pfd_doublebuffer;
    end;
+   if kind = gck_pixmap then begin
+    dwflags:= dwflags or pfd_draw_to_bitmap;
+   end
+   else begin
+    dwflags:= dwflags or pfd_draw_to_window;
+   end;
    ipixeltype:= pfd_type_rgba;
-   ccolorbits:= 24;
-   cdepthbits:= 32;
+   ccolorbits:= 32;
+   cdepthbits:= 16;
+   cstencilbits:= 8;
   end;
+  fcontext:= 0;
   int1:= choosepixelformat(fdc,@pixeldesc);
-  setpixelformat(fdc,int1,@pixeldesc);
-  fcontext:= wglcreatecontext(fdc);
+  if int1 <> 0 then begin
+   if setpixelformat(fdc,int1,@pixeldesc) then begin
+    fcontext:= wglcreatecontext(fdc);
+   end
+else begin
+ testvar:= getlasterror;
+end;
+  end;
   if fcontext = 0 then begin
    error:= gde_rendercontext;
    exit;
@@ -688,7 +715,12 @@ begin
   wglmakecurrent(0,0);
   gldeletetextures(1,@texture);
   wgldeletecontext(fcontext);
-  releasedc(paintdevice,fdc);
+  if fkind = gck_pixmap then begin
+   deletedc(fdc);
+  end
+  else begin
+   releasedc(paintdevice,fdc);
+  end;
   dec(gccount);
 {$endif}
   if gccount = 0 then begin
