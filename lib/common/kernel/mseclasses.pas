@@ -457,7 +457,8 @@ type
    procedure sendrootcomponentevent(const event: tcomponentevent;
                                         const destroyevent: boolean = true);
                   //event will be destroyed if not async
-   procedure asyncevent(atag: integer = 0; const alocal: boolean = false);
+   procedure asyncevent(atag: integer = 0; const alocal: boolean = false;
+                                            const afirst: boolean = false);
                           //posts event for doasyncevent to self
    procedure postcomponentevent(const event: tcomponentevent;
                                              const alocal: boolean = false);
@@ -3707,9 +3708,9 @@ begin
 end;
 
 procedure tmsecomponent.asyncevent(atag: integer = 0;
-                                             const alocal: boolean = false);
+               const alocal: boolean = false; const afirst: boolean = false);
 begin
- application.postevent(tasyncevent.create(ievent(self),atag),alocal);
+ application.postevent(tasyncevent.create(ievent(self),atag),alocal,afirst);
 end;
 
 procedure tmsecomponent.doasyncevent(var atag: integer);

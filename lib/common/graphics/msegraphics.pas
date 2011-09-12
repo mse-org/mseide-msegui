@@ -2868,13 +2868,7 @@ begin
   printernamepo:= @aprintername;
   contextinfopo:= getcontextinfopo;
   gcpo:= @gc;
-//  if df_canvasismonochrome in gc.drawingflags then begin
-//   gui_getgdifuncs^[gdf_creategc](fdrawinfo); //todo: fix the workaround
-//  end
-//  else begin
-   getgdifuncs^[gdf_creategc](fdrawinfo);
-//  end;
-//  fdrawinfo.gc.gdifuncs^[gdf_creategc](fdrawinfo);
+  getgdifuncs^[gdf_creategc](fdrawinfo);
   result:= error;
  end;
 end;
@@ -2998,7 +2992,7 @@ procedure tcanvas.linktopaintdevice(apaintdevice: paintdevicety;
 var
  rea1: real;
  int1: integer;
-// func1: pgdifunctionaty;
+ func1: pgdifunctionaty;
 begin
  resetpaintedflag;
  if (fdrawinfo.gc.handle <> 0) then begin
@@ -3009,10 +3003,12 @@ begin
  end;
  fdrawinfo.paintdevice:= apaintdevice;
  rea1:= fdrawinfo.gc.ppmm;
-// func1:= fdrawinfo.gc.gdifuncs;
+ func1:= fdrawinfo.gc.gdifuncs;
  fdrawinfo.gc:= gc;
  fdrawinfo.gc.ppmm:= rea1;                //restore
-// fdrawinfo.gc.gdifuncs:= func1;           //restore
+ if fdrawinfo.gc.gdifuncs = nil then begin
+  fdrawinfo.gc.gdifuncs:= func1;         //restore in case of unlink
+ end;
  updatecliporigin(cliporigin);
  if gc.handle <> 0 then begin
   gdi(gdf_setcliporigin);
@@ -4415,7 +4411,7 @@ end;
 
 function tcanvas.createregion: regionty;
 begin
- gdi(gdf_createemptyregion);
+ fdrawinfo.gc.gdifuncs^[gdf_createemptyregion](fdrawinfo);
  result:= fdrawinfo.regionoperation.dest;
 end;
 
@@ -4423,7 +4419,7 @@ function tcanvas.createregion(const asource: regionty): regionty;
 begin
  with fdrawinfo.regionoperation do begin
   source:= asource;
-  gdi(gdf_copyregion);
+  fdrawinfo.gc.gdifuncs^[gdf_copyregion](fdrawinfo);
   result:= dest;
  end;
 end;
@@ -4434,7 +4430,7 @@ begin
   rect:= arect;
   inc(rect.x,origin.x);
   inc(rect.y,origin.y);
-  gdi(gdf_createrectregion);
+  fdrawinfo.gc.gdifuncs^[gdf_createrectregion](fdrawinfo);
   result:= dest;
  end;
 end;
@@ -4446,7 +4442,7 @@ begin
   if rectscount > 0 then begin
    rectspo:= @rects[0];
    adjustrectar(@rects[0],rectscount);
-   gdi(gdf_createrectsregion);
+   fdrawinfo.gc.gdifuncs^[gdf_createrectsregion](fdrawinfo);
    result:= dest;
    readjustrectar(@rects[0],rectscount);
   end
@@ -4481,7 +4477,7 @@ procedure tcanvas.destroyregion(region: regionty);
 begin
  with fdrawinfo.regionoperation do begin
   source:= region;
-  gdi(gdf_destroyregion);
+  fdrawinfo.gc.gdifuncs^[gdf_destroyregion](fdrawinfo);
  end;
 end;
 
@@ -4491,7 +4487,7 @@ begin
   dest:= adest;
   rect.pos:= dist;
  end;
- gdi(gdf_moveregion);
+ fdrawinfo.gc.gdifuncs^[gdf_moveregion](fdrawinfo);
 end;
 
 procedure tcanvas.regremove(const adest: regionty; const dist: pointty);
@@ -4546,44 +4542,44 @@ end;
 procedure tcanvas.regsubrect(const dest: regionty; const rect: rectty);
 begin
  initregrect(dest,rect);
- gdi(gdf_regsubrect);
+ fdrawinfo.gc.gdifuncs^[gdf_regsubrect](fdrawinfo);
 end;
 
 procedure tcanvas.regaddrect(const dest: regionty; const rect: rectty);
 begin
  initregrect(dest,rect);
- gdi(gdf_regaddrect);
+ fdrawinfo.gc.gdifuncs^[gdf_regaddrect](fdrawinfo);
 end;
 
 procedure tcanvas.regintersectrect(const dest: regionty; const rect: rectty);
 begin
  initregrect(dest,rect);
- gdi(gdf_regintersectrect);
+ fdrawinfo.gc.gdifuncs^[gdf_regintersectrect](fdrawinfo);
 end;
 
 procedure tcanvas.regaddregion(const dest: regionty; const region: regionty);
 begin
  initregreg(dest,region);
- gdi(gdf_regaddregion);
+ fdrawinfo.gc.gdifuncs^[gdf_regaddregion](fdrawinfo);
 end;
 
 procedure tcanvas.regsubregion(const dest: regionty; const region: regionty);
 begin
  initregreg(dest,region);
- gdi(gdf_regsubregion);
+ fdrawinfo.gc.gdifuncs^[gdf_regsubregion](fdrawinfo);
 end;
 
 procedure tcanvas.regintersectregion(const dest: regionty; const region: regionty);
 begin
  initregreg(dest,region);
- gdi(gdf_regintersectregion);
+ fdrawinfo.gc.gdifuncs^[gdf_regintersectregion](fdrawinfo);
 end;
 
 function tcanvas.regionisempty(const region: regionty): boolean;
 begin
  with fdrawinfo.regionoperation do begin
   source:= region;
-  gdi(gdf_regionisempty);
+  fdrawinfo.gc.gdifuncs^[gdf_regionisempty](fdrawinfo);
   result:= dest <> 0;
  end;
 end;
@@ -4593,7 +4589,7 @@ begin
  if region <> 0 then begin
   with fdrawinfo.regionoperation do begin
    source:= region;
-   gdi(gdf_regionclipbox);
+   fdrawinfo.gc.gdifuncs^[gdf_regionclipbox](fdrawinfo);
    result:= rect;
   end;
  end
@@ -4688,7 +4684,7 @@ function tcanvas.copyclipregion: regionty;
 begin
  with fdrawinfo.regionoperation do begin
   source:= fvaluepo^.clipregion;
-  gdi(gdf_copyregion);
+  fdrawinfo.gc.gdifuncs^[gdf_copyregion](fdrawinfo);
   result:= dest;
  end;
 end;

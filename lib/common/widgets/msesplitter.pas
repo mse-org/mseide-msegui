@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -68,6 +68,7 @@ type
    procedure setgrip(const avalue: stockbitmapty);
    procedure setoptions(const avalue: splitteroptionsty);
   protected
+   procedure postupdatepropevent;
    function clippoint(const aoffset: pointty): pointty;
    procedure calcoffset(const refsize: sizety; 
                       out offset,clippedoffset: pointty; out newsize: sizety);
@@ -561,7 +562,7 @@ procedure tcustomsplitter.setstatfile(const avalue: tstatfile);
 begin
  setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
-
+var testvar: integer;
 procedure tcustomsplitter.dostatread(const reader: tstatreader);
 var
  po1,po2: pointty;
@@ -574,6 +575,9 @@ begin
   else begin
    po2.x:= po1.x;
   end;
+if name = 'macrosplitter' then begin
+ inc(testvar);
+end;
   if spo_vmove in foptions then begin
    po2.y:= reader.readinteger('y',po1.y);
   end
@@ -605,7 +609,11 @@ end;
 
 procedure tcustomsplitter.statreading;
 begin
- //dummy
+{
+ if fparentwidget <> nil then begin
+  postupdatepropevent;
+ end;
+}
 end;
 
 procedure tcustomsplitter.statread;
@@ -765,6 +773,9 @@ end;
 procedure tcustomsplitter.setpropoffset(const aoffset: pointty; const asize: sizety);
 begin      
  inc(fpropsetting);
+if name = 'macrosplitter' then begin
+inc(testvar);
+end;
  try
   size:= asize;
   setclippedpickoffset(aoffset);
@@ -796,6 +807,9 @@ begin //doasyncevent
    end;
    try
     if fparentwidget <> nil then begin
+if name = 'macrosplitter' then begin
+inc(testvar);
+end;
      calcoffset(fparentwidget.clientsize,pt1,pt2,size2);
      if (([spo_hmove,spo_hprop] * foptions <> []) and (pt1.x <> pt2.x) or 
          ([spo_vmove,spo_vprop] * foptions <> []) and (pt1.y <> pt2.y)) and
@@ -826,6 +840,9 @@ var
  size1,size2: sizety;
 begin
  if fupdating = 0 then begin
+if name = 'macrosplitter' then begin
+inc(testvar);
+end;
   if not (spo_nohshrinkzero in foptions) then begin
    size1.cx:= 0;
   end
@@ -852,13 +869,23 @@ begin
  end;
 end;
 
+procedure tcustomsplitter.postupdatepropevent;
+begin
+ if fnotified = 0 then begin
+if name = 'macrosplitter' then begin
+inc(testvar);
+end;
+  inc(fnotified);
+  asyncevent(updatepropeventtag,true,true);
+ end;
+end;
+
 procedure tcustomsplitter.parentclientrectchanged;
 begin
  inherited;
  if (componentstate * [csloading{,csdesigning}] = []) and canmouseinteract and
-              (fparentwidget <> nil) and (fnotified = 0) then begin
-  inc(fnotified);
-  asyncevent(updatepropeventtag,true);
+              (fparentwidget <> nil) then begin
+  postupdatepropevent;
  end;
 end;
 

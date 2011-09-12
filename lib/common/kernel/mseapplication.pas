@@ -267,10 +267,13 @@ type
    procedure processmessages; virtual; //handle with care!
    function idle: boolean; virtual;
    function modallevel: integer; virtual; abstract;
-   property applicationname: msestring read fapplicationname write fapplicationname;
+   property applicationname: msestring read fapplicationname 
+                                                 write fapplicationname;
    
-   procedure postevent(event: tmseevent; const alocal: boolean = false);
+   procedure postevent(event: tmseevent; const alocal: boolean = false;
+                                            const afirst: boolean = false);
                             //local -> direcly to the internal queue
+                            //afirst for local = true only
    function checkoverload(const asleepus: integer = 100000): boolean;
               //true if never idle since last call,
               // unlocks application and calls sleep if not mainthread and asleepus >= 0
@@ -1268,7 +1271,7 @@ begin
 end;
 
 procedure tcustomapplication.postevent(event: tmseevent;
-                                                const alocal: boolean = false);
+                const alocal: boolean = false; const afirst: boolean = false);
 begin
  if csdestroying in componentstate then begin
   event.free1;
@@ -1285,11 +1288,13 @@ begin
     end;
     flusheventbuffer;
     if alocal then begin
-     eventlist.add(event);
-//     if fstate * [aps_waiting,aps_woken] = [aps_waiting] then begin
-//      include(fstate,aps_woken);
-      wakeupmainthread;
-//     end;
+     if afirst then begin
+      eventlist.insert(0,event);
+     end
+     else begin
+      eventlist.add(event);
+     end;
+     wakeupmainthread;
     end
     else begin
      dopostevent(event);

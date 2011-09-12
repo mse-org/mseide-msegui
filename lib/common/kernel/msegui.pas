@@ -7267,6 +7267,9 @@ begin
   exclude(fwidgetstate,ws_loadedproc);
  end;
  updateskin;
+ if ws1_childscaled in fwidgetstate1 then begin
+  appinst.postevent(tobjectevent.create(ek_childscaled,ievent(self)),true);
+ end;
 end;
 
 function twidget.updateopaque(const children: boolean): boolean;
@@ -11201,7 +11204,9 @@ procedure twidget.postchildscaled;
 begin
  if not (ws1_childscaled in fwidgetstate1) then begin
   include(fwidgetstate1,ws1_childscaled);
-  appinst.postevent(tobjectevent.create(ek_childscaled,ievent(self)),true);
+  if not (csloading in componentstate) then begin
+   appinst.postevent(tobjectevent.create(ek_childscaled,ievent(self)),true);
+  end;
  end;
 end;
 
