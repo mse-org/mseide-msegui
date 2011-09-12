@@ -171,7 +171,8 @@ type
                      const aowner: tgridarrayprop); override;
    destructor destroy; override;
    procedure sourcenamechanged(const atag: integer);
-   procedure updatecellzone(const row: integer; const pos: pointty; var result: cellzonety); override;
+   procedure updatecellzone(const row: integer; const pos: pointty;
+                                             var result: cellzonety); override;
    function actualfont: tfont; override;
 //   procedure cellchanged(const row: integer); override;
    property editwidget: twidget read geteditwidget write seteditwidget;

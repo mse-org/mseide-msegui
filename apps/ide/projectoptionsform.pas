@@ -2446,7 +2446,22 @@ end;
 
 procedure tprojectoptionsfo.selectactiveonrowsmoved(const sender: tcustomgrid;
        const fromindex: Integer; const toindex: Integer; const acount: Integer);
+var
+ ar1: array of longboolarty;
+ int1: integer;
 begin
+ setlength(ar1,selectactivegroupgrid.rowcount);
+ with macrogrid do begin
+  beginupdate;
+  for int1:= 0 to high(ar1) do begin
+   ar1[int1]:= tbooleanedit(datacols[int1].editwidget).gridvalues;
+  end;
+  moveitem(pointerarty(ar1),fromindex,toindex);
+  for int1:= 0 to high(ar1) do begin
+   tbooleanedit(datacols[int1].editwidget).gridvalues:= ar1[int1];
+  end;
+  endupdate;
+ end;
  activegroupchanged;
 end;
 
