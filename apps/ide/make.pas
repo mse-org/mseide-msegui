@@ -309,10 +309,12 @@ begin
    procid:= execmse2(acommandline,nil,messagepipe,errorpipe,false,-1,
                                                             true,false,true);
   except
-   on e: exception do begin
+   on e1: exception do begin
     fcanceled:= true;
-    if e is eoserror then begin
+    if e1 is eoserror then begin
+{$warnings off}
      fexitcode:= eoserror(e).error;
+{$warnings on}
     end;
     application.handleexception(nil,'Runerror with "'+acommandline+'": ');
    end;

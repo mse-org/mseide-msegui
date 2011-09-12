@@ -2517,16 +2517,28 @@ begin
  while step < alength do begin
   d:= dest;
   l:= source;
-  r:= source + step;
+ {$ifdef FPC}
+  r:= source+step;
+ {$else}
+  r:= pointer(pchar(source)+step*sizeof(source^));
+ {$endif}
   stopl:= r;
+ {$ifdef FPC}
   stopr:= r+step;
+ {$else}
+  stopr:= pointer(pchar(r)+step*sizeof(r^));
+ {$endif}
+ {$ifdef FPC}
   stops:= source + alength;
-  if stopr > stops then begin
+ {$else}
+  stops:= pointer(pchar(source) + alength*sizeof(source^));
+ {$endif}
+  if pchar(stopr) > pchar(stops) then begin
    stopr:= stops;
   end;
   while true do begin //runs
    while true do begin //steps
-    while acompare((po1+l^*asize)^,(po1+r^*asize)^) <= 0 do begin 
+    while acompare((po1+l^*asize)^,(po1+r^*asize)^) <= 0 do begin
                                                            //merge from left
      d^:= l^;
      inc(l);
@@ -2560,17 +2572,29 @@ endstep:
     break;  //run finished
    end;
    l:= stopr; //next step
+  {$ifdef FPC}
    r:= l + step;
-   if r >= stops then begin
+  {$else}
+   r:= pointer(pchar(l) + step*sizeof(l^));
+  {$endif}
+   if pchar(r) >= pchar(stops) then begin
+  {$ifdef FPC}
     r:= stops-1;
+  {$else}
+    r:= pointer(pchar(stops)-1*sizeof(stops^));
+  {$endif}
    end;
    if r = l then begin
     d^:= l^;
     break;
    end;
    stopl:= r;
+  {$ifdef FPC}
    stopr:= r + step;
-   if stopr > stops then begin
+  {$else}
+   stopr:= pointer(pchar(r) + step*sizeof(r^));
+  {$endif}
+   if pchar(stopr) > pchar(stops) then begin
     stopr:= stops;
    end;
   end;
@@ -2692,11 +2716,23 @@ begin
  while step < acount do begin
   d:= dest;
   l:= source;
+ {$ifdef FPC}
   r:= source + step;
+ {$else}
+  r:= pointer(pchar(source) + step*sizeof(source^));
+ {$endif}
   stopl:= r;
+ {$ifdef FPC}
   stopr:= r+step;
+ {$else}
+  stopr:= pointer(pchar(r)+step*sizeof(r^));
+ {$endif}
+ {$ifdef FPC}
   stops:= source + acount;
-  if stopr > stops then begin
+ {$else}
+  stops:= pointer(pchar(source) + acount*sizeof(source^));
+ {$endif}
+  if pchar(stopr) > pchar(stops) then begin
    stopr:= stops;
   end;
   while true do begin //runs
@@ -2733,17 +2769,29 @@ endstep:
     break;  //run finished
    end;
    l:= stopr; //next step
+  {$ifdef FPC}
    r:= l + step;
-   if r >= stops then begin
+  {$else}
+   r:= pointer(pchar(l) + step*sizeof(l^));
+  {$endif}
+   if pchar(r) >= pchar(stops) then begin
+  {$ifdef FPC}
     r:= stops-1;
+  {$else}
+    r:= pointer(pchar(stops)-1*sizeof(stops^));
+  {$endif}
    end;
    if r = l then begin
     d^:= l^;
     break;
    end;
    stopl:= r;
+  {$ifdef FPC}
    stopr:= r + step;
-   if stopr > stops then begin
+  {$else}
+   stopr:= pointer(pchar(r) + step*sizeof(r^));
+  {$endif}
+   if pchar(stopr) > pchar(stops) then begin
     stopr:= stops;
    end;
   end;

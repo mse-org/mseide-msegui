@@ -1617,7 +1617,7 @@ end;
 
 function tfiledialogcontroller.execute(var avalue: filenamety;
        const  dialogkind: filedialogkindty; const acaption: msestring; 
-                            aoptions: filedialogoptionsty): boolean; overload;
+                            aoptions: filedialogoptionsty): boolean;
 var
  wstr1: filenamety;
 begin

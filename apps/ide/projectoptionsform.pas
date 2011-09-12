@@ -2934,19 +2934,26 @@ begin
  if (t <> nil) and (texp <> nil) then begin
   ar1:= getpropinfoar(t);
   for int1:= 0 to high(ar1) do begin
-   po1:= gettypedata(ar1[int1]^.proptype);
+   po1:= gettypedata(ar1[int1]^.proptype{$ifndef FPC}^{$endif});
    case ar1[int1]^.proptype^.kind of
+   {$ifdef FPC}
     tkustring: begin
      mstr1:= getunicodestrprop(t,ar1[int1]);
      amacrolist.expandmacros(mstr1);
      setunicodestrprop(texp,ar1[int1],mstr1);
+   {$else}
+    tkwstring: begin
+     mstr1:= getwidestrprop(t,ar1[int1]);
+     amacrolist.expandmacros(mstr1);
+     setwidestrprop(texp,ar1[int1],mstr1);
+   {$endif}
     end;
     tkdynarray: begin
     {$ifdef FPC}
      if ptypeinfo(pointer(po1^.eltype2))^.kind = tkustring then begin
                            //wrong define in ttypedata
     {$else}
-     if po1^.eltype2^^.kind = tkustring then begin
+     if po1^.eltype2^^.kind = tkwstring then begin
     {$endif}
       ar2:= copy(getmsestringar(t,ar1[int1]));
       for int2:= 0 to high(ar2) do begin

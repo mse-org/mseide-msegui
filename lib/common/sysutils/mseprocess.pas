@@ -529,8 +529,10 @@ procedure tmseprocess.setoptions(const avalue: processoptionsty);
 const
  mask: processoptionsty = [pro_erroroutput,pro_errorouttoout];
 begin
- foptions:= processoptionsty(setsinglebit(longword(avalue),
-                                        longword(foptions),longword(mask)));
+ foptions:= processoptionsty(
+   setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),
+                {$ifdef FPC}longword{$else}word{$endif}(foptions),
+                {$ifdef FPC}longword{$else}word{$endif}(mask)));
 end;
 
 { tstringprocess }

@@ -170,10 +170,11 @@ type
  treelistitemarty = array of ttreelistitem;
  treelistitematy = array[0..0] of ttreelistitem;
  ptreelistitematy = ^treelistitematy;
- 
+
  treelistitemclassty = class of ttreelistitem;
  checktreelistitemprocty = procedure(const sender: ttreelistitem;
                               var delete: boolean) of object;
+ treelistitemcomparefuncty = function(const l,r: ttreelistitem): integer of object;
 
  ttreelistitem = class(tlistitem)
   private
@@ -1983,9 +1984,17 @@ procedure ttreelistitem.sort(const casesensitive: boolean;
                                         const recursive: boolean = false);
 var
  int1: integer;
+{$ifndef FPC}
+ po1: treelistitemcomparefuncty;
+{$endif}
 begin
  if ns1_customsort in fstate1 then begin
+  {$ifdef FPC}
   mergesort(pointerarty(fitems),fcount,pointercomparemethodty(@compare));
+  {$else}
+  po1:= self.compare;
+  mergesort(pointerarty(fitems),fcount,pointercomparemethodty(po1));
+  {$endif}
  end
  else begin
   setlength(fitems,fcount);

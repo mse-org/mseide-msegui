@@ -158,7 +158,7 @@ begin
  ffpsmax:= -1;
  application.registeronwiniddestroyed({$ifdef FPC}@{$endif}winiddestroyed);
  inherited;
- ftimer:= tsimpletimer.create(0,@dotimer,false,[to_leak]);
+ ftimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}dotimer,false,[to_leak]);
 end;
 
 destructor tcustomwindowwidget.destroy;

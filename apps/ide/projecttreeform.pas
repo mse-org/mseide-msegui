@@ -28,6 +28,10 @@ uses
  mseglob,msegraphics,msescrollbar,msesys,msehash,mseifiglob;
 
 type
+ projectnodety = (pnk_none,pnk_source,pnk_form,pnk_files,pnk_dir);
+const
+ filenodes = [pnk_source,pnk_dir,pnk_form];
+type
  tdirnode = class;
  tprojecttreefo = class(tdockform)
    grid: twidgetgrid;
@@ -108,11 +112,6 @@ type
   public
    procedure clear;
  end;
-
- projectnodety = (pnk_none,pnk_source,pnk_form,pnk_files,pnk_dir);
-const
- filenodes = [pnk_source,pnk_dir,pnk_form]; 
-type
 
  tprojectnode = class(ttreelistedititem)
    fkind: projectnodety;

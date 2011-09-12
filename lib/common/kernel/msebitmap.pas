@@ -257,7 +257,8 @@ type
 
  tcenteredbitmap = class(tmaskedbitmap)
   public
-   constructor create(amonochrome: boolean);
+   constructor create(const amonochrome: boolean;
+                     const acanvasclass: canvasclassty = nil);
   published
    property alignment default [al_xcentered,al_ycentered];
  end;
@@ -2622,7 +2623,8 @@ end;
 
 { tcenteredbitmap }
 
-constructor tcenteredbitmap.create(amonochrome: boolean);
+constructor tcenteredbitmap.create(const amonochrome: boolean;
+                     const acanvasclass: canvasclassty = nil);
 begin
  inherited;
  alignment:= [al_xcentered,al_ycentered];

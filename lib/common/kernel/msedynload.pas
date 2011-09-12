@@ -57,14 +57,14 @@ var
 procedure regdynlibinit(var info: dynlibinfoty; const initproc: dynlibprocty);
 begin
  sys_mutexlock(lock);
- adduniqueitem(info.inithooks,pointer(initproc));
+ adduniqueitem(info.inithooks,pointer({$ifndef FPC}@{$endif}initproc));
  sys_mutexunlock(lock);
 end;
 
 procedure regdynlibdeinit(var info: dynlibinfoty; const initproc: dynlibprocty);
 begin
  sys_mutexlock(lock);
- adduniqueitem(info.deinithooks,pointer(initproc));
+ adduniqueitem(info.deinithooks,pointer({$ifndef FPC}@{$endif}initproc));
  sys_mutexunlock(lock);
 end;
 
@@ -114,8 +114,8 @@ begin
     for int1:= 0 to high(inithooks) do begin
      dynlibprocty(inithooks[int1])(info);
     end;
-    if (callback <> nil) then begin
-     callback;
+    if ({$ifndef FPC}@{$endif}callback <> nil) then begin
+     callback();
     end;
    end;
    inc(refcount);
@@ -140,8 +140,8 @@ begin
    else begin
     if refcount = 1 then begin //not initialized otherwise
      try
-      if callback <> nil then begin
-       callback;
+      if {$ifndef FPC}@{$endif}callback <> nil then begin
+       callback();
       end;
       for int1:= 0 to high(deinithooks) do begin
        dynlibprocty(deinithooks[int1])(info);

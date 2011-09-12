@@ -3410,8 +3410,8 @@ var
 begin
  if avalue <> foptions then begin
   delta:= buttonoptionsty(
-        {$ifdef FPC}longword{$else}byte{$endif}(foptions) xor
-        {$ifdef FPC}longword{$else}byte{$endif}(avalue));
+        {$ifdef FPC}longword{$else}word{$endif}(foptions) xor
+        {$ifdef FPC}longword{$else}word{$endif}(avalue));
   if bo_updateonidle in delta then begin
    if (bo_updateonidle in avalue) and 
                                not (csdesigning in componentstate) then begin

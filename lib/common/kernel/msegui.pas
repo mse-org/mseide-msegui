@@ -3397,7 +3397,7 @@ begin
  end;
 end;
 
-function createregion(const gdi: pgdifunctionaty): gdiregionty; overload; 
+function createregion(const gdi: pgdifunctionaty): gdiregionty; overload;
 var
  info: drawinfoty;
 begin
@@ -3435,7 +3435,7 @@ begin
    result.gdi:= gdi;
   end
   else begin
-   result:= createregion;
+   result:= createregion(gdi);
   end;
  end;
 end;
