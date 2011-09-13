@@ -35,6 +35,8 @@ type
    procedure copytoclipboard(const sender: TObject);
   private
    frameinfo: frameinfoarty;
+  protected
+   procedure dispdetails;
   public
    gdb: tgdbmi;
    procedure refresh;
@@ -81,25 +83,48 @@ begin
  end;
 end;
 
+procedure tstackfo.dispdetails;
+begin
+ if (grid.row < 0) and (grid.rowcount > 0) then begin
+  grid.row:= 0;
+  exit;
+ end;
+ if grid.row >= 0 then begin 
+  filedisp.value:= grid[2][grid.row]+':'+grid[3][grid.row];
+  address.value:= grid[4][grid.row];
+ end
+ else begin
+  filedisp.value:= '';
+  address.value:= '';
+ end;
+end;
+
 procedure tstackfo.gridoncellevent(const sender: tobject;
   var info: celleventinfoty);
 var
 // str1: msestring;
  rect1: rectty;
 begin
+// if isrowexit(info,true) then begin
+//  filedisp.value:= '';
+//  address.value:= '';
+// end;
  with info do begin
   case eventkind of
+   cek_focusedcellchanged: begin
+    dispdetails;
+   end;
    cek_enter: begin
-    filedisp.value:= self.grid[2][cell.row]+':'+self.grid[3][cell.row];
-    address.value:= self.grid[4][cell.row];
     if (cellbefore.row >= 0) and (cellbefore.row <> newcell.row) then begin
      mainfo.stackframechanged(newcell.row);
     end;
    end;
+{
    cek_exit: begin
     filedisp.value:= '';
     address.value:= '';
    end;
+  }
    cek_firstmousepark: begin
     if cell.col = 1 then begin
      with tstringgrid(sender) do begin

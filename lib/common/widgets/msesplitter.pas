@@ -562,7 +562,7 @@ procedure tcustomsplitter.setstatfile(const avalue: tstatfile);
 begin
  setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
-var testvar: integer;
+
 procedure tcustomsplitter.dostatread(const reader: tstatreader);
 var
  po1,po2: pointty;
@@ -575,9 +575,6 @@ begin
   else begin
    po2.x:= po1.x;
   end;
-if name = 'macrosplitter' then begin
- inc(testvar);
-end;
   if spo_vmove in foptions then begin
    po2.y:= reader.readinteger('y',po1.y);
   end
@@ -773,9 +770,6 @@ end;
 procedure tcustomsplitter.setpropoffset(const aoffset: pointty; const asize: sizety);
 begin      
  inc(fpropsetting);
-if name = 'macrosplitter' then begin
-inc(testvar);
-end;
  try
   size:= asize;
   setclippedpickoffset(aoffset);
@@ -807,9 +801,6 @@ begin //doasyncevent
    end;
    try
     if fparentwidget <> nil then begin
-if name = 'macrosplitter' then begin
-inc(testvar);
-end;
      calcoffset(fparentwidget.clientsize,pt1,pt2,size2);
      if (([spo_hmove,spo_hprop] * foptions <> []) and (pt1.x <> pt2.x) or 
          ([spo_vmove,spo_vprop] * foptions <> []) and (pt1.y <> pt2.y)) and
@@ -840,9 +831,6 @@ var
  size1,size2: sizety;
 begin
  if fupdating = 0 then begin
-if name = 'macrosplitter' then begin
-inc(testvar);
-end;
   if not (spo_nohshrinkzero in foptions) then begin
    size1.cx:= 0;
   end
@@ -872,9 +860,6 @@ end;
 procedure tcustomsplitter.postupdatepropevent;
 begin
  if fnotified = 0 then begin
-if name = 'macrosplitter' then begin
-inc(testvar);
-end;
   inc(fnotified);
   asyncevent(updatepropeventtag,true,true);
  end;

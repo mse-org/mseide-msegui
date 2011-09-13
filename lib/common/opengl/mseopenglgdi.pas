@@ -523,7 +523,7 @@ begin
   {$endif}
  end;
 end;
-var testvar: integer;
+
 procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
 var
  device1: ptruint; //used for extension query 
@@ -650,9 +650,6 @@ begin
    if setpixelformat(fdc,int1,@pixeldesc) then begin
     fcontext:= wglcreatecontext(fdc);
    end
-else begin
- testvar:= getlasterror;
-end;
   end;
   if fcontext = 0 then begin
    error:= gde_rendercontext;

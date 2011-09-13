@@ -114,42 +114,48 @@ object stackfo: tstackfo
     bounds_cy = 160
     anchors = [an_top, an_bottom]
     datacols.count = 5
+    datacols.colorfocused = -1879048185
     datacols.items = <    
       item
         color = -2147483646
+        colorfocused = -1879048185
         width = 31
-        options = [co_readonly, co_nofocus, co_focusselect, co_rowselect, co_savestate]
+        options = [co_readonly, co_nofocus, co_focusselect, co_savestate]
         textflags = [tf_xcentered, tf_ycentered]
         valuefalse = '0'
         valuetrue = '1'
       end    
       item
         colorselect = -1879048185
+        colorfocused = -1879048185
         width = 54
-        options = [co_readonly, co_focusselect, co_rowselect, co_fill]
+        options = [co_readonly, co_focusselect, co_fill]
         optionsedit = [scoe_eatreturn, scoe_homeonenter]
         valuefalse = '0'
         valuetrue = '1'
       end    
       item
+        colorfocused = -1879048185
         options = [co_invisible, co_savestate]
         optionsedit = [scoe_eatreturn]
         valuefalse = '0'
         valuetrue = '1'
       end    
       item
+        colorfocused = -1879048185
         options = [co_invisible, co_savestate]
         valuefalse = '0'
         valuetrue = '1'
       end    
       item
+        colorfocused = -1879048185
         options = [co_invisible, co_savestate]
         valuefalse = '0'
         valuetrue = '1'
       end>
-    datarowheight = 16
+    datarowheight = 15
     oncellevent = gridoncellevent
-    reffontheight = 14
+    reffontheight = 13
   end
   object filedisp: tstringdisp
     frame.dummy = 0
@@ -157,20 +163,20 @@ object stackfo: tstackfo
     bounds_x = 71
     bounds_y = 0
     bounds_cx = 172
-    bounds_cy = 18
+    bounds_cy = 17
     anchors = [an_left, an_top, an_right]
     textflags = [tf_ycentered, tf_ellipseleft]
     options = [dwo_hintclippedtext]
-    reffontheight = 14
+    reffontheight = 13
   end
   object address: tstringdisp
     frame.dummy = 0
     bounds_x = 1
     bounds_y = 0
     bounds_cx = 70
-    bounds_cy = 18
+    bounds_cy = 17
     textflags = [tf_xcentered, tf_ycentered]
-    reffontheight = 14
+    reffontheight = 13
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1
