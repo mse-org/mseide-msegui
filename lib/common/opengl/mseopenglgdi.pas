@@ -96,6 +96,8 @@ type
    0: (d: oglgcdty;);
    1: (_bufferspace: gcpty;);
  end;
+ poglgcty = ^oglgcty;
+ 
 { 
 function createrendercontext(const aparent: winidty; const windowrect: rectty;
                                    const ainfo: contextinfoty;
@@ -955,13 +957,14 @@ begin
  with drawinfo.gcvalues^,drawinfo.gc,oglgcty(platformdata).d do begin
   statebefore:= gcstate;
   if gvm_colorforeground in mask then begin
-   glcolorforeground:= rgbtriplety(colorforeground);
+   glcolorforeground:= colortorgb(drawinfo.acolorforeground);
    with glcolorforeground do begin
     glcolor3ub(red,green,blue);
    end;
   end;
   if gvm_colorbackground in mask then begin
-   glcolorbackground:= rgbtriplety(colorbackground);
+   glcolorbackground:= colortorgb(drawinfo.acolorbackground);
+    //rgbtriplety(colorbackground);
   end;
   if gvm_rasterop in mask then begin
    setlogicop(rasterop,drawinfo.gc);
