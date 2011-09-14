@@ -998,6 +998,7 @@ type
    procedure switchtomonochrome;
 
   protected
+   fgdifuncs: pgdifunctionaty;
    fcanvasclass: canvasclassty;
    fcanvas: tcanvas;
    fhandle: pixmapty;
@@ -1033,7 +1034,7 @@ type
                                     var aimage: maskedimagety); virtual;
   public
    constructor create(const monochrome: boolean;
-                    const acanvasclass: canvasclassty = nil); reintroduce;
+                    const agdifuncs: pgdifunctionaty = nil); reintroduce;
                                   //nil -> default
    destructor destroy; override;
 
@@ -1637,14 +1638,13 @@ end;
  { tsimplebitmap }
 
 constructor tsimplebitmap.create(const monochrome: boolean;
-                                const acanvasclass: canvasclassty = nil);
+                                const agdifuncs: pgdifunctionaty = nil);
 begin
- if acanvasclass <> nil then begin
-  fcanvasclass:= acanvasclass;
+ fgdifuncs:= agdifuncs;
+ if fgdifuncs = nil then begin
+  fgdifuncs:= getdefaultgdifuncs;
  end;
- if fcanvasclass = nil then begin
-  fcanvasclass:= getgdicanvasclass(getdefaultgdifuncs,monochrome);
- end;
+ fcanvasclass:= getgdicanvasclass(fgdifuncs,monochrome);
  if monochrome then begin
   include(fstate,pms_monochrome);
  end;
@@ -1700,13 +1700,13 @@ begin
   end
   else begin
    if avalue then begin
-    bmp:= tsimplebitmap.create(true,fcanvasclass);
+    bmp:= tsimplebitmap.create(true,fgdifuncs);
     bmp.size:= fsize;
     bmp.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint,rop_copy,
        getconverttomonochromecolorbackground);
    end
    else begin
-    bmp:= tsimplebitmap.create(false,fcanvasclass);
+    bmp:= tsimplebitmap.create(false,fgdifuncs);
     bmp.size:= fsize;
     bmp.canvas.colorbackground:= fcolorbackground;
     bmp.canvas.color:= fcolorforeground;

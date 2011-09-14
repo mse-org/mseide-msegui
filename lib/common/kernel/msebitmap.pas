@@ -70,7 +70,7 @@ type
    procedure dochange; virtual;
   public
    constructor create(const amonochrome: boolean;
-                              const acanvasclass: canvasclassty = nil);
+                              const agdifuncs: pgdifunctionaty = nil);
                                         //nil -> default
 
    procedure savetoimage(out aimage: imagety);
@@ -202,7 +202,7 @@ type
                             var aimage: maskedimagety); override;
   public
    constructor create(const amonochrome: boolean;
-                     const acanvasclass: canvasclassty = nil);
+                     const agdifuncs: pgdifunctionaty = nil);
                                         //nil -> default
    destructor destroy; override;
    class procedure freeimageinfo(var ainfo: imagebufferinfoty);
@@ -258,7 +258,7 @@ type
  tcenteredbitmap = class(tmaskedbitmap)
   public
    constructor create(const amonochrome: boolean;
-                     const acanvasclass: canvasclassty = nil);
+                     const agdifuncs: pgdifunctionaty = nil);
   published
    property alignment default [al_xcentered,al_ycentered];
  end;
@@ -461,7 +461,7 @@ end;
 { tbitmap }
 
 constructor tbitmap.create(const amonochrome: boolean;
-                                  const acanvasclass: canvasclassty = nil);
+                                  const agdifuncs: pgdifunctionaty = nil);
 begin
  ftransparency:= cl_none;
  inherited;
@@ -1312,7 +1312,7 @@ end;
 { tmaskedbitmap }
 
 constructor tmaskedbitmap.create(const amonochrome: boolean;
-                                    const acanvasclass: canvasclassty = nil);
+                                    const agdifuncs: pgdifunctionaty = nil);
                                         //nil -> default
 begin
  ftransparentcolor:= cl_default;
@@ -1363,7 +1363,7 @@ end;
 procedure tmaskedbitmap.createmask(const acolormask: boolean);
 begin
  if fmask = nil then begin
-  fmask:= tbitmap.create(true,fcanvasclass);
+  fmask:= tbitmap.create(true,fgdifuncs);
   with fmask do begin
    fcolorforeground:= fmaskcolorforeground;
    fcolorbackground:= fmaskcolorbackground;
@@ -1645,7 +1645,7 @@ begin
      inherited;
      self.freemask;
      if fmask <> nil then begin
-      self.fmask:= tbitmap.create(fmask.monochrome,self.fcanvasclass);
+      self.fmask:= tbitmap.create(fmask.monochrome,self.fgdifuncs);
       with self,fmask do begin
        fcolorforeground:= fmaskcolorforeground;
        fcolorbackground:= fmaskcolorbackground;
@@ -2624,7 +2624,7 @@ end;
 { tcenteredbitmap }
 
 constructor tcenteredbitmap.create(const amonochrome: boolean;
-                     const acanvasclass: canvasclassty = nil);
+                     const agdifuncs: pgdifunctionaty = nil);
 begin
  inherited;
  alignment:= [al_xcentered,al_ycentered];
