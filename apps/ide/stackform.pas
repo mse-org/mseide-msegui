@@ -85,10 +85,10 @@ end;
 
 procedure tstackfo.dispdetails;
 begin
- if (grid.row < 0) and (grid.rowcount > 0) then begin
-  grid.row:= 0;
-  exit;
- end;
+// if (grid.row < 0) and (grid.rowcount > 0) then begin
+//  grid.row:= 0;
+//  exit;
+// end;
  if grid.row >= 0 then begin 
   filedisp.value:= grid[2][grid.row]+':'+grid[3][grid.row];
   address.value:= grid[4][grid.row];
@@ -145,6 +145,7 @@ end;
 procedure tstackfo.clear;
 begin
  grid.rowcount:= 0;
+ dispdetails;
 end;
 
 procedure tstackfo.refresh;
@@ -154,6 +155,7 @@ var
 begin
  if visible and gdb.cancommand then begin
   gdb.stacklistframes(frameinfo);
+  grid.beginupdate;
   grid.row:= -1;
   grid.rowcount:= length(frameinfo);
   for int1:= 0 to high(frameinfo) do begin
@@ -176,6 +178,7 @@ begin
   if grid.rowcount > 0 then begin
    grid.row:= 0;
   end;
+  grid.endupdate;
  end;
 end;
 
