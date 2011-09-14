@@ -102,12 +102,18 @@ const
                 $03,$0b,$07,$0f,
                 $02,$0a,$06,$0e,
                 $04,$0c,$08,$10);
-
+{
  inverserops2: array[rasteropty] of byte =//for 1->foreground in monochromebitmaps
                 ($00,$04,$08,$0c,
                  $01,$05,$09,$0d,
                  $02,$06,$0a,$0e,
                  $03,$07,$0b,$0f);
+}
+ inverserops2: array[rasteropty] of byte =//for 1->foreground in monochromebitmaps
+                ($10,$0e,$0f,$0d,
+                 $08,$06,$07,$05,
+                 $0c,$0a,$0b,$09,
+                 $04,$02,$03,$01);
 
  firstrasterops2: array[rasteropty] of byte = //backgroudcolor = $ffffff,
                ($09,$09,$09,$09,              //textcolor = $000000, and
@@ -172,6 +178,8 @@ type
    0: (d: win32gcdty;);
    1: (_bufferspace: gcpty;);
  end;
+ pwin32gcty = ^win32gcty;
+ 
  charwidthsty = array[0..255] of integer;
  pcharwidthsty = ^charwidthsty;
  win32fontdataty = record

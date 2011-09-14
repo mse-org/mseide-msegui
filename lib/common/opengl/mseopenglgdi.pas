@@ -497,7 +497,7 @@ procedure gdi_createpixmap(var drawinfo: drawinfoty); //gdifunc
 var
  info: tbitmapinfo;
  dc: hdc;
- po1: pointer;
+// po1: pointer;
 {$endif}
 begin
  with drawinfo.createpixmap do begin
@@ -803,8 +803,9 @@ var
  ps,pd: plongword;
  pm: prgbtriplety;
  int1,int2: integer;
- scx,dcx,scy,dcy: integer;
+ scxw,scx,dcx,scy,dcy: integer;
  xintp,yintp: integer;
+ lwos,lwod: longword;
 begin
  dest:= source.image;
  result:= false;
@@ -820,11 +821,18 @@ begin
     dcy:= size.cy;
     scx:= source.image.size.cx;
     scy:= source.image.size.cy;    
-    dest.pixels:= gui_allocimagemem(dcx*dcy);
+    if source.image.monochrome then begin
+     scxw:= ((dcx+31) div 32);
+     dest.pixels:= gui_allocimagemem(scxw*dcy);
+    end
+    else begin
+     dest.pixels:= gui_allocimagemem(dcx*dcy);
+    end;
     ps:= pointer(source.image.pixels);
     pd:= pointer(dest.pixels);
     yintp:= dcy;
     if (source.mask.pixels <> nil) and not source.mask.monochrome then begin
+     //color mask
      pm:= pointer(source.mask.pixels);
      for int1:= dcy-1 downto 0 do begin
       xintp:= dcx;
@@ -850,23 +858,65 @@ begin
      end;
     end
     else begin
-     for int1:= dcy-1 downto 0 do begin
-      xintp:= dcx;
-      for int2:= dcx-1 downto 0 do begin
-       pd^:= ps^;
-       inc(pd);
-       dec(xintp,scx);
-       if xintp <= 0 then begin
+     if source.image.monochrome then begin  //mask in monochrome not supported
+      for int1:= dcy-1 downto 0 do begin
+       xintp:= dcx;
+       pd^:= 0;
+       lwos:= 1;
+       lwod:= 1;
+       for int2:= dcx-1 downto 0 do begin
+        if ps^ and lwos <> 0 then begin
+         pd^:= pd^ or lwod;
+        end;
+        lwod:= lwod shl 1;
+        if lwod = 0 then begin
+         inc(pd);
+         lwod:= 1;
+        end;
+        dec(xintp,scx);
+        if xintp <= 0 then begin
+         lwos:= lwos shl 1;
+         if lwos = 0 then begin
+          inc(ps);
+          lwos:= 1;
+         end;
+         inc(xintp,dcx);
+        end;
+       end;
+       if lwod <> 1 then begin
+        inc(pd);
+       end;
+       if lwos <> 0 then begin
         inc(ps);
-        inc(xintp,dcx);
+       end;
+       dec(yintp,scy);
+       if yintp <= 0 then begin
+        inc(yintp,dcy);
+       end
+       else begin
+        dec(ps,scxw); //duplicate row
        end;
       end;
-      dec(yintp,scy);
-      if yintp <= 0 then begin
-       inc(yintp,dcy);
-      end
-      else begin
-       dec(ps,scx); //duplicate row
+     end
+     else begin //rgb
+      for int1:= dcy-1 downto 0 do begin
+       xintp:= dcx;
+       for int2:= dcx-1 downto 0 do begin
+        pd^:= ps^;
+        inc(pd);
+        dec(xintp,scx);
+        if xintp <= 0 then begin
+         inc(ps);
+         inc(xintp,dcx);
+        end;
+       end;
+       dec(yintp,scy);
+       if yintp <= 0 then begin
+        inc(yintp,dcy);
+       end
+       else begin
+        dec(ps,scx); //duplicate row
+       end;
       end;
      end;
     end;
@@ -902,6 +952,7 @@ begin
   if im1.mask.pixels <> nil then begin
    include(gcstate,ogcs_needsblend);
   end;
+  glpushclientattrib(gl_client_pixel_store_bit);
   glpushattrib(gl_pixel_mode_bit);
   if im2.monochrome then begin
    map[0]:= glcolorbackground.red/255;
@@ -924,6 +975,7 @@ begin
    glpixelmapfv(gl_pixel_map_i_to_a,2,@map);
    mode:= gl_color_index;
    datatype:= gl_bitmap;
+   glpixelstorei(gl_unpack_lsb_first,1);
   end
   else begin
    datatype:= gl_unsigned_byte;
@@ -939,6 +991,7 @@ begin
    gui_freeimagemem(im2.pixels);
   end;
   glpopattrib;
+  glpopclientattrib;
   gltexenvi(gl_texture_env,gl_texture_env_mode,gl_replace);
   gltexparameteri(gl_texture_2d, gl_texture_wrap_s, gl_repeat);
   gltexparameteri (gl_texture_2d, gl_texture_wrap_t, gl_repeat);
