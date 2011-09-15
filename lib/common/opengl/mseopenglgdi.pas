@@ -1121,9 +1121,9 @@ end;
 procedure gdi_getcanvasclass(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.getcanvasclass do begin
-  if not monochrome then begin
+//  if not monochrome then begin
    canvasclass:= topenglwindowcanvas;
-  end;
+//  end;
  end;
 end;
 
@@ -1396,10 +1396,8 @@ begin
           oglgcty(tcanvas1(source).fdrawinfo.gc.platformdata).d.top-y-cy+1,
                                   cx,cy,gl_rgba,gl_unsigned_byte,po1);
    if mask <> nil then begin
-    with tcanvas1(mask.canvas) do begin
-     checkgcstate([cs_gc]);
-     makecurrent(tcanvas1(mask.canvas).fdrawinfo.gc);
-    end;
+    tcanvas1(mask.canvas).checkgcstate([cs_gc]);
+    makecurrent(tcanvas1(mask.canvas).fdrawinfo.gc);
     getmem(po2,cx*cy);
     glpushclientattrib(gl_client_pixel_store_bit);
     glpixelstorei(gl_pack_alignment,1);
