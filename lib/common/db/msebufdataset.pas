@@ -463,8 +463,12 @@ type
   
 type
  
+ recupdateflagty = (ruf_applied);
+ recupdateflagsty = set of recupdateflagty;
+ 
  recupdatebufferty = record
   updatekind: tupdatekind;
+  flags: recupdateflagsty;
   bookmark: bookmarkdataty;
   oldvalues: pintrecordty;
  end;
@@ -492,7 +496,8 @@ type
                       );
  bufdatasetstatesty = set of bufdatasetstatety;
 
- bufdatasetstate1ty = (bs1_needsresync,bs1_lookupnotifying,bs1_posting);
+ bufdatasetstate1ty = (bs1_needsresync,bs1_lookupnotifying,bs1_posting,
+                          bs1_deferdeleterecupdatebuffer,bs1_restoreupdate);
  bufdatasetstates1ty = set of bufdatasetstate1ty;
  
  internalcalcfieldseventty = procedure(const sender: tmsebufdataset;
@@ -647,6 +652,7 @@ type
    procedure checkfilterstate;
    procedure checklogfile;
    procedure openlocal;
+   procedure initsavepoint;
    procedure dointernalopen;
    procedure doloadfromstream;
    procedure dointernalclose;
@@ -754,6 +760,7 @@ type
    fcurrentupdating: integer;
 //   flastcurrentrec: pintrecordty;
    flastcurrentindex: integer;
+   fsavepointlevel: integer;
 
    procedure fixupcurrentset; virtual;
    procedure currentcheckbrowsemode;
@@ -830,6 +837,14 @@ type
    procedure setofflineblob(const adata: precheaderty; const aindex: integer;
                                    const ainfo: blobstreaminfoty);
    function getblobrecpo: precheaderty;
+
+   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty); virtual;
+   procedure savepointevent(const sender: tmdbtransaction;
+                  const akind: savepointeventkindty; const alevel: integer); override;
+   procedure packrecupdatebuffer;
+   procedure restorerecupdatebuffer;
+   procedure postrecupdatebuffer;
+   procedure recupdatebufferapplied(const abuf: precupdatebufferty);
    procedure internalapplyupdate(const maxerrors: integer;
                const revertonerror: boolean; out response: resolverresponsesty);
    procedure afterapply; virtual;
@@ -2178,11 +2193,18 @@ begin
  end; 
 end;
 
+procedure tmsebufdataset.initsavepoint;
+begin
+ fsavepointlevel:= -1;
+ exclude(fbstate1,bs1_deferdeleterecupdatebuffer);
+end;
+
 procedure tmsebufdataset.dointernalopen;
 var
  int1: integer;
  kind1: filtereditkindty;
 begin
+ initsavepoint;
  for int1:= 0 to fields.count - 1 do begin
   with fields[int1] do begin
    if (fieldkind = fkdata) and (fielddefs.indexof(fieldname) < 0) then begin
@@ -2269,8 +2291,22 @@ procedure tmsebufdataset.dointernalclose;
 var 
  int1: integer;
  kind1: filtereditkindty;
+ po1: precupdatebufferty;
 begin
  exclude(fbstate,bs_opening);
+ for int1:= 0 to high(fupdatebuffer) do begin
+  po1:= @fupdatebuffer[int1];
+  with po1^ do begin
+   if bookmark.recordpo <> nil then begin
+    if ruf_applied in flags then begin
+     recupdatebufferapplied(po1);
+    end
+    else begin
+     intfreerecord(oldvalues);
+    end;
+   end;
+  end;
+ end;
  closelogger;
  frecno:= -1;
  resetblobcache;
@@ -2286,17 +2322,14 @@ begin
    intfinalizerecord(@ffilterbuffer[kind1]^.header);
    freerecordbuffer(pchar(ffilterbuffer[kind1]));
   end;
- // pointer(fnewvaluebuffer^.header.blobinfo):= nil;
- // freerecordbuffer(pchar(fnewvaluebuffer));
   freemem(fnewvaluebuffer); //allways copied by move, needs no finalize
-//  freemem(flookupbuffer);
-  for int1:= 0 to high(fupdatebuffer) do begin
-   with fupdatebuffer[int1] do begin
-    if bookmark.recordpo <> nil then begin
-     intfreerecord(oldvalues);
-    end;
-   end;
-  end;
+//  for int1:= 0 to high(fupdatebuffer) do begin
+//   with fupdatebuffer[int1] do begin
+//    if bookmark.recordpo <> nil then begin
+//     intfreerecord(oldvalues);
+//    end;
+//   end;
+//  end;
   fupdatebuffer:= nil;
  end;
  clearindex;
@@ -2444,9 +2477,11 @@ begin
         (fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo <> 
                                                          recordpo) then begin
     for int1:= 0 to high(fupdatebuffer) do begin
-     if fupdatebuffer[int1].bookmark.recordpo = recordpo then begin
-      fcurrentupdatebuffer:= int1;
-      break;
+     with fupdatebuffer[int1] do begin
+      if (bookmark.recordpo = recordpo) and not (ruf_applied in flags) then begin
+       fcurrentupdatebuffer:= int1;
+       break;
+      end;
      end;
     end;
    end;
@@ -3198,33 +3233,84 @@ begin
   FOnUpdateError := AValue;
 end;
 
+procedure tmsebufdataset.recupdatebufferapplied(const abuf: precupdatebufferty);
+begin
+ if flogger <> nil then begin
+  logupdatebuffer(flogger,abuf^,nil,true,lf_apply);
+  flogger.flushbuffer;
+ end;
+ intFreeRecord(abuf^.OldValues);
+ abuf^.bookmark.recordpo:= nil;
+end;
+
+procedure tmsebufdataset.packrecupdatebuffer;
+var
+ int1,int2: integer;
+begin
+ int2:= 0;
+ for int1:= 0 to high(fupdatebuffer) do begin //pack
+  if fupdatebuffer[int1].bookmark.recordpo <> nil then begin
+   fupdatebuffer[int2]:= fupdatebuffer[int1];
+   inc(int2);
+  end;
+ end;
+ setlength(fupdatebuffer,int2);
+end;
+
+procedure tmsebufdataset.restorerecupdatebuffer;
+var
+ int1: integer;
+begin
+ for int1:= high(fupdatebuffer) downto 0 do begin
+  exclude(fupdatebuffer[int1].flags,ruf_applied);
+ end;
+end;
+
+procedure tmsebufdataset.postrecupdatebuffer;
+var
+ po1: precupdatebufferty;
+ int1,int2: integer;
+begin
+ int2:= 0;
+ for int1:= high(fupdatebuffer) downto 0 do begin
+  po1:= @fupdatebuffer[int1];
+  with po1^ do begin
+   if (ruf_applied in flags) and (bookmark.recordpo <> nil) then begin
+    inc(int2);
+    recupdatebufferapplied(po1);
+   end;
+  end;
+ end;
+ if int2 = length(fupdatebuffer) then begin
+  fupdatebuffer:= nil;
+ end
+ else begin
+  packrecupdatebuffer;
+ end;
+end;
+
 procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
                const revertonerror: boolean; out response: resolverresponsesty);
                
  procedure checkrevert;
-  procedure disableupdateitem;
-  begin
-   fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo:= nil;
-//   deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),fcurrentupdatebuffer);
-//   fcurrentupdatebuffer:= bigint; //invalid
-//   resync([]);
-  end; //deleteupdateitem
  var
   po1: precupdatebufferty;
  begin
   po1:= @fupdatebuffer[fcurrentupdatebuffer];
   if rr_applied in response then begin
-   if flogger <> nil then begin
-    logupdatebuffer(flogger,po1^,nil,true,lf_apply);
-    flogger.flushbuffer;
+   if bs1_deferdeleterecupdatebuffer in fbstate1 then begin
+    include(po1^.flags,ruf_applied);
+   end
+   else begin
+    recupdatebufferapplied(po1);
    end;
-   intFreeRecord(po1^.OldValues);
-   disableupdateitem;
   end
   else begin
    if revertonerror or (rr_revert in response) then begin
-    cancelrecupdate(fupdatebuffer[fcurrentupdatebuffer]);
-    disableupdateitem;
+    cancelrecupdate(po1^);
+    po1^.bookmark.recordpo:= nil;
+//    cancelrecupdate(fupdatebuffer[fcurrentupdatebuffer]);
+//    disableupdateitem;
    end;
   end;
  end; //checkrevert
@@ -3394,34 +3480,31 @@ begin
     response:= [];
     while (fapplyindex <= high(FUpdateBuffer)) and not(rr_abort in response) do begin
      fcurrentupdatebuffer:= fapplyindex;
-     if FUpdateBuffer[fcurrentupdatebuffer].Bookmark.recordpo <> nil then begin
-      internalapplyupdate(maxerrors,revertonerror,response);
-      bo1:= bo1 or not (rr_applied in response);
+     with fupdatebuffer[fcurrentupdatebuffer] do begin
+      if (bookmark.recordpo <> nil) and not (ruf_applied in flags) then begin
+       internalapplyupdate(maxerrors,revertonerror,response);
+       bo1:= bo1 or not (rr_applied in response);
+      end;
      end;
      inc(fapplyindex);
-//     if (bs_idle in fbstate) and not application.idle then begin
-//      break;
-//     end;
-               //win98 is not idle after applyupdate ???
+ //     if (bs_idle in fbstate) and not application.idle then begin
+ //      break;
+ //     end;
+                //win98 is not idle after applyupdate ???
     end;
    finally 
     fcurrentupdatebuffer:= bigint; //invalid
-    if (ffailedcount = 0) and (fapplyindex > high(fupdatebuffer)) then begin
-     fupdatebuffer:= nil;
-    end
-    else begin
-     int2:= 0;
-     for int1:= 0 to high(fupdatebuffer) do begin //pack
-      if fupdatebuffer[int1].bookmark.recordpo <> nil then begin
-       fupdatebuffer[int2]:= fupdatebuffer[int1];
-       inc(int2);
-      end;
+    if not (bs1_deferdeleterecupdatebuffer in fbstate1) then begin
+     if (ffailedcount = 0) and (fapplyindex > high(fupdatebuffer)) then begin
+      fupdatebuffer:= nil;
+     end
+     else begin
+      packrecupdatebuffer;
      end;
-     setlength(fupdatebuffer,int2);
     end;
     if active then begin
      internalsetrecno(recnobefore);
-     Resync([]);
+     resync([]);
      enablecontrols;
     end
     else begin
@@ -5663,6 +5746,7 @@ var
  updabuf: recupdatebufferarty;
  
 begin
+ initsavepoint;
  updabuf:= nil; //compilerwarning
  actindexbefore:= factindex;
  factindex:= 0;
@@ -7877,6 +7961,48 @@ begin
   inherited;
  finally
   exclude(fbstate1,bs1_posting);
+ end;
+end;
+
+procedure tmsebufdataset.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+begin
+ if dso_restoreupdateonsavepointrollback in aoptions then begin
+  include(fbstate1,bs1_restoreupdate);
+ end
+ else begin
+  if (bs1_restoreupdate in fbstate1) and active then begin
+   postrecupdatebuffer;
+  end;
+  exclude(fbstate1,bs1_restoreupdate);
+ end;
+end;
+
+procedure tmsebufdataset.savepointevent(const sender: tmdbtransaction;
+               const akind: savepointeventkindty; const alevel: integer);
+begin
+ if (bs1_restoreupdate in fbstate1) and active and 
+               ((sender = ftransactionwrite) or 
+                  (ftransactionwrite = nil) and (sender = ftransaction)) then begin
+  case akind of
+   spek_begin: begin
+    if fsavepointlevel < 0 then begin
+     fsavepointlevel:= alevel;
+     include(fbstate1,bs1_deferdeleterecupdatebuffer);
+    end;
+   end;
+   else begin
+    if alevel <= fsavepointlevel then begin
+     fsavepointlevel:= -1;
+     exclude(fbstate1,bs1_deferdeleterecupdatebuffer);
+     if akind in [spek_release,spek_committrans] then begin
+      postrecupdatebuffer;
+     end
+     else begin
+      restorerecupdatebuffer;
+     end;
+    end;
+   end;
+  end;
  end;
 end;
 

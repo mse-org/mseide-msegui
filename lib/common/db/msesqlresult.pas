@@ -312,9 +312,12 @@ type
    procedure prepare;
    procedure unprepare;
    procedure execute;
+    //itransactionclient
    procedure settransaction(const avalue: tmdbtransaction);
    procedure settransactionwrite(const avalue: tmdbtransaction);
-   //isqlclient
+   procedure savepointevent(const sender: tmdbtransaction;
+           const akind: savepointeventkindty; const alevel: integer);
+    //isqlclient
    procedure setdatabase(const avalue: tmdatabase);
    function getname: ansistring;
    function gettransaction: tmdbtransaction;
@@ -1765,6 +1768,12 @@ begin
 end;
 
 procedure tsqlresult.checkbrowsemode;
+begin
+ //dummy
+end;
+
+procedure tsqlresult.savepointevent(const sender: tmdbtransaction;
+               const akind: savepointeventkindty; const alevel: integer);
 begin
  //dummy
 end;

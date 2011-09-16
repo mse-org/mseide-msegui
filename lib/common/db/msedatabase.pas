@@ -45,6 +45,9 @@ type
   function moveby(distance: longint): longint;
  end; 
  
+ savepointeventkindty = (spek_begin,spek_release,spek_rollback,
+                         spek_committrans,spek_rollbacktrans);
+  
  itransactionclient = interface(idbclient)
   procedure settransaction(const avalue: tmdbtransaction);
   procedure settransactionwrite(const avalue: tmdbtransaction);
@@ -52,6 +55,8 @@ type
   procedure checkbrowsemode;
   procedure refreshtransaction;
 //  function getcomponentinstance: tcomponent;
+  procedure savepointevent(const sender: tmdbtransaction;
+                   const akind: savepointeventkindty; const alevel: integer);
  end;
  itransactionclientarty = array of itransactionclient;
  pitransactionclientarty = ^itransactionclientarty;
@@ -242,6 +247,7 @@ type
   end;
 
   tmdbdatasetClass = Class of tmdbdataset;
+
   tmdbdataset = Class(TDataset,idatabaseclient,itransactionclient)
    private
     ftagpo: pointer;
@@ -250,10 +256,13 @@ type
     ftransaction : tmdbtransaction;
     ftransactionwrite : tmdbtransaction;
     procedure setdatabase (const value: tmdatabase); virtual;
+     //itransactionclient
     procedure settransaction(const value: tmdbtransaction); virtual;
     procedure settransactionwrite(const value: tmdbtransaction); virtual;
 //      procedure checkdatabase;
-    //idbclient
+    procedure savepointevent(const sender: tmdbtransaction;
+           const akind: savepointeventkindty; const alevel: integer); virtual;
+     //idbclient
     function getcomponentinstance: tcomponent;
     function getname: ansistring;
     function gettransaction: tmdbtransaction;
@@ -721,6 +730,12 @@ begin
   Transaction:=Nil;
   transactionwrite:= nil;
   Inherited;
+end;
+
+procedure tmdbdataset.savepointevent(const sender: tmdbtransaction;
+               const akind: savepointeventkindty; const alevel: integer);
+begin
+ //dummy
 end;
 
 { tmdbtransaction }

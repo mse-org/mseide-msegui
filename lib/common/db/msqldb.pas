@@ -433,6 +433,7 @@ type
     procedure dobeforestop;
     procedure doafterstop;
     procedure checkpendingaction;
+    procedure savepointevent(const akind: savepointeventkindty; const alevel: integer);
    public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
@@ -525,7 +526,7 @@ type
    procedure setparams(const avalue: tmseparams);
    procedure settransaction1(const avalue: tsqltransaction);
    procedure setoptions(const avalue: sqlstatementoptionsty);
-   //itransactionclient
+    //itransactionclient
    function getname: string;
    function getactive: boolean;
    procedure setactive(avalue: boolean); virtual;
@@ -533,6 +534,8 @@ type
    procedure settransactionwrite(const avalue: tmdbtransaction);
    procedure checkbrowsemode;
    procedure refreshtransaction;
+   procedure savepointevent(const sender: tmdbtransaction;
+                    const akind: savepointeventkindty; const alevel: integer);
    //idbclient
    procedure setdatabase(const avalue: tmdatabase);
    function gettransaction: tmdbtransaction;
@@ -2259,8 +2262,9 @@ end;
 
 constructor TSQLTransaction.Create(AOwner : TComponent);
 begin
-  inherited Create(AOwner);
-  FParams := TStringList.Create;
+ fsavepointlevel:= -1;
+ inherited Create(AOwner);
+ FParams := TStringList.Create;
 end;
 
 destructor TSQLTransaction.Destroy;
@@ -2312,18 +2316,18 @@ begin
  end;
 end;
 
-procedure TSQLTransaction.doendtransaction(
+procedure tsqltransaction.doendtransaction(
                          const aaction: tcommitrollbackaction);
 begin
  case aaction of
-  caCommit: commit;
-  caCommitRetaining: commitretaining;
-  caRollbackRetaining: rollbackretaining;
-  else rollback;        //canone,caRollback
+  cacommit: commit;
+  cacommitretaining: commitretaining;
+  carollbackretaining: rollbackretaining;
+  else rollback;        //canone,carollback
  end;
 end;
 
-procedure TSQLTransaction.EndTransaction;
+procedure tsqltransaction.endtransaction;
 
 begin
  doendtransaction(faction);
@@ -2458,6 +2462,7 @@ begin
    else begin
     tcustomsqlconnection(database).commit(FTrans);
    end;
+   savepointevent(spek_committrans,0);
   except
    on e: exception do begin
     bo1:= false;
@@ -2476,8 +2481,11 @@ begin
     end;
    end;
   end;
+ end
+ else begin
+  savepointevent(spek_committrans,0);
  end;
- fsavepointlevel:= 0;
+ fsavepointlevel:= -1;
  dofinish;
  result:= true;
 end;
@@ -2488,7 +2496,7 @@ function TSQLTransaction.Commit(const checksavepoint: boolean = true): boolean;
 begin
  result:= true;
  if active then begin
-  if checksavepoint and (fsavepointlevel > 0) then begin
+  if checksavepoint and (fsavepointlevel >= 0) then begin
    pendingaction:= cacommit;
    exit;
   end;
@@ -2509,7 +2517,7 @@ function TSQLTransaction.CommitRetaining(
 begin
  result:= true;
  if active then begin
-  if checksavepoint and (fsavepointlevel > 0) then begin
+  if checksavepoint and (fsavepointlevel >= 0) then begin
    pendingaction:= cacommitretaining;
    exit;
   end;
@@ -2530,13 +2538,14 @@ begin
   if checkcanevent(self,tmethod(fonbeforerollback)) then begin
    fonbeforerollback(self);
   end;
+  savepointevent(spek_rollbacktrans,0);
   closedatasets;
   try
    if not (tao_fake in foptions) then begin
     tcustomsqlconnection(database).RollBack(FTrans);
    end;
   finally
-   fsavepointlevel:= 0;
+   fsavepointlevel:= -1;
    CloseTrans;
    if checkcanevent(self,tmethod(fonafterrollback)) then begin
     fonafterrollback(self);
@@ -2556,8 +2565,9 @@ begin
    if not (tao_fake in foptions) then begin
     tcustomsqlconnection(database).RollBackRetaining(FTrans);
    end;
+   savepointevent(spek_rollbacktrans,0);
   finally
-   fsavepointlevel:= 0;
+   fsavepointlevel:= -1;
   end;
 //  if (tao_refreshdatasets in foptions) or
 //       (sco_emulateretaining in 
@@ -2667,10 +2677,11 @@ var
  mstr1: msestring;
 begin
  active:= true;
+ inc(fsavepointlevel);
  result:= fsavepointlevel;
  mstr1:= 'sp'+inttostrmse(result);
  database.executedirect('SAVEPOINT '+mstr1+';',self,nil,false,true);
- inc(fsavepointlevel);
+ savepointevent(spek_begin,result);
 end;
 
 procedure tsqltransaction.checkpendingaction;
@@ -2678,7 +2689,7 @@ var
  act1: tcommitrollbackaction;
  bo1: boolean;
 begin
- if (fpendingaction <> canone) and (fsavepointlevel = 0) and active then begin
+ if (fpendingaction <> canone) and (fsavepointlevel < 0) and active then begin
   act1:= fpendingaction;
   bo1:= fpendingrefresh;
   fpendingaction:= canone;
@@ -2696,21 +2707,27 @@ procedure TSQLTransaction.savepointrollback(alevel: integer = -1);
 begin
  checkactive;
  if alevel = -1 then begin
-  alevel:= fsavepointlevel-1;
+  alevel:= fsavepointlevel;
  end;
- database.executedirect('ROLLBACK TO '+'sp'+inttostrmse(alevel)+';',
-                                                    self,nil,false,true); 
- fsavepointlevel:= alevel;
- checkpendingaction;
+ if alevel >= 0 then begin
+  database.executedirect('ROLLBACK TO '+'sp'+inttostrmse(alevel)+';',
+                                                     self,nil,false,true); 
+  fsavepointlevel:= alevel-1;
+  savepointevent(spek_rollback,alevel);
+  checkpendingaction;
+ end;
 end;
 
 procedure TSQLTransaction.savepointrelease;
 begin
  checkactive;
- database.executedirect('RELEASE SAVEPOINT '+'sp'+
-            inttostrmse(fsavepointlevel-1)+';',self,nil,false,true); 
- dec(fsavepointlevel);
- checkpendingaction;
+ if fsavepointlevel >= 0 then begin
+  database.executedirect('RELEASE SAVEPOINT '+'sp'+
+             inttostrmse(fsavepointlevel)+';',self,nil,false,true); 
+  dec(fsavepointlevel);
+  savepointevent(spek_release,fsavepointlevel+1);
+  checkpendingaction;
+ end;
 end;
 
 procedure TSQLTransaction.dobeforestop;
@@ -2732,6 +2749,39 @@ begin
  fpendingaction:= avalue;
  if not (avalue in [cacommitretaining,carollbackretaining]) then begin
   fpendingrefresh:= false;
+ end;
+end;
+
+procedure TSQLTransaction.savepointevent(const akind: savepointeventkindty;
+                                                        const alevel: integer);
+var
+ int1: integer;
+begin
+ int1:= bigint;
+ while true do begin
+  if int1 > high(fdatasets) then begin
+   int1:= high(fdatasets);
+  end;
+  if int1 < 0 then begin
+   break;
+  end;
+  if fdatasets[int1].getactive then begin
+   fdatasets[int1].savepointevent(self,akind,alevel);
+  end;
+  dec(int1);
+ end;
+ int1:= bigint;
+ while true do begin
+  if int1 > high(fwritedatasets) then begin
+   int1:= high(fwritedatasets);
+  end;
+  if int1 < 0 then begin
+   break;
+  end;
+  if fwritedatasets[int1].getactive then begin
+   fwritedatasets[int1].savepointevent(self,akind,alevel);
+  end;
+  dec(int1);
  end;
 end;
 
@@ -4810,6 +4860,12 @@ begin
 end;
 
 procedure tcustomsqlstatement.checkbrowsemode;
+begin
+ //dummy
+end;
+
+procedure tcustomsqlstatement.savepointevent(const sender: tmdbtransaction;
+               const akind: savepointeventkindty; const alevel: integer);
 begin
  //dummy
 end;
