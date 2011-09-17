@@ -638,7 +638,7 @@ type
    procedure insertrow(const aindex: integer; const count: integer = 1); override;
    procedure deleterow(const aindex: integer; const count: integer = 1); override;
    procedure rearange(const list: integerarty); override;
-   procedure sortcompare(const index1,index2: integer; var result: integer); virtual;
+   function sortcompare(const index1,index2: integer): integer; virtual;
    function isempty(const aindex: integer): boolean; virtual;
    procedure docellevent(var info: celleventinfoty); virtual;
    function getcursor(const arow: integer; 
@@ -6024,13 +6024,13 @@ begin
  end;
 end;
 
-procedure tdatacol.sortcompare(const index1, index2: integer;
-  var result: integer);
+function tdatacol.sortcompare(const index1,index2: integer): integer;
 begin
+ result:= 0;
  if fdata <> nil then begin
   with tdatalist1(fdata) do begin
-   tdatalist1(fdata).compare((fdatapo+index1*fsize)^,
-                                (fdatapo+index2*fsize)^,result);
+   result:= tdatalist1(fdata).compare((fdatapo+index1*fsize)^,
+                                (fdatapo+index2*fsize)^);
   end;
  end;
 end;
@@ -7972,7 +7972,7 @@ begin
   for int1:= 0 to count-1 do begin
    with tdatacol(fitems[int1]) do begin
     if not(co_nosort in foptions) then begin
-     sortcompare(l,r,result);
+     result:= sortcompare(l,r);
      if result <> 0 then begin
       if co_sortdescent in foptions then begin
        result:= - result;
@@ -7986,7 +7986,7 @@ begin
  else begin
   with tdatacol(fitems[fsortcol]) do begin
    if not(co_nosort in foptions) then begin
-    sortcompare(l,r,result);
+    result:= sortcompare(l,r);
     if co_sortdescent in foptions then begin
      result:= - result;
     end;
@@ -7995,7 +7995,7 @@ begin
   if (result = 0) and (fsortcoldefault >= 0) then begin
    with tdatacol(fitems[fsortcoldefault]) do begin
     if not(co_nosort in foptions) then begin
-     sortcompare(l,r,result);
+     result:= sortcompare(l,r);
      if co_sortdescent in foptions then begin
       result:= - result;
      end;
@@ -16866,7 +16866,7 @@ var
 begin
  cleanrowheight(count-1);
  po1:= dataporowheight;
- bo1:= findarrayvalue(aypos,po1,count,@comprowypos,fsize,result);
+ bo1:= findarrayvalue(aypos,po1,fsize,count,@comprowypos,result);
  if not bo1 then begin
   dec(result);
   if (result = count-1) then begin

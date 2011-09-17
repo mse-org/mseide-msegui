@@ -15575,8 +15575,8 @@ begin
     for int1:= 0 to high(fwindowstack) do begin
      findlevel(fwindowstack[int1]);
     end;
-    sortarray(fwindowstack,{$ifdef FPC}@{$endif}cmpwindowstack,
-                                              sizeof(windowstackinfoty));
+    sortarray(fwindowstack,sizeof(windowstackinfoty),
+                                    {$ifdef FPC}@{$endif}cmpwindowstack);
    {$ifdef mse_debugzorder}
     for int1:= 0 to high(fwindowstack) do begin
      debugwriteln(debugwindowinfo(fwindowstack[int1].lower)+' '+
@@ -15743,7 +15743,7 @@ begin
   printwindowstackinfo(ar3);
  {$endif}
   ar4:= copy(ar3);
-  sortarray(ar3,{$ifdef FPC}@{$endif}compwindowzorder,sizeof(ar3[0]));
+  sortarray(ar3,sizeof(ar3[0]),{$ifdef FPC}@{$endif}compwindowzorder);
   for int1:= 0 to high(ar3) do begin
    with ar3[int1] do begin
     fstate:= fstate - [tws_raise,tws_lower]; 

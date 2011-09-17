@@ -3969,8 +3969,8 @@ begin
    end;
   end;
  end; 
- mergesortarray(ar1,@comparefieldnum,sizeof(ar1[0]),
-                length(ar1),false,ffieldorder);
+ mergesortarray(ar1,sizeof(ar1[0]),length(ar1),@comparefieldnum,
+                                                          ffieldorder,false);
    //MS SQL ODBC needs ordered load field
 end;
 
@@ -4303,8 +4303,8 @@ begin
   if not (bs_blobssorted in fbstate) then begin
    sortblobcache;
   end;
-  result:= findarrayvalue(info,fblobcache,fblobcount,@compblobcache,
-                                         sizeof(blobcacheinfoty),int1);
+  result:= findarrayvalue(info,fblobcache,sizeof(blobcacheinfoty),
+                                             fblobcount,@compblobcache,int1);
   if result then begin
    info.data:= fblobcache[int1].data;
   end
@@ -4317,7 +4317,7 @@ end;
 procedure tmsebufdataset.sortblobcache;
 begin
  setlength(fblobcache,fblobcount);
- sortarray(fblobcache,@compblobcache,sizeof(blobcacheinfoty));
+ sortarray(fblobcache,sizeof(blobcacheinfoty),@compblobcache);
  include(fbstate,bs_blobssorted);
 end;
 
@@ -5709,8 +5709,7 @@ var
  var
   int1: integer;
  begin
-  result:= findarrayitem(oldpo,ar2,@comparepointer,
-                                          sizeof(pointer),int1);
+  result:= findarrayitem(oldpo,ar2,sizeof(pointer),@comparepointer,int1);
   if result then begin
    aindex:= ar3[int1];
    newpo:= findexes[0].ind[aindex];
@@ -5810,7 +5809,7 @@ begin
     if header.recordcount > 0 then begin
 //     allocuninitedarray(fbrecordcount,sizeof(pointer),ar1);
 //     move(pointer(findexes[0])^,pointer(ar1)^,fbrecordcount*sizeof(pointer));
-     sortarray(ar2,@comparepointer,sizeof(pointer),ar3);
+     sortarray(ar2,sizeof(pointer),@comparepointer,ar3);
          //index of old pointers
     end
     else begin

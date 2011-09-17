@@ -20,6 +20,7 @@ type
  arraysortcomparety = function (const l,r): integer;
  sortcomparemethodty = function (const l,r): integer of object;
  indexsortcomparemethodty = function (const l,r: integer): integer of object;
+// compareprocty = procedure (const l,r; var result: integer) of object;
 
  recordliststatety = (rels_needsinitialize,rels_needsfinalize,rels_needscopy,
                       rels_destroying);
@@ -64,8 +65,6 @@ type
    property count: integer read fcount write setcount;
    property capacity: integer read fcapacity write setcapacity;
  end;
-
- compareprocty = procedure (const l,r; var result: integer) of object;
 
  torderedrecordlist = class(trecordlist)
   private
@@ -717,7 +716,7 @@ begin
 //   arangelist[int1]:= int1;
 //  end;
 //  quicksort(arangelist,0,fcount-1);
-  mergesort(fdata,fcomparefunc,frecordsize,fcount,arangelist);
+  mergesort(fdata,frecordsize,fcount,fcomparefunc,arangelist);
   getmem(po1,fcount*frecordsize);
   po2:= po1;
   for int1:= 0 to high(arangelist) do begin
@@ -975,7 +974,7 @@ end;
 procedure tpointerlist.sort(compare: arraysortcomparety;
                     out indexlist: integerarty);
 begin
- mergesortarray(fitems,compare,sizeof(pointer),fcount,false,indexlist);
+ mergesortarray(fitems,sizeof(pointer),fcount,compare,indexlist,false);
  order(indexlist);
 end;
 

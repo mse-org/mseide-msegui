@@ -68,7 +68,7 @@ type
    procedure valuetogrid(row: integer); virtual;
    procedure gridtovalue(row: integer); virtual;
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
-   procedure sortfunc(const l,r; var result: integer); virtual;
+   function sortfunc(const l,r): integer; virtual;
    procedure gridvaluechanged(const index: integer); virtual;
    procedure updatecoloptions(const aoptions: coloptionsty);
    procedure statdataread; virtual;
@@ -301,9 +301,9 @@ begin
  //dummy
 end;
 
-procedure tcustomdataimage.sortfunc(const l; const r; var result: integer);
+function tcustomdataimage.sortfunc(const l,r): integer;
 begin
- //dummy
+ result:= 0;
 end;
 
 procedure tcustomdataimage.gridvaluechanged(const index: integer);

@@ -86,7 +86,7 @@ type
    function getnoparagraphs(index: integer): boolean; override;
    procedure freedata(var data); override;      //gibt daten frei
    procedure copyinstance(var data); override;  //nach blockcopy aufgerufen
-   procedure compare(const l,r; var result: integer); override;
+   function compare(const l,r): integer; override;
    procedure setstatdata(const index: integer; const value: msestring); override;
    function getstatdata(const index: integer): msestring; override;
   public
@@ -986,7 +986,7 @@ begin
  insertdata(index,ristr1);
 end;
 
-procedure trichstringdatalist.compare(const l, r; var result: integer);
+function trichstringdatalist.compare(const l,r): integer;
 begin
  result:= msecomparestr(richstringty(l).text,richstringty(r).text);
 end;

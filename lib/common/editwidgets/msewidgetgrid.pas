@@ -86,7 +86,7 @@ type
   procedure valuetogrid(row: integer);  //row = -1 -> focused row
   function getnulltext: msestring;
   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty);
-  procedure sortfunc(const l,r; var result: integer);
+  function sortfunc(const l,r): integer;
   procedure gridvaluechanged(const index: integer); //index = -1 -> undefined, all
   procedure updatecoloptions(const aoptions: coloptionsty);
   procedure statdataread;
@@ -148,8 +148,7 @@ type
    procedure drawcell(const canvas: tcanvas); override;
    procedure drawfocusedcell(const acanvas: tcanvas); override;
    procedure drawfocus(const acanvas: tcanvas); override;
-   procedure sortcompare(const index1,index2: integer;
-                                  var result: integer); override;
+   function sortcompare(const index1,index2: integer): integer; override;
    procedure itemchanged(const sender: tdatalist; 
                                   const aindex: integer); override;
    procedure setwidget(const awidget: twidget); virtual;
@@ -1695,13 +1694,12 @@ begin
  //else no paint, done in widgetpainted
 end;
 
-procedure twidgetcol.sortcompare(const index1, index2: integer;
-  var result: integer);
+function twidgetcol.sortcompare(const index1,index2: integer): integer;
 begin
  if (fintf <> nil) then begin
   if fdata <> nil then begin
    with tdatalist1(fdata) do begin
-    fintf.sortfunc((fdatapo+index1*fsize)^,(fdatapo+index2*fsize)^,result);
+    result:= fintf.sortfunc((fdatapo+index1*fsize)^,(fdatapo+index2*fsize)^);
    end;
   end;
  end

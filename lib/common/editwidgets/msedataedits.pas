@@ -180,7 +180,7 @@ type
    procedure valuetogrid(row: integer); virtual; abstract;
    procedure gridtovalue(row: integer); virtual;
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
-   procedure sortfunc(const l,r; var result: integer); virtual;
+   function sortfunc(const l,r): integer; virtual;
    procedure gridvaluechanged(const index: integer); virtual;
    procedure updatecoloptions(const aoptions: coloptionsty);
    procedure setoptionsedit(const avalue: optionseditty); override;
@@ -325,7 +325,7 @@ type
    procedure gridtovalue(arow: integer); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
-   procedure sortfunc(const l,r; var result: integer); override;
+   function sortfunc(const l,r): integer; override;
    function getdefaultvalue: pointer; override;
 
   public
@@ -429,7 +429,7 @@ type
    procedure gridtovalue(arow: integer); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
-   procedure sortfunc(const l,r; var result: integer); override;
+   function sortfunc(const l,r): integer; override;
   public
    procedure fillcol(const value: string);
    procedure assigncol(const value: tansistringdatalist);
@@ -527,7 +527,8 @@ type
     //idropdownlist
    function getdropdownitems: tdropdowncols; virtual;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-   procedure internalsort(const acol: integer; const sortlist: tintegerdatalist); virtual;
+   procedure internalsort(const acol: integer; 
+                          out sortlist: integerarty); virtual;
   public
    procedure sort(const acol: integer = 0);
    property dropdown: tdropdownlistcontroller read getdropdown write setdropdown;
@@ -842,7 +843,8 @@ type
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-   procedure internalsort(const acol: integer; const sortlist: tintegerdatalist); override;
+   procedure internalsort(const acol: integer;
+                               out sortlist: integerarty); override;
 
    function getvalueempty: integer; override;
    function textcellcopy: boolean; override;
@@ -2132,9 +2134,9 @@ begin
  end;
 end;
 
-procedure tcustomdataedit.sortfunc(const l, r; var result: integer);
+function tcustomdataedit.sortfunc(const l,r): integer;
 begin
- tdatalist1(twidgetcol1(fgridintf.getcol).fdata).compare(l,r,result);
+ result:= tdatalist1(twidgetcol1(fgridintf.getcol).fdata).compare(l,r);
 end;
 
 function tcustomdataedit.griddata: tdatalist;
@@ -2804,7 +2806,7 @@ begin
  internalsetgridvalue(index,value);
 end;
 
-procedure tcustomstringedit.sortfunc(const l, r; var result: integer);
+function tcustomstringedit.sortfunc(const l,r): integer;
 begin
  if oe_casesensitive in foptionsedit then begin
   result:= msecomparestr(msestring(l),msestring(r));
@@ -3231,7 +3233,7 @@ begin
  writer.writestring(valuevarname,value);
 end;
 
-procedure thexstringedit.sortfunc(const l ; const r ; var result: integer);
+function thexstringedit.sortfunc(const l,r): integer;
 begin
  result:= stringcomp(ansistring(l),ansistring(r)); 
 end;
@@ -3439,36 +3441,28 @@ begin
 end;
 
 procedure tcustomdropdownlistedit.internalsort(const acol: integer;
-                                            const sortlist: tintegerdatalist);
+                                            out sortlist: integerarty);
 var
- list: tintegerdatalist;
  int1: integer;
 begin
  with tdropdownlistcontroller(fdropdown) do begin
   cols.beginupdate;
-  if sortlist = nil then begin
-   list:= tintegerdatalist.create;
-  end
-  else begin
-   list:= sortlist;
-  end;
   try
-   cols[acol].sort(list,false);
+   cols[acol].sort(sortlist,false);
    for int1:= 0 to cols.count - 1 do begin
-    cols[int1].rearange(list);
+    cols[int1].rearange(sortlist);
    end;
   finally
-   if sortlist = nil then begin
-    list.free;
-   end;
    cols.endupdate;
   end;
  end;
 end;
 
 procedure tcustomdropdownlistedit.sort(const acol: integer);
+var
+ ar1: integerarty;
 begin
- internalsort(acol,nil);
+ internalsort(acol,ar1);
 end;
 
 {$ifdef mse_with_ifi}
@@ -4492,42 +4486,27 @@ begin
 end;
 
 procedure tcustomenuedit.internalsort(const acol: integer;
-  const sortlist: tintegerdatalist);
+                                                 out sortlist: integerarty);
 var
- list: tintegerdatalist;
  enum1: integerarty;
- po1: pinteger;
  int1: integer;
 begin
- if sortlist = nil then begin
-  list:= tintegerdatalist.create;
- end
- else begin
-  list:= sortlist;
- end;
+ tdropdownlistcontroller(fdropdown).cols.beginupdate;
  try
-  tdropdownlistcontroller(fdropdown).cols.beginupdate;
-  inherited internalsort(acol,list);
+  inherited internalsort(acol,sortlist);
   if enums <> nil then begin
-   setlength(enum1,list.count);
-  {$warnings off}
-   po1:= pinteger(tdatalist1(list).fdatapo);
-  {$warnings on}
+   setlength(enum1,length(sortlist));
    for int1:= 0 to high(enum1) do begin
-    if po1^ > high(enums) then begin
+    if sortlist[int1] > high(enums) then begin
      enum1[int1]:= -1;
     end
     else begin
-     enum1[int1]:= enums[po1^];
+     enum1[int1]:= enums[sortlist[int1]];
     end;
-    inc(po1);
    end;
    enums:= enum1;
   end;
  finally
-  if sortlist = nil then begin
-   list.free;
-  end;
   tdropdownlistcontroller(fdropdown).cols.endupdate;
  end;
 end;

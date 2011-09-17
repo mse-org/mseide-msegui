@@ -2008,7 +2008,8 @@ begin
    dispname:= fdesigner.getcomponentdispname(instance);
   end;
  end;
- sortarray(result,{$ifdef FPC}@{$endif}comparecomponentname,sizeof(componentnamety));
+ sortarray(result,sizeof(componentnamety),
+                                 {$ifdef FPC}@{$endif}comparecomponentname);
 end;
 
 { tmoduleinfo }

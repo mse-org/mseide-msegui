@@ -178,7 +178,7 @@ type
    procedure gridtovalue(row: integer); virtual;
    function getnulltext: msestring;
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
-   procedure sortfunc(const l,r; var result: integer); virtual;
+   function sortfunc(const l,r): integer; virtual;
    procedure gridvaluechanged(const index: integer); virtual;
    procedure updatecoloptions(const aoptions: coloptionsty);
    procedure statdataread; virtual;
@@ -1765,9 +1765,9 @@ begin
  end;
 end;
 
-procedure tgraphdataedit.sortfunc(const l, r; var result: integer);
+function tgraphdataedit.sortfunc(const l, r): integer;
 begin
- tdatalist1(twidgetcol1(fgridintf.getcol).fdata).compare(l,r,result);
+ result:= tdatalist1(twidgetcol1(fgridintf.getcol).fdata).compare(l,r);
 end;
 
 procedure tgraphdataedit.internalgetgridvalue(index: integer;

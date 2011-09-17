@@ -1670,7 +1670,7 @@ begin
    scan(mstr1,tokeninfos[int1]);
   end;
   setlength(scanar,scanindex);
-  sortarray(scanar,@comparescan,sizeof(scanar[0]));
+  sortarray(scanar,sizeof(scanar[0]),@comparescan);
   fillchar(groupused,sizeof(groupused),0);
   allocuninitedarray(length(scanar),sizeof(scanar[0]),grouporder); //max
   int2:= 0;

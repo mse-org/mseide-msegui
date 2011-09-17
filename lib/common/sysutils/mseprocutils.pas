@@ -188,10 +188,10 @@ var
  int1,int2: integer;
 begin
  result:= sys_getprocesses;
- sortarray(result,{$ifdef FPC}@{$endif}compprocitem,sizeof(procitemty));
+ sortarray(result,sizeof(procitemty),{$ifdef FPC}@{$endif}compprocitem);
  for int1:= 0 to high(result) do begin
-  if findarrayitem(result[int1].ppid,result,{$ifdef FPC}@{$endif}findprocitem,
-                sizeof(procitemty),int2) then begin
+  if findarrayitem(result[int1].ppid,result,sizeof(procitemty),
+                      {$ifdef FPC}@{$endif}findprocitem,int2) then begin
    additem(winidarty(result[int2].children),result[int1].pid);
   end;
  end;
@@ -203,8 +203,8 @@ var
  int2: integer;
 begin
  ar1:= getprocesstree;
- if findarrayitem(pid,ar1,{$ifdef FPC}@{$endif}findprocitem,
-                sizeof(procitemty),int2) then begin
+ if findarrayitem(pid,ar1,sizeof(procitemty),
+                         {$ifdef FPC}@{$endif}findprocitem,int2) then begin
   result:= ar1[int2].children;
  end
  else begin
@@ -220,8 +220,8 @@ var
  var
   int1,int2: integer;
  begin
-  if findarrayitem(pid,ar1,{$ifdef FPC}@{$endif}findprocitem,
-                sizeof(procitemty),int2) then begin
+  if findarrayitem(pid,ar1,sizeof(procitemty),
+                       {$ifdef FPC}@{$endif}findprocitem,int2) then begin
    stackarray(winidarty(ar1[int2].children),winidarty(result));
    for int1:= 0 to high(ar1[int2].children) do begin
     addproc(ar1[int2].children[int1]);

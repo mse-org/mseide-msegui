@@ -390,7 +390,7 @@ type
    procedure doitemchange(const index: integer); override;
    procedure nodenotification(const sender: tlistitem; 
                                       var ainfo: nodeactioninfoty); override;
-   procedure compare(const l,r; var result: integer); override;
+   function compare(const l,r): integer; override;
   public
    constructor create(const intf: iitemlist; const owner: titemedit); reintroduce;
    procedure assign(const aitems: listitemarty); reintroduce; overload;
@@ -645,7 +645,7 @@ type
    procedure createitem(out item: tlistitem); override;
    procedure nodenotification(const sender: tlistitem;
                   var ainfo: nodeactioninfoty); override;
-   procedure compare(const l,r; var result: integer); override;
+   function compare(const l,r): integer; override;
    procedure statreaditem(const reader: tstatreader;
                     var aitem: tlistitem); override;
    procedure readstate(const reader; const acount: integer); override;
@@ -2304,7 +2304,7 @@ begin
  end;
 end;
 
-procedure tcustomitemeditlist.compare(const l, r; var result: integer);
+function tcustomitemeditlist.compare(const l,r): integer;
 begin
  if oe_casesensitive in fowner.foptionsedit then begin
   result:= msecomparestr(tlistitem1(l).fcaption,tlistitem1(r).fcaption);
@@ -3906,7 +3906,7 @@ begin
  oncreateobject:= createobjecteventty(value);
 end;
 
-procedure ttreeitemeditlist.compare(const l, r; var result: integer);
+function ttreeitemeditlist.compare(const l,r): integer;
 var
  pathl,pathr: treelistitemarty;
  int1,int2,int3: integer;
@@ -3925,7 +3925,7 @@ begin
   end;
  end;
  if int3 >= 0 then begin
-  inherited compare(pathl[int3],pathr[int3],result);
+  result:= inherited compare(pathl[int3],pathr[int3]);
  end
  else begin
   result:= length(pathl) - length(pathr);

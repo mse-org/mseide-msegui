@@ -49,7 +49,7 @@ type
   protected
    procedure freedata(var data); override;
    procedure copyinstance(var data); override;
-   procedure compare(const l,r; var result: integer); override;
+   function compare(const l,r): integer; override;
   public
    constructor create; override;
    function add(const value: fileinfoty): integer;
@@ -1762,7 +1762,7 @@ begin
  end;
 end;
 
-procedure tcustomfiledatalist.compare(const l, r; var result: integer);
+function tcustomfiledatalist.compare(const l,r): integer;
 begin
  if flo_sorttype in foptions then begin
   result:= integer(fileinfoty(l).extinfo1.filetype) -

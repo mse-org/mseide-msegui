@@ -10411,8 +10411,8 @@ var
  co1: gridcoordty;
 begin
  po1:= cols[0].datalist.datapo; //workaround internal error 200304235 in 2.0.2
- result:= findarrayvalue(filter,po1,rowcount,
-                @compareimsestring,sizeof(msestring),int1);
+ result:= findarrayvalue(filter,po1,sizeof(msestring),rowcount,
+                                                  @compareimsestring,int1);
  if not result then begin
   result:= (int1 < rowcount) and (msecomparetextlen(filter,cols[0][int1]) = 0);
  end;

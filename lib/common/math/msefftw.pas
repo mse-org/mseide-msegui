@@ -140,7 +140,7 @@ begin
   getmem(originalptr,size + align-1 + SizeOf(Pointer));
   ptruint(p):=(ptruint(originalptr) + SizeOf(Pointer));
   ptruint(p):=(ptruint(p)+align-1) and not (align-1);
-  PPointer(ptruint(p) - SizeOf(Pointer))^:= originalptr;
+  PPointer(ptruint(ptruint(p) - SizeOf(Pointer)))^:= originalptr;
 {$ELSE}
 begin
   getmem(p,size);
@@ -152,7 +152,7 @@ procedure fftw_freemem(var p: pointer); {$ifdef FPC}inline;{$endif}
 begin
  if p <> nil then begin
 {$IFDEF align}
-  freemem(PPointer(ptruint(p) - SizeOf(Pointer))^);
+  freemem(PPointer(ptruint(ptruint(p) - SizeOf(Pointer)))^);
 {$ELSE}
   freemem(p);
 {$ENDIF}

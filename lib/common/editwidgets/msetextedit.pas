@@ -161,7 +161,7 @@ type
    procedure gridtovalue(row: integer);
    procedure docellevent(const ownedcol: boolean; 
                                          var info: celleventinfoty); virtual;
-   procedure sortfunc(const l,r; var result: integer);
+   function sortfunc(const l,r): integer;
    procedure gridvaluechanged(const index: integer); virtual;
    procedure updatecoloptions(const aoptions: coloptionsty);
    procedure statdataread; virtual;
@@ -636,9 +636,9 @@ begin
  optionsskin:= optionsskin + defaultgridskinoptions;
 end;
 
-procedure tcustomtextedit.sortfunc(const l, r; var result: integer);
+function tcustomtextedit.sortfunc(const l,r): integer;
 begin
- //dummy
+ result:= 0;
 end;
 
 procedure tcustomtextedit.gridvaluechanged(const index: integer);

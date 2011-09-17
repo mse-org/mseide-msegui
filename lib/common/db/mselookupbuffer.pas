@@ -474,7 +474,7 @@ var
  int1: integer;
  bo1: boolean;
 begin
- result:= findarrayvalue(avalue,data,index,compfunc,itemsize,aindex);
+ result:= findarrayvalue(avalue,data,itemsize,index,compfunc,aindex);
  if assigned(filter) then begin
   if result then begin
    result:= false;
@@ -511,8 +511,8 @@ begin
   if (index = nil) and (data <> nil) then begin
    application.beginwait;
    try
-    mergesortarray(data,@compareinteger,sizeof(integer),length(data),
-                      false,index);
+    mergesortarray(data,sizeof(integer),length(data),@compareinteger,
+                      index,false);
    finally
     application.endwait;
    end;
@@ -538,8 +538,7 @@ begin
   if (index = nil) and (data <> nil) then begin
    application.beginwait;
    try
-    mergesortarray(data,@comparerealty,sizeof(realty),length(data),
-                      false,index);
+    mergesortarray(data,sizeof(realty),length(data),@comparerealty,index,false);
    finally
     application.endwait;
    end;
@@ -564,8 +563,7 @@ begin
   if (index = nil) and (data <> nil) then begin
    application.beginwait;
    try
-    mergesortarray(data,@compareint64,sizeof(int64),length(data),
-                      false,index);
+    mergesortarray(data,sizeof(int64),length(data),@compareint64,index,false);
    finally
     application.endwait;
    end;
@@ -592,8 +590,8 @@ begin
    if (indexcaseinsensitive = nil) and (data <> nil) then begin
     application.beginwait;
     try
-     mergesortarray(data,@compareimsestring,sizeof(msestring),length(data),
-                       false,indexcaseinsensitive);
+     mergesortarray(data,sizeof(msestring),length(data),@compareimsestring,
+                                                    indexcaseinsensitive,false);
     finally
      application.endwait;
     end;
@@ -603,8 +601,8 @@ begin
    if (indexcasesensitive = nil) and (data <> nil) then begin
     application.beginwait;
     try
-     mergesortarray(data,@comparemsestring,sizeof(msestring),length(data),
-                       false,indexcasesensitive);
+     mergesortarray(data,sizeof(msestring),length(data),@comparemsestring,
+                                                     indexcasesensitive,false);
     finally
      application.endwait;
     end;

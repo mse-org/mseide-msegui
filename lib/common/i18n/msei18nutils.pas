@@ -43,10 +43,10 @@ type
  
  tresourcestringlist = class(torderedrecordlist)
   protected
-   function getcompareproc: compareprocty; override;
+   function getcomparefunc: sortcomparemethodty; override;
    procedure finalizerecord(var item); override;
    procedure copyrecord(var item); override;
-   procedure compare(const l,r; var result: integer);
+   function compare(const l,r): integer;
   public
    constructor create;
    procedure readvalues(data: pobjectdataty);
@@ -272,12 +272,12 @@ begin
  end;
 end;
 
-function tresourcestringlist.getcompareproc: compareprocty;
+function tresourcestringlist.getcomparefunc: sortcomparemethodty;
 begin
  result:= {$ifdef FPC}@{$endif}compare;
 end;
 
-procedure tresourcestringlist.compare(const l; const r; var result: integer);
+function tresourcestringlist.compare(const l,r): integer;
 begin
  result:= stringcomp(resourcestringinfoty(l).name,resourcestringinfoty(r).name);
 end;

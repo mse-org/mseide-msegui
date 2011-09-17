@@ -1523,7 +1523,7 @@ begin
     end;
    end;
   end;
-  sortarray(ftabs,{$ifdef FPC}@{$endif}cmptab,sizeof(ftabs[0]));
+  sortarray(ftabs,sizeof(ftabs[0]),{$ifdef FPC}@{$endif}cmptab);
   for int1:= 0 to high(ftabs) do begin
    with ftabs[int1],ttabulatoritem(fitems[index]) do begin
     if int1 < high(ftabs) then begin

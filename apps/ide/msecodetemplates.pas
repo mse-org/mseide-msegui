@@ -146,7 +146,7 @@ begin
   end;
  end;
  setlength(finfos,int2);
- sortarray(finfos,@compitems,sizeof(templateinfoty));
+ sortarray(finfos,sizeof(templateinfoty),@compitems);
  for int1:= 0 to high(finfos) do begin
   flist.add(finfos[int1].name,pointer(ptruint(int1)));
  end; 
