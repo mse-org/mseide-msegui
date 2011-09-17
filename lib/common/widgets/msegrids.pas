@@ -13974,9 +13974,10 @@ function tcustomgrid.internalsort(const sortfunc: indexsortcomparemethodty;
                                                var refindex: integer): boolean;
 var
  ar1: integerarty;
- bo1,bo2: boolean;
+ bo1: boolean;
  int1: integer;
 begin
+ result:= false;
  int1:= frowcount;
  if int1 > 0 then begin
   bo1:= not (gs_isdb in fstate) and (og_autoappend in foptionsgrid) and 
@@ -13984,8 +13985,8 @@ begin
   if bo1 then begin
    dec(int1); //do not sort last row
   end;
-  mergesort(int1,sortfunc,ar1,refindex,bo2);
-  if bo2 then begin
+  mergesort(int1,sortfunc,ar1,refindex,result);
+  if result then begin
    if bo1 then begin
     additem(ar1,int1);
    end;

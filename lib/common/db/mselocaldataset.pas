@@ -64,7 +64,8 @@ type
    procedure internalclose; override;
    function  getcanmodify: boolean; override;
    function islocal: boolean; override;
-   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
+//   procedure dscontrolleroptionschanged(
+//                           const aoptions: datasetoptionsty); override;
 
    function fetch : boolean; override;
    function getblobdatasize: integer; override;
@@ -386,10 +387,10 @@ begin
   end;
  end;
 end;
-
+{
 procedure tlocaldataset.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin
  //dummy
 end;
-
+}
 end.
