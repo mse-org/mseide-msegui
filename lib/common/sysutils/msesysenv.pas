@@ -189,8 +189,8 @@ type
   protected
    procedure finalizerecord(var item); override;
    procedure copyrecord(var item); override;
-   procedure compare(const l,r; var result: integer);
-   function getcompareproc: compareprocty; override;
+   function compare(const l,r): integer;
+   function getcomparefunc: sortcomparemethodty; override;
    procedure setrec(const index: integer; const avalue: msestring);
    function getrec(const index: integer): msestring;
    //istatupdatevalue
@@ -955,13 +955,13 @@ begin
  end;
 end;
 
-procedure tmacrolist.compare(const l, r; var result: integer);
+function tmacrolist.compare(const l, r): integer;
 begin
  result:= msestrcomp(pmsechar(macroinfoty(l).name),
                    pmsechar(macroinfoty(r).name));
 end;
 
-function tmacrolist.getcompareproc: compareprocty;
+function tmacrolist.getcomparefunc: sortcomparemethodty;
 begin
  result:= {$ifdef FPC}@{$endif}compare;
 end;

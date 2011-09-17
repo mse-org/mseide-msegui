@@ -54,8 +54,8 @@ type
 
  tsourceitemlist = class(torderedrecordlist)
   protected
-   function getcompareproc: compareprocty; override;
-   procedure compare(const l,r; var result: integer);
+   function getcomparefunc: sortcomparemethodty; override;
+   function compare(const l,r): integer;
   public
    constructor create;
    function newitem(const astart,aend: sourceposty;
@@ -314,9 +314,9 @@ type
     fstart,fstop: sourceposty;
     fkind: symbolkindty;
     fcasesensitive: boolean;
-    procedure comp(const l,r; var result: integer);
-    procedure compnopars(const l,r; var result: integer);
-    procedure compsubstr(const l,r; var result: integer);
+    function comp(const l,r): integer;
+    function compnopars(const l,r): integer;
+    function compsubstr(const l,r): integer;
     function getname: string; virtual;
     function getdefinfopo: pdefinfoty;
     function getrootlist: trootdeflist;
@@ -327,7 +327,7 @@ type
     finfos: definfoarty;
     fparentscope: tdeflist; //class definition
     procedure finalizerecord(var item); override;
-    function getcompareproc: compareprocty; override;
+    function getcomparefunc: sortcomparemethodty; override;
     function add(const aname: string; const akind: symbolkindty;
                  const apos,astop: sourceposty): pdefinfoty; overload;
     function add(const akind: symbolkindty; const apos,astop: sourceposty): pdefinfoty; overload;
@@ -471,10 +471,10 @@ type
   tfunctions = class(torderedrecordlist)
    private
     function getitempo(const index: integer): pfunctioninfoty;
-    procedure comp(const left,right; var res: integer);
+    function comp(const left,right): integer;
    protected
     procedure finalizerecord(var item); override;
-    function getcompareproc: compareprocty; override;
+    function getcomparefunc: sortcomparemethodty; override;
    public
     constructor create;
     procedure add(const aname: ansistring; const astart,astop: sourceposty);
@@ -708,7 +708,7 @@ begin
  inherited create(sizeof(sourceitemty));
 end;
 
-procedure tsourceitemlist.compare(const l,r; var result: integer);
+function tsourceitemlist.compare(const l,r): integer;
 begin
  result:= sourceitemty(l).startpos.row - sourceitemty(r).startpos.row;
  if result = 0 then begin
@@ -716,7 +716,7 @@ begin
  end;
 end;
 
-function tsourceitemlist.getcompareproc: compareprocty;
+function tsourceitemlist.getcomparefunc: sortcomparemethodty;
 begin
  result:= {$ifdef FPC}@{$endif}compare;
 end;
@@ -1567,7 +1567,7 @@ begin
  end;
 end;
 }
-procedure tdeflist.comp(const l,r; var result: integer);
+function tdeflist.comp(const l,r): integer;
 var
  po1,po2: pchar;
  ch1: shortint;
@@ -1585,7 +1585,7 @@ begin
  result:= ch1;
 end;
 
-procedure tdeflist.compnopars(const l,r; var result: integer);
+function tdeflist.compnopars(const l,r): integer;
 var
  po1,po2: pchar;
  ch1: shortint;
@@ -1608,7 +1608,7 @@ begin
  result:= ch1;
 end;
 
-procedure tdeflist.compsubstr(const l,r; var result: integer);
+function tdeflist.compsubstr(const l,r): integer;
 var
  po1,po2: pchar;
  ch1: shortint;
@@ -1630,7 +1630,7 @@ begin
  result:= ch1;
 end;
 
-function tdeflist.getcompareproc: compareprocty;
+function tdeflist.getcomparefunc: sortcomparemethodty;
 begin
  result:= {$ifdef FPC}@{$endif}comp;
 end;
@@ -1680,11 +1680,11 @@ begin
  end;
  sorted:= true;
  if akind = syk_nopars then begin
-  fcompareproc:= {$ifdef FPC}@{$endif}compnopars;
+  fcomparefunc:= {$ifdef FPC}@{$endif}compnopars;
  end
  else begin
   if akind = syk_substr then begin
-   fcompareproc:= {$ifdef FPC}@{$endif}compsubstr;
+   fcomparefunc:= {$ifdef FPC}@{$endif}compsubstr;
   end
  end;
  if internalfind(str1,int1) then begin
@@ -1694,7 +1694,7 @@ begin
     if (int1 < 0) then begin
      goto exit1;
     end;
-    comp(str1,pdefnameaty(fdata)^[int1].name,int2);
+    int2:= comp(str1,pdefnameaty(fdata)^[int1].name);
     if (int2 <> 0) then begin
      goto exit1;
     end;
@@ -1703,7 +1703,7 @@ begin
   result:= @finfos[pdefnameaty(fdata)^[int1].id];
  end;
 exit1:
- fcompareproc:= {$ifdef FPC}@{$endif}comp;
+ fcomparefunc:= {$ifdef FPC}@{$endif}comp;
 end;
 
 function tdeflist.getmatchingitems(const aname: string;
@@ -1722,16 +1722,16 @@ begin
  end;
  sorted:= true;
  if akind = syk_nopars then begin
-  fcompareproc:= {$ifdef FPC}@{$endif}compnopars;
+  fcomparefunc:= {$ifdef FPC}@{$endif}compnopars;
  end
  else begin
   if akind = syk_substr then begin
-   fcompareproc:= {$ifdef FPC}@{$endif}compsubstr;
+   fcomparefunc:= {$ifdef FPC}@{$endif}compsubstr;
   end
  end;
  if internalfind(str1,int1) then begin
   while (int1 >= 0) do begin
-   fcompareproc(str1,pdefnameaty(fdata)^[int1],int2);
+   int2:= fcomparefunc(str1,pdefnameaty(fdata)^[int1]);
    if int2 <> 0 then begin
     break;
    end;
@@ -1742,7 +1742,7 @@ begin
    dec(int1);
   end;
  end;
- fcompareproc:= {$ifdef FPC}@{$endif}comp;
+ fcomparefunc:= {$ifdef FPC}@{$endif}comp;
 end;
 
 function tdeflist.rootnamepath: string;
@@ -2030,12 +2030,12 @@ begin
  end;
 end;
 
-procedure tfunctions.comp(const left; const right; var res: integer);
+function tfunctions.comp(const left,right): integer;
 begin
- res:= stringcomp(ansistring(left),ansistring(right));
+ result:= stringcomp(ansistring(left),ansistring(right));
 end;
 
-function tfunctions.getcompareproc: compareprocty;
+function tfunctions.getcomparefunc: sortcomparemethodty;
 begin
  result:= {$ifdef FPC}@{$endif}comp;
 end;

@@ -71,17 +71,17 @@ type
   private
    fsorted: boolean;
    procedure setsorted(const avalue: boolean);
-   procedure quicksort(var arangelist: integerarty; L, R: Integer);
+//   procedure quicksort(var arangelist: integerarty; L, R: Integer);
    procedure sort;
   protected
-   fcompareproc: compareprocty;
+   fcomparefunc: sortcomparemethodty;
    function internalfind(const item; out index: integer): boolean;
            //true if exact else next bigger
            //for comp: l is item, r are tablevalues
    function add(const source): integer;
    function indexof(const item): integer;
    function deleteitem(const item): integer;
-   function getcompareproc: compareprocty; virtual; abstract;
+   function getcomparefunc: sortcomparemethodty; virtual; abstract;
   public
    function newitem: pointer; override;
    function newitems(const acount: integer): pointer; override;
@@ -209,11 +209,11 @@ type
  tindexednamelist = class(torderedrecordlist)
   private
    fidnames: stringarty;
-   procedure comp(const l,r; var result: integer);
+   function comp(const l,r): integer;
   protected
    procedure finalizerecord(var item); override;
    procedure copyrecord(var item); override;
-   function getcompareproc: compareprocty; override;
+   function getcomparefunc: sortcomparemethodty; override;
   public
    constructor create;
    function add(const avalue: string): integer;
@@ -234,11 +234,11 @@ type
  tmseindexednamelist = class(torderedrecordlist)
   private
    fidnames: msestringarty;
-   procedure comp(const l,r; var result: integer);
+   function comp(const l,r): integer;
   protected
    procedure finalizerecord(var item); override;
    procedure copyrecord(var item); override;
-   function getcompareproc: compareprocty; override;
+   function getcomparefunc: sortcomparemethodty; override;
   public
    constructor create;
    function add(const avalue: msestring): integer; virtual;
@@ -652,7 +652,7 @@ begin
   fsorted:= avalue;
  end;
 end;
-
+(*
 procedure torderedrecordlist.quicksort(var arangelist: integerarty; L, R: Integer);
 var
   I, J: Integer;
@@ -668,8 +668,7 @@ begin
    pp:= fdata+p*frecordsize;
    repeat
     repeat
-     int1:= 0;
-     fcompareproc((fdata+arangeList[I]*frecordsize)^, pp^,int1);
+     int1:= fcomparefunc((fdata+arangeList[I]*frecordsize)^, pp^);
      if int1 = 0 then begin
       int1:= arangelist[i] - p;
      end;
@@ -677,8 +676,7 @@ begin
      inc(i);
     until false;
     repeat
-     int1:= 0;
-     fcompareproc((fdata+arangeList[J]*frecordsize)^, pp^,int1);
+     int1:= fcomparefunc((fdata+arangeList[J]*frecordsize)^, pp^);
      if int1 = 0 then begin
       int1:= arangelist[j] - p;
      end;
@@ -703,7 +701,7 @@ begin
   until I >= R;
  end;
 end;
-
+*)
 procedure torderedrecordlist.sort;
 
 
@@ -712,13 +710,14 @@ var
  int1: integer;
  po1,po2: pchar;
 begin
- fcompareproc:= getcompareproc();
+ fcomparefunc:= getcomparefunc();
  if fcount > 0 then begin
-  setlength(arangelist,fcount);
-  for int1:= 0 to high(arangelist) do begin
-   arangelist[int1]:= int1;
-  end;
-  quicksort(arangelist,0,fcount-1);
+//  setlength(arangelist,fcount);
+//  for int1:= 0 to high(arangelist) do begin
+//   arangelist[int1]:= int1;
+//  end;
+//  quicksort(arangelist,0,fcount-1);
+  mergesort(fdata,fcomparefunc,frecordsize,fcount,arangelist);
   getmem(po1,fcount*frecordsize);
   po2:= po1;
   for int1:= 0 to high(arangelist) do begin
@@ -746,7 +745,7 @@ begin
 //  bo1:= false;
   while true do begin
    int1:= (ilo + ihi) div 2;
-   fcompareproc(item,(fdata+int1*frecordsize)^,int2);
+   int2:= fcomparefunc(item,(fdata+int1*frecordsize)^);
 //   if int2 = 0 then begin
 //    index:= int1;
 //    result:= true;
@@ -1255,7 +1254,7 @@ begin
  end;
 end;
 
-procedure tindexednamelist.comp(const l,r; var result: integer);
+function tindexednamelist.comp(const l,r): integer;
 var
  int1: integer;
 begin
@@ -1272,7 +1271,7 @@ begin
  end;
 end;
 
-function tindexednamelist.getcompareproc: compareprocty;
+function tindexednamelist.getcomparefunc: sortcomparemethodty;
 begin
  result:= {$ifdef FPC}@{$endif}comp;
 end;
@@ -1335,7 +1334,7 @@ begin
  end;
 end;
 
-procedure tmseindexednamelist.comp(const l,r; var result: integer);
+function tmseindexednamelist.comp(const l,r): integer;
 var
  int1: integer;
 begin
@@ -1352,7 +1351,7 @@ begin
  end;
 end;
 
-function tmseindexednamelist.getcompareproc: compareprocty;
+function tmseindexednamelist.getcomparefunc: sortcomparemethodty;
 begin
  result:= {$ifdef FPC}@{$endif}comp;
 end;

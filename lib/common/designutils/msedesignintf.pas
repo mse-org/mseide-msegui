@@ -51,8 +51,8 @@ type
   protected
    function findpage(const pagename: msestring): integer;
    function addpage(const pagename: msestring): integer;
-   function getcompareproc: compareprocty; override;
-   procedure compare(const l,r; var result: integer);
+   function getcomparefunc: sortcomparemethodty; override;
+   function compare(const l,r): integer;
    function componentcounts: integerarty;
   public
    constructor create;
@@ -663,7 +663,7 @@ begin
  filer.endlist;
 end;
 
-procedure tcomponentclasslist.compare(const l, r; var result: integer);
+function tcomponentclasslist.compare(const l, r): integer;
 begin 
  if fdefaultorder then begin
   result:= componentclassinfoty(l).defaultindex -
@@ -675,7 +675,7 @@ begin
  end;
 end;
 
-function tcomponentclasslist.getcompareproc: compareprocty;
+function tcomponentclasslist.getcomparefunc: sortcomparemethodty;
 begin
  result:= {$ifdef FPC}@{$endif}compare;
 end;

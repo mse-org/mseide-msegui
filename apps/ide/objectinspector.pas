@@ -62,8 +62,8 @@ type
 
  tcomponentinfos = class(torderedrecordlist)
   protected
-   procedure compare(const l,r; var result: integer);
-   function getcompareproc: compareprocty; override;
+   function compare(const l,r): integer;
+   function getcomparefunc: sortcomparemethodty; override;
    procedure finalizerecord(var item); override;
   public
    constructor create;
@@ -324,12 +324,12 @@ begin
  inherited create(sizeof(compinfoty),[rels_needsfinalize]);
 end;
 
-procedure tcomponentinfos.compare(const l,r; var result: integer);
+function tcomponentinfos.compare(const l,r): integer;
 begin
  result:= pchar(compinfoty(l).instance) - pchar(compinfoty(r).instance);
 end;
 
-function tcomponentinfos.getcompareproc: compareprocty;
+function tcomponentinfos.getcomparefunc: sortcomparemethodty;
 begin
  result:= {$ifdef FPC}@{$endif}compare;
 end;
