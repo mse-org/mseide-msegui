@@ -3316,7 +3316,7 @@ procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
  end; //checkrevert
  
 var
- by1: boolean;
+ by1,by2: boolean;
  e1: exception;
  ar1,ar2,ar3: integerarty;
 // int1: integer;
@@ -3325,6 +3325,7 @@ var
 begin
  include(fbstate,bs_recapplying);
  by1:= not islocal;
+ by2:= false;
  response:= [];
  with fupdatebuffer[fcurrentupdatebuffer] do begin
   origpo:= bookmark.recordpo;
@@ -3386,6 +3387,7 @@ begin
      end;
     finally
      if bs_curvaluemodified in fbstate then begin
+      by2:= true;
 //      if (updatekind = ukmodify) and 
 //                          (bs_refreshupdateindex in fbstate) or
 //      (updatekind = ukinsert) and 
@@ -3403,7 +3405,7 @@ begin
    checkrevert;
   finally
    exclude(fbstate,bs_recapplying);
-   if (bs_curvaluemodified in fbstate) and (updatekind <> ukdelete) then begin
+   if by2 and (updatekind <> ukdelete) then begin
     include(fbstate1,bs1_needsresync);
     finalizevalues(origpo^.header);
     move(fnewvaluebuffer^.header,origpo^.header,frecordsize);
@@ -3462,7 +3464,7 @@ var
  recnobefore: integer;
  response: resolverresponsesty;
  bo1: boolean;
- int1,int2: integer;
+// int1,int2: integer;
 
 begin
  if not (bs_applying in fbstate) then begin
