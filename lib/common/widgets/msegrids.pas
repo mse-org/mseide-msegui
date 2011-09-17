@@ -23,7 +23,7 @@ uses
  msescrollbar,msearrayprops,mseglob,mseguiglob,typinfo,
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,
  mseobjectpicker,msepointer,msetimer,msebits,msestat,msestatfile,msekeyboard,
- msestream,msedrag,msemenus,msepipestream,mseshapes,msegridsglob
+ msestream,msedrag,msemenus,msepipestream,mseshapes,msegridsglob,mselist
  {$ifdef mse_with_ifi},mseificomp,mseifiglob,mseificompglob{$endif};
 
 type
@@ -496,7 +496,7 @@ type
    procedure setoptions(const Value: coloptionsty); virtual;
    procedure setoptions1(const avalue: coloptions1ty); virtual;
    procedure updatelayout; override;
-   procedure rearange(const list: tintegerdatalist); virtual; abstract;
+   procedure rearange(const list: integerarty); virtual; abstract;
 
    function checkactivecolor(const aindex: integer): boolean;
          //true if coloractive and fontactivenum active
@@ -637,7 +637,7 @@ type
    procedure moverow(const fromindex,toindex: integer; const count: integer = 1); override;
    procedure insertrow(const aindex: integer; const count: integer = 1); override;
    procedure deleterow(const aindex: integer; const count: integer = 1); override;
-   procedure rearange(const list: tintegerdatalist); override;
+   procedure rearange(const list: integerarty); override;
    procedure sortcompare(const index1,index2: integer; var result: integer); virtual;
    function isempty(const aindex: integer): boolean; virtual;
    procedure docellevent(var info: celleventinfoty); virtual;
@@ -851,7 +851,7 @@ type
    procedure insertrow(const aindex: integer; const count: integer = 1); override;
    procedure deleterow(const aindex: integer; const count: integer = 1); override;
    procedure paint(var info: colpaintinfoty); override;
-   procedure rearange(const list: tintegerdatalist); override;
+   procedure rearange(const list: integerarty); override;
   public
    constructor create(const agrid: tcustomgrid;
                             const aowner: tgridarrayprop); override;
@@ -1215,7 +1215,7 @@ type
                 const acount: integer = 1); virtual;
    procedure insertrow(const index: integer; const acount: integer = 1); virtual;
    procedure deleterow(const index: integer; const acount: integer = 1); virtual;
-   procedure rearange(const list: tintegerdatalist); virtual;
+   procedure rearange(const list: integerarty); virtual;
    procedure resetpropwidth;
    property options: coloptionsty read foptions
                 write setoptions default [];
@@ -1429,7 +1429,7 @@ type
    procedure dosizechanged; override;
    procedure countchanged; override;
    procedure mergechanged(const arow: integer);
-   procedure rearange(const list: tintegerdatalist); override;
+   procedure rearange(const list: integerarty); override;
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure setrowcountmax(const value: integer);
    procedure rowcountchanged(const newcount: integer); override;
@@ -1446,8 +1446,9 @@ type
    procedure beginselect;
    procedure endselect;
    procedure decselect;
-   procedure sortfunc(sender: tcustomgrid;
-                       const index1,index2: integer; var result: integer);
+   function sortfunc(const l,r: integer): integer;
+//   procedure sortfunc(sender: tcustomgrid;
+//                       const index1,index2: integer; var result: integer);
    procedure updatedatastate(var accepted: boolean); virtual;
 
    function hassortstat: boolean;
@@ -1835,6 +1836,7 @@ type
    procedure setrowstatelist(const avalue: trowstatelist);
    function getrowlinewidth(index: integer): integer;
    procedure setrowlinewidth(index: integer; const avalue: integer);
+   function doonsort(const l,r: integer): integer;
   protected
    fupdating: integer;
    ffocuscount: integer;
@@ -1966,7 +1968,7 @@ type
    function isfirstrow: boolean; virtual;
    function islastrow: boolean; virtual;
 
-   function internalsort(sortfunc: gridsorteventty; 
+   function internalsort(const sortfunc:  indexsortcomparemethodty; 
                                  var refindex: integer): boolean;
                               //true if moved
    procedure updaterowdata; virtual;
@@ -6014,7 +6016,7 @@ begin
              canrowfocus and (not noreadonly or not(co_readonly in options));
 end;
 
-procedure tdatacol.rearange(const list: tintegerdatalist);
+procedure tdatacol.rearange(const list: integerarty);
 begin
  if not (co_norearange in foptions) and (fdata <> nil) then begin
   fdata.rearange(list);
@@ -6865,10 +6867,10 @@ begin
  end;
 end;
 
-procedure tfixcol.rearange(const list: tintegerdatalist);
+procedure tfixcol.rearange(const list: integerarty);
 begin
  if not (co_norearange in foptions) and (fnumstep = 0) and
-       (fcaptions.count = list.count) then begin
+       (fcaptions.count = length(list)) then begin
   fcaptions.rearange(list);
  end;
 end;
@@ -7224,7 +7226,7 @@ begin
  end;
 end;
 
-procedure tcols.rearange(const list: tintegerdatalist);
+procedure tcols.rearange(const list: integerarty);
 var
  int1: integer;
 begin
@@ -7961,16 +7963,16 @@ begin
  fgrid.endupdate;
 end;
 
-procedure tdatacols.sortfunc(sender: tcustomgrid; const index1,
-  index2: integer; var result: integer);
+function tdatacols.sortfunc(const l,r: integer): integer;
 var
  int1: integer;
 begin
+ result:= 0;
  if fsortcol < 0 then begin
   for int1:= 0 to count-1 do begin
    with tdatacol(fitems[int1]) do begin
     if not(co_nosort in foptions) then begin
-     sortcompare(index1,index2,result);
+     sortcompare(l,r,result);
      if result <> 0 then begin
       if co_sortdescent in foptions then begin
        result:= - result;
@@ -7984,7 +7986,7 @@ begin
  else begin
   with tdatacol(fitems[fsortcol]) do begin
    if not(co_nosort in foptions) then begin
-    sortcompare(index1,index2,result);
+    sortcompare(l,r,result);
     if co_sortdescent in foptions then begin
      result:= - result;
     end;
@@ -7993,7 +7995,7 @@ begin
   if (result = 0) and (fsortcoldefault >= 0) then begin
    with tdatacol(fitems[fsortcoldefault]) do begin
     if not(co_nosort in foptions) then begin
-     sortcompare(index1,index2,result);
+     sortcompare(l,r,result);
      if co_sortdescent in foptions then begin
       result:= - result;
      end;
@@ -8127,7 +8129,7 @@ begin
  end;
 end;
 
-procedure tdatacols.rearange(const list: tintegerdatalist);
+procedure tdatacols.rearange(const list: integerarty);
 begin
  inherited;
  frowstate.rearange(list);
@@ -13968,6 +13970,40 @@ begin
  end;
 end;
 
+function tcustomgrid.internalsort(const sortfunc: indexsortcomparemethodty;
+                                               var refindex: integer): boolean;
+var
+ ar1: integerarty;
+ bo1,bo2: boolean;
+ int1: integer;
+begin
+ int1:= frowcount;
+ if int1 > 0 then begin
+  bo1:= not (gs_isdb in fstate) and (og_autoappend in foptionsgrid) and 
+                    fdatacols.rowempty(int1-1);
+  if bo1 then begin
+   dec(int1); //do not sort last row
+  end;
+  mergesort(int1,sortfunc,ar1,refindex,bo2);
+  if bo2 then begin
+   if bo1 then begin
+    additem(ar1,int1);
+   end;
+   for int1:= 0 to fdatacols.count - 1 do begin
+    include(tdatacol(fdatacols.fitems[int1]).fstate,gps_noinvalidate);
+   end;
+   try
+    fdatacols.rearange(ar1);
+   finally
+    for int1:= 0 to fdatacols.count - 1 do begin
+     exclude(tdatacol(fdatacols.fitems[int1]).fstate,gps_noinvalidate);
+    end;
+   end;
+   ffixcols.rearange(ar1);
+  end;
+ end;
+end;
+(*
 function tcustomgrid.internalsort(sortfunc: gridsorteventty;
   var refindex: integer): boolean;
           //true if rows moved, refindex is new indexpos
@@ -14071,24 +14107,18 @@ begin
  end;
  result:= bewegt;
 end;
+*)
 
 procedure tcustomgrid.reorderrow;
 var
  lo,hi,pivot: integer;
- sf: gridsorteventty;
+ sf: indexsortcomparemethodty;
  bo1: boolean;
 // int1: integer;
 
- function check1(const a,b: integer): integer;
- begin
-  result:= 0;
-  sf(self,a,b,result);
- end; //check1
- 
  function check(const a,b: integer): integer;
  begin
-  result:= 0;
-  sf(self,a,b,result);
+  result:= sf(a,b);
   if result = 0 then begin
    result:= a-b;
   end;
@@ -14098,7 +14128,7 @@ begin
  exclude(fstate1,gs1_rowsortinvalid);
  if not (gs_isdb in fstate) then begin
   if assigned(fonsort) then begin
-   sf:= fonsort;
+   sf:= {$ifdef FPC}@{$endif}doonsort;
   end
   else begin
    sf:= {$ifdef FPC}@{$endif}fdatacols.sortfunc;
@@ -14106,10 +14136,10 @@ begin
   if frowcount > 1 then begin
    bo1:= true;
    if row > 0 then begin
-    bo1:= check1(row-1,row) <= 0;
+    bo1:= sf(row-1,row) <= 0;
    end;
    if bo1 and (row < rowhigh) then begin
-    bo1:= check1(row+1,row) >= 0;
+    bo1:= sf(row+1,row) >= 0;
    end;
    if not bo1 then begin   //position changed
     lo:= 0;
@@ -14177,7 +14207,7 @@ begin
   try
    int1:= ffocusedcell.row;
    if assigned(fonsort) then begin
-    internalsort(fonsort,int1);
+    internalsort({$ifdef FPC}@{$endif}doonsort{fonsort},int1);
    end
    else begin
     internalsort({$ifdef FPC}@{$endif}fdatacols.sortfunc,int1);
@@ -14882,6 +14912,13 @@ function tcustomgrid.cellhasfocus: boolean;
 begin
  result:= entered;
 end;
+
+function tcustomgrid.doonsort(const l,r: integer): integer;
+begin
+ result:= 0;
+ fonsort(self,l,r,result);
+end;
+
 
 
 { tdrawgrid }

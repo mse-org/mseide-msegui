@@ -18,6 +18,8 @@ uses
 
 type
  arraysortcomparety = function (const l,r): integer;
+ sortcomparemethodty = function (const l,r): integer of object;
+ indexsortcomparemethodty = function (const l,r: integer): integer of object;
 
  recordliststatety = (rels_needsinitialize,rels_needsfinalize,rels_needscopy,
                       rels_destroying);
