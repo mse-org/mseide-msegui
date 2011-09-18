@@ -1027,6 +1027,7 @@ type
  datalistclassty = class of tdatalist;
 
 type
+{
  indexcomparety = function(item1,item2: pointer): integer of object;
 
  tlinindexmse = class(tlist)
@@ -1042,7 +1043,7 @@ type
    function insert(value: pointer): integer; overload;
    property comparefunc: indexcomparety read Fcomparefunc write Setcomparefunc;
  end;
-
+}
  stringsortmodety = (sms_none,sms_upascii,sms_up,sms_upi);
  pointercomparemethodty = function(l,r:pointer): integer of object; 
 
@@ -9020,7 +9021,7 @@ procedure tcustomrowstatelist.checkdirty(const arow: integer);
 begin
  //dummy
 end;
-
+(*
 { tlinindexmse }
 
 function tlinindexmse.find(key: pointer; nearest : boolean): integer;
@@ -9139,6 +9140,7 @@ begin
   fsortvalid:= false;
  end;
 end;
+*)
 
 { tobjectdatalist }
 

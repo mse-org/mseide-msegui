@@ -261,7 +261,7 @@ uses
 const
  growstep = 32;
 
-
+{
 procedure QuickSort1(var indexlist: array of integer; SortList: PPointerList; L, R: Integer;
                        SCompare: TListSortCompare);
                        //bei compareresult = 0 wird urspruengliche ordnung beibehalten
@@ -321,7 +321,7 @@ begin
     L := I;
   until I >= R;
 end;
-{
+
 procedure QuickSortmse(SortList: PPointerList; count: integer;
                        SCompare: TListSortCompare; out indexlist: integerarty);
        //on compareresult = 0 order remains unchanged
