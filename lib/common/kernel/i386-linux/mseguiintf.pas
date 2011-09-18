@@ -3585,7 +3585,8 @@ begin
  gdi_lock;
  gc:= xcreategc(appdisp,id,0,nil);
  if gc <> nil then begin
-  xcopyarea(appdisp,id,id,gc,rect.x,rect.y,rect.cx,rect.cy,rect.x+dist.x,rect.y+dist.y);
+  xcopyarea(appdisp,id,id,gc,rect.x,rect.y,rect.cx,rect.cy,rect.x+dist.x,
+                                                                rect.y+dist.y);
   xfreegc(appdisp,gc);
   result:= gue_ok;
  end

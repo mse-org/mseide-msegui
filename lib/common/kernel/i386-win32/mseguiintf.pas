@@ -1785,7 +1785,8 @@ begin
  end;
 end;
 
-function gui_movewindowrect(id: winidty; const dist: pointty; const rect: rectty): guierrorty;
+function gui_movewindowrect(id: winidty; const dist: pointty;
+                                             const rect: rectty): guierrorty;
 var
  rect1,rect2: rectty;
 begin

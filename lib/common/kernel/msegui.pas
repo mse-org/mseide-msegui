@@ -13202,10 +13202,10 @@ begin
  end;
 end;
 
-procedure twindow.movewindowrect(const dist: pointty;
-  const rect: rectty);
+procedure twindow.movewindowrect(const dist: pointty; const rect: rectty);
 begin
- gui_movewindowrect(fwindow.id,dist,rect);
+ tcanvas1(fcanvas).movewindowrect(dist,rect);
+// gui_movewindowrect(fwindow.id,dist,rect);
 end;
 
 function twindow.getsize: sizety;

@@ -949,6 +949,13 @@ begin
  //dummy
 end;
 
+procedure gdi_movewindowrect(var drawinfo: drawinfoty); //gdifunc
+begin
+ with drawinfo.moverect do begin
+  gui_movewindowrect(drawinfo.paintdevice,dist^,rect^);  
+ end;
+end;
+
 procedure gdi_drawlines(var drawinfo: drawinfoty);
 var
  po1: ppointty;
@@ -2454,6 +2461,7 @@ const
    {$ifdef FPC}@{$endif}gdi_getcanvasclass,
    {$ifdef FPC}@{$endif}gdi_endpaint,
    {$ifdef FPC}@{$endif}gdi_flush,
+   {$ifdef FPC}@{$endif}gdi_movewindowrect,
    {$ifdef FPC}@{$endif}gdi_drawlines,
    {$ifdef FPC}@{$endif}gdi_drawlinesegments,
    {$ifdef FPC}@{$endif}gdi_drawellipse,

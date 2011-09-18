@@ -1346,6 +1346,12 @@ procedure gdi_setcliporigin(var drawinfo: drawinfoty);
 begin
 end;
 
+procedure setrasterpos(const agc: gcty; const apos: pointty);
+begin
+ glrasterpos2f(0.999*glpixelshift,0.999*glpixelshift);
+ glbitmap(0,0,0,0,apos.x,oglgcty(agc.platformdata).d.top-apos.y,nil);
+end;
+
 procedure copyareaself(var drawinfo: drawinfoty);
 var
  xscale,yscale: real;
@@ -1355,7 +1361,8 @@ begin
    glpushattrib(gl_pixel_mode_bit);
    xscale:= cx/sourcerect^.cx;
    yscale:= cy/sourcerect^.cy;
-   glrasterpos2i(x,(top-y-cy));
+   setrasterpos(drawinfo.gc,mp(x,y+cy));
+//   glrasterpos2i(x,(top-y-cy));
    glpixelzoom(xscale,yscale);
    with sourcerect^ do begin
     glcopypixels(x,top-y-cy,cx,cy,gl_color);
@@ -1365,10 +1372,18 @@ begin
  end;
 end;
 
-procedure setrasterpos(const agc: gcty; const apos: pointty);
+procedure gdi_movewindowrect(var drawinfo: drawinfoty); //gdifunc
 begin
- glrasterpos2f(0.999*glpixelshift,0.999*glpixelshift);
- glbitmap(0,0,0,0,apos.x,oglgcty(agc.platformdata).d.top-apos.y,nil);
+ glpushattrib(gl_enable_bit);
+ gldisable(gl_stencil_test);
+ gldisable(gl_blend);
+ with drawinfo.moverect,oglgcty(drawinfo.gc.platformdata).d do begin
+  with rect^ do begin
+   setrasterpos(drawinfo.gc,mp(x+dist^.x,y+dist^.y+cy));
+   glcopypixels(x,top-y-cy,cx,cy,gl_color);
+  end;
+ end;
+ glpopattrib;
 end;
 
 procedure copyareagl(var drawinfo: drawinfoty);
@@ -1833,6 +1848,7 @@ const
    {$ifdef FPC}@{$endif}gdi_getcanvasclass,
    {$ifdef FPC}@{$endif}gdi_endpaint,
    {$ifdef FPC}@{$endif}gdi_flush,
+   {$ifdef FPC}@{$endif}gdi_movewindowrect,
    {$ifdef FPC}@{$endif}gdi_drawlines,
    {$ifdef FPC}@{$endif}gdi_drawlinesegments,
    {$ifdef FPC}@{$endif}gdi_drawellipse,

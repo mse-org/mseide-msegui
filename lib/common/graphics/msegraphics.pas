@@ -358,6 +358,11 @@ type
   canvasclass: canvasclassty;
   monochrome: boolean;
  end;
+ 
+ moverectinfoty = record
+  dist: ppointty;
+  rect: prectty;
+ end;
   
  gcvaluemaskty = (gvm_clipregion,gvm_colorbackground,gvm_colorforeground,
                   gvm_dashes,gvm_linewidth,gvm_capstyle,gvm_joinstyle,
@@ -419,7 +424,8 @@ type
   17: (getimage: getimageinfoty);
   18: (getcanvasclass: getcanvasclassinfoty);
   19: (createpixmap: createpixmapinfoty);
-  20: (pixmapimage: pixmapimageinfoty)
+  20: (pixmapimage: pixmapimageinfoty);
+  21: (moverect: moverectinfoty)
  end;
 
  getfontfuncty = function (var drawinfo: drawinfoty): boolean of object;
@@ -583,7 +589,7 @@ type
 
  gdifuncty = (gdf_creategc,gdf_destroygc,gdf_changegc,gdf_createpixmap,
               gdf_pixmaptoimage,gdf_imagetopixmap,
-              gdf_getcanvasclass,gdf_endpaint,gdf_flush,
+              gdf_getcanvasclass,gdf_endpaint,gdf_flush,gdf_movewindowrect,
               gdf_drawlines,gdf_drawlinesegments,gdf_drawellipse,gdf_drawarc,
               gdf_fillrect,
               gdf_fillelipse,gdf_fillarc,gdf_fillpolygon,{gdf_drawstring,}
@@ -753,6 +759,7 @@ type
    procedure nextpage; virtual; //used by tcustomprintercanvas
    function getcontextinfopo: pointer; virtual;
    procedure updatesize(const asize: sizety); virtual;
+   procedure movewindowrect(const adist: pointty; const arect: rectty);
   public
    drawinfopo: pointer; //used to transport additional drawing information
    constructor create(const user: tobject; const intf: icanvas); virtual;
@@ -5462,6 +5469,16 @@ end;
 procedure tcanvas.updatesize(const asize: sizety);
 begin
  fdrawinfo.gc.paintdevicesize:= asize;
+end;
+
+procedure tcanvas.movewindowrect(const adist: pointty; const arect: rectty);
+begin
+ checkgcstate([cs_gc]);
+ with fdrawinfo.moverect do begin
+  dist:= @adist;
+  rect:= @arect;
+  gdi(gdf_movewindowrect);
+ end;
 end;
 
 initialization
