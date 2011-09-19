@@ -924,7 +924,7 @@ begin
   end;
  end;
 end;
-
+var testvar: glenum;
 procedure settexture(const gc: gcty; const apixmap: tsimplebitmap);
 var
  mode,datatype: glenum;
@@ -940,7 +940,7 @@ begin
    mode:= gl_bgra;
   end;
   im1:= tcanvas1(apixmap.canvas).getimage(mode = gl_rgba);
-  makecurrent(gc);
+  makecurrent(gc); //possibly changed by getimage
   brushsize:= im1.image.size;
   if (brushsize.cx = 0) or (brushsize.cy = 0) then begin
    glteximage2d(gl_texture_2d,0,4,0,0,0,mode,gl_unsigned_byte,nil);
@@ -986,6 +986,7 @@ begin
   end;
   with im2 do begin
    glteximage2d(gl_texture_2d,0,4,size.cx,size.cy,0,mode,datatype,pixels);
+testvar:= checkerror;
   end;
   if bo1 then begin
    gui_freeimagemem(im2.pixels);
@@ -1070,11 +1071,11 @@ begin
     with pregioninfoty(clipregion)^ do begin
      if rectcount > 0 then begin
       glbegin(gl_quads);
-      y1:= top-stripestart;
+      y1:= top-(stripestart+cliporigin.y);
       po1:= datapo;      
       for int1:= stripecount-1 downto 0 do begin
        int3:= y1;
-       x1:= 0;
+       x1:= cliporigin.x;
        y1:= y1 - po1^.header.height; //next stripe
        int2:= po1^.header.rectcount -1;
        po1:= @po1^.data;

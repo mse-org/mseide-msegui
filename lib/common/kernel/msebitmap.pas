@@ -79,9 +79,9 @@ type
    procedure change;
    procedure beginupdate;
    procedure endupdate;
-   procedure loaddata(const asize: sizety; data: pbyte;
-             msbitfirst: boolean = false; dwordaligned: boolean = false;
-             bottomup: boolean = false); virtual; //calls change
+   procedure loaddata(const asize: sizety; const data: pbyte;
+             const msbitfirst: boolean = false; const dwordaligned: boolean = false;
+             const bottomup: boolean = false); virtual; //calls change
    function hasimage: boolean;
    procedure paint(const acanvas: tcanvas; const dest: rectty;
                    const asource: rectty; const aalignment: alignmentsty = [];
@@ -505,6 +505,68 @@ begin
  change;
 end;
 
+procedure tbitmap.loaddata(const asize: sizety; const data: pbyte;
+        const msbitfirst: boolean = false; const dwordaligned: boolean = false;
+        const bottomup: boolean = false);
+var
+ sourcerowstep,rowstep: integer;
+ ps,pd: pbyteaty;
+ int1,int2,int3: integer;
+begin
+ if not monochrome then begin
+  gdierror(gde_notmonochrome,self);
+ end;
+ destroyhandle;
+ fsize:= asize;
+ if (asize.cx > 0) and (asize.cy > 0) then begin
+  with fimage do begin
+   monochrome:= true;
+   size:= asize;
+   rowstep:= (size.cx+31) div 32; //words
+   length:= size.cy * rowstep;
+   rowstep:= rowstep*4;           //bytes
+   pixels:= gui_allocimagemem(length);
+   if dwordaligned then begin
+    sourcerowstep:= rowstep;
+   end
+   else begin
+    sourcerowstep:= (asize.cx+7) div 8;
+   end;
+   int1:= asize.cy - 1;
+   int3:= sourcerowstep - 1;
+   if bottomup then begin
+    pd:= pointer(pchar(pixels) + int1*rowstep);
+    rowstep:= -rowstep;
+   end
+   else begin
+    pd:= pointer(pixels);
+   end;
+   ps:= pointer(data);
+   if msbitfirst then begin
+    for int1:= int1 downto 0 do begin
+     for int2:= int3 downto 0 do begin
+      pd^[int2]:= bitreverse[ps^[int2]];
+     end;
+     inc(pbyte(ps),sourcerowstep);
+     inc(pbyte(pd),rowstep);
+    end;
+   end
+   else begin
+    for int1:= int1 downto 0 do begin
+     for int2:= int3 downto 0 do begin
+      pd^[int2]:= ps^[int2];
+     end;
+     inc(pbyte(ps),sourcerowstep);
+     inc(pbyte(pd),rowstep);
+    end;
+   end;   
+  end;
+ end;
+// creategc;
+ change;
+end;
+
+{
 procedure tbitmap.loaddata(const asize: sizety; data: pbyte;
              msbitfirst: boolean = false; dwordaligned: boolean = false;
              bottomup: boolean = false);
@@ -523,7 +585,7 @@ begin
  creategc;
  change;
 end;
-
+}
 procedure tbitmap.paint(const acanvas: tcanvas; const dest: rectty;
                   const asource: rectty; const aalignment: alignmentsty = [];
                          const acolorforeground: colorty = cl_default;

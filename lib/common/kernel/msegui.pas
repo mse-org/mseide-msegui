@@ -12883,7 +12883,7 @@ begin
    end;
   end
   else begin
-   bmp:= tbitmap.create(false);
+   bmp:= tbitmap.create(false,fgdi);
    try
     if intersectrect(fcanvas.clipbox,
             makerect(nullpoint,fowner.widgetrect.size),rect1) then begin

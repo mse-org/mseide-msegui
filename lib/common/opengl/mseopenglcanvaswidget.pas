@@ -227,9 +227,9 @@ constructor topenglwidgetcanvas.create(const user: tobject;
                const intf: icanvas);
 begin
  inherited;
- if not flushgdi then begin
-  fcontextinfo.attrib.doublebuffer:= true;
- end;
+// if not flushgdi then begin
+//  fcontextinfo.attrib.doublebuffer:= true;
+// end;
 end;
 
 end.
