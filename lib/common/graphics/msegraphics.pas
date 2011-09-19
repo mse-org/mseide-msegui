@@ -2250,6 +2250,10 @@ end;
 
 function tfont.gethandleforcanvas(const canvas: tcanvas): fontnumty;
 begin
+ if (fhandlepo^ <> 0) and 
+           (finfopo^.gdifuncs <> canvas.fdrawinfo.gc.gdifuncs) then begin
+  releasehandles(true);
+ end;
  if fhandlepo^ = 0 then begin
   createhandle(canvas);
  end;
