@@ -1438,20 +1438,20 @@ begin
    int1:= int1 or gl_color_buffer_bit;
   end;
   glpushattrib(int1);
-  if df_canvasismonochrome in 
-                       tcanvas1(source).fdrawinfo.gc.drawingflags then begin
-   glpixeltransferf(gl_red_bias,glcolorbackground.red/255);
-   glpixeltransferf(gl_red_scale,
-                         (glcolorforeground.red-glcolorbackground.red)/255);
-   glpixeltransferf(gl_green_bias,glcolorbackground.green/255);
-   glpixeltransferf(gl_green_scale,
-                         (glcolorforeground.green-glcolorbackground.green)/255);
-   glpixeltransferf(gl_blue_bias,glcolorbackground.blue/255);
-   glpixeltransferf(gl_blue_scale,
-                         (glcolorforeground.blue-glcolorbackground.blue)/255);
-  end
-  else begin
-   if df_colorconvert in drawinfo.gc.drawingflags then begin
+  if df_colorconvert in drawinfo.gc.drawingflags then begin
+   if df_canvasismonochrome in 
+                        tcanvas1(source).fdrawinfo.gc.drawingflags then begin
+    glpixeltransferf(gl_red_bias,glcolorbackground.red/255);
+    glpixeltransferf(gl_red_scale,
+                          (glcolorforeground.red-glcolorbackground.red)/255);
+    glpixeltransferf(gl_green_bias,glcolorbackground.green/255);
+    glpixeltransferf(gl_green_scale,
+                          (glcolorforeground.green-glcolorbackground.green)/255);
+    glpixeltransferf(gl_blue_bias,glcolorbackground.blue/255);
+    glpixeltransferf(gl_blue_scale,
+                          (glcolorforeground.blue-glcolorbackground.blue)/255);
+   end
+   else begin
     transparentcolor1:= transparentcolor;
     rgbtriplety(transparentcolor1).res:= $ff;
     for int1:= size1-1 downto 0 do begin
