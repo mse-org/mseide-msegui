@@ -8,14 +8,14 @@ object actionsmo: tactionsmo
     Tag = 1
     caption = '&Make'
     onexecute = makeactonexecute
-    left = 168
+    left = 152
     top = 316
   end
   object run: taction
     caption = '&Run'
     imagenr = 0
     hint = 'Run'
-    left = 368
+    left = 360
     top = 404
   end
   object step: taction
@@ -25,7 +25,7 @@ object actionsmo: tactionsmo
     imagenrdisabled = 18
     hint = 'Step'
     onexecute = stepactonexecute
-    left = 24
+    left = 8
     top = 316
     sc = (
       1
@@ -39,7 +39,7 @@ object actionsmo: tactionsmo
     imagenrdisabled = 22
     hint = 'Next'
     onexecute = nextactonexecute
-    left = 24
+    left = 8
     top = 300
     sc = (
       1
@@ -53,7 +53,7 @@ object actionsmo: tactionsmo
     imagenrdisabled = 17
     hint = 'Continue'
     onexecute = continueactonexecute
-    left = 24
+    left = 8
     top = 348
     sc = (
       1
@@ -67,7 +67,7 @@ object actionsmo: tactionsmo
     imagenrdisabled = 16
     hint = 'Interrupt'
     onexecute = interruptactonexecute
-    left = 22
+    left = 6
     top = 282
   end
   object reset: taction
@@ -77,7 +77,7 @@ object actionsmo: tactionsmo
     imagenrdisabled = 15
     hint = 'Reset'
     onexecute = resetactonexecute
-    left = 23
+    left = 7
     top = 263
   end
   object opensource: taction
@@ -97,7 +97,7 @@ object actionsmo: tactionsmo
     imagenrdisabled = 20
     hint = 'Finish'
     onexecute = finishactonexecute
-    left = 24
+    left = 8
     top = 332
     sc = (
       1
@@ -127,7 +127,7 @@ object actionsmo: tactionsmo
   object abortmakeact: taction
     caption = '&Abort Make'
     onexecute = abortmakeactonexecute
-    left = 168
+    left = 152
     top = 402
   end
   object undo: taction
@@ -249,7 +249,7 @@ object actionsmo: tactionsmo
     imagenr = 7
     hint = 'Breakpoints on/off'
     onexecute = bkptsononexecute
-    left = 168
+    left = 152
     top = 220
     sc = (
       1
@@ -264,7 +264,7 @@ object actionsmo: tactionsmo
     hint = 'Watches on/off'
     statfile = mainfo.projectstatfile
     onexecute = watchesononexecute
-    left = 168
+    left = 152
     top = 236
     sc = (
       1
@@ -284,7 +284,7 @@ object actionsmo: tactionsmo
   object togglebkpt: taction
     caption = '&Toggle Breakpoint'
     onexecute = togglebreakpointexe
-    left = 168
+    left = 152
     top = 188
     sc = (
       1
@@ -294,7 +294,7 @@ object actionsmo: tactionsmo
   object togglebkptenable: taction
     caption = 'Toggle Bkpt. &enabled'
     onexecute = togglebkptenableactonexecute
-    left = 168
+    left = 152
     top = 204
     sc = (
       1
@@ -1318,7 +1318,7 @@ object actionsmo: tactionsmo
     imagenr = 13
     imagenrdisabled = 19
     onexecute = nextiactonexecute
-    left = 96
+    left = 80
     top = 264
     sc = (
       1
@@ -1331,7 +1331,7 @@ object actionsmo: tactionsmo
     imagenr = 12
     imagenrdisabled = 21
     onexecute = stepiactonexecute
-    left = 96
+    left = 80
     top = 280
     sc = (
       1
@@ -1346,7 +1346,7 @@ object actionsmo: tactionsmo
     hint = 'Executable lines hint on/off'
     statfile = mainfo.projectstatfile
     onchange = bluedotsononchange
-    left = 168
+    left = 152
     top = 256
   end
   object replace: taction
@@ -1911,7 +1911,7 @@ object actionsmo: tactionsmo
     )
     statfile = mainfo.mainstatfile
     onafterupdate = updateshortcuts
-    left = 288
+    left = 280
     top = 368
   end
   object toggleinspector: taction
@@ -1925,27 +1925,27 @@ object actionsmo: tactionsmo
   end
   object buildact: taction
     onexecute = makeactonexecute
-    left = 168
+    left = 152
     top = 328
   end
   object make1act: taction
     onexecute = makeactonexecute
-    left = 168
+    left = 152
     top = 339
   end
   object make2act: taction
     onexecute = makeactonexecute
-    left = 168
+    left = 152
     top = 352
   end
   object make3act: taction
     onexecute = makeactonexecute
-    left = 168
+    left = 152
     top = 366
   end
   object make4act: taction
     onexecute = makeactonexecute
-    left = 168
+    left = 152
     top = 384
   end
   object download: taction
@@ -1957,7 +1957,7 @@ object actionsmo: tactionsmo
   object helpact: taction
     options = [ao_globalshortcut]
     onexecute = helpex
-    left = 288
+    left = 280
     top = 400
     sc = (
       1
@@ -1973,7 +1973,7 @@ object actionsmo: tactionsmo
   object setbm0: taction
     caption = 'Bookmark &0'
     onexecute = setbmexec
-    left = 288
+    left = 280
     top = 168
     sc = (
       1
@@ -1983,7 +1983,7 @@ object actionsmo: tactionsmo
   object findbm0: taction
     caption = 'Bookmark &0'
     onexecute = findbmexec
-    left = 368
+    left = 360
     top = 168
     sc = (
       1
@@ -1994,7 +1994,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &1'
     tagaction = 1
     onexecute = findbmexec
-    left = 368
+    left = 360
     top = 184
     sc = (
       1
@@ -2005,7 +2005,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &1'
     tagaction = 1
     onexecute = setbmexec
-    left = 288
+    left = 280
     top = 184
     sc = (
       1
@@ -2016,7 +2016,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &2'
     tagaction = 2
     onexecute = findbmexec
-    left = 368
+    left = 360
     top = 200
     sc = (
       1
@@ -2027,7 +2027,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &2'
     tagaction = 2
     onexecute = setbmexec
-    left = 288
+    left = 280
     top = 200
     sc = (
       1
@@ -2038,7 +2038,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &3'
     tagaction = 3
     onexecute = findbmexec
-    left = 368
+    left = 360
     top = 216
     sc = (
       1
@@ -2049,7 +2049,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &3'
     tagaction = 3
     onexecute = setbmexec
-    left = 288
+    left = 280
     top = 216
     sc = (
       1
@@ -2060,7 +2060,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &4'
     tagaction = 4
     onexecute = findbmexec
-    left = 368
+    left = 360
     top = 232
     sc = (
       1
@@ -2071,7 +2071,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &4'
     tagaction = 4
     onexecute = setbmexec
-    left = 288
+    left = 280
     top = 232
     sc = (
       1
@@ -2082,7 +2082,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &5'
     tagaction = 5
     onexecute = findbmexec
-    left = 368
+    left = 360
     top = 248
     sc = (
       1
@@ -2093,7 +2093,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &5'
     tagaction = 5
     onexecute = setbmexec
-    left = 288
+    left = 280
     top = 248
     sc = (
       1
@@ -2104,7 +2104,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &6'
     tagaction = 6
     onexecute = findbmexec
-    left = 368
+    left = 360
     top = 264
     sc = (
       1
@@ -2116,7 +2116,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &6'
     tagaction = 6
     onexecute = setbmexec
-    left = 288
+    left = 280
     top = 264
     sc = (
       1
@@ -2127,7 +2127,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &7'
     tagaction = 7
     onexecute = findbmexec
-    left = 368
+    left = 360
     top = 280
     sc = (
       1
@@ -2138,7 +2138,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &7'
     tagaction = 7
     onexecute = setbmexec
-    left = 288
+    left = 280
     top = 280
     sc = (
       1
@@ -2149,7 +2149,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &8'
     tagaction = 8
     onexecute = findbmexec
-    left = 368
+    left = 360
     top = 296
     sc = (
       1
@@ -2160,7 +2160,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &8'
     tagaction = 8
     onexecute = setbmexec
-    left = 288
+    left = 280
     top = 296
     sc = (
       1
@@ -2171,7 +2171,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &9'
     tagaction = 9
     onexecute = findbmexec
-    left = 368
+    left = 360
     top = 312
     sc = (
       1
@@ -2182,7 +2182,7 @@ object actionsmo: tactionsmo
     caption = 'Bookmark &9'
     tagaction = 9
     onexecute = setbmexec
-    left = 288
+    left = 280
     top = 312
     sc = (
       1
@@ -2193,12 +2193,12 @@ object actionsmo: tactionsmo
     caption = 'none'
     tagaction = -1
     onexecute = setbmexec
-    left = 288
+    left = 280
     top = 328
   end
   object instemplate: taction
     onexecute = instemplateactonexecute
-    left = 344
+    left = 360
     top = 64
     sc = (
       1

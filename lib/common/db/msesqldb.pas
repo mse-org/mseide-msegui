@@ -643,7 +643,7 @@ procedure tmsesqlquery.afterapply;
 begin
  if writetransaction <> nil then begin //can be nil in local mode
   if (ftransopenref = writetransaction.opencount) then begin
-   if (writetransaction.savepointlevel = 0) then begin
+   if (writetransaction.savepointlevel < 0) then begin
     if dso_autocommitret in fcontroller.options then begin
      writetransaction.commitretaining;
     end;
