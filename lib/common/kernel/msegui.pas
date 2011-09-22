@@ -12841,7 +12841,8 @@ begin
   else begin
    if fsizeerrorcount < maxsizeerrorcount then begin
     inc(fsizeerrorcount);
-    gui_reposwindow(fwindow.id,makerect(arect.pos,rect1.size));
+    gui_reposwindow(fwindow.id,rect1);
+//    gui_reposwindow(fwindow.id,makerect(arect.pos,rect1.size));
    end;
   end;
  end;
