@@ -1402,11 +1402,17 @@ var
  int1: integer;
  po1: prgbtriplety;
  po2: pbyte;
+ size1: integer;
+ transparentcolor1: pixelty;
+const
+ co0: rgbtriplety = (blue: $00; green: $00; red: $00; res: $ff);
+ co1: rgbtriplety = (blue: $ff; green: $ff; red: $ff; res: $ff);
 begin
  with drawinfo.copyarea,oglgcty(drawinfo.gc.platformdata).d do begin
   makecurrent(tcanvas1(source).fdrawinfo.gc);
   with sourcerect^ do begin
-   getmem(po1,cx*cy*sizeof(rgbtriplety));
+   size1:= cx*cy;
+   getmem(po1,size1*sizeof(rgbtriplety));
 //   setlength(ar1,cx*cy);
    glreadpixels(x,
           oglgcty(tcanvas1(source).fdrawinfo.gc.platformdata).d.top-y-cy+1,
@@ -1443,6 +1449,20 @@ begin
    glpixeltransferf(gl_blue_bias,glcolorbackground.blue/255);
    glpixeltransferf(gl_blue_scale,
                          (glcolorforeground.blue-glcolorbackground.blue)/255);
+  end
+  else begin
+   if df_colorconvert in drawinfo.gc.drawingflags then begin
+    transparentcolor1:= transparentcolor;
+    rgbtriplety(transparentcolor1).res:= $ff;
+    for int1:= size1-1 downto 0 do begin
+     if ppixelaty(po1)^[int1] = transparentcolor1 then begin
+      plongwordaty(po1)^[int1]:= pixelty(co0);
+     end
+     else begin
+      plongwordaty(po1)^[int1]:= pixelty(co1);
+     end;     
+    end;    
+   end;
   end;
   if mask <> nil then begin
    glenable(gl_blend);

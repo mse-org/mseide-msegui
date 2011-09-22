@@ -25,6 +25,8 @@ type
  imagenrty = type integer; //for timagelist
  facenrty = type integer;  //for tfacelist
  pixelty = longword;
+ pixelaty = array[0..0] of pixelty;
+ ppixelaty = ^pixelaty;
 
  colorty = type longword;
  pcolorty = ^colorty;
