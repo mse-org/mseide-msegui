@@ -3604,7 +3604,7 @@ end;
 procedure tsqlquery.internalrefresh;
 begin
  if dso_refreshtransaction in getdsoptions then begin
-  if transaction.savepointlevel = 0 then begin
+  if transaction.savepointlevel < 0 then begin
    transaction.refresh;
   end
   else begin
