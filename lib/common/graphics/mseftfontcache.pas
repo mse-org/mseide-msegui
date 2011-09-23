@@ -247,14 +247,14 @@ begin
   po2:= pointer(text);
   if face.getglyph(po2^[0],po1,false) then begin
    with arect do begin
-    x:= text16pos.pos^.x + po1^.leftbearing;
-    int2:= x + po1^.width;
+    x:= text16pos.pos^.x {+ po1^.leftbearing};
+    int2:= po1^.width {- po1^.leftbearing};
     for int1:= 1 to count - 1 do begin
      if face.getglyph(po2^[int1],po1,false) then begin
       int2:= int2+po1^.width;
      end;
     end;
-    cx:= int2 + po1^.rightbearing;
+    cx:= int2 {+ po1^.rightbearing};
     y:= text16pos.pos^.y - face.fascent;
     cy:= face.fglyphheight;
    end;
