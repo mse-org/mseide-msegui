@@ -531,7 +531,7 @@ procedure stripeop(var reg: regioninfoty;
                              const stripe: pstripety; const op: regopty);
 var
  d: regopdataty;
- po1,po6,psa1,psb,psb1,pd,pd1,pd2: pstripety;
+ po1,po6,psa1,psb,psb1,psbb1,pd,pd1,pd2: pstripety;
  lastdeststripe: pstripety;
  psbbelowref: ptrint;
  po2,po3: prectextentaty;
@@ -547,6 +547,8 @@ var
  don: boolean;
  dpos: rectextentty;
  dstripeco,drectco: rectextentty;
+ pendingmovecount: integer;
+ moves,moved: pointer;
 const
  endmark = maxint-1; 
 begin
@@ -678,19 +680,21 @@ begin
          //merge stripes in block
          
   psb1:= pd;           //dest
+  psbb1:= pd;          //dest buffer
   psa1:= pd;           //init last stripe
   po1:= nextstripe(pd);//source
   int1:= stripeco;
   dstripeco:= int1;
   dec(int1);
+  pendingmovecount:= 0;
   while int1 <> 0 do begin             //pack similar stripes
    psa1:= po1; //backup last stripe
    while (int1 <> 0) and 
-                  (po1^.header.rectcount = psb1^.header.rectcount) do begin
+                  (po1^.header.rectcount = psbb1^.header.rectcount) do begin
     po2:= @po1^.data;
-    po3:= @psb1^.data;
+    po3:= @psbb1^.data;
     bo1:= false;
-    for int3:= psb1^.header.rectcount*2-1 downto 0 do begin
+    for int3:= psbb1^.header.rectcount*2-1 downto 0 do begin
      if po2^[int3] <> po3^[int3] then begin
       bo1:= true; //different
       break;
@@ -700,18 +704,34 @@ begin
      break;
     end;
     dec(dstripeco);
-    drectco:= drectco - psb1^.header.rectcount; //merge stripe
-    psb1^.header.height:= psb1^.header.height + po1^.header.height;
+    drectco:= drectco - psbb1^.header.rectcount; //merge stripe
+    psbb1^.header.height:= psbb1^.header.height + po1^.header.height;
     incstripe(po1);
     dec(int1);
    end;
    if int1 <> 0 then begin
+    if pendingmovecount <> 0 then begin
+     move(moves^,moved^,pendingmovecount);
+    end;
     incstripe(psb1);
     if psb1 <> po1 then begin
-     move(po1^,psb1^,stripesize(po1)); //first of next group
+     pendingmovecount:= stripesize(po1);
+     psbb1:= po1;
+     moves:= po1;
+     moved:= psb1;
+//     move(po1^,psb1^,stripesize(po1)); //first of next group
+    end
+    else begin
+     pendingmovecount:= 0;
+     psbb1:= psb1;
     end;
     incstripe(po1);
     dec(int1);
+   end
+   else begin
+    if pendingmovecount <> 0 then begin
+     move(moves^,moved^,pendingmovecount);
+    end;
    end;
   end;
   lastdeststripe:= psb1;

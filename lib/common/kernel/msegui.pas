@@ -12864,7 +12864,7 @@ begin
  if (ws_visible in fowner.fwidgetstate) and (fupdateregion.region <> 0) then begin
   checkwindow(false); //ev. reposition window
   fcanvas.reset;
-  fcanvas.clipregion:= fupdateregion.region;
+  fcanvas.clipregion:= fupdateregion.region; //canvas owns the region
   bo1:= appinst.caret.islinkedto(fcanvas) and
    testintersectrect(fcanvas.clipbox,appinst.caret.rootcliprect);
   if bo1 then begin
@@ -12889,7 +12889,6 @@ begin
     if intersectrect(fcanvas.clipbox,
             makerect(nullpoint,fowner.widgetrect.size),rect1) then begin
      bmp.size:= rect1.size;
-
      bmp.canvas.clipregion:= bmp.canvas.createregion(fupdateregion.region);
      po1.x:= -rect1.x;
      po1.y:= -rect1.y;

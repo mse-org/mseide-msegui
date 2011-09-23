@@ -924,7 +924,7 @@ begin
   end;
  end;
 end;
-var testvar: glenum;
+
 procedure settexture(const gc: gcty; const apixmap: tsimplebitmap);
 var
  mode,datatype: glenum;
@@ -986,7 +986,6 @@ begin
   end;
   with im2 do begin
    glteximage2d(gl_texture_2d,0,4,size.cx,size.cy,0,mode,datatype,pixels);
-testvar:= checkerror;
   end;
   if bo1 then begin
    gui_freeimagemem(im2.pixels);
