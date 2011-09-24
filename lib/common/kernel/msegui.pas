@@ -10940,7 +10940,10 @@ end;
 
 function twidget.getcanvas(aorigin: originty = org_client): tcanvas;
 begin
- result:= window.fasynccanvas;
+ with tcanvas1(window.fcanvas) do begin
+  fstate:= fstate - changedmask; //state invalid
+ end; 
+ result:= fwindow.fasynccanvas;
  with result do begin
   if active then begin
    reset;

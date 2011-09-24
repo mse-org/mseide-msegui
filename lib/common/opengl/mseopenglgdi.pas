@@ -772,7 +772,7 @@ const
  //rop_notcopy,      rop_notor,      rop_nand, rop_set
    gl_copy_inverted, gl_or_inverted, gl_nand,   gl_set
  );
- 
+   
 procedure setlogicop(const rasterop: rasteropty; const gc: gcty);
 begin
  if rasterop = rop_copy then begin
