@@ -785,6 +785,7 @@ begin
   end;
  end
  else begin
+//  gllogicop(rops[rasterop]);
   if df_canvasismonochrome in gc.drawingflags then begin
    glenable(gl_index_logic_op);
   end

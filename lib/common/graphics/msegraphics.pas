@@ -3091,6 +3091,7 @@ end;
 procedure tcanvas.reset;
 begin
  restore(0);
+ fstate:= fstate - changedmask;
 // clipregion:= 0;
 // origin:= nullpoint;
 end;
