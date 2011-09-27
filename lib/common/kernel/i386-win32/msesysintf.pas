@@ -168,27 +168,6 @@ begin
  end;
 end;
 
-function sys_getlasterror: Integer;
-begin
- result:= windows.GetLastError;
-end;
-
-procedure sys_setlasterror(const avalue: integer);
-begin
- windows.setlasterror(avalue);
-end;
-
-function sys_geterrortext(aerror: integer): string;
-const
- maxlen = 1024;
-var
- int1: integer;
-begin
- setlength(result,maxlen);
- int1:= formatmessage(format_message_from_system,nil,aerror,0,pchar(result),maxlen,nil);
- setlength(result,int1);
-end;
-
 {
 function sys_towupper(char: msechar): msechar;
 begin
