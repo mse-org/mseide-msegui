@@ -22,6 +22,7 @@ object mainfo: tmainfo
     bounds_x = 1
     bounds_y = 8
     bounds_cx = 347
+    bounds_cy = 19
     anchors = [an_left, an_top, an_right]
     statfile = tstatfile1
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -29,11 +30,11 @@ object mainfo: tmainfo
     controller.filterlist.data = (
       (
         'textfiles'
-        '*txt'
+        '*.txt'
       )
     )
     controller.options = [fdo_checkexist, fdo_savelastdir]
-    reffontheight = 14
+    reffontheight = 13
   end
   object tbutton1: tbutton
     taborder = 1
@@ -56,7 +57,7 @@ object mainfo: tmainfo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 16
+        height = 15
         captions.count = 1
         captions.items = <        
           item
@@ -70,8 +71,8 @@ object mainfo: tmainfo
         widgetname = 'treeedit'
       end>
     datarowlinewidth = 0
-    datarowheight = 16
-    reffontheight = 14
+    datarowheight = 15
+    reffontheight = 13
     object treeedit: ttreeitemedit
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
@@ -82,10 +83,10 @@ object mainfo: tmainfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 395
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_locate, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
       options = [teo_treecolnavig]
-      reffontheight = 14
+      reffontheight = 13
     end
   end
   object start: tdropdownlistedit
@@ -93,15 +94,15 @@ object mainfo: tmainfo
     frame.button.color = -2147483646
     frame.outerframe = (
       0
-      17
+      16
       0
       0
     )
     taborder = 3
     bounds_x = 1
-    bounds_y = 218
+    bounds_y = 220
     bounds_cx = 198
-    bounds_cy = 37
+    bounds_cy = 35
     anchors = [an_left, an_bottom]
     statfile = tstatfile1
     ondataentered = pathdatentexe
@@ -111,22 +112,22 @@ object mainfo: tmainfo
     dropdown.cols.items = <    
       item
       end>
-    reffontheight = 14
+    reffontheight = 13
   end
   object dest: tdropdownlistedit
     frame.caption = 'Dest. Unit'
     frame.button.color = -2147483646
     frame.outerframe = (
       0
-      17
+      16
       0
       0
     )
     taborder = 4
     bounds_x = 202
-    bounds_y = 218
+    bounds_y = 220
     bounds_cx = 201
-    bounds_cy = 37
+    bounds_cy = 35
     anchors = [an_left, an_right, an_bottom]
     statfile = tstatfile1
     ondataentered = pathdatentexe
@@ -136,18 +137,18 @@ object mainfo: tmainfo
     dropdown.cols.items = <    
       item
       end>
-    reffontheight = 14
+    reffontheight = 13
   end
   object pathdisp: tstringdisp
     frame.dummy = 0
     taborder = 5
     bounds_x = 1
-    bounds_y = 259
+    bounds_y = 260
     bounds_cx = 401
-    bounds_cy = 18
+    bounds_cy = 17
     anchors = [an_left, an_right, an_bottom]
     options = [dwo_hintclippedtext]
-    reffontheight = 14
+    reffontheight = 13
   end
   object tsplitter1: tsplitter
     optionswidget = [ow_destroywidgets, ow_autoscale]
