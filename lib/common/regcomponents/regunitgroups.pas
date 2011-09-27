@@ -23,7 +23,6 @@ uses
  
 procedure reggroups;
 begin
-
  registerunitgroup(['mseskin'],['mseclasses']);
  registerunitgroup(['mseedit'],['msegui','msemenus','mseguiglob','msestrings']);
  registerunitgroup(['msetabs'],['msegui','msemenus','mseguiglob','mseapplication','sysutils','msestat','msewidgets','msegraphutils','msescrollbar']);
@@ -52,7 +51,7 @@ begin
  registerunitgroup(['msereport'],['msegui','msemenus','mseguiglob','msesplitter','db','mserichstring','msegraphics','msestrings']);
  registerunitgroup(['msesysenv'],['msestrings']);
  registerunitgroup(['msepostscriptprinter'],['mseprinter','sysutils']);
- registerunitgroup(['mseprocmonitorcomp'],['msesys']);
+ registerunitgroup(['mseprocmonitorcomp'],['msesystypes']);
  registerunitgroup(['mserttistat'],['msestat']);
  registerunitgroup(['mseprinter'],['msegui','msemenus','mseguiglob','msedataedits','msestrings','mseedit']);
  registerunitgroup(['mseimage'],['msegui','msemenus','mseguiglob']);
