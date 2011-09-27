@@ -45,7 +45,7 @@ Uses
   unix,
   unixtype,
 //  sysutils,
-  initc, msedatalist,msesysintf,msestrings;
+  initc,{msedatalist,}msesysintf,msestrings;
 
 Const
 {$ifndef useiconv}

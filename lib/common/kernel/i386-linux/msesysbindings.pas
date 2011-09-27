@@ -11,7 +11,7 @@ unit msesysbindings;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- {$ifdef FPC}cthreads,cwstring,{$endif}
+ {$ifdef FPC}cthreads,{cwstring,}{$endif}
   mselibc;
 
 {$ifdef FPC}

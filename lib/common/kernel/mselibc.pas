@@ -2154,7 +2154,7 @@ function gai_strerror(__ecode:longint):Pchar;cdecl;external clib name 'gai_strer
 
 implementation
 uses
- msedynload,msesys;
+ msedynload{,msesys};
  
 Function WEXITSTATUS(Status: longint): longint;
 begin
