@@ -1,42 +1,41 @@
 object projectfo: tprojectfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  visible = False
   bounds_x = 149
   bounds_y = 167
   bounds_cx = 683
   bounds_cy = 388
-  taborder = 1
-  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 683
-  container.bounds_cy = 388
-  container.frame.dummy = 0
-  container.onchildscaled = childscaled
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
+  container.onlayout = childscaled
+  container.bounds = (
+    0
+    0
+    683
+    388
+  )
   options = [fo_closeonesc, fo_savepos, fo_savestate]
   statfile = projectstat
   caption = 'Edit Translate Project'
-  onchildscaled = childscaled
+  onlayout = childscaled
   moduleclassname = 'tmseform'
   object impexpencoding: tenumtypeedit
-    bounds_x = 8
-    bounds_y = 362
-    bounds_cx = 244
-    bounds_cy = 20
     frame.caption = 'Encoding for imp/exp files'
     frame.captionpos = cp_right
     frame.button.color = -2147483646
-    frame.dummy = 0
     frame.outerframe = (
       0
       0
       144
       0
     )
-    anchors = [an_left, an_bottom]
     taborder = 6
+    bounds_x = 8
+    bounds_y = 362
+    bounds_cx = 244
+    anchors = [an_left, an_bottom]
     statfile = projectstat
-    value = 1
     valuedefault = 1
     min = 0
     max = 2
@@ -44,19 +43,17 @@ object projectfo: tprojectfo
     dropdown.cols.items = <    
       item
       end>
-    dropdown.itemindex = 1
     oninit = impexpencinit
     reffontheight = 14
   end
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    taborder = 4
     bounds_x = 0
     bounds_y = 112
     bounds_cx = 683
     bounds_cy = 104
-    frame.dummy = 0
     anchors = [an_top]
-    taborder = 4
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixrows.count = 1
     fixrows.items = <    
@@ -81,26 +78,25 @@ object projectfo: tprojectfo
     datacols.items = <    
       item
         width = 71
-        options = [co_readonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_readonly, co_savevalue, co_savestate]
         widgetname = 'rootname'
+        dataclass = tgridmsestringdatalist
       end    
       item
         width = 479
         options = [co_fill, co_savevalue]
         widgetname = 'filename'
+        dataclass = tgridmsestringdatalist
       end    
       item
         width = 126
         widgetname = 'filekind'
+        dataclass = tgridenumdatalist
       end>
     datarowheight = 16
     statfile = projectstat
     reffontheight = 14
     object rootname: tstringedit
-      bounds_x = 0
-      bounds_y = 0
-      bounds_cx = 71
-      bounds_cy = 16
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -108,40 +104,42 @@ object projectfo: tprojectfo
       frame.dummy = 0
       taborder = 1
       visible = False
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 71
+      bounds_cy = 16
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       reffontheight = 14
     end
     object filename: tfilenameedit
-      bounds_x = 72
-      bounds_y = 0
-      bounds_cx = 479
-      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.button.color = -2147483646
       frame.button.imagenr = 17
-      frame.dummy = 0
       taborder = 2
       visible = False
+      bounds_x = 72
+      bounds_y = 0
+      bounds_cx = 479
+      bounds_cy = 16
       ondataentered = filenamedataentered
       controller.historymaxcount = 0
       controller.captionopen = 'Select unit or form file'
       reffontheight = 14
     end
     object filekind: tenumtypeedit
-      bounds_x = 552
-      bounds_y = 0
-      bounds_cx = 126
-      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.button.color = -2147483646
-      frame.dummy = 0
       taborder = 3
       visible = False
-      font.xscale =  1.0000000000000000E+0000
+      bounds_x = 552
+      bounds_y = 0
+      bounds_cx = 126
+      bounds_cy = 16
+      font.xscale = 1
       font.dummy = 0
       dropdown.cols.count = 1
       dropdown.cols.items = <      
@@ -152,22 +150,21 @@ object projectfo: tprojectfo
     end
   end
   object datafilename: tfilenameedit
-    bounds_x = 0
-    bounds_y = 15
-    bounds_cx = 683
-    bounds_cy = 37
     frame.caption = 'Datafile'
     frame.button.color = -2147483646
     frame.button.imagenr = 17
-    frame.dummy = 0
     frame.outerframe = (
       0
       17
       0
       0
     )
-    anchors = [an_top]
     taborder = 1
+    bounds_x = 0
+    bounds_y = -1
+    bounds_cx = 683
+    bounds_cy = 37
+    anchors = [an_top]
     statfile = projectstat
     controller.filterlist.data = (
       (
@@ -193,13 +190,12 @@ object projectfo: tprojectfo
   end
   object grid2: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    taborder = 5
     bounds_x = 0
     bounds_y = 248
     bounds_cx = 683
     bounds_cy = 105
-    frame.dummy = 0
     anchors = [an_top, an_bottom]
-    taborder = 5
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
     fixrows.count = 1
     fixrows.items = <    
@@ -221,62 +217,61 @@ object projectfo: tprojectfo
       item
         width = 94
         widgetname = 'lang'
+        dataclass = tgridmsestringdatalist
       end    
       item
         width = 583
         options = [co_fill, co_savevalue]
         widgetname = 'dir'
+        dataclass = tgridmsestringdatalist
       end>
     datarowheight = 16
     statfile = projectstat
     onrowsdeleted = langdeleted
     reffontheight = 14
     object lang: tstringedit
-      bounds_x = 0
-      bounds_y = 0
-      bounds_cx = 94
-      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       taborder = 1
       visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 94
+      bounds_cy = 16
       reffontheight = 14
     end
     object dir: tdirdropdownedit
-      bounds_x = 95
-      bounds_y = 0
-      bounds_cx = 583
-      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.button.color = -2147483646
-      frame.dummy = 0
       taborder = 2
       visible = False
-      font.xscale =  1.0000000000000000E+0000
+      bounds_x = 95
+      bounds_y = 0
+      bounds_cx = 583
+      bounds_cy = 16
+      font.xscale = 1
       font.dummy = 0
       reffontheight = 14
     end
   end
   object splitter: tsplitter
+    optionswidget = [ow_destroywidgets, ow_autoscale]
+    color = -1879048189
+    taborder = 8
     bounds_x = 0
     bounds_y = 224
     bounds_cx = 683
     bounds_cy = 3
     anchors = [an_top]
-    taborder = 8
     options = [spo_vmove, spo_vprop]
     linktop = grid
     linkbottom = grid2
   end
   object makecommand: tstringedit
-    bounds_x = 0
-    bounds_y = 63
-    bounds_cx = 644
-    bounds_cy = 37
     frame.caption = 'Make command'
     frame.dummy = 0
     frame.outerframe = (
@@ -285,19 +280,19 @@ object projectfo: tprojectfo
       0
       0
     )
-    anchors = [an_left, an_top, an_right]
     taborder = 2
     onshowhint = showhintexe
+    bounds_x = 0
+    bounds_y = 63
+    bounds_cx = 644
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
     statfile = projectstat
     value = '${COMPILER} -Fu${MSELIBDIR}i18n ${LIBFILE}'
     onsetvalue = makecommandsetvalue
     reffontheight = 14
   end
   object makeon: tbooleanedit
-    bounds_x = 656
-    bounds_y = 68
-    bounds_cx = 16
-    bounds_cy = 30
     frame.caption = 'on'
     frame.captionpos = cp_top
     frame.dummy = 0
@@ -307,21 +302,23 @@ object projectfo: tprojectfo
       2
       0
     )
-    anchors = [an_top, an_right]
     taborder = 3
+    bounds_x = 656
+    bounds_y = 68
+    bounds_cx = 16
+    bounds_cy = 30
+    anchors = [an_top, an_right]
     statfile = projectstat
     value = True
   end
   object ok: tbutton
+    taborder = 7
     bounds_x = 558
     bounds_y = 360
     bounds_cx = 50
     bounds_cy = 22
     anchors = [an_right, an_bottom]
-    taborder = 7
     state = [as_default, as_localdefault, as_localcaption]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = 'OK'
     modalresult = mr_ok
   end
@@ -332,10 +329,26 @@ object projectfo: tprojectfo
     bounds_cy = 22
     anchors = [an_right, an_bottom]
     state = [as_localcaption]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = 'Cancel'
     modalresult = mr_cancel
+  end
+  object destname: tstringedit
+    frame.caption = 'Destinatiation Basename (empty = Datafile name)'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      17
+      0
+      0
+    )
+    taborder = 9
+    bounds_x = 0
+    bounds_y = 31
+    bounds_cx = 683
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
+    statfile = projectstat
+    reffontheight = 14
   end
   object projectstat: tstatfile
     onstatupdate = projectstatonupdatestat
@@ -357,7 +370,6 @@ object projectfo: tprojectfo
     controller.historymaxcount = 0
     controller.captionopen = 'Open import file'
     controller.captionsave = 'Save export file'
-    dialogkind = fdk_none
     left = 240
     top = 56
   end

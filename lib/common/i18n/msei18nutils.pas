@@ -32,7 +32,7 @@ procedure unregisterresourcestrings(datapo: pointer); cdecl;
 implementation
 uses
  {$ifdef FPC}dynlibs,{$ifdef UNIX}dl,{$endif}{$endif}sysutils,mseclasses,
-                           mselist,msestrings,mseapplication,msesysintf;
+               mselist,msearrayutils,msestrings,mseapplication,msesysintf;
  
 type
  resourcestringinfoty = record
@@ -129,9 +129,11 @@ end;
 procedure registerresourcestrings(datapo: pointer); cdecl;
 {$ifdef FPC}
 var
- int1,int2: integer;
  list1: tresourcestringlist;
+{$ifdef internalresstrhandling}
+ int1,int2: integer;
  po1: presourcestringinfoty;
+{$endif}
 {$endif}
 begin
 {$ifdef FPC}
@@ -161,9 +163,11 @@ end;
 
 procedure unregisterresourcestrings(datapo: pointer); cdecl;
 var
- int1,int2: integer;
  list1: tresourcestringlist;
+{$ifdef internalresstrhandling}
+ int1,int2: integer;
  po1: presourcestringinfoty;
+{$endif}
 begin
  list1:= tresourcestringlist.create;
  try

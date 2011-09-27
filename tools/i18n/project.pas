@@ -20,8 +20,8 @@ unit project;
 interface
 uses
  mseforms,msewidgetgrid,msefiledialog,msestat,msestatfile,msegraphedits,
- msedataedits,
- msesimplewidgets,msesplitter,msegui,msestrings,msedbedit,msegrids,msetypes;
+ msedataedits,msesimplewidgets,msesplitter,msegui,msestrings,msedbedit,msegrids,
+ msetypes,mseedit,mseglob,mseguiglob,mseifiglob,msemenus;
 
 type
  tprojectfo = class(tmseform)
@@ -41,6 +41,7 @@ type
    ok: tbutton;
    cancel: tbutton;
    impexpencoding: tenumtypeedit;
+   destname: tstringedit;
    procedure projectstatonupdatestat(const sender: TObject; 
                       const filer: tstatfiler);
    procedure projectstatonafterreadstat(const sender: tobject);
@@ -116,7 +117,7 @@ end;
 
 procedure tprojectfo.childscaled(const sender: TObject);
 begin
- placeyorder(0,[0,2,0,0,4],[datafilename,makecommand,grid,splitter,grid2,ok],4);
+ placeyorder(0,[0,0,2,0,0,4],[datafilename,destname,makecommand,grid,splitter,grid2,ok],4);
  aligny(wam_center,[makecommand,makeon]);
  aligny(wam_center,[ok,cancel,impexpencoding]);
 end;

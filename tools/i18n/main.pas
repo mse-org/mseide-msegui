@@ -821,8 +821,17 @@ var
 // actdir: filenamety;
  dirbefore: filenamety;
  error: boolean;
+ basename: filenamety;
 
 begin
+// basename:= filenamebase(projectfo.projectstat.filename);
+ basename:= projectfo.destname.value;
+ if basename = '' then begin
+  basename:= filenamebase(projectfo.datafilename.value);
+ end;
+ if basename = '' then begin
+  basename:= filenamebase(projectfo.projectstat.filename);
+ end;
  commandstring:= expandmacros(projectfo.makecommand.value,getsyssettingsmacros);
  setlength(macroar,2);
  macroar[0].name:= 'LIBFILE';
@@ -841,7 +850,7 @@ begin
     node:= nil;
     afilename:= filepath(projectfo.dir[int1],msefileutils.filename(projectfo.filename[int2]));
     if issamefilename(afilename,filepath(projectfo.filename[int2])) then begin
-     addmessage(afilename+' overwrites it self.');
+     addmessage(afilename+' overwrites itself.');
      error:= true;
      break;
     end;
@@ -912,7 +921,7 @@ begin
    end;
    if (modulenames <> nil) or (resourcenames <> nil) then begin
     with projectfo do begin
-     macroar[0].value:= filenamebase(projectstat.filename)+'_'+lang[int1]+'.pas';
+     macroar[0].value:= basename+'_'+lang[int1]+'.pas';
      macroar[1].value:= filenamebase(macroar[0].value);
      createlanglib(dir[int1]+macroar[0].value,modulenames,resourcenames);
      if makeon.value then begin
