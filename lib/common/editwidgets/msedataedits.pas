@@ -47,7 +47,8 @@ type
  textchangeeventty = procedure(const sender: tcustomdataedit;
                                       const atext: msestring) of object;
  dataeditstatety = (des_edited,des_emptytext,des_grayed,des_isdb,des_dbnull,
-                    des_actualcursor,des_updating,des_valueread);
+                    des_actualcursor,des_updating,des_valueread,
+                    des_updatelayout,des_editing);
  dataeditstatesty = set of dataeditstatety;
 
  emptyoptionty = (eo_defaulttext); //use text of tfacecontroller

@@ -78,7 +78,7 @@ type
    grid: twidgetgrid;
    props: ttreeitemedit;
    tpopupmenu1: tpopupmenu;
-   values: tdropdownitemedit;
+   values: tmbdropdownitemedit;
    compedit: tbutton;
    procedure propsoncheckrowmove(const curindex: Integer; 
                   const newindex: Integer; var accept: Boolean);

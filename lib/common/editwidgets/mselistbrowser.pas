@@ -447,12 +447,13 @@ type
    fonupdaterowvalues: itemindexeventty;
    foncellevent: celleventty;
    factiverow: integer;
-   fediting: boolean;
+//   fediting: boolean;
    foncheckcanedit: itemcanediteventty;
    function getitemlist: titemeditlist;
    procedure setitemlist(const Value: titemeditlist);
    function getitems(const index: integer): tlistitem;
    procedure setitems(const index: integer; const Value: tlistitem);
+   function getediting: boolean;
    procedure setediting(const avalue: boolean);
   protected
    flayoutinfofocused: listitemlayoutinfoty;
@@ -512,7 +513,7 @@ type
                                          var info: celleventinfoty); override;
 
    function getoptionsedit: optionseditty; override;
-   property editing: boolean read fediting write setediting;
+   property editing: boolean read getediting write setediting;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2340,7 +2341,8 @@ end;
 
 constructor titemedit.create(aowner: tcomponent);
 begin
- fediting:= true;
+ include(fstate,des_editing);
+// fediting:= true;
  if fitemlist = nil then begin
   fitemlist:=  titemeditlist.create(iitemlist(self),self);
  end;
@@ -2375,7 +2377,7 @@ end;
 
 function titemedit.getlayoutinfo: plistitemlayoutinfoty;
 begin
- if ws1_painting in fwidgetstate1 then begin
+ if (ws1_painting in fwidgetstate1) or (des_updatelayout in fstate) then begin
   result:= @flayoutinfofocused;
  end
  else begin
@@ -2555,9 +2557,19 @@ begin
 end;
 
 procedure titemedit.clientrectchanged;
+var
+ bo1: boolean;
 begin
  updatelayout;
- inherited;
+ bo1:= des_updatelayout in fstate;
+ include(fstate,des_updatelayout); //for setupeditor
+ try
+  inherited;
+ finally
+  if not bo1 then begin
+   exclude(fstate,des_updatelayout);
+  end;
+ end;
 end;
 
 procedure titemedit.doitembuttonpress(var info: mouseeventinfoty);
@@ -2913,13 +2925,24 @@ begin
  end;
 end;
 }
+function titemedit.getediting: boolean;
+begin
+ result:= des_editing in fstate;
+end;
+
 procedure titemedit.setediting(const avalue: boolean);
 begin
- if fediting <> avalue then begin
+ if editing <> avalue then begin
   if avalue or (oe_locate in foptionsedit) then begin
-   fediting:= avalue;
+   if avalue then begin
+    include(fstate,des_editing);
+   end
+   else begin
+    exclude(fstate,des_editing);
+   end;
+//   fediting:= avalue;
    setupeditor;
-   if fediting then begin
+   if editing then begin
 //    ffiltertext:= '';
     feditor.selectall;
    end
@@ -2931,7 +2954,8 @@ begin
    end;
   end
   else begin
-   fediting:= false;
+   exclude(fstate,des_editing);
+//   fediting:= false;
   end;
   cursorchanged;
  end;

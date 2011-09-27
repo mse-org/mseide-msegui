@@ -13499,12 +13499,16 @@ end;
 procedure tcustomgrid.endupdate(const nosort: boolean = false);
 var
  int1,int2: integer;
+{$ifdef mse_with_ifi}
  bo1: boolean;
+{$endif}
 begin
  dec(fupdating);
  if fupdating = 0 then begin
+{$ifdef mse_with_ifi}
   bo1:= fstate * 
          [gs_rowcountinvalid,gs_rowdatachanged,gs_selectionchanged] <> [];
+{$endif}
   if gs_rowcountinvalid in fstate then begin
    int2:= bigint;
    for int1:= 0 to datacols.count - 1 do begin
