@@ -97,13 +97,8 @@ var
 begin
  flist.parse(filename.value);
  with treeedit.itemlist do begin
-  beginupdate;   
-  try
-   clear;
-   add(flist.getnodes(flist.fapplication));
-  finally
-   endupdate;
-  end;
+  clear;
+  add(flist.getnodes(flist.fapplication));
  end;
  grid.fixrows[-1].captions[0].caption:= flist.fapplication;
  str1:= start.value;
