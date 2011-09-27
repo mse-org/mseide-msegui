@@ -11,19 +11,9 @@ unit msesysintf1;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msesystypes,mselibc;
+ msesystypes,mselibc,msesysbindings;
 const
  unidatetimeoffset = -25569;
-
-{$include ..\msesysintf1.inc}
- 
-function unigettimestamp(timeoutusec: integer): timespec;
-
-implementation
-
-uses
- msesysbindings,dateutils;
-
 type
  linuxmutexty = record
   case integer of
@@ -49,6 +39,15 @@ type
    0: (d: linuxsemdty;);
    1: (_bufferspace: semty;);
  end;
+
+{$include ..\msesysintf1.inc}
+ 
+function unigettimestamp(timeoutusec: integer): timespec;
+
+implementation
+
+uses
+ dateutils;
 
 {$ifdef mse_debugmutex}
 var

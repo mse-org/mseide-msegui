@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,12 +12,13 @@ unit msenoguiintf;
 
 interface
 uses
- msesys;
+ msesystypes;
+ 
 {$include ../msenoguiintf.inc}
 
 implementation
 uses
- mselibc,mseevent,msesysintf,mseapplication,msenogui;
+ mselibc,mseevent,msesysintf1,mseapplication,msenogui;
 type
  tapplication1 = class(tnoguiapplication);
 var
