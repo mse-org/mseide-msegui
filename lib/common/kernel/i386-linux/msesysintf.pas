@@ -21,7 +21,7 @@ interface
 uses
  msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads,cwstring,{$endif}msetypes,
  mselibc,
- msestrings,msestream,msesysbindings;
+ msestrings,msestream;
  
 var
  thread1: threadty;

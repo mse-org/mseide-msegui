@@ -610,8 +610,7 @@ implementation
 uses
  sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,
  msebits,msesysintf,mseguiintf,msearrayutils,msesys
-        {$ifdef UNIX},mselibc,
-        msesysbindings{$else},windows{$endif};
+        {$ifdef UNIX},mselibc{$else},windows{$endif};
 
 const                                      
  stopreasons: array[stopreasonty] of string = 

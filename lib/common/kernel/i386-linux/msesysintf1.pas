@@ -11,7 +11,7 @@ unit msesysintf1;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msesystypes,mselibc,msesysbindings;
+ msesystypes,mselibc;
 const
  unidatetimeoffset = -25569;
 type

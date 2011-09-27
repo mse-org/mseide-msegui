@@ -428,7 +428,7 @@ function asciitobin(const chars: string): string;
 
 implementation
 uses
- {$ifdef UNIX} {kernelioctl,}msesysbindings, {$endif}
+// {$ifdef UNIX} {kernelioctl,}msesysbindings, {$endif}
  sysutils,mseapplication,msesysintf1,msesysintf,msesys,msesysutils;
 
 const
