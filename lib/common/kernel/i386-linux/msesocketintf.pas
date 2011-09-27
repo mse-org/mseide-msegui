@@ -12,12 +12,13 @@ unit msesocketintf;
 
 interface
 uses
- msesys;
+ msesystypes,msesys;
+ 
 {$include ..\msesocketintf}
 
 implementation
 uses
- mselibc,msefileutils,msesysintf,msesysutils,sysutils;
+ mselibc,msefileutils,msesysintf1,msesysintf,msesysutils,sysutils;
  
 type
  datarecty = record

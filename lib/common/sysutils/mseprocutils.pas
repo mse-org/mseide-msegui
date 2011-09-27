@@ -166,7 +166,7 @@ type
 
 implementation
 uses 
- msesysintf,msestrings,mseprocmonitor,msearrayutils;
+ msesysintf1,msesysintf,msestrings,mseprocmonitor,msearrayutils;
 
 function getpid: procidty;
 begin

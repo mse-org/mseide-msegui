@@ -687,6 +687,8 @@ begin
   dstripeco:= int1;
   dec(int1);
   pendingmovecount:= 0;
+  moves:= nil; //compiler warning
+  moved:= nil; //compiler warning
   while int1 <> 0 do begin             //pack similar stripes
    psa1:= po1; //backup last stripe
    while (int1 <> 0) and 

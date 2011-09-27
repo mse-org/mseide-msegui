@@ -123,7 +123,7 @@ function geticelib: boolean;
 
 implementation
 uses
- msesys,msesonames;
+ msesys,msesonames,msedynload;
  
 function geticelib: boolean;
 begin

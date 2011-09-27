@@ -8,6 +8,10 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 
+function sys_getlasterror: integer;
+procedure sys_setlasterror(const avalue: integer);
+function sys_geterrortext(aerror: integer): string;
+
 function sys_mutexcreate(out mutex: mutexty): syserrorty;
 function sys_mutexdestroy(var mutex: mutexty): syserrorty;
 function sys_mutexlock(var mutex: mutexty): syserrorty;

@@ -609,7 +609,7 @@ implementation
 
 uses
  sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,
- msebits,msesysintf,mseguiintf,msearrayutils
+ msebits,msesysintf,mseguiintf,msearrayutils,msesys
         {$ifdef UNIX},mselibc,
         msesysbindings{$else},windows{$endif};
 

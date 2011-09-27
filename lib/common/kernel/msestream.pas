@@ -330,7 +330,8 @@ type
 implementation
 
 uses
- msefileutils,msebits,{msegui,}mseformatstr,sysconst,msesysutils,msesysintf,
+ msefileutils,msebits,{msegui,}mseformatstr,sysconst,msesysutils,
+ msesysintf1,msesysintf,
  msedatalist,mseclasses,mseapplication,msearrayutils,
         {$ifdef UNIX} mselibc,
         {$else} windows,

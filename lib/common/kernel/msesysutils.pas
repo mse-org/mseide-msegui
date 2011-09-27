@@ -75,7 +75,7 @@ uses
 {$else}
  mselibc,
 {$endif}
- msesysintf,msestrings,mseformatstr,msetypes,msesys;
+ msesysintf1,msesysintf,msestrings,mseformatstr,msetypes,msesys;
 
 function createguidstring: string;
 var
@@ -90,7 +90,8 @@ end;
 constructor eoserror.create(const errno: integer; const leadingtext: string = '');
 begin
  error:= errno;
- inherited create(leadingtext + 'OSError ' + inttostr(error) + ': ' + sys_geterrortext(error));
+ inherited create(leadingtext + 'OSError ' + inttostr(error) + ': ' + 
+                                                   sys_geterrortext(error));
 end;
 
 constructor eoserror.create(const leadingtext: string);

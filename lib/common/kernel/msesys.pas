@@ -223,7 +223,8 @@ procedure initdefaultformatsettings;
              //initialization order is wrong, FPC bug?
 implementation
 uses
- Classes,{msestreaming,}msesysintf,msearrayutils,sysutils,mseglob,msesysutils;
+ Classes,{msestreaming,}msesysintf1,msesysintf,msearrayutils,sysutils,
+ mseglob,msesysutils;
 {$ifdef FPC}
  {$ifdef MSWINDOWS}
 Procedure CatchUnhandledException (Obj : TObject; Addr: Pointer;

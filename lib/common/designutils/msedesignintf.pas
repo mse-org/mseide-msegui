@@ -221,7 +221,7 @@ type
    function getrecordsize: integer; virtual;
   public
    constructor create;
-   procedure change; virtual;
+   procedure change; override;
    procedure beginupdate;
    procedure endupdate;
    procedure decupdate;

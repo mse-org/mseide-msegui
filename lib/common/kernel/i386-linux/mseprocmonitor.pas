@@ -11,12 +11,13 @@ unit mseprocmonitor;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- msesys,mseglob;
+ msesystypes,mseglob;
  
  {$include ../mseprocmonitor.inc}
 implementation
 uses
- mseapplication,msedatalist,mselibc;
+ mseapplication,msedatalist,mselibc,msearrayutils;
+ 
 type
  procinfoty = record
   prochandle: prochandlety;

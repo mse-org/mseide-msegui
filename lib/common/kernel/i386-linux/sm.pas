@@ -170,7 +170,7 @@ function getsmlib: boolean;
               
 implementation
 uses
- msesys,msesonames;
+ msesys,msesonames,msedynload;
 
 function getsmlib: boolean;
 begin

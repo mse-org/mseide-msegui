@@ -163,7 +163,7 @@ var
 
 implementation
 uses
- msesys,msesonames,sysutils,msefcfontselect;
+ msesys,msesonames,sysutils,msefcfontselect,msedynload;
 
 
 (*

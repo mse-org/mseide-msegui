@@ -16,7 +16,7 @@ interface
 
 uses
  {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,mseapplication,
- msegraphutils,mseevent,msepointer,mseguiglob,msesys,{msestockobjects,}
+ msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
  msestrings,xft,xrender{$ifdef mse_debugwindowfocus},mseformatstr{$endif};
@@ -458,7 +458,8 @@ implementation
 
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist
- {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi
+ {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
+ msearrayutils,msesys,msesysintf1
  {$ifdef mse_debug},mseformatstr{$endif};
 
  
