@@ -1,0 +1,181 @@
+object mainfo: tmainfo
+  visible = False
+  bounds_x = 188
+  bounds_y = 220
+  bounds_cx = 403
+  bounds_cy = 280
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
+  container.bounds = (
+    0
+    0
+    403
+    280
+  )
+  statfile = tstatfile1
+  caption = 'MSEunitdep'
+  moduleclassname = 'tmainform'
+  object filename: tfilenameedit
+    frame.button.color = -2147483646
+    frame.button.imagenr = 17
+    hint = 'FPC -vu compiler message file'
+    bounds_x = 1
+    bounds_y = 8
+    bounds_cx = 347
+    anchors = [an_left, an_top, an_right]
+    statfile = tstatfile1
+    textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
+    ondataentered = filenamedatentexe
+    controller.filterlist.data = (
+      (
+        'textfiles'
+        '*txt'
+      )
+    )
+    controller.options = [fdo_checkexist, fdo_savelastdir]
+    reffontheight = 14
+  end
+  object tbutton1: tbutton
+    taborder = 1
+    bounds_x = 352
+    bounds_y = 8
+    bounds_cx = 50
+    bounds_cy = 19
+    anchors = [an_top, an_right]
+    state = [as_localcaption, as_localonexecute]
+    caption = '&scan'
+    onexecute = scanexe
+  end
+  object grid: twidgetgrid
+    taborder = 2
+    bounds_x = 1
+    bounds_y = 32
+    bounds_cx = 400
+    bounds_cy = 186
+    anchors = [an_left, an_top, an_right, an_bottom]
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+        captions.count = 1
+        captions.items = <        
+          item
+          end>
+      end>
+    datacols.count = 1
+    datacols.items = <    
+      item
+        width = 395
+        options = [co_readonly, co_fill, co_savevalue, co_savestate, co_mousescrollrow]
+        widgetname = 'treeedit'
+      end>
+    datarowlinewidth = 0
+    datarowheight = 16
+    reffontheight = 14
+    object treeedit: ttreeitemedit
+      optionsskin = [osk_framebuttononly]
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      taborder = 1
+      visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 395
+      bounds_cy = 16
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_locate, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+      options = [teo_treecolnavig]
+      reffontheight = 14
+    end
+  end
+  object start: tdropdownlistedit
+    frame.caption = 'Start Unit'
+    frame.button.color = -2147483646
+    frame.outerframe = (
+      0
+      17
+      0
+      0
+    )
+    taborder = 3
+    bounds_x = 1
+    bounds_y = 218
+    bounds_cx = 198
+    bounds_cy = 37
+    anchors = [an_left, an_bottom]
+    statfile = tstatfile1
+    ondataentered = pathdatentexe
+    ifilink = dropdownunits
+    dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_cliphint]
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+      end>
+    reffontheight = 14
+  end
+  object dest: tdropdownlistedit
+    frame.caption = 'Dest. Unit'
+    frame.button.color = -2147483646
+    frame.outerframe = (
+      0
+      17
+      0
+      0
+    )
+    taborder = 4
+    bounds_x = 202
+    bounds_y = 218
+    bounds_cx = 201
+    bounds_cy = 37
+    anchors = [an_left, an_right, an_bottom]
+    statfile = tstatfile1
+    ondataentered = pathdatentexe
+    ifilink = dropdownunits
+    dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_cliphint]
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+      end>
+    reffontheight = 14
+  end
+  object pathdisp: tstringdisp
+    frame.dummy = 0
+    taborder = 5
+    bounds_x = 1
+    bounds_y = 259
+    bounds_cx = 401
+    bounds_cy = 18
+    anchors = [an_left, an_right, an_bottom]
+    options = [dwo_hintclippedtext]
+    reffontheight = 14
+  end
+  object tsplitter1: tsplitter
+    optionswidget = [ow_destroywidgets, ow_autoscale]
+    color = -1879048189
+    taborder = 6
+    visible = False
+    bounds_x = 199
+    bounds_y = 232
+    bounds_cx = 3
+    bounds_cy = 20
+    options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
+    linkleft = start
+    linkright = dest
+  end
+  object tstatfile1: tstatfile
+    filename = 'mseunitdep.sta'
+    filedir = '"^/.mseide"'
+    options = [sfo_createpath, sfo_transaction, sfo_activatorread, sfo_activatorwrite]
+    left = 16
+    top = 8
+  end
+  object dropdownunits: tifidropdownlistlinkcomp
+    controller.optionsvalue = [vco_nosync]
+    controller.dropdown.cols.count = 1
+    controller.dropdown.cols.items = <    
+      item
+      end>
+    left = 32
+    top = 72
+  end
+end

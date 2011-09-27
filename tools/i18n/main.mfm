@@ -366,6 +366,7 @@ object mainfo: tmainfo
   object mainstatfile: tstatfile
     filename = 'msei18n.sta'
     filedir = '"^/.mseide"'
+    options = [sfo_createpath, sfo_transaction, sfo_activatorread, sfo_activatorwrite]
     onstatupdate = mainupdatestat
     left = 16
     top = 96
