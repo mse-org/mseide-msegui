@@ -16,7 +16,8 @@ interface
 uses
  mseglob,mseguiglob,msegui,mseforms,Classes,mseclasses,msewidgets,msegrids,
  mselistbrowser,mseedit,msesimplewidgets,msedataedits,msedialog,msetypes,
- msestrings,msesys,msedispwidgets,msedatalist,msestat,msestatfile,msebitmap,
+ msestrings,msesystypes,msesys,msedispwidgets,msedatalist,msestat,
+ msestatfile,msebitmap,
  msedatanodes,msefileutils,msedropdownlist,mseevent,msegraphedits,mseeditglob,
  msesplitter,msemenus,msegridsglob,msegraphics,msegraphutils;
 
@@ -441,7 +442,7 @@ implementation
 uses
  msefiledialog_mfm,sysutils,msebits,
  msestringenter,msedirtree,msefiledialogres,msekeyboard,
- msestockobjects,msesysintf;
+ msestockobjects,msesysintf,msearrayutils;
 
 procedure getfileicon(const info: fileinfoty; var imagelist: timagelist;
                       out imagenr: integer);

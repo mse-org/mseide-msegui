@@ -14,7 +14,7 @@ unit msedesignintf;
 interface
 uses
  classes,msegraphutils,mselist,sysutils,typinfo,msebitmap,
- msetypes,msestrings,msegraphics,msegui,mseglob,
+ msetypes,msestrings,msegraphics,msegui,mseglob,msearrayutils,
  mseclasses,mseforms,msestat,mserichstring,msecomptree;
 const
  defaultmoduleclassname = 'tmseform';

@@ -6,7 +6,8 @@ uses
  msegraphics,msegraphutils,mseevent,mseclasses,mseforms,msestatfile,
  msesimplewidgets,msewidgets,msedataedits,mseedit,msegrids,msestrings,msetypes,
  msewidgetgrid,msegraphedits,msesplitter,mseeditglob,msetextedit,msedispwidgets,
- msebitmap,msedatanodes,msefiledialog,mselistbrowser,msescrollbar,msesys;
+ msebitmap,msedatanodes,msefiledialog,mselistbrowser,msescrollbar,msesystypes,
+ msesys;
 type
  ttemplateeditorfo = class(tmseform)
    tstatfile1: tstatfile;
@@ -51,7 +52,7 @@ type
 implementation
 uses
  templateeditor_mfm,msecodetemplates,projectoptionsform,sysutils,msefileutils,
- msedatalist,msesysintf;
+ msedatalist,msesysintf,msearrayutils;
  
 constructor ttemplateeditorfo.create(const aindex: integer);
 begin

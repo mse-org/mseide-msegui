@@ -117,7 +117,7 @@ type
 
 implementation
 uses
- msedatalist,rtlconsts,msesysintf,mselist
+ msedatalist,rtlconsts,msesysintf1,msesysintf,mselist,msearrayutils
 {$ifdef mswindows}
  ,windows
 {$else}

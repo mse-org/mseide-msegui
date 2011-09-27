@@ -81,7 +81,7 @@ var
 implementation
 
 uses
- reportdesigner_mfm,msedatalist,msegraphics,msewidgets,msereal;
+ reportdesigner_mfm,msearrayutils,msegraphics,msewidgets,msereal;
 type
  tcustomreport1 = class(tcustomreport);
  

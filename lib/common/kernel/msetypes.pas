@@ -115,6 +115,7 @@ type
  pcardinalarty = ^cardinalarty;
  pointerarty = array of pointer;
  ppointerarty = ^pointerarty;
+ pointerararty = array of pointerarty;
  objectarty = array of tobject;
  pobjectarty = ^objectarty;
  classarty = array of tclass;
@@ -251,7 +252,7 @@ procedure splitcomplexar(const acomplex: complexarty; out re,im: realarty);
 
 implementation
 uses
- msedatalist;
+ msearrayutils;
 (*
 const
 {$ifdef FPC_DOUBLE_HILO_SWAPPED}

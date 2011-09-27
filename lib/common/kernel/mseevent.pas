@@ -13,7 +13,7 @@ unit mseevent;
 
 interface
 uses
- mselist,mseglob,msegraphutils,msekeyboard,msetypes,msestrings,msesys;
+ mselist,mseglob,msegraphutils,msekeyboard,msetypes,msestrings,msesystypes;
 
 const
 // eta_timer = 1; //tags for userevents
@@ -144,7 +144,7 @@ type
 
 implementation
 uses
- msesysintf,mseapplication;
+ msesysintf1,mseapplication;
 type
  tapplication1 = class(tcustomapplication);
  

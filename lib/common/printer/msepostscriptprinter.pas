@@ -203,7 +203,7 @@ function pspoint(const apoint: pointty): pspointty;
 implementation
 uses
  msegui,msesys,sysutils,msedatalist,mseformatstr,mseunicodeps,
- mseguiintf,msebits,msefloattostr,msefont;
+ mseguiintf,msebits,msefloattostr,msefont,msearrayutils;
 type
  tsimplebitmap1 = class(tsimplebitmap); 
  tcanvas1 = class(tcanvas);

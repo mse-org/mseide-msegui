@@ -151,7 +151,7 @@ uses
  dbconst,db,mseibconnection,
  msepqconnection,mseodbcconn,{sqldb,}
  mselookupbuffer,msedbf,msesdfdata,msememds,mselocaldataset,
- msedatalist,msedbfieldeditor,sysutils,msetexteditor,
+ msearrayutils,msedbfieldeditor,sysutils,msetexteditor,
  msedbdispwidgets,msedbgraphics,regdb_bmp,msedbdialog,msegrids,
  msedbcalendardatetimeedit,
  regwidgets,msebufdataset,msedbevents,msesqlite3conn,msqldb,msemysqlconn,

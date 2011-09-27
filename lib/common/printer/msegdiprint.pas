@@ -114,8 +114,7 @@ function defaultprinter: msestring;
  
 implementation
 uses
- mseguiintf,msesys,sysutils,
- msesysintf;
+ mseguiintf,msedynload,sysutils,msesysintf1,msesys;
 var
  hasgdiprint: boolean;
  

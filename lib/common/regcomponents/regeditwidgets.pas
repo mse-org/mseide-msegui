@@ -28,7 +28,7 @@ uses
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,{msedialog,}msestrings,
  regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit,msebitmap,mseglob,
  msestream,mserealsumedit,msedatalist,msegui,msegrids,msesumlist,mseclasses,
- sysutils,regglob;
+ sysutils,regglob,msearrayutils;
 
 type
  tdropdowncolpropertyeditor = class(tarraypropertyeditor)

@@ -15,7 +15,7 @@ unit mseprocutils;
 interface
 uses
  {$ifdef mswindows}windows{$else}mselibc{$endif},
- msetypes,msestream,msepipestream,sysutils,msesysutils,msesys;
+ msetypes,msestream,msepipestream,sysutils,msesysutils,msesystypes,msesys;
  
 type
  pipedescriptorty = record
@@ -166,7 +166,7 @@ type
 
 implementation
 uses 
- msesysintf,msestrings,msedatalist,mseprocmonitor;
+ msesysintf,msestrings,mseprocmonitor,msearrayutils;
 
 function getpid: procidty;
 begin

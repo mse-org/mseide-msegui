@@ -164,7 +164,7 @@ uses
  sysutils,msewidgets,finddialogform,replacedialogform,msekeyboard,
  sourceupdate,msefiledialog,mseintegerenter,msedesigner,
  projectoptionsform,msesys,make,actionsmodule,msegraphics,sourcehintform,
- mseedit,msedrawtext,msebits,msedatalist,msestream,msedesignintf,
+ mseedit,msedrawtext,msebits,msearrayutils,msestream,msedesignintf,
  msesysutils,msedesignparser,msesyntaxpainter,msesysenv,msecodetemplates;
 
 const

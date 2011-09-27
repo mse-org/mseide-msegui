@@ -484,7 +484,7 @@ procedure twriter_writemsestring(awriter: twriter; const avalue: msestring);
 
 implementation
 uses
- sysutils,msedatalist,msesysintf;
+ sysutils,msearrayutils{,msesysintf};
 type
  tmemorystream1 = class(tmemorystream);
 
@@ -2815,6 +2815,7 @@ begin
 end;
 
 function msePosEx(const SubStr, S: msestring; Offset: longword = 1): Integer;
+//todo: optimize
 var
   I,X: Integer;
   Len, LenSubStr: Integer;
@@ -4144,16 +4145,17 @@ end;
 function msecomparestr(const S1, S2: msestring): Integer;
 begin
 {$ifdef FPC}
- {$ifdef mswindows}
- if iswin95 then begin
-  result:= comparestr(s1,s2);
- end
- else begin
-  result:= unicodecomparestr(s1,s2); 
- end;
- {$else}
   result:= unicodecomparestr(s1,s2);
- {$endif}
+// {$ifdef mswindows}
+// if iswin95 then begin
+//  result:= comparestr(s1,s2);
+// end
+// else begin
+//  result:= unicodecomparestr(s1,s2); 
+// end;
+// {$else}
+//  result:= unicodecomparestr(s1,s2);
+// {$endif}
 {$else}
  result:= widecomparestr(s1,s2);
 {$endif}
@@ -4162,16 +4164,16 @@ end;
 function msecomparetext(const S1, S2: msestring): Integer;
 begin
 {$ifdef FPC}
- {$ifdef mswindows}
- if iswin95 then begin
-  result:= comparetext(s1,s2);
- end
- else begin
+// {$ifdef mswindows}
+// if iswin95 then begin
+//  result:= comparetext(s1,s2);
+// end
+// else begin
+//  result:= unicodecomparetext(s1,s2);
+// end;
+// {$else}
   result:= unicodecomparetext(s1,s2);
- end;
- {$else}
-  result:= unicodecomparetext(s1,s2);
- {$endif}
+// {$endif}
 {$else}
  result:= widecomparetext(s1,s2);
 {$endif}
@@ -4260,16 +4262,16 @@ end;
 function mselowercase(const s: msestring): msestring;
 begin
 {$ifdef FPC}
- {$ifdef mswindows}
- if iswin95 then begin
-  result:= lowercase(s);
- end
- else begin
-  result:= unicodelowercase(s);    
- end;
- {$else}
+// {$ifdef mswindows}
+// if iswin95 then begin
+//  result:= lowercase(s);
+// end
+// else begin
+//  result:= unicodelowercase(s);    
+// end;
+// {$else}
  result:= unicodelowercase(s);    
- {$endif}
+// {$endif}
 {$else}
  result:= widelowercase(s);    
 {$endif}
@@ -4278,16 +4280,16 @@ end;
 function mseuppercase(const s: msestring): msestring;
 begin
 {$ifdef FPC}
- {$ifdef mswindows}
- if iswin95 then begin
-  result:= ansiuppercase(s);
- end
- else begin
-  result:= unicodeuppercase(s);    
- end;
- {$else}
+// {$ifdef mswindows}
+// if iswin95 then begin
+//  result:= ansiuppercase(s);
+// end
+// else begin
+//  result:= unicodeuppercase(s);    
+// end;
+// {$else}
  result:= unicodeuppercase(s);    
- {$endif}
+// {$endif}
 {$else}
  result:= wideuppercase(s);    
 {$endif}

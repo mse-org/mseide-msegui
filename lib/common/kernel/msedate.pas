@@ -19,7 +19,7 @@ function localtimetoutc(const value: tdatetime): tdatetime;
 
 implementation
 uses
- msesysintf;
+ msesysintf1;
  
 function utctolocaltime(const value: tdatetime): tdatetime;
 begin

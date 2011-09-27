@@ -800,7 +800,7 @@ procedure setskinhandler(const avalue: tskinhandler);
 
 implementation
 uses
- msetabsglob,sysutils,mseapplication,msedatalist,msestockobjects,msefont;
+ msetabsglob,sysutils,mseapplication,msearrayutils,msestockobjects,msefont;
  
 type
  twidget1 = class(twidget);

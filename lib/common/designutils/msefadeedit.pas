@@ -108,7 +108,7 @@ type
 implementation
 
 uses
- msefadeedit_mfm,msedatalist;
+ msefadeedit_mfm,msedatalist,msearrayutils;
 type
  tpropertyeditor1 = class(tpropertyeditor);
  

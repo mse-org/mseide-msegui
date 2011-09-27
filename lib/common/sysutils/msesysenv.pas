@@ -15,7 +15,7 @@ unit msesysenv;
 interface
 uses
  Classes,msestat,msestatfile,mseclasses,msetypes,msestrings,msedatalist,sysutils,
- mselist;
+ mselist,msearrayutils;
 const
  commandlineparchar = '-';
  defaulterrorcode = 1;

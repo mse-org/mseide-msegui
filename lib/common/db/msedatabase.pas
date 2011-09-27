@@ -296,7 +296,7 @@ procedure checkactive(const active: boolean; const aname: ansistring);
                  
 implementation
 uses
- dbconst,msefileutils,msedatalist,msebits;
+ dbconst,msefileutils,msearrayutils,msebits;
  
 procedure checkdatabase(const aname: ansistring; const adatabase: tmdatabase);
 begin

@@ -13,20 +13,9 @@ unit msesys;
 
 interface
 uses
- {$ifdef mswindows}windows,{$endif}mseerr,msetypes,msestrings
+ {$ifdef mswindows}windows,{$endif}mseerr,msetypes,msestrings,msesystypes
   {$ifdef FPC},dynlibs{$endif};
 
-type
- {$ifndef FPC}
- tlibhandle = thandle;
- {$endif}
- threadty = ptruint;
- procidty = ptrint;
- procidarty = array of procidty; //same item size as winidarty!
- prochandlety = type ptrint;
-const
- invalidprocid = -1;
- invalidprochandle = -1;
 type
  internalthreadprocty = function(): integer of object;
 
@@ -42,11 +31,6 @@ type
   stacksize: ptruint;
   platformdata: array[0..3] of pointer;
  end;
-
- mutexty = array[0..9] of pointer;
- semty = array[0..7] of pointer;
- psemty = ^semty;
- condty = array[0..31] of pointer;
  
  socketkindty = (sok_local,sok_inet,sok_inet6);
  socketshutdownkindty = (ssk_rx,ssk_tx,ssk_both);
@@ -62,8 +46,6 @@ type
   platformdata: array[0..32] of longword;
  end;
 
-const
- invalidfilehandle = -1;
 type
  fileopenmodety = (fm_read,fm_write,fm_readwrite,fm_create,fm_append);
  fileaccessmodety = (fa_denywrite,fa_denyread);
@@ -136,13 +118,6 @@ type
   dirinfo: dirstreaminfoty;
   platformdata: dirstreampty;
  end;
-
- syserrorty = (sye_ok,sye_lasterror,sye_extendederror,sye_busy,sye_dirstream,
-                sye_network,
-                sye_thread,sye_mutex,sye_semaphore,sye_cond,sye_timeout,
-                sye_copyfile,sye_createdir,sye_noconsole,sye_notimplemented,
-                sye_sockaddr,sye_socket,sye_isdir
-               );
 
  esys = class(eerror)
   private
@@ -226,28 +201,6 @@ procedure deletecommandlineargument(const index: integer);
 
 function nowutc: tdatetime;
 
-function loadlib(const libnames: array of filenamety; out libname: filenamety;
-                        const errormessage: msestring = ''): tlibhandle;
-type
- funcinfoty = record
-               n: string;      //name
-               d: ppointer;    //destination
-              end;
-              
-function getprocaddresses(const lib: tlibhandle;
-                       const procedures: array of funcinfoty;
-                       const noexception: boolean = false): boolean; overload;
-function getprocaddresses(const lib: tlibhandle; const anames: array of string;
-               const adest: array of ppointer;
-               const noexception: boolean = false): boolean; overload;
-function getprocaddresses(const libnames: array of filenamety; 
-                             const anames: array of string; 
-                             const adest: array of ppointer;
-                             const noexception: boolean = false): tlibhandle; overload;
-function checkprocaddresses(const libnames: array of filenamety; 
-                             const anames: array of string; 
-                             const adest: array of ppointer): boolean;
-function quotelibnames(const libnames: array of filenamety): msestring;
 
 {$ifdef FPC}
 function getexceptiontext(obj: tobject; addr: pointer; framecount: longint;
@@ -270,7 +223,7 @@ procedure initdefaultformatsettings;
              //initialization order is wrong, FPC bug?
 implementation
 uses
- Classes,msestreaming,msesysintf,msedatalist,sysutils,mseglob,msesysutils;
+ Classes,{msestreaming,}msesysintf,msearrayutils,sysutils,mseglob,msesysutils;
 {$ifdef FPC}
  {$ifdef MSWINDOWS}
 Procedure CatchUnhandledException (Obj : TObject; Addr: Pointer;
@@ -328,126 +281,6 @@ begin
 end;
  {$endif}
 {$endif}
-
-function getprocaddresses(const lib: tlibhandle;
-                          const procedures: array of funcinfoty;
-                          const noexception: boolean = false): boolean; overload;
-var
- int1: integer;
-begin
- result:= true;
- for int1:= 0 to high(procedures) do begin
-  with procedures[int1] do begin
-  {$ifdef FPC}
-   d^:= getprocedureaddress(lib,n);
-  {$else}
-   d^:= getprocaddress(lib,pansichar(n));
-  {$endif}
-   if (d^ = nil) then begin
-    result:= false;
-    if not noexception then begin
-     raise exception.create('Function "'+n+'" not found.');
-    end;
-   end;
-  end;
- end;
-end;
-
-function getprocaddresses(const lib: tlibhandle; const anames: array of string; 
-             const adest: array of ppointer;
-             const noexception: boolean = false): boolean;
-var
- int1: integer;
-begin
- if high(anames) <> high(adest) then begin
-  raise exception.create('Invalid parameter.');
- end;
- result:= true;
- for int1:= 0 to high(anames) do begin
-// {$ifdef FPC}
-//  adest[int1]^:= getprocedureaddress(lib,anames[int1]);
-//  {$else}
-  adest[int1]^:= getprocaddress(lib,pansichar(anames[int1]));
-//  {$endif}
-  if (adest[int1]^ = nil) then begin
-   result:= false;
-   if not noexception then begin
-    raise exception.create('Function "'+anames[int1]+'" not found.');
-   end;
-  end;
- end;
-end;
-
-function loadlib(const libnames: array of filenamety; out libname: filenamety; 
-                                const errormessage: msestring = ''): tlibhandle;
-var
- int1: integer;
-begin
- result:= 0;
- libname:= '';
- for int1:= 0 to high(libnames) do begin
- {$ifdef FPC}
-  result:= loadlibrary(libnames[int1]);
- {$else}
-  result:= loadlibrary(pansichar(string(libnames[int1])));
- {$endif}
-  if result <> 0 then begin
-   libname:= libnames[int1];
-   break;
-  end;
- end;
- if result = 0 then begin
-  raise exception.create(errormessage+
-                   'Library '+quotelibnames(libnames)+' not found.');
- end;
-end;
-
-function getprocaddresses(const libnames: array of filenamety;
-                 const anames: array of string; const adest: array of ppointer;
-                 const noexception: boolean = false): tlibhandle; overload;
-var
- mstr1: filenamety;
-begin
- result:= loadlib(libnames,mstr1);
- getprocaddresses(result,anames,adest,noexception);
-end;
-
-function checkprocaddresses(const libnames: array of filenamety; 
-                             const anames: array of string; 
-                             const adest: array of ppointer): boolean;
-var
- int1: integer;
-begin
- for int1:= 0 to high(adest) do begin
-  adest[int1]^:= nil;
- end;
- result:= true;
- try
-  getprocaddresses(libnames,anames,adest,true);
- except
-  result:= false;
-  exit;
- end;
- for int1:= 0 to high(adest) do begin
-  if adest[int1]^ = nil then begin
-   result:= false;
-   break;
-  end;
- end;
-end;
-
-function quotelibnames(const libnames: array of filenamety): msestring;
-var 
- int1: integer;
-begin
- result:= '';
- for int1:= 0 to high(libnames) do begin
-  result:= result+'"'+libnames[int1]+'",';
- end;  
- if length(result) > 0 then begin
-  setlength(result,length(result)-1);
- end;
-end;
 
 const
  errortexts: array[syserrorty] of string =

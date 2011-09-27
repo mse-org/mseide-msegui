@@ -169,7 +169,7 @@ implementation
 uses
  sourceform_mfm,msefileutils,sysutils,mseformatstr,
  projectoptionsform,main,mseeditglob,watchform,msesys,msewidgets,msedesigner,
- selecteditpageform,sourceupdate,pascaldesignparser,mseclasses,msedatalist,
+ selecteditpageform,sourceupdate,pascaldesignparser,mseclasses,msearrayutils,
  msebits,msesysutils;
 
 type

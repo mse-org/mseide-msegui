@@ -562,7 +562,7 @@ type
 
 implementation
 uses
- msedatalist,sysutils,msebits,msetabs,mseguiintf,mseforms,msestream;
+ msearrayutils,sysutils,msebits,msetabs,mseguiintf,mseforms,msestream;
 
 type
  twidget1 = class(twidget);

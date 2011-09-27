@@ -633,7 +633,7 @@ function makexseriesdata(const value: real; const index: integer): xseriesdataty
 
 implementation
 uses
- sysutils,math,msebits,rtlconsts,msestockobjects;
+ sysutils,math,msebits,rtlconsts,msestockobjects,msearrayutils;
 
 type
  tcustomdialcontroller1 = class(tcustomdialcontroller);

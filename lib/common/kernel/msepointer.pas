@@ -128,7 +128,7 @@ function adjustsizingrect(const arect: rectty; const kind: sizingkindty;
 
 implementation
 uses
- mseguiintf;
+ mseguiintf,msebitmap;
 
 function calcsizingkind(const apos: pointty; const arect: rectty;
                 const margin: integer = defaultsizingmargin): sizingkindty;
@@ -317,8 +317,8 @@ constructor tcaret.create{(out intf: pointer)};
 begin
 // intf:= pointer(icaret(self));
  ftimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}timerevent,false,[]);
- fbackup:= tsimplebitmap.create(false);
- fcaret:= tsimplebitmap.create(false);
+ fbackup:= tbitmap.create(false); //getcanvasimage possibly used by opengl window
+ fcaret:= tbitmap.create(false);  //getcanvasimage possibly used by opengl window
  periodetime:= defaultcaretblinkperiodetime;
 end;
 

@@ -20,9 +20,9 @@ interface
 uses
  {$ifdef FPC}classes{$else}Classes{$endif},sysutils,msegraphics,msetypes,
  msestrings,mseerr,msegraphutils,mseapplication,
- msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,msesys,
- msethread,mseguiintf,
- msebitmap,msearrayprops,msethreadcomp,mserichstring
+ msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,
+ msesystypes,msethread,mseguiintf,
+ msebitmap,msearrayprops,msethreadcomp,mserichstring,msearrayutils
                                {$ifdef mse_with_ifi},mseifiglob{$endif};
 
 const
@@ -2601,7 +2601,8 @@ implementation
 uses
  msesysintf,typinfo,msestreaming,msetimer,msebits,msewidgets,
  mseshapes,msestockobjects,msefileutils,msedatalist,Math,msesysutils,
- {$ifdef FPCc} rtlconst {$else} RtlConsts{$endif},mseformatstr,mseprocutils;
+ {$ifdef FPCc} rtlconst {$else} RtlConsts{$endif},mseformatstr,mseprocutils,
+ msesys;
 
 const
  faceoptionsmask: faceoptionsty = [fao_alphafadeimage,fao_alphafadenochildren,

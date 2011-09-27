@@ -15,7 +15,7 @@ unit msestream;
 // {$WARN SYMBOL_PLATFORM off}
 interface
 uses 
- Classes,Sysutils,msestrings,msetypes,msethread,msesys,msereal,mseevent;
+ Classes,Sysutils,msestrings,msetypes,msethread,msesystypes,msesys,msereal,mseevent;
 
 const
  defaultfilerights = [s_irusr,s_iwusr,s_irgrp,s_iwgrp,s_iroth,s_iwoth];
@@ -331,7 +331,7 @@ implementation
 
 uses
  msefileutils,msebits,{msegui,}mseformatstr,sysconst,msesysutils,msesysintf,
- msedatalist,mseclasses,mseapplication,
+ msedatalist,mseclasses,mseapplication,msearrayutils,
         {$ifdef UNIX} mselibc,
         {$else} windows,
         {$endif}

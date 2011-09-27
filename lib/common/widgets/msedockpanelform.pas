@@ -125,7 +125,7 @@ function createdockpanelform(const aclass: tclass;
 
 implementation
 uses
- {msedockpanelform_mfm,}sysutils,msekeyboard,mseactions;
+ {msedockpanelform_mfm,}sysutils,msekeyboard,mseactions,msearrayutils;
 type
  tcomponent1 = class(tcomponent);
  tmsecomponent1 = class(tmsecomponent);

@@ -95,7 +95,7 @@ procedure deinit;
 
 implementation
 uses
- msesysintf,SysUtils,mseapplication,msesys,msesysutils;
+ msesysintf1,msesysintf,SysUtils,mseapplication,msesystypes,msesysutils;
 
 const
  enabletimertag = 8346320;

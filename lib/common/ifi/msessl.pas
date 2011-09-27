@@ -11,7 +11,7 @@ unit msessl;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,msecryptio,mopenssl,msestrings,msesys;
+ classes,msecryptio,mopenssl,msestrings,msesystypes;
 type
  
  essl = class(ecryptio)
@@ -65,7 +65,7 @@ function waitforio(const aerror: integer; var ainfo: cryptioinfoty;
  
 implementation
 uses
- sysutils,msesysintf,msefileutils,msesocketintf;
+ sysutils,msesysintf1,msefileutils,msesocketintf,msesys;
  
 procedure raiseerror(errco : integer);
 var

@@ -47,7 +47,7 @@ implementation
 
 uses
  selecteditpageform_mfm,sourceform,msedatalist,msedatanodes,msegraphutils,main,
- msefileutils,mseguiglob;
+ msefileutils,mseguiglob,msearrayutils;
 var
  colwidth: integer;
  pos: rectty;

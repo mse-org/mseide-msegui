@@ -22,7 +22,7 @@ interface
 
 uses
  mseforms,msewidgets,msegrids,msewidgetgrid,classes,mseclasses,
- msepropertyeditors,mseglob,mseguiglob,
+ msepropertyeditors,mseglob,mseguiglob,msearrayutils,
  msegui,mseedit,msedataedits,mselistbrowser,msedatanodes,
  msedesignintf,typinfo,msecomponenteditors,msesimplewidgets,msegraphutils,
  msemenus,mseevent,msedesigner,msetypes,msestrings,mselist,msegraphics;
@@ -228,9 +228,9 @@ var
 
 implementation
 uses
- objectinspector_mfm,msedatalist,sysutils,msearrayprops,
+ objectinspector_mfm,sysutils,msearrayprops,
  msebitmap,msedrag,mseeditglob,msestockobjects,msedropdownlist,
- sourceupdate,sourceform,msekeyboard,main;
+ sourceupdate,sourceform,msekeyboard,main,msedatalist;
 
 const
  ado_rereadprops = 1;  //asyncevent codes

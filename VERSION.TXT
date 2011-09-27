@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2011-09-26
+ Array util functions msedatalist.pas -> msearrayutils.pas.
+ Dynload functions -> msedynload.pas.
 2011-09-17
  Unified parameter order for sort functions.
 2011-06-27

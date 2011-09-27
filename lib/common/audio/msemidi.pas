@@ -204,7 +204,7 @@ const
 
 implementation
 uses
- msesysutils,msedatalist; 
+ msesysutils,msedatalist,msearrayutils; 
 const
  errormessages: array[midierrorty] of msestring = (
   '',

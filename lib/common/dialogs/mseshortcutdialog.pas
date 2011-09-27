@@ -57,7 +57,7 @@ function shortcutdialog(const acontroller: tshortcutcontroller): modalresultty;
 
 implementation
 uses
- mseshortcutdialog_mfm,msekeyboard,msedatalist;
+ mseshortcutdialog_mfm,msekeyboard,msedatalist,msearrayutils;
 
 const
  errorcolor = cl_ltred;

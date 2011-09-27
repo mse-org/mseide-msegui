@@ -165,7 +165,7 @@ var
 implementation
 uses
  componentstore_mfm,msestream,storedcomponentinfodialog,msedatalist,msefileutils,
- sysutils,projectoptionsform,componentpaletteform,mseobjecttext;
+ sysutils,projectoptionsform,componentpaletteform,mseobjecttext,msearrayutils;
 const
  storecaption = 'Component Store';
 type

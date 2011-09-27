@@ -70,7 +70,7 @@ procedure cryptthreadterminate(var ainfo: cryptioinfoty);
 
 implementation
 uses
- msesys;
+ msesystypes;
  
 procedure cryptconnect(var ainfo: cryptioinfoty; const atimeoutms: integer);
 begin

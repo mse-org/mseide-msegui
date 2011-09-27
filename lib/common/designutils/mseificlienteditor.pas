@@ -29,7 +29,7 @@ function editificlient(const acomponent: tifilinkcomp): modalresultty;
 implementation
 uses
  mseificlienteditor_mfm,msepropertyeditors,msedesignintf,msedesigner,
- objectinspector,typinfo,msedatalist;
+ objectinspector,typinfo,msearrayutils;
 type
  tmsecomponent1 = class(tmsecomponent);
 

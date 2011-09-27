@@ -99,7 +99,7 @@ type
  
 implementation
 uses
- msefileutils,msesys,msestat,msestream,mseparamentryform,mseglob,msedatalist,
+ msefileutils,msesys,msestat,msestream,mseparamentryform,mseglob,msearrayutils,
  msetemplateselectform,msedataedits;
  
 { tcodetemplates }

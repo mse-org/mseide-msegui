@@ -15,7 +15,7 @@ interface
 uses
  windows,messages,mseapplication,msetypes,msegraphutils,
  mseevent,msepointer,mseguiglob,msegraphics,
- msethread,mseformatstr,msesysintf,msestrings,msesys;
+ msethread,mseformatstr,{msesysintf,}msestrings,msesystypes,msewinglob;
 
 type
  syseventty = record
@@ -31,12 +31,6 @@ const
 // pixel1 = $ffffff;
  pixel0 = $ffffff;   //select colorbackground
  pixel1 = $000000;   //select colorforeground
-
- msemessage = wm_user + $3694;
- wakeupmessage = msemessage + 1;
- destroymessage = msemessage + 2;
- traycallbackmessage = msemessage + 3;
- timermessage = msemessage + 4;
 
 {$ifdef FPC}
 {$include ../mseguiintf.inc}
@@ -63,8 +57,8 @@ var
 implementation
 //todo: 19.10.03 rasterops for textout
 uses
- sysutils,mselist,msekeyboard,msebits,msedatalist,msesysutils,msegui,
- msesystimer,msegdi32gdi;
+ sysutils,mselist,msekeyboard,msebits,msearrayutils,msesysutils,msegui,
+ msesystimer,msegdi32gdi,msesysintf1,msedynload;
 
 type
 
@@ -2988,7 +2982,7 @@ begin
  if applicationallocated then begin
   createapphandle(applicationwindow);
  end;
- systimerinit(eventlist);
+ systimerinit(eventlist,applicationwindow);
 end;
 
 function gui_deinit: guierrorty;

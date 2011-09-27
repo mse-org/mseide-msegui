@@ -13,7 +13,7 @@ unit msesockets;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- classes,mseglob,mseclasses,msesys,msestrings,msepipestream,
+ classes,mseglob,mseclasses,msesystypes,msesys,msestrings,msepipestream,
  mseapplication,msethread,mseevent,msecryptio,msetypes;
 
 const
@@ -437,7 +437,7 @@ procedure setcomcomp(const alink: icommclient; const acommcomp: tcustomcommcomp;
 implementation
 uses
  msefileutils,msesysintf,sysutils,msestream,mseprocutils,msesysutils,
- msesocketintf,msedatalist;
+ msesocketintf,msearrayutils;
 
 procedure setcomcomp(const alink: icommclient;
                const acommcomp: tcustomcommcomp; var dest: tcustomcommcomp);

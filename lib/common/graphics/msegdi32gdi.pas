@@ -141,7 +141,7 @@ const
 
 implementation
 uses
- mseguiintf,msegraphutils,msesysintf,sysutils;
+ mseguiintf,msegraphutils,msesysintf1,sysutils;
  
 type
  shapety = (fs_copyarea,fs_rect,fs_ellipse,fs_arc,fs_polygon);

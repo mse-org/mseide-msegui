@@ -445,7 +445,7 @@ function emptysourcepos: sourceposty;
 implementation
 uses
  sysutils,mseformatstr,msedatalist,typinfo,msebits,msewidgets,
- msefileutils;
+ msefileutils,msearrayutils;
 
 type
  treader1 = class(treader);

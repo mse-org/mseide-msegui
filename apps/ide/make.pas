@@ -37,7 +37,7 @@ function runscript(const script: filenamety;
 implementation
 uses
  mseprocutils,main,projectoptionsform,sysutils,msegrids,
- sourceform,mseeditglob,msefileutils,msesys,
+ sourceform,mseeditglob,msefileutils,msesystypes,msesys,
  msesysutils,msegraphics,messageform,msedesignintf,msedesigner,
  mseprocmonitor,mseevent,
  msetypes,classes,mseclasses,mseapplication,msestream,msepipestream,

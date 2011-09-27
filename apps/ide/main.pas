@@ -30,7 +30,8 @@ uses
  msedispwidgets,msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,
  msegrids,msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,
  classes,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
- msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,msesys,mserttistat,
+ msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,msesystypes,
+ mserttistat,
  msedatanodes,mseedit,mseifiglob,mselistbrowser,projecttreeform;
 const
  versiontext = '2.7 unstable';
@@ -290,7 +291,7 @@ procedure handleerror(const e: exception; const text: string);
 
 implementation
 uses
- regwidgets,regeditwidgets,regdialogs,regkernel,regprinter,
+ regwidgets,regeditwidgets,regdialogs,regkernel,regprinter,msesys,
  {$ifndef mse_no_math}
   {$ifdef FPC}regmath,{$endif}
   {$ifdef FPC}regmm,{$endif}

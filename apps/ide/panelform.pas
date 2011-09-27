@@ -45,7 +45,8 @@ procedure updatestat(const filer: tstatfiler);
 implementation
 
 uses
- panelform_mfm,main,sysutils,msekeyboard,mselist,msetypes,msedatalist;
+ panelform_mfm,main,sysutils,msekeyboard,mselist,msetypes,msedatalist,
+ msearrayutils;
 
 var
  panellist: tpointerlist;

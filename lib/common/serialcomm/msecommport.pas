@@ -16,7 +16,7 @@ interface
 uses {$ifdef mswindows} windows,{$ifndef FPC} mmsystem,{$endif}
      {$else} mselibc,
      {$endif}
-     Classes,msethread,mseguiglob,msecommtimer,mseevent,mseclasses,msesys,
+     Classes,msethread,mseguiglob,msecommtimer,mseevent,mseclasses,msesystypes,
      msestrings,msestat,msestatfile,msetypes;
 
 type
@@ -429,7 +429,7 @@ function asciitobin(const chars: string): string;
 implementation
 uses
  {$ifdef UNIX} {kernelioctl,}msesysbindings, {$endif}
- sysutils,mseapplication,msesysintf,msesysutils;
+ sysutils,mseapplication,msesysintf1,msesysintf,msesys,msesysutils;
 
 const
  asciipufferlaenge = 255;

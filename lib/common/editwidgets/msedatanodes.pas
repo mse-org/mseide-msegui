@@ -15,7 +15,7 @@ interface
 uses
  classes,msegraphutils,msedrawtext,msegraphics,msedatalist,mseglob,mseguiglob,
  msebitmap,mseclasses,mseevent,msegrids,msetypes,msestrings,mseinplaceedit,
- msestat,msegridsglob,mselist;
+ msestat,msegridsglob,mselist,msearrayutils;
 
 type
 

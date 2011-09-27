@@ -266,7 +266,7 @@ procedure DestroySSLInterface;
 
 implementation
 uses
- msesys,dynlibs,msesysintf;
+ msesystypes,dynlibs,msesysintf1,msesysintf,msedynload;
 var
  ssllibhandle: integer;
  sslutillibhandle: integer;

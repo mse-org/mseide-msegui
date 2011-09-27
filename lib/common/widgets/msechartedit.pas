@@ -258,7 +258,7 @@ type
    
 implementation
 uses
- msereal,msekeyboard,msedatalist,sysutils;
+ msereal,msekeyboard,msedatalist,sysutils,msearrayutils;
  
 type
  ttraces1 = class(ttraces);

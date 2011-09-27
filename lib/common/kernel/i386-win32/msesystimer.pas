@@ -11,18 +11,18 @@ unit msesystimer;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseguiglob,mselist,msetypes;
+ mseguiglob,mselist,msetypes,windows;
  
 function setsystimer(us: longword): guierrorty;
                //send et_timer event after delay or us (micro seconds)
-procedure systimerinit(const aeventlist: tobjectqueue);
+procedure systimerinit(const aeventlist: tobjectqueue; const apphandle: hwnd);
 procedure systimerdeinit;
 function systimerus: longword;
 function setmmtimer(const avalue: boolean): boolean;
 
 implementation
 uses
- windows,mseevent,msesys,mseguiintf;
+ msewinglob,mseevent,msesys,msedynload{,mseguiintf};
 
 const
   MMSYSERR_NOERROR = 0;
@@ -56,6 +56,7 @@ var
 
 var
  eventlist: tobjectqueue;
+ applicationhandle: hwnd;
 
  timer: longword;
  mmtimer: mmresult;
@@ -136,7 +137,7 @@ procedure mmtimerproc(uTimerID, uMessage: UINT;
     dwUser, dw1, dw2: DWORD); stdcall;
 begin
  killtimer;
- windows.postmessage(getapplicationwindow,timermessage,0,0);
+ windows.postmessage(applicationhandle,timermessage,0,0);
 end;
 
 function setsystimer(us: longword): guierrorty;
@@ -175,9 +176,10 @@ begin
  eventlist:= nil;
 end;
 
-procedure systimerinit(const aeventlist: tobjectqueue);
+procedure systimerinit(const aeventlist: tobjectqueue; const apphandle: hwnd);
 begin
  eventlist:= aeventlist;
+ applicationhandle:= apphandle;
 end;
 
 end.

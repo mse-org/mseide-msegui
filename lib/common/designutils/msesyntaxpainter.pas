@@ -198,7 +198,7 @@ type
 
 implementation
 uses
- sysutils,msefileutils,msesys,mseformatstr,msegraphics,mseglob;
+ sysutils,msefileutils,msesys,mseformatstr,msegraphics,mseglob,msearrayutils;
 
 procedure markstartchars(const str: msestring; var chars: charsty); overload;
 begin

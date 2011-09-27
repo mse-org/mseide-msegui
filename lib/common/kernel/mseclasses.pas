@@ -964,7 +964,7 @@ uses
  mseobjecttext,
 {$endif}
  msestream,msesys,msedatalist,msedatamodules,rtlconsts,msesysutils,
- msestreaming;
+ msearrayutils,msestreaming;
 
 type
  tpersistent1 = class(tpersistent);

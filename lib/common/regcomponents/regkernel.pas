@@ -32,7 +32,7 @@ uses
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
  mseapplication,mseglob,mseguiglob,mseskin,msedesigner,
  mseguithreadcomp,mseprocmonitorcomp,msefadeedit,
- msearrayprops,msesumlist,mserttistat,msestockobjects,regglob;
+ msearrayprops,msesumlist,mserttistat,msestockobjects,regglob,msearrayutils;
 
 type
  twidget1 = class(twidget);

@@ -18,7 +18,7 @@ unit msesignal;
 interface
 uses
  msedatalist,mseclasses,classes,msetypes,msearrayprops,mseevent,msehash,
- msesys,msereal,msetimer,mseglob;
+ msesystypes,msereal,msetimer,mseglob;
  
 const
  defaultsamplefrequ = 44100; //Hz
@@ -1046,7 +1046,8 @@ function scalevalue(const ainfo: doublescaleinfoty): double;
  
 implementation
 uses
- sysutils,mseformatstr,msesysutils,msesysintf,mseapplication;
+ sysutils,mseformatstr,msesysutils,msesysintf1,mseapplication,msearrayutils,
+ msesys;
 type
  tmsecomponent1 = class(tmsecomponent);
 

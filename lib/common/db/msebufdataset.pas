@@ -26,7 +26,7 @@ interface
 
 uses
  db,classes,variants,msetypes,msearrayprops,mseclasses,mselist,msestrings,
- msedb,msedatabase,mseglob,msedatalist,msevariants;
+ msedb,msedatabase,mseglob,msearrayutils,msedatalist,msevariants;
   
 const
  defaultpacketrecords = -1;
@@ -8611,7 +8611,7 @@ begin
    quicksort(0,tmsebufdataset(fowner).fbrecordcount - 1);
   end
   else begin
-   msedatalist.mergesort(adata,tmsebufdataset(fowner).fbrecordcount,
+   msearrayutils.mergesort(adata,tmsebufdataset(fowner).fbrecordcount,
                  pointercomparemethodty(@compare2));
 //   mergesort(adata);
   end;

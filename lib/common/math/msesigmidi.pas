@@ -310,7 +310,7 @@ type
   
 implementation
 uses
- math,msedatalist,sysutils;
+ math,msearrayutils,sysutils;
 type
  tsigcontroller1 = class(tsigcontroller);
  tdoubleoutputconn1 = class(tdoubleoutputconn);

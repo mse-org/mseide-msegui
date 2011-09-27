@@ -29,7 +29,7 @@ interface
 //todo: use execute_immediate if possible
 
 uses
- Classes,SysUtils,msqldb,db,math,dbconst,msebufdataset,msedbevents,msesys,
+ Classes,SysUtils,msqldb,db,math,dbconst,msebufdataset,msedbevents,msesystypes,
  msestrings,msedb,msetypes,
 {$IfDef LinkDynamically}
   ibase60dyn;
@@ -224,7 +224,7 @@ function clientminorversion: integer;
 implementation
 
 uses 
- strutils,msesysintf,msebits,msefloattostr,msedatabase;
+ strutils,msesysintf1,msebits,msefloattostr,msedatabase;
 
 function clientversion: string;
 var

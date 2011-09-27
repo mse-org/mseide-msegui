@@ -11,7 +11,7 @@ unit mseprocess;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,mseclasses,msepipestream,msestrings,msestatfile,msestat,msesys,
+ classes,mseclasses,msepipestream,msestrings,msestatfile,msestat,msesystypes,
  mseevent,msetypes,mseprocmonitor;
 type
  processstatety = (prs_listening);
@@ -103,7 +103,7 @@ function getprocessoutput(const acommandline: string; const todata: string;
 
 implementation
 uses
- mseprocutils,msefileutils,mseapplication,sysutils,msesysintf,msebits;
+ mseprocutils,msefileutils,mseapplication,sysutils,msesysintf,msebits,msesys;
 type
  tstringprocess = class(tmseprocess)
   private

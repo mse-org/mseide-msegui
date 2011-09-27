@@ -13,7 +13,7 @@ interface
 uses
  classes,mseapplication,mseclasses,msearrayprops,mseact,msestrings,msetypes,mseevent,
  mseglob,msestream,msepipestream,{msegui,}mseifiglob,typinfo,msebintree,
- msesys,msesockets,msecryptio,msethread,msedatalist;
+ msesystypes,msesockets,msecryptio,msethread,msedatalist;
 
 //todo: use icommclient instead of oninputavailable
 
@@ -650,7 +650,7 @@ const
  );
 implementation
 uses
- sysutils,mseprocutils,msesysintf,{mseforms,}msetmpmodules,
+ sysutils,mseprocutils,msesysintf1,msesysintf,{mseforms,}msetmpmodules,
  msesysutils,variants,msesumlist;
 type
  tsocketreader1 = class(tsocketreader);

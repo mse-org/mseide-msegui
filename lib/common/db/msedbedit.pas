@@ -20,7 +20,8 @@ unit msedbedit;
 interface
 uses
  db,classes,mseguiglob,mseclasses,msegui,msetoolbar,mseeditglob,mseglob,
- msewidgetgrid,msedatalist,msetypes,msegrids,msegraphics,mseevent,msekeyboard,
+ msewidgetgrid,msearrayutils,msedatalist,
+ msetypes,msegrids,msegraphics,mseevent,msekeyboard,
  msegraphedits,msestrings,msegraphutils,mselist,msedropdownlist,
  msescrollbar,msedataedits,msewidgets,msearrayprops,msedb,mselookupbuffer,
  msedialog,mseinplaceedit,msemenus,mseedit,msestat,msegridsglob,typinfo

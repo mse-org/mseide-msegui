@@ -13,7 +13,7 @@ unit msereal;
 
 interface
 uses
- msetypes,mseformatstr,Classes,msestrings;
+ msetypes,{mseformatstr,}Classes,msestrings;
 
 const
  emptyrealstring = '';   //stringsymbol for empty realty
@@ -25,19 +25,6 @@ function isemptyreal(const val: realty): boolean; {$ifdef FPC}inline;{$endif}
                         deprecated;
             //use x = emptyreal instead
 function candiv(const val: realty): boolean; //true if not 0.0 or empty:
-
-function trystrtorealty(const ein: string; out value: realty;
-                             forcevalue: boolean = false): boolean;
-function strtorealty(const ein: string; forcevalue: boolean = false): realty;
-function strtorealtydot(const ein: string): realty;
-function trystrtorealtydot(const ein: string; out value: realty): boolean;
-//function realtytostr(const val: realty; const format: msestring = ''): msestring;
-function realtytostr(const val: realty; const format: msestring = '';
-                                            const scale: real = 1): msestring;
-function realtytostrrange(const val: realty; const format: msestring = '';
-                                            const range: real = 1;
-                                            const offset: real = 0): msestring;
-function realtytostrdot(const val: realty): string;
 
 function addrealty(const a,b: realty): realty; //result = a - b
 function subrealty(const a,b: realty): realty; //result = a + b
@@ -52,7 +39,7 @@ function expscale(const value: real; const min: real; const max: real): real;
 
 implementation
 uses
- sysutils,msesys,sysconst;
+ sysutils,{msesys,}sysconst;
 
 const
 {$ifdef FPC_DOUBLE_HILO_SWAPPED}
@@ -194,136 +181,6 @@ begin
     end;
    end;
   end;
- end;
-end;
-
-function realtytostr(const val: realty; const format: msestring = '';
-                                            const scale: real = 1): msestring;
-var
- rea1: real;
-begin
- if val = emptyreal then begin
-  result:= emptyrealstring;
- end
- else begin
-  if scale <> 0 then begin
-   rea1:= val/scale;
-  end
-  else begin
-   rea1:= val;
-  end;
-  result:= formatfloatmse(rea1,format,defaultformatsettingsmse);
- end;
-end;
-
-function realtytostrrange(const val: realty; const format: msestring = '';
-                       const range: real = 1; const offset: real = 0): msestring;
-var
- rea1: real;
-begin
- if val = emptyreal then begin
-  result:= emptyrealstring;
- end
- else begin
-  if range <> 0 then begin
-   rea1:= val*range+offset;
-  end
-  else begin
-   rea1:= val;
-  end;
-  result:= formatfloatmse(rea1,format,defaultformatsettingsmse);
- end;
-end;
-
-const
- expos: array[ord('A')..ord('z')] of shortint =
- //    A    B    C    D    E    F    G    H    I    J    K    L    M  
-  (    0,   0,   0,   0, 6*3,   0, 3*3,   0,   0,   0,   0,   0, 2*3,
- //    N    O    P    Q    R    S    T    U    V    W    X    Y    Z  
-       0,   0, 5*3,   0,   0,   0, 4*3,   0,   0,   0,   0, 8*3, 7*3,
- //[ \ ] ^ _ '
-   0,0,0,0,0,0,
- //   a    b    c    d    e    f    g    h    i    j    k    l    m  
-   -6*3,   0,   0,   0,   0,-5*3,   0,   0,   0,   0, 1*3,   0,-1*3,
- //   n    o    p    q    r    s    t    u    v    w    x    y    z  
-   -3*3,   0,-4*3,   0,   0,   0,   0,-2*3,   0,   0,   0,-8*3,-7*3);
- 
-function trystrtorealty(const ein: string; out value: realty;
-                             forcevalue: boolean = false): boolean;
-var
- str1: string;
- ch1: char;
- sint1: shortint;
-begin
- str1:= trim(ein);
- result:= true;
- if not forcevalue and (str1 = emptyrealstring) then begin
-  value:= emptyreal;
- end
- else begin
-  removechar(str1,{$ifdef FPC}defaultformatsettings.{$endif}thousandseparator);
-  if length(str1) > 0 then begin
-   ch1:= str1[length(str1)];
-   if (ch1 >= 'A') and (ch1 <= 'z') then begin
-    sint1:= expos[ord(ch1)];
-    if sint1 <> 0 then begin
-     setlength(str1,length(str1)-1);
-     str1:= str1 + 'E'+inttostr(sint1);
-    end;
-   end;
-  end;
-  result:= trystrtofloat(str1,double(value));
- end;
-end;
-
-function strtorealty(const ein: string; forcevalue: boolean = false): realty;
-begin
- if not trystrtorealty(ein,result,forcevalue) then begin
-  raise EConvertError.CreateFmt(SInvalidFloat,[ein]);
- end;
-end;
-
-function realtytostrdot(const val: realty): string;
-begin
- if val = emptyreal then begin
-  result:= emptyrealstring;
- end
- else begin
-// {$ifdef withformatsettings}
-  result:= floattostr(val,defaultformatsettingsdot);
-// {$else}
-//  result:= replacechar(floattostr(val),decimalseparator,'.');
-// {$endif}
- end;
-end;
-
-function strtorealtydot(const ein: string): realty;
-
-begin
- if trim(ein) = emptyrealstring then begin
-  result:= emptyreal;
- end
- else begin
-// {$ifdef withformatsettings}
-  result:= strtofloat(ein,defaultformatsettingsdot);
-// {$else}
-//  result:= strtofloat(replacechar(ein,'.',decimalseparator));
-// {$endif}
- end;
-end;
-
-function trystrtorealtydot(const ein: string; out value: realty): boolean;
-begin
- result:= true;
- if trim(ein) = emptyrealstring then begin
-  value:= emptyreal;
- end
- else begin
-// {$ifdef withformatsettings}
-  result:= trystrtofloat(ein,double(value),defaultformatsettingsdot);
-// {$else}
-//  result:= trystrtofloat(replacechar(ein,'.',decimalseparator),double(value));
-// {$endif}
  end;
 end;
 

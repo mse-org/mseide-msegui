@@ -1807,7 +1807,7 @@ function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
 
 implementation
 uses
- rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,msebits,
+ rtlconsts,msefileutils,typinfo,dbconst,msearrayutils,mseformatstr,msebits,
  msereal,variants,msedate{,msedbgraphics}{$ifdef unix},cwstring{$endif};
 const
  fieldnamedummy = ';%)(mse';

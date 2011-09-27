@@ -13,8 +13,9 @@ unit msepropertyeditors;
 
 interface
 uses
- Classes,TypInfo,msedesignintf,msetypes,msestrings,sysutils,msedatalist,msemenus,
- mseevent,msegui,mseglob,mseguiglob,
+ Classes,TypInfo,msedesignintf,msetypes,msestrings,sysutils,
+ msearrayutils,msedatalist,
+ msemenus,mseevent,msegui,mseglob,mseguiglob,
  mseclasses,mseforms,msegraphics,mserichstring;
 
 const

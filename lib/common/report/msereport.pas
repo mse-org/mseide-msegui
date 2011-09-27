@@ -1718,7 +1718,7 @@ function getreportscale(const amodule: tcomponent): real;
 
 implementation
 uses
- msedatalist,sysutils,msestreaming,msebits,msereal,math,msesysintf,msesys;
+ msearrayutils,sysutils,msestreaming,msebits,msereal,math,msesysintf,msesys;
 type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);

@@ -53,7 +53,7 @@ type
  
 implementation
 uses
- sysutils,msesysintf,msedatalist;
+ sysutils,msesysintf,msearrayutils;
  
 type
  langinfoty = record

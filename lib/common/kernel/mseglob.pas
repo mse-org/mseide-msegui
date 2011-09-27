@@ -65,8 +65,8 @@ procedure mseerror(error: mseerrorty; text: string = ''); overload;
 procedure mseerror(error: mseerrorty; sender: tobject; text: string = ''); overload;
 
 implementation
-uses
- mseclasses;
+//uses
+// mseclasses;
 const
  errortexts: array[mseerrorty] of string = 
  ('',

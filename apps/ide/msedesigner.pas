@@ -21,7 +21,7 @@ unit msedesigner;
 interface
 uses
  classes,msegraphutils,mseglob,mseguiglob,msedesignintf,
- mseforms,mselist,msedatalist,msebitmap,msetypes,sysutils,msehash,mseclasses,
+ mseforms,mselist,msearrayutils,msebitmap,msetypes,sysutils,msehash,mseclasses,
  mseformdatatools,typinfo,msepropertyeditors,msecomponenteditors,msegraphics,
  mseapplication,msegui,msestrings,msedesignparser,msecomptree;
 

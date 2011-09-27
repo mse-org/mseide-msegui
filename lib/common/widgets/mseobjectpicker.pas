@@ -112,7 +112,7 @@ type
 
 implementation
 uses
- msekeyboard,msedatalist;
+ msekeyboard,msearrayutils;
  
 type
  twidget1 = class(twidget);

@@ -15,7 +15,7 @@ unit msegdbutils;
 interface
 uses
  msestream,mseclasses,classes,msetypes,mseevent,msehash,msepipestream,msestrings,
- mseapplication,msegui,msedatalist,msesys;
+ mseapplication,msegui,msedatalist,msesystypes;
 
 //todo: byte endianess for remote debugging
 
@@ -609,7 +609,7 @@ implementation
 
 uses
  sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,
- msebits,msesysintf,mseguiintf
+ msebits,msesysintf,mseguiintf,msearrayutils
         {$ifdef UNIX},mselibc,
         msesysbindings{$else},windows{$endif};
 

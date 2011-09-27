@@ -18,7 +18,8 @@ unit msedesignparser;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseglob,msedatalist,mselist,mseparser,msetypes,typinfo,msestrings;
+ mseglob,msedatalist,mselist,mseparser,msetypes,typinfo,msestrings,
+ msearrayutils;
  
 type
  idesignparser = interface(inullinterface)

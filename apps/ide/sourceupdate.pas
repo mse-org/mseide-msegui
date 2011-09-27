@@ -232,7 +232,7 @@ function getimplementationtext(const amodule: tmsecomponent; out aunit: punitinf
 implementation
 uses
  sysutils,msesys,msefileutils,sourceform,sourcepage,projectoptionsform,
- msegui,msedatalist,projecttreeform;
+ msegui,msearrayutils,projecttreeform;
 
 function findprogramlanguage(const afilename: filenamety): proglangty;
 var

@@ -74,8 +74,8 @@ begin
 end;
 
 procedure tprojectfo.projectstatonbeforewritestat(const sender: TObject);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
 {
  setlength(colwidths,mainfo.grid.datacols.count - variantshift);
@@ -96,8 +96,8 @@ begin
 end;
 
 procedure tprojectfo.projectstatonafterreadstat(const sender: tobject);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  try
   mainfo.loadproject;

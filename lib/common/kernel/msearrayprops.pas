@@ -438,7 +438,7 @@ type
 implementation
 
 uses
- rtlconsts,msedatalist;
+ rtlconsts,msedatalist,msearrayutils;
 
 type
 {$ifdef FPC}

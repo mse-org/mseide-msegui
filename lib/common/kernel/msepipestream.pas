@@ -15,7 +15,7 @@ unit msepipestream;
 interface
 
 uses
-  msestream,msethread,msesys,classes,msebits,mseclasses;
+ msestream,msethread,msesystypes,classes,msebits,mseclasses;
 
 type
 
@@ -161,7 +161,7 @@ end;
 implementation
 uses
   {$ifdef UNIX}mselibc, {$else}windows, {$endif}
- mseapplication,msesysintf,sysutils,msesysutils;
+ mseapplication,msesysintf1,msesysintf,sysutils,msesysutils;
 
 { tpipewriter }
 

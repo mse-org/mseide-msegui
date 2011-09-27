@@ -100,7 +100,7 @@ procedure setstatfilevar(const sender: istatfile; const source: tstatfile;
               var instance: tstatfile);
 implementation
 uses
- msesys,msefileutils,sysutils;
+ msesystypes,msesys,msefileutils,sysutils;
  
 procedure setstatfilevar(const sender: istatfile; const source: tstatfile;
               var instance: tstatfile);

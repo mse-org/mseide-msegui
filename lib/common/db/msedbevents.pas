@@ -82,7 +82,7 @@ type
  
 implementation
 uses
- msedatalist,msetypes;
+ msearrayutils,msetypes;
 
 { tdbevent }
 

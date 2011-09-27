@@ -20,7 +20,7 @@ interface
 uses
  {$ifdef FPC}classes,sysutils{$else}Classes,SysUtils{$endif},mseclasses,msegui,
  msegraphics,msetypes,msestrings,msegraphutils,msebitmap,
- msescrollbar,msearrayprops,mseglob,mseguiglob,typinfo,
+ msescrollbar,msearrayprops,mseglob,mseguiglob,typinfo,msearrayutils,
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,
  mseobjectpicker,msepointer,msetimer,msebits,msestat,msestatfile,msekeyboard,
  msestream,msedrag,msemenus,msepipestream,mseshapes,msegridsglob,mselist

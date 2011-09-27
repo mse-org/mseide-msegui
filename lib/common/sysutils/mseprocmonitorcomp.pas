@@ -11,7 +11,7 @@ unit mseprocmonitorcomp;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseclasses,msesys,mseevent,mseprocmonitor;
+ mseclasses,msesystypes,mseevent,mseprocmonitor;
  
 type
  proclisteninfoty = record
@@ -52,7 +52,7 @@ type
  
 implementation
 uses
- msedatalist,mseapplication,mseprocutils;
+ msedatalist,mseapplication,mseprocutils,msearrayutils;
  
 { tprocessmonitor }
 

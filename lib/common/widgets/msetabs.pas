@@ -899,7 +899,7 @@ function createtabform(const aclass: tclass;
  
 implementation
 uses
- sysutils,msedatalist,msekeyboard,msestockobjects;
+ sysutils,msearrayutils,msekeyboard,msestockobjects;
 
 type
  twidget1 = class(twidget);

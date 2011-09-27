@@ -12,13 +12,13 @@ unit msenoguiintf;
 
 interface
 uses
- msesys;
+ msesystypes;
  
 {$include ../msenoguiintf.inc}
 
 implementation
 uses
- windows,{$ifndef FPC}messages,{$endif}msesysintf,msenogui,mseevent,
+ windows,{$ifndef FPC}messages,{$endif}msesysintf1,msesysintf,msenogui,mseevent,
  mseapplication;
 type
  tapplication1 = class(tnoguiapplication);

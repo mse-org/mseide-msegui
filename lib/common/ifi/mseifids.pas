@@ -473,7 +473,7 @@ function decodefielddefs(const adata: pfdefdataty;
  
 implementation
 uses
- sysutils,msedatalist,dbconst,mseapplication,msereal;
+ sysutils,msearrayutils,msedatalist,dbconst,mseapplication,msereal;
 type
  tmsestringfield1 = class(tmsestringfield);
  tdataset1 = class(tdataset);

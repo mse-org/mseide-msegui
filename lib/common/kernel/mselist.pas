@@ -14,12 +14,9 @@ unit mselist;
 interface
 
 uses
- msetypes,msestrings,mseglob,Classes,sysutils,msesys;
+ msetypes,msestrings,mseglob,Classes,sysutils,msesystypes,msearrayutils;
 
 type
- arraysortcomparety = function (const l,r): integer;
- sortcomparemethodty = function (const l,r): integer of object;
- indexsortcomparemethodty = function (const l,r: integer): integer of object;
 // compareprocty = procedure (const l,r; var result: integer) of object;
 
  recordliststatety = (rels_needsinitialize,rels_needsfinalize,rels_needscopy,
@@ -28,13 +25,13 @@ type
 
  trecordlist = class(tnullinterfacedobject)
   private
-   frecordsize: integer;
    fcapacity: integer;
    procedure checkindex(const index: integer);
    procedure checkcapacity;
    procedure setcapacity(Value: integer);
    procedure inccount;
   protected
+   frecordsize: integer;
    fcount: integer;
    fdata: pchar;
    fstate: recordliststatesty;
@@ -50,12 +47,14 @@ type
    procedure finalizerecord(var item); virtual;
    procedure initializerecord(var item); virtual;
    procedure copyrecord(var item); virtual;
+   procedure change; virtual;
    property recordsize: integer read frecordsize;
   public
-   constructor create(arecordsize: integer; aoptions: recordliststatesty = []);
+   constructor create(const arecordsize: integer; const aoptions: recordliststatesty = []);
    destructor destroy; override;
    procedure assign(const source: trecordlist);
    function datapo: pointer;
+   function dataend: pointer; //after datablock
    function newitem: pointer; virtual;
    function newitems(const acount: integer): pointer; virtual;
    procedure deletelast;
@@ -87,6 +86,34 @@ type
    property sorted: boolean read fsorted write setsorted;
  end;
 
+ trecordmap = class(trecordlist)
+  private
+   procedure setorder(const avalue: integer);
+  protected
+   fcomparefuncs: sortcomparemethodarty;
+   findexes: pointerararty;
+   fhasindex: boolean;
+   forder: integer;
+   procedure setitem(const index: integer; const source);
+   procedure getitem(const index: integer; out dest);
+   function internalgetitempo(const aorder: integer;
+                                     const index: integer): pointer;
+   function getitempo(const index: integer): pointer;
+       //nil if index < 0
+       //will be invalid after capacity change!
+   procedure sort(const aindexnum: integer);
+   function internalfind(const aindexnum: integer; const item; 
+                            out aindex: integer; out adata: pointer): boolean;
+           //true if exact else next bigger
+           //for comp: l is item, r are tablevalues
+   procedure change; override;
+   procedure setcomparefuncs(const afuncs: array of sortcomparemethodty);
+  public
+   constructor create(const arecordsize: integer;
+                     const aoptions: recordliststatesty = []);
+   property order: integer read forder write setorder default -1;
+ end;
+ 
  tpointerlist = class(tnullinterfacedobject)
   private
    fringpointer: integer; //for queue
@@ -257,7 +284,7 @@ type
  
 implementation
 uses
- rtlconsts,msebits,msedatalist,msesysintf;
+ rtlconsts,msebits,msedatalist,msesysintf1,msesysintf;
 const
  growstep = 32;
 
@@ -356,7 +383,8 @@ end;
 
 { trecordlist }
 
-constructor trecordlist.create(arecordsize: integer; aoptions: recordliststatesty = []);
+constructor trecordlist.create(const arecordsize: integer; 
+                                const aoptions: recordliststatesty = []);
 begin
  frecordsize:= arecordsize;
  fstate:= aoptions;
@@ -394,6 +422,11 @@ end;
 function trecordlist.datapo: pointer;
 begin
  result:= fdata;
+end;
+
+function trecordlist.dataend: pointer;
+begin
+ result:= fdata+fcount*frecordsize;
 end;
 
 function trecordlist.newitem: pointer;
@@ -444,30 +477,33 @@ var
  int1: integer;
  po1: pchar;
 begin
- if value > fcount then begin
-  if fcapacity < value then begin
-   capacity:= value + value div 8 + growstep;
-  end;
-  fillchar((fdata+fcount*frecordsize)^,(value-fcount)*frecordsize,0);
-  if rels_needsinitialize in fstate then begin
-   po1:= fdata + fcount * frecordsize;
-   for int1:= fcount to value - 1 do begin
-    initializerecord(po1^);
-    inc(po1,frecordsize);
+ if value <> fcount then begin
+  if value > fcount then begin
+   if fcapacity < value then begin
+    capacity:= value + value div 8 + growstep;
    end;
-  end;
-  fcount:= value;
- end
- else begin
-  if rels_needsfinalize in fstate then begin
-   po1:= fdata + value * frecordsize;
-   for int1:= value to fcount - 1 do begin
-    finalizerecord(po1^);
-    inc(po1,frecordsize);
+   fillchar((fdata+fcount*frecordsize)^,(value-fcount)*frecordsize,0);
+   if rels_needsinitialize in fstate then begin
+    po1:= fdata + fcount * frecordsize;
+    for int1:= fcount to value - 1 do begin
+     initializerecord(po1^);
+     inc(po1,frecordsize);
+    end;
    end;
+   fcount:= value;
+  end
+  else begin
+   if rels_needsfinalize in fstate then begin
+    po1:= fdata + value * frecordsize;
+    for int1:= value to fcount - 1 do begin
+     finalizerecord(po1^);
+     inc(po1,frecordsize);
+    end;
+   end;
+   fcount:= value;
+   checkcapacity;
   end;
-  fcount:= value;
-  checkcapacity;
+  change;
  end;
 end;
 
@@ -528,16 +564,16 @@ begin
 end;
 
 function trecordlist.getitempo(const index: integer): pointer;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  if index < 0 then begin
   result:= nil;
  end
  else begin
-  int1:= index;
-  checkindex(int1);
-  result:= fdata + int1 * frecordsize;
+//  int1:= index;
+  checkindex(index);
+  result:= fdata + index * frecordsize;
  end;
 end;
 
@@ -554,6 +590,7 @@ begin
  if rels_needscopy in fstate then begin
   copyrecord(po1^);
  end;
+ change;
 end;
 
 procedure trecordlist.clear;
@@ -611,6 +648,7 @@ begin
    freemem(fdata);
    fdata:= nil;
   end;
+  change;
  end;
 end;
 
@@ -625,6 +663,11 @@ begin
 end;
 
 procedure trecordlist.copyrecord(var item);
+begin
+ //dummy
+end;
+
+procedure trecordlist.change;
 begin
  //dummy
 end;
@@ -1472,6 +1515,124 @@ begin
  lock;
  result:= inherited getlast;
  unlock;
+end;
+
+{ trecordmap }
+
+constructor trecordmap.create(const arecordsize: integer;
+                                 const aoptions: recordliststatesty = []);
+begin
+ forder:= -1;
+ inherited;
+end;
+
+procedure trecordmap.change;
+var
+ int1: integer;
+begin
+ if fhasindex then begin
+  for int1:= 0 to high(findexes) do begin
+   findexes[int1]:= nil;
+  end;
+  fhasindex:= false;
+ end;
+end;
+
+procedure trecordmap.setcomparefuncs(const afuncs: array of sortcomparemethodty);
+var
+ int1: integer;
+begin
+ if forder > high(afuncs) then begin
+  forder:= -1;
+ end;
+ change;
+ setlength(findexes,length(afuncs));
+ setlength(fcomparefuncs,length(afuncs));
+ for int1:= 0 to high(fcomparefuncs) do begin
+  fcomparefuncs[int1]:= afuncs[int1];
+ end;
+end;
+
+procedure trecordmap.sort(const aindexnum: integer);
+begin
+ mergesortpointer(fdata,frecordsize,fcount,fcomparefuncs[aindexnum],
+                                                      findexes[aindexnum]);
+ fhasindex:= true;
+end;
+
+function trecordmap.internalfind(const aindexnum: integer; const item;
+               out aindex: integer; out adata: pointer): boolean;
+begin
+ result:= false;
+ aindex:= -1;
+ adata:= nil;
+ if fcount > 0 then begin
+  if findexes[aindexnum] = nil then begin
+   sort(aindexnum);
+  end;
+  result:= findarrayitem(item,findexes[aindexnum],
+                                fcomparefuncs[aindexnum],aindex);
+  if aindex < fcount then begin
+   adata:= findexes[aindexnum][aindex];
+  end;
+ end;
+end;
+
+function trecordmap.internalgetitempo(const aorder: integer;
+                                             const index: integer): pointer;
+begin
+ checkindex(index);
+ if aorder >= 0 then begin
+  if findexes[aorder] = nil then begin
+   sort(aorder);
+  end;
+  result:= findexes[aorder][index];
+ end
+ else begin
+  result:= fdata + index * frecordsize;
+ end;
+end;
+
+procedure trecordmap.setitem(const index: integer; const source);
+var
+ po1: pointer;
+begin
+ po1:= internalgetitempo(forder,index);
+ if rels_needsfinalize in fstate then begin
+  finalizerecord(po1^);
+ end;
+ move(source,(po1)^,frecordsize);
+ if rels_needscopy in fstate then begin
+  copyrecord(po1^);
+ end;
+ change;
+end;
+
+procedure trecordmap.getitem(const index: integer; out dest);
+var
+ po1: pointer;
+begin
+ po1:= internalgetitempo(forder,index);
+ move(po1^,dest,frecordsize);
+ if rels_needscopy in fstate then begin
+  copyrecord(po1^);
+ end;
+end;
+
+function trecordmap.getitempo(const index: integer): pointer;
+begin
+ result:= nil;
+ if index >= 0 then begin
+  result:= internalgetitempo(forder,index);
+ end;
+end;
+
+procedure trecordmap.setorder(const avalue: integer);
+begin
+ if (avalue < -1) or (avalue > high(findexes)) then begin
+  raise exception.create('Invalid order index '+inttostr(avalue)+'.');
+ end;
+ forder:= avalue;
 end;
 
 end.

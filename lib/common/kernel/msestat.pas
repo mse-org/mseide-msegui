@@ -270,9 +270,12 @@ function canstatstate(const editoptions: optionseditty;
 function canstatoptions(const editoptions: optionseditty;
                          const stat: tstatfiler): boolean;
 
+procedure readstringar(const reader: treader; out avalue: stringarty);
+procedure writestringar(const writer: twriter; const avalue: stringarty);
+
 implementation
 uses
- sysutils,mseformatstr,msefileutils;
+ sysutils,mseformatstr,msefileutils,msearrayutils;
 
 type
  tdatalist1 = class(tdatalist);
@@ -280,6 +283,30 @@ type
   private
    fcapacity: longint;
  end;
+
+procedure readstringar(const reader: treader; out avalue: stringarty);
+var
+ int1: integer;
+begin
+ reader.readlistbegin;
+ int1:= 0;
+ while not reader.endoflist do begin
+  additem(avalue,reader.readstring,int1);
+ end;
+ reader.readlistend;
+ setlength(avalue,int1);
+end;
+
+procedure writestringar(const writer: twriter; const avalue: stringarty);
+var
+ int1: integer;
+begin
+ writer.writelistbegin;
+ for int1:= 0 to high(avalue) do begin
+  writer.writestring(avalue[int1]);
+ end;
+ writer.writelistend;
+end;
 
 function canstatvalue(const editoptions: optionseditty;
                          const stat: tstatfiler): boolean;

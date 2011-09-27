@@ -24,7 +24,7 @@ unit mseapplication;
 interface
 uses
  classes,mseclasses,mseevent,mseglob,sysutils,msetypes,mselist,
-     msethread,msesys,{msethreadcomp,}msestrings
+     msethread,msesystypes,msesys,{msethreadcomp,}msestrings
      {$ifdef mse_with_ifi},mseifiglob{$endif};
  
 type
@@ -367,7 +367,8 @@ var
  
 implementation
 uses
- msebits,msesysintf,msesysutils,msefileutils,msedatalist
+ msebits,msesysintf1,msesysintf,msesysutils,msefileutils,msedatalist,
+ msearrayutils
  {$ifdef mse_debuggdisync},msegraphics{$endif};
 
 type

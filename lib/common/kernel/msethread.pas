@@ -15,7 +15,7 @@ unit msethread;
 interface
 uses
  {$ifdef FPC}{$ifdef UNIX}cthreads,{$endif}classes{$else}Classes{$endif},
- {mseclasses,}mselist,mseevent,msesys,msetypes,sysutils;
+ {mseclasses,}mselist,mseevent,msesystypes,msesys,msetypes,sysutils;
 
 {$ifndef FPC}
 const
@@ -132,7 +132,7 @@ function synchronizeevent(const aevent: tsynchronizeevent): boolean;
 implementation
 
 uses
- msesysintf,mseapplication;
+ msesysintf1,msesysintf,mseapplication;
  
 function synchronizeevent(const aevent: tsynchronizeevent): boolean;
           //true if not aborted, does not free aevent

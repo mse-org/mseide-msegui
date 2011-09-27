@@ -11,7 +11,7 @@ unit msenogui;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- sysutils,classes,mseapplication,mseevent,msesys,msestrings;
+ sysutils,classes,mseapplication,mseevent,msesystypes,msestrings;
 type
  tnoguiapplication = class(tcustomapplication)
   private
@@ -39,7 +39,7 @@ function application: tnoguiapplication;
  
 implementation
 uses
- msesysutils,msesysintf,msetimer,msenoguiintf,msethread;
+ msesysutils,msesysintf1,msetimer,msenoguiintf,msethread;
 var
  appinst: tnoguiapplication;
  

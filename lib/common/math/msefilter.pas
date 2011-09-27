@@ -239,7 +239,7 @@ type
  
 implementation
 uses
- sysutils,math;
+ sysutils,math,msearrayutils;
 type
  tdoubleinputconn1 = class(tdoubleinputconn);
 

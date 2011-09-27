@@ -113,7 +113,7 @@ procedure addobjectinfoitem(var dest: objectinfoarty; const aobj: tobject;
                      
 implementation
 uses
- {$ifdef mse_with_ifi}mseificompglob,{$endif}msedatalist,sysutils;
+ {$ifdef mse_with_ifi}mseificompglob,{$endif}msedatalist,sysutils,msearrayutils;
 
 type
  dynarraysetter = procedure(const avalue: pointerarty) of object;

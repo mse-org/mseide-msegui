@@ -98,7 +98,7 @@ procedure writefpcresourcestrings(const outstream: ttextstream;
 
 implementation
 uses
- sysutils,mseformatstr,msedatalist,typinfo,msebits,msewidgets;
+ sysutils,mseformatstr,msearrayutils,typinfo,msebits,msewidgets;
 
 type
  treader1 = class(treader);

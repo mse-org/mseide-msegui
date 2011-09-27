@@ -13,7 +13,8 @@ unit msefileutils;
 
 interface
 uses
- msesysintf,msedatalist,msesys,msebits,msetypes,msestream,msestrings;
+ msesysintf,msearrayutils,msedatalist,msesystypes,msesys,msebits,msetypes,
+ msestream,msestrings;
 
 type
  filelistoptionty = (flo_sortname,flo_sorttime,flo_sortsize,

@@ -26,7 +26,8 @@ interface
 
 uses 
  sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses,msedatabase,
- msestrings,msedatalist,mseapplication,mseglob,msetimer,msesysenv,msearrayprops;
+ msestrings,msearrayutils,msedatalist,
+ mseapplication,mseglob,msetimer,msesysenv,msearrayprops;
 
 type 
  TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,

@@ -11,7 +11,7 @@ unit mseprocmonitor;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- msesys,mseglob;
+ msesystypes,mseglob;
 {$ifdef FPC}
  {$include ../mseprocmonitor.inc}
 {$else}
@@ -20,7 +20,7 @@ uses
 
 implementation
 uses 
- msethread,msetypes,windows,sysutils,msedatalist,mseapplication;
+ msethread,msetypes,windows,sysutils,msearrayutils,mseapplication;
 type
  handlearty = array of thandle;
 

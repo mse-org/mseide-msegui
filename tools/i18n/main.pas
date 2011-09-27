@@ -19,9 +19,12 @@ unit main;
 
 interface
 uses
- mseforms,msefiledialog,msestat,msestatfile,msesimplewidgets,msegrids,msewidgetgrid,
- mselistbrowser,msedataedits,typinfo,msedatanodes,msegraphedits,msestream,mseglob,
- msemenus,classes,msetypes,msestrings,msethreadcomp,mseguiglob,msegui,mseresourceparser,
+ mseforms,msefiledialog,msestat,msestatfile,msesimplewidgets,msegrids,
+ msewidgetgrid,
+ mselistbrowser,msedataedits,typinfo,msedatanodes,msegraphedits,msestream,
+ mseglob,
+ msemenus,classes,msetypes,msestrings,msethreadcomp,mseguiglob,msegui,
+ mseresourceparser,
  msedialog,msememodialog,mseobjecttext;
 
 const
@@ -97,7 +100,7 @@ type
    procedure exitexe(const sender: TObject);
   private
    datastream: ttextdatastream;
-   alang: integer;
+//   alang: integer;
    fdatachanged: boolean;
    procedure datachanged;
    procedure updatecaption;
@@ -129,10 +132,10 @@ var
 
 implementation
 uses
- main_mfm,msefileutils,msesys,sysutils,mselist,project,
+ main_mfm,msefileutils,msesystypes,msesys,sysutils,mselist,project,
  rtlconsts,mseprocutils,
  msewidgets,mseparser,mseformdatatools,mseresourcetools,
- msedatalist,msesettings,msesysenv,messagesform,mseclasses,mseeditglob;
+ msearrayutils,msesettings,msesysenv,messagesform,mseclasses,mseeditglob;
 
 const
  translateext = 'trans';
@@ -378,7 +381,7 @@ var
  node,node1,node2: tpropinfonode;
  int1,int2: integer;
  str1: string;
- po1: pchar;
+// po1: pchar;
 begin
  scanner:= nil;
  parser:= nil;
@@ -452,7 +455,7 @@ function tmainfo.readmodule(const stream: tmsefilestream): msestring;
 var
  memstream: tmemorystream;
  node: tpropinfonode;
- int1: integer;
+// int1: integer;
 begin
  memstream:= tmemorystream.Create;
  result:= '';
@@ -815,7 +818,7 @@ var
  commandstring: msestring;
  mstr1: msestring;
  macroar: macroinfoarty;
- actdir: filenamety;
+// actdir: filenamety;
  dirbefore: filenamety;
  error: boolean;
 

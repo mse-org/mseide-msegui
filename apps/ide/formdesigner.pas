@@ -320,7 +320,7 @@ uses
  formdesigner_mfm,mselist,msekeyboard,msepointer,msebits,sysutils,
  msestockobjects,msedrawtext,selectsubmoduledialogform,mseshapes,settaborderform,
  msedatalist,objectinspector,projectoptionsform,main,msedatamodules,msetypes,
- setcreateorderform,mseactions,componentstore;
+setcreateorderform,mseactions,componentstore,msearrayutils;
 
 type
  tcomponent1 = class(tcomponent);

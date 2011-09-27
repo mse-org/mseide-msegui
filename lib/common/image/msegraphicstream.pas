@@ -84,7 +84,7 @@ function readfpgraphic(const source: tstream; const readerclass: fpreaderclassty
 
 implementation
 uses
- msestockobjects,msegraphutils,msedatalist;
+ msestockobjects,msegraphutils,msearrayutils;
  
 type
  graphicformatinfoty = record

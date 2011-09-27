@@ -782,7 +782,7 @@ type
 
 implementation
 uses
- sysutils,msebits,msekeyboard;
+ sysutils,msebits,msekeyboard,msearrayutils;
 
 type
  tdatalist1 = class(tdatalist);
@@ -3277,7 +3277,8 @@ begin
  include(fstate,ns_nosubnodestat);
 end;
 
-function trecordtreelistedititem.getfieldtext(const fieldindex: integer): msestring;
+function trecordtreelistedititem.getfieldtext(
+                                 const fieldindex: integer): msestring;
 begin
  result:= '';
 end;

@@ -13,7 +13,7 @@ interface
 
 uses
  classes,db,msedb,msetypes,msestrings,mseclasses,msearrayprops,mselist,
- mseapplication,mseglob;
+ msearrayutils,mseapplication,mseglob;
  
 type
 
@@ -370,7 +370,7 @@ type
   
 implementation
 uses
- msedatalist,rtlconsts,sysutils,msereal;
+ rtlconsts,sysutils,{msereal,}mseformatstr;
  
 type 
  tarrayprop1 = class(tarrayprop);
@@ -1196,7 +1196,7 @@ procedure tcustomlookupbuffer.checkarrayindex(const value;
                const index: integer);
 begin
  checkbuffer;
- msedatalist.checkarrayindex(value,index);
+ msearrayutils.checkarrayindex(value,index);
 end;
 
 function tcustomlookupbuffer.fieldnamestext: stringarty;
