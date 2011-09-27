@@ -77,7 +77,7 @@ type
  
 implementation
 uses
- msecryptio,msesys,mseapplication,msestream;
+ msecryptio,msesys,msesystypes,mseapplication,msestream;
  
 { tcustomsercommcomp }
 
@@ -116,7 +116,7 @@ end;
 
 procedure tcustomsercommcomp.internaldisconnect;
 begin
- fpipes.handle:= invalidfilehandle;
+ fpipes.handle:= msesystypes.invalidfilehandle;
  inherited;
  fport.close;
 end;
