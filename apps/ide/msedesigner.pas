@@ -4950,9 +4950,11 @@ begin
     raise exception.Create('Invalid component name,');
    end;
    if acomponent.name <> newname then begin
-    comp1:= acomponent.getparentcomponent;
-    if (comp1 <> nil) and (comp1.findcomponent(newname) <> nil) then begin
-     raise EComponentError.Createfmt(SDuplicateName,[newname]);
+    if stringicomp(acomponent.name,newname) <> 0 then begin
+     comp1:= acomponent.getparentcomponent;
+     if (comp1 <> nil) and (comp1.findcomponent(newname) <> nil) then begin
+      raise EComponentError.Createfmt(SDuplicateName,[newname]);
+     end;
     end;
     po1^.components.namechanged(acomponent,newname);
     fdescendentinstancelist.componentnamechanged(po1,acomponent,newname);
