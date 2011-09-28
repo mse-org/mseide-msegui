@@ -117,9 +117,9 @@ begin
   ok:= true;
   po1:= find(fontdata^);
   with fontdata^ do begin 
-   font:= 0;
    if po1 = nil then begin
     if not internalgetfont(drawinfo.getfont,h1) then begin
+     font:= 0;
      ok:= false;
      exit;
     end;
@@ -132,6 +132,7 @@ begin
    end;
    inc(po1^.refcount);
 //   height:= po1^.height;
+   font:= po1^.font;
    ascent:= po1^.ascent;
    descent:= po1^.descent;
    linespacing:= po1^.linespacing;
