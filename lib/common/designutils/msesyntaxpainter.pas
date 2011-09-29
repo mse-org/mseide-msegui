@@ -63,7 +63,8 @@ type
  charsty = set of char;
  charspoty = ^charsty;
 
- keywordarty = array of thashedmsestrings;
+// keywordarty = array of thashedmsestrings;
+ keywordarty = array of tpointermsestringhashdatalist;
 
  refreshinfoty = record
   astart,count: integer;
@@ -123,7 +124,8 @@ type
   keywordchars: charsty;
   scopeendchars,scopestartchars: charsty;
   keywordar: keywordarty;
-  keywordnames: thashedstrings;
+//  keywordnames: thashedstrings;
+  keywordnames: tpointeransistringhashdatalist;
   colors: syntaxcolorinfoty;
  end;
 
@@ -340,7 +342,7 @@ begin
   charstyles:= tcharstyledatalist.create;
   charstyles.add; //default
   keywordchars:= defaultkeywordchars;
-  keywordnames:= thashedstrings.create;
+  keywordnames:= tpointeransistringhashdatalist.create;
   with colors do begin
    font:= cl_default;
    background:= cl_default;
@@ -902,7 +904,7 @@ var
   result:= true;
  end;
  
- procedure addname(list: thashedstrings; const name: lstringty; nummer: integer);
+ procedure addname(list: tpointeransistringhashdatalist; const name: lstringty; nummer: integer);
  var
   str1: string;
  begin
@@ -916,9 +918,9 @@ var
   list.add(str1,pointer(nummer+1));
  end;
 
- function findname(list: thashedstrings; const name: lstringty): integer;
+ function findname(list: tpointeransistringhashdatalist; const name: lstringty): integer;
  begin
-  result:= ptrint(list.findi(name));
+  result:= ptrint(list.find(struppercase(name)));
   if result = 0 then begin
    namenotfound;
   end;
@@ -930,8 +932,8 @@ const
 var
  flags: set of tokennrty;
  str1: string;
- keys: thashedstrings;
- scopenames,stylenames: thashedstrings;
+ keys: tpointeransistringhashdatalist;
+ scopenames,stylenames: tpointeransistringhashdatalist;
  int1,int2,int3: integer;
  lstr1,lstr2,lstr3: lstringty;
  global: boolean;
@@ -955,9 +957,9 @@ begin
  initsyntaxdef(result);
  syntaxdefpo:= @fsyntaxdefs[result];
  with syntaxdefpo^ do begin
-  keys:= thashedstrings.create;
-  scopenames:= thashedstrings.create;
-  stylenames:= thashedstrings.create;
+  keys:= tpointeransistringhashdatalist.create;
+  scopenames:= tpointeransistringhashdatalist.create;
+  stylenames:= tpointeransistringhashdatalist.create;
   keys.add(tokens);
   stylenames.add('',pointer(1)); //default
  // fcharstyles.add; //default
@@ -973,7 +975,7 @@ begin
     if (strlnscan(pointer(line),' ',length(line)) <> nil) and (checkfirstchar(line,'#') = nil) then begin
      stringtolstring(line,lstr1);
      nextword(lstr1,lstr2);
-     int1:= ptrint(keys.findi(lstr2));
+     int1:= ptrint(keys.find(struppercase(lstr2)));
      if int1 <> 0 then begin
       akttoken:= tokennrty(int1-1);
       if akttoken in (flags - tn_canmultiple) then begin
@@ -995,7 +997,8 @@ begin
           invalidtoken;
          end;
          setlength(keywordar,length(keywordar)+1);
-         keywordar[high(keywordar)]:= thashedmsestrings.create;
+//         keywordar[high(keywordar)]:= thashedmsestrings.create;
+         keywordar[high(keywordar)]:= tpointermsestringhashdatalist.create;
          addname(keywordnames,lstr3,length(keywordar));
         end;
         tn_colors: begin

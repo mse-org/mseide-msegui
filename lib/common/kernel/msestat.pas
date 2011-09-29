@@ -85,7 +85,7 @@ type
 
  sectionty = record
   fileposition: integer;
-  names: thashedmsestrings;
+  names: tpointermsestringhashdatalist;
   count: integer;
   values: msestringarty;
  end;
@@ -99,7 +99,7 @@ type
 
  tstatreader = class(tstatfiler)
   private
-   fsectionlist: thashedmsestrings;
+   fsectionlist: tpointermsestringhashdatalist;
    fsections: sectionarty;
    fsectioncount: integer;
    factsection: psectionty;
@@ -597,7 +597,7 @@ constructor tstatreader.create(const astream: ttextstream;
                                   const aencoding: charencodingty = ce_utf8n);
 begin
  inherited;
- fsectionlist:= thashedmsestrings.create;
+ fsectionlist:= tpointermsestringhashdatalist.create;
  readdata;
 end;
 
@@ -653,7 +653,7 @@ begin
      fsectionlist.add(copy(str1,2,int1-2),pointer(ptruint(fsectioncount)));
      with fsections[fsectioncount-1] do begin
       fileposition:= fstream.position;
-      names:= thashedmsestrings.create;
+      names:= tpointermsestringhashdatalist.create;
       count:= 0;
       while fstream.readln(str1) do begin
        if (length(str1) > 0) and (str1[1] = '[') then begin

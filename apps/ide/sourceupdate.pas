@@ -37,7 +37,7 @@ type
    procedure addunitinfo(ainfo: punitinfoty);
  end;
 
- tfilenamelist = class(thashedmsestringobjects)
+ tfilenamelist = class(tobjectmsestringhashdatalist)
   public
    procedure add(const key: filenamety; info: punitinfoty);
    function find(const key: filenamety): tfilenameinfo;
@@ -46,7 +46,8 @@ type
 
  tunitinfolist = class(tobjectqueue)
   private
-   fnamelist: thashedstrings;
+//   fnamelist: thashedstrings;
+   fnamelist: tpointeransistringhashdatalist;
   protected
    function getitempo(const index: integer): punitinfoty;
   public
@@ -550,7 +551,8 @@ end;
 
 constructor tunitinfolist.create;
 begin
- fnamelist:= thashedstrings.create;
+// fnamelist:= thashedstrings.create;
+ fnamelist:= tpointeransistringhashdatalist.create;
  inherited create(true);
 end;
 
@@ -648,7 +650,7 @@ end;
 
 function tunitinfolist.finditembyunitname(const aname: string): punitinfoty;
 begin
- result:= fnamelist.findi(aname);
+ result:= fnamelist.find(struppercase(aname));
 end;
 
 { tsourceupdater }
@@ -2124,7 +2126,7 @@ begin
  if not infopo^.interfacecompiled or
        not infopo^.implementationcompiled and not interfaceonly then begin
   if infopo^.unitname <> '' then begin
-   funitinfolist.fnamelist.delete(infopo^.unitname);
+   funitinfolist.fnamelist.delete(ansistring(infopo^.unitname),true);
   end;
   case infopo^.proglang of
    pl_c: begin

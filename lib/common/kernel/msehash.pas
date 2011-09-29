@@ -14,147 +14,8 @@ unit msehash;
 interface
 uses
  msestrings,msetypes;
-const
- defaultbucketcount = $20;
- defaultgrowstep = 8;
-
+ 
 type
- datastatety = (ds_empty,ds_data);
- bucketty = record
-  count: integer;
-  keys: array of ptruint;    //0-> free
-  datapo: pointer;
- end;
- pbucketty = ^bucketty;
- bucketarty = array of bucketty;
-
- tbucketlist = class
-  private
-   fbuckets: bucketarty;
-   fsize: integer;
-   fmask1: longword;
-   fcapacitystep: integer;
-   fstepbucket,fstepindex: integer;
-   procedure invalidkey;
-   function bucketindex(const key: ptruint): integer;
-  protected
-   fcount: integer;
-   procedure freedata(var data); virtual;
-   procedure initdata(var data); virtual;
-   function add(const key: ptruint; const data): pointer; //key <> 0
-               //returns pointer to new data, @data can be nil -> data inited with 0
-   function internalfind(const key: ptruint; var bucket,index: integer): boolean;
-   function find(const key: ptruint): pointer;
-   function next: pointer;
-  public
-   constructor create(recordsize: integer; abucketcount: integer = defaultbucketcount);
-   destructor destroy; override;
-   procedure clear;
-   function count: integer;
-   function delete(const key: ptruint): boolean; //true if found
- end;
-
- datastringty = record
-  key: string;
-  data: pointer;
- end;
- pdatastringty = ^datastringty;
-
- stringbucketty = array of datastringty;
- stringbucketpoty = ^stringbucketty;
- stringbucketarty = array of stringbucketty;
-
- thashedstrings = class
-  private
-   fbuckets: stringbucketarty;
-   fmask: longword;
-   fcapacitystep: integer;
-   fcount: integer;
-   fstepbucket,fstepindex: integer;
-   function getbucketcount: integer;
-   procedure setbucketcount(const Value: integer);
-   function internalfind(const key: string): pdatastringty; overload;
-   function internalfind(const key: lstringty): pdatastringty; overload;
-  public
-   constructor create;
-   procedure clear; virtual;
-   procedure add(const key: string; data: pointer = pointer($ffffffff)); overload;
-                         //nil nicht erlaubt
-   procedure add(const keys: array of string;
-                   startindex: pointer = pointer($00000001)); overload;
-                             //data = arrayindex + startindex
-   procedure delete(const key: lstringty); overload; virtual;
-   procedure delete(const key: string); overload;
-   function find(const key: string): pointer; overload;     //casesensitive
-   function find(const key: lstringty): pointer; overload;  //casesensitive
-   function findi(const key: string): pointer; overload;    //caseinsensitive
-   function findi(const key: lstringty): pointer; overload; //caseinsensitive
-   property bucketcount: integer read getbucketcount write setbucketcount default defaultbucketcount;
-   property count: integer read fcount;
-   function next: pdatastringty;
- end;
-
- msedatastringty = record
-  key: msestring;
-  data: pointer;
- end;
- pmsedatastringty = ^msedatastringty;
-
- msestringbucketty = array of msedatastringty;
- pmsestringbucketty = ^msestringbucketty;
- msestringbucketarty = array of msestringbucketty;
-
- thashedmsestrings = class
-  private
-   fcount: integer;
-   fbuckets: msestringbucketarty;
-   fmask: longword;
-   fcapacitystep: integer;
-   fstepbucket,fstepindex: integer;
-   function getbucketcount: integer;
-   procedure setbucketcount(const Value: integer);
-   function internalfind(const key: msestring): pmsedatastringty;
-  public
-   constructor create;
-   procedure clear; virtual;
-   procedure add(const key: msestring; data: pointer = pointer($ffffffff)); overload;
-   procedure add(const keys: array of msestring;
-                       startindex:  pointer = pointer($00000001));
-               overload; //data = arrayindex + startindex
-   procedure delete(const key: msestring); virtual;
-   function find(const key: msestring): pointer; overload;
-   function find(const key: lmsestringty): pointer; overload;
-   function findi(const key: msestring): pointer; overload;
-   function findi(const key: lmsestringty): pointer; overload;
-   property bucketcount: integer read getbucketcount write setbucketcount default defaultbucketcount;
-   property count: integer read fcount;
-   function next: pmsedatastringty;
- end;
-
- thashedmsestringobjects = class(thashedmsestrings)
-  public
-   destructor destroy; override;
-   procedure clear; override;
-   procedure add(const key: msestring; aobject: tobject);
-   procedure delete(const key: msestring); override;
-   function find(const key: msestring): tobject; overload;
-   function find(const key: lmsestringty): tobject; overload;
-   function findi(const key: msestring): tobject; overload;
-   function findi(const key: lmsestringty): tobject; overload;
- end;
-
- thashedstringobjects = class(thashedstrings)
-  public
-   destructor destroy; override;
-   procedure clear; override;
-   procedure add(const key: string; aobject: tobject);
-   procedure delete(const key: lstringty); override;
-   function find(const key: string): tobject; overload;
-   function find(const key: lstringty): tobject; overload;
-   function findi(const key: string): tobject; overload;
-   function findi(const key: lstringty): tobject; overload;
- end;
-
  hashvaluety = longword;
  phashvaluety = ^hashvaluety;
 
@@ -262,6 +123,9 @@ type
    function add(const akey: ptruint): pointer;
    function addunique(const akey: ptruint): pointer;
    function find(const akey: ptruint): pointer;
+   function delete(const akey: ptruint; 
+                         const all: boolean = false): boolean; overload;
+                         //true if found
    function first: pptruintdataty;
    function next: pptruintdataty;
  end;
@@ -317,6 +181,8 @@ type
   protected
    function hashkey(const akey): hashvaluety; override;
    function checkkey(const akey; const aitemdata): boolean; override;
+   function hashlkey(const akey: lstringty): hashvaluety;
+   function checklkey(const akey: lstringty; const aitemdata): boolean;
    procedure finalizeitem(var aitemdata); override;
   public
    constructor create(const datasize: integer);
@@ -324,8 +190,13 @@ type
             //returns pointer on ansistringdataty.data
    function addunique(const akey: ansistring): pointer;
    function find(const akey: ansistring): pointer;
+   function find(const akey: lstringty): pointer;
    function delete(const akey: ansistring; 
-                         const all: boolean = false): boolean; //true if found
+                         const all: boolean = false): boolean; overload;
+                         //true if found
+   function delete(const akey: lstringty; 
+                         const all: boolean = false): boolean; overload;
+                         //true if found
    function first: pansistringdataty;
    function next: pansistringdataty;
    procedure iterate(const akey: ansistring;
@@ -353,10 +224,13 @@ type
    procedure checkexact(const aitemdata; var accept: boolean); override;
   public
    constructor create;
-   procedure add(const akey: ansistring; const avalue: pointer);
+   procedure add(const akey: ansistring; const avalue: pointer); overload;
+   procedure add(const keys: array of string;
+                   startindex: pointer = pointer($00000001)); overload;
+                             //data = arrayindex + startindex
    function addunique(const akey: ansistring; const avalue: pointer): boolean;
                    //true if found
-   procedure delete(const akey: ansistring; const avalue: pointer);
+   procedure delete(const akey: ansistring; const avalue: pointer); overload;
    function find(const akey: ansistring): pointer; overload;
    function find(const akey: ansistring; out avalue: pointer): boolean; overload;
    function first: ppointeransistringdataty;
@@ -383,6 +257,8 @@ type
   protected
    function hashkey(const akey): hashvaluety; override;
    function checkkey(const akey; const aitemdata): boolean; override;
+   function hashlkey(const akey: lmsestringty): hashvaluety;
+   function checklkey(const akey: lmsestringty; const aitemdata): boolean;
    procedure finalizeitem(var aitemdata); override;
   public
    constructor create(const datasize: integer);
@@ -390,9 +266,14 @@ type
                  //returns pointer on msestringdataty.data
    function addunique(const akey: msestring): pointer;
    function find(const akey: msestring): pointer; overload;
+   function find(const akey: lmsestringty): pointer; overload;
    function find(const akey: msestring; out acount: integer): pointer; overload;
    function delete(const akey: msestring; 
-                         const all: boolean = false): boolean; //true if found
+                         const all: boolean = false): boolean; overload;
+                                      //true if found
+   function delete(const akey: lmsestringty; 
+                         const all: boolean = false): boolean; overload;
+                                      //true if found
    function first: pmsestringdataty;
    function next: pmsestringdataty;
    procedure iterate(const akey: msestring;
@@ -434,6 +315,38 @@ type
                      const aiterator: pointermsestringiteratorprocty); overload;
  end;
 
+ objectmsestringdataty = record
+  key: msestring;
+  data: tobject;
+ end;
+ pobjectmsestringdataty = ^objectmsestringdataty;
+ objectmsestringhashdataty = record
+  header: hashheaderty;
+  data: objectmsestringdataty;
+ end;
+ pobjectmsestringhashdataty = ^objectmsestringhashdataty;
+
+ objectmsestringiteratorprocty = 
+                       procedure(var aitem: objectmsestringdataty) of object;
+
+ tobjectmsestringhashdatalist = class(tpointermsestringhashdatalist)
+  protected
+   procedure finalizeitem(var aitemdata); override;
+  public
+   procedure add(const akey: msestring; const avalue: tobject);
+   function addunique(const akey: msestring; const avalue: tobject): boolean;
+                   //true if found
+   procedure delete(const akey: msestring; const avalue: tobject);
+   function find(const akey: msestring): tobject; overload;
+   function find(const akey: msestring; out avalue: tobject): boolean; overload;
+   function find(const akey: msestring; out avalue: tobject;
+                                        out acount: integer): boolean; overload;
+   function first: pobjectmsestringdataty;
+   function next: pobjectmsestringdataty;
+   procedure iterate(const akey: msestring;
+                     const aiterator: objectmsestringiteratorprocty); overload;
+ end;
+ 
 function datahash(const data; len: integer): longword; //simple
 function datahash2(const data; len: integer): longword;
 function stringhash(const key: string): longword; overload;
@@ -477,775 +390,50 @@ end;
 
 function stringhash(const key: string): longword; overload;
 var
- I: Integer;
+ int1: integer;
 begin
- Result := 0;
- for I := 1 to Length(key) do begin
-  Result := ((Result shl 2) or (Result shr (SizeOf(Result) * 8 - 2))) xor
-                            Ord(Key[I]);
+ result := 0;
+ for int1 := 1 to length(key) do begin
+  result := ((result shl 2) or (result shr (sizeof(result) * 8 - 2))) xor
+                            ord(key[int1]);
  end;
 end;
 
 function stringhash(const key: lstringty): longword; overload;
 var
- I: Integer;
- po: pchar;
+ int1: integer;
+ po: pcharaty;
 begin
- Result := 0;
- po:= key.po;
- i:= key.len;
- while i > 0 do begin
-  Result := ((Result shl 2) or (Result shr (SizeOf(Result) * 8 - 2))) xor
-                            Ord(po^);
-  inc(po);
-  dec(i);
+ result := 0;
+ po:= pointer(key.po);
+ for int1:= 0 to key.len - 1 do begin;
+  result:= ((result shl 2) or (result shr (sizeof(result) * 8 - 2))) xor
+                            ord(po^[int1]);
  end;
 end;
 
 function stringhash(const key: msestring): longword; overload;
 var
- I: Integer;
+ int1: integer;
 begin
- Result := 0;
- for I := 1 to Length(key) do begin
-  Result := ((Result shl 2) or (Result shr (SizeOf(Result) * 8 - 2))) xor
-                            Ord(Key[I]);
+ result:= 0;
+ for int1 := 1 to length(key) do begin
+  result := ((result shl 2) or (result shr (sizeof(result) * 8 - 2))) xor
+                            ord(key[int1]);
  end;
 end;
 
 function stringhash(const key: lmsestringty): longword; overload;
 var
- I: Integer;
- po: pmsechar;
-begin
- Result := 0;
- po:= key.po;
- i:= key.len;
- while i > 0 do begin
-  Result := ((Result shl 2) or (Result shr (SizeOf(Result) * 8 - 2))) xor
-                            Ord(po^);
-  inc(po);
-  dec(i);
- end;
-end;
-
-function maxbitmask(value: longword): longword;
-begin
- if value = 0 then begin
-  result:= 0;
- end
- else begin
-  result:= $ffffffff;
-  while value and $80000000 = 0 do begin
-   result:= result shr 1;
-   value:= value shl 1;
-  end;
- end;
-end;
-
-{ tbucketlist }
-
-constructor tbucketlist.create(recordsize: integer;
-                        abucketcount: integer = defaultbucketcount);
-begin
- fcapacitystep:= defaultgrowstep;
- fsize:= recordsize;
- fmask1:= maxbitmask(abucketcount-1);
- setlength(fbuckets,fmask1+1);
-end;
-
-destructor tbucketlist.destroy;
-begin
- clear;
- inherited;
-end;
-
-function tbucketlist.bucketindex(const key: ptruint): integer;
-begin
- if key = 0 then begin
-  invalidkey;
- end;
- result:= (key xor (key shr 4)) and fmask1;
-end;
-
-procedure tbucketlist.clear;
-var
- int1,int2: integer;
- po1: pchar;
-begin
- for int1:= 0 to high(fbuckets) do begin
-  with fbuckets[int1] do begin
-   po1:= datapo;
-   if po1 <> nil then begin
-    for int2:= 0 to high(keys) do begin
-     if keys[int2] <> 0 then begin
-      freedata(po1^);
-     end;
-     inc(po1,fsize);
-    end;
-    freemem(datapo);
-    datapo:= nil;
-    setlength(keys,0);
-    count:= 0;
-   end;
-  end;
- end;
- fcount:= 0;
-end;
-
-procedure tbucketlist.freedata(var data);
-begin
- //dummy
-end;
-
-function tbucketlist.count: integer;
-begin
- result:= fcount;
-end;
-
-procedure tbucketlist.initdata(var data);
-begin
- //dummy
-end;
-
-function tbucketlist.add(const key: ptruint; const data): pointer;
-var
  int1: integer;
+ po: pmsecharaty;
 begin
- with fbuckets[bucketindex(key)] do begin
-  if count >= length(keys) then begin
-   int1:= length(keys);
-   setlength(keys,length(keys)+fcapacitystep);
-   reallocmem(datapo,length(keys)*fsize);
-  end
-  else begin
-   int1:= high(keys);
-   while keys[int1] <> 0 do begin
-    dec(int1);
-   end;
-  end;
-  keys[int1]:= key;
-  result:= pchar(datapo) + int1*fsize;
-  if @data = nil then begin
-   fillchar(result^,fsize,0);
-  end
-  else begin
-   move(data,result^,fsize);
-  end;
-  inc(count);
-  inc(fcount);
-  initdata(result^);
+ result:= 0;
+ po:= pointer(key.po);
+ for int1:= 0 to key.len - 1 do begin
+  result := ((result shl 2) or (result shr (sizeof(result) * 8 - 2))) xor
+                            ord(po^[int1]);
  end;
-end;
-
-function tbucketlist.internalfind(const key: ptruint; var bucket,index: integer): boolean;
-var
- int1: integer;
-begin
- result:= false;
- bucket:= bucketindex(key);
- with fbuckets[bucket] do begin
-  for int1:= 0 to high(keys) do begin
-   if keys[int1] = key then begin
-    index:= int1;
-    result:= true;
-    break;
-   end;
-  end;
- end;
-end;
-
-function tbucketlist.delete(const key: ptruint): boolean;
-       //true if found
-var
- bucket,index: integer;
-begin
- result:= internalfind(key,bucket,index);
- if result then begin
-  with fbuckets[bucket] do begin
-   freedata((pchar(datapo) + index*fsize)^);
-   dec(count);
-   keys[index]:= 0;
-   dec(fcount);
-  end;
- end;
-end;
-
-procedure tbucketlist.invalidkey;
-begin
- raise exception.Create('Invalid keyvalue.');
-end;
-
-function tbucketlist.find(const key: ptruint): pointer;
-var
- bucket,index: integer;
-begin
- if internalfind(key,bucket,index) then begin
-  result:= pchar(fbuckets[bucket].datapo) + index*fsize;
- end
- else begin
-  result:= nil;
- end;
-end;
-
-function tbucketlist.next: pointer;
-begin
- result:= nil;
- if fcount > 0 then begin
-  inc(fstepindex);
-  repeat
-   if fstepbucket >= length(fbuckets) then begin
-    fstepbucket:= 0;
-    fstepindex:= 0;
-   end;
-   with fbuckets[fstepbucket] do begin
-    if fstepindex >= length(keys) then begin
-     inc(fstepbucket);
-     fstepindex:= 0;
-    end
-    else begin
-     if keys[fstepindex] <> 0 then begin
-      result:= pchar(datapo) + fstepindex*fsize;
-     end
-     else begin
-      inc(fstepindex);
-     end;
-    end;
-   end;
-  until result <> nil;
- end;
-end;
-
-{ thashedstrings }
-
-constructor thashedstrings.create;
-begin
- fcapacitystep:= defaultgrowstep;
- setbucketcount(defaultbucketcount);
-end;
-
-procedure thashedstrings.add(const key: string; data: pointer = pointer($ffffffff));
-var
- po: stringbucketpoty;
- po1: pdatastringty;
- int1: integer;
- freefound: boolean;
-begin
- if data = nil then begin
-  raise exception.create('nil not allowed.');
- end;
- inc(fcount);
- po:= @fbuckets[stringhash(key) and fmask];
- po1:= @po^[0];
- freefound:= false;
- for int1:= 0 to high(po^) do begin
-  if po1^.data = nil then begin
-   freefound:= true;
-   break;
-  end;
-  inc(po1)
- end;
- if not freefound then begin
-  int1:= length(po^);
-  setlength(po^,int1+fcapacitystep);
-  po1:= @po^[int1];
- end;
- po1^.key:= key;
- po1^.data:= data;
-end;
-
-procedure thashedstrings.add(const keys: array of string;
-                 startindex:  pointer = pointer($00000001));
-var
- ca1: longword;
-begin
- if ptruint(length(keys)) + ptruint(startindex) <= ptruint(length(keys)) then begin
-  raise exception.create('nil not allowed.');
- end;
- for ca1:= 0 to high(keys) do begin
-  add(keys[ca1],pointer(ca1+ptruint(startindex)));
- end;
-end;
-
-procedure thashedstrings.clear;
-var
- int1: integer;
-begin
- for int1:= 0 to high(fbuckets) do begin
-  fbuckets[int1]:= nil;
- end;
- fcount:= 0;
-end;
-
-function thashedstrings.internalfind(const key: string): pdatastringty;
-var
- po: stringbucketpoty;
- po1: pdatastringty;
- int1: integer;
-begin
- result:= nil;
- if fcount > 0 then begin
-  po:= @fbuckets[stringhash(key) and fmask];
-  po1:= @po^[0];
-  for int1:= 0 to high(po^) do begin
-   if (po1^.data <> nil) and (po1^.key = key) then begin
-    result:= po1;
-    break;
-   end;
-   inc(po1)
-  end;
- end;
-end;
-
-function thashedstrings.internalfind(const key: lstringty): pdatastringty;
-var
- po: stringbucketpoty;
- po1: pdatastringty;
- int1,int2: integer;
-begin
- result:= nil;
- if fcount > 0 then begin
-  po:= @fbuckets[stringhash(key) and fmask];
-  po1:= @po^[0];
-  for int1:= 0 to high(po^) do begin
-   if po1^.data <> nil then begin
-    int2:= length(po1^.key);
-    if int2 > 0 then begin
-     if int2 < key.len then begin
-      int2:= key.len;
-     end;
-     if strlcomp(key.po,pointer(po1^.key),int2) = 0 then begin
-      result:= po1;
-      break;
-     end;
-    end;
-   end;
-   inc(po1)
-  end;
- end;
-end;
-
-function thashedstrings.find(const key: lstringty): pointer;
-var
- po1: pdatastringty;
-begin
- po1:= internalfind(key);
- if po1 <> nil then begin
-  result:= po1^.data;
- end
- else begin
-  result:= nil;
- end;
-end;
-
-function thashedstrings.find(const key: string): pointer;
-var
- po1: pdatastringty;
-begin
- po1:= internalfind(key);
- if po1 <> nil then begin
-  result:= po1^.data;
- end
- else begin
-  result:= nil;
- end;
-end;
-
-
-function thashedstrings.findi(const key: string): pointer;
-begin
- if fcount > 0 then begin
-  result:= find(struppercase(key));
- end
- else begin
-  result:= nil;
- end;
-end;
-
-function thashedstrings.findi(const key: lstringty): pointer;
-begin
- if fcount > 0 then begin
-  result:= find(struppercase(key));
- end
- else begin
-  result:= nil;
- end;
-end;
-
-procedure thashedstrings.delete(const key: lstringty);
-var
- po1: pdatastringty;
-begin
- while true do begin
-  po1:= internalfind(key);
-  if po1 = nil then begin
-   break;
-  end;
-  po1^.data:= nil;
-  dec(fcount);
- end;
-end;
-
-procedure thashedstrings.delete(const key: string);
-var
- lstr1: lstringty;
-begin
- lstr1.len:= length(key);
- lstr1.po:= pointer(key);
- delete(lstr1);
-end;
-
-function thashedstrings.getbucketcount: integer;
-begin
- result:= length(fbuckets);
-end;
-
-procedure thashedstrings.setbucketcount(const Value: integer);
-begin
- fmask:= maxbitmask(value-1);
- setlength(fbuckets,fmask+1);
-end;
-
-function thashedstrings.next: pdatastringty;
-begin
- result:= nil;
- if fcount > 0 then begin
-  inc(fstepindex);
-  repeat
-   if fstepbucket > high(fbuckets) then begin
-    fstepbucket:= 0;
-    fstepindex:= 0;
-   end;
-   if fstepindex > high(fbuckets[fstepbucket]) then begin
-    inc(fstepbucket);
-    fstepindex:= 0;
-   end
-   else begin
-    if fbuckets[fstepbucket][fstepindex].data <> nil then begin
-     result:= @fbuckets[fstepbucket][fstepindex];
-    end
-    else begin
-     inc(fstepindex);
-    end;
-   end;
-  until result <> nil;
- end;
-end;
-
-{ thashedmsestrings }
-
-constructor thashedmsestrings.create;
-begin
- fcapacitystep:= defaultgrowstep;
- setbucketcount(defaultbucketcount);
-end;
-
-procedure thashedmsestrings.add(const key: msestring;
-                         data: pointer = pointer($ffffffff));
-var
- po: pmsestringbucketty;
- po1: pmsedatastringty;
- int1: integer;
- freefound: boolean;
-begin
- if data = nil then begin
-  raise exception.create('nil not allowed.');
- end;
- inc(fcount);
- po:= @fbuckets[stringhash(key) and fmask];
- po1:= @po^[0];
- freefound:= false;
- for int1:= 0 to high(po^) do begin
-  if po1^.data = nil then begin
-   freefound:= true;
-   break;
-  end;
-  inc(po1)
- end;
- if not freefound then begin
-  int1:= length(po^);
-  setlength(po^,int1+fcapacitystep);
-  po1:= @po^[int1];
- end;
- po1^.key:= key;
- po1^.data:= data;
-end;
-
-procedure thashedmsestrings.add(const keys: array of msestring;
-                  startindex:  pointer = pointer($00000001));
-var
- ca1: longword;
-begin
- if longword(length(keys)) + ptruint(startindex) <= longword(length(keys)) then begin
-  raise exception.create('nil not alowed.');
- end;
- for ca1:= 0 to high(keys) do begin
-  add(keys[ca1],pointer(ca1+ptruint(startindex)));
- end;
-end;
-
-procedure thashedmsestrings.clear;
-var
- int1: integer;
-begin
- for int1:= 0 to high(fbuckets) do begin
-  fbuckets[int1]:= nil;
- end;
- fcount:= 0;
-end;
-
-function thashedmsestrings.internalfind(const key: msestring): pmsedatastringty;
-var
- po: pmsestringbucketty;
- po1: pmsedatastringty;
- int1: integer;
-begin
- result:= nil;
- if fcount > 0 then begin
-  po:= @fbuckets[stringhash(key) and fmask];
-  po1:= @po^[0];
-  for int1:= 0 to high(po^) do begin
-   if (po1^.data <> nil) and (po1^.key = key) then begin
-    result:= po1;
-    break;
-   end;
-   inc(po1)
-  end;
- end;
-end;
-
-function thashedmsestrings.find(const key: lmsestringty): pointer;
-var
- po: pmsestringbucketty;
- po1: pmsedatastringty;
- int1,int2: integer;
-begin
- result:= nil;
- if fcount > 0 then begin
-  po:= @fbuckets[stringhash(key) and fmask];
-  po1:= @po^[0];
-  for int1:= 0 to high(po^) do begin
-   if po1^.data <> nil then begin
-    int2:= length(po1^.key);
-    if int2 > 0 then begin
-     if int2 < key.len then begin
-      int2:= key.len;
-     end;
-     if msestrlcomp(key.po,pointer(po1^.key),int2) = 0 then begin
-      result:= po1^.data;
-      break;
-     end;
-    end;
-   end;
-   inc(po1)
-  end;
- end;
-end;
-
-function thashedmsestrings.find(const key: msestring): pointer;
-var
- po1: pmsedatastringty;
-begin
- po1:= internalfind(key);
- if po1 <> nil then begin
-  result:= po1^.data;
- end
- else begin
-  result:= nil;
- end;
-end;
-
-function thashedmsestrings.findi(const key: lmsestringty): pointer;
-begin
- result:= find(struppercase(key));
-end;
-
-function thashedmsestrings.findi(const key: msestring): pointer;
-begin
- if fcount > 0 then begin
-  result:= find(struppercase(key));
- end
- else begin
-  result:= nil;
- end;
-end;
-
-procedure thashedmsestrings.delete(const key: msestring);
-var
- po1: pmsedatastringty;
-begin
- repeat
-  po1:= internalfind(key);
-  if po1 <> nil then begin
-   dec(fcount);
-   po1^.data:= nil;
-  end;
- until po1 = nil;
-end;
-
-function thashedmsestrings.getbucketcount: integer;
-begin
- result:= length(fbuckets);
-end;
-
-procedure thashedmsestrings.setbucketcount(const Value: integer);
-begin
- fmask:= maxbitmask(value-1);
- setlength(fbuckets,fmask+1);
-end;
-
-function thashedmsestrings.next: pmsedatastringty;
-begin
- result:= nil;
- if fcount > 0 then begin
-  inc(fstepindex);
-  repeat
-   if fstepbucket > high(fbuckets) then begin
-    fstepbucket:= 0;
-    fstepindex:= 0;
-   end;
-   if fstepindex > high(fbuckets[fstepbucket]) then begin
-    inc(fstepbucket);
-    fstepindex:= 0;
-   end
-   else begin
-    if fbuckets[fstepbucket][fstepindex].data <> nil then begin
-     result:= @fbuckets[fstepbucket][fstepindex];
-    end
-    else begin
-     inc(fstepindex);
-    end;
-   end;
-  until result <> nil;
- end;
-end;
-
-{ thashedstringobjects }
-
-destructor thashedstringobjects.destroy;
-begin
- clear;
- inherited;
-end;
-
-procedure thashedstringobjects.clear;
-var
- int1,int2: integer;
-begin
- for int1:= 0 to high(fbuckets) do begin
-  if fbuckets[int1] <> nil then begin
-   for int2:= 0 to high(fbuckets[int1]) do begin
-    if fbuckets[int1][int2].data <> nil then begin
-     tobject(fbuckets[int1][int2].data).free;
-    end;
-   end;
-  end;
-  fbuckets[int1]:= nil;
- end;
- fcount:= 0;
-end;
-
-procedure thashedstringobjects.add(const key: string; aobject: tobject);
-begin
- inherited add(key,aobject);
-end;
-
-procedure thashedstringobjects.delete(const key: lstringty);
-var
- po1: pdatastringty;
-begin
- repeat
-  po1:= internalfind(key);
-  if po1 <> nil then begin
-   tobject(po1^.data).Free;
-   po1^.data:= nil;
-   dec(fcount);
-  end;
- until po1 = nil;
-end;
-
-function thashedstringobjects.find(const key: string): tobject;
-begin
- result:= tobject(inherited find(key));
-end;
-
-function thashedstringobjects.find(const key: lstringty): tobject;
-begin
- result:= tobject(inherited find(key));
-end;
-
-function thashedstringobjects.findi(const key: string): tobject;
-begin
- result:= tobject(inherited findi(key));
-end;
-
-function thashedstringobjects.findi(const key: lstringty): tobject;
-begin
- result:= tobject(inherited findi(key));
-end;
-
-{ thashedmsestringobjects }
-
-destructor thashedmsestringobjects.destroy;
-begin
- clear;
- inherited;
-end;
-
-procedure thashedmsestringobjects.clear;
-var
- int1,int2: integer;
-begin
- for int1:= 0 to high(fbuckets) do begin
-  if fbuckets[int1] <> nil then begin
-   for int2:= 0 to high(fbuckets[int1]) do begin
-    if fbuckets[int1][int2].data <> nil then begin
-     tobject(fbuckets[int1][int2].data).free;
-    end;
-   end;
-  end;
-  fbuckets[int1]:= nil;
- end;
- fcount:= 0;
-end;
-
-procedure thashedmsestringobjects.add(const key: msestring; aobject: tobject);
-begin
- inherited add(key,aobject);
-end;
-
-procedure thashedmsestringobjects.delete(const key: msestring);
-var
- po1: pmsedatastringty;
-begin
- repeat
-  po1:= internalfind(key);
-  if po1 <> nil then begin
-   tobject(po1^.data).Free;
-   po1^.data:= nil;
-   dec(fcount);
-  end;
- until po1 = nil;
-end;
-
-function thashedmsestringobjects.find(const key: msestring): tobject;
-begin
- result:= tobject(inherited find(key));
-end;
-
-function thashedmsestringobjects.find(const key: lmsestringty): tobject;
-begin
- result:= tobject(inherited find(key));
-end;
-
-function thashedmsestringobjects.findi(const key: msestring): tobject;
-begin
- result:= tobject(inherited findi(key));
-end;
-
-function thashedmsestringobjects.findi(const key: lmsestringty): tobject;
-begin
- result:= tobject(inherited findi(key));
 end;
 
 { thashdatalist }
@@ -1711,9 +899,10 @@ begin
  result:= nil;
  if count > 0 then begin
   inc(fcurrentitem,phashdataty(pchar(fdata) + fcurrentitem)^.header.nextlist);
-  if fcurrentitem <> 0 then begin
-   result:= phashdatadataty(pchar(fdata) + fcurrentitem + sizeof(hashheaderty));
+  if fcurrentitem = 0 then begin
+   fcurrentitem:= fassignedroot;
   end;
+  result:= phashdatadataty(pchar(fdata) + fcurrentitem + sizeof(hashheaderty));
  end;
 end;
 
@@ -1795,6 +984,12 @@ end;
 function tptruinthashdatalist.next: pptruintdataty;
 begin
  result:= pptruintdataty(internalnext);
+end;
+
+function tptruinthashdatalist.delete(const akey: ptruint;
+               const all: boolean = false): boolean;
+begin
+ result:= internaldelete(akey,all);
 end;
 
 { tpointerptruinthashdatalist }
@@ -1905,6 +1100,36 @@ begin
  end;
 end;
 
+function tansistringhashdatalist.find(const akey: lstringty): pointer;
+var
+ ha1: hashvaluety;
+ uint1: ptruint;
+ po1: phashdataty;
+begin
+ po1:= nil;
+ if count > 0 then begin
+  ha1:= hashlkey(akey);
+  uint1:= fhashtable[ha1 and fmask];
+  if uint1 <> 0 then begin
+   po1:= phashdataty(pchar(fdata) + uint1);
+   while true do begin
+    if (po1^.header.hash = ha1) and checklkey(akey,po1^.data) then begin
+     break;
+    end;
+    if po1^.header.nexthash = 0 then begin
+     po1:= nil;
+     break;
+    end;
+    po1:= phashdataty(pchar(fdata) + po1^.header.nexthash);
+   end;
+  end;
+ end;
+ result:= po1;
+ if result <> nil then begin
+  result:= @pmsestringdataty(pchar(result)+sizeof(hashheaderty))^.data;
+ end;
+end;
+
 function tansistringhashdatalist.addunique(const akey: ansistring): pointer;
 begin
  result:= find(akey);
@@ -1921,6 +1146,14 @@ begin
  result:= ha1 xor (ha1 shr fhashshift); 
 end;
 
+function tansistringhashdatalist.hashlkey(const akey: lstringty): hashvaluety;
+var
+ ha1: hashvaluety;
+begin
+ ha1:= stringhash(akey);
+ result:= ha1 xor (ha1 shr fhashshift); 
+end;
+
 function tansistringhashdatalist.checkkey(const akey; const aitemdata): boolean;
 var
  int1: integer;
@@ -1931,13 +1164,25 @@ begin
   result:= (int1 = length(ansistringdataty(aitemdata).key)) and
       comparemem(pointer(akey),pointer(ansistringdataty(aitemdata).key),int1);
  end;
-// pointer ansistring(akey) = ansistringdataty(aitemdata).key;
+end;
+
+function tansistringhashdatalist.checklkey(const akey: lstringty;
+                                                const aitemdata): boolean;
+begin
+ result:= (akey.len = length(ansistringdataty(aitemdata).key)) and
+      comparemem(akey.po,pointer(ansistringdataty(aitemdata).key),akey.len);
 end;
 
 function tansistringhashdatalist.delete(const akey: ansistring;
                const all: boolean = false): boolean;
 begin
  result:= internaldelete(akey,all);
+end;
+
+function tansistringhashdatalist.delete(const akey: lstringty;
+               const all: boolean = false): boolean;
+begin
+ result:= internaldelete(lstringtostring(akey),all);
 end;
 
 function tansistringhashdatalist.first: pansistringdataty;
@@ -1967,6 +1212,16 @@ procedure tpointeransistringhashdatalist.add(const akey: ansistring;
                                        const avalue: pointer);
 begin
  ppointer(inherited add(akey))^:= avalue;
+end;
+
+procedure tpointeransistringhashdatalist.add(const keys: array of string;
+                   startindex: pointer = pointer($00000001)); overload;
+var
+ ca1: longword;
+begin
+ for ca1:= 0 to high(keys) do begin
+  add(keys[ca1],pointer(ca1+ptruint(startindex)));
+ end;
 end;
 
 function tpointeransistringhashdatalist.find(const akey: ansistring;
@@ -2064,6 +1319,36 @@ begin
  end;
 end;
 
+function tmsestringhashdatalist.find(const akey: lmsestringty): pointer;
+var
+ ha1: hashvaluety;
+ uint1: ptruint;
+ po1: phashdataty;
+begin
+ po1:= nil;
+ if count > 0 then begin
+  ha1:= hashlkey(akey);
+  uint1:= fhashtable[ha1 and fmask];
+  if uint1 <> 0 then begin
+   po1:= phashdataty(pchar(fdata) + uint1);
+   while true do begin
+    if (po1^.header.hash = ha1) and checklkey(akey,po1^.data) then begin
+     break;
+    end;
+    if po1^.header.nexthash = 0 then begin
+     po1:= nil;
+     break;
+    end;
+    po1:= phashdataty(pchar(fdata) + po1^.header.nexthash);
+   end;
+  end;
+ end;
+ result:= po1;
+ if result <> nil then begin
+  result:= @pmsestringdataty(pchar(result)+sizeof(hashheaderty))^.data;
+ end;
+end;
+
 function tmsestringhashdatalist.find(const akey: msestring;
                                                 out acount: integer): pointer;
 begin
@@ -2089,6 +1374,21 @@ begin
  result:= ha1 xor (ha1 shr fhashshift); 
 end;
 
+function tmsestringhashdatalist.hashlkey(const akey: lmsestringty): hashvaluety;
+var
+ ha1: hashvaluety;
+begin
+ ha1:= stringhash(akey);
+ result:= ha1 xor (ha1 shr fhashshift); 
+end;
+
+function tmsestringhashdatalist.checklkey(const akey: lmsestringty; const aitemdata): boolean;
+begin
+ result:= (akey.len = length(msestringdataty(aitemdata).key)) and
+      comparemem(akey.po,pointer(msestringdataty(aitemdata).key),
+                                               akey.len*sizeof(msechar));
+end;
+
 function tmsestringhashdatalist.checkkey(const akey; const aitemdata): boolean;
 var
  int1: integer;
@@ -2107,6 +1407,12 @@ function tmsestringhashdatalist.delete(const akey: msestring;
                const all: boolean = false): boolean;
 begin
  result:= internaldelete(akey,all);
+end;
+
+function tmsestringhashdatalist.delete(const akey: lmsestringty;
+               const all: boolean = false): boolean;
+begin
+ result:= internaldelete(lstringtostring(akey),all);
 end;
 
 function tmsestringhashdatalist.first: pmsestringdataty;
@@ -2216,6 +1522,67 @@ procedure tpointermsestringhashdatalist.iterate(const akey: msestring;
                const aiterator: pointermsestringiteratorprocty);
 begin
  iterate(akey,keyhashiteratorprocty(aiterator));
+end;
+
+{ tobjectmsestringhashdatalist }
+
+procedure tobjectmsestringhashdatalist.add(const akey: msestring;
+               const avalue: tobject);
+begin
+ inherited add(akey,avalue);
+end;
+
+function tobjectmsestringhashdatalist.addunique(const akey: msestring;
+               const avalue: tobject): boolean;
+begin
+ result:= inherited addunique(akey,avalue);
+end;
+
+procedure tobjectmsestringhashdatalist.delete(const akey: msestring;
+               const avalue: tobject);
+begin
+ inherited delete(akey,avalue);
+end;
+
+function tobjectmsestringhashdatalist.find(const akey: msestring): tobject;
+begin
+ result:= tobject(inherited find(akey));
+end;
+
+function tobjectmsestringhashdatalist.find(const akey: msestring;
+               out avalue: tobject): boolean;
+begin
+ result:= inherited find(akey,pointer(avalue));
+end;
+
+function tobjectmsestringhashdatalist.find(const akey: msestring;
+               out avalue: tobject; out acount: integer): boolean;
+begin
+ result:= inherited find(akey,pointer(avalue),acount);
+end;
+
+function tobjectmsestringhashdatalist.first: pobjectmsestringdataty;
+begin
+ result:= pobjectmsestringdataty(inherited first);
+end;
+
+function tobjectmsestringhashdatalist.next: pobjectmsestringdataty;
+begin
+ result:= pobjectmsestringdataty(inherited next);
+end;
+
+procedure tobjectmsestringhashdatalist.iterate(const akey: msestring;
+               const aiterator: objectmsestringiteratorprocty);
+begin
+ inherited iterate(akey,pointermsestringiteratorprocty(aiterator));
+end;
+
+procedure tobjectmsestringhashdatalist.finalizeitem(var aitemdata);
+begin
+ inherited;
+ with objectmsestringdataty(aitemdata) do begin
+  data.free;
+ end;
 end;
 
 end.

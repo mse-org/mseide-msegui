@@ -269,7 +269,8 @@ type
    fonevent: gdbeventty;
    fonerror: gdbeventty;
    fguiintf: boolean;
-   fsourcefiles: thashedmsestrings;
+//   fsourcefiles: thashedmsestrings;
+   fsourcefiles: tmsestringhashdatalist;
    fsourcefiledirs: filenamearty;  //dirs for fsourcefiles
    fexceptionbkpt: integer;
    fstartupbreakpoint: integer;
@@ -762,7 +763,8 @@ begin
  fpointerhexdigits:= fpointersize * 2;
  fgdb:= invalidprochandle;
  fguiintf:= true;
- fsourcefiles:= thashedmsestrings.create;
+ fsourcefiles:= tmsestringhashdatalist.create(0);
+// fsourcefiles:= thashedmsestrings.create;
  fstoptime:= emptydatetime;
  {$ifdef UNIX}
  ftargetterminal:= tpseudoterminal.create;

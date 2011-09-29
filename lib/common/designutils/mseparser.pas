@@ -159,7 +159,8 @@ type
                   const scanner: tscanner) of object;
  scannerclassty = class of tscanner;
 
- tdefineslist = class(thashedstrings);
+// tdefineslist = class(thashedstrings);
+ tdefineslist = class(tansistringhashdatalist);
  defstatety = (def_none,def_skip);
 
  tparser = class (tnullinterfacedobject)
@@ -699,7 +700,7 @@ end;
 
 constructor tparser.create(const afilelist: tmseindexednamelist);
 begin
- fdefines:= tdefineslist.create;
+ fdefines:= tdefineslist.create(0);
  ffilelist:= afilelist;
  flastvalidident:= bigint;
  setlength(fincludefiledirs,1);
