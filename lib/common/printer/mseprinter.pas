@@ -444,7 +444,8 @@ function stringtopages(const avalue: msestring): pagerangearty;
 
 implementation
 uses
- mseprocutils,msepipestream,msesysintf,msestockobjects,mseconsts,msesys;
+ mseprocutils,msepipestream,msesysintf,msestockobjects,mseconsts,msesys,
+ mseformatstr;
  
 type
  tfont1 = class(tfont);
