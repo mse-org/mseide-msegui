@@ -719,7 +719,8 @@ procedure setoptionalobject(const componentstate: tcomponentstate;
 procedure setlinkedcomponent(const sender: iobjectlink; const source: tmsecomponent;
                       var instance: tmsecomponent; ainterfacetype: pointer = nil);
 
-procedure createmodule(aowner: tcomponent; instanceclass: msecomponentclassty; var reference);
+procedure createmodule(aowner: tcomponent; instanceclass: msecomponentclassty;
+                                                                 var reference);
 procedure registerobjectdata(datapo: pobjectdataty; 
                  objectclass: tpersistentclass; name: string = ''); overload;
 procedure registerobjectdata(datapo: pobjectdataty; 

@@ -13,7 +13,61 @@ unit mseformatstr;     //stringwandelroutinen 31.5.99 mse
 
 interface
 uses
- Classes, msetypes,msestrings,SysUtils,msesys;
+ Classes, msetypes,msestrings,SysUtils{,msesys};
+
+type
+  TMonthNameArraymse = array[1..12] of msestring;
+  TWeekNameArraymse = array[1..7] of msestring;
+
+  TFormatSettingsmse = record
+    CurrencyFormat: Byte;
+    NegCurrFormat: Byte;
+    ThousandSeparator: mseChar;
+    DecimalSeparator: mseChar;
+    CurrencyDecimals: Byte;
+    DateSeparator: mseChar;
+    TimeSeparator: mseChar;
+    ListSeparator: mseChar;
+    CurrencyString: msestring;
+    ShortDateFormat: msestring;
+    LongDateFormat: msestring;
+    TimeAMString: msestring;
+    TimePMString: msestring;
+    ShortTimeFormat: msestring;
+    LongTimeFormat: msestring;
+    ShortMonthNames: TMonthNameArraymse;
+    LongMonthNames: TMonthNameArraymse;
+    ShortDayNames: TWeekNameArraymse;
+    LongDayNames: TWeekNameArraymse;
+    TwoDigitYearCenturyWindow: Word;
+  end;
+  
+var
+ DefaultFormatSettingsmse : TFormatSettingsmse = (
+   CurrencyFormat: 1;
+   NegCurrFormat: 5;
+   ThousandSeparator: ',';
+   DecimalSeparator: '.';
+   CurrencyDecimals: 2;
+   DateSeparator: '-';
+   TimeSeparator: ':';
+   ListSeparator: ',';
+   CurrencyString: '$';
+   ShortDateFormat: 'd/m/y';
+   LongDateFormat: 'dd" "mmmm" "yyyy';
+   TimeAMString: 'AM';
+   TimePMString: 'PM';
+   ShortTimeFormat: 'hh:nn';
+   LongTimeFormat: 'hh:nn:ss';
+   ShortMonthNames: ('Jan','Feb','Mar','Apr','May','Jun', 
+                     'Jul','Aug','Sep','Oct','Nov','Dec');
+   LongMonthNames: ('January','February','March','April','May','June',
+                    'July','August','September','October','November','December');
+   ShortDayNames: ('Sun','Mon','Tue','Wed','Thu','Fri','Sat');
+   LongDayNames:  ('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
+   TwoDigitYearCenturyWindow: 50;
+ );
+
 const
 // noformatsettings = 14.5;    //rtlversion
  noformatsettings = 15;    //rtlversion

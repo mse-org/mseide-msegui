@@ -127,61 +127,9 @@ type
    property error: syserrorty read geterror;
  end;
 
-type
-  TMonthNameArraymse = array[1..12] of msestring;
-  TWeekNameArraymse = array[1..7] of msestring;
-
-  TFormatSettingsmse = record
-    CurrencyFormat: Byte;
-    NegCurrFormat: Byte;
-    ThousandSeparator: mseChar;
-    DecimalSeparator: mseChar;
-    CurrencyDecimals: Byte;
-    DateSeparator: mseChar;
-    TimeSeparator: mseChar;
-    ListSeparator: mseChar;
-    CurrencyString: msestring;
-    ShortDateFormat: msestring;
-    LongDateFormat: msestring;
-    TimeAMString: msestring;
-    TimePMString: msestring;
-    ShortTimeFormat: msestring;
-    LongTimeFormat: msestring;
-    ShortMonthNames: TMonthNameArraymse;
-    LongMonthNames: TMonthNameArraymse;
-    ShortDayNames: TWeekNameArraymse;
-    LongDayNames: TWeekNameArraymse;
-    TwoDigitYearCenturyWindow: Word;
-  end;
-
 var
  defaultprintcommand: string;
  
- DefaultFormatSettingsmse : TFormatSettingsmse = (
-   CurrencyFormat: 1;
-   NegCurrFormat: 5;
-   ThousandSeparator: ',';
-   DecimalSeparator: '.';
-   CurrencyDecimals: 2;
-   DateSeparator: '-';
-   TimeSeparator: ':';
-   ListSeparator: ',';
-   CurrencyString: '$';
-   ShortDateFormat: 'd/m/y';
-   LongDateFormat: 'dd" "mmmm" "yyyy';
-   TimeAMString: 'AM';
-   TimePMString: 'PM';
-   ShortTimeFormat: 'hh:nn';
-   LongTimeFormat: 'hh:nn:ss';
-   ShortMonthNames: ('Jan','Feb','Mar','Apr','May','Jun', 
-                     'Jul','Aug','Sep','Oct','Nov','Dec');
-   LongMonthNames: ('January','February','March','April','May','June',
-                    'July','August','September','October','November','December');
-   ShortDayNames: ('Sun','Mon','Tue','Wed','Thu','Fri','Sat');
-   LongDayNames:  ('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
-   TwoDigitYearCenturyWindow: 50;
- );
-
 procedure checkdirstreamdata(var adata: dirstreamty);
  
 procedure syserror(const error: syserrorty; const text: string = ''); overload;
@@ -224,7 +172,7 @@ procedure initdefaultformatsettings;
 implementation
 uses
  Classes,{msestreaming,}msesysintf1,msesysintf,msearrayutils,sysutils,
- mseglob,msesysutils;
+ mseglob,msesysutils,mseformatstr;
 {$ifdef FPC}
  {$ifdef MSWINDOWS}
 Procedure CatchUnhandledException (Obj : TObject; Addr: Pointer;
