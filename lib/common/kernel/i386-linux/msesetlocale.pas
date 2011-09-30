@@ -15,7 +15,7 @@ uses
  
 implementation
 uses
- cwstring,sysutils,msestrings;
+ cwstring,sysutils,msestrings,mseformatstr;
  
 function getlocstr(const id: integer; const defaultvalue: string): string;
 var
