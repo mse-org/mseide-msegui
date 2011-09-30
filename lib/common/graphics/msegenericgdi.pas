@@ -85,13 +85,15 @@ procedure segmentellipsef(var drawinfo: drawinfoty;
                       const segmentsproc: pointsfprocty);
                       
 {$ifdef mse_debugregion}
-procedure dumpregion(const atext: string; const aregion: regionty);
+procedure dumpregion(const atext: string; const aregion: regionty;
+                        const nocheck: boolean = false);
 {$endif}
 
 implementation
 //todo: optimize, especially memory handling, use changebuffer
 uses
- msesysutils,sysutils,math;
+ msesysutils,sysutils,math{$ifdef mse_debugregion},typinfo,mseformatstr{$endif}
+;
  
 type
  regopty = (reop_add,reop_sub,reop_intersect);
@@ -111,16 +113,18 @@ const
 {$ifdef mse_debugregion}
 
 procedure dodumpstripes(po1: pstripety; const stripecount: rectextentty; 
-                                                             s1: rectextentty);
+                       s1: rectextentty; out stripeheight: integer);
 var
  int1,int2,int3: integer;
- c1,h1: rectextentty;
+ c1: rectextentty;
 begin
+ stripeheight:= s1;
  for int1:= 0 to stripecount - 1 do begin
   with po1^.header do begin
-   debugwriteln(' stripe'+inttostr(int1)+
+   debugwriteln(' stripe'+inttostr(int1)+' $'+hextostr(po1)+
                      ' start: '+inttostr(s1)+
                      ' height: '+inttostr(height)+
+                     ' end: ' + inttostr(s1+height)+
                      ' rectcount: '+ inttostr(rectcount)
                      );
    int2:= rectcount;
@@ -137,11 +141,14 @@ begin
    inc(prectextentty(po1));
   end;
  end;
+ stripeheight:= s1-stripeheight;
 end;
 
 procedure dumpstripes(const atext: string; const astripe: pstripety;
                            const stripecount: rectextentty;
                            const stripestart: rectextentty);
+var
+ int1: integer;
 begin
  if astripe = nil then begin
   debugwriteln('****'+atext+' NIL');
@@ -150,11 +157,14 @@ begin
   debugwriteln('****'+atext+' '+
                     'stripecount: '+inttostr(stripecount)+
                     ' stripestart: '+inttostr(stripestart));
-  dodumpstripes(astripe,stripecount,stripestart);
+  dodumpstripes(astripe,stripecount,stripestart,int1);
  end;
 end;
 
-procedure dumpregion(const atext: string; const aregion: regionty);
+procedure dumpregion(const atext: string; const aregion: regionty;
+                                   const nocheck: boolean = false);
+var
+ stripeheight: integer;
 begin
  if aregion = 0 then begin
   debugwriteln('*****'+atext+' NIL');
@@ -171,7 +181,11 @@ begin
                     ' datasize: '+inttostr(datasize)+
                     ' buffersize: '+inttostr(buffersize)
                     );
-   dodumpstripes(datapo,stripecount,stripestart);
+   dodumpstripes(datapo,stripecount,stripestart,stripeheight);
+   if not nocheck and (stripeheight <> stripeend-stripestart) then begin
+    debugwriteln('     *** ERROR *** stripeheight expected '+
+      inttostr(stripeheight)+' stripeend '+inttostr(stripeheight+stripestart));
+   end;
   end;
  end;
 end;
@@ -365,7 +379,8 @@ procedure splitstripes(var reg: regioninfoty;
              const astripestart: rectextentty; const astripe: pstripety;
         out start: pstripety; out belowref: ptrint;
         out splitstripecount,splitrectcount: integer);
-
+        //start = first deststripe from astripe
+        //belowref = distance datapo to above last deststripe from astripe
 var
  po1,po2,po3: pstripety;
  ext1,ext2,ext3: rectextentty;
@@ -399,7 +414,7 @@ begin
     insertemptystripe(reg,
           pstripety(pchar(start)+sizeof(regionemptystripety)),
                                                        ext2,ext1-ext2,po2);
-    pui1:= pchar(datapo)-pchar(po1);
+    pui1:= pchar(datapo)-pchar(po1); //follow reallocmem
     start:= pstripety(pchar(start)+pui1);
    end;
   end
@@ -553,20 +568,24 @@ const
  endmark = maxint-1; 
 begin
 {$ifdef mse_debugregion}
- dumpregion('beforesplit ',ptruint(@reg));
+ debugwriteln('');
+ debugwriteln('********* stripeop '+getenumname(typeinfo(regopty),ord(op)));
+ dumpstripes('sourcestripe',stripe,1,astripestart);
+ dumpregion('region before split ',ptruint(@reg));
 {$endif}
  splitstripes(reg,astripestart,stripe,psb,psbbelowref,stripeco,rectco);
-{$ifdef mse_debugregion}
- dumpregion('split ',ptruint(@reg));
- debugwriteln('* stripeco: '+inttostr(stripeco)+' rectco: '+inttostr(rectco));
-{$endif}
  with reg do begin
   po1:= reg.datapo;
   pd:= getbuffer(reg,stripeco,stripeco*(rectco+stripe^.header.rectcount),
                          stripeco*stripe^.header.rectcount*sizeof(rectdataty));
+                              //max
+ {$ifdef mse_debugregion}
+  dumpregion('region after split ',ptruint(@reg));
+  debugwriteln('* stripeco: '+inttostr(stripeco)+' rectco: '+inttostr(rectco));
+ {$endif}
   pd1:= pd;
-  psb:= pstripety(pchar(psb)+(pchar(datapo)-(pchar(po1))));  //existing
-  psb1:= psb;
+  psb:= pstripety(pchar(psb)+(pchar(datapo)-(pchar(po1))));//follow reallocmem
+  psb1:= psb;     //first touched
   opproc:= regops[op];
   drectco:= 0;
   for int1:= stripeco-1 downto 0 do begin
@@ -674,7 +693,8 @@ begin
    end;
   end;
  {$ifdef mse_debugregion}
-  dumpstripes('dest before pack ',pd,stripeco,astripestart);
+  dumpstripes('dest after operation ',pd,stripeco,astripestart);
+//  dumpregion('region after operation ',ptruint(@reg));
  {$endif}
          
          //merge stripes in block
@@ -690,7 +710,8 @@ begin
   moves:= nil; //compiler warning
   moved:= nil; //compiler warning
   while int1 <> 0 do begin             //pack similar stripes
-   psa1:= po1; //backup last stripe
+//   psa1:= po1; //backup last stripe
+   psa1:= psb1; //backup last stripe
    while (int1 <> 0) and 
                   (po1^.header.rectcount = psbb1^.header.rectcount) do begin
     po2:= @po1^.data;
@@ -739,7 +760,7 @@ begin
   lastdeststripe:= psb1;
  {$ifdef mse_debugregion}
   dumpstripes('dest after pack ',pd,dstripeco,astripestart);
-  dumpregion('region after pack',ptruint(@reg));
+//  dumpregion('region after pack',ptruint(@reg));
  {$endif}
 
   if op <> reop_intersect then begin 
@@ -760,8 +781,15 @@ begin
     end;
     if not bo1 then begin
      psa1^.header.height:= psa1^.header.height + po1^.header.height;
+//     po1^.header.height:= psa1^.header.height + po1^.header.height;
+       //merge to existing
      dec(stripecount);
      rectcount:= rectcount-psa1^.header.rectcount;
+ {$ifdef mse_debugregion}
+     dumpstripes('dest after merge above ',pd,dstripeco,astripestart);
+     debugwriteln('* stripecoount: '+
+                      inttostr(stripecount)+' rectcount: '+inttostr(rectcount));
+ {$endif}
      incstripe(po1);
     end;
    end;
@@ -789,7 +817,9 @@ begin
     end;
    end;
   {$ifdef mse_debugregion}
-   dumpstripes('dest after merge ',pd,dstripeco,0);
+   dumpstripes('dest after merge below ',pd,dstripeco,0);
+   debugwriteln('* stripecoount: '+
+                      inttostr(stripecount)+' rectcount: '+inttostr(rectcount));
   {$endif}
   end
   else begin
