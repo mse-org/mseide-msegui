@@ -1,7 +1,7 @@
 MSEide+MSEgui version history
 
 2011-09-30
- formatsettingsmse -> mseformatsettings.pas.
+ formatsettingsmse moved from msesys.pas to mseformatsettings.pas.
 2011-09-29
  Deprecated bucket lists moved from msehash.pas to to msebucketlist.pas
 2011-09-26

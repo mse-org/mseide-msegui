@@ -95,6 +95,14 @@ type
    property maxchars: integer read fmaxchars write fmaxchars default 0;
    property tabulators;
 
+   property caretwidth;
+   property textflags;
+   property textflagsactive;
+
+   property marginlinepos;
+                     //offset to innerclientrect.x
+   property marginlinecolor;
+
    property onchange;
    property ontextedited;
    property onkeydown;

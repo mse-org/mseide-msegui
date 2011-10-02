@@ -28,6 +28,7 @@ uses
 {$ifdef FPC}{$ifdef linux}
   cthreads,
 {$endif}{$endif}
+//  mseopenglgdiinit,
   mseskindesign,
   msegui,msegraphics,actionsmodule,sourceform,debuggerform,
   componentpaletteform,componentstore,
