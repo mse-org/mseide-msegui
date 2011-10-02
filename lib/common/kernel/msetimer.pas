@@ -60,6 +60,7 @@ type
    ftimer: tsimpletimer;
    fenabled: boolean; //for design
 //   foptions: timeroptionsty;
+   fontimer: notifyeventty;
    function getenabled: boolean;
    procedure setenabled(const avalue: boolean);
    function getinterval: integer;
@@ -70,6 +71,7 @@ type
    procedure setoptions(const avalue: timeroptionsty);
    function getsingleshot: boolean;
    procedure setsingleshot(const avalue: boolean);
+   procedure dotimer(const sender: tobject);
   protected
    procedure doasyncevent(var atag: integer); override;
   public
@@ -84,7 +86,7 @@ type
              //restarts timer if enabled
              //0 -> fire once in main loop idle
    property options: timeroptionsty read getoptions write setoptions default [];
-   property ontimer: notifyeventty read getontimer write setontimer;
+   property ontimer: notifyeventty read fontimer write fontimer;
    property enabled: boolean read getenabled write setenabled default false;
              //last!
  end;
@@ -425,7 +427,7 @@ end;
 
 constructor ttimer.create(aowner: tcomponent);
 begin
- ftimer:= tsimpletimer.create(1000000,nil,false,[]);
+ ftimer:= tsimpletimer.create(1000000,{$ifdef FPC}@{$endif}dotimer,false,[]);
  inherited;
 end;
 
@@ -536,6 +538,13 @@ end;
 procedure ttimer.setsingleshot(const avalue: boolean);
 begin
  ftimer.singleshot:= avalue;
+end;
+
+procedure ttimer.dotimer(const sender: tobject);
+begin
+ if canevent(tmethod(fontimer)) then begin
+  fontimer(self);
+ end;
 end;
 
 initialization
