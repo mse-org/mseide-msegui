@@ -6288,13 +6288,11 @@ function tstringcoldatalist.add(const avalue: msestring;
 begin
  result:= inherited add(avalue,anoparagraph);
  if anoparagraph then begin
-  with fgrid.fdatacols.frowstate do begin
-   if fgrid.fupdating = 0 then begin
-    flag1[result]:= true;
-   end
-   else begin
-    additem(fnoparagraph,result);
-   end;
+  if (nochange = 0) and (fgrid.fupdating = 0) then begin
+   fgrid.fdatacols.frowstate.flag1[result]:= true;
+  end
+  else begin
+   additem(fnoparagraph,result);
   end;
  end;
 end;

@@ -88,8 +88,8 @@ type
    procedure setrichlines(const index: integer; const Value: richstringty);
    function getrichformats(const index: integer): formatinfoarty;
    procedure setrichformats(const index: integer; const avalue: formatinfoarty);
-   procedure setmodified(const Value: boolean);
-   procedure setdatalist(const Value: trichstringdatalist);
+   procedure setmodified(const avalue: boolean);
+   procedure setdatalist(const avalue: tgridrichstringdatalist);
 
    procedure mousepostotextpos1(const row: integer; const mousepos: pointty;
                var textpos: gridcoordty; var result: boolean);
@@ -109,7 +109,7 @@ type
    fupdating: integer;
    fnotificationchangelock: integer;
    ffilename: filenamety;
-   flines: trichstringdatalist;
+   flines: tgridrichstringdatalist;
    procedure setoptionsedit(const avalue: optionseditty); override;
 
    function beforechange: boolean; //true if not aborted
@@ -255,7 +255,7 @@ type
                  read getrichlines write setrichlines;
    property richformats[const index: integer]: formatinfoarty 
                  read getrichformats write setrichformats;
-   property datalist: trichstringdatalist read flines write setdatalist;
+   property datalist: tgridrichstringdatalist read flines write setdatalist;
 
    function mousepostotextpos(const mousepos: pointty; out textpos: gridcoordty;
                                  widgetorg: boolean = false): boolean;
@@ -471,7 +471,7 @@ procedure tcustomtextedit.setgridintf(const intf: iwidgetgrid);
 begin
  fgridintf:= intf;
  if (intf <> nil) then begin
-  flines:= trichstringdatalist(fgridintf.getcol.datalist);
+  flines:= tgridrichstringdatalist(fgridintf.getcol.datalist);
   if (ow_autoscale in foptionswidget) and
       (foptionswidget * [ow_fontglyphheight,ow_fontlineheight] <> []) then begin
    fgridintf.getcol.grid.datarowheight:= bounds_cy;
@@ -2049,19 +2049,19 @@ begin
  flines.formats[index]:= avalue;
 end;
 
-procedure tcustomtextedit.setmodified(const Value: boolean);
+procedure tcustomtextedit.setmodified(const avalue: boolean);
 begin
- if fmodified <> value then begin
-  fmodified := Value;
+ if fmodified <> avalue then begin
+  fmodified := avalue;
   if canevent(tmethod(fonmodifiedchanged)) then begin
-   fonmodifiedchanged(self,value);
+   fonmodifiedchanged(self,avalue);
   end;
  end;
 end;
 
-procedure tcustomtextedit.setdatalist(const Value: trichstringdatalist);
+procedure tcustomtextedit.setdatalist(const avalue: tgridrichstringdatalist);
 begin
- flines.assign(value);
+ flines.assign(avalue);
 end;
 
 procedure tcustomtextedit.textinserted (const apos: gridcoordty;
