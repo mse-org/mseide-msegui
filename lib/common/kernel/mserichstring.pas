@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -103,7 +103,8 @@ type
                                const aseparator: msestring = ''): msestring;
 
    property formats[index: integer]: formatinfoarty read Getformats write Setformats;
-   property noparagraphs[index : integer]: boolean read getnoparagraphs write setnoparagraphs;
+   property noparagraphs[index : integer]: boolean read getnoparagraphs
+                                                         write setnoparagraphs;
    property richitems[index: integer]: richstringty read getrichitems write setrichitems;
    property richitemspo[index: integer]: prichstringty read getrichitemspo;
    property position: pointty read fposition write fposition;

@@ -369,6 +369,7 @@ type
  tcustomwidgetgrid1 = class(tcustomwidgetgrid);
  tinplaceedit1 = class(tinplaceedit);
  twidgetcol1 = class(twidgetcol);
+ tcustomrowstatelist1 = class(tcustomrowstatelist);
 
 procedure normalizetextrect(const po1,po2: gridcoordty; out start,stop: gridcoordty);
 begin
@@ -1880,9 +1881,16 @@ begin
  else begin
   result:= copy(flines[po1.row],po1.col+1,bigint);
   for int1:= po1.row + 1 to po2.row - 1 do begin
-   result:= result + lineend + flines[int1];
+   if flines.noparagraphs[int1] then begin
+    result:= result + flines[int1];
+   end
+   else begin
+    result:= result + lineend + flines[int1];
+   end;
   end;
-  result:= result + lineend;
+  if not flines.noparagraphs[po2.row] then begin
+   result:= result + lineend; //paragraph
+  end;
   if po2.row < flines.count then begin
    result:= result + copy(flines[po2.row],1,po2.col);
   end;
