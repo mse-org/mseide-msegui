@@ -520,8 +520,6 @@ type
    fonafterexecute: sqlstatementeventty;
    fonerror: sqlstatementerroreventty;
    foptions: sqlstatementoptionsty;
-   fterm: msechar;
-   fcharescapement: boolean;
    procedure setsql(const avalue: tsqlstringlist);
    procedure setdatabase1(const avalue: tcustomsqlconnection);
    procedure setparams(const avalue: tmseparams);
@@ -564,9 +562,6 @@ type
   published
    property params : tmseparams read fparams write setparams;
    property sql: tsqlstringlist read fsql write setsql;
-   property term: msechar read fterm write fterm default ';';
-   property charescapement: boolean read fcharescapement 
-                                      write fcharescapement default false;
    property database: tcustomsqlconnection read fdatabase write setdatabase1;
    property transaction: tsqltransaction read ftransaction write settransaction1;
                   //can be nil
@@ -588,15 +583,21 @@ type
 //   fstatements: msestringarty;
    fonbeforestatement: msesqlscripteventty;
    fonafterstatement: msesqlscripteventty;
+   fterm: msechar;
+   fcharescapement: boolean;
   protected
    procedure execute; override; overload;
   public
+   constructor create(aowner: tcomponent); override;
    procedure execute(adatabase: tcustomsqlconnection = nil;
                         atransaction: tsqltransaction = nil); overload;
    property statementnr: integer read fstatementnr; //null based
    property statementcount: integer read fstatementcount;
 //   property fstatements: msestringarty read fstatements;
   published
+   property term: msechar read fterm write fterm default ';';
+   property charescapement: boolean read fcharescapement 
+                                      write fcharescapement default false;
    property onbeforestatement: msesqlscripteventty read fonbeforestatement
                                                        write fonbeforestatement;
    property onafterstatement: msesqlscripteventty read fonafterstatement
@@ -4691,7 +4692,6 @@ constructor tcustomsqlstatement.create(aowner: tcomponent);
 begin
  fparams:= tmseparams.create(self);
  fsql:= tsqlstringlist.create;
- fterm:= ';';
  fsql.onchange:= @dosqlchange;
  inherited;
 end;
@@ -4872,6 +4872,12 @@ begin
 end;
 
 { tmsesqlscript }
+
+constructor tmsesqlscript.create(aowner: tcomponent);
+begin
+ fterm:= ';';
+ inherited;
+end;
 
 procedure tmsesqlscript.execute(adatabase: tcustomsqlconnection = nil;
                  atransaction: tsqltransaction = nil);
