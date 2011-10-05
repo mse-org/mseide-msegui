@@ -4462,7 +4462,12 @@ begin
   if maxchars <> 0 then begin
    int2:= 0;
    for int1:= 0 to high(ar1) do begin        //calc new linecount
-    int2:= int2 + length(ar1[int1]) div maxchars + 1;
+    if ar1[int1] = '' then begin
+     inc(int2);
+    end
+    else begin
+     int2:= int2 + (length(ar1[int1])-1) div maxchars + 1;
+    end;
    end;
    if int2 <> length(ar1) then begin    //break lines
     setlength(ar2,int2);
@@ -4470,15 +4475,15 @@ begin
     setlength(ar3,int2+1);
     int2:= 0;
     for int1:= 0 to high(ar1) do begin
-     ar4[int2]:= true;
+     ar4[int2]:= true;                  //paragraph start
      int3:= length(ar1[int1]);
      if int3 > maxchars then begin
       int4:= 1;
       while int4 <= int3 do begin
        ar2[int2]:= copy(ar1[int1],int4,maxchars);
        int4:= int4 + maxchars;
+       ar3[int2]:= true;                //appended line
        inc(int2);
-       ar3[int2]:= true;
       end;
      end
      else begin

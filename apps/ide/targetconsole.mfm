@@ -64,14 +64,14 @@ object targetconsolefo: ttargetconsolefo
     datacols.items = <    
       item
         width = 3000
-        options = [co_fill, co_savestate]
+        options = [co_fill, co_savestate, co_mousescrollrow]
         widthmin = 3000
         widgetname = 'terminal'
         dataclass = tgridrichstringdatalist
       end>
     datarowlinewidth = 0
     datarowheight = 15
-    reffontheight = 13
+    reffontheight = 15
     object terminal: tterminal
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
       taborder = 1
@@ -83,7 +83,7 @@ object targetconsolefo: ttargetconsolefo
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_caretonreadonly, oe_focusrectonreadonly, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       maxchars = 120
       onsendtext = sendtext
-      reffontheight = 13
+      reffontheight = 15
     end
   end
   object tpopupmenu1: tpopupmenu

@@ -966,6 +966,7 @@ var
 begin
  ristr1.text:= value;
  ristr1.format:= nil;
+ ristr1.flags:= [];
  result:= adddata(ristr1);
 end;
 
@@ -984,6 +985,7 @@ var
 begin
  ristr1.text:= item;
  ristr1.format:= nil;
+ ristr1.flags:= [];
  insertdata(index,ristr1);
 end;
 
