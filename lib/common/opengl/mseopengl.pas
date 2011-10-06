@@ -52,6 +52,9 @@ type
 implementation
 uses
  mseguiintf;
+type
+ tsimplebitmap1 = class(tsimplebitmap);
+ 
 const
  defaultcontextattributes: contextattributesty =
   (buffersize: -1;
@@ -99,6 +102,11 @@ const
 
 constructor topenglcanvas.create(const user: tobject; const intf: icanvas);
 begin
+ if user is tsimplebitmap then begin
+  with tsimplebitmap1(user) do begin
+   include(fstate,pms_staticcanvas); //opengl gc creation is expensive
+  end;
+ end;
  initializeopengl([]);
 // fgdinum:= openglgetgdinum;
  fcontextinfo.attrib:= defaultcontextattributes;

@@ -988,7 +988,8 @@ type
                  //incremented by drawing operations
  end;
  
- pixmapstatety = (pms_monochrome,pms_ownshandle,pms_maskvalid,pms_nosave);
+ pixmapstatety = (pms_monochrome,pms_ownshandle,pms_maskvalid,pms_nosave,
+                  pms_staticcanvas);
  pixmapstatesty = set of pixmapstatety;
 
  pixmapinfoty = record
@@ -1662,12 +1663,19 @@ destructor tsimplebitmap.destroy;
 begin
  inherited;
  destroyhandle;
- freecanvas;
+ freeandnil(fcanvas);
 end;
 
 procedure tsimplebitmap.freecanvas;
 begin
- freeandnil(fcanvas);
+ if pms_staticcanvas in fstate then begin
+  if fcanvas <> nil then begin
+   fcanvas.reset;
+  end;
+ end
+ else begin
+  freeandnil(fcanvas);
+ end;
 end;
 
 function tsimplebitmap.canvasallocated: boolean;
