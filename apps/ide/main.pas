@@ -1236,6 +1236,7 @@ begin
   gdb.gdbdownload:= d.gdbdownload;
   gdb.simulator:= d.gdbsimulator;
   gdb.processorname:= gdbprocessor;
+  gdb.guiintf:= not d.nodebugbeginend;
   gdb.beforeload:= beforeload;  
   gdb.beforerun:= beforerun;
   gdb.afterload:= afterload;

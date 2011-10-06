@@ -572,7 +572,6 @@ type
              const start,stop: qword): gdbresultty; overload;
    function getframeaddress(out address: qword): gdbresultty;
 
-   property guiintf: boolean read fguiintf write fguiintf default true;
    property execloaded: boolean read getexecloaded;
    property attached: boolean read getattached;
    property stoponexception: boolean read fstoponexception write setstoponexception default false;
@@ -589,6 +588,8 @@ type
    {$endif}
    property processorname: ansistring read getprocessorname write setprocessorname;
   published
+   property guiintf: boolean read fguiintf write fguiintf default false;
+                   //call GUI_DEBUGBEGIN/END
    property remoteconnection: msestring read fremoteconnection 
                                                     write fremoteconnection;
    property gdbdownload: boolean read fgdbdownload write fgdbdownload;
@@ -1666,19 +1667,29 @@ var
  bo1: boolean;
  int1: integer;
 begin
-// if fgdbfrom.eof then begin
-//  exit;
-// end;
  bo1:= false; //compiler warning
  repeat
   if gs_syncget in fstate then begin
    bo1:= fgdbfrom.readstrln(str1);
+  {$ifdef mse_debuggdb}
+   if bo1 then begin
+    debugwriteln(str1);
+   end;
+  {$endif}
   end
   else begin
    str1:= '';
    int1:= 0;
    while true do begin
     bo1:= fgdbfrom.readuln(str2);
+   {$ifdef mse_debuggdb}
+    if bo1 then begin
+     debugwriteln(str2);
+    end
+    else begin
+     debugwrite(str2);
+    end;
+   {$endif}
     str1:= str1 + str2;
     if str2 <> '' then begin
      int1:= 0;
@@ -1720,6 +1731,9 @@ begin
  fgdbfrom.responseflag:= false;
  try
   fgdbto.writeln(inttostr(fsequence)+acommand);
+ {$ifdef mse_debuggdb}
+  debugwriteln('>'+inttostr(fsequence)+'>'+acommand);
+ {$endif}
   result:= true;
  except
   closegdb;
@@ -2331,8 +2345,14 @@ var
  ek1: gdbeventkindty;
 begin
  checkpointersize;
- getprocaddress('MSEGUIINTF_GUI_DEBUGBEGIN',ftargetdebugbegin);
- getprocaddress('MSEGUIINTF_GUI_DEBUGEND',ftargetdebugend);
+ if fguiintf then begin
+  getprocaddress('MSEGUIINTF_GUI_DEBUGBEGIN',ftargetdebugbegin);
+  getprocaddress('MSEGUIINTF_GUI_DEBUGEND',ftargetdebugend);
+ end
+ else begin
+  ftargetdebugbegin:= 0;
+  ftargetdebugend:= 0;
+ end;
  if assigned(fonevent) then begin
   initstopinfo(info1);
   ek1:= gek_loaded;

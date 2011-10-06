@@ -434,6 +434,7 @@ type
    fexceptclassnames: msestringarty;
    fexceptignore: booleanarty;
    fnogdbserverexit: boolean;
+   fnodebugbeginend: boolean;
  protected
    function gett: tobject; override;
    function gettexp: tobject; override;
@@ -460,6 +461,8 @@ type
                                                  write fexceptclassnames;
    property exceptignore: booleanarty read fexceptignore 
                                                  write fexceptignore;
+   property nodebugbeginend: boolean read fnodebugbeginend 
+                                          write fnodebugbeginend;
  end;
    
  tprojectoptions = class(toptions)
@@ -951,6 +954,7 @@ type
    settingsdebugger: tbooleanedit;
    settingsstorage: tbooleanedit;
    settingsprojecttree: tbooleanedit;
+   tbooleanedit1: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
