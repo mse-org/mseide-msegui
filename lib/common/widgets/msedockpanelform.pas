@@ -23,10 +23,19 @@ const
                 [ow_mousefocus,ow_arrowfocusin,ow_arrowfocusout];
 type
  tdockpanelformcontroller = class;
+ tdockpanelform = class;
+
+ tdockpanelformmenuitem = class(tmenuitem)
+  private
+   fpanel: tdockpanelform;
+  public
+   constructor create(const apanel: tdockpanelform);
+   destructor destroy; override;
+ end;
  
  tdockpanelform = class(tdockformwidget)
   private
-   fmenuitem: tmenuitem;
+   fmenuitem: tdockpanelformmenuitem;
    fnameindex: integer; //0 for unnumbered
    fcontroller: tdockpanelformcontroller;
    procedure showexecute(const sender: tobject);
@@ -83,6 +92,7 @@ type
    fcaption: msestring;
    procedure updatestat(const filer: tstatfiler);
    procedure setmenu(const avalue: tcustommenu);
+   procedure checkstatfile(const avalue: tstatfile; const ref: tstatfile);
    procedure setstatfile(const avalue: tstatfile);
    procedure setstatfileclient(const avalue: tstatfile);
   protected
@@ -234,6 +244,7 @@ begin
    dragdock.optionsdock:= foptionsdock;
    frame.grip_options:= foptionsgrip;
    container.frame.framei:= nullframe;
+   statfile:= self.fstatfileclient;
   end;
  end;
  
@@ -245,7 +256,8 @@ begin
   name:= aname;
   fnameindex:= int2;
   if item1 <> nil then begin
-   fmenuitem:= tmenuitem.create(nil,nil);
+   tdockpanelformmenuitem.create(result);
+//   fmenuitem:= tmenuitem.create(nil,nil);
   end;
   updatecaption('');
  end;
@@ -262,8 +274,17 @@ begin
  setlinkedvar(avalue,tmsecomponent(fmenu));
 end;
 
+procedure tdockpanelformcontroller.checkstatfile(
+             const avalue: tstatfile; const ref: tstatfile);
+begin
+ if (avalue <> nil) and (avalue = ref) then begin
+  raise exception.create(self.name+':Invalid statfile '+avalue.name+'.');
+ end;
+end;
+
 procedure tdockpanelformcontroller.setstatfile(const avalue: tstatfile);
 begin
+ checkstatfile(avalue,fstatfileclient);
  setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
 
@@ -294,6 +315,7 @@ end;
 
 procedure tdockpanelformcontroller.setstatfileclient(const avalue: tstatfile);
 begin
+ checkstatfile(avalue,fstatfile);
  setlinkedvar(avalue,tmsecomponent(fstatfileclient));
 end;
 
@@ -309,6 +331,21 @@ begin
    inc(po1);
   end;
  end;
+end;
+
+{ tdockpanelformmenuitem }
+
+constructor tdockpanelformmenuitem.create(const apanel: tdockpanelform);
+begin
+ inherited create(nil,nil);
+ fpanel:= apanel;
+ apanel.fmenuitem:= self;
+end;
+
+destructor tdockpanelformmenuitem.destroy;
+begin
+ fpanel.fmenuitem:= nil;
+ inherited;
 end;
 
 { tdockpanelform }
