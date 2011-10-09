@@ -100,6 +100,13 @@ type
               const aparent: ttreelistitem = nil); override;
  end;
 
+ tdirtreenode = class(ttreelistedititem)
+  protected
+   procedure checkfiles(var afiles: filenamearty); virtual;
+  public
+   procedure loaddirtree(const apath: filenamety); virtual;
+ end;
+ 
  createlistitemeventty = procedure(const sender: tcustomitemlist; var item: tlistedititem) of object;
  createtreelistitemeventty = procedure(const sender: tcustomitemlist; var item: ttreelistedititem) of object;
  nodenotificationeventty = procedure(const sender: tlistitem;
@@ -660,8 +667,8 @@ type
    procedure beginupdate; override;
    procedure endupdate; override;
    procedure change(const index: integer); override;
-   procedure assign(const root: ttreelistedititem); reintroduce; overload;
-                 //root is freed
+   procedure assign(const root: ttreelistedititem;
+                      const freeroot: boolean = true); reintroduce; overload;
    procedure assign(const aitems: treelistedititemarty); reintroduce; overload;
    procedure add(const anode: ttreelistedititem); overload;
                  //adds toplevel node
@@ -3532,7 +3539,8 @@ begin
  end;
 end;
 
-procedure ttreeitemeditlist.assign(const root: ttreelistedititem);
+procedure ttreeitemeditlist.assign(const root: ttreelistedititem;
+                                            const freeroot: boolean = true);
 var
  ar1: treelistedititemarty;
  int1: integer;
@@ -3551,7 +3559,9 @@ begin
    self.clear;
   end;
  end;
- root.Free;
+ if freeroot then begin
+  root.Free;
+ end;
 end;
 
 procedure ttreeitemeditlist.assign(const aitems: treelistedititemarty);
@@ -4707,6 +4717,43 @@ begin
 // fsourcerow:= invalidaxis;
  fdestrow:= invalidaxis;
  inherited create(asender,instance,apickpos);
+end;
+
+{ tdirtreenode }
+
+procedure tdirtreenode.loaddirtree(const apath: filenamety);
+ 
+ procedure doload(const anode: tdirtreenode; const apath: filenamety);
+ var
+  ar1: filenamearty;
+  int1: integer;
+ begin
+  ar1:= searchfiles('*',apath,[fa_dir]);
+  if ar1 <> nil then begin
+   checkfiles(ar1);
+  end;
+  with anode do begin
+   add(length(ar1));
+   for int1:= 0 to high(ar1) do begin
+    fitems[int1].caption:= filename(ar1[int1]);
+    doload(tdirtreenode(fitems[int1]),ar1[int1]);
+   end;
+  end;
+ end;
+ 
+begin
+ beginupdate;
+ clear;
+ try
+  doload(self,apath);
+ finally
+  endupdate;
+ end;  
+end;
+
+procedure tdirtreenode.checkfiles(var afiles: filenamearty);
+begin
+ //dummy
 end;
 
 end.
