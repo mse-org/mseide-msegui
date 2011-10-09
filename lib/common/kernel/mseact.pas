@@ -132,7 +132,7 @@ type
  actionoptionsty = set of actionoptionty;
 
  tcustomaction = class(tactcomponent,istatfile{,iimagelistinfo}
-                    {$ifdef mse_with_ifi},iifilink{$endif})
+                    {$ifdef mse_with_ifi},iifiexeclink{$endif})
   private
    fonupdate: actioneventty;
    fstatvarname: msestring;
@@ -1254,7 +1254,7 @@ begin
  sendchangeevent(oe_fired);
 {$ifdef mse_with_ifi}
  if fifiserverintf <> nil then begin
-  fifiserverintf.execute(iificlient(self));
+  fifiserverintf.execute(iifiexeclink(self));
  end;
 {$endif}
 end;
@@ -1272,12 +1272,12 @@ end;
 {$ifdef mse_with_ifi}
 function tcustomaction.getifilinkkind: ptypeinfo;
 begin
- result:= typeinfo(iifilink);
+ result:= typeinfo(iifiexeclink);
 end;
 
 procedure tcustomaction.setifilink(const avalue: tifiactionlinkcomp);
 begin
- mseificomp.setifilinkcomp(iifilink(self),avalue,tifilinkcomp(fifilink));
+ mseificomp.setifilinkcomp(iifiexeclink(self),avalue,tifilinkcomp(fifilink));
 end;
 {$endif}
 

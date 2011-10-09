@@ -125,9 +125,10 @@ type
    function getdatetimeval(const alink: iificlient; const aname: string;
                                  var avalue: tdatetime): boolean;
                                     //true if found
+   procedure dovaluechanged(const sender: iificlient; const isexecute: boolean); virtual;
     //iifiserver
    procedure execute(const sender: iificlient); virtual;
-   procedure valuechanged(const sender: iificlient); virtual;
+   procedure valuechanged(const sender: iificlient);
    procedure statechanged(const sender: iificlient;
                             const astate: ifiwidgetstatesty); virtual;
    procedure setvalue(const sender: iificlient; var avalue;
@@ -184,9 +185,16 @@ type
  ificlientcontrollerclassty = class of tificlientcontroller;
 
  texecclientcontroller = class(tificlientcontroller)
+  private
   protected
+   procedure valuestoclient(const alink: pointer); override;
+   procedure execute(const sender: iificlient); overload; override;
   public
    function canconnect(const acomponent: tcomponent): boolean; override;
+   procedure execute; overload;
+  published
+   property optionsvalue: valueclientoptionsty read foptionsvalue
+                                           write foptionsvalue default [];
  end;
 
  valarsetterty = procedure(const alink: pointer; var handled: boolean) of object; 
@@ -1213,7 +1221,8 @@ begin
  end;
 end;
 
-procedure tcustomificlientcontroller.valuechanged(const sender: iificlient);
+procedure tcustomificlientcontroller.dovaluechanged(const sender: iificlient;
+                            const isexecute: boolean);
 begin
  if {(fvalueproperty <> nil) and} not (ivs_valuesetting in fstate) and 
                not(csloading in fowner.componentstate) then begin
@@ -1229,9 +1238,14 @@ begin
    exclude(fstate,ivs_valuesetting);
   end;
  end;
- if fowner.canevent(tmethod(fonclientvaluechanged)) then begin
+ if not isexecute and fowner.canevent(tmethod(fonclientvaluechanged)) then begin
   fonclientvaluechanged(self,sender);
  end;
+end;
+
+procedure tcustomificlientcontroller.valuechanged(const sender: iificlient);
+begin
+ dovaluechanged(sender,false);
 end;
 
 procedure tcustomificlientcontroller.statechanged(const sender: iificlient;
@@ -3121,14 +3135,35 @@ end;
 
 function texecclientcontroller.canconnect(const acomponent: tcomponent): boolean;
 var
-// intf1: pointer;
- prop1: ppropinfo;
+ po1: pointer;
+// prop1: ppropinfo;
 begin
- result:= inherited canconnect(acomponent);
+// result:= inherited canconnect(acomponent);
+ result:= getcorbainterface(acomponent,typeinfo(iifilink),po1);
+ {
  if result then begin
   prop1:= getpropinfo(acomponent,'onexecute');
   result:= (prop1 <> nil) and (prop1^.proptype^.kind = tkmethod);
  end;
+ }
+end;
+
+procedure texecclientcontroller.valuestoclient(const alink: pointer);
+begin
+ if not (ivs_loadedproc in fstate) then begin
+  iifiexeclink(alink).execute;
+ end;
+end;
+
+procedure texecclientcontroller.execute(const sender: iificlient);
+begin
+ dovaluechanged(sender,true); //distribute event
+ inherited;
+end;
+
+procedure texecclientcontroller.execute;
+begin
+ execute(nil);
 end;
 
 { tifigridlinkcomp }

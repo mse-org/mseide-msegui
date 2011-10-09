@@ -37,6 +37,10 @@ type
   function getobjectlinker: tobjectlinker;
  end;
 
+ iifiexeclink = interface(iifilink) ['{6B4FDC33-D151-46A4-B72B-083D55A18A67}']
+  procedure execute;
+ end;
+ 
  iifidatalink = interface(iifilink) ['{FC6BF316-8347-4CAC-ABB7-FB171E14F52B}']
   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
   function getgriddata: tdatalist;
