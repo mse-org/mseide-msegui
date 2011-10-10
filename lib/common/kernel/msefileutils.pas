@@ -825,12 +825,14 @@ begin
    end;
    include:= ainclude;
    exclude:= aexclude;
+   infolevel:= fil_type;
    if sys_opendirstream(dirstream) <> sye_ok then begin
     exit;
    end;
    int2:= 0;
    while sys_readdirstream(dirstream,fileinfo) do begin
-    if (fileinfo.name <> '.') and (fileinfo.name <> '..') then begin
+    if (fileinfo.extinfo1.filetype <> ft_dir) or 
+                  (fileinfo.name <> '.') and (fileinfo.name <> '..') then begin
      if high(result) < int2 then begin
       setlength(result,int2*2+16);
      end;
