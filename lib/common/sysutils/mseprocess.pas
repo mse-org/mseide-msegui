@@ -98,7 +98,12 @@ type
 
 function getprocessoutput(const acommandline: string; const todata: string;
                          out fromdata: string; out errordata: string;
-                         const atimeout: integer = -1): integer;
+                         const atimeout: integer = -1): integer; overload;
+                         //returns program exitcode, -1 in case of error
+function getprocessoutput(const acommandline: string; const todata: string;
+                         out fromdata: string;
+                         const atimeout: integer = -1;
+                         const errorouttoout: boolean = true): integer; overload;
                          //returns program exitcode, -1 in case of error
 
 implementation
@@ -115,9 +120,9 @@ type
    constructor create(aowner: tcomponent); override;
  end;
  
-function getprocessoutput(const acommandline: string; const todata: string;
-                         out fromdata: string; out errordata: string;
-                         const atimeout: integer = -1): integer;
+function getprocessoutput1(const acommandline: string; const todata: string;
+               out fromdata: string; out errordata: string;
+               const atimeout: integer; const errorouttoout: boolean): integer;
                          //returns program exitcode, -1 in case of error
 var
  proc1: tstringprocess;
@@ -127,6 +132,9 @@ begin
  try
   with proc1 do begin
    commandline:= acommandline;
+   if errorouttoout then begin
+    options:= options + [pro_errorouttoout];
+   end;    
    active:= true;
    if todata <> '' then begin
     try
@@ -148,6 +156,25 @@ begin
  finally
   proc1.free;
  end;
+end;
+
+function getprocessoutput(const acommandline: string; const todata: string;
+                         out fromdata: string; out errordata: string;
+                         const atimeout: integer = -1): integer;
+begin
+ result:= getprocessoutput1(acommandline,todata,fromdata,errordata,
+                                                          atimeout,false);
+end;
+ 
+function getprocessoutput(const acommandline: string; const todata: string;
+                         out fromdata: string;
+                         const atimeout: integer = -1;
+                         const errorouttoout: boolean = true): integer;
+var
+ str1: string;
+begin
+ result:= getprocessoutput1(acommandline,todata,fromdata,str1,
+                                             atimeout,errorouttoout);
 end;
  
 { tmseprocess }
