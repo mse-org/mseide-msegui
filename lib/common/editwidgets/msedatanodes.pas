@@ -9,7 +9,7 @@
 }
 unit msedatanodes;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 
 interface
 uses
@@ -38,7 +38,8 @@ type
  nodestatesty = set of nodestatty;
  nodestate1ty = (ns1_statechanged,ns1_rootchange,ns1_candrag,
                  ns1_destroying,ns1_updating,ns1_noowner,ns1_captionclipped,
-                 ns1_childchecked,ns1_checkboxclicked,ns1_customsort
+                 ns1_childchecked,ns1_checkboxclicked,ns1_customsort,
+                 ns1_nofreeroot
                 );
  nodestates1ty = set of nodestate1ty;
  
@@ -211,7 +212,7 @@ type
    procedure internalgetnodes(var aresult: treelistitemarty; var acount: integer;
                        const must: nodestatesty; const mustnot: nodestatesty;
                        const amode: getnodemodety; const addself: boolean);
-  function compare(const l,r: ttreelistitem): integer; virtual;
+   function compare(const l,r: ttreelistitem): integer; virtual;
 
   public
    constructor create(const aowner: tcustomitemlist = nil;
@@ -244,6 +245,7 @@ type
 
    function finditembycaption(const acaption: msestring;
             casesensitive: boolean = false): ttreelistitem; overload;
+   function finditembycaption(const acaption: lmsestringty): ttreelistitem;
    function finditembycaption(const acaptions: msestringarty;
             casesensitive: boolean = false): ttreelistitem; overload;
    function rootnode: ttreelistitem;
@@ -1621,7 +1623,8 @@ end;
 
 function ttreelistitem.createsubnode: ttreelistitem;
 begin
- result:= treelistitemclassty(classtype).create(fowner);
+ result:= treelistitemclassty(classtype).create(fowner); 
+                                //child class = parent class
 end;
 
 procedure ttreelistitem.swap(const a,b: integer);
@@ -2433,6 +2436,31 @@ begin
    result:= fitems[int1];
    break;
   end;
+ end;
+end;
+
+function ttreelistitem.finditembycaption(const acaption: lmsestringty): ttreelistitem;
+var
+ po1,po2: pmsechar;
+ int1,int2: integer;
+label
+ nextitem;
+begin
+ result:= nil;
+ for int1:= 0 to fcount - 1 do begin
+  with fitems[int1] do begin
+   if length(fcaption) = acaption.len then begin
+    po1:= pointer(fcaption);
+    po2:= acaption.po;
+    for int2:= 0 to acaption.len-1 do begin
+     if (po1+int2)^ <> (po2+int2)^ then begin
+      goto nextitem;
+     end;
+    end;
+    result:= self.fitems[int1];
+   end;
+  end;
+nextitem:
  end;
 end;
 

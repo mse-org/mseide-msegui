@@ -670,7 +670,8 @@ type
    procedure assign(const root: ttreelistedititem;
                       const freeroot: boolean = true); reintroduce; overload;
    procedure assign(const aitems: treelistedititemarty); reintroduce; overload;
-   procedure add(const anode: ttreelistedititem); overload;
+   procedure add(const anode: ttreelistedititem;
+                                 const freeroot: boolean = true); overload;
                  //adds toplevel node
    procedure add(const anodes: treelistedititemarty); overload;
    procedure add(const acount: integer; 
@@ -3415,7 +3416,12 @@ begin
       po1^:= nil;
      end;
      if not (ils_subnodecountupdating in self.fitemstate) then begin
-      inherited; //free node
+      if not (ns1_nofreeroot in fstate1) then begin
+       inherited; //free node
+      end
+      else begin
+       ttreelistitem1(data).setowner(nil)
+      end;
      end;
     end
    end;
@@ -3592,10 +3598,17 @@ begin
  inherited assign(listitemarty(ar1));
 end;
 
-procedure ttreeitemeditlist.add(const anode: ttreelistedititem); //adds toplevel node
+procedure ttreeitemeditlist.add(const anode: ttreelistedititem;
+                       const freeroot: boolean = true); //adds toplevel node
 var
  bo1: boolean;
 begin
+ if freeroot then begin
+  exclude(anode.fstate1,ns1_nofreeroot);
+ end
+ else begin
+  include(anode.fstate1,ns1_nofreeroot);
+ end;
  bo1:= anode.expanded;
  anode.expanded:= false;
  inherited add(anode);

@@ -286,6 +286,7 @@ function getcharpos(const str: msestring; achar: msechar): integerarty;
 function strscan(const Str: PChar; Chr: Char): PChar; overload;
 //function strscan(const str: string; chr: char): integer; overload; 
            //use findchar()
+function strscan(const str: lmsestringty; const chr: msechar): pmsechar; overload;
 function msestrscan(const Str: PmseChar; Chr: mseChar): PmseChar; overload;
 //function msestrscan(const str: msestring; chr: msechar): integer; overload;
            //use findchar()
@@ -3346,6 +3347,21 @@ begin
    inc(po1);
   end;
  end;
+end;
+
+function strscan(const str: lmsestringty; const chr: msechar): pmsechar; overload;
+var
+ int1: integer;
+ po1: pmsechar;
+begin
+ po1:= str.po;
+ for int1:= 0 to str.len-1 do begin
+  if (po1+int1)^ = chr then begin
+   result:= po1+int1;
+   exit;
+  end;
+ end;
+ result:= nil;
 end;
 
 function mseStrScan(const Str: PmseChar; Chr: mseChar): Pmsechar;
