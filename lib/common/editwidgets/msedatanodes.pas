@@ -84,6 +84,7 @@ type
  tlistitem = class;
 
  iitemlist = interface(inullinterface)
+  function getgrid: tcustomgrid;
   function getlayoutinfo: plistitemlayoutinfoty;
   procedure updatelayout;
   procedure itemcountchanged;
@@ -251,7 +252,9 @@ type
    function rootnode: ttreelistitem;
    function rootpath: treelistitemarty;
              //top-down
-   function rootcaptions: msestringarty;
+   function rootcaptions: msestringarty; overload;
+   function rootcaptions(const aowner: tcustomitemlist): msestringarty; overload;
+                    //stops if not owned by aowner
    procedure checkitems(const checkdelete: checktreelistitemprocty);
 
    procedure updatecellzone(const pos: pointty; var zone: cellzonety); override;
@@ -2555,6 +2558,29 @@ begin
  for int1:= high(result) downto 0 do begin
   result[int1]:= item.fcaption;
   item:= item.fparent;
+ end;
+end;
+
+function ttreelistitem.rootcaptions(const aowner: tcustomitemlist): msestringarty;
+var
+ int1,int2: integer;
+ item: ttreelistitem;
+begin
+ int2:= ftreelevel+1;
+ setlength(result,int2); //max
+ item:= self;
+ for int1:= high(result) downto 0 do begin
+  if item.fowner <> aowner then begin
+   break;
+  end;
+  result[int1]:= item.fcaption;
+  item:= item.fparent;
+  dec(int2);
+ end;
+ if int2 <> 0 then begin
+  int1:= (length(result)-int2);
+  system.move(result[int2],result[0],int1*sizeof(pointer));
+  setlength(pointerarty(result),int1);
  end;
 end;
 

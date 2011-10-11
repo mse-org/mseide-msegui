@@ -275,7 +275,7 @@ type
                          const all: boolean = false): boolean; overload;
                                       //true if found
    function first: pmsestringdataty;
-   function next: pmsestringdataty;
+   function next: pmsestringdataty; //wraps to first after last
    procedure iterate(const akey: msestring;
                      const aiterator: msestringiteratorprocty); overload;
  end;

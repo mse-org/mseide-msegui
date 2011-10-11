@@ -124,6 +124,7 @@ type
    procedure invalidate; override;
 
    //iitemlist
+   function getgrid: tcustomgrid;
    function getlayoutinfo: plistitemlayoutinfoty;
    procedure itemcountchanged;
    function getcolorglyph: colorty;
@@ -399,7 +400,8 @@ type
                                       var ainfo: nodeactioninfoty); override;
    function compare(const l,r): integer; override;
   public
-   constructor create(const intf: iitemlist; const owner: titemedit); reintroduce;
+   constructor create(const intf: iitemlist; 
+                                 const owner: titemedit); reintroduce;
    procedure assign(const aitems: listitemarty); reintroduce; overload;
    procedure add(const anode: tlistitem);
    procedure refreshitemvalues;
@@ -484,6 +486,7 @@ type
    procedure doupdatecelllayout; virtual;
 
     //iitemlist
+   function getgrid: tcustomgrid;
    function getlayoutinfo: plistitemlayoutinfoty;
    procedure itemcountchanged;
    procedure updateitemvalues(const index: integer; const count: integer); virtual;
@@ -629,6 +632,11 @@ type
             const source,dest: ttreelistitem;
             var dragobject: ttreeitemdragobject; var processed: boolean) of object;
 
+ expandedinfoty = record
+  path: msestringarty;
+ end;
+ expandedinfoarty = array of expandedinfoty;
+ 
  ttreeitemeditlist = class(tcustomitemeditlist)
   private
    fchangingnode: ttreelistitem;
@@ -647,6 +655,8 @@ type
    procedure setitems(const index: integer; const avalue: ttreelistedititem);
    function getitemclass: treelistedititemclassty;
    procedure setitemclass(const avalue: treelistedititemclassty);
+   function getexpandedstate: expandedinfoarty;
+   procedure setexpandedstate(const avalue: expandedinfoarty);
   protected
    procedure freedata(var data); override;
    procedure docreateobject(var instance: tobject); override;
@@ -699,6 +709,9 @@ type
                                                           write setitemclass;
    property items[const index: integer]: ttreelistedititem read getitems1
                                           write setitems; default;
+   property expandedstate: expandedinfoarty read getexpandedstate 
+                                                write setexpandedstate;
+                       //address by caption
   published
    property imnr_base;
    property imnr_expanded;
@@ -876,6 +889,11 @@ end;
 procedure titemviewlist.setoncreateitem(const value: createlistitemeventty);
 begin
  oncreateobject:= createobjecteventty(value);
+end;
+
+function titemviewlist.getgrid: tcustomgrid;
+begin
+ result:= flistview;
 end;
 
 { tlistcol }
@@ -3042,6 +3060,14 @@ begin
   fitemlist[row].updatecellzone(apos,result);
  end;
 end;
+
+function titemedit.getgrid: tcustomgrid;
+begin
+ result:= nil;
+ if fgridintf <> nil then begin
+  result:= fgridintf.getcol.grid;
+ end;
+end;
 {
 function titemedit.actualcursor(const apos: pointty): cursorshapety;
 var
@@ -4098,6 +4124,89 @@ end;
 procedure ttreeitemeditlist.setitemclass(const avalue: treelistedititemclassty);
 begin
  fitemclass:= avalue;
+end;
+
+function ttreeitemeditlist.getexpandedstate: expandedinfoarty;
+var
+ grid: tcustomgrid;
+ po1: ptreelistitematy;
+ int1,int2: integer;
+begin
+ result:= nil;
+ grid:= fintf.getgrid;
+ if grid <> nil then begin
+  setlength(result,count+1); //max
+  po1:= datapo;
+  if grid.row >= 0 then begin
+   result[0].path:= po1^[grid.row].rootcaptions(self); //focused row
+  end;
+  int2:= 1;
+  for int1:= 0 to count-1 do begin
+   if po1^[int1].expanded then begin
+    result[int2].path:= po1^[int1].rootcaptions(self);
+    inc(int2);
+   end;
+  end;
+  setlength(result,int2);
+ end; 
+end;
+
+procedure ttreeitemeditlist.setexpandedstate(const avalue: expandedinfoarty);
+var
+ ar1: treelistedititemarty;
+
+ function find(const acaption: msestring): ttreelistedititem;
+ var
+  int1: integer;
+ begin
+  result:= nil;
+  for int1:= 0 to high(ar1) do begin
+   if ar1[int1].caption = acaption then begin
+    result:= ar1[int1];
+    break;
+   end;
+  end;
+ end; //find
+ 
+var
+ grid: tcustomgrid;
+ n1: ttreelistedititem;
+ int1,int2: integer;
+begin
+ grid:= fintf.getgrid;
+ if grid <> nil then begin
+  grid.row:= invalidaxis; 
+  if avalue <> nil then begin
+   ar1:= toplevelnodes;
+   for int1:= 1 to high(avalue) do begin
+    n1:= find(avalue[int1].path[0]);
+    if n1 <> nil then begin
+     n1.expanded:= true;
+     for int2:= 1 to high(avalue[int1].path) do begin
+      n1:= ttreelistedititem(n1.finditembycaption(avalue[int1].path[int2]));
+      if n1 = nil then begin
+       break;
+      end;
+      n1.expanded:= true;
+     end;
+    end;
+   end;
+   if ar1 <> nil then begin
+    n1:= find(avalue[0].path[0]); //restore focused row
+    if n1 <> nil then begin
+     int1:= n1.findex;
+     for int2:= 1 to high(avalue[0].path) do begin
+      n1:= ttreelistedititem(n1.finditembycaption(avalue[0].path[int2]));
+      if n1 = nil then begin
+       break;
+      end;
+      int1:= n1.findex;
+     end;
+     grid.row:= int1;
+    end;     
+   end;
+  end;
+ end;
 end;
 
 { trecordfieldedit }
