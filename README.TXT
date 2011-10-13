@@ -102,6 +102,11 @@ uses 64bit it seems. ;-)
 There is a problem in FPC with -gl compiler switch, it is possible that the delay
 in case of an exception is very long, please don't use -gl on 64 bit.
 
+Antialiased text with MSEgui 32 bit on 64 bit Linux
+****************************************************
+MSEgui uses Xft for antialiased fonts on Linux. Please install lib32-libxft
+package if necessary.
+
 Debugging
 *********
 Breakpoints don't work on win32 in units compiled with -CX 
