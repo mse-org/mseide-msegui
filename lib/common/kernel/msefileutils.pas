@@ -116,6 +116,7 @@ function relocatepath(const olddir,newdir: filenamety;
 function isrelativepath(const path: filenamety): boolean;
 function isrootdir(const path: filenamety): boolean;
 function removelastpathsection(path: filenamety): filenamety;
+function getlastpathsection(const path: filenamety): filenamety;
 function removelastdir(path: filenamety; var newpath: filenamety): filenamety;
 procedure splitfilepath(const path: filenamety;
                             out directory,filename: filenamety); overload;
@@ -239,6 +240,8 @@ uses
 
 const
  quotechar = msechar('"');
+ slashchar = msechar('/');
+ dotchar = msechar('.');
 
 type
  checkmaskresultty = (cmr_correct,cmr_wrong,cmr_wrongfinished,cmr_correctfinished);
@@ -401,7 +404,7 @@ begin
  ar1:= splitrootpath(path);
  mstr1:= '';
  for int1:= 0 to high(ar1) do begin
-  mstr1:= mstr1+'/'+ar1[int1];
+  mstr1:= mstr1+slashchar+ar1[int1];
   if not finddir(mstr1) then begin
    createdir(mstr1,rights);
   end;
@@ -420,7 +423,7 @@ var
 begin
  error:= sys_setcurrentdir(path);
  if error <> sye_ok then begin
-  syserror(error,'Setcurrentdir "'+ path + '"'+':'+lineend);
+  syserror(error,'Setcurrentdir "'+ path + quotechar+':'+lineend);
  end;
 end;
 
@@ -450,7 +453,7 @@ var
 begin
  str1:= remquote(path);
  tomsefilepath1(str1);
- result:= (length(str1) > 0) and (str1[1] = '/');
+ result:= (length(str1) > 0) and (str1[1] = slashchar);
 end;
 
 procedure checkmask(s: pmsechar; mask: pmsechar; var result: checkmaskresultty);
@@ -658,7 +661,7 @@ begin
       dirname:= mergerootpath(copy(ar1,0,int1));
      end
      else begin
-      dirname:= '/';
+      dirname:= slashchar;
      end;
      if ar1[int1] = '***' then begin
       deleteitem(ar1,int1);
@@ -679,7 +682,7 @@ begin
      end;
      fna1:= ar1[int1];
      while sys_readdirstream(dirstream,fileinfo) do begin
-      if (fileinfo.name <> '.') and (fileinfo.name <> '..') then begin
+      if (fileinfo.name <> dotchar) and (fileinfo.name <> '..') then begin
        ar1[int1]:= fileinfo.name;
        result:= searchfile(afilename,mergerootpath(ar1),ainclude,aexclude);
        if result <> '' then begin
@@ -778,7 +781,7 @@ begin
       dirname:= mergerootpath(copy(ar1,0,int1));
      end
      else begin
-      dirname:= '/';
+      dirname:= slashchar;
      end;
      if ar1[int1] = '***' then begin
       deleteitem(ar1,int1);
@@ -797,7 +800,7 @@ begin
      end;
      fna1:= ar1[int1];
      while sys_readdirstream(dirstream,fileinfo) do begin
-      if (fileinfo.name <> '.') and (fileinfo.name <> '..') then begin
+      if (fileinfo.name <> dotchar) and (fileinfo.name <> '..') then begin
        ar1[int1]:= fileinfo.name;
        stackarray(searchfiles(afilename,
                                mergerootpath(ar1),ainclude,aexclude),result);
@@ -832,7 +835,7 @@ begin
    int2:= 0;
    while sys_readdirstream(dirstream,fileinfo) do begin
     if (fileinfo.extinfo1.filetype <> ft_dir) or 
-                  (fileinfo.name <> '.') and (fileinfo.name <> '..') then begin
+                  (fileinfo.name <> dotchar) and (fileinfo.name <> '..') then begin
      if high(result) < int2 then begin
       setlength(result,int2*2+16);
      end;
@@ -891,7 +894,7 @@ begin
    exit;
   end;
   while sys_readdirstream(dirstream,fileinfo) do begin
-   if (fileinfo.name <> '.') and (fileinfo.name <> '..') then begin
+   if (fileinfo.name <> dotchar) and (fileinfo.name <> '..') then begin
     result:= true;
     break;
    end;
@@ -1042,7 +1045,7 @@ begin
    if bo1 then begin
     break;
    end;
-   if ch1 = '/' then begin
+   if ch1 = slashchar then begin
     int3:= int2;
    end;
   end;
@@ -1063,7 +1066,7 @@ begin
  setlength(result,length(names));
  for int1:= 0 to high(names) do begin
   str2:= filepath(names[int1],fk_default,true);
-  if (length(str2) > 0) and (str2[1] = '/') then begin
+  if (length(str2) > 0) and (str2[1] = slashchar) then begin
    result[int1]:= str2;
   end
   else begin
@@ -1088,14 +1091,14 @@ var
 begin
  str1:= remquote(path);
  result:= not (
-  (length(str1) > 0) and ((str1[1] = '\') or (str1[1] = '/')) or
+  (length(str1) > 0) and ((str1[1] = '\') or (str1[1] = slashchar)) or
   (length(str1) >= 1) and (str1[2] = ':')
             );
 end;
 
 function isrootdir(const path: filenamety): boolean;
 begin
- result:= (path = '/') or (path = '\') or (path = '"/"') or (path = '"\"');
+ result:= (path = slashchar) or (path = '\') or (path = '"/"') or (path = '"\"');
 end;
 
 procedure tomsefilepath1(var path: filenamety);
@@ -1105,11 +1108,11 @@ procedure tomsefilepath1(var path: filenamety);
   str1: filenamety;
  begin
   str1:= remquote(path);
-  replacechar1(str1,msechar('\'),msechar('/')); //calls uniquestring
-  if (length(str1) >= 2) and (str1[2] = ':'){ and (str1[3] = '/')} then begin
+  replacechar1(str1,msechar('\'),msechar(slashchar)); //calls uniquestring
+  if (length(str1) >= 2) and (str1[2] = ':'){ and (str1[3] = slashchar)} then begin
    setlength(str1,length(str1)+1);
    move(str1[1],str1[2],(length(str1)-1)*sizeof(msechar)); // 'c:x' -> 'cc:x'
-   pmsecharaty(str1)^[0]:= '/'; // /c:
+   pmsecharaty(str1)^[0]:= slashchar; // /c:
    pmsecharaty(str1)^[1]:= str1[2];//charuppercase(str1[2]);
   end;
   requote(path,str1);
@@ -1168,12 +1171,12 @@ procedure syncpathdelim(const source: filenamety; var dest: filenamety;
 begin
  if length(dest) > 0 then begin
   if (length(dest) >= 3) and (length(dest) <= 4) and 
-                       (dest[1] = '/') and (dest[3] = ':') then begin
+                       (dest[1] = slashchar) and (dest[3] = ':') then begin
    kind:= fk_dir;      // /a:  -> /a:/
                        // /a:/ -> /a:/
   end;
   if kind = fk_default then begin
-   if (length(source) > 0) and (source[length(source)] = '/') then begin
+   if (length(source) > 0) and (source[length(source)] = slashchar) then begin
     kind:= fk_dir;
    end
    else begin
@@ -1182,12 +1185,12 @@ begin
   end;
   case kind of
    fk_dir: begin
-    if dest[length(dest)] <> '/' then begin
-     dest:= dest + '/';
+    if dest[length(dest)] <> slashchar then begin
+     dest:= dest + slashchar;
     end;
    end;
    fk_file: begin
-    if (length(dest) > 1) and (dest[length(dest)] = '/') then begin
+    if (length(dest) > 1) and (dest[length(dest)] = slashchar) then begin
      setlength(dest,length(dest) - 1);
     end;
    end;
@@ -1204,7 +1207,7 @@ var
  bo1: boolean;
 begin
  mstr1:= unquotefilename(tomsefilepath(path));
- if (length(mstr1) > 1) and (mstr1[2] = '/') then begin
+ if (length(mstr1) > 1) and (mstr1[2] = slashchar) then begin
   if mstr1[1] = '~' then begin
    mstr1:= sys_getuserhomedir + copy(mstr1,2,bigint);
   end
@@ -1216,14 +1219,14 @@ begin
  end;
  if not relative and not isrootpath(mstr1) then begin
   if mstr1 <> '' then begin
-   mstr1:= sys_getcurrentdir + '/' + mstr1;
+   mstr1:= sys_getcurrentdir + slashchar + mstr1;
   end
   else begin
    mstr1:= sys_getcurrentdir;
   end;
  end;
  ar1:= nil;
- splitstring(msestring(mstr1),msestringarty(ar1),msechar('/'));
+ splitstring(msestring(mstr1),msestringarty(ar1),msechar(slashchar));
  setlength(ar2,length(ar1));
  int2:= 0;
  for int1:= 0 to high(ar1) do begin
@@ -1245,35 +1248,35 @@ begin
    end;
   end
   else begin
-   if (ar1[int1] <> '.') and (ar1[int1] <> '') then begin
+   if (ar1[int1] <> dotchar) and (ar1[int1] <> '') then begin
     ar2[int2]:= ar1[int1];
     inc(int2);
    end;
   end;
  end;
  result:= '';
- bo1:= (length(mstr1) > 0) and (mstr1[1] = '/'); //rootpath
+ bo1:= (length(mstr1) > 0) and (mstr1[1] = slashchar); //rootpath
  if bo1 and (int2 = 0) then begin
-  result:= '/';
+  result:= slashchar;
 //  inc(int2);
  end;
  bo1:= not relative or bo1;
  for int1:= 0 to int2 - 1 do begin
   if bo1 then begin
-   result:= result + '/' + ar2[int1];
+   result:= result + slashchar + ar2[int1];
   end
   else begin
    result:= result + ar2[int1]; //relative start
    bo1:= true;
   end;
  end;
- if relative and ((mstr1 = '.') or msestartsstr('./',mstr1)) and 
+ if relative and ((mstr1 = dotchar) or msestartsstr('./',mstr1)) and 
            not msestartsstr('../',result) then begin
   result:= './' + result;
  end;
  syncpathdelim(mstr1,result,kind);
  if msestartsstr('//',mstr1) then begin
-  result:= '/'+result; //restore uncfilename
+  result:= slashchar+result; //restore uncfilename
  end;
 end;
 
@@ -1318,7 +1321,7 @@ begin
   end;
  end;
  if int1 > 1 then begin //quoted
-  result:= '"'+tosysfilepath(copy(acommandline,int1,int2-int1)) + '"'+
+  result:= quotechar+tosysfilepath(copy(acommandline,int1,int2-int1)) + quotechar+
                        copy(acommandline,int3,bigint);
  end
  else begin
@@ -1371,13 +1374,13 @@ begin
   result:= result + '../';
  end;
  for int1:= int3 to high(ar3) do begin
-  result:= result + ar3[int1] + '/';
+  result:= result + ar3[int1] + slashchar;
  end;
  if int3 <= high(ar3) then begin
-  setlength(result,length(result)-1); //remove last '/'
+  setlength(result,length(result)-1); //remove last slashchar
  end;
  if result = '' then begin
-  result:= '.';
+  result:= dotchar;
  end;
  syncpathdelim(str1,result,kind);
 end;
@@ -1406,14 +1409,14 @@ var
 begin
 // str1:= unquotefilename(filepath(path,fk_default,true));
  str1:= filepath(path,fk_default,true);
- if (str1 = '') or (str1[length(str1)] = '/') then begin
+ if (str1 = '') or (str1[length(str1)] = slashchar) then begin
   directory:= str1;
   filename:= '';
  end
  else begin
   directory:= removelastpathsection(str1);
   if directory <> '' then begin
-   if directory = '/' then begin //root
+   if directory = slashchar then begin //root
     filename:= copy(str1,2,bigint);
    end
    else begin
@@ -1421,7 +1424,7 @@ begin
      filename:= copy(str1,3,bigint);
     end
     else begin
-     directory:= directory + '/';
+     directory:= directory + slashchar;
      filename:= copy(str1,length(directory)+1,bigint);
     end;
    end;
@@ -1439,7 +1442,7 @@ var
  int1: integer;
 begin
  splitfilepath(path,directory,fstr1);
- int1:= findlastchar(fstr1,'.');
+ int1:= findlastchar(fstr1,dotchar);
  if int1 > 1 then begin
   filename:= copy(fstr1,1,int1-1);
   fileext:= copy(fstr1,int1,bigint);
@@ -1456,7 +1459,7 @@ var
 begin
  str1:= unquotefilename(filepath(path,fk_file));
  result:= nil;
- splitstring(str1,result,msechar('/'));
+ splitstring(str1,result,msechar(slashchar));
  result:= copy(result,1,bigint);
 end;
 
@@ -1465,12 +1468,12 @@ var
  int1: integer;
 begin
  if segments = nil then begin
-  result:= '/';
+  result:= slashchar;
  end
  else begin
   result:= '';
   for int1:= 0 to high(segments) do begin
-   result:= result + '/' + segments[int1];
+   result:= result + slashchar + segments[int1];
   end;
  end;
 end;
@@ -1503,8 +1506,8 @@ var
 begin
  str1:= path;
  tomsefilepath1(str1);
- int1:= findlastchar(path,'.');
- if (int1 > 1) and (findlastchar(path,'/') < int1) then begin
+ int1:= findlastchar(path,dotchar);
+ if (int1 > 1) and (findlastchar(path,slashchar) < int1) then begin
   result:= copy(str1,1,int1-1);
  end
  else begin
@@ -1516,8 +1519,8 @@ function hasfileext(const path: filenamety): boolean;
 var
  int1: integer;
 begin
- int1:= findlastchar(path,'.');
- result:= (int1 > 1) and (findlastchar(path,'/') < int1);
+ int1:= findlastchar(path,dotchar);
+ result:= (int1 > 1) and (findlastchar(path,slashchar) < int1);
 end;
 
 function fileext(const path: filenamety): filenamety;
@@ -1526,7 +1529,7 @@ var
  int1: integer;
 begin
  str1:= filename(path);
- int1:= findlastchar(str1,'.');
+ int1:= findlastchar(str1,dotchar);
  if int1 > 1 then begin
   result:= copy(str1,int1+1,bigint);
  end
@@ -1562,7 +1565,7 @@ function replacefileext(const path,newext: filenamety): filenamety;
 begin
  result:= removefileext(path);
  if newext <> '' then begin
-  result:= result + '.' + newext;
+  result:= result + dotchar + newext;
  end;
 end;
 
@@ -1587,20 +1590,48 @@ function removelastpathsection(path: filenamety): filenamety;
 var
  int1: integer;
 begin
- int1:= findlastchar(path,msechar('/'));
+ int1:= findlastchar(path,msechar(slashchar));
  if (int1 > 1) then begin
   result:= copy(path,1,int1-1);
-  if (int1 = 2) and (path[1] = '/') then begin
-   result:= '/' + result; //UNC
+  if (int1 = 2) and (path[1] = slashchar) then begin
+   result:= slashchar + result; //UNC
   end;
  end
  else begin
   if int1 = 1 then begin
-   result:= '/'; //root
+   result:= slashchar; //root
   end
   else begin
    result:= '';
   end;
+ end;
+end;
+
+function getlastpathsection(const path: filenamety): filenamety;
+var
+ fna1: filenamety;
+ int1,int2: integer;
+ po1: pmsechar;
+begin
+ result:= '';
+ fna1:= filepath(path);
+ if fna1 <> '' then begin
+  int1:= length(fna1);
+  if fna1[int1] = slashchar then begin
+   dec(int1); //skip trailing slash
+  end;
+  int2:= int1;
+  while int2 > 0 do begin
+   if fna1[int2] = slashchar then begin
+    break;
+   end;
+   dec(int2);
+  end;
+  if (int2 <= 1) or (int2 = 2) and (fna1[1] = slashchar) then begin //UNC
+   result:= copy(fna1,1,int1); //all without trailing slash   
+   exit;
+  end;
+  result:= copy(fna1,int2+1,int1-int2);
  end;
 end;
 
@@ -1611,9 +1642,9 @@ begin
   result:= '';
  end
  else begin
-  if path[length(path)] = '/' then begin
+  if path[length(path)] = slashchar then begin
    newpath:= removelastpathsection(copy(path,1,length(path)-1));
-   if newpath = '/' then begin
+   if newpath = slashchar then begin
     result:= copy(path,length(newpath)+1,length(path)-length(newpath)-1);
    end
    else begin
@@ -1624,8 +1655,8 @@ begin
    newpath:= removelastpathsection(path);
    result:= copy(path,length(newpath)+2,length(path)-length(newpath)-1);
   end;
-  if (newpath <> '/') and (newpath <> '//') then begin
-   newpath:= newpath + '/';
+  if (newpath <> slashchar) and (newpath <> '//') then begin
+   newpath:= newpath + slashchar;
   end;
  end;
 end;
@@ -1669,7 +1700,8 @@ begin
   exclude:= aexcludeattrib;
   infolevel:= ainfolevel;
  end;
- syserror(sys_opendirstream(dirstream),'"'+dirstream.dirinfo.dirname + '" ');
+ syserror(sys_opendirstream(dirstream),
+                           quotechar+dirstream.dirinfo.dirname + '" ');
  beginupdate;
  try
   finalize(info);
@@ -1677,7 +1709,7 @@ begin
   repeat
    bo1:= sys_readdirstream(dirstream,info);
    if bo1 then begin
-    if not ((info.extinfo1.filetype = ft_dir) and ((info.name = '.') or
+    if not ((info.extinfo1.filetype = ft_dir) and ((info.name = dotchar) or
                  (info.name = '..'))) then begin
      bo2:= true;
      if assigned(acheckproc) then begin
