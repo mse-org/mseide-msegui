@@ -64,6 +64,7 @@ type
   captionrect: rectty;
   captioninnerrect: rectty;
   imagerect: rectty;
+  imagealignment: alignmentsty;
   textflags: textflagsty;
   expandboxrect: rectty;
   checkboxrect: rectty;
@@ -348,10 +349,12 @@ type
    procedure setimageheight(const Value: integer);
    procedure setimagewidth(const Value: integer);
    procedure setimagesize(const avalue: sizety);
+   procedure setimagealignment(const avalue: alignmentsty);
   protected
    fdefaultnodestate: nodestatesty;
    fimagelist: timagelist;
    fimagesize: sizety;
+   fimagealignment: alignmentsty;
    fimnr_base: integer;
    fimnr_expanded,fimnr_selected,fimnr_readonly,fimnr_checked,
    fimnr_subitems: integer;
@@ -392,6 +395,7 @@ type
    procedure registerobject(const aobject: iobjectlink);
     //call objectevent method of items
    procedure unregisterobject(const aobject: iobjectlink);
+   function layoutinfopo: plistitemlayoutinfoty;
 
    function add(const aitem: tlistitem): integer; overload;
    function add(const aitem: msestring): integer; overload;
@@ -409,24 +413,36 @@ type
    property items[const index: integer]: tlistitem read getitems1 write setitems;
                     default;
    property imnr_base: integer read fimnr_base write setimnr_base default 0;
-   property imnr_expanded: integer read fimnr_expanded write setimnr_expanded default 0;
-   property imnr_selected: integer read fimnr_selected write setimnr_selected default 0;
-   property imnr_readonly: integer read fimnr_readonly write setimnr_readonly default 0;
-   property imnr_checked: integer read fimnr_checked write setimnr_checked default 0;
-   property imnr_subitems: integer read fimnr_subitems write setimnr_subitems default 0;
+   property imnr_expanded: integer read fimnr_expanded 
+                                              write setimnr_expanded default 0;
+   property imnr_selected: integer read fimnr_selected
+                                              write setimnr_selected default 0;
+   property imnr_readonly: integer read fimnr_readonly
+                                              write setimnr_readonly default 0;
+   property imnr_checked: integer read fimnr_checked
+                                               write setimnr_checked default 0;
+   property imnr_subitems: integer read fimnr_subitems 
+                                              write setimnr_subitems default 0;
    property imagelist: timagelist read fimagelist write setimagelist;
-   property imagewidth: integer read fimagesize.cx write setimagewidth default 0;
-   property imageheight: integer read fimagesize.cy write setimageheight default 0;
+   property imagewidth: integer read fimagesize.cx 
+                                                 write setimagewidth default 0;
+   property imageheight: integer read fimagesize.cy 
+                                                write setimageheight default 0;
    property imagesize: sizety read fimagesize write setimagesize;
+   property imagealignment: alignmentsty read fimagealignment 
+                   write setimagealignment default [al_xcentered,al_ycentered]; 
    property options: nodeoptionsty read foptions write setoptions default [];
-   property captionpos: captionposty read fcaptionpos write setcaptionpos default cp_right;
-   property levelstep: integer read flevelstep write setlevelstep default defaultlevelstep;
-   property defaultnodestate: nodestatesty read fdefaultnodestate write fdefaultnodestate default [];
+   property captionpos: captionposty read fcaptionpos write setcaptionpos
+                                                              default cp_right;
+   property levelstep: integer read flevelstep write setlevelstep
+                                                    default defaultlevelstep;
+   property defaultnodestate: nodestatesty read fdefaultnodestate 
+                                            write fdefaultnodestate default [];
 
    property onstatreaditem: statreaditemeventty read fonstatreaditem
                             write fonstatreaditem;
-   property onstatreadtreeitem: statreadtreeitemeventty read fonstatreadtreeitem
-                            write fonstatreadtreeitem;
+   property onstatreadtreeitem: statreadtreeitemeventty 
+                            read fonstatreadtreeitem write fonstatreadtreeitem;
  end;
 
  ttreenode = class;
@@ -439,7 +455,8 @@ type
   private
    procedure setcount(const value: integer);
    procedure checkindex(const index: integer);
-   procedure convertflat(const listitem: ttreelistitem; const filterfunc: treenodefilterfuncty);
+   procedure convertflat(const listitem: ttreelistitem; 
+                                       const filterfunc: treenodefilterfuncty);
    function converttree(const filterfunc: treenodefilterfuncty): ttreelistitem;
   protected
    fitems: treenodearty;
@@ -456,7 +473,8 @@ type
    function count: integer;
    function add(const anode: ttreenode): integer;
    procedure iterate(const event: nodeeventty);
-   function converttotreelistitem(flat: boolean = false; withrootnode: boolean =  false;
+   function converttotreelistitem(flat: boolean = false; 
+                                        withrootnode: boolean =  false;
                 filterfunc: treenodefilterfuncty = nil): ttreelistitem;
    property items[const index: integer]: ttreenode read getitems
                                                     write setitems; default;
@@ -517,6 +535,7 @@ const
 begin
  with list do begin
   aimagesize:= fimagesize;
+  info.imagealignment:= fimagealignment;
  end;
  with info do begin
   cellsize:= asize;
@@ -620,7 +639,7 @@ begin
   if aimagelist <> nil then begin
    int1:= getactimagenr;
    if (int1 >= 0) and (int1 < aimagelist.count) then begin
-    aimagelist.paint(acanvas,int1,imagerect,[al_xcentered,al_ycentered],
+    aimagelist.paint(acanvas,int1,imagerect,imagealignment,
                    fintf.getcolorglyph);
    end;
   end;
@@ -987,6 +1006,7 @@ constructor tcustomitemlist.create(const intf: iitemlist);
 begin
  fintf:= intf;
  fcaptionpos:= cp_right;
+ fimagealignment:= [al_xcentered,al_ycentered];
  flevelstep:= defaultlevelstep;
  inherited create;
  fitemclass:= tlistitem;
@@ -1104,12 +1124,30 @@ begin
  end;
 end;
 
+procedure tcustomitemlist.setimagealignment(const avalue: alignmentsty);
+begin
+ if fimagealignment <> avalue then begin
+  movealignment(avalue,fimagealignment);
+  updatelayout;
+ end;
+end;
+
 procedure tcustomitemlist.setimagelist(const Value: timagelist);
+var
+ imagelistbefore: timagelist;
 begin
  if fimagelist <> value then begin
+  imagelistbefore:= fimagelist;
   setlinkedcomponent(iobjectlink(self),value,tmsecomponent(fimagelist));
   if (fimagelist <> nil) and (csdesigning in fintf.getcomponentstate) then begin
-   fimagesize:= fimagelist.size;
+   if (imagelistbefore = nil) or 
+                   (imagelistbefore.width = fimagesize.cx) then begin
+    fimagesize.cx:= fimagelist.width;
+   end;
+   if (imagelistbefore = nil) or 
+                   (imagelistbefore.height = fimagesize.cy) then begin
+    fimagesize.cy:= fimagelist.height;
+   end;
   end;
   updatelayout;
 //  invalidate;
@@ -1470,6 +1508,11 @@ var
 begin
  item1:= items[index];
  result:= (item1 = nil) or item1.empty;
+end;
+
+function tcustomitemlist.layoutinfopo: plistitemlayoutinfoty;
+begin
+ result:= fintf.getlayoutinfo;
 end;
 
 { ttreelistitem }

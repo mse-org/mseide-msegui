@@ -143,6 +143,7 @@ type
    property imagelist;
    property imagewidth;
    property imageheight;
+   property imagealignment;
  end;
 
 
@@ -433,6 +434,7 @@ type
    property imagelist;
    property imagewidth;
    property imageheight;
+   property imagealignment;
    property defaultnodestate;
    property captionpos;
    property options;
@@ -722,6 +724,7 @@ type
    property imagelist;
    property imagewidth;
    property imageheight;
+   property imagealignment;
    property defaultnodestate;
    property captionpos;
    property options;

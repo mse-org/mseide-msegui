@@ -1081,28 +1081,9 @@ begin
 end;
 
 procedure tbitmap.setalignment(const Value: alignmentsty);
-const
- mask1: alignmentsty = [al_intpol,al_or,al_and];
- mask2: alignmentsty = [al_left,al_xcentered,al_right];
- mask3: alignmentsty = [al_top,al_ycentered,al_bottom];
-var
- value1,value2,value3: alignmentsty;
 begin
  if falignment <> value then begin
-  value1:= alignmentsty(setsinglebit(
-                          {$ifdef FPC}longword{$else}word{$endif}(value),
-                          {$ifdef FPC}longword{$else}word{$endif}(falignment),
-                          {$ifdef FPC}longword{$else}word{$endif}(mask1)));
-  value2:= alignmentsty(setsinglebit(
-                          {$ifdef FPC}longword{$else}word{$endif}(value),
-                          {$ifdef FPC}longword{$else}word{$endif}(falignment),
-                          {$ifdef FPC}longword{$else}word{$endif}(mask2)));
-  value3:= alignmentsty(setsinglebit(
-                          {$ifdef FPC}longword{$else}word{$endif}(value),
-                          {$ifdef FPC}longword{$else}word{$endif}(falignment),
-                          {$ifdef FPC}longword{$else}word{$endif}(mask3)));
-  falignment:= (value - (mask1+mask2+mask3))+
-                              (value1*mask1)+(value2*mask2)+(value3*mask3);
+  movealignment(value,falignment);
   change;
  end;
 end;
