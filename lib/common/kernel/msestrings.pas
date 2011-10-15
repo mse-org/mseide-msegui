@@ -337,7 +337,8 @@ function strlcopy(const str: pchar; len: integer): ansistring;
                        //nicht nullterminiert
 function msestrlcopy(const str: pmsechar; len: integer): msestring;
                        //nicht nullterminiert
-function psubstr(const start,stop: pchar): string;
+function psubstr(const start,stop: pchar): string; overload;
+function psubstr(const start,stop: pmsechar): msestring; overload;
 
 function msePosEx(const SubStr, S: msestring; Offset: longword = 1): Integer;
 
@@ -471,10 +472,11 @@ type
  locatestringoptionty = (lso_casesensitive,lso_posinsensitive,lso_exact);
  locatestringoptionsty = set of locatestringoptionty;
 
-function locatestring(const afilter: msestring; const getkeystringfunc: getkeystringfuncty;
-           const options: locatestringoptionsty;
-           const count: integer; var aindex: integer): boolean;
-               //true if found
+function locatestring(const afilter: msestring;
+                    const getkeystringfunc: getkeystringfuncty;
+                    const options: locatestringoptionsty;
+                    const count: integer; var aindex: integer): boolean;
+                             //true if found
 
 function getmsestringprop(const ainstance: tobject;
                                  const apropinfo: ppropinfo): msestring;
@@ -847,6 +849,20 @@ begin
 end;
 
 function psubstr(const start,stop: pchar): string;
+var
+ int1: integer;
+begin
+ if (start = nil) or (stop = nil) then begin
+  result:= '';
+ end
+ else begin
+  int1:= stop-start;
+  setlength(result,int1);
+  move(start^,result[1],int1);
+ end;
+end;
+
+function psubstr(const start,stop: pmsechar): msestring;
 var
  int1: integer;
 begin
