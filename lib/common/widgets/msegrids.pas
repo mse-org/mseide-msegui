@@ -2525,7 +2525,8 @@ function iscellkeypress(const info: celleventinfoty;
 function iscellclick(const info: celleventinfoty;
                         const restrictions: cellclickrestrictionsty = [];
                         const allowedshiftstates: shiftstatesty = []): boolean;
-function isrowenter(const info: celleventinfoty): boolean;
+function isrowenter(const info: celleventinfoty;
+                               const noentergrid: boolean = false): boolean;
 function isrowexit(const info: celleventinfoty;
                                const noexitgrid: boolean = false): boolean;
 function isrowchange(const info: celleventinfoty): boolean;
@@ -2622,10 +2623,12 @@ begin
  end;
 end;
 
-function isrowenter(const info: celleventinfoty): boolean;
+function isrowenter(const info: celleventinfoty;
+                     const noentergrid: boolean = false): boolean;
 begin
  with info do begin
-  result:= (eventkind = cek_enter) and (cellbefore.row <> newcell.row);
+  result:= (eventkind = cek_enter) and (cellbefore.row <> newcell.row) and
+                  (not noentergrid or (selectaction <> fca_entergrid));
  end;
 end;
 

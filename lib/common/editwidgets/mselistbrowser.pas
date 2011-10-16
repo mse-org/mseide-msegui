@@ -2442,14 +2442,22 @@ begin
    end;
   end;
  end;
+ if fgridintf <> nil then begin
+  with tcustomgrid1(fgridintf.getcol.grid) do begin
+   sortinvalid(invalidaxis,invalidaxis);
+   rowdatachanged(makegridcoord(invalidaxis,index),count);
+   checksort;
+  end;
+ end;
 end;
 
 procedure titemedit.itemcountchanged;
 begin
+ fvalue:= nil; //invalid
  if fgridintf <> nil then begin
   with fgridintf.getcol.grid do begin
    rowcount:= fitemlist.count;
-   rowdatachanged(makegridcoord(invalidaxis,0),fitemlist.count);
+//   rowdatachanged(makegridcoord(invalidaxis,0),fitemlist.count);
   end;
  end;
 end;
