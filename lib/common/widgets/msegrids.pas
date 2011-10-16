@@ -212,7 +212,8 @@ type
  gridstatesty = set of gridstatety;
  gridstate1ty = (gs1_showcellinvalid,gs1_sortvalid,gs1_rowsortinvalid,
                  gs1_sortmoving,gs1_sortchangelock,gs1_rowinserted,
-                 gs1_gridsorted,gs1_dbsorted,gs1_rowdeleting);
+                 gs1_gridsorted,gs1_dbsorted,gs1_rowdeleting,
+                 gs1_focuscellonenterlock);
  gridstates1ty = set of gridstate1ty;
 
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
@@ -12485,7 +12486,8 @@ end;
 procedure tcustomgrid.doenter;
 begin
  inherited;
- if og_focuscellonenter in foptionsgrid then begin
+ if (og_focuscellonenter in foptionsgrid) and 
+               not (gs1_focuscellonenterlock in fstate1)then begin
   focuscell(ffocusedcell,fca_entergrid);
  end;
 end;

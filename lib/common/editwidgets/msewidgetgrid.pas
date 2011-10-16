@@ -1101,19 +1101,28 @@ begin
    if (fintf <> nil) then begin
     updatewidgetrect;
     inherited;
+    bo1:= (tcustomwidgetgrid(fgrid).fmouseinfopo <> nil) and 
+              tcustomwidgetgrid(fgrid).wantmousefocus(fmouseinfopo^);
     if fgrid.entered or 
-              not (gs_cellexiting in tcustomwidgetgrid(fgrid).fstate) and
-              (tcustomwidgetgrid(fgrid).fmouseinfopo <> nil) and 
-              tcustomwidgetgrid(fgrid).wantmousefocus(fmouseinfopo^) then begin
+               not (gs_cellexiting in tcustomwidgetgrid(fgrid).fstate) and 
+                                                                bo1 then begin
      widget1:= fintf.getwidget;
      with widget1 do begin
       visible:= true;
-      if canfocus and tcustomwidgetgrid(fgrid).entered and 
+      if canfocus and (tcustomwidgetgrid(fgrid).entered or bo1) and 
        not fgrid.checkdescendent(fwindow.focusedwidget) or
        (fwindow.focusedwidget = fgrid) or 
        fcontainer2.checkdescendent(fwindow.focusedwidget) or
        fcontainer0.checkdescendent(fwindow.focusedwidget) then begin
-       setfocus(fgrid.active);
+       bo1:= gs1_focuscellonenterlock in twidgetgrid(fgrid).fstate1;
+       include(twidgetgrid(fgrid).fstate1,gs1_focuscellonenterlock);
+       try
+        setfocus(fgrid.active);
+       finally
+        if not bo1 then begin
+         exclude(twidgetgrid(fgrid).fstate1,gs1_focuscellonenterlock);
+        end;
+       end;
       end;
      end;
      if ffocuscount = focuscount then begin
