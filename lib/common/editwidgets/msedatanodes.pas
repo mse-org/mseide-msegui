@@ -1139,7 +1139,9 @@ begin
  if fimagelist <> value then begin
   imagelistbefore:= fimagelist;
   setlinkedcomponent(iobjectlink(self),value,tmsecomponent(fimagelist));
-  if (fimagelist <> nil) and (csdesigning in fintf.getcomponentstate) then begin
+  if (fimagelist <> nil) and 
+             (fintf.getcomponentstate * [csdesigning,csloading] = 
+                                                     [csdesigning]) then begin
    if (imagelistbefore = nil) or 
                    (imagelistbefore.width = fimagesize.cx) then begin
     fimagesize.cx:= fimagelist.width;
