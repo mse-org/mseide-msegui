@@ -1707,6 +1707,7 @@ type
                                         var handled: boolean) of object;
  pasteselectioneventty = procedure(const sender: tcustomgrid;
                                         var handled: boolean) of object;
+
  tcustomgrid = class(tpublishedwidget,iautoscrollframe,iobjectpicker,iscrollbar,
                     idragcontroller,istatfile
                     {$ifdef mse_with_ifi},iifigridlink{$endif})
@@ -14210,7 +14211,7 @@ end;
 
 procedure tcustomgrid.sort;
 var
- int1: integer;
+ bo1: boolean;
 begin
  if gs_isdb in fstate then begin
   include(fstate1,gs1_sortvalid);
@@ -14220,13 +14221,18 @@ begin
   fdatacols.roworderinvalid;
   beginupdate;
   try
-   int1:= ffocusedcell.row;
+//   int1:= ffocusedcell.row;
+   bo1:= factiverow = ffocusedcell.row;
    if assigned(fonsort) then begin
-    internalsort({$ifdef FPC}@{$endif}doonsort{fonsort},int1);
+    internalsort({$ifdef FPC}@{$endif}doonsort{fonsort},ffocusedcell.row);
    end
    else begin
-    internalsort({$ifdef FPC}@{$endif}fdatacols.sortfunc,int1);
+    internalsort({$ifdef FPC}@{$endif}fdatacols.sortfunc,ffocusedcell.row);
    end;
+   if bo1 then begin
+    factiverow:= ffocusedcell.row;
+   end;
+   {
    if int1 <> ffocusedcell.row then begin
     if factiverow = ffocusedcell.row then begin
      factiverow:= int1;
@@ -14234,6 +14240,7 @@ begin
     ffocusedcell.row:= int1;
 //    updaterowdata; //for twidgetgrid
    end;
+   }
    include(fstate1,gs1_sortvalid);
    exclude(fstate1,gs1_rowsortinvalid);
    layoutchanged;
