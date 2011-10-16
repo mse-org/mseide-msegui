@@ -597,7 +597,7 @@ type
 
    property container_face: tfacecomp read fcontainer.wi.fa 
                                               write setcontainer_face;
-   property container_ftrame: tframecomp read fcontainer.wi.fra 
+   property container_frame: tframecomp read fcontainer.wi.fra 
                                               write setcontainer_frame;
    property groupbox_face: tfacecomp read fgroupbox.wi.fa write setgroupbox_face;
    property groupbox_frame: tframecomp read fgroupbox.wi.fra write setgroupbox_frame;
