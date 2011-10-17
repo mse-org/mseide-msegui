@@ -311,22 +311,31 @@ end;
 function tmseprocess.waitforprocess(const atimeoutus: integer): boolean;
                                               //true if process finished
 var
-// int1: integer;
+ int1: integer;
  bo1: boolean;
 begin
  result:= false;
- application.lock;
- try
+// application.lock;
+// try
+//  application.lock;
   bo1:= prs_listening in fstate;
   unlisten;
-  if not bo1 or mseprocutils.getprocessexitcode(
-                                 fprochandle,fexitcode,atimeoutus) then begin
-   procend;
+//  application.unlock;
+  if bo1 then begin
+   int1:= application.unlockall;
+   result:= mseprocutils.getprocessexitcode(
+                                 fprochandle,fexitcode,atimeoutus);
+   application.relockall(int1);
+  end
+  else begin
    result:= true;
   end;
- finally
-  application.unlock;
- end;
+  if result  then begin
+   procend;
+  end;
+// finally
+//  application.unlock;
+// end;
 end;
 
 function tmseprocess.waitforprocess: integer;
