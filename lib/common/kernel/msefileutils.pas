@@ -1611,7 +1611,7 @@ function getlastpathsection(const path: filenamety): filenamety;
 var
  fna1: filenamety;
  int1,int2: integer;
- po1: pmsechar;
+// po1: pmsechar;
 begin
  result:= '';
  fna1:= filepath(path);

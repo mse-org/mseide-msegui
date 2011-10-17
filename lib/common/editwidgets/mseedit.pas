@@ -1004,7 +1004,7 @@ procedure tcustombuttonframe.paintoverlay(const canvas: tcanvas;
                                                      const arect: rectty);
 var
  int1: integer;
- color2: colorty;
+ color1,color2: colorty;
 begin
  color2:= cl_none;
  for int1:= 0 to fbuttons.count-1 do begin
@@ -1019,9 +1019,10 @@ begin
      if color2 = cl_none then begin
       color2:= fintf.getwidget.parentcolor;
      end;
+     color1:= finfo.color;
      finfo.color:= color2;
      drawtoolbutton(canvas,finfo);
-     finfo.color:= cl_parent;
+     finfo.color:= color1;
     end
     else begin
      drawtoolbutton(canvas,finfo);

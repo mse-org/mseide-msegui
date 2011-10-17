@@ -2443,7 +2443,9 @@ begin
   end;
  end;
  if fgridintf <> nil then begin
+ {$warnings off}
   with tcustomgrid1(fgridintf.getcol.grid) do begin
+ {$warnings on}
    sortinvalid(invalidaxis,invalidaxis);
    rowdatachanged(makegridcoord(invalidaxis,index),count);
    checksort;
