@@ -1116,7 +1116,7 @@ end;
 
 function tcustomrealgraphdataedit.createdatalist(const sender: twidgetcol): tdatalist;
 begin
- result:= trealdatalist.create;
+ result:= tgridrealdatalist.create(sender);
 end;
 
 function tcustomrealgraphdataedit.getdatatype: listdatatypety;
