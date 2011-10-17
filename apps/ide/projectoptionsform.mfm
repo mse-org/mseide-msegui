@@ -2126,7 +2126,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cx = 47
             bounds_cy = 30
           end
-          object tbooleanedit1: tbooleanedit
+          object nodebugbeginend: tbooleanedit
             frame.caption = 'Call GUI_DEBUGBEGIN/'#10'GUI_DEBUGEND'
             frame.dummy = 0
             frame.outerframe = (

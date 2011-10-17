@@ -954,7 +954,7 @@ type
    settingsdebugger: tbooleanedit;
    settingsstorage: tbooleanedit;
    settingsprojecttree: tbooleanedit;
-   tbooleanedit1: tbooleanedit;
+   nodebugbeginend: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
