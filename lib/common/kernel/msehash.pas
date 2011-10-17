@@ -97,11 +97,40 @@ type
    constructor create(const datasize: integer);
    destructor destroy; override;
    procedure clear;{ virtual;}
+   procedure reset; //net next will return first
    property capacity: integer read fcapacity write setcapacity;
    property count: integer read fcount;
    procedure iterate(const aiterator: hashiteratorprocty); overload;
  end;
  
+ integerdataty = record
+  key: integer;
+  data: record end;
+ end;
+ pintegerdataty = ^integerdataty;
+ integerhashdataty = record
+  header: hashheaderty;
+  data: integerdataty;
+ end;
+ pintegerhashdataty = ^integerhashdataty;
+ 
+ tintegerhashdatalist = class(thashdatalist)
+  private
+  protected
+   function hashkey(const akey): hashvaluety; override;
+   function checkkey(const akey; const aitemdata): boolean; override;
+  public
+   constructor create(const datasize: integer);
+   function add(const akey: integer): pointer;
+   function addunique(const akey: integer): pointer;
+   function find(const akey: integer): pointer;
+   function delete(const akey: integer; 
+                         const all: boolean = false): boolean; overload;
+                         //true if found
+   function first: pintegerdataty;
+   function next: pintegerdataty;
+ end;
+
  ptruintdataty = record
   key: ptruint;
   data: record end;
@@ -671,6 +700,11 @@ begin
  end;
 end;
 
+procedure thashdatalist.reset;
+begin
+ fcurrentitem:= 0;
+end;
+
 procedure thashdatalist.iterate(const aiterator: hashiteratorprocty);
 var
  puint1: ptruint;
@@ -898,9 +932,14 @@ function thashdatalist.internalnext: phashdatadataty;
 begin
  result:= nil;
  if count > 0 then begin
-  inc(fcurrentitem,phashdataty(pchar(fdata) + fcurrentitem)^.header.nextlist);
   if fcurrentitem = 0 then begin
    fcurrentitem:= fassignedroot;
+  end
+  else begin
+   inc(fcurrentitem,phashdataty(pchar(fdata) + fcurrentitem)^.header.nextlist);
+   if fcurrentitem = 0 then begin
+    fcurrentitem:= fassignedroot;
+   end;
   end;
   result:= phashdatadataty(pchar(fdata) + fcurrentitem + sizeof(hashheaderty));
  end;
@@ -921,19 +960,75 @@ begin
  result:= pchar(adata)-pchar(fdata);
 end;
 
+{ tintegerhasdatalist }
+
+constructor tintegerhashdatalist.create(const datasize: integer);
+begin
+ inherited create(datasize + sizeof(integerdataty));
+end;
+
+function tintegerhashdatalist.hashkey(const akey): hashvaluety;
+// todo: optimize
+var
+ ha1: hashvaluety;
+begin
+ ha1:= (integer(akey) xor (integer(akey) shr 2));
+ result:= ha1 xor (ha1 shr fhashshift); 
+end;
+
+function tintegerhashdatalist.add(const akey: integer): pointer;
+var
+ po1: pintegerhashdataty;
+begin
+ po1:= pintegerhashdataty(internaladd(akey));
+ po1^.data.key:= akey;
+ result:= @po1^.data.data;
+end;
+
+function tintegerhashdatalist.find(const akey: integer): pointer;
+begin
+ result:= internalfind(akey);
+ if result <> nil then begin
+  result:= @pintegerhashdataty(result)^.data.data;
+ end;
+end;
+
+function tintegerhashdatalist.addunique(const akey: integer): pointer;
+begin
+ result:= find(akey);
+ if result = nil then begin
+  result:= add(akey);
+ end;
+end;
+
+function tintegerhashdatalist.checkkey(const akey; const aitemdata): boolean;
+begin
+ result:= integer(akey) = integerdataty(aitemdata).key;
+end;
+
+function tintegerhashdatalist.first: pintegerdataty;
+begin
+ result:= pintegerdataty(internalfirst);
+end;
+
+function tintegerhashdatalist.next: pintegerdataty;
+begin
+ result:= pintegerdataty(internalnext);
+end;
+
+function tintegerhashdatalist.delete(const akey: integer;
+               const all: boolean = false): boolean;
+begin
+ result:= internaldelete(akey,all);
+end;
+
 { tptruinthasdatalist }
 
 constructor tptruinthashdatalist.create(const datasize: integer);
 begin
  inherited create(datasize + sizeof(ptruintdataty));
 end;
-{
-function tptruinthashdatalist.hash(const key: ptruint): hashvaluety;
-// todo: optimize
-begin
- result:= (key xor (key shr 2));
-end;
-}
+
 function tptruinthashdatalist.hashkey(const akey): hashvaluety;
 // todo: optimize
 var
@@ -953,9 +1048,6 @@ begin
 end;
 
 function tptruinthashdatalist.find(const akey: ptruint): pointer;
-//var
-// uint1: ptruint;
-// po1: pptruinthashdataty;
 begin
  result:= internalfind(akey);
  if result <> nil then begin
