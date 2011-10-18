@@ -65,7 +65,6 @@ type
    procedure moveitem(const aitem: phashdataty);
   protected
    fstate: hashliststatesty;
-   function scramble(const avalue: hashvaluety): hashvaluety; inline;
    function getdatapo(const aoffset: longword): pointer;
    function getdataoffset(const adata: pointer): longword;
    function internaladd(const akey): phashdataty;
@@ -83,6 +82,7 @@ type
    function internalfindexact(const akey;
                            out acount: integer): phashdataty; overload;
    procedure checkexact(const aitemdata; var accept: boolean); virtual;
+   function scramble(const avalue: hashvaluety): hashvaluety; inline;
    function hashkey(const akey): hashvaluety; virtual; abstract;
    function checkkey(const akey; const aitemdata): boolean; virtual; abstract;
    procedure rehash;
@@ -605,7 +605,7 @@ begin
   result:= phashdataty(pchar(fdata) + count * frecsize + frecsize);
  end;
  result^.header.prevhash:= 0;
- hash1:= scramble(hashkey(akey));
+ hash1:= hashkey(akey);
  result^.header.hash:= hash1;
  hash1:= hash1 and fmask;
  puint2:= fhashtable[hash1];
@@ -733,7 +733,7 @@ var
 begin
  po1:= nil;
  if count > 0 then begin
-  ha1:= scramble(hashkey(akey));
+  ha1:= hashkey(akey);
   uint1:= fhashtable[ha1 and fmask];
   if uint1 <> 0 then begin
    po1:= phashdataty(pchar(fdata) + uint1);
@@ -782,7 +782,7 @@ var
 begin
  po1:= nil;
  if count > 0 then begin
-  ha1:= scramble(hashkey(akey));
+  ha1:= hashkey(akey);
   uint1:= fhashtable[ha1 and fmask];
   if uint1 <> 0 then begin
    po1:= phashdataty(pchar(fdata) + uint1);
@@ -810,7 +810,7 @@ begin
  result:= nil;
  acount:= 0;
  if count > 0 then begin
-  ha1:= scramble(hashkey(akey));
+  ha1:= hashkey(akey);
   uint1:= fhashtable[ha1 and fmask];
   if uint1 <> 0 then begin
    po1:= phashdataty(pchar(fdata) + uint1);
@@ -845,7 +845,7 @@ var
 begin
  po1:= nil;
  if count > 0 then begin
-  ha1:= scramble(hashkey(akey));
+  ha1:= hashkey(akey);
   uint1:= fhashtable[ha1 and fmask];
   if uint1 <> 0 then begin
    po1:= phashdataty(pchar(fdata) + uint1);
@@ -880,7 +880,7 @@ begin
  result:= nil;
  acount:= 0;
  if count > 0 then begin
-  ha1:= scramble(hashkey(akey));
+  ha1:= hashkey(akey);
   uint1:= fhashtable[ha1 and fmask];
   if uint1 <> 0 then begin
    po1:= phashdataty(pchar(fdata) + uint1);
@@ -976,7 +976,7 @@ end;
 function tintegerhashdatalist.hashkey(const akey): hashvaluety;
 // todo: optimize
 begin
- result:= (integer(akey) xor (integer(akey) shr 2));
+ result:= scramble((integer(akey) xor (integer(akey) shr 2)));
 end;
 
 function tintegerhashdatalist.add(const akey: integer): pointer;
@@ -1035,7 +1035,7 @@ end;
 function tptruinthashdatalist.hashkey(const akey): hashvaluety;
 // todo: optimize
 begin
- result:= (ptruint(akey) xor (ptruint(akey) shr 2));
+ result:= scramble(ptruint(akey) xor (ptruint(akey) shr 2));
 end;
 
 function tptruinthashdatalist.add(const akey: ptruint): pointer;
@@ -1200,7 +1200,7 @@ var
 begin
  po1:= nil;
  if count > 0 then begin
-  ha1:= scramble(hashlkey(akey));
+  ha1:= hashlkey(akey);
   uint1:= fhashtable[ha1 and fmask];
   if uint1 <> 0 then begin
    po1:= phashdataty(pchar(fdata) + uint1);
@@ -1413,7 +1413,7 @@ var
 begin
  po1:= nil;
  if count > 0 then begin
-  ha1:= scramble(hashlkey(akey));
+  ha1:= hashlkey(akey);
   uint1:= fhashtable[ha1 and fmask];
   if uint1 <> 0 then begin
    po1:= phashdataty(pchar(fdata) + uint1);
