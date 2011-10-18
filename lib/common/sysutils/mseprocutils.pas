@@ -678,9 +678,13 @@ function execmse0(const commandline: string; topipe: pinteger = nil;
              ): prochandlety;
 const
  shell = shortstring('/bin/sh');
+ buflen = 256;
 var
  procid: integer;
  topipehandles,frompipehandles,errorpipehandles: tpipedescriptors;
+ pty: integer = -1;
+ ptyname: array[0..buflen] of char;
+ 
 {$ifndef FPC}
  params: array[0..3] of pchar;
 {$endif}
@@ -697,32 +701,66 @@ var
   if errorpipehandles.readdes <> invalidfilehandle then __close(errorpipehandles.readdes);
   execerror(errorbefore,commandline);
  end;
- 
- procedure openpipe(var pipehandles: tpipedescriptors);
- const
-  buflen = 80;
+
+ function dogetpt: integer;
+  procedure ptyerror;
+  begin
+   __close(pty);
+   pty:= -1;
+  end; //ptyerror
  var
-  buffer: array[0..buflen] of char;
+  ios: termios;  
+ begin
+  if pty < 0 then begin
+   pty:= getpt;
+  end;
+  if pty >= 0 then begin
+   if msetcgetattr(pty,ios) <> 0 then begin
+    ptyerror;
+   end
+   else begin
+    ios.c_lflag:= ios.c_lflag and not (icanon or echo);
+    ios.c_cc[vmin]:= #1;
+    ios.c_cc[vtime]:= #0;
+    if msetcsetattr(pty,tcsanow,ios) <> 0 then begin
+     ptyerror;
+    end
+    else begin
+     if (grantpt(pty) < 0) or (unlockpt(pty) < 0) then begin
+      ptyerror;
+     end
+     else begin
+      if ptsname_r(pty,@ptyname,buflen) < 0 then begin
+       ptyerror;
+      end;
+     end;
+    end;
+   end;
+  end;
+  result:= pty;
+ end; //dogetpt
+  
+ procedure openpipe(var pipehandles: tpipedescriptors);
  begin
   if tty then begin
    with pipehandles do begin
     if @pipehandles = @topipehandles then begin
-     if mselibc.pipe(pipehandles) <> 0 then execerr;
-     {
-     writedes:= getpt;
-     if writedes < 0 then execerr;
-     if (grantpt(writedes) < 0) or (unlockpt(writedes) < 0) then execerr;
-     if ptsname_r(writedes,@buffer,buflen) < 0 then execerr;
-     readdes:= open(buffer,o_rdonly);
+//     if mselibc.pipe(pipehandles) <> 0 then execerr;
+     writedes:= dogetpt;
+//     if writedes < 0 then execerr;
+//     if (grantpt(writedes) < 0) or (unlockpt(writedes) < 0) then execerr;
+//     if ptsname_r(writedes,@ptyname,buflen) < 0 then execerr;
+     readdes:= open(ptyname,o_rdonly);
      if readdes < 0 then execerr;
-     }
     end
     else begin
-     readdes:= getpt;
+     readdes:= dogetpt;
      if readdes < 0 then execerr;
+     {
      if (grantpt(readdes) < 0) or (unlockpt(readdes) < 0) then execerr;
      if ptsname_r(readdes,@buffer,buflen) < 0 then execerr;
-     writedes:= open(buffer,o_wronly);
+     }
+     writedes:= open(ptyname,o_wronly);
      if writedes < 0 then execerr;
     end;
    end;
