@@ -747,19 +747,12 @@ var
     if @pipehandles = @topipehandles then begin
 //     if mselibc.pipe(pipehandles) <> 0 then execerr;
      writedes:= dogetpt;
-//     if writedes < 0 then execerr;
-//     if (grantpt(writedes) < 0) or (unlockpt(writedes) < 0) then execerr;
-//     if ptsname_r(writedes,@ptyname,buflen) < 0 then execerr;
      readdes:= open(ptyname,o_rdonly);
      if readdes < 0 then execerr;
     end
     else begin
      readdes:= dogetpt;
      if readdes < 0 then execerr;
-     {
-     if (grantpt(readdes) < 0) or (unlockpt(readdes) < 0) then execerr;
-     if ptsname_r(readdes,@buffer,buflen) < 0 then execerr;
-     }
      writedes:= open(ptyname,o_wronly);
      if writedes < 0 then execerr;
     end;
