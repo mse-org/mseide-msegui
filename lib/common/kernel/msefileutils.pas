@@ -214,7 +214,7 @@ procedure createdir(const path: filenamety;
 procedure createdirpath(const path: filenamety; 
                                  const rights: filerightsty = defaultdirrights);
 function getcurrentdir: filenamety;
-procedure setcurrentdir(const path: filenamety);
+function setcurrentdir(const path: filenamety): filenamety;
 
 procedure clearfileinfo(var info: fileinfoty);
 procedure initdirfileinfo(var info: fileinfoty; const aname: filenamety;
@@ -417,10 +417,11 @@ begin
  result:= sys_getcurrentdir;
 end;
 
-procedure setcurrentdir(const path: filenamety);
+function setcurrentdir(const path: filenamety): filenamety;
 var
  error: syserrorty;
 begin
+ result:= sys_getcurrentdir;
  error:= sys_setcurrentdir(path);
  if error <> sye_ok then begin
   syserror(error,'Setcurrentdir "'+ path + quotechar+':'+lineend);

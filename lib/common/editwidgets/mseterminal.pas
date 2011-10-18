@@ -51,12 +51,9 @@ type
    procedure setoutputfd(const avalue: integer);
    function geterrorfd: integer;
    procedure seterrorfd(const avalue: integer);
-//   function getonprocfinished: notifyeventty;
-//   procedure setonprocfinished(const avalue: notifyeventty);
    function getoptionsprocess: processoptionsty;
    procedure setoptionsprocess(const avalue: processoptionsty);
   protected
-//   ftermstate: terminalstatesty;
    fprocess: tmseprocess;
 
    procedure doinputavailable(const sender: tpipereader);
