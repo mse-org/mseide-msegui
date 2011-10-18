@@ -77,7 +77,7 @@ type
   name: string;   //case sensitive, single char ->
                   //  short parameter 'a' 'b' -> '-a' '-b' or '-ab' or '-ba',
                   // '-abcde' -> '--abcde'
-  anames: pstring;//pointer auf array[0..0] of string,
+  anames: pstring;//pointer auf array[0..0] of string alias,
                      //letzter string muss leer sein ('abc','def','');
   flags: argumentflagsty;
   initvalue: string;

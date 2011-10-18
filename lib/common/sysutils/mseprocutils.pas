@@ -111,6 +111,8 @@ function pipe(out desc: pipedescriptorty; write: boolean): boolean;
             //true if ok
 
  {$ifdef UNIX}
+function getpseudoterminal(out name: string): integer;
+
 type
  procinfoty = record
   pid: integer;
@@ -641,6 +643,25 @@ begin
    setcloexec(desc.readdes);
   end;
  end;
+end;
+
+function getpseudoterminal(out name: string): integer;
+const
+ buflen = 256;
+var
+ buffer: array[0..buflen] of char;
+begin
+ result:= getpt;
+ if result < 0 then begin
+  syserror(sye_lasterror);
+ end;
+ if (grantpt(result) < 0) or (unlockpt(result) < 0) then begin
+  syserror(sye_lasterror);
+ end;
+ if ptsname_r(result,@buffer,buflen) < 0 then begin
+  syserror(sye_lasterror);
+ end;
+ name:= buffer; 
 end;
 
 function execmse0(const commandline: string; topipe: pinteger = nil;
