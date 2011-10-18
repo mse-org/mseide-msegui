@@ -61,6 +61,8 @@ procedure arraydecref(var dynamicarray);
 procedure allocuninitedarray(count,itemsize: integer; out dynamicarray);
                  //does not init memory, dynamicarray must be nil!
 function arrayrefcount(var dynamicarray): sizeint;
+function arrayminhigh(arrays: array of pointer): integer;
+                       //array of dynamicarray
 
 procedure additem(var dest: stringarty; const value: string); overload;
 procedure additem(var dest: msestringarty; const value: msestring); overload;
@@ -381,6 +383,23 @@ begin
  result:= 0;
  if pointer(dynamicarray) <> nil then begin
   result:= psizeint(pchar(dynamicarray)-2*sizeof(sizeint))^;
+ end;
+end;
+
+function arrayminhigh(arrays: array of pointer): integer;
+                       //array of dynamicarray
+var
+ int1,int2: integer;
+begin
+ result:= bigint;
+ for int1:= 0 to high(arrays) do begin
+  int2:= high(pointerarty(arrays[int1]));
+  if int1 < result then begin
+   result:= int2;
+  end;
+ end;
+ if result = bigint then begin
+  result:= -1;
  end;
 end;
 
