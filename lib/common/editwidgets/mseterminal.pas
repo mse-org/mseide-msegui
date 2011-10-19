@@ -94,6 +94,7 @@ type
    property command: msestring read getcommand write setcommand;
    property commandhistory: msestringarty read fcommandhistory 
                                                     write fcommandhistory;
+   property inputcolindex: integer read finputcolindex;
   published
    property optionsedit default defaultterminaleditoptions;
    property optionsedit1;
@@ -318,7 +319,7 @@ begin
     if (key = key_c) and (shiftstate - [ss_ctrl] = []) and 
                (pro_ctrlc in optionsprocess) and running then begin
      command:= '^C';
-     finputcolindex:= finputcolindex+2;
+     finputcolindex:= finputcolindex + 2;
      fprocess.terminate;
      include(info.eventstate,es_processed);
     end
