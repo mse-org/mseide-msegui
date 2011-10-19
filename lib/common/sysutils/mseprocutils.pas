@@ -679,11 +679,15 @@ function execmse0(const commandline: string; topipe: pinteger = nil;
 const
  shell = shortstring('/bin/sh');
  buflen = 256;
+type
+ namebufferty = array[0..buflen] of char;
 var
  procid: integer;
  topipehandles,frompipehandles,errorpipehandles: tpipedescriptors;
- pty: integer = -1;
- ptyname: array[0..buflen] of char;
+ ptyout: integer = -1;
+ ptyerr: integer = -1;
+ ptynameout: namebufferty;
+ ptynameerr: namebufferty;
  
 {$ifndef FPC}
  params: array[0..3] of pchar;
@@ -702,7 +706,7 @@ var
   execerror(errorbefore,commandline);
  end;
 
- function dogetpt: integer;
+ function dogetpt(var pty: integer; var ptyname: namebufferty): integer;
   procedure ptyerror;
   begin
    __close(pty);
@@ -746,14 +750,21 @@ var
    with pipehandles do begin
     if @pipehandles = @topipehandles then begin
 //     if mselibc.pipe(pipehandles) <> 0 then execerr;
-     writedes:= dogetpt;
-     readdes:= open(ptyname,o_rdonly);
+     writedes:= dogetpt(ptyout,ptynameout);
+     readdes:= open(ptynameout,o_rdonly);
      if readdes < 0 then execerr;
     end
     else begin
-     readdes:= dogetpt;
-     if readdes < 0 then execerr;
-     writedes:= open(ptyname,o_wronly);
+     if @pipehandles = @frompipehandles then begin
+      readdes:= dogetpt(ptyout,ptynameout);
+      if readdes < 0 then execerr;
+      writedes:= open(ptynameout,o_wronly);
+     end
+     else begin
+      readdes:= dogetpt(ptyerr,ptynameerr);
+      if readdes < 0 then execerr;
+      writedes:= open(ptynameerr,o_wronly);
+     end;
      if writedes < 0 then execerr;
     end;
    end;

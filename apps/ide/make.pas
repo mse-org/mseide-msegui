@@ -50,17 +50,17 @@ type
    fmessagefile: ttextstream;
    fnofilecopy: boolean;
    ffinished: boolean;
-   ferrorfinished: boolean;
+//   ferrorfinished: boolean;
    fmessagefinished: boolean;
    fsetmakedir: boolean;
    messagepipe: tpipereader;
-   errorpipe: tpipereader;
+//   errorpipe: tpipereader;
   protected
    fcanceled: boolean;
    procid: integer;
    procedure doasyncevent(var atag: integer); override;
    procedure inputavailable(const sender: tpipereader);
-   procedure errorfinished(const sender: tpipereader);
+//   procedure errorfinished(const sender: tpipereader);
    procedure messagefinished(const sender: tpipereader);
    procedure dofinished; virtual;
    function getcommandline: ansistring; virtual;
@@ -262,9 +262,9 @@ begin
   messagepipe:= tpipereader.create;
   messagepipe.oninputavailable:= {$ifdef FPC}@{$endif}inputavailable;
   messagepipe.onpipebroken:= {$ifdef FPC}@{$endif}messagefinished;
-  errorpipe:= tpipereader.create;
-  errorpipe.oninputavailable:= {$ifdef FPC}@{$endif}inputavailable;
-  errorpipe.onpipebroken:= {$ifdef FPC}@{$endif}errorfinished;
+//  errorpipe:= tpipereader.create;
+//  errorpipe.oninputavailable:= {$ifdef FPC}@{$endif}inputavailable;
+//  errorpipe.onpipebroken:= {$ifdef FPC}@{$endif}errorfinished;
   if clearscreen then begin
    messagefo.messages.rowcount:= 0;
   end;
@@ -285,7 +285,7 @@ begin
   procid:= invalidprochandle;
  end;
  messagepipe.Free;
- errorpipe.Free;
+// errorpipe.Free;
  fmessagefile.free;
  inherited;
 end;
@@ -295,7 +295,7 @@ var
  wdbefore: string;
 begin
  fexitcode:= 1; //defaulterror
- ferrorfinished:= false;
+// ferrorfinished:= false;
  fmessagefinished:= false;
  ffinished:= false;
  
@@ -306,7 +306,7 @@ begin
    setcurrentdir(makedir);
   end;
   try
-   procid:= execmse2(acommandline,nil,messagepipe,errorpipe,false,-1,
+   procid:= execmse2(acommandline,nil,messagepipe,nil{errorpipe},false,-1,
                                                             true,false,true);
   except
    on e1: exception do begin
@@ -340,7 +340,7 @@ begin
  ffinished:= true;
  asyncevent(0);
 end;
-
+{
 procedure tprogrunner.errorfinished(const sender: tpipereader);
 begin
  ferrorfinished:= true;
@@ -348,13 +348,13 @@ begin
   dofinished;
  end;
 end;
-
+}
 procedure tprogrunner.messagefinished(const sender: tpipereader);
 begin
  fmessagefinished:= true;
- if ferrorfinished then begin
+// if ferrorfinished then begin
   dofinished;
- end;
+// end;
 end;
 
 procedure tprogrunner.inputavailable(const sender: tpipereader);

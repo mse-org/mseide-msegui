@@ -252,7 +252,7 @@ type
  tgdbmi = class(tactcomponent)
   private
    fgdbto: tpipewriter;
-   fgdbfrom,fgdberror: tpipereader;
+   fgdbfrom{,fgdberror}: tpipereader;
    {$ifdef UNIX}
    ftargetterminal: tpseudoterminal;
    {$endif}
@@ -325,7 +325,7 @@ type
    procedure targetfrom(const sender: tpipereader);
    {$endif}
    procedure gdbfrom(const sender: tpipereader);
-   procedure gdberror(const sender: tpipereader);
+//   procedure gdberror(const sender: tpipereader);
    procedure gdbpipebroken(const sender: tpipereader);
    procedure interpret(const line: string);
    procedure consoleoutput(const text: string);
@@ -828,9 +828,11 @@ begin
   if fgdbfrom <> nil then begin
    fgdbfrom.terminate;
   end;
+  {
   if fgdberror <> nil then begin
    fgdberror.terminate;
   end;
+  }
   if fgdb <> invalidprochandle then begin
    killprocess(fgdb);
    fgdb:= invalidprochandle;
@@ -840,8 +842,8 @@ begin
   fgdbto:= nil;
   fgdbfrom.free;
   fgdbfrom:= nil;
-  fgdberror.free;
-  fgdberror:= nil;
+//  fgdberror.free;
+//  fgdberror:= nil;
   fsourcefiles.clear;
   fsourcefiledirs:= nil;
   resetexec;
@@ -865,12 +867,12 @@ begin
  fgdbto:= tpipewriter.create;
  fgdbfrom:= tpipereader.create;
  fgdbfrom.overloadsleepus:= foverloadsleepus;
- fgdberror:= tpipereader.create;
- fgdberror.overloadsleepus:= foverloadsleepus;
+// fgdberror:= tpipereader.create;
+// fgdberror.overloadsleepus:= foverloadsleepus;
  fgdbfrom.oninputavailable:= {$ifdef FPC}@{$endif}gdbfrom;
- fgdberror.oninputavailable:= {$ifdef FPC}@{$endif}gdberror;
+// fgdberror.oninputavailable:= {$ifdef FPC}@{$endif}gdberror;
  fgdbfrom.onpipebroken:= {$ifdef FPC}@{$endif}gdbpipebroken;
- fgdberror.onpipebroken:= {$ifdef FPC}@{$endif}gdbpipebroken;
+// fgdberror.onpipebroken:= {$ifdef FPC}@{$endif}gdbpipebroken;
  fconsolesequence:= 0;
  frunsequence:= 0;
  fsequence:= 1;
@@ -879,7 +881,7 @@ begin
  sys_setenv(lcmessages,'C');
   
  fgdb:= execmse2(syscommandline(commandline)+' --interpreter=mi --nx',
-                      fgdbto,fgdbfrom,fgdberror,false,-1,true,false,true);
+                fgdbto,fgdbfrom,fgdbfrom{fgdberror},false,-1,true,false,true);
 
  if haslang then begin
   sys_setenv(lcmessages,langbefore);
@@ -1648,7 +1650,7 @@ begin
   application.postevent(ev);
  end;
 end;
-
+{
 procedure tgdbmi.gdberror(const sender: tpipereader);
 var
  str1: string;
@@ -1660,7 +1662,7 @@ begin
  targetoutput(str1);
 // writedebug(str1);
 end;
-
+}
 procedure tgdbmi.gdbfrom(const sender: tpipereader);
 var
  str1,str2: string;
@@ -4406,9 +4408,11 @@ begin
  if fgdbfrom <> nil then begin
   fgdbfrom.overloadsleepus:= avalue;
  end;
+{
  if fgdberror <> nil then begin
   fgdberror.overloadsleepus:= avalue;
  end;
+}
 {$ifdef UNIX}
  ftargetterminal.input.overloadsleepus:= avalue;
 {$endif}
