@@ -717,8 +717,6 @@ var
  begin
   if pty < 0 then begin
    pty:= getpt;
-  end;
-  if pty >= 0 then begin
    if msetcgetattr(pty,ios) <> 0 then begin
     ptyerror;
    end
@@ -732,13 +730,13 @@ var
     else begin
      if (grantpt(pty) < 0) or (unlockpt(pty) < 0) then begin
       ptyerror;
-     end
-     else begin
-      if ptsname_r(pty,@ptyname,buflen) < 0 then begin
-       ptyerror;
-      end;
      end;
     end;
+   end;
+  end;
+  if pty >= 0 then begin
+   if ptsname_r(pty,@ptyname,buflen) < 0 then begin
+    ptyerror;
    end;
   end;
   result:= pty;

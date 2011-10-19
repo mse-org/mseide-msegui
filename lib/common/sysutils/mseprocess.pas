@@ -19,7 +19,8 @@ type
  processoptionty = (pro_output,pro_erroroutput,pro_input,pro_errorouttoout,
                     pro_tty, //linux only
                     pro_nowaitforpipeeof,pro_nopipeterminate,
-                    pro_inactive,pro_nostdhandle //windows only
+                    pro_inactive,pro_nostdhandle, //windows only
+                    pro_ctrlc //for tterminal
                     );
  processoptionsty = set of processoptionty;
   
@@ -248,6 +249,8 @@ var
  outp: tpipereader;
  erroroutp: tpipereader;
  inp: tpipewriter;
+ sessionleader: boolean = false;
+ group: integer = -1;
 // bo1: boolean;
 begin
  if componentstate * [csloading,csdesigning] <> [] then begin
@@ -277,8 +280,12 @@ begin
      if pro_input in foptions then begin
       inp:= finput;
      end;
+     if pro_tty in foptions then begin
+      group:= 0;
+      sessionleader:= true;
+     end;
      fprochandle:= execmse2(syscommandline(fcommandline1),
-           inp,outp,erroroutp,false,-1,pro_inactive in foptions,false,
+           inp,outp,erroroutp,sessionleader,group,pro_inactive in foptions,false,
                           pro_tty in foptions,pro_nostdhandle in foptions);
      if fprochandle = invalidprochandle then begin
       finalizeexec;

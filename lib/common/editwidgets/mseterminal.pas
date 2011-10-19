@@ -27,7 +27,8 @@ const
  defaultterminaleditoptions = (defaulttexteditoptions + [oe_caretonreadonly])-
                             [oe_linebreak];
  defaultterminaloptions = [{teo_tty}];
- defaultoptionsprocess = [pro_output,pro_errorouttoout,pro_input,pro_tty];
+ defaultoptionsprocess = [pro_output,pro_errorouttoout,pro_input,
+                                                        pro_tty,pro_ctrlc];
 type 
 // terminalstatety = ({ts_running,}ts_listening);
 // terminalstatesty = set of terminalstatety;
@@ -44,6 +45,10 @@ type
    fmaxchars: integer;
    fupdatingcount: integer;
    fonprocfinished: notifyeventty;
+   fmaxcommandhistory: integer;
+   fcommandhistory: msestringarty;
+   fhistoryindex: integer;
+   fhistorybackup: msestring;
    function getinputfd: integer;
    procedure setinoutfd(const Value: integer);
    procedure setoptions(const avalue: terminaloptionsty);
@@ -53,9 +58,11 @@ type
    procedure seterrorfd(const avalue: integer);
    function getoptionsprocess: processoptionsty;
    procedure setoptionsprocess(const avalue: processoptionsty);
+   procedure setmaxcommandhistory(const avalue: integer);
+   function getcommand: msestring;
+   procedure setcommand(const avalue: msestring);
   protected
    fprocess: tmseprocess;
-
    procedure doinputavailable(const sender: tpipereader);
    procedure dopipebroken(const sender: tpipereader);
    procedure doprocfinished(const sender: tobject);
@@ -84,12 +91,17 @@ type
    property errorfd: integer read geterrorfd write seterrorfd;
    procedure beginupdate; override;
    procedure endupdate;  override;
+   property command: msestring read getcommand write setcommand;
+   property commandhistory: msestringarty read fcommandhistory 
+                                                    write fcommandhistory;
   published
    property optionsedit default defaultterminaleditoptions;
    property optionsedit1;
    property font;
    property cursorreadonly;
    property maxchars: integer read fmaxchars write fmaxchars default 0;
+   property maxcommandhistory: integer read fmaxcommandhistory 
+                                     write setmaxcommandhistory default 0;
    property tabulators;
 
    property caretwidth;
@@ -126,7 +138,7 @@ type
 implementation
 uses
  msesysutils,mseprocutils,msewidgets,msetypes,mseprocmonitor,
- msekeyboard,sysutils,msesysintf,rtlconsts,msegraphutils;
+ msekeyboard,sysutils,msesysintf,rtlconsts,msegraphutils,msearrayutils;
 type
  tinplaceedit1 = class(tinplaceedit);
  
@@ -135,6 +147,7 @@ type
 constructor tterminal.create(aowner: tcomponent);
 begin
  foptions:= defaultterminaloptions;
+ fhistoryindex:= -1;
  inherited;
  optionsedit:= defaultterminaleditoptions;
  fprocess:= tmseprocess.create(nil);
@@ -173,6 +186,35 @@ begin
  inherited;
 end;
 
+function tterminal.getcommand: msestring;
+var
+ int1: integer;
+begin
+ result:= '';
+ if fgridintf <> nil then begin
+  int1:= fgridintf.getcol.grid.rowhigh;
+  if int1 >= 0 then begin
+   result:= copy(gridvalue[int1],finputcolindex+1,bigint);
+  end;
+ end;
+end;
+
+procedure tterminal.setcommand(const avalue: msestring);
+var
+ int1: integer;
+begin
+ if fgridintf <> nil then begin
+  with fgridintf.getcol.grid do begin
+   if rowhigh >= 0 then begin
+    gridvalue[rowhigh]:= copy(gridvalue[rowhigh],1,finputcolindex)+avalue;
+    if row = rowhigh then begin
+     feditor.curindex:= bigint;
+    end;
+   end;
+  end;
+ end;
+end;
+
 procedure tterminal.editnotification(var info: editnotificationinfoty);
 var
  mstr1: msestring;
@@ -199,10 +241,20 @@ begin
       info.action:= ea_none;
      end;
     end;
+    ea_textedited: begin
+     fhistoryindex:= -1;
+     fhistorybackup:= '';
+    end;
     ea_textentered: begin
      if (row = rowhigh) and not (teo_readonly in foptions) then begin
       info.action:= ea_none;
       mstr1:= copy(feditor.text,finputcolindex+1,bigint);
+      if (fmaxcommandhistory > 0) and not running then begin
+       insertitem(fcommandhistory,0,mstr1);
+       if length(fcommandhistory) > fmaxcommandhistory then begin
+        setlength(fcommandhistory,fmaxcommandhistory);
+       end;
+      end;
       bo1:= false;
       if assigned(fonsendtext) then begin
        fonsendtext(self,mstr1,bo1);
@@ -263,9 +315,55 @@ begin
     end; 
    end;
    if not (es_processed in info.eventstate) then begin
-    inherited;
+    if (key = key_c) and (shiftstate - [ss_ctrl] = []) and 
+               (pro_ctrlc in optionsprocess) and running then begin
+     command:= '^C';
+     finputcolindex:= finputcolindex+2;
+     fprocess.terminate;
+     include(info.eventstate,es_processed);
+    end
+    else begin
+     if (fmaxcommandhistory > 0) and not running then begin
+      include(info.eventstate,es_processed);
+      case key of
+       key_up: begin
+        if fhistoryindex < high(fcommandhistory) then begin
+         inc(fhistoryindex);
+         if fhistoryindex = 0 then begin
+          fhistorybackup:= command;
+         end;
+         command:= fcommandhistory[fhistoryindex];
+        end;
+       end;
+       key_down: begin
+        if fhistoryindex >= 0 then begin
+         dec(fhistoryindex);
+         if fhistoryindex < 0 then begin
+          command:= fhistorybackup;
+         end
+         else begin
+          command:= fcommandhistory[fhistoryindex];
+         end;
+        end;
+       end;
+       else begin
+        exclude(info.eventstate,es_processed);
+       end;
+      end;
+      if (es_processed in eventstate) and (fgridintf <> nil) then begin
+       fgridintf.getcol.grid.row:= bigint;
+       feditor.curindex:= bigint;
+       if not (teo_readonly in foptions) then begin
+        optionsedit:= optionsedit - [oe_readonly];
+       end;
+      end;
+     end;
+    end;
+    if not (es_processed in eventstate) then begin
+     inherited;
+    end;
    end;
-  end;
+  end;  
  end;
 end;
 
@@ -482,6 +580,14 @@ begin
   if fupdatingcount = 0 then begin
    updateeditpos;
   end;
+ end;
+end;
+
+procedure tterminal.setmaxcommandhistory(const avalue: integer);
+begin
+ fmaxcommandhistory:= avalue;
+ if length(fcommandhistory) > avalue then begin
+  setlength(fcommandhistory,avalue);
  end;
 end;
 

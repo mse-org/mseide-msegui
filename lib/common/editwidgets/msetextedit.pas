@@ -1448,7 +1448,7 @@ begin
      end;
     end;
     ea_delchar: begin
-     if dir <> gd_left then begin
+     if dir <> gd_left then begin //no backspace
       if (fselectstart.col = fselectend.col) and (fselectstart.row = fselectend.row) then begin
        if (feditor.curindex = length(feditor.text)) then begin
         if fselectstart.row < grid.rowcount - 1 then begin
