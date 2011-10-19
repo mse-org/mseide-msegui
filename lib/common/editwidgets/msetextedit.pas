@@ -1448,19 +1448,21 @@ begin
      end;
     end;
     ea_delchar: begin
-     if (fselectstart.col = fselectend.col) and (fselectstart.row = fselectend.row) then begin
-      if (feditor.curindex = length(feditor.text)) then begin
-       if fselectstart.row < grid.rowcount - 1 then begin
-        fselectstart.row:= fselectend.row+1;
-        fselectstart.col:= 0;
-        deleteselection;             //remove linebreak
-        action:= ea_none;
+     if dir <> gd_left then begin
+      if (fselectstart.col = fselectend.col) and (fselectstart.row = fselectend.row) then begin
+       if (feditor.curindex = length(feditor.text)) then begin
+        if fselectstart.row < grid.rowcount - 1 then begin
+         fselectstart.row:= fselectend.row+1;
+         fselectstart.col:= 0;
+         deleteselection;             //remove linebreak
+         action:= ea_none;
+        end;
        end;
+      end
+      else begin 
+       deleteselection;
+       action:= ea_none;
       end;
-     end
-     else begin 
-      deleteselection;
-      action:= ea_none;
      end;
     end;
     ea_selectall: begin
