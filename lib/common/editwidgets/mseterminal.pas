@@ -126,7 +126,7 @@ type
 implementation
 uses
  msesysutils,mseprocutils,msewidgets,msetypes,mseprocmonitor,
- msekeyboard,sysutils,msesysintf,rtlconsts;
+ msekeyboard,sysutils,msesysintf,rtlconsts,msegraphutils;
 type
  tinplaceedit1 = class(tinplaceedit);
  
@@ -192,6 +192,11 @@ begin
       else begin
        optionsedit:= optionsedit - [oe_readonly];
       end;
+     end;
+    end;
+    ea_delchar: begin
+     if (info.dir = gd_left) and (editpos.col <= finputcolindex) then begin
+      info.action:= ea_none;
      end;
     end;
     ea_textentered: begin

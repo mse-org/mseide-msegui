@@ -73,7 +73,7 @@ type
  editnotificationinfoty = record
   state: editactionstatesty;
   case action: editactionty of
-   ea_exit:(
+   ea_exit,ea_delchar:(
     dir: graphicdirectionty;
    );
    ea_caretupdating:(

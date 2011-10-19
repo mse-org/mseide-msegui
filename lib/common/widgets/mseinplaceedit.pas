@@ -1158,7 +1158,10 @@ begin
          end
          else begin
           if fcurindex > 0 then begin
-           deleteback;
+           actioninfo.action:= ea_delchar;
+           if checkaction(actioninfo) then begin
+            deleteback;
+           end;
           end
           else begin
            if checkaction(actioninfo) then begin
@@ -1179,6 +1182,7 @@ begin
         end
         else begin
          actioninfo.action:= ea_delchar;
+         actioninfo.dir:= gd_none;
          if checkaction(actioninfo) then begin
           if fcurindex < length(finfo.text.text) then begin
            deletechar;
