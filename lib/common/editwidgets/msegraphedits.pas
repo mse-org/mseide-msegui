@@ -2625,7 +2625,7 @@ var
 begin
  if not areadonly then begin
   internalcheckeditem(bo1);
-  if not fvalue or not bo1 then begin
+  if (bo_cantoggle in foptions) or not fvalue or not bo1 then begin
    bo1:= not fvalue;
    docheckvalue(bo1);
   end;

@@ -1133,7 +1133,9 @@ type
                    bo_nodefaultframeactive,
                    bo_ellipsemouse, //mouse area is elliptical
                    bo_nocandefocus,bo_candefocuswindow, //check own window only
-                   bo_radioitemcol,bo_resetcheckedonrowexit,
+                   bo_radioitemcol,
+                   bo_cantoggle, //for tbooleaneditradio
+                   bo_resetcheckedonrowexit,
                                  //used in tdatabutton
                    bo_reversed   //for tbooleanedit
                    );
