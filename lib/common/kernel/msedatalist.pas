@@ -3053,9 +3053,20 @@ begin
 end;
 
 procedure tintegerdatalist.readappendix(const reader; const aname: msestring);
+var
+ po1: plongboolaty;
+ int1: integer;
 begin
  with tstatreader(reader) do begin
   fcheckeditem:= readinteger(aname+'_ci',fcheckeditem,-1,count-1);
+  if fcheckeditem >= 0 then begin
+   po1:= datapo;
+   for int1:= 0 to fcount-1 do begin //fix wrong data
+    if po1^[int1] <> (int1 = fcheckeditem) then begin
+     items[int1]:= integer(longbool((int1 = fcheckeditem)));
+    end;
+   end;
+  end;
  end;
 end;
 
