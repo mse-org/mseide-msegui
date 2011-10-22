@@ -403,6 +403,7 @@ type
                                       var ainfo: nodeactioninfoty); override;
    function compare(const l,r): integer; override;
   public
+   constructor create; override; overload;
    constructor create(const intf: iitemlist; 
                                  const owner: titemedit); reintroduce;
    procedure assign(const aitems: listitemarty); reintroduce; overload;
@@ -544,7 +545,8 @@ type
    property activerow: integer read factiverow;
 //   property filtertext: msestring read ffiltertext write setfiltertext;
   published
-   property itemlist: titemeditlist read getitemlist write setitemlist;
+   property itemlist: titemeditlist read getitemlist 
+                                       write setitemlist stored false;
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
    property onclientmouseevent: mouseeventty read fonclientmouseevent 
                            write fonclientmouseevent;
@@ -680,7 +682,9 @@ type
    procedure afterdragevent(var ainfo: draginfoty; const arow: integer;
                                var processed: boolean);
   public
+   constructor create; override; overload;
    constructor create(const intf: iitemlist; const aowner: ttreeitemedit);
+                                     reintroduce; overload;
    procedure beginupdate; override;
    procedure endupdate; override;
    procedure change(const index: integer); override;
@@ -805,7 +809,8 @@ type
    function candragsource(const apos: pointty): boolean;
    procedure dragdrop(const adragobject: ttreeitemdragobject);
   published
-   property itemlist: ttreeitemeditlist read getitemlist write setitemlist;
+   property itemlist: ttreeitemeditlist read getitemlist 
+                                        write setitemlist stored false;
    property fieldedit: trecordfieldedit read ffieldedit write setfieldedit;
    property options: treeitemeditoptionsty read foptions write foptions default [];
    property oncheckrowmove: checkmoveeventty read foncheckrowmove write foncheckrowmove;
@@ -2238,13 +2243,18 @@ end;
 
 { tcustomitemeditlist }
 
-constructor tcustomitemeditlist.create(const intf: iitemlist; const owner: titemedit);
+constructor tcustomitemeditlist.create;
 begin
  fcolorglyph:= cl_black;
+ inherited;
+ fitemclass:= tlistedititem;
+ fstate:= fstate + [dls_nogridstreaming,dls_propertystreaming]
+end;
+
+constructor tcustomitemeditlist.create(const intf: iitemlist; const owner: titemedit);
+begin
  fowner:= owner;
  inherited create(intf);
- fitemclass:= tlistedititem;
- include(fstate,dls_nogridstreaming);
 end;
 
 procedure tcustomitemeditlist.setcolorglyph(const Value: colorty);
@@ -2404,6 +2414,36 @@ end;
 function titemedit.getdatatype: listdatatypety;
 begin
  result:= dl_none;
+end;
+
+procedure titemedit.setgridintf(const intf: iwidgetgrid);
+var
+ li1: tcustomitemeditlist;
+begin
+ inherited;
+ if intf <> nil then begin
+  li1:= tcustomitemeditlist(intf.getcol.datalist);
+  if li1 <> nil then begin
+   if fitemlist = nil then begin //changed inherited grid col
+    fitemlist:= tcustomitemeditlist(intf.getcol.datalist);
+    fitemlist.fowner:= self;
+    fitemlist.fintf:= iitemlist(self);
+   end
+   else begin
+    if fitemlist <> li1 then begin
+     fitemlist.free;
+     fitemlist:= li1;
+    end;
+   end;
+  end;
+  if fitemlist.count > 0 then begin
+   itemcountchanged;
+  end
+  else begin
+   fitemlist.count:= intf.getcol.grid.rowcount;
+  end;
+  updatelayout;
+ end;
 end;
 
 procedure titemedit.createnode(var item: tlistitem);
@@ -2739,24 +2779,6 @@ begin
  end;
 end;
 }
-procedure titemedit.setgridintf(const intf: iwidgetgrid);
-begin
- inherited;
- if intf <> nil then begin
-  if fitemlist = nil then begin
-   fitemlist:= tcustomitemeditlist(intf.getcol.datalist);
-   fitemlist.create(iitemlist(self),self);
-  end;
-  if fitemlist.count > 0 then begin
-   itemcountchanged;
-  end
-  else begin
-   fitemlist.count:= intf.getcol.grid.rowcount;
-  end;
-  updatelayout;
- end;
-end;
-
 procedure titemedit.dokeydown(var info: keyeventinfoty);
 //var
 // str1: msestring;
@@ -3399,12 +3421,18 @@ end;
 
 { ttreeitemeditlist }
 
+constructor ttreeitemeditlist.create;
+begin
+ fcolorline:= cl_dkgray;
+ inherited;
+ fitemclass:= ttreelistedititem;
+end;
+
 constructor ttreeitemeditlist.create(const intf: iitemlist;
                                                const aowner: ttreeitemedit);
 begin
- fcolorline:= cl_dkgray;
- inherited create(intf,aowner);
- fitemclass:= ttreelistedititem;
+ inherited;
+// inherited create(intf,aowner);
 end;
 
 procedure ttreeitemeditlist.setcolorline(const value: colorty);
@@ -4955,7 +4983,7 @@ end;
 
 function createttreeitemeditlist(const aowner: twidgetcol): tdatalist;
 begin
- result:= titemeditlist.create;
+ result:= ttreeitemeditlist.create;
 end;
 
 initialization

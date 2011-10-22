@@ -1289,8 +1289,9 @@ begin
  end;
  filer.defineproperty('dataclass',{$ifdef FPC}@{$endif}readdataclass,
                        {$ifdef FPC}@{$endif}writedataclass,
-                              (fdata <> nil) and 
-           ([dls_nogridstreaming,dls_remote] * fdata.state = []));
+       (fdata <> nil) and not (dls_remote in fdata.state) and
+      (not(dls_nogridstreaming in fdata.state) or
+          (dls_propertystreaming in fdata.state)));
  filer.defineproperty('data',{$ifdef FPC}@{$endif}readdata,
                        {$ifdef FPC}@{$endif}writedata,bo1);
  if (fdata <> nil) and (dls_propertystreaming in 

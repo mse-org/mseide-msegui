@@ -391,7 +391,8 @@ type
    procedure readstate(const reader; const acount: integer); override;
 
   public
-   constructor create(const intf: iitemlist); reintroduce;
+   constructor create; override; overload;
+   constructor create(const intf: iitemlist); reintroduce; overload;
    destructor destroy; override;
    procedure registerobject(const aobject: iobjectlink);
     //call objectevent method of items
@@ -1003,14 +1004,19 @@ end;
 
 { tcustomitemlist }
 
-constructor tcustomitemlist.create(const intf: iitemlist);
+constructor tcustomitemlist.create;
 begin
- fintf:= intf;
  fcaptionpos:= cp_right;
  fimagealignment:= [al_xcentered,al_ycentered];
  flevelstep:= defaultlevelstep;
- inherited create;
+ inherited;
  fitemclass:= tlistitem;
+end;
+
+constructor tcustomitemlist.create(const intf: iitemlist);
+begin
+ fintf:= intf;
+ create;
 end;
 
 destructor tcustomitemlist.destroy;
@@ -1233,8 +1239,10 @@ end;
 
 procedure tcustomitemlist.updatelayout;
 begin
- fintf.updatelayout;
- invalidate;
+ if fintf <> nil then begin
+  fintf.updatelayout;
+  invalidate;
+ end;
 end;
 
 procedure tcustomitemlist.docreateobject(var instance: tobject);
