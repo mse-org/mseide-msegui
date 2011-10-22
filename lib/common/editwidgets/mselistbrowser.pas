@@ -2550,11 +2550,13 @@ end;
 
 procedure titemedit.valuetogrid(arow: integer);
 begin
- fitemlist.incupdate;
- try
-  updateitemvalues(arow,1);
- finally
-  fitemlist.decupdate;
+ if arow >= 0 then begin
+  fitemlist.incupdate;
+  try
+   updateitemvalues(arow,1);
+  finally
+   fitemlist.decupdate;
+  end;
  end;
 end;
 
