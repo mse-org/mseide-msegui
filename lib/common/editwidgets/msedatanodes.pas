@@ -125,13 +125,13 @@ type
   public
    tag: integer;
    tagpointer: pointer;
-   constructor create(const aowner: tcustomitemlist);
+   constructor create(const aowner: tcustomitemlist); virtual;
    destructor destroy; override;
    class procedure calcitemlayout(const asize: sizety; const ainnerframe: framety;
                            const list: tcustomitemlist;
                               var info: listitemlayoutinfoty); virtual;
 
-   procedure assign(source: tlistitem); overload; virtual;
+   procedure assign(const source: tlistitem); overload; virtual;
    procedure beginupdate;
    procedure endupdate;
 
@@ -219,7 +219,7 @@ type
 
   public
    constructor create(const aowner: tcustomitemlist = nil;
-              const aparent: ttreelistitem = nil); virtual;
+              const aparent: ttreelistitem = nil); virtual; reintroduce;
    destructor destroy; override;
    class procedure calcitemlayout(const asize: sizety; const ainnerframe: framety;
                            const list: tcustomitemlist;
@@ -485,11 +485,24 @@ type
 
  ptreenode = ^ttreenode;
 
+ function copylistitems(const asource: listitemarty): listitemarty;
+ 
 implementation
 
 uses
  msestockobjects,{$ifdef FPCc}rtlconst{$else}rtlconsts{$endif},
            sysutils,msebits,msesysintf;
+
+function copylistitems(const asource: listitemarty): listitemarty;
+var
+ int1: integer;
+begin
+ allocuninitedarray(length(asource),sizeof(pointer),result);
+ for int1:= 0 to high(result) do begin
+  result[int1]:= listitemclassty(asource[int1].classtype).create(nil);
+  result[int1].assign(asource[int1]);
+ end;
+end;
 
 { tlistitem }
 
@@ -515,7 +528,7 @@ begin
  inherited;
 end;
 
-procedure tlistitem.assign(source: tlistitem);
+procedure tlistitem.assign(const source: tlistitem);
 begin
  beginupdate;
  tag:= source.tag;
@@ -1218,6 +1231,12 @@ begin
  if foptions <> value then begin
   optionsbefore:= foptions;
   foptions:= Value;
+  if no_nofreeitems in value then begin
+   exclude(fstate,dls_needsfree);
+  end
+  else begin
+   include(fstate,dls_needsfree);
+  end;
   if nodeoptionsty({$ifdef FPC}longword{$else}byte{$endif}(foptions) xor
                      {$ifdef FPC}longword{$else}byte{$endif}(optionsbefore)) *
                    [no_checkbox] <> [] then begin

@@ -286,7 +286,8 @@ type
    procedure updatecontainerrect;
    procedure updatelayout; override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
-   procedure loaded; override;
+//   procedure loaded; override;
+   procedure doendread; override;
    function scrollcaret(const vertical: boolean): boolean; override;
    procedure docellevent(var info: celleventinfoty); override;
    procedure checkcellvalue(var accept: boolean); override; //store edited value to grid
@@ -1179,7 +1180,9 @@ begin
  str1:= reader.readident;
  if (fdata = nil) or (fdata.classname <> str1) then begin
   if fdata <> nil then begin
-   fintf.datalistdestroyed;
+   if fintf <> nil then begin
+    fintf.datalistdestroyed;
+   end;
    freeandnil(fdata);
   end;
   if griddatalists.find(str1,pointer({$ifndef FPC}@{$endif}createproc)) then begin
@@ -2927,7 +2930,8 @@ begin
  twidget1(fcontainer3).getchildren(proc,root);
 end;
 
-procedure tcustomwidgetgrid.loaded;
+//procedure tcustomwidgetgrid.loaded;
+procedure tcustomwidgetgrid.doendread;
 var
  int1,int2,int3: integer;
  ar1: widgetarty;
