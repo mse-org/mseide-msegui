@@ -161,6 +161,7 @@ type
     //igridwidget
    procedure setfirstclick;
    function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
+   procedure datalistdestroyed; virtual;
    function getdatatype: listdatatypety; virtual; abstract;
    function getdefaultvalue: pointer; virtual;
    function getrowdatapo(const arow: integer): pointer; virtual;
@@ -2632,6 +2633,11 @@ begin
    fifiserverintf.valuechanged(getifidatalinkintf);
   end;
  end;
+end;
+
+procedure tcustomdataedit.datalistdestroyed;
+begin
+ fdatalist:= nil;
 end;
 
 {$endif mse_with_ifi}

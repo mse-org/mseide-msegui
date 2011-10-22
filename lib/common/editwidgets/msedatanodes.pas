@@ -44,7 +44,8 @@ type
  nodestates1ty = set of nodestate1ty;
  
  nodeoptionty = (no_drawemptybox,no_checkbox,
-                 no_updatechildchecked //track ns1_childchecked state, slow!
+                 no_updatechildchecked, //track ns1_childchecked state, slow!
+                 no_nofreeitems
                  );
  nodeoptionsty = set of nodeoptionty;
 
@@ -1326,7 +1327,7 @@ end;
 
 procedure tcustomitemlist.freedata(var data);
 begin
- if (tlistitem(data) <> nil) and 
+ if not (no_nofreeitems in foptions) and (tlistitem(data) <> nil) and 
                not (ns1_destroying in tlistitem(data).fstate1) then begin
   inherited;
  end;

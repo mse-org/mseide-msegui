@@ -1728,8 +1728,8 @@ type
            //calls checkwidgetsize and frame.checkwidgetsize
    property maxsize: sizety read fmaxsize write setmaxsize;
    function maxclientsize: sizety; virtual;
-   property bounds_x: integer read fwidgetrect.x write setbounds_x nodefault;
-   property bounds_y: integer read fwidgetrect.y write setbounds_y nodefault;
+   property bounds_x: integer read fwidgetrect.x write setbounds_x;
+   property bounds_y: integer read fwidgetrect.y write setbounds_y;
    property bounds_cx: integer read fwidgetrect.cx write setbounds_cx
                   {default defaultwidgetwidth} stored true;
    property bounds_cy: integer read fwidgetrect.cy write setbounds_cy

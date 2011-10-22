@@ -156,9 +156,10 @@ type
    procedure updatereadonlystate; virtual;
    procedure initeditfocus;
    
-   //igridwidget
+    //igridwidget
    procedure setfirstclick;
    function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
+   procedure datalistdestroyed; virtual;
    function getdatatype: listdatatypety; virtual; abstract;
    function getdefaultvalue: pointer; virtual;
    function getrowdatapo(const arow: integer): pointer; virtual;
@@ -684,6 +685,7 @@ type
    procedure togglevalue(const areadonly: boolean;
                                    const down: boolean); override;
    procedure doinc(var avalue: integer; const down: boolean);
+   procedure datalistdestroyed; override;
   public
    function checkvalue: boolean; override;
    procedure togglegridvalue(const index: integer); override;
@@ -1977,6 +1979,11 @@ begin
   result:= getpropinfo(self,'value');
 end;
 
+procedure tgraphdataedit.datalistdestroyed;
+begin
+ //dummy
+end;
+
 {$endif mse_with_ifi}
 
 { ttogglegraphdataedit}
@@ -2840,6 +2847,11 @@ function tcustomintegergraphdataedit.gridvaluechecked(
                                       const aindex: integer): boolean;
 begin
  result:= gridvalue[aindex] <> valuedefault;
+end;
+
+procedure tcustomintegergraphdataedit.datalistdestroyed;
+begin
+ fdatalist:= nil;
 end;
 
 { tvaluefacearrayprop }

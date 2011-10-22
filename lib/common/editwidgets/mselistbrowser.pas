@@ -62,6 +62,7 @@ type
 
  tlistedititem = class(tlistitem)
  end;
+ listedititemarty = array of tlistitem;
  listedititemclassty = class of tlistedititem;
 
  ttreeitemeditlist = class;
@@ -90,7 +91,7 @@ type
                const itemclass: treelistedititemclassty = nil); overload;
    property activeindex: integer read getactiveindex;
  end;
-
+ 
  trecordtreelistedititem = class(ttreelistedititem,irecordfield)   //does not statsave subitems
   protected
    function getfieldtext(const fieldindex: integer): msestring;
@@ -105,6 +106,7 @@ type
    procedure checkfiles(var afiles: filenamearty); virtual;
   public
    procedure loaddirtree(const apath: filenamety); virtual;
+   function path: filenamety;
  end;
  
  createlistitemeventty = procedure(const sender: tcustomitemlist; var item: tlistedititem) of object;
@@ -472,11 +474,6 @@ type
    fvalue: tlistitem;
 
    function fieldcanedit: boolean;
-    //igridwidget
-   function getcellcursor(const arow: integer; 
-                         const acellzone: cellzonety): cursorshapety; override;
-   procedure updatecellzone(const row: integer; const apos: pointty;
-                            var result: cellzonety); override;
     //iedit
    function locatecount: integer; override;        //number of locate values
    function getkeystring(const index: integer): msestring; override;
@@ -494,8 +491,14 @@ type
    procedure updateitemvalues(const index: integer; const count: integer); virtual;
    function getcolorglyph: colorty;
 
+    //igridwidget
+   function getcellcursor(const arow: integer; 
+                         const acellzone: cellzonety): cursorshapety; override;
+   procedure updatecellzone(const row: integer; const apos: pointty;
+                            var result: cellzonety); override;
    procedure setgridintf(const intf: iwidgetgrid); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
+   procedure datalistdestroyed; override;
    function getdatatype: listdatatypety; override;
    procedure drawcell(const canvas: tcanvas); override;
    procedure valuetogrid(arow: integer); override;
@@ -532,10 +535,12 @@ type
    function getvaluetext: msestring;
    procedure setvaluetext(var avalue: msestring);
    function item: tlistitem;
-   procedure beginedit;
-   procedure endedit;
    property items[const index: integer]: tlistitem read getitems 
                                                     write setitems; default;
+   function selecteditems: listedititemarty;
+
+   procedure beginedit;
+   procedure endedit;
    property activerow: integer read factiverow;
 //   property filtertext: msestring read ffiltertext write setfiltertext;
   published
@@ -795,6 +800,8 @@ type
    function item: ttreelistitem;
    property items[const index: integer]: ttreelistitem read getitems 
                                                  write setitems; default;
+   function selecteditems: treelistedititemarty;
+
    function candragsource(const apos: pointty): boolean;
    procedure dragdrop(const adragobject: ttreeitemdragobject);
   published
@@ -2568,7 +2575,7 @@ end;
 
 procedure titemedit.doupdatelayout;
 begin
- if fgridintf <> nil then begin
+ if (fgridintf <> nil) and (fitemlist <> nil) then begin
   if fframe <> nil then begin
    getitemclass.calcitemlayout(paintrect.size,tframe1(fframe).fi.innerframe,
                                               fitemlist,flayoutinfofocused);
@@ -2736,6 +2743,10 @@ procedure titemedit.setgridintf(const intf: iwidgetgrid);
 begin
  inherited;
  if intf <> nil then begin
+  if fitemlist = nil then begin
+   fitemlist:= tcustomitemeditlist(intf.getcol.datalist);
+   fitemlist.create(iitemlist(self),self);
+  end;
   if fitemlist.count > 0 then begin
    itemcountchanged;
   end
@@ -3080,6 +3091,32 @@ begin
  if fgridintf <> nil then begin
   result:= fgridintf.getcol.grid;
  end;
+end;
+
+function titemedit.selecteditems: listedititemarty;
+var
+ int1: integer;
+ ar1: integerarty;
+ po1: ppointeraty;
+begin
+ result:= nil;
+ if fgridintf <> nil then begin
+  with fgridintf.getcol do begin
+   if datalist <> nil then begin
+    ar1:= selectedcells;
+    setlength(result,length(ar1));
+    po1:= datalist.datapo;
+    for int1:= 0 to high(result) do begin
+     result[int1]:= tlistitem(po1^[ar1[int1]]);
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure titemedit.datalistdestroyed;
+begin
+ fitemlist:= nil;
 end;
 {
 function titemedit.actualcursor(const apos: pointty): cursorshapety;
@@ -4807,6 +4844,11 @@ begin
  ttreeitemeditlist(fitemlist).afterdragevent(ainfo,arow,processed);
 end;
 
+function ttreeitemedit.selecteditems: treelistedititemarty;
+begin
+ result:= treelistedititemarty(inherited selecteditems);
+end;
+
 (*
 { ttreeitemdragcontroller }
 
@@ -4891,4 +4933,34 @@ begin
  //dummy
 end;
 
+function tdirtreenode.path: filenamety;
+var
+ ar1: treelistitemarty;
+ int1: integer;
+begin
+ ar1:= rootpath;
+ result:= ar1[0].caption;
+ for int1:= 1 to high(ar1) do begin
+  result:= result+'/'+ar1[int1].caption;
+ end;
+ if (result <> '') and (result <> '/') then begin
+  result:= result + '/';
+ end;
+end;
+
+function createtitemeditlist(const aowner: twidgetcol): tdatalist;
+begin
+ result:= titemeditlist.create;
+end;
+
+function createttreeitemeditlist(const aowner: twidgetcol): tdatalist;
+begin
+ result:= titemeditlist.create;
+end;
+
+initialization
+ registergriddatalistclass(titemeditlist.classname,
+                     {$ifdef FPC}@{$endif}createtitemeditlist);
+ registergriddatalistclass(ttreeitemeditlist.classname,
+                     {$ifdef FPC}@{$endif}createttreeitemeditlist);
 end.

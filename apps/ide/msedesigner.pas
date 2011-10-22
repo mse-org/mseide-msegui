@@ -683,7 +683,8 @@ begin
  end;
 end;
 
-function tancestorlist.findancestor(const adescendent: tcomponent): tmsecomponent;
+function tancestorlist.findancestor(
+                              const adescendent: tcomponent): tmsecomponent;
 var
  po1: pancestorinfoty;
  int1: integer;
@@ -4320,6 +4321,9 @@ begin
   fdescendentinstancelist.beginstreaming;
   doswapmethodpointers(instance,false);
   writer1:= twritermse.create(astream,4096,false);
+  if instance is twidget then begin
+   fdescendentinstancelist.setnodefaultpos(twidget(instance));
+  end;
   beginstreaming(amodule);
   try
    if csancestor in instance.componentstate then begin

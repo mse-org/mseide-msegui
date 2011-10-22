@@ -138,6 +138,7 @@ type
     //igridwidget
    procedure setfirstclick;
    function createdatalist(const sender: twidgetcol): tdatalist; virtual;
+   procedure datalistdestroyed;
    function getdatatype: listdatatypety; virtual;
    function getinitvalue: pointer;
    function getdefaultvalue: pointer;
@@ -2207,6 +2208,11 @@ end;
 function tcustomtextedit.getgridintf: iwidgetgrid;
 begin
  result:= fgridintf;
+end;
+
+procedure tcustomtextedit.datalistdestroyed;
+begin
+ flines:= nil;
 end;
 
 { tundotextedit }

@@ -48,6 +48,7 @@ type
    procedure setfirstclick;
    procedure setreadonly(const avalue: boolean);
    function createdatalist(const sender: twidgetcol): tdatalist; virtual;
+   procedure datalistdestroyed;
    function getdatatype: listdatatypety;
    function getdefaultvalue: pointer;
    function getrowdatapo(const arow: integer): pointer; virtual;
@@ -471,6 +472,11 @@ begin
   str1:= format;
  end;
  value:= bitmap.writetostring(str1,params);
+end;
+
+procedure tcustomdataimage.datalistdestroyed;
+begin
+ //dummy
 end;
 
 end.

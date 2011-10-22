@@ -23,6 +23,8 @@ uses
  msegraphics,mseevent,msedatalist,msetypes,msepointer,msestrings,
  msegridsglob{$ifdef mse_with_ifi},mseificomp{$endif};
 
+//todo: simplify handling of changed column widgets in inherited grids
+
 type
 
  twidgetcol = class;
@@ -68,6 +70,7 @@ type
                          const apos: pointty;
                            var result: cellzonety);
   function createdatalist(const sender: twidgetcol): tdatalist;
+  procedure datalistdestroyed;
   function getdatatype: listdatatypety;
   function getdefaultvalue: pointer;
 //  function getrowdatapo(const info: cellinfoty): pointer;
@@ -1175,7 +1178,10 @@ var
 begin
  str1:= reader.readident;
  if (fdata = nil) or (fdata.classname <> str1) then begin
-  freeandnil(fdata);
+  if fdata <> nil then begin
+   fintf.datalistdestroyed;
+   freeandnil(fdata);
+  end;
   if griddatalists.find(str1,pointer({$ifndef FPC}@{$endif}createproc)) then begin
    fdata:= createproc(self);
    include(fstate,gps_datalistvalid);
