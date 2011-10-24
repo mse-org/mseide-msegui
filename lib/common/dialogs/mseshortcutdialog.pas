@@ -211,7 +211,7 @@ end;
 
 constructor tsysshortcutitem.create(const acaption: msestring);
 begin
- inherited create;
+ inherited create(nil,nil);
  caption:= acaption;
  fisgroup:= true;
 end;
@@ -219,7 +219,7 @@ end;
 constructor tsysshortcutitem.create(const acontroller: tshortcutcontroller;
                                            const aindex: sysshortcutty);
 begin
- inherited create;
+ inherited create(nil,nil);
  caption:= getsysshortcutdispname(aindex);
  with acontroller do begin
   setsimpleshortcut(sysshortcuts[aindex],fshortcut);

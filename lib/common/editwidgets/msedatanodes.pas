@@ -126,7 +126,7 @@ type
    tag: integer;
    tagpointer: pointer;
    constructor create(const aowner: tcustomitemlist); virtual; overload;
-   constructor create(const aowner: tcustomitemlist; 
+   constructor createassign(const aowner: tcustomitemlist; 
                                    const asource: tlistitem); overload;
    destructor destroy; override;
    class procedure calcitemlayout(const asize: sizety; const ainnerframe: framety;
@@ -519,7 +519,7 @@ begin
  end;
 end;
 
-constructor tlistitem.create(const aowner: tcustomitemlist; 
+constructor tlistitem.createassign(const aowner: tcustomitemlist; 
                                    const asource: tlistitem);
 begin
  create(aowner);

@@ -2426,8 +2426,6 @@ begin
   if li1 <> nil then begin
    if fitemlist = nil then begin //changed inherited grid col
     fitemlist:= tcustomitemeditlist(intf.getcol.datalist);
-    fitemlist.fowner:= self;
-    fitemlist.fintf:= iitemlist(self);
    end
    else begin
     if fitemlist <> li1 then begin
@@ -2435,6 +2433,8 @@ begin
      fitemlist:= li1;
     end;
    end;
+   fitemlist.fowner:= self;
+   fitemlist.fintf:= iitemlist(self);
   end;
   if fitemlist.count > 0 then begin
    itemcountchanged;
