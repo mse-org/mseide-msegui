@@ -125,7 +125,9 @@ type
   public
    tag: integer;
    tagpointer: pointer;
-   constructor create(const aowner: tcustomitemlist); virtual;
+   constructor create(const aowner: tcustomitemlist); virtual; overload;
+   constructor create(const aowner: tcustomitemlist; 
+                                   const asource: tlistitem); overload;
    destructor destroy; override;
    class procedure calcitemlayout(const asize: sizety; const ainnerframe: framety;
                            const list: tcustomitemlist;
@@ -515,6 +517,13 @@ begin
  if (fowner <> nil) then begin
   fstate:= fowner.fdefaultnodestate;
  end;
+end;
+
+constructor tlistitem.create(const aowner: tcustomitemlist; 
+                                   const asource: tlistitem);
+begin
+ create(aowner);
+ assign(asource);
 end;
 
 destructor tlistitem.destroy;

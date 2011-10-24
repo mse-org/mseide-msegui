@@ -106,7 +106,7 @@ type
    procedure checkfiles(var afiles: filenamearty); virtual;
   public
    procedure loaddirtree(const apath: filenamety); virtual;
-   function path: filenamety;
+   function path(const astart: integer = 0): filenamety;
  end;
  
  createlistitemeventty = procedure(const sender: tcustomitemlist; var item: tlistedititem) of object;
@@ -4963,18 +4963,21 @@ begin
  //dummy
 end;
 
-function tdirtreenode.path: filenamety;
+function tdirtreenode.path(const astart: integer = 0): filenamety;
 var
  ar1: treelistitemarty;
  int1: integer;
 begin
+ result:= '';
  ar1:= rootpath;
- result:= ar1[0].caption;
- for int1:= 1 to high(ar1) do begin
-  result:= result+'/'+ar1[int1].caption;
- end;
- if (result <> '') and (result <> '/') then begin
-  result:= result + '/';
+ if high(ar1) >= astart then begin
+  result:= ar1[astart].caption;
+  for int1:= astart+1 to high(ar1) do begin
+   result:= result+'/'+ar1[int1].caption;
+  end;
+  if (result <> '') and (result <> '/') then begin
+   result:= result + '/';
+  end;
  end;
 end;
 
