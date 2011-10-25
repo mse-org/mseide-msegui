@@ -2560,6 +2560,11 @@ begin
  result:= true;
 end;
 
+procedure tcustomdataedit.datalistdestroyed;
+begin
+ fdatalist:= nil;
+end;
+
 {$ifdef mse_with_ifi}
 function tcustomdataedit.getifilinkkind: ptypeinfo;
 begin
@@ -2633,11 +2638,6 @@ begin
    fifiserverintf.valuechanged(getifidatalinkintf);
   end;
  end;
-end;
-
-procedure tcustomdataedit.datalistdestroyed;
-begin
- fdatalist:= nil;
 end;
 
 {$endif mse_with_ifi}

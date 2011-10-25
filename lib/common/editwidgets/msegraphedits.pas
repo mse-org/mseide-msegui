@@ -1927,6 +1927,11 @@ begin
  //dummy
 end;
 
+procedure tgraphdataedit.datalistdestroyed;
+begin
+ //dummy
+end;
+
 {$ifdef mse_with_ifi}
 function tgraphdataedit.getifilinkkind: ptypeinfo;
 begin
@@ -1977,11 +1982,6 @@ end;
 function tgraphdataedit.getvalueprop: ppropinfo;
 begin
   result:= getpropinfo(self,'value');
-end;
-
-procedure tgraphdataedit.datalistdestroyed;
-begin
- //dummy
 end;
 
 {$endif mse_with_ifi}

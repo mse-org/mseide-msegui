@@ -1009,7 +1009,8 @@ type
    procedure doalphablend(const canvas: tcanvas);
   public
    constructor create; overload; override;
-   constructor create(const owner: twidget); reintroduce; overload;//sets fowner.fframe
+   constructor create(const owner: twidget); reintroduce; overload;
+                                                     //sets fowner.fframe
    constructor create(const intf: iface); reintroduce; overload;
    destructor destroy; override;
    procedure checktemplate(const sender: tobject);
@@ -1079,6 +1080,9 @@ type
    function getclientrect: rectty;
    function getcomponentstate: tcomponentstate;
    procedure widgetregioninvalid;
+  protected
+   procedure objectevent(const sender: tobject;
+                             const event: objecteventty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -6175,6 +6179,24 @@ end;
 procedure tfacelist.widgetregioninvalid;
 begin
  //dummy
+end;
+
+procedure tfacelist.objectevent(const sender: tobject;
+               const event: objecteventty);
+var
+ int1: integer;
+ fa1: tcustomface;
+begin
+ inherited;
+ if (event = oe_changed) and (sender is tfacecomp) then begin
+  for int1:= 0 to list.count do begin
+   fa1:= tcustomface(flist.fitems[int1]);
+   if fa1.template = sender then begin
+    fa1.checktemplate(sender);
+    break;
+   end;
+  end;
+ end;
 end;
 
 { tdragobject }
