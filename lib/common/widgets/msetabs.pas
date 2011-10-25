@@ -4579,7 +4579,8 @@ end;
 procedure tcustomtabwidget.widgetregionchanged(const sender: twidget);
 begin
  inherited;
- if not (csdestroying in componentstate) and (sender = ftabs) then begin
+ if not (csdestroying in componentstate) and (sender = ftabs) and 
+        not (ws1_updateopaque in twidget1(sender).fwidgetstate1) then begin
   if tabo_vertical in ftabs.options then begin
    tab_size:= ftabs.bounds_cx;
   end

@@ -138,7 +138,7 @@ type
                  );
  widgetstatesty = set of widgetstatety;
  widgetstate1ty = (ws1_childscaled,ws1_childrectchanged,
-                   ws1_scaling,ws1_painting,
+                   ws1_scaling,ws1_painting,ws1_updateopaque,
                    ws1_widgetregionvalid,ws1_rootvalid,
                    ws1_anchorsizing,ws1_anchorsetting,ws1_parentclientsizeinited,
                    ws1_parentupdating, //set while setparentwidget
@@ -7298,7 +7298,7 @@ end;
 function twidget.updateopaque(const children: boolean): boolean;
                      //true if widgetregionchanged called
 var
- bo1: boolean;
+ bo1,bo2: boolean;
  int1: integer;
 begin
  result:= false;
@@ -7317,7 +7317,15 @@ begin
   fwidgetstate:= fwidgetstate - [ws_opaque,ws_isvisible];
  end;
  if (bo1 <> (ws_opaque in fwidgetstate)) and (fparentwidget <> nil) then begin
-  fparentwidget.widgetregionchanged(self);
+  bo2:= ws1_updateopaque in fwidgetstate1;
+  include(fwidgetstate1,ws1_updateopaque);
+  try
+   fparentwidget.widgetregionchanged(self);
+  finally
+   if not bo2 then begin
+    include(fwidgetstate1,ws1_updateopaque);
+   end;
+  end;
   result:= true;
  end;
  if children then begin
