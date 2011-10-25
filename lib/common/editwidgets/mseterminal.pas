@@ -201,8 +201,8 @@ begin
 end;
 
 procedure tterminal.setcommand(const avalue: msestring);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  if fgridintf <> nil then begin
   with fgridintf.getcol.grid do begin

@@ -139,11 +139,11 @@ object msepopupcalendarfo: tpopupcalendarfo
     gridframecolor = -2147483645
     datarowheight = 21
     oncellevent = cellevent
-    reffontheight = 13
+    reffontheight = 14
   end
   object monthdisp: tdatetimedisp
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
-    color = -1610612730
+    color = -1879048186
     taborder = 5
     bounds_x = 83
     bounds_y = 0
@@ -152,11 +152,11 @@ object msepopupcalendarfo: tpopupcalendarfo
     textflags = [tf_xcentered, tf_right, tf_ycentered]
     format = 'mmmm'
     value = -Inf
-    reffontheight = 13
+    reffontheight = 14
   end
   object yeardisp: tdatetimedisp
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
-    color = -1610612730
+    color = -1879048186
     taborder = 4
     bounds_x = 0
     bounds_y = 0
@@ -165,7 +165,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     textflags = [tf_xcentered, tf_right, tf_ycentered]
     format = 'yyyy'
     value = -Inf
-    reffontheight = 13
+    reffontheight = 14
   end
   object tstockglyphbutton1: tstockglyphbutton
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
