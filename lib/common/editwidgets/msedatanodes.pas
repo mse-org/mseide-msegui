@@ -125,7 +125,7 @@ type
   public
    tag: integer;
    tagpointer: pointer;
-   constructor create(const aowner: tcustomitemlist); virtual; overload;
+   constructor create(const aowner: tcustomitemlist); overload; virtual;
    constructor createassign(const aowner: tcustomitemlist; 
                                    const asource: tlistitem); overload;
    destructor destroy; override;
@@ -221,7 +221,7 @@ type
 
   public
    constructor create(const aowner: tcustomitemlist = nil;
-              const aparent: ttreelistitem = nil); virtual; reintroduce;
+              const aparent: ttreelistitem = nil); reintroduce; virtual;
    destructor destroy; override;
    class procedure calcitemlayout(const asize: sizety; const ainnerframe: framety;
                            const list: tcustomitemlist;
@@ -251,6 +251,7 @@ type
    function finditembycaption(const acaption: msestring;
             casesensitive: boolean = false): ttreelistitem; overload;
    function finditembycaption(const acaption: lmsestringty): ttreelistitem;
+                                                            overload;
    function finditembycaption(const acaptions: msestringarty;
             casesensitive: boolean = false): ttreelistitem; overload;
    function rootnode: ttreelistitem;
@@ -393,7 +394,7 @@ type
    procedure readstate(const reader; const acount: integer); override;
 
   public
-   constructor create; override; overload;
+   constructor create; overload; override;
    constructor create(const intf: iitemlist); reintroduce; overload;
    destructor destroy; override;
    procedure registerobject(const aobject: iobjectlink);

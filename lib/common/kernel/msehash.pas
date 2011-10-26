@@ -82,7 +82,8 @@ type
    function internalfindexact(const akey;
                            out acount: integer): phashdataty; overload;
    procedure checkexact(const aitemdata; var accept: boolean); virtual;
-   function scramble(const avalue: hashvaluety): hashvaluety; inline;
+   function scramble(const avalue: hashvaluety): hashvaluety;
+                                          {$ifdef FPC}inline;{$endif}
    function hashkey(const akey): hashvaluety; virtual; abstract;
    function checkkey(const akey; const aitemdata): boolean; virtual; abstract;
    procedure rehash;
@@ -219,8 +220,8 @@ type
    function add(const akey: ansistring): pointer; 
             //returns pointer on ansistringdataty.data
    function addunique(const akey: ansistring): pointer;
-   function find(const akey: ansistring): pointer;
-   function find(const akey: lstringty): pointer;
+   function find(const akey: ansistring): pointer; overload;
+   function find(const akey: lstringty): pointer; overload;
    function delete(const akey: ansistring; 
                          const all: boolean = false): boolean; overload;
                          //true if found
@@ -1267,8 +1268,11 @@ end;
 
 function tansistringhashdatalist.delete(const akey: lstringty;
                const all: boolean = false): boolean;
+var
+ str1: string;
 begin
- result:= internaldelete(lstringtostring(akey),all);
+ str1:= lstringtostring(akey);
+ result:= internaldelete(str1,all);
 end;
 
 function tansistringhashdatalist.first: pansistringdataty;
@@ -1301,7 +1305,7 @@ begin
 end;
 
 procedure tpointeransistringhashdatalist.add(const keys: array of string;
-                   startindex: pointer = pointer($00000001)); overload;
+                   startindex: pointer = pointer($00000001));
 var
  ca1: longword;
 begin
@@ -1491,8 +1495,11 @@ end;
 
 function tmsestringhashdatalist.delete(const akey: lmsestringty;
                const all: boolean = false): boolean;
+var
+ mstr1: msestring;
 begin
- result:= internaldelete(lstringtostring(akey),all);
+ mstr1:= lstringtostring(akey);
+ result:= internaldelete(mstr1,all);
 end;
 
 function tmsestringhashdatalist.first: pmsestringdataty;

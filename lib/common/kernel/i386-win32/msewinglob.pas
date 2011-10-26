@@ -11,7 +11,7 @@ unit msewinglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- windows;
+ windows{$ifndef FPC},messages{$endif};
  
 const
  msemessage = wm_user + $3694;

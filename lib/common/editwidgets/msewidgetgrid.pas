@@ -1723,7 +1723,7 @@ begin
   end;
  end
  else begin
-  inherited;
+  result:= inherited sortcompare(index1,index2);
  end;
 end;
 

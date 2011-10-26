@@ -2,7 +2,7 @@ unit msedynload;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- {msesys,}{$ifdef FPC}dynlibs,{$endif}msestrings,sysutils,msetypes;
+ msesystypes,{$ifdef FPC}dynlibs,{$endif}msestrings,sysutils,msetypes;
  
 type
  funcinfoty = record
@@ -62,7 +62,7 @@ function quotelibnames(const libnames: array of filenamety): msestring;
 implementation
 
 uses
- msesystypes,msesysintf1{$ifndef FPC},windows{$endif}{,msedatalist};
+ msesysintf1{$ifndef FPC},windows{$endif}{,msedatalist};
 
 function getprocaddresses(const lib: tlibhandle;
                           const procedures: array of funcinfoty;

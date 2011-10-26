@@ -290,7 +290,7 @@ function opentodynarrayby(const items: array of byte): bytearty;
 
 implementation
 uses
- rtlconsts,classes,sysutils,msereal;
+ rtlconsts,classes,sysutils,msereal,msesys;
  
 function DynArraySize(a: Pointer): sizeint;
 {$ifdef FPC}
@@ -1621,7 +1621,7 @@ begin
  {$ifdef FPC}
   stops:= source + acount;
  {$else}
-  stops:= pointer(pchar(source) + alength*sizeof(source^));
+  stops:= pointer(pchar(source) + acount*sizeof(source^));
  {$endif}
   if pchar(stopr) > pchar(stops) then begin
    stopr:= stops;
@@ -1744,7 +1744,7 @@ begin
  {$ifdef FPC}
   stops:= source + acount;
  {$else}
-  stops:= pointer(pchar(source) + alength*sizeof(source^));
+  stops:= pointer(pchar(source) + acount*sizeof(source^));
  {$endif}
   if pchar(stopr) > pchar(stops) then begin
    stopr:= stops;
@@ -1867,7 +1867,7 @@ begin
  {$ifdef FPC}
   stops:= source + acount;
  {$else}
-  stops:= pointer(pchar(source) + alength*sizeof(source^));
+  stops:= pointer(pchar(source) + acount*sizeof(source^));
  {$endif}
   if pchar(stopr) > pchar(stops) then begin
    stopr:= stops;
@@ -2019,7 +2019,7 @@ begin
  {$ifdef FPC}
   stops:= source + acount;
  {$else}
-  stops:= pointer(pchar(source) + alength*sizeof(source^));
+  stops:= pointer(pchar(source) + acount*sizeof(source^));
  {$endif}
   if pchar(stopr) > pchar(stops) then begin
    stopr:= stops;

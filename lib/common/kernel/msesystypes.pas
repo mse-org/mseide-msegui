@@ -10,7 +10,8 @@
 unit msesystypes;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
-
+uses
+ msetypes;
 type
  {$ifndef FPC}
  tlibhandle = thandle;

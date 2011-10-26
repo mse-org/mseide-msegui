@@ -1773,7 +1773,8 @@ begin
   for int3:= 0 to high(ar1) do begin
    with ar1[int3] do begin
     for int1:= 0 to count - 1 do begin
-     po1:= @pmethodstataty(next).data;
+     po1:= pmethodinfoty(next);
+//     po1:= @pmethodstataty(next).data; ????
      int2:= length(po1^.name);
      po2^.len:= sizeof(methodtableentryfixty) + int2;
      po2^.adr:= po1^.address;

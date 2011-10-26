@@ -399,13 +399,13 @@ type
    procedure setcolorglyph(const Value: colorty);
   protected
    procedure doitemchange(const index: integer); override;
-   procedure nodenotification(const sender: tlistitem; 
+   procedure nodenotification(const sender: tlistitem;
                                       var ainfo: nodeactioninfoty); override;
    function compare(const l,r): integer; override;
   public
-   constructor create; override; overload;
-   constructor create(const intf: iitemlist; 
-                                 const owner: titemedit); reintroduce;
+   constructor create; overload; override;
+   constructor create(const intf: iitemlist;
+                                 const owner: titemedit); reintroduce; overload;
    procedure assign(const aitems: listitemarty); reintroduce; overload;
    procedure add(const anode: tlistitem);
    procedure refreshitemvalues;
@@ -682,7 +682,7 @@ type
    procedure afterdragevent(var ainfo: draginfoty; const arow: integer;
                                var processed: boolean);
   public
-   constructor create; override; overload;
+   constructor create; overload; override;
    constructor create(const intf: iitemlist; const aowner: ttreeitemedit);
                                      reintroduce; overload;
    procedure beginupdate; override;
@@ -3433,8 +3433,8 @@ end;
 constructor ttreeitemeditlist.create(const intf: iitemlist;
                                                const aowner: ttreeitemedit);
 begin
- inherited;
-// inherited create(intf,aowner);
+// inherited;
+ inherited create(intf,aowner);
 end;
 
 procedure ttreeitemeditlist.setcolorline(const value: colorty);

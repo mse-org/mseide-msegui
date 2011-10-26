@@ -249,10 +249,12 @@ var
  outp: tpipereader;
  erroroutp: tpipereader;
  inp: tpipewriter;
- sessionleader: boolean = false;
- group: integer = -1;
+ sessionleader: boolean;
+ group: integer;
 // bo1: boolean;
 begin
+ sessionleader:= false;
+ group:= -1;
  if componentstate * [csloading,csdesigning] <> [] then begin
   factive:= avalue;
  end

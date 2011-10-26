@@ -13,7 +13,7 @@
 {$ifdef FPC}
  {$if defined(FPC) and (fpc_fullversion >= 020501)}
   {$define mse_fpc_2_6} 
- {$endif}
+ {$ifend}
  {$ifdef mse_fpc_2_6}
   {$define mse_hasvtunicodestring}
  {$endif}
