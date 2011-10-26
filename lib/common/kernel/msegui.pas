@@ -30,6 +30,8 @@ const
  
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
+ defaultfadecolor = cl_ltgray;
+ defaultfadecolor1 = cl_dkgray;
  hintdelaytime = 500000; //us
  defaulthintshowtime = 3000000; //us
  mouseparktime = 500000; //us
@@ -961,6 +963,11 @@ type
  faceoptionty = (fao_alphafadeimage,fao_alphafadenochildren,fao_alphafadeall);
  faceoptionsty = set of faceoptionty;
 
+ tfadecolorarrayprop = class(tcolorarrayprop)
+  public
+   constructor create;
+ end;
+ 
  faceinfoty = record
   frameimage_offset: integer;
   options: faceoptionsty;
@@ -969,7 +976,7 @@ type
   fade_direction: graphicdirectionty;
   image: tmaskedbitmap;
   fade_pos: trealarrayprop;
-  fade_color: tcolorarrayprop;
+  fade_color: tfadecolorarrayprop;
   fade_transparency: colorty;
  end;
 
@@ -985,7 +992,7 @@ type
    function isoptionsstored: boolean;
    procedure setimage(const value: tmaskedbitmap);
    function isimagestored: boolean;
-   procedure setfade_color(const Value: tcolorarrayprop);
+   procedure setfade_color(const Value: tfadecolorarrayprop);
    function isfacolorstored: boolean;
    procedure setfade_pos(const Value: trealarrayprop);
    function isfaposstored: boolean;
@@ -1022,7 +1029,7 @@ type
                      stored isimagestored;
    property fade_pos: trealarrayprop read fi.fade_pos write setfade_pos
                     stored isfaposstored;
-   property fade_color: tcolorarrayprop read fi.fade_color write setfade_color
+   property fade_color: tfadecolorarrayprop read fi.fade_color write setfade_color
                     stored isfacolorstored;
    property fade_direction: graphicdirectionty read fi.fade_direction
                     write setfade_direction
@@ -1094,7 +1101,7 @@ type
   private
    fi: faceinfoty;
    procedure setoptions(const avalue: faceoptionsty);
-   procedure setfade_color(const Value: tcolorarrayprop);
+   procedure setfade_color(const Value: tfadecolorarrayprop);
    procedure setfade_direction(const Value: graphicdirectionty);
    procedure setfade_pos(const Value: trealarrayprop);
    procedure setfade_transparency(avalue: colorty);
@@ -1116,7 +1123,8 @@ type
    property options: faceoptionsty read fi.options write setoptions default [];
    property image: tmaskedbitmap read fi.image write setimage;
    property fade_pos: trealarrayprop read fi.fade_pos write setfade_pos;
-   property fade_color: tcolorarrayprop read fi.fade_color write setfade_color;
+   property fade_color: tfadecolorarrayprop read fi.fade_color 
+                                                   write setfade_color;
    property fade_direction: graphicdirectionty read fi.fade_direction
                 write setfade_direction default gd_right;
    property fade_transparency: colorty read fi.fade_transparency
@@ -2613,7 +2621,7 @@ const
                         fao_alphafadeall];
 type
  tcanvas1 = class(tcanvas);
- tcolorarrayprop1 = class(tcolorarrayprop);
+ tfadecolorarrayprop1 = class(tfadecolorarrayprop);
  trealarrayprop1 = class(trealarrayprop);
  tcaret1 = class(tcaret);
  tobjectevent1 = class(tobjectevent);
@@ -5395,7 +5403,7 @@ begin
  fi.image:= tmaskedbitmap.create(false);
  fi.image.onchange:= {$ifdef FPC}@{$endif}imagechanged;
  fi.fade_pos:= trealarrayprop.Create;
- fi.fade_color:= tcolorarrayprop.Create;
+ fi.fade_color:= tfadecolorarrayprop.Create;
  fi.fade_pos.link([fi.fade_color,fi.fade_pos]);
  fi.fade_transparency:= cl_none;
  fi.fade_pos.onchange:= {$ifdef FPC}@{$endif}dochange;
@@ -5638,7 +5646,7 @@ begin
    if (fi.fade_color.count > 1) or 
                 (fi.fade_transparency <> cl_none) and 
                                (fi.options * faceoptionsmask = []) then begin
-    with tcolorarrayprop1(fi.fade_color) do begin
+    with tfadecolorarrayprop1(fi.fade_color) do begin
      setlength(rgbs,length(fitems));
      for int1:= 0 to high(rgbs) do begin
       rgbs[int1]:= colortorgb(fintf.translatecolor(fitems[int1]));
@@ -5749,11 +5757,11 @@ begin
     if fi.options * faceoptionsmask <> [] then begin
      createalphabuffer(false);
      falphabuffer.transparency:=
-      (longword(colortorgb(tcolorarrayprop1(fi.fade_color).fitems[0])) xor
+      (longword(colortorgb(tfadecolorarrayprop1(fi.fade_color).fitems[0])) xor
                 $ffffffff) and $00ffffff;
     end
     else begin
-     canvas.fillrect(rect1,tcolorarrayprop1(fi.fade_color).fitems[0]);
+     canvas.fillrect(rect1,tfadecolorarrayprop1(fi.fade_color).fitems[0]);
     end;
    end;
   end
@@ -5832,7 +5840,7 @@ begin
  end;
 end;
 
-procedure tcustomface.setfade_color(const Value: tcolorarrayprop);
+procedure tcustomface.setfade_color(const Value: tfadecolorarrayprop);
 begin
  include(flocalprops,fal_facolor);
  fi.fade_color.assign(Value);
@@ -5981,7 +5989,7 @@ procedure tfacetemplate.internalcreate;
 begin
  fi.image:= tmaskedbitmap.create(false);
  fi.fade_pos:= trealarrayprop.Create;
- fi.fade_color:= tcolorarrayprop.Create;
+ fi.fade_color:= tfadecolorarrayprop.Create;
  fi.fade_pos.link([fi.fade_color,fi.fade_pos]);
  fi.fade_transparency:= cl_none;
  fi.image.onchange:= {$ifdef FPC}@{$endif}doimagechange;
@@ -6030,7 +6038,7 @@ begin
  changed;
 end;
 
-procedure tfacetemplate.setfade_color(const Value: tcolorarrayprop);
+procedure tfacetemplate.setfade_color(const Value: tfadecolorarrayprop);
 begin
  fi.fade_color.Assign(Value);
 end;
@@ -17184,6 +17192,14 @@ begin
  if fwindowpo <> nil then begin
   gui_destroywindow(fwindowpo^);
  end;
+end;
+
+{ tfadecolorarrayprop }
+
+constructor tfadecolorarrayprop.create;
+begin
+ inherited;
+ fvaluedefault:= defaultfadecolor;
 end;
 
 initialization

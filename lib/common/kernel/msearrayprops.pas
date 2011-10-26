@@ -109,8 +109,10 @@ type
    function getitems(const index: integer): colorty;
    procedure setitems(const index: integer; const Value: colorty);
   protected
+   fvaluedefault: colorty;
    procedure init(startindex,endindex: integer); override;
   public
+   constructor create;
    function propkind: arraypropkindty; override;
    property items[const index: integer]: colorty read getitems write setitems; default;
  end;
@@ -849,6 +851,12 @@ end;
 
 { tcolorarrayprop }
 
+constructor tcolorarrayprop.create;
+begin
+ fvaluedefault:= cl_transparent;
+ inherited;
+end;
+
 function tcolorarrayprop.getitems(const index: integer): colorty;
 begin
  checkindex(index);
@@ -865,7 +873,7 @@ var
  int1: integer;
 begin
  for int1:= startindex to endindex do begin
-  items[int1]:= cl_transparent;
+  items[int1]:= fvaluedefault;
  end;
 end;
 

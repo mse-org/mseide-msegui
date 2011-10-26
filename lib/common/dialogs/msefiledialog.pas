@@ -29,7 +29,7 @@ type
   private
   protected
   public
-   constructor create(const aowner: tcustomitemlist);
+   constructor create(const aowner: tcustomitemlist); override;
  end;
  pfilelistitem = ^tfilelistitem;
 

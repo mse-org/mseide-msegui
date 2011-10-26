@@ -244,11 +244,11 @@ begin
    grid.rowcount:= 2;
    posed[0]:= 0;
    posed[1]:= 1;
-   if int1 > 1 then begin
-    colored[0]:= cl_light;
+   if int1 < 1 then begin
+    colored[0]:= defaultfadecolor;
    end;
-   if int1 > 2 then begin
-    colored[1]:= cl_shadow;
+   if int1 < 2 then begin
+    colored[1]:= defaultfadecolor1;
    end;
   end;
   int1:= 0;

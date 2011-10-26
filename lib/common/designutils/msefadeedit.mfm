@@ -1,18 +1,20 @@
 object fadeeditfo: tfadeeditfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  visible = False
   bounds_x = 160
   bounds_y = 221
   bounds_cx = 408
   bounds_cy = 281
-  taborder = 1
-  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 408
-  container.bounds_cy = 281
   container.frame.clientwidth = 408
-  container.frame.dummy = 0
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
+  container.bounds = (
+    0
+    0
+    408
+    281
+  )
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = formstatfile
   caption = 'Fade edit'
@@ -20,46 +22,45 @@ object fadeeditfo: tfadeeditfo
   moduleclassname = 'tmseform'
   object posedit: tpickwidget
     optionswidget = [ow_destroywidgets, ow_autoscale]
+    frame.leveli = -1
+    frame.framei_bottom = 2
+    frame.localprops = [frl_leveli, frl_fibottom]
+    frame.dummy = 0
+    taborder = 2
     bounds_x = 8
     bounds_y = 8
     bounds_cx = 394
     bounds_cy = 50
     bounds_cxmin = 394
-    frame.leveli = -1
-    frame.framei_bottom = 2
-    frame.localprops = [frl_leveli, frl_fibottom]
-    frame.dummy = 0
     anchors = [an_left, an_top, an_right]
-    taborder = 2
     onclientmouseevent = mouseev
     onpaint = pospaintev
     onresize = resizeev
+    options = []
     ongetcursorshape = getcursorshapeev
     ongetpickobjects = getpickobjectev
     onendpickmove = endpickev
     onpaintxorpic = paintxorev
     object fadedisp: tsimplewidget
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+      color = -1610612731
+      face.dummy = 0
+      visible = True
       bounds_x = 1
       bounds_y = 0
       bounds_cx = 392
       bounds_cy = 40
-      color = -1610612731
-      face.dummy = 0
       anchors = [an_top]
-      visible = True
     end
   end
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    taborder = 1
     bounds_x = 8
     bounds_y = 64
     bounds_cx = 321
     bounds_cy = 179
     bounds_cymin = 90
-    frame.dummy = 0
     anchors = [an_left, an_top, an_right, an_bottom]
-    taborder = 1
     optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autoappend, og_sorted, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     fixcols.count = 1
     fixcols.items = <    
@@ -68,23 +69,25 @@ object fadeeditfo: tfadeeditfo
         numstep = 1
       end>
     datacols.count = 3
-    datacols.options = [co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+    datacols.options = [co_savestate, co_mousescrollrow]
     datacols.items = <    
       item
         colorselect = -2147483642
         width = 24
         onbeforedrawcell = beforedrawev
-        options = [co_nofocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        options = [co_nofocus, co_savestate, co_mousescrollrow]
       end    
       item
         width = 63
         widgetname = 'posed'
+        dataclass = tgridrealdatalist
       end    
       item
         width = 204
-        options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort, co_mousescrollrow]
+        options = [co_fill, co_savevalue, co_savestate, co_nosort, co_mousescrollrow]
         widthmin = 63
         widgetname = 'colored'
+        dataclass = tgridenumdatalist
       end>
     datarowheight = 16
     statfile = fadestatfile
@@ -95,51 +98,49 @@ object fadeeditfo: tfadeeditfo
     object posed: trealedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
       optionsskin = [osk_framebuttononly]
-      bounds_x = 25
-      bounds_y = 0
-      bounds_cx = 63
-      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.dummy = 0
       taborder = 1
       visible = False
+      bounds_x = 25
+      bounds_y = 0
+      bounds_cx = 63
+      bounds_cy = 16
       ondataentered = dataenteterev
+      value = -Inf
+      valuedefault = -Inf
       formatedit = '0.000'
       formatdisp = '0.000'
-      valuescale =  1.0000000000000000E+0000
+      valuerange = 1
+      valuestart = 0
+      min = 0
+      max = 1
       reffontheight = 14
-      mi =  0.0000000000000000E+0000
-      ma =  1.0000000000000000E+0000
     end
     object colored: tcoloredit
       optionsskin = [osk_framebuttononly]
-      bounds_x = 89
-      bounds_y = 0
-      bounds_cx = 204
-      bounds_cy = 16
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
       frame.button.color = -1879048187
       frame.buttonellipse.color = -1879048187
       frame.buttonellipse.imagenr = 17
-      frame.dummy = 0
       taborder = 2
       visible = False
+      bounds_x = 89
+      bounds_y = 0
+      bounds_cx = 204
+      bounds_cy = 16
       ondataentered = dataenteterev
-      valuedefault = -1879048189
+      valuedefault = -1610612731
       dropdown.options = [deo_autodropdown, deo_keydropdown]
       reffontheight = 14
     end
   end
   object fadevert: tsimplewidget
     optionswidget = [ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-    bounds_x = 336
-    bounds_y = 64
-    bounds_cx = 66
-    bounds_cy = 179
     color = -1610612731
     frame.leveli = -1
     frame.localprops = [frl_leveli]
@@ -147,20 +148,22 @@ object fadeeditfo: tfadeeditfo
     face.fade_direction = gd_down
     face.localprops = [fal_fadirection]
     face.dummy = 0
-    anchors = [an_top, an_right, an_bottom]
     taborder = 3
     visible = True
+    bounds_x = 336
+    bounds_y = 64
+    bounds_cx = 66
+    bounds_cy = 179
+    anchors = [an_top, an_right, an_bottom]
   end
   object tbutton1: tbutton
+    taborder = 4
     bounds_x = 263
     bounds_y = 249
     bounds_cx = 66
     bounds_cy = 28
     anchors = [an_right, an_bottom]
-    taborder = 4
     state = [as_default, as_localdefault, as_localcaption]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = '&OK'
     modalresult = mr_ok
   end
@@ -171,16 +174,10 @@ object fadeeditfo: tfadeeditfo
     bounds_cy = 28
     anchors = [an_right, an_bottom]
     state = [as_localcaption]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = 'Cancel'
     modalresult = mr_canclose
   end
   object reverse: tbooleanedit
-    bounds_x = 24
-    bounds_y = 253
-    bounds_cx = 57
-    bounds_cy = 16
     frame.caption = '&reverse'
     frame.dummy = 0
     frame.outerframe = (
@@ -189,33 +186,33 @@ object fadeeditfo: tfadeeditfo
       44
       2
     )
-    anchors = [an_left, an_bottom]
     taborder = 5
+    bounds_x = 24
+    bounds_y = 253
+    bounds_cx = 57
+    bounds_cy = 16
+    anchors = [an_left, an_bottom]
     ondataentered = reverseenteredev
   end
   object tbutton3: tbutton
+    taborder = 6
     bounds_x = 184
     bounds_y = 249
     bounds_cx = 66
     bounds_cy = 28
     anchors = [an_right, an_bottom]
-    taborder = 6
     state = [as_localcaption, as_localonexecute]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = '&Save'
     onexecute = saveex
   end
   object tbutton4: tbutton
+    taborder = 7
     bounds_x = 112
     bounds_y = 249
     bounds_cx = 66
     bounds_cy = 28
     anchors = [an_right, an_bottom]
-    taborder = 7
     state = [as_localcaption, as_localonexecute]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = '&Load'
     onexecute = loadex
   end
@@ -241,7 +238,6 @@ object fadeeditfo: tfadeeditfo
     controller.options = [fdo_checkexist, fdo_savelastdir]
     controller.captionopen = 'Load Fade File'
     controller.captionsave = 'Save Fade File'
-    dialogkind = fdk_none
     left = 208
     top = 176
   end
