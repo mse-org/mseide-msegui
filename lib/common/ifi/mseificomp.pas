@@ -10,6 +10,14 @@
    experimental user <-> business logic connection components.
    Warning: works with RTTI and is therefore slow.
 }
+{$ifdef FPC}
+ {$if defined(FPC) and (fpc_fullversion >= 020501)}
+  {$define mse_fpc_2_6} 
+ {$endif}
+ {$ifdef mse_fpc_2_6}
+  {$define mse_hasvtunicodestring}
+ {$endif}
+{$endif}
 unit mseificomp;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
@@ -4235,6 +4243,17 @@ begin
        end;
       end;
      end;
+    {$ifdef mse_hasvtunicodestring}
+     vtunicodestring: begin
+      if comp1 is tifistringlinkcomp then begin
+       with tifistringlinkcomp(comp1).controller do begin
+        if fdatalist <> nil then begin
+         griddata[fdatalist.count-1]:= unicodestring(vunicodestring);
+        end;
+       end;
+      end;
+     end;
+    {$endif}
      vtwidestring: begin
       if comp1 is tifistringlinkcomp then begin
        with tifistringlinkcomp(comp1).controller do begin

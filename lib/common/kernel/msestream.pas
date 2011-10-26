@@ -8,6 +8,14 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msestream;   
+{$ifdef FPC}
+ {$if defined(FPC) and (fpc_fullversion >= 020501)}
+  {$define mse_fpc_2_6} 
+ {$endif}
+ {$ifdef mse_fpc_2_6}
+  {$define mse_hasvtunicodestring}
+ {$endif}
+{$endif}
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
@@ -596,6 +604,9 @@ begin
     vtAnsiString: mstr1:= ansistring(VAnsiString);
     vtCurrency:   mstr1:= realtostr(VCurrency^);
     vtWideString: mstr1:= msestring(VWideString);
+    {$ifdef mse_hasvtunicodestring}
+    vtunicodeString: mstr1:= msestring(VunicodeString);
+    {$endif}
     vtInt64:      mstr1:= inttostr(VInt64^);
    end;
   end;
@@ -636,6 +647,9 @@ begin
    vtAnsiString: pansistring(dest[int1])^:= ansistring(source[int1].VAnsiString);
    vtCurrency:   pcurrency(dest[int1])^:= source[int1].Vcurrency^;
    vtwidestring: pmsestring(dest[int1])^:= msestring(source[int1].VwideString);
+  {$ifdef mse_hasvtunicodestring}
+   vtunicodestring: pmsestring(dest[int1])^:= msestring(source[int1].VunicodeString);
+  {$endif}
    vtInt64:      pint64(dest[int1])^:= source[int1].Vint64^;
   end;
  end;
@@ -668,6 +682,9 @@ begin
    vtansistring: begin
     ch1:= 's';
    end;
+  {$ifdef mse_hasvtunicodestring}
+   vtunicodestring,
+  {$endif}
    vtwidestring: begin
     ch1:= 'S';
    end;
@@ -1800,8 +1817,13 @@ begin
  setlength(ar1,length(fields));
  for int1:= 0 to high(ar1) do begin
   with ar1[int1] do begin
+  {$ifdef mse_hasvtunicodestring}
+   vtype:= vtunicodestring;
+   vunicodestring:= pointer(fields[int1]);
+  {$else}
    vtype:= vtwidestring;
    vwidestring:= pointer(fields[int1]);
+  {$endif}
   end;
  end;
  writerecord(ar1);

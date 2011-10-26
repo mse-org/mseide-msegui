@@ -1493,7 +1493,9 @@ begin
  if fowner <> nil then begin
   tfilesnode(rootnode).loadlist;
  end;
- fparent.sort(false);
+ if fparent <> nil then begin
+  fparent.sort(false);
+ end;
 end;
 
 function tdirnode.getcurrentimagenr: integer;

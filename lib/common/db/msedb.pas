@@ -12,6 +12,12 @@ unit msedb;
 {$if fpc_fullversion >= 020403}
  {$define mse_fpc_2_4_3} 
 {$endif}
+{$if fpc_fullversion >= 020501}
+ {$define mse_fpc_2_6} 
+{$endif}
+{$ifdef mse_fpc_2_6}
+ {$define mse_hasvtunicodestring}
+{$endif}
 {$ifdef VER2_2_0} {$define focuscontrolbug} {$endif}
 {$define mse_FPC_2_2}
 {$define hasaswidestring}
@@ -3251,30 +3257,74 @@ begin
      vtcurrency: begin
       comparefuncar[int1]:= @locatecurrency;
      end;
+    {$ifdef mse_hasvtunicodestring}
+     vtunicodestring,
+    {$endif}
      vtwidestring: begin
       if fields[int1] is tmsestringfield then begin
        comparefuncar[int1]:= msestringcomp[longword(opt1)];
        if lko_caseinsensitive in opt1 then begin
-        keymsestrings[int1]:= 
+    {$ifdef mse_hasvtunicodestring}
+        if vtype = vtunicodestring then begin
+         keymsestrings[int1]:= 
+                  mseuppercase(msestring(tvarrec(keys[int1]).vunicodestring));
+         pvarrec(@keys[int1])^.vunicodestring:= pointer(keymsestrings[int1]);
+        end
+        else begin
+    {$endif}
+         keymsestrings[int1]:= 
                   mseuppercase(msestring(tvarrec(keys[int1]).vwidestring));
-        pvarrec(@keys[int1])^.vwidestring:= pointer(keymsestrings[int1]);
+         pvarrec(@keys[int1])^.vwidestring:= pointer(keymsestrings[int1]);
+    {$ifdef mse_hasvtunicodestring}
+        end;
+    {$endif}
        end
       end
       else begin
        if lro_utf8 in options then begin
         if lko_caseinsensitive in opt1 then begin
-         keyansistrings[int1]:= stringtoutf8(mseuppercase(
+    {$ifdef mse_hasvtunicodestring}
+         if vtype = vtunicodestring then begin
+          keyansistrings[int1]:= stringtoutf8(mseuppercase(
+                               msestring(tvarrec(keys[int1]).vunicodestring)));
+         end
+         else begin
+    {$endif}
+          keyansistrings[int1]:= stringtoutf8(mseuppercase(
                                   msestring(tvarrec(keys[int1]).vwidestring)));
+    {$ifdef mse_hasvtunicodestring}
+         end;
+    {$endif}
         end
         else begin
-         keyansistrings[int1]:= 
-          stringtoutf8(msestring(tvarrec(keys[int1]).vwidestring));
+    {$ifdef mse_hasvtunicodestring}
+         if vtype = vtunicodestring then begin
+          keyansistrings[int1]:= 
+           stringtoutf8(msestring(tvarrec(keys[int1]).vunicodestring));
+         end
+         else begin
+    {$endif}
+          keyansistrings[int1]:= 
+           stringtoutf8(msestring(tvarrec(keys[int1]).vwidestring));
+    {$ifdef mse_hasvtunicodestring}
+         end;
+    {$endif}
         end;
        end
        else begin
         if lko_caseinsensitive in opt1 then begin
-         keyansistrings[int1]:= 
+    {$ifdef mse_hasvtunicodestring}
+         if vtype = vtunicodestring then begin
+          keyansistrings[int1]:= 
+                       mseuppercase(msestring(tvarrec(keys[int1]).vunicodestring));
+         end
+         else begin
+    {$endif}
+          keyansistrings[int1]:= 
                        mseuppercase(msestring(tvarrec(keys[int1]).vwidestring));
+    {$ifdef mse_hasvtunicodestring}
+         end;
+    {$endif}
         end
         else begin
          keyansistrings[int1]:= 
@@ -3305,7 +3355,9 @@ begin
        end
        else begin
         keyansistrings[int1]:= 
-                      msestring(tvarrec(keys[int1]).vwidestring);
+                      ansistring(tvarrec(keys[int1]).vansistring);
+//        keyansistrings[int1]:= 
+//                      msestring(tvarrec(keys[int1]).vwidestring);
        end;
        comparefuncar[int1]:= ansistringcomp[longword(opt1)];
       end;
@@ -6868,6 +6920,21 @@ begin
      vtCurrency:   field1.ascurrency:= VCurrency^;
      vtVariant:    field1.asvariant:= VVariant^;
  //    vtInterface:
+    {$ifdef mse_hasvtunicodestring}
+     vtunicodestring: begin
+      if (field1 is tmsestringfield) then begin
+       tmsestringfield(field1).asmsestring:= msestring(vunicodestring);
+      end
+      else begin 
+       if (field1 is tmsememofield) then begin
+        tmsememofield(field1).asmsestring:= msestring(vunicodestring);
+       end
+       else begin
+        field1.asstring:= widestring(vunicodestring);
+       end;
+      end;
+     end;
+    {$endif}
      vtWideString: begin
       if (field1 is tmsestringfield) then begin
        tmsestringfield(field1).asmsestring:= msestring(vwidestring);

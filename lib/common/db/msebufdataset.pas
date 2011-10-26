@@ -20,6 +20,12 @@ unit msebufdataset;
 {$ifdef FPC}
  {$define mse_FPC_2_2}
  {$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}
+ {$if defined(FPC) and (fpc_fullversion >= 020501)}
+  {$define mse_fpc_2_6} 
+ {$endif}
+ {$ifdef mse_fpc_2_6}
+  {$define mse_hasvtunicodestring}
+ {$endif}
 {$endif}
 
 interface 
@@ -1382,7 +1388,9 @@ const
                                  compfunci: @compfloat),
    (datatypes: currencyindexfields; cvtype: vtcurrency; compfunc: @compcurrency;
                                     compfunci: @compcurrency),
-   (datatypes: stringindexfields; cvtype: vtwidestring; compfunc: @compstring;
+   (datatypes: stringindexfields; 
+          cvtype: {$ifdef mse_hasvtunicodestring}vtunicodestring
+                  {$else}vtwidestring{$endif}; compfunc: @compstring;
                                   compfunci: @compstringi));
 
 procedure alignfieldpos(var avalue: integer);
@@ -8765,7 +8773,8 @@ begin
      end;
      desc:= ifo_desc in foptions;
      caseinsensitive:= ifo_caseinsensitive in foptions;
-     canpartialstring:= vtype = vtwidestring;
+     canpartialstring:= vtype = {$ifdef mse_hasvtunicodestring}vtunicodestring
+                  {$else}vtwidestring{$endif};
     end;
    end;
   end;
@@ -8824,8 +8833,10 @@ begin
      vtinteger: begin
       pinteger(po2)^:= vinteger;
      end;
-     vtwidestring: begin
-      ppointer(po2)^:= vwidestring;
+     {$ifdef mse_hasvtunicodestring}vtunicodestring
+                  {$else}vtwidestring{$endif}: begin
+      ppointer(po2)^:= {$ifdef mse_hasvtunicodestring}vunicodestring
+                  {$else}vwidestring{$endif};
      end;
      vtextended: begin
       pdouble(po2)^:= vextended^;
@@ -9038,9 +9049,11 @@ begin
        vextended:= @ar3[int1];
       end;
       varstring,varolestr: begin
-       vtype:= vtwidestring;
+       vtype:= {$ifdef mse_hasvtunicodestring}vtunicodestring
+                  {$else}vtwidestring{$endif};
        ar2[int1]:= avalue[int1];
-       vwidestring:= pointer(ar2[int1]);
+       {$ifdef mse_hasvtunicodestring}vunicodestring
+                  {$else}vwidestring{$endif}:= pointer(ar2[int1]);
       end
       else begin
        paramerror;
@@ -9096,8 +9109,10 @@ begin
    end;
    if field1 is tmsestringfield then begin
     mstr1:= tmsestringfield(field1).asmsestring;
-    vtype:= vtwidestring;
-    vwidestring:= pointer(mstr1);
+    vtype:= {$ifdef mse_hasvtunicodestring}vtunicodestring
+                  {$else}vtwidestring{$endif};
+    {$ifdef mse_hasvtunicodestring}vunicodestring
+                  {$else}vwidestring{$endif}:= pointer(mstr1);
    end
    else begin
     case datatype of
@@ -9126,8 +9141,10 @@ begin
      end;
      ftWideString: begin
       mstr1:= aswidestring;
-      vtype:= vtwidestring;
-      vwidestring:= pointer(mstr1);
+      vtype:= {$ifdef mse_hasvtunicodestring}vtunicodestring
+                  {$else}vtwidestring{$endif};
+      {$ifdef mse_hasvtunicodestring}vunicodestring
+                  {$else}vwidestring{$endif}:= pointer(mstr1);
      end;
      ftLargeint: begin
       lint1:= aslargeint;

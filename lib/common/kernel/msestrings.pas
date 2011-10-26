@@ -9,6 +9,22 @@
 }
 unit msestrings; 
 
+{$ifdef FPC}
+ {$if defined(FPC) and (fpc_fullversion >= 020501)}
+  {$define mse_fpc_2_6} 
+ {$endif}
+ {$if defined(FPC) and (fpc_fullversion >= 020300)}
+  {$define mse_fpc_2_3} 
+ {$endif}
+
+ {$ifdef mse_fpc_2_6}
+  {$define mse_hasvtunicodestring}
+ {$endif}
+ {$ifdef mse_fpc_2_3}
+  {$define mse_unicodestring}
+ {$endif}
+{$endif}
+
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
 interface
@@ -2965,8 +2981,13 @@ end;
 
 procedure msestrtotvarrec(const value: msestring; out varrec: tvarrec);
 begin
+{$ifdef mse_hasvtunicodestring}
+ varrec.vtype:= vtunicodestring;
+ varrec.vunicodestring:= pointer(value); //msestringimplementation
+{$else}
  varrec.vtype:= vtwidestring;
  varrec.vwidestring:= pointer(value); //msestringimplementation
+{$endif}
 end;
 
 function tvarrectoansistring(value: tvarrec): ansistring;
