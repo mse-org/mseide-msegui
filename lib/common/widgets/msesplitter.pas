@@ -1083,6 +1083,12 @@ begin
  updatespace;
 end;
 
+function alive(const acomponent: tcomponent): boolean;
+begin
+ result:= (acomponent <> nil) and 
+           not (csdestroying in acomponent.componentstate);
+end;
+
 procedure tspacer.updatespace;
 var
  po1: pointty;
@@ -1094,22 +1100,22 @@ begin
   try  
    po1:= pos;
    if spao_glueright in foptions then begin
-    if flinkright <> nil then begin
+    if alive(flinkright) then begin
      po1.x:= flinkright.bounds_x - bounds_cx - fdist_right;
     end;
    end
    else begin
-    if flinkleft <> nil then begin
+    if alive(flinkleft) then begin
      po1.x:= flinkleft.bounds_x + flinkleft.bounds_cx + fdist_left;
     end;
    end;
    if spao_gluebottom in foptions then begin
-    if flinkbottom <> nil then begin
+    if alive(flinkbottom) then begin
      po1.y:= flinkbottom.bounds_y - bounds_cy - fdist_bottom;
     end;
    end
    else begin
-    if flinktop <> nil then begin
+    if alive(flinktop) then begin
      po1.y:= flinktop.bounds_y + flinktop.bounds_cy + fdist_top;
     end;
    end;
@@ -1118,7 +1124,7 @@ begin
    po1.x:= po1.x + fdist_right;
    po1.y:= po1.y + fdist_bottom;
    if spao_glueright in foptions then begin
-    if flinkleft <> nil then begin
+    if alive(flinkleft) then begin
      rect1:= flinkleft.widgetrect;
      if an_left in flinkleft.anchors then begin
       rect1.cx:= bounds_x - fdist_left - flinkleft.bounds_x;
@@ -1130,7 +1136,7 @@ begin
     end;
    end
    else begin
-    if flinkright <> nil then begin
+    if alive(flinkright) then begin
      rect1:= flinkright.widgetrect;
      if an_right in flinkright.anchors then begin
       rect1.cx:= rect1.cx + (rect1.x - po1.x);
@@ -1140,7 +1146,7 @@ begin
     end;
    end;
    if spao_gluebottom in foptions then begin
-    if flinktop <> nil then begin
+    if alive(flinktop) then begin
      rect1:= flinktop.widgetrect;
      if an_top in flinktop.anchors then begin
       rect1.cy:= bounds_y - fdist_top - flinktop.bounds_y;
@@ -1152,7 +1158,7 @@ begin
     end;
    end
    else begin
-    if flinkbottom <> nil then begin
+    if alive(flinkbottom) then begin
      rect1:= flinkbottom.widgetrect;
      if an_bottom in flinkbottom.anchors then begin
       rect1.cy:= rect1.cy + (rect1.y - po1.y);

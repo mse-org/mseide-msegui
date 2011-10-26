@@ -813,6 +813,8 @@ function readsplitset(const reader: treader; const info: setsplitinfoty;
 function setloading(const acomponent: tcomponent; const avalue: boolean): boolean;
            //returns old value
 
+function alive(const acomponent: tcomponent): boolean;
+
 procedure componentexception(const acomponent: tcomponent;
                                    const atext: msestring);
 type
@@ -1101,9 +1103,15 @@ end;
 
 {$endif}
 
+function alive(const acomponent: tcomponent): boolean; 
+                                                {$ifdef FPC}inline;{$endif}
+begin
+ result:= (acomponent <> nil) and 
+           not (csdestroying in acomponent.componentstate);
+end;
 
 procedure componentexception(const acomponent: tcomponent;
-                                   const atext: msestring);
+                                      const atext: msestring);
 begin
  raise exception.create(acomponent.classname+','+acomponent.name+': '+atext);
 end;
