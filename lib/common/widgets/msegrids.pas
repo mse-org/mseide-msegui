@@ -1774,6 +1774,7 @@ type
 {$ifdef mse_with_ifi}
    fifilink: tifigridlinkcomp;
 //   procedure ifisetvalue(var avalue; var accept: boolean);
+   procedure ifirowchange;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);
     //iifigridlink
@@ -13477,6 +13478,7 @@ end;
 procedure tcustomgrid.beginupdate;
 begin
  if fupdating = 0 then begin
+  exclude(fstate,gs_emptyrowremoved); //possibly checked in endupdate
   fappendcount:= 0;
  end;
  inc(fupdating);
@@ -14895,6 +14897,15 @@ begin
 end;
 
 {$ifdef mse_with_ifi}
+
+procedure tcustomgrid.ifirowchange;
+begin
+ if (fupdating = 0) and (fifiserverintf <> nil) and 
+                              not(ws_loadedproc in fwidgetstate) then begin
+  fifiserverintf.valuechanged(iifigridlink(self));
+ end;
+end;
+
 function tcustomgrid.getifilinkkind: ptypeinfo;
 begin
  result:= typeinfo(iifigridlink);

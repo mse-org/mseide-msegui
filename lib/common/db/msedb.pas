@@ -1893,6 +1893,42 @@ type
   
   TDataSetcracker = class(TComponent)
    Private
+{$ifdef mse_fpc_2_6}
+    FOpenAfterRead : boolean;
+    FActiveRecord: Longint;
+    FAfterCancel: TDataSetNotifyEvent;
+    FAfterClose: TDataSetNotifyEvent;
+    FAfterDelete: TDataSetNotifyEvent;
+    FAfterEdit: TDataSetNotifyEvent;
+    FAfterInsert: TDataSetNotifyEvent;
+    FAfterOpen: TDataSetNotifyEvent;
+    FAfterPost: TDataSetNotifyEvent;
+    FAfterRefresh: TDataSetNotifyEvent;
+    FAfterScroll: TDataSetNotifyEvent;
+    FAutoCalcFields: Boolean;
+    FBOF: Boolean;
+    FBeforeCancel: TDataSetNotifyEvent;
+    FBeforeClose: TDataSetNotifyEvent;
+    FBeforeDelete: TDataSetNotifyEvent;
+    FBeforeEdit: TDataSetNotifyEvent;
+    FBeforeInsert: TDataSetNotifyEvent;
+    FBeforeOpen: TDataSetNotifyEvent;
+    FBeforePost: TDataSetNotifyEvent;
+    FBeforeRefresh: TDataSetNotifyEvent;
+    FBeforeScroll: TDataSetNotifyEvent;
+    FBlobFieldCount: Longint;
+    FBlockReadSize: Integer;
+    FBookmarkSize: Longint;
+    FBuffers : TBufferArray;
+    FBufferCount: Longint;
+    FCalcBuffer: PChar;
+    FCalcFieldsSize: Longint;
+    FConstraints: TCheckConstraints;
+    FDisableControlsCount : Integer;
+    FDisableControlsState : TDatasetState;
+    FCurrentRecord: Longint;
+    FDataSources : TList;
+{$else}
     FOpenAfterRead : boolean;
     FActiveRecord: Longint;
     FAfterCancel: TDataSetNotifyEvent;
@@ -1926,6 +1962,7 @@ type
     FDisableControlsState : TDatasetState;
     FCurrentRecord: Longint;
     FDataSources : TList;
+  {$endif}
   end;
 
   TDataSetcrackerxx = class(TDataSetcracker) //no "not used note"
