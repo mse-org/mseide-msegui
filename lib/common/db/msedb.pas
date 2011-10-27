@@ -2000,6 +2000,9 @@ type
     property DisableControlsState : TDatasetState read FDisableControlsState;
     property CurrentRecord: Longint read Fcurrentrecord;
     property DataSources : TList read FDataSources;
+   {$ifdef mse_fpc_2_6}
+    property BlockReadSize: Integer read FBlockReadSize;
+   {$endif}
   end;
   
  tdataset1 = class(tdataset);
