@@ -1086,7 +1086,7 @@ end;
 function alive(const acomponent: tcomponent): boolean;
 begin
  result:= (acomponent <> nil) and 
-           not (csdestroying in acomponent.componentstate);
+                       not (csdestroying in acomponent.componentstate);
 end;
 
 procedure tspacer.updatespace;
