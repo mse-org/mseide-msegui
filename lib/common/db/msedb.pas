@@ -1243,6 +1243,7 @@ type
                          dso_initinternalcalc,
                          dso_postsavepoint,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,
+                         dso_cancelupdateondeleteerror,
                          dso_restoreupdateonsavepointrollback,
                          dso_autoapply,
                          dso_autocommitret,dso_autocommit,
@@ -1301,7 +1302,7 @@ const
  de_afterpost = ord(high(tdataevent))+3;
  de_hasactiveedit = ord(high(tdataevent))+4;
 
- defaultdscontrolleroptions = [];
+ defaultdscontrolleroptions = [{dso_cancelupdateondeleteerror}];
  allfieldkinds = [fkData,fkCalculated,fkLookup,fkInternalCalc];
   
 type
@@ -6868,6 +6869,7 @@ begin
  fintf:= aintf;
  frecnooffset:= arecnooffset;
  fcancelresync:= acancelresync;
+ foptions:= defaultdscontrolleroptions;
  inherited create(aowner);
 end;
 

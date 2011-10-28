@@ -115,8 +115,9 @@ type
    function moveby(const distance: integer): integer;
    procedure cancel; override;
    procedure post; override;
-   procedure applyupdates(const maxerrors: integer;
-                     const cancelonerror: boolean); override; overload;
+   procedure applyupdates(const maxerrors: integer; 
+                const cancelonerror: boolean;
+                const cancelondeleteerror: boolean = false); override; overload;
    procedure applyupdates(const maxerrors: integer = 0); override; overload;
    procedure applyupdate; override; overload;
   published
@@ -677,7 +678,8 @@ begin
 end;
 
 procedure tmsesqlquery.applyupdates(const maxerrors: integer;
-                const cancelonerror: boolean = false);
+                const cancelonerror: boolean;
+                const cancelondeleteerror: boolean = false);
 begin
  checkcanupdate;
  try
@@ -734,14 +736,16 @@ end;
 procedure tmsesqlquery.applyupdates(const maxerrors: integer = 0);
 begin
  applyupdates(maxerrors,fcontroller.options *
-      [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> []);
+      [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> [],
+      dso_cancelupdateondeleteerror in fcontroller.options);
 end;
 
 procedure tmsesqlquery.applyupdate;
 begin
  checkcanupdate;
  inherited applyupdate(fcontroller.options *
-      [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> []);
+      [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> [],
+      dso_cancelupdateondeleteerror in fcontroller.options);
 end;
 
 function tmsesqlquery.getfieldclass(fieldtype: tfieldtype): tfieldclass;

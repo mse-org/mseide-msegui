@@ -795,9 +795,11 @@ type
    constructor Create(AOwner : TComponent); override;
    destructor Destroy; override;
    function isutf8: boolean; override;
-   procedure applyupdate(const cancelonerror: boolean); override;
+   procedure applyupdate(const cancelonerror: boolean;
+                const cancelondeleteerror: boolean = false); override;
    procedure applyupdates(const maxerrors: integer;
-                   const cancelonerror: boolean); override;
+                const cancelonerror: boolean;
+                const cancelondeleteerror: boolean = false); override;
    function refreshrecquery(const update: boolean): string;
    procedure checktablename;
    function updaterecquery{(const refreshfieldvalues: boolean)} : string;
@@ -4435,14 +4437,16 @@ begin
  inherited transactionwrite:= avalue;
 end;
 
-procedure TSQLQuery.applyupdate(const cancelonerror: boolean);
+procedure TSQLQuery.applyupdate(const cancelonerror: boolean;
+                               const cancelondeleteerror: boolean = false);
 begin
  fupdaterowsaffected:= 0;
  inherited;
 end;
 
 procedure TSQLQuery.applyupdates(const maxerrors: integer;
-               const cancelonerror: boolean);
+                                  const cancelonerror: boolean;
+                                  const cancelondeleteerror: boolean = false);
 begin
  fupdaterowsaffected:= 0;
  if fdatabase = nil then begin

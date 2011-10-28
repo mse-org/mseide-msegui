@@ -469,18 +469,24 @@ type
   
 type
  
- recupdateflagty = (ruf_applied);
+ recupdateflagty = (ruf_applied,ruf_error);
  recupdateflagsty = set of recupdateflagty;
  
- recupdatebufferty = record
+ recupdateinfoty = record
   updatekind: tupdatekind;
   flags: recupdateflagsty;
   bookmark: bookmarkdataty;
+ end;
+ recupdateinfoarty = array of recupdateinfoty;
+ 
+ recupdatebufferty = record
+  info: recupdateinfoty;
   oldvalues: pintrecordty;
  end;
  precupdatebufferty = ^recupdatebufferty;
 
  recupdatebufferarty = array of recupdatebufferty;
+ 
  
  bufdatasetstatety = (bs_opening,bs_loading,bs_fetching,
                       bs_displaydata,bs_applying,bs_recapplying,
@@ -745,6 +751,8 @@ type
    function getcurrentasvariant(const afield: tfield; aindex: integer): variant;
    procedure setcurrentasvariant(const afield: tfield; aindex: integer;
                    const avalue: variant);
+   function getchangerecords: recupdateinfoarty;
+   function getapplyerrorrecords: recupdateinfoarty;
   protected
    fcontroller: tdscontroller;
    fbrecordcount: integer;
@@ -852,7 +860,9 @@ type
    procedure postrecupdatebuffer;
    procedure recupdatebufferapplied(const abuf: precupdatebufferty);
    procedure internalapplyupdate(const maxerrors: integer;
-               const revertonerror: boolean; out response: resolverresponsesty);
+               const cancelonerror: boolean;
+               const cancelondeleteerror: boolean;
+               out response: resolverresponsesty);
    procedure afterapply; virtual;
    procedure freeblob(const ablob: blobinfoty);
    procedure freeblobs(var ablobs: blobinfoarty);
@@ -866,6 +876,7 @@ type
    procedure setrecno(value: longint); override;
    function  getrecno: longint; override;
    function getchangecount: integer; virtual;
+   function getapplyerrorcount: integer; virtual;
    function  allocrecordbuffer: pchar; override;
    procedure internalinitrecord(buffer: pchar); override;
    procedure clearcalcfields(buffer: pchar); override;
@@ -1071,10 +1082,18 @@ type
    procedure fetchall;
    procedure resetindex; //deactivates all indexes
    function createblobbuffer(const afield: tfield): tblobbuffer;
+
+   property changecount: integer read getchangecount;
+   property changerecords: recupdateinfoarty read getchangerecords;
+   property applyerrorcount: integer read getapplyerrorcount;
+   property applyerrorrecords: recupdateinfoarty read getapplyerrorrecords;
+   
    procedure applyupdates(const maxerrors: integer = 0); virtual; overload;
    procedure applyupdates(const maxerrors: integer;
-                   const revertonerror: boolean); virtual; overload;
-   procedure applyupdate(const revertonerror: boolean); virtual; overload;
+                         const cancelonerror: boolean;
+                const cancelondeleteerror: boolean = false); virtual; overload;
+   procedure applyupdate(const cancelonerror: boolean;
+                const cancelondeleteerror: boolean = false); virtual; overload;
    procedure applyupdate; virtual; overload;
                    //applies current record
    function recapplying: boolean;
@@ -1082,8 +1101,9 @@ type
    procedure cancelupdate(const norecordcancel: boolean = false); virtual; 
                    //cancels current record,
                    //if norecordcancel no restoring of old values
-   function updatestatus: tupdatestatus; override;
-   property changecount : integer read getchangecount;
+   function updatestatus: tupdatestatus; overload; override;
+   function updatestatus(out aflags: recupdateflagsty): tupdatestatus; overload;
+   
    property bookmarkdata: bookmarkdataty read getbookmarkdata1
                                              write setbookmarkdata1;
    property filtereditkind: filtereditkindty read ffiltereditkind write ffiltereditkind;
@@ -2305,8 +2325,8 @@ begin
  for int1:= 0 to high(fupdatebuffer) do begin
   po1:= @fupdatebuffer[int1];
   with po1^ do begin
-   if bookmark.recordpo <> nil then begin
-    if ruf_applied in flags then begin
+   if info.bookmark.recordpo <> nil then begin
+    if ruf_applied in info.flags then begin
      recupdatebufferapplied(po1);
     end
     else begin
@@ -2482,11 +2502,12 @@ begin
  else begin
   with pdsrecordty(activebuffer)^.dsheader.bookmark.data do begin
    if (fcurrentupdatebuffer >= length(fupdatebuffer)) or 
-        (fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo <> 
+        (fupdatebuffer[fcurrentupdatebuffer].info.bookmark.recordpo <> 
                                                          recordpo) then begin
     for int1:= 0 to high(fupdatebuffer) do begin
      with fupdatebuffer[int1] do begin
-      if (bookmark.recordpo = recordpo) and not (ruf_applied in flags) then begin
+      if (info.bookmark.recordpo = recordpo) and 
+                             not (ruf_applied in info.flags) then begin
        fcurrentupdatebuffer:= int1;
        break;
       end;
@@ -2494,7 +2515,7 @@ begin
     end;
    end;
    result:= (fcurrentupdatebuffer <= high(fupdatebuffer))  and 
-          (fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo = recordpo) and 
+   (fupdatebuffer[fcurrentupdatebuffer].info.bookmark.recordpo = recordpo) and 
           (recordpo <> nil);
   end;
  end;
@@ -3128,23 +3149,23 @@ begin
  if not getrecordupdatebuffer then begin
   getnewupdatebuffer;
   with fupdatebuffer[fcurrentupdatebuffer] do begin
-   bookmark.recno:= recnobefore;
-   bookmark.recordpo:= po1;
-   oldvalues:= bookmark.recordpo;
+   info.bookmark.recno:= recnobefore;
+   info.bookmark.recordpo:= po1;
+   oldvalues:= info.bookmark.recordpo;
   end;
  end
  else begin
   with fupdatebuffer[fcurrentupdatebuffer] do begin
-   intfreerecord(bookmark.recordpo);
-   if updatekind = ukmodify then begin
-    bookmark.recordpo:= oldvalues;
+   intfreerecord(info.bookmark.recordpo);
+   if info.updatekind = ukmodify then begin
+    info.bookmark.recordpo:= oldvalues;
    end
    else begin //ukinsert
-    bookmark.recordpo := nil;  //this 'disables' the updatebuffer
+    info.bookmark.recordpo := nil;  //this 'disables' the updatebuffer
    end;
   end;
  end;
- fupdatebuffer[fcurrentupdatebuffer].updatekind := ukdelete;
+ fupdatebuffer[fcurrentupdatebuffer].info.updatekind := ukdelete;
  if flogger <> nil then begin
   logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],po1,true,lf_update);
   flogger.flushbuffer;
@@ -3163,27 +3184,27 @@ begin
   flogger.flushbuffer;
  end;
  with arec do begin
-  if bookmark.recordpo <> nil then begin
-   if updatekind = ukmodify then begin
-    freeblobs(bookmark.recordpo^.header.blobinfo);
-    finalizevalues(bookmark.recordpo^.header);
-    move(oldvalues^.header,bookmark.recordpo^.header,frecordsize);
+  if info.bookmark.recordpo <> nil then begin
+   if info.updatekind = ukmodify then begin
+    freeblobs(info.bookmark.recordpo^.header.blobinfo);
+    finalizevalues(info.bookmark.recordpo^.header);
+    move(oldvalues^.header,info.bookmark.recordpo^.header,frecordsize);
     freemem(oldvalues); //no finalize
    end
    else begin
-    if updatekind = ukdelete then begin
-     insertrecord(bookmark.recno,bookmark.recordpo);
+    if info.updatekind = ukdelete then begin
+     insertrecord(info.bookmark.recno,info.bookmark.recordpo);
     end
     else begin
-     if updatekind = ukinsert then begin
-      deleterecord(bookmark.recordpo);
-      if bookmark.recordpo = fcurrentbuf then begin
+     if info.updatekind = ukinsert then begin
+      deleterecord(info.bookmark.recordpo);
+      if info.bookmark.recordpo = fcurrentbuf then begin
        fcurrentbuf:= nil;
        if frecno >= 0 then begin
         dec(frecno);
        end;
       end;
-      intfreerecord(bookmark.recordpo);
+      intfreerecord(info.bookmark.recordpo);
      end;
     end;
    end;
@@ -3199,14 +3220,14 @@ begin
  checkbrowsemode;
  if (fupdatebuffer <> nil) and (frecno >= 0) then begin
   for int1:= high(fupdatebuffer) downto 0 do begin
-   if fupdatebuffer[int1].bookmark.recordpo = fcurrentbuf then begin
+   if fupdatebuffer[int1].info.bookmark.recordpo = fcurrentbuf then begin
     if not norecordcancel then begin
      cancelrecupdate(fupdatebuffer[int1]);
     end
     else begin
      with fupdatebuffer[int1] do begin
       intFreeRecord(OldValues);
-      bookmark.recordpo:= nil
+      info.bookmark.recordpo:= nil
      end;
     end;
     deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),int1);
@@ -3248,7 +3269,7 @@ begin
   flogger.flushbuffer;
  end;
  intFreeRecord(abuf^.OldValues);
- abuf^.bookmark.recordpo:= nil;
+ abuf^.info.bookmark.recordpo:= nil;
 end;
 
 procedure tmsebufdataset.packrecupdatebuffer;
@@ -3257,7 +3278,7 @@ var
 begin
  int2:= 0;
  for int1:= 0 to high(fupdatebuffer) do begin //pack
-  if fupdatebuffer[int1].bookmark.recordpo <> nil then begin
+  if fupdatebuffer[int1].info.bookmark.recordpo <> nil then begin
    fupdatebuffer[int2]:= fupdatebuffer[int1];
    inc(int2);
   end;
@@ -3270,7 +3291,7 @@ var
  int1: integer;
 begin
  for int1:= high(fupdatebuffer) downto 0 do begin
-  exclude(fupdatebuffer[int1].flags,ruf_applied);
+  exclude(fupdatebuffer[int1].info.flags,ruf_applied);
  end;
 end;
 
@@ -3283,7 +3304,7 @@ begin
  for int1:= high(fupdatebuffer) downto 0 do begin
   po1:= @fupdatebuffer[int1];
   with po1^ do begin
-   if (ruf_applied in flags) and (bookmark.recordpo <> nil) then begin
+   if (ruf_applied in info.flags) and (info.bookmark.recordpo <> nil) then begin
     inc(int2);
     recupdatebufferapplied(po1);
    end;
@@ -3298,7 +3319,9 @@ begin
 end;
 
 procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
-               const revertonerror: boolean; out response: resolverresponsesty);
+               const cancelonerror: boolean; 
+               const cancelondeleteerror: boolean;
+               out response: resolverresponsesty);
                
  procedure checkrevert;
  var
@@ -3307,18 +3330,18 @@ procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
   po1:= @fupdatebuffer[fcurrentupdatebuffer];
   if rr_applied in response then begin
    if bs1_deferdeleterecupdatebuffer in fbstate1 then begin
-    include(po1^.flags,ruf_applied);
+    include(po1^.info.flags,ruf_applied);
    end
    else begin
     recupdatebufferapplied(po1);
    end;
   end
   else begin
-   if revertonerror or (rr_revert in response) then begin
+   if (cancelonerror or 
+       cancelondeleteerror and (po1^.info.updatekind = ukdelete)) or
+                                         (rr_revert in response) then begin
     cancelrecupdate(po1^);
-    po1^.bookmark.recordpo:= nil;
-//    cancelrecupdate(fupdatebuffer[fcurrentupdatebuffer]);
-//    disableupdateitem;
+    po1^.info.bookmark.recordpo:= nil;
    end;
   end;
  end; //checkrevert
@@ -3336,7 +3359,7 @@ begin
  by2:= false;
  response:= [];
  with fupdatebuffer[fcurrentupdatebuffer] do begin
-  origpo:= bookmark.recordpo;
+  origpo:= info.bookmark.recordpo;
   move(origpo^.header,fnewvaluebuffer^.header,frecordsize);
   addrefvalues(fnewvaluebuffer^.header);
   try
@@ -3345,15 +3368,17 @@ begin
     getcalcfields(pchar(fnewvaluebuffer));
     if rr_again in response then begin
      dec(ffailedcount);
+     exclude(info.flags,ruf_error);
     end;
     Response:= [rr_applied];
     try
      try
       if by1 then begin
-       ApplyRecUpdate(UpdateKind);
+       ApplyRecUpdate(info.UpdateKind);
       end;
      except
       on E: EDatabaseError do begin
+       include(info.flags,ruf_error);
        e1:= e;
        Inc(fFailedCount);
        if e is eapplyerror then begin
@@ -3370,7 +3395,7 @@ begin
        e.message:= 'An error occured while applying the updates in a record: '+
                                e.message;
        if checkcanevent(self,tmethod(OnUpdateError)) then begin
-        OnUpdateError(Self,edatabaseerror(e1),UpdateKind,Response);
+        OnUpdateError(Self,edatabaseerror(e1),info.UpdateKind,Response);
         if rr_applied in response then begin
          dec(ffailedcount);
         end;
@@ -3413,7 +3438,7 @@ begin
    checkrevert;
   finally
    exclude(fbstate,bs_recapplying);
-   if by2 and (updatekind <> ukdelete) then begin
+   if by2 and (info.updatekind <> ukdelete) then begin
     include(fbstate1,bs1_needsresync);
     finalizevalues(origpo^.header);
     move(fnewvaluebuffer^.header,origpo^.header,frecordsize);
@@ -3431,7 +3456,9 @@ begin
  //dummy
 end;
 
-procedure tmsebufdataset.applyupdate(const revertonerror: boolean = false); //applies current record
+procedure tmsebufdataset.applyupdate(const cancelonerror: boolean;
+                               const cancelondeleteerror: boolean);
+                                               //applies current record
 var
  response: resolverresponsesty;
 begin
@@ -3445,10 +3472,10 @@ begin
     ffailedcount:= 0;
     exclude(fbstate1,bs1_needsresync);
     try
-     internalapplyupdate(0,revertonerror,response);
+     internalapplyupdate(0,cancelonerror,cancelondeleteerror,response);
     finally
      if (fcurrentupdatebuffer <= high(fupdatebuffer)) and //???
-      (FUpdateBuffer[fcurrentupdatebuffer].Bookmark.recordpo = nil) then begin
+      (FUpdateBuffer[fcurrentupdatebuffer].info.Bookmark.recordpo = nil) then begin
       deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),fcurrentupdatebuffer);
      end;
      if bs1_needsresync in fbstate1 then begin
@@ -3467,7 +3494,8 @@ begin
 end;
 
 procedure tmsebufdataset.ApplyUpdates(const MaxErrors: Integer; 
-                                const revertonerror: boolean = false);
+                             const cancelonerror: boolean;
+                             const cancelondeleteerror: boolean = false);
 var
  recnobefore: integer;
  response: resolverresponsesty;
@@ -3491,8 +3519,9 @@ begin
     while (fapplyindex <= high(FUpdateBuffer)) and not(rr_abort in response) do begin
      fcurrentupdatebuffer:= fapplyindex;
      with fupdatebuffer[fcurrentupdatebuffer] do begin
-      if (bookmark.recordpo <> nil) and not (ruf_applied in flags) then begin
-       internalapplyupdate(maxerrors,revertonerror,response);
+      if (info.bookmark.recordpo <> nil) and not (ruf_applied in info.flags) then begin
+       internalapplyupdate(maxerrors,cancelonerror,
+                                       cancelondeleteerror,response);
        bo1:= bo1 or not (rr_applied in response);
       end;
      end;
@@ -3637,11 +3666,11 @@ begin
   if newupdatebuffer then begin
    getnewupdatebuffer;
    with fupdatebuffer[fcurrentupdatebuffer] do begin
-    bookmark.recordpo:= fcurrentbuf;
-    bookmark.recno:= frecno;
+    info.bookmark.recordpo:= fcurrentbuf;
+    info.bookmark.recno:= frecno;
     if state = dsedit then begin
      oldvalues:= intallocrecord;
-     move(bookmark.recordpo^,oldvalues^,frecordsize+intheadersize);
+     move(info.bookmark.recordpo^,oldvalues^,frecordsize+intheadersize);
      addrefvalues(oldvalues^.header);
      po1:= getintblobpo;
      if po1^ <> nil then begin
@@ -3662,10 +3691,10 @@ begin
        end;
       end;
      end;
-     updatekind := ukmodify;
+     info.updatekind := ukmodify;
     end
     else begin
-     updatekind := ukinsert;
+     info.updatekind := ukinsert;
     end;
    end;
   end;
@@ -3692,7 +3721,7 @@ begin
   finalizevalues(fcurrentbuf^.header);
   move(header,fcurrentbuf^.header,frecordsize); //get new field values
   if flogger <> nil then begin
-   logrecbuffer(flogger,fupdatebuffer[fcurrentupdatebuffer].updatekind,
+   logrecbuffer(flogger,fupdatebuffer[fcurrentupdatebuffer].info.updatekind,
                      fcurrentbuf);
    if newupdatebuffer then begin
     logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],nil,true,
@@ -3992,6 +4021,18 @@ begin
  result:= length(fupdatebuffer);
 end;
 
+function tmsebufdataset.getapplyerrorcount: integer;
+var
+ int1: integer;
+begin
+ result:= 0;
+ for int1:= 0 to high(fupdatebuffer) do begin
+  if ruf_error in fupdatebuffer[int1].info.flags then begin
+   inc(result);
+  end;
+ end;
+end;
+
 procedure tmsebufdataset.setrecno1(value: longint; const nocheck: boolean);
 var
  bm: bufbookmarkty;
@@ -4067,17 +4108,29 @@ begin
  result:= fbrecordcount;
 end;
 
-function tmsebufdataset.updatestatus: tupdatestatus;
+function tmsebufdataset.updatestatus(out aflags: recupdateflagsty): tupdatestatus;
 begin
+ aflags:= [];
  result:= usunmodified;
  if getrecordupdatebuffer then begin
-  case fupdatebuffer[fcurrentupdatebuffer].updatekind of
-   ukmodify : result := usmodified;
-   ukinsert : result := usinserted;
-   ukdelete : result := usdeleted;
+  with fupdatebuffer[fcurrentupdatebuffer] do begin
+   aflags:= info.flags;
+   case info.updatekind of
+    ukmodify : result := usmodified;
+    ukinsert : result := usinserted;
+    ukdelete : result := usdeleted;
+   end;
   end;
  end;
 end;
+
+function tmsebufdataset.updatestatus: tupdatestatus;
+var
+ stat1: recupdateflagsty;
+begin
+ result:= updatestatus(stat1);
+end;
+
 {
 Function tmsebufdataset.Locate(const KeyFields: string; const KeyValues: Variant; options: TLocateOptions) : boolean;
 
@@ -5593,11 +5646,11 @@ var
 begin
  header1.flag:= alogmode;
  with abuffer,header1.update do begin
-  if (bookmark.recordpo <> nil) or (deletedrecord <> nil) then begin
+  if (info.bookmark.recordpo <> nil) or (deletedrecord <> nil) then begin
    deletedrecord:= adeletedrecord;
    logging:= alogging;
-   kind:= updatekind;
-   po:= bookmark.recordpo;
+   kind:= info.updatekind;
+   po:= info.bookmark.recordpo;
    awriter.writelogbufferheader(header1);
    if (alogmode = lf_update) and 
        ((kind = ukmodify) or 
@@ -5665,7 +5718,7 @@ begin
   end;
   for int1:= 0 to high(fupdatebuffer) do begin
    with fupdatebuffer[int1] do begin
-    if bookmark.recordpo <> nil then begin
+    if info.bookmark.recordpo <> nil then begin
     {
      if updatekind = ukinsert then begin
       logrecbuffer(awriter,updatekind,
@@ -5848,7 +5901,7 @@ begin
         setlength(oldupdatepointers,length(updabuf));
        end;     
        with updabuf[int2],header1.update do begin
-        updatekind:= kind;
+        info.updatekind:= kind;
         oldupdatepointers[int2]:= po;
         int3:= -1;
         if deletedrecord <> nil then begin
@@ -5866,33 +5919,33 @@ begin
            formaterror;
           end;
           if po = nil then begin
-           bookmark.recordpo:= nil;   //deleting of inserted record
+           info.bookmark.recordpo:= nil;   //deleting of inserted record
            intfreerecord(po1);
           end
           else begin                  //deleting of modified record
-           intfreerecord(updabuf[int3].bookmark.recordpo);
-           bookmark.recordpo:= updabuf[int3].oldvalues;
-           bookmark.recno:= 0;
+           intfreerecord(updabuf[int3].info.bookmark.recordpo);
+           info.bookmark.recordpo:= updabuf[int3].oldvalues;
+           info.bookmark.recno:= 0;
           end;
-          updabuf[int3].bookmark.recordpo:= nil; //to be removed
+          updabuf[int3].info.bookmark.recordpo:= nil; //to be removed
          end
          else begin
           if logging then begin
-           if not findrec(deletedrecord,bookmark.recordpo,
-                                         bookmark.recno,true) then begin
+           if not findrec(deletedrecord,info.bookmark.recordpo,
+                                         info.bookmark.recno,true) then begin
             formaterror;
            end;
           end
           else begin
-           bookmark.recno:= 0;
-           bookmark.recordpo:= intallocrecord;
-           reader.readrecord(bookmark.recordpo);
+           info.bookmark.recno:= 0;
+           info.bookmark.recordpo:= intallocrecord;
+           reader.readrecord(info.bookmark.recordpo);
           end;
          end;
-         oldvalues:= bookmark.recordpo;
+         oldvalues:= info.bookmark.recordpo;
         end
         else begin
-         if not findrec(po,bookmark.recordpo,bookmark.recno) then begin
+         if not findrec(po,info.bookmark.recordpo,info.bookmark.recno) then begin
           formaterror;        //old pointer not found
          end;
         end;
@@ -5921,7 +5974,7 @@ begin
          end;
          ukdelete: begin
           with updabuf[int3] do begin
-           appendrecord(bookmark.recordpo);
+           appendrecord(info.bookmark.recordpo);
            additem(appended,oldupdatepointers[int3]);
 //           additem(appended,bookmark.recordpo);
           end;
@@ -5931,11 +5984,11 @@ begin
            formaterror;
           end;
           with updabuf[int3] do begin
-           intfreerecord(bookmark.recordpo);
+           intfreerecord(info.bookmark.recordpo);
           end;
          end;
         end;
-        updabuf[int3].bookmark.recordpo:= nil;
+        updabuf[int3].info.bookmark.recordpo:= nil;
         oldupdatepointers[int3]:= nil;
                     //inactive
        end;
@@ -5954,7 +6007,7 @@ begin
         end;
         with updabuf[int3] do begin
          intfreerecord(oldvalues);
-         bookmark.recordpo:= nil;
+         info.bookmark.recordpo:= nil;
          oldupdatepointers[int3]:= nil;
                     //inactive
         end;
@@ -5969,7 +6022,7 @@ begin
     setlength(fupdatebuffer,int2);   
     int2:= 0;     //pack updatebuffer
     for int1:= 0 to high(updabuf) do begin
-     if updabuf[int1].bookmark.recordpo <> nil then begin
+     if updabuf[int1].info.bookmark.recordpo <> nil then begin
       fupdatebuffer[int2]:= updabuf[int1];
       inc(int2);
      end;
@@ -8013,6 +8066,42 @@ begin
    end;
   end;
  end;
+end;
+
+function tmsebufdataset.getchangerecords: recupdateinfoarty;
+var
+ int1,int2: integer;
+begin
+ setlength(result,length(fupdatebuffer));
+ int2:= 0;
+ for int1:= 0 to high(result) do begin
+  with fupdatebuffer[int1] do begin
+   if (info.bookmark.recordpo <> nil) and 
+                     not (ruf_applied in info.flags) then begin
+    result[int2]:= info;
+    inc(int2);
+   end;
+  end;
+ end;
+ setlength(result,int2);
+end;
+
+function tmsebufdataset.getapplyerrorrecords: recupdateinfoarty;
+var
+ int1,int2: integer;
+begin
+ setlength(result,length(fupdatebuffer));
+ int2:= 0;
+ for int1:= 0 to high(result) do begin
+  with fupdatebuffer[int1] do begin
+   if (info.bookmark.recordpo <> nil) and 
+              (info.flags*[ruf_applied,ruf_error] = [ruf_error]) then begin
+    result[int2]:= info;
+    inc(int2);
+   end;
+  end;
+ end;
+ setlength(result,int2);
 end;
 
 { tlocalindexes }
