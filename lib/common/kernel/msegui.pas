@@ -11033,11 +11033,11 @@ begin
 end;
 
 procedure twidget.setoptionswidget(const avalue: optionswidgetty);
-const
- mask1: optionswidgetty = [ow_fontglyphheight,ow_fontlineheight];
- mask2: optionswidgetty = [ow_hinton,ow_hintoff];
+//const
+// mask1: optionswidgetty = [ow_fontglyphheight,ow_fontlineheight];
+// mask2: optionswidgetty = [ow_hinton,ow_hintoff];
 var
- value,value1,value2,delta: optionswidgetty;
+ value,{value1,value2,}delta: optionswidgetty;
  opt1: optionswidget1ty;
 begin
  if avalue <> foptionswidget then begin
@@ -11060,12 +11060,17 @@ begin
    end;
    optionswidget1:= opt1;
   end;
-  
-  value1:= optionswidgetty(setsinglebit(longword(avalue),
-          longword(foptionswidget),longword(mask1)));
-  value2:= optionswidgetty(setsinglebit(longword(avalue),
-          longword(foptionswidget),longword(mask2)));
-  value:= value1 * mask1 + value2 * mask2 + (avalue - (mask1 + mask2));
+
+  value:= optionswidgetty(setsinglebit(longword(avalue),
+          longword(foptionswidget),  
+          [longword([ow_fontglyphheight,ow_fontlineheight]),
+           longword([ow_hinton,ow_hintoff])]));
+           
+//  value1:= optionswidgetty(setsinglebit(longword(avalue),
+//          longword(foptionswidget),longword(mask1)));
+//  value2:= optionswidgetty(setsinglebit(longword(avalue),
+//          longword(foptionswidget),longword(mask2)));
+//  value:= value1 * mask1 + value2 * mask2 + (avalue - (mask1 + mask2));
   delta:= optionswidgetty(longword(value) xor longword(foptionswidget));
   foptionswidget:= value - deprecatedoptionswidget;
   if (delta * [ow_background,ow_top] <> []) then begin
@@ -11085,21 +11090,30 @@ begin
 end;
 
 procedure twidget.setoptionswidget1(const avalue: optionswidget1ty);
-const
- mask1: optionswidget1ty = [ow1_autosizeanright,ow1_noautosizeanright];
- mask2: optionswidget1ty = [ow1_autosizeanbottom,ow1_noautosizeanbottom];
+//const
+// mask1: optionswidget1ty = [ow1_autosizeanright,ow1_noautosizeanright];
+// mask2: optionswidget1ty = [ow1_autosizeanbottom,ow1_noautosizeanbottom];
 var
- value,value1,value2,delta: optionswidget1ty;
+ value,{value1,value2,}delta: optionswidget1ty;
 begin
- value1:= optionswidget1ty(setsinglebit(
-          {$ifdef FPC}longword{$else}word{$endif}(avalue),
-          {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1), 
-          {$ifdef FPC}longword{$else}word{$endif}(mask1)));
- value2:= optionswidget1ty(setsinglebit(
-          {$ifdef FPC}longword{$else}word{$endif}(avalue),
-          {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1),
-          {$ifdef FPC}longword{$else}word{$endif}(mask2)));
- value:= value1 * mask1 + value2 * mask2 + (avalue - (mask1 + mask2));
+// value1:= optionswidget1ty(setsinglebit(
+//          {$ifdef FPC}longword{$else}word{$endif}(avalue),
+//          {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1), 
+//          {$ifdef FPC}longword{$else}word{$endif}(mask1)));
+// value2:= optionswidget1ty(setsinglebit(
+//          {$ifdef FPC}longword{$else}word{$endif}(avalue),
+//          {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1),
+//          {$ifdef FPC}longword{$else}word{$endif}(mask2)));
+// value:= value1 * mask1 + value2 * mask2 + (avalue - (mask1 + mask2));
+
+ value:= optionswidget1ty(setsinglebit(
+ {$ifdef FPC}longword{$else}word{$endif}(avalue),
+ {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1),
+ [{$ifdef FPC}longword{$else}word{$endif}(
+                [ow1_autosizeanright,ow1_noautosizeanright]),
+  {$ifdef FPC}longword{$else}word{$endif}(
+              [ow1_autosizeanbottom,ow1_noautosizeanbottom])]));
+              
  delta:= optionswidget1ty({$ifdef FPC}longword{$else}word{$endif}(value) xor
                     {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1));
  if delta <> [] then begin
@@ -11981,23 +11995,31 @@ begin
 end;
 
 procedure twidget.setoptionsskin(const avalue: optionsskinty);
-const
- mask1: optionsskinty = [osk_skin,osk_noskin];
- mask2: optionsskinty = [osk_colorcaptionframe,osk_nocolorcaptionframe];
+//const
+// mask1: optionsskinty = [osk_skin,osk_noskin];
+// mask2: optionsskinty = [osk_colorcaptionframe,osk_nocolorcaptionframe];
 var
- opt1,opt2,valuebefore: optionsskinty;
+ {opt1,opt2,}valuebefore: optionsskinty;
 begin
  valuebefore:= foptionsskin;
- opt1:= optionsskinty(setsinglebit(
+// opt1:= optionsskinty(setsinglebit(
+//                 {$ifdef FPC}longword{$else}word{$endif}(avalue),
+//                 {$ifdef FPC}longword{$else}word{$endif}(foptionsskin),
+//                 {$ifdef FPC}longword{$else}word{$endif}(mask1)));
+// opt2:= optionsskinty(setsinglebit(
+//                 {$ifdef FPC}longword{$else}word{$endif}(avalue),
+//                 {$ifdef FPC}longword{$else}word{$endif}(foptionsskin),
+//                 {$ifdef FPC}longword{$else}word{$endif}(mask2)));
+// foptionsskin:= avalue - (mask1+mask2) + opt1*mask1 + opt2*mask2;
+
+ foptionsskin:= optionsskinty(setsinglebit(
                  {$ifdef FPC}longword{$else}word{$endif}(avalue),
                  {$ifdef FPC}longword{$else}word{$endif}(foptionsskin),
-                 {$ifdef FPC}longword{$else}word{$endif}(mask1)));
- opt2:= optionsskinty(setsinglebit(
-                 {$ifdef FPC}longword{$else}word{$endif}(avalue),
-                 {$ifdef FPC}longword{$else}word{$endif}(foptionsskin),
-                 {$ifdef FPC}longword{$else}word{$endif}(mask2)));
- foptionsskin:= avalue - (mask1+mask2) + opt1*mask1 + opt2*mask2;
- 
+                [{$ifdef FPC}longword{$else}word{$endif}(
+                                             [osk_skin,osk_noskin]),
+                 {$ifdef FPC}longword{$else}word{$endif}(
+                   [osk_colorcaptionframe,osk_nocolorcaptionframe])]));
+                   
  if (optionsskinty({$ifdef FPC}longword{$else}word{$endif}(valuebefore) xor
                    {$ifdef FPC}longword{$else}word{$endif}(avalue)) * 
     [osk_nopropwidth,osk_nopropheight] <> []) and (fparentwidget <> nil) then begin
