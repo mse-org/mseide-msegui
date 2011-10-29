@@ -1244,6 +1244,7 @@ type
                          dso_postsavepoint,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,
                          dso_cancelupdateondeleteerror,
+                         dso_editonapplyerror,
                          dso_restoreupdateonsavepointrollback,
                          dso_autoapply,
                          dso_autocommitret,dso_autocommit,
@@ -1325,7 +1326,6 @@ type
   private
    ffields: tpersistentfields;
    fintf: idscontroller;
-//   fneedsrefresh: integer;
    frecno: integer;
    frecnovalid: boolean;
    fscrollsum: integer;
@@ -7655,8 +7655,8 @@ begin
 end;
 
 procedure tdscontroller.setoptions(const avalue: datasetoptionsty);
-const
- mask: datasetoptionsty = [dso_autocommitret,dso_autocommit];
+//const
+// mask: datasetoptionsty = [dso_autocommitret,dso_autocommit];
 var
  opt,options1,optionsbefore: datasetoptionsty;
 begin
@@ -7667,7 +7667,11 @@ begin
  end;
  options1:= datasetoptionsty(longword(foptions) xor longword(opt));
  foptions:= datasetoptionsty(setsinglebit(longword(opt),longword(foptions),
-                    longword(mask)));
+                 [longword([dso_autocommitret,dso_autocommit]),
+                  longword([dso_editonapplyerror,dso_cancelupdatesonerror,
+                      dso_cancelupdateonerror,dso_cancelupdateondeleteerror])]));
+// foptions:= datasetoptionsty(setsinglebit(longword(opt),longword(foptions),
+//                    longword(mask)));
  if dso_noedit in options1 then begin
   if (dso_noedit in opt) and tdataset(fowner).active then begin
    tdataset(fowner).checkbrowsemode;

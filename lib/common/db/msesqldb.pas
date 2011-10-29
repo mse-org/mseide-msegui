@@ -117,7 +117,8 @@ type
    procedure post; override;
    procedure applyupdates(const maxerrors: integer; 
                 const cancelonerror: boolean;
-                const cancelondeleteerror: boolean = false); override; overload;
+                const cancelondeleteerror: boolean = false;
+                const editonerror: boolean = false); override; overload;
    procedure applyupdates(const maxerrors: integer = 0); override; overload;
    procedure applyupdate; override; overload;
   published
@@ -679,7 +680,8 @@ end;
 
 procedure tmsesqlquery.applyupdates(const maxerrors: integer;
                 const cancelonerror: boolean;
-                const cancelondeleteerror: boolean = false);
+                const cancelondeleteerror: boolean = false;
+                const editonerror: boolean = false);
 begin
  checkcanupdate;
  try
@@ -737,7 +739,8 @@ procedure tmsesqlquery.applyupdates(const maxerrors: integer = 0);
 begin
  applyupdates(maxerrors,fcontroller.options *
       [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> [],
-      dso_cancelupdateondeleteerror in fcontroller.options);
+      dso_cancelupdateondeleteerror in fcontroller.options,
+      dso_editonapplyerror in fcontroller.options);
 end;
 
 procedure tmsesqlquery.applyupdate;
@@ -745,7 +748,8 @@ begin
  checkcanupdate;
  inherited applyupdate(fcontroller.options *
       [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> [],
-      dso_cancelupdateondeleteerror in fcontroller.options);
+      dso_cancelupdateondeleteerror in fcontroller.options,
+      dso_editonapplyerror in fcontroller.options);
 end;
 
 function tmsesqlquery.getfieldclass(fieldtype: tfieldtype): tfieldclass;

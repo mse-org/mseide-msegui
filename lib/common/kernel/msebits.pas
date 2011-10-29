@@ -100,6 +100,12 @@ function bitschanged(const a,b,mask: longword): boolean; overload;
 function setsinglebit(const new,old,mask: byte): byte; overload;
 function setsinglebit(const new,old,mask: word): word; overload;
 function setsinglebit(const new,old,mask: longword): longword; overload;
+function setsinglebit(const new,old: byte;
+                            const mask: array of byte): byte; overload;
+function setsinglebit(const new,old: word;
+                            const mask: array of word): word; overload;
+function setsinglebit(const new,old: longword;
+                            const mask: array of longword): longword; overload;
 
 function checkbit(const value: byte; const bitnum: integer): boolean; overload;
 function checkbit(const value: word; const bitnum: integer): boolean; overload;
@@ -397,8 +403,6 @@ begin
    result:= new; //no change
   end
   else begin
-//   result:= new and  not mask or
-//            v1 and bitmask[lowestbit(v1)+1];
    result:= (new and  not mask) or
             bits[lowestbit(v1 and new)];
   end;
@@ -418,8 +422,6 @@ begin
    result:= new; //no change
   end
   else begin
-//   result:= new and  not mask or
-//            v1 and bitmask[lowestbit(v1)+1];
    result:= (new and  not mask) or
             bits[lowestbit(v1 and new)];
   end;
@@ -439,11 +441,42 @@ begin
    result:= new; //no change
   end
   else begin
-//   result:= new and  not mask or
-//            v1 and bitmask[lowestbit(v1)+1];
    result:= (new and  not mask) or
             bits[lowestbit(v1 and new)];
   end;
+ end;
+end;
+
+function setsinglebit(const new,old: byte;
+                            const mask: array of byte): byte;
+var
+ int1: integer;
+begin
+ result:= new;
+ for int1:= 0 to high(mask) do begin
+  result:= setsinglebit(result,old,mask[int1]);
+ end;
+end;
+
+function setsinglebit(const new,old: word;
+                            const mask: array of word): word;
+var
+ int1: integer;
+begin
+ result:= new;
+ for int1:= 0 to high(mask) do begin
+  result:= setsinglebit(result,old,mask[int1]);
+ end;
+end;
+
+function setsinglebit(const new,old: longword;
+                            const mask: array of longword): longword;
+var
+ int1: integer;
+begin
+ result:= new;
+ for int1:= 0 to high(mask) do begin
+  result:= setsinglebit(result,old,mask[int1]);
  end;
 end;
 

@@ -2491,7 +2491,7 @@ end;
 
 function tsetelementeditor.getdefaultstate: propertystatesty;
 begin
- result:= inherited getdefaultstate + [ps_valuelist,ps_candefault];
+ result:= inherited getdefaultstate + [ps_valuelist,ps_candefault,ps_refresh];
 end;
 
 function tsetelementeditor.getvalue: msestring;

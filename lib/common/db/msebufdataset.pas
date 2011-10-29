@@ -859,6 +859,7 @@ type
    procedure restorerecupdatebuffer;
    procedure postrecupdatebuffer;
    procedure recupdatebufferapplied(const abuf: precupdatebufferty);
+   procedure editapplyerror(const arecupdatenum: integer);
    procedure internalapplyupdate(const maxerrors: integer;
                const cancelonerror: boolean;
                const cancelondeleteerror: boolean;
@@ -980,6 +981,8 @@ type
    destructor destroy; override;
    
    procedure post; override;
+   procedure gotobookmark(const abookmark: bookmarkdataty); overload;
+   function findbookmark(const abookmark: bookmarkdataty): boolean;
    
    function createblobstream(field: tfield;
                                      mode: tblobstreammode): tstream; override;
@@ -1091,9 +1094,11 @@ type
    procedure applyupdates(const maxerrors: integer = 0); virtual; overload;
    procedure applyupdates(const maxerrors: integer;
                          const cancelonerror: boolean;
-                const cancelondeleteerror: boolean = false); virtual; overload;
+                const cancelondeleteerror: boolean = false;
+                const editonerror: boolean = false); virtual; overload;
    procedure applyupdate(const cancelonerror: boolean;
-                const cancelondeleteerror: boolean = false); virtual; overload;
+                const cancelondeleteerror: boolean = false;
+                const editonerror: boolean = false); virtual; overload;
    procedure applyupdate; virtual; overload;
                    //applies current record
    function recapplying: boolean;
@@ -2596,6 +2601,35 @@ begin
  end;
 end;
 
+function tmsebufdataset.findbookmark(const abookmark: bookmarkdataty): boolean;
+var
+ int1: integer;
+ bm1: bookmarkdataty;
+begin
+ result:= false;
+ with abookmark do begin
+  checkindex(false);
+  if (recno < 0) or (recno >= fbrecordcount) or 
+          (factindexpo^.ind[recno] <> recordpo) and (recordpo <> nil) then begin
+   int1:= findrecord(recordpo);
+  end
+  else begin
+   int1:= recno;
+  end;
+  if int1 >= 0 then begin
+   bm1:= abookmark;
+   bm1.recno:= int1;
+   gotobookmark(@bm1);
+   result:= true;
+  end;
+ end;
+end;
+
+procedure tmsebufdataset.gotobookmark(const abookmark: bookmarkdataty);
+begin
+ gotobookmark(@abookmark);
+end;
+
 function tmsebufdataset.getnextpacket(const all: boolean): integer;
 var
  state1: tdatasetstate;
@@ -3278,9 +3312,11 @@ var
 begin
  int2:= 0;
  for int1:= 0 to high(fupdatebuffer) do begin //pack
-  if fupdatebuffer[int1].info.bookmark.recordpo <> nil then begin
-   fupdatebuffer[int2]:= fupdatebuffer[int1];
-   inc(int2);
+  with fupdatebuffer[int1] do begin
+   if (info.bookmark.recordpo <> nil) or (oldvalues <> nil) then begin
+    fupdatebuffer[int2]:= fupdatebuffer[int1];
+    inc(int2);
+   end;
   end;
  end;
  setlength(fupdatebuffer,int2);
@@ -3456,27 +3492,91 @@ begin
  //dummy
 end;
 
+procedure tmsebufdataset.editapplyerror(const arecupdatenum: integer);
+var
+ po1: pintrecordty;
+ info1: recupdatebufferty;
+begin
+ disablecontrols;
+ try
+  info1:= fupdatebuffer[arecupdatenum];
+  with info1 do begin
+   if  (info.updatekind = ukdelete) or findbookmark(info.bookmark) then begin
+    po1:= nil;
+    if info.updatekind in [ukinsert,ukmodify] then begin
+     po1:= intallocrecord;
+     move(fcurrentbuf^.header,po1^.header,frecordsize);
+     addrefvalues(po1^.header);
+    end;
+    try
+     cancelrecupdate(info1);
+     resync([]);
+     deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),arecupdatenum);
+     if info.updatekind = ukdelete then begin
+      findbookmark(info.bookmark)
+     end
+     else begin
+      if info.updatekind in [ukmodify,ukinsert] then begin
+       if info.updatekind = ukmodify then begin
+        edit;
+       end
+       else begin
+        insert;
+       end;
+       finalizevalues(pdsrecordty(activebuffer)^.header);
+       finalizecalcvalues(pdsrecordty(activebuffer)^.header);
+       move(po1^,pdsrecordty(activebuffer)^.header,frecordsize);
+       freemem(po1);
+       setmodified(true);
+       getcalcfields(activebuffer);
+      end; 
+     end;
+    except
+     if po1 <> nil then begin
+      intfreerecord(po1);
+     end;
+     raise;
+    end;
+   end;
+  end;
+ finally
+  enablecontrols;
+ end;
+end;
+
 procedure tmsebufdataset.applyupdate(const cancelonerror: boolean;
-                               const cancelondeleteerror: boolean);
+                               const cancelondeleteerror: boolean;
+                               const editonerror: boolean = false);
                                                //applies current record
 var
  response: resolverresponsesty;
+ canedit1: boolean;
+ recupdatebuffernum1: integer;
 begin
  if not (bs_applying in fbstate) then begin
   include(fbstate,bs_applying);
   try
+   canedit1:= false;
    checkbrowsemode;
    dobeforeapplyupdate;
    checkbrowsemode;
    if getrecordupdatebuffer then begin
+    canedit1:= editonerror;
+    if canedit1 then begin
+     recupdatebuffernum1:= fcurrentupdatebuffer;
+    end;
     ffailedcount:= 0;
     exclude(fbstate1,bs1_needsresync);
     try
      internalapplyupdate(0,cancelonerror,cancelondeleteerror,response);
+     if rr_applied in response then begin
+      canedit1:= false;
+     end;
     finally
      if (fcurrentupdatebuffer <= high(fupdatebuffer)) and //???
       (FUpdateBuffer[fcurrentupdatebuffer].info.Bookmark.recordpo = nil) then begin
       deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),fcurrentupdatebuffer);
+      canedit1:= false;
      end;
      if bs1_needsresync in fbstate1 then begin
       resync([]);
@@ -3489,22 +3589,28 @@ begin
    doafterapplyupdate;
   finally
    exclude(fbstate,bs_applying);
+   if canedit1 then begin
+    editapplyerror(recupdatebuffernum1);
+   end;
   end;
  end;
 end;
 
 procedure tmsebufdataset.ApplyUpdates(const MaxErrors: Integer; 
                              const cancelonerror: boolean;
-                             const cancelondeleteerror: boolean = false);
+                             const cancelondeleteerror: boolean = false;
+                             const editonerror: boolean = false);
 var
  recnobefore: integer;
  response: resolverresponsesty;
  bo1: boolean;
-// int1,int2: integer;
+ canedit1: boolean;
+ recupdatenum1: integer;
 
 begin
  if not (bs_applying in fbstate) then begin
   include(fbstate,bs_applying);
+  canedit1:= false;
   try
    CheckBrowseMode;
    dobeforeapplyupdate;
@@ -3517,12 +3623,17 @@ begin
     bo1:= false;
     response:= [];
     while (fapplyindex <= high(FUpdateBuffer)) and not(rr_abort in response) do begin
+     canedit1:= editonerror;
      fcurrentupdatebuffer:= fapplyindex;
+     recupdatenum1:= fcurrentupdatebuffer;
      with fupdatebuffer[fcurrentupdatebuffer] do begin
       if (info.bookmark.recordpo <> nil) and not (ruf_applied in info.flags) then begin
        internalapplyupdate(maxerrors,cancelonerror,
                                        cancelondeleteerror,response);
        bo1:= bo1 or not (rr_applied in response);
+       if rr_applied in response then begin
+        canedit1:= false;
+       end;
       end;
      end;
      inc(fapplyindex);
@@ -3556,6 +3667,9 @@ begin
    doafterapplyupdate;
   finally
    exclude(fbstate,bs_applying);
+   if canedit1 then begin
+    editapplyerror(recupdatenum1);
+   end;
   end;
  end;
 end;
