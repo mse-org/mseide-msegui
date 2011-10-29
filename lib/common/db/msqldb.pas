@@ -102,6 +102,8 @@ type
    constructor create(const aowner: tsqlstringlist); reintroduce;
    property items[const aindex: integer]: tsqlmacroitem read getitems 
                      write setitems; default;
+   function itembyname(const aname: msestring): tsqlmacroitem;
+   function itembynames(const anames: array of msestring): tsqlmacroitem;
    class function getitemclasstype: persistentclassty; override;
                //used in dumpunitgroups
   published
@@ -5342,6 +5344,35 @@ end;
 class function tmacroproperty.getitemclasstype: persistentclassty;
 begin
  result:= tsqlmacroitem;
+end;
+
+function tmacroproperty.itembyname(const aname: msestring): tsqlmacroitem;
+var
+ int1: integer;
+begin
+ result:= nil;
+ for int1:= 0 to high(fitems) do begin
+  if tsqlmacroitem(fitems[int1]).name = aname then begin
+   result:= tsqlmacroitem(fitems[int1]);
+   break;
+  end;
+ end;
+ if result = nil then begin
+  raise exception.create('Macro "'+aname+'" not found.');
+ end;
+end;
+
+function tmacroproperty.itembynames(const anames: array of msestring): tsqlmacroitem;
+var
+ int1: integer;
+begin
+ result:= nil;
+ if length(anames) > 0 then begin
+  result:= itembyname(anames[0]);
+  for int1:= 1 to high(anames) do begin
+   result:= result.value.macros.itembyname(anames[int1]);
+  end;
+ end;
 end;
 
 { tmacrostringlist }
