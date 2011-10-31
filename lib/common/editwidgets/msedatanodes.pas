@@ -45,6 +45,7 @@ type
  
  nodeoptionty = (no_drawemptybox,no_checkbox,
                  no_updatechildchecked, //track ns1_childchecked state, slow!
+                 no_cellitemselect,     //copy cell select state to item select
                  no_nofreeitems
                  );
  nodeoptionsty = set of nodeoptionty;
@@ -375,6 +376,7 @@ type
    procedure change(const item: tlistitem); reintroduce; overload;
    procedure nodenotification(const sender: tlistitem;
                   var ainfo: nodeactioninfoty); virtual;
+   procedure setitemselected(const row: integer; const value: boolean); override;
    procedure doitemchange(const index: integer); override;
    procedure invalidate; virtual;
    procedure updatelayout; virtual;
@@ -1359,6 +1361,40 @@ procedure tcustomitemlist.nodenotification(const sender: tlistitem;
 begin
  if (ainfo.action = na_change) then begin
   change(sender);
+ end;
+end;
+
+procedure tcustomitemlist.setitemselected(const row: integer;
+               const value: boolean);
+var
+ po1: plistitematy;
+ int1: integer;
+begin
+ if (no_cellitemselect in foptions) and 
+                   not (dls_selectsetting in fstate) then begin
+  if row >= 0 then begin
+   with items[row] do begin
+    if value then begin
+     include(fstate,ns_selected);
+    end
+    else begin
+     exclude(fstate,ns_selected);
+    end;
+   end;
+  end
+  else begin
+   po1:= datapo;
+   if value then begin
+    for int1:= 0 to count - 1 do begin
+     include(po1^[int1].fstate,ns_selected);
+    end;
+   end
+   else begin
+    for int1:= 0 to count - 1 do begin
+     exclude(po1^[int1].fstate,ns_selected);
+    end;
+   end;
+  end;
  end;
 end;
 

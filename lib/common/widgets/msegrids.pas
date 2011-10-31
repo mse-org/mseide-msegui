@@ -5625,6 +5625,9 @@ begin
  if ident <= selectedcolmax then begin
   if row >= 0 then begin
    with fgrid.fdatacols.frowstate.getitempo(row)^ do begin
+    if fdata <> nil then begin
+     tdatalist1(fdata).setitemselected(row,value);
+    end;
     ca1:= selected;
     if value then begin
      selected:= selected or bits[ident];
@@ -5653,6 +5656,9 @@ begin
    end;
   end
   else begin //row < 0
+   if fdata <> nil then begin
+    tdatalist1(fdata).setitemselected(row,value);
+   end;
    if value then begin
     if not (gps_selected in fstate) then begin
      include(fstate,gps_selected);

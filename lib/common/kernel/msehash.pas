@@ -65,6 +65,8 @@ type
    procedure moveitem(const aitem: phashdataty);
   protected
    fstate: hashliststatesty;
+   property data: pointer read fdata;
+   property assignedroot: ptruint read fassignedroot;
    function getdatapo(const aoffset: longword): pointer;
    function getdataoffset(const adata: pointer): longword;
    function internaladd(const akey): phashdataty;

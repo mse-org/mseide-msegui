@@ -77,7 +77,7 @@ type
  dataliststatety = (
                     dls_needsfree,dls_needscopy,dls_needsinit,
                     dls_nostreaming,dls_nogridstreaming,
-                    dls_propertystreaming,
+                    dls_propertystreaming,dls_selectsetting,
                     dls_sorted,dls_sortio,
                     dls_forcenew, //used in tundolist
                     dls_remote,   //used in ificomp datalist
@@ -199,6 +199,7 @@ type
    procedure datainserted(const aindex: integer; const acount: integer);
    procedure datamoved(const fromindex: integer; const toindex: integer;
                                   const acount: integer); virtual;
+   procedure setitemselected(const row: integer; const value: boolean); virtual;
   public
    constructor create; override;
    destructor destroy; override;
@@ -278,6 +279,7 @@ type
                                     const index: integer); virtual;
    procedure setmemberitem(const subitem: integer; 
                          const index: integer; const avalue: integer); virtual;
+
 
    property count: integer read Fcount write Setcount;       //anzahl zeilen
    property capacity: integer read Fcapacity write Setcapacity;
@@ -2887,6 +2889,11 @@ begin
 end;
 
 procedure tdatalist.setastext(const index: integer; const avalue: msestring);
+begin
+ //dummy
+end;
+
+procedure tdatalist.setitemselected(const row: integer; const value: boolean);
 begin
  //dummy
 end;

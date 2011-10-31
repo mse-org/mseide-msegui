@@ -752,7 +752,8 @@ type
    property levelstep;
  end;
 
- treeitemeditoptionty = (teo_treecolnavig,teo_treerownavig,teo_keyrowmoving,teo_enteronimageclick);
+ treeitemeditoptionty = (teo_treecolnavig,teo_treerownavig,teo_keyrowmoving,
+                         teo_enteronimageclick);
  treeitemeditoptionsty = set of treeitemeditoptionty;
 
  checkmoveeventty = procedure(const curindex,newindex: integer; var accept: boolean) of object;
@@ -2465,7 +2466,16 @@ procedure titemedit.updateitemvalues(const index: integer; const count: integer)
 var
  int1,int2: integer;
  po1: plistitem;
+ po2: plistitematy;
+ col1: tdatacol;
 begin
+ if (no_cellitemselect in fitemlist.options) and (fgridintf <> nil) then begin
+  col1:= fgridintf.getcol;
+  po2:= fitemlist.datapo;
+  for int1:= index to index + count - 1 do begin
+   col1.selected[int1]:= ns_selected in tlistitem1(po2^[int1]).fstate;
+  end;
+ end;
  if canevent(tmethod(fonupdaterowvalues)) then begin
   if index >= 0 then begin
    if count > 1 then begin
