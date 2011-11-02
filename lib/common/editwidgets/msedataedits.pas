@@ -563,6 +563,8 @@ type
   private
    fhistorymaxcount: integer;
    procedure sethistorymaxcount(const avalue: integer);
+   function gethistory: msestringarty;
+   procedure sethistory(const avalue: msestringarty);
   protected
    procedure checkmaxcount;
   public
@@ -570,6 +572,7 @@ type
    procedure readstate(const reader: tstatreader);
    procedure writestate(const writer: tstatwriter);
    procedure savehistoryvalue(const avalue: msestring);
+   property history: msestringarty read gethistory write sethistory;
   published
    property dropdownrowcount; //first
    property historymaxcount: integer read fhistorymaxcount
@@ -3572,6 +3575,16 @@ end;
 procedure thistorycontroller.writestate(const writer: tstatwriter);
 begin
  writer.writedatalist('history',valuelist);
+end;
+
+function thistorycontroller.gethistory: msestringarty;
+begin
+ result:= valuelist.asarray;
+end;
+
+procedure thistorycontroller.sethistory(const avalue: msestringarty);
+begin
+ valuelist.asarray:= copy(avalue,0,fhistorymaxcount);
 end;
 
 { tcustomhistoryedit }

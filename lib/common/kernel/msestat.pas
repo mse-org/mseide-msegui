@@ -9,7 +9,7 @@
 }
 unit msestat;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 
 interface
 uses
@@ -175,6 +175,7 @@ type
  tstatwriter = class(tstatfiler)
   protected
    procedure writeval(const name: msestring; const avalue: msestring);
+   procedure writemultilistval(const avalue: msestring);
    procedure writelistval(const avalue: msestring);
   public
    constructor create(const astream: ttextstream;
@@ -663,7 +664,7 @@ begin
         setlength(values,length(values)+16);
        end;
        inc(count);
-       if (length(str1) > 0) and (str1[1] <> ' ') then begin
+       if (length(str1) > 0) and (str1[1] <> ' ') and (str1[1] <> '+') then begin
 //        int1:= msestrscan(str1,msechar('='));
         int1:= findchar(str1,msechar('='));
         if int1 > 0 then begin
@@ -928,20 +929,34 @@ end;
 
 function tstatreader.readlistitem: msestring;
 var
- int1: integer;
+ int1,int2: integer;
+ po1: pmsecharaty;
+label
+ lab1;
 begin
  inc(factitem);
  result:= '';
+lab1:
  if factitem < factsection^.count then begin
-  result:= factsection^.values[factitem];
-  if result <> '' then begin
-   for int1:= 1 to flistlevel + 1 do begin
-    if result[int1] <> ' ' then begin
+  po1:= pointer(factsection^.values[factitem]);
+  if po1 <> nil then begin
+   for int1:= 0 to flistlevel do begin
+    if (po1^[int1] <> ' ') and (po1^[int1] <> '+') then begin
      exit;
     end;
    end;
+   int2:= length(result);
+   int1:= length(msestring(pointer(po1)))-flistlevel-1;
+   setlength(result,int2+int1);
+   move(po1^[flistlevel+1],pmsecharaty(pointer(result))^[int2],
+                                                     int1*sizeof(msechar));
+   if po1^[flistlevel] = '+' then begin
+    result:= result+lineend;
+    inc(factitem);
+    goto lab1;
+   end;
   end;
-  result:= copy(result,flistlevel+2,bigint);
+//  result:= copy(po1,flistlevel+1,bigint);
  end;
 end;
 
@@ -1480,8 +1495,32 @@ begin
  end;
 end;
 
-procedure tstatwriter.writelistval(const avalue: msestring);
+procedure tstatwriter.writemultilistval(const avalue: msestring);
+var
+ ar1: msestringarty;
+ int1: integer;
 begin
+ ar1:= breaklines(avalue);
+ for int1:= 0 to high(ar1)-1 do begin
+  fstream.writeln(charstring(msechar(' '),flistlevel)+'+'+ar1[int1]);
+ end;
+ fstream.writeln(charstring(msechar(' '),flistlevel+1)+ar1[high(ar1)]);
+end;
+
+procedure tstatwriter.writelistval(const avalue: msestring);
+var
+ po1: pmsechar;
+begin
+ po1:= pointer(avalue);
+ if po1 <> nil then begin
+  while (po1^ <> c_linefeed) and (po1^ <> #0) do begin
+   inc(po1);
+  end;
+  if po1^ <> #0 then begin
+   writemultilistval(avalue);
+   exit;
+  end;
+ end;
  fstream.writeln(charstring(msechar(' '),flistlevel+1)+avalue)
 end;
 
