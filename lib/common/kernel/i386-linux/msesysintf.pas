@@ -287,6 +287,24 @@ begin
  result:= t1.tv_sec * 1000 + t1.tv_usec div 1000;
 end;
 
+var
+ lastlocaltime: integer;
+ gmtoff: real;
+
+function sys_localtimeoffset: tdatetime;
+var
+ tm: tunixtime;
+ int1: integer;
+begin
+ int1:= __time(nil);
+ if int1 <> lastlocaltime then begin
+  lastlocaltime:= int1;
+  localtime_r(@int1,@tm);
+  gmtoff:= tm.__tm_gmtoff / (24.0*60.0*60.0);
+ end;
+ result:= gmtoff;
+end;
+
 function sys_getutctime: tdatetime;
 var
  ti: timeval;
@@ -295,7 +313,22 @@ begin
  result:= ti.tv_sec / (double(24.0)*60.0*60.0) + 
           ti.tv_usec / (double(24.0)*60.0*60.0*1e6) - unidatetimeoffset;
 end;
- 
+
+function sys_getlocaltime: tdatetime;
+var
+ ti: timeval;
+begin
+ gettimeofday(@ti,nil);
+ result:= ti.tv_sec / (double(24.0)*60.0*60.0) + 
+          ti.tv_usec / (double(24.0)*60.0*60.0*1e6) - unidatetimeoffset;
+ if ti.tv_sec = lastlocaltime then begin
+  result:= result + gmtoff;
+ end
+ else begin
+  result:= result + sys_localtimeoffset;
+ end;
+end;
+
 function sys_tosysfilepath(var path: msestring): syserrorty;
 begin
  result:= sye_ok;
@@ -903,24 +936,6 @@ begin
   stattofileinfo(statbuffer,info);
   splitfilepath(filepath(path),str1,info.name);
  end;
-end;
-
-var
- lastlocaltime: integer;
- gmtoff: real;
-
-function sys_localtimeoffset: tdatetime;
-var
- tm: tunixtime;
- int1: integer;
-begin
- int1:= __time(nil);
- if int1 <> lastlocaltime then begin
-  lastlocaltime:= int1;
-  localtime_r(@int1,@tm);
-  gmtoff:= tm.__tm_gmtoff / (24.0*60.0*60.0);
- end;
- result:= gmtoff;
 end;
 
 function sys_getlangname: string;

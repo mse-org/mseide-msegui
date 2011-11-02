@@ -722,6 +722,14 @@ begin
  result:= -int1 / (24*60.0);
 end;
 
+function sys_getlocaltime: tdatetime;
+var
+ ti1: tsystemtime;
+begin
+ localtime(ti1);
+ result:= systemtimetodatetime(ti1);
+end; 
+
 (*
 function sys_localtimeoffset: tdatetime;
 var

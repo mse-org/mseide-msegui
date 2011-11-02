@@ -101,6 +101,7 @@ procedure sys_usleep(const us: longword);
 procedure sys_schedyield;
 
 function sys_getutctime: tdatetime;
+function sys_getlocaltime: tdatetime;
 function sys_localtimeoffset: tdatetime;
 function sys_getlangname: string;
 function sys_getprintcommand: string;
