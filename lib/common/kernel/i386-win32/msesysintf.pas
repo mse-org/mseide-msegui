@@ -702,6 +702,10 @@ begin
  result:= filetimetotime(ft1);
 end;
  
+var
+ lastlocaltime: integer;
+ gmtoff: real;
+
 function sys_localtimeoffset: tdatetime;
 var                                  
  tinfo: time_zone_information;
@@ -724,12 +728,28 @@ end;
 
 function sys_getlocaltime: tdatetime;
 var
+ ft1: tfiletime;
+ lint1: int64;
+ lwo1: longword;
+begin
+ getsystemtimeasfiletime(ft1);
+ lint1:= (int64(ft1.dwhighdatetime) shl 32) + ft1.dwlowdatetime;
+ lwo1:= lint1 div 100000000; //seconds
+ if lwo1 <> lastlocaltime then begin
+  lastlocaltime:= lwo1;
+  gmtoff:= sys_localtimeoffset;
+ end;
+ result:= real(lint1)/(24.0*60.0*60.0*1000000.0*10.0) + filetimeoffset + gmtoff;
+end; 
+{
+function sys_getlocaltime: tdatetime;
+var
  ti1: tsystemtime;
 begin
- localtime(ti1);
+ getlocaltime(ti1);
  result:= systemtimetodatetime(ti1);
 end; 
-
+}
 (*
 function sys_localtimeoffset: tdatetime;
 var
