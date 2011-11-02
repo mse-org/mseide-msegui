@@ -2028,11 +2028,11 @@ type
    function modalwindowbefore: twindow;
    function transientforstackactive: boolean; 
          //true if the window is member of the active transient for stack
-   procedure activate;
+   procedure activate(const force: boolean = false);
    function active: boolean;
    function deactivateintermediate: boolean; 
       //true if ok, sets app.finactivewindow
-   procedure reactivate; //clears app.finactivewindow
+   procedure reactivate(const force: boolean = false); //clears app.finactivewindow
    procedure update;
    function candefocus: boolean;
    procedure nofocus;
@@ -2071,6 +2071,7 @@ type
    function normalwindowrect: rectty;
    property updateregion: regionty read fupdateregion.region;
    function updaterect: rectty;
+   function defaulttransientfor: twindow;
 
    procedure registermovenotification(sender: iobjectlink);
    procedure unregistermovenotification(sender: iobjectlink);
@@ -9705,6 +9706,7 @@ function twidget.internalshow(const modallevel: modallevelty;
              const windowevent,nomodalforreset: boolean): modalresultty;
 var
  bo1: boolean;
+ modaltransientfor: twindow;
 begin
  bo1:= not showing;
  updateroot; //create window
@@ -9725,21 +9727,10 @@ begin
   end;
  end;
  if ownswindow1 then begin
+  modaltransientfor:= nil;
   if (modallevel = ml_application) and (transientfor = nil) then begin
-   if appinst.fmodalwindow = nil then begin
-    if appinst.fwantedactivewindow <> nil then begin
-     transientfor:= appinst.fwantedactivewindow;
-    end
-    else begin
-//     {$ifndef mswindows}  //on win32 winid wil be destroyed on destroying transientfor
-      //todo: no ifndef
-     transientfor:= appinst.factivewindow;
-//     {$endif}
-    end;
-   end
-   else begin
-    transientfor:= appinst.fmodalwindow;
-   end;
+   transientfor:= fwindow.defaulttransientfor;
+   modaltransientfor:= transientfor;
   end;
   if transientfor = window then begin
    transientfor:= nil;
@@ -9770,6 +9761,12 @@ begin
    if window.beginmodal then begin
     result:= mr_windowdestroyed;
     exit;
+   end;
+   if modaltransientfor <> nil then begin
+    window.settransientfor(nil,false);
+//    if application.activewindow = modaltransientfor then begin
+//     modaltransientfor.stackunder(nil);
+//    end;
    end;
   end;
  end
@@ -12556,10 +12553,10 @@ begin
  end;
 end;
 
-procedure twindow.reactivate; //clears appinst.finactivewindow
+procedure twindow.reactivate(const force: boolean = false); //clears appinst.finactivewindow
 begin
  appinst.finactivewindow:= nil;
- activate;
+ activate(force);
 end;
 
 procedure twindow.hide(windowevent: boolean);
@@ -13534,10 +13531,10 @@ begin
                                              (appinst.fmodalwindow = self);
 end;
 
-procedure twindow.activate;
+procedure twindow.activate(const force: boolean = false);
 begin
- if fowner.visible and not active then begin
-  internalactivate(false);
+ if fowner.visible and (force or not active) then begin
+  internalactivate(false,true);
  end;
 end;
 
@@ -13783,6 +13780,25 @@ end;
 function twindow.updaterect: rectty;
 begin
  result:= fcanvas.regionclipbox(fupdateregion.region);
+end;
+
+function twindow.defaulttransientfor: twindow;
+begin
+ result:= nil;
+ if appinst.fmodalwindow = nil then begin
+  if appinst.fwantedactivewindow <> nil then begin
+   result:= appinst.fwantedactivewindow;
+  end
+  else begin
+   result:= appinst.factivewindow;
+  end;
+ end
+ else begin
+  result:= appinst.fmodalwindow;
+ end;
+ if result = self then begin
+  result:= nil;
+ end;
 end;
 
 procedure twindow.postkeyevent(const akey: keyty; 
