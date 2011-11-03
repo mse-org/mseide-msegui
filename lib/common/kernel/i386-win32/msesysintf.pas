@@ -734,7 +734,7 @@ var
 begin
  getsystemtimeasfiletime(ft1);
  lint1:= (int64(ft1.dwhighdatetime) shl 32) + ft1.dwlowdatetime;
- lwo1:= lint1 div 100000000; //seconds
+ lwo1:= lint1 div 10000000; //seconds
  if lwo1 <> lastlocaltime then begin
   lastlocaltime:= lwo1;
   gmtoff:= sys_localtimeoffset;
@@ -1590,6 +1590,7 @@ var
 // int1: integer;
 
 begin
+ gmtoff:= sys_getlocaltimeoffset;
  po1:= nil; //compiler warning
  libhandle:= loadlibrary('shell32.dll');
  if libhandle <> 0 then begin
