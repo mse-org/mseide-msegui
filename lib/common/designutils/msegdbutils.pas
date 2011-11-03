@@ -1190,7 +1190,7 @@ procedure tgdbmi.initstopinfo(var ainfo: stopinfoty);
 begin
  finalize(ainfo);
  fillchar(ainfo,sizeof(ainfo),0);
- ainfo.time:= now;
+ ainfo.time:= nowlocal;
 end;
 
 procedure tgdbmi.receiveevent(const event: tobjectevent);

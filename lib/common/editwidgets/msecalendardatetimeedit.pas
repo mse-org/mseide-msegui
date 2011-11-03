@@ -57,7 +57,7 @@ type
 
 implementation
 uses
- sysutils,mseformatstr;
+ sysutils,mseformatstr,msesys;
  
 { tcustomcalendardatetimeedit }
 
@@ -142,7 +142,7 @@ begin
   abort;
  end;
  awidget:= tpopupcalendarfo.create(nil,fdropdown);
- dat1:= now;
+ dat1:= nowlocal;
  if trim(mstr1) <> '' then begin
   try
    dat1:= stringtodatetime(mstr1,formatedit);

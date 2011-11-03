@@ -5249,7 +5249,7 @@ end;
 
 constructor tcustomreportpage.create(aowner: tcomponent);
 begin
- fprintstarttime:= now;
+ fprintstarttime:= nowlocal;
  fvisiblepage:= true;
  fdatalink:= treportpagedatalink.create;
  inherited;
@@ -5404,7 +5404,7 @@ begin
  if not (rpps_inited in fstate) then begin
   init;
  end;
- fprintstarttime:= now;
+ fprintstarttime:= nowlocal;
  bo1:= odd(reppagenum);
  if bo1 and (rpo_firsteven in foptions) or not bo1 and 
                          (rpo_firstodd in foptions) then begin
@@ -5961,7 +5961,7 @@ end;
  
 constructor tcustomreport.create(aowner: tcomponent);
 begin
- fprintstarttime:= now;
+ fprintstarttime:= nowlocal;
  fppmm:= defaultrepppmm;
  foptions:= defaultreportoptions;
  with frepdesigninfo do begin
@@ -6362,7 +6362,7 @@ begin
          (tobject(tmethod(fonrenderfinish).data) is tcomponent) then begin
   tcomponent(tmethod(fonrenderfinish).data).freenotification(self);
  end;
- fprintstarttime:= now;
+ fprintstarttime:= nowlocal;
  fprinter:= aprinter;
  fcanvas:= acanvas;
  fstream:= astream;

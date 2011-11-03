@@ -899,7 +899,7 @@ uses
  mseactions,msehash,msegraphutils,
  msestringlisteditor,msedoublestringlisteditor,msestringintlisteditor,
  msereallisteditor,msedoublereallisteditor,msecomptree,
- mseintegerlisteditor,mseact,
+ mseintegerlisteditor,mseact,msesys,
  msecolordialog,msememodialog,
  mseshapes,msestockobjects,msetexteditor,
  msegraphicstream,
@@ -4525,7 +4525,7 @@ begin
  end
  else begin
   if value = ' ' then begin
-   rea1:= now;
+   rea1:= nowlocal;
   end
   else begin
    rea1:= 0;

@@ -1501,7 +1501,7 @@ type
 
  fieldeventty = procedure(const afield: tfield) of object;
  
- fieldlinkoptionty = (flo_onlyifnull,flo_notifunmodifiedinsert);
+ fieldlinkoptionty = (flo_onlyifnull,flo_notifunmodifiedinsert,flo_utc);
  fieldlinkoptionsty = set of fieldlinkoptionty;
   
  tfieldlink = class(tmsecomponent,idbeditinfo)
@@ -1815,7 +1815,8 @@ function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
 implementation
 uses
  rtlconsts,msefileutils,typinfo,dbconst,msearrayutils,mseformatstr,msebits,
- msereal,variants,msedate{,msedbgraphics}{$ifdef unix},cwstring{$endif};
+ msereal,variants,msedate,msesys
+ {,msedbgraphics}{$ifdef unix},cwstring{$endif};
 const
  fieldnamedummy = ';%)(mse';
 var
@@ -8176,7 +8177,12 @@ end;
 
 procedure ttimestampfieldlink.updatedata(const afield: tfield);
 begin
- afield.asdatetime:= now;
+ if flo_utc in foptions then begin
+  afield.asdatetime:= nowutc;
+ end
+ else begin
+  afield.asdatetime:= nowlocal;
+ end;
  inherited;
 end;
 

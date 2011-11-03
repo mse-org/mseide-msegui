@@ -356,7 +356,7 @@ const
 implementation
 
 uses
- sysconst,msedate,msereal,Math,msefloattostr,msearrayutils;
+ sysconst,msedate,msereal,Math,msefloattostr,msearrayutils,msesys;
  
 {$ifndef FPC}
 function trystrtoqword(const s: string; out value: qword): boolean;
@@ -1373,7 +1373,7 @@ var
  timesep: msechar;
 begin
  if avalue = ' ' then begin
-  result:= frac(now);
+  result:= frac(nowlocal);
  end
  else begin
   if avalue = '' then begin
@@ -1460,7 +1460,7 @@ var
  datsep: msechar;
 begin
  if avalue = ' ' then begin
-  result:= now;
+  result:= nowlocal;
  end
  else begin
   if avalue = '' then begin
@@ -1718,7 +1718,7 @@ begin
   defaultdateorder[1]:= dttg_mon;
   defaultdateorder[2]:= dttg_day;
 
-  refdate:= now;
+  refdate:= nowlocal;
   if aformat = '' then begin
    mstr1:= 'c';
   end
