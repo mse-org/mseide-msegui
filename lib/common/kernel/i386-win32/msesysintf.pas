@@ -1590,7 +1590,7 @@ var
 // int1: integer;
 
 begin
- gmtoff:= sys_getlocaltimeoffset;
+ gmtoff:= sys_localtimeoffset;
  po1:= nil; //compiler warning
  libhandle:= loadlibrary('shell32.dll');
  if libhandle <> 0 then begin
