@@ -1042,7 +1042,9 @@ var
  bo1: boolean;
  opt1: optionseditty;
  locating1: boolean;
- shiftstate1: shiftstatesty;
+ shiftstate1,shiftstate2: shiftstatesty;
+ int1: integer;
+ ismultilinectrl: boolean;
 
 begin
  with kinfo do begin
@@ -1110,7 +1112,9 @@ begin
   if finished then begin
    exit;
   end;
-  if shiftstate1 <> [ss_ctrl] then begin
+  ismultilinectrl:= (oe1_multiline in foptionsedit1) and 
+                                    ((key = key_end) or (key = key_home));
+  if (shiftstate1 <> [ss_ctrl]) or ismultilinectrl then begin
    finished:= true;
    bo1:= true;
    if (key = key_return) {or (key = key_enter)} then  begin
@@ -1221,26 +1225,44 @@ begin
    end;
    if not finished then begin
     finished:= true;
-    if (shiftstate1 = []) or (shiftstate1 = [ss_shift]) then begin
+    shiftstate2:= shiftstate1;
+    if ismultilinectrl then begin
+     exclude(shiftstate2,ss_ctrl);
+    end;
+    if (shiftstate2 = []) or (shiftstate2 = [ss_shift]) then begin
      case key of
       key_tab,key_backtab,key_escape,key_backspace,key_delete: begin //nochars
        finished:= false;
        nochars:= true;
       end;
       key_home: begin
-       if locating1 and (shiftstate1 = []) then begin
+       if locating1 and (shiftstate2 = []) then begin
         filtertext:= '';
        end
        else begin
-        moveindex(0,shiftstate1 = [ss_shift]);
+        if not (oe1_multiline in foptionsedit1) or 
+                                 (ss_ctrl in shiftstate1) then begin
+         moveindex(0,ss_shift in shiftstate1);
+        end
+        else begin
+         int1:= mousepostotextindex(mp(-bigint,fcaretpos.y));
+         moveindex(int1,ss_shift in shiftstate1);
+        end;
        end;
       end;
       key_end: begin
-       if locating1 and (shiftstate1 = []) then begin
+       if locating1 and (shiftstate2 = []) then begin
         filtertext:= finfo.text.text;
        end
        else begin
-        moveindex(length(finfo.text.text),shiftstate1 = [ss_shift]);
+        if not (oe1_multiline in foptionsedit1) or 
+                                 (ss_ctrl in shiftstate1) then begin
+         moveindex(length(finfo.text.text),ss_shift in shiftstate1);
+        end
+        else begin
+         int1:= mousepostotextindex(mp(bigint,fcaretpos.y));
+         moveindex(int1,ss_shift in shiftstate1);
+        end;
        end;
       end;
       key_left: begin

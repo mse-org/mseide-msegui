@@ -56,7 +56,7 @@ type
                     oe_savevalue,oe_savestate,oe_saveoptions
                     );
  optionseditty = set of optioneditty;
- optionedit1ty = (oe1_noselectall);
+ optionedit1ty = (oe1_noselectall,oe1_multiline);
  optionsedit1ty = set of optionedit1ty;
 
  editactionty = (ea_none,ea_beforechange,ea_textchanged,ea_textedited,
