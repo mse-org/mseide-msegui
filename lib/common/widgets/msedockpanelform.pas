@@ -344,7 +344,9 @@ end;
 
 destructor tdockpanelformmenuitem.destroy;
 begin
- fpanel.fmenuitem:= nil;
+ if fpanel <> nil then begin
+  fpanel.fmenuitem:= nil;
+ end;
  inherited;
 end;
 
@@ -394,9 +396,14 @@ begin
    if fpanellist <> nil then begin
     fpanellist.remove(self);
    end;
-   if (fmenuitem <> nil) and (fmenuitem.owner <> nil) and 
+   if (fmenuitem <> nil) then begin
+    if (fmenuitem.owner <> nil) and 
              not (csdestroying in fmenuitem.owner.componentstate) then begin
-    fmenuitem.parentmenu.submenu.delete(fmenuitem.index);
+     fmenuitem.parentmenu.submenu.delete(fmenuitem.index);
+    end
+    else begin
+     fmenuitem.fpanel:= nil;
+    end;
    end;
   end;
  end;

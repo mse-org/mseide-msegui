@@ -1139,7 +1139,8 @@ end;
 
 procedure tcustomaction.execute;
 begin
- if doactionexecute(self,finfo) then begin
+ if not (csloading in componentstate) and 
+                           doactionexecute(self,finfo) then begin
   changed;
  end;
 end;
