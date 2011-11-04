@@ -2014,6 +2014,8 @@ type
    procedure unlockactivate;
    procedure setzorder(const value: integer);
    function topmodaltransientfor: twindow;
+   function beginmodal(const doshowwidget: twidget): boolean; overload;
+    //true if window destroyed
   public
    constructor create(const aowner: twidget; const agdi: pgdifunctionaty = nil);
                                                  //nil = platform default
@@ -2022,7 +2024,7 @@ type
    procedure registeronscroll(const method: notifyeventty);
    procedure unregisteronscroll(const method: notifyeventty);
    
-   function beginmodal: boolean; //true if window destroyed
+   function beginmodal: boolean; overload;//true if window destroyed
    procedure endmodal;
    function modal: boolean;
    function modalwindowbefore: twindow;
@@ -2768,7 +2770,8 @@ type
    function eventloop(const amodalwindow: twindow; 
                               const once: boolean = false): boolean;
                  //true if actual modalwindow destroyed
-   function beginmodal(const sender: twindow): boolean;
+   function beginmodal(const sender: twindow;
+                               const doshowwidget: twidget): boolean;
                  //true if modalwindow destroyed
    procedure endmodal(const sender: twindow);
    procedure stackunder(const sender: twindow; const predecessor: twindow);
@@ -9707,6 +9710,7 @@ function twidget.internalshow(const modallevel: modallevelty;
 var
  bo1: boolean;
  modaltransientfor: twindow;
+ w1: twidget;
 begin
  bo1:= not showing;
  updateroot; //create window
@@ -9747,26 +9751,26 @@ begin
   if not nomodalforreset then begin
    fwindow.settransientfor(transientfor,windowevent);
   end;
-//  if (transientfor <> nil) and (modallevel = ml_window) then begin
-//   include(fwindow.fstate,tws_modalfor);
-//  end;
-  if bo1 then begin
-   doshow;
-  end;
-  if (modallevel = ml_window) and (fwindow.modalfor) and
-                fwindow.ftransientfor.active then begin
-   fwindow.activate;             
-  end;
   if modallevel = ml_application then begin
-   if window.beginmodal then begin
+   w1:= nil;
+   if bo1 then begin
+    w1:= self;
+   end;
+   if window.beginmodal(w1) then begin
     result:= mr_windowdestroyed;
     exit;
    end;
    if modaltransientfor <> nil then begin
     window.settransientfor(nil,false);
-//    if application.activewindow = modaltransientfor then begin
-//     modaltransientfor.stackunder(nil);
-//    end;
+   end;
+  end
+  else begin
+   if bo1 then begin
+    doshow;
+   end;
+   if (modallevel = ml_window) and (fwindow.modalfor) and
+                 fwindow.ftransientfor.active then begin
+    fwindow.activate;             
    end;
   end;
  end
@@ -12796,7 +12800,7 @@ begin
  end;
 end;
 
-function twindow.beginmodal: boolean; //true if destroyed
+function twindow.beginmodal(const doshowwidget: twidget): boolean;
 var
  pt1: pointty;
  event1: tmouseevent;
@@ -12816,7 +12820,7 @@ begin
   win1:= fmousewinid;
   processleavewindow;
   fmousewinid:= win1;
-  result:= beginmodal(self);
+  result:= beginmodal(self,doshowwidget);
   if (fmodalwindow = nil) then begin
    if fwantedactivewindow <> nil then begin
     if appinst.active and not (aps_cancelloop in appinst.fstate) then begin
@@ -12850,6 +12854,11 @@ begin
    end;
   end;
  end;
+end;
+
+function twindow.beginmodal: boolean; //true if destroyed
+begin
+ result:= beginmodal(nil);
 end;
 
 procedure twindow.endmodal;
@@ -15506,40 +15515,39 @@ begin       //eventloop
 // end;
 end;
 
-function tinternalapplication.beginmodal(const sender: twindow): boolean;
+function tinternalapplication.beginmodal(const sender: twindow;
+                                       const doshowwidget: twidget): boolean;
                  //true if modalwindow destroyed
 var
-// bo1: boolean;
  window1: twindow;
 begin
  window1:= nil;
  if (factivewindow <> nil) and (factivewindow <> sender) then begin
   setlinkedvar(factivewindow,tlinkedobject(window1));
  end;
- with sender do begin
-  if tws_modal in fstate then begin
-   guierror(gue_recursivemodal,self,fowner.name);
-  end;
-  include(fstate,tws_modal);
- end;
- sender.activate;  
- exclude(fstate,aps_cancelloop);
-// bo1:= ismainthread and unlock;
  try
-//  sender.activate;  
-//  inc(fmodallevel);
-  result:= eventloop(sender);
- finally
-//  dec(fmodallevel);
-//  if bo1 then begin
-//   lock;
-//  end;
-  if (window1 <> nil) and not (aps_cancelloop in fstate) then begin
-   if appinst.active then begin
-    window1.activate;
+  with sender do begin
+   if tws_modal in fstate then begin
+    guierror(gue_recursivemodal,self,fowner.name);
    end;
-   setlinkedvar(nil,tlinkedobject(window1));
+   include(fstate,tws_modal);
   end;
+  if doshowwidget <> nil then begin
+   doshowwidget.doshow;
+  end;
+  sender.activate;  
+  exclude(fstate,aps_cancelloop);
+  try
+   result:= eventloop(sender);
+  finally
+   if (window1 <> nil) and not (aps_cancelloop in fstate) then begin
+    if appinst.active then begin
+     window1.activate;
+    end;
+   end;
+  end;
+ finally
+  setlinkedvar(nil,tlinkedobject(window1));
  end;
 end;
 
