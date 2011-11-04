@@ -2440,7 +2440,8 @@ begin
       dec(flayoutupdating);
      end;
     end;
-    updatelayout;
+    internalupdatelayout;
+    //updatelayout;
    end;
   end;
  end;
