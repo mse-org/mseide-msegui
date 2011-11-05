@@ -21,7 +21,7 @@ type
  splitteroptionty = (spo_hmove,spo_hprop,spo_hsizeprop,
                      spo_vmove,spo_vprop,spo_vsizeprop,
                      spo_dockleft,spo_docktop,spo_dockright,spo_dockbottom,
-                     spo_nohshrinkzero,spo_novshrinkzero,
+                     spo_hshrinkzero,spo_vshrinkzero,
                      spo_hrefstart,spo_vrefstart);
  splitteroptionsty = set of splitteroptionty;
 
@@ -831,7 +831,7 @@ var
  size1,size2: sizety;
 begin
  if fupdating = 0 then begin
-  if not (spo_nohshrinkzero in foptions) then begin
+  if spo_hshrinkzero in foptions then begin
    size1.cx:= 0;
   end
   else begin
@@ -840,7 +840,7 @@ begin
     size1.cx:= aclientsize.cx;
    end;
   end;
-  if not(spo_novshrinkzero in foptions) then begin
+  if spo_vshrinkzero in foptions then begin
    size1.cy:= 0;
   end
   else begin
