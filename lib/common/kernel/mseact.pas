@@ -351,7 +351,7 @@ begin
      exit;
     end;
    end;
-   if assigned(info.onbeforeexecute) then begin
+   if checkcanevent(tmethod(info.onbeforeexecute)) then begin
     bo1:= true;
     info.onbeforeexecute(sender,bo1);
     if not bo1 then begin
@@ -367,7 +367,7 @@ begin
      changed:= true;
     end;
    end;
-   if assigned(info.onexecute) then begin
+   if checkcanevent(tmethod(info.onexecute)) then begin
     info.onexecute(sender);
    end;
    if info.action <> nil then begin
@@ -1139,7 +1139,7 @@ end;
 
 procedure tcustomaction.execute;
 begin
- if not (csloading in componentstate) and 
+ if (componentstate*[csloading,csdesigning] = []) and 
                            doactionexecute(self,finfo) then begin
   changed;
  end;

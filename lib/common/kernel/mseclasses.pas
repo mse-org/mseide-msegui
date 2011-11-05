@@ -795,6 +795,8 @@ function isinterface(const actual: ptypeinfo; const wanted: ptypeinfo): boolean;
 function isinterfaceornil(const actual: ptypeinfo; const wanted: ptypeinfo): boolean;
 
 function checkcanevent(const acomponent: tcomponent; const event: tmethod): boolean;
+function checkcanevent(const event: tmethod): boolean; 
+                                      {$ifdef FPC}inline;{$endif}
 
 procedure readstringar(const reader: treader; out ar: stringarty);
 procedure writestringar(const writer: twriter; const ar: stringarty);
@@ -1404,6 +1406,11 @@ function checkcanevent(const acomponent: tcomponent; const event: tmethod): bool
 begin
  result:= (event.code <> nil) and (acomponent <> nil) and (event.data <> nil) and
             (acomponent.componentstate * [csloading,csdesigning,csdestroying] = []);
+end;
+
+function checkcanevent(const event: tmethod): boolean;
+begin
+ result:= (event.code <> nil) and (event.data <> nil);
 end;
 
 procedure writestringar(const writer: twriter; const ar: stringarty);
