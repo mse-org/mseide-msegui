@@ -96,6 +96,7 @@ type
    procedure valuestoclient(const alink: pointer); virtual; 
    procedure clienttovalues(const alink: pointer); virtual;
    procedure change(const alink: iificlient = nil);
+   procedure linkset(const alink: iificlient); virtual;
    
    function setmsestringval(const alink: iificlient; const aname: string;
                                  const avalue: msestring): boolean;
@@ -197,6 +198,7 @@ type
   protected
    procedure valuestoclient(const alink: pointer); override;
    procedure execute(const sender: iificlient); overload; override;
+   procedure linkset(const alink: iificlient); override;
   public
    function canconnect(const acomponent: tcomponent): boolean; override;
    procedure execute; overload;
@@ -249,6 +251,7 @@ type
   protected
    fdatalist: tdatalist;
    procedure updateoptionsedit(var avalue: optionseditty); override;
+   procedure linkset(const alink: iificlient); override;
     //iifidatasourceclient
    procedure bindingchanged;
    function ifigriddata: tdatalist;
@@ -1141,7 +1144,8 @@ begin
    iifidatalink(alink).updateifigriddata(alinkcomp,
         tifivaluelinkcomp(alinkcomp).controller.fdatalist);
   end;
-  dest.fcontroller.change(alink);
+  dest.fcontroller.linkset(alink);
+//  dest.fcontroller.change(alink);
  end;
 end;
 
@@ -1353,6 +1357,11 @@ begin
    exclude(fstate,ivs_valuesetting);
   end;
  end;
+end;
+
+procedure tcustomificlientcontroller.linkset(const alink: iificlient);
+begin
+ change(alink);
 end;
 
 procedure tcustomificlientcontroller.finalizelink(const alink: pointer);
@@ -2355,6 +2364,13 @@ begin
  end;
 end;
 
+procedure tvalueclientcontroller.linkset(const alink: iificlient);
+begin
+ if not (vco_nosync in foptionsvalue) then begin
+  inherited;
+ end;
+end;
+
 { tstringclientcontroller }
 
 constructor tstringclientcontroller.create(const aowner: tmsecomponent);
@@ -3172,6 +3188,11 @@ end;
 procedure texecclientcontroller.execute;
 begin
  execute(nil);
+end;
+
+procedure texecclientcontroller.linkset(const alink: iificlient);
+begin
+ //do nothing
 end;
 
 { tifigridlinkcomp }
