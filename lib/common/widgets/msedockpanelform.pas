@@ -411,6 +411,8 @@ begin
 end;
 
 procedure tdockpanelform.updatecaption(acaption: msestring);
+var
+ menucapt: msestring;
 begin
  if acaption = '' then begin
   if fcontroller <> nil then begin
@@ -418,19 +420,20 @@ begin
   end;
  end;
  if fmenuitem <> nil then begin
+  menucapt:= acaption;
   with fmenuitem do begin
    onexecute:= {$ifdef FPC}@{$endif}showexecute;
    if fnameindex < 9 then begin
     shortcut:= (ord(key_f1) or key_modctrl) + fnameindex;
-    if acaption <> '' then begin
-     acaption:= acaption + ' ';
+    if menucapt <> '' then begin
+     menucapt:= acaption + ' ';
     end;
-    acaption:= acaption + '&' + inttostr(fnameindex+1);
+    menucapt:= menucapt + '&' + inttostr(fnameindex+1);
    end
    else begin
     shortcut:= 0;
    end;
-   caption:= acaption;
+   caption:= menucapt;
    if (fcontroller <> nil) and 
                   fcontroller.canevent(tmethod(fcontroller.fonupdatemenu)) then begin
     fcontroller.fonupdatemenu(fcontroller,self,fmenuitem);
