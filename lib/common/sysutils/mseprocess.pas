@@ -13,6 +13,8 @@ interface
 uses
  classes,mseclasses,msepipestream,msestrings,msestatfile,msestat,msesystypes,
  mseevent,msetypes,mseprocmonitor;
+const 
+ defaultpipewaitus = 0;
 type
  processstatety = (prs_listening);
  processstatesty = set of processstatety;
@@ -41,6 +43,7 @@ type
    fexitcode: integer;
    fcommandline: string;
    fcommandline1: string;
+   fpipewaitus: integer;
    procedure setoutput(const avalue: tpipereaderpers);
    procedure seterroroutput(const avalue: tpipereaderpers);
    function getactive: boolean;
@@ -90,6 +93,8 @@ type
    property parameter: msestring read fparameter write fparameter;
    property active: boolean read getactive write setactive default false;
    property options: processoptionsty read foptions write setoptions default [];
+   property pipewaitus: integer read fpipewaitus write fpipewaitus 
+                                                 default defaultpipewaitus;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
    property output: tpipereaderpers read foutput write setoutput;
@@ -109,7 +114,8 @@ function getprocessoutput(const acommandline: string; const todata: string;
 
 implementation
 uses
- mseprocutils,msefileutils,mseapplication,sysutils,msesysintf,msebits,msesys;
+ mseprocutils,msefileutils,mseapplication,sysutils,msesysintf,msebits,msesys,
+ msesysutils;
 type
  tstringprocess = class(tmseprocess)
   private
@@ -186,6 +192,7 @@ begin
  finput:= tpipewriter.create;
  foutput:= tpipereaderpers.create;
  ferroroutput:= tpipereaderpers.create;
+ fpipewaitus:= defaultpipewaitus;
  inherited;
 end;
 
@@ -434,6 +441,7 @@ end;
 procedure tmseprocess.waitforpipeeof;
 var
  int1,int2,int3: integer;
+ lwo1: longword;
 begin
  if not (pro_nowaitforpipeeof in foptions) then begin
   int1:= application.unlockall;
@@ -441,8 +449,11 @@ begin
   int3:= ferroroutput.pipereader.overloadsleepus;
   foutput.pipereader.overloadsleepus:= 0;
   ferroroutput.pipereader.overloadsleepus:= 0;
-  while not (foutput.pipereader.eof and ferroroutput.pipereader.eof) do begin
-   sleep(100); //wait for last chars
+  lwo1:= timestep(fpipewaitus);
+  sleepus(0); //shed_yield
+  while not (foutput.pipereader.eof and ferroroutput.pipereader.eof) and 
+                  ((fpipewaitus = 0) or not timeout(lwo1)) do begin
+   sleepus(10000); //wait for last chars
   end;
   application.relockall(int1);
   foutput.pipereader.overloadsleepus:= int2;

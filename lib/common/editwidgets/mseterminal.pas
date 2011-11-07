@@ -61,6 +61,8 @@ type
    procedure setmaxcommandhistory(const avalue: integer);
    function getcommand: msestring;
    procedure setcommand(const avalue: msestring);
+   function getpipewiatus: integer;
+   procedure setpipewaitus(const avalue: integer);
   protected
    fprocess: tmseprocess;
    procedure doinputavailable(const sender: tpipereader);
@@ -134,6 +136,8 @@ type
                           default defaultterminaloptions;
    property optionsprocess: processoptionsty read getoptionsprocess 
                             write setoptionsprocess default defaultoptionsprocess;
+   property pipewaitus: integer read getpipewiatus write setpipewaitus
+                                   default defaultpipewaitus;
  end;
 
 implementation
@@ -590,6 +594,16 @@ begin
  if length(fcommandhistory) > avalue then begin
   setlength(fcommandhistory,avalue);
  end;
+end;
+
+function tterminal.getpipewiatus: integer;
+begin
+ result:= fprocess.pipewaitus;
+end;
+
+procedure tterminal.setpipewaitus(const avalue: integer);
+begin
+ fprocess.pipewaitus:= avalue;
 end;
 
 end.
