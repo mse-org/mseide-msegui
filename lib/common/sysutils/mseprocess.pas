@@ -25,7 +25,11 @@ type
                     pro_ctrlc //for tterminal
                     );
  processoptionsty = set of processoptionty;
-  
+const
+ defaultgetprocessoutputoptions = [pro_inactive];
+ defaultgetprocessoutputoptionserrorouttoout = [pro_inactive,pro_errorouttoout];
+ 
+type   
  tmseprocess = class(tmsecomponent,istatfile,iprocmonitor)
   private
    finput: tpipewriter;
@@ -104,12 +108,15 @@ type
 
 function getprocessoutput(const acommandline: string; const todata: string;
                          out fromdata: string; out errordata: string;
-                         const atimeout: integer = -1): integer; overload;
+                         const atimeout: integer = -1;
+                         const aoptions: processoptionsty = 
+                            defaultgetprocessoutputoptions): integer; overload;
                          //returns program exitcode, -1 in case of error
 function getprocessoutput(const acommandline: string; const todata: string;
                          out fromdata: string;
                          const atimeout: integer = -1;
-                         const errorouttoout: boolean = true): integer; overload;
+                    const aoptions: processoptionsty = 
+              defaultgetprocessoutputoptionserrorouttoout): integer; overload;
                          //returns program exitcode, -1 in case of error
 
 implementation
@@ -129,7 +136,7 @@ type
  
 function getprocessoutput1(const acommandline: string; const todata: string;
                out fromdata: string; out errordata: string;
-               const atimeout: integer; const errorouttoout: boolean): integer;
+               const atimeout: integer; const aoptions: processoptionsty): integer;
                          //returns program exitcode, -1 in case of error
 var
  proc1: tstringprocess;
@@ -139,9 +146,7 @@ begin
  try
   with proc1 do begin
    commandline:= acommandline;
-   if errorouttoout then begin
-    options:= options + [pro_errorouttoout];
-   end;    
+   options:= aoptions + [pro_output,pro_erroroutput,pro_input];
    active:= true;
    if todata <> '' then begin
     try
@@ -167,21 +172,24 @@ end;
 
 function getprocessoutput(const acommandline: string; const todata: string;
                          out fromdata: string; out errordata: string;
-                         const atimeout: integer = -1): integer;
+                         const atimeout: integer = -1;
+                          const aoptions: processoptionsty = 
+                            defaultgetprocessoutputoptions): integer;
 begin
  result:= getprocessoutput1(acommandline,todata,fromdata,errordata,
-                                                          atimeout,false);
+                                                          atimeout,aoptions);
 end;
  
 function getprocessoutput(const acommandline: string; const todata: string;
                          out fromdata: string;
                          const atimeout: integer = -1;
-                         const errorouttoout: boolean = true): integer;
+                         const aoptions: processoptionsty = 
+                      defaultgetprocessoutputoptionserrorouttoout): integer;
 var
  str1: string;
 begin
  result:= getprocessoutput1(acommandline,todata,fromdata,str1,
-                                             atimeout,errorouttoout);
+                                             atimeout,aoptions);
 end;
  
 { tmseprocess }

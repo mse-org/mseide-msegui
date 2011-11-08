@@ -426,12 +426,14 @@ begin
   end;
  end;
  if not nostdhandle then begin
-  startupinfo.dwflags:= startf_usestdhandles;
+  startupinfo.dwflags:= startupinfo.dwFlags or startf_usestdhandles;
  end;
  if inactive then begin
   startupinfo.wShowWindow:= sw_hide;
   startupinfo.dwflags:= startupinfo.dwFlags or startf_useshowwindow;
  end;
+// if createprocess(nil,pchar('cmd.exe '+'/c'+commandline),
+//                                            nil,nil,true,0,nil,nil,
  if createprocess(nil,pchar(commandline),nil,nil,true,0,nil,nil,
      startupinfo,processinfo) then begin
   if topipehandles.readdes <> invalidfilehandle then closehandle(topipehandles.readdes);

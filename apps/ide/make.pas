@@ -292,7 +292,7 @@ end;
 
 procedure tprogrunner.runprog(const acommandline: string);
 var
- wdbefore: string;
+ wdbefore: filenamety;
 begin
  fexitcode:= 1; //defaulterror
 // ferrorfinished:= false;
@@ -302,8 +302,8 @@ begin
  procid:= invalidprochandle;
  with projectoptions,o.texp do begin
   if fsetmakedir and (makedir <> '') then begin
-   wdbefore:= getcurrentdir;
-   setcurrentdir(makedir);
+   wdbefore:= msegetcurrentdir;
+   msesetcurrentdir(makedir);
   end;
   try
    procid:= execmse2(acommandline,nil,messagepipe,nil{errorpipe},false,-1,
@@ -320,7 +320,7 @@ begin
    end;
   end;
   if fsetmakedir and (makedir <> '') then begin
-   setcurrentdir(wdbefore);
+   msesetcurrentdir(wdbefore);
   end;
  end;
 end;
@@ -391,7 +391,7 @@ begin
  fstep:= maks_before;
  fmaketag:= atag;
  ftargettimestamp:= getfilemodtime(gettargetfile);
- fcurrentdir:= getcurrentdir;
+ fcurrentdir:= msegetcurrentdir;
  inherited create(nil,true,true);
  if procid <> invalidprochandle then begin
   mainfo.setstattext('Making.',mtk_running);
@@ -462,7 +462,7 @@ end;
 procedure tmaker.doasyncevent(var atag: integer);
  procedure finished;
  begin
-  setcurrentdir(fcurrentdir);
+  msesetcurrentdir(fcurrentdir);
   designnotifications.aftermake(idesigner(designer),fexitcode);
   messagefo.messages.font.options:= messagefo.messages.font.options +
               [foo_antialiased2]{ - [foo_nonantialiased]};

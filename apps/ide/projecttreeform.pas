@@ -393,7 +393,7 @@ begin
   result:= tfilenode(n1).path;
  end
  else begin
-  result:= getcurrentdir;
+  result:= msegetcurrentdir;
  end;
 end;
 
@@ -749,7 +749,7 @@ begin
  beginupdate;
  try
   fhashlist.clear;
-  mstr1:= getcurrentdir;
+  mstr1:= msegetcurrentdir;
   for int1:= 0 to fcount-1 do begin
    scan(tprojectnode(fitems[int1]),mstr1);
   end;
@@ -1429,7 +1429,7 @@ begin
   end;
  end;
  if result = '' then begin
-  result:= getcurrentdir;
+  result:= msegetcurrentdir;
  end;
 end;
 

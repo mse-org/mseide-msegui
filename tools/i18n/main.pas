@@ -836,7 +836,7 @@ begin
  setlength(macroar,2);
  macroar[0].name:= 'LIBFILE';
  macroar[1].name:= 'LIBFILEBASE';
- dirbefore:= getcurrentdir;
+ dirbefore:= msegetcurrentdir;
  error:= false;
  for int1:= 0 to projectfo.grid2.rowcount - 1 do begin
   if error then break;
@@ -926,7 +926,7 @@ begin
      createlanglib(dir[int1]+macroar[0].value,modulenames,resourcenames);
      if makeon.value then begin
       try
-       msefileutils.setcurrentdir(dir[int1]);
+       msesetcurrentdir(dir[int1]);
        mstr1:= expandmacros(commandstring,macroar);
        int3:= messagesfo.messages.execprog(mstr1);
        if int3 = invalidprochandle then begin
@@ -949,7 +949,7 @@ begin
         end;
        end;
       finally
-       setcurrentdir(dirbefore);
+       msesetcurrentdir(dirbefore);
       end;
      end;
     end;
@@ -1018,7 +1018,7 @@ begin
  projectfo.projectstat.filename:= mstr1;
  if mstr1 <> '' then begin
   try
-   msefileutils.setcurrentdir(filedir(mstr1));
+   msesetcurrentdir(filedir(mstr1));
   except
    application.handleexception(nil);
   end;

@@ -597,7 +597,7 @@ begin
     history^:= filename.dropdown.valuelist.asarray;
    end;
    if fdo_chdir in aoptions then begin
-    msefileutils.setcurrentdir(listview.directory);
+    msesetcurrentdir(listview.directory);
    end;
   end;
  end;
@@ -1430,7 +1430,7 @@ begin
  fcolwidth:= reader.readinteger('filecolwidth',fcolwidth);
  if fdo_chdir in foptions then begin
   try
-   setcurrentdir(flastdir);
+   msesetcurrentdir(flastdir);
   except
   end;
  end;
@@ -1527,7 +1527,7 @@ begin
    end;
   end;
   if fdo_relative in foptions then begin
-   fo.listview.directory:= getcurrentdir;
+   fo.listview.directory:= msegetcurrentdir;
   end
   else begin
    fo.listview.directory:= flastdir;
@@ -1549,7 +1549,7 @@ begin
  {$ifdef FPC} {$checkpointer default} {$endif}
   if result = mr_ok then begin
    if fdo_relative in foptions then begin
-    flastdir:= getcurrentdir;
+    flastdir:= msegetcurrentdir;
    end
    else begin
     flastdir:= fo.dir.value;
@@ -1716,7 +1716,7 @@ begin
   end;
  end;
  if fdo_relative in foptions then begin
-  flastdir:= getcurrentdir;
+  flastdir:= msegetcurrentdir;
   for int1:= 0 to high(ffilenames) do begin
    ffilenames[int1]:= relativepath(filenames[int1],'',akind);
   end;
