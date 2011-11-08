@@ -3432,7 +3432,7 @@ begin
 //        int2:= fgrid.fdatarowheight;
 //       end;
 //       heightextend:= int2 - rect.cy;
-       heightextend:= rowstatelist.internalheight(row1) - rect.cy;
+       heightextend:= rowstatelist.internalheight(row1) - fgrid.fdatarowheight;//rect.cy;
        int2:= rowstatelist.linewidth[row1];
        if int2 > 0 then begin
         heightextend:= heightextend - int2 + fgrid.fdatarowlinewidth;
