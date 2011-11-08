@@ -30,6 +30,7 @@ const
  defaultdirrights = [s_irusr,s_iwusr,s_ixusr,s_irgrp,s_iwgrp,
                      s_ixgrp,s_iroth,s_iwoth,s_ixoth];
 type
+   {$warnings off}
  tmsefilestream = class(thandlestream)
   private
    ffilename: filenamety;
@@ -40,6 +41,11 @@ type
    fmemorystream: tmemorystream;
    procedure sethandle(value: integer); virtual;
    procedure closehandle(const ahandle: integer); virtual;
+   constructor internalcreate(const afilename: filenamety; 
+                      const openmode: fileopenmodety;
+                      const accessmode: fileaccessmodesty;
+                      const rights: filerightsty;
+                      out error: syserrorty); overload;
   public
    constructor create(const afilename: filenamety; 
                       const openmode: fileopenmodety = fm_read;
@@ -50,6 +56,10 @@ type
    constructor createtempfile(const prefix: filenamety; out afilename: filenamety);
    constructor create(ahandle: integer); overload; virtual; //allways called
    constructor create; overload; //tmemorystream
+   class function trycreate(const afilename: filenamety; 
+             const openmode: fileopenmodety = fm_read;
+             const accessmode: fileaccessmodesty = [];
+             const rights: filerightsty = defaultfilerights): tmsefilestream;
    destructor destroy; override;
    function read(var buffer; count: longint): longint; override;
    function write(const buffer; count: longint): longint; override;
@@ -68,6 +78,7 @@ type
    procedure clear; virtual;        //only for memorystream
    property memory: pointer read getmemory;     //only for memorystream
  end;
+   {$warnings on}
 
 const
  defaultbuflen = 2048;
@@ -325,7 +336,11 @@ function decoderecord(const value: msestring;
 function readstreamdatastring(const astream: tstream): string; 
                //reads from current pos to eof               
 function readfiledatastring(const afilename: filenamety): string;
+function tryreadfiledatastring(const afilename: filenamety;
+                                    out adata: string): boolean;
 procedure writefiledatastring(const afilename: filenamety; const adata: string);
+function trywritefiledatastring(const afilename: filenamety;
+                                    const adata: string): boolean;
 
 {$ifdef FPC}
 type
@@ -415,6 +430,24 @@ begin
  end;
 end;
 
+function tryreadfiledatastring(const afilename: filenamety;
+                                    out adata: string): boolean;
+var
+ stream1: tmsefilestream;
+begin
+ adata:= '';
+ stream1:= tmsefilestream.trycreate(afilename);
+ result:= stream1 <> nil;
+ if result then begin
+  try
+   adata:= stream1.readdatastring;
+  except
+   result:= false;
+  end;
+  stream1.free;
+ end;
+end;
+
 procedure writefiledatastring(const afilename: filenamety; const adata: string);
 var
  stream1: tmsefilestream;
@@ -423,6 +456,23 @@ begin
  try
   stream1.writedatastring(adata);
  finally
+  stream1.free;
+ end;
+end;
+
+function trywritefiledatastring(const afilename: filenamety;
+                                    const adata: string): boolean;
+var
+ stream1: tmsefilestream;
+begin
+ stream1:= tmsefilestream.trycreate(afilename,fm_create);
+ result:= stream1 <> nil;
+ if result then begin
+  try
+   stream1.writedatastring(adata);
+  except
+   result:= false;
+  end;
   stream1.free;
  end;
 end;
@@ -782,14 +832,13 @@ begin
  create(invalidfilehandle);
 end;
 
-constructor tmsefilestream.create(const afilename: filenamety;
-            const openmode: fileopenmodety = fm_read;
-            const accessmode: fileaccessmodesty = [];
-            const Rights: filerightsty = defaultfilerights);   //!!!!todo linux lock
+constructor tmsefilestream.internalcreate(const afilename: filenamety; 
+                      const openmode: fileopenmodety;
+                      const accessmode: fileaccessmodesty;
+                      const rights: filerightsty;
+                      out error: syserrorty); overload;
 var
  ahandle: integer;
- error: syserrorty;
- mstr1: msestring;
 begin
  ffilename:= filepath(afilename);
  if openmode = fm_append then begin
@@ -808,6 +857,32 @@ begin
   end;
  end
  else begin
+ end;
+end;
+
+class function tmsefilestream.trycreate(const afilename: filenamety;
+               const openmode: fileopenmodety = fm_read;
+               const accessmode: fileaccessmodesty = [];
+               const rights: filerightsty = defaultfilerights): tmsefilestream;
+var
+ error: syserrorty;
+begin
+ result:= internalcreate(afilename,openmode,accessmode,rights,error);
+ if error <> sye_ok then begin
+  freeandnil(result);
+ end;
+end;
+
+constructor tmsefilestream.create(const afilename: filenamety;
+            const openmode: fileopenmodety = fm_read;
+            const accessmode: fileaccessmodesty = [];
+            const Rights: filerightsty = defaultfilerights);   //!!!!todo linux lock
+var
+ mstr1: msestring;
+ error: syserrorty;
+begin
+ internalcreate(afilename,openmode,accessmode,rights,error);
+ if error <> sye_ok then begin
   mstr1:= ffilename;
   ffilename:= '';
   if openmode in [fm_create,fm_append] then begin
