@@ -460,7 +460,7 @@ begin
   lwo1:= timestep(fpipewaitus);
   sleepus(0); //shed_yield
   while not (foutput.pipereader.eof and ferroroutput.pipereader.eof) and 
-                  ((fpipewaitus = 0) or not timeout(lwo1)) do begin
+                            (fpipewaitus <> 0) and not timeout(lwo1) do begin
    sleepus(10000); //wait for last chars
   end;
   application.relockall(int1);

@@ -167,7 +167,7 @@ end;
 
 function timeout(time: longword): boolean;
 begin
- result:= later(time,timestamp);
+ result:= laterorsame(time,timestamp);
 end;
 
 function later(ref,act: longword): boolean;
