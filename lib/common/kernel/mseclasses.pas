@@ -331,7 +331,7 @@ type
  skinobjectkindty = (sok_component,sok_widget,sok_groupbox,
                      sok_simplebutton,sok_databutton,
                      sok_tabbar,sok_tabpage,sok_toolbar,
-                     sok_edit,sok_dataedit,sok_booleanedit,
+                     sok_edit,sok_dispwidget,sok_dataedit,sok_booleanedit,
                      sok_grid,
                      sok_mainmenu,sok_popupmenu,
                      sok_user); 

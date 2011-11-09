@@ -24,6 +24,11 @@ type
   frameendbu1: tframecomp;
   frameendbu2: tframecomp;
  end;
+ widgetcolorinfoty = record
+  co: colorty;
+  cocaptionframe: colorty;
+ end;
+ pwidgetcolorinfoty = ^widgetcolorinfoty;
  widgetskininfoty = record
   fa: tfacecomp;
   fra: tframecomp;
@@ -105,6 +110,10 @@ type
  mainmenuskininfoty = record
   ma: menuskininfoty;
   pop: menuskininfoty;
+ end;
+ dispwidgetskininfoty = record
+  wi: widgetskininfoty;
+  color: widgetcolorinfoty;
  end;
  dataeditskininfoty = record
   wi: widgetskininfoty;
@@ -328,6 +337,8 @@ type
                                             const ainfo: dataeditskininfoty);
    procedure setwidgetfont(const instance: twidget; const afont: tfont);
    procedure setwidgetcolor(const instance: twidget; const acolor: colorty);
+   function setwidgetcolorcaptionframe(
+                   const awidget: twidget; const acolor: colorty): boolean;
    procedure setscrollbarskin(const instance: tcustomscrollbar; 
                 const ainfo: scrollbarskininfoty);
    procedure setstepbuttonskin(const instance: tcustomstepframe;
@@ -341,7 +352,8 @@ type
    procedure setmainmenuskin(const instance: tcustommainmenu;
          const ainfo: mainmenuskininfoty);
 
-   procedure handlewidget(const ainfo: skininfoty); virtual;
+   procedure handlewidget(const askin: skininfoty;
+                          const acolor: pwidgetcolorinfoty = nil); virtual;
    procedure handlecontainer(const ainfo: skininfoty); virtual;
    procedure handlegroupbox(const ainfo: skininfoty); virtual;
    procedure handlesimplebutton(const ainfo: skininfoty); virtual;
@@ -351,6 +363,7 @@ type
    procedure handletabpage(const ainfo: skininfoty); virtual;
    procedure handletoolbar(const ainfo: skininfoty); virtual;
    procedure handleedit(const ainfo: skininfoty); virtual;
+   procedure handledispwidget(const ainfo: skininfoty); virtual;
    procedure handledataedit(const ainfo: skininfoty); virtual;
    procedure handlebooleanedit(const ainfo: skininfoty); virtual;
    procedure handlemainmenu(const ainfo: skininfoty); virtual;
@@ -407,14 +420,14 @@ type
    fstepbutton: stepbuttonskininfoty;
    fframebutton: framebuttonskininfoty;
    fcontainer: containerskininfoty;
-   fwidget_color: colorty;
-   fwidget_colorcaptionframe: colorty;
+   fwidgetcolor: widgetcolorinfoty;
    ftabbar: tabbarskininfoty;
    ftabpage: tabpageskininfoty;
    ftoolbar_horz: toolbarskininfoty;
    ftoolbar_vert: toolbarskininfoty;
    fpopupmenu: menuskininfoty;
    fmainmenu: mainmenuskininfoty;
+   fdispwidget: dispwidgetskininfoty;
    fdataedit: dataeditskininfoty;
    fbooleanedit: dataeditskininfoty;
    
@@ -456,6 +469,9 @@ type
 
    procedure setstepbutton_face(const avalue: tfacecomp);
    procedure setstepbutton_frame(const avalue: tframecomp);
+
+   procedure setdispwidget_face(const avalue: tfacecomp);
+   procedure setdispwidget_frame(const avalue: tframecomp);
 
    procedure setdataedit_face(const avalue: tfacecomp);
    procedure setdataedit_frame(const avalue: tframecomp);
@@ -519,7 +535,8 @@ type
    procedure setmainmenu_popupitemfaceactive(const avalue: tfacecomp);
    procedure setmainmenu_popupitemframeactive(const avalue: tframecomp);
   protected
-   procedure handlewidget(const ainfo: skininfoty); override;
+   procedure handlewidget(const askin: skininfoty;
+                           const acolor: pwidgetcolorinfoty = nil); override;
    procedure handlecontainer(const ainfo: skininfoty); override;
    procedure handlegroupbox(const ainfo: skininfoty); override;
    procedure handlesimplebutton(const ainfo: skininfoty); override;
@@ -528,6 +545,7 @@ type
    procedure handletabpage(const ainfo: skininfoty); override;
    procedure handletoolbar(const ainfo: skininfoty); override;
    procedure handleedit(const ainfo: skininfoty); override;
+   procedure handledispwidget(const ainfo: skininfoty); override;
    procedure handledataedit(const ainfo: skininfoty); override;
    procedure handlebooleanedit(const ainfo: skininfoty); override;
    procedure handlemainmenu(const ainfo: skininfoty); override;
@@ -567,12 +585,22 @@ type
    property stepbutton_face: tfacecomp read fstepbutton.fa 
                         write setstepbutton_face;
                         
-   property widget_color: colorty read fwidget_color 
-                        write fwidget_color default cl_default;
-   property widget_colorcaptionframe: colorty read fwidget_colorcaptionframe 
-                        write fwidget_colorcaptionframe default cl_default;
+   property widget_color: colorty read fwidgetcolor.co
+                        write fwidgetcolor.co default cl_default;
+   property widget_colorcaptionframe: colorty 
+                        read fwidgetcolor.cocaptionframe 
+                        write fwidgetcolor.cocaptionframe default cl_default;
                         //overrides widget_color for widgets with frame caption
 
+   property dispwidget_color: colorty read fdispwidget.color.co
+                              write fdispwidget.color.co default cl_default;
+   property dispwidget_colorcaptionframe: colorty 
+                         read fdispwidget.color.cocaptionframe 
+                         write fdispwidget.color.cocaptionframe default cl_default;
+   property dispwidget_face: tfacecomp read fdispwidget.wi.fa 
+                                            write setdispwidget_face;
+   property dispwidget_frame: tframecomp read fdispwidget.wi.fra 
+                                            write setdispwidget_frame;
    property dataedit_face: tfacecomp read fdataedit.wi.fa write setdataedit_face;
    property dataedit_frame: tframecomp read fdataedit.wi.fra 
                         write setdataedit_frame;
@@ -1071,12 +1099,12 @@ begin
    case ainfo.objectkind of 
     sok_widget: begin
      handlewidget(ainfo);
-//     if sko_container in ainfo.options then begin
-//      handlecontainer(ainfo);
-//     end;
     end;
     sok_edit: begin
      handleedit(ainfo);
+    end;
+    sok_dispwidget: begin
+     handledispwidget(ainfo);
     end;
     sok_dataedit: begin
      handledataedit(ainfo);
@@ -1137,7 +1165,8 @@ begin
  updateskin1(ainfo,true);
 end;
 }
-procedure tcustomskincontroller.handlewidget(const ainfo: skininfoty);
+procedure tcustomskincontroller.handlewidget(const askin: skininfoty;
+                              const acolor: pwidgetcolorinfoty = nil);
 begin
  //dummy
 end;
@@ -1376,25 +1405,25 @@ end;
 procedure tcustomskincontroller.setwidgetcolor(const instance: twidget;
                const acolor: colorty);
 begin
-{
- if (acolor <> cl_default) and 
-       not (osk_framebuttononly in instance.optionsskin) then begin
-  if removing then begin
-   if instance.color = acolor then begin 
-    instance.color:= cl_default;
-   end;
-  end
-  else begin
-   if instance.color = cl_default then begin 
-    instance.color:= acolor;
-   end;
-  end;
- end;
-}
  if (acolor <> cl_default) and 
        not (osk_framebuttononly in instance.optionsskin) and
            (instance.color = cl_default) then begin 
   instance.color:= acolor;
+ end;
+end;
+
+function tcustomskincontroller.setwidgetcolorcaptionframe(
+                   const awidget: twidget; const acolor: colorty): boolean;
+begin
+ result:= false;
+ with twidget1(awidget) do begin
+  if (osk_colorcaptionframe in optionsskin) or 
+       not (osk_nocolorcaptionframe in optionsskin) and
+         (fframe is tcustomcaptionframe) and 
+       (tcustomcaptionframe(fframe).caption <> '') then begin
+   setwidgetcolor(awidget,acolor);
+   result:= true;
+  end
  end;
 end;
 
@@ -1633,6 +1662,11 @@ begin
  //dummy
 end;
 
+procedure tcustomskincontroller.handledispwidget(const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
 procedure tcustomskincontroller.handledataedit(const ainfo: skininfoty);
 begin
  //dummy
@@ -1779,10 +1813,13 @@ end;
 
 constructor tskincontroller.create(aowner: tcomponent);
 begin
- fwidget_color:= cl_default;
- fwidget_colorcaptionframe:= cl_default;
+ fwidgetcolor.co:= cl_default;
+ fwidgetcolor.cocaptionframe:= cl_default;
  fstepbutton.co:= cl_default;
 
+ fdispwidget.color.co:= cl_default;
+ fdispwidget.color.cocaptionframe:= cl_default;
+ 
  fdataedit.empty_color:= cl_default;
  fdataedit.empty_textcolor:= cl_default;
  fdataedit.empty_textcolorbackground:= cl_default;
@@ -1810,6 +1847,16 @@ destructor tskincontroller.destroy;
 begin
  inherited;
  fbutton.font.free;
+end;
+
+procedure tskincontroller.setdispwidget_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fdispwidget.wi.fa));
+end;
+
+procedure tskincontroller.setdispwidget_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fdispwidget.wi.fra));
 end;
 
 procedure tskincontroller.setdataedit_face(const avalue: tfacecomp);
@@ -2212,12 +2259,28 @@ begin
  setlinkedvar(avalue,tmsecomponent(fmainmenu.pop.itemframeactive));
 end;
 
-procedure tskincontroller.handlewidget(const ainfo: skininfoty);
+procedure tskincontroller.handlewidget(const askin: skininfoty;
+            const acolor: pwidgetcolorinfoty);
 var
  int1: integer;
  wi1: twidget1;
+ co1,co2: colorty;
 begin
- wi1:= twidget1(ainfo.instance);
+ if acolor = nil then begin
+  co1:= fwidgetcolor.co;
+  co2:= fwidgetcolor.cocaptionframe
+ end
+ else begin
+  co1:= acolor^.co;
+  if co1 = cl_default then begin
+   co1:= fwidgetcolor.co;
+  end;
+  co2:= acolor^.cocaptionframe;
+  if co2 = cl_default then begin
+   co2:= fwidgetcolor.cocaptionframe;
+  end;
+ end;
+ wi1:= twidget1(askin.instance);
  with wi1 do begin
   if fframe <> nil then begin
    if fframe is tcustomscrollframe then begin
@@ -2239,14 +2302,8 @@ begin
     end; 
    end; 
   end;
-  if (osk_colorcaptionframe in optionsskin) or 
-       not (osk_nocolorcaptionframe in optionsskin) and
-         (fframe is tcustomcaptionframe) and 
-       (tcustomcaptionframe(fframe).caption <> '') then begin
-   setwidgetcolor(wi1,fwidget_colorcaptionframe);
-  end
-  else begin
-   setwidgetcolor(wi1,fwidget_color);
+  if not setwidgetcolorcaptionframe(wi1,co2) then begin
+   setwidgetcolor(wi1,co1);
   end;
  end;
 end;
@@ -2380,6 +2437,12 @@ end;
 procedure tskincontroller.handleedit(const ainfo: skininfoty);
 begin
  handlewidget(ainfo);
+end;
+
+procedure tskincontroller.handledispwidget(const ainfo: skininfoty);
+begin
+ handlewidget(ainfo,@fdispwidget.color);
+ setwidgetskin(twidget(ainfo.instance),fdispwidget.wi);
 end;
 
 procedure tskincontroller.handledataedit(const ainfo: skininfoty);

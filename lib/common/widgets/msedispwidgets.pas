@@ -19,7 +19,7 @@ unit msedispwidgets;
 interface
 uses
  classes,msegui,mseguiglob,msewidgets,msegraphics,msedrawtext,msegraphutils,
- msemenus,msetypes,msestrings,mseformatstr,mseevent
+ msemenus,msetypes,msestrings,mseformatstr,mseevent,mseclasses
  {$ifdef mse_with_ifi}
   ,mseificomp,mseifiglob,mseificompglob,typinfo,msedatalist
  {$endif};
@@ -144,6 +144,7 @@ type
    procedure showhint(var info: hintinfoty); override;
    procedure enabledchanged; override;
    function verticalfontheightdelta: boolean; override;
+   class function classskininfo: skininfoty; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
@@ -377,6 +378,12 @@ begin
  fwidgetrect.cy:= defaultdispwidgetheight;
  ftextflags:= defaultdisptextflags;
  finfo.flags:= ftextflags;
+end;
+
+class function tdispwidget.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_dispwidget;
 end;
 
 procedure tdispwidget.initnewcomponent(const ascale: real);
