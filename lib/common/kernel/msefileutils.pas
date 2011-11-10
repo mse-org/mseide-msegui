@@ -214,9 +214,9 @@ procedure createdir(const path: filenamety;
 procedure createdirpath(const path: filenamety; 
                                  const rights: filerightsty = defaultdirrights);
 function getcurrentdir: filenamety; deprecated;
-function msegetcurrentdir: filenamety;
+function getcurrentdirmse: filenamety;
 function setcurrentdir(const path: filenamety): filenamety; deprecated;
-function msesetcurrentdir(const path: filenamety): filenamety;
+function setcurrentdirmse(const path: filenamety): filenamety;
 
 procedure clearfileinfo(var info: fileinfoty);
 procedure initdirfileinfo(var info: fileinfoty; const aname: filenamety;
@@ -413,17 +413,17 @@ begin
  end;
 end;
 
-function msegetcurrentdir: filenamety;
+function getcurrentdirmse: filenamety;
 begin
  result:= sys_getcurrentdir;
 end;
 
 function getcurrentdir: filenamety;
 begin
- result:= msegetcurrentdir;
+ result:= getcurrentdirmse;
 end;
 
-function msesetcurrentdir(const path: filenamety): filenamety;
+function setcurrentdirmse(const path: filenamety): filenamety;
 var
  error: syserrorty;
 begin
@@ -436,7 +436,7 @@ end;
 
 function setcurrentdir(const path: filenamety): filenamety;
 begin
- result:= msesetcurrentdir(path);
+ result:= setcurrentdirmse(path);
 end;
 
 function remquote(const path: filenamety): filenamety;

@@ -2080,7 +2080,7 @@ begin
  end
  else begin
   caption:= idecaption+' ('+filename(aname)+')';
-  msesetcurrentdir(filedir(aname));
+  setcurrentdirmse(filedir(aname));
   openfile.controller.filename:= '';
  end;
  dragdock.layoutchanged; //refresh possible dockpanel caption
@@ -2118,7 +2118,7 @@ begin
   closepro;
   if aname <> '' then begin
    try
-    msesetcurrentdir(removelastpathsection(aname));
+    setcurrentdirmse(removelastpathsection(aname));
    except
     application.handleexception(nil,'Can not load Project "'+aname+'": ');
     exit;
@@ -2193,7 +2193,7 @@ begin
    aname:= '';
    if filedialog(aname,[fdo_checkexist],'Select program file',
             ['Program files','All files'],['"*.pas" "*.pp"','*'],'pas') = mr_ok then begin
-    msesetcurrentdir(filedir(aname));
+    setcurrentdirmse(filedir(aname));
     with projectoptions do begin
      with o.t do begin
       mainfile:= filename(aname);
@@ -2208,7 +2208,7 @@ begin
   if filedialog(aname,[fdo_save,fdo_checkexist],'New Project',
            ['Project files','All files'],['*.prj','*'],'prj') = mr_ok then begin
    curdir:= filedir(aname);
-   msesetcurrentdir(curdir);
+   setcurrentdirmse(curdir);
    if not fromprogram then begin
     mstr1:= removefileext(filename(aname));
     with projectoptions,o do begin
@@ -2438,8 +2438,8 @@ begin
     mstr1:= mstr1 + ' ' + progparameters;
    end;
    if progworkingdirectory <> '' then begin
-    pwdbefore:= msegetcurrentdir;
-    msesetcurrentdir(progworkingdirectory);
+//    pwdbefore:= getcurrentdirmse;
+    pwdbefore:= setcurrentdirmse(progworkingdirectory);
    end;
    frunningprocess:= targetconsolefo.terminal.execprog(mstr1);   
    if frunningprocess = invalidprochandle then begin
@@ -2450,7 +2450,7 @@ begin
    try
    finally
     if progworkingdirectory <> '' then begin
-     msesetcurrentdir(pwdbefore);
+     setcurrentdirmse(pwdbefore);
     end;
    end;
   end;

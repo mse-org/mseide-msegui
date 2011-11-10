@@ -302,8 +302,8 @@ begin
  procid:= invalidprochandle;
  with projectoptions,o.texp do begin
   if fsetmakedir and (makedir <> '') then begin
-   wdbefore:= msegetcurrentdir;
-   msesetcurrentdir(makedir);
+//   wdbefore:= getcurrentdirmse;
+   wdbefore:= setcurrentdirmse(makedir);
   end;
   try
    procid:= execmse2(acommandline,nil,messagepipe,nil{errorpipe},false,-1,
@@ -320,7 +320,7 @@ begin
    end;
   end;
   if fsetmakedir and (makedir <> '') then begin
-   msesetcurrentdir(wdbefore);
+   setcurrentdirmse(wdbefore);
   end;
  end;
 end;
@@ -391,7 +391,7 @@ begin
  fstep:= maks_before;
  fmaketag:= atag;
  ftargettimestamp:= getfilemodtime(gettargetfile);
- fcurrentdir:= msegetcurrentdir;
+ fcurrentdir:= getcurrentdirmse;
  inherited create(nil,true,true);
  if procid <> invalidprochandle then begin
   mainfo.setstattext('Making.',mtk_running);
@@ -462,7 +462,7 @@ end;
 procedure tmaker.doasyncevent(var atag: integer);
  procedure finished;
  begin
-  msesetcurrentdir(fcurrentdir);
+  setcurrentdirmse(fcurrentdir);
   designnotifications.aftermake(idesigner(designer),fexitcode);
   messagefo.messages.font.options:= messagefo.messages.font.options +
               [foo_antialiased2]{ - [foo_nonantialiased]};

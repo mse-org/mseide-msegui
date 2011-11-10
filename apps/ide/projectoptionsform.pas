@@ -1132,7 +1132,7 @@ begin
   end;
   with result[1] do begin
    name:= 'PROJECTDIR';
-   value:= tosysfilepath(msegetcurrentdir)+pathdelim;
+   value:= tosysfilepath(getcurrentdirmse)+pathdelim;
   end;
   with result[2] do begin
    name:= 'MAINFILE';
@@ -1897,7 +1897,7 @@ var
 begin
  with statfiler,projectoptions do begin
   if iswriter then begin
-   projectdir:= msegetcurrentdir;
+   projectdir:= getcurrentdirmse;
    with mainfo,mainmenu1.menu.itembyname('view') do begin
     int3:= formmenuitemstart;
     int2:= count - int3;
