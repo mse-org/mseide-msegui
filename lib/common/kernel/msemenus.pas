@@ -163,8 +163,10 @@ type
    fsubmenu: tmenuitems;
    procedure updatecaption;
    procedure defineproperties(filer: tfiler); override;
+   procedure befexec;
+   function doexec: boolean;
 
-   //iactionlink
+    //iactionlink
    function getactioninfopo: pactioninfoty;
    function loading: boolean;
    function shortcutseparator: msechar;
@@ -538,8 +540,9 @@ function tcustommenu.checkexec: boolean;
 begin
  result:= fexecitem <> nil;
  if result then begin
-  doactionexecute(fexecitem,fexecitem.finfo,true,
-         mao_nocandefocus in fexecitem.options);
+  result:= fexecitem.doexec;
+//  result:= doactionexecute(fexecitem,fexecitem.finfo,true,
+//         mao_nocandefocus in fexecitem.options);
  end;
  fexecitem:= nil;
 end;
@@ -1029,7 +1032,7 @@ begin
  end;
 end;
 
-function tmenuitem.internalexecute(async: boolean): boolean;
+procedure tmenuitem.befexec;
 begin
  if [mao_checkbox,mao_radiobutton] * finfo.options <> [] then begin
   if mao_checkbox in finfo.options then begin
@@ -1039,10 +1042,19 @@ begin
    checked:= true;
   end;
  end;
+end;
+
+function tmenuitem.doexec: boolean;
+begin
+ result:= doactionexecute(self,finfo,true,false,@befexec);
+end;
+
+function tmenuitem.internalexecute(async: boolean): boolean;
+begin
  result:= canactivate {and assigned(finfo.onexecute)};
  if result then begin
   if async then begin
-   doactionexecute(self,finfo,true);
+   result:= doexec;
 //   finfo.onexecute(self);
   end
   else begin

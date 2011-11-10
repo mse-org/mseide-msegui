@@ -2357,7 +2357,9 @@ type
                           //nil -> current active window
    property activewindow: twindow read factivewindow;
    property inactivewindow: twindow read finactivewindow;
-   function regularactivewindow: twindow;
+   function normalactivewindow: twindow; 
+        //active window or active window after closing modal stack if defined
+   function regularactivewindow: twindow; //first no transientfor window
    function unreleasedactivewindow: twindow;
    function activewidget: twidget;
    function activerootwidget: twidget;
@@ -13543,7 +13545,7 @@ end;
 procedure twindow.activate(const force: boolean = false);
 begin
  if fowner.visible and (force or not active) then begin
-  internalactivate(false,true);
+  internalactivate(false);
  end;
 end;
 
@@ -16240,6 +16242,14 @@ begin
   id:= awindow.fwindow.id;
  end;
  result:= gui_getworkarea(id);
+end;
+
+function tguiapplication.normalactivewindow: twindow;
+begin
+ result:= fwantedactivewindow;
+ if result = nil then begin
+  result:= factivewindow;
+ end;
 end;
 
 function tguiapplication.regularactivewindow: twindow;

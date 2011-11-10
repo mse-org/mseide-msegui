@@ -914,7 +914,7 @@ begin
  else begin
   int1:= stop-start;
   setlength(result,int1);
-  move(start^,result[1],int1);
+  move(start^,result[1],int1*sizeof(msechar));
  end;
 end;
 

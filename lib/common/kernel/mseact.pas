@@ -299,12 +299,14 @@ procedure actionendload(const sender: iactionlink);
 //                        var keyinfo: keyeventinfoty): boolean; //true if done
 function doactionexecute(const sender: tobject; var info: actioninfoty;
                                const nocheckbox: boolean = false;
-                               const nocandefocus: boolean = false): boolean;
+                               const nocandefocus: boolean = false;
+                               const beforeexecute: proceventty = nil): boolean;
           //true if local checked changed
 function doactionexecute1(const sender: tobject; var info: actioninfoty;
                          out changed: boolean;
                          const nocheckbox: boolean = false;
-                         const nocandefocus: boolean = false): boolean;
+                         const nocandefocus: boolean = false;
+                         const beforeexecute: proceventty = nil): boolean;
           //true if not canceled
 
 procedure initactioninfo(var info: actioninfoty; aoptions: menuactionoptionsty = []);
@@ -336,7 +338,8 @@ end;
 function doactionexecute1(const sender: tobject; var info: actioninfoty;
                          out changed: boolean;
                          const nocheckbox: boolean = false;
-                         const nocandefocus: boolean = false): boolean;
+                         const nocandefocus: boolean = false;
+                         const beforeexecute: proceventty = nil): boolean;
           //true if not canceled
 var
  bo1: boolean;
@@ -367,6 +370,9 @@ begin
      changed:= true;
     end;
    end;
+   if assigned(beforeexecute) then begin
+    beforeexecute;
+   end;
    if checkcanevent(tmethod(info.onexecute)) then begin
     info.onexecute(sender);
    end;
@@ -380,10 +386,11 @@ end;
 
 function doactionexecute(const sender: tobject; var info: actioninfoty;
                          const nocheckbox: boolean = false;
-                         const nocandefocus: boolean = false): boolean;
+                         const nocandefocus: boolean = false;
+                         const beforeexecute: proceventty = nil): boolean;
       //true if local checked changed
 begin
- doactionexecute1(sender,info,result,nocheckbox,nocandefocus);
+ doactionexecute1(sender,info,result,nocheckbox,nocandefocus,beforeexecute);
 end;
 
 procedure actionstatestoshapestates(const source: actioninfoty; var dest: shapestatesty);
