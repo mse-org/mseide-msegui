@@ -48,7 +48,7 @@ type
    fmaxcommandhistory: integer;
    fcommandhistory: msestringarty;
    fhistoryindex: integer;
-   fhistorybackup: msestring;
+//   fhistorybackup: msestring;
    function getinputfd: integer;
    procedure setinoutfd(const Value: integer);
    procedure setoptions(const avalue: terminaloptionsty);
@@ -152,7 +152,7 @@ type
 constructor tterminal.create(aowner: tcomponent);
 begin
  foptions:= defaultterminaloptions;
- fhistoryindex:= -1;
+// fhistoryindex:= -1;
  inherited;
  optionsedit:= defaultterminaleditoptions;
  fprocess:= tmseprocess.create(nil);
@@ -246,18 +246,25 @@ begin
       info.action:= ea_none;
      end;
     end;
-    ea_textedited: begin
-     fhistoryindex:= -1;
-     fhistorybackup:= '';
-    end;
+//    ea_textedited: begin
+//     fhistoryindex:= -1;
+//     fhistorybackup:= '';
+//    end;
     ea_textentered: begin
      if (row = rowhigh) and not (teo_readonly in foptions) then begin
       info.action:= ea_none;
       mstr1:= copy(feditor.text,finputcolindex+1,bigint);
       if (fmaxcommandhistory > 0) and not running then begin
-       insertitem(fcommandhistory,0,mstr1);
-       if length(fcommandhistory) > fmaxcommandhistory then begin
-        setlength(fcommandhistory,fmaxcommandhistory);
+       fhistoryindex:= 0;
+       if((fcommandhistory = nil) or (fcommandhistory[0] <> mstr1))  then begin
+        if (fcommandhistory = nil) then begin
+         setlength(fcommandhistory,1);
+        end;
+        fcommandhistory[0]:= mstr1;
+        insertitem(fcommandhistory,0,'');
+        if length(fcommandhistory) > fmaxcommandhistory then begin
+         setlength(fcommandhistory,fmaxcommandhistory);
+        end;
        end;
       end;
       bo1:= false;
@@ -331,25 +338,23 @@ begin
      if (fmaxcommandhistory > 0) and not running then begin
       include(info.eventstate,es_processed);
       case key of
-       key_up: begin
-        if fhistoryindex < high(fcommandhistory) then begin
-         inc(fhistoryindex);
-         if fhistoryindex = 0 then begin
-          fhistorybackup:= command;
-         end;
-         command:= fcommandhistory[fhistoryindex];
+       key_up,key_down: begin
+        if fcommandhistory = nil then begin
+         setlength(fcommandhistory,1);
+         fhistoryindex:= 0;
         end;
-       end;
-       key_down: begin
-        if fhistoryindex >= 0 then begin
-         dec(fhistoryindex);
-         if fhistoryindex < 0 then begin
-          command:= fhistorybackup;
-         end
-         else begin
-          command:= fcommandhistory[fhistoryindex];
+        fcommandhistory[fhistoryindex]:= command;
+        if key = key_up then begin
+         if fhistoryindex < high(fcommandhistory) then begin
+          inc(fhistoryindex);
+         end;
+        end
+        else begin
+         if fhistoryindex > 0 then begin
+          dec(fhistoryindex);
          end;
         end;
+        command:= fcommandhistory[fhistoryindex];
        end;
        else begin
         exclude(info.eventstate,es_processed);
@@ -593,6 +598,9 @@ begin
  fmaxcommandhistory:= avalue;
  if length(fcommandhistory) > avalue then begin
   setlength(fcommandhistory,avalue);
+ end;
+ if fhistoryindex > high(fcommandhistory) then begin
+  fhistoryindex:= high(fcommandhistory);
  end;
 end;
 
