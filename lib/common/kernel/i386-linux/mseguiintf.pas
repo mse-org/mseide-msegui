@@ -1019,12 +1019,82 @@ begin
                                                 length(value));
 end;
 
+function readatomproperty(id: winidty; name: atom; var value: atomarty): boolean;
+var
+ actualtype: atom;
+ actualformat: cint;
+ nitems: clong;
+ bytesafter: culong;
+ prop: pchar;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ result:= false;
+ if xgetwindowproperty(appdisp,id,name,0,10000,{$ifdef xboolean}false{$else}0{$endif},
+   atomatom,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
+  if (actualtype = atomatom) and (actualformat = 32) then begin
+   setlength(value,nitems);
+   if nitems > 0 then begin
+ {$ifdef FPC} {$checkpointer off} {$endif}
+    move(prop^,value[0],nitems*sizeof(value[0]));
+ {$ifdef FPC} {$checkpointer default} {$endif}
+   end;
+   result:= true;
+  end;
+  xfree(prop);
+ end;
+end;
+
 procedure setatomproperty(id: winidty; prop: atom; value: atom);
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
  xchangeproperty(appdisp,id,prop,atomatom,32,propmodereplace,@value,1);
+end;
+
+procedure setatomarrayitemproperty(id: winidty; prop: atom; value: atom);
+var
+ ar1: atomarty;
+ int1: integer;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ readatomproperty(id,prop,ar1);
+ for int1:= 0 to high(ar1) do begin
+  if ar1[int1] = value then begin
+   exit; //already set
+  end;
+ end;
+ setlength(ar1,high(ar1)+2);
+ ar1[high(ar1)]:= value;
+ xchangeproperty(appdisp,id,prop,atomatom,32,propmodereplace,
+                                                pointer(ar1),length(ar1));
+end;
+
+procedure resetatomarrayitemproperty(id: winidty; prop: atom; value: atom);
+var
+ ar1: atomarty;
+ int1: integer;
+ bo1: boolean;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif}
+ readatomproperty(id,prop,ar1);
+ bo1:= false;
+ for int1:= high(ar1) downto 0 do begin
+  if ar1[int1] = value then begin
+   deleteitem(ar1,int1);
+   bo1:= true;
+  end;
+ end;
+ if bo1 then begin
+  xchangeproperty(appdisp,id,prop,atomatom,32,propmodereplace,pointer(ar1),
+                                                                   length(ar1));
+ end;
 end;
 
 function readcardinalproperty(id: winidty; name: atom; count: longword;
@@ -1104,33 +1174,6 @@ begin
  {$ifdef FPC} {$checkpointer default} {$endif}
    result:= true;
 {$endif}
-  end;
-  xfree(prop);
- end;
-end;
-
-function readatomproperty(id: winidty; name: atom; var value: atomarty): boolean;
-var
- actualtype: atom;
- actualformat: cint;
- nitems: clong;
- bytesafter: culong;
- prop: pchar;
-begin
-{$ifdef mse_debuggdisync}
- checkgdilock;
-{$endif} 
- result:= false;
- if xgetwindowproperty(appdisp,id,name,0,10000,{$ifdef xboolean}false{$else}0{$endif},
-   atomatom,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
-  if (actualtype = atomatom) and (actualformat = 32) then begin
-   setlength(value,nitems);
-   if nitems > 0 then begin
- {$ifdef FPC} {$checkpointer off} {$endif}
-    move(prop^,value[0],nitems*sizeof(value[0]));
- {$ifdef FPC} {$checkpointer default} {$endif}
-   end;
-   result:= true;
   end;
   xfree(prop);
  end;
@@ -3013,6 +3056,32 @@ begin
  end;
 end;
 
+function setnetatomarrayitem(const id: winidty; const aproperty: netatomty;
+                                         const avalue: netatomty): boolean;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ result:= false;
+ if (netatoms[aproperty] <> 0) and (netatoms[avalue] <> 0) then begin
+  setatomarrayitemproperty(id,netatoms[aproperty],netatoms[avalue]);
+  result:= true;
+ end;
+end;
+
+function resetnetatomarrayitem(const id: winidty; const aproperty: netatomty;
+                                         const avalue: netatomty): boolean;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ result:= false;
+ if (netatoms[aproperty] <> 0) and (netatoms[avalue] <> 0) then begin
+  resetatomarrayitemproperty(id,netatoms[aproperty],netatoms[avalue]);
+  result:= true;
+ end;
+end;
+
 function gui_createwindow(const rect: rectty; const options: internalwindowoptionsty;
                                var awindow: windowty): guierrorty;
 var
@@ -3133,18 +3202,19 @@ begin
      //transientforhint not used by overrideredirect
   end;
   if (wo_popup in options.options) then begin
-   setnetatom(id,net_wm_window_type,net_wm_window_type_dropdown_menu);
+   setnetatomarrayitem(id,net_wm_window_type,net_wm_window_type_dropdown_menu);
    gui_raisewindow(id);
   end
   else begin
    if wo_message in options.options then begin
-    setnetatom(id,net_wm_window_type,net_wm_window_type_dialog);
+    setnetatomarrayitem(id,net_wm_window_type,net_wm_window_type_dialog);
    end
    else begin
-    setnetatom(id,net_wm_window_type,net_wm_window_type_normal);
+    setnetatomarrayitem(id,net_wm_window_type,net_wm_window_type_normal);
    end;
    if wo_notaskbar in options.options then begin
-    setnetatom(id,net_wm_state,net_wm_state_skip_taskbar);
+//    changenetwmstate(id,nso_add,net_wm_state_skip_taskbar,net_none);
+    setnetatomarrayitem(id,net_wm_state,net_wm_state_skip_taskbar);
    end;
   end;
  end;
@@ -3813,6 +3883,7 @@ var
  rect1: rectty;
  pt1: pointty;
  aic: xic;
+ window1: twindow;
 
 label
  eventrestart;
@@ -3906,20 +3977,6 @@ begin
    end;
 {$endif}
   end;
-  {
-  if timerevent then begin
-   application.postevent(tevent.create(ek_timer));
-   timerevent:= false;
-  end;
-  if terminated then begin
-   application.postevent(tevent.create(ek_terminate));
-   terminated:= false;
-  end;
-  if childevent then begin
-   childevent:= false;
-   handlesigchld;
-  end;
-  } //moved out of loop
  end;
  result:= nil;
  if not gui_hasevent then begin
@@ -4184,6 +4241,10 @@ eventrestart:
   mapnotify: begin
    with xev.xmap do begin
     result:= twindowevent.create(ek_show,xwindow);
+    if application.findwindow(xwindow,window1) and 
+             (wo_notaskbar in window1.options) then begin
+     setnetatomarrayitem(xwindow,net_wm_state,net_wm_state_skip_taskbar);
+    end;
    end;
   end;
   unmapnotify: begin
