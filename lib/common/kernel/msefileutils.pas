@@ -216,6 +216,8 @@ function renamefile(const oldname,newname: filenamety;
                       //false if newname exists and not canoverwrite
 function deletefile(const filename: filenamety): boolean;
                       //false if not existing
+function trydeletefile(const filename: filenamety): boolean;
+                      //false if not existing or not deleted
 procedure createdir(const path: filenamety; 
                                  const rights: filerightsty = defaultdirrights);
 procedure createdirpath(const path: filenamety; 
@@ -389,11 +391,20 @@ end;
 
 function deletefile(const filename: filenamety): boolean;
                       //false if not existing
+var
+ err: syserrorty;
 begin
- result:= findfile(filename);
- if result then begin
-  syserror(sys_deletefile(filename),'Can not delete file "'+filename+'".');
+ err:= sys_deletefile(filename);
+ result:= err = sye_ok;
+ if not result and findfile(filename) then begin
+  syserror(err,'Can not delete file "'+filename+'".');
  end;
+end;
+
+function trydeletefile(const filename: filenamety): boolean;
+                      //false if not existing or not deleted
+begin
+ result:= sys_deletefile(filename) = sye_ok;
 end;
 
 procedure createdir(const path: filenamety; 
