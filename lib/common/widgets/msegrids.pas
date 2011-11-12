@@ -102,7 +102,7 @@ type
                  og_autopopup,
                  og_mousescrollcol,og_noresetselect);
  optionsgridty = set of optiongridty;
- optiongrid1ty = (og1_norowdeletequery);
+ optiongrid1ty = (og1_norowdeletequery,og1_swaprowinsertappend); //for Ctrl+Insert
  optionsgrid1ty = set of optiongrid1ty;
 
 const
@@ -12338,12 +12338,22 @@ begin
   if not (es_processed in info.eventstate) then begin
    if og_rowinserting in foptionsgrid then begin
     if issysshortcut(sho_rowinsert,info) then begin
-     doinsertrow(nil);
+     if og1_swaprowinsertappend in foptionsgrid1 then begin
+      doappendrow(nil);
+     end
+     else begin
+      doinsertrow(nil);
+     end;
      include(info.eventstate,es_processed);
     end
     else begin
      if issysshortcut(sho_rowappend,info) then begin
-      doappendrow(nil);
+      if og1_swaprowinsertappend in foptionsgrid1 then begin
+       doinsertrow(nil);
+      end
+      else begin
+       doappendrow(nil);
+      end;
       include(info.eventstate,es_processed);
      end;
     end;
