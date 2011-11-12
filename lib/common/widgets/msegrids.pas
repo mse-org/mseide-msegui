@@ -13765,7 +13765,8 @@ end;
 function tcustomgrid.getmerged(const arow: integer): longword;
 begin
  result:= 0;
- if (og_colmerged in foptionsgrid) and (arow >= 0) then begin
+ if (og_colmerged in foptionsgrid) and (arow >= 0) and 
+                                  (arow < frowcount) then begin
   result:= fdatacols.frowstate.getitempocolmerge(arow)^.colmerge.merged;
  end;
 end;
