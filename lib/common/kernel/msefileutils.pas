@@ -184,6 +184,13 @@ function searchfiles(const afilename: filenamety;
            //afilename must be simple filename and can have wildchars ('?','*'),
            //adirname can have wildchars ('?','*','**','***')
             
+function searchfilenames(const afilename: filenamety; const adirname: filenamety;
+                      const ainclude: fileattributesty = [fa_all];
+                      const aexclude: fileattributesty = []): filenamearty;
+           //returns filenames
+           //afilename must be simple filename and can have wildchars ('?','*')
+           //empty -> all
+           
 function dirhasentries(const adirname: filenamety;
                          const ainclude: fileattributesty = [fa_all];
                          const aexclude: fileattributesty = []): boolean;
@@ -861,6 +868,44 @@ begin
  end;
 end;
 
+function searchfilenames(const afilename: filenamety; const adirname: filenamety;
+                      const ainclude: fileattributesty = [fa_all];
+                      const aexclude: fileattributesty = []): filenamearty;
+var
+ int2: integer;
+ dirstream: dirstreamty;
+ fileinfo: fileinfoty;
+begin
+ result:= nil;
+ fillchar(dirstream,sizeof(dirstream),0);
+ with dirstream,dirinfo do begin
+  dirname:= filepath(adirname,fk_file);
+  if afilename <> '' then begin
+   setlength(mask,1);
+   mask[0]:= afilename;
+  end;
+  include:= ainclude;
+  exclude:= aexclude;
+  infolevel:= fil_type;
+  if sys_opendirstream(dirstream) <> sye_ok then begin
+   exit;
+  end;
+  int2:= 0;
+  while sys_readdirstream(dirstream,fileinfo) do begin
+   if (fileinfo.extinfo1.filetype <> ft_dir) or 
+                 (fileinfo.name <> dotchar) and (fileinfo.name <> '..') then begin
+    if high(result) < int2 then begin
+     setlength(result,int2*2+16);
+    end;
+    result[int2]:= fileinfo.name;
+    inc(int2);
+   end;
+  end;
+  setlength(result,int2);
+  sys_closedirstream(dirstream);
+ end;
+end;
+
 function searchfiles(const afilename: filenamety; 
                       const adirnames: array of filenamety;
                       const ainclude: fileattributesty = [fa_all];
@@ -882,8 +927,7 @@ begin
    end
    else begin
     splitfilepath(filepath(adirnames[int1],afilename,fk_file,true),dir1,file1);
-   end;
-   
+   end;   
    stackarray(searchfiles(file1,dir1),result);
   end;
  end;
