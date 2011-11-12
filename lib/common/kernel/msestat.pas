@@ -1210,16 +1210,24 @@ var
 begin
  if findvar(name,str1) and trystrtointmse(str1,int2) then begin
   try
-   setcount(int2);
-   for int1:= 0 to int2-1 do begin
-    store(int1,readlistitem);
+   if setcount <> nil then begin
+    setcount(int2);
+   end;
+   if store <> nil then begin
+    for int1:= 0 to int2-1 do begin
+     store(int1,readlistitem);
+    end;
    end;
   except
-   setcount(0);
+   if setcount <> nil then begin
+    setcount(0);
+   end;
   end;
  end
  else begin
-  setcount(0);
+  if setcount <> nil then begin
+   setcount(0);
+  end;
  end;
 end;
 
@@ -1231,16 +1239,24 @@ var
 begin
  if findvar(name,str1) and trystrtointmse(str1,int2) then begin
   try
-   setcount(int2);
-   for int1:= 0 to int2-1 do begin
-    store(int1,readlistitem);
+   if setcount <> nil then begin
+    setcount(int2);
+   end;
+   if store <> nil then begin
+    for int1:= 0 to int2-1 do begin
+     store(int1,readlistitem);
+    end;
    end;
   except
-   setcount(0);
+   if setcount <> nil then begin
+    setcount(0);
+   end;
   end;
  end
  else begin
-  setcount(0);
+  if setcount <> nil then begin
+   setcount(0);
+  end;
  end;
 end;
 
