@@ -387,12 +387,12 @@ begin
      end;
     {$endif}
      tkwstring: begin
-      setwidestrprop(obj,po1,reader.readmsestring(
+      setwidestrprop(obj,po1,reader.readmsestrings(
                                           str1,getwidestrprop(obj,po1)));
      end;
     {$ifdef FPC}
      tkustring: begin
-      setunicodestrprop(obj,po1,reader.readmsestring(
+      setunicodestrprop(obj,po1,reader.readmsestrings(
                                           str1,getunicodestrprop(obj,po1)));
      end;
     {$endif}
@@ -487,11 +487,11 @@ begin
       writer.writeboolean(str1,getordprop(obj,po1) <> 0);
      end;
      tkustring: begin
-      writer.writemsestring(str1,getunicodestrprop(obj,po1));
+      writer.writemsestrings(str1,getunicodestrprop(obj,po1));
      end;
     {$endif}
      tkwstring: begin
-      writer.writemsestring(str1,getwidestrprop(obj,po1));
+      writer.writemsestrings(str1,getwidestrprop(obj,po1));
      end;
      {$ifdef FPC}tkastring,{$endif}tklstring,tkstring: begin
       writer.writestring(str1,getstrprop(obj,po1));
