@@ -1789,8 +1789,9 @@ begin
   result:= (fnonullcheck = 0) and ({entered and} {or} 
             not (fcontainer1.checkdescendent(newfocus) or 
                   fcontainer3.checkdescendent(newfocus))) and
-             (row >= 0) and not ((row = rowhigh) and isautoappend or 
-                                         isinsertempty);
+             (row >= 0) and ((gs1_forcenullcheck in fstate1) or 
+                              not ((row = rowhigh) and isautoappend or 
+                                                         isinsertempty));
  end;
 end;
 

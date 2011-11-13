@@ -213,7 +213,7 @@ type
  gridstate1ty = (gs1_showcellinvalid,gs1_sortvalid,gs1_rowsortinvalid,
                  gs1_sortmoving,gs1_sortchangelock,gs1_rowinserted,
                  gs1_gridsorted,gs1_dbsorted,gs1_rowdeleting,
-                 gs1_focuscellonenterlock);
+                 gs1_focuscellonenterlock,gs1_forcenullcheck);
  gridstates1ty = set of gridstate1ty;
 
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
@@ -1450,7 +1450,6 @@ type
    function sortfunc(const l,r: integer): integer;
 //   procedure sortfunc(sender: tcustomgrid;
 //                       const index1,index2: integer; var result: integer);
-   procedure updatedatastate(var accepted: boolean); virtual;
 
    function hassortstat: boolean;
    procedure dostatread(const reader: tstatreader); virtual;
@@ -1458,10 +1457,12 @@ type
    
    function cancopy: boolean;
    function canpaste: boolean;
+   procedure updatedatastate(var accepted: boolean); virtual; overload;
 
   public
    constructor create(aowner: tcustomgrid; aclasstype: gridpropclassty);
    destructor destroy; override;
+   function updatedatastate: boolean; overload;
    procedure move(const curindex,newindex: integer); override;
    procedure clearselection;
    function hasselection: boolean;
@@ -2096,6 +2097,7 @@ type
    procedure removeappendedrow;
    function checkreautoappend: boolean; //true if row appended
    function hasdata: boolean;
+   function canexitrow(const force: boolean = false): boolean;
 
    function gridprop(const coord: gridcoordty): tgridprop;  //nil if none
    function isdatacell(const coord: gridcoordty): boolean;
@@ -8323,6 +8325,12 @@ begin
  end;
 end;
 
+function tdatacols.updatedatastate: boolean;
+begin
+ result:= true;
+ updatedatastate(result);
+end;
+
 { tdrawcols }
 
 constructor tdrawcols.create(aowner: tcustomgrid);
@@ -10599,6 +10607,19 @@ begin
  end;
 end;
 
+function tcustomgrid.canexitrow(const force: boolean = false): boolean;
+begin
+ if force then begin
+  include(fstate1,gs1_forcenullcheck);
+ end;
+ try
+  result:= container.canclose(nil);
+             //for notnull check in twidgetgrid
+ finally
+  exclude(fstate1,gs1_forcenullcheck);
+ end;
+end;
+
 procedure tcustomgrid.beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
 begin
@@ -10917,9 +10938,11 @@ begin     //focuscell
    end;
    if ((cell.row <> ffocusedcell.row) or (selectaction = fca_focusinforce)) and 
                      (ffocusedcell.row >= 0) and container.entered and
-            not ((gs1_rowdeleting in fstate1) or
-                   container.canclose(window.focusedwidget)) then begin
-    exit;        //for not null check in twidgetgrid
+            not ((gs1_rowdeleting in fstate1) or  
+                           container.canclose(window.focusedwidget)) then begin
+                               //for notnull check in twidgetgrid
+
+    exit;        
    end;
   end;
   if (selectaction in [fca_focusin,fca_focusinrepeater,fca_focusinforce]) and 
