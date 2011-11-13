@@ -2136,6 +2136,7 @@ type
    procedure focuscolbyname(const aname: string);
                  //case sensitive
    function focusedcellvalid: boolean;
+   function rowremoving: boolean;
    function scrollingcol: boolean;   //true if focusedcolvalid and no co_nohscroll
    function noscrollingcol: boolean; //true if focusedcolvalid and co_nohscroll
 
@@ -2632,7 +2633,8 @@ function isrowenter(const info: celleventinfoty;
                      const noentergrid: boolean = false): boolean;
 begin
  with info do begin
-  result:= (eventkind = cek_enter) and (cellbefore.row <> newcell.row) and
+  result:= (eventkind = cek_enter) and 
+  ((cellbefore.row <> newcell.row) or (selectaction = fca_focusinforce)) and
                   (not noentergrid or (selectaction <> fca_entergrid));
  end;
 end;
@@ -11145,6 +11147,11 @@ begin
             not (gs_cellexiting in fstate);
 end;
 
+function tcustomgrid.rowremoving: boolean;
+begin
+ result:= gs_rowremoving in fstate;
+end;
+
 function tcustomgrid.scrollingcol: boolean;
           //true if focusedcolvalid and no co_nohscroll
 begin
@@ -13380,7 +13387,17 @@ begin
      else begin
       if ffocusedcell.row >= aindex then begin
        countbefore:= frowcount;
-       focuscell(makegridcoord(ffocusedcell.col,invalidaxis)); //defocus row
+       bo1:= gs_rowremoving in fstate;
+       if ffocusedcell.row < aindex + acount then begin
+        include(fstate,gs_rowremoving);
+       end;
+       try
+        focuscell(makegridcoord(ffocusedcell.col,invalidaxis)); //defocus row
+       finally
+        if not bo1 then begin
+         exclude(fstate,gs_rowremoving);
+        end;
+       end;
        if ffocusedcell.row <> invalidaxis then begin
         factiverow:= ffocusedcell.row;
         exit;
