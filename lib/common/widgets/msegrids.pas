@@ -11042,8 +11042,12 @@ begin     //focuscell
            (cell.row < frowcount)))) then begin
     int1:= ffocusedcell.row;
     ffocusedcell.row:= invalidaxis;
-    if doremoveappinsrow(int1) and (cell.row > int1) then begin
-     dec(cell.row);
+    bo2:= false;
+    if (int1 <> cell.row) and doremoveappinsrow(int1) then begin
+     if (cell.row > int1) then begin
+      dec(cell.row);
+      bo2:= true;
+     end;
     end;
     if int1 = frowcount then begin
      dec(int1);
@@ -11051,6 +11055,9 @@ begin     //focuscell
     if (int1 >= 0) and not ((selectaction = fca_exitgrid) and 
                                  (gs_rowremoving in fstate)) then begin
      ffocusedcell.row:= int1;
+     if bo2 and (cell.row = cell.row) then begin
+      updaterowdata; //no focusin data update
+     end;
     end;
    end;
    dosortcheck;
@@ -11179,6 +11186,7 @@ begin
     fstate1:= fstate1-[gs1_rowinserted,gs1_rowsortinvalid];
     result:= true;
     deleterow(arow);
+//    include(fstate,gs_emptyrowremoved); for last row only
     exit;
    end;
   end
@@ -14904,6 +14912,7 @@ procedure tcustomgrid.updaterowdata;
 begin
  //dummy
 end;
+
 function tcustomgrid.getsorted: boolean;
 begin
  result:= og_sorted in optionsgrid;
