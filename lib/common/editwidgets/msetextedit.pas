@@ -683,9 +683,16 @@ end;
 {$endif mse_with_ifi}
 
 procedure tcustomtextedit.setoptionsedit(const avalue: optionseditty);
+var
+ opt1: optionseditty;
 begin
- inherited setoptionsedit(avalue - [oe_trimleft,oe_trimright,oe_uppercase,
-        oe_lowercase{,oe_autopopupmenu}]);
+ opt1:= avalue - [oe_trimleft,oe_trimright,oe_uppercase,oe_lowercase];
+ if foptionsedit <> opt1 then begin
+  inherited setoptionsedit(opt1);
+  if fgridintf <> nil then begin
+   fgridintf.updateeditoptions(foptionsedit);
+  end;
+ end;
 end;
 
 procedure tcustomtextedit.dokeydown(var info: keyeventinfoty);
