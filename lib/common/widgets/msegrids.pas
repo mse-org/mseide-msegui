@@ -2098,6 +2098,7 @@ type
    function checkreautoappend: boolean; //true if row appended
    function hasdata: boolean;
    function canexitrow(const force: boolean = false): boolean;
+   function cellexiting: boolean;
 
    function gridprop(const coord: gridcoordty): tgridprop;  //nil if none
    function isdatacell(const coord: gridcoordty): boolean;
@@ -2646,7 +2647,7 @@ function isrowexit(const info: celleventinfoty;
 begin
  with info do begin
   result:= (eventkind = cek_exit) and (cellbefore.row <> newcell.row) and
-                        not noexitgrid or (info.selectaction <> fca_exitgrid);
+                  (not noexitgrid or (info.selectaction <> fca_exitgrid));
  end;
 end;
 
@@ -11187,6 +11188,11 @@ function tcustomgrid.noscrollingcol: boolean;
 begin
  result:= (ffocusedcell.col >= 0) and
             (co_nohscroll in fdatacols[ffocusedcell.col].foptions);
+end;
+
+function tcustomgrid.cellexiting: boolean;
+begin
+ result:= gs_cellexiting in fstate;
 end;
 
 function tcustomgrid.isinsertempty: boolean; 

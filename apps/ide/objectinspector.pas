@@ -249,7 +249,7 @@ type
   protected
    feditor: tpropertyeditor;
   public
-   procedure updatestate;
+   procedure updatestate(const exitrow: boolean = false);
  end;
  ppropertyvalue = ^tpropertyvalue;
 
@@ -496,10 +496,11 @@ end;
 
 { tpropertyvalue }
 
-procedure tpropertyvalue.updatestate;
+procedure tpropertyvalue.updatestate(const exitrow: boolean = false);
 begin
  with feditor do begin
-  if allequal then begin
+  if allequal or 
+            (not exitrow and (objectinspectorfo.values.item = self)) then begin
    caption:= removelinebreaks(getvalue);
   end
   else begin
@@ -628,7 +629,9 @@ begin
    tpropertyitem(props.itemlist[int1]).updatestate;
    tpropertyvalue(values.itemlist[int1]).feditor:=
            tpropertyitem(props.itemlist[int1]).feditor;
-   tpropertyvalue(values.itemlist[int1]).updatestate;
+   if not grid.cellexiting then begin
+    tpropertyvalue(values.itemlist[int1]).updatestate;
+   end;
   end;
  finally
   props.itemlist.endupdate;
@@ -1295,6 +1298,11 @@ begin
    end;
   finally
    values.itemlist.decupdate;
+  end;
+ end
+ else begin
+  if isrowexit(info,true) then begin
+   tpropertyvalue(values[info.cellbefore.row]).updatestate(true);
   end;
  end;
 end;
