@@ -352,6 +352,7 @@ type
    procedure updatecellrect(const aframe: tcustomframe);
    function getinnerframe: framety; virtual;
    function step(getscrollable: boolean = true): integer; virtual; abstract;
+   function scrollable: boolean; virtual; abstract;
 
   //iframe
    function getwidget: twidget;
@@ -509,6 +510,7 @@ type
    procedure paint(var info: colpaintinfoty); virtual;
    class function defaultstep(width: integer): integer; virtual;
    function step(getscrollable: boolean = true): integer; override;
+   function scrollable: boolean; override;
    procedure drawcell(const acanvas: tcanvas); virtual;
    procedure drawfocusedcell(const acanvas: tcanvas); virtual;
    procedure rowcountchanged(const newcount: integer); virtual;
@@ -3683,6 +3685,11 @@ begin
  end;
 end;
 
+function tcol.scrollable: boolean;
+begin
+ result:= not (co_nohscroll in foptions);
+end;
+
 function tcol.getcolindex: integer;
 begin
  fgrid.internalupdatelayout;
@@ -4383,7 +4390,7 @@ var
 begin
  int2:= count;
  for int1:= 0 to count - 1 do begin
-  with tcolheader(fitems[int1]) do begin
+  with tcolheader(fitems[int1]) do begin //extend count for mergecols
    fmergeflags:= [];
    int3:= int1 + fmergecols;
    if int3 >= int2 then begin
@@ -4419,12 +4426,13 @@ begin
     else begin
      fmergedx:= 0;
     end;
+    bo1:= tgridprop(cols.fitems[int1]).scrollable;
     for int2:= int1 + 1 to lastmergedcol do begin
      with tcolheader(fitems[int2]) do begin
       include(fmergeflags,cmf_h);
       frefcell:= cell1;
      end;
-     int4:= tgridprop(cols.fitems[int2]).step;
+     int4:= tgridprop(cols.fitems[int2]).step(bo1);
      inc(fmergedcx,int4);
      if cols.freversedorder then begin
       dec(fmergedx,int4);
