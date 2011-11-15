@@ -479,6 +479,12 @@ begin
    drawinfo.getfont.basefont:= 0;
    if getfont(drawinfo) then begin
     data1.realfont:= data1.h;
+    if data1.realfont.d.height = 0 then begin
+     if data1.realheight = 0 then begin
+      data1.realheight:= data1.linespacing;
+     end;
+     data1.realfont.d.height:= data1.realheight shl fontsizeshift;
+    end;
     getfontvalues(fontinfo,data1);
     data1.basefont:= drawinfo.getfont.basefont;
     result:= registerfont(data1);

@@ -2119,6 +2119,7 @@ begin
     ascent:= textmetricsa.tmAscent;
     descent:= textmetricsa.tmDescent;
     linespacing:= textmetricsa.tmheight + textmetricsa.tmexternalleading;
+    realheight:= textmetricsa.tmheight;
     overhang:= textmetricsa.tmOverhang;
     if textmetricsa.tmpitchandfamily and tmpf_truetype <> 0 then begin
      caretshift:= 0;

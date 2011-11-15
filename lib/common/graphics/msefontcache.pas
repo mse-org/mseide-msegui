@@ -131,11 +131,11 @@ begin
     updatefontinfo(getdataoffset(po1),po1^);
    end;
    inc(po1^.refcount);
-//   height:= po1^.height;
    font:= po1^.font;
    ascent:= po1^.ascent;
    descent:= po1^.descent;
    linespacing:= po1^.linespacing;
+   realheight:= po1^.height;
    caretshift:= po1^.caretshift;
   end;
  end;

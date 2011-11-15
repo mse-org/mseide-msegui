@@ -350,6 +350,7 @@ begin
    descent:= po^.descent;
  //   linespacing:= ascent + descent;
    linespacing:= po^.height;
+   realheight:= po^.height;
    caretshift:= 0;
    d.infopo:= nil;
    d.xftascent:= po^.ascent;
@@ -1268,6 +1269,7 @@ procedure gdi_getfont(var drawinfo: drawinfoty);
    ascent:= po^.ascent;
    descent:= po^.descent;
    linespacing:= ascent + descent;
+   realheight:= linespacing;
    caretshift:= 0;
    d.infopo:= po;
    with po^ do begin

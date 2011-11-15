@@ -128,7 +128,7 @@ type
   font: fontty;
   fonthighres: fontty;
   basefont: fontty;
-  ascent,descent,linespacing,caretshift,linewidth: integer;
+  ascent,descent,linespacing,caretshift,linewidth,realheight: integer;
   platformdata: fontdatapty; //platform dependent
  end;
  pfontdataty = ^fontdataty;
