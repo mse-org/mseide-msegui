@@ -350,7 +350,7 @@ begin
    descent:= po^.descent;
  //   linespacing:= ascent + descent;
    linespacing:= po^.height;
-   realheight:= po^.height;
+//   realheight:= po^.height;
    caretshift:= 0;
    d.infopo:= nil;
    d.xftascent:= po^.ascent;
@@ -1321,6 +1321,9 @@ begin
      writeln('"'+string(po5)+'"');
     end;     
    {$endif}
+    if fcpatterngetinteger(po4,fc_pixel_size,0,@int1) = fcresultmatch then begin
+     realheight:= int1;
+    end;
     po2:= xftfontopenpattern(appdisp,po4); //font owns the pattern
     if po2 <> nil then begin
      drawinfo.getfont.ok:= true;
