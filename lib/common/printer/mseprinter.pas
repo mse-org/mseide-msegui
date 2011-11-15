@@ -277,7 +277,7 @@ type
    foriginx,foriginy: real;
    fscale: real;
    foffset: pointty;
-   fclientsize: sizety;
+   fclientrect: rectty;
    fpapersize: sizety;
    fboundingbox: framety;
    ftitle: msestring;
@@ -290,6 +290,7 @@ type
    function createfont: tcanvasfont; override;
    procedure initprinting(const apreamble: string = '');
    procedure checkgcstate(state: canvasstatesty); override;
+   function getfitrect: rectty; override;
    procedure setppmm(avalue: real); override;
    function defaultcliprect: rectty; override;
    procedure updatescale; virtual;
@@ -353,7 +354,9 @@ type
       
    property title: msestring read ftitle write ftitle;
                             //used as print job lable
-   property clientsize: sizety read fclientsize;
+   property clientrect: rectty read fclientrect;
+   property clientpos: pointty read fclientrect.pos;
+   property clientsize: sizety read fclientrect.size;
    property colorspace: colorspacety read fcolorspace 
                          write setcolorspace default cos_gray;
    property pagenumber: integer read fpagenumber;
@@ -856,7 +859,6 @@ begin
   exclude(fstate,cs_origin);
   exclude(fpstate,pcs_matrixvalid);
   with fprinter do begin
-//   self.ppmm:= fppmm;
    fgcscale:= mmtoprintscale/ppmm; //map to printerunits
 
    if fprintorientation = pao_landscape then begin
@@ -877,25 +879,27 @@ begin
     fpapersize.cy:= round((fdrawinfo.gc.paintdevicesize.cx/ppmm)*mmtoprintscale);
     fboundingbox.left:= round(fpa_frametop*mmtoprintscale);
     fboundingbox.bottom:= round(fpa_frameleft*mmtoprintscale);
-    fboundingbox.right:= round((fdrawinfo.gc.paintdevicesize.cy/ppmm-fpa_framebottom)*
-                                                               mmtoprintscale);
-    fboundingbox.top:= round((fdrawinfo.gc.paintdevicesize.cx/ppmm-fpa_frameright)*
-                                                               mmtoprintscale);
+    fboundingbox.right:= round(
+        (fdrawinfo.gc.paintdevicesize.cy/ppmm-fpa_framebottom)*mmtoprintscale);
+    fboundingbox.top:= round(
+         (fdrawinfo.gc.paintdevicesize.cx/ppmm-fpa_frameright)*mmtoprintscale);
    end
    else begin
     fpapersize.cx:= round((fdrawinfo.gc.paintdevicesize.cx/ppmm)*mmtoprintscale);
     fpapersize.cy:= round((fdrawinfo.gc.paintdevicesize.cy/ppmm)*mmtoprintscale);
     fboundingbox.left:= round(fpa_frameleft*mmtoprintscale);
     fboundingbox.bottom:= round(fpa_framebottom*mmtoprintscale);
-    fboundingbox.right:= round((fdrawinfo.gc.paintdevicesize.cx/ppmm-fpa_frameright)*
-                                                               mmtoprintscale);
-    fboundingbox.top:= round((fdrawinfo.gc.paintdevicesize.cy/ppmm-fpa_frametop)*
-                                                               mmtoprintscale);
+    fboundingbox.right:= round(
+        (fdrawinfo.gc.paintdevicesize.cx/ppmm-fpa_frameright)*mmtoprintscale);
+    fboundingbox.top:= round(
+        (fdrawinfo.gc.paintdevicesize.cy/ppmm-fpa_frametop)*mmtoprintscale);
    end;
-   fclientsize.cx:= fdrawinfo.gc.paintdevicesize.cx - round((fpa_frameleft+fpa_frameright)*
-                                                               ppmm);
-   fclientsize.cy:= fdrawinfo.gc.paintdevicesize.cy - round((fpa_frametop+fpa_framebottom)*
-                                                               ppmm);
+   fclientrect.x:= round(fpa_frameleft*ppmm);
+   fclientrect.y:= round(fpa_frametop*ppmm);
+   fclientrect.cx:= fdrawinfo.gc.paintdevicesize.cx - 
+                         round((fpa_frameleft+fpa_frameright)*ppmm);
+   fclientrect.cy:= fdrawinfo.gc.paintdevicesize.cy - round(
+                         (fpa_frametop+fpa_framebottom)*ppmm);
   end;
  end;
 end;
@@ -903,10 +907,8 @@ end;
 procedure tcustomprintercanvas.checkgcstate(state: canvasstatesty);
 begin
  if not (cs_origin in fstate) then begin
-//  with fprinter do begin
-   foriginx:= fgcoffsetx + mmtoprintscale * (origin.x/ppmm);
-   foriginy:= fgcoffsety - mmtoprintscale * (origin.y/ppmm);
-//  end;
+  foriginx:= fgcoffsetx + mmtoprintscale * (origin.x/ppmm);
+  foriginy:= fgcoffsety - mmtoprintscale * (origin.y/ppmm);
  end;
  inherited;
 end;
@@ -1348,7 +1350,7 @@ end;
 function tcustomprintercanvas.remaininglines: integer;
 begin
  checkgcstate([cs_gc]); //init all values
- result:= (fclientsize.cy - fheaderheight - ffooterheight - fliney - findenty -
+ result:= (fclientrect.cy - fheaderheight - ffooterheight - fliney - findenty -
                             origin.y) div lineheight;
 end;
 
@@ -1435,6 +1437,11 @@ end;
 procedure tcustomprintercanvas.internaldrawtext(var info);
 begin
  drawtext(drawtextinfoty(info));
+end;
+
+function tcustomprintercanvas.getfitrect: rectty;
+begin
+ result:= fclientrect;
 end;
 
 { tprintervalueselector }

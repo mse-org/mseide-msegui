@@ -720,6 +720,7 @@ type
    procedure gcdestroyed(const sender: tcanvas); virtual;
    
    procedure setppmm(avalue: real); virtual;
+   function getfitrect: rectty; virtual;
    procedure valuechanged(value: canvasstatety);
    procedure valueschanged(values: canvasstatesty);
    procedure initgcvalues; virtual;
@@ -773,6 +774,9 @@ type
    procedure linktopaintdevice(apaintdevice: paintdevicety; const gc: gcty;
                                            const cliporigin: pointty); virtual;
          //calls reset, resets cliporigin, canvas owns the gc!
+   procedure fitppmm(const asize: sizety);
+                     //for printercanvas
+
    function highresdevice: boolean;
    procedure initflags(const dest: tcanvas); virtual;
    procedure unlink; //frees gc
@@ -5529,6 +5533,28 @@ begin
   rect:= @arect;
   gdi(gdf_movewindowrect);
  end;
+end;
+
+procedure tcanvas.fitppmm(const asize: sizety);
+begin
+ with getfitrect do begin
+  if (asize.cx <> 0) and (asize.cy <> 0) and 
+          (size.cx <> 0) and (size.cy <> 0) then begin
+   if asize.cx/asize.cy > size.cx/size.cy then begin
+    self.ppmm:= ppmm * asize.cx/size.cx;
+   end
+   else begin
+    self.ppmm:= ppmm * asize.cy/size.cy;
+   end;
+  end;
+ end;
+end;
+
+function tcanvas.getfitrect: rectty;
+begin
+ result.pos:= nullpoint;
+ checkgcstate([cs_gc]);
+ result.size:= fdrawinfo.gc.paintdevicesize;
 end;
 
 initialization
