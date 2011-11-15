@@ -176,8 +176,8 @@ implementation
 
 uses
  sysutils,msestockobjects_mfm,msesysintf1,mseguiintf,typinfo,mseconsts,msefont;
-//const
-// defaultfontheight = 14;
+const
+ defaultfontheight = 14;
 // defaultfontheight = 26;
 
 type
@@ -423,19 +423,22 @@ function tstockobjects.getfonts(index: stockfontty): twidgetfont;
 var
  fo1: stockfontty;
  str1: string;
+ int1: integer;
 begin
  if not ffontaliasregistered then begin
   for fo1:= low(stockfontty) to high(stockfontty) do begin
    case fo1 of
     stf_default: begin
+     int1:= defaultfontheight;
      str1:= '';
     end;
     else begin
+     int1:= 0;
      str1:= 'stf_default';
     end;
    end;
    registerfontalias(getenumname(typeinfo(stockfontty),ord(fo1)),
-            gui_getdefaultfontnames[fo1],fam_nooverwrite,0,0,[],1.0,str1);
+            gui_getdefaultfontnames[fo1],fam_nooverwrite,int1,0,[],1.0,str1);
   end;
   ffontaliasregistered:= true;
  end;

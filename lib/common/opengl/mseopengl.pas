@@ -25,7 +25,6 @@ type
    procedure setviewport(const avalue: rectty);
   protected
    fcontextinfo: contextinfoty;
-   class function getclassgdifuncs: pgdifunctionaty; override;
    function lock: boolean; override;
    function getcontextinfopo: pointer; override;
    procedure updatesize(const asize: sizety); override;
@@ -34,6 +33,8 @@ type
   public
    constructor create(const user: tobject; const intf: icanvas); override;
    destructor destroy; override;
+   class function getclassgdifuncs: pgdifunctionaty; override;
+
    procedure updatewindowoptions(var aoptions: internalwindowoptionsty); override;
    procedure init(const acolor: colorty = cl_none); //cl_none -> colorbackground
    procedure swapbuffers;

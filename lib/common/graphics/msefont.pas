@@ -478,6 +478,7 @@ begin
    drawinfo.getfont.fontdata:= @data1;
    drawinfo.getfont.basefont:= 0;
    if getfont(drawinfo) then begin
+    data1.realfont:= data1.h;
     getfontvalues(fontinfo,data1);
     data1.basefont:= drawinfo.getfont.basefont;
     result:= registerfont(data1);

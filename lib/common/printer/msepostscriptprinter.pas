@@ -709,6 +709,7 @@ begin
  fimagecachemaxitemsize:= defaultimagecachemaxitemsize;
  fpslevel:= psl_3;
  inherited create(user,intf);
+ fdrawinfo.gc.fontgdifuncs:= tcanvas.getclassgdifuncs;
 end;
 
 function tpostscriptcanvas.getgdifuncs: pgdifunctionaty;
@@ -791,20 +792,20 @@ var
  int1,int2: integer;
  rea1: real;
 begin
- with getfontdata(adata)^ do begin
-  str1:= realfontname(h.name);
-  if str1 = '' then begin
+ with getfontdata(adata)^,realfont do begin
+  str1:= name;
+  if (str1 = '') or (h.name = 'stf_default') and (str1 = 'sans') then begin
    str1:= 'Helvetica';
   end
   else begin
    str1:= psencode(pchar(str1),length(str1));
   end;
-  if h.d.style * [fs_bold,fs_italic] <> [] then begin
+  if d.style * [fs_bold,fs_italic] <> [] then begin
    str1:= str1 + '-';
-   if fs_bold in h.d.style then begin
+   if fs_bold in d.style then begin
     str1:= str1 + 'Bold';
    end;
-   if fs_italic in h.d.style then begin
+   if fs_italic in d.style then begin
     str1:= str1 + 'Italic';
    end;
   end;
@@ -829,23 +830,23 @@ begin
    handle:= adata;
    namenum:= int2;
    additem(codepages,acodepage);
-   if h.d.height = 0 then begin
+   if d.height = 0 then begin
     size:= round(defaultfontheight*ppmm);
    end
    else begin
-    size:= (h.d.height + fontsizeroundvalue) shr fontsizeshift;
+    size:= (d.height + fontsizeroundvalue) shr fontsizeshift;
    end;
    rea1:= (size / ppmm) * mmtoprintscale;
-   scalestring1:= psrealtostr(rea1 * h.d.xscale);     //xscale
+   scalestring1:= psrealtostr(rea1 * d.xscale);     //xscale
    scalestringfull:= scalestring1;
    str1:= ' ' + psrealtostr(rea1);                //yscale
    scalestringfull:= scalestringfull + str1;
-   if (h.d.xscale <> 1) or (h.d.rotation <> 0) then begin
+   if (d.xscale <> 1) or (d.rotation <> 0) then begin
     scalestring1:= scalestring1 + str1;
    end;
-   str1:= ' ' + psrealtostr(h.d.rotation*radtodeg);
+   str1:= ' ' + psrealtostr(d.rotation*radtodeg);
    scalestringfull:= scalestringfull + str1;
-   if h.d.rotation <> 0 then begin 
+   if d.rotation <> 0 then begin 
     scalestring1:= scalestring1 + str1;
    end;
   end;

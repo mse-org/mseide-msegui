@@ -123,6 +123,7 @@ type
   
  fontdataty = record
   h: fonthashdataty;
+  realfont: fonthashdataty;
 
   font: fontty;
   fonthighres: fontty;
@@ -215,6 +216,7 @@ type
   handle: ptruint;//cardinal;
   refgc: ptruint;//cardinal; //for windowsmetafile
   gdifuncs: pgdifunctionaty;
+  fontgdifuncs: pgdifunctionaty;
   drawingflags: drawingflagsty;
   cliporigin: pointty;
   paintdevicesize: sizety;
@@ -712,7 +714,6 @@ type
    afonthandle1: fontnumty;
    ffont: tfont;
 
-   class function getclassgdifuncs: pgdifunctionaty; virtual;
    function getgdifuncs: pgdifunctionaty; virtual;
    procedure registergclink(const dest: tcanvas);
    procedure unregistergclink(const dest: tcanvas);
@@ -764,6 +765,8 @@ type
    drawinfopo: pointer; //used to transport additional drawing information
    constructor create(const user: tobject; const intf: icanvas); virtual;
    destructor destroy; override;
+   class function getclassgdifuncs: pgdifunctionaty; virtual;
+
    procedure updatewindowoptions(var aoptions: internalwindowoptionsty); virtual;
    function creategc(const apaintdevice: paintdevicety; const akind: gckindty;
                 var gc: gcty; const aprintername: msestring = ''): gdierrorty;
@@ -2256,7 +2259,7 @@ begin
  if (canvas <> nil) then begin
   canvas.checkgcstate([cs_gc]); //windows needs gc
   if finfopo^.gdifuncs <> nil then begin
-   if finfopo^.gdifuncs <> canvas.fdrawinfo.gc.gdifuncs then begin
+   if finfopo^.gdifuncs <> canvas.fdrawinfo.gc.fontgdifuncs then begin
     for int1:= 0 to high(finfopo^.handles) do begin
      releasefont(finfopo^.handles[int1]);
      finfopo^.handles[int1]:= 0;
@@ -2266,7 +2269,7 @@ begin
     releasefont(fhandlepo^);
    end;
   end;
-  finfopo^.gdifuncs:= canvas.fdrawinfo.gc.gdifuncs;
+  finfopo^.gdifuncs:= canvas.fdrawinfo.gc.fontgdifuncs;
 //  finfopo^.gdifuncs:= gdifuncs[canvas.fgdinum];
   fhandlepo^:= getfontnum(finfopo^,canvas.fdrawinfo,
                                          {$ifdef FPC}@{$endif}getfont);
@@ -2873,6 +2876,7 @@ end;
 constructor tcanvas.create(const user: tobject; const intf: icanvas);
 begin
  fdrawinfo.gc.gdifuncs:= getgdifuncs; //default
+ fdrawinfo.gc.fontgdifuncs:= fdrawinfo.gc.gdifuncs;
  fuser:= user;
  fintf:= pointer(intf);
  with fvaluestack do begin
@@ -2912,6 +2916,9 @@ begin
   contextinfopo:= getcontextinfopo;
   gcpo:= @gc;
   getgdifuncs^[gdf_creategc](fdrawinfo);
+  if gc.fontgdifuncs = nil then begin
+   gc.fontgdifuncs:= gc.gdifuncs;
+  end;
   result:= error;
  end;
 end;
@@ -3036,6 +3043,7 @@ var
  rea1: real;
  int1: integer;
  func1: pgdifunctionaty;
+ func2: pgdifunctionaty;
 begin
  resetpaintedflag;
  if (fdrawinfo.gc.handle <> 0) then begin
@@ -3047,10 +3055,15 @@ begin
  fdrawinfo.paintdevice:= apaintdevice;
  rea1:= fdrawinfo.gc.ppmm;
  func1:= fdrawinfo.gc.gdifuncs;
+ func2:= fdrawinfo.gc.fontgdifuncs;
  fdrawinfo.gc:= gc;
+ if fdrawinfo.gc.fontgdifuncs = nil then begin
+  fdrawinfo.gc.fontgdifuncs:= fdrawinfo.gc.gdifuncs;
+ end;
  fdrawinfo.gc.ppmm:= rea1;                //restore
  if fdrawinfo.gc.gdifuncs = nil then begin
   fdrawinfo.gc.gdifuncs:= func1;         //restore in case of unlink
+  fdrawinfo.gc.fontgdifuncs:= func2;     //restore in case of unlink
  end;
  updatecliporigin(cliporigin);
  if gc.handle <> 0 then begin
