@@ -2173,11 +2173,11 @@ type
    procedure deleterow(aindex: integer; acount: integer = 1); virtual;
    procedure clear; //sets rowcount to 0
    function appendrow(const checkautoappend: boolean = false): integer; 
-   //returns index of new row, does not call change events, calls updatelayout.
-   //use for single visible append,
-   //do not use for multiple row append in a block.
+    //returns index of new row, does not call change events, calls updatelayout.
+    //use for single visible append,
+    //do not use for multiple row append in a block.
    function appenddatarow: integer; 
-   //returns index of new row, use it in a beginupdate/endupdate block
+    //returns index of new row, use it in a beginupdate/endupdate block
    
    procedure sort;
    function copyselection: boolean; virtual;  //false if no copy
