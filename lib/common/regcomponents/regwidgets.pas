@@ -151,7 +151,7 @@ begin
  registerclass(tdockpanelform);
  registercomponents('Widget',[
   tlabel,
-  tstringdisp,tintegerdisp,trealdisp,tdatetimedisp,tbytestringdisp,
+  tstringdisp,trichstringdisp,tintegerdisp,trealdisp,tdatetimedisp,tbytestringdisp,
   tbooleandisp,
   tedit,
   tbutton,trichbutton,tstockglyphbutton,trichstockglyphbutton,

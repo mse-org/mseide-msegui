@@ -19,7 +19,7 @@ unit msedispwidgets;
 interface
 uses
  classes,msegui,mseguiglob,msewidgets,msegraphics,msedrawtext,msegraphutils,
- msemenus,msetypes,msestrings,mseformatstr,mseevent,mseclasses
+ msemenus,msetypes,msestrings,mseformatstr,mseevent,mseclasses,mserichstring
  {$ifdef mse_with_ifi}
   ,mseificomp,mseifiglob,mseificompglob,typinfo,msedatalist
  {$endif};
@@ -38,6 +38,8 @@ type
                                     var avalue: ansistring) of object;
  changestringeventty = procedure(sender: tobject;
                                     var avalue: msestring) of object;
+ changerichstringeventty = procedure(sender: tobject;
+                                    var avalue: richstringty) of object;
  changeintegereventty = procedure(sender: tobject;
                                     var avalue: integer) of object;
  changerealeventty = procedure(sender: tobject; var avalue: realty) of object;
@@ -161,32 +163,57 @@ type
    property options: dispwidgetoptionsty read foptions write setoptions default [];
  end;
 
- tcustomstringdisp = class(tdispwidget)
+ tbasestringdisp = class(tdispwidget)
   private
-   fvalue: msestring;
-   fonchange: changestringeventty;
-   procedure setvalue(const Value: msestring);
   {$ifdef mse_with_ifi}
    function getifilink: tifistringlinkcomp;
    procedure setifilink(const avalue: tifistringlinkcomp);
   {$endif}
   protected
+  published
+{$ifdef mse_with_ifi}
+   property ifilink: tifistringlinkcomp read getifilink write setifilink;
+{$endif}
+ end;
+
+ tcustomstringdisp = class(tbasestringdisp)
+  private
+   fvalue: msestring;
+   fonchange: changestringeventty;
+   procedure setvalue(const Value: msestring);
    function getvaluetext: msestring; override;
    procedure valuechanged; override;
   public
    property value: msestring read fvalue write setvalue;
   published
    property onchange: changestringeventty read fonchange write fonchange;
-{$ifdef mse_with_ifi}
-   property ifilink: tifistringlinkcomp read getifilink write setifilink;
-{$endif}
  end;
-
+ 
  tstringdisp = class(tcustomstringdisp)
   published
    property value;
  end;
- 
+
+ tcustomrichstringdisp = class(tbasestringdisp)
+  private
+//   fvalue: richstringty;
+   fonchange: changerichstringeventty;
+   procedure setvalue(const avalue: msestring);
+   procedure setrichvalue(const avalue: richstringty);
+   function getvaluetext: msestring; override;
+   procedure valuechanged; override;
+  public
+   property value: msestring read finfo.text.text write setvalue;
+   property richvalue: richstringty read finfo.text write setrichvalue;
+  published
+   property onchange: changerichstringeventty read fonchange write fonchange;
+ end;
+
+ trichstringdisp = class(tcustomrichstringdisp)
+  published
+   property value;
+ end;
+  
  tbytestringdisp = class(tdispwidget)
   private
    fvalue: string;
@@ -554,20 +581,21 @@ begin
  end;
 end;
 
-{ tcustomstringdisp }
-
 {$ifdef mse_with_ifi}
 
-function tcustomstringdisp.getifilink: tifistringlinkcomp;
+function tbasestringdisp.getifilink: tifistringlinkcomp;
 begin
  result:= tifistringlinkcomp(fifilink);
 end;
 
-procedure tcustomstringdisp.setifilink(const avalue: tifistringlinkcomp);
+procedure tbasestringdisp.setifilink(const avalue: tifistringlinkcomp);
 begin
  inherited setifilink(avalue);
 end;
+
 {$endif}
+
+{ tcustomstringdisp }
 
 function tcustomstringdisp.getvaluetext: msestring;
 begin
@@ -586,6 +614,36 @@ procedure tcustomstringdisp.valuechanged;
 begin
  if canevent(tmethod(fonchange)) then begin
   fonchange(self,fvalue);
+ end;
+ inherited;
+end;
+
+{ tcustomrichstringdisp }
+
+procedure tcustomrichstringdisp.setvalue(const avalue: msestring);
+begin
+// if fvalue <> value then begin
+ finfo.text.text:= avalue;
+ finfo.text.format:= nil;
+ valuechanged;
+// end;
+end;
+
+procedure tcustomrichstringdisp.setrichvalue(const avalue: richstringty);
+begin
+ finfo.text:= avalue;
+ valuechanged;
+end;
+
+function tcustomrichstringdisp.getvaluetext: msestring;
+begin
+ result:= finfo.text.text;
+end;
+
+procedure tcustomrichstringdisp.valuechanged;
+begin
+ if canevent(tmethod(fonchange)) then begin
+  fonchange(self,finfo.text);
  end;
  inherited;
 end;
@@ -907,6 +965,5 @@ begin
  ftext_true:= avalue;
  formatchanged;
 end;
-
 
 end.

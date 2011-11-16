@@ -68,7 +68,6 @@ type
  richstringaty = array[0..0] of richstringty;
  prichstringaty = ^richstringaty;
 
-// lirichstrarty = array[0..0] of richstringty;
  trichstringdatalist = class(tmsestringdatalist)
   private
    fposition: pointty;
@@ -91,7 +90,6 @@ type
    function getstatdata(const index: integer): msestring; override;
   public
    constructor create; override;
-//   procedure assign(source: tpersistent); override;
    procedure insert(const index: integer; const item: msestring); override;
    function add(const value: msestring): integer; override;
    function add(const avalue: msestring; 
@@ -116,7 +114,6 @@ type
 
  tcharstyledatalist = class(tdatalist)
   private
-//   fcolors: colorarty;
    function Getitems(index: integer): charstylety;
    procedure Setitems(index: integer; const Value: charstylety);
   public
@@ -127,12 +124,13 @@ type
                        colorbackground: pcolorty = nil): integer; overload;
    function add(const value: string): integer; overload;
                 //'bius' fontcolor colorbackground
-   property items[index: integer]: charstylety read Getitems write Setitems; default;
+   property items[index: integer]: charstylety read Getitems write Setitems;
+                                                                       default;
  end;
 
 
-function setfontcolor(var formats: formatinfoarty; aindex: integer; len: halfinteger;
-                              color: colorty): boolean;
+function setfontcolor(var formats: formatinfoarty; aindex: integer; 
+                       len: halfinteger; color: colorty): boolean;
                                  //true if changed
 function setcolorbackground(var formats: formatinfoarty; aindex: integer;
                               len: halfinteger;
@@ -158,11 +156,17 @@ procedure richdelete(var value: richstringty; aindex,count: integer);
 procedure richinsert(const source: msestring; var value: richstringty; aindex: integer);
 function richcopy(const source: richstringty; index, count: halfinteger): richstringty;
 function richconcat(const a,b: richstringty): richstringty; overload;
-function richconcat(const a: richstringty; const b: msestring): richstringty; overload;
-{
-function uniqueformatinfoarty(const value: formatinfoarty): formatinfoarty;
-function uniquerichstringty(const value: richstringty): richstringty;
-}
+function richconcat(const a: richstringty; const b: msestring;
+              const fontstyle: fontstylesty = [];
+              const fontcolor: colorty = cl_none;
+              const colorbackground: colorty = cl_none): richstringty; overload;
+procedure richconcat1(var dest: richstringty; const b: richstringty); overload;
+procedure richconcat1(var dest: richstringty; const b: msestring;
+              const fontstyle: fontstylesty = [];
+              const fontcolor: colorty = cl_none;
+              const colorbackground: colorty = cl_none); overload;
+                                                         
+
 procedure additem(const value: richstringty; var dest: richstringarty;
                              var count: integer; step: integer = 32); overload;
 function splitrichstring(const avalue: richstringty; const separator: msechar): richstringarty;
@@ -769,13 +773,51 @@ begin
  result:= res;
 end;
 
-function richconcat(const a: richstringty; const b: msestring): richstringty;
+function richconcat(const a: richstringty; const b: msestring;
+               const fontstyle: fontstylesty = [];
+               const fontcolor: colorty = cl_none;
+               const colorbackground: colorty = cl_none): richstringty;
 var
  rstr1: richstringty;
 begin
- rstr1.format:= nil;
+ setlength(rstr1.format,1);
+ if (fontstyle <> []) or (fontcolor <> cl_none) or 
+                       (colorbackground <> cl_none) then begin
+  setlength(rstr1.format,1);
+  with rstr1.format[0] do begin
+   index:= 0;
+   if fontstyle <> [] then begin
+    style.fontstyle:= fontstyle;
+    newinfos:= fontstyleflags;
+   end;
+   if fontcolor <> cl_none then begin
+    style.fontcolor:= fontcolor;
+    include(newinfos,ni_fontcolor);
+   end;
+   if colorbackground <> cl_none then begin
+    style.colorbackground:= colorbackground;
+    include(newinfos,ni_colorbackground);
+   end;
+  end
+ end
+ else begin
+  rstr1.format:= nil;
+ end;
  rstr1.text:= b;
  result:= richconcat(a,rstr1);
+end;
+
+procedure richconcat1(var dest: richstringty; const b: richstringty);
+begin
+ dest:= richconcat(dest,b);
+end;
+
+procedure richconcat1(var dest: richstringty; const b: msestring;
+              const fontstyle: fontstylesty = [];
+              const fontcolor: colorty = cl_none;
+              const colorbackground: colorty = cl_none);
+begin
+ dest:= richconcat(dest,b,fontstyle,fontcolor,colorbackground);
 end;
 
 {
