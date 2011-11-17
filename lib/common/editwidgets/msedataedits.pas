@@ -5582,5 +5582,4 @@ begin
   formatchanged;
  end;
 end;
-
 end.

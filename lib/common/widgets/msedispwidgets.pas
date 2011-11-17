@@ -110,7 +110,8 @@ type
    property template;
  end;
 
- dispwidgetoptionty = (dwo_hintclippedtext,dwo_nogray);
+ dispwidgetoptionty = (dwo_hintclippedtext,dwo_nogray,
+                                       dwo_showlocal,dwo_showutc);
  dispwidgetoptionsty = set of dispwidgetoptionty;
  
  tdispwidget = class(tpublishedwidget{$ifdef mse_with_ifi},iifidatalink{$endif})
@@ -132,9 +133,9 @@ type
 {$endif}
    procedure updatetextflags;
    procedure settextflags(const value: textflagsty);
-   procedure setoptions(const avalue: dispwidgetoptionsty);
    procedure settext(const avalue: msestring);
   protected
+   procedure setoptions(const avalue: dispwidgetoptionsty); virtual;
    procedure valuechanged; virtual;
    procedure formatchanged;
    function getvaluetext: msestring; virtual; abstract;
@@ -181,6 +182,7 @@ type
    fvalue: msestring;
    fonchange: changestringeventty;
    procedure setvalue(const Value: msestring);
+  protected
    function getvaluetext: msestring; override;
    procedure valuechanged; override;
   public
@@ -200,6 +202,7 @@ type
    fonchange: changerichstringeventty;
    procedure setvalue(const avalue: msestring);
    procedure setrichvalue(const avalue: richstringty);
+  protected
    function getvaluetext: msestring; override;
    procedure valuechanged; override;
   public
@@ -323,6 +326,7 @@ type
    fonchange: changedatetimeeventty;
    fformat: msestring;
    fkind: datetimekindty;
+   fconvert: dateconvertty;
    procedure setvalue(const avalue: tdatetime);
    procedure setformat(const avalue: msestring);
    procedure setkind(const avalue: datetimekindty);
@@ -333,6 +337,7 @@ type
    procedure setifilink(const avalue: tifidatetimelinkcomp);
   {$endif}
   protected
+   procedure setoptions(const avalue: dispwidgetoptionsty); override;
    procedure valuechanged; override;
    function getvaluetext: msestring; override;
    procedure defineproperties(filer: tfiler); override;
@@ -382,7 +387,7 @@ type
 
 implementation
 uses
- sysutils,msereal,math,msestreaming,msedate;
+ sysutils,msereal,math,msestreaming,msedate,msebits;
 
 { tdispframe }
 
@@ -575,7 +580,7 @@ end;
 procedure tdispwidget.setoptions(const avalue: dispwidgetoptionsty);
 begin
  if foptions <> avalue then begin
-  foptions:= avalue;
+  foptions:= avalue-[dwo_showlocal,dwo_showutc];
   updatetextflags;
   invalidate;
  end;
@@ -879,16 +884,20 @@ begin
 end;
 
 function tcustomdatetimedisp.getvaluetext: msestring;
+var
+ dt1: tdatetime;
 begin
+ dt1:= fvalue;
+ checkdatereconvert(fconvert,dt1);
  case fkind of 
   dtk_time: begin
-   result:= mseformatstr.timetostring(fvalue,fformat);
+   result:= mseformatstr.timetostring(dt1,fformat);
   end;
   dtk_date: begin
-   result:= mseformatstr.datetostring(fvalue,fformat);
+   result:= mseformatstr.datetostring(dt1,fformat);
   end;
   else begin
-   result:= mseformatstr.datetimetostring(fvalue,fformat);
+   result:= mseformatstr.datetimetostring(dt1,fformat);
   end;
  end;
 end;
@@ -916,6 +925,27 @@ begin
  inherited;
  filer.DefineProperty('val',
              {$ifdef FPC}@{$endif}readvalue,nil,false);
+end;
+
+procedure tcustomdatetimedisp.setoptions(const avalue: dispwidgetoptionsty);
+var
+ opt1: dispwidgetoptionsty;
+begin
+ opt1:= foptions;
+ inherited;
+ foptions:= dispwidgetoptionsty(
+      replacebits(setsinglebit(longword(avalue),longword(opt1),
+                         longword([dwo_showlocal,dwo_showutc])),
+                  longword(foptions),
+                  longword([dwo_showlocal,dwo_showutc])));
+ fconvert:= dc_none;
+ if dwo_showutc in foptions then begin
+  fconvert:= dc_tolocal;
+ end;
+ if dwo_showlocal in foptions then begin
+  fconvert:= dc_toutc;
+ end;
+ formatchanged;
 end;
 
 { tcustombooleandisp }
