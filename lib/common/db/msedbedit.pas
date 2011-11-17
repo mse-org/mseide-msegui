@@ -988,6 +988,7 @@ type
    property formatedit;
    property formatdisp;
    property kind;
+   property options;
    property onsetvalue;
  end;
 

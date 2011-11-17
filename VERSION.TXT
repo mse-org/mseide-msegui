@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2011-11-17
+ nowutc(), nowlocal() msesysutils.pas -> msedate.pas.
 2011-11-05
  splitteroptionsty spo_nohshrinkzero -> spo_hshrinkzero.
  splitteroptionsty spo_novshrinkzero -> spo_vshrinkzero.

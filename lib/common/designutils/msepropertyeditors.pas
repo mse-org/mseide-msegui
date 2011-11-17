@@ -902,7 +902,7 @@ uses
  mseintegerlisteditor,mseact,msesys,
  msecolordialog,msememodialog,
  mseshapes,msestockobjects,msetexteditor,
- msegraphicstream,
+ msegraphicstream,msedate,
  mseformatbmpicoread{$ifdef FPC},mseformatjpgread,mseformatpngread,
  mseformatpnmread,mseformattgaread,mseformatxpmread{$endif},
  msestat,msestatfile,msefileutils,

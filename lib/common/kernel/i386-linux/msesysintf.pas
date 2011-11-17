@@ -49,7 +49,8 @@ procedure setcloexec(const fd: integer);
 
 implementation
 uses
- msesysintf1,sysutils,msesysutils,msefileutils{$ifdef FPC},dateutils{$else},DateUtils{$endif}
+ msesysintf1,sysutils,msesysutils,msefileutils
+ {$ifdef FPC},dateutils{$else},DateUtils{$endif},msedate
  {$ifdef mse_debugmutex},mseapplication{$endif};
  
 function sigactionex(SigNum: Integer; var Action: TSigActionex;

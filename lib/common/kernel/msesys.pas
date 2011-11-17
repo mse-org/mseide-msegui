@@ -147,10 +147,6 @@ function getcommandlineargument(const index: integer): string;
 procedure deletecommandlineargument(const index: integer);
                 //index 1..argumentcount-1, no action otherwise
 
-function nowutc: tdatetime;
-function nowlocal: tdatetime;
-
-
 {$ifdef FPC}
 function getexceptiontext(obj: tobject; addr: pointer; framecount: longint;
                                      frames: ppointer): msestring;
@@ -181,16 +177,6 @@ Procedure CatchUnhandledException (Obj : TObject; Addr: Pointer;
  //[public,alias:'FPC_BREAK_UNHANDLED_EXCEPTION'];
  {$endif}
 {$endif}
-
-function nowutc: tdatetime;
-begin
- result:= sys_getutctime;
-end;
-
-function nowlocal: tdatetime;
-begin
- result:= sys_getlocaltime;
-end;
 
 procedure checkdirstreamdata(var adata: dirstreamty);
 var

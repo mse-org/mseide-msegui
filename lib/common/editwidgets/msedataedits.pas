@@ -1208,6 +1208,9 @@ type
    property wheelsensitivity;
  end;
 
+ datetimeeditoptionty = (dteo_showlocal,dteo_showutc);
+ datetimeeditoptionsty = set of datetimeeditoptionty;
+ 
  tcustomdatetimeedit = class(tnumedit)
   private
    fonsetvalue: setdatetimeeventty;
@@ -1218,6 +1221,8 @@ type
    fmin: tdatetime;
    fmax: tdatetime;
    fkind: datetimekindty;
+   foptions: datetimeeditoptionsty;
+   fconvert: dateconvertty;
    procedure setvalue(const Value: tdatetime);
    procedure setformatdisp(const Value: msestring);
    procedure setformatedit(const Value: msestring);
@@ -1235,6 +1240,7 @@ type
    function getifilink: tifidatetimelinkcomp;
    procedure setifilink(const avalue: tifidatetimelinkcomp);
   {$endif}
+   procedure setoptions(const avalue: datetimeeditoptionsty);
   protected
    function gettextvalue(var accept: boolean; const quiet: boolean): tdatetime;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -1264,6 +1270,8 @@ type
    property min: tdatetime read fmin write fmin;
    property max: tdatetime read fmax write fmax;
    property kind: datetimekindty read fkind write setkind default dtk_date;
+   property options: datetimeeditoptionsty read foptions write setoptions
+                                                                   default [];
    property gridvalue[const index: integer]: tdatetime 
                  read getgridvalue write setgridvalue; default;
    property gridvalues: datetimearty read getgridvalues write setgridvalues;
@@ -1282,6 +1290,7 @@ type
    property min {stored false};
    property max {stored false};
    property kind;
+   property options;
   {$ifdef mse_with_ifi}
    property ifilink;
   {$endif}
@@ -5304,28 +5313,32 @@ function tcustomdatetimeedit.gettextvalue(var accept: boolean;
                                              const quiet: boolean): tdatetime;
 var
  mstr1: msestring;
+ bo1: boolean;
 begin
- try
-  mstr1:= feditor.text;
-  checktext(mstr1,accept);
-  if not accept then begin
-   result:= emptydatetime; //compiler warning
-   exit;
+ mstr1:= feditor.text;
+ checktext(mstr1,accept);
+ if not accept then begin
+  result:= emptydatetime; //compiler warning
+  exit;
+ end;
+ bo1:= false;
+ case fkind of
+  dtk_time: begin
+   bo1:= trystringtotime(mstr1,fformatedit,result);
   end;
-  case fkind of
-   dtk_time: begin
-    result:= stringtotime(mstr1,fformatedit);
-   end;
-   dtk_date: begin
-    result:= stringtodate(mstr1,fformatedit);
-   end;
-   else begin
-    result:= stringtodatetime(mstr1,fformatedit);
-   end;
+  dtk_date: begin
+   bo1:= trystringtodate(mstr1,fformatedit,result);
   end;
- except
+  else begin
+   bo1:= trystringtodatetime(mstr1,fformatedit,result);
+  end;
+ end;
+ if not bo1 then begin
   formaterror(quiet);
   accept:= false
+ end
+ else begin
+  checkdateconvert(fconvert,result);
  end;
 end;
 
@@ -5372,19 +5385,21 @@ end;
 procedure tcustomdatetimeedit.texttodata(const atext: msestring; var data);
 var
  dat1: tdatetime;
+ bo1: boolean;
 begin
- try
-  if fkind = dtk_time then begin
-   dat1:= stringtotime(atext);
+ if fkind = dtk_time then begin
+  bo1:= trystringtotime(atext,fformatedit,dat1,fconvert);
+ end
+ else begin
+  bo1:= trystringtodatetime(atext,fformatedit,dat1,fconvert);
+ end;
+ if not bo1 then begin
+  bo1:= trystrtorealty(atext,dat1);
+  if not bo1 then begin
+   dat1:= emptyreal;
   end
   else begin
-   dat1:= stringtodatetime(atext);
-  end;
- except
-  try
-   dat1:= strtorealty(atext);
-  except
-   dat1:= emptyreal;
+   checkdateconvert(fconvert,dat1);
   end;
  end;
  if cmprealty(fmin,dat1) > 0 then begin
@@ -5407,6 +5422,7 @@ begin
  else begin
   dat1:= tdatetime(data);
  end;
+ checkdatereconvert(fconvert,dat1);
  if (@data = nil) and focused then begin
   mstr1:= fformatedit;
  end
@@ -5548,6 +5564,23 @@ end;
 function tcustomdatetimeedit.getdefaultvalue: pointer;
 begin
  result:= @fvaluedefault;
+end;
+
+procedure tcustomdatetimeedit.setoptions(const avalue: datetimeeditoptionsty);
+begin
+ if avalue <> foptions then begin
+  foptions:= datetimeeditoptionsty(
+       setsinglebit(longword(avalue),longword(foptions),
+                                      longword([dteo_showlocal,dteo_showutc])));
+  fconvert:= dc_none;
+  if dteo_showutc in foptions then begin
+   fconvert:= dc_tolocal;
+  end;
+  if dteo_showlocal in foptions then begin
+   fconvert:= dc_toutc;
+  end;
+  formatchanged;
+ end;
 end;
 
 end.

@@ -611,7 +611,7 @@ implementation
 
 uses
  sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,
- msebits,msesysintf,mseguiintf,msearrayutils,msesys
+ msebits,msesysintf,mseguiintf,msearrayutils,msesys,msedate
         {$ifdef UNIX},mselibc{$else},windows{$endif};
 
 const                                      

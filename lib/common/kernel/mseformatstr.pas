@@ -16,6 +16,8 @@ uses
  Classes, msetypes,msestrings,SysUtils{,msesys};
 
 type
+ dateconvertty = (dc_none,dc_tolocal,dc_toutc);
+ 
   TMonthNameArraymse = array[1..12] of msestring;
   TWeekNameArraymse = array[1..7] of msestring;
 
@@ -228,7 +230,10 @@ function trystrtohex64(const inp: string; out value: qword): boolean;
 function strtohex64(const inp: string): qword;
 
 
-function trystrtointmse(const text: msestring; out value: integer): boolean;
+function trystrtointmse(const text: msestring;
+                                   out value: integer): boolean; overload;
+function trystrtointmse(const text: msestring;
+                                   out value: longword): boolean; overload;
 function trystrtoint64mse(const text: msestring; out value: int64): boolean;
 function trystrtoqwordmse(const text: msestring; out value: qword): boolean;
 
@@ -283,22 +288,50 @@ function replaceext(inp,ext: string): string;
 function bcdtoint(inp: byte): integer;
 function inttobcd(inp: integer): byte;
 
-function stringtotime(const avalue: msestring): tdatetime; overload;
 function stringtotime(const avalue: msestring;
-                              const aformat: msestring): tdatetime; overload;
+                               const convert: dateconvertty = dc_none): tdatetime; overload;
+function stringtotime(const avalue: msestring;
+                              const aformat: msestring;
+                               const convert: dateconvertty = dc_none): tdatetime; overload;
+function trystringtotime(const text: msestring;
+                              out value: tdatetime;
+                               const convert: dateconvertty = dc_none): boolean;  overload;
+function trystringtotime(const text: msestring;
+                              const aformat: msestring;
+                              out value: tdatetime;
+                               const convert: dateconvertty = dc_none): boolean;  overload;
 
 function timetostring(const avalue: tdatetime; 
                           const format: msestring = 't'): msestring;
 function datetostring(const avalue: tdatetime;
                           const format: msestring = 'c'): msestring;
-function stringtodate(const avalue: msestring): tdatetime;  overload;
 function stringtodate(const avalue: msestring;
-                              const aformat: msestring): tdatetime;  overload;
+                               const convert: dateconvertty = dc_none): tdatetime;  overload;
+function stringtodate(const avalue: msestring;
+                              const aformat: msestring;
+                               const convert: dateconvertty = dc_none): tdatetime;  overload;
+function trystringtodate(const text: msestring; out value: tdatetime;
+                               const convert: dateconvertty = dc_none): boolean;  overload;
+function trystringtodate(const text: msestring;
+                              const aformat: msestring;
+                              out value: tdatetime;
+                               const convert: dateconvertty = dc_none): boolean;  overload;
 function datetimetostring(const avalue: tdatetime;
                           const format: msestring = 'c'): msestring;
-function stringtodatetime(const avalue: msestring): tdatetime; overload;
 function stringtodatetime(const avalue: msestring;
-                              const aformat: msestring): tdatetime; overload;
+                               const convert: dateconvertty = dc_none): tdatetime; overload;
+function stringtodatetime(const avalue: msestring;
+                              const aformat: msestring;
+                               const convert: dateconvertty = dc_none): tdatetime; overload;
+function trystringtodatetime(const text: msestring;
+                              out value: tdatetime;
+                               const convert: dateconvertty = dc_none): boolean;  overload;
+function trystringtodatetime(const text: msestring;
+                              const aformat: msestring;
+                              out value: tdatetime;
+                               const convert: dateconvertty = dc_none): boolean;  overload;
+procedure checkdateconvert(const convert: dateconvertty; var value: tdatetime);
+procedure checkdatereconvert(const convert: dateconvertty; var value: tdatetime);
 
 function timemse(const value: tdatetime): tdatetime;
   //bringt timeanteil im mseformat
@@ -1367,39 +1400,75 @@ begin
  setlength(result,po1-pmsechar(pointer(result)));
 end;
 
-function stringtotime(const avalue: msestring): tdatetime;
+procedure checkdateconvert(const convert: dateconvertty; var value: tdatetime);
+begin
+ if value <> emptydatetime then begin
+  if convert = dc_toutc then begin
+   value:= localtimetoutc(value);
+  end
+  else begin
+   if convert = dc_tolocal then begin
+    value:= utctolocaltime(value);
+   end;
+  end;
+ end;
+end;
+
+procedure checkdatereconvert(const convert: dateconvertty; var value: tdatetime);
+begin
+ if value <> emptydatetime then begin
+  if convert = dc_tolocal then begin
+   value:= localtimetoutc(value);
+  end
+  else begin
+   if convert = dc_toutc then begin
+    value:= utctolocaltime(value);
+   end;
+  end;
+ end;
+end;
+
+function stringtotime(const text: msestring; out value: tdatetime;
+                               const convert: dateconvertty = dc_none): boolean;
 var
  mstr1: msestring;
  timesep: msechar;
 begin
- if avalue = ' ' then begin
-  result:= frac(nowlocal);
+ result:= true;
+ if text = ' ' then begin
+  if convert = dc_toutc then begin
+   value:= frac(nowutc);
+  end
+  else begin
+   value:= frac(nowlocal);
+  end;
  end
  else begin
-  if avalue = '' then begin
-   result:= emptydatetime;
+  if text = '' then begin
+   value:= emptydatetime;
   end
   else begin
    timesep:= defaultformatsettingsmse.timeseparator;
-   if (countchars(avalue,timesep) = 0) and
-      (countchars(avalue,defaultformatsettingsmse.timeseparator) = 0) then begin
-    case length(avalue) of
+   if (countchars(text,timesep) = 0) and
+      (countchars(text,defaultformatsettingsmse.timeseparator) = 0) then begin
+    case length(text) of
      3,4: begin
-      mstr1:= copy(avalue,1,2)+timesep+copy(avalue,3,2);
+      mstr1:= copy(text,1,2)+timesep+copy(text,3,2);
      end;
      5,6: begin
-      mstr1:= copy(avalue,1,2)+timesep+copy(avalue,3,2)+timesep+
-              copy(avalue,5,2);
+      mstr1:= copy(text,1,2)+timesep+copy(text,3,2)+timesep+
+              copy(text,5,2);
      end;
      else begin
-      mstr1:= avalue;
+      mstr1:= text;
      end;
     end;
-    result:= sysutils.strtotime(mstr1);
+    result:= sysutils.trystrtotime(mstr1,value);
    end
    else begin
-    result:= sysutils.strtotime(avalue);
+    result:= sysutils.trystrtotime(text,value);
    end;
+   checkdateconvert(convert,value);
   end;
  end;
 end;
@@ -1434,16 +1503,6 @@ begin
  end;
 end;
 
-function stringtodate(const avalue: msestring): tdatetime;
-begin
- if avalue = '' then begin
-  result:= emptydatetime;
- end
- else begin
-  result:= trunc(stringtodatetime(avalue));
- end;
-end;
-
 function datetostring(const avalue: tdatetime; const format: msestring = 'c'): msestring;
 begin
  if avalue = emptydatetime then begin
@@ -1454,41 +1513,9 @@ begin
  end;
 end;
 
-function stringtodatetime(const avalue: msestring): tdatetime;
-var
- mstr1: msestring;
- datsep: msechar;
+procedure formaterror(const value: string);
 begin
- if avalue = ' ' then begin
-  result:= nowlocal;
- end
- else begin
-  if avalue = '' then begin
-   result:= emptydatetime;
-  end
-  else begin
-   datsep:= defaultformatsettingsmse.dateseparator;
-   if (countchars(avalue,datsep) = 0) and
-      (countchars(avalue,defaultformatsettingsmse.timeseparator) = 0) then begin
-    case length(avalue) of
-     3,4: begin
-      mstr1:= copy(avalue,1,2)+datsep+copy(avalue,3,2);
-     end;
-     5,6: begin
-      mstr1:= copy(avalue,1,2)+datsep+copy(avalue,3,2)+datsep+
-              copy(avalue,5,2);
-     end;
-     else begin
-      mstr1:= avalue;
-     end;
-    end;
-    result:= strtodatetime(mstr1);
-   end
-   else begin
-    result:= strtodatetime(avalue);
-   end;
-  end;
- end;
+ raise exception.Create('Invalid value '''+value+'''.');
 end;
 
 type
@@ -1582,9 +1609,10 @@ function comparescan(const l,r): integer;
 begin
  result:= scaninfoty(l).index - scaninfoty(r).index;
 end;
- 
-function stringtodatetime(const avalue: msestring;
-                              const aformat: msestring): tdatetime;
+
+function trystringtodatetime(const text: msestring;
+                const aformat: msestring; out value: tdatetime;
+                               const convert: dateconvertty = dc_none): boolean;
  procedure removequotes(var astring: msestring);
  var
   po1: pmsechar;
@@ -1694,6 +1722,7 @@ var
 var
  mstr1: msestring;
  int1,int2,int3,int4,int5: integer;
+ dt1,dt2: tdatetime;
  grouporder: array of dttokengroupty;
  groupused: array[dttokengroupty] of boolean;
  ar1: msestringarty;
@@ -1707,8 +1736,11 @@ var
                   { = (dttg_year,dttg_mon,dttg_day);}
 
 begin
- if avalue = '' then begin
-  result:= emptydatetime;
+ result:= false;
+ if text = '' then begin
+  value:= emptydatetime;
+  result:= true;
+  exit;
  end
  else begin
   for int1:= 0 to high(dateorder) do begin
@@ -1718,8 +1750,13 @@ begin
   defaultdateorder[1]:= dttg_mon;
   defaultdateorder[2]:= dttg_day;
 
-  refdate:= nowlocal;
-  if aformat = '' then begin
+  if convert = dc_toutc then begin
+   refdate:= nowutc;
+  end
+  else begin
+   refdate:= nowlocal;
+  end;
+  if text = '' then begin
    mstr1:= 'c';
   end
   else begin
@@ -1794,17 +1831,17 @@ begin
    end;
   end;
   
-  int2:= length(avalue);
-  if (int2 > 2) and isnumber(avalue) then begin
+  int2:= length(text);
+  if (int2 > 2) and isnumber(text) then begin
    mstr1:= '';
    int1:= 1;
    while int1 <= int2 do begin
-    mstr1:= mstr1+copy(avalue,int1,2)+' ';
+    mstr1:= mstr1+copy(text,int1,2)+' ';
     int1:= int1 + 2;
    end;
   end
   else begin
-   mstr1:= struppercase(avalue);
+   mstr1:= struppercase(text);
   end;
   setlength(ar1,length(mstr1)); //max
   int2:= 0;
@@ -1980,58 +2017,174 @@ begin
     hour:= hour + 12;
    end;
    if high(datear) >= 0 then begin
-    result:= composedatetime(encodedate(year,month,day),
-                                encodetime(hour,minute,second,millisecond));
+    if not tryencodedate(year,month,day,dt1) then begin
+     exit;
+    end;
+    if not tryencodetime(hour,minute,second,millisecond,dt2) then begin
+     exit;
+    end;
+    value:= composedatetime(dt1,dt2);
+    result:= true;
    end
    else begin
-    result:= encodetime(hour,minute,second,millisecond);
+    if not tryencodetime(hour,minute,second,millisecond,value) then begin
+     exit;
+    end;
+    result:= true;
    end;
   end
   else begin
    if (high(datear) >= 0) or hasmonthname then begin
-    result:= encodedate(year,month,day);
+    if not tryencodedate(year,month,day,value) then begin
+     exit;
+    end;
+    result:= true;
    end
    else begin
-    if avalue = ' ' then begin
+    if text = ' ' then begin
+     result:= true;
      if hasdateformat and hastimeformat or 
         not(hasdateformat or hastimeformat) then begin
-      result:= refdate;
+      value:= refdate;
      end
      else begin
       if hasdateformat then begin
-       result:= trunc(refdate);
+       value:= trunc(refdate);
       end
       else begin
-       result:= frac(refdate);
+       value:= frac(refdate);
       end;
      end;
-    end
-    else begin
-     raise exception.create('Invalid date or time.');
+     exit;
     end;
+   end;
+  end;
+ end;
+ if result then begin
+  checkdateconvert(convert,value);
+ end;
+end;
+
+function stringtodatetime(const avalue: msestring; const aformat: msestring;
+                               const convert: dateconvertty = dc_none): tdatetime;
+begin
+ if not trystringtodatetime(avalue,aformat,result,convert) then begin
+  formaterror(avalue);
+ end;
+end;
+
+function trystringtodatetime(const text: msestring; out value: tdatetime;
+                               const convert: dateconvertty = dc_none): boolean;
+var
+ mstr1: msestring;
+ datsep: msechar;
+begin
+ result:= true;
+ if text = '' then begin
+  value:= emptydatetime;
+ end
+ else begin
+  if text = ' ' then begin
+   if convert = dc_toutc then begin
+    value:= nowutc;
+   end
+   else begin
+    value:= nowlocal;
+   end;
+  end
+  else begin
+   datsep:= defaultformatsettingsmse.dateseparator;
+   if (countchars(text,datsep) = 0) and
+      (countchars(text,defaultformatsettingsmse.timeseparator) = 0) then begin
+    case length(text) of
+     3,4: begin
+      mstr1:= copy(text,1,2)+datsep+copy(text,3,2);
+     end;
+     5,6: begin
+      mstr1:= copy(text,1,2)+datsep+copy(text,3,2)+datsep+
+              copy(text,5,2);
+     end;
+     else begin
+      mstr1:= text;
+     end;
+    end;
+    result:= trystrtodatetime(mstr1,value);
+   end
+   else begin
+    result:= trystrtodatetime(text,value);
+   end;
+   if result then begin
+    checkdateconvert(convert,value);
    end;
   end;
  end;
 end;
 
-function stringtodate(const avalue: msestring;
-                              const aformat: msestring): tdatetime;
+function stringtodatetime(const avalue: msestring;
+                               const convert: dateconvertty = dc_none): tdatetime;
 begin
- if avalue = '' then begin
-  result:= emptydatetime;
- end
- else begin
-  result:= trunc(stringtodatetime(avalue,aformat));
+ if not trystringtodatetime(avalue,result,convert) then begin
+  formaterror(avalue);
  end;
 end;
 
-function stringtotime(const avalue: msestring;
-                              const aformat: msestring): tdatetime;
+function trystringtodate(const text: msestring;
+                const aformat: msestring; out value: tdatetime;
+                               const convert: dateconvertty = dc_none): boolean;
+begin
+ if text = '' then begin
+  value:= emptydatetime;
+  result:= true;
+ end
+ else begin
+  result:= trystringtodatetime(text,aformat,value,convert);
+  if result then begin
+   value:= trunc(value);
+  end;
+ end;
+end;
+
+function stringtodate(const avalue: msestring;
+                              const aformat: msestring;
+                               const convert: dateconvertty = dc_none): tdatetime;
+begin
+ if not trystringtodate(avalue,aformat,result,convert) then begin
+  formaterror(avalue);
+ end;
+end;
+
+function trystringtodate(const text: msestring; out value: tdatetime;
+                               const convert: dateconvertty = dc_none): boolean;
+begin
+ if text = '' then begin
+  value:= emptydatetime;
+  result:= true;
+ end
+ else begin
+  result:= trystringtodatetime(text,value,convert);
+  if result then begin
+   value:= trunc(value);
+  end;
+ end;
+end;
+
+function stringtodate(const avalue: msestring;
+                               const convert: dateconvertty = dc_none): tdatetime;
+begin
+ if not trystringtodate(avalue,result,convert) then begin
+  formaterror(avalue);
+ end;
+end;
+
+function trystringtotime(const text: msestring;
+                const aformat: msestring; out value: tdatetime;
+                               const convert: dateconvertty = dc_none): boolean;
 var
  mstr1: msestring;
 begin
- if avalue = '' then begin
-  result:= emptydatetime;
+ if text = '' then begin
+  value:= emptydatetime;
+  result:= true;
  end
  else begin
   if aformat = '' then begin
@@ -2040,10 +2193,47 @@ begin
   else begin
    mstr1:= aformat;
   end;
-  result:= frac(stringtodatetime(avalue,mstr1));
+  result:= trystringtodatetime(text,mstr1,value,convert);
+  if result then begin
+   value:= frac(value);
+  end;
  end;
 end;
 
+function stringtotime(const avalue: msestring;
+                             const aformat: msestring;
+                               const convert: dateconvertty = dc_none): tdatetime;
+begin
+ if not trystringtotime(avalue,aformat,result,convert) then begin
+  formaterror(avalue);
+ end; 
+end;
+
+function trystringtotime(const text: msestring; out value: tdatetime;
+                               const convert: dateconvertty = dc_none): boolean;
+var
+ mstr1: msestring;
+begin
+ if text = '' then begin
+  value:= emptydatetime;
+  result:= true;
+ end
+ else begin
+  result:= trystringtodatetime(text,value,convert);
+  if result then begin
+   value:= frac(value);
+  end;
+ end;
+end;
+
+function stringtotime(const avalue: msestring;
+                               const convert: dateconvertty = dc_none): tdatetime;
+begin
+ if not trystringtotime(avalue,result,convert) then begin
+  formaterror(avalue);
+ end; 
+end;
+ 
 function timemse(const value: tdatetime): tdatetime;
   //bringt timeanteil im mseformat
 begin
@@ -3169,11 +3359,6 @@ begin
  end;
 end;
 
-procedure formaterror(const value: string);
-begin
- raise exception.Create('Invalid number '''+value+'''.');
-end;
-
 function trystrtointmse(const text: msestring; out value: integer): boolean;
 const
  max = maxint div 10;
@@ -3225,6 +3410,60 @@ begin
    exit;
   end;
  end;
+ result:= true;
+end;
+
+function trystrtointmse(const text: msestring; out value: longword): boolean;
+const
+ max = $ffffffff div 10;
+var
+ po1: pmsechar;
+// neg: boolean;
+begin
+ result:= false;
+ value:= 0;
+ if text <> '' then begin
+  po1:= pointer(text);
+  while (po1^ = ' ') or (po1^ = c_tab) do begin
+   inc(po1);
+  end;
+//  neg:= po1^ = msechar('-');
+//  if not neg then begin
+  if po1^ = '+' then begin
+   inc(po1);
+  end;
+//  end
+//  else begin
+//   inc(po1);
+//  end;
+  if po1^ = #0 then begin
+   exit;
+  end;
+  while po1^ <> #0 do begin
+   if (po1^ < '0') or (po1^ > '9')  then begin
+    exit;
+   end;
+//   if value < 0 then begin
+//    exit;
+//   end;
+   if value > max then begin
+    exit;
+   end;
+   value:= value * 10 + (ord(po1^) - ord('0'));
+   inc(po1);
+  end;
+ end;
+// if neg then begin
+//  if (value < 0) and (value <> minint) then begin
+//   exit;
+//  end;  
+//  value:= -value;
+// end
+// else begin
+//  if value < 0 then begin
+//   exit;
+//  end;
+// end;
  result:= true;
 end;
 

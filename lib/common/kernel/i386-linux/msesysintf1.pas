@@ -12,8 +12,6 @@ unit msesysintf1;
 interface
 uses
  msesystypes,mselibc;
-const
- unidatetimeoffset = -25569;
 type
  linuxmutexty = record
   case integer of
@@ -47,7 +45,7 @@ function unigettimestamp(timeoutusec: integer): timespec;
 implementation
 
 uses
- dateutils;
+ dateutils,msedate;
 
 {$ifdef mse_debugmutex}
 var

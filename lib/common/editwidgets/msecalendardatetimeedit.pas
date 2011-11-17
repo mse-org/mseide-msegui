@@ -48,6 +48,7 @@ type
    property min {stored false};
    property max {stored false};
    property kind;
+   property options;
 {$ifdef mse_with_ifi}
    property ifilink;
 {$endif}
@@ -57,7 +58,7 @@ type
 
 implementation
 uses
- sysutils,mseformatstr,msesys;
+ sysutils,mseformatstr,msesys,msedate;
  
 { tcustomcalendardatetimeedit }
 
