@@ -432,7 +432,9 @@ var
 //    lwo1: longword;
     {$endif}
    begin
+   {$ifdef FPC}{$warnings off}{$endif}
     with twriter1(writer) do begin
+   {$ifdef FPC}{$warnings on}{$endif}
      with node.info do begin
       case valuetype of
        vaNull: begin
@@ -571,7 +573,9 @@ var
    end;
 
   begin //writepropdat
+   {$ifdef FPC}{$warnings off}{$endif}
    with twriter1(writer) do begin
+   {$ifdef FPC}{$warnings on}{$endif}
     {$ifdef FPC}
     driver.beginproperty(node.info.name);
     {$else}
@@ -590,7 +594,9 @@ var
   Prefix: Byte;
   {$endif}
  begin //writeobj
+   {$ifdef FPC}{$warnings off}{$endif}
   with twriter1(writer) do begin
+   {$ifdef FPC}{$warnings on}{$endif}
    compname:= node.info.name;
    compclass:= node.info.stringvalue;
    flags:= tfilerflags({$ifdef FPC}longword{$else}byte{$endif}(node.info.integervalue and $07));
@@ -639,7 +645,9 @@ var
 begin //writeprops
  writer:= twritermse.Create(stream,4096);
  try
+   {$ifdef FPC}{$warnings off}{$endif}
   with twriter1(writer) do begin
+   {$ifdef FPC}{$warnings on}{$endif}
   {$ifdef FPC}
 //   driver.beginrootcomponent; //signature written by begincomponent
   {$else}

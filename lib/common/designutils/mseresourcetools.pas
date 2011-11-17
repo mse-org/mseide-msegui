@@ -32,14 +32,14 @@ var
  instream: ttextstream;
  outstream: ttextstream;
  outfilename: filenamety;
- mstr1: msestring;
+// mstr1: msestring;
  scanner: tscanner;
  parser: tparser;
  ar1: constinfoarty;
  int1: integer;
  int2: integer;
  str1: string;
- po1: pbyte;
+// po1: pbyte;
 begin
  instream:= ttextstream.create(sourcefilename,fm_read);
  try
