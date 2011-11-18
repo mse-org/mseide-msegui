@@ -1420,7 +1420,7 @@ begin
   if arow = -1 then begin
    arow:= twidgetgrid(fgrid).ffocusedcell.row;
   end;
-  if arow >= 0 then begin
+  if (arow >= 0) and (arow < fdata.count) then begin
    tdatalist1(fdata).getgriddata(arow,dest);
   end
   else begin
