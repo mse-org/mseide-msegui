@@ -1254,7 +1254,8 @@ procedure tobjectinspectorfo.clear;
 begin
  saveproppath;
  compselector.value:= '';
- values.itemlist.clear;
+ grid.clear;
+// values.itemlist.clear;
  frereadprops:= false;
 end;
 
