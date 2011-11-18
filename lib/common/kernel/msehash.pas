@@ -566,7 +566,7 @@ procedure thashdatalist.rehash;
 var
  puint1,puint2: ptruint;
  po1: phashdataty;
- po2: phashvaluety;
+ po2: pptruint;
 begin
  po1:= pointer(pchar(fdata) + fassignedroot);
  while true do begin
@@ -574,8 +574,8 @@ begin
   if puint1 = 0 then begin
    break;
   end;
-  po2:= phashvaluety(pchar(fhashtable) + 
-                       (po1^.header.hash and fmask)*sizeof(hashvaluety));
+  po2:= pptruint(pchar(fhashtable) + 
+                           (po1^.header.hash and fmask)*sizeof(ptruint));
   puint2:= po2^;
   po1^.header.nexthash:= puint2;
   po2^:= pchar(po1) - fdata;
@@ -610,7 +610,7 @@ begin
  result^.header.prevhash:= 0;
  hash1:= hashkey(akey);
  result^.header.hash:= hash1;
- hash1:= hash1 and fmask;
+ hash1:= hash1 and ptruint(fmask);
  puint2:= fhashtable[hash1];
  result^.header.nexthash:= puint2;
  puint1:= pchar(result) - fdata;
