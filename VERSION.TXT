@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2011-11-19
+ coloptionty co_sortdescent -> co_sortdescend
 2011-11-17
  nowutc(), nowlocal() msesysutils.pas -> msedate.pas.
 2011-11-05

@@ -46,7 +46,7 @@ type
                 co_rowfont,co_rowcolor,co_zebracolor, //deprecated -> co1_
                 co_rowcoloractive,                    //deprecated -> co1_
 
-                co_nosort,co_sortdescent,co_norearange,
+                co_nosort,co_sortdescend,co_norearange,
                 co_cancopy,co_canpaste,co_mousescrollrow,co_rowdatachange
                 );
  coloptionsty = set of coloptionty;
@@ -4335,7 +4335,7 @@ begin
                                 (fgrid.datacols.sortcol <> index) then begin
     include(al1,al_grayed);
    end;
-   if co_sortdescent in options then begin
+   if co_sortdescend in options then begin
     int1:= ord(stg_arrowupsmall);
    end
    else begin
@@ -5014,11 +5014,11 @@ begin
        fgrid.updatesortcol(-1);
       end
       else begin
-       if co_sortdescent in foptions then begin
-        options:= foptions - [co_sortdescent];
+       if co_sortdescend in foptions then begin
+        options:= foptions - [co_sortdescend];
        end
        else begin
-        options:= foptions + [co_sortdescent];
+        options:= foptions + [co_sortdescend];
        end;
        fgrid.updatesortcol(index);
       end;
@@ -6023,7 +6023,7 @@ begin
          {$ifdef FPC}longword{$else}longword{$endif}(foptions),
          {$ifdef FPC}longword{$else}longword{$endif}(mask))));
  if coloptionsty(longword(optionsbefore) xor longword(foptions)) * 
-          [co_nosort,co_sortdescent] <> [] then begin
+          [co_nosort,co_sortdescend] <> [] then begin
   fgrid.sortinvalid(index,-1);
   fgrid.checksort;
  end;
@@ -6135,12 +6135,12 @@ begin
                    (og_colsizing in fgrid.optionsgrid) then begin
    width:= reader.readinteger('width'+mstr1,fwidth,0);
   end;
-  bo1:= reader.readboolean('sortdescent'+mstr1,co_sortdescent in foptions);
+  bo1:= reader.readboolean('sortdescend'+mstr1,co_sortdescend in foptions);
   if bo1 then begin
-   options:= options + [co_sortdescent];
+   options:= options + [co_sortdescend];
   end
   else begin
-   options:= options - [co_sortdescent];
+   options:= options - [co_sortdescend];
   end;
  end;
 end;
@@ -6162,7 +6162,7 @@ begin
                    (og_colsizing in fgrid.optionsgrid) then begin
    writer.writeinteger('width'+mstr1,fwidth);
   end;
-  writer.writeboolean('sortdescent'+mstr1,co_sortdescent in foptions);
+  writer.writeboolean('sortdescend'+mstr1,co_sortdescend in foptions);
  end;
 end;
 {
@@ -8015,7 +8015,7 @@ begin
     if not(co_nosort in foptions) then begin
      result:= sortcompare(l,r);
      if result <> 0 then begin
-      if co_sortdescent in foptions then begin
+      if co_sortdescend in foptions then begin
        result:= - result;
       end;
       break;
@@ -8028,7 +8028,7 @@ begin
   with tdatacol(fitems[fsortcol]) do begin
    if not(co_nosort in foptions) then begin
     result:= sortcompare(l,r);
-    if co_sortdescent in foptions then begin
+    if co_sortdescend in foptions then begin
      result:= - result;
     end;
    end;
@@ -8037,7 +8037,7 @@ begin
    with tdatacol(fitems[fsortcoldefault]) do begin
     if not(co_nosort in foptions) then begin
      result:= sortcompare(l,r);
-     if co_sortdescent in foptions then begin
+     if co_sortdescend in foptions then begin
       result:= - result;
      end;
     end;
@@ -12036,6 +12036,9 @@ end;
 
 procedure tcustomgrid.rowup(const action: focuscellactionty = fca_focusin);
 begin
+ if ffocusedcell.row = 0 then begin
+  checkmorerows(-1);
+ end;
  with fdatacols.frowstate do begin
   if visiblerowcount > 0 then begin
    if (ffocusedcell.row > 0) or not (og_wraprow in foptionsgrid) then begin
@@ -12077,6 +12080,12 @@ procedure tcustomgrid.pageup(const action: focuscellactionty = fca_focusin);
 var
  int1: integer;
 begin
+ if (ffocusedcell.row >= 0) then begin
+  int1:= ffocusedcell.row - rowsperpage;
+  if int1 < 0 then begin
+   checkmorerows(int1);
+  end;
+ end;
  with fdatacols.frowstate do begin
   if visiblerowcount > 0 then begin
    int1:= visiblerowstep(ffocusedcell.row,-rowsperpage+1,false);
@@ -15071,7 +15080,7 @@ function tcustomgrid.getsortdescend(const acol: integer): boolean;
 begin
  result:= false;
  if (acol >= 0) and (acol < fdatacols.count) then begin
-  result:= co_sortdescent in tdatacol(fdatacols.fitems[acol]).foptions;
+  result:= co_sortdescend in tdatacol(fdatacols.fitems[acol]).foptions;
  end;
 end;
 

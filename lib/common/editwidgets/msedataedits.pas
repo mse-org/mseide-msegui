@@ -228,6 +228,7 @@ type
    function actualcursor(const apos: pointty): cursorshapety; override;
    function widgetcol: twidgetcol;
    function gridrow: integer;
+   function gridcol: integer;
    function griddata: tdatalist;
    property gridintf: iwidgetgrid read fgridintf;
    function textclipped(const arow: integer; out acellrect: rectty): boolean; overload;
@@ -2147,6 +2148,16 @@ begin
  end
  else begin
   result:= fgridintf.getcol.grid.row;
+ end;
+end;
+
+function tcustomdataedit.gridcol: integer;
+begin
+ if fgridintf = nil then begin
+  result:= -1;
+ end
+ else begin
+  result:= fgridintf.getcol.index;
  end;
 end;
 

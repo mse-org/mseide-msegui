@@ -209,8 +209,9 @@ type
 
    function edited: boolean;
    function actualcolor: colorty; override;
-   function col: twidgetcol;
+   function widgetcol: twidgetcol;
    function gridrow: integer;
+   function gridcol: integer;
    function griddata: tdatalist;
 
    function checkvalue: boolean; virtual; abstract;
@@ -1675,7 +1676,7 @@ begin
  result:= fgridintf.getcol.datalist;
 end;
 
-function tgraphdataedit.col: twidgetcol;
+function tgraphdataedit.widgetcol: twidgetcol;
 begin
  if fgridintf = nil then begin
   result:= nil;
@@ -1692,6 +1693,16 @@ begin
  end
  else begin
   result:= fgridintf.getcol.grid.row;
+ end;
+end;
+
+function tgraphdataedit.gridcol: integer;
+begin
+ if fgridintf = nil then begin
+  result:= -1;
+ end
+ else begin
+  result:= fgridintf.getcol.index;
  end;
 end;
 
