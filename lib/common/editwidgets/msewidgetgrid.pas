@@ -378,6 +378,7 @@ type
    property onrowsdeleting;
    property onrowsdeleted;
    property onscrollrows;
+   property ongetmorerows;
    property oncellevent;
    property onselectionchanged;
    property onsort;

@@ -1701,9 +1701,11 @@ type
  gridbeforeblockeventty = procedure(const sender: tcustomgrid; var aindex,acount: integer) of object;
  gridblockeventty = procedure(const sender: tcustomgrid; 
                   const aindex: integer; const acount: integer) of object;
- gridsorteventty = procedure(sender: tcustomgrid;
+ gridsorteventty = procedure(const sender: tcustomgrid;
                        const index1,index2: integer; var aresult: integer) of object;
-
+ gridmorerowseventty = procedure(const sender: tcustomgrid;
+                               const count: integer) of object; 
+                               //negative -> before row 0
  gridscrolleventty = procedure(const sender: tcustomgrid;
                                      var step: integer) of object; 
  copyselectioneventty = procedure(const sender: tcustomgrid;
@@ -1774,6 +1776,7 @@ type
    foptionsfold: optionsfoldty;
    foncopyselection: copyselectioneventty;
    fonpasteselection: pasteselectioneventty;
+   fongetmorerows: gridmorerowseventty;
 {$ifdef mse_with_ifi}
    fifilink: tifigridlinkcomp;
 //   procedure ifisetvalue(var avalue; var accept: boolean);
@@ -2011,6 +2014,7 @@ type
                       const arow: integer; const noreadonly: boolean): integer;
    procedure checkcellvalue(var accept: boolean); virtual; 
                    //store edited value to grid
+   procedure checkmorerows(const acount: integer);
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty); virtual;
    procedure afterfocuscell(const cellbefore: gridcoordty;
@@ -2290,7 +2294,10 @@ type
               write fonrowdatachanged;
    property onrowsmoved: gridblockmovedeventty read fonrowsmoved
               write fonrowsmoved;
-   property onscrollrows: gridscrolleventty read fonscrollrows write fonscrollrows;
+   property onscrollrows: gridscrolleventty read fonscrollrows 
+                                                   write fonscrollrows;
+   property ongetmorerows: gridmorerowseventty read fongetmorerows
+                                                   write fongetmorerows;
 
    property onrowsinserting: gridbeforeblockeventty read fonrowsinserting
               write fonrowsinserting;
@@ -2384,6 +2391,7 @@ type
    property onrowsdeleting;
    property onrowsdeleted;
    property onscrollrows;
+   property ongetmorerows;
    property oncellevent;
    property onselectionchanged;
    property onsort;
@@ -2514,6 +2522,7 @@ type
    property onrowsdeleted;
    property onrowcountchanged;
    property onscrollrows;
+   property ongetmorerows;
    property oncellevent;
    property onselectionchanged;
    property onsort;
@@ -10629,10 +10638,27 @@ begin
  end;
 end;
 
+procedure tcustomgrid.checkmorerows(const acount: integer);
+                       //<0 -> before
+begin
+ if canevent(tmethod(fongetmorerows)) then begin
+  fongetmorerows(self,acount);
+ end;
+end;
+
 procedure tcustomgrid.beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
 begin
- //dummy
+ if (cell.row <> invalidaxis) then begin
+  if cell.row >= frowcount then begin
+   checkmorerows(cell.row-frowcount+1);
+  end
+  else begin
+   if cell.row < 0 then begin
+    checkmorerows(cell.row);
+   end;   
+  end;
+ end;
 end;
 
 procedure tcustomgrid.afterfocuscell(const cellbefore: gridcoordty;
@@ -12028,6 +12054,9 @@ procedure tcustomgrid.rowdown(const action: focuscellactionty = fca_focusin);
 //var
 // int1: integer;
 begin
+ if ffocusedcell.row = frowcount - 1 then begin
+  checkmorerows(1);
+ end;
  with fdatacols.frowstate do begin
   if visiblerowcount > 0 then begin
    if not (og_wraprow in foptionsgrid) or 
@@ -12063,6 +12092,10 @@ procedure tcustomgrid.pagedown(const action: focuscellactionty = fca_focusin);
 var
  int1: integer;
 begin
+ int1:= (ffocusedcell.row+rowsperpage)-frowcount+1;
+ if int1 > 0 then begin
+  checkmorerows(int1);
+ end;
  with fdatacols.frowstate do begin
   if visiblerowcount > 0 then begin
    int1:= visiblerowstep(ffocusedcell.row,rowsperpage-1,false);
