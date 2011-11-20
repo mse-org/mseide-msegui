@@ -11262,7 +11262,7 @@ begin
    end;
   end
   else begin
-   if isautoappend then begin
+   if (arow <> frowcount-1) and isautoappend then begin
     if row >= 0 then begin
      if row = 0 then begin
       row:= invalidaxis;
