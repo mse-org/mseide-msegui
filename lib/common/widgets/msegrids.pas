@@ -1953,7 +1953,6 @@ type
    procedure rowstatechanged(const arow: integer); virtual;
    procedure scrolled(const dist: pointty); virtual;
    procedure sortchanged(const all: boolean);
-   procedure sortinvalid(const acol: integer; const arow: integer);
    procedure checksort;
    procedure checkinvalidate;
    function startanchor: gridcoordty;
@@ -2076,6 +2075,8 @@ type
    procedure beginupdate;
    procedure endupdate(const nosort: boolean = false);
    function updating: boolean; reintroduce;
+   procedure sortinvalid(const acol: integer = invalidaxis; 
+                                       const arow: integer = invalidaxis);
    function calcminscrollsize: sizety; override;
    procedure layoutchanged;
    function cellclicked: boolean;
