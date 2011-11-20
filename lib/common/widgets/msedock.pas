@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -3248,8 +3248,15 @@ var
 begin
  fcaption := Value;
  widget1:= fintf.getwidget;
- if widget1.ownswindow then begin
-  widget1.window.caption:= fcaption;
+ if not (csdestroying in widget1.componentstate) then begin
+  if widget1.ownswindow then begin
+   widget1.window.caption:= fcaption;
+  end
+  else begin
+   if istabed and (widget1.parentwidget is tdocktabpage) then begin
+    tdocktabpage(widget1.parentwidget).caption:= value;    
+   end;
+  end;
  end;
 end;
 

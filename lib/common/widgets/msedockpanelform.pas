@@ -450,7 +450,7 @@ begin
            fcontroller.canevent(tmethod(fcontroller.fonupdatecaption)) then begin
   fcontroller.fonupdatecaption(fcontroller,self,acaption);
  end;
- caption:= acaption;
+ dragdock.caption:= acaption;
 end;
 
 procedure tdockpanelform.showexecute(const sender: tobject);
