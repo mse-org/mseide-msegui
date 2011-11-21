@@ -203,13 +203,15 @@ type
    property imagenr: imagenrty read finfo.imagenr write setimagenr default -1;
    property imagenrdisabled: imagenrty read finfo.imagenrdisabled
                       write setimagenrdisabled default -2;
-   property colorglyph: colorty read finfo.colorglyph write setcolorglyph default cl_glyph;
+   property colorglyph: colorty read finfo.colorglyph 
+                              write setcolorglyph default cl_default;
    property color: colorty read finfo.color write setcolor default cl_default;
-   property imagecheckedoffset: integer read finfo.imagecheckedoffset write setimagecheckedoffset default 0;
+   property imagecheckedoffset: integer read finfo.imagecheckedoffset 
+                                      write setimagecheckedoffset default 0;
    property hint: msestring read finfo.hint write sethint;
    property tagaction: integer read finfo.tag write settag default 0;
    property options: actionoptionsty read foptions write setoptions 
-                 default defaultactionoptions;
+                                                default defaultactionoptions;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
 {$ifdef mse_with_ifi}
@@ -436,7 +438,7 @@ begin
   imagenr:= -1;
   imagenrdisabled:= -2;
   options:= aoptions;
-  colorglyph:= cl_glyph;
+  colorglyph:= cl_default;
   color:= cl_default;
  end;
 end;

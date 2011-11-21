@@ -1303,7 +1303,8 @@ begin
   end;
  end
  else begin
-  if isrowexit(info,true) and (info.cellbefore.row < grid.rowcount) then begin
+  if not frereadprops and isrowexit(info,true) and 
+                      (info.cellbefore.row < grid.rowcount) then begin
    tpropertyvalue(values[info.cellbefore.row]).updatestate(true);
   end;
  end;
