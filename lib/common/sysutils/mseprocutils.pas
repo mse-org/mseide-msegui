@@ -773,8 +773,11 @@ var
    if mselibc.pipe(pipehandles) <> 0 then execerr;
   end;
  end;
- 
+
+var
+ lockvar: integer; 
 begin
+ lockvar:= 0;
  result:= invalidprochandle; //compilerwarnung;
  topipehandles.writedes:= invalidfilehandle;
  topipehandles.readdes:= invalidfilehandle;
@@ -832,6 +835,7 @@ begin
   if topipe <> nil then begin
    __close(topipehandles.writedes);
    if dup2(topipehandles.ReadDes,0) = -1 then begin
+    interlockedincrement(lockvar);
     mselibc._exit(exit_failure);
    end;
    __close(topipehandles.readdes);
@@ -839,6 +843,7 @@ begin
   if frompipe <> nil then begin
    __close(frompipehandles.readdes);
    if dup2(frompipehandles.writeDes,1) = -1 then begin
+    interlockedincrement(lockvar);
     mselibc._exit(exit_failure);
    end;
   end;
@@ -846,12 +851,14 @@ begin
    if errorpipe <> frompipe then  begin
     __close(errorpipehandles.readdes);
     if dup2(errorpipehandles.writeDes,2) = -1 then begin
+     interlockedincrement(lockvar);
      mselibc._exit(exit_failure);
     end;
     __close(errorpipehandles.writedes);
    end
    else begin
     if dup2(frompipehandles.writeDes,2) = -1 then begin
+     interlockedincrement(lockvar);
      mselibc._exit(exit_failure);
     end;
    end
@@ -859,6 +866,7 @@ begin
   if frompipe <> nil then begin
    __close(frompipehandles.writedes);
   end;
+  interlockedincrement(lockvar);
   {$ifdef FPC}
   mselibc.execl(shell,shell,['-c',pchar(commandline),nil]);
   {$else}
@@ -902,6 +910,9 @@ begin
    end;
   end;
   result:= procid;
+  while lockvar = 0 do begin
+   usleep(0); //sched_yield
+  end;
  end;
 end;
 
