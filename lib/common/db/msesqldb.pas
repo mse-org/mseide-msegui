@@ -13,7 +13,10 @@ interface
 uses
  classes,db,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseglob,
  msedatabase,sysutils,msetimer,msestrings,msearrayprops;
-  
+
+const
+ defaultsqlcontrolleroptions = defaultdscontrolleroptions + 
+                         [dso_autoapply,dso_autocommitret];
 type
  tmsesqltransaction = class(tsqltransaction)
   private
@@ -47,7 +50,11 @@ type
   protected
    function savepointbegin: integer; override;
    procedure savepointrollback(const alevel: integer = -1); override;
-   procedure savepointrelease; override;      
+   procedure savepointrelease; override;
+  public
+   constructor create(const aowner: tmsesqlquery);
+  published
+   property options default defaultsqlcontrolleroptions;
  end;
                               
  tmsesqlquery = class(tsqlquery,imselocate,idscontroller,igetdscontroller,
@@ -444,7 +451,7 @@ begin
 // updatemode:= upwhereall;
  fsqlonchangebefore:= sql.onchange;
  sql.onchange:= {$ifdef FPC}@{$endif}sqlonchange;
- fcontroller:= tsqldscontroller.create(self,idscontroller(self),-1,false);
+ fcontroller:= tsqldscontroller.create(self);
 end;
 
 destructor tmsesqlquery.destroy;
@@ -1640,6 +1647,12 @@ begin
    writetransaction.savepointrelease;
   end;
  end;
+end;
+
+constructor tsqldscontroller.create(const aowner: tmsesqlquery);
+begin
+ inherited create(aowner,idscontroller(aowner),-1,false);
+ foptions:= defaultsqlcontrolleroptions;
 end;
 
 { tdestparams }

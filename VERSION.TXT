@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2011-11-21
+ tmsesqlquery.controller.options default = [dso_autoapply,dso_autocommitret].
 2011-11-19
  coloptionty co_sortdescent -> co_sortdescend
 2011-11-17
