@@ -10132,10 +10132,15 @@ var
      bo2:= fdatacols[cell1.col].canfocus(info.button,info.shiftstate,false,
                                                                      rowfocus);
      if not bo2 then begin
-      cell1.col:= mergestart(ffocusedcell.col,cell1.row); 
-                                          //try to focus mouse row
-      if (cell1.col < 0) or (co_nofocus in fdatacols[cell1.col].options) then begin
-       cell1.col:= nextfocusablecol(0,false,cell1.row,false);
+      if rowfocus then begin
+       cell1.col:= mergestart(ffocusedcell.col,cell1.row); 
+                                           //try to focus mouse row
+       if (cell1.col < 0) or (co_nofocus in fdatacols[cell1.col].options) then begin
+        cell1.col:= nextfocusablecol(0,false,cell1.row,false);
+       end;
+      end
+      else begin
+       cell1.col:= invalidaxis;
       end;
      end;
      if (cell1.col >= 0) and 
