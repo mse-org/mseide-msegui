@@ -2640,12 +2640,13 @@ procedure tcustombooleaneditradio.togglevalue(const areadonly: boolean;
                                          const down: boolean);
 var
  bo1: boolean;
+ bo2: longbool;
 begin
  if not areadonly then begin
   internalcheckeditem(bo1);
   if (bo_cantoggle in foptions) or not fvalue or not bo1 then begin
-   bo1:= not fvalue;
-   docheckvalue(bo1);
+   bo2:= not fvalue;
+   docheckvalue(bo2);
   end;
  end;
 end;
