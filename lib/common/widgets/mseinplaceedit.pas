@@ -1699,7 +1699,12 @@ begin
   fselstart:= 0;
   fsellength:= length(finfo.text.text);
   updateselect;
-  curindex:= fsellength;
+  if oe_homeonenter in optionsedit then begin
+   curindex:= 0;
+  end
+  else begin
+   curindex:= fsellength;
+  end;
  end;
 end;
 
