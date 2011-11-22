@@ -1897,7 +1897,14 @@ type
   parent: pmodalinfoty;
   events: eventarty; //deferred events
  end;
-
+ showinfoty = record
+  widget: twidget;
+//  modallevel: modallevelty;
+  transientfor: twindow;
+  windowevent,nomodalforreset: boolean
+ end;
+ pshowinfoty = ^showinfoty;
+ 
  twindow = class(teventobject,icanvas)
   private
    fstate: windowstatesty;
@@ -2014,7 +2021,8 @@ type
    procedure unlockactivate;
    procedure setzorder(const value: integer);
    function topmodaltransientfor: twindow;
-   function beginmodal(const doshowwidget: twidget): boolean; overload;
+   function beginmodal(const showinfo: pshowinfoty): boolean; overload;
+//   function beginmodal(const doshowwidget: twidget): boolean; overload;
     //true if window destroyed
   public
    constructor create(const aowner: twidget; const agdi: pgdifunctionaty = nil);
@@ -2773,7 +2781,9 @@ type
                               const once: boolean = false): boolean;
                  //true if actual modalwindow destroyed
    function beginmodal(const sender: twindow;
-                               const doshowwidget: twidget): boolean;
+                               const showinfo: pshowinfoty): boolean;
+//   function beginmodal(const sender: twindow;
+//                               const doshowwidget: twidget): boolean;
                  //true if modalwindow destroyed
    procedure endmodal(const sender: twindow);
    procedure stackunder(const sender: twindow; const predecessor: twindow);
@@ -9712,75 +9722,98 @@ function twidget.internalshow(const modallevel: modallevelty;
 var
  bo1: boolean;
  modaltransientfor: twindow;
- w1: twidget;
+// w1: twidget;
+ info: showinfoty;
 begin
- bo1:= not showing;
- updateroot; //create window
- if fparentwidget <> nil then begin
-  if not (csdesigning in componentstate) then begin
-   include(fwidgetstate,ws_showproc);
-   try
-    fparentwidget.show(modallevel,transientfor);
-   finally
-    exclude(fwidgetstate,ws_showproc);
-   end;
-  end;
- end;
- include(fwidgetstate,ws_visible);
- if bo1 then begin
-  if not updateopaque(false) and (fparentwidget <> nil) then begin
-   fparentwidget.widgetregionchanged(self);
-  end;
- end;
- if ownswindow1 then begin
+ if modallevel = ml_application then begin
   modaltransientfor:= nil;
-  if (modallevel = ml_application) and (transientfor = nil) then begin
+  if transientfor = nil then begin
    transientfor:= fwindow.defaulttransientfor;
    modaltransientfor:= transientfor;
   end;
-  if transientfor = window then begin
-   transientfor:= nil;
+  info.widget:= self;
+  info.transientfor:= transientfor;
+  info.windowevent:= windowevent;
+  info.nomodalforreset:= nomodalforreset;
+  if window.beginmodal(@info) then begin
+   result:= mr_windowdestroyed;
+   exit;
   end;
-  if (transientfor <> nil) and (modallevel = ml_window) then begin
-   include(fwindow.fstate,tws_modalfor);
-  end
-  else begin
+  if modaltransientfor <> nil then begin
+   window.settransientfor(nil,false);
+  end;
+ end
+ else begin
+  bo1:= not showing;
+  updateroot; //create window
+  if fparentwidget <> nil then begin
+   if not (csdesigning in componentstate) then begin
+    include(fwidgetstate,ws_showproc);
+    try
+     fparentwidget.show(modallevel,transientfor);
+    finally
+     exclude(fwidgetstate,ws_showproc);
+    end;
+   end;
+  end;
+  include(fwidgetstate,ws_visible);
+  if bo1 then begin
+   if not updateopaque(false) and (fparentwidget <> nil) then begin
+    fparentwidget.widgetregionchanged(self);
+   end;
+  end;
+  if ownswindow1 then begin
+ //  modaltransientfor:= nil;
+ //  if (modallevel = ml_application) and (transientfor = nil) then begin
+ //   transientfor:= fwindow.defaulttransientfor;
+ //   modaltransientfor:= transientfor;
+ //  end;
+   if transientfor = window then begin
+    transientfor:= nil;
+   end;
+   if (transientfor <> nil) and (modallevel = ml_window) then begin
+    include(fwindow.fstate,tws_modalfor);
+   end
+   else begin
+    if not nomodalforreset then begin
+     exclude(fwindow.fstate,tws_modalfor);
+    end;
+   end;
+   fwindow.show(windowevent);
    if not nomodalforreset then begin
-    exclude(fwindow.fstate,tws_modalfor);
+    fwindow.settransientfor(transientfor,windowevent);
    end;
-  end;
-  fwindow.show(windowevent);
-  if not nomodalforreset then begin
-   fwindow.settransientfor(transientfor,windowevent);
-  end;
-  if modallevel = ml_application then begin
-   w1:= nil;
-   if bo1 then begin
-    w1:= self;
-   end;
-   if window.beginmodal(w1) then begin
-    result:= mr_windowdestroyed;
-    exit;
-   end;
-   if modaltransientfor <> nil then begin
-    window.settransientfor(nil,false);
-   end;
+   {
+   if modallevel = ml_application then begin
+    w1:= nil;
+    if bo1 then begin
+     w1:= self;
+    end;
+    if window.beginmodal(w1) then begin
+     result:= mr_windowdestroyed;
+     exit;
+    end;
+    if modaltransientfor <> nil then begin
+     window.settransientfor(nil,false);
+    end;
+   end
+   else begin
+   }
+    if bo1 then begin
+     doshow;
+    end;
+    if (modallevel = ml_window) and (fwindow.modalfor) and
+                  fwindow.ftransientfor.active then begin
+     fwindow.activate;             
+    end;
+ //  end;
   end
   else begin
    if bo1 then begin
     doshow;
    end;
-   if (modallevel = ml_window) and (fwindow.modalfor) and
-                 fwindow.ftransientfor.active then begin
-    fwindow.activate;             
-   end;
   end;
- end
- else begin
-  if bo1 then begin
-   doshow;
-  end;
- end;
+ end; // ml_application
  if fwindow <> nil then begin
   result:= fwindow.fmodalresult;
  end
@@ -12802,7 +12835,8 @@ begin
  end;
 end;
 
-function twindow.beginmodal(const doshowwidget: twidget): boolean;
+function twindow.beginmodal(const showinfo: pshowinfoty): boolean;
+//function twindow.beginmodal(const doshowwidget: twidget): boolean;
 var
  pt1: pointty;
  event1: tmouseevent;
@@ -12822,7 +12856,7 @@ begin
   win1:= fmousewinid;
   processleavewindow;
   fmousewinid:= win1;
-  result:= beginmodal(self,doshowwidget);
+  result:= beginmodal(self,showinfo);
   if (fmodalwindow = nil) then begin
    if fwantedactivewindow <> nil then begin
     if appinst.active and not (aps_cancelloop in appinst.fstate) then begin
@@ -15518,11 +15552,12 @@ begin       //eventloop
 end;
 
 function tinternalapplication.beginmodal(const sender: twindow;
-                                       const doshowwidget: twidget): boolean;
+                                       const showinfo: pshowinfoty): boolean;
                  //true if modalwindow destroyed
 var
  window1: twindow;
 begin
+ exclude(fstate,aps_cancelloop);
  window1:= nil;
  if (factivewindow <> nil) and (factivewindow <> sender) then begin
   setlinkedvar(factivewindow,tlinkedobject(window1));
@@ -15534,22 +15569,32 @@ begin
    end;
    include(fstate,tws_modal);
   end;
-  if doshowwidget <> nil then begin
-   doshowwidget.doshow;
+  if showinfo <> nil then begin
+   with showinfo^ do begin
+    widget.internalshow(ml_none,transientfor,windowevent,nomodalforreset);
+    if fstate * [aps_cancelloop,aps_exitloop] <> [] then begin
+     exit;
+    end;
+    widget.activate;
+   end;
+//   doshowwidget.doshow;
   end;
   sender.activate;  
-  exclude(fstate,aps_cancelloop);
-  try
-   result:= eventloop(sender);
-  finally
-   if (window1 <> nil) and not (aps_cancelloop in fstate) then begin
-    if appinst.active then begin
-     window1.activate;
+  if fstate * [aps_cancelloop,aps_exitloop] = [] then begin
+ //  exclude(fstate,aps_cancelloop);
+   try
+    result:= eventloop(sender);
+   finally
+    if (window1 <> nil) and not (aps_cancelloop in fstate) then begin
+     if appinst.active then begin
+      window1.activate;
+     end;
     end;
    end;
   end;
  finally
   setlinkedvar(nil,tlinkedobject(window1));
+  exclude(fstate,aps_exitloop);
  end;
 end;
 

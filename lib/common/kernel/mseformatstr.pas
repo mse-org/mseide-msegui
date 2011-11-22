@@ -2211,8 +2211,8 @@ end;
 
 function trystringtotime(const text: msestring; out value: tdatetime;
                                const convert: dateconvertty = dc_none): boolean;
-var
- mstr1: msestring;
+//var
+// mstr1: msestring;
 begin
  if text = '' then begin
   value:= emptydatetime;
