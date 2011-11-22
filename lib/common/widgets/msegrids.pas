@@ -11109,7 +11109,7 @@ begin     //focuscell
     int1:= ffocusedcell.row;
     ffocusedcell.row:= invalidaxis;
     bo2:= false;
-    if (int1 <> cell.row) and doremoveappinsrow(int1) then begin
+    if (int1 <> cell.row) and doremoveappinsrow(cell.row) then begin
      if (cell.row > int1) then begin
       dec(cell.row);
       bo2:= true;
