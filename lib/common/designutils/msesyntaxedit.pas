@@ -437,7 +437,7 @@ begin
  if (flinkpos.row >= 0) then begin
   application.cursorshape:= cr_default;
   if (flinkpos.row < datalist.count) then begin
-   if updatefontstyle(datalist.getformatpo(flinkpos.row)^,flinkpos.col,
+   if updatefontstyle1(datalist.getformatpo(flinkpos.row)^,flinkpos.col,
           flinklength,fs_underline,false) then begin
     with fgridintf.getcol do begin
      cellchanged(flinkpos.row);
@@ -467,7 +467,7 @@ begin
   flinklength:= length1;
   if flinklength > 0 then begin
    application.cursorshape:= cr_pointinghand;
-   if updatefontstyle(datalist.getformatpo(flinkpos.row)^,flinkpos.col,
+   if updatefontstyle1(datalist.getformatpo(flinkpos.row)^,flinkpos.col,
           flinklength,fs_underline,true) then begin
     with fgridintf.getcol do begin
      cellchanged(flinkpos.row);

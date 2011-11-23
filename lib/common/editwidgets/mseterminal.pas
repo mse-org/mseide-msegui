@@ -69,7 +69,7 @@ type
    procedure dopipebroken(const sender: tpipereader);
    procedure doprocfinished(const sender: tobject);
    function echoisoff: boolean;
-   function echooff: boolean;
+   function echooff(out aechoisoff: boolean): boolean;
    procedure echoon(const avalue: boolean);
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure editnotification(var info: editnotificationinfoty); override;
@@ -147,7 +147,7 @@ implementation
 uses
  msesysutils,mseprocutils,msewidgets,msetypes,mseprocmonitor,
  msekeyboard,sysutils,msesysintf,rtlconsts,msegraphutils,msearrayutils,
- msesysintf1
+ msesysintf1,mserichstring
  {$ifdef unix},mselibc{$endif};
 type
  tinplaceedit1 = class(tinplaceedit);
@@ -228,14 +228,19 @@ end;
 procedure tterminal.editnotification(var info: editnotificationinfoty);
 var
  mstr1: msestring;
- bo1,bo2: boolean;
+ bo1,bo2,bo3: boolean;
  ar1: msestringarty;
-// co1: gridcoordty;
  int1: integer;
 begin
  if fgridintf <> nil then begin
   with fgridintf.getcol.grid do begin
    case info.action of
+    ea_textedited: begin
+     if echoisoff then begin
+      feditor.format:= updatefontstyle(feditor.format,
+                                 finputcolindex,bigint,fs_blank,true);
+     end;
+    end;
     ea_indexmoved: begin
      if editpos.row = datalist.count - 1 then begin
       if (editpos.col < finputcolindex) or (teo_readonly in foptions) then begin
@@ -251,10 +256,6 @@ begin
       info.action:= ea_none;
      end;
     end;
-//    ea_textedited: begin
-//     fhistoryindex:= -1;
-//     fhistorybackup:= '';
-//    end;
     ea_textentered: begin
      if (row = rowhigh) and not (teo_readonly in foptions) then begin
       info.action:= ea_none;
@@ -277,10 +278,12 @@ begin
        fonsendtext(self,mstr1,bo1);
       end;
       if not bo1 then begin
-       bo2:= echooff;
+       bo2:= echooff(bo3);
        try
         fprocess.input.writeln(mstr1);
-        datalist.add('');
+        if not bo3 then begin
+         datalist.add('');
+        end;
        except
         feditor.text:= '';
         gridvalue[row]:= copy(gridvalue[row],1,finputcolindex);
@@ -331,17 +334,19 @@ begin
 {$endif}
 end;
 
-function tterminal.echooff: boolean;
+function tterminal.echooff(out aechoisoff: boolean): boolean;
 {$ifdef unix}
 var
  terminfo: termios;
 {$endif}
 begin
  result:= false;
+ aechoisoff:= false;
 {$ifdef unix}
  if (pro_echo in fprocess.options) and running and
         (msetcgetattr(outputfd,terminfo) = 0) then begin
   result:= terminfo.c_lflag and echo <> 0;
+  aechoisoff:= not result;
   if result then begin
    tcdrain(outputfd);
    usleep(0); //why is this necessary? no tcdrain without
@@ -380,56 +385,50 @@ begin
     include(info.eventstate,es_processed);
    end
    else begin
-    if echoisoff and (chars <> '') then begin
-     writestr(chars);
-     include(info.eventstate,es_processed);
-    end
-    else begin
-     if shiftstate - [ss_shift] = [] then begin
-      if (chars <> '') and
-       ((editpos.row < datalist.count - 1) or 
-                    (editpos.col < finputcolindex)) then begin
-       editpos:= makegridcoord(bigint,bigint);
-      end
-      else begin
-       if (key = key_home) and (editpos.row = datalist.count - 1) then begin
-        editor.moveindex(finputcolindex,ss_shift in shiftstate);
-        include(eventstate,es_processed);
-       end;
-      end; 
-     end;
-     if not (es_processed in info.eventstate) then begin
-      if (fmaxcommandhistory > 0) and not running then begin
-       include(info.eventstate,es_processed);
-       case key of
-        key_up,key_down: begin
-         if fcommandhistory = nil then begin
-          setlength(fcommandhistory,1);
-          fhistoryindex:= 0;
-         end;
-         fcommandhistory[fhistoryindex]:= command;
-         if key = key_up then begin
-          if fhistoryindex < high(fcommandhistory) then begin
-           inc(fhistoryindex);
-          end;
-         end
-         else begin
-          if fhistoryindex > 0 then begin
-           dec(fhistoryindex);
-          end;
-         end;
-         command:= fcommandhistory[fhistoryindex];
+    if shiftstate - [ss_shift] = [] then begin
+     if (chars <> '') and
+      ((editpos.row < datalist.count - 1) or 
+                   (editpos.col < finputcolindex)) then begin
+      editpos:= makegridcoord(bigint,bigint);
+     end
+     else begin
+      if (key = key_home) and (editpos.row = datalist.count - 1) then begin
+       editor.moveindex(finputcolindex,ss_shift in shiftstate);
+       include(eventstate,es_processed);
+      end;
+     end; 
+    end;
+    if not (es_processed in info.eventstate) then begin
+     if (fmaxcommandhistory > 0) and not running then begin
+      include(info.eventstate,es_processed);
+      case key of
+       key_up,key_down: begin
+        if fcommandhistory = nil then begin
+         setlength(fcommandhistory,1);
+         fhistoryindex:= 0;
         end;
+        fcommandhistory[fhistoryindex]:= command;
+        if key = key_up then begin
+         if fhistoryindex < high(fcommandhistory) then begin
+          inc(fhistoryindex);
+         end;
+        end
         else begin
-         exclude(info.eventstate,es_processed);
+         if fhistoryindex > 0 then begin
+          dec(fhistoryindex);
+         end;
         end;
+        command:= fcommandhistory[fhistoryindex];
        end;
-       if (es_processed in eventstate) and (fgridintf <> nil) then begin
-        fgridintf.getcol.grid.row:= bigint;
-        feditor.curindex:= bigint;
-        if not (teo_readonly in foptions) then begin
-         optionsedit:= optionsedit - [oe_readonly];
-        end;
+       else begin
+        exclude(info.eventstate,es_processed);
+       end;
+      end;
+      if (es_processed in eventstate) and (fgridintf <> nil) then begin
+       fgridintf.getcol.grid.row:= bigint;
+       feditor.curindex:= bigint;
+       if not (teo_readonly in foptions) then begin
+        optionsedit:= optionsedit - [oe_readonly];
        end;
       end;
      end;
@@ -600,9 +599,9 @@ end;
 
 procedure tterminal.writestr(const atext: string);
 var
- bo1: boolean;
+ bo1,bo2: boolean;
 begin
- bo1:= echooff;
+ bo1:= echooff(bo2);
  try
   if sys_write(outputfd,pointer(atext),length(atext)) <> length(atext) then begin
    syserror(syelasterror);

@@ -25,14 +25,16 @@ const
 type
  newinfoty = (ni_bold=ord(fs_bold),ni_italic=ord(fs_italic),
               ni_underline=ord(fs_underline),ni_strikeout=ord(fs_strikeout),
-              ni_selected=ord(fs_selected),
+              ni_selected=ord(fs_selected),ni_blank=ord(fs_blank),
               //same order as in fontstylety
-                 ni_fontcolor,ni_colorbackground,ni_delete);
+              ni_fontcolor,ni_colorbackground,ni_delete);
  newinfosty = set of newinfoty;
 
 const
  fonthandleflags = [ni_bold,ni_italic];
- fontstyleflags = [ni_bold,ni_italic,ni_underline,ni_strikeout,ni_selected];
+ fontlayoutflags = [ni_bold,ni_italic,ni_blank];
+ fontstyleflags = [ni_bold,ni_italic,ni_underline,ni_strikeout,ni_selected,
+                   ni_blank];
 
 type
  charstylety = record
@@ -129,24 +131,37 @@ type
  end;
 
 
-function setfontcolor(var formats: formatinfoarty; aindex: integer; 
+function setfontcolor1(var formats: formatinfoarty; aindex: integer; 
                        len: halfinteger; color: colorty): boolean;
                                  //true if changed
-function setcolorbackground(var formats: formatinfoarty; aindex: integer;
+function setfontcolor(const formats: formatinfoarty; aindex: integer; 
+                       len: halfinteger; color: colorty): formatinfoarty;
+function setcolorbackground1(var formats: formatinfoarty; aindex: integer;
                               len: halfinteger;
                               color: colorty): boolean;
                                  //true if changed
+function setcolorbackground(const formats: formatinfoarty; aindex: integer;
+                              len: halfinteger;
+                              color: colorty): formatinfoarty;
 
-function updatefontstyle(var formats: formatinfoarty; aindex: integer;
+function updatefontstyle1(var formats: formatinfoarty; aindex: integer;
                               len: halfinteger;
                               astyle: fontstylety; aset: boolean): boolean;
                                  //true if changed
-function setcharstyle(var formats: formatinfoarty; aindex,len: halfinteger;
+function updatefontstyle(const formats: formatinfoarty; aindex: integer;
+                len: halfinteger;
+                astyle: fontstylety; aset: boolean): formatinfoarty;
+
+function setcharstyle1(var formats: formatinfoarty; aindex,len: halfinteger;
                             const style: charstylety): boolean;
                                   //true if changed
+function setcharstyle(const formats: formatinfoarty; aindex,len: halfinteger;
+                            const style: charstylety): formatinfoarty;
 function getcharstyle(const formats: formatinfoarty; aindex: integer): charstylety;
 
-procedure setselected(var text: richstringty; start,len: halfinteger);
+procedure setselected1(var text: richstringty; start,len: halfinteger);
+function setselected(const text: richstringty;
+                                        start,len: halfinteger): richstringty;
 
 function isequalrichstring(const a,b: richstringty): boolean;
 function isequalformat(const a,b: formatinfoarty): boolean;
@@ -261,7 +276,7 @@ begin
     end
     else begin
      if format = nil then begin
-      updatefontstyle(format,int2,1,fs_underline,true);
+      updatefontstyle1(format,int2,1,fs_underline,true);
      end;
     end;
    end
@@ -492,7 +507,7 @@ begin
  result:= result and not (isempty and (length(formats) = 0));
 end;
 
-function setfontcolor(var formats: formatinfoarty; aindex: integer;
+function setfontcolor1(var formats: formatinfoarty; aindex: integer;
                              len: halfinteger;
                              color: colorty): boolean;
      //true if changed
@@ -503,7 +518,15 @@ begin
  result:= setfontinfolen(formats,aindex,len,style,[ni_fontcolor]);
 end;
 
-function setcolorbackground(var formats: formatinfoarty; aindex: integer;
+function setfontcolor(const formats: formatinfoarty; aindex: integer;
+                                  len: halfinteger;
+                                  color: colorty): formatinfoarty;
+begin
+ result:= copy(formats);
+ setfontcolor1(result,aindex,len,color);
+end;
+
+function setcolorbackground1(var formats: formatinfoarty; aindex: integer;
                                   len: halfinteger;
                                   color: colorty): boolean;
      //true if changed
@@ -514,13 +537,29 @@ begin
  result:= setfontinfolen(formats,aindex,len,style,[ni_colorbackground]);
 end;
 
-procedure setselected(var text: richstringty; start,len: halfinteger);
+function setcolorbackground(const formats: formatinfoarty; aindex: integer;
+                                  len: halfinteger;
+                                  color: colorty): formatinfoarty;
 begin
- updatefontstyle(text.format,0,bigint,fs_selected,false);
- updatefontstyle(text.format,start,len,fs_selected,true);
+ result:= copy(formats);
+ setcolorbackground1(result,aindex,len,color);
 end;
 
-function updatefontstyle(var formats: formatinfoarty; aindex: integer; len: halfinteger;
+procedure setselected1(var text: richstringty; start,len: halfinteger);
+begin
+ updatefontstyle1(text.format,0,bigint,fs_selected,false);
+ updatefontstyle1(text.format,start,len,fs_selected,true);
+end;
+
+function setselected(const text: richstringty;
+                      start,len: halfinteger): richstringty;
+begin
+ result:= text;
+ setlength(result.format,length(result.format));
+ setselected1(result,start,len);
+end;
+
+function updatefontstyle1(var formats: formatinfoarty; aindex: integer; len: halfinteger;
                               astyle: fontstylety; aset: boolean): boolean;
                               //true if changed
 var
@@ -537,12 +576,27 @@ begin
  result:= setfontinfolen(formats,aindex,len,style,newinfos);
 end;
 
-function setcharstyle(var formats: formatinfoarty;
+function updatefontstyle(const formats: formatinfoarty; aindex: integer;
+                len: halfinteger;
+                astyle: fontstylety; aset: boolean): formatinfoarty;
+begin
+ result:= copy(formats);
+ updatefontstyle1(result,aindex,len,astyle,aset);
+end;
+
+function setcharstyle1(var formats: formatinfoarty;
                aindex,len: halfinteger; const style: charstylety): boolean;
                                   //true if changed
 begin
  result:= setfontinfolen(formats,aindex,len,style,
      [ni_fontcolor,ni_colorbackground,ni_bold,ni_italic,ni_underline,ni_strikeout]);
+end;
+
+function setcharstyle(const formats: formatinfoarty;
+               aindex,len: halfinteger; const style: charstylety): formatinfoarty;
+begin
+ result:= copy(formats);
+ setcharstyle1(result,aindex,len,style);
 end;
 
 function getcharstyle(const formats: formatinfoarty; aindex: integer): charstylety;

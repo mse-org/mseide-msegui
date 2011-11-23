@@ -1246,7 +1246,7 @@ var
     int2:= length(po1^.text);
    end;
    if int2 > 0 then begin
-    updatefontstyle(po1^.format,
+    updatefontstyle1(po1^.format,
                 astart.col,int2,fs_selected,value);
     cell.row:= int1;
     grid.invalidatecell(cell);
@@ -1364,7 +1364,7 @@ begin
   if int1 = b.row then begin
    int2:= b.col - a.col;
   end;
-  if updatefontstyle(po1^.format,a.col,int2,astyle,aset) then begin
+  if updatefontstyle1(po1^.format,a.col,int2,astyle,aset) then begin
    with fgridintf.getcol do begin
     invalidatecell(int1);
     if int1 = grid.row then begin

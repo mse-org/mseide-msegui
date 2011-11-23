@@ -2530,9 +2530,9 @@ begin
   dispgrid.datarowheight:= lineheight;
   fontdisp[0]:= teststring+teststring+teststring+teststring;
   format1:= nil;
-  updatefontstyle(format1,length(teststring),length(teststring),fs_bold,true);
-  updatefontstyle(format1,2*length(teststring),2*length(teststring),fs_italic,true);
-  updatefontstyle(format1,3*length(teststring),length(teststring),fs_bold,true);
+  updatefontstyle1(format1,length(teststring),length(teststring),fs_bold,true);
+  updatefontstyle1(format1,2*length(teststring),2*length(teststring),fs_italic,true);
+  updatefontstyle1(format1,3*length(teststring),length(teststring),fs_bold,true);
   fontdisp.richformats[0]:= format1;
   fontdisp[1]:= 
     'Ascent: '+inttostr(ascent)+' Descent: '+inttostr(descent)+

@@ -286,7 +286,9 @@ type
  graphicdirectionsty = set of graphicdirectionty;
  pgraphicdirectionsty = ^graphicdirectionsty;
  
- fontstylety = (fs_bold,fs_italic,fs_underline,fs_strikeout,fs_selected,fs_force);
+ fontstylety = (fs_bold,fs_italic,
+                fs_underline,fs_strikeout,fs_selected,fs_blank,
+                fs_force);
                       //order fix
  fontstylesty = set of fontstylety;
 

@@ -135,7 +135,7 @@ begin
    end;
    int1:= foundlist.appendrow(str1+str2);
    foundcount.value:= foundcount.value + 1;
-   updatefontstyle(foundlist.datalist.richitemspo[int1]^.format,length(str1)+col,
+   updatefontstyle1(foundlist.datalist.richitemspo[int1]^.format,length(str1)+col,
                length(finfo.findinfo.text),fs_bold,true);
   finally
    application.unlock;

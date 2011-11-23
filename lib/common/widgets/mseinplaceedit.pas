@@ -563,7 +563,7 @@ begin
   fselstart:= fcurindex;
   fsellength:= 0;
  end;
- setselected(finfo.text,fselstart,fsellength);
+ setselected1(finfo.text,fselstart,fsellength);
  if fcurindex > length(text) then begin
   fcurindex:= length(text);
  end;
@@ -823,7 +823,7 @@ begin
  if fsellength < 0 then begin
   fsellength:= 0;
  end;
- setselected(finfo.text,fselstart,fsellength);
+ setselected1(finfo.text,fselstart,fsellength);
  invalidatetextrect(minint,bigint);
 end;
 

@@ -15,7 +15,8 @@ unit msedrawtext;
 
 interface
 uses
- {$ifdef FPC}classes{$else}Classes{$endif},msegraphics,mserichstring,msegraphutils,
+ {$ifdef FPC}classes{$else}Classes{$endif},msegraphics,mserichstring,
+  msegraphutils,
   msearrayprops,mseclasses,msestrings,msetypes,mseguiglob;
 
 const
@@ -253,30 +254,40 @@ var
   if acount <= 0 then begin
    exit;
   end;
-  with drawinfo.getchar16widths do begin
-   fontdata:= getfontdata(canvas.font.handle);
-   resultpo:= resultpo1;
-   text:= text1;
-   count:= acount;
-   if highresfo then begin
-    checkhighresfont(fontdata,tcanvas1(canvas).fdrawinfo);
-   end;
-   getchar16widths(drawinfo);
-//   gdierror(gui_getchar16widths(drawinfo));
-  end;
-  if tf_tabtospace in info.flags then begin
-   with drawinfo.getfontmetrics do begin
-    fontdata:= drawinfo.getchar16widths.fontdata;
-    char:= ' ';
-    resultpo:= @fontmetrics1;       
-    getfontmetrics({datapo,}drawinfo);
-   end;
+  if fs_blank in canvas.font.style then begin
    for int1:= 0 to acount-1 do begin
-    if (text1+int1)^ = c_tab then begin
-     pintegeraty(resultpo1)^[int1]:= fontmetrics1.width;
-    end;
+   {$ifdef FPC}
+    resultpo1[int1]:= 0;
+   {$else}
+    pinteger(pchar(pointer(resultpo1))+int1*sizeof(integer))^:= 0;
+   {$endif}
    end;
-  end; 
+  end
+  else begin
+   with drawinfo.getchar16widths do begin
+    fontdata:= getfontdata(canvas.font.handle);
+    resultpo:= resultpo1;
+    text:= text1;
+    count:= acount;
+    if highresfo then begin
+     checkhighresfont(fontdata,tcanvas1(canvas).fdrawinfo);
+    end;
+    getchar16widths(drawinfo);
+   end;
+   if tf_tabtospace in info.flags then begin
+    with drawinfo.getfontmetrics do begin
+     fontdata:= drawinfo.getchar16widths.fontdata;
+     char:= ' ';
+     resultpo:= @fontmetrics1;       
+     getfontmetrics({datapo,}drawinfo);
+    end;
+    for int1:= 0 to acount-1 do begin
+     if (text1+int1)^ = c_tab then begin
+      pintegeraty(resultpo1)^[int1]:= fontmetrics1.width;
+     end;
+    end;
+   end; 
+  end;
   inc(text1,acount);
   inc(resultpo1,acount);
  end;
@@ -408,8 +419,7 @@ begin
     style1:= font.style;
     for int1:= 0 to high(text.format) do begin
      with text.format[int1] do begin
-      if {$ifdef FPC}longword{$else}byte{$endif}(newinfos) and 
-                                           fontstylehandlemask <> 0 then begin
+      if newinfos * fontlayoutflags <> [] then begin
        if index > textlen then begin
         getcharwidths(textlen-int2);
        end
@@ -855,10 +865,10 @@ end;
 
 procedure drawtext(const canvas: tcanvas; var info: drawtextinfoty);
 const
- stopmask = [ni_bold,ni_italic,ni_underline,ni_strikeout,ni_selected,
+ stopmask = [ni_bold,ni_italic,ni_blank,ni_underline,ni_strikeout,ni_selected,
              ni_fontcolor,ni_colorbackground];
  fonthandlemask = [ni_bold,ni_italic];
- fontstylemask = [ni_bold,ni_italic,ni_underline,ni_strikeout];
+ fontstylemask = [ni_bold,ni_italic,ni_blank,ni_underline,ni_strikeout];
 
 var
  layoutinfo: layoutinfoty;
@@ -966,28 +976,6 @@ var
                  makepoint(x-1,pos.y+layoutinfo.strikeout));
       end;
      end;
-     {
-     if fs_underline in canvas.font.style then begin
-      if xyswapped then begin
-       drawline(makepoint(pos.x+underline,xbefore),
-                makepoint(pos.x+underline,x-1),font.color);
-      end
-      else begin
-       drawline(makepoint(xbefore,pos.y+underline),
-                makepoint(x-1,pos.y+underline),font.color);
-      end;
-     end;
-     if fs_strikeout in font.style then begin
-      if xyswapped then begin
-       drawline(makepoint(pos.x+layoutinfo.strikeout,xbefore),
-                 makepoint(pos.x+layoutinfo.strikeout,x-1),font.color);
-      end
-      else begin
-       drawline(makepoint(xbefore,pos.y+layoutinfo.strikeout),
-                 makepoint(x-1,pos.y+layoutinfo.strikeout),font.color);
-      end;
-     end;
-     }
     end;
     if layoutinfo.xyswapped then begin
      pos.y:= x;
@@ -1016,7 +1004,7 @@ var
   with aformat,info,canvas do begin
    if newinfos * fontstylemask <> [] then begin
     afontstyle:= afontstyle * fontstylesty(
-          not {$ifdef FPC}longword{$else}byte{$endif}(newinfos)) + style.fontstyle;
+       not {$ifdef FPC}longword{$else}byte{$endif}(newinfos)) + style.fontstyle;
     font.style:= afontstyle + overridefontstyle;
    end;
    if (ni_selected in newinfos) and not (tf_noselect in flags)then begin

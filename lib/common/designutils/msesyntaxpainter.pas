@@ -499,7 +499,7 @@ begin
      wpo1:= startpo;
      alen:= length(msestring(startpo));
      keywordlen:= 0;
-     changed:= setcharstyle(format,
+     changed:= setcharstyle1(format,
                                0,bigint,charstyles[scopeinfopo^.fontinfonr]) or changed;
      if alen > 0 then begin
       repeat
@@ -531,7 +531,7 @@ begin
           end;
          end;
          if po1 <> nil then begin
-          changed:= setcharstyle(format,lstr1.po-startpo,lstr1.len,
+          changed:= setcharstyle1(format,lstr1.po-startpo,lstr1.len,
                                 charstyles[ptruint(po1)-1]) or changed;
           dec(alen,lstr1.len);
           keywordlen:= 0;
@@ -552,7 +552,7 @@ begin
             if msestartsstr(pointer(token),wpo1) then begin
              bo1:= false;
              int2:= length(token);
-             changed:= setcharstyle(format,wpo1-startpo,int2,
+             changed:= setcharstyle1(format,wpo1-startpo,int2,
                       charstyles[scopeinfopo^.endtokens[int1].fontinfonr]) or changed;
              inc(wpo1,int2);
              if int2 = 0 then begin
@@ -561,7 +561,7 @@ begin
              dec(alen,int2);
              dec(keywordlen,int2);
              popscope;
-             changed:= setcharstyle(format,wpo1-startpo,bigint,
+             changed:= setcharstyle1(format,wpo1-startpo,bigint,
                                    charstyles[scopeinfopo^.fontinfonr]) or changed;
              break;
             end;
@@ -577,7 +577,7 @@ begin
 //         dec(keywordlen);
          bo1:= false;
          popscope;
-         changed:= setcharstyle(format,wpo1-startpo,bigint,
+         changed:= setcharstyle1(format,wpo1-startpo,bigint,
                          charstyles[scopeinfopo^.fontinfonr]) or changed;
         end;
        end;
@@ -589,7 +589,7 @@ begin
           bo1:= false;
           int2:= length(scopeinfopo^.starttokens[int1].token);
           if scopeinfopo^.starttokens[int1].fontinfonr <> 0 then begin
-           changed:= setcharstyle(format,wpo1-startpo,int2,
+           changed:= setcharstyle1(format,wpo1-startpo,int2,
                     charstyles[scopeinfopo^.starttokens[int1].fontinfonr]) or changed;
            int3:= int2;
           end
@@ -597,7 +597,7 @@ begin
            int3:= 0;     //keine sonderbehandlung
           end;
           pushscope(scopeinfopo^.starttokens[int1]);
-          changed:= setcharstyle(format,wpo1-startpo+int3,bigint,
+          changed:= setcharstyle1(format,wpo1-startpo+int3,bigint,
                          charstyles[scopeinfopo^.fontinfonr]) or changed;
           inc(wpo1,int2);
           dec(alen,int2);
@@ -637,7 +637,7 @@ endlab:
   for int1:= 0 to high(boldchars) do begin
    with boldchars[int1] do begin
     if (row >= firstrow) and (row <= lastrow) then begin
-     if updatefontstyle(list.richitemspo[row]^.format,col,1,fs_bold,true) then begin
+     if updatefontstyle1(list.richitemspo[row]^.format,col,1,fs_bold,true) then begin
       if assigned(onlinechanged) then begin
        onlinechanged(self,row);
       end;

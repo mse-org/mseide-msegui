@@ -4121,6 +4121,9 @@ begin
  if cs_inactive in fstate then exit;
  with fdrawinfo do begin
   if afont <> nil then begin //foreign font
+   if fs_blank in afont.style then begin
+    exit;
+   end;
    font1:= afont;
    with afont do begin
     po1:= finfopo;
@@ -4131,6 +4134,9 @@ begin
    end;
   end
   else begin
+   if fs_blank in ffont.style then begin
+    exit;
+   end;
    font1:= ffont;
    ffont.rotation:= arotation;
    afonthandle1:= ffont.gethandle;
@@ -4255,15 +4261,19 @@ function tcanvas.getstringwidth(const atext: pmsechar; const acount: integer;
 var
  afontnum: integer;
 begin
- if atext = '' then begin
-  result:= 0;
- end
- else begin
+ result:= 0;
+ if atext <> '' then begin
   checkgcstate([cs_gc]);
   if afont <> nil then begin //foreign font
+   if fs_blank in afont.style then begin
+    exit;
+   end;
    afontnum:= afont.gethandleforcanvas(self);
   end
   else begin
+   if fs_blank in ffont.style then begin
+    exit;
+   end;
    afontnum:= ffont.handle;
   end;
   with fdrawinfo.gettext16width do begin
@@ -4273,9 +4283,6 @@ begin
   end;
   gdi(gdf_gettext16width);
   result:= fdrawinfo.gettext16width.result;
-//  gdi_lock;
-//  result:= gui_gettext16width(fdrawinfo);
-//  gdi_unlock;
  end;
 end;
 
