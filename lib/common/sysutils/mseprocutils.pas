@@ -437,10 +437,10 @@ begin
    end;
   end;
  end;
- if not nostdhandle then begin
+ if not (exo_nostdhandle in options) then begin
   startupinfo.dwflags:= startupinfo.dwFlags or startf_usestdhandles;
  end;
- if inactive then begin
+ if exo_inactive in options then begin
   startupinfo.wShowWindow:= sw_hide;
   startupinfo.dwflags:= startupinfo.dwFlags or startf_useshowwindow;
  end;
@@ -484,8 +484,8 @@ begin
  result:= true;
  try
   try
-   prochandle:= execmse1(commandline,nil,nil,nil,false,-1,inactive,
-                         nil,nil,false,nostdhandle);
+   prochandle:= execmse1(commandline,nil,nil,nil,{false,}-1,options{inactive,
+                         nil,nil,false,nostdhandle});
   finally
    if prochandle <> invalidprochandle then begin
     closehandle(prochandle);
@@ -502,8 +502,8 @@ function execmse4(const commandline: string; const options: execoptionsty = []
                                //windows only
                 ): prochandlety;
 begin
- result:= execmse1(commandline,nil,nil,nil,false,-1,inactive,
-                       nil,nil,false,nostdhandle);
+ result:= execmse1(commandline,nil,nil,nil,{false,}-1,options{inactive,
+                       nil,nil,false,nostdhandle});
 end;
 
 function execwaitmse(const commandline: string;
@@ -518,7 +518,7 @@ var
 begin
  result:= -1;
    //programm wurde nicht gestartet oder getexitcodeprozessproblem
- prochandle:= execmse1(commandline,nil,nil,nil,false,-1,inactive);
+ prochandle:= execmse1(commandline,nil,nil,nil,{false,}-1,options{inactive});
  if prochandle <> invalidprochandle then begin
   result:= waitforprocess(prochandle);
   {

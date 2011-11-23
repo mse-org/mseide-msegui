@@ -220,7 +220,7 @@ begin
   end;
  end;
 end;
-var testvar: integer;
+
 procedure tterminal.editnotification(var info: editnotificationinfoty);
 var
  mstr1: msestring;
@@ -309,10 +309,11 @@ begin
   end;
  end;
 end;
-var testvar1: boolean;
+//var testvar: integer;
+//var testvar1: boolean;
 procedure tterminal.dokeydown(var info: keyeventinfoty);
-var
- terminfo: termios;
+//var
+// terminfo: termios;
 begin
  if fgridintf <> nil then begin
   with info do begin
@@ -324,10 +325,10 @@ begin
     include(info.eventstate,es_processed);
    end
    else begin
-    if running then begin
-     testvar:= msetcgetattr(fprocess.input.handle,terminfo);
-     testvar1:= icanon and terminfo.c_lflag <> 0;
-    end;
+//    if running then begin
+//     testvar:= msetcgetattr(fprocess.input.handle,terminfo);
+//     testvar1:= icanon and terminfo.c_lflag <> 0;
+//    end;
     if shiftstate - [ss_shift] = [] then begin
      if (chars <> '') and
       ((editpos.row < datalist.count - 1) or 
