@@ -19,7 +19,7 @@ type
  processstatety = (prs_listening);
  processstatesty = set of processstatety;
  processoptionty = (pro_output,pro_erroroutput,pro_input,pro_errorouttoout,
-                    pro_tty, //linux only
+                    pro_tty,pro_echo,pro_icanon, //linux only
                     pro_nowaitforpipeeof,pro_nopipeterminate,
                     pro_inactive,pro_nostdhandle, //windows only
                     pro_ctrlc //for tterminal
@@ -311,6 +311,12 @@ begin
      end;
      if pro_tty in foptions then begin
       include(opt1,exo_tty);
+     end;
+     if pro_echo in foptions then begin
+      include(opt1,exo_echo);
+     end;
+     if pro_icanon in foptions then begin
+      include(opt1,exo_icanon);
      end;
      if pro_nostdhandle in foptions then begin
       include(opt1,exo_nostdhandle);

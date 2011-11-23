@@ -17,12 +17,10 @@
 
 unit mmysqlconn;
 
-{$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
-{$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
-{$ifdef VER2_3} {$define mse_FPC_2_2} {$endif}
-{$ifdef VER2_4} {$define mse_FPC_2_2} {$endif}
-{$ifdef VER2_5} {$define mse_FPC_2_2} {$endif}
-{$if FPC_FULLVERSION >= 20300} {$define mse_FPC_2_2} {$endif}
+{$if fpc_fullversion >= 020105}
+ {$define mse_FPC_2_2} 
+{$endif}
+
 {$mode objfpc}{$H+}
 {$MACRO on}
 

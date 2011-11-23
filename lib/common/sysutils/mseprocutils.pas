@@ -22,9 +22,9 @@ type
   readdes: integer;
   writedes: integer;
  end;
- execoptionty = (exo_inactive,     //windows only
-                 exo_nostdhandle,  //windows only
-                 exo_tty,          //linux only
+ execoptionty = (exo_inactive,                 //windows only
+                 exo_nostdhandle,              //windows only
+                 exo_tty,exo_echo,exo_icanon,  //linux only
                  exo_usepipewritehandles,
                  exo_sessionleader);         
  execoptionsty = set of execoptionty;
@@ -740,7 +740,19 @@ var
     ptyerror;
    end
    else begin
-    ios.c_lflag:= ios.c_lflag and not (icanon or echo);
+    if exo_icanon in options then begin
+     ios.c_lflag:= ios.c_lflag or icanon;
+    end
+    else begin
+     ios.c_lflag:= ios.c_lflag and not icanon;
+    end;
+    if exo_echo in options then begin
+     ios.c_lflag:= ios.c_lflag or echo;
+    end
+    else begin
+     ios.c_lflag:= ios.c_lflag and not echo;
+    end;
+//    ios.c_lflag:= ios.c_lflag and not (icanon or echo);
     ios.c_cc[vmin]:= #1;
     ios.c_cc[vtime]:= #0;
     if msetcsetattr(pty,tcsanow,ios) <> 0 then begin

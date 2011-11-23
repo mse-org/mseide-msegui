@@ -2302,9 +2302,14 @@ type
 function gettimeofday(__tv:Ptimeval; __tz:ptimezone):longint;cdecl;
                                            external clib name 'gettimeofday';
 function  msetcgetattr(filedes: longint;
-         var msetermios: termios{ty}): longint;cdecl;external clib name 'tcgetattr';
+         var msetermios: termios{ty}): longint;
+                                    cdecl;external clib name 'tcgetattr';
 function  msetcsetattr(filedes: longint; when: longint;
-         var msetermios: termios{ty}): longint;cdecl;external clib name 'tcsetattr';
+         var msetermios: termios{ty}): longint;
+                                    cdecl;external clib name 'tcsetattr';
+function  tcdrain(filedes: longint): longint;cdecl;external clib name 'tcdrain';
+function  tcflush(filedes: longint; queue_selector: longint): longint;
+                                    cdecl;external clib name 'tcflush';
 
 function pthread_create(__thread:Ppthread_t; __attr:Ppthread_attr_t;
       __start_routine:TStartRoutine; __arg:pointer):longint;cdecl;

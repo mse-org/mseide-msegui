@@ -436,11 +436,12 @@ end;
 
 function sys_flushfile(const handle: integer): syserrorty;
 begin
- if mselibc.fsync(handle) = 0 then begin
-  result:= sye_ok;
- end
- else begin
-  result:= syelasterror;
+ result:= sye_ok;
+ while mselibc.fsync(handle) <> 0 do begin
+  if sys_getlasterror <> eintr then begin
+   result:= syelasterror;
+   break;
+  end;
  end;
 end;
 
