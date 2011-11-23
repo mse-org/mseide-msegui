@@ -442,8 +442,8 @@ function extractquotedstr(const value: msestring): msestring;
 
 function checkfirstchar(const value: string; achar: char): pchar;
            //nil wenn erster char nicht space <> achar, ^achar sonst
-function firstline(atext: msestring): msestring;
-function lastline(atext: msestring): msestring;
+function firstline(const atext: msestring): msestring;
+function lastline(const atext: msestring): msestring;
 procedure textdim(const atext: msestring; out firstx,lastx,y: integer);
 
 function shrinkpathellipse(var value: msestring): boolean;
@@ -2380,7 +2380,7 @@ begin
 end;
 
 function checkfirstchar(const value: string; achar: char): pchar;
-           //nil wenn ester char nicht space <> achar, ^achar sonst
+           //nil wenn erster char nicht space <> achar, ^achar sonst
 begin
  result:= strlnscan(pointer(value),' ',length(value));
  if result <> nil then begin
@@ -2390,19 +2390,43 @@ begin
  end;
 end;
 
-function lastline(atext: msestring): msestring;
+function lastline(const atext: msestring): msestring;
 var
  po1: pmsechar;
+ int1: integer;
 begin
  po1:= msestrlrscan(pmsechar(atext),c_linefeed,length(atext));
  if po1 = nil then begin
   result:= atext;
  end
  else begin
-  result:= po1;
+  inc(po1);
+  int1:= length(atext)-(po1-pmsechar(pointer(atext)));
+  setlength(result,int1);
+  move(po1^,pointer(result)^,int1*sizeof(msechar));
+//  result:= po1;
  end;
 end;
 
+function firstline(const atext: msestring): msestring;
+var
+ po1: pmsechar;
+begin
+ if atext <> '' then begin
+  po1:= pointer(atext);
+  while (po1^ <> c_linefeed) and (po1^ <> #0) do begin
+   inc(po1);
+  end;
+  if (po1 > pointer(atext)) and ((po1-1)^ = c_return) then begin
+   dec(po1);
+  end;
+  result:= psubstr(pmsechar(pointer(atext)),po1);
+ end
+ else begin
+  result:= '';
+ end;
+end;
+{
 function firstline(atext: msestring): msestring;
 var
  po1: pmsechar;
@@ -2425,7 +2449,7 @@ begin
   move(po1^,result[1],length(result)*sizeof(result[1]));
  end;
 end;
-
+}
 procedure textdim(const atext: msestring; out firstx,lastx,y: integer);
 begin
  Y:= countchars(atext,c_linefeed);
