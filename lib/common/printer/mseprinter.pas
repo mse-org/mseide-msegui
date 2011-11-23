@@ -1585,6 +1585,7 @@ procedure tstreamprinter.beginprint(command: string = '';
                                             const apreamble: string = '');
 var
  pip1: tpipewriter;
+ opt1: execoptionsty;
 begin
  if command = '' then begin
   command:= fprintcommand;
@@ -1597,7 +1598,12 @@ begin
  end;
  pip1:= tpipewriter.create;
  try
-  execmse2(command,pip1,nil,nil,false,-1,pro_inactivewindow in foptions);
+  opt1:= [];
+  if pro_inactivewindow in foptions then begin
+   include(opt1,exo_inactive);
+  end;
+  execmse2(command,pip1,nil,nil,{false,}-1,opt1
+                             {pro_inactivewindow in foptions});
  except
   pip1.free;
   raise;

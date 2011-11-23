@@ -61,7 +61,7 @@ type
    procedure setmaxcommandhistory(const avalue: integer);
    function getcommand: msestring;
    procedure setcommand(const avalue: msestring);
-   function getpipewiatus: integer;
+   function getpipewaitus: integer;
    procedure setpipewaitus(const avalue: integer);
   protected
    fprocess: tmseprocess;
@@ -136,14 +136,15 @@ type
                           default defaultterminaloptions;
    property optionsprocess: processoptionsty read getoptionsprocess 
                             write setoptionsprocess default defaultoptionsprocess;
-   property pipewaitus: integer read getpipewiatus write setpipewaitus
+   property pipewaitus: integer read getpipewaitus write setpipewaitus
                                    default defaultpipewaitus;
  end;
 
 implementation
 uses
  msesysutils,mseprocutils,msewidgets,msetypes,mseprocmonitor,
- msekeyboard,sysutils,msesysintf,rtlconsts,msegraphutils,msearrayutils;
+ msekeyboard,sysutils,msesysintf,rtlconsts,msegraphutils,msearrayutils
+ {$ifdef unix},mselibc{$endif};
 type
  tinplaceedit1 = class(tinplaceedit);
  
@@ -219,7 +220,7 @@ begin
   end;
  end;
 end;
-
+var testvar: integer;
 procedure tterminal.editnotification(var info: editnotificationinfoty);
 var
  mstr1: msestring;
@@ -308,33 +309,39 @@ begin
   end;
  end;
 end;
-
+var testvar1: boolean;
 procedure tterminal.dokeydown(var info: keyeventinfoty);
+var
+ terminfo: termios;
 begin
  if fgridintf <> nil then begin
   with info do begin
-   if shiftstate - [ss_shift] = [] then begin
-    if (chars <> '') and
-     ((editpos.row < datalist.count - 1) or 
-                  (editpos.col < finputcolindex)) then begin
-     editpos:= makegridcoord(bigint,bigint);
-    end
-    else begin
-     if (key = key_home) and (editpos.row = datalist.count - 1) then begin
-      editor.moveindex(finputcolindex,ss_shift in shiftstate);
-      include(eventstate,es_processed);
-     end;
-    end; 
-   end;
-   if not (es_processed in info.eventstate) then begin
-    if (key = key_c) and (shiftstate - [ss_ctrl] = []) and 
-               (pro_ctrlc in optionsprocess) and running then begin
-     command:= '^C';
-     finputcolindex:= finputcolindex + 2;
-     fprocess.terminate;
-     include(info.eventstate,es_processed);
-    end
-    else begin
+   if (key = key_c) and (shiftstate - [ss_ctrl] = []) and 
+              (pro_ctrlc in optionsprocess) and running then begin
+    command:= '^C';
+    finputcolindex:= finputcolindex + 2;
+    fprocess.terminate;
+    include(info.eventstate,es_processed);
+   end
+   else begin
+    if running then begin
+     testvar:= msetcgetattr(fprocess.input.handle,terminfo);
+     testvar1:= icanon and terminfo.c_lflag <> 0;
+    end;
+    if shiftstate - [ss_shift] = [] then begin
+     if (chars <> '') and
+      ((editpos.row < datalist.count - 1) or 
+                   (editpos.col < finputcolindex)) then begin
+      editpos:= makegridcoord(bigint,bigint);
+     end
+     else begin
+      if (key = key_home) and (editpos.row = datalist.count - 1) then begin
+       editor.moveindex(finputcolindex,ss_shift in shiftstate);
+       include(eventstate,es_processed);
+      end;
+     end; 
+    end;
+    if not (es_processed in info.eventstate) then begin
      if (fmaxcommandhistory > 0) and not running then begin
       include(info.eventstate,es_processed);
       case key of
@@ -604,7 +611,7 @@ begin
  end;
 end;
 
-function tterminal.getpipewiatus: integer;
+function tterminal.getpipewaitus: integer;
 begin
  result:= fprocess.pipewaitus;
 end;

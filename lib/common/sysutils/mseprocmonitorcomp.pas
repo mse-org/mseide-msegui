@@ -11,7 +11,7 @@ unit mseprocmonitorcomp;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseclasses,msesystypes,mseevent,mseprocmonitor;
+ mseclasses,msesystypes,mseevent,mseprocmonitor,mseprocutils;
  
 type
  proclisteninfoty = record
@@ -41,18 +41,20 @@ type
                                  const adata: pointer = nil): boolean;
           //does nothing and returns false if aprochandle = invalidprochandle
    procedure unlistentoprocess(const aprochandle: prochandlety);
-   function exec(const acommandline: string;
-                       const inactive: boolean = true; 
+   function exec(const acommandline: string; 
+                 const aoptions: execoptionsty = []
+//                       const inactive: boolean = true; 
                           //windows only
-                       const nostdhandle: boolean = false): prochandlety;
+//                       const nostdhandle: boolean = false
                           //windows only
+                                                   ): prochandlety;
   published
    property onchilddied: childdiedeventty read fonchilddied write fonchilddied;
  end;
  
 implementation
 uses
- msedatalist,mseapplication,mseprocutils,msearrayutils;
+ msedatalist,mseapplication,msearrayutils;
  
 { tprocessmonitor }
 
@@ -125,12 +127,14 @@ begin
 end;
 
 function tprocessmonitor.exec(const acommandline: string;
-               const inactive: boolean = true;
-               const nostdhandle: boolean = false): prochandlety;
+               const aoptions: execoptionsty = []
+//               const inactive: boolean = true;
+//               const nostdhandle: boolean = false
+                ): prochandlety;
 begin
  application.lock;
  try
-  result:= execmse4(acommandline,inactive,nostdhandle);
+  result:= execmse4(acommandline,aoptions{inactive,nostdhandle});
   listentoprocess(result);
  finally
   application.unlock;

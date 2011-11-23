@@ -22,22 +22,28 @@ type
   readdes: integer;
   writedes: integer;
  end;
-
+ execoptionty = (exo_inactive,     //windows only
+                 exo_nostdhandle,  //windows only
+                 exo_tty,          //linux only
+                 exo_usepipewritehandles,
+                 exo_sessionleader);         
+ execoptionsty = set of execoptionty;
+ 
 function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
                               const timeoutus: integer = 0): boolean;
                                //<0 -> no timeout
                  //true if ok, close handle
 function waitforprocess(prochandle: prochandlety): integer;
 
-function execmse(const commandline: string;
-                    const inactive: boolean = true;    //windows only
-                    const nostdhandle: boolean = false //windows only
+function execmse(const commandline: string; const options: execoptionsty = []
+//                    const inactive: boolean = true;    //windows only
+//                    const nostdhandle: boolean = false //windows only
                 ): boolean;
 //starts program, true if OK
 
-function execmse4(const commandline: string;
-                    const inactive: boolean = true;    //windows only
-                    const nostdhandle: boolean = false //windows only
+function execmse4(const commandline: string; const  options: execoptionsty = []
+//                    const inactive: boolean = true;    //windows only
+//                    const nostdhandle: boolean = false //windows only
                 ): prochandlety;
 //starts program, returns processhandle, execerror on error
 //don't forget closehandle on windows!
@@ -45,13 +51,14 @@ function execmse4(const commandline: string;
 function execmse1(const commandline: ansistring; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
-             sessionleader: boolean = false;
+//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
-             inactive: boolean = true; //windows only
+             const options: execoptionsty = [];
+//             inactive: boolean = true; //windows only
              frompipewritehandle: pinteger = nil;
-             errorpipewritehandle: pinteger = nil;
-             tty: boolean = false;
-             nostdhandle: boolean = false //windows only
+             errorpipewritehandle: pinteger = nil
+//             tty: boolean = false;
+//             nostdhandle: boolean = false //windows only
                  ): prochandlety;
 //starts program, returns processhandle, execerror on error
 //don't forget closehandle on windows!
@@ -60,12 +67,13 @@ function execmse1(const commandline: ansistring; topipe: pinteger = nil;
 function execmse2(const commandline: string; topipe: tpipewriter = nil;
                       frompipe: tpipereader = nil;
                       errorpipe: tpipereader = nil;
-             sessionleader: boolean = false;
+//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
-             inactive: boolean = true; //windows only
-             usepipewritehandles: boolean = false;
-             tty: boolean = false;
-             nostdhandle: boolean = false
+             const options: execoptionsty = []
+//             inactive: boolean = true; //windows only
+//             usepipewritehandles: boolean = false;
+//             tty: boolean = false;
+//             nostdhandle: boolean = false
                               //windows only
                  ): prochandlety;
 //starts program, returns processhandle, execerror on error
@@ -75,13 +83,14 @@ function execmse2(const commandline: string; topipe: tpipewriter = nil;
 function execmse3(const commandline: string; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
-             sessionleader: boolean = false;
+//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
-             inactive: boolean = true; //windows only
+             const options: execoptionsty = [];
+//             inactive: boolean = true; //windows only
              frompipewritehandle: pinteger = nil;
-             errorpipewritehandle: pinteger = nil;
-             tty: boolean = false;
-             nostdhandle: boolean = false
+             errorpipewritehandle: pinteger = nil
+//             tty: boolean = false;
+//             nostdhandle: boolean = false
                               //windows only
                  ): prochandlety;
 //starts program, returns processhandle, execerror on error
@@ -89,7 +98,9 @@ function execmse3(const commandline: string; topipe: pinteger = nil;
 //uses existing file handles
 
 function execwaitmse(const commandline: string;
-                      const inactive: boolean = true): integer; overload;
+                     const options: execoptionsty = []
+//                      const inactive: boolean = true
+                      ): integer; overload;
 //runs programm, waits for program termination, returns program exitcode
 //inactive true -> no console window (win32 only)
 
@@ -334,13 +345,14 @@ end;
 function execmse0(const commandline: string; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
-             sessionleader: boolean = false;
+//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
-             inactive: boolean = true; //windows only
+             const options: execoptionsty = [];
+//             inactive: boolean = true; //windows only
              frompipewritehandle: pinteger = nil;
-             errorpipewritehandle: pinteger = nil;
-             tty: boolean = false;
-             nostdhandle: boolean = false
+             errorpipewritehandle: pinteger = nil
+//             tty: boolean = false;
+//             nostdhandle: boolean = false
                                //windows only
              ): prochandlety;
 //startet programm, bringt processhandle, execerror wenn misslungen
@@ -461,9 +473,9 @@ begin
  end;
 end;
 
-function execmse(const commandline: string;
-                     const inactive: boolean = true; //windows only
-                     const nostdhandle: boolean = false
+function execmse(const commandline: string;const options: execoptionsty = []
+//                     const inactive: boolean = true; //windows only
+//                     const nostdhandle: boolean = false
                                //windows only
                            ): boolean;
 var
@@ -484,9 +496,9 @@ begin
  end;
 end;
 
-function execmse4(const commandline: string;
-                    const inactive: boolean = true; //windows only
-                    const nostdhandle: boolean = false
+function execmse4(const commandline: string; const options: execoptionsty = []
+//                    const inactive: boolean = true; //windows only
+//                    const nostdhandle: boolean = false
                                //windows only
                 ): prochandlety;
 begin
@@ -495,7 +507,9 @@ begin
 end;
 
 function execwaitmse(const commandline: string;
-                      const inactive: boolean = true): integer;
+                     const options: execoptionsty = []
+//                      const inactive: boolean = true
+                      ): integer;
 //startet programm, wartet auf ende, bring exitcode, -1 wenn start nicht moeglich
 var
  prochandle: prochandlety;
@@ -628,7 +642,9 @@ begin
 end;
 
 function execwaitmse(const commandline: string;
-                      const inactive: boolean = true): integer;
+                     const options: execoptionsty = []
+                      //const inactive: boolean = true
+                      ): integer;
 begin
  result:= mselibc.{$ifdef FPC}__system{$else}system{$endif}(pchar(commandline));
 end;
@@ -669,13 +685,14 @@ end;
 function execmse0(const commandline: string; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
-             sessionleader: boolean = false;
+//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
-             inactive: boolean = true; //windows only
+             const options: execoptionsty = [];
+//             inactive: boolean = true; //windows only
              frompipewritehandle: pinteger = nil;
-             errorpipewritehandle: pinteger = nil;
-             tty: boolean = false;
-             nostdhandle: boolean = false
+             errorpipewritehandle: pinteger = nil
+//             tty: boolean = false;
+//             nostdhandle: boolean = false
                                //windows only
              ): prochandlety;
 const
@@ -746,7 +763,7 @@ var
   
  procedure openpipe(var pipehandles: tpipedescriptors);
  begin
-  if tty then begin
+  if exo_tty in options then begin
    with pipehandles do begin
     if @pipehandles = @topipehandles then begin
 //     if mselibc.pipe(pipehandles) <> 0 then execerr;
@@ -824,7 +841,7 @@ begin
 
  if procid = 0 then begin   //child
 {$ifdef FPC}{$checkpointer off}{$endif}
-  if sessionleader then begin
+  if exo_sessionleader in options then begin
    setsid;
   end
   else begin
@@ -916,9 +933,9 @@ begin
  end;
 end;
 
-function execmse(const commandline: string;
-                    const inactive: boolean = true;
-                    const nostdhandle: boolean = false
+function execmse(const commandline: string; const options: execoptionsty = []
+//                    const inactive: boolean = true;
+//                    const nostdhandle: boolean = false
                                 //windows only
                     ): boolean;
 var
@@ -933,13 +950,13 @@ begin
  end;
 end;
 
-function execmse4(const commandline: string;
-                    const inactive: boolean = true; //windows only
-                    const nostdhandle: boolean = false
+function execmse4(const commandline: string; const options: execoptionsty = []
+//                    const inactive: boolean = true; //windows only
+//                    const nostdhandle: boolean = false
                                //windows only
                 ): prochandlety;
 begin
- result:= execmse1(commandline);
+ result:= execmse1(commandline,nil,nil,nil,-1,options);
 end;
 
 procedure killprocess(handle: prochandlety);
@@ -1112,13 +1129,14 @@ end;
 function execmse1(const commandline: ansistring; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
-             sessionleader: boolean = false;
+//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
-             inactive: boolean = true; //windows only
+             const options: execoptionsty = [];
+//             inactive: boolean = true; //windows only
              frompipewritehandle: pinteger = nil;
-             errorpipewritehandle: pinteger = nil;
-             tty: boolean = false;
-             nostdhandle: boolean = false
+             errorpipewritehandle: pinteger = nil
+//             tty: boolean = false;
+//             nostdhandle: boolean = false
                               //windows only
                  ): prochandlety;
         //creates pipes
@@ -1132,39 +1150,39 @@ begin
  if errorpipe <> nil then begin
   errorpipe^:= invalidfilehandle;
  end;
- result:= execmse0(commandline,topipe,frompipe,errorpipe,sessionleader,
-           groupid,inactive,frompipewritehandle,errorpipewritehandle,
-           tty,nostdhandle);
+ result:= execmse0(commandline,topipe,frompipe,errorpipe,{sessionleader,}
+           groupid,options,frompipewritehandle,errorpipewritehandle);
 end;
 
 function execmse3(const commandline: string; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
-             sessionleader: boolean = false;
+//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
-             inactive: boolean = true; //windows only
+             const options: execoptionsty = [];
+//             inactive: boolean = true; //windows only
              frompipewritehandle: pinteger = nil;
-             errorpipewritehandle: pinteger = nil;
-             tty: boolean = false;
-             nostdhandle: boolean = false
+             errorpipewritehandle: pinteger = nil
+//             tty: boolean = false;
+//             nostdhandle: boolean = false
                               //windows only
                          ): prochandlety;
     //uses existing file handles
 begin
- result:= execmse0(commandline,topipe,frompipe,errorpipe,sessionleader,
-           groupid,inactive,frompipewritehandle,errorpipewritehandle,
-           tty,nostdhandle);
+ result:= execmse0(commandline,topipe,frompipe,errorpipe,{sessionleader,}
+           groupid,options,frompipewritehandle,errorpipewritehandle);
 end;
 
 function execmse2(const commandline: string; topipe: tpipewriter = nil;
              frompipe: tpipereader = nil;
              errorpipe: tpipereader = nil;
-             sessionleader: boolean = false;
+//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
-             inactive: boolean = true; //windows only
-             usepipewritehandles: boolean = false;
-             tty: boolean = false;
-             nostdhandle: boolean = false
+             const options: execoptionsty = []
+//             inactive: boolean = true; //windows only
+//             usepipewritehandles: boolean = false;
+//             tty: boolean = false;
+//             nostdhandle: boolean = false
                                //windows only
              ): prochandlety;
  //bringt procid
@@ -1203,12 +1221,13 @@ begin
   errpp:= nil;
   errwritep:= nil;
  end;
- if not usepipewritehandles then begin
+ if not (exo_usepipewritehandles in options) then begin
   fromwritep:= nil;
   errwritep:= nil;
  end;
- result:= execmse1(commandline,topp,frompp,errpp,sessionleader,groupid,
-                          inactive,fromwritep,errwritep,tty,nostdhandle);
+ result:= execmse1(commandline,topp,frompp,errpp,{sessionleader,}groupid,
+                          options,
+                          {inactive,}fromwritep,errwritep{,tty,nostdhandle});
  if topp <> nil then begin
   topipe.Handle:= topp^;
  end;

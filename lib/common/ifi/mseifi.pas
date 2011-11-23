@@ -1635,7 +1635,8 @@ begin
  resetrxbuffer;
  if fserverapp <> '' then begin
 //  fprochandle:= execmse2(fserverapp,ftx,frx,nil,false,-1,true,true);
-  fprochandle:= execmse2(fserverapp,ftx,frx,nil,false,-1,true,false);
+  fprochandle:= execmse2(fserverapp,ftx,frx,nil,{false,}-1,[exo_inactive]
+                              {true,false});
  end
  else begin
   ftx.connect(sys_stdout);

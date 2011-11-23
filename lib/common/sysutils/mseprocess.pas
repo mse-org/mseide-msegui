@@ -266,6 +266,7 @@ var
  inp: tpipewriter;
  sessionleader: boolean;
  group: integer;
+ opt1: execoptionsty;
 // bo1: boolean;
 begin
  sessionleader:= false;
@@ -301,9 +302,23 @@ begin
       group:= 0;
       sessionleader:= true;
      end;
+     opt1:= [];
+     if sessionleader then begin
+      include(opt1,exo_sessionleader);
+     end;
+     if pro_inactive in foptions then begin
+      include(opt1,exo_inactive);
+     end;
+     if pro_tty in foptions then begin
+      include(opt1,exo_tty);
+     end;
+     if pro_nostdhandle in foptions then begin
+      include(opt1,exo_nostdhandle);
+     end;
      fprochandle:= execmse2(syscommandline(fcommandline1),
-           inp,outp,erroroutp,sessionleader,group,pro_inactive in foptions,false,
-                          pro_tty in foptions,pro_nostdhandle in foptions);
+           inp,outp,erroroutp,{sessionleader,}group,opt1
+           {pro_inactive in foptions,false,
+                          pro_tty in foptions,pro_nostdhandle in foptions});
      if fprochandle = invalidprochandle then begin
       finalizeexec;
      end

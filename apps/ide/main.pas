@@ -2707,7 +2707,7 @@ var
  spos1: sourceposty;
  ar1: componentarty;
  propit: tpropertyitem;
- 
+ opt1: execoptionsty; 
 begin
  with tmenuitem(sender),projectoptions,o,texp do begin
   str1:= tosysfilepath(toolfiles[index]);
@@ -2771,7 +2771,11 @@ begin
      str1:= str1 + ' ' + mstr1;
     end;
    end;
-   execmse(str1,not((index > high(toolhide)) or toolhide[index]),true);
+   opt1:= [exo_nostdhandle];
+   if not((index > high(toolhide)) or toolhide[index]) then begin
+    include(opt1,exo_inactive);
+   end;
+   execmse(str1,opt1{not((index > high(toolhide)) or toolhide[index]),true});
   end;
  end;
 end;

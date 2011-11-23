@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2011-11-23
+ execmse*() inactive,nostdhandle,tty,usepipewritehandle,sessionleader parameter
+ replaced by execoptionsty options parameter.
 2011-11-21
  tmsesqlquery.controller.options default = [dso_autoapply,dso_autocommitret].
 2011-11-19
