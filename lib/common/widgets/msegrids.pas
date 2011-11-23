@@ -2080,7 +2080,9 @@ type
    function calcminscrollsize: sizety; override;
    procedure layoutchanged;
    function cellclicked: boolean;
-   procedure rowdatachanged(const acell: gridcoordty; const count: integer = 1);
+   procedure rowdatachanged; overload;
+   procedure rowdatachanged(const acell: gridcoordty;
+                               const count: integer = 1); overload;
                  //acell.col = invalidaxis -> col unknown
 
    procedure rowup(const action: focuscellactionty = fca_focusin); virtual;
@@ -8846,6 +8848,7 @@ procedure tcustomgrid.rowdatachanged(const acell: gridcoordty;
                                               const count: integer = 1);
 begin
  if not (csloading in componentstate) then begin
+  sortinvalid;
   if fupdating = 0 then begin
    exclude(fstate,gs_rowdatachanged);
    inc(frowdatachanging);
@@ -8859,6 +8862,11 @@ begin
    include(fstate,gs_rowdatachanged);
   end;
  end;
+end;
+
+procedure tcustomgrid.rowdatachanged;
+begin
+ rowdatachanged(mgc(invalidaxis,0),frowcount);
 end;
 
 procedure tcustomgrid.setselected(const cell: gridcoordty; const avalue: boolean);
@@ -13691,6 +13699,7 @@ begin
    fdatacols.endchangelock;
   end;
   if gs_rowdatachanged in fstate then begin
+   updaterowdata;
    rowdatachanged(makegridcoord(invalidaxis,0),frowcount);
   end; 
   if gs_selectionchanged in fstate then begin
