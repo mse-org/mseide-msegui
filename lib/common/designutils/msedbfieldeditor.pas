@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,11 +54,11 @@ type
    procedure fieldrowsdeleting(const sender: tcustomgrid; var aindex: Integer;
                                   var acount: Integer);
    procedure initfieldkind(const sender: tenumtypeedit);
-   procedure fieldssort(sender: tcustomgrid; const index1: Integer;
-                     const index2: Integer; var aresult: Integer);
    procedure fieldcellevent(const sender: TObject; var info: celleventinfoty);
    procedure fieldselectioncha(const sender: TObject);
    procedure deletefields(const sender: TObject);
+   procedure fieldsort(const sender: tcustomgrid; const index1: Integer;
+                   const index2: Integer; var aresult: Integer);
   private
    ffields: tpersistentfields;
    procedure checkfielddefs;
@@ -356,13 +356,12 @@ begin
  end;
 end;
 
-
-procedure tmsedbfieldeditorfo.fieldssort(sender: tcustomgrid;
-          const index1: Integer; const index2: Integer; var aresult: Integer);
+procedure tmsedbfieldeditorfo.fieldsort(const sender: tcustomgrid;
+               const index1: Integer; const index2: Integer;
+               var aresult: Integer);
 begin
  aresult:= fields.rowfontstate[index1] - fields.rowfontstate[index2];
 end;
-
 
 procedure tmsedbfieldeditorfo.fieldcellevent(const sender: TObject;
         var info: celleventinfoty);

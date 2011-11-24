@@ -193,6 +193,7 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
     onrowsdeleted = fieldsrowdel
     oncellevent = fieldcellevent
     onselectionchanged = fieldselectioncha
+    onsort = fieldsort
     reffontheight = 14
     object index: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
