@@ -613,7 +613,7 @@ var
  atomatom: atom;
  mseclientmessageatom,{timeratom,wakeupatom,}
  wmprotocolsatom,wmstateatom,wmnameatom,wmclassatom: atom;
- wmclientleaderatom: atom;
+ wmtransientforatom,wmclientleaderatom: atom;
  wmprotocols: array[wmprotocolty] of atom;
  clipboardatom: atom;
  cardinalatom,windowatom,stringatom,utf8_stringatom,compound_textatom,
@@ -2964,7 +2964,12 @@ begin
  checkgdilock;
 {$endif} 
  if transientfor = 0 then begin
-  xsettransientforhint(appdisp,id,mserootwindow);
+  if wmtransientforatom <> 0 then begin
+   xdeleteproperty(appdisp,id,wmtransientforatom);
+  end
+  else begin
+   xsettransientforhint(appdisp,id,mserootwindow);
+  end;
  end
  else begin
   xsettransientforhint(appdisp,id,transientfor);
@@ -4655,6 +4660,8 @@ begin
             {$ifdef FPC}false{$else}0{$endif});
  {$endif}
   wmstateatom:= xinternatom(appdisp,'WM_STATE',
+            {$ifdef xboolean}false{$else}0{$endif});
+  wmtransientforatom:= xinternatom(appdisp,'WM_TRANSIENT_FOR',
             {$ifdef xboolean}false{$else}0{$endif});
   wmclientleaderatom:= xinternatom(appdisp,'WM_CLIENT_LEADER',
             {$ifdef xboolean}false{$else}0{$endif});

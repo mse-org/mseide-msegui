@@ -11778,7 +11778,7 @@ begin
   show(ml_window,window.transientfor);
  end
  else begin
-  show;
+  show(ml_none,window.transientfor);
  end;
  if aforce then begin
   gui_setwindowfocus(window.winid);
