@@ -54,20 +54,22 @@ type
   public
    constructor create; override;
    function add(const value: fileinfoty): integer;
-   procedure adddirectory(const directoryname: filenamety;
+   function adddirectory(const directoryname: filenamety;
         ainfolevel: fileinfolevelty = fil_name; const amask: filenamearty = nil;
         const aincludeattrib: fileattributesty = [fa_all];
         const aexcludeattrib: fileattributesty = [];
         const aoptions: dirstreamoptionsty = [];
-        const acheckproc: checkfileeventty = nil); overload;
-        //amask = nil -> all,
-   procedure adddirectory(const directoryname: filenamety;
+        const acheckproc: checkfileeventty = nil;
+        const noexception: boolean = false): boolean; overload;
+        //amask = nil -> all, true if ok
+   function adddirectory(const directoryname: filenamety;
         ainfolevel: fileinfolevelty; const amask: filenamety;
         const aincludeattrib: fileattributesty = [fa_all];
         const aexcludeattrib: fileattributesty = [];
         const aoptions: dirstreamoptionsty = [];
-        const acheckproc: checkfileeventty = nil); overload;
-        //amask = '' -> all,
+        const acheckproc: checkfileeventty = nil;
+        const noexception: boolean = false): boolean; overload;
+        //amask = '' -> all, true if ok
    function itempo(const index: integer): pfileinfoty;
     //invalid after capacity change!
    function indexof(const filename: filenamety): integer;
@@ -1746,17 +1748,20 @@ begin
  fileinfoty(data).name:= '';
 end;
 
-procedure tcustomfiledatalist.adddirectory(const directoryname: filenamety;
+function tcustomfiledatalist.adddirectory(const directoryname: filenamety;
         ainfolevel: fileinfolevelty = fil_name; const amask: filenamearty = nil;
         const aincludeattrib: fileattributesty = [fa_all];
         const aexcludeattrib: fileattributesty = [];
         const aoptions: dirstreamoptionsty = [];
-        const acheckproc: checkfileeventty = nil);
+        const acheckproc: checkfileeventty = nil;
+        const noexception: boolean = false
+        ): boolean;
         //amask = '' -> all,
 var
  dirstream: dirstreamty;
  info: fileinfoty;
  bo1,bo2: boolean;
+ err1: syserrorty;
 begin
  fillchar(dirstream,sizeof(dirstream),0);
  with dirstream,dirinfo do begin
@@ -1767,8 +1772,16 @@ begin
   exclude:= aexcludeattrib;
   infolevel:= ainfolevel;
  end;
- syserror(sys_opendirstream(dirstream),
-                           quotechar+dirstream.dirinfo.dirname + '" ');
+ err1:= sys_opendirstream(dirstream);
+ result:= err1 = sye_ok;
+ if not result then begin
+  if not noexception then begin
+   syserror(err1,quotechar+dirstream.dirinfo.dirname + '" ');
+  end
+  else begin
+   exit;
+  end;
+ end;
  beginupdate;
  try
   finalize(info);
@@ -1794,19 +1807,20 @@ begin
  end;
 end;
 
-procedure tcustomfiledatalist.adddirectory(const directoryname: filenamety;
+function tcustomfiledatalist.adddirectory(const directoryname: filenamety;
         ainfolevel: fileinfolevelty; const amask: filenamety;
         const aincludeattrib: fileattributesty = [fa_all];
         const aexcludeattrib: fileattributesty = [];
         const aoptions: dirstreamoptionsty = [];
-        const acheckproc: checkfileeventty = nil);
+        const acheckproc: checkfileeventty = nil;
+        const noexception: boolean = false): boolean;
         //amask = '' -> all
 var
  ar1: filenamearty;
 begin
  unquotefilename(amask,ar1);
- adddirectory(directoryname,ainfolevel,ar1,
-                          aincludeattrib,aexcludeattrib,aoptions,acheckproc);
+ result:= adddirectory(directoryname,ainfolevel,ar1,
+              aincludeattrib,aexcludeattrib,aoptions,acheckproc,noexception);
 end;
 
 function tcustomfiledatalist.itempo(const index: integer): pfileinfoty;

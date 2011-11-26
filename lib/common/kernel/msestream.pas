@@ -56,10 +56,10 @@ type
    constructor createtempfile(const prefix: filenamety; out afilename: filenamety);
    constructor create(ahandle: integer); overload; virtual; //allways called
    constructor create; overload; //tmemorystream
-   class function trycreate(const afilename: filenamety; 
+   constructor trycreate(const afilename: filenamety; 
              const openmode: fileopenmodety = fm_read;
              const accessmode: fileaccessmodesty = [];
-             const rights: filerightsty = defaultfilerights): tmsefilestream;
+             const rights: filerightsty = defaultfilerights);
    destructor destroy; override;
    function read(var buffer; count: longint): longint; override;
    function write(const buffer; count: longint): longint; override;
@@ -860,16 +860,16 @@ begin
  end;
 end;
 
-class function tmsefilestream.trycreate(const afilename: filenamety;
+constructor tmsefilestream.trycreate(const afilename: filenamety;
                const openmode: fileopenmodety = fm_read;
                const accessmode: fileaccessmodesty = [];
-               const rights: filerightsty = defaultfilerights): tmsefilestream;
+               const rights: filerightsty = defaultfilerights);
 var
  error: syserrorty;
 begin
- result:= internalcreate(afilename,openmode,accessmode,rights,error);
+ internalcreate(afilename,openmode,accessmode,rights,error);
  if error <> sye_ok then begin
-  freeandnil(result);
+  freeandnil(self);
  end;
 end;
 

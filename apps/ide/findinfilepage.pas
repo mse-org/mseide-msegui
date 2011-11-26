@@ -149,7 +149,6 @@ procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
  var
   str1: string;
  begin
-//        stream.buflen:= 1024;
   case projectoptions.e.encoding of
    1: begin
     stream.encoding:= ce_utf8n;
@@ -158,9 +157,6 @@ procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
     stream.encoding:= ce_iso8859_1;
    end;   
   end;
-//  if projectoptions.encoding <> 0 then begin
-//   stream.encoding:= ce_utf8n;
-//  end;
   with sender,tfindinfilepagefo(datapo),finfo do begin
    stream.buflen:= 4096;
    with stream do begin
@@ -187,31 +183,36 @@ procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
    filelist.options:= [flo_sortname];
    try
     if fifo_subdirs in options then begin
-     filelist.adddirectory(dir,fil_ext1,'',[fa_dir]);
+     if filelist.adddirectory(dir,fil_ext1,'',[fa_dir],[],[],nil,true) then begin
+      for int1:= 0 to filelist.count - 1 do begin
+       if terminated then begin
+        break;
+       end;
+       with filelist[int1] do begin
+        searchdirectory(dir+'/'+ name);
+       end;
+      end;
+     end;
+    end;
+    filelist.clear;
+    if filelist.adddirectory(dir,fil_ext1,filemask,
+                               [fa_all],[fa_dir],[],nil,true) then begin
      for int1:= 0 to filelist.count - 1 do begin
       if terminated then begin
        break;
       end;
       with filelist[int1] do begin
-       searchdirectory(dir+'/'+ name);
-      end;
-     end;
-    end;
-    filelist.clear;
-    filelist.adddirectory(dir,fil_ext1,filemask,[fa_all],[fa_dir]);
-    for int1:= 0 to filelist.count - 1 do begin
-     if terminated then begin
-      break;
-     end;
-     with filelist[int1] do begin
-      try
-       stream1:= ttextstream.create(dir+'/'+name,fm_read);
        try
-        searchstream(stream1,stream1.filename);
-       finally
-        stream1.free;
+        stream1:= ttextstream.trycreate(dir+'/'+name,fm_read);
+        if stream1 <> nil then begin
+         try
+          searchstream(stream1,stream1.filename);
+         finally
+          stream1.free;
+         end;
+        end;
+       except
        end;
-      except
       end;
      end;
     end;
