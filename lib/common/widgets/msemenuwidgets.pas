@@ -1064,10 +1064,11 @@ begin
   transientforwindow:= application.activewindow;
  end;
  if aactivate and (flayout.activeitem < 0) then begin
+  capturemouse;
   setactiveitem(nextmenuitem(flayout));
-  if flayout.activeitem < 0 then begin
-   exit;
-  end;
+//  if flayout.activeitem < 0 then begin
+//   exit;
+//  end;
  end;
  show(aactivate,transientforwindow);
  if aactivate then begin
