@@ -194,6 +194,8 @@ type
    procedure internalcheckitems(const checkdelete: checktreelistitemprocty);
    procedure setdestroying;
    function inccount: integer; //returns itemindex
+   function getrootexpanded: boolean;
+   procedure setrootexpanded(const avalue: boolean);
   protected
    fparent: ttreelistitem;
    fparentindex: integer;
@@ -250,11 +252,13 @@ type
    function candrop(const source: ttreelistitem): boolean; virtual;
 
    function finditembycaption(const acaption: msestring;
-            casesensitive: boolean = false): ttreelistitem; overload;
-   function finditembycaption(const acaption: lmsestringty): ttreelistitem;
-                                                            overload;
+             const acasesensitive: boolean = false;
+             const aexpand: boolean = false): ttreelistitem; overload;
+   function finditembycaption(const acaption: lmsestringty;
+                       const aexpand: boolean = false): ttreelistitem; overload;
    function finditembycaption(const acaptions: msestringarty;
-            casesensitive: boolean = false): ttreelistitem; overload;
+            const acasesensitive: boolean = false;
+            const aexpand: boolean = false): ttreelistitem; overload;
    function rootnode: ttreelistitem;
    function rootpath: treelistitemarty;
              //top-down
@@ -299,7 +303,7 @@ type
                            const recursive: boolean = false); overload;
    property count: integer read fcount;
    procedure setupeditor(const editor: tinplaceedit; const font: tfont); override;
-   function rootexpanded: boolean;
+   property rootexpanded: boolean read getrootexpanded write setrootexpanded;
    property expanded: boolean read getexpanded write setexpanded;
    property items[const aindex: integer]: ttreelistitem read getitems; default;
  end;
@@ -2440,17 +2444,28 @@ begin
  result:= ns_expanded in fstate;
 end;
 
-function ttreelistitem.rootexpanded: boolean;
+function ttreelistitem.getrootexpanded: boolean;
 var
  n1: ttreelistitem;
 begin
  result:= true;
- n1:= self;
+ n1:= self.fparent;
  while (n1 <> nil) and (n1.fowner <> nil) do begin
   if not (ns_expanded in fstate) then begin
    result:= false;
    break;
   end;
+  n1:= n1.fparent;
+ end;
+end;
+
+procedure ttreelistitem.setrootexpanded(const avalue: boolean);
+var
+ n1: ttreelistitem;
+begin
+ n1:= self.fparent;
+ while (n1 <> nil) and (n1.fowner <> nil) do begin
+  n1.expanded:= avalue;
   n1:= n1.fparent;
  end;
 end;
@@ -2541,13 +2556,14 @@ begin
 end;
 
 function ttreelistitem.finditembycaption(const acaption: msestring;
-         casesensitive: boolean = false): ttreelistitem;
+          const acasesensitive: boolean = false;
+          const aexpand: boolean = false): ttreelistitem;
 var
  int1: integer;
  compfunc: function(const a,b: msestring): integer;
 begin
  result:= nil;
- if casesensitive then begin
+ if acasesensitive then begin
   compfunc:= {$ifdef FPC}@{$endif}msecomparestr;
  end
  else begin
@@ -2559,9 +2575,13 @@ begin
    break;
   end;
  end;
+ if aexpand and (result <> nil) then begin
+  result.rootexpanded:= true;
+ end;
 end;
 
-function ttreelistitem.finditembycaption(const acaption: lmsestringty): ttreelistitem;
+function ttreelistitem.finditembycaption(const acaption: lmsestringty;
+                         const aexpand: boolean = false): ttreelistitem;
 var
  po1,po2: pmsechar;
  int1,int2: integer;
@@ -2584,19 +2604,26 @@ begin
   end;
 nextitem:
  end;
+ if aexpand and (result <> nil) then begin
+  result.rootexpanded:= true;
+ end;
 end;
 
 function ttreelistitem.finditembycaption(const acaptions: msestringarty;
-         casesensitive: boolean = false): ttreelistitem;
+         const acasesensitive: boolean = false;
+         const aexpand: boolean = false): ttreelistitem;
 var
  int1: integer;
 begin
  result:= self;
  for int1:= 0 to high(acaptions) do begin
-  result:= result.finditembycaption(acaptions[int1],casesensitive);
+  result:= result.finditembycaption(acaptions[int1],acasesensitive);
   if result = nil then begin
    break;
   end;
+ end;
+ if aexpand and (result <> nil) then begin
+  result.rootexpanded:= true;
  end;
 end;
 

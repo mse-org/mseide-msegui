@@ -32,16 +32,9 @@ uses
  classes,{msegraphutils,}msetypes{$ifdef FPC},strings{$endif},typinfo;
 {$ifdef FPC}
  {$ifndef mse_nounicodestring}
-  {$ifdef VER2_3}{$define mse_unicodestring}{$endif}
-  {$ifdef VER2_4}{$define mse_unicodestring}{$endif}
-  {$ifdef VER2_5}{$define mse_unicodestring}{$endif}
-  {$ifdef VER2_6}{$define mse_unicodestring}{$endif}
-  {$ifdef VER2_7}{$define mse_unicodestring}{$endif}
-  {$ifdef VER2_8}{$define mse_unicodestring}{$endif}
-//  {$ifdef FPC_FULLVERSION}
-//   {$if FPC_FULLVERSION >= 20300}{$define mse_unicodestring}{$endif}
-//  {$endif}
-               //does not work with delphi
+  {$if defined(FPC) and (fpc_fullversion >= 020300)}
+   {$define mse_unicodestring}
+  {$endif}
  {$endif}
  {$ifndef mse_unicodestring}
   {$ifdef FPC_WINLIKEWIDESTRING}
@@ -380,8 +373,6 @@ function mselowercase(const s: msestring): msestring; overload;
 function mselowercase(const s: msestringarty): msestringarty; overload;
 function mseuppercase(const s: msestring): msestring; overload;
 function mseuppercase(const s: msestringarty): msestringarty; overload;
-
-function msestartstr(const atext: msestring; trenner: msechar): msestring;
 
 //ascii only
 function charuppercase(const c: char): char; overload;

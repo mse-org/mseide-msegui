@@ -63,6 +63,8 @@ type
    procedure setcommand(const avalue: msestring);
    function getpipewaitus: integer;
    procedure setpipewaitus(const avalue: integer);
+   function getprompt: msestring;
+   procedure setprompt(const avalue: msestring);
   protected
    fprocess: tmseprocess;
    procedure doinputavailable(const sender: tpipereader);
@@ -96,6 +98,7 @@ type
    property errorfd: integer read geterrorfd write seterrorfd;
    procedure beginupdate; override;
    procedure endupdate;  override;
+   property prompt: msestring read getprompt write setprompt;
    property command: msestring read getcommand write setcommand;
    property commandhistory: msestringarty read fcommandhistory 
                                                     write fcommandhistory;
@@ -196,6 +199,37 @@ begin
  inherited;
 end;
 
+function tterminal.getprompt: msestring;
+var
+ int1: integer;
+begin
+ result:= '';
+ if fgridintf <> nil then begin
+  int1:= fgridintf.getcol.grid.rowhigh;
+  if int1 >= 0 then begin
+   result:= copy(gridvalue[int1],0,finputcolindex);
+  end;
+ end;
+end;
+
+procedure tterminal.setprompt(const avalue: msestring);
+//var
+// mstr1: msestring;
+begin
+ if fgridintf <> nil then begin
+  with fgridintf.getcol.grid do begin
+   if rowhigh >= 0 then begin
+    gridvalue[rowhigh]:= avalue + 
+                          copy(gridvalue[rowhigh],finputcolindex+1,bigint);
+    finputcolindex:= length(avalue);
+    if row = rowhigh then begin
+     feditor.curindex:= bigint;
+    end;
+   end;
+  end;
+ end;
+end;
+
 function tterminal.getcommand: msestring;
 var
  int1: integer;
@@ -289,10 +323,10 @@ begin
         gridvalue[row]:= copy(gridvalue[row],1,finputcolindex);
        end;
        echoon(bo2);
-      end
-      else begin
-       datalist.add('');
       end;
+//      else begin
+//       datalist.add('');
+//      end;
       updateeditpos;
      end;
     end;
