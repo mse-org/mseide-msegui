@@ -368,7 +368,7 @@ type
    property optionsgrid;
    property optionsgrid1;
    property options;
-   property gridframewidth;
+//   property gridframewidth;
    property gridframecolor;
    property itemlist;
    property cellwidthmin;

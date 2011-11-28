@@ -1753,7 +1753,7 @@ type
    foncolmoved: gridblockmovedeventty;
    fonselectionchanged: notifyeventty;
    fgridframecolor: colorty;
-   fgridframewidth: integer;
+//   fgridframewidth: integer;
    frowcolors: tcolorarrayprop;
    frowfonts: trowfontarrayprop;
    fmouseparkcell: gridcoordty;
@@ -1811,7 +1811,7 @@ type
    procedure decodepickobject(code: integer; out kind: pickobjectkindty;
                out cell: gridcoordty; out col: tcol; out row: tfixrow);
    procedure setgridframecolor(const Value: colorty);
-   procedure setgridframewidth(const Value: integer);
+//   procedure setgridframewidth(const Value: integer);
    procedure setrowcolors(const Value: tcolorarrayprop);
    procedure setrowfonts(const Value: trowfontarrayprop);
    function getrowcolorstate(index: integer): rowstatenumty;
@@ -1846,6 +1846,7 @@ type
    function getrowlinewidth(index: integer): integer;
    procedure setrowlinewidth(index: integer; const avalue: integer);
    function doonsort(const l,r: integer): integer;
+   procedure readgridframewidth(reader: treader);
   protected
    fupdating: integer;
    ffocuscount: integer;
@@ -1926,6 +1927,7 @@ type
    procedure error(aerror: griderrorty; text: string = '');
    procedure indexerror(row: boolean; index: integer; text: string = '');
 
+   procedure defineproperties(filer: tfiler); override;
    function getdisprect: rectty; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure fontchanged; override;
@@ -2232,8 +2234,8 @@ type
    property row: integer read ffocusedcell.row write setrow;
    property mousecell: gridcoordty read fmousecell;
    
-   property gridframewidth: integer read fgridframewidth 
-                        write setgridframewidth default 0;
+//   property gridframewidth: integer read fgridframewidth 
+//                        write setgridframewidth default 0;
    property gridframecolor: colorty read fgridframecolor 
                         write setgridframecolor default cl_black;
 
@@ -2362,7 +2364,7 @@ type
    property rowcount;
    property rowcountmax;
    property gridframecolor;
-   property gridframewidth;
+//   property gridframewidth;
    property rowcolors;
    property rowfonts;
    property zebra_color;
@@ -2492,7 +2494,7 @@ type
    property rowcount;
    property rowcountmax;
    property gridframecolor;
-   property gridframewidth;
+//   property gridframewidth;
    property rowcolors;
    property rowfonts;
    property zebra_color;
@@ -8955,8 +8957,8 @@ begin
   fpropcolwidthref:= self.fwidgetrect.cx -
                      fouterframe.left - fouterframe.right -
                      2*(fi.levelo+fi.framewidth+fi.leveli) -
-                     finnerframe.left - finnerframe.right - 
-                     2 * gridframewidth;
+                     finnerframe.left - finnerframe.right{ - 
+                     2 * gridframewidth};
  end;
  int3:= 0;
  for int1:= 0 to fdatacols.count - 1 do begin
@@ -9043,22 +9045,22 @@ begin
    with fdatarecty,ffixrows do begin
     finnerdatarect.y:= ffirstsize + fi.innerframe.top;
     finnerdatarect.cy:= finnerclientrect.cy - ftotsize;
-    if self.fgridframewidth = 0 then begin
-     x:= 0;
-     cx:= fpaintrect.cx;
-    end
-    else begin
+//    if self.fgridframewidth = 0 then begin
+//     x:= 0;
+//     cx:= fpaintrect.cx;
+//    end
+//    else begin
      x:= fi.innerframe.left;
      cx:= finnerclientrect.cx;
-    end;
+//    end;
     y:= 0;
     if foppositecount = count then begin
-     if self.fgridframewidth <> 0 then begin
+//     if self.fgridframewidth <> 0 then begin
       y:= fi.innerframe.top;
-     end;
+//     end;
     end
     else begin
-     if (ffirstsize > 0) or (self.fgridframewidth <> 0) then begin
+     if (ffirstsize > 0) {or (self.fgridframewidth <> 0)} then begin
       y:= ffirstsize + fi.innerframe.top;
      end;
     end;
@@ -9067,9 +9069,9 @@ begin
      cy:= cy - ftotsize + ffirstsize - fi.innerframe.bottom;
     end
     else begin
-     if self.fgridframewidth <> 0 then begin
+//     if self.fgridframewidth <> 0 then begin
       cy:= cy - fi.innerframe.bottom;
-     end;
+//     end;
     end;
     if cx < 0 then begin
      cx:= 0;
@@ -9084,22 +9086,22 @@ begin
    with fdatarectx,ffixcols do begin
     finnerdatarect.x:= ffirstsize + fi.innerframe.left + ffirstnohscroll;
     finnerdatarect.cx:= finnerclientrect.cx - ftotsize - ffirstnohscroll;
-    if self.fgridframewidth = 0 then begin
-     y:= 0;
-     cy:= fpaintrect.cy;
-    end
-    else begin
+//    if self.fgridframewidth = 0 then begin
+//     y:= 0;
+//     cy:= fpaintrect.cy;
+//    end
+//    else begin
      y:= fi.innerframe.top;
      cy:= finnerclientrect.cy;
-    end;
+//    end;
     x:= ffirstnohscroll;
     if foppositecount = count then begin
-     if (x > 0) or (self.fgridframewidth <> 0) then begin
+//     if (x > 0) or (self.fgridframewidth <> 0) then begin
       inc(x,fi.innerframe.left);
-     end;
+//     end;
     end
     else begin
-     if (ffirstsize > 0) or (self.fgridframewidth <> 0) then begin
+     if (ffirstsize > 0) {or (self.fgridframewidth <> 0)} then begin
       x:= ffirstsize + fi.innerframe.left + ffirstnohscroll;
      end;
     end;
@@ -9108,9 +9110,9 @@ begin
      cx:= cx - ftotsize + ffirstsize - fi.innerframe.right;
     end
     else begin
-     if self.fgridframewidth <> 0 then begin
+//     if self.fgridframewidth <> 0 then begin
       cx:= cx - fi.innerframe.right;
-     end;
+//     end;
     end;
     if cx < 0 then begin
      cx:= 0;
@@ -9216,10 +9218,10 @@ begin
  rowstate1:= fdatacols.frowstate;
  internalupdatelayout(true);
  fnumoffset:= getnumoffset;
- saveindex:= -1;
- if fgridframewidth <> 0 then begin
+// saveindex:= -1;
+// if fgridframewidth <> 0 then begin
   saveindex:= acanvas.save;
- end;
+// end;
  acanvas.move(pointty(tframe1(fframe).fi.innerframe.topleft));
  frootbrushorigin:= clientwidgetpos;
  frootbrushorigin.x:= frootbrushorigin.x + finnerdatarect.x + rootpos.x;
@@ -9448,10 +9450,13 @@ begin
   end; //rect1 not empty
  end; //if cliprect not empty
 
- if saveindex >= 0 then begin
+// if saveindex >= 0 then begin
   acanvas.restore(saveindex);
-  acanvas.drawframe(innerclientrect,fgridframewidth,fgridframecolor);
- end;
+  with tgridframe(fframe).fi do begin
+   acanvas.drawframe(clientrect,innerframe,fgridframecolor);
+  end;
+//  acanvas.drawframe(innerclientrect,fgridframewidth,fgridframecolor);
+// end;
  
 end;
  
@@ -13871,7 +13876,7 @@ begin
   invalidate;
  end;
 end;
-
+{
 procedure tcustomgrid.setgridframewidth(const Value: integer);
 begin
  if fgridframewidth <> value then begin
@@ -13900,7 +13905,7 @@ begin
   end;
  end;
 end;
-
+}
 function tcustomgrid.getmerged(const arow: integer): longword;
 begin
  result:= 0;
@@ -15110,7 +15115,22 @@ begin
  fonsort(self,l,r,result);
 end;
 
+procedure tcustomgrid.readgridframewidth(reader: treader);
+var
+ int1: integer;
+begin
+ int1:= reader.readinteger;
+ fframe.framei_right:= int1;
+ fframe.framei_top:= int1;
+ fframe.framei_left:= int1;
+ fframe.framei_bottom:= int1;
+end;
 
+procedure tcustomgrid.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('gridframewidth',@readgridframewidth,nil,false);
+end;
 
 { tdrawgrid }
 

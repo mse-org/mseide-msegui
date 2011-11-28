@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2011-11-28
+ tcustomgrid.gridframewidth removed, use frame.framei* instead.
 2011-11-23
  execmse*() inactive,nostdhandle,tty,usepipewritehandle,sessionleader parameter
  replaced by execoptionsty options parameter.

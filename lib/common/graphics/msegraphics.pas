@@ -891,8 +891,11 @@ type
                          
    procedure drawframe(const arect: rectty; awidth: integer = -1;
                    const acolor: colorty = cl_default;
-                   const hiddenedges: edgesty = []);
+                   const hiddenedges: edgesty = []); overload;
                     //no dashes, awidth < 0 -> inside frame,!
+   procedure drawframe(const arect: rectty; awidth: framety;
+                   const acolor: colorty = cl_default;
+                   const hiddenedges: edgesty = []); overload;
    procedure drawxorframe(const arect: rectty; const awidth: integer = -1;
                            const abrush: tsimplebitmap = nil); overload;
    procedure drawxorframe(const po1: pointty; const po2: pointty;
@@ -4366,6 +4369,42 @@ begin
        gdi(gdf_fillrect); //right
       end;
      end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tcanvas.drawframe(const arect: rectty; awidth: framety;
+                   const acolor: colorty = cl_default;
+                   const hiddenedges: edgesty = []); overload;
+var
+ rect1,rect2: rectty;
+begin
+ if cs_inactive in fstate then exit;
+ if acolor <> cl_transparent then begin
+  rect2:= arect;
+  if checkforeground(acolor,false) then begin
+   with fdrawinfo.rect do begin
+    rect:= @rect1;
+    with rect2 do begin
+     rect1.pos:= pos;
+     rect1.cx:= cx;
+     rect1.cy:= awidth.top;
+     gdi(gdf_fillrect); //top
+     rect1.pos.y:= y + cy - awidth.bottom;
+     rect1.cy:= awidth.bottom;
+     gdi(gdf_fillrect); //bottom
+     rect1.pos.y:= y;
+     rect1.cy:= cy;
+     inc(rect1.pos.y,awidth.top);
+     dec(rect1.cy,awidth.top);
+     dec(rect1.cy,awidth.bottom);
+     rect1.cx:= awidth.left;
+     gdi(gdf_fillrect); //left
+     rect1.pos.x:= x + cx - awidth.right;
+     rect1.cx:= awidth.right;
+     gdi(gdf_fillrect); //right
     end;
    end;
   end;

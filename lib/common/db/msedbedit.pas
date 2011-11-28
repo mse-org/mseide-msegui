@@ -1688,7 +1688,7 @@ type
 //   property font;
    property fontempty;
    property gridframecolor;
-   property gridframewidth;
+//   property gridframewidth;
    property rowcolors;
    property rowfonts;
    property zebra_color;
@@ -1969,7 +1969,7 @@ type
    property fixcols;
    property fixrows;
    property gridframecolor;
-   property gridframewidth;
+//   property gridframewidth;
    property rowcolors;
    property rowfonts;
    property zebra_color;

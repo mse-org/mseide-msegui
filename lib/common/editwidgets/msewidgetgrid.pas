@@ -342,7 +342,7 @@ type
    property rowcount;
    property rowcountmax;
    property gridframecolor;
-   property gridframewidth;
+//   property gridframewidth;
    property rowcolors;
    property rowfonts;
    property zebra_color;
