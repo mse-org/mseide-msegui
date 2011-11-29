@@ -218,6 +218,9 @@ procedure nextword(const value: string; out res: lstringty); overload;
 procedure nextword(var value: lmsestringty; out res: lmsestringty); overload;
 procedure nextword(var value: lstringty; out res: lstringty); overload;
 procedure nextword(var value: lstringty; out res: string); overload;
+function nextword(var start: pchar): string; overload;
+function nextword(var start: pmsechar): msestring; overload;
+
 function nextquotedstring(var value: lstringty; out res: string): boolean;
                    //false wenn kein quote vorhanden
 procedure lstringgoback(var value: lstringty; const res: lstringty);
@@ -2282,6 +2285,40 @@ var
 begin
  nextword(value,lstr1);
  setstring(res,lstr1.po,lstr1.len);
+end;
+
+function nextword(var start: pchar): string;
+var
+ po1,po2: pchar;
+begin
+ po1:= start;
+ while (po1^ = ' ') and (po1^ <> #0) do begin
+  inc(po1);
+ end;
+ po2:= po1;
+ while (po2^ <> ' ') and (po2^ <> #0) do begin
+  inc(po2);
+ end;
+ setlength(result,po2-po1);
+ move(po1^,pchar(pointer(result))^,pchar(pointer(po2))-pchar(pointer(po1)));
+ start:= po2;
+end;
+
+function nextword(var start: pmsechar): msestring;
+var
+ po1,po2: pmsechar;
+begin
+ po1:= start;
+ while (po1^ = ' ') and (po1^ <> #0) do begin
+  inc(po1);
+ end;
+ po2:= po1;
+ while (po2^ <> ' ') and (po2^ <> #0) do begin
+  inc(po2);
+ end;
+ setlength(result,po2-po1);
+ move(po1^,pmsechar(pointer(result))^,pchar(pointer(po2))-pchar(pointer(po1)));
+ start:= po2;
 end;
 
 procedure lstringgoback(var value: lstringty; const res: lstringty);

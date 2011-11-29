@@ -50,7 +50,6 @@ type
  thashdatalist = class
   private
    fmask: hashvaluety;
-//   fhashshift: integer;
    fdatasize: integer;
    frecsize: integer;
    fcapacity: integer;
@@ -364,8 +363,10 @@ type
 
  tobjectmsestringhashdatalist = class(tpointermsestringhashdatalist)
   protected
+   fownsobjects: boolean;
    procedure finalizeitem(var aitemdata); override;
   public
+   constructor create(const aownsobjects: boolean = true);
    procedure add(const akey: msestring; const avalue: tobject);
    function addunique(const akey: msestring; const avalue: tobject): boolean;
                    //true if found
@@ -1615,6 +1616,12 @@ end;
 
 { tobjectmsestringhashdatalist }
 
+constructor tobjectmsestringhashdatalist.create(const aownsobjects: boolean = true);
+begin
+ fownsobjects:= aownsobjects;
+ inherited create;
+end;
+
 procedure tobjectmsestringhashdatalist.add(const akey: msestring;
                const avalue: tobject);
 begin
@@ -1669,8 +1676,10 @@ end;
 procedure tobjectmsestringhashdatalist.finalizeitem(var aitemdata);
 begin
  inherited;
- with objectmsestringdataty(aitemdata) do begin
-  data.free;
+ if fownsobjects then begin
+  with objectmsestringdataty(aitemdata) do begin
+   data.free;
+  end;
  end;
 end;
 

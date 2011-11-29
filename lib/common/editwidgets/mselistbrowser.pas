@@ -14,10 +14,11 @@ unit mselistbrowser;
 interface
 uses
  mseglob,classes,msegrids,msedatanodes,msedatalist,msegraphics,msegraphutils,
-      msetypes,msestrings,msemenus,
-      msebitmap,mseclasses,mseguiglob,msedrawtext,msefileutils,msedataedits,
-      mseeditglob,msewidgetgrid,msewidgets,mseedit,mseevent,msegui,msedropdownlist,
-      msesys,msedrag,msestat,mseinplaceedit,msepointer,msegridsglob;
+ msetypes,msestrings,msemenus,
+ msebitmap,mseclasses,mseguiglob,msedrawtext,msefileutils,msedataedits,
+ mseeditglob,msewidgetgrid,msewidgets,mseedit,mseevent,msegui,msedropdownlist,
+ msesys,msedrag,msestat,mseinplaceedit,msepointer,msegridsglob,
+ mserichstring;
 
 const
  defaultcellwidth = 50;
@@ -64,6 +65,19 @@ type
  end;
  listedititemarty = array of tlistitem;
  listedititemclassty = class of tlistedititem;
+ 
+ trichlistedititem = class(tlistedititem)
+  private
+   function getrichcaption: richstringty;
+   procedure setrichcaption(const avalue: richstringty);
+   procedure setcaptionformat(const avalue: formatinfoarty);
+  protected
+   fformat: formatinfoarty;
+  public
+   procedure updatecaption(var ainfo: drawtextinfoty); override;
+   property richcaption: richstringty read getrichcaption write setrichcaption;
+   property captionformat: formatinfoarty read fformat write setcaptionformat;
+ end;
 
  ttreeitemeditlist = class;
  ttreelistedititem = class;
@@ -4999,6 +5013,32 @@ end;
 function createttreeitemeditlist(const aowner: twidgetcol): tdatalist;
 begin
  result:= ttreeitemeditlist.create;
+end;
+
+{ trichlistedititem }
+
+function trichlistedititem.getrichcaption: richstringty;
+begin
+ result.text:= fcaption;
+ result.format:= fformat;
+end;
+
+procedure trichlistedititem.setrichcaption(const avalue: richstringty);
+begin
+ fformat:= avalue.format;
+ caption:= avalue.text;
+end;
+
+procedure trichlistedititem.updatecaption(var ainfo: drawtextinfoty);
+begin
+ inherited;
+ ainfo.text.format:= fformat;
+end;
+
+procedure trichlistedititem.setcaptionformat(const avalue: formatinfoarty);
+begin
+ fformat:= avalue;
+ change;
 end;
 
 initialization

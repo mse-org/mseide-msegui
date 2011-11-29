@@ -769,7 +769,6 @@ begin
    updatecaption(info1);
    editor.setup(text.text,editor.curindex,false,dest,clip,nil,nil,font);
   end;
-//  editor.setup(fcaption,editor.curindex,false,captioninnerrect,captionrect,nil,nil,font);
  end;
 end;
 
