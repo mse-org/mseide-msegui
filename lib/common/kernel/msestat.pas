@@ -960,7 +960,8 @@ lab1:
  end;
 end;
 
-procedure tstatreader.readdatalist(const name: msestring;  const value: tdatalist);
+procedure tstatreader.readdatalist(const name: msestring; 
+                                                  const value: tdatalist);
 var
  str1: msestring;
  int1: integer;

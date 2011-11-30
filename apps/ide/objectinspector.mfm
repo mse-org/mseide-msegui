@@ -177,6 +177,7 @@ object objectinspectorfo: tobjectinspectorfo
         onshowhint = col0onshowhint
         onselectionchanged = selchanged
         widgetname = 'props'
+        dataclass = ttreeitemeditlist
       end    
       item
         linecolorfix = -1610612733
@@ -188,6 +189,7 @@ object objectinspectorfo: tobjectinspectorfo
         oncellevent = valuescellevent
         onshowhint = col1onshowhint
         widgetname = 'values'
+        dataclass = titemeditlist
       end>
     datarowlinecolor = -1610612731
     datarowheight = 16
