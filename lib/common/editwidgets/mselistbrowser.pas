@@ -2512,14 +2512,14 @@ begin
     end;
    end;
   end;
- end;
- if fgridintf <> nil then begin
- {$warnings off}
-  with tcustomgrid1(fgridintf.getcol.grid) do begin
- {$warnings on}
-   sortinvalid(invalidaxis,invalidaxis);
-   rowdatachanged(makegridcoord(invalidaxis,index),count);
-   checksort;
+  if (fgridintf <> nil) and not fitemlist.updating then begin
+  {$warnings off}
+   with tcustomgrid1(fgridintf.getcol.grid) do begin
+  {$warnings on}
+    sortinvalid(invalidaxis,invalidaxis);
+    rowdatachanged(makegridcoord(invalidaxis,index),count);
+    checksort;
+   end;
   end;
  end;
 end;
@@ -3000,11 +3000,16 @@ begin
    end;
    factiverow:= info.newcell.row;
    if fvalue <> nil then begin
-    if info.eventkind = cek_enter then begin
-     updateitemvalues(info.newcell.row,1);
-    end
-    else begin
-     updateitemvalues(info.cellbefore.row,1);
+    fitemlist.incupdate;
+    try
+     if info.eventkind = cek_enter then begin
+      updateitemvalues(info.newcell.row,1);
+     end
+     else begin
+      updateitemvalues(info.cellbefore.row,1);
+     end;
+    finally
+     fitemlist.decupdate;
     end;
    end;
   end;
@@ -3802,9 +3807,12 @@ procedure ttreeitemeditlist.nodenotification(const sender: tlistitem;
      include(fstate,des_updating);
      grid1:= fgridintf.getcol.grid;
      incupdate;
-     grid1.insertrow(finsertcount,int1);      
-     decupdate;
-     exclude(fstate,des_updating);
+     try
+      grid1.insertrow(finsertcount,int1);      
+     finally
+      decupdate;
+      exclude(fstate,des_updating);
+     end;
      fintf.updateitemvalues(int2,int1);
      int1:= int2+int1;
      if int2 < fcount then begin
