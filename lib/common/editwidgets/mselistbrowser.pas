@@ -2512,14 +2512,16 @@ begin
     end;
    end;
   end;
-  if (fgridintf <> nil) and not fitemlist.updating then begin
-  {$warnings off}
-   with tcustomgrid1(fgridintf.getcol.grid) do begin
-  {$warnings on}
-    sortinvalid(invalidaxis,invalidaxis);
-    rowdatachanged(makegridcoord(invalidaxis,index),count);
-    checksort;
-   end;
+ end;
+ if (fgridintf <> nil) then begin
+ {$warnings off}
+  with tcustomgrid1(fgridintf.getcol.grid) do begin
+ {$warnings on}
+//    sortinvalid(invalidaxis,invalidaxis);
+   rowdatachanged(makegridcoord(invalidaxis,index),count);
+//   if not fitemlist.updating then begin
+//    checksort;
+//   end;
   end;
  end;
 end;
@@ -2559,6 +2561,7 @@ begin
  end
  else begin
   fvalue:= fitemlist[int1];
+{
   if not (des_updating in fstate) then begin
    fitemlist.incupdate;
    try
@@ -2567,6 +2570,7 @@ begin
     fitemlist.decupdate;
    end;
   end;
+}
  end;
  getitemvalues;
  inherited;
@@ -2999,19 +3003,21 @@ begin
     editing:= false;
    end;
    factiverow:= info.newcell.row;
+{
    if fvalue <> nil then begin
-    fitemlist.incupdate;
-    try
+//    fitemlist.incupdate;
+//    try
      if info.eventkind = cek_enter then begin
       updateitemvalues(info.newcell.row,1);
      end
      else begin
       updateitemvalues(info.cellbefore.row,1);
      end;
-    finally
-     fitemlist.decupdate;
-    end;
+//    finally
+//     fitemlist.decupdate;
+//    end;
    end;
+}
   end;
  end;
  if canevent(tmethod(foncellevent)) then begin

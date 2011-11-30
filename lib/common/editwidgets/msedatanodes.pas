@@ -767,7 +767,7 @@ begin
    text.text:= fcaption;
    flags:= textflags;
    updatecaption(info1);
-   editor.setup(text.text,editor.curindex,false,dest,clip,nil,nil,font);
+   editor.setup(text.text,editor.curindex,false,dest,clip,text.format,nil,font);
   end;
  end;
 end;
