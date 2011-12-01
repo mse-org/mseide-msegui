@@ -1070,8 +1070,8 @@ begin
  case event.kind of
   ek_loaded: begin
    doeventloopstart;
-   if (fo_modal in foptions) and not (csloading in componentstate) and 
-                           showing  then begin
+   if (fo_modal in foptions) and 
+          (componentstate*[csloading,csdesigning] = []) and showing  then begin
     show(true);
    end;
   end;
