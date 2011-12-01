@@ -13,13 +13,18 @@ unit mseguiintf; //i386-linux, X11
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
-
+{$ifdef mse_debugwindowfocus}
+ {$define mse_debug}
+{$endif}
+{$ifdef mse_debugconfigure}
+ {$define mse_debug}
+{$endif}
 uses
  {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,mseapplication,
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
- msestrings,xft,xrender{$ifdef mse_debugwindowfocus},mseformatstr{$endif};
+ msestrings,xft,xrender;
 
 {$ifdef FPC}
 {$define xbooleanresult}
@@ -3139,6 +3144,10 @@ begin
    if visual = nil then begin
     visual:= pvisual(copyfromparent);
    end;
+   attributes.win_gravity:= staticgravity;
+   attributes.bit_gravity:= northwestgravity;
+   valuemask:= valuemask or cwwingravity or cwbitgravity;
+   
    id:= xcreatewindow(appdisp,id1,rect.x,rect.y,width,height,0,
       depth,copyfromparent,visual,
       valuemask,@attributes);
@@ -3328,9 +3337,16 @@ begin
   xsetwmnormalhints(appdisp,id,sizehints);
   xfree(sizehints);
  end;
+ {$ifdef mse_debugconfigure}
+  with changes do begin
+   debugwriteln('*reposwindow     '+hextostr(id)+' '+inttostr(x)+' '+inttostr(y)+
+                   ' '+inttostr(width)+' '+inttostr(height));
+  end;
+ {$endif}
  xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
  {$ifdef FPC} {$checkpointer default} {$endif}
  result:= gue_ok;
+// xflush(appdisp);
  gdi_unlock;
 end;
 
@@ -4289,12 +4305,40 @@ eventrestart:
      result:= twindowevent.create(ek_destroy,xwindow);
     end
     else begin
-     while xchecktypedwindowevent(appdisp,w,configurenotify,@xev) do begin end;
+     if not application.deinitializing then begin //there can be an Xerror?
+      //gnome returns a different pos on window resizing than on window moving!
+//      xsync(appdisp,false);
+      getwindowrect(w,rect1,pt1);
+    {$ifdef mse_debugconfigure}
+      debugwriteln('*conf winrect    '+hextostr(w)+' '+
+                      inttostr(pt1.x)+' '+inttostr(pt1.y)+'|'+
+                 inttostr(rect1.x)+' '+inttostr(rect1.y)+
+                 ' '+inttostr(rect1.cx)+' '+inttostr(rect1.cy));
+    {$endif}
+      result:= twindowrectevent.create(ek_configure,w,rect1,pt1);
+     end;
+    {$ifdef mse_debugconfigure}
+     debugwriteln('                 '+hextostr(w)+' '+inttostr(x)+' '+inttostr(y)+
+                 ' '+inttostr(width)+' '+inttostr(height));
+    {$endif}
+     while xchecktypedwindowevent(appdisp,w,configurenotify,@xev) do begin
+    {$ifdef mse_debugconfigure}
+      debugwriteln('                 '+hextostr(w)+' '+inttostr(x)+' '+inttostr(y)+
+                 ' '+inttostr(width)+' '+inttostr(height));
+    {$endif}
+     end;
+     (*
       //gnome returns a different pos on window resizing than on window moving!
      if not application.deinitializing then begin //there can be an Xerror?
       getwindowrect(w,rect1,pt1);
+    {$ifdef mse_debugconfigure}
+      debugwriteln(' windowrect '+inttostr(rect1.x)+' '+inttostr(rect1.y)+
+                 ' '+inttostr(rect1.cx)+' '+inttostr(rect1.cy)+
+                 ' pos '+inttostr(pt1.x)+' '+inttostr(pt1.y));
+    {$endif}
+      result:= twindowrectevent.create(ek_configure,w,rect1,pt1);
      end;
-     result:= twindowrectevent.create(ek_configure,w,rect1,pt1);
+     *)
     end;
    end;
   end;

@@ -12353,6 +12353,18 @@ begin
     if not windowevent and not (tws_needsdefaultpos in fstate) and
         (fmoving <= 0) and (windowpos <> wp_maximized) then begin
      fnormalwindowrect:= fowner.fwidgetrect;
+    {$ifdef mse_debugconfigure}
+     with fnormalwindowrect do begin
+      if visible then begin
+       debugwrite('*checkwin visible');
+      end
+      else begin
+       debugwrite('*checkw. invis.  ');
+      end;
+      debugwriteln(hextostr(fwindow.id)+' '+
+              inttostr(x)+' '+inttostr(y)+' '+inttostr(cx)+' '+inttostr(cy));
+     end;
+    {$endif}
      guierror(gui_reposwindow(fwindow.id,fnormalwindowrect),self);
      fstate:= fstate + [tws_posvalid,tws_sizevalid];
     end;
@@ -12776,6 +12788,8 @@ begin
                                 not (wo_embedded in foptions) then begin
        gui_reposwindow(fwindow.id,fnormalwindowrect);
       end;
+      fstate:= fstate-[tws_posvalid,tws_sizevalid]; 
+              //possibly wrong window pos because of KDE bug with staticgravity
      end;
      exclude(fstate,tws_grouphidden);
      exclude(fstate,tws_groupminimized);
@@ -12926,36 +12940,47 @@ const
 var
  rect1: rectty;
 begin
- exclude(fstate,tws_needsdefaultpos);
- rect1:= arect;
- if not (wo_embedded in foptions) then begin
-  addpoint1(rect1.pos,aorigin);
- end;
- if not rectisequal(rect1,fowner.fwidgetrect) then begin
-  if fsizeerrorcount < maxsizeerrorcount then begin
-   fowner.checkwidgetsize(rect1.size);
+{$ifdef mse_debugconfigure}
+ debugwriteln('*wmconfigured    '+hextostr(fwindow.id)+
+                       inttostr(aorigin.x)+' '+inttostr(aorigin.y)+'|'+
+                 inttostr(arect.x)+' '+inttostr(arect.y)+
+                 ' '+inttostr(arect.cx)+' '+inttostr(arect.cy));
+
+{$endif}
+ if fstate*[tws_posvalid,tws_sizevalid] <> 
+               [tws_posvalid,tws_sizevalid] then begin
+  checkwindow(false);
+ end
+ else begin
+  exclude(fstate,tws_needsdefaultpos);
+  rect1:= arect;
+  if not (wo_embedded in foptions) then begin
+   addpoint1(rect1.pos,aorigin);
   end;
-  fowner.internalsetwidgetrect(rect1,true);
-  if pointisequal(rect1.pos,fowner.fwidgetrect.pos) then begin
-   include(fstate,tws_posvalid);
-  end;
-//  if sizeisequal(rect1.size,fowner.fwidgetrect.size) then begin
-  if sizeisequal(arect.size,fowner.fwidgetrect.size) then begin
-   include(fstate,tws_sizevalid);
-   fsizeerrorcount:= 0;
-  end
-  else begin
+  if not rectisequal(rect1,fowner.fwidgetrect) then begin
    if fsizeerrorcount < maxsizeerrorcount then begin
-    inc(fsizeerrorcount);
-    gui_reposwindow(fwindow.id,rect1);
-//    gui_reposwindow(fwindow.id,makerect(arect.pos,rect1.size));
+    fowner.checkwidgetsize(rect1.size);
+   end;
+   fowner.internalsetwidgetrect(rect1,true);
+   if pointisequal(rect1.pos,fowner.fwidgetrect.pos) then begin
+    include(fstate,tws_posvalid);
+   end;
+   if sizeisequal(arect.size,fowner.fwidgetrect.size) then begin
+    include(fstate,tws_sizevalid);
+    fsizeerrorcount:= 0;
+   end
+   else begin
+    if fsizeerrorcount < maxsizeerrorcount then begin
+     inc(fsizeerrorcount);
+     gui_reposwindow(fwindow.id,rect1);
+    end;
    end;
   end;
- end;
- fwindowposbefore:= windowpos;
- if not (fwindowposbefore in [wp_minimized,wp_maximized,
-                              wp_fullscreen,wp_fullscreenvirt]) then begin
-  fnormalwindowrect:= fowner.fwidgetrect;
+  fwindowposbefore:= windowpos;
+  if not (fwindowposbefore in [wp_minimized,wp_maximized,
+                               wp_fullscreen,wp_fullscreenvirt]) then begin
+   fnormalwindowrect:= fowner.fwidgetrect;
+  end;
  end;
 end;
 
