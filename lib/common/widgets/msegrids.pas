@@ -9844,6 +9844,9 @@ end;
 
 procedure tcustomgrid.dorowcountchanged(const countbefore,newcount: integer);
 begin
+ if (fclickedcell.row >= 0) and (newcount <= fclickedcell.row) then begin
+  exclude(fstate,gs_cellclicked);
+ end;
  layoutchanged;
  ffixcols.rowcountchanged(newcount);
  fdatacols.rowcountchanged(newcount);
@@ -13481,6 +13484,11 @@ begin
    if aindex >= 0 then begin //datarows
     if not fdatacols.roworderinvalid then begin
      exit;
+    end;
+    if (fclickedcell.row >= 0) and 
+       (aindex <= fclickedcell.row) and 
+                             (fclickedcell.row < aindex + acount) then begin
+     exclude(fstate,gs_cellclicked);
     end;
     if (factiverow >= 0) then begin
      if (factiverow >= aindex + acount) then begin
