@@ -1955,7 +1955,7 @@ type
    procedure rowstatechanged(const arow: integer); virtual;
    procedure scrolled(const dist: pointty); virtual;
    procedure sortchanged(const all: boolean);
-   procedure checksort;
+//   procedure checksort;
    procedure checkinvalidate;
    function startanchor: gridcoordty;
    function endanchor: gridcoordty;
@@ -2077,8 +2077,6 @@ type
    procedure beginupdate;
    procedure endupdate(const nosort: boolean = false);
    function updating: boolean; reintroduce;
-   procedure sortinvalid(const acol: integer = invalidaxis; 
-                                       const arow: integer = invalidaxis);
    function calcminscrollsize: sizety; override;
    procedure layoutchanged;
    function cellclicked: boolean;
@@ -2188,7 +2186,11 @@ type
    function appenddatarow: integer; 
     //returns index of new row, use it in a beginupdate/endupdate block
    
+   procedure sortinvalid(const acol: integer = invalidaxis; 
+                                       const arow: integer = invalidaxis);
+   function checksort: boolean; //true if sortchanged called  
    procedure sort;
+   
    function copyselection: boolean; virtual;  //false if no copy
    function pasteselection: boolean; virtual; //false if no paste
 
@@ -14480,11 +14482,13 @@ begin
  end;
 end;
 
-procedure tcustomgrid.checksort;
+function tcustomgrid.checksort: boolean;
 begin
- if (fstate1 * [gs1_sortvalid,gs1_rowsortinvalid]<>[gs1_sortvalid]) and 
+ result:= false;
+ if (fstate1 * [gs1_sortvalid,gs1_rowsortinvalid] <> [gs1_sortvalid]) and 
             not (gs1_sortchangelock in fstate1) and (fupdating = 0) then begin
   sortchanged(false);
+  result:= true;
  end;
 end;
 
