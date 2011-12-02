@@ -10905,7 +10905,7 @@ function tcustomgrid.focuscell(cell: gridcoordty;
 var
  sortchecked: boolean;
  
- procedure dosortcheck;
+ procedure dosortcheck(const isappend: boolean); //follow sort order
  var
   int1: integer;
  begin
@@ -10920,8 +10920,15 @@ var
       if cell.row < 0 then begin
        cell.row:= 0;
       end;
-      if cell.row > frowcount then begin
-       cell.row:= frowcount;
+      if isappend then begin
+       if cell.row > frowcount then begin
+        cell.row:= frowcount;
+       end;
+      end
+      else begin
+       if cell.row >= frowcount then begin
+        cell.row:= frowcount-1;
+       end;
       end;
      end;
     end;
@@ -11079,7 +11086,7 @@ begin     //focuscell
 }   
    sortchecked:= false;
    if isappend(cell.row) then begin
-    dosortcheck;
+    dosortcheck(true);
     if (frowcount = 0) or (og_appendempty in foptionsgrid) or
             not fdatacols.rowempty(frowcount-1) then begin
      cell.row:= frowcount;
@@ -11139,7 +11146,7 @@ begin     //focuscell
      end;
     end;
    end;
-   dosortcheck;
+   dosortcheck(false);
    
    if not (selectaction in [fca_exitgrid,fca_entergrid]) then begin
     ffocusedcell:= invalidcell;
