@@ -102,7 +102,7 @@ type
    property command: msestring read getcommand write setcommand;
    property commandhistory: msestringarty read fcommandhistory 
                                                     write fcommandhistory;
-   property inputcolindex: integer read finputcolindex;
+   property inputcolindex: integer read finputcolindex write finputcolindex;
   published
    property optionsedit default defaultterminaleditoptions;
    property optionsedit1;
