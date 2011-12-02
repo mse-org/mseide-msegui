@@ -2033,14 +2033,16 @@ begin
 end;
 
 procedure ttogglegraphdataedit.mouseevent(var info: mouseeventinfoty);
+var
+ bo1: boolean;
 begin
- if not (csdesigning in componentstate) and 
-                iswidgetclick(info,fcheckcaption) and 
-                      (bo_executeonclick in foptions) then begin
+ bo1:= not (csdesigning in componentstate) and 
+          iswidgetclick(info,fcheckcaption) and (bo_executeonclick in foptions);
+ inherited;
+ if bo1 then begin
          //twidgetgrid needs childmouseevent
   togglevalue(oe_readonly in getoptionsedit,false);
  end;
- inherited;
 end;
 
 procedure ttogglegraphdataedit.docellevent(const ownedcol: boolean;
