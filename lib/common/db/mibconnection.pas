@@ -161,6 +161,10 @@ type
                           const acursor: tsqlcursor): TStream; override;
    function getblobdatasize: integer; override;
                           
+   procedure writeblobdata(const atransactionhandle: pointer;
+              const tablename: string; const acursor: tsqlcursor;
+              const adata: pointer; const alength: integer;
+              const afield: tfield; const aparam: tparam; out newid: string);
           //iblobconnection                           
    procedure writeblobdata(const atransaction: tsqltransaction;
               const tablename: string; const acursor: tsqlcursor;
@@ -1146,7 +1150,7 @@ procedure TIBConnection.SetParameters(cursor: TSQLCursor; AParams: TmseParams);
          //todo: remove not needed move operations
 var
  ParNr,SQLVarNr: integer;
- s: string;
+ s,str1: string;
  i: integer;
  li: LargeInt;
  currbuff: pchar;
@@ -1233,8 +1237,25 @@ begin
       ftDate, ftTime, ftDateTime: begin
        SetDateTime(po1^.SQLData,AsDateTime, po1^.SQLType);
       end;
-      ftLargeInt,ftblob,ftmemo: begin
+      ftLargeInt: begin
        li := AsLargeInt;
+       Move(li, po1^.SQLData^,po1^.SQLLen);
+      end;
+      ftblob,ftmemo: begin
+       if datatype in [ftblob,ftString,ftFixedChar,ftwidestring,
+                                           ftbytes,ftvarbytes] then begin
+        if paramtypes[sqlvarnr] = ftmemo then begin
+         s:= aparams.asdbstring(parnr);
+        end
+        else begin
+         s:= asstring;
+        end;
+        writeblobdata(cursor.ftrans,'',nil,pointer(s),length(s),nil,nil,str1);
+        move(str1[1],li,sizeof(li)); //blobid
+       end
+       else begin
+        li := AsLargeInt;
+       end;
        Move(li, po1^.SQLData^,po1^.SQLLen);
       end;
       ftFloat,ftcurrency: begin
@@ -1667,7 +1688,7 @@ begin
 end;
 
 
-procedure TIBConnection.writeblobdata(const atransaction: tsqltransaction;
+procedure TIBConnection.writeblobdata(const atransactionhandle: pointer;
                const tablename: string; const acursor: tsqlcursor;
                const adata: pointer; const alength: integer;
                const afield: tfield; const aparam: tparam; out newid: string);
@@ -1681,55 +1702,56 @@ procedure TIBConnection.writeblobdata(const atransaction: tsqltransaction;
 const
  defsegsize = $4000; 
 var
- transactionhandle: pointer;
+// transactionhandle: pointer;
  blobhandle: isc_blob_handle;
  blobid: isc_quad;
  step: word;
  po1: pointer;
  int1: integer;
-// str1: string;
 begin
-{
- if alength = 0 then begin
-  aparam.clear;
-  newid:= '';
- end
- else begin
- }
-  transactionhandle:= atransaction.handle;
-  blobhandle:= nil;
-  fillchar(blobid,sizeof(blobid),0);
-  check(isc_create_blob2(@fstatus,@fsqldatabasehandle,@transactionhandle,
-                       @blobhandle,@blobid,0,nil));
-  try
-   int1:= getmaxblobsize(blobhandle);
-   if (int1 <= 0) or (int1 > defsegsize) then begin
-    step:= defsegsize;
-   end
-   else begin
+//  transactionhandle:= atransaction.handle;
+ blobhandle:= nil;
+ fillchar(blobid,sizeof(blobid),0);
+ check(isc_create_blob2(@fstatus,@fsqldatabasehandle,@atransactionhandle,
+                      @blobhandle,@blobid,0,nil));
+ try
+  int1:= getmaxblobsize(blobhandle);
+  if (int1 <= 0) or (int1 > defsegsize) then begin
+   step:= defsegsize;
+  end
+  else begin
+   step:= int1;
+  end;
+  po1:= adata;
+  int1:= alength;
+  while int1 > 0 do begin
+   if int1 < step then begin
     step:= int1;
    end;
-   po1:= adata;
-   int1:= alength;
-   while int1 > 0 do begin
-    if int1 < step then begin
-     step:= int1;
-    end;
-    check(isc_put_segment(@fstatus,@blobhandle,step,po1));
-    dec(int1,step);
-    inc(po1,step);
-   end;
+   check(isc_put_segment(@fstatus,@blobhandle,step,po1));
+   dec(int1,step);
+   inc(po1,step);
+  end;
+  if aparam = nil then begin
+   setlength(newid,sizeof(blobid));
+   move(blobid,newid[1],sizeof(blobid));
+  end
+  else begin
    aparam.aslargeint:= int64(blobid);
    newid:= ''; //id no more usable
-   {
-   setlength(str1,sizeof(blobid));
-   move(blobid,str1[1],sizeof(blobid));
-   newid:= str1;
-   }
-  finally
-   isc_close_blob(@fstatus,@blobhandle);
   end;
-// end;
+ finally
+  isc_close_blob(@fstatus,@blobhandle);
+ end;
+end;
+
+procedure TIBConnection.writeblobdata(const atransaction: tsqltransaction;
+               const tablename: string; const acursor: tsqlcursor;
+               const adata: pointer; const alength: integer;
+               const afield: tfield; const aparam: tparam; out newid: string);
+begin
+ writeblobdata(atransaction.handle,tablename,acursor,adata,alength,
+                                                     afield,aparam,newid);
 end;
 
 procedure tibconnection.setupblobdata(const afield: tfield;

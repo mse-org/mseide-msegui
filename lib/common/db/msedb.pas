@@ -1560,16 +1560,18 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
  end;
  
- {$define mse_withpublishedparamvalue}
+// {$define mse_withpublishedparamvalue}
  
  tparamconnector = class;
 
  tmseparam = class(tparam,idbeditinfo)
- {$ifdef mse_withpublishedparamvalue}
+// {$ifdef mse_withpublishedparamvalue}
   private
    procedure setasvariant(const avalue: variant);
    function getasid: int64;
    procedure setasid(const avalue: int64);
+   function getasmsestring: msestring;
+   procedure setasmsestring(const avalue: msestring);
    function getdatasource: tdatasource;
    procedure setdatasource(const avalue: tdatasource);
    function getfieldname: string;
@@ -1582,7 +1584,7 @@ type
   published
    property value : variant read getasvariant write setasvariant 
                                                   stored isparamstored;
- {$endif mse_withpublishedparamvalue}
+// {$endif mse_withpublishedparamvalue}
   private
    fconnector: tparamconnector;
    fdatalink: tfielddatalink;
@@ -1591,6 +1593,7 @@ type
    constructor Create(ACollection: TCollection); overload; override;
    destructor destroy; override;
    property asid: int64 read getasid write setasid; //-1 -> null
+   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property connector: tparamconnector read fconnector write setconnector;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -8655,7 +8658,7 @@ begin
  end;
 end;
 
-{$ifdef mse_withpublishedparamvalue}
+//{$ifdef mse_withpublishedparamvalue}
 procedure tmseparam.setasvariant(const avalue: variant);
 begin
  inherited setasvariant(avalue);
@@ -8663,7 +8666,7 @@ begin
  tparamcracker(self).fbound:= not varisclear(avalue);
 {$warnings on}
 end;
-{$endif mse_withpublishedparamvalue}
+//{$endif mse_withpublishedparamvalue}
 
 function tmseparam.getasid: int64;
 begin
@@ -8720,6 +8723,16 @@ end;
 function tmseparam.isparamstored: boolean;
 begin
  result:= bound;
+end;
+
+function tmseparam.getasmsestring: msestring;
+begin
+ result:= getaswidestring;
+end;
+
+procedure tmseparam.setasmsestring(const avalue: msestring);
+begin
+ setaswidestring(avalue);
 end;
 
 { tparamconnector }

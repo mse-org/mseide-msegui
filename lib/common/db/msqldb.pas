@@ -143,7 +143,6 @@ type
     fname: ansistring;
     frowsaffected: integer;
     frowsreturned: integer;
-//    property query: tsqlquery read fquery;
     constructor create(const aowner: icursorclient; const aname: ansistring);
                    //aowner can be nil
     procedure close; virtual;
@@ -1670,7 +1669,7 @@ function tcustomsqlconnection.internalExecuteDirect(const aSQL: mseString;
 var 
  Cursor: TSQLCursor;
  params1: tmseparams;
- bo1: boolean; 
+ bo1,bo2: boolean; 
  int1: integer;
 // str1: ansistring;
 begin
@@ -1708,6 +1707,10 @@ begin
    end;
    cursor.ftrans:= atransaction.handle;
    updateutf8(aisutf8);
+   if params1 <> nil then begin
+    bo2:= params1.isutf8;
+    params1.isutf8:= aisutf8;
+   end;
    try
     if noprepare then begin
      executeunprepared(cursor,atransaction,params1,asql,aisutf8);
@@ -1718,6 +1721,9 @@ begin
     result:= cursor.frowsaffected;
    finally
     UnPrepareStatement(Cursor);
+    if params1 <> nil then begin
+     params1.isutf8:= bo2;
+    end;
    end;
   finally;
     DeAllocateCursorHandle(Cursor);
