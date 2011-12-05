@@ -536,11 +536,11 @@ type
    function canconnect: boolean; override;
   public
    destructor destroy; override;
+   procedure link(const apipes: tcustomcommpipes);
  end;
 
  tsocketserveriochannel = class(tcustomsocketserveriochannel)
   public
-   procedure link(const apipes: tcustomsocketpipes);
   published
    property localconn;
  end;
@@ -1904,6 +1904,16 @@ begin
  inherited;
 end;
 
+procedure tcustomsocketserveriochannel.link(const apipes: tcustomcommpipes);
+begin
+ unlink;
+ dobeforeconnect;
+ setlinkedvar(apipes,tlinkedpersistent(fpipes));
+ fpipes.onbeforedisconnect:= @dobeforedisconnect;
+ fpipes.rx.oninputavailable:= @doinputavailable;
+ doafterconnect; 
+end;
+
 procedure tcustomsocketserveriochannel.unlink;
 begin
  if funlinking = 0 then begin
@@ -1914,7 +1924,8 @@ begin
     fpipes.close;
    end;
   finally
-   fpipes:= nil;
+   setlinkedvar(nil,tlinkedpersistent(fpipes));
+//   fpipes:= nil;
    dec(funlinking);
   end;
  end;
@@ -1965,16 +1976,6 @@ begin
 end;
 
 { tsocketserveriochannel }
-
-procedure tsocketserveriochannel.link(const apipes: tcustomsocketpipes);
-begin
- unlink;
- dobeforeconnect;
- setlinkedvar(apipes,tlinkedpersistent(fpipes));
- fpipes.onbeforedisconnect:= @dobeforedisconnect;
- fpipes.rx.oninputavailable:= @doinputavailable;
- doafterconnect; 
-end;
 
 { tifiiolinkcomponent }
 

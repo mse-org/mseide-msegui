@@ -4,8 +4,8 @@ object objectinspectorfo: tobjectinspectorfo
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
   visible = False
-  bounds_x = 354
-  bounds_y = 403
+  bounds_x = 358
+  bounds_y = 421
   bounds_cx = 254
   bounds_cy = 248
   container.frame.zoomwidthstep = 1

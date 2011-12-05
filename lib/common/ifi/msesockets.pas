@@ -1152,6 +1152,7 @@ begin
   if (fpipes[int1] <> nil) and 
               (fpipes[int1].tx.handle = invalidfilehandle) then begin
    fpipes[int1].release;
+   fpipes[int1]:= nil;
   end;
  end;
 end;

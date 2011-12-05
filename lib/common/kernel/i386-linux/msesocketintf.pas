@@ -328,11 +328,19 @@ var
 begin
  result:= sye_ok;
  with addr,linuxsockaddrty(platformdata) do begin
-  str1:= url;
+  if kind = sok_local then begin
+   str1:= tosysfilepath(url);
+  end
+  else begin
+   str1:= url;
+  end;
   fillchar(info1,sizeof(addrinfo),0);
   with info1 do begin
    ai_socktype:= ord(sock_stream);
    case kind of
+    sok_local: begin
+     ai_family:= af_local;
+    end;
     sok_inet: begin
      ai_family:= af_inet;
     end;

@@ -59,6 +59,8 @@ procedure ttargetconsolefo.sendtext(const sender: tobject;
 begin
  mainfo.gdb.targetwriteln(atext);
  donotsend:= true;
+ terminal.inputcolindex:= length(terminal.text);
+ terminal.addline('');
 end;
 
 procedure ttargetconsolefo.clear;
