@@ -1928,13 +1928,14 @@ var
 function gui_grabpointer(id: winidty): guierrorty;
 begin
  gdi_lock;
- xflush(appdisp);
+ xflush(appdisp); //possibly show window
  if xgrabpointer(appdisp,id,{$ifdef xboolean}false{$else}0{$endif},
            mouseeventmask,grabmodeasync,grabmodeasync,
            none,none,currenttime) = grabsuccess then begin
   result:= gue_ok;
   pointergrabbed:= true;
   grabwinid:= id;
+  xflush(appdisp);
  end
  else begin
   result:= gue_capturemouse;
@@ -1948,6 +1949,7 @@ begin
  xungrabpointer(appdisp,currenttime);
  result:= gue_ok;
  pointergrabbed:= false; 
+ xflush(appdisp);
  gdi_unlock;
 end;
 
