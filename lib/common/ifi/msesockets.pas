@@ -1152,7 +1152,10 @@ begin
   if (fpipes[int1] <> nil) and 
               (fpipes[int1].tx.handle = invalidfilehandle) then begin
    fpipes[int1].release;
-   fpipes[int1]:= nil;
+   if not (csdestroying in application.componentstate) and 
+                not application.terminated then begin
+    fpipes[int1]:= nil;     //destroying can be delayed
+   end;
   end;
  end;
 end;

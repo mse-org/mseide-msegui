@@ -28,7 +28,6 @@ type
    terminal: tterminal;
    grid: twidgetgrid;
    tpopupmenu1: tpopupmenu;
-   procedure tartgetconsoleonshow(const sender: TObject);
    procedure sendtext(const sender: tobject; var atext: msestring;
                                                  var donotsend: Boolean);
    procedure targetconsoleonidle(var again: Boolean);
@@ -48,11 +47,6 @@ var
 implementation
 uses
  targetconsole_mfm,msegdbutils,main;
-
-procedure ttargetconsolefo.tartgetconsoleonshow(const sender: TObject);
-begin
-// terminal.datalist.add('Target console is not working yet!');
-end;
 
 procedure ttargetconsolefo.sendtext(const sender: tobject;
                                var atext: msestring; var donotsend: Boolean);

@@ -1354,7 +1354,6 @@ end;
 procedure tcustomiochannel.setactive(const avalue: boolean);
 begin
  if factive <> avalue then begin
-  factive:= avalue;
   if componentstate * [csloading,csdesigning] = [] then begin
    if avalue then begin
     connect;
@@ -1363,6 +1362,7 @@ begin
     disconnect;
    end;
   end;
+  factive:= avalue;
  end;
 end;
 
@@ -1445,6 +1445,7 @@ begin
    else begin
     internaldisconnect;
    end;
+   factive:= false;
    disconnected;
   finally
    exclude(fstate,iocs_disconnecting);
@@ -1843,7 +1844,7 @@ end;
 
 destructor tsocketclientiochannel.destroy;
 begin
- fsocket.free;
+ freeandnil(fsocket);;
  inherited;
 end;
 
@@ -1854,7 +1855,9 @@ end;
 
 procedure tsocketclientiochannel.internaldisconnect;
 begin
- fsocket.active:= false;
+ if fsocket <> nil then begin
+  fsocket.active:= false;
+ end;
 end;
 
 function tsocketclientiochannel.commio: boolean;

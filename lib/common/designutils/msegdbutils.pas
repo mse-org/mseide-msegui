@@ -3309,7 +3309,7 @@ begin
  result:= clicommand('info threads',true);
  if result = gdb_ok then begin
   result:= gdb_dataerror;
-  setlength(infolist,length(fclivaluelist));
+  setlength(infolist,length(fclivaluelist)); //max
   int2:= 0;
   for int1:= 0 to high(fclivaluelist) do begin
    with infolist[int2] do begin
@@ -3323,15 +3323,15 @@ begin
       state:= ts_none;
      end;
      if high(ar1) < 2 then begin
-      exit;
+      system.continue;
      end;
      if not trystrtoint64(ar1[0],pint64(@id)^) then begin
-      exit;
+      system.continue;
      end;
      if ar1[1] = 'Thread' then begin
       ar1:= copy(ar1,2,bigint);
       if high(ar1) < 2 then begin
-       exit;
+       system.continue;
       end;
      end;
      threadid:= 0;

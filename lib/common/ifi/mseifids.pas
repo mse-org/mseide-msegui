@@ -128,10 +128,6 @@ type
    frxbindings: integerarty;
    ftxbindings: integerarty;
    foptionsdb: ifioptionsdbty;
-//   fbindings: integerarty;
-//   ffielddefindex: integerarty;
-//   ffieldoptions: tififieldoptions;
-//   procedure setfieldoptions(const avalue: tififieldoptions);
   protected
    fistate: ifidsstatesty;
    fdscontroller: tdscontroller;
@@ -167,9 +163,8 @@ type
   published
    property remotedatachange: notifyeventty read fremotedatachange 
                                               write fremotedatachange;
-//   property fieldoptions: tififieldoptions read ffieldoptions 
-//                                  write setfieldoptions;
-   property optionsdb: ifioptionsdbty read foptionsdb write foptionsdb;
+   property optionsdb: ifioptionsdbty read foptionsdb write foptionsdb
+                                                                default [];
  end;
 
  tifidataset = class(tdataset,idscontroller,igetdscontroller,imselocate,

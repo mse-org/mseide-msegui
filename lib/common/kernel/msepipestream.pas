@@ -472,7 +472,7 @@ begin
     sleepus(foverloadsleepus);
    end;
   end;
-  needslock:= not (pro_nolock in foptions);
+  needslock:= not (pro_nolock in foptions) and not fthread.terminated;
   if needslock then begin
    application.lock;
   end;

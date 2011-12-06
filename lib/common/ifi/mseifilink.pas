@@ -178,21 +178,29 @@ type
  trxlinkmodule = class;
  rxlinkmoduleeventty = procedure(sender: trxlinkmodule) of object;
 
+ rxlinkoptionty = (rlo_closeconnonfree);
+ rxlinkoptionsty = set of rxlinkoptionty;
+ 
  trxlinkmodule = class(tlinkaction)
   private
    fmodule: tmsecomponent;
    fcommandintf: iificommand;
    fonmodulereceived: rxlinkmoduleeventty;
    fsequence: sequencety;
+   foptions: rxlinkoptionsty;
   protected
+   procedure objevent(const sender: iobjectlink;
+                                const event: objecteventty); override;
    procedure objectevent(const sender: tobject;
                                   const event: objecteventty); override;
+   procedure domodulereceived;
   public
    procedure requestmodule;
    property module: tmsecomponent read fmodule;
   published
    property onmodulereceived: rxlinkmoduleeventty read fonmodulereceived 
                          write fonmodulereceived;
+   property options: rxlinkoptionsty read foptions write foptions default [];
  end;
   
  trxlinkmodules = class(tmodulelinkarrayprop)
@@ -1134,11 +1142,33 @@ begin
  fsequence:= tcustommodulelink(fowner).senddata(str1);
 end;
 
+procedure trxlinkmodule.objevent(const sender: iobjectlink;
+               const event: objecteventty);
+var
+ conn1: tcustomiochannel;
+begin
+ if (event = oe_destroyed) and (rlo_closeconnonfree in foptions) and 
+                                    (sender.getinstance = fmodule) then begin
+  conn1:= tcustommodulelink(fowner).channel;
+  if conn1 <> nil then begin
+   conn1.active:= false;
+  end;
+ end;
+ inherited;
+end;
+
 procedure trxlinkmodule.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  if (event = oe_fired) and (sender = faction) then begin
   requestmodule;
+ end;
+end;
+
+procedure trxlinkmodule.domodulereceived;
+begin
+ if tcustommodulelink(fowner).canevent(tmethod(fonmodulereceived)) then begin
+  fonmodulereceived(self);
  end;
 end;
 
@@ -1922,6 +1952,7 @@ begin
       end;
      end;
      setlinkedvar(fmodule,fmodule);
+     domodulereceived;
     end;
    end;
   end;
@@ -1990,6 +2021,10 @@ begin
     setifibytes(@po1^.data,po1^.size,pifibytesty(po3));
    end;
    senddata(str1);
+  end
+  else begin
+   raise exception.create('Module resouces for "'+aname+'" class "'+
+           mo1.fmoduleclassname+'" not found.');
   end;
  end;
 end;

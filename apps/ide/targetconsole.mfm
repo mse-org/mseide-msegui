@@ -4,8 +4,8 @@ object targetconsolefo: ttargetconsolefo
   frame.dummy = 0
   popupmenu = tpopupmenu1
   visible = False
-  bounds_x = 205
-  bounds_y = 367
+  bounds_x = 209
+  bounds_y = 385
   bounds_cx = 368
   bounds_cy = 137
   container.frame.zoomwidthstep = 1
@@ -46,7 +46,6 @@ object targetconsolefo: ttargetconsolefo
     7C7C7C01FFFFFF17
   }
   onidle = targetconsoleonidle
-  onshow = tartgetconsoleonshow
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
@@ -70,8 +69,8 @@ object targetconsolefo: ttargetconsolefo
         dataclass = tgridrichstringdatalist
       end>
     datarowlinewidth = 0
-    datarowheight = 15
-    reffontheight = 15
+    datarowheight = 14
+    reffontheight = 14
     object terminal: tterminal
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
       taborder = 1
@@ -79,11 +78,11 @@ object targetconsolefo: ttargetconsolefo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 3000
-      bounds_cy = 15
+      bounds_cy = 14
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig, oe_caretonreadonly, oe_focusrectonreadonly, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
       maxchars = 120
       onsendtext = sendtext
-      reffontheight = 15
+      reffontheight = 14
     end
   end
   object tpopupmenu1: tpopupmenu

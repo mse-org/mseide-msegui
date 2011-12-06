@@ -120,8 +120,6 @@ type
    procedure dorowsdeleted(index,count: integer); override;
    procedure rowstatechanged(const arow: integer); override;
    procedure docellevent(var info: celleventinfoty); override;
-//   procedure dorowsdatachanged(const acell: gridcoordty; 
-//                                           const acount: integer); override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
    procedure setselected(const cell: gridcoordty;
                                        const avalue: boolean); override;
@@ -130,7 +128,6 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-//   procedure post;
   published
    property ifi: tifiwidgetgridcontroller read fifi write setifi;
    property active: boolean read factive write setactive1 default false;
@@ -207,7 +204,6 @@ end;
 
 destructor tformlink.destroy;
 begin
-// fdatas.free;
  inherited;
 end;
 
@@ -225,7 +221,6 @@ function tformlink.processdataitem(const adata: pifirecty;
            var adatapo: pchar; const atag: integer; const aname: string): boolean;
 var
  command1: ifiwidgetcommandty;
-// str2: string;
 begin
  with adata^ do begin
   case header.kind of
@@ -384,12 +379,9 @@ end;
 function tifiwidgetgridcontroller.encodegriddata(
                      const asequence: sequencety): ansistring;
 var
- po1{,po4}: pchar;
- int1,int2,int3{,int4}: integer;
-// po2: pmsestring;
-// po3: pansistring;
+ po1: pchar;
+ int1,int2,int3: integer;
  ar1: booleanarty;
-// ar2: bytearty;
 begin
  with trxwidgetgrid(fowner) do begin
   setlength(ar1,datacols.count);
@@ -409,9 +401,6 @@ begin
 {$warnings off}
   int2:= int2 + datalisttoifidata(tdatacols1(datacols).frowstate);
 {$warnings on}
-//  if tdatacols1(datacols).frowstate.folded then begin
-//   int2:= int2 + rowcount * sizeof(byte);
-//  end;
   inititemheader(result,ik_griddata,asequence,int2,po1);
   with pgriddatadataty(po1)^ do begin
    rows:= rowcount;
@@ -432,15 +421,6 @@ begin
 {$warnings off}
    datalisttoifidata(tdatacols1(datacols).frowstate,po1);
 {$warnings on}
-{
-   if tdatacols1(datacols).frowstate.folded then begin
-    ar2:= tdatacols1(datacols).frowstate.foldinfoar;
-    inc(po1,setifibytes(pointer(ar2),rowcount,pifibytesty(po1)));
-   end
-   else begin
-    inc(po1,setifibytes(pointer(ar2),0,pifibytesty(po1)));
-   end;
-   }
   end;
  end;
 end;
@@ -453,12 +433,10 @@ var
  kind1: listdatatypety;
  po1: pchar;
  str1: ansistring;
-// po2: pointer;
  ckind1: gridcommandkindty;
  source1,dest1,count1: integer;
  rowstate1: rowstaterowheightty;
  select1: selectdataty;
-// lwo1: longword;
  datalist1: subdatainfoty;
  po3: prowstaterowheightty;
  ifikind1: ifidatakindty;
@@ -618,20 +596,13 @@ end;
 procedure tifiwidgetcol.datachange(const arow: integer);
 begin
  with trxwidgetgrid(fgrid).fifi do begin
-  if (self.name <> '') and cancommandsend(igo_coldata) and 
+  if (self.name <> '') and (arow >= 0) and cancommandsend(igo_coldata) and 
                                             (fdata <> nil) then begin
    senditem(ik_coldatachange,[encodecolchangedata(self.name,arow,fdata)]);
   end;
  end;  
 end;
-{
-procedure tifiwidgetcol.setdata(var arow: integer; const source;
-               const noinvalidate: boolean = false);
-begin
- inherited;
- datachange(arow);
-end;
-}
+
 { trxwidgetgrid }
 
 constructor trxwidgetgrid.create(aowner: tcomponent);
@@ -657,10 +628,6 @@ procedure trxwidgetgrid.setactive(const avalue: boolean);
 begin
  if avalue <> factive then begin
   if avalue then begin
-//   if csloading in componentstate then begin
-//    include(fistate,rws_openpending);
-//   end
-//   else begin
     try
      internalopen;
     except
@@ -668,10 +635,8 @@ begin
      raise;
     end;
     factive:= true;
-//   end;
   end
   else begin
-//   exclude(fistate,rws_openpending);
    internalclose;
    factive:= false;
   end;
@@ -681,12 +646,6 @@ end;
 procedure trxwidgetgrid.loaded;
 begin
  inherited;
- {
- if rws_openpending in fistate then begin
-  exclude(fistate,rws_openpending);
-  active:= true;
- end;
- }
  fifi.loaded;
 end;
 
@@ -698,26 +657,16 @@ begin
  with fifi do begin
   if cansend then begin
    inititemheader(str1,ik_requestopen,0,0,po1);
-//   include(fistate,rws_openpending);
    if senddataandwait(str1,fdatasequence) and 
               (rws_datareceived in fistate) then begin
    end
    else begin
-    sysutils.abort;
+    raise exception.create('Can not open '+name+'.'); //sysutils.abort;
    end;
   end;
  end;
 end;
-{
-procedure trxwidgetgrid.post;
-begin
- with fifi do begin
-  if cansend then begin
-   senddata(encodegriddata(0));
-  end;
- end;
-end;
-}
+
 procedure trxwidgetgrid.internalclose;
 begin
  rowcount:= 0;
