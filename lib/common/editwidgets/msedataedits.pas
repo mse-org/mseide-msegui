@@ -808,12 +808,18 @@ type
    property oninit;
  end;
   
- tenumdropdowncontroller = class(tdropdownlistcontroller)
+ tenumdropdowncontroller = class(tnocolsdropdownlistcontroller)
+  private
+   procedure readitemindex(reader: treader);
   protected
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(const intf: idropdownlist);
   published
    property options default defaultenumdropdownoptions;
+   property cols;
+   property valuecol;
+//   property itemindex;
  end;
  
  tcustomenuedit = class(tcustomdropdownlistedit)
@@ -3468,7 +3474,8 @@ begin
  fdropdown.Assign(avalue);
 end;
 
-function tcustomdropdownlistedit.createdropdowncontroller: tcustomdropdowncontroller;
+function tcustomdropdownlistedit.createdropdowncontroller: 
+                                           tcustomdropdowncontroller;
 begin
  result:= tdropdownlistcontroller.create(idropdownlist(self));
 end;
@@ -4614,6 +4621,17 @@ constructor tenumdropdowncontroller.create(const intf: idropdownlist);
 begin
  inherited;
  options:= defaultenumdropdownoptions;
+end;
+
+procedure tenumdropdowncontroller.readitemindex(reader: treader);
+begin
+ reader.readinteger; //dummy
+end;
+
+procedure tenumdropdowncontroller.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('itemindex',@readitemindex,nil,false);
 end;
 
 { tcustomenumedit }
