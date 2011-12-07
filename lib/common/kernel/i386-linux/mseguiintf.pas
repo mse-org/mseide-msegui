@@ -13,6 +13,7 @@ unit mseguiintf; //i386-linux, X11
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
+
 {$ifdef mse_debugwindowfocus}
  {$define mse_debug}
 {$endif}
@@ -611,7 +612,6 @@ var
  xredshiftleft,xgreenshiftleft,xblueshiftleft: boolean;
  defcolormap: colormap;
  hassm: boolean;
- toplevelraise: boolean;
 
  numlockstate: cuint;
  rootid: winidty;
@@ -760,12 +760,7 @@ end;
 
 function gui_canstackunder: boolean;
 begin
-//{$ifdef mse_userestackwindow}
-// result:= netatoms[net_restack_window] <> 0;
-       //does not work, WM does not stack windows contiguous
-//{$else}
- result:= false; //no solution found to restack windows in kde
-//{$endif}
+ result:= not norestackwindow or not noreconfigurewmwindow;
 end;
 
 function gui_copytoclipboard(const value: msestring): guierrorty;
@@ -1692,7 +1687,9 @@ end;
 function stackwindow(id: winidty; predecessor: winidty;
                                    stackmode: integer): guierrorty;
 var
-// changes: xwindowchanges;
+ bo1: boolean;
+ id1: winidty;
+ changes: xwindowchanges;
  ar1: winidarty;
  int1: integer;
  idindex,pindex: integer;
@@ -1708,11 +1705,61 @@ begin
  else begin
   if id <> predecessor then begin
    if gui_canstackunder then begin
-    if netatoms[net_restack_window] <> 0 then begin
-     sendnetrootcardinalmessage(netatoms[net_restack_window],id,
-                                     [1,predecessor,stackmode]);
+ //many WM place stack_mode below windows 
+ //below all other windows so we need this ugly workaround
+    bo1:= not norestackwindow and (netatoms[net_restack_window] <> 0);
+    if stackmode = below then begin
+ //     xflush(appdisp);
+ //      xsync(appdisp,false);
+     application.sortzorder;
+     ar1:= application.winidar;
+     pindex:= -1;
+     for int1:= high(ar1) downto 0 do begin
+      if ar1[int1] = predecessor then begin
+       pindex:= int1;
+       break;
+      end;
+     end;
+     if bo1 then begin
+      sendnetrootcardinalmessage(netatoms[net_restack_window],predecessor,
+                                    [2,id,above]);
+     end
+     else begin
+      changes.stack_mode:= above;
+      changes.sibling:= id;
+      xreconfigurewmwindow(appdisp,predecessor,msedefaultscreenno,
+                                   cwsibling or cwstackmode,@changes);
+     end;
+     if pindex > 0 then begin
+      for int1:= pindex+1 to high(ar1) do begin
+       if (ar1[int1] <> id) and (ar1[int1-1] <> id) then begin
+        if bo1 then begin
+         sendnetrootcardinalmessage(netatoms[net_restack_window],ar1[int1],
+                                       [2,ar1[int1-1],above]);
+        end
+        else begin
+         changes.sibling:= ar1[int1-1];
+         xreconfigurewmwindow(appdisp,ar1[int1],msedefaultscreenno,
+                                      cwsibling or cwstackmode,@changes);
+        end;
+       end;
+      end;
+     end;
+ //     xflush(appdisp);
     end
     else begin
+     changes.sibling:= predecessor;
+     changes.stack_mode:= stackmode;
+     xreconfigurewmwindow(appdisp,id,msedefaultscreenno,
+                                   cwsibling or cwstackmode,@changes);
+    end;
+   {
+     changes.sibling:= predecessor;
+     changes.stack_mode:= stackmode;
+     xreconfigurewmwindow(appdisp,id,msedefaultscreenno,
+                                    cwsibling or cwstackmode,@changes);
+   }
+    {
      topid:= toplevelwindow(id);
      toppred:= toplevelwindow(predecessor);
      if stackmode = above then begin
@@ -1724,8 +1771,7 @@ begin
       winar1[1]:= topid;
      end;
      xrestackwindows(appdisp,@winar1,2);
-    end;
-
+    }
    {
     changes.sibling:= toplevelwindow(predecessor);
     changes.stack_mode:= stackmode;
@@ -2986,11 +3032,12 @@ end;
 
 function gui_settransientfor(var awindow: windowty;
                                      const transientfor: winidty): guierrorty;
-var
- attributes: xwindowattributes;
+//var
+// attributes: xwindowattributes;
 begin
  gdi_lock;
  result:= settransientforhint(awindow.id,transientfor);
+(*
  if result = gue_ok then begin
   if xgetwindowattributes(appdisp,awindow.id,@attributes) <> 0 then begin
    if attributes.override_redirect{$ifndef xboolean} <> 0 {$endif}then begin
@@ -2998,6 +3045,7 @@ begin
    end;
   end;
  end;
+*)
  gdi_unlock;
 end;
 
@@ -4556,9 +4604,19 @@ begin
    if ar1[int1] = '--TOPLEVELRAISE' then begin
     toplevelraise:= true;
     deletecommandlineargument(int1);
+    noreconfigurewmwindow:= true;
+    norestackwindow:= true;
    end;
    if ar1[int1] = '--NOZORDERHANDLING' then begin
     nozorderhandling:= true;
+    deletecommandlineargument(int1);
+   end;
+   if ar1[int1] = '--NORESTACKWINDOW' then begin
+    norestackwindow:= true;
+    deletecommandlineargument(int1);
+   end;
+   if ar1[int1] = '--NORECONFIGUREWMWINDOW' then begin
+    noreconfigurewmwindow:= true;
     deletecommandlineargument(int1);
    end;
   end;
@@ -4760,6 +4818,9 @@ begin
     end;
    end;
   end;
+//  if norestackwindow then begin
+//   netatoms[net_restack_window]:= 0;
+//  end;
   for netnum:= low(netatomty) to needednetatom do begin
    if netatoms[netnum] = 0 then begin
     netsupported:= false;

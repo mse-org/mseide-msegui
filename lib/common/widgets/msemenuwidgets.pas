@@ -121,7 +121,8 @@ type
  tcustommainmenuwidget = class(tpopupmenuwidget)
   private
    factivewindowbefore: twindow;
-   fstackedoverbefore: twindow;
+//   fstackedoverbefore: twindow;
+   fstackedunderbefore: twindow;
    fstate: mainmenuwidgetstatesty;
    flayoutcalcing: integer;
    procedure internalsetactiveitem(const Value: integer;
@@ -1792,6 +1793,18 @@ begin
  if mws_firstactivated in fstate then begin
   if factivewindowbefore <> fwindow then begin
    if mws_raised in fstate then begin
+    if (fstackedunderbefore <> nil) then begin 
+     if fstackedunderbefore.visible then begin
+      setlength(ar1,2);
+      ar1[0]:= fstackedunderbefore.winid;
+      ar1[1]:= fwindow.winid;
+      gui_getzorder(ar1,ar2);
+      if ar2[1] > ar2[0] then begin
+       gui_stackunderwindow(fwindow.winid,fstackedunderbefore.winid);
+      end;
+     end;
+    end
+    {
     if (fstackedoverbefore <> nil) then begin 
      if fstackedoverbefore.visible then begin
       setlength(ar1,2);
@@ -1803,6 +1816,7 @@ begin
       end;
      end;
     end
+    }
     else begin
 //     if activateoptionset then begin
 //      window.stackover(nil);
@@ -1817,7 +1831,7 @@ begin
    factivewindowbefore.reactivate;
   end;
   setlinkedvar(nil,tlinkedobject(factivewindowbefore));
-  setlinkedvar(nil,tlinkedobject(fstackedoverbefore));
+  setlinkedvar(nil,tlinkedobject(fstackedunderbefore));
  end;
 end;
 
@@ -1829,7 +1843,7 @@ begin
  if not (mws_firstactivated in fstate) or force then begin
   if not (mws_firstactivated in fstate) then begin
    include(fstate,mws_firstactivated);
-   setlinkedvar(fwindow.stackedover(true),tlinkedobject(fstackedoverbefore));
+   setlinkedvar(fwindow.stackedunder(true),tlinkedobject(fstackedunderbefore));
   end;
   if (force or activateoptionset) then begin
    capturekeyboard;

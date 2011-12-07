@@ -63,6 +63,20 @@ Creating a new console project
 ******************************
 'Project'-'New'-'From Template', select "console.prj"
 
+MSEgui command line parameters
+******************************
+--NOZORDERHANDLING
+ Do not touch Z-order of the windows.
+--NORESTACKWINDOW
+ Do not use the NET_RESTACK_WINDOW protocol.
+--NORECONFIGUREWMWINDOW
+ Do not use the xreconfigurewmwindow() for window stacking operation.
+--TOPLEVELRAISE
+ Use the top level frame window id instead the application client window id
+ for window raise operation. Implies --NORESTACKWINDOW, --NORESTACKWINDOW and
+ --NORECONFIGUREWMWINDOW.
+
+ 
 MSEide command line parameters
 ******************************
 -np
@@ -78,8 +92,6 @@ MSEide command line parameters
 --fontalias=<alias>,<fontname>[,<fontheight>[,<fontwidth>[,<options>[,<xscale>]
                               [,<ancestor>]]]]
  Change the used fonts. <alias> can be stf_default, stf_menu or mseide_source.
---NOZORDERHANDLING
- Do not touch Z-order of the windows, necessary for some window managers.
  
 MSEide environment variables
 ****************************
