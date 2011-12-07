@@ -12947,12 +12947,15 @@ begin
                  ' '+inttostr(arect.cx)+' '+inttostr(arect.cy));
 
 {$endif}
- if fstate*[tws_posvalid,tws_sizevalid] <> 
-               [tws_posvalid,tws_sizevalid] then begin
+ if (fstate*[tws_posvalid,tws_sizevalid] <> [tws_posvalid,tws_sizevalid]) and 
+                                    (windowpos <> wp_maximized) then begin
   checkwindow(false);
  end
  else begin
-  exclude(fstate,tws_needsdefaultpos);
+//  if tws_needsdefaultpos in fstate then begin
+//   fnormalwindowrect:= fowner.fwidgetrect;
+//  end;
+  fstate:= (fstate + [tws_posvalid,tws_sizevalid]) - [tws_needsdefaultpos];
   rect1:= arect;
   if not (wo_embedded in foptions) then begin
    addpoint1(rect1.pos,aorigin);
