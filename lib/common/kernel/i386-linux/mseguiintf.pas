@@ -1688,13 +1688,13 @@ function stackwindow(id: winidty; predecessor: winidty;
                                    stackmode: integer): guierrorty;
 var
  bo1: boolean;
- id1: winidty;
+// id1: winidty;
  changes: xwindowchanges;
  ar1: winidarty;
  int1: integer;
  idindex,pindex: integer;
- topid,toppred: winidty;
- winar1: array[0..1] of winidty;
+// topid,toppred: winidty;
+// winar1: array[0..1] of winidty;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
