@@ -22,7 +22,7 @@ interface
 
 uses
  msetextedit,msewidgetgrid,mseforms,classes,msegdbutils,msegraphedits,mseevent,
- msehash,msebitmap,msetabs,msetypes,
+ msehash,msebitmap,msetabs,msetypes,msedataedits,
  mseglob,mseguiglob,msegui,msesyntaxedit,mseeditglob,
  mseinplaceedit,msedispwidgets,msegraphutils,msegrids,breakpointsform,
  pascaldesignparser,msefilechange,msestrings,mserichstring,mseparser,
@@ -42,8 +42,8 @@ type
    grid: twidgetgrid;
    edit: tsyntaxedit;
    dataicon: tdataicon;
-   linedisp: tstringdisp;
-   pathdisp: tstringdisp;
+   linedisp: tstringedit;
+   pathdisp: tstringedit;
    procedure icononcellevent(const sender: tobject; var info: celleventinfoty);
    procedure sourcefooncreate(const sender: tobject);
    procedure sourcefoondestroy(const sender: tobject);
