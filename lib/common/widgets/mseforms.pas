@@ -1304,7 +1304,9 @@ begin
      window.windowpos:= pos1; //does not work with kde and invisible window
     end;
     if readboolean('active',active) then begin
-     activate;
+     application.postevent(tobjectevent.create(ek_activate,ievent(self)));
+                        //to the OS queue
+//     activate;
     end;
    end;
   end;
