@@ -3261,9 +3261,11 @@ begin
   try
    for int1:= high(ar1)-1 downto 0 do begin
     stream2:= nil;
-    po2:= fmodules.findmodule(root);
-    if po2 <> nil then begin
-     stream2:= po2^.loadingstream; //needs possibly fixup
+    if high(ar1) < 2 then begin //has no ancestors, loading stream can be used ????
+     po2:= fmodules.findmodule(root);
+     if po2 <> nil then begin
+      stream2:= po2^.loadingstream; //needs possibly fixup
+     end;
     end;
     if stream2 = nil then begin
      stream2:= stream1;
