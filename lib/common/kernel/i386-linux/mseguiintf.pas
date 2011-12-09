@@ -4998,6 +4998,8 @@ begin
 end;
 
 initialization
+ norestackwindow:= true;
+ noreconfigurewmwindow:= true;
  hassm:= geticelib and getsmlib;
 // x11initdefaultfont;
 end.
