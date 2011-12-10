@@ -61,8 +61,8 @@ const
 {$ifdef mswindows}
  mysqllib: array[0..0] of filenamety = ('libmysql.dll');
 {$else}
- mysqllib: array[0..2] of filenamety = ('libmysqlclient.so.16',
-                                'libmysqlclient.so.15','libmysqlclient.so');
+ mysqllib: array[0..3] of filenamety = ('libmysqlclient.so.18',
+         'libmysqlclient.so.16','libmysqlclient.so.15','libmysqlclient.so');
 {$endif}
 
 procedure initializemysql(const sonames: array of filenamety); 
