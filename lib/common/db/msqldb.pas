@@ -771,6 +771,7 @@ type
    procedure freemodifyqueries;
    procedure freequery;
    procedure disconnect{(const aexecute: boolean)};
+   procedure checkrecursivedatasource(const avalue: tdatasource);
    procedure InternalOpen; override;
    procedure internalrefresh; override;
    procedure refreshtransaction; override;
@@ -3564,6 +3565,9 @@ begin
 {$ifdef mse_debugdataset}
  debugoutstart(ts,self,'internalopen');
 {$endif}
+ if fmasterlink <> nil then begin
+  checkrecursivedatasource(fmasterlink.datasource);
+ end;
  inherited;
 {$ifdef mse_debugdataset}
  debugoutend(ts,self,'internalopen');
@@ -4244,10 +4248,31 @@ begin
     else Result := stNone;
 end;
 }
+procedure tsqlquery.checkrecursivedatasource(const avalue: tdatasource);
+var
+ dso1: tdatasource;
+ ds1: tdataset;
+begin
+ dso1:= avalue;
+ while dso1 <> nil do begin
+  if dso1.dataset = self then begin
+   databaseerror('Recursive datasource.',self);
+  end;
+  ds1:= dso1.dataset;
+  if ds1 is tsqlquery then begin
+   dso1:= tsqlquery(ds1).datasource;
+  end
+  else begin
+   break;
+  end;
+ end;
+end;
+
 Procedure TSQLQuery.SetDataSource(AVAlue : TDatasource);
 Var
  DS : TDatasource;
 begin
+ checkrecursivedatasource(avalue);
  DS:=DataSource;
  If (AValue<>DS) then begin
   If Assigned(DS) then begin
