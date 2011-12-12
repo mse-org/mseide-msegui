@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+Version 2.8rc1
+2011-12-12
 2011-11-28
  tcustomgrid.gridframewidth removed, use frame.framei* instead.
 2011-11-23
