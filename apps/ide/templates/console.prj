@@ -152,7 +152,7 @@ sigsettings=27
  26,26,T,F
  27,27,T,F
  28,28,T,F
- 29,29,T,F
+ 29,29,F,F
  30,30,T,F
 gridsizex=8
 gridsizey=8

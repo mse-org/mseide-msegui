@@ -3,7 +3,7 @@ unit mybutton;
 
 interface
 uses
- msesimplewidgets,mseevent,msegraphics,classes,msegraphutils,mseact;
+ msesimplewidgets,mseevent,msegraphics,classes,msegraphutils,mseact,mseguiglob;
  
 const
  defaultcolorclicked = cl_red;
