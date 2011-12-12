@@ -4252,10 +4252,13 @@ procedure tsqlquery.checkrecursivedatasource(const avalue: tdatasource);
 var
  dso1: tdatasource;
  ds1: tdataset;
+ int1: integer;
 begin
  dso1:= avalue;
+ int1:= 0;
  while dso1 <> nil do begin
-  if dso1.dataset = self then begin
+  inc(int1);
+  if (dso1.dataset = self) or (int1 > 100) then begin
    databaseerror('Recursive datasource.',self);
   end;
   ds1:= dso1.dataset;
