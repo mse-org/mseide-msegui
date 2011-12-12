@@ -23,6 +23,7 @@ uses
  
 procedure reggroups;
 begin
+
  registerunitgroup(['mseskin'],['mseclasses']);
  registerunitgroup(['mseedit'],['msegui','msemenus','mseguiglob','msestrings']);
  registerunitgroup(['msetabs'],['msegui','msemenus','mseguiglob','mseapplication','sysutils','msestat','msewidgets','msegraphutils','msescrollbar']);
@@ -40,7 +41,7 @@ begin
  registerunitgroup(['mseforms'],['msegui','msemenus','mseguiglob','msegraphutils','msewidgets','msegraphics','mseglob','mseevent','msestat','mseguiintf','msedock']);
  registerunitgroup(['msedock'],['msegui','msemenus','mseguiglob','msegraphutils']);
  registerunitgroup(['msesplitter'],['msegui','msemenus','mseguiglob']);
- registerunitgroup(['msedispwidgets'],['msegui','msemenus','mseguiglob','msestrings','msetypes']);
+ registerunitgroup(['msedispwidgets'],['msegui','msemenus','mseguiglob','msestrings','mserichstring','msetypes']);
  registerunitgroup(['mselistbrowser'],['msegui','msemenus','mseguiglob','msedatanodes','msegrids','msestrings','msedataedits','mseedit','msestat']);
  registerunitgroup(['msefiledialog'],['msegui','msemenus','mseguiglob','mselistbrowser','msegrids','msestrings','msesys','msebitmap','mseglob','msedataedits','mseedit']);
  registerunitgroup(['msedialog'],['msegui','msemenus','mseguiglob','msedataedits','msestrings','mseedit','mseglob','msetypes']);
@@ -115,6 +116,7 @@ begin
  registerunitgroup(['msemysql40conn'],['msedatabase','sysutils']);
  registerunitgroup(['msemysql41conn'],['msedatabase','sysutils']);
  registerunitgroup(['msemysql50conn'],['msedatabase','sysutils']);
+
 end;
 
 initialization
