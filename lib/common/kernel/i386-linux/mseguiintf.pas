@@ -2923,23 +2923,35 @@ begin
  end;
 end;
 
-function getrootpath(id: winidty; out rootpath: longwordarty): boolean;
+var
+ getrootpathlevel: integer;
+ 
+function getrootpath(const id: winidty; out rootpath: longwordarty): boolean;
 var
  root,parent: winidty;//{$ifdef FPC}dword{$else}xlib.twindow{$endif};
  children: pwindow;
  count: integer;
  ca1: longword;
+ id1: winidty;
 
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
  result:= false;
+ id1:= id;
  setlength(rootpath,5);
  rootpath[0]:= id;
  count:= 1; //reserve for root
+ inc(xlockerror); //parent window possibly destroyed by WM
  repeat
-  if xquerytree(appdisp,id,@root,@parent,@children,@ca1) = 0 then begin
+  if xquerytree(appdisp,id1,@root,@parent,@children,@ca1) = 0 then begin
+   dec(xlockerror);
+   if (count > 1) and (getrootpathlevel < 4) then begin
+    inc(getrootpathlevel);
+    result:= getrootpath(id,rootpath);
+    dec(getrootpathlevel);
+   end;
    exit;
   end;
   if children <> nil then begin
@@ -2949,9 +2961,10 @@ begin
    setlength(rootpath,count+5);
   end;
   rootpath[count]:= parent;
-  id:= parent;
+  id1:= parent;
   inc(count);
  until parent = root;
+ dec(xlockerror);
  setlength(rootpath,count);
  result:= true;
 end;
@@ -4351,14 +4364,15 @@ eventrestart:
   configurenotify: begin
    with xev.xconfigure do begin
     w:= xwindow;
+    xsync(appdisp,false);
     if xchecktypedwindowevent(appdisp,w,destroynotify,@xev2) then begin
      result:= twindowevent.create(ek_destroy,xwindow);
     end
     else begin
-     if not application.deinitializing then begin //there can be an Xerror?
-      //gnome returns a different pos on window resizing than on window moving!
-//      xsync(appdisp,false);
-      getwindowrect(w,rect1,pt1);
+     if not application.deinitializing and 
+       (getwindowrect(w,rect1,pt1) = gue_ok) then begin
+                         //there can be an Xerror?
+     //gnome returns a different pos on window resizing than on window moving!
     {$ifdef mse_debugconfigure}
       debugwriteln('*conf winrect    '+hextostr(w)+' '+
                       inttostr(pt1.x)+' '+inttostr(pt1.y)+'|'+

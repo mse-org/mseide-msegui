@@ -12734,7 +12734,7 @@ var
  int1: integer;
  window1: twindow;
  size1: windowsizety;
- bo1,bo2: boolean;
+ {bo1,}bo2: boolean;
 begin
  if (ws_visible in fowner.fwidgetstate) then begin
   if not visible then begin
@@ -12793,7 +12793,7 @@ begin
      end;
      exclude(fstate,tws_grouphidden);
      exclude(fstate,tws_groupminimized);
-     bo1:= gui_grouphideminimizedwindows;
+//     bo1:= gui_grouphideminimizedwindows;
      bo2:= false;
      for int1:= 0 to high(appinst.fwindows) do begin
       window1:= appinst.fwindows[int1];
@@ -12824,17 +12824,25 @@ begin
                    //necessary for win32 show desktop
       gui_setwindowstate(winid,wsi_maximized,true);
      end;
-     if bo1 and bo2 then begin
+     if {bo1 and} bo2 then begin
       window1:= nil; //compiler warning
       activate;
       with appinst do begin
        if fgroupzorder <> nil then begin
 //        removeitem(pointerarty(fgroupzorder),window1);
 //        additem(pointerarty(fgroupzorder),window1);
+       {$ifdef mse_debuggrouprestore}
+        debugwriteln('*** grouprestorezorder '+fowner.name);
+       {$endif}
+        flockupdatewindowstack:= nil; //enable z-order handling
         fwindowstack:= nil;
         setlength(fwindowstack,high(fgroupzorder));
         window1:= fgroupzorder[0]; //lowest
         for int1:= 1 to high(fgroupzorder) do begin
+       {$ifdef mse_debuggrouprestore}
+        debugwriteln(' '+inttostr(int1)+' '+window1.fowner.name+' '+
+                 fgroupzorder[int1].fowner.name);
+       {$endif}
          fwindowstack[int1-1].upper:= fgroupzorder[int1];
          fwindowstack[int1-1].lower:= window1;
          window1:= fgroupzorder[int1];
@@ -15670,7 +15678,7 @@ begin
  end;
 end;
 
-procedure printwindowstackinfo(const ar3: windowarty);
+procedure printwindowstackinfo(const ar3: windowarty); overload;
 var
  int1: integer;
 begin
@@ -15683,6 +15691,16 @@ begin
   end;
   debugwriteln(debugwindowinfo(ar3[int1])+' '+
                  debugwindowinfo(ar3[int1].ftransientfor));
+ end;
+end;
+
+procedure printwindowstackinfo(const ar3: windowstackinfoarty); overload;
+var
+ int1: integer;
+begin 
+ for int1:= 0 to high(ar3) do begin
+  debugwriteln(debugwindowinfo(ar3[int1].lower)+' '+
+                    debugwindowinfo(ar3[int1].upper));
  end;
 end;
 
@@ -15733,7 +15751,8 @@ begin
   try
    if not nozorderhandling then begin
   {$ifdef mse_debugzorder}
-    debugwriteln('****checkwindowstack****');
+    debugwriteln('****checkwindowstack**** fwindowstack');
+    printwindowstackinfo(fwindowstack);
   {$endif}
     for int1:= 0 to high(fwindowstack) do begin
      findlevel(fwindowstack[int1]);
@@ -15741,10 +15760,8 @@ begin
     sortarray(fwindowstack,sizeof(windowstackinfoty),
                                     {$ifdef FPC}@{$endif}cmpwindowstack);
    {$ifdef mse_debugzorder}
-    for int1:= 0 to high(fwindowstack) do begin
-     debugwriteln(debugwindowinfo(fwindowstack[int1].lower)+' '+
-                       debugwindowinfo(fwindowstack[int1].upper));
-    end;
+    debugwriteln('..... after sort');
+    printwindowstackinfo(fwindowstack);
    {$endif}
     if gui_canstackunder then begin
      for int1:= 0 to high(fwindowstack) do begin
@@ -15902,7 +15919,7 @@ begin
   sortzorder;
   ar3:= windowar; //refcount 1
  {$ifdef mse_debugzorder}
-  debugwriteln('*****updatewindowstack*****');
+  debugwriteln('*****updatewindowstack***** current order');
   printwindowstackinfo(ar3);
  {$endif}
   ar4:= copy(ar3);
@@ -15915,7 +15932,7 @@ begin
   end;
   int2:= -1;
  {$ifdef mse_debugzorder}
-  debugwriteln('++++');
+  debugwriteln('++++ after sort');
   printwindowstackinfo(ar3);
  {$endif}
   for int1:= 0 to high(ar4) do begin
