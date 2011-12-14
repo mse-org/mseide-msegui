@@ -94,7 +94,7 @@ object breakpointsfo: tbreakpointsfo
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 16
+        height = 15
         captions.count = 11
         captions.items = <        
           item
@@ -226,18 +226,19 @@ object breakpointsfo: tbreakpointsfo
         widgetname = 'flags'
         dataclass = tgridintegerdatalist
       end>
-    datarowheight = 16
+    datarowheight = 15
     onrowsdeleting = gridonrowsdeleting
     onrowsdeleted = gridonrowsdeleted
     oncellevent = gridoncellevent
-    reffontheight = 14
+    reffontheight = 13
     object bkpton: tbooleanedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 1
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 16
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       ondataentered = ondataentered
       visible = False
@@ -245,45 +246,42 @@ object breakpointsfo: tbreakpointsfo
       valuedefault = True
     end
     object filename: tstringedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_autoscale]
       optionsskin = [osk_framebuttononly]
       taborder = 2
       visible = False
       bounds_x = 17
       bounds_y = 0
       bounds_cx = 158
-      bounds_cy = 16
+      bounds_cy = 15
       ondataentered = ondataenterednewbkpt
       onsetvalue = filenameonsetvalue
-      reffontheight = 14
     end
     object path: tstringedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 3
       visible = False
       bounds_x = 176
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 16
-      reffontheight = 14
+      bounds_cy = 15
     end
     object line: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 4
       visible = False
       bounds_x = 227
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 16
+      bounds_cy = 15
       ondataentered = ondataenterednewbkpt
       onsetvalue = lineonsetvalue
       min = 1
-      reffontheight = 14
     end
     object address: tint64edit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -294,14 +292,13 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 278
       bounds_y = 0
       bounds_cx = 61
-      bounds_cy = 16
+      bounds_cy = 15
       font.name = 'stf_fixed'
       font.xscale = 1
       font.dummy = 0
       ondataentered = addressentered
       base = nb_hex
       max = -1
-      reffontheight = 14
     end
     object addressbkpt: tbooleanedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
@@ -314,71 +311,68 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 340
       bounds_y = 0
       bounds_cx = 6
-      bounds_cy = 16
+      bounds_cy = 15
       visible = False
     end
     object bkptno: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 7
       visible = False
       bounds_x = 347
       bounds_y = 0
       bounds_cx = 19
-      bounds_cy = 16
-      reffontheight = 14
+      bounds_cy = 15
     end
     object count: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 8
       visible = False
       bounds_x = 367
       bounds_y = 0
       bounds_cx = 31
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
-      reffontheight = 14
     end
     object ignore: tintegeredit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 9
       visible = False
       bounds_x = 399
       bounds_y = 0
       bounds_cx = 30
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       ondataentered = ondataentered
       onsetvalue = ignoreonsetvalue
-      reffontheight = 14
     end
     object conderr: tdataicon
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 10
       bounds_x = 430
       bounds_y = 0
       bounds_cx = 7
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       visible = False
       imagelist = actionsmo.buttonicons
       imageoffset = 10
     end
     object condition: tstringedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 11
       visible = False
       bounds_x = 438
       bounds_y = 0
       bounds_cx = 200
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft, oe_autopopupmenu, oe_savevalue, oe_savestate]
       ondataentered = ondataentered
       onsetvalue = conditiononsetvalue
-      reffontheight = 14
     end
     object errormessage: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
@@ -388,9 +382,9 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 639
       bounds_y = 0
       bounds_cx = 19
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savestate]
-      reffontheight = 14
+      reffontheight = 13
     end
     object flags: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -400,8 +394,8 @@ object breakpointsfo: tbreakpointsfo
       bounds_x = 659
       bounds_y = 0
       bounds_cx = 17
-      bounds_cy = 16
-      reffontheight = 14
+      bounds_cy = 15
+      reffontheight = 13
     end
   end
   object bkptson: tbooleanedit
@@ -410,13 +404,13 @@ object breakpointsfo: tbreakpointsfo
     frame.outerframe = (
       0
       1
-      86
-      2
+      74
+      1
     )
     bounds_x = 8
     bounds_y = 4
-    bounds_cx = 99
-    bounds_cy = 16
+    bounds_cx = 87
+    bounds_cy = 15
     statfile = mainfo.projectstatfile
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
     onchange = bkptsononchange
