@@ -1878,6 +1878,7 @@ type
  pwidget = ^twidget;
 
  windowstatety = (tws_posvalid,tws_sizevalid,tws_windowvisible,
+                  tws_windowshowpending,
                   tws_modal,tws_modalfor,tws_needsdefaultpos,
                   tws_closing,tws_painting,tws_activating,
                   tws_globalshortcuts,tws_localshortcuts,
@@ -2136,6 +2137,7 @@ type
    fwinid: winidty;
    constructor create(akind: eventkindty; winid: winidty);
  end;
+ pwindowevent = ^twindowevent;
 
  twindowrectevent = class(twindowevent)
   private
@@ -2617,7 +2619,7 @@ function activateprocesswindow(const procid: integer;
 function combineframestateflags(
             const disabled,active,mouse,clicked: boolean): framestateflagsty;
 
-{$ifdef mse_debugwindowfocus}
+{$ifdef mse_debug}
 procedure debugwindow(const atext: string; const aid: winidty);
 {$endif}
 
@@ -2794,6 +2796,8 @@ type
    procedure checkcursorshape;
 
    procedure mouseparktimer(const sender: tobject);
+   procedure removewindowevents(const awindow: winidty; 
+                                              const aeventkind: eventkindty);
   protected
    function getevents: integer; override;
     //application must be locked
@@ -12356,15 +12360,18 @@ begin
     {$ifdef mse_debugconfigure}
      with fnormalwindowrect do begin
       if visible then begin
-       debugwrite('*checkwin visible');
+       debugwindow('*checkwin visible '+
+        inttostr(x)+' '+inttostr(y)+' '+inttostr(cx)+' '+inttostr(cy),
+                                                                  fwindow.id);
       end
       else begin
-       debugwrite('*checkw. invis.  ');
+       debugwindow('*checkw. invis.   '+
+       inttostr(x)+' '+inttostr(y)+' '+inttostr(cx)+' '+inttostr(cy)+' ',
+                                                                 fwindow.id);
       end;
-      debugwriteln(hextostr(fwindow.id)+' '+
-              inttostr(x)+' '+inttostr(y)+' '+inttostr(cx)+' '+inttostr(cy));
      end;
     {$endif}
+     appinst.removewindowevents(fwindow.id,ek_configure);
      guierror(gui_reposwindow(fwindow.id,fnormalwindowrect),self);
      fstate:= fstate + [tws_posvalid,tws_sizevalid];
     end;
@@ -12618,6 +12625,15 @@ var
  mini1: boolean;
 begin
  releasemouse;
+ fstate:= fstate - [tws_posvalid,tws_sizevalid,tws_windowshowpending];
+{$ifdef mse_debugconfigure}
+ if windowevent then begin
+  debugwindow('*hide windowevent ',fwindow.id);
+ end
+ else begin
+  debugwindow('*hide no windowevent ',fwindow.id);
+ end;
+{$endif}
  if not(ws_visible in fowner.fwidgetstate) then begin
   mini1:= windowpos = wp_minimized;
   if not mini1 then begin
@@ -12734,14 +12750,24 @@ var
  int1: integer;
  window1: twindow;
  size1: windowsizety;
- bo1,bo2: boolean;
+ {bo1,}bo2: boolean;
 begin
+ if windowevent then begin
+  {$ifdef mse_debugconfigure}
+   debugwindow('*show windowevent ',fwindow.id);
+  {$endif}
+  exclude(fstate,tws_windowshowpending);
+  checkwindowid; //check position
+ end;
  if (ws_visible in fowner.fwidgetstate) then begin
   if not visible then begin
+   if not windowevent then begin
+    include(fstate,tws_windowshowpending);
+   end;
    include(fstate,tws_windowvisible);
    checkwindowid;
   {$ifdef mse_debugwindowfocus}
-   debugwindow('show ',fwindow.id);
+   debugwindow('*show ',fwindow.id);
   {$endif}
    with appinst do begin
     if flockupdatewindowstack = self then begin
@@ -12793,7 +12819,7 @@ begin
      end;
      exclude(fstate,tws_grouphidden);
      exclude(fstate,tws_groupminimized);
-     bo1:= gui_grouphideminimizedwindows;
+//     bo1:= gui_grouphideminimizedwindows;
      bo2:= false;
      for int1:= 0 to high(appinst.fwindows) do begin
       window1:= appinst.fwindows[int1];
@@ -12811,7 +12837,9 @@ begin
          debugwindow('groupshow '+
            getenumname(typeinfo(windowsizety),integer(size1))+' ',fwindow.id);
        {$endif}
-         gui_setwindowstate(winid,size1,true);
+         if fwindow.id <> 0 then begin
+          gui_setwindowstate(fwindow.id,size1,true);
+         end;
          bo2:= true;
         end;
         exclude(fstate,tws_grouphidden);
@@ -12824,17 +12852,36 @@ begin
                    //necessary for win32 show desktop
       gui_setwindowstate(winid,wsi_maximized,true);
      end;
-     if bo1 and bo2 then begin
+     if {bo1 and} bo2 then begin
       window1:= nil; //compiler warning
       activate;
       with appinst do begin
        if fgroupzorder <> nil then begin
 //        removeitem(pointerarty(fgroupzorder),window1);
 //        additem(pointerarty(fgroupzorder),window1);
+       {$ifdef mse_debuggrouprestore}
+        debugwriteln('*** grouprestorezorder '+fowner.name);
+       {$endif}
+        flockupdatewindowstack:= nil; //enable z-order handling
+        for int1:= 0 to high(fgroupzorder) do begin
+         if fgroupzorder[int1] = self then begin
+          moveitem(pointerarty(fgroupzorder),int1,high(fgroupzorder));
+                        //probably focused, bring to front
+          break;
+         end;
+        end;
         fwindowstack:= nil;
         setlength(fwindowstack,high(fgroupzorder));
         window1:= fgroupzorder[0]; //lowest
         for int1:= 1 to high(fgroupzorder) do begin
+         if fgroupzorder[int1] = self then begin
+          moveitem(pointerarty(fgroupzorder),int1,high(fgroupzorder));
+                        //probably focused, bring to front
+         end;
+       {$ifdef mse_debuggrouprestore}
+         debugwriteln(' '+inttostr(int1)+' '+window1.fowner.name+' '+
+                 fgroupzorder[int1].fowner.name);
+       {$endif}
          fwindowstack[int1-1].upper:= fgroupzorder[int1];
          fwindowstack[int1-1].lower:= window1;
          window1:= fgroupzorder[int1];
@@ -12941,48 +12988,56 @@ var
  rect1: rectty;
 begin
 {$ifdef mse_debugconfigure}
- debugwriteln('*wmconfigured    '+hextostr(fwindow.id)+
-                       inttostr(aorigin.x)+' '+inttostr(aorigin.y)+'|'+
+ debugwindow('*wmconfigured     '+
+                 inttostr(aorigin.x)+' '+inttostr(aorigin.y)+'|'+
                  inttostr(arect.x)+' '+inttostr(arect.y)+
-                 ' '+inttostr(arect.cx)+' '+inttostr(arect.cy));
+                 ' '+inttostr(arect.cx)+' '+inttostr(arect.cy)+' ',fwindow.id);
 
 {$endif}
- if (fstate*[tws_posvalid,tws_sizevalid] <> [tws_posvalid,tws_sizevalid]) and 
-                                    (windowpos <> wp_maximized) then begin
-  checkwindow(false);
+ rect1:= arect;
+ if not (wo_embedded in foptions) then begin
+  addpoint1(rect1.pos,aorigin);
+ end;
+ if not visible or (tws_windowshowpending in fstate) then begin 
+                        //do not accept changes by hiding window (kwin bugs)
+  if not rectisequal(fowner.fwidgetrect,rect1) then begin
+   fstate:= fstate - [tws_posvalid,tws_sizevalid];
+  end;
  end
  else begin
-//  if tws_needsdefaultpos in fstate then begin
-//   fnormalwindowrect:= fowner.fwidgetrect;
-//  end;
-  fstate:= (fstate + [tws_posvalid,tws_sizevalid]) - [tws_needsdefaultpos];
-  rect1:= arect;
-  if not (wo_embedded in foptions) then begin
-   addpoint1(rect1.pos,aorigin);
-  end;
-  if not rectisequal(rect1,fowner.fwidgetrect) then begin
-   if fsizeerrorcount < maxsizeerrorcount then begin
-    fowner.checkwidgetsize(rect1.size);
-   end;
-   fowner.internalsetwidgetrect(rect1,true);
-   if pointisequal(rect1.pos,fowner.fwidgetrect.pos) then begin
-    include(fstate,tws_posvalid);
-   end;
-   if sizeisequal(arect.size,fowner.fwidgetrect.size) then begin
-    include(fstate,tws_sizevalid);
-    fsizeerrorcount:= 0;
-   end
-   else begin
+  if (fstate*[tws_posvalid,tws_sizevalid] <> [tws_posvalid,tws_sizevalid]) and 
+                                     (windowpos <> wp_maximized) then begin
+   checkwindow(false);
+  end
+  else begin
+ //  if tws_needsdefaultpos in fstate then begin
+ //   fnormalwindowrect:= fowner.fwidgetrect;
+ //  end;
+   fstate:= (fstate + [tws_posvalid,tws_sizevalid]) - [tws_needsdefaultpos];
+   if not rectisequal(rect1,fowner.fwidgetrect) then begin
     if fsizeerrorcount < maxsizeerrorcount then begin
-     inc(fsizeerrorcount);
-     gui_reposwindow(fwindow.id,rect1);
+     fowner.checkwidgetsize(rect1.size);
+    end;
+    fowner.internalsetwidgetrect(rect1,true);
+    if pointisequal(rect1.pos,fowner.fwidgetrect.pos) then begin
+     include(fstate,tws_posvalid);
+    end;
+    if sizeisequal(arect.size,fowner.fwidgetrect.size) then begin
+     include(fstate,tws_sizevalid);
+     fsizeerrorcount:= 0;
+    end
+    else begin
+     if fsizeerrorcount < maxsizeerrorcount then begin
+      inc(fsizeerrorcount);
+      gui_reposwindow(fwindow.id,rect1);
+     end;
     end;
    end;
-  end;
-  fwindowposbefore:= windowpos;
-  if not (fwindowposbefore in [wp_minimized,wp_maximized,
-                               wp_fullscreen,wp_fullscreenvirt]) then begin
-   fnormalwindowrect:= fowner.fwidgetrect;
+   fwindowposbefore:= windowpos;
+   if not (fwindowposbefore in [wp_minimized,wp_maximized,
+                                wp_fullscreen,wp_fullscreenvirt]) then begin
+    fnormalwindowrect:= fowner.fwidgetrect;
+   end;
   end;
  end;
 end;
@@ -15157,7 +15212,7 @@ begin
  end;
 end;
 
-{$ifdef mse_debugwindowfocus}
+{$ifdef mse_debug}
 procedure debugwindow(const atext: string; const aid: winidty);
 var
  str1: string;
@@ -15173,6 +15228,27 @@ begin
  debugwriteln(str1);
 end;
 {$endif}
+
+procedure tinternalapplication.removewindowevents(const awindow: winidty;
+                    const aeventkind: eventkindty);
+var
+ po1: pwindowevent;
+ int1: integer;
+begin
+ getevents;
+ po1:= pointer(eventlist.datapo);
+ for int1:= 0 to eventlist.count - 1 do begin
+  if po1^ <> nil then begin
+   with po1^ do begin
+    if (kind = ek_configure) and (fwinid = awindow) then begin
+     po1^.free;
+     po1^:= nil;
+    end;
+   end;
+  end;
+  inc(po1);
+ end;
+end;
 
 function tinternalapplication.eventloop(const amodalwindow: twindow;
                                     const once: boolean = false): boolean;
@@ -15670,7 +15746,7 @@ begin
  end;
 end;
 
-procedure printwindowstackinfo(const ar3: windowarty);
+procedure printwindowstackinfo(const ar3: windowarty); overload;
 var
  int1: integer;
 begin
@@ -15683,6 +15759,16 @@ begin
   end;
   debugwriteln(debugwindowinfo(ar3[int1])+' '+
                  debugwindowinfo(ar3[int1].ftransientfor));
+ end;
+end;
+
+procedure printwindowstackinfo(const ar3: windowstackinfoarty); overload;
+var
+ int1: integer;
+begin 
+ for int1:= 0 to high(ar3) do begin
+  debugwriteln(debugwindowinfo(ar3[int1].lower)+' '+
+                    debugwindowinfo(ar3[int1].upper));
  end;
 end;
 
@@ -15733,7 +15819,8 @@ begin
   try
    if not nozorderhandling then begin
   {$ifdef mse_debugzorder}
-    debugwriteln('****checkwindowstack****');
+    debugwriteln('****checkwindowstack**** fwindowstack');
+    printwindowstackinfo(fwindowstack);
   {$endif}
     for int1:= 0 to high(fwindowstack) do begin
      findlevel(fwindowstack[int1]);
@@ -15741,10 +15828,8 @@ begin
     sortarray(fwindowstack,sizeof(windowstackinfoty),
                                     {$ifdef FPC}@{$endif}cmpwindowstack);
    {$ifdef mse_debugzorder}
-    for int1:= 0 to high(fwindowstack) do begin
-     debugwriteln(debugwindowinfo(fwindowstack[int1].lower)+' '+
-                       debugwindowinfo(fwindowstack[int1].upper));
-    end;
+    debugwriteln('..... after sort');
+    printwindowstackinfo(fwindowstack);
    {$endif}
     if gui_canstackunder then begin
      for int1:= 0 to high(fwindowstack) do begin
@@ -15902,7 +15987,7 @@ begin
   sortzorder;
   ar3:= windowar; //refcount 1
  {$ifdef mse_debugzorder}
-  debugwriteln('*****updatewindowstack*****');
+  debugwriteln('*****updatewindowstack***** current order');
   printwindowstackinfo(ar3);
  {$endif}
   ar4:= copy(ar3);
@@ -15915,7 +16000,7 @@ begin
   end;
   int2:= -1;
  {$ifdef mse_debugzorder}
-  debugwriteln('++++');
+  debugwriteln('++++ after sort');
   printwindowstackinfo(ar3);
  {$endif}
   for int1:= 0 to high(ar4) do begin

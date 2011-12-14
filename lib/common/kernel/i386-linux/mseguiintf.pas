@@ -2923,23 +2923,38 @@ begin
  end;
 end;
 
-function getrootpath(id: winidty; out rootpath: longwordarty): boolean;
+var
+ getrootpathlevel: integer;
+ 
+function getrootpath(const id: winidty; out rootpath: longwordarty): boolean;
 var
  root,parent: winidty;//{$ifdef FPC}dword{$else}xlib.twindow{$endif};
  children: pwindow;
  count: integer;
  ca1: longword;
+ id1: winidty;
 
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
  result:= false;
+ id1:= id;
  setlength(rootpath,5);
  rootpath[0]:= id;
  count:= 1; //reserve for root
+ inc(xlockerror); //parent window possibly destroyed by WM
  repeat
-  if xquerytree(appdisp,id,@root,@parent,@children,@ca1) = 0 then begin
+  if xquerytree(appdisp,id1,@root,@parent,@children,@ca1) = 0 then begin
+   dec(xlockerror);
+   if (count > 1) and (getrootpathlevel < 4) then begin
+  {$ifdef mse_debugrootpath}
+    debugwindow('*** rootpatherror ',id);
+  {$endif}
+    inc(getrootpathlevel);
+    result:= getrootpath(id,rootpath);
+    dec(getrootpathlevel);
+   end;
    exit;
   end;
   if children <> nil then begin
@@ -2949,9 +2964,10 @@ begin
    setlength(rootpath,count+5);
   end;
   rootpath[count]:= parent;
-  id:= parent;
+  id1:= parent;
   inc(count);
  until parent = root;
+ dec(xlockerror);
  setlength(rootpath,count);
  result:= true;
 end;
@@ -3314,8 +3330,8 @@ var
 begin
  result:= gue_error;
  with rect do begin
-  if (xgetgeometry(appdisp,id,@int1,@x,@y,@cx,@cy,@int1,@int1) <> 0) and
-                 getrootoffset(id,origin) then begin
+  if getrootoffset(id,origin) and
+   (xgetgeometry(appdisp,id,@int1,@x,@y,@cx,@cy,@int1,@int1) <> 0) then begin
    result:= gue_ok;
   end;
  end;
@@ -3348,12 +3364,20 @@ begin
  end;
  gdi_unlock;
 end;
-
+{
+procedure wmwait;
+begin
+ xsync(appdisp,false);
+ sys_schedyield;
+ xsync(appdisp,false);
+end;
+}
 function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
 var
  changes: xwindowchanges;
  sizehints: pxsizehints;
  int1: clong;
+// rect1: rectty;
 begin
  gdi_lock;
  fillchar(changes,sizeof(changes),0);
@@ -3389,11 +3413,32 @@ begin
  end;
  {$ifdef mse_debugconfigure}
   with changes do begin
-   debugwriteln('*reposwindow     '+hextostr(id)+' '+inttostr(x)+' '+inttostr(y)+
-                   ' '+inttostr(width)+' '+inttostr(height));
+   debugwindow('*reposwindow     '+' '+inttostr(x)+' '+inttostr(y)+
+                   ' '+inttostr(width)+' '+inttostr(height)+' ',id);
   end;
  {$endif}
  xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
+{
+ if gui_windowvisible(id) and (gui_getwindowrect(id,rect1) = gue_ok) and 
+                  not rectisequal(rect1,rect) then begin
+    //try to fix kwin staticgravity bug
+  wmwait;                
+  xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
+              //again, maybe a staticgravity WM decoration bug
+  wmwait;                
+  if (gui_getwindowrect(id,rect1) = gue_ok) and 
+                       not rectisequal(rect1,rect) then begin 
+          //again, brute force
+   with changes do begin
+    x:= x + rect.x-rect1.x;
+    y:= y + rect.y-rect1.y;
+    width:= width + rect.cx-rect1.cx;
+    height:= height + rect.cy-rect1.cy;
+   end;
+   xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
+  end;
+ end;
+}
  {$ifdef FPC} {$checkpointer default} {$endif}
  result:= gue_ok;
 // xflush(appdisp);
@@ -4351,44 +4396,33 @@ eventrestart:
   configurenotify: begin
    with xev.xconfigure do begin
     w:= xwindow;
+    xsync(appdisp,false);
     if xchecktypedwindowevent(appdisp,w,destroynotify,@xev2) then begin
      result:= twindowevent.create(ek_destroy,xwindow);
     end
     else begin
-     if not application.deinitializing then begin //there can be an Xerror?
-      //gnome returns a different pos on window resizing than on window moving!
-//      xsync(appdisp,false);
-      getwindowrect(w,rect1,pt1);
+     if not application.deinitializing and 
+       (getwindowrect(w,rect1,pt1) = gue_ok) then begin
+                         //there can be an Xerror?
+     //gnome returns a different pos on window resizing than on window moving!
     {$ifdef mse_debugconfigure}
-      debugwriteln('*conf winrect    '+hextostr(w)+' '+
+      debugwindow('*conf winrect     '+
                       inttostr(pt1.x)+' '+inttostr(pt1.y)+'|'+
                  inttostr(rect1.x)+' '+inttostr(rect1.y)+
-                 ' '+inttostr(rect1.cx)+' '+inttostr(rect1.cy));
+                 ' '+inttostr(rect1.cx)+' '+inttostr(rect1.cy)+' ',w);
     {$endif}
       result:= twindowrectevent.create(ek_configure,w,rect1,pt1);
      end;
     {$ifdef mse_debugconfigure}
-     debugwriteln('                 '+hextostr(w)+' '+inttostr(x)+' '+inttostr(y)+
+     debugwriteln('                  '+inttostr(x)+' '+inttostr(y)+
                  ' '+inttostr(width)+' '+inttostr(height));
     {$endif}
      while xchecktypedwindowevent(appdisp,w,configurenotify,@xev) do begin
     {$ifdef mse_debugconfigure}
-      debugwriteln('                 '+hextostr(w)+' '+inttostr(x)+' '+inttostr(y)+
+      debugwriteln('                  '+inttostr(x)+' '+inttostr(y)+
                  ' '+inttostr(width)+' '+inttostr(height));
     {$endif}
      end;
-     (*
-      //gnome returns a different pos on window resizing than on window moving!
-     if not application.deinitializing then begin //there can be an Xerror?
-      getwindowrect(w,rect1,pt1);
-    {$ifdef mse_debugconfigure}
-      debugwriteln(' windowrect '+inttostr(rect1.x)+' '+inttostr(rect1.y)+
-                 ' '+inttostr(rect1.cx)+' '+inttostr(rect1.cy)+
-                 ' pos '+inttostr(pt1.x)+' '+inttostr(pt1.y));
-    {$endif}
-      result:= twindowrectevent.create(ek_configure,w,rect1,pt1);
-     end;
-     *)
     end;
    end;
   end;

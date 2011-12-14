@@ -11,7 +11,9 @@ unit msedbf;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
+{$warnings off}
  classes,db,dbf,msedb,msestrings,dbf_idxfile;
+{$warnings on}
  
 type
  tmsedbf = class(tdbf,imselocate,idscontroller,igetdscontroller)
