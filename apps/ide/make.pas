@@ -306,7 +306,7 @@ begin
    wdbefore:= setcurrentdirmse(makedir);
   end;
   try
-   procid:= execmse2(acommandline,nil,messagepipe,nil{errorpipe},{false,}-1,
+   procid:= execmse2(acommandline,nil,messagepipe,messagepipe{errorpipe},{false,}-1,
                                [exo_inactive,exo_tty]
                                {true,false,true});
   except
