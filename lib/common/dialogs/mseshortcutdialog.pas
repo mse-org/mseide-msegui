@@ -349,6 +349,7 @@ begin
        else begin
         shortcut1:= ar1;
        end;
+       sc.itemlist.refreshitemvalues(-1,1); //show changes
        include(eventstate,es_processed);
        if not (sc.item is tsysshortcutitem) then begin
         timer.enabled:= true;
