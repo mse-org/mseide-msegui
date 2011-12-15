@@ -422,7 +422,8 @@ type
                                  const owner: titemedit); reintroduce; overload;
    procedure assign(const aitems: listitemarty); reintroduce; overload;
    procedure add(const anode: tlistitem);
-   procedure refreshitemvalues;
+   procedure refreshitemvalues(aindex: integer = 0; //-1 = current grid row
+                               acount: integer = -1); //-1 = all
    property owner: titemedit read fowner;
    property colorglyph: colorty read fcolorglyph 
                                     write setcolorglyph default cl_black;
@@ -2325,11 +2326,22 @@ begin
 // adddata(anode);
 end;
 
-procedure tcustomitemeditlist.refreshitemvalues;
+procedure tcustomitemeditlist.refreshitemvalues(aindex: integer = 0; acount: integer = -1);
 begin
  beginupdate;
  try
-  fintf.updateitemvalues(0,fcount);
+  if aindex < 0 then begin
+   aindex:= fowner.gridrow;
+  end;
+  if (aindex >= 0) and (aindex < fcount) then begin
+   if acount < 0 then begin
+    acount:= fcount;
+   end;
+   if acount + aindex > fcount then begin
+    acount:= fcount - aindex;
+   end;
+   fintf.updateitemvalues(aindex,acount);
+  end;
  finally
   endupdate;
  end;
