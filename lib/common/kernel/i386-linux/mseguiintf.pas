@@ -2401,12 +2401,13 @@ function gui_setwindowfocus(id: winidty): guierrorty;
 begin
  gdi_lock;
 {$ifdef mse_debugwindowfocus}
- debugwriteln('gui_setwindowfocus '+hextostr(id,8));
+ debugwindow('*gui_setwindowfocus ',id);
 {$endif}
 
 // xseticfocus(getic(id));
  waitfordecoration(id);
  xsetinputfocus(appdisp,id,reverttoparent,currenttime);
+ xsync(appdisp,false);
 // xflush(appdisp);
  result:= gue_ok;
  gdi_unlock;

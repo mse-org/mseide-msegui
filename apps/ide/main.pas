@@ -1596,11 +1596,12 @@ begin //opensourceactonexecute
   end;
   if aactivate then begin
    if page <> nil then begin
-    page.activate;
+//writeln('******page activate*****');
+    page.activate(true,true);
    end
    else begin
     if po1 <> nil then begin
-     po1^.designform.activate;
+     po1^.designform.activate(true,true);
     end;
    end;
   end;

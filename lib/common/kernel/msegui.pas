@@ -12442,8 +12442,8 @@ var
  
 begin
 {$ifdef mse_debugwindowfocus}
- debugwriteln('********');
- debugwrite('internalactivate '+fowner.name+' '+hextostr(fwindow.id,8));
+ debugwindow('*internalactivate ',fwindow.id);
+ debugwrite(' modalwindow ');
  if appinst.fmodalwindow = nil then begin
   debugwriteln(' NIL');
  end
@@ -12530,7 +12530,7 @@ begin
   dec(factivating);
  end;
 {$ifdef mse_debugwindowfocus}
- debugwriteln('++++++++');
+ debugwindow('-internalactivate ',fwindow.id);
 {$endif}
 end;
 
@@ -15282,7 +15282,7 @@ var
  modalinfo: modalinfoty;
  event: tmseevent;
  int1: integer;
- bo1: boolean;
+ bo1,bo2: boolean;
  window: twindow;
  id1: winidty;
  po1: ^twindowevent;
@@ -15405,10 +15405,10 @@ begin       //eventloop
         ek_show,ek_hide: begin
         {$ifdef mse_debugwindowfocus}
          if event.kind = ek_show then begin
-          debugwindow('show ',twindowevent(event).fwinid);
+          debugwindow('ek_show ',twindowevent(event).fwinid);
          end
          else begin
-          debugwindow('hide ',twindowevent(event).fwinid);
+          debugwindow('ek_hide ',twindowevent(event).fwinid);
          end;
         {$endif}
          processshowingevent(twindowevent(event));
@@ -15434,12 +15434,31 @@ begin       //eventloop
         end;
         ek_focusin: begin
         {$ifdef mse_debugwindowfocus}
-         debugwindow('focusin ',twindowevent(event).fwinid);
+         debugwindow('ek_focusin ',twindowevent(event).fwinid);
         {$endif}
          getevents;
-         po1:= pointer(eventlist.datapo);
          bo1:= true;
- 
+         id1:= twindowevent(event).fwinid;
+         po1:= pointer(eventlist.datapo);
+         for int1:= 0 to eventlist.count - 1 do begin
+          if po1^ <> nil then begin //find last focusin
+           with po1^ do begin
+            case kind of
+             ek_focusin: begin
+              id1:= fwinid;
+             end;
+             ek_focusout: begin
+              if fwinid = twindowevent(event).fwinid then begin
+               id1:= 0;
+              end;
+             end;
+            end; 
+           end;
+          end;
+          inc(po1);
+         end;
+         bo2:= id1 = twindowevent(event).fwinid; //last focus is current window
+         po1:= pointer(eventlist.datapo);
          for int1:= 0 to eventlist.count - 1 do begin
           if po1^ <> nil then begin
            with po1^ do begin
@@ -15447,15 +15466,26 @@ begin       //eventloop
                             (fwinid = twindowevent(event).fwinid) then begin
              bo1:= false;
             end;
-            if (kind = ek_focusout) and 
-                              (fwinid = twindowevent(event).fwinid) then begin
-            {$ifdef mse_debugwindowfocus}
-             debugwindow('focusout deleted ',twindowevent(event).fwinid);
-            {$endif}
-             bo1:= false;
-             freeandnil(po1^); 
-                //spurious focus, for instance minimize window group on windows
-             break;
+            if bo2 then begin //last focus is current window
+             if kind in [ek_focusin,ek_focusout] then begin
+             {$ifdef mse_debugwindowfocus}
+              debugwindow(' '+getenumname(typeinfo(eventkindty),ord(kind))+
+                           ' deleted',twindowevent(event).fwinid);
+             {$endif}
+              freeandnil(po1^); //ignore
+             end;
+            end
+            else begin
+             if (kind = ek_focusout) and 
+                               (fwinid = twindowevent(event).fwinid) then begin
+             {$ifdef mse_debugwindowfocus}
+              debugwindow(' spurious ek_focusout deleted ',twindowevent(event).fwinid);
+             {$endif}
+              bo1:= false;
+              freeandnil(po1^); 
+                 //spurious focus, for instance minimize window group on windows
+              break;
+             end;
             end;
            end;
           end;
@@ -15466,10 +15496,15 @@ begin       //eventloop
           setwindowfocus(twindowevent(event).fwinid);
           checkapplicationactive;
          end;
+        {$ifdef mse_debugwindowfocus}
+         if not bo1 then begin
+          debugwriteln(' ek_focusin ignored');
+         end;
+        {$endif}
         end;
         ek_focusout: begin
         {$ifdef mse_debugwindowfocus}
-         debugwindow('focusout ',twindowevent(event).fwinid);
+         debugwindow('ek_focusout ',twindowevent(event).fwinid);
         {$endif}
          getevents;
          po1:= pointer(eventlist.datapo);
@@ -15479,7 +15514,7 @@ begin       //eventloop
            with po1^ do begin
             if (kind = ek_focusin) then begin
             {$ifdef mse_debugwindowfocus}
-             debugwindow('focusout ignored ',twindowevent(event).fwinid);
+             debugwindow(' ek_focusout ignored ',twindowevent(event).fwinid);
             {$endif}
              bo1:= false; //ignore the event
              break;
