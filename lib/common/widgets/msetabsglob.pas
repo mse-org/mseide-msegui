@@ -18,7 +18,7 @@ type
   tabbaroptionty = (tabo_dragsource,tabo_dragdest,
                      tabo_dragsourceenabledonly,tabo_dragdestenabledonly,
                                 //no action on disabled pages
-                     tabo_vertical,tabo_opposite,
+                     tabo_vertical,tabo_opposite,tabo_multitabsonly,
                      tabo_buttonsoutside,tabo_tabsizing,
                      tabo_acttabfirst,tabo_clickedtabfirst,tabo_dblclickedtabfirst,
                      tabo_sorted,tabo_autopopup,tabo_hintclippedtext);
