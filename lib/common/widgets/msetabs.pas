@@ -3642,11 +3642,14 @@ begin
   factivepageindexdesign:= -1;
  end;
  if not (csdesigning in componentstate) and (factivepageindexdesign >= 0) then begin
-  if (fvisiblepage >= 0) and  (fvisiblepage <> factivepageindexdesign) and
+  factivepageindex:= factivepageindexdesign;
+ end;
+ if factivepageindex >= 0 then begin
+  if (fvisiblepage >= 0) and  (fvisiblepage <> factivepageindex) and
                        (fvisiblepage < count) then begin
    items[fvisiblepage].visible:= false;
   end;
-  items[factivepageindexdesign].visible:= true;
+  items[factivepageindex].visible:= true;
  end;
  inherited;
  ftabs.loaded;
@@ -3709,8 +3712,7 @@ begin
    updatepagesize(page);
   end
   else begin
-   bo1:= (tabo_multitabsonly in ftabs.options) and (count < 2) and 
-                                       not (csdesigning in componentstate);
+   bo1:= (tabo_multitabsonly in ftabs.options) and (count < 2);
    if bo1 then begin
     include(ftabs.fstate,tbs_shrinktozero);
    end
@@ -3802,7 +3804,8 @@ begin
   end;
   widget1.visible:= false;
   tab:= tpagetab.create(ftabs,page);
-  if not (csloading in componentstate) then begin
+  if not (csreading in componentstate) then begin
+//  if not (csloading in componentstate) then begin
    ftabs.tabs.insert(tab,aindex);
    with widget1 do begin
     parentwidget:= self;
@@ -3818,7 +3821,8 @@ begin
   include(widget1.fwidgetstate1,ws1_nodesignvisible);
   page.settabwidget(self);
   pagechanged(page);
-  if not (csloading in componentstate) then begin
+//  if not (csloading in componentstate) then begin
+  if not (csreading in componentstate) then begin
 //   activepageindex:= aindex;
    setactivepageindex(aindex);
   end;
@@ -4215,8 +4219,7 @@ end;
 function tcustomtabwidget.checktabsizingpos(const apos: pointty): boolean;
 begin
  with ftabs,moverect(ftabs.paintrect,ftabs.fwidgetrect.pos) do begin
-  if (tabo_tabsizing in foptions) and
-                not (tbs_shrinktozero in fstate) then begin
+  if tabo_tabsizing in foptions then begin
    if tabo_vertical in foptions then begin
     if tabo_opposite in foptions then begin
      result:= pointinrect(apos,makerect(x-sizingtol,y,sizingwidth,cy));
@@ -4841,7 +4844,9 @@ begin
   end;
  end;
  ftabs.endupdate;
- updatesize(nil);
+ if fupdating = 0 then begin
+  updatesize(nil);
+ end;
 end;
 
 { tpagetab }
