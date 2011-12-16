@@ -28,6 +28,8 @@ procedure additem(var dest: stringarty; const value: string;
                              var count: integer; step: integer = 32); overload;
 procedure additem(var dest: msestringarty; const value: msestring;
                              var count: integer; step: integer = 32); overload;
+procedure additem(var dest: msestringararty; const value: msestringarty;
+                             var count: integer; step: integer = 32); overload;
 procedure additem(var dest: lstringarty; const value: lstringty;
                              var count: integer; step: integer = 32); overload;
 procedure additem(var dest: lmsestringarty; const value: lmsestringty;
@@ -66,6 +68,8 @@ function arrayminhigh(arrays: array of pointer): integer;
 
 procedure additem(var dest: stringarty; const value: string); overload;
 procedure additem(var dest: msestringarty; const value: msestring); overload;
+procedure additem(var dest: msestringararty; 
+                             const value: msestringarty); overload;
 procedure additem(var dest: integerarty; const value: integer); overload;
 procedure additem(var dest: longboolarty; const value: longbool); overload;
 procedure additem(var dest: booleanarty; const value: boolean); overload;
@@ -479,6 +483,16 @@ begin
  inc(count);
 end;
 
+procedure additem(var dest: msestringararty; const value: msestringarty;
+                             var count: integer; step: integer = 32);
+begin
+ if length(dest) <= count then begin
+  setlength(dest,count+step+2*length(dest));
+ end;
+ dest[count]:= value;
+ inc(count);
+end;
+
 procedure additem(var dest: lstringarty; const value: lstringty;
                              var count: integer; step: integer = 32);
 begin
@@ -558,6 +572,13 @@ begin
 end;
 
 procedure additem(var dest: msestringarty; const value: msestring);
+begin
+ setlength(dest,high(dest)+2);
+ dest[high(dest)]:= value;
+end;
+
+procedure additem(var dest: msestringararty;
+                                   const value: msestringarty); overload;
 begin
  setlength(dest,high(dest)+2);
  dest[high(dest)]:= value;

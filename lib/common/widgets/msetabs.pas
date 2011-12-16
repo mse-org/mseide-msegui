@@ -274,7 +274,7 @@ type
  movedeventty = procedure(const sender: tobject; const curindex: integer;
                                        const newindex: integer) of object;
 
- tabbarstatety = (tbs_layoutvalid,tbs_designdrag);
+ tabbarstatety = (tbs_layoutvalid,tbs_designdrag,tbs_shrinktozero);
  tabbarstatesty = set of tabbarstatety;
  
  tcustomtabbar = class(tcustomstepbox)
@@ -2405,6 +2405,14 @@ begin
  asize.cx:= flayoutinfo.totsize.cx;
  asize.cy:= flayoutinfo.totsize.cy;
  addsize1(asize,innerframewidth);
+ if tbs_shrinktozero in fstate then begin
+  if tabo_vertical in foptions then begin
+   asize.cx:= 0;
+  end
+  else begin
+   asize.cy:= 0;
+  end;
+ end;
 end;
 
 procedure tcustomtabbar.synctofontheight;
@@ -3693,7 +3701,7 @@ var
 
 var
  int1: integer;
-
+ bo1: boolean;
 begin
  if not (csloading in componentstate) then begin
   rect1:= innerwidgetrect;
@@ -3701,22 +3709,52 @@ begin
    updatepagesize(page);
   end
   else begin
+   bo1:= (tabo_multitabsonly in ftabs.options) and (count < 2) and 
+                                       not (csdesigning in componentstate);
+   if bo1 then begin
+    include(ftabs.fstate,tbs_shrinktozero);
+   end
+   else begin
+    exclude(ftabs.fstate,tbs_shrinktozero);
+   end;
    if tabo_vertical in ftabs.options then begin
     if tabo_opposite in ftabs.options then begin
-     ftabs.setwidgetrect(makerect(rect1.x+rect1.cx-ftab_size,rect1.y,
-                                         ftab_size,rect1.cy));
+     if bo1 then begin
+      ftabs.setwidgetrect(makerect(rect1.x+rect1.cx,rect1.y,
+                                          0,rect1.cy));
+     end
+     else begin
+      ftabs.setwidgetrect(makerect(rect1.x+rect1.cx-ftab_size,rect1.y,
+                                          ftab_size,rect1.cy));
+     end;
     end
     else begin
-     ftabs.setwidgetrect(makerect(rect1.x,rect1.y,ftab_size,rect1.cy));
+     if bo1 then begin
+      ftabs.setwidgetrect(makerect(rect1.x,rect1.y,0,rect1.cy));
+     end
+     else begin
+      ftabs.setwidgetrect(makerect(rect1.x,rect1.y,ftab_size,rect1.cy));
+     end;
     end;
    end
    else begin
     if tabo_opposite in ftabs.options then begin
-     ftabs.setwidgetrect(makerect(rect1.x,rect1.y+rect1.cy-ftab_size,
+     if bo1 then begin
+      ftabs.setwidgetrect(makerect(rect1.x,rect1.y+rect1.cy,
+                                         rect1.cx,0));
+     end
+     else begin
+      ftabs.setwidgetrect(makerect(rect1.x,rect1.y+rect1.cy-ftab_size,
                                          rect1.cx,ftab_size));
+     end;
     end
     else begin
-     ftabs.setwidgetrect(makerect(rect1.x,rect1.y,rect1.cx,ftab_size));
+     if bo1 then begin
+      ftabs.setwidgetrect(makerect(rect1.x,rect1.y,rect1.cx,0));
+     end
+     else begin
+      ftabs.setwidgetrect(makerect(rect1.x,rect1.y,rect1.cx,ftab_size));
+     end;
     end;
    end;
    for int1:= 0 to ftabs.tabs.count - 1 do begin
@@ -4177,7 +4215,8 @@ end;
 function tcustomtabwidget.checktabsizingpos(const apos: pointty): boolean;
 begin
  with ftabs,moverect(ftabs.paintrect,ftabs.fwidgetrect.pos) do begin
-  if tabo_tabsizing in foptions then begin
+  if (tabo_tabsizing in foptions) and
+                not (tbs_shrinktozero in fstate) then begin
    if tabo_vertical in foptions then begin
     if tabo_opposite in foptions then begin
      result:= pointinrect(apos,makerect(x-sizingtol,y,sizingwidth,cy));
@@ -4385,7 +4424,7 @@ begin
  ftabs.options:= avalue;
  if (tabbaroptionsty({$ifdef FPC}longword{$else}word{$endif}(optionsbefore) xor
             {$ifdef FPC}longword{$else}word{$endif}(ftabs.options)) *
-    [tabo_vertical,tabo_opposite] <> []) then begin
+    [tabo_vertical,tabo_opposite,tabo_multitabsonly] <> []) then begin
   if tabo_vertical in avalue then begin
    ftabs.anchors:= [an_left,an_top,an_bottom];
   end
@@ -4802,6 +4841,7 @@ begin
   end;
  end;
  ftabs.endupdate;
+ updatesize(nil);
 end;
 
 { tpagetab }
