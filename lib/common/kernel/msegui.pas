@@ -12361,7 +12361,7 @@ begin
      with fnormalwindowrect do begin
       if visible then begin
        debugwindow('*checkwin visible '+
-        inttostr(x)+' '+inttostr(y)+' '+inttostr(cx)+' '+inttostr(cy),
+        inttostr(x)+' '+inttostr(y)+' '+inttostr(cx)+' '+inttostr(cy)+' ',
                                                                   fwindow.id);
       end
       else begin
@@ -13638,6 +13638,7 @@ end;
 
 procedure twindow.showed;
 begin
+ exclude(fstate,tws_windowshowpending);
  if not (tws_windowvisible in fstate) then begin
   fowner.internalshow(ml_none,nil,true,true);
  end;
