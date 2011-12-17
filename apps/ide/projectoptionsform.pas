@@ -1745,7 +1745,7 @@ begin
  end;
  with projectoptions,e,t do begin
 
-  additem(fsourcefilemasks,'"*.pas" "*.dpr" "*.pp" "*.inc"');
+  additem(fsourcefilemasks,'"*.pas" "*.dpr" "*.lpr" "*.pp" "*.inc"');
   additem(fsyntaxdeffiles,'${SYNTAXDEFDIR}pascal.sdef');
   additem(fsourcefilemasks,'"*.c" "*.cc" "*.h"');
   additem(fsyntaxdeffiles,'${SYNTAXDEFDIR}cpp.sdef');
@@ -1753,7 +1753,7 @@ begin
   additem(fsyntaxdeffiles,'${SYNTAXDEFDIR}objecttext.sdef');
 
   additem(ffilemasknames,'Source');
-  additem(ffilemasks,'"*.pp" "*.pas" "*.inc" "*.dpr"');
+  additem(ffilemasks,'"*.pp" "*.pas" "*.inc" "*.dpr" "*.lpr"');
   additem(ffilemasknames,'Forms');
   additem(ffilemasks,'*.mfm');
   additem(ffilemasknames,'All Files');

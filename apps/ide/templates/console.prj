@@ -234,7 +234,7 @@ libpref=-Fl
 objpref=-Fo
 targpref=-o
 sourcefilemasks=2
- "*.pas" "*.dpr" "*.pp" "*.inc"
+ "*.pas" "*.dpr" "*.lpr" "*.pp" "*.inc"
  "*.c" "*.cc" "*.h"
 syntaxdeffiles=2
  ${SYNTAXDEFDIR}pascal.sdef
@@ -244,7 +244,7 @@ filemasknames=3
  Forms
  All Files
 filemasks=3
- "*.pp" "*.pas" "*.inc" "*.dpr"
+ "*.pp" "*.pas" "*.inc" "*.dpr" "*.lpr"
  *.mfm
  *
 toolsave=0
