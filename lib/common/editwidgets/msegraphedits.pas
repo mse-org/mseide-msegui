@@ -2172,7 +2172,7 @@ var
 begin
  if canevent(tmethod(fonsetvalue)) then begin
   bo1:= longbool(avalue);
-  fonsetvalue(self,boolean(avalue),accept);
+  fonsetvalue(self,bo1,accept);
   longbool(avalue):= bo1;
  end;
 {$ifdef mse_with_ifi}
