@@ -12994,6 +12994,10 @@ begin
                  ' '+inttostr(arect.cx)+' '+inttostr(arect.cy)+' ',fwindow.id);
 
 {$endif}
+ if (tws_windowshowpending in fstate) and visible and
+                gui_windowvisible(fwindow.id) then begin
+  exclude(fstate,tws_windowshowpending);
+ end;
  rect1:= arect;
  if not (wo_embedded in foptions) then begin
   addpoint1(rect1.pos,aorigin);
