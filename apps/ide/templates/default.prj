@@ -205,7 +205,7 @@ libpref=-Fl
 objpref=-Fo
 targpref=-o
 sourcefilemasks=3
- "*.pas" "*.dpr" "*.pp" "*.inc"
+ "*.pas" "*.dpr" "*.lpr" "*.pp" "*.inc"
  "*.c" "*.cc" "*.h"
  "*.mfm"
 syntaxdeffiles=3
@@ -217,7 +217,7 @@ filemasknames=3
  Forms
  All Files
 filemasks=3
- "*.pp" "*.pas" "*.inc" "*.dpr"
+ "*.pp" "*.pas" "*.inc" "*.dpr" "*.lpr"
  *.mfm
  *
 toolsave=0

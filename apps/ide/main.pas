@@ -2193,7 +2193,9 @@ begin
   else begin
    aname:= '';
    if filedialog(aname,[fdo_checkexist],'Select program file',
-            ['Program files','All files'],['"*.pas" "*.pp"','*'],'pas') = mr_ok then begin
+            ['Pascal program files','C program files','All files'],
+            ['"*.pas" "*.pp" "*.dpr" "*.lpr"','"*.c" "*.cc" "*.cpp"','*'],
+            'pas') = mr_ok then begin
     setcurrentdirmse(filedir(aname));
     with projectoptions do begin
      with o.t do begin
