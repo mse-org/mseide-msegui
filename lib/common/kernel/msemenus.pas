@@ -1161,7 +1161,7 @@ var
  int1: integer;
 begin
  result:= false;
- if fsubmenu <> nil then begin
+ if enabled and (fsubmenu <> nil) then begin
   for int1:= 0 to fsubmenu.count - 1 do begin
    if not (as_invisible in  fsubmenu[int1].finfo.state) then begin
     result:= true;
@@ -1905,6 +1905,7 @@ begin
  result:= additems(amenu,atransientfor,mouseinfo,items.fmenu.fsubmenu,aseparator,
             mo_insertfirst in items.foptions);
  if bo1 then begin
+  amenu.fmenu.enabled:= items.fmenu.enabled;
   amenu.foptions:= items.foptions;
   amenu.assigntemplate(items);
   amenu.fmenu.ffont:= items.fmenu.ffont;
