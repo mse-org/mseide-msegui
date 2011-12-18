@@ -2571,7 +2571,8 @@ end;
 
 function tclasspropertyeditor.getdefaultstate: propertystatesty;
 begin
- result:= inherited getdefaultstate + [ps_subproperties,ps_isordprop];
+ result:= inherited getdefaultstate + 
+                        [ps_subproperties,ps_isordprop,ps_refresh];
 end;
 
 function tclasspropertyeditor.checkfreeoptionalclass: boolean;
