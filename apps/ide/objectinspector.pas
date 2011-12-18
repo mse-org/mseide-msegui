@@ -1055,7 +1055,7 @@ procedure tobjectinspectorfo.propertymodified(const sender: tpropertyeditor);
   end;
  end;
  
- var
+var
  po1,po2: tpropertyvalue;
  int1,int2,int3: integer;
  bo1: boolean;
@@ -1084,6 +1084,7 @@ begin
    end;
    if po1 <> nil then begin
     po1.updatestate;
+    updatedefaultstate(po1.index);
     bo1:= (ps_refreshall in sender.state);
     for int1:= 0 to grid.rowcount - 1 do begin
      po2:= tpropertyvalue(values[int1]);

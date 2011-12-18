@@ -2411,7 +2411,7 @@ end;
 
 function tsetpropertyeditor.getdefaultstate: propertystatesty;
 begin
- result:= inherited getdefaultstate  + [ps_subproperties];
+ result:= inherited getdefaultstate  + [ps_subproperties,ps_refresh];
 end;
 
 function tsetpropertyeditor.getvalue: msestring;
