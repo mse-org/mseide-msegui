@@ -52,6 +52,7 @@ const
  buttonshiftstatesmask: shiftstatesty = 
                          [ss_left,ss_right,ss_middle,ss_double,ss_triple];
  shiftstatesmask = [ss_shift,ss_alt,ss_ctrl,ss_left,ss_right,ss_middle];
+ singlekeyshiftstatemask = shiftstatesmask + [ss_repeat];
 
 type
  mouseeventinfoty = record //same layout as mousewheeleventinfoty!

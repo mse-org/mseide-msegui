@@ -32,6 +32,7 @@ type
                fo_defaultpos,fo_screencentered,fo_screencenteredvirt,fo_modal,
                fo_minimized,fo_maximized,fo_fullscreen,fo_fullscreenvirt,
                fo_closeonesc,fo_cancelonesc,fo_closeonenter,fo_closeonf10,
+               fo_keycloseifwinonly,
                fo_globalshortcuts,fo_localshortcuts,
                fo_autoreadstat,fo_delayedreadstat,fo_autowritestat,
                fo_savepos,fo_savezorder,fo_savestate);
@@ -1585,11 +1586,13 @@ var
 begin
  inherited;
  with info do begin
-  if not (es_processed in eventstate) and (shiftstate = []) and
-   (((fo_closeonesc in foptions) or (fo_cancelonesc in foptions)) and 
-     (key = key_escape) or
-     (fo_closeonf10 in foptions) and (key = key_f10) or
-     (fo_closeonenter in foptions) and isenterkey(self,key))  then begin
+  if not (es_processed in eventstate) and 
+    (shiftstate*singlekeyshiftstatemask = []) and
+    (not (fo_keycloseifwinonly in foptions) or (fparentwidget = nil)) and
+    (((fo_closeonesc in foptions) or (fo_cancelonesc in foptions)) and 
+      (key = key_escape) or
+      (fo_closeonf10 in foptions) and (key = key_f10) or
+      (fo_closeonenter in foptions) and isenterkey(self,key))  then begin
    include(eventstate,es_processed);
    if key = key_f10 then begin
     modres1:= mr_f10;
