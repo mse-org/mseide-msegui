@@ -102,6 +102,9 @@ function removeitem(var dest: pointerarty; const aitem: pointer): integer;
 function finditem(const ar: pointerarty; const aitem: pointer): integer;
                                                 overload;
                            //-1 if none
+
+procedure moveitem(var dest; const sourceindex: integer;
+                       destindex: integer; const itemsize: integer); overload;
 procedure moveitem(var dest: pointerarty; const sourceindex: integer;
                        destindex: integer); overload;
 
@@ -808,6 +811,29 @@ begin
    result:= int1;
    break;
   end;
+ end;
+end;
+
+procedure moveitem(var dest; const sourceindex: integer;
+                       destindex: integer; const itemsize: integer); overload;
+var
+ po1: pchar;
+begin
+ if (pointer(dest) <> nil) and (destindex <> sourceindex) then begin
+  getmem(po1,itemsize);
+  move((pchar(dest)+sourceindex*itemsize)^,po1^,itemsize);
+  if destindex < sourceindex then begin
+   move((pchar(dest)+destindex*itemsize)^,
+        (pchar(dest)+(destindex+1)*itemsize)^,
+        (sourceindex-destindex)*itemsize);
+  end
+  else begin
+   move((pchar(dest)+(sourceindex+1)*itemsize)^,
+        (pchar(dest)+sourceindex*itemsize)^,
+        (destindex-sourceindex)*itemsize);
+  end;
+  move(po1^,(pchar(dest)+destindex*itemsize)^,itemsize);
+  freemem(po1);
  end;
 end;
 
