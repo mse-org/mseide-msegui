@@ -13052,7 +13052,7 @@ begin
   pok_datacol: begin
    //cellkind:= 
    cellatpos(makepoint(apos.x,fdatarect.y),cell1);
-   if (cell1.col >= 0) and not 
+   if (cell1.col >= 0) and (cell.col <> cell1.col) and not 
      ((co_nohscroll in tdatacol(fdatacols.fitems[cell1.col]).options) xor 
      (co_nohscroll in tdatacol(fdatacols.fitems[cell.col]).options)) then begin
     movecol(cell.col,cell1.col);
@@ -13063,7 +13063,7 @@ begin
   pok_datarow: begin
 //   cellkind:= 
    cellatpos(makepoint(fdatarect.x,apos.y),cell1);
-   if cell1.row >= 0 then begin
+   if (cell1.row >= 0) and (cell.row <> cell1.row) then begin
     moverow(cell.row,cell1.row);
    end
    else begin
