@@ -429,8 +429,10 @@ function wordatindex(const value: msestring; const index: integer;
             const delimchars: msestring;
             const nodelimstrings:  array of msestring): msestring; overload;
 
-function quotestring(const value: string; quotechar: char): string; overload;
-function quotestring(const value: msestring; quotechar: msechar): msestring; overload;
+function quotestring(value: string; quotechar: char): string; overload;
+function quotestring(value: msestring; quotechar: msechar): msestring; overload;
+function unquotestring(value: string; quotechar: char): string; overload;
+function unquotestring(value: msestring; quotechar: msechar): msestring; overload;
 function extractquotedstr(const value: msestring): msestring;
                 //entfernt vorhandene paare ' und "
 
@@ -2499,55 +2501,115 @@ begin
  if wholeword then include(result,so_wholeword);
 end;
 
-function quotestring(const value: string; quotechar: char): string; overload;
+function quotestring(value: string; quotechar: char): string; overload;
 var
- int1,int2: integer;
- ch1: char;
+ ps,pd,pe: pchar;
 begin
- setlength(result,length(value)*2+2);
- int2:= 2;
- result[1]:= quotechar;
- for int1:= 1 to length(value) do begin
-  ch1:= value[int1];
-  result[int2]:= ch1;
-  inc(int2);
-  if ch1 = quotechar then begin
-   result[int2]:= ch1;
-   inc(int2);
+ setlength(result,length(value)*2+2); //max
+ pd:= pchar(pointer(result));
+ pd^:= quotechar;
+ inc(pd);
+ if value <> '' then begin
+  ps:= pchar(pointer(value));
+  pe:= ps+length(value);
+  while ps < pe do begin
+   pd^:= ps^;
+   inc(pd);
+   if ps^ = quotechar then begin
+    pd^:= quotechar;
+    inc(pd);
+   end;
+   inc(ps);
   end;
  end;
- result[int2]:= quotechar;
- setlength(result,int2);
+ pd^:= quotechar;
+ inc(pd);
+ setlength(result,pd-pchar(pointer(result)));
 end;
 
-function quotestring(const value: msestring; quotechar: msechar): msestring; overload;
+function quotestring(value: msestring;
+                                quotechar: msechar): msestring; overload;
 var
- int1,int2: integer;
- ch1: msechar;
+ ps,pd,pe: pmsechar;
 begin
- setlength(result,length(value)*2+2);
- int2:= 2;
- result[1]:= quotechar;
- for int1:= 1 to length(value) do begin
-  ch1:= value[int1];
-  result[int2]:= ch1;
-  inc(int2);
-  if ch1 = quotechar then begin
-   result[int2]:= ch1;
-   inc(int2);
+ setlength(result,length(value)*2+2); //max
+ pd:= pmsechar(pointer(result));
+ pd^:= quotechar;
+ inc(pd);
+ if value <> '' then begin
+  ps:= pmsechar(pointer(value));
+  pe:= ps+length(value);
+  while ps < pe do begin
+   pd^:= ps^;
+   inc(pd);
+   if ps^ = quotechar then begin
+    pd^:= quotechar;
+    inc(pd);
+   end;
+   inc(ps);
   end;
  end;
- result[int2]:= quotechar;
- setlength(result,int2);
+ pd^:= quotechar;
+ inc(pd);
+ setlength(result,pd-pmsechar(pointer(result)));
+end;
+
+function unquotestring(value: string; quotechar: char): string; overload;
+var
+ ps,pd,pe: pchar;
+begin
+ result:= value;
+ if (value <> '') and (value[1] = quotechar) then begin
+  ps:= pchar(pointer(value));
+  pe:= ps + length(value);
+  setlength(result,length(value)); //unique, max
+  pd:= pchar(pointer(result));
+  while ps < pe do begin
+   if ps^ = quotechar then begin
+    inc(ps);
+   end;
+   pd^:= ps^;
+   inc(ps);
+   inc(pd);
+  end;
+  if ps > pe then begin
+   dec(pd); //remove trailing quote
+  end;
+  setlength(result,pd-pchar(pointer(result)));
+ end;
+end;
+
+function unquotestring(value: msestring;
+                                       quotechar: msechar): msestring; overload;
+var
+ ps,pd,pe: pmsechar;
+begin
+ result:= value;
+ if (value <> '') and (value[1] = quotechar) then begin
+  ps:= pmsechar(pointer(value));
+  pe:= ps + length(value);
+  setlength(result,length(value)); //unique, max
+  pd:= pmsechar(pointer(result));
+  while ps < pe do begin
+   if ps^ = quotechar then begin
+    inc(ps);
+   end;
+   pd^:= ps^;
+   inc(ps);
+   inc(pd);
+  end;
+  if ps > pe then begin
+   dec(pd); //remove trailing quote
+  end;
+  setlength(result,pd-pmsechar(pointer(result)));
+ end;
 end;
 
 function extractquotedstr(const value: msestring): msestring;
                 //entfernt vorhandene paare ' und "
 begin
- if (length(value) > 1) and
-    ((value[1] = '''') and (value[length(value)] = '''') or
-     (value[1] = '"') and (value[length(value)] = '"')) then begin
-  result:= copy(value,2,length(value)-2);
+ if (value <> '') and ((value[1] = '"') or (value[1] = '''')) then begin
+  result:= unquotestring(value,value[1]);
  end
  else begin
   result:= value;

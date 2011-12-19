@@ -1696,9 +1696,12 @@ type
                              const acell: gridcoordty) of object;
  griddatablockeventty = procedure(const sender: tcustomgrid; 
                   const acell: gridcoordty; const acount: integer) of object;
+ gridblockmovingeventty = procedure(const sender: tcustomgrid; 
+                  var fromindex,toindex,acount: integer) of object;
  gridblockmovedeventty = procedure(const sender: tcustomgrid; 
                   const fromindex,toindex,acount: integer) of object;
- gridbeforeblockeventty = procedure(const sender: tcustomgrid; var aindex,acount: integer) of object;
+ gridbeforeblockeventty = procedure(const sender: tcustomgrid;
+                                var aindex,acount: integer) of object;
  gridblockeventty = procedure(const sender: tcustomgrid; 
                   const aindex: integer; const acount: integer) of object;
  gridsorteventty = procedure(const sender: tcustomgrid;
@@ -1780,6 +1783,8 @@ type
 {$ifdef mse_with_ifi}
    fifilink: tifigridlinkcomp;
 //   procedure ifisetvalue(var avalue; var accept: boolean);
+   foncolmoving: gridblockmovingeventty;
+   fonrowsmoving: gridblockmovingeventty;
    procedure ifirowchange;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);
@@ -2174,8 +2179,8 @@ type
    procedure scrollright;
    procedure scrollpageleft;
    procedure scrollpageright;
-   procedure movecol(const curindex,newindex: integer);
-   procedure moverow(const curindex,newindex: integer; const count: integer = 1);
+   procedure movecol(curindex,newindex: integer);
+   procedure moverow(curindex,newindex: integer; count: integer = 1);
    procedure insertrow(aindex: integer; acount: integer = 1); virtual;
    procedure deleterow(aindex: integer; acount: integer = 1); virtual;
    procedure clear; //sets rowcount to 0
@@ -2291,6 +2296,8 @@ type
                 read fonbeforeupdatelayout write fonbeforeupdatelayout;
    property onlayoutchanged: gridnotifyeventty read fonlayoutchanged
               write fonlayoutchanged;
+   property oncolmoving: gridblockmovingeventty read foncolmoving
+              write foncolmoving;
    property oncolmoved: gridblockmovedeventty read foncolmoved
               write foncolmoved;
    property onrowcountchanged: gridnotifyeventty read fonrowcountchanged
@@ -2299,6 +2306,8 @@ type
               write fonrowsdatachanged;
    property onrowdatachanged: griddataeventty read fonrowdatachanged
               write fonrowdatachanged;
+   property onrowsmoving: gridblockmovingeventty read fonrowsmoving
+              write fonrowsmoving;
    property onrowsmoved: gridblockmovedeventty read fonrowsmoved
               write fonrowsmoved;
    property onscrollrows: gridscrolleventty read fonscrollrows 
@@ -2388,10 +2397,12 @@ type
    property onpasteselection;
    property onbeforeupdatelayout;
    property onlayoutchanged;
+   property oncolmoving;
    property oncolmoved;
    property onrowcountchanged;
-   property onrowsdatachanged;
    property onrowdatachanged;
+   property onrowsdatachanged;
+   property onrowsmoving;
    property onrowsmoved;
    property onrowsinserting;
    property onrowsinserted;
@@ -2519,15 +2530,17 @@ type
    property onpasteselection;
    property onbeforeupdatelayout;
    property onlayoutchanged;
+   property oncolmoving;
    property oncolmoved;
-   property onrowsmoved;
-   property onrowsdatachanged;
+   property onrowcountchanged;
    property onrowdatachanged;
+   property onrowsdatachanged;
+   property onrowsmoving;
+   property onrowsmoved;
    property onrowsinserting;
    property onrowsinserted;
    property onrowsdeleting;
    property onrowsdeleted;
-   property onrowcountchanged;
    property onscrollrows;
    property ongetmorerows;
    property oncellevent;
@@ -13313,10 +13326,18 @@ begin
  end;
 end;
 
-procedure tcustomgrid.movecol(const curindex, newindex: integer);
+procedure tcustomgrid.movecol(curindex, newindex: integer);
 var
  colbefore: integer;
+ count: integer;
 begin
+ if canevent(tmethod(foncolmoving)) then begin
+  count:= 1;
+  foncolmoving(self,curindex,newindex,count);
+  if count <= 0 then begin
+   exit;
+  end;
+ end;
  if curindex <> newindex then begin
   colbefore:= ffocusedcell.col;
   beginupdate;
@@ -13344,13 +13365,15 @@ begin
  end;
 end;
 
-procedure tcustomgrid.moverow(const curindex, newindex: integer;
-                 const count: integer = 1);
+procedure tcustomgrid.moverow(curindex, newindex: integer; count: integer = 1);
 var
  int1: integer;
  rowbefore: integer;
 begin
- if count > 0 then begin
+ if canevent(tmethod(fonrowsmoving)) then begin
+  fonrowsmoving(self,curindex,newindex,count);
+ end;
+ if (count > 0) and (curindex <> newindex) then begin
   if (curindex < 0) or (curindex + count > rowcount) then begin
    tlist.Error(SListIndexError,curindex);
   end;

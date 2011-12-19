@@ -36,7 +36,7 @@ type
   function getcol: twidgetcol;
   function getdatapo(const arow: integer): pointer;
   function getrowdatapo: pointer;
-  procedure getdata(var index: integer; var dest);
+  procedure getdata(var index: integer; out dest);
   procedure setdata(var index: integer; const source;
                         const noinvalidate: boolean = false);
   procedure datachange(const index: integer);
@@ -124,7 +124,7 @@ type
    function getgrid: tcustomwidgetgrid;
    function getbrushorigin: pointty;
    function getcol: twidgetcol;
-   procedure getdata(var arow: integer; var dest);
+   procedure getdata(var arow: integer; out dest);
    procedure setdata(var arow: integer;
                 const source; const noinvalidate: boolean = false); virtual;
    procedure datachange(const arow: integer); virtual;
@@ -368,10 +368,12 @@ type
    property onpasteselection;
    property onbeforeupdatelayout;
    property onlayoutchanged;
+   property oncolmoving;
    property oncolmoved;
    property onrowcountchanged;
    property onrowdatachanged;
    property onrowsdatachanged;
+   property onrowsmoving;
    property onrowsmoved;
    property onrowsinserting;
    property onrowsinserted;
@@ -1411,7 +1413,7 @@ begin
  end;
 end;
 
-procedure twidgetcol.getdata(var arow: integer; var dest);
+procedure twidgetcol.getdata(var arow: integer; out dest);
 var
  datatype: listdatatypety;
  info: cellinfoty;
