@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -63,6 +63,7 @@ type
    procedure updatevalue(const name: msestring; var value: real;
                const min: real = -bigreal; const max: real = bigreal); overload;
    procedure updatevalue(const name: msestring; var value: string); overload;
+   procedure updatebinaryvalue(const name: msestring; var value: string);
    procedure updatevalue(const name: msestring; var value: msestring); overload;
    procedure updatevalue(const name: msestring; var value: tdatalist); overload;
    procedure updatevalue(const name: msestring; var value: msestringarty); overload;
@@ -137,6 +138,7 @@ type
    function readreal(const name: msestring; const default: real = 0;
                const min: real = -bigreal; const max: real = bigreal): realty;
    function readstring(const name: msestring; const default: string): string;
+   function readbinarystring(const name: msestring; const default: string): string;
    function readmsestring(const name: msestring; const default: msestring): msestring;
    function readmsestrings(const name: msestring; const default: msestring): msestring;
                          //handles linebreaks, 'ar' is multiline name extension
@@ -192,6 +194,7 @@ type
    procedure writeint64(const name: msestring; const value: int64);
    procedure writereal(const name: msestring; const value: real);
    procedure writestring(const name: msestring; const value: string);
+   procedure writebinarystring(const name: msestring; const value: string);
    procedure writemsestring(const name: msestring; const value: msestring);
    procedure writemsestrings(const name: msestring; const value: msestring);
                        //handles linebreaks, 'ar' is multiline name extension
@@ -511,6 +514,16 @@ begin
  end
  else begin
   value:= tstatreader(self).readstring(name,value);
+ end;
+end;
+
+procedure tstatfiler.updatebinaryvalue(const name: msestring; var value: string);
+begin
+ if fiswriter then begin
+  tstatwriter(self).writebinarystring(name,value);
+ end
+ else begin
+  value:= tstatreader(self).readbinarystring(name,value);
  end;
 end;
 
@@ -902,6 +915,12 @@ begin
  else begin
   result:= str1;
  end;
+end;
+
+function tstatreader.readbinarystring(const name: msestring;
+               const default: string): string;
+begin
+ result:= decodebase64(readmsestrings(name,default));
 end;
 
 function tstatreader.readmsestring(const name: msestring;
@@ -1361,6 +1380,7 @@ begin
   result:= fstream.readmsedatastring;
  end;
 end;
+
 {
 procedure tstatreader.readstatfile(const name: msestring; const statfile: tstatfile);
 var
@@ -1462,6 +1482,12 @@ end;
 procedure tstatwriter.writestring(const name: msestring; const value: string);
 begin
  writeval(name,value);
+end;
+
+procedure tstatwriter.writebinarystring(const name: msestring;
+               const value: string);
+begin
+ writemsestrings(name,encodebase64(value,76));
 end;
 
 procedure tstatwriter.writemsestring(const name: msestring;
@@ -1698,6 +1724,7 @@ begin
  writesection('');
  fstream.write(atext);
 end;
+
 {
 procedure tstatwriter.writestatfile(const name: msestring; const statfile: tstatfile);
 var

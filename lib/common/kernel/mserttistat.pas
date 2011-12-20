@@ -397,7 +397,7 @@ begin
      end;
     {$endif}
      {$ifdef FPC}tkastring,{$endif}tklstring,tkstring: begin
-      setstrprop(obj,po1,reader.readstring(str1,getstrprop(obj,po1)));
+      setstrprop(obj,po1,reader.readbinarystring(str1,getstrprop(obj,po1)));
      end;
       //how to reach fpc_DecRef?
      tkdynarray: begin
@@ -456,13 +456,11 @@ end;
 procedure writeobjectstat(const writer: tstatwriter; const aobj: objectinfoty);
 var
  ar1: propinfopoarty;
-// ar2: array of istatfile;
  po1: ppropinfo;
  po2: ptypeinfo;
  po3: ptypedata;
  int1: integer;
  obj1: tobject;
-// intf1: istatfile;
  str1: string;
  info1: objectinfoty;
 begin
@@ -494,7 +492,7 @@ begin
       writer.writemsestrings(str1,getwidestrprop(obj,po1));
      end;
      {$ifdef FPC}tkastring,{$endif}tklstring,tkstring: begin
-      writer.writestring(str1,getstrprop(obj,po1));
+      writer.writebinarystring(str1,getstrprop(obj,po1));
      end;
      tkdynarray: begin
      {$ifdef FPC}
@@ -557,14 +555,12 @@ var
  ar1: propinfopoarty; 
  po1,po4: ppropinfo;
  po2: ptypeinfo;
-// po3: ptypedata;
  int1: integer;
  intf1: iifidatalink;
  obj1: tobject;
  info1: objectinfoty;
  bo1: boolean;
  list1: tdatalist;
-// arpo: pointer;
 begin
  ar1:= getpropinfoar(dest.obj);
  for int1 := 0 to high(ar1) do begin
@@ -642,25 +638,20 @@ begin
        {$endif}
        end;
        tkclass: begin
-//        obj1:= tobject(ptruint(getordprop(dest.obj,po1)));
-//        if (obj1 is tdatalist) then begin
-         list1:= intf1.getgriddata;
-         if list1 <> nil then begin
-          tdatalist(obj1).assign(list1);
-         end;
-//        end;
+        list1:= intf1.getgriddata;
+        if list1 <> nil then begin
+         tdatalist(obj1).assign(list1);
+        end;
        end;
        tkdynarray: begin
         list1:= intf1.getgriddata;
         if list1 <> nil then begin
- //        arpo:= pointer(ptruint(getordprop(dest.obj,po1)));
         {$ifdef FPC}
          po2:= pointer(gettypedata(proptype)^.eltype2);
                              //wrong define in ttypedata
         {$else}
          po2:= gettypedata(proptype^)^.eltype2^;
         {$endif}
- //        po3:= gettypedata(po2);
          case po2^.kind of
           tkinteger: begin
            if list1 is tintegerdatalist then begin
@@ -838,13 +829,10 @@ begin
         end;
        end;
        tkclass: begin
-//        obj1:= tobject(ptruint(getordprop(source.obj,po1)));
-//        if (obj1 is tdatalist) then begin
-         list1:= intf1.getgriddata;
-         if list1 <> nil then begin
-          list1.assign(tdatalist(obj1));
-         end;
-//        end;
+        list1:= intf1.getgriddata;
+        if list1 <> nil then begin
+         list1.assign(tdatalist(obj1));
+        end;
        end;
       end;
      end;
