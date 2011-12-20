@@ -2782,7 +2782,7 @@ begin
 //   value:= concatstrings(ar1,lineend);
 //  end
 //  else begin
-   value:= reader.readmsestrings(valuevarname,value);
+   value:= reader.readmsestring(valuevarname,value);
 //  end;
 // end;
 end;
@@ -2796,7 +2796,7 @@ begin
 //  writer.writearray(valuevarname+'ar',ar1);
 // end
 // else begin
-  writer.writemsestrings(valuevarname,value);
+  writer.writemsestring(valuevarname,value);
 // end;
 end;
 

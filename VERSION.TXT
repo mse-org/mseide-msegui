@@ -1,5 +1,9 @@
 MSEide+MSEgui version history
 
+2011-12-20
+ Statfile multi line string values format unified.
+ rttistat ansi string value stored in binary.
+ 
 Version 2.8rc1
 2011-12-12
 2011-11-28

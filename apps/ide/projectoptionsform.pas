@@ -305,7 +305,7 @@ type
    ftabstops: integer;
    fspacetabs: boolean;
    ftabindent: boolean;
-   feditfontname: string;
+   feditfontname: msestring;
    feditfontheight: integer;
    feditfontwidth: integer;
    feditfontextraspace: integer;
@@ -345,7 +345,7 @@ type
    property tabstops: integer read ftabstops write ftabstops;
    property spacetabs: boolean read fspacetabs write fspacetabs;
    property tabindent: boolean read ftabindent write ftabindent;
-   property editfontname: string read feditfontname write feditfontname;
+   property editfontname: msestring read feditfontname write feditfontname;
    property editfontheight: integer read feditfontheight write feditfontheight;
    property editfontwidth: integer read feditfontwidth write feditfontwidth;
    property editfontextraspace: integer read feditfontextraspace 

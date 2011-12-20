@@ -140,8 +140,10 @@ type
    function readstring(const name: msestring; const default: string): string;
    function readbinarystring(const name: msestring; const default: string): string;
    function readmsestring(const name: msestring; const default: msestring): msestring;
+  {   
    function readmsestrings(const name: msestring; const default: msestring): msestring;
                          //handles linebreaks, 'ar' is multiline name extension
+  }
    procedure readdatalist(const name: msestring; const value: tdatalist);
    function readarray(const name: msestring; const default: stringarty): stringarty; overload;
    function readarray(const name: msestring; const default: msestringarty): msestringarty; overload;
@@ -177,6 +179,7 @@ type
  tstatwriter = class(tstatfiler)
   protected
    procedure writeval(const name: msestring; const avalue: msestring);
+   procedure writemultival(const name: msestring; const avalue: msestring);
    procedure writemultilistval(const avalue: msestring);
    procedure writelistval(const avalue: msestring);
   public
@@ -196,8 +199,8 @@ type
    procedure writestring(const name: msestring; const value: string);
    procedure writebinarystring(const name: msestring; const value: string);
    procedure writemsestring(const name: msestring; const value: msestring);
-   procedure writemsestrings(const name: msestring; const value: msestring);
-                       //handles linebreaks, 'ar' is multiline name extension
+//   procedure writemsestrings(const name: msestring; const value: msestring);
+//                       //handles linebreaks, 'ar' is multiline name extension
    procedure writedatalist(const name: msestring; const value: tdatalist);
    procedure writearray(const name: msestring; const value: stringarty); overload;
    procedure writearray(const name: msestring; const value: msestringarty); overload;
@@ -653,7 +656,6 @@ begin
     end;
    end;
    if not fstream.eof then begin     
-//    int1:= msestrscan(str1,msechar(']'));
     int1:= findchar(str1,msechar(']'));
     if int1 > 0 then begin
      if int1 = 2 then begin
@@ -678,7 +680,6 @@ begin
        end;
        inc(count);
        if (length(str1) > 0) and (str1[1] <> ' ') and (str1[1] <> '+') then begin
-//        int1:= msestrscan(str1,msechar('='));
         int1:= findchar(str1,msechar('='));
         if int1 > 0 then begin
          names.add(copy(str1,1,int1-1),pointer(ptruint(count)));
@@ -705,9 +706,8 @@ end;
 function tstatreader.findvar(const name: msestring; 
                                          var value: msestring): boolean;
 var
- int1: integer;
+ int1,int2,int3: integer;
  ch1: msechar;
- int2: integer;
 begin
  if factsection <> nil then begin
   with factsection^ do begin
@@ -719,25 +719,37 @@ begin
     else begin
      dec(factitem);
      value:= values[factitem];
+     int1:= factitem+1;      //check multiline
+     while (int1 <= high(values)) and (values[int1] <> '') and 
+                       (values[int1][1] = '+') do begin
+      value:= value+lineend+copy(values[int1],2,bigint);
+      inc(int1);
+     end; 
      result:= true;
     end;
    end
    else begin
     result:= false;
     for int1:= fliststart[flistlevel] to high(values) do begin
+//    for int1:= fliststart[flistlevel] to high(values) do begin
      if length(values[int1]) > flistlevel then begin
       ch1:= values[int1][flistlevel+1];
       if ch1 = ')' then begin
        break;
       end;
       if ch1 <> ' ' then begin
-//       int2:= msestrscan(values[int1],msechar('='));
        int2:= findchar(values[int1],msechar('='));
-       if (int2 = flistlevel+length(name)+1) and (msestrlcomp(pmsechar(values[int1])+flistlevel,
-//       if (int2 > 0) and (msestrlcomp(pmsechar(values[int1])+flistlevel,
-               pmsechar(name),length(name)) = 0) then begin
+       if (int2 = flistlevel+length(name)+1) and 
+             (msestrlcomp(pmsechar(values[int1])+flistlevel,
+                          pmsechar(name),length(name)) = 0) then begin
         factitem:= int1;
         value:= copy(values[int1],int2+1,bigint);
+        int3:= int1+1;  //check multiline
+        while (int3 <= high(values)) and (length(values[int1]) > flistlevel) and 
+                          (values[int3][flistlevel+1] = '+') do begin
+         value:= value+lineend+copy(values[int3],flistlevel+2,bigint);
+         inc(int3);
+        end; 
         result:= true;
         break;
        end;
@@ -919,8 +931,15 @@ end;
 
 function tstatreader.readbinarystring(const name: msestring;
                const default: string): string;
+var
+ mstr1: msestring;
 begin
- result:= decodebase64(readmsestrings(name,default));
+ if not findvar(name,mstr1) then begin
+  result:= default;
+ end
+ else begin 
+  result:= decodebase64(mstr1);
+ end;
 end;
 
 function tstatreader.readmsestring(const name: msestring;
@@ -931,7 +950,7 @@ begin
   result:= default;
  end;
 end;
-
+(*
 function tstatreader.readmsestrings(const name: msestring;
   const default: msestring): msestring;
 var
@@ -945,7 +964,7 @@ begin
   result:= readmsestring(name,default);
  end;
 end;
-
+*)
 function tstatreader.readlistitem: msestring;
 var
  int1,int2: integer;
@@ -1449,6 +1468,23 @@ begin
  fstream.writeln(charstring(msechar(' '),flistlevel)+name+'='+avalue);
 end;
 
+procedure tstatwriter.writemultival(const name: msestring; const avalue: msestring);
+var
+ ar1: msestringarty;
+ int1: integer;
+begin
+ if avalue = '' then begin
+  fstream.writeln(charstring(msechar(' '),flistlevel)+name+'=');
+ end
+ else begin
+  ar1:= breaklines(avalue);
+  fstream.writeln(charstring(msechar(' '),flistlevel)+name+'='+ar1[0]);
+  for int1:= 1 to high(ar1) do begin
+   fstream.writeln(charstring(msechar(' '),flistlevel)+'+'+ar1[int1]);
+  end;
+ end;
+end;
+
 procedure tstatwriter.writeinteger(const name: msestring; const value: integer);
 begin
  writeval(name,inttostrmse(value));
@@ -1487,20 +1523,22 @@ end;
 procedure tstatwriter.writebinarystring(const name: msestring;
                const value: string);
 begin
- writemsestrings(name,encodebase64(value,76));
+ writemsestring(name,encodebase64(value,76));
 end;
 
 procedure tstatwriter.writemsestring(const name: msestring;
   const value: msestring);
 begin
- writeval(name,value);
+ writemultival(name,value);
 end;
-
+(*
 procedure tstatwriter.writemsestrings(const name: msestring;
   const value: msestring);
 var
  ar1: msestringarty;
 begin
+ writemsestring(name,value);
+{
  ar1:= breaklines(value);
  if high(ar1) > 0 then begin
   writearray(name+'ar',ar1);
@@ -1508,8 +1546,9 @@ begin
  else begin
   writeval(name,value);
  end;
+}
 end;
-
+*)
 procedure tstatwriter.writerecord(const name: msestring;
   const values: array of const);
 begin

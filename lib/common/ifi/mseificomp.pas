@@ -2442,13 +2442,13 @@ end;
 procedure tstringclientcontroller.statreadvalue(const reader: tstatreader);
 begin
  inherited;
- value:= reader.readmsestrings(valuevarname,value);
+ value:= reader.readmsestring(valuevarname,value);
 end;
 
 procedure tstringclientcontroller.statwritevalue(const writer: tstatwriter);
 begin
  inherited;
- writer.writemsestrings(valuevarname,value);
+ writer.writemsestring(valuevarname,value);
 end;
 
 function tstringclientcontroller.createdatalist: tdatalist;
