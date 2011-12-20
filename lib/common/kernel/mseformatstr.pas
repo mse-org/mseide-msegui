@@ -9,7 +9,7 @@
 }
 unit mseformatstr;     //stringwandelroutinen 31.5.99 mse
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 
 interface
 uses
@@ -345,6 +345,9 @@ function stringtocstring(const inp: pmsechar;
 function stringtopascalstring(const value: msestring): string;
 function pascalstringtostring(const value: string): msestring;
                                     //increments inputpointer
+function encodebase64(const abinary: string;
+                      const maxlinelength: integer = 0): string;
+function decodebase64(const atext: string): string;
 
 {$ifndef FPC}
 function TryStrToQWord(const S: string; out Value: QWord): Boolean;
@@ -1398,6 +1401,181 @@ begin
   end;
  end;
  setlength(result,po1-pmsechar(pointer(result)));
+end;
+
+const
+ base64mask = $3f;
+ base64encoding: array[0..63] of char = (
+//0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
+ 'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P', //00
+ 'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f', //10
+ 'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v', //20
+ 'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/');//30
+
+ base64decoding: array[0..255] of byte = (
+//0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //00
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //10
+//                                            '+'            '/'
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$3e,$ff,$ff,$ff,$3f, //20
+//'0','1','2','3','4','5','6','7','8','9',
+ $34,$35,$36,$37,$38,$39,$3a,$3b,$3c,$3d,$ff,$ff,$ff,$ff,$ff,$ff, //30
+//    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O',
+ $ff,$00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0a,$0b,$0c,$0d,$0e, //40
+//'P','Q','R','S','T','U','V','W','X','Y','Z',
+ $0f,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$ff,$ff,$ff,$ff,$ff, //50
+//    'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o',
+ $ff,$1a,$1b,$1c,$1d,$1e,$1f,$20,$21,$22,$23,$24,$25,$26,$27,$28, //60
+//'p','q','r','s','t','u','v','w','x','y','z',
+ $29,$2a,$2b,$2c,$2d,$2e,$2f,$30,$31,$32,$33,$ff,$ff,$ff,$ff,$ff, //70
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //80
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //90
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //a0
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //b0
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //c0
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //d0
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //e0
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff);//f0
+
+function encodebase64(const abinary: string;
+                                const maxlinelength: integer = 0): string;
+   //todo: optimize
+var
+ int1: integer;
+ ps,pe: pbyte;
+ pd,pline: pchar;
+ tail,linestep: integer;
+ by1: byte;
+begin
+ result:= '';
+ if abinary <> '' then begin
+  int1:= ((length(abinary)+2) div 3)*4;
+  linestep:= maxlinelength and $fffffffc; //do not cut 4 char boundary
+  if maxlinelength > 0 then begin
+   if linestep = 0 then begin
+    linestep:= 4;
+   end;
+   int1:= int1 + 2*((int1+linestep-1)div linestep - 1); //return-linefeed
+  end;
+  setlength(result,int1);
+  ps:= pointer(abinary);
+  int1:= length(abinary);
+  tail:= int1 mod 3;
+  pe:= ps+int1-tail;
+  pd:= pointer(result);
+  if maxlinelength > 0 then begin
+   pline:=  pd + linestep;
+  end
+  else begin
+   pline:= pointer(not ptruint(0));
+  end;
+  while ps < pe do begin
+   if pd >= pline then begin
+    pd^:= c_return;
+    inc(pd);
+    pd^:= c_linefeed;
+    inc(pd);
+    pline:= pd+linestep;
+   end;
+   by1:= ps^;                                        //s0
+   pd^:= base64encoding[by1 shr 2];                  //d0
+   inc(ps);                                          //s1
+   inc(pd);                                          //d1
+   pd^:= base64encoding[((by1 shl 4) or (ps^ shr 4)) and base64mask];
+   by1:= ps^ shl 2;
+   inc(ps);                                          //s2
+   inc(pd);                                          //d2
+   pd^:= base64encoding[(by1 or (ps^ shr 6)) and base64mask];
+   inc(pd);                                          //d3
+   pd^:= base64encoding[ps^ and base64mask];
+   inc(ps);
+   inc(pd);                                          //d0
+  end;
+  if tail > 0 then begin
+   by1:= ps^;                                        //s0
+   pd^:= base64encoding[by1 shr 2];                  //d0
+   inc(pd);                                          //d1
+   pd^:= base64encoding[(by1 shl 4) and base64mask];
+   if tail > 1 then begin
+    inc(ps);                                         //s1
+    pd^:= base64encoding[((by1 shl 4) or (ps^ shr 4)) and base64mask];
+    inc(pd);                                         //d2 
+    pd^:= base64encoding[(ps^ shl 2) and base64mask];
+   end
+   else begin
+    inc(pd);                                         //d2
+    pd^:= '=';
+   end;
+   inc(pd);                                          //d3
+   pd^:= '=';
+  end;
+ end;
+end;
+
+function decodebase64(const atext: string): string;
+   //todo: optimize
+label
+ endlab;
+var
+ ps,pend: pchar;
+ pd: pbyte;
+ by1: byte;
+begin
+ setlength(result,length(atext)); //>max
+ if atext <> '' then begin
+  ps:= pointer(atext);
+  pd:= pointer(result);
+  pend:= ps+length(atext);
+  while ps < pend do begin
+   by1:= base64decoding[ord(ps^)];       //s0
+   while shortint(by1) < 0 do begin
+    inc(ps);
+    if (ps >= pend) or (char(by1) = '=') then begin
+     goto endlab;
+    end;
+    by1:= base64decoding[ord(ps^)];
+   end;
+   pd^:= by1 shl 2;                     //d0
+   inc(ps);
+   by1:= base64decoding[ord(ps^)];      //s1
+   while shortint(by1) < 0 do begin
+    inc(ps);
+    if (ps >= pend) or (char(by1) = '=') then begin
+     goto endlab;
+    end;
+    by1:= base64decoding[ord(ps^)];
+   end;
+   pd^:= pd^ or (by1 shr 4);
+   inc(pd);                             //d1
+   pd^:= by1 shl 4;
+   inc(ps);
+   by1:= base64decoding[ord(ps^)];      //s2
+   while shortint(by1) < 0 do begin
+    inc(ps);
+    if (ps >= pend) or (char(by1) = '=') then begin
+     goto endlab;
+    end;
+    by1:= base64decoding[ord(ps^)];
+   end;
+   pd^:= pd^ or by1 shr 2;
+   inc(pd);                             //d2
+   pd^:= by1 shl 6;
+   inc(ps);
+   by1:= base64decoding[ord(ps^)];      //s3
+   while shortint(by1) < 0 do begin
+    inc(ps);
+    if (ps >= pend) or (char(by1) = '=') then begin
+     goto endlab;
+    end;
+    by1:= base64decoding[ord(ps^)];
+   end;
+   pd^:= pd^ or by1;
+   inc(pd);
+   inc(ps);                            //s0
+  end;
+endlab:
+  setlength(result,pchar(pointer(pd))-pchar(pointer(result)));
+ end;
 end;
 
 procedure checkdateconvert(const convert: dateconvertty; var value: tdatetime);
