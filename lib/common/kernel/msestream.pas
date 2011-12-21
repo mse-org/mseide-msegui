@@ -118,6 +118,7 @@ type
    constructor createdata(const adata: string);
    procedure clear; override;        //only for memorystream
 
+   procedure setsize(const newsize: int64); override;
    function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
    function Read(var Buffer; Count: Longint): Longint; override;
    function Write(const Buffer; Count: Longint): Longint; override;
@@ -1371,6 +1372,16 @@ begin
   end;
  end;
  result:= bufoffset;
+end;
+
+procedure tcustombufstream.setsize(const newsize: int64);
+begin
+ flushbuffer;
+ if fcachedposition > newsize then begin
+  fcachedposition:= newsize;
+ end;
+ bufoffset:= nil;
+ inherited;
 end;
 
 { tbufstream }

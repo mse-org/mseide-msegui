@@ -695,7 +695,8 @@ function rootcomponent(const acomponent: tcomponent): tcomponent;
 procedure setcomponentorder(const owner: tcomponent; const anames: msestringarty);
 function getcomponentchildren(const acomp: tcomponent;
            const aroot: tcomponent; 
-           const nestedowners: boolean = false): componentarty;
+           const nestedowners: boolean = false;
+           const nestedparents: boolean = false): componentarty;
 function getpropinfoar(const obj: tobject): propinfopoarty; overload;
 function getpropinfoar(const atypeinfo: ptypeinfo): propinfopoarty; overload;
 
@@ -1586,25 +1587,38 @@ type
    fcomp: tcomponent;
    froot: tcomponent;
    fnestedowners: boolean;
+   fnestedparents: boolean;
    fchildren: componentarty;
    fcount: integer;
+   fcurrroot: tcomponent;
    function getchildrenar: componentarty;
   protected
    procedure childproc(child: tcomponent);
   public
    constructor create(const acomp: tcomponent; const aroot: tcomponent;
-                            const nestedowners: boolean = false);
+                            const nestedowners: boolean = false;
+                            const nestedparents: boolean = false);
    property children: componentarty read getchildrenar;
  end;
 
 { tgetcomponentchildren }
 
 constructor tgetcomponentchildren.create(const acomp: tcomponent;
-      const aroot: tcomponent; const nestedowners: boolean = false);
+      const aroot: tcomponent; const nestedowners: boolean = false;
+      const nestedparents: boolean = false);
 begin
  fcomp:= acomp;
  froot:= aroot;
  fnestedowners:= nestedowners;
+ fnestedparents:= nestedparents;
+end;
+
+procedure tgetcomponentchildren.childproc(child: tcomponent);
+begin
+ additem(pointerarty(fchildren),child,fcount);
+ if fnestedparents then begin
+  tcomponent1(child).getchildren({$ifdef FPC}@{$endif}childproc,fcurrroot);
+ end;
 end;
 
 function tgetcomponentchildren.getchildrenar: componentarty;
@@ -1616,25 +1630,23 @@ begin
  if fnestedowners then begin
   comp1:= fcomp;
   while (comp1 <> froot) and (comp1 <> nil) do begin
+   fcurrroot:= comp1;
    tcomponent1(fcomp).getchildren({$ifdef FPC}@{$endif}childproc,comp1);
    comp1:= comp1.owner;
   end;
  end;
  if froot <> nil then begin
+  fcurrroot:= froot;
   tcomponent1(fcomp).getchildren({$ifdef FPC}@{$endif}childproc,froot);
  end;
  setlength(fchildren,fcount);
  result:= fchildren;
 end;
 
-procedure tgetcomponentchildren.childproc(child: tcomponent);
-begin
- additem(pointerarty(fchildren),child,fcount);
-end;
-
 function getcomponentchildren(const acomp: tcomponent;
                 const aroot: tcomponent;
-                const nestedowners: boolean = false): componentarty;
+                const nestedowners: boolean = false;
+                const nestedparents: boolean = false): componentarty;
 var
  obj: tgetcomponentchildren;
 // ev1: getchildreneventty; 
@@ -1642,7 +1654,7 @@ begin
 // ev1:= onstreaminggetchildren;
 // try
 //  onstreaminggetchildren:= nil;
-  obj:= tgetcomponentchildren.create(acomp,aroot,nestedowners);
+  obj:= tgetcomponentchildren.create(acomp,aroot,nestedowners,nestedparents);
   result:= obj.children;
   obj.free;
 // finally
@@ -2021,6 +2033,25 @@ begin
  end;
 end;
 
+type
+ trefreshancestoreventhandler = class(trefresheventhandler)
+  private
+   fnonancestors: componentarty;
+  protected
+   procedure notification(acomponent: tcomponent; operation: toperation);
+                               override;        
+ end;
+ 
+procedure trefreshancestoreventhandler.notification(acomponent: tcomponent;
+                                                     operation: toperation);
+begin
+ if operation = opremove then begin
+  removeitem(pointerarty(fnonancestors),pointer(acomponent));
+ end;
+ inherited;
+end;
+
+
 procedure refreshancestor(const descendent,newancestor,oldancestor: tcomponent;
               const revert: boolean; 
               const onfindancestor: tfindancestorevent = nil;
@@ -2034,7 +2065,8 @@ var
  descendentroot: tcomponent;
  newancestorroot: tcomponent;
  oldancestorroot: tcomponent;
- 
+ eventhandler: trefreshancestoreventhandler;
+  
  procedure deletecomps(const adescendent,anewancestor,aoldancestor: tcomponent);
  var
   deleter: tcomponentdeleter;
@@ -2088,28 +2120,47 @@ var
      end;
     end;
    end;
+   if not revert then begin
+    with eventhandler do begin
+     for int1:= 0 to high(fnonancestors) do begin
+      tcomponent1(fnonancestors[int1]).setancestor(false);
+     end;
+    end;
+   end;
   finally
    deleter.free;
   end;
  end;
 
 var
+ nonancestors: componentarty;
  stream1,stream2: tmemorystream;
  writer: twritermse;
  reader: treader;
-// comp1: tcomponent;
-// comp1,comp2: tcomponent;
-// int1: integer;
- eventhandler: trefresheventhandler;
- inl{,anc}: boolean;
+ inl: boolean;
+ int1,int2: integer;
  tabbefore: pointer;
  {$ifdef mse_debugrefresh}
+ comp1: tcomponent;
  stream3: ttextstream;
  {$endif}
-// ar1,ar2: componentarty;
-// bo1: boolean;
  
 begin
+ descendentroot:= rootcomponent(descendent);
+ newancestorroot:= rootcomponent(newancestor);
+ oldancestorroot:= rootcomponent(oldancestor);
+ if not revert then begin
+  nonancestors:= getcomponentchildren(descendent,descendentroot,false,true);
+                   //nested components
+  int2:= 0;
+  for int1:= 0 to high(nonancestors) do begin
+   if not (csancestor in nonancestors[int1].componentstate) then begin
+    nonancestors[int2]:= nonancestors[int1];
+    inc(int2);
+   end;
+  end;
+  setlength(nonancestors,int2);
+ end;
  {$ifdef mse_debugrefresh}
   if revert then begin
    write('****revert ');
@@ -2117,7 +2168,7 @@ begin
   else begin
    write('****refresh ');
   end;
-  comp1:= rootcomponent(descendent);
+  comp1:= descendentroot;
   writeln('root: '+comp1.name+' descendent: '+ descendent.name + ' newancestor: '+
          newancestor.name + ' oldancestor: '+oldancestor.name);
   dumpcomponent(descendent,'*descendent');
@@ -2125,7 +2176,12 @@ begin
   dumpcomponent(oldancestor,'*oldancestor');
  stream3:= ttextstream.create;
  {$endif}
- eventhandler:= trefresheventhandler.create(nil);
+ eventhandler:= trefreshancestoreventhandler.create(nil);
+ for int1:= 0 to high(nonancestors) do begin
+  nonancestors[int1].freenotification(eventhandler);
+ end;
+ eventhandler.fnonancestors:= nonancestors;
+ nonancestors:= nil;
  stream1:= tmemorystream.Create;
  stream2:= tmemorystream.Create;
  try
@@ -2162,6 +2218,7 @@ begin
   end;
   try
    writer.OnFindAncestor:= onfindancestor;
+//   writer.WriteDescendent(newancestor,oldancestor); //new state
    writer.WriteDescendent(newancestor,descendent); //new state
   finally
    tmsecomponent(newancestor).SetInline(inl);
@@ -2172,12 +2229,12 @@ begin
    writer.Free;
   end;
  {$ifdef mse_debugrefresh}
-   stream2.position:= 0;
-   stream3.setsize(0);
-   objectbinarytotextmse(stream2,stream3);
-   stream3.position:= 0;
-   writeln('changes newancestor->descendent');
-   stream3.writetotext(output);
+  stream2.position:= 0;
+  stream3.setsize(0);
+  objectbinarytotextmse(stream2,stream3);
+  stream3.position:= 0;
+  writeln('changes newancestor->descendent');
+  stream3.writetotext(output);
  {$endif}
   stream1.Position:= 0;
   stream2.Position:= 0;
@@ -2194,6 +2251,8 @@ begin
  {$ifdef mse_debugrefresh}
     writeln('*reading changes newancestor->descendent');
  {$endif}
+   if not revert then begin
+   end;
    reader.ReadRootComponent(descendent); //changes
   finally
    if destmethodtab <> nil then begin
@@ -2230,6 +2289,8 @@ begin
     removefixupreferences(descendent,'');
    end;
   end;
+  nonancestors:= eventhandler.fnonancestors;
+  deletecomps(descendent,newancestor,oldancestor);
  finally
   stream1.Free;
   stream2.Free;
@@ -2238,10 +2299,6 @@ begin
   {$endif}
   eventhandler.free;
  end;
- descendentroot:= rootcomponent(descendent);
- newancestorroot:= rootcomponent(newancestor);
- oldancestorroot:= rootcomponent(oldancestor);
- deletecomps(descendent,newancestor,oldancestor);
 end;
 
 var
@@ -4834,8 +4891,9 @@ begin
 {$warnings off}
  with twritercracker(self) do begin
 {$warnings on}
-  if Not Assigned(FAncestors) then
-    exit;
+  if Not Assigned(FAncestors) then begin
+   exit;
+  end;
   comp1:= froot;
   for int1:= fancestorlookuplevel-1 downto 0 do begin
    comp1:= comp1.owner;

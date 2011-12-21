@@ -1299,8 +1299,8 @@ begin
     dependentmod[int2]:= po2;
     inc(int2);
    {$ifdef mse_debugsubmodule}
-    debugwriteln(' item ancestor '+po1^.ancestor.name+ ' descendent '+
-             po1^.descendent.name + ' module '+po2^.instance.name);
+    debugwriteln(' item ancestor: '+po1^.ancestor.name+ ' descendent: '+
+             po1^.descendent.name + ' module: '+po2^.instance.name);
    {$endif}               
     int3:= finditem(pointerarty(dependentmodules),po2);
     if int3 < 0 then begin
@@ -3478,7 +3478,8 @@ begin
   end;
  end
  else begin
-  if not (csinline in component.componentstate) then begin
+  if not (csinline in component.componentstate) and 
+   (component.owner <> nil) and (csancestor in component.owner.componentstate) then begin
    ancestor:= nil; //has name duplicate
   end;
  end; 

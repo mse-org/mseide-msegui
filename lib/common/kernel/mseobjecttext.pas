@@ -169,13 +169,13 @@ end;
 procedure ObjectBinaryToText1(Input, Output: TStream;
                           Encoding: TObjectTextEncoding);
 
-  procedure OutStr(s: String);
+  procedure OutStr(const s: String);
   begin
-    if Length(s) > 0 then
-      Output.Write(s[1], Length(s));
+    if s <> '' then
+      Output.Write(pointer(s)^, Length(s));
   end;
 
-  procedure OutLn(s: String);
+  procedure OutLn(const s: String);
   begin
     OutStr(s + LineEnd);
   end;
@@ -230,22 +230,22 @@ procedure ObjectBinaryToText1(Input, Output: TStream;
    OutStr(res);
   end;
 
-  procedure OutString(s: String);
+  procedure OutString(const s: String);
   begin
     OutChars(Pointer(S),PChar(S)+Length(S),@CharToOrd,Encoding=oteLFM);
   end;
 
-  procedure OutWString(W: WideString);
+  procedure OutWString(const W: WideString);
   begin
     OutChars(Pointer(W),pwidechar(W)+Length(W),@WideCharToOrd);
   end;
 
-  procedure OutUString(W: UnicodeString);
+  procedure OutUString(const W: UnicodeString);
   begin
     OutChars(Pointer(W),pwidechar(W)+Length(W),@WideCharToOrd);
   end;
 
-  procedure OutUtf8Str(s: String);
+  procedure OutUtf8Str(const s: String);
   begin
     if Encoding=oteLFM then
       OutChars(Pointer(S),PChar(S)+Length(S),@CharToOrd)
@@ -1052,6 +1052,11 @@ begin
 end;
 
 procedure objectbinarytotextmse(input, output: tstream);
+begin
+ objectbinarytotext(input,output);
+end;
+(*
+procedure objectbinarytotextmse(input, output: tstream);
                 //workaround for FPC bug with localized float strings
 {$ifdef FPC}
 var
@@ -1070,7 +1075,7 @@ begin
   objectbinarytotext(input,output);
  {$endif}
 end;
-
+*)
 procedure objecttexttobinarymse(input, output: tstream);
 begin
  objecttexttobinary(input,output);
