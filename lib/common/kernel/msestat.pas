@@ -968,33 +968,38 @@ end;
 function tstatreader.readlistitem: msestring;
 var
  int1,int2: integer;
+ slen: integer;
  po1: pmsecharaty;
-label
- lab1;
+ bo1: boolean;
 begin
- inc(factitem);
  result:= '';
-lab1:
- if factitem < factsection^.count then begin
-  po1:= pointer(factsection^.values[factitem]);
-  if po1 <> nil then begin
-   for int1:= 0 to flistlevel do begin
-    if (po1^[int1] <> ' ') and (po1^[int1] <> '+') then begin
-     exit;
-    end;
-   end;
-   int2:= length(result);
-   int1:= length(msestring(pointer(po1)))-flistlevel-1;
-   setlength(result,int2+int1);
-   move(po1^[flistlevel+1],pmsecharaty(pointer(result))^[int2],
-                                                     int1*sizeof(msechar));
-   if po1^[flistlevel] = '+' then begin
-    result:= result+lineend;
-    inc(factitem);
-    goto lab1;
+ bo1:= false;
+ while factitem < factsection^.count - 1 do begin
+  po1:= pointer(factsection^.values[factitem+1]);
+  slen:= length(msestring(pointer(po1)));
+  if slen <= flistlevel then begin
+   exit;
+  end;
+  for int1:= 0 to flistlevel-1 do begin
+   if (po1^[int1] <> ' ') then begin
+    exit;
    end;
   end;
-//  result:= copy(po1,flistlevel+1,bigint);
+  if po1^[flistlevel] = '+' then begin
+   result:= result+lineend;
+  end
+  else begin
+   if bo1 or (po1^[flistlevel] <> ' ') then begin
+    exit;
+   end;
+  end;
+  int2:= length(result);
+  int1:= slen-flistlevel-1;
+  setlength(result,int2+int1);
+  move(po1^[flistlevel+1],pmsecharaty(pointer(result))^[int2],
+                                                    int1*sizeof(msechar));
+  bo1:= true;
+  inc(factitem);
  end;
 end;
 
@@ -1583,10 +1588,12 @@ var
  int1: integer;
 begin
  ar1:= breaklines(avalue);
- for int1:= 0 to high(ar1)-1 do begin
-  fstream.writeln(charstring(msechar(' '),flistlevel)+'+'+ar1[int1]);
+ if ar1 <> nil then begin
+  fstream.writeln(charstring(msechar(' '),flistlevel+1)+ar1[0]);
+  for int1:= 1 to high(ar1) do begin
+   fstream.writeln(charstring(msechar(' '),flistlevel)+'+'+ar1[int1]);
+  end;
  end;
- fstream.writeln(charstring(msechar(' '),flistlevel+1)+ar1[high(ar1)]);
 end;
 
 procedure tstatwriter.writelistval(const avalue: msestring);
