@@ -137,8 +137,8 @@ type
    procedure internalgetdata(index: integer; out ziel);
    procedure internalsetdata(index: integer; const quelle);
    procedure internalfill(const anzahl: integer; const wert);
-   procedure getdefaultdata(var dest);
-   procedure getgriddefaultdata(var dest); virtual;
+   procedure getdefaultdata(out dest);
+   procedure getgriddefaultdata(out dest); virtual;
    procedure getdata(index: integer; out dest);
    procedure getgriddata(index: integer; out dest); virtual;
    procedure setdata(index: integer; const source);
@@ -2012,13 +2012,13 @@ begin
  end;
 end;
 
-procedure tdatalist.getdefaultdata(var dest);
+procedure tdatalist.getdefaultdata(out dest);
 var
  po: pointer;
 begin
- if dls_needsfree in fstate then begin
-  freedata(dest);
- end;
+// if dls_needsfree in fstate then begin
+//  freedata(dest);
+// end;
  po:= getdefault;
  if po = nil then begin
   fillchar(dest,fsize,0);
@@ -2031,7 +2031,7 @@ begin
  end;
 end;
 
-procedure tdatalist.getgriddefaultdata(var dest);
+procedure tdatalist.getgriddefaultdata(out dest);
 begin
  getdefaultdata(dest);
 end;

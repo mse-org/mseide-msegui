@@ -2146,6 +2146,7 @@ var
  {$endif}
  
 begin
+ begingloballoading;
  descendentroot:= rootcomponent(descendent);
  newancestorroot:= rootcomponent(newancestor);
  oldancestorroot:= rootcomponent(oldancestor);
@@ -2289,15 +2290,20 @@ begin
     removefixupreferences(descendent,'');
    end;
   end;
-  nonancestors:= eventhandler.fnonancestors;
-  deletecomps(descendent,newancestor,oldancestor);
+  notifygloballoading;
  finally
-  stream1.Free;
-  stream2.Free;
-  {$ifdef mse_debugrefresh}
-  stream3.free;
-  {$endif}
-  eventhandler.free;
+  try
+   nonancestors:= eventhandler.fnonancestors;
+   deletecomps(descendent,newancestor,oldancestor);
+  finally
+   stream1.Free;
+   stream2.Free;
+   {$ifdef mse_debugrefresh}
+   stream3.free;
+   {$endif}
+   eventhandler.free;
+   endgloballoading;
+  end;
  end;
 end;
 

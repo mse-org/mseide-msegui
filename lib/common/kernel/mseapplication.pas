@@ -1615,26 +1615,30 @@ end;
 function tactivatorcontroller.setactive(const value: boolean): boolean;
 begin
  factive:= value;
- result:= floaded or not (csloading in fowner.componentstate);
+ result:= not value or (floaded or not (csloading in fowner.componentstate));
 end;
 
 procedure tactivatorcontroller.loaded;
 begin
  floaded:= true;
- if (factivator = nil) or factivator.activated then begin
-  if factivator <> nil then begin
-   factive:= true; //activated
-  end;
-  if csdesigning in fowner.componentstate then begin
-   try
-    setowneractive(factive);
-   except
-    application.handleexception(fowner);
+ try
+  if (factivator = nil) or factivator.activated then begin
+   if factivator <> nil then begin
+    factive:= true; //activated
    end;
-  end
-  else begin
-   setowneractive(factive);
+   if csdesigning in fowner.componentstate then begin
+    try
+     setowneractive(factive);
+    except
+     application.handleexception(fowner);
+    end;
+   end
+   else begin
+    setowneractive(factive);
+   end;
   end;
+ finally
+  floaded:= false;
  end;
 end;
 
@@ -1651,7 +1655,11 @@ begin
    oe_activate: begin
     floaded:= true;
     factive:= true;
-    setowneractive(factive);
+    try
+     setowneractive(factive);
+    finally
+     floaded:= false;
+    end;
    end;
    oe_deactivate: begin
     factive:= false;

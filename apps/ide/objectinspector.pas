@@ -147,7 +147,6 @@ type
    function candragsource(const apos: pointty; var row: integer): boolean;
    function candragdest(const apos: pointty; var row: integer): boolean;
    procedure rereadprops;
-   procedure callrereadprops;
    procedure showmethodsource(const aeditor: tmethodpropertyeditor);
   protected
    procedure updatedefaultstate(const aindex: integer);
@@ -164,6 +163,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure refresh;
 
    //idesignnotification
    procedure itemdeleted(const adesigner: idesigner;
@@ -204,8 +204,6 @@ type
                           const acomponent: tcomponent): propertyeditorarty;
    procedure propertymodified(const sender: tpropertyeditor);
    function getmatchingmethods(const sender: tpropertyeditor; atype: ptypeinfo): msestringarty;
-//   function show(const modallevel: modallevelty;
-//           const transientfor: twindow = nil): modalresultty; override;
  end;
 
  tpropertyitem = class(ttreelistedititem)
@@ -1002,7 +1000,7 @@ procedure tobjectinspectorfo.ItemsModified(const ADesigner: IDesigner;
                          const AItem: tobject);
 begin
  if (aitem = nil) or (aitem = factcomp) and (fchanging = 0) then begin
-  callrereadprops;
+  refresh;
  end;
 end;
 
@@ -1019,7 +1017,7 @@ begin
  end;
 end;
 
-procedure tobjectinspectorfo.callrereadprops;
+procedure tobjectinspectorfo.refresh;
 begin
  if not frereadprops and (fchanging = 0) then begin
   asyncevent(ado_rereadprops);
@@ -1064,7 +1062,7 @@ begin
  designer.begincomponentmodify;
  try
   if ps_volatile in sender.state then begin
-   callrereadprops;
+   refresh;
    compmodified;
   end
   else begin

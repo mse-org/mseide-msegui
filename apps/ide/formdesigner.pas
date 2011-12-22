@@ -3063,6 +3063,7 @@ begin
  if askok('Do you wish to revert to inherited'+lineend+
           'the selected component?') then begin
   fdesigner.revert(tdesignwindow(window).fselections[0]);
+  objectinspectorfo.refresh;
  end;
 end;
 
