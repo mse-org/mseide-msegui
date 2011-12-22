@@ -414,12 +414,14 @@ begin
  ar1:= fields.datacols.selectedrows;
  setlength(ar2,length(ar1)); //max
  int2:= 0;
- ffields.beginupdate;
  for int1:= high(ar1) downto 0 do begin
   ar2[int2]:= findfielddef(fieldname[ar1[int1]]);
   if ar2[int2] >= 0 then begin
    inc(int2);
   end;
+ end;
+ ffields.beginupdate;
+ for int1:= high(ar1) downto 0 do begin
   fields.deleterow(ar1[int1]);
  end;
  ffields.endupdate;

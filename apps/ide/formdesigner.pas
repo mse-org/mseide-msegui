@@ -1425,6 +1425,12 @@ begin
     with fdelobjs[int1] do begin
      pastefromobjecttext(objtext,owner,parent,
                     {$ifdef FPC}@{$endif}doinitcomponent);
+     if parent <> nil then begin
+      designer.componentmodified(parent);
+     end
+     else begin
+      designer.componentmodified(owner);
+     end;
     end;
    end;
    for int1:= count-1 downto 0 do begin
@@ -1435,6 +1441,7 @@ begin
   end;
   updateselections;
   fdelobjs:= nil;
+  clientsizechanged;
  end;
 end;
 
@@ -3056,6 +3063,7 @@ begin
  if askok('Do you wish to revert to inherited'+lineend+
           'the selected component?') then begin
   fdesigner.revert(tdesignwindow(window).fselections[0]);
+  objectinspectorfo.refresh;
  end;
 end;
 
