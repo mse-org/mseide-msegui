@@ -268,6 +268,7 @@ type
  end;
 
  tcryptfilestream = class(tfilestream)      //seek nicht erlaubt!
+         //used to obfuscate ini files, obsolete
   private
    seed: word;
    schluesseln: boolean;

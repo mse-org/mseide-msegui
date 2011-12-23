@@ -780,7 +780,7 @@ type
    procedure dataevent(event: tdataevent; info: ptrint); override;
    
    function  GetCanModify: Boolean; override;
-   procedure updatewherepart(var sql_where : string; const afield: tfield);
+   procedure updatewherepart(var sql_where : msestring; const afield: tfield);
    Procedure internalApplyRecUpdate(UpdateKind : TUpdateKind);
    procedure dobeforeapplyupdate; override;
    procedure ApplyRecUpdate(UpdateKind : TUpdateKind); override;
@@ -804,11 +804,11 @@ type
                 const cancelonerror: boolean;
                 const cancelondeleteerror: boolean = false;
                 const editonerror: boolean = false); override;
-   function refreshrecquery(const update: boolean): string;
+   function refreshrecquery(const update: boolean): msestring;
    procedure checktablename;
-   function updaterecquery{(const refreshfieldvalues: boolean)} : string;
-   function insertrecquery{(const refreshfieldvalues: boolean)} : string;
-   function deleterecquery : string;
+   function updaterecquery : msestring;
+   function insertrecquery : msestring;
+   function deleterecquery : msestring;
    function writetransaction: tsqltransaction;
                   //self.transaction if self.transactionwrite = nil
    procedure Prepare; virtual;
@@ -3704,9 +3704,9 @@ begin
  end;
 end;
 
-procedure tsqlquery.updatewherepart(var sql_where : string; const afield: tfield);
+procedure tsqlquery.updatewherepart(var sql_where : msestring; const afield: tfield);
 var
- quotechar: string;
+ quotechar: msestring;
 begin
  if database <> nil then begin
   quotechar:= database.identquotechar;
@@ -3726,7 +3726,7 @@ begin
  end;
 end;
 
-function tsqlquery.refreshrecquery(const update: boolean): string;
+function tsqlquery.refreshrecquery(const update: boolean): msestring;
 var
  int1,int2: integer;
  intf1: imsefield;
@@ -3782,13 +3782,13 @@ begin
  end;
 end;
 
-function tsqlquery.updaterecquery{(const refreshfieldvalues: boolean)} : string;
+function tsqlquery.updaterecquery : msestring;
 var 
  x: integer;
- sql_set: string;
- sql_where: string;
+ sql_set: msestring;
+ sql_where: msestring;
  field1: tfield;
- quotechar: string;
+ quotechar: msestring;
 begin
  checktablename;
  quotechar:= database.identquotechar;
@@ -3820,12 +3820,12 @@ begin
 end;
 
 
-function tsqlquery.insertrecquery{(const refreshfieldvalues: boolean)} : string;
+function tsqlquery.insertrecquery: msestring;
 var 
  x: integer;
- sql_fields: string;
- sql_values: string;
- quotechar: string;
+ sql_fields: msestring;
+ sql_values: msestring;
+ quotechar: msestring;
 begin
  checktablename;
  quotechar:= database.identquotechar;
@@ -3852,10 +3852,10 @@ begin
 // end;
 end;
 
-function tsqlquery.deleterecquery : string;
+function tsqlquery.deleterecquery : msestring;
 var 
  x: integer;
- sql_where: string;
+ sql_where: msestring;
  field1: tfield;
 begin
  checktablename;
@@ -3892,6 +3892,7 @@ var
  statementtypebefore: tstatementtype;
 // refreshfieldvalues: boolean;
  oldisnew: boolean;
+ rowsaffected1: integer;
     
 begin
  oldisnew:= (updatekind = ukinsert) and (bs_inserttoupdate in fbstate);
@@ -4022,13 +4023,15 @@ begin
        end;
       end;
      end;
+     rowsaffected1:= fcursor.frowsaffected;
     finally
-     active:= false;
+     active:= false;          //todo: no destroy of prepared statement
      statementtype:= statementtypebefore;
     end;
    end
    else begin
     execsql;
+    rowsaffected1:= fcursor.frowsaffected;
    end;
    if not (bs_refreshinsert in fbstate) and (updatekind = ukinsert) and 
                                         (self.fprimarykeyfield <> nil) then begin
@@ -4040,7 +4043,7 @@ begin
      self.fupdaterowsaffected:= -1;
     end
     else begin
-     inc(self.fupdaterowsaffected,fcursor.frowsaffected);
+     inc(self.fupdaterowsaffected,rowsaffected1);
     end;
    end;
   finally
