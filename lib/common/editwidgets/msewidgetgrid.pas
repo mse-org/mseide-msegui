@@ -846,7 +846,7 @@ begin
         end;
        end;
        coord1:= makegridcoord(int1,-int2-1);
-       if fgrid.cellvisible(coord1) then begin
+       if fgrid.cellvisible(coord1) or (csdesigning in fgrid.componentstate) then begin
         rect1:= fgrid.cellrect(coord1,cil_noline);
         rect1.pos:= translatewidgetpoint(addpoint(rect1.pos,fgrid.paintpos),
                                fgrid,parentwidget);
