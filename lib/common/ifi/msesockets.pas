@@ -198,12 +198,12 @@ type
    fonafterconnect: commcompeventty;
    fonbeforedisconnect: commcompeventty;
    fonafterdisconnect: commcompeventty;
-   procedure setactive(const avalue: boolean);
    procedure setcryptio(const avalue: tcryptio);
   protected
    fhandle: integer;
    factive: boolean;
    fcryptio: tcryptio;
+   procedure setactive(const avalue: boolean); override;
    procedure doactivated; override;
    procedure dodeactivated; override;
    procedure internalconnect; virtual; abstract;

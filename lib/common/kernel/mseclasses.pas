@@ -2146,7 +2146,7 @@ var
  {$endif}
  
 begin
- begingloballoading;
+// begingloballoading;
  descendentroot:= rootcomponent(descendent);
  newancestorroot:= rootcomponent(newancestor);
  oldancestorroot:= rootcomponent(oldancestor);
@@ -2239,6 +2239,9 @@ begin
  {$endif}
   stream1.Position:= 0;
   stream2.Position:= 0;
+  if descendent is tactcomponent then begin
+   tactcomponent(descendent).deactivate(true);
+  end;
   reader:= tasinheritedreader.create(stream2,4096,inl{false});  //new state
   if destmethodtab <> nil then begin
    tabbefore:= swapmethodtable(descendent,destmethodtab);
@@ -2290,7 +2293,7 @@ begin
     removefixupreferences(descendent,'');
    end;
   end;
-  notifygloballoading;
+//  notifygloballoading;
  finally
   try
    nonancestors:= eventhandler.fnonancestors;
@@ -2302,7 +2305,7 @@ begin
    stream3.free;
    {$endif}
    eventhandler.free;
-   endgloballoading;
+//   endgloballoading;
   end;
  end;
 end;

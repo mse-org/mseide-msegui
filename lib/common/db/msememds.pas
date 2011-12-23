@@ -11,9 +11,10 @@ unit msememds;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,db,memds,msedb,msestrings;
+ classes,db,memds,msedb,msestrings,mseapplication;
 type
- tmsememdataset = class(tmemdataset,imselocate,idscontroller,igetdscontroller)
+ tmsememdataset = class(tmemdataset,imselocate,idscontroller,igetdscontroller,
+                               iactivatorclient)
   private
    fcontroller: tdscontroller;
    ftagpo: pointer;
@@ -41,7 +42,7 @@ type
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
-   procedure setactive (value : boolean); reintroduce;
+   procedure setactive (const value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -130,7 +131,7 @@ begin
  result:= inherited active;
 end;
 
-procedure tmsememdataset.setactive(value: boolean);
+procedure tmsememdataset.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
   inherited;

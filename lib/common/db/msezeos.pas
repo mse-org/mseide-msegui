@@ -2,7 +2,8 @@ unit msezeos;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,db,ZDataset,msedb,ZStoredProcedure,msestrings,msedbgraphics;
+ classes,db,ZDataset,msedb,ZStoredProcedure,msestrings,msedbgraphics,
+ mseapplication;
 type
  tmsezgraphicfield = class(tmsegraphicfield)
   public
@@ -10,7 +11,7 @@ type
  end;
  
  tmsezreadonlyquery = class(tzreadonlyquery,imselocate,idscontroller,
-                               igetdscontroller,isqlpropertyeditor)
+                      igetdscontroller,isqlpropertyeditor,iactivatorclient)
    private
    fcontroller: tdscontroller;
    ftagpo: pointer;
@@ -39,7 +40,7 @@ type
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
-   procedure setactive (value : boolean); reintroduce;
+   procedure setactive (const value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -79,7 +80,7 @@ type
  end;
  
  tmsezquery = class(tzquery,imselocate,idscontroller,igetdscontroller,
-                          isqlpropertyeditor)
+                          isqlpropertyeditor,iactivatorclient)
    private
    fcontroller: tdscontroller;
    ftagpo: pointer;
@@ -108,7 +109,7 @@ type
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
-   procedure setactive (value : boolean); reintroduce;
+   procedure setactive (const value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -147,7 +148,8 @@ type
    property AutocalcFields default false;
  end;
  
- tmseztable = class(tztable,imselocate,idscontroller,igetdscontroller)
+ tmseztable = class(tztable,imselocate,idscontroller,
+                          igetdscontroller,iactivatorclient)
    private
    fcontroller: tdscontroller;
    ftagpo: pointer;
@@ -175,7 +177,7 @@ type
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
-   procedure setactive (value : boolean); reintroduce;
+   procedure setactive (const value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -214,7 +216,8 @@ type
    property AutocalcFields default false;
  end;
 
- tmsezstoredproc = class(tzstoredproc,imselocate,idscontroller,igetdscontroller)
+ tmsezstoredproc = class(tzstoredproc,imselocate,idscontroller,
+                       igetdscontroller,iactivatorclient)
    private
    fcontroller: tdscontroller;
    ftagpo: pointer;
@@ -242,7 +245,7 @@ type
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
-   procedure setactive (value : boolean); reintroduce;
+   procedure setactive (const value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -332,7 +335,7 @@ begin
  result:= inherited active;
 end;
 
-procedure tmsezreadonlyquery.setactive(value: boolean);
+procedure tmsezreadonlyquery.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
   inherited;
@@ -581,7 +584,7 @@ begin
  result:= inherited active;
 end;
 
-procedure tmsezquery.setactive(value: boolean);
+procedure tmsezquery.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
   inherited;
@@ -830,7 +833,7 @@ begin
  result:= inherited active;
 end;
 
-procedure tmseztable.setactive(value: boolean);
+procedure tmseztable.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
   inherited;
@@ -1074,7 +1077,7 @@ begin
  result:= inherited active;
 end;
 
-procedure tmsezstoredproc.setactive(value: boolean);
+procedure tmsezstoredproc.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
   inherited;

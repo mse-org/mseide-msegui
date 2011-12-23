@@ -43,6 +43,8 @@ type
  iactivator = interface(inullinterface)
  end;
  iactivatorclient = interface(inullinterface)
+               ['{DD72357B-4570-493A-B73E-660F07B0C97B}']
+  procedure setactive(const avalue: boolean);
  end;
 
  tactivator = class;
@@ -54,7 +56,7 @@ type
  actcomponentstatety = (acs_releasing);
  actcomponentstatesty = set of actcomponentstatety;
   
- tactcomponent = class(tmsecomponent,iactivator)
+ tactcomponent = class(tmsecomponent,iactivatorclient)
   private
    factivator: tactivator;
    fstate: actcomponentstatesty;
@@ -71,9 +73,12 @@ type
    {$ifdef mse_with_ifi}
    procedure executeificommand(var acommand: ificommandcodety); override;
    {$endif}
+    //iactivatorclient
+   procedure setactive(const avalue: boolean); virtual;
   public
    procedure release(const nomodaldefer: boolean=false); virtual;
    function releasing: boolean;
+   procedure deactivate(const achildren: boolean = true); virtual;
    property activator: tactivator read factivator write setactivator;
  end;
 
@@ -96,10 +101,10 @@ type
    function getclients: integer;
    procedure setclients(const avalue: integer);
    procedure setoptions(const avalue: activatoroptionsty);
-   procedure setactive(const avalue: boolean);
   protected
    fclientnames: stringarty;
    fclients: pointerarty;
+   procedure setactive(const avalue: boolean); override;
    procedure registerclient(const aclient: iobjectlink);
    procedure unregisterclient(const aclient: iobjectlink);
    procedure updateorder;
@@ -149,12 +154,13 @@ type
    procedure setactivator(const avalue: tactivator);
   protected
    fowner: tcomponent;
+   fintf: iactivatorclient;
    function getinstance: tobject; override;
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
    procedure setowneractive(const avalue: boolean); virtual; abstract;
   public
-   constructor create(const aowner: tcomponent); reintroduce;
+   constructor create(const aowner: tcomponent; const aintf: iactivatorclient); reintroduce;
    function setactive (const value : boolean): boolean;
    procedure loaded;
   published 
@@ -599,6 +605,40 @@ begin
   end;
  end;
 end;
+
+procedure tactcomponent.setactive(const avalue: boolean);
+begin
+ //dummy
+end;
+
+procedure tactcomponent.deactivate(const achildren: boolean = true);
+ procedure deactivateall(const acomp: tcomponent); 
+ var
+  intf1: iactivatorclient;
+  int1: integer;
+ begin
+  if mseclasses.getcorbainterface(acomp,
+                           typeinfo(iactivatorclient),intf1) then begin
+   intf1.setactive(false);
+  end;
+  with acomp do begin
+   int1:= componentcount - 1;
+   while int1 >= 0 do begin
+    if int1 >= componentcount then begin
+     int1:= componentcount - 1;
+    end;
+    deactivateall(components[int1]);
+    dec(int1);
+   end;
+  end;
+ end;
+begin
+ if achildren then begin
+  deactivateall(self);
+ end;
+ setactive(false);
+end;
+
 {$ifdef mse_with_ifi}
 procedure tactcomponent.executeificommand(var acommand: ificommandcodety);
 begin
@@ -609,6 +649,7 @@ begin
   end;
  end;
 end;
+
 {$endif}
 
 { tactivator }
@@ -1606,8 +1647,10 @@ end;
 
 { tactivatorcontroller }
 
-constructor tactivatorcontroller.create(const aowner: tcomponent);
+constructor tactivatorcontroller.create(const aowner: tcomponent;
+                         const aintf: iactivatorclient);
 begin
+ fintf:= aintf;
  fowner:= aowner;
  inherited create;
 end;
@@ -1615,7 +1658,7 @@ end;
 function tactivatorcontroller.setactive(const value: boolean): boolean;
 begin
  factive:= value;
- result:= not value or (floaded or not (csloading in fowner.componentstate));
+ result:= floaded or not (csloading in fowner.componentstate);
 end;
 
 procedure tactivatorcontroller.loaded;

@@ -17,9 +17,10 @@ unit msesqlite3ds;
 
 interface
 uses
- classes,db,sqlite3ds,msedb,msestrings;
+ classes,db,sqlite3ds,msedb,msestrings,mseapplication;
 type
- tmsesqlite3dataset = class(tsqlite3dataset,imselocate,idscontroller,igetdscontroller)
+ tmsesqlite3dataset = class(tsqlite3dataset,imselocate,idscontroller,
+                       igetdscontroller,iactivatorclient)
   private
    fcontroller: tdscontroller;
    ftagpo: pointer;
@@ -47,7 +48,7 @@ type
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
-   procedure setactive (value : boolean); reintroduce;
+   procedure setactive (const value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -164,7 +165,7 @@ begin
  result:= inherited active;
 end;
 
-procedure tmsesqlite3dataset.setactive(value: boolean);
+procedure tmsesqlite3dataset.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
   inherited;

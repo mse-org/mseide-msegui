@@ -11,7 +11,7 @@ unit mselocaldataset;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,db,msestrings,msebufdataset,msedb;
+ classes,db,msestrings,msebufdataset,msedb,mseapplication;
 
 const
  defaultlocaldsoptions = defaultdscontrolleroptions + [dso_local,dso_utf8]; 
@@ -27,7 +27,8 @@ type
    property options default defaultlocaldsoptions;
  end;
  
- tlocaldataset = class(tmsebufdataset,imselocate,idscontroller,igetdscontroller)
+ tlocaldataset = class(tmsebufdataset,imselocate,idscontroller,igetdscontroller,
+                               iactivatorclient)
   private
 //   fcontroller: tdscontroller;
 //   ftagpo: pointer;
@@ -52,7 +53,7 @@ type
    procedure endfilteredit;
    procedure doidleapplyupdates;
   protected
-   procedure setactive (value : boolean); reintroduce;
+   procedure setactive (const value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -182,7 +183,7 @@ begin
  result:= inherited active;
 end;
 
-procedure tlocaldataset.setactive(value: boolean);
+procedure tlocaldataset.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
   inherited;

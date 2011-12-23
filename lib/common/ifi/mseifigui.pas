@@ -12,7 +12,7 @@ unit mseifigui;
 interface
 uses
  classes,mseclasses,mseguiglob,mseifiglob,mseifi,mseact,msegui,typinfo,
- msestrings,
+ msestrings,mseapplication,
  msearrayprops,mseglob,msetypes,mseifilink,msewidgetgrid,msemenus,
  mseevent,msegrids,msegraphutils,msedatalist;
  
@@ -90,7 +90,8 @@ type
    procedure setowneractive(const avalue: boolean); override;
    function encodegriddata(const asequence: sequencety): ansistring; override;
   public
-   constructor create(const aowner: trxwidgetgrid);
+   constructor create(const aowner: trxwidgetgrid; 
+                               const aintf: iactivatorclient);
  end;
 
  tifiwidgetcol = class(twidgetcol)
@@ -366,9 +367,10 @@ end;
 
 { tifiwidgetgridcontroller }
 
-constructor tifiwidgetgridcontroller.create(const aowner: trxwidgetgrid);
+constructor tifiwidgetgridcontroller.create(const aowner: trxwidgetgrid;
+                    const aintf: iactivatorclient);
 begin
- inherited create(aowner);
+ inherited create(aowner,aintf);
 end;
 
 procedure tifiwidgetgridcontroller.setowneractive(const avalue: boolean);
@@ -608,7 +610,7 @@ end;
 constructor trxwidgetgrid.create(aowner: tcomponent);
 begin
  if fifi = nil then begin
-  fifi:= tifiwidgetgridcontroller.create(self);
+  fifi:= tifiwidgetgridcontroller.create(self,iactivatorclient(self));
  end;
  inherited;
 end;

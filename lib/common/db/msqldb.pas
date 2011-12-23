@@ -185,7 +185,7 @@ type
  tdbcontroller = class(tactivatorcontroller)
   private
    fdatabasename: filenamety;
-   fintf: idbcontroller;
+//   fintf: idbcontroller;
    foptions: databaseoptionsty;
 //   factioncount: integer;
 //   factionwait: boolean;   
@@ -201,7 +201,7 @@ type
  end;
 
  tmsesqlscript = class;
- tcustomsqlconnection = class(TmDatabase,idbcontroller)
+ tcustomsqlconnection = class(TmDatabase,idbcontroller,iactivatorclient)
   private
     FPassword            : string;
     FTransaction         : TSQLTransaction;
@@ -1450,15 +1450,15 @@ end;
 
 constructor tdbcontroller.create(const aowner: tmdatabase; const aintf: idbcontroller);
 begin
- fintf:= aintf;
- inherited create(aowner);
+// fintf:= aintf;
+ inherited create(aowner,aintf);
 end;
 
 procedure tdbcontroller.setowneractive(const avalue: boolean);
 //var
 // bo1: boolean;
 begin
- fintf.setinheritedconnected(avalue);
+ idbcontroller(fintf).setinheritedconnected(avalue);
  {
  if avalue then begin
   with tmdatabase(fowner) do begin

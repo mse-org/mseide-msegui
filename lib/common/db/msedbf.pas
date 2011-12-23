@@ -12,11 +12,12 @@ unit msedbf;
 interface
 uses
 {$warnings off}
- classes,db,dbf,msedb,msestrings,dbf_idxfile;
+ classes,db,dbf,msedb,msestrings,dbf_idxfile,mseapplication;
 {$warnings on}
  
 type
- tmsedbf = class(tdbf,imselocate,idscontroller,igetdscontroller)
+ tmsedbf = class(tdbf,imselocate,idscontroller,igetdscontroller,
+            iactivatorclient)
   private
    ffilepath: filenamety;
    fcontroller: tdscontroller;
@@ -46,7 +47,7 @@ type
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
-   procedure setactive (value : boolean); reintroduce;
+   procedure setactive (const value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -141,7 +142,7 @@ begin
  fcontroller.assign(avalue);
 end;
 
-procedure tmsedbf.setactive(value: boolean);
+procedure tmsedbf.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
   inherited;

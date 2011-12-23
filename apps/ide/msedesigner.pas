@@ -1265,188 +1265,200 @@ begin
                               amodule^.filename+'".','ERROR');
   sysutils.abort;
  end;
- dependentmodules:= nil; //compilerwarning
+ if modifylevel = 0 then begin
+  begingloballoading;
+ end;
  inc(modifylevel);
- {$ifdef mse_debugsubmodule}
-  debugwriteln('***modulemodified '+inttostr(modifylevel)+' '+
-                amodule^.instance.name);
-  debugwriteln(' destcomps: '+concatstrings(destcomps,','));
-  debugwriteln(' ancestorcomps: '+concatstrings(ancestorcomps,','));
-//  po1:= datapo;
-//  for int1:= 0 to count-1 do begin
-//   debugwriteln('*'+inttostr(int1)+' '+po1^.ancestor.name+' '+
-//                                            po1^.descendent.name);
-//   inc(po1);
-//  end;
- {$endif}
-
-  oldancestor0:= fdesigner.fsubmodulelist.findoldancestor(amodule^.instance); 
-  po1:= datapo;
-  int2:= 0;
-  setlength(dependentmod,fcount); //max
-  for int1:= 0 to fcount - 1 do begin
-   if po1^.ancestor = amodule^.instance then begin
-//    dependentcomponents[int2]:= po1^.descendent;
-    if ismodule(po1^.descendent) then begin  //inherited form        
-     comp1:= po1^.descendent;
-     destname:= 'OWNER';
-    end
-    else begin
-     comp1:= tmsecomponent(po1^.descendent.owner);
-     destname:= po1^.descendent.name;
-    end;
-    po2:= fdesigner.modules.findmodule(comp1);
-    dependentmod[int2]:= po2;
-    inc(int2);
-   {$ifdef mse_debugsubmodule}
-    debugwriteln(' item ancestor: '+po1^.ancestor.name+ ' descendent: '+
-             po1^.descendent.name + ' module: '+po2^.instance.name);
-   {$endif}               
-    int3:= finditem(pointerarty(dependentmodules),po2);
-    if int3 < 0 then begin
-     int3:= length(dependentmodules);
-     setlength(dependentmodules,int3+1);
-     setlength(depmodcomps,int3+1);
-     setlength(dependentcomponents,int3+1);
-     setlength(oldancestorcomponents,int3+1);
-     dependentmodules[int3]:= po2;
-    end;
-    if destcomps = nil then begin
-     additem(depmodcomps[int3],destname);
-     additem(pointerarty(dependentcomponents[int3]),po1^.descendent);
-     additem(pointerarty(oldancestorcomponents[int3]),oldancestor0);
-    end
-    else begin
-     for int4:= 0 to high(destcomps) do begin
-      additem(depmodcomps[int3],destname+'.'+destcomps[int4]);
-      additem(pointerarty(oldancestorcomponents[int3]),oldancestorcomps[int4]);
+ try
+  dependentmodules:= nil; //compilerwarning
+  {$ifdef mse_debugsubmodule}
+   debugwriteln('***modulemodified '+inttostr(modifylevel)+' '+
+                 amodule^.instance.name);
+   debugwriteln(' destcomps: '+concatstrings(destcomps,','));
+   debugwriteln(' ancestorcomps: '+concatstrings(ancestorcomps,','));
+ //  po1:= datapo;
+ //  for int1:= 0 to count-1 do begin
+ //   debugwriteln('*'+inttostr(int1)+' '+po1^.ancestor.name+' '+
+ //                                            po1^.descendent.name);
+ //   inc(po1);
+ //  end;
+  {$endif}
+ 
+   oldancestor0:= fdesigner.fsubmodulelist.findoldancestor(amodule^.instance); 
+   po1:= datapo;
+   int2:= 0;
+   setlength(dependentmod,fcount); //max
+   for int1:= 0 to fcount - 1 do begin
+    if po1^.ancestor = amodule^.instance then begin
+ //    dependentcomponents[int2]:= po1^.descendent;
+     if ismodule(po1^.descendent) then begin  //inherited form        
+      comp1:= po1^.descendent;
+      destname:= 'OWNER';
+     end
+     else begin
+      comp1:= tmsecomponent(po1^.descendent.owner);
+      destname:= po1^.descendent.name;
+     end;
+     po2:= fdesigner.modules.findmodule(comp1);
+     dependentmod[int2]:= po2;
+     inc(int2);
+    {$ifdef mse_debugsubmodule}
+     debugwriteln(' item ancestor: '+po1^.ancestor.name+ ' descendent: '+
+              po1^.descendent.name + ' module: '+po2^.instance.name);
+    {$endif}               
+     int3:= finditem(pointerarty(dependentmodules),po2);
+     if int3 < 0 then begin
+      int3:= length(dependentmodules);
+      setlength(dependentmodules,int3+1);
+      setlength(depmodcomps,int3+1);
+      setlength(dependentcomponents,int3+1);
+      setlength(oldancestorcomponents,int3+1);
+      dependentmodules[int3]:= po2;
+     end;
+     if destcomps = nil then begin
+      additem(depmodcomps[int3],destname);
       additem(pointerarty(dependentcomponents[int3]),po1^.descendent);
+      additem(pointerarty(oldancestorcomponents[int3]),oldancestor0);
+     end
+     else begin
+      for int4:= 0 to high(destcomps) do begin
+       additem(depmodcomps[int3],destname+'.'+destcomps[int4]);
+       additem(pointerarty(oldancestorcomponents[int3]),oldancestorcomps[int4]);
+       additem(pointerarty(dependentcomponents[int3]),po1^.descendent);
+      end;
+     end;
+ //    adduniqueitem(pointerarty(dependentmodules),po2);
+    end;
+    inc(po1);
+   end;
+   setlength(dependentmod,int2);
+ 
+   if int2 > 0 then begin
+   {$ifdef mse_debugsubmodule}
+    debugwriteln('*descendents:');
+    for int1:= 0 to high(dependentmodules) do begin
+     debugwriteln('module: '+dependentmodules[int1]^.instance.name);
+     for int2:= 0 to high(depmodcomps[int1]) do begin
+      debugwriteln(' '+depmodcomps[int1][int2]);
      end;
     end;
-//    adduniqueitem(pointerarty(dependentmodules),po2);
-   end;
-   inc(po1);
-  end;
-  setlength(dependentmod,int2);
-
-  if int2 > 0 then begin
-  {$ifdef mse_debugsubmodule}
-   debugwriteln('*descendents:');
-   for int1:= 0 to high(dependentmodules) do begin
-    debugwriteln('module: '+dependentmodules[int1]^.instance.name);
-    for int2:= 0 to high(depmodcomps[int1]) do begin
-     debugwriteln(' '+depmodcomps[int1][int2]);
+   {$endif}
+    beginsubmodulecopy;
+    beginstreaming;
+    if modifylevel = 1 then begin
+     streamingswapmethodpointer(amodule^.instance);
+     frefreshmethods:= fdesigner.getancestormethods(amodule);
+     amodule^.methods.createmethodtable(frefreshmethods);
     end;
-   end;
-  {$endif}
-   beginsubmodulecopy;
-   beginstreaming;
-   if modifylevel = 1 then begin
-    streamingswapmethodpointer(amodule^.instance);
-    frefreshmethods:= fdesigner.getancestormethods(amodule);
-    amodule^.methods.createmethodtable(frefreshmethods);
-   end;
-   setlength(frefreshmethods,high(frefreshmethods)+2);
-   frefreshmethods[high(frefreshmethods)]:= amodule^.methods;
-   for int1:= 0 to high(dependentmodules) do begin
-    dependentmodules[int1]^.methods.createmethodtable(frefreshmethods);
-//                        fdesigner.getancestormethods(dependentmodules[int1]));
-   end;
-   stackarray(pointerarty(dependentmodules),pointerarty(fmodifiedmodules));
-   try
-    oldancestor0:= fdesigner.fsubmodulelist.findoldancestor(amodule^.instance);
+    setlength(frefreshmethods,high(frefreshmethods)+2);
+    frefreshmethods[high(frefreshmethods)]:= amodule^.methods;
     for int1:= 0 to high(dependentmodules) do begin
-     streamingswapmethodpointer(dependentmodules[int1]^.instance);
-     for int2:= 0 to high(depmodcomps[int1]) do begin
-      descendent1:= dependentcomponents[int1][int2];
-      newancestor1:= amodule^.instance;
-      oldancestor1:= oldancestor0;
-      descendent1:= tmsecomponent(
-                 findnestedcomponent(dependentmodules[int1]^.instance,
-                                                     depmodcomps[int1][int2]));
-      if ancestorcomps <> nil then begin
-       str1:= ancestorcomps[int2 mod length(ancestorcomps)];
-       newancestor1:= tmsecomponent(findnestedcomponent(newancestor1,str1));
-       oldancestor1:= tmsecomponent(findnestedcomponent(oldancestor1,str1));
-       refreshancestor(descendent1,newancestor1,oldancestor1,false,
-        {$ifdef FPC}@{$endif}fdesigner.findancestor,
-        {$ifdef FPC}@{$endif}fdesigner.findcomponentclass,
-        {$ifdef FPC}@{$endif}fdesigner.createcomponent,
-        {$ifdef FPC}@{$endif}findrefreshmethod,
-                            dependentmod[int1]^.methods.fmethodtable
-                                 {amodule^.methods.fmethodtable},
-                                       dependentmod[int1]^.methods.fmethodtable);
-      end
-      else begin
-       if destcomps <> nil then begin
-        str1:= destcomps[int2 mod length(destcomps)];
-        oldancestor1:= tmsecomponent(
-                    findnestedcomponent(oldancestor1,str1));
-        newancestor1:= tmsecomponent(
-                    findnestedcomponent(newancestor1,str1));
-       end;
-       bo3:= (csinline in descendent1.componentstate) and 
-                                        (descendent1.owner <> nil); 
-                           //whole submodule
-       bo1:= false;
-       bo2:= false;
-       if bo3 then begin   //submodule
-        bo1:= descendent1 is twidget;
-        if bo1 then begin
-         pt1:= twidget(descendent1).pos;
-         taborderbefore:= twidget(descendent1).taborder;
-        end
-        else begin
-         bo2:= isdatasubmodule(descendent1);
-         if bo2 then begin
-          pt1:= getcomponentpos(descendent1);
-         end;
-        end;
-       end;
-       refreshancestor(descendent1,newancestor1,oldancestor1,false,
-        {$ifdef FPC}@{$endif}fdesigner.findancestor,
-        {$ifdef FPC}@{$endif}fdesigner.findcomponentclass,
-        {$ifdef FPC}@{$endif}fdesigner.createcomponent,
-        {$ifdef FPC}@{$endif}findrefreshmethod,
-                            amodule^.methods.fmethodtable,
-                                       dependentmod[int1]^.methods.fmethodtable);
-       if bo1 then begin
-        twidget(descendent1).pos:= pt1;  //restore insert position
-        twidget(descendent1).taborder:= taborderbefore;
+     dependentmodules[int1]^.methods.createmethodtable(frefreshmethods);
+ //                        fdesigner.getancestormethods(dependentmodules[int1]));
+    end;
+    stackarray(pointerarty(dependentmodules),pointerarty(fmodifiedmodules));
+    try
+     oldancestor0:= fdesigner.fsubmodulelist.findoldancestor(amodule^.instance);
+     for int1:= 0 to high(dependentmodules) do begin
+      streamingswapmethodpointer(dependentmodules[int1]^.instance);
+      for int2:= 0 to high(depmodcomps[int1]) do begin
+       descendent1:= dependentcomponents[int1][int2];
+       newancestor1:= amodule^.instance;
+       oldancestor1:= oldancestor0;
+       descendent1:= tmsecomponent(
+                  findnestedcomponent(dependentmodules[int1]^.instance,
+                                                      depmodcomps[int1][int2]));
+       if ancestorcomps <> nil then begin
+        str1:= ancestorcomps[int2 mod length(ancestorcomps)];
+        newancestor1:= tmsecomponent(findnestedcomponent(newancestor1,str1));
+        oldancestor1:= tmsecomponent(findnestedcomponent(oldancestor1,str1));
+        refreshancestor(descendent1,newancestor1,oldancestor1,false,
+         {$ifdef FPC}@{$endif}fdesigner.findancestor,
+         {$ifdef FPC}@{$endif}fdesigner.findcomponentclass,
+         {$ifdef FPC}@{$endif}fdesigner.createcomponent,
+         {$ifdef FPC}@{$endif}findrefreshmethod,
+                             dependentmod[int1]^.methods.fmethodtable
+                                  {amodule^.methods.fmethodtable},
+                                        dependentmod[int1]^.methods.fmethodtable);
        end
        else begin
-        if bo2 then begin
-         setcomponentpos(descendent1,pt1); //restore insert position
+        if destcomps <> nil then begin
+         str1:= destcomps[int2 mod length(destcomps)];
+         oldancestor1:= tmsecomponent(
+                     findnestedcomponent(oldancestor1,str1));
+         newancestor1:= tmsecomponent(
+                     findnestedcomponent(newancestor1,str1));
+        end;
+        bo3:= (csinline in descendent1.componentstate) and 
+                                         (descendent1.owner <> nil); 
+                            //whole submodule
+        bo1:= false;
+        bo2:= false;
+        if bo3 then begin   //submodule
+         bo1:= descendent1 is twidget;
+         if bo1 then begin
+          pt1:= twidget(descendent1).pos;
+          taborderbefore:= twidget(descendent1).taborder;
+         end
+         else begin
+          bo2:= isdatasubmodule(descendent1);
+          if bo2 then begin
+           pt1:= getcomponentpos(descendent1);
+          end;
+         end;
+        end;
+        refreshancestor(descendent1,newancestor1,oldancestor1,false,
+         {$ifdef FPC}@{$endif}fdesigner.findancestor,
+         {$ifdef FPC}@{$endif}fdesigner.findcomponentclass,
+         {$ifdef FPC}@{$endif}fdesigner.createcomponent,
+         {$ifdef FPC}@{$endif}findrefreshmethod,
+                             amodule^.methods.fmethodtable,
+                                        dependentmod[int1]^.methods.fmethodtable);
+        if bo1 then begin
+         twidget(descendent1).pos:= pt1;  //restore insert position
+         twidget(descendent1).taborder:= taborderbefore;
+        end
+        else begin
+         if bo2 then begin
+          setcomponentpos(descendent1,pt1); //restore insert position
+         end;
         end;
        end;
       end;
      end;
+     for int1:= 0 to high(dependentmodules) do begin
+      domodulemodified(dependentmodules[int1],modifylevel,
+                  depmodcomps[int1],destcomps,oldancestorcomponents[int1]);
+     end;
+    finally
+     setlength(frefreshmethods,high(frefreshmethods));
+     fdesigner.fsubmodulelist.renewbackup(amodule^.instance);
+     amodule^.methods.releasemethodtable;
+     endsubmodulecopy;
+     endstreaming;
     end;
-    for int1:= 0 to high(dependentmodules) do begin
-     domodulemodified(dependentmodules[int1],modifylevel,
-                 depmodcomps[int1],destcomps,oldancestorcomponents[int1]);
-    end;
-   finally
-    setlength(frefreshmethods,high(frefreshmethods));
+   end
+   else begin
     fdesigner.fsubmodulelist.renewbackup(amodule^.instance);
-    amodule^.methods.releasemethodtable;
-    endsubmodulecopy;
-    endstreaming;
    end;
-  end
-  else begin
-   fdesigner.fsubmodulelist.renewbackup(amodule^.instance);
+  {$ifdef mse_debugsubmodule}
+   debugwriteln('***end modulemodified '+inttostr(modifylevel)+' '+
+                 amodule^.instance.name);
+ //  po1:= datapo;
+ //  for int1:= 0 to count-1 do begin
+ //   debugwriteln('*'+inttostr(int1)+' '+po1^.ancestor.name+' '+
+ //                                                        po1^.descendent.name);
+ //   inc(po1);
+ //  end;
+  {$endif}
+  if modifylevel = 1 then begin
+   notifygloballoading;
   end;
- {$ifdef mse_debugsubmodule}
-  debugwriteln('***end modulemodified '+inttostr(modifylevel)+' '+
-                amodule^.instance.name);
-//  po1:= datapo;
-//  for int1:= 0 to count-1 do begin
-//   debugwriteln('*'+inttostr(int1)+' '+po1^.ancestor.name+' '+
-//                                                        po1^.descendent.name);
-//   inc(po1);
-//  end;
- {$endif}               
+ finally
+  if modifylevel = 1 then begin
+   endgloballoading;
+  end;
+ end;
 end;
 
 procedure tdescendentinstancelist.modulemodified(const amodule: pmoduleinfoty);

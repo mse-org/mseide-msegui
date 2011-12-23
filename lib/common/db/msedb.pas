@@ -1263,7 +1263,7 @@ type
                          dso_inserttoupdate,dso_syncinsertfields}); 
  datasetoptionsty = set of datasetoptionty;
 
- idscontroller = interface(inullinterface)
+ idscontroller = interface(iactivatorclient)
   procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
   procedure inheritedcancel;
   procedure inheritedpost;
@@ -1325,7 +1325,7 @@ type
  tdscontroller = class(tactivatorcontroller,idsfieldcontroller)
   private
    ffields: tpersistentfields;
-   fintf: idscontroller;
+//   fintf: idscontroller;
    frecno: integer;
    frecnovalid: boolean;
    fscrollsum: integer;
@@ -1474,7 +1474,7 @@ type
                                                      write fonaftercopyrecord;
  end;
  
- idbcontroller = interface(inullinterface)
+ idbcontroller = interface(iactivatorclient)
           ['{B26D004A-7FEE-44F2-9919-3B8612BDD598}']
   procedure setinheritedconnected(const avalue: boolean);
   function readsequence(const sequencename: string): string;
@@ -6873,11 +6873,11 @@ constructor tdscontroller.create(const aowner: tdataset; const aintf: idscontrol
                                    const acancelresync: boolean = true);
 begin
  ffields:= tpersistentfields.create(aowner); 
- fintf:= aintf;
+// fintf:= aintf;
  frecnooffset:= arecnooffset;
  fcancelresync:= acancelresync;
  foptions:= defaultdscontrolleroptions;
- inherited create(aowner);
+ inherited create(aowner,aintf);
 end;
 
 destructor tdscontroller.destroy;
@@ -7203,10 +7203,10 @@ begin
  if not fmovebylock or (event <> dedatasetchange) then begin
   with tdataset(fowner) do begin
    if (event = deupdaterecord) and not modified and (state = dsinsert) then begin
-    fintf.inheriteddataevent(event,info); //for second notnull check
+    idscontroller(fintf).inheriteddataevent(event,info); //for second notnull check
    end;
   end;
-  fintf.inheriteddataevent(event,info);
+  idscontroller(fintf).inheriteddataevent(event,info);
  end;
  state1:= tdataset(fowner).state;
  if (state1 <> fstatebefore) then begin
@@ -7230,7 +7230,7 @@ begin
     dobeforescroll;
    end;
    if fcancelresync and (state = dsinsert) and not modified then begin
-    fintf.inheritedcancel;
+    idscontroller(fintf).inheritedcancel;
     try
      if finsertbm <> '' then begin
       bookmark:= finsertbm;
@@ -7240,7 +7240,7 @@ begin
     finsertbm:= '';
    end
    else begin
-    fintf.inheritedcancel;
+    idscontroller(fintf).inheritedcancel;
    end;
    if bo1 then begin
     doafterscroll;
@@ -7267,7 +7267,7 @@ begin
     fmovebylock:= true;
    end;
    try
-    result:= fintf.inheritedmoveby(distance);
+    result:= idscontroller(fintf).inheritedmoveby(distance);
     if fmovebylock then begin
      fmovebylock:= false;
      dataevent(dedatasetscroll,0);
@@ -7282,12 +7282,12 @@ end;
 procedure tdscontroller.internalinsert;
 begin
  finsertbm:= tdataset(fowner).bookmark;
- fintf.inheritedinternalinsert;
+ idscontroller(fintf).inheritedinternalinsert;
 end;
 
 procedure tdscontroller.internaldelete;
 begin
- fintf.inheritedinternaldelete;
+ idscontroller(fintf).inheritedinternaldelete;
  modified;
  tdataset1(fowner).dataevent(tdataevent(de_afterdelete),0);
 end;
@@ -7328,10 +7328,10 @@ begin
   end;
   try
    if dso_local in foptions then begin
-    fintf.openlocal;
+    idscontroller(fintf).openlocal;
    end
    else begin
-    fintf.inheritedinternalopen;
+    idscontroller(fintf).inheritedinternalopen;
    end;
   finally
    if bo1 then begin
@@ -7360,7 +7360,7 @@ end;
 
 procedure tdscontroller.doonidle(var again: boolean);
 begin
- fintf.doidleapplyupdates;
+ idscontroller(fintf).doidleapplyupdates;
 end;
 
 procedure tdscontroller.registeronidle;
@@ -7385,7 +7385,7 @@ var
  field1: tfield;
 begin
  unregisteronidle;
- fintf.inheritedinternalclose;
+ idscontroller(fintf).inheritedinternalclose;
  with tdataset(fowner) do begin
   for int1:= 0 to fields.count - 1 do begin
    field1:= fields[int1];
@@ -7403,7 +7403,7 @@ end;
 
 function tdscontroller.assql(const avalue: boolean): string;
 begin
- if fintf.getnumboolean then begin
+ if idscontroller(fintf).getnumboolean then begin
   if avalue then begin
    result:= '1';
   end
@@ -7463,7 +7463,7 @@ end;
 
 function tdscontroller.assql(const avalue: currency): string;
 begin
- if fintf.getint64currency then begin
+ if idscontroller(fintf).getint64currency then begin
   result:= inttostr(int64(avalue));
  end
  else begin
@@ -7477,7 +7477,7 @@ begin
   result:= 'NULL';
  end
  else begin
-  if fintf.getfloatdate then begin
+  if idscontroller(fintf).getfloatdate then begin
    result:= encodesqlfloat(avalue);
   end
   else begin
@@ -7492,7 +7492,7 @@ begin
   result:= 'NULL';
  end
  else begin
-  if fintf.getfloatdate then begin
+  if idscontroller(fintf).getfloatdate then begin
    result:= inttostr(trunc(avalue));
   end
   else begin
@@ -7507,7 +7507,7 @@ begin
   result:= 'NULL';
  end
  else begin
-  if fintf.getfloatdate then begin
+  if idscontroller(fintf).getfloatdate then begin
    result:= encodesqlfloat(frac(avalue));
   end
   else begin
@@ -7562,7 +7562,7 @@ begin
       include(fstate,dscs_posting);
       try    
        try
-        fintf.inheritedpost;
+        idscontroller(fintf).inheritedpost;
        except
         on epostcancel do begin
          if bo1 then begin
@@ -7686,7 +7686,7 @@ begin
   tdataset1(fowner).dataevent(dedisabledstatechange,0);
  end;
  if optionsbefore <> foptions then begin
-  fintf.dscontrolleroptionschanged(foptions);
+  idscontroller(fintf).dscontrolleroptionschanged(foptions);
  end;
 end;
 
@@ -7697,7 +7697,7 @@ end;
 
 function tdscontroller.filtereditkind: filtereditkindty;
 begin
- result:= fintf.getfiltereditkind;
+ result:= idscontroller(fintf).getfiltereditkind;
 end;
 
 procedure tdscontroller.beginupdate; //calls diablecontrols, stores bookmark
@@ -7724,12 +7724,12 @@ end;
 
 procedure tdscontroller.beginfilteredit(const akind: filtereditkindty);
 begin
- fintf.beginfilteredit(akind);
+ idscontroller(fintf).beginfilteredit(akind);
 end;
 
 procedure tdscontroller.endfilteredit;
 begin
- fintf.endfilteredit;
+ idscontroller(fintf).endfilteredit;
 end;
 
 function tdscontroller.getfieldar(
@@ -7756,7 +7756,7 @@ begin
   if tdataset(fowner).active and not (csloading in fowner.componentstate) then begin
    if fdelayedapplycount > 0 then begin
     fdelayedapplycount:= 1;
-    fintf.doidleapplyupdates; //apply pending updates.
+    idscontroller(fintf).doidleapplyupdates; //apply pending updates.
    end;
    fdelayedapplycount:= avalue;
    if avalue > 0 then begin
@@ -7807,13 +7807,13 @@ begin
   else begin
    if dscs_restorerecno in fstate then begin
     exclude(fstate,dscs_restorerecno);
-    bo1:= fintf.restorerecno;
-    fintf.restorerecno:= true;
+    bo1:= idscontroller(fintf).restorerecno;
+    idscontroller(fintf).restorerecno:= true;
     try
      tdataset(fowner).refresh;
     finally
      if not bo1 then begin
-      fintf.restorerecno:= false;
+      idscontroller(fintf).restorerecno:= false;
      end;
     end;
    end
@@ -7874,7 +7874,7 @@ begin
     end;
    end
    else begin
-    result:= fintf.islastrecord;
+    result:= idscontroller(fintf).islastrecord;
    end;
   end;
  end;
@@ -7910,7 +7910,7 @@ begin
  if alink <> nil then begin
   field1:= alink.sortfield;
  end;
- result:= fintf.updatesortfield(field1,adescend);
+ result:= idscontroller(fintf).updatesortfield(field1,adescend);
 end;
 
 function tdscontroller.getasmsestring(const afieldname: string): msestring;
@@ -7962,12 +7962,12 @@ end;
 
 procedure tdscontroller.begindisplaydata;
 begin
- fintf.begindisplaydata;
+ idscontroller(fintf).begindisplaydata;
 end;
 
 procedure tdscontroller.enddisplaydata;
 begin
- fintf.enddisplaydata;
+ idscontroller(fintf).enddisplaydata;
 end;
 
 procedure tdscontroller.copyrecord(const aappend: boolean = false);
