@@ -17,7 +17,7 @@ unit mseifids;
 interface
 uses
  classes,db,mseifi,mseclasses,mseglob,mseevent,msedb,msetypes,msebufdataset,
- msestrings,mseifilink,msesqldb,msearrayprops,msehash;
+ msestrings,mseifilink,msesqldb,msearrayprops,msehash,mseapplication;
 
 
 type
@@ -83,7 +83,7 @@ type
                  ids_updating,ids_append,ids_sendpostresult,ids_postpending);
  ifidsstatesty = set of ifidsstatety;
 type  
- iifidscontroller = interface(inullinterface)
+ iifidscontroller = interface(iactivatorclient)
    function getfielddefs: tfielddefs;
    function getfieldinfos: fieldinfoarty;
    procedure requestopendsreceived(const asequence: sequencety);
@@ -120,7 +120,7 @@ type
      
  tifidscontroller = class(tificontroller,ievent)
   private
-   fintf: iifidscontroller;
+//   fintf: iifidscontroller;
    fremotedatachange: notifyeventty;
    fpostsequence: sequencety;
    fpostcode: postresultcodety;
@@ -168,7 +168,7 @@ type
  end;
 
  tifidataset = class(tdataset,idscontroller,igetdscontroller,imselocate,
-                     iifidscontroller,iifimodulelink)
+                     iifidscontroller,iifimodulelink,iactivatorclient)
   private
 //   fifimodulelink: iifimodulelink;
 //   property ifimodulelink: iifimodulelink read fifimodulelink 
@@ -305,7 +305,7 @@ type
    procedure cancelconnection;
    procedure calcrecordsize;
    
-   procedure setactive (value : boolean);{ override;} reintroduce;
+   procedure setactive (const value : boolean);{ override;} reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -399,7 +399,7 @@ type
    property fielddefs;
  end;
 
- ttxsqlquery = class(tmsesqlquery,iifidscontroller)
+ ttxsqlquery = class(tmsesqlquery,iifidscontroller,iactivatorclient)
   private
    fificontroller: tifidscontroller;
    fmodifiedfields: string; //same layout as nullmask
@@ -418,6 +418,8 @@ type
    procedure InternalPost; override;
    function getfieldbuffer(const afield: tfield;
              const isnull: boolean; out datasize: integer): pointer; override;
+   procedure iactivatorclient.setactive = setcontrolleractive;
+   procedure iifidscontroller.setactive = setcontrolleractive;
   //iifids
    function getfielddefs: tfielddefs;
    function getfieldinfos: fieldinfoarty;
@@ -468,7 +470,7 @@ function decodefielddefs(const adata: pfdefdataty;
  
 implementation
 uses
- sysutils,msearrayutils,msedatalist,dbconst,mseapplication,msereal;
+ sysutils,msearrayutils,msedatalist,dbconst,msereal;
 type
  tmsestringfield1 = class(tmsestringfield);
  tdataset1 = class(tdataset);
@@ -715,12 +717,12 @@ constructor tifidscontroller.create(const aowner: tdataset;
 var
  intf1: igetdscontroller;
 begin
- fintf:= aintf;
+// fintf:= aintf;
  if getcorbainterface(aowner,typeinfo(igetdscontroller),intf1) then begin
   fdscontroller:= intf1.getcontroller;
  end;
 // ffieldoptions:= tififieldoptions.create(typeinfo(ififieldoptionsty));
- inherited create(aowner);
+ inherited create(aowner,aintf);
 end;
 
 destructor tifidscontroller.destroy;
@@ -736,7 +738,7 @@ var
  infos: fieldinfoarty;
 begin
  int2:= 0;
- infos:= fintf.getfieldinfos;
+ infos:= iifidscontroller(fintf).getfieldinfos;
  for int1:= 0 to high(ftxbindings) do begin
   int2:= int2 + length(infos[ftxbindings[int1]].ext.field.fieldname);
  end;
@@ -780,7 +782,7 @@ var
  index1: integer;
  
 begin                 //postrecord
- fieldinfos1:= fintf.getfieldinfos;
+ fieldinfos1:= iifidscontroller(fintf).getfieldinfos;
  setlength(ar1,length(fieldinfos1)); //max
  int2:= 0;
  int3:= 0;
@@ -817,7 +819,7 @@ begin                 //postrecord
   if not senddataandwait(str1,fpostsequence) then begin
    exclude(fistate,ids_postpending);
    application.errormessage('Timeout.');
-   fintf.cancelconnection;
+   iifidscontroller(fintf).cancelconnection;
   end
   else begin
    if (fpostcode <> pc_ok) then begin
@@ -837,13 +839,13 @@ procedure tifidscontroller.post;
 begin
  if fistate * [ids_remotedata,ids_updating] = [] then begin
   if tdataset(fowner).state = dsinsert then begin
-   postrecord1(frk_insert,pbyte(fintf.getmodifiedfields));
+   postrecord1(frk_insert,pbyte(iifidscontroller(fintf).getmodifiedfields));
   end
   else begin
-   postrecord1(frk_edit,pbyte(fintf.getmodifiedfields));
+   postrecord1(frk_edit,pbyte(iifidscontroller(fintf).getmodifiedfields));
   end;
   exclude(fistate,ids_append);
-  fintf.initmodifiedfields;
+  iifidscontroller(fintf).initmodifiedfields;
  end;
 end;
 
@@ -871,7 +873,7 @@ procedure tifidscontroller.delete;
 begin
  if fistate * [ids_remotedata,ids_updating] = [] then begin
   postrecord1(frk_delete,nil);
-  fintf.initmodifiedfields;
+  iifidscontroller(fintf).initmodifiedfields;
  end;
 end;
 
@@ -983,7 +985,7 @@ begin
    try
     checkbrowsemode;
 //    disablecontrols;
-    ar1:= fintf.getfieldinfos;
+    ar1:= iifidscontroller(fintf).getfieldinfos;
     bm:= bookmark;
     include(fistate,ids_remotedata);
     try
@@ -1013,17 +1015,17 @@ begin
         with ar1[frxbindings[index1]],base,ext do begin
          inc(po1,sizeof(mseifi.fielddataty.header));
          inc(po1,ifidatatofield(pifidataty(po1),field));
-         clearfieldflag(pbyte(fintf.getmodifiedfields),index1);
+         clearfieldflag(pbyte(iifidscontroller(fintf).getmodifiedfields),index1);
                      //reset changeflag
         end;
        end;
       end;
-      fintf.initmodifiedfields; //init for postecho
+      iifidscontroller(fintf).initmodifiedfields; //init for postecho
       post;
      end;
      if (irxo_postecho in foptions) and 
             (adata^.header.kind in [frk_insert,frk_edit]) then begin
-      str1:= fintf.getmodifiedfields;
+      str1:= iifidscontroller(fintf).getmodifiedfields;
       if not isnullstring(str1) then begin
        application.postevent(tpostechoevent.create(str1,bookmark,
                                     ievent(self)));      
@@ -1071,14 +1073,14 @@ begin
     requestfielddefsreceived(header.sequence);
    end;
    ik_requestopen: begin
-    fintf.requestopendsreceived(header.sequence);
+    iifidscontroller(fintf).requestopendsreceived(header.sequence);
    end;
    ik_fielddefsdata: begin
-    fintf.fielddefsdatareceived(header.answersequence,
+    iifidscontroller(fintf).fielddefsdatareceived(header.answersequence,
               pfielddefsdatadataty(adatapo));
    end;
    ik_dsdata: begin
-    fintf.dsdatareceived(header.answersequence,pfielddefsdatadataty(adatapo));
+    iifidscontroller(fintf).dsdatareceived(header.answersequence,pfielddefsdatadataty(adatapo));
    end;
    ik_postresult: begin
     if (ids_postpending in fistate) and 
@@ -1153,7 +1155,7 @@ begin
   result:= encodeifinull;
  end
  else begin
-  with fintf.getfieldinfos[aindex],base,ext do begin
+  with iifidscontroller(fintf).getfieldinfos[aindex],base,ext do begin
    case fieldtype of
     ftinteger: begin
      result:= encodeifidata(pinteger(pointer(recpo)+offset)^);
@@ -1223,10 +1225,10 @@ begin
  ind1:= 1;
  move(arecordcount,result[1],sizeof(arecordcount));
  inc(ind1,sizeof(arecordcount));
- bufbefore:= fintf.setcurrentbuf(nil);
+ bufbefore:= iifidscontroller(fintf).setcurrentbuf(nil);
  statebefore:= tdataset1(fowner).settempstate(dscurvalue);
  for int1:= 0 to arecordcount - 1 do begin
-  fintf.setcurrentbuf(abufs[int1]);
+  iifidscontroller(fintf).setcurrentbuf(abufs[int1]);
   for int2:= 0 to high(ftxbindings) do begin
    str1:= encoderecord(ftxbindings[int2],abufs[int1]);
    if ind1 + length(str1) > length(result) then begin
@@ -1236,7 +1238,7 @@ begin
    inc(ind1,length(str1));
   end;
  end;
- fintf.setcurrentbuf(bufbefore);
+ iifidscontroller(fintf).setcurrentbuf(bufbefore);
  tdataset1(fowner).restorestate(statebefore);
  setlength(result,ind1 - 1);
 end;
@@ -1267,7 +1269,7 @@ var
  ar1: fieldinfoarty;
 begin
  result:= nil; 
- ar1:= fintf.getfieldinfos;
+ ar1:= iifidscontroller(fintf).getfieldinfos;
  if aindex <= high(ar1) then begin
   result:= ar1[aindex].ext.field;
  end;
@@ -1278,7 +1280,7 @@ var
  int1,int2: integer;
  ar1: fieldinfoarty;
 begin
- ar1:= fintf.getfieldinfos;
+ ar1:= iifidscontroller(fintf).getfieldinfos;
  setlength(ftxbindings,length(ar1));
  int2:= 0;
  for int1:= 0 to high(ftxbindings) do begin
@@ -2098,7 +2100,7 @@ begin
  fificontroller.fistate:= fificontroller.fistate - openflags;
 end;
 
-procedure tifidataset.setactive(value: boolean);
+procedure tifidataset.setactive(const value: boolean);
 begin
  if not value then begin
   cancelconnection;

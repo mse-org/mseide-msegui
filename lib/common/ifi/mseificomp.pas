@@ -1003,11 +1003,11 @@ end;
                                               implements iififieldsource;
          //not working in FPC 2.4
   {$endif}
-   procedure setactive(const avalue: boolean);
    procedure getbindinginfo(const alink: pointer); 
   protected
    factive: boolean;
    ffields: tififields;
+   procedure setactive(const avalue: boolean); override;
    procedure open; virtual;
    procedure afteropen;
    procedure close; virtual;

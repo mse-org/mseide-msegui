@@ -138,6 +138,8 @@ type
    factioncount: integer;
    procedure setwaitcursor(const avalue: boolean);
   protected
+     //iactivatorclient
+    procedure setactive(const avalue: boolean); virtual;
     procedure DoConnect; virtual;
     procedure DoDisconnect; virtual;
     function GetConnected : boolean; virtual;
@@ -280,7 +282,8 @@ type
   protected
    procedure setowneractive(const avalue: boolean); override;
   public
-   constructor create(const aowner: tmdbtransaction);
+   constructor create(const aowner: tmdbtransaction; 
+                                    const aintf: iactivatorclient);
  end;
 
  
@@ -1050,6 +1053,12 @@ begin
       end;
     end;
 end;
+
+procedure tcustomconnection.setactive(const avalue: boolean);
+begin
+ connected:= avalue;
+end;
+
 {
 procedure TCustomConnection.SetBeforeDisconnect(const AValue: TNotifyEvent);
 begin
@@ -1140,9 +1149,10 @@ end;
 
 { ttacontroller }
 
-constructor ttacontroller.create(const aowner: tmdbtransaction);
+constructor ttacontroller.create(const aowner: tmdbtransaction;
+                                  const aintf: iactivatorclient);
 begin
- inherited create(aowner);
+ inherited create(aowner,aintf);
 end;
 
 procedure ttacontroller.setowneractive(const avalue: boolean);

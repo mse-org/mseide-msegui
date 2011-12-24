@@ -186,13 +186,49 @@ type
    procedure add(const akey: ptruint; const avalue: pointer);
    function addunique(const akey: ptruint; const avalue: pointer): boolean;
                    //true if found
-   procedure delete(const akey: ptruint; const avalue: pointer);
+   procedure delete(const akey: ptruint; const avalue: pointer); overload;
    function find(const akey: ptruint): pointer; overload;
    function find(const akey: ptruint; out avalue: pointer): boolean; overload;
    function first: ppointerptruintdataty;
    function next: ppointerptruintdataty;
    procedure iterate(const akey: ptruint;
                      const aiterator: pointerptruintiteratorprocty); overload;
+ end;
+
+ ansistringptruintdataty = record
+  key: ptruint;
+  data: ansistring;
+ end;
+ pansistringptruintdataty = ^ansistringptruintdataty;
+ ansistringptruinthashdataty = record
+  header: hashheaderty;
+  data: ansistringptruintdataty;
+ end;
+ pansistringptruinthashdataty = ^ansistringptruinthashdataty;
+
+ ansistringptruintiteratorprocty = 
+                     procedure(var aitem: ansistringptruintdataty) of object;
+
+ tansistringptruinthashdatalist = class(tptruinthashdatalist)
+  private
+   fansistringparam: ansistring;
+  protected
+   procedure checkexact(const aitemdata; var accept: boolean); override;
+   procedure finalizeitem(var aitemdata); override;
+  public
+   constructor create;
+   procedure add(const akey: ptruint; const avalue: ansistring);
+   function addunique(const akey: ptruint; const avalue: ansistring): boolean;
+                   //true if found
+   procedure delete(const akey: ptruint; const avalue: ansistring); overload;
+   function find(const akey: ptruint): ansistring; overload;
+   function find(const akey: ptruint; out avalue: ansistring): boolean; overload;
+   function first: pansistringptruintdataty;
+   function next: pansistringptruintdataty;
+   procedure iterate(const akey: ptruint;
+                     const aiterator: ansistringptruintiteratorprocty); overload;
+   function setdata(const akey: ptruint; const avalue: ansistring): boolean;
+                      //false if not found
  end;
  
  ansistringdataty = record
@@ -1164,6 +1200,102 @@ procedure tpointerptruinthashdatalist.iterate(const akey: ptruint;
                const aiterator: pointerptruintiteratorprocty);
 begin
  iterate(akey,keyhashiteratorprocty(aiterator));
+end;
+
+{ tansistringptruinthashdatalist }
+
+constructor tansistringptruinthashdatalist.create;
+begin
+ inherited create(sizeof(ansistring));
+ fstate:= fstate + [hls_needsnull,hls_needsfinalize];
+end;
+
+procedure tansistringptruinthashdatalist.add(const akey: ptruint;
+                                       const avalue: ansistring);
+begin
+ pansistring(inherited add(akey))^:= avalue;
+end;
+
+function tansistringptruinthashdatalist.find(const akey: ptruint;
+                                             out avalue: ansistring): boolean;
+var
+ po1: pansistring;
+begin
+ po1:= inherited find(akey);
+ result:= po1 <> nil;
+ if result then begin
+  avalue:= po1^;
+ end
+ else begin
+  avalue:= '';
+ end;
+end;
+
+function tansistringptruinthashdatalist.addunique(const akey: ptruint;
+                                               const avalue: ansistring): boolean;
+var
+ po1: pansistring;
+begin
+ result:= true;
+ po1:= inherited find(akey);
+ if po1 = nil then begin
+  result:= false;
+  po1:= inherited add(akey);
+  po1^:= avalue;
+ end;
+end;
+
+procedure tansistringptruinthashdatalist.checkexact(const aitemdata;
+               var accept: boolean);
+begin
+ accept:= ansistringptruintdataty(aitemdata).data = fansistringparam;
+end;
+
+procedure tansistringptruinthashdatalist.delete(const akey: ptruint;
+               const avalue: ansistring);
+//var
+// po1: phashdataty;
+begin
+ fansistringparam:= avalue;
+ internaldeleteitem(internalfindexact(akey));
+end;
+
+function tansistringptruinthashdatalist.find(const akey: ptruint): ansistring;
+begin
+ find(akey,result);
+end;
+
+function tansistringptruinthashdatalist.first: pansistringptruintdataty;
+begin
+ result:= pansistringptruintdataty(internalfirst);
+end;
+
+function tansistringptruinthashdatalist.next: pansistringptruintdataty;
+begin
+ result:= pansistringptruintdataty(internalnext);
+end;
+
+procedure tansistringptruinthashdatalist.iterate(const akey: ptruint;
+               const aiterator: ansistringptruintiteratorprocty);
+begin
+ iterate(akey,keyhashiteratorprocty(aiterator));
+end;
+
+procedure tansistringptruinthashdatalist.finalizeitem(var aitemdata);
+begin
+ finalize(ansistringptruintdataty(aitemdata));
+end;
+
+function tansistringptruinthashdatalist.setdata(const akey: ptruint;
+               const avalue: ansistring): boolean;
+var
+ po1: pansistring;
+begin
+ po1:= inherited find(akey);
+ result:= po1 <> nil;
+ if result then begin
+  po1^:= avalue;
+ end;
 end;
 
 { tansistringhashdatalist }

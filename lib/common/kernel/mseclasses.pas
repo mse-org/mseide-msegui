@@ -15,6 +15,9 @@ unit mseclasses;
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
 {$endif}
+{$ifndef mse_methodswap}
+ {$ifdef FPC} {$define mse_nomethodswap}{$endif}
+{$endif}
 
 interface
 uses
@@ -751,20 +754,29 @@ function findmoduledata(const aclassname: string;
 function getfproppath(const writer:twriter): string;
 procedure setfproppath(const writer:twriter; const value: string);
 
+procedure freecomponents(const acomponents: componentarty);
+                    //uses freenotification
 function copycomponent(const source: tcomponent; const aowner: tcomponent = nil;
               const onfindancestor: tfindancestorevent = nil;
               const onfindcomponentclass: tfindcomponentclassevent = nil;
               const oncreatecomponent: tcreatecomponentevent = nil;
               const onancestornotfound: tancestornotfoundevent = nil): tcomponent;
                 //copy by stream.writecomponent, readcomponent
-procedure refreshancestor(const descendent,newancestor,oldancestor: tcomponent;
+procedure refreshancestor(var deletedcomps: componentarty;
+              const descendent,newancestor,oldancestor: tcomponent;
               const revert: boolean;
               const onfindancestor: tfindancestorevent = nil;
               const onfindcomponentclass: tfindcomponentclassevent = nil;
               const oncreatecomponent: tcreatecomponentevent = nil;
+             {$ifdef mse_nomethodswap}
+              const onsetmethodproperty: tsetmethodpropertyevent = nil;
+              const onwritemethodproperty: twritemethodpropertyevent = nil
+             {$else}
               const onfindmethod: tfindmethodevent = nil;
               const sourcemethodtab: pointer = nil;
-              const destmethodtab: pointer = nil);
+              const destmethodtab: pointer = nil
+             {$endif});
+             
 procedure initinline(const acomponent: tcomponent);
                  //sets inline, resets ancestor, sets ancestor of children
 procedure checkinline(const acomponent: tcomponent);
@@ -1718,6 +1730,57 @@ begin
  end;
 end;
 
+type
+ tcomponentdestroyer = class(tcomponent)
+  private
+   fcomps: componentarty;
+   fcurrentcomponent: tcomponent;
+  protected
+   procedure notification(acomponent: tcomponent;
+                                   operation: toperation); override;
+  public
+   constructor create(const acomps: componentarty); reintroduce;
+ end;
+
+{ tcomponentdestroyer }
+
+constructor tcomponentdestroyer.create(const acomps: componentarty);
+var
+ int1: integer;
+begin
+ inherited create(nil);
+ fcomps:= copy(acomps);
+ for int1:= 0 to high(fcomps) do begin
+  fcomps[int1].freenotification(self);
+ end;
+ for int1:= 0 to high(fcomps) do begin
+  fcurrentcomponent:= fcomps[int1];
+  fcurrentcomponent.free;
+ end;
+end;
+
+procedure tcomponentdestroyer.notification(acomponent: tcomponent;
+                                                  operation: toperation);
+var
+ int1: integer;
+begin
+ if (operation = opremove) and (acomponent <> fcurrentcomponent) then begin
+  for int1:= high(fcomps) downto 0 do begin
+   if fcomps[int1] = acomponent then begin
+    fcomps[int1]:= nil;
+    break;
+   end;
+  end;
+ end;
+ inherited;
+end;
+ 
+procedure freecomponents(const acomponents: componentarty);
+                    //uses freenotification
+begin
+ tcomponentdestroyer.create(acomponents).free;
+end;
+
 function copycomponent(const source: tcomponent; const aowner: tcomponent = nil;
               const onfindancestor: tfindancestorevent = nil;
               const onfindcomponentclass: tfindcomponentclassevent = nil;
@@ -2051,15 +2114,20 @@ begin
  inherited;
 end;
 
-
-procedure refreshancestor(const descendent,newancestor,oldancestor: tcomponent;
+procedure refreshancestor(var deletedcomps: componentarty;
+              const descendent,newancestor,oldancestor: tcomponent;
               const revert: boolean; 
               const onfindancestor: tfindancestorevent = nil;
               const onfindcomponentclass: tfindcomponentclassevent = nil;
               const oncreatecomponent: tcreatecomponentevent = nil;
+             {$ifdef mse_nomethodswap}
+              const onsetmethodproperty: tsetmethodpropertyevent = nil;
+              const onwritemethodproperty: twritemethodpropertyevent = nil
+             {$else}
               const onfindmethod: tfindmethodevent = nil;
               const sourcemethodtab: pointer = nil;
-              const destmethodtab: pointer = nil);
+              const destmethodtab: pointer = nil
+             {$endif});
 
 var
  descendentroot: tcomponent;
@@ -2103,8 +2171,9 @@ var
       end;
      end;
      if (comp1 = nil) and (revert or (comp2 <> nil)) then begin
+      additem(pointerarty(deletedcomps),pointer(descendentar[int1]));
 //      freedesigncomponent(descendentar[int1]);
-      descendentar[int1].free;
+//      descendentar[int1].free;
      end
      else begin
       if revert or (comp2 <> nil) then begin
@@ -2134,19 +2203,21 @@ var
 
 var
  nonancestors: componentarty;
- stream1,stream2: tmemorystream;
+ stream1,stream2,stream4: tmemorystream;
  writer: twritermse;
  reader: treader;
  inl: boolean;
  int1,int2: integer;
+ intf1: iactivatorclient;
+{$ifndef mse_nomethodswap}
  tabbefore: pointer;
+{$endif}
  {$ifdef mse_debugrefresh}
  comp1: tcomponent;
  stream3: ttextstream;
  {$endif}
  
 begin
- begingloballoading;
  descendentroot:= rootcomponent(descendent);
  newancestorroot:= rootcomponent(newancestor);
  oldancestorroot:= rootcomponent(oldancestor);
@@ -2162,21 +2233,23 @@ begin
   end;
   setlength(nonancestors,int2);
  end;
- {$ifdef mse_debugrefresh}
-  if revert then begin
-   write('****revert ');
-  end
-  else begin
-   write('****refresh ');
-  end;
-  comp1:= descendentroot;
-  writeln('root: '+comp1.name+' descendent: '+ descendent.name + ' newancestor: '+
-         newancestor.name + ' oldancestor: '+oldancestor.name);
-  dumpcomponent(descendent,'*descendent');
-  dumpcomponent(newancestor,'*newancestor');
-  dumpcomponent(oldancestor,'*oldancestor');
+
+{$ifdef mse_debugrefresh}
+ if revert then begin
+  write('****revert ');
+ end
+ else begin
+  write('****refresh ');
+ end;
+ comp1:= descendentroot;
+ writeln('root: '+comp1.name+' descendent: '+ descendent.name + ' newancestor: '+
+        newancestor.name + ' oldancestor: '+oldancestor.name);
+ dumpcomponent(descendent,'*descendent');
+ dumpcomponent(newancestor,'*newancestor');
+ dumpcomponent(oldancestor,'*oldancestor');
  stream3:= ttextstream.create;
- {$endif}
+{$endif}
+
  eventhandler:= trefreshancestoreventhandler.create(nil);
  for int1:= 0 to high(nonancestors) do begin
   nonancestors[int1].freenotification(eventhandler);
@@ -2185,112 +2258,176 @@ begin
  nonancestors:= nil;
  stream1:= tmemorystream.Create;
  stream2:= tmemorystream.Create;
+ stream4:= tmemorystream.Create;
+
  try
   writer:= trefreshwriter.Create(stream1,4096,false);
+{$ifdef mse_nomethodswap}
+  writer.onwritemethodproperty:= onwritemethodproperty;
+{$else}
   tabbefore:= nil; //compiler warning
   if destmethodtab <> nil then begin
    tabbefore:= swapmethodtable(descendent,destmethodtab);
   end;
+{$endif}
   try
    writer.OnFindAncestor:= onfindancestor;
    writer.WriteDescendent(descendent,oldancestor); //changes from oldancestor
   finally
+{$ifndef mse_nomethodswap}
    if destmethodtab <> nil then begin
     swapmethodtable(descendent,tabbefore);
    end;
+{$endif}
    writer.Free;
   end;
- {$ifdef mse_debugrefresh}
-   stream1.position:= 0;
-   objectbinarytotextmse(stream1,stream3);
-   stream3.position:= 0;
-   writeln('changes descendent->oldancestor');
-   stream3.writetotext(output);
- {$endif}
+
+{$ifdef mse_debugrefresh}
+  stream1.position:= 0;
+  objectbinarytotextmse(stream1,stream3);
+  stream3.position:= 0;
+  writeln('**changes descendent->oldancestor');
+  stream3.writetotext(output);
+{$endif}
+
   writer:= twritermse.Create(stream2,4096,false);
   inl:= csinline in newancestor.componentstate;
-//  anc:= csancestor in newancestor.componentstate;
   if csinline in descendent.componentstate then begin
    tmsecomponent(newancestor).SetInline(true);
   end;
-//  tcomponent1(newancestor).SetAncestor(true);
+
+{$ifdef mse_nomethodswap}
+  writer.onwritemethodproperty:= onwritemethodproperty;
+{$else}
   if sourcemethodtab <> nil then begin
    tabbefore:= swapmethodtable(newancestor,sourcemethodtab);
   end;
+{$endif}
+
   try
    writer.OnFindAncestor:= onfindancestor;
-//   writer.WriteDescendent(newancestor,oldancestor); //new state
-   writer.WriteDescendent(newancestor,descendent); //new state
+   writer.WriteDescendent(newancestor,descendent); 
+                                       //new state before deactivate
+   writer.free;
+  {$ifdef mse_debugrefresh}
+   stream2.position:= 0;
+   stream3.setsize(0);
+   objectbinarytotextmse(stream2,stream3);
+   stream3.position:= 0;
+   writeln('**changes newancestor->descendent before deactivate');
+   stream3.writetotext(output);
+  {$endif}
+
+   if descendent is tactcomponent then begin
+    tactcomponent(descendent).deactivate(true);
+   end
+   else begin
+    if getcorbainterface(descendent,typeinfo(iactivatorclient),intf1) then begin
+     intf1.setactive(false);
+    end;
+   end;
+ 
+   writer:= twritermse.Create(stream4,4096,false);
+  {$ifdef mse_nomethodswap}
+   writer.onwritemethodproperty:= onwritemethodproperty;
+  {$endif}
+   writer.WriteDescendent(newancestor,descendent); //new state after deactivate
   finally
+   writer.free;
    tmsecomponent(newancestor).SetInline(inl);
-//   tcomponent1(newancestor).SetAncestor(anc);
+{$ifndef mse_nomethodswap}
    if sourcemethodtab <> nil then begin
     swapmethodtable(newancestor,tabbefore);
    end;
-   writer.Free;
+{$endif}
   end;
+
  {$ifdef mse_debugrefresh}
-  stream2.position:= 0;
+  stream4.position:= 0;
   stream3.setsize(0);
-  objectbinarytotextmse(stream2,stream3);
+  objectbinarytotextmse(stream4,stream3);
   stream3.position:= 0;
-  writeln('changes newancestor->descendent');
+  writeln('**changes newancestor->descendent after deactivate');
   stream3.writetotext(output);
  {$endif}
+
   stream1.Position:= 0;
   stream2.Position:= 0;
-  reader:= tasinheritedreader.create(stream2,4096,inl{false});  //new state
+  stream4.Position:= 0;
+
+ {$ifndef mse_nomethodswap}
   if destmethodtab <> nil then begin
    tabbefore:= swapmethodtable(descendent,destmethodtab);
   end;
+ {$endif}
   try
+   reader:= tasinheritedreader.create(stream2,4096,inl{false});  
+                    //new state before deactivate
    reader.OnFindComponentClass:= onfindcomponentclass;
    reader.OnCreateComponent:= oncreatecomponent;
+  {$ifdef mse_nomethodswap}
+   reader.onsetmethodproperty:= onsetmethodproperty;
+  {$else}
    reader.onfindmethod:= onfindmethod;
+  {$endif}
    reader.onancestornotfound:= 
                 {$ifdef FPC}@{$endif}eventhandler.doancestornotfound;
  {$ifdef mse_debugrefresh}
-    writeln('*reading changes newancestor->descendent');
+    writeln('**reading changes newancestor->descendent before deactivate');
  {$endif}
-   if not revert then begin
-   end;
    reader.ReadRootComponent(descendent); //changes
-  finally
-   if destmethodtab <> nil then begin
-    swapmethodtable(descendent,tabbefore);
-   end;
    reader.free;
-   removefixupreferences(descendent,'');
-  end;
-  if not revert then begin
-   reader:= tasinheritedreader.create(stream1,4096,false);  //restore old changes
-   if destmethodtab <> nil then begin
-    tabbefore:= swapmethodtable(descendent,destmethodtab);
-   end;
-   try
+
+   reader:= tasinheritedreader.create(stream4,4096,inl{false});  
+                    //new state after deactivate
+   reader.OnFindComponentClass:= onfindcomponentclass;
+   reader.OnCreateComponent:= oncreatecomponent;
+  {$ifdef mse_nomethodswap}
+   reader.onsetmethodproperty:= onsetmethodproperty;
+  {$else}
+   reader.onfindmethod:= onfindmethod;
+  {$endif}
+   reader.onancestornotfound:= 
+                {$ifdef FPC}@{$endif}eventhandler.doancestornotfound;
+ {$ifdef mse_debugrefresh}
+    writeln('**reading changes newancestor->descendent after deactivate');
+ {$endif}
+   reader.ReadRootComponent(descendent); //changes
+  
+   if not revert then begin
+    reader.free;
+    reader:= tasinheritedreader.create(stream1,4096,false);  //restore old changes
     reader.OnFindComponentClass:= onfindcomponentclass;
     reader.OnCreateComponent:= oncreatecomponent;
+   {$ifdef mse_nomethodswap}
+    reader.onsetmethodproperty:= onsetmethodproperty;
+   {$else}
     reader.onfindmethod:= onfindmethod;
+   {$endif}
     reader.onsetname:= {$ifdef FPC}@{$endif}eventhandler.onsetname;
     reader.onerror:= {$ifdef FPC}@{$endif}eventhandler.onerror;
     reader.onancestornotfound:= 
                 {$ifdef FPC}@{$endif}eventhandler.doancestornotfound;
  {$ifdef mse_debugrefresh}
-    writeln('*reading changes descendent->oldancestor');
+    writeln('**reading changes descendent->oldancestor');
  {$endif}
     reader.ReadRootComponent(descendent); //changes descendent->oldancestor
-   {$ifdef mse_debugrefresh}
-    dumpcomponent(descendent,'descendent');
-   {$endif}
-   finally
-    if destmethodtab <> nil then begin
-     swapmethodtable(descendent,tabbefore);
-    end;
-    reader.free;
-    removefixupreferences(descendent,'');
    end;
+
+  {$ifdef mse_debugrefresh}
+   dumpcomponent(descendent,'descendent');
+  {$endif}
+  
+  finally
+  {$ifndef mse_nomethodswap}
+   if destmethodtab <> nil then begin
+    swapmethodtable(descendent,tabbefore);
+   end;
+  {$endif}
+   reader.free;
+   removefixupreferences(descendent,'');
   end;
-  notifygloballoading;
+
  finally
   try
    nonancestors:= eventhandler.fnonancestors;
@@ -2298,13 +2435,16 @@ begin
   finally
    stream1.Free;
    stream2.Free;
-   {$ifdef mse_debugrefresh}
+   stream4.Free;
+ 
+  {$ifdef mse_debugrefresh}
    stream3.free;
-   {$endif}
+  {$endif}
+
    eventhandler.free;
-   endgloballoading;
   end;
  end;
+
 end;
 
 var

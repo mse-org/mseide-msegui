@@ -11,10 +11,10 @@ unit msesdfdata;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,db,sdfdata,msedb,msestrings;
+ classes,db,sdfdata,msedb,msestrings,mseapplication;
 type
  tmsefixedformatdataset = class(tfixedformatdataset,imselocate,
-                             idscontroller,igetdscontroller)
+                             idscontroller,igetdscontroller,iactivatorclient)
   private
    ffilename: filenamety;
    fcontroller: tdscontroller;
@@ -44,7 +44,7 @@ type
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
-   procedure setactive (value : boolean); reintroduce;
+   procedure setactive (const value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -86,7 +86,8 @@ type
    property Readonly default false;
  end;
  
- tmsesdfdataset = class(tsdfdataset,imselocate,idscontroller,igetdscontroller)
+ tmsesdfdataset = class(tsdfdataset,imselocate,idscontroller,igetdscontroller,
+                                        iactivatorclient)
   private
    ffilename: filenamety;
    fcontroller: tdscontroller;
@@ -116,7 +117,7 @@ type
    procedure setrestorerecno(const avalue: boolean);
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
   protected
-   procedure setactive (value : boolean); reintroduce;
+   procedure setactive (const value : boolean); reintroduce;
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -218,7 +219,7 @@ begin
  result:= inherited active;
 end;
 
-procedure tmsefixedformatdataset.setactive(value: boolean);
+procedure tmsefixedformatdataset.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
   inherited;
@@ -474,7 +475,7 @@ begin
  result:= inherited active;
 end;
 
-procedure tmsesdfdataset.setactive(value: boolean);
+procedure tmsesdfdataset.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
   inherited;

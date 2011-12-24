@@ -467,7 +467,7 @@ type
    //iifimodulelink
    procedure connectmodule(const sender: tcustommodulelink);
   public
-   constructor create(const aowner: tcomponent);
+   constructor create(const aowner: tcomponent; const aintf: iactivatorclient);
    function cansend: boolean;
   published
    property channel: tcustomiochannel read fchannel write setchannel;
@@ -673,7 +673,7 @@ type
                                     override;
    function encodegriddata(const asequence: sequencety): ansistring; override;
   public
-   constructor create(const aowner: ttxdatagrid);
+   constructor create(const aowner: ttxdatagrid; const aintf: iactivatorclient);
  end;
 
  ifigriditemeventty = procedure(const sender: ttxdatagrid;
@@ -684,7 +684,7 @@ type
                   const fromindex,toindex,acount: integer) of object;
  ifigrideventty = procedure(const sender: ttxdatagrid) of object;
 
- ttxdatagrid = class(tmsecomponent)
+ ttxdatagrid = class(tactcomponent)
   private
    fifi: ttxdatagridcontroller;
    fdatacols: tifidatacols;
@@ -2251,11 +2251,12 @@ end;
 
 { tificontroller }
 
-constructor tificontroller.create(const aowner: tcomponent);
+constructor tificontroller.create(const aowner: tcomponent;
+                                     const aintf: iactivatorclient);
 begin
  foptions:= defaultifirxoptions;
  fdefaulttimeout:= defaultifirxtimeout;
- inherited create(aowner);
+ inherited create(aowner,aintf);
 end;
 
 procedure tificontroller.connectmodule(const sender: tcustommodulelink);
@@ -3094,7 +3095,7 @@ end;
 
 constructor ttxdatagrid.create(aowner: tcomponent);
 begin
- fifi:= ttxdatagridcontroller.create(self);
+ fifi:= ttxdatagridcontroller.create(self,iactivatorclient(self));
  inherited;
  fdatacols:= tifidatacols.create(self);
 end;
@@ -3374,9 +3375,10 @@ end;
 
 { ttxdatagridcontroller }
 
-constructor ttxdatagridcontroller.create(const aowner: ttxdatagrid);
+constructor ttxdatagridcontroller.create(const aowner: ttxdatagrid;
+                    const aintf: iactivatorclient);
 begin
- inherited create(aowner);
+ inherited create(aowner,aintf);
 end;
 
 procedure ttxdatagridcontroller.processdata(const adata: pifirecty;

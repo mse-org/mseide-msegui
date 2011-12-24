@@ -12,13 +12,13 @@ unit msesqldb;
 interface
 uses
  classes,db,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseglob,
- msedatabase,sysutils,msetimer,msestrings,msearrayprops;
+ msedatabase,sysutils,msetimer,msestrings,msearrayprops,mseapplication;
 
 const
  defaultsqlcontrolleroptions = defaultdscontrolleroptions + 
                          [dso_autoapply,dso_autocommitret];
 type
- tmsesqltransaction = class(tsqltransaction)
+ tmsesqltransaction = class(tsqltransaction,iactivatorclient)
   private
    fcontroller: ttacontroller;
    function getactive: boolean;
@@ -58,7 +58,7 @@ type
  end;
                               
  tmsesqlquery = class(tsqlquery,imselocate,idscontroller,igetdscontroller,
-                              isqlpropertyeditor)
+                              isqlpropertyeditor,iactivatorclient)
   private
    fsqlonchangebefore: notifyeventty;
 //   fcontroller: tdscontroller;
@@ -80,6 +80,9 @@ type
   protected
    procedure checkpendingupdates; override;
    procedure setactive(avalue: boolean); override;
+   procedure setcontrolleractive(const avalue: boolean);
+   procedure idscontroller.setactive = setcontrolleractive;
+   procedure iactivatorclient.setactive = setcontrolleractive;
    procedure afterapply; override;
    procedure updateindexdefs; override;
    procedure sqlonchange(const sender: tobject);
@@ -94,10 +97,10 @@ type
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
    function islocal: boolean; override;
-  //icursorclient
+    //icursorclient
    function stringmemo: boolean; override;
        //memo fields are text(0) fields
-  //idscontroller
+    //idscontroller
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
    procedure inheritedpost;
@@ -404,14 +407,14 @@ type
  
 implementation
 uses
- dbconst,msesysutils,typinfo,msedatalist,mseapplication,msesqlresult;
+ dbconst,msesysutils,typinfo,msedatalist,msesqlresult;
  
 { tmsesqltransaction }
 
 constructor tmsesqltransaction.create(aowner: tcomponent);
 begin
  inherited;
- fcontroller:= ttacontroller.create(self);
+ fcontroller:= ttacontroller.create(self,iactivatorclient(self));
 end;
 
 destructor tmsesqltransaction.destroy;
@@ -891,6 +894,12 @@ function tmsesqlquery.stringmemo: boolean;
 begin
  result:= dso_stringmemo in fcontroller.options;
 end;
+
+procedure tmsesqlquery.setcontrolleractive(const avalue: boolean);
+begin
+ setactive(avalue);
+end;
+
 {
 procedure tmsesqlquery.dscontrolleroptionschanged(const aoptions: datasetoptionsty);
 begin

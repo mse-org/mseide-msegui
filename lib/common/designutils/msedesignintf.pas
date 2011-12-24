@@ -10,6 +10,9 @@
 unit msedesignintf;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifndef mse_methodswap}
+ {$ifdef FPC} {$define mse_nomethodswap}{$endif}
+{$endif}
 
 interface
 uses
@@ -213,8 +216,15 @@ type
    procedure Setitems(const index: integer; const Value: tcomponent);
    procedure dosetactcomp(component: tcomponent);
    procedure doadd(component: tcomponent);
+  {$ifdef mse_nomethodswap}
+   procedure setpastemethodproperty(reader: treader;
+                        instance: tpersistent;
+                        propinfo: ppropinfo; const themethodname: string;
+                        var handled: boolean);
+  {$else}
    procedure findpastemethod(Reader: TReader;
            const aMethodName: string; var Address: Pointer; var Error: Boolean);
+  {$endif}
    procedure referencepastename(reader: treader; var name: string);
   protected
    procedure dochanged; virtual;
@@ -887,8 +897,10 @@ var
  component: tcomponent;
  writer: twritermse;
  comp1,comp2: tcomponent;
+{$ifndef mse_nomethodswap}
  po1: pointer;
  modulepo: pmoduleinfoty;
+{$endif}
 begin
  result:= '';
  if count > 0 then begin
@@ -901,14 +913,19 @@ begin
      writer:= twritermse.Create(binstream,4096,true);
      comp1:= tcomponent.create(nil);
      try
+     {$ifdef mse_nomethodswap}
+      writer.onwritemethodproperty:= 
+               {$ifdef FPC}@{$endif}designer.writedesignmethod;
+     {$else}
       modulepo:= designer.modules.findmodulebycomponent(component);
       po1:= swapmethodtable(comp1,
                          modulepo^.methods.createmethodtable(
                                  designer.getancestormethods(modulepo)));
       designer.doswapmethodpointers(component,false);
+     {$endif}
       try
        writer.Root:= component.Owner;
-       designer.descendentinstancelist.beginstreaming; 
+       designer.descendentinstancelist.beginstreaming(nil); 
        comp2:= designer.descendentinstancelist.findancestor(component);
        writer.ancestor:= comp2;
        writer.rootancestor:= comp2;
@@ -919,9 +936,11 @@ begin
        writer.writecomponent(component);
       finally
        designer.descendentinstancelist.endstreaming; 
+      {$ifndef mse_nomethodswap}
        designer.doswapmethodpointers(component,true);
        swapmethodtable(comp1,po1);
        modulepo^.methods.releasemethodtable;
+      {$endif}
       end;
      finally
       comp1.free;
@@ -1009,7 +1028,28 @@ end;
 
 var
  pastingmodulepo: pmoduleinfoty;
- 
+
+{$ifdef mse_nomethodswap} 
+procedure tdesignerselections.setpastemethodproperty(reader: treader;
+                        instance: tpersistent;
+                        propinfo: ppropinfo; const themethodname: string;
+                        var handled: boolean);
+var
+ methodinfopo: pmethodinfoty;
+ m1: tmethod;
+begin
+ handled:= true;
+ m1.data:= nil;
+ m1.code:= nil;
+ if pastingmodulepo <> nil then begin
+  methodinfopo:= pastingmodulepo^.methods.findmethodbyname(themethodname);
+  if methodinfopo <> nil then begin
+   m1.data:= methodinfopo^.address;
+  end;
+ end;
+ setmethodprop(instance,propinfo,m1);
+end;
+{$else}
 procedure tdesignerselections.findpastemethod(Reader: TReader;
            const aMethodName: string; var Address: Pointer; var Error: Boolean);
 var
@@ -1023,7 +1063,7 @@ begin
   end;
  end;
 end;
-
+{$endif}
 const
  pastenametrailer = '_15dtz4u67sd3r';
 
@@ -1088,7 +1128,11 @@ begin
      reader:= treader.create(binstream,4096);
      try
       reader.onreferencename:= {$ifdef FPC}@{$endif}referencepastename;
+     {$ifdef mse_nomethodswap}
+      reader.onsetmethodproperty:= {$ifdef FPC}@{$endif}setpastemethodproperty;
+     {$else}
       reader.onfindmethod:= {$ifdef FPC}@{$endif}findpastemethod;
+     {$endif}
       reader.onancestornotfound:= {$ifdef FPC}@{$endif}designer.ancestornotfound;
       reader.onfindcomponentclass:= 
                            {$ifdef FPC}@{$endif}designer.findcomponentclass;
@@ -1120,7 +1164,9 @@ begin
       end;
       for int1:= aowner.componentcount to comp1.componentcount - 1 do begin
        comp2:= comp1.components[int1];
+      {$ifndef mse_nomethodswap}
        designer.doswapmethodpointers(comp2,true);
+      {$endif}
        if (comp2.getparentcomponent = nil) or (comp2 is tmsedatamodule) then begin
         add(comp2);
        end;

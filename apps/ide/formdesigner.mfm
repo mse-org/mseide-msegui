@@ -234,7 +234,7 @@ object formdesignerfo: tformdesignerfo
         onexecute = doinsertsubmodule
       end    
       item
-        caption = 'Insert component'
+        caption = 'Insert Component'
         name = 'insertcomp'
         state = [as_localcaption, as_localonexecute]
         onexecute = doinsertcomponent

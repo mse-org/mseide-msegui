@@ -12,7 +12,7 @@ unit mseifidbgui;
 interface
 uses
  classes,db,mseifigui,mseifids,mseifi,msedatalist,msegui,msemenus,msegrids,
- mseguiglob,msetypes;
+ mseguiglob,msetypes,mseapplication;
 type
  tdbrxwidgetgrid = class;
 
@@ -30,7 +30,8 @@ type
    function getifireckinds: ifireckindsty; override;
    function bindnames(const aname: string; var ainfo: subdatainfoty): boolean;
   public
-   constructor create(const aowner: tdbrxwidgetgrid);
+   constructor create(const aowner: tdbrxwidgetgrid;
+                                         const aintf: iactivatorclient);
   published
    property name_select: string read fnames[rsm_select] write fnames[rsm_select];
    property name_color: string read fnames[rsm_color] write fnames[rsm_color];
@@ -66,7 +67,8 @@ uses
  
 { tifidbwidgetgridcontroller }
 
-constructor tifidbwidgetgridcontroller.create(const aowner: tdbrxwidgetgrid);
+constructor tifidbwidgetgridcontroller.create(const aowner: tdbrxwidgetgrid;
+                                        const aintf: iactivatorclient);
 begin
  inherited;
 end;
@@ -187,7 +189,7 @@ end;
 
 constructor tdbrxwidgetgrid.create(aowner: tcomponent);
 begin
- fifi:= tifidbwidgetgridcontroller.create(self);
+ fifi:= tifidbwidgetgridcontroller.create(self,iactivatorclient(self));
  inherited;
 end;
 

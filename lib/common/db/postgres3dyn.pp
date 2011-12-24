@@ -22,7 +22,7 @@ const
 {$ifdef mswindows}
  postgreslib: array[0..0] of filenamety = ('libpq.dll');
 {$else}
- postgreslib: array[0..2] of filenamety = ('libpq.so.5.1','libpq.so.5','libpq.so');
+ postgreslib: array[0..2] of filenamety = ('libpq.so.5.4','libpq.so.5','libpq.so');
 {$endif}
 
 procedure initializepostgres3(const sonames: array of filenamety);

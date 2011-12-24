@@ -36,8 +36,8 @@ type
    function threadproc(sender: tmsethread): integer;
    procedure terminateandwait;
    function getactive: boolean;
-   procedure setactive(const Value: boolean);
   protected
+   procedure setactive(const Value: boolean); override;
    procedure loaded; override;
   public
    constructor create(aowner: tcomponent); override;
