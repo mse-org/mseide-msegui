@@ -231,6 +231,42 @@ type
                       //false if not found
  end;
  
+ msestringptruintdataty = record
+  key: ptruint;
+  data: msestring;
+ end;
+ pmsestringptruintdataty = ^msestringptruintdataty;
+ msestringptruinthashdataty = record
+  header: hashheaderty;
+  data: msestringptruintdataty;
+ end;
+ pmsestringptruinthashdataty = ^msestringptruinthashdataty;
+
+ msestringptruintiteratorprocty = 
+                     procedure(var aitem: msestringptruintdataty) of object;
+
+ tmsestringptruinthashdatalist = class(tptruinthashdatalist)
+  private
+   fmsestringparam: msestring;
+  protected
+   procedure checkexact(const aitemdata; var accept: boolean); override;
+   procedure finalizeitem(var aitemdata); override;
+  public
+   constructor create;
+   procedure add(const akey: ptruint; const avalue: msestring);
+   function addunique(const akey: ptruint; const avalue: msestring): boolean;
+                   //true if found
+   procedure delete(const akey: ptruint; const avalue: msestring); overload;
+   function find(const akey: ptruint): msestring; overload;
+   function find(const akey: ptruint; out avalue: msestring): boolean; overload;
+   function first: pmsestringptruintdataty;
+   function next: pmsestringptruintdataty;
+   procedure iterate(const akey: ptruint;
+                     const aiterator: msestringptruintiteratorprocty); overload;
+   function setdata(const akey: ptruint; const avalue: msestring): boolean;
+                      //false if not found
+ end;
+ 
  ansistringdataty = record
   key: ansistring;
   data: record end;
@@ -1290,6 +1326,102 @@ function tansistringptruinthashdatalist.setdata(const akey: ptruint;
                const avalue: ansistring): boolean;
 var
  po1: pansistring;
+begin
+ po1:= inherited find(akey);
+ result:= po1 <> nil;
+ if result then begin
+  po1^:= avalue;
+ end;
+end;
+
+{ tmsestringptruinthashdatalist }
+
+constructor tmsestringptruinthashdatalist.create;
+begin
+ inherited create(sizeof(msestring));
+ fstate:= fstate + [hls_needsnull,hls_needsfinalize];
+end;
+
+procedure tmsestringptruinthashdatalist.add(const akey: ptruint;
+                                       const avalue: msestring);
+begin
+ pmsestring(inherited add(akey))^:= avalue;
+end;
+
+function tmsestringptruinthashdatalist.find(const akey: ptruint;
+                                             out avalue: msestring): boolean;
+var
+ po1: pmsestring;
+begin
+ po1:= inherited find(akey);
+ result:= po1 <> nil;
+ if result then begin
+  avalue:= po1^;
+ end
+ else begin
+  avalue:= '';
+ end;
+end;
+
+function tmsestringptruinthashdatalist.addunique(const akey: ptruint;
+                                               const avalue: msestring): boolean;
+var
+ po1: pmsestring;
+begin
+ result:= true;
+ po1:= inherited find(akey);
+ if po1 = nil then begin
+  result:= false;
+  po1:= inherited add(akey);
+  po1^:= avalue;
+ end;
+end;
+
+procedure tmsestringptruinthashdatalist.checkexact(const aitemdata;
+               var accept: boolean);
+begin
+ accept:= msestringptruintdataty(aitemdata).data = fmsestringparam;
+end;
+
+procedure tmsestringptruinthashdatalist.delete(const akey: ptruint;
+               const avalue: msestring);
+//var
+// po1: phashdataty;
+begin
+ fmsestringparam:= avalue;
+ internaldeleteitem(internalfindexact(akey));
+end;
+
+function tmsestringptruinthashdatalist.find(const akey: ptruint): msestring;
+begin
+ find(akey,result);
+end;
+
+function tmsestringptruinthashdatalist.first: pmsestringptruintdataty;
+begin
+ result:= pmsestringptruintdataty(internalfirst);
+end;
+
+function tmsestringptruinthashdatalist.next: pmsestringptruintdataty;
+begin
+ result:= pmsestringptruintdataty(internalnext);
+end;
+
+procedure tmsestringptruinthashdatalist.iterate(const akey: ptruint;
+               const aiterator: msestringptruintiteratorprocty);
+begin
+ iterate(akey,keyhashiteratorprocty(aiterator));
+end;
+
+procedure tmsestringptruinthashdatalist.finalizeitem(var aitemdata);
+begin
+ finalize(msestringptruintdataty(aitemdata));
+end;
+
+function tmsestringptruinthashdatalist.setdata(const akey: ptruint;
+               const avalue: msestring): boolean;
+var
+ po1: pmsestring;
 begin
  po1:= inherited find(akey);
  result:= po1 <> nil;
