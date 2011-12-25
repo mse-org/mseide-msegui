@@ -1982,26 +1982,30 @@ end;
 
 function tcustomdataedit.getcelltext(const datapo: pointer;
                                    out empty: boolean): msestring;
+var
+ mstr1: msestring; 
+      //avoid refcount 0 because of const param  in internaldatatotext()
 begin
  empty:= false;
  if datapo <> nil then begin
-  result:= internaldatatotext(datapo^);
+  mstr1:= internaldatatotext(datapo^);
   if passwordchar <> #0 then begin
-   result:= charstring(passwordchar,length(result));
+   mstr1:= charstring(passwordchar,length(mstr1));
   end;
-  if not (des_isdb in fstate) and (result = '') and 
+  if not (des_isdb in fstate) and (mstr1 = '') and 
                                   (fempty_text <> '') then begin
    empty:= true;
-   result:= fempty_text;
+   mstr1:= fempty_text;
   end;
  end
  else begin
   empty:= true;
-  result:= fempty_text;
+  mstr1:= fempty_text;
  end;
  if canevent(tmethod(fongettext)) then begin
-  fongettext(self,result,false);
+  fongettext(self,mstr1,false);
  end;
+ result:= mstr1;
 end;
 
 procedure tcustomdataedit.drawcell(const canvas: tcanvas);
@@ -2330,11 +2334,15 @@ begin
 end;
 
 function tcustomdataedit.datatotext(const data): msestring;
+var
+ mstr1: msestring; 
+        //avoid refcount 0 because of const param in internaldatatotext()
 begin
- result:= internaldatatotext(data);
+ mstr1:= internaldatatotext(data);
  if canevent(tmethod(fongettext)) then begin
-  fongettext(self,result,focused);
+  fongettext(self,mstr1,focused);
  end;
+ result:= mstr1;
 end;
 
 procedure tcustomdataedit.setempty_text(const avalue: msestring);

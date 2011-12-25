@@ -1866,7 +1866,7 @@ type
     //iwidgetgrid (dummy)
    function getbrushorigin: pointty;
    function getcol: twidgetcol;
-   procedure getdata(var index: integer; out dest);
+   procedure getdata(var index: integer; var dest);
    procedure setdata(var index: integer; const source; const noinvalidate: boolean = false);
    procedure datachange(const arow: integer);
    function getrow: integer;
@@ -9058,7 +9058,7 @@ begin
  result:= nil;
 end;
 
-procedure tcustomdbstringgrid.getdata(var index: integer; out dest);
+procedure tcustomdbstringgrid.getdata(var index: integer; var dest);
 begin
  //dummy
 end;
