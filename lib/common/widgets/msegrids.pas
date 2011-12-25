@@ -2563,8 +2563,10 @@ function iscellkeypress(const info: celleventinfoty;
              const shiftstatemustnotinclude: shiftstatesty = []): boolean;
 
 function iscellclick(const info: celleventinfoty;
-                        const restrictions: cellclickrestrictionsty = [];
-                        const allowedshiftstates: shiftstatesty = []): boolean;
+             const restrictions: cellclickrestrictionsty = [];
+             const shiftstatemustinclude: shiftstatesty = [];
+             const shiftstatemustnotinclude: shiftstatesty = []): boolean;
+
 function isrowenter(const info: celleventinfoty;
                                const noentergrid: boolean = false): boolean;
 function isrowexit(const info: celleventinfoty;
@@ -2617,7 +2619,8 @@ end;
 
 function iscellclick(const info: celleventinfoty;
              const restrictions: cellclickrestrictionsty = [];
-             const allowedshiftstates: shiftstatesty = []): boolean;
+             const shiftstatemustinclude: shiftstatesty = [];
+             const shiftstatemustnotinclude: shiftstatesty = []): boolean;
 begin
  result:= false;
  with info do begin
@@ -2625,7 +2628,9 @@ begin
    cek_keydown: begin
     if not (ccr_nokeyreturn in restrictions) then begin
      with info.keyeventinfopo^ do begin
-      if isenterkey(nil,key) and (shiftstate = []) then begin
+      if isenterkey(nil,key) and 
+                (shiftstate * shiftstatemustinclude = shiftstatemustinclude) and
+                (shiftstate * shiftstatemustnotinclude = []) then begin
        result:= true;
        include(eventstate,es_processed);
       end;
@@ -2636,11 +2641,12 @@ begin
     if (zone <> cz_none) and not
             ((zone = cz_default) and (ccr_nodefaultzone in restrictions)) then begin
      with info.mouseeventinfopo^ do begin
-      if button = mb_left then begin
+      if (button = mb_left)  and 
+                (shiftstate * shiftstatemustinclude = shiftstatemustinclude) and
+                (shiftstate * shiftstatemustnotinclude = []) then begin
        if ((ccr_buttonpress in restrictions) and (eventkind = ek_buttonpress) or
-          not (ccr_buttonpress in restrictions) and (eventkind = ek_buttonrelease)) and
-           (info.mouseeventinfopo^.shiftstate * keyshiftstatesmask -
-                                        allowedshiftstates = []) then begin
+          not (ccr_buttonpress in restrictions) and
+                                     (eventkind = ek_buttonrelease)) then begin
         if ccr_dblclick in restrictions then begin
          result:= (ss_double in info.mouseeventinfopo^.shiftstate) and 
                    (grid.fclickedcellbefore.row = cell.row) and 
