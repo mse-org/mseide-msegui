@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2011-12-25
+ shiftstatemustinclude and shiftstatemustnotinclude parameters for iscellclick(),
+ same as iscellkeypress().
 2011-12-20
  Statfile multi line string values format unified.
  rttistat ansi string value stored in binary.
