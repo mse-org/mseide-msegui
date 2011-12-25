@@ -109,13 +109,13 @@ type
   methods: tmethods;
  {$ifndef mse_nomethodswap}
   methodtableswapped: integer;
+  methodtablebefore: pointer;
  {$endif}
   components: tcomponents;
   designform: tmseform;
   modified: boolean;
   hasmenuitem: boolean;
   referencedmodules: stringarty;
-  methodtablebefore: pointer;
   resolved: boolean;
   loadingstream: tstream;
  end;

@@ -830,8 +830,9 @@ function isactiononexecutestored(const info: actioninfoty): boolean;
 begin
  with info do begin
   result:= (as_localonexecute in state) and
-        not ((action = nil) and (tmethod(info.onexecute).Code = nil));
-                                 //assigned does not work
+                  not ((action = nil) and 
+                       (tmethod(info.onexecute).code = nil) and 
+                       (tmethod(info.onexecute).data = nil));
  end;
 end;
 
