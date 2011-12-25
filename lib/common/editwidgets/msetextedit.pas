@@ -838,6 +838,7 @@ procedure tcustomtextedit.loadfromstream(const stream: ttextstream;
 var
  statsave: texteditstatety;
 begin
+ checkgrid;
  if restorestate then begin
   getstate(statsave);
  end;
@@ -861,6 +862,7 @@ var
  stream: ttextstream;
 
 begin
+ checkgrid;
  stream:= ttextstream.Create(afilename,fm_read);
  try
   stream.encoding:= fencoding;
