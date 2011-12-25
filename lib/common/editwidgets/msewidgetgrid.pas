@@ -36,7 +36,7 @@ type
   function getcol: twidgetcol;
   function getdatapo(const arow: integer): pointer;
   function getrowdatapo: pointer;
-  procedure getdata(var index: integer; out dest);
+  procedure getdata(var index: integer; var dest);
   procedure setdata(var index: integer; const source;
                         const noinvalidate: boolean = false);
   procedure datachange(const index: integer);
@@ -124,7 +124,7 @@ type
    function getgrid: tcustomwidgetgrid;
    function getbrushorigin: pointty;
    function getcol: twidgetcol;
-   procedure getdata(var arow: integer; out dest);
+   procedure getdata(var arow: integer; var dest);
    procedure setdata(var arow: integer;
                 const source; const noinvalidate: boolean = false); virtual;
    procedure datachange(const arow: integer); virtual;
@@ -1413,7 +1413,7 @@ begin
  end;
 end;
 
-procedure twidgetcol.getdata(var arow: integer; out dest);
+procedure twidgetcol.getdata(var arow: integer; var dest);
 var
  datatype: listdatatypety;
  info: cellinfoty;
@@ -1471,7 +1471,7 @@ begin
       msestring(dest):= fintf.getnulltext;
      end
      else begin
-      msestring(dest):= pmsestring(po1)^;
+      msestring(dest):= pmsestring(po1)^; 
      end;
     end;
     dl_ansistring: begin
@@ -3351,7 +3351,8 @@ begin
  if (info.cellbefore.row <> info.newcell.row) and 
          ((info.eventkind = cek_enter) or 
                 (info.eventkind = cek_focusedcellchanged) and 
-                 (info.newcell.col = invalidaxis)) then begin
+                 (info.newcell.col = invalidaxis) and 
+                 (info.newcell.row >= 0)) then begin
                       //there was no cek_enter
   for int1:= 0 to fdatacols.count - 1 do begin
    with twidgetcols(fdatacols)[int1] do begin
