@@ -1575,7 +1575,7 @@ begin
     end;
    end;
    widget.caption:= caption;
-   acanvas.font.name:= 'stf_message';
+   acanvas.font:= stockobjects.fonts[stf_message];
    rect1:= textrect(acanvas,atext);
    if rect1.cx > maxtextwidth then begin
     rect1.cx:= maxtextwidth;
@@ -2027,7 +2027,7 @@ end;
 procedure tshowmessagewidget.dopaint(const canvas: tcanvas);
 begin
  inherited;
- canvas.font.name:= 'stf_message';
+ canvas.font:= stockobjects.fonts[stf_message];
  drawtext(canvas,info);
 end;
 
