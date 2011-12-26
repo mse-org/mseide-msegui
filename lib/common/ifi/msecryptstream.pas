@@ -11,8 +11,11 @@ unit msecryptstream;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msestream;
-type
+ msecryptio;
 
+type
+ tblockcipher = class(tcryptio)
+ end;
+ 
 implementation
 end.

@@ -4874,7 +4874,8 @@ var
 begin
  result:= '';
  if comp <> nil then begin
-  if comp.Owner = floadingmodulepo^.instance then begin
+  if (floadingmodulepo <> nil) and  
+           (comp.Owner = floadingmodulepo^.instance) then begin  //???
    result:= comp.name;
   end
   else begin
