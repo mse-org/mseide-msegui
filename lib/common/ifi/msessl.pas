@@ -17,11 +17,19 @@ type
  essl = class(ecryptio)
  end;
   
- sslinfoty = record
+ ssldataty = record
   ssl: pssl;
-  mutex: mutexty;
-  reserved: array[9..15] of pointer;
+  mutex: mutexty;  
  end;
+
+ sslinfoty = record
+  case integer of
+   0: (d: ssldataty);
+   1: (_bufferspace: cryptdataty);
+ end;
+ {$if sizeof(ssldataty) > sizeof(cryptdataty)}
+  {$error 'buffer overflow'}
+ {$endif}
  
  sslprotocolty = (ssp_sslv2,ssp_sslv3,ssp_tlsv1);
  sslprotocolsty = set of sslprotocolty;
@@ -129,7 +137,7 @@ begin
   end;
   ctxchanged;
  end;
- with ainfo,sslinfoty(cryptdata) do begin
+ with ainfo,sslinfoty(cryptdata).d do begin
   ssl:= ssl_new(fctx);
   if ssl = nil then begin
    sslerror(0);
@@ -169,7 +177,7 @@ end;
 
 class procedure tssl.internalunlink(var ainfo: cryptioinfoty);
 begin //todo: shutdown
- with ainfo,sslinfoty(cryptdata) do begin
+ with ainfo,sslinfoty(cryptdata).d do begin
   if ssl <> nil then begin
    ssl_free(ssl);
   end;
@@ -191,7 +199,7 @@ var
  err1: syserrorty;
  pollres: pollkindsty;
 begin
- with ainfo,sslinfoty(cryptdata) do begin
+ with ainfo,sslinfoty(cryptdata).d do begin
   sys_mutexunlock(mutex);
   result:= (aerror > 0);
   if not result then begin
@@ -237,7 +245,7 @@ class procedure tssl.connect(var ainfo: cryptioinfoty; const atimeoutms: integer
 // int1,int2: integer;
 // err1: syserrorty;
 begin
- with ainfo,sslinfoty(cryptdata) do begin
+ with ainfo,sslinfoty(cryptdata).d do begin
   repeat
    sys_mutexlock(mutex);
   until waitforio(ssl_connect(ssl),ainfo,atimeoutms);
@@ -249,7 +257,7 @@ class procedure tssl.accept(var ainfo: cryptioinfoty; const atimeoutms: integer)
 // int1{,int2}: integer;
 // err1: syserrorty;
 begin
- with ainfo,sslinfoty(cryptdata) do begin
+ with ainfo,sslinfoty(cryptdata).d do begin
   repeat
    sys_mutexlock(mutex);
   until waitforio(ssl_accept(ssl),ainfo,atimeoutms);
@@ -264,7 +272,7 @@ end;
 class function tssl.write(var ainfo: cryptioinfoty; const buffer: pointer;
                const count: integer; const atimeoutms: integer): integer;
 begin
- with ainfo,sslinfoty(cryptdata) do begin
+ with ainfo,sslinfoty(cryptdata).d do begin
   try
    repeat
     sys_mutexlock(mutex);
@@ -281,7 +289,7 @@ var
  pollres: pollkindsty;
 begin
  result:= 0;
- with ainfo,sslinfoty(cryptdata) do begin
+ with ainfo,sslinfoty(cryptdata).d do begin
   try
    if (atimeoutms < 0) or 
     (soc_poll(ainfo.rxfd,[poka_read],atimeoutms,pollres) = sye_ok) then begin

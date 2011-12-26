@@ -21,14 +21,15 @@ type
  tcryptio = class; 
  cryptioclassty = class of tcryptio;
  cryptiokindty = (cyk_none,cyk_server,cyk_client);
-  
+
+ cryptdataty = array[0..17] of pointer;  
  cryptioinfoty = record
 //  handler: tcryptio;
   kind: cryptiokindty;
   classtype: cryptioclassty;
   rxfd: integer;
   txfd: integer;
-  cryptdata: array[0..17] of pointer;
+  cryptdata: cryptdataty;
  end;
  pcryptioinfoty = ^cryptioinfoty;
 
