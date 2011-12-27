@@ -46,10 +46,6 @@ type
                            var atext: msestring; var accept: boolean) of object;
  textchangeeventty = procedure(const sender: tcustomdataedit;
                                       const atext: msestring) of object;
- dataeditstatety = (des_edited,des_emptytext,des_grayed,des_isdb,des_dbnull,
-                    des_actualcursor,des_updating,des_valueread,
-                    des_updatelayout,des_editing);
- dataeditstatesty = set of dataeditstatety;
 
  emptyoptionty = (eo_defaulttext); //use text of tfacecontroller
  emptyoptionsty = set of emptyoptionty;
@@ -103,7 +99,9 @@ type
    function getgriddata: tdatalist;
    function getvalueprop: ppropinfo;
 {$endif}
-   procedure setisdb;
+//   procedure setisdb;
+   function geteditstate: dataeditstatesty;
+   procedure seteditstate(const avalue: dataeditstatesty);
    procedure updateedittext(const force: boolean);
    function getgridintf: iwidgetgrid;
    procedure checkgrid;
@@ -1516,14 +1514,24 @@ begin
  result:= des_edited in fstate;
 end;
 
-function tcustomdataedit.emptytext: boolean;
+function tcustomdataedit.geteditstate: dataeditstatesty;
 begin
- result:= des_emptytext in fstate;
+ result:= fstate;
 end;
 
+procedure tcustomdataedit.seteditstate(const avalue: dataeditstatesty);
+begin
+ fstate:= avalue;
+end;
+{
 procedure tcustomdataedit.setisdb;
 begin
  include(fstate,des_isdb);
+end;
+}
+function tcustomdataedit.emptytext: boolean;
+begin
+ result:= des_emptytext in fstate;
 end;
 
 procedure tcustomdataedit.updatetextflags;
@@ -2259,7 +2267,8 @@ begin
  if (newfocus <> self) and not ((oe_checkmrcancel in foptionsedit) and 
                             (window.modalresult = mr_cancel)) then begin
   if fgridintf = nil then begin
-   result:= newfocus = nil;
+   result:= (newfocus = nil) and 
+               (not (des_isdb in fstate) or (des_dbnullcheck in fstate));
   end
   else begin
    result:= fgridintf.nullcheckneeded(newfocus);

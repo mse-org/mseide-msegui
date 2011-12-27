@@ -59,6 +59,12 @@ type
  optionedit1ty = (oe1_noselectall,oe1_multiline);
  optionsedit1ty = set of optionedit1ty;
 
+ dataeditstatety = (des_edited,des_emptytext,des_grayed,
+                    des_isdb,des_dbnull,des_dbnullcheck,
+                    des_actualcursor,des_updating,des_valueread,
+                    des_updatelayout,des_editing);
+ dataeditstatesty = set of dataeditstatety;
+
  editactionty = (ea_none,ea_beforechange,ea_textchanged,ea_textedited,
                  ea_textentered,ea_indexmoved,{ea_selectindexmoved,}
                  ea_textsizechanged,

@@ -124,9 +124,12 @@ type
   protected
    fgridintf: iwidgetgrid;
    fgriddatalink: pointer;
-   fisdb: boolean;
+   fstate: dataeditstatesty;
+//   fisdb: boolean;
  
-   procedure setisdb;  
+//   procedure setisdb;  
+   function geteditstate: dataeditstatesty;
+   procedure seteditstate(const avalue: dataeditstatesty);
    function getoptionsedit: optionseditty; virtual;
    procedure updateoptions; virtual;
    procedure loaded; override;
@@ -1107,7 +1110,7 @@ end;
 procedure tcustomrealgraphdataedit.setvalue(const avalue: realty);
 begin
  if fvalue <> avalue then begin
-  if not fisdb and (avalue = emptyreal) then begin
+  if not (des_isdb in fstate) and (avalue = emptyreal) then begin
    fvalue:= 0;
   end
   else begin
@@ -1577,7 +1580,7 @@ end;
 procedure tgraphdataedit.dostatread(const reader: tstatreader);
 begin
  fvalueread:= false;
- if not fisdb and (fgridintf = nil) and 
+ if not (des_isdb in fstate) and (fgridintf = nil) and 
                         canstatvalue(foptionsedit,reader) then begin
   fvalueread:= true;
   readstatvalue(reader);
@@ -1592,7 +1595,7 @@ end;
 
 procedure tgraphdataedit.dostatwrite(const writer: tstatwriter);
 begin
- if not fisdb and (fgridintf = nil) and 
+ if not (des_isdb in fstate) and (fgridintf = nil) and 
                                  canstatvalue(foptionsedit,writer) then begin
   writestatvalue(writer);
  end;
@@ -1747,11 +1750,21 @@ begin
  //dummy
 end;
 
+function tgraphdataedit.geteditstate: dataeditstatesty;
+begin
+ result:= fstate;
+end;
+
+procedure tgraphdataedit.seteditstate(const avalue: dataeditstatesty);
+begin
+ fstate:= avalue;
+end;
+{
 procedure tgraphdataedit.setisdb;
 begin
  fisdb:= true;
 end;
-
+}
 function tgraphdataedit.getoptionsedit: optionseditty;
 begin
  result:= foptionsedit;

@@ -751,7 +751,11 @@ type
    ftextinfo: drawtextinfoty;
    foptionsedit: stringcoleditoptionsty;
    foptionsedit1: optionsedit1ty;
-   procedure setisdb;
+   feditstate: dataeditstatesty;
+//   procedure setisdb;
+   function geteditstate: dataeditstatesty;
+   procedure seteditstate(const avalue: dataeditstatesty);
+
    function getoptionsedit: optionseditty;
    function getitems(aindex: integer): msestring; virtual;
    procedure setitems(aindex: integer; const Value: msestring); virtual;
@@ -6694,11 +6698,21 @@ begin
  datalist.addchars(mstr1,processeditchars,maxchars);
 end;
 
+function tcustomstringcol.geteditstate: dataeditstatesty;
+begin
+ result:= feditstate;
+end;
+
+procedure tcustomstringcol.seteditstate(const avalue: dataeditstatesty);
+begin
+ feditstate:= avalue;
+end;
+{
 procedure tcustomstringcol.setisdb;
 begin
  //dummy
 end;
-
+}
 function tcustomstringcol.getoptionsedit: optionseditty;
 begin
  result:= [];

@@ -37,7 +37,10 @@ type
    fgriddatalink: pointer;
    fvalue: string;   //in design mode only
    fcurformat: string;
-   procedure setisdb;
+   feditstate: dataeditstatesty;
+//   procedure setisdb;
+   function geteditstate: dataeditstatesty;
+   procedure seteditstate(const avalue: dataeditstatesty);
    function getgridintf: iwidgetgrid;
    procedure defineproperties(filer: tfiler); override;
    procedure setvalue(const avalue: string); virtual;
@@ -365,11 +368,21 @@ begin
  fgridintf.getdata(index,result);
 end;
 
+function tcustomdataimage.geteditstate: dataeditstatesty;
+begin
+ result:= feditstate;
+end;
+
+procedure tcustomdataimage.seteditstate(const avalue: dataeditstatesty);
+begin
+ feditstate:= avalue;
+end;
+{
 procedure tcustomdataimage.setisdb;
 begin
  //dummy
 end;
-
+}
 procedure tcustomdataimage.setgridvalue(index: integer;
                const avalue: string);
 begin
