@@ -1934,7 +1934,7 @@ begin
   else begin
    refdate:= nowlocal;
   end;
-  if text = '' then begin
+  if aformat = '' then begin
    mstr1:= 'c';
   end
   else begin
