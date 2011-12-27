@@ -1789,7 +1789,7 @@ end;
 function twidgetcol.nullcheckneeded(const newfocus: twidget): boolean;
 begin
  with twidgetgrid(fgrid) do begin
-  result:= (fnonullcheck = 0) and ({entered and} {or} 
+  result:= not (gs_isdb in fstate) and (fnonullcheck = 0) and (
             not (fcontainer1.checkdescendent(newfocus) or 
                   fcontainer3.checkdescendent(newfocus))) and
              (row >= 0) and not (gs_rowremoving in fstate) and

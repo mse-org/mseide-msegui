@@ -256,7 +256,9 @@ type
   function getoptionsedit: optionseditty;
   procedure updatereadonlystate;
   procedure getfieldtypes(var afieldtypes: fieldtypesty); //[] = all
-  procedure setisdb;
+  function geteditstate: dataeditstatesty;
+  procedure seteditstate(const avalue: dataeditstatesty);
+//  procedure setisdb;
   procedure setmaxlength(const avalue: integer);
   function getfieldlink: tcustomeditwidgetdatalink;
  end;
@@ -3007,7 +3009,8 @@ begin
  fintf:= intf;
  inherited Create;
  visualcontrol:= true;
- fintf.setisdb;
+ fintf.seteditstate(fintf.geteditstate+[des_isdb]);
+// fintf.setisdb;
 end;
 
 destructor tcustomeditwidgetdatalink.destroy;
@@ -3315,8 +3318,14 @@ begin
 end;
 
 procedure tcustomeditwidgetdatalink.updatedata;
+var
+ stat1: dataeditstatesty;
 begin
  inc(fcanclosing);
+ stat1:= fintf.geteditstate;
+ if not (des_dbnullcheck in stat1) then begin
+  fintf.seteditstate(stat1+[des_dbnullcheck]);
+ end;
  try
   with fintf.getwidget do begin
    if canclose(nil) then begin
@@ -3350,6 +3359,9 @@ begin
   inherited;
  finally
   dec(fcanclosing);
+  if not (des_dbnullcheck in stat1) then begin
+   fintf.seteditstate(fintf.geteditstate-[des_dbnullcheck]);
+  end;
  end;
 end;
 
@@ -4883,7 +4895,7 @@ end;
 
 constructor tdbslider.create(aowner: tcomponent);
 begin
- fisdb:= true;
+// fisdb:= true;
  fvaluerange:= 1;
  fdatalink:= teditwidgetdatalink.create(idbeditfieldlink(self));
  inherited;
@@ -5008,7 +5020,7 @@ end;
 
 constructor tdbprogressbar.create(aowner: tcomponent);
 begin
- fisdb:= true;
+// fisdb:= true;
  fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
  inherited;
 end;
