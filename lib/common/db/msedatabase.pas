@@ -800,11 +800,14 @@ begin
   FActive := false;
 end;
 
-Procedure tmdbtransaction.OpenTrans;
+procedure tmdbtransaction.opentrans;
 
 begin
  inc(fopencount);
-  FActive := true;
+ if fopencount = 0 then begin
+  inc(fopencount);
+ end;
+ factive := true;
 end;
 
 Procedure tmdbtransaction.SetDatabase (Value : tmdatabase);
