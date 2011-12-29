@@ -78,6 +78,7 @@ type
 //   procedure setstatementtype(const avalue: TStatementType);
    procedure checkcanupdate;
   protected
+   procedure dobeforeapplyupdate; override;
    procedure checkpendingupdates; override;
    procedure setactive(avalue: boolean); override;
    procedure setcontrolleractive(const avalue: boolean);
@@ -678,13 +679,20 @@ begin
  end;
 end;
 
+procedure tmsesqlquery.dobeforeapplyupdate;
+begin
+ inherited;
+ if writetransaction <> nil then begin
+  with writetransaction do begin
+   ftransopenref:= opencount;
+  end;
+ end;
+end;
+
 procedure tmsesqlquery.checkcanupdate;
 begin
  if not islocal and (transactionwrite = nil) then begin
   checkconnected;
- end;
- if writetransaction <> nil then begin
-  ftransopenref:= writetransaction.opencount;
  end;
 end;
 
