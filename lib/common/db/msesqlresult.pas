@@ -1031,7 +1031,7 @@ begin
   end;  
  end
  else begin
-  result:= inherited getasstring;
+  result:= inherited getasmsestring;
  end;
 end;
 
