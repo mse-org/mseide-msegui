@@ -71,6 +71,7 @@ type
  tstringdbcol = class(tdbcol)
   private
   protected
+   function getasmsestring1: msestring; override;
    function getasmsestring: msestring; override;
    function getasstring: ansistring; override;
    function getasstring1: ansistring; override;
@@ -1048,6 +1049,11 @@ end;
 function tstringdbcol.getasstring1: ansistring;
 begin
  result:= getasstring;
+end;
+
+function tstringdbcol.getasmsestring1: msestring;
+begin
+ result:= getasmsestring;
 end;
 
 { tblobdbcol }
