@@ -71,6 +71,7 @@ type
  tstringdbcol = class(tdbcol)
   private
   protected
+   function getasmsestring: msestring; override;
    function getasstring: ansistring; override;
    function getasstring1: ansistring; override;
    function getvariantvar: variant; override;
@@ -985,23 +986,52 @@ function tstringdbcol.getasstring: ansistring;
 var
  int1: integer;
 begin
- int1:= fdatasize*4+4; //room for multibyte encodings
- setlength(result,int1);
- if not loadfield(pointer(result),int1) then begin
-  result:= '';
+ if fdatatype in widecharfields then begin
+  result:= getasmsestring;
  end
  else begin
-  if int1 < 0 then begin //too small
-   int1:= -int1;
-   setlength(result,int1);
-   loadfield(pointer(result),int1);
-  end;
+  int1:= fdatasize*4+4; //room for multibyte encodings
   setlength(result,int1);
-  if fdatatype = ftvarbytes then begin
-   int1:= int1 - sizeof(word);
-   move((pchar(pointer(result))+sizeof(word))^,(pchar(pointer(result)))^,int1);
+  if not loadfield(pointer(result),int1) then begin
+   result:= '';
+  end
+  else begin
+   if int1 < 0 then begin //too small
+    int1:= -int1;
+    setlength(result,int1);
+    loadfield(pointer(result),int1);
+   end;
    setlength(result,int1);
+   if fdatatype = ftvarbytes then begin
+    int1:= int1 - sizeof(word);
+    move((pchar(pointer(result))+sizeof(word))^,(pchar(pointer(result)))^,int1);
+    setlength(result,int1);
+   end;
   end;
+ end;
+end;
+
+function tstringdbcol.getasmsestring: msestring;
+var
+ int1: integer;
+begin
+ if fdatatype in widecharfields then begin
+  int1:= fdatasize*2+4; //room for multibyte encodings
+  setlength(result,int1);
+  if not loadfield(pointer(result),int1) then begin
+   result:= '';
+  end
+  else begin
+   if int1 < 0 then begin //too small
+    int1:= -int1;
+    setlength(result,(int1+1) div 2);
+    loadfield(pointer(result),int1);
+   end;
+   setlength(result,int1 div 2);
+  end;  
+ end
+ else begin
+  result:= inherited getasstring;
  end;
 end;
 

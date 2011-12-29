@@ -790,7 +790,7 @@ type
    procedure SetFilterText(const Value: string); override;
    Function GetDataSource : TDatasource; override;
    Procedure SetDataSource(AValue : TDatasource);    
-   //icursorclient
+    //icursorclient
    function stringmemo: boolean; virtual;
         //memo fields are text(0) fields
   public
