@@ -188,7 +188,7 @@ implementation
 
 uses 
  math,msestream,msetypes,msedatalist,mseformatstr,msedatabase,msectypes,
- variants,msevariants;
+ variants,msevariants,msesqlresult;
 
 ResourceString
   SErrRollbackFailed = 'Rollback transaction failed';
@@ -1290,24 +1290,20 @@ begin
  end;
 end;
 
-procedure TPQConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                          const aTableName : string);
+procedure tpqconnection.updateindexdefs(var indexdefs : tindexdefs;
+                          const atablename : string);
 
-var qry : TSQLQuery;
-
+var
+ qry : tsqlresult;
 begin
-  if not assigned(Transaction) then
-    DatabaseError(SErrConnTransactionnSet);
+ if not assigned(transaction) then
+   databaseerror(serrconntransactionnset);
 
-  qry := tsqlquery.Create(nil);
-  qry.transaction := Transaction;
-  qry.database := Self;
-  with qry do
-    begin
-    ReadOnly := True;
-    sql.clear;
-
-    sql.add('select '+
+ qry:= tsqlresult.create(nil);  
+ try 
+  with qry do begin
+   database:= self;
+   sql.text:= 'select '+
               'ic.relname as indexname,  '+
               'tc.relname as tablename, '+
               'ia.attname, '+
@@ -1327,25 +1323,29 @@ begin
               '(ta.attnum = i.indkey[ia.attnum-1]) and '+
               '(upper(tc.relname)=''' +  UpperCase(aTableName) +''') '+
             'order by '+
-              'ic.relname;');
-    open;
+              'ic.relname;';
+   active:= true;
+   while not eof do begin 
+    with IndexDefs.AddIndexDef do begin
+     Name:= trim(qry.cols[0].asstring);
+     Fields:= trim(qry.cols[2].asstring);
+     If cols[3].asboolean then begin
+      options:= options + [ixPrimary];
+     end;
+     If cols[4].asboolean then begin
+      options:= options + [ixUnique];
+     end;
+     next;
+     while not qry.eof and (name = cols[0].asstring) do begin
+      fields:= fields + ';' + trim(cols[2].asstring);
+      next;
+     end;
     end;
-
-  while not qry.eof do with IndexDefs.AddIndexDef do
-    begin
-    Name := trim(qry.fields[0].asstring);
-    Fields := trim(qry.Fields[2].asstring);
-    If qry.fields[3].asboolean then options := options + [ixPrimary];
-    If qry.fields[4].asboolean then options := options + [ixUnique];
-    qry.next;
-    while (name = qry.fields[0].asstring) and (not qry.eof) do
-      begin
-      Fields := Fields + ';' + trim(qry.Fields[2].asstring);
-      qry.next;
-      end;
-    end;
-  qry.close;
+   end;
+  end;
+ finally
   qry.free;
+ end;
 end;
 
 function TPQConnection.GetSchemaInfoSQL(SchemaType: TSchemaType;

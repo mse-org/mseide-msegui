@@ -1535,21 +1535,21 @@ begin
             'order by '+
               'ind.rdb$index_name;';
    active:= true;
-   while not res.eof do begin
+   while not eof do begin
     with indexdefs.AddIndexDef do begin
-     str1:= res.cols[0].asstring;
-     name := trim(str1);
+     str1:= cols[0].asstring;
+     name:= trim(str1);
      fields:= trim(res.cols[3].asstring);
-     if res.cols[4].asstring = 'PRIMARY KEY' then begin
+     if cols[4].asstring = 'PRIMARY KEY' then begin
       options:= options + [ixPrimary];
      end;
-     if res.cols[2].asinteger = 1 then begin
+     if cols[2].asinteger = 1 then begin
       options:= options + [ixUnique];
      end;
-     res.next;
-     while  not res.eof and (str1 = res.cols[0].asstring) do begin
-      fields:= fields + ';' + trim(res.cols[3].asstring);
-      res.next;
+     next;
+     while  not eof and (str1 = cols[0].asstring) do begin
+      fields:= fields + ';' + trim(cols[3].asstring);
+      next;
      end;
     end;
    end;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2011 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -14,8 +14,8 @@ unit mseifidbcomp;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseificomp,msesqlresult,mseclasses,classes,msedatalist,msestrings,db,msedb,
- msetypes;
+ mseificomp,msesqlresult,msqldb,mseclasses,classes,msedatalist,msestrings,db,
+ msedb,msetypes;
 type
 { 
  tifisqldatasource = class;

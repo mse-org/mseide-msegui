@@ -312,6 +312,7 @@ type
 //   function isprepared: boolean;
    procedure open;
    procedure close;
+   procedure doclear;
    procedure prepare; override;
    procedure checkautocommit; override;
 //   procedure execute;
@@ -339,8 +340,9 @@ type
    destructor destroy; override;
 //   function isutf8: boolean;
    procedure unprepare; override;
-   procedure next;
+   procedure clear; //frees buffers, does not unprepare
    procedure refresh;
+   procedure next;
    function rowsaffected: integer; //-1 if not supported
    function rowsreturned: integer; //-1 if not supported
 //   procedure asvariant(out avalue: variant); overload; //internal compiler error
@@ -1353,6 +1355,22 @@ begin
  end;
 end;
 
+procedure tsqlresult.doclear;
+begin
+ if fcursor <> nil then begin
+  fcursor.close;
+ end;
+ feof:= true;
+ fbof:= true;
+ fcols.clear;
+end;
+
+procedure tsqlresult.clear;
+begin
+ doclear;
+ changed;
+end;
+
 procedure tsqlresult.close;
 begin
  factive:= false;
@@ -1361,7 +1379,6 @@ begin
  sendchangeevent(oe_releasefields);
  freefldbuffers;
  inherited setactive(false);
-// unprepare;
  fcols.clear;
  changed;
 end;
@@ -1487,7 +1504,7 @@ begin
   active:= true;
  end
  else begin
-  fcursor.close;
+  doclear;
   feof:= false;
   execute; 
   next;

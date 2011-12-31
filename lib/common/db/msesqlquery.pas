@@ -13,7 +13,7 @@ unit msesqlquery;
 interface
 uses
  classes,db,msetimer,msebufdataset,msqldb,msedb,msestrings,msedatabase,
- mseclasses,msetypes;
+ mseclasses,msetypes,msesqlresult;
  
 type
  tsqlquery = class;
@@ -63,7 +63,7 @@ type
    fparsesql: boolean;
    fstatementtype: tstatementtype;
    fmasterlink: tsqlmasterparamsdatalink;
-   fapplyqueries: array[tupdatekind] of tsqlquery;
+   fapplyqueries: array[tupdatekind] of tsqlresult;
    fapplysql: array[tupdatekind] of tsqlstringlist;
 //   fupdateqry,fdeleteqry,finsertqry: tsqlquery;
    fupdaterowsaffected: integer;
@@ -75,26 +75,26 @@ type
    function getindexdefs : tindexdefs;
 //   function getstatementtype : tstatementtype;
    procedure setindexdefs(avalue : tindexdefs);
-   procedure SetReadOnly(AValue : Boolean);
-   procedure SetParseSQL(AValue : Boolean);
+   procedure setreadonly(avalue : boolean);
+   procedure setparsesql(avalue : boolean);
    procedure setstatementtype(const avalue: tstatementtype);
-   procedure SetUsePrimaryKeyAsKey(AValue : Boolean);
-   procedure SetUpdateMode(AValue : TUpdateMode);
-   procedure OnChangeSQL(const Sender : TObject);
-   procedure OnChangeModifySQL(const Sender : TObject);
-   procedure Execute;
-   Procedure SQLParser(var ASQL: msestring);
-   procedure ApplyFilter;
-   Function AddFilter(SQLstr : string) : string;
+   procedure setuseprimarykeyaskey(avalue : boolean);
+   procedure setupdatemode(avalue : tupdatemode);
+   procedure onchangesql(const sender : tobject);
+   procedure onchangemodifysql(const sender : tobject);
+   procedure execute;
+   procedure sqlparser(var asql: msestring);
+   procedure applyfilter;
+   function addfilter(sqlstr : string) : string;
    function getdatabase1: tcustomsqlconnection;
    procedure setdatabase1(const avalue: tcustomsqlconnection);
-   procedure setparams(const avalue: TmseParams);
+   procedure setparams(const avalue: tmseparams);
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
-   procedure setFSQL(const avalue: tsqlstringlist);
-   procedure setFSQLUpdate(const avalue: tsqlstringlist);
-   procedure setFSQLInsert(const avalue: tsqlstringlist);
-   procedure setFSQLDelete(const avalue: tsqlstringlist);
+   procedure setfsql(const avalue: tsqlstringlist);
+   procedure setfsqlupdate(const avalue: tsqlstringlist);
+   procedure setfsqlinsert(const avalue: tsqlstringlist);
+   procedure setfsqldelete(const avalue: tsqlstringlist);
    procedure setbeforeexecute(const avalue: tcustomsqlstatement);
    procedure setaftercursorclose(const avalue: tcustomsqlstatement);
    function getsqltransaction: tsqltransaction;
@@ -128,30 +128,30 @@ type
           //if bufsize < 0 -> buffer was to small, should be -bufsize
    // abstract & virtual methods of TDataset
 //   procedure dscontrolleroptionschanged(const aoptions: datasetoptionsty);
-   procedure UpdateIndexDefs; override;
-   procedure SetDatabase(const Value: tmdatabase); override;
-   Procedure SetTransaction(const Value : tmdbtransaction); override;
-   procedure InternalAddRecord(Buffer: Pointer; AAppend: Boolean); override;
-   procedure InternalClose; override;
-   procedure InternalInitFieldDefs; override;
+   procedure updateindexdefs; override;
+   procedure setdatabase(const value: tmdatabase); override;
+   procedure settransaction(const value : tmdbtransaction); override;
+   procedure internaladdrecord(buffer: pointer; aappend: boolean); override;
+   procedure internalclose; override;
+   procedure internalinitfielddefs; override;
    procedure connect(const aexecute: boolean);
    procedure freemodifyqueries;
    procedure freequery;
    procedure disconnect{(const aexecute: boolean)};
    procedure checkrecursivedatasource(const avalue: tdatasource);
-   procedure InternalOpen; override;
+   procedure internalopen; override;
    procedure internalrefresh; override;
    procedure refreshtransaction; override;
    procedure dobeforeedit; override;
    procedure dobeforeinsert; override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
    
-   function  GetCanModify: Boolean; override;
+   function  getcanmodify: boolean; override;
    procedure updatewherepart(var sql_where : msestring; const afield: tfield);
-   Procedure internalApplyRecUpdate(UpdateKind : TUpdateKind);
+   procedure internalapplyrecupdate(updatekind : tupdatekind);
    procedure dobeforeapplyupdate; override;
-   procedure ApplyRecUpdate(UpdateKind : TUpdateKind); override;
-   Function IsPrepared: Boolean; virtual;
+   procedure applyrecupdate(updatekind : tupdatekind); override;
+   function isprepared: boolean; virtual;
    Procedure SetActive (Value : Boolean); override;
    procedure SetFiltered(Value: Boolean); override;
    procedure SetFilterText(const Value: string); override;
@@ -270,6 +270,7 @@ type
  tcustomsqlconnection1 = class(tcustomsqlconnection);
  tcustomsqlstatement1 = class(tcustomsqlstatement);
  tsqltransaction1 = class(tsqltransaction);
+ tsqlresult1 = class(tsqlresult);
   
 function SkipComments(var p: PmseChar) : boolean;
 begin
@@ -1202,17 +1203,17 @@ begin
  end;
 end;
 }
-procedure TSQLQuery.connect(const aexecute: boolean);
+procedure tsqlquery.connect(const aexecute: boolean);
 
-  procedure InitialiseModifyQuery(var qry : TSQLQuery; aSQL: TsqlSTringList);  
+  procedure initialisemodifyquery(var qry: tsqlresult; asql: tsqlstringlist);  
   begin
    if qry = nil then begin
-    qry:= TSQLQuery.Create(nil);
+    qry:= tsqlresult.create(nil);
     with qry do begin
-     ParseSQL:= False;
-     DataBase:= Self.DataBase;
-     Transaction:= self.writetransaction;
-     SQL.Assign(aSQL);
+//     ParseSQL:= False;
+     transaction:= self.writetransaction;
+     database:= self.database;
+     sql.assign(asql);
     end;
    end;
   end; //initialisemodifyquery
@@ -1631,15 +1632,9 @@ begin
 end;
 
 Procedure TSQLQuery.internalApplyRecUpdate(UpdateKind : TUpdateKind);
-//var
-// s: string;
- 
-//todo: optimize, use tsqlstatement and tsqlresult instead of tsqlquery
-
 var
-// qry: tsqlquery;
  x: integer;
- Fld : TField;
+ fld1: tfield;
  param1,param2: tparam;
  int1: integer;
  blobspo: pblobinfoarty;
@@ -1647,7 +1642,6 @@ var
  bo1: boolean;
  freeblobar: pointerarty;
  statementtypebefore: tstatementtype;
-// refreshfieldvalues: boolean;
  oldisnew: boolean;
  rowsaffected1: integer;
     
@@ -1661,32 +1655,7 @@ begin
   databaseerror(name+': No rec apply query for '+
                    getenumname(typeinfo(tupdatekind),ord(updatekind))+'.');
  end;
-(*
- case UpdateKind of
-  ukModify: begin
-//   refreshfieldvalues:= uso_refresh in fsqlupdate.options;
-   qry:= FUpdateQry;
-   if qry.sql.count = 0 then begin
-    qry.SQL.Add(updateRecQuery{(refreshfieldvalues)});
-   end;
-  end;
-  ukInsert: begin
-//   refreshfieldvalues:= uso_refresh in fsqlinsert.options;
-   qry:= FInsertQry;
-   if qry.sql.count = 0 then begin
-    qry.SQL.Add(InsertRecQuery{(refreshfieldvalues)});
-   end;
-  end
-  else begin               //ukDelete
-//   refreshfieldvalues:= false;
-   qry := FDeleteQry;
-   if qry.sql.count = 0 then begin
-    qry.SQL.Add(DeleteRecQuery);
-   end;
-  end;
- end;
-*)
- with fapplyqueries[updatekind] do begin
+ with tsqlresult1(fapplyqueries[updatekind]) do begin
   if sql.count = 0 then begin
    case updatekind of
     ukinsert: begin
@@ -1713,13 +1682,12 @@ begin
       str1:= copy(str1,5,bigint);
      end;
      if bo1 and not oldisnew then begin
-      Fld:= self.FieldByName(str1);
-      oldfieldtoparam(fld,param1);
- //     AssignFieldValue(Fld,Fld.OldValue);
+      fld1:= self.FieldByName(str1);
+      oldfieldtoparam(fld1,param1);
      end
      else begin
-      fld:= self.findfield(str1);
-      if fld = nil then begin     //search for param
+      fld1:= self.findfield(str1);
+      if fld1 = nil then begin     //search for param
        param2:= self.params.findparam(str1);
        if param2 = nil then begin
         fieldbyname(str1); //raise exception
@@ -1729,33 +1697,33 @@ begin
        end;
       end
       else begin             //use field
-       if fld is tblobfield and (self.fblobintf <> nil) then begin
-        if fld.isnull then begin
+       if fld1 is tblobfield and (self.fblobintf <> nil) then begin
+        if fld1.isnull then begin
          clear;
-         datatype:= fld.datatype;
+         datatype:= fld1.datatype;
         end
         else begin
          bo1:= false;
          for int1:= 0 to high(blobspo^) do begin
-          if blobspo^[int1].field = fld then begin
+          if blobspo^[int1].field = fld1 then begin
            self.fblobintf.writeblobdata(tsqltransaction(self.transaction),
-                self.ftablename,self.fcursor,
-                blobspo^[int1].data,blobspo^[int1].datalength,fld,params[x],str1);
+             self.ftablename,self.fcursor,
+             blobspo^[int1].data,blobspo^[int1].datalength,fld1,params[x],str1);
            if str1 <> '' then begin
-            self.setdatastringvalue(fld,str1);
-            additem(freeblobar,fld);
+            self.setdatastringvalue(fld1,str1);
+            additem(freeblobar,fld1);
            end;
            bo1:= true;
            break;
           end;
          end;
          if not bo1 then begin
-          self.fblobintf.setupblobdata(fld,self.fcursor,params[x]);
+          self.fblobintf.setupblobdata(fld1,self.fcursor,params[x]);
          end;
         end;
        end
        else begin
-        self.fieldtoparam(fld,param1);
+        self.fieldtoparam(fld1,param1);
        end;
       end;
      end;
@@ -1765,29 +1733,28 @@ begin
                           (bs_refreshupdate in self.fbstate) or
       (updatekind = ukinsert) and 
                           (bs_refreshinsert in self.fbstate) then begin
-    parsesql:= false;
     statementtypebefore:= statementtype;
     try
      statementtype:= stselect;
      active:= true;
      if not eof then begin
-      for int1:= 0 to {qry.}fieldcount - 1 do begin
-       with fields[int1] do begin
-        fld:= self.fields.fieldbyname(fieldname);
+      for int1:= 0 to {qry.}cols.count - 1 do begin
+       with cols[int1] do begin
+        fld1:= self.fields.fieldbyname(fieldname);
 //        if not(fld is tblobfield) then begin
-         fld.value:= value;
+        fld1.value:= asvariant;
 //        end;
        end;
       end;
      end;
      rowsaffected1:= fcursor.frowsaffected;
     finally
-     active:= false;          //todo: no destroy of prepared statement
+     clear;  
      statementtype:= statementtypebefore;
     end;
    end
    else begin
-    execsql;
+    execute;
     rowsaffected1:= fcursor.frowsaffected;
    end;
    if not (bs_refreshinsert in fbstate) and (updatekind = ukinsert) and 
