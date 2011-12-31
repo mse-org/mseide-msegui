@@ -513,14 +513,9 @@ type
 
  tcustomsqlstatement = class(tmsecomponent,itransactionclient,idatabaseclient)
   private
-   fsql: tsqlstringlist;
-   fdatabase: tcustomsqlconnection;
-   ftransaction: tsqltransaction;
-   fparams: tmseparams;
    fonbeforeexecute: sqlstatementeventty;
    fonafterexecute: sqlstatementeventty;
    fonerror: sqlstatementerroreventty;
-   foptions: sqlstatementoptionsty;
    procedure setsql(const avalue: tsqlstringlist);
    procedure setdatabase1(const avalue: tcustomsqlconnection);
    procedure setparams(const avalue: tmseparams);
@@ -529,7 +524,6 @@ type
     //itransactionclient
    function getname: string;
    function getactive: boolean;
-   procedure setactive(avalue: boolean); virtual;
    procedure settransaction(const avalue: tmdbtransaction);
    procedure settransactionwrite(const avalue: tmdbtransaction);
    procedure checkbrowsemode;
@@ -544,8 +538,18 @@ type
    procedure disablecontrols;
    procedure enablecontrols;
    function moveby(distance: longint): longint;
+//   procedure readoptionsold(areader: treader);
+//   procedure readoptions(areader: treader);
+//   procedure writeoptions(awriter: twriter);
   protected
+   fsql: tsqlstringlist;
+   fdatabase: tcustomsqlconnection;
+   ftransaction: tsqltransaction;
+   fparams: tmseparams;
+   foptions: sqlstatementoptionsty;
+//   procedure defineproperties(afiler: tfiler); override;
    
+   procedure setactive(avalue: boolean); virtual;
    procedure execute; virtual; abstract;
    procedure dobeforeexecute(const adatabase: tcustomsqlconnection;
                               const atransaction: tsqltransaction);
@@ -555,24 +559,22 @@ type
               const atransaction: tsqltransaction; const e: exception;
               var handled: boolean);
    procedure dosqlchange(const sender: tobject); virtual;
+   property onbeforeexecute: sqlstatementeventty read fonbeforeexecute 
+                                                     write fonbeforeexecute;
+   property onafterexecute: sqlstatementeventty read fonafterexecute 
+                                                     write fonafterexecute;
+   property onerror: sqlstatementerroreventty read fonerror write fonerror;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function isutf8: boolean; overload;
-//   function isutf8(const adatabase): boolean; overload;
-  published
+   function isutf8: boolean;
    property params : tmseparams read fparams write setparams;
    property sql: tsqlstringlist read fsql write setsql;
    property database: tcustomsqlconnection read fdatabase write setdatabase1;
    property transaction: tsqltransaction read ftransaction write settransaction1;
                   //can be nil
    property options: sqlstatementoptionsty read foptions 
-                                 write setoptions default [];
-   property onbeforeexecute: sqlstatementeventty read fonbeforeexecute 
-                                                     write fonbeforeexecute;
-   property onafterexecute: sqlstatementeventty read fonafterexecute 
-                                                     write fonafterexecute;
-   property onerror: sqlstatementerroreventty read fonerror write fonerror;
+                                 write setoptions {stored false} default [] ;
  end;
 
  msesqlscripteventty = procedure(const sender: tmsesqlscript) of object;
@@ -603,29 +605,53 @@ type
                                                        write fonbeforestatement;
    property onafterstatement: msesqlscripteventty read fonafterstatement
                                                        write fonafterstatement;
+   property params;
+   property sql;
+   property database;
+   property transaction;
+                  //can be nil
+   property options;
+   property onbeforeexecute;
+   property onafterexecute;
+   property onerror;
  end;
 
- tsqlstatement = class(tcustomsqlstatement)
+ tcursorsqlstatement = class(tcustomsqlstatement)
   private
-   FCursor: TSQLCursor;
+  protected
+   fcursor: tsqlcursor;
    fstatementtype: tstatementtype;
    procedure setactive(avalue: boolean); override;
-  protected
    procedure dosqlchange(const sender: tobject); override;
-   procedure prepare;
+   function isprepared: boolean;
+   procedure prepare; virtual;
+   procedure checkautocommit; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure unprepare;
+   procedure unprepare; virtual;
    procedure execute; overload; override;
    procedure execute(const aparams: array of variant); overload;
    function rowsaffected: integer;
                   //-1 if not supported
-  published
    property statementtype : tstatementtype read fstatementtype 
                  write fstatementtype default stnone;
  end;
-  
+
+ tsqlstatement = class(tcursorsqlstatement)
+  published
+   property params;
+   property sql;
+   property database;
+   property transaction;
+                  //can be nil
+   property options;
+   property statementtype;
+   property onbeforeexecute;
+   property onafterexecute;
+   property onerror;
+ end;
+   
 const
  blobidsize = sizeof(integer);
 type
@@ -910,7 +936,7 @@ function splitsql(const asql: msestring; const term: msechar = ';';
 implementation
 uses 
  dbconst,strutils,msereal,msestream,msebits,msefileutils,mseformatstr,typinfo,
- msesysutils;
+ msesysutils,msesqlresult;
 type
  tdataset1 = class(tdataset);
  tmdatabase1 = class(tmdatabase);
@@ -2604,7 +2630,7 @@ var
  k1: tupdatekind;
 begin
  int1:= 1;
- if (self <> sender.ftransactionwrite) then begin
+ if (self = sender.writetransaction) then begin
   for k1:= low(tupdatekind) to high(tupdatekind) do begin
    if sender.fapplyqueries[k1] <> nil then begin
     inc(int1);
@@ -4917,6 +4943,38 @@ procedure tcustomsqlstatement.savepointevent(const sender: tmdbtransaction;
 begin
  //dummy
 end;
+{
+procedure tcustomsqlstatement.readoptionsold(areader: treader);
+begin
+ if self is tsqlresult then begin
+  if areader.readset(typeinfo(sqlresultoptionty)) <> 0 then begin
+   options:= [sso_utf8];
+  end
+  else begin
+   options:= sqlstatementoptionsty(areader.readset(
+                               typeinfo(sqlstatementoptionty)));
+  end;
+ end;
+end;
+
+procedure tcustomsqlstatement.readoptions(areader: treader);
+begin
+ options:= sqlstatementoptionsty(areader.readset(
+                               typeinfo(sqlstatementoptionty)));
+end;
+
+procedure tcustomsqlstatement.writeoptions(awriter: twriter);
+begin
+ awriter.writeset(integer(options),typeinfo(sqlstatementoptionty));
+end;
+
+procedure tcustomsqlstatement.defineproperties(afiler: tfiler);
+begin
+ inherited;
+ afiler.defineproperty('options',@readoptionsold,nil,false);
+ afiler.defineproperty('optionsnew',@readoptions,@writeoptions,foptions <> []);
+end;
+}
 
 { tmsesqlscript }
 
@@ -5001,30 +5059,36 @@ begin
  execute(nil,nil);
 end;
 
-{ tsqlstatement }
+{ tcursorsqlstatement }
 
-constructor tsqlstatement.create(aowner: tcomponent);
+constructor tcursorsqlstatement.create(aowner: tcomponent);
 begin
  inherited;
 end;
 
-destructor tsqlstatement.destroy;
+destructor tcursorsqlstatement.destroy;
 begin
  setactive(false);
  inherited;
 end;
 
-procedure tsqlstatement.dosqlchange(const sender: tobject);
+procedure tcursorsqlstatement.dosqlchange(const sender: tobject);
 begin
  unprepare;
  inherited;
 end;
 
-procedure tsqlstatement.prepare;
+procedure tcursorsqlstatement.prepare;
+var
+ mstr1: msestring;
 begin
  if (fcursor = nil) or not fcursor.fprepared then begin
   checkdatabase(name,fdatabase);
   checktransaction(name,ftransaction);
+  mstr1:= trim(fsql.text);
+  if mstr1 = '' then begin
+   raise edatabaseerror.create(name+': Empty query.');
+  end;
   if not fdatabase.Connected then begin
    fdatabase.Open;
   end;
@@ -5037,19 +5101,38 @@ begin
   fcursor.ftrans:= ftransaction.handle;
   fcursor.fstatementtype:= fstatementtype;
   if not (sso_noprepare in foptions) then begin
-   fdatabase.PrepareStatement(Fcursor,ftransaction,fsql.text,FParams);
+   fdatabase.PrepareStatement(Fcursor,ftransaction,mstr1,FParams);
   end;
  end;
 end;
 
-procedure tsqlstatement.unprepare;
+function tcursorsqlstatement.isprepared: boolean;
+begin
+ result:= (fcursor <> nil) and fcursor.fprepared;
+end;
+
+procedure tcursorsqlstatement.unprepare;
 begin
  if (fcursor <> nil) and fcursor.fprepared then begin
   fdatabase.unpreparestatement(fcursor);
  end;
 end;
 
-procedure tsqlstatement.execute;
+procedure tcursorsqlstatement.checkautocommit;
+begin
+ if not (csdesigning in componentstate) then begin
+  if sso_autocommit in foptions then begin
+   ftransaction.commit;
+  end
+  else begin
+   if sso_autocommitret in foptions then begin
+    ftransaction.commitretaining;
+   end;
+  end;
+ end;
+end;
+
+procedure tcursorsqlstatement.execute;
 var
  bo1: boolean;
 begin
@@ -5067,14 +5150,7 @@ begin
                              fparams,isutf8);
   end;
 //  fcursor.close;
-  if sso_autocommit in foptions then begin
-   ftransaction.commit;
-  end
-  else begin
-   if sso_autocommitret in foptions then begin
-    ftransaction.commitretaining;
-   end;
-  end;
+  checkautocommit;
   doafterexecute(fdatabase,ftransaction);
  except
   on e: exception do begin  
@@ -5087,7 +5163,7 @@ begin
  end;
 end;
 
-procedure tsqlstatement.setactive(avalue: boolean);
+procedure tcursorsqlstatement.setactive(avalue: boolean);
 begin
  if not avalue then begin
   unprepare;
@@ -5097,7 +5173,7 @@ begin
  end;
 end;
 
-procedure tsqlstatement.execute(const aparams: array of variant);
+procedure tcursorsqlstatement.execute(const aparams: array of variant);
 var
  int1: integer;
 begin
@@ -5107,7 +5183,7 @@ begin
  execute;
 end;
 
-function tsqlstatement.rowsaffected: integer;
+function tcursorsqlstatement.rowsaffected: integer;
 begin
  if fcursor = nil then begin
   result:= -1;
