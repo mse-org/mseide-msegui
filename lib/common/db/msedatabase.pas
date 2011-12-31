@@ -51,6 +51,7 @@ type
  itransactionclient = interface(idbclient)
   procedure settransaction(const avalue: tmdbtransaction);
   procedure settransactionwrite(const avalue: tmdbtransaction);
+//  function getwritetransaction: tmbtransaction;
 //  function getactive: boolean;
   procedure checkbrowsemode;
   procedure refreshtransaction;

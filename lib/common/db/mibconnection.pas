@@ -229,7 +229,7 @@ function clientminorversion: integer;
 implementation
 
 uses 
- strutils,msesysintf1,msebits,msefloattostr,msedatabase;
+ strutils,msesysintf1,msebits,msefloattostr,msedatabase,msesqlresult;
 
 function clientversion: string;
 var
@@ -1503,23 +1503,20 @@ begin
 end;
 
 
-procedure TIBConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
-                               const aTableName : string);
+procedure tibconnection.updateindexdefs(var indexdefs : tindexdefs;
+                               const atablename : string);
 var 
- qry : TSQLQuery;
+ res: tsqlresult;
  str1: ansistring;
 begin
-  if not assigned(Transaction) then
-    DatabaseError(SErrConnTransactionnSet);
-
-  qry := tsqlquery.Create(nil);
-  qry.transaction := Transaction;
-  qry.database := Self;
-  with qry do
-    begin
-    ReadOnly := True;
-    sql.clear;
-    sql.add('select '+
+ if not assigned(Transaction) then begin
+  DatabaseError(SErrConnTransactionnSet);
+ end;
+ res:= tsqlresult.Create(nil);
+ try
+  with res do begin
+   database:= self;
+   sql.text:= 'select '+
               'ind.rdb$index_name, '+
               'ind.rdb$relation_name, '+
               'ind.rdb$unique_flag, '+
@@ -1534,32 +1531,32 @@ begin
               'rel_con.rdb$index_name = ind.rdb$index_name '+
             'where '+
               '(ind_seg.rdb$index_name = ind.rdb$index_name) and '+
-              '(ind.rdb$relation_name=''' +  UpperCase(aTableName) +''') '+
+              '(ind.rdb$relation_name=''' +  uppercase(atablename) +''') '+
             'order by '+
-              'ind.rdb$index_name;');
-    open;
-    end;
-
-  while not qry.eof do begin
-   with IndexDefs.AddIndexDef do begin
-    str1:= qry.fields[0].asstring;
-    Name := trim(str1);
-    Fields := trim(qry.Fields[3].asstring);
-    If qry.fields[4].asstring = 'PRIMARY KEY' then begin
-     options := options + [ixPrimary];
-    end;
-    If qry.fields[2].asinteger = 1 then begin
-     options := options + [ixUnique];
-    end;
-    qry.next;
-    while (str1 = qry.fields[0].asstring) and (not qry.eof) do begin
-     Fields := Fields + ';' + trim(qry.Fields[3].asstring);
-     qry.next;
+              'ind.rdb$index_name;';
+   active:= true;
+   while not res.eof do begin
+    with indexdefs.AddIndexDef do begin
+     str1:= res.cols[0].asstring;
+     name := trim(str1);
+     fields:= trim(res.cols[3].asstring);
+     if res.cols[4].asstring = 'PRIMARY KEY' then begin
+      options:= options + [ixPrimary];
+     end;
+     if res.cols[2].asinteger = 1 then begin
+      options:= options + [ixUnique];
+     end;
+     res.next;
+     while  not res.eof and (str1 = res.cols[0].asstring) do begin
+      fields:= fields + ';' + trim(res.cols[3].asstring);
+      res.next;
+     end;
     end;
    end;
   end;
-  qry.close;
-  qry.free;
+ finally
+  res.free;
+ end;
 end;
 
 procedure TIBConnection.SetFloat(CurrBuff: pointer; Dbl: Double; Size: integer);

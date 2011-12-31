@@ -2,6 +2,7 @@ MSEide+MSEgui version history
 
 2011-12-31
  tsqlresult inherits from tsqlstatement, options -> sqlresultoptionsty.
+ tsqlquery moved to msesqlquery.pas.
 2011-12-25
  shiftstatemustinclude and shiftstatemustnotinclude parameters for iscellclick(),
  same as iscellkeypress().
