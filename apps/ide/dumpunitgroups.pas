@@ -182,7 +182,7 @@ var
  int1,int2: integer;
  po1: pcomponentclassinfoty;
  po2: ptypeinfo;
- po3: ptypedata;
+// po3: ptypedata;
  
 begin
  parsedclasses:= nil;

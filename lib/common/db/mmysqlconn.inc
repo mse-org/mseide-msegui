@@ -205,7 +205,7 @@ Type
 
 implementation
 uses 
- dbconst,msebufdataset,msetypes;
+ dbconst,msebufdataset,msetypes,msesqlresult;
 type
  tmsebufdataset1 = class(tmsebufdataset);
  
@@ -940,41 +940,39 @@ end;
 procedure TConnectionName.UpdateIndexDefs(var IndexDefs : TIndexDefs;
                      const aTableName : string);
 var 
- qry: TSQLQuery;
- keynamef,{filednamef,}columnnamef,nonuniquef: tfield;
+ qry: tsqlresult;
+ keynamef,{filednamef,}columnnamef,nonuniquef: tdbcol;
  str1: string;
 begin
  if not assigned(Transaction) then begin
   DatabaseError(SErrConnTransactionnSet);
  end;
- qry:= tsqlquery.Create(nil);
+ qry:= tsqlresult.Create(nil);
  try
-  qry.transaction := Transaction;
-  qry.database := Self;
   with qry do begin
-   parsesql:= false;
-   sql.add('show index from ' +  aTableName);
-   open;
-  end;
-  keynamef:= qry.fieldbyname('Key_name');
-  columnnamef:= qry.fieldbyname('Column_name');
-  nonuniquef:= qry.fieldbyname('Non_unique');
-  while not qry.eof do begin
-   with IndexDefs.AddIndexDef do begin
-    Name:= trim(keynamef.asstring);
-    if Name = 'PRIMARY' then begin
-     options:= options + [ixPrimary];
+   database := Self;
+   sql.text:= 'show index from ' +  aTableName;
+   active:= true;
+   keynamef:= cols.colbyname('Key_name');
+   columnnamef:= cols.colbyname('Column_name');
+   nonuniquef:= cols.colbyname('Non_unique');
+   while not eof do begin
+    with IndexDefs.AddIndexDef do begin
+     Name:= trim(keynamef.asstring);
+     if Name = 'PRIMARY' then begin
+      options:= options + [ixPrimary];
+     end;
+     if nonuniquef.asinteger = 0 then begin
+      options:= options + [ixUnique];
+     end;
+     str1:= '';
+     repeat 
+      str1:= str1 + trim(columnnamef.asstring) + ';';
+      next;
+     until eof or (name <> keynamef.asstring);
+     setlength(str1,length(str1)-1); //remove last ';'
+     fields:= str1;
     end;
-    if nonuniquef.asinteger = 0 then begin
-     options:= options + [ixUnique];
-    end;
-    str1:= '';
-    repeat 
-     str1:= str1 + trim(columnnamef.asstring) + ';';
-     qry.next;
-    until qry.eof or (name <> keynamef.asstring);
-    setlength(str1,length(str1)-1); //remove last ';'
-    fields:= str1;
    end;
   end;
  finally

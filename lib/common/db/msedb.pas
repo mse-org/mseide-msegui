@@ -1560,13 +1560,12 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
  end;
  
-// {$define mse_withpublishedparamvalue}
- 
  tparamconnector = class;
 
  tmseparam = class(tparam,idbeditinfo)
-// {$ifdef mse_withpublishedparamvalue}
   private
+   fconnector: tparamconnector;
+   fdatalink: tfielddatalink;
    procedure setasvariant(const avalue: variant);
    function getasid: int64;
    procedure setasid(const avalue: int64);
@@ -1581,13 +1580,6 @@ type
    procedure getfieldtypes(out apropertynames: stringarty;
                            out afieldtypes: fieldtypesarty);
    function isparamstored: boolean;
-  published
-   property value : variant read getasvariant write setasvariant 
-                                                  stored isparamstored;
-// {$endif mse_withpublishedparamvalue}
-  private
-   fconnector: tparamconnector;
-   fdatalink: tfielddatalink;
    procedure setconnector(const avalue: tparamconnector);
   public
    constructor Create(ACollection: TCollection); overload; override;
@@ -1598,6 +1590,8 @@ type
    property connector: tparamconnector read fconnector write setconnector;
    property datasource: tdatasource read getdatasource write setdatasource;
    property fieldname: string read getfieldname write setfieldname;
+   property value : variant read getasvariant write setasvariant 
+                                                  stored isparamstored;
  end;
 
  tparamconnector = class(tmsecomponent)

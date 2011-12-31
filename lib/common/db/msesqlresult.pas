@@ -275,45 +275,47 @@ type
 
  sqlresulteventty = procedure(const sender: tsqlresult) of object;  
  
- tsqlresult = class(tmsecomponent,isqlpropertyeditor,isqlclient,itransactionclient)
+ tsqlresult = class(tcursorsqlstatement,isqlpropertyeditor,
+                     isqlclient,itransactionclient)
   private
-   fsql: tsqlstringlist;
+//   fsql: tsqlstringlist;
    fopenafterread: boolean;
    factive: boolean;
-   fdatabase: tcustomsqlconnection;
-   ftransaction: tsqltransaction;
-   fcursor: tsqlcursor;
-   fparams: tmseparams;
+//   fdatabase: tcustomsqlconnection;
+//   ftransaction: tsqltransaction;
+//   fcursor: tsqlcursor;
+//   fparams: tmseparams;
    ffielddefs: tsqlresultfielddefs;
    fcols: tdbcols;
    feof: boolean;
    fbof: boolean;
-   foptions: sqlresultoptionsty;
+//   foptions: sqlresultoptionsty;
    fbeforeopen: tmsesqlscript;
    fafteropen: tmsesqlscript;
    fonbeforeopen: sqlresulteventty;
    fonafteropen: sqlresulteventty;
    procedure setsql(const avalue: tsqlstringlist);
-   function getactive: boolean;
-   procedure setactive(avalue: boolean);
    procedure setdatabase1(const avalue: tcustomsqlconnection);
    function getsqltransaction: tsqltransaction;
    procedure setsqltransaction(const avalue: tsqltransaction);
    procedure setparams(const avalue: tmseparams);
-   procedure onchangesql(const sender : tobject);
    procedure setbeforeopen(const avalue: tmsesqlscript);
    procedure setafteropen(const avalue: tmsesqlscript);
    procedure changed;
    procedure setfielddefs(const avalue: tsqlresultfielddefs);
   protected
+   procedure dosqlchange(const sender : tobject); override;
+   function getactive: boolean;
+   procedure setactive(avalue: boolean); override;
    procedure loaded; override;
    procedure freefldbuffers;
-   function isprepared: boolean;
+//   function isprepared: boolean;
    procedure open;
    procedure close;
-   procedure prepare;
-   procedure unprepare;
-   procedure execute;
+   procedure doclear;
+   procedure prepare; override;
+   procedure checkautocommit; override;
+//   procedure execute;
     //itransactionclient
    procedure settransaction(const avalue: tmdbtransaction);
    procedure settransactionwrite(const avalue: tmdbtransaction);
@@ -336,9 +338,11 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function isutf8: boolean;
-   procedure next;
+//   function isutf8: boolean;
+   procedure unprepare; override;
+   procedure clear; //frees buffers, does not unprepare
    procedure refresh;
+   procedure next;
    function rowsaffected: integer; //-1 if not supported
    function rowsreturned: integer; //-1 if not supported
 //   procedure asvariant(out avalue: variant); overload; //internal compiler error
@@ -355,19 +359,29 @@ type
    property bof: boolean read fbof;
    property eof: boolean read feof;
   published
-   property params : tmseparams read fparams write setparams; //before sql property
+//   property params : tmseparams read fparams write setparams; //before sql property
 
-   property sql: tsqlstringlist read fsql write setsql;
+//   property sql: tsqlstringlist read fsql write setsql;
    property beforeopen: tmsesqlscript read fbeforeopen write setbeforeopen;
    property afteropen: tmsesqlscript read fafteropen write setafteropen;
-   property database: tcustomsqlconnection read fdatabase write setdatabase1;
-   property transaction: tsqltransaction read getsqltransaction 
-                                      write setsqltransaction;
+//   property database: tcustomsqlconnection read fdatabase write setdatabase1;
+//   property transaction: tsqltransaction read getsqltransaction 
+//                                      write setsqltransaction;
    property active: boolean read getactive write setactive default false;
-   property options: sqlresultoptionsty read foptions write foptions default [];
+//   property options: sqlresultoptionsty read foptions write foptions default [];
    property fielddefs: tsqlresultfielddefs read ffielddefs write setfielddefs;
    property onbeforeopen: sqlresulteventty read fonbeforeopen write fonbeforeopen;
    property onafteropen: sqlresulteventty read fonafteropen write fonafteropen;
+
+   property params;
+   property sql;
+   property database;
+   property transaction;
+   property options;
+   property statementtype default stselect;
+   property onbeforeexecute;
+   property onafterexecute;
+   property onerror;
  end;
  
  idbcolinfo = interface(inullinterface)
@@ -491,6 +505,7 @@ const
  SString = 'String';
 type
  tdatalist1 = class(tdatalist);
+// tcursorsqlstatement1 = class(tcursorsqlstatement);
  
 function dogetsqlresult(const atransaction: tsqltransaction; const asql: msestring;
                         const aparams: array of variant): tsqlresult;           
@@ -702,8 +717,8 @@ var
 begin
  int1:= 0;
  result:= not fsqlresult.active or 
-            not fsqlresult.fdatabase.loadfield(fsqlresult.fcursor,
-            fdatatype,ffieldnum,nil,int1,false)
+            not fsqlresult.database.loadfield(fsqlresult.fcursor,
+                               fdatatype,ffieldnum,nil,int1,false);
 end;
 
 function tdbcol.loadfield(const buffer: pointer; var bufsize: integer): boolean;
@@ -1218,12 +1233,13 @@ constructor tsqlresult.create(aowner: tcomponent);
 begin
  fbof:= true;
  feof:= true;
- fparams:= tmseparams.create(self);
+// fparams:= tmseparams.create(self);
  fcols:= tdbcols.create(@getname);
  ffielddefs:= tsqlresultfielddefs.create(nil);
- fsql:= tsqlstringlist.create;
- fsql.onchange:= @onchangesql;
+// fsql:= tsqlstringlist.create;
+// fsql.onchange:= @onchangesql;
  inherited;
+ statementtype:= stselect;
 end;
 
 destructor tsqlresult.destroy;
@@ -1232,8 +1248,8 @@ begin
  database:= nil;
  transaction:= nil;
  inherited;
- fsql.free;
- fparams.free;
+// fsql.free;
+// fparams.free;
  ffielddefs.free;
  fcols.free;
 end;
@@ -1265,7 +1281,7 @@ begin
   end;
  end;
 end;
-
+{
 function tsqlresult.isutf8: boolean;
 begin
  result:= (sro_utf8 in foptions);
@@ -1273,7 +1289,7 @@ begin
   fdatabase.updateutf8(result);
  end;
 end;
-
+}
 procedure tsqlresult.setdatabase1(const avalue: tcustomsqlconnection);
 begin
  setdatabase(avalue);
@@ -1333,9 +1349,26 @@ begin
   fafteropen.execute;
  end;
  changed;
+ inherited checkautocommit;
  if canevent(tmethod(fonafteropen)) then begin
   fonafteropen(self);
  end;
+end;
+
+procedure tsqlresult.doclear;
+begin
+ if fcursor <> nil then begin
+  fcursor.close;
+ end;
+ feof:= true;
+ fbof:= true;
+ fcols.clear;
+end;
+
+procedure tsqlresult.clear;
+begin
+ doclear;
+ changed;
 end;
 
 procedure tsqlresult.close;
@@ -1345,8 +1378,7 @@ begin
  fbof:= true;
  sendchangeevent(oe_releasefields);
  freefldbuffers;
- unprepare;
-// ffielddefs.clear; //is now published
+ inherited setactive(false);
  fcols.clear;
  changed;
 end;
@@ -1361,13 +1393,16 @@ end;
 procedure tsqlresult.unprepare;
 begin
  CheckInactive(active,name);
- if IsPrepared  then begin
+ inherited;
+{
+ if IsPrepared then begin
   with tcustomsqlconnection(Database) do begin
    UnPrepareStatement(FCursor);
   end;
  end;
+}
 end;
-
+{
 procedure tsqlresult.prepare;
 var
  db: tcustomsqlconnection;
@@ -1404,22 +1439,24 @@ begin
   FCursor.FInitFieldDef:= True;
  end;
 end;
+}
+
+procedure tsqlresult.prepare;
+begin
+ inherited;
+ fcursor.finitfielddef:= true;
+end;
 
 procedure tsqlresult.setparams(const avalue: tmseparams);
 begin
  fparams.assign(avalue);
 end;
-
-function tsqlresult.isprepared: boolean;
-begin
- result:= (fcursor <> nil) and fcursor.fprepared;
-end;
-
+{
 procedure tsqlresult.execute;
 begin
  doexecute(fparams,ftransaction,fcursor,fdatabase,isutf8);
 end;
-
+}
 procedure tsqlresult.loaded;
 begin
  inherited;
@@ -1435,7 +1472,7 @@ begin
  end;
 end;
 
-procedure tsqlresult.onchangesql(const sender: tobject);
+procedure tsqlresult.dosqlchange(const sender: tobject);
 var
  bo1: boolean;
 begin
@@ -1443,8 +1480,9 @@ begin
  if bo1 then begin
   active:= false;
  end;
- unprepare;
- fparams.parsesql(fsql.text,true);
+ inherited;
+// unprepare;
+// fparams.parsesql(fsql.text,true);
  if bo1 then begin
   active:= true;
  end;
@@ -1466,7 +1504,7 @@ begin
   active:= true;
  end
  else begin
-  fcursor.close;
+  doclear;
   feof:= false;
   execute; 
   next;
@@ -1810,6 +1848,11 @@ end;
 
 procedure tsqlresult.savepointevent(const sender: tmdbtransaction;
                const akind: savepointeventkindty; const alevel: integer);
+begin
+ //dummy
+end;
+
+procedure tsqlresult.checkautocommit;
 begin
  //dummy
 end;

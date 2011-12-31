@@ -12,7 +12,8 @@ unit msesqldb;
 interface
 uses
  classes,db,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseglob,
- msedatabase,sysutils,msetimer,msestrings,msearrayprops,mseapplication;
+ msedatabase,sysutils,msetimer,msestrings,msearrayprops,mseapplication,
+ msesqlquery;
 
 const
  defaultsqlcontrolleroptions = defaultdscontrolleroptions + 
