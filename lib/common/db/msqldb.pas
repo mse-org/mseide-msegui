@@ -35,7 +35,6 @@ type
  sqlconnoptionty = (sco_supportparams,sco_emulateretaining,sco_nounprepared);
  sqlconnoptionsty = set of sqlconnoptionty;
 
-type
  tcustomsqlconnection = class;
  TSQLTransaction = class;
 // TSQLQuery = class;
@@ -45,6 +44,12 @@ type
     stDDL, stGetSegment, stPutSegment, stExecProcedure,
     stStartTrans, stCommit, stRollback, stSelectForUpd);
 
+const
+ updatestatementtypes: array[tupdatekind] of tstatementtype =
+        //(ukModify, ukInsert, ukDelete)
+          (stupdate, stinsert, stdelete);
+
+type
  tsqlstringlist = class(tmsestringdatalist)
   private
    fmacros: tmacroproperty;
