@@ -1288,10 +1288,12 @@ begin
  m1.code:= nil;
  m1.data:= nil;
  for int1:= high(frefreshmethods) downto 0 do begin
-  po1:= frefreshmethods[int1].findmethodbyname(themethodname);
-  if po1 <> nil then begin
-   m1.data:= po1^.address;
-   break;
+  if frefreshmethods[int1] <> nil then begin
+   po1:= frefreshmethods[int1].findmethodbyname(themethodname);
+   if po1 <> nil then begin
+    m1.data:= po1^.address;
+    break;
+   end;
   end;
  end;
  setmethodprop(instance,propinfo,m1);
@@ -1439,8 +1441,8 @@ begin
      amodule^.methods.createmethodtable(frefreshmethods);
    {$endif}
     end;
-    setlength(frefreshmethods,high(frefreshmethods)+2);
-    frefreshmethods[high(frefreshmethods)]:= amodule^.methods;
+    setlength(frefreshmethods,high(frefreshmethods)+3);
+    frefreshmethods[high(frefreshmethods)-1]:= amodule^.methods;
    {$ifndef mse_nomethodswap}
     for int1:= 0 to high(dependentmodules) do begin
      dependentmodules[int1]^.methods.createmethodtable(frefreshmethods);
@@ -1454,6 +1456,7 @@ begin
      {$ifndef mse_nomethodswap}
       streamingswapmethodpointer(dependentmodules[int1]^.instance);
      {$endif}
+      frefreshmethods[high(frefreshmethods)]:= dependentmodules[int1]^.methods;
       for int2:= 0 to high(depmodcomps[int1]) do begin
        descendent1:= dependentcomponents[int1][int2];
        newancestor1:= amodule^.instance;
