@@ -139,8 +139,8 @@ type
    procedure internalfill(const anzahl: integer; const wert);
    procedure getdefaultdata(out dest);
    procedure getgriddefaultdata(out dest); virtual;
-   procedure getdata(index: integer; out dest);
-   procedure getgriddata(index: integer; out dest); virtual;
+   procedure getdata(index: integer; var dest);
+   procedure getgriddata(index: integer; var dest); virtual;
    procedure setdata(index: integer; const source);
    procedure setgriddata(index: integer; const source); virtual;
    function getstatdata(const index: integer): msestring; virtual;
@@ -1754,14 +1754,14 @@ begin
  move((fdatapo+index*fsize)^,ziel,fsize);
 end;
 
-procedure tdatalist.getdata(index: integer; out dest);
+procedure tdatalist.getdata(index: integer; var dest);
 var
  po1: pointer;
 begin
  checkindex(index);
-// if dls_needsfree in fstate then begin
-//  freedata(dest);
-// end;  
+ if dls_needsfree in fstate then begin
+  freedata(dest);
+ end;  
  po1:= fdatapo+index*fsize;
  move(po1^,dest,fsize);
  if dls_needscopy in fstate then begin
@@ -1769,7 +1769,7 @@ begin
  end;
 end;
 
-procedure tdatalist.getgriddata(index: integer; out dest);
+procedure tdatalist.getgriddata(index: integer; var dest);
 begin
  getdata(index,dest);
 end;
@@ -1781,14 +1781,14 @@ var
 begin
  int1:= index;
  checkindex(index);
+ if dls_needscopy in fstate then begin
+  copyinstance((@quelle)^);
+ end;
  po1:= fdatapo+index*fsize;
  if dls_needsfree in fstate then begin
   freedata(po1^);
  end;
  move(quelle,po1^,fsize);
- if dls_needscopy in fstate then begin
-  copyinstance(po1^);
- end;
  change(int1);
 end;
 

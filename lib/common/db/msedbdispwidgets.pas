@@ -180,11 +180,11 @@ type
  tdbrealdisp = class(tcustomrealdisp,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
-     //idbdispfieldlink
+    //idbdispfieldlink
    procedure getfieldtypes(var fieldtypes: fieldtypesty); virtual;
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
-   //ireccontrol
+    //ireccontrol
    procedure recchanged;
    procedure setdatalink(const avalue: tdispfielddatalink);
   protected   

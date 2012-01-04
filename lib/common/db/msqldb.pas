@@ -2347,8 +2347,8 @@ end;
 
 procedure tsqltransaction.disconnect(const sender: itransactionclient;
                                      const auxclients: integer);
-var
- int1: integer;
+//var
+// int1: integer;
 // intf1: itransactionclient;
 // k1: tupdatekind;
 begin

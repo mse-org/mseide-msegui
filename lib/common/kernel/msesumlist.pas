@@ -72,7 +72,7 @@ type
    procedure setsourcelevel(const avalue: string); virtual;
    procedure setsourceissum(const avalue: string); virtual;
    procedure getgriddefaultdata(out dest); override;
-   procedure getgriddata(index: integer; out dest); override;
+   procedure getgriddata(index: integer; var dest); override;
    procedure setgriddata(index: integer; const source); override;
    function getdefault: pointer; override;
    function getlinkdatatypes(const atag: integer): listdatatypesty; override;
@@ -164,7 +164,7 @@ begin
  realty(dest):= emptyreal;
 end;
 
-procedure trealsumlist.getgriddata(index: integer; out dest);
+procedure trealsumlist.getgriddata(index: integer; var dest);
 //var
 // po1: prealsumty;
 begin
