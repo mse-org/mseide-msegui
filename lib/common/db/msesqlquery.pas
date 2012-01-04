@@ -1203,21 +1203,8 @@ begin
  end;
 end;
 }
+ 
 procedure tsqlquery.connect(const aexecute: boolean);
-
-  procedure initialisemodifyquery(var qry: tsqlresult; asql: tsqlstringlist);  
-  begin
-   if qry = nil then begin
-    qry:= tsqlresult.create(nil);
-    with qry do begin
-//     ParseSQL:= False;
-     transaction:= self.writetransaction;
-     database:= self.database;
-     sql.assign(asql);
-    end;
-   end;
-  end; //initialisemodifyquery
-
 var
  tel{,fieldc}: integer;
  f: TField;
@@ -1226,8 +1213,7 @@ var
  IndexFields: stringarty;
  str1: string;
  int1: integer;
- k1: tupdatekind;
- 
+ k1: tupdatekind; 
 begin
  if database <> nil then begin
   getcorbainterface(database,typeinfo(iblobconnection),fblobintf);
@@ -1280,20 +1266,17 @@ begin
      end;
      if fupdateable then begin
       for k1:= low(tupdatekind) to high(tupdatekind) do begin
-       InitialiseModifyQuery(Fapplyqueries[k1],Fapplysql[k1]);       
+       if fapplyqueries[k1] = nil then begin
+        fapplyqueries[k1]:= tsqlresult.create(nil);
+        with fapplyqueries[k1] do begin
+         transaction:= self.writetransaction;
+         database:= self.database;
+         sql.assign(fapplysql[k1]);
+         statementtype:= updatestatementtypes[k1];
+        end;
+       end;
       end;
      end;
-     {
-     if FUpdateable or (fsqldelete.count > 0) then begin
-      InitialiseModifyQuery(FDeleteQry,FSQLDelete);
-     end;
-     if FUpdateable or (fsqlupdate.count > 0) then begin
-      InitialiseModifyQuery(FUpdateQry,FSQLUpdate);
-     end;
-     if FUpdateable or (fsqlinsert.count > 0) then begin
-      InitialiseModifyQuery(FInsertQry,FSQLInsert);
-     end;
-     }
     end;
    end
    else begin

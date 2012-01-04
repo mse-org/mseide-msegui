@@ -378,11 +378,11 @@ type
    fonafterdisconnect: iochanneleventty;
    foptionsio: optionsiochty;
    flocalconn: tcustomiochannel;
-   procedure setactive(const avalue: boolean);
    procedure setlocalconn(const avalue: tcustomiochannel);
   protected
    fsynchronizer: tiosynchronizer;
    fstate: iochannelstatesty;
+   procedure setactive(const avalue: boolean); override;
    procedure checkinactive;
    function canconnect: boolean; virtual;
    procedure datareceived(var adata: ansistring);

@@ -7113,7 +7113,7 @@ var
  int1: integer;
 begin
  for int1:= 0 to count - 1 do begin
-  tcol(items[int1]).rowcountchanged(newcount);
+  tcol(fitems[int1]).rowcountchanged(newcount);
  end;
 end;
 

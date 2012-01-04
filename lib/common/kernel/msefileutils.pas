@@ -49,7 +49,7 @@ type
    function sortsize(const l,r: fileinfoty): integer;
   protected
    procedure freedata(var data); override;
-   procedure copyinstance(var data); override;
+   procedure beforecopy(var data); override;
    function compare(const l,r): integer; override;
   public
    constructor create; override;
@@ -1738,9 +1738,9 @@ begin
  fsize:= sizeof(fileinfoty)
 end;
 
-procedure tcustomfiledatalist.copyinstance(var data);
+procedure tcustomfiledatalist.beforecopy(var data);
 begin
- reallocstring(fileinfoty(data).name);
+ stringaddref(fileinfoty(data).name);
 end;
 
 procedure tcustomfiledatalist.freedata(var data);
