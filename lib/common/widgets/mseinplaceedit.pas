@@ -269,7 +269,7 @@ type
    function getlocked: boolean;
   protected
    procedure freedata(var data); override;      //gibt daten frei
-   procedure copyinstance(var data); override;  //nach blockcopy aufgerufen
+   procedure beforecopy(var data); override;
   public
    constructor create(intf: iundo); reintroduce;
    procedure beginlink(linkto: undotypety; forcenew: boolean);
@@ -2141,12 +2141,14 @@ begin
  maxcount:= defaultundomaxcount;
 end;
 
-procedure ttextundolist.copyinstance(var data);
+procedure ttextundolist.beforecopy(var data);
 begin
  inherited;
  with undoinfoty(data) do begin
-  reallocstring(text);
-  reallocstring(textbefore);
+  stringaddref(text);
+  stringaddref(textbefore);
+//  reallocstring(text);
+//  reallocstring(textbefore);
  end;
 end;
 

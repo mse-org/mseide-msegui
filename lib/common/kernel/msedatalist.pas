@@ -137,8 +137,9 @@ type
    procedure internalgetdata(index: integer; out ziel);
    procedure internalsetdata(index: integer; const quelle);
    procedure internalfill(const anzahl: integer; const wert);
-   procedure getdefaultdata(out dest);
-   procedure getgriddefaultdata(out dest); virtual;
+   procedure getdefaultdata(var dest);    //out is not possible because of
+                                          //FPC bug 20962
+   procedure getgriddefaultdata(var dest); virtual;
    procedure getdata(index: integer; var dest);
    procedure getgriddata(index: integer; var dest); virtual;
    procedure setdata(index: integer; const source);
@@ -160,7 +161,9 @@ type
    procedure insertdata(const index: integer; const quelle);
    procedure defineproperties(filer: tfiler); override;
    procedure freedata(var data); virtual;      //gibt daten frei
-   procedure copyinstance(var data); virtual;  //nach blockcopy aufgerufen
+   procedure beforecopy(var data); virtual;
+   procedure aftercopy(var data); virtual;
+//   procedure copyinstance(var data); virtual;  //nach blockcopy aufgerufen
    procedure initinstance(var data); virtual;  //fuer neue zeilen aufgerufen
    function internaladddata(const quelle; docopy: boolean): integer;
    function adddata(const quelle): integer;
@@ -620,8 +623,7 @@ type
    procedure readitem(const reader: treader; var value); override;
    procedure writeitem(const writer: twriter; var value); override;
    procedure freedata(var data); override; //gibt daten frei
-   procedure copyinstance(var data); override;
-               //nach blockcopy aufgerufen
+   procedure beforecopy(var data); override;
    procedure assignto(dest: tpersistent); override;
    function compare(const l,r): integer; override;
    procedure setstatdata(const index: integer; const value: msestring); override;
@@ -669,8 +671,7 @@ type
    procedure readitem(const reader: treader; var value); override;
    procedure writeitem(const writer: twriter; var value); override;
    procedure freedata(var data); override; //gibt daten frei
-   procedure copyinstance(var data); override;
-               //nach blockcopy aufgerufen
+   procedure beforecopy(var data); override;
    procedure assignto(dest: tpersistent); override;
    procedure setstatdata(const index: integer; const value: msestring); override;
    function getstatdata(const index: integer): msestring; override;
@@ -745,7 +746,7 @@ type
    procedure writeitem(const writer: twriter; var value); override;
    function compare(const l,r): integer; override;
    procedure freedata(var data); override; //gibt daten frei
-   procedure copyinstance(var data); override;
+   procedure beforecopy(var data); override;
   public
    constructor create; override;
 //   procedure assign(source: tpersistent); override;
@@ -1015,7 +1016,7 @@ type
                             const source: tpersistent): boolean; override;
    procedure checkitemclass(const aitem: tobject);
    procedure freedata(var data); override;
-   procedure copyinstance(var data); override;
+//   procedure copyinstance(var data); override;
    procedure initinstance(var data); override;
    procedure docreateobject(var instance: tobject); virtual;
   public
@@ -1512,8 +1513,9 @@ begin
   end;
   po1:= fdatapo + int1*fsize;
   move(quelle,po1^,fsize);
-  if (dls_needscopy in fstate) and docopy then begin
-   copyinstance(po1^);
+  if docopy and (dls_needscopy in fstate) then begin
+   beforecopy(po1^);
+   aftercopy(po1^);
   end;
  finally
   endupdate;
@@ -1694,7 +1696,8 @@ begin
    po1:= adatapo;
    s1:= asize;
    for int1:= 0 to fcount - 1 do begin
-    copyinstance(po1^);
+    beforecopy(po1^);
+    aftercopy(po1^);
     inc(pchar(po1),s1);
    end;
   end;
@@ -1759,13 +1762,16 @@ var
  po1: pointer;
 begin
  checkindex(index);
+ po1:= fdatapo+index*fsize;
+ if dls_needscopy in fstate then begin
+  beforecopy(po1^);
+ end;
  if dls_needsfree in fstate then begin
   freedata(dest);
  end;  
- po1:= fdatapo+index*fsize;
  move(po1^,dest,fsize);
  if dls_needscopy in fstate then begin
-  copyinstance(dest);
+  aftercopy(dest);
  end;
 end;
 
@@ -1782,13 +1788,16 @@ begin
  int1:= index;
  checkindex(index);
  if dls_needscopy in fstate then begin
-  copyinstance((@quelle)^);
+  beforecopy((@quelle)^);
  end;
  po1:= fdatapo+index*fsize;
  if dls_needsfree in fstate then begin
   freedata(po1^);
  end;
  move(quelle,po1^,fsize);
+ if dls_needscopy in fstate then begin
+  aftercopy(po1^);
+ end;
  change(int1);
 end;
 
@@ -1890,7 +1899,7 @@ end;
 procedure tdatalist.internalinsertdata(index: integer; const quelle;
                                            const docopy: boolean);
 var
- int1: integer;
+ po1: pchar;
 begin
  if index = fcount then begin
   internaladddata(quelle,docopy);
@@ -1899,18 +1908,17 @@ begin
   beginupdate;
   try
    internalsetcount(fcount+1,true);
-//   count:= fcount+1;
    checkindex(index);
-   int1:= (index)*fsize;
-   move((fdatapo+int1)^,(fdatapo+int1+fsize)^,(fcount-index-1)*fsize);
+   po1:= fdatapo+index*fsize;
+   move(po1^,(po1+fsize)^,(fcount-index-1)*fsize);
    if @quelle = nil then begin
- //   fillchar(datapoty(fdatapo)^[int1],fsize,0);
     initdata1(false,index,1);
    end
    else begin
-    move(quelle,(fdatapo+int1)^,fsize);
+    move(quelle,po1^,fsize);
     if (dls_needscopy in fstate) and docopy then begin
-     copyinstance((fdatapo+int1)^);
+     beforecopy(po1^);
+     aftercopy(po1^);
     end;
    end;
   finally
@@ -1942,7 +1950,7 @@ procedure tdatalist.initdata1(const afree: boolean; index: integer;
     //initialisiert mit defaultwert
 var
  int1,int2: integer;
- default,po: pchar;
+ default,po,po1: pchar;
 begin
  if acount <= 0 then begin
   exit;
@@ -1986,7 +1994,9 @@ begin
    end;
    if dls_needscopy in fstate then begin
     for int2:= index to index + acount - 1 do begin
-     copyinstance((fdatapo+int2*fsize)^);
+     po1:= fdatapo+int2*fsize;
+     beforecopy(po1^);
+     aftercopy(po1^);
     end;
    end;
   end
@@ -2002,36 +2012,43 @@ begin
    end;
    if dls_needscopy in fstate then begin
     for int2:= 0 to int1 - 1 do begin
-     copyinstance((fdatapo+int2*fsize)^);
+     po1:= fdatapo+int2*fsize;
+     beforecopy(po1^);
+     aftercopy(po1^);
     end;
     for int2:= index to fmaxcount-index - 1 do begin
-     copyinstance((fdatapo+int2*fsize)^);
+     po1:= fdatapo+int2*fsize;
+     beforecopy(po1^);
+     aftercopy(po1^);
     end;
    end;
   end;
  end;
 end;
 
-procedure tdatalist.getdefaultdata(out dest);
+procedure tdatalist.getdefaultdata(var dest);
 var
  po: pointer;
 begin
-// if dls_needsfree in fstate then begin
-//  freedata(dest);
-// end;
  po:= getdefault;
  if po = nil then begin
   fillchar(dest,fsize,0);
  end
  else begin
+  if dls_needscopy in fstate then begin
+   beforecopy(po^);
+  end;
+  if dls_needsfree in fstate then begin
+   freedata(dest);
+  end;
   move(po^,dest,fsize);
   if dls_needscopy in fstate then begin
-   copyinstance(dest);
+   aftercopy(dest);
   end;
  end;
 end;
 
-procedure tdatalist.getgriddefaultdata(out dest);
+procedure tdatalist.getgriddefaultdata(var dest);
 begin
  getdefaultdata(dest);
 end;
@@ -2191,6 +2208,11 @@ begin
   count:= anzahl;
   normalizering;
   po1:= fdatapo;
+  if (@wert <> nil) and (dls_needscopy in fstate) then begin
+   for int1:= 0 to fcount - 1 do begin
+    beforecopy((@wert)^);
+   end;
+  end;
   if dls_needsfree in fstate then begin
    for int1:= 0 to fcount - 1 do begin
     freedata(po1^);
@@ -2205,7 +2227,7 @@ begin
    if dls_needscopy in fstate then begin
     for int1:= 0 to fcount - 1 do begin
      move(wert,po1^,fsize);
-     copyinstance(po1^);
+     aftercopy(po1^);
      inc(po1,fsize);
     end;
    end
@@ -2442,7 +2464,12 @@ begin
  end;
 end;
 
-procedure tdatalist.copyinstance(var data);
+procedure tdatalist.beforecopy(var data);
+begin
+ //dumy
+end;
+
+procedure tdatalist.aftercopy(var data);
 begin
  //dumy
 end;
@@ -2455,7 +2482,8 @@ end;
 procedure tdatalist.internalcopyinstance(index, anzahl: integer);
 begin
  if dls_needscopy in fstate then begin
-  forall(index,anzahl,{$ifdef FPC}@{$endif}copyinstance);
+  forall(index,anzahl,{$ifdef FPC}@{$endif}beforecopy);
+  forall(index,anzahl,{$ifdef FPC}@{$endif}aftercopy);
  end;
 end;
 
@@ -4151,10 +4179,9 @@ begin
  ansistring(data):= '';
 end;
 
-procedure tansistringdatalist.copyinstance(var data);
+procedure tansistringdatalist.beforecopy(var data);
 begin
  stringaddref(ansistring(data));
-// reallocstring(ansistring(data));
 end;
 
 procedure tansistringdatalist.assignto(dest: tpersistent);
@@ -4693,10 +4720,9 @@ begin
  msestring(data):= '';
 end;
 
-procedure tpoorstringdatalist.copyinstance(var data);
+procedure tpoorstringdatalist.beforecopy(var data);
 begin
  stringaddref(msestring(data));
-// reallocstring(msestring(data));
 end;
 
 procedure tpoorstringdatalist.assignto(dest: tpersistent);
@@ -5141,11 +5167,10 @@ begin
  result:= adddata(value);
 end;
 
-procedure tdoublemsestringdatalist.copyinstance(var data);
+procedure tdoublemsestringdatalist.beforecopy(var data);
 begin
  inherited;
  stringaddref(doublemsestringty(data).b);
-// reallocstring(doublemsestringty(data).b);
 end;
 
 constructor tdoublemsestringdatalist.create;
@@ -6731,13 +6756,13 @@ begin
  result:= self[index];
  internaldeletedata(index,false);
 end;
-
+{
 procedure tobjectdatalist.copyinstance(var data);
 begin
  tobject(data):= nil;
  initinstance(data);
 end;
-
+}
 procedure tobjectdatalist.freedata(var data);
 begin
  freeandnil(tobject(data));

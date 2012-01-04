@@ -86,7 +86,7 @@ type
   protected
    function getnoparagraphs(index: integer): boolean; override;
    procedure freedata(var data); override;      //gibt daten frei
-   procedure copyinstance(var data); override;  //nach blockcopy aufgerufen
+   procedure aftercopy(var data); override;
    function compare(const l,r): integer; override;
    procedure setstatdata(const index: integer; const value: msestring); override;
    function getstatdata(const index: integer): msestring; override;
@@ -211,7 +211,7 @@ function richformatinfotostring(const aformat: formatinfoty): ansistring;
 
 implementation
 uses
- typinfo;
+ typinfo,msearrayutils;
 
 type
  tpoorstringdatalist1 = class(tpoorstringdatalist);
@@ -1087,7 +1087,7 @@ begin
  richstringty(data).format:= nil;
 end;
 
-procedure trichstringdatalist.copyinstance(var data);
+procedure trichstringdatalist.aftercopy(var data);
 begin
  inherited;
  reallocarray(richstringty(data).format,sizeof(richstringty(data).format[0]));

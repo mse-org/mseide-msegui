@@ -869,7 +869,7 @@ type
    function getitems(const index: integer): ppropertyeditorinfoty;
   protected
    procedure freedata(var data); override;
-   procedure copyinstance(var data); override;
+   procedure beforecopy(var data); override;
    procedure add(apropertytype: ptypeinfo;
      apropertyownerclass: tclass; const apropertyname: string;
        aeditorclass: propertyeditorclassty);
@@ -1112,9 +1112,9 @@ begin
  inherited;
 end;
 
-procedure tpropertyeditors.copyinstance(var data);
+procedure tpropertyeditors.beforecopy(var data);
 begin
- reallocstring(propertyeditorinfoty(data).propertyname);
+ stringaddref(propertyeditorinfoty(data).propertyname);
 end;
 
 function tpropertyeditors.getitems(
