@@ -4762,7 +4762,9 @@ end;
 procedure tactionwidget.doactivate;
 begin
  inherited;
- if canevent(tmethod(fonactivate)) then begin
+ if canevent(tmethod(fonactivate)) and 
+         ((ow1_modalcallonactivate in foptionswidget1) or 
+          not (tws_modalcalling in twindow1(window).fstate)) then begin
   fonactivate(self);
  end;
 end;
@@ -4770,7 +4772,9 @@ end;
 procedure tactionwidget.dodeactivate;
 begin
  inherited;
- if canevent(tmethod(fondeactivate)) then begin
+ if canevent(tmethod(fondeactivate)) and 
+         ((ow1_modalcallondeactivate in foptionswidget1) or 
+          not (tws_modalcalling in twindow1(window).fstate)) then begin
   fondeactivate(self);
  end;
 end;

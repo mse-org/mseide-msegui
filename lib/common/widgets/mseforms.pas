@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -184,7 +184,7 @@ type
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    function getframe: tgripframe;
    procedure setframe(const Value: tgripframe);
-   //istatfile
+    //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatread1(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
