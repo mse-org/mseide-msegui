@@ -4608,12 +4608,14 @@ begin
   end;
   if not (csloading in componentstate) then begin
    updatesize(nil);
+  {
    if tabo_vertical in ftabs.options then begin
     ftab_size:= ftabs.bounds_cx;
    end
    else begin
     ftab_size:= ftabs.bounds_cy;
    end;
+  }
   end;
  end;
 end;
