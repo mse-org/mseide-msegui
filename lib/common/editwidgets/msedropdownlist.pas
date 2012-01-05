@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -311,7 +311,7 @@ type
    function candropdown: boolean; virtual;
    procedure selectnone(const akey: keyty); virtual;
    function isloading: boolean;
-   //ibutton
+    //ibutton
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
    
     //idataeditcontroller
@@ -389,7 +389,7 @@ type
    procedure selectnone(const akey: keyty); override;
    procedure clearitemindex; //sets fcols.fitemindex to -1, no events
    
-   //idropdownlist
+    //idropdownlist
    procedure itemselected(const index: integer; const akey: keyty); virtual;
              //-2 -> no selection, -1 -> cancel
    procedure dropdownkeydown(var info: keyeventinfoty);

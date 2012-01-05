@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -93,7 +93,10 @@ type
                     ow1_autosizeanbottom,ow1_noautosizeanbottom,
                     ow1_noparentwidthextend,ow1_noparentheightextend,
                     ow1_canclosenil, //call canclose(nil) on exit
-                    ow1_nocancloseifhidden);
+                    ow1_nocancloseifhidden,
+                    ow1_modalcallonactivate,ow1_modalcallondeactivate
+                               //used in tactionwidget
+                    );
                                          
 const
  deprecatedoptionswidget= [ow_noautosizing,ow_canclosenil,ow_autosize,
@@ -189,7 +192,7 @@ const
  focusstates = [ws_visible,ws_enabled];
  defaultoptionswidget = [ow_mousefocus,ow_tabfocus,ow_arrowfocus,{ow_mousewheel,}
                          ow_destroywidgets,ow_autoscale];
- defaultoptionswidget1 = [];
+ defaultoptionswidget1 = [ow1_modalcallondeactivate];
  defaultoptionswidgetmousewheel = defaultoptionswidget + [ow_mousewheel];
  defaultoptionswidgetnofocus = defaultoptionswidget -
              [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
@@ -1879,7 +1882,8 @@ type
 
  windowstatety = (tws_posvalid,tws_sizevalid,tws_windowvisible,
                   tws_windowshowpending,
-                  tws_modal,tws_modalfor,tws_needsdefaultpos,
+                  tws_modal,tws_modalfor,tws_modalcalling,
+                  tws_needsdefaultpos,
                   tws_closing,tws_painting,tws_activating,
                   tws_globalshortcuts,tws_localshortcuts,
                   tws_buttonendmodal,
@@ -1908,7 +1912,6 @@ type
  
  twindow = class(teventobject,icanvas)
   private
-   fstate: windowstatesty;
    ffocuscount: longword; //for recursive setwidgetfocus
    factivecount: longword; //for recursive activate,deactivate
    factivating: integer;
@@ -1990,6 +1993,7 @@ type
    procedure setscreenpos(const avalue: pointty);
    function getmodalfor: boolean;
   protected
+   fstate: windowstatesty;
    fgdi: pgdifunctionaty;
    fwindow: windowty;
    fcontainer: winidty;
@@ -15700,11 +15704,14 @@ function tinternalapplication.beginmodal(const sender: twindow;
                  //true if modalwindow destroyed
 var
  window1: twindow;
+ bo1: boolean;
 begin
  exclude(fstate,aps_cancelloop);
  window1:= nil;
  if (factivewindow <> nil) and (factivewindow <> sender) then begin
   setlinkedvar(factivewindow,tlinkedobject(window1));
+  bo1:= tws_modalcalling in window1.fstate;
+  include(window1.fstate,tws_modalcalling);
  end;
  try
   with sender do begin
@@ -15729,9 +15736,17 @@ begin
    try
     result:= eventloop(sender);
    finally
-    if (window1 <> nil) and not (aps_cancelloop in fstate) then begin
-     if appinst.active then begin
-      window1.activate;
+    if (window1 <> nil) then begin
+     try
+      if not (aps_cancelloop in fstate) then begin
+       if appinst.active then begin
+        window1.activate;
+       end;
+      end;
+     finally
+      if (window1 <> nil) and not bo1 then begin
+       exclude(window1.fstate,tws_modalcalling);
+      end;
      end;
     end;
    end;
