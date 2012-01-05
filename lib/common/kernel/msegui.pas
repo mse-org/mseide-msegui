@@ -192,7 +192,8 @@ const
  focusstates = [ws_visible,ws_enabled];
  defaultoptionswidget = [ow_mousefocus,ow_tabfocus,ow_arrowfocus,{ow_mousewheel,}
                          ow_destroywidgets,ow_autoscale];
- defaultoptionswidget1 = [ow1_modalcallondeactivate];
+// defaultoptionswidget1 = [ow1_modalcallondeactivate];
+ defaultoptionswidget1 = [];
  defaultoptionswidgetmousewheel = defaultoptionswidget + [ow_mousewheel];
  defaultoptionswidgetnofocus = defaultoptionswidget -
              [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
