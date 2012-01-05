@@ -325,6 +325,7 @@ begin
  inc(ffileloading);
  try
   edit.loadfromfile(value);
+  ismoduletext:= ismoduletext or (fileext(value) = formfileext);
   finitialfilepath:= edit.filename;
   setsyntaxdef(value);
   updatebreakpointicons;

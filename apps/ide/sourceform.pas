@@ -213,6 +213,22 @@ begin
      end;
     end;
     if alevel >= minlevel then begin
+     if trystrtointmse(ar3[0],row) then begin
+      dec(row);
+      if high(ar3) >= 1 then begin
+       if trystrtointmse(ar3[1],col) then begin
+        dec(col);
+        result:= true;
+       end;
+      end
+      else begin
+       result:= true;
+      end;
+      if result then begin
+       apage:= sourcefo.showsourceline(objpath(ar1[0]),row,col,true);
+      end;
+     end;
+    {
      try
       row:= strtoint(ar3[0]) - 1;
       if high(ar3) >= 1 then begin
@@ -222,6 +238,7 @@ begin
       result:= true;
      except
      end;
+    }
     end;
    end;
   end;
@@ -252,6 +269,18 @@ begin
     end;
    end;
    if alevel >= minlevel then begin
+    if trystrtointmse(ar1[1],row) then begin
+     dec(row);
+     if trystrtointmse(ar1[2],col) then begin
+      dec(col);
+     end
+     else begin
+      col:= 0;
+     end;
+     apage:= sourcefo.showsourceline(objpath(ar1[0]),row,col,true);
+     result:= true;
+    end;
+{
     try
      result:= true;
      row:= strtoint(ar1[1]) - 1;
@@ -263,6 +292,7 @@ begin
      apage:= sourcefo.showsourceline(objpath(ar1[0]),row,col,true);
     except
     end; 
+}
    end;
   end; 
  end;
@@ -646,11 +676,18 @@ function tsourcefo.openfile(const filename: filenamety;
               //nil if not ok
 
  function loadfile(aname: filenamety): tsourcepage;
+ var
+  po1: pmoduleinfoty;
  begin
+  po1:= designer.modules.findmodule(filepath(aname));
+  if not mainfo.closemodule(po1,true) then begin
+   sysutils.abort;
+  end;
   ffileloading:= true;
   try
    result:= createnewpage(aname);
    if result <> nil then begin
+    result.ismoduletext:= (po1 <> nil);
     mainfo.loadformbysource(aname);
    end;
   finally
