@@ -1436,13 +1436,14 @@ begin
    {$ifndef mse_nomethodswap}
      streamingswapmethodpointer(amodule^.instance);
    {$endif}
-     frefreshmethods:= fdesigner.getancestormethods(amodule);
+//     frefreshmethods:= fdesigner.getancestormethods(amodule);
    {$ifndef mse_nomethodswap}
      amodule^.methods.createmethodtable(frefreshmethods);
    {$endif}
     end;
-    setlength(frefreshmethods,high(frefreshmethods)+3);
-    frefreshmethods[high(frefreshmethods)-1]:= amodule^.methods;
+    insertitem(pointerarty(frefreshmethods),0,nil);
+//    setlength(frefreshmethods,high(frefreshmethods)+3);
+//    frefreshmethods[high(frefreshmethods)-1]:= amodule^.methods;
    {$ifndef mse_nomethodswap}
     for int1:= 0 to high(dependentmodules) do begin
      dependentmodules[int1]^.methods.createmethodtable(frefreshmethods);
@@ -1456,7 +1457,7 @@ begin
      {$ifndef mse_nomethodswap}
       streamingswapmethodpointer(dependentmodules[int1]^.instance);
      {$endif}
-      frefreshmethods[high(frefreshmethods)]:= dependentmodules[int1]^.methods;
+      frefreshmethods[0]:= dependentmodules[int1]^.methods;
       for int2:= 0 to high(depmodcomps[int1]) do begin
        descendent1:= dependentcomponents[int1][int2];
        newancestor1:= amodule^.instance;
