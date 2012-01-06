@@ -2596,7 +2596,8 @@ begin
  inherited;
 end;
 
-procedure tcustombooleaneditradio.setgridvalue(const aindex: integer; const aValue: longbool);
+procedure tcustombooleaneditradio.setgridvalue(const aindex: integer;
+                                                   const avalue: longbool);
 var
  widget: twidget;
  int1: integer;
