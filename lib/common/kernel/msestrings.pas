@@ -487,7 +487,10 @@ function concatstrings(const source: msestringarty;
 function concatstrings(const source: stringarty;
               const separator: string = ' '): string; overload;
 
-function parsecommandline(const s: pchar): stringarty;
+function parsecommandline(const s: pchar): stringarty; overload;
+function parsecommandline(const s: pmsechar): msestringarty; overload;
+function parsecommandline(const s: string): stringarty; overload;
+function parsecommandline(const s: msestring): msestringarty; overload;
 
            //no surrogate pair handling!
 function stringtoutf8(const value: msestring): utf8string; overload;
@@ -1631,6 +1634,112 @@ begin
  {$ifdef FPC}{$checkpointer default}{$endif}
   setlength(result,count);
  end;
+end;
+
+function parsecommandline(const s: pmsechar): msestringarty;
+var
+ po1,po2: pmsechar;
+ count: integer;
+ str1: msestring;
+
+ procedure addsubstring;
+ var
+  int1,int2: integer;
+ begin
+ {$ifdef FPC}{$checkpointer off}{$endif}
+  int1:= po1-po2;
+  int2:= length(str1);
+  setlength(str1,int2+int1);
+  move(po2^,str1[int2+1],int1*sizeof(msechar));
+  po2:= po1;
+ {$ifdef FPC}{$checkpointer default}{$endif}
+ end;
+
+begin
+ result:= nil;
+ count:= 0;
+ if s <> nil then begin
+ {$ifdef FPC}{$checkpointer off}{$endif}
+  po1:= s;
+  while (po1^ <> #0) and (po1^ = ' ') do begin
+   inc(po1);
+  end;
+  if po1^ <> #0 then begin
+   po2:= po1;
+   str1:= '';
+   while true do begin
+    case po1^ of
+     ' ',#0: begin
+      addsubstring;
+      additem(result,str1,count);
+      str1:= '';
+      while (po1^ <> #0) and (po1^ = ' ') do begin
+       inc(po1);
+      end;
+      if po1^ = #0 then begin
+       break;
+      end;
+      po2:= po1;
+     end;
+     '"': begin
+      addsubstring;
+      po2:= po1 + 1;
+      repeat
+       inc(po1);
+       case po1^ of
+        '"': begin
+         addsubstring;
+         inc(po1);
+         inc(po2);
+         break;
+        end;
+        {
+        '\': begin
+         if (po1+1)^ = '"' then begin
+          addsubstring;
+          inc(po1);
+          inc(po2);
+         end;
+        end;
+        }
+       end;
+      until po1^ = #0;
+     end;
+     {
+     '\': begin
+      if ((po1+1)^ < ' ') or ((po1+1)^ in ['"','\']) then begin
+       addsubstring;
+       inc(po1);
+       if po1^ = #0 then begin
+        break;
+       end;
+       inc(po1);
+       inc(po2);
+      end
+      else begin
+       inc(po1);
+      end;
+     end;
+     }
+     else begin
+      inc(po1);
+     end;
+    end;
+   end;
+  end;
+ {$ifdef FPC}{$checkpointer default}{$endif}
+  setlength(result,count);
+ end;
+end;
+
+function parsecommandline(const s: string): stringarty;
+begin
+ result:= parsecommandline(pchar(s));
+end;
+
+function parsecommandline(const s: msestring): msestringarty;
+begin
+ result:= parsecommandline(pmsechar(s));
 end;
 
 function printableascii(const source: string): string; 
