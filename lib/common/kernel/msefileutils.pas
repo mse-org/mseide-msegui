@@ -213,6 +213,9 @@ function isrootpath(const path: filenamety): boolean;
 function copyfile(const oldfile,newfile: filenamety; 
                                 const canoverwrite: boolean = true): boolean;
                       //false if newfile exists and not canoverwrite
+function trycopyfile(const oldfile,newfile: filenamety; 
+                                const canoverwrite: boolean = true): boolean;
+                      //false on error or newfile exists and not canoverwrite
 function renamefile(const oldname,newname: filenamety; 
                                 const canoverwrite: boolean = true): boolean;
                       //false if newname exists and not canoverwrite
@@ -366,6 +369,7 @@ end;
 function copyfile(const oldfile,newfile: filenamety; 
                                 const canoverwrite: boolean = true): boolean;
                       //false if dest exists and not canoverwrite
+ //todo: remove race condition
 begin
  if not canoverwrite and findfile(newfile) then begin
   result:= false;
@@ -374,6 +378,19 @@ begin
   result:= true;
   syserror(sys_copyfile(oldfile,newfile),'Can not copy File "'+oldfile+
             '" to "'+newfile+'": ');
+ end;
+end;
+
+function trycopyfile(const oldfile,newfile: filenamety; 
+                                const canoverwrite: boolean = true): boolean;
+                      //false if dest exists and not canoverwrite
+begin
+ //todo: remove race condition
+ if not canoverwrite and findfile(newfile) then begin
+  result:= false;
+ end
+ else begin
+  result:= sys_copyfile(oldfile,newfile) = sye_ok;
  end;
 end;
 

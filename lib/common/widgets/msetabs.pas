@@ -638,10 +638,12 @@ type
    fvisiblepage: integer;
    procedure setstatfile(const value: tstatfile);
    function getitems(const index: integer): twidget;
+   function getitemsintf(const index: integer): itabpage;
    function getactivepageindex: integer;
    procedure setactivepageindex(value: integer);
    procedure setactivepageindex1(const avalue: integer);
    function getactivepage: twidget;
+   function getactivepageintf: itabpage;
    procedure setactivepage(const value: twidget);
    procedure updatesize(const page: twidget);
    function gettab_options: tabbaroptionsty;
@@ -767,7 +769,9 @@ type
                    //case sensitive!
                            
    property items[const index: integer]: twidget read getitems; default;
+   property itemsintf[const index: integer]: itabpage read getitemsintf;
    property activepage: twidget read getactivepage write setactivepage;
+   property activepageintf: itabpage read getactivepageintf;
    property idents: integerarty read getidents;
    property activepageindex: integer read getactivepageindex 
                       write setactivepageindex1 default -1;
@@ -3551,6 +3555,11 @@ begin
  result:= tpagetab(ftabs.tabs[index]).page;
 end;
 
+function tcustomtabwidget.getitemsintf(const index: integer): itabpage;
+begin
+ result:= tpagetab(ftabs.tabs[index]).fpageintf;
+end;
+
 procedure tcustomtabwidget.pagechanged(const sender: itabpage);
 var
  widget1: twidget1;
@@ -4044,6 +4053,16 @@ function tcustomtabwidget.getactivepage: twidget;
 begin
  if factivepageindex >= 0 then begin
   result:= items[factivepageindex];
+ end
+ else begin
+  result:= nil;
+ end;
+end;
+
+function tcustomtabwidget.getactivepageintf: itabpage;
+begin
+ if factivepageindex >= 0 then begin
+  result:= itemsintf[factivepageindex];
  end
  else begin
   result:= nil;
