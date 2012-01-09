@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1115,7 +1115,10 @@ begin
                                                                 bo1 then begin
      widget1:= fintf.getwidget;
      with widget1 do begin
-      visible:= true;
+      if not visible then begin
+       twidgetgrid(fgrid).fmouseactivewidget:= nil;
+       visible:= true;
+      end;
       if (fwindow <> nil) and 
        (canfocus and (tcustomwidgetgrid(fgrid).entered or bo1) and 
         not fgrid.checkdescendent(fwindow.focusedwidget) or
