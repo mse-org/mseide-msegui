@@ -86,6 +86,12 @@ type
   protected
    function gettag: integer; override;
  end;
+ 
+ trowstatelistsourcefoldhiddenpropertyeditor = 
+                   class(tdatalistsourcepropertyeditor)
+  protected
+   function gettag: integer; override;
+ end;
 
  trowstatelistsourceissumpropertyeditor = 
                    class(tdatalistsourcepropertyeditor)
@@ -141,6 +147,8 @@ begin
                                            toptionswidgetpropertyeditor);
  registerpropertyeditor(typeinfo(string),trowstatelist,'sourcefoldlevel',
                                  trowstatelistsourcefoldlevelpropertyeditor);
+ registerpropertyeditor(typeinfo(string),trowstatelist,'sourcefoldhidden',
+                                 trowstatelistsourcefoldhiddenpropertyeditor);
  registerpropertyeditor(typeinfo(string),trowstatelist,'sourceissum',
                                  trowstatelistsourceissumpropertyeditor);
  registerpropertyeditor(typeinfo(boolean),tcustomdatabutton,'visible',
@@ -287,6 +295,13 @@ end;
 function trowstatelistsourceissumpropertyeditor.gettag: integer;
 begin
  result:= rowstateissumtag;
+end;
+
+{ trowstatelistsourcefoldhiddenpropertyeditor }
+
+function trowstatelistsourcefoldhiddenpropertyeditor.gettag: integer;
+begin
+ result:= rowstatefoldhiddentag;
 end;
 
 initialization
