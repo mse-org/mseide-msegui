@@ -108,7 +108,7 @@ type
    function checkgriddata: tdatalist; overload;
    function checkgriddata(var index: integer): tdatalist; overload; 
                         //index -1 -> grid.row, nil if no focused row
-   procedure internalgetgridvalue(index: integer; out value);
+   procedure internalgetgridvalue(index: integer; var value);
    procedure internalsetgridvalue(index: integer; const Value);
    procedure internalfillcol(const value);
    procedure internalassigncol(const value);
@@ -2120,7 +2120,7 @@ begin
  end;
 end;
 
-procedure tcustomdataedit.internalgetgridvalue(index: integer; out value);
+procedure tcustomdataedit.internalgetgridvalue(index: integer; var value);
 begin
  checkgrid;
  fgridintf.getdata(index,value);
