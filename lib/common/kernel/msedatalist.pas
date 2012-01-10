@@ -190,6 +190,7 @@ type
    procedure unlinksource(var alink: listlinkinfoty);
    function internallinksource(const source: tdatalist;
                  const atag: integer; var variable: tdatalist): boolean;
+   function sourceischanged(const asource: listlinkinfoty): boolean;
    function checksourcechange(var ainfo: listlinkinfoty; 
                         const sender: tdatalist; const aindex: integer): boolean;
    function checksourcecopy(var ainfo: listlinkinfoty;
@@ -1179,6 +1180,13 @@ end;
 procedure tdatalist.listdestroyed(const sender: tdatalist);
 begin
  removeitems(pointerarty(flinkdest),sender);
+end;
+
+function tdatalist.sourceischanged(const asource: listlinkinfoty): boolean;
+begin
+ with asource do begin
+  result:= (source <> nil) and (dirtystart >= dirtystop);
+ end;
 end;
 
 function tdatalist.checksourcechange(var ainfo: listlinkinfoty;
