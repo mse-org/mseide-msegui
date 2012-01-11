@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -20,9 +20,8 @@ interface
 
 uses
  {$ifdef FPC}classes{$else}Classes{$endif},mseclasses,mserichstring,
- msetypes,mseglob,mseapplication,
- {msekeyboard,}mseevent,msestat,msestatfile,msestrings,typinfo,
- msegraphutils{,msebitmap}
+ msetypes,mseglob,mseapplication, mseevent,msestat,msestatfile,msestrings,
+ typinfo,msegraphutils
  {$ifdef mse_with_ifi},mseifiglob,mseificomp,mseificompglob{$endif};
 
 const

@@ -2675,7 +2675,7 @@ begin
              'MSEide version: '+versiontext+c_linefeed+
              'Host: '+ hosttext+ c_linefeed+
              c_linefeed+
-             'Copyright 1999-2011'+c_linefeed+
+             'Copyright 1999-2012'+c_linefeed+
              'by Martin Schreiber'
              ,'About MSEide');
 end;

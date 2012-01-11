@@ -1304,7 +1304,6 @@ type
    procedure updatereadonlystate;
   {$endif}
   protected
-   procedure listdestroyed(const sender: tdatalist); override;
    procedure sethidden(const index: integer; const avalue: boolean); override;
    procedure setfoldissum(const index: integer; const avalue: boolean); override;
    function getlinkdatatypes(const atag: integer): listdatatypesty; override;
@@ -1350,6 +1349,7 @@ type
    constructor create(const aowner: tcustomgrid); reintroduce;
    destructor destroy; override;
 
+   procedure listdestroyed(const sender: tdatalist); override;
    function getsourcecount: integer; override;
    function getsourceinfo(const atag: integer): plistlinkinfoty; override;
    procedure linksource(const source: tdatalist; const atag: integer); override;
