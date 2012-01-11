@@ -3935,7 +3935,7 @@ var
  ss1: shiftstatesty;
 // po1: pcuint;
  statebefore: cuint;
- keysym1: cuint;
+ keysym1: keysym;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
