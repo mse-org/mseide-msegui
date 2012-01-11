@@ -34,7 +34,7 @@ uses
  mserttistat,
  msedatanodes,mseedit,mseifiglob,mselistbrowser,projecttreeform;
 const
- versiontext = '2.8';
+ versiontext = '2.9 unstable';
 {$ifdef linux}
  {$ifdef CPU64}
   hosttext = 'x86_64-linux';
