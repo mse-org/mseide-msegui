@@ -1,7 +1,7 @@
 MAINICON ICON "mseide.ico"
 1 VERSIONINFO
-FILEVERSION 2,6,0,0
-PRODUCTVERSION 2,6,0,0
+FILEVERSION 2,8,0,0
+PRODUCTVERSION 2,8,0,0
 FILEFLAGSMASK 0
 FILEOS 0x40000
 FILETYPE 1
@@ -12,12 +12,12 @@ FILETYPE 1
   {
   VALUE "CompanyName",""
   VALUE "FileDescription","MSEide FreePascal RAD suite"
-  VALUE "FileVersion","2.6.0.0"
+  VALUE "FileVersion","2.8.0.0"
   VALUE "InternalName",""
-  VALUE "LegalCopyright","2011 (c) Martin Schreiber"
+  VALUE "LegalCopyright","2012 (c) Martin Schreiber"
   VALUE "OriginalFilename","mseide.pas"
   VALUE "ProductName","MSEide"
-  VALUE "ProductVersion","2.6.0"
+  VALUE "ProductVersion","2.8.0"
   }
  }
 }
