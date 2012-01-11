@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -28,12 +28,12 @@ uses
  msestrings,xft,xrender;
 
 {$ifdef FPC}
-{$define xbooleanresult}
-{$ifndef VER2_3}{$ifndef VER2_4}{$ifndef VER2_5} 
- {$define xboolean} 
-{$endif}{$endif}{$endif}
-{$ifdef UNIX}
-{$ifdef msedebug}
+ {$define xbooleanresult}
+ {$if defined(FPC) and (fpc_fullversion < 020300)}
+  {$define xboolean} 
+ {$ifend}
+ {$ifdef UNIX}
+  {$ifdef msedebug}
 var
  _IO_stdin: P_IO_FILE; cvar;       
   //avoid link errors if rtl is compiled with stabs info
@@ -41,8 +41,8 @@ var
  _IO_stderr: P_IO_FILE; cvar;
  __malloc_initialized : longint;cvar;
  h_errno : longint;cvar;
-{$endif}
-{$endif}
+  {$endif}
+ {$endif}
 {$endif}
 
 { $define smdebug}
