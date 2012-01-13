@@ -1889,6 +1889,25 @@ begin
  end;
 end;
 
+var
+ configuredwindow: winidty;
+ 
+procedure postconfigureevent(const id: winidty);
+var
+ rect1: rectty;
+ pt1: pointty;
+begin
+ configuredwindow:= id;
+ if gui_getwindowsize(id) <> wsi_minimized then begin
+  getwindowrectpa(id,rect1,pt1);
+  eventlist.add(twindowrectevent.create(ek_configure,id,
+                          rect1,pt1));
+ end
+ else begin
+  eventlist.add(twindowevent.create(ek_hide,id));
+ end;
+end;
+
 function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
 var
  rect1,rect2: trect;
@@ -1900,10 +1919,14 @@ begin
   if windows.GetclientRect(id,rect2) then begin
    getframe(rect1,rect2,frame);
    arect:= inflaterect(rect,frame);
+   configuredwindow:= 0;
    if windows.SetWindowPos(id,0,arect.x,arect.y,arect.cx,arect.cy,
                 swp_nozorder or swp_noactivate) then begin
     result:= gue_ok;
    end;
+  end;
+  if configuredwindow <> id then begin
+   postconfigureevent(id);
   end;
  end;
 end;
@@ -2211,14 +2234,7 @@ begin
    end;
   end;
   wm_move,wm_size: begin
-   if gui_getwindowsize(ahwnd) <> wsi_minimized then begin
-    getwindowrectpa(ahwnd,rect1,pt1);
-    eventlist.add(twindowrectevent.create(ek_configure,ahwnd,
-                            rect1,pt1));
-   end
-   else begin
-    eventlist.add(twindowevent.create(ek_hide,ahwnd));
-   end;
+   postconfigureevent(ahwnd);
   end;
   wm_queryopen: begin
    eventlist.add(twindowevent.create(ek_show,ahwnd));
@@ -2233,10 +2249,11 @@ begin
     end;
     if ((swp_nomove or swp_nosize) and flags <> (swp_nomove or swp_nosize)) and
             windowvisible(ahwnd) then begin
-     getwindowrectpa(ahwnd,rect1,pt1); 
-     eventlist.add(twindowrectevent.create(ek_configure,ahwnd,rect1,pt1));
-      result:= 0;
-      exit;
+     postconfigureevent(ahwnd);
+//     getwindowrectpa(ahwnd,rect1,pt1); 
+//     eventlist.add(twindowrectevent.create(ek_configure,ahwnd,rect1,pt1));
+     result:= 0;
+     exit;
     end;
    end;
   end;
