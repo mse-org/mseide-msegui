@@ -5032,7 +5032,7 @@ procedure tfixrow.buttoncellevent(var info: celleventinfoty);
 begin
  if (info.cell.col >= 0) and (info.cell.col < fcaptions.count) and
           (dco_colsort in fcaptions[info.cell.col].options) and 
-          iscellclick(info,[ccr_nokeyreturn],[ss_ctrl]) then begin
+          iscellclick(info,[ccr_nokeyreturn]{,[ss_ctrl]}) then begin
   with fgrid.datacols[info.cell.col] do begin
    if (info.mouseeventinfopo^.pos.x > 
 //           fgrid.cellrect(info.cell).cx - 15) and 
