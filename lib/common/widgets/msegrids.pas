@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1832,7 +1832,6 @@ type
    procedure setrowlinecolorfixstate(index: integer; const Value: rowstatenumty);
    function getrowfontstate(index: integer): rowstatenumty;
    procedure setrowfontstate(index: integer; const Value: rowstatenumty);
-   procedure appinsrow(index: integer);
    procedure setdragcontroller(const avalue: tdragcontroller);
    function getrowreadonlystate(index: integer): boolean;
    procedure setrowreadonlystate(index: integer; const avalue: boolean);
@@ -2112,6 +2111,9 @@ type
                            const noreadonly: boolean); virtual;
                  //step > 0 -> right, step < 0 left
 
+   procedure appinsrow(aindex: integer); 
+           //insert or append empty row, set focused row to index
+           // empty row removed by exit row if og_noinsertempty
    function isinsertempty: boolean; 
          //true if row will be removed by og_noinsertempty
    function isautoappend: boolean; //true if last row is auto appended
@@ -11139,7 +11141,7 @@ begin     //focuscell
     int1:= ffocusedcell.row;
     ffocusedcell.row:= invalidaxis;
     bo2:= false;
-    if (int1 <> cell.row) and doremoveappinsrow(cell.row) then begin
+    if (int1 <> cell.row) and doremoveappinsrow(int1) then begin
      if (cell.row > int1) then begin
       dec(cell.row);
       bo2:= true;
@@ -14827,7 +14829,7 @@ begin
  end;
 end;
 
-procedure tcustomgrid.appinsrow(index: integer);
+procedure tcustomgrid.appinsrow(aindex: integer);
 var
  int1{,int2}: integer;
  bo1: boolean;
@@ -14836,17 +14838,17 @@ begin
                          //for not null check in twidgetgrid
   int1:= ffocusedcell.row;
   checksort;
-  index:= index+ffocusedcell.row-int1;
-  if index < 0 then begin
-   index:= 0;
+  aindex:= aindex+ffocusedcell.row-int1;
+  if aindex < 0 then begin
+   aindex:= 0;
   end;
-  if index > rowcount then begin
-   index:= rowcount;
+  if aindex > rowcount then begin
+   aindex:= rowcount;
   end;  
   bo1:= gs1_sortchangelock in fstate1;
   include(fstate1,gs1_sortchangelock);
   try
-   insertrow(index);
+   insertrow(aindex);
    if fdatacols.fnewrowcol < 0 then begin
     int1:= ffocusedcell.col;
    end
@@ -14858,9 +14860,11 @@ begin
     exclude(fstate1,gs1_sortchangelock);
    end;
   end;
-  include(fstate1,gs1_rowinserted);
-  focuscell(makegridcoord(int1,index));
-  fstate1:= fstate1 + [gs1_rowsortinvalid,gs1_rowinserted];
+//  include(fstate1,gs1_rowinserted);
+  focuscell(makegridcoord(int1,aindex));
+  if ffocusedcell.row = aindex then begin
+   fstate1:= fstate1 + [gs1_rowsortinvalid,gs1_rowinserted];
+  end;
 //  fstate1:= fstate1 + [gs1_rowsortinvalid,gs1_rowinserted];
  end;
 end;
