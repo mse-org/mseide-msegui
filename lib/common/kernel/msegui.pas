@@ -12907,6 +12907,8 @@ var
  pt1: pointty;
  event1: tmouseevent;
  win1: winidty;
+ focusedwidgetbefore: twidget;
+ window1: twindow;
 begin
  fmodalresult:= mr_none;
  with appinst do begin
@@ -12918,26 +12920,41 @@ begin
   if fmodalwindow = nil then begin
    fwantedactivewindow:= nil; //init for lowest level
   end;
-  appinst.cursorshape:= cr_default;
-  win1:= fmousewinid;
-  processleavewindow;
-  fmousewinid:= win1;
-  result:= beginmodal(self,showinfo);
-  if (fmodalwindow = nil) then begin
-   if fwantedactivewindow <> nil then begin
-    if appinst.active and not (aps_cancelloop in appinst.fstate) then begin
-     fwantedactivewindow.activate;
+  focusedwidgetbefore:= nil;
+  setlinkedvar(ffocusedwidget,tmsecomponent(focusedwidgetbefore));
+  try
+   appinst.cursorshape:= cr_default;
+   win1:= fmousewinid;
+   processleavewindow;
+   fmousewinid:= win1;
+   result:= beginmodal(self,showinfo);
+   if (fmodalwindow = nil) then begin
+//    if fwantedactivewindow <> nil then begin
+     if not (aps_cancelloop in appinst.fstate) then begin
+      window1:= fwantedactivewindow;
+      if (window1 = self) or (window1 = nil) and 
+                       (focusedwidgetbefore <> nil) then begin
+       focusedwidgetbefore.parentfocus;
+      end;
+      if appinst.active then begin
+       if fwantedactivewindow <> nil then begin
+        fwantedactivewindow:= nil;
+        window1.activate;
+       end;
+      end;
+     end;
+//    end;
+   end
+   else begin
+    if fmodalwindow = fwantedactivewindow then begin
+     fwantedactivewindow:= nil;
     end;
-    fwantedactivewindow:= nil;
+    if appinst.active and not (aps_cancelloop in appinst.fstate) then begin
+     fmodalwindow.activate;
+    end;
    end;
-  end
-  else begin
-   if fmodalwindow = fwantedactivewindow then begin
-    fwantedactivewindow:= nil;
-   end;
-   if appinst.active and not (aps_cancelloop in appinst.fstate) then begin
-    fmodalwindow.activate;
-   end;
+  finally
+   setlinkedvar(nil,tmsecomponent(focusedwidgetbefore));
   end;
   if appinst.modallevel = 0 then begin
    exclude(appinst.fstate,aps_cancelloop);
