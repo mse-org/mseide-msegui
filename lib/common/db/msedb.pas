@@ -3745,11 +3745,25 @@ var
  mstr1: msestring;
 begin
  if assigned(fgetmsestringdata) then begin
-  if fgetmsestringdata(self,mstr1) then begin
-   result:= mstr1;
-  end
-  else begin
-   result:= null;
+{$ifdef FPC}{$warnings off}{$endif}
+  with tfieldcracker(self) do begin
+{$ifdef FPC}{$warnings on}{$endif}
+   if fvalidating then begin
+    if fvaluebuffer = nil then begin
+     result:= null;
+    end
+    else begin
+     result:= msestring(fvaluebuffer^);
+    end;
+   end
+   else begin
+    if fgetmsestringdata(self,mstr1) then begin
+     result:= mstr1;
+    end
+    else begin
+     result:= null;
+    end;
+   end;
   end;
  end
  else begin

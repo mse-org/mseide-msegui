@@ -819,6 +819,7 @@ type
    procedure getbmvariant(const afield: tfield; const bm: bookmarkdataty;
                                           var adata: lookupdataty);
    
+   procedure checkvalidating(const afield: tfield);
    function getfieldbuffer(const afield: tfield;
              out buffer: pointer; out datasize: integer): boolean; overload; 
              //read, true if not null
@@ -3097,12 +3098,22 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.checkvalidating(const afield: tfield);
+begin
+{$ifdef FPC}{$warnings off}{$endif}
+ if tfieldcracker(afield).fvalidating then begin
+{$ifdef FPC}{$warnings on}{$endif}
+  databaseerror('Field read only in OnValidate.',self);
+ end;
+end;
+
 procedure tmsebufdataset.setfielddata(field: tfield; buffer: pointer);
 
 var 
  po1: pointer;
  datasize: integer;
 begin
+ checkvalidating(field);
  field.validate(buffer);
  po1:= getfieldbuffer(field,buffer = nil,datasize);
  if buffer <> nil then begin
@@ -3120,6 +3131,7 @@ var
  po1: pointer;
  int1: integer;
 begin
+ checkvalidating(sender);
  sender.validate(@avalue);
  po1:= getfieldbuffer(sender,false,int1);
  msestring(po1^):= avalue;
@@ -3136,6 +3148,7 @@ var
  po1: pvariant;
  int1: integer;
 begin
+ checkvalidating(sender);
  sender.validate(@avalue);
  po1:= getfieldbuffer(sender,false,int1);
  po1^:= avalue;
