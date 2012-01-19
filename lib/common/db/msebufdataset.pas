@@ -3,7 +3,7 @@
     Copyright (c) 1999-2000 by Michael Van Canneyt, member of the
     Free Pascal development team
     
-    Rewritten 2006-2011 by Martin Schreiber
+    Rewritten 2006-2012 by Martin Schreiber
     
     BufDataset implementation
 
@@ -656,10 +656,10 @@ type
    
    function getmsestringdata(const sender: tmsestringfield; 
                                out avalue: msestring): boolean;
-   procedure setmsestringdata(const sender: tmsestringfield; const avalue: msestring);
+   procedure setmsestringdata(const sender: tmsestringfield; avalue: msestring);
    function getvardata(const sender: tmsevariantfield;
                                     out avalue: variant): boolean;
-   procedure setvardata(const sender: tmsevariantfield; const avalue: variant);
+   procedure setvardata(const sender: tmsevariantfield; avalue: variant);
    procedure setoninternalcalcfields(const avalue: internalcalcfieldseventty);
    procedure checkfilterstate;
    procedure checklogfile;
@@ -819,7 +819,6 @@ type
    procedure getbmvariant(const afield: tfield; const bm: bookmarkdataty;
                                           var adata: lookupdataty);
    
-   procedure checkvalidating(const afield: tfield);
    function getfieldbuffer(const afield: tfield;
              out buffer: pointer; out datasize: integer): boolean; overload; 
              //read, true if not null
@@ -977,6 +976,9 @@ type
            //if bufsize < 0 -> buffer was to small, should be -bufsize
    property nullmasksize: integer read fnullmasksize;
    function islastrecord: boolean;   
+   procedure checkfreebuffer(const afield: tfield);
+   function callvalidate(const afield: tfield; const avalue: pointer): boolean;
+   procedure checkvaluebuffer(const afield: tfield; const asize: integer);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2949,62 +2951,6 @@ begin
  end;
 end;
 
-function tmsebufdataset.getfielddata(field: tfield; buffer: pointer): boolean;
-var 
- po1: pointer;
- datasize: integer;
-begin
- result:= getfieldbuffer(field,po1,datasize);
- if (buffer <> nil) and result then begin 
-  move(po1^,buffer^,datasize);
- end;
-end;
-
-function tmsebufdataset.getfielddata(field: tfield; buffer: pointer;
-                         nativeformat: boolean): boolean;
-begin
- result:= getfielddata(field,buffer);
-end;
-
-function tmsebufdataset.getmsestringdata(const sender: tmsestringfield;
-               out avalue: msestring): boolean;
-var
- po1: pointer;
- int1: integer;
-begin
- result:= getfieldbuffer(sender,po1,int1);
- if result then begin
-  avalue:= msestring(po1^);
- end
- else begin
-  avalue:= '';
- end;
-end;
-{
-procedure tmsebufdataset.setcurvalue(const afield: tfield; const avalue: int64);
-var
- po1: pointer;
- int1: integer;
-begin
- if bs_recapplying in fbstate then begin
-  int1:= afield.fieldno - 1;
-  if int1 >= 0 then begin
-//   po1:= @fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo^.header;
-   po1:= @fnewvaluebuffer^.header;
-//   po1:= @fcurrentbuf^.header;
-   if getfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1) then begin
-    unsetfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1);
-    inc(po1,ffieldinfos[int1].offset);
-    case afield.datatype of
-     ftinteger,ftautoinc: pinteger(po1)^:= avalue;
-     ftlargeint: pint64(po1)^:= avalue;
-    end;
-    include(fbstate,bs_curvaluemodified);
-   end;
-  end;
- end;
-end;
-}
 function tmsebufdataset.getfieldbuffer(const afield: tfield;
                         const isnull: boolean; out datasize: integer): pointer;
            //write buffer
@@ -3098,61 +3044,46 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.checkvalidating(const afield: tfield);
-begin
-{$ifdef FPC}{$warnings off}{$endif}
- if tfieldcracker(afield).fvalidating then begin
-{$ifdef FPC}{$warnings on}{$endif}
-  databaseerror('Field read only in OnValidate.',self);
- end;
-end;
-
-procedure tmsebufdataset.setfielddata(field: tfield; buffer: pointer);
-
+function tmsebufdataset.getfielddata(field: tfield; buffer: pointer): boolean;
 var 
  po1: pointer;
  datasize: integer;
 begin
- checkvalidating(field);
- field.validate(buffer);
- po1:= getfieldbuffer(field,buffer = nil,datasize);
- if buffer <> nil then begin
-  move(buffer^,po1^,datasize);
- end
- else begin
-  fillchar(po1^,datasize,0);
+ result:= getfieldbuffer(field,po1,datasize);
+ if (buffer <> nil) and result then begin 
+  move(po1^,buffer^,datasize);
  end;
- fieldchanged(field);
 end;
 
-procedure tmsebufdataset.setmsestringdata(const sender: tmsestringfield;
-               const avalue: msestring);
+function tmsebufdataset.getfielddata(field: tfield; buffer: pointer;
+                         nativeformat: boolean): boolean;
+begin
+ result:= getfielddata(field,buffer);
+end;
+
+function tmsebufdataset.getmsestringdata(const sender: tmsestringfield;
+               out avalue: msestring): boolean;
 var
  po1: pointer;
  int1: integer;
 begin
- checkvalidating(sender);
- sender.validate(@avalue);
- po1:= getfieldbuffer(sender,false,int1);
- msestring(po1^):= avalue;
- if (sender.characterlength > 0) and 
-                     (length(avalue) > sender.characterlength) then begin
-  setlength(msestring(po1^),sender.characterlength);
+ {$ifdef FPC}{$warnings off}{$endif}
+ with tfieldcracker(sender) do begin
+ {$ifdef FPC}{$warnings on}{$endif}
+  if fvalidating then begin
+   result:= (fvaluebuffer <> nil) and (foffset and 1 = 0);
+   po1:= fvaluebuffer;
+  end
+  else begin
+   result:= getfieldbuffer(sender,po1,int1);
+  end;
  end;
- fieldchanged(sender);
-end;
-
-procedure tmsebufdataset.setvardata(const sender: tmsevariantfield;
-               const avalue: variant);
-var
- po1: pvariant;
- int1: integer;
-begin
- checkvalidating(sender);
- sender.validate(@avalue);
- po1:= getfieldbuffer(sender,false,int1);
- po1^:= avalue;
- fieldchanged(sender);
+ if result then begin
+  avalue:= msestring(po1^);
+ end
+ else begin
+  avalue:= '';
+ end;
 end;
 
 function tmsebufdataset.getvardata(const sender: tmsevariantfield;
@@ -3161,7 +3092,17 @@ var
  po1: pvariant;
  int1: integer;
 begin
- result:= getfieldbuffer(sender,po1,int1);
+ {$ifdef FPC}{$warnings off}{$endif}
+ with tfieldcracker(sender) do begin
+ {$ifdef FPC}{$warnings on}{$endif}
+  if fvalidating then begin
+   result:= (fvaluebuffer <> nil) and (foffset and 1 = 0);
+   po1:= fvaluebuffer;
+  end
+  else begin
+   result:= getfieldbuffer(sender,po1,int1);
+  end;
+ end;
  if result then begin
   avalue:= po1^;
  end
@@ -3170,10 +3111,157 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.checkfreebuffer(const afield: tfield);
+begin
+ {$ifdef FPC}{$warnings off}{$endif}
+ with tfieldcracker(afield) do begin
+ {$ifdef FPC}{$warnings on}{$endif}
+  if foffset and 2 <> 0 then begin
+   freemem(fvaluebuffer);
+   fvaluebuffer:= nil;
+  end;
+ end;
+end;
+
+function tmsebufdataset.callvalidate(const afield: tfield;
+                              const avalue: pointer): boolean;
+              //true if not nulled
+begin
+ {$ifdef FPC}{$warnings off}{$endif}
+ with tfieldcracker(afield) do begin
+ {$ifdef FPC}{$warnings on}{$endif}
+  foffset:= 0;
+  fvaluebuffer:= avalue;
+  afield.validate(avalue);
+  result:= (avalue <> nil) and (foffset and 1 = 0);
+ end;
+end;
+
+procedure tmsebufdataset.checkvaluebuffer(const afield: tfield;
+                                                   const asize: integer);
+begin
+ {$ifdef FPC}{$warnings off}{$endif}
+ with tfieldcracker(afield) do begin
+ {$ifdef FPC}{$warnings on}{$endif}
+  foffset:= foffset and not 1;
+  if fvaluebuffer = nil then begin
+   getmem(fvaluebuffer,asize);
+   fillchar(fvaluebuffer^,asize,0);
+   foffset:= foffset or 2;
+  end;
+ end;
+end;
+
+procedure tmsebufdataset.setfielddata(field: tfield; buffer: pointer);
+
+var 
+ po1: pointer;
+ datasize1: integer;
+begin
+ {$ifdef FPC}{$warnings off}{$endif}
+ with tfieldcracker(field) do begin
+ {$ifdef FPC}{$warnings on}{$endif}
+  if fvalidating then begin
+   if buffer = nil then begin
+    foffset:= foffset or 1;
+   end
+   else begin
+    getfieldbuffer(field,po1,datasize1); //get data size
+    checkvaluebuffer(field,datasize1);
+    move(buffer^,fvaluebuffer^,datasize1);
+   end;
+  end
+  else begin
+   try
+    if callvalidate(field,buffer) then begin
+     po1:= getfieldbuffer(field,false,datasize1);
+     move(fvaluebuffer^,po1^,datasize1);
+    end
+    else begin
+     po1:= getfieldbuffer(field,true,datasize1);
+     fillchar(po1^,datasize1,0);
+    end;
+   finally
+    checkfreebuffer(field);
+   end;
+   fieldchanged(field);
+  end;
+ end;
+end;
+
 procedure tmsebufdataset.setfielddata(field: tfield; buffer: pointer;
                                                   nativeformat: boolean);
 begin
  setfielddata(field,buffer);
+end;
+
+procedure tmsebufdataset.setmsestringdata(const sender: tmsestringfield;
+               avalue: msestring);
+var
+ po1: pmsestring;
+ int1: integer;
+begin
+ {$ifdef FPC}{$warnings off}{$endif}
+ with tfieldcracker(sender) do begin
+ {$ifdef FPC}{$warnings on}{$endif}
+  if fvalidating then begin
+   checkvaluebuffer(sender,sizeof(msestring));
+   pmsestring(fvaluebuffer)^:= avalue;
+  end
+  else begin
+   try
+    if callvalidate(sender,@avalue) then begin
+     po1:= getfieldbuffer(sender,false,int1);
+     po1^:= pmsestring(fvaluebuffer)^;
+     if (sender.characterlength > 0) and 
+                         (length(avalue) > sender.characterlength) then begin
+      setlength(msestring(po1^),sender.characterlength);
+     end;
+    end
+    else begin
+     po1:= getfieldbuffer(sender,true,int1);
+     po1^:= '';
+    end;
+   finally
+    pmsestring(fvaluebuffer)^:= '';
+    checkfreebuffer(sender);    
+   end;
+   fieldchanged(sender);
+  end;
+ end;
+end;
+
+procedure tmsebufdataset.setvardata(const sender: tmsevariantfield;
+               avalue: variant);
+var
+ po1: pvariant;
+ int1: integer;
+begin
+ {$ifdef FPC}{$warnings off}{$endif}
+ with tfieldcracker(sender) do begin
+ {$ifdef FPC}{$warnings on}{$endif}
+  if fvalidating then begin
+   checkvaluebuffer(sender,sizeof(variant));
+   pvariant(fvaluebuffer)^:= avalue;
+  end
+  else begin
+   try
+    if callvalidate(sender,@avalue) then begin
+     po1:= getfieldbuffer(sender,false,int1);
+     po1^:= pvariant(fvaluebuffer)^;
+    end
+    else begin
+     po1:= getfieldbuffer(sender,true,int1);
+     finalize(po1^);
+     fillchar(po1^,sizeof(variant),0);
+    end;
+   finally
+    finalize(pvariant(fvaluebuffer)^);
+    checkfreebuffer(sender);    
+   end;
+   fieldchanged(sender);
+  end;
+ end;
 end;
 
 procedure tmsebufdataset.getnewupdatebuffer;
