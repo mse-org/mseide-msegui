@@ -275,7 +275,7 @@ type
              //write
    function getmsestringdata(const sender: tmsestringfield; 
                                out avalue: msestring): boolean;
-   procedure setmsestringdata(const sender: tmsestringfield; const avalue: msestring);
+   procedure setmsestringdata(const sender: tmsestringfield; avalue: msestring);
 
    procedure dataevent(event: tdataevent; info: ptrint); override;
 
@@ -1778,7 +1778,7 @@ begin
 end;
 
 procedure tifidataset.setmsestringdata(const sender: tmsestringfield;
-               const avalue: msestring);
+               avalue: msestring);
 var
  po1: pointer;
  int1: integer;

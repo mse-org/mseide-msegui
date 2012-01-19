@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2004-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2004-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -242,7 +242,7 @@ type
  getmsestringdataty = function(const sender: tmsestringfield;
                      out avalue: msestring): boolean of object; //false if null
  setmsestringdataty = procedure(const sender: tmsestringfield;
-                          const avalue: msestring) of object;
+                          avalue: msestring) of object;
  
  tmsestringfield = class(tstringfield,ifieldcomponent,imsefield)
   private
@@ -1047,7 +1047,7 @@ type
 
  tmsevariantfield = class;
  setvardataty = procedure(const sender: tmsevariantfield;
-                          const avalue: variant) of object;
+                                  avalue: variant) of object;
  getvardataty = function(const sender: tmsevariantfield;
                           out avalue: variant): boolean of object;
  tmsevariantfield = class(tvariantfield,imsefield)
@@ -3592,17 +3592,17 @@ begin
  with tfieldcracker(self) do begin
 {$warnings on}
   if assigned(fgetmsestringdata) then begin
-   if fvalidating then begin
-    if fvaluebuffer = nil then begin
-     result:= '';
-    end
-    else begin
-     result:= msestring(fvaluebuffer^);
-    end;
-   end
-   else begin
+//   if fvalidating then begin
+//    if fvaluebuffer = nil then begin
+//     result:= '';
+//    end
+//    else begin
+//     result:= msestring(fvaluebuffer^);
+//    end;
+//   end
+//   else begin
     fgetmsestringdata(self,result);
-   end;
+//   end;
   end
   else begin
    result:= fieldgetmsestring(self,fdsintf);
@@ -3745,25 +3745,11 @@ var
  mstr1: msestring;
 begin
  if assigned(fgetmsestringdata) then begin
-{$ifdef FPC}{$warnings off}{$endif}
-  with tfieldcracker(self) do begin
-{$ifdef FPC}{$warnings on}{$endif}
-   if fvalidating then begin
-    if fvaluebuffer = nil then begin
-     result:= null;
-    end
-    else begin
-     result:= msestring(fvaluebuffer^);
-    end;
-   end
-   else begin
-    if fgetmsestringdata(self,mstr1) then begin
-     result:= mstr1;
-    end
-    else begin
-     result:= null;
-    end;
-   end;
+  if fgetmsestringdata(self,mstr1) then begin
+   result:= mstr1;
+  end
+  else begin
+   result:= null;
   end;
  end
  else begin
