@@ -1270,7 +1270,9 @@ begin
  comp1:= acomponent.owner;
  if (comp1 <> nil) and not 
             issubcomponent(tformdesignerfo(fowner).fmodule,comp1) then begin
+ {$ifdef FPC}{$warnings off}{$endif}
   with tcomponentcracker(comp1) do begin
+ {$ifdef FPC}{$warnings on}{$endif}
    comps:= fcomponents;
    fcomponents:= nil; //do not propagate freenotifiaction to children
    comp1.removecomponent(acomponent);
