@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -211,8 +211,8 @@ type
    procedure paintxorpic(const canvas: tcanvas);
    procedure checkdelobjs(const aitem: tcomponent);
 
-   procedure doaddcomponent(component: tcomponent);
-   procedure doinitcomponent(component: tcomponent; parent: tcomponent);
+   procedure doaddcomponent(acomponent: tcomponent);
+   procedure doinitcomponent(acomponent: tcomponent; parent: tcomponent);
 
    procedure setshowgrid(const avalue: boolean);
    procedure setgridsizex(const avalue: integer);
@@ -1262,37 +1262,55 @@ begin
  inc(result.cy,handlesize);
 end;
 
-procedure tdesignwindow.doaddcomponent(component: tcomponent);
+procedure tdesignwindow.doaddcomponent(acomponent: tcomponent);
 var
  comp1: tcomponent;
+ comps: tfplist;
 begin
- comp1:= component.owner;
+ comp1:= acomponent.owner;
  if (comp1 <> nil) and not 
             issubcomponent(tformdesignerfo(fowner).fmodule,comp1) then begin
-  comp1.removecomponent(component);
+  with tcomponentcracker(comp1) do begin
+   comps:= fcomponents;
+   fcomponents:= nil; //do not propagate freenotifiaction to children
+   comp1.removecomponent(acomponent);
+   if comps <> nil then begin
+    comps.remove(acomponent);
+    if comps.count = 0 then begin
+     comps.free;
+    end
+    else begin
+     fcomponents:= comps;
+    end;
+   end;
+  end;
  end;
- fdesigner.addcomponent(module,component);
+ fdesigner.addcomponent(module,acomponent);
 // if csinline in component.ComponentState then begin
- if component.ComponentState * [csancestor,csinline] <> [] then begin
-  tcomponent1(component).getchildren({$ifdef FPC}@{$endif}doaddcomponent,component);
+ if acomponent.ComponentState * [csancestor,csinline] <> [] then begin
+  tcomponent1(acomponent).getchildren(
+                           {$ifdef FPC}@{$endif}doaddcomponent,acomponent);
   if comp1 <> nil then begin
-   tcomponent1(component).getchildren({$ifdef FPC}@{$endif}doaddcomponent,comp1);
+   tcomponent1(acomponent).getchildren(
+                               {$ifdef FPC}@{$endif}doaddcomponent,comp1);
   end;
  end
  else begin
 // if comp1 <> nil then begin //else submodule
-  tcomponent1(component).getchildren({$ifdef FPC}@{$endif}doaddcomponent,comp1);
+  tcomponent1(acomponent).getchildren(
+                                   {$ifdef FPC}@{$endif}doaddcomponent,comp1);
  end;
 end;
 
-procedure tdesignwindow.doinitcomponent(component: tcomponent; parent: tcomponent);
+procedure tdesignwindow.doinitcomponent(
+                         acomponent: tcomponent; parent: tcomponent);
 var
  rect1: rectty;
  pt1,pt2: pointty;
 begin
- doaddcomponent(component);
- if (component is twidget) and (parent is twidget) then begin
-  with twidget(component) do begin
+ doaddcomponent(acomponent);
+ if (acomponent is twidget) and (parent is twidget) then begin
+  with twidget(acomponent) do begin
    if fuseinitcompsoffset then begin
     pt1:= finitcompsoffset;
     subpoint1(finitcompsoffset,pos);
@@ -1308,15 +1326,15 @@ begin
     end;
    end;
   end;
-  twidget(parent).insertwidget(twidget(component),pt1);
+  twidget(parent).insertwidget(twidget(acomponent),pt1);
   if fclipinitcomps then begin
-   rect1:= twidget(component).widgetrect;
-   shiftinrect(rect1,twidget(component).parentwidget.clientwidgetrect);
-   twidget(component).widgetrect:= rect1;
+   rect1:= twidget(acomponent).widgetrect;
+   shiftinrect(rect1,twidget(acomponent).parentwidget.clientwidgetrect);
+   twidget(acomponent).widgetrect:= rect1;
   end;
  end
  else begin
-  pt2:= getcomponentpos(component);
+  pt2:= getcomponentpos(acomponent);
   if fuseinitcompsoffset then begin  
    pt1:= finitcompsoffset;
    subpoint1(finitcompsoffset,pt2);
@@ -1329,7 +1347,7 @@ begin
     addpoint1(pt1,finitcompsoffset);
    end;
   end;
-  setcomponentpos(component,pt1);
+  setcomponentpos(acomponent,pt1);
  end;
 end;
 
@@ -1406,6 +1424,7 @@ begin
      pastefromclipboard(module,comp1,{$ifdef FPC}@{$endif}doinitcomponent);
     end;
     updateselections;
+    designer.componentmodified(module);
    end;
   end;
  finally
