@@ -71,7 +71,6 @@ type
   basetype: tfieldtype;
   field: tfield;
   uppername: string;
-  validatenull: boolean;
  end;
  fieldinfoty = record
   base: fieldinfobasety;
