@@ -273,6 +273,7 @@ type
                                        var newindex: integer) of object;
  movedeventty = procedure(const sender: tobject; const curindex: integer;
                                        const newindex: integer) of object;
+ tabschangedeventty = procedure(const synctabindex: boolean) of object;
 
  tabbarstatety = (tbs_layoutvalid,tbs_designdrag,tbs_shrinktozero);
  tabbarstatesty = set of tabbarstatety;
@@ -283,7 +284,7 @@ type
    fhintedbutton: integer;
    fonactivetabchange: notifyeventty;
    fupdating: integer;
-   finternaltabchange: proceventty;
+   finternaltabchange: tabschangedeventty;
    fontabmoving: movingeventty;
    fontabmoved: movedeventty;
    fonclientmouseevent: mouseeventty;
@@ -627,6 +628,7 @@ type
    ftabs: tcustomtabbar1;
    fobjectpicker: tobjectpicker;
    factivepageindex: integer;
+   factivepageindex1: integer;
    fonactivepagechanged: notifyeventty;
    fonpageadded: widgeteventty;
    fonpageremoved: widgeteventty;
@@ -717,7 +719,7 @@ type
    procedure unregisterchildwidget(const child: twidget); override;
    procedure pagechanged(const sender: itabpage);
    procedure GetChildren(Proc: TGetChildProc; Root: TComponent); override;
-   procedure tabchanged;
+   procedure tabchanged(const synctabindex: boolean);
    procedure loaded; override;
    procedure clientrectchanged; override;
    procedure widgetregionchanged(const sender: twidget); override;
@@ -2149,7 +2151,6 @@ var
  int1,int2: integer;
  bo1: boolean;
  activetabbefore: integer;
- ar1: integerarty;
 begin
  if fupdating = 0 then begin
   with flayoutinfo do begin
@@ -2157,15 +2158,15 @@ begin
    updateactivetabindex;
    bo1:= activetabbefore <> activetab;
    if bo1 and assigned(finternaltabchange) then begin
-    finternaltabchange;
+    finternaltabchange(false);
    end;
    if tabo_sorted in foptions then begin
     sortarray(pointerarty(flayoutinfo.tabs.fitems),
-                                     {$ifdef FPC}@{$endif}comptabs,ar1);
-    if activetab >= 0 then begin
-     activetab:= ar1[activetab];
-    end;
+                                     {$ifdef FPC}@{$endif}comptabs);
     updateactivetabindex;
+    if assigned(finternaltabchange) then begin
+     finternaltabchange(true);
+    end;
    end;
    if bo1 then begin
     if (activetab >= 0) and (activetab <= high(cells)) then begin
@@ -3963,9 +3964,10 @@ var
  parenttabfocus: boolean;
  widget1,widget2: twidget;
 begin
- if value <> factivepageindex then begin
+ if (value <> factivepageindex) or (fupdating > 0) then begin
   if csloading in componentstate then begin
    factivepageindex:= value;
+   factivepageindex1:= value;
    exit;
   end;
   if (value >= 0) then begin
@@ -3974,78 +3976,87 @@ begin
   else begin
    value:= -1;
   end;
-  
-  parenttabfocus:= ow_parenttabfocus in foptionswidget;
-  exclude(foptionswidget,ow_parenttabfocus);
-  try
-   if factivepageindex >= 0 then begin
-    widget1:= items[factivepageindex];
-    int1:= factivepageindex;
-    if not (csdestroying in widget1.componentstate) then begin
-     widget2:= widget1;
-     if ow1_canclosenil in widget1.optionswidget1 then begin
-      widget2:= nil;
-     end;
-     if not widget1.canparentclose(widget2) then begin
-      ftabs.tabs[factivepageindex].active:= true;
-      exit;
-     end;
-     factivepageindex:= -1;
-     if not (csloading in componentstate) then begin
-      tpagetab(ftabs.tabs[int1]).fpageintf.dodeselect;
-      if (factivepageindex <> -1) then begin
+  if fupdating > 0 then begin
+   factivepageindex1:= value;
+  end
+  else begin  
+   parenttabfocus:= ow_parenttabfocus in foptionswidget;
+   exclude(foptionswidget,ow_parenttabfocus);
+   try
+    if factivepageindex >= 0 then begin
+     widget1:= items[factivepageindex];
+     int1:= factivepageindex;
+     if not (csdestroying in widget1.componentstate) then begin
+      widget2:= widget1;
+      if ow1_canclosenil in widget1.optionswidget1 then begin
+       widget2:= nil;
+      end;
+      if not widget1.canparentclose(widget2) then begin
+       ftabs.tabs[factivepageindex].active:= true;
+       exit;
+      end;
+      factivepageindex:= -1;
+      if not (csloading in componentstate) then begin
+       tpagetab(ftabs.tabs[int1]).fpageintf.dodeselect;
+       if (factivepageindex <> -1) then begin
+        exit;
+       end;
+      end;
+      items[int1].visible:= false;
+      if (factivepageindex <> -1) or items[int1].visible then begin
        exit;
       end;
      end;
-     items[int1].visible:= false;
-     if (factivepageindex <> -1) or items[int1].visible then begin
-      exit;
-     end;
+     ftabs.tabs[int1].active:= false; //if items[int1] was already invisible
     end;
-    ftabs.tabs[int1].active:= false; //if items[int1] was already invisible
-   end;
-   factivepageindex:= Value;
-   if value >= 0 then begin
-    defaultfocuschild:= items[value];
-    if not (csloading in componentstate) then begin
-     tpagetab(ftabs.tabs[value]).fpageintf.doselect;
-     if factivepageindex <> value then begin
-      exit;
-     end;
-    end;
-    with items[value] do begin
-     bringtofront; //needed in design mode where all widgets are visible
-     inc(fupdating);
-     try
-      visible:= true;
-     finally
-      dec(fupdating);
-     end;
-     if self.entered and canfocus and not ftabs.focused then begin
-      setfocus(false);
-     end;
-    end;
-   end
-   else begin
-    defaultfocuschild:= nil;
-   end;
-   if (value = factivepageindex) then begin
-    doactivepagechanged;
+    factivepageindex:= Value;
     if value >= 0 then begin
-     ftabs.tabs[value].active:= true
+     defaultfocuschild:= items[value];
+     if not (csloading in componentstate) then begin
+      tpagetab(ftabs.tabs[value]).fpageintf.doselect;
+      if factivepageindex <> value then begin
+       exit;
+      end;
+     end;
+     with items[value] do begin
+      bringtofront; //needed in design mode where all widgets are visible
+      inc(fupdating);
+      try
+       visible:= true;
+      finally
+       dec(fupdating);
+      end;
+      if self.entered and canfocus and not ftabs.focused then begin
+       setfocus(false);
+      end;
+     end;
+    end
+    else begin
+     defaultfocuschild:= nil;
     end;
-   end;
-  finally
-   if parenttabfocus then begin
-    include(foptionswidget,ow_parenttabfocus);
+    if (value = factivepageindex) then begin
+     doactivepagechanged;
+     if value >= 0 then begin
+      ftabs.tabs[value].active:= true
+     end;
+    end;
+   finally
+    if parenttabfocus then begin
+     include(foptionswidget,ow_parenttabfocus);
+    end;
    end;
   end;
  end;
 end;
 
-procedure tcustomtabwidget.tabchanged;
+procedure tcustomtabwidget.tabchanged(const synctabindex: boolean);
 begin
- setactivepageindex(ftabs.activetab);
+ if synctabindex and (factivepageindex >= 0) then begin
+  factivepageindex:= ftabs.activetab;
+ end
+ else begin
+  setactivepageindex(ftabs.activetab);
+ end;
 // activepageindex:= ftabs.activetab;
 end;
 
@@ -4837,7 +4848,12 @@ end;
 
 function tcustomtabwidget.getactivepageindex: integer;
 begin
- result:= factivepageindex;
+ if fupdating > 0 then begin
+  result:= factivepageindex1;
+ end
+ else begin  
+  result:= factivepageindex;
+ end;
  if csdesigning in componentstate then begin
   result:= factivepageindexdesign;
  end;
@@ -4846,11 +4862,14 @@ end;
 procedure tcustomtabwidget.setactivepageindex1(const avalue: integer);
 begin
  setactivepageindex(avalue);
- factivepageindexdesign:= factivepageindex;
+ factivepageindexdesign:= avalue;//factivepageindex;
 end;
 
 procedure tcustomtabwidget.beginupdate;
 begin
+ if fupdating = 0 then begin
+  factivepageindex1:= factivepageindex;
+ end;
  inc(fupdating);
  ftabs.beginupdate;
 end;
@@ -4861,6 +4880,7 @@ var
 begin
  dec(fupdating);
  if fupdating = 0 then begin
+  activepageindex:= factivepageindex1;
   with ftabs.tabs do begin
    for int1:= 0 to high(fitems) do begin
     with tpagetab(fitems[int1]) do begin
