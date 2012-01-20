@@ -2582,6 +2582,10 @@ function isrowenter(const info: celleventinfoty;
 function isrowexit(const info: celleventinfoty;
                                const noexitgrid: boolean = false): boolean;
 function isrowchange(const info: celleventinfoty): boolean;
+function wasrowenter(const info: celleventinfoty;
+                               const noentergrid: boolean = false): boolean;
+function wasrowexit(const info: celleventinfoty;
+                               const noexitgrid: boolean = false): boolean;
 function cellkeypress(const info: celleventinfoty): keyty;
 
 implementation
@@ -2702,6 +2706,24 @@ function isrowchange(const info: celleventinfoty): boolean;
 begin
  with info do begin
   result:= (eventkind = cek_focusedcellchanged) and (cellbefore.row <> newcell.row);
+ end;
+end;
+
+function wasrowenter(const info: celleventinfoty;
+                     const noentergrid: boolean = false): boolean;
+begin
+ with info do begin
+  result:= isrowchange(info) and (newcell.row >= 0) and
+                  (not noentergrid or (selectaction <> fca_entergrid));
+ end;
+end;
+
+function wasrowexit(const info: celleventinfoty;
+                     const noexitgrid: boolean = false): boolean;
+begin
+ with info do begin
+  result:= isrowchange(info) and (newcell.row < 0) and
+                  (not noexitgrid or (selectaction <> fca_exitgrid));
  end;
 end;
 
