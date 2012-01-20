@@ -2149,6 +2149,7 @@ var
  int1,int2: integer;
  bo1: boolean;
  activetabbefore: integer;
+ ar1: integerarty;
 begin
  if fupdating = 0 then begin
   with flayoutinfo do begin
@@ -2159,7 +2160,11 @@ begin
     finternaltabchange;
    end;
    if tabo_sorted in foptions then begin
-    sortarray(pointerarty(flayoutinfo.tabs.fitems),{$ifdef FPC}@{$endif}comptabs);
+    sortarray(pointerarty(flayoutinfo.tabs.fitems),
+                                     {$ifdef FPC}@{$endif}comptabs,ar1);
+    if activetab >= 0 then begin
+     activetab:= ar1[activetab];
+    end;
     updateactivetabindex;
    end;
    if bo1 then begin
