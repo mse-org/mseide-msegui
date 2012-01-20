@@ -4880,7 +4880,9 @@ var
 begin
  dec(fupdating);
  if fupdating = 0 then begin
-  activepageindex:= factivepageindex1;
+  if factivepageindex1 < count then begin
+   activepageindex:= factivepageindex1;
+  end;
   with ftabs.tabs do begin
    for int1:= 0 to high(fitems) do begin
     with tpagetab(fitems[int1]) do begin
