@@ -1160,7 +1160,7 @@ end;
 procedure tcustomedit.doafterpaint(const canvas: tcanvas);
 begin
  if ([oe_focusrectonreadonly,oe_readonly] * optionsedit = 
-        [oe_focusrectonreadonly,oe_readonly]) and focused then begin
+        [oe_focusrectonreadonly,oe_readonly]) and focused and active then begin
   drawfocusrect(canvas,paintrect);
  end;
  inherited;

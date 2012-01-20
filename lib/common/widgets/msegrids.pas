@@ -3585,7 +3585,7 @@ begin
       end;
       if isfocusedcol and (row1 = fgrid.ffocusedcell.row) and 
                           (co_drawfocus in foptions) and
-                           fgrid.cellhasfocus then begin
+                           fgrid.cellhasfocus and fgrid.active then begin
        if fframe <> nil then begin
         canvas.move(fframe.fpaintrect.pos);
        end;
