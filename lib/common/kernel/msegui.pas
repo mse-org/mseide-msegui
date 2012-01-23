@@ -13177,7 +13177,7 @@ begin
   capture:= fowner.mouseeventwidget(info);
   if (fmodalwidget <> nil) and 
           not fmodalwidget.checkdescendent(capture) then begin
-   capture:= nil;
+   capture:= fmodalwidget;
   end;
   if (capture = nil) and (tws_grab in fstate) then begin
    capture:= fmodalwidget;
