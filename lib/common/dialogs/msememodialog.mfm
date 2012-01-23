@@ -4,6 +4,14 @@ object msememodialogfo: tmsememodialogfo
   bounds_y = 237
   bounds_cx = 386
   bounds_cy = 291
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
+  container.bounds = (
+    0
+    0
+    386
+    291
+  )
   options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = tstatfile1
   caption = 'Enter Memo Text'
@@ -15,7 +23,7 @@ object msememodialogfo: tmsememodialogfo
     bounds_cx = 386
     bounds_cy = 257
     anchors = [an_top, an_bottom]
-    optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_shiftreturn, oe_resetselectonexit, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_shiftreturn, oe_resetselectonexit, oe_nofirstarrownavig, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
   end
   object tbutton1: tbutton
     taborder = 1
