@@ -481,10 +481,14 @@ begin
   lwo1:= timestep(fpipewaitus);
   sleepus(0); //shed_yield
   while not (foutput.pipereader.eof and ferroroutput.pipereader.eof) and 
-                            (fpipewaitus <> 0) and not timeout(lwo1) do begin
+                      not ((fpipewaitus <> 0) and timeout(lwo1)) do begin
    sleepus(10000); //wait for last chars
   end;
   application.relockall(int1);
+  if (foutput.pipereader.eof and ferroroutput.pipereader.eof) then begin
+   foutput.pipereader.waitfor;          //process data
+   ferroroutput.pipereader.waitfor;     //process data
+  end;
   foutput.pipereader.overloadsleepus:= int2;
   ferroroutput.pipereader.overloadsleepus:= int3;
  end;

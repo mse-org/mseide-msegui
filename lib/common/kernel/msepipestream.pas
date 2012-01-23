@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -97,6 +97,7 @@ type
    procedure clear; override;
    procedure terminate;
    procedure terminateandwait;
+   procedure waitfor;
    function waitforresponse(timeoutusec: integer = 0;
                       resetflag: boolean = true): boolean;
              //false if timeout or error
@@ -307,6 +308,13 @@ procedure tpipereader.terminateandwait;
 begin
  if fthread <> nil then begin
   terminate;
+  application.waitforthread(fthread);
+ end;
+end;
+
+procedure tpipereader.waitfor;
+begin
+ if fthread <> nil then begin
   application.waitforthread(fthread);
  end;
 end;
