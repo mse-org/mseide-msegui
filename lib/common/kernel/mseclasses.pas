@@ -3186,25 +3186,7 @@ begin
   inc(po1);
  end;
 end;
-{
-function tobjectlinker.findsource(const item: linkinfoty): integer;
-var
- int1: integer;
- po1: plinkinfoty;
-begin
- result:= -1;
- po1:= plinkinfoty(fdata);
- for int1:= 0 to fcount - 1 do begin
-  with po1^ do begin
-   if source = item.source then begin
-    result:= int1;
-    break;
-   end;
-  end;
-  inc(po1);
- end;
-end;
-}
+
 procedure tobjectlinker.link(const source,dest: iobjectlink; valuepo: pointer = nil;
                                   ainterfacetype: pointer = nil; once: boolean = false);
 var
@@ -3263,12 +3245,7 @@ begin
 {$ifdef debugobjectlink}
   write('unlink');getdebugtext(self,source,dest,valuepo);
 {$endif}
-// if ptrint(source) = 1 then begin //objektlinker destroyed
-//  info.source:= nil;
-// end
-// else begin
-  info.source:= pointer(source);
-// end;
+ info.source:= pointer(source);
  info.dest:= pointer(dest);
  info.valuepo:= valuepo;
  removelink(info,ptrint(source) = 1);
