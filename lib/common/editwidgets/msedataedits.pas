@@ -364,7 +364,8 @@ const
  defaultmemooptionsedit = (defaultoptionsedit - 
          [oe_undoonesc,oe_exitoncursor,oe_shiftreturn,
           oe_endonenter,oe_homeonenter,
-          oe_autoselect,oe_autoselectonfirstclick]) + [oe_linebreak];
+          oe_autoselect,oe_autoselectonfirstclick]) + 
+          [oe_linebreak,oe_nofirstarrownavig];
  defaultmemooptionsedit1 = defaultoptionsedit1 + [oe1_multiline];
  
 type
