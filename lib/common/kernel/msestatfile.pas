@@ -1,3 +1,12 @@
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
+
+    See the file COPYING.MSE, included in this distribution,
+    for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+}
 unit msestatfile;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
@@ -21,6 +30,9 @@ const
  defaultstatfileoptions = [sfo_activatorread,sfo_activatorwrite,sfo_transaction];
  
 type
+ tstatfile = class;
+ statfilemissingeventty = procedure (const sender: tstatfile; 
+                  const afilename: filenamety; var aretry: boolean) of object;
  tstatfile = class(tactcomponent,istatfile)
   private
    ffilename: filenamety;
@@ -41,6 +53,7 @@ type
    fencoding: charencodingty;
    fstatfile: tstatfile;
    fsavedmemoryfiles: msestring;
+   fonfilemissing: statfilemissingeventty;
    procedure dolinkstatread(const info: linkinfoty);
    procedure dolinkstatreading(const info: linkinfoty);
    procedure dolinkstatreaded(const info: linkinfoty);
@@ -53,6 +66,7 @@ type
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
    procedure updateoptions(const afiler: tstatfiler);
+   function defaultfile(const adirs: filenamearty): filenamety;
    
    //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -90,10 +104,16 @@ type
    property onstatupdate: statupdateeventty read fonstatupdate write fonstatupdate;
    property onstatread: statreadeventty read fonstatread write fonstatread;
    property onstatwrite: statwriteeventty read fonstatwrite write fonstatwrite;
-   property onstatbeforewrite: notifyeventty read fonstatbeforewrite write fonstatbeforewrite;
-   property onstatafterwrite: notifyeventty read fonstatafterwrite write fonstatafterwrite;
-   property onstatbeforeread: notifyeventty read fonstatbeforeread write fonstatbeforeread;
-   property onstatafterread: notifyeventty read fonstatafterread write fonstatafterread;
+   property onstatbeforewrite: notifyeventty read fonstatbeforewrite 
+                                                    write fonstatbeforewrite;
+   property onstatafterwrite: notifyeventty read fonstatafterwrite
+                                                    write fonstatafterwrite;
+   property onstatbeforeread: notifyeventty read fonstatbeforeread
+                                                    write fonstatbeforeread;
+   property onstatafterread: notifyeventty read fonstatafterread
+                                                    write fonstatafterread;
+   property onfilemissing: statfilemissingeventty read fonfilemissing 
+                                                    write fonfilemissing;
  end;
 
 procedure setstatfilevar(const sender: istatfile; const source: tstatfile;
@@ -252,10 +272,21 @@ begin
  afiler.options:= opt1;
 end;
 
+function tstatfile.defaultfile(const adirs: filenamearty): filenamety;
+begin
+ if high(adirs) >= 0 then begin
+  result:= filepath(adirs[0],ffilename);
+ end
+ else begin
+  result:= filepath(ffilename);
+ end;
+end;
+
 procedure tstatfile.readstat(stream: ttextstream = nil);
 var
  stream1: ttextstream;
  ar1: filenamearty;
+ by1: boolean;
 begin
  if assigned(fonstatbeforeread) then begin
   fonstatbeforeread(self);
@@ -263,20 +294,27 @@ begin
  stream1:= stream;
  try
   if (stream1 = nil) and (filename <> '') then begin
-   try
-    if sfo_memory in foptions then begin
-     stream1:= memorystatstreams.open(ffilename,fm_read);
-    end
-    else begin
+   if sfo_memory in foptions then begin
+    floadedfile:= '';
+    stream1:= memorystatstreams.open(ffilename,fm_read);
+   end
+   else begin
+    by1:= false;
+    repeat
      unquotefilename(ffiledir,ar1);
      if not findfile(ffilename,ar1,floadedfile) then begin
       floadedfile:= ffilename;
      end;
-     stream1:= ttextstream.Create(floadedfile,fm_read);
+     stream1:= ttextstream.trycreate(floadedfile,fm_read);
+     if stream1 = nil then begin
+      if canevent(tmethod(fonfilemissing)) then begin
+       fonfilemissing(self,defaultfile(ar1),by1);
+      end;
+     end;
+    until (stream1 <> nil) or not by1;
+    if stream1 = nil then begin
+     floadedfile:= '';
     end;
-//    stream1.encoding:= fencoding;
-   except
-    floadedfile:= '';
    end;
   end;
   areader:= tstatreader.create(stream1,fencoding);
@@ -377,12 +415,7 @@ begin
    if floadedfile = '' then begin
     unquotefilename(ffiledir,ar1);
     if not findfile(ffilename,ar1,floadedfile) then begin
-     if high(ar1) >= 0 then begin
-      floadedfile:= filepath(ar1[0],ffilename);
-     end
-     else begin
-      floadedfile:= filepath(ffilename);
-     end;
+     floadedfile:= defaultfile(ar1);
     end;
     if (sfo_createpath in foptions) and not findfile(floadedfile) then begin
      createdirpath(msefileutils.filedir(floadedfile));
@@ -532,7 +565,8 @@ begin
  end;
 end;
 
-procedure tstatfile.updatestat(const aname: msestring; const statfiler: tstatfiler);
+procedure tstatfile.updatestat(const aname: msestring; 
+                                        const statfiler: tstatfiler);
 begin
  if statfiler.iswriter then begin
   writestat(aname,tstatwriter(statfiler));

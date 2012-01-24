@@ -1212,10 +1212,18 @@ end;
 procedure tsourcefo.convpasex(const sender: TObject);
 var
  mstr1,mstr2: msestring;
+ ar1: msestringarty;
+ int1: integer;
 begin
  with activepage.edit do begin
   mstr1:= selectedtext;
-  mstr2:= stringtopascalstring(mstr1);
+  ar1:= breaklines(mstr1);
+  for int1:= 0 to high(ar1)-1 do begin
+   ar1[int1]:= stringtopascalstring(ar1[int1])+'+linend+';
+  end;
+  ar1[high(ar1)]:= stringtopascalstring(ar1[high(ar1)]);
+  mstr2:= concatstrings(ar1,lineend);
+//  mstr2:= stringtopascalstring(mstr1);
   if askyesno('Do you wish to replace:'+lineend+mstr1+lineend+'with:'+lineend+
         mstr2+lineend+'?') then begin
    editor.begingroup;
