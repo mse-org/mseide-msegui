@@ -1327,10 +1327,10 @@ begin
     end;
    end
    else begin
-//    if relative then begin  //if not relative ignore '..' if rootdir
+    if relative then begin  //if not relative ignore '..' if rootdir
      ar2[int2]:= ar1[int1];
      inc(int2);
-//    end;
+    end;
    end;
   end
   else begin
