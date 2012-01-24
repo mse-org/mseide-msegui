@@ -619,7 +619,7 @@ begin
   int1:= fcaretwidth;
  end;
  if int1 < 0 then begin
-  result:= (canvas.getfontmetrics('o',afont).sum * -int1 -
+  result:= (canvas.getfontmetrics('o',afont).sum * - int1 -
                            int1 div 2) div 1024; //round
   if result = 0 then begin
    result:= 1;
@@ -640,8 +640,9 @@ var
  afont,font1: tfont;
  actioninfo: editnotificationinfoty;
  int1,int2: integer;
- posbefore: pointty;
+ posbefore: rectty;
  updatecaretcountref: integer;
+ options1: optionseditty;
 
 begin
  if (fupdating > 0) or (ws_destroying in fowner.widgetstate) or
@@ -650,8 +651,9 @@ begin
  end;
  inc(fupdatecaretcount);
  updatecaretcountref:= fupdatecaretcount;
- posbefore:= finfo.dest.pos;
- if not (canedit or (oe_caretonreadonly in iedit(fintf).getoptionsedit)) then begin
+ posbefore:= finfo.dest;
+ options1:= iedit(fintf).getoptionsedit;
+ if not (canedit or (oe_caretonreadonly in options1)) then begin
   nocaret:= true;
  end;
  actioninfo:= initactioninfo(ea_caretupdating);
@@ -702,6 +704,13 @@ begin
     end;
     caretrect.x:= fcaretpos.x - showrect.cx;
     inc(caretrect.x,afont.caretshift);
+    if showrect.x > caretrect.x then begin
+     showrect.x:= caretrect.x;
+    end;
+    int1:= caretrect.x+caretrect.cx-(showrect.x+showrect.cx);
+    if int1 > 0 then begin
+     showrect.cx:= showrect.cx+int1;
+    end;
    end
    else begin
     font1:= tfont.create;
@@ -755,8 +764,59 @@ begin
      end;
     end;
     if not isnullpoint(po1) then begin
+     if not (tf_clipi in flags) then begin
+      addpoint1(dest.pos,po1);
+      int1:= dest.x - ftextrect.x;
+      if int1 > 0 then begin //use cliprect space
+       int2:= ftextrect.x - clip.x;
+       if int1 > int2 then begin
+        int1:= int2;
+       end;
+       po1.x:= po1.x - int1;
+       dest.x:= dest.x - int1;
+      end;
+     end
+     else begin
+      if tf_right in flags then begin
+       dest.cx:= dest.cx + po1.x;
+      end
+      else begin
+       if tf_xcentered in flags then begin
+        dest.x:= dest.x + po1.x;
+        int1:= dest.x - ftextrect.x;
+        int2:= ftextrect.y+ftextrect.cx - (dest.x+dest.cx);
+        if int2 > int1 then begin //adjust to textrect
+         int1:= int2;
+        end;
+        dest.x:= dest.x - int1;
+        dest.cx:= dest.cx + 2*int1;
+       end
+       else begin
+        dest.x:= dest.x + po1.x;
+        dest.cx:= dest.cx - po1.x;
+       end;
+      end;
+      if tf_bottom in flags then begin
+       dest.cy:= dest.cy + po1.y;
+      end
+      else begin
+       if tf_ycentered in flags then begin
+        dest.y:= dest.y + po1.y;
+        int1:= dest.y - ftextrect.y;
+        int2:= ftextrect.y+ftextrect.cy - (dest.y+dest.cy);
+        if int2 > int1 then begin //adjust to textrect
+         int1:= int2;
+        end;
+        dest.y:= dest.y - int1;
+        dest.cy:= dest.cy + 2*int1;
+       end
+       else begin
+        dest.y:= dest.y + po1.y;
+        dest.cy:= dest.cy - po1.y;
+       end;
+      end;
+     end;
      addpoint1(fcaretpos,po1);
-     addpoint1(dest.pos,po1);
      addpoint1(caretrect.pos,po1);
      addpoint1(showrect.pos,po1);
     end;
@@ -780,7 +840,8 @@ begin
    end;
   end;
  end;
- if (finfo.dest.x <> posbefore.x) or (finfo.dest.y <> posbefore.y) then begin
+ if (finfo.dest.x <> posbefore.x) or (finfo.dest.y <> posbefore.y) or 
+    (finfo.dest.cx <> posbefore.cx) or (finfo.dest.cy <> posbefore.cy) then begin
   invalidatetextrect(minint,bigint);
  end;
 end;
