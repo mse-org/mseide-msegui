@@ -1856,8 +1856,12 @@ begin
 end;
 
 procedure tgraphdataedit.updatecoloptions(const aoptions: coloptionsty);
+var
+ opt1: optionseditty;
 begin
- fgridintf.coloptionstoeditoptions(foptionsedit);
+ opt1:= foptionsedit;
+ fgridintf.coloptionstoeditoptions(opt1);
+ optionsedit:= opt1;
 end;
 
 procedure tgraphdataedit.statdataread;
