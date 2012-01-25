@@ -1210,22 +1210,37 @@ begin
 end;
 
 procedure tsourcefo.convpasex(const sender: TObject);
+
 var
- mstr1,mstr2: msestring;
  ar1: msestringarty;
+
+ function messagestr(const def: msestring): msestring;
+ begin
+  if high(ar1) > 4 then begin
+   result:= concatstrings(copy(ar1,0,5),lineend);
+   result:= result+lineend+'...';
+  end
+  else begin
+   result:= def;
+  end;
+ end; //msessagestr
+
+var
+ mstr1,mstr2,mstr3,mstr4: msestring;
  int1: integer;
 begin
  with activepage.edit do begin
   mstr1:= selectedtext;
   ar1:= breaklines(mstr1);
+  mstr3:= messagestr(mstr1);
   for int1:= 0 to high(ar1)-1 do begin
    ar1[int1]:= stringtopascalstring(ar1[int1])+'+linend+';
   end;
-  ar1[high(ar1)]:= stringtopascalstring(ar1[high(ar1)]);
+  ar1[high(ar1)]:= stringtopascalstring(ar1[high(ar1)]);  
   mstr2:= concatstrings(ar1,lineend);
-//  mstr2:= stringtopascalstring(mstr1);
-  if askyesno('Do you wish to replace:'+lineend+mstr1+lineend+'with:'+lineend+
-        mstr2+lineend+'?') then begin
+  mstr4:= messagestr(mstr2);
+  if askyesno('Do you wish to replace:'+lineend+mstr3+lineend+'with:'+lineend+
+        mstr4+lineend+'?') then begin
    editor.begingroup;
    deleteselection;
    inserttext(mstr2,true);
