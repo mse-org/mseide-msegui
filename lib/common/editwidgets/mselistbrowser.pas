@@ -490,6 +490,8 @@ type
    fvalue: tlistitem;
 
    function fieldcanedit: boolean;
+   procedure getautopaintsize(var asize: sizety); override;
+
     //iedit
    function locatecount: integer; override;        //number of locate values
    function getkeystring(const index: integer): msestring; override;
@@ -3118,6 +3120,17 @@ begin
  result:= (fvalue <> nil) and not (ns_readonly in fvalue.state);
  if (fvalue <> nil) and canevent(tmethod(foncheckcanedit)) then begin
   foncheckcanedit(self,fvalue,result);
+ end;
+end;
+
+procedure titemedit.getautopaintsize(var asize: sizety);
+begin
+ inherited;
+ if asize.cy < flayoutinfofocused.minsize.cy then begin
+  asize.cy:= flayoutinfofocused.minsize.cy;
+ end;
+ if asize.cx < flayoutinfofocused.minsize.cx then begin
+  asize.cx:= flayoutinfofocused.minsize.cx;
  end;
 end;
 

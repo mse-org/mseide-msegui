@@ -214,7 +214,8 @@ type
  gridstate1ty = (gs1_showcellinvalid,gs1_sortvalid,gs1_rowsortinvalid,
                  gs1_sortmoving,gs1_sortchangelock,gs1_rowinserted,
                  gs1_gridsorted,gs1_dbsorted,gs1_rowdeleting,
-                 gs1_focuscellonenterlock,gs1_forcenullcheck);
+                 gs1_focuscellonenterlock,gs1_forcenullcheck,
+                 gs1_cellsizesyncing);
  gridstates1ty = set of gridstate1ty;
 
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);

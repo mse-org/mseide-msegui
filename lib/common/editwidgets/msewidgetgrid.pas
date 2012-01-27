@@ -273,7 +273,6 @@ type
    function getgriddatalink: pointer; virtual;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
-//   procedure focusedcellchanged; override;
    procedure dofocus; override;
    procedure dochildfocused(const sender: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
@@ -286,7 +285,6 @@ type
    procedure updatecontainerrect;
    procedure updatelayout; override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
-//   procedure loaded; override;
    procedure doendread; override;
    function scrollcaret(const vertical: boolean): boolean; override;
    procedure docellevent(var info: celleventinfoty); override;
@@ -468,9 +466,11 @@ type
 procedure registergriddatalistclass(const tag: ansistring;
        const createfunc: creategriddatalistty);
 
-procedure gridwidgetfontheightdelta(const sender: twidget; const gridintf: iwidgetgrid;
-                        const delta: integer);
-procedure defaultinitgridwidget(const awidget: twidget; const agridintf: iwidgetgrid);
+procedure gridwidgetfontheightdelta(const sender: twidget;
+                  const gridintf: iwidgetgrid; const delta: integer);
+procedure gridwidgetsized(const sender: twidget; const gridintf: iwidgetgrid);
+procedure defaultinitgridwidget(const awidget: twidget;
+                                     const agridintf: iwidgetgrid);
 
 implementation
 uses
@@ -589,6 +589,68 @@ begin
       cell1:= widgetcell(sender);
       if (cell1.row < 0) and (cell1.row >= -fixrows.count) then begin
        fixrows[cell1.row].height:= fixrows[cell1.row].height + delta;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure gridwidgetsized(const sender: twidget; const gridintf: iwidgetgrid);
+var
+ cell1: gridcoordty;
+ widget1: twidget;
+begin
+ with twidget1(sender) do begin
+  if (foptionswidget1*[ow1_autowidth,ow1_autoheight] <> []) and 
+          not (csdesigning in componentstate) then begin
+          //in designmode widgetsize -> cellsize
+   if gridintf <> nil then begin
+    with gridintf.getcol do begin
+     if not (gs1_cellsizesyncing in grid.fstate1) then begin
+      include(grid.fstate1,gs1_cellsizesyncing);
+      try
+       if ow1_autowidth in foptionswidget1 then begin
+        width:= bounds_cx;
+       end;
+       if ow1_autoheight in foptionswidget1 then begin
+        grid.datarowheight:= bounds_cy;
+       end;
+      finally
+       exclude(grid.fstate1,gs1_cellsizesyncing);
+      end;
+     end;
+    end;
+   end
+   else begin
+    widget1:= parentofcontainer;
+    if widget1 is tcustomwidgetgrid then begin
+     with tcustomwidgetgrid(widget1) do begin
+      if not (gs1_cellsizesyncing in fstate1) then begin
+       include(fstate1,gs1_cellsizesyncing);
+       try
+        cell1:= widgetcell(sender);
+        if ow1_autowidth in sender.optionswidget1 then begin
+         if (cell1.col >= 0) then begin
+          if (cell1.col < datacols.count) then begin
+           datacols[cell1.col].width:= sender.bounds_cx;
+          end;
+         end
+         else begin
+          if cell1.col >= -fixcols.count then begin
+           fixcols[cell1.col].width:= sender.bounds_cx;
+          end;
+         end;
+        end;
+        if ow1_autoheight in sender.optionswidget1 then begin
+         if (cell1.row < 0) and (cell1.row >= -fixrows.count) then begin
+          fixrows[cell1.row].height:= sender.bounds_cy;
+         end;
+        end;
+       finally
+        exclude(fstate1,gs1_cellsizesyncing);
+       end;
       end;
      end;
     end;
@@ -1002,7 +1064,6 @@ begin
    widget1:= fintf.getwidget;
    if co_nohscroll in foptions then begin
     widget1.parentwidget:= fcontainer0;
-//    widget1.parentwidget:= fgrid;
    end
    else begin
     widget1.parentwidget:= fcontainer2;
@@ -1013,8 +1074,6 @@ begin
      rect1.cx:= rect1.cx + fdatacols.mergedwidth(index,row);
     end;
     if co_nohscroll in self.foptions then begin
-//     rect1.y:= fdatarect.y;
-//     widget1.widgetrect:= moverect(rect1,paintpos);
      rect1.y:= 0;
      rect1.x:= rect1.x - fdatarecty.x;
      widget1.widgetrect:= rect1;
@@ -1028,9 +1087,7 @@ begin
    else begin
     rect1:= cellrect(makegridcoord(colindex,ffocusedcell.row),cil_noline);
     if co_nohscroll in self.foptions then begin
-//     removerect1(rect1,fdatarecty.pos);
      removerect1(rect1,fdatarecty.pos);
-//     moverect1(rect1,subpoint(fcontainer2.pos,fcontainer0.pos));
     end
     else begin
      removerect1(rect1,fdatarect.pos);

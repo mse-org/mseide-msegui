@@ -6952,7 +6952,8 @@ var
  ar1: widgetarty;
  ar2,ar3: integerarty;
 begin
- if ([ow1_autowidth,ow1_autoheight]*foptionswidget1 <> []) and not (csloading in componentstate) then begin
+ if ([ow1_autowidth,ow1_autoheight]*foptionswidget1 <> []) and 
+                                 not (csloading in componentstate) then begin
   if not windowevent then begin
    checkwidgetsize(value.size);
   end;

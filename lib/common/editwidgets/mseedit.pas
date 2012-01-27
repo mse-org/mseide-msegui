@@ -1315,6 +1315,7 @@ procedure tcustomedit.fontchanged;
 begin
  inherited;
  setupeditor;
+ checkautosize;
 end;
 
 function tcustomedit.getmaxlength: integer;

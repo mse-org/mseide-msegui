@@ -117,7 +117,8 @@ type
    procedure dotextchange; virtual;
    procedure modified; virtual; //for dbedits
    procedure checktext(var atext: msestring; var accept: boolean);
-   procedure texttovalue(var accept: boolean; const quiet: boolean); virtual; abstract;
+   procedure texttovalue(var accept: boolean;
+                             const quiet: boolean); virtual; abstract;
    procedure texttodata(const atext: msestring; var data); virtual;
              //used for clipboard paste in widgetgrid
    function datatotext(const data): msestring;
@@ -131,6 +132,7 @@ type
    procedure loaded; override;
    procedure fontchanged; override;
    procedure dofontheightdelta(var delta: integer); override;
+   procedure sizechanged; override;
    function geteditfont: tfont; override;
    class function classskininfo: skininfoty; override;
    procedure dopaintbackground(const canvas: tcanvas); override;
@@ -2691,6 +2693,12 @@ begin
    fifiserverintf.valuechanged(getifidatalinkintf);
   end;
  end;
+end;
+
+procedure tcustomdataedit.sizechanged;
+begin
+ inherited;
+ gridwidgetsized(self,fgridintf);
 end;
 
 {$endif mse_with_ifi}

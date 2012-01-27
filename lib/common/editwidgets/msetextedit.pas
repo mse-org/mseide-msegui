@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -133,6 +133,7 @@ type
    procedure dotextmouseevent(var info: textmouseeventinfoty);
    procedure setupeditor; override;
    procedure dofontheightdelta(var delta: integer); override;
+   procedure sizechanged; override;
    function getinnerframe: framety; override;
 
     //igridwidget
@@ -462,11 +463,21 @@ end;
 procedure tcustomtextedit.dofontheightdelta(var delta: integer);
 begin
  inherited;
+ gridwidgetfontheightdelta(self,fgridintf,delta);
+{
+ inherited;
  if fgridintf <> nil then begin
   with fgridintf.getcol.grid do begin
    datarowheight:= datarowheight + delta;
   end;
  end;
+}
+end;
+
+procedure tcustomtextedit.sizechanged;
+begin
+ inherited;
+ gridwidgetsized(self,fgridintf);
 end;
 
 procedure tcustomtextedit.setgridintf(const intf: iwidgetgrid);
