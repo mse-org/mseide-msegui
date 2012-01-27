@@ -5044,6 +5044,7 @@ object projectoptionsfo: tprojectoptionsfo
           place_maxdist = 5
           place_options = [plo_endmargin]
           object savebu: tbutton
+            optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
             taborder = 2
             bounds_x = 615
             bounds_y = 5
@@ -5053,8 +5054,10 @@ object projectoptionsfo: tprojectoptionsfo
             state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
             caption = 'Save'
             onexecute = saveexe
+            reffontheight = 13
           end
           object loadbu: tbutton
+            optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
             taborder = 1
             bounds_x = 561
             bounds_y = 5
@@ -5064,6 +5067,7 @@ object projectoptionsfo: tprojectoptionsfo
             state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
             caption = 'Load'
             onexecute = loadexe
+            reffontheight = 13
           end
           object settingsfile: tfilenameedit
             optionsskin = [osk_nolayoutcx, osk_nolayoutcy]
