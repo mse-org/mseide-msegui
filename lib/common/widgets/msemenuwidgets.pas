@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -602,7 +602,7 @@ begin
       end;
      end;
     end;
-    sizerect.cx:= sizemax1 {- extrasp - frame2.right};
+    sizerect.cx:= sizemax1+frame2.right {- extrasp - frame2.right};
 //    sizerect.cx:= ax - extrasp - frame2.right;
     sizerect.cy:= regioncount * (maxheight + frameheight) - extrasp;
    end
@@ -1133,126 +1133,131 @@ var
  end;
  
 begin
- with info,flayout do begin
-  itembefore:= activeitem;
-  pt1:= translatewidgetpoint(info.pos,self,nil);
-  if (mlo_keymode in options) and
-   (eventkind in [ek_mousemove,ek_buttonpress,
-                        ek_buttonrelease,ek_mousepark]) then begin
-   if (distance(pt1,mousepos) <= 3) and
-      (eventkind in [ek_mousemove,ek_mousepark]) then begin
-    exit;
-   end
-   else begin
-    exclude(options,mlo_keymode);
+ if (csdesigning in componentstate) and (ws_iswidget in fwidgetstate) then begin
+  inherited;
+ end
+ else begin
+  with info,flayout do begin
+   itembefore:= activeitem;
+   pt1:= translatewidgetpoint(info.pos,self,nil);
+   if (mlo_keymode in options) and
+    (eventkind in [ek_mousemove,ek_buttonpress,
+                         ek_buttonrelease,ek_mousepark]) then begin
+    if (distance(pt1,mousepos) <= 3) and
+       (eventkind in [ek_mousemove,ek_mousepark]) then begin
+     exit;
+    end
+    else begin
+     exclude(options,mlo_keymode);
+    end;
    end;
-  end;
-  if (eventkind = ek_mousemove) and (fnextpopup <> nil) and
-         pointinrect(pt1,fnextpopup.fwidgetrect) and 
-                             not (mlo_childreninactive in options) then begin
-   invalidaterect(cells[activeitem].dimouter);
-   fnextpopup.activatemenu(false,ss_left in info.shiftstate);
-   exit;
-  end;
-  if eventkind in mouseposevents then begin
-   if not checkprevpopuparea(pt1) then begin
-    if pointinrect(pos,paintrect) then begin
-     pt2:= subpoint(pos,paintpos);
-     internalsetactiveitem(getcellatpos(flayout,pt2),ss_left in info.shiftstate,
-                           false,pointinrect(pt2,sizerect));
-     if activeitem >= 0 then begin
-      include(cells[activeitem].buttoninfo.state,shs_mouse);
-      fmouseitem:= activeitem;
-      if (itembefore <> activeitem) and 
-                tmenuitem1(menu.items[activeitem]).canshowhint then begin
-       application.restarthint(self);
+   if (eventkind = ek_mousemove) and (fnextpopup <> nil) and
+          pointinrect(pt1,fnextpopup.fwidgetrect) and 
+                              not (mlo_childreninactive in options) then begin
+    invalidaterect(cells[activeitem].dimouter);
+    fnextpopup.activatemenu(false,ss_left in info.shiftstate);
+    exit;
+   end;
+   if eventkind in mouseposevents then begin
+    if not checkprevpopuparea(pt1) then begin
+     if pointinrect(pos,paintrect) then begin
+      pt2:= subpoint(pos,paintpos);
+      internalsetactiveitem(getcellatpos(flayout,pt2),ss_left in info.shiftstate,
+                            false,pointinrect(pt2,sizerect));
+      if activeitem >= 0 then begin
+       include(cells[activeitem].buttoninfo.state,shs_mouse);
+       fmouseitem:= activeitem;
+       if (itembefore <> activeitem) and 
+                 tmenuitem1(menu.items[activeitem]).canshowhint then begin
+        application.restarthint(self);
+       end;
+      end
+      else begin
+       resetmouseflag;
       end;
      end
      else begin
       resetmouseflag;
-     end;
-    end
-    else begin
-     resetmouseflag;
-     if eventkind = ek_buttonpress then begin
-      closepopupstack(nil);
-      exit;
-     end;
-    end;
-   end;
-  end;
-  case eventkind of
-   ek_buttonpress: begin
-    if (activeitem >= 0) and (button = mb_left) then begin
-     if (fnextpopup <> nil) and (activeitem = itembefore) then begin
-      fclickeditem:= activeitem; //prepare for close popupup
-     end;
-     if mlo_childreninactive in options then begin
-      exclude(options,mlo_childreninactive);
-      activeitem:= -1;
-      mouseevent(info);
-      if (activeitem >= 0) and 
-                     tmenuitem1(menu.items[activeitem]).canshowhint then begin
-       application.hidehint;
+      if eventkind = ek_buttonpress then begin
+       closepopupstack(nil);
+       exit;
       end;
-      exit;
-     end;
-     with cells[activeitem],buttoninfo do begin
-      include(state,shs_clicked);
-      invalidaterect(dimouter);
      end;
     end;
    end;
-   ek_buttonrelease: begin
-    if (activeitem >= 0) and (button = mb_left) then begin
-     with cells[activeitem],buttoninfo do begin
-      bo1:= shs_clicked in state;
-      exclude(state,shs_clicked);
-      invalidaterect(dimouter);
-      if bo1 then begin
-       include(info.eventstate,es_processed);
-//       int1:= activeitem;
-       selectmenu(false);
-//       include(state,shs_mouse);
-//       if (activeitem < 0) and (application.mousecapturewidget = nil) and 
-//                 (int1 <= high(cells)) then begin
-//        activeitem:= int1; //restore mouseactivating
-//       end;
-       if (mlo_main in options) and (fclickeditem = activeitem) then begin
-        fclickeditem:= -1;
-        closepopupstack(nil);
-//        include(state,shs_mouse);
-        exit;
+   case eventkind of
+    ek_buttonpress: begin
+     if (activeitem >= 0) and (button = mb_left) then begin
+      if (fnextpopup <> nil) and (activeitem = itembefore) then begin
+       fclickeditem:= activeitem; //prepare for close popupup
+      end;
+      if mlo_childreninactive in options then begin
+       exclude(options,mlo_childreninactive);
+       activeitem:= -1;
+       mouseevent(info);
+       if (activeitem >= 0) and 
+                      tmenuitem1(menu.items[activeitem]).canshowhint then begin
+        application.hidehint;
        end;
-       fclickeditem:= activeitem;
+       exit;
+      end;
+      with cells[activeitem],buttoninfo do begin
+       include(state,shs_clicked);
+       invalidaterect(dimouter);
       end;
      end;
     end;
-   end;
-   ek_clientmouseleave: begin
-    resetmouseflag;
-    if (fnextpopup = nil) then begin
-//     if itembefore >= 0 then begin
-//      subpoint1(info.pos,clientpos);
-//      updatemouseshapestate(cells[itembefore].buttoninfo,info,self,nil);
-//     end;
-     setactiveitem(-1);
-//     if itembefore >= 0 then begin
-//      subpoint1(info.pos,clientpos);
-//      updatemouseshapestate(cells[itembefore].buttoninfo,info,self,nil);
-//     end;
-    end
-//    else begin
-//     if activeitem >= 0 then begin
-//      subpoint1(info.pos,clientpos);
-//      updatemouseshapestate(cells[activeitem].buttoninfo,info,self,nil);
-//     end;
-//    end;
+    ek_buttonrelease: begin
+     if (activeitem >= 0) and (button = mb_left) then begin
+      with cells[activeitem],buttoninfo do begin
+       bo1:= shs_clicked in state;
+       exclude(state,shs_clicked);
+       invalidaterect(dimouter);
+       if bo1 then begin
+        include(info.eventstate,es_processed);
+ //       int1:= activeitem;
+        selectmenu(false);
+ //       include(state,shs_mouse);
+ //       if (activeitem < 0) and (application.mousecapturewidget = nil) and 
+ //                 (int1 <= high(cells)) then begin
+ //        activeitem:= int1; //restore mouseactivating
+ //       end;
+        if (mlo_main in options) and (fclickeditem = activeitem) then begin
+         fclickeditem:= -1;
+         closepopupstack(nil);
+ //        include(state,shs_mouse);
+         exit;
+        end;
+        fclickeditem:= activeitem;
+       end;
+      end;
+     end;
+    end;
+    ek_clientmouseleave: begin
+     resetmouseflag;
+     if (fnextpopup = nil) then begin
+ //     if itembefore >= 0 then begin
+ //      subpoint1(info.pos,clientpos);
+ //      updatemouseshapestate(cells[itembefore].buttoninfo,info,self,nil);
+ //     end;
+      setactiveitem(-1);
+ //     if itembefore >= 0 then begin
+ //      subpoint1(info.pos,clientpos);
+ //      updatemouseshapestate(cells[itembefore].buttoninfo,info,self,nil);
+ //     end;
+     end
+ //    else begin
+ //     if activeitem >= 0 then begin
+ //      subpoint1(info.pos,clientpos);
+ //      updatemouseshapestate(cells[activeitem].buttoninfo,info,self,nil);
+ //     end;
+ //    end;
+    end;
    end;
   end;
- end;
- if not (es_processed in info.eventstate) then begin
-  inherited;
+  if not (es_processed in info.eventstate) then begin
+   inherited;
+  end;
  end;
 end;
 
