@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -431,6 +431,8 @@ function wordatindex(const value: msestring; const index: integer;
 
 function quotestring(value: string; quotechar: char): string; overload;
 function quotestring(value: msestring; quotechar: msechar): msestring; overload;
+function quoteescapedstring(value: string; quotechar: char): string; overload;
+function quoteescapedstring(value: msestring; quotechar: msechar): msestring; overload;
 function unquotestring(value: string; quotechar: char): string; overload;
 function unquotestring(value: msestring; quotechar: msechar): msestring; overload;
 function extractquotedstr(const value: msestring): msestring;
@@ -2686,6 +2688,71 @@ begin
   end;
   setlength(result,pd-pchar(pointer(result)));
  end;
+end;
+
+const
+ escapechar = '\';
+ 
+function quoteescapedstring(value: string; quotechar: char): string;
+var
+ ps,pd,pe: pchar;
+begin
+ setlength(result,length(value)*2+2); //max
+ pd:= pchar(pointer(result));
+ pd^:= quotechar;
+ inc(pd);
+ if value <> '' then begin
+  ps:= pchar(pointer(value));
+  pe:= ps+length(value);
+  while ps < pe do begin
+   pd^:= ps^;
+   if ps^ = quotechar then begin
+    pd^:= escapechar;
+    inc(pd);
+    pd^:= quotechar;
+   end;
+   if ps^ = escapechar then begin
+    inc(pd);
+    pd^:= escapechar;
+   end;
+   inc(pd);
+   inc(ps);
+  end;
+ end;
+ pd^:= quotechar;
+ inc(pd);
+ setlength(result,pd-pchar(pointer(result)));
+end;
+
+function quoteescapedstring(value: msestring; quotechar: msechar): msestring;
+var
+ ps,pd,pe: pmsechar;
+begin
+ setlength(result,length(value)*2+2); //max
+ pd:= pmsechar(pointer(result));
+ pd^:= quotechar;
+ inc(pd);
+ if value <> '' then begin
+  ps:= pmsechar(pointer(value));
+  pe:= ps+length(value);
+  while ps < pe do begin
+   pd^:= ps^;
+   if ps^ = quotechar then begin
+    pd^:= escapechar;
+    inc(pd);
+    pd^:= quotechar;
+   end;
+   if ps^ = escapechar then begin
+    inc(pd);
+    pd^:= escapechar;
+   end;
+   inc(pd);
+   inc(ps);
+  end;
+ end;
+ pd^:= quotechar;
+ inc(pd);
+ setlength(result,pd-pmsechar(pointer(result)));
 end;
 
 function unquotestring(value: msestring;

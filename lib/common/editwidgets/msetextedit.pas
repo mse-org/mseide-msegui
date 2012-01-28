@@ -35,7 +35,11 @@ const
 
  texteditminimalframe: framety = (left: 1; top: 0; right: 1; bottom: 0);
  defaulttexteditwidgetoptions = 
-         (defaulteditwidgetoptions - [ow_fontglyphheight]) + [ow_fontlineheight];
+         (defaulteditwidgetoptions
+                     { - [ow_fontglyphheight]}){ + [ow_fontlineheight]};
+ defaulttexteditwidgetoptions1 = 
+         (defaulteditwidgetoptions1 - [ow1_fontglyphheight]) + 
+                                                   [ow1_fontlineheight];
 
 type
 
@@ -293,6 +297,9 @@ type
    property oneditnotifcation: editnotificationeventty read foneditnotification 
                                      write foneditnotification;
    property oncellevent: celleventty read foncellevent write foncellevent;
+  published
+   property optionswidget default defaulttexteditwidgetoptions;
+   property optionswidget1 default defaulttexteditwidgetoptions1;
  end;
 
  ttextedit = class(tcustomtextedit)
@@ -432,6 +439,7 @@ begin
  end;
  inherited;
  foptionswidget:= defaulttexteditwidgetoptions;
+ foptionswidget1:= defaulttexteditwidgetoptions1;
  optionsedit:= defaulttexteditoptions;
  textflags:= defaulttextflags - [tf_noselect];
 end;
@@ -485,8 +493,9 @@ begin
  fgridintf:= intf;
  if (intf <> nil) then begin
   flines:= tgridrichstringdatalist(fgridintf.getcol.datalist);
-  if (ow_autoscale in foptionswidget) and
-      (foptionswidget * [ow_fontglyphheight,ow_fontlineheight] <> []) then begin
+  if (ow1_autoscale in foptionswidget1) and
+      (foptionswidget1 * [ow1_fontglyphheight,ow1_fontlineheight]
+                                                         <> []) then begin
    fgridintf.getcol.grid.datarowheight:= bounds_cy;
   end;
  end;
@@ -641,7 +650,7 @@ end;
 
 procedure tcustomtextedit.initgridwidget;
 begin
- optionswidget:= optionswidget - [ow_autoscale];
+ optionswidget1:= optionswidget1 - [ow1_autoscale];
  frame:= nil;
  with fgridintf.grid do begin
   optionsgrid:= optionsgrid + [og_autofirstrow];

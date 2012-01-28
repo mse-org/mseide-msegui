@@ -176,11 +176,9 @@ type
    procedure updatecellzone(const row: integer; const pos: pointty;
                                              var result: cellzonety); override;
    function actualfont: tfont; override;
-//   procedure cellchanged(const row: integer); override;
    property editwidget: twidget read geteditwidget write seteditwidget;
    property grid: tcustomwidgetgrid read getgrid;
   published
-//   property datalist;
    property datalist stored false; //stored by defineproperties
  end;
 
@@ -486,7 +484,6 @@ type
  treader1 = class(treader);
 
  tcontainer1 = class(twidget)
-  private
   protected
    fgrid: tcustomwidgetgrid;
    procedure doexit; override;
@@ -500,7 +497,6 @@ type
    procedure widgetregionchanged(const sender: twidget); override;
    procedure dochildfocused(const sender: twidget); override;
    procedure doenter; override;
-//   procedure dokeydown(var info: keyeventinfoty); override;
   public
    constructor create(aowner: tcustomwidgetgrid); reintroduce;
    function focusback(const aactivate: boolean = true): boolean; override;
@@ -550,7 +546,7 @@ procedure defaultinitgridwidget(const awidget: twidget;
 
 begin
  with twidget1(awidget) do begin
-  optionswidget:= optionswidget - [ow_autoscale];
+  optionswidget1:= optionswidget1 - [ow1_autoscale];
   optionsskin:= optionsskin + defaultgridskinoptions;
   if (fframe <> nil) then begin
    if (ws_staticframe in fwidgetstate) then begin
@@ -574,7 +570,7 @@ var
  widget1: twidget;
 begin
  with twidget1(sender) do begin
-  if (ow_autoscale in foptionswidget) and 
+  if (ow1_autoscale in foptionswidget1) and 
           not (csdesigning in componentstate) then begin
           //in designmode widgetsize -> cellsize
    if gridintf <> nil then begin
@@ -2125,7 +2121,7 @@ begin
  end;
 end;
 
-{ tcontainer }
+{ tcontainer1 }
 
 procedure tcontainer1.doexit;
 begin
@@ -2143,6 +2139,26 @@ begin
  inherited;
 end;
 
+{
+procedure tcontainer1.registerchildwidget(const child: twidget);
+var
+ int1: integer;
+begin
+ if ws1_oldautoscale in twidget1(child).fwidgetstate1 then begin
+  foldautoscale:= true;
+ end;
+ if foldautoscale then begin
+  for int1:= 0 to high(fwidgets) do begin
+   with twidget1(fwidgets[int1]) do begin
+    if not (ws1_oldautoscale in fwidgetstate1) then begin
+     exclude(foptionswidget1,ow1_autoscale);
+    end;
+   end;
+  end;
+ end;
+ inherited;
+end;
+}
 { tfixcontainer }
 
 constructor tfixcontainer.create(aowner: tcustomwidgetgrid);
@@ -2173,10 +2189,11 @@ var
  pt1: pointty;
 begin
  with self do begin 
-  if not (gs_layoutupdating in grid.fstate) and 
-      (grid.componentstate * [csdesigning,csloading,csdestroying] = 
-       [csdesigning]) and (sender <> nil) and 
-          (twidget1(sender).fparentwidget = self) then begin
+  if not (gs_layoutupdating in grid.fstate) and (sender <> nil) and
+      (grid.componentstate * [csdesigning,csdestroying] = [csdesigning]) and
+         (not (csloading in grid.componentstate) or 
+              (ws1_autoscaling in twidget1(sender).fwidgetstate1)) and
+      (twidget1(sender).fparentwidget = self) then begin
    with grid do begin
     cell1:= widgetcell(sender);
     if cell1.row <> invalidaxis then begin
@@ -2268,120 +2285,6 @@ begin
   result:= inherited focusback(aactivate);
  end;
 end;
-{
-procedure tfixcontainer.dokeydown(var info: keyeventinfoty);
-var
- cell1: gridcoordty;
- int1: integer;
- widget1: twidget;
- 
- function checkarrowfocus(const awidget: twidget): boolean;
- begin
-  if (awidget <> nil) and (ow_arrowfocus in awidget.optionswidget) and
-      awidget.canfocus then begin
-   result:= true;
-   widget1:= awidget;
-  end
-  else begin
-   result:= false;
-  end;
- end;
- 
-begin
- with info do begin
-  cell1:= fgrid.widgetcell(focusedchild);
-  cell1.row:= cell1.row + fgrid.ffixrows.count; //positive index
-  widget1:= nil;
-  include(eventstate,es_processed);
-  if shiftstate = [] then begin
-   case key of
-    key_right: begin
-     if cell1.col >= 0 then begin
-      for int1:= cell1.col + 1 to fgrid.datacols.count - 1 do begin
-       if checkarrowfocus(twidgetcol(fgrid.fdatacols.items[int1]).
-                            ffixrowwidgets[cell1.row]) then begin
-        break;
-       end;
-      end;
-      if widget1 = nil then begin
-       for int1:= 0 to fgrid.ffixcols.opositecount - 1 do begin
-        if checkarrowfocus(twidgetfixcol(fgrid.ffixcols.items[int1]).
-                             ffixrowwidgets[cell1.row]) then begin
-          break;
-        end;
-       end;
-       if widget1 = nil then begin
-        for int1:= fgrid.ffixcols.opositecount to fgrid.ffixcols.count - 1 do begin
-         if checkarrowfocus(twidgetfixcol(fgrid.ffixcols.items[int1]).
-                              ffixrowwidgets[cell1.row]) then begin
-           break;
-         end;
-        end;
-        if widget1 = nil then begin
-         for int1:= fgrid.fdatacols.count - 1 downto cell1.col+1 do begin
-          if checkarrowfocus(twidgetcol(fgrid.fdatacols.items[int1]).
-                               ffixrowwidgets[cell1.row]) then begin
-            break;
-          end;
-         end;
-        end;
-       end;
-      end;
-     end;
-    end;
-    key_left: begin
-     if cell1.col >= 0 then begin
-      for int1:= cell1.col - 1 downto 0 do begin
-       if checkarrowfocus(twidgetcol(fgrid.fdatacols.items[int1]).
-                            ffixrowwidgets[cell1.row]) then begin
-        break;
-       end;
-      end;
-      if widget1 = nil then begin
-       for int1:= fgrid.ffixcols.count - 1 downto fgrid.ffixcols.opositecount do begin
-        if checkarrowfocus(twidgetfixcol(fgrid.ffixcols.items[int1]).
-                             ffixrowwidgets[cell1.row]) then begin
-          break;
-        end;
-       end;
-       if widget1 = nil then begin
-        for int1:= fgrid.ffixcols.opositecount - 1 downto 0 do begin
-         if checkarrowfocus(twidgetfixcol(fgrid.ffixcols.items[int1]).
-                              ffixrowwidgets[cell1.row]) then begin
-           break;
-         end;
-        end;
-        if widget1 = nil then begin
-         for int1:= fgrid.fdatacols.count - 1 downto cell1.col+1 do begin
-          if checkarrowfocus(twidgetcol(fgrid.fdatacols.items[int1]).
-                               ffixrowwidgets[cell1.row]) then begin
-            break;
-          end;
-         end;
-        end;
-       end;
-      end;
-     end;
-    end;
-    else begin
-     exclude(eventstate,es_processed);
-    end;
-   end;
-  end
-  else begin
-   exclude(eventstate,es_processed);
-  end;
-  if not (es_processed in eventstate) then begin
-   inherited;
-  end
-  else begin
-   if widget1 <> nil then begin
-    widget1.setfocus;
-   end;
-  end;
- end;
-end;
-}
 
 { twidgetdummy }
 
@@ -2462,10 +2365,12 @@ var
 begin
  if not (csdestroying in fgrid.componentstate) then begin
   inherited;
-  if not (gs_layoutupdating in fgrid.fstate) and 
-      (fgrid.componentstate * [csdesigning,csloading] = 
-       [csdesigning]) and (sender <> nil) and (flayoutupdating = 0) and 
-          (twidget1(sender).fparentwidget = self) then begin
+  if not (gs_layoutupdating in fgrid.fstate) and (sender <> nil) and 
+      (fgrid.componentstate * [csdesigning,csdestroying] = [csdesigning]) and
+         (not (csloading in fgrid.componentstate) or 
+                    (ws1_autoscaling in twidget1(sender).fwidgetstate1)) and
+      (flayoutupdating = 0) and 
+      (twidget1(sender).fparentwidget = self) then begin
    with fgrid do begin
     int3:= -1;
     for int1:= 0 to datacols.count-1 do begin
@@ -2708,7 +2613,7 @@ begin
   if (cell1.row <> invalidaxis) and (cell1.col <> invalidaxis) and 
             (cell1.row < 0) then begin
    if not checkdescendent(awidget) then begin //new insert
-    exclude(twidget1(awidget).foptionswidget,ow_autoscale);
+    exclude(twidget1(awidget).foptionswidget1,ow1_autoscale);
    end;
    if cell1.col >= 0 then begin
     datacols[cell1.col].setfixrowwidget(awidget,cell1.row);
@@ -2998,7 +2903,6 @@ begin
  twidget1(fcontainer3).getchildren(proc,root);
 end;
 
-//procedure tcustomwidgetgrid.loaded;
 procedure tcustomwidgetgrid.doendread;
 var
  int1,int2,int3: integer;
@@ -3060,7 +2964,6 @@ begin
       end;
      end;
     end;
-//    fwidgetname:= '';
     ffixrowwidgetnames:= nil;
    end;
   end;

@@ -1785,8 +1785,8 @@ begin
   fdatalist:= fgridintf.getcol.datalist;
   fgriddatalink:= tcustomwidgetgrid1(fgridintf.getgrid).getgriddatalink;
   fgridintf.updateeditoptions(foptionsedit);
-  if (ow_autoscale in foptionswidget) and
-              (foptionswidget * [ow_fontglyphheight,ow_fontlineheight] <> []) then begin
+  if (ow1_autoscale in foptionswidget1) and
+              (foptionswidget1 * [ow1_fontglyphheight,ow1_fontlineheight] <> []) then begin
    fgridintf.getcol.grid.datarowheight:= bounds_cy;
   end;
  end

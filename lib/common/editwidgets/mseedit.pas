@@ -26,7 +26,10 @@ uses
          {$ifdef mse_with_ifi},mseifiglob{$endif};
 
 const
- defaulteditwidgetoptions = defaultoptionswidget+[ow_fontglyphheight,ow_autoscale];
+ defaulteditwidgetoptions = defaultoptionswidget
+                                {+[ow_fontglyphheight,ow_autoscale]};
+ defaulteditwidgetoptions1 = defaultoptionswidget1+
+                                  [ow1_fontglyphheight,ow1_autoscale];
  defaulteditwidgetwidth = 100;
  defaulteditwidgetheight = 20;
  defaulttextflags = [tf_ycentered,tf_noselect];
@@ -417,7 +420,8 @@ type
    property onpastefromclipboard: updatestringeventty read fonpastefromclipboard 
                   write fonpastefromclipboard;
   published
-   property optionswidget default defaulteditwidgetoptions; //first!
+   property optionswidget1 default defaulteditwidgetoptions1; //first!
+   property optionswidget default defaulteditwidgetoptions;   //first!
    property bounds_cx default defaulteditwidgetwidth;
    property bounds_cy default defaulteditwidgetheight;
  end;
@@ -1085,6 +1089,7 @@ begin
  end;
  maxlength:= -1;
  foptionswidget:= defaulteditwidgetoptions;
+ foptionswidget1:= defaulteditwidgetoptions1;
  ftextflags:= defaulttextflags;
  ftextflagsactive:= defaulttextflagsactive;
  updatetextflags;

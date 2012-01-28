@@ -101,6 +101,7 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 220
+    bounds_cy = 19
     anchors = [an_left, an_top, an_right]
     onsetvalue = compselectoronsetvalue
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown]
@@ -109,7 +110,7 @@ object objectinspectorfo: tobjectinspectorfo
       item
       end>
     onbeforedropdown = compselectorbeforedropdown
-    reffontheight = 14
+    reffontheight = 13
   end
   object grid: twidgetgrid
     frame.localprops = [frl_levelo, frl_colorclient]
@@ -192,16 +193,17 @@ object objectinspectorfo: tobjectinspectorfo
         dataclass = titemeditlist
       end>
     datarowlinecolor = -1610612731
-    datarowheight = 16
+    datarowheight = 15
     statfile = mainfo.projectstatfile
     onrowsdatachanged = gridrowsdatachanged
     oncellevent = gridcellevent
     drag.onbeforedragbegin = gridondragbegin
     drag.onbeforedragover = gridondragover
     drag.onbeforedragdrop = gridondragdrop
-    reffontheight = 14
+    reffontheight = 13
     object props: ttreeitemedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget1 = [ow1_autoheight]
       optionsskin = [osk_noskin]
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -212,12 +214,12 @@ object objectinspectorfo: tobjectinspectorfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 90
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_hintclippedtext, oe_locate, oe_savestate]
       onupdaterowvalues = propupdaterowvalue
       options = [teo_treecolnavig, teo_keyrowmoving]
       oncheckrowmove = propsoncheckrowmove
-      reffontheight = 14
+      reffontheight = 13
     end
     object values: tmbdropdownitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
@@ -243,7 +245,7 @@ object objectinspectorfo: tobjectinspectorfo
       bounds_x = 91
       bounds_y = 0
       bounds_cx = 148
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_forcereturncheckvalue, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_savestate]
       font.name = 'stf_default'
       font.xscale = 1
@@ -260,7 +262,7 @@ object objectinspectorfo: tobjectinspectorfo
         item
         end>
       onbeforedropdown = valuesbeforedropdown
-      reffontheight = 14
+      reffontheight = 13
     end
   end
   object compedit: tbutton
@@ -269,12 +271,12 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_x = 223
     bounds_y = 2
     bounds_cx = 19
-    bounds_cy = 18
+    bounds_cy = 17
     anchors = [an_top, an_right]
     state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]
     caption = 'ED'
     onexecute = compeditonexecute
-    reffontheight = 14
+    reffontheight = 13
   end
   object tpopupmenu1: tpopupmenu
     onupdate = popupupdate
