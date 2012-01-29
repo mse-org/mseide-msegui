@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 2008-2010 by Martin Schreiber
+{ MSEide Copyright (c) 2008-2012 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -129,9 +129,7 @@ type
    procedure doaddfile(const sender: TObject);
    procedure setval(const sender: TObject; var avalue: Integer;
                    var accept: Boolean);
-//   procedure selcha(const sender: tdatacol; const aindex: Integer);
   private
-//   frootnode: tstoredcomponent;
    far1: storedcomponentarty;
    fstoredir: msestring;
    fchanged: boolean;
