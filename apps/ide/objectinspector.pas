@@ -1115,13 +1115,21 @@ begin
 end;
 
 procedure tobjectinspectorfo.updatecomponentname;
+var
+ comp1: tcomponent;
 begin
  with compselector do begin
   if fsinglecomp then begin
    value:= componentdispname(factcomp);
   end
   else begin
-   value:= '';
+   comp1:= designer.clickedcomp;
+   if comp1 <> nil then begin
+    value:= componentdispname(comp1);
+   end
+   else begin
+    value:= '';
+   end;
   end;
   if focused then begin
    initfocus;
@@ -1208,14 +1216,14 @@ begin
   end;
   factcomps:= getarray;
   if count = 1 then begin
-//   compselector.value:= -1;
    fsinglecomp:= true;
    updatecomponentname;
    readprops(factmodule,factcomp);
   end
   else begin
    fsinglecomp:= false;
-   compselector.value:= '';
+   updatecomponentname;
+//   compselector.value:= '';
    readprops(factmodule,factcomps);
   end;
   inc(fchanging);

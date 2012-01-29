@@ -16,7 +16,7 @@
 }
 unit msedesigner;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
 interface
 uses
@@ -38,6 +38,11 @@ const
 type
  tdesigner = class;
 
+ iformdesigner = interface(inullinterface)
+                           ['{0207E291-638A-4A1B-BA9F-4FB0F6A0EA29}']
+  function clickedcomponent: tcomponent;
+ end;
+ 
  methodinfoty = record
   name: string;
   address: pointer;
@@ -113,6 +118,7 @@ type
  {$endif}
   components: tcomponents;
   designform: tmseform;
+  designformintf: iformdesigner;
   modified: boolean;
   hasmenuitem: boolean;
   referencedmodules: stringarty;
@@ -538,6 +544,7 @@ type
    procedure showobjectinspector;
    function actmodulepo: pmoduleinfoty;
    function modified: boolean;
+   function clickedcomp: tcomponent;
    procedure moduledestroyed(const amodule: pmoduleinfoty);
    procedure addancestorinfo(const ainstance,aancestor: tmsecomponent);
    function copycomponent(const source: tmsecomponent;
@@ -4427,6 +4434,8 @@ begin //loadformfile
        end;
        if result <> nil then begin
         result^.designform:= createdesignform(self,result);
+        result^.designform.getcorbainterface(typeinfo(iformdesigner),
+                                             result^.designformintf);
         checkmethodtypes(result,true);
         result^.modified:= false;
        end;
@@ -5339,6 +5348,14 @@ begin
  end;
  with exception(ExceptObject) do begin
   message:= 'Component "'+ownernamepath(comp1)+'":'+lineend+message;
+ end;
+end;
+
+function tdesigner.clickedcomp: tcomponent;
+begin
+ result:= nil;
+ if (factmodulepo <> nil) and (factmodulepo^.designformintf <> nil) then begin
+  result:= factmodulepo^.designformintf.clickedcomponent;
  end;
 end;
 
