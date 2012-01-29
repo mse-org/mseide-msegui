@@ -1570,7 +1570,7 @@ type
                       const aparentwidget: twidget;
                       const aiswidget: boolean = true); overload;
    destructor destroy; override;
-   procedure afterconstruction; override;
+   procedure afterconstruction; override;   
    procedure initnewcomponent(const ascale: real); override;
                      //called before inserting in parentwidget
    procedure initnewwidget(const ascale: real); virtual;
@@ -1587,6 +1587,8 @@ type
    function hasparent: boolean; override;               //tcomponent
    function getparentcomponent: tcomponent; override;   //tcomponent
    function hascaret: boolean;
+   function canwindow: boolean; 
+            //true if twindow allocated or not rootwidget destroying
    function windowallocated: boolean;
                 //true if winid allocated and not loading and not destroying
    function ownswindow: boolean;
@@ -6350,12 +6352,13 @@ begin
  if fparentwidget <> nil then begin
   clearparentwidget;
  end;
+ inherited;
  fwindow.Free;
  ffont.free;
  ffontempty.free;
  fframe.free;
  fface.free;
- inherited;
+// inherited;
  destroyregion(fwidgetregion);
 end;
 
@@ -8174,13 +8177,15 @@ begin
 end;
 
 function twidget.rootwidget: twidget;
+var
+ wi1,wi2: twidget;
 begin
- if fparentwidget = nil then begin
-  result:= self;
- end
- else begin
-  result:= fparentwidget.rootwidget;
- end;
+ wi1:= self;
+ repeat
+  wi2:= wi1;
+  wi1:= wi2.fparentwidget;
+ until wi1 = nil;
+ result:= wi2;
 end;
 
 function twidget.parentofcontainer: twidget;
@@ -10702,6 +10707,13 @@ end;
 function twidget.hascaret: boolean;
 begin
  result:= (appinst <> nil) and checkdescendent(appinst.fcaretwidget)
+end;
+
+function twidget.canwindow: boolean; 
+begin
+ result:= (fwindow <> nil) and 
+           not (csdestroying in fwindow.fowner.componentstate) or 
+       (fwindow = nil) and not (csdestroying in rootwidget.componentstate);
 end;
 
 procedure twidget.getcaret;

@@ -1159,7 +1159,9 @@ begin
   end
   else begin
    if (fintf <> nil) then begin
-    updatewidgetrect;
+    if fgrid.canwindow then begin
+     updatewidgetrect;
+    end;
     inherited;
     bo1:= (tcustomwidgetgrid(fgrid).fmouseinfopo <> nil) and 
               tcustomwidgetgrid(fgrid).wantmousefocus(fmouseinfopo^);
