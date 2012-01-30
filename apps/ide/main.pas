@@ -695,7 +695,9 @@ begin
  if (aselection.Count > 0) and (factivedesignmodule <> nil) then begin
 //  objectinspectorfo.bringtofront;
   objectinspectorfo.show;
-  objectinspectorfo.window.stackunder(factivedesignmodule^.designform.window);
+  if not objectinspectorfo.active then begin
+   objectinspectorfo.window.stackunder(factivedesignmodule^.designform.window);
+  end;
  end;
 end;
 

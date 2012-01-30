@@ -369,7 +369,6 @@ type
    fifiserverintf: iifiserver;
   //iificlient
    procedure setifiserverintf(const aintf: iifiserver);
-//   function getifiserverintf: iifiserver;
    //iificommand
    procedure executeificommand(var acommand: ificommandcodety); virtual;
 {$endif}   

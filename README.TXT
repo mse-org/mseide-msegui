@@ -73,7 +73,7 @@ MSEgui command line parameters
  Do not use the xreconfigurewmwindow() for window stacking operation.
 --TOPLEVELRAISE
  Use the top level frame window id instead the application client window id
- for window raise operation. Implies --NORESTACKWINDOW, --NORESTACKWINDOW and
+ for window raise operation. Implies --NORESTACKWINDOW and
  --NORECONFIGUREWMWINDOW.
 
  

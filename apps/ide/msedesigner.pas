@@ -365,10 +365,8 @@ type
    floadedsubmodules: componentarty;
    fformloadlevel: integer;
    fformloadlocklevel: integer;
-//   flookupmodule: pmoduleinfoty;
    fnotifydeletedlock: integer;
    fallsaved: boolean;
-  // fforallmethpropsinfo: forallmethpropinfoty;
    fcreatecomponenttag: integer; //incremented by createcoponent
    ffindcompclasstag: integer;       //stamp of createcomponenttag
    fcheckfixups: moduleinfopoarty;
@@ -382,15 +380,12 @@ type
    procedure findmethod(Reader: TReader; const aMethodName: string;
                    var Address: Pointer; var Error: Boolean);
   {$endif}
-//   procedure findmethod2(Reader: TReader; const aMethodName: string;
-//                   var Address: Pointer; var Error: Boolean);
    function getinheritedmodule(const aclassname: string): pmoduleinfoty;
    function findcomponentmodule(const acomponent: tcomponent): pmoduleinfoty;
    procedure selectionchanged;
 {$ifndef mse_nomethodswap}
    procedure docopymethods(const source, dest: tcomponent; const force: boolean);
 {$endif}
-//   procedure dorefreshmethods(const descendent,newancestor,oldancestor: tcomponent);
    procedure writemodule(const amodule: pmoduleinfoty; const astream: tstream);
    procedure notifydeleted(comp: tcomponent);
    procedure componentdestroyed(const acomponent: tcomponent; const module: pmoduleinfoty);
@@ -401,9 +396,9 @@ type
   {$endif}
   protected
    fstate: designerstatesty;
+//   procedure doasyncevent(var atag: integer); override;
    procedure readererror(reader: treader; const message: string;
                                  var handled: boolean);
-//   procedure forallmethprop(child: tcomponent);
    procedure forallmethodproperties(const aroot: tcomponent;
                  const ainstance: tobject; const data: pointer;
                  const aproc: propprocty;
@@ -437,8 +432,8 @@ type
               out aancestormodule: pmoduleinfoty): boolean;
    function getreferencingmodulenames(const amodule: pmoduleinfoty): stringarty;
    function checkmethodtypes(const amodule: pmoduleinfoty;
-            const init: boolean{; const quiet: tcomponent}): boolean;
-               //does correct errors quiet for tmethod.data = quiet
+                                          const init: boolean): boolean;
+                                      //false on cancel
 {$ifndef mse_nomethodswap}
    procedure doswapmethodpointers(const ainstance: tobject; const ainit: boolean);
 {$endif}
@@ -581,6 +576,9 @@ uses
  pascaldesignparser,msearrayprops,rtlconsts,msedatamodules,
  msesimplewidgets,msesysutils,mseobjecttext,msestreaming,msedatanodes,main;
 
+//const
+// showobjectinspectortag = 0;
+ 
 type
  tcomponent1 = class(tcomponent);
  tmsecomponent1 = class(tmsecomponent);
@@ -4062,10 +4060,9 @@ begin
 end;
 
 function tdesigner.checkmethodtypes(const amodule: pmoduleinfoty;
-                      const init: boolean{; const quiet: tcomponent}): boolean;
+                      const init: boolean): boolean;
                                       //false on cancel
 var
-// classinf: pclassinfoty;
  classinfar: classinfopoarty;
  comp1: tcomponent;
  
@@ -4098,7 +4095,6 @@ var
           break;
          end;
         end;
-//        po2:= classinf^.procedurelist.finditembyname(po1^.name);
         mr1:= mr_none;
         if (po2 = nil) or not po2^.managed then begin
          mr1:= askyesnocancel('Published (managed) method '+
@@ -4842,7 +4838,8 @@ end;
 }
 procedure tdesigner.showobjectinspector;
 begin
-// checkobjectinspector;
+// asyncevent(showobjectinspectortag);  
+               //use async because of window stacking problems
  objectinspectorfo.activate;
 end;
 
@@ -5358,7 +5355,14 @@ begin
   result:= factmodulepo^.designformintf.clickedcomponent;
  end;
 end;
-
+{
+procedure tdesigner.doasyncevent(var atag: integer);
+begin
+ if atag = showobjectinspectortag then begin
+  objectinspectorfo.activate;
+ end;
+end;
+}
 { tcomponentslink }
 
 procedure tcomponentslink.notification(acomponent: tcomponent;

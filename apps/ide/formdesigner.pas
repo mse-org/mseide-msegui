@@ -1938,9 +1938,11 @@ begin
           updateselections; //change objectinspector componentname
          end;
         end;
+        {
         if ss_double in shiftstate then begin
          designer.showobjectinspector;
         end;
+        }
        end;
       end
       else begin
@@ -2043,6 +2045,11 @@ begin
        if fselections.move(griddelta) then begin
         fowner.invalidate; //redraw handles
         clientsizechanged;
+       end;
+      end;
+      ar_component: begin
+       if ss_double in shiftstate then begin
+        designer.showobjectinspector;
        end;
       end;
       ar_selectrect: begin
@@ -2791,7 +2798,8 @@ end;
 
 procedure tformdesignerfo.doshowobjectinspector(const sender: tobject);
 begin
- objectinspectorfo.activate;
+ designer.showobjectinspector;
+// objectinspectorfo.activate;
 end;
 
 procedure tformdesignerfo.doshowcomponentpalette(const sender: tobject);
