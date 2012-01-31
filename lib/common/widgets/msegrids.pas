@@ -190,7 +190,9 @@ const
  fastrepeat = 100000; //us
 
  defaultgridwidgetoptions = defaultoptionswidgetmousewheel + 
-                                        [ow_focusbackonesc,ow_fontglyphheight];
+                                        [ow_focusbackonesc{,ow_fontglyphheight}];
+ defaultgridwidgetoptions1 = defaultoptionswidget1 + 
+                                        [ow1_fontglyphheight];
 
 type
  tgridexception = class(exception);
@@ -214,7 +216,8 @@ type
  gridstate1ty = (gs1_showcellinvalid,gs1_sortvalid,gs1_rowsortinvalid,
                  gs1_sortmoving,gs1_sortchangelock,gs1_rowinserted,
                  gs1_gridsorted,gs1_dbsorted,gs1_rowdeleting,
-                 gs1_focuscellonenterlock,gs1_forcenullcheck);
+                 gs1_focuscellonenterlock,gs1_forcenullcheck,
+                 gs1_cellsizesyncing);
  gridstates1ty = set of gridstate1ty;
 
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
@@ -2358,6 +2361,7 @@ type
    property wheelscrollheight: integer read fwheelscrollheight write
                     fwheelscrollheight default defaultwheelscrollheight;
    property optionswidget default defaultgridwidgetoptions;
+   property optionswidget1 default defaultgridwidgetoptions1;
  end;
 
  tcellgrid = class(tcustomgrid)
@@ -8822,6 +8826,7 @@ begin
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
 // fobjectpicker.options:= fobjectpicker.options + [opo_candoubleclick];
  foptionswidget:= defaultgridwidgetoptions;
+ foptionswidget1:= defaultgridwidgetoptions1;
  exclude(fstate,gs_updatelocked);
  internalupdatelayout;
 end;
@@ -13915,7 +13920,7 @@ end;
 
 procedure tcustomgrid.dofontheightdelta(var delta: integer);
 begin
- if ow_autoscale in optionswidget then begin
+ if ow1_autoscale in optionswidget1 then begin
   ffixrows.dofontheightdelta(delta);
  end;
 end;
@@ -15660,7 +15665,7 @@ end;
 procedure tcustomstringgrid.dofontheightdelta(var delta: integer);
 begin
  inherited;
- if ow_autoscale in foptionswidget then begin
+ if ow1_autoscale in foptionswidget1 then begin
   datarowheight:= datarowheight + delta;
  end; 
 end;
@@ -15763,7 +15768,7 @@ end;
 procedure tcustomstringgrid.synctofontheight;
 begin
  inherited;
- if ow_fontlineheight in optionswidget then begin
+ if ow1_fontlineheight in optionswidget1 then begin
   datarowheight:= font.lineheight;
  end
  else begin

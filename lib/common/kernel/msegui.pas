@@ -75,34 +75,43 @@ type
                    ow_destroywidgets,ow_nohidewidgets,
                    ow_hinton,ow_hintoff,ow_disabledhint,ow_multiplehint,
                    ow_timedhint,
-                   ow_fontglyphheight, 
-                   //track font.glyphheight, 
-                   //create fonthighdelta and childscaled events
-                   ow_fontlineheight, 
-                   //track font.linespacing,
-                   //create fonthighdelta and childscaled events
-                   ow_autoscale, //synchronizes bounds_cy or bonds_cx 
-                                 //with fontheightdelta
+                   
+                   ow_fontglyphheight,ow_fontlineheight,ow_autoscale,
                    ow_autosize,ow_autosizeanright,ow_autosizeanbottom 
                            //don't use, moved to optionwidget1
                    );
  optionswidgetty = set of optionwidgetty;
- optionwidget1ty = (ow1_noautosizing,
+ optionwidget1ty = (
+                    ow1_fontglyphheight, 
+                          //track font.glyphheight, 
+                          //create fonthighdelta and childscaled events
+                    ow1_fontlineheight, 
+                         //track font.linespacing,
+                         //create fonthighdelta and childscaled events
+                    ow1_autoscale, //synchronizes bounds_cy or bonds_cx 
+                                  //with fontheightdelta
                     ow1_autowidth,ow1_autoheight,
                     ow1_autosizeanright,ow1_noautosizeanright,
                     ow1_autosizeanbottom,ow1_noautosizeanbottom,
                     ow1_noparentwidthextend,ow1_noparentheightextend,
                     ow1_canclosenil, //call canclose(nil) on exit
                     ow1_nocancloseifhidden,
-                    ow1_modalcallonactivate,ow1_modalcallondeactivate
+                    ow1_modalcallonactivate,ow1_modalcallondeactivate,
                                //used in tactionwidget
+                    ow1_noautosizing //used in tdockcontroller
                     );
                                          
 const
- deprecatedoptionswidget= [ow_noautosizing,ow_canclosenil,ow_autosize,
-                           ow_autosizeanright,ow_autosizeanbottom];
- invisibleoptionswidget = [ord(ow_noautosizing),ord(ow_canclosenil),ord(ow_autosize),
-                           ord(ow_autosizeanright),ord(ow_autosizeanbottom)]; 
+ deprecatedoptionswidget= [ow_noautosizing,ow_canclosenil,
+                           ow_autosize,
+                           ow_autosizeanright,ow_autosizeanbottom,
+                           ow_fontglyphheight,ow_fontlineheight,
+                           ow_autoscale];
+ invisibleoptionswidget = [ord(ow_noautosizing),ord(ow_canclosenil),
+                           ord(ow_autosize),
+                           ord(ow_autosizeanright),ord(ow_autosizeanbottom),
+                           ord(ow_fontglyphheight),ord(ow_fontlineheight),
+                           ord(ow_autoscale)]; 
 
 type
  optionswidget1ty = set of optionwidget1ty;
@@ -143,7 +152,7 @@ type
                  );
  widgetstatesty = set of widgetstatety;
  widgetstate1ty = (ws1_childscaled,ws1_childrectchanged,
-                   ws1_scaling,ws1_painting,ws1_updateopaque,
+                   ws1_scaling,ws1_autoscaling,ws1_painting,ws1_updateopaque,
                    ws1_widgetregionvalid,ws1_rootvalid,
                    ws1_anchorsizing,ws1_anchorsetting,ws1_parentclientsizeinited,
                    ws1_parentupdating, //set while setparentwidget
@@ -191,9 +200,9 @@ const
  defaultwidgetstatesinvisible = [ws_enabled,ws_iswidget];
  focusstates = [ws_visible,ws_enabled];
  defaultoptionswidget = [ow_mousefocus,ow_tabfocus,ow_arrowfocus,{ow_mousewheel,}
-                         ow_destroywidgets,ow_autoscale];
+                         ow_destroywidgets{,ow_autoscale}];
 // defaultoptionswidget1 = [ow1_modalcallondeactivate];
- defaultoptionswidget1 = [];
+ defaultoptionswidget1 = [ow1_autoscale];
  defaultoptionswidgetmousewheel = defaultoptionswidget + [ow_mousewheel];
  defaultoptionswidgetnofocus = defaultoptionswidget -
              [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
@@ -1399,7 +1408,6 @@ type
    procedure windowcreated; virtual;
    procedure setoptionswidget(const avalue: optionswidgetty); virtual;
    procedure setoptionswidget1(const avalue: optionswidget1ty); virtual;
-//   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
 
    procedure initparentclientsize;
@@ -1562,7 +1570,7 @@ type
                       const aparentwidget: twidget;
                       const aiswidget: boolean = true); overload;
    destructor destroy; override;
-   procedure afterconstruction; override;
+   procedure afterconstruction; override;   
    procedure initnewcomponent(const ascale: real); override;
                      //called before inserting in parentwidget
    procedure initnewwidget(const ascale: real); virtual;
@@ -1579,6 +1587,8 @@ type
    function hasparent: boolean; override;               //tcomponent
    function getparentcomponent: tcomponent; override;   //tcomponent
    function hascaret: boolean;
+   function canwindow: boolean; 
+            //true if twindow allocated or not rootwidget destroying
    function windowallocated: boolean;
                 //true if winid allocated and not loading and not destroying
    function ownswindow: boolean;
@@ -6342,12 +6352,13 @@ begin
  if fparentwidget <> nil then begin
   clearparentwidget;
  end;
+ inherited;
  fwindow.Free;
  ffont.free;
  ffontempty.free;
  fframe.free;
  fface.free;
- inherited;
+// inherited;
  destroyregion(fwidgetregion);
 end;
 
@@ -6952,7 +6963,8 @@ var
  ar1: widgetarty;
  ar2,ar3: integerarty;
 begin
- if ([ow1_autowidth,ow1_autoheight]*foptionswidget1 <> []) and not (csloading in componentstate) then begin
+ if ([ow1_autowidth,ow1_autoheight]*foptionswidget1 <> []) and 
+                                 not (csloading in componentstate) then begin
   if not windowevent then begin
    checkwidgetsize(value.size);
   end;
@@ -8165,13 +8177,15 @@ begin
 end;
 
 function twidget.rootwidget: twidget;
+var
+ wi1,wi2: twidget;
 begin
- if fparentwidget = nil then begin
-  result:= self;
- end
- else begin
-  result:= fparentwidget.rootwidget;
- end;
+ wi1:= self;
+ repeat
+  wi2:= wi1;
+  wi1:= wi2.fparentwidget;
+ until wi1 = nil;
+ result:= wi2;
 end;
 
 function twidget.parentofcontainer: twidget;
@@ -10695,6 +10709,13 @@ begin
  result:= (appinst <> nil) and checkdescendent(appinst.fcaretwidget)
 end;
 
+function twidget.canwindow: boolean; 
+begin
+ result:= (fwindow <> nil) and 
+           not (csdestroying in fwindow.fowner.componentstate) or 
+       (fwindow = nil) and not (csdestroying in rootwidget.componentstate);
+end;
+
 procedure twidget.getcaret;
 begin
  if (appinst <> nil) then begin
@@ -11090,21 +11111,18 @@ end;
 procedure twidget.setfontheight;
 begin
  if not (csloading in componentstate) then begin
-  if ow_fontglyphheight in foptionswidget then begin
+  if ow1_fontglyphheight in foptionswidget1 then begin
    ffontheight:= getfont.glyphheight;
   end;
-  if ow_fontlineheight in foptionswidget then begin
+  if ow1_fontlineheight in foptionswidget1 then begin
    ffontheight:= getfont.lineheight;
   end;
  end;
 end;
 
 procedure twidget.setoptionswidget(const avalue: optionswidgetty);
-//const
-// mask1: optionswidgetty = [ow_fontglyphheight,ow_fontlineheight];
-// mask2: optionswidgetty = [ow_hinton,ow_hintoff];
 var
- value,{value1,value2,}delta: optionswidgetty;
+ value,delta: optionswidgetty;
  opt1: optionswidget1ty;
 begin
  if avalue <> foptionswidget then begin
@@ -11113,7 +11131,15 @@ begin
    if ow_noautosizing in avalue then begin  //don't use deprecated flags
     opt1:= opt1 + [ow1_noautosizing];
    end;
-   if ow_autosize in avalue then begin  //don't use deprecated flags
+   if [ow_fontglyphheight,ow_fontlineheight,ow_autoscale] * avalue <> 
+                                                              [] then begin
+    updatebit1(longword(opt1),ord(ow1_fontglyphheight),
+                                         ow_fontglyphheight in avalue);
+    updatebit1(longword(opt1),ord(ow1_fontlineheight),
+                                         ow_fontlineheight in avalue);
+    updatebit1(longword(opt1),ord(ow1_autoscale),ow_autoscale in avalue);
+   end;
+   if ow_autosize in avalue then begin
     opt1:= opt1 + [ow1_autowidth,ow1_autoheight];
    end;
    if ow_autosizeanright in avalue then begin
@@ -11130,14 +11156,9 @@ begin
 
   value:= optionswidgetty(setsinglebit(longword(avalue),
           longword(foptionswidget),  
-          [longword([ow_fontglyphheight,ow_fontlineheight]),
+          [{longword([ow_fontglyphheight,ow_fontlineheight]),}
            longword([ow_hinton,ow_hintoff])]));
            
-//  value1:= optionswidgetty(setsinglebit(longword(avalue),
-//          longword(foptionswidget),longword(mask1)));
-//  value2:= optionswidgetty(setsinglebit(longword(avalue),
-//          longword(foptionswidget),longword(mask2)));
-//  value:= value1 * mask1 + value2 * mask2 + (avalue - (mask1 + mask2));
   delta:= optionswidgetty(longword(value) xor longword(foptionswidget));
   foptionswidget:= value - deprecatedoptionswidget;
   if (delta * [ow_background,ow_top] <> []) then begin
@@ -11150,33 +11171,25 @@ begin
     end;
    end;
   end;
+  {
   if delta * [ow_fontlineheight,ow_fontglyphheight] <> [] then begin
    updatefontheight;
   end;
+  }
  end;
 end;
 
 procedure twidget.setoptionswidget1(const avalue: optionswidget1ty);
-//const
-// mask1: optionswidget1ty = [ow1_autosizeanright,ow1_noautosizeanright];
-// mask2: optionswidget1ty = [ow1_autosizeanbottom,ow1_noautosizeanbottom];
 var
- value,{value1,value2,}delta: optionswidget1ty;
+ value,delta: optionswidget1ty;
 begin
-// value1:= optionswidget1ty(setsinglebit(
-//          {$ifdef FPC}longword{$else}word{$endif}(avalue),
-//          {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1), 
-//          {$ifdef FPC}longword{$else}word{$endif}(mask1)));
-// value2:= optionswidget1ty(setsinglebit(
-//          {$ifdef FPC}longword{$else}word{$endif}(avalue),
-//          {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1),
-//          {$ifdef FPC}longword{$else}word{$endif}(mask2)));
-// value:= value1 * mask1 + value2 * mask2 + (avalue - (mask1 + mask2));
 
  value:= optionswidget1ty(setsinglebit(
  {$ifdef FPC}longword{$else}word{$endif}(avalue),
  {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1),
  [{$ifdef FPC}longword{$else}word{$endif}(
+                [ow1_fontglyphheight,ow1_fontlineheight]),  
+  {$ifdef FPC}longword{$else}word{$endif}(
                 [ow1_autosizeanright,ow1_noautosizeanright]),
   {$ifdef FPC}longword{$else}word{$endif}(
               [ow1_autosizeanbottom,ow1_noautosizeanbottom])]));
@@ -11185,6 +11198,9 @@ begin
                     {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1));
  if delta <> [] then begin
   foptionswidget1:= value;
+  if delta * [ow1_fontlineheight,ow1_fontglyphheight] <> [] then begin
+   updatefontheight;
+  end;
   if delta * avalue * [ow1_autowidth,ow1_autoheight] <> [] then begin
    checkautosize;
   end;
@@ -11296,28 +11312,38 @@ begin
 end;
 
 procedure twidget.dofontheightdelta(var delta: integer);
+var
+ bo1: boolean;
 begin
- if ow_autoscale in foptionswidget then begin
-  with fwidgetrect do begin
-   if verticalfontheightdelta then begin
-    if fanchors * [an_left,an_right] = [an_right] then begin
-     setwidgetrect(makerect(x-delta,y,cx+delta,cy));
-    end
-    else begin
-     if fanchors * [an_left,an_right] = [an_left] then begin
-      bounds_cx:= cx + delta;
+ if ow1_autoscale in foptionswidget1 then begin
+  bo1:= ws1_autoscaling in fwidgetstate1;
+  include(fwidgetstate1,ws1_autoscaling);
+  try
+   with fwidgetrect do begin
+    if verticalfontheightdelta then begin
+     if fanchors * [an_left,an_right] = [an_right] then begin
+      setwidgetrect(makerect(x-delta,y,cx+delta,cy));
      end
-    end;
-   end
-   else begin
-    if fanchors * [an_top,an_bottom] = [an_bottom] then begin
-     setwidgetrect(makerect(x,y-delta,cx,cy+delta));
+     else begin
+      if fanchors * [an_left,an_right] = [an_left] then begin
+       bounds_cx:= cx + delta;
+      end
+     end;
     end
     else begin
-     if fanchors * [an_top,an_bottom] = [an_top] then begin
-      bounds_cy:= cy + delta;
+     if fanchors * [an_top,an_bottom] = [an_bottom] then begin
+      setwidgetrect(makerect(x,y-delta,cx,cy+delta));
+     end
+     else begin
+      if fanchors * [an_top,an_bottom] = [an_top] then begin
+       bounds_cy:= cy + delta;
+      end;
      end;
     end;
+   end;
+  finally
+   if not bo1 then begin
+    exclude(fwidgetstate1,ws1_autoscaling);
    end;
   end;
  end;
@@ -11338,9 +11364,9 @@ var
  int1: integer;
 begin
  if not (csloading in componentstate) and 
-      (foptionswidget * [ow_fontglyphheight,ow_fontlineheight] <> []) then begin
+      (foptionswidget1 * [ow1_fontglyphheight,ow1_fontlineheight] <> []) then begin
   int1:= ffontheight;
-  if ow_fontglyphheight in foptionswidget then begin
+  if ow1_fontglyphheight in foptionswidget1 then begin
    ffontheight:= getfont.glyphheight;
   end
   else begin
@@ -11377,7 +11403,7 @@ begin
   bo1:= twidget(filer.ancestor).ffontheight <> ffontheight;
  end
  else begin
-  bo1:= foptionswidget * [ow_fontglyphheight,ow_fontlineheight] <> [];
+  bo1:= foptionswidget1 * [ow1_fontglyphheight,ow1_fontlineheight] <> [];
  end;
  filer.DefineProperty('reffontheight',{$ifdef FPC}@{$endif}readfontheight,
            {$ifdef FPC}@{$endif}writefontheight,bo1);

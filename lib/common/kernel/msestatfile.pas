@@ -32,7 +32,9 @@ const
 type
  tstatfile = class;
  statfilemissingeventty = procedure (const sender: tstatfile; 
-                  const afilename: filenamety; var aretry: boolean) of object;
+                  const afilename: filenamety;
+                  var astream: ttextstream; var aretry: boolean) of object;
+
  tstatfile = class(tactcomponent,istatfile)
   private
    ffilename: filenamety;
@@ -307,8 +309,9 @@ begin
      end;
      stream1:= ttextstream.trycreate(floadedfile,fm_read);
      if stream1 = nil then begin
+      floadedfile:= defaultfile(ar1);
       if canevent(tmethod(fonfilemissing)) then begin
-       fonfilemissing(self,defaultfile(ar1),by1);
+       fonfilemissing(self,floadedfile,stream1,by1);
       end;
      end;
     until (stream1 <> nil) or not by1;

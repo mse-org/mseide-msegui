@@ -3400,13 +3400,13 @@ begin
   xgetwmnormalhints(appdisp,id,sizehints,@int1);
   with sizehints^ do begin
    flags:= flags or pposition or psize or usposition or ussize 
-               or pbasesize {or pbasesize} or pwingravity;
+               {or pbasesize} or pwingravity;
    x:= changes.x;
    y:= changes.y;
    width:= changes.width;
    height:= changes.height;
-   base_width:= width;
-   base_height:= height;
+//   base_width:= width;   //openbox does not allow size smaller than this?
+//   base_height:= height;
    win_gravity:= staticgravity;
   end;
   xsetwmnormalhints(appdisp,id,sizehints);

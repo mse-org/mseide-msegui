@@ -89,7 +89,7 @@ type
  
  selectmodety = (sm_select,sm_add,sm_flip,sm_remove);
 
- tformdesignerfo = class(tmseform)
+ tformdesignerfo = class(tmseform,iformdesigner)
    popupme: tpopupmenu;
    procedure doshowobjectinspector(const sender: tobject);
    procedure doshowcomponentpalette(const sender: tobject);
@@ -119,7 +119,6 @@ type
    fmodule: tmsecomponent;
    fmoduleintf: pdesignmoduleintfty;
    fmodulesetting: integer;
-//   fformsizesetting: integer;
    procedure setmodule(const Value: tmsecomponent);
    function getselections: tformdesignerselections;
   protected
@@ -165,6 +164,7 @@ type
                         
    destructor destroy; override;
    function designnotification: idesignnotification;
+   function clickedcomponent: tcomponent;
    property modulerect: rectty read fwidgetrect;
    procedure updatecaption;
    procedure placemodule;
@@ -232,8 +232,10 @@ type
    function iswidgetcomp(const acomp: tcomponent): boolean;
  
    procedure poschanged; override;
-   procedure dispatchmouseevent(var info: moeventinfoty; capture: twidget); override;
-   procedure dispatchkeyevent(const eventkind: eventkindty; var info: keyeventinfoty); override;
+   procedure dispatchmouseevent(var info: moeventinfoty;
+                                            capture: twidget); override;
+   procedure dispatchkeyevent(const eventkind: eventkindty;
+                                            var info: keyeventinfoty); override;
    procedure dobeforepaint(const canvas: tcanvas);
    procedure doafterpaint(const canvas: tcanvas);
    procedure movewindowrect(const dist: pointty; const rect: rectty); override;
@@ -248,8 +250,11 @@ type
    procedure beginselect;
    procedure endselect;
    procedure updateselections;
+   procedure updateclickedcomponent;
    procedure deletecomponent(const component: tcomponent);
-   procedure selectcomponent(const component: tcomponent; mode: selectmodety = sm_select);
+   procedure selectcomponent(const component: tcomponent;
+                                             mode: selectmodety = sm_select);
+   procedure selectparentwidget(const awidget: twidget);
    procedure clearselection;
    procedure domodified;
 
@@ -273,16 +278,19 @@ type
                      const amodule: tmsecomponent; const newname: string);
    procedure selectionchanged(const adesigner: idesigner;
                                     const aselection: idesignerselections);
-   procedure moduleactivated(const adesigner: idesigner; const amodule: tmsecomponent);
+   procedure moduleactivated(const adesigner: idesigner;
+                                           const amodule: tmsecomponent);
    procedure moduledeactivated(const adesigner: idesigner; 
                    const amodule: tmsecomponent);
-   procedure moduledestroyed(const adesigner: idesigner; const amodule: tmsecomponent);
+   procedure moduledestroyed(const adesigner: idesigner;
+                                           const amodule: tmsecomponent);
    procedure methodcreated(const adesigner: idesigner;
                           const amodule: tmsecomponent;
                           const aname: string; const atype: ptypeinfo);
    procedure methodnamechanged(const adesigner: idesigner;
                           const amodule: tmsecomponent;
-                          const newname,oldname: string; const atypeinfo: ptypeinfo);
+                          const newname,oldname: string;
+                          const atypeinfo: ptypeinfo);
    procedure showobjecttext(const adesigner: idesigner;
                   const afilename: filenamety; const backupcreated: boolean);
    procedure closeobjecttext(const adesigner: idesigner;
@@ -294,7 +302,8 @@ type
    procedure aftermake(const adesigner: idesigner; const exitcode: integer);
 
   public
-   constructor create(const aowner: tformdesignerfo; const adesigner: tdesigner);
+   constructor create(const aowner: tformdesignerfo;
+                                     const adesigner: tdesigner);
    destructor destroy; override;
    procedure updateprojectoptions;
    property snaptogrid: boolean read fsnaptogrid write fsnaptogrid default true;
@@ -587,7 +596,8 @@ begin
  inherited create;
 end;
 
-function tformdesignerselections.assign(const source: idesignerselections): boolean;
+function tformdesignerselections.assign(
+                          const source: idesignerselections): boolean;
               //true if owned components involved
 var
  amodule: tmsecomponent;
@@ -1490,8 +1500,6 @@ end;
 
 procedure tdesignwindow.dispatchkeyevent(const eventkind: eventkindty;
   var info: keyeventinfoty);
-
-
 var
  po1: pointty;
  comp1: tcomponent;
@@ -1515,24 +1523,34 @@ begin
       end;
      end;
      key_escape: begin
-      if factarea <> ar_none then begin
+      if not (factarea in [ar_none,ar_component]) then begin
        hidexorpic(fowner.container.getcanvas(org_widget));
        fxorpicactive:= false;
        factarea:= ar_none;
       end
       else begin      
-       if (fselections.count > 1){ or (form = nil)} then begin
+       if (fselections.count > 1) and (factarea <> ar_component) then begin
         selectcomponent(module);
        end
        else begin
-        if fselections.count = 1 then begin
-         comp1:= fselections[0];
+        if fselections.count > 0 then begin
+         if factarea = ar_component then begin
+          comp1:= fselections[factcompindex];
+         end
+         else begin
+          comp1:= fselections[0];
+         end;
          if iswidgetcomp(comp1) then begin
           repeat
            comp1:= twidget(comp1).parentwidget;
           until (comp1 = nil) or (ws_iswidget in twidget(comp1).widgetstate);
           if (comp1 <> nil) and (comp1 <> fowner) then begin
-           selectcomponent(comp1);
+           if fselections.count > 1 then begin
+            selectparentwidget(twidget(comp1));
+           end
+           else begin
+            selectcomponent(comp1);
+           end;
           end
           else begin
            selectcomponent(module);
@@ -1909,16 +1927,23 @@ begin
         selectcomponent(component,sm_flip);
        end
        else begin
-        if (component = form) and (fselections.count > 1) or 
-               (fselections.indexof(component) < 0) then begin
+        bo1:= fselections.indexof(component) < 0;
+        if (component = form) and (fselections.count > 1) or bo1 then begin
          selectcomponent(component,sm_select);
          if projectoptions.e.moveonfirstclick then begin
           factarea:= ar_component;
          end;
+        end
+        else begin
+         if not bo1 then begin
+          updateclickedcomponent;
+         end;
         end;
+        {
         if ss_double in shiftstate then begin
          designer.showobjectinspector;
         end;
+        }
        end;
       end
       else begin
@@ -2023,6 +2048,11 @@ begin
         clientsizechanged;
        end;
       end;
+      ar_component: begin
+       if ss_double in shiftstate then begin
+        designer.showobjectinspector;
+       end;
+      end;
       ar_selectrect: begin
        if fpickwidget <> nil then begin
         rect1.pos:= fpickpos;
@@ -2065,7 +2095,10 @@ begin
      end;
      fpickwidget:= nil;
      factarea:= ar_none;
-     factcompindex:= -1;
+     if factcompindex >= 0 then begin
+      factcompindex:= -1;
+      updateclickedcomponent; //update objectionspector componentname
+     end;
      fowner.releasemouse;
     end;
  
@@ -2292,18 +2325,51 @@ procedure tdesignwindow.selectcomponent(const component: tcomponent;
 begin
  if mode = sm_remove then begin
   fselections.remove(component);
+  factcompindex:= -1;
  end
  else begin
   if mode = sm_select then begin
    fselections.clear;
   end;
-  if fselections.indexof(component) < 0 then begin
-   fselections.add(component);
+  factcompindex:= fselections.indexof(component);
+  if factcompindex < 0 then begin
+   factcompindex:= fselections.add(component);
   end
   else begin
    if mode = sm_flip then begin
     fselections.remove(component);
+    factcompindex:= -1;
    end;
+  end;
+ end;
+ if factcompindex >= 0 then begin
+  factarea:= ar_component;
+ end
+ else begin
+  factarea:= ar_none;
+ end;
+ updateselections;
+end;
+
+procedure tdesignwindow.selectparentwidget(const awidget: twidget);
+var
+ int1: integer;
+begin
+ with fselections do begin
+  beginupdate;
+  try
+   for int1:= count-1 downto 0 do begin
+    with itempo(int1)^ do begin
+     if (selectedinfo.instance is twidget) and 
+             awidget.checkdescendent(twidget(selectedinfo.instance)) then begin
+      delete(int1);
+     end;
+    end;
+   end;
+   add(awidget);
+   factcompindex:= indexof(awidget);
+  finally
+   endupdate;
   end;
  end;
  updateselections;
@@ -2330,6 +2396,12 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tdesignwindow.updateclickedcomponent;
+begin           
+ objectinspectorfo.clickedcomponentchanged(
+                     tformdesignerfo(fowner).clickedcomponent);
 end;
 
 procedure tdesignwindow.beginselect;
@@ -2733,7 +2805,8 @@ end;
 
 procedure tformdesignerfo.doshowobjectinspector(const sender: tobject);
 begin
- objectinspectorfo.activate;
+ designer.showobjectinspector;
+// objectinspectorfo.activate;
 end;
 
 procedure tformdesignerfo.doshowcomponentpalette(const sender: tobject);
@@ -3068,14 +3141,19 @@ end;
 procedure tformdesignerfo.formdeonclose(const sender: TObject);
 var
  int1: integer;
+ bo1: boolean;
 begin
  with tdesignwindow(window),fselections do begin
+  bo1:= false;
   for int1:= count - 1 downto 0 do begin
    if (items[int1] = fmodule) or (items[int1].owner = fmodule) then begin
     delete(int1);
+    bo1:= true;
    end;
   end;
-  updateselections;
+  if bo1 then begin
+   updateselections;
+  end;
  end;
 end;
 
@@ -3211,6 +3289,16 @@ begin
   fselections.clear;
   fselections.add(comp);
   dodelete;
+ end;
+end;
+
+function tformdesignerfo.clickedcomponent: tcomponent;
+begin
+ result:= nil;
+ with tdesignwindow(fwindow) do begin
+  if (factcompindex >= 0) and (factcompindex < fselections.count) then begin
+   result:= fselections[factcompindex];
+  end;
  end;
 end;
 

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -155,6 +155,7 @@ type
                         const avalue; const arect: rectty);
                  virtual; abstract;
    procedure dofontheightdelta(var delta: integer); override;
+   procedure sizechanged; override;
    
    procedure updatereadonlystate; virtual;
    procedure initeditfocus;
@@ -1429,6 +1430,12 @@ begin
  gridwidgetfontheightdelta(self,fgridintf,delta);
 end;
 
+procedure tgraphdataedit.sizechanged;
+begin
+ inherited;
+ gridwidgetsized(self,fgridintf);
+end;
+
 procedure tgraphdataedit.dochange;
 begin
  if not (ws_loadedproc in fwidgetstate) then begin
@@ -1856,8 +1863,12 @@ begin
 end;
 
 procedure tgraphdataedit.updatecoloptions(const aoptions: coloptionsty);
+var
+ opt1: optionseditty;
 begin
- fgridintf.coloptionstoeditoptions(foptionsedit);
+ opt1:= foptionsedit;
+ fgridintf.coloptionstoeditoptions(opt1);
+ optionsedit:= opt1;
 end;
 
 procedure tgraphdataedit.statdataread;

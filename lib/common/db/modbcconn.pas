@@ -7,7 +7,7 @@
  *  Description: ODBC SQLDB unit                                              *
  *  License:     (modified) LGPL                                              *
  *                                                                            *
- *  Modified 2006-2010 by Martin Schreiber                                    *
+ *  Modified 2006-2012 by Martin Schreiber                                    *
  ******************************************************************************)
 
 unit modbcconn;
@@ -94,6 +94,7 @@ type
     procedure internalCommitRetaining(trans:TSQLHandle); override;
     procedure internalRollbackRetaining(trans:TSQLHandle); override;
     // - Statement execution
+    procedure updaterowcount(const acursor: todbccursor);
     procedure internalExecute(const cursor:TSQLCursor; 
              const ATransaction:TSQLTransaction; const AParams:TmseParams;
              const autf8: boolean); override;
@@ -847,6 +848,23 @@ begin
   // Tranactions not implemented yet
 end;
 
+procedure todbcconnection.updaterowcount(const acursor: todbccursor);
+var
+ len1: sqllen;
+ int1: sqlsmallint;
+begin
+ with acursor do begin
+  if odbcsucces(sqlgetdiagfield(sql_handle_stmt,fstmthandle,0,
+              sql_diag_cursor_row_count,@len1,0,int1)) then begin
+   frowsreturned:= len1;
+  end;
+  if odbcsucces(sqlgetdiagfield(sql_handle_stmt,fstmthandle,0,
+              sql_diag_row_count,@len1,0,int1)) then begin
+   frowsaffected:= len1;
+  end;
+ end;
+end;
+
 procedure TODBCConnection.internalExecute(const cursor: TSQLCursor;
       const ATransaction: TSQLTransaction; const AParams: TmseParams;
       const autf8: boolean);
@@ -855,6 +873,9 @@ var
   Res: SQLRETURN;
 begin
   ODBCCursor:= TODBCCursor(cursor);
+  odbccursor.frowsreturned:= -1;
+  odbccursor.frowsaffected:= -1;
+
 
   // set parameters
     if Assigned(APArams) and (AParams.count > 0) then begin
@@ -866,7 +887,7 @@ begin
   ODBCCheckResult(res,
     SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle, 'Could not execute statement.'
   );
-
+  updaterowcount(odbccursor);
   // free parameter buffers
   FreeParamBuffers(ODBCCursor);
 end;
@@ -879,10 +900,13 @@ var
   Res: SQLRETURN;
 begin
   ODBCCursor:= TODBCCursor(cursor);
+  odbccursor.frowsreturned:= -1;
+  odbccursor.frowsaffected:= -1;
   res:= SQLExecdirect(ODBCCursor.FSTMTHandle,pchar(asql),length(asql));
   ODBCCheckResult(res,
     SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle, 'Could not execute statement.'
   );
+  updaterowcount(odbccursor);
 end;
 
 function TODBCConnection.Fetch(cursor: TSQLCursor): boolean;
@@ -1148,7 +1172,7 @@ var
   ColumnCount:SQLSMALLINT;
   i:integer;
   ColNameLength,{TypeNameLength,}DataType,DecimalDigits,Nullable:SQLSMALLINT;
-  ColumnSize:SQLUINTEGER;
+  ColumnSize: SQLULEN;
   ColName{,TypeName}:string;
   FieldType:TFieldType;
   FieldSize: integer;

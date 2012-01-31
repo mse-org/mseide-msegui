@@ -63,6 +63,7 @@ type
  getnodemodety = (gno_matching,gno_allchildren,gno_nochildren);
  listitemlayoutinfoty = record
   cellsize: sizety;
+  minsize: sizety;
   captionrect: rectty;
   captioninnerrect: rectty;
   imagerect: rectty;
@@ -638,6 +639,7 @@ begin
   else begin
    checkboxinnerrect.pos:= checkboxrect.pos;
   end;
+  minsize:= aimagesize;
  end;
 end;
 
@@ -2394,20 +2396,22 @@ begin
   inc(x,boxdist);
   dec(cx,boxdist);
  end;
-// if no_checkbox in list.options then begin
-  with info.checkboxrect do begin
-   inc(x,boxdist);
-  end;
-  with info.checkboxinnerrect do begin
-   inc(x,boxdist);
-  end;
-// end;
+ with info.checkboxrect do begin
+  inc(x,boxdist);
+ end;
+ with info.checkboxinnerrect do begin
+  inc(x,boxdist);
+ end;
  inc(info.imagerect.x,boxdist);
  with info.expandboxrect do begin
   x:= 0;
   y:= (asize.cy - boxsize) div 2;
   cx:= boxsize;
   cy:= boxsize;
+ end;
+ info.minsize.cx:= info.minsize.cx + boxdist;
+ if info.minsize.cy < boxsize then begin
+  info.minsize.cy:= boxsize;
  end;
 end;
 

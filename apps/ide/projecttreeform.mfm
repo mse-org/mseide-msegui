@@ -44,6 +44,15 @@ object projecttreefo: tprojecttreefo
         options = [co_readonly, co_savestate, co_mousescrollrow]
         oncellevent = projecteditoncellevent
         widgetname = 'projectedit'
+        dataclass = ttreeitemeditlist
+        datalist.imnr_expanded = 1
+        datalist.imagelist = nodeicons
+        datalist.imagewidth = 16
+        datalist.imageheight = 16
+        datalist.onstatreaditem = projecteditonstatreaditem
+        datalist.ondragbegin = editdragbegin
+        datalist.ondragover = editdragover
+        datalist.ondragdrop = editdragrop
       end    
       item
         linecolorfix = -1610612733
@@ -51,13 +60,15 @@ object projecttreefo: tprojecttreefo
         options = [co_fill, co_savestate, co_mousescrollrow]
         onshowhint = colshowhintexe
         widgetname = 'edit'
+        dataclass = titemeditlist
       end>
-    datarowheight = 16
+    datarowheight = 15
     statfile = mainfo.projectstatfile
     oncellevent = gridcellevent
-    reffontheight = 14
+    reffontheight = 13
     object projectedit: ttreeitemedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
+      optionswidget1 = [ow1_autoheight]
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -68,26 +79,17 @@ object projecttreefo: tprojecttreefo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 141
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_hintclippedtext, oe_locate, oe_savestate]
       onchange = projecteditonchange
-      itemlist.imnr_expanded = 1
-      itemlist.imagelist = nodeicons
-      itemlist.imagewidth = 16
-      itemlist.imageheight = 16
-      itemlist.onstatreaditem = projecteditonstatreaditem
-      itemlist.ondragbegin = editdragbegin
-      itemlist.ondragover = editdragover
-      itemlist.ondragdrop = editdragrop
       onsetvalue = captionset
       onupdaterowvalues = projecteditonupdaterowvalues
       fieldedit = edit
       options = [teo_treecolnavig, teo_keyrowmoving]
       oncheckrowmove = itemoncheckrowmove
-      reffontheight = 14
     end
     object edit: trecordfieldedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -111,7 +113,7 @@ object projecttreefo: tprojecttreefo
       bounds_x = 142
       bounds_y = 0
       bounds_cx = 129
-      bounds_cy = 16
+      bounds_cy = 15
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       textflags = [tf_ycentered, tf_clipo, tf_noselect, tf_ellipseleft]
       oncellevent = editoncellevent
@@ -119,7 +121,6 @@ object projecttreefo: tprojecttreefo
       dropdown.cols.items = <      
         item
         end>
-      reffontheight = 14
     end
   end
   object unitpopup: tpopupmenu

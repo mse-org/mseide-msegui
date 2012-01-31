@@ -293,6 +293,16 @@ type
    function write(const Buffer; Count: Longint): Longint; override;
  end;
 
+ ttextstringcopystream = class(ttextstream)
+  private
+   fdata: string;
+  protected
+  public
+   constructor create(const adata: string);
+   destructor destroy; override;
+   function write(const Buffer; Count: Longint): Longint; override;
+ end;
+
  tmemorycopystream = class(tmemorystream)
   private
   protected
@@ -2133,6 +2143,28 @@ begin
 end;
 
 function tstringcopystream.write(const Buffer; Count: Longint): Longint;
+begin
+ result:= 0;
+end;
+
+{ ttextstringcopystream }
+
+constructor ttextstringcopystream.create(const adata: string);
+begin
+ fdata:= adata;
+ inherited create;
+ if adata <> '' then begin
+  tmemorystream1(fmemorystream).setpointer(pointer(adata),length(adata));
+ end;
+end;
+
+destructor ttextstringcopystream.destroy;
+begin
+ tmemorystream1(fmemorystream).setpointer(nil,0);
+ inherited;
+end;
+
+function ttextstringcopystream.write(const Buffer; Count: Longint): Longint;
 begin
  result:= 0;
 end;

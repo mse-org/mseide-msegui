@@ -117,7 +117,8 @@ type
    procedure dotextchange; virtual;
    procedure modified; virtual; //for dbedits
    procedure checktext(var atext: msestring; var accept: boolean);
-   procedure texttovalue(var accept: boolean; const quiet: boolean); virtual; abstract;
+   procedure texttovalue(var accept: boolean;
+                             const quiet: boolean); virtual; abstract;
    procedure texttodata(const atext: msestring; var data); virtual;
              //used for clipboard paste in widgetgrid
    function datatotext(const data): msestring;
@@ -131,6 +132,7 @@ type
    procedure loaded; override;
    procedure fontchanged; override;
    procedure dofontheightdelta(var delta: integer); override;
+   procedure sizechanged; override;
    function geteditfont: tfont; override;
    class function classskininfo: skininfoty; override;
    procedure dopaintbackground(const canvas: tcanvas); override;
@@ -1783,8 +1785,8 @@ begin
   fdatalist:= fgridintf.getcol.datalist;
   fgriddatalink:= tcustomwidgetgrid1(fgridintf.getgrid).getgriddatalink;
   fgridintf.updateeditoptions(foptionsedit);
-  if (ow_autoscale in foptionswidget) and
-              (foptionswidget * [ow_fontglyphheight,ow_fontlineheight] <> []) then begin
+  if (ow1_autoscale in foptionswidget1) and
+              (foptionswidget1 * [ow1_fontglyphheight,ow1_fontlineheight] <> []) then begin
    fgridintf.getcol.grid.datarowheight:= bounds_cy;
   end;
  end
@@ -1805,8 +1807,12 @@ begin
 end;
 
 procedure tcustomdataedit.updatecoloptions(const aoptions: coloptionsty);
+var
+ opt1: optionseditty;
 begin
- fgridintf.coloptionstoeditoptions(foptionsedit);
+ opt1:= foptionsedit;
+ fgridintf.coloptionstoeditoptions(opt1);
+ optionsedit:= opt1;
 end;
 
 procedure tcustomdataedit.setoptionsedit(const avalue: optionseditty);
@@ -2687,6 +2693,12 @@ begin
    fifiserverintf.valuechanged(getifidatalinkintf);
   end;
  end;
+end;
+
+procedure tcustomdataedit.sizechanged;
+begin
+ inherited;
+ gridwidgetsized(self,fgridintf);
 end;
 
 {$endif mse_with_ifi}

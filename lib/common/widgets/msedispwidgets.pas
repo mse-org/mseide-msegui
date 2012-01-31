@@ -29,8 +29,10 @@ const
  defaultdispwidgetwidth = 100;
  defaultdispwidgetheight = 20;
  defaultdispwidgetoptions = (defaultoptionswidget -
-                                 [ow_mousefocus,ow_tabfocus,ow_arrowfocus]) +
-                                 [ow_fontglyphheight];
+                                 [ow_mousefocus,ow_tabfocus,ow_arrowfocus]){ +
+                                 [ow_fontglyphheight]};
+
+ defaultdispwidgetoptions1 = defaultoptionswidget1 + [ow1_fontglyphheight];
 
 type
 
@@ -161,6 +163,7 @@ type
    property textflags: textflagsty read ftextflags write settextflags
                 default defaultdisptextflags;
    property optionswidget default defaultdispwidgetoptions;
+   property optionswidget1 default defaultdispwidgetoptions1;
    property options: dispwidgetoptionsty read foptions write setoptions default [];
  end;
 
@@ -406,6 +409,7 @@ constructor tdispwidget.create(aowner: tcomponent);
 begin
  inherited;
  foptionswidget:= defaultdispwidgetoptions;
+ foptionswidget1:= defaultdispwidgetoptions1;
  fwidgetrect.cx:= defaultdispwidgetwidth;
  fwidgetrect.cy:= defaultdispwidgetheight;
  ftextflags:= defaultdisptextflags;

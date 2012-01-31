@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -35,7 +35,11 @@ const
 
  texteditminimalframe: framety = (left: 1; top: 0; right: 1; bottom: 0);
  defaulttexteditwidgetoptions = 
-         (defaulteditwidgetoptions - [ow_fontglyphheight]) + [ow_fontlineheight];
+         (defaulteditwidgetoptions
+                     { - [ow_fontglyphheight]}){ + [ow_fontlineheight]};
+ defaulttexteditwidgetoptions1 = 
+         (defaulteditwidgetoptions1 - [ow1_fontglyphheight]) + 
+                                                   [ow1_fontlineheight];
 
 type
 
@@ -133,6 +137,7 @@ type
    procedure dotextmouseevent(var info: textmouseeventinfoty);
    procedure setupeditor; override;
    procedure dofontheightdelta(var delta: integer); override;
+   procedure sizechanged; override;
    function getinnerframe: framety; override;
 
     //igridwidget
@@ -292,6 +297,9 @@ type
    property oneditnotifcation: editnotificationeventty read foneditnotification 
                                      write foneditnotification;
    property oncellevent: celleventty read foncellevent write foncellevent;
+  published
+   property optionswidget default defaulttexteditwidgetoptions;
+   property optionswidget1 default defaulttexteditwidgetoptions1;
  end;
 
  ttextedit = class(tcustomtextedit)
@@ -431,6 +439,7 @@ begin
  end;
  inherited;
  foptionswidget:= defaulttexteditwidgetoptions;
+ foptionswidget1:= defaulttexteditwidgetoptions1;
  optionsedit:= defaulttexteditoptions;
  textflags:= defaulttextflags - [tf_noselect];
 end;
@@ -462,11 +471,21 @@ end;
 procedure tcustomtextedit.dofontheightdelta(var delta: integer);
 begin
  inherited;
+ gridwidgetfontheightdelta(self,fgridintf,delta);
+{
+ inherited;
  if fgridintf <> nil then begin
   with fgridintf.getcol.grid do begin
    datarowheight:= datarowheight + delta;
   end;
  end;
+}
+end;
+
+procedure tcustomtextedit.sizechanged;
+begin
+ inherited;
+ gridwidgetsized(self,fgridintf);
 end;
 
 procedure tcustomtextedit.setgridintf(const intf: iwidgetgrid);
@@ -474,8 +493,9 @@ begin
  fgridintf:= intf;
  if (intf <> nil) then begin
   flines:= tgridrichstringdatalist(fgridintf.getcol.datalist);
-  if (ow_autoscale in foptionswidget) and
-      (foptionswidget * [ow_fontglyphheight,ow_fontlineheight] <> []) then begin
+  if (ow1_autoscale in foptionswidget1) and
+      (foptionswidget1 * [ow1_fontglyphheight,ow1_fontlineheight]
+                                                         <> []) then begin
    fgridintf.getcol.grid.datarowheight:= bounds_cy;
   end;
  end;
@@ -630,7 +650,7 @@ end;
 
 procedure tcustomtextedit.initgridwidget;
 begin
- optionswidget:= optionswidget - [ow_autoscale];
+ optionswidget1:= optionswidget1 - [ow1_autoscale];
  frame:= nil;
  with fgridintf.grid do begin
   optionsgrid:= optionsgrid + [og_autofirstrow];
