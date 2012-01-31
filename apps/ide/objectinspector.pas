@@ -164,6 +164,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure refresh;
+   procedure clickedcomponentchanged(const aclickedcomp: tcomponent);
 
    //idesignnotification
    procedure itemdeleted(const adesigner: idesigner;
@@ -1114,18 +1115,16 @@ begin
  end;
 end;
 
-procedure tobjectinspectorfo.updatecomponentname;
-var
- comp1: tcomponent;
+procedure tobjectinspectorfo.clickedcomponentchanged(
+                                         const aclickedcomp: tcomponent);
 begin
  with compselector do begin
   if fsinglecomp then begin
    value:= componentdispname(factcomp);
   end
   else begin
-   comp1:= designer.clickedcomp;
-   if comp1 <> nil then begin
-    value:= componentdispname(comp1);
+   if aclickedcomp <> nil then begin
+    value:= componentdispname(aclickedcomp);
    end
    else begin
     value:= '';
@@ -1135,6 +1134,11 @@ begin
    initfocus;
   end;
  end;
+end;
+
+procedure tobjectinspectorfo.updatecomponentname;
+begin
+ clickedcomponentchanged(designer.clickedcomp);
 end;
 
 function tobjectinspectorfo.componentdispname(

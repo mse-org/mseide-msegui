@@ -250,6 +250,7 @@ type
    procedure beginselect;
    procedure endselect;
    procedure updateselections;
+   procedure updateclickedcomponent;
    procedure deletecomponent(const component: tcomponent);
    procedure selectcomponent(const component: tcomponent;
                                              mode: selectmodety = sm_select);
@@ -1935,7 +1936,7 @@ begin
         end
         else begin
          if not bo1 then begin
-          updateselections; //change objectinspector componentname
+          updateclickedcomponent;
          end;
         end;
         {
@@ -2096,7 +2097,7 @@ begin
      factarea:= ar_none;
      if factcompindex >= 0 then begin
       factcompindex:= -1;
-      updateselections; //update objectionspector componentname
+      updateclickedcomponent; //update objectionspector componentname
      end;
      fowner.releasemouse;
     end;
@@ -2395,6 +2396,12 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tdesignwindow.updateclickedcomponent;
+begin           
+ objectinspectorfo.clickedcomponentchanged(
+                     tformdesignerfo(fowner).clickedcomponent);
 end;
 
 procedure tdesignwindow.beginselect;
@@ -3134,14 +3141,19 @@ end;
 procedure tformdesignerfo.formdeonclose(const sender: TObject);
 var
  int1: integer;
+ bo1: boolean;
 begin
  with tdesignwindow(window),fselections do begin
+  bo1:= false;
   for int1:= count - 1 downto 0 do begin
    if (items[int1] = fmodule) or (items[int1].owner = fmodule) then begin
     delete(int1);
+    bo1:= true;
    end;
   end;
-  updateselections;
+  if bo1 then begin
+   updateselections;
+  end;
  end;
 end;
 
