@@ -1863,7 +1863,7 @@ procedure tdesignwindow.dispatchmouseevent(var info: moeventinfoty;
 var
  component: tcomponent;
  int1: integer;
- bo1: boolean;
+ bo1,bo2: boolean;
  posbefore: pointty;
  widget1: twidget;
  rect1: rectty;
@@ -1927,15 +1927,15 @@ begin
         selectcomponent(component,sm_flip);
        end
        else begin
-        bo1:= fselections.indexof(component) < 0;
-        if (component = form) and (fselections.count > 1) or bo1 then begin
+        bo2:= fselections.indexof(component) < 0;
+        if (component = form) and (fselections.count > 1) or bo2 then begin
          selectcomponent(component,sm_select);
          if projectoptions.e.moveonfirstclick then begin
           factarea:= ar_component;
          end;
         end
         else begin
-         if not bo1 then begin
+         if not bo2 then begin
           updateclickedcomponent;
          end;
         end;
