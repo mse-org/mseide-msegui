@@ -104,8 +104,8 @@ type
                                                     write fcommandhistory;
    property inputcolindex: integer read finputcolindex write finputcolindex;
   published
+   property optionsedit1; //before optionsedit!
    property optionsedit default defaultterminaleditoptions;
-   property optionsedit1;
    property font;
    property cursorreadonly;
    property maxchars: integer read fmaxchars write fmaxchars default 0;

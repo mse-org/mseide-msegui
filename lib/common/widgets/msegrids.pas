@@ -822,8 +822,8 @@ type
    property textflags;
    property textflagsactive;
    property passwordchar;
+   property optionsedit1; //before optionsedit!
    property optionsedit;
-   property optionsedit1;
    property font;
    property datalist;
    property valuedefault;

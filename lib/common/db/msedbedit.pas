@@ -1785,8 +1785,8 @@ type
    property focusrectdist;
    property textflags;
    property textflagsactive;
+   property optionsedit1; //before optionsedit!
    property optionsedit;
-   property optionsedit1;
    property passwordchar;
    property font;
    property colorselect;

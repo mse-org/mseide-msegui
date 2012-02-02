@@ -312,7 +312,8 @@ end;
 function tdialogcontroller.iskeyexecute(const info: keyeventinfoty): boolean;
 begin
  with fowner,info do begin
-  result:= not readonly and (oe_keyexecute in optionsedit) and (key = key_down) and 
+  result:= (not readonly or (oe1_readonlydialog in optionsedit1)) and 
+                (oe1_keyexecute in optionsedit1) and (key = key_down) and 
            (shiftstate = [ss_alt]);
  end;
 end;
@@ -323,7 +324,8 @@ begin
   if fframe <> nil then begin
    with tcustombuttonframe(fframe) do begin
     if buttons.count > 0 then begin
-     buttons[0].enabled:= not (oe_readonly in getoptionsedit);
+     buttons[0].enabled:= not (oe_readonly in getoptionsedit) or 
+                     (oe1_readonlydialog in optionsedit1);
     end;
    end;
   end;  
@@ -366,7 +368,7 @@ var
 begin
  with tcustomstringedit(fowner) do begin
   str1:= text;
-  if execute(str1) then begin
+  if execute(str1) and not readonly then begin
    setexecresult(str1);
    checkvalue;
   end;
@@ -417,84 +419,7 @@ function tcustomdialogstringed.createdialogcontroller: tstringdialogcontroller;
 begin
  result:= tstringdialogcontroller.create(self);
 end;
-{
-procedure tcustomdialogstringed.buttonaction(var action: buttonactionty;
-  const buttonindex: integer);
-begin
- if action = ba_click then begin
-  if canfocus and not setfocus then begin
-   exit;
-  end;
-  internalexecute;
- end;
-end;
-}
-{
-procedure tcustomdialogstringed.internalcreateframe;
-begin
- tellipsebuttonframe.create(iscrollframe(self),ibutton(self));
- updatereadonlystate;
-end;
-}
-{
-function tcustomdialogstringed.execute(var avalue: msestring): boolean;
-begin
- result:= false;
-end;
 
-procedure tcustomdialogstringed.setexecresult(var avalue: msestring);
-begin
- text:= avalue;
-end;
-
-procedure tcustomdialogstringed.internalexecute;
-var
- str1: msestring;
-begin
- str1:= text;
- if execute(str1) then begin
-  setexecresult(str1);
-  checkvalue;
- end;
-end;
-}
-{
-procedure tcustomdialogstringed.mouseevent(var info: mouseeventinfoty);
-begin
- inherited;
- tcustombuttonframe(fframe).mouseevent(info);
-end;
-}
-{
-function tcustomdialogstringed.iskeyexecute(const info: keyeventinfoty): boolean;
-
-begin
- with info do begin
-  result:= not readonly and (oe_keyexecute in foptionsedit) and (key = key_down) and 
-           (shiftstate = [ss_alt]);
- end;
-end;
-}
-(*
-procedure tcustomdialogstringed.dokeydown(var info: keyeventinfoty);
-begin
-{
- with info do begin
-  if iskeyexecute(info) then begin
-   include(info.eventstate,es_processed);
-   internalexecute;
-  end
-  else begin
-   inherited;
-  end;
- end;
-}
- fcontroller.dokeydown(info);
- if not (es_processed in info.eventstate) then begin
-  inherited;
- end;
-end;
-*)
 function tcustomdialogstringed.getframe: tellipsebuttonframe;
 begin
  result:= tellipsebuttonframe(inherited getframe);
@@ -505,35 +430,6 @@ begin
  inherited setframe(avalue);
 end;
 
-{
-procedure tcustomdialogstringed.updatereadonlystate;
-begin
- inherited;
- if fframe <> nil then begin
-  with frame do begin
-   if buttons.count > 0 then begin
-    frame.buttons[0].enabled:= not (oe_readonly in getoptionsedit);
-   end;
-  end;
- end;
-end;
-}
-{ tcustomdialogstringedit }
-{
-function tcustomdialogstringedit.execute(var avalue: msestring): boolean;
-var
- mr1: modalresultty;
-begin
- if canevent(tmethod(fonexecute)) then begin
-  mr1:= mr_ok;
-  fonexecute(self,avalue,mr1);
-  result:= mr1 = mr_ok;
- end
- else begin
-  result:= false;
- end;
-end;
-}
 function tcustomdialogstringedit.getonexecute: stringdialogexeceventty;
 begin
  result:= tstringdialogcontroller(fdialogcontroller).onexecute;

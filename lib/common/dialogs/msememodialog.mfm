@@ -23,7 +23,8 @@ object msememodialogfo: tmsememodialogfo
     bounds_cx = 386
     bounds_cy = 257
     anchors = [an_top, an_bottom]
-    optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_shiftreturn, oe_resetselectonexit, oe_nofirstarrownavig, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_shiftreturn, oe_resetselectonexit, oe_nofirstarrownavig, oe_caretonreadonly, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    reffontheight = 14
   end
   object tbutton1: tbutton
     taborder = 1

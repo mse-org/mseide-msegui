@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -18,45 +18,53 @@ uses
 type
               //used in MSEifi
  optioneditty = (oe_readonly,oe_undoonesc,            
-                    oe_closequery,oe_checkmrcancel,
-                    oe_nogray,
-                    oe_linebreak, 
-                       // if oe_shiftreturn -> shift key_return inserts linebreak
-                       // else         -> key_return inserts linebreak
-                    oe_shiftreturn,
-                    oe_forcereturncheckvalue, 
-                       //call checkvalue unconditionally by key_return
-                    oe_eatreturn,
-              //      oe_returntaborder, //key_return selects next widget in taborder
-                    //moved to twidget.optionswidget ow_keyreturntaborder
-                    oe_resetselectonexit,
+                 oe_closequery,oe_checkmrcancel,
+                 oe_nogray,
+                 oe_linebreak, 
+                    // if oe_shiftreturn -> shift key_return inserts linebreak
+                    // else         -> key_return inserts linebreak
+                 oe_shiftreturn,
+                 oe_forcereturncheckvalue, 
+                    //call checkvalue unconditionally by key_return
+                 oe_eatreturn,
+           //      oe_returntaborder, //key_return selects next widget in taborder
+                 //moved to twidget.optionswidget ow_keyreturntaborder
+                 oe_resetselectonexit,
 
-                    //same layout as strincoleditoptionty
-                    oe_exitoncursor,
-                    oe_nofirstarrownavig,
-                    oe_endonenter,
-                    oe_homeonenter,
-                    oe_autoselect, //selectall bei widget enter
-                    oe_autoselectonfirstclick,
-                    oe_caretonreadonly,
-                    oe_focusrectonreadonly,
-                    oe_trimright,
-                    oe_trimleft,
-                    oe_uppercase,
-                    oe_lowercase,
-                    oe_hintclippedtext,
-                    oe_locate,
-                    oe_casesensitive,
-                    
-                    oe_notnull,
- //                   oe_autopost,  //deprecated, moved to optiondeditdbty
-                    oe_autopopupmenu,
-                    oe_keyexecute, //alt+down-key starts dialog
-                    oe_checkvaluepaststatread,
-                    oe_savevalue,oe_savestate,oe_saveoptions
-                    );
+                 //same layout as strincoleditoptionty
+                 oe_exitoncursor,
+                 oe_nofirstarrownavig,
+                 oe_endonenter,
+                 oe_homeonenter,
+                 oe_autoselect, //selectall bei widget enter
+                 oe_autoselectonfirstclick,
+                 oe_caretonreadonly,
+                 oe_focusrectonreadonly,
+                 oe_trimright,
+                 oe_trimleft,
+                 oe_uppercase,
+                 oe_lowercase,
+                 oe_hintclippedtext,
+                 oe_locate,
+                 oe_casesensitive,
+                 
+                 oe_notnull,
+                 oe_savevalue,oe_savestate,oe_saveoptions,
+                 oe_checkvaluepaststatread,
+                 
+                 oe_autopopupmenu, //deprecated, moved to optionsedit1ty
+                 oe_keyexecute 
+                 );
  optionseditty = set of optioneditty;
- optionedit1ty = (oe1_noselectall,oe1_multiline);
+const
+ deprecatedoptionsedit = [oe_autopopupmenu,oe_keyexecute];
+ invisibleoptionsedit = [ord(oe_autopopupmenu),ord(oe_keyexecute)];
+ 
+type
+ optionedit1ty = (oe1_noselectall,oe1_multiline,
+                  oe1_autopopupmenu, 
+                  oe1_keyexecute,    //alt+down-key starts dialog
+                  oe1_readonlydialog);
  optionsedit1ty = set of optionedit1ty;
 
  dataeditstatety = (des_edited,des_emptytext,des_grayed,
@@ -108,10 +116,10 @@ const
                        oe_autoselect,oe_endonenter,
                        oe_autoselectonfirstclick,
                        oe_resetselectonexit,
-                       oe_autopopupmenu,oe_keyexecute,
+//                       oe_autopopupmenu,oe_keyexecute,
                        oe_checkvaluepaststatread,oe_savevalue,oe_savestate,
                        oe_checkmrcancel];
- defaultoptionsedit1 = [];
+ defaultoptionsedit1 = [oe1_autopopupmenu,oe1_keyexecute];
  
  nullcoord: gridcoordty = (col: 0; row: 0);
  invalidcell: gridcoordty = (col: invalidaxis; row: invalidaxis);

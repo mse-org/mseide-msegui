@@ -3177,7 +3177,7 @@ var
  mstr1: msestring;
 begin
  mstr1:= encodemsestring(getmsestringvalue(0));
- if memodialog(mstr1) = mr_ok then begin
+ if memodialog(mstr1,false) = mr_ok then begin
   setmsestringvalue(decodemsestring(mstr1));
  end;
 end;

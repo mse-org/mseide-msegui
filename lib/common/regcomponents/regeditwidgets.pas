@@ -28,7 +28,7 @@ uses
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,{msedialog,}msestrings,
  regwidgets,msearrayprops,typinfo,msestockobjects,msefoldedit,msebitmap,mseglob,
  msestream,mserealsumedit,msedatalist,msegui,msegrids,msesumlist,mseclasses,
- sysutils,regglob,msearrayutils;
+ sysutils,regglob,msearrayutils,mseeditglob;
 
 type
  tdropdowncolpropertyeditor = class(tarraypropertyeditor)
@@ -104,6 +104,11 @@ type
    function getinvisibleitems: tintegerset; override;
  end;
   
+ toptionseditpropertyeditor = class(tsetpropertyeditor)
+  protected
+   function getinvisibleitems: tintegerset; override;
+ end;
+  
 procedure Register;
 begin
  registercomponents('Edit',[twidgetgrid,
@@ -128,15 +133,19 @@ begin
  registercomponenttabhints(['Edit'],
  ['Edit widgets, twidgetgrid and widgets'+c_linefeed+
   'which can be placed into twidgetgrid']);
- registerpropertyeditor(tdropdowncols.classinfo,nil,'',tdropdowncolpropertyeditor);
+ registerpropertyeditor(tdropdowncols.classinfo,nil,'',
+                                      tdropdowncolpropertyeditor);
  registerpropertyeditor(ttabulators.classinfo,tcustomtextedit,'tabulators',
             toptionalpersistentarraypropertyeditor);
- registerpropertyeditor(tcustomitemlist.classinfo,nil,'',titemlistpropertyeditor);
+ registerpropertyeditor(tcustomitemlist.classinfo,nil,'',
+                                           titemlistpropertyeditor);
  registerpropertyeditor(typeinfo(twidgetcols),nil,'',twidgetcolspropertyeditor);
  registerpropertyeditor(typeinfo(tintegerarrayprop),tstockglyphdatabutton,'',
               tstockglypharraypropertyeditor);
- registerpropertyeditor(typeinfo(string),tdataimage,'value',tdataimagepropertyeditor);
- registerpropertyeditor(typeinfo(tmaskedbitmap),tdataimage,'bitmap',tclasspropertyeditor);
+ registerpropertyeditor(typeinfo(string),tdataimage,'value',
+                                                  tdataimagepropertyeditor);
+ registerpropertyeditor(typeinfo(tmaskedbitmap),tdataimage,'bitmap',
+                                                  tclasspropertyeditor);
  registerpropertyeditor(typeinfo(string),tdatalist,'sourcevalue',
                                            tdatalistsourcepropertyeditor);
  registerpropertyeditor(typeinfo(string),trealsumlist,'sourcelevel',
@@ -145,6 +154,8 @@ begin
                                       tsumlistsourceissumpropertyeditor);
  registerpropertyeditor(typeinfo(optionswidgetty),nil,'',
                                            toptionswidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(optionseditty),nil,'',
+                                           toptionseditpropertyeditor);
  registerpropertyeditor(typeinfo(string),trowstatelist,'sourcefoldlevel',
                                  trowstatelistsourcefoldlevelpropertyeditor);
  registerpropertyeditor(typeinfo(string),trowstatelist,'sourcefoldhidden',
@@ -281,6 +292,13 @@ end;
 function toptionswidgetpropertyeditor.getinvisibleitems: tintegerset;
 begin
  result:= invisibleoptionswidget;
+end;
+
+{ toptionseditpropertyeditor }
+
+function toptionseditpropertyeditor.getinvisibleitems: tintegerset;
+begin
+ result:= invisibleoptionsedit;
 end;
 
 { trowstatelistsourcefoldlevelpropertyeditor }

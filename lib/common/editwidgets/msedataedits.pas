@@ -279,8 +279,8 @@ type
    property empty_textcolor;
    property empty_textcolorbackground;
 
+   property optionsedit1; //before optionsedit!
    property optionsedit;
-   property optionsedit1;
    property font;
    property textflags;
    property textflagsactive;
