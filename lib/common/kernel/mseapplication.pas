@@ -331,6 +331,7 @@ type
    procedure langchanged; virtual;
    procedure beginwait(const aprocessmessages: boolean = false); virtual;
    procedure endwait; virtual;
+   function waitescaped: boolean; virtual;
    procedure idlesleep(const asleepus: integer);
                        //calls unlockall-relockall
    function candefocus: boolean; virtual;
@@ -1643,6 +1644,11 @@ begin
  if fhighrestimercount = 0 then begin
   sethighrestimer(false);
  end;
+end;
+
+function tcustomapplication.waitescaped: boolean;
+begin
+ result:= false;
 end;
 
 { tactivatorcontroller }

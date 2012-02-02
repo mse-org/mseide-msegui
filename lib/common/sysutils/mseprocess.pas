@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2010-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2010-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,18 +16,21 @@ uses
 const 
  defaultpipewaitus = 0;
 type
- processstatety = (prs_listening);
+ processstatety = (prs_listening,prs_waitcursor);
  processstatesty = set of processstatety;
  processoptionty = (pro_output,pro_erroroutput,pro_input,pro_errorouttoout,
-                    pro_tty,pro_echo,pro_icanon, //linux only
+                    pro_tty,pro_echo,pro_icanon,  //linux only
                     pro_nowaitforpipeeof,pro_nopipeterminate,
                     pro_inactive,pro_nostdhandle, //windows only
-                    pro_ctrlc //for tterminal
+                    pro_waitcursor,pro_checkescape,pro_processmessages,
+                               //kill process if esc pressed
+                    pro_ctrlc                     //for tterminal
                     );
  processoptionsty = set of processoptionty;
 const
  defaultgetprocessoutputoptions = [pro_inactive];
  defaultgetprocessoutputoptionserrorouttoout = [pro_inactive,pro_errorouttoout];
+ defaultstartprocessoptions = [pro_inactive];
  
 type   
  tmseprocess = class(tmsecomponent,istatfile,iprocmonitor)
@@ -119,6 +122,11 @@ function getprocessoutput(const acommandline: string; const todata: string;
               defaultgetprocessoutputoptionserrorouttoout): integer; overload;
                          //returns program exitcode, -1 in case of error
 
+function startprocessandwait(const acommandline: string;
+                         const atimeout: integer = -1;
+                         const aoptions: processoptionsty = 
+                            defaultgetprocessoutputoptions): integer; overload;
+                         //returns program exitcode, -1 in case of error
 implementation
 uses
  mseprocutils,msefileutils,mseapplication,sysutils,msesysintf,msebits,msesys,
@@ -164,6 +172,35 @@ begin
    end;
    fromdata:= proc1.ffromdata;
    errordata:= proc1.ferrordata;
+  end;
+ finally
+  proc1.free;
+ end;
+end;
+
+function startprocessandwait(const acommandline: string;
+                         const atimeout: integer = -1;
+                         const aoptions: processoptionsty = 
+                            defaultstartprocessoptions): integer; overload;
+                         //returns program exitcode, -1 in case of error
+var
+ proc1: tmseprocess;
+begin
+ result:= -1;
+ proc1:= tstringprocess.create(nil);
+ try
+  with proc1 do begin
+   commandline:= acommandline;
+   options:= aoptions - [pro_output,pro_erroroutput,pro_input];
+   active:= true;
+   if atimeout < 0 then begin
+    result:= waitforprocess;
+   end
+   else begin
+    if waitforprocess(atimeout) then begin
+     result:= exitcode;
+    end;
+   end;
   end;
  finally
   proc1.free;
@@ -248,6 +285,10 @@ procedure tmseprocess.procend;
 begin  
  fprochandle:= invalidprochandle;
  waitforpipeeof;
+ if prs_waitcursor in fstate then begin
+  exclude(fstate,prs_waitcursor);
+  application.endwait;
+ end;  
  doprocfinished;
 end;
 
@@ -267,7 +308,6 @@ var
  sessionleader: boolean;
  group: integer;
  opt1: execoptionsty;
-// bo1: boolean;
 begin
  sessionleader:= false;
  group:= -1;
@@ -329,6 +369,10 @@ begin
       finalizeexec;
      end
      else begin
+      if pro_waitcursor in foptions then begin
+       include(fstate,prs_waitcursor);
+       application.beginwait;
+      end;
       listen;
      end;
     finally
@@ -358,29 +402,38 @@ function tmseprocess.waitforprocess(const atimeoutus: integer): boolean;
 var
  int1: integer;
  bo1: boolean;
+ ts1: longword;
 begin
  result:= false;
-// application.lock;
-// try
-//  application.lock;
-  bo1:= prs_listening in fstate;
-  unlisten;
-//  application.unlock;
-  if bo1 then begin
-   int1:= application.unlockall;
-   result:= mseprocutils.getprocessexitcode(
-                                 fprochandle,fexitcode,atimeoutus);
-   application.relockall(int1);
+ bo1:= prs_listening in fstate;
+ unlisten;
+ if bo1 then begin
+  int1:= application.unlockall;
+  if foptions*[pro_checkescape,pro_processmessages] <> [] then begin
+   ts1:= timestep(atimeoutus);
+   repeat
+    if pro_processmessages in foptions then begin
+     application.processmessages;
+    end;
+    result:= mseprocutils.getprocessexitcode(fprochandle,fexitcode,100000);
+   until result or (pro_checkescape in foptions) and application.waitescaped or 
+                                          (atimeoutus >= 0) and timeout(ts1);
+   if not result then begin
+    terminateprocess(fprochandle);
+    procend;
+   end;
   end
   else begin
-   result:= true;
+   result:= mseprocutils.getprocessexitcode(fprochandle,fexitcode,atimeoutus);
   end;
-  if result  then begin
-   procend;
-  end;
-// finally
-//  application.unlock;
-// end;
+  application.relockall(int1);
+ end
+ else begin
+  result:= true;
+ end;
+ if result  then begin
+  procend;
+ end;
 end;
 
 function tmseprocess.waitforprocess: integer;
