@@ -413,7 +413,9 @@ begin
    ts1:= timestep(atimeoutus);
    repeat
     if pro_processmessages in foptions then begin
+     application.relockall(int1);
      application.processmessages;
+     int1:= application.unlockall;
     end;
     result:= mseprocutils.getprocessexitcode(fprochandle,fexitcode,100000);
    until result or (pro_checkescape in foptions) and application.waitescaped or 
