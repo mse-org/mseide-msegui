@@ -28,6 +28,7 @@ type
    tbutton2: tbutton;
   public
    constructor create(const aowner: tcomponent; const readonly: boolean);
+                                                                  reintroduce;
  end;
 
  tdialogdropdownbuttonframe = class(tdropdownbuttonframe)
