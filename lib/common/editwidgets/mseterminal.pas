@@ -415,8 +415,12 @@ begin
               (pro_ctrlc in optionsprocess) and running then begin
     command:= '^C';
     finputcolindex:= finputcolindex + 2;
-    fprocess.terminate;
     include(info.eventstate,es_processed);
+//    try
+     fprocess.terminate;
+//    except
+//     fprocess.kill;
+//    end;
    end
    else begin
     if shiftstate - [ss_shift] = [] then begin
