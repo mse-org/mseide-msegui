@@ -15365,6 +15365,7 @@ function tinternalapplication.eventloop(const amodalwindow: twindow;
  begin
   result:= not once or (fwaitcount = 0);
   if not result and (fmousewidget <> nil) then begin
+   capturemouse(nil,false);
    setmousewidget(nil);
   end;
  end; //canuievent

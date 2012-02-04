@@ -10519,7 +10519,7 @@ begin
    end;
   end;
  end;
- if info.eventkind = ek_buttonrelease then begin
+ if info.eventkind in [ek_buttonrelease,ek_mousecaptureend] then begin
   if gs_cellclicked in fstate then begin
    killrepeater;
   end;
