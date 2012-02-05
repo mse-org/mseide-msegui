@@ -48,7 +48,6 @@ type
    fmaxcommandhistory: integer;
    fcommandhistory: msestringarty;
    fhistoryindex: integer;
-//   fhistorybackup: msestring;
    function getinputfd: integer;
    procedure setinoutfd(const Value: integer);
    procedure setoptions(const avalue: terminaloptionsty);
@@ -416,11 +415,11 @@ begin
     command:= '^C';
     finputcolindex:= finputcolindex + 2;
     include(info.eventstate,es_processed);
-//    try
+    try
      fprocess.terminate;
-//    except
-//     fprocess.kill;
-//    end;
+    except
+     fprocess.kill;
+    end;
    end
    else begin
     if shiftstate - [ss_shift] = [] then begin
