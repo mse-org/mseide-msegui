@@ -792,8 +792,8 @@ type
 
  tactionpublishedwidgetnwr = class(tactionwidget)
   published
+   property optionswidget1; //first!
    property optionswidget;
-   property optionswidget1;
    property optionsskin;
    property color;
    property cursor;

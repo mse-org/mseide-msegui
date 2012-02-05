@@ -203,7 +203,7 @@ type
 
    property imagedist: integer read finfo.ca.imagedist write setimagedist default 0;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
-                      stored iscolorglyphstored default cl_glyph;
+                      stored iscolorglyphstored default cl_default;
    property shortcut: shortcutty read getshortcut write setshortcut 
                                     stored false default 0;
    property shortcut1: shortcutty read getshortcut1 write setshortcut1 

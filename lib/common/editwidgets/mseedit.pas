@@ -428,8 +428,8 @@ type
 
  tedit = class(tcustomedit)
   published
+   property optionsedit1; //before optionsedit!
    property optionsedit;
-   property optionsedit1;
    property font;
    property textflags;
    property textflagsactive;
@@ -1234,12 +1234,18 @@ begin
 end;
 }
 procedure tcustomedit.setoptionsedit(const avalue: optionseditty);
+var
+ opt1: optionsedit1ty;
 begin
-// if oe_autopost in avalue then begin
-//  include(foptionsdb,oed_autopost);
-// end;
  if foptionsedit <> avalue then begin
-  foptionsedit:= avalue {- [oe_autopost]};
+  foptionsedit:= avalue - deprecatedoptionsedit;
+  if (csreading in componentstate) and 
+                           (avalue * deprecatedoptionsedit <> []) then begin
+   opt1:= feditor.optionsedit1;
+   updatebit(longword(opt1),ord(oe1_autopopupmenu),oe_autopopupmenu in avalue);
+   updatebit(longword(opt1),ord(oe1_keyexecute),oe_keyexecute in avalue);
+   feditor.optionsedit1:= opt1;
+  end;
   updatereadonlystate;
  end;
 end;
@@ -1250,8 +1256,15 @@ begin
 end;
 
 procedure tcustomedit.setoptionsedit1(const avalue: optionsedit1ty);
+var
+ optbefore: optionsedit1ty;
 begin
+ optbefore:= feditor.optionsedit1; 
  feditor.optionsedit1:= avalue;
+ if oe1_readonlydialog in optionsedit1ty(longword(avalue) xor 
+                                           longword(optbefore)) then begin
+  updatereadonlystate;
+ end;
 end;
 
 function tcustomedit.geteditfont: tfont;
@@ -1480,83 +1493,12 @@ function tcustomedit.geteditor: tinplaceedit;
 begin
  result:= feditor;
 end;
-(*
-procedure tcustomedit.onundo(const sender: tobject);
-begin
- feditor.undo;
-end;
 
-procedure tcustomedit.oncopy(const sender: tobject);
-begin
- feditor.copytoclipboard;
-end;
-
-procedure tcustomedit.oncut(const sender: tobject);
-begin
- feditor.cuttoclipboard;
-end;
-
-procedure tcustomedit.onpaste(const sender: tobject);
-begin
- feditor.pastefromclipboard;
-end;
-
-procedure tcustomedit.dopopup(var amenu: tpopupmenu;
-                        var mouseinfo: mouseeventinfoty);
-var
- states: array[0..3] of actionstatesty;
- sepchar: msechar;
- bo1: boolean;
-begin
- if oe_autopopupmenu in foptionsedit then begin
-  if feditor.canundo then begin
-   states[0]:= []; //undo
-  end
-  else begin
-   states[0]:= [as_disabled];
-  end;
-  bo1:= feditor.cancopy or hasselection;
-  if bo1 or cangridcopy then begin
-   states[1]:= []; //copy
-   if bo1 and not (oe_readonly in foptionsedit) then begin
-    states[2]:= [];
-   end
-   else begin
-    states[2]:= [as_disabled]; //cut
-   end;
-  end
-  else begin
-   states[1]:= [as_disabled]; //copy
-   states[2]:= [as_disabled]; //cut
-  end;
-  if feditor.canpaste then begin
-   states[3]:= []; //paste
-  end
-  else begin
-   states[3]:= [as_disabled];
-  end;
-  if popupmenu <> nil then begin
-   sepchar:= popupmenu.shortcutseparator;
-  end
-  else begin
-   sepchar:= tcustommenu.getshortcutseparator(amenu);
-  end;
-  tpopupmenu.additems(amenu,self,mouseinfo,
-     [stockobjects.captions[sc_Undo]+sepchar+'(Esc)',
-      stockobjects.captions[sc_Copy]+sepchar+'(Ctrl+C)',
-      stockobjects.captions[sc_Cut]+sepchar+'(Ctrl+X)',
-      stockobjects.captions[sc_Paste]+sepchar+'(Ctrl+V)'],
-     [],states,[{$ifdef FPC}@{$endif}onundo,{$ifdef FPC}@{$endif}oncopy,
-     {$ifdef FPC}@{$endif}oncut,{$ifdef FPC}@{$endif}onpaste]);
- end;
- inherited;
-end;
-*)
 procedure tcustomedit.updatepopupmenu(var amenu: tpopupmenu;
                                         var mouseinfo: mouseeventinfoty);
 begin
- if oe_autopopupmenu in foptionsedit then begin
-  feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,hasselection{,cangridcopy});
+ if oe1_autopopupmenu in feditor.optionsedit1 then begin
+  feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,hasselection);
  end;
  inherited;
 end;

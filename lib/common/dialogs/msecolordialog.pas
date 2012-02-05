@@ -124,7 +124,7 @@ type
  end;
  
 function colordialog(var acolor: colorty): modalresultty;
-//threadsave
+//threadsafe
 
 implementation
 uses

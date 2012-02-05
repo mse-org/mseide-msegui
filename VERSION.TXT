@@ -1,5 +1,8 @@
 MSEide+MSEgui breaking changes version history
 
+2012-02-01
+ optionedit oe_autopoupmenu,oe_keyexecute->
+ optionedit1 oe1_autopoupmenu,oe1_keyexecute->
 2012-01-27
  optionwidget ow_fontglyphheight,ow_fontlineheight,ow_autoscale ->
  optionwidget1 ow1_fontglyphheight,ow1_fontlineheight,ow1_autoscale.

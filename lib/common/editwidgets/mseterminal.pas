@@ -48,7 +48,6 @@ type
    fmaxcommandhistory: integer;
    fcommandhistory: msestringarty;
    fhistoryindex: integer;
-//   fhistorybackup: msestring;
    function getinputfd: integer;
    procedure setinoutfd(const Value: integer);
    procedure setoptions(const avalue: terminaloptionsty);
@@ -104,8 +103,8 @@ type
                                                     write fcommandhistory;
    property inputcolindex: integer read finputcolindex write finputcolindex;
   published
+   property optionsedit1; //before optionsedit!
    property optionsedit default defaultterminaleditoptions;
-   property optionsedit1;
    property font;
    property cursorreadonly;
    property maxchars: integer read fmaxchars write fmaxchars default 0;
@@ -415,8 +414,12 @@ begin
               (pro_ctrlc in optionsprocess) and running then begin
     command:= '^C';
     finputcolindex:= finputcolindex + 2;
-    fprocess.terminate;
     include(info.eventstate,es_processed);
+    try
+     fprocess.terminate;
+    except
+     fprocess.kill;
+    end;
    end
    else begin
     if shiftstate - [ss_shift] = [] then begin

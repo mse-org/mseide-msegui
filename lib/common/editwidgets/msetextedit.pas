@@ -30,8 +30,7 @@ const
               [oe_linebreak,oe_nofirstarrownavig]) -
               [oe_autoselect,oe_autoselectonfirstclick,oe_endonenter,
                oe_resetselectonexit,oe_undoonesc,oe_shiftreturn,
-               oe_trimleft,oe_trimright,oe_uppercase,oe_lowercase{,
-               oe_autopopupmenu}];
+               oe_trimleft,oe_trimright,oe_uppercase,oe_lowercase];
 
  texteditminimalframe: framety = (left: 1; top: 0; right: 1; bottom: 0);
  defaulttexteditwidgetoptions = 
@@ -307,8 +306,8 @@ type
    property font;
    property caretwidth;
    property cursorreadonly;
+   property optionsedit1; //before optionsedit!
    property optionsedit;
-   property optionsedit1;
    property textflags;
    property textflagsactive;
 

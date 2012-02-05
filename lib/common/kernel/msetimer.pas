@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -9,7 +9,7 @@
 }
 unit msetimer;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
 
 interface
 uses
@@ -97,7 +97,8 @@ procedure deinit;
 
 implementation
 uses
- msesysintf1,msesysintf,SysUtils,mseapplication,msesystypes,msesysutils;
+ msesysintf1,msesysintf,SysUtils,mseapplication,msesystypes,msesysutils,
+ mseformatstr;
 
 const
  enabletimertag = 8346320;
@@ -110,11 +111,45 @@ type
   prevpo,nextpo: ptimerinfoty;
   ontimer: proceventty;
   options: timeroptionsty
+  {$ifdef mse_debugtimer}
+  ;checked: boolean
+  {$endif}
  end;
  
 var
  first: ptimerinfoty;
  mutex: mutexty;
+{$ifdef mse_debugtimer}
+ timeitemcount: integer;
+
+procedure checktimer;
+var
+ int1: integer;
+ po1,po2: ptimerinfoty;
+begin
+ int1:= 0;
+ po1:= first;
+ while po1 <> nil do begin
+  inc(int1);
+  if po1^.checked then begin
+   raise exception.create('Recursion in timer list.');
+  end;
+  po1^.checked := true;
+  if (po1^.nextpo <> nil) and (po1^.nextpo^.prevpo <> po1) then begin
+   raise exception.create('Invalid back link in timer list');
+  end;
+  po1:= po1^.nextpo;
+ end;
+ if int1 <> timeitemcount then begin
+  raise exception.create('Invalid timer item count.');
+ end;
+ po1:= first;
+ while po1 <> nil do begin
+  po1^.checked:= false;
+  po1:= po1^.nextpo;
+ end;
+end;
+{$endif}
 
 procedure extract(po: ptimerinfoty);
           //mutex has to be locked
@@ -131,6 +166,11 @@ begin
  if po^.nextpo <> nil then begin
   po^.nextpo^.prevpo:= po^.prevpo;
  end;
+{$ifdef mse_debugtimer}
+ dec(timeitemcount);
+ checktimer;
+ inc(timeitemcount);
+{$endif}
 end;
 
 procedure insert(po: ptimerinfoty); //mutex has to be locked
@@ -174,6 +214,9 @@ begin
    po^.nextpo:= po1;
   end;
  end;
+{$ifdef mse_debugtimer}
+ checktimer;
+{$endif}
 end;
 
 procedure killtimertick(aontimer: proceventty);
@@ -207,6 +250,9 @@ var
 begin
  new(po);
  sys_mutexlock(mutex);
+ {$ifdef mse_debugtimer}
+ inc(timeitemcount);
+{$endif}
  time:= sys_gettimeus;
  if to_absolute in aoptions then begin
   ainterval:= ainterval - time;
@@ -242,7 +288,8 @@ end;
 
 var
  timebefore: longword;
- 
+ tickcount: integer;
+
 procedure tick(sender: tobject);
 var
  time: longword;
@@ -250,10 +297,18 @@ var
  po,po2: ptimerinfoty;
  ontimer: proceventty;
  int1: integer;
+ tickcountbefore: integer;
+label
+ endlab;
 begin
  sys_mutexlock(mutex);
  if first <> nil then begin
+{$ifdef mse_debugtimer}
+  checktimer;
+{$endif}
   time:= sys_gettimeus;
+  inc(tickcount);
+  tickcountbefore:= tickcount;
   ca1:= time-timebefore;
   timebefore:= time;
   if integer(ca1) < 0 then begin              //clock has been changed
@@ -271,11 +326,17 @@ begin
    if (to_single in po^.options) or not assigned(ontimer) then begin
                   //single shot or killed, remove item
     dispose(po);
+   {$ifdef mse_debugtimer}
+    dec(timeitemcount);
+   {$endif}
     if assigned(ontimer) then begin
      try
       ontimer;
      except
       application.handleexception(sender);
+     end;
+     if tickcount <> tickcountbefore then begin
+      goto endlab; //processmessages called
      end;
     end;
    end
@@ -302,6 +363,10 @@ begin
       except
        application.handleexception(sender);
       end;
+      if tickcount <> tickcountbefore then begin
+       goto endlab; //processmessages called,
+                    // tick leak possible for current item
+      end;
      end;
     end;
    end;
@@ -311,6 +376,10 @@ begin
    starttimer(time);
   end;
  end;
+endlab:
+{$ifdef mse_debugtimer}
+ checktimer;
+{$endif}
  sys_mutexunlock(mutex);
 end;
 

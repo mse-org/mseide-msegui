@@ -2329,7 +2329,8 @@ type
    procedure beginwait(const aprocessmessages: boolean = false); override;
    procedure endwait; override;
    function waiting: boolean;
-   function waitescaped: boolean; //true if escape pressed while waiting
+   function waitescaped: boolean; override;
+                //true if escape pressed while waiting
 
    procedure resetwaitdialog;   
    function waitdialog(const athread: tthreadcomp = nil; const atext: msestring = '';
@@ -14654,7 +14655,6 @@ var
  abspos: pointty;
  int1: integer;
  bo1: boolean;
-// ek1: eventkindty;
  widget1: twidget;
  pt1: pointty;
 begin
@@ -14741,14 +14741,6 @@ begin
      end;
     end;
     fmouseparkeventinfo:= info.mouse;
-    {
-    if factmousewindow <> window then begin
-     ek1:= info.eventkind;
-     info.eventkind:= ek_mouseenter;
-     window.dispatchmouseevent(info,nil);
-     info.eventkind:= ek1;
-    end;
-    }
     factmousewindow:= window;
     fmouseparktimer.interval:= mouseparktime;
     fmouseparktimer.enabled:= true;
@@ -15368,6 +15360,15 @@ function tinternalapplication.eventloop(const amodalwindow: twindow;
   end;
   result:= po2 = nil;
  end;
+
+ function canuievent: boolean;
+ begin
+  result:= not once or (fwaitcount = 0);
+  if not result and (fmousewidget <> nil) then begin
+   capturemouse(nil,false);
+   setmousewidget(nil);
+  end;
+ end; //canuievent
  
 var
  modalinfo: modalinfoty;
@@ -15400,7 +15401,9 @@ begin       //eventloop
  end;
  fcurrmodalinfo:= @modalinfo;
  waitcountbefore:= fwaitcount;
- fwaitcount:= 0;
+ if not once then begin
+  fwaitcount:= 0;
+ end;
  checkcursorshape;
  if amodalwindow <> nil then begin
   if fmodalwindow <> nil then begin
@@ -15651,7 +15654,7 @@ begin       //eventloop
         if fmousewinid <> twindowevent(event).fwinid then begin
                   //there can be an additional enterwindow by mouse click
          processwindowcrossingevent(twindowevent(event));
-         if event is tmouseenterevent then begin
+         if canuievent and (event is tmouseenterevent) then begin
           processmouseevent(tmouseenterevent(event));
          end;
         end;
@@ -15687,15 +15690,19 @@ begin       //eventloop
         end;
        end;
        ek_mousemove: begin
-        if checkiflast(ek_mousemove) then begin
+        if checkiflast(ek_mousemove) and canuievent then begin
          processmouseevent(tmouseevent(event));
         end;
        end;
        ek_buttonpress,ek_buttonrelease,ek_mousewheel: begin
-        processmouseevent(tmouseevent(event));
+        if canuievent then begin
+         processmouseevent(tmouseevent(event));
+        end;
        end;
        ek_keypress,ek_keyrelease: begin
-        processkeyevent(tkeyevent(event));
+        if canuievent then begin
+         processkeyevent(tkeyevent(event));
+        end;
        end;
        ek_synchronize: begin
         tsynchronizeevent(event).deliver;

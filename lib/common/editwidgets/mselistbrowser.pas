@@ -567,8 +567,8 @@ type
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
    property onclientmouseevent: mouseeventty read fonclientmouseevent 
                            write fonclientmouseevent;
+   property optionsedit1; //before optionsedit!
    property optionsedit;
-   property optionsedit1;
    property font;
    property passwordchar;
    property maxlength;

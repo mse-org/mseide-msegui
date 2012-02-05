@@ -26,6 +26,9 @@ type
    tstatfile1: tstatfile;
    tbutton1: tbutton;
    tbutton2: tbutton;
+  public
+   constructor create(const aowner: tcomponent; const readonly: boolean);
+                                                                  reintroduce;
  end;
 
  tdialogdropdownbuttonframe = class(tdropdownbuttonframe)
@@ -68,17 +71,17 @@ type
 //   property frame: tellipsebuttonframe read getframe write setframe;
  end;
   
-function memodialog(var avalue: msestring): modalresultty;
+function memodialog(var avalue: msestring; const readonly: boolean): modalresultty;
  
 implementation
 uses
  msememodialog_mfm,mseeditglob,msekeyboard,msestockobjects;
  
-function memodialog(var avalue: msestring): modalresultty;
+function memodialog(var avalue: msestring; const readonly: boolean): modalresultty;
 var
  dia1: tmsememodialogfo;
 begin
- dia1:= tmsememodialogfo.create(nil);
+ dia1:= tmsememodialogfo.create(nil,readonly);
  try
   dia1.memo.value:= avalue;
   result:= dia1.show(true);
@@ -94,7 +97,7 @@ end;
 
 function tmemodialogcontroller.execute(var avalue: msestring): boolean;
 begin
- result:= memodialog(avalue) = mr_ok;
+ result:= memodialog(avalue,fowner.readonly) = mr_ok;
 end;
 
 { tmemodialogedit }
@@ -143,7 +146,7 @@ end;
 }
 function tmemodialoghistoryedit.execute(var avalue: msestring): boolean;
 begin
- result:= memodialog(avalue) = mr_ok;
+ result:= memodialog(avalue,readonly) = mr_ok;
 end;
 
 procedure tmemodialoghistoryedit.setexecresult(var avalue: msestring);
@@ -166,57 +169,7 @@ function tmemodialoghistoryedit.createdropdowncontroller: tcustomdropdowncontrol
 begin
  result:= tdialoghistorycontroller.create(idropdownlist(self));
 end;
-{
-procedure tmemodialoghistoryedit.mouseevent(var info: mouseeventinfoty);
-begin
- inherited;
- tcustombuttonframe(fframe).mouseevent(info);
-end;
 
-function tmemodialoghistoryedit.iskeyexecute(const info: keyeventinfoty): boolean;
-
-begin
- with info do begin
-  result:= (oe_keyexecute in foptionsedit) and (key = key_down) and 
-           (shiftstate = [ss_alt]);
- end;
-end;
-
-procedure tmemodialoghistoryedit.dokeydown(var info: keyeventinfoty);
-begin
- with info do begin
-  if iskeyexecute(info) then begin
-   include(info.eventstate,es_processed);
-   internalexecute;
-  end
-  else begin
-   inherited;
-  end;
- end;
-end;
-
-function tmemodialoghistoryedit.getframe: tellipsebuttonframe;
-begin
- result:= tellipsebuttonframe(inherited getframe);
-end;
-
-procedure tmemodialoghistoryedit.setframe(const avalue: tellipsebuttonframe);
-begin
- inherited setframe(avalue);
-end;
-
-procedure tmemodialoghistoryedit.updatereadonlystate;
-begin
- inherited;
- if fframe <> nil then begin
-  with frame do begin
-   if buttons.count > 0 then begin
-    frame.buttons[0].enabled:= not (oe_readonly in getoptionsedit);
-   end;
-  end;
- end;
-end;
-}
 { tdialoghistorycontroller }
 
 function tdialoghistorycontroller.getbuttonframeclass: dropdownbuttonframeclassty;
@@ -242,6 +195,15 @@ end;
 procedure tdialogdropdownbuttonframe.setbuttondialog(const avalue: tdropdownbutton);
 begin
  tdropdownbutton(buttons[1]).assign(avalue);
+end;
+
+{ tmsememodialogfo }
+
+constructor tmsememodialogfo.create(const aowner: tcomponent;
+               const readonly: boolean);
+begin
+ inherited create(aowner);
+ memo.readonly:= readonly;
 end;
 
 end.

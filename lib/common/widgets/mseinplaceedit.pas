@@ -206,7 +206,8 @@ type
    function mousepostotextindex(const apos: pointty): integer;
    function textindextomousepos(const aindex: integer): pointty;
 
-   property optionsedit1: optionsedit1ty read foptionsedit1 write foptionsedit1;
+   property optionsedit1: optionsedit1ty read foptionsedit1 
+                        write foptionsedit1 default defaultoptionsedit1;
    property textflags: textflagsty read ftextflags write settextflags;
    property textflagsactive: textflagsty read ftextflagsactive write settextflagsactive;
    property passwordchar: msechar read fpasswordchar write setpasswordchar default #0;
@@ -357,6 +358,7 @@ begin
  fmaxlength:= -1;
  ffontcolor:= cl_none;
  ffontcolorbackground:= cl_none;
+ foptionsedit1:= defaultoptionsedit1;
  if istextedit then begin
   include(fstate,ies_istextedit);
  end;
