@@ -21,6 +21,7 @@ type
  processoptionty = (pro_output,pro_erroroutput,pro_input,pro_errorouttoout,
                     pro_tty,pro_echo,pro_icanon,  //linux only
                     pro_nowaitforpipeeof,pro_nopipeterminate,
+                    pro_usepipewritehandles,
                     pro_inactive,pro_nostdhandle, //windows only
                     pro_waitcursor,pro_checkescape,pro_processmessages,
                                //kill process if esc pressed
@@ -361,6 +362,9 @@ begin
      if pro_nostdhandle in foptions then begin
       include(opt1,exo_nostdhandle);
      end;
+     if pro_usepipewritehandles in foptions then begin
+      include(opt1,exo_usepipewritehandles);
+     end;
      fprochandle:= execmse2(syscommandline(fcommandline1),
            inp,outp,erroroutp,{sessionleader,}group,opt1
            {pro_inactive in foptions,false,
@@ -662,6 +666,9 @@ begin
  application.lock;
  try
   if running then begin
+   finput.close;
+   foutput.pipereader.terminate;
+   ferroroutput.pipereader.terminate;
    syserror(sys_killprocess(fprochandle));
   end;
  finally
