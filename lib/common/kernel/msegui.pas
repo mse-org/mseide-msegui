@@ -6301,10 +6301,12 @@ constructor twidget.create(const aowner: tcomponent;
              const aparentwidget: twidget; const aiswidget: boolean = true);
 begin
  create(aowner);
+ initnewcomponent(1);
  setlockedparentwidget(aparentwidget);
  if not aiswidget then begin
   exclude(fwidgetstate,ws_iswidget);
  end;
+ initnewwidget(1);
 end;
 
 procedure twidget.afterconstruction;
