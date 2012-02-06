@@ -1569,6 +1569,8 @@ type
    constructor create(const aowner: tcomponent; 
                       const aparentwidget: twidget;
                       const aiswidget: boolean = true); overload;
+   constructor createandinit(const aowner: tcomponent; 
+                      const aparentwidget: twidget); overload;
    destructor destroy; override;
    procedure afterconstruction; override;   
    procedure initnewcomponent(const ascale: real); override;
@@ -6301,11 +6303,17 @@ constructor twidget.create(const aowner: tcomponent;
              const aparentwidget: twidget; const aiswidget: boolean = true);
 begin
  create(aowner);
- initnewcomponent(1);
  setlockedparentwidget(aparentwidget);
  if not aiswidget then begin
   exclude(fwidgetstate,ws_iswidget);
  end;
+end;
+
+constructor twidget.createandinit(const aowner: tcomponent; 
+                      const aparentwidget: twidget);
+begin
+ create(aowner,aparentwidget);
+ initnewcomponent(1);
  initnewwidget(1);
 end;
 
