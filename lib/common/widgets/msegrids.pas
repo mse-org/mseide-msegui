@@ -216,7 +216,8 @@ type
  gridstate1ty = (gs1_showcellinvalid,gs1_sortvalid,gs1_rowsortinvalid,
                  gs1_sortmoving,gs1_sortchangelock,gs1_rowinserted,
                  gs1_gridsorted,gs1_dbsorted,gs1_rowdeleting,
-                 gs1_focuscellonenterlock,gs1_forcenullcheck,
+                 gs1_focuscellonenterlock,gs1_mousecaptureendlock,
+                 gs1_forcenullcheck,
                  gs1_cellsizesyncing);
  gridstates1ty = set of gridstate1ty;
 
@@ -10519,7 +10520,9 @@ begin
    end;
   end;
  end;
- if info.eventkind in [ek_buttonrelease,ek_mousecaptureend] then begin
+ if (info.eventkind = ek_buttonrelease) or 
+          (info.eventkind = ek_mousecaptureend) and 
+                    not (gs1_mousecaptureendlock in fstate1) then begin
   if gs_cellclicked in fstate then begin
    killrepeater;
   end;

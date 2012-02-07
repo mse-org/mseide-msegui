@@ -315,6 +315,7 @@ type
    procedure focusunlock;
 
    procedure seteditfocus;   
+   procedure setcellclientclick(const awidget: twidget);
    function editwidgetatpos(const apos: pointty; out cell: gridcoordty): twidget;
    function widgetcell(const awidget: twidget): gridcoordty;
    function cellwidget(const acell: gridcoordty): twidget;
@@ -3270,6 +3271,8 @@ begin
 end;
 
 procedure tcustomwidgetgrid.mouseevent(var info: mouseeventinfoty);
+var
+ bo1: boolean;
 begin
  fmousefocusedcell:= ffocusedcell;
  fmouseactivewidget:= factivewidget;
@@ -3278,7 +3281,15 @@ begin
           not (gs_mousecellredirected in fstate) and 
                 checkreflectmouseevent(info,false) then begin
   fmousefocusedcell.col:= -1;
-  releasemouse;
+  bo1:= gs1_mousecaptureendlock in fstate1;
+  include(fstate1,gs1_mousecaptureendlock);
+  try
+   releasemouse;
+  finally
+   if not bo1 then begin
+    exclude(fstate1,gs1_mousecaptureendlock);
+   end;
+  end;
   if ffocusedcell.col >= 0 then begin
    with twidgetcols(fdatacols)[ffocusedcell.col] do begin
     if fintf <> nil then begin
@@ -3464,6 +3475,23 @@ begin
  end
  else begin
   activate;
+ end;
+end;
+
+procedure tcustomwidgetgrid.setcellclientclick(const awidget: twidget);
+var
+ bo1: boolean;
+begin
+ if factivewidget = awidget then begin
+  bo1:= gs1_mousecaptureendlock in fstate1;
+  try
+   include(fstate1,gs1_mousecaptureendlock);
+   twidget1(awidget).setclientclick;
+  finally
+   if not bo1 then begin
+    exclude(fstate1,gs1_mousecaptureendlock);
+   end;
+  end;
  end;
 end;
 
