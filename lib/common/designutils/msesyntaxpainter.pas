@@ -543,7 +543,32 @@ begin
         end;
        end;
        bo1:= true;
-       if scopeinfopo^.hasendtokens or scopeinfopo^.return then begin
+       if (length(scopeinfopo^.starttokens) > 0) and 
+               (char(byte(wpo1^)) in scopestartchars) then begin
+                       //starttoken suchen
+        for int1:= 0 to high(scopeinfopo^.starttokens) do begin
+         if msestartsstr(pointer(scopeinfopo^.starttokens[int1].token),wpo1) then begin
+          bo1:= false;
+          int2:= length(scopeinfopo^.starttokens[int1].token);
+          if scopeinfopo^.starttokens[int1].fontinfonr <> 0 then begin
+           changed:= setcharstyle1(format,wpo1-startpo,int2,
+                    charstyles[scopeinfopo^.starttokens[int1].fontinfonr]) or changed;
+           int3:= int2;
+          end
+          else begin
+           int3:= 0;     //keine sonderbehandlung
+          end;
+          pushscope(scopeinfopo^.starttokens[int1]);
+          changed:= setcharstyle1(format,wpo1-startpo+int3,bigint,
+                         charstyles[scopeinfopo^.fontinfonr]) or changed;
+          inc(wpo1,int2);
+          dec(alen,int2);
+          dec(keywordlen,int2);
+          break;
+         end;
+        end;
+       end;
+       if bo1 and (scopeinfopo^.hasendtokens or scopeinfopo^.return) then begin
         if (length(scopeinfopo^.endtokens) > 0) then begin
          if (char(byte(wpo1^)) in scopeendchars) then begin
                        //endtoken suchen
@@ -573,39 +598,13 @@ begin
          if not scopeinfopo^.return and (wpo1^ <> #0) then begin
           inc(wpo1);
          end;       //else return immediately
-//         dec(alen);
-//         dec(keywordlen);
          bo1:= false;
          popscope;
          changed:= setcharstyle1(format,wpo1-startpo,bigint,
                          charstyles[scopeinfopo^.fontinfonr]) or changed;
         end;
        end;
-       if bo1 and (length(scopeinfopo^.starttokens) > 0) and 
-               (char(byte(wpo1^)) in scopestartchars) then begin
-                       //starttoken suchen
-        for int1:= 0 to high(scopeinfopo^.starttokens) do begin
-         if msestartsstr(pointer(scopeinfopo^.starttokens[int1].token),wpo1) then begin
-          bo1:= false;
-          int2:= length(scopeinfopo^.starttokens[int1].token);
-          if scopeinfopo^.starttokens[int1].fontinfonr <> 0 then begin
-           changed:= setcharstyle1(format,wpo1-startpo,int2,
-                    charstyles[scopeinfopo^.starttokens[int1].fontinfonr]) or changed;
-           int3:= int2;
-          end
-          else begin
-           int3:= 0;     //keine sonderbehandlung
-          end;
-          pushscope(scopeinfopo^.starttokens[int1]);
-          changed:= setcharstyle1(format,wpo1-startpo+int3,bigint,
-                         charstyles[scopeinfopo^.fontinfonr]) or changed;
-          inc(wpo1,int2);
-          dec(alen,int2);
-          dec(keywordlen,int2);
-          break;
-         end;
-        end;
-       end;
+       
        if bo1 then begin
         inc(wpo1);
         dec(alen);
