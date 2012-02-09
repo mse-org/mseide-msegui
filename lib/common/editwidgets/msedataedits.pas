@@ -2930,6 +2930,7 @@ end;
 constructor tcustommemoedit.create(aowner: tcomponent);
 begin
  inherited;
+ internalcreateframe;
  foptionswidget:= defaultoptionswidgetmousewheel;
  foptionsedit:= defaultmemooptionsedit;
  optionsedit1:= defaultmemooptionsedit1;
@@ -3180,7 +3181,9 @@ end;
 procedure tcustommemoedit.setupeditor;
 begin
  inherited;
- updatescrollbars;
+ if not (fs_creating in tcustomframe1(fframe).fstate) then begin
+  updatescrollbars;
+ end;
 end;
 
 procedure tcustommemoedit.domousewheelevent(var info: mousewheeleventinfoty);

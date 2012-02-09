@@ -170,11 +170,8 @@ type
  framestatety = (fs_sbhorzon,fs_sbverton,fs_sbhorzfix,fs_sbvertfix,
                  fs_sbhorztop,fs_sbvertleft,
                  fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom,
-                 fs_nowidget,fs_nosetinstance,fs_disabled,
+                 fs_nowidget,fs_nosetinstance,fs_disabled,fs_creating,
                  fs_cancaptionsyncx,fs_cancaptionsyncy,
-                 {
-                 fs_captiondistouter,fs_captionnoclip,fs_captionframecentered,
-                 }
                  fs_drawfocusrect,fs_paintrectfocus,
                  fs_captionfocus,fs_captionhint,fs_rectsvalid,
                  fs_widgetactive,fs_paintposinited,fs_needsmouseinvalidate);
@@ -3567,6 +3564,7 @@ constructor tcustomframe.create(const intf: iframe);
 var
  ws1: widgetstates1ty;
 begin
+ include(fstate,fs_creating);
  fintf:= intf;
  ws1:= fintf.getwidget.fwidgetstate1;
  if ws1_noframewidgetshift in ws1 then begin
@@ -4028,6 +4026,7 @@ begin
  else begin
   exclude(fstate,fs_rectsvalid);
  end;
+ exclude(fstate,fs_creating);
 end;
 
 procedure tcustomframe.checkstate;

@@ -3049,31 +3049,37 @@ var
  po1: pointty;
 begin
  with info do begin
-  if not (es_reflected in eventstate)  and
-   (eventkind in [ek_mousemove,ek_mousepark,ek_buttonpress,ek_buttonrelease]) then begin
-   po1:= translateclientpoint(nullpoint,sender,self);
-   addpoint1(pos,po1);
-   if sender = factivewidget then begin
-    clientmouseevent(info);
-   end
-   else begin
-    with fobjectpicker do begin
-     if (sender <> fcontainer2) and (sender <> self) and
-            ((fpickkind = pok_datacolsize) or (eventkind <> ek_buttonpress)) then begin
-      include(fstate,gs_child);
-      mouseevent(info);
-      exclude(fstate,gs_child);
-      if not (fpickkind in [pok_datacolsize,pok_datacol]) then begin
-       exclude(eventstate,es_processed);
-      end
-      else begin
-       include(eventstate,es_processed);
+  if not (es_reflected in eventstate)  then begin
+   if (eventkind in [ek_mousemove,ek_mousepark,ek_buttonpress,ek_buttonrelease]) then begin
+    po1:= translateclientpoint(nullpoint,sender,self);
+    addpoint1(pos,po1);
+    if sender = factivewidget then begin
+     clientmouseevent(info);
+    end
+    else begin
+     with fobjectpicker do begin
+      if (sender <> fcontainer2) and (sender <> self) and
+             ((fpickkind = pok_datacolsize) or (eventkind <> ek_buttonpress)) then begin
+       include(fstate,gs_child);
+       mouseevent(info);
+       exclude(fstate,gs_child);
+       if not (fpickkind in [pok_datacolsize,pok_datacol]) then begin
+        exclude(eventstate,es_processed);
+       end
+       else begin
+        include(eventstate,es_processed);
+       end;
       end;
      end;
     end;
+    subpoint1(pos,po1);
+   end
+   else begin
+    if (eventkind = ek_mousecaptureend) and (sender = factivewidget) then begin
+     clientmouseevent(info);
+    end;
    end;
-   subpoint1(pos,po1);
-  end;
+  end
  end;
  inherited;
 end;
