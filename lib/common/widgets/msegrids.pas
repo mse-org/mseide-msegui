@@ -8016,17 +8016,18 @@ end;
 
 function tdatacols.getselectedrows: integerarty;
 var
- int1,int2: integer;
+ int1,int2,int3: integer;
  po1: prowstatety;
 begin
  result:= nil;
  po1:= frowstate.datapo;
  int2:= 0;
+ int3:= frowstate.fsize;
  for int1:= 0 to fgrid.frowcount - 1 do begin
   if po1^.selected and wholerowselectedmask <> 0 then begin
    additem(result,int1,int2);
   end;
-  inc(po1);
+  inc(pchar(po1),int3);
  end;
  setlength(result,int2);
 end;
