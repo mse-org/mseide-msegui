@@ -297,9 +297,9 @@ type
   notext: boolean;
   ismousecell: boolean;
   datapo: pointer;
-//  griddatalink: pointer;
   rowstate: prowstatety;
   foldinfo: prowfoldinfoty;
+//  needslayout: boolean;
   calcautocellsize: boolean; // don't paint
   autocellsize: sizety;
  end;
@@ -470,6 +470,8 @@ type
    frowcoloroffsetselect: integer;
    ffontactivenum: integer;
    ffontfocusednum: integer;
+//   frowheightbefore: integer;
+//   fdrawfocusedcellbefore: boolean;
    function getcolindex: integer;
    procedure setfocusrectdist(const avalue: integer);
    procedure updatepropwidth;
@@ -3447,7 +3449,7 @@ end;
 procedure tcol.paint(var info: colpaintinfoty);
 var
  int1,int2,int3: integer;
- isfocusedcol: boolean;
+ isfocusedcol,isfocusedcell: boolean;
  bo1,bo2: boolean;
  saveindex: integer;
  linewidthbefore: integer;
@@ -3466,7 +3468,9 @@ var
  endy: integer;
 
 begin
- if not (co_invisible in foptions) or (csdesigning in fgrid.ComponentState) then begin
+ if (not (co_invisible in foptions) or 
+         (csdesigning in fgrid.ComponentState)) and
+    (not info.calcautocellsize or (co1_autorowheight in foptions1)) then begin
   checkmerge:= og_colmerged in fgrid.foptionsgrid;
   canbeforedrawcell:= fgrid.canevent(tmethod(fonbeforedrawcell));
   canafterdrawcell:= fgrid.canevent(tmethod(fonafterdrawcell));
@@ -3505,14 +3509,10 @@ begin
      additem(hiddenlines,row1); //by merged columns
     end;
     if not checkmerge or not merged[row1] then begin
+     isfocusedcell:= isfocusedcol and (row1 = fgrid.ffocusedcell.row);
      heightextend:= 0;
      if hasrowheight then begin
       with fcellinfo do begin
-//       int2:= prowstaterowheightty(rowstate)^.rowheight.height;
-//       if int2 = 0 then begin
-//        int2:= fgrid.fdatarowheight;
-//       end;
-//       heightextend:= int2 - rect.cy;
        heightextend:= rowstatelist.internalheight(row1) - fgrid.fdatarowheight;//rect.cy;
        int2:= rowstatelist.linewidth[row1];
        if int2 > 0 then begin
@@ -3558,18 +3558,22 @@ begin
       fcellinfo.selected:= getselected(row1);
       fcellinfo.readonly:= fgrid.getrowreadonlystate(row1);
       fcellinfo.notext:= false;
+//      fcellinfo.needslayout:= hasrowheight and 
+//             (frowheightbefore <> fcellrect.cy) or 
+//             (fdrawfocusedcellbefore <> isfocusedcell); //used in listedititems
+//      frowheightbefore:= fcellrect.cy;
+//      fdrawfocusedcellbefore:= isfocusedcell;
       fcellinfo.ismousecell:= (fgrid.fmousecell.col = fcellinfo.cell.col) and 
                                 (fgrid.fmousecell.row = row1);
       saveindex:= canvas.save;
       fcellinfo.color:= rowcolor(row1);
-//      canvas.intersectcliprect(makerect(nullpoint,fcellinfo.rect.size));
       canvas.intersectcliprect(fcellrect);
       bo2:= false;
       if canbeforedrawcell then begin
        fonbeforedrawcell(self,canvas,fcellinfo,bo2);
       end;
       if not bo2 then begin
-       if isfocusedcol and (row1 = fgrid.ffocusedcell.row) then begin
+       if isfocusedcell then begin
         drawfocusedcell(canvas);
        end
        else begin
@@ -3619,11 +3623,6 @@ begin
      end;
     end;
     if hasrowheight then begin
-//     int2:= prowstaterowheightty(fcellinfo.rowstate)^.rowheight.height;
-//     if int2 = 0 then begin
-//      int2:= fgrid.fdatarowheight;
-//     end;
-//     canvas.move(makepoint(0,int2+fgrid.fdatarowlinewidth));
      canvas.move(makepoint(0,rowstatelist.internalystep(row1)));
     end
     else begin
@@ -3874,6 +3873,7 @@ end;
 }
 procedure tcol.updatelayout;
 begin
+// frowheightbefore:= -bigint;
  fcellrect.size.cy:= fgrid.fdatarowheight;
  fcellrect.size.cx:= fwidth;
  fcellrect.y:= 0;

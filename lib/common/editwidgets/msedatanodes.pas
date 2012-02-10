@@ -89,7 +89,7 @@ type
 
  iitemlist = interface(inullinterface)
   function getgrid: tcustomgrid;
-  function getlayoutinfo: plistitemlayoutinfoty;
+  function getlayoutinfo(const acellinfo: pcellinfoty): plistitemlayoutinfoty;
   procedure updatelayout;
   procedure itemcountchanged;
   function getcolorglyph: colorty;
@@ -650,7 +650,7 @@ var
  glyphno: stockglyphty;
 begin
  aimagelist:= imagelist;
- with fowner,fintf.getlayoutinfo^ do begin
+ with fowner,fintf.getlayoutinfo(pcellinfoty(acanvas.drawinfopo))^ do begin
   if (no_checkbox in foptions) and (ns_checkbox in self.fstate) then begin
    glyphno:= stg_checkbox;
    if ns_checked in self.fstate then begin
@@ -685,7 +685,7 @@ var
 begin
 //toto: check captionpos and the like
  if fimagelist <> nil then begin
-  with fowner.fintf.getlayoutinfo^ do begin
+  with fowner.fintf.getlayoutinfo(nil)^ do begin
    int1:= fimagelist.width - imagerect.cx;
    with ainfo.dest do begin
     x:= x+int1;
@@ -703,10 +703,16 @@ procedure tlistitem.drawcell(const acanvas: tcanvas);
 var
  info: drawtextinfoty;
  pt1: pointty;
+ po1: pcellinfoty;
+ size1: sizety;
+ int1: integer;
 begin
  pt1:= acanvas.origin;
- drawimage(acanvas); //ttreelistitem shifts origin
- with fowner.fintf.getlayoutinfo^ do begin
+ po1:=  pcellinfoty(acanvas.drawinfopo);
+ if not po1^.calcautocellsize then begin
+  drawimage(acanvas); //ttreelistitem shifts origin
+ end;
+ with fowner.fintf.getlayoutinfo(po1)^ do begin
   info.text.text:= fcaption;
   info.text.format:= nil;
   info.dest:= captioninnerrect;
@@ -714,21 +720,40 @@ begin
   info.font:= nil;
   info.tabulators:= nil;
   updatecaption(info);
-  drawtext(acanvas,info);
-  with info.res do begin
-   x:= x + captioninnerrect.x - info.dest.x;
-   y:= y + captioninnerrect.y - info.dest.y;
-   cx:= cx + captioninnerrect.cx - info.dest.cx;
-   cy:= cy + captioninnerrect.cy - info.dest.cy;
-  end;
-  if not rectinrect(info.res,
-      moverect(captioninnerrect,subpoint(pt1,acanvas.origin))) then begin
-   include(fstate1,ns1_captionclipped);
+  if po1^.calcautocellsize then begin
+   textrect(acanvas,info);
+   size1:= po1^.rect.size;
+   int1:= info.res.cx - info.dest.cx;
+   if int1 > 0 then begin
+    size1.cx:= size1.cx + int1;
+   end;
+   int1:= info.res.cy - info.dest.cy;
+   if int1 > 0 then begin
+    size1.cy:= size1.cy + int1;
+   end;
+   if size1.cx > po1^.autocellsize.cx then begin
+    po1^.autocellsize.cx:= size1.cx;
+   end;
+   if size1.cy > po1^.autocellsize.cy then begin
+    po1^.autocellsize.cy:= size1.cy;
+   end;
   end
   else begin
-   exclude(fstate1,ns1_captionclipped);
+   drawtext(acanvas,info);
+   with info.res do begin
+    x:= x + captioninnerrect.x - info.dest.x;
+    y:= y + captioninnerrect.y - info.dest.y;
+    cx:= cx + captioninnerrect.cx - info.dest.cx;
+    cy:= cy + captioninnerrect.cy - info.dest.cy;
+   end;
+   if not rectinrect(info.res,
+       moverect(captioninnerrect,subpoint(pt1,acanvas.origin))) then begin
+    include(fstate1,ns1_captionclipped);
+   end
+   else begin
+    exclude(fstate1,ns1_captionclipped);
+   end;
   end;
-//  drawtext(acanvas,fcaption,captioninnerrect,textflags);
  end;
 end;
 
@@ -739,7 +764,7 @@ end;
 
 procedure tlistitem.updatecellzone(const pos: pointty; var zone: cellzonety);
 begin
- with fowner.fintf.getlayoutinfo^ do begin
+ with fowner.fintf.getlayoutinfo(nil)^ do begin
   if pointinrect(pos,captionrect) then begin
    zone:= cz_caption;
   end
@@ -760,7 +785,7 @@ procedure tlistitem.setupeditor(const editor: tinplaceedit; const font: tfont);
 var
  info1: drawtextinfoty;
 begin
- with fowner.fintf.getlayoutinfo^ do begin
+ with fowner.fintf.getlayoutinfo(nil)^ do begin
   info1.font:= font;
   with info1 do begin
    tabulators:= nil;
@@ -815,7 +840,8 @@ procedure tlistitem.mouseevent(var info: mouseeventinfoty);
 begin
  with info do begin
   if eventkind in mouseposevents then begin
-   if pointinrect(pos,fowner.fintf.getlayoutinfo^.checkboxinnerrect) then begin
+   if pointinrect(pos,
+              fowner.fintf.getlayoutinfo(nil)^.checkboxinnerrect) then begin
     if (eventkind = ek_buttonrelease) then begin
      if (shiftstate * keyshiftstatesmask = []) and (button = mb_left) and
        (ns1_checkboxclicked in fstate1) then begin
@@ -1349,7 +1375,7 @@ end;
 function tcustomitemlist.nodezone(const point: pointty): cellzonety;
 begin
  result:= cz_default;
- with fintf.getlayoutinfo^ do begin
+ with fintf.getlayoutinfo(nil)^ do begin
   if pointinrect(point,captionrect) then begin
    result:= cz_caption;
   end
@@ -1593,7 +1619,7 @@ end;
 
 function tcustomitemlist.layoutinfopo: plistitemlayoutinfoty;
 begin
- result:= fintf.getlayoutinfo;
+ result:= fintf.getlayoutinfo(nil);
 end;
 
 { ttreelistitem }
@@ -2286,7 +2312,7 @@ begin
  end;
  setlength(lines,ftreelevel+2); //last line can be doubled + horz. line
  acanvas.move(makepoint(levelshift,0));
- with fowner,fintf.getlayoutinfo^ do begin
+ with fowner,fintf.getlayoutinfo(pcellinfoty(acanvas.drawinfopo))^ do begin
   cellheight:= cellsize.cy;
   seg.a.x:= (expandboxrect.x + expandboxrect.cx) div 2;
   seg.a.y:= 0;
@@ -2359,7 +2385,7 @@ var
  info1: drawtextinfoty;
 begin
  if fowner <> nil then begin
-  with fowner.fintf.getlayoutinfo^ do begin
+  with fowner.fintf.getlayoutinfo(nil)^ do begin
    info1.font:= font;
    with info1 do begin
     tabulators:= nil;
@@ -2432,7 +2458,7 @@ begin
    inherited;
    if (eventkind = ek_buttonpress) and
          (shiftstate * keyshiftstatesmask = []) and (button = mb_left) and
-     pointinrect(pos,fowner.fintf.getlayoutinfo^.expandboxrect) then begin
+     pointinrect(pos,fowner.fintf.getlayoutinfo(nil)^.expandboxrect) then begin
     expanded:= not expanded;
     include(eventstate,es_processed);
    end;

@@ -185,6 +185,7 @@ type
    function sortfunc(const l,r): integer; virtual;
    procedure gridvaluechanged(const index: integer); virtual;
    procedure updatecoloptions(const aoptions: coloptionsty);
+   procedure updatecoloptions1(const aoptions: coloptions1ty);
    procedure setoptionsedit(const avalue: optionseditty); override;
    procedure statdataread; virtual;
    procedure griddatasourcechanged; virtual;
@@ -1813,6 +1814,11 @@ begin
  opt1:= foptionsedit;
  fgridintf.coloptionstoeditoptions(opt1);
  optionsedit:= opt1;
+end;
+
+procedure tcustomdataedit.updatecoloptions1(const aoptions: coloptions1ty);
+begin
+ //dummy
 end;
 
 procedure tcustomdataedit.setoptionsedit(const avalue: optionseditty);

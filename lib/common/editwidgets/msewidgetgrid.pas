@@ -92,6 +92,7 @@ type
   function sortfunc(const l,r): integer;
   procedure gridvaluechanged(const index: integer); //index = -1 -> undefined, all
   procedure updatecoloptions(const aoptions: coloptionsty);
+  procedure updatecoloptions1(const aoptions: coloptions1ty);
   procedure statdataread;
   procedure griddatasourcechanged;
   procedure setreadonly(const avalue: boolean);
@@ -160,6 +161,7 @@ type
    function geteditwidget: twidget;
    function getinnerframe: framety; override;
    procedure setoptions(const avalue: coloptionsty); override;
+   procedure setoptions1(const avalue: coloptions1ty); override;
    function getcursor(const arow: integer; 
                        const actcellzone: cellzonety): cursorshapety; override;
    procedure datasourcechanged;
@@ -1639,21 +1641,6 @@ var
  face1: tcustomface;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
- {
-  if (fdata <> nil) then begin
-   if cell.row < fdata.count then begin
-    datapo:= fdata.getitempo(cell.row);
-   end
-   else begin
-    datapo:= nil;
-   end;
-  end
-  else begin
-   if fintf <> nil then begin
-    datapo:= fintf.getrowdatapo(cellinfoty(canvas.drawinfopo^));
-   end;
-  end;
-  }
   inherited;
   if fintf <> nil then begin
    if calcautocellsize then begin
@@ -1814,17 +1801,22 @@ begin
 end;
 
 procedure twidgetcol.setoptions(const avalue: coloptionsty);
-var
- aoptions: coloptionsty;
+//var
+// aoptions: coloptionsty;
 begin
- aoptions:= avalue;
-// if co_nohscroll in aoptions then begin
-//  include(aoptions,co_nofocus);
-// end;
- inherited setoptions(aoptions);
+// aoptions:= avalue;
+// inherited setoptions(aoptions);
+ inherited;
  if fintf <> nil then begin
-//  fintf.updatecoloptions(aoptions);
   fintf.updatecoloptions(foptions);
+ end;
+end;
+
+procedure twidgetcol.setoptions1(const avalue: coloptions1ty);
+begin
+ inherited;
+ if fintf <> nil then begin
+  fintf.updatecoloptions1(foptions1);
  end;
 end;
 

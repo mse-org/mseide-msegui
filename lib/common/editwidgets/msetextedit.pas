@@ -169,6 +169,7 @@ type
    function sortfunc(const l,r): integer;
    procedure gridvaluechanged(const index: integer); virtual;
    procedure updatecoloptions(const aoptions: coloptionsty);
+   procedure updatecoloptions1(const aoptions: coloptions1ty);
    procedure statdataread; virtual;
    procedure griddatasourcechanged;
    {$ifdef mse_with_ifi}
@@ -670,6 +671,11 @@ end;
 procedure tcustomtextedit.updatecoloptions(const aoptions: coloptionsty);
 begin
  fgridintf.coloptionstoeditoptions(foptionsedit);
+end;
+
+procedure tcustomtextedit.updatecoloptions1(const aoptions: coloptions1ty);
+begin
+ //dummy
 end;
 
 procedure tcustomtextedit.statdataread;
