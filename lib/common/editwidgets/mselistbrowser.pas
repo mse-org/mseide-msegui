@@ -2351,7 +2351,9 @@ end;
 
 procedure tcustomitemeditlist.doitemchange(const index: integer);
 begin
- fowner.itemchanged(index);
+ if fowner <> nil then begin
+  fowner.itemchanged(index);
+ end;
  inherited;
 end;
 
