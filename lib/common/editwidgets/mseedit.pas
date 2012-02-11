@@ -1445,7 +1445,7 @@ end;
 
 procedure tcustomedit.initnewcomponent(const ascale: real);
 begin
- internalcreateframe;
+ createframe;
  fframe.scale(ascale);
  inherited;
 end;

@@ -216,7 +216,8 @@ type
  gridstate1ty = (gs1_showcellinvalid,gs1_sortvalid,gs1_rowsortinvalid,
                  gs1_sortmoving,gs1_sortchangelock,gs1_rowinserted,
                  gs1_gridsorted,gs1_dbsorted,gs1_rowdeleting,
-                 gs1_focuscellonenterlock,gs1_forcenullcheck,
+                 gs1_focuscellonenterlock,gs1_mousecaptureendlock,
+                 gs1_forcenullcheck,
                  gs1_cellsizesyncing);
  gridstates1ty = set of gridstate1ty;
 
@@ -296,9 +297,9 @@ type
   notext: boolean;
   ismousecell: boolean;
   datapo: pointer;
-//  griddatalink: pointer;
   rowstate: prowstatety;
   foldinfo: prowfoldinfoty;
+//  needslayout: boolean;
   calcautocellsize: boolean; // don't paint
   autocellsize: sizety;
  end;
@@ -469,6 +470,8 @@ type
    frowcoloroffsetselect: integer;
    ffontactivenum: integer;
    ffontfocusednum: integer;
+//   frowheightbefore: integer;
+//   fdrawfocusedcellbefore: boolean;
    function getcolindex: integer;
    procedure setfocusrectdist(const avalue: integer);
    procedure updatepropwidth;
@@ -2040,7 +2043,7 @@ type
    procedure focusrow(const arow: integer; const action: focuscellactionty;
                       const noreadonly: boolean; 
                       const selectmode: selectcellmodety = scm_cell);
-   function doremoveappinsrow(const arow: integer): boolean;
+   function doremoveappinsrow(const oldrow,newrow: integer): boolean;
                     //true if removed
    function hassort: boolean;
    function canautoappend: boolean; virtual;
@@ -3446,7 +3449,7 @@ end;
 procedure tcol.paint(var info: colpaintinfoty);
 var
  int1,int2,int3: integer;
- isfocusedcol: boolean;
+ isfocusedcol,isfocusedcell: boolean;
  bo1,bo2: boolean;
  saveindex: integer;
  linewidthbefore: integer;
@@ -3465,7 +3468,9 @@ var
  endy: integer;
 
 begin
- if not (co_invisible in foptions) or (csdesigning in fgrid.ComponentState) then begin
+ if (not (co_invisible in foptions) or 
+         (csdesigning in fgrid.ComponentState)) and
+    (not info.calcautocellsize or (co1_autorowheight in foptions1)) then begin
   checkmerge:= og_colmerged in fgrid.foptionsgrid;
   canbeforedrawcell:= fgrid.canevent(tmethod(fonbeforedrawcell));
   canafterdrawcell:= fgrid.canevent(tmethod(fonafterdrawcell));
@@ -3504,14 +3509,10 @@ begin
      additem(hiddenlines,row1); //by merged columns
     end;
     if not checkmerge or not merged[row1] then begin
+     isfocusedcell:= isfocusedcol and (row1 = fgrid.ffocusedcell.row);
      heightextend:= 0;
      if hasrowheight then begin
       with fcellinfo do begin
-//       int2:= prowstaterowheightty(rowstate)^.rowheight.height;
-//       if int2 = 0 then begin
-//        int2:= fgrid.fdatarowheight;
-//       end;
-//       heightextend:= int2 - rect.cy;
        heightextend:= rowstatelist.internalheight(row1) - fgrid.fdatarowheight;//rect.cy;
        int2:= rowstatelist.linewidth[row1];
        if int2 > 0 then begin
@@ -3557,18 +3558,22 @@ begin
       fcellinfo.selected:= getselected(row1);
       fcellinfo.readonly:= fgrid.getrowreadonlystate(row1);
       fcellinfo.notext:= false;
+//      fcellinfo.needslayout:= hasrowheight and 
+//             (frowheightbefore <> fcellrect.cy) or 
+//             (fdrawfocusedcellbefore <> isfocusedcell); //used in listedititems
+//      frowheightbefore:= fcellrect.cy;
+//      fdrawfocusedcellbefore:= isfocusedcell;
       fcellinfo.ismousecell:= (fgrid.fmousecell.col = fcellinfo.cell.col) and 
                                 (fgrid.fmousecell.row = row1);
       saveindex:= canvas.save;
       fcellinfo.color:= rowcolor(row1);
-//      canvas.intersectcliprect(makerect(nullpoint,fcellinfo.rect.size));
       canvas.intersectcliprect(fcellrect);
       bo2:= false;
       if canbeforedrawcell then begin
        fonbeforedrawcell(self,canvas,fcellinfo,bo2);
       end;
       if not bo2 then begin
-       if isfocusedcol and (row1 = fgrid.ffocusedcell.row) then begin
+       if isfocusedcell then begin
         drawfocusedcell(canvas);
        end
        else begin
@@ -3618,11 +3623,6 @@ begin
      end;
     end;
     if hasrowheight then begin
-//     int2:= prowstaterowheightty(fcellinfo.rowstate)^.rowheight.height;
-//     if int2 = 0 then begin
-//      int2:= fgrid.fdatarowheight;
-//     end;
-//     canvas.move(makepoint(0,int2+fgrid.fdatarowlinewidth));
      canvas.move(makepoint(0,rowstatelist.internalystep(row1)));
     end
     else begin
@@ -3873,6 +3873,7 @@ end;
 }
 procedure tcol.updatelayout;
 begin
+// frowheightbefore:= -bigint;
  fcellrect.size.cy:= fgrid.fdatarowheight;
  fcellrect.size.cx:= fwidth;
  fcellrect.y:= 0;
@@ -8015,17 +8016,18 @@ end;
 
 function tdatacols.getselectedrows: integerarty;
 var
- int1,int2: integer;
+ int1,int2,int3: integer;
  po1: prowstatety;
 begin
  result:= nil;
  po1:= frowstate.datapo;
  int2:= 0;
+ int3:= frowstate.fsize;
  for int1:= 0 to fgrid.frowcount - 1 do begin
   if po1^.selected and wholerowselectedmask <> 0 then begin
    additem(result,int1,int2);
   end;
-  inc(po1);
+  inc(pchar(po1),int3);
  end;
  setlength(result,int2);
 end;
@@ -8887,6 +8889,14 @@ procedure tcustomgrid.rowdatachanged(const acell: gridcoordty;
 begin
  if not (csloading in componentstate) then begin
   sortinvalid;
+  if acell.col >= 0 then begin
+   fdatacols[acell.col].checkdirtyautorowheight(acell.row);
+  end
+  else begin
+   if gs_needsrowheight in fstate then begin
+    fdatacols.rowstate.checkdirtyautorowheight(acell.row);
+   end;
+  end;
   if fupdating = 0 then begin
    exclude(fstate,gs_rowdatachanged);
    inc(frowdatachanging);
@@ -10519,7 +10529,9 @@ begin
    end;
   end;
  end;
- if info.eventkind in [ek_buttonrelease,ek_mousecaptureend] then begin
+ if (info.eventkind = ek_buttonrelease) or 
+          (info.eventkind = ek_mousecaptureend) and 
+                    not (gs1_mousecaptureendlock in fstate1) then begin
   if gs_cellclicked in fstate then begin
    killrepeater;
   end;
@@ -11106,23 +11118,6 @@ begin     //focuscell
    else begin
     coord1:= invalidcell;
    end;
-{ -> after removeappenderdrow 
-   int1:= cell.row - ffocusedcell.row;
-   if (int1 <> 0) or (selectaction = fca_focusinforce) then begin
-    checksort;
-    if cell.row >= 0 then begin
-     if (cell.row >= 0) and (ffocusedcell.row >= 0) then begin
-      cell.row:= ffocusedcell.row + int1;
-      if cell.row < 0 then begin
-       cell.row:= 0;
-      end;
-      if cell.row > frowcount then begin
-       cell.row:= frowcount;
-      end;
-     end;
-    end;
-   end;
-}   
    sortchecked:= false;
    if isappend(cell.row) then begin
     dosortcheck(true);
@@ -11163,12 +11158,12 @@ begin     //focuscell
    if (selectaction = fca_exitgrid) or ((coord1.row >= 0) and
           ((coord1.row >= frowcount-1) and (cell.row < coord1.row) or
            not autorowappended and (
-           (cell.row <= rowcountbefore{-1}) and not (gs_restorerow in fstate) or 
+           (cell.row <= rowcountbefore{-1}) and not (gs_restorerow in fstate) or
            (cell.row < frowcount)))) then begin
     int1:= ffocusedcell.row;
     ffocusedcell.row:= invalidaxis;
     bo2:= false;
-    if (int1 <> cell.row) and doremoveappinsrow(int1) then begin
+    if (int1 <> cell.row) and doremoveappinsrow(int1,cell.row) then begin
      if (cell.row > int1) then begin
       dec(cell.row);
       bo2:= true;
@@ -11311,33 +11306,32 @@ begin
      ) and fdatacols.rowempty(frowcount - 1);
 end;
 
-function tcustomgrid.doremoveappinsrow(const arow: integer): boolean;
+function tcustomgrid.doremoveappinsrow(const oldrow,newrow: integer): boolean;
 begin
  result:= false;
  if not (gs_isdb in fstate) then begin
   if gs1_rowinserted in fstate1 then begin
    if (og_noinsertempty in foptionsgrid) and
-     (arow >= 0) and fdatacols.rowempty(arow) then begin
+     (oldrow >= 0) and fdatacols.rowempty(oldrow) then begin
     fstate1:= fstate1-[gs1_rowinserted,gs1_rowsortinvalid];
     result:= true;
-    deleterow(arow);
-//    include(fstate,gs_emptyrowremoved); for last row only
+    deleterow(oldrow);
     exit;
    end;
   end
   else begin
-   if (arow <> frowcount-1) and isautoappend then begin
+   if (newrow <> frowcount-1) and isautoappend then begin
     if row >= 0 then begin
      if row = 0 then begin
       row:= invalidaxis;
      end
      else begin
-      row:= arow-1;
+      row:= newrow-1;
      end;
     end
     else begin
      result:= true;
-     if arow = frowcount-1 then begin
+     if newrow = frowcount-1 then begin
       exclude(fstate1,gs1_rowsortinvalid);
      end;
      deleterow(frowcount-1);
@@ -11352,7 +11346,7 @@ end;
 procedure tcustomgrid.removeappendedrow;
 begin
  docheckcellvalue;
- doremoveappinsrow(row);
+ doremoveappinsrow(row,row);
 end;
 
 function tcustomgrid.hasdata: boolean;
@@ -16545,30 +16539,36 @@ begin
 end;
 
 procedure trowstatelist.checkdirtyautorowheight(const arow: integer);
+var
+ bo1: boolean;
 begin
+ bo1:= false;
  if arow < 0 then begin
   fdirtyrowheight:= 0;
   fdirtyautorowheight:= 0;
+  bo1:= true;
  end
  else begin
   if finfolevel >= ril_rowheight then begin
    with prowstaterowheightty(getitempo(arow))^ do begin
     if rowheight.height <= 0 then begin
      rowheight.height:= 0;
-    end
-    else begin
-     exit;
+     bo1:= true;
     end;
    end;
   end;
   if arow < fdirtyrowheight then begin
    fdirtyrowheight:= arow;
-  end
-  else begin
-   exit;
+   bo1:= true;
+  end;
+  if arow < fdirtyautorowheight then begin
+   fdirtyautorowheight:= arow;
+   bo1:= true;
   end;
  end;   
- fgrid.layoutchanged;
+ if bo1 then begin
+  fgrid.layoutchanged;
+ end;
 end;
 
 procedure trowstatelist.change(const index: integer);

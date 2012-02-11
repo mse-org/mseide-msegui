@@ -141,7 +141,7 @@ type
 
    //iitemlist
    function getgrid: tcustomgrid;
-   function getlayoutinfo: plistitemlayoutinfoty;
+   function getlayoutinfo(const acellinfo: pcellinfoty): plistitemlayoutinfoty;
    procedure itemcountchanged;
    function getcolorglyph: colorty;
    procedure updateitemvalues(const index: integer; const acount: integer);
@@ -476,6 +476,7 @@ type
    fonupdaterowvalues: itemindexeventty;
    foncellevent: celleventty;
    factiverow: integer;
+   fcalcsize: sizety;
 //   fediting: boolean;
    foncheckcanedit: itemcanediteventty;
    function getitemlist: titemeditlist;
@@ -491,6 +492,8 @@ type
 
    function fieldcanedit: boolean;
    procedure getautopaintsize(var asize: sizety); override;
+   procedure calclayout(const asize: sizety; 
+                                       out alayout: listitemlayoutinfoty);
 
     //iedit
    function locatecount: integer; override;        //number of locate values
@@ -504,7 +507,7 @@ type
 
     //iitemlist
    function getgrid: tcustomgrid;
-   function getlayoutinfo: plistitemlayoutinfoty;
+   function getlayoutinfo(const acellinfo: pcellinfoty): plistitemlayoutinfoty;
    procedure itemcountchanged;
    procedure updateitemvalues(const index: integer; const count: integer); virtual;
    function getcolorglyph: colorty;
@@ -858,7 +861,8 @@ begin
  inherited create(iitemlist(self));
 end;
 
-function titemviewlist.getlayoutinfo: plistitemlayoutinfoty;
+function titemviewlist.getlayoutinfo(
+                          const acellinfo: pcellinfoty): plistitemlayoutinfoty;
 begin
  result:= @flayoutinfo;
 end;
@@ -959,9 +963,11 @@ var
  item: tlistitem;
 begin
  inherited;
- item:= items[cellinfoty(acanvas.drawinfopo^).cell.row];
- if item <> nil then begin
-  item.drawcell(acanvas);
+ with cellinfoty(acanvas.drawinfopo^) do begin
+  item:= items[cell.row];
+  if item <> nil then begin
+   item.drawcell(acanvas);
+  end;
  end;
 end;
 
@@ -2351,7 +2357,9 @@ end;
 
 procedure tcustomitemeditlist.doitemchange(const index: integer);
 begin
- fowner.itemchanged(index);
+ if fowner <> nil then begin
+  fowner.itemchanged(index);
+ end;
  inherited;
 end;
 
@@ -2480,13 +2488,20 @@ begin
  item:= tlistitem.create(fitemlist);
 end;
 
-function titemedit.getlayoutinfo: plistitemlayoutinfoty;
+function titemedit.getlayoutinfo(
+                       const acellinfo: pcellinfoty): plistitemlayoutinfoty;
 begin
  if (ws1_painting in fwidgetstate1) or (des_updatelayout in fstate) then begin
   result:= @flayoutinfofocused;
  end
  else begin
   result:= @flayoutinfocell;
+  if (acellinfo <> nil) and
+          ((acellinfo^.rect.cx <> fcalcsize.cx) or 
+           (acellinfo^.rect.cy <> fcalcsize.cy)) then begin
+   fcalcsize:= acellinfo^.rect.size;
+   calclayout(fcalcsize,flayoutinfocell);
+  end;
  end;
 end;
 
@@ -2657,17 +2672,22 @@ begin
  end;
 end;
 
+procedure titemedit.calclayout(const asize: sizety;
+                                           out alayout: listitemlayoutinfoty);
+begin
+ if fframe <> nil then begin
+  getitemclass.calcitemlayout(asize,tframe1(fframe).fi.innerframe,
+                                             fitemlist,alayout);
+ end
+ else begin
+  getitemclass.calcitemlayout(asize,minimalframe,fitemlist,alayout);
+ end;
+end;
+
 procedure titemedit.doupdatelayout;
 begin
  if (fgridintf <> nil) and (fitemlist <> nil) then begin
-  if fframe <> nil then begin
-   getitemclass.calcitemlayout(paintrect.size,tframe1(fframe).fi.innerframe,
-                                              fitemlist,flayoutinfofocused);
-  end
-  else begin
-   getitemclass.calcitemlayout(paintrect.size,minimalframe,fitemlist,
-                                              flayoutinfofocused);
-  end;
+  calclayout(paintrect.size,flayoutinfofocused);
   invalidate;
   if not fitemlist.updating then begin
    fgridintf.getcol.changed;
@@ -2678,6 +2698,7 @@ end;
 procedure titemedit.doupdatecelllayout;
 begin
  flayoutinfocell:= flayoutinfofocused;
+ fcalcsize:= flayoutinfofocused.cellsize;
 end;
 
 procedure titemedit.updatelayout;
@@ -2762,6 +2783,8 @@ begin
 end;
 
 procedure titemedit.setupeditor;
+var
+ bo1: boolean;
 begin
  if not (csloading in componentstate) then begin
   if fvalue = nil then begin
@@ -2771,7 +2794,12 @@ begin
    end;
   end
   else begin
+   bo1:= des_updatelayout in fstate;
+   include(fstate,des_updatelayout);
    fvalue.setupeditor(feditor,geteditfont);
+   if not bo1 then begin
+    exclude(fstate,des_updatelayout);
+   end;
   end;
  end;
 end;

@@ -26,7 +26,7 @@ uses
                                {$ifdef mse_with_ifi},mseifiglob{$endif};
 
 const
- mseguiversiontext = '2.8.1 fixes';
+ mseguiversiontext = '2.9 unstable';
  
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
@@ -170,11 +170,8 @@ type
  framestatety = (fs_sbhorzon,fs_sbverton,fs_sbhorzfix,fs_sbvertfix,
                  fs_sbhorztop,fs_sbvertleft,
                  fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom,
-                 fs_nowidget,fs_nosetinstance,fs_disabled,
+                 fs_nowidget,fs_nosetinstance,fs_disabled,fs_creating,
                  fs_cancaptionsyncx,fs_cancaptionsyncy,
-                 {
-                 fs_captiondistouter,fs_captionnoclip,fs_captionframecentered,
-                 }
                  fs_drawfocusrect,fs_paintrectfocus,
                  fs_captionfocus,fs_captionhint,fs_rectsvalid,
                  fs_widgetactive,fs_paintposinited,fs_needsmouseinvalidate);
@@ -1569,6 +1566,8 @@ type
    constructor create(const aowner: tcomponent; 
                       const aparentwidget: twidget;
                       const aiswidget: boolean = true); overload;
+   constructor createandinit(const aowner: tcomponent; 
+                      const aparentwidget: twidget); overload;
    destructor destroy; override;
    procedure afterconstruction; override;   
    procedure initnewcomponent(const ascale: real); override;
@@ -3565,6 +3564,7 @@ constructor tcustomframe.create(const intf: iframe);
 var
  ws1: widgetstates1ty;
 begin
+ include(fstate,fs_creating);
  fintf:= intf;
  ws1:= fintf.getwidget.fwidgetstate1;
  if ws1_noframewidgetshift in ws1 then begin
@@ -4026,6 +4026,7 @@ begin
  else begin
   exclude(fstate,fs_rectsvalid);
  end;
+ exclude(fstate,fs_creating);
 end;
 
 procedure tcustomframe.checkstate;
@@ -6305,6 +6306,14 @@ begin
  if not aiswidget then begin
   exclude(fwidgetstate,ws_iswidget);
  end;
+end;
+
+constructor twidget.createandinit(const aowner: tcomponent; 
+                      const aparentwidget: twidget);
+begin
+ create(aowner,aparentwidget);
+ initnewcomponent(1);
+ initnewwidget(1);
 end;
 
 procedure twidget.afterconstruction;

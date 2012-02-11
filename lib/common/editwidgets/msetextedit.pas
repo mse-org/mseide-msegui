@@ -169,6 +169,7 @@ type
    function sortfunc(const l,r): integer;
    procedure gridvaluechanged(const index: integer); virtual;
    procedure updatecoloptions(const aoptions: coloptionsty);
+   procedure updatecoloptions1(const aoptions: coloptions1ty);
    procedure statdataread; virtual;
    procedure griddatasourcechanged;
    {$ifdef mse_with_ifi}
@@ -670,6 +671,11 @@ end;
 procedure tcustomtextedit.updatecoloptions(const aoptions: coloptionsty);
 begin
  fgridintf.coloptionstoeditoptions(foptionsedit);
+end;
+
+procedure tcustomtextedit.updatecoloptions1(const aoptions: coloptions1ty);
+begin
+ //dummy
 end;
 
 procedure tcustomtextedit.statdataread;
@@ -1660,7 +1666,7 @@ begin
 end;
 
 procedure tcustomtextedit.docellevent(const ownedcol: boolean; 
-                                                        var info: celleventinfoty);
+                                                var info: celleventinfoty);
 var
  textinfo: textmouseeventinfoty;
  bo1: boolean;
@@ -1706,7 +1712,7 @@ begin
        end;
       end;
       if selectaction = fca_focusinrepeater then begin
-       setclientclick;
+       fgridintf.getcol.grid.setcellclientclick(self);
       end;
      finally
       if not bo1 then begin
@@ -1723,9 +1729,12 @@ begin
                                                 grid.cellclicked then begin
        fxpos:= textpostomousepos(textinfo.pos).x;
        
-       fgridintf.getcol.grid.focuscell(cell,fca_focusinshift);       
-       setclientclick;
-       exit;
+       with fgridintf.getcol.grid do begin
+        focuscell(cell,fca_focusinshift);
+        setcellclientclick(self);
+//        setclientclick;
+        exit;
+       end;
       end;
       if not bo1 then begin
        textinfo.pos:= invalidcell;

@@ -1,43 +1,41 @@
-{
+(*
+** License Applicability. Except to the extent portions of this file are
+** made subject to an alternative license as permitted in the SGI Free
+** Software License B, Version 1.1 (the "License"), the contents of this
+** file are subject only to the provisions of the License. You may not use
+** this file except in compliance with the License. You may obtain a copy
+** of the License at Silicon Graphics, Inc., attn: Legal Services, 1600
+** Amphitheatre Parkway, Mountain View, CA 94043-1351, or at:
+** 
+** http://oss.sgi.com/projects/FreeB
+** 
+** Note that, as provided in the License, the Software is distributed on an
+** "AS IS" basis, with ALL EXPRESS AND IMPLIED WARRANTIES AND CONDITIONS
+** DISCLAIMED, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED WARRANTIES AND
+** CONDITIONS OF MERCHANTABILITY, SATISFACTORY QUALITY, FITNESS FOR A
+** PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+** 
+** Original Code. The Original Code is: OpenGL Sample Implementation,
+** Version 1.2.1, released January 26, 2000, developed by Silicon Graphics,
+** Inc. The Original Code is Copyright (c) 1991-2000 Silicon Graphics, Inc.
+** Copyright in any portions created by third parties is as indicated
+** elsewhere herein. All Rights Reserved.
+** 
+** Additional Notice Provisions: This software was created using the
+** OpenGL(R) version 1.2.1 Sample Implementation published by SGI, but has
+** not been independently verified as being compliant with the OpenGL(R)
+** version 1.2.1 Specification.
+**
+** (this unit actually only contains the 1.1 parts of the specification,
+**  the parts from the subsequence versions are in glext.pp)
+*)
 
-  Adaption of the delphi3d.net OpenGL units to FreePascal
-  Sebastian Guenther (sg@freepascal.org) in 2002
-  These units are free to use
-}
+{******************************************************************************}
+{ Converted to Delphi by Tom Nuydens (tom@delphi3d.net)                        }
+{******************************************************************************}
 
 { modified 2011 by Martin Schreiber }
 
-(*++ BUILD Version: 0004    // Increment this if a change has global effects
-
-Copyright (c) 1985-96, Microsoft Corporation
-
-Module Name:
-
-    gl.h
-
-Abstract:
-
-    Procedure declarations, constant definitions and macros for the OpenGL
-    component.
-
---*)
-
-{*
-** Copyright 1996 Silicon Graphics, Inc.
-** All Rights Reserved.
-**
-** This is UNPUBLISHED PROPRIETARY SOURCE CODE of Silicon Graphics, Inc.;
-** the contents of this file may not be disclosed to third parties, copied or
-** duplicated in any form, in whole or in part, without the prior written
-** permission of Silicon Graphics, Inc.
-**
-** RESTRICTED RIGHTS LEGEND:
-** Use, duplication or disclosure by the Government is subject to restrictions
-** as set forth in subdivision (c)(1)(ii) of the Rights in Technical Data
-** and Computer Software clause at DFARS 252.227-7013, and/or in similar or
-** successor clauses in the FAR, DOD or NASA FAR Supplement. Unpublished -
-** rights reserved under the Copyright Laws of the United States.
-*}
 
 {******************************************************************************}
 { Converted to Delphi by Tom Nuydens (tom@delphi3d.net)                        }

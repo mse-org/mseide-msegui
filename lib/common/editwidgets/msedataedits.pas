@@ -185,6 +185,7 @@ type
    function sortfunc(const l,r): integer; virtual;
    procedure gridvaluechanged(const index: integer); virtual;
    procedure updatecoloptions(const aoptions: coloptionsty);
+   procedure updatecoloptions1(const aoptions: coloptions1ty);
    procedure setoptionsedit(const avalue: optionseditty); override;
    procedure statdataread; virtual;
    procedure griddatasourcechanged; virtual;
@@ -1815,6 +1816,11 @@ begin
  optionsedit:= opt1;
 end;
 
+procedure tcustomdataedit.updatecoloptions1(const aoptions: coloptions1ty);
+begin
+ //dummy
+end;
+
 procedure tcustomdataedit.setoptionsedit(const avalue: optionseditty);
 begin
  if foptionsedit <> avalue then begin
@@ -2930,6 +2936,7 @@ end;
 constructor tcustommemoedit.create(aowner: tcomponent);
 begin
  inherited;
+ internalcreateframe;
  foptionswidget:= defaultoptionswidgetmousewheel;
  foptionsedit:= defaultmemooptionsedit;
  optionsedit1:= defaultmemooptionsedit1;
@@ -3180,7 +3187,9 @@ end;
 procedure tcustommemoedit.setupeditor;
 begin
  inherited;
- updatescrollbars;
+ if not (fs_creating in tcustomframe1(fframe).fstate) then begin
+  updatescrollbars;
+ end;
 end;
 
 procedure tcustommemoedit.domousewheelevent(var info: mousewheeleventinfoty);

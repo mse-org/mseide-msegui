@@ -337,6 +337,7 @@ type
    procedure delete(const akey: ansistring; const avalue: pointer); overload;
    function find(const akey: ansistring): pointer; overload;
    function find(const akey: ansistring; out avalue: pointer): boolean; overload;
+   function find(const akey: lstringty): pointer; overload;
    function first: ppointeransistringdataty;
    function next: ppointeransistringdataty;
    procedure iterate(const akey: ansistring;
@@ -413,6 +414,7 @@ type
    function find(const akey: msestring; out avalue: pointer): boolean; overload;
    function find(const akey: msestring; out avalue: pointer;
                                         out acount: integer): boolean; overload;
+   function find(const akey: lmsestringty): pointer; overload;
    function first: ppointermsestringdataty;
    function next: ppointermsestringdataty;
    procedure iterate(const akey: msestring;
@@ -1596,6 +1598,14 @@ begin
  end;
 end;
 
+function tpointeransistringhashdatalist.find(const akey: lstringty): pointer;
+begin
+ result:= inherited find(akey);
+ if result <> nil then begin
+  result:= ppointer(result)^;
+ end;
+end;
+
 function tpointeransistringhashdatalist.addunique(const akey: ansistring;
                                                const avalue: pointer): boolean;
 var
@@ -1825,6 +1835,14 @@ begin
  end
  else begin
   avalue:= nil;
+ end;
+end;
+
+function tpointermsestringhashdatalist.find(const akey: lmsestringty): pointer;
+begin
+ result:= inherited find(akey);
+ if result <> nil then begin
+  result:= ppointer(result)^;
  end;
 end;
 

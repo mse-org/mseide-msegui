@@ -92,6 +92,7 @@ type
   function sortfunc(const l,r): integer;
   procedure gridvaluechanged(const index: integer); //index = -1 -> undefined, all
   procedure updatecoloptions(const aoptions: coloptionsty);
+  procedure updatecoloptions1(const aoptions: coloptions1ty);
   procedure statdataread;
   procedure griddatasourcechanged;
   procedure setreadonly(const avalue: boolean);
@@ -160,6 +161,7 @@ type
    function geteditwidget: twidget;
    function getinnerframe: framety; override;
    procedure setoptions(const avalue: coloptionsty); override;
+   procedure setoptions1(const avalue: coloptions1ty); override;
    function getcursor(const arow: integer; 
                        const actcellzone: cellzonety): cursorshapety; override;
    procedure datasourcechanged;
@@ -315,6 +317,7 @@ type
    procedure focusunlock;
 
    procedure seteditfocus;   
+   procedure setcellclientclick(const awidget: twidget);
    function editwidgetatpos(const apos: pointty; out cell: gridcoordty): twidget;
    function widgetcell(const awidget: twidget): gridcoordty;
    function cellwidget(const acell: gridcoordty): twidget;
@@ -1638,21 +1641,6 @@ var
  face1: tcustomface;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
- {
-  if (fdata <> nil) then begin
-   if cell.row < fdata.count then begin
-    datapo:= fdata.getitempo(cell.row);
-   end
-   else begin
-    datapo:= nil;
-   end;
-  end
-  else begin
-   if fintf <> nil then begin
-    datapo:= fintf.getrowdatapo(cellinfoty(canvas.drawinfopo^));
-   end;
-  end;
-  }
   inherited;
   if fintf <> nil then begin
    if calcautocellsize then begin
@@ -1813,17 +1801,22 @@ begin
 end;
 
 procedure twidgetcol.setoptions(const avalue: coloptionsty);
-var
- aoptions: coloptionsty;
+//var
+// aoptions: coloptionsty;
 begin
- aoptions:= avalue;
-// if co_nohscroll in aoptions then begin
-//  include(aoptions,co_nofocus);
-// end;
- inherited setoptions(aoptions);
+// aoptions:= avalue;
+// inherited setoptions(aoptions);
+ inherited;
  if fintf <> nil then begin
-//  fintf.updatecoloptions(aoptions);
   fintf.updatecoloptions(foptions);
+ end;
+end;
+
+procedure twidgetcol.setoptions1(const avalue: coloptions1ty);
+begin
+ inherited;
+ if fintf <> nil then begin
+  fintf.updatecoloptions1(foptions1);
  end;
 end;
 
@@ -3048,31 +3041,37 @@ var
  po1: pointty;
 begin
  with info do begin
-  if not (es_reflected in eventstate)  and
-   (eventkind in [ek_mousemove,ek_mousepark,ek_buttonpress,ek_buttonrelease]) then begin
-   po1:= translateclientpoint(nullpoint,sender,self);
-   addpoint1(pos,po1);
-   if sender = factivewidget then begin
-    clientmouseevent(info);
-   end
-   else begin
-    with fobjectpicker do begin
-     if (sender <> fcontainer2) and (sender <> self) and
-            ((fpickkind = pok_datacolsize) or (eventkind <> ek_buttonpress)) then begin
-      include(fstate,gs_child);
-      mouseevent(info);
-      exclude(fstate,gs_child);
-      if not (fpickkind in [pok_datacolsize,pok_datacol]) then begin
-       exclude(eventstate,es_processed);
-      end
-      else begin
-       include(eventstate,es_processed);
+  if not (es_reflected in eventstate)  then begin
+   if (eventkind in [ek_mousemove,ek_mousepark,ek_buttonpress,ek_buttonrelease]) then begin
+    po1:= translateclientpoint(nullpoint,sender,self);
+    addpoint1(pos,po1);
+    if sender = factivewidget then begin
+     clientmouseevent(info);
+    end
+    else begin
+     with fobjectpicker do begin
+      if (sender <> fcontainer2) and (sender <> self) and
+             ((fpickkind = pok_datacolsize) or (eventkind <> ek_buttonpress)) then begin
+       include(fstate,gs_child);
+       mouseevent(info);
+       exclude(fstate,gs_child);
+       if not (fpickkind in [pok_datacolsize,pok_datacol]) then begin
+        exclude(eventstate,es_processed);
+       end
+       else begin
+        include(eventstate,es_processed);
+       end;
       end;
      end;
     end;
+    subpoint1(pos,po1);
+   end
+   else begin
+    if (eventkind = ek_mousecaptureend) and (sender = factivewidget) then begin
+     clientmouseevent(info);
+    end;
    end;
-   subpoint1(pos,po1);
-  end;
+  end
  end;
  inherited;
 end;
@@ -3270,6 +3269,8 @@ begin
 end;
 
 procedure tcustomwidgetgrid.mouseevent(var info: mouseeventinfoty);
+var
+ bo1: boolean;
 begin
  fmousefocusedcell:= ffocusedcell;
  fmouseactivewidget:= factivewidget;
@@ -3278,7 +3279,15 @@ begin
           not (gs_mousecellredirected in fstate) and 
                 checkreflectmouseevent(info,false) then begin
   fmousefocusedcell.col:= -1;
-  releasemouse;
+  bo1:= gs1_mousecaptureendlock in fstate1;
+  include(fstate1,gs1_mousecaptureendlock);
+  try
+   releasemouse;
+  finally
+   if not bo1 then begin
+    exclude(fstate1,gs1_mousecaptureendlock);
+   end;
+  end;
   if ffocusedcell.col >= 0 then begin
    with twidgetcols(fdatacols)[ffocusedcell.col] do begin
     if fintf <> nil then begin
@@ -3464,6 +3473,23 @@ begin
  end
  else begin
   activate;
+ end;
+end;
+
+procedure tcustomwidgetgrid.setcellclientclick(const awidget: twidget);
+var
+ bo1: boolean;
+begin
+ if factivewidget = awidget then begin
+  bo1:= gs1_mousecaptureendlock in fstate1;
+  try
+   include(fstate1,gs1_mousecaptureendlock);
+   twidget1(awidget).setclientclick;
+  finally
+   if not bo1 then begin
+    exclude(fstate1,gs1_mousecaptureendlock);
+   end;
+  end;
  end;
 end;
 

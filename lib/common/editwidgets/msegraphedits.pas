@@ -182,10 +182,12 @@ type
    procedure valuetogrid(row: integer); virtual; abstract;
    procedure gridtovalue(row: integer); virtual;
    function getnulltext: msestring;
-   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
+   procedure docellevent(const ownedcol: boolean;
+                                        var info: celleventinfoty); virtual;
    function sortfunc(const l,r): integer; virtual;
    procedure gridvaluechanged(const index: integer); virtual;
    procedure updatecoloptions(const aoptions: coloptionsty);
+   procedure updatecoloptions1(const aoptions: coloptions1ty);
    procedure statdataread; virtual;
    procedure griddatasourcechanged; virtual;
    procedure fontchanged; override;
@@ -1869,6 +1871,11 @@ begin
  opt1:= foptionsedit;
  fgridintf.coloptionstoeditoptions(opt1);
  optionsedit:= opt1;
+end;
+
+procedure tgraphdataedit.updatecoloptions1(const aoptions: coloptions1ty);
+begin
+ //dummy
 end;
 
 procedure tgraphdataedit.statdataread;

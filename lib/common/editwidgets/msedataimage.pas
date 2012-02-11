@@ -75,6 +75,7 @@ type
    function sortfunc(const l,r): integer; virtual;
    procedure gridvaluechanged(const index: integer); virtual;
    procedure updatecoloptions(const aoptions: coloptionsty);
+   procedure updatecoloptions1(const aoptions: coloptions1ty);
    procedure statdataread; virtual;
    procedure griddatasourcechanged; virtual;
    {$ifdef mse_with_ifi}
@@ -316,6 +317,11 @@ begin
 end;
 
 procedure tcustomdataimage.updatecoloptions(const aoptions: coloptionsty);
+begin
+ //dummy
+end;
+
+procedure tcustomdataimage.updatecoloptions1(const aoptions: coloptions1ty);
 begin
  //dummy
 end;
