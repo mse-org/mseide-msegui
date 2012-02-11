@@ -2043,7 +2043,7 @@ type
    procedure focusrow(const arow: integer; const action: focuscellactionty;
                       const noreadonly: boolean; 
                       const selectmode: selectcellmodety = scm_cell);
-   function doremoveappinsrow(const arow: integer): boolean;
+   function doremoveappinsrow(const oldrow,newrow: integer): boolean;
                     //true if removed
    function hassort: boolean;
    function canautoappend: boolean; virtual;
@@ -8889,6 +8889,14 @@ procedure tcustomgrid.rowdatachanged(const acell: gridcoordty;
 begin
  if not (csloading in componentstate) then begin
   sortinvalid;
+  if acell.col >= 0 then begin
+   fdatacols[acell.col].checkdirtyautorowheight(acell.row);
+  end
+  else begin
+   if gs_needsrowheight in fstate then begin
+    fdatacols.rowstate.checkdirtyautorowheight(acell.row);
+   end;
+  end;
   if fupdating = 0 then begin
    exclude(fstate,gs_rowdatachanged);
    inc(frowdatachanging);
@@ -11110,23 +11118,6 @@ begin     //focuscell
    else begin
     coord1:= invalidcell;
    end;
-{ -> after removeappenderdrow 
-   int1:= cell.row - ffocusedcell.row;
-   if (int1 <> 0) or (selectaction = fca_focusinforce) then begin
-    checksort;
-    if cell.row >= 0 then begin
-     if (cell.row >= 0) and (ffocusedcell.row >= 0) then begin
-      cell.row:= ffocusedcell.row + int1;
-      if cell.row < 0 then begin
-       cell.row:= 0;
-      end;
-      if cell.row > frowcount then begin
-       cell.row:= frowcount;
-      end;
-     end;
-    end;
-   end;
-}   
    sortchecked:= false;
    if isappend(cell.row) then begin
     dosortcheck(true);
@@ -11167,12 +11158,12 @@ begin     //focuscell
    if (selectaction = fca_exitgrid) or ((coord1.row >= 0) and
           ((coord1.row >= frowcount-1) and (cell.row < coord1.row) or
            not autorowappended and (
-           (cell.row <= rowcountbefore{-1}) and not (gs_restorerow in fstate) or 
+           (cell.row <= rowcountbefore{-1}) and not (gs_restorerow in fstate) or
            (cell.row < frowcount)))) then begin
     int1:= ffocusedcell.row;
     ffocusedcell.row:= invalidaxis;
     bo2:= false;
-    if (int1 <> cell.row) and doremoveappinsrow(int1) then begin
+    if (int1 <> cell.row) and doremoveappinsrow(int1,cell.row) then begin
      if (cell.row > int1) then begin
       dec(cell.row);
       bo2:= true;
@@ -11315,33 +11306,32 @@ begin
      ) and fdatacols.rowempty(frowcount - 1);
 end;
 
-function tcustomgrid.doremoveappinsrow(const arow: integer): boolean;
+function tcustomgrid.doremoveappinsrow(const oldrow,newrow: integer): boolean;
 begin
  result:= false;
  if not (gs_isdb in fstate) then begin
   if gs1_rowinserted in fstate1 then begin
    if (og_noinsertempty in foptionsgrid) and
-     (arow >= 0) and fdatacols.rowempty(arow) then begin
+     (oldrow >= 0) and fdatacols.rowempty(oldrow) then begin
     fstate1:= fstate1-[gs1_rowinserted,gs1_rowsortinvalid];
     result:= true;
-    deleterow(arow);
-//    include(fstate,gs_emptyrowremoved); for last row only
+    deleterow(oldrow);
     exit;
    end;
   end
   else begin
-   if (arow <> frowcount-1) and isautoappend then begin
+   if (newrow <> frowcount-1) and isautoappend then begin
     if row >= 0 then begin
      if row = 0 then begin
       row:= invalidaxis;
      end
      else begin
-      row:= arow-1;
+      row:= newrow-1;
      end;
     end
     else begin
      result:= true;
-     if arow = frowcount-1 then begin
+     if newrow = frowcount-1 then begin
       exclude(fstate1,gs1_rowsortinvalid);
      end;
      deleterow(frowcount-1);
@@ -11356,7 +11346,7 @@ end;
 procedure tcustomgrid.removeappendedrow;
 begin
  docheckcellvalue;
- doremoveappinsrow(row);
+ doremoveappinsrow(row,row);
 end;
 
 function tcustomgrid.hasdata: boolean;
@@ -16549,30 +16539,36 @@ begin
 end;
 
 procedure trowstatelist.checkdirtyautorowheight(const arow: integer);
+var
+ bo1: boolean;
 begin
+ bo1:= false;
  if arow < 0 then begin
   fdirtyrowheight:= 0;
   fdirtyautorowheight:= 0;
+  bo1:= true;
  end
  else begin
   if finfolevel >= ril_rowheight then begin
    with prowstaterowheightty(getitempo(arow))^ do begin
     if rowheight.height <= 0 then begin
      rowheight.height:= 0;
-    end
-    else begin
-     exit;
+     bo1:= true;
     end;
    end;
   end;
   if arow < fdirtyrowheight then begin
    fdirtyrowheight:= arow;
-  end
-  else begin
-   exit;
+   bo1:= true;
+  end;
+  if arow < fdirtyautorowheight then begin
+   fdirtyautorowheight:= arow;
+   bo1:= true;
   end;
  end;   
- fgrid.layoutchanged;
+ if bo1 then begin
+  fgrid.layoutchanged;
+ end;
 end;
 
 procedure trowstatelist.change(const index: integer);

@@ -705,7 +705,6 @@ var
  pt1: pointty;
  po1: pcellinfoty;
  size1: sizety;
- int1: integer;
 begin
  pt1:= acanvas.origin;
  po1:=  pcellinfoty(acanvas.drawinfopo);
@@ -722,14 +721,13 @@ begin
   updatecaption(info);
   if po1^.calcautocellsize then begin
    textrect(acanvas,info);
-   size1:= po1^.rect.size;
-   int1:= info.res.cx - info.dest.cx;
-   if int1 > 0 then begin
-    size1.cx:= size1.cx + int1;
+   size1.cx:= po1^.rect.cx + info.res.cx - info.dest.cx;
+   if size1.cx < minsize.cx then begin
+    size1.cx:= minsize.cx;
    end;
-   int1:= info.res.cy - info.dest.cy;
-   if int1 > 0 then begin
-    size1.cy:= size1.cy + int1;
+   size1.cy:= po1^.rect.cy + info.res.cy - info.dest.cy;
+   if size1.cy < minsize.cy then begin
+    size1.cy:= minsize.cy;
    end;
    if size1.cx > po1^.autocellsize.cx then begin
     po1^.autocellsize.cx:= size1.cx;
