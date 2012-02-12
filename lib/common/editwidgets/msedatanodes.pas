@@ -74,6 +74,7 @@ type
   checkboxinnerrect: rectty;
   colorline: colorty;
   imageextend: sizety; //variable
+  imageextra: sizety;  //variable
  end;
  plistitemlayoutinfoty = ^listitemlayoutinfoty;
 
@@ -668,7 +669,7 @@ begin
    end;
   end;
   if aimagelist <> nil then begin
-   imageextend.cx:= aimagelist.size.cx-imagerect.cx;
+   imageextend.cx:= aimagelist.size.cx+imageextra.cx-imagerect.cx;
    if acanvas <> nil then begin
     int1:= getactimagenr;
     if (int1 >= 0) and (int1 < aimagelist.count) then begin
