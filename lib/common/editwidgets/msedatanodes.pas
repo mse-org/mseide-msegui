@@ -647,7 +647,6 @@ var
  int1: integer;
  aimagelist: timagelist;
  glyphno: stockglyphty;
- size1: sizety;
 begin
  aimagelist:= imagelist;
  with fowner,alayoutinfo do begin

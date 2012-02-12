@@ -1293,15 +1293,10 @@ type
    procedure setsourceissum(const avalue: string);
    procedure sourcenamechanged(const atag: integer);
   {$ifdef mse_with_ifi}
-//   procedure setifilinkfoldlevel1(const avalue: tifiintegerlinkcomp);
-//   procedure setifilinkissum1(const avalue: tifibooleanlinkcomp);
-//   procedure setifilinkfoldlevel(const avalue: tifiintegerlinkcomp);
-//   procedure setifilinkissum(const avalue: tifibooleanlinkcomp);
     //iifilink
    function getifilinkkind: ptypeinfo;
     //iificlient
    procedure setifiserverintf(const aintf: iifiserver);
-//   function getifiserverintf: iifiserver;
     //iifidatalink
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    procedure ifisetvalue(var avalue; var accept: boolean);   
@@ -1327,8 +1322,6 @@ type
    procedure movegrouptoparent(const aindex: integer; const acount: integer); 
                  //called before deleting of rows
    procedure updatedeletedrows(const index: integer; const acount: integer);
-//   procedure setcount(const value: integer); override;
-//   procedure clearbuffer; override;   
    procedure internalshow(var aindex: integer);
    procedure internalhide(var aindex: integer);
    procedure show(const aindex: integer);
@@ -1461,10 +1454,9 @@ type
    procedure endselect;
    procedure decselect;
    function sortfunc(const l,r: integer): integer;
-//   procedure sortfunc(sender: tcustomgrid;
-//                       const index1,index2: integer; var result: integer);
 
    function hassortstat: boolean;
+   function hasdatastat: boolean;
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    
@@ -5707,7 +5699,7 @@ procedure tdatacol.setselected(const row: integer; value: boolean);
 var
  po1: prowstatety;
  ca1: longword;
- int1: integer;
+ int1,int2: integer;
 begin
  if ident <= selectedcolmax then begin
   if row >= 0 then begin
@@ -5737,7 +5729,6 @@ begin
       end;
      end;
      invalidatecell(row);
-//     cellchanged(row);
      doselectionchanged;
     end;
    end;
@@ -5759,18 +5750,17 @@ begin
     if fselectedrow <> -1 then begin
      po1:= fgrid.fdatacols.frowstate.datapo;
      ca1:= not (bits[ident] {or wholerowselectedmask});
+     int2:= fgrid.fdatacols.frowstate.fsize;
      if fselectedrow >= 0 then begin
-      with prowstatety(pchar(po1)+
-             fselectedrow*fgrid.fdatacols.frowstate.fsize)^ do begin
+      with prowstatety(pchar(po1)+fselectedrow*int2)^ do begin
        selected:= selected and ca1;
       end;
       invalidatecell(fselectedrow);
-//      cellchanged(fselectedrow);
      end
      else begin
       for int1:= 0 to fgrid.frowcount - 1 do begin
        po1^.selected:= po1^.selected and ca1;
-       inc(po1);
+       inc(pchar(po1),int2);
       end;
       changed;
      end;
@@ -8108,7 +8098,6 @@ begin
  fgrid.beginupdate;
  try
   if (og_savestate in fgrid.foptionsgrid) and reader.canstate then begin
-//   sortcol:= reader.readinteger('sortcol',sortcol,-1,count-1);
    if og_colmoving in fgrid.optionsgrid then begin
     fgrid.ffixrows.orderdatacols(originalorder);
     ar1:= readorder(reader);
@@ -8128,7 +8117,7 @@ begin
    int2:= 0;
    if (og_savestate in fgrid.foptionsgrid) and
      (fgrid.foptionsgrid * [og_folded,og_colmerged,og_rowheight] <> []) and
-                                                      reader.candata then begin
+        hasdatastat and reader.candata then begin
     reader.readdatalist('rowstate',frowstate);
     int2:= frowstate.count;
    end;
@@ -8384,6 +8373,22 @@ begin
   end;
  end;
 end;
+
+function tdatacols.hasdatastat: boolean;
+var
+ int1: integer;
+begin
+ result:= false;
+ for int1:= 0 to high(fitems) do begin
+  with tdatacol(fitems[int1]) do begin
+   if co_savevalue in foptions then begin
+    result:= true;
+    break;
+   end;
+  end;
+ end;
+end;
+
 
 function tdatacols.updatedatastate: boolean;
 begin
@@ -14442,7 +14447,6 @@ begin
   fdatacols.roworderinvalid;
   beginupdate;
   try
-//   int1:= ffocusedcell.row;
    bo1:= factiverow = ffocusedcell.row;
    if assigned(fonsort) then begin
     internalsort({$ifdef FPC}@{$endif}doonsort{fonsort},ffocusedcell.row);
@@ -14453,15 +14457,6 @@ begin
    if bo1 then begin
     factiverow:= ffocusedcell.row;
    end;
-   {
-   if int1 <> ffocusedcell.row then begin
-    if factiverow = ffocusedcell.row then begin
-     factiverow:= int1;
-    end;
-    ffocusedcell.row:= int1;
-//    updaterowdata; //for twidgetgrid
-   end;
-   }
    include(fstate1,gs1_sortvalid);
    exclude(fstate1,gs1_rowsortinvalid);
    layoutchanged;
@@ -16706,7 +16701,6 @@ procedure trowstatelist.cleanrowheight(const aindex: integer);
 var
  int1,int2,int3,int4,int5: integer;
  po1: prowstaterowheightty;
-// po2: pintegeraty;
  needsrowheightupdate: boolean;
 begin
  if aindex >= fdirtyrowheight then begin
@@ -16715,10 +16709,12 @@ begin
    needsrowheightupdate:= gs_needsrowheight in fgrid.fstate;  
    po1:= dataporowheight;
    inc(pchar(po1),fdirtyrowheight*fsize);
+   if fdirtyrowheight = 0 then begin
+    po1^.rowheight.ypos:= 0;
+   end;
    int3:= po1^.rowheight.ypos;
    if ffolded then begin
     cleanvisible(aindex);
- //   po2:= fvisiblerowmap.datapo;
    end;
    for int1:= fdirtyrowheight to aindex do begin
     if po1^.rowheight.linewidth = 0 then begin
