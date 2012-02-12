@@ -74,7 +74,8 @@ type
   protected
    fformat: formatinfoarty;
   public
-   procedure updatecaption(var ainfo: drawtextinfoty); override;
+   procedure updatecaption(var alayoutinfo: listitemlayoutinfoty;
+                                        var ainfo: drawtextinfoty); override;
    property richcaption: richstringty read getrichcaption write setrichcaption;
    property captionformat: formatinfoarty read fformat write setcaptionformat;
  end;
@@ -221,11 +222,9 @@ type
    fcolorglyph: colorty;
    fediting: boolean;
    fonitemsmoved: gridblockmovedeventty;
-//   ffiltertext: msestring;
    fcellframe: tcellframe;
    foncopytoclipboard: updatestringeventty;
    fonpastefromclipboard: updatestringeventty;
-//   fcellheight: integer;
    fcellcursor: cursorshapety;
    procedure createcellframe;
    function getcellframe: tcellframe;
@@ -242,7 +241,6 @@ type
    procedure setcolorselect(const Value: colorty);
    procedure setcolorglyph(const Value: colorty);
    procedure setediting(const Value: boolean);
-//   procedure setfiltertext(const value: msestring);
    function getkeystring(const index: integer): msestring;
    function getfocusedindex: integer;
    procedure setfocusedindex(const avalue: integer);
@@ -382,7 +380,6 @@ type
    property optionsgrid;
    property optionsgrid1;
    property options;
-//   property gridframewidth;
    property gridframecolor;
    property itemlist;
    property cellwidthmin;
@@ -477,7 +474,6 @@ type
    foncellevent: celleventty;
    factiverow: integer;
    fcalcsize: sizety;
-//   fediting: boolean;
    foncheckcanedit: itemcanediteventty;
    function getitemlist: titemeditlist;
    procedure setitemlist(const Value: titemeditlist);
@@ -1639,7 +1635,7 @@ begin
  drawcellbackground(canvas);
  item1:= tlistitem1(focuseditem);
  if item1 <> nil then begin
-  item1.drawimage(canvas);
+  item1.drawimage(fitemlist.flayoutinfo,canvas);
   po1:= cellrect(ffocusedcell,cil_paint).pos;
   canvas.remove(po1);
   feditor.dopaint(canvas);
@@ -1738,7 +1734,8 @@ begin
  end;
 end;
 
-procedure tcustomlistview.setupeditor(const newcell: gridcoordty; posonly: boolean);
+procedure tcustomlistview.setupeditor(const newcell: gridcoordty;
+                                                    posonly: boolean);
 var
  po1: pointty;
  rect1,rect2: rectty;
@@ -2812,7 +2809,7 @@ begin
    acanvas.rootbrushorigin:= fgridintf.getbrushorigin;
   end;
   with tlistitem1(fvalue) do begin
-   drawimage(acanvas);
+   drawimage(flayoutinfofocused,acanvas);
    if feditor.lasttextclipped then begin
     include(fstate1,ns1_captionclipped);
    end
@@ -5096,7 +5093,8 @@ begin
  caption:= avalue.text;
 end;
 
-procedure trichlistedititem.updatecaption(var ainfo: drawtextinfoty);
+procedure trichlistedititem.updatecaption(
+             var alayoutinfo: listitemlayoutinfoty; var ainfo: drawtextinfoty);
 begin
  inherited;
  ainfo.text.format:= fformat;

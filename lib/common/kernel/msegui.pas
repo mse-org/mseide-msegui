@@ -2362,6 +2362,7 @@ type
               const aflags: hintflagsty = defaulthintflags
                       ); overload;
    procedure showhint(const sender: twidget; const info: hintinfoty); overload;
+   procedure showhint(const sender: twidget; const hint: msestring); overload;
    procedure hidehint;
    procedure restarthint(const sender: twidget);
    function hintedwidget: twidget; //last hinted widget
@@ -16854,13 +16855,24 @@ begin
  showhint(sender,hint,makerect(apos,nullsize),cp_bottomleft,ashowtime,aflags);
 end;
 
-procedure tguiapplication.showhint(const sender: twidget; const info: hintinfoty);
+procedure tguiapplication.showhint(const sender: twidget;
+                                           const info: hintinfoty);
 begin
  with info do begin
   if (hfl_show in flags) or (caption <> '') then begin
    showhint(sender,caption,posrect,placement,showtime,flags);
   end;
  end;
+end;
+
+procedure tguiapplication.showhint(const sender: twidget;
+                                    const hint: msestring);
+var
+ info: hintinfoty;
+begin
+ inithintinfo(info,sender);
+ info.caption:= hint;
+ showhint(sender,info);
 end;
 
 procedure tguiapplication.hidehint;

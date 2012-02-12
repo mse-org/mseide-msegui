@@ -2257,7 +2257,8 @@ begin
   {$warnings on}
    application.inithintinfo(hintinfo,info.grid);
   {$warnings off}
-   hintinfo.caption:= datatotext(tdatacol1(fgridintf.getcol).getdatapo(info.cell.row)^);
+   hintinfo.caption:= 
+                datatotext(tdatacol1(fgridintf.getcol).getdatapo(info.cell.row)^);
   {$warnings on}
    application.showhint(info.grid,hintinfo);
   end; 

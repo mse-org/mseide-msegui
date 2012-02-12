@@ -1178,11 +1178,12 @@ begin
        visible:= true;
       end;
       if (fwindow <> nil) and 
-       (canfocus and (tcustomwidgetgrid(fgrid).entered or bo1) and 
-        not fgrid.checkdescendent(fwindow.focusedwidget) or
-        (fwindow.focusedwidget = fgrid) or 
-        fcontainer2.checkdescendent(fwindow.focusedwidget) or
-        fcontainer0.checkdescendent(fwindow.focusedwidget)) then begin
+        canfocus and (tcustomwidgetgrid(fgrid).entered or bo1) and
+        (
+         not fgrid.checkdescendent(fwindow.focusedwidget) or
+         (fwindow.focusedwidget = fgrid) or 
+         fcontainer2.checkdescendent(fwindow.focusedwidget) or
+         fcontainer0.checkdescendent(fwindow.focusedwidget)) then begin
        bo1:= gs1_focuscellonenterlock in twidgetgrid(fgrid).fstate1;
        include(twidgetgrid(fgrid).fstate1,gs1_focuscellonenterlock);
        try
