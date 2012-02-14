@@ -1992,6 +1992,7 @@ type
    
    procedure objectevent(const sender: tobject; 
                                  const event: objecteventty); override;
+
    procedure loaded; override;
    procedure doexit; override;
    procedure doenter; override;
@@ -5407,7 +5408,7 @@ begin
   calcrange(0,count-foppositecount-1,range2);
  end;
 end;
-var testvar: tgridprop;
+
 function tgridarrayprop.itematpos(const pos: integer;
                    const getscrollable: boolean = true): integer;
 var
@@ -5415,7 +5416,6 @@ var
 begin
  result:= invalidaxis;
  for int1:= 0 to count - 1 do begin
-testvar:= geoitems(int1);
   with geoitems(int1) do begin
    if (not (co_invisible in foptions) or 
            (csdesigning in fgrid.componentstate)) and
@@ -8697,13 +8697,12 @@ begin
 //  if (cols.count > 0) and
   (rowrange.range1.endindex >= rowrange.range1.startindex) or
          (rowrange.range2.endindex >= rowrange.range2.startindex) then begin
-         {
    po1:= canvas.origin;
    po2.x:= po1.x;
    paintrows(rowrange.range1);
    paintrows(rowrange.range2);
    canvas.origin:= po1;
-   }
+
    reg:= canvas.copyclipregion;
    canvas.subcliprect(makerect(0,
              fgrid.finnerdatarect.y-tframe1(fgrid.fframe).fi.innerframe.top,
@@ -8729,11 +8728,13 @@ begin
     end;
    end;
    canvas.clipregion:= reg;
+   {
    po1:= canvas.origin;
    po2.x:= po1.x;
    paintrows(rowrange.range1);
    paintrows(rowrange.range2);
    canvas.origin:= po1;
+   }
   end;
  end;
 end;
@@ -9388,7 +9389,11 @@ begin
       fdatacols.paint(colinfo,false);     //draw fix datacols
       adatarect:= makerect(
         fdatarect.x-tframe1(fframe).fi.innerframe.left-ffirstnohscroll,
-        -fscrollrect.y,fdatarect.cx+ftotnohscroll,fdatarect.cy);
+        -fscrollrect.y,fdatarecty.cx-ffixcols.ftotsize
+        {fdatarect.cx+ftotnohscroll},fdatarect.cy);
+      if adatarect.cx < 0 then begin
+       adatarect.cx:= 0;
+      end;
       {
       if ffirstnohscroll > 0 then begin
        adatarect:= makerect(fdatarect.x-tframe1(fframe).fi.innerframe.left-ffirstnohscroll,
