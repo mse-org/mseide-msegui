@@ -3556,7 +3556,7 @@ begin
                                 (fgrid.fmousecell.row = row1);
       saveindex:= canvas.save;
       fcellinfo.color:= rowcolor(row1);
-      canvas.intersectcliprect(fcellrect);
+      canvas.intersectcliprect(mr(nullpoint,fcellrect.size));
       bo2:= false;
       if canbeforedrawcell then begin
        fonbeforedrawcell(self,canvas,fcellinfo,bo2);
