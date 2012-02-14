@@ -13183,7 +13183,7 @@ var
  cell,cell1: gridcoordty;
  col1: tcol;
  fixrow: tfixrow;
- int1: integer;
+ int1,int2: integer;
  rect1: rectty;
  offset: pointty;
  apos: pointty;
@@ -13256,35 +13256,41 @@ begin
     end;
    end;
    pok_datacol: begin
+    s1:= co_nohscroll in tdatacol(fdatacols.fitems[cell.col]).options;
     cellatpos(makepoint(apos.x,fdatarect.y),cell1);
+    d1:= not s1; //inhibit
     if cell1.col >= 0 then begin
-     s1:= co_nohscroll in tdatacol(fdatacols.fitems[cell1.col]).options;
-     d1:= co_nohscroll in tdatacol(fdatacols.fitems[cell.col]).options;
-     bo1:= s1 xor d1;
+     d1:= co_nohscroll in tdatacol(fdatacols.fitems[cell1.col]).options;
      rect1:= cellrect(cell1);
-     killrepeater;
+     int1:= rect1.x;
      if cell1.col > cell.col then begin
       int1:= rect1.x+rect1.cx;
-      if not s1 and (int1 > fdatarect.x + fdatarect.cx) then begin
-       startrepeater(gs_scrollright,slowrepeat);
-      end
-      else begin
-       if not bo1 then begin
-        drawvertline(int1);
-       end;
-      end;
+     end;
+    end;
+    killrepeater;
+    if not s1 then begin
+     if int1 < fdatarect.x then begin
+      int1:= fdatarect.x;
      end
      else begin
-      if not s1 and {(cell1.col > 0) and} (rect1.x < fdatarect.x) then begin
-       startrepeater(gs_scrollleft,slowrepeat);
-      end
-      else begin
-       if not bo1 then begin
-        drawvertline(rect1.x);
-       end;
+      int2:= fdatarect.x + fdatarect.cx;
+      if int1 > int2 then begin
+       int1:= int2;
       end;
      end;
-    end
+     if (apos.x < fdatarect.x) then begin
+      startrepeater(gs_scrollleft,slowrepeat);
+     end
+     else begin
+      if (apos.x >= fdatarect.x + fdatarect.cx) then begin
+       startrepeater(gs_scrollright,slowrepeat);
+      end;
+     end;
+    end;
+    if s1 = d1 then begin
+     drawvertline(int1);
+    end;
+    {
     else begin
      if not s1 then begin
       if (apos.x < fdatarect.x) then begin
@@ -13299,6 +13305,7 @@ begin
       end;
      end;
     end;
+    }
    end;
   end;
  end;
