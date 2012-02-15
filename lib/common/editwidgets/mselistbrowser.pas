@@ -1538,10 +1538,10 @@ begin
  if lvo_fill in foptions then begin
   inherited;
   if lvo_horz in foptions then begin
-   width1:= finnerdatarect.cx - datacollinewidth;
+   width1:= fdatarect.cx - datacollinewidth;
   end
   else begin
-   height1:= finnerdatarect.cy - datarowlinewidth;
+   height1:= fdatarect.cy - datarowlinewidth;
   end;
  end;
  limitcellwidth(width1);
@@ -1559,7 +1559,7 @@ begin
    if int1 = 0 then begin
     int1:= 1;
    end;
-   int2:= finnerdatarect.cx div int1;
+   int2:= fdatarect.cx div int1;
    if int2 = 0 then begin
     int2:= 1;
    end;
@@ -1578,7 +1578,7 @@ begin
    if int1 = 0 then begin
     int1:= 1;
    end;
-   int2:= finnerdatarect.cy div int1;
+   int2:= fdatarect.cy div int1;
    if int2 = 0 then begin
     int2:= 1;
    end;
