@@ -470,8 +470,6 @@ type
    frowcoloroffsetselect: integer;
    ffontactivenum: integer;
    ffontfocusednum: integer;
-//   frowheightbefore: integer;
-//   fdrawfocusedcellbefore: boolean;
    function getcolindex: integer;
    procedure setfocusrectdist(const avalue: integer);
    procedure updatepropwidth;
@@ -1293,15 +1291,10 @@ type
    procedure setsourceissum(const avalue: string);
    procedure sourcenamechanged(const atag: integer);
   {$ifdef mse_with_ifi}
-//   procedure setifilinkfoldlevel1(const avalue: tifiintegerlinkcomp);
-//   procedure setifilinkissum1(const avalue: tifibooleanlinkcomp);
-//   procedure setifilinkfoldlevel(const avalue: tifiintegerlinkcomp);
-//   procedure setifilinkissum(const avalue: tifibooleanlinkcomp);
     //iifilink
    function getifilinkkind: ptypeinfo;
     //iificlient
    procedure setifiserverintf(const aintf: iifiserver);
-//   function getifiserverintf: iifiserver;
     //iifidatalink
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    procedure ifisetvalue(var avalue; var accept: boolean);   
@@ -1327,8 +1320,6 @@ type
    procedure movegrouptoparent(const aindex: integer; const acount: integer); 
                  //called before deleting of rows
    procedure updatedeletedrows(const index: integer; const acount: integer);
-//   procedure setcount(const value: integer); override;
-//   procedure clearbuffer; override;   
    procedure internalshow(var aindex: integer);
    procedure internalhide(var aindex: integer);
    procedure show(const aindex: integer);
@@ -1435,6 +1426,8 @@ type
    procedure setrowselected(const index: integer; const avalue: boolean);
   protected
    frowstate: trowstatelist;
+   fscrollsize: integer;
+   ffirsthscrollindex: integer;
    procedure beginchangelock;
    procedure endchangelock;
    procedure datasourcechanged; virtual;
@@ -1461,10 +1454,9 @@ type
    procedure endselect;
    procedure decselect;
    function sortfunc(const l,r: integer): integer;
-//   procedure sortfunc(sender: tcustomgrid;
-//                       const index1,index2: integer; var result: integer);
 
    function hassortstat: boolean;
+   function hasdatastat: boolean;
    procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatwrite(const writer: tstatwriter); virtual;
    
@@ -1480,6 +1472,8 @@ type
    procedure clearselection;
    function hasselection: boolean;
    function previosvisiblecol(aindex: integer): integer;
+                   //invalidaxis if none
+   function nextvisiblecol(aindex: integer): integer;
                    //invalidaxis if none
    property lastvisiblecol: integer read flastvisiblecol;
    function rowempty(const arow: integer): boolean;
@@ -1767,7 +1761,6 @@ type
    foncolmoved: gridblockmovedeventty;
    fonselectionchanged: notifyeventty;
    fgridframecolor: colorty;
-//   fgridframewidth: integer;
    frowcolors: tcolorarrayprop;
    frowfonts: trowfontarrayprop;
    fmouseparkcell: gridcoordty;
@@ -1793,7 +1786,6 @@ type
    fongetmorerows: gridmorerowseventty;
 {$ifdef mse_with_ifi}
    fifilink: tifigridlinkcomp;
-//   procedure ifisetvalue(var avalue; var accept: boolean);
    foncolmoving: gridblockmovingeventty;
    fonrowsmoving: gridblockmovingeventty;
    procedure ifirowchange;
@@ -1827,7 +1819,6 @@ type
    procedure decodepickobject(code: integer; out kind: pickobjectkindty;
                out cell: gridcoordty; out col: tcol; out row: tfixrow);
    procedure setgridframecolor(const Value: colorty);
-//   procedure setgridframewidth(const Value: integer);
    procedure setrowcolors(const Value: tcolorarrayprop);
    procedure setrowfonts(const Value: trowfontarrayprop);
    function getrowcolorstate(index: integer): rowstatenumty;
@@ -1892,12 +1883,14 @@ type
    frowcount: integer;
    frowcountmax: integer;
    fscrollrect: rectty;
-   finnerdatarect,fdatarect,fdatarectx,fdatarecty: rectty;
+   {finnerdatarect,}fdatarect,fdatarectx,fdatarecty: rectty;
           //origin = clientrect.pos
    frootbrushorigin: pointty;
    fbrushorigin: pointty;
           //origin windowpos
-   ffirstnohscroll: integer;
+//   ffirstnohscroll: integer;
+//   ftotnohscroll: integer;
+   
    fdragcontroller: tdragcontroller;
    fobjectpicker: tobjectpicker;
    fpickkind: pickobjectkindty;
@@ -1972,7 +1965,6 @@ type
    procedure rowstatechanged(const arow: integer); virtual;
    procedure scrolled(const dist: pointty); virtual;
    procedure sortchanged(const all: boolean);
-//   procedure checksort;
    procedure checkinvalidate;
    function startanchor: gridcoordty;
    function endanchor: gridcoordty;
@@ -2002,10 +1994,10 @@ type
    
    procedure objectevent(const sender: tobject; 
                                  const event: objecteventty); override;
+
    procedure loaded; override;
    procedure doexit; override;
    procedure doenter; override;
-//   procedure dofocus; override;
    procedure doactivate; override;
    procedure dodeactivate; override;
    procedure activechanged; override;
@@ -3567,7 +3559,7 @@ begin
                                 (fgrid.fmousecell.row = row1);
       saveindex:= canvas.save;
       fcellinfo.color:= rowcolor(row1);
-      canvas.intersectcliprect(fcellrect);
+      canvas.intersectcliprect(mr(nullpoint,fcellrect.size));
       bo2:= false;
       if canbeforedrawcell then begin
        fonbeforedrawcell(self,canvas,fcellinfo,bo2);
@@ -3860,24 +3852,18 @@ begin
  drawfocusrect(acanvas,inflaterect(makerect(nullpoint,fcellinfo.rect.size),
                     -ffocusrectdist));
 end;
-{
-function tcol.isoptionsstored: Boolean;
-begin
- result:= foptions <> tcols(prop).foptions;
-end;
 
-function tcol.isfocusrectdiststored: boolean;
-begin
- result:= ffocusrectdist <> tcols(prop).ffocusrectdist;
-end;
-}
 procedure tcol.updatelayout;
+var
+ bo1: boolean;
 begin
-// frowheightbefore:= -bigint;
  fcellrect.size.cy:= fgrid.fdatarowheight;
  fcellrect.size.cx:= fwidth;
  fcellrect.y:= 0;
- if fcellinfo.cell.col <= tgridarrayprop(prop).ffirstopposite then begin
+ bo1:= fcellinfo.cell.col < 0;
+ if bo1 and (fcellinfo.cell.col <= tgridarrayprop(prop).ffirstopposite) or 
+   not bo1 and 
+        (fcellinfo.cell.col >= tgridarrayprop(prop).ffirstopposite) then begin
   flinepos:= -((flinewidth+1) div 2);
   fcellrect.x:= flinewidth;
  end
@@ -4918,8 +4904,8 @@ begin
    pt2.y:= pt1.y+fcellrect.y;
    canbeforedrawcell:= fgrid.canevent(tmethod(fonbeforedrawcell));
    canafterdrawcell:= fgrid.canevent(tmethod(fonafterdrawcell));
-   paintcols(colrange.range1);
    paintcols(colrange.range2);
+   paintcols(colrange.range1);
    canvas.linewidth:= linewidthbefore; //???
    canvas.origin:= pt1;
   end;
@@ -5300,9 +5286,9 @@ procedure tgridarrayprop.updatelayout;
 var
  int1,int2,int3: integer;
 begin
- int2:= 0;
- int3:= getclientsize;
- if freversedorder then begin
+ if freversedorder then begin //fixrows or fixcols
+  int3:= getclientsize;
+  int2:= 0;
   for int1:= count - foppositecount to count - 1 do begin
    with tgridprop(fitems[int1]) do begin
     fend:= int3;
@@ -5322,8 +5308,11 @@ begin
     end;
    end;
   end;
+  ffirstsize:= int2;
+  ftotsize:= ftotsize + int2;
  end
- else begin
+ else begin  //datacols
+ {
   for int1:= count - 1 downto count - foppositecount do begin
    with tgridprop(fitems[int1]) do begin
     fend:= int3;
@@ -5334,18 +5323,22 @@ begin
   end;
   ftotsize:= int2;
   int2:= 0;
-  for int1:= 0 to count - foppositecount - 1 do begin
-   with tgridprop(fitems[int1]) do begin
-    if not (co_nohscroll in foptions) then begin
-     fstart:= int2;
-     inc(int2,step);
-     fend:= int2;
+  }
+  with tdatacols(self) do begin
+   int2:= 0;
+   fscrollsize:= 0;
+   for int1:= ffirsthscrollindex to count - foppositecount - 1 do begin
+    with tgridprop(fitems[int1]) do begin
+ //    if not (co_nohscroll in foptions) then begin
+      fstart:= int2;
+      inc(int2,step);
+      fend:= int2;
+ //    end;
     end;
    end;
+   fscrollsize:= int2;
   end;
  end;
- ffirstsize:= int2;
- ftotsize:= ftotsize + int2;
 end;
 
 procedure tgridarrayprop.setoppositecount(const value: integer);
@@ -5420,8 +5413,6 @@ begin
  length:= startpos + length;
  with range do begin
   scrollables:= ascrollables;
-//  calcrange(foppositecount,count-1,range1);
-//  calcrange(0,foppositecount-1,range2);
   calcrange(count-foppositecount,count-1,range1);
   calcrange(0,count-foppositecount-1,range2);
  end;
@@ -5435,7 +5426,8 @@ begin
  result:= invalidaxis;
  for int1:= 0 to count - 1 do begin
   with geoitems(int1) do begin
-   if (not (co_invisible in foptions) or (csdesigning in fgrid.componentstate)) and
+   if (not (co_invisible in foptions) or 
+           (csdesigning in fgrid.componentstate)) and
           (getscrollable xor (co_nohscroll in foptions)) then begin
     if (pos >= fstart) and (pos < fend) then begin
      if freversedorder then begin
@@ -5707,7 +5699,7 @@ procedure tdatacol.setselected(const row: integer; value: boolean);
 var
  po1: prowstatety;
  ca1: longword;
- int1: integer;
+ int1,int2: integer;
 begin
  if ident <= selectedcolmax then begin
   if row >= 0 then begin
@@ -5737,7 +5729,6 @@ begin
       end;
      end;
      invalidatecell(row);
-//     cellchanged(row);
      doselectionchanged;
     end;
    end;
@@ -5759,18 +5750,17 @@ begin
     if fselectedrow <> -1 then begin
      po1:= fgrid.fdatacols.frowstate.datapo;
      ca1:= not (bits[ident] {or wholerowselectedmask});
+     int2:= fgrid.fdatacols.frowstate.fsize;
      if fselectedrow >= 0 then begin
-      with prowstatety(pchar(po1)+
-             fselectedrow*fgrid.fdatacols.frowstate.fsize)^ do begin
+      with prowstatety(pchar(po1)+fselectedrow*int2)^ do begin
        selected:= selected and ca1;
       end;
       invalidatecell(fselectedrow);
-//      cellchanged(fselectedrow);
      end
      else begin
       for int1:= 0 to fgrid.frowcount - 1 do begin
        po1^.selected:= po1^.selected and ca1;
-       inc(po1);
+       inc(pchar(po1),int2);
       end;
       changed;
      end;
@@ -7432,12 +7422,24 @@ begin
  if int2 >= 0 then begin
   tdatacol(fitems[int2]).fwidth:= 1;
  end;
+ ffirstopposite:= 0;
+ for int1:= count-1 downto 0 do begin
+  with tdatacol(fitems[int1]) do begin
+   if not (co_nohscroll in foptions) then begin
+    ffirstopposite:= int1+1;
+    break;
+   end;
+  end;
+ end;
+ if ffirstopposite = 0 then begin
+  ffirstopposite:= count;
+ end;
  inherited;
  if int2 >= 0 then begin
   int1:= totwidth;
-  if int1 < fgrid.finnerdatarect.cx then begin
+  if int1 < fgrid.fdatarect.cx then begin
    with tdatacol(fitems[int2]) do begin
-    fwidth:= fwidth + fgrid.finnerdatarect.cx - int1{ - (step-fwidth)};
+    fwidth:= fwidth + fgrid.fdatarect.cx - int1{ - (step-fwidth)};
    end;
    inherited;
   end;
@@ -7903,6 +7905,23 @@ begin
  end;
 end;
 
+function tdatacols.nextvisiblecol(aindex: integer): integer;
+var
+ int1: integer;
+begin
+ result:= invalidaxis;
+ if aindex < 0 then begin
+  aindex:= 0;
+ end;
+ for int1:= aindex + 1 to count-1 do begin
+  if not (co_invisible in tdatacol(fitems[int1]).foptions) or
+                  (csdesigning in fgrid.ComponentState) then begin
+   result:= int1;
+   break;
+  end;
+ end;
+end;
+
 function tdatacols.selectedcellcount: integer;
 var
  int1,int2: integer;
@@ -8108,7 +8127,6 @@ begin
  fgrid.beginupdate;
  try
   if (og_savestate in fgrid.foptionsgrid) and reader.canstate then begin
-//   sortcol:= reader.readinteger('sortcol',sortcol,-1,count-1);
    if og_colmoving in fgrid.optionsgrid then begin
     fgrid.ffixrows.orderdatacols(originalorder);
     ar1:= readorder(reader);
@@ -8128,7 +8146,7 @@ begin
    int2:= 0;
    if (og_savestate in fgrid.foptionsgrid) and
      (fgrid.foptionsgrid * [og_folded,og_colmerged,og_rowheight] <> []) and
-                                                      reader.candata then begin
+        hasdatastat and reader.candata then begin
     reader.readdatalist('rowstate',frowstate);
     int2:= frowstate.count;
    end;
@@ -8384,6 +8402,22 @@ begin
   end;
  end;
 end;
+
+function tdatacols.hasdatastat: boolean;
+var
+ int1: integer;
+begin
+ result:= false;
+ for int1:= 0 to high(fitems) do begin
+  with tdatacol(fitems[int1]) do begin
+   if co_savevalue in foptions then begin
+    result:= true;
+    break;
+   end;
+  end;
+ end;
+end;
+
 
 function tdatacols.updatedatastate: boolean;
 begin
@@ -8663,7 +8697,7 @@ var
  end;
 
 var
- int1,int2: integer;
+ int1,int2,int3,int4: integer;
  reg: regionty;
 
 begin
@@ -8672,43 +8706,66 @@ begin
 //  if (cols.count > 0) and
   (rowrange.range1.endindex >= rowrange.range1.startindex) or
          (rowrange.range2.endindex >= rowrange.range2.startindex) then begin
-         {
+   po1:= canvas.origin;
+   po2.x:= po1.x;
+   paintrows(rowrange.range1);
+   paintrows(rowrange.range2);
+   canvas.origin:= po1;
+   reg:= canvas.copyclipregion;
+   canvas.subcliprect(makerect(0,
+        fgrid.fdatarect.y-tframe1(fgrid.fframe).fi.innerframe.top,
+        bigint{tframe1(fgrid.fframe).fpaintrect.cx)},fgrid.fdatarect.cy));
+   if fix then begin
+    with fgrid.ffixcols do begin
+     int3:= fgrid.fdatarecty.cx - ftotsize+ffirstsize;
+     int4:= -1-ffirstopposite;
+    end;
+   end
+   else begin
+    with fgrid.fdatacols do begin
+     int3:= fgrid.fdatarecty.cx - 
+            fgrid.ffixcols.ftotsize + fgrid.ffixcols.ffirstsize - 
+            ftotsize + ffirstsize;
+     if colrange.scrollables then begin
+      int3:= int3 - fgrid.fscrollrect.x; 
+     end;
+     int4:= ffirstopposite;
+    end;
+   end;
+   for int1:= 0 to cols.count - 1 do begin
+    with cols[int1] do begin
+     if (flinewidth > 0) and (colrange.scrollables xor 
+         (co_nohscroll in foptions)) and
+         (not(co_invisible in foptions) or 
+              (csdesigning in fgrid.componentstate)) then begin
+      int2:= fstart + flinepos + fcellrect.x;
+      if (index >= int4) or 
+             (int2 < int3) then begin
+                     //not overlapped by right side columns
+       linewidthbefore:= canvas.linewidth;
+       if flinewidth = 1 then begin
+        canvas.linewidth:= 0;
+       end
+       else begin
+        canvas.linewidth:= flinewidth;
+       end;
+       canvas.drawline(makepoint(int2,0),
+            makepoint(int2,
+                       tframe1(fgrid.fframe).finnerclientrect.cy{ - 1}),
+                       flinecolorfix);
+       canvas.linewidth:= linewidthbefore;
+      end;
+     end;
+    end;
+   end;
+   canvas.clipregion:= reg;
+   {
    po1:= canvas.origin;
    po2.x:= po1.x;
    paintrows(rowrange.range1);
    paintrows(rowrange.range2);
    canvas.origin:= po1;
    }
-   reg:= canvas.copyclipregion;
-   canvas.subcliprect(makerect(0,
-             fgrid.finnerdatarect.y-tframe1(fgrid.fframe).fi.innerframe.top,
-             bigint{tframe1(fgrid.fframe).fpaintrect.cx)},fgrid.finnerdatarect.cy));
-   for int1:= 0 to cols.count - 1 do begin
-    with cols[int1] do begin
-     if (flinewidth > 0) and (colrange.scrollables xor (co_nohscroll in foptions)) and
-         (not(co_invisible in foptions) or (csdesigning in fgrid.ComponentState)) then begin
-      linewidthbefore:= canvas.linewidth;
-      if flinewidth = 1 then begin
-       canvas.linewidth:= 0;
-      end
-      else begin
-       canvas.linewidth:= flinewidth;
-      end;
-      int2:= fstart + flinepos + fcellrect.x;
-      canvas.drawline(makepoint(int2,0),
-           makepoint(int2,
-                      tframe1(fgrid.fframe).finnerclientrect.cy{ - 1}),
-                      flinecolorfix);
-      canvas.linewidth:= linewidthbefore;
-     end;
-    end;
-   end;
-   canvas.clipregion:= reg;
-   po1:= canvas.origin;
-   po2.x:= po1.x;
-   paintrows(rowrange.range1);
-   paintrows(rowrange.range2);
-   canvas.origin:= po1;
   end;
  end;
 end;
@@ -8977,9 +9034,10 @@ function tcustomgrid.calcminscrollsize: sizety;
 begin
  internalupdatelayout;
  if not (gs_updatelocked in fstate) then begin
-  result.cx:= fdatacols.ftotsize + ffixcols.ftotsize + ffirstnohscroll +
-             tgridframe(fframe).fi.innerframe.left +
-             tgridframe(fframe).fi.innerframe.right;
+  result.cx:= fdatacols.fscrollsize + fdatacols.ftotsize + 
+              ffixcols.ftotsize +
+              tgridframe(fframe).fi.innerframe.left +
+              tgridframe(fframe).fi.innerframe.right;
   if og_rowheight in foptionsgrid then begin
    result.cy:= fdatacols.frowstate.rowypos[frowcount];
   end
@@ -9034,7 +9092,8 @@ end;
 procedure tcustomgrid.updatelayout;
 var
  scrollstate: framestatesty;
- int1,int2{,int3}: integer;
+ int1,int2,int3: integer;
+ loopcount{,firsthscrollindex}: integer;
  bo1: boolean;
 begin
  bo1:= fobjectpicker.removexorpic;
@@ -9067,108 +9126,103 @@ begin
    end;
   end;
  end;
- int2:= 0;
+ loopcount:= 0;
  repeat
   calcpropcolwidthref;
   scrollstate:= frame.state;
   fystep:= fdatarowheight + fdatarowlinewidth;
   ffixcols.updatelayout;
   ffixrows.updatelayout;
-  ffirstnohscroll:= fixcols.ffirstsize;
+//  {
+  fdatacols.ffirsthscrollindex:= fdatacols.count;
+  int3:= fixcols.ffirstsize;
   for int1:= 0 to fdatacols.count - 1 do begin
-   with fdatacols[int1] do begin
+   with tdatacol(fdatacols.fitems[int1]) do begin
     if not (co_nohscroll in foptions) then begin
+     fdatacols.ffirsthscrollindex:= int1;
      break;
     end;
-    fstart:= ffirstnohscroll;
-    inc(ffirstnohscroll,step(false));
-    fend:= ffirstnohscroll;
+    fstart:= int3;
+    inc(int3,step(false));
+    fend:= int3;
    end;
   end;
-  ffirstnohscroll:= ffirstnohscroll - fixcols.ffirstsize;
+  fdatacols.ffirstsize:= int3 - fixcols.ffirstsize;
+//  }
   with tgridframe(fframe) do begin
    checkstate;
    with fdatarecty,ffixrows do begin
-    finnerdatarect.y:= ffirstsize + fi.innerframe.top;
-    finnerdatarect.cy:= finnerclientrect.cy - ftotsize;
-//    if self.fgridframewidth = 0 then begin
-//     x:= 0;
-//     cx:= fpaintrect.cx;
-//    end
-//    else begin
-     x:= fi.innerframe.left;
-     cx:= finnerclientrect.cx;
-//    end;
-    y:= 0;
-    if foppositecount = count then begin
-//     if self.fgridframewidth <> 0 then begin
-      y:= fi.innerframe.top;
-//     end;
-    end
-    else begin
-     if (ffirstsize > 0) {or (self.fgridframewidth <> 0)} then begin
-      y:= ffirstsize + fi.innerframe.top;
-     end;
-    end;
-    cy:= fpaintrect.cy - y;
-    if (foppositecount > 0) and (ftotsize - ffirstsize > 0) then begin
-     cy:= cy - ftotsize + ffirstsize - fi.innerframe.bottom;
-    end
-    else begin
-//     if self.fgridframewidth <> 0 then begin
-      cy:= cy - fi.innerframe.bottom;
-//     end;
-    end;
+//    finnerdatarect.y:= ffirstsize + fi.innerframe.top;
+//    finnerdatarect.cy:= finnerclientrect.cy - ftotsize;
+    x:= fi.innerframe.left;
+    cx:= finnerclientrect.cx;
+    y:= ffirstsize + fi.innerframe.top;
+    cy:= finnerclientrect.cy-ftotsize;
     if cx < 0 then begin
      cx:= 0;
     end;
     if cy < 0 then begin
      cy:= 0;
     end;
+    {
     if finnerdatarect.cy < 0 then begin
      finnerdatarect.cy:= 0;
     end;
+    }
    end;
    with fdatarectx,ffixcols do begin
-    finnerdatarect.x:= ffirstsize + fi.innerframe.left + ffirstnohscroll;
-    finnerdatarect.cx:= finnerclientrect.cx - ftotsize - ffirstnohscroll;
-//    if self.fgridframewidth = 0 then begin
-//     y:= 0;
-//     cy:= fpaintrect.cy;
-//    end
-//    else begin
-     y:= fi.innerframe.top;
-     cy:= finnerclientrect.cy;
-//    end;
+    int2:= finnerclientrect.cx - ftotsize + ffirstsize;
+    int3:= int2;
+    fdatacols.foppositecount:= 0;
+    for int1:= fdatacols.count - 1 downto fdatacols.ffirsthscrollindex do begin
+     with fdatacols[int1] do begin
+      if not (co_nohscroll in foptions) then begin
+       fdatacols.foppositecount:= fdatacols.count-int1-1;
+       break;
+      end;
+      fend:= int3;
+      dec(int3,step(false));
+      fstart:= int3;
+     end;
+    end;
+    fdatacols.ftotsize:= fdatacols.ffirstsize + int2 - int3;  //width
+//    finnerdatarect.x:= ffirstsize + fi.innerframe.left + fdatacols.ffirstsize;
+//    finnerdatarect.cx:= finnerclientrect.cx - ftotsize - fdatacols.ftotsize;
+    y:= fi.innerframe.top;
+    cy:= finnerclientrect.cy;
+    x:= fi.innerframe.left + ffirstsize + fdatacols.ffirstsize;
+    {
     x:= ffirstnohscroll;
     if foppositecount = count then begin
-//     if (x > 0) or (self.fgridframewidth <> 0) then begin
-      inc(x,fi.innerframe.left);
-//     end;
+     inc(x,fi.innerframe.left);
     end
     else begin
-     if (ffirstsize > 0) {or (self.fgridframewidth <> 0)} then begin
+     if (ffirstsize > 0) then begin
       x:= ffirstsize + fi.innerframe.left + ffirstnohscroll;
      end;
     end;
+    }
+    cx:= fpaintrect.cx - x - ftotsize + ffirstsize - 
+                     fdatacols.ftotsize + fdatacols.ffirstsize -
+                     fi.innerframe.right;
+    {
     cx:= fpaintrect.cx - x;
     if (foppositecount > 0) and (ftotsize - ffirstsize > 0) then begin
      cx:= cx - ftotsize + ffirstsize - fi.innerframe.right;
     end
     else begin
-//     if self.fgridframewidth <> 0 then begin
-      cx:= cx - fi.innerframe.right;
-//     end;
+     cx:= cx - fi.innerframe.right;
     end;
+    }
     if cx < 0 then begin
      cx:= 0;
     end;
     if cy < 0 then begin
      cy:= 0;
     end;
-    if finnerdatarect.cx < 0 then begin
-     finnerdatarect.cx:= 0;
-    end;
+//    if finnerdatarect.cx < 0 then begin
+//     finnerdatarect.cx:= 0;
+//    end;
    end;
    with fdatarect do begin
     x:= fdatarectx.x;
@@ -9181,17 +9235,14 @@ begin
   ffixrows.updatemergedcells;
   updatevisiblerows; //scroll needs valid visiblerows
   tgridframe(fframe).updatestate;
-  inc(int2);
+  inc(loopcount);
  until (frame.state * scrollbarframestates = 
                        scrollstate * scrollbarframestates) or
-                                          (int2 > 40);
+                                          (loopcount > 40);
 
  if bo1 then begin
   fobjectpicker.paintxorpic;
  end;
-// if og_folded in foptionsgrid then begin
-//  updatevisiblerows;
-// end;
 end;
 
 procedure tcustomgrid.dolayoutchanged;
@@ -9246,7 +9297,8 @@ var
  colinfo: colpaintinfoty;
  lines: segmentarty;
  int1,int2,int3,int4,int5: integer;
- adatarect: rectty;
+ dataclip: rectty;
+ fixdataclip: rectty;
  reg: regionty;
  saveindex: integer;
  linewidthbefore: integer;
@@ -9264,18 +9316,20 @@ begin
  rowstate1:= fdatacols.frowstate;
  internalupdatelayout(true);
  fnumoffset:= getnumoffset;
-// saveindex:= -1;
-// if fgridframewidth <> 0 then begin
-  saveindex:= acanvas.save;
-// end;
+ saveindex:= acanvas.save;
  acanvas.move(pointty(tframe1(fframe).fi.innerframe.topleft));
  frootbrushorigin:= clientwidgetpos;
- frootbrushorigin.x:= frootbrushorigin.x + finnerdatarect.x + rootpos.x;
- frootbrushorigin.y:= frootbrushorigin.y + finnerdatarect.y + rootpos.y;
+ frootbrushorigin.x:= frootbrushorigin.x + fdatarect.x + rootpos.x;
+ frootbrushorigin.y:= frootbrushorigin.y + fdatarect.y + rootpos.y;
  fbrushorigin.x:= frootbrushorigin.x;
  fbrushorigin.y:= frootbrushorigin.y + fscrollrect.y;
  rect1:= acanvas.clipbox;
  if (rect1.cx > 0) or (rect1.cy > 0) then begin
+  fixdataclip:= mr(fdatarecty.x-tframe1(fframe).fi.innerframe.left,0,
+               fdatarecty.cx-ffixcols.ftotsize+ffixcols.ffirstsize,bigint);
+  if fixdataclip.cx < 0 then begin
+   fixdataclip.cx:= 0;
+  end;
   with arowinfo do begin
    ffixrows.getindexrange(rect1.y,rect1.cy,rowrange);
    if (rowrange.range1.endindex >= rowrange.range1.endindex) or
@@ -9290,12 +9344,14 @@ begin
     rowinfo.cols:= fdatacols;
     rowinfo.fix:= false;
     fdatacols.getindexrange(rect1.x,rect1.cx,rowinfo.colrange,false);
-    ffixrows.paint(arowinfo);
     acanvas.save;
+    acanvas.intersectcliprect(fixdataclip);
+    ffixrows.paint(arowinfo);
     acanvas.intersectcliprect(makerect(fdatarect.x -
                tframe1(fframe).fi.innerframe.left,0,
                fdatarect.cx,tframe1(fframe).fpaintrect.cy));
-    acanvas.move(makepoint(ffixcols.ffirstsize+ffirstnohscroll+fscrollrect.x,0));
+    acanvas.move(makepoint(ffixcols.ffirstsize+fdatacols.ffirstsize+
+                                                          fscrollrect.x,0));
     rect1:= acanvas.clipbox;
     if (rect1.cx > 0) and (rect1.cy > 0) then begin
      fdatacols.getindexrange(rect1.x,rect1.cx,rowinfo.colrange);
@@ -9362,16 +9418,21 @@ begin
      if endrow >= startrow then begin
       canvas:= acanvas;
       ffixcols.paint(colinfo);
+{      
+      acanvas.intersectcliprect(mr(fdatarect.x-fdatacols.ffirstsize,0,
+                                  fdatarect.cx+fdatacols.ftotsize,bigint));
       fdatacols.paint(colinfo,false);     //draw fix datacols
-      if ffirstnohscroll > 0 then begin
-       adatarect:= makerect(fdatarect.x-tframe1(fframe).fi.innerframe.left-ffirstnohscroll,
-             -fscrollrect.y,fdatarect.cx+ffirstnohscroll,fdatarect.cy);
-      end
-      else begin
-       adatarect:= removerect(fdatarect,
-                     makepoint(tframe1(fframe).fi.innerframe.left,
-                      tframe1(fframe).fi.innerframe.top+ffixrows.ffirstsize+fscrollrect.y));
+      adatarect.x:= adatarect.x - fdatacols.ffirstsize;
+      adatarect.cx:= adatarect.cx - fdatacols.ffirstsize;
+}
+      dataclip:= makerect(
+        fdatarect.x-tframe1(fframe).fi.innerframe.left-fdatacols.ffirstsize,
+        -fscrollrect.y,fdatarecty.cx-ffixcols.ftotsize
+        {fdatarect.cx+ftotnohscroll},fdatarect.cy);
+      if dataclip.cx < 0 then begin
+       dataclip.cx:= 0;
       end;
+
       linewidthbefore:= acanvas.linewidth;
       if (fdatarowlinewidth > 0) or rowheight1 then begin
        acanvas.linewidth:= fdatarowlinewidth;
@@ -9389,8 +9450,9 @@ begin
        int4:= 0;
        for int1:= 0 to high(lines) do begin
         if rowheight1 then begin
-         with rowstate1.getitemporowheight(fvisiblerows[int1+startrow])^.rowheight,
-              lineinfos[int1] do begin
+         with rowstate1.getitemporowheight(
+                       fvisiblerows[int1+startrow])^.rowheight,
+                                               lineinfos[int1] do begin
           int4:= (linecolor and rowstatemask) - 1;
           if (int4 < 0) or (int4 >= int5) then begin
            lcolor:= fdatarowlinecolor;
@@ -9427,7 +9489,7 @@ begin
        end;
        if ffixcols.count > 0 then begin   //draw horz lines fixcols
         reg:= acanvas.copyclipregion;
-        acanvas.subcliprect(adatarect);
+        acanvas.subcliprect(dataclip);
         if not acanvas.clipregionisempty then begin
          if rowheight1 then begin
           for int1:= 0 to high(lines) do begin
@@ -9444,16 +9506,23 @@ begin
         acanvas.clipregion:= reg;
        end;
       end;
-      acanvas.intersectcliprect(adatarect);
+
+      acanvas.intersectcliprect(fixdataclip);
+      fdatacols.paint(colinfo,false);     //draw fix datacols
+
+      acanvas.intersectcliprect(dataclip);
+      int1:= fscrollrect.x + fdatacols.fscrollsize + 
+                      fdatarect.x - tframe1(fframe).fi.innerframe.left;
+      int2:= fdatarect.x + fdatarect.cx - tframe1(fframe).fi.innerframe.left;
+      if int1 < int2 then begin
+       acanvas.subcliprect(mr(int1,dataclip.y,int2-int1,dataclip.cy));
+      end;
       if not acanvas.clipregionisempty then begin //draw horz lines datacols
-       int2:= ffixcols.ffirstsize + datacols.ftotsize +
-                      {fscrollrect.x +} ffirstnohscroll{ - 1};
-       if ffirstnohscroll > 0 then begin
-        int3:= ffixcols.ffirstsize;
-       end
-       else begin
-        int3:= {fscrollrect.x + }ffixcols.ffirstsize;
+       int2:= fdatarecty.cx - ffixcols.ftotsize + ffixcols.ffirstsize;
+       if int2 < fdatarect.x then begin
+        int2:= fdatarect.x;
        end;
+       int3:= ffixcols.ffirstsize;
        if int2 > paintrect.cx then begin
         int2:= paintrect.cx;
        end;
@@ -9479,13 +9548,19 @@ begin
          acanvas.drawlinesegments(lines,fdatarowlinecolor);
         end;
        end;
-       if ffirstnohscroll > 0 then begin
+       if fdatacols.fscrollsize > 0 then begin
+//        acanvas.intersectcliprect(fdatarect);
         acanvas.intersectcliprect(
-             makerect(ffirstnohscroll+ffixcols.ffirstsize,-fscrollrect.y,
-                fscrollrect.size.cx,fscrollrect.size.cy));
+             mr(fdatacols.ffirstsize+ffixcols.ffirstsize,-fscrollrect.y,
+             fdatarect.cx
+             {fscrollrect.size.cx-ftotnohscroll-ffirstnohscroll},
+                                                        fscrollrect.size.cy));
+//        acanvas.intersectcliprect(
+//             makerect(ffirstnohscroll+ffixcols.ffirstsize,-fscrollrect.y,
+//                fscrollrect.size.cx,fscrollrect.size.cy));
        end;
-       acanvas.move(makepoint(ffirstnohscroll+ffixcols.ffirstsize+
-                        fscrollrect.x,0));
+       acanvas.move(mp(fdatacols.ffirstsize+ffixcols.ffirstsize+
+                                                       fscrollrect.x,0));
        acanvas.linewidth:= linewidthbefore;
        fdatacols.paint(colinfo,true); //draw normal cols
       end;
@@ -10041,10 +10116,10 @@ begin
    if col = 0 then begin
     col:= fdatacols.colatpos(x,false);
     if col < 0 then begin
-     dec(x,fscrollrect.x+ffixcols.ffirstsize+ffirstnohscroll);
-     col:= fdatacols.colatpos(x);
+     dec(x,fscrollrect.x+ffixcols.ffirstsize+fdatacols.ffirstsize);
+     col:= fdatacols.colatpos(x,true);
     end;
-   if col >= 0 then begin
+    if col >= 0 then begin
      result:= ck_fixrow;
     end;
    end
@@ -10059,8 +10134,8 @@ begin
    if col = 0 then begin
     col:= fdatacols.colatpos(x,false);
     if col < 0 then begin
-     dec(x,fscrollrect.x+ffixcols.ffirstsize+ffirstnohscroll);
-     col:= fdatacols.colatpos(x);
+     dec(x,fscrollrect.x+ffixcols.ffirstsize+fdatacols.ffirstsize);
+     col:= fdatacols.colatpos(x,true);
     end;
     if (col >= 0) and (row >= 0) then begin
      result:= ck_data;
@@ -11462,21 +11537,21 @@ var
 begin
  if fdatacols.scrollablecount <= 1 then begin
   tgridframe(fframe).scrollpos:= subpoint(tgridframe(fframe).scrollpos,
-                                    makepoint(finnerdatarect.cx div 10 + 1,0));
+                                    makepoint(fdatarect.cx div 10 + 1,0));
  end
  else begin
-  cellatpos(makepoint(finnerdatarect.x+finnerdatarect.cx-1,finnerdatarect.y),coord1);
+  cellatpos(makepoint(fdatarect.x+fdatarect.cx-1,fdatarect.y),coord1);
   if coord1.col >= 0 then begin
    rect1:= cellrect(coord1);
-   if rect1.x + rect1.cx = finnerdatarect.x + finnerdatarect.cx then begin
+   if rect1.x + rect1.cx = fdatarect.x + fdatarect.cx then begin
     if coord1.col < fdatacols.Count - 1 then begin
      rect1:= cellrect(makegridcoord(coord1.col+1,coord1.row));
     end
     else begin
-     rect1.x:= finnerdatarect.x + finnerdatarect.cx - rect1.cx;
+     rect1.x:= fdatarect.x + fdatarect.cx - rect1.cx;
     end;
    end;
-   int1:= finnerdatarect.x + finnerdatarect.cx - rect1.x - rect1.cx;
+   int1:= fdatarect.x + fdatarect.cx - rect1.x - rect1.cx;
    tgridframe(fframe).scrollpos:= addpoint(tgridframe(fframe).scrollpos,
          makepoint(int1,0));
   end;
@@ -11491,21 +11566,21 @@ var
 begin
  if fdatacols.scrollablecount <= 1 then begin
   tgridframe(fframe).scrollpos:= addpoint(tgridframe(fframe).scrollpos,
-                                    makepoint(finnerdatarect.cx div 10 + 1,0));
+                                    makepoint(fdatarect.cx div 10 + 1,0));
  end
  else begin
-  cellatpos(finnerdatarect.pos,coord1);
+  cellatpos(fdatarect.pos,coord1);
   if coord1.col >= 0 then begin
    rect1:= cellrect(coord1);
-   if rect1.x = finnerdatarect.x then begin
+   if rect1.x = fdatarect.x then begin
     if coord1.col > 0 then begin
      rect1:= cellrect(makegridcoord(coord1.col-1,coord1.row));
     end
     else begin
-     rect1.x:= finnerdatarect.x;
+     rect1.x:= fdatarect.x;
     end;
    end;
-   int1:= finnerdatarect.x - rect1.x;
+   int1:= fdatarect.x - rect1.x;
    tgridframe(fframe).scrollpos:= addpoint(tgridframe(fframe).scrollpos,
          makepoint(int1,0));
   end;
@@ -11520,16 +11595,16 @@ var
 begin
  if fdatacols.scrollablecount <= 1 then begin
   tgridframe(fframe).scrollpos:= subpoint(tgridframe(fframe).scrollpos,
-                                    makepoint(finnerdatarect.cx,0));
+                                    makepoint(fdatarect.cx,0));
  end
  else begin
-  cellatpos(finnerdatarect.pos,coord1);
+  cellatpos(fdatarect.pos,coord1);
   if coord1.col >= 0 then begin
    rect1:= cellrect(coord1);
    int2:= fdatacols[coord1.col].step;
    for int1:= coord1.col to datacols.count - 1 do begin
     inc(int2,fdatacols[int1].step);
-    if int2 > finnerdatarect.cx then begin
+    if int2 > fdatarect.cx then begin
      dec(int2,fdatacols[int1].step);
      break;
     end;
@@ -11549,10 +11624,10 @@ var
 begin
  if fdatacols.scrollablecount <= 1 then begin
   tgridframe(fframe).scrollpos:= addpoint(tgridframe(fframe).scrollpos,
-                                    makepoint(finnerdatarect.cx,0));
+                                    makepoint(fdatarect.cx,0));
  end
  else begin
-  cellatpos(finnerdatarect.pos,coord1);
+  cellatpos(fdatarect.pos,coord1);
   if coord1.col >= 0 then begin
    rect1:= cellrect(coord1);
    int2:= -rect1.x;
@@ -11561,7 +11636,7 @@ begin
    end;
    for int1:= coord1.col - 1 downto 0 do begin
     inc(int2,fdatacols[int1].step);
-    if int2 > finnerdatarect.cx then begin
+    if int2 > fdatarect.cx then begin
      dec(int2,fdatacols[int1].step);
      break;
     end;
@@ -11579,8 +11654,8 @@ begin
  po1:= nullpoint; //left, up
  po2:= nullpoint; //right, down
  with rect do begin
-  po1.x:= finnerdatarect.x + finnerdatarect.cx - (x + cx); //rangeend-endpos
-  po2.x:= finnerdatarect.x - x;             //rangestart-startpos
+  po1.x:= fdatarect.x + fdatarect.cx - (x + cx); //rangeend-endpos
+  po2.x:= fdatarect.x - x;             //rangestart-startpos
   case position of
    cep_nearest: begin
     if po1.x >= 0 then begin   //no left shift
@@ -11614,7 +11689,7 @@ begin
     po2.x:= 0;
    end;
   end;
-  po1.y:= finnerdatarect.y + finnerdatarect.cy - (y + cy); //rangeend-endpos
+  po1.y:= fdatarect.y + fdatarect.cy - (y + cy); //rangeend-endpos
   case position of
    cep_nearest: begin
     if po1.y > 0 then begin
@@ -11622,7 +11697,7 @@ begin
     end;
    end;
   end;
-  po2.y:= finnerdatarect.y - y;             //rangestart-startpos
+  po2.y:= fdatarect.y - y;             //rangestart-startpos
   case position of
    cep_nearest: begin
     if po2.y <= 0 then begin
@@ -11633,7 +11708,7 @@ begin
     end;
    end;
    cep_rowcentered: begin
-    po1.y:= -(y - finnerdatarect.y - (finnerdatarect.cy - cy) div 2);
+    po1.y:= -(y - fdatarect.y - (fdatarect.cy - cy) div 2);
     po2.y:= 0;
    end;
    cep_rowcenteredif: begin
@@ -11956,11 +12031,16 @@ begin  //cellrect
      x:= x + fstart;
     end
     else begin
-     x:= x + fstart + ffixcols.ffirstsize + ffirstnohscroll + fscrollrect.x;
+     x:= x + fstart + ffixcols.ffirstsize + fdatacols.ffirstsize +
+                                                             fscrollrect.x;
     end;
-    if (innerlevel = cil_noline) or 
+    if (innerlevel >= cil_noline) or 
                             isfixr and (innerlevel >= cil_noline) then begin
      dec(cx,flinewidth);
+     if (co_nohscroll in foptions) and 
+                            (index >= fdatacols.ffirsthscrollindex) then begin
+      inc(x,flinewidth);
+     end;
     end;
     if not isfixr then begin
      updatex(fdatacols[col]);
@@ -12057,11 +12137,11 @@ var
  rect1: rectty;
 begin
  rect1:= cellrect(makegridcoord(0,arow));
- if rect1.y < finnerdatarect.y then begin
+ if rect1.y < fdatarect.y then begin
   result:= -1;
  end
  else begin
-  if rect1.y + rect1.cy > finnerdatarect.y + finnerdatarect.cy then begin
+  if rect1.y + rect1.cy > fdatarect.y + fdatarect.cy then begin
    result:= 1;
   end
   else begin
@@ -12073,7 +12153,7 @@ end;
 function tcustomgrid.rowsperpage: integer;
 begin
  internalupdatelayout;
- result:= finnerdatarect.cy div ystep;
+ result:= fdatarect.cy div ystep;
 end;
 
 procedure tcustomgrid.focusrow(const arow: integer; 
@@ -12847,13 +12927,22 @@ var
   result:= false;
   with sender.pickrect do begin
    if (pos.x >= rect1.x + rect1.cx - sizingtol) then begin
-    if (cell.col >= 0) and cancolsizing(cell.col) then begin
-     objects[0]:= pickobjectstep * (cell.col) + integer(pok_datacolsize);
+    if (cell.col >= 0) then begin
+     int1:= cell.col;
+     if int1 >= fdatacols.ffirstopposite then begin
+      int1:= fdatacols.nextvisiblecol(int1);
+     end;
+     if cancolsizing(int1) then begin
+      objects[0]:= pickobjectstep * (int1) + integer(pok_datacolsize);
+     end;
     end;
    end
    else begin
     if (pos.x <= rect1.x + sizingtol) then begin
-     int1:= fdatacols.previosvisiblecol(cell.col);
+     int1:= cell.col;
+     if cell.col < fdatacols.ffirstopposite then begin
+      int1:= fdatacols.previosvisiblecol(int1);
+     end;
      if (int1 >= 0) and cancolsizing(int1) then begin
       objects[0]:= pickobjectstep * (int1) + integer(pok_datacolsize);
      end;
@@ -13023,7 +13112,6 @@ var
  cell,cell1: gridcoordty;
  col1: tcol;
  fixrow: tfixrow;
-// cellkind: cellkindty;
  int1,int2: integer;
  offset: pointty;
  apos: pointty;
@@ -13034,7 +13122,9 @@ begin
  apos:= sender.pos;
  case kind of
   pok_datacolsize,pok_fixcolsize: begin
-   if (kind = pok_fixcolsize) and (cell.col <= fixcols.ffirstopposite) then begin
+   if (kind = pok_fixcolsize) and (cell.col <= fixcols.ffirstopposite) or 
+      (kind = pok_datacolsize) and 
+                            (cell.col >= fdatacols.ffirstopposite) then begin
     col1.width:= col1.width - offset.x;
    end
    else begin
@@ -13117,8 +13207,6 @@ procedure tcustomgrid.paintxorpic(const sender: tobjectpicker;
   with tframe1(fframe) do begin
    canvas.intersectcliprect(makerect(fdatarecty.x,0,
                        fdatarecty.cx,fpaintrect.cy));
-//   canvas.drawline(makepoint(finnerclientrect.x,pos),
-//          makepoint(finnerclientrect.x + finnerclientrect.cx,pos){,cl_white});
    canvas.fillxorrect(makepoint(finnerclientrect.x,pos),finnerclientrect.cx,
                                   gd_right,2,stockobjects.bitmaps[stb_dens50]);
   end;
@@ -13129,8 +13217,6 @@ procedure tcustomgrid.paintxorpic(const sender: tobjectpicker;
   with tframe1(fframe) do begin
    canvas.intersectcliprect(makerect(0,fdatarectx.y,
                       fpaintrect.cx,fdatarectx.cy));
-//   canvas.drawline(makepoint(pos,finnerclientrect.y),
-//           makepoint(pos,finnerclientrect.y + finnerclientrect.cy){,cl_white});
    canvas.fillxorrect(makepoint(pos,finnerclientrect.y),finnerclientrect.cy,
                                  gd_down,2,stockobjects.bitmaps[stb_dens50]);
   end;
@@ -13141,12 +13227,12 @@ var
  cell,cell1: gridcoordty;
  col1: tcol;
  fixrow: tfixrow;
- int1: integer;
+ int1,int2: integer;
  rect1: rectty;
  offset: pointty;
  apos: pointty;
  ar1: integerarty;
- bo1: boolean;
+ {bo1,}s1,d1: boolean;
 begin
  offset:= sender.pickoffset;
  apos:= sender.pos;
@@ -13155,13 +13241,13 @@ begin
   exit;
  end;
  decodepickobject(ar1[0],kind,cell,col1,fixrow);
-// canvas.rasterop:= rop_xor;
  rect1:= cellrect(cell);
  with rect1 do begin
   case kind of
    pok_datacolsize,pok_fixcolsize: begin
-    if (kind = pok_fixcolsize) and (cell.col <
-                  -(fixcols.count-fixcols.foppositecount)) then begin
+    if (kind = pok_fixcolsize) and (cell.col <= fixcols.ffirstopposite) or 
+       (kind = pok_datacolsize) and (cell.col >=
+                                           fdatacols.ffirstopposite) then begin
      int1:= offset.x+x;
     end
     else begin
@@ -13181,7 +13267,6 @@ begin
    end;
    pok_datarow: begin
     cellatpos(makepoint(fdatarect.x,apos.y),cell1);
-//    if cellkind = ck_data then begin
     if cell1.row >= 0 then begin
      rect1:= cellrect(cell1);
      killrepeater;
@@ -13215,45 +13300,56 @@ begin
     end;
    end;
    pok_datacol: begin
+    s1:= co_nohscroll in tdatacol(fdatacols.fitems[cell.col]).options;
     cellatpos(makepoint(apos.x,fdatarect.y),cell1);
-//    if cellkind = ck_data then begin
+    d1:= not s1; //inhibit
     if cell1.col >= 0 then begin
-     bo1:= (co_nohscroll in tdatacol(fdatacols.fitems[cell1.col]).options) xor 
-           (co_nohscroll in tdatacol(fdatacols.fitems[cell.col]).options);
+     d1:= co_nohscroll in tdatacol(fdatacols.fitems[cell1.col]).options;
      rect1:= cellrect(cell1);
-     killrepeater;
+     int1:= rect1.x;
      if cell1.col > cell.col then begin
       int1:= rect1.x+rect1.cx;
-      if int1 > fdatarect.x + fdatarect.cx then begin
-       startrepeater(gs_scrollright,slowrepeat);
-      end
-      else begin
-       if not bo1 then begin
-        drawvertline(int1);
-       end;
-      end;
+     end;
+    end;
+    killrepeater;
+    if not s1 then begin
+     if int1 < fdatarect.x then begin
+      int1:= fdatarect.x;
      end
      else begin
-      if (cell1.col > 0) and (rect1.x{ - fdatacols[cell.col-1].step} < fdatarect.x) then begin
-       startrepeater(gs_scrollleft,slowrepeat);
-      end
-      else begin
-       if not bo1 then begin
-        drawvertline(rect1.x);
-       end;
+      int2:= fdatarect.x + fdatarect.cx;
+      if int1 > int2 then begin
+       int1:= int2;
       end;
      end;
-    end
-    else begin
-     if apos.x < fdatarect.x then begin
+     if (apos.x < fdatarect.x) then begin
       startrepeater(gs_scrollleft,slowrepeat);
      end
      else begin
-      rect1:= cellrect(makegridcoord(fdatacols.count-1,0));
-      drawvertline(rect1.x+rect1.cx-2);
-      startrepeater(gs_scrollright,slowrepeat);
+      if (apos.x >= fdatarect.x + fdatarect.cx) then begin
+       startrepeater(gs_scrollright,slowrepeat);
+      end;
      end;
     end;
+    if s1 = d1 then begin
+     drawvertline(int1);
+    end;
+    {
+    else begin
+     if not s1 then begin
+      if (apos.x < fdatarect.x) then begin
+       startrepeater(gs_scrollleft,slowrepeat);
+      end
+      else begin
+//       rect1:= cellrect(makegridcoord(fdatacols.count-1,0));
+//       if cell1.col <> invalidaxis then begin
+//        drawvertline(rect1.x+rect1.cx-2);
+//       end;
+       startrepeater(gs_scrollright,slowrepeat);
+      end;
+     end;
+    end;
+    }
    end;
   end;
  end;
@@ -14442,7 +14538,6 @@ begin
   fdatacols.roworderinvalid;
   beginupdate;
   try
-//   int1:= ffocusedcell.row;
    bo1:= factiverow = ffocusedcell.row;
    if assigned(fonsort) then begin
     internalsort({$ifdef FPC}@{$endif}doonsort{fonsort},ffocusedcell.row);
@@ -14453,15 +14548,6 @@ begin
    if bo1 then begin
     factiverow:= ffocusedcell.row;
    end;
-   {
-   if int1 <> ffocusedcell.row then begin
-    if factiverow = ffocusedcell.row then begin
-     factiverow:= int1;
-    end;
-    ffocusedcell.row:= int1;
-//    updaterowdata; //for twidgetgrid
-   end;
-   }
    include(fstate1,gs1_sortvalid);
    exclude(fstate1,gs1_rowsortinvalid);
    layoutchanged;
@@ -15338,8 +15424,7 @@ procedure tcustomstringgrid.updatepopupmenu(var amenu: tpopupmenu;
                          var mouseinfo: mouseeventinfoty);
 begin
  if isdatacell(ffocusedcell) then begin
-  feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,false{,
-                                            fdatacols.hasselection});
+  feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,false);
  end;
  inherited;
 end;
@@ -15406,7 +15491,6 @@ begin
  inherited;
  if isdatacell(ffocusedcell) then begin
   feditor.updatecaret;
-//  setupeditor(ffocusedcell,false);
  end;
 end;
 
@@ -15502,27 +15586,25 @@ begin
   exit;
  end;
  ar1:= nil; //compiler waring
-// if feditor.sellength = 0 then begin
-  ar1:= datacols.selectedcells;
-  if ar1 <> nil then begin
-   wstr1:= '';
-   int2:= ar1[0].row;
-   for int1:= 0 to high(ar1) do begin
-    if ar1[int1].row <> int2 then begin
-     removetabterminator(wstr1);
-     wstr1:= wstr1 + lineend;
-     int2:= ar1[int1].row;
-    end;
-    if co_cancopy in datacols[ar1[int1].col].foptions then begin
-     wstr1:= wstr1 + self.items[ar1[int1]] + c_tab;
-    end;
+ ar1:= datacols.selectedcells;
+ if ar1 <> nil then begin
+  wstr1:= '';
+  int2:= ar1[0].row;
+  for int1:= 0 to high(ar1) do begin
+   if ar1[int1].row <> int2 then begin
+    removetabterminator(wstr1);
+    wstr1:= wstr1 + lineend;
+    int2:= ar1[int1].row;
    end;
-   removetabterminator(wstr1);
-   wstr1:= wstr1 + lineend; //terminator
-   msewidgets.copytoclipboard(wstr1);
-   result:= true;
+   if co_cancopy in datacols[ar1[int1].col].foptions then begin
+    wstr1:= wstr1 + self.items[ar1[int1]] + c_tab;
+   end;
   end;
-// end;
+  removetabterminator(wstr1);
+  wstr1:= wstr1 + lineend; //terminator
+  msewidgets.copytoclipboard(wstr1);
+  result:= true;
+ end;
 end;
 
 function tcustomstringgrid.pasteselection: boolean;
@@ -15530,23 +15612,14 @@ var
  wstr1: msestring;
  int1,int2,int3,int5: integer;
  ar4,ar5: msestringarty;
- {bo1,}bo2: boolean;
+ bo2: boolean;
 begin
  result:= inherited pasteselection;
  if result = true then begin
   exit;
  end;
-// bo1:= false;
  ar4:= nil; //compiler warning
  ar5:= nil; //compiler warning
-{ 
- for int1:= 0 to datacols.count - 1 do begin
-  if co_canpaste in datacols[int1].options then begin
-   bo1:= true;
-   break;
-  end;
- end;
- }
  if fdatacols.canpaste{bo1} and pastefromclipboard(wstr1) then begin
   ar4:= breaklines(wstr1);
   if high(ar4) > 0 then begin
@@ -15639,18 +15712,6 @@ begin
            showcaretrect(info.caretrect,frame1));
      end;
     end;
-    {
-    ea_copyselection: begin
-     if copyselection then begin
-      info.action:= ea_none;
-     end;
-    end;
-    ea_pasteselection: begin
-     if pasteselection then begin
-      info.action:= ea_none;
-     end;
-    end;
-    }
    end;
   end;
  end;
@@ -15688,19 +15749,12 @@ end;
 
 procedure tcustomstringgrid.updatelayout;
 var
- {rect1,}rect2: rectty;
+ rect2: rectty;
 begin
-// rect1:= cellrect(ffocusedcell,cil_inner);
  inherited;
  if focusedcellvalid then begin
   rect2:= cellrect(ffocusedcell,cil_inner);
-//  if (rect2.cx <> rect1.cx) or (rect2.cy <> rect1.cy) then begin
-   feditor.updatepos(rect2,rect2);
-//  end
-//  else begin
-//   feditor.scroll(subpoint(rect2.pos,rect1.pos));
-//   feditor.updatecaret;
-//  end;
+  feditor.updatepos(rect2,rect2);
  end;
 end;
 
@@ -15783,7 +15837,6 @@ begin
   acellrect:= clippedcellrect(acell,cil_inner);
   canvas1:= getcanvas;
   with datacols[acell.col] do begin
-//   rect2:= textrect(canvas1,items[acell.row],acellrect,textflags,font);
    rect2:= textrect(canvas1,getrowtext(acell.row),acellrect,textflags,font);
   end;
   result:= not rectinrect(rect2,acellrect);
@@ -15859,8 +15912,32 @@ begin
 end;
 
 function tcustomstringgrid.getcaretcliprect: rectty;
+var
+ pt1: pointty;
 begin
- result:= intersectrect(moverect(fdatarect,clientpos),cellrect(ffocusedcell));
+ result:= cellrect(ffocusedcell);
+ if ffocusedcell.col >= 0 then begin
+  pt1:= clientpos;
+  with fdatarect do begin
+   if co_nohscroll in tcol(fdatacols.fitems[ffocusedcell.col]).options then begin
+    with fdatacols do begin
+     if ffocusedcell.col >= ffirsthscrollindex then begin
+      intersectrect1(result,
+         mr(fdatarecty.x+fdatarecty.cx-ffixcols.ftotsize+ffixcols.ffirstsize-
+                         ftotsize+ffirstsize+pt1.x,y+pt1.y,
+                                       ftotsize-ffirstsize,cy));
+     end
+     else begin
+      intersectrect1(result,
+       mr(fdatarecty.x+ffixcols.ffirstsize+pt1.x,y+pt1.y,ffirstsize,cy));
+     end;
+    end;
+   end
+   else begin
+    intersectrect1(result,mr(x+pt1.x,y+pt1.y,cx,cy));
+   end;
+  end;
+ end;
 end;
 
 function tcustomstringgrid.canclose(const newfocus: twidget): boolean;
@@ -16706,7 +16783,6 @@ procedure trowstatelist.cleanrowheight(const aindex: integer);
 var
  int1,int2,int3,int4,int5: integer;
  po1: prowstaterowheightty;
-// po2: pintegeraty;
  needsrowheightupdate: boolean;
 begin
  if aindex >= fdirtyrowheight then begin
@@ -16715,10 +16791,12 @@ begin
    needsrowheightupdate:= gs_needsrowheight in fgrid.fstate;  
    po1:= dataporowheight;
    inc(pchar(po1),fdirtyrowheight*fsize);
+   if fdirtyrowheight = 0 then begin
+    po1^.rowheight.ypos:= 0;
+   end;
    int3:= po1^.rowheight.ypos;
    if ffolded then begin
     cleanvisible(aindex);
- //   po2:= fvisiblerowmap.datapo;
    end;
    for int1:= fdirtyrowheight to aindex do begin
     if po1^.rowheight.linewidth = 0 then begin

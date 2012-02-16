@@ -955,7 +955,6 @@ type
    procedure change(const aindex: integer); override;
    procedure assign(source: tpersistent); override;
    property infolevel: rowinfolevelty read finfolevel;
-//   procedure assign(source: tpersistent); override;
    function datatype: listdatatypety; override;
    function datapocolmerge: pointer;
    function dataporowheight: pointer;
@@ -2577,13 +2576,11 @@ procedure tdatalist.internalrearange(arangelist: pinteger;
                                                        const acount: integer);
 var
  datapo1: pchar;
-// po1: pinteger;
  int1: integer;
 begin
  normalizering;
  getmem(datapo1,fbytelength);
  try
-//  po1:= arangelist.datapo;
   for int1:= 0 to acount -1 do begin
    move((fdatapo+arangelist^*fsize)^,(datapo1+int1*fsize)^,fsize);
    inc(arangelist);

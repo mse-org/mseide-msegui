@@ -1504,8 +1504,7 @@ var
  po1: pointty;
  comp1: tcomponent;
  shiftstate1: shiftstatesty;
-// component1: tcomponent;
-
+ actareabefore: areaty;
 begin
  if module = nil then begin
   inherited;
@@ -1544,6 +1543,7 @@ begin
           repeat
            comp1:= twidget(comp1).parentwidget;
           until (comp1 = nil) or (ws_iswidget in twidget(comp1).widgetstate);
+          actareabefore:= factarea;
           if (comp1 <> nil) and (comp1 <> fowner) then begin
            if fselections.count > 1 then begin
             selectparentwidget(twidget(comp1));
@@ -1555,6 +1555,7 @@ begin
           else begin
            selectcomponent(module);
           end;
+          factarea:= actareabefore;
          end
          else begin
           if isdatasubmodule(comp1.owner) then begin

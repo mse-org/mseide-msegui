@@ -564,6 +564,7 @@ procedure rotateframe1(var aframe: framety; const olddirection,
                 
 function intersectrect(const a,b: rectty; out dest: rectty): boolean; overload;
 function intersectrect(const a,b: rectty): rectty; overload;
+procedure intersectrect1(var dest: rectty; const source: rectty);
 function testintersectrect(const a,b: rectty): boolean;
      //true on intersection
 function clipinrect(const point: pointty; const boundsrect: rectty): pointty; overload;
@@ -1378,6 +1379,11 @@ end;
 function intersectrect(const a,b: rectty): rectty;
 begin
  intersectrect(a,b,result);
+end;
+
+procedure intersectrect1(var dest: rectty; const source: rectty);
+begin
+ intersectrect(source,dest,dest);
 end;
 
 function testintersectrect(const a,b: rectty): boolean;

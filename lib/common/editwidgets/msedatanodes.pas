@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -73,6 +73,8 @@ type
   checkboxrect: rectty;
   checkboxinnerrect: rectty;
   colorline: colorty;
+  imageextend: sizety; //variable
+  imageextra: sizety;  //variable
  end;
  plistitemlayoutinfoty = ^listitemlayoutinfoty;
 
@@ -142,8 +144,11 @@ type
    function empty: boolean; virtual;
    procedure change;
    procedure updatecellzone(const pos: pointty; var zone: cellzonety); virtual;
-   procedure drawimage(const acanvas: tcanvas); virtual;
-   procedure updatecaption(var ainfo: drawtextinfoty); virtual;
+   procedure drawimage(var alayoutinfo: listitemlayoutinfoty;
+                                const acanvas: tcanvas); virtual;
+                                //acanvas can be nil for layout update
+   procedure updatecaption(var alayoutinfo: listitemlayoutinfoty;
+                                var ainfo: drawtextinfoty); virtual;
    procedure drawcell(const acanvas: tcanvas); virtual;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    property index: integer read findex;
@@ -270,7 +275,8 @@ type
 
    procedure updatecellzone(const pos: pointty; var zone: cellzonety); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
-   procedure drawimage(const acanvas: tcanvas); override;
+   procedure drawimage(var alayoutinfo: listitemlayoutinfoty;
+                                   const acanvas: tcanvas); override;
    procedure addchildren(const aitem: ttreelistitem);
                    //transfers children
    function add(const aitem: ttreelistitem): integer; overload; 
@@ -342,7 +348,6 @@ type
 
  tcustomitemlist = class(tobjectdatalist,iobjectlink)
   private
-//   fobjectlinker: tobjectlinker;
    fonstatreaditem: statreaditemeventty;
    fonstatreadtreeitem: statreadtreeitemeventty;
    procedure setimnr_base(const Value: integer);
@@ -351,7 +356,6 @@ type
    procedure setimnr_readonly(const Value: integer);
    procedure setimnr_checked(const Value: integer);
    procedure setimnr_subitems(const Value: integer);
-//   function getobjectlinker: tobjectlinker;
    procedure setimagelist(const Value: timagelist);
    procedure setoptions(const Value: nodeoptionsty);
    procedure setcaptionpos(const Value: captionposty);
@@ -391,11 +395,6 @@ type
                     var aitem: tlistitem); virtual;
    procedure statreadtreeitem(const reader: tstatreader; const parent: ttreelistitem;
                     var aitem: ttreelistitem); virtual;
-//   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
-//                       ainterfacetype: pointer = nil; once: boolean = false);
-//   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
-//   procedure objevent(const sender: iobjectlink; const event: objecteventty);
-//   function getinstance: tobject;
 
    procedure writestate(const writer; const name: msestring); override;
    procedure readstate(const reader; const acount: integer); override;
@@ -643,49 +642,70 @@ begin
  end;
 end;
 
-procedure tlistitem.drawimage(const acanvas: tcanvas);
+procedure tlistitem.drawimage(var alayoutinfo: listitemlayoutinfoty;
+                                                   const acanvas: tcanvas);
 var
  int1: integer;
  aimagelist: timagelist;
  glyphno: stockglyphty;
 begin
  aimagelist:= imagelist;
- with fowner,fintf.getlayoutinfo(pcellinfoty(acanvas.drawinfopo))^ do begin
-  if (no_checkbox in foptions) and (ns_checkbox in self.fstate) then begin
-   glyphno:= stg_checkbox;
-   if ns_checked in self.fstate then begin
-    glyphno:= stg_checkboxchecked;
-   end
-   else begin
-    if (ns_showchildchecked in self.fstate) and 
-                      (ns1_childchecked in self.fstate1) then begin
-     glyphno:= stg_checkboxchildchecked;
+ with fowner,alayoutinfo do begin
+  imageextend:= nullsize;
+  if acanvas <> nil then begin
+   if (no_checkbox in foptions) and (ns_checkbox in self.fstate) then begin
+    glyphno:= stg_checkbox;
+    if ns_checked in self.fstate then begin
+     glyphno:= stg_checkboxchecked;
+    end
+    else begin
+     if (ns_showchildchecked in self.fstate) and 
+                       (ns1_childchecked in self.fstate1) then begin
+      glyphno:= stg_checkboxchildchecked;
+     end;
     end;
+    stockobjects.glyphs.paint(acanvas,ord(glyphno),checkboxrect,
+                   [al_xcentered,al_ycentered],fintf.getcolorglyph);
    end;
-   stockobjects.glyphs.paint(acanvas,ord(glyphno),checkboxrect,
-                  [al_xcentered,al_ycentered],fintf.getcolorglyph);
-//   acanvas.drawframe(checkboxinnerrect,-2,cl_black);
-//   if ns_checked in self.fstate then begin
-//    stockobjects.paintglyph(acanvas,stg_checked,checkboxinnerrect,false,cl_black);
-//   end;
   end;
   if aimagelist <> nil then begin
-   int1:= getactimagenr;
-   if (int1 >= 0) and (int1 < aimagelist.count) then begin
-    aimagelist.paint(acanvas,int1,imagerect,imagealignment,
-                   fintf.getcolorglyph);
+   imageextend.cx:= aimagelist.size.cx+imageextra.cx-imagerect.cx;
+   if acanvas <> nil then begin
+    int1:= getactimagenr;
+    if (int1 >= 0) and (int1 < aimagelist.count) then begin
+      //todo: check imagepos and the like
+     with imagerect do begin
+      aimagelist.paint(acanvas,int1,mr(x,y,cx+imageextend.cx,cy),
+                                       imagealignment,fintf.getcolorglyph);
+     end;
+    end;
    end;
   end;
  end;
 end;
 
-procedure tlistitem.updatecaption(var ainfo: drawtextinfoty);
+procedure tlistitem.updatecaption(var alayoutinfo: listitemlayoutinfoty;
+                                             var ainfo: drawtextinfoty);
 var
  int1: integer;
 begin
 //toto: check captionpos and the like
  if fimagelist <> nil then begin
-  with fowner.fintf.getlayoutinfo(nil)^ do begin
+  with alayoutinfo do begin
+   int1:= imageextend.cx;
+   with ainfo.dest do begin
+    x:= x+int1;
+    cx:= cx-int1;
+   end;
+   with ainfo.clip do begin
+    x:= x+int1;
+    cx:= cx-int1;
+   end;
+  end;
+ end;
+{
+ if fimagelist <> nil then begin
+  with alayoutinfo do begin
    int1:= fimagelist.width - imagerect.cx;
    with ainfo.dest do begin
     x:= x+int1;
@@ -697,6 +717,7 @@ begin
    end;
   end;
  end;
+}
 end;
 
 procedure tlistitem.drawcell(const acanvas: tcanvas);
@@ -704,21 +725,26 @@ var
  info: drawtextinfoty;
  pt1: pointty;
  po1: pcellinfoty;
+ layoutinfopo: plistitemlayoutinfoty;
  size1: sizety;
 begin
  pt1:= acanvas.origin;
  po1:=  pcellinfoty(acanvas.drawinfopo);
+ layoutinfopo:= fowner.fintf.getlayoutinfo(po1);
  if not po1^.calcautocellsize then begin
-  drawimage(acanvas); //ttreelistitem shifts origin
+  drawimage(layoutinfopo^,acanvas); //ttreelistitem shifts origin
+ end
+ else begin
+  drawimage(layoutinfopo^,nil);
  end;
- with fowner.fintf.getlayoutinfo(po1)^ do begin
+ with layoutinfopo^ do begin
   info.text.text:= fcaption;
   info.text.format:= nil;
   info.dest:= captioninnerrect;
   info.flags:= textflags - [tf_clipo];
   info.font:= nil;
   info.tabulators:= nil;
-  updatecaption(info);
+  updatecaption(layoutinfopo^,info);
   if po1^.calcautocellsize then begin
    textrect(acanvas,info);
    size1.cx:= po1^.rect.cx + info.res.cx - info.dest.cx;
@@ -782,8 +808,11 @@ end;
 procedure tlistitem.setupeditor(const editor: tinplaceedit; const font: tfont);
 var
  info1: drawtextinfoty;
+ po1: plistitemlayoutinfoty;
 begin
- with fowner.fintf.getlayoutinfo(nil)^ do begin
+ po1:= fowner.fintf.getlayoutinfo(nil);
+ drawimage(po1^,nil); //calc image extend
+ with po1^ do begin
   info1.font:= font;
   with info1 do begin
    tabulators:= nil;
@@ -791,7 +820,8 @@ begin
    clip:= captionrect;
    text.text:= fcaption;
    flags:= textflags;
-   updatecaption(info1);
+   
+   updatecaption(po1^,info1);
    editor.setup(text.text,editor.curindex,false,dest,clip,text.format,nil,font);
   end;
  end;
@@ -2279,7 +2309,8 @@ begin
  end;
 end;
 
-procedure ttreelistitem.drawimage(const acanvas: tcanvas);
+procedure ttreelistitem.drawimage(var alayoutinfo: listitemlayoutinfoty;
+                                                       const acanvas: tcanvas);
 var
  boxno: integer;
  int1: integer;
@@ -2292,84 +2323,83 @@ var
  cellheight{,boxy}: integer;
 
 begin
- if (fcount = 0) and not (ns_subitems in fstate) then begin
-  if (ns_drawemptybox in fstate) or (no_drawemptybox in fowner.foptions) then begin
-   boxno:= integer(stg_box);
-  end
-  else begin
-   boxno:= -1;
-  end;
- end
- else begin
-  if ns_expanded in fstate then begin
-   boxno:= integer(stg_boxexpanded);
-  end
-  else begin
-   boxno:= integer(stg_boxexpand);
-  end;
- end;
- setlength(lines,ftreelevel+2); //last line can be doubled + horz. line
- acanvas.move(makepoint(levelshift,0));
- with fowner,fintf.getlayoutinfo(pcellinfoty(acanvas.drawinfopo))^ do begin
-  cellheight:= cellsize.cy;
-  seg.a.x:= (expandboxrect.x + expandboxrect.cx) div 2;
-  seg.a.y:= 0;
-  seg.b.x:= seg.a.x;
-  seg.b.y:= cellheight-1;
-  item1:= self;
-  int1:= 0;
-  while item1.fparent <> nil do begin
-   if (item1.fparentindex <> item1.fparent.fcount - 1) or (int1 = 0) then begin
-    lines[int1]:= seg;
-    inc(int1);
+ if acanvas <> nil then begin
+  if (fcount = 0) and not (ns_subitems in fstate) then begin
+   if (ns_drawemptybox in fstate) or (no_drawemptybox in fowner.foptions) then begin
+    boxno:= integer(stg_box);
+   end
+   else begin
+    boxno:= -1;
    end;
-   dec(seg.a.x,flevelstep);
-   seg.b.x:= seg.a.x;
-   item1:= item1.fparent;
+  end
+  else begin
+   if ns_expanded in fstate then begin
+    boxno:= integer(stg_boxexpanded);
+   end
+   else begin
+    boxno:= integer(stg_boxexpand);
+   end;
   end;
-  if int1 > 0 then begin
-   if fparentindex <> fparent.fcount - 1 then begin
-    if boxno >= 0 then begin
-     lines[0].b.y:= expandboxrect.y-1; //top of splited vert.
-     lines[int1]:= lines[0];
-     with lines[int1] do begin
-      a.y:= b.y + expandboxrect.cy;    //bottom of splited vert.
-      b.y:= cellheight-1;
-     end;
+  setlength(lines,ftreelevel+2); //last line can be doubled + horz. line
+  acanvas.move(makepoint(levelshift,0));
+  with fowner,alayoutinfo do begin
+   cellheight:= cellsize.cy;
+   seg.a.x:= (expandboxrect.x + expandboxrect.cx) div 2;
+   seg.a.y:= 0;
+   seg.b.x:= seg.a.x;
+   seg.b.y:= cellheight-1;
+   item1:= self;
+   int1:= 0;
+   while item1.fparent <> nil do begin
+    if (item1.fparentindex <> item1.fparent.fcount - 1) or (int1 = 0) then begin
+     lines[int1]:= seg;
      inc(int1);
     end;
-   end 
-   else begin //last vert.
-    if boxno >= 0 then begin
-     lines[0].b.y:= expandboxrect.y-1; //to top of box
-    end
-    else begin
-     lines[0].b.y:= cellheight div 2;
-    end;
+    dec(seg.a.x,flevelstep);
+    seg.b.x:= seg.a.x;
+    item1:= item1.fparent;
    end;
-   with lines[int1] do begin
-    if boxno >= 0 then begin
-     dec(int1);
-//     a.x:= expandboxrect.x + expandboxrect.cx;
-//     a.x:= lines[0].a.x + 1;
-    end
-    else begin
-     a.y:= cellheight div 2;
-     b.y:= a.y;
-     a.x:= lines[0].a.x + 1;
-//     b.x:= imagerect.x - 1; //horizontal line
-     b.x:= checkboxrect.x - 1; //horizontal line
-     if b.x < a.x then begin
-      dec(int1);
+   if int1 > 0 then begin
+    if fparentindex <> fparent.fcount - 1 then begin
+     if boxno >= 0 then begin
+      lines[0].b.y:= expandboxrect.y-1; //top of splited vert.
+      lines[int1]:= lines[0];
+      with lines[int1] do begin
+       a.y:= b.y + expandboxrect.cy;    //bottom of splited vert.
+       b.y:= cellheight-1;
+      end;
+      inc(int1);
+     end;
+    end 
+    else begin //last vert.
+     if boxno >= 0 then begin
+      lines[0].b.y:= expandboxrect.y-1; //to top of box
+     end
+     else begin
+      lines[0].b.y:= cellheight div 2;
      end;
     end;
+    with lines[int1] do begin
+     if boxno >= 0 then begin
+      dec(int1);
+     end
+     else begin
+      a.y:= cellheight div 2;
+      b.y:= a.y;
+      a.x:= lines[0].a.x + 1;
+      b.x:= checkboxrect.x - 1; //horizontal line
+      if b.x < a.x then begin
+       dec(int1);
+      end;
+     end;
+    end;
+    setlength(lines,int1+1);
+    drawdottedlinesegments(acanvas,lines,colorline);
    end;
-   setlength(lines,int1+1);
-   drawdottedlinesegments(acanvas,lines,colorline);
-  end;
-  if boxno >= 0 then begin
-   stockobjects.glyphs.paint(acanvas,boxno,expandboxrect,
-                  [al_xcentered,al_ycentered],fintf.getcolorglyph);
+   if boxno >= 0 then begin
+    stockobjects.glyphs.paint(acanvas,boxno,expandboxrect,
+                   [al_xcentered,al_ycentered],fintf.getcolorglyph);
+   end;
   end;
  end;
  inherited;
@@ -2377,13 +2407,14 @@ end;
 
 procedure ttreelistitem.setupeditor(const editor: tinplaceedit; const font: tfont);
 var
-// str1: msestring;
-// rect1,rect2: rectty;
  int1: integer;
  info1: drawtextinfoty;
+ po1: plistitemlayoutinfoty;
 begin
  if fowner <> nil then begin
-  with fowner.fintf.getlayoutinfo(nil)^ do begin
+  po1:= fowner.fintf.getlayoutinfo(nil);
+  drawimage(po1^,nil); //calc image extend
+  with po1^ do begin
    info1.font:= font;
    with info1 do begin
     tabulators:= nil;
@@ -2396,7 +2427,7 @@ begin
     dec(dest.cx,int1);
     inc(clip.x,int1);
     dec(clip.cx,int1);
-    updatecaption(info1);
+    updatecaption(po1^,info1);
     editor.setup(text.text,editor.curindex,false,dest,clip,nil,nil,font);
    end;
   end;
