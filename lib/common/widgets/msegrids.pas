@@ -12034,9 +12034,13 @@ begin  //cellrect
      x:= x + fstart + ffixcols.ffirstsize + fdatacols.ffirstsize +
                                                              fscrollrect.x;
     end;
-    if (innerlevel = cil_noline) or 
+    if (innerlevel >= cil_noline) or 
                             isfixr and (innerlevel >= cil_noline) then begin
      dec(cx,flinewidth);
+     if (co_nohscroll in foptions) and 
+                            (index >= fdatacols.ffirsthscrollindex) then begin
+      inc(x,flinewidth);
+     end;
     end;
     if not isfixr then begin
      updatex(fdatacols[col]);
@@ -15420,8 +15424,7 @@ procedure tcustomstringgrid.updatepopupmenu(var amenu: tpopupmenu;
                          var mouseinfo: mouseeventinfoty);
 begin
  if isdatacell(ffocusedcell) then begin
-  feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,false{,
-                                            fdatacols.hasselection});
+  feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,false);
  end;
  inherited;
 end;
@@ -15488,7 +15491,6 @@ begin
  inherited;
  if isdatacell(ffocusedcell) then begin
   feditor.updatecaret;
-//  setupeditor(ffocusedcell,false);
  end;
 end;
 
@@ -15584,27 +15586,25 @@ begin
   exit;
  end;
  ar1:= nil; //compiler waring
-// if feditor.sellength = 0 then begin
-  ar1:= datacols.selectedcells;
-  if ar1 <> nil then begin
-   wstr1:= '';
-   int2:= ar1[0].row;
-   for int1:= 0 to high(ar1) do begin
-    if ar1[int1].row <> int2 then begin
-     removetabterminator(wstr1);
-     wstr1:= wstr1 + lineend;
-     int2:= ar1[int1].row;
-    end;
-    if co_cancopy in datacols[ar1[int1].col].foptions then begin
-     wstr1:= wstr1 + self.items[ar1[int1]] + c_tab;
-    end;
+ ar1:= datacols.selectedcells;
+ if ar1 <> nil then begin
+  wstr1:= '';
+  int2:= ar1[0].row;
+  for int1:= 0 to high(ar1) do begin
+   if ar1[int1].row <> int2 then begin
+    removetabterminator(wstr1);
+    wstr1:= wstr1 + lineend;
+    int2:= ar1[int1].row;
    end;
-   removetabterminator(wstr1);
-   wstr1:= wstr1 + lineend; //terminator
-   msewidgets.copytoclipboard(wstr1);
-   result:= true;
+   if co_cancopy in datacols[ar1[int1].col].foptions then begin
+    wstr1:= wstr1 + self.items[ar1[int1]] + c_tab;
+   end;
   end;
-// end;
+  removetabterminator(wstr1);
+  wstr1:= wstr1 + lineend; //terminator
+  msewidgets.copytoclipboard(wstr1);
+  result:= true;
+ end;
 end;
 
 function tcustomstringgrid.pasteselection: boolean;
@@ -15612,23 +15612,14 @@ var
  wstr1: msestring;
  int1,int2,int3,int5: integer;
  ar4,ar5: msestringarty;
- {bo1,}bo2: boolean;
+ bo2: boolean;
 begin
  result:= inherited pasteselection;
  if result = true then begin
   exit;
  end;
-// bo1:= false;
  ar4:= nil; //compiler warning
  ar5:= nil; //compiler warning
-{ 
- for int1:= 0 to datacols.count - 1 do begin
-  if co_canpaste in datacols[int1].options then begin
-   bo1:= true;
-   break;
-  end;
- end;
- }
  if fdatacols.canpaste{bo1} and pastefromclipboard(wstr1) then begin
   ar4:= breaklines(wstr1);
   if high(ar4) > 0 then begin
@@ -15721,18 +15712,6 @@ begin
            showcaretrect(info.caretrect,frame1));
      end;
     end;
-    {
-    ea_copyselection: begin
-     if copyselection then begin
-      info.action:= ea_none;
-     end;
-    end;
-    ea_pasteselection: begin
-     if pasteselection then begin
-      info.action:= ea_none;
-     end;
-    end;
-    }
    end;
   end;
  end;
@@ -15770,19 +15749,12 @@ end;
 
 procedure tcustomstringgrid.updatelayout;
 var
- {rect1,}rect2: rectty;
+ rect2: rectty;
 begin
-// rect1:= cellrect(ffocusedcell,cil_inner);
  inherited;
  if focusedcellvalid then begin
   rect2:= cellrect(ffocusedcell,cil_inner);
-//  if (rect2.cx <> rect1.cx) or (rect2.cy <> rect1.cy) then begin
-   feditor.updatepos(rect2,rect2);
-//  end
-//  else begin
-//   feditor.scroll(subpoint(rect2.pos,rect1.pos));
-//   feditor.updatecaret;
-//  end;
+  feditor.updatepos(rect2,rect2);
  end;
 end;
 
@@ -15865,7 +15837,6 @@ begin
   acellrect:= clippedcellrect(acell,cil_inner);
   canvas1:= getcanvas;
   with datacols[acell.col] do begin
-//   rect2:= textrect(canvas1,items[acell.row],acellrect,textflags,font);
    rect2:= textrect(canvas1,getrowtext(acell.row),acellrect,textflags,font);
   end;
   result:= not rectinrect(rect2,acellrect);
@@ -15951,15 +15922,19 @@ begin
    if co_nohscroll in tcol(fdatacols.fitems[ffocusedcell.col]).options then begin
     with fdatacols do begin
      if ffocusedcell.col >= ffirsthscrollindex then begin
-      intersectrect1(result,mr(x+cx+pt1.x,y+pt1.y,ftotsize-ffirstsize,cy));
+      intersectrect1(result,
+         mr(fdatarecty.x+fdatarecty.cx-ffixcols.ftotsize+ffixcols.ffirstsize-
+                         ftotsize+ffirstsize+pt1.x,y+pt1.y,
+                                       ftotsize-ffirstsize,cy));
      end
      else begin
-      intersectrect1(result,mr(x-ffirstsize+pt1.x,y+pt1.y,ffirstsize,cy));
+      intersectrect1(result,
+       mr(fdatarecty.x+ffixcols.ffirstsize+pt1.x,y+pt1.y,ffirstsize,cy));
      end;
     end;
    end
    else begin
-    intersectrect1(result,mr(pt1.x,y+pt1.y,cx,cy));
+    intersectrect1(result,mr(x+pt1.x,y+pt1.y,cx,cy));
    end;
   end;
  end;
