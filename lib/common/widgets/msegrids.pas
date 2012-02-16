@@ -5281,7 +5281,7 @@ begin
   result:= ageoindex;
  end;
 end;
-var testvar: tgridprop;
+
 procedure tgridarrayprop.updatelayout;
 var
  int1,int2,int3: integer;
@@ -5328,7 +5328,6 @@ begin
    int2:= 0;
    fscrollsize:= 0;
    for int1:= ffirsthscrollindex to count - foppositecount - 1 do begin
- testvar:= tgridprop(fitems[int1]);
     with tgridprop(fitems[int1]) do begin
  //    if not (co_nohscroll in foptions) then begin
       fstart:= int2;
@@ -8734,7 +8733,6 @@ begin
     end;
    end;
    for int1:= 0 to cols.count - 1 do begin
-testvar:= cols[int1];
     with cols[int1] do begin
      if (flinewidth > 0) and (colrange.scrollables xor 
          (co_nohscroll in foptions)) and
@@ -13230,7 +13228,7 @@ var
  offset: pointty;
  apos: pointty;
  ar1: integerarty;
- bo1,s1,d1: boolean;
+ {bo1,}s1,d1: boolean;
 begin
  offset:= sender.pickoffset;
  apos:= sender.pos;
@@ -15943,8 +15941,28 @@ begin
 end;
 
 function tcustomstringgrid.getcaretcliprect: rectty;
+var
+ pt1: pointty;
 begin
- result:= intersectrect(moverect(fdatarect,clientpos),cellrect(ffocusedcell));
+ result:= cellrect(ffocusedcell);
+ if ffocusedcell.col >= 0 then begin
+  pt1:= clientpos;
+  with fdatarect do begin
+   if co_nohscroll in tcol(fdatacols.fitems[ffocusedcell.col]).options then begin
+    with fdatacols do begin
+     if ffocusedcell.col >= ffirsthscrollindex then begin
+      intersectrect1(result,mr(x+cx+pt1.x,y+pt1.y,ftotsize-ffirstsize,cy));
+     end
+     else begin
+      intersectrect1(result,mr(x-ffirstsize+pt1.x,y+pt1.y,ffirstsize,cy));
+     end;
+    end;
+   end
+   else begin
+    intersectrect1(result,mr(pt1.x,y+pt1.y,cx,cy));
+   end;
+  end;
+ end;
 end;
 
 function tcustomstringgrid.canclose(const newfocus: twidget): boolean;
