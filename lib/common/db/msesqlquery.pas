@@ -1719,7 +1719,8 @@ begin
     statementtypebefore:= statementtype;
     try
      statementtype:= stselect;
-     active:= true;
+     refresh;
+//     active:= true;
      if not eof then begin
       for int1:= 0 to {qry.}cols.count - 1 do begin
        with cols[int1] do begin
