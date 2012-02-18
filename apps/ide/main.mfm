@@ -1,5 +1,5 @@
 object mainfo: tmainfo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton, go_lockbutton]
   frame.dummy = 0
@@ -8,7 +8,7 @@ object mainfo: tmainfo
   bounds_y = 178
   bounds_cx = 437
   bounds_cy = 138
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
   container.frame.framei_left = 0
@@ -42,7 +42,7 @@ object mainfo: tmainfo
   top = 80
   moduleclassname = 'tdockform'
   object basedock: tdockpanel
-    optionswidget = [ow_background, ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_autoscale]
+    optionswidget = [ow_background, ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets]
     bounds_x = 0
     bounds_y = 21
     bounds_cx = 427
@@ -52,7 +52,7 @@ object mainfo: tmainfo
     statfile = projectstatfile
   end
   object statdisp: tstringdisp
-    optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
     frame.dummy = 0
     taborder = 1
@@ -593,19 +593,13 @@ object mainfo: tmainfo
             options = [mao_separator, mao_shortcutcaption]
           end        
           item
-            caption = '&Options'
-            state = [as_localcaption, as_localonexecute]
-            onexecute = projectoptionsonexecute
+            action = actionsmo.projectoptionsact
           end        
           item
-            caption = '&Tree'
-            state = [as_localcaption, as_localonexecute]
-            onexecute = viewprojectonexecute
+            action = actionsmo.projecttreeact
           end        
           item
-            caption = 'So&urce'
-            state = [as_localcaption, as_localonexecute]
-            onexecute = viewprojectsourceonexecute
+            action = actionsmo.projectsourceact
           end        
           item
             options = [mao_separator, mao_shortcutcaption]
@@ -632,9 +626,7 @@ object mainfo: tmainfo
             state = [as_localcaption]
           end        
           item
-            caption = 'O&pen'
-            state = [as_localcaption, as_localimagelist, as_localonexecute]
-            onexecute = openprojectonexecute
+            action = actionsmo.projectopenact
           end        
           item
             caption = 'Open copy'
@@ -642,9 +634,7 @@ object mainfo: tmainfo
             onexecute = openprojectcopyexecute
           end        
           item
-            caption = '&Save'
-            state = [as_localcaption, as_localonexecute]
-            onexecute = projectsaveonexecute
+            action = actionsmo.projectsaveact
           end        
           item
             caption = 'Save &as'
@@ -657,6 +647,7 @@ object mainfo: tmainfo
             onexecute = saveprojectcopyexecute
           end        
           item
+            action = actionsmo.projectcloseact
             caption = '&Close'
             name = 'close'
             state = [as_localcaption, as_localonexecute]

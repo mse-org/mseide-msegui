@@ -8,15 +8,15 @@ object actionsmo: tactionsmo
     Tag = 1
     caption = '&Make'
     onexecute = makeactonexecute
-    left = 152
-    top = 316
+    left = 8
+    top = 294
   end
   object run: taction
     caption = '&Run'
     imagenr = 0
     hint = 'Run'
-    left = 360
-    top = 404
+    left = 80
+    top = 191
   end
   object step: taction
     imagelist = buttonicons
@@ -26,7 +26,7 @@ object actionsmo: tactionsmo
     hint = 'Step'
     onexecute = stepactonexecute
     left = 8
-    top = 316
+    top = 222
     sc = (
       1
       310
@@ -40,7 +40,7 @@ object actionsmo: tactionsmo
     hint = 'Next'
     onexecute = nextactonexecute
     left = 8
-    top = 300
+    top = 206
     sc = (
       1
       311
@@ -54,7 +54,7 @@ object actionsmo: tactionsmo
     hint = 'Continue'
     onexecute = continueactonexecute
     left = 8
-    top = 348
+    top = 254
     sc = (
       1
       312
@@ -67,8 +67,8 @@ object actionsmo: tactionsmo
     imagenrdisabled = 16
     hint = 'Interrupt'
     onexecute = interruptactonexecute
-    left = 6
-    top = 282
+    left = 9
+    top = 269
   end
   object reset: taction
     imagelist = buttonicons
@@ -78,7 +78,7 @@ object actionsmo: tactionsmo
     hint = 'Reset'
     onexecute = resetactonexecute
     left = 7
-    top = 263
+    top = 191
   end
   object opensource: taction
     caption = '&Open'
@@ -98,7 +98,7 @@ object actionsmo: tactionsmo
     hint = 'Finish'
     onexecute = finishactonexecute
     left = 8
-    top = 332
+    top = 238
     sc = (
       1
       8502
@@ -127,7 +127,7 @@ object actionsmo: tactionsmo
   object abortmakeact: taction
     caption = '&Abort Make'
     onexecute = abortmakeactonexecute
-    left = 152
+    left = 8
     top = 402
   end
   object undo: taction
@@ -306,8 +306,8 @@ object actionsmo: tactionsmo
     height = 24
     colormask = True
     count = 24
-    left = 160
-    top = 144
+    left = 352
+    top = 32
     image = {
       00000000060000007800000078000000583A0000000000000000000000000000
       0000000000000000000000000000000000000000C0C0C018D0D0D00600A50903
@@ -1295,7 +1295,7 @@ object actionsmo: tactionsmo
     imagenrdisabled = 19
     onexecute = nextiactonexecute
     left = 80
-    top = 264
+    top = 208
     sc = (
       1
       24887
@@ -1308,7 +1308,7 @@ object actionsmo: tactionsmo
     imagenrdisabled = 21
     onexecute = stepiactonexecute
     left = 80
-    top = 280
+    top = 224
     sc = (
       1
       24886
@@ -1323,7 +1323,7 @@ object actionsmo: tactionsmo
     statfile = mainfo.projectstatfile
     onchange = bluedotsononchange
     left = 152
-    top = 256
+    top = 253
   end
   object replace: taction
     caption = 'Find && &Replace'
@@ -1345,13 +1345,13 @@ object actionsmo: tactionsmo
     caption = 'Detach'
     onexecute = ondetachtarget
     left = 8
-    top = 168
+    top = 136
   end
   object attachprocess: taction
     caption = 'Attach Process'
     onexecute = onattachprocess
     left = 8
-    top = 184
+    top = 152
   end
   object lowercase: taction
     caption = 'Lowercase'
@@ -1368,7 +1368,7 @@ object actionsmo: tactionsmo
     top = 136
   end
   object shortcuts: tshortcutcontroller
-    actions.count = 76
+    actions.count = 81
     actions.items = <    
       item
         dispname = 'File'
@@ -1847,6 +1847,26 @@ object actionsmo: tactionsmo
         dispname = 'Abort Make'
       end    
       item
+        action = projectoptionsact
+        dispname = 'Options'
+      end    
+      item
+        action = projectopenact
+        dispname = 'Open'
+      end    
+      item
+        action = projecttreeact
+        dispname = 'Tree'
+      end    
+      item
+        action = projectsourceact
+        dispname = 'Source'
+      end    
+      item
+        action = projectcloseact
+        dispname = 'Close'
+      end    
+      item
         dispname = 'Help'
       end    
       item
@@ -1887,8 +1907,8 @@ object actionsmo: tactionsmo
     )
     statfile = mainfo.mainstatfile
     onafterupdate = updateshortcuts
-    left = 280
-    top = 368
+    left = 352
+    top = 8
   end
   object toggleinspector: taction
     caption = 'Toggle Form/Inspector'
@@ -1901,40 +1921,40 @@ object actionsmo: tactionsmo
   end
   object buildact: taction
     onexecute = makeactonexecute
-    left = 152
-    top = 328
+    left = 8
+    top = 312
   end
   object make1act: taction
     onexecute = makeactonexecute
-    left = 152
-    top = 339
+    left = 8
+    top = 330
   end
   object make2act: taction
     onexecute = makeactonexecute
-    left = 152
-    top = 352
+    left = 8
+    top = 348
   end
   object make3act: taction
     onexecute = makeactonexecute
-    left = 152
+    left = 8
     top = 366
   end
   object make4act: taction
     onexecute = makeactonexecute
-    left = 152
+    left = 8
     top = 384
   end
   object download: taction
     caption = 'Download'
     onexecute = downloadexe
     left = 8
-    top = 200
+    top = 168
   end
   object helpact: taction
     options = [ao_globalshortcut]
     onexecute = helpex
     left = 280
-    top = 400
+    top = 360
     sc = (
       1
       304
@@ -1944,7 +1964,7 @@ object actionsmo: tactionsmo
     caption = 'Attach Target'
     onexecute = onattachtarget
     left = 8
-    top = 152
+    top = 120
   end
   object setbm0: taction
     caption = 'Bookmark &0'
@@ -2180,5 +2200,41 @@ object actionsmo: tactionsmo
       1
       16468
     )
+  end
+  object projectopenact: taction
+    caption = 'O&pen'
+    onexecute = projectopenexe
+    left = 112
+    top = 296
+  end
+  object projectoptionsact: taction
+    caption = '&Options'
+    onexecute = projectoptionsexe
+    left = 112
+    top = 312
+  end
+  object projecttreeact: taction
+    caption = '&Tree'
+    onexecute = projecttreeexe
+    left = 112
+    top = 328
+  end
+  object projectsourceact: taction
+    caption = 'So&urce'
+    onexecute = projectsourceexe
+    left = 112
+    top = 344
+  end
+  object projectsaveact: taction
+    caption = '&Save'
+    onexecute = projectsaveexe
+    left = 112
+    top = 360
+  end
+  object projectcloseact: taction
+    caption = '&Close'
+    onexecute = projectcloeseexe
+    left = 112
+    top = 376
   end
 end

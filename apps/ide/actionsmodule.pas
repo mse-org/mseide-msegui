@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,8 @@ unit actionsmodule;
 interface
 uses
  mseclasses,mseact,mseactions,msebitmap,msestrings,msegui,msedatamodules,
- mseglob,msestat,mseifiglob;
+ mseglob,msestat,mseifiglob,msegraphics,msegraphutils,mseguiglob,msemenus,
+ msesimplewidgets,msewidgets,projecttreeform;
  
 type
  tactionsmo = class(tmsedatamodule)
@@ -109,6 +110,12 @@ type
    setbm9: taction;
    setbmnone: taction;
    instemplate: taction;
+   projectopenact: taction;
+   projectoptionsact: taction;
+   projecttreeact: taction;
+   projectsourceact: taction;
+   projectsaveact: taction;
+   projectcloseact: taction;
    procedure findinfileonexecute(const sender: tobject);
 
    //file
@@ -169,6 +176,12 @@ type
    procedure setbmexec(const sender: TObject);
    procedure findbmexec(const sender: TObject);
    procedure instemplateactonexecute(const sender: TObject);
+   procedure projectopenexe(const sender: TObject);
+   procedure projectoptionsexe(const sender: TObject);
+   procedure projecttreeexe(const sender: TObject);
+   procedure projectsourceexe(const sender: TObject);
+   procedure projectsaveexe(const sender: TObject);
+   procedure projectcloeseexe(const sender: TObject);
  end;
 
 var
@@ -178,10 +191,10 @@ procedure configureide;
 
 implementation
 uses
- main,make,actionsmodule_mfm,msemenus,sourceform,msedesigner,msetypes,msefiledialog,
+ main,make,actionsmodule_mfm,sourceform,msedesigner,msetypes,msefiledialog,
  projectoptionsform,findinfileform,breakpointsform,watchform,selecteditpageform,
- msewidgets,disassform,printform,msegdbutils,mseintegerenter,msesettings,
- mseguiglob,componentstore,cpuform;
+ disassform,printform,msegdbutils,mseintegerenter,msesettings,
+ componentstore,cpuform;
 
 procedure configureide;
 begin
@@ -572,6 +585,45 @@ end;
 procedure tactionsmo.findbmexec(const sender: TObject);
 begin
  sourcefo.findbmexec(sender);
+end;
+
+procedure tactionsmo.projectopenexe(const sender: TObject);
+var
+ fna1: filenamety;
+begin
+ if projectfiledialog(fna1,false) = mr_ok then begin
+  mainfo.openproject(fna1);
+ end;
+end;
+
+procedure tactionsmo.projectoptionsexe(const sender: TObject);
+begin
+ editprojectoptions;
+end;
+
+procedure tactionsmo.projecttreeexe(const sender: TObject);
+begin
+ projecttreefo.activate;
+end;
+
+procedure tactionsmo.projectsourceexe(const sender: TObject);
+begin
+ sourcefo.openfile(projectoptions.o.texp.mainfile,true);
+end;
+
+procedure tactionsmo.projectsaveexe(const sender: TObject);
+begin
+ if projectoptions.projectfilename = '' then begin
+  mainfo.saveprojectasonexecute(sender);
+ end
+ else begin
+  mainfo.saveproject(projectoptions.projectfilename);
+ end;
+end;
+
+procedure tactionsmo.projectcloeseexe(const sender: TObject);
+begin
+ mainfo.closeprojectactonexecute (sender);
 end;
 
 end.

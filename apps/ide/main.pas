@@ -95,9 +95,6 @@ type
    procedure onscale(const sender: TObject);
    procedure parametersonexecute(const sender: TObject);
    procedure buildactonexecute(const sender: TObject);
-   procedure projectoptionsonexecute(const sender: tobject);
-   procedure openprojectonexecute(const sender: tobject);
-   procedure projectsaveonexecute(const sender: TObject);
    procedure saveprojectasonexecute(const sender: tobject);
    procedure newprojectonexecute(const sender: TObject);
    procedure closeprojectactonexecute(const sender: TObject);
@@ -108,7 +105,6 @@ type
    procedure viewcpuonexecute(const sender: TObject);
    procedure viewmessagesonexecute(const sender: TObject);
    procedure viewsourceonexecute(const sender: tobject);
-   procedure viewprojectonexecute(const sender: tobject);
    procedure viewbreakpointsonexecute(const sender: tobject);
    procedure viewwatchesonexecute(const sender: tobject);
    procedure viewstackonexecute(const sender: tobject);
@@ -118,7 +114,6 @@ type
    procedure viewcomponentstoreonexecute(const sender: TObject);
    procedure viewdebuggertoolbaronexecute(const sender: TObject);
    procedure viewwatchpointsonexecute(const sender: TObject);
-   procedure viewprojectsourceonexecute(const sender: TObject);
    procedure viewthreadsonexecute(const sender: TObject);
    procedure viewconsoleonexecute(const sender: TObject);
    procedure viewfindresults(const sender: TObject);
@@ -1311,11 +1306,6 @@ begin
  sourcefo.activate;
 end;
 
-procedure tmainfo.viewprojectonexecute(const sender: tobject);
-begin
- projecttreefo.activate;
-end;
-
 procedure tmainfo.mainmenuonupdate(const sender: tcustommenu);
 var
  bo1: boolean;
@@ -2021,11 +2011,6 @@ begin
  domake(2);
 end;
 
-procedure tmainfo.projectoptionsonexecute(const sender: tobject);
-begin
- editprojectoptions;
-end;
-
 procedure tmainfo.showfirsterror;
 var
  int1: integer;
@@ -2315,39 +2300,12 @@ begin
  newproject(false,true);
 end;
 
-procedure tmainfo.openprojectonexecute(const sender: tobject);
-var
- str1: filenamety;
-begin
- if projectfiledialog(str1,false) = mr_ok then begin
-  openproject(str1);
- end;
-end;
-
 procedure tmainfo.openprojectcopyexecute(const sender: TObject);
 var
  str1: filenamety;
 begin
  if projectfiledialog(str1,false) = mr_ok then begin
   openproject(str1,true);
- end;
-end;
-
-procedure tmainfo.closeprojectactonexecute(const sender: TObject);
-begin
- if openproject('') then begin
-  caption:= idecaption;
-  fprojectloaded:= false;
- end;
-end;
-
-procedure tmainfo.projectsaveonexecute(const sender: TObject);
-begin
- if projectoptions.projectfilename = '' then begin
-  saveprojectasonexecute(sender);
- end
- else begin
-  saveproject(projectoptions.projectfilename);
  end;
 end;
 
@@ -2651,11 +2609,6 @@ begin
  symbolfo.activate;
 end;
 
-procedure tmainfo.viewprojectsourceonexecute(const sender: TObject);
-begin
- sourcefo.openfile(projectoptions.o.texp.mainfile,true);
-end;
-
 procedure tmainfo.viewthreadsonexecute(const sender: TObject);
 begin
  threadsfo.activate;
@@ -2828,6 +2781,14 @@ begin
                                            [sfo_nodata,sfo_nooptions];
    statreader.free;
   end;
+ end;
+end;
+
+procedure tmainfo.closeprojectactonexecute(const sender: TObject);
+begin
+ if mainfo.openproject('') then begin
+  caption:= idecaption;
+  fprojectloaded:= false;
  end;
 end;
 
