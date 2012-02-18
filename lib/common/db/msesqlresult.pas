@@ -1362,7 +1362,7 @@ begin
  end;
  feof:= true;
  fbof:= true;
- fcols.clear;
+ //fcols.clear;
 end;
 
 procedure tsqlresult.clear;
@@ -1374,8 +1374,9 @@ end;
 procedure tsqlresult.close;
 begin
  factive:= false;
- feof:= true;
- fbof:= true;
+// feof:= true;
+// fbof:= true;
+ doclear;
  sendchangeevent(oe_releasefields);
  freefldbuffers;
  inherited setactive(false);
