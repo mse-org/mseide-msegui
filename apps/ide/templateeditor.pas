@@ -138,6 +138,7 @@ begin
     cursorrow:= rowed.value - 1;
     comment:= commented.value;
     name:= nameed.value;
+    paramgrid.removeappendedrow;
     params:= paramgrid[0].datalist.asarray;
     paramdefaults:= paramgrid[1].datalist.asarray;
     template:= templed.gettext;

@@ -2115,7 +2115,7 @@ type
    function isinsertempty: boolean; 
          //true if row will be removed by og_noinsertempty
    function isautoappend: boolean; //true if last row is auto appended
-   procedure removeappendedrow;
+   procedure removeappendedrow; 
    function checkreautoappend: boolean; //true if row appended
    function hasdata: boolean;
    function canexitrow(const force: boolean = false): boolean;
@@ -11421,7 +11421,7 @@ end;
 procedure tcustomgrid.removeappendedrow;
 begin
  docheckcellvalue;
- doremoveappinsrow(row,row);
+ doremoveappinsrow(row,invalidaxis);
 end;
 
 function tcustomgrid.hasdata: boolean;
