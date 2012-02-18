@@ -8971,7 +8971,9 @@ end;
 
 procedure tcustomgrid.rowdatachanged;
 begin
- rowdatachanged(mgc(invalidaxis,0),frowcount);
+ if frowcount > 0 then begin
+  rowdatachanged(mgc(invalidaxis,0),frowcount);
+ end;
 end;
 
 procedure tcustomgrid.setselected(const cell: gridcoordty; const avalue: boolean);
