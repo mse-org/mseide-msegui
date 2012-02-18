@@ -427,8 +427,9 @@ begin
  with tshortcutitem(sc.item) do begin
   shortcut:= fshortcutdefault;
   shortcut1:= fshortcut1default;
-  checkconflict;
  end;
+ sc.itemlist.refreshitemvalues(grid.row,1);
+ checkconflict;
 end;
 
 procedure tmseshortcutdialogfo.collapseall(const sender: TObject);
