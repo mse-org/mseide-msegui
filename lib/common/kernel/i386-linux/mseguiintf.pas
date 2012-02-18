@@ -3929,6 +3929,10 @@ end;
 
 function getkeynomod(var xev: {$ifdef FPC}txkeyevent{$else}
                                                   xkeyevent{$endif}): keyty;
+const
+ modimask = not (shiftmask or lockmask or controlmask or 
+                 mod1mask or mod2mask or mod3mask or
+                 mod4mask or mod5mask);
 var
 // keysym1: pkeysym;
 // int1{,int2}: integer;
@@ -3942,11 +3946,12 @@ begin
 {$endif} 
  result:= key_none;
  statebefore:= xev.state;
- xev.state:= numlockstate;
+ xev.state:= xev.state and modimask or numlockstate;
  xlookupstring(@xev,nil,0,@keysym1,nil);
  xev.state:= statebefore;
  ss1:= [];
  result:= xkeytokey(keysym1,ss1);
+
  (*
  {$ifdef fpc} {$checkpointer off} {$endif}
  inc(xlockerror);
