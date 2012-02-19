@@ -34,7 +34,8 @@ const
 type
 
  tcustomtabbar = class;
- tabstatety = (ts_invisible,ts_disabled,ts_active,ts_updating,ts_captionclipped);
+ tabstatety = (ts_invisible,ts_disabled,ts_active,ts_updating,ts_captionclipped,
+               ts_noface);
  tabstatesty = set of tabstatety;
 
  ttabfont = class(tparentfont)
@@ -386,6 +387,7 @@ type
   function getwidget: twidget;
   function getcaption: msestring;
   function gettabhint: msestring;
+  function gettabnoface: boolean;
   function getcolortab: colorty;
   function getcoloractivetab: colorty;
   function getfonttab: tfont;
@@ -413,6 +415,7 @@ type
    ftabwidget: tcustomtabwidget;
    fcaption: msestring;
    ftabhint: msestring;
+   ftabnoface: boolean;
    fimagelist: timagelist;
    fimagenr: integer;
    fimagenrdisabled: integer;
@@ -426,6 +429,8 @@ type
    procedure setcaption(const Value: captionty);
    function gettabhint: msestring;
    procedure settabhint(const avalue: msestring);
+   function gettabnoface: boolean;
+   procedure settabnoface(const avalue: boolean);
    function getcolortab: colorty;
    procedure setcolortab(const avalue: colorty);
    function getcoloractivetab: colorty;
@@ -478,6 +483,8 @@ type
    property invisible: boolean read getinvisible write setinvisible default false;
    property caption: captionty read getcaption write setcaption;
    property tabhint: msestring read gettabhint write settabhint;
+   property tabnoface: boolean read gettabnoface 
+                                 write settabnoface default false;
    property colortab: colorty read getcolortab
                   write setcolortab default cl_default;
    property coloractivetab: colorty read getcoloractivetab
@@ -521,6 +528,7 @@ type
    fimagenrdisabled: integer;
    fcolortab,fcoloractivetab: colorty;
    ftabhint: msestring;
+   ftabnoface: boolean;
    fonselect: notifyeventty;
    fondeselect: notifyeventty;
    finvisible: boolean;
@@ -536,6 +544,8 @@ type
    procedure settabindex(const avalue: integer);
    function gettabhint: msestring;
    procedure settabhint(const avalue: msestring);
+   function gettabnoface: boolean;
+   procedure settabnoface(const avalue: boolean);
    function getimagelist: timagelist;
    procedure setimagelist(const avalue: timagelist);
    function getimagenr: imagenrty;
@@ -584,6 +594,8 @@ type
    property fontactivetab: ttabformfontactivetab read getfontactivetab1 
                                  write setfontactivetab stored isfontactivetabstored;
    property tabhint: msestring read gettabhint write settabhint;
+   property tabnoface: boolean read gettabnoface 
+                                      write settabnoface default false;
    property imagelist: timagelist read getimagelist write setimagelist;
    property imagenr: imagenrty read getimagenr write setimagenr default -1;
    property imagenrdisabled: imagenrty read getimagenrdisabled
@@ -1156,6 +1168,9 @@ begin
       color:= fcolor;
      end;
      face:= tabs.face;
+    end;
+    if ts_noface in fstate then begin
+     face:= nil;
     end;
     if bo1 or (ts_disabled in fstate) then begin
      include(state,shs_disabled);
@@ -2862,6 +2877,19 @@ begin
  changed;
 end;
 
+function ttabpage.gettabnoface: boolean;
+begin
+ result:= ftabnoface;
+end;
+
+procedure ttabpage.settabnoface(const avalue: boolean);
+begin
+ if ftabnoface <> avalue then begin
+  ftabnoface:= avalue;
+  changed;
+ end;
+end;
+
 function ttabpage.getcolortab: colorty;
 begin
  result:= fcolortab;
@@ -2869,8 +2897,10 @@ end;
 
 procedure ttabpage.setcolortab(const avalue: colorty);
 begin
- fcolortab:= avalue;
- changed;
+ if fcolortab <> avalue then begin
+  fcolortab:= avalue;
+  changed;
+ end;
 end;
 
 function ttabpage.getcoloractivetab: colorty;
@@ -2880,8 +2910,10 @@ end;
 
 procedure ttabpage.setcoloractivetab(const avalue: colorty);
 begin
- fcoloractivetab:= avalue;
- changed;
+ if fcoloractivetab <> avalue then begin
+  fcoloractivetab:= avalue;
+  changed;
+ end;
 end;
 
 procedure ttabpage.registerchildwidget(const child: twidget);
@@ -3242,8 +3274,10 @@ end;
 
 procedure ttabform.setcolortab(const avalue: colorty);
 begin
- fcolortab:= avalue;
- changed;
+ if fcolortab <> avalue then begin
+  fcolortab:= avalue;
+  changed;
+ end;
 end;
 
 function ttabform.getcoloractivetab: colorty;
@@ -3253,8 +3287,10 @@ end;
 
 procedure ttabform.setcoloractivetab(const avalue: colorty);
 begin
- fcoloractivetab:= avalue;
- changed;
+ if fcoloractivetab <> fcoloractivetab then begin
+  fcoloractivetab:= avalue;
+  changed;
+ end;
 end;
 
 function ttabform.gettabwidget: tcustomtabwidget;
@@ -3282,6 +3318,19 @@ procedure ttabform.settabhint(const avalue: msestring);
 begin
  ftabhint:= avalue;
  changed;
+end;
+
+function ttabform.gettabnoface: boolean;
+begin
+ result:= ftabnoface;
+end;
+
+procedure ttabform.settabnoface(const avalue: boolean);
+begin
+ if ftabnoface <> avalue then begin
+  ftabnoface:= avalue;
+  changed;
+ end;
 end;
 
 procedure ttabform.settabwidget(const value: tcustomtabwidget);
@@ -3590,6 +3639,13 @@ begin
     hint:= sender.gettabhint;
     color:= sender.getcolortab;
     coloractive:= sender.getcoloractivetab;
+    bo1:= sender.gettabnoface;
+    if bo1 then begin
+     state:= state + [ts_noface];
+    end
+    else begin
+     state:= state - [ts_noface];
+    end;
     font:= ttabfont(sender.getfonttab);
     fontactive:= ttabfontactive(sender.getfontactivetab);
     imagelist:= sender.getimagelist;

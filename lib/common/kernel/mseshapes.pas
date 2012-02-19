@@ -33,7 +33,6 @@ type
   caption: richstringty;
   font: tfont;
   textflags: textflagsty;
-//  captionpos: captionposty;
   imagepos: imageposty;
   captiondist: integer;
   imagenr: imagenrty;
