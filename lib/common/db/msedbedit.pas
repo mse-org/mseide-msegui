@@ -6972,13 +6972,23 @@ procedure tgriddatalink.doupdaterowdata(const row: integer);
     fgrid.rowfontstate[arow]:= rowstatenumty((int1 shr 8) and $7f);
    end;
   end;
-  if (field_color <> nil) and not field_color.isnull then begin
-   fgrid.rowcolorstate[arow]:= field_color.asinteger;
+  if (field_color <> nil) then begin
+   if field_color.isnull then begin
+    fgrid.rowcolorstate[arow]:= -1;
+   end
+   else begin
+    fgrid.rowcolorstate[arow]:= field_color.asinteger;
+   end;
   end;
-  if (field_font <> nil) and not field_font.isnull then begin
-   fgrid.rowfontstate[arow]:= field_font.asinteger;
+  if (field_font <> nil) then begin
+   if field_font.isnull then begin
+    fgrid.rowfontstate[arow]:= -1;
+   end
+   else begin
+    fgrid.rowfontstate[arow]:= field_font.asinteger;
+   end;
   end;
-  if (field_readonly <> nil) and not field_readonly.isnull then begin
+  if (field_readonly <> nil) then begin
    fgrid.rowreadonlystate[arow]:= field_readonly.asboolean;
   end;
   if field_merged <> nil then begin

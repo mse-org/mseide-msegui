@@ -305,7 +305,7 @@ type
    procedure setfielddefs(const avalue: tsqlresultfielddefs);
   protected
    procedure dosqlchange(const sender : tobject); override;
-   function getactive: boolean;
+   function getactive: boolean; override;
    procedure setactive(avalue: boolean); override;
    procedure loaded; override;
    procedure freefldbuffers;
@@ -1278,6 +1278,11 @@ begin
     fopenafterread:= false;
     close;
    end;
+  end
+  else begin
+   if not avalue then begin
+    inherited setactive(false); //free cursor for exec call
+   end;
   end;
  end;
 end;
@@ -1334,7 +1339,7 @@ begin
  if fbeforeopen <> nil then begin
   fbeforeopen.execute;
  end;
- prepare;
+// prepare;
  execute;
 // ffielddefs.clear;
  fdatabase.addfielddefs(fcursor,ffielddefs);

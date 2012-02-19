@@ -1712,6 +1712,7 @@ begin
      end;
     end;
    end;
+
    if (updatekind = ukmodify) and 
                           (bs_refreshupdate in self.fbstate) or
       (updatekind = ukinsert) and 
@@ -1741,6 +1742,7 @@ begin
     execute;
     rowsaffected1:= fcursor.frowsaffected;
    end;
+
    if not (bs_refreshinsert in fbstate) and (updatekind = ukinsert) and 
                                         (self.fprimarykeyfield <> nil) then begin
     tcustomsqlconnection1(database).updateprimarykeyfield(

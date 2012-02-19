@@ -533,7 +533,7 @@ type
    procedure setoptions(const avalue: sqlstatementoptionsty);
     //itransactionclient
    function getname: string;
-   function getactive: boolean;
+   function getactive: boolean; virtual;
    procedure settransaction(const avalue: tmdbtransaction);
    procedure settransactionwrite(const avalue: tmdbtransaction);
    procedure checkbrowsemode;
@@ -631,6 +631,8 @@ type
   protected
    fcursor: tsqlcursor;
    fstatementtype: tstatementtype;
+   procedure internalclose;
+   function getactive: boolean; override;
    procedure setactive(avalue: boolean); override;
    procedure dosqlchange(const sender: tobject); override;
    function isprepared: boolean;
@@ -2958,8 +2960,17 @@ end;
 
 destructor tcursorsqlstatement.destroy;
 begin
- setactive(false);
+ internalclose;
+// setactive(false);
  inherited;
+end;
+
+procedure tcursorsqlstatement.internalclose;
+begin
+ unprepare;
+ if fcursor <> nil then begin
+  fdatabase.deallocatecursorhandle(fcursor);
+ end;
 end;
 
 procedure tcursorsqlstatement.dosqlchange(const sender: tobject);
@@ -2992,6 +3003,7 @@ begin
   fcursor.fstatementtype:= fstatementtype;
   if not (sso_noprepare in foptions) then begin
    fdatabase.PrepareStatement(Fcursor,ftransaction,mstr1,FParams);
+//   fcursor.fprepared:= true;
   end;
  end;
 end;
@@ -3005,6 +3017,7 @@ procedure tcursorsqlstatement.unprepare;
 begin
  if (fcursor <> nil) and fcursor.fprepared then begin
   fdatabase.unpreparestatement(fcursor);
+  //fcursor.fprepared:= false;
  end;
 end;
 
@@ -3053,13 +3066,15 @@ begin
  end;
 end;
 
+function tcursorsqlstatement.getactive: boolean;
+begin
+ result:= fcursor <> nil;
+end;
+
 procedure tcursorsqlstatement.setactive(avalue: boolean);
 begin
  if not avalue then begin
-  unprepare;
-  if fcursor <> nil then begin
-   fdatabase.deallocatecursorhandle(fcursor);
-  end;
+  internalclose;
  end;
 end;
 
