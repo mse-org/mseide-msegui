@@ -5247,7 +5247,9 @@ begin
     checkbrowsemode;
    end
    else begin
-    bookmarkdata:= bm1;   
+    if bm1.recordpo <> nil then begin
+     bookmarkdata:= bm1;   
+    end;
    end;
   end
   else begin
