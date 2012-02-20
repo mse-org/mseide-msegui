@@ -320,6 +320,8 @@ function strscan(const str: lmsestringty; const chr: msechar): pmsechar; overloa
 function msestrscan(const Str: PmseChar; Chr: mseChar): PmseChar; overload;
 //function msestrscan(const str: msestring; chr: msechar): integer; overload;
            //use findchar()
+procedure mseskipspace(var str: pmsechar); inline;
+procedure skipspace(var str: pchar); inline;
 
 function StrLScan(const Str: PChar; Chr: Char; len: integer): PChar;
 function mseStrLScan(const Str: PmseChar; Chr: mseChar; len: integer): PmseChar;
@@ -3688,6 +3690,20 @@ begin
    result:= int1;
    exit;
   end;
+ end;
+end;
+
+procedure mseskipspace(var str: pmsechar); inline;
+begin
+ while str^ = ' ' do begin
+  inc(str);
+ end;
+end;
+
+procedure skipspace(var str: pchar); inline;
+begin
+ while str^ = ' ' do begin
+  inc(str);
  end;
 end;
 
