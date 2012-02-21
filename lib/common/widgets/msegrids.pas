@@ -1469,8 +1469,6 @@ type
    destructor destroy; override;
    function updatedatastate: boolean; overload;
    procedure move(const curindex,newindex: integer); override;
-   procedure clearselection;
-   function hasselection: boolean;
    function previosvisiblecol(aindex: integer): integer;
                    //invalidaxis if none
    function nextvisiblecol(aindex: integer): integer;
@@ -1483,6 +1481,8 @@ type
    function datalistbyname(const aname: string): tdatalist; //can be nil
    function colsubdatainfo(const aname: string): subdatainfoty;
    
+   procedure clearselection;
+   function hasselection: boolean;
    function selectedcellcount: integer;
    function hascolselection: boolean;
    property selectedcells: gridcoordarty read getselectedcells 
