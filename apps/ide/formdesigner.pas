@@ -253,6 +253,7 @@ type
    procedure updateclickedcomponent;
    procedure deletecomponent(const component: tcomponent);
    procedure selectcomponent(const component: tcomponent;
+//                                 const bymouse: boolean;
                                              mode: selectmodety = sm_select);
    procedure selectparentwidget(const awidget: twidget);
    procedure clearselection;
@@ -2322,6 +2323,7 @@ begin
 end;
 
 procedure tdesignwindow.selectcomponent(const component: tcomponent;
+//                       const bymouse: boolean;
                        mode: selectmodety = sm_select);
 begin
  if mode = sm_remove then begin
@@ -2343,12 +2345,19 @@ begin
    end;
   end;
  end;
- if factcompindex >= 0 then begin
-  factarea:= ar_component;
- end
- else begin
+ if factcompindex < 0 then begin
   factarea:= ar_none;
  end;
+ {
+ if bymouse then begin
+  if factcompindex >= 0 then begin
+   factarea:= ar_component;
+  end
+  else begin
+   factarea:= ar_none;
+  end;
+ end;
+ }
  updateselections;
 end;
 
