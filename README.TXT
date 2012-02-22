@@ -75,7 +75,6 @@ MSEgui command line parameters
  Use the top level frame window id instead the application client window id
  for window raise operation. Implies --NORESTACKWINDOW and
  --NORECONFIGUREWMWINDOW.
-
  
 MSEide command line parameters
 ******************************
@@ -103,12 +102,25 @@ COMPSTOREDIR, COMPILER, DEBUGGER, EXEEXT, TARGET.
 
 MSEide project macros
 *********************
-Predefined projectmacros:
-PROJECTNAME, PROJECTDIR, MAINFILE, TARGFILE, they can be overridden by 
+Predefined project macros:
+PROJECTNAME, PROJECTDIR, MAINFILE, TARGETFILE, they can be overridden by 
 'Project'-'Options'-'Macros'.
 
-Linux x84-64
-************
+MSEide external tools parameters macros
+***************************************
+Predefined macros in 'Project'-'Options'-'Tools'-'Parameters':
+CURSOURCEFILE current source file.
+CURMODULEFILE current *.mfm file.
+CURSSELECTION selected text in source editor.
+CURSWORD word at cursor in source editor
+CURSDEFINITION} definition of the current token at cursor 
+ (Ctrl+LClick destination), needs activated P-column
+ (Parse source before call) to be current.
+CURCOMPONENTCLASS current selected component class in form editor.
+CURPROPERTY current selected property in object inspector.
+
+MSEide+MSEgui Linux x84-64
+**************************
 The 64bit version is experimental and not well tested because nobody
 uses 64bit it seems. ;-)
 There is a problem in FPC with -gl compiler switch, it is possible that the delay
