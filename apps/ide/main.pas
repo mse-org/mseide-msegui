@@ -2718,6 +2718,7 @@ begin
     mstr1:= toolparams[index];
     if mstr1 <> '' then begin
      macrolist:= tmacrolist.create([mao_caseinsensitive]);
+     macrolist.add(getprojectmacros);     
      macrolist.add(['CURSOURCEFILE','CURMODULEFILE',
                     'CURSSELECTION','CURSWORD','CURSDEFINITION',
                     'CURCOMPONENTCLASS','CURPROPERTY'],

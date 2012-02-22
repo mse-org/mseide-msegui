@@ -201,6 +201,7 @@ type
   public
    constructor create(const aoptions: macrooptionsty);
    function itempo(const index: integer): pmacroinfoty;
+   procedure add(const avalue: tmacrolist); overload;
    procedure add(const avalue: macroinfoty); overload;
    procedure add(const avalue: macroinfoarty); overload;
    procedure add(const names,values: array of msestring); overload;
@@ -920,6 +921,11 @@ begin
  for int1:= 0 to high(avalue) do begin
   add(avalue[int1]);
  end;
+end;
+
+procedure tmacrolist.add(const avalue: tmacrolist);
+begin
+ add(asarray);
 end;
 
 procedure tmacrolist.add(const names,values: array of msestring);
