@@ -572,6 +572,7 @@ begin
       end;
       wstr1:= wstr1 + ' Do you wish to reload from disk?';
       if askok(wstr1,'Confirmation') then begin
+       filechanged:= false;
        reload;
        mainfo.sourcechanged(items[int1]);
       end;

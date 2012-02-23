@@ -8756,7 +8756,7 @@ begin
        else begin
         canvas.linewidth:= flinewidth;
        end;
-                 //merged cells should be clipped
+                 //todo: merged cells should be clipped
        canvas.drawline(makepoint(int2,0),
             makepoint(int2,
                        tframe1(fgrid.fframe).finnerclientrect.cy{ - 1}),
@@ -8767,7 +8767,7 @@ begin
     end;
    end;
    canvas.clipregion:= reg;
-      //should be on top because of overwriting
+      //todo: should be on top because of overwriting
       //overlapping co_nohscroll grid lines 
       
    po1:= canvas.origin;
