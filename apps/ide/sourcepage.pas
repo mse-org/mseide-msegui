@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -103,6 +103,7 @@ type
    procedure clearbrackets;
    procedure beginupdate;
    procedure endupdate;
+   function checkfilechanged: boolean;
   public
    filechanged: boolean;
    ismoduletext: boolean;
@@ -454,9 +455,48 @@ begin
  end;
 end;
 
+function tsourcepage.checkfilechanged: boolean;
+var
+ stream1: ttextstream;
+ int1,int2: integer;
+ po1: prichstringty;
+ mstr1: msestring;
+begin
+ result:= modified;
+ if not result then begin
+  stream1:= ttextstream.trycreate(edit.filename,fm_read);
+  result:= true;
+  if stream1 <> nil then begin ; //else locked or deleted
+   try
+    stream1.encoding:= edit.encoding;
+    int1:= 0;
+    int2:= edit.datalist.count - 1;
+    po1:= edit.datalist.datapo;
+    for int1:= 0 to int2 do begin
+     if not stream1.readln(mstr1) then begin
+      if int1 <> int2 then begin
+       exit;
+      end;
+     end;
+     if mstr1 <> po1^.text then begin
+      exit;
+     end;
+     inc(po1);
+    end;
+    if stream1.eof then begin
+     result:= false;
+    end;
+   finally
+    stream1.free;
+   end;
+  end;
+ end;
+end;
+
 function tsourcepage.canchangenotify(const info: filechangeinfoty): boolean;
 begin
- result:= info.info.extinfo1.modtime - fsavetime > 5.0/(24.0*3600); //> 5 sec
+ result:= (info.info.extinfo1.modtime - fsavetime > 5.0/(24.0*3600)) or //> 5 sec
+                  checkfilechanged; 
  with projectoptions,o.texp do begin
   if result and making and o.copymessages and
           (filepath = msefileutils.filepath(messageoutputfile)) then begin
