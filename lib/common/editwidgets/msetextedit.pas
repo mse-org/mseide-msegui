@@ -207,7 +207,7 @@ type
                        //afilename = '' -> actual filename
    procedure beginupdate; virtual;
    procedure endupdate;  virtual;
-   procedure clear;
+   procedure clear; virtual;
    function filename: filenamety;
 
    procedure seteditpos(const Value: gridcoordty; const select: boolean = false;
@@ -352,6 +352,7 @@ type
   protected
   public
    constructor create(aowner: tcomponent); override;
+   procedure clear; override;
    procedure undo;
    procedure redo;
    function canundo: boolean;
@@ -2355,6 +2356,12 @@ begin
    tundoinplaceedit(feditor).endgroup;
   end;
  end;
+end;
+
+procedure tundotextedit.clear;
+begin
+ tundoinplaceedit(feditor).undolist.clear;
+ inherited;
 end;
 
 initialization

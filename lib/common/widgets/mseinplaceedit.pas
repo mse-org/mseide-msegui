@@ -273,6 +273,7 @@ type
    procedure beforecopy(var data); override;
   public
    constructor create(intf: iundo); reintroduce;
+   procedure clear; override;
    procedure beginlink(linkto: undotypety; forcenew: boolean);
    procedure endlink(forcenew: boolean);
    procedure setpos(const endpos: gridcoordty; selected: boolean;
@@ -2493,6 +2494,12 @@ end;
 function ttextundolist.getlocked: boolean;
 begin
  result:= flock <> 0;
+end;
+
+procedure ttextundolist.clear;
+begin
+ fundopo:= 0;
+ inherited;
 end;
 
 { tundoinplaceedit }
