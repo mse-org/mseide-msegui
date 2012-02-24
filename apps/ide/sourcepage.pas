@@ -497,7 +497,7 @@ function tsourcepage.canchangenotify(const info: filechangeinfoty): boolean;
 begin
 // result:= (info.info.extinfo1.modtime - fsavetime > 5.0/(24.0*3600)) or //> 5 sec
 //                  checkfilechanged; 
- result:= (info.changed - [fc_force] <> []) or checkfilechanged();
+ result:= (info.changed - [fc_force,fc_accesstime] <> []) or checkfilechanged();
  with projectoptions,o.texp do begin
   if result and making and o.copymessages and
           (filepath = msefileutils.filepath(messageoutputfile)) then begin
