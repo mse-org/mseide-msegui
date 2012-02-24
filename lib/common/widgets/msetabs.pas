@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -31,8 +31,10 @@ const
  defaulttabpageskinoptions = defaultcontainerskinoptions;
  defaultoptionswidgettab = defaultoptionswidgetnofocus;
  defaultoptionswidget1tab = [ow1_autoheight];
-type
+ defaultcolortab = cl_transparent;
+ defaultcoloractivetab = cl_active;
 
+type
  tcustomtabbar = class;
  tabstatety = (ts_invisible,ts_disabled,ts_active,ts_updating,ts_captionclipped,
                ts_noface);
@@ -225,9 +227,9 @@ type
    property oncreatetab: createtabeventty read foncreatetab write foncreatetab;
   published
    property color: colorty read fcolor
-                  write setcolor default cl_transparent;
+                  write setcolor default cl_default;
    property coloractive: colorty read fcoloractive
-                  write setcoloractive default cl_active;
+                  write setcoloractive default cl_default;
    property font: ttabsfont read getfont write setfont  stored isfontstored;
    property fontactive: ttabsfontactive read getfontactive write setfontactive
                                           stored isfontactivestored;
@@ -396,6 +398,8 @@ type
   function getimagenr: imagenrty;
   function getimagenrdisabled: imagenrty;
   function getinvisible: boolean;
+  procedure setcolortab(const avalue: colorty);
+  procedure setcoloractivetab(const avalue: colorty);
   procedure doselect;
   procedure dodeselect;
  end;
@@ -576,6 +580,7 @@ type
    class function hasresource: boolean; override;
 //   constructor docreate(aowner: tcomponent); override;
    procedure docreate(aowner: tcomponent); override;
+   class function classskininfo: skininfoty; override;
   public
    destructor destroy; override;
    procedure createfonttab;
@@ -588,7 +593,7 @@ type
    property colortab: colorty read getcolortab
                                     write setcolortab default cl_default;
    property coloractivetab: colorty read getcoloractivetab
-                                    write setcoloractivetab default cl_active;
+                                    write setcoloractivetab default cl_default;
    property fonttab: ttabformfonttab read getfonttab1 write setfonttab
                                                         stored isfonttabstored;
    property fontactivetab: ttabformfontactivetab read getfontactivetab1 
@@ -802,9 +807,9 @@ type
    property tab_face: tface read gettab_face write settab_face;
    property tab_color: colorty read gettab_color write settab_color default cl_default;
    property tab_colortab: colorty read gettab_colortab 
-                        write settab_colortab default cl_transparent;
+                        write settab_colortab default cl_default;
    property tab_coloractivetab: colorty read gettab_coloractivetab 
-                        write settab_coloractivetab default cl_active;
+                        write settab_coloractivetab default cl_default;
    property tab_font: ttab_font read gettab_font write settab_font 
                                                         stored istab_fontstored;
    property tab_fonttab: ttab_fonttab read gettab_fonttab write settab_fonttab 
@@ -1156,6 +1161,9 @@ begin
      else begin
       color:= fcoloractive;
      end;
+     if color = cl_default then begin
+      color:= defaultcoloractivetab;
+     end;
      coloractive:= color;
      face:= tabs.ffaceactive;
     end
@@ -1166,6 +1174,9 @@ begin
      end
      else begin
       color:= fcolor;
+     end;
+     if color = cl_default then begin
+      color:= defaultcolortab;
      end;
      face:= tabs.face;
     end;
@@ -1557,8 +1568,8 @@ end;
 constructor ttabs.create(const aowner: tcustomtabbar;
                                   aclasstype: indexpersistentclassty);
 begin
- fcolor:= cl_transparent;
- fcoloractive:= cl_active;
+ fcolor:= cl_default;
+ fcoloractive:= cl_default;
  fimagepos:= defaultimagepos;
  ftextflags:= defaultcaptiontextflags;
  fcaptionframe.left:= defaultcaptiondist;
@@ -3210,7 +3221,7 @@ end;
 procedure ttabform.docreate(aowner: tcomponent);
 begin
  fcolortab:= cl_default;
- fcoloractivetab:= cl_active;
+ fcoloractivetab:= cl_default;
  fimagenr:= -1;
  fimagenrdisabled:= -2;
  inherited;
@@ -3224,6 +3235,12 @@ begin
  inherited;
  freeandnil(ffonttab);
  freeandnil(ffontactivetab);
+end;
+
+class function ttabform.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_tabpage;
 end;
 
 procedure ttabform.createfonttab;
@@ -3513,6 +3530,7 @@ function ttabform.isfontactivetabstored: boolean;
 begin
  result:= ffontactivetab <> nil;
 end;
+
 {
 function ttabform.gettabwidth: integer;
 begin

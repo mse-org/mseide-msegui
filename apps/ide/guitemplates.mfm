@@ -1,17 +1,15 @@
 object guitemplatesmo: tguitemplatesmo
+  bounds_cx = 483
+  bounds_cy = 132
   oncreate = cre
   left = 99
   top = 135
   moduleclassname = 'tmsedatamodule'
-  size = (
-    483
-    132
-  )
   object fadevertkonvex: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0
+      1
     )
     template.fade_color.count = 2
     template.fade_color.items = (
@@ -25,8 +23,8 @@ object guitemplatesmo: tguitemplatesmo
   object fadehorzconvex: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0
+      1
     )
     template.fade_color.count = 2
     template.fade_color.items = (
@@ -39,8 +37,8 @@ object guitemplatesmo: tguitemplatesmo
   object fadehorzconcave: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0
+      1
     )
     template.fade_color.count = 2
     template.fade_color.items = (
@@ -54,8 +52,8 @@ object guitemplatesmo: tguitemplatesmo
   object fadevertconcave: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0
+      1
     )
     template.fade_color.count = 2
     template.fade_color.items = (
@@ -94,8 +92,8 @@ object guitemplatesmo: tguitemplatesmo
   object fadecontainer: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
+      0
+      1
     )
     template.fade_color.count = 2
     template.fade_color.items = (

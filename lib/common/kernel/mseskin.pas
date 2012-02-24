@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2008-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2008-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -97,6 +97,8 @@ type
  end;
  tabpageskininfoty = record
   wi: widgetskininfoty;
+  colortab: colorty;
+  coloractivetab: colorty;
  end;
  menuskininfoty = record
   face: tfacecomp;
@@ -754,6 +756,10 @@ type
 
    property tabpage_face: tfacecomp read ftabpage.wi.fa write settabpage_face;
    property tabpage_frame: tframecomp read ftabpage.wi.fra write settabpage_frame;
+   property tabpage_colortab: colorty read ftabpage.colortab 
+                               write ftabpage.colortab default cl_default;
+   property tabpage_coloractive: colorty read ftabpage.coloractivetab 
+                           write ftabpage.coloractivetab default cl_default;
 {
    property popupmenu_options: skinmenuoptionsty read fpopupmenu.options
                 write fpopupmenu.options default [];         
@@ -1840,6 +1846,8 @@ begin
  ftabbar.tavertopo.color:= cl_default;
  ftabbar.tavertopo.coloractive:= cl_default;
  ftabbar.tavertopo.shift:= defaulttabshift;
+ ftabpage.colortab:= cl_default;
+ ftabpage.coloractivetab:= cl_default;
  inherited;
 end;
 
@@ -2401,9 +2409,24 @@ begin
 end;
 
 procedure tskincontroller.handletabpage(const ainfo: skininfoty);
+var
+ intf1: itabpage;
 begin
  handlewidget(ainfo);
- setwidgetskin(ttabpage(ainfo.instance),ftabpage.wi);
+ setwidgetskin(twidget(ainfo.instance),ftabpage.wi);
+ if ((ftabpage.colortab <> cl_default) or 
+               (ftabpage.coloractivetab <> cl_default)) and
+    twidget(ainfo.instance).getcorbainterface(typeinfo(itabpage),
+                                                      intf1) then begin
+  if (ftabpage.colortab <> cl_default) and 
+                            (intf1.getcolortab = cl_default) then begin
+   intf1.setcolortab(ftabpage.colortab);
+  end;
+  if (ftabpage.coloractivetab <> cl_default) and 
+                            (intf1.getcoloractivetab = cl_default) then begin
+   intf1.setcoloractivetab(ftabpage.coloractivetab);
+  end;
+ end;
 end;
 
 procedure tskincontroller.handletoolbar(const ainfo: skininfoty);
