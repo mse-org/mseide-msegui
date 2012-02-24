@@ -870,13 +870,13 @@ end;
 procedure tsourcefo.saveactivepage(const newname: filenamety = '');
 begin
  if activepage <> nil then begin
-  if newname <> '' then begin
-   filechangenotifyer.removenotification(activepage.filepath);
-  end;
+//  if newname <> '' then begin
+//   filechangenotifyer.removenotification(activepage.filepath);
+//  end;
   activepage.save(newname);
-  if newname <> '' then begin
-   filechangenotifyer.addnotification(activepage.filepath,activepage.filetag);
-  end;
+//  if newname <> '' then begin
+//   filechangenotifyer.addnotification(activepage.filepath,activepage.filetag);
+//  end;
  end;
 end;
 

@@ -23,7 +23,7 @@ type
  filekindty = (fk_default,fk_file,fk_dir);
 
  filechangety = (fc_name,fc_attributes,fc_modtime,fc_accesstime,fc_ctime,
-            fc_size,fc_removed,fc_direntries);
+            fc_size,fc_removed,fc_direntries,fc_force);
  filechangesty = set of filechangety;
  checkfileeventty = procedure (const sender: tobject;
                                     const streaminfo: dirstreaminfoty;

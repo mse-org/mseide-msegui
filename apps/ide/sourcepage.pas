@@ -495,8 +495,9 @@ end;
 
 function tsourcepage.canchangenotify(const info: filechangeinfoty): boolean;
 begin
- result:= (info.info.extinfo1.modtime - fsavetime > 5.0/(24.0*3600)) or //> 5 sec
-                  checkfilechanged; 
+// result:= (info.info.extinfo1.modtime - fsavetime > 5.0/(24.0*3600)) or //> 5 sec
+//                  checkfilechanged; 
+ result:= (info.changed - [fc_force] <> []) or checkfilechanged();
  with projectoptions,o.texp do begin
   if result and making and o.copymessages and
           (filepath = msefileutils.filepath(messageoutputfile)) then begin
@@ -866,6 +867,9 @@ begin
  end;
  createbackupfile(newname,edit.filename,fbackupcreated,
                             projectoptions.e.backupfilecount);
+ if newname <> '' then begin
+  sourcefo.filechangenotifyer.removenotification(filepath);
+ end;
  finitialfilepath:= newname;
  try
   designnotifications.beforefilesave(idesigner(designer),newname);
@@ -873,6 +877,9 @@ begin
   application.handleexception(nil);
  end; 
  edit.savetofile(newname);
+ if newname <> '' then begin
+  sourcefo.filechangenotifyer.addnotification(filepath,filetag,true);
+ end;
  setsyntaxdef(newname);
  if getfileinfo(newname,info) then begin
   fsavetime:= info.extinfo1.modtime;

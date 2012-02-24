@@ -31,6 +31,7 @@ type
    infovorher: fileinfoty;
    info: fileinfoty;
    tag: integer;
+   force: boolean;
    changed: filechangesty;
   end;
 
@@ -53,7 +54,8 @@ type
    public
     constructor create(afd: integer; const apath: string); //owns the fd
     destructor destroy; override;
-    procedure addfile(root: boolean; const sender: tfilechangenotifyer; tag: integer;
+    procedure addfile(root: boolean; const sender: tfilechangenotifyer;
+                      const tag: integer; const aforce: boolean;
                       const ainfo: fileinfoty);
     procedure changed;
     property path: filenamety read fpath;
@@ -81,7 +83,8 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure addnotification(const sender: tfilechangenotifyer;
-                              const filename: filenamety; tag: integer);
+                              const filename: filenamety;
+                              const tag: integer; const force: boolean);
     procedure removenotification(const sender: tfilechangenotifyer;
                               const filename: filenamety; tag: integer);
     procedure clear;
@@ -105,7 +108,8 @@ type
    procedure receiveevent(const event: tobjectevent); override;
   public
    destructor destroy; override;
-   procedure addnotification(const filename: filenamety; atag: integer = 0);
+   procedure addnotification(const filename: filenamety; const atag: integer = 0;
+                             const force: boolean = false);
    procedure removenotification(const filename: filenamety; atag: integer = 0);
    procedure clear;
   published
@@ -212,7 +216,7 @@ begin
 end;
 
 procedure tdirinfo.addfile(root: boolean; const sender:tfilechangenotifyer;
-                                  tag: integer; const ainfo: fileinfoty);
+        const tag: integer; const aforce: boolean; const ainfo: fileinfoty);
 var
  int1: integer;
 begin
@@ -222,6 +226,7 @@ begin
   info.dir:= fpath;
   info.infovorher:= ainfo;
   info.tag:= tag;
+  info.force:= aforce;
   isroot:= root;
   owner:= sender;
  end;
@@ -261,6 +266,10 @@ begin
    end;
    if isroot and (info.changed = []) then begin
     include(info.changed,fc_direntries);
+   end;
+   if info.force then begin
+    include(info.changed,fc_force);
+    info.force:= false;
    end;
    if info.changed - notcheckflags <> [] then begin
     aevent:= tfilechangeevent.Create(ievent(owner),0);
@@ -416,7 +425,8 @@ end;
 {$endif}
 
 procedure tdirchangethread.addnotification(const sender: tfilechangenotifyer;
-                              const filename: filenamety; tag: integer);
+                  const filename: filenamety; const tag: integer;
+                                     const force: boolean);
 var
  int1: integer;
  apath: filenamety;
@@ -493,7 +503,7 @@ begin
   end;
  end;
  if dirinfo <> nil then begin
-  dirinfo.addfile(fname = '',sender,tag,info);
+  dirinfo.addfile(fname = '',sender,tag,force,info);
  end;
  unlock;
 end;
@@ -633,9 +643,9 @@ begin
 end;
 
 procedure tfilechangenotifyer.addnotification(const filename: filenamety;
-                                             atag: integer = 0);
+               const atag: integer = 0; const force: boolean = false);
 begin
- changethread.addnotification(self,filename,atag);
+ changethread.addnotification(self,filename,atag,force);
 end;
 
 procedure tfilechangenotifyer.removenotification(const filename: filenamety;
