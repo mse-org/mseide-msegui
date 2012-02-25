@@ -2796,9 +2796,10 @@ type
    function focusinpending: boolean;
    procedure checkapplicationactive;
    function winiddestroyed(const aid: winidty): boolean;
-   function eventloop(const amodalwindow: twindow; 
-                              const once: boolean = false): boolean;
+//   function eventloop(const amodalwindow: twindow; 
+//                              const once: boolean = false): boolean;
                  //true if actual modalwindow destroyed
+   procedure eventloop(const once: boolean = false);
    function beginmodal(const sender: twindow;
                                const showinfo: pshowinfoty): boolean;
                  //true if modalwindow destroyed
@@ -3355,7 +3356,7 @@ procedure designeventloop;
 begin
  if appinst <> nil then begin
   appinst.fdesigning:= true;
-  tinternalapplication(appinst).eventloop(nil);
+  tinternalapplication(appinst).eventloop({nil});
  end;
 end;
 
@@ -15352,8 +15353,8 @@ begin
  end;
 end;
 
-function tinternalapplication.eventloop(const amodalwindow: twindow;
-                                    const once: boolean = false): boolean;
+procedure tinternalapplication.eventloop({const amodalwindow: twindow;}
+                                    const once: boolean = false);
                    //true if actual modalwindow destroyed
                    
  function checkiflast(const akind: eventkindty): boolean;
@@ -15390,8 +15391,8 @@ function tinternalapplication.eventloop(const amodalwindow: twindow;
  end; //canuievent
  
 var
- modalinfo: modalinfoty;
- modalinfobefore: pmodalinfoty;
+// modalinfo: modalinfoty;
+// modalinfobefore: pmodalinfoty;
  event: tmseevent;
  int1: integer;
  bo1,bo2: boolean;
@@ -15404,7 +15405,7 @@ var
  ar2: eventarty;
  
 begin       //eventloop
- result:= false;
+// result:= false;
  if aps_looplocked in fstate then begin
   exit;
  end;
@@ -15413,17 +15414,18 @@ begin       //eventloop
  end;
 
  ftimertick:= false;
- fillchar(modalinfo,sizeof(modalinfo),0);
- if fcurrmodalinfo <> nil then begin
-  modalinfo.parent:= fcurrmodalinfo;
-  modalinfo.level:= fcurrmodalinfo^.level+1;
- end;
- fcurrmodalinfo:= @modalinfo;
+// fillchar(modalinfo,sizeof(modalinfo),0);
+// if fcurrmodalinfo <> nil then begin
+//  modalinfo.parent:= fcurrmodalinfo;
+//  modalinfo.level:= fcurrmodalinfo^.level+1;
+// end;
+// fcurrmodalinfo:= @modalinfo;
  waitcountbefore:= fwaitcount;
  if not once then begin
   fwaitcount:= 0;
  end;
  checkcursorshape;
+ {
  if amodalwindow <> nil then begin
   if fmodalwindow <> nil then begin
    setlinkedvar(fmodalwindow,tlinkedobject(modalinfo.modalwindowbefore));
@@ -15433,12 +15435,13 @@ begin       //eventloop
   setlinkedvar(amodalwindow,tlinkedobject(fmodalwindow));
   amodalwindow.internalactivate(false,true);
  end;
-
- while not modalinfo.modalend and not terminated and 
-                (fstate * [aps_exitloop,aps_cancelloop] = []) do begin 
+ }
+ while not ((fcurrmodalinfo <> nil) and fcurrmodalinfo^.modalend) and 
+      not terminated and (fstate * [aps_exitloop,aps_cancelloop] = []) do begin 
                                                  //main eventloop
   try
-   if (high(modalinfo.events) < 0) and (getevents = 0) then begin
+   if ((fcurrmodalinfo = nil) or (high(fcurrmodalinfo^.events) < 0)) and 
+                                                    (getevents = 0) then begin
     checkwindowstack;
     repeat
      bo1:= false;
@@ -15458,7 +15461,7 @@ begin       //eventloop
     end;
     if not gui_hasevent then begin
      try
-      if (amodalwindow = nil) and 
+      if (fcurrmodalinfo{amodalwindow} = nil) and 
                          not (aps_activewindowchecked in fstate) then begin
        include(fstate,aps_activewindowchecked);
        checkactivewindow;
@@ -15498,10 +15501,10 @@ begin       //eventloop
     break;
    end;
    getevents;
-   if high(modalinfo.events) >= 0 then begin
-    event:= modalinfo.events[0];
+   if (fcurrmodalinfo <> nil) and (high(fcurrmodalinfo^.events) >= 0) then begin
+    event:= fcurrmodalinfo^.events[0];
     tobjectevent1(event).fmodallevel:= -1;
-    deleteitem(pointerarty(modalinfo.events),0);
+    deleteitem(pointerarty(fcurrmodalinfo^.events),0);
    end
    else begin
     event:= tmseevent(eventlist.getfirst);
@@ -15729,9 +15732,14 @@ begin       //eventloop
        else begin
         if event is tobjectevent then begin
          with tobjectevent(event) do begin
-          int1:= modalinfo.level-modallevel;
+          if fcurrmodalinfo = nil then begin
+           int1:= -modallevel;
+          end
+          else begin
+           int1:= fcurrmodalinfo^.level-modallevel;
+          end;
           if (int1 > 0) and (modallevel >= 0) then begin
-           po2:= modalinfo.parent;
+           po2:= fcurrmodalinfo^.parent;
            for int1:= int1 - 2 downto 0 do begin
             po2:= po2^.parent;
            end;
@@ -15757,7 +15765,8 @@ begin       //eventloop
   end;
  end;
  exclude(fstate,aps_exitloop);
- result:= false;
+// result:= false;
+ (*
  if amodalwindow <> nil then begin
   if fmodalwindow <> nil then begin
    fmodalwindow.fmodalinfopo:= modalinfobefore{nil};
@@ -15776,17 +15785,24 @@ begin       //eventloop
    end;
   end;
  end;
+ *)
  fwaitcount:= waitcountbefore;
  if fwaitcount > 0 then begin
   mouse.shape:= cr_wait;
  end;
  checkcursorshape;
- if modalinfo.parent <> nil then begin
-  stackarray(pointer(modalinfo.events),pointerarty(modalinfo.parent^.events));
+ if (fcurrmodalinfo <> nil) and (fcurrmodalinfo^.parent <> nil) then begin
+  stackarray(pointer(fcurrmodalinfo^.events),
+                        pointerarty(fcurrmodalinfo^.parent^.events));
  end
  else begin
-  ar2:= modalinfo.events;
-  modalinfo.events:= nil;
+  if fcurrmodalinfo <> nil then begin
+   ar2:= fcurrmodalinfo^.events;
+   fcurrmodalinfo^.events:= nil;
+  end
+  else begin
+   ar2:= nil;
+  end;
   for int1:= 0 to high(ar2) do begin
    if ar2[int1] is tobjectevent then begin
     with tobjectevent1(ar2[int1]) do begin
@@ -15799,7 +15815,7 @@ begin       //eventloop
    end;
   end;
  end;
- fcurrmodalinfo:= modalinfo.parent;
+// fcurrmodalinfo:= modalinfo.parent;
 end;
 
 function tinternalapplication.beginmodal(const sender: twindow;
@@ -15809,7 +15825,10 @@ var
  window1: twindow;
  bo1: boolean;
  modalwidgetbefore,focusedwidgetbefore: twidget;
+ modalinfo: modalinfoty;
+ modalinfobefore: pmodalinfoty;
 begin
+ result:= false;
  exclude(fstate,aps_cancelloop);
  window1:= nil;
  if (factivewindow <> nil) and (factivewindow <> sender) then begin
@@ -15819,6 +15838,20 @@ begin
  end;
  modalwidgetbefore:= nil;
  focusedwidgetbefore:= nil;
+ fillchar(modalinfo,sizeof(modalinfo),0);
+ if fcurrmodalinfo <> nil then begin
+  modalinfo.parent:= fcurrmodalinfo;
+  modalinfo.level:= fcurrmodalinfo^.level+1;
+ end;
+ fcurrmodalinfo:= @modalinfo;
+ if fmodalwindow <> nil then begin
+  setlinkedvar(fmodalwindow,tlinkedobject(modalinfo.modalwindowbefore));
+ end;
+ modalinfobefore:= sender.fmodalinfopo;
+ sender.fmodalinfopo:= @modalinfo;
+ setlinkedvar(sender,tlinkedobject(fmodalwindow));
+// amodalwindow.internalactivate(false,true);
+
  try
   with sender do begin
    inc(fmodallevel);
@@ -15849,7 +15882,7 @@ begin
   sender.activate;  
   if fstate * [aps_cancelloop,aps_exitloop] = [] then begin
    try
-    result:= eventloop(sender);
+    eventloop;
    finally
     with showinfo^ do begin
      if (widget <> nil) then begin
@@ -15879,6 +15912,23 @@ begin
   setlinkedvar(nil,tmsecomponent(modalwidgetbefore));
   setlinkedvar(nil,tmsecomponent(focusedwidgetbefore));
   exclude(fstate,aps_exitloop);
+  if fmodalwindow <> nil then begin
+   fmodalwindow.fmodalinfopo:= modalinfobefore{nil};
+  end
+  else begin
+   result:= true;
+  end; 
+  if modalinfo.modalwindowbefore <> nil then begin
+   setlinkedvar(modalinfo.modalwindowbefore,tlinkedobject(fmodalwindow));
+   setlinkedvar(nil,tlinkedobject(modalinfo.modalwindowbefore));
+  end
+  else begin
+   if fmodalwindow <> nil then begin
+    setlinkedvar(nil,tlinkedobject(fmodalwindow));
+    //no lower modalwindow alive
+   end;
+  end;
+  fcurrmodalinfo:= modalinfo.parent;
  end;
 end;
 
@@ -16277,7 +16327,7 @@ end;
 
 procedure tinternalapplication.doeventloop(const once: boolean);
 begin
- eventloop(nil,once);
+ eventloop(once);
 end;
 
 
@@ -16481,7 +16531,7 @@ procedure tguiapplication.eventloop(const once: boolean = false);
 begin
  inc(feventlooping);
  try
-  tinternalapplication(self).eventloop(nil,once);
+  tinternalapplication(self).eventloop(once);
  finally
   dec(feventlooping);
  end;
