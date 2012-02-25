@@ -350,7 +350,8 @@ begin
   int1:= (fsiginpo + 1) and sigpuffermask;
   if int1 <> fsigoutpo then begin
    fsigqueue[fsiginpo]:= afd;
-   fsiginpo:= int1;
+//   fsiginpo:= int1;
+   interlockedexchange(fsiginpo,int1);
   end;
   sempost;
  end;
@@ -411,10 +412,10 @@ begin
  while not terminated  do begin
   semwait;
   while not terminated and not (application.terminated) and
-                      (fsiginpo <> fsigoutpo) do begin
-   dochange(fsigqueue[fsigoutpo]);
-   int1:= (fsigoutpo + 1) and sigpuffermask;
-   fsigoutpo:= int1;
+                                     (fsiginpo <> fsigoutpo) do begin
+   int1:= fsigoutpo;
+   interlockedexchange(fsigoutpo,(fsigoutpo + 1) and sigpuffermask);
+   dochange(fsigqueue[int1]);
   end;
   if not terminated then begin
    sleep(500);
