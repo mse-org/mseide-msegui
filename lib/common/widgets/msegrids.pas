@@ -13126,83 +13126,87 @@ var
  int1,int2: integer;
  offset: pointty;
  apos: pointty;
+ ar1: integerarty;
 begin
  killrepeater;
- decodepickobject(sender.currentobjects[0],kind,cell,col1,fixrow);
- offset:= sender.pickoffset;
- apos:= sender.pos;
- case kind of
-  pok_datacolsize,pok_fixcolsize: begin
-   if (kind = pok_fixcolsize) and (cell.col <= fixcols.ffirstopposite) or 
-      (kind = pok_datacolsize) and 
-                            (cell.col >= fdatacols.ffirstopposite) then begin
-    col1.width:= col1.width - offset.x;
-   end
-   else begin
-    int1:= offset.x;
-    if co_nohscroll in col1.foptions then begin
-     if col1.fend + int1 > fdatarect.x + fdatarect.cx then begin
-      int1:= fdatarect.x + fdatarect.cx - col1.fend;
+ ar1:= sender.currentobjects;
+ if ar1 <> nil then begin
+  decodepickobject(ar1[0],kind,cell,col1,fixrow);
+  offset:= sender.pickoffset;
+  apos:= sender.pos;
+  case kind of
+   pok_datacolsize,pok_fixcolsize: begin
+    if (kind = pok_fixcolsize) and (cell.col <= fixcols.ffirstopposite) or 
+       (kind = pok_datacolsize) and 
+                             (cell.col >= fdatacols.ffirstopposite) then begin
+     col1.width:= col1.width - offset.x;
+    end
+    else begin
+     int1:= offset.x;
+     if co_nohscroll in col1.foptions then begin
+      if col1.fend + int1 > fdatarect.x + fdatarect.cx then begin
+       int1:= fdatarect.x + fdatarect.cx - col1.fend;
+      end;
      end;
-    end;
-    if co_fill in col1.options then begin
-     for int2:= col1.index to datacols.count - 1 do begin
-      with datacols[int2] do begin
-       if options * [co_fixwidth,co_fill,co_invisible] = [] then begin
-        width:= width - int1;
-        int1:= 0;
-        break;
+     if co_fill in col1.options then begin
+      for int2:= col1.index to datacols.count - 1 do begin
+       with datacols[int2] do begin
+        if options * [co_fixwidth,co_fill,co_invisible] = [] then begin
+         width:= width - int1;
+         int1:= 0;
+         break;
+        end;
        end;
       end;
      end;
+     col1.width:= col1.width + int1;
     end;
-    col1.width:= col1.width + int1;
    end;
-  end;
-  pok_fixrowsize: begin
-   if cell.row <= fixrows.ffirstopposite then begin
-    fixrow.height:= fixrow.height - offset.y;
-   end
-   else begin
-    fixrow.height:= fixrow.height + offset.y;
-   end;
-  end;
-  pok_datarowsize: begin
-   if og_rowheight in foptionsgrid then begin
-    if ss_double in sender.shiftstate then begin
-     rowheight[cell.row]:= 0;
+   pok_fixrowsize: begin
+    if cell.row <= fixrows.ffirstopposite then begin
+     fixrow.height:= fixrow.height - offset.y;
     end
     else begin
-     int1:= fdatacols.frowstate.currentrowheight(cell.row);
-     rowheight[cell.row]:= int1 + offset.y;
+     fixrow.height:= fixrow.height + offset.y;
     end;
-   end
-   else begin
-    datarowheight:= fdatarowheight + offset.y;
+   end;
+   pok_datarowsize: begin
+    if og_rowheight in foptionsgrid then begin
+     if ss_double in sender.shiftstate then begin
+      rowheight[cell.row]:= 0;
+     end
+     else begin
+      int1:= fdatacols.frowstate.currentrowheight(cell.row);
+      rowheight[cell.row]:= int1 + offset.y;
+     end;
+    end
+    else begin
+     datarowheight:= fdatarowheight + offset.y;
+    end;
+   end;
+   pok_datacol: begin
+    //cellkind:= 
+    cellatpos(makepoint(apos.x,fdatarect.y),cell1);
+    if (cell1.col >= 0) and (cell.col <> cell1.col) and not 
+      ((co_nohscroll in tdatacol(fdatacols.fitems[cell1.col]).options) xor 
+      (co_nohscroll in tdatacol(fdatacols.fitems[cell.col]).options)) then begin
+     movecol(cell.col,cell1.col);
+    end
+    else begin
+    end;
+   end;
+   pok_datarow: begin
+ //   cellkind:= 
+    cellatpos(makepoint(fdatarect.x,apos.y),cell1);
+    if (cell1.row >= 0) and (cell.row <> cell1.row) then begin
+     moverow(cell.row,cell1.row);
+    end
+    else begin
+    end;
    end;
   end;
-  pok_datacol: begin
-   //cellkind:= 
-   cellatpos(makepoint(apos.x,fdatarect.y),cell1);
-   if (cell1.col >= 0) and (cell.col <> cell1.col) and not 
-     ((co_nohscroll in tdatacol(fdatacols.fitems[cell1.col]).options) xor 
-     (co_nohscroll in tdatacol(fdatacols.fitems[cell.col]).options)) then begin
-    movecol(cell.col,cell1.col);
-   end
-   else begin
-   end;
-  end;
-  pok_datarow: begin
-//   cellkind:= 
-   cellatpos(makepoint(fdatarect.x,apos.y),cell1);
-   if (cell1.row >= 0) and (cell.row <> cell1.row) then begin
-    moverow(cell.row,cell1.row);
-   end
-   else begin
-   end;
-  end;
+  designchanged;
  end;
- designchanged;
 end;
 
 procedure tcustomgrid.cancelpickmove(const sender: tobjectpicker);
