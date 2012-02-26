@@ -75,6 +75,7 @@ type
   colorline: colorty;
   imageextend: sizety; //variable
   imageextra: sizety;  //variable
+  treelevelshift: integer; //variable
  end;
  plistitemlayoutinfoty = ^listitemlayoutinfoty;
 
@@ -152,7 +153,8 @@ type
    procedure drawcell(const acanvas: tcanvas); virtual;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    property index: integer read findex;
-   procedure setupeditor(const editor: tinplaceedit; const font: tfont); virtual;
+   procedure setupeditor(const editor: tinplaceedit;
+                       const font: tfont; const notext: boolean); virtual;
 
    procedure dostatupdate(const filer: tstatfiler);
    procedure dostatread(const reader: tstatreader); virtual;
@@ -309,7 +311,8 @@ type
    procedure sort(const sortfunc: arraysortcomparety;
                            const recursive: boolean = false); overload;
    property count: integer read fcount;
-   procedure setupeditor(const editor: tinplaceedit; const font: tfont); override;
+   procedure setupeditor(const editor: tinplaceedit;
+                          const font: tfont; const notext: boolean); override;
    property rootexpanded: boolean read getrootexpanded write setrootexpanded;
    property expanded: boolean read getexpanded write setexpanded;
    property items[const aindex: integer]: ttreelistitem read getitems; default;
@@ -690,8 +693,10 @@ var
  int1: integer;
 begin
 //toto: check captionpos and the like
- if fimagelist <> nil then begin
-  with alayoutinfo do begin
+ with alayoutinfo do begin
+  ainfo.dest.cx:= ainfo.dest.cx - treelevelshift;
+  ainfo.clip.cx:= ainfo.clip.cx - treelevelshift;
+  if fimagelist <> nil then begin
    int1:= imageextend.cx;
    with ainfo.dest do begin
     x:= x+int1;
@@ -723,12 +728,12 @@ end;
 procedure tlistitem.drawcell(const acanvas: tcanvas);
 var
  info: drawtextinfoty;
- pt1: pointty;
+// pt1: pointty;
  po1: pcellinfoty;
  layoutinfopo: plistitemlayoutinfoty;
  size1: sizety;
 begin
- pt1:= acanvas.origin;
+// pt1:= acanvas.origin;
  po1:=  pcellinfoty(acanvas.drawinfopo);
  layoutinfopo:= fowner.fintf.getlayoutinfo(po1);
  if not po1^.calcautocellsize then begin
@@ -764,6 +769,13 @@ begin
   end
   else begin
    drawtext(acanvas,info);
+   if not rectinrect(info.res,info.dest) then begin
+    include(fstate1,ns1_captionclipped);
+   end
+   else begin
+    exclude(fstate1,ns1_captionclipped);
+   end;
+   {
    with info.res do begin
     x:= x + captioninnerrect.x - info.dest.x;
     y:= y + captioninnerrect.y - info.dest.y;
@@ -777,6 +789,7 @@ begin
    else begin
     exclude(fstate1,ns1_captionclipped);
    end;
+   }
   end;
  end;
 end;
@@ -805,7 +818,8 @@ begin
  end;
 end;
 
-procedure tlistitem.setupeditor(const editor: tinplaceedit; const font: tfont);
+procedure tlistitem.setupeditor(const editor: tinplaceedit; const font: tfont;
+                                             const notext: boolean);
 var
  info1: drawtextinfoty;
  po1: plistitemlayoutinfoty;
@@ -818,7 +832,12 @@ begin
    tabulators:= nil;
    dest:= captioninnerrect;
    clip:= captionrect;
-   text.text:= fcaption;
+   if not notext then begin
+    text.text:= fcaption;
+   end
+   else begin
+    text.text:= editor.text;
+   end;
    flags:= textflags;
    
    updatecaption(po1^,info1);
@@ -2323,6 +2342,7 @@ var
  cellheight{,boxy}: integer;
 
 begin
+ alayoutinfo.treelevelshift:= levelshift;
  if acanvas <> nil then begin
   if (fcount = 0) and not (ns_subitems in fstate) then begin
    if (ns_drawemptybox in fstate) or (no_drawemptybox in fowner.foptions) then begin
@@ -2341,8 +2361,8 @@ begin
    end;
   end;
   setlength(lines,ftreelevel+2); //last line can be doubled + horz. line
-  acanvas.move(makepoint(levelshift,0));
   with fowner,alayoutinfo do begin
+   acanvas.move(makepoint(treelevelshift,0));
    cellheight:= cellsize.cy;
    seg.a.x:= (expandboxrect.x + expandboxrect.cx) div 2;
    seg.a.y:= 0;
@@ -2405,9 +2425,10 @@ begin
  inherited;
 end;
 
-procedure ttreelistitem.setupeditor(const editor: tinplaceedit; const font: tfont);
+procedure ttreelistitem.setupeditor(const editor: tinplaceedit;
+                   const font: tfont; const notext: boolean);
 var
- int1: integer;
+// int1: integer;
  info1: drawtextinfoty;
  po1: plistitemlayoutinfoty;
 begin
@@ -2420,13 +2441,22 @@ begin
     tabulators:= nil;
     dest:= captioninnerrect;
     clip:= captionrect;
-    text.text:= fcaption;
+    if not notext then begin
+     text.text:= fcaption;
+    end
+    else begin
+     text.text:= editor.text;
+    end;
     flags:= textflags;
+    inc(dest.x,treelevelshift);
+    inc(clip.x,treelevelshift);
+    {
     int1:= levelshift;
     inc(dest.x,int1);
     dec(dest.cx,int1);
     inc(clip.x,int1);
     dec(clip.cx,int1);
+    }
     updatecaption(po1^,info1);
     editor.setup(text.text,editor.curindex,false,dest,clip,nil,nil,font);
    end;

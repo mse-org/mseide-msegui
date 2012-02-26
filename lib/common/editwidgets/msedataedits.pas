@@ -232,7 +232,8 @@ type
    function gridcol: integer;
    function griddata: tdatalist;
    property gridintf: iwidgetgrid read fgridintf;
-   function textclipped(const arow: integer; out acellrect: rectty): boolean; overload;
+   function textclipped(const arow: integer;
+                       out acellrect: rectty): boolean; virtual; overload;
    function textclipped(const arow: integer): boolean; overload;
 
    function checkvalue(const quiet: boolean = false): boolean; virtual;

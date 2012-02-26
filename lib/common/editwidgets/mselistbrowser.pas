@@ -549,6 +549,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function textclipped(const arow: integer;
+                       out acellrect: rectty): boolean; override; overload;
    function getvaluetext: msestring;
    procedure setvaluetext(var avalue: msestring);
    function item: tlistitem;
@@ -2793,7 +2795,7 @@ begin
   else begin
    bo1:= des_updatelayout in fstate;
    include(fstate,des_updatelayout);
-   fvalue.setupeditor(feditor,geteditfont);
+   fvalue.setupeditor(feditor,geteditfont,true);
    if not bo1 then begin
     exclude(fstate,des_updatelayout);
    end;
@@ -3226,6 +3228,34 @@ end;
 procedure titemedit.datalistdestroyed;
 begin
  fitemlist:= nil;
+end;
+
+function titemedit.textclipped(const arow: integer;
+               out acellrect: rectty): boolean;
+var
+ cell1: gridcoordty;
+ grid1: tcustomgrid;
+ bo1: boolean;
+begin
+ checkgrid;
+ with twidgetcol1(fgridintf.getcol) do begin
+  grid1:= grid;
+  cell1.row:= arow;
+  cell1.col:= colindex;
+  result:= grid1.isdatacell(cell1);
+  if result then begin
+   acellrect:= grid1.clippedcellrect(cell1,cil_inner);
+   if focused and (arow = grid1.row) then begin
+    result:= feditor.lasttextclipped;
+   end
+   else begin
+    result:= ns1_captionclipped in tlistitem1(fitemlist[arow]).fstate1;
+   end;
+  end
+  else begin
+   acellrect:= nullrect;
+  end;
+ end;
 end;
 {
 function titemedit.actualcursor(const apos: pointty): cursorshapety;

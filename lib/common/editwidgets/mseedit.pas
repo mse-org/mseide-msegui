@@ -1562,7 +1562,7 @@ end;
 procedure tcustomedit.showhint(var info: hintinfoty);
 begin
  if (oe_hintclippedtext in foptionsedit) and 
-                      editor.textclipped and getshowhint then begin
+                      editor.lasttextclipped and getshowhint then begin
   info.caption:= text;
  end;
  inherited;
