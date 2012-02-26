@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -128,7 +128,7 @@ type
                     dos_topbuttonclicked,dos_backgroundbuttonclicked,
                     dos_lockbuttonclicked,
                     dos_moving,
-                    {dos_proprefvalid,}dos_showed);
+                    {dos_proprefvalid,}dos_showed,dos_xorpic);
  dockstatesty = set of dockstatety;
 
  splitdirty = (sd_none,sd_vert,sd_horz,sd_tabed);
@@ -3042,7 +3042,7 @@ var
 var
  canvas1: tcanvas;
  
- procedure drawxorpic;
+ procedure drawxorpic(const ashow: boolean);
  var
   rect1: rectty;
  begin
@@ -3061,8 +3061,21 @@ var
    end;
    canvas1.fillxorrect(rect1,stockobjects.bitmaps[stb_dens50]);
   end;
+  if ashow then begin
+   include(fdockstate,dos_xorpic);
+  end
+  else begin
+   exclude(fdockstate,dos_xorpic);
+  end;
  end;
- 
+
+const
+ resetmousedockstate =
+        [dos_closebuttonclicked,dos_maximizebuttonclicked,
+            dos_normalizebuttonclicked,dos_minimizebuttonclicked,
+            dos_fixsizebuttonclicked,dos_topbuttonclicked,
+            dos_backgroundbuttonclicked,dos_lockbuttonclicked,dos_moving];
+             
 begin
  inherited;
  with info do begin
@@ -3074,10 +3087,15 @@ begin
            widget1,widget1.container); //widget origin
    case info.eventkind of
     ek_mouseleave,ek_clientmouseleave: begin
-     if not (ds_clicked in fstate) then begin
+     if not (ds_clicked in fstate) or 
+                                  (info.eventkind = ek_mouseleave) then begin
       restorepickshape;
       fsizeindex:= -1;
-      exclude(fdockstate,dos_moving);
+      if dos_xorpic in fdockstate then begin
+       drawxorpic(false); //remove pic
+      end;
+      exclude(fstate,ds_clicked);
+      fdockstate:= fdockstate - resetmousedockstate;
      end;
     end;
     ek_mousemove: begin
@@ -3087,16 +3105,16 @@ begin
      end
      else begin
       if fsplitdir = sd_vert then begin
-       drawxorpic;   //remove pic
+       drawxorpic(false);   //remove pic
        fsizeoffset:= pos.x - fpickpos.x;
        checksizeoffset;
-       drawxorpic;   //draw pic
+       drawxorpic(true);   //draw pic
       end;
       if fsplitdir = sd_horz then begin
-       drawxorpic;  //remove pic
+       drawxorpic(false);  //remove pic
        fsizeoffset:= pos.y - fpickpos.y;
        checksizeoffset;
-       drawxorpic;  //draw pic
+       drawxorpic(true);  //draw pic
       end;
      end;
     end;
@@ -3113,7 +3131,7 @@ begin
        else begin
         exclude(fdockstate,dos_moving);
        end;
-       drawxorpic;
+       drawxorpic(true);
       end;
       if not (ss_shift in shiftstate) then begin
        case checkbuttonarea(pos) of
@@ -3131,6 +3149,9 @@ begin
     end;
     ek_buttonrelease: begin
      restorepickshape;
+     if dos_xorpic in fdockstate then begin
+      drawxorpic(false); //remove pic
+     end;
      if fsizeindex >= 0 then begin
       checksizeoffset;
       if high(ar1) > 0 then begin
@@ -3186,11 +3207,7 @@ begin
        end;
       end;
      end;
-     fdockstate:= fdockstate - 
-        [dos_closebuttonclicked,dos_maximizebuttonclicked,
-            dos_normalizebuttonclicked,dos_minimizebuttonclicked,
-            dos_fixsizebuttonclicked,dos_topbuttonclicked,
-            dos_backgroundbuttonclicked,dos_lockbuttonclicked,dos_moving];
+     fdockstate:= fdockstate - resetmousedockstate;
     end;
    end;
   end;
