@@ -196,7 +196,7 @@ type
          aps_terminating,aps_deinitializing,
          aps_shortcutting,aps_clearkeyhistory,
          aps_waitstarted,aps_waitcanceled,aps_waitterminated,aps_waitok,
-         aps_waitidlelock,aps_eventflushing);
+         aps_waitidlelock,aps_eventflushing,aps_processmessages);
  applicationstatesty = set of applicationstatety;
  
  synchronizeprocty = procedure(const adata: pointer);
@@ -1503,15 +1503,21 @@ end;
 procedure tcustomapplication.processmessages;
 var
  int1: integer;
+ bo1: boolean;
 begin
  if not ismainthread then begin
   raise exception.create('processmessages must be called from main thread.');
  end;
+ bo1:= aps_processmessages in fstate;
+ include(fstate,aps_processmessages);
  int1:= unlockall;
  try
   doeventloop(true);
  finally
   relockall(int1);
+  if not bo1 then begin
+   exclude(fstate,aps_processmessages);
+  end;
  end;
 end;
 

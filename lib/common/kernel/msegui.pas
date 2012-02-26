@@ -15383,7 +15383,7 @@ procedure tinternalapplication.eventloop({const amodalwindow: twindow;}
 
  function canuievent: boolean;
  begin
-  result:= not once or (fwaitcount = 0);
+  result:= not once or (fwaitcount = 0) or (aps_processmessages in fstate);
   if not result and (fmousewidget <> nil) then begin
    capturemouse(nil,false);
    setmousewidget(nil);
