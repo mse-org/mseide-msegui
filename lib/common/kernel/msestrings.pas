@@ -355,6 +355,9 @@ function startsstr(const substring,s: string): boolean; overload;
 function msestartsstr(substring,s: pmsechar): boolean; overload;
 function msestartsstr(const substring,s: msestring): boolean; overload;
 
+function msestartsstrcaseinsensitive(substring,s: pmsechar): boolean;
+        //substring must be uppercase, ASCII caseinsensitve
+
 function isnullstring(const s: ansistring): boolean;
 function isemptystring(const s: pchar): boolean; overload;
 function isemptystring(const s: pmsechar): boolean; overload;
@@ -380,8 +383,8 @@ function mseuppercase(const s: msestring): msestring; overload;
 function mseuppercase(const s: msestringarty): msestringarty; overload;
 
 //ascii only
-function charuppercase(const c: char): char; overload;
-function charuppercase(const c: msechar): msechar; overload;
+function charuppercase(const c: char): char; overload; inline;
+function charuppercase(const c: msechar): msechar; overload; inline;
 function struppercase(const s: string): string; overload;
 function struppercase(const s: msestring): msestring; overload;
 function struppercase(const s: lmsestringty): msestring; overload;
@@ -4581,6 +4584,23 @@ begin
  if not result then begin
   if (substring <> nil) and (s <> nil) then begin
    while (substring^ = s^) and (substring^ <> #0) do begin
+    inc(substring);
+    inc(s);
+   end;
+   result:= substring^= #0;
+  end
+  else begin
+   result:= isemptystring(substring) and isemptystring(s);
+  end;
+ end;
+end;
+
+function msestartsstrcaseinsensitive(substring: pmsechar; s: pmsechar): boolean;
+begin
+ result:= substring = s;
+ if not result then begin
+  if (substring <> nil) and (s <> nil) then begin
+   while (substring^ = charuppercase(s^)) and (substring^ <> #0) do begin
     inc(substring);
     inc(s);
    end;

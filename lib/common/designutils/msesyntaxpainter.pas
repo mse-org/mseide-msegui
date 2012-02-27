@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -221,7 +221,8 @@ begin
  end;
 end;
 
-procedure markstartchars(const starttokens: starttokenarty; var chars: charsty); overload;
+procedure markstartchars(const starttokens: starttokenarty;
+             var chars: charsty; const caseinsensitive: boolean); overload;
 var
  int1: integer;
 begin
@@ -231,6 +232,9 @@ begin
   end
   else begin
    include(chars,char(starttokens[int1].token[1]));
+   if caseinsensitive then begin
+    include(chars,lowerchars[char(starttokens[int1].token[1])]);
+   end;
   end
  end;
 end;
@@ -547,7 +551,12 @@ begin
                (char(byte(wpo1^)) in scopestartchars) then begin
                        //starttoken suchen
         for int1:= 0 to high(scopeinfopo^.starttokens) do begin
-         if msestartsstr(pointer(scopeinfopo^.starttokens[int1].token),wpo1) then begin
+         if caseinsensitive and 
+                msestartsstrcaseinsensitive(
+                 pointer(scopeinfopo^.starttokens[int1].token),wpo1) or
+           not caseinsensitive and 
+                msestartsstr(
+                 pointer(scopeinfopo^.starttokens[int1].token),wpo1) then begin
           bo1:= false;
           int2:= length(scopeinfopo^.starttokens[int1].token);
           if scopeinfopo^.starttokens[int1].fontinfonr <> 0 then begin
@@ -770,7 +779,7 @@ type
               tn_scope,tn_endtokens,tn_keywords,tn_jumptokens,tn_calltokens,
               tn_return);
 const
- tn_canmultiple = [tn_keyworddefs];
+ tn_canmultiple = [tn_keyworddefs{,tn_jumptokens,tn_calltokens,tn_endtokens}];
 
  nonetoken = 'NONE';
  tokens: array[tokennrty] of string = (
@@ -804,7 +813,7 @@ var
   with syntaxdefpo^ do begin
    if aktscopeinfo < length(scopeinfos) then begin
     with scopeinfos[aktscopeinfo] do begin
-     markstartchars(starttokens,scopestartchars);
+     markstartchars(starttokens,scopestartchars,caseinsensitive);
      for int1:= 0 to high(endtokens) do begin
       markstartchars(endtokens[int1].token,scopeendchars);
      end;
@@ -933,13 +942,13 @@ var
  str1: string;
  keys: tpointeransistringhashdatalist;
  scopenames,stylenames: tpointeransistringhashdatalist;
- int1,int2,int3: integer;
+ int1,int2,int3,int4: integer;
  lstr1,lstr2,lstr3: lstringty;
  global: boolean;
  wstrar1: msestringarty;
  bo1: boolean;
  aktkeywordfontinfonr: integer;
- 
+ ar1: stringarty; 
 
 begin
  result:= -1;
@@ -1102,21 +1111,31 @@ begin
        end;
        tn_calltokens,tn_jumptokens: begin
         bo1:= nextquotedstring(lstr1,str1);
-        if not bo1 then begin
+        if not bo1 then begin        //at least one
          invalidstring;
+        end;
+        setlength(ar1,1);
+        ar1[0]:= str1;
+        while nextquotedstring(lstr1,str1) do begin
+         additem(ar1,str1);
         end;
         nextword(lstr1,lstr3);
         int1:= findname(scopenames,lstr3);
+        int3:= length(scopeinfos[aktscopeinfo].starttokens);
         setlength(scopeinfos[aktscopeinfo].starttokens,
-                     length(scopeinfos[aktscopeinfo].starttokens)+1);
+                     int3+length(ar1));
         nextword(lstr1,lstr3);
         int2:= findname(stylenames,lstr3);
-        with scopeinfos[aktscopeinfo].
-         starttokens[high(scopeinfos[aktscopeinfo].starttokens)] do begin
-         token:= str1;
-         fontinfonr:= int2;
-         scopenr:= int1;
-         call:= akttoken = tn_calltokens;
+        for int4:= int3 to int3 + high(ar1) do begin
+         with scopeinfos[aktscopeinfo].starttokens[int4] do begin
+          token:= ar1[int4-int3];
+          if caseinsensitive then begin
+           token:= struppercase(token);
+          end;
+          fontinfonr:= int2;
+          scopenr:= int1;
+          call:= akttoken = tn_calltokens;
+         end;
         end;
        end;
        tn_endtokens: begin

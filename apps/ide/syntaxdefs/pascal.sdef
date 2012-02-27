@@ -46,17 +46,7 @@ scope string string
 
 scope string1 string
  jumptokens
-  '$' string1
-  '0' string1
-  '1' string1
-  '2' string1
-  '3' string1
-  '4' string1
-  '5' string1
-  '6' string1
-  '7' string1
-  '8' string1
-  '9' string1
+  '$' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' 'A' 'B' 'C' 'D' 'E' 'F' string1
  return
  
 scope main
