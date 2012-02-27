@@ -3235,7 +3235,7 @@ function titemedit.textclipped(const arow: integer;
 var
  cell1: gridcoordty;
  grid1: tcustomgrid;
- bo1: boolean;
+// bo1: boolean;
 begin
  checkgrid;
  with twidgetcol1(fgridintf.getcol) do begin
