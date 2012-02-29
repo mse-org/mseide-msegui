@@ -1,3 +1,4 @@
+#for nested {} comments
 caseinsensitive
 styles
  default ''
@@ -5,14 +6,15 @@ styles
  comment 'i' cl_dkblue
  option 'b' cl_dkblue
  string '' cl_dkblue
+ number '' cl_dkred
 
-keyworddefs pascal
+keyworddefs pascal 
  'ABSOLUTE' 'ABSTRACT' 'AND' 'ARRAY' 'AS' 'ASM' 'ASSEMBLER' 'BEGIN'
  'BREAK' 'CASE' 'CDECL' 'CLASS' 'CONST' 'CONSTRUCTOR'
- 'CONTINUE' 'DEFAULT' 'DESTRUCTOR' 'DISPOSE' 'DIV' 'DO' 'DOWNTO'
+ 'CONTINUE' 'DEFAULT' 'DEPRECATED' 'DESTRUCTOR' 'DISPOSE' 'DIV' 'DO' 'DOWNTO'
  'ELSE' 'END' 'EXCEPT' 'EXIT' 'EXPORT' 'EXPORTS' 'EXTERNAL' 'FAIL'
  'FALSE' 'FAR' 'FILE' 'FINALIZATION' 'FINALLY' 'FOR' 'FORWARD' 'FUNCTION' 'GOTO' 'IF'
- 'IMPLEMENTATION' 'IN' 'INDEX' 'INHERITED'
+ 'IMPLEMENTATION' 'IMPLEMENTS' 'IN' 'INDEX' 'INHERITED'
  'INITIALIZATION' 'INLINE' 'INTERFACE' 'INTERRUPT' 'IS' 'LABEL' 'LIBRARY'
  'MOD' 'NEW' 'NIL' 'NODEFAULT' 'NOT' 'OBJECT'
  'OF' 'ON' 'OPERATOR' 'OR' 'OUT' 'OTHERWISE' 'PACKED' 'POPSTACK' 'PRIVATE' 
@@ -46,21 +48,38 @@ scope string string
  endtokens
   '''' ''
 
-scope string1 string
+scope hexnumber
  jumptokens
-  '$' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' 'A' 'B' 'C' 'D' 'E' 'F' string1
+  '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' 'A' 'B' 'C' 'D' 'E' 'F' hexnumber
  return
 
+scope number
+ jumptokens
+  '$' hexnumber
+  '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' number
+ return
+
+scope word
+ jumptokens
+  '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' 
+  'A' 'B' 'C' 'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M' 'N' 'O' 'P' 
+  'Q' 'R' 'S' 'T' 'U' 'V' 'W' 'X' 'Y' 'Z' '_' word
+ return
+ 
 scope main
 
  keywords words
   pascal
 
- calltokens
+ calltokens  
   '{$' option
   '{' comment1
   '//' comment2
   '(*' comment3
   '''' string
-  '#' string1
-
+  '#' number string
+  
+#  '$' hexnumber number
+#  '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' number number
+#  'A' 'B' 'C' 'D' 'E' 'F' 'G' 'H' 'I' 'J' 'K' 'L' 'M' 'N' 'O' 'P'
+#  'Q' 'R' 'S' 'T' 'U' 'V' 'W' 'X' 'Y' 'Z' '_' word

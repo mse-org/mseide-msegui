@@ -9,10 +9,67 @@
 }
 unit msesyntaxpainter;
 
-{
+(*
+
+sdef file =
+{globaldefinition}
+{scope}
+
+globaldefinition = CASEINSENSITIVE | keywordchars | addkeywordchars |
+     keyworddefs | editorcolors | styles
+
+keywordchars =
+KEYWORDCHARS {string} newline
+//default = A..Z, a..z, 0..9,_
+
+string = 
+'{character}'
+
+character =
+ASCII-character
+
+keyworddefs =
+KEYWORDDEFS keyworddefsname newline
+{{keyword} newline}
+
+editorcolors =
 COLORS [[[fontcolor [backgroundcolor [statementcolor]]]
-                      cl_default for project options settings
-}
+//   cl_default for project options settings
+
+styles =
+STYLE newline
+{stylename styledef newline}
+
+styledef =
+[stylestring [fontcolor [colorbackground]]]
+
+stylestring =
+'[b][i][u][s]'
+//b = bold i = italic u = underscore s = strikeout
+
+scope =
+SCOPE scopename [stylename] newline
+{localdefinition}
+
+localdefinition =
+keywords | calltokens | jumptokens | endtokens | RETURN newline
+
+keywords =
+KEYWORDS keyworddefsname newline
+
+calltokens =
+CALLTOKENS newline
+{{string} scopename newline}
+
+jumptokens =
+JUMPTOKENS newline
+{{string} scopename newline}
+
+endtokens =
+ENDTOKENS newline
+{{string} [stylename] newline}
+
+*)
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
 
@@ -28,8 +85,13 @@ const
  defaultlinesperslice = 100;
 
 type
+ tokencharsty = set of char;
+
  starttokenty = record
   token: msestring;
+  hastokenchars: boolean;
+  tokenchars: tokencharsty;
+  shortcircuit: boolean;
   fontinfonr: integer;
   scopenr: integer;
   call: boolean;
@@ -39,6 +101,8 @@ type
 
  endtokenty = record
   token: msestring;
+  hastokenchars: boolean;
+  tokenchars: tokencharsty;
   fontinfonr: integer;
  end;
  endtokenpoty = ^endtokenty;
@@ -57,6 +121,7 @@ type
   hasendtokens: boolean;
   return: boolean;
   fontinfonr: integer;
+  currfontinfonr: integer;
  end;
  scopeinfopoty = ^scopeinfoty;
  scopeinfoarty = array of scopeinfoty;
@@ -202,22 +267,30 @@ implementation
 uses
  sysutils,msefileutils,msesys,mseformatstr,msegraphics,mseglob,msearrayutils;
 
-procedure markstartchars(const str: msestring; var chars: charsty); overload;
+procedure markstartchars(const str: msestring; var chars: charsty;
+                          const caseinsensitive: boolean); overload;
 begin
  if length(str) = 0 then begin
   include(chars,#0);
  end
  else begin
-  include(chars,char(str[1]));
+  if caseinsensitive then begin
+   include(chars,lowerchars[char(str[1])]);
+   include(chars,upperchars[char(str[1])]);
+  end
+  else begin
+   include(chars,char(str[1]));
+  end;    
  end
 end;
 
-procedure markstartchars(const strar: msestringarty; var chars: charsty); overload;
+procedure markstartchars(const strar: msestringarty; var chars: charsty;
+                          const caseinsensitive: boolean); overload;
 var
  int1: integer;
 begin
  for int1:= 0 to high(strar) do begin
-  markstartchars(strar[int1],chars);
+  markstartchars(strar[int1],chars,caseinsensitive);
  end;
 end;
 
@@ -227,15 +300,25 @@ var
  int1: integer;
 begin
  for int1:= 0 to high(starttokens) do begin
-  if length(starttokens[int1].token) = 0 then begin
-   include(chars,#0);
-  end
-  else begin
-   include(chars,char(starttokens[int1].token[1]));
-   if caseinsensitive then begin
-    include(chars,lowerchars[char(starttokens[int1].token[1])]);
+  with starttokens[int1] do begin
+   if hastokenchars then begin
+    chars:= chars + tokenchars;
+   end
+   else begin
+    if length(token) = 0 then begin
+     include(chars,#0);
+    end
+    else begin
+     if caseinsensitive then begin
+      include(chars,lowerchars[char(starttokens[int1].token[1])]);
+      include(chars,upperchars[char(starttokens[int1].token[1])]);
+     end
+     else begin
+      include(chars,char(starttokens[int1].token[1]));
+     end;    
+    end;
    end;
-  end
+  end;
  end;
 end;
 
@@ -432,6 +515,8 @@ var
  end;
 
  procedure pushscope(const starttoken: starttokenty);
+ var
+  po1: scopeinfopoty;
  begin
   with starttoken,fclients[handle] do begin
    if call then begin
@@ -441,7 +526,19 @@ var
     end;
    end;
    scopestack[scopestackpo]:= scopenr;
-   scopeinfopo:= @fsyntaxdefs[syntaxdefhandle].scopeinfos[scopenr];
+   po1:= @fsyntaxdefs[syntaxdefhandle].scopeinfos[scopenr];
+   if po1^.fontinfonr <> 0 then begin
+    po1^.currfontinfonr:= po1^.fontinfonr;
+   end
+   else begin
+    if starttoken.fontinfonr <> 0 then begin
+     po1^.currfontinfonr:= starttoken.fontinfonr;
+    end
+    else begin
+     po1^.currfontinfonr:= scopeinfopo^.currfontinfonr;
+    end;
+   end;
+   scopeinfopo:= po1;
    startscopenr:= scopenr;
   end;
  end;
@@ -460,6 +557,7 @@ var
  stok1: starttokenty;
  format: formatinfoarty;
  firstrow,lastrow: integer;
+ wpo2: pmsechar;
 
 label
  endlab;
@@ -478,8 +576,10 @@ begin
    if startscopenr = -1 then begin
     startscopenr:= high(scopeinfos);
     stok1.scopenr:= startscopenr;
+    stok1.fontinfonr:= 0;
     stok1.call:= true;
     scopestackpo:= -1;
+    scopeinfopo:= @scopeinfos[startscopenr];
     pushscope(stok1);
    end;
    if (startscopenr >= 0) and (startscopenr < length(scopeinfos)) then begin
@@ -503,8 +603,9 @@ begin
      wpo1:= startpo;
      alen:= length(msestring(startpo));
      keywordlen:= 0;
-     changed:= setcharstyle1(format,
-                               0,bigint,charstyles[scopeinfopo^.fontinfonr]) or changed;
+     changed:= setcharstyle1(format,0,bigint,
+                                 charstyles[scopeinfopo^.currfontinfonr]) or
+                                                                        changed;
      if alen > 0 then begin
       repeat
        if (keywordlen <= 0) and not scopeinfopo^.return then begin
@@ -551,29 +652,45 @@ begin
                (char(byte(wpo1^)) in scopestartchars) then begin
                        //starttoken suchen
         for int1:= 0 to high(scopeinfopo^.starttokens) do begin
-         if caseinsensitive and 
-                msestartsstrcaseinsensitive(
-                 pointer(scopeinfopo^.starttokens[int1].token),wpo1) or
-           not caseinsensitive and 
-                msestartsstr(
-                 pointer(scopeinfopo^.starttokens[int1].token),wpo1) then begin
-          bo1:= false;
-          int2:= length(scopeinfopo^.starttokens[int1].token);
-          if scopeinfopo^.starttokens[int1].fontinfonr <> 0 then begin
-           changed:= setcharstyle1(format,wpo1-startpo,int2,
-                    charstyles[scopeinfopo^.starttokens[int1].fontinfonr]) or changed;
-           int3:= int2;
+         with scopeinfopo^.starttokens[int1] do begin
+          if hastokenchars then begin
+           wpo2:= wpo1;
+           while (ord(wpo2^) <= 255) and (char(wpo2^) in tokenchars) do begin
+            inc(wpo2);
+            if not shortcircuit then begin
+             break;
+            end;
+           end;
+           int2:= wpo2-wpo1;
+           if int2 > 0 then begin
+            bo1:= false;
+           end;
           end
           else begin
-           int3:= 0;     //keine sonderbehandlung
+           if caseinsensitive and msestartsstrcaseinsensitive(
+                                              pointer(token),wpo1) or
+             not caseinsensitive and msestartsstr(pointer(token),wpo1) then begin
+            bo1:= false;
+            int2:= length(token);
+           end;
           end;
-          pushscope(scopeinfopo^.starttokens[int1]);
-          changed:= setcharstyle1(format,wpo1-startpo+int3,bigint,
-                         charstyles[scopeinfopo^.fontinfonr]) or changed;
-          inc(wpo1,int2);
-          dec(alen,int2);
-          dec(keywordlen,int2);
-          break;
+          if not bo1 then begin
+           if fontinfonr <> 0 then begin
+            changed:= setcharstyle1(format,wpo1-startpo,int2,
+                    charstyles[fontinfonr]) or changed;
+            int3:= int2;
+           end
+           else begin
+            int3:= 0;     //keine sonderbehandlung
+           end;
+           pushscope(scopeinfopo^.starttokens[int1]);
+           changed:= setcharstyle1(format,wpo1-startpo+int3,bigint,
+                          charstyles[scopeinfopo^.currfontinfonr]) or changed;
+           inc(wpo1,int2);
+           dec(alen,int2);
+           dec(keywordlen,int2);
+           break;
+          end;
          end;
         end;
        end;
@@ -583,11 +700,27 @@ begin
                        //endtoken suchen
           for int1:= 0 to high(scopeinfopo^.endtokens) do begin
            with scopeinfopo^.endtokens[int1] do begin
-            if msestartsstr(pointer(token),wpo1) then begin
-             bo1:= false;
-             int2:= length(token);
+            if hastokenchars then begin
+             if (ord(wpo1^) <= 255) and (char(wpo1^) in tokenchars) then begin
+              int2:= 1;
+              bo1:= false;
+             end;
+            end
+            else begin
+             if msestartsstr(pointer(token),wpo1) then begin
+              bo1:= false;
+              int2:= length(token);
+             end;
+            end;
+            if not bo1 then begin
+             if fontinfonr <> 0 then begin
+              int3:= fontinfonr;
+             end
+             else begin
+              int3:= scopeinfopo^.currfontinfonr;
+             end;
              changed:= setcharstyle1(format,wpo1-startpo,int2,
-                      charstyles[scopeinfopo^.endtokens[int1].fontinfonr]) or changed;
+                                         charstyles[int3]) or changed;
              inc(wpo1,int2);
              if int2 = 0 then begin
               int2:= 1; //zeilenende
@@ -596,7 +729,7 @@ begin
              dec(keywordlen,int2);
              popscope;
              changed:= setcharstyle1(format,wpo1-startpo,bigint,
-                                   charstyles[scopeinfopo^.fontinfonr]) or changed;
+                            charstyles[scopeinfopo^.currfontinfonr]) or changed;
              break;
             end;
            end;
@@ -772,6 +905,32 @@ begin
  end;
 end;
 
+procedure checktokenchars(const ar1: stringarty; const caseinsensitive: boolean;
+             out hastokenchars: boolean; out tokenchars: tokencharsty);
+var
+ int1: integer;
+begin
+ hastokenchars:= ar1 <> nil;
+ tokenchars:= [];
+ for int1:= 0 to high(ar1) do begin
+  if (length(ar1[int1]) <> 1) or (ord(ar1[int1][1]) > 255) then begin
+   hastokenchars:= false;
+   break;
+  end;
+ end;
+ if hastokenchars then begin
+  for int1:= 0 to high(ar1) do begin
+   if caseinsensitive then begin
+    include(tokenchars,upperchars[char(ar1[int1][1])]);
+    include(tokenchars,lowerchars[char(ar1[int1][1])]);
+   end
+   else begin
+    include(tokenchars,char(ar1[int1][1]));
+   end;
+  end;
+ end;
+end;
+
 function tsyntaxpainter.readdeffile(stream: ttextstream): integer;
 type
  tokennrty = (tn_styles,tn_caseinsensitive,tn_keywordchars,tn_addkeywordchars,
@@ -815,12 +974,19 @@ var
     with scopeinfos[aktscopeinfo] do begin
      markstartchars(starttokens,scopestartchars,caseinsensitive);
      for int1:= 0 to high(endtokens) do begin
-      markstartchars(endtokens[int1].token,scopeendchars);
+      with endtokens[int1] do begin
+       if hastokenchars then begin
+        scopeendchars:= scopeendchars + endtokens[int1].tokenchars;
+       end
+       else begin
+        markstartchars(token,scopeendchars,caseinsensitive);
+       end;
+      end;
      end;
     end;
    end;
   end;
- end;
+ end; //updateaktscope
 
  function addscoperule(const astarttokens: starttokenarty;
                   const aendtokens: endtokenarty; ahasendtokens: boolean;
@@ -935,6 +1101,53 @@ var
   dec(result);
  end;
 
+var
+ lstr1: lstringty;
+ 
+ function nextline: boolean;
+ begin
+  if stream.eof then begin
+   lstr1.len:= 0;
+   lstr1.po:= nil;
+   result:= true;
+  end
+  else begin
+   stream.readln(line);
+   inc(linenr);
+   result:= (strlnscan(pointer(line),' ',length(line)) <> nil) and 
+                                (checkfirstchar(line,'#') = nil); //comment
+   if result then begin 
+    stringtolstring(line,lstr1);
+   end;
+  end;
+ end;
+ 
+ procedure addquotedstrings(var ar1: stringarty; out isnextline: boolean);
+ var
+  str1: string;
+ begin
+  isnextline:= false;
+  if not stream.eof then begin
+   while true do begin
+    while nextquotedstring(lstr1,str1) do begin
+     additem(ar1,str1);
+     isnextline:= false;
+    end;
+    if lstr1.len = 0 then begin
+     isnextline:= true;
+     if stream.eof then begin
+      break;
+     end;
+     repeat
+     until nextline; //skip comments
+    end
+    else begin
+     break;
+    end;
+   end;
+  end;
+ end; //getquotedstrings
+
 const
  defaultname = 'DEFAULT';
 var
@@ -943,13 +1156,14 @@ var
  keys: tpointeransistringhashdatalist;
  scopenames,stylenames: tpointeransistringhashdatalist;
  int1,int2,int3,int4: integer;
- lstr1,lstr2,lstr3: lstringty;
+ lstr2,lstr3: lstringty;
  global: boolean;
  wstrar1: msestringarty;
  bo1: boolean;
  aktkeywordfontinfonr: integer;
  ar1: stringarty; 
-
+ tokenchars1: tokencharsty;
+ isnextline: boolean;
 begin
  result:= -1;
  for int1:= 0 to high(fsyntaxdefs) do begin
@@ -977,11 +1191,10 @@ begin
   akttoken:= tokennrty(-1);
   aktkeywordfontinfonr:= 0;
   try
+   isnextline:= false;
    repeat
-    stream.readln(line);
-    inc(linenr);
-    if (strlnscan(pointer(line),' ',length(line)) <> nil) and (checkfirstchar(line,'#') = nil) then begin
-     stringtolstring(line,lstr1);
+    if isnextline or nextline then begin
+     isnextline:= false;
      nextword(lstr1,lstr2);
      int1:= ptrint(keys.find(struppercase(lstr2)));
      if int1 <> 0 then begin
@@ -1106,7 +1319,7 @@ begin
          charstyles.add(lstringtostring(lstr1));
         except
          invalidstyle;
-         error('Invalid style '''+line+''''+lineinfo);
+//         error('Invalid style '''+line+''''+lineinfo);
         end;
        end;
        tn_calltokens,tn_jumptokens: begin
@@ -1116,48 +1329,79 @@ begin
         end;
         setlength(ar1,1);
         ar1[0]:= str1;
-        while nextquotedstring(lstr1,str1) do begin
-         additem(ar1,str1);
+        addquotedstrings(ar1,isnextline);
+        if not isnextline then begin
+         nextword(lstr1,lstr3);
+         int1:= findname(scopenames,lstr3);
+         nextword(lstr1,lstr3);
+         int2:= findname(stylenames,lstr3);
+        end
+        else begin
+         namenotfound;
         end;
-        nextword(lstr1,lstr3);
-        int1:= findname(scopenames,lstr3);
         int3:= length(scopeinfos[aktscopeinfo].starttokens);
-        setlength(scopeinfos[aktscopeinfo].starttokens,
-                     int3+length(ar1));
-        nextword(lstr1,lstr3);
-        int2:= findname(stylenames,lstr3);
-        for int4:= int3 to int3 + high(ar1) do begin
-         with scopeinfos[aktscopeinfo].starttokens[int4] do begin
-          token:= ar1[int4-int3];
-          if caseinsensitive then begin
-           token:= struppercase(token);
-          end;
+        checktokenchars(ar1,caseinsensitive,bo1,tokenchars1);
+        if bo1 then begin
+         setlength(scopeinfos[aktscopeinfo].starttokens,int3+1);
+         with scopeinfos[aktscopeinfo].starttokens[int3] do begin
+          hastokenchars:= true;
+          tokenchars:= tokenchars1;
           fontinfonr:= int2;
           scopenr:= int1;
           call:= akttoken = tn_calltokens;
+          shortcircuit:= not call and (scopenr = aktscopeinfo);
+         end;
+        end
+        else begin
+         setlength(scopeinfos[aktscopeinfo].starttokens,
+                      int3+length(ar1));
+         for int4:= int3 to int3 + high(ar1) do begin
+          with scopeinfos[aktscopeinfo].starttokens[int4] do begin
+           token:= ar1[int4-int3];
+           if caseinsensitive then begin
+            token:= struppercase(token);
+           end;
+           fontinfonr:= int2;
+           scopenr:= int1;
+           call:= akttoken = tn_calltokens;
+           shortcircuit:= not call and (scopenr = aktscopeinfo);
+          end;
          end;
         end;
        end;
        tn_endtokens: begin
-        int3:= length(scopeinfos[aktscopeinfo].endtokens);
-        repeat
-         bo1:= nextquotedstring(lstr1,str1);
-         if bo1 then begin
-          setlength(scopeinfos[aktscopeinfo].endtokens,
-                       length(scopeinfos[aktscopeinfo].endtokens)+1);
-          scopeinfos[aktscopeinfo].endtokens[
-                   high(scopeinfos[aktscopeinfo].endtokens)].token:= str1;
+        with scopeinfos[aktscopeinfo] do begin
+         ar1:= nil;
+         addquotedstrings(ar1,isnextline);
+         int3:= length(endtokens);
+         if not isnextline then begin
+          nextword(lstr1,lstr3);
+          int2:= findname(stylenames,lstr3);
          end
-        until not bo1;
-        nextword(lstr1,lstr3);
-        if lstr3.len <> 0 then begin
-         int2:= findname(stylenames,lstr3);
-        end
-        else begin
-         int2:= scopeinfos[aktscopeinfo].fontinfonr;
-        end;
-        for int1:= int3 to high(scopeinfos[aktscopeinfo].endtokens) do begin
-         scopeinfos[aktscopeinfo].endtokens[int1].fontinfonr:= int2;
+         else begin
+          int2:= fontinfonr;
+         end;
+         checktokenchars(ar1,caseinsensitive,bo1,tokenchars1);
+         if bo1 then begin
+          setlength(endtokens,int3+1);
+          with endtokens[high(endtokens)] do begin
+           hastokenchars:= true;
+           tokenchars:= tokenchars1;
+           fontinfonr:= int2;
+          end;
+         end
+         else begin
+          setlength(scopeinfos[aktscopeinfo].endtokens,int3+length(ar1));
+          for int4:= int3 to int3 + high(ar1) do begin
+           with scopeinfos[aktscopeinfo].endtokens[int4] do begin
+            token:= ar1[int4-int3];
+            if caseinsensitive then begin
+             token:= struppercase(token);
+            end;
+            fontinfonr:= int2;
+           end;
+          end;
+         end;
         end;
        end;
        tn_keywords: begin
@@ -1175,7 +1419,7 @@ begin
       end;
      end;
     end;
-   until stream.eof;
+   until stream.eof and not (isnextline and (lstr1.len > 0));
    updateaktscope;
   finally
    keys.Free;
