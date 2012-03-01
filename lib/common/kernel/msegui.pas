@@ -13739,10 +13739,13 @@ begin
 end;
 
 procedure twindow.showed;
+var
+ wi1: twindow;
 begin
  exclude(fstate,tws_windowshowpending);
  if not (tws_windowvisible in fstate) then begin
-  fowner.internalshow(ml_none,nil,true,true);
+  wi1:= nil;
+  fowner.internalshow(ml_none,@wi1,true,true);
  end;
 end;
 
