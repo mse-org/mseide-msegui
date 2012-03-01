@@ -1169,6 +1169,7 @@ type
  widgetarty = array of twidget;
 
  twindow = class;
+ pwindow = ^twindow;
 
  windowinfoty = record
   options: windowoptionsty;
@@ -1528,7 +1529,8 @@ type
    procedure setclientwidth(const avalue: integer);
    function getclientheight: integer;
    procedure setclientheight(const avalue: integer);
-   function internalshow(const modallevel: modallevelty; transientfor: twindow;
+   function internalshow(const modallevel: modallevelty;
+           const transientfor: pwindow; //follow linkedvar state
            const windowevent,nomodalforreset: boolean): modalresultty; virtual;
    procedure internalhide(const windowevent: boolean);
    function getnextfocus: twidget;
@@ -9757,24 +9759,30 @@ begin
 end;
 
 function twidget.internalshow(const modallevel: modallevelty;
-             transientfor: twindow;
+             const transientfor: pwindow; //follow linked var state
              const windowevent,nomodalforreset: boolean): modalresultty;
 var
- bo1: boolean;
+ bo1,bo2: boolean;
  modaltransientfor: twindow;
 // w1: twidget;
  info: showinfoty;
 begin
  if modallevel = ml_application then begin
   modaltransientfor:= nil;
-  if transientfor = nil then begin
-   transientfor:= fwindow.defaulttransientfor;
-   modaltransientfor:= transientfor;
+  info.transientfor:= nil;
+  if transientfor^ = nil then begin
+   setlinkedvar(fwindow.defaulttransientfor,tlinkedobject(info.transientfor));
+   modaltransientfor:= info.transientfor;
+//   transientfor:= fwindow.defaulttransientfor;
+//   modaltransientfor:= transientfor;
+  end
+  else begin
+   setlinkedvar(transientfor^,tlinkedobject(info.transientfor));
   end;
   info.widget:= nil;
   setlinkedvar(self,tmsecomponent(info.widget));
   try
-   info.transientfor:= transientfor;
+//   info.transientfor:= transientfor;
    info.windowevent:= windowevent;
    info.nomodalforreset:= nomodalforreset;
    if window.beginmodal(@info) or (info.widget = nil) then begin
@@ -9785,6 +9793,7 @@ begin
     window.settransientfor(nil,false);
    end;
   finally
+   setlinkedvar(nil,tlinkedobject(info.transientfor));
    setlinkedvar(nil,tmsecomponent(info.widget));
   end;
  end
@@ -9795,7 +9804,7 @@ begin
    if not (csdesigning in componentstate) then begin
     include(fwidgetstate,ws_showproc);
     try
-     fparentwidget.show(modallevel,transientfor);
+     fparentwidget.show(modallevel,transientfor^);
     finally
      exclude(fwidgetstate,ws_showproc);
     end;
@@ -9808,15 +9817,11 @@ begin
    end;
   end;
   if ownswindow1 then begin
- //  modaltransientfor:= nil;
- //  if (modallevel = ml_application) and (transientfor = nil) then begin
- //   transientfor:= fwindow.defaulttransientfor;
- //   modaltransientfor:= transientfor;
- //  end;
-   if transientfor = window then begin
-    transientfor:= nil;
-   end;
-   if (transientfor <> nil) and (modallevel = ml_window) then begin
+   bo2:= transientfor^ = window;
+//   if transientfor = window then begin
+//    transientfor:= nil;
+//   end;
+   if not bo2 and (transientfor^ <> nil) and (modallevel = ml_window) then begin
     include(fwindow.fstate,tws_modalfor);
    end
    else begin
@@ -9825,33 +9830,16 @@ begin
     end;
    end;
    fwindow.show(windowevent);
-   if not nomodalforreset then begin
-    fwindow.settransientfor(transientfor,windowevent);
+   if not nomodalforreset and not bo2 then begin
+    fwindow.settransientfor(transientfor^,windowevent);
    end;
-   {
-   if modallevel = ml_application then begin
-    w1:= nil;
-    if bo1 then begin
-     w1:= self;
-    end;
-    if window.beginmodal(w1) then begin
-     result:= mr_windowdestroyed;
-     exit;
-    end;
-    if modaltransientfor <> nil then begin
-     window.settransientfor(nil,false);
-    end;
-   end
-   else begin
-   }
-    if bo1 then begin
-     doshow;
-    end;
-    if (modallevel = ml_window) and (fwindow.modalfor) and
-                  fwindow.ftransientfor.active then begin
-     fwindow.activate;             
-    end;
- //  end;
+   if bo1 then begin
+    doshow;
+   end;
+   if (modallevel = ml_window) and (fwindow.modalfor) and
+                 fwindow.ftransientfor.active then begin
+    fwindow.activate;             
+   end;
   end
   else begin
    if bo1 then begin
@@ -9876,7 +9864,7 @@ begin
   event:= twidgetshowevent.create(false);
   event.fwidget:= self;
   event.fmodallevel:= modallevel;
-  event.ftransientfor:= transientfor;
+//  event.ftransientfor:= transientfor^; dangerouse becouse of lifetime
   try
    synchronizeevent(event);
    result:= event.fmodalresult;
@@ -9885,7 +9873,7 @@ begin
   end;  
  end
  else begin
-  result:= internalshow(modallevel,transientfor,false,false);
+  result:= internalshow(modallevel,@transientfor,false,false);
  end;
 end;
 
@@ -15850,17 +15838,10 @@ begin
  modalinfobefore:= sender.fmodalinfopo;
  sender.fmodalinfopo:= @modalinfo;
  setlinkedvar(sender,tlinkedobject(fmodalwindow));
-// amodalwindow.internalactivate(false,true);
 
  try
   with sender do begin
    inc(fmodallevel);
-   {
-   if tws_modal in fstate then begin
-    guierror(gue_recursivemodal,self,fowner.name);
-   end;
-   include(fstate,tws_modal);
-   }
   end;
   if showinfo <> nil then begin
    with showinfo^ do begin
@@ -15870,7 +15851,7 @@ begin
      setlinkedvar(sender.ffocusedwidget,
                      tmsecomponent(focusedwidgetbefore));
     end;
-    widget.internalshow(ml_none,transientfor,windowevent,nomodalforreset);
+    widget.internalshow(ml_none,@transientfor,windowevent,nomodalforreset);
     if fstate * [aps_cancelloop,aps_exitloop] <> [] then begin
      exit;
     end;

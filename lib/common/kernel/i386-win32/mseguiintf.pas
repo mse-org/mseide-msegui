@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1230,6 +1230,9 @@ var
 begin
  with awindow do begin
   if id <> 0 then begin
+{$ifdef mse_debugwindowdestroy}
+   debugwindow('*gui_destroywindow ',awindow.id);
+{$endif}
    ico1:= sendmessage(id,wm_seticon,icon_big,0);
    if ico1 <> 0 then begin
     destroyicon(ico1);
@@ -2153,6 +2156,9 @@ begin
   {$ifdef mse_debugwindowfocus}
    debugwindow('wm_destroy ',ahwnd);
   {$endif}
+  {$ifdef mse_debugwindowdestroy}
+   debugwindow('*wm_destroy ',ahwnd);
+  {$endif}
    windowdestroyed(ahwnd);
    eventlist.add(twindowevent.create(ek_destroy,ahwnd));
   end;
@@ -2420,6 +2426,9 @@ begin
    with msg do begin
     case message of
      destroymessage: begin
+     {$ifdef mse_debugwindowdestroy}
+      debugwindow('*destroymessage ',msg.wparam);
+     {$endif}
       windows.destroywindow(msg.wparam);
      end;
      wm_keydown,wm_keyup,wm_syskeydown,wm_syskeyup: begin
@@ -2475,6 +2484,9 @@ begin
  id:= windows.CreateWindow(widgetclassname,pchar(str1),
              WS_POPUP or WS_CAPTION or WS_CLIPSIBLINGS or 
              WS_SYSMENU or WS_MINIMIZEBOX,0,0,0,0,0,0,hinstance,nil);
+{$ifdef mse_debugwindowdestroy}
+ debugwindow('ceateapphandle ',id);
+{$endif}
  menu1:= getsystemmenu(id,false);
  deletemenu(menu1,sc_maximize,mf_bycommand);
  deletemenu(menu1,sc_size,mf_bycommand);
@@ -2494,9 +2506,10 @@ end;
 function gui_settransientfor(var awindow: windowty; const transientfor: winidty): guierrorty;
 begin
  with awindow,win32windowty(platformdata).d do begin
-  if not istaskbar then begin
-   setwindowlong(id,gwl_hwndparent,transientfor); //no taskbar widget if called!
-  end;
+//  if not istaskbar then begin
+//   setwindowlong(id,gwl_hwndparent,transientfor); //no taskbar widget if called!
+// transientfor can be destroyed
+//  end;
  end;
  result:= gue_ok;
 end;
@@ -2562,9 +2575,9 @@ begin
   end;
   windowstyle:= windowstyle or ws_clipchildren;
   if (transientfor <> 0) or (options * [wo_popup,wo_message,wo_notaskbar] <> []) then begin
-   if transientfor <> 0 then begin
-    ownerwindow:= transientfor;
-   end;
+//   if transientfor <> 0 then begin
+//    ownerwindow:= transientfor; transientfor can be destroyed
+//   end;
    id:= windows.CreateWindowex(windowstyleex,widgetclassname,nil,windowstyle,
          rect1.x,rect1.y,rect1.cx,rect1.cy,ownerwindow{transientfor},0,hinstance,nil);
    if transientfor = 0 then begin
@@ -2592,6 +2605,9 @@ begin
    result:= gue_createwindow;
   end
   else begin
+{$ifdef mse_debugwindowdestroy}
+   debugwindow('gui_createwindow ',id);
+{$endif}
 {$ifdef mse_debuggdi}
    inc(windowcount);
 {$endif}
