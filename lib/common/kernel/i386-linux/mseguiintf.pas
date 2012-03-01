@@ -473,6 +473,8 @@ var
  pixmapcount: integer;
  
 type
+ pwinid = ^TXID;
+ 
  twindow1 = class(msegui.twindow);
  tguiapplication1 = class(tguiapplication);
  tcanvas1 = class(tcanvas);
@@ -1516,7 +1518,7 @@ var
  var
   parent,root: winidty;
   ca1: longword;
-  children: pwindow;
+  children: pwinid;
   int1: integer;
 //  id1: winidty;
   ar1: atomarty;
@@ -1571,7 +1573,7 @@ function getwindowstack(const id: winidty): winidarty;
 var
  parent,root: winidty;
  ca1: longword;
- children: pwindow;
+ children: pwinid;
  count: integer;
 begin
 {$ifdef mse_debuggdisync}
@@ -1618,7 +1620,7 @@ var
  bo1: boolean;
  parent,root: winidty;
  ca1: longword;
- children: pwindow;
+ children: pwinid;
 
 begin
  gdi_lock;
@@ -2930,7 +2932,7 @@ var
 function getrootpath(const id: winidty; out rootpath: longwordarty): boolean;
 var
  root,parent: winidty;//{$ifdef FPC}dword{$else}xlib.twindow{$endif};
- children: pwindow;
+ children: pwinid;
  count: integer;
  ca1: longword;
  id1: winidty;
@@ -2976,7 +2978,7 @@ end;
 function gui_getchildren(const id: winidty; out children: winidarty): guierrorty;
 var
  root,parent: winidty;//{$ifdef FPC}dword{$else}xlib.twindow{$endif};
- chi: pwindow;
+ chi: pwinid;
 // count: integer;
  ca1: longword;
  int1: integer;
@@ -3525,7 +3527,7 @@ end;
 function gui_getparentwindow(const awindow: winidty): winidty;
 var
  root,parent: winidty;//{$ifdef FPC}dword{$else}xlib.twindow{$endif};
- children: pwindow;
+ children: pwinid;
 // count: integer;
  ca1: longword;
 begin
