@@ -13262,6 +13262,10 @@ begin
     end
     else begin
      mouseevent(info.mouse);
+     if (info.mouse.eventkind = ek_buttonpress) and (wo_popup in foptions) and
+      (ow_mousefocus in fowner.foptionswidget) then begin
+      activate; //possibly not done by windowmanager
+     end;
     end;
     posbefore:= subpoint(info.mouse.pos,posbefore);
     addpoint1(posbefore,appinst.fdelayedmouseshift);
