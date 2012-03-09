@@ -18,6 +18,7 @@ type
  {$endif}
  threadty = ptruint;
  procidty = ptrint;
+ pprocidty = ^procidty;
  procidarty = array of procidty; //same item size as winidarty!
  prochandlety = type ptrint;
 

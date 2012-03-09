@@ -20,12 +20,14 @@ unit make;
 
 interface
 uses
- msestrings;
+ msestrings,msepipestream,msesystypes;
  
 procedure domake(atag: integer);
 procedure abortmake;
 function making: boolean;
 function buildmakecommandline(const atag: integer): string;
+function addmessagetext(const sender: tpipereader;
+                              const procid: pprocidty): string;
 
 procedure dodownload;
 procedure abortdownload;
@@ -37,10 +39,10 @@ function runscript(const script: filenamety;
 implementation
 uses
  mseprocutils,main,projectoptionsform,sysutils,msegrids,
- sourceform,mseeditglob,msefileutils,msesystypes,msesys,
+ sourceform,mseeditglob,msefileutils,msesys,
  msesysutils,msegraphics,messageform,msedesignintf,msedesigner,
  mseprocmonitor,mseevent,
- msetypes,classes,mseclasses,mseapplication,msestream,msepipestream,
+ msetypes,classes,mseclasses,mseapplication,msestream,
  msegui;
  
 type
@@ -358,13 +360,14 @@ begin
 // end;
 end;
 
-procedure tprogrunner.inputavailable(const sender: tpipereader);
+function addmessagetext(const sender: tpipereader;
+                                         const procid: pprocidty): string;
 var
  str1: string;
 begin
  str1:= sender.readdatastring;
  while application.checkoverload(-1) do begin
-  if procid = invalidprochandle then begin
+  if (procid <> nil) and (procid^ = invalidprochandle) then begin
    exit;
   end;
   application.unlock;
@@ -375,6 +378,14 @@ begin
   datacols[0].readpipe(str1,true,120);
   showlastrow;
  end;
+ result:= str1;
+end;
+
+procedure tprogrunner.inputavailable(const sender: tpipereader);
+var
+ str1: string;
+begin
+ str1:= addmessagetext(sender,@procid);
  if fmessagefile <> nil then begin
   fmessagefile.writestr(str1);
  end;

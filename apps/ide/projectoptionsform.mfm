@@ -1592,7 +1592,7 @@ object projectoptionsfo: tprojectoptionsfo
               color = -2147483645
               taborder = 2
               bounds_x = 0
-              bounds_y = 73
+              bounds_y = 74
               bounds_cx = 669
               bounds_cy = 37
               anchors = [an_top]
@@ -1660,7 +1660,7 @@ object projectoptionsfo: tprojectoptionsfo
               hint = '"--tty DEVICE" to set target terminal'
               onshowhint = hintexpandedmacros
               bounds_x = 1
-              bounds_y = 110
+              bounds_y = 111
               bounds_cx = 667
               bounds_cy = 37
               anchors = [an_left, an_top, an_right]
@@ -1673,7 +1673,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 5
               bounds_x = 0
-              bounds_y = 187
+              bounds_y = 188
               bounds_cx = 669
               bounds_cy = 37
               anchors = [an_top]
@@ -1759,7 +1759,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 6
               bounds_x = 0
-              bounds_y = 220
+              bounds_y = 224
               bounds_cx = 669
               bounds_cy = 37
               anchors = [an_top]
@@ -1911,7 +1911,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.dummy = 0
               taborder = 4
               bounds_x = 0
-              bounds_y = 150
+              bounds_y = 151
               bounds_cx = 555
               bounds_cy = 37
               optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
@@ -4886,7 +4886,7 @@ object projectoptionsfo: tprojectoptionsfo
             end          
             item
               width = 13
-              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
+              options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_cancopy, co_canpaste, co_mousescrollrow]
               widgetname = 'toolmessages'
               dataclass = tgridintegerdatalist
             end          
@@ -4956,6 +4956,16 @@ object projectoptionsfo: tprojectoptionsfo
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_autopopupmenu, oe_keyexecute]
             visible = False
           end
+          object toolmessages: tbooleanedit
+            optionswidget1 = []
+            optionsskin = [osk_framebuttononly]
+            taborder = 4
+            bounds_x = 42
+            bounds_y = 0
+            bounds_cy = 16
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_autopopupmenu, oe_keyexecute]
+            visible = False
+          end
           object toolmenus: tstringedit
             optionsskin = [osk_framebuttononly]
             frame.levelo = 0
@@ -4963,7 +4973,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_levelo, frl_colorclient]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             frame.dummy = 0
-            taborder = 4
+            taborder = 5
             onshowhint = hintexpandedmacros
             visible = False
             bounds_x = 56
@@ -4982,7 +4992,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             frame.button.color = -1879048187
             frame.button.imagenr = 17
-            taborder = 5
+            taborder = 6
             onshowhint = hintexpandedmacros
             visible = False
             bounds_x = 170
@@ -5001,7 +5011,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_levelo, frl_colorclient]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             frame.dummy = 0
-            taborder = 6
+            taborder = 7
             onshowhint = hintexpandedmacros
             visible = False
             bounds_x = 385
@@ -5010,16 +5020,6 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cy = 16
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_savestate]
             reffontheight = 14
-          end
-          object toolmessages: tbooleanedit
-            optionswidget1 = []
-            optionsskin = [osk_framebuttononly]
-            taborder = 7
-            bounds_x = 42
-            bounds_y = 0
-            bounds_cy = 16
-            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_autopopupmenu, oe_keyexecute]
-            visible = False
           end
         end
       end

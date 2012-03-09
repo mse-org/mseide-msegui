@@ -1841,6 +1841,7 @@ begin
   end
   else begin
    mainfo.statoptions.readstat(tstatreader(statfiler));
+   setlength(ftoolmessages,length(ftoolsave));
    with tstatreader(statfiler) do begin
     readrecordarray('sigsettings',{$ifdef FPC}@{$endif}setsignalinfocount,
              {$ifdef FPC}@{$endif}storesignalinforec);

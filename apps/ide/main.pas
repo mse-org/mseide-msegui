@@ -287,6 +287,7 @@ procedure handleerror(const e: exception; const text: string);
 implementation
 uses
  regwidgets,regeditwidgets,regdialogs,regkernel,regprinter,msesys,
+ toolhandlermodule,
  {$ifndef mse_no_math}
   {$ifdef FPC}regmath,{$endif}
   {$ifdef FPC}regmm,{$endif}
@@ -2734,7 +2735,12 @@ begin
    if not((index > high(toolhide)) or toolhide[index]) then begin
     include(opt1,exo_inactive);
    end;
-   execmse(str1,opt1{not((index > high(toolhide)) or toolhide[index]),true});
+   if (index <= high(toolmessages)) and toolmessages[index] then begin
+    ttoolhandlermo.create(self,str1,opt1);
+   end
+   else begin
+    execmse(str1,opt1{not((index > high(toolhide)) or toolhide[index]),true});
+   end;
   end;
  end;
 end;
