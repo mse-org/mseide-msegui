@@ -17,7 +17,7 @@ type
 
 implementation
 uses
- toolhandlermodule_mfm,make;
+ toolhandlermodule_mfm,make,messageform;
  
 procedure ttoolhandlermo.inputavailexe(const sender: tpipereader);
 begin
@@ -37,12 +37,13 @@ begin
  inherited create(aowner);
  name:= '';
  proc.commandline:= acommandline;
- opt1:= [pro_output,pro_errorouttoout];
+ opt1:= [pro_tty,pro_output,pro_errorouttoout];
  if exo_inactive in aoptions then begin
   include(opt1,pro_inactive);
  end;
  proc.options:= opt1; 
  proc.active:= true;
+ messagefo.activate;
 end;
 
 end.
