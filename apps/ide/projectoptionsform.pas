@@ -526,6 +526,7 @@ type
    ftoolsave: longboolarty;
    ftoolhide: longboolarty;
    ftoolparse: longboolarty;
+   ftoolmessages: longboolarty;
    ffontalias: msestringarty;
    ffontancestors: msestringarty;
    ffontheights: integerarty;
@@ -626,6 +627,7 @@ type
    property toolsave: longboolarty read ftoolsave write ftoolsave;
    property toolhide: longboolarty read ftoolhide write ftoolhide;
    property toolparse: longboolarty read ftoolparse write ftoolparse;
+   property toolmessages: longboolarty read ftoolmessages write ftoolmessages;
 
    property fontalias: msestringarty read ffontalias write ffontalias;
    property fontancestors: msestringarty read ffontancestors 
@@ -955,6 +957,7 @@ type
    settingsstorage: tbooleanedit;
    settingsprojecttree: tbooleanedit;
    nodebugbeginend: tbooleanedit;
+   toolmessages: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);

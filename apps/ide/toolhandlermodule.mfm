@@ -1,0 +1,7 @@
+object toolhandlermo: ttoolhandlermo
+  bounds_cx = 100
+  bounds_cy = 100
+  left = 100
+  top = 100
+  moduleclassname = 'tmsedatamodule'
+end
