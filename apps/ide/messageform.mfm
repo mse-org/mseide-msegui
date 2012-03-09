@@ -1,21 +1,22 @@
 object messagefo: tmessagefo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.dummy = 0
+  visible = False
   bounds_x = 100
   bounds_y = 100
   bounds_cx = 491
   bounds_cy = 317
-  frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
-  frame.dummy = 0
-  taborder = 1
-  visible = False
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 481
-  container.bounds_cy = 317
-  container.frame.dummy = 0
-  dragdock.tab_size = 0
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
+  container.bounds = (
+    0
+    0
+    481
+    317
+  )
   dragdock.caption = 'Messages'
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savezorder, fo_savestate]
@@ -51,27 +52,27 @@ object messagefo: tmessagefo
   }
   moduleclassname = 'tdockform'
   object messages: tstringgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    popupmenu = tpopupmenu1
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 481
     bounds_cy = 317
-    frame.dummy = 0
     anchors = []
-    popupmenu = tpopupmenu1
     font.name = 'stf_default'
     font.options = [foo_antialiased]
-    font.xscale =  1.0000000000000000E+0000
+    font.xscale = 1
     font.dummy = 0
     datacols.count = 1
     datacols.linewidth = 0
     datacols.items = <    
       item
         linecolorfix = -1610612733
-        colorselect = 16777088
+        colorfocused = 16777088
         width = 3000
-        options = [co_readonly, co_focusselect]
+        options = [co_readonly, co_leftbuttonfocusonly, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_cancopy, co_mousescrollrow]
         optionsedit = []
+        valuefalse = '0'
+        valuetrue = '1'
       end>
     rowcountmax = 5000
     datarowlinewidth = 0
