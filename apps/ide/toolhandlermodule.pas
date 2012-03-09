@@ -41,7 +41,8 @@ begin
  if exo_inactive in aoptions then begin
   include(opt1,pro_inactive);
  end;
- proc.options:= opt1; 
+ proc.options:= opt1;
+ messagefo.messages.clear;
  proc.active:= true;
  messagefo.activate;
 end;
