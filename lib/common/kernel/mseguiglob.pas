@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -104,7 +104,9 @@ type
                    wo_utility,wo_splash,wo_dialog,wo_dropdownmenu,
                    wo_popupmenu,wo_tooltip,wo_notification,wo_combo,
                    wo_dnd,
-                   wo_overrideredirect,wo_embedded,
+                   wo_noframe, //uses motif hints on linux
+                   wo_overrideredirect,
+                   wo_embedded,
                    wo_buttonendmodal,wo_groupleader,
                    wo_taskbar,    //win32 only
                    wo_notaskbar,  //linux only
@@ -114,11 +116,12 @@ type
  
 const
  windowtypeoptions = [wo_popup,wo_message,
-                   wo_desktop,wo_dock,wo_toolbar,wo_menu,
-                   wo_utility,wo_splash,wo_dialog,wo_dropdownmenu,
-                   wo_popupmenu,wo_tooltip,wo_notification,wo_combo,
-                   wo_dnd];
- 
+                      wo_desktop,wo_dock,wo_toolbar,wo_menu,
+                      wo_utility,wo_splash,wo_dialog,wo_dropdownmenu,
+                      wo_popupmenu,wo_tooltip,wo_notification,wo_combo,
+                      wo_dnd];
+ noframewindowtypes = [wo_popup,wo_splash,wo_dropdownmenu,wo_popupmenu,
+                       wo_tooltip,wo_combo,wo_noframe,wo_overrideredirect];
 type
  windowposty = (wp_normal,wp_screencentered,wp_screencenteredvirt,
                 wp_minimized,wp_maximized,wp_default,

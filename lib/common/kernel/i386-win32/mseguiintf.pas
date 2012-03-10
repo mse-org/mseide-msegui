@@ -2542,7 +2542,8 @@ begin
  with awindow,win32windowty(awindow.platformdata).d,options do begin
   ownerwindow:= applicationwindow;
   windowstyleex:= 0;
-  if wo_popup in options then begin
+//  if wo_popup in options then begin
+  if options * noframewindowtypes <> [] then begin
    windowstyle:= ws_popup;
 //   windowstyleex:= windowstyleex or ws_ex_toolwindow;
   end
