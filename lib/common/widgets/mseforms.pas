@@ -233,7 +233,8 @@ type
               //true if ok
    procedure beforedestruction; override;
    property optionswidget default defaultformwidgetoptions;
-   property optionswindow: windowoptionsty read foptionswindow write setoptionswindow default [];
+   property optionswindow: windowoptionsty read foptionswindow 
+                                          write setoptionswindow default [];
    property mainmenu: tmainmenu read fmainmenu write setmainmenu;
 //   property color default cl_background;
    property font: twidgetfont read getfont write setfont stored isfontstored;

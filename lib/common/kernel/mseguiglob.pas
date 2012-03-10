@@ -99,12 +99,27 @@ type
  defaultfontnamesty = array[stockfontty] of string;
  
 type
- windowoptionty = (wo_popup,wo_message,wo_embedded,
+ windowoptionty = (wo_popup,wo_message,
+                   wo_desktop,wo_dock,wo_toolbar,wo_menu,
+                   wo_utility,wo_splash,wo_dialog,wo_dropdownmenu,
+                   wo_popupmenu,wo_tooltip,wo_notification,wo_combo,
+                   wo_dnd,
+                   wo_overrideredirect,wo_embedded,
                    wo_buttonendmodal,wo_groupleader,
                    wo_taskbar,    //win32 only
                    wo_notaskbar,  //linux only
                    wo_windowcentermessage); //showmessage centered in window
  windowoptionsty = set of windowoptionty;
+ windowtypeoptionty = wo_popup..wo_dnd;
+ 
+const
+ windowtypeoptions = [wo_popup,wo_message,
+                   wo_desktop,wo_dock,wo_toolbar,wo_menu,
+                   wo_utility,wo_splash,wo_dialog,wo_dropdownmenu,
+                   wo_popupmenu,wo_tooltip,wo_notification,wo_combo,
+                   wo_dnd];
+ 
+type
  windowposty = (wp_normal,wp_screencentered,wp_screencenteredvirt,
                 wp_minimized,wp_maximized,wp_default,
                 wp_fullscreen,wp_fullscreenvirt);

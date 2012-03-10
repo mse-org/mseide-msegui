@@ -665,9 +665,22 @@ type
        net_restack_window,net_close_window,
        //not supports checked below
        net_wm_pid,
-       net_wm_window_type_normal,
+
+       net_wm_window_type_desktop,
+       net_wm_window_type_dock,
+       net_wm_window_type_toolbar,
+       net_wm_window_type_menu,
+       net_wm_window_type_utility,
+       net_wm_window_type_splash,
        net_wm_window_type_dialog,
        net_wm_window_type_dropdown_menu,
+       net_wm_window_type_popup_menu,
+       net_wm_window_type_tooltip,
+       net_wm_window_type_notification,
+       net_wm_window_type_combo,
+       net_wm_window_type_dnd,
+       net_wm_window_type_normal,
+
        net_frame_extents,
        net_request_frame_extents,
        net_system_tray_s0,net_system_tray_opcode,net_system_tray_message_data,
@@ -688,9 +701,22 @@ const
        '_NET_WM_STATE_SKIP_TASKBAR',
        '_NET_RESTACK_WINDOW','_NET_CLOSE_WINDOW',
        '_NET_WM_PID', 
-       '_NET_WM_WINDOW_TYPE_NORMAL',
+
+       '_NET_WM_WINDOW_TYPE_DESKTOP',
+       '_NET_WM_WINDOW_TYPE_DOCK',
+       '_NET_WM_WINDOW_TYPE_TOOLBAR',
+       '_NET_WM_WINDOW_TYPE_MENU',
+       '_NET_WM_WINDOW_TYPE_UTILITY',
+       '_NET_WM_WINDOW_TYPE_SPLASH',
        '_NET_WM_WINDOW_TYPE_DIALOG',
        '_NET_WM_WINDOW_TYPE_DROPDOWN_MENU',
+       '_NET_WM_WINDOW_TYPE_POPUP_MENU',
+       '_NET_WM_WINDOW_TYPE_TOOLTIP',
+       '_NET_WM_WINDOW_TYPE_NOTIFICATION',
+       '_NET_WM_WINDOW_TYPE_COMBO',
+       '_NET_WM_WINDOW_TYPE_DND',
+       '_NET_WM_WINDOW_TYPE_NORMAL',
+
        '_NET_FRAME_EXTENTS', 
        '_NET_REQUEST_FRAME_EXTENTS',
        '_NET_SYSTEM_TRAY_S0','_NET_SYSTEM_TRAY_OPCODE',
@@ -3161,8 +3187,25 @@ begin
  end;
 end;
 
-function gui_createwindow(const rect: rectty; const options: internalwindowoptionsty;
-                               var awindow: windowty): guierrorty;
+const
+ windowtypes: array[windowtypeoptionty] of netatomty =
+ (
+//  wo_popup,                     wo_message,
+net_wm_window_type_dropdown_menu,net_wm_window_type_dialog,
+//wo_desktop,              wo_dock,                wo_toolbar,
+net_wm_window_type_desktop,net_wm_window_type_dock,net_wm_window_type_toolbar,
+//wo_menu,              wo_utility,               wo_splash,
+net_wm_window_type_menu,net_wm_window_type_utility,net_wm_window_type_splash,
+//wo_dialog,              wo_dropdownmenu,                 
+net_wm_window_type_dialog,net_wm_window_type_dropdown_menu,
+//wo_popupmenu,               wo_tooltip,
+net_wm_window_type_popup_menu,net_wm_window_type_tooltip,
+//wo_notification,              wo_combo,                wo_dnd
+net_wm_window_type_notification,net_wm_window_type_combo,net_wm_window_type_dnd
+ );                 
+ 
+function gui_createwindow(const rect: rectty;
+     const options: internalwindowoptionsty; var awindow: windowty): guierrorty;
 var
  attributes: xsetwindowattributes;
  valuemask: longword;
@@ -3170,11 +3213,12 @@ var
  id1: winidty;
  icmask: longword;
  colormap1: tcolormap;
+ opt1: windowtypeoptionty;
 begin
  gdi_lock;
  with awindow,x11windowty(platformdata).d do begin
   valuemask:= 0;
-  if wo_popup in options.options then begin
+  if options.options * [wo_popup,wo_overrideredirect] <> [] then begin
    attributes.override_redirect:= {$ifdef xboolean}true{$else}1{$endif};
    valuemask:= valuemask or cwoverrideredirect;
   end;
@@ -3284,17 +3328,21 @@ begin
    gui_raisewindow(options.transientfor);
      //transientforhint not used by overrideredirect
   end;
+  if options.options * windowtypeoptions <> [] then begin
+   for opt1:= low(windowtypeoptionty) to high(windowtypeoptionty) do begin
+    if opt1 in options.options then begin
+     setnetatomarrayitem(id,net_wm_window_type,windowtypes[opt1]);
+//     break;
+    end;
+   end;
+  end
+  else begin
+   setnetatomarrayitem(id,net_wm_window_type,net_wm_window_type_normal);
+  end;
   if (wo_popup in options.options) then begin
-   setnetatomarrayitem(id,net_wm_window_type,net_wm_window_type_dropdown_menu);
    gui_raisewindow(id);
   end
   else begin
-   if wo_message in options.options then begin
-    setnetatomarrayitem(id,net_wm_window_type,net_wm_window_type_dialog);
-   end
-   else begin
-    setnetatomarrayitem(id,net_wm_window_type,net_wm_window_type_normal);
-   end;
    if wo_notaskbar in options.options then begin
 //    changenetwmstate(id,nso_add,net_wm_state_skip_taskbar,net_none);
     setnetatomarrayitem(id,net_wm_state,net_wm_state_skip_taskbar);
