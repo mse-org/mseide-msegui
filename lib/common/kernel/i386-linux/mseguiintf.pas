@@ -393,7 +393,27 @@ const
   AllHints = (((((InputHint or StateHint) or IconPixmapHint) or IconWindowHint)
     or IconPositionHint) or IconMaskHint) or WindowGroupHint;
   XUrgencyHint = 1 shl 8;
-  {
+
+type
+ MwmHints = record
+  flags: culong;
+  functions: culong;
+  decorations: culong;
+  input_mode: clong;
+  status: culong
+ end;
+
+const
+ MWM_HINTS_FUNCTIONS = 1 shl 0;
+ MWM_HINTS_DECORATIONS =  1 shl 1;
+
+ MWM_FUNC_ALL = 1 shl 0;
+ MWM_FUNC_RESIZE = 1 shl 1;
+ MWM_FUNC_MOVE = 1 shl 2;
+ MWM_FUNC_MINIMIZE = 1 shl 3;
+ MWM_FUNC_MAXIMIZE = 1 shl 4;
+ MWM_FUNC_CLOSE = 1 shl 5;
+{
 type
    TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
      XStdICCTextStyle,XUTF8StringStyle);
@@ -684,7 +704,7 @@ type
        net_frame_extents,
        net_request_frame_extents,
        net_system_tray_s0,net_system_tray_opcode,net_system_tray_message_data,
-       xembed_info,
+       xembed_info,motif_wm_hints,
        net_none);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
@@ -722,6 +742,7 @@ const
        '_NET_SYSTEM_TRAY_S0','_NET_SYSTEM_TRAY_OPCODE',
        '_NET_SYSTEM_TRAY_MESSAGE_DATA',
        '_XEMBED_INFO',
+       '_MOTIF_WM_HINTS',
        ''); 
 // needednetatom = netatomty(ord(high(netatomty))-4);
 var
@@ -3338,6 +3359,10 @@ begin
   end
   else begin
    setnetatomarrayitem(id,net_wm_window_type,net_wm_window_type_normal);
+  end;
+  if (options.options * noframewindowtypes <> []) and 
+                           (netatoms[motif_wm_hints] <> 0) then begin
+   setlongproperty(id,netatoms[motif_wm_hints],[mwm_hints_decorations,0,0,0,0]);
   end;
   if (wo_popup in options.options) then begin
    gui_raisewindow(id);
