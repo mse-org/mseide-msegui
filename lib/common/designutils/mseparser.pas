@@ -22,7 +22,7 @@ type
 
  operatorty = (op_unknown);
  tokenkindty = (tk_operator,tk_whitespace,tk_name,tk_number,tk_newline,
-                   tk_fileend1,tk_include);
+                   tk_fileend,tk_include);
 
  sourceposty = record
   filenum: integer; //0 -> sourcepos empty
@@ -650,7 +650,7 @@ begin
    end;
   end;
  end;
- newtoken(tk_fileend1);
+ newtoken(tk_fileend);
 end;
 
 procedure tscanner.updatecase;
@@ -1109,13 +1109,13 @@ end;
 
 procedure tparser.nexttoken;
 begin
- if fto^.kind <> tk_fileend1 then begin
+ if fto^.kind <> tk_fileend then begin
   inc(ftokennum);
   fto:= @fscanner.ftokens[ftokennum];
  end
  else begin
   repeat
-  until (fto^.kind <> tk_fileend1) or not exitinclude;
+  until (fto^.kind <> tk_fileend) or not exitinclude;
  end;
 end;
 
@@ -1238,7 +1238,7 @@ end;
 function tparser.findoperator(aoperator: char): boolean;
 begin
  result:= false;
- while (fto^.kind <> tk_fileend1) or exitinclude do begin
+ while (fto^.kind <> tk_fileend) or exitinclude do begin
   if (fto^.kind = tk_operator) and (fto^.op = aoperator) then begin
    nexttoken;
    result:= true;
@@ -1251,7 +1251,7 @@ end;
 function tparser.getnextoperator: char;
 begin
  result:= #0;
- while (fto^.kind <> tk_fileend1) or exitinclude do begin
+ while (fto^.kind <> tk_fileend) or exitinclude do begin
   skipwhitespace;
   if (fto^.kind = tk_operator) then begin
    result:= fto^.op;
@@ -1354,11 +1354,11 @@ begin
    while (fto^.kind = tk_whitespace) or (fto^.kind = tk_newline) do begin
     nexttoken;
    end;
-   if fto^.kind = tk_fileend1 then begin
+   if fto^.kind = tk_fileend then begin
     nexttoken; //exit include file
    end;
   end;
-  if fto^.kind = tk_fileend1 then begin
+  if fto^.kind = tk_fileend then begin
    nexttoken; //exit include file
   end;
  until not ((fto^.kind = tk_whitespace) or (fto^.kind = tk_newline));
@@ -1642,10 +1642,10 @@ var
 begin
 // result:= false;
  po1:= fto;
- while (fto^.kind <> tk_fileend1) and (fto^.kind <> tk_newline) do begin
+ while (fto^.kind <> tk_fileend) and (fto^.kind <> tk_newline) do begin
   inc(fto);
  end;
- if fto^.kind <> tk_fileend1 then begin
+ if fto^.kind <> tk_fileend then begin
   inc(fto);
   result:= true;
  end
@@ -1832,7 +1832,7 @@ procedure tpascalparser.parsecompilerswitch;
 
  procedure skiprest;
  begin
-  while (fto^.kind <> tk_fileend1) and
+  while (fto^.kind <> tk_fileend) and
      not((fto^.kind = tk_operator) and (fto^.op = '}')) do begin
    nexttoken;
   end;
@@ -1845,7 +1845,7 @@ procedure tpascalparser.parsecompilerswitch;
    if not skipcomment then begin
     nexttoken;
    end;
-  until (fto^.kind = tk_fileend1) or (fdefstate <> def_skip);
+  until (fto^.kind = tk_fileend) or (fdefstate <> def_skip);
  end;
  
 var
@@ -1921,7 +1921,7 @@ begin
        else begin
         str1:= '';
         skipwhitespaceonly;
-        while not(fto^.kind in [tk_fileend1,tk_newline,tk_whitespace]) and
+        while not(fto^.kind in [tk_fileend,tk_newline,tk_whitespace]) and
            not((fto^.kind = tk_operator) and (fto^.op = '}')) do begin
          str1:= str1 + getorigtoken;
         end;
@@ -1966,38 +1966,57 @@ var
  first: boolean;
 begin
  result:= false;
- if (fto^.kind = tk_operator) and (fto^.op = '/') and checknextoperator('/') then begin
+ if (fto^.kind = tk_operator) and (fto^.op = '/') and 
+                                             checknextoperator('/') then begin
   result:= true;
-  while not ((fto^.kind = tk_newline) or (fto^.kind = tk_fileend1)) do begin
+  while not ((fto^.kind = tk_newline) or (fto^.kind = tk_fileend)) do begin
    nexttoken;
   end;
  end
  else begin
-  if (fto^.kind = tk_operator) and (fto^.op = '{') then begin
-   nexttoken;
-   result:= true;
-   first:= true;
-   int1:= 1;
-   while (int1 > 0) and (fto^.kind <> tk_fileend1) do begin
-    if (fto^.kind = tk_operator) then begin
-     if first and (fto^.op = '$') then begin //compiler switch
-      nexttoken;
-      parsecompilerswitch;
-      int1:= 0;
-      break;
-     end;
-     if fto^.op = '}' then begin
-      dec(int1);
-     end;
-     if (fto^.op = '{') and frecursivecomment then begin
-      inc(int1);
-     end;
-    end;
-    first:= false;
+  if (fto^.kind = tk_operator) then begin
+   if (fto^.op = '{') then begin
     nexttoken;
-   end;
-   if int1 > 0 then begin
-    syntaxerror;
+    result:= true;
+    first:= true;
+    int1:= 1;
+    while (int1 > 0) and (fto^.kind <> tk_fileend) do begin
+     if (fto^.kind = tk_operator) then begin
+      if first and (fto^.op = '$') then begin //compiler switch
+       nexttoken;
+       parsecompilerswitch;
+       int1:= 0;
+       break;
+      end;
+      if fto^.op = '}' then begin
+       dec(int1);
+      end;
+      if (fto^.op = '{') and frecursivecomment then begin
+       inc(int1);
+      end;
+     end;
+     first:= false;
+     nexttoken;
+    end;
+    if int1 > 0 then begin
+     syntaxerror;
+    end;
+   end
+   else begin
+    if (fto^.op = '(') and checknextoperator('*') then begin
+     nexttoken;
+     result:= true;
+     repeat
+      nexttoken;
+      if (fto^.kind = tk_operator) and (fto^.op = '*') then begin
+       nexttoken;
+       if (fto^.kind = tk_operator) and (fto^.op = ')') then begin
+        nexttoken;
+        break;
+       end;
+      end;
+     until fto^.kind = tk_fileend;
+    end;
    end;
   end;
  end;
@@ -2034,11 +2053,11 @@ begin
      inc(int1);
     end;
     if odd(int1) then begin
-     while (fto^.kind <> tk_fileend1) and (fto^.kind <> tk_newline) and
+     while (fto^.kind <> tk_fileend) and (fto^.kind <> tk_newline) and
       not ((fto^.kind = tk_operator) and (fto^.op = '''')) do begin
       value:= value + getorigtoken;
      end;
-     if (fto^.kind = tk_fileend1) or (fto^.kind = tk_newline) then begin
+     if (fto^.kind = tk_fileend) or (fto^.kind = tk_newline) then begin
       result:= false;
       break;
      end;
@@ -2181,7 +2200,7 @@ begin
      value:= value + getorigtoken;
     end;
    end;
-   if (fto^.kind = tk_fileend1) or (fto^.kind = tk_newline) then begin
+   if (fto^.kind = tk_fileend) or (fto^.kind = tk_newline) then begin
     result:= false;
     break;
    end;
@@ -2224,7 +2243,7 @@ procedure tcparser.parsepreprocdef;
 
  procedure skiprest;
  begin
-  while not ((fto^.kind = tk_newline) or (fto^.kind = tk_fileend1)) do begin
+  while not ((fto^.kind = tk_newline) or (fto^.kind = tk_fileend)) do begin
                                //skip rest of line
    nexttoken;
   end;
@@ -2359,7 +2378,7 @@ begin
     inc(fincomment);
    end
    else begin
-    while not ((fto^.kind = tk_newline) or (fto^.kind = tk_fileend1)) do begin
+    while not ((fto^.kind = tk_newline) or (fto^.kind = tk_fileend)) do begin
      nexttoken;
     end;
     result:= true;
@@ -2369,7 +2388,7 @@ begin
    if (fto^.kind = tk_operator) and (fto^.op = '/') and checknextoperator('*') then begin
     result:= true;
     int1:= 1;
-    while (int1 > 0) and (fto^.kind <> tk_fileend1) do begin
+    while (int1 > 0) and (fto^.kind <> tk_fileend) do begin
      if (fto^.kind = tk_operator) then begin
       if fto^.op = '*' then begin
        if checknextoperator('/') then begin
