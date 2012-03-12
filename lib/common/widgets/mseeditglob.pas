@@ -70,6 +70,7 @@ type
  dataeditstatety = (des_edited,des_emptytext,des_grayed,
                     des_isdb,des_dbnull,des_dbnullcheck,
                     des_actualcursor,des_updating,des_valueread,
+                    des_statreading,
                     des_updatelayout,des_editing);
  dataeditstatesty = set of dataeditstatety;
 

@@ -1929,10 +1929,20 @@ begin
 end;
 
 procedure tcustomdataedit.statread;
+var
+ bo1: boolean;
 begin
  if (oe_checkvaluepaststatread in foptionsedit) and 
                       (des_valueread in fstate) then begin
-  checkvalue;
+  bo1:= des_statreading in fstate;
+  include(fstate,des_statreading);
+  try
+   checkvalue;
+  finally
+   if not bo1 then begin
+    exclude(fstate,des_statreading);
+   end;
+  end;
  end;
 end;
 
@@ -2279,7 +2289,8 @@ end;
 function tcustomdataedit.nullcheckneeded(const newfocus: twidget): boolean;
 begin
  result:= false;
- if (newfocus <> self) and not ((oe_checkmrcancel in foptionsedit) and 
+ if (newfocus <> self) and not (des_statreading in fstate) and
+                not ((oe_checkmrcancel in foptionsedit) and 
                             (window.modalresult = mr_cancel)) then begin
   if fgridintf = nil then begin
    result:= (newfocus = nil) and 

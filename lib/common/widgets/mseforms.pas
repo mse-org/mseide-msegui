@@ -29,7 +29,8 @@ uses
 type
  formoptionty = (fo_main,fo_terminateonclose,fo_freeonclose,
                fo_windowclosecancel,
-               fo_defaultpos,fo_screencentered,fo_screencenteredvirt,fo_modal,
+               fo_defaultpos,fo_screencentered,fo_screencenteredvirt,
+               fo_modal,fo_createmodal,
                fo_minimized,fo_maximized,fo_fullscreen,fo_fullscreenvirt,
                fo_closeonesc,fo_cancelonesc,fo_closeonenter,fo_closeonf10,
                fo_keycloseifwinonly,
@@ -796,6 +797,11 @@ begin
  else begin
   registerhandlers;
  end;
+ if (fo_createmodal in foptions) and 
+         (componentstate*[csdesigning,csdestroying,csloading] = []) and
+                                                           showing then begin
+  show(true);
+ end;
 end;
 
 constructor tcustommseform.create(aowner: tcomponent);
@@ -1149,14 +1155,21 @@ begin
 end;
 
 procedure tcustommseform.setoptions(const Value: formoptionsty);
-const
- mask1: formoptionsty = [fo_screencentered,fo_screencenteredvirt,fo_defaultpos];
- mask2: formoptionsty = [fo_closeonesc,fo_cancelonesc];
- mask3: formoptionsty = [fo_maximized,fo_minimized,fo_fullscreen,fo_fullscreenvirt];
-var
- opt1,opt2: formoptionsty;
+//const
+// mask1: formoptionsty = [fo_screencentered,fo_screencenteredvirt,fo_defaultpos];
+// mask2: formoptionsty = [fo_closeonesc,fo_cancelonesc];
+// mask3: formoptionsty = [fo_maximized,fo_minimized,fo_fullscreen,fo_fullscreenvirt];
+//var
+// opt1,opt2: formoptionsty;
 begin
  if foptions <> value then begin
+  foptions:= formoptionsty(setsinglebit(longword(value),longword(foptions),
+   [longword([fo_screencentered,fo_screencenteredvirt,fo_defaultpos]),
+    longword([fo_closeonesc,fo_cancelonesc]),
+    longword([fo_maximized,fo_minimized,fo_fullscreen,fo_fullscreenvirt]),
+    longword([fo_modal,fo_createmodal])
+   ]));
+{
   opt1:= formoptionsty(setsinglebit(
        {$ifdef FPC}longword{$else}longword{$endif}(value),
        {$ifdef FPC}longword{$else}longword{$endif}(foptions),
@@ -1177,6 +1190,7 @@ begin
        {$ifdef FPC}longword{$else}longword{$endif}(opt2),
        {$ifdef FPC}longword{$else}longword{$endif}(foptions),
        {$ifdef FPC}longword{$else}longword{$endif}(mask3)));
+}
   updateoptions;
  end;
 end;
