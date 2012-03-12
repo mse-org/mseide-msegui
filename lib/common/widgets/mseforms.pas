@@ -1169,7 +1169,7 @@ begin
     longword([fo_maximized,fo_minimized,fo_fullscreen,fo_fullscreenvirt]),
     longword([fo_modal,fo_createmodal])
    ]));
-{
+(*
   opt1:= formoptionsty(setsinglebit(
        {$ifdef FPC}longword{$else}longword{$endif}(value),
        {$ifdef FPC}longword{$else}longword{$endif}(foptions),
@@ -1190,7 +1190,7 @@ begin
        {$ifdef FPC}longword{$else}longword{$endif}(opt2),
        {$ifdef FPC}longword{$else}longword{$endif}(foptions),
        {$ifdef FPC}longword{$else}longword{$endif}(mask3)));
-}
+*)
   updateoptions;
  end;
 end;
