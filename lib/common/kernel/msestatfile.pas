@@ -312,6 +312,9 @@ begin
       floadedfile:= defaultfile(ar1);
       if canevent(tmethod(fonfilemissing)) then begin
        fonfilemissing(self,floadedfile,stream1,by1);
+       if stream1 <> nil then begin
+        floadedfile:= '';
+       end;
       end;
      end;
     until (stream1 <> nil) or not by1;
