@@ -222,7 +222,7 @@ end;
 procedure tmsefixedformatdataset.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
-  inherited;
+  inherited setactive(value);
  end;
 end;
 
@@ -478,7 +478,7 @@ end;
 procedure tmsesdfdataset.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
-  inherited;
+  inherited setactive(value);
  end;
 end;
 

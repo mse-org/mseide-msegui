@@ -186,7 +186,7 @@ end;
 procedure tlocaldataset.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
-  inherited;
+  inherited setactive(value);
  end;
 end;
 

@@ -1028,7 +1028,7 @@ begin
  result:= sys_getfileinfo(filename,info) and (info.extinfo1.filetype <> ft_dir);
 end;
 
-function finddir(const filename: filenamety): boolean; overload;
+function finddir(const filename: filenamety): boolean;
 var
  info: fileinfoty;
 begin

@@ -6047,14 +6047,14 @@ end;
 
 { tdbdropdownlist }
 
-constructor tdbdropdownlist.create(const acontroller: tcustomdbdropdownlistcontroller;
-                             acols: tdropdowncols);
+constructor tdbdropdownlist.create(
+      const acontroller: tcustomdbdropdownlistcontroller; acols: tdropdowncols);
 var
  int1: integer;
 begin
  fdatalink:= tdropdownlistdatalink.create(self,igriddatalink(self),
                                                     acontroller.fdatalink);
- inherited;
+ inherited create(acontroller,acols);
  include(fstate,gs_isdb);
  fzebra_step:= 0;
  fdatalink.datasource:= acontroller.datasource;
@@ -9591,7 +9591,7 @@ end;
 
 constructor texterndatadropdownlistcontroller.create(const intf: ilbdropdownlist);
 begin
- inherited;
+ inherited create(intf);
  options:= defaulteddropdownoptions;
 end;
 
@@ -10481,7 +10481,7 @@ constructor texterndatadropdownlist.create(
 var
  int1,int2,int3: integer;
 begin
- inherited;
+ inherited create(acontroller,acols);
  include(fstate,gs_isdb);
  int1:= acontroller.dropdownrowcount;
  if (edds_filtered in feddstate) then begin

@@ -2067,7 +2067,7 @@ constructor tlookupdbdispfielddatalink.create(const aowner: tcustomdataedit;
 begin
  flookupdatalink:= tlookupdatalink.create;
  flookupdatalink.fdisplink:= self;
- inherited;
+ inherited create(aowner,intf);
 end;
 
 destructor tlookupdbdispfielddatalink.destroy;
