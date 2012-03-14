@@ -421,7 +421,7 @@ end;
 
 constructor tgraphicdatalink.create(const intf: idbgraphicfieldlink);
 begin
- inherited;
+ inherited create(intf);
 end;
 
 procedure tgraphicdatalink.setfield(const value: tfield);

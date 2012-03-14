@@ -5169,7 +5169,7 @@ begin
    end;
   end;
  end;
- inherited;
+ inherited bindfields(bind);
 end;
 
 function tmsebufdataset.findfields(const anames: string): fieldarty;

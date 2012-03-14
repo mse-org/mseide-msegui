@@ -70,7 +70,7 @@ uses
 constructor tifidbwidgetgridcontroller.create(const aowner: tdbrxwidgetgrid;
                                         const aintf: iactivatorclient);
 begin
- inherited;
+ inherited create(aowner,aintf);
 end;
 
 function tifidbwidgetgridcontroller.getifireckinds: ifireckindsty;

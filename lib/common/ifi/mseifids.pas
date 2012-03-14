@@ -1593,7 +1593,7 @@ begin
    end;
   end;
  end;
- inherited;
+ inherited bindfields(bind);
 end;
 
 function tifidataset.getfieldbuffer(const afield: tfield; out buffer: pointer;
@@ -2104,7 +2104,7 @@ begin
   cancelconnection;
  end;
  if fcontroller.setactive(value) then begin
-  inherited;
+  inherited setactive(value);
  end;
 end;
 
