@@ -833,7 +833,7 @@ end;
 
 constructor tmsefilestream.create(ahandle: integer); //allways called
 begin
- inherited;
+ inherited create(ahandle);
 end;
 
 constructor tmsefilestream.Create;

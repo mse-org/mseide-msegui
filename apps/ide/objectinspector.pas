@@ -475,6 +475,7 @@ var
  prop1: tpropertyitem;
 begin
  prop1:= self;
+ result:= '';
  while prop1 <> nil do begin
   if (prop1.feditor is tarrayelementeditor) or 
               (prop1.feditor is tcollectionitemeditor) then begin
