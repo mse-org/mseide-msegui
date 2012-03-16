@@ -83,6 +83,7 @@ type
 
 function formatdatetimemse(const formatstr: msestring; const datetime: tdatetime;
             const formatsettings: tformatsettingsmse): msestring; overload;
+//            'I' = ISO date, 'II' ISO datetime, 'III' ISO datetime + ms
 function formatdatetimemse(const formatstr: msestring;
                           const datetime: tdatetime): msestring; overload;
 
@@ -523,7 +524,7 @@ var
                 end ;
              '/': StoreStr(@DateSeparator, 1);
              ':': StoreStr(@TimeSeparator, 1);
-             ' ', 'C', 'D', 'H', 'M', 'N', 'S', 'T', 'Y','Z' :
+             ' ', 'C', 'D', 'H', 'I', 'M', 'N', 'S', 'T', 'Y','Z' :
                begin
                  while (P < FormatEnd) and (charUpperCase(P^) = Token) do
                    P := P + 1;
@@ -593,15 +594,27 @@ var
                        if Count = 1 then StoreFormat(ShortTimeFormat)
                        else StoreFormat(LongTimeFormat);
                        end ;
-                    'C':
-                      begin
+                    'C': begin
                         StoreFormat(ShortDateFormat);
                         if (Hour<>0) or (Minute<>0) or (Second<>0) then
                          begin
                            StoreString(' ');
                            StoreFormat(LongTimeFormat);
                          end;
+                    end;
+                    'I': begin
+                     case count of
+                      1: begin
+                       StoreFormat('YYYY-MM-DD');
                       end;
+                      2: begin
+                       StoreFormat('YYYY-MM-DD"T"HH:MM:SS');
+                      end;
+                      else begin
+                       StoreFormat('YYYY-MM-DD"T"HH:MM:SS:ZZZ');
+                      end;
+                     end;
+                    end;
                  end;
                  lastformattoken:=token;
                end;

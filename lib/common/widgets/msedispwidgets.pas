@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -122,6 +122,7 @@ type
    ftext: msestring;
    foptions: dispwidgetoptionsty;
    ftextflags: textflagsty;
+   ftextrectvalid: boolean;
 {$ifdef mse_with_ifi}
    fifilink: tifilinkcomp;
 //   procedure ifisetvalue(var avalue; var accept: boolean);
@@ -137,12 +138,14 @@ type
    procedure settextflags(const value: textflagsty);
    procedure settext(const avalue: msestring);
   protected
+   procedure invalidatetext;
    procedure setoptions(const avalue: dispwidgetoptionsty); virtual;
    procedure valuechanged; virtual;
    procedure formatchanged;
    function getvaluetext: msestring; virtual; abstract;
    procedure dopaint(const canvas: tcanvas); override;
    procedure clientrectchanged; override;
+   procedure getautopaintsize(var asize: sizety); override;
    procedure fontchanged; override;
    procedure internalcreateframe; override;
    procedure doloaded; override;
@@ -435,27 +438,49 @@ begin
  if ftextflags <> value then begin
   ftextflags:= value;
   updatetextflags;
-  invalidate;
+  invalidatetext;
  end;
 end;
 
 procedure tdispwidget.clientrectchanged;
 begin
+ ftextrectvalid:= false;
  inherited;
  finfo.dest:= innerclientrect;
+end;
+
+procedure tdispwidget.getautopaintsize(var asize: sizety);
+var
+ fram1: framety;
+begin
+ if fframe = nil then begin
+  fram1:= nullframe;
+ end
+ else begin
+  fram1:= fframe.innerframe;
+ end;
+ if not ftextrectvalid then begin
+  msedrawtext.textrect(getcanvas,finfo);
+  ftextrectvalid:= true;
+ end;
+ asize:= finfo.res.size;
+
+ asize.cx:= asize.cx + fram1.left + fram1.right;
+ asize.cy:= asize.cy + fram1.top + fram1.bottom;
 end;
 
 procedure tdispwidget.dopaint(const canvas: tcanvas);
 begin
  inherited;
  drawtext(canvas,finfo);
+ ftextrectvalid:= true;
 end;
 
 procedure tdispwidget.fontchanged;
 begin
  inherited;
  finfo.font:= getfont;
- invalidate;
+ invalidatetext;
 end;
 
 procedure tdispwidget.internalcreateframe;
@@ -472,14 +497,15 @@ begin
  else begin
   finfo.text.text:= avalue;
  end;
- invalidate;
+ invalidatetext;
 end;
 
 procedure tdispwidget.valuechanged;
 begin
  if ftext = '' then begin
   finfo.text.text:= getvaluetext;
-  invalidate;
+  ftextrectvalid:= false;
+  invalidatetext;
  end;
 {$ifdef mse_with_ifi}
  if not (ws_loadedproc in fwidgetstate) then begin
@@ -533,7 +559,7 @@ procedure tdispwidget.formatchanged;
 begin
  if ftext = '' then begin
   finfo.text.text:= getvaluetext;
-  invalidate;
+  invalidatetext;
  end;
 end;
 
@@ -586,8 +612,15 @@ begin
  if foptions <> avalue then begin
   foptions:= avalue-[dwo_showlocal,dwo_showutc];
   updatetextflags;
-  invalidate;
+  invalidatetext;
  end;
+end;
+
+procedure tdispwidget.invalidatetext;
+begin
+ ftextrectvalid:= false;
+ invalidate;
+ checkautosize;
 end;
 
 {$ifdef mse_with_ifi}

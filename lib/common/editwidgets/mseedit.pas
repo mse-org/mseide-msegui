@@ -1323,7 +1323,12 @@ procedure tcustomedit.getautopaintsize(var asize: sizety);
 var
  fram1: framety;
 begin
- fram1:= getinnerframe;
+ if fframe = nil then begin
+  fram1:= getinnerframe;
+ end
+ else begin
+  fram1:= fframe.innerframe;
+ end;
  asize:= feditor.textrect.size;
  asize.cx:= asize.cx + fram1.left + fram1.right;
  asize.cy:= asize.cy + fram1.top + fram1.bottom;
