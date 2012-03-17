@@ -1247,15 +1247,20 @@ const
   int1: integer;
  begin
   ico:= getico(interval,intervalcount);
-  result:= power(interval,avalue div ico);
-  int1:= avalue mod ico;
-  if int1 <> 0 then begin
-   if int1 < 0 then begin
-    int1:= int1+ico;
-    result:= result * ((int1+intervalcount-ico)/intervalcount);
-   end
-   else begin
-    result:= result * interval * ((int1+intervalcount-ico)/intervalcount);
+  if ico = 0 then begin
+   result:= 0;
+  end
+  else begin
+   result:= power(interval,avalue div ico);
+   int1:= avalue mod ico;
+   if int1 <> 0 then begin
+    if int1 < 0 then begin
+     int1:= int1+ico;
+     result:= result * ((int1+intervalcount-ico)/intervalcount);
+    end
+    else begin
+     result:= result * interval * ((int1+intervalcount-ico)/intervalcount);
+    end;
    end;
   end;
  end;
@@ -1266,11 +1271,16 @@ const
   rea1{,rea2}: real;
   ico: integer;
  begin
-  result:= floor(logn(interval,avalue) + tolerance);
-  rea1:= intpower(interval,result+1);
-  ico:= getico(interval,intervalcount);
-  result:= floor(result * ico + (avalue/rea1)*intervalcount+tolerance) -
-                                                          intervalcount + ico;
+  if avalue > 0 then begin
+   result:= floor(logn(interval,avalue) + tolerance);
+   rea1:= intpower(interval,result+1);
+   ico:= getico(interval,intervalcount);
+   result:= floor(result * ico + (avalue/rea1)*intervalcount+tolerance) -
+                                                           intervalcount + ico;
+  end
+  else begin
+   result:= 0;
+  end;
  end;
   
 var
@@ -1530,8 +1540,10 @@ begin
        end;
        logstartn:= getlogn(fsstart,interval,intervalcount1);
        rea1:= getlogval(logstartn,interval,intervalcount1);
-       if (fsstart-rea1)/fsstart > tolerance then begin
-        inc(logstartn);
+       if fsstart <> 0 then begin
+        if (fsstart-rea1)/fsstart > tolerance then begin
+         inc(logstartn);
+        end;
        end;
        rea1:= fsstart + frange;
        int1:= getlogn(rea1,interval,intervalcount1);
@@ -1556,6 +1568,9 @@ begin
        first:= (first * frange) / intervalcount; //real value
       end;
       inc(int1);
+      if int1 < 0 then begin
+       int1:= 0;
+      end;
       system.setlength(ticks,int1);
       system.setlength(ticksreal,int1);
       if islog then begin
