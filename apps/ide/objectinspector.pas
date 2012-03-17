@@ -122,6 +122,7 @@ type
    procedure selchanged(const sender: tdatacol);
    procedure clearselect(const sender: TObject);
    procedure valuescellevent(const sender: TObject; var info: celleventinfoty);
+   procedure valuesenterexe(const sender: TObject);
   private
    factmodule: tmsecomponent;
    factcomp: tcomponent;
@@ -638,6 +639,11 @@ begin
   props.itemlist.endupdate;
   values.itemlist.endupdate;
  end;
+end;
+
+procedure tobjectinspectorfo.valuesenterexe(const sender: TObject);
+begin
+ tpropertyvalue(values.item).updatestate; 
 end;
 
 procedure tobjectinspectorfo.moduleactivated(const adesigner: idesigner;
@@ -1313,6 +1319,7 @@ begin
   finally
    values.itemlist.decupdate;
   end;
+//  tpropertyvalue(values[info.cellbefore.row]).updatestate(false);
  end
  else begin
   if not frereadprops and isrowexit(info,true) and 

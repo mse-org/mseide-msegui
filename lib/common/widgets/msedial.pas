@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2009-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2009-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -55,7 +55,7 @@ type
 //  kind: dialdatakindty;
  end;
 
- dialtickoptionty =  (dto_opposite,dto_rotatetext,
+ dialtickoptionty =  (dto_invisible,dto_opposite,dto_rotatetext,
                       dto_multiplecaptions); 
                       //allow captions of different ticks at same position
                                     
@@ -120,7 +120,7 @@ type
    property escapement: real read fli.escapement write setescapement;
  end;
 
- dialmarkeroptionty = (dmo_opposite,dmo_rotatetext,
+ dialmarkeroptionty = (dmo_invisible,dmo_opposite,dmo_rotatetext,
                        dmo_hideoverload,dmo_limitoverload,
                        dmo_fix,dmo_ordered,dmo_savevalue); //for tchartedit
  dialmarkeroptionsty = set of dialmarkeroptionty;
@@ -144,11 +144,14 @@ type
 //   procedure writevalue(writer: twriter);
    procedure setvalue(const avalue: realty);
    procedure setoptions(const avalue: dialmarkeroptionsty);
+   function getvisible: boolean;
+   procedure setvisible(const avalue: boolean);
   protected
    procedure defineproperties(filer: tfiler); override;
    procedure updatemarker;
   public
    procedure paint(const acanvas: tcanvas);
+   property visible: boolean read getvisible write setvisible;
   published
    property value: realty read finfo.value write setvalue {stored false};
    property options: dialmarkeroptionsty read finfo.options 
@@ -180,9 +183,12 @@ type
    procedure setinterval(const avalue: real);
    function isintervalcountstored: boolean;
    function isintervalstored: boolean;
+   function getvisible: boolean;
+   procedure setvisible(const avalue: boolean);
   protected
 //   procedure paint(const acanvas: tcanvas);
   public
+   property visible: boolean read getvisible write setvisible;
   published
    property intervalcount: real read getintervalcount write setintervalcount 
                                        stored isintervalcountstored;
@@ -206,7 +212,7 @@ type
    property items[const index: integer]: tdialtick read getitems; default;
  end;
  
- dialoptionty = (do_opposite,do_sideline,do_boxline,do_log,
+ dialoptionty = (do_invisible,do_opposite,do_sideline,do_boxline,do_log,
                  do_front,do_scrollwithdata,do_shiftwithdata,
                  do_savestate);
  dialoptionsty = set of dialoptionty;  
@@ -266,6 +272,8 @@ type
    procedure setindent2(const avalue: integer);
    function getlog: boolean;
    procedure setlog(const avalue: boolean);
+   function getvisible: boolean;
+   procedure setvisible(const avalue: boolean);
   protected
    procedure setdirection(const avalue: graphicdirectionty); virtual;
    procedure changed;
@@ -289,6 +297,7 @@ type
    destructor destroy; override;
    procedure paint(const acanvas: tcanvas);
    procedure afterpaint(const acanvas: tcanvas);
+   property visible: boolean read getvisible write setvisible;
    property options: dialoptionsty read foptions write setoptions default []; 
                 //first!
    property log: boolean read getlog write setlog;
@@ -687,6 +696,7 @@ var
  rea1,rea2: real;
  start1,stop1: real;
  size1: sizety;
+ pt1: pointty;
 begin
  with tcustomdialcontroller(fowner),fli,finfo,line do begin
   getactdialrect(rect1);
@@ -780,6 +790,11 @@ begin
    end;
    transform(a);
    transform(b);
+   if dmo_opposite in options then begin
+    pt1:= a;
+    a:= b;
+    b:= pt1;
+   end;
   end;
  end;
 end;
@@ -790,6 +805,21 @@ begin
   finfo.options:= avalue;
   changed;
  end;
+end;
+
+function tdialmarker.getvisible: boolean;
+begin
+ result:= not (dmo_invisible in finfo.options);
+end;
+
+procedure tdialmarker.setvisible(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options - [dmo_invisible];
+ end
+ else begin
+  options:= options + [dmo_invisible];
+ end; 
 end;
 
 { tdialmarkers }
@@ -814,7 +844,11 @@ var
  int1: integer;
 begin
  for int1:= high(fitems) downto 0 do begin
-  tdialmarker(fitems[int1]).paint(acanvas);
+  with tdialmarker(fitems[int1]) do begin
+   if visible then begin
+    paint(acanvas);
+   end;
+  end;
  end;
 end;
 
@@ -912,6 +946,21 @@ begin
                            (finfo.interval <> 0);
 end;
 
+function tdialtick.getvisible: boolean;
+begin
+ result:= not (dto_invisible in finfo.options);
+end;
+
+procedure tdialtick.setvisible(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options - [dto_invisible];
+ end
+ else begin
+  options:= options + [dto_invisible];
+ end; 
+end;
+
 { tdialticks }
 
 constructor tdialticks.create(const aowner: tcustomdialcontroller);
@@ -1006,9 +1055,13 @@ procedure tcustomdialcontroller.calclineend(const ainfo: diallineinfoty;
                    const aopposite: boolean;
                    const arect: rectty; out linestart,lineend: integer;
                    out linedirection: graphicdirectionty);
+var
+ int1: integer;
+ bo1: boolean;
 begin
+ bo1:= (do_opposite in foptions) xor aopposite;
  linedirection:= fdirection;
- if (do_opposite in foptions) xor aopposite then begin
+ if bo1 then begin
   linedirection:= graphicdirectionty((ord(fdirection)+2) and $3);
  end;
  with ainfo do begin
@@ -1051,6 +1104,13 @@ begin
    end;
   end;
  end;
+ {
+ if bo1 then begin
+  int1:= linestart;
+  linestart:= lineend;
+  lineend:= int1;
+ end;
+ }
 end;
 
 procedure tcustomdialcontroller.transform(var apoint: pointty);
@@ -1233,6 +1293,7 @@ var
  logstartn,intervalcount1: integer;
  ar1: realarty;
  ar2: booleanarty;
+ pt1: pointty;
  
 begin
  if not (dis_layoutvalid in fstate) then begin
@@ -1657,8 +1718,21 @@ begin
     end;
    end;
   end;
+  for int4:= 0 to high(fticks.fitems) do begin
+   with tdialtick(fticks.fitems[int4]).finfo do begin
+    if dto_opposite in options then begin
+     for int1:= 0 to high(ticks) do begin
+      with ticks[int1] do begin
+       pt1:= a;
+       a:= b;
+       b:= pt1;
+      end;
+     end;
+    end;
+   end;
+  end;
+  include(fstate,dis_layoutvalid);
  end;
- include(fstate,dis_layoutvalid);
 end;
 
 procedure tcustomdialcontroller.invalidate;
@@ -1670,21 +1744,25 @@ procedure tcustomdialcontroller.paintdial(const acanvas: tcanvas);
 var
  int1,int2: integer;
 begin
- for int1:= high(fticks.fitems) downto 0 do begin
-  with tdialtick(fticks.fitems[int1]),finfo do begin
-   if ticks <> nil then begin
-    acanvas.linewidthmm:= actualwidthmm;
-    if dashes <> '' then begin
-     acanvas.dashes:= dashes;
-    end;
-    acanvas.drawlinesegments(ticks,actualcolor);
-    if dashes <> '' then begin
-     acanvas.dashes:= '';
-    end;
-   end;
-   for int2:= 0 to high(captions) do begin
-    with captions[int2] do begin
-     acanvas.drawstring(caption,pos,afont,false,angle);
+ if visible then begin
+  for int1:= high(fticks.fitems) downto 0 do begin
+   with tdialtick(fticks.fitems[int1]),finfo do begin
+    if visible then begin
+     if ticks <> nil then begin
+      acanvas.linewidthmm:= actualwidthmm;
+      if dashes <> '' then begin
+       acanvas.dashes:= dashes;
+      end;
+      acanvas.drawlinesegments(ticks,actualcolor);
+      if dashes <> '' then begin
+       acanvas.dashes:= '';
+      end;
+     end;
+     for int2:= 0 to high(captions) do begin
+      with captions[int2] do begin
+       acanvas.drawstring(caption,pos,afont,false,angle);
+      end;
+     end;
     end;
    end;
   end;
@@ -1920,6 +1998,21 @@ begin
  else begin
   options:= options - [do_log];
  end;
+end;
+
+function tcustomdialcontroller.getvisible: boolean;
+begin
+ result:= not (do_invisible in foptions);
+end;
+
+procedure tcustomdialcontroller.setvisible(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options - [do_invisible];
+ end
+ else begin
+  options:= options + [do_invisible];
+ end; 
 end;
 
 { tcustomdial }
