@@ -708,7 +708,11 @@ begin
    calclineend(fli,dmo_opposite in options,rect1,linestart,lineend,dir1);
    if do_log in foptions then begin
     rea2:= chartln(fsstart);
-    rea1:= (chartln(value) - rea2)/(chartln(frange+fsstart)-rea2);
+    rea1:= (chartln(frange+fsstart)-rea2);
+    if rea1 = 0 then begin
+     exit;
+    end;
+    rea1:= (chartln(value) - rea2)/rea1;
 //    rea1:= (chartln(value)-chartln(fstart))/chartln({fstart+}frange);
    end
    else begin
@@ -1056,7 +1060,7 @@ procedure tcustomdialcontroller.calclineend(const ainfo: diallineinfoty;
                    const arect: rectty; out linestart,lineend: integer;
                    out linedirection: graphicdirectionty);
 var
- int1: integer;
+// int1: integer;
  bo1: boolean;
 begin
  bo1:= (do_opposite in foptions) xor aopposite;
@@ -1532,7 +1536,11 @@ begin
       calclineend(fli,dto_opposite in options,rect1,linestart,lineend,dir1);
       if islog then begin
        offs:= -chartln(fsstart);
-       step:= 1/(chartln(fsstart+frange) + offs); //used for scaling
+       rea1:= (chartln(fsstart+frange) + offs);
+       if rea1 = 0 then begin
+        exit;
+       end;
+       step:= 1/rea1; //used for scaling
        offs:= offs * step;
        intervalcount1:= round(intervalcount);
        if interval <= 0 then begin
