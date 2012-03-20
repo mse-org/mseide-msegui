@@ -606,13 +606,22 @@ var
  procedure checkowned;
  var
   int1: integer;
+  comp1: tcomponent;
   po1: pformselectedinfoty;
  begin
+  result:= false;
   po1:= datapo;
   for int1:= 0 to count - 1 do begin
-   if (po1^.selectedinfo.instance = amodule) or
-           (po1^.selectedinfo.instance.Owner = amodule) then begin
-    result:= true;
+   result:= po1^.selectedinfo.instance = amodule;
+   comp1:= po1^.selectedinfo.instance;
+   while comp1 <> nil do begin
+    if comp1 = amodule then begin
+     result:= true;
+     break;
+    end;
+    comp1:= comp1.owner;
+   end;
+   if result then begin
     break;
    end;
    inc(po1);
