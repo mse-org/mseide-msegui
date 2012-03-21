@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -387,7 +387,9 @@ type
     { Private declarations }
    fselectednames: filenamearty;
    procedure updatefiltertext;
-   procedure readlist;
+//   function readlist: boolean; //true if ok
+   function tryreadlist(const adir: filenamety): boolean;
+                  //restores old dir on error
    procedure changedir(const adir: filenamety);
   public
    dialogoptions: filedialogoptionsty;
@@ -1074,9 +1076,8 @@ end;
 
 procedure tfiledialogfo.changedir(const adir: filenamety);
 begin
+ tryreadlist(filepath(adir));
  with listview do begin
-  directory:= filepath(adir);
-  readlist;
   if filelist.count > 0 then begin
    focuscell(makegridcoord(0,0));
   end;
@@ -1119,16 +1120,18 @@ procedure Tfiledialogfo.upaction(const sender: TObject);
 begin
  listview.updir;
 end;
-
-procedure tfiledialogfo.readlist;
+{
+function tfiledialogfo.readlist: boolean;
 begin
+ result:= true;
  try
   with listview do begin
    readlist;
   end;
  except
   on ex: esys do begin
-   if esys(ex).error = sye_dirstream then begin
+   result:= false;
+  // if esys(ex).error = sye_dirstream then begin
     listview.directory:= '';
     with stockobjects do begin
      showerror(captions[sc_can_not_read_directory]+ ' ' + esys(ex).text,
@@ -1140,13 +1143,49 @@ begin
     except
      application.handleexception(self);
     end;
-   end
-   else begin
-    application.handleexception(self);
+//   end
+//   else begin
+//    application.handleexception(self);
+//   end;
+  end;
+  else begin
+   result:= false;
+   application.handleexception(self);
+  end;
+ end;
+end;
+}
+function tfiledialogfo.tryreadlist(const adir: filenamety): boolean;
+                  //restores old dir on error
+var
+ dirbefore: filenamety;
+begin
+ dirbefore:= listview.directory;
+ listview.directory:= adir;
+ result:= false;
+ try
+  listview.readlist;
+  result:= true;
+ except
+  on ex: esys do begin
+   result:= false;
+   with stockobjects do begin
+     showerror(captions[sc_can_not_read_directory]+ ' ' + esys(ex).text,
+               captions[sc_error]);
    end;
   end;
   else begin
+   result:= false;
    application.handleexception(self);
+  end;
+ end;
+ if not result then begin
+  listview.directory:= dirbefore;
+  try
+   listview.readlist;
+  except
+   listview.directory:= '';
+   listview.readlist;
   end;
  end;
 end;
@@ -1157,6 +1196,7 @@ var
  str1,str2,str3: filenamety;
 // ar1: msestringarty;
  bo1: boolean;
+ newdir: filenamety;
 begin
  avalue:= trim(avalue);
  unquotefilename(avalue,fselectednames);
@@ -1172,14 +1212,14 @@ begin
   str1:= extractrootpath(fselectednames);
   if str1 <> '' then begin
    bo1:= true;
-   listview.directory:= str1;
+   newdir:= str1;
    avalue:= quotefilename(fselectednames);
   end;
  end
  else begin
   str3:= filepath(listview.directory,avalue);
   splitfilepath(str3,str1,str2);
-  listview.directory:= str1;
+  newdir:= str1;
   if hasmaskchars(str2) then begin
    filter.value:= str2;
    listview.mask:= str2;
@@ -1187,7 +1227,7 @@ begin
   end
   else begin
    if searchfile(str3,true) <> '' then begin
-    listview.directory:= str3;
+    newdir:= str3;
     str2:= '';
    end;
   end;
@@ -1202,7 +1242,7 @@ begin
   bo1:= true;
  end;
  if bo1 then begin
-  readlist;
+  tryreadlist(newdir);
   if fdo_directory in dialogoptions then begin
    avalue:= listview.directory;
   end;
@@ -1212,13 +1252,16 @@ end;
 
 procedure tfiledialogfo.filepathentered(const sender: tobject);
 begin
- readlist;
+ tryreadlist(listview.directory);
+// readlist;
 end;
 
 procedure tfiledialogfo.dironsetvalue(const sender: TObject;
   var avalue: mseString; var accept: Boolean);
 begin
- listview.directory:= avalue;
+//
+ accept:= tryreadlist(avalue);
+// listview.directory:= avalue;
 end;
 
 procedure tfiledialogfo.listviewonlistread(const sender: tobject);
@@ -1379,9 +1422,9 @@ end;
 
 procedure tfiledialogfo.homeaction(const sender: TObject);
 begin
- dir.value:= sys_getuserhomedir;
- listview.directory:= dir.value;
- readlist;
+ tryreadlist(sys_getuserhomedir);
+ dir.value:= listview.directory;
+// readlist;
 end;
 
 { tfiledialogcontroller }
