@@ -1,5 +1,5 @@
 object msepopupcalendarfo: tpopupcalendarfo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton]
   frame.framewidth = 1
   frame.colorframe = -1610612734
   frame.localprops = [frl_framewidth, frl_colorframe]
@@ -10,7 +10,7 @@ object msepopupcalendarfo: tpopupcalendarfo
   bounds_cx = 233
   bounds_cy = 179
   anchors = [an_left, an_top, an_bottom]
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
   container.frame.localprops = [frl_framewidth]
@@ -27,7 +27,7 @@ object msepopupcalendarfo: tpopupcalendarfo
   oncreate = formoncreate
   moduleclassname = 'tmseform'
   object grid: tdrawgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
+    optionswidget1 = [ow1_fontglyphheight]
     frame.levelo = 0
     frame.framewidth = 1
     frame.colorframe = -1610612733
@@ -102,10 +102,6 @@ object msepopupcalendarfo: tpopupcalendarfo
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused, co1_rowreadonly]
         focusrectdist = 1
         ondrawcell = drawcell
-        font.color = -1610612729
-        font.name = 'stf_default'
-        font.xscale = 1
-        font.dummy = 0
       end>
     fixrows.count = 1
     fixrows.items = <    
@@ -142,7 +138,8 @@ object msepopupcalendarfo: tpopupcalendarfo
     reffontheight = 14
   end
   object monthdisp: tdatetimedisp
-    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
+    optionswidget1 = [ow1_fontglyphheight]
+    optionswidget = [ow_mousewheel, ow_destroywidgets]
     color = -1879048186
     taborder = 5
     bounds_x = 83
@@ -155,7 +152,8 @@ object msepopupcalendarfo: tpopupcalendarfo
     reffontheight = 14
   end
   object yeardisp: tdatetimedisp
-    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
+    optionswidget1 = [ow1_fontglyphheight]
+    optionswidget = [ow_mousewheel, ow_destroywidgets]
     color = -1879048186
     taborder = 4
     bounds_x = 0
@@ -168,7 +166,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     reffontheight = 14
   end
   object tstockglyphbutton1: tstockglyphbutton
-    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
+    optionswidget = [ow_mousewheel, ow_destroywidgets]
     taborder = 3
     bounds_x = 220
     bounds_y = 0
@@ -180,7 +178,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     onexecute = moup
   end
   object tstockglyphbutton2: tstockglyphbutton
-    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
+    optionswidget = [ow_mousewheel, ow_destroywidgets]
     taborder = 1
     bounds_x = 220
     bounds_y = 11
@@ -192,7 +190,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     onexecute = modown
   end
   object buup: tstockglyphbutton
-    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
+    optionswidget = [ow_mousewheel, ow_destroywidgets]
     taborder = 2
     bounds_x = 72
     bounds_y = 0
@@ -204,7 +202,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     onexecute = yearup
   end
   object budo: tstockglyphbutton
-    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
+    optionswidget = [ow_mousewheel, ow_destroywidgets]
     bounds_x = 72
     bounds_y = 11
     bounds_cx = 11

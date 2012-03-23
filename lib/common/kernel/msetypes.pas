@@ -72,6 +72,7 @@ type
  prealty = ^realty;
 
  datetimekindty = (dtk_date,dtk_time,dtk_datetime);
+ dayofweekty = (dw_sun,dw_mon,dw_tue,dw_wed,dw_thu,dw_fri,dw_sat);
 
 const
 {$ifndef FPC}

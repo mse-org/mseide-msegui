@@ -24,6 +24,8 @@ type
  end;
  
  tcalendarcontroller = class(tdropdownwidgetcontroller)
+  private
+   ffirstdayofweek: dayofweekty;
   protected
    procedure dropdownkeydown(var info: keyeventinfoty);
   public
@@ -31,6 +33,8 @@ type
    procedure editnotification(var info: editnotificationinfoty); override;
   published
    property bounds_cx default popupcalendarwidth;
+   property firstdayofweek: dayofweekty read ffirstdayofweek 
+                                        write ffirstdayofweek default dw_mon;
  end;
  
  tpopupcalendarfo = class(tmseform)
@@ -59,6 +63,7 @@ type
    procedure setvalue(const avalue: tdatetime);
    function isinvalidcell(const acell: gridcoordty): boolean;
   protected
+   fdayofweekoffset: integer;
 //   procedure mousewheelevent(var info: mousewheeleventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure doactivate; override;
@@ -121,6 +126,7 @@ end;
 
 constructor tcalendarcontroller.create(const intf: idropdowncalendar);
 begin
+ ffirstdayofweek:= dw_mon;
  inherited create(intf);
  fforcecaret:= true;
  bounds_cx:= popupcalendarwidth;
@@ -155,18 +161,30 @@ constructor tpopupcalendarfo.create(const aowner: tcomponent;
                                        const acontroller: tcalendarcontroller);
 begin
  fcontroller:= acontroller;
+ fdayofweekoffset:= ord(fcontroller.ffirstdayofweek)+1;
  inherited create(aowner);
 end;
 
 procedure tpopupcalendarfo.formoncreate(const sender: TObject);
 var
- int1: integer;
+ int1,int2: integer;
 begin
  with grid.fixrows[-1] do begin
+  int2:= ord(fcontroller.ffirstdayofweek);
+  for int1:= 0 to 6 do begin
+   captions[int1].caption:= 
+     defaultformatsettingsmse.shortdaynames[((int1+int2) mod 7)+1];
+  end;
+  {
   for int1:= 2 to 7 do begin
    captions[int1-2].caption:= defaultformatsettingsmse.shortdaynames[int1];
   end;
   captions[6].caption:= defaultformatsettingsmse.shortdaynames[1];
+  }
+ end;
+ with grid.datacols[(7-int2) mod 7] do begin
+  createfont;
+  font.color:= cl_red;
  end;
  value:= fvalue;
 end;
@@ -188,13 +206,14 @@ begin
   end;
   decodedate(avalue,year,month,day);
   dat1:= encodedate(year,month,1);
-  int1:= 2-dayofweek(dat1);
+  int1:= fdayofweekoffset-dayofweek(dat1);
   if int1 > 0 then begin
    int1:= int1 - 7;
   end;
   ffirstdate:= incday(dat1,int1);
   ffirstcol:= - int1;
-  flastcol:= dayofweek(encodedate(year,month,daysinmonth(avalue))-2) mod 7;
+  flastcol:= dayofweek(encodedate(year,month,daysinmonth(avalue))-
+                                                fdayofweekoffset) mod 7;
   flastrow:= (ffirstcol + daysinmonth(avalue) - 1) div 7;
   int1:= daysbetween(ffirstdate,avalue);
   grid.focuscell(makegridcoord(int1 mod 7,int1 div 7));
