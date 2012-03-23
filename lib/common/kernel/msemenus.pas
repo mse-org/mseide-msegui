@@ -1046,7 +1046,8 @@ end;
 
 function tmenuitem.doexec: boolean;
 begin
- result:= doactionexecute(self,finfo,true,false,@befexec);
+ result:= doactionexecute(self,finfo,true,
+                mao_nocandefocus in finfo.options{false},@befexec);
 end;
 
 function tmenuitem.internalexecute(async: boolean): boolean;
