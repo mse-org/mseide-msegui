@@ -2293,7 +2293,6 @@ type
    procedure setcursorshape(const avalue: cursorshapety);
    procedure setwidgetcursorshape(const avalue: cursorshapety);
    function getwindows(const index: integer): twindow;
-   procedure destroyforms;
    procedure dothreadterminated(const sender: tthreadcomp);
    procedure dowaitidle(var again: boolean);
    procedure dowaitidle1(var again: boolean);
@@ -2312,6 +2311,7 @@ type
    procedure objecteventdestroyed(const sender: tobjectevent); override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure destroyforms;
    procedure langchanged; override;
    procedure settimer(const us: integer); override;
    function findwindow(aid: winidty; out window: twindow): boolean;
