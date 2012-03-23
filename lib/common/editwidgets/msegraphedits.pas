@@ -103,6 +103,7 @@ type
    fstatvarname: msestring;
    fstatfile: tstatfile;
    foptionsedit: optionseditty;
+   foptionsedit1: optionsedit1ty;
    fedited: boolean;
    fvalueread: boolean;
 {$ifdef mse_with_ifi}
@@ -234,6 +235,8 @@ type
    property statvarname: msestring read getstatvarname write fstatvarname;
    property optionsedit: optionseditty read getoptionsedit write setoptionsedit
                               default defaultoptionsedit;
+   property optionsedit1: optionsedit1ty read foptionsedit1 
+                             write foptionsedit1 default defaultoptionsedit1;
    property onchange: notifyeventty read fonchange write fonchange;
    property ondataentered: notifyeventty read fondataentered write fondataentered;
 //   property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
@@ -552,6 +555,7 @@ type
   {$endif}
   protected
    class function classskininfo: skininfoty; override;
+   function isvaluestored: boolean;
    procedure setnullvalue;
    function getdefaultvalue: pointer; override;
    procedure valuetogrid(arow: integer); override;
@@ -579,7 +583,8 @@ type
    function checkvalue: boolean; override;
    procedure togglegridvalue(const index: integer); override;
    
-   property value: boolean read getvalue write setvalue default false;
+   property value: boolean read getvalue write setvalue 
+                                 stored isvaluestored nodefault;
    property valuedefault: boolean read getvaluedefault 
                                        write setvaluedefault default false;
                       //streaming of longbool does not work on kylix and fpc
@@ -677,6 +682,7 @@ type
    function getgridvalues: integerarty;
    procedure setgridvalues(const Value: integerarty);
   protected
+   function isvaluestored: boolean;
    procedure setgridintf(const intf: iwidgetgrid); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
@@ -702,7 +708,8 @@ type
    property gridvalues: integerarty read getgridvalues write setgridvalues;
    property datalist: tintegerdatalist read fdatalist;
    property onsetvalue: setintegereventty read fonsetvalue write fonsetvalue;
-   property value: integer read fvalue write setvalue default 0;
+   property value: integer read fvalue write setvalue 
+                                  stored isvaluestored nodefault;
    property valuedefault: integer read fvaluedefault write fvaluedefault default 0;
    property min: integer read fmin write fmin default 0; //checked by togglevalue
    property max: integer read fmax write fmax default 0; //checked by togglevalue
@@ -1380,6 +1387,7 @@ end;
 constructor tgraphdataedit.create(aowner: tcomponent);
 begin
  foptionsedit:= defaultoptionsedit;
+ foptionsedit1:= defaultoptionsedit1;
  inherited;
  fcolorglyph:= cl_glyph;
 end;
@@ -2578,6 +2586,11 @@ begin
  result:= gridvalue[aindex];
 end;
 
+function tcustombooleanedit.isvaluestored: boolean;
+begin
+ result:= fvalue or (oe1_streamdefaultvalue in optionsedit1);
+end;
+
 { tcustombooleaneditradio }
 
 function tcustombooleaneditradio.getglyph: stockglyphty;
@@ -2898,6 +2911,11 @@ end;
 procedure tcustomintegergraphdataedit.datalistdestroyed;
 begin
  fdatalist:= nil;
+end;
+
+function tcustomintegergraphdataedit.isvaluestored: boolean;
+begin
+ result:= (fvalue <> 0) or (oe1_streamdefaultvalue in optionsedit1);
 end;
 
 { tvaluefacearrayprop }
