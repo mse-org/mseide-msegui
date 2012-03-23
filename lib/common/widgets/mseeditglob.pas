@@ -64,8 +64,7 @@ type
  optionedit1ty = (oe1_noselectall,oe1_multiline,
                   oe1_autopopupmenu, 
                   oe1_keyexecute,    //alt+down-key starts dialog
-                  oe1_readonlydialog,
-                  oe1_streamdefaultvalue);
+                  oe1_readonlydialog);
  optionsedit1ty = set of optionedit1ty;
 
  dataeditstatety = (des_edited,des_emptytext,des_grayed,

@@ -314,7 +314,6 @@ type
    function getifilink: tifistringlinkcomp;
    procedure setifilink(const avalue: tifistringlinkcomp);
   {$endif}
-   procedure writevalue(writer: twriter);
   protected
    fvalue: msestring;
    fvaluedefault: msestring;
@@ -333,17 +332,14 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
    function sortfunc(const l,r): integer; override;
    function getdefaultvalue: pointer; override;
-   function isvaluestored: boolean;
-   procedure defineproperties(filer: tfiler); override;
+
   public
    function checkvalue(const quiet: boolean = false): boolean; override;
    procedure dragevent(var info: draginfoty); override;
    procedure fillcol(const value: msestring);
    procedure assigncol(const value: tmsestringdatalist);
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
-   property value: msestring read fvalue write setvalue
-                                              stored isvaluestored nodefault;
-
+   property value: msestring read fvalue write setvalue;
    property valuedefault: msestring read fvaluedefault write fvaluedefault;
    property gridvalue[const index: integer]: msestring
         read getgridvalue write setgridvalue; default;
@@ -670,14 +666,12 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure setnullvalue; override;
    function getdefaultvalue: pointer; override;
-   function isvaluestored: boolean;
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: integer);
    procedure assigncol(const value: tintegerdatalist);
    property onsetvalue: setintegereventty read fonsetvalue write fonsetvalue;
-   property value: integer read fvalue write setvalue 
-                                 stored isvaluestored nodefault;
+   property value: integer read fvalue write setvalue default 0;
    property valuedefault: integer read fvaluedefault write fvaluedefault default 0;
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 32;
@@ -2935,11 +2929,6 @@ begin
  result:= @fvaluedefault;
 end;
 
-function tcustomstringedit.isvaluestored: boolean;
-begin
- result:= (fvalue <> '') or (oe1_streamdefaultvalue in optionsedit1);
-end;
-
 {$ifdef mse_with_ifi}
 function tcustomstringedit.getifilink: tifistringlinkcomp;
 begin
@@ -2952,21 +2941,6 @@ begin
 end;
 
 {$endif}
-
-procedure tcustomstringedit.writevalue(writer: twriter);
-begin
- writer.writeunicodestring(fvalue)
-end;
-
-procedure tcustomstringedit.defineproperties(filer: tfiler);
-begin
- inherited;
- if (oe1_streamdefaultvalue in optionsedit1) and (fvalue = '') and 
-        ((filer.ancestor = nil) or 
-         (tcustomstringedit(filer.ancestor).fvalue = '')) then begin
-  filer.defineproperty('value',nil,@writevalue,true);
- end;
-end;
 
 { tstringedit }
 
@@ -3994,11 +3968,6 @@ end;
 function tcustomintegeredit.getdefaultvalue: pointer;
 begin
  result:= @fvaluedefault;
-end;
-
-function tcustomintegeredit.isvaluestored: boolean;
-begin
- result:= (fvalue <> 0) or (oe1_streamdefaultvalue in optionsedit1);
 end;
 
 { tcustomint64edit }
