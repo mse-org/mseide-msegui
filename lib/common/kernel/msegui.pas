@@ -2640,6 +2640,7 @@ function combineframestateflags(
 
 {$ifdef mse_debug}
 procedure debugwindow(const atext: string; const aid: winidty);
+function checkwindowname(const aid: winidty; const aname: string): boolean;
 {$endif}
 
 implementation
@@ -12676,6 +12677,7 @@ var
  window1: twindow;
  bo1: boolean;
  mini1: boolean;
+ mydesktop: integer;
 begin
  releasemouse;
  fstate:= fstate - [tws_posvalid,tws_sizevalid,tws_windowshowpending];
@@ -12711,16 +12713,20 @@ begin
     end
     else begin
      if (application.fmainwindow = self) and not appinst.terminated then begin
+      mydesktop:= gui_getwindowdesktop(fwindow.id);
       bo1:= gui_grouphideminimizedwindows;
       application.sortzorder;
       with appinst do begin
        setlength(fgroupzorder,length(fwindows));
        int2:= 0;
        for int1:= 0 to high(fwindows) do begin
-        if tws_windowvisible in fwindows[int1].fstate then begin
-                      //don't touch invisible windows
-         fgroupzorder[int2]:= fwindows[int1];
-         inc(int2);
+        with fwindows[int1] do begin
+         if (tws_windowvisible in fstate) and
+          (gui_getwindowdesktop(fwindow.id) = mydesktop) then begin
+                      //don't touch invisible windows or other desktops
+          fgroupzorder[int2]:= fwindows[int1];
+          inc(int2);
+         end;
         end;
        end;
        if int2 = 1 then begin
@@ -12752,7 +12758,8 @@ begin
        end;
       {$endif}
        if (window1 <> self) and (window1.fwindow.id <> 0) and 
-                         gui_windowvisible(window1.fwindow.id) then begin
+              gui_windowvisible(window1.fwindow.id) and 
+              (gui_getwindowdesktop(window1.fwindow.id) = mydesktop) then begin
         with window1 do begin
          include(fstate,tws_grouphidden);
          if tws_windowvisible in fstate then begin
@@ -12804,6 +12811,7 @@ var
  window1: twindow;
  size1: windowsizety;
  {bo1,}bo2: boolean;
+ mydesktop: integer;
 begin
  if windowevent then begin
   {$ifdef mse_debugconfigure}
@@ -12873,30 +12881,35 @@ begin
      exclude(fstate,tws_grouphidden);
      exclude(fstate,tws_groupminimized);
 //     bo1:= gui_grouphideminimizedwindows;
+     mydesktop:= gui_getwindowdesktop(fwindow.id);
      bo2:= false;
-     for int1:= 0 to high(appinst.fwindows) do begin
-      window1:= appinst.fwindows[int1];
-      if window1 <> self then begin
-       with window1 do begin
-        if tws_grouphidden in fstate then begin
-         size1:= wsi_minimized;
-         if tws_groupminimized in fstate then begin
-          size1:= wsi_normal;
-          if tws_groupmaximized in fstate then begin
-           size1:= wsi_maximized;
+     if not (wo_popup in foptions) and not (tws_modalfor in fstate) and
+                                                  (fmodallevel = 0) then begin
+      for int1:= 0 to high(appinst.fwindows) do begin
+       window1:= appinst.fwindows[int1];
+       if window1 <> self then begin
+        with window1 do begin
+         if (tws_grouphidden in fstate) and (fwindow.id <> 0) and 
+                       (gui_getwindowdesktop(fwindow.id) = mydesktop) then begin
+          size1:= wsi_minimized;
+          if tws_groupminimized in fstate then begin
+           size1:= wsi_normal;
+           if tws_groupmaximized in fstate then begin
+            size1:= wsi_maximized;
+           end;
           end;
+        {$ifdef mse_debugwindowfocus}
+          debugwindow('groupshow '+
+            getenumname(typeinfo(windowsizety),integer(size1))+' ',fwindow.id);
+        {$endif}
+          if fwindow.id <> 0 then begin
+           gui_setwindowstate(fwindow.id,size1,true);
+          end;
+          bo2:= true;
+          exclude(fstate,tws_grouphidden);
+          exclude(fstate,tws_groupminimized);
          end;
-       {$ifdef mse_debugwindowfocus}
-         debugwindow('groupshow '+
-           getenumname(typeinfo(windowsizety),integer(size1))+' ',fwindow.id);
-       {$endif}
-         if fwindow.id <> 0 then begin
-          gui_setwindowstate(fwindow.id,size1,true);
-         end;
-         bo2:= true;
         end;
-        exclude(fstate,tws_grouphidden);
-        exclude(fstate,tws_groupminimized);
        end;
       end;
      end;
@@ -15325,6 +15338,15 @@ begin
  end;
  debugwriteln(str1);
 end;
+
+function checkwindowname(const aid: winidty; const aname: string): boolean;
+var
+ window1: twindow;
+begin
+ result:= appinst.findwindow(aid,window1) and
+              (window1.fowner.name = aname);
+end;
+
 {$endif}
 
 procedure tinternalapplication.removewindowevents(const awindow: winidty;
@@ -15924,7 +15946,7 @@ procedure tinternalapplication.endmodal(const sender: twindow);
 begin
  with sender do begin
   if fmodallevel > 0 then begin
-   if not appinst.terminated then begin
+   if not appinst.terminated and (fmodalinfopo <> nil) then begin
     fmodalinfopo^.modalend:= true;
    end;
    dec(fmodallevel);

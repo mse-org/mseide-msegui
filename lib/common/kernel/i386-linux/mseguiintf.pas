@@ -20,6 +20,9 @@ interface
 {$ifdef mse_debugconfigure}
  {$define mse_debug}
 {$endif}
+{$ifdef mse_debugshow}
+ {$define mse_debug}
+{$endif}
 uses
  {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,mseapplication,
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
@@ -684,7 +687,7 @@ type
        net_wm_state_skip_taskbar,
        net_restack_window,net_close_window,
        //not supports checked below
-       net_wm_pid,
+       net_wm_pid,net_wm_desktop,
 
        net_wm_window_type_desktop,
        net_wm_window_type_dock,
@@ -720,7 +723,7 @@ const
        '_NET_WM_STATE_FULLSCREEN',
        '_NET_WM_STATE_SKIP_TASKBAR',
        '_NET_RESTACK_WINDOW','_NET_CLOSE_WINDOW',
-       '_NET_WM_PID', 
+       '_NET_WM_PID','_NET_WM_DESKTOP',
 
        '_NET_WM_WINDOW_TYPE_DESKTOP',
        '_NET_WM_WINDOW_TYPE_DOCK',
@@ -785,230 +788,6 @@ begin
  if result = 0 then begin
   result:= interlockedincrement(fidnum);
  end;
-end;
-
-function gui_sethighrestimer(const avalue: boolean): guierrorty;
-begin
- result:= gue_ok; //dummy
-end;
-
-function gui_grouphideminimizedwindows: boolean;
-begin
- result:= false;
-end;
-{
-function hasxft: boolean;
-begin
- result:= fhasxft;
-end;
-}
-function gui_getdefaultfontnames: defaultfontnamesty;
-begin
- result:= x11getdefaultfontnames;
-end;
-
-function gui_canstackunder: boolean;
-begin
- result:= not norestackwindow or not noreconfigurewmwindow;
-end;
-
-function gui_copytoclipboard(const value: msestring): guierrorty;
-begin
- gdi_lock;
- clipboard:= value;
- clipboardtimestamp:= lasteventtime;
- clipboardtimestamp:= clipboardtimestamp; //no "not used" compiler message
- xsetselectionowner(appdisp,clipboardatom,appid,lasteventtime);
- result:= gue_ok;
- gdi_unlock;
-end;
-
-function eventlater(const atime: ttime): boolean;
-begin
- result:= (atime = currenttime) or (lasteventtime = currenttime) or
-                           laterorsame(lasteventtime,atime);
-end;
-
-function gui_pastefromclipboard(out value: msestring): guierrorty;
-const
- transferbuffersize = 1024 div 4; //1kb
-var 
- clipboardowner: longword;
- value1: string;
- nitems1: integer;
- acttype: atom;
- actformat: cint;
-  
- function getdata(const target: atom; const resulttarget: atom): guierrorty;
- var
-  event: xevent;
-  po1: pchar;
-  nitems: culong;
-  bytesafter: culong;
-  charoffset: integer;
-  longoffset: clong;
-  time1: longword;
-  int1: integer;
-  bo1{,bo2}: boolean;
- begin
-  result:= gue_clipboard;
-  charoffset:= 1;
-  longoffset:= 0;
-  xdeleteproperty(appdisp,appid,convertselectionpropertyatom);
-  repeat      //remove pending notifications
-  until not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
-             {$ifndef xbooleanresult} <> 0{$endif});
-  xconvertselection(appdisp,clipboardatom,target,convertselectionpropertyatom,
-                       appid,lasteventtime);
-  time1:= timestep(2000000); //2 sec
-  bo1:= true;
-  repeat
-   bo1:= not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
-             {$ifndef xbooleanresult} = 0 {$endif});
-   if bo1 then begin
-    with event.xproperty do begin
-     bo1:= eventlater(time) and (atom = convertselectionpropertyatom) and
-             (state = propertynewvalue);
-    end;
-   end;
-//   if xcheckwindowevent(appdisp,appid,propertychangemask,@event)
-//             {$ifndef FPC} = 0 {$endif} then begin
-   if not bo1 then begin
-    if timeout(time1) then begin
-     exit;
-    end;
-    if bo1 then begin
-     bo1:= false;
-//     sys_threadschedyield;
-     sys_schedyield;
-    end
-    else begin
-     sleep(20);
-    end;
-   end
-   else begin
-    with event.xproperty do begin
-     nitems1:= 0;
-     bytesafter:= 0;
-     value1:= '';
-     repeat
-      if xgetwindowproperty(appdisp,appid,convertselectionpropertyatom,
-           longoffset,transferbuffersize,{$ifdef xboolean} true{$else}1{$endif},
-          anypropertytype,@acttype,@actformat,@nitems,@bytesafter,@po1) = success then begin
-       if (resulttarget = 0) or (acttype = resulttarget) then begin
-        if actformat = 32 then begin
-         actformat:= atombits;
-        end;
-        int1:= (actformat div 8) * nitems; //bytecount
-        if nitems > 0 then begin
-         inc(nitems1,nitems);
-         setlength(value1,length(value1) + int1 );
-         move(po1^,value1[charoffset],int1);
-         inc(charoffset,int1);
-         inc(longoffset,int1 div sizeof(dword));
-//         inc(longoffset,int1 div sizeof(atom)); //32/64 bit
-         result:= gue_ok;
-        end;
-       end
-       else begin
-        bytesafter:= 0;
-        result:= gue_clipboard;
-       end;
-       xfree(po1);
-      end
-      else begin
-       if timeout(time1) then begin
-        exit;
-       end;
-      end;
-     until bytesafter = 0;
-     break;
-    end;
-   end;
-  until false;
- end; //getdata
-
-var
- int1,int2: integer; 
- po1: patomaty;
- atoms1: array[0..4] of atom;
- atom1: atom;
- po2: ppchar;
- prop1: xtextproperty;
-
-begin
- gdi_lock;
- clipboardowner:= xgetselectionowner(appdisp,clipboardatom);
- if clipboardowner = appid then begin
-  value:= clipboard;
-  result:= gue_ok;
- end
- else begin
-  result:= gue_clipboard;
-  value:= '';
-  if clipboardowner <> none then begin
-   result:= getdata(targetsatom,atomatom);
-   if result = gue_ok then begin
-    po1:= pointer(value1);
-    atom1:= 0;
-    atoms1[0]:= utf8_stringatom; //preferred
-    atoms1[1]:= compound_textatom;
-    atoms1[2]:= textatom;
-    atoms1[3]:= textplainatom;
-    atoms1[4]:= stringatom;
-    for int2:= low(atoms1) to high(atoms1) do begin
-     for int1:= 0 to (length(value1) div sizeof(atom)) - 1 do begin
-      if po1^[int1] = atoms1[int2] then begin
-       atom1:= atoms1[int2];
-       break;
-      end;
-     end;
-     if atom1 <> 0 then begin
-      break;
-     end;
-    end;
-    if atom1 <> 0 then begin
-     result:= getdata(atom1,0);
-     if result = gue_ok then begin      
-      if acttype = utf8_stringatom then begin
-        value:= utf8tostring(value1);
-      end
-      else begin
-       if (acttype = textatom) or (acttype = textplainatom) then begin
-        value:= value1; //current locale
-       end
-       else begin
-        if acttype = compound_textatom then begin
-         with prop1 do begin
-          value:= pointer(value1);
-          encoding:= acttype;
-          format:= actformat;
-          nitems:= nitems1;
-         end;
-         xutf8textpropertytotextlist(appdisp,@prop1,@po2,@int1);
-         if int1 >= 1 then begin
-          value:= utf8tostring(string(po2^));
-         end;
-         xfreestringlist(po2);
-        end
-        else begin
-         value:= latin1tostring(value1);
-        end;
-       end;
-      end;
-     end;
-    end;
-   end;
-  end;
- end;
- gdi_unlock;
-end;
-
-function gui_canpastefromclipboard: boolean;
-begin
- gdi_lock;
- result:= xgetselectionowner(appdisp,clipboardatom) <> none;
- gdi_unlock;
 end;
 
 type
@@ -1246,6 +1025,294 @@ begin
  end;
 end;
 
+function setnetcardinal(const id: winidty; const aproperty: netatomty;
+                                         const avalue: longword): boolean;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ result:= false;
+ if netatoms[aproperty] <> 0 then begin
+  setlongproperty(id,netatoms[aproperty],avalue);
+  result:= true;
+ end;
+end;
+
+function getnetcardinal(const id: winidty; const aproperty: netatomty;
+                                         out avalue: longword): boolean;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ result:= false;
+ if netatoms[aproperty] <> 0 then begin
+  result:= readcardinalproperty(id,netatoms[aproperty],1,avalue);
+ end;
+end;
+
+function setnetatom(const id: winidty; const aproperty: netatomty;
+                                         const avalue: netatomty): boolean;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ result:= false;
+ if (netatoms[aproperty] <> 0) and (netatoms[avalue] <> 0) then begin
+  setatomproperty(id,netatoms[aproperty],netatoms[avalue]);
+  result:= true;
+ end;
+end;
+
+function setnetatomarrayitem(const id: winidty; const aproperty: netatomty;
+                                         const avalue: netatomty): boolean;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ result:= false;
+ if (netatoms[aproperty] <> 0) and (netatoms[avalue] <> 0) then begin
+  setatomarrayitemproperty(id,netatoms[aproperty],netatoms[avalue]);
+  result:= true;
+ end;
+end;
+
+function resetnetatomarrayitem(const id: winidty; const aproperty: netatomty;
+                                         const avalue: netatomty): boolean;
+begin
+{$ifdef mse_debuggdisync}
+ checkgdilock;
+{$endif} 
+ result:= false;
+ if (netatoms[aproperty] <> 0) and (netatoms[avalue] <> 0) then begin
+  resetatomarrayitemproperty(id,netatoms[aproperty],netatoms[avalue]);
+  result:= true;
+ end;
+end;
+
+function gui_sethighrestimer(const avalue: boolean): guierrorty;
+begin
+ result:= gue_ok; //dummy
+end;
+
+function gui_grouphideminimizedwindows: boolean;
+begin
+ result:= false;
+end;
+{
+function hasxft: boolean;
+begin
+ result:= fhasxft;
+end;
+}
+function gui_getdefaultfontnames: defaultfontnamesty;
+begin
+ result:= x11getdefaultfontnames;
+end;
+
+function gui_canstackunder: boolean;
+begin
+ result:= not norestackwindow or not noreconfigurewmwindow;
+end;
+
+function gui_copytoclipboard(const value: msestring): guierrorty;
+begin
+ gdi_lock;
+ clipboard:= value;
+ clipboardtimestamp:= lasteventtime;
+ clipboardtimestamp:= clipboardtimestamp; //no "not used" compiler message
+ xsetselectionowner(appdisp,clipboardatom,appid,lasteventtime);
+ result:= gue_ok;
+ gdi_unlock;
+end;
+
+function eventlater(const atime: ttime): boolean;
+begin
+ result:= (atime = currenttime) or (lasteventtime = currenttime) or
+                           laterorsame(lasteventtime,atime);
+end;
+
+function gui_pastefromclipboard(out value: msestring): guierrorty;
+const
+ transferbuffersize = 1024 div 4; //1kb
+var 
+ clipboardowner: longword;
+ value1: string;
+ nitems1: integer;
+ acttype: atom;
+ actformat: cint;
+  
+ function getdata(const target: atom; const resulttarget: atom): guierrorty;
+ var
+  event: xevent;
+  po1: pchar;
+  nitems: culong;
+  bytesafter: culong;
+  charoffset: integer;
+  longoffset: clong;
+  time1: longword;
+  int1: integer;
+  bo1{,bo2}: boolean;
+ begin
+  result:= gue_clipboard;
+  charoffset:= 1;
+  longoffset:= 0;
+  xdeleteproperty(appdisp,appid,convertselectionpropertyatom);
+  repeat      //remove pending notifications
+  until not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
+             {$ifndef xbooleanresult} <> 0{$endif});
+  xconvertselection(appdisp,clipboardatom,target,convertselectionpropertyatom,
+                       appid,lasteventtime);
+  time1:= timestep(2000000); //2 sec
+  bo1:= true;
+  repeat
+   bo1:= not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
+             {$ifndef xbooleanresult} = 0 {$endif});
+   if bo1 then begin
+    with event.xproperty do begin
+     bo1:= eventlater(time) and (atom = convertselectionpropertyatom) and
+             (state = propertynewvalue);
+    end;
+   end;
+//   if xcheckwindowevent(appdisp,appid,propertychangemask,@event)
+//             {$ifndef FPC} = 0 {$endif} then begin
+   if not bo1 then begin
+    if timeout(time1) then begin
+     exit;
+    end;
+    if bo1 then begin
+     bo1:= false;
+//     sys_threadschedyield;
+     sys_schedyield;
+    end
+    else begin
+     sleep(20);
+    end;
+   end
+   else begin
+    with event.xproperty do begin
+     nitems1:= 0;
+     bytesafter:= 0;
+     value1:= '';
+     repeat
+      if xgetwindowproperty(appdisp,appid,convertselectionpropertyatom,
+           longoffset,transferbuffersize,{$ifdef xboolean} true{$else}1{$endif},
+          anypropertytype,@acttype,@actformat,@nitems,@bytesafter,@po1) = success then begin
+       if (resulttarget = 0) or (acttype = resulttarget) then begin
+        if actformat = 32 then begin
+         actformat:= atombits;
+        end;
+        int1:= (actformat div 8) * nitems; //bytecount
+        if nitems > 0 then begin
+         inc(nitems1,nitems);
+         setlength(value1,length(value1) + int1 );
+         move(po1^,value1[charoffset],int1);
+         inc(charoffset,int1);
+         inc(longoffset,int1 div sizeof(dword));
+//         inc(longoffset,int1 div sizeof(atom)); //32/64 bit
+         result:= gue_ok;
+        end;
+       end
+       else begin
+        bytesafter:= 0;
+        result:= gue_clipboard;
+       end;
+       xfree(po1);
+      end
+      else begin
+       if timeout(time1) then begin
+        exit;
+       end;
+      end;
+     until bytesafter = 0;
+     break;
+    end;
+   end;
+  until false;
+ end; //getdata
+
+var
+ int1,int2: integer; 
+ po1: patomaty;
+ atoms1: array[0..4] of atom;
+ atom1: atom;
+ po2: ppchar;
+ prop1: xtextproperty;
+
+begin
+ gdi_lock;
+ clipboardowner:= xgetselectionowner(appdisp,clipboardatom);
+ if clipboardowner = appid then begin
+  value:= clipboard;
+  result:= gue_ok;
+ end
+ else begin
+  result:= gue_clipboard;
+  value:= '';
+  if clipboardowner <> none then begin
+   result:= getdata(targetsatom,atomatom);
+   if result = gue_ok then begin
+    po1:= pointer(value1);
+    atom1:= 0;
+    atoms1[0]:= utf8_stringatom; //preferred
+    atoms1[1]:= compound_textatom;
+    atoms1[2]:= textatom;
+    atoms1[3]:= textplainatom;
+    atoms1[4]:= stringatom;
+    for int2:= low(atoms1) to high(atoms1) do begin
+     for int1:= 0 to (length(value1) div sizeof(atom)) - 1 do begin
+      if po1^[int1] = atoms1[int2] then begin
+       atom1:= atoms1[int2];
+       break;
+      end;
+     end;
+     if atom1 <> 0 then begin
+      break;
+     end;
+    end;
+    if atom1 <> 0 then begin
+     result:= getdata(atom1,0);
+     if result = gue_ok then begin      
+      if acttype = utf8_stringatom then begin
+        value:= utf8tostring(value1);
+      end
+      else begin
+       if (acttype = textatom) or (acttype = textplainatom) then begin
+        value:= value1; //current locale
+       end
+       else begin
+        if acttype = compound_textatom then begin
+         with prop1 do begin
+          value:= pointer(value1);
+          encoding:= acttype;
+          format:= actformat;
+          nitems:= nitems1;
+         end;
+         xutf8textpropertytotextlist(appdisp,@prop1,@po2,@int1);
+         if int1 >= 1 then begin
+          value:= utf8tostring(string(po2^));
+         end;
+         xfreestringlist(po2);
+        end
+        else begin
+         value:= latin1tostring(value1);
+        end;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+ gdi_unlock;
+end;
+
+function gui_canpastefromclipboard: boolean;
+begin
+ gdi_lock;
+ result:= xgetselectionowner(appdisp,clipboardatom) <> none;
+ gdi_unlock;
+end;
+
 {
 function stringtotextproperty(const value: msestring; const style: txiccencodingstyle;
                                out textproperty: xtextproperty): boolean;
@@ -1348,6 +1415,16 @@ begin
   end;
  end;
  gdi_unlock;
+end;
+
+function gui_getwindowdesktop(const id: winidty): integer;
+var
+ lwo1: longword;
+begin
+ result:= 0;
+ if getnetcardinal(id,net_wm_desktop,lwo1) then begin
+  result:= lwo1;
+ end;
 end;
 
 function changenetwmstate(id: winidty; const operation: netwmstateoperationty;
@@ -1460,6 +1537,9 @@ begin
  gdi_lock;
  result:= gue_ok;
  if visible then begin
+{$ifdef mse_debugshow}
+  debugwindow('*gui_setwindowstate xmapwindow ',id);
+{$endif}
   xmapwindow(appdisp,id);
  end;
  if size in [wsi_fullscreen,wsi_fullscreenvirt] then begin
@@ -2384,6 +2464,9 @@ var
 begin
  gdi_lock;
  xmapwindow(appdisp,id);
+{$ifdef mse_debugshow}
+ debugwindow('*gui_showwindow ',id);
+{$endif}
  result:= gue_ok;
  rect1:= nullrect;
  application.checkwindowrect(id,rect1);
@@ -3157,58 +3240,6 @@ begin
  setwinidproperty(id,wmclientleaderatom,group);
  result:= gue_ok;
  gdi_unlock;
-end;
-
-function setnetcardinal(const id: winidty; const aproperty: netatomty;
-                                         const avalue: longword): boolean;
-begin
-{$ifdef mse_debuggdisync}
- checkgdilock;
-{$endif} 
- result:= false;
- if netatoms[aproperty] <> 0 then begin
-  setlongproperty(id,netatoms[aproperty],avalue);
-  result:= true;
- end;
-end;
-
-function setnetatom(const id: winidty; const aproperty: netatomty;
-                                         const avalue: netatomty): boolean;
-begin
-{$ifdef mse_debuggdisync}
- checkgdilock;
-{$endif} 
- result:= false;
- if (netatoms[aproperty] <> 0) and (netatoms[avalue] <> 0) then begin
-  setatomproperty(id,netatoms[aproperty],netatoms[avalue]);
-  result:= true;
- end;
-end;
-
-function setnetatomarrayitem(const id: winidty; const aproperty: netatomty;
-                                         const avalue: netatomty): boolean;
-begin
-{$ifdef mse_debuggdisync}
- checkgdilock;
-{$endif} 
- result:= false;
- if (netatoms[aproperty] <> 0) and (netatoms[avalue] <> 0) then begin
-  setatomarrayitemproperty(id,netatoms[aproperty],netatoms[avalue]);
-  result:= true;
- end;
-end;
-
-function resetnetatomarrayitem(const id: winidty; const aproperty: netatomty;
-                                         const avalue: netatomty): boolean;
-begin
-{$ifdef mse_debuggdisync}
- checkgdilock;
-{$endif} 
- result:= false;
- if (netatoms[aproperty] <> 0) and (netatoms[avalue] <> 0) then begin
-  resetatomarrayitemproperty(id,netatoms[aproperty],netatoms[avalue]);
-  result:= true;
- end;
 end;
 
 const

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -70,10 +70,17 @@ function gui_stackoverwindow(id: winidty; predecessor: winidty): guierrorty;
 function gui_canstackunder: boolean; //no way found to change stacking order in KDE
 function gui_getzorder(const ids: winidarty; out zorders: integerarty): guierrorty;
     //topevel -> highest, numbers have not to be contiguous
+
 function gui_getwindowrect(id: winidty; out rect: rectty): guierrorty;
              //screen coordinates
 function gui_getwindowpos(id: winidty; out pos: pointty): guierrorty;
              //parent window coordinates
+function gui_getwindowsize(id: winidty): windowsizety;
+function gui_getwindowdesktop(const id: winidty): integer;
+function gui_windowvisible(id: winidty): boolean;
+function gui_setwindowstate(id: winidty; size: windowsizety; visible: boolean): guierrorty;
+function gui_setwindowcaption(id: winidty; const caption: msestring): guierrorty;
+function gui_setwindowicon(id: winidty; const icon,mask: pixmapty): guierrorty;
             
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
 function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
@@ -98,11 +105,6 @@ function gui_movewindowrect(id: winidty; const dist: pointty;
 function gui_windowatpos(const pos: pointty): winidty;
 function gui_getscreenrect(const id: winidty): rectty; //0 -> virtual screen
 function gui_getworkarea(id: winidty): rectty;
-function gui_getwindowsize(id: winidty): windowsizety;
-function gui_windowvisible(id: winidty): boolean;
-function gui_setwindowstate(id: winidty; size: windowsizety; visible: boolean): guierrorty;
-function gui_setwindowcaption(id: winidty; const caption: msestring): guierrorty;
-function gui_setwindowicon(id: winidty; const icon,mask: pixmapty): guierrorty;
 function gui_setapplicationicon(const icon,mask: pixmapty): guierrorty;
 function gui_pidtowinid(const pids: procidarty): winidty;
 

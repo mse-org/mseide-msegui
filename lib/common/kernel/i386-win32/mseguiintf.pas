@@ -575,6 +575,11 @@ begin
  end;
 end;
 
+function gui_getwindowdesktop(const id: winidty): integer;
+begin
+ result:= 0; //todo
+end;
+
 function gui_windowvisible(id: winidty): boolean;
 begin
  result:= iswindowvisible(id);
