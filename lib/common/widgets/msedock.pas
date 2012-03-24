@@ -2494,7 +2494,7 @@ end;
 procedure tdockcontroller.dostatread(const reader: tstatreader);
 var
  rect1: rectty;
- widget1: twidget;
+ widget0,widget1: twidget;
  str1: string;
  bo1: boolean;
  intf1: idocktarget;
@@ -2507,7 +2507,8 @@ begin
 // setoptionsdock(foptionsdock); //check valid values
  ftaborder:= reader.readarray('order',msestringarty(nil));
  factivetab:= reader.readinteger('activetab',0);
- with fintf.getwidget do begin
+ widget0:= fintf.getwidget;
+ with widget0 do begin
   if od_savepos in foptionsdock then begin
    if parentwidget = nil then begin
     str1:= '';
@@ -2541,13 +2542,15 @@ begin
      visible:= false;
     end;
     if (widget1 <> nil) and 
-                 widget1.getcorbainterface(typeinfo(idocktarget),intf1) then begin
+                 widget1.getcorbainterface(typeinfo(idocktarget),
+                                                            intf1) then begin
      intf1.getdockcontroller.frefsize:= 0; //invalid
     end;
     parentwidget:= widget1;
    end;
    if (parentwidget <> nil) then begin
-    if not parentwidget.getcorbainterface(typeinfo(idocktarget),intf1) then begin
+    if not parentwidget.getcorbainterface(typeinfo(idocktarget),
+                                                            intf1) then begin
      rect1:= clipinrect(rect1,parentwidget.paintrect); //shift into widget
     end;
     widgetrect:= rect1;
@@ -2555,6 +2558,8 @@ begin
    else begin
     rect1:= clipinrect(rect1,application.screenrect); //shift into screen
     widgetrect:= rect1;
+    application.postevent(tobjectevent.create(ek_checkscreenrange,
+                                                             ievent(widget0)));
 //    setclippedwidgetrect(rect1); //shift into screen
    end;
    visible:= bo1;

@@ -567,10 +567,15 @@ function intersectrect(const a,b: rectty): rectty; overload;
 procedure intersectrect1(var dest: rectty; const source: rectty);
 function testintersectrect(const a,b: rectty): boolean;
      //true on intersection
-function clipinrect(const point: pointty; const boundsrect: rectty): pointty; overload;
-function clipinrect(const rect: rectty; const boundsrect: rectty): rectty; overload;
-procedure clipinrect1(var point: pointty; const boundsrect: rectty); overload;
-procedure clipinrect1(var rect: rectty; const boundsrect: rectty); overload;
+function clipinrect(const point: pointty;
+                               const boundsrect: rectty): pointty; overload;
+function clipinrect(const rect: rectty;
+                                const boundsrect: rectty): rectty; overload;
+function clipinrect1(var point: pointty;
+                                const boundsrect: rectty): boolean; overload;
+function clipinrect1(var rect: rectty; 
+                              const boundsrect: rectty): boolean; overload;
+            //true if changed
 
 function pointinrect(const point: pointty; const rect: rectty): boolean;
      //true if point is in rect
@@ -1428,19 +1433,24 @@ begin
           (itopleft.y >= otopleft.y) and (ibottomright.y <= obottomright.y);
 end;
 
-procedure clipinrect1(var point: pointty; const boundsrect: rectty);
+function clipinrect1(var point: pointty; const boundsrect: rectty): boolean;
 begin
+ result:= false;
  with boundsrect do begin
   if point.x < x then begin
+   result:= true;
    point.x:= x;
   end;
   if point.x >= x + cx then begin
+   result:= true;
    point.x:= x + cx - 1;
   end;
   if point.y < y then begin
+   result:= true;
    point.y:= y;
   end;
   if point.y >= y + cy then begin
+   result:= true;
    point.y:= y + cy - 1;
   end;
  end;
@@ -1452,23 +1462,28 @@ begin
  clipinrect1(result,boundsrect);
 end;
 
-procedure clipinrect1(var rect: rectty; const boundsrect: rectty);
+function clipinrect1(var rect: rectty; const boundsrect: rectty): boolean;
 begin
+ result:= false;
  with boundsrect do begin
   if rect.x < x then begin
+   result:= true;
    rect.x:= x;
   end;
   if rect.x + rect.cx > x + cx then begin
    rect.x:= x + cx - rect.cx;
    if rect.x < x then begin
+    result:= true;
     rect.x:= x;
     rect.cx:= cx;
    end;
   end;
   if rect.y < y then begin
+   result:= true;
    rect.y:= y;
   end;
   if rect.y + rect.cy > y + cy then begin
+   result:= true;
    rect.y:= y + cy - rect.cy;
    if rect.y < y then begin
     rect.y:= y;

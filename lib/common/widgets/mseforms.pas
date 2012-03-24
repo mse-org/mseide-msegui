@@ -1073,6 +1073,8 @@ begin
 end;
 
 procedure tcustommseform.receiveevent(const event: tobjectevent);
+var
+ rect1: rectty;
 begin
  inherited;
  case event.kind of
@@ -1085,6 +1087,14 @@ begin
   end;
   ek_closeform: begin
    close;
+  end;
+  ek_checkscreenrange: begin
+   if ownswindow and visible and (window.windowpos = wp_normal) then begin
+    rect1:= window.decoratedwidgetrect;
+    if clipinrect1(rect1,application.screenrect) then begin
+     window.decoratedwidgetrect:= rect1;
+    end;
+   end;
   end;
  end;
 end;
@@ -1271,6 +1281,7 @@ begin
 //  setclippedwidgetrect(rect1);
   rect1:= clipinrect(rect1,application.screenrect); //shift into screen
   widgetrect:= rect1;
+  application.postevent(tobjectevent.create(ek_checkscreenrange,ievent(self)));
  end;
  if fo_savezorder in foptions then begin
   str1:= '~';
