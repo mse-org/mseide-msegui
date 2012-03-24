@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -26,6 +26,7 @@ type
  tcalendarcontroller = class(tdropdownwidgetcontroller)
   private
    ffirstdayofweek: dayofweekty;
+   freddayofweek: dayofweekty;
   protected
    procedure dropdownkeydown(var info: keyeventinfoty);
   public
@@ -35,6 +36,8 @@ type
    property bounds_cx default popupcalendarwidth;
    property firstdayofweek: dayofweekty read ffirstdayofweek 
                                         write ffirstdayofweek default dw_mon;
+   property reddayofweek: dayofweekty read freddayofweek 
+                                        write freddayofweek default dw_sun;
  end;
  
  tpopupcalendarfo = class(tmseform)
@@ -64,6 +67,7 @@ type
    function isinvalidcell(const acell: gridcoordty): boolean;
   protected
    fdayofweekoffset: integer;
+//   freddayofweeknum: integer;
 //   procedure mousewheelevent(var info: mousewheeleventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure doactivate; override;
@@ -127,6 +131,7 @@ end;
 constructor tcalendarcontroller.create(const intf: idropdowncalendar);
 begin
  ffirstdayofweek:= dw_mon;
+ freddayofweek:= dw_sun;
  inherited create(intf);
  fforcecaret:= true;
  bounds_cx:= popupcalendarwidth;
@@ -162,6 +167,7 @@ constructor tpopupcalendarfo.create(const aowner: tcomponent;
 begin
  fcontroller:= acontroller;
  fdayofweekoffset:= ord(fcontroller.ffirstdayofweek)+1;
+// freddayofweeknum:= ord(fcontroller.freddayofweek)+1;
  inherited create(aowner);
 end;
 
@@ -182,7 +188,12 @@ begin
   captions[6].caption:= defaultformatsettingsmse.shortdaynames[1];
   }
  end;
- with grid.datacols[(7-int2) mod 7] do begin
+ int2:= ord(fcontroller.freddayofweek) - int2;
+ if int2 < 0 then begin
+  int2:= int2 + 7;
+ end;
+ with grid.datacols[int2] do begin
+// with grid.datacols[(7-int2) mod 7] do begin
   createfont;
   font.color:= cl_red;
  end;
