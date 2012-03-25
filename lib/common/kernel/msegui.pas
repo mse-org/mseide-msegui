@@ -2104,6 +2104,7 @@ type
    procedure unregistermovenotification(sender: iobjectlink);
 
    property options: windowoptionsty read foptions;
+   function ispopup: boolean; inline;
    property owner: twidget read fowner;
    property focusedwidget: twidget read ffocusedwidget;
    property transientfor: twindow read ftransientfor;
@@ -12466,7 +12467,7 @@ procedure twindow.internalactivate(const windowevent: boolean;
    end;
   end
   else begin
-   if not (wo_popup in foptions) then begin
+   if not ispopup then begin
     appinst.ffocuslocktransientfor:= nil;
    end;
   end;
@@ -12883,7 +12884,7 @@ begin
 //     bo1:= gui_grouphideminimizedwindows;
      mydesktop:= gui_getwindowdesktop(fwindow.id);
      bo2:= false;
-     if not (wo_popup in foptions) and not (tws_modalfor in fstate) and
+     if not ispopup and not (tws_modalfor in fstate) and
                                                   (fmodallevel = 0) then begin
       for int1:= 0 to high(appinst.fwindows) do begin
        window1:= appinst.fwindows[int1];
@@ -13263,7 +13264,7 @@ begin
     end
     else begin
      mouseevent(info.mouse);
-     if (info.mouse.eventkind = ek_buttonpress) and (wo_popup in foptions) and
+     if (info.mouse.eventkind = ek_buttonpress) and ispopup and
       (ow_mousefocus in fowner.foptionswidget) then begin
       activate; //possibly not done by windowmanager
      end;
@@ -14047,6 +14048,11 @@ begin
  if result = self then begin
   result:= nil;
  end;
+end;
+
+function twindow.ispopup: boolean;
+begin
+ result:= wo_popup in foptions;
 end;
 
 procedure twindow.postkeyevent(const akey: keyty; 
@@ -16169,10 +16175,10 @@ begin
  if ow_top in twindow(r).fowner.foptionswidget then begin
   dec(result,topweight);
  end;
- if wo_popup in  twindow(l).foptions then begin
+ if twindow(l).ispopup then begin
   inc(result,popupweight);
  end;
- if wo_popup in  twindow(r).foptions then begin
+ if twindow(r).ispopup then begin
   dec(result,popupweight);
  end;
  if twindow(l).fmodallevel > 0 then begin

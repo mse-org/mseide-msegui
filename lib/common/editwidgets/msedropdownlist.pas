@@ -1246,7 +1246,7 @@ begin
    }
    updatedropdownpos;
    fdropdownwidget.window.winid; //update window.options
-   if wo_popup in fdropdownwidget.window.options then begin
+   if fdropdownwidget.window.ispopup then begin
     application.registeronapplicationactivechanged(
             {$ifdef FPC}@{$endif}applicationactivechanged);
    end;

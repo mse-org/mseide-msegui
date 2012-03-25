@@ -1560,7 +1560,7 @@ begin
   widget1.visible:= false;
         //stays invisible, no wm_configured processing on win32
   widget:= tshowmessagewidget.create(nil,(transientfor <> nil) and 
-              (wo_popup in transientfor.options) and transientfor.owner.visible,
+              (transientfor.ispopup) and transientfor.owner.visible,
               high(actions) >= 0,exttext);
   widget.name:= '_showmessage'; //debug purpose
   widget.parentwidget:= widget1; //do not create window handle of widget
