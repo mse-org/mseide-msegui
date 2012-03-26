@@ -1804,8 +1804,10 @@ procedure varianttorealty(const value: variant; out dest: realty); overload;
 function varianttorealty(const value: variant):realty; overload;
 procedure realtytovariant(const value: realty; out dest: variant); overload;
 function realtytovariant(const value: realty): variant; overload;
-function varianttoid(const value: variant): int64;
-function idtovariant(const value: int64): variant;
+function varianttoid(const value: variant): int64; //null -> -1
+function idtovariant(const value: int64): variant; //-1 -> null
+function varianttomsestring(const value: variant): msestring; //null -> ''
+function msestringtovariant(const value: msestring): variant; //'' -> null
 
 function opentodynarrayft(const items: array of tfieldtype): fieldtypearty;
 
@@ -2095,6 +2097,26 @@ begin
  end;
 end;
 
+function varianttomsestring(const value: variant): msestring; //null -> ''
+begin
+ if varisnull(value) or varisempty(value) then begin
+  result:= '';
+ end
+ else begin
+  result:= value;
+ end;
+end;
+
+function msestringtovariant(const value: msestring): variant; //'' -> null
+begin
+ if value = '' then begin
+  result:= null;
+ end
+ else begin
+  result:= value;
+ end;
+end;
+
 function getdsfields(const adataset: tdataset;
              const afields: array of tfield): fieldarty;
 var
@@ -2116,7 +2138,8 @@ begin
  end;
 end;
 
-procedure regfieldclass(const atype: fieldclasstypety; const aclass: fieldclassty);
+procedure regfieldclass(const atype: fieldclasstypety;
+                                          const aclass: fieldclassty);
 begin
  msefieldtypeclasses[atype]:= aclass;
 end;

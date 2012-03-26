@@ -9819,7 +9819,7 @@ begin
    end;
   end;
   if ownswindow1 then begin
-   bo2:= transientfor^ = window;
+   bo2:= (transientfor <> nil) and (transientfor^ = window);
 //   if transientfor = window then begin
 //    transientfor:= nil;
 //   end;
