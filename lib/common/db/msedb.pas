@@ -270,6 +270,7 @@ type
     //imsefield
    function getproviderflags1: providerflags1ty;
 //   function getlookupinfo: plookupfieldinfoty;
+   procedure setasnullmsestring(const avalue: msestring);
   protected
    procedure readlookup(reader: treader);
          //workaround for breaking fix of FPC Mantis 12809
@@ -300,6 +301,9 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property asnullmsestring: msestring read getasmsestring 
+                                          write setasnullmsestring;
+                        //'' -> NULL
    function oldmsestring(out aisnull: boolean): msestring; overload;
    function oldmsestring: msestring; overload;
    function curmsestring(out aisnull: boolean): msestring; overload;
@@ -3633,6 +3637,15 @@ begin
  end;
 end;
 
+procedure tmsestringfield.setasnullmsestring(const avalue: msestring);
+begin
+ if avalue = '' then begin
+ end
+ else begin
+  setasmsestring(avalue);
+ end;
+end;
+
 procedure tmsestringfield.setasmsestring(const avalue: msestring);
 begin
  if assigned(fsetmsestringdata) then begin
@@ -3857,6 +3870,7 @@ begin
   inherited;
  end;
 end;
+
 {
 function tmsestringfield.getlookupinfo: plookupfieldinfoty;
 begin

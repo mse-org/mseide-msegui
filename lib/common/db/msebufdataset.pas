@@ -753,6 +753,11 @@ type
                    const avalue: variant);
    function getchangerecords: recupdateinfoarty;
    function getapplyerrorrecords: recupdateinfoarty;
+   function getcurrentbmasvariant(const afield: tfield;
+                                                           const abm: bookmarkdataty): variant;
+   procedure setcurrentbmasvariant(const afield: tfield;
+                                                           const abm: bookmarkdataty;
+                   const avalue: variant);
   protected
    fcontroller: tdscontroller;
    fbrecordcount: integer;
@@ -889,6 +894,7 @@ type
    function  GetNextRecords: Longint; override;
    function bookmarktostring(const abookmark: bookmarkdataty): string;
    function stringtobookmark(const abookmark: string): bookmarkdataty;
+   function findbookmarkindex(const abookmark: bookmarkdataty): integer;
    procedure checkrecno(const avalue: integer);
    procedure setonfilterrecord(const value: tfilterrecordevent); override;
    procedure setfiltered(value: boolean); override;
@@ -1151,6 +1157,9 @@ type
                               const abm: bookmarkdataty);
    property currentbmisnull[const afield: tfield;
                const abm: bookmarkdataty]: boolean read getcurrentbmisnull;
+   property currentbmasvariant[const afield: tfield;
+                                        const abm: bookmarkdataty]: variant
+                  read getcurrentbmasvariant write setcurrentbmasvariant;
    property currentbmasboolean[const afield: tfield;
                                         const abm: bookmarkdataty]: boolean
                   read getcurrentbmasboolean write setcurrentbmasboolean;
@@ -2580,27 +2589,31 @@ begin
  end;
 end;
 
+function tmsebufdataset.findbookmarkindex(const abookmark: bookmarkdataty): integer;
+begin
+ with abookmark do begin
+  if (recno >= fbrecordcount) or (recno < 0) then begin
+   databaseerror('Invalid bookmark recno: '+inttostr(recno)+'.'); 
+  end;
+  checkindex(false);
+  if (factindexpo^.ind[recno] <> recordpo) and (recordpo <> nil) then begin
+   result:= findrecord(recordpo);
+   if result < 0 then begin
+    databaseerror('Invalid bookmarkdata.');
+   end;
+  end
+  else begin
+   result:= recno;
+  end;
+ end;
+end;
+
 procedure tmsebufdataset.internalgotobookmark(abookmark: pointer);
 var
  int1: integer;
 begin
  if abookmark <> nil then begin
-  with pbufbookmarkty(abookmark)^.data do begin
-   if (recno >= fbrecordcount) or (recno < 0) then begin
-    databaseerror('Invalid bookmark recno: '+inttostr(recno)+'.'); 
-   end;
-   checkindex(false);
-   if (factindexpo^.ind[recno] <> recordpo) and (recordpo <> nil) then begin
-    int1:= findrecord(recordpo);
-    if int1 < 0 then begin
-     databaseerror('Invalid bookmarkdata.');
-    end;
-   end
-   else begin
-    int1:= recno;
-   end;
-   internalsetrecno(int1);
-  end;
+  internalsetrecno(findbookmarkindex(pbufbookmarkty(abookmark)^.data));
  end;
 end;
 
@@ -6913,6 +6926,80 @@ begin
    end;
    ftstring: begin
     setcurrentasmsestring(afield,aindex,avalue);
+   end;  
+   else begin
+    raise ecurrentvalueaccess.create(self,afield,
+                             'Invalid fieldtype field "'+afield.fieldname+'".');  
+   end;
+  end;
+ end; 
+end;
+
+function tmsebufdataset.getcurrentbmasvariant(const afield: tfield;
+               const abm: bookmarkdataty): variant;
+begin
+ if currentbmisnull[afield,abm] then begin
+  result:= null;
+ end
+ else begin
+  case afield.datatype of
+   ftboolean: begin
+    result:= getcurrentbmasboolean(afield,abm);
+   end;
+   ftfloat: begin
+    result:= getcurrentbmasfloat(afield,abm);
+   end;
+   ftdatetime,fttime,ftdate: begin
+    result:= getcurrentbmasdatetime(afield,abm);
+   end;
+   ftbcd: begin
+    result:= getcurrentbmascurrency(afield,abm);
+   end;
+   ftinteger,ftword,ftsmallint: begin
+    result:= getcurrentbmasinteger(afield,abm);
+   end;
+   ftlargeint: begin
+    result:= getcurrentbmaslargeint(afield,abm);
+   end;
+   ftstring: begin
+    result:= getcurrentbmasmsestring(afield,abm);
+   end;
+   else begin
+    raise ecurrentvalueaccess.create(self,afield,
+                             'Invalid fieldtype field "'+afield.fieldname+'".');  
+   end;
+  end;
+ end; 
+end;
+
+procedure tmsebufdataset.setcurrentbmasvariant(const afield: tfield;
+               const abm: bookmarkdataty; const avalue: variant);
+begin
+ if varisnull(avalue) then begin
+  currentbmclear(afield,abm)
+ end
+ else begin
+  case afield.datatype of
+   ftboolean: begin
+    setcurrentbmasboolean(afield,abm,avalue);
+   end;
+   ftfloat: begin
+    setcurrentbmasfloat(afield,abm,avalue);
+   end;
+   ftdatetime,fttime,ftdate: begin
+    setcurrentbmasdatetime(afield,abm,avalue);
+   end;
+   ftbcd: begin
+    setcurrentbmascurrency(afield,abm,avalue);
+   end;
+   ftinteger,ftword,ftsmallint: begin
+    setcurrentbmasinteger(afield,abm,avalue);
+   end;
+   ftlargeint: begin
+    setcurrentbmaslargeint(afield,abm,avalue);
+   end;
+   ftstring: begin
+    setcurrentbmasmsestring(afield,abm,avalue);
    end;  
    else begin
     raise ecurrentvalueaccess.create(self,afield,
