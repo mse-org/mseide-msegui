@@ -1229,9 +1229,28 @@ begin
  end;
 end;
 
+type
+ setwindowownerinfoty = record
+  oldowner,newowner: winidty;
+ end;
+ psetwindowownerinfoty = ^setwindowownerinfoty;
+
+function setwindowowner(id: hwnd; param: lparam): winbool; stdcall;
+
+begin
+ with psetwindowownerinfoty(ptruint(param))^ do begin
+  if getwindowlong(id,gwl_hwndparent) = oldowner then begin
+   setwindowlong(id,gwl_hwndparent,newowner);
+  end;  
+ end;
+ result:= true;
+end;
+
 function gui_destroywindow(var awindow: windowty): guierrorty;
 var
  ico1: hicon;
+ id1: winidty;
+ info: setwindowownerinfoty;
 begin
  with awindow do begin
   if id <> 0 then begin
@@ -1242,6 +1261,10 @@ begin
    if ico1 <> 0 then begin
     destroyicon(ico1);
    end;
+   info.oldowner:= id;
+   info.newowner:= getwindowlong(id,gwl_hwndparent);
+   enumwindows(@setwindowowner,ptruint(@info)); 
+                                      //do not destroy children   
    if windows.DestroyWindow(id) then begin
 {$ifdef mse_debuggdi}
     dec(windowcount);
@@ -1275,6 +1298,9 @@ end;
 
 function gui_raisewindow(id: winidty): guierrorty;
 begin
+{$ifdef mse_debugzorder}
+ debugwindow('gui_raisewindow ',id);
+{$endif}
  windows.SetWindowPos(id,hwnd_top,0,0,0,0,swp_noactivate or swp_nomove or
                           swp_noownerzorder or swp_nosize);
  result:= gue_ok;
@@ -1282,6 +1308,9 @@ end;
 
 function gui_lowerwindow(id: winidty): guierrorty;
 begin
+{$ifdef mse_debugzorder}
+ debugwindow('gui_lowerwindow ',id);
+{$endif}
  windows.SetWindowPos(id,hwnd_bottom,0,0,0,0,swp_noactivate or swp_nomove or
                           swp_noownerzorder or swp_nosize);
  result:= gue_ok;
@@ -1290,6 +1319,9 @@ end;
 function gui_stackunderwindow(id: winidty; predecessor: winidty): guierrorty;
 begin
  if id <> predecessor then begin
+{$ifdef mse_debugzorder}
+ debugwindow('gui_stackunderwindow ',id,predecessor);
+{$endif}
   windows.SetWindowPos(id,predecessor,0,0,0,0,swp_noactivate or swp_nomove or
                           swp_noownerzorder or swp_nosize);
  end;
@@ -2511,10 +2543,10 @@ end;
 function gui_settransientfor(var awindow: windowty; const transientfor: winidty): guierrorty;
 begin
  with awindow,win32windowty(platformdata).d do begin
-//  if not istaskbar then begin
-//   setwindowlong(id,gwl_hwndparent,transientfor); //no taskbar widget if called!
+  if not istaskbar then begin
+   setwindowlong(id,gwl_hwndparent,transientfor); //no taskbar widget if called!
 // transientfor can be destroyed
-//  end;
+  end;
  end;
  result:= gue_ok;
 end;
@@ -2581,12 +2613,15 @@ begin
   end;
   windowstyle:= windowstyle or ws_clipchildren;
   if (transientfor <> 0) or (options * [wo_popup,wo_message,wo_notaskbar] <> []) then begin
-//   if transientfor <> 0 then begin
-//    ownerwindow:= transientfor; transientfor can be destroyed
-//   end;
+   if transientfor <> 0 then begin
+    ownerwindow:= transientfor;
+   end;
    id:= windows.CreateWindowex(windowstyleex,widgetclassname,nil,windowstyle,
          rect1.x,rect1.y,rect1.cx,rect1.cy,ownerwindow{transientfor},0,hinstance,nil);
    if transientfor = 0 then begin
+{$ifdef mse_debugzorder}
+    debugwriteln('gui_createwindow hwnd_top '+hextostr(id));
+{$endif}
     setwindowpos(id,hwnd_top,0,0,0,0,swp_noactivate or swp_nomove or 
                                             swp_nosize or swp_noownerzorder);
    end;

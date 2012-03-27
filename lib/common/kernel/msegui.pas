@@ -2640,7 +2640,8 @@ function combineframestateflags(
             const disabled,active,mouse,clicked: boolean): framestateflagsty;
 
 {$ifdef mse_debug}
-procedure debugwindow(const atext: string; const aid: winidty);
+procedure debugwindow(const atext: string; const aid: winidty); overload;
+procedure debugwindow(const atext: string; const aid1,aid2: winidty); overload;
 function checkwindowname(const aid: winidty; const aname: string): boolean;
 {$endif}
 
@@ -9819,7 +9820,7 @@ begin
    end;
   end;
   if ownswindow1 then begin
-   bo2:= (transientfor <> nil) and (transientfor^ = window);
+   bo2:= transientfor^ = window;
 //   if transientfor = window then begin
 //    transientfor:= nil;
 //   end;
@@ -12840,7 +12841,9 @@ begin
    if (fstate * [tws_transientforminimized,tws_modalfor] = 
             [tws_transientforminimized,tws_modalfor]) and
                                      (ftransientfor <> nil) then begin
-    ftransientfor.fowner.internalshow(ml_none,nil,false,true);
+//    ftransientfor.fowner.internalshow(ml_none,nil,false,true);
+    ftransientfor.fowner.internalshow(ml_none,
+                                    @ftransientfor.ftransientfor,false,true);
    end;    
    exclude(fstate,tws_transientforminimized);
    if not (csdesigning in fowner.ComponentState) then begin
@@ -15342,6 +15345,29 @@ begin
  else begin
   str1:= str1+'NIL';
  end;
+ debugwriteln(str1);
+end;
+
+procedure debugwindow(const atext: string; const aid1,aid2: winidty);
+var
+ str1: string;
+ window1: twindow;
+begin
+ str1:= atext+hextostr(aid1)+' ';
+ if appinst.findwindow(aid1,window1) then begin
+  str1:= str1+window1.owner.name;
+ end
+ else begin
+  str1:= str1+'NIL';
+ end;
+ str1:= str1+','+hextostr(aid2)+' ';
+ if appinst.findwindow(aid2,window1) then begin
+  str1:= str1+window1.owner.name;
+ end
+ else begin
+  str1:= str1+'NIL';
+ end;
+ 
  debugwriteln(str1);
 end;
 
