@@ -27,6 +27,7 @@ type
  end;
 
  captionframeoptionty = (cfo_fixleft,cfo_fixright,cfo_fixtop,cfo_fixbottom,
+                         cfo_captionnogray,
                          cfo_captiondistouter,cfo_captionframecentered,
                          cfo_captionnoclip,cfo_nofocusrect);
  captionframeoptionsty = set of captionframeoptionty;
@@ -2206,7 +2207,8 @@ begin
  if (finfo.text.text <> '') {and 
              twidget1(icaptionframe(fintf).getwidget).isvisible} then begin
   updatebit({$ifdef FPC}longword{$else}longword{$endif}(finfo.flags),
-                                      ord(tf_grayed),fs_disabled in fstate);
+              ord(tf_grayed),
+              (fs_disabled in fstate) and not (cfo_captionnogray in foptions));
   canvas:= icaptionframe(fintf).getcanvas;
   canvas.font:= getfont;
   finfo.dest:= textrect(canvas,finfo.text);
@@ -2622,7 +2624,7 @@ begin
  inherited;
  flags1:= finfo.flags;
  updatebit({$ifdef FPC}longword{$else}longword{$endif}(finfo.flags),
-                 ord(tf_grayed),value);
+                 ord(tf_grayed),value and not (cfo_captionnogray in foptions));
  if finfo.flags <> flags1 then begin
   fintf.invalidatewidget;
  end;
