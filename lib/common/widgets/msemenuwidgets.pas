@@ -77,7 +77,8 @@ type
    procedure nextpopupshowing; virtual;
    function isinpopuparea(const apos: pointty): boolean; virtual;
    function checkprevpopuparea(const apos: pointty): boolean; virtual;
-   procedure activatemenu(keymode: boolean; aclicked: boolean); virtual;
+   procedure activatemenu(
+              const keymode,aclicked,nokeymodereset: boolean); virtual;
    procedure deactivatemenu; virtual;
    procedure selectmenu(const keymode: boolean); virtual;
    function rootpopup: tpopupmenuwidget;
@@ -141,7 +142,7 @@ type
    function isinpopuparea(const apos: pointty): boolean; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure childdeactivated(const sender: tpopupmenuwidget); override;
-   procedure activatemenu(keymode: boolean; aclicked: boolean); override;
+   procedure activatemenu(const keymode,aclicked,nokeymodereset: boolean); override;
    procedure deactivatemenu; override;
    procedure selectmenu(const keymode: boolean); override;
    procedure internalcreateframe; override;
@@ -1155,7 +1156,7 @@ begin
           pointinrect(pt1,fnextpopup.fwidgetrect) and 
                               not (mlo_childreninactive in options) then begin
     invalidaterect(cells[activeitem].dimouter);
-    fnextpopup.activatemenu(false,ss_left in info.shiftstate);
+    fnextpopup.activatemenu(false,ss_left in info.shiftstate,true);
     exit;
    end;
    if eventkind in mouseposevents then begin
@@ -1335,7 +1336,8 @@ begin
  internalsetactiveitem(value,false,false,false);
 end;
 
-procedure tpopupmenuwidget.activatemenu(keymode: boolean; aclicked: boolean);
+procedure tpopupmenuwidget.activatemenu(
+                const keymode,aclicked,nokeymodereset: boolean);
 begin
  capturekeyboard;
  capturemouse;
@@ -1343,7 +1345,9 @@ begin
   beginkeymode;
  end
  else begin
-  exclude(flayout.options,mlo_keymode);
+  if not nokeymodereset then begin
+   exclude(flayout.options,mlo_keymode);
+  end;
  end;
  if (flayout.menu.count > 0) and (flayout.activeitem < 0) then begin
   if keymode then begin
@@ -1384,7 +1388,7 @@ begin
  end;
  if (fnextpopup <> nil) then begin
   if keymode then begin
-   fnextpopup.activatemenu(keymode,false);
+   fnextpopup.activatemenu(keymode,false,false);
   end
   else begin
    fnextpopup.window.bringtofront; //win32 workaround
@@ -1494,7 +1498,7 @@ begin
     end;
     key_left,key_right: begin
      if (fnextpopup <> nil) and isup(fnextpopup.factposition) then begin
-      fnextpopup.activatemenu(true,false);
+      fnextpopup.activatemenu(true,false,false);
      end
      else begin
       exclude(options,mlo_keymode);
@@ -1886,7 +1890,8 @@ begin
  end;
 end;
 
-procedure tcustommainmenuwidget.activatemenu(keymode: boolean; aclicked: boolean);
+procedure tcustommainmenuwidget.activatemenu(
+             const keymode,aclicked,nokeymodereset: boolean);
 begin
  inherited;
  flayout.menu.owner.checkexec;
