@@ -1117,6 +1117,7 @@ type
    procedure DataEvent(Event: TDataEvent; Info: Ptrint); override;
    procedure disabledstatechange; virtual;
   public
+   destructor destroy; override;
    function moveby(distance: integer): integer; override;
    function noedit: boolean;
    property dataset: tdataset read getdataset;
@@ -6447,6 +6448,23 @@ end;
 procedure tmsedatalink.disabledstatechange;
 begin
  //dummy
+end;
+
+destructor tmsedatalink.destroy;
+var
+ int1: integer;
+ ds1: tdataset1;
+begin
+{$warnings off}
+ ds1:= tdataset1(dataset);
+{$warnings on}
+ if ds1 <> nil then begin
+  int1:= ds1.buffercount;
+ end;
+ inherited;
+ if (ds1 <> nil) and (ds1.buffercount < int1) then begin
+  ds1.dataevent(dedatasetchange,0);
+ end;
 end;
 
 { tfieldsdatalink }

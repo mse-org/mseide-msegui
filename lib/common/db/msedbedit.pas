@@ -1209,6 +1209,7 @@ type
    fnavigator: tdbnavigator;
    fdescend: boolean;
    fsortdatalink: tfielddatalink;
+   procedure checkzebraoffset;
    procedure checkscroll;
    procedure checkscrollbar; virtual;
    procedure doupdaterowdata(const row: integer);
@@ -1367,7 +1368,7 @@ type
    procedure cellevent(var info: celleventinfoty); override;
    function getrecordcount: integer; override; 
            //workaround FPC bug 19290
-   function  GetBufferCount: Integer; override;
+//   function  GetBufferCount: Integer; override;
    procedure SetBufferCount(Value: Integer); override;
    function getfirstrecord: integer; override;
    procedure updatefocustext;
@@ -5957,17 +5958,17 @@ begin
   ffirstrecord:= fcurrentrecord;
  end;
 end;
-
+{
 function tdropdownlistdatalink.GetBufferCount: Integer;
 begin
- if fdataintf = nil then begin
+ if (fdataintf = nil) or (fmaxrowcount <= 0) then begin
   result:= inherited getbuffercount;
  end
  else begin
   result:= fmaxrowcount;
  end;   
 end;
-
+}
 procedure tdropdownlistdatalink.SetBufferCount(Value: Integer);
 begin
  if fdataintf = nil then begin
@@ -6895,6 +6896,7 @@ end;
 
 destructor tgriddatalink.destroy;
 begin
+ inc(fdatasetchangedlock);
  inherited;
  fobjectlinker.free;
 end;
@@ -7311,7 +7313,7 @@ procedure tgriddatalink.datasetchanged;
 //var
 // state1: tdatasetstate;
 begin
- if fdatasetchangedlock = 0 then begin
+ if (fdatasetchangedlock = 0) and not (csdestroying in fgrid.componentstate) then begin
   finserting:= (dataset <> nil) and (dataset.state = dsinsert);
   if recordcount > fgrid.rowcount then begin
    updaterowcount;  //for append
@@ -7379,6 +7381,16 @@ begin
  end;
 end;
 
+procedure tgriddatalink.checkzebraoffset;
+begin
+ if active and (gs_needszebraoffset in tcustomgrid1(fgrid).fstate) then begin
+  fzebraoffset:= -(arecord - activerecord);
+ end
+ else begin
+  fzebraoffset:= 0;
+ end;
+end;
+ 
 procedure tgriddatalink.checkscroll;
 var
  rect1,rect2: rectty;
@@ -7387,12 +7399,7 @@ var
  int1: integer;
  
 begin
- if active and (gs_needszebraoffset in tcustomgrid1(fgrid).fstate) then begin
-  fzebraoffset:= -(arecord - activerecord);
- end
- else begin
-  fzebraoffset:= 0;
- end;
+ checkzebraoffset;
  distance:= firstrecord - ffirstrecordbefore;
  ffirstrecordbefore:= firstrecord;
  with tcustomgrid1(fgrid) do begin
@@ -8229,6 +8236,16 @@ begin
  result:= (int1 >= 0) and (int1 < recordcount);
  if result then begin
   ainfo.row:= activerecord;
+  {
+  if ainfo.row <> fgrid.row then begin 
+      //probably changed by tdatalink.destroy -> dataset.recalcbuflistsize
+   result:= false;
+   checkzebraoffset;
+   checkactiverecord;
+   fgrid.invalidaterow(invalidaxis);
+   exit;
+  end;
+  }
   if fdscontroller <> nil then begin
    fdscontroller.begindisplaydata;
   end;
