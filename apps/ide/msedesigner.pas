@@ -4297,7 +4297,7 @@ begin //loadformfile
      result:= modules.findmodulebyname(modulename);
      if result <> nil then begin
       stream2.free; //not listed in loadingstreams
-      if skipexisting then begin
+      if skipexisting and issamefilepath(result^.filename,filename) then begin
        exit;
       end;
       raise exception.create('A module "'+modulename+'" is already open.');

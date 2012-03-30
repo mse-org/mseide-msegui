@@ -1531,7 +1531,7 @@ begin
   if findfile(str1) then begin
    activebefore:= factivedesignmodule;
    try
-    openformfile(str1,true,false,false,true,false);
+    openformfile(str1,true,false,false,true,true);
    finally
     factivedesignmodule:= activebefore;
    end;
