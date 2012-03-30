@@ -538,7 +538,7 @@ begin
   if mainfo.errorformfilename <> '' then begin
    showsourceline(mainfo.errorformfilename,0,0,true);
   end;
-  if tabwidget.activepageindex < 0 then begin
+  if (tabwidget.activepageindex < 0) and (tabwidget.count > 0) then begin
    tabwidget.activepageindex:= 0; //default
   end;
  end;
