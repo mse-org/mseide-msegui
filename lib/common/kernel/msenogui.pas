@@ -90,7 +90,12 @@ end;
 
 procedure tnoguiapplication.settimer(const us: integer);
 begin
- nogui_settimer(us);
+ if us <= 0 then begin
+  inherited;
+ end
+ else begin
+  nogui_settimer(us);
+ end;
 end;
 
 procedure tnoguiapplication.doeventloop(const once: boolean);

@@ -269,18 +269,22 @@ uses
 
 procedure markstartchars(const str: msestring; var chars: charsty;
                           const caseinsensitive: boolean); overload;
+var
+ ch1: char;
 begin
  if length(str) = 0 then begin
   include(chars,#0);
  end
  else begin
-  if caseinsensitive then begin
-   include(chars,lowerchars[char(str[1])]);
-   include(chars,upperchars[char(str[1])]);
-  end
-  else begin
-   include(chars,char(str[1]));
-  end;    
+  if getansichar(str[1],ch1) then begin
+   if caseinsensitive then begin
+    include(chars,lowerchars[ch1]);
+    include(chars,upperchars[ch1]);
+   end
+   else begin
+    include(chars,ch1);
+   end;    
+  end;
  end
 end;
 
@@ -298,6 +302,7 @@ procedure markstartchars(const starttokens: starttokenarty;
              var chars: charsty; const caseinsensitive: boolean); overload;
 var
  int1: integer;
+ ch1: char;
 begin
  for int1:= 0 to high(starttokens) do begin
   with starttokens[int1] do begin
@@ -309,13 +314,15 @@ begin
      include(chars,#0);
     end
     else begin
-     if caseinsensitive then begin
-      include(chars,lowerchars[char(starttokens[int1].token[1])]);
-      include(chars,upperchars[char(starttokens[int1].token[1])]);
-     end
-     else begin
-      include(chars,char(starttokens[int1].token[1]));
-     end;    
+     if getansichar(starttokens[int1].token[1],ch1) then begin
+      if caseinsensitive then begin
+       include(chars,lowerchars[ch1]);
+       include(chars,upperchars[ch1]);
+      end
+      else begin
+       include(chars,ch1);
+      end;    
+     end;
     end;
    end;
   end;
@@ -601,7 +608,7 @@ begin
      format:= ristr^.format;
      startpo:= pointer(ristr^.text);
      wpo1:= startpo;
-     alen:= length(msestring(startpo));
+     alen:= length(ristr^.text);
      keywordlen:= 0;
      changed:= setcharstyle1(format,0,bigint,
                                  charstyles[scopeinfopo^.currfontinfonr]) or
@@ -655,7 +662,7 @@ begin
          with scopeinfopo^.starttokens[int1] do begin
           if hastokenchars then begin
            wpo2:= wpo1;
-           while (ord(wpo2^) <= 255) and (char(wpo2^) in tokenchars) do begin
+           while (wpo2^ <= #255) and (char(byte(wpo2^)) in tokenchars) do begin
             inc(wpo2);
             if not shortcircuit then begin
              break;
@@ -701,7 +708,7 @@ begin
           for int1:= 0 to high(scopeinfopo^.endtokens) do begin
            with scopeinfopo^.endtokens[int1] do begin
             if hastokenchars then begin
-             if (ord(wpo1^) <= 255) and (char(wpo1^) in tokenchars) then begin
+             if (wpo1^ <= #255) and (char(byte(wpo1^)) in tokenchars) then begin
               int2:= 1;
               bo1:= false;
              end;
@@ -909,23 +916,25 @@ procedure checktokenchars(const ar1: stringarty; const caseinsensitive: boolean;
              out hastokenchars: boolean; out tokenchars: tokencharsty);
 var
  int1: integer;
+ ch1: char;
 begin
  hastokenchars:= ar1 <> nil;
  tokenchars:= [];
  for int1:= 0 to high(ar1) do begin
-  if (length(ar1[int1]) <> 1) or (ord(ar1[int1][1]) > 255) then begin
+  if (length(ar1[int1]) <> 1) or (ar1[int1][1] > #255) then begin
    hastokenchars:= false;
    break;
   end;
  end;
  if hastokenchars then begin
   for int1:= 0 to high(ar1) do begin
+   ch1:= char(byte(ar1[int1][1]));
    if caseinsensitive then begin
-    include(tokenchars,upperchars[char(ar1[int1][1])]);
-    include(tokenchars,lowerchars[char(ar1[int1][1])]);
+    include(tokenchars,upperchars[ch1]);
+    include(tokenchars,lowerchars[ch1]);
    end
    else begin
-    include(tokenchars,char(ar1[int1][1]));
+    include(tokenchars,ch1);
    end;
   end;
  end;

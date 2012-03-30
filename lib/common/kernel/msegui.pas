@@ -17590,7 +17590,12 @@ end;
 
 procedure tguiapplication.settimer(const us: integer);
 begin
- gui_settimer(us);
+ if us <= 0 then begin
+  inherited;
+ end
+ else begin
+  gui_settimer(us);
+ end;
 end;
 
 procedure tguiapplication.doafterrun;

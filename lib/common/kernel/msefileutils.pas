@@ -136,6 +136,7 @@ function checkfilename(const filename: filenamety;
                         const dirstream: dirstreamty): boolean; overload;
 function hasmaskchars(const filename: filenamety): boolean;
 function issamefilename(const a,b: filenamety): boolean;
+function issamefilepath(const a,b: filenamety): boolean;
 
 function filename(const path: filenamety): filenamety;
 function filedir(const path: filenamety): filenamety;
@@ -674,6 +675,11 @@ begin
  else begin
   result:= a = b;
  end;
+end;
+
+function issamefilepath(const a,b: filenamety): boolean;
+begin
+ result:= issamefilename(filepath(a),filepath(b));
 end;
 
 function searchfile(const filename: filenamety;

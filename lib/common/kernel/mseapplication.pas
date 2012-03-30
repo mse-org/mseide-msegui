@@ -236,6 +236,7 @@ type
    fonterminatedlist: tnotifylist;
    fonterminatequerylist: tonterminatequerylist;
    fonidlelist: tonidlelist;
+   ftimertriggercount: integer;
    procedure flusheventbuffer;
    procedure doidle;
    procedure sethighrestimer(const avalue: boolean); virtual; abstract;
@@ -252,6 +253,7 @@ type
    procedure internalinitialize; virtual;
    procedure internaldeinitialize;  virtual;
    procedure objecteventdestroyed(const sender: tobjectevent); virtual;
+   procedure resettimertrigger;
   public
   {$ifdef mse_debugmutex}
    function getmutexaddr: pointer;
@@ -301,7 +303,7 @@ type
    procedure unregisteronterminate(const method: terminatequeryeventty);
    procedure registeronidle(const method: idleeventty);
    procedure unregisteronidle(const method: idleeventty);
-   procedure settimer(const us: integer); virtual; abstract;
+   procedure settimer(const us: integer); virtual;
    function locked: boolean; //true if calling thread holds the lock
    function trylock: boolean;
    function lock: boolean;
@@ -1655,6 +1657,18 @@ end;
 function tcustomapplication.waitescaped: boolean;
 begin
  result:= false;
+end;
+
+procedure tcustomapplication.settimer(const us: integer);
+begin
+ if interlockedincrement(ftimertriggercount) = 1 then begin
+  postevent(tmseevent.create(ek_timer));
+ end;
+end;
+
+procedure tcustomapplication.resettimertrigger;
+begin
+ interlockedexchange(ftimertriggercount,0);
 end;
 
 { tactivatorcontroller }

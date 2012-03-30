@@ -104,6 +104,7 @@ const
  enabletimertag = 8346320;
  
 type
+ tapplication1 = class(tcustomapplication);
  ptimerinfoty = ^timerinfoty;
  timerinfoty = record
   nexttime: longword;
@@ -302,6 +303,7 @@ label
  endlab;
 begin
  sys_mutexlock(mutex);
+ tapplication1(application).resettimertrigger;
  if first <> nil then begin
 {$ifdef mse_debugtimer}
   checktimer;

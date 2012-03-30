@@ -511,6 +511,11 @@ function stringtolatin1(const value: msestring): string;
 function latin1tostring(const value: string): msestring;
 function ucs4tostring(const achar: dword): msestring;
 
+function getasciichar(const source: msechar; out dest: char): boolean; inline;
+                    //true if valid;
+function getansichar(const source: msechar; out dest: char): boolean; inline;
+                    //true if valid;
+
 type
 // getkeystringfuncty = function (const index: integer;
 //        var astring: msestring): boolean of object;
@@ -894,6 +899,20 @@ begin
                         msechar(word((achar shr 10) and $3ff or $d800));
   (pmsechar(pointer(result))+1)^:= msechar(word(achar) and $3ff or $dc00);
  end;
+end;
+
+function getasciichar(const source: msechar; out dest: char): boolean;
+                    //true if valid;
+begin
+ result:= source < #128;
+ dest:= char(byte(source));
+end;
+
+function getansichar(const source: msechar; out dest: char): boolean;
+                    //true if valid;
+begin
+ result:= source < #256;
+ dest:= char(byte(source));
 end;
 
 function psubstr(const start,stop: pchar): string;
@@ -2098,8 +2117,8 @@ end;
 
 function charuppercase(const c: msechar): msechar;
 begin
- if ord(c) < $100 then begin
-  result:= msechar(upperchars[char(c)]);
+ if c < #$100 then begin
+  result:= msechar(byte(upperchars[char(byte(c))]));
  end
  else begin
   result:= c;
