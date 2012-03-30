@@ -1121,7 +1121,7 @@ var
 begin
   Byte((@Header[0])^) := $FF;
   Word((@Header[1])^) := resourcetyp;
-  HeaderSize := StrLen(StrUpper(StrPLCopy(@Header[3], ResName, 63))) + 10;
+  HeaderSize := StrLen(StrUpper(StrPLCopy(pchar(@Header[3]), ResName, 63))) + 10;
   Word((@Header[HeaderSize - 6])^) := $1030;
   Longint((@Header[HeaderSize - 4])^) := 0;
   WriteBuffer(Header, HeaderSize);
