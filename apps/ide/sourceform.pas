@@ -523,18 +523,23 @@ begin
       end;
      end;
     end;
+    tabwidget.activepageindex:= -1; //do not load source
+//    updatestat(istatfile(tabwidget));
    finally
     tabwidget.endupdate;
    end; 
   end;
-  if visible and (activepage <> nil) then begin
-   activepage.sourcefoonshow(nil);
-  end;
+//  if visible and (activepage <> nil) then begin
+//   activepage.sourcefoonshow(nil);
+//  end;
   feditposar:= nil; //no longer used
   fbookmarkar:= nil;
   updatestat(istatfile(tabwidget));
   if mainfo.errorformfilename <> '' then begin
    showsourceline(mainfo.errorformfilename,0,0,true);
+  end;
+  if tabwidget.activepageindex < 0 then begin
+   tabwidget.activepageindex:= 0; //default
   end;
  end;
 end;
