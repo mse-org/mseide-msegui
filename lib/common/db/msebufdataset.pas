@@ -2609,8 +2609,6 @@ begin
 end;
 
 procedure tmsebufdataset.internalgotobookmark(abookmark: pointer);
-var
- int1: integer;
 begin
  if abookmark <> nil then begin
   internalsetrecno(findbookmarkindex(pbufbookmarkty(abookmark)^.data));
