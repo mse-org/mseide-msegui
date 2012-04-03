@@ -39,7 +39,7 @@ type
  nodestate1ty = (ns1_statechanged,ns1_rootchange,ns1_candrag,
                  ns1_destroying,ns1_updating,ns1_noowner,ns1_captionclipped,
                  ns1_childchecked,ns1_checkboxclicked,ns1_customsort,
-                 ns1_nofreeroot
+                 ns1_nofreeroot,ns1_top
                 );
  nodestates1ty = set of nodestate1ty;
  
@@ -204,6 +204,8 @@ type
    function inccount: integer; //returns itemindex
    function getrootexpanded: boolean;
    procedure setrootexpanded(const avalue: boolean);
+   function gettop: boolean;
+   procedure settop(const avalue: boolean);
   protected
    fparent: ttreelistitem;
    fparentindex: integer;
@@ -260,6 +262,8 @@ type
    function candrop(const source: ttreelistitem): boolean; virtual;
 
    function finditembycaption(const acaption: msestring;
+                                  var dest: ttreelistitem): boolean;
+   function finditembycaption(const acaption: msestring;
              const acasesensitive: boolean = false;
              const aexpand: boolean = false): ttreelistitem; overload;
    function finditembycaption(const acaption: lmsestringty;
@@ -310,6 +314,7 @@ type
                            const recursive: boolean = false); overload;
    procedure sort(const sortfunc: arraysortcomparety;
                            const recursive: boolean = false); overload;
+   property top: boolean read gettop write settop;
    property count: integer read fcount;
    procedure setupeditor(const editor: tinplaceedit;
                           const font: tfont; const notext: boolean); override;
@@ -2175,12 +2180,30 @@ end;
 
 function comparetreelistitemcasesensitive(const l,r): integer;
 begin
- result:= msestringcomp(ttreelistitem(l).caption,ttreelistitem(r).caption);
+ result:= 0;
+ if ns1_top in ttreelistitem(l).fstate1 then begin
+  dec(result);
+ end;
+ if ns1_top in ttreelistitem(r).fstate1 then begin
+  inc(result);
+ end;
+ if result = 0 then begin
+  result:= msestringcomp(ttreelistitem(l).caption,ttreelistitem(r).caption);
+ end;
 end;
 
 function comparetreelistitemcaseinsensitive(const l,r): integer;
 begin
- result:= msestringicomp(ttreelistitem(l).caption,ttreelistitem(r).caption);
+ result:= 0;
+ if ns1_top in ttreelistitem(l).fstate1 then begin
+  dec(result);
+ end;
+ if ns1_top in ttreelistitem(r).fstate1 then begin
+  inc(result);
+ end;
+ if result = 0 then begin
+  result:= msestringicomp(ttreelistitem(l).caption,ttreelistitem(r).caption);
+ end;
 end;
 
 procedure ttreelistitem.sort(const casesensitive: boolean;
@@ -2668,6 +2691,20 @@ begin
  end;
 end;
 
+function ttreelistitem.finditembycaption(const acaption: msestring;
+                                           var dest: ttreelistitem): boolean;
+var
+ int1: integer;
+begin
+ result:= false;
+ for int1:= 0 to fcount-1 do begin
+  if fitems[int1].fcaption = acaption then begin
+   dest:= fitems[int1];
+   result:= true;
+  end;
+ end;
+end;
+
 function ttreelistitem.finditembycaption(const acaption: lmsestringty;
                          const aexpand: boolean = false): ttreelistitem;
 var
@@ -2909,7 +2946,28 @@ end;
 function ttreelistitem.compare(const l: ttreelistitem;
                                        const r: ttreelistitem): integer;
 begin
- result:= 0; //dummy
+ result:= 0;
+ if ns1_top in l.fstate1 then begin
+  dec(result);
+ end;
+ if ns1_top in r.fstate1 then begin
+  inc(result);
+ end;
+end;
+
+function ttreelistitem.gettop: boolean;
+begin
+ result:= ns1_top in fstate1;
+end;
+
+procedure ttreelistitem.settop(const avalue: boolean);
+begin
+ if avalue then begin
+  include(fstate1,ns1_top);
+ end
+ else begin
+  exclude(fstate1,ns1_top);
+ end;
 end;
 
 { trecordfielditem }

@@ -96,7 +96,8 @@ type
               const aparent: ttreelistitem = nil); override;
    procedure assign(source: ttreeitemeditlist); overload;
        //source remains owner of items, parent of items is unchanged
-   procedure add(const aitem: ttreelistedititem); overload; //nil ignored
+   function add(const aitem: ttreelistedititem): integer; overload;
+                   //returns index, nil ignored
    procedure add(const aitems: treelistedititemarty); overload;
    function add(const itemclass: treelistedititemclassty = nil):
                                              ttreelistedititem; overload;
@@ -715,6 +716,8 @@ type
    procedure add(const anodes: treelistedititemarty); overload;
    procedure add(const acount: integer; 
                              aitemclass: treelistedititemclassty = nil); overload;
+   procedure addchildren(const anode: ttreelistedititem);
+                 //adds children as toplevel nodes
    procedure readnode(const aname: msestring; const reader: tstatreader;
                                             const anode: ttreelistitem);
    procedure writenode(const aname: msestring; const writer: tstatwriter;
@@ -3470,9 +3473,9 @@ begin
  end;
 end;
 
-procedure ttreelistedititem.add(const aitem: ttreelistedititem);
+function ttreelistedititem.add(const aitem: ttreelistedititem): integer;
 begin
- inherited add(aitem);
+ result:= inherited add(aitem);
 end;
 
 function ttreelistedititem.add(
@@ -3844,6 +3847,26 @@ begin
  try
   for int1:= 0 to high(anodes) do begin
    add(anodes[int1]);
+  end;
+ finally
+  endupdate;
+ end;
+end;
+
+procedure ttreeitemeditlist.addchildren(const anode: ttreelistedititem);
+                 //adds children as toplevel nodes
+var
+ int1: integer;
+ po1: ptreelistedititematy;
+ n1: ttreelistedititem;
+begin
+ beginupdate;
+ try
+  po1:= pointer(anode.fitems);
+  for int1:= 0 to anode.count-1 do begin
+   n1:= ttreelistedititem(po1^[int1]);
+   n1.settreelevel(0);
+   add(n1);
   end;
  finally
   endupdate;

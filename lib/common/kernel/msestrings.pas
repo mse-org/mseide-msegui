@@ -178,6 +178,9 @@ type
  searchoptionty = (so_caseinsensitive,so_wholeword);
  searchoptionsty = set of searchoptionty;
 
+procedure trimright1(var s: string); overload;
+procedure trimright1(var s: msestring); overload;
+
 function removechar(const source: string; a: char): string; overload;
 function removechar(const source: msestring; a: msechar): msestring; overload;
 procedure removechar1(var dest: string; a: char); overload;
@@ -185,6 +188,7 @@ procedure removechar1(var dest: msestring; a: msechar); overload;
   //removes all a
 function printableascii(const source: string): string; 
                 //removes all nonprintablechars and ' '
+                
 function replacechar(const source: string; a,b: char): string; overload;
 function replacechar(const source: msestring; a,b: msechar): msestring; overload;
 procedure replacechar1(var dest: string; a,b: char); overload;
@@ -1766,6 +1770,40 @@ end;
 function parsecommandline(const s: msestring): msestringarty;
 begin
  result:= parsecommandline(pmsechar(s));
+end;
+
+procedure trimright1(var s: string); overload;
+var
+ po1,po2: pchar;
+begin
+ if s <> '' then begin
+  po1:= pointer(s);
+  po2:= po1+length(s)-1;
+  while (po2^ <= ' ') do begin
+   dec(po2);
+   if po2 < po1 then begin
+    break;
+   end;
+  end;
+  setlength(s,po2-po1+1);
+ end;
+end;
+
+procedure trimright1(var s: msestring); overload;
+var
+ po1,po2: pmsechar;
+begin
+ if s <> '' then begin
+  po1:= pointer(s);
+  po2:= po1+length(s)-1;
+  while (po2^ <= ' ') do begin
+   dec(po2);
+   if po2 < po1 then begin
+    break;
+   end;
+  end;
+  setlength(s,po2-po1+1);
+ end;
 end;
 
 function printableascii(const source: string): string; 
