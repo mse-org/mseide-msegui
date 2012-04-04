@@ -905,7 +905,8 @@ end;
 
 { tcustombuttonframe }
 
-constructor tcustombuttonframe.create(const intf: icaptionframe; const buttonintf: ibutton);
+constructor tcustombuttonframe.create(const intf: icaptionframe;
+                                             const buttonintf: ibutton);
 begin
  fbuttons:= tframebuttons.create(self,getbuttonclass);
  fbuttonintf:= buttonintf;

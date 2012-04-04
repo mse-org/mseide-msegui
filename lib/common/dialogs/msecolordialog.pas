@@ -271,12 +271,23 @@ procedure tcustomcoloredit.buttonaction(var action: buttonactionty;
 var
  co1: colorty;
 begin
- if (action = ba_click) and (buttonindex = 1) then begin
-  co1:= value;
-  if colordialog(co1) = mr_ok then begin
-   tcolordropdowncontroller(fdropdown).clearitemindex; 
-   text:= colortostring(co1);
-   checkvalue;  
+ if buttonindex = 1 then begin
+  case action of
+   ba_buttonpress: begin
+    if canfocus then begin
+     setfocus;
+    end;
+   end;
+   ba_click: begin
+    if focused then begin
+     co1:= value;
+     if colordialog(co1) = mr_ok then begin
+      tcolordropdowncontroller(fdropdown).clearitemindex; 
+      text:= colortostring(co1);
+      checkvalue;  
+     end;
+    end;
+   end;
   end;
  end;
 end;

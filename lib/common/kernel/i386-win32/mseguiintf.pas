@@ -1249,7 +1249,7 @@ end;
 function gui_destroywindow(var awindow: windowty): guierrorty;
 var
  ico1: hicon;
- id1: winidty;
+// id1: winidty;
  info: setwindowownerinfoty;
 begin
  with awindow do begin

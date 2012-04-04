@@ -1000,7 +1000,7 @@ procedure tcustomdropdowncontroller.buttonaction(var action: buttonactionty;
 begin
  fintf.buttonaction(action,buttonindex);
  if buttonindex = tcustomdropdownbuttonframe(
-           twidget1(fintf.getwidget).fframe).factivebutton then begin
+                  twidget1(fintf.getwidget).fframe).factivebutton then begin
   with fintf.getwidget do begin
    case action of
     ba_buttonpress: begin
