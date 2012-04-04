@@ -4412,7 +4412,7 @@ begin
      end;
     end;
    end;
-   if ar1 <> nil then begin
+   if (ar1 <> nil) and (avalue[0].path <> nil) then begin
     n1:= find(avalue[0].path[0]); //restore focused row
     if n1 <> nil then begin
      int1:= n1.findex;
