@@ -141,6 +141,7 @@ type
    procedure assign(const source: tlistitem); overload; virtual;
    procedure beginupdate;
    procedure endupdate;
+   procedure releaseowner; virtual;
 
    function empty: boolean; virtual;
    procedure change;
@@ -239,6 +240,8 @@ type
    class procedure calcitemlayout(const asize: sizety; const ainnerframe: framety;
                            const list: tcustomitemlist;
                               var info: listitemlayoutinfoty); override;
+
+   procedure releaseowner; override;
 
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
@@ -1108,6 +1111,11 @@ end;
 function tlistitem.empty: boolean;
 begin
  result:= fcaption = '';
+end;
+
+procedure tlistitem.releaseowner;
+begin
+ setowner(nil);
 end;
 
 { tcustomitemlist }
@@ -2968,6 +2976,16 @@ begin
  else begin
   exclude(fstate1,ns1_top);
  end;
+end;
+
+procedure ttreelistitem.releaseowner;
+var
+ int1: integer;
+begin
+ for int1:= 0 to fcount - 1 do begin
+  fitems[int1].releaseowner;
+ end;
+ inherited;
 end;
 
 { trecordfielditem }
