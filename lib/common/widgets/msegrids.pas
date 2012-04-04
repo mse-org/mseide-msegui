@@ -103,7 +103,8 @@ type
                  og_autopopup,
                  og_mousescrollcol,og_noresetselect);
  optionsgridty = set of optiongridty;
- optiongrid1ty = (og1_norowdeletequery,og1_swaprowinsertappend); //for Ctrl+Insert
+ optiongrid1ty = (og1_norowdeletequery,og1_swaprowinsertappend,//for Ctrl+Insert
+                  og1_focusmorerows,og1_scrollmorerows); 
  optionsgrid1ty = set of optiongrid1ty;
 
 const
@@ -2181,6 +2182,9 @@ type
                       const position: cellpositionty = cep_nearest;
                       const force: boolean = false); 
                //scrolls cell into view, force true -> if scrollbar clicked also
+   procedure showrow(const arow: integer; 
+                      const position: cellpositionty = cep_nearest;
+                      const force: boolean = false); 
    procedure showlastrow;
    procedure scrollrows(step: integer);
    procedure scrollleft;
@@ -10805,9 +10809,10 @@ end;
 procedure tcustomgrid.beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
 begin
- if (cell.row <> invalidaxis) then begin
+ if (og1_focusmorerows in foptionsgrid1) and 
+                    (cell.row <> invalidaxis) then begin
   if cell.row >= frowcount then begin
-   checkmorerows(cell.row-frowcount+1);
+   checkmorerows(cell.row - frowcount + 1);
   end
   else begin
    if cell.row < 0 then begin
@@ -11532,7 +11537,23 @@ begin
 end;
 
 procedure tcustomgrid.scrollrows(step: integer);
+var
+ int1: integer;
 begin
+ if og1_scrollmorerows in foptionsgrid1 then begin
+  if step > 0 then begin
+   int1:= firstvisiblerow - step;
+   if int1 < 0 then begin
+    checkmorerows(int1);
+   end;
+  end
+  else begin
+   int1:= lastvisiblerow - step - rowcount+1;
+   if int1 > 0 then begin
+    checkmorerows(int1);
+   end;
+  end;
+ end;
  if canevent(tmethod(fonscrollrows)) then begin
   fonscrollrows(self,step);
  end;
@@ -11860,6 +11881,13 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tcustomgrid.showrow(const arow: integer; 
+                      const position: cellpositionty = cep_nearest;
+                      const force: boolean = false); 
+begin
+ showcell(mgc(invalidaxis,arow),position,force);
 end;
 
 procedure tcustomgrid.showlastrow;
