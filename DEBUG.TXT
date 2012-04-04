@@ -1,0 +1,29 @@
+MSEide debugging
+****************
+Breakpoints don't work on win32 in units compiled with -CX 
+(create smartlinked units). It is recommended to use mingw gdb 6.8+ on win32.
+String and dynamic array variables of units compiled with 
+-gv (Valgrind debug info) are displayed incorrect.
+gdb 6.5 has bugs with threads and forking on linux. Please update to gdb 6.6+.
+FPC 2.2+ projects must be compiled with -O- (no optimization) for debugging.
+
+Tips from IvankoB:
+------------------
+
+In win-32, when debugging MSEide as a slave project run within master  
+MSEide, there're possible
+uncontrollable breakpoints on pressing the F12 key (in MSEide, this key  
+toggles design/code view
+for form, datamodules and reports). These breakpoints are caused by the  
+win-32 internal debug
+facilities activated by the F12 key too. To release this key for MSEide,  
+there's a solution:
+
+- run the REGEDIT.exe
+
+- set  
+"HKLM\SOFTWARE\Microsoft\WindowsNT\CurrentVersion\AeDebug\UserDebuggerHotKey"  
+to 0x2F
+(it's the scancode of VK_HELP which is not present on most PC keyboards )
+
+- reboot

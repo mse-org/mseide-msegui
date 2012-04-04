@@ -131,15 +131,6 @@ Antialiased text with MSEgui 32 bit on 64 bit Linux
 MSEgui uses Xft for antialiased fonts on Linux. Please install lib32-libxft
 package if necessary.
 
-Debugging
-*********
-Breakpoints don't work on win32 in units compiled with -CX 
-(create smartlinked units). It is recommended to use mingw gdb 6.8 on win32.
-String and dynamic array variables of units compiled with 
--gv (Valgrind debug info) are displayed incorrect.
-gdb 6.5 has bugs with threads and forking on linux. Please update to gdb 6.6+.
-FPC 2.2+ projects must be compiled with -O- (no optimization) for debugging.
-
 Popup widgets behind the forms
 ******************************
 If the popup widgets are showed behind the forms, try to start the 
