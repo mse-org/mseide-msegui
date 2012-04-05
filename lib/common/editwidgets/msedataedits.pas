@@ -2725,6 +2725,7 @@ begin
   end;
  end;
 end;
+{$endif mse_with_ifi}
 
 procedure tcustomdataedit.sizechanged;
 begin
@@ -2732,7 +2733,6 @@ begin
  gridwidgetsized(self,fgridintf);
 end;
 
-{$endif mse_with_ifi}
 
 { tcustomstringedit }
 

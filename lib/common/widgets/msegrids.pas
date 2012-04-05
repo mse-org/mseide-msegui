@@ -1786,10 +1786,10 @@ type
    foncopyselection: copyselectioneventty;
    fonpasteselection: pasteselectioneventty;
    fongetmorerows: gridmorerowseventty;
-{$ifdef mse_with_ifi}
-   fifilink: tifigridlinkcomp;
    foncolmoving: gridblockmovingeventty;
    fonrowsmoving: gridblockmovingeventty;
+{$ifdef mse_with_ifi}
+   fifilink: tifigridlinkcomp;
    procedure ifirowchange;
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifigridlinkcomp);

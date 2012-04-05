@@ -2027,6 +2027,7 @@ function tgraphdataedit.getvalueprop: ppropinfo;
 begin
   result:= getpropinfo(self,'value');
 end;
+{$endif mse_with_ifi}
 
 function tgraphdataedit.getedited: boolean;
 begin
@@ -2038,7 +2039,6 @@ begin
  fedited:= avalue;
 end;
 
-{$endif mse_with_ifi}
 
 { ttogglegraphdataedit}
 
