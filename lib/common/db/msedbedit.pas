@@ -246,7 +246,7 @@ type
   procedure setenabled(const avalue: boolean);
   function getgridintf: iwidgetgrid;
   function getgriddatasource: tdatasource;
-  function edited: boolean;
+  function getedited: boolean;
   function seteditfocus: boolean;
   procedure initeditfocus;
   function checkvalue(const quiet: boolean = false): boolean;
@@ -1765,7 +1765,7 @@ type
    function getgridintf: iwidgetgrid;
    function getwidget: twidget;
    function seteditfocus: boolean;
-   function edited: boolean;
+   function getedited: boolean;
    procedure initeditfocus;
    function checkvalue(const quiet: boolean = false): boolean;
    procedure valuetofield;
@@ -3460,7 +3460,7 @@ procedure tcustomeditwidgetdatalink.nullcheckneeded(var avalue: boolean);
  end; //findactivedatalink
  
 begin
- avalue:= active and ((avalue or fintf.edited and (oed_autopost in foptions) or
+ avalue:= active and ((avalue or fintf.getedited and (oed_autopost in foptions) or
               (fcanclosing > 0)) and 
               ((dataset.state in [dsinsert,dsedit]) and
                       (dataset.modified or 
@@ -8791,7 +8791,7 @@ begin
  result:= grid.entered and (grid.col = index);
 end;
 
-function tdbstringcol.edited: boolean;
+function tdbstringcol.getedited: boolean;
 begin
  result:= fds_modified in fdatalink.fstate;
 end;

@@ -91,7 +91,7 @@ type
    fvaluebuffer: string;
     //idbeditfieldlink
    function getgriddatasource: tdatasource;
-   function edited: boolean;
+   function getedited: boolean;
    procedure initeditfocus;
    function checkvalue(const quiet: boolean = false): boolean;
    procedure valuetofield;
@@ -176,7 +176,7 @@ begin
  result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datalink.datasource;
 end;
 
-function tdbdataimage.edited: boolean;
+function tdbdataimage.getedited: boolean;
 begin
  result:= false;
 end;

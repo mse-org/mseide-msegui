@@ -121,6 +121,8 @@ type
    procedure setoptionsedit(const avalue: optionseditty);
    function getreadonly: boolean;
    procedure setreadonly(const avalue: boolean);
+   function getedited: boolean; virtual;
+   procedure setedited(const avalue: boolean); virtual;
   protected
    fgridintf: iwidgetgrid;
    fgriddatalink: pointer;
@@ -213,7 +215,7 @@ type
    procedure initnewwidget(const ascale: real); override;
    procedure initgridwidget; virtual;
 
-   function edited: boolean;
+   property edited: boolean read getedited write setedited;
    function actualcolor: colorty; override;
    function widgetcol: twidgetcol;
    function gridrow: integer;
@@ -1544,12 +1546,12 @@ begin
  {$endif}
  end;
 end;
-
+{
 function tgraphdataedit.edited: boolean;
 begin
  result:= fedited;
 end;
-
+}
 procedure tgraphdataedit.initeditfocus;
 begin
  //dummy
@@ -2024,6 +2026,16 @@ end;
 function tgraphdataedit.getvalueprop: ppropinfo;
 begin
   result:= getpropinfo(self,'value');
+end;
+
+function tgraphdataedit.getedited: boolean;
+begin
+ result:= fedited;
+end;
+
+procedure tgraphdataedit.setedited(const avalue: boolean);
+begin
+ fedited:= avalue;
 end;
 
 {$endif mse_with_ifi}
