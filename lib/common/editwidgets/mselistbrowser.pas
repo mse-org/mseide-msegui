@@ -294,7 +294,7 @@ type
    function locatecount: integer; virtual;        //number of locate values
    function locatecurrentindex: integer; virtual; //index of current row
    procedure locatesetcurrentindex(const aindex: integer);
-   function edited: boolean;
+   function getedited: boolean;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1704,7 +1704,7 @@ begin
  focuscell(indextocell(aindex));
 end;
 
-function tcustomlistview.edited: boolean;
+function tcustomlistview.getedited: boolean;
 begin
  result:= false;
 end;

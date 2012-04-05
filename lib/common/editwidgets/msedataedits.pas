@@ -219,6 +219,8 @@ type
    procedure setnullvalue; virtual; //for dbedits
    function nullcheckneeded(const newfocus: twidget): boolean; virtual;
    function textcellcopy: boolean; virtual;
+   function getedited: boolean; override;
+   procedure setedited(const avalue: boolean); virtual;
   public
    constructor create(aowner: tcomponent); override;
    
@@ -238,7 +240,7 @@ type
 
    function checkvalue(const quiet: boolean = false): boolean; virtual;
    function canclose(const newfocus: twidget): boolean; override;
-   function edited: boolean; override;
+   property edited: boolean read getedited write setedited;
    function emptytext: boolean;
    function seteditfocus: boolean;
    
@@ -1514,9 +1516,19 @@ begin
  end;
 end;
 
-function tcustomdataedit.edited: boolean;
+function tcustomdataedit.getedited: boolean;
 begin
  result:= des_edited in fstate;
+end;
+
+procedure tcustomdataedit.setedited(const avalue: boolean);
+begin
+ if avalue then begin
+  include(fstate,des_edited);
+ end
+ else begin
+  exclude(fstate,des_edited);
+ end;
 end;
 
 function tcustomdataedit.geteditstate: dataeditstatesty;

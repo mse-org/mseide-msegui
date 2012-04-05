@@ -157,7 +157,7 @@ type
   function getvalueempty: integer;
   function getwidget: twidget;
   function geteditor: tinplaceedit;
-  function edited: boolean;
+  function getedited: boolean;
   procedure modified;
   procedure dobeforedropdown;
   procedure doafterclosedropdown;
@@ -1069,7 +1069,7 @@ begin
   end;
   ea_textentered: begin
    if (deo_selectonly in foptions) and not fdataselected and 
-           fintf.edited then begin
+           fintf.getedited then begin
     if not (deo_forceselect in foptions) and 
                                      (fintf.geteditor.text = '') then begin
      info.action:= ea_none;

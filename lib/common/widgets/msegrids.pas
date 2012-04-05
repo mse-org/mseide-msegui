@@ -2468,7 +2468,7 @@ type
    function locatecurrentindex: integer; //index of current row
    procedure locatesetcurrentindex(const aindex: integer);
    function getkeystring(const aindex: integer): msestring; //locate text
-   function edited: boolean;
+   function getedited: boolean;
 
    procedure rowstatechanged(const arow: integer); override;
    procedure dofocusedcellposchanged; override;
@@ -16032,7 +16032,7 @@ begin
  end;
 end;
 
-function tcustomstringgrid.edited: boolean;
+function tcustomstringgrid.getedited: boolean;
 begin
  result:= isdatacell(ffocusedcell) and cols[ffocusedcell.col].edited;
 end;

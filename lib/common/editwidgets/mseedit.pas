@@ -362,7 +362,7 @@ type
    function locatecurrentindex: integer; virtual; //index of current row
    procedure locatesetcurrentindex(const aindex: integer); virtual;
    function getkeystring(const aindex: integer): msestring; virtual; //locate text
-   function edited: boolean; virtual;
+   function getedited: boolean; virtual;
 
                //interface to inplaceedit
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -1467,7 +1467,7 @@ begin
  feditor.poschanged;
 end;
 
-function tcustomedit.edited: boolean;
+function tcustomedit.getedited: boolean;
 begin
  result:= false;
 end;

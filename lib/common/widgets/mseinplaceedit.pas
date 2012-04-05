@@ -38,7 +38,7 @@ type
   function locatecurrentindex: integer; //index of current row
   procedure locatesetcurrentindex(const aindex: integer);
   function getkeystring(const aindex: integer): msestring; //locate text
-  function edited: boolean;
+  function getedited: boolean;
  end;
 
  inplaceeditstatety = (ies_focused,ies_poschanging,ies_firstclick,ies_istextedit,
@@ -960,7 +960,7 @@ end;
 
 function tinplaceedit.canundo: boolean;
 begin
- result:= (fbackup <> finfo.text.text) or fintf.edited;
+ result:= (fbackup <> finfo.text.text) or fintf.getedited;
 end;
 
 function tinplaceedit.cancopy: boolean;
