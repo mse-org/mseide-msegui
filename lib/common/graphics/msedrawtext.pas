@@ -1004,7 +1004,8 @@ var
   with aformat,info,canvas do begin
    if newinfos * fontstylemask <> [] then begin
     afontstyle:= afontstyle * fontstylesty(
-       not {$ifdef FPC}longword{$else}byte{$endif}(newinfos)) + style.fontstyle;
+       not {$ifdef FPC}longword({$else}byte(word{$endif}(newinfos))) +
+                                                           style.fontstyle;
     font.style:= afontstyle + overridefontstyle;
    end;
    if (ni_selected in newinfos) and not (tf_noselect in flags)then begin

@@ -4377,7 +4377,7 @@ end;
 
 procedure tcanvas.drawframe(const arect: rectty; awidth: framety;
                    const acolor: colorty = cl_default;
-                   const hiddenedges: edgesty = []); overload;
+                   const hiddenedges: edgesty = []);
 var
  rect1,rect2: rectty;
 begin

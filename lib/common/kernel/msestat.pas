@@ -1254,22 +1254,22 @@ var
 begin
  if findvar(name,str1) and trystrtointmse(str1,int2) then begin
   try
-   if setcount <> nil then begin
+   if assigned(setcount) then begin
     setcount(int2);
    end;
-   if store <> nil then begin
+   if assigned(store) then begin
     for int1:= 0 to int2-1 do begin
      store(int1,readlistitem);
     end;
    end;
   except
-   if setcount <> nil then begin
+   if assigned(setcount) then begin
     setcount(0);
    end;
   end;
  end
  else begin
-  if setcount <> nil then begin
+  if assigned(setcount) then begin
    setcount(0);
   end;
  end;
@@ -1283,22 +1283,22 @@ var
 begin
  if findvar(name,str1) and trystrtointmse(str1,int2) then begin
   try
-   if setcount <> nil then begin
+   if assigned(setcount) then begin
     setcount(int2);
    end;
-   if store <> nil then begin
+   if assigned(store) then begin
     for int1:= 0 to int2-1 do begin
      store(int1,readlistitem);
     end;
    end;
   except
-   if setcount <> nil then begin
+   if assigned(setcount) then begin
     setcount(0);
    end;
   end;
  end
  else begin
-  if setcount <> nil then begin
+  if assigned(setcount) then begin
    setcount(0);
   end;
  end;

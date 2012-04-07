@@ -101,6 +101,7 @@ begin
  end
  else begin
   usemmtimer:= false;
+  result:= false;
  end;
 end;
 

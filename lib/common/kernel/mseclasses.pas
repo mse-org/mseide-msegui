@@ -808,9 +808,10 @@ procedure checkcorbainterface(const sender: tcomponent;
 function isinterface(const actual: ptypeinfo; const wanted: ptypeinfo): boolean;
 function isinterfaceornil(const actual: ptypeinfo; const wanted: ptypeinfo): boolean;
 
-function checkcanevent(const acomponent: tcomponent; const event: tmethod): boolean;
-function checkcanevent(const event: tmethod): boolean; 
-                                      {$ifdef FPC}inline;{$endif}
+function checkcanevent(const acomponent: tcomponent;
+                     const event: tmethod): boolean; overload;
+function checkcanevent(const event: tmethod): boolean;
+                           {$ifdef FPC}inline;{$endif} overload;
 
 procedure readstringar(const reader: treader; out ar: stringarty);
 procedure writestringar(const writer: twriter; const ar: stringarty);

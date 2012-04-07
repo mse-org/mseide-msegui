@@ -82,7 +82,7 @@ type
                    );
  optionswidgetty = set of optionwidgetty;
  optionwidget1ty = (
-                    ow1_fontglyphheight, 
+                    ow1_fontglyphheight,
                           //track font.glyphheight, 
                           //create fonthighdelta and childscaled events
                     ow1_fontlineheight, 
@@ -1565,7 +1565,7 @@ type
    function canclose1: boolean; 
   public
    constructor create(aowner: tcomponent); overload; override;
-   constructor create(const aowner: tcomponent; 
+   constructor create(const aowner: tcomponent;
                       const aparentwidget: twidget;
                       const aiswidget: boolean = true); overload;
    constructor createandinit(const aowner: tcomponent; 
@@ -2104,7 +2104,7 @@ type
    procedure unregistermovenotification(sender: iobjectlink);
 
    property options: windowoptionsty read foptions;
-   function ispopup: boolean; inline;
+   function ispopup: boolean; {$ifdef FPC}inline;{$endif}
    property owner: twidget read fowner;
    property focusedwidget: twidget read ffocusedwidget;
    property transientfor: twindow read ftransientfor;
@@ -5726,8 +5726,8 @@ begin
      reverse:= false;
     end;
     with trealarrayprop1(fi.fade_pos) do begin
+     first:= 0;
      if count > 1 then begin
-      first:= 0;
       last:= count - 1;
       for int1:= 1 to last do begin
        if fitems[int1] < a then begin
@@ -11124,6 +11124,10 @@ begin
 end;
 
 procedure twidget.setoptionswidget(const avalue: optionswidgetty);
+{$ifndef FPC}
+const
+ mask: optionswidgetty = [ow_hinton,ow_hintoff];
+{$endif}
 var
  value,delta: optionswidgetty;
  opt1: optionswidget1ty;
@@ -11136,11 +11140,14 @@ begin
    end;
    if [ow_fontglyphheight,ow_fontlineheight,ow_autoscale] * avalue <> 
                                                               [] then begin
-    updatebit1(longword(opt1),ord(ow1_fontglyphheight),
+    updatebit1({$ifdef FPC}longword{$else}word{$endif}(opt1),
+                                                   ord(ow1_fontglyphheight),
                                          ow_fontglyphheight in avalue);
-    updatebit1(longword(opt1),ord(ow1_fontlineheight),
+    updatebit1({$ifdef FPC}longword{$else}word{$endif}(opt1),
+                     ord(ow1_fontlineheight),
                                          ow_fontlineheight in avalue);
-    updatebit1(longword(opt1),ord(ow1_autoscale),ow_autoscale in avalue);
+    updatebit1({$ifdef FPC}longword{$else}word{$endif}(opt1),
+                 ord(ow1_autoscale),ow_autoscale in avalue);
    end;
    if ow_autosize in avalue then begin
     opt1:= opt1 + [ow1_autowidth,ow1_autoheight];
@@ -11158,10 +11165,13 @@ begin
   end;
 
   value:= optionswidgetty(setsinglebit(longword(avalue),
-          longword(foptionswidget),  
-          [{longword([ow_fontglyphheight,ow_fontlineheight]),}
-           longword([ow_hinton,ow_hintoff])]));
-           
+          longword(foptionswidget),
+           {$ifdef FPC}
+           longword([ow_hinton,ow_hintoff])));
+           {$else}
+           longword(mask)));
+           {$endif}
+
   delta:= optionswidgetty(longword(value) xor longword(foptionswidget));
   foptionswidget:= value - deprecatedoptionswidget;
   if (delta * [ow_background,ow_top] <> []) then begin
@@ -11183,20 +11193,24 @@ begin
 end;
 
 procedure twidget.setoptionswidget1(const avalue: optionswidget1ty);
+{$ifndef FPC}
+const
+ mask1: optionswidget1ty = [ow1_fontglyphheight,ow1_fontlineheight];
+ mask2: optionswidget1ty = [ow1_autosizeanright,ow1_noautosizeanright];
+ mask3: optionswidget1ty = [ow1_autosizeanbottom,ow1_noautosizeanbottom];
+{$endif}
 var
  value,delta: optionswidget1ty;
 begin
-
- value:= optionswidget1ty(setsinglebit(
- {$ifdef FPC}longword{$else}word{$endif}(avalue),
- {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1),
- [{$ifdef FPC}longword{$else}word{$endif}(
-                [ow1_fontglyphheight,ow1_fontlineheight]),  
-  {$ifdef FPC}longword{$else}word{$endif}(
-                [ow1_autosizeanright,ow1_noautosizeanright]),
-  {$ifdef FPC}longword{$else}word{$endif}(
-              [ow1_autosizeanbottom,ow1_noautosizeanbottom])]));
-              
+{$ifdef FPC}
+ value:= optionswidget1ty(setsinglebit(longword(avalue),longword(foptionswidget1),
+               [longword([ow1_fontglyphheight,ow1_fontlineheight]),
+                longword([ow1_autosizeanright,ow1_noautosizeanright]),
+                longword([ow1_autosizeanbottom,ow1_noautosizeanbottom])]));
+{$else}
+ value:= optionswidget1ty(setsinglebitar16(word(avalue),word(foptionswidget1),
+                                        [word(mask1),word(mask2),word(mask3)]));
+{$endif}
  delta:= optionswidget1ty({$ifdef FPC}longword{$else}word{$endif}(value) xor
                     {$ifdef FPC}longword{$else}word{$endif}(foptionswidget1));
  if delta <> [] then begin
@@ -12091,9 +12105,11 @@ begin
 end;
 
 procedure twidget.setoptionsskin(const avalue: optionsskinty);
-//const
-// mask1: optionsskinty = [osk_skin,osk_noskin];
-// mask2: optionsskinty = [osk_colorcaptionframe,osk_nocolorcaptionframe];
+{$ifndef FPC}
+const
+ mask1: optionsskinty = [osk_skin,osk_noskin];
+ mask2: optionsskinty = [osk_colorcaptionframe,osk_nocolorcaptionframe];
+{$endif}
 var
  {opt1,opt2,}valuebefore: optionsskinty;
 begin
@@ -12108,14 +12124,16 @@ begin
 //                 {$ifdef FPC}longword{$else}word{$endif}(mask2)));
 // foptionsskin:= avalue - (mask1+mask2) + opt1*mask1 + opt2*mask2;
 
+{$ifdef FPC}
  foptionsskin:= optionsskinty(setsinglebit(
-                 {$ifdef FPC}longword{$else}word{$endif}(avalue),
-                 {$ifdef FPC}longword{$else}word{$endif}(foptionsskin),
-                [{$ifdef FPC}longword{$else}word{$endif}(
-                                             [osk_skin,osk_noskin]),
-                 {$ifdef FPC}longword{$else}word{$endif}(
-                   [osk_colorcaptionframe,osk_nocolorcaptionframe])]));
-                   
+                longword(avalue),longword(foptionsskin),
+                  [longword([osk_skin,osk_noskin]),
+                   longword([osk_colorcaptionframe,osk_nocolorcaptionframe])]));
+{$else}
+ foptionsskin:= optionsskinty(setsinglebitar16(
+                  word(avalue),word(foptionsskin),
+                  [word(mask1),word(mask2)]));
+{$endif}
  if (optionsskinty({$ifdef FPC}longword{$else}word{$endif}(valuebefore) xor
                    {$ifdef FPC}longword{$else}word{$endif}(avalue)) * 
     [osk_nopropwidth,osk_nopropheight] <> []) and (fparentwidget <> nil) then begin

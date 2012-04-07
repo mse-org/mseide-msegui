@@ -1047,7 +1047,7 @@ end;
 function tmenuitem.doexec: boolean;
 begin
  result:= doactionexecute(self,finfo,true,
-                mao_nocandefocus in finfo.options{false},@befexec);
+                mao_nocandefocus in finfo.options{false},{$ifdef FPC}@{$endif}befexec);
 end;
 
 function tmenuitem.internalexecute(async: boolean): boolean;
@@ -1871,6 +1871,7 @@ begin
  if amenu = nil then begin
   amenu:= tpopupmenu.createtransient(atransientfor,@mouseinfo);
  end;
+ result:= -1; //compiler warning
  if items <> nil then begin
   if first then begin
    result:= amenu.menu.submenu.insert(0,items);

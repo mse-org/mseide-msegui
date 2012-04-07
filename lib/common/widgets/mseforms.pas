@@ -1165,20 +1165,28 @@ begin
 end;
 
 procedure tcustommseform.setoptions(const Value: formoptionsty);
-//const
-// mask1: formoptionsty = [fo_screencentered,fo_screencenteredvirt,fo_defaultpos];
-// mask2: formoptionsty = [fo_closeonesc,fo_cancelonesc];
-// mask3: formoptionsty = [fo_maximized,fo_minimized,fo_fullscreen,fo_fullscreenvirt];
+{$ifndef FPC}
+const
+ mask1: formoptionsty = [fo_screencentered,fo_screencenteredvirt,fo_defaultpos];
+ mask2: formoptionsty = [fo_closeonesc,fo_cancelonesc];
+ mask3: formoptionsty = [fo_maximized,fo_minimized,fo_fullscreen,fo_fullscreenvirt];
+ mask4: formoptionsty = [fo_modal,fo_createmodal];
+{$endif}
 //var
 // opt1,opt2: formoptionsty;
 begin
  if foptions <> value then begin
+ {$ifdef FPC}
   foptions:= formoptionsty(setsinglebit(longword(value),longword(foptions),
    [longword([fo_screencentered,fo_screencenteredvirt,fo_defaultpos]),
     longword([fo_closeonesc,fo_cancelonesc]),
     longword([fo_maximized,fo_minimized,fo_fullscreen,fo_fullscreenvirt]),
     longword([fo_modal,fo_createmodal])
    ]));
+ {$else}
+  foptions:= formoptionsty(setsinglebitar32(longword(value),longword(foptions),
+   [longword(mask1),longword(mask2),longword(mask3),longword(mask4)]));
+ {$endif}
 (*
   opt1:= formoptionsty(setsinglebit(
        {$ifdef FPC}longword{$else}longword{$endif}(value),
@@ -1249,9 +1257,9 @@ const
  mask1: windowoptionsty = [wo_taskbar,wo_notaskbar];
 begin
  foptionswindow:= windowoptionsty(setsinglebit(
-                    {$ifdef FPC}longword{$else}byte{$endif}(value),
-                    {$ifdef FPC}longword{$else}byte{$endif}(foptionswindow),
-                    {$ifdef FPC}longword{$else}byte{$endif}(mask1)));
+                    {$ifdef FPC}longword{$else}longword{$endif}(value),
+                    {$ifdef FPC}longword{$else}longword{$endif}(foptionswindow),
+                    {$ifdef FPC}longword{$else}longword{$endif}(mask1)));
 end;
 
 procedure tcustommseform.setstatfile(const avalue: tstatfile);

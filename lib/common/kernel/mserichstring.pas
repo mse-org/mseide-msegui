@@ -437,8 +437,12 @@ begin
      {$ifdef FPC}longword{$else}byte{$endif}(fontstyles) xor
      {$ifdef FPC}longword{$else}byte{$endif}(style.fontstyle));
     newinfos:= newinfos -
-           newinfosty(not {$ifdef FPC}longword{$else}byte{$endif}(fontstylesdelta)) * fontstyleflags +
-           newinfosty({$ifdef FPC}longword{$else}byte{$endif}(fontstylesdelta)) * fontstyleflags;
+           newinfosty(not
+             {$ifdef FPC}longword({$else}
+                         word(byte{$endif}(fontstylesdelta))) * fontstyleflags +
+           newinfosty(
+             {$ifdef FPC}longword({$else}
+                         word(byte{$endif}(fontstylesdelta))) * fontstyleflags;
     if ni_fontcolor in newinfos then begin
      focopo:= style.fontcolor;
     end;
@@ -447,7 +451,7 @@ begin
     end;
     fontstyles:= fontstylesty({$ifdef FPC}longword{$else}byte{$endif}(fontstyles) xor
             {$ifdef FPC}longword{$else}byte{$endif}(fontstylesdelta) and
-               {$ifdef FPC}longword{$else}byte{$endif}(newinfos));
+               {$ifdef FPC}longword({$else}byte(word{$endif}(newinfos)));
     if newinfos <> [] then begin
      if int1 <> int2 then begin
       formats[int2]:= formats[int1];
@@ -483,8 +487,10 @@ function setfontinfolen(var formats: formatinfoarty; aindex: integer; len: halfi
   end;
   afontstyle:= style.fontstyle;
   style.fontstyle:= style.fontstyle -
-            fontstylesty({$ifdef FPC}longword{$else}byte{$endif}(flags * fontstyleflags)) +
-            astyle.fontstyle * fontstylesty({$ifdef FPC}longword{$else}byte{$endif}(flags));
+            fontstylesty({$ifdef FPC}longword({$else}
+                         byte(word{$endif}(flags * fontstyleflags))) +
+            astyle.fontstyle * fontstylesty(
+            {$ifdef FPC}longword({$else}byte(word{$endif}(flags)));
   result:= result or (afontstyle <> style.fontstyle);
  end;
 
@@ -577,7 +583,7 @@ begin
  else begin
   style.fontstyle:= [];
  end;
- newinfos:= newinfosty({$ifdef FPC}longword{$else}byte{$endif}([astyle]));
+ newinfos:= newinfosty({$ifdef FPC}longword({$else}word(byte{$endif}([astyle])));
  result:= setfontinfolen(formats,aindex,len,style,newinfos);
 end;
 

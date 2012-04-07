@@ -100,7 +100,6 @@ type
    fcachedposition: int64;
 
    fusewritebuffer: boolean;
-   function getnotopen: boolean;
    procedure setusewritebuffer(const avalue: boolean);
    function getbufpo: pchar;
   protected
@@ -108,6 +107,7 @@ type
    fbuffer: pchar;
    bufoffset, bufend: pchar;
    fstate: textstreamstatesty;
+   function getnotopen: boolean;
    procedure setbuflen(const Value: integer); virtual;
    function geteof: boolean;
    function readbytes(var buf): integer; virtual;
@@ -848,7 +848,7 @@ constructor tmsefilestream.internalcreate(const afilename: filenamety;
                       const openmode: fileopenmodety;
                       const accessmode: fileaccessmodesty;
                       const rights: filerightsty;
-                      out error: syserrorty); overload;
+                      out error: syserrorty);
 var
  ahandle: integer;
 begin

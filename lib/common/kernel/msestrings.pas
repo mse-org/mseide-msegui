@@ -34,7 +34,7 @@ uses
  {$ifndef mse_nounicodestring}
   {$if defined(FPC) and (fpc_fullversion >= 020300)}
    {$define mse_unicodestring}
-  {$endif}
+  {$ifend}
  {$endif}
  {$ifndef mse_unicodestring}
   {$ifdef FPC_WINLIKEWIDESTRING}
@@ -324,8 +324,8 @@ function strscan(const str: lmsestringty; const chr: msechar): pmsechar; overloa
 function msestrscan(const Str: PmseChar; Chr: mseChar): PmseChar; overload;
 //function msestrscan(const str: msestring; chr: msechar): integer; overload;
            //use findchar()
-procedure mseskipspace(var str: pmsechar); inline;
-procedure skipspace(var str: pchar); inline;
+procedure mseskipspace(var str: pmsechar); {$ifdef FPC} inline; {$endif}
+procedure skipspace(var str: pchar); {$ifdef FPC} inline; {$endif}
 
 function StrLScan(const Str: PChar; Chr: Char; len: integer): PChar;
 function mseStrLScan(const Str: PmseChar; Chr: mseChar; len: integer): PmseChar;
@@ -387,8 +387,10 @@ function mseuppercase(const s: msestring): msestring; overload;
 function mseuppercase(const s: msestringarty): msestringarty; overload;
 
 //ascii only
-function charuppercase(const c: char): char; overload; inline;
-function charuppercase(const c: msechar): msechar; overload; inline;
+function charuppercase(const c: char): char; overload;
+                               {$ifdef FPC} inline; {$endif}
+function charuppercase(const c: msechar): msechar; overload;
+                               {$ifdef FPC} inline; {$endif}
 function struppercase(const s: string): string; overload;
 function struppercase(const s: msestring): msestring; overload;
 function struppercase(const s: lmsestringty): msestring; overload;
@@ -515,9 +517,11 @@ function stringtolatin1(const value: msestring): string;
 function latin1tostring(const value: string): msestring;
 function ucs4tostring(const achar: dword): msestring;
 
-function getasciichar(const source: msechar; out dest: char): boolean; inline;
+function getasciichar(const source: msechar; out dest: char): boolean;
+                                         {$ifdef FPC} inline; {$endif}
                     //true if valid;
-function getansichar(const source: msechar; out dest: char): boolean; inline;
+function getansichar(const source: msechar; out dest: char): boolean;
+                                         {$ifdef FPC} inline; {$endif}
                     //true if valid;
 
 type
@@ -3753,14 +3757,14 @@ begin
  end;
 end;
 
-procedure mseskipspace(var str: pmsechar); inline;
+procedure mseskipspace(var str: pmsechar); {$ifdef FPC}inline;{$endif}
 begin
  while str^ = ' ' do begin
   inc(str);
  end;
 end;
 
-procedure skipspace(var str: pchar); inline;
+procedure skipspace(var str: pchar); {$ifdef FPC}inline;{$endif}
 begin
  while str^ = ' ' do begin
   inc(str);

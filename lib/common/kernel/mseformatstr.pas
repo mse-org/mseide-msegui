@@ -290,17 +290,16 @@ function bcdtoint(inp: byte): integer;
 function inttobcd(inp: integer): byte;
 
 function stringtotime(const avalue: msestring;
-                               const convert: dateconvertty = dc_none): tdatetime; overload;
+             const convert: dateconvertty = dc_none): tdatetime; overload;
 function stringtotime(const avalue: msestring;
                               const aformat: msestring;
-                               const convert: dateconvertty = dc_none): tdatetime; overload;
+             const convert: dateconvertty = dc_none): tdatetime; overload;
 function trystringtotime(const text: msestring;
                               out value: tdatetime;
-                               const convert: dateconvertty = dc_none): boolean;  overload;
+               const convert: dateconvertty = dc_none): boolean;  overload;
 function trystringtotime(const text: msestring;
-                              const aformat: msestring;
-                              out value: tdatetime;
-                               const convert: dateconvertty = dc_none): boolean;  overload;
+                   const aformat: msestring; out value: tdatetime;
+                   const convert: dateconvertty = dc_none): boolean;  overload;
 
 function timetostring(const avalue: tdatetime; 
                           const format: msestring = 't'): msestring;
@@ -1474,7 +1473,7 @@ begin
   ps:= pointer(abinary);
   int1:= length(abinary);
   tail:= int1 mod 3;
-  pe:= ps+int1-tail;
+  pchar(pe):= pchar(ps)+int1-tail;
   pd:= pointer(result);
   if maxlinelength > 0 then begin
    pline:=  pd + linestep;
@@ -1482,7 +1481,7 @@ begin
   else begin
    pline:= pointer(not ptruint(0));
   end;
-  while ps < pe do begin
+  while pchar(ps) < pchar(pe) do begin
    if pd >= pline then begin
     pd^:= c_return;
     inc(pd);
@@ -1618,9 +1617,9 @@ begin
   end;
  end;
 end;
-
+(*
 function stringtotime(const text: msestring; out value: tdatetime;
-                               const convert: dateconvertty = dc_none): boolean;
+                         const convert: dateconvertty = dc_none): boolean;
 var
  mstr1: msestring;
  timesep: msechar;
@@ -1663,7 +1662,7 @@ begin
   end;
  end;
 end;
-
+*)
 function timetostring(const avalue: tdatetime; const format: msestring = 't'): msestring;
 begin
  if avalue = emptydatetime then begin
@@ -2418,13 +2417,13 @@ begin
 end;
 
 function stringtotime(const avalue: msestring;
-                               const convert: dateconvertty = dc_none): tdatetime;
+                 const convert: dateconvertty = dc_none): tdatetime;
 begin
  if not trystringtotime(avalue,result,convert) then begin
   formaterror(avalue);
- end; 
+ end;
 end;
- 
+
 function timemse(const value: tdatetime): tdatetime;
   //bringt timeanteil im mseformat
 begin
@@ -3640,7 +3639,7 @@ begin
    if value > max then begin
     exit;
    end;
-   value:= value * 10 + (ord(po1^) - ord('0'));
+   value:= value * longword(10) + longword(word(po1^) - word('0'));
    inc(po1);
   end;
  end;

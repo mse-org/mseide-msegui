@@ -810,7 +810,7 @@ type
    procedure insert(const index: integer; const item: msestring);
                                                       overload; override;
    procedure insert(const index: integer; const item: msestring;
-                            const itemint: integer); overload;
+                            const itemint: integer); reintroduce; overload;
    procedure fill(const acount: integer; const defaultvalue: msestring;
                      const defaultint: integer);
 

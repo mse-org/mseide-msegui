@@ -2466,13 +2466,13 @@ begin
  if avalue <> foptions then begin
   optionsbefore:= foptions;
   foptions:= captionframeoptionsty(setsinglebit(
-            {$ifdef FPC}longword{$else}byte{$endif}(avalue),
-            {$ifdef FPC}longword{$else}byte{$endif}(foptions),
-            {$ifdef FPC}longword{$else}byte{$endif}(mask1)));
+            {$ifdef FPC}longword{$else}word{$endif}(avalue),
+            {$ifdef FPC}longword{$else}word{$endif}(foptions),
+            {$ifdef FPC}longword{$else}word{$endif}(mask1)));
 
-  if (({$ifdef FPC}longword{$else}byte{$endif}(optionsbefore) xor
-       {$ifdef FPC}longword{$else}byte{$endif}(foptions)) and
-       {$ifdef FPC}longword{$else}byte{$endif}(mask2) <> 0) and
+  if (({$ifdef FPC}longword{$else}word{$endif}(optionsbefore) xor
+       {$ifdef FPC}longword{$else}word{$endif}(foptions)) and
+       {$ifdef FPC}longword{$else}word{$endif}(mask2) <> 0) and
      (fintf.getcomponentstate * [csdesigning,csloading] = [csdesigning]) and
      (caption <> '') then begin
    size1.cy:= font.glyphheight + 2 * captionmargin;
