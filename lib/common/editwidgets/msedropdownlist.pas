@@ -237,7 +237,8 @@ type
                              acols: tdropdowncols); reintroduce;
    destructor destroy; override;
    procedure show(awidth: integer; arowcount: integer;
-                var aitemindex: integer; afiltertext: msestring); reintroduce;
+                var aitemindex: integer; afiltertext: msestring;
+                const maxheight: integer); reintroduce;
    property filtertext: msestring read ffiltertext write setfiltertext;
    property options: dropdownlistoptionsty read foptions1 write foptions1;
  end;
@@ -896,7 +897,8 @@ begin
  result:= tdropdownbutton;
 end;
 
-procedure tcustomdropdownbuttonframe.updatedropdownoptions(const avalue: dropdowneditoptionsty);
+procedure tcustomdropdownbuttonframe.updatedropdownoptions(
+                                         const avalue: dropdowneditoptionsty);
 begin
  buttons[factivebutton].visible:= not (deo_disabled in avalue);
 end;
@@ -922,7 +924,8 @@ begin
  inherited;
 end;
 
-function tcustomdropdowncontroller.getbuttonframeclass: dropdownbuttonframeclassty;
+function tcustomdropdowncontroller.getbuttonframeclass: 
+                                                  dropdownbuttonframeclassty;
 begin
  result:= tcustomdropdownbuttonframe;
 end;
@@ -938,10 +941,12 @@ begin
  updatereadonlystate;
 end;
 
-procedure tcustomdropdowncontroller.setoptions(const Value: dropdowneditoptionsty);
+procedure tcustomdropdowncontroller.setoptions(
+                                           const Value: dropdowneditoptionsty);
 begin
  foptions := Value;
- tcustomdropdownbuttonframe(twidget1(fintf.getwidget).fframe).updatedropdownoptions(value);
+ tcustomdropdownbuttonframe(
+                twidget1(fintf.getwidget).fframe).updatedropdownoptions(value);
 end;
 
 procedure tcustomdropdowncontroller.updatereadonlystate;
@@ -1399,8 +1404,10 @@ end;
 
 procedure tcustomdropdownlistcontroller.receiveevent(const event: tobjectevent);
 var
- int1,int2: integer;
+ int1,int2{,int3,int4}: integer;
+// rect1: rectty;
  str1: msestring;
+ widget1: twidget;
 begin
  inherited;
  if event.kind = ek_dropdown then begin
@@ -1411,7 +1418,7 @@ begin
    end;
    setlinkedcomponent(ievent(self),createdropdownlist,
                                          tmsecomponent(fdropdownlist));
-   fdropdownlist.name:= '_dropdownlist'; //debug purposes
+   fdropdownlist.name:= '_dropdownlist'; //debug purpose
    fdropdownlist.updateskin;
    try
     with fdropdownlist.frame.sbvert do begin
@@ -1422,6 +1429,7 @@ begin
             {$ifdef FPC}@{$endif}applicationactivechanged);
     fintf.geteditor.forcecaret:= true;
     try
+     widget1:= self.fintf.getwidget;
      with fdropdownlist do begin
       if deo_casesensitive in self.foptions then begin
        options:= options + [dlo_casesensitive];
@@ -1433,7 +1441,7 @@ begin
        sort;
       end;
       if fwidth = 0 then begin
-       int1:= self.fintf.getwidget.framesize.cx;
+       int1:= widget1.framesize.cx;
       end
       else begin
        if fwidth = -1 then begin
@@ -1451,7 +1459,7 @@ begin
        int2:= -1;
       end;
       fselectkey:= key_none;
-      show(int1,fdropdownrowcount,int2,str1);
+      show(int1,fdropdownrowcount,int2,str1,getmaxdropdownheight(widget1));
       fintf.geteditor.forcecaret:= false;
       self.itemselected(int2,fselectkey);
      end;
@@ -1852,7 +1860,8 @@ begin
 end;
 
 procedure tdropdownlist.show(awidth: integer; arowcount: integer;
-                 var aitemindex: integer; afiltertext: msestring);
+                 var aitemindex: integer; afiltertext: msestring;
+                 const maxheight: integer);
 var
  rect1: rectty;
 begin
@@ -1860,6 +1869,9 @@ begin
  bounds_cx:= awidth;
  rect1:= widgetrect;
  rect1.cx:= awidth;
+ if arowcount = 0 then begin
+  arowcount:= frowcount;
+ end;
  if arowcount > frowcount then begin
   arowcount:= frowcount;
  end;
@@ -1876,6 +1888,9 @@ begin
   end;
  end;
  rect1.cy:= rect1.cy + fframe.paintframewidth.cy;
+ if rect1.cy > maxheight then begin
+  rect1.cy:= maxheight;
+ end;
  widgetrect:= rect1;
  fcontroller.updatedropdownpos;
  ffiltertext:= afiltertext;

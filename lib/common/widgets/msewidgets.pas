@@ -1201,6 +1201,7 @@ procedure synccaptiondisty(const awidgets: widgetarty);
                 //adjusts captiondist for equal distouter
                 //don't set cfo_captiondistouter!
                 
+function getmaxdropdownheight(const parent: twidget): integer;
 procedure getdropdownpos(const parent: twidget; const right: boolean;
                                             var rect: rectty);
 
@@ -1423,10 +1424,24 @@ begin
  result:= modalresult in [mr_yes,mr_all];
 end;
 
+function getmaxdropdownheight(const parent: twidget): integer;
+var
+ rect1: rectty;
+ int1: integer;
+begin
+ rect1:= application.workarea(parent.window);
+ int1:= translatewidgetpoint(parent.framerect.pos,parent,nil).y;
+ result:= int1 - rect1.y;
+ int1:= rect1.y + rect1.cy - (int1 + parent.framerect.cy);
+ if int1 > result then begin
+  result:= int1;
+ end;
+end;
+
 procedure getdropdownpos(const parent: twidget; const right: boolean;
                                                   var rect: rectty);
 var
- int1: integer;
+ int1,int2: integer;
  size1: sizety;
  workarea: rectty;
 begin
@@ -1436,8 +1451,10 @@ begin
   rect.x:= rect.x + size1.cx - rect.cx;
  end;
  workarea:= application.workarea(parent.window);
- inc(rect.pos.y,size1.cy);
- if rect.y + rect.cy > (workarea.y + workarea.cy) then begin
+ inc(rect.y,size1.cy);
+ int1:= (workarea.y + workarea.cy);
+ int2:= rect.y + rect.cy;
+ if (int2 > int1) and (rect.y - rect.cy - workarea.y > int1 - int2) then begin
   dec(rect.y,size1.cy + rect.cy);
  end;
  int1:= (workarea.x + workarea.cx) - (rect.x + rect.cx);
@@ -1451,7 +1468,7 @@ end;
 
 function placepopuprect(const awindow: twindow; const adest: rectty;
                  const placement: captionposty; const asize: sizety): rectty;
- //placement actually only cp_bottomleft and cp_center
+ //placement currently cp_bottomleft and cp_center only,
  //todo
 
 var
