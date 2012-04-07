@@ -1455,7 +1455,18 @@ begin
  int1:= (workarea.y + workarea.cy);
  int2:= rect.y + rect.cy;
  if (int2 > int1) and (rect.y - rect.cy - workarea.y > int1 - int2) then begin
-  dec(rect.y,size1.cy + rect.cy);
+  dec(rect.y,size1.cy);
+  int1:= rect.y - workarea.y;
+  if rect.cy > int1 then begin
+   rect.cy:= int1;
+  end;   
+  dec(rect.y,rect.cy); //shift above
+ end
+ else begin
+  int1:= workarea.y + workarea.cy - rect.y;
+  if rect.cy > int1 then begin
+   rect.cy:= int1;
+  end;
  end;
  int1:= (workarea.x + workarea.cx) - (rect.x + rect.cx);
  if int1 < 0 then begin

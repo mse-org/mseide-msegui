@@ -178,7 +178,7 @@ type
 
  idropdowncontroller = interface(inullinterface)
   function getwidget: twidget;
-  procedure updatedropdownpos;
+  procedure updatedropdownpos(const arect: rectty);
  end;
 
  idropdownlistcontroller = interface(idropdowncontroller)
@@ -237,8 +237,7 @@ type
                              acols: tdropdowncols); reintroduce;
    destructor destroy; override;
    procedure show(awidth: integer; arowcount: integer;
-                var aitemindex: integer; afiltertext: msestring;
-                const maxheight: integer); reintroduce;
+                var aitemindex: integer; afiltertext: msestring); reintroduce;
    property filtertext: msestring read ffiltertext write setfiltertext;
    property options: dropdownlistoptionsty read foptions1 write foptions1;
  end;
@@ -298,7 +297,7 @@ type
    procedure applicationactivechanged(const avalue: boolean); virtual;
    function getbuttonframeclass: dropdownbuttonframeclassty; virtual;
    procedure updatedropdownbounds(var arect: rectty); virtual;
-   procedure updatedropdownpos;
+   procedure updatedropdownpos(const arect: rectty);
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure setoptions(const Value: dropdowneditoptionsty); virtual;
    function getdropdownwidget: twidget; virtual;
@@ -1096,14 +1095,14 @@ begin
  //dummy
 end;
 
-procedure tcustomdropdowncontroller.updatedropdownpos;
+procedure tcustomdropdowncontroller.updatedropdownpos(const arect: rectty);
 var
  widget1: twidget;
  rect1: rectty;
 begin
  widget1:= getdropdownwidget;
  if widget1 <> nil then begin
-  rect1:= widget1.widgetrect;
+  rect1:= arect; //widget1.widgetrect;
   updatedropdownbounds(rect1);
   getdropdownpos(fintf.getwidget,deo_right in foptions,rect1);
   widget1.widgetrect:= rect1;
@@ -1120,8 +1119,9 @@ begin
            {$ifdef FPC}@{$endif}applicationactivechanged);
  end;
  inherited;
- if (event = oe_changed) and (sender = fintf.getwidget.window) then begin
-  updatedropdownpos;
+ if (event = oe_changed) and (sender = fintf.getwidget.window) and 
+         (getdropdownwidget <> nil) then begin
+  updatedropdownpos(getdropdownwidget.widgetrect);
  end;
 end;
 
@@ -1249,7 +1249,7 @@ begin
     fdropdownwidget.bounds_cy:= fbounds_cy;
    end;
    }
-   updatedropdownpos;
+   updatedropdownpos(fdropdownwidget.widgetrect);
    fdropdownwidget.window.winid; //update window.options
    if fdropdownwidget.window.ispopup then begin
     application.registeronapplicationactivechanged(
@@ -1459,7 +1459,7 @@ begin
        int2:= -1;
       end;
       fselectkey:= key_none;
-      show(int1,fdropdownrowcount,int2,str1,getmaxdropdownheight(widget1));
+      show(int1,fdropdownrowcount,int2,str1);
       fintf.geteditor.forcecaret:= false;
       self.itemselected(int2,fselectkey);
      end;
@@ -1860,8 +1860,7 @@ begin
 end;
 
 procedure tdropdownlist.show(awidth: integer; arowcount: integer;
-                 var aitemindex: integer; afiltertext: msestring;
-                 const maxheight: integer);
+                 var aitemindex: integer; afiltertext: msestring);
 var
  rect1: rectty;
 begin
@@ -1888,11 +1887,11 @@ begin
   end;
  end;
  rect1.cy:= rect1.cy + fframe.paintframewidth.cy;
- if rect1.cy > maxheight then begin
-  rect1.cy:= maxheight;
- end;
- widgetrect:= rect1;
- fcontroller.updatedropdownpos;
+// if rect1.cy > maxheight then begin
+//  rect1.cy:= maxheight;
+// end;
+ fcontroller.updatedropdownpos(rect1);
+// widgetrect:= rect1;
  ffiltertext:= afiltertext;
  if aitemindex = -1 then begin
   application.beginnoignorewaitevents;
