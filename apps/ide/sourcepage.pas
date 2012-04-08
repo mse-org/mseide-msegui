@@ -464,9 +464,10 @@ var
 begin
  result:= modified;
  if not result then begin
-  stream1:= ttextstream.trycreate(edit.filename,fm_read);
   result:= true;
-  if stream1 <> nil then begin ; //else locked or deleted
+  if ttextstream.trycreate(tmsefilestream(stream1),
+                                           edit.filename,fm_read) then begin
+                            //else locked or deleted
    try
     stream1.encoding:= edit.encoding;
     int1:= 0;

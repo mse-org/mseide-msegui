@@ -33,6 +33,10 @@ type
  getobjectseventty = procedure(const sender: tobject;
                                    var aobjects: objectinfoarty) of object;
 
+{$M+} //toptionsclass needs RTTI
+ toptionsclass = class(tobject)
+ end;
+
  tcustomrttistat = class(tmsecomponent,istatfile)
   private
    fstatfile: tstatfile;

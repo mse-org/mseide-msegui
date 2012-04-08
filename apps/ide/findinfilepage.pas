@@ -203,8 +203,8 @@ procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
       end;
       with filelist[int1] do begin
        try
-        stream1:= ttextstream.trycreate(dir+'/'+name,fm_read);
-        if stream1 <> nil then begin
+        if ttextstream.trycreate(
+                 tmsefilestream(stream1),dir+'/'+name,fm_read) then begin
          try
           searchstream(stream1,stream1.filename);
          finally
