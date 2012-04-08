@@ -265,7 +265,7 @@ type
    function candrop(const source: ttreelistitem): boolean; virtual;
 
    function finditembycaption(const acaption: msestring;
-                                  var dest: ttreelistitem): boolean;
+                                  var dest: ttreelistitem): boolean; overload;
    function finditembycaption(const acaption: msestring;
              const acasesensitive: boolean = false;
              const aexpand: boolean = false): ttreelistitem; overload;

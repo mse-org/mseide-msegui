@@ -1464,7 +1464,7 @@ type
    
    function cancopy: boolean;
    function canpaste: boolean;
-   procedure updatedatastate(var accepted: boolean); virtual; overload;
+   procedure updatedatastate(var accepted: boolean); overload; virtual;
 
   public
    constructor create(aowner: tcustomgrid; aclasstype: gridpropclassty);
@@ -15338,7 +15338,8 @@ end;
 procedure tcustomgrid.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('gridframewidth',@readgridframewidth,nil,false);
+ filer.defineproperty('gridframewidth',{$ifdef FPC}@{$endif}readgridframewidth,
+                                                       nil,false);
 end;
 
 { tdrawgrid }

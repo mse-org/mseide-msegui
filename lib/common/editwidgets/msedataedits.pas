@@ -235,7 +235,7 @@ type
    function griddata: tdatalist;
    property gridintf: iwidgetgrid read fgridintf;
    function textclipped(const arow: integer;
-                       out acellrect: rectty): boolean; virtual; overload;
+                       out acellrect: rectty): boolean; overload; virtual;
    function textclipped(const arow: integer): boolean; overload;
 
    function checkvalue(const quiet: boolean = false): boolean; virtual;
@@ -4695,7 +4695,8 @@ end;
 procedure tenumdropdowncontroller.defineproperties(filer: tfiler);
 begin
  inherited;
- filer.defineproperty('itemindex',@readitemindex,nil,false);
+ filer.defineproperty('itemindex',{$ifdef FPC}@{$endif}readitemindex,
+                                                                 nil,false);
 end;
 
 { tcustomenumedit }
@@ -5487,7 +5488,7 @@ begin
   bo1:= trystringtodatetime(atext,fformatedit,dat1,fconvert);
  end;
  if not bo1 then begin
-  bo1:= trystrtorealty(atext,dat1);
+  bo1:= trystrtorealty(atext,realty(dat1));
   if not bo1 then begin
    dat1:= emptyreal;
   end
@@ -5660,11 +5661,19 @@ begin
 end;
 
 procedure tcustomdatetimeedit.setoptions(const avalue: datetimeeditoptionsty);
+{$ifndef FPC}
+const
+ mask1: datetimeeditoptionsty = [dteo_showlocal,dteo_showutc];
+{$endif}
 begin
  if avalue <> foptions then begin
   foptions:= datetimeeditoptionsty(
+  {$ifdef FPC}
        setsinglebit(longword(avalue),longword(foptions),
                                       longword([dteo_showlocal,dteo_showutc])));
+  {$else}
+       setsinglebit(byte(avalue),byte(foptions),byte(mask1)));
+  {$endif}
   fconvert:= dc_none;
   if dteo_showutc in foptions then begin
    fconvert:= dc_tolocal;

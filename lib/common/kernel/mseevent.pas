@@ -32,7 +32,8 @@ type
                 ek_keypress,ek_keyrelease,ek_timer,ek_wakeup,
                 ek_release,{ek_releasedefer,}ek_closeform,ek_checkscreenrange,
                 ek_childscaled,ek_resize,
-                ek_dropdown,ek_async,ek_execute,ek_component,ek_synchronize,
+                ek_dropdown,ek_async,ek_execute,ek_component,
+                ek_synchronize,ek_releaseobject,
                 ek_connect,
                 ek_dbedit,ek_dbupdaterowdata,ek_data,ek_objectdata,ek_childproc,
                 ek_dbinsert, //for tdscontroller

@@ -551,7 +551,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function textclipped(const arow: integer;
-                       out acellrect: rectty): boolean; override; overload;
+                       out acellrect: rectty): boolean; overload; override;
    function getvaluetext: msestring;
    procedure setvaluetext(var avalue: msestring);
    function item: tlistitem;

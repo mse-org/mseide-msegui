@@ -307,8 +307,8 @@ begin
      if not findfile(ffilename,ar1,floadedfile) then begin
       floadedfile:= ffilename;
      end;
-     stream1:= ttextstream.trycreate(floadedfile,fm_read);
-     if stream1 = nil then begin
+     if not ttextstream.trycreate(tmsefilestream(stream1),
+                                     floadedfile,fm_read) then begin
       floadedfile:= defaultfile(ar1);
       if canevent(tmethod(fonfilemissing)) then begin
        fonfilemissing(self,floadedfile,stream1,by1);

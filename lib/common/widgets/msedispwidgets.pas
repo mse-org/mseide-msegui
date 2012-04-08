@@ -965,16 +965,25 @@ begin
 end;
 
 procedure tcustomdatetimedisp.setoptions(const avalue: dispwidgetoptionsty);
+{$ifndef FPC}
+const
+ mask1: dispwidgetoptionsty = [dwo_showlocal,dwo_showutc];
+{$endif}
 var
  opt1: dispwidgetoptionsty;
 begin
  opt1:= foptions;
  inherited;
  foptions:= dispwidgetoptionsty(
+ {$ifdef FPC}
       replacebits(setsinglebit(longword(avalue),longword(opt1),
                          longword([dwo_showlocal,dwo_showutc])),
                   longword(foptions),
                   longword([dwo_showlocal,dwo_showutc])));
+ {$else}
+      replacebits(setsinglebit(byte(avalue),byte(opt1),
+                         byte(mask1)),byte(foptions),byte(mask1)));
+ {$endif}
  fconvert:= dc_none;
  if dwo_showutc in foptions then begin
   fconvert:= dc_tolocal;

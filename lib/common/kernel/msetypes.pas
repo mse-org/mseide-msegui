@@ -140,16 +140,18 @@ type
  pcurrencyarty = ^currencyarty;
  datetimearty = array of tdatetime;
  pdatetimearty = ^datetimearty;
+ datetimeaty = array[0..0] of tdatetime;
+ pdatetimeaty = ^datetimeaty;
  ptrintarty = array of ptrint;
  pptrintarty = ^ptrintarty;
  ptruintarty = array of ptruint;
  pptruintarty = ^ptruintarty;
  qwordarty = array of qword;
  pqwordarty = ^qwordarty;
-  
+
  pdatetime = ^tdatetime;
  ppvariant = ^pvariant;
- 
+
  complexty = record re,im: double; end;
  pcomplexty = ^complexty;
  complexarty = array of complexty;

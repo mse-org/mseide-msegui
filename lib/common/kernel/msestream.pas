@@ -56,11 +56,12 @@ type
    constructor createtempfile(const prefix: filenamety; out afilename: filenamety);
    constructor create(ahandle: integer); overload; virtual; //allways called
    constructor create; overload; //tmemorystream
-   constructor trycreate(const afilename: filenamety; 
+   destructor destroy; override;
+   class function trycreate(out ainstance: tmsefilestream;
+             const afilename: filenamety;
              const openmode: fileopenmodety = fm_read;
              const accessmode: fileaccessmodesty = [];
-             const rights: filerightsty = defaultfilerights);
-   destructor destroy; override;
+             const rights: filerightsty = defaultfilerights): boolean;
    function read(var buffer; count: longint): longint; override;
    function write(const buffer; count: longint): longint; override;
    function seek(const offset: int64; origin: tseekorigin): int64; override;
@@ -448,8 +449,7 @@ var
  stream1: tmsefilestream;
 begin
  adata:= '';
- stream1:= tmsefilestream.trycreate(afilename);
- result:= stream1 <> nil;
+ result:= tmsefilestream.trycreate(stream1,afilename);
  if result then begin
   try
    adata:= stream1.readdatastring;
@@ -477,8 +477,7 @@ function trywritefiledatastring(const afilename: filenamety;
 var
  stream1: tmsefilestream;
 begin
- stream1:= tmsefilestream.trycreate(afilename,fm_create);
- result:= stream1 <> nil;
+ result:= tmsefilestream.trycreate(stream1,afilename,fm_create);
  if result then begin
   try
    stream1.writedatastring(adata);
@@ -872,16 +871,25 @@ begin
  end;
 end;
 
-constructor tmsefilestream.trycreate(const afilename: filenamety;
+class function tmsefilestream.trycreate(out ainstance: tmsefilestream;
+               const afilename: filenamety;
                const openmode: fileopenmodety = fm_read;
                const accessmode: fileaccessmodesty = [];
-               const rights: filerightsty = defaultfilerights);
+               const rights: filerightsty = defaultfilerights): boolean;
 var
  error: syserrorty;
 begin
- internalcreate(afilename,openmode,accessmode,rights,error);
- if error <> sye_ok then begin
+ ainstance:= internalcreate(afilename,openmode,accessmode,rights,error);
+ result:= error = sye_ok;
+ if not result then begin
+  freeandnil(ainstance);
+ (*
+ {$ifdef FPC}
   freeandnil(self);
+ {$else}
+  application.releaseobject(self);
+ {$endif}
+ *)
  end;
 end;
 

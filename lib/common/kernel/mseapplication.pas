@@ -237,6 +237,7 @@ type
    fonterminatequerylist: tonterminatequerylist;
    fonidlelist: tonidlelist;
    ftimertriggercount: integer;
+   procedure receiveevent(const event: tobjectevent); override;
    procedure flusheventbuffer;
    procedure doidle;
    procedure sethighrestimer(const avalue: boolean); virtual; abstract;
@@ -326,6 +327,7 @@ type
    function synchronize(const proc: synchronizeprocty; const data: pointer;
                        const quite: boolean = false): boolean; overload;
      //true if not aborted, quiet -> show no exceptions
+   procedure releaseobject(const aobject: tobject);
    function ismainthread: boolean;
    function islockthread: boolean;
    procedure waitforthread(athread: tmsethread); //does unlock-relock before waiting
@@ -413,6 +415,13 @@ type
                               const aquiet: boolean);
  end;
 
+ treleaseevent = class(tobjectevent)
+  private 
+   fobject: tobject;
+  public
+   constructor create(const dest: ievent; const aobject: tobject);
+ end;
+ 
 var
  appinst: tcustomapplication;
  appclass: applicationclassty;
@@ -1671,6 +1680,20 @@ begin
  interlockedexchange(ftimertriggercount,0);
 end;
 
+procedure tcustomapplication.releaseobject(const aobject: tobject);
+begin
+ postevent(treleaseevent.create(ievent(self),aobject));
+end;
+
+procedure tcustomapplication.receiveevent(const event: tobjectevent);
+begin
+ inherited;
+ if (event.kind = ek_releaseobject) and 
+                          (event is treleaseevent) then begin
+  treleaseevent(event).fobject.free;
+ end;
+end;
+
 { tactivatorcontroller }
 
 constructor tactivatorcontroller.create(const aowner: tcomponent;
@@ -1785,6 +1808,14 @@ end;
 procedure tappsynchronizeprocevent.execute;
 begin
  fproc(fdata);
+end;
+
+{ treleaseevent }
+
+constructor treleaseevent.create(const dest: ievent; const aobject: tobject);
+begin
+ fobject:= aobject;
+ inherited create(ek_releaseobject,dest);
 end;
 
 initialization

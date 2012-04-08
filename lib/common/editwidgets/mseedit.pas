@@ -1243,8 +1243,10 @@ begin
   if (csreading in componentstate) and 
                            (avalue * deprecatedoptionsedit <> []) then begin
    opt1:= feditor.optionsedit1;
-   updatebit(longword(opt1),ord(oe1_autopopupmenu),oe_autopopupmenu in avalue);
-   updatebit(longword(opt1),ord(oe1_keyexecute),oe_keyexecute in avalue);
+   updatebit({$ifdef FPC}longword{$else}byte{$endif}(opt1),
+                      ord(oe1_autopopupmenu),oe_autopopupmenu in avalue);
+   updatebit({$ifdef FPC}longword{$else}byte{$endif}(opt1),
+                      ord(oe1_keyexecute),oe_keyexecute in avalue);
    feditor.optionsedit1:= opt1;
   end;
   updatereadonlystate;
@@ -1262,8 +1264,9 @@ var
 begin
  optbefore:= feditor.optionsedit1; 
  feditor.optionsedit1:= avalue;
- if oe1_readonlydialog in optionsedit1ty(longword(avalue) xor 
-                                           longword(optbefore)) then begin
+ if oe1_readonlydialog in optionsedit1ty(
+          {$ifdef FPC}longword{$else}byte{$endif}(avalue) xor
+          {$ifdef FPC}longword{$else}byte{$endif}(optbefore)) then begin
   updatereadonlystate;
  end;
 end;
