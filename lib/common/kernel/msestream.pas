@@ -23,20 +23,27 @@ unit msestream;
 // {$WARN SYMBOL_PLATFORM off}
 interface
 uses 
- Classes,Sysutils,msestrings,msetypes,msethread,msesystypes,msesys,msereal,mseevent;
+ Classes,Sysutils,msestrings,msetypes,msethread,msesystypes,msesys,msereal,
+ mseevent,mseclasses,mseglob;
 
 const
  defaultfilerights = [s_irusr,s_iwusr,s_irgrp,s_iwgrp,s_iroth,s_iwoth];
  defaultdirrights = [s_irusr,s_iwusr,s_ixusr,s_irgrp,s_iwgrp,
                      s_ixgrp,s_iroth,s_iwoth,s_ixoth];
 type
+
+ tcustomcryptohandler = class(tmsecomponent)
+ end;
+ 
    {$warnings off}
  tmsefilestream = class(thandlestream)
   private
    ffilename: filenamety;
    ftransactionname: filenamety;
+   fcryptohandler: tcustomcryptohandler;
    function getmemory: pointer;
    procedure checkmemorystream;
+   procedure setcryptohandler(const avalue: tcustomcryptohandler);
   protected
    fmemorystream: tmemorystream;
    procedure sethandle(value: integer); virtual;
@@ -78,6 +85,8 @@ type
    procedure setsize(const newsize: int64); override;
    procedure clear; virtual;        //only for memorystream
    property memory: pointer read getmemory;     //only for memorystream
+   property cryptohandler: tcustomcryptohandler read fcryptohandler 
+                                                   write setcryptohandler;
  end;
    {$warnings on}
 
@@ -368,7 +377,7 @@ implementation
 uses
  msefileutils,msebits,{msegui,}mseformatstr,sysconst,msesysutils,
  msesysintf1,msesysintf,
- msedatalist,mseclasses,mseapplication,msearrayutils,
+ msedatalist,mseapplication,msearrayutils,
         {$ifdef UNIX} mselibc,
         {$else} windows,
         {$endif}
@@ -1117,6 +1126,11 @@ end;
 procedure tmsefilestream.flushbuffer;
 begin
  //dummy
+end;
+
+procedure tmsefilestream.setcryptohandler(const avalue: tcustomcryptohandler);
+begin
+ fcryptohandler:= avalue;
 end;
 
 { tresourcefilestream}

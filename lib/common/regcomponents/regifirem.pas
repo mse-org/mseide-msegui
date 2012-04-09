@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ implementation
 uses
  classes,mseifi,msedesignintf,msepropertyeditors,msestrings,msedesigner,
  mseclasses,mseifids,mseifiglob,msegui,typinfo,msesockets,mseifigui,
- mseifilink,msessl,db,regifirem_bmp,mseifidbgui;
+ mseifilink,msessl,db,regifirem_bmp,mseifidbgui,msedummycryptohandler;
  
 type
  tmodulelinkitemeditor = class(tclasselementeditor)
@@ -106,7 +106,7 @@ begin
                      tsocketclientiochannel,tsocketserveriochannel,
                      tsocketstdio,tsocketclient,
                      tsocketserver,tsocketserverstdio,
-                     tssl]); 
+                     tssl,tdummycryptohandler]); 
  registerpropertyeditor(typeinfo(tmodulelinkarrayprop),nil,'',tmodulelinkeditor);
  registerpropertyeditor(typeinfo(tlinkactions),nil,'',tmodulelinkactionseditor);
  registerpropertyeditor(typeinfo(tvaluewidgetlinks),nil,'',tvaluewidgetlinkseditor);
