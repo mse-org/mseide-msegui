@@ -890,6 +890,7 @@ begin
  for int1:= 0 to high(ar1) do begin
   widget1:= ar1[int1];
   with twidget1(widget1) do begin
+   include(fwidgetstate1,ws1_nominsize);
    if not (ow1_noautosizing in foptionswidget1) then begin
     if visible then begin
      result[int2]:= ar1[int1];
@@ -3491,6 +3492,7 @@ end;
 
 procedure tdockcontroller.parentchanged(const sender: twidget);
 begin
+ exclude(twidget1(sender).fwidgetstate1,ws1_nominsize);
  if not (csloading in sender.componentstate) and 
             (twidget1(sender).fframe is tgripframe) then begin
   with tgripframe(twidget1(sender).fframe) do begin

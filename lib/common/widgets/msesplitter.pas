@@ -35,6 +35,9 @@ const
  retrypropeventtag = 1;
 
 type
+ splitterstatety = (sps_propnotified);
+ splitterstatesty = set of splitterstatety;
+ 
  tcustomsplitter = class(tscalingwidget,iobjectpicker,istatfile)
   private
    fobjectpicker: tobjectpicker;
@@ -52,11 +55,12 @@ type
    fonupdatelayout: notifyeventty;
    fupdating: integer;
    fpropsetting: integer;
-   fnotified: integer;
+//   fnotified: integer;
    fregionchangedcount: integer;
    fregionchangedmark: integer;
    frefrect: rectty;
    fshrinkpriority: integer;
+   fpropoffsetrecursion: integer;
    procedure setstatfile(const avalue: tstatfile);
    procedure setlinkbottom(const avalue: twidget);
    procedure setlinkleft(const avalue: twidget);
@@ -68,6 +72,7 @@ type
    procedure setgrip(const avalue: stockbitmapty);
    procedure setoptions(const avalue: splitteroptionsty);
   protected
+   fstate: splitterstatesty;
    procedure postupdatepropevent;
    function clippoint(const aoffset: pointty): pointty;
    procedure calcoffset(const refsize: sizety; 
@@ -767,7 +772,8 @@ begin
 //  pt2:= pt1;
 end;
 
-procedure tcustomsplitter.setpropoffset(const aoffset: pointty; const asize: sizety);
+procedure tcustomsplitter.setpropoffset(const aoffset: pointty;
+                                                      const asize: sizety);
 begin      
  inc(fpropsetting);
  try
@@ -797,7 +803,7 @@ begin //doasyncevent
  case atag of
   updatepropeventtag,retrypropeventtag: begin
    if atag = updatepropeventtag then begin
-    dec(fnotified);
+    exclude(fstate,sps_propnotified);
    end;
    try
     if fparentwidget <> nil then begin
@@ -810,7 +816,16 @@ begin //doasyncevent
       asyncevent(retrypropeventtag,true);
      end
      else begin
-      setpropoffset(pt2,size2);
+      inc(fpropoffsetrecursion);
+      if fpropoffsetrecursion < 16 then begin
+       setpropoffset(pt2,size2);
+       if not(sps_propnotified in fstate) then begin
+        fpropoffsetrecursion:= 0;
+       end;
+      end
+      else begin
+       fpropoffsetrecursion:= 0;
+      end;
      end;
     end;
    finally
@@ -859,8 +874,8 @@ end;
 
 procedure tcustomsplitter.postupdatepropevent;
 begin
- if fnotified = 0 then begin
-  inc(fnotified);
+ if not (sps_propnotified in fstate) then begin
+  include(fstate,sps_propnotified);
   asyncevent(updatepropeventtag,true,true);
  end;
 end;
