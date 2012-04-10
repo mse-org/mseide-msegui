@@ -48,8 +48,9 @@ Type
   private
    fsqlcode: string;
   public
-   constructor create(const asender: tcustomsqlconnection; const amessage: ansistring;
-              const aerrormessage: msestring; const aerror: integer; const asqlcode: string);
+   constructor create(const asender: tcustomsqlconnection;
+               const amessage: ansistring; const aerrormessage: msestring;
+               const aerror: integer; const asqlcode: string);
    property sqlcode: string read fsqlcode;
  end;
   

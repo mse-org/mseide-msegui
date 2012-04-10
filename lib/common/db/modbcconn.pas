@@ -1,4 +1,4 @@
-(******************************************************************************
+{******************************************************************************
  *                                                                            *
  *  (c) 2005 Hexis BV                                                         *
  *                                                                            *
@@ -8,7 +8,7 @@
  *  License:     (modified) LGPL                                              *
  *                                                                            *
  *  Modified 2006-2012 by Martin Schreiber                                    *
- ******************************************************************************)
+ ******************************************************************************}
 
 unit modbcconn;
 
@@ -32,6 +32,7 @@ type
 
   TODBCCursor = class(TSQLCursor)
   protected
+   fconnection: todbcconnection;
    ffieldnames: stringarty;
    FSTMTHandle:SQLHSTMT; // ODBC Statement Handle
    FQuery:string;        // last prepared query, with :ParamName converted to ?
@@ -76,6 +77,14 @@ type
     procedure SetParameters(ODBCCursor:TODBCCursor; AParams:TmseParams);
     procedure FreeParamBuffers(ODBCCursor:TODBCCursor);
   protected
+   procedure ODBCCheckResult(
+                           LastReturnCode:SQLRETURN; HandleType:SQLSMALLINT;
+                           AHandle: SQLHANDLE; ErrorMsg: string); overload;
+
+   procedure ODBCCheckResult(
+                       LastReturnCode:SQLRETURN; HandleType:SQLSMALLINT;
+                                    AHandle: SQLHANDLE; ErrorMsg: string;
+                                    const values: array of const); overload;
     // Overrides from TSQLConnection
     function GetHandle:pointer; override;
     // - Connect/disconnect
@@ -170,6 +179,7 @@ implementation
 
 uses
   Math, DBConst,msedatabase;
+  
 {$define ODBCVER3}
 
 (* odbc type nums
@@ -299,8 +309,9 @@ begin
   end;
 end;
 
-procedure ODBCCheckResult(LastReturnCode:SQLRETURN; HandleType:SQLSMALLINT;
-                                    AHandle: SQLHANDLE; ErrorMsg: string); overload;
+procedure todbcconnection.ODBCCheckResult(
+                           LastReturnCode:SQLRETURN; HandleType:SQLSMALLINT;
+                           AHandle: SQLHANDLE; ErrorMsg: string);
 
   // check return value from SQLGetDiagField/Rec function itself
   procedure Check(const Res:SQLRETURN);
@@ -322,6 +333,8 @@ var
   Res:SQLRETURN;
   SqlState,MessageText,TotalMessage:string;
   RecNumber:SQLSMALLINT;
+  firstmessage: string;
+  firsterror: integer;
 begin
   // check result
   if ODBCSucces(LastReturnCode) then begin
@@ -334,7 +347,9 @@ begin
   check(sqlgetdiagfield(handletype,ahandle,0,SQL_DIAG_NUMBER,@reccount,
                                   sizeof(reccount),textlength));
              //unixODBC crashes with too big rec number
+
   SetLength(SqlState,5); // SqlState buffer
+  firsterror:= 0;
   for RecNumber:=1 to reccount do begin
     // dummy call to get correct TextLength
     Res:=SQLGetDiagRec(HandleType,AHandle,RecNumber,@(SqlState[1]),
@@ -343,24 +358,41 @@ begin
       Break; // no more status records
     end;
     Check(Res);
-    if TextLength>0 then begin// if TextLength=0 we don't need another call; also our string buffer would not point to a #0, but be a nil pointer
+    if TextLength>0 then begin
+      // if TextLength=0 we don't need another call;
+      // also our string buffer would not point to a #0, but be a nil pointer
       // allocate large enough buffer
-      SetLength(MessageText,TextLength); // note: ansistrings of Length>0 are always terminated by a #0 character, so this is safe
+      SetLength(MessageText,4*TextLength); 
+           //reserve for multi-byte-encodings, ODBC bug?
+           // note: ansistrings of Length>0 are always terminated by a #0 character, so this is safe
       // actual call
       check(SQLGetDiagRec(HandleType,AHandle,RecNumber,@(SqlState[1]),
               NativeError,@(MessageText[1]),Length(MessageText)+1,TextLength));
+    end
+    else begin
+     messagetext:= '';
+    end;
+    if firsterror = 0 then begin
+     firsterror:= nativeerror;
+     firstmessage:= strpas(pchar(messagetext));
     end;
     // add to TotalMessage
-    TotalMessage:=TotalMessage + Format(' Record %d: SqlState: %s; NativeError: %d; Message: %s;',[RecNumber,SqlState,NativeError,MessageText]);
-    // incement counter
+    TotalMessage:=TotalMessage + 
+      Format(' Record %d: SqlState: %s; NativeError: %d; Message: %s;',
+                            [RecNumber,SqlState,NativeError,
+                                strpas(pchar(MessageText))]); 
+       //string termination by #0, textlength seems to be unreliable
   end;
   // raise error
-  raise EODBCException.Create(TotalMessage);
+//  raise EODBCException.Create(TotalMessage);
+  raise econnectionerror.create(self,connectionmessage(pchar(totalmessage)),
+                              firstmessage,firsterror);
 end;
 
-procedure ODBCCheckResult(LastReturnCode:SQLRETURN; HandleType:SQLSMALLINT;
+procedure todbcconnection.ODBCCheckResult(
+                       LastReturnCode:SQLRETURN; HandleType:SQLSMALLINT;
                                     AHandle: SQLHANDLE; ErrorMsg: string;
-                                    const values: array of const); overload;
+                                    const values: array of const);
 begin
  if not ODBCSucces(LastReturnCode) then begin
   odbccheckresult(lastreturncode,handletype,ahandle,format(errormsg,values));
@@ -711,7 +743,8 @@ begin
   ConnectionString:=CreateConnectionString;
   SetLength(OutConnectionString,BufferLength-1); // allocate completed connection string buffer (using the ansistring #0 trick)
   try
-   ODBCCheckResult(SQLDriverConnect(FDBCHandle,               // the ODBC connection handle
+   ODBCCheckResult(
+     SQLDriverConnect(FDBCHandle,               // the ODBC connection handle
                      nil,                      // no parent window (would be required for prompts)
                      PChar(ConnectionString),  // the connection string
                      Length(ConnectionString), // connection string length
@@ -750,7 +783,8 @@ begin
   // deallocate connection handle
   Res:=SQLFreeHandle(SQL_HANDLE_DBC, FDBCHandle);
   if Res=SQL_ERROR then
-    ODBCCheckResult(Res,SQL_HANDLE_DBC,FDBCHandle,'Could not free connection handle.');
+    ODBCCheckResult(Res,SQL_HANDLE_DBC,FDBCHandle,
+                           'Could not free connection handle.');
   fdbchandle:= nil;
 end;
 
@@ -1553,20 +1587,41 @@ end;
 
 { TODBCEnvironment }
 
+procedure ODBCCheckResult(LastReturnCode:SQLRETURN; HandleType:SQLSMALLINT;
+                                    AHandle: SQLHANDLE; ErrorMsg: string;
+                                    const values: array of const);
+var
+ conn: todbcconnection;  
+begin
+ if not odbcsucces(lastreturncode) then begin
+  conn:= todbcconnection.create(nil);
+  try
+   conn.odbccheckresult(lastreturncode,handletype,ahandle,errormsg,values);
+  finally;
+   conn.free;
+  end;
+ end;
+end;
+
 constructor TODBCEnvironment.Create;
+var
+ res: sqlreturn;
 begin
   // make sure odbc is loaded
   initializeodbc([]);
   finitialized:= true;
   // allocate environment handle
-  if SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, FENVHandle)=SQL_Error then
-    raise EODBCException.Create('Could not allocate ODBC Environment handle'); // we can't retrieve any more information, because we don't have a handle for the SQLGetDiag* functions
-
+  if SQLAllocHandle(SQL_HANDLE_ENV,
+                        SQL_NULL_HANDLE, FENVHandle) = SQL_Error then begin
+    raise EODBCException.Create('Could not allocate ODBC Environment handle');
+     // we can't retrieve any more information, 
+     //because we don't have a handle for the SQLGetDiag* functions
+  end;
   // set odbc version
-  ODBCCheckResult(
-    SQLSetEnvAttr(FENVHandle, SQL_ATTR_ODBC_VERSION, SQLPOINTER(SQL_OV_ODBC3), 0),
-    SQL_HANDLE_ENV, FENVHandle,'Could not set ODBC version to 3.'
-  );
+  res:= SQLSetEnvAttr(FENVHandle, SQL_ATTR_ODBC_VERSION,
+                                             SQLPOINTER(SQL_OV_ODBC3), 0);
+  ODBCCheckResult(res,
+           SQL_HANDLE_ENV, FENVHandle,'Could not set ODBC version to 3.',[]);
 end;
 
 destructor TODBCEnvironment.Destroy;
@@ -1576,9 +1631,9 @@ begin
   // free environment handle
   if FENVHandle <> nil then begin //otherwise exception in create
    Res:=SQLFreeHandle(SQL_HANDLE_ENV, FENVHandle);
-   if Res=SQL_ERROR then
+   if Res = SQL_ERROR then
      ODBCCheckResult(Res,SQL_HANDLE_ENV, FENVHandle,
-      'Could not free ODBC Environment handle.');
+      'Could not free ODBC Environment handle.',[]);
  
    // free odbc if not used by any TODBCEnvironment object anymore
   end;
@@ -1594,9 +1649,10 @@ end;
 constructor TODBCCursor.Create(const aowner: icursorclient;
               const aname: ansistring; const Connection:TODBCConnection);
 begin
+ fconnection:= connection;
  inherited create(aowner,aname);
   // allocate statement handle
-  ODBCCheckResult(
+  connection.ODBCCheckResult(
     SQLAllocHandle(SQL_HANDLE_STMT, Connection.FDBCHandle, FSTMTHandle),
     SQL_HANDLE_DBC, Connection.FDBCHandle,
      'Could not allocate ODBC Statement handle.'
@@ -1619,7 +1675,7 @@ begin
     // deallocate statement handle
     Res:=SQLFreeHandle(SQL_HANDLE_STMT, FSTMTHandle);
     if Res=SQL_ERROR then
-      ODBCCheckResult(Res,SQL_HANDLE_STMT, FSTMTHandle,
+      fconnection.ODBCCheckResult(Res,SQL_HANDLE_STMT, FSTMTHandle,
        'Could not free ODBC Statement handle.');
   end;
 end;

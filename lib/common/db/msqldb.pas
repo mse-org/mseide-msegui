@@ -3102,7 +3102,8 @@ end;
 { econnectionerror }
 
 constructor econnectionerror.create(const asender: tcustomsqlconnection; 
-   const amessage: ansistring; const aerrormessage: msestring; const aerror: integer);
+   const amessage: ansistring; const aerrormessage: msestring;
+    const aerror: integer);
 begin
  fsender:= sender;
  ferror:= aerror;
