@@ -693,7 +693,7 @@ begin
    setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),
                 {$ifdef FPC}longword{$else}word{$endif}(foptions),
                 [{$ifdef FPC}longword{$else}word{$endif}(mask1),
-                 {$ifdef FPC}longword{$else}word{$endif}(mask1)]));
+                 {$ifdef FPC}longword{$else}word{$endif}(mask2)]));
  if foptions * [pro_nowaitforpipeeof,pro_nopipeterminate] = [] then begin
   exclude(foptions,pro_usepipewritehandles);
  end;
