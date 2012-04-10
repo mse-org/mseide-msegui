@@ -22,7 +22,10 @@ type
   readdes: integer;
   writedes: integer;
  end;
- execoptionty = (exo_inactive,                 //windows only
+ execoptionty = (exo_shell,                    //default on Linux
+                 exo_noshell,                  //default on Windows
+                          //todo: implement on linux
+                 exo_inactive,                 //windows only
                  exo_nostdhandle,              //windows only
                  exo_tty,exo_echo,exo_icanon,  //linux only
                  exo_usepipewritehandles,
@@ -381,7 +384,7 @@ var
 var
  startupinfo: tstartupinfo;
  processinfo: tprocessinformation;
-
+ bo1: boolean;
 begin
  result:= invalidprochandle;
  fillchar(startupinfo,sizeof(startupinfo),0);
@@ -444,10 +447,15 @@ begin
   startupinfo.wShowWindow:= sw_hide;
   startupinfo.dwflags:= startupinfo.dwFlags or startf_useshowwindow;
  end;
-// if createprocess(nil,pchar('cmd.exe '+'/c'+commandline),
-//                                            nil,nil,true,0,nil,nil,
- if createprocess(nil,pchar(commandline),nil,nil,true,0,nil,nil,
-     startupinfo,processinfo) then begin
+ if exo_shell in options then begin
+  bo1:= createprocess(nil,pchar('cmd.exe '+'/c'+commandline),
+                           nil,nil,true,0,nil,nil,startupinfo,processinfo);
+ end
+ else begin
+  bo1:= createprocess(nil,pchar(commandline),nil,nil,true,0,nil,nil,
+                                                  startupinfo,processinfo);
+ end;
+ if bo1 then begin
   if topipehandles.readdes <> invalidfilehandle then closehandle(topipehandles.readdes);
   if frompipehandles.writedes <> invalidfilehandle then begin
    if frompipewritehandle <> nil then begin

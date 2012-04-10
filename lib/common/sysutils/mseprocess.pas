@@ -19,10 +19,12 @@ type
  processstatety = (prs_listening,prs_waitcursor);
  processstatesty = set of processstatety;
  processoptionty = (pro_output,pro_erroroutput,pro_input,pro_errorouttoout,
+                    pro_shell,    //default on linux
+                    pro_noshell,  //default on windows, todo: implement on linux
+                    pro_inactive,pro_nostdhandle, //windows only
                     pro_tty,pro_echo,pro_icanon,  //linux only
                     pro_nowaitforpipeeof,pro_nopipeterminate,
                     pro_usepipewritehandles,
-                    pro_inactive,pro_nostdhandle, //windows only
                     pro_waitcursor,pro_checkescape,pro_processmessages,
                                //kill process if esc pressed
                     pro_ctrlc                     //for tterminal
@@ -126,7 +128,7 @@ function getprocessoutput(const acommandline: string; const todata: string;
 function startprocessandwait(const acommandline: string;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
-                            defaultgetprocessoutputoptions): integer; overload;
+                            defaultgetprocessoutputoptions): integer;
                          //returns program exitcode, -1 in case of error
 implementation
 uses
@@ -182,13 +184,13 @@ end;
 function startprocessandwait(const acommandline: string;
                          const atimeout: integer = -1;
                          const aoptions: processoptionsty = 
-                            defaultstartprocessoptions): integer; overload;
+                            defaultstartprocessoptions): integer;
                          //returns program exitcode, -1 in case of error
 var
  proc1: tmseprocess;
 begin
  result:= -1;
- proc1:= tstringprocess.create(nil);
+ proc1:= tmseprocess.create(nil);
  try
   with proc1 do begin
    commandline:= acommandline;
@@ -346,6 +348,12 @@ begin
      opt1:= [];
      if sessionleader then begin
       include(opt1,exo_sessionleader);
+     end;
+     if pro_shell in foptions then begin
+      include(opt1,exo_shell);
+     end;
+     if pro_noshell in foptions then begin
+      include(opt1,exo_noshell);
      end;
      if pro_inactive in foptions then begin
       include(opt1,exo_inactive);
@@ -678,12 +686,14 @@ end;
 
 procedure tmseprocess.setoptions(const avalue: processoptionsty);
 const
- mask: processoptionsty = [pro_erroroutput,pro_errorouttoout];
+ mask1: processoptionsty = [pro_erroroutput,pro_errorouttoout];
+ mask2: processoptionsty = [pro_shell,pro_noshell];
 begin
  foptions:= processoptionsty(
    setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),
                 {$ifdef FPC}longword{$else}word{$endif}(foptions),
-                {$ifdef FPC}longword{$else}word{$endif}(mask)));
+                [{$ifdef FPC}longword{$else}word{$endif}(mask1),
+                 {$ifdef FPC}longword{$else}word{$endif}(mask1)]));
  if foptions * [pro_nowaitforpipeeof,pro_nopipeterminate] = [] then begin
   exclude(foptions,pro_usepipewritehandles);
  end;
