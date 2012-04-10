@@ -180,7 +180,8 @@ type
    ferrormessage: msestring;
    fsender: tcustomsqlconnection;
   public
-   constructor create(const asender: tcustomsqlconnection; const amessage: ansistring;
+   constructor create(const asender: tcustomsqlconnection;
+              const amessage: ansistring;
               const aerrormessage: msestring; const aerror: integer);
    property sender: tcustomsqlconnection read fsender;
    property error: integer read ferror;
