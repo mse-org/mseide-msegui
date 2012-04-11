@@ -7,7 +7,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit msedummycryptohandler;
+unit msecryptohandler;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses

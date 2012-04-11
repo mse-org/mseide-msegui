@@ -21,7 +21,7 @@ implementation
 uses
  classes,mseifi,msedesignintf,msepropertyeditors,msestrings,msedesigner,
  mseclasses,mseifids,mseifiglob,msegui,typinfo,msesockets,mseifigui,
- mseifilink,msessl,db,regifirem_bmp,mseifidbgui,msedummycryptohandler;
+ mseifilink,msessl,db,regifirem_bmp,mseifidbgui,msecryptohandler;
  
 type
  tmodulelinkitemeditor = class(tclasselementeditor)
