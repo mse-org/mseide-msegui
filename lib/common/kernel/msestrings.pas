@@ -291,7 +291,8 @@ function replacestring(const s: string; oldsub: string;
                            const newsub: string;
                const options: searchoptionsty = []): string; overload;
 
-procedure addeditchars(const source: msestring; var buffer: msestring; var cursorpos: integer);
+procedure addeditchars(const source: msestring; var buffer: msestring;
+                         var cursorpos: integer);
                                   //cursorpos nullbased
 function processeditchars(var value: msestring; stripcontrolchars: boolean): integer;
            //bringt offset durch backspace
@@ -3507,10 +3508,15 @@ begin
  d:= pmsechar(buffer);
  while true do begin
   ch1:= s^;
-  case ch1 of
-   #0: begin
+  if ch1 = #0 then begin
+   if s - pmsechar(pointer(source)) >= length(source) then begin
     break;
+   end
+   else begin
+    ch1:= #$2400; //unicode null glyph
    end;
+  end;
+  case ch1 of
    c_backspace: begin
     if i > 0 then begin
      dec(i);
