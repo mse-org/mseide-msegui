@@ -5429,7 +5429,7 @@ begin
   if int1 >= recordcount then begin
    int1:= fbrecordcount - 1;
   end;
-  if int1 > 0 then begin
+  if int1 >= 0 then begin
    internalsetrecno(int1);
    resync([]);
    result:= int1 = frecno;
