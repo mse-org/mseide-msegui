@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -11,7 +11,7 @@ unit msessl;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,msecryptio,mopenssl,msestrings,msesystypes;
+ classes,msecryptio,mopenssl,msestrings,msesystypes,msecryptohandler;
 type
  
  essl = class(ecryptio)
@@ -38,6 +38,22 @@ const
  defaultcipherlist = 'DEFAULT';
  
 type
+
+ sslhandlerdatadty = record
+ end;
+ {$if sizeof(sslhandlerdatadty) > sizeof(cryptohandlerdataty)} 
+  {$error 'buffer overflow'}
+ {$endif}
+ sslhandlerdataty = record
+  case integer of
+   0: begin
+    d: sslhandlerdatadty;
+   end;
+   1: begin
+    _bufferspace: cryptohandlerdataty;
+   end;
+ end;
+ 
  tssl = class(tcryptio)
   private
    fctx: pssl_ctx;
@@ -68,6 +84,9 @@ type
    property privkeyfile: filenamety read fprivkeyfile write fprivkeyfile;
  end;
 
+ tsslcryptohandler = class(tbasecryptohandler)
+ end;
+ 
 function waitforio(const aerror: integer; var ainfo: cryptioinfoty; 
               const atimeoutms: integer; const resultpo: pinteger = nil): boolean;
  

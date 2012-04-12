@@ -101,6 +101,9 @@ type
   needsstat: boolean;
   needstype: boolean;
  end;
+ {$if sizeof(dirstreamlinuxdty) > sizeof(dirstreampty)} 
+  {$error 'buffer overflow'}
+ {$endif}
  dirstreamlinuxty = record
   case integer of
    0: (d: dirstreamlinuxdty;);

@@ -106,7 +106,7 @@ begin
                      tsocketclientiochannel,tsocketserveriochannel,
                      tsocketstdio,tsocketclient,
                      tsocketserver,tsocketserverstdio,
-                     tssl,tdummycryptohandler]); 
+                     tssl,tdummycryptohandler,tsslcryptohandler]); 
  registerpropertyeditor(typeinfo(tmodulelinkarrayprop),nil,'',tmodulelinkeditor);
  registerpropertyeditor(typeinfo(tlinkactions),nil,'',tmodulelinkactionseditor);
  registerpropertyeditor(typeinfo(tvaluewidgetlinks),nil,'',tvaluewidgetlinkseditor);

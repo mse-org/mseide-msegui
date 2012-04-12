@@ -32,7 +32,37 @@ const
                      s_ixgrp,s_iroth,s_iwoth,s_ixoth];
 type
 
+ tmsefilestream = class;
+
+ cryptoclientstatety = (ccs_open);
+ cryptoclientstatesty = set of cryptoclientstatety;
+ cryptohandlerdataty = array[0..15] of pointer;
+ 
+ cryptoclientinfoty = record
+  stream: tmsefilestream;
+  state: cryptoclientstatesty;
+  handlerdata: cryptohandlerdataty;
+ end;
+ pcryptoclientinfoty = ^cryptoclientinfoty;
+ cryptoclientinfoarty = array of cryptoclientinfoty;
+
  tcustomcryptohandler = class(tmsecomponent)
+  private
+   fclients: cryptoclientinfoarty;
+  protected
+   function checkopen(const aindex: integer): pcryptoclientinfoty;
+   procedure connect(const aclient: tmsefilestream);
+   procedure disconnect(const aclient: tmsefilestream);
+   procedure open(var aclient: cryptoclientinfoty); virtual;
+   procedure close(var aclient: cryptoclientinfoty);  virtual;
+   function read(var aclient: cryptoclientinfoty;
+                   var buffer; count: longint): longint; virtual;
+   function write(var aclient: cryptoclientinfoty;
+                   const buffer; count: longint): longint; virtual;
+   function seek(var aclient: cryptoclientinfoty;
+                   const offset: int64; origin: tseekorigin): int64; virtual;
+  public
+   destructor destroy; override;
  end;
  
    {$warnings off}
@@ -41,6 +71,7 @@ type
    ffilename: filenamety;
    ftransactionname: filenamety;
    fcryptohandler: tcustomcryptohandler;
+   fcryptoindex: integer;
    function getmemory: pointer;
    procedure checkmemorystream;
    procedure setcryptohandler(const avalue: tcustomcryptohandler);
@@ -53,6 +84,10 @@ type
                       const accessmode: fileaccessmodesty;
                       const rights: filerightsty;
                       out error: syserrorty); overload;
+   function inheritedread(var buffer; count: longint): longint;
+   function inheritedwrite(const buffer; count: longint): longint;
+   function inheritedseek(const offset: int64;
+                                       origin: tseekorigin): int64;
   public
    constructor create(const afilename: filenamety; 
                       const openmode: fileopenmodety = fm_read;
@@ -841,6 +876,7 @@ end;
 
 constructor tmsefilestream.create(ahandle: integer); //allways called
 begin
+ fcryptoindex:= -1;
  inherited create(ahandle);
 end;
 
@@ -972,6 +1008,7 @@ end;
 destructor tmsefilestream.Destroy;
 begin
  close;
+ cryptohandler:= nil;
  inherited Destroy;
  fmemorystream.Free;
 end;
@@ -1042,18 +1079,19 @@ begin
  result:= handle <> invalidfilehandle;
 end;
 
-function tmsefilestream.Read(var Buffer; Count: Integer): Longint;
+function tmsefilestream.Read(var Buffer; Count: longint): Longint;
 begin
  if fmemorystream <> nil then begin
   result:= fmemorystream.Read(buffer,count);
  end
  else begin
-{$warnings off}
-  result:= sys_read({$ifdef FPC}thandlestreamcracker(self).{$endif}fhandle,
-                                      @buffer,count);
-{$warnings on}
-  if result = - 1 then begin
-   result:= 0;
+  if fcryptohandler <> nil then begin
+   with fcryptohandler do begin
+    result:= read(checkopen(fcryptoindex)^,buffer,count);
+   end;
+  end
+  else begin
+   result:= inheritedread(buffer,count);
   end;
  end;
 end;
@@ -1064,22 +1102,30 @@ begin
   result:= fmemorystream.Seek(offset,origin);
  end
  else begin
-  result:= inherited seek(offset,origin);
+  if fcryptohandler <> nil then begin
+   with fcryptohandler do begin
+    result:= seek(checkopen(fcryptoindex)^,offset,origin);
+   end;
+  end
+  else begin
+   result:= inherited seek(offset,origin);
+  end;
  end;
 end;
 
-function tmsefilestream.Write(const Buffer; Count: Integer): Longint;
+function tmsefilestream.Write(const Buffer; Count: longint): Longint;
 begin
  if fmemorystream <> nil then begin
   result:= fmemorystream.Write(Buffer,count);
  end
  else begin
-{$warnings off}
-  result:= sys_write({$ifdef FPC}thandlestreamcracker(self).{$endif}fhandle,
-                             @buffer,count);
-{$warnings on}
-  if result = -1 then begin
-   result:= 0;
+  if fcryptohandler <> nil then begin
+   with fcryptohandler do begin
+    result:= write(checkopen(fcryptoindex)^,buffer,count);
+   end;
+  end
+  else begin
+   result:= inheritedwrite(buffer,count);
   end;
  end;
 end;
@@ -1130,7 +1176,43 @@ end;
 
 procedure tmsefilestream.setcryptohandler(const avalue: tcustomcryptohandler);
 begin
+ if fcryptohandler <> nil then begin
+  fcryptohandler.disconnect(self);
+ end;
  fcryptohandler:= avalue;
+ if fcryptohandler <> nil then begin
+  fcryptohandler.connect(self);
+ end;
+end;
+
+function tmsefilestream.inheritedread(var buffer; count: longint): longint;
+begin
+{$warnings off}
+ result:= sys_read({$ifdef FPC}thandlestreamcracker(self).{$endif}fhandle,
+                                     @buffer,count);
+{$warnings on}
+ if result = - 1 then begin
+  result:= 0;
+ end;
+// result:= inherited read(buffer,count);
+end;
+
+function tmsefilestream.inheritedwrite(const buffer; count: longint): longint;
+begin
+{$warnings off}
+ result:= sys_write({$ifdef FPC}thandlestreamcracker(self).{$endif}fhandle,
+                            @buffer,count);
+{$warnings on}
+ if result = -1 then begin
+  result:= 0;
+ end;
+// result:= inherited write(buffer,count);
+end;
+
+function tmsefilestream.inheritedseek(const offset: int64;
+               origin: tseekorigin): int64;
+begin
+ result:= inherited seek(offset,origin);
 end;
 
 { tresourcefilestream}
@@ -2208,6 +2290,106 @@ end;
 function tmemorycopystream.write(const Buffer; Count: Longint): Longint;
 begin
  result:= 0;
+end;
+
+{ tcustomcryptohandler }
+
+destructor tcustomcryptohandler.destroy;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fclients) do begin
+  with fclients[int1] do begin
+   if stream <> nil then begin
+    with stream do begin
+     fcryptohandler:= nil;
+     fcryptoindex:= -1;
+    end;
+    stream:= nil;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomcryptohandler.connect(const aclient: tmsefilestream);
+var
+ int1,int2,int3: integer;
+begin
+ int3:= high(fclients);
+ int2:= int3+1;
+ for int1:= 0 to int3 do begin
+  if fclients[int1].stream <> nil then begin
+   int2:= int1;
+   break;
+  end;
+ end;
+ if int2 >= int3 then begin
+  setlength(fclients,int2+1);
+ end;
+ aclient.fcryptoindex:= int2;
+ with fclients[int2] do begin
+  stream:= aclient;
+  state:= [];
+ end;
+end;
+
+procedure tcustomcryptohandler.disconnect(const aclient: tmsefilestream);
+var
+ po1: pcryptoclientinfoty;
+begin
+ po1:= @fclients[aclient.fcryptoindex];
+ with po1^ do begin
+  if ccs_open in state then begin
+   close(po1^);
+  end;
+  stream:= nil;
+ end;
+ aclient.fcryptoindex:= -1;
+end;
+
+function tcustomcryptohandler.read(var aclient: cryptoclientinfoty; var buffer;
+               count: longint): longint;
+begin
+ with aclient do begin
+  result:= stream.inheritedread(buffer,count);
+ end;
+end;
+
+function tcustomcryptohandler.write(var aclient: cryptoclientinfoty;
+               const buffer; count: longint): longint;
+begin
+ with aclient do begin
+  result:= stream.inheritedwrite(buffer,count);
+ end;
+end;
+
+function tcustomcryptohandler.seek(var aclient: cryptoclientinfoty;
+                          const offset: int64; origin: tseekorigin): int64;
+begin
+ with aclient do begin
+  result:= stream.inheritedseek(offset,origin);
+ end;
+end;
+
+procedure tcustomcryptohandler.open(var aclient: cryptoclientinfoty);
+begin
+ include(aclient.state,ccs_open);
+end;
+
+procedure tcustomcryptohandler.close(var aclient: cryptoclientinfoty);
+begin
+ exclude(aclient.state,ccs_open);
+end;
+
+function tcustomcryptohandler.checkopen(
+                      const aindex: integer): pcryptoclientinfoty;
+begin
+ result:= @fclients[aindex];
+ with result^ do begin
+  if not (ccs_open in state) then begin
+   self.open(result^);
+  end;
+ end;
 end;
 
 end.

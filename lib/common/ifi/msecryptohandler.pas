@@ -13,7 +13,11 @@ interface
 uses
  msestream;
 type
- tdummycryptohandler = class(tcustomcryptohandler)
+ tbasecryptohandler = class(tcustomcryptohandler)
+  protected
+ end;
+ 
+ tdummycryptohandler = class(tbasecryptohandler)
  end;
  
 implementation

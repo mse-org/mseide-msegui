@@ -64,7 +64,9 @@ type
   visual: pvisual;
   colormap: tcolormap;
  end;
- 
+ {$if sizeof(x11internalwindowoptionsdty) > sizeof(internalwindowoptionspty)} 
+  {$error 'buffer overflow'}
+ {$endif} 
  x11internalwindowoptionsty =  record
   case integer of
    0: (d: x11internalwindowoptionsdty;);
