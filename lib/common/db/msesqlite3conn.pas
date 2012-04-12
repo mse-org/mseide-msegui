@@ -316,7 +316,9 @@ end;
 
 procedure freebindstring(astring: pointer); cdecl;
 begin
- string(astring):= '';
+ if astring <> pchar('') then begin
+  string(astring):= '';
+ end;
 end;
 
 procedure tsqlite3connection.AddFieldDefs(const cursor: TSQLCursor;
@@ -516,6 +518,7 @@ var
  cu1: currency;
  do1: double;
  wo1: word;
+ po1: pchar;
 begin
  with tsqlite3cursor(cursor) do begin
   frowsaffected:= -1;
@@ -547,8 +550,14 @@ begin
        end;
        ftstring,ftwidestring,ftmemo,ftfixedchar,ftfixedwidechar: begin
         str1:= aparams.asdbstring(fparambinding[int1]);
-        stringaddref(str1);
-        checkerror(sqlite3_bind_text(fstatement,int1+1,pchar(str1),
+        if str1 = '' then begin
+         po1:= pchar('');
+        end
+        else begin
+         stringaddref(str1);
+         po1:= pchar(str1);
+        end;
+        checkerror(sqlite3_bind_text(fstatement,int1+1,po1,
                     length(str1),@freebindstring));
        end;
        ftblob: begin
