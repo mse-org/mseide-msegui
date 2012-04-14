@@ -12,8 +12,8 @@ unit msesonames;
 interface
 uses
  msestrings;
-const
 {$ifdef mswindows}
+//const
 // sqlite3lib: array[0..0] of filenamety = ('sqlite3.dll');  
 // postgreslib: array[0..0] of filenamety = ('libpq.dll');
 // mysqllib: array[0..0] of filenamety = ('libmysql.dll');
@@ -22,6 +22,7 @@ const
 // fbembedlib: array[0..0] of filenamety = ('fbembed.dll');
 // fbcgdslib: array[0..1] of filenamety = ('fbclient.dll','gds32.dll');
 {$else}
+const
  xrendernames: array[0..1] of filenamety = ('libXrender.so.1','libXrender.so');
  xftnames: array[0..1] of filenamety = ('libXft.so.2','libXft.so');
  icenames: array[0..1] of filenamety = ('libICE.so.6','libICE.so');
@@ -44,4 +45,5 @@ const
 {$endif}
 
 implementation
+
 end.

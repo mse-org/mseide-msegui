@@ -718,9 +718,9 @@ procedure TODBCConnection.DoInternalConnect;
 const
   BufferLength = 1024; // should be at least 1024 according to the ODBC specification
 var
-  ConnectionString:string;
-  OutConnectionString:string;
-  ActualLength:SQLSMALLINT;
+  ConnectionString: string;
+  OutConnectionString: string;
+  ActualLength: SQLSMALLINT;
 begin
   // Do not call the inherited method as it checks for a non-empty DatabaseName, and we don't even use DatabaseName!
   // inherited DoInternalConnect;
@@ -741,10 +741,10 @@ begin
 
   // connect
   ConnectionString:=CreateConnectionString;
-  SetLength(OutConnectionString,BufferLength-1); // allocate completed connection string buffer (using the ansistring #0 trick)
+  SetLength(OutConnectionString,BufferLength); // allocate completed connection string buffer (using the ansistring #0 trick)
   try
    ODBCCheckResult(
-     SQLDriverConnect(FDBCHandle,               // the ODBC connection handle
+     SQLDriverConnect(FDBCHandle,              // the ODBC connection handle
                      nil,                      // no parent window (would be required for prompts)
                      PChar(ConnectionString),  // the connection string
                      Length(ConnectionString), // connection string length
