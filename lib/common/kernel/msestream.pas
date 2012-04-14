@@ -1023,6 +1023,11 @@ begin
  flushbuffer;
  if value <> handle then begin
   if handle <> invalidfilehandle then begin
+   if fcryptohandler <> nil then begin
+    with fcryptohandler do begin
+     close(fclients[fcryptoindex]);
+    end;
+   end;
    closehandle(handle);
   end;
   {$ifdef FPC}

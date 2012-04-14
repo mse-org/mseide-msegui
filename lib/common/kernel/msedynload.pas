@@ -13,12 +13,12 @@ type
   libhandle: tlibhandle;
   libname: filenamety;
   refcount: integer;
-  inithooks: pointerarty;   //array of dynlibprocty
-  deinithooks: pointerarty; //array of dynlibprocty
+  inithooks: pointerarty;       //array of dynlibprocty
+  deinithooks: pointerarty;     //array of dynlibprocty
   cw8087: word;             //fpu control word after lib load
  end;
  dynlibprocty = procedure(const dynlib: dynlibinfoty);
- 
+  
 procedure initializelibinfo(var info: dynlibinfoty);
 procedure finalizelibinfo(var info: dynlibinfoty);
 
@@ -62,7 +62,7 @@ function quotelibnames(const libnames: array of filenamety): msestring;
 implementation
 
 uses
- msesysintf1{$ifndef FPC},windows{$endif}{,msedatalist};
+ msesysintf1{$ifndef FPC},windows{$endif}{,msedatalist},msearrayutils;
 
 function getprocaddresses(const lib: tlibhandle;
                           const procedures: array of funcinfoty;

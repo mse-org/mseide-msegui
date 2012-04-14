@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
-
+2012-04-13
+ mopenssl -> mseopenssl, uses dynlibinfoty, stadardised with other lib bindings.
+ BIO functions -> mseopensslbio.
 Version 2.8.2
 2012-04-01
 2012-02-01

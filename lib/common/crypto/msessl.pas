@@ -11,7 +11,8 @@ unit msessl;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,msecryptio,mopenssl,msestrings,msesystypes,msecryptohandler;
+ classes,msecryptio,mseopenssl,msestrings,msesystypes,msecryptohandler,
+ msestream;
 type
  
  essl = class(ecryptio)
@@ -39,21 +40,6 @@ const
  
 type
 
- sslhandlerdatadty = record
- end;
- {$if sizeof(sslhandlerdatadty) > sizeof(cryptohandlerdataty)} 
-  {$error 'buffer overflow'}
- {$endif}
- sslhandlerdataty = record
-  case integer of
-   0: begin
-    d: sslhandlerdatadty;
-   end;
-   1: begin
-    _bufferspace: cryptohandlerdataty;
-   end;
- end;
- 
  tssl = class(tcryptio)
   private
    fctx: pssl_ctx;
@@ -84,7 +70,22 @@ type
    property privkeyfile: filenamety read fprivkeyfile write fprivkeyfile;
  end;
 
+ sslhandlerdatadty = record
+  bio: pbio;
+ end;
+ {$if sizeof(sslhandlerdatadty) > sizeof(cryptohandlerdataty)} 
+  {$error 'buffer overflow'}
+ {$endif}
+ sslhandlerdataty = record
+  case integer of
+   0: (d: sslhandlerdatadty;);
+   1: (_bufferspace: cryptohandlerdataty;);
+ end;
+ 
  tsslcryptohandler = class(tbasecryptohandler)
+  protected
+   procedure open(var aclient: cryptoclientinfoty); override;
+   procedure close(var aclient: cryptoclientinfoty);  override;
  end;
  
 function waitforio(const aerror: integer; var ainfo: cryptioinfoty; 
@@ -92,7 +93,7 @@ function waitforio(const aerror: integer; var ainfo: cryptioinfoty;
  
 implementation
 uses
- sysutils,msesysintf1,msefileutils,msesocketintf,msesys;
+ sysutils,msesysintf1,msefileutils,msesocketintf,msesys,mseopensslbio;
  
 procedure raiseerror(errco : integer);
 var
@@ -320,6 +321,23 @@ begin
   except
    result:= -1;
   end;
+ end;
+end;
+
+{ tsslcryptohandler }
+
+procedure tsslcryptohandler.open(var aclient: cryptoclientinfoty);
+begin
+ initsslinterface;
+ with sslhandlerdataty(aclient.handlerdata).d do begin
+  bio:= bio_new(bio_s_mem());
+ end;
+end;
+
+procedure tsslcryptohandler.close(var aclient: cryptoclientinfoty);
+begin
+ with sslhandlerdataty(aclient.handlerdata).d do begin
+  bio_free_all(bio);
  end;
 end;
 

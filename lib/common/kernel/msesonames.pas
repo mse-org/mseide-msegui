@@ -17,8 +17,8 @@ const
 // sqlite3lib: array[0..0] of filenamety = ('sqlite3.dll');  
 // postgreslib: array[0..0] of filenamety = ('libpq.dll');
 // mysqllib: array[0..0] of filenamety = ('libmysql.dll');
- sslnames: array[0..1] of filenamety = ('ssleay32.dll','libssl32.dll');
- sslutilnames: array[0..0] of filenamety = ('libeay32.dll');
+// sslnames: array[0..1] of filenamety = ('ssleay32.dll','libssl32.dll');
+// sslutilnames: array[0..0] of filenamety = ('libeay32.dll');
 // fbembedlib: array[0..0] of filenamety = ('fbembed.dll');
 // fbcgdslib: array[0..1] of filenamety = ('fbclient.dll','gds32.dll');
 {$else}
@@ -31,12 +31,12 @@ const
 // postgreslib: array[0..2] of filenamety = ('libpq.so.5.1','libpq.so.5','libpq.so');
 // mysqllib: array[0..2] of filenamety = ('libmysqlclient.so.16',
 //         'libmysqlclient.so.15','libmysqlclient.so');
- sslnames: array[0..4] of filenamety = (
-           'libssl.so.1.0.0','libssl.so.0.9.8','libssl.so.0.9.7','libssl.so.0.9.6',
-           'libssl.so');
- sslutilnames: array[0..4] of filenamety = (
-           'libcrypto.so.1.0.0','libcrypto.so.0.9.8','libcrypto.so.0.9.7','libcrypto.so.0.9.6',
-           'libcrypto.so');  
+// sslnames: array[0..4] of filenamety = (
+//           'libssl.so.1.0.0','libssl.so.0.9.8','libssl.so.0.9.7','libssl.so.0.9.6',
+//           'libssl.so');
+// sslutilnames: array[0..4] of filenamety = (
+//           'libcrypto.so.1.0.0','libcrypto.so.0.9.8','libcrypto.so.0.9.7','libcrypto.so.0.9.6',
+//           'libcrypto.so');  
 // fbembedlib: array[0..2] of filenamety = ('libfbembed.so.2','libfbembed.so.1',
 //                                          'libfbembed.so');
 // fbcgdslib: array[0..3] of filenamety = ('libfbclient.so.2','libfbclient.so.1',
