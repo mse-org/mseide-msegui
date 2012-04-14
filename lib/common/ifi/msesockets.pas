@@ -41,7 +41,7 @@ type
    fonthreadterminate: proceventty;
   protected
    fowner: tcustomcommpipes;
-   fcrypt: pcryptioinfoty;
+   fcrypto: pcryptoioinfoty;
    fonafterconnect: proceventty;
    procedure settimeoutms(const avalue: integer); virtual;
    function execthread(thread: tmsethread): integer; override;
@@ -72,7 +72,7 @@ type
    procedure settimeoutms(const avalue: integer); virtual;
   protected
    fowner: tcustomcommpipes;
-   fcrypt: pcryptioinfoty;
+   fcrypto: pcryptoioinfoty;
    function internalwrite(const buffer; count: longint): longint; virtual;
    function dowrite(const buffer; count: longint): longint; override;
   public
@@ -120,18 +120,18 @@ type
    fstate: socketpipesstatesty;
    frx: tcommreader;
    ftx: tcommwriter;
-   fcryptio: tcryptio;
-   fcryptioinfo: cryptioinfoty;
+   fcryptoio: tcryptoio;
+   fcryptoioinfo: cryptoioinfoty;
    procedure createpipes; virtual; abstract;
    procedure doafterconnect; virtual;
    procedure dothreadterminate;
-   procedure setcryptio(const acryptio: tcryptio);
+   procedure setcryptoio(const acryptoio: tcryptoio);
    procedure receiveevent(const event: tobjectevent);
    property oncommbroken: commpipeseventty read foncommbroken 
                                                       write foncommbroken;
   public
    constructor create(const aowner: tcustomcommcomp;
-                                 const acryptkind: cryptiokindty); reintroduce;
+                                 const acryptkind: cryptoiokindty); reintroduce;
    destructor destroy; override;
    procedure close;
    procedure release;
@@ -198,11 +198,11 @@ type
    fonafterconnect: commcompeventty;
    fonbeforedisconnect: commcompeventty;
    fonafterdisconnect: commcompeventty;
-   procedure setcryptio(const avalue: tcryptio);
+   procedure setcryptoio(const avalue: tcryptoio);
   protected
    fhandle: integer;
    factive: boolean;
-   fcryptio: tcryptio;
+   fcryptoio: tcryptoio;
    procedure setactive(const avalue: boolean); override;
    procedure doactivated; override;
    procedure dodeactivated; override;
@@ -218,7 +218,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    property active: boolean read factive write setactive default false;
-   property cryptio: tcryptio read fcryptio write setcryptio;
+   property cryptoio: tcryptoio read fcryptoio write setcryptoio;
    
    property onbeforeconnect: commcompeventty read fonbeforeconnect 
                                                 write fonbeforeconnect;
@@ -240,7 +240,7 @@ type
   published
    property active;
    property activator;
-   property cryptio;   
+   property cryptoio;   
    property onbeforeconnect;
    property onafterconnect;
    property onbeforedisconnect;
@@ -264,7 +264,7 @@ type
   published
    property active;
    property activator;
-   property cryptio;   
+   property cryptoio;   
    property onbeforeconnect;
    property onafterconnect;
    property onbeforedisconnect;
@@ -295,7 +295,7 @@ type
    property pipes;
    property active;
    property activator;
-   property cryptio;   
+   property cryptoio;   
    property onbeforeconnect;
    property onafterconnect;
    property onbeforedisconnect;
@@ -309,8 +309,8 @@ type
  tsocketstdio = class(tsocketcomp)
   private
    procedure setpipes(const avalue: tsocketpipes);
-   function getcryptiokind: cryptiokindty;
-   procedure setcryptiokind(const avalue: cryptiokindty);
+   function getcryptoiokind: cryptoiokindty;
+   procedure setcryptoiokind(const avalue: cryptoiokindty);
   protected
    fpipes: tsocketpipes;
    procedure internalconnect; override;
@@ -322,8 +322,8 @@ type
    destructor destroy; override;
   published
    property pipes: tsocketpipes read fpipes write setpipes;
-   property cryptiokind: cryptiokindty read getcryptiokind write setcryptiokind
-                             default cyk_none;
+   property cryptiokind: cryptoiokindty read getcryptoiokind 
+                        write setcryptoiokind default cyk_none;
  end;
  
   
@@ -402,7 +402,7 @@ type
   published
    property active;
    property activator;
-   property cryptio;   
+   property cryptoio;   
    property onbeforeconnect;
    property onafterconnect;
    property onbeforedisconnect;
@@ -424,9 +424,9 @@ type
      
 procedure checksyserror(const aresult: integer);
 
-procedure connectcryptio(const acryptio: tcryptio; const tx: tcommwriter;
+procedure connectcryptoio(const acryptoio: tcryptoio; const tx: tcommwriter;
                          const rx: tcommreader;
-                         var cryptioinfo: cryptioinfoty;
+                         var cryptoioinfo: cryptoioinfoty;
                          txfd: integer = invalidfilehandle;
                          rxfd: integer = invalidfilehandle);
 procedure socketerror(const error: syserrorty; const text: string = '');
@@ -477,39 +477,39 @@ begin
  end;
 end;
 
-procedure connectcryptio(const acryptio: tcryptio; const tx: tcommwriter;
+procedure connectcryptoio(const acryptoio: tcryptoio; const tx: tcommwriter;
                          const rx: tcommreader;
-                         var cryptioinfo: cryptioinfoty;
+                         var cryptoioinfo: cryptoioinfoty;
                          txfd: integer = invalidfilehandle;
                          rxfd: integer = invalidfilehandle);
 begin
- if (acryptio <> nil) and (cryptioinfo.kind <> cyk_none) then begin
+ if (acryptoio <> nil) and (cryptoioinfo.kind <> cyk_none) then begin
   if txfd = invalidfilehandle then begin
    txfd:= tx.handle;
   end;
   if rxfd = invalidfilehandle then begin
    rxfd:= rx.handle;
   end;
-  tx.fcrypt:= @cryptioinfo;
-  rx.fcrypt:= @cryptioinfo;
-  acryptio.link(txfd,rxfd,cryptioinfo);
-  if cryptioinfo.kind = cyk_server then begin
-   cryptaccept(cryptioinfo,rx.timeoutms);
+  tx.fcrypto:= @cryptoioinfo;
+  rx.fcrypto:= @cryptoioinfo;
+  acryptoio.link(txfd,rxfd,cryptoioinfo);
+  if cryptoioinfo.kind = cyk_server then begin
+   cryptoaccept(cryptoioinfo,rx.timeoutms);
   end
   else begin
-   cryptconnect(cryptioinfo,rx.timeoutms);
+   cryptoconnect(cryptoioinfo,rx.timeoutms);
   end;
  end
  else begin
-  tx.fcrypt:= nil;
-  rx.fcrypt:= nil;
+  tx.fcrypto:= nil;
+  rx.fcrypto:= nil;
  end;
 end;
 
 { tcustomcommpipes }
 
 constructor tcustomcommpipes.create(const aowner: tcustomcommcomp; 
-                                              const acryptkind: cryptiokindty);
+                                              const acryptkind: cryptoiokindty);
 begin
  fowner:= aowner;
  createpipes;
@@ -518,8 +518,8 @@ begin
  frx.onpipebroken:= {$ifdef FPC}@{$endif}dopipebroken;
  frx.fonthreadterminate:= {$ifdef FPC}@{$endif}dothreadterminate;
 // ftx:= tsocketwriter.create;
- setlinkedvar(aowner.fcryptio,tmsecomponent(fcryptio));
- fcryptioinfo.kind:= acryptkind;
+ setlinkedvar(aowner.fcryptoio,tmsecomponent(fcryptoio));
+ fcryptoioinfo.kind:= acryptkind;
 end;
 
 destructor tcustomcommpipes.destroy;
@@ -545,7 +545,7 @@ end;
 
 procedure tcustomcommpipes.doafterconnect;
 begin
- connectcryptio(fcryptio,ftx,frx,fcryptioinfo);
+ connectcryptoio(fcryptoio,ftx,frx,fcryptoioinfo);
  if assigned(fonafterconnect) then begin
   fonafterconnect(self);
  end;  
@@ -553,7 +553,7 @@ end;
 
 procedure tcustomcommpipes.dothreadterminate;
 begin
- cryptthreadterminate(fcryptioinfo);
+ cryptothreadterminate(fcryptoioinfo);
  //dummy
 end;
 
@@ -575,18 +575,18 @@ begin
   include(fstate,sops_open);
  end
  else begin
-  setcryptio(nil);
+  setcryptoio(nil);
   exclude(fstate,sops_open);
  end;
 end;
 
-procedure tcustomcommpipes.setcryptio(const acryptio: tcryptio);
+procedure tcustomcommpipes.setcryptoio(const acryptoio: tcryptoio);
 begin
- fcryptio:= acryptio;
- with fcryptioinfo do begin
-  cryptunlink(fcryptioinfo);
-  ftx.fcrypt:= nil;
-  frx.fcrypt:= nil;
+ fcryptoio:= acryptoio;
+ with fcryptoioinfo do begin
+  cryptounlink(fcryptoioinfo);
+  ftx.fcrypto:= nil;
+  frx.fcrypto:= nil;
  end;
 end;
 
@@ -810,9 +810,9 @@ begin
  end; 
 end;
 
-procedure tcustomcommcomp.setcryptio(const avalue: tcryptio);
+procedure tcustomcommcomp.setcryptoio(const avalue: tcryptoio);
 begin
- setlinkedvar(avalue,tmsecomponent(fcryptio));
+ setlinkedvar(avalue,tmsecomponent(fcryptoio));
 end;
 
 procedure tcustomcommcomp.loaded;
@@ -895,14 +895,14 @@ begin
  end;
 end;
 
-function tsocketstdio.getcryptiokind: cryptiokindty;
+function tsocketstdio.getcryptoiokind: cryptoiokindty;
 begin
- result:= fpipes.fcryptioinfo.kind;
+ result:= fpipes.fcryptoioinfo.kind;
 end;
 
-procedure tsocketstdio.setcryptiokind(const avalue: cryptiokindty);
+procedure tsocketstdio.setcryptoiokind(const avalue: cryptoiokindty);
 begin
- fpipes.fcryptioinfo.kind:= avalue;
+ fpipes.fcryptoioinfo.kind:= avalue;
 end;
 
 { tclientsocketpipes }
@@ -951,7 +951,7 @@ begin
  end;
  try
   fpipes.onafterconnect:= {$ifdef FPC}@{$endif}doafterconnect;
-  fpipes.setcryptio(fcryptio);
+  fpipes.setcryptoio(fcryptoio);
   fpipes.handle:= fhandle;
  except
   internaldisconnect;
@@ -1086,7 +1086,7 @@ begin
         if canevent(tmethod(fonbeforechconnect)) then begin
          fonbeforechconnect(self,fpipes[int2]);
         end;
-        setcryptio(fcryptio);
+        setcryptoio(fcryptoio);
         handle:= conn;
        end;
       end
@@ -1333,14 +1333,14 @@ function tcommreader.doread(var buf; const acount: integer;
 var
  int1: integer;
 begin
- if fcrypt <> nil then begin
+ if fcrypto <> nil then begin
   if nonblocked then begin
    int1:= -1;
   end
   else begin
    int1:= 0;
   end;
-  result:= cryptread(fcrypt^,@buf,acount,int1);
+  result:= cryptoread(fcrypto^,@buf,acount,int1);
  end
  else begin  
   result:= internalread(buf,acount,nonblocked);
@@ -1416,8 +1416,8 @@ end;
 
 function tcommwriter.dowrite(const buffer; count: longint): longint;
 begin
- if fcrypt <> nil then begin
-  result:= cryptwrite(fcrypt^,@buffer,count,ftimeoutms);
+ if fcrypto <> nil then begin
+  result:= cryptowrite(fcrypto^,@buffer,count,ftimeoutms);
  end
  else begin
   result:= internalwrite(buffer,count);

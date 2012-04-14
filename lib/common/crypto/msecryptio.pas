@@ -15,79 +15,79 @@ uses
  
 type
  
- ecryptio = class(exception)
+ ecryptoio = class(exception)
  end;
 
- tcryptio = class; 
- cryptioclassty = class of tcryptio;
- cryptiokindty = (cyk_none,cyk_server,cyk_client);
+ tcryptoio = class; 
+ cryptoioclassty = class of tcryptoio;
+ cryptoiokindty = (cyk_none,cyk_server,cyk_client);
 
- cryptdataty = array[0..17] of pointer;  
- cryptioinfoty = record
+ cryptodataty = array[0..17] of pointer;  
+ cryptoioinfoty = record
 //  handler: tcryptio;
-  kind: cryptiokindty;
-  classtype: cryptioclassty;
+  kind: cryptoiokindty;
+  classtype: cryptoioclassty;
   rxfd: integer;
   txfd: integer;
-  cryptdata: cryptdataty;
+  cryptodata: cryptodataty;
  end;
- pcryptioinfoty = ^cryptioinfoty;
+ pcryptoioinfoty = ^cryptoioinfoty;
 
  connectionkindty = (cok_server,cok_client); 
  
- tcryptio = class(tmsecomponent)
+ tcryptoio = class(tmsecomponent)
   protected
-   class procedure internalunlink(var ainfo: cryptioinfoty); virtual;
+   class procedure internalunlink(var ainfo: cryptoioinfoty); virtual;
    class procedure internalthreadterminate; virtual;
-   class procedure connect(var ainfo: cryptioinfoty; 
+   class procedure connect(var ainfo: cryptoioinfoty; 
                           const atimeoutms: integer);  virtual; abstract;
-   class procedure accept(var ainfo: cryptioinfoty; 
+   class procedure accept(var ainfo: cryptoioinfoty; 
                           const atimeoutms: integer);  virtual; abstract;
-   class function write(var ainfo: cryptioinfoty; const buffer: pointer; 
+   class function write(var ainfo: cryptoioinfoty; const buffer: pointer; 
                   const count: integer; 
                   const atimeoutms: integer): integer; virtual; abstract;
-   class function read(var ainfo: cryptioinfoty; const buffer: pointer;
+   class function read(var ainfo: cryptoioinfoty; const buffer: pointer;
                   const count: integer; 
                   const atimeoutms: integer): integer; virtual; abstract;
                     //atimeoutms < 0 -> nonblocked
  public
    procedure link(const atxfd,arxfd: integer; 
-                          out ainfo: cryptioinfoty); virtual;
+                          out ainfo: cryptoioinfoty); virtual;
    {
    class procedure unlink(var ainfo: cryptioinfoty);
    class procedure threadterminate(var ainfo: cryptioinfoty);
    }
  end;
 
-procedure cryptconnect(var ainfo: cryptioinfoty; const atimeoutms: integer);
-procedure cryptaccept(var ainfo: cryptioinfoty; const atimeoutms: integer);
-function cryptwrite(var ainfo: cryptioinfoty; const buffer: pointer;
+procedure cryptoconnect(var ainfo: cryptoioinfoty; const atimeoutms: integer);
+procedure cryptoaccept(var ainfo: cryptoioinfoty; const atimeoutms: integer);
+function cryptowrite(var ainfo: cryptoioinfoty; const buffer: pointer;
                     const count: integer; const atimeoutms: integer): integer;
-function cryptread(var ainfo: cryptioinfoty; const buffer: pointer;
+function cryptoread(var ainfo: cryptoioinfoty; const buffer: pointer;
                     const count: integer; const atimeoutms: integer): integer;
                     //atimeoutms < 0 -> nonblocked
-procedure cryptunlink(var ainfo: cryptioinfoty);
-procedure cryptthreadterminate(var ainfo: cryptioinfoty);
+procedure cryptounlink(var ainfo: cryptoioinfoty);
+procedure cryptothreadterminate(var ainfo: cryptoioinfoty);
 
 implementation
 uses
  msesystypes;
  
-procedure cryptconnect(var ainfo: cryptioinfoty; const atimeoutms: integer);
+procedure cryptoconnect(var ainfo: cryptoioinfoty; const atimeoutms: integer);
 begin
  if ainfo.classtype <> nil then begin
   ainfo.classtype.connect(ainfo,atimeoutms);
  end;
 end;
 
-procedure cryptaccept(var ainfo: cryptioinfoty; const atimeoutms: integer);
+procedure cryptoaccept(var ainfo: cryptoioinfoty; const atimeoutms: integer);
 begin
  if ainfo.classtype <> nil then begin
   ainfo.classtype.accept(ainfo,atimeoutms);
  end;
 end;
 
-function cryptwrite(var ainfo: cryptioinfoty; const buffer: pointer;
+function cryptowrite(var ainfo: cryptoioinfoty; const buffer: pointer;
                  const count: integer; const atimeoutms: integer): integer;
 begin
  if ainfo.classtype <> nil then begin
@@ -95,7 +95,7 @@ begin
  end;
 end;
 
-function cryptread(var ainfo: cryptioinfoty; const buffer: pointer;
+function cryptoread(var ainfo: cryptoioinfoty; const buffer: pointer;
            const count: integer; const atimeoutms: integer): integer;
 begin
  if ainfo.classtype <> nil then begin
@@ -103,23 +103,23 @@ begin
  end;
 end;
 
-procedure cryptunlink(var ainfo: cryptioinfoty);
+procedure cryptounlink(var ainfo: cryptoioinfoty);
 begin
  if ainfo.classtype <> nil then begin
   ainfo.classtype.internalunlink(ainfo);
  end;
 end;
 
-procedure cryptthreadterminate(var ainfo: cryptioinfoty);
+procedure cryptothreadterminate(var ainfo: cryptoioinfoty);
 begin
  if ainfo.classtype <> nil then begin
   ainfo.classtype.internalthreadterminate;
  end;
 end;
 
-{ tcryptio }
+{ tcryptoio }
 
-class procedure tcryptio.internalunlink(var ainfo: cryptioinfoty);
+class procedure tcryptoio.internalunlink(var ainfo: cryptoioinfoty);
 begin
  with ainfo do begin
 //  handler:= nil;
@@ -129,16 +129,16 @@ begin
  end;
 end;
 
-class procedure tcryptio.internalthreadterminate;
+class procedure tcryptoio.internalthreadterminate;
 begin
  //dummy
 end;
 
-procedure tcryptio.link(const atxfd,arxfd: integer; 
-                          out ainfo: cryptioinfoty);
+procedure tcryptoio.link(const atxfd,arxfd: integer; 
+                          out ainfo: cryptoioinfoty);
 begin
 // ainfo.handler:= self;
- ainfo.classtype:= cryptioclassty(classtype);
+ ainfo.classtype:= cryptoioclassty(classtype);
  ainfo.rxfd:= arxfd;
  ainfo.txfd:= atxfd;
 end;

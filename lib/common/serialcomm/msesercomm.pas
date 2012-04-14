@@ -68,7 +68,7 @@ type
    property port;
    property active;
    property activator;
-   property cryptio;   
+   property cryptoio;   
    property onbeforeconnect;
    property onafterconnect;
    property onbeforedisconnect;

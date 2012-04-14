@@ -1,4 +1,6 @@
 MSEide+MSEgui breaking changes version history
+2012-04-14
+ *cryptio* -> *cryptoio*.
 2012-04-13
  mopenssl -> mseopenssl, uses dynlibinfoty, stadardised with other lib bindings.
  BIO functions -> mseopensslbio.

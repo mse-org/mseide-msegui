@@ -472,9 +472,9 @@ type
  
  tsocketstdiochannel = class(tcustompipeiochannel)
   private
-   fcryptio: tcryptio;
-   fcryptioinfo: cryptioinfoty;
-   procedure setcryptio(const avalue: tcryptio);
+   fcryptoio: tcryptoio;
+   fcryptoioinfo: cryptoioinfoty;
+   procedure setcryptoio(const avalue: tcryptoio);
   protected
    procedure internalconnect; override;
    procedure internaldisconnect; override;
@@ -483,15 +483,15 @@ type
   published
    property active;   
    property activator;
-   property cryptio: tcryptio read fcryptio write setcryptio;
-   property cryptiokindt: cryptiokindty read fcryptioinfo.kind
-                               write fcryptioinfo.kind;
+   property cryptoio: tcryptoio read fcryptoio write setcryptoio;
+   property cryptoiokindt: cryptoiokindty read fcryptoioinfo.kind
+                               write fcryptoioinfo.kind;
  end;
 
  tifisocketclient = class(tcustomsocketclient)
   published
    property pipes;
-   property cryptio;   
+   property cryptoio;   
 
    property kind;
    property url;
@@ -2014,9 +2014,9 @@ begin
  inherited;
 end;
 
-procedure tsocketstdiochannel.setcryptio(const avalue: tcryptio);
+procedure tsocketstdiochannel.setcryptoio(const avalue: tcryptoio);
 begin
- setlinkedvar(avalue,tmsecomponent(fcryptio));
+ setlinkedvar(avalue,tmsecomponent(fcryptoio));
 end;
 {
 procedure tsocketstdiochannel.doafterconnect;
@@ -2028,7 +2028,7 @@ end;
 procedure tsocketstdiochannel.internalconnect;
 begin
 // fcryptioinfo.handler:= fcryptio;
- connectcryptio(fcryptio,tsocketwriter(ftx),tsocketreader(frx),fcryptioinfo,
+ connectcryptoio(fcryptoio,tsocketwriter(ftx),tsocketreader(frx),fcryptoioinfo,
                            sys_stdout,sys_stdin);
  inherited;
 end;
@@ -2036,7 +2036,7 @@ end;
 procedure tsocketstdiochannel.internaldisconnect;
 begin
  inherited;
- cryptunlink(fcryptioinfo);
+ cryptounlink(fcryptoioinfo);
 end;
 
 end.

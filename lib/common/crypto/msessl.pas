@@ -15,7 +15,7 @@ uses
  msestream;
 type
  
- essl = class(ecryptio)
+ essl = class(ecryptoio)
  end;
   
  ssldataty = record
@@ -26,9 +26,9 @@ type
  sslinfoty = record
   case integer of
    0: (d: ssldataty);
-   1: (_bufferspace: cryptdataty);
+   1: (_bufferspace: cryptodataty);
  end;
- {$if sizeof(ssldataty) > sizeof(cryptdataty)}
+ {$if sizeof(ssldataty) > sizeof(cryptodataty)}
   {$error 'buffer overflow'}
  {$endif}
  
@@ -40,7 +40,7 @@ const
  
 type
 
- tssl = class(tcryptio)
+ tssl = class(tcryptoio)
   private
    fctx: pssl_ctx;
    fprotocols: sslprotocolsty;
@@ -50,18 +50,18 @@ type
    procedure ctxchanged;
    procedure setcipherlist(const avalue: tstringlist);
   protected
-   class procedure internalunlink(var ainfo: cryptioinfoty); override;
+   class procedure internalunlink(var ainfo: cryptoioinfoty); override;
    class procedure internalthreadterminate; override;
-   class procedure connect(var ainfo: cryptioinfoty; const atimeoutms: integer);  override;
-   class procedure accept(var ainfo: cryptioinfoty; const atimeoutms: integer);  override;
-   class function write(var ainfo: cryptioinfoty; const buffer: pointer;
+   class procedure connect(var ainfo: cryptoioinfoty; const atimeoutms: integer);  override;
+   class procedure accept(var ainfo: cryptoioinfoty; const atimeoutms: integer);  override;
+   class function write(var ainfo: cryptoioinfoty; const buffer: pointer;
            const count: integer; const atimeoutms: integer): integer; override;
-   class function read(var ainfo: cryptioinfoty; const buffer: pointer; const count: integer; 
+   class function read(var ainfo: cryptoioinfoty; const buffer: pointer; const count: integer; 
                   const atimeoutms: integer): integer; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure link(const arxfd,atxfd: integer; out ainfo: cryptioinfoty); override;
+   procedure link(const arxfd,atxfd: integer; out ainfo: cryptoioinfoty); override;
   published
    property protocols: sslprotocolsty read fprotocols write fprotocols default
                                    defaultsslprotocols;
@@ -88,7 +88,7 @@ type
    procedure close(var aclient: cryptoclientinfoty);  override;
  end;
  
-function waitforio(const aerror: integer; var ainfo: cryptioinfoty; 
+function waitforio(const aerror: integer; var ainfo: cryptoioinfoty; 
               const atimeoutms: integer; const resultpo: pinteger = nil): boolean;
  
 implementation
@@ -143,7 +143,7 @@ begin
  end;
 end;
 
-procedure tssl.link(const arxfd,atxfd: integer; out ainfo: cryptioinfoty);
+procedure tssl.link(const arxfd,atxfd: integer; out ainfo: cryptoioinfoty);
 var
  int1: integer;
  str1: string;
@@ -157,7 +157,7 @@ begin
   end;
   ctxchanged;
  end;
- with ainfo,sslinfoty(cryptdata).d do begin
+ with ainfo,sslinfoty(cryptodata).d do begin
   ssl:= ssl_new(fctx);
   if ssl = nil then begin
    sslerror(0);
@@ -195,9 +195,9 @@ begin
  end; 
 end;
 
-class procedure tssl.internalunlink(var ainfo: cryptioinfoty);
+class procedure tssl.internalunlink(var ainfo: cryptoioinfoty);
 begin //todo: shutdown
- with ainfo,sslinfoty(cryptdata).d do begin
+ with ainfo,sslinfoty(cryptodata).d do begin
   if ssl <> nil then begin
    ssl_free(ssl);
   end;
@@ -212,14 +212,14 @@ begin
  inherited;
 end;
 
-function {tssl.}waitforio(const aerror: integer; var ainfo: cryptioinfoty; 
+function {tssl.}waitforio(const aerror: integer; var ainfo: cryptoioinfoty; 
        const atimeoutms: integer; const resultpo: pinteger = nil): boolean;
 var
  int1: integer;
  err1: syserrorty;
  pollres: pollkindsty;
 begin
- with ainfo,sslinfoty(cryptdata).d do begin
+ with ainfo,sslinfoty(cryptodata).d do begin
   sys_mutexunlock(mutex);
   result:= (aerror > 0);
   if not result then begin
@@ -260,24 +260,26 @@ begin
  end;
 end;
 
-class procedure tssl.connect(var ainfo: cryptioinfoty; const atimeoutms: integer);
+class procedure tssl.connect(var ainfo: cryptoioinfoty;
+                                              const atimeoutms: integer);
 //var
 // int1,int2: integer;
 // err1: syserrorty;
 begin
- with ainfo,sslinfoty(cryptdata).d do begin
+ with ainfo,sslinfoty(cryptodata).d do begin
   repeat
    sys_mutexlock(mutex);
   until waitforio(ssl_connect(ssl),ainfo,atimeoutms);
  end;
 end;
 
-class procedure tssl.accept(var ainfo: cryptioinfoty; const atimeoutms: integer);
+class procedure tssl.accept(var ainfo: cryptoioinfoty;
+                                                 const atimeoutms: integer);
 //var
 // int1{,int2}: integer;
 // err1: syserrorty;
 begin
- with ainfo,sslinfoty(cryptdata).d do begin
+ with ainfo,sslinfoty(cryptodata).d do begin
   repeat
    sys_mutexlock(mutex);
   until waitforio(ssl_accept(ssl),ainfo,atimeoutms);
@@ -289,10 +291,10 @@ begin
  fcipherlist.assign(avalue);
 end;
 
-class function tssl.write(var ainfo: cryptioinfoty; const buffer: pointer;
+class function tssl.write(var ainfo: cryptoioinfoty; const buffer: pointer;
                const count: integer; const atimeoutms: integer): integer;
 begin
- with ainfo,sslinfoty(cryptdata).d do begin
+ with ainfo,sslinfoty(cryptodata).d do begin
   try
    repeat
     sys_mutexlock(mutex);
@@ -303,13 +305,13 @@ begin
  end;
 end;
 
-class function tssl.read(var ainfo: cryptioinfoty; const buffer: pointer;
+class function tssl.read(var ainfo: cryptoioinfoty; const buffer: pointer;
                const count: integer; const atimeoutms: integer): integer;
 var
  pollres: pollkindsty;
 begin
  result:= 0;
- with ainfo,sslinfoty(cryptdata).d do begin
+ with ainfo,sslinfoty(cryptodata).d do begin
   try
    if (atimeoutms < 0) or 
     (soc_poll(ainfo.rxfd,[poka_read],atimeoutms,pollres) = sye_ok) then begin
