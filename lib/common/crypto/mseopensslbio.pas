@@ -78,13 +78,16 @@ var
  // BIO functions
  BIO_new: function(b: PBIO_METHOD): PBIO; cdecl;
  BIO_new_fd: function(fd: cint; close_flag: cint): PBIO; cdecl;
+ BIO_new_file: function(const filename: PCharacter;
+                                    const mode: PCharacter): pBIO; cdecl;
  BIO_free_all: procedure(b: PBIO); cdecl;
  BIO_s_mem: function(): PBIO_METHOD; cdecl;
+ BIO_s_fd: function: pBIO_METHOD; cdecl;
+ BIO_s_file: function: pBIO_METHOD; cdecl;
  BIO_ctrl_pending: function(b: PBIO): cint; cdecl;
  BIO_read: function(b: PBIO; Buf: pbyte; Len: cint): cint; cdecl;
  BIO_write: function(b: PBIO; Buf: pbyte; Len: cint): cint; cdecl;
  d2i_PKCS12_bio: function(b:PBIO; Pkcs12: SslPtr): SslPtr; cdecl;
- BIO_new_file: function(const filename: PCharacter; const mode: PCharacter): pBIO; cdecl;
  BIO_set: function(a: pBIO; _type: pBIO_METHOD): cint; cdecl;
  BIO_free: function(a: pBIO): cint; cdecl;
  BIO_vfree: procedure(a: pBIO); cdecl;
@@ -97,8 +100,6 @@ var
  BIO_gets: function(b: pBIO; buf: PCharacter; size: cint): cint; cdecl;
  BIO_puts: function(b: pBIO; const buf: PCharacter): cint; cdecl;
  BIO_f_base64: function: pBIO_METHOD; cdecl;
- BIO_s_fd: function: pBIO_METHOD; cdecl;
- BIO_s_file: function: pBIO_METHOD; cdecl;
 
 //optional todo: these are probably macros
  BIO_set_mem_eof_return: procedure(b: pBIO; v: cint); cdecl;

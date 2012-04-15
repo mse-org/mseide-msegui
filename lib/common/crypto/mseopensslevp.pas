@@ -11,7 +11,7 @@ unit mseopensslevp;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseopenssl,msectypes;
+ mseopenssl,msectypes,mseopenssldes;
 type
   MD2_CTX = record
     num: cint;

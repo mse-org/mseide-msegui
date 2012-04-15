@@ -73,6 +73,7 @@ type
  sslhandlerdatadty = record
   bio: pbio;
  end;
+ psslhandlerdataty = ^sslhandlerdataty;
  {$if sizeof(sslhandlerdatadty) > sizeof(cryptohandlerdataty)} 
   {$error 'buffer overflow'}
  {$endif}
@@ -84,8 +85,16 @@ type
  
  tsslcryptohandler = class(tbasecryptohandler)
   protected
+   procedure checkerror;
+   procedure clearerror; inline;
    procedure open(var aclient: cryptoclientinfoty); override;
    procedure close(var aclient: cryptoclientinfoty);  override;
+   function read(var aclient: cryptoclientinfoty;
+                   var buffer; count: longint): longint; override;
+   function write(var aclient: cryptoclientinfoty;
+                   const buffer; count: longint): longint; override;
+   function seek(var aclient: cryptoclientinfoty;
+                   const offset: int64; origin: tseekorigin): int64; override;
  end;
  
 function waitforio(const aerror: integer; var ainfo: cryptoioinfoty; 
@@ -327,12 +336,17 @@ begin
 end;
 
 { tsslcryptohandler }
-
+var testvar: psslhandlerdataty;
 procedure tsslcryptohandler.open(var aclient: cryptoclientinfoty);
 begin
+testvar:= @sslhandlerdataty(aclient.handlerdata).d;
  initsslinterface;
  with sslhandlerdataty(aclient.handlerdata).d do begin
-  bio:= bio_new(bio_s_mem());
+  bio:= nil;
+  bio:= bio_new_fd(aclient.stream.handle,0);
+  if bio = nil then begin
+   checkerror;
+  end;
  end;
 end;
 
@@ -341,6 +355,56 @@ begin
  with sslhandlerdataty(aclient.handlerdata).d do begin
   bio_free_all(bio);
  end;
+end;
+
+function tsslcryptohandler.read(var aclient: cryptoclientinfoty; var buffer;
+               count: longint): longint;
+begin
+ inherited;
+end;
+
+function tsslcryptohandler.write(var aclient: cryptoclientinfoty; const buffer;
+               count: longint): longint;
+begin
+ with sslhandlerdataty(aclient.handlerdata).d do begin
+  result:= bio_write(bio,@buffer,count);
+ end;
+end;
+
+function tsslcryptohandler.seek(var aclient: cryptoclientinfoty;
+               const offset: int64; origin: tseekorigin): int64;
+begin
+ inherited;
+end;
+
+procedure tsslcryptohandler.checkerror;
+const
+ buffersize = 200;
+var
+ int1: integer;
+ str1,str2: string;
+begin
+ str1:= '';
+ setlength(str2,buffersize);
+ while true do begin
+  int1:= err_get_error();
+  if int1 = 0 then begin
+   break;
+  end;
+  err_error_string_n(int1,pointer(str2),buffersize);
+  if str1 = '' then begin
+   str1:= str1 + lineend;
+  end;
+  str1:= str1 + pchar(str2);
+ end;
+ if str1 <> '' then begin
+  essl.create(str1);
+ end;
+end;
+
+procedure tsslcryptohandler.clearerror;
+begin
+ err_clear_error();
 end;
 
 end.

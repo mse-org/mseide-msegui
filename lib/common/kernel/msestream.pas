@@ -1196,7 +1196,7 @@ begin
  result:= sys_read({$ifdef FPC}thandlestreamcracker(self).{$endif}fhandle,
                                      @buffer,count);
 {$warnings on}
- if result = - 1 then begin
+ if result < 0 then begin
   result:= 0;
  end;
 // result:= inherited read(buffer,count);
@@ -1208,7 +1208,7 @@ begin
  result:= sys_write({$ifdef FPC}thandlestreamcracker(self).{$endif}fhandle,
                             @buffer,count);
 {$warnings on}
- if result = -1 then begin
+ if result < 0 then begin
   result:= 0;
  end;
 // result:= inherited write(buffer,count);
