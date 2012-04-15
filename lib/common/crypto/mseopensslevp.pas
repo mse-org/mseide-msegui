@@ -12,6 +12,15 @@ unit mseopensslevp;
 interface
 uses
  mseopenssl,msectypes,mseopenssldes;
+const
+ EVP_MAX_MD_SIZE = 64; //* longest known is SHA512 */
+ EVP_MAX_KEY_LENGTH = 32;
+ EVP_MAX_IV_LENGTH = 16;
+ EVP_MAX_BLOCK_LENGTH	=	32;
+
+ PKCS5_SALT_LEN = 8;
+ PKCS5_DEFAULT_ITER	=	2048; //* Default PKCS#5 iteration count */
+
 type
   MD2_CTX = record
     num: cint;
@@ -87,7 +96,40 @@ type
     attributes: pSTACK_OFX509;
   end;
 
-  pEVP_CIPHER = pointer;
+ ASN1_TYPE = record      //todo
+ end;
+ pASN1_TYPE = ^ASN1_TYPE;
+ 
+ pEVP_CIPHER_CTX = ^EVP_CIPHER_CTX;
+ EVP_CIPHER = record
+	 nid: cint;
+	 block_size: cint;
+ 	key_len: cint;		//* Default value for variable length ciphers */
+	 iv_len: cint;
+	 flags: culong;	//* Various flags */
+	 init: function(ctx: pEVP_CIPHER_CTX; key: pCharacter; iv: pCharacter;
+	                  enc: cint): cint;
+//	int (*init)(EVP_CIPHER_CTX *ctx, const unsigned char *key,
+//		    const unsigned char *iv, int enc);	/* init key */
+  do_cipher: function (ctx: pEVP_CIPHER_CTX; _out: pCharacter; _in: pCharacter;
+                   inl: cint): cint; //* encrypt/decrypt data */
+//	int (*do_cipher)(EVP_CIPHER_CTX *ctx, unsigned char *out,
+//			 const unsigned char *in, unsigned int inl);/* encrypt/decrypt data */
+  cleanup: function(ctx: pEVP_CIPHER_CTX): cint; //* cleanup ctx */
+//	int (*cleanup)(EVP_CIPHER_CTX *); /* cleanup ctx */
+	 ctx_size: cint;		//* how big ctx->cipher_data needs to be */
+  set_asn1_parameters: function (ctx: pEVP_CIPHER_CTX; _type: pASN1_TYPE): cint;
+                   //* Populate a ASN1_TYPE with parameters */
+//	int (*set_asn1_parameters)(EVP_CIPHER_CTX *, ASN1_TYPE *); /* Populate a ASN1_TYPE with parameters */
+	 get_asn1_parameters: function(ctx: pEVP_CIPHER_CTX; _type: pASN1_TYPE): cint;
+                                  //* Get parameters from a ASN1_TYPE */
+//	int (*get_asn1_parameters)(EVP_CIPHER_CTX *, ASN1_TYPE *); /* Get parameters from a ASN1_TYPE */
+  ctrl: function(ctx: pEVP_CIPHER_CTX; _type: cint; arg: cint;
+                                   ptr: pointer): cint; //* Miscellaneous operations */
+//	int (*ctrl)(EVP_CIPHER_CTX *, int type, int arg, void *ptr); /* Miscellaneous operations */
+ 	app_data: pointer;		//* Application data */
+ end;
+ pEVP_CIPHER = ^EVP_CIPHER;
 
   pEVP_MD = ^EVP_MD;
   EVP_MD = record
@@ -104,9 +146,30 @@ type
     ctx_size: cint;
   end;
 
-
+  pENGINE = SslPtr;
+  EVP_CIPHER_CTX = record
+  	cipher: pEVP_CIPHER;
+  	engine: pENGINE;	//* functional reference if 'cipher' is ENGINE-provided */
+  	encrypt: cint;		//* encrypt or decrypt */
+  	buf_len: cint;		//* number we have left */
+  
+  	iov: array[0..EVP_MAX_IV_LENGTH-1] of byte;	   //* original iv */
+  	iv: array[0..EVP_MAX_IV_LENGTH-1] of byte;	   //* working iv */
+  	buf: array[0..EVP_MAX_BLOCK_LENGTH-1] of byte; //* saved partial block */
+  	num: cint;				                       //* used by cfb/ofb mode */
+  
+  	app_data: pointer;        		//* application stuff */
+  	key_len: cint;		            //* May change for variable length cipher */
+  	flags: culong;	                //* Various flags */
+  	cipher_data: pointer;           //* per EVP data */
+  	final_used: cint;
+  	block_mask: cint;
+  	final: array[0..EVP_MAX_BLOCK_LENGTH-1] of byte; 
+	                                //* possible final block */
+  end;
+//  pEVP_CIPHER_CTX = ^EVP_CIPHER_CTX;
+   
 var
-// libeay.dll
   EVP_PKEY_New: function(): EVP_PKEY; cdecl;
   EVP_PKEY_Free: procedure(pk: EVP_PKEY); cdecl;
   EVP_PKEY_Assign: function(pkey: EVP_PKEY; _type: cint;
@@ -123,6 +186,13 @@ var
   EVP_dss1: function: pEVP_MD; cdecl;
   EVP_mdc2: function: pEVP_MD; cdecl;
   EVP_ripemd160: function: pEVP_MD; cdecl;
+  
+  EVP_EncryptInit: function(ctx: pEVP_CIPHER_CTX; _type: pEVP_CIPHER;
+         key: pCharacter; iv: pCharacter): cint;
+ 	EVP_EncryptUpdate: function(ctx: pEVP_CIPHER_CTX;_out: pCharacter;
+		              var outl: cint; _in: pCharacter; inl: cint): cint;
+  EVP_EncryptFinal: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
+         var outl: cint): cint;
   EVP_DigestInit: procedure(ctx: pEVP_MD_CTX; const _type: pEVP_MD); cdecl;
   EVP_DigestUpdate: procedure(ctx: pEVP_MD_CTX; const d: Pointer;
                                                         cnt: sslsize_t); cdecl;
@@ -221,7 +291,7 @@ end;
 
 procedure init(const info: dynlibinfoty);
 const
- funcs: array[0..49] of funcinfoty = (
+ funcs: array[0..52] of funcinfoty = (
    (n: 'EVP_PKEY_new'; d: @EVP_PKEY_new),
    (n: 'EVP_PKEY_free'; d: @EVP_PKEY_free),
    (n: 'EVP_PKEY_assign'; d: @EVP_PKEY_assign),
@@ -235,6 +305,9 @@ const
    (n: 'EVP_dss'; d: @EVP_dss),
    (n: 'EVP_dss1'; d: @EVP_dss1),
    (n: 'EVP_ripemd160'; d: @EVP_ripemd160),
+   (n: 'EVP_EncryptInit'; d: @EVP_EncryptInit),
+   (n: 'EVP_EncryptUpdate'; d: @EVP_EncryptUpdate),
+   (n: 'EVP_EncryptFinal'; d: @EVP_EncryptFinal),
    (n: 'EVP_DigestInit'; d: @EVP_DigestInit),
    (n: 'EVP_DigestUpdate'; d: @EVP_DigestUpdate),
    (n: 'EVP_DigestFinal'; d: @EVP_DigestFinal),
