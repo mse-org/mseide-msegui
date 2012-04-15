@@ -20,7 +20,7 @@ type
    ks: DES_cblock;
    weak_key: cint;
  end;
- des_key_schedule = array[1..16] of des_ks_struct;
+ des_key_schedule = array[0..15] of des_ks_struct;
 
 var
  DES_set_odd_parity: procedure(Key: des_cblock); cdecl;
