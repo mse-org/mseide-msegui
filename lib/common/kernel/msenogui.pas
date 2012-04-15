@@ -25,6 +25,10 @@ type
    procedure doafterrun; override;
    procedure internalinitialize; override;
    procedure internaldeinitialize; override;
+   procedure sethighrestimer(const avalue: boolean); override;
+   function getevents: integer; override;
+    //application must be locked
+    //returns count of queued events
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -183,6 +187,16 @@ end;
 function tnoguiapplication.modallevel: integer;
 begin
  result:= fmodallevel;
+end;
+
+procedure tnoguiapplication.sethighrestimer(const avalue: boolean);
+begin
+ //dummy
+end;
+
+function tnoguiapplication.getevents: integer;
+begin
+ result:= eventlist.count;
 end;
 
 initialization

@@ -118,6 +118,8 @@ begin
  terminated:= true;
  settimer1(0);
  signal(sigalrm,sigtimerbefore);
+ signal(sigterm,sigtermbefore);
+ signal(sigchld,sigchldbefore);
 end;
  
 end.
