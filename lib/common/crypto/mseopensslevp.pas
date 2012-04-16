@@ -174,6 +174,8 @@ var
   EVP_PKEY_Free: procedure(pk: EVP_PKEY); cdecl;
   EVP_PKEY_Assign: function(pkey: EVP_PKEY; _type: cint;
                           key: Prsa): cint; cdecl;
+  EVP_CIPHER_CTX_init: procedure(ctx: pEVP_CIPHER_CTX); cdecl;
+  EVP_CIPHER_CTX_cleanup: function(ctx: pEVP_CIPHER_CTX): cint; cdecl;
   EVP_get_digestbyname: function(Name: pchar): PEVP_MD; cdecl;
   EVP_cleanup: procedure; cdecl;
   // Hash functions
@@ -186,18 +188,49 @@ var
   EVP_dss1: function: pEVP_MD; cdecl;
   EVP_mdc2: function: pEVP_MD; cdecl;
   EVP_ripemd160: function: pEVP_MD; cdecl;
+
+ 	EVP_OpenInit: function(ctx: pEVP_CIPHER_CTX; _type: pEVP_CIPHER;
+   		ek: pCharacter; ekl: cint; iv: pCharacter; priv:		pEVP_PKEY): cint; cdecl;
+  EVP_OpenFinal: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
+                                              var outl: cint): cint; cdecl;
   
+  EVP_CipherInit: function(ctc: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
+		       key: pCharacter; iv: pCharacter; enc: cint): cint; cdecl;
+ 	EVP_CipherInit_ex: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
+     impl: pENGINE; key: pCharacter; iv: pCharacter; enc: cint): cint; cdecl;
+	 EVP_CipherUpdate: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
+		        var outl: cint; _in: pCharacter; inl: cint): cint; cdecl;
+ 	EVP_CipherFinal: function(ctx: pEVP_CIPHER_CTX; outm: pCharacter;
+ 	                     var outl: cint): cint; cdecl;
+ 	EVP_CipherFinal_ex: function(ctx: pEVP_CIPHER_CTX; outm: pCharacter;
+ 	                     var outl: cint): cint; cdecl;
+
   EVP_EncryptInit: function(ctx: pEVP_CIPHER_CTX; _type: pEVP_CIPHER;
-         key: pCharacter; iv: pCharacter): cint;
+         key: pCharacter; iv: pCharacter): cint; cdecl;
+  EVP_EncryptInit_ex: function(ctx: pEVP_CIPHER_CTX; _type: pEVP_CIPHER;
+         impl: pENGINE; key: pCharacter; iv: pCharacter): cint; cdecl;
  	EVP_EncryptUpdate: function(ctx: pEVP_CIPHER_CTX;_out: pCharacter;
-		              var outl: cint; _in: pCharacter; inl: cint): cint;
+		              var outl: cint; _in: pCharacter; inl: cint): cint; cdecl;
   EVP_EncryptFinal: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
-         var outl: cint): cint;
-  EVP_DigestInit: procedure(ctx: pEVP_MD_CTX; const _type: pEVP_MD); cdecl;
-  EVP_DigestUpdate: procedure(ctx: pEVP_MD_CTX; const d: Pointer;
-                                                        cnt: sslsize_t); cdecl;
-  EVP_DigestFinal: procedure(ctx: pEVP_MD_CTX; md: PCharacter;
-                                                       var s: cuint); cdecl;
+         var outl: cint): cint; cdecl;
+  EVP_EncryptFinal_ex: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
+         var outl: cint): cint; cdecl;
+ 	EVP_DecryptInit: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
+      	                  key: pCharacter; iv: pCharacter): cint; cdecl;
+ 	EVP_DecryptInit_ex: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
+           impl: pENGINE; key: pCharacter; iv: pCharacter): cint; cdecl;
+ 	EVP_DecryptUpdate: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
+              var outl: cint; _in: pCharacter; inl: cint): cint; cdecl;
+ 	EVP_DecryptFinal: function(ctx: pEVP_CIPHER_CTX; outm: pCharacter;
+                 var outl: cint): cint; cdecl;
+ 	EVP_DecryptFinal_ex: function(ctx: pEVP_CIPHER_CTX; outm: pCharacter;
+                 var outl: cint): cint; cdecl;
+
+  EVP_DigestInit: function(ctx: pEVP_MD_CTX; const _type: pEVP_MD): cint; cdecl;
+  EVP_DigestUpdate: function(ctx: pEVP_MD_CTX; const d: Pointer;
+                                              cnt: sslsize_t): cint; cdecl;
+  EVP_DigestFinal: function(ctx: pEVP_MD_CTX; md: PCharacter;
+                                              var s: cuint): cint; cdecl;
   EVP_SignFinal: function(ctx: pEVP_MD_CTX; sig: pointer;
                               var s: cuint; key: pEVP_PKEY): cint; cdecl;
   EVP_VerifyFinal: function(ctx: pEVP_MD_CTX; sigbuf: pointer;
@@ -243,15 +276,18 @@ var
   EVP_get_pw_prompt: function: PCharacter;cdecl;
   // Default callback password function: replace if you want
   EVP_read_pw_string: function(buf: PCharacter; len: cint;
-                      const prompt: PCharacter; verify: cint): cint;cdecl;
+                      const prompt: PCharacter; verify: cint): cint; cdecl;
   d2i_PrivateKey_bio: function(bp: pBIO; var a: pEVP_PKEY): pEVP_PKEY; cdecl;
   d2i_PUBKEY_bio: function(bp: pBIO; var a: pEVP_PKEY): pEVP_PKEY; cdecl;
   i2d_PUBKEY_bio: function(bp: pBIO; pkey: pEVP_PKEY): cint; cdecl;
 
-procedure EVP_SignInit(ctx: pEVP_MD_CTX; const _type: pEVP_MD);
-procedure EVP_SignUpdate(ctx: pEVP_MD_CTX; const d: Pointer; cnt: cuint);
-procedure EVP_VerifyInit(ctx: pEVP_MD_CTX; const _type: pEVP_MD);
-procedure EVP_VerifyUpdate(ctx: pEVP_MD_CTX; const d: Pointer; cnt: cuint);
+
+function EVP_OpenUpdate(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
+                 var outl: cint; _in: pCharacter; inl: cint): cint;
+function EVP_SignInit(ctx: pEVP_MD_CTX; const _type: pEVP_MD): cint;
+function EVP_SignUpdate(ctx: pEVP_MD_CTX; const d: Pointer; cnt: cuint): cint;
+function EVP_VerifyInit(ctx: pEVP_MD_CTX; const _type: pEVP_MD): cint;
+function EVP_VerifyUpdate(ctx: pEVP_MD_CTX; const d: Pointer; cnt: cuint): cint;
 function EVP_MD_size(e: pEVP_MD): cint;
 function EVP_MD_CTX_size(e: pEVP_MD_CTX): cint;
 
@@ -259,24 +295,30 @@ implementation
 uses
  msedynload;
  
-procedure EVP_SignInit(ctx: pEVP_MD_CTX; const _type: pEVP_MD);
+function EVP_OpenUpdate(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
+                 var outl: cint; _in: pCharacter; inl: cint): cint;
 begin
-  EVP_DigestInit(ctx, _type);
+ result:= evp_decryptupdate(ctx,_out,outl,_in,inl);
 end;
 
-procedure EVP_SignUpdate(ctx: pEVP_MD_CTX; const d: Pointer; cnt: cardinal);
+function EVP_SignInit(ctx: pEVP_MD_CTX; const _type: pEVP_MD): cint;
 begin
-  EVP_DigestUpdate(ctx, d, cnt);
+ result:= EVP_DigestInit(ctx, _type);
 end;
 
-procedure EVP_VerifyInit(ctx: pEVP_MD_CTX; const _type: pEVP_MD);
+function EVP_SignUpdate(ctx: pEVP_MD_CTX; const d: Pointer; cnt: cardinal): cint;
 begin
-  EVP_DigestInit(ctx, _type);
+ result:= EVP_DigestUpdate(ctx, d, cnt);
 end;
 
-procedure EVP_VerifyUpdate(ctx: pEVP_MD_CTX; const d: Pointer; cnt: cardinal);
+function EVP_VerifyInit(ctx: pEVP_MD_CTX; const _type: pEVP_MD): cint;
 begin
-  EVP_DigestUpdate(ctx, d, cnt);
+ result:= EVP_DigestInit(ctx, _type);
+end;
+
+function EVP_VerifyUpdate(ctx: pEVP_MD_CTX; const d: Pointer; cnt: cardinal): cint;
+begin
+ result:= EVP_DigestUpdate(ctx, d, cnt);
 end;
 
 function EVP_MD_size(e: pEVP_MD): cint;
@@ -291,10 +333,12 @@ end;
 
 procedure init(const info: dynlibinfoty);
 const
- funcs: array[0..52] of funcinfoty = (
+ funcs: array[0..68] of funcinfoty = (
    (n: 'EVP_PKEY_new'; d: @EVP_PKEY_new),
    (n: 'EVP_PKEY_free'; d: @EVP_PKEY_free),
    (n: 'EVP_PKEY_assign'; d: @EVP_PKEY_assign),
+   (n: 'EVP_CIPHER_CTX_init'; d: @EVP_CIPHER_CTX_init),
+   (n: 'EVP_CIPHER_CTX_cleanup'; d: @EVP_CIPHER_CTX_cleanup),
    (n: 'EVP_cleanup'; d: @EVP_cleanup),
    (n: 'EVP_get_digestbyname'; d: @EVP_get_digestbyname),
    (n: 'EVP_md_null'; d: @EVP_md_null),
@@ -305,9 +349,23 @@ const
    (n: 'EVP_dss'; d: @EVP_dss),
    (n: 'EVP_dss1'; d: @EVP_dss1),
    (n: 'EVP_ripemd160'; d: @EVP_ripemd160),
+   (n: 'EVP_OpenInit'; d: @EVP_OpenInit),
+   (n: 'EVP_OpenFinal'; d: @EVP_OpenFinal),
+   (n: 'EVP_CipherInit'; d: @EVP_CipherInit),
+   (n: 'EVP_CipherInit_ex'; d: @EVP_CipherInit_ex),
+   (n: 'EVP_CipherUpdate'; d: @EVP_CipherUpdate),
+   (n: 'EVP_CipherFinal'; d: @EVP_CipherFinal),
+   (n: 'EVP_CipherFinal_ex'; d: @EVP_CipherFinal_ex),
    (n: 'EVP_EncryptInit'; d: @EVP_EncryptInit),
+   (n: 'EVP_EncryptInit_ex'; d: @EVP_EncryptInit_ex),
    (n: 'EVP_EncryptUpdate'; d: @EVP_EncryptUpdate),
    (n: 'EVP_EncryptFinal'; d: @EVP_EncryptFinal),
+   (n: 'EVP_EncryptFinal_ex'; d: @EVP_EncryptFinal_ex),
+   (n: 'EVP_DecryptInit'; d: @EVP_DecryptInit),
+   (n: 'EVP_DecryptInit_ex'; d: @EVP_DecryptInit_ex),
+   (n: 'EVP_DecryptUpdate'; d: @EVP_DecryptUpdate),
+   (n: 'EVP_DecryptFinal'; d: @EVP_DecryptFinal),
+   (n: 'EVP_DecryptFinal_ex'; d: @EVP_DecryptFinal_ex),
    (n: 'EVP_DigestInit'; d: @EVP_DigestInit),
    (n: 'EVP_DigestUpdate'; d: @EVP_DigestUpdate),
    (n: 'EVP_DigestFinal'; d: @EVP_DigestFinal),
