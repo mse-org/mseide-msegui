@@ -47,7 +47,7 @@ type
  end;
 
 type
- fileopenmodety = (fm_read,fm_write,fm_readwrite,fm_create,fm_append);
+ fileopenmodety = (fm_none,fm_read,fm_write,fm_readwrite,fm_create,fm_append);
  fileaccessmodety = (fa_denywrite,fa_denyread);
  fileaccessmodesty = set of fileaccessmodety;
  filerightty = (s_irusr,s_iwusr,s_ixusr,

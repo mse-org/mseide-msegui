@@ -340,7 +340,7 @@ end;
 
 const
  openmodes: array[fileopenmodety] of longword =
-     (o_rdonly,o_wronly,o_rdwr,o_rdwr or o_creat or o_trunc,
+     (0,o_rdonly,o_wronly,o_rdwr,o_rdwr or o_creat or o_trunc,
       o_rdwr or o_creat or o_trunc);
 
 function getfilerights(const rights: filerightsty): longword;

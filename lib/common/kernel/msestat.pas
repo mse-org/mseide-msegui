@@ -250,7 +250,7 @@ type
 //   findex: integer;
   public
    constructor create(aowner: tmemorystreams; const name: msestring;
-                const openmode: fileopenmodety; var info: streaminfoty); reintroduce;
+      const aopenmode: fileopenmodety; var info: streaminfoty); reintroduce;
    destructor destroy; override;
  end;
 
@@ -1791,7 +1791,7 @@ end;
 { tmemorytextstream }
 
 constructor tmemorytextstream.create(aowner: tmemorystreams; const name: msestring;
-                           const openmode: fileopenmodety; var info: streaminfoty);
+                           const aopenmode: fileopenmodety; var info: streaminfoty);
 begin
  fowner:= aowner;
  fname:= name;

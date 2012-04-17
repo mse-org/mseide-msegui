@@ -11,7 +11,8 @@ unit msessl;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,msecryptio,mseopenssl,msestrings,msesystypes,msecryptohandler,
+ classes,msecryptio,mseopenssl,mseopensslevp,
+ msestrings,msesystypes,msecryptohandler,msetypes,
  msestream;
 type
  
@@ -37,6 +38,7 @@ type
 const
  defaultsslprotocols = [ssp_sslv2,ssp_sslv3,ssp_tlsv1];
  defaultcipherlist = 'DEFAULT';
+ defaultkeygeniterationcount = 5;
  
 type
 
@@ -70,8 +72,17 @@ type
    property privkeyfile: filenamety read fprivkeyfile write fprivkeyfile;
  end;
 
+ cipherkindty = (ckt_stream, 
+                 ckt_ecb, //electronic codebook
+                 ctk_cbc, //cipher-block chaining
+                 ctk_cfb, //cipher feedback
+                 ctk_ofb);//output feedback
+
  sslhandlerdatadty = record
-  bio: pbio;
+  ctx: pevp_cipher_ctx;
+  cipher: pevp_cipher;
+  digest: pevp_md;
+//  kind: cipherkindty;
  end;
  psslhandlerdataty = ^sslhandlerdataty;
  {$if sizeof(sslhandlerdatadty) > sizeof(cryptohandlerdataty)} 
@@ -82,11 +93,35 @@ type
    0: (d: sslhandlerdatadty;);
    1: (_bufferspace: cryptohandlerdataty;);
  end;
- 
+
+//
+// under construction!
+// 
+ cryptoerrorty = (cerr_error,cerr_ciphernotfound,cerr_notseekable,
+                  cerr_cipherinit,cerr_invalidopenmode,cerr_digestnotfound,
+                  cerr_cannotwrite,cerr_invalidblocksize);
+
+ getkeyeventty = procedure(const sender: tobject;
+                                var akey,asalt: string) of object;
+
  tsslcryptohandler = class(tbasecryptohandler)
+  private
+   fciphername: string;
+   fkeydigestname: string;
+   fkeyiterationcount: integer;
+   fkey: string;
+   fsalt: string;
+   fkeyphrase: msestring;
+   fongetkey: getkeyeventty;
+   procedure setkeyphrase(const avalue: msestring);
   protected
-   procedure checkerror;
+   procedure error(const err: cryptoerrorty);
+   procedure checkerror(const err: cryptoerrorty = cerr_error);
    procedure clearerror; inline;
+   function checknullerror(const avalue: integer;
+                   const err: cryptoerrorty = cerr_error): integer; inline;
+   function checknilerror(const avalue: pointer;
+                   const err: cryptoerrorty = cerr_error): pointer; inline;
    procedure open(var aclient: cryptoclientinfoty); override;
    procedure close(var aclient: cryptoclientinfoty);  override;
    function read(var aclient: cryptoclientinfoty;
@@ -95,6 +130,20 @@ type
                    const buffer; count: longint): longint; override;
    function seek(var aclient: cryptoclientinfoty;
                    const offset: int64; origin: tseekorigin): int64; override;
+   procedure getkey(out akey: string; out asalt: string); virtual;
+   procedure finalizedata(var adata: sslhandlerdatadty);
+  public
+   constructor create(aowner: tcomponent); override;
+   property key: string read fkey write fkey;
+   property salt: string read fsalt write fsalt;
+  published
+   property ciphername: string read fciphername write fciphername;
+   property keydigestname: string read fkeydigestname write fkeydigestname;
+                         //default md5
+   property keyiterationcount: integer read fkeyiterationcount 
+                 write fkeyiterationcount default defaultkeygeniterationcount;
+   property keyphrase: msestring read fkeyphrase write setkeyphrase;
+   property ongetkey: getkeyeventty read fongetkey write fongetkey;
  end;
  
 function waitforio(const aerror: integer; var ainfo: cryptoioinfoty; 
@@ -103,6 +152,17 @@ function waitforio(const aerror: integer; var ainfo: cryptoioinfoty;
 implementation
 uses
  sysutils,msesysintf1,msefileutils,msesocketintf,msesys,mseopensslbio;
+const
+ cryptoerrormessages: array[cryptoerrorty] of msestring =(
+  'OpenSSL error.',
+  'Cipher not found.',
+  'Stream not seekable.',
+  'Can not cipher init.',
+  'Invalid open mode.',
+  'Digest not found.',
+  'Can not write.',
+  'Invalid block size.'
+  );
  
 procedure raiseerror(errco : integer);
 var
@@ -336,48 +396,157 @@ begin
 end;
 
 { tsslcryptohandler }
-var testvar: psslhandlerdataty;
-procedure tsslcryptohandler.open(var aclient: cryptoclientinfoty);
+
+constructor tsslcryptohandler.create(aowner: tcomponent);
 begin
-testvar:= @sslhandlerdataty(aclient.handlerdata).d;
- initsslinterface;
- with sslhandlerdataty(aclient.handlerdata).d do begin
-  bio:= nil;
-  bio:= bio_new_fd(aclient.stream.handle,0);
-  if bio = nil then begin
-   checkerror;
+ fkeydigestname:= 'md5';
+ fkeyiterationcount:= defaultkeygeniterationcount;
+ inherited;
+end;
+
+procedure tsslcryptohandler.finalizedata(var adata: sslhandlerdatadty);
+begin
+ with adata do begin
+  if ctx <> nil then begin
+   evp_cipher_ctx_cleanup(ctx);
+   freemem(ctx);
+   ctx:= nil;
   end;
  end;
 end;
 
-procedure tsslcryptohandler.close(var aclient: cryptoclientinfoty);
+var testvar: psslhandlerdataty;
+procedure tsslcryptohandler.open(var aclient: cryptoclientinfoty);
+var
+ mode: integer;
+ keydata,ivdata,key1,salt1: string;
 begin
+testvar:= @sslhandlerdataty(aclient.handlerdata).d;
+ initsslinterface;
+ case aclient.stream.openmode of
+  fm_read: begin
+   mode:= 0; //decrypt
+  end;
+  fm_create,fm_write: begin
+   mode:= 1; //encrypt
+  end;
+  else begin
+   error(cerr_invalidopenmode); //todo: allow append
+  end;
+ end;
  with sslhandlerdataty(aclient.handlerdata).d do begin
-  bio_free_all(bio);
+  getmem(ctx,sizeof(ctx^));
+  evp_cipher_ctx_init(ctx);
+  cipher:= checknilerror(evp_get_cipherbyname(pchar(fciphername)),
+                                                     cerr_ciphernotfound);
+  if (mode = 0) and (cipher^.block_size > 1) then begin
+   finalizedata(sslhandlerdataty(aclient.handlerdata).d);
+   error(cerr_invalidblocksize); //todo: implement block ciphers
+  end;
+  digest:= checknilerror(evp_get_digestbyname(pchar(fkeydigestname)),
+                                                     cerr_digestnotfound);
+  checknullerror(evp_cipherinit_ex(ctx,cipher,nil,nil,nil,mode),
+                                          cerr_cipherinit);
+  setlength(keydata,ctx^.key_len);
+  setlength(ivdata,cipher^.iv_len);
+  getkey(key1,salt1);
+  if salt1 <> '' then begin
+   salt1:= salt1 + nullstring(8-length(salt1));
+  end;
+  checknullerror(evp_bytestokey(cipher,digest,pointer(salt1),pchar(key1),
+            length(key1),fkeyiterationcount,pointer(keydata),pointer(ivdata)));
+  checknullerror(evp_cipherinit_ex(ctx,nil,nil,pointer(keydata),
+                     pointer(ivdata),mode),cerr_cipherinit);
+ end;
+ inherited;
+end;
+
+procedure tsslcryptohandler.close(var aclient: cryptoclientinfoty);
+var
+ buffer: array[0..evp_max_block_length-1] of byte;
+ int1: integer;
+begin
+ try
+  with sslhandlerdataty(aclient.handlerdata).d do begin
+   if ctx <> nil then begin
+    if aclient.stream.openmode in [fm_write] then begin
+     checknullerror(evp_cipherfinal(ctx,@buffer,int1));
+     if int1 > 0 then begin
+      if inherited write(aclient,buffer,int1) <> int1 then begin
+       error(cerr_cannotwrite);
+      end;
+     end;
+    end
+    else begin
+     checknullerror(evp_cipherfinal(ctx,@buffer,int1));
+    end;
+   end;
+  end;
+ finally
+  finalizedata(sslhandlerdataty(aclient.handlerdata).d);
+  inherited;
  end;
 end;
 
 function tsslcryptohandler.read(var aclient: cryptoclientinfoty; var buffer;
                count: longint): longint;
+var
+ po1: pointer;
+ int1: integer;
 begin
- inherited;
+ if count > 0 then begin
+  with sslhandlerdataty(aclient.handlerdata).d do begin
+   getmem(po1,count+ctx^.cipher^.block_size);
+   result:= inherited read(aclient,po1^,count);
+   try       //todo: implement block cipher
+    checknullerror(evp_cipherupdate(ctx,@buffer,int1,po1,result));
+   finally
+    freemem(po1);
+   end;
+  end;
+ end
+ else begin
+  result:= inherited read(aclient,buffer,count);
+ end;
 end;
 
 function tsslcryptohandler.write(var aclient: cryptoclientinfoty; const buffer;
                count: longint): longint;
+var
+ po1: pointer;
+ int1: integer;
 begin
- with sslhandlerdataty(aclient.handlerdata).d do begin
-  result:= bio_write(bio,@buffer,count);
+ if count > 0 then begin
+  with sslhandlerdataty(aclient.handlerdata).d do begin
+   getmem(po1,count+ctx^.cipher^.block_size);
+   try
+    checknullerror(evp_cipherupdate(ctx,po1,int1,@buffer,count));
+    result:= inherited write(aclient,po1^,int1);
+    if result = int1 then begin
+     result:= count;
+    end;
+   finally
+    freemem(po1);
+   end;
+  end;
+ end
+ else begin
+  result:= inherited write(aclient,buffer,count);
  end;
 end;
 
 function tsslcryptohandler.seek(var aclient: cryptoclientinfoty;
                const offset: int64; origin: tseekorigin): int64;
 begin
- inherited;
+ if offset <> 0 then begin //todo
+  error(cerr_notseekable);
+ end
+ else begin
+  result:= inherited seek(aclient,offset,origin);
+ end;
 end;
 
-procedure tsslcryptohandler.checkerror;
+procedure tsslcryptohandler.checkerror(const err: cryptoerrorty);
 const
  buffersize = 200;
 var
@@ -398,13 +567,54 @@ begin
   str1:= str1 + pchar(str2);
  end;
  if str1 <> '' then begin
-  essl.create(str1);
+  essl.create(cryptoerrormessages[err]+lineend+str1);
  end;
 end;
 
 procedure tsslcryptohandler.clearerror;
 begin
  err_clear_error();
+end;
+
+function tsslcryptohandler.checknullerror(const avalue: integer;
+                                          const err: cryptoerrorty): integer;
+begin
+ result:= avalue;
+ if avalue = 0 then begin
+  checkerror(err);
+  error(err);
+ end;
+end;
+
+function tsslcryptohandler.checknilerror(const avalue: pointer;
+                                         const err: cryptoerrorty): pointer;
+begin
+ result:= avalue;
+ if avalue = nil then begin
+  checkerror(err);
+  error(err);
+ end;
+end;
+
+procedure tsslcryptohandler.error(const err: cryptoerrorty);
+begin
+ raise essl.create(cryptoerrormessages[err]); 
+           //there was no queued error
+end;
+
+procedure tsslcryptohandler.setkeyphrase(const avalue: msestring);
+begin
+ fkey:= stringtoutf8(avalue);
+ fkeyphrase:= avalue;
+end;
+
+procedure tsslcryptohandler.getkey(out akey: string; out asalt: string);
+begin
+ akey:= fkey;
+ asalt:= fsalt;
+ if canevent(tmethod(fongetkey)) then begin
+  fongetkey(self,akey,asalt);
+ end;
 end;
 
 end.

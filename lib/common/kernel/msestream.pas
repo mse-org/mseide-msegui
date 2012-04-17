@@ -69,6 +69,7 @@ type
  tmsefilestream = class(thandlestream)
   private
    ffilename: filenamety;
+   fopenmode: fileopenmodety;
    ftransactionname: filenamety;
    fcryptohandler: tcustomcryptohandler;
    fcryptoindex: integer;
@@ -80,7 +81,7 @@ type
    procedure sethandle(value: integer); virtual;
    procedure closehandle(const ahandle: integer); virtual;
    constructor internalcreate(const afilename: filenamety; 
-                      const openmode: fileopenmodety;
+                      const aopenmode: fileopenmodety;
                       const accessmode: fileaccessmodesty;
                       const rights: filerightsty;
                       out error: syserrorty); overload;
@@ -90,7 +91,7 @@ type
                                        origin: tseekorigin): int64;
   public
    constructor create(const afilename: filenamety; 
-                      const openmode: fileopenmodety = fm_read;
+                      const aopenmode: fileopenmodety = fm_read;
                       const accessmode: fileaccessmodesty = [];
                       const rights: filerightsty = defaultfilerights); overload;
    constructor createtransaction(const afilename: filenamety;
@@ -101,7 +102,7 @@ type
    destructor destroy; override;
    class function trycreate(out ainstance: tmsefilestream;
              const afilename: filenamety;
-             const openmode: fileopenmodety = fm_read;
+             const aopenmode: fileopenmodety = fm_read;
              const accessmode: fileaccessmodesty = [];
              const rights: filerightsty = defaultfilerights): boolean;
    function read(var buffer; count: longint): longint; override;
@@ -111,6 +112,7 @@ type
    procedure writedatastring(const value: string);
    function isopen: boolean;
    property filename: filenamety read ffilename;
+   property openmode: fileopenmodety read fopenmode;
    property transactionname: filenamety read ftransactionname;
    function close: boolean; //false on commit error
    procedure cancel; //calls close without commit, removes intermediate file
@@ -889,7 +891,7 @@ begin
 end;
 
 constructor tmsefilestream.internalcreate(const afilename: filenamety; 
-                      const openmode: fileopenmodety;
+                      const aopenmode: fileopenmodety;
                       const accessmode: fileaccessmodesty;
                       const rights: filerightsty;
                       out error: syserrorty);
@@ -897,6 +899,7 @@ var
  ahandle: integer;
 begin
  ffilename:= filepath(afilename);
+ fopenmode:= aopenmode;
  if openmode = fm_append then begin
   error:= sys_openfile(ffilename,fm_readwrite,accessmode,rights,ahandle);
   if error <> sye_ok then begin
@@ -904,11 +907,11 @@ begin
   end;
  end
  else begin
-  error:= sys_openfile(ffilename,openmode,accessmode,rights,ahandle);
+  error:= sys_openfile(ffilename,aopenmode,accessmode,rights,ahandle);
  end;
  create(ahandle);
  if error = sye_ok then begin
-  if openmode = fm_append then begin
+  if aopenmode = fm_append then begin
    position:= size;
   end;
  end
@@ -918,13 +921,13 @@ end;
 
 class function tmsefilestream.trycreate(out ainstance: tmsefilestream;
                const afilename: filenamety;
-               const openmode: fileopenmodety = fm_read;
+               const aopenmode: fileopenmodety = fm_read;
                const accessmode: fileaccessmodesty = [];
                const rights: filerightsty = defaultfilerights): boolean;
 var
  error: syserrorty;
 begin
- ainstance:= internalcreate(afilename,openmode,accessmode,rights,error);
+ ainstance:= internalcreate(afilename,aopenmode,accessmode,rights,error);
  result:= error = sye_ok;
  if not result then begin
   freeandnil(ainstance);
@@ -939,18 +942,18 @@ begin
 end;
 
 constructor tmsefilestream.create(const afilename: filenamety;
-            const openmode: fileopenmodety = fm_read;
+            const aopenmode: fileopenmodety = fm_read;
             const accessmode: fileaccessmodesty = [];
             const Rights: filerightsty = defaultfilerights);   //!!!!todo linux lock
 var
  mstr1: msestring;
  error: syserrorty;
 begin
- internalcreate(afilename,openmode,accessmode,rights,error);
+ internalcreate(afilename,aopenmode,accessmode,rights,error);
  if error <> sye_ok then begin
   mstr1:= ffilename;
   ffilename:= '';
-  if openmode in [fm_create,fm_append] then begin
+  if aopenmode in [fm_create,fm_append] then begin
 {$ifdef FPC}
    raise EFCreateError.CreateFmt(SFCreateError+lineend+'%s',[mstr1,
                                        sys_geterrortext(mselasterror)]);

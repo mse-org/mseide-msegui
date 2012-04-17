@@ -21,6 +21,42 @@ const
  PKCS5_SALT_LEN = 8;
  PKCS5_DEFAULT_ITER	=	2048; //* Default PKCS#5 iteration count */
 
+//* Values for cipher flags */
+
+//* Modes for ciphers */
+
+	EVP_CIPH_STREAM_CIPHER	=	$0;
+	EVP_CIPH_ECB_MODE	=	$1;
+	EVP_CIPH_CBC_MODE	=	$2;
+	EVP_CIPH_CFB_MODE	=	$3;
+	EVP_CIPH_OFB_MODE	=	$4;
+	EVP_CIPH_MODE	= $7;
+//* Set if variable length cipher */
+	EVP_CIPH_VARIABLE_LENGTH =	$8;
+//* Set if the iv handling should be done by the cipher itself */
+	EVP_CIPH_CUSTOM_IV	=	$10;
+//* Set if the cipher's init() function should be called if key is NULL */
+	EVP_CIPH_ALWAYS_CALL_INIT	= $20;
+//* Call ctrl() to init cipher parameters */
+	EVP_CIPH_CTRL_INIT	=	$40;
+//* Don't use standard key length function */
+	EVP_CIPH_CUSTOM_KEY_LENGTH	= $80;
+//* Don't use standard block padding */
+	EVP_CIPH_NO_PADDING	=	$100;
+//* cipher handles random key generation */
+	EVP_CIPH_RAND_KEY	=	$200;
+
+//* ctrl() values */
+
+	EVP_CTRL_INIT	=	$0;
+	EVP_CTRL_SET_KEY_LENGTH	=	$1;
+	EVP_CTRL_GET_RC2_KEY_BITS	= $2;
+	EVP_CTRL_SET_RC2_KEY_BITS	= $3;
+	EVP_CTRL_GET_RC5_ROUNDS	=	$4;
+	EVP_CTRL_SET_RC5_ROUNDS	=	$5;
+	EVP_CTRL_RAND_KEY	=	$6;
+
+
 type
   MD2_CTX = record
     num: cint;
@@ -170,24 +206,11 @@ type
 //  pEVP_CIPHER_CTX = ^EVP_CIPHER_CTX;
    
 var
-  EVP_PKEY_New: function(): EVP_PKEY; cdecl;
-  EVP_PKEY_Free: procedure(pk: EVP_PKEY); cdecl;
-  EVP_PKEY_Assign: function(pkey: EVP_PKEY; _type: cint;
-                          key: Prsa): cint; cdecl;
+  EVP_cleanup: procedure; cdecl;
   EVP_CIPHER_CTX_init: procedure(ctx: pEVP_CIPHER_CTX); cdecl;
   EVP_CIPHER_CTX_cleanup: function(ctx: pEVP_CIPHER_CTX): cint; cdecl;
-  EVP_get_digestbyname: function(Name: pchar): PEVP_MD; cdecl;
-  EVP_cleanup: procedure; cdecl;
-  // Hash functions
-  EVP_md_null: function: pEVP_MD; cdecl;
-  EVP_md2: function: pEVP_MD; cdecl;
-  EVP_md5: function: pEVP_MD; cdecl;
-  EVP_sha: function: pEVP_MD; cdecl;
-  EVP_sha1: function: pEVP_MD; cdecl;
-  EVP_dss: function: pEVP_MD; cdecl;
-  EVP_dss1: function: pEVP_MD; cdecl;
-  EVP_mdc2: function: pEVP_MD; cdecl;
-  EVP_ripemd160: function: pEVP_MD; cdecl;
+  EVP_get_digestbyname: function(Name: pchar): pEVP_MD; cdecl;
+  EVP_get_cipherbyname: function(name: PCharacter): pEVP_CIPHER; cdecl;
 
  	EVP_OpenInit: function(ctx: pEVP_CIPHER_CTX; _type: pEVP_CIPHER;
    		ek: pCharacter; ekl: cint; iv: pCharacter; priv:		pEVP_PKEY): cint; cdecl;
@@ -215,6 +238,7 @@ var
          var outl: cint): cint; cdecl;
   EVP_EncryptFinal_ex: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
          var outl: cint): cint; cdecl;
+
  	EVP_DecryptInit: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
       	                  key: pCharacter; iv: pCharacter): cint; cdecl;
  	EVP_DecryptInit_ex: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
@@ -235,7 +259,19 @@ var
                               var s: cuint; key: pEVP_PKEY): cint; cdecl;
   EVP_VerifyFinal: function(ctx: pEVP_MD_CTX; sigbuf: pointer;
                          siglen: cuint; pkey: pEVP_PKEY): cint;  cdecl;
+
   EVP_MD_CTX_copy: function(_out: pEVP_MD_CTX; _in: pEVP_MD_CTX): cint; cdecl;
+
+  // Hash functions
+  EVP_md_null: function: pEVP_MD; cdecl;
+  EVP_md2: function: pEVP_MD; cdecl;
+  EVP_md5: function: pEVP_MD; cdecl;
+  EVP_sha: function: pEVP_MD; cdecl;
+  EVP_sha1: function: pEVP_MD; cdecl;
+  EVP_dss: function: pEVP_MD; cdecl;
+  EVP_dss1: function: pEVP_MD; cdecl;
+  EVP_mdc2: function: pEVP_MD; cdecl;
+  EVP_ripemd160: function: pEVP_MD; cdecl;
   // Crypt functions
   EVP_enc_null: function: pEVP_CIPHER; cdecl;
   EVP_des_ecb: function: pEVP_CIPHER; cdecl;
@@ -255,8 +291,12 @@ var
   EVP_idea_cfb: function: pEVP_CIPHER; cdecl;
   EVP_idea_ecb: function: pEVP_CIPHER; cdecl;
   EVP_idea_ofb: function: pEVP_CIPHER; cdecl;
-  EVP_get_cipherbyname: function(name: PCharacter): pEVP_CIPHER; cdecl;
+
   // EVP Key functions
+  EVP_PKEY_New: function(): EVP_PKEY; cdecl;
+  EVP_PKEY_Free: procedure(pk: EVP_PKEY); cdecl;
+  EVP_PKEY_Assign: function(pkey: EVP_PKEY; _type: cint;
+                          key: Prsa): cint; cdecl;
   EVP_PKEY_type: function(keytype: cint): cint; cdecl;
   EVP_PKEY_assign_RSA: function(key: pEVP_PKEY; rsa: pRSA): cint; cdecl;
   EVP_PKEY_assign_DSA: function(key: pEVP_PKEY; dsa: pDSA): cint; cdecl;
@@ -277,9 +317,26 @@ var
   // Default callback password function: replace if you want
   EVP_read_pw_string: function(buf: PCharacter; len: cint;
                       const prompt: PCharacter; verify: cint): cint; cdecl;
+  EVP_read_pw_string_min: function(buf: pchar; minlen: cint; maxlen: cint;
+              prompt: pchar; verify: cint): cint; cdecl; //openssl 1.0+
   d2i_PrivateKey_bio: function(bp: pBIO; var a: pEVP_PKEY): pEVP_PKEY; cdecl;
   d2i_PUBKEY_bio: function(bp: pBIO; var a: pEVP_PKEY): pEVP_PKEY; cdecl;
   i2d_PUBKEY_bio: function(bp: pBIO; pkey: pEVP_PKEY): cint; cdecl;
+
+  EVP_MD_type: function(const md: pEVP_MD): cint; cdecl;
+  EVP_MD_pkey_type: function(const md: pEVP_MD): cint; cdecl;	
+  EVP_MD_block_size: function(const md: pEVP_MD): cint; cdecl;
+  EVP_MD_flags: function(const md: pEVP_MD): cardinal; cdecl; //openssl 1.0 +
+  EVP_MD_CTX_md: function(const ctx: pEVP_MD_CTX): pEVP_MD;cdecl;
+
+  EVP_MD_CTX_init: procedure(ctx: pEVP_MD_CTX);cdecl;
+  EVP_MD_CTX_cleanup: function(ctx: pEVP_MD_CTX): cint;cdecl;
+  EVP_MD_CTX_create: function: pEVP_MD_CTX;cdecl;
+  EVP_MD_CTX_destroy: procedure(ctx: pEVP_MD_CTX);cdecl;
+
+  EVP_BytesToKey: function(const _type: pEVP_CIPHER; const md: pEVP_MD;
+             		salt: pchar; const data: pchar; datalen: cint;
+            		 count: cint; key: pchar; iv: pchar): cint; cdecl;
 
 
 function EVP_OpenUpdate(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
@@ -333,7 +390,7 @@ end;
 
 procedure init(const info: dynlibinfoty);
 const
- funcs: array[0..68] of funcinfoty = (
+ funcs: array[0..77] of funcinfoty = (
    (n: 'EVP_PKEY_new'; d: @EVP_PKEY_new),
    (n: 'EVP_PKEY_free'; d: @EVP_PKEY_free),
    (n: 'EVP_PKEY_assign'; d: @EVP_PKEY_assign),
@@ -400,11 +457,22 @@ const
    (n: 'EVP_set_pw_prompt'; d: @EVP_set_pw_prompt),
    (n: 'EVP_get_pw_prompt'; d: @EVP_get_pw_prompt),
    (n: 'EVP_read_pw_string'; d: @EVP_read_pw_string),
-   (n:  'd2i_PrivateKey_bio'; d: @d2i_PrivateKey_bio),
-   (n:  'd2i_PUBKEY_bio'; d: @d2i_PUBKEY_bio),
-   (n:  'i2d_PUBKEY_bio'; d: @i2d_PUBKEY_bio)
+   (n: 'd2i_PrivateKey_bio'; d: @d2i_PrivateKey_bio),
+   (n: 'd2i_PUBKEY_bio'; d: @d2i_PUBKEY_bio),
+   (n: 'i2d_PUBKEY_bio'; d: @i2d_PUBKEY_bio),
+   (n: 'EVP_MD_type'; d: @EVP_MD_type),
+   (n: 'EVP_MD_pkey_type'; d: @EVP_MD_pkey_type),
+   (n: 'EVP_MD_block_size'; d: @EVP_MD_block_size),
+   (n: 'EVP_MD_CTX_md'; d: @EVP_MD_CTX_md),
+   (n: 'EVP_MD_CTX_init'; d: @EVP_MD_CTX_init),
+   (n: 'EVP_MD_CTX_cleanup'; d: @EVP_MD_CTX_cleanup),
+   (n: 'EVP_MD_CTX_create'; d: @EVP_MD_CTX_create),
+   (n: 'EVP_MD_CTX_destroy'; d: @EVP_MD_CTX_destroy),
+   (n: 'EVP_BytesToKey'; d: @EVP_BytesToKey)
   );
- funcsopt: array[0..7] of funcinfoty = (
+ funcsopt: array[0..9] of funcinfoty = (
+   (n: 'EVP_MD_flags'; d: @EVP_MD_flags),
+   (n: 'EVP_read_pw_string_min'; d: @EVP_read_pw_string_min),
    (n: 'EVP_mdc2'; d: @EVP_mdc2),
    (n: 'EVP_idea_cbc'; d: @EVP_idea_cbc),
    (n: 'EVP_idea_ecb'; d: @EVP_idea_ecb),

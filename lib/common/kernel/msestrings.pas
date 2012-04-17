@@ -2036,25 +2036,40 @@ end;
 
 function nullstring(const count: integer): string;
 begin
- setlength(result,count);
- fillchar(pointer(result)^,count,#0 );
+ if count > 0 then begin
+  setlength(result,count);
+  fillchar(pointer(result)^,count,#0 );
+ end
+ else begin
+  result:= '';
+ end;
 end;
 
 function charstring(ch: char; count: integer): string; overload;
 begin
- setlength(result,count);
- for count:= count - 1 downto 0 do begin
-  (pchar(pointer(result)) + count)^:= ch;
-//  result[count]:= ch;
+ if count > 0 then begin
+  setlength(result,count);
+  for count:= count - 1 downto 0 do begin
+   (pchar(pointer(result)) + count)^:= ch;
+ //  result[count]:= ch;
+  end;
+ end
+ else begin
+  result:= '';
  end;
 end;
 
 function charstring(ch: msechar; count: integer): msestring; overload;
 begin
- setlength(result,count);
- for count:= count - 1 downto 0 do begin
-  (pmsechar(pointer(result)) + count)^:= ch;
-//  result[count]:= ch;
+ if count > 0 then begin
+  setlength(result,count);
+  for count:= count - 1 downto 0 do begin
+   (pmsechar(pointer(result)) + count)^:= ch;
+ //  result[count]:= ch;
+  end;
+ end
+ else begin
+  result:= '';
  end;
 end;
 {
