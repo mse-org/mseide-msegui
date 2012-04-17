@@ -56,6 +56,7 @@ type
    fstatfile: tstatfile;
    fsavedmemoryfiles: msestring;
    fonfilemissing: statfilemissingeventty;
+   fcryptohandler: tcustomcryptohandler;
    procedure dolinkstatread(const info: linkinfoty);
    procedure dolinkstatreading(const info: linkinfoty);
    procedure dolinkstatreaded(const info: linkinfoty);
@@ -64,6 +65,7 @@ type
    procedure setfilename(const avalue: filenamety);
    procedure setfiledir(const avalue: filenamety);
    procedure setoptions(avalue: statfileoptionsty);
+   procedure setcryptohandler(const avalue: tcustomcryptohandler);
   protected
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
@@ -91,7 +93,8 @@ type
   published
    property filename: filenamety read ffilename write setfilename nodefault;
    property filedir: filenamety read ffiledir write setfiledir;
-   property encoding: charencodingty read fencoding write fencoding default ce_utf8n;
+   property encoding: charencodingty read fencoding write fencoding
+                                                           default ce_utf8n;
    property options: statfileoptionsty read foptions write setoptions 
                               default defaultstatfileoptions;
    property statfile: tstatfile read fstatfile write setstatfile;
@@ -102,6 +105,8 @@ type
             //use quotes for several filenames '"file1.sta" "file2.sta*"', 
             //'*' and '?' wildcards supported.
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property cryptohandler: tcustomcryptohandler read fcryptohandler
+                                     write setcryptohandler;
    property activator;
    property onstatupdate: statupdateeventty read fonstatupdate write fonstatupdate;
    property onstatread: statreadeventty read fonstatread write fonstatread;
@@ -323,6 +328,9 @@ begin
     end;
    end;
   end;
+  if (fcryptohandler <> nil) and (stream1 <> nil) then begin
+   stream1.cryptohandler:= fcryptohandler;
+  end;   
   areader:= tstatreader.create(stream1,fencoding);
   updateoptions(areader);
   try
@@ -350,6 +358,11 @@ begin
  finally
   if stream = nil then begin
    stream1.Free;
+  end
+  else begin
+   if (fcryptohandler <> nil) and (stream1 <> nil) then begin
+    stream1.cryptohandler:= nil;
+   end;
   end;
  end;
 end;
@@ -445,6 +458,9 @@ begin
   exit;
  end;
  try
+  if (fcryptohandler <> nil) then begin
+   stream1.cryptohandler:= fcryptohandler;
+  end;
   awriter:= tstatwriter.create(stream1,fencoding);
   updateoptions(awriter);
   bo1:= false;
@@ -473,6 +489,11 @@ begin
  finally
   if stream = nil then begin
    stream1.Free;
+  end
+  else begin
+   if (fcryptohandler <> nil) then begin
+    stream1.cryptohandler:= nil;
+   end;
   end;
  end;
 end;
@@ -580,6 +601,11 @@ begin
  else begin
   readstat(aname,tstatreader(statfiler));
  end;
+end;
+
+procedure tstatfile.setcryptohandler(const avalue: tcustomcryptohandler);
+begin
+ setlinkedvar(avalue,tmsecomponent(fcryptohandler));
 end;
 
 end.
