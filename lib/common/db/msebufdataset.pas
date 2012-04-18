@@ -2489,7 +2489,12 @@ begin
      flag:= bfcurrent;
     end;
     move(fcurrentbuf^.header,header,frecordsize);
-    getcalcfields(buffer);
+    state1:= settempstate(dscalcfields);
+    try
+     getcalcfields(buffer); //get lookup fields
+    finally
+     restorestate(state1);
+    end;
     if filtered then begin
      state1:= settempstate(tdatasetstate(dscheckfilter));
      try
@@ -2869,7 +2874,7 @@ var
 begin 
  result:= false;
  buffer:= nil;
- if not active then begin
+ if not fopen{active} then begin
   exit;
  end;
  int1:= afield.fieldno - 1;
