@@ -99,20 +99,21 @@ type
 // 
  cryptoerrorty = (cerr_error,cerr_ciphernotfound,cerr_notseekable,
                   cerr_cipherinit,cerr_invalidopenmode,cerr_digestnotfound,
-                  cerr_cannotwrite,cerr_invalidblocksize);
+                  cerr_cannotwrite,cerr_invalidblocksize,cerr_invalidkeylength);
 
  getkeyeventty = procedure(const sender: tobject;
                                 var akey,asalt: string) of object;
 
- tsslcryptohandler = class(tbasecryptohandler)
+ topensslcryptohandler = class(tbasecryptohandler)
   private
    fciphername: string;
    fkeydigestname: string;
-   fkeyiterationcount: integer;
+   fkeygeniterationcount: integer;
    fkey: string;
    fsalt: string;
    fkeyphrase: msestring;
    fongetkey: getkeyeventty;
+   fkeylength: integer;
    procedure setkeyphrase(const avalue: msestring);
   protected
    procedure error(const err: cryptoerrorty);
@@ -140,9 +141,11 @@ type
    property ciphername: string read fciphername write fciphername;
    property keydigestname: string read fkeydigestname write fkeydigestname;
                          //default md5
-   property keyiterationcount: integer read fkeyiterationcount 
-                 write fkeyiterationcount default defaultkeygeniterationcount;
+   property keygeniterationcount: integer read fkeygeniterationcount 
+                 write fkeygeniterationcount default defaultkeygeniterationcount;
    property keyphrase: msestring read fkeyphrase write setkeyphrase;
+   property keylength: integer read fkeylength write fkeylength default 0;
+                                          //bits, 0 -> use cipher default
    property ongetkey: getkeyeventty read fongetkey write fongetkey;
  end;
  
@@ -161,7 +164,8 @@ const
   'Invalid open mode.',
   'Digest not found.',
   'Can not write.',
-  'Invalid block size.'
+  'Invalid block size.',
+  'Invalid key length'
   );
  
 procedure raiseerror(errco : integer);
@@ -395,16 +399,16 @@ begin
  end;
 end;
 
-{ tsslcryptohandler }
+{ topensslcryptohandler }
 
-constructor tsslcryptohandler.create(aowner: tcomponent);
+constructor topensslcryptohandler.create(aowner: tcomponent);
 begin
  fkeydigestname:= 'md5';
- fkeyiterationcount:= defaultkeygeniterationcount;
+ fkeygeniterationcount:= defaultkeygeniterationcount;
  inherited;
 end;
 
-procedure tsslcryptohandler.finalizedata(var adata: sslhandlerdatadty);
+procedure topensslcryptohandler.finalizedata(var adata: sslhandlerdatadty);
 begin
  with adata do begin
   if ctx <> nil then begin
@@ -416,10 +420,13 @@ begin
 end;
 
 var testvar: psslhandlerdataty;
-procedure tsslcryptohandler.open(var aclient: cryptoclientinfoty);
+procedure topensslcryptohandler.open(var aclient: cryptoclientinfoty);
 var
  mode: integer;
- keydata,ivdata,key1,salt1: string;
+ keydata: array[0..evp_max_key_length-1] of byte;
+ ivdata: array[0..evp_max_iv_length-1] of byte;
+ key1,salt1: string;
+ int1: integer;
 begin
 testvar:= @sslhandlerdataty(aclient.handlerdata).d;
  initsslinterface;
@@ -447,21 +454,29 @@ testvar:= @sslhandlerdataty(aclient.handlerdata).d;
                                                      cerr_digestnotfound);
   checknullerror(evp_cipherinit_ex(ctx,cipher,nil,nil,nil,mode),
                                           cerr_cipherinit);
-  setlength(keydata,ctx^.key_len);
-  setlength(ivdata,cipher^.iv_len);
+  if fkeylength <> 0 then begin
+   int1:= fkeylength div 8;
+   if int1 > evp_max_key_length then begin
+    error(cerr_invalidkeylength);
+   end;
+   checknullerror(evp_cipher_ctx_set_key_length(ctx,int1));
+   if (ctx^.key_len * 8 <> fkeylength) then begin
+    error(cerr_invalidkeylength);
+   end;
+  end;
   getkey(key1,salt1);
   if salt1 <> '' then begin
    salt1:= salt1 + nullstring(8-length(salt1));
   end;
   checknullerror(evp_bytestokey(cipher,digest,pointer(salt1),pchar(key1),
-            length(key1),fkeyiterationcount,pointer(keydata),pointer(ivdata)));
-  checknullerror(evp_cipherinit_ex(ctx,nil,nil,pointer(keydata),
-                     pointer(ivdata),mode),cerr_cipherinit);
+                         length(key1),fkeygeniterationcount,@keydata,@ivdata));
+  checknullerror(evp_cipherinit_ex(ctx,nil,nil,@keydata,
+                                                @ivdata,mode),cerr_cipherinit);
  end;
  inherited;
 end;
 
-procedure tsslcryptohandler.close(var aclient: cryptoclientinfoty);
+procedure topensslcryptohandler.close(var aclient: cryptoclientinfoty);
 var
  buffer: array[0..evp_max_block_length-1] of byte;
  int1: integer;
@@ -488,7 +503,7 @@ begin
  end;
 end;
 
-function tsslcryptohandler.read(var aclient: cryptoclientinfoty; var buffer;
+function topensslcryptohandler.read(var aclient: cryptoclientinfoty; var buffer;
                count: longint): longint;
 var
  po1: pointer;
@@ -510,7 +525,7 @@ begin
  end;
 end;
 
-function tsslcryptohandler.write(var aclient: cryptoclientinfoty; const buffer;
+function topensslcryptohandler.write(var aclient: cryptoclientinfoty; const buffer;
                count: longint): longint;
 var
  po1: pointer;
@@ -535,7 +550,7 @@ begin
  end;
 end;
 
-function tsslcryptohandler.seek(var aclient: cryptoclientinfoty;
+function topensslcryptohandler.seek(var aclient: cryptoclientinfoty;
                const offset: int64; origin: tseekorigin): int64;
 begin
  if offset <> 0 then begin //todo
@@ -546,7 +561,7 @@ begin
  end;
 end;
 
-procedure tsslcryptohandler.checkerror(const err: cryptoerrorty);
+procedure topensslcryptohandler.checkerror(const err: cryptoerrorty);
 const
  buffersize = 200;
 var
@@ -571,12 +586,12 @@ begin
  end;
 end;
 
-procedure tsslcryptohandler.clearerror;
+procedure topensslcryptohandler.clearerror;
 begin
  err_clear_error();
 end;
 
-function tsslcryptohandler.checknullerror(const avalue: integer;
+function topensslcryptohandler.checknullerror(const avalue: integer;
                                           const err: cryptoerrorty): integer;
 begin
  result:= avalue;
@@ -586,7 +601,7 @@ begin
  end;
 end;
 
-function tsslcryptohandler.checknilerror(const avalue: pointer;
+function topensslcryptohandler.checknilerror(const avalue: pointer;
                                          const err: cryptoerrorty): pointer;
 begin
  result:= avalue;
@@ -596,19 +611,19 @@ begin
  end;
 end;
 
-procedure tsslcryptohandler.error(const err: cryptoerrorty);
+procedure topensslcryptohandler.error(const err: cryptoerrorty);
 begin
  raise essl.create(cryptoerrormessages[err]); 
            //there was no queued error
 end;
 
-procedure tsslcryptohandler.setkeyphrase(const avalue: msestring);
+procedure topensslcryptohandler.setkeyphrase(const avalue: msestring);
 begin
  fkey:= stringtoutf8(avalue);
  fkeyphrase:= avalue;
 end;
 
-procedure tsslcryptohandler.getkey(out akey: string; out asalt: string);
+procedure topensslcryptohandler.getkey(out akey: string; out asalt: string);
 begin
  akey:= fkey;
  asalt:= fsalt;

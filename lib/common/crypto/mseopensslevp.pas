@@ -209,6 +209,10 @@ var
   EVP_cleanup: procedure; cdecl;
   EVP_CIPHER_CTX_init: procedure(ctx: pEVP_CIPHER_CTX); cdecl;
   EVP_CIPHER_CTX_cleanup: function(ctx: pEVP_CIPHER_CTX): cint; cdecl;
+  EVP_CIPHER_CTX_set_padding: function(ctx: pEVP_CIPHER_CTX;
+                                                padding: cint): cint; cdecl;
+  EVP_CIPHER_CTX_set_key_length: function(ctx: pEVP_CIPHER_CTX;
+                                                keylen: cint): cint; cdecl;
   EVP_get_digestbyname: function(Name: pchar): pEVP_MD; cdecl;
   EVP_get_cipherbyname: function(name: PCharacter): pEVP_CIPHER; cdecl;
 
@@ -218,47 +222,47 @@ var
                                               var outl: cint): cint; cdecl;
   
   EVP_CipherInit: function(ctc: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
-		       key: pCharacter; iv: pCharacter; enc: cint): cint; cdecl;
+             		       key: pCharacter; iv: pCharacter; enc: cint): cint; cdecl;
  	EVP_CipherInit_ex: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
      impl: pENGINE; key: pCharacter; iv: pCharacter; enc: cint): cint; cdecl;
 	 EVP_CipherUpdate: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
-		        var outl: cint; _in: pCharacter; inl: cint): cint; cdecl;
+           		        var outl: cint; _in: pCharacter; inl: cint): cint; cdecl;
  	EVP_CipherFinal: function(ctx: pEVP_CIPHER_CTX; outm: pCharacter;
- 	                     var outl: cint): cint; cdecl;
+                       	                     var outl: cint): cint; cdecl;
  	EVP_CipherFinal_ex: function(ctx: pEVP_CIPHER_CTX; outm: pCharacter;
- 	                     var outl: cint): cint; cdecl;
+                        	                     var outl: cint): cint; cdecl;
 
   EVP_EncryptInit: function(ctx: pEVP_CIPHER_CTX; _type: pEVP_CIPHER;
-         key: pCharacter; iv: pCharacter): cint; cdecl;
+                                key: pCharacter; iv: pCharacter): cint; cdecl;
   EVP_EncryptInit_ex: function(ctx: pEVP_CIPHER_CTX; _type: pEVP_CIPHER;
-         impl: pENGINE; key: pCharacter; iv: pCharacter): cint; cdecl;
+                 impl: pENGINE; key: pCharacter; iv: pCharacter): cint; cdecl;
  	EVP_EncryptUpdate: function(ctx: pEVP_CIPHER_CTX;_out: pCharacter;
-		              var outl: cint; _in: pCharacter; inl: cint): cint; cdecl;
+    		              var outl: cint; _in: pCharacter; inl: cint): cint; cdecl;
   EVP_EncryptFinal: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
-         var outl: cint): cint; cdecl;
+                                                var outl: cint): cint; cdecl;
   EVP_EncryptFinal_ex: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
-         var outl: cint): cint; cdecl;
+                                                 var outl: cint): cint; cdecl;
 
  	EVP_DecryptInit: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
-      	                  key: pCharacter; iv: pCharacter): cint; cdecl;
+              	                  key: pCharacter; iv: pCharacter): cint; cdecl;
  	EVP_DecryptInit_ex: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
-           impl: pENGINE; key: pCharacter; iv: pCharacter): cint; cdecl;
+                 impl: pENGINE; key: pCharacter; iv: pCharacter): cint; cdecl;
  	EVP_DecryptUpdate: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
-              var outl: cint; _in: pCharacter; inl: cint): cint; cdecl;
+                    var outl: cint; _in: pCharacter; inl: cint): cint; cdecl;
  	EVP_DecryptFinal: function(ctx: pEVP_CIPHER_CTX; outm: pCharacter;
-                 var outl: cint): cint; cdecl;
+                                                var outl: cint): cint; cdecl;
  	EVP_DecryptFinal_ex: function(ctx: pEVP_CIPHER_CTX; outm: pCharacter;
-                 var outl: cint): cint; cdecl;
+                                                 var outl: cint): cint; cdecl;
 
   EVP_DigestInit: function(ctx: pEVP_MD_CTX; const _type: pEVP_MD): cint; cdecl;
   EVP_DigestUpdate: function(ctx: pEVP_MD_CTX; const d: Pointer;
                                               cnt: sslsize_t): cint; cdecl;
   EVP_DigestFinal: function(ctx: pEVP_MD_CTX; md: PCharacter;
-                                              var s: cuint): cint; cdecl;
+                                               var s: cuint): cint; cdecl;
   EVP_SignFinal: function(ctx: pEVP_MD_CTX; sig: pointer;
-                              var s: cuint; key: pEVP_PKEY): cint; cdecl;
+                               var s: cuint; key: pEVP_PKEY): cint; cdecl;
   EVP_VerifyFinal: function(ctx: pEVP_MD_CTX; sigbuf: pointer;
-                         siglen: cuint; pkey: pEVP_PKEY): cint;  cdecl;
+                          siglen: cuint; pkey: pEVP_PKEY): cint;  cdecl;
 
   EVP_MD_CTX_copy: function(_out: pEVP_MD_CTX; _in: pEVP_MD_CTX): cint; cdecl;
 
@@ -390,12 +394,14 @@ end;
 
 procedure init(const info: dynlibinfoty);
 const
- funcs: array[0..77] of funcinfoty = (
+ funcs: array[0..79] of funcinfoty = (
    (n: 'EVP_PKEY_new'; d: @EVP_PKEY_new),
    (n: 'EVP_PKEY_free'; d: @EVP_PKEY_free),
    (n: 'EVP_PKEY_assign'; d: @EVP_PKEY_assign),
    (n: 'EVP_CIPHER_CTX_init'; d: @EVP_CIPHER_CTX_init),
    (n: 'EVP_CIPHER_CTX_cleanup'; d: @EVP_CIPHER_CTX_cleanup),
+   (n: 'EVP_CIPHER_CTX_set_padding'; d: @EVP_CIPHER_CTX_set_padding),
+   (n: 'EVP_CIPHER_CTX_set_key_length'; d: @EVP_CIPHER_CTX_set_key_length),
    (n: 'EVP_cleanup'; d: @EVP_cleanup),
    (n: 'EVP_get_digestbyname'; d: @EVP_get_digestbyname),
    (n: 'EVP_md_null'; d: @EVP_md_null),
