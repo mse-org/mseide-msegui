@@ -15,7 +15,6 @@ uses
  msestrings,msesystypes,msecryptohandler,msetypes,
  msestream;
 type
- 
  essl = class(ecryptoio)
  end;
   
@@ -82,6 +81,11 @@ type
   ctx: pevp_cipher_ctx;
   cipher: pevp_cipher;
   digest: pevp_md;
+  padindex: integer;
+  padcount: integer;
+  padbuf: array[0..2*evp_max_block_length-1] of byte;
+  hasfirstblock: boolean;
+  eofflag: boolean;
 //  kind: cipherkindty;
  end;
  psslhandlerdataty = ^sslhandlerdataty;
@@ -99,7 +103,8 @@ type
 // 
  cryptoerrorty = (cerr_error,cerr_ciphernotfound,cerr_notseekable,
                   cerr_cipherinit,cerr_invalidopenmode,cerr_digestnotfound,
-                  cerr_cannotwrite,cerr_invalidblocksize,cerr_invalidkeylength);
+                  cerr_cannotwrite,cerr_invalidblocksize,
+                  cerr_invalidkeylength,cerr_invaliddatalength);
 
  getkeyeventty = procedure(const sender: tobject;
                                 var akey,asalt: string) of object;
@@ -165,7 +170,8 @@ const
   'Digest not found.',
   'Can not write.',
   'Invalid block size.',
-  'Invalid key length'
+  'Invalid key length.',
+  'Invalid data length.'
   );
  
 procedure raiseerror(errco : integer);
@@ -414,8 +420,8 @@ begin
   if ctx <> nil then begin
    evp_cipher_ctx_cleanup(ctx);
    freemem(ctx);
-   ctx:= nil;
   end;
+  fillchar(adata,sizeof(adata),0);
  end;
 end;
 
@@ -446,10 +452,11 @@ testvar:= @sslhandlerdataty(aclient.handlerdata).d;
   evp_cipher_ctx_init(ctx);
   cipher:= checknilerror(evp_get_cipherbyname(pchar(fciphername)),
                                                      cerr_ciphernotfound);
-  if (mode = 0) and (cipher^.block_size > 1) then begin
+{  if (mode = 0) and (cipher^.block_size > 1) then begin
    finalizedata(sslhandlerdataty(aclient.handlerdata).d);
    error(cerr_invalidblocksize); //todo: implement block ciphers
   end;
+}
   digest:= checknilerror(evp_get_digestbyname(pchar(fkeydigestname)),
                                                      cerr_digestnotfound);
   checknullerror(evp_cipherinit_ex(ctx,cipher,nil,nil,nil,mode),
@@ -484,17 +491,17 @@ begin
  try
   with sslhandlerdataty(aclient.handlerdata).d do begin
    if ctx <> nil then begin
-    if aclient.stream.openmode in [fm_write] then begin
+    if aclient.stream.openmode in [fm_write,fm_create] then begin
      checknullerror(evp_cipherfinal(ctx,@buffer,int1));
      if int1 > 0 then begin
       if inherited write(aclient,buffer,int1) <> int1 then begin
        error(cerr_cannotwrite);
       end;
      end;
-    end
-    else begin
-     checknullerror(evp_cipherfinal(ctx,@buffer,int1));
     end;
+//    else begin
+//     checknullerror(evp_cipherfinal(ctx,@buffer,int1));
+//    end;
    end;
   end;
  finally
@@ -506,17 +513,93 @@ end;
 function topensslcryptohandler.read(var aclient: cryptoclientinfoty; var buffer;
                count: longint): longint;
 var
- po1: pointer;
- int1: integer;
+ ps,pd: pbyte;
+ blocksize: integer;
+
+ procedure checkpadding;
+ var
+  int1,int2: integer;
+ begin
+  with sslhandlerdataty(aclient.handlerdata).d do begin
+   int2:= padcount - padindex;
+   if int2 > 0 then begin
+    int1:= count;
+    if int1 > int2 then begin
+     int1:= int2;
+    end;
+    move(padbuf[padindex],pd^,int1);
+    padindex:= padindex + int1;
+    result:= result + int1;
+    count:= count - int1;
+    inc(pd,int1);
+   end;
+  end;
+ end; //checkpadding
+
+var
+ int1,int2,int3,int4: integer;
+ pb,po1: pbyte;
+ 
 begin
  if count > 0 then begin
   with sslhandlerdataty(aclient.handlerdata).d do begin
-   getmem(po1,count+ctx^.cipher^.block_size);
-   result:= inherited read(aclient,po1^,count);
-   try       //todo: implement block cipher
-    checknullerror(evp_cipherupdate(ctx,@buffer,int1,po1,result));
-   finally
-    freemem(po1);
+   blocksize:= ctx^.cipher^.block_size;
+   pd:= @buffer;
+   result:= 0;
+   if blocksize > 1 then begin
+    checkpadding;
+   end;
+   if count > 0 then begin
+    int1:= count;
+    if blocksize > 1 then begin
+     if eofflag then begin
+      exit;
+     end;
+     int1:= ((count+blocksize-1) div blocksize) * blocksize; //whole blocks
+     if not hasfirstblock then begin
+      int1:= int1+blocksize;
+      hasfirstblock:= true;
+     end;
+     getmem(po1,int1); 
+     ps:= po1;
+     try       
+      int2:= inherited read(aclient,(ps)^,int1);
+      eofflag:= int2 <= int1;
+      if int2 < blocksize then begin
+       error(cerr_invaliddatalength);
+      end;
+      int4:= int2 - blocksize; 
+      if int4 > 0 then begin
+       checknullerror(evp_cipherupdate(ctx,pointer(pd),int3,pointer(ps),int4));
+       inc(ps,int4);
+       inc(result,int3);
+       inc(pd,int3);
+       dec(count,int3);
+      end;
+      pb:= @padbuf;
+      padindex:= 0;
+      checknullerror(evp_cipherupdate(ctx,pointer(pb),padcount,pointer(ps),blocksize));
+      inc(pb,padcount);             
+      if eofflag then begin
+       checknullerror(evp_cipherfinal(ctx,pointer(pb),int3));
+       padcount:= padcount + int3;
+      end;
+      checkpadding;
+     finally
+      freemem(po1);
+     end;
+    end
+    else begin
+     getmem(ps,int1);
+     try
+      int2:= inherited read(aclient,ps^,int1);
+      if int2 > 0 then begin
+       checknullerror(evp_cipherupdate(ctx,@buffer,result,pointer(ps),int2));
+      end;
+     finally
+      freemem(ps);
+     end;
+    end;
    end;
   end;
  end
@@ -525,8 +608,8 @@ begin
  end;
 end;
 
-function topensslcryptohandler.write(var aclient: cryptoclientinfoty; const buffer;
-               count: longint): longint;
+function topensslcryptohandler.write(var aclient: cryptoclientinfoty;
+                                   const buffer; count: longint): longint;
 var
  po1: pointer;
  int1: integer;
@@ -539,6 +622,7 @@ begin
     result:= inherited write(aclient,po1^,int1);
     if result = int1 then begin
      result:= count;
+     padcount:= padcount + count - int1;
     end;
    finally
     freemem(po1);
