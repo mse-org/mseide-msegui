@@ -113,7 +113,10 @@ type
 
  opensslcryptooptionty = (sslco_salt);
  opensslcryptooptionsty = set of opensslcryptooptionty;
+const
+ defaultopensslcryptooptions = [sslco_salt];
  
+type 
  topensslcryptohandler = class(tbasecryptohandler)
   private
    fciphername: string;
@@ -151,7 +154,7 @@ type
    property salt: string read fsalt write fsalt;
   published
    property options: opensslcryptooptionsty read foptions 
-                                            write foptions default [];
+                             write foptions default defaultopensslcryptooptions;
    property ciphername: string read fciphername write fciphername;
    property keydigestname: string read fkeydigestname write fkeydigestname;
                          //default md5
@@ -422,6 +425,7 @@ constructor topensslcryptohandler.create(aowner: tcomponent);
 begin
  fkeydigestname:= 'md5';
  fkeygeniterationcount:= defaultkeygeniterationcount;
+ foptions:= defaultopensslcryptooptions;
  inherited;
 end;
 
