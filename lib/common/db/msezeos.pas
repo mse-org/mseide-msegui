@@ -338,7 +338,7 @@ end;
 procedure tmsezreadonlyquery.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
-  inherited;
+  inherited setactive(value);
  end;
 end;
 
@@ -587,7 +587,7 @@ end;
 procedure tmsezquery.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
-  inherited;
+  inherited setactive(value);
  end;
 end;
 
@@ -836,7 +836,7 @@ end;
 procedure tmseztable.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
-  inherited;
+  inherited setactive(value);
  end;
 end;
 
@@ -1080,7 +1080,7 @@ end;
 procedure tmsezstoredproc.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
-  inherited;
+  inherited setactive(value);
  end;
 end;
 
