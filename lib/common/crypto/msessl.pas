@@ -568,10 +568,11 @@ begin
       int2:= inherited read(aclient,(ps)^,int1);
       eofflag:= int2 < int1;
       seekoffset:= seekoffset + ((count div blocksize) * blocksize - int2);
+                       //set to zero later if eofflag
       pb:= @padbuf;
       padindex:= 0;
       padcount:= 0;
-      int4:= int1 - blocksize; 
+      int4:= (int2 div blocksize - 1) * blocksize; 
       if int4 > count then begin
        int4:= (count div blocksize) * blocksize;
       end;
@@ -593,6 +594,9 @@ begin
        padcount:= padcount + int3;
       end;
       checkpadding;
+      if eofflag then begin
+       seekoffset:= 0;
+      end;
      finally
       freemem(po1);
      end;
