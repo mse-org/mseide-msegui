@@ -32,7 +32,8 @@ interface
 
 uses
  db,classes,variants,msetypes,msearrayprops,mseclasses,mselist,msestrings,
- msedb,msedatabase,mseglob,msearrayutils,msedatalist,msevariants;
+ msedb,msedatabase,mseglob,msearrayutils,msedatalist,msevariants,
+ msestream;
   
 const
  defaultpacketrecords = -1;
@@ -566,7 +567,8 @@ type
                              const akind: filtereditkindty) of object;
  bufdatasetarty = array of tmsebufdataset;
  
- tmsebufdataset = class(tmdbdataset,iblobchache,idatasetsum,imasterlink,idbdata)
+ tmsebufdataset = class(tmdbdataset,iblobchache,idatasetsum,imasterlink,
+                        idbdata,iobjectlink)
   private
    fpacketrecords: integer;
    fopen: boolean;
@@ -621,6 +623,8 @@ type
    fafterendfilteredit: filterediteventty;
    ffiltereditkind: filtereditkindty;
    
+   fobjectlinker: tobjectlinker;   
+   fcryptohandler: tcustomcryptohandler;
    procedure calcrecordsize;
    function loadbuffer(var buffer: recheaderty): tgetresult;
    function getfieldsize(const datatype: tfieldtype; const varsize: integer;
@@ -758,6 +762,7 @@ type
    procedure setcurrentbmasvariant(const afield: tfield;
                                                            const abm: bookmarkdataty;
                    const avalue: variant);
+   procedure setcryptohandler(const avalue: tcustomcryptohandler);
   protected
    fcontroller: tdscontroller;
    fbrecordcount: integer;
@@ -947,6 +952,16 @@ type
    
    function islocal: boolean; virtual;
    function updatesortfield(const afield: tfield; const adescend: boolean): boolean;
+   function getobjectlinker: tobjectlinker;
+   procedure objectevent(const sender: tobject;
+                                 const event: objecteventty); virtual;
+    //iobjectlink
+   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
+               ainterfacetype: pointer = nil; once: boolean = false);
+   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil); virtual;
+   procedure objevent(const sender: iobjectlink; const event: objecteventty); virtual;
+   function getinstance: tobject;
+   function getcomponent: tcomponent;
     //idscontroller
    procedure begindisplaydata;
    procedure enddisplaydata;
@@ -1013,8 +1028,10 @@ type
    property logging: boolean read getlogging;
    procedure savetostream(const astream: tstream);
    procedure loadfromstream(const astream: tstream);
-   procedure savetofile(const afilename: filenamety);
-   procedure loadfromfile(const afilename: filenamety);
+   procedure savetofile(const afilename: filenamety;
+                      const acryptohandler: tcustomcryptohandler = nil);
+   procedure loadfromfile(const afilename: filenamety;
+                      const acryptohandler: tcustomcryptohandler = nil);
    function streamloading: boolean;
 
     //imasterlink   
@@ -1209,6 +1226,8 @@ type
    
   published
    property logfilename: filenamety read flogfilename write flogfilename;
+   property cryptohandler: tcustomcryptohandler read fcryptohandler
+                                                  write setcryptohandler;
    property packetrecords : integer read fpacketrecords write setpacketrecords 
                                  default defaultpacketrecords;
    property indexlocal: tlocalindexes read findexlocal write setindexlocal;
@@ -1240,7 +1259,7 @@ procedure alignfieldpos(var avalue: integer);
 
 implementation
 uses
- rtlconsts,dbconst,sysutils,mseformatstr,msereal,msestream,msesys,
+ rtlconsts,dbconst,sysutils,mseformatstr,msereal,msesys,
  msefileutils,mseapplication,msesysutils;
  
 {$ifdef mse_FPC_2_2}
@@ -1899,6 +1918,7 @@ begin
  end;
  findexlocal.free;
  closelogger;
+ freeandnil(fobjectlinker);
 end;
 
 procedure tmsebufdataset.setpacketrecords(avalue : integer);
@@ -2312,6 +2332,7 @@ begin
  end;
  if (flogfilename <> '') and findfile(flogfilename) then begin
   floadingstream:= tmsefilestream.create(flogfilename,fm_read);
+  tmsefilestream(floadingstream).cryptohandler:= fcryptohandler;
   bo1:= true;
  end;
  if floadingstream <> nil then begin
@@ -6352,24 +6373,28 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.savetofile(const afilename: filenamety);
+procedure tmsebufdataset.savetofile(const afilename: filenamety;
+                         const acryptohandler: tcustomcryptohandler = nil);
 var
- stream1: tstream;
+ stream1: tmsefilestream;
 begin
  stream1:= tmsefilestream.create(afilename,fm_create);
  try
+  stream1.cryptohandler:= acryptohandler;
   savetostream(stream1);
  finally
   stream1.free;
  end;
 end;
 
-procedure tmsebufdataset.loadfromfile(const afilename: filenamety);
+procedure tmsebufdataset.loadfromfile(const afilename: filenamety;
+                         const acryptohandler: tcustomcryptohandler = nil);
 var
- stream1: tstream;
+ stream1: tmsefilestream;
 begin
  stream1:= tmsefilestream.create(afilename,fm_read);
  try
+  stream1.cryptohandler:= acryptohandler;
   loadfromstream(stream1);
  finally
   stream1.free;
@@ -6390,7 +6415,7 @@ begin
   active:= true;
  end
  else begin
-  loadfromfile(flogfilename);
+  loadfromfile(flogfilename,fcryptohandler);
   startlogger;
  end;
 end;
@@ -6401,6 +6426,7 @@ var
 begin
  if flogfilename <> '' then begin
   stream1:= tmsefilestream.create(flogfilename,fm_create);
+  stream1.cryptohandler:= fcryptohandler;
   flogger:= tbufstreamwriter.create(self,stream1);
   savestate(flogger);
   flogger.flushbuffer;
@@ -8409,6 +8435,56 @@ begin
   end;
  end;
  setlength(result,int2);
+end;
+
+procedure tmsebufdataset.setcryptohandler(const avalue: tcustomcryptohandler);
+begin
+ getobjectlinker.setlinkedvar(iobjectlink(self),avalue,
+                tmsecomponent(fcryptohandler));
+end;
+
+procedure tmsebufdataset.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ //dummy
+end;
+
+function tmsebufdataset.getobjectlinker: tobjectlinker;
+begin
+ if fobjectlinker = nil then begin
+  createobjectlinker(iobjectlink(self),{$ifdef FPC}@{$endif}objectevent,
+                                                             fobjectlinker);
+ end;
+ result:= fobjectlinker;
+end;
+
+procedure tmsebufdataset.link(const source: iobjectlink;
+               const dest: iobjectlink; valuepo: pointer = nil;
+               ainterfacetype: pointer = nil; once: boolean = false);
+begin
+ getobjectlinker.link(source,dest,valuepo,ainterfacetype,once);
+end;
+
+procedure tmsebufdataset.unlink(const source: iobjectlink;
+               const dest: iobjectlink; valuepo: pointer = nil);
+begin
+ getobjectlinker.unlink(source,dest,valuepo);
+end;
+
+procedure tmsebufdataset.objevent(const sender: iobjectlink;
+               const event: objecteventty);
+begin
+ getobjectlinker.objevent(sender,event);
+end;
+
+function tmsebufdataset.getinstance: tobject;
+begin
+ result:= self;
+end;
+
+function tmsebufdataset.getcomponent: tcomponent;
+begin
+ result:= self;
 end;
 
 { tlocalindexes }
