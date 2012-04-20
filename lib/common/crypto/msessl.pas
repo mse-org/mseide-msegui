@@ -137,6 +137,7 @@ type
                    const buffer; count: longint): longint; override;
    function seek(var aclient: cryptoclientinfoty;
                    const offset: int64; origin: tseekorigin): int64; override;
+   function  getsize(var aclient: cryptoclientinfoty): int64; override;
    procedure getkey(out akey: string; out asalt: string); virtual;
    procedure finalizedata(var adata: sslhandlerdatadty);
   public
@@ -659,10 +660,38 @@ begin
     socurrent: begin
      result:= result + seekoffset;
     end;
+    sobeginning: begin
+     checknullerror(evp_cipherinit_ex(ctx,nil,nil,nil,nil,-1)); //restart
+     padindex:= 0;
+     padcount:= 0;
+     seekoffset:= 0;
+     hasfirstblock:= false;
+     eofflag:= false;
+    end;
+    soend: begin
+     error(cerr_notseekable);
+    end;
    end;
   end;
  end;
 end;
+
+function topensslcryptohandler.getsize(var aclient: cryptoclientinfoty): int64;
+var
+ lint1: int64;
+begin
+ with aclient do begin
+  if stream.handle <> invalidfilehandle then begin
+   lint1:= fileseek(stream.handle,int64(0),ord(socurrent));
+   result:= fileseek(stream.handle,int64(0),ord(soend));
+   fileseek(stream.handle,lint1,ord(sobeginning));
+  end
+  else begin
+   result:= inherited getsize(aclient);
+  end;
+ end; 
+end;
+
 
 procedure topensslcryptohandler.checkerror(const err: cryptoerrorty);
 const

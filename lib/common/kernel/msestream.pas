@@ -61,6 +61,7 @@ type
                    const buffer; count: longint): longint; virtual;
    function seek(var aclient: cryptoclientinfoty;
                    const offset: int64; origin: tseekorigin): int64; virtual;
+   function  getsize(var aclient: cryptoclientinfoty): int64; virtual;
   public
    destructor destroy; override;
  end;
@@ -85,6 +86,8 @@ type
                       const accessmode: fileaccessmodesty;
                       const rights: filerightsty;
                       out error: syserrorty); overload;
+   function  getsize: int64; override;
+   function  inheritedgetsize: int64;
    function inheritedread(var buffer; count: longint): longint;
    function inheritedwrite(const buffer; count: longint): longint;
    function inheritedseek(const offset: int64;
@@ -1104,6 +1107,23 @@ begin
  end;
 end;
 
+function tmsefilestream.Write(const Buffer; Count: longint): Longint;
+begin
+ if fmemorystream <> nil then begin
+  result:= fmemorystream.Write(Buffer,count);
+ end
+ else begin
+  if fcryptohandler <> nil then begin
+   with fcryptohandler do begin
+    result:= write(checkopen(fcryptoindex)^,buffer,count);
+   end;
+  end
+  else begin
+   result:= inheritedwrite(buffer,count);
+  end;
+ end;
+end;
+
 function tmsefilestream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
 begin
  if fmemorystream <> nil then begin
@@ -1121,20 +1141,15 @@ begin
  end;
 end;
 
-function tmsefilestream.Write(const Buffer; Count: longint): Longint;
+function tmsefilestream.getsize: int64;
 begin
- if fmemorystream <> nil then begin
-  result:= fmemorystream.Write(Buffer,count);
+ if fcryptohandler <> nil then begin
+  with fcryptohandler do begin
+   result:= getsize(checkopen(fcryptoindex)^);
+  end;
  end
  else begin
-  if fcryptohandler <> nil then begin
-   with fcryptohandler do begin
-    result:= write(checkopen(fcryptoindex)^,buffer,count);
-   end;
-  end
-  else begin
-   result:= inheritedwrite(buffer,count);
-  end;
+  result:= inherited getsize;
  end;
 end;
 
@@ -1221,6 +1236,11 @@ function tmsefilestream.inheritedseek(const offset: int64;
                origin: tseekorigin): int64;
 begin
  result:= inherited seek(offset,origin);
+end;
+
+function tmsefilestream.inheritedgetsize: int64;
+begin
+ result:= inherited getsize;
 end;
 
 { tresourcefilestream}
@@ -2376,6 +2396,13 @@ function tcustomcryptohandler.seek(var aclient: cryptoclientinfoty;
 begin
  with aclient do begin
   result:= stream.inheritedseek(offset,origin);
+ end;
+end;
+
+function tcustomcryptohandler.getsize(var aclient: cryptoclientinfoty): int64;
+begin
+ with aclient do begin
+  result:= stream.inheritedgetsize;
  end;
 end;
 
