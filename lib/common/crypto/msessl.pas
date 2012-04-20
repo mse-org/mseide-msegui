@@ -11,7 +11,7 @@ unit msessl;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- classes,msecryptio,mseopenssl,mseopensslevp,
+ classes,msecryptio,mseopenssl,mseopensslevp,mseopensslrand,
  msestrings,msesystypes,msecryptohandler,msetypes,
  msestream;
 type
@@ -105,11 +105,15 @@ type
  cryptoerrorty = (cerr_error,cerr_ciphernotfound,cerr_notseekable,
                   cerr_cipherinit,cerr_invalidopenmode,cerr_digestnotfound,
                   cerr_cannotwrite,cerr_invalidblocksize,
-                  cerr_invalidkeylength,cerr_invaliddatalength);
+                  cerr_invalidkeylength,cerr_invaliddatalength,
+                  cerr_readheader,cerr_writeheader);
 
  getkeyeventty = procedure(const sender: tobject;
                                 var akey,asalt: string) of object;
 
+ opensslcryptooptionty = (sslco_salt);
+ opensslcryptooptionsty = set of opensslcryptooptionty;
+ 
  topensslcryptohandler = class(tbasecryptohandler)
   private
    fciphername: string;
@@ -120,6 +124,7 @@ type
    fkeyphrase: msestring;
    fongetkey: getkeyeventty;
    fkeylength: integer;
+   foptions: opensslcryptooptionsty;
    procedure setkeyphrase(const avalue: msestring);
   protected
    procedure error(const err: cryptoerrorty);
@@ -145,6 +150,8 @@ type
    property key: string read fkey write fkey;
    property salt: string read fsalt write fsalt;
   published
+   property options: opensslcryptooptionsty read foptions 
+                                            write foptions default [];
    property ciphername: string read fciphername write fciphername;
    property keydigestname: string read fkeydigestname write fkeydigestname;
                          //default md5
@@ -173,7 +180,9 @@ const
   'Can not write.',
   'Invalid block size.',
   'Invalid key length.',
-  'Invalid data length.'
+  'Invalid data length.',
+  'Can not read header.',
+  'Can not write header.'
   );
  
 procedure raiseerror(errco : integer);
@@ -477,6 +486,23 @@ testvar:= @sslhandlerdataty(aclient.handlerdata).d;
   if salt1 <> '' then begin
    salt1:= salt1 + nullstring(8-length(salt1));
   end;
+  if sslco_salt in foptions then begin
+   if mode = 0 then begin
+    setlength(salt1,8);
+    if inherited read(aclient,salt1[1],8) <> 8 then begin
+     error(cerr_readheader);
+    end;
+   end
+   else begin
+    if salt1 = '' then begin
+     setlength(salt1,8);
+     checknullerror(rand_bytes(pbyte(pointer(salt1)),8));
+    end;
+    if inherited write(aclient,salt1[1],8) <> 8 then begin
+     error(cerr_writeheader);
+    end;
+   end;
+  end;
   checknullerror(evp_bytestokey(cipher,digest,pointer(salt1),pchar(key1),
                          length(key1),fkeygeniterationcount,@keydata,@ivdata));
   checknullerror(evp_cipherinit_ex(ctx,nil,nil,@keydata,
@@ -668,6 +694,9 @@ begin
      seekoffset:= 0;
      hasfirstblock:= false;
      eofflag:= false;
+     if sslco_salt in foptions then begin
+      inherited seek(aclient,int64(8),sobeginning);
+     end;
     end;
     soend: begin
      error(cerr_notseekable);

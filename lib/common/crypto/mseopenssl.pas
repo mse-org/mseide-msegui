@@ -103,6 +103,8 @@ type
  pSTACK = SslPtr;
  pPKCS7_SIGNER_INFO = SslPtr;
  pAES_KEY = SslPtr;
+ pENGINE = SslPtr;
+ pRAND_METHOD = SslPtr;
 
  pFunction = procedure; cdecl;
  pCharacter = PChar;
