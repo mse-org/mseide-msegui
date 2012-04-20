@@ -22,11 +22,13 @@ interface
 
 implementation
 uses
- msedesignintf,msesysenv,msefilechange,regsysutils_bmp,mseprocess;
+ msedesignintf,msesysenv,msefilechange,regsysutils_bmp,mseprocess,
+ msessl;
 
 procedure Register;
 begin
- registercomponents('NoGui',[tsysenvmanager,tfilechangenotifyer,tmseprocess]);
+ registercomponents('NoGui',[tsysenvmanager,tfilechangenotifyer,tmseprocess,
+                             topensslcryptohandler]);
 end;
 
 initialization

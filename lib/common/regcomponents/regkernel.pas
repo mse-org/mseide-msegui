@@ -32,8 +32,7 @@ uses
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
  mseapplication,mseglob,mseguiglob,mseskin,msedesigner,
  mseguithreadcomp,mseprocmonitorcomp,msefadeedit,
- msearrayprops,msesumlist,mserttistat,msestockobjects,regglob,msearrayutils,
- msessl;
+ msearrayprops,msesumlist,mserttistat,msestockobjects,regglob,msearrayutils;
 
 type
  twidget1 = class(twidget);
@@ -164,8 +163,7 @@ begin
  registercomponenttabhints(['Gui'],['Non visual components with GUI dependence']);
 
  registercomponents('NoGui',[tstatfile,trttistat,tnoguiaction,tactivator,
-                             ttimer,tthreadcomp,tpipereadercomp,tprocessmonitor,
-                             topensslcryptohandler]);
+                             ttimer,tthreadcomp,tpipereadercomp,tprocessmonitor]);
  registercomponenttabhints(['NoGui'],['Components without GUI dependence']);
 
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
