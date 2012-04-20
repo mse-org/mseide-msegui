@@ -340,6 +340,10 @@ type
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure setnullvalue; virtual; //for dbedits
+  {$ifdef mse_with_ifi}
+   function getifilink: tifireallinkcomp;
+   procedure setifilink(const avalue: tifireallinkcomp);
+  {$endif}
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: realty);
@@ -357,6 +361,9 @@ type
    property enabled;
    property bounds_cx default defaultsliderwidth;
    property bounds_cy default defaultsliderheight;
+  {$ifdef mse_with_ifi}
+   property ifilink: tifireallinkcomp  read getifilink write setifilink;
+  {$endif}
  end;
 
  trealgraphdataedit = class(tcustomrealgraphdataedit)
@@ -678,6 +685,10 @@ type
    procedure setgridvalue(const index, Value: integer);
    function getgridvalues: integerarty;
    procedure setgridvalues(const Value: integerarty);
+  {$ifdef mse_with_ifi}
+   function getifilink: tifiintegerlinkcomp;
+   procedure setifilink(const avalue: tifiintegerlinkcomp);
+  {$endif}
   protected
    procedure setgridintf(const intf: iwidgetgrid); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
@@ -708,6 +719,10 @@ type
    property valuedefault: integer read fvaluedefault write fvaluedefault default 0;
    property min: integer read fmin write fmin default 0; //checked by togglevalue
    property max: integer read fmax write fmax default 0; //checked by togglevalue
+  published
+  {$ifdef mse_with_ifi}
+   property ifilink: tifiintegerlinkcomp  read getifilink write setifilink;
+  {$endif}
  end;
 
  tcustomdatabutton = class;
@@ -1226,6 +1241,18 @@ function tcustomrealgraphdataedit.checkvalue: boolean;
 begin
  result:= docheckvalue(fvalue);
 end;
+
+{$ifdef mse_with_ifi}
+function tcustomrealgraphdataedit.getifilink: tifireallinkcomp;
+begin
+ result:= tifireallinkcomp(fifilink);
+end;
+
+procedure tcustomrealgraphdataedit.setifilink(const avalue: tifireallinkcomp);
+begin
+ inherited setifilink(avalue);
+end;
+{$endif}
 
 { tcustomslider }
 
@@ -2911,6 +2938,17 @@ procedure tcustomintegergraphdataedit.datalistdestroyed;
 begin
  fdatalist:= nil;
 end;
+{$ifdef mse_with_ifi}
+function tcustomintegergraphdataedit.getifilink: tifiintegerlinkcomp;
+begin
+ result:= tifiintegerlinkcomp(fifilink);
+end;
+
+procedure tcustomintegergraphdataedit.setifilink(const avalue: tifiintegerlinkcomp);
+begin
+ inherited setifilink(avalue);
+end;
+{$endif}
 
 { tvaluefacearrayprop }
 
