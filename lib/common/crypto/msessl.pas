@@ -83,7 +83,8 @@ type
   digest: pevp_md;
   padindex: integer;
   padcount: integer;
-  padbuf: array[0..2*evp_max_block_length-1] of byte;
+  seekoffset: integer;
+  padbuf: array[0..3*evp_max_block_length-1] of byte;
   hasfirstblock: boolean;
   eofflag: boolean;
 //  kind: cipherkindty;
@@ -531,6 +532,7 @@ var
     padindex:= padindex + int1;
     result:= result + int1;
     count:= count - int1;
+    seekoffset:= seekoffset + int1;
     inc(pd,int1);
    end;
   end;
@@ -564,22 +566,28 @@ begin
      ps:= po1;
      try       
       int2:= inherited read(aclient,(ps)^,int1);
-      eofflag:= int2 <= int1;
-      if int2 < blocksize then begin
-       error(cerr_invaliddatalength);
+      eofflag:= int2 < int1;
+      seekoffset:= seekoffset + ((count div blocksize) * blocksize - int2);
+      pb:= @padbuf;
+      padindex:= 0;
+      padcount:= 0;
+      int4:= int1 - blocksize; 
+      if int4 > count then begin
+       int4:= (count div blocksize) * blocksize;
       end;
-      int4:= int2 - blocksize; 
       if int4 > 0 then begin
        checknullerror(evp_cipherupdate(ctx,pointer(pd),int3,pointer(ps),int4));
-       inc(ps,int4);
        inc(result,int3);
        inc(pd,int3);
        dec(count,int3);
+       inc(ps,int4);
       end;
-      pb:= @padbuf;
-      padindex:= 0;
-      checknullerror(evp_cipherupdate(ctx,pointer(pb),padcount,pointer(ps),blocksize));
-      inc(pb,padcount);             
+      int4:= int2-int4;
+      if int4 > 0 then begin
+       checknullerror(evp_cipherupdate(ctx,pointer(pb),padcount,
+                                            pointer(ps),int4));
+       inc(pb,padcount);
+      end;
       if eofflag then begin
        checknullerror(evp_cipherfinal(ctx,pointer(pb),int3));
        padcount:= padcount + int3;
@@ -622,7 +630,7 @@ begin
     result:= inherited write(aclient,po1^,int1);
     if result = int1 then begin
      result:= count;
-     padcount:= padcount + count - int1;
+     seekoffset:= seekoffset + count - int1;
     end;
    finally
     freemem(po1);
@@ -642,6 +650,13 @@ begin
  end
  else begin
   result:= inherited seek(aclient,offset,origin);
+  with sslhandlerdataty(aclient.handlerdata).d do begin
+   case origin of
+    socurrent: begin
+     result:= result + seekoffset;
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -660,13 +675,13 @@ begin
    break;
   end;
   err_error_string_n(int1,pointer(str2),buffersize);
-  if str1 = '' then begin
+  if str1 <> '' then begin
    str1:= str1 + lineend;
   end;
   str1:= str1 + pchar(str2);
  end;
  if str1 <> '' then begin
-  essl.create(cryptoerrormessages[err]+lineend+str1);
+  raise essl.create(cryptoerrormessages[err]+lineend+str1);
  end;
 end;
 
