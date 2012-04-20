@@ -99,9 +99,6 @@ type
    1: (_bufferspace: cryptohandlerdataty;);
  end;
 
-//
-// under construction!
-// 
  cryptoerrorty = (cerr_error,cerr_ciphernotfound,cerr_notseekable,
                   cerr_cipherinit,cerr_invalidopenmode,cerr_digestnotfound,
                   cerr_cannotwrite,cerr_invalidblocksize,
@@ -440,7 +437,6 @@ begin
  end;
 end;
 
-var testvar: psslhandlerdataty;
 procedure topensslcryptohandler.open(var aclient: cryptoclientinfoty);
 var
  mode: integer;
@@ -449,7 +445,6 @@ var
  key1,salt1: string;
  int1: integer;
 begin
-testvar:= @sslhandlerdataty(aclient.handlerdata).d;
  initsslinterface;
  case aclient.stream.openmode of
   fm_read: begin
