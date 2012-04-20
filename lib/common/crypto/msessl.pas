@@ -493,7 +493,8 @@ begin
  try
   with sslhandlerdataty(aclient.handlerdata).d do begin
    if ctx <> nil then begin
-    if aclient.stream.openmode in [fm_write,fm_create] then begin
+    if (aclient.stream.openmode in [fm_write,fm_create]) and
+               (cipher <> nil) then begin
      checknullerror(evp_cipherfinal(ctx,@buffer,int1));
      if int1 > 0 then begin
       if inherited write(aclient,buffer,int1) <> int1 then begin
