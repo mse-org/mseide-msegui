@@ -2337,6 +2337,7 @@ begin
    end;
   end;
  end;
+ inherited;
 end;
 
 procedure tcustomcryptohandler.connect(const aclient: tmsefilestream);
