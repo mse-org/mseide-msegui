@@ -122,6 +122,7 @@ type
       2: (dsa: pDSA);  // ^dsa_st
       3: (dh: pDH);  // ^dh_st
   end;
+  ppEVP_PKEY = ^pEVP_PKEY;
   pSTACK_OFX509 = SslPtr; //todo
   EVP_PKEY = record
     ktype: cint;
@@ -215,11 +216,6 @@ var
                                                 keylen: cint): cint; cdecl;
   EVP_get_digestbyname: function(Name: pchar): pEVP_MD; cdecl;
   EVP_get_cipherbyname: function(name: PCharacter): pEVP_CIPHER; cdecl;
-
- 	EVP_OpenInit: function(ctx: pEVP_CIPHER_CTX; _type: pEVP_CIPHER;
-   		ek: pCharacter; ekl: cint; iv: pCharacter; priv:		pEVP_PKEY): cint; cdecl;
-  EVP_OpenFinal: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
-                                              var outl: cint): cint; cdecl;
   
   EVP_CipherInit: function(ctc: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
              		       key: pCharacter; iv: pCharacter; enc: cint): cint; cdecl;
@@ -341,8 +337,18 @@ var
   EVP_BytesToKey: function(const _type: pEVP_CIPHER; const md: pEVP_MD;
              		salt: pchar; const data: pchar; datalen: cint;
             		 count: cint; key: pchar; iv: pchar): cint; cdecl;
-
-
+  EVP_SealInit: function(ctx: pEVP_CIPHER_CTX; _type: pEVP_CIPHER;
+                           ek: ppbyte; ekl: pcint; iv: pbyte;
+                              pubkey: ppEVP_PKEY; npubk: cint): cint;
+  EVP_SealUpdate: function(ctx: pEVP_CIPHER_CTX; _out: pbyte;
+                            var outl: cint; _int: pbyte; inl: cint): cint;
+  EVP_SealFinal: function(ctx: pEVP_CIPHER_CTX; _out: pbyte;
+                                           var outl: cint): cint;
+  EVP_OpenInit: function(ctx: pEVP_CIPHER_CTX;_type: pEVP_CIPHER;
+                 ek: pbyte; ekl: cint; iv: pbyte; priv: pEVP_PKEY): cint;
+  EVP_OpenFinal: function(ctx: pEVP_CIPHER_CTX; _out: pbyte;
+                                              var outl: cint): cint;
+         
 function EVP_OpenUpdate(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
                  var outl: cint; _in: pCharacter; inl: cint): cint;
 function EVP_SignInit(ctx: pEVP_MD_CTX; const _type: pEVP_MD): cint;
@@ -394,7 +400,7 @@ end;
 
 procedure init(const info: dynlibinfoty);
 const
- funcs: array[0..79] of funcinfoty = (
+ funcs: array[0..82] of funcinfoty = (
    (n: 'EVP_PKEY_new'; d: @EVP_PKEY_new),
    (n: 'EVP_PKEY_free'; d: @EVP_PKEY_free),
    (n: 'EVP_PKEY_assign'; d: @EVP_PKEY_assign),
@@ -412,8 +418,6 @@ const
    (n: 'EVP_dss'; d: @EVP_dss),
    (n: 'EVP_dss1'; d: @EVP_dss1),
    (n: 'EVP_ripemd160'; d: @EVP_ripemd160),
-   (n: 'EVP_OpenInit'; d: @EVP_OpenInit),
-   (n: 'EVP_OpenFinal'; d: @EVP_OpenFinal),
    (n: 'EVP_CipherInit'; d: @EVP_CipherInit),
    (n: 'EVP_CipherInit_ex'; d: @EVP_CipherInit_ex),
    (n: 'EVP_CipherUpdate'; d: @EVP_CipherUpdate),
@@ -474,7 +478,12 @@ const
    (n: 'EVP_MD_CTX_cleanup'; d: @EVP_MD_CTX_cleanup),
    (n: 'EVP_MD_CTX_create'; d: @EVP_MD_CTX_create),
    (n: 'EVP_MD_CTX_destroy'; d: @EVP_MD_CTX_destroy),
-   (n: 'EVP_BytesToKey'; d: @EVP_BytesToKey)
+   (n: 'EVP_BytesToKey'; d: @EVP_BytesToKey),
+   (n: 'EVP_SealInit'; d: @EVP_SealInit),
+   (n: 'EVP_SealUpdate'; d: @EVP_SealUpdate),
+   (n: 'EVP_SealFinal'; d: @EVP_SealFinal),
+   (n: 'EVP_OpenInit'; d: @EVP_OpenInit),
+   (n: 'EVP_OpenFinal'; d: @EVP_OpenFinal)
   );
  funcsopt: array[0..9] of funcinfoty = (
    (n: 'EVP_MD_flags'; d: @EVP_MD_flags),
