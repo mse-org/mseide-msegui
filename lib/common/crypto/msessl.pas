@@ -12,7 +12,7 @@ unit msessl;
 interface
 uses
  classes,msecryptio,mseopenssl,mseopensslevp,mseopensslrand,
- msestrings,msesystypes,msecryptohandler,msetypes,
+ msestrings,msesystypes,msecryptohandler,msetypes,msesys,
  msestream;
 type
  essl = class(ecryptoio)
@@ -78,6 +78,7 @@ type
                  ctk_ofb);//output feedback
 
  sslhandlerdatadty = record
+  mode: integer;
   ctx: pevp_cipher_ctx;
   cipher: pevp_cipher;
   digest: pevp_md;
@@ -103,7 +104,7 @@ type
                   cerr_cipherinit,cerr_invalidopenmode,cerr_digestnotfound,
                   cerr_cannotwrite,cerr_invalidblocksize,
                   cerr_invalidkeylength,cerr_invaliddatalength,
-                  cerr_readheader,cerr_writeheader);
+                  cerr_readheader,cerr_writeheader,cerr_nobio);
 
  getkeyeventty = procedure(const sender: tobject;
                                 var akey,asalt: string) of object;
@@ -114,7 +115,7 @@ const
  defaultopensslcryptooptions = [sslco_salt];
  
 type 
- topensslcryptohandler = class(tbasecryptohandler)
+ tcustomopensslcryptohandler = class(tbasecryptohandler)
   private
    fciphername: string;
    fkeydigestname: string;
@@ -127,6 +128,7 @@ type
    foptions: opensslcryptooptionsty;
    procedure setkeyphrase(const avalue: msestring);
   protected
+   procedure initcipher(var aclient: cryptoclientinfoty); virtual; abstract;
    procedure error(const err: cryptoerrorty);
    procedure checkerror(const err: cryptoerrorty = cerr_error);
    procedure clearerror; inline;
@@ -149,7 +151,6 @@ type
    constructor create(aowner: tcomponent); override;
    property key: string read fkey write fkey;
    property salt: string read fsalt write fsalt;
-  published
    property options: opensslcryptooptionsty read foptions 
                              write foptions default defaultopensslcryptooptions;
    property ciphername: string read fciphername write fciphername;
@@ -162,13 +163,50 @@ type
                                           //bits, 0 -> use cipher default
    property ongetkey: getkeyeventty read fongetkey write fongetkey;
  end;
+
+ tsymciphercryptohandler = class(tcustomopensslcryptohandler)
+  protected
+   procedure initcipher(var aclient: cryptoclientinfoty); override;
+  published
+   property options;
+   property ciphername;
+   property keydigestname;
+   property keygeniterationcount;
+   property keyphrase;
+   property keylength;
+   property ongetkey;
+ end;
+
+//
+// under construction!
+//
+ tasymciphercryptohandler = class(tcustomopensslcryptohandler)
+  private
+   fprivkeyfile: filenamety;
+   fpubkeyfile: filenamety;
+  protected
+   procedure initcipher(var aclient: cryptoclientinfoty); override;
+  published
+   property privkeyfile: filenamety read fprivkeyfile write fprivkeyfile;
+   property pubkeyfile: filenamety read fpubkeyfile write fpubkeyfile;
+                      //use '"first" "second" "third"' for multiple
+   property options;
+   property ciphername;
+   property keydigestname;
+   property keygeniterationcount;
+   property keyphrase;
+   property keylength;
+   property ongetkey;
+ end;
  
 function waitforio(const aerror: integer; var ainfo: cryptoioinfoty; 
               const atimeoutms: integer; const resultpo: pinteger = nil): boolean;
+function filebio(const aname: filenamety; const aopenmode: fileopenmodety): pbio;
+procedure closebio(const abio: pbio);
  
 implementation
 uses
- sysutils,msesysintf1,msefileutils,msesocketintf,msesys,mseopensslbio;
+ sysutils,msesysintf1,msefileutils,msesocketintf,mseopensslbio,msesysintf;
 const
  cryptoerrormessages: array[cryptoerrorty] of msestring =(
   'OpenSSL error.',
@@ -182,15 +220,21 @@ const
   'Invalid key length.',
   'Invalid data length.',
   'Can not read header.',
-  'Can not write header.'
+  'Can not write header.',
+  'Can not create BIO.'
   );
  
-procedure raiseerror(errco : integer);
+procedure raiseerror(errco : integer; const amessage: string = '');
 var
  buf: array [0..255] of char;
  str1: string;
 begin
- str1:= 'SSL error.';
+ if amessage = '' then begin
+  str1:= 'SSL error.';
+ end
+ else begin
+  str1:= amessage;
+ end;
  repeat
   err_error_string_n(errco,@buf,sizeof(buf));
   str1:= str1 + lineend + buf;
@@ -204,6 +248,32 @@ begin
  if aerror <> 1 then begin
   raiseerror(err_get_error());
  end;
+end;
+
+procedure cryptoerror(const aerror: cryptoerrorty);
+var
+ int1: integer;
+begin
+ int1:= err_get_error();
+ if int1 <> 0 then begin
+  raiseerror(int1,cryptoerrormessages[aerror]);
+ end;
+end;
+
+function filebio(const aname: filenamety; const aopenmode: fileopenmodety): pbio;
+var
+ fd: integer;
+begin
+ syserror(sys_openfile(aname,aopenmode,[],[],fd));
+ result:= bio_new_fd(fd,1);
+ if result = nil then begin
+  cryptoerror(cerr_nobio);
+ end;
+end;
+
+procedure closebio(const abio: pbio);
+begin
+ bio_free_all(abio);
 end;
 
 { tssl }
@@ -416,9 +486,9 @@ begin
  end;
 end;
 
-{ topensslcryptohandler }
+{ tcustomopensslcryptohandler }
 
-constructor topensslcryptohandler.create(aowner: tcomponent);
+constructor tcustomopensslcryptohandler.create(aowner: tcomponent);
 begin
  fkeydigestname:= 'md5';
  fkeygeniterationcount:= defaultkeygeniterationcount;
@@ -426,7 +496,7 @@ begin
  inherited;
 end;
 
-procedure topensslcryptohandler.finalizedata(var adata: sslhandlerdatadty);
+procedure tcustomopensslcryptohandler.finalizedata(var adata: sslhandlerdatadty);
 begin
  with adata do begin
   if ctx <> nil then begin
@@ -437,27 +507,21 @@ begin
  end;
 end;
 
-procedure topensslcryptohandler.open(var aclient: cryptoclientinfoty);
-var
- mode: integer;
- keydata: array[0..evp_max_key_length-1] of byte;
- ivdata: array[0..evp_max_iv_length-1] of byte;
- key1,salt1: string;
- int1: integer;
+procedure tcustomopensslcryptohandler.open(var aclient: cryptoclientinfoty);
 begin
  initsslinterface;
- case aclient.stream.openmode of
-  fm_read: begin
-   mode:= 0; //decrypt
-  end;
-  fm_create,fm_write: begin
-   mode:= 1; //encrypt
-  end;
-  else begin
-   error(cerr_invalidopenmode); //todo: allow append
-  end;
- end;
  with sslhandlerdataty(aclient.handlerdata).d do begin
+  case aclient.stream.openmode of
+   fm_read: begin
+    mode:= 0; //decrypt
+   end;
+   fm_create,fm_write: begin
+    mode:= 1; //encrypt
+   end;
+   else begin
+    error(cerr_invalidopenmode); //todo: allow append
+   end;
+  end;
   getmem(ctx,sizeof(ctx^));
   evp_cipher_ctx_init(ctx);
   cipher:= checknilerror(evp_get_cipherbyname(pchar(fciphername)),
@@ -467,50 +531,12 @@ begin
    error(cerr_invalidblocksize); //todo: implement block ciphers
   end;
 }
-  digest:= checknilerror(evp_get_digestbyname(pchar(fkeydigestname)),
-                                                     cerr_digestnotfound);
-  checknullerror(evp_cipherinit_ex(ctx,cipher,nil,nil,nil,mode),
-                                          cerr_cipherinit);
-  if fkeylength <> 0 then begin
-   int1:= fkeylength div 8;
-   if int1 > evp_max_key_length then begin
-    error(cerr_invalidkeylength);
-   end;
-   checknullerror(evp_cipher_ctx_set_key_length(ctx,int1));
-   if (ctx^.key_len * 8 <> fkeylength) then begin
-    error(cerr_invalidkeylength);
-   end;
-  end;
-  getkey(key1,salt1);
-  if salt1 <> '' then begin
-   salt1:= salt1 + nullstring(8-length(salt1));
-  end;
-  if sslco_salt in foptions then begin
-   if mode = 0 then begin
-    setlength(salt1,8);
-    if inherited read(aclient,salt1[1],8) <> 8 then begin
-     error(cerr_readheader);
-    end;
-   end
-   else begin
-    if salt1 = '' then begin
-     setlength(salt1,8);
-     checknullerror(rand_bytes(pbyte(pointer(salt1)),8));
-    end;
-    if inherited write(aclient,salt1[1],8) <> 8 then begin
-     error(cerr_writeheader);
-    end;
-   end;
-  end;
-  checknullerror(evp_bytestokey(cipher,digest,pointer(salt1),pchar(key1),
-                         length(key1),fkeygeniterationcount,@keydata,@ivdata));
-  checknullerror(evp_cipherinit_ex(ctx,nil,nil,@keydata,
-                                                @ivdata,mode),cerr_cipherinit);
+  initcipher(aclient);
  end;
  inherited;
 end;
 
-procedure topensslcryptohandler.close(var aclient: cryptoclientinfoty);
+procedure tcustomopensslcryptohandler.close(var aclient: cryptoclientinfoty);
 var
  buffer: array[0..evp_max_block_length-1] of byte;
  int1: integer;
@@ -538,7 +564,7 @@ begin
  end;
 end;
 
-function topensslcryptohandler.read(var aclient: cryptoclientinfoty; var buffer;
+function tcustomopensslcryptohandler.read(var aclient: cryptoclientinfoty; var buffer;
                count: longint): longint;
 var
  ps,pd: pbyte;
@@ -647,7 +673,7 @@ begin
  end;
 end;
 
-function topensslcryptohandler.write(var aclient: cryptoclientinfoty;
+function tcustomopensslcryptohandler.write(var aclient: cryptoclientinfoty;
                                    const buffer; count: longint): longint;
 var
  po1: pointer;
@@ -673,7 +699,7 @@ begin
  end;
 end;
 
-function topensslcryptohandler.seek(var aclient: cryptoclientinfoty;
+function tcustomopensslcryptohandler.seek(var aclient: cryptoclientinfoty;
                const offset: int64; origin: tseekorigin): int64;
 begin
  if offset <> 0 then begin //todo
@@ -705,7 +731,7 @@ begin
  end;
 end;
 
-function topensslcryptohandler.getsize(var aclient: cryptoclientinfoty): int64;
+function tcustomopensslcryptohandler.getsize(var aclient: cryptoclientinfoty): int64;
 var
  lint1: int64;
 begin
@@ -722,7 +748,7 @@ begin
 end;
 
 
-procedure topensslcryptohandler.checkerror(const err: cryptoerrorty);
+procedure tcustomopensslcryptohandler.checkerror(const err: cryptoerrorty);
 const
  buffersize = 200;
 var
@@ -747,12 +773,12 @@ begin
  end;
 end;
 
-procedure topensslcryptohandler.clearerror;
+procedure tcustomopensslcryptohandler.clearerror;
 begin
  err_clear_error();
 end;
 
-function topensslcryptohandler.checknullerror(const avalue: integer;
+function tcustomopensslcryptohandler.checknullerror(const avalue: integer;
                                           const err: cryptoerrorty): integer;
 begin
  result:= avalue;
@@ -762,7 +788,7 @@ begin
  end;
 end;
 
-function topensslcryptohandler.checknilerror(const avalue: pointer;
+function tcustomopensslcryptohandler.checknilerror(const avalue: pointer;
                                          const err: cryptoerrorty): pointer;
 begin
  result:= avalue;
@@ -772,25 +798,83 @@ begin
  end;
 end;
 
-procedure topensslcryptohandler.error(const err: cryptoerrorty);
+procedure tcustomopensslcryptohandler.error(const err: cryptoerrorty);
 begin
  raise essl.create(cryptoerrormessages[err]); 
            //there was no queued error
 end;
 
-procedure topensslcryptohandler.setkeyphrase(const avalue: msestring);
+procedure tcustomopensslcryptohandler.setkeyphrase(const avalue: msestring);
 begin
  fkey:= stringtoutf8(avalue);
  fkeyphrase:= avalue;
 end;
 
-procedure topensslcryptohandler.getkey(out akey: string; out asalt: string);
+procedure tcustomopensslcryptohandler.getkey(out akey: string; out asalt: string);
 begin
  akey:= fkey;
  asalt:= fsalt;
  if canevent(tmethod(fongetkey)) then begin
   fongetkey(self,akey,asalt);
  end;
+end;
+
+{ tsymciphercryptohandler}
+
+procedure tsymciphercryptohandler.initcipher(var aclient: cryptoclientinfoty);
+var
+ keydata: array[0..evp_max_key_length-1] of byte;
+ ivdata: array[0..evp_max_iv_length-1] of byte;
+ key1,salt1: string;
+ int1: integer;
+begin
+ with sslhandlerdataty(aclient.handlerdata).d do begin
+  digest:= checknilerror(evp_get_digestbyname(pchar(fkeydigestname)),
+                                                     cerr_digestnotfound);
+  checknullerror(evp_cipherinit_ex(ctx,cipher,nil,nil,nil,mode),
+                                          cerr_cipherinit);
+  if fkeylength <> 0 then begin
+   int1:= fkeylength div 8;
+   if int1 > evp_max_key_length then begin
+    error(cerr_invalidkeylength);
+   end;
+   checknullerror(evp_cipher_ctx_set_key_length(ctx,int1));
+   if (ctx^.key_len * 8 <> fkeylength) then begin
+    error(cerr_invalidkeylength);
+   end;
+  end;
+  getkey(key1,salt1);
+  if salt1 <> '' then begin
+   salt1:= salt1 + nullstring(8-length(salt1));
+  end;
+  if sslco_salt in foptions then begin
+   if mode = 0 then begin
+    setlength(salt1,8);
+    if inherited read(aclient,salt1[1],8) <> 8 then begin
+     error(cerr_readheader);
+    end;
+   end
+   else begin
+    if salt1 = '' then begin
+     setlength(salt1,8);
+     checknullerror(rand_bytes(pbyte(pointer(salt1)),8));
+    end;
+    if inherited write(aclient,salt1[1],8) <> 8 then begin
+     error(cerr_writeheader);
+    end;
+   end;
+  end;
+  checknullerror(evp_bytestokey(cipher,digest,pointer(salt1),pchar(key1),
+                         length(key1),fkeygeniterationcount,@keydata,@ivdata));
+  checknullerror(evp_cipherinit_ex(ctx,nil,nil,@keydata,
+                                                @ivdata,mode),cerr_cipherinit);
+ end;
+end;
+
+{ tasymciphercryptohandler }
+
+procedure tasymciphercryptohandler.initcipher(var aclient: cryptoclientinfoty);
+begin
 end;
 
 end.

@@ -117,7 +117,7 @@ type
   pEVP_PKEY = ^EVP_PKEY;
   EVP_PKEY_PKEY = record
     case integer of
-      0: (ptr: PCharacter);
+      0: (ptr: pcuchar);
       1: (rsa: pRSA);  // ^rsa_st
       2: (dsa: pDSA);  // ^dsa_st
       3: (dh: pDH);  // ^dh_st
@@ -144,11 +144,11 @@ type
  	key_len: cint;		//* Default value for variable length ciphers */
 	 iv_len: cint;
 	 flags: culong;	//* Various flags */
-	 init: function(ctx: pEVP_CIPHER_CTX; key: pCharacter; iv: pCharacter;
+	 init: function(ctx: pEVP_CIPHER_CTX; key: pcuchar; iv: pcuchar;
 	                  enc: cint): cint;
 //	int (*init)(EVP_CIPHER_CTX *ctx, const unsigned char *key,
 //		    const unsigned char *iv, int enc);	/* init key */
-  do_cipher: function (ctx: pEVP_CIPHER_CTX; _out: pCharacter; _in: pCharacter;
+  do_cipher: function (ctx: pEVP_CIPHER_CTX; _out: pcuchar; _in: pcuchar;
                    inl: cint): cint; //* encrypt/decrypt data */
 //	int (*do_cipher)(EVP_CIPHER_CTX *ctx, unsigned char *out,
 //			 const unsigned char *in, unsigned int inl);/* encrypt/decrypt data */
@@ -214,46 +214,46 @@ var
                                                 padding: cint): cint; cdecl;
   EVP_CIPHER_CTX_set_key_length: function(ctx: pEVP_CIPHER_CTX;
                                                 keylen: cint): cint; cdecl;
-  EVP_get_digestbyname: function(Name: pchar): pEVP_MD; cdecl;
-  EVP_get_cipherbyname: function(name: PCharacter): pEVP_CIPHER; cdecl;
+  EVP_get_digestbyname: function(Name: pcchar): pEVP_MD; cdecl;
+  EVP_get_cipherbyname: function(name: pcchar): pEVP_CIPHER; cdecl;
   
   EVP_CipherInit: function(ctc: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
-             		       key: pCharacter; iv: pCharacter; enc: cint): cint; cdecl;
+             		       key: pcuchar; iv: pcuchar; enc: cint): cint; cdecl;
  	EVP_CipherInit_ex: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
-     impl: pENGINE; key: pCharacter; iv: pCharacter; enc: cint): cint; cdecl;
-	 EVP_CipherUpdate: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
-           		        var outl: cint; _in: pCharacter; inl: cint): cint; cdecl;
- 	EVP_CipherFinal: function(ctx: pEVP_CIPHER_CTX; outm: pCharacter;
+     impl: pENGINE; key: pcuchar; iv: pcuchar; enc: cint): cint; cdecl;
+	 EVP_CipherUpdate: function(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
+           		        var outl: cint; _in: pcuchar; inl: cint): cint; cdecl;
+ 	EVP_CipherFinal: function(ctx: pEVP_CIPHER_CTX; outm: pcuchar;
                        	                     var outl: cint): cint; cdecl;
- 	EVP_CipherFinal_ex: function(ctx: pEVP_CIPHER_CTX; outm: pCharacter;
+ 	EVP_CipherFinal_ex: function(ctx: pEVP_CIPHER_CTX; outm: pcuchar;
                         	                     var outl: cint): cint; cdecl;
 
   EVP_EncryptInit: function(ctx: pEVP_CIPHER_CTX; _type: pEVP_CIPHER;
-                                key: pCharacter; iv: pCharacter): cint; cdecl;
+                                key: pcuchar; iv: pcuchar): cint; cdecl;
   EVP_EncryptInit_ex: function(ctx: pEVP_CIPHER_CTX; _type: pEVP_CIPHER;
-                 impl: pENGINE; key: pCharacter; iv: pCharacter): cint; cdecl;
- 	EVP_EncryptUpdate: function(ctx: pEVP_CIPHER_CTX;_out: pCharacter;
-    		              var outl: cint; _in: pCharacter; inl: cint): cint; cdecl;
-  EVP_EncryptFinal: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
+                 impl: pENGINE; key: pcuchar; iv: pcuchar): cint; cdecl;
+  EVP_EncryptUpdate: function(ctx: pEVP_CIPHER_CTX;_out: pcuchar;
+    		              var outl: cint; _in: pcuchar; inl: cint): cint; cdecl;
+  EVP_EncryptFinal: function(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
                                                 var outl: cint): cint; cdecl;
-  EVP_EncryptFinal_ex: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
+  EVP_EncryptFinal_ex: function(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
                                                  var outl: cint): cint; cdecl;
-
- 	EVP_DecryptInit: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
-              	                  key: pCharacter; iv: pCharacter): cint; cdecl;
- 	EVP_DecryptInit_ex: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
-                 impl: pENGINE; key: pCharacter; iv: pCharacter): cint; cdecl;
- 	EVP_DecryptUpdate: function(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
-                    var outl: cint; _in: pCharacter; inl: cint): cint; cdecl;
- 	EVP_DecryptFinal: function(ctx: pEVP_CIPHER_CTX; outm: pCharacter;
+  
+  EVP_DecryptInit: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
+              	                  key: pcuchar; iv: pcuchar): cint; cdecl;
+  EVP_DecryptInit_ex: function(ctx: pEVP_CIPHER_CTX; cipher: pEVP_CIPHER;
+                 impl: pENGINE; key: pcuchar; iv: pcuchar): cint; cdecl;
+  EVP_DecryptUpdate: function(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
+                    var outl: cint; _in: pcuchar; inl: cint): cint; cdecl;
+  EVP_DecryptFinal: function(ctx: pEVP_CIPHER_CTX; outm: pcuchar;
                                                 var outl: cint): cint; cdecl;
- 	EVP_DecryptFinal_ex: function(ctx: pEVP_CIPHER_CTX; outm: pCharacter;
+  EVP_DecryptFinal_ex: function(ctx: pEVP_CIPHER_CTX; outm: pcuchar;
                                                  var outl: cint): cint; cdecl;
 
   EVP_DigestInit: function(ctx: pEVP_MD_CTX; const _type: pEVP_MD): cint; cdecl;
   EVP_DigestUpdate: function(ctx: pEVP_MD_CTX; const d: Pointer;
                                               cnt: sslsize_t): cint; cdecl;
-  EVP_DigestFinal: function(ctx: pEVP_MD_CTX; md: PCharacter;
+  EVP_DigestFinal: function(ctx: pEVP_MD_CTX; md: pcuchar;
                                                var s: cuint): cint; cdecl;
   EVP_SignFinal: function(ctx: pEVP_MD_CTX; sig: pointer;
                                var s: cuint; key: pEVP_PKEY): cint; cdecl;
@@ -264,7 +264,7 @@ var
 
   // Hash functions
   EVP_md_null: function: pEVP_MD; cdecl;
-  EVP_md2: function: pEVP_MD; cdecl;
+  EVP_md2: function: pEVP_MD; cdecl;  //optional!
   EVP_md5: function: pEVP_MD; cdecl;
   EVP_sha: function: pEVP_MD; cdecl;
   EVP_sha1: function: pEVP_MD; cdecl;
@@ -312,13 +312,13 @@ var
   EVP_PKEY_get1_DH: function(key: pEVP_PKEY): pDH; cdecl;
   EVP_PKEY_get1_EC_KEY: function(key: pEVP_PKEY): pEC_KEY; cdecl;
   // Password prompt for callback function
-  EVP_set_pw_prompt: procedure(prompt: PCharacter);cdecl;
-  EVP_get_pw_prompt: function: PCharacter;cdecl;
+  EVP_set_pw_prompt: procedure(prompt: pcchar);cdecl;
+  EVP_get_pw_prompt: function: pcchar;cdecl;
   // Default callback password function: replace if you want
-  EVP_read_pw_string: function(buf: PCharacter; len: cint;
-                      const prompt: PCharacter; verify: cint): cint; cdecl;
-  EVP_read_pw_string_min: function(buf: pchar; minlen: cint; maxlen: cint;
-              prompt: pchar; verify: cint): cint; cdecl; //openssl 1.0+
+  EVP_read_pw_string: function(buf: pcchar; len: cint;
+                      const prompt: pcchar; verify: cint): cint; cdecl;
+  EVP_read_pw_string_min: function(buf: pcchar; minlen: cint; maxlen: cint;
+              prompt: pcchar; verify: cint): cint; cdecl; //openssl 1.0+
   d2i_PrivateKey_bio: function(bp: pBIO; var a: pEVP_PKEY): pEVP_PKEY; cdecl;
   d2i_PUBKEY_bio: function(bp: pBIO; var a: pEVP_PKEY): pEVP_PKEY; cdecl;
   i2d_PUBKEY_bio: function(bp: pBIO; pkey: pEVP_PKEY): cint; cdecl;
@@ -335,22 +335,22 @@ var
   EVP_MD_CTX_destroy: procedure(ctx: pEVP_MD_CTX);cdecl;
 
   EVP_BytesToKey: function(const _type: pEVP_CIPHER; const md: pEVP_MD;
-             		salt: pchar; const data: pchar; datalen: cint;
-            		 count: cint; key: pchar; iv: pchar): cint; cdecl;
+             		salt: pcchar; const data: pcchar; datalen: cint;
+            		 count: cint; key: pcchar; iv: pcchar): cint; cdecl;
   EVP_SealInit: function(ctx: pEVP_CIPHER_CTX; _type: pEVP_CIPHER;
-                           ek: ppbyte; ekl: pcint; iv: pbyte;
-                              pubkey: ppEVP_PKEY; npubk: cint): cint;
-  EVP_SealUpdate: function(ctx: pEVP_CIPHER_CTX; _out: pbyte;
-                            var outl: cint; _int: pbyte; inl: cint): cint;
-  EVP_SealFinal: function(ctx: pEVP_CIPHER_CTX; _out: pbyte;
-                                           var outl: cint): cint;
+                           ek: ppcuchar; ekl: pcint; iv: pcuchar;
+                              pubkey: ppEVP_PKEY; npubk: cint): cint; cdecl;
+  EVP_SealFinal: function(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
+                                           var outl: cint): cint; cdecl;
   EVP_OpenInit: function(ctx: pEVP_CIPHER_CTX;_type: pEVP_CIPHER;
-                 ek: pbyte; ekl: cint; iv: pbyte; priv: pEVP_PKEY): cint;
-  EVP_OpenFinal: function(ctx: pEVP_CIPHER_CTX; _out: pbyte;
-                                              var outl: cint): cint;
+                 ek: pcuchar; ekl: cint; iv: pcuchar; priv: pEVP_PKEY): cint; cdecl;
+  EVP_OpenFinal: function(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
+                                              var outl: cint): cint; cdecl;
          
-function EVP_OpenUpdate(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
-                 var outl: cint; _in: pCharacter; inl: cint): cint;
+function EVP_SealUpdate(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
+                            var outl: cint; _in: pcuchar; inl: cint): cint;
+function EVP_OpenUpdate(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
+                 var outl: cint; _in: pcuchar; inl: cint): cint;
 function EVP_SignInit(ctx: pEVP_MD_CTX; const _type: pEVP_MD): cint;
 function EVP_SignUpdate(ctx: pEVP_MD_CTX; const d: Pointer; cnt: cuint): cint;
 function EVP_VerifyInit(ctx: pEVP_MD_CTX; const _type: pEVP_MD): cint;
@@ -361,9 +361,15 @@ function EVP_MD_CTX_size(e: pEVP_MD_CTX): cint;
 implementation
 uses
  msedynload;
+
+function EVP_SealUpdate(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
+                            var outl: cint; _in: pcuchar; inl: cint): cint;
+begin
+ result:= evp_encryptupdate(ctx,_out,outl,_in,inl);
+end;
  
-function EVP_OpenUpdate(ctx: pEVP_CIPHER_CTX; _out: pCharacter;
-                 var outl: cint; _in: pCharacter; inl: cint): cint;
+function EVP_OpenUpdate(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
+                 var outl: cint; _in: pcuchar; inl: cint): cint;
 begin
  result:= evp_decryptupdate(ctx,_out,outl,_in,inl);
 end;
@@ -400,7 +406,7 @@ end;
 
 procedure init(const info: dynlibinfoty);
 const
- funcs: array[0..82] of funcinfoty = (
+ funcs: array[0..80] of funcinfoty = (
    (n: 'EVP_PKEY_new'; d: @EVP_PKEY_new),
    (n: 'EVP_PKEY_free'; d: @EVP_PKEY_free),
    (n: 'EVP_PKEY_assign'; d: @EVP_PKEY_assign),
@@ -411,7 +417,6 @@ const
    (n: 'EVP_cleanup'; d: @EVP_cleanup),
    (n: 'EVP_get_digestbyname'; d: @EVP_get_digestbyname),
    (n: 'EVP_md_null'; d: @EVP_md_null),
-   (n: 'EVP_md2'; d: @EVP_md2),
    (n: 'EVP_md5'; d: @EVP_md5),
    (n: 'EVP_sha'; d: @EVP_sha),
    (n: 'EVP_sha1'; d: @EVP_sha1),
@@ -480,14 +485,15 @@ const
    (n: 'EVP_MD_CTX_destroy'; d: @EVP_MD_CTX_destroy),
    (n: 'EVP_BytesToKey'; d: @EVP_BytesToKey),
    (n: 'EVP_SealInit'; d: @EVP_SealInit),
-   (n: 'EVP_SealUpdate'; d: @EVP_SealUpdate),
+//   (n: 'EVP_SealUpdate'; d: @EVP_SealUpdate), //macro
    (n: 'EVP_SealFinal'; d: @EVP_SealFinal),
    (n: 'EVP_OpenInit'; d: @EVP_OpenInit),
    (n: 'EVP_OpenFinal'; d: @EVP_OpenFinal)
   );
- funcsopt: array[0..9] of funcinfoty = (
+ funcsopt: array[0..10] of funcinfoty = (
    (n: 'EVP_MD_flags'; d: @EVP_MD_flags),
    (n: 'EVP_read_pw_string_min'; d: @EVP_read_pw_string_min),
+   (n: 'EVP_md2'; d: @EVP_md2),
    (n: 'EVP_mdc2'; d: @EVP_mdc2),
    (n: 'EVP_idea_cbc'; d: @EVP_idea_cbc),
    (n: 'EVP_idea_ecb'; d: @EVP_idea_ecb),

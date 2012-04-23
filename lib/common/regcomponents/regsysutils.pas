@@ -28,7 +28,7 @@ uses
 procedure Register;
 begin
  registercomponents('NoGui',[tsysenvmanager,tfilechangenotifyer,tmseprocess,
-                             topensslcryptohandler]);
+                             tsymciphercryptohandler,tasymciphercryptohandler]);
 end;
 
 initialization

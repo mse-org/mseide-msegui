@@ -35,7 +35,12 @@ type
  __ULONG32_TYPE = longword;
 {$endif}
 
+ cchar = char;
+ pcchar = ^cchar;
+ ppcchar = ^pcchar;
  cuchar = byte;
+ pcuchar = ^cuchar;
+ ppcuchar = ^pcuchar;
  culonglong = __ULONGLONGWORD_TYPE;
  clonglong = __SLONGLONGWORD_TYPE;
  culong = __ULONGWORD_TYPE;
