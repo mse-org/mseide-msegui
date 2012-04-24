@@ -36,7 +36,7 @@ type
 
  cryptoclientstatety = (ccs_open);
  cryptoclientstatesty = set of cryptoclientstatety;
- cryptohandlerdataty = array[0..31] of pointer;
+ cryptohandlerdataty = array[0..47] of pointer;
  
  cryptoclientinfoty = record
   stream: tmsefilestream;

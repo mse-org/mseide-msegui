@@ -46,8 +46,17 @@ function loadlib(const libnames: array of filenamety; out libname: filenamety;
               
 function getprocaddresses(const lib: tlibhandle;
                        const procedures: array of funcinfoty;
-                       const noexception: boolean = false): boolean; overload;
+                       const noexception: boolean = false;
+                       const libname: msestring = ''): boolean; overload;
 function getprocaddresses(const lib: tlibhandle; const anames: array of string;
+               const adest: array of ppointer;
+               const noexception: boolean = false;
+               const libname: msestring = ''): boolean; overload;
+function getprocaddresses(const libinfo: dynlibinfoty;
+                       const procedures: array of funcinfoty;
+                       const noexception: boolean = false): boolean; overload;
+function getprocaddresses(const libinfo: dynlibinfoty;
+               const anames: array of string;
                const adest: array of ppointer;
                const noexception: boolean = false): boolean; overload;
 function getprocaddresses(const libnames: array of filenamety; 
@@ -66,9 +75,11 @@ uses
 
 function getprocaddresses(const lib: tlibhandle;
                           const procedures: array of funcinfoty;
-                          const noexception: boolean = false): boolean; overload;
+                          const noexception: boolean = false;
+                          const libname: msestring = ''): boolean; overload;
 var
  int1: integer;
+ str1: string;
 begin
  result:= true;
  for int1:= 0 to high(procedures) do begin
@@ -81,7 +92,11 @@ begin
    if (d^ = nil) then begin
     result:= false;
     if not noexception then begin
-     raise exception.create('Function "'+n+'" not found.');
+     if libname <> '' then begin
+      str1:= libname + lineend;
+     end;
+     str1:= str1 + 'Function "'+n+'" not found.';
+     raise exception.create(str1);
     end;
    end;
   end;
@@ -90,26 +105,47 @@ end;
 
 function getprocaddresses(const lib: tlibhandle; const anames: array of string; 
              const adest: array of ppointer;
-             const noexception: boolean = false): boolean;
+             const noexception: boolean = false;
+                                const libname: msestring = ''): boolean;
 var
  int1: integer;
+ str1: string;
 begin
  if high(anames) <> high(adest) then begin
   raise exception.create('Invalid parameter.');
  end;
  result:= true;
  for int1:= 0 to high(anames) do begin
-// {$ifdef FPC}
-//  adest[int1]^:= getprocedureaddress(lib,anames[int1]);
-//  {$else}
   adest[int1]^:= getprocaddress(lib,pansichar(anames[int1]));
-//  {$endif}
   if (adest[int1]^ = nil) then begin
    result:= false;
    if not noexception then begin
-    raise exception.create('Function "'+anames[int1]+'" not found.');
+    if libname <> '' then begin
+     str1:= libname + lineend;
+    end;
+    str1:= str1 + 'Function "'+anames[int1]+'" not found.';
+    raise exception.create(str1);
    end;
   end;
+ end;
+end;
+
+function getprocaddresses(const libinfo: dynlibinfoty;
+                       const procedures: array of funcinfoty;
+                       const noexception: boolean = false): boolean;
+begin
+ with libinfo do begin
+  result:= getprocaddresses(libhandle,procedures,noexception,libname);
+ end;
+end;
+
+function getprocaddresses(const libinfo: dynlibinfoty;
+               const anames: array of string;
+               const adest: array of ppointer;
+               const noexception: boolean = false): boolean; overload;
+begin
+ with libinfo do begin
+  result:= getprocaddresses(libhandle,anames,adest,noexception,libname);
  end;
 end;
 

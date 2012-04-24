@@ -407,7 +407,9 @@ function sys_openfile(const path: msestring; const openmode: fileopenmodety;
           const rights: filerightsty; out handle: integer): syserrorty;
 const
  openmodes: array[fileopenmodety] of cardinal =
-     (0,generic_read,generic_write,generic_read or generic_write,
+//    fm_none,fm_read,     fm_write,     fm_readwrite,
+     (0,      generic_read,generic_write,generic_read or generic_write,
+//    fm_create,                    fm_append
       generic_read or generic_write,generic_read or generic_write);
 var
  ca1: cardinal;

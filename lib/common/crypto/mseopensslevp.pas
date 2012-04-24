@@ -125,7 +125,7 @@ type
   ppEVP_PKEY = ^pEVP_PKEY;
   pSTACK_OFX509 = SslPtr; //todo
   EVP_PKEY = record
-    ktype: cint;
+    _type: cint;
     save_type: cint;
     references: cint;
     pkey: EVP_PKEY_PKEY;
@@ -261,6 +261,8 @@ var
                           siglen: cuint; pkey: pEVP_PKEY): cint;  cdecl;
 
   EVP_MD_CTX_copy: function(_out: pEVP_MD_CTX; _in: pEVP_MD_CTX): cint; cdecl;
+  EVP_CIPHER_CTX_rand_key: function(ctx: pEVP_CIPHER_CTX;
+                                             key: pcuchar): cint; cdecl;
 
   // Hash functions
   EVP_md_null: function: pEVP_MD; cdecl;
@@ -293,10 +295,10 @@ var
   EVP_idea_ofb: function: pEVP_CIPHER; cdecl;
 
   // EVP Key functions
-  EVP_PKEY_New: function(): EVP_PKEY; cdecl;
-  EVP_PKEY_Free: procedure(pk: EVP_PKEY); cdecl;
-  EVP_PKEY_Assign: function(pkey: EVP_PKEY; _type: cint;
-                          key: Prsa): cint; cdecl;
+  EVP_PKEY_New: function(): pEVP_PKEY; cdecl;
+  EVP_PKEY_Free: procedure(pk: pEVP_PKEY); cdecl;
+  EVP_PKEY_Assign: function(pkey: pEVP_PKEY; _type: cint;
+                          key: pRSA): cint; cdecl;
   EVP_PKEY_type: function(keytype: cint): cint; cdecl;
   EVP_PKEY_assign_RSA: function(key: pEVP_PKEY; rsa: pRSA): cint; cdecl;
   EVP_PKEY_assign_DSA: function(key: pEVP_PKEY; dsa: pDSA): cint; cdecl;
@@ -343,10 +345,11 @@ var
   EVP_SealFinal: function(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
                                            var outl: cint): cint; cdecl;
   EVP_OpenInit: function(ctx: pEVP_CIPHER_CTX;_type: pEVP_CIPHER;
-                 ek: pcuchar; ekl: cint; iv: pcuchar; priv: pEVP_PKEY): cint; cdecl;
+                 ek: pcuchar; ekl: cint; iv: pcuchar;
+                                            priv: pEVP_PKEY): cint; cdecl;
   EVP_OpenFinal: function(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
                                               var outl: cint): cint; cdecl;
-         
+
 function EVP_SealUpdate(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
                             var outl: cint; _in: pcuchar; inl: cint): cint;
 function EVP_OpenUpdate(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
@@ -358,9 +361,34 @@ function EVP_VerifyUpdate(ctx: pEVP_MD_CTX; const d: Pointer; cnt: cuint): cint;
 function EVP_MD_size(e: pEVP_MD): cint;
 function EVP_MD_CTX_size(e: pEVP_MD_CTX): cint;
 
+function encryptsymkeyrsa(ek: pcuchar; key: pcuchar; key_len: integer;
+                           	                     pubk: pEVP_PKEY): integer;
+                //like EVP_PKEY_encrypt_old(), -2 if no rsa key, -1 on error
+function decryptsymkeyrsa(key: pcuchar; ek: pcuchar; ekl: integer;
+                           	                     priv: pEVP_PKEY): integer;
+                //like EVP_PKEY_decrypt_old(), -2 if no rsa key, -1 on error
+
 implementation
 uses
- msedynload;
+ msedynload,mseopensslrsa;
+ 
+function encryptsymkeyrsa(ek: pcuchar; key: pcuchar; key_len: cint;
+                           	                     pubk: pEVP_PKEY): cint;
+begin
+ result:= -2;
+	if pubk^._type = EVP_PKEY_RSA then begin
+	 result:= RSA_public_encrypt(key_len,key,ek,pubk^.pkey.rsa,RSA_PKCS1_PADDING);
+	end;
+end;
+
+function decryptsymkeyrsa(key: pcuchar; ek: pcuchar; ekl: integer;
+                           	                     priv: pEVP_PKEY): integer;
+begin
+ result:= -2;
+	if priv^._type = EVP_PKEY_RSA then begin
+	 result:= RSA_private_decrypt(ekl,ek,key,priv^.pkey.rsa,RSA_PKCS1_PADDING);
+	end;
+end;
 
 function EVP_SealUpdate(ctx: pEVP_CIPHER_CTX; _out: pcuchar;
                             var outl: cint; _in: pcuchar; inl: cint): cint;
@@ -406,7 +434,7 @@ end;
 
 procedure init(const info: dynlibinfoty);
 const
- funcs: array[0..80] of funcinfoty = (
+ funcs: array[0..81] of funcinfoty = (
    (n: 'EVP_PKEY_new'; d: @EVP_PKEY_new),
    (n: 'EVP_PKEY_free'; d: @EVP_PKEY_free),
    (n: 'EVP_PKEY_assign'; d: @EVP_PKEY_assign),
@@ -488,7 +516,9 @@ const
 //   (n: 'EVP_SealUpdate'; d: @EVP_SealUpdate), //macro
    (n: 'EVP_SealFinal'; d: @EVP_SealFinal),
    (n: 'EVP_OpenInit'; d: @EVP_OpenInit),
-   (n: 'EVP_OpenFinal'; d: @EVP_OpenFinal)
+   (n: 'EVP_OpenFinal'; d: @EVP_OpenFinal),
+   (n: 'EVP_CIPHER_CTX_rand_key'; d: @EVP_CIPHER_CTX_rand_key)
+//   (n: 'EVP_PKEY_encrypt_old'; d: @EVP_PKEY_encrypt_old) //version dependent
   );
  funcsopt: array[0..10] of funcinfoty = (
    (n: 'EVP_MD_flags'; d: @EVP_MD_flags),
@@ -505,8 +535,8 @@ const
   );
 
 begin
- getprocaddresses(info.libhandle,funcs);
- getprocaddresses(info.libhandle,funcsopt,true);
+ getprocaddresses(info,funcs);
+ getprocaddresses(info,funcsopt,true);
 end;
   
 procedure deinit(const info: dynlibinfoty);

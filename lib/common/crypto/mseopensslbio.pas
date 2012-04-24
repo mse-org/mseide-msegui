@@ -239,8 +239,8 @@ const
   );
    
 begin
- getprocaddresses(info.libhandle,funcs);
- getprocaddresses(info.libhandle,funcsopt,true);
+ getprocaddresses(info,funcs);
+ getprocaddresses(info,funcsopt,true);
 end;
 
 initialization

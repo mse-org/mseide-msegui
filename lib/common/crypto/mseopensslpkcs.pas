@@ -165,7 +165,7 @@ const
    (n:  'd2i_PKCS8_PRIV_KEY_INFO'; d: @d2i_PKCS8_PRIV_KEY_INFO)
   );
 begin
- getprocaddresses(info.libhandle,funcs);
+ getprocaddresses(info,funcs);
 end;
 
 initialization

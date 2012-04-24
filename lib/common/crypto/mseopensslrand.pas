@@ -59,7 +59,7 @@ const
    (n: 'RAND_cleanup'; d: @RAND_cleanup)
   );
 begin
- getprocaddresses(info.libhandle,funcs);
+ getprocaddresses(info,funcs);
 end;
 
 initialization

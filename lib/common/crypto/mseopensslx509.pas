@@ -378,7 +378,7 @@ const
   );
 
 begin
- getprocaddresses(info.libhandle,funcs);
+ getprocaddresses(info,funcs);
 end;
 
 initialization

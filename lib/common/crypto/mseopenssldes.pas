@@ -41,7 +41,7 @@ const
    (n: 'DES_ecb_encrypt'; d: @DES_ecb_encrypt)
   );
 begin
- getprocaddresses(info.libhandle,funcs);
+ getprocaddresses(info,funcs);
 end;
 
 initialization

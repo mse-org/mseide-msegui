@@ -82,6 +82,7 @@ type
   ctx: pevp_cipher_ctx;
   cipher: pevp_cipher;
   digest: pevp_md;
+  headersize: integer;
   padindex: integer;
   padcount: integer;
   seekoffset: integer;
@@ -104,7 +105,9 @@ type
                   cerr_cipherinit,cerr_invalidopenmode,cerr_digestnotfound,
                   cerr_cannotwrite,cerr_invalidblocksize,
                   cerr_invalidkeylength,cerr_invaliddatalength,
-                  cerr_readheader,cerr_writeheader,cerr_nobio);
+                  cerr_readheader,cerr_writeheader,cerr_nobio,
+                  cerr_nopubkey,cerr_encrypt,cerr_norsakey,
+                  cerr_noprivkey,cerr_decrypt);
 
  getkeyeventty = procedure(const sender: tobject;
                                 var akey,asalt: string) of object;
@@ -129,6 +132,7 @@ type
    procedure setkeyphrase(const avalue: msestring);
   protected
    procedure initcipher(var aclient: cryptoclientinfoty); virtual; abstract;
+   procedure restartcipher(var aclient: cryptoclientinfoty); virtual;
    procedure error(const err: cryptoerrorty);
    procedure checkerror(const err: cryptoerrorty = cerr_error);
    procedure clearerror; inline;
@@ -144,6 +148,12 @@ type
                    const buffer; count: longint): longint; override;
    function seek(var aclient: cryptoclientinfoty;
                    const offset: int64; origin: tseekorigin): int64; override;
+   function internalread(var aclient: cryptoclientinfoty;
+                   var buffer; count: longint): longint;
+   function internalwrite(var aclient: cryptoclientinfoty;
+                   const buffer; count: longint): longint;
+   function internalseek(var aclient: cryptoclientinfoty;
+                   const offset: int64; origin: tseekorigin): int64;
    function  getsize(var aclient: cryptoclientinfoty): int64; override;
    procedure getkey(out akey: string; out asalt: string); virtual;
    procedure finalizedata(var adata: sslhandlerdatadty);
@@ -164,6 +174,12 @@ type
    property ongetkey: getkeyeventty read fongetkey write fongetkey;
  end;
 
+ asymkeyfileheader = record
+  symkeylen: integer;
+  symkey: array[0..0] of byte; //encrypted, variable length
+  iv: array[0..0] of byte; //variable length, cipher dependent
+ end;
+ 
  tsymciphercryptohandler = class(tcustomopensslcryptohandler)
   protected
    procedure initcipher(var aclient: cryptoclientinfoty); override;
@@ -198,15 +214,23 @@ type
    property keylength;
    property ongetkey;
  end;
+
+getkeydataeventty = procedure(out akey: string; out asalt: string) of object;
  
 function waitforio(const aerror: integer; var ainfo: cryptoioinfoty; 
               const atimeoutms: integer; const resultpo: pinteger = nil): boolean;
 function filebio(const aname: filenamety; const aopenmode: fileopenmodety): pbio;
 procedure closebio(const abio: pbio);
+function readpubkey(const aname: filenamety): pevp_pkey;
+function readprivkey(const aname: filenamety;
+                          const getkey: getkeydataeventty): pevp_pkey;
+procedure freekey(const akey: pevp_pkey);
  
 implementation
 uses
- sysutils,msesysintf1,msefileutils,msesocketintf,mseopensslbio,msesysintf;
+ sysutils,msesysintf1,msefileutils,msesocketintf,mseopensslbio,mseopensslpem,
+ mseopensslrsa,
+ msesysintf,msectypes;
 const
  cryptoerrormessages: array[cryptoerrorty] of msestring =(
   'OpenSSL error.',
@@ -221,7 +245,12 @@ const
   'Invalid data length.',
   'Can not read header.',
   'Can not write header.',
-  'Can not create BIO.'
+  'Can not create BIO.',
+  'No public key.',
+  'Can not encrypt.',
+  'No RSA key.',
+  'No private key.',
+  'Can not decrypt.'
   );
  
 procedure raiseerror(errco : integer; const amessage: string = '');
@@ -260,7 +289,37 @@ begin
  end;
 end;
 
-function filebio(const aname: filenamety; const aopenmode: fileopenmodety): pbio;
+function filebio(const aname: filenamety;
+                                    const aopenmode: fileopenmodety): pbio;
+var
+ str1,str2: string;
+begin
+ str1:= stringtoutf8(tosysfilepath(filepath(aname)));
+ case aopenmode of
+  fm_write: begin
+   str2:= 'a+';      //-> append, not supported
+  end;
+  fm_readwrite: begin
+   str2:= 'r+';
+  end;
+  fm_create: begin
+   str2:= 'w+';
+  end;
+  fm_append: begin
+   str2:= 'a+';       //sets write filepointer to end!
+  end
+  else begin
+   str2:= 'r'; //fm_read, fm none
+  end;
+ end;
+ result:= bio_new_file(pchar(str1),pchar(str2));
+ if result = nil then begin
+  cryptoerror(cerr_nobio);
+ end;
+end;
+{
+function filebio(const aname: filenamety;
+                                    const aopenmode: fileopenmodety): pbio;
 var
  fd: integer;
 begin
@@ -270,10 +329,71 @@ begin
   cryptoerror(cerr_nobio);
  end;
 end;
-
+}
+{
+function streambio(const aname: filenamety;
+                                   const aopenmode: fileopenmodety): pbio;
+var
+ fd: integer;
+ file1: pfile;
+ str1: string;
+begin
+ syserror(sys_openfile(aname,aopenmode,[],[],fd));
+ file1:= fdopen(fd,pchar(str1);
+ if file1 = nil then begin
+  syserror(syelasterror);
+ end;
+ bio_new(bio_s_file);
+ if bio_set
+end;
+}
 procedure closebio(const abio: pbio);
 begin
  bio_free_all(abio);
+end;
+
+function readpubkey(const aname: filenamety): pevp_pkey;
+var
+ bio: pbio;
+begin
+ bio:= filebio(aname,fm_read);
+ result:= pem_read_bio_pubkey(bio,nil,nil,nil);
+ closebio(bio);
+ if result = nil then begin
+  cryptoerror(cerr_nopubkey);
+ end;
+end;
+
+function cb(buf: pcuchar; size: cint; rwflag: cint; u: pointer): cint; cdecl;
+var
+ key,iv: string;
+begin
+ getkeydataeventty(u^)(key,iv);
+ if length(key) > size then begin
+  setlength(key,size);
+ end;
+ result:= length(key);
+ move(key[1],buf^,result);
+end;
+
+function readprivkey(const aname: filenamety;
+                          const getkey: getkeydataeventty): pevp_pkey;
+var
+ bio: pbio;
+begin
+ bio:= filebio(aname,fm_read);
+ result:= pem_read_bio_privatekey(bio,nil,@cb,@getkey);
+ closebio(bio);
+ if result = nil then begin
+  cryptoerror(cerr_noprivkey);
+ end;
+end;
+
+procedure freekey(const akey: pevp_pkey);
+begin
+ if akey <> nil then begin
+  evp_pkey_free(akey);
+ end;
 end;
 
 { tssl }
@@ -506,9 +626,12 @@ begin
   fillchar(adata,sizeof(adata),0);
  end;
 end;
-
+var testvar: psslhandlerdataty;
 procedure tcustomopensslcryptohandler.open(var aclient: cryptoclientinfoty);
+var
+ int1: integer;
 begin
+testvar:= @sslhandlerdataty(aclient.handlerdata).d;
  initsslinterface;
  with sslhandlerdataty(aclient.handlerdata).d do begin
   case aclient.stream.openmode of
@@ -526,6 +649,18 @@ begin
   evp_cipher_ctx_init(ctx);
   cipher:= checknilerror(evp_get_cipherbyname(pchar(fciphername)),
                                                      cerr_ciphernotfound);
+  checknullerror(evp_cipherinit_ex(ctx,cipher,nil,nil,nil,mode),
+                                          cerr_cipherinit);
+  if fkeylength <> 0 then begin
+   int1:= fkeylength div 8;
+   if int1 > evp_max_key_length then begin
+    error(cerr_invalidkeylength);
+   end;
+   checknullerror(evp_cipher_ctx_set_key_length(ctx,int1));
+   if (ctx^.key_len * 8 <> fkeylength) then begin
+    error(cerr_invalidkeylength);
+   end;
+  end;
 {  if (mode = 0) and (cipher^.block_size > 1) then begin
    finalizedata(sslhandlerdataty(aclient.handlerdata).d);
    error(cerr_invalidblocksize); //todo: implement block ciphers
@@ -535,6 +670,22 @@ begin
  end;
  inherited;
 end;
+
+procedure tcustomopensslcryptohandler.restartcipher(var aclient: cryptoclientinfoty);
+begin
+ with sslhandlerdataty(aclient.handlerdata).d do begin
+  checknullerror(evp_cipherinit_ex(ctx,nil,nil,nil,nil,-1)); //restart
+  padindex:= 0;
+  padcount:= 0;
+  seekoffset:= 0;
+  hasfirstblock:= false;
+  eofflag:= false;
+  if headersize > 0 then begin
+   internalseek(aclient,int64(headersize),sobeginning);
+  end;
+ end;
+end;
+
 
 procedure tcustomopensslcryptohandler.close(var aclient: cryptoclientinfoty);
 var
@@ -706,22 +857,14 @@ begin
   error(cerr_notseekable);
  end
  else begin
-  result:= inherited seek(aclient,offset,origin);
+  result:= internalseek(aclient,offset,origin);
   with sslhandlerdataty(aclient.handlerdata).d do begin
    case origin of
     socurrent: begin
      result:= result + seekoffset;
     end;
     sobeginning: begin
-     checknullerror(evp_cipherinit_ex(ctx,nil,nil,nil,nil,-1)); //restart
-     padindex:= 0;
-     padcount:= 0;
-     seekoffset:= 0;
-     hasfirstblock:= false;
-     eofflag:= false;
-     if sslco_salt in foptions then begin
-      inherited seek(aclient,int64(8),sobeginning);
-     end;
+     restartcipher(aclient);
     end;
     soend: begin
      error(cerr_notseekable);
@@ -783,7 +926,6 @@ function tcustomopensslcryptohandler.checknullerror(const avalue: integer;
 begin
  result:= avalue;
  if avalue = 0 then begin
-  checkerror(err);
   error(err);
  end;
 end;
@@ -793,13 +935,13 @@ function tcustomopensslcryptohandler.checknilerror(const avalue: pointer;
 begin
  result:= avalue;
  if avalue = nil then begin
-  checkerror(err);
   error(err);
  end;
 end;
 
 procedure tcustomopensslcryptohandler.error(const err: cryptoerrorty);
 begin
+ checkerror(err);
  raise essl.create(cryptoerrormessages[err]); 
            //there was no queued error
 end;
@@ -819,6 +961,24 @@ begin
  end;
 end;
 
+function tcustomopensslcryptohandler.internalseek(var aclient: cryptoclientinfoty;
+               const offset: int64; origin: tseekorigin): int64;
+begin
+ result:= inherited seek(aclient,offset,origin);
+end;
+
+function tcustomopensslcryptohandler.internalread(var aclient: cryptoclientinfoty;
+               var buffer; count: longint): longint;
+begin
+ result:= inherited read(aclient,buffer,count);
+end;
+
+function tcustomopensslcryptohandler.internalwrite(var aclient: cryptoclientinfoty;
+               const buffer; count: longint): longint;
+begin
+ result:= inherited write(aclient,buffer,count);
+end;
+
 { tsymciphercryptohandler}
 
 procedure tsymciphercryptohandler.initcipher(var aclient: cryptoclientinfoty);
@@ -826,23 +986,10 @@ var
  keydata: array[0..evp_max_key_length-1] of byte;
  ivdata: array[0..evp_max_iv_length-1] of byte;
  key1,salt1: string;
- int1: integer;
 begin
  with sslhandlerdataty(aclient.handlerdata).d do begin
   digest:= checknilerror(evp_get_digestbyname(pchar(fkeydigestname)),
                                                      cerr_digestnotfound);
-  checknullerror(evp_cipherinit_ex(ctx,cipher,nil,nil,nil,mode),
-                                          cerr_cipherinit);
-  if fkeylength <> 0 then begin
-   int1:= fkeylength div 8;
-   if int1 > evp_max_key_length then begin
-    error(cerr_invalidkeylength);
-   end;
-   checknullerror(evp_cipher_ctx_set_key_length(ctx,int1));
-   if (ctx^.key_len * 8 <> fkeylength) then begin
-    error(cerr_invalidkeylength);
-   end;
-  end;
   getkey(key1,salt1);
   if salt1 <> '' then begin
    salt1:= salt1 + nullstring(8-length(salt1));
@@ -850,7 +997,7 @@ begin
   if sslco_salt in foptions then begin
    if mode = 0 then begin
     setlength(salt1,8);
-    if inherited read(aclient,salt1[1],8) <> 8 then begin
+    if internalread(aclient,salt1[1],8) <> 8 then begin
      error(cerr_readheader);
     end;
    end
@@ -859,10 +1006,13 @@ begin
      setlength(salt1,8);
      checknullerror(rand_bytes(pbyte(pointer(salt1)),8));
     end;
-    if inherited write(aclient,salt1[1],8) <> 8 then begin
+    if internalwrite(aclient,salt1[1],8) <> 8 then begin
      error(cerr_writeheader);
     end;
    end;
+  end;
+  if sslco_salt in foptions then begin
+   headersize:= 0;
   end;
   checknullerror(evp_bytestokey(cipher,digest,pointer(salt1),pchar(key1),
                          length(key1),fkeygeniterationcount,@keydata,@ivdata));
@@ -874,7 +1024,79 @@ end;
 { tasymciphercryptohandler }
 
 procedure tasymciphercryptohandler.initcipher(var aclient: cryptoclientinfoty);
+var
+ asymkey: pevp_pkey;
+ keybuf: string;
+ keydata: string;
+ ivdata: array[0..evp_max_iv_length-1] of byte;
+ int1: integer;
 begin
+ with sslhandlerdataty(aclient.handlerdata).d do begin
+  asymkey:= nil;
+  try
+   if mode = 1 then begin //encrypt
+    if fpubkeyfile = '' then begin
+     error(cerr_nopubkey);
+    end;
+    asymkey:= readpubkey(fpubkeyfile);
+    setlength(keydata,evp_max_key_length);
+    checknullerror(evp_cipher_ctx_rand_key(ctx,pointer(keydata)));
+    if cipher^.iv_len > 0 then begin
+     checknullerror(rand_bytes(@ivdata,cipher^.iv_len));
+    end;
+    setlength(keybuf,evp_pkey_size(asymkey));
+    int1:= encryptsymkeyrsa(pointer(keybuf),pointer(keydata),ctx^.key_len,
+                                                                      asymkey);
+    if int1 < -1 then begin
+     error(cerr_norsakey);
+    end;
+    if int1 < 0 then begin
+     error(cerr_encrypt);
+    end;
+    if internalwrite(aclient,keybuf,int1) <> int1 then begin
+     error(cerr_writeheader);
+    end;
+    if cipher^.iv_len > 0 then begin
+     if internalwrite(aclient,ivdata,cipher^.iv_len) <> 
+                                               cipher^.iv_len then begin
+      error(cerr_writeheader);
+     end;
+    end;
+   end
+   else begin
+    if fprivkeyfile = '' then begin
+     error(cerr_nopubkey);
+    end;
+    asymkey:= readprivkey(fprivkeyfile,@getkey);
+    if asymkey^._type <> EVP_PKEY_RSA then begin
+     error(cerr_norsakey);
+    end;
+    setlength(keybuf,evp_pkey_size(asymkey));
+    if internalread(aclient, keybuf[1],length(keybuf)) <> 
+                                            length(keybuf) then begin
+     error(cerr_readheader);
+    end;
+    setlength(keydata,rsa_size(asymkey^.pkey.rsa)+2);
+    int1:= decryptsymkeyrsa(pointer(keydata),pointer(keybuf),length(keybuf),
+                                                                     asymkey);
+    if int1 < 0 then begin
+     error(cerr_decrypt);
+    end;
+    checknullerror(evp_cipher_ctx_set_key_length(ctx,int1));
+    if cipher^.iv_len > 0 then begin
+     if internalread(aclient,ivdata,cipher^.iv_len) <> 
+                                               cipher^.iv_len then begin
+      error(cerr_readheader);
+     end;
+    end;
+   end;
+   headersize:= int1+cipher^.iv_len;
+  finally
+   freekey(asymkey);
+  end;
+  checknullerror(evp_cipherinit_ex(ctx,nil,nil,pointer(keydata),
+                                       @ivdata,mode),cerr_cipherinit);
+ end;
 end;
 
 end.

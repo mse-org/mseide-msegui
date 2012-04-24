@@ -13,6 +13,17 @@ interface
 uses
  mseopenssl,msectypes;
 
+const
+ RSA_PKCS1_PADDING =	1;
+ RSA_SSLV23_PADDING =	2;
+ RSA_NO_PADDING	=	3;
+ RSA_PKCS1_OAEP_PADDING	= 4;
+ RSA_X931_PADDING	= 5;
+//* EVP_PKEY_ only */
+ RSA_PKCS1_PSS_PADDING =	6;
+
+ RSA_PKCS1_PADDING_SIZE	= 11;
+
 type
   pRSA_METHOD = pointer;
   RSA = record
@@ -51,13 +62,13 @@ var
  RSA_new_method: function(method: pRSA_METHOD): pRSA; cdecl;
  RSA_size: function(pkey: pRSA): cint; cdecl;
  RSA_check_key: function(arg0: pRSA): cint; cdecl;
- RSA_public_encrypt: function(flen: cint; from: PCharacter; _to: PCharacter;
+ RSA_public_encrypt: function(flen: cint; from: pcuchar; _to: pcuchar;
                                         rsa: pRSA; padding: cint): cint; cdecl;
- RSA_private_encrypt: function(flen: cint; from: PCharacter; _to: PCharacter;
+ RSA_private_encrypt: function(flen: cint; from: pcuchar; _to: pcuchar;
                                         rsa: pRSA; padding: cint): cint; cdecl;
- RSA_public_decrypt: function(flen: cint; from: PCharacter; _to: PCharacter;
+ RSA_public_decrypt: function(flen: cint; from: pcuchar; _to: pcuchar;
                                         rsa: pRSA; padding: cint): cint; cdecl;
- RSA_private_decrypt: function(flen: cint; from: PCharacter; _to: PCharacter;
+ RSA_private_decrypt: function(flen: cint; from: pcuchar; _to: pcuchar;
                                         rsa: pRSA; padding: cint): cint; cdecl;
  RSA_flags: function(r: pRSA): cint; cdecl;
  RSA_set_default_method: procedure(meth: pRSA_METHOD); cdecl;
@@ -101,7 +112,7 @@ const
    (n:  'i2d_RSAPrivateKey_bio'; d: @i2d_RSAPrivateKey_bio)
   );
 begin
- getprocaddresses(info.libhandle,funcs);
+ getprocaddresses(info,funcs);
 end;
 
 initialization

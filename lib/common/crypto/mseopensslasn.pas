@@ -67,7 +67,7 @@ const
    (n:  'a2i_ASN1_INTEGER'; d: @a2i_ASN1_INTEGER)
    );
 begin
- getprocaddresses(info.libhandle,funcs);
+ getprocaddresses(info,funcs);
 end;
 
 initialization

@@ -30,7 +30,7 @@ const
    (n: 'AES_cbc_encrypt'; d: @AES_cbc_encrypt)
   );
 begin
- getprocaddresses(info.libhandle,funcs);
+ getprocaddresses(info,funcs);
 end;
 
 initialization

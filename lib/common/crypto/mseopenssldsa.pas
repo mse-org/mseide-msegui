@@ -63,7 +63,7 @@ const
    (n:  'i2d_DSAPrivateKey_bio'; d: @i2d_DSAPrivateKey_bio)
   );
 begin
- getprocaddresses(info.libhandle,funcs);
+ getprocaddresses(info,funcs);
 end;
 
 initialization

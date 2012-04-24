@@ -77,7 +77,7 @@ const
    (n: 'PEM_write_bio_PKCS7'; d: @PEM_write_bio_PKCS7)
   );
 begin
- getprocaddresses(info.libhandle,funcs);
+ getprocaddresses(info,funcs);
 end;
 
 initialization

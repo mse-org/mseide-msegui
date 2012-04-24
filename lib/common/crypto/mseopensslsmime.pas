@@ -30,7 +30,7 @@ const
    (n: 'SMIME_read_PKCS7'; d: @SMIME_read_PKCS7)
   );
 begin
- getprocaddresses(info.libhandle,funcs);
+ getprocaddresses(info,funcs);
 end;
 
 initialization

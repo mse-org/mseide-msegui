@@ -371,7 +371,7 @@ const
    (n: 'BN_to_ASN1_ENUMERATED'; d: @BN_to_ASN1_ENUMERATED)
    );
 begin
- getprocaddresses(info.libhandle,funcs);
+ getprocaddresses(info,funcs);
 end;
 
 initialization

@@ -125,7 +125,7 @@ type
 
  // Password ask callback for I/O function prototipe
  // It must fill buffer with password and return password length
- TPWCallbackFunction = function(buffer: PCharacter; length: cint;
+ TPWCallbackFunction = function(buffer: pcuchar; length: cint;
                                 verify: cint; data: pointer): cint; cdecl;
 
   
