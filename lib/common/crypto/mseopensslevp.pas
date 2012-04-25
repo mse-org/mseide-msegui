@@ -337,8 +337,8 @@ var
   EVP_MD_CTX_destroy: procedure(ctx: pEVP_MD_CTX);cdecl;
 
   EVP_BytesToKey: function(const _type: pEVP_CIPHER; const md: pEVP_MD;
-             		salt: pcchar; const data: pcchar; datalen: cint;
-            		 count: cint; key: pcchar; iv: pcchar): cint; cdecl;
+             		salt: pcuchar; const data: pcuchar; datalen: cint;
+            		 count: cint; key: pcuchar; iv: pcuchar): cint; cdecl;
   EVP_SealInit: function(ctx: pEVP_CIPHER_CTX; _type: pEVP_CIPHER;
                            ek: ppcuchar; ekl: pcint; iv: pcuchar;
                               pubkey: ppEVP_PKEY; npubk: cint): cint; cdecl;

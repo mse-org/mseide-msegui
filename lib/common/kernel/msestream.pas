@@ -36,7 +36,7 @@ type
 
  cryptoclientstatety = (ccs_open);
  cryptoclientstatesty = set of cryptoclientstatety;
- cryptohandlerdataty = array[0..47] of pointer;
+ cryptohandlerdataty = array[0..15] of pointer;
  
  cryptoclientinfoty = record
   stream: tmsefilestream;
@@ -1156,12 +1156,14 @@ end;
 function tmsefilestream.readdatastring: string;
 begin
  setlength(result,size-position);
- setlength(result,read(result[1],length(result)));
+ setlength(result,read(pointer(result)^,length(result)));
 end;
 
 procedure tmsefilestream.writedatastring(const value: string);
 begin
- writebuffer(value[1],length(value));
+ if value <> '' then begin
+  writebuffer(pointer(value)^,length(value));
+ end;
 end;
 
 procedure tmsefilestream.SetSize(const NewSize: Int64);

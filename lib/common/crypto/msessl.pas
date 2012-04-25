@@ -53,19 +53,21 @@ type
   protected
    class procedure internalunlink(var ainfo: cryptoioinfoty); override;
    class procedure internalthreadterminate; override;
-   class procedure connect(var ainfo: cryptoioinfoty; const atimeoutms: integer);  override;
+   class procedure connect(var ainfo: cryptoioinfoty;
+                                       const atimeoutms: integer);  override;
    class procedure accept(var ainfo: cryptoioinfoty; const atimeoutms: integer);  override;
    class function write(var ainfo: cryptoioinfoty; const buffer: pointer;
            const count: integer; const atimeoutms: integer): integer; override;
-   class function read(var ainfo: cryptoioinfoty; const buffer: pointer; const count: integer; 
-                  const atimeoutms: integer): integer; override;
+   class function read(var ainfo: cryptoioinfoty; const buffer: pointer;
+           const count: integer; const atimeoutms: integer): integer; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure link(const arxfd,atxfd: integer; out ainfo: cryptoioinfoty); override;
+   procedure link(const arxfd,atxfd: integer;
+                                out ainfo: cryptoioinfoty); override;
   published
-   property protocols: sslprotocolsty read fprotocols write fprotocols default
-                                   defaultsslprotocols;
+   property protocols: sslprotocolsty read fprotocols write fprotocols
+                                                default defaultsslprotocols;
    property cipherlist: tstringlist read fcipherlist write setcipherlist;
    property certfile: filenamety read fcertfile write fcertfile;
    property privkeyfile: filenamety read fprivkeyfile write fprivkeyfile;
@@ -77,6 +79,14 @@ type
                  ctk_cfb, //cipher feedback
                  ctk_ofb);//output feedback
 
+ sslhandlerstatety = (sslhs_hasfirstblock,sslhs_eofflag,sslhs_finalized);
+ sslhandlerstatesty = set of sslhandlerstatety;
+ 
+ padbufty = array[0..3*evp_max_block_length-1] of byte;
+ keybufty = array[0..evp_max_key_length-1] of byte;
+ ivbufty = array[0..evp_max_iv_length-1] of byte;
+ blockbufty = array[0..evp_max_block_length-1] of byte;
+ 
  sslhandlerdatadty = record
   mode: integer;
   ctx: pevp_cipher_ctx;
@@ -86,10 +96,10 @@ type
   padindex: integer;
   padcount: integer;
   seekoffset: integer;
-  padbuf: array[0..3*evp_max_block_length-1] of byte;
-  hasfirstblock: boolean;
-  eofflag: boolean;
-//  kind: cipherkindty;
+  padbuf: ^padbufty;
+  keybuf: ^keybufty;
+  ivbuf: ^ivbufty;
+  state: sslhandlerstatesty;
  end;
  psslhandlerdataty = ^sslhandlerdataty;
  {$if sizeof(sslhandlerdatadty) > sizeof(cryptohandlerdataty)} 
@@ -107,12 +117,14 @@ type
                   cerr_invalidkeylength,cerr_invaliddatalength,
                   cerr_readheader,cerr_writeheader,cerr_nobio,
                   cerr_nopubkey,cerr_encrypt,cerr_norsakey,
-                  cerr_noprivkey,cerr_decrypt);
+                  cerr_noprivkey,cerr_decrypt,cerr_nokey,
+                  cerr_cannotrestart);
 
  getkeyeventty = procedure(const sender: tobject;
                                 var akey,asalt: string) of object;
 
- opensslcryptooptionty = (sslco_salt);
+ opensslcryptooptionty = (sslco_salt,sslco_canrestart); 
+                                     //stores key and iv for seek(0)
  opensslcryptooptionsty = set of opensslcryptooptionty;
 const
  defaultopensslcryptooptions = [sslco_salt];
@@ -121,8 +133,6 @@ type
  tcustomopensslcryptohandler = class(tbasecryptohandler)
   private
    fciphername: string;
-   fkeydigestname: string;
-   fkeygeniterationcount: integer;
    fkey: string;
    fsalt: string;
    fkeyphrase: msestring;
@@ -156,38 +166,43 @@ type
                    const offset: int64; origin: tseekorigin): int64;
    function  getsize(var aclient: cryptoclientinfoty): int64; override;
    procedure getkey(out akey: string; out asalt: string); virtual;
+   procedure initializedata(var adata: sslhandlerdatadty);
    procedure finalizedata(var adata: sslhandlerdatadty);
   public
    constructor create(aowner: tcomponent); override;
    property key: string read fkey write fkey;
-   property salt: string read fsalt write fsalt;
    property options: opensslcryptooptionsty read foptions 
                              write foptions default defaultopensslcryptooptions;
    property ciphername: string read fciphername write fciphername;
-   property keydigestname: string read fkeydigestname write fkeydigestname;
-                         //default md5
-   property keygeniterationcount: integer read fkeygeniterationcount 
-                 write fkeygeniterationcount default defaultkeygeniterationcount;
    property keyphrase: msestring read fkeyphrase write setkeyphrase;
    property keylength: integer read fkeylength write fkeylength default 0;
                                           //bits, 0 -> use cipher default
    property ongetkey: getkeyeventty read fongetkey write fongetkey;
  end;
-
+{
  asymkeyfileheader = record
   symkeylen: integer;
   symkey: array[0..0] of byte; //encrypted, variable length
   iv: array[0..0] of byte; //variable length, cipher dependent
  end;
- 
+}
  tsymciphercryptohandler = class(tcustomopensslcryptohandler)
+  private
+   fkeydigestname: string;
+   fkeygeniterationcount: integer;
   protected
    procedure initcipher(var aclient: cryptoclientinfoty); override;
   published
+   constructor create(aowner: tcomponent); override;
+   property salt: string read fsalt write fsalt;
+   property keydigestname: string read fkeydigestname write fkeydigestname;
+                         //default md5
+   property keygeniterationcount: integer read fkeygeniterationcount 
+                 write fkeygeniterationcount default defaultkeygeniterationcount;
    property options;
    property ciphername;
-   property keydigestname;
-   property keygeniterationcount;
+//   property keydigestname;
+//   property keygeniterationcount;
    property keyphrase;
    property keylength;
    property ongetkey;
@@ -208,8 +223,8 @@ type
                       //use '"first" "second" "third"' for multiple
    property options;
    property ciphername;
-   property keydigestname;
-   property keygeniterationcount;
+//   property keydigestname;
+//   property keygeniterationcount;
    property keyphrase;
    property keylength;
    property ongetkey;
@@ -229,7 +244,7 @@ procedure freekey(const akey: pevp_pkey);
 implementation
 uses
  sysutils,msesysintf1,msefileutils,msesocketintf,mseopensslbio,mseopensslpem,
- mseopensslrsa,
+ mseopensslrsa,msebits,
  msesysintf,msectypes;
 const
  cryptoerrormessages: array[cryptoerrorty] of msestring =(
@@ -250,7 +265,9 @@ const
   'Can not encrypt.',
   'No RSA key.',
   'No private key.',
-  'Can not decrypt.'
+  'Can not decrypt.',
+  'No key.',
+  'Can not restart.'
   );
  
 procedure raiseerror(errco : integer; const amessage: string = '');
@@ -610,28 +627,50 @@ end;
 
 constructor tcustomopensslcryptohandler.create(aowner: tcomponent);
 begin
- fkeydigestname:= 'md5';
- fkeygeniterationcount:= defaultkeygeniterationcount;
  foptions:= defaultopensslcryptooptions;
  inherited;
 end;
 
-procedure tcustomopensslcryptohandler.finalizedata(var adata: sslhandlerdatadty);
+procedure tcustomopensslcryptohandler.initializedata(
+                                    var adata: sslhandlerdatadty);
+begin
+ with adata do begin
+  getmem(ctx,sizeof(ctx^));
+  evp_cipher_ctx_init(ctx);
+  getmem(padbuf,sizeof(padbuf^));
+  getmem(keybuf,sizeof(keybuf^));
+  getmem(ivbuf,sizeof(ivbuf^));
+ end;
+end;
+
+procedure tcustomopensslcryptohandler.finalizedata(
+                                            var adata: sslhandlerdatadty);
 begin
  with adata do begin
   if ctx <> nil then begin
    evp_cipher_ctx_cleanup(ctx);
    freemem(ctx);
   end;
+  if padbuf <> nil then begin
+   fillchar(padbuf^,sizeof(padbuf^),0);  
+   freemem(padbuf);
+  end;
+  if keybuf <> nil then begin
+   fillchar(keybuf^,sizeof(keybuf^),0);  
+   freemem(keybuf);
+  end;
+  if ivbuf <> nil then begin
+   fillchar(ivbuf^,sizeof(ivbuf^),0);  
+   freemem(ivbuf);
+  end;
   fillchar(adata,sizeof(adata),0);
  end;
 end;
-var testvar: psslhandlerdataty;
+
 procedure tcustomopensslcryptohandler.open(var aclient: cryptoclientinfoty);
 var
  int1: integer;
 begin
-testvar:= @sslhandlerdataty(aclient.handlerdata).d;
  initsslinterface;
  with sslhandlerdataty(aclient.handlerdata).d do begin
   case aclient.stream.openmode of
@@ -645,8 +684,7 @@ testvar:= @sslhandlerdataty(aclient.handlerdata).d;
     error(cerr_invalidopenmode); //todo: allow append
    end;
   end;
-  getmem(ctx,sizeof(ctx^));
-  evp_cipher_ctx_init(ctx);
+  initializedata(sslhandlerdataty(aclient.handlerdata).d);
   cipher:= checknilerror(evp_get_cipherbyname(pchar(fciphername)),
                                                      cerr_ciphernotfound);
   checknullerror(evp_cipherinit_ex(ctx,cipher,nil,nil,nil,mode),
@@ -667,19 +705,41 @@ testvar:= @sslhandlerdataty(aclient.handlerdata).d;
   end;
 }
   initcipher(aclient);
+  if not (sslco_canrestart in foptions) then begin
+   fillchar(keybuf^,sizeof(keybuf^),0);
+   fillchar(ivbuf^,sizeof(ivbuf^),0);
+  end;
  end;
  inherited;
 end;
 
-procedure tcustomopensslcryptohandler.restartcipher(var aclient: cryptoclientinfoty);
+procedure tcustomopensslcryptohandler.restartcipher(
+                                      var aclient: cryptoclientinfoty);
+var
+ int1: integer;
+ buffer: blockbufty;
 begin
+ if not (sslco_canrestart in foptions) then begin
+  error(cerr_cannotrestart);
+ end;
  with sslhandlerdataty(aclient.handlerdata).d do begin
-  checknullerror(evp_cipherinit_ex(ctx,nil,nil,nil,nil,-1)); //restart
+  if not (sslhs_finalized in state) and 
+            (aclient.stream.openmode in [fm_write,fm_create])then begin
+   checknullerror(evp_cipherfinal(ctx,@buffer,int1));
+   if int1 > 0 then begin
+    if inherited write(aclient,buffer,int1) <> int1 then begin
+     error(cerr_cannotwrite);
+    end;
+   end;
+  end;
+//  checknullerror(evp_cipherinit_ex(ctx,nil,nil,nil,nil,-1)); //restart
+  checknullerror(evp_cipherinit_ex(ctx,nil,nil,pointer(keybuf),
+                               pointer(ivbuf),mode),cerr_cipherinit);
+  ctx^.iv:= ctx^.iov;
   padindex:= 0;
   padcount:= 0;
   seekoffset:= 0;
-  hasfirstblock:= false;
-  eofflag:= false;
+  state:= [];
   if headersize > 0 then begin
    internalseek(aclient,int64(headersize),sobeginning);
   end;
@@ -689,7 +749,7 @@ end;
 
 procedure tcustomopensslcryptohandler.close(var aclient: cryptoclientinfoty);
 var
- buffer: array[0..evp_max_block_length-1] of byte;
+ buf1: blockbufty;
  int1: integer;
 begin
  try
@@ -697,10 +757,13 @@ begin
    if ctx <> nil then begin
     if (aclient.stream.openmode in [fm_write,fm_create]) and
                (cipher <> nil) then begin
-     checknullerror(evp_cipherfinal(ctx,@buffer,int1));
-     if int1 > 0 then begin
-      if inherited write(aclient,buffer,int1) <> int1 then begin
-       error(cerr_cannotwrite);
+     if not (sslhs_finalized in state) then begin
+      checknullerror(evp_cipherfinal(ctx,@buf1,int1));
+      include(state,sslhs_finalized);
+      if int1 > 0 then begin
+       if inherited write(aclient,buf1,int1) <> int1 then begin
+        error(cerr_cannotwrite);
+       end;
       end;
      end;
     end;
@@ -715,8 +778,8 @@ begin
  end;
 end;
 
-function tcustomopensslcryptohandler.read(var aclient: cryptoclientinfoty; var buffer;
-               count: longint): longint;
+function tcustomopensslcryptohandler.read(var aclient: cryptoclientinfoty;
+                                         var buffer; count: longint): longint;
 var
  ps,pd: pbyte;
  blocksize: integer;
@@ -732,7 +795,7 @@ var
     if int1 > int2 then begin
      int1:= int2;
     end;
-    move(padbuf[padindex],pd^,int1);
+    move(padbuf^[padindex],pd^,int1);
     padindex:= padindex + int1;
     result:= result + int1;
     count:= count - int1;
@@ -758,22 +821,22 @@ begin
    if count > 0 then begin
     int1:= count;
     if blocksize > 1 then begin
-     if eofflag then begin
+     if sslhs_eofflag in state then begin
       exit;
      end;
      int1:= ((count+blocksize-1) div blocksize) * blocksize; //whole blocks
-     if not hasfirstblock then begin
+     if not (sslhs_hasfirstblock in state) then begin
       int1:= int1+blocksize;
-      hasfirstblock:= true;
+      include(state,sslhs_hasfirstblock);
      end;
      getmem(po1,int1); 
      ps:= po1;
      try       
       int2:= inherited read(aclient,(ps)^,int1);
-      eofflag:= int2 < int1;
+      updatebit1(longword(state),ord(sslhs_eofflag),int2 < int1);
       seekoffset:= seekoffset + ((count div blocksize) * blocksize - int2);
                        //set to zero later if eofflag
-      pb:= @padbuf;
+      pb:= pointer(padbuf);
       padindex:= 0;
       padcount:= 0;
       int4:= (int2 div blocksize - 1) * blocksize; 
@@ -786,6 +849,9 @@ begin
        inc(pd,int3);
        dec(count,int3);
        inc(ps,int4);
+      end
+      else begin
+       int4:= 0;
       end;
       int4:= int2-int4;
       if int4 > 0 then begin
@@ -793,12 +859,13 @@ begin
                                             pointer(ps),int4));
        inc(pb,padcount);
       end;
-      if eofflag then begin
+      if sslhs_eofflag in state then begin
        checknullerror(evp_cipherfinal(ctx,pointer(pb),int3));
+       include(state,sslhs_finalized);
        padcount:= padcount + int3;
       end;
       checkpadding;
-      if eofflag then begin
+      if sslhs_eofflag in state then begin
        seekoffset:= 0;
       end;
      finally
@@ -835,10 +902,19 @@ begin
    getmem(po1,count+ctx^.cipher^.block_size);
    try
     checknullerror(evp_cipherupdate(ctx,po1,int1,@buffer,count));
-    result:= inherited write(aclient,po1^,int1);
-    if result = int1 then begin
+    if int1 > 0 then begin
+     result:= inherited write(aclient,po1^,int1);
+     if result = int1 then begin
+      result:= count;
+      seekoffset:= seekoffset + count - int1;
+     end
+     else begin
+      error(cerr_cannotwrite);
+     end;
+    end
+    else begin
      result:= count;
-     seekoffset:= seekoffset + count - int1;
+     seekoffset:= seekoffset + count;
     end;
    finally
     freemem(po1);
@@ -889,7 +965,6 @@ begin
   end;
  end; 
 end;
-
 
 procedure tcustomopensslcryptohandler.checkerror(const err: cryptoerrorty);
 const
@@ -981,23 +1056,33 @@ end;
 
 { tsymciphercryptohandler}
 
+constructor tsymciphercryptohandler.create(aowner: tcomponent);
+begin
+ fkeydigestname:= 'md5';
+ fkeygeniterationcount:= defaultkeygeniterationcount;
+ inherited;
+end;
+
 procedure tsymciphercryptohandler.initcipher(var aclient: cryptoclientinfoty);
 var
- keydata: array[0..evp_max_key_length-1] of byte;
- ivdata: array[0..evp_max_iv_length-1] of byte;
+// keydata: keybufty;
+// ivdata: ivbufty;
  key1,salt1: string;
 begin
  with sslhandlerdataty(aclient.handlerdata).d do begin
   digest:= checknilerror(evp_get_digestbyname(pchar(fkeydigestname)),
                                                      cerr_digestnotfound);
   getkey(key1,salt1);
+  if key1 = '' then begin
+   error(cerr_nokey);
+  end;
   if salt1 <> '' then begin
    salt1:= salt1 + nullstring(8-length(salt1));
   end;
   if sslco_salt in foptions then begin
    if mode = 0 then begin
     setlength(salt1,8);
-    if internalread(aclient,salt1[1],8) <> 8 then begin
+    if internalread(aclient,pointer(salt1)^,8) <> 8 then begin
      error(cerr_readheader);
     end;
    end
@@ -1006,18 +1091,19 @@ begin
      setlength(salt1,8);
      checknullerror(rand_bytes(pbyte(pointer(salt1)),8));
     end;
-    if internalwrite(aclient,salt1[1],8) <> 8 then begin
+    if internalwrite(aclient,pointer(salt1)^,8) <> 8 then begin
      error(cerr_writeheader);
     end;
    end;
   end;
   if sslco_salt in foptions then begin
-   headersize:= 0;
+   headersize:= 8;
   end;
-  checknullerror(evp_bytestokey(cipher,digest,pointer(salt1),pchar(key1),
-                         length(key1),fkeygeniterationcount,@keydata,@ivdata));
-  checknullerror(evp_cipherinit_ex(ctx,nil,nil,@keydata,
-                                                @ivdata,mode),cerr_cipherinit);
+  checknullerror(evp_bytestokey(cipher,digest,pointer(salt1),pointer(key1),
+                         length(key1),fkeygeniterationcount,
+                                               pointer(keybuf),pointer(ivbuf)));
+  checknullerror(evp_cipherinit_ex(ctx,nil,nil,pointer(keybuf),pointer(ivbuf),
+                                                         mode),cerr_cipherinit);
  end;
 end;
 
@@ -1026,10 +1112,10 @@ end;
 procedure tasymciphercryptohandler.initcipher(var aclient: cryptoclientinfoty);
 var
  asymkey: pevp_pkey;
- keybuf: string;
+ keybuf1: string;
  keydata: string;
- ivdata: array[0..evp_max_iv_length-1] of byte;
- int1: integer;
+// ivdata: ivbufty;
+ int1,int2: integer;
 begin
  with sslhandlerdataty(aclient.handlerdata).d do begin
   asymkey:= nil;
@@ -1039,13 +1125,13 @@ begin
      error(cerr_nopubkey);
     end;
     asymkey:= readpubkey(fpubkeyfile);
-    setlength(keydata,evp_max_key_length);
-    checknullerror(evp_cipher_ctx_rand_key(ctx,pointer(keydata)));
+//    setlength(keydata,evp_max_key_length);
+    checknullerror(evp_cipher_ctx_rand_key(ctx,pointer(keybuf)));
     if cipher^.iv_len > 0 then begin
-     checknullerror(rand_bytes(@ivdata,cipher^.iv_len));
+     checknullerror(rand_bytes(pointer(ivbuf),cipher^.iv_len));
     end;
-    setlength(keybuf,evp_pkey_size(asymkey));
-    int1:= encryptsymkeyrsa(pointer(keybuf),pointer(keydata),ctx^.key_len,
+    setlength(keybuf1,evp_pkey_size(asymkey));
+    int1:= encryptsymkeyrsa(pointer(keybuf1),pointer(keybuf),ctx^.key_len,
                                                                       asymkey);
     if int1 < -1 then begin
      error(cerr_norsakey);
@@ -1053,11 +1139,11 @@ begin
     if int1 < 0 then begin
      error(cerr_encrypt);
     end;
-    if internalwrite(aclient,keybuf,int1) <> int1 then begin
+    if internalwrite(aclient,pointer(keybuf1)^,int1) <> int1 then begin
      error(cerr_writeheader);
     end;
     if cipher^.iv_len > 0 then begin
-     if internalwrite(aclient,ivdata,cipher^.iv_len) <> 
+     if internalwrite(aclient,ivbuf^,cipher^.iv_len) <> 
                                                cipher^.iv_len then begin
       error(cerr_writeheader);
      end;
@@ -1071,31 +1157,32 @@ begin
     if asymkey^._type <> EVP_PKEY_RSA then begin
      error(cerr_norsakey);
     end;
-    setlength(keybuf,evp_pkey_size(asymkey));
-    if internalread(aclient, keybuf[1],length(keybuf)) <> 
-                                            length(keybuf) then begin
+    int1:= evp_pkey_size(asymkey);
+    setlength(keybuf1,int1);
+    if internalread(aclient,pointer(keybuf1)^,int1) <> int1 then begin
      error(cerr_readheader);
     end;
     setlength(keydata,rsa_size(asymkey^.pkey.rsa)+2);
-    int1:= decryptsymkeyrsa(pointer(keydata),pointer(keybuf),length(keybuf),
+    int2:= decryptsymkeyrsa(pointer(keydata),pointer(keybuf1),length(keybuf1),
                                                                      asymkey);
-    if int1 < 0 then begin
+    if (int2 < 0) or (int2 > sizeof(keybuf^)) then begin
      error(cerr_decrypt);
     end;
-    checknullerror(evp_cipher_ctx_set_key_length(ctx,int1));
+    checknullerror(evp_cipher_ctx_set_key_length(ctx,int2));
+    move(pointer(keydata)^,keybuf^,int2);
     if cipher^.iv_len > 0 then begin
-     if internalread(aclient,ivdata,cipher^.iv_len) <> 
+     if internalread(aclient,ivbuf^,cipher^.iv_len) <> 
                                                cipher^.iv_len then begin
       error(cerr_readheader);
      end;
     end;
    end;
-   headersize:= int1+cipher^.iv_len;
+   headersize:= int1 + cipher^.iv_len;
   finally
    freekey(asymkey);
   end;
-  checknullerror(evp_cipherinit_ex(ctx,nil,nil,pointer(keydata),
-                                       @ivdata,mode),cerr_cipherinit);
+  checknullerror(evp_cipherinit_ex(ctx,nil,nil,pointer(keybuf),
+                                       pointer(ivbuf),mode),cerr_cipherinit);
  end;
 end;
 
