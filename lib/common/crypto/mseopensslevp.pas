@@ -376,9 +376,9 @@ function encryptsymkeyrsa(ek: pcuchar; key: pcuchar; key_len: cint;
                            	                     pubk: pEVP_PKEY): cint;
 begin
  result:= -2;
-	if pubk^._type = EVP_PKEY_RSA then begin
-	 result:= RSA_public_encrypt(key_len,key,ek,pubk^.pkey.rsa,RSA_PKCS1_PADDING);
-	end;
+ if pubk^._type = EVP_PKEY_RSA then begin
+  result:= RSA_public_encrypt(key_len,key,ek,pubk^.pkey.rsa,RSA_PKCS1_PADDING);
+ end;
 end;
 
 function decryptsymkeyrsa(key: pcuchar; ek: pcuchar; ekl: integer;
