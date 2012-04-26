@@ -1162,7 +1162,7 @@ begin
     if internalread(aclient,pointer(keybuf1)^,int1) <> int1 then begin
      error(cerr_readheader);
     end;
-    setlength(keydata,rsa_size(asymkey^.pkey.rsa)+2);
+    setlength(keydata,rsa_size(EVP_PKEY_get1_RSA(asymkey))+2);
     int2:= decryptsymkeyrsa(pointer(keydata),pointer(keybuf1),length(keybuf1),
                                                                      asymkey);
     if (int2 < 0) or (int2 > sizeof(keybuf^)) then begin

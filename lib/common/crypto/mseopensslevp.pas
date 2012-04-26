@@ -124,10 +124,12 @@ type
   end;
   ppEVP_PKEY = ^pEVP_PKEY;
   pSTACK_OFX509 = SslPtr; //todo
-  EVP_PKEY = record
+  EVP_PKEY = record       //for version 1.0
     _type: cint;
     save_type: cint;
     references: cint;
+    ameth: SslPtr;
+    engine: pENGINE;
     pkey: EVP_PKEY_PKEY;
     save_parameters: cint;
     attributes: pSTACK_OFX509;
@@ -377,7 +379,8 @@ function encryptsymkeyrsa(ek: pcuchar; key: pcuchar; key_len: cint;
 begin
  result:= -2;
  if pubk^._type = EVP_PKEY_RSA then begin
-  result:= RSA_public_encrypt(key_len,key,ek,pubk^.pkey.rsa,RSA_PKCS1_PADDING);
+  result:= RSA_public_encrypt(key_len,key,ek,EVP_PKEY_get1_RSA(pubk),
+                               RSA_PKCS1_OAEP_PADDING{RSA_PKCS1_PADDING});
  end;
 end;
 
@@ -385,9 +388,10 @@ function decryptsymkeyrsa(key: pcuchar; ek: pcuchar; ekl: integer;
                            	                     priv: pEVP_PKEY): integer;
 begin
  result:= -2;
-	if priv^._type = EVP_PKEY_RSA then begin
-	 result:= RSA_private_decrypt(ekl,ek,key,priv^.pkey.rsa,RSA_PKCS1_PADDING);
-	end;
+ if priv^._type = EVP_PKEY_RSA then begin
+  result:= RSA_private_decrypt(ekl,ek,key,EVP_PKEY_get1_RSA(priv),
+                      RSA_PKCS1_OAEP_PADDING{RSA_PKCS1_PADDING});
+ end;
 end;
 
 function EVP_SealUpdate(ctx: pEVP_CIPHER_CTX; _out: pcuchar;

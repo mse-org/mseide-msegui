@@ -348,7 +348,7 @@ begin
  //init library
  Ssl_Library_Init;
  Ssl_Load_Error_Strings;
-// OPENSSL_add_all_algorithms_noconf;
+ OPENSSL_add_all_algorithms_noconf;
  pointer(rand_screen):= getprocedureaddress(
                       libinfoutil.libhandle,'RAND_screen');
  if assigned(rand_screen) then begin

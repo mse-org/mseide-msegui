@@ -53,7 +53,7 @@ type
 	bignum_data: ^byte;
 	blinding: pBN_BLINDING;
   end;
-
+  pRSA = ^RSA;
 
 var
   // RSA function
