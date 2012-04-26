@@ -64,6 +64,11 @@ type
    procedure moveitem(const aitem: phashdataty);
   protected
    fstate: hashliststatesty;
+  {$ifdef mse_debug_hash}
+   procedure checkhash;
+   procedure checkexists(const aitem: phashdataty);
+   procedure checknotexists(const aitem: phashdataty);
+  {$endif}
    property data: pointer read fdata;
    property assignedroot: ptruint read fassignedroot;
    function getdatapo(const aoffset: longword): pointer;
@@ -578,6 +583,9 @@ var
  puint1: ptruint;
 begin
  if avalue <> fcapacity then begin
+{$ifdef mse_debug_hash}
+  checkhash;
+{$endif}
   if avalue < fcount then begin
    raise exception.create('Capacity < count.');
   end;
@@ -634,6 +642,9 @@ begin
 //   fhashshift:= sizeof(hashvaluety)*8 - int2;
    rehash;
   end;
+{$ifdef mse_debug_hash}
+  checkhash;
+{$endif}
  end; 
 end;
 
@@ -653,10 +664,14 @@ begin
                            (po1^.header.hash and fmask)*sizeof(ptruint));
   puint2:= po2^;
   po1^.header.nexthash:= puint2;
+  po1^.header.prevhash:= 0;
   po2^:= pchar(po1) - fdata;
   phashdataty(pchar(fdata)+puint2)^.header.prevhash:= po2^;
   inc(pchar(po1),puint1);
  end;
+{$ifdef mse_debug_hash}
+ checkhash;
+{$endif}
 end;
 
 procedure thashdatalist.grow;
@@ -669,6 +684,9 @@ var
  puint1,puint2: ptruint;
  hash1: hashvaluety;
 begin
+{$ifdef mse_debug_hash}
+  checkhash;
+{$endif}
  if count = capacity then begin
   grow;
  end;
@@ -682,6 +700,9 @@ begin
  else begin
   result:= phashdataty(pchar(fdata) + count * frecsize + frecsize);
  end;
+{$ifdef mse_debug_hash}
+ checknotexists(result);
+{$endif}
  result^.header.prevhash:= 0;
  hash1:= hashkey(akey);
  result^.header.hash:= hash1;
@@ -698,6 +719,9 @@ begin
                                              result^.header.nextlist;
                          //-memory offset to previous item
  fassignedroot:= puint1; //new item is root
+{$ifdef mse_debug_hash}
+ checkhash;
+{$endif}
 end;
 
 procedure thashdatalist.internaldeleteitem(const aitem: phashdataty);
@@ -705,6 +729,9 @@ var
  puint1: ptruint;
 begin
  if aitem <> nil then begin
+{$ifdef mse_debug_hash}
+  checkexists(aitem);
+{$endif}
   if pointer(aitem) = pointer(pchar(fdata) + fcurrentitem) then begin
    fcurrentitem:= 0;
   end;
@@ -713,6 +740,14 @@ begin
   end;
   puint1:= pchar(aitem) - fdata;
   with aitem^.header do begin
+{$ifdef mse_debug_hash}
+   if nexthash <> 0 then begin
+    checkexists(phashdataty(pchar(fdata)+nexthash));
+   end;
+   if prevhash <> 0 then begin
+    checkexists(phashdataty(pchar(fdata)+prevhash));
+   end;
+{$endif}
    if nexthash <> 0 then begin
     phashdataty(pchar(fdata)+nexthash)^.header.prevhash:= prevhash;
    end;
@@ -735,6 +770,9 @@ begin
   end;
   fdeletedroot:= puint1;
   dec(fcount);
+{$ifdef mse_debug_hash}
+  checkhash;
+{$endif}
  end;
 end;
 
@@ -858,6 +896,9 @@ var
  uint1: ptruint;
  po1: phashdataty;
 begin
+{$ifdef mse_debug_hash}
+ checkhash;
+{$endif}
  po1:= nil;
  if count > 0 then begin
   ha1:= hashkey(akey);
@@ -1043,6 +1084,99 @@ function thashdatalist.scramble(const avalue: hashvaluety): hashvaluety;
 begin
  result:= ((avalue xor (avalue shr 8)) xor (avalue shr 16)) xor (avalue shr 24);
 end;
+
+{$ifdef mse_debug_hash}
+procedure thashdatalist.checkhash;
+var
+ int1,int2,int3: integer;
+ po1,po2: phashdataty;
+ uint1: ptruint;
+begin
+ if (fmask <> 0) and (fhashtable <> nil) then begin
+  int3:= 0;
+  for int1:= 0 to fmask do begin
+   uint1:= fhashtable[int1];
+   if uint1 <> 0 then begin
+    inc(int3);
+    po1:= phashdataty(pchar(fdata) + uint1);
+    if po1^.header.prevhash <> 0 then begin
+     raise exception.create('prevhash is not 0.');
+    end;
+    int2:= 0;
+    while po1^.header.nexthash <> 0 do begin
+     po2:= po1;
+     po1:= phashdataty(pchar(fdata) + po1^.header.nexthash);
+     if phashdataty(pchar(fdata)+po1^.header.prevhash) <> po2 then begin
+      raise exception.create('Wrong hash backlink.');
+     end;
+     inc(int2);
+     inc(int3);
+     if int2 > count then begin
+      raise exception.create('Hash loop.');
+     end;
+    end;
+   end;
+  end;
+  if int3 <> count then begin
+   raise exception.create('Wrong hash count.');
+  end;
+ end;
+end;
+
+procedure thashdatalist.checkexists(const aitem: phashdataty);
+var
+ int1: integer;
+ po1: phashdataty;
+ uint1: ptruint;
+begin
+ checkhash;
+ if fmask <> 0 then begin
+  for int1:= 0 to fmask do begin
+   uint1:= fhashtable[int1];
+   if uint1 <> 0 then begin
+    po1:= phashdataty(pchar(fdata) + uint1);
+    if po1 = aitem then begin
+     exit;
+    end;
+    while po1^.header.nexthash <> 0 do begin
+     po1:= phashdataty(pchar(fdata) + po1^.header.nexthash);
+     if po1 = aitem then begin
+      exit;
+     end;
+    end;
+   end;
+  end;
+  raise exception.create('Hash item does not exist.');
+ end;
+end;
+
+procedure thashdatalist.checknotexists(const aitem: phashdataty);
+var
+ int1: integer;
+ po1: phashdataty;
+ uint1: ptruint;
+begin
+ checkhash;
+ if fmask <> 0 then begin
+  for int1:= 0 to fmask do begin
+   uint1:= fhashtable[int1];
+   if uint1 <> 0 then begin
+    po1:= phashdataty(pchar(fdata) + uint1);
+    if po1 = aitem then begin
+     raise exception.create('Hash item does exist.');
+    end;
+    while po1^.header.nexthash <> 0 do begin
+     po1:= phashdataty(pchar(fdata) + po1^.header.nexthash);
+     if po1 = aitem then begin
+      raise exception.create('Hash item does exist.');
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+{$endif}
 
 { tintegerhasdatalist }
 
