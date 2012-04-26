@@ -17,7 +17,7 @@ uses
  msedynload,msestrings,msectypes;
 const
 {$ifdef mswindows}
- openssllib: array[0..1] of filenamety = ('ssleay32.dll','libssl32.dll');
+ openssllib: array[0..1] of filenamety = ('libssl32.dll','ssleay32.dll');
  opensslutillib: array[0..0] of filenamety = ('libeay32.dll');
 {$else}
  openssllib: array[0..4] of filenamety = (
@@ -199,13 +199,13 @@ var
  SSL_CIPHER_get_bits: function(c: SslPtr; var alg_bits: cint):cint; cdecl;
  SSL_get_verify_result: function(ssl: PSSL):cint; cdecl;
 
- SSLeay: function: cardinal;
+{$ifndef mswindows}
+ SSLeay: function: cardinal; cdecl;
  OpenSSL_add_all_ciphers: procedure; cdecl;
  OpenSSL_add_all_digests: procedure; cdecl;
  ERR_load_crypto_strings: procedure; cdecl;
  ERR_peek_error: function: cardinal; cdecl;
  ERR_peek_last_error: function: cardinal; cdecl;
- // Low level debugable memory management function
  CRYPTO_malloc: function (length: clong; const f: PCharacter;
                                               line: cint): pointer; cdecl;
  CRYPTO_realloc: function(str: PCharacter; length: clong;
@@ -213,6 +213,8 @@ var
  CRYPTO_remalloc: function(a: pointer; length: clong;
                            const f: PCharacter; line: cint): pointer; cdecl;
  CRYPTO_free: procedure(str: pointer); cdecl;
+{$endif}
+ // Low level debugable memory management function
 //util
  SSLeay_version: function(t: cint): pchar; cdecl;
  ERR_error_string_n: procedure(e: cint; buf: PChar; len: cint); cdecl;
@@ -247,11 +249,12 @@ var
 // Helper: convert standard Delphi integer in big-endian integer
 function int2bin(n: cint): cint;
 // High level memory management function
+{$ifndef mswindows}
 function OPENSSL_malloc(length: clong): pointer;
 function OPENSSL_realloc(address: PCharacter; length: clong): pointer;
 function OPENSSL_remalloc(var address: pointer; length: clong): pointer;
 procedure OPENSSL_free(address: pointer); // cdecl; ?
-
+{$endif}
 function SSL_set_options(ssl: PSSL; options: cint): cint;
 //function IsSSLloaded: Boolean;
 
@@ -287,7 +290,7 @@ begin
         ((cardinal(n) shl 8) and $00FF0000) or
         ((cardinal(n) shl 24) and $FF000000);
 end;
-
+{$ifndef mswindows}
 function OPENSSL_malloc(length: clong): pointer;
 begin
   OPENSSL_malloc := CRYPTO_malloc(length, nil, 0);
@@ -307,6 +310,7 @@ procedure OPENSSL_free(address: pointer);
 begin
   CRYPTO_free(address);
 end;
+{$endif}
 {
 procedure dounload;
 begin
@@ -366,7 +370,7 @@ procedure initializeopenssl(const sonames: array of filenamety;
                                  const sonamesutil: array of filenamety);
                                      //[] = default
 const
- funcs: array[0..54] of funcinfoty = (
+ funcs: array[0..{$ifndef mswindows}54{$else}44{$endif}] of funcinfoty = (
    (n: 'SSL_get_error'; d: @SSL_get_error),
    (n: 'SSL_library_init'; d: @SSL_library_init),
    (n: 'SSL_load_error_strings'; d: @SSL_load_error_strings),
@@ -411,7 +415,9 @@ const
    (n: 'SSL_get_current_cipher'; d: @SSL_get_current_cipher),
    (n: 'SSL_CIPHER_get_name'; d: @SSL_CIPHER_get_name),
    (n: 'SSL_CIPHER_get_bits'; d: @SSL_CIPHER_get_bits),
-   (n: 'SSL_get_verify_result'; d: @SSL_get_verify_result),
+   (n: 'SSL_get_verify_result'; d: @SSL_get_verify_result)
+  {$ifndef mswindows}
+      ,
    (n: 'SSLeay'; d: @SSLeay),
    (n: 'OpenSSL_add_all_ciphers'; d: @OpenSSL_add_all_ciphers),
    (n: 'OpenSSL_add_all_digests'; d: @OpenSSL_add_all_digests),
@@ -422,6 +428,7 @@ const
    (n: 'CRYPTO_realloc'; d: @CRYPTO_realloc),
    (n: 'CRYPTO_remalloc'; d: @CRYPTO_remalloc),
    (n: 'CRYPTO_free'; d: @CRYPTO_free)
+  {$endif}
   );
  funcsutil: array[0..20] of funcinfoty = (
    (n: 'SSLeay_version'; d: @SSLeay_version),
@@ -452,7 +459,7 @@ const
 
    );
 
- errormessage = 'Can not load OpneSSL library, ';
+ errormessage = 'Can not load OpenSSL library, ';
 begin
  initializedynlib(libinfo,sonames,openssllib,funcs,[],errormessage);
  initializedynlib(libinfoutil,sonamesutil,opensslutillib,

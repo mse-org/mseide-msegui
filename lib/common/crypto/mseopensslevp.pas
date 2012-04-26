@@ -281,6 +281,7 @@ var
   EVP_des_ecb: function: pEVP_CIPHER; cdecl;
   EVP_des_ede: function: pEVP_CIPHER; cdecl;
   EVP_des_ede3: function: pEVP_CIPHER; cdecl;
+ {$ifndef mswindows}
   EVP_des_cfb: function: pEVP_CIPHER; cdecl;
   EVP_des_ede_cfb: function: pEVP_CIPHER; cdecl;
   EVP_des_ede3_cfb: function: pEVP_CIPHER; cdecl;
@@ -290,6 +291,7 @@ var
   EVP_des_cbc: function: pEVP_CIPHER; cdecl;
   EVP_des_ede_cbc: function: pEVP_CIPHER; cdecl;
   EVP_des_ede3_cbc: function: pEVP_CIPHER; cdecl;
+ {$endif}
   EVP_desx_cbc: function: pEVP_CIPHER; cdecl;
   EVP_idea_cbc: function: pEVP_CIPHER; cdecl;
   EVP_idea_cfb: function: pEVP_CIPHER; cdecl;
@@ -438,7 +440,7 @@ end;
 
 procedure init(const info: dynlibinfoty);
 const
- funcs: array[0..81] of funcinfoty = (
+ funcs: array[0.. {$ifndef mswindows}81{$else}72{$endif}] of funcinfoty = (
    (n: 'EVP_PKEY_new'; d: @EVP_PKEY_new),
    (n: 'EVP_PKEY_free'; d: @EVP_PKEY_free),
    (n: 'EVP_PKEY_assign'; d: @EVP_PKEY_assign),
@@ -480,6 +482,7 @@ const
    (n: 'EVP_des_ecb'; d: @EVP_des_ecb),
    (n: 'EVP_des_ede'; d: @EVP_des_ede),
    (n: 'EVP_des_ede3'; d: @EVP_des_ede3),
+ {$ifndef mswindows}
    (n: 'EVP_des_cfb'; d: @EVP_des_cfb),
    (n: 'EVP_des_ede_cfb'; d: @EVP_des_ede_cfb),
    (n: 'EVP_des_ede3_cfb'; d: @EVP_des_ede3_cfb),
@@ -489,6 +492,7 @@ const
    (n: 'EVP_des_cbc'; d: @EVP_des_cbc),
    (n: 'EVP_des_ede_cbc'; d: @EVP_des_ede_cbc),
    (n: 'EVP_des_ede3_cbc'; d: @EVP_des_ede3_cbc),
+ {$endif}
    (n: 'EVP_desx_cbc'; d: @EVP_desx_cbc),
    (n: 'EVP_get_cipherbyname'; d: @EVP_get_cipherbyname),
    (n: 'EVP_PKEY_type'; d: @EVP_PKEY_type),
