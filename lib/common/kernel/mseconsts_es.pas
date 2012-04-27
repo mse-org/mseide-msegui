@@ -101,6 +101,7 @@ const
   'Imagen XPM',                        //sc_XPM_Image
   'Imagen PNM',                        //sc_PNM_Image
   'Imagen TARGA',                      //sc_TARGA_image
+  'Imagen TIFF',                       //sc_TIFF_image
   'Todo',                              //sc_All
   'Confirme',                          //sc_Confirmation
   #191'Borrar el registro?',           //sc_Delete_record_question

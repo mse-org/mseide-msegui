@@ -101,6 +101,7 @@ const
   'XPM Image',          //sc_XPM_Image
   'PNM Image',          //sc_PNM_Image
   'TARGA Image',        //sc_TARGA_image
+  'TIFF Image',        //sc_TIFF_image
   #25152#26377,                        //sc_All
   #35777#26126,                        //sc_Confirmation
   #21024#38500#35760#24405#65311,      //sc_Delete_record_question

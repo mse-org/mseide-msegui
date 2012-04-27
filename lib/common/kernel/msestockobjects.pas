@@ -99,7 +99,7 @@ type
                     sc_does_not_exist,sc_can_not_read_directory,
                     sc_graphic_format_not_supported,sc_graphic_format_error,
                     sc_MS_Bitmap,sc_MS_Icon,sc_JPEG_Image,sc_PNG_Image,
-                    sc_XPM_Image,sc_PNM_Image,sc_TARGA_image,
+                    sc_XPM_Image,sc_PNM_Image,sc_TARGA_image,sc_TIFF_image,
                     sc_All,
                     sc_Confirmation,sc_Delete_record_question,sc_Copy_record_question,
                     sc_close_page,
