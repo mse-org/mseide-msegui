@@ -19,7 +19,8 @@ uses
  fpimage;
 
 //
-// todo: TFPWriterTiff writes a black image, maybe it needs initialization
+// todo: -TFPWriterTiff writes a black image, maybe it needs initialization
+//       -add parameter
 //
 procedure writegraphic(const dest: tstream;
                                const source: tobject;
