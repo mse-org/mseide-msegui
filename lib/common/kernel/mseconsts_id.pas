@@ -97,6 +97,7 @@ const
   'XPM Image',            //sc_XPM_Image
   'PNM Image',            //sc_PNM_Image
   'TARGA Image',          //sc_TARGA_image
+  'TIFF Image',           //sc_TIFF_image
   'Semua',                //sc_All
   'Konfirmasi',           //sc_Confirmation
   'Hapus Rekaman?',       //sc_Delete_record_question

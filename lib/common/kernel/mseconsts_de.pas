@@ -98,6 +98,7 @@ const
   'XPM Bild',             //sc_XPM_Image
   'PNM Bild',             //sc_PNM_Image
   'TARGA Bild',           //sc_TARGA_image
+  'TIFF Bild',            //sc_TIFF_image
   'Alle',                 //sc_All
   'Best'#228'tigung',     //sc_Confirmation
   'Datensatz l'#246'schen?', //sc_Delete_record_question
