@@ -157,22 +157,26 @@ end;
 
 procedure tthreadcomp.terminate;
 begin
- thread.terminate;
+ if fthread <> nil then begin
+  fthread.terminate;
+ end;
 end;
 
 procedure tthreadcomp.waitfor;
 begin
- application.waitforthread(fthread);
+ if fthread <> nil then begin
+  application.waitforthread(thread);
+ end;
 end;
 
 procedure tthreadcomp.postevent(event: tmseevent);
 begin
- fthread.postevent(event);
+ thread.postevent(event);
 end;
 
 function tthreadcomp.waitevent(const timeoutus: integer = -1): tmseevent;
 begin
- result:= fthread.waitevent(timeoutus);
+ result:= thread.waitevent(timeoutus);
 end;
 
 function tthreadcomp.getactive: boolean;

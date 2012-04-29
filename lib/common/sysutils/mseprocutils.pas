@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -544,15 +544,20 @@ end;
 
 procedure killprocess(handle: prochandlety);
 begin
- windows.terminateprocess(handle,0);
- closehandle(handle);
+ if handle <> invalidprochandle then begin
+  windows.terminateprocess(handle,0);
+  closehandle(handle);
+ end;
 end;
 
 function terminateprocess(handle: prochandlety): integer;
            //bricht process ab, kein exitresult
 begin
- result:= 0;
- killprocess(handle);
+ result:= -1;
+ if handle <> invalidprochandle then begin
+  result:= 0;
+  killprocess(handle);
+ end;
 end;
 
 {$endif}
@@ -983,22 +988,24 @@ procedure killprocess(handle: prochandlety);
 var
  int1: integer;
 begin
- int1:= kill(handle,sigterm);
- if (int1 <> 0) and (errno <> esrch) then begin
-  raise eoserror.create(''); //sigterm nicht moeglich
- end;
- if waitpid(handle,@int1,wnohang) = 0 then begin
-  sleep(100);
+ if handle <> invalidprochandle then begin
+  int1:= kill(handle,sigterm);
+  if (int1 <> 0) and (errno <> esrch) then begin
+   raise eoserror.create(''); //sigterm nicht moeglich
+  end;
   if waitpid(handle,@int1,wnohang) = 0 then begin
-   sleep(1000);
+   sleep(100);
    if waitpid(handle,@int1,wnohang) = 0 then begin
-    int1:= kill(handle,sigkill);
-    if (int1 <> 0) and (errno <> esrch) then begin
-     raise eoserror.create(''); //sigkill nicht moeglich
-    end;
-    while waitpid(handle,@int1,0) = -1 do begin
-     if sys_getlasterror <> eintr then begin
-      raise eoserror.create('');
+    sleep(1000);
+    if waitpid(handle,@int1,wnohang) = 0 then begin
+     int1:= kill(handle,sigkill);
+     if (int1 <> 0) and (errno <> esrch) then begin
+      raise eoserror.create(''); //sigkill nicht moeglich
+     end;
+     while waitpid(handle,@int1,0) = -1 do begin
+      if sys_getlasterror <> eintr then begin
+       raise eoserror.create('');
+      end;
      end;
     end;
    end;
@@ -1011,12 +1018,16 @@ function terminateprocess(handle: prochandlety): integer;
 var
  int1: integer;
 begin
- int1:= kill(handle,sigterm);
- if (int1 <> 0) and (errno <> esrch) then raise eoserror.create(''); 
-             //sigterm nicht moeglich
- while waitpid(handle,@result,0) = -1 do begin
-  if sys_getlasterror <> eintr then begin
-   raise eoserror.create('');
+ result:= -1;
+ if handle <> invalidprochandle then begin
+  int1:= kill(handle,sigterm);
+  if (int1 <> 0) and (errno <> esrch) then raise eoserror.create(''); 
+              //sigterm nicht moeglich
+  while waitpid(handle,@result,0) = -1 do begin
+   if sys_getlasterror <> eintr then begin
+    break;
+//    raise eoserror.create('');
+   end;
   end;
  end;
 end;

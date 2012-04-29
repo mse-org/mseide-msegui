@@ -21,6 +21,7 @@ type
  pprocidty = ^procidty;
  procidarty = array of procidty; //same item size as winidarty!
  prochandlety = type ptrint;
+ pprochandlety = ^prochandlety;
 
  mutexty = array[0..9] of pointer;
  semty = array[0..7] of pointer;

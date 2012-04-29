@@ -1941,7 +1941,7 @@ type
    fnormalwindowrect: rectty;
    fcaption: msestring;
    fscrollnotifylist: tnotifylist;
-   fdestroyevent: pointer; //tdestroywindowevent
+//   fdestroyevent: pointer; //tdestroywindowevent
    fsyscontainer: syswindowty;
    fmodalwidget: twidget;
    fmodallevel: integer;
@@ -12390,20 +12390,20 @@ begin
  if fwindow.id <> 0 then begin
   appinst.windowdestroyed(fwindow.id);
  end;
- if application.ismainthread then begin
-  if fdestroyevent <> nil then begin
-   tdestroywindowevent(fdestroyevent).fwindowpo:= nil;
-  end;
+// if application.ismainthread then begin
+//  if fdestroyevent <> nil then begin
+//   tdestroywindowevent(fdestroyevent).fwindowpo:= nil;
+//  end;
   gui_destroywindow(fwindow);
- end
- else begin
-  if fdestroyevent = nil then begin
-   fdestroyevent:= tdestroywindowevent.create(false);
-   tdestroywindowevent(fdestroyevent).fwindowpo:= @fwindow;
-   synchronizeevent(tdestroywindowevent(fdestroyevent));
-   freeandnil(fdestroyevent);
-  end;
- end;
+// end
+// else begin
+//  if fdestroyevent = nil then begin
+//   fdestroyevent:= tdestroywindowevent.create(false);
+//   tdestroywindowevent(fdestroyevent).fwindowpo:= @fwindow;
+//   synchronizeevent(tdestroywindowevent(fdestroyevent));
+//   freeandnil(fdestroyevent);
+//  end;
+// end;
  fillchar(fwindow,sizeof(fwindow),0);
  exclude(fstate,tws_windowvisible);
 end;

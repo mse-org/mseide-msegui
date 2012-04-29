@@ -152,9 +152,15 @@ begin
 end;
 {$endif}
 
+var
+ timeraccesscount: integer;
+ 
 procedure extract(po: ptimerinfoty);
           //mutex has to be locked
 begin
+ if not application.ismainthread then begin
+  inc(timeraccesscount);
+ end;
  if first = po then begin
   first:= po^.nextpo;
   if first <> nil then begin
@@ -179,6 +185,9 @@ var
  po1,po2: ptimerinfoty;
  ca1: longword;
 begin
+ if not application.ismainthread then begin
+  inc(timeraccesscount);
+ end;
  ca1:= po^.nexttime;
  po2:= po;
  po1:= po^.nextpo;
@@ -289,7 +298,6 @@ end;
 
 var
  timebefore: longword;
- tickcount: integer;
 
 procedure tick(sender: tobject);
 var
@@ -298,7 +306,7 @@ var
  po,po2: ptimerinfoty;
  ontimer: proceventty;
  int1: integer;
- tickcountbefore: integer;
+ timeraccesscountbefore: integer;
 label
  endlab;
 begin
@@ -309,8 +317,8 @@ begin
   checktimer;
 {$endif}
   time:= sys_gettimeus;
-  inc(tickcount);
-  tickcountbefore:= tickcount;
+  inc(timeraccesscount);
+  timeraccesscountbefore:= timeraccesscount;
   ca1:= time-timebefore;
   timebefore:= time;
   if integer(ca1) < 0 then begin              //clock has been changed
@@ -332,12 +340,14 @@ begin
     dec(timeitemcount);
    {$endif}
     if assigned(ontimer) then begin
+     sys_mutexunlock(mutex);
      try
       ontimer;
      except
       application.handleexception(sender);
      end;
-     if tickcount <> tickcountbefore then begin
+     sys_mutexlock(mutex);
+     if timeraccesscount <> timeraccesscountbefore then begin
       goto endlab; //processmessages called
      end;
     end;
@@ -360,12 +370,14 @@ begin
     insert(po);
     for int1:= int1 - 1 downto 0 do begin
      if assigned(po^.ontimer) then begin
+      sys_mutexunlock(mutex);
       try
        po^.ontimer;
       except
        application.handleexception(sender);
       end;
-      if tickcount <> tickcountbefore then begin
+      sys_mutexlock(mutex);
+      if timeraccesscount <> timeraccesscountbefore then begin
        goto endlab; //processmessages called,
                     // tick leak possible for current item
       end;

@@ -124,6 +124,20 @@ function getprocessoutput(const acommandline: string; const todata: string;
                     const aoptions: processoptionsty = 
               defaultgetprocessoutputoptionserrorouttoout): integer; overload;
                          //returns program exitcode, -1 in case of error
+function getprocessoutput(out prochandle: prochandlety;
+                         const acommandline: string; const todata: string;
+                         out fromdata: string; out errordata: string;
+                         const atimeout: integer = -1;
+                         const aoptions: processoptionsty = 
+                            defaultgetprocessoutputoptions): integer; overload;
+                         //returns program exitcode, -1 in case of error
+function getprocessoutput(out prochandle: prochandlety;
+                         const acommandline: string; const todata: string;
+                         out fromdata: string;
+                         const atimeout: integer = -1;
+                    const aoptions: processoptionsty = 
+              defaultgetprocessoutputoptionserrorouttoout): integer; overload;
+                         //returns program exitcode, -1 in case of error
 
 function startprocessandwait(const acommandline: string;
                          const atimeout: integer = -1;
@@ -145,7 +159,8 @@ type
    constructor create(aowner: tcomponent); override;
  end;
  
-function getprocessoutput1(const acommandline: string; const todata: string;
+function getprocessoutput1(const prochandlepo: pprochandlety;
+               const acommandline: string; const todata: string;
                out fromdata: string; out errordata: string;
                const atimeout: integer; const aoptions: processoptionsty): integer;
                          //returns program exitcode, -1 in case of error
@@ -159,6 +174,11 @@ begin
    commandline:= acommandline;
    options:= aoptions + [pro_output,pro_erroroutput,pro_input];
    active:= true;
+   if prochandlepo <> nil then begin
+    application.lock;
+    prochandlepo^:= prochandle;
+    application.unlock;
+   end;
    if todata <> '' then begin
     try
      input.write(todata);
@@ -177,6 +197,11 @@ begin
    errordata:= proc1.ferrordata;
   end;
  finally
+  if prochandlepo <> nil then begin
+   application.lock;
+   prochandlepo^:= invalidprochandle;
+   application.unlock;
+  end;
   proc1.free;
  end;
 end;
@@ -216,7 +241,7 @@ function getprocessoutput(const acommandline: string; const todata: string;
                           const aoptions: processoptionsty = 
                             defaultgetprocessoutputoptions): integer;
 begin
- result:= getprocessoutput1(acommandline,todata,fromdata,errordata,
+ result:= getprocessoutput1(nil,acommandline,todata,fromdata,errordata,
                                                           atimeout,aoptions);
 end;
  
@@ -228,7 +253,31 @@ function getprocessoutput(const acommandline: string; const todata: string;
 var
  str1: string;
 begin
- result:= getprocessoutput1(acommandline,todata,fromdata,str1,
+ result:= getprocessoutput1(nil,acommandline,todata,fromdata,str1,
+                                             atimeout,aoptions);
+end;
+
+function getprocessoutput(out prochandle: prochandlety;
+                         const acommandline: string; const todata: string;
+                         out fromdata: string; out errordata: string;
+                         const atimeout: integer = -1;
+                          const aoptions: processoptionsty = 
+                            defaultgetprocessoutputoptions): integer;
+begin
+ result:= getprocessoutput1(@prochandle,acommandline,todata,fromdata,errordata,
+                                                          atimeout,aoptions);
+end;
+ 
+function getprocessoutput(out prochandle: prochandlety;
+                         const acommandline: string; const todata: string;
+                         out fromdata: string;
+                         const atimeout: integer = -1;
+                         const aoptions: processoptionsty = 
+                      defaultgetprocessoutputoptionserrorouttoout): integer;
+var
+ str1: string;
+begin
+ result:= getprocessoutput1(@prochandle,acommandline,todata,fromdata,str1,
                                              atimeout,aoptions);
 end;
  
