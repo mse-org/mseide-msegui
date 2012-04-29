@@ -109,7 +109,7 @@ function execwaitmse(const commandline: string;
 
 procedure killprocess(handle: prochandlety);
 function terminateprocess(handle: prochandlety): integer;
-           //sendet sigterm, bringt exitresult
+           //sendet sigterm, bringt exitresult, -1 on error
 
 function getpid: procidty; 
            
@@ -991,7 +991,8 @@ begin
  if handle <> invalidprochandle then begin
   int1:= kill(handle,sigterm);
   if (int1 <> 0) and (errno <> esrch) then begin
-   raise eoserror.create(''); //sigterm nicht moeglich
+   exit;
+//   raise eoserror.create(''); //sigterm nicht moeglich
   end;
   if waitpid(handle,@int1,wnohang) = 0 then begin
    sleep(100);
