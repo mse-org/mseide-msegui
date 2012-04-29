@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -30,6 +30,13 @@ const
                   [ow1_autowidth,ow1_autoheight,ow1_fontglyphheight];
  defaultlabelwidgetwidth = 100;
  defaultlabelwidgetheight = 20;
+
+ defaulticonoptionswidget = defaultoptionswidget - 
+                                [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
+ defaulticonoptionswidget1 = defaultoptionswidget1 + 
+                                [ow1_autowidth,ow1_autoheight];
+ defaulticonwidgetwidth = 16;
+ defaulticonwidgetheight = 16;
 
 type
 
@@ -447,7 +454,59 @@ type
    property textflags;
    property options;
  end;
- 
+
+ tcustomicon = class(tpublishedwidget)
+  private
+   fimagelist: timagelist;
+   fimagenum: integer;
+   fcolorglyph: colorty;
+   fcolorbackground: colorty;
+   falignment: alignmentsty;
+   ftransparency: colorty;
+   fimagesize: sizety;
+   procedure setimagelist(const avalue: timagelist);
+   procedure setimagenum(const avalue: integer);
+   procedure setcolorglyph(const avalue: colorty);
+   procedure setcolorbackground(const avalue: colorty);
+   procedure setalignment(const avalue: alignmentsty);
+   procedure settransparency(const avalue: colorty);
+  protected
+   procedure dopaint(const canvas: tcanvas); override;
+   procedure enabledchanged; override;
+   procedure getautopaintsize(var asize: sizety); override;
+   procedure clientrectchanged; override;
+   procedure objectevent(const sender: tobject;
+                             const event: objecteventty); override;
+  public
+   constructor create(aowner: tcomponent); override;
+  public
+   property imagelist: timagelist read fimagelist write setimagelist;
+   property imagenum: integer read fimagenum write setimagenum default -1;
+   property colorglyph: colorty read fcolorglyph 
+                           write setcolorglyph default cl_default;
+   property colorbackground: colorty read fcolorbackground 
+                           write setcolorbackground default cl_default;
+   property transparency: colorty read ftransparency 
+                           write settransparency default cl_default;
+   property alignment: alignmentsty read falignment 
+                        write setalignment default [al_xcentered,al_ycentered];
+  published
+   property optionswidget default defaulticonoptionswidget;
+   property optionswidget1 default defaulticonoptionswidget1;
+   property bounds_cx default defaulticonwidgetwidth;
+   property bounds_cy default defaulticonwidgetheight;
+ end;
+
+ ticon = class(tcustomicon)
+  published
+   property imagelist;
+   property imagenum;
+   property colorglyph;
+   property colorbackground;
+   property transparency;
+   property alignment;
+ end;
+  
  tgroupboxframe = class(tcaptionframe)
   public
    constructor create(const intf: icaptionframe);
@@ -663,7 +722,9 @@ type
 implementation
 uses
  msekeyboard,sysutils,mseactions,msestreaming;
-
+type
+ tcustomframe1 = class(tcustomframe);
+ 
 { tcustombutton }
 
 constructor tcustombutton.create(aowner: tcomponent);
@@ -1685,6 +1746,127 @@ procedure tcustomlabel.initnewcomponent(const ascale: real);
 begin
  inherited;
  caption:= name;
+end;
+
+{ tcustomicon }
+
+constructor tcustomicon.create(aowner: tcomponent);
+begin
+ fimagenum:= -1;
+ fcolorglyph:= cl_default;
+ fcolorbackground:= cl_default;
+ ftransparency:= cl_default;
+ falignment:= [al_xcentered,al_ycentered];
+ inherited;
+ foptionswidget:= defaulticonoptionswidget;
+ foptionswidget1:= defaulticonoptionswidget1;
+ fwidgetrect.cx:= defaulticonwidgetwidth;
+ fwidgetrect.cy:= defaulticonwidgetheight;
+end;
+
+procedure tcustomicon.setimagelist(const avalue: timagelist);
+begin
+ if fimagelist <> avalue then begin
+  setlinkedvar(avalue,tmsecomponent(fimagelist));
+  checkautosize;
+  invalidate;
+ end;
+end;
+
+procedure tcustomicon.setimagenum(const avalue: integer);
+begin
+ if fimagenum <> avalue then begin
+  fimagenum:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomicon.dopaint(const canvas: tcanvas);
+begin
+ inherited;
+ if fimagelist <> nil then begin
+  fimagelist.paint(canvas,fimagenum,innerclientrect,falignment,fcolorglyph,
+                   fcolorbackground,ftransparency);
+ end;
+end;
+
+procedure tcustomicon.enabledchanged;
+begin
+ inherited;
+ invalidate;
+end;
+
+procedure tcustomicon.getautopaintsize(var asize: sizety);
+var
+ size1: sizety;
+begin
+ inherited;
+ if fimagelist <> nil then begin
+  if frame <> nil then begin
+   with tcustomframe1(fframe) do begin
+    asize.cx:= fimagelist.width + fi.innerframe.left + fi.innerframe.right;
+    asize.cy:= fimagelist.height + fi.innerframe.top + fi.innerframe.bottom;
+   end;
+  end
+  else begin
+   asize:= fimagelist.size;
+  end;
+ end;
+end;
+
+procedure tcustomicon.clientrectchanged;
+begin
+ inherited;
+ checkautosize; //for framei
+end;
+
+procedure tcustomicon.setcolorglyph(const avalue: colorty);
+begin
+ if fcolorglyph <> avalue then begin
+  fcolorglyph:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomicon.setcolorbackground(const avalue: colorty);
+begin
+ if fcolorbackground <> avalue then begin
+  fcolorbackground:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomicon.settransparency(const avalue: colorty);
+begin
+ if ftransparency <> avalue then begin
+  ftransparency:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcustomicon.setalignment(const avalue: alignmentsty);
+begin
+ if falignment <> avalue then begin
+  falignment:= avalue;
+  checkautosize;
+  invalidate;
+ end;
+end;
+
+procedure tcustomicon.objectevent(const sender: tobject;
+               const event: objecteventty);
+var
+ size1: sizety;
+begin
+ inherited;
+ if (sender = fimagelist) and (event = oe_changed) then begin
+  size1:= fimagelist.size;
+  if (size1.cx <> fimagesize.cx) or (size1.cy <> fimagesize.cy) then begin
+   fimagesize:= size1;
+   checkautosize;
+  end;
+  invalidate;
+ end;
 end;
 
 { tgroupboxframe }

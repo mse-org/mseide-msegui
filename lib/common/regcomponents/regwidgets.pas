@@ -150,7 +150,7 @@ begin
  registerclass(tsubform);
  registerclass(tdockpanelform);
  registercomponents('Widget',[
-  tlabel,
+  tlabel,ticon,
   tstringdisp,trichstringdisp,tintegerdisp,trealdisp,tdatetimedisp,tbytestringdisp,
   tbooleandisp,
   tedit,
