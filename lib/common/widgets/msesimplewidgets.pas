@@ -1797,8 +1797,6 @@ begin
 end;
 
 procedure tcustomicon.getautopaintsize(var asize: sizety);
-var
- size1: sizety;
 begin
  inherited;
  if fimagelist <> nil then begin

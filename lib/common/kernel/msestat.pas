@@ -262,7 +262,7 @@ type
   public
    destructor destroy; override;
    function open(const streamname: msestring;
-                  const openmode: fileopenmodety): ttextstream;
+                  const aopenmode: fileopenmodety): ttextstream;
    procedure delete(const name: msestring);
    function findfiles(const aname: msestring): msestringarty;
  end;
@@ -1799,7 +1799,7 @@ begin
  info.stream:= self;
  inherited create;
  if info.size > 0 then begin
-  if openmode <> fm_create then begin
+  if aopenmode <> fm_create then begin
  {$ifdef mswindows}
   {$ifndef FPC}
    fmemorystream.SetSize(info.size);
@@ -1835,6 +1835,7 @@ destructor tmemorytextstream.destroy;
 var
  int1: integer;
 begin
+ flushbuffer;
  int1:= fowner.findname(fname);
  if int1 >= 0 then begin
   with fowner.fstreams[int1] do begin
@@ -1910,7 +1911,7 @@ begin
 end;
 
 function tmemorystreams.open(const streamname: msestring;
-                    const openmode: fileopenmodety): ttextstream;
+                    const aopenmode: fileopenmodety): ttextstream;
 var
  int1: integer;
 begin
@@ -1928,7 +1929,7 @@ begin
    setlength(fstreams,int1+1);
   end;
  end;
- result:= tmemorytextstream.create(self,streamname,openmode,fstreams[int1]);
+ result:= tmemorytextstream.create(self,streamname,aopenmode,fstreams[int1]);
 end;
 
 function tmemorystreams.findfiles(const aname: msestring): msestringarty;
