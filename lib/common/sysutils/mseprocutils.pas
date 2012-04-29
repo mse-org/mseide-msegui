@@ -291,7 +291,8 @@ begin
      end;
     end
     else begin
-     raise eoserror.create('');
+     exit;
+//     raise eoserror.create('');
     end;
    end;
   end;
@@ -300,12 +301,13 @@ end;
 
 function waitforprocess(prochandle: prochandlety): integer;
 begin
+ result:= -1;
  if waitforsingleobject(prochandle,infinite) = wait_object_0 then begin
   getprocessexitcode(prochandle,result);
- end
- else begin
-  raise eoserror.create('');
  end;
+// else begin
+//  raise eoserror.create('');
+// end;
 end;
 
 function pipe(out desc: pipedescriptorty; write: boolean): boolean;
@@ -569,7 +571,8 @@ function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
                  //true if ok, close handle
 var
  dwo1: longword;
- 
+ cancel: boolean;
+  
  function check(const apid: integer): boolean;
  begin
   result:= false;
@@ -581,7 +584,8 @@ var
   end
   else begin
    if sys_getlasterror <> eintr then begin
-    raise eoserror.create('getprocessexitcode: ');
+    cancel:= true;
+//    raise eoserror.create('getprocessexitcode: ');
    end;
   end;
  end;
@@ -591,6 +595,7 @@ var
 
 begin
  result:= false;
+ cancel:= false;
  exitcode:= -1;
  if prochandle <> invalidprochandle then begin
   result:= check(waitpid(prochandle,@dwo1,wnohang));
@@ -598,11 +603,11 @@ begin
    if timeoutus < 0 then begin
     repeat
      result:= check(waitpid(prochandle,@dwo1,0));
-    until result;
+    until result or cancel;
    end
    else begin
     ca1:= timestep(timeoutus);
-    while not result and not timeout(ca1) do begin
+    while not result and not cancel and not timeout(ca1) do begin
      sys_schedyield;
      sleep(10);       //todo: use better method
      result:= check(waitpid(prochandle,@dwo1,wnohang));
@@ -639,6 +644,7 @@ var
  dwo1: longword;
  pid: integer;
 begin
+ result:= -1;
  while true do begin
   pid:= waitpid(prochandle,@dwo1,0);
   if pid <> -1 then begin
@@ -647,8 +653,9 @@ begin
   end
   else begin
    if sys_getlasterror <> eintr then begin
-    result:= 0; //compilerwarning
-    raise eoserror.create('');
+    exit;
+//    result:= 0; //compilerwarning
+//    raise eoserror.create('');
    end;
   end;
  end;

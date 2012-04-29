@@ -193,16 +193,18 @@ begin
      result:= exitcode;
     end;
    end;
-   fromdata:= proc1.ffromdata;
-   errordata:= proc1.ferrordata;
+   if result <> -1 then begin
+    fromdata:= proc1.ffromdata;
+    errordata:= proc1.ferrordata;
+   end;
   end;
  finally
+  application.lock;
   if prochandlepo <> nil then begin
-   application.lock;
    prochandlepo^:= invalidprochandle;
-   application.unlock;
   end;
   proc1.free;
+  application.unlock;
  end;
 end;
 
