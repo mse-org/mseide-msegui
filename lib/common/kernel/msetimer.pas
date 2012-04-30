@@ -44,6 +44,8 @@ type
              //activates timer
    destructor destroy; override;
    procedure firependingandstop;
+   procedure fireandstop;
+   procedure fire;
    property interval: longword read finterval write setinterval;
              //in microseconds, max +2000 seconds
              //restarts timer if active
@@ -79,6 +81,8 @@ type
    destructor destroy; override;
    procedure restart;
    procedure firependingandstop;
+   procedure fireandstop;
+   procedure fire;
    property singleshot: boolean read getsingleshot write setsingleshot;
   published
    property interval: integer read getinterval write setinterval default 1000000;
@@ -491,6 +495,17 @@ begin
  end;
 end;
 
+procedure tsimpletimer.fireandstop;
+begin
+ enabled:= false;
+ dotimer;
+end;
+
+procedure tsimpletimer.fire;
+begin
+ dotimer;
+end;
+
 function tsimpletimer.getsingleshot: boolean;
 begin
  result:= to_single in foptions;
@@ -601,6 +616,16 @@ end;
 procedure ttimer.firependingandstop;
 begin
  ftimer.firependingandstop;
+end;
+
+procedure ttimer.fireandstop;
+begin
+ ftimer.fireandstop;
+end;
+
+procedure ttimer.fire;
+begin
+ ftimer.fire;
 end;
 
 function ttimer.getoptions: timeroptionsty;
