@@ -382,7 +382,8 @@ begin
       setint64prop(obj,po1,reader.readint64(str1,getint64prop(obj,po1)));
      end;
      tkfloat: begin
-      setfloatprop(obj,po1,reader.readreal(str1,getfloatprop(obj,po1)));
+      setfloatprop(obj,po1,reader.readreal(str1,getfloatprop(obj,po1),
+                                                             emptyreal,1e300));
      end;
     {$ifdef FPC}
      tkbool: begin

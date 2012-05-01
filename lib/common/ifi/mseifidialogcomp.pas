@@ -44,8 +44,10 @@ type
   public
    function execute: modalresultty; reintroduce;
   published
-   property onbeforedialog: beforedialogeventty read fonbeforedialog;
-   property onafterdialog: afterdialogeventty read fonafterdialog;
+   property onbeforedialog: beforedialogeventty read fonbeforedialog 
+                                                      write fonbeforedialog;
+   property onafterdialog: afterdialogeventty read fonafterdialog 
+                                                      write fonafterdialog;
    property action: tcustomaction read faction write setaction;
    property rttistat: tcustomrttistat read frttistat write setrttistat;
  end;

@@ -12,7 +12,7 @@ unit mseprocess;
 interface
 uses
  classes,mseclasses,msepipestream,msestrings,msestatfile,msestat,msesystypes,
- mseevent,msetypes,mseprocmonitor;
+ mseevent,msetypes,mseprocmonitor,mseapplication;
 const 
  defaultpipewaitus = 0;
 type
@@ -36,7 +36,7 @@ const
  defaultstartprocessoptions = [pro_inactive];
  
 type   
- tmseprocess = class(tmsecomponent,istatfile,iprocmonitor)
+ tmseprocess = class(tactcomponent,istatfile,iprocmonitor)
   private
    finput: tpipewriter;
    foutput: tpipereaderpers;
@@ -146,7 +146,7 @@ function startprocessandwait(const acommandline: string;
                          //returns program exitcode, -1 in case of error
 implementation
 uses
- mseprocutils,msefileutils,mseapplication,sysutils,msesysintf,msebits,msesys,
+ mseprocutils,msefileutils,sysutils,msesysintf,msebits,msesys,
  msesysutils;
 type
  tstringprocess = class(tmseprocess)
@@ -203,7 +203,7 @@ begin
   if prochandlepo <> nil then begin
    prochandlepo^:= invalidprochandle;
   end;
-  proc1.free;
+  proc1.release;
   application.unlock;
  end;
 end;
