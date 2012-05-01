@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2009-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2009-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -52,7 +52,6 @@ type
    fonclientexecute: ificlienteventty;
    fonclientstatechanged: ificlientstateeventty;
    fonclientmodalresult: ificlientmodalresulteventty;
-   fowner: tmsecomponent;
    fstatfile: tstatfile;
    fstatvarname: msestring;
    function getintegerpro(const aname: string): integer;
@@ -67,6 +66,7 @@ type
    procedure setdatetimepro(const aname: string; const avalue: tdatetime);
    procedure setstatfile(const avalue: tstatfile);
   protected
+   fowner: tmsecomponent;
    fkind: ttypekind;
    fstate: ifivaluelinkstatesty;
    foptionsvalue: valueclientoptionsty;
@@ -155,6 +155,7 @@ type
   public
    constructor create(const aowner: tmsecomponent; const akind: ttypekind);
                               reintroduce;
+   constructor create(const aowner: tmsecomponent); overload; virtual;
    function canconnect(const acomponent: tcomponent): boolean; virtual;
 
    property msestringprop[const aname: string]: msestring read getmsestringpro 
@@ -179,9 +180,9 @@ type
                      write fonclientexecute;
  end;
 
+ customificlientcontrollerclassty = class of tcustomificlientcontroller;
+
  tificlientcontroller = class(tcustomificlientcontroller)
-  public
-   constructor create(const aowner: tmsecomponent); overload; virtual;
   published
    property statfile;
    property statvarname;
@@ -191,8 +192,6 @@ type
    property onclientexecute;
  end;
                              
- ificlientcontrollerclassty = class of tificlientcontroller;
-
  texecclientcontroller = class(tificlientcontroller)
   private
   protected
@@ -205,6 +204,9 @@ type
   published
    property optionsvalue: valueclientoptionsty read foptionsvalue
                                            write foptionsvalue default [];
+ end;
+
+ tformclientcontroller = class(tificlientcontroller)
  end;
 
  valarsetterty = procedure(const alink: pointer; var handled: boolean) of object; 
@@ -785,15 +787,15 @@ type
  
  tifilinkcomp = class(tmsecomponent)
   private
-   fcontroller: tificlientcontroller;
-   procedure setcontroller(const avalue: tificlientcontroller);
+   fcontroller: tcustomificlientcontroller;
   protected
-   function getcontrollerclass: ificlientcontrollerclassty; virtual;
+   procedure setcontroller(const avalue: tcustomificlientcontroller);
+   function getcontrollerclass: customificlientcontrollerclassty; virtual;
    procedure loaded; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property controller: tificlientcontroller read fcontroller 
+   property controller: tcustomificlientcontroller read fcontroller 
                                                          write setcontroller;
   published
  end;
@@ -810,7 +812,7 @@ type
    function getcontroller: tstringclientcontroller;
    procedure setcontroller(const avalue: tstringclientcontroller);
   protected
-   function getcontrollerclass: ificlientcontrollerclassty; override;
+   function getcontrollerclass: customificlientcontrollerclassty; override;
   published
    property controller: tstringclientcontroller read getcontroller
                                                          write setcontroller;
@@ -821,7 +823,7 @@ type
    function getcontroller: tdropdownlistclientcontroller;
    procedure setcontroller(const avalue: tdropdownlistclientcontroller);
   protected
-   function getcontrollerclass: ificlientcontrollerclassty; override;
+   function getcontrollerclass: customificlientcontrollerclassty; override;
   published
    property controller: tdropdownlistclientcontroller read getcontroller
                                                          write setcontroller;
@@ -832,7 +834,7 @@ type
    function getcontroller: tintegerclientcontroller;
    procedure setcontroller(const avalue: tintegerclientcontroller);
   protected
-   function getcontrollerclass: ificlientcontrollerclassty; override;
+   function getcontrollerclass: customificlientcontrollerclassty; override;
   published
    property controller: tintegerclientcontroller read getcontroller
                                                          write setcontroller;
@@ -843,7 +845,7 @@ type
    function getcontroller: tint64clientcontroller;
    procedure setcontroller(const avalue: tint64clientcontroller);
   protected
-   function getcontrollerclass: ificlientcontrollerclassty; override;
+   function getcontrollerclass: customificlientcontrollerclassty; override;
   published
    property controller: tint64clientcontroller read getcontroller
                                                          write setcontroller;
@@ -854,7 +856,7 @@ type
    function getcontroller: tenumclientcontroller;
    procedure setcontroller(const avalue: tenumclientcontroller);
   protected
-   function getcontrollerclass: ificlientcontrollerclassty; override;
+   function getcontrollerclass: customificlientcontrollerclassty; override;
   published
    property controller: tenumclientcontroller read getcontroller
                                                          write setcontroller;
@@ -865,7 +867,7 @@ type
    function getcontroller: tbooleanclientcontroller;
    procedure setcontroller(const avalue: tbooleanclientcontroller);
   protected
-   function getcontrollerclass: ificlientcontrollerclassty; override;
+   function getcontrollerclass: customificlientcontrollerclassty; override;
   published
    property controller: tbooleanclientcontroller read getcontroller
                                                          write setcontroller;
@@ -876,7 +878,7 @@ type
    function getcontroller: trealclientcontroller;
    procedure setcontroller(const avalue: trealclientcontroller);
   protected
-   function getcontrollerclass: ificlientcontrollerclassty; override;
+   function getcontrollerclass: customificlientcontrollerclassty; override;
   published
    property controller: trealclientcontroller read getcontroller
                                                          write setcontroller;
@@ -887,7 +889,7 @@ type
    function getcontroller: tdatetimeclientcontroller;
    procedure setcontroller(const avalue: tdatetimeclientcontroller);
   protected
-   function getcontrollerclass: ificlientcontrollerclassty; override;
+   function getcontrollerclass: customificlientcontrollerclassty; override;
   published
    property controller: tdatetimeclientcontroller read getcontroller
                                                          write setcontroller;
@@ -898,9 +900,20 @@ type
    function getcontroller: texecclientcontroller;
    procedure setcontroller(const avalue: texecclientcontroller);
   protected
-   function getcontrollerclass: ificlientcontrollerclassty; override;
+   function getcontrollerclass: customificlientcontrollerclassty; override;
   published
    property controller: texecclientcontroller read getcontroller
+                                                         write setcontroller;
+ end;
+
+ tififormlinkcomp = class(tifilinkcomp)
+  private
+   function getcontroller: tformclientcontroller;
+   procedure setcontroller(const avalue: tformclientcontroller);
+  protected
+   function getcontrollerclass: customificlientcontrollerclassty; override;
+  published
+   property controller: tformclientcontroller read getcontroller
                                                          write setcontroller;
  end;
 
@@ -909,7 +922,7 @@ type
    function getcontroller: tgridclientcontroller;
    procedure setcontroller(const avalue: tgridclientcontroller);
   protected
-   function getcontrollerclass: ificlientcontrollerclassty; override;
+   function getcontrollerclass: customificlientcontrollerclassty; override;
   published
    property controller: tgridclientcontroller read getcontroller
                                                          write setcontroller;
@@ -1165,6 +1178,11 @@ begin
  fowner:= aowner;
  fkind:= akind;
  inherited create;
+end;
+
+constructor tcustomificlientcontroller.create(const aowner: tmsecomponent);
+begin
+ create(aowner,tkunknown);
 end;
 
 procedure tcustomificlientcontroller.interfaceerror;
@@ -1797,12 +1815,12 @@ begin
  fcontroller.free;
 end;
 
-procedure tifilinkcomp.setcontroller(const avalue: tificlientcontroller);
+procedure tifilinkcomp.setcontroller(const avalue: tcustomificlientcontroller);
 begin
  fcontroller.assign(avalue);
 end;
 
-function tifilinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+function tifilinkcomp.getcontrollerclass: customificlientcontrollerclassty;
 begin
  result:= tificlientcontroller;
 end;
@@ -3013,7 +3031,8 @@ end;
 
 { tifistringlinkcomp }
 
-function tifistringlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+function tifistringlinkcomp.getcontrollerclass: 
+                                customificlientcontrollerclassty;
 begin
  result:= tstringclientcontroller;
 end;
@@ -3041,14 +3060,16 @@ begin
  inherited setcontroller(avalue);
 end;
 
-function tifidropdownlistlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+function tifidropdownlistlinkcomp.getcontrollerclass: 
+                                   customificlientcontrollerclassty;
 begin
  result:= tdropdownlistclientcontroller;
 end;
 
 { tifiintegerlinkcomp }
 
-function tifiintegerlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+function tifiintegerlinkcomp.getcontrollerclass: 
+                                       customificlientcontrollerclassty;
 begin
  result:= tintegerclientcontroller;
 end;
@@ -3065,7 +3086,8 @@ end;
 
 { tifiint64linkcomp }
 
-function tifiint64linkcomp.getcontrollerclass: ificlientcontrollerclassty;
+function tifiint64linkcomp.getcontrollerclass: 
+                           customificlientcontrollerclassty;
 begin
  result:= tint64clientcontroller;
 end;
@@ -3082,7 +3104,8 @@ end;
 
 { tifibooleanlinkcomp }
 
-function tifibooleanlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+function tifibooleanlinkcomp.getcontrollerclass: 
+                              customificlientcontrollerclassty;
 begin
  result:= tbooleanclientcontroller;
 end;
@@ -3099,7 +3122,8 @@ end;
 
 { tifireallinkcomp }
 
-function tifireallinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+function tifireallinkcomp.getcontrollerclass: 
+                                   customificlientcontrollerclassty;
 begin
  result:= trealclientcontroller;
 end;
@@ -3116,7 +3140,8 @@ end;
 
 { tifidatetimelinkcomp }
 
-function tifidatetimelinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+function tifidatetimelinkcomp.getcontrollerclass: 
+                                       customificlientcontrollerclassty;
 begin
  result:= tdatetimeclientcontroller;
 end;
@@ -3133,14 +3158,10 @@ end;
 
 { tificlientcontroller }
 
-constructor tificlientcontroller.create(const aowner: tmsecomponent);
-begin
- inherited create(aowner,tkunknown);
-end;
-
 { tifiactionlinkcomp }
 
-function tifiactionlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+function tifiactionlinkcomp.getcontrollerclass:
+                               customificlientcontrollerclassty;
 begin
  result:= texecclientcontroller;
 end;
@@ -3151,6 +3172,24 @@ begin
 end;
 
 procedure tifiactionlinkcomp.setcontroller(const avalue: texecclientcontroller);
+begin
+ inherited setcontroller(avalue);
+end;
+
+{ tififormlinkcomp }
+
+function tififormlinkcomp.getcontrollerclass: 
+                               customificlientcontrollerclassty;
+begin
+ result:= tformclientcontroller;
+end;
+
+function tififormlinkcomp.getcontroller: tformclientcontroller;
+begin
+ result:= tformclientcontroller(inherited controller);
+end;
+
+procedure tififormlinkcomp.setcontroller(const avalue: tformclientcontroller);
 begin
  inherited setcontroller(avalue);
 end;
@@ -3197,7 +3236,8 @@ end;
 
 { tifigridlinkcomp }
 
-function tifigridlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+function tifigridlinkcomp.getcontrollerclass: 
+                                 customificlientcontrollerclassty;
 begin
  result:= tgridclientcontroller;
 end;
@@ -3386,7 +3426,7 @@ begin
  inherited setcontroller(avalue);
 end;
 
-function tifienumlinkcomp.getcontrollerclass: ificlientcontrollerclassty;
+function tifienumlinkcomp.getcontrollerclass: customificlientcontrollerclassty;
 begin
  result:= tenumclientcontroller;
 end;

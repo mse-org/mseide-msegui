@@ -20,7 +20,8 @@ uses
  msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,
  msetypes,msestrings,mseglob,mseguiglob,mseguiintf,
  msemenuwidgets,msestat,msestatfile,mseclasses,Classes,msedock,msesimplewidgets,
- msebitmap{$ifdef mse_with_ifi},mseifiglob{$endif};
+ msebitmap,typinfo
+ {$ifdef mse_with_ifi},mseifiglob,mseificompglob,mseificomp{$endif};
 
 {$if defined(FPC) and (fpc_fullversion >= 020403)}
  {$define mse_fpc_2_4_3}
@@ -89,7 +90,8 @@ type
  syseventeventty = procedure(const sender: tcustommseform;
                     var aevent: syseventty; var handled: boolean) of object;
                              
- tcustommseform = class(tcustomeventwidget,istatfile,idockcontroller)
+ tcustommseform = class(tcustomeventwidget,istatfile,idockcontroller
+                                 {$ifdef mse_with_ifi},iififormlink{$endif})
   private
    foncreate: notifyeventty;
    fonloaded: notifyeventty;
@@ -124,6 +126,11 @@ type
    ficonchanging: integer;
    fonsysevent: syseventeventty;
    fonsyswindowevent: syseventeventty;
+{$ifdef mse_with_ifi}
+   fifilink: tififormlinkcomp;
+   function getifilinkkind: ptypeinfo;
+   procedure setifilink(const avalue: tififormlinkcomp);
+{$endif}
    function getonlayout: notifyeventty;
    procedure setonlayout(const avalue: notifyeventty);
    procedure setmainmenu(const Value: tmainmenu);
@@ -294,9 +301,12 @@ type
                                          write setsyswindoweventty;
   published
    property container: tformscrollbox read fscrollbox write setscrollbox;
+{$ifdef mse_with_ifi}
+   property ifilink: tififormlinkcomp read fifilink write setifilink;
+{$endif}
  end;
 
- mseformclassty = class of tcustommseform;
+ custommseformclassty = class of tcustommseform;
 
  tmseformwidget = class(tcustommseform)
   published
@@ -550,7 +560,7 @@ function simulatemodalresult(const awidget: twidget;
 
 implementation
 uses
- sysutils,mselist,typinfo,msekeyboard,msebits,msestreaming;
+ sysutils,mselist,msekeyboard,msebits,msestreaming;
 const
  containercommonflags: optionswidgetty = 
             [ow_arrowfocus,ow_arrowfocusin,ow_arrowfocusout,ow_destroywidgets,
@@ -569,7 +579,7 @@ function createmseform(const aclass: tclass;
                     const aclassname: pshortstring): tmsecomponent;
 
 begin
- result:= mseformclassty(aclass).create(nil,false);
+ result:= custommseformclassty(aclass).create(nil,false);
  tmsecomponent1(result).factualclassname:= aclassname;
 end;
 
@@ -1816,6 +1826,16 @@ end;
 procedure tcustommseform.dolayoutchanged(const sender: tdockcontroller);
 begin
  //dummy
+end;
+
+function tcustommseform.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iififormlink);
+end;
+
+procedure tcustommseform.setifilink(const avalue: tififormlinkcomp);
+begin
+ mseificomp.setifilinkcomp(iififormlink(self),avalue,tifilinkcomp(fifilink));
 end;
 
 { tmseform }

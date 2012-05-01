@@ -11,8 +11,8 @@ unit mseificompglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- mseifiglob,mseclasses,msetypes,msegridsglob,mseguiglob,msegraphutils,
- typinfo,msedatalist;
+ mseglob,mseifiglob,mseclasses,msetypes,msegridsglob,mseguiglob,msegraphutils,
+ typinfo,msedatalist,mseapplication;
 
 type
  ificelleventinfoty = record //same layout as celleventinfoty
@@ -40,7 +40,14 @@ type
  iifiexeclink = interface(iifilink) ['{6B4FDC33-D151-46A4-B72B-083D55A18A67}']
   procedure execute;
  end;
- 
+
+ iififormlink = interface(iifilink)['{32BE765F-CB4E-4C87-BE4C-639F08114B11}']
+ end;
+
+ iifidialoglink = interface(iifilink)['{50751EAB-C5E1-467F-B3F7-50F5EAEEA53C}']
+  function showdialog(out adialog: tactcomponent): modalresultty;
+ end;
+   
  iifidatalink = interface(iifilink) ['{FC6BF316-8347-4CAC-ABB7-FB171E14F52B}']
   procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
   function getgriddata: tdatalist;

@@ -81,6 +81,7 @@ type
    procedure deactivate(const achildren: boolean = true); virtual;
    property activator: tactivator read factivator write setactivator;
  end;
+ pactcomponent = ^tactcomponent;
 
  activatoraborteventty = procedure(const sender: tactivator;
                           var aaction: activatorabortactionty) of object;

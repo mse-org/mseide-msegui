@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2010 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -12,9 +12,10 @@ unit mseifigui;
 interface
 uses
  classes,mseclasses,mseguiglob,mseifiglob,mseifi,mseact,msegui,typinfo,
- msestrings,mseapplication,
+ msestrings,mseapplication,mseforms,
  msearrayprops,mseglob,msetypes,mseifilink,msewidgetgrid,msemenus,
- mseevent,msegrids,msegraphutils,msedatalist;
+ mseevent,msegrids,msegraphutils,msedatalist,mseificomp,mseificompglob,
+ mseifidialogcomp;
  
 type
  
@@ -134,12 +135,30 @@ type
    property active: boolean read factive write setactive1 default false;
  end;
 
+ getdialogclasseventty = procedure(const sender: tobject;
+                            var adialogclass: custommseformclassty) of object;
+ 
+ tifidialog = class(tmsecomponent,iifidialoglink)
+  private
+   fifilink: tifidialoglinkcomp;
+   fongetdialogclass: getdialogclasseventty;
+   function getifilinkkind: ptypeinfo;
+   procedure setifilink(const avalue: tifidialoglinkcomp);
+  protected
+   function showdialog(out adialog: tactcomponent): modalresultty; virtual;
+  published
+   property ifilink: tifidialoglinkcomp read fifilink write setifilink;
+   property ongetdialogclass: getdialogclasseventty 
+                 read fongetdialogclass write fongetdialogclass;
+ end;
+
 implementation
 uses
  sysutils,msestream,msesysutils,msetmpmodules,mseeditglob;
 type
  tcustommodulelink1 = class(tcustommodulelink);
  tdatacols1 = class(tdatacols);
+ tdialogclientcontroller1 = class(tdialogclientcontroller);
  
 // tlinkdata1 = class(tlinkdata);
 
@@ -772,6 +791,46 @@ procedure trxwidgetgrid.setactive1(const avalue: boolean);
 begin
  if fifi.setactive(avalue) then begin
   setactive(avalue);
+ end;
+end;
+
+{ tifidialog }
+
+function tifidialog.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iifidialoglink);
+end;
+
+procedure tifidialog.setifilink(const avalue: tifidialoglinkcomp);
+begin
+ mseificomp.setifilinkcomp(iifidialoglink(self),avalue,tifilinkcomp(fifilink));
+end;
+
+function tifidialog.showdialog(out adialog: tactcomponent): modalresultty;
+var
+ dia1: custommseformclassty;
+begin
+ dia1:= nil;
+ adialog:= nil;
+ result:= mr_none;
+ dia1:= nil;
+ if owner is tcustommseform then begin
+  dia1:= custommseformclassty(owner.classtype);
+ end;
+ if canevent(tmethod(fongetdialogclass)) then begin
+  fongetdialogclass(self,dia1);
+ end;
+ if dia1 <> nil then begin
+  adialog:= dia1.create(nil);
+  if fifilink <> nil then begin
+   tdialogclientcontroller1(fifilink.controller).beforedialog(adialog);
+  end;
+  try
+   result:= twidget(adialog).show(ml_application);
+  except
+   result:= mr_exception;
+   application.handleexception;
+  end;
  end;
 end;
 
