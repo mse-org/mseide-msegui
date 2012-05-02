@@ -5059,46 +5059,33 @@ begin
           iscellclick(info,[ccr_nokeyreturn]{,[ss_ctrl]}) then begin
   with fgrid.datacols[info.cell.col] do begin
    if (info.mouseeventinfopo^.pos.x > 
-//           fgrid.cellrect(info.cell).cx - 15) and 
            fwidth - 15) and    //button click of merged cells not supported
        not (co_nosort in foptions) then begin
-    if (fgrid.datacols.sortcol = info.cell.col) and 
-              fgrid.hassort then begin
-//     if not (gps_sortclicked in fstate) then begin
-//      include(fstate,gps_sortclicked);
-      if ss_ctrl in info.mouseeventinfopo^.shiftstate then begin
-       fgrid.sorted:= false;
-       fgrid.fdatacols.fsortcol:= -1;
-       fgrid.updatesortcol(-1);
+    if (fgrid.datacols.sortcol = info.cell.col) and fgrid.hassort then begin
+     if ss_ctrl in info.mouseeventinfopo^.shiftstate then begin
+      if fgrid.datacols.sortcoldefault >= 0 then begin
+       fgrid.datacols.sortcol:= fgrid.datacols.sortcoldefault;
       end
       else begin
-       if co_sortdescend in foptions then begin
-        options:= foptions - [co_sortdescend];
-       end
-       else begin
-        options:= foptions + [co_sortdescend];
-       end;
-       fgrid.updatesortcol(index);
+       fgrid.sorted:= false;
+       fgrid.fdatacols.fsortcol:= -1;
       end;
-//     end
-//     else begin
-//      fgrid.optionsgrid:= fgrid.optionsgrid-[og_sorted];
-//     end;
+     end
+     else begin
+      if co_sortdescend in foptions then begin
+       options:= foptions - [co_sortdescend];
+      end
+      else begin
+       options:= foptions + [co_sortdescend];
+      end;
+     end;
     end
     else begin
      fgrid.datacols.sortcol:= info.cell.col;
      if fgrid.datacols.sortcol = info.cell.col then begin
       fgrid.sorted:= true;
      end;
-//     exclude(fstate,gps_sortclicked);
     end;
-    {
-    with tdatacolheader(fcaptions.fitems[info.cell.col]) do begin
-     if fgrid.canevent(tmethod(fonsortchanged)) then begin
-      fonsortchanged(fgrid.datacols[info.cell.col]);
-     end;
-    end;
-    }
    end;
   end;
  end;  

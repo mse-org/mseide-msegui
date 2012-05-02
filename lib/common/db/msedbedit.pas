@@ -8629,12 +8629,10 @@ end;
 
 function tcustomdbwidgetgrid.updatesortcol(const avalue: integer): integer;
 begin
+ result:= inherited updatesortcol(avalue);
  if not fdatalink.updatesortfield(getfieldlink(avalue),
                                    getsortdescend(avalue)) then begin
   result:= -1;
- end
- else begin
-  result:= avalue;
  end;
 end;
 
@@ -9541,11 +9539,9 @@ end;
 
 function tcustomdbstringgrid.updatesortcol(const avalue: integer): integer;
 begin
+ result:= inherited updatesortcol(avalue);
  if not fdatalink.updatesortfield(getfieldlink(avalue),getsortdescend(avalue)) then begin
   result:= -1;
- end
- else begin
-  result:= avalue;
  end;
 end;
 
