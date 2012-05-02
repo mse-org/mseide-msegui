@@ -204,6 +204,7 @@ begin
    prochandlepo^:= invalidprochandle;
   end;
   proc1.release;
+//  proc1.free; //calls application.unlockall
   application.unlock;
  end;
 end;
@@ -298,10 +299,13 @@ end;
 destructor tmseprocess.destroy;
 begin
  finalizeexec;
+ finput.free;    
+ foutput.free;         //calls application.unlockall
+ ferroroutput.free;    //calls application.unlockall
  inherited;
- finput.free;
- foutput.free;
- ferroroutput.free;
+// finput.free;
+// foutput.free;
+// ferroroutput.free;
 end;
 
 procedure tmseprocess.setoutput(const avalue: tpipereaderpers);
