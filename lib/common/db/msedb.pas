@@ -44,6 +44,10 @@ uses
  msevariants;
 
 type
+ bookmarkty = string; 
+   //use instead of TBookmarkStr in order to avoid
+   // FPC deprecated warning
+ 
  fieldtypearty = array of tfieldtype;
  fieldtypesty = set of tfieldtype;
  fieldtypesarty = array of fieldtypesty;
@@ -1339,11 +1343,11 @@ type
    frecnooffset: integer;
    fmovebylock: boolean;
    fcancelresync: boolean;
-   finsertbm: string;
+   finsertbm: bookmarkty;
    flinkedfields: fieldlinkarty;
    fstate: dscontrollerstatesty;
    fdelayedapplycount: integer;
-   fbmbackup: string;
+   fbmbackup: bookmarkty;
    fupdatecount: integer;
    fstatebefore: tdatasetstate;
    fonstatechanged: datasetstatechangedeventty;
@@ -3278,7 +3282,7 @@ var
  keymsestrings: msestringarty; 
  keyansistrings: stringarty;
  int1: integer;
- bm: string;
+ bm: bookmarkty;
  opt1: locatekeyoptionsty;
 begin
  int1:= high(keys);
@@ -4146,7 +4150,7 @@ end;
 
 function tmselongintfield.sum: integer;
 var
- bm: string;
+ bm: bookmarkty;
  int1: integer;
  intf1: idatasetsum;
 begin
@@ -4344,7 +4348,7 @@ end;
 
 function tmselargeintfield.sum: int64;
 var
- bm: string;
+ bm: bookmarkty;
  lint1: int64;
  intf1: idatasetsum;
 begin
@@ -4864,7 +4868,7 @@ end;
 
 function tmsefloatfield.sum: double;
 var
- bm: string;
+ bm: bookmarkty;
  do1: double;
  intf1: idatasetsum;
 begin
@@ -5137,7 +5141,7 @@ end;
 
 function tmsebooleanfield.sum: integer;
 var
- bm: string;
+ bm: bookmarkty;
 // int1: integer;
  intf1: idatasetsum;
  bo1: wordbool;
@@ -5817,7 +5821,7 @@ end;
 function tmsebcdfield.sum: currency;
 var
  curr1: system.currency;
- bm: string;
+ bm: bookmarkty;
  intf1: idatasetsum;
 begin
  result:= 0;

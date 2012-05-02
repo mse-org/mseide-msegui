@@ -57,7 +57,6 @@ type
    procedure setoutput(const avalue: tpipereaderpers);
    procedure seterroroutput(const avalue: tpipereaderpers);
    function getactive: boolean;
-   procedure setactive(const avalue: boolean);
    procedure setstatfile(const avalue: tstatfile);
    procedure updatecommandline;
    function getcommandline: string;
@@ -66,6 +65,7 @@ type
    procedure setoptions(const avalue: processoptionsty);
   protected
    fstate: processstatesty;
+   procedure setactive(const avalue: boolean); override;
    procedure loaded; override;
    procedure listen;
    procedure unlisten;

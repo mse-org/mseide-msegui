@@ -369,7 +369,7 @@ type
                  //itemcount of avalues and aisnull
                  //can be smaller than fields count in index
                  //itemcount of aisnull can be smaller than itemcount of avalues
-               out abookmark: string;
+               out abookmark: bookmarkty;
                const abigger: boolean = false;
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false): boolean; overload;
@@ -377,7 +377,7 @@ type
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
    function findvariant(const avalue: array of variant;
-               out abookmark: string;
+               out abookmark: bookmarkty;
                const abigger: boolean = false;
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false): boolean; overload;
@@ -385,7 +385,7 @@ type
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
    function find(const avalues: array of tfield;
-               out abookmark: string;
+               out abookmark: bookmarkty;
                const abigger: boolean = false;
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false): boolean; overload;
@@ -423,7 +423,7 @@ type
                 //sets dataset cursor if found
 
    function unique(const avalues: array of const): boolean;
-   function getbookmark(const arecno: integer): string;
+   function getbookmark(const arecno: integer): bookmarkty;
    property desc: boolean read getdesc write setdesc;
    property default: boolean read getdefault write setdefault;
   published
@@ -897,8 +897,8 @@ type
                                    docheck: boolean): tgetresult; override;
    function  GetNextRecord: Boolean; override;
    function  GetNextRecords: Longint; override;
-   function bookmarktostring(const abookmark: bookmarkdataty): string;
-   function stringtobookmark(const abookmark: string): bookmarkdataty;
+   function bookmarkdatatobookmark(const abookmark: bookmarkdataty): bookmarkty;
+   function bookmarktobookmarkdata(const abookmark: bookmarkty): bookmarkdataty;
    function findbookmarkindex(const abookmark: bookmarkdataty): integer;
    procedure checkrecno(const avalue: integer);
    procedure setonfilterrecord(const value: tfilterrecordevent); override;
@@ -5356,7 +5356,8 @@ begin
  end;
 end;
 
-function tmsebufdataset.bookmarktostring(const abookmark: bookmarkdataty): string;
+function tmsebufdataset.bookmarkdatatobookmark(
+                      const abookmark: bookmarkdataty): bookmarkty;
 begin
  if abookmark.recordpo = nil then begin
   result:= '';
@@ -5367,7 +5368,8 @@ begin
  end;
 end;
 
-function tmsebufdataset.stringtobookmark(const abookmark: string): bookmarkdataty;
+function tmsebufdataset.bookmarktobookmarkdata(
+                              const abookmark: bookmarkty): bookmarkdataty;
 begin
  if abookmark = '' then begin
   result.recordpo:= nil;
@@ -9430,7 +9432,7 @@ var
  bm1: bookmarkdataty;
 begin
  result:= find(avalues,aisnull,bm1,abigger,partialstring,nocheckbrowsemode);
- abookmark:=  tmsebufdataset(fowner).bookmarktostring(bm1);
+ abookmark:=  tmsebufdataset(fowner).bookmarkdatatobookmark(bm1);
 end;
 
 function tlocalindex.find(const avalues: array of const;
@@ -9642,7 +9644,7 @@ var
  bm: bookmarkdataty;
 begin
  result:= find(avalues,bm,abigger,partialstring,nocheckbrowsemode);
- abookmark:= tmsebufdataset(fowner).bookmarktostring(bm);
+ abookmark:= tmsebufdataset(fowner).bookmarkdatatobookmark(bm);
 end;
 
 function tlocalindex.unique(const avalues: array of const): boolean;
@@ -9653,7 +9655,7 @@ begin
       (bm1.recordpo = tmsebufdataset(fowner).bookmarkdata.recordpo);
 end;
 
-function tlocalindex.getbookmark(const arecno: integer): string;
+function tlocalindex.getbookmark(const arecno: integer): bookmarkty;
 var
  bm1: bookmarkdataty;
 begin
@@ -9662,7 +9664,7 @@ begin
   checkindex(true);
   bm1.recno:= arecno - 1;
   bm1.recordpo:= findexes[findexlocal.indexof(self) + 1].ind[arecno-1];
-  result:= bookmarktostring(bm1);
+  result:= bookmarkdatatobookmark(bm1);
  end;
 end;
 

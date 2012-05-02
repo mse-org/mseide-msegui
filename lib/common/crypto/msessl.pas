@@ -955,7 +955,7 @@ var
  lint1: int64;
 begin
  with aclient do begin
-  if stream.handle <> invalidfilehandle then begin
+  if stream.handle <> thandle(invalidfilehandle) then begin
    lint1:= fileseek(stream.handle,int64(0),ord(socurrent));
    result:= fileseek(stream.handle,int64(0),ord(soend));
    fileseek(stream.handle,lint1,ord(sobeginning));
