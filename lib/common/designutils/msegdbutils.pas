@@ -882,7 +882,7 @@ begin
   
  fgdb:= execmse2(syscommandline(commandline)+' --interpreter=mi --nx',
                 fgdbto,fgdbfrom,fgdbfrom{fgdberror},{false,}-1,
-                [exo_inactive,exo_tty]
+                [exo_inactive,exo_tty,exo_winpipewritehandles]
                 {true,false,true});
 
  if haslang then begin

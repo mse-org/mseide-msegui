@@ -28,7 +28,7 @@ const
                             [oe_linebreak];
  defaultterminaloptions = [{teo_tty}];
  defaultoptionsprocess = [pro_output,pro_errorouttoout,pro_input,
-                                                        pro_tty,pro_ctrlc];
+                        pro_winpipewritehandles,pro_inactive,pro_tty,pro_ctrlc];
 type 
 // terminalstatety = ({ts_running,}ts_listening);
 // terminalstatesty = set of terminalstatety;

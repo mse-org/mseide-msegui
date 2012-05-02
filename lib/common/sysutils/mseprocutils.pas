@@ -28,10 +28,13 @@ type
                  exo_inactive,                 //windows only
                  exo_nostdhandle,              //windows only
                  exo_tty,exo_echo,exo_icanon,  //linux only
-                 exo_usepipewritehandles,
+                 exo_usepipewritehandles,exo_winpipewritehandles,
                  exo_sessionleader);         
  execoptionsty = set of execoptionty;
- 
+const
+ pipewritehandlemask = [exo_usepipewritehandles
+                  {$ifdef mswindows},exo_winpipewritehandles{$endif}];
+                    
 function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
                               const timeoutus: integer = 0): boolean;
                                //<0 -> no timeout
@@ -1260,7 +1263,7 @@ begin
   errpp:= nil;
   errwritep:= nil;
  end;
- if not (exo_usepipewritehandles in options) then begin
+ if options * pipewritehandlemask = [] then begin
   fromwritep:= nil;
   errwritep:= nil;
  end;

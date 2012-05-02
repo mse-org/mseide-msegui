@@ -24,16 +24,20 @@ type
                     pro_inactive,pro_nostdhandle, //windows only
                     pro_tty,pro_echo,pro_icanon,  //linux only
                     pro_nowaitforpipeeof,pro_nopipeterminate,
-                    pro_usepipewritehandles,
+                    pro_usepipewritehandles,pro_winpipewritehandles,
                     pro_waitcursor,pro_checkescape,pro_processmessages,
                                //kill process if esc pressed
                     pro_ctrlc                     //for tterminal
                     );
  processoptionsty = set of processoptionty;
 const
- defaultgetprocessoutputoptions = [pro_inactive];
- defaultgetprocessoutputoptionserrorouttoout = [pro_inactive,pro_errorouttoout];
- defaultstartprocessoptions = [pro_inactive];
+ defaultprocessoptions = [pro_winpipewritehandles];
+             //there is no other way on win32 to 
+             //terminate read on a hanging process
+ defaultgetprocessoutputoptions = defaultprocessoptions + [pro_inactive];
+ defaultgetprocessoutputoptionserrorouttoout = 
+                    defaultprocessoptions + [pro_inactive,pro_errorouttoout];
+ defaultstartprocessoptions = defaultprocessoptions + [pro_inactive];
  
 type   
  tmseprocess = class(tactcomponent,istatfile,iprocmonitor)
@@ -102,7 +106,8 @@ type
    property filename: filenamety read ffilename write ffilename;
    property parameter: msestring read fparameter write fparameter;
    property active: boolean read getactive write setactive default false;
-   property options: processoptionsty read foptions write setoptions default [];
+   property options: processoptionsty read foptions write setoptions 
+                                                default defaultprocessoptions;
    property pipewaitus: integer read fpipewaitus write fpipewaitus 
                                                  default defaultpipewaitus;
    property statfile: tstatfile read fstatfile write setstatfile;
@@ -288,6 +293,7 @@ end;
 
 constructor tmseprocess.create(aowner: tcomponent);
 begin
+ foptions:= defaultprocessoptions;
  fprochandle:= invalidprochandle;
  finput:= tpipewriter.create;
  foutput:= tpipereaderpers.create;
@@ -342,6 +348,8 @@ end;
 procedure tmseprocess.procend;
 begin  
  fprochandle:= invalidprochandle;
+ foutput.pipereader.writehandle:= invalidfilehandle;
+ ferroroutput.pipereader.writehandle:= invalidfilehandle;
  waitforpipeeof;
  if prs_waitcursor in fstate then begin
   exclude(fstate,prs_waitcursor);
@@ -427,6 +435,9 @@ begin
      end;
      if pro_usepipewritehandles in foptions then begin
       include(opt1,exo_usepipewritehandles);
+     end;
+     if pro_winpipewritehandles in foptions then begin
+      include(opt1,exo_winpipewritehandles);
      end;
      fprochandle:= execmse2(syscommandline(fcommandline1),
            inp,outp,erroroutp,{sessionleader,}group,opt1
@@ -730,9 +741,10 @@ begin
  try
   if running then begin
    finput.close;
+   syserror(sys_killprocess(fprochandle));
    foutput.pipereader.terminate;
    ferroroutput.pipereader.terminate;
-   syserror(sys_killprocess(fprochandle));
+//   syserror(sys_killprocess(fprochandle));
   end;
  finally
   application.unlock;
