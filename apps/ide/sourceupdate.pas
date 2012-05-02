@@ -308,7 +308,9 @@ end;
 
 procedure sourcechanged(const filename: filenamety);
 begin
- sourceupdater.sourcechanged(filename);
+ if sourceupdater <> nil then begin
+  sourceupdater.sourcechanged(filename);
+ end;
 end;
 
 function switchheaderimplementation(const filename: filenamety;
