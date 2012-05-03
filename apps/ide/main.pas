@@ -314,7 +314,7 @@ uses
  panelform,watchpointsform,threadsform,targetconsole,
  debuggerform,componentpaletteform,componentstore,
  messageform,msesettings,mseintegerenter,symbolform
- {$ifdef linux} ,mselibc {$endif},
+ {$ifdef linux},mselibc {$endif}, //SIGRT*
  mseprocutils
  {$ifdef mse_dumpunitgroups},dumpunitgroups{$endif};
 
