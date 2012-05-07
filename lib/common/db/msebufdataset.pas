@@ -455,10 +455,10 @@ type
    class function getitemclasstype: persistentclassty; override;
    procedure move(const curindex,newindex: integer); override;
    property items[const index: integer]: tlocalindex read getitems; default;
-   property activeindex: integer read getactiveindex write setactiveindex;
-                       //-1 > none
-   property defaultindex: integer read getdefaultindex write setdefaultindex;
-                       //-1 > none
+   property activeindex: integer read getactiveindex 
+                                        write setactiveindex;    //-1 > none
+   property defaultindex: integer read getdefaultindex 
+                                        write setdefaultindex;   //-1 > none
    function fieldactive(const afield: tfield): boolean;
                    //true if field in active index
    function hasfield(const afield: tfield): boolean;
@@ -8732,8 +8732,8 @@ begin
      exclude(tlocalindex(fitems[int1]).foptions,lio_default);
     end;
    end;
+   include(foptions,lio_default);
   end;
-  include(foptions,lio_default);
   change;
  end;
 end;
@@ -9188,11 +9188,15 @@ begin
  with tmsebufdataset(fowner) do begin
   int1:= findexlocal.indexof(self) + 1;
   if avalue then begin
-   actindex:= int1;
+   if actindex <> int1 then begin
+    actindex:= int1;
+    tmsebufdataset(fowner).findexlocal.doindexchanged;
+   end;
   end
   else begin
    if actindex = int1 then begin
     actindex:= 0;
+    tmsebufdataset(fowner).findexlocal.doindexchanged;
    end;
   end;
  end;   
