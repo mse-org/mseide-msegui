@@ -8207,6 +8207,7 @@ begin
   else begin
    if gs1_dbsorted in fstate1 then begin
     exclude(fstate1,gs1_dbsorted);
+    updatesortfield(nil,false);
     invalidate;
    end;
   end;

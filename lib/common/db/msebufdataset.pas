@@ -297,6 +297,8 @@ type
    constructor create(const aowner: tlocalindex); reintroduce;
    class function getitemclasstype: persistentclassty; override;
    property items[const index: integer]: tindexfield read getitems; default;
+  published
+   property count default 1;
  end;
  
  intrecordpoaty = array[0..0] of pintrecordty;
@@ -9703,6 +9705,7 @@ end;
 constructor tindexfields.create(const aowner: tlocalindex);
 begin
  inherited create(aowner,tindexfield);
+ count:= 1;
 end;
 
 class function tindexfields.getitemclasstype: persistentclassty;

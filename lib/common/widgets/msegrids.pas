@@ -5078,6 +5078,7 @@ begin
       else begin
        options:= foptions + [co_sortdescend];
       end;
+      fgrid.datacols.sortcol:= fgrid.datacols.sortcol; //call updatesortcol
      end;
     end
     else begin
