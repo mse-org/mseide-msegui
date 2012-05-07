@@ -38,7 +38,6 @@ type
    function geteditorclass: propertyeditorclassty; override;  
   public
    function itemprefix: msestring; override;
-//   procedure move(const curindex,newindex: integer); override;
  end;
  
 implementation

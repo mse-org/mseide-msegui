@@ -324,6 +324,7 @@ type
    findexfieldinfos: indexfieldinfoarty;
    finvalid: boolean;
    fhaslookup: boolean;
+   fname: string;
    procedure setoptions(const avalue: localindexoptionsty);
    procedure setfields(const avalue: tindexfields);
    function dolookupcompare(const l,r: pintrecordty;
@@ -433,6 +434,8 @@ type
    property options: localindexoptionsty read foptions 
                               write setoptions default [];
    property active: boolean read getactive write setactive default false;
+   property name: string read fname write fname;
+                   //case sensitive
  end;
 
  bufdataseteventty = procedure(const sender: tmsebufdataset) of object;
@@ -455,6 +458,7 @@ type
    class function getitemclasstype: persistentclassty; override;
    procedure move(const curindex,newindex: integer); override;
    property items[const index: integer]: tlocalindex read getitems; default;
+   function indexbyname(const aname: string): tlocalindex; //case sensitive
    property activeindex: integer read getactiveindex 
                                         write setactiveindex;    //-1 > none
    property defaultindex: integer read getdefaultindex 
@@ -8669,6 +8673,18 @@ begin
   end
   else begin
    tlocalindex(fitems[avalue]).default:= true;
+  end;
+ end;
+end;
+
+function tlocalindexes.indexbyname(const aname: string): tlocalindex;
+var
+ int1: integer;
+begin
+ result:= nil;
+ for int1:= 0 to high(fitems) do begin
+  if tlocalindex(fitems[int1]).name = aname then begin
+   result:= tlocalindex(fitems[int1]);
   end;
  end;
 end;

@@ -304,7 +304,7 @@ type
    function getinvisibleitems: tintegerset; override;
   public
  end;
-  
+
 procedure Register;
 begin
  registercomponents('DB',[     
@@ -1243,8 +1243,8 @@ function tlocalindexpropertyeditor.getvalue: msestring;
 var
  int1: integer;
 begin
- result:= '<';
- with tlocalindex(getpointervalue).fields do begin
+ with tlocalindex(getpointervalue),fields do begin
+  result:= '<'+name+'><';
   if count > 0 then begin
    for int1:= 0 to count - 1 do begin
     result:= result + items[int1].fieldname+',';
