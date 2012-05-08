@@ -3645,6 +3645,7 @@ end;
 procedure tmsestringfield.setasnullmsestring(const avalue: msestring);
 begin
  if avalue = '' then begin
+  clear;
  end
  else begin
   setasmsestring(avalue);

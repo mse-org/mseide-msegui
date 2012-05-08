@@ -3222,7 +3222,17 @@ begin
     end
     else begin
      po1:= getfieldbuffer(field,true,datasize1);
-     fillchar(po1^,datasize1,0);
+     case field.datatype of
+      ftstring: begin
+       pmsestring(po1)^:= '';
+      end;
+      ftvariant: begin
+       freedbvariant(pvariant(po1)^);
+      end;
+      else begin
+       fillchar(po1^,datasize1,0);
+      end;
+     end;
     end;
    finally
     checkfreebuffer(field);
