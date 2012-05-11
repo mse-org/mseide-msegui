@@ -56,7 +56,7 @@ type
  coloption1ty = (co1_rowfont,co1_rowcolor,co1_zebracolor,
                  co1_rowcoloractive,co1_rowcolorfocused,co1_rowreadonly,
 //                 co1_active, //not used
-                 co1_autorowheight);
+                 co1_autorowheight,co1_autocolwidth);
  coloptions1ty = set of coloption1ty;
 
 const
@@ -161,7 +161,9 @@ const
  pickobjectstep = integer(high(pickobjectkindty)) + 1;
  layoutchangedcoloptions: coloptionsty = [co_fill,co_proportional,co_invisible,
                               co_nohscroll{,co_rowcoloractive}];
- layoutchangedcoloptions1: coloptions1ty = [co1_rowcoloractive,co1_rowcolorfocused];
+ layoutchangedcoloptions1: coloptions1ty = 
+         [co1_rowcoloractive,co1_rowcolorfocused,
+          co1_autorowheight,co1_autocolwidth];
  notfixcoloptions = [co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
                      co_rowdatachange];
  defaultoptionsgrid = [og_autopopup,og_colchangeontabkey,og_focuscellonenter,
@@ -313,7 +315,8 @@ type
 
  gridpropstatety = (gps_fix,gps_selected,gps_noinvalidate,gps_edited,
                gps_readonlyupdating,gps_selectionchanged,gps_changelock,
-               gps_datalistvalid,gps_needsrowheight{,gps_sortclicked});
+               gps_datalistvalid,gps_needsrowheight,
+               gps_maxsizevalid,gps_autosizevalid);
  gridpropstatesty = set of gridpropstatety;
 
  tgridprop = class(tindexpersistent,iframe,iface)
@@ -496,6 +499,8 @@ type
    fpropwidth: real;
    ffontselect: tcolselectfont;
    ffocusrectdist: integer;
+   fmaxwidth: integer;
+   procedure updatecolwidth(const acol,acount: integer; var acolwidth: integer);
    procedure createfontselect;
    function getselected(const row: integer): boolean; virtual;
    procedure updatewidth(var avalue: integer); virtual;
@@ -506,6 +511,8 @@ type
    procedure updatelayout; override;
    procedure rearange(const list: integerarty); virtual; abstract;
 
+   procedure maxwidthinvalid(const aindex: integer); virtual;
+   procedure checkmaxwidth;
    function checkactivecolor(const aindex: integer): boolean;
          //true if coloractive and fontactivenum active
    function checkfocusedcolor(const aindex: integer): boolean;
@@ -546,6 +553,7 @@ type
    procedure cellchanged(const row: integer); virtual;
    function actualcolor: colorty;
    function actualfont: tfont; virtual;
+   function maxwidth: integer;
    property colindex: integer read getcolindex;
    function translatetocell(const arow: integer; const apos: pointty): pointty;
    property visible: boolean read getvisible write setvisible;
@@ -553,7 +561,7 @@ type
    property readonly: boolean read getreadonly write setreadonly;
   published
    property width: integer read fwidth write setwidth 
-                 {stored iswidthstored} default griddefaultcolwidth;
+                                         default griddefaultcolwidth;
    property rowcoloroffset: integer read frowcoloroffset 
                                write setrowcoloroffset default 0;
    property rowcoloroffsetselect: integer read frowcoloroffsetselect
@@ -3217,6 +3225,7 @@ end;
 
 constructor tcol.create(const agrid: tcustomgrid; const aowner: tgridarrayprop);
 begin
+// fmaxwidthrow:= -1;
  inherited create(agrid,aowner);
  ffocusrectdist:= tcols(aowner).ffocusrectdist;
  fwidth:= tcols(aowner).fwidth;
@@ -3466,8 +3475,18 @@ var
 
 begin
  if (not (co_invisible in foptions) or 
-         (csdesigning in fgrid.ComponentState)) and
-    (not info.calcautocellsize or (co1_autorowheight in foptions1)) then begin
+         (csdesigning in fgrid.componentstate)) {and
+    (not info.calcautocellsize or (co1_autorowheight in foptions1))} then begin
+  if (co1_autocolwidth in foptions1) and 
+                     not (gps_autosizevalid in fstate) and 
+                       not (csdesigning in fgrid.componentstate) then begin
+   include(fstate,gps_autosizevalid);
+   int1:= width;
+   width:= maxwidth;
+   if width <> int1 then begin
+    exit;
+   end;
+  end;
   checkmerge:= og_colmerged in fgrid.foptionsgrid;
   canbeforedrawcell:= fgrid.canevent(tmethod(fonbeforedrawcell));
   canafterdrawcell:= fgrid.canevent(tmethod(fonafterdrawcell));
@@ -3582,10 +3601,8 @@ begin
       end;
       canvas.restore(saveindex);
       if calcautocellsize then begin
-       autocellsize:= fcellinfo.autocellsize;
-       exit;
+       continue;
       end;
-
       if not bo2 then begin
        drawcelloverlay(canvas,fframe);
       end;
@@ -3626,7 +3643,7 @@ begin
      canvas.move(makepoint(0,ystep));
     end;
    end;
-   if flinewidth > 0 then begin
+   if not calcautocellsize and (flinewidth > 0) then begin
     linewidthbefore:= canvas.linewidth;
     if flinewidth = 1 then begin
      canvas.linewidth:= 0;
@@ -3695,6 +3712,7 @@ begin
     end;
     canvas.linewidth:= linewidthbefore;
    end;
+   autocellsize:= fcellinfo.autocellsize;
   end;
  end;
 end;
@@ -4033,6 +4051,51 @@ begin
  else begin
   options:= options - [co_readonly];
  end; 
+end;
+
+procedure tcol.updatecolwidth(const acol,acount: integer; 
+                                            var acolwidth: integer);
+var
+ int1,int2: integer;
+ info: colpaintinfoty; 
+begin
+ fillchar(info,sizeof(info),0);
+ with info do begin
+  calcautocellsize:= true;
+  autocellsize.cx:= acolwidth;
+  autocellsize.cy:= fgrid.datarowheight;
+  canvas:= fgrid.getcanvas;  
+  allocuninitedarray(acount,sizeof(rows[0]),rows);
+  int2:= acol;
+  startrow:= acol;
+  endrow:= acol + acount - 1;
+  for int1:= acol to endrow do begin
+   rows[int1]:= int2;
+   inc(int2);
+  end;
+  paint(info);
+  acolwidth:= autocellsize.cx;
+ end;
+end;
+
+procedure tcol.checkmaxwidth;
+begin
+ if not (gps_maxsizevalid in fstate) then begin  
+  include(fstate,gps_maxsizevalid);
+  fmaxwidth:= 0;
+  updatecolwidth(0,fgrid.rowcount,fmaxwidth);
+ end;
+end;
+
+function tcol.maxwidth: integer;
+begin
+ checkmaxwidth;
+ result:= fmaxwidth;
+end;
+
+procedure tcol.maxwidthinvalid(const aindex: integer);
+begin
+ fstate:= fstate - [gps_maxsizevalid,gps_autosizevalid];
 end;
 
 { tcolheaderfont }
@@ -5568,6 +5631,7 @@ begin
   fdata.count:= newcount;
  end;
  inherited;
+ maxwidthinvalid(-1);
 end;
 
 procedure tdatacol.docellfocuschanged(enter: boolean;
@@ -5969,6 +6033,7 @@ begin
  if not (co_nosort in foptions) then begin
   fgrid.sortinvalid(index,aindex);
  end;
+ maxwidthinvalid(aindex);
  if not (gps_changelock in fstate) and 
                                 fgrid.canevent(tmethod(fonchange)) then begin
   fonchange(self,aindex);
@@ -13152,30 +13217,35 @@ begin
   apos:= sender.pos;
   case kind of
    pok_datacolsize,pok_fixcolsize: begin
-    if (kind = pok_fixcolsize) and (cell.col <= fixcols.ffirstopposite) or 
-       (kind = pok_datacolsize) and 
-                             (cell.col >= fdatacols.ffirstopposite) then begin
-     col1.width:= col1.width - offset.x;
+    if ss_double in sender.mouseeventinfopo^.shiftstate then begin
+     col1.width:= col1.maxwidth;
     end
     else begin
-     int1:= offset.x;
-     if co_nohscroll in col1.foptions then begin
-      if col1.fend + int1 > fdatarect.x + fdatarect.cx then begin
-       int1:= fdatarect.x + fdatarect.cx - col1.fend;
+     if (kind = pok_fixcolsize) and (cell.col <= fixcols.ffirstopposite) or 
+        (kind = pok_datacolsize) and 
+                              (cell.col >= fdatacols.ffirstopposite) then begin
+      col1.width:= col1.width - offset.x;
+     end
+     else begin
+      int1:= offset.x;
+      if co_nohscroll in col1.foptions then begin
+       if col1.fend + int1 > fdatarect.x + fdatarect.cx then begin
+        int1:= fdatarect.x + fdatarect.cx - col1.fend;
+       end;
       end;
-     end;
-     if co_fill in col1.options then begin
-      for int2:= col1.index to datacols.count - 1 do begin
-       with datacols[int2] do begin
-        if options * [co_fixwidth,co_fill,co_invisible] = [] then begin
-         width:= width - int1;
-         int1:= 0;
-         break;
+      if co_fill in col1.options then begin
+       for int2:= col1.index to datacols.count - 1 do begin
+        with datacols[int2] do begin
+         if options * [co_fixwidth,co_fill,co_invisible] = [] then begin
+          width:= width - int1;
+          int1:= 0;
+          break;
+         end;
         end;
        end;
       end;
+      col1.width:= col1.width + int1;
      end;
-     col1.width:= col1.width + int1;
     end;
    end;
    pok_fixrowsize: begin
