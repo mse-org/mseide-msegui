@@ -899,6 +899,17 @@ begin
   end;
  end;
 end;
+
+function tcustommseform.getifilinkkind: ptypeinfo;
+begin
+ result:= typeinfo(iififormlink);
+end;
+
+procedure tcustommseform.setifilink(const avalue: tififormlinkcomp);
+begin
+ mseificomp.setifilinkcomp(iififormlink(self),avalue,tifilinkcomp(fifilink));
+end;
+
 {$endif}
 
 procedure tcustommseform.beforeclosequery(var amodalresult: modalresultty);
@@ -1826,16 +1837,6 @@ end;
 procedure tcustommseform.dolayoutchanged(const sender: tdockcontroller);
 begin
  //dummy
-end;
-
-function tcustommseform.getifilinkkind: ptypeinfo;
-begin
- result:= typeinfo(iififormlink);
-end;
-
-procedure tcustommseform.setifilink(const avalue: tififormlinkcomp);
-begin
- mseificomp.setifilinkcomp(iififormlink(self),avalue,tifilinkcomp(fifilink));
 end;
 
 { tmseform }
