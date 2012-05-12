@@ -232,6 +232,7 @@ type
    procedure dorepeat(const sender: tobject);
    procedure initcols(const acols: tdropdowncols); virtual;
    procedure updatelayout; override;
+   procedure setactiveitem(const aitemindex: integer); virtual;
   public
    constructor create(const acontroller: tcustomdropdownlistcontroller;
                              acols: tdropdowncols); reintroduce;
@@ -1859,6 +1860,11 @@ begin
  end;
 end;
 
+procedure tdropdownlist.setactiveitem(const aitemindex: integer);
+begin
+ focuscell(makegridcoord(0,aitemindex));
+end;
+
 procedure tdropdownlist.show(awidth: integer; arowcount: integer;
                  var aitemindex: integer; afiltertext: msestring);
 var
@@ -1893,7 +1899,7 @@ begin
  fcontroller.updatedropdownpos(rect1);
 // widgetrect:= rect1;
  ffiltertext:= afiltertext;
- if aitemindex = -1 then begin
+ if (aitemindex = -1) and (ffiltertext <> '') then begin
   application.beginnoignorewaitevents;
   try
    locate(ffiltertext);
@@ -1902,7 +1908,7 @@ begin
   end;
  end
  else begin
-  focuscell(makegridcoord(0,aitemindex));
+  setactiveitem(aitemindex);
  end;
  if inherited show(true,fcontroller.getwidget.window) = mr_ok then begin
   aitemindex:= fselectedindex;

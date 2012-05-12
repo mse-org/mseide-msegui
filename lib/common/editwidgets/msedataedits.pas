@@ -872,7 +872,8 @@ type
    constructor create(aowner: tcomponent); override;
    procedure clear;
    function enumname(const avalue: integer): msestring;
-   function addrow(const aitems: array of msestring; const enum: integer = -1): integer; //returns itemindex
+   function addrow(const aitems: array of msestring;
+                       const enum: integer = -1): integer; //returns itemindex
                    //enum = -1 -> no enum set
    procedure fillcol(const avalue: integer);
    procedure assigncol(const avalue: tintegerdatalist);
@@ -4508,7 +4509,8 @@ var
  int1: integer;
  mstr1: msestring;
 begin
- if trim(text) = '' then begin
+ if (tdropdownlistcontroller(fdropdown).itemindex < 0) and 
+                                (trim(text) = '') then begin
   int1:= fvalueempty;
  end
  else begin

@@ -1399,6 +1399,7 @@ type
    procedure initcols(const acols: tdropdowncols); override;
    procedure docellevent(var info: celleventinfoty); override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); override;
+   procedure setactiveitem(const aitemindex: integer); override;
    function locate(const filter: msestring): boolean; override;
    procedure dopaint(const acanvas: tcanvas); override;
    procedure dohide; override;
@@ -6201,6 +6202,12 @@ begin
  //dummy
 end;
 
+procedure tdbdropdownlist.setactiveitem(const aitemindex: integer);
+begin
+ inherited;
+ fdatalink.recordchanged(nil);
+end;
+
 { tcustomdbdropdownlistcontroller }
 
 constructor tcustomdbdropdownlistcontroller.create(const intf: idbdropdownlist;
@@ -9851,7 +9858,8 @@ procedure tcustomenum64edit.texttovalue(var accept: boolean; const quiet: boolea
 var
  lint1: int64;
 begin
- if trim(text) = '' then begin
+ if (tdropdownlistcontroller(fdropdown).itemindex < 0) and 
+                                           (trim(text) = '') then begin
   lint1:= valuedefault;
  end
  else begin
