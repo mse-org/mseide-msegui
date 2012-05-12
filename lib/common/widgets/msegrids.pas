@@ -500,6 +500,7 @@ type
    ffontselect: tcolselectfont;
    ffocusrectdist: integer;
    fmaxwidth: integer;
+   function checkautocolwidth: boolean; //true if width changed
    procedure updatecolwidth(const acol,acount: integer; var acolwidth: integer);
    procedure createfontselect;
    function getselected(const row: integer): boolean; virtual;
@@ -3453,6 +3454,23 @@ begin
  result:= nil;
 end;
 
+function tcol.checkautocolwidth: boolean;
+var
+ int1: integer;
+begin
+ result:= false;
+ if (co1_autocolwidth in foptions1) and 
+                    not (gps_autosizevalid in fstate) and 
+                      not (csdesigning in fgrid.componentstate) then begin
+  include(fstate,gps_autosizevalid);
+  int1:= width;
+  width:= maxwidth;
+  if width <> int1 then begin
+   result:= true;
+  end;
+ end;
+end;
+
 procedure tcol.paint(var info: colpaintinfoty);
 var
  int1,int2,int3: integer;
@@ -3478,15 +3496,8 @@ begin
  if (not (co_invisible in foptions) or 
          (csdesigning in fgrid.componentstate)) {and
     (not info.calcautocellsize or (co1_autorowheight in foptions1))} then begin
-  if (co1_autocolwidth in foptions1) and 
-                     not (gps_autosizevalid in fstate) and 
-                       not (csdesigning in fgrid.componentstate) then begin
-   include(fstate,gps_autosizevalid);
-   int1:= width;
-   width:= maxwidth;
-   if width <> int1 then begin
-    exit;
-   end;
+  if not info.calcautocellsize and checkautocolwidth then begin
+   exit;
   end;
   checkmerge:= og_colmerged in fgrid.foptionsgrid;
   canbeforedrawcell:= fgrid.canevent(tmethod(fonbeforedrawcell));

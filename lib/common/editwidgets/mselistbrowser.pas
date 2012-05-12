@@ -3156,11 +3156,18 @@ end;
 procedure titemedit.getautopaintsize(var asize: sizety);
 begin
  inherited;
- if asize.cy < flayoutinfofocused.minsize.cy then begin
-  asize.cy:= flayoutinfofocused.minsize.cy;
+ if fvalue <> nil then begin
+  fvalue.drawimage(flayoutinfofocused,nil);
  end;
- if asize.cx < flayoutinfofocused.minsize.cx then begin
-  asize.cx:= flayoutinfofocused.minsize.cx;
+ with flayoutinfofocused do begin
+  asize.cx:= asize.cx + imagerect.cx + imageextend.cx + imageextra.cx +
+                     treelevelshift; //???
+  if asize.cy < minsize.cy then begin
+   asize.cy:= minsize.cy;
+  end;
+  if asize.cx < minsize.cx then begin
+   asize.cx:= minsize.cx;
+  end;
  end;
 end;
 

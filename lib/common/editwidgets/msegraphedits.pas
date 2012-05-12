@@ -214,6 +214,7 @@ type
    procedure initnewcomponent(const ascale: real); override;
    procedure initnewwidget(const ascale: real); override;
    procedure initgridwidget; virtual;
+   procedure paint(const canvas: tcanvas); override;
 
    property edited: boolean read getedited write setedited;
    function actualcolor: colorty; override;
@@ -1037,6 +1038,7 @@ type
  twidget1 = class(twidget);
  tarrayprop1 = class(tarrayprop);
  tcustomwidgetgrid1 = class(tcustomwidgetgrid);
+ twidgetdatacol1 = class(twidgetcol);
 
 const
  valuevarname = 'value';
@@ -1423,6 +1425,14 @@ begin
  if fcolorglyph <> value then begin
   fcolorglyph := Value;
   invalidate;
+ end;
+end;
+
+procedure tgraphdataedit.paint(const canvas: tcanvas);
+begin
+ if (fgridintf = nil) or 
+                 not (twidgetcol1(fgridintf.getcol).checkautocolwidth) then begin
+  inherited;
  end;
 end;
 

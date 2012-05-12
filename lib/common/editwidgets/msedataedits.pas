@@ -226,6 +226,7 @@ type
    
    procedure initnewwidget(const ascale: real); override;
    procedure initgridwidget; virtual;
+   procedure paint(const canvas: tcanvas); override;
    procedure synctofontheight; override;
    function actualcolor: colorty; override;
    function actualcursor(const apos: pointty): cursorshapety; override;
@@ -1325,7 +1326,7 @@ type
  tcustomframe1 = class(tcustomframe);
  tcustomgrid1 = class(tcustomgrid);
  tcustomwidgetgrid1 = class(tcustomwidgetgrid);
- tdatacol1 = class(tdatacol);
+// tdatacol1 = class(tdatacol);
 
 function realtytoint(const avalue: realty): integer;
 begin
@@ -2282,7 +2283,7 @@ begin
    application.inithintinfo(hintinfo,info.grid);
   {$warnings off}
    hintinfo.caption:= 
-                datatotext(tdatacol1(fgridintf.getcol).getdatapo(info.cell.row)^);
+            datatotext(twidgetcol1(fgridintf.getcol).getdatapo(info.cell.row)^);
   {$warnings on}
    application.showhint(info.grid,hintinfo);
   end; 
@@ -2734,7 +2735,14 @@ begin
  gridwidgetsized(self,fgridintf);
 end;
 
-
+procedure tcustomdataedit.paint(const canvas: tcanvas);
+begin
+ if (fgridintf = nil) or 
+                 not (twidgetcol1(fgridintf.getcol).checkautocolwidth) then begin
+  inherited;
+ end;
+end;
+ 
 { tcustomstringedit }
 
 function tcustomstringedit.internaldatatotext(const data): msestring;
