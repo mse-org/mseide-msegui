@@ -1231,6 +1231,7 @@ type
    procedure updaterowheight(const arow: integer; var arowheight: integer);
    function totwidth: integer;
    procedure rowcountchanged(const newcount: integer); virtual;
+   procedure maxwidthinvalid(const aindex: integer);
    procedure updatelayout; override;
    procedure countchanged; override;
    procedure moverow(const curindex,newindex: integer;
@@ -7424,6 +7425,15 @@ procedure tcols.countchanged;
 begin
  resetpropwidth;
  inherited;
+end;
+
+procedure tcols.maxwidthinvalid(const aindex: integer);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  tcol(fitems[int1]).maxwidthinvalid(aindex);
+ end;
 end;
 
 { tdatacols }

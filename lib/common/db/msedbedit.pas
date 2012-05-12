@@ -2427,6 +2427,7 @@ type
  ttoolbuttons1 = class(ttoolbuttons);
  tcustomstringgrid1 = class(tcustomstringgrid);
  treader1 = class(treader);
+ tcols1 = class(tcols);
 
  hasactiveeditinfoty = record
   field: tfield;
@@ -7073,6 +7074,7 @@ begin
      end;
     end;
    end;   
+   tcols1(fgrid.datacols).maxwidthinvalid(-1);
   end;
  end;
  if row < 0 then begin
