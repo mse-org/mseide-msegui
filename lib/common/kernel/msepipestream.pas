@@ -292,7 +292,7 @@ begin
    end
    else begin
     inherited sethandle(invalidfilehandle);
-    {$ifdef linux}
+    {$ifdef unix}
     pthread_kill(fthread.id,sigio);
     {$endif}
    end;
@@ -421,18 +421,18 @@ end;
 function tpipereader.execthread(thread: tmsethread): integer;
 var
  int1: integer;
- {$ifdef linux}
+ {$ifdef unix}
  info: pollfd;
  {$endif}
 begin                          
  fthread:= tsemthread(thread);
- {$ifdef linux}
+ {$ifdef unix}
  info.fd:= handle;
  info.events:= pollin;
  {$endif}
  with fthread do begin
   while not terminated and not (tss_error in fstate) do begin
-  {$ifdef linux}
+  {$ifdef unix}
    if (poll(@info,1,-1) > 0) and not terminated then begin
   {$else}
    if true then begin

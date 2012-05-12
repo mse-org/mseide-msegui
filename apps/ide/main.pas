@@ -42,7 +42,23 @@ const
   hosttext = 'i386-linux';
  {$endif}
 {$else}
- hosttext = 'i386-win32';
+ {$ifdef openbsd}
+  {$ifdef CPU64}
+  hosttext = 'x86_64-openbsd';
+  {$else}
+  hosttext = 'i386-openbsd';
+  {$endif}
+ {$else}
+  {$ifdef bsd}
+   {$ifdef CPU64}
+  hosttext = 'x86_64-bsd';
+   {$else}
+  hosttext = 'i386-bsd';
+   {$endif}
+  {$else}
+   hosttext = 'i386-win32';
+  {$endif}
+ {$endif}
 {$endif}
  idecaption = 'MSEide';
 
@@ -314,7 +330,7 @@ uses
  panelform,watchpointsform,threadsform,targetconsole,
  debuggerform,componentpaletteform,componentstore,
  messageform,msesettings,mseintegerenter,symbolform
- {$ifdef linux},mselibc {$endif}, //SIGRT*
+ {$ifdef unix},mselibc {$endif}, //SIGRT*
  mseprocutils
  {$ifdef mse_dumpunitgroups},dumpunitgroups{$endif};
 
@@ -1661,6 +1677,12 @@ begin
   {$endif}
   {$ifdef linux}
   mainstatfile.filename:= 'mseideli.sta';
+  {$endif}
+  {$ifdef openbsd}
+  mainstatfile.filename:= 'mseideobsd.sta';
+  {$endif}
+  {$ifdef bsd}
+  mainstatfile.filename:= 'mseidebsd.sta';
   {$endif}
   mainstatfile.readstat;
   expandprojectmacros;

@@ -24,7 +24,7 @@ program msei18n;
 {$endif}
 
 uses
-  {$ifdef FPC}{$ifdef linux}cthreads,{$endif}{$endif}msegui,
+  {$ifdef FPC}{$ifdef unix}cthreads,{$endif}{$endif}msegui,
   main,messagesform,project;
 
 begin

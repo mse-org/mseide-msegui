@@ -7,7 +7,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit mseguiintf; //i386-linux, X11
+unit mseguiintf; //X11
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}

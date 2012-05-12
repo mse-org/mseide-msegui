@@ -41,7 +41,7 @@ begin
 
   writeln('uses');
   writeln(
-' {$ifdef FPC}{$ifdef linux}cthreads,{$endif}{$endif}msegui,mseforms,main;');
+' {$ifdef FPC}{$ifdef unix}cthreads,{$endif}{$endif}msegui,mseforms,main;');
   writeln('begin');
   writeln(' application.createform(tmainfo,mainfo);');
   writeln(' application.run;');

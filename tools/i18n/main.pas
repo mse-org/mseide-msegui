@@ -170,6 +170,12 @@ begin
  {$ifdef linux}
  mainstatfile.filename:= 'msei18nli.sta';
  {$endif}
+ {$ifdef openbsd}
+ mainstatfile.filename:= 'msei18nobsd.sta';
+ {$endif}
+ {$ifdef bsd}
+ mainstatfile.filename:= 'msei18nbsd.sta';
+ {$endif}
  rootnode:= tpropinfonode.Create;
  application.createform(tprojectfo, projectfo);
  updatecaption;
