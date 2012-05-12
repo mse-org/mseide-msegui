@@ -9030,7 +9030,7 @@ begin
     end
     else begin
      fwidgetstate:= fwidgetstate - [ws_clientmousecaptured];
-     appinst.ungrabpointer;
+//     appinst.ungrabpointer; ????
     end;
    end;
   end;
@@ -14777,7 +14777,7 @@ begin
          fmousecapturewidget.fwindow.fowner.fwidgetrect.pos));
      window:= fmousecapturewidget.fwindow;
     end;
-    if (aps_mousecaptured in fstate) and
+    if (fmousecapturewidget = nil) and (aps_mousecaptured in fstate) and
              (event.fshiftstate * mousebuttons = []) then begin
      ungrabpointer;
     end;
