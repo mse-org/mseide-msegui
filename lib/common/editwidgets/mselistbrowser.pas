@@ -279,7 +279,7 @@ type
    function createdatacols: tdatacols; override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
    procedure updatelayout; override;
-   procedure drawfocusedcell(const canvas: tcanvas); override;
+   procedure drawfocusedcell(const acanvas: tcanvas); override;
    procedure loaded; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure moveitem(const source,dest: tlistitem; focus: boolean);
@@ -1631,29 +1631,36 @@ begin
  end;
 end;
 
-procedure tcustomlistview.drawfocusedcell(const canvas: tcanvas);
+procedure tcustomlistview.drawfocusedcell(const acanvas: tcanvas);
 var
- po1: pointty;
+ pt1: pointty;
  item1: tlistitem1;
 begin
- canvas.save;
- drawcellbackground(canvas);
- item1:= tlistitem1(focuseditem);
- if item1 <> nil then begin
-  item1.drawimage(fitemlist.flayoutinfo,canvas);
-  po1:= cellrect(ffocusedcell,cil_paint).pos;
-  canvas.remove(po1);
-  feditor.dopaint(canvas);
-  canvas.move(po1);
-  if feditor.lasttextclipped then begin
-   include(item1.fstate1,ns1_captionclipped);   
-  end
-  else begin
-   exclude(item1.fstate1,ns1_captionclipped);   
+ if cellinfoty(acanvas.drawinfopo^).calcautocellsize then begin
+  if focuseditem <> nil then begin
+   focuseditem.drawcell(acanvas);
   end;
+ end
+ else begin
+  acanvas.save;
+  drawcellbackground(acanvas);
+  item1:= tlistitem1(focuseditem);
+  if item1 <> nil then begin
+   item1.drawimage(fitemlist.flayoutinfo,acanvas);
+   pt1:= cellrect(ffocusedcell,cil_paint).pos;
+   acanvas.remove(pt1);
+   feditor.dopaint(acanvas);
+   acanvas.move(pt1);
+   if feditor.lasttextclipped then begin
+    include(item1.fstate1,ns1_captionclipped);   
+   end
+   else begin
+    exclude(item1.fstate1,ns1_captionclipped);   
+   end;
+  end;
+  acanvas.restore;
+  drawcelloverlay(acanvas);
  end;
- canvas.restore;
- drawcelloverlay(canvas);
 end;
 
 procedure tcustomlistview.setoptions(const avalue: listviewoptionsty);
