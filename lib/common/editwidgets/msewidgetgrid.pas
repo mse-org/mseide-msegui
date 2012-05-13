@@ -61,6 +61,7 @@ type
  igridwidget = interface(inullinterface) ['{CB4BC9B0-A6C2-4929-9E5F-92406B6617B4}']
   procedure setfirstclick;
   function getwidget: twidget;
+  procedure getautocellsize(const acanvas: tcanvas; var asize: sizety);
   procedure updatepopupmenu(var amenu: tpopupmenu; 
                                           var mouseinfo: mouseeventinfoty);
   function getcellframe: framety;
@@ -1738,10 +1739,9 @@ begin
   end
   else begin
    with fcellinfo do begin
-    if calcautocellsize then begin
+    if calcautocellsize and (fintf <> nil) then begin
      size1:= rect.size;
-     twidget1(factivewidget).getautopaintsize(size1);
-     factivewidget.painttowidgetsize(size1);
+     fintf.getautocellsize(acanvas,size1);
      if size1.cx > autocellsize.cx then begin
       autocellsize.cx:= size1.cx;
      end;

@@ -1451,6 +1451,8 @@ type
    procedure colorchanged; virtual;
    procedure sizechanged; virtual;
    procedure getautopaintsize(var asize: sizety); virtual;
+   procedure getautocellsize(const acanvas: tcanvas;
+                                      var asize: sizety); virtual;
    procedure checkautosize;
    procedure childclientrectchanged(const sender: twidget); virtual;
    procedure childautosizechanged(const sender: twidget); virtual;
@@ -12004,6 +12006,13 @@ end;
 procedure twidget.getautopaintsize(var asize: sizety);
 begin
  //default
+end;
+
+procedure twidget.getautocellsize(const acanvas: tcanvas;
+                                      var asize: sizety);
+begin
+ getautopaintsize(asize);
+ painttowidgetsize(asize);
 end;
 
 procedure twidget.checkautosize;

@@ -489,6 +489,8 @@ type
 
    function fieldcanedit: boolean;
    procedure getautopaintsize(var asize: sizety); override;
+   procedure getautocellsize(const acanvas: tcanvas;
+                                      var asize: sizety); override;
    procedure calclayout(const asize: sizety; 
                                        out alayout: listitemlayoutinfoty);
 
@@ -3175,6 +3177,18 @@ begin
   if asize.cx < minsize.cx then begin
    asize.cx:= minsize.cx;
   end;
+ end;
+end;
+
+procedure titemedit.getautocellsize(const acanvas: tcanvas;
+                                      var asize: sizety);
+begin
+ if fvalue <> nil then begin
+  drawcell(acanvas); //called from twidgetcol.drawfocusedcell()
+  asize:= cellinfoty(acanvas.drawinfopo^).autocellsize;
+ end
+ else begin
+  inherited;
  end;
 end;
 
