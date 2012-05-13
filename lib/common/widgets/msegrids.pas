@@ -56,7 +56,7 @@ type
  coloption1ty = (co1_rowfont,co1_rowcolor,co1_zebracolor,
                  co1_rowcoloractive,co1_rowcolorfocused,co1_rowreadonly,
 //                 co1_active, //not used
-                 co1_autorowheight,co1_autocolwidth);
+                 co1_autorowheight,co1_autocolwidth,co1_noautocolwidth);
  coloptions1ty = set of coloption1ty;
 
 const
@@ -13238,7 +13238,8 @@ begin
   apos:= sender.pos;
   case kind of
    pok_datacolsize,pok_fixcolsize: begin
-    if ss_double in sender.mouseeventinfopo^.shiftstate then begin
+    if (ss_double in sender.mouseeventinfopo^.shiftstate) and 
+                          not(co1_noautocolwidth in col1.foptions1) then begin
      col1.width:= col1.maxwidth;
     end
     else begin
