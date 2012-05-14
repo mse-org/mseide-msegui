@@ -127,6 +127,8 @@ type
    function getactimagenr: integer; virtual;
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
    procedure setowner(const aowner: tcustomitemlist); virtual;
+   function compare(const r: tlistitem;
+                          const acasesensitive: boolean): integer; virtual;
   public
    tag: integer;
    tagpointer: pointer;
@@ -1116,6 +1118,17 @@ end;
 procedure tlistitem.releaseowner;
 begin
  setowner(nil);
+end;
+
+function tlistitem.compare(const r: tlistitem;
+               const acasesensitive: boolean): integer;
+begin
+ if acasesensitive then begin
+  result:= msecomparestr(fcaption,r.fcaption);
+ end
+ else begin
+  result:= msecomparetext(fcaption,r.fcaption);
+ end;
 end;
 
 { tcustomitemlist }

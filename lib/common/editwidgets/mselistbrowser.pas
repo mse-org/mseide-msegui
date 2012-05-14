@@ -2401,12 +2401,16 @@ end;
 
 function tcustomitemeditlist.compare(const l,r): integer;
 begin
+ result:= tlistitem1(l).compare(tlistitem(r),
+                           oe_casesensitive in fowner.foptionsedit);
+{
  if oe_casesensitive in fowner.foptionsedit then begin
   result:= msecomparestr(tlistitem1(l).fcaption,tlistitem1(r).fcaption);
  end
  else begin
   result:= msecomparetext(tlistitem1(l).fcaption,tlistitem1(r).fcaption);
  end;
+}
 end;
 
 { titemeditlist}
