@@ -2547,12 +2547,30 @@ begin
    extraspace:= finfopo^.extraspace;
    include(changed,cs_font);
   end;
-  height:= finfopo^.height;
-  width:= finfopo^.width;
-  name:= finfopo^.name;
-  charset:= finfopo^.charset;
-  options:= finfopo^.options;
-  xscale:= finfopo^.xscale;
+  if height <> finfopo^.height then begin
+   height:= finfopo^.height;
+   include(changed,cs_font);
+  end;
+  if width <> finfopo^.width then begin
+   width:= finfopo^.width;
+   include(changed,cs_font);
+  end;
+  if name <> finfopo^.name then begin
+   name:= finfopo^.name;
+   include(changed,cs_font);
+  end;
+  if charset <> finfopo^.charset then begin
+   charset:= finfopo^.charset;
+   include(changed,cs_font);
+  end;
+  if options <> finfopo^.options then begin
+   options:= finfopo^.options;
+   include(changed,cs_font);
+  end;
+  if xscale <> finfopo^.xscale then begin
+   xscale:= finfopo^.xscale;
+   include(changed,cs_font);
+  end;
   bo1:= false;
   if ahandles then begin
    for int1:= 0 to high(handles) do begin
@@ -2575,7 +2593,7 @@ begin
    end;
   end;
   if bo1 then begin
-   changed:= changed + [cs_font,cs_fonthandle];
+   include(changed,cs_fonthandle);
   end;
  end;
  if changed <> [] then begin
@@ -2640,6 +2658,9 @@ begin
  if bo1 then begin
   fillchar(finfopo^.handles,sizeof(finfopo^.handles),0);
   dochanged([cs_font,cs_fonthandle],nochanged);
+ end
+ else begin
+  dochanged([cs_font],nochanged);
  end;
 end;
 

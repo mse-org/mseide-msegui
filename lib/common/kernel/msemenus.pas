@@ -93,7 +93,7 @@ type
    fcoloractive: colorty;
    function getsubmenu: tmenuitems;
    procedure setsubmenu(const Value: tmenuitems);
-   procedure setcaption(const Value: captionty);
+   procedure setcaption(const avalue: captionty);
    function iscaptionstored: Boolean;
    procedure setstate(const avalue: actionstatesty);
    function getstate: actionstatesty;
@@ -726,9 +726,11 @@ begin
   result:= tmenufont(itemframetemplate.template.font);
 {$warnings on}
  end;
+{
  if result = nil then begin
   result:= tmenufont(pointer(stockobjects.fonts[stf_menu]));
  end;
+}
 end;
 
 function tcustommenu.gettemplatefontactive(
@@ -819,9 +821,9 @@ begin
  result:= fparentmenu;
 end;
 
-procedure tmenuitem.setcaption(const Value: msestring);
+procedure tmenuitem.setcaption(const avalue: captionty);
 begin
- setactioncaption(iactionlink(self),value);
+ setactioncaption(iactionlink(self),avalue);
 end;
 
 function tmenuitem.iscaptionstored: Boolean;
@@ -1999,11 +2001,13 @@ begin
    result:= tmenufont(popupitemframetemplate.template.font);
 {$warnings on}
   end;
+(*
   if result = nil then begin
 {$warnings off}
    result:= tmenufont(pointer(stockobjects.fonts[stf_menu]));
 {$warnings on}
   end;
+*)
  end
  else begin
   result:= inherited gettemplatefont(sender);
