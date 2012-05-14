@@ -17401,6 +17401,18 @@ end;
 
 function trowstatelist.internalheight(const aindex: integer): integer;
 begin
+ with prowstaterowheightty(getitempo(aindex))^.rowheight do begin
+  if height = 0 then begin
+   result:= fgrid.fdatarowheight;
+  end
+  else begin
+   result:= height;
+   if result < 0 then begin
+    result:= -result; //auto height
+   end;
+  end;
+ end;
+{
  with prowstaterowheightty(getitempo(aindex))^ do begin
   if aindex >= count - 1 then begin
    result:= ftopypos - rowheight.ypos;
@@ -17410,6 +17422,7 @@ begin
   end;
  end;
  result:= result - fgrid.fdatarowlinewidth;
+}
 end;
 
 function trowstatelist.currentrowheight(const index: integer): integer;
