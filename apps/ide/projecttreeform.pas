@@ -118,7 +118,8 @@ type
    ferror: boolean;
   protected
    function getcurrentimagenr: integer; virtual;
-   function compare(const l,r: ttreelistitem): integer; override;
+   function compare(const r: tlistitem;
+                          const acasesensitive: boolean): integer; override;
   public
    constructor create(const akind: projectnodety); reintroduce;
  end;
@@ -309,22 +310,23 @@ constructor tprojectnode.create(const akind: projectnodety);
 begin
  fkind:= akind;
  inherited create;
- include(fstate1,ns1_customsort);
+// include(fstate1,ns1_customsort);
  fstate:= fstate + [ns_sorted];
 end;
 
-function tprojectnode.compare(const l: ttreelistitem;
-               const r: ttreelistitem): integer;
+function tprojectnode.compare(const r: tlistitem;
+                           const acasesensitive: boolean): integer;
 begin
  result:= 0;
- if tprojectnode(l).fkind = pnk_dir then begin
+ if fkind = pnk_dir then begin
   dec(result);
  end;
  if tprojectnode(r).fkind = pnk_dir then begin
   inc(result);
  end;
  if result = 0 then begin
-  result:= msestringicomp(l.caption,r.caption);
+  result:= inherited compare(r,acasesensitive);
+//  result:= msestringicomp(l.caption,r.caption);
  end;
 end;
 

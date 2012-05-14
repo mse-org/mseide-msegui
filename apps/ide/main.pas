@@ -221,7 +221,7 @@ type
    function checksave: modalresultty;
    procedure unloadexec;
    procedure cleardebugdisp;
-   procedure resetdebugdisp; //called before running debbuggee
+   procedure resetdebugdisp; //called before running debuggee
    procedure createprogramfile(const aname: filenamety);
    function copynewfile(const aname,newname: filenamety;
                             const autoincrement: boolean;

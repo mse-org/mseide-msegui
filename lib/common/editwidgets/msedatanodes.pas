@@ -233,8 +233,12 @@ type
    procedure internalgetnodes(var aresult: treelistitemarty; var acount: integer;
                        const must: nodestatesty; const mustnot: nodestatesty;
                        const amode: getnodemodety; const addself: boolean);
-   function compare(const l,r: ttreelistitem): integer; virtual;
+   function customcompare(const l,r: ttreelistitem): integer; virtual;
 
+   function comparecasesens(const l: ttreelistitem;
+                                       const r: ttreelistitem): integer;
+   function comparecaseinsens(const l: ttreelistitem;
+                                       const r: ttreelistitem): integer;
   public
    constructor create(const aowner: tcustomitemlist = nil;
               const aparent: ttreelistitem = nil); reintroduce; virtual;
@@ -1123,11 +1127,22 @@ end;
 function tlistitem.compare(const r: tlistitem;
                const acasesensitive: boolean): integer;
 begin
- if acasesensitive then begin
-  result:= msecomparestr(fcaption,r.fcaption);
- end
- else begin
-  result:= msecomparetext(fcaption,r.fcaption);
+ result:= 0;
+ if ns1_top in fstate1 then begin
+  dec(result);
+ end;
+ if ns1_top in r.fstate1 then begin
+  inc(result);
+ end;
+ if result = 0 then begin
+  if acasesensitive then begin
+//   result:= msestringcomp(fcaption,r.fcaption);
+   result:= msecomparestr(fcaption,r.fcaption);
+  end
+  else begin
+//   result:= msestringicomp(fcaption,r.fcaption);
+   result:= msecomparetext(fcaption,r.fcaption);
+  end;
  end;
 end;
 
@@ -2198,7 +2213,7 @@ begin
  end;
  countchange(int2);
 end;
-
+{
 function comparetreelistitemcasesensitive(const l,r): integer;
 begin
  result:= 0;
@@ -2226,6 +2241,30 @@ begin
   result:= msestringicomp(ttreelistitem(l).caption,ttreelistitem(r).caption);
  end;
 end;
+}
+function ttreelistitem.customcompare(const l: ttreelistitem;
+                                       const r: ttreelistitem): integer;
+begin
+ result:= 0;
+ if ns1_top in l.fstate1 then begin
+  dec(result);
+ end;
+ if ns1_top in r.fstate1 then begin
+  inc(result);
+ end;
+end;
+
+function ttreelistitem.comparecasesens(const l: ttreelistitem;
+                                       const r: ttreelistitem): integer;
+begin
+ result:= l.compare(r,true);
+end;
+
+function ttreelistitem.comparecaseinsens(const l: ttreelistitem;
+                                       const r: ttreelistitem): integer;
+begin
+ result:= l.compare(r,false);
+end;
 
 procedure ttreelistitem.sort(const casesensitive: boolean;
                                         const recursive: boolean = false);
@@ -2237,13 +2276,22 @@ var
 begin
  if ns1_customsort in fstate1 then begin
   {$ifdef FPC}
-  mergesort(pointerarty(fitems),fcount,pointercomparemethodty(@compare));
+  mergesort(pointerarty(fitems),fcount,pointercomparemethodty(@customcompare));
   {$else}
   po1:= self.compare;
   mergesort(pointerarty(fitems),fcount,pointercomparemethodty(po1));
   {$endif}
  end
  else begin
+  if casesensitive then begin
+   mergesort(pointerarty(fitems),fcount,pointercomparemethodty(
+                                                    @comparecasesens));
+  end
+  else begin
+   mergesort(pointerarty(fitems),fcount,pointercomparemethodty(
+                                                    @comparecaseinsens));
+  end;
+(*
   setlength(fitems,fcount);
   if casesensitive then begin
    sortarray(pointerarty(fitems),{$ifdef FPC}@{$endif}comparetreelistitemcasesensitive);
@@ -2251,6 +2299,7 @@ begin
   else begin
    sortarray(pointerarty(fitems),{$ifdef FPC}@{$endif}comparetreelistitemcaseinsensitive);
   end;
+*)
  end;
  for int1:= 0 to fcount-1 do begin
   fitems[int1].fparentindex:= int1;
@@ -2962,18 +3011,6 @@ end;
 function ttreelistitem.candrop(const source: ttreelistitem): boolean;
 begin
  result:= false;
-end;
-
-function ttreelistitem.compare(const l: ttreelistitem;
-                                       const r: ttreelistitem): integer;
-begin
- result:= 0;
- if ns1_top in l.fstate1 then begin
-  dec(result);
- end;
- if ns1_top in r.fstate1 then begin
-  inc(result);
- end;
 end;
 
 function ttreelistitem.gettop: boolean;
