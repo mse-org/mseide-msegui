@@ -112,6 +112,8 @@ type
    function getimagelist: timagelist;
    procedure setimagelist(const Value: timagelist);
    procedure setvaluetext1(const avalue: msestring);
+   function gettop: boolean;
+   procedure settop(const avalue: boolean);
   protected
    fstate: nodestatesty;
    fstate1: nodestates1ty;
@@ -176,6 +178,7 @@ type
    function getvaluetext: msestring; virtual;
    procedure setvaluetext(var avalue: msestring); virtual;
    property valuetext: msestring read getvaluetext write setvaluetext1;
+   property top: boolean read gettop write settop;
  end;
 
  plistitem = ^tlistitem;
@@ -207,8 +210,6 @@ type
    function inccount: integer; //returns itemindex
    function getrootexpanded: boolean;
    procedure setrootexpanded(const avalue: boolean);
-   function gettop: boolean;
-   procedure settop(const avalue: boolean);
   protected
    fparent: ttreelistitem;
    fparentindex: integer;
@@ -323,7 +324,6 @@ type
                            const recursive: boolean = false); overload;
    procedure sort(const sortfunc: arraysortcomparety;
                            const recursive: boolean = false); overload;
-   property top: boolean read gettop write settop;
    property count: integer read fcount;
    procedure setupeditor(const editor: tinplaceedit;
                           const font: tfont; const notext: boolean); override;
@@ -1710,6 +1710,21 @@ begin
  result:= fintf.getlayoutinfo(nil);
 end;
 
+function tlistitem.gettop: boolean;
+begin
+ result:= ns1_top in fstate1;
+end;
+
+procedure tlistitem.settop(const avalue: boolean);
+begin
+ if avalue then begin
+  include(fstate1,ns1_top);
+ end
+ else begin
+  exclude(fstate1,ns1_top);
+ end;
+end;
+
 { ttreelistitem }
 
 constructor ttreelistitem.create(const aowner: tcustomitemlist = nil;
@@ -3011,21 +3026,6 @@ end;
 function ttreelistitem.candrop(const source: ttreelistitem): boolean;
 begin
  result:= false;
-end;
-
-function ttreelistitem.gettop: boolean;
-begin
- result:= ns1_top in fstate1;
-end;
-
-procedure ttreelistitem.settop(const avalue: boolean);
-begin
- if avalue then begin
-  include(fstate1,ns1_top);
- end
- else begin
-  exclude(fstate1,ns1_top);
- end;
 end;
 
 procedure ttreelistitem.releaseowner;
