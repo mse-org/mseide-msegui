@@ -129,7 +129,7 @@ type
    procedure internalsetactiveitem(const Value: integer;
                          const aclicked: boolean; const force: boolean;
                          const nochildreninactive: boolean); override;
-   procedure checkactivate(const force: boolean);
+   procedure checkactivate(const force,noraise: boolean);
   protected
    foptions: mainmenuwidgetoptionsty;
    procedure restorefocus;
@@ -1844,7 +1844,7 @@ begin
  end;
 end;
 
-procedure tcustommainmenuwidget.checkactivate(const force: boolean);
+procedure tcustommainmenuwidget.checkactivate(const force,noraise: boolean);
 begin
  if force then begin
   include(fstate,mws_forced);
@@ -1861,7 +1861,7 @@ begin
    end;
   end;
   if force or activateoptionset then begin
-   if application.active and (fmenucomp <> nil) then begin
+   if application.active and (fmenucomp <> nil) and not noraise then begin
     window.bringtofrontlocal;
     include(fstate,mws_raised);
    end;
@@ -1881,7 +1881,7 @@ procedure tcustommainmenuwidget.internalsetactiveitem(const Value: integer;
            const nochildreninactive: boolean);
 begin
  if (value >= 0) and not (csdesigning in componentstate) then begin
-  checkactivate(false);
+  checkactivate(false,false);
  end;
  inherited;
  if value = -1 then begin
@@ -1899,7 +1899,10 @@ end;
 
 procedure tcustommainmenuwidget.selectmenu(const keymode: boolean);
 begin
- checkactivate(true);
+ checkactivate(true,fnextpopup = nil);
+ if fnextpopup <> nil then begin
+  window.activate;
+ end;
  inherited;
  flayout.menu.owner.checkexec;
 end;
