@@ -77,6 +77,8 @@ MSEgui command line parameters
  Use xreconfigurewmwindow() for window stacking operation.
 --STACKMODEBELOWWORKAROUND
  Necessarry for windowmanagers with buggy xreconfigurewmwindow() handling.
+--NOSTACKMODEBELOWWORKAROUND
+ No workaround.
 --TOPLEVELRAISE
  Use the top level frame window id instead of the application client window id
  for window raise operation. Implies --NORESTACKWINDOW and

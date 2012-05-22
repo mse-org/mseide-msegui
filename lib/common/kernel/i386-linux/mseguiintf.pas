@@ -1850,9 +1850,12 @@ begin
   if id <> predecessor then begin
    if gui_canstackunder then begin
     bo1:= not norestackwindow and (netatoms[net_restack_window] <> 0);
-    if (stackmode = below) and stackmodebelowworkaround then begin
+    if {not bo1 and} (stackmode = below) and stackmodebelowworkaround then begin
  //     xflush(appdisp);
  //      xsync(appdisp,false);
+     //many WM place stack_mode below windows 
+     //below all other windows so we need this ugly workaround
+     //??? OK ???
      application.sortzorder;
      ar1:= application.winidar;
      pindex:= -1;
@@ -1890,10 +1893,16 @@ begin
  //     xflush(appdisp);
     end
     else begin
-     changes.sibling:= predecessor;
-     changes.stack_mode:= stackmode;
-     xreconfigurewmwindow(appdisp,id,msedefaultscreenno,
+     if bo1 then begin
+      sendnetrootcardinalmessage(netatoms[net_restack_window],id,
+                                    [2,predecessor,stackmode]);
+     end
+     else begin
+      changes.sibling:= predecessor;
+      changes.stack_mode:= stackmode;
+      xreconfigurewmwindow(appdisp,id,msedefaultscreenno,
                                    cwsibling or cwstackmode,@changes);
+     end;
     end;
    {
      changes.sibling:= predecessor;
@@ -1921,8 +1930,6 @@ begin
    }
    end
    else begin
-     //many WM place stack_mode below windows 
-     //below all other windows so we need this ugly workaround
     application.sortzorder;
     ar1:= application.winidar;
     idindex:= -1;
@@ -4771,30 +4778,42 @@ begin
     deletecommandlineargument(int1);
     noreconfigurewmwindow:= true;
     norestackwindow:= true;
+    continue;
    end;
    if ar1[int1] = '--NOZORDERHANDLING' then begin
     nozorderhandling:= true;
     deletecommandlineargument(int1);
+    continue;
    end;
    if ar1[int1] = '--NORESTACKWINDOW' then begin
     norestackwindow:= true;
     deletecommandlineargument(int1);
+    continue;
    end;
    if ar1[int1] = '--RESTACKWINDOW' then begin
     norestackwindow:= false;
     deletecommandlineargument(int1);
+    continue;
    end;
    if ar1[int1] = '--NORECONFIGUREWMWINDOW' then begin
     noreconfigurewmwindow:= true;
     deletecommandlineargument(int1);
+    continue;
    end;
    if ar1[int1] = '--RECONFIGUREWMWINDOW' then begin
     noreconfigurewmwindow:= false;
     deletecommandlineargument(int1);
+    continue;
    end;
    if ar1[int1] = '--STACKMODEBELOWWORKAROUND' then begin
     stackmodebelowworkaround:= true;
     deletecommandlineargument(int1);
+    continue;
+   end;
+   if ar1[int1] = '--NOSTACKMODEBELOWWORKAROUND' then begin
+    stackmodebelowworkaround:= false;
+    deletecommandlineargument(int1);
+    continue;
    end;
   end;
   {$ifdef with_sm} 
