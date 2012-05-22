@@ -1854,13 +1854,11 @@ begin
    include(fstate,mws_firstactivated);
    setlinkedvar(fwindow.stackedunder(true),tlinkedobject(fstackedunderbefore));
   end;
-  if (force or activateoptionset) then begin
+  if force or activateoptionset then begin
    capturekeyboard;
    if (factivewindowbefore = nil) then begin
     setlinkedvar(application.activewindow,tlinkedobject(factivewindowbefore));
    end;
-  end;
-  if force or activateoptionset then begin
    if application.active and (fmenucomp <> nil) and not noraise then begin
     window.bringtofrontlocal;
     include(fstate,mws_raised);
@@ -1903,6 +1901,7 @@ begin
  if fnextpopup <> nil then begin
   window.activate;
  end;
+ include(fstate,mws_raised);
  inherited;
  flayout.menu.owner.checkexec;
 end;
