@@ -263,6 +263,7 @@ const
 var
  nozorderhandling: boolean;
  norestackwindow: boolean;
+ stackmodebelowworkaround: boolean;
  noreconfigurewmwindow: boolean;
  toplevelraise: boolean;
 

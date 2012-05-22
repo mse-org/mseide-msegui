@@ -1839,10 +1839,8 @@ begin
  else begin
   if id <> predecessor then begin
    if gui_canstackunder then begin
- //many WM place stack_mode below windows 
- //below all other windows so we need this ugly workaround
     bo1:= not norestackwindow and (netatoms[net_restack_window] <> 0);
-    if stackmode = below then begin
+    if (stackmode = below) and stackmodebelowworkaround then begin
  //     xflush(appdisp);
  //      xsync(appdisp,false);
      application.sortzorder;
@@ -1913,6 +1911,8 @@ begin
    }
    end
    else begin
+     //many WM place stack_mode below windows 
+     //below all other windows so we need this ugly workaround
     application.sortzorder;
     ar1:= application.winidar;
     idindex:= -1;
@@ -4770,8 +4770,20 @@ begin
     norestackwindow:= true;
     deletecommandlineargument(int1);
    end;
+   if ar1[int1] = '--RESTACKWINDOW' then begin
+    norestackwindow:= false;
+    deletecommandlineargument(int1);
+   end;
    if ar1[int1] = '--NORECONFIGUREWMWINDOW' then begin
     noreconfigurewmwindow:= true;
+    deletecommandlineargument(int1);
+   end;
+   if ar1[int1] = '--RECONFIGUREWMWINDOW' then begin
+    noreconfigurewmwindow:= false;
+    deletecommandlineargument(int1);
+   end;
+   if ar1[int1] = '--STACKMODEBELOWWORKAROUND' then begin
+    stackmodebelowworkaround:= true;
     deletecommandlineargument(int1);
    end;
   end;
@@ -5154,8 +5166,7 @@ end;
 
 initialization
  norestackwindow:= true;
- noreconfigurewmwindow:= true;
+// noreconfigurewmwindow:= true;
  hassm:= geticelib and getsmlib;
-// x11initdefaultfont;
 end.
 

@@ -69,10 +69,16 @@ MSEgui command line parameters
  Do not touch Z-order of the windows.
 --NORESTACKWINDOW
  Do not use the NET_RESTACK_WINDOW protocol.
+--RESTACKWINDOW
+ Use the NET_RESTACK_WINDOW protocol.
 --NORECONFIGUREWMWINDOW
- Do not use the xreconfigurewmwindow() for window stacking operation.
+ Do not use xreconfigurewmwindow() for window stacking operation.
+--RECONFIGUREWMWINDOW
+ Use xreconfigurewmwindow() for window stacking operation.
+--STACKMODEBELOWWORKAROUND
+ Necessarry for windowmanagers with buggy xreconfigurewmwindow() handling.
 --TOPLEVELRAISE
- Use the top level frame window id instead the application client window id
+ Use the top level frame window id instead of the application client window id
  for window raise operation. Implies --NORESTACKWINDOW and
  --NORECONFIGUREWMWINDOW.
  
