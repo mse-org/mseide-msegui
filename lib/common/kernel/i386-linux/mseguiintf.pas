@@ -1799,6 +1799,9 @@ end;
 function gui_raisewindow(id: winidty): guierrorty;
 begin
  gdi_lock;
+{$ifdef mse_debugzorder}
+ debugwindow('* gui_raisewindow ',id);
+{$endif}
  if toplevelraise then begin
 //  waitfordecoration(id);
   xraisewindow(appdisp,toplevelwindow(id));
@@ -1813,6 +1816,9 @@ end;
 function gui_lowerwindow(id: winidty): guierrorty;
 begin
  gdi_lock;
+{$ifdef mse_debugzorder}
+ debugwindow('* gui_lowerwindow ',id);
+{$endif}
  xlowerwindow(appdisp,id);
  result:= gue_ok;
  gdi_unlock;
@@ -1833,6 +1839,10 @@ begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
+{$ifdef mse_debugzorder}
+ debugwindow('*stackwindow '+inttostr(stackmode)+' ',id);
+ debugwindow(' predecessor ',predecessor);
+{$endif}
  if predecessor = 0 then begin
   result:= gui_raisewindow(id);
  end
@@ -5167,6 +5177,7 @@ end;
 initialization
  norestackwindow:= true;
 // noreconfigurewmwindow:= true;
+ stackmodebelowworkaround:= true;
  hassm:= geticelib and getsmlib;
 end.
 
