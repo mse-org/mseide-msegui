@@ -27,6 +27,7 @@ type
                           //todo: implement on linux
                  exo_inactive,                 //windows only
                  exo_nostdhandle,              //windows only
+                 exo_detached,                 //windows only
                  exo_tty,exo_echo,exo_icanon,  //linux only
                  exo_usepipewritehandles,exo_winpipewritehandles,
                  exo_sessionleader);         
@@ -388,6 +389,7 @@ var
 
 var
  startupinfo: tstartupinfo;
+ creationflags: dword = 0;
  processinfo: tprocessinformation;
  bo1: boolean;
 begin
@@ -448,16 +450,19 @@ begin
  if not (exo_nostdhandle in options) then begin
   startupinfo.dwflags:= startupinfo.dwFlags or startf_usestdhandles;
  end;
+ if exo_detached in options then begin
+  creationflags:= creationflags or detached_process;
+ end;
  if exo_inactive in options then begin
   startupinfo.wShowWindow:= sw_hide;
   startupinfo.dwflags:= startupinfo.dwFlags or startf_useshowwindow;
  end;
  if exo_shell in options then begin
   bo1:= createprocess(nil,pchar('cmd.exe '+'/c'+commandline),
-                           nil,nil,true,0,nil,nil,startupinfo,processinfo);
+                           nil,nil,true,creationflags,nil,nil,startupinfo,processinfo);
  end
  else begin
-  bo1:= createprocess(nil,pchar(commandline),nil,nil,true,0,nil,nil,
+  bo1:= createprocess(nil,pchar(commandline),nil,nil,true,creationflags,nil,nil,
                                                   startupinfo,processinfo);
  end;
  if bo1 then begin
