@@ -5196,7 +5196,7 @@ end;
 initialization
  norestackwindow:= true;
  noreconfigurewmwindow:= true;
- stackmodebelowworkaround:= true;
+ stackmodebelowworkaround:= false;
  hassm:= geticelib and getsmlib;
 end.
 
