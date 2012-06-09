@@ -27,7 +27,9 @@ type
                           //todo: implement on linux
                  exo_inactive,                 //windows only
                  exo_nostdhandle,              //windows only
+                 exo_nowindow,                 //windows only
                  exo_detached,                 //windows only
+                 exo_allowsetforegroundwindow, //windows only
                  exo_tty,exo_echo,exo_icanon,  //linux only
                  exo_usepipewritehandles,exo_winpipewritehandles,
                  exo_sessionleader);         
@@ -260,8 +262,8 @@ procedure execerror(const errno: integer; const commandline: string);
 begin
  raise eexecerror.Create(errno,'Can not execute "'+commandline+'".'+lineend);
 end;
-{$ifdef mswindows}
 
+{$ifdef mswindows}
 function getprocessexitcode(prochandle: prochandlety; out exitcode: integer;
                   const timeoutus: integer = 0): boolean;
                  //true if ok, close handle
@@ -450,8 +452,15 @@ begin
  if not (exo_nostdhandle in options) then begin
   startupinfo.dwflags:= startupinfo.dwFlags or startf_usestdhandles;
  end;
+ if exo_nowindow in options then begin
+  creationflags:= creationflags or create_no_window;
+ end;
  if exo_detached in options then begin
   creationflags:= creationflags or detached_process;
+ end;
+ if (exo_allowsetforegroundwindow in options) and 
+        assigned(allowsetforegroundwindow) then begin
+  allowsetforegroundwindow(asfw_any);
  end;
  if exo_inactive in options then begin
   startupinfo.wShowWindow:= sw_hide;

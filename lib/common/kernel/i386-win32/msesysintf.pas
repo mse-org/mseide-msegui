@@ -13,13 +13,18 @@ unit msesysintf; //i386-win32
 
 interface
 uses
- msesys,{msethread,}msetypes,msesystypes,msestrings;
+ msesys,{msethread,}msetypes,msesystypes,msestrings,windows;
  
 {$include ..\msesysintf.inc}
 
+const
+ ASFW_ANY = dword(-1);
+var
+ AllowSetForegroundWindow: function(dwProcessId: DWORD):WINBOOL; stdcall;
+
 implementation
 uses
- sysutils,windows,msebits,msefileutils,{msedatalist,}dateutils,
+ sysutils,msebits,msefileutils,{msedatalist,}dateutils,
  msesystimer,msearrayutils,msesysintf1,msedynload;
 
 //todo: correct unicode implementation, long filepaths, stubs for win95
@@ -127,6 +132,7 @@ function Process32Next(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
 var
  GetLongPathNameW: function(lpszShortPath: LPCWSTR; lpszLongPath: LPCWSTR;
                                            cchBuffer: DWORD):DWORD; stdcall;              
+ 
 function sys_getpid: procidty;
 begin
  result:= getcurrentprocessid;
@@ -1263,7 +1269,7 @@ begin
    -1: begin
     dispose(finddatapo);
     if handle <> invalid_handle_value then begin
-     findclose(handle);
+     windows.findclose(handle);
     end;
    end;
   end;
@@ -1434,7 +1440,7 @@ begin
     info.name:= cfilename;
    end;
   end;
-  findclose(handle);
+  windows.findclose(handle);
   result:= true;
  end
  else begin   //possibly a drive name
@@ -1625,6 +1631,9 @@ begin
  checkprocaddresses(['kernel32.dll'],
       ['GetLongPathNameW'],
       [{$ifndef FPC}@{$endif}@GetLongPathNameW]);
+ checkprocaddresses(['user32.dll'],
+      ['AllowSetForegroundWindow'],
+      [{$ifndef FPC}@{$endif}@AllowSetForegroundWindow]);
 end;
 {
 procedure initformatsettings;

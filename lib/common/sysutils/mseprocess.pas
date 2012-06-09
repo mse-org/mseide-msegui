@@ -21,7 +21,9 @@ type
  processoptionty = (pro_output,pro_erroroutput,pro_input,pro_errorouttoout,
                     pro_shell,    //default on linux
                     pro_noshell,  //default on windows, todo: implement on linux
-                    pro_inactive,pro_nostdhandle,pro_detached, //windows only
+                    pro_inactive,pro_nostdhandle, //windows only
+                    pro_nowindow,pro_detached,    //windows only
+                    pro_allowsetforegroundwindow,    //windows only
                     pro_tty,pro_echo,pro_icanon,  //linux only
                     pro_nowaitforpipeeof,pro_nopipeterminate,
                     pro_usepipewritehandles,pro_winpipewritehandles,
@@ -433,8 +435,14 @@ begin
      if pro_nostdhandle in foptions then begin
       include(opt1,exo_nostdhandle);
      end;
+     if pro_nowindow in foptions then begin
+      include(opt1,exo_nowindow);
+     end;
      if pro_detached in foptions then begin
       include(opt1,exo_detached);
+     end;
+     if pro_allowsetforegroundwindow in foptions then begin
+      include(opt1,exo_allowsetforegroundwindow);
      end;
      if pro_usepipewritehandles in foptions then begin
       include(opt1,exo_usepipewritehandles);
