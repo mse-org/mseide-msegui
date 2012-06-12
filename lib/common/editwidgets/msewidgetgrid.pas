@@ -1027,17 +1027,17 @@ var
  aintf: igridwidget;
  int1: integer;
 begin
- if not (csdestroying in fgrid.componentstate) then begin
+ if not (csdestroying in fcellinfo.grid.componentstate) then begin
   if fintf <> nil then begin
    aintf:= fintf;
    fintf:= nil;
    aintf.setgridintf(nil);
-   if not (csreading in fgrid.componentstate) then begin
+   if not (csreading in fcellinfo.grid.componentstate) then begin
                            //refreshancestor otherwise
     freedesigncomponent(aintf.getwidget); //inhibit deleting of inherited widget
    end;
   end;
-  if not (csreading in fgrid.componentstate) then begin
+  if not (csreading in fcellinfo.grid.componentstate) then begin
                            //refreshancestor otherwise
    for int1:= 0 to high(ffixrowwidgets) do begin
     if ffixrowwidgets[int1] <> nil then begin
@@ -1059,7 +1059,7 @@ var
  rect1: rectty;
  widget1: twidget;
 begin
- with tcustomwidgetgrid(fgrid) do begin
+ with tcustomwidgetgrid(fcellinfo.grid) do begin
   if (fintf <> nil) then begin //bug in fixes_2_0 2850 with checkpointer
    widget1:= fintf.getwidget;
    if co_nohscroll in foptions then begin
@@ -1105,7 +1105,7 @@ end;
 procedure twidgetcol.checkcanclose(var accepted: boolean);
 begin
  if (fintf <> nil) and fintf.getwidget.focused and 
-       not tcustomgrid1(fgrid).nocheckvalue and accepted then begin
+       not tcustomgrid1(fcellinfo.grid).nocheckvalue and accepted then begin
   accepted:= fintf.getwidget.canclose(nil);
  end;
 end;
@@ -1121,7 +1121,7 @@ var
  bo1: boolean;
  
 begin
- with twidgetgrid(fgrid) do begin
+ with twidgetgrid(fcellinfo.grid) do begin
   if ffocuslock > 0 then begin
    if not enter then begin
     factivewidget:= nil;
@@ -1137,13 +1137,13 @@ begin
   if not enter and (selectaction <> fca_exitgrid) then begin
    factivewidget:= nil;
    bo1:= true;
-   if not (gs1_rowdeleting in twidgetgrid(fgrid).fstate1) then begin
+   if not (gs1_rowdeleting in twidgetgrid(fcellinfo.grid).fstate1) then begin
     checkcanclose(bo1);
    end;
    if bo1 then begin
     if (activewidgetbefore <> nil) and 
            activewidgetbefore.clicked then begin
-     with fgrid do begin
+     with fcellinfo.grid do begin
       capturemouse;
       fwidgetstate:= fwidgetstate + [ws_clientmousecaptured];
       include(fstate,gs_childmousecaptured);
@@ -1163,35 +1163,35 @@ begin
   end
   else begin
    if (fintf <> nil) then begin
-    if fgrid.canwindow then begin
+    if fcellinfo.grid.canwindow then begin
      updatewidgetrect;
     end;
     inherited;
-    bo1:= (tcustomwidgetgrid(fgrid).fmouseinfopo <> nil) and 
-              tcustomwidgetgrid(fgrid).wantmousefocus(fmouseinfopo^);
-    if fgrid.entered or 
-               not (gs_cellexiting in tcustomwidgetgrid(fgrid).fstate) and 
+    bo1:= (tcustomwidgetgrid(fcellinfo.grid).fmouseinfopo <> nil) and 
+              tcustomwidgetgrid(fcellinfo.grid).wantmousefocus(fmouseinfopo^);
+    if fcellinfo.grid.entered or 
+               not (gs_cellexiting in tcustomwidgetgrid(fcellinfo.grid).fstate) and 
                                                                 bo1 then begin
      widget1:= fintf.getwidget;
      with widget1 do begin
       if not visible then begin
-       twidgetgrid(fgrid).fmouseactivewidget:= nil;
+       twidgetgrid(fcellinfo.grid).fmouseactivewidget:= nil;
        visible:= true;
       end;
       if (fwindow <> nil) and 
-        canfocus and (tcustomwidgetgrid(fgrid).entered or bo1) and
+        canfocus and (tcustomwidgetgrid(fcellinfo.grid).entered or bo1) and
         (
-         not fgrid.checkdescendent(fwindow.focusedwidget) or
-         (fwindow.focusedwidget = fgrid) or 
+         not fcellinfo.grid.checkdescendent(fwindow.focusedwidget) or
+         (fwindow.focusedwidget = fcellinfo.grid) or 
          fcontainer2.checkdescendent(fwindow.focusedwidget) or
          fcontainer0.checkdescendent(fwindow.focusedwidget)) then begin
-       bo1:= gs1_focuscellonenterlock in twidgetgrid(fgrid).fstate1;
-       include(twidgetgrid(fgrid).fstate1,gs1_focuscellonenterlock);
+       bo1:= gs1_focuscellonenterlock in twidgetgrid(fcellinfo.grid).fstate1;
+       include(twidgetgrid(fcellinfo.grid).fstate1,gs1_focuscellonenterlock);
        try
-        setfocus(fgrid.active);
+        setfocus(fcellinfo.grid.active);
        finally
         if not bo1 then begin
-         exclude(twidgetgrid(fgrid).fstate1,gs1_focuscellonenterlock);
+         exclude(twidgetgrid(fcellinfo.grid).fstate1,gs1_focuscellonenterlock);
         end;
        end;
       end;
@@ -1384,9 +1384,9 @@ end;
 procedure twidgetcol.setfixrowwidget(const awidget: twidget;
                        const rowindex: integer);
 begin
- tcustomwidgetgrid(fgrid).removefixwidget(awidget);
+ tcustomwidgetgrid(fcellinfo.grid).removefixwidget(awidget);
  ffixrowwidgets[-rowindex-1]:= awidget;
- fgrid.layoutchanged;
+ fcellinfo.grid.layoutchanged;
 end;
 
 procedure twidgetcol.setwidget(const awidget: twidget);
@@ -1447,23 +1447,23 @@ begin
      end
      else begin
       if po1 <> nil then begin
-       tdatalist1(fdata).internalfill(fgrid.rowcount,po1^);
+       tdatalist1(fdata).internalfill(fcellinfo.grid.rowcount,po1^);
       end
       else begin
-       fdata.count:= fgrid.rowcount;
+       fdata.count:= fcellinfo.grid.rowcount;
       end;
      end;
-     fdata.maxcount:= fgrid.rowcountmax;
+     fdata.maxcount:= fcellinfo.grid.rowcountmax;
      fdata.onitemchange:= {$ifdef FPC}@{$endif}itemchanged;
     end;
   {$ifdef mse_with_ifi}
    end;
   {$endif}
-   if gs_isdb in tcustomgrid1(fgrid).fstate then begin
+   if gs_isdb in tcustomgrid1(fcellinfo.grid).fstate then begin
     datasourcechanged;
    end;
    sourcenamechanged(-1);   
-   tcustomgrid1(fgrid).layoutchanged;
+   tcustomgrid1(fcellinfo.grid).layoutchanged;
   end
   else begin
    fintf:= nil;
@@ -1484,7 +1484,7 @@ var
 begin
  if fdata <> nil then begin
   if arow = -1 then begin
-   arow:= twidgetgrid(fgrid).ffocusedcell.row;
+   arow:= twidgetgrid(fcellinfo.grid).ffocusedcell.row;
   end;
   if (arow >= 0) and (arow < fdata.count) then begin
    tdatalist1(fdata).getgriddata(arow,dest);
@@ -1555,14 +1555,15 @@ procedure twidgetcol.setdata(var arow: integer; const source;
 begin
  if fdata <> nil then begin
   if arow = -1 then begin
-   arow:= twidgetgrid(fgrid).ffocusedcell.row;
+   arow:= twidgetgrid(fcellinfo.grid).ffocusedcell.row;
   end;
   if arow >= 0 then begin
    if noinvalidate then begin
     fdata.beginupdate;
    end;
    tdatalist1(fdata).setgriddata(arow,source);
-   if (arow = twidgetgrid(fgrid).ffocusedcell.row) and (fintf <> nil) then begin
+   if (arow = twidgetgrid(fcellinfo.grid).ffocusedcell.row) and
+                                                 (fintf <> nil) then begin
     fintf.gridtovalue(arow);
    end;
    if noinvalidate then begin
@@ -1586,7 +1587,7 @@ begin
  result:= true;
  if fdata <> nil then begin
   if arow = -1 then begin
-   arow:= twidgetgrid(fgrid).ffocusedcell.row;
+   arow:= twidgetgrid(fcellinfo.grid).ffocusedcell.row;
   end;
   if arow >= 0 then begin
    result:= tdatalist1(fdata).empty(arow);
@@ -1596,7 +1597,7 @@ end;
 
 function twidgetcol.cangridcopy: boolean;
 begin
- result:= tcustomwidgetgrid(fgrid).datacols.hasselection;
+ result:= tcustomwidgetgrid(fcellinfo.grid).datacols.hasselection;
 end;
 
 procedure twidgetcol.updateeditoptions(var aoptions: optionseditty);
@@ -1611,7 +1612,7 @@ function twidgetcol.showcaretrect(const arect: rectty;
                                        const aframe: tcustomframe): pointty;
 begin
  result:= grid.showcaretrect(makerect(translateclientpoint(arect.pos,
-              fintf.getwidget,fgrid),arect.size),aframe);
+              fintf.getwidget,fcellinfo.grid),arect.size),aframe);
 end;
 
 procedure twidgetcol.widgetpainted(const canvas: tcanvas);
@@ -1663,12 +1664,12 @@ end;
 
 function twidgetcol.getrow: integer;
 begin
- result:= twidgetgrid(fgrid).factiverow;
+ result:= twidgetgrid(fcellinfo.grid).factiverow;
 end;
 
 procedure twidgetcol.setrow(arow: integer);
 begin
- with twidgetgrid(fgrid) do begin
+ with twidgetgrid(fcellinfo.grid) do begin
   focuscell(makegridcoord(colindex,arow));
  end;
 end;
@@ -1725,7 +1726,7 @@ procedure twidgetcol.seteditwidget(const value: twidget);
 begin
  setwidget(value);
  if value <> nil then begin
-  value.parentwidget:= twidgetgrid(fgrid).fcontainer2;
+  value.parentwidget:= twidgetgrid(fcellinfo.grid).fcontainer2;
  end;
 end;
 
@@ -1733,7 +1734,7 @@ procedure twidgetcol.drawfocusedcell(const acanvas: tcanvas);
 var
  size1: sizety;
 begin
- with tcustomwidgetgrid(fgrid) do begin
+ with tcustomwidgetgrid(fcellinfo.grid) do begin
   if (factivewidget = nil) or not factivewidget.visible then begin
    inherited;
   end
@@ -1756,7 +1757,7 @@ end;
 
 procedure twidgetcol.drawfocus(const acanvas: tcanvas);
 begin
- with tcustomwidgetgrid(fgrid) do begin
+ with tcustomwidgetgrid(fcellinfo.grid) do begin
   if (factivewidget = nil) or not factivewidget.visible then begin
    inherited;
   end;
@@ -1782,7 +1783,7 @@ procedure twidgetcol.itemchanged(const sender: tdatalist; const aindex: integer)
 begin
  inherited;
  if {(tcustomwidgetgrid(fgrid).fupdating = 0) and} (fintf <> nil) and
-               not (gs_rowremoving in tcustomgrid1(fgrid).fstate) and
+               not (gs_rowremoving in tcustomgrid1(fcellinfo.grid).fstate) and
                not (gps_changelock in fstate)then begin
   fintf.gridvaluechanged(aindex);
   if ((aindex < 0) or (aindex = grid.row)) and (grid.row >= 0) then begin
@@ -1840,7 +1841,7 @@ end;
 
 function twidgetcol.nullcheckneeded(const newfocus: twidget): boolean;
 begin
- with twidgetgrid(fgrid) do begin
+ with twidgetgrid(fcellinfo.grid) do begin
   result:= not (gs_isdb in fstate) and (fnonullcheck = 0) and (
             not (fcontainer1.checkdescendent(newfocus) or 
                   fcontainer3.checkdescendent(newfocus))) and
@@ -1853,12 +1854,12 @@ end;
 
 function twidgetcol.nonullcheck: boolean;
 begin
- result:= tcustomgrid1(fgrid).fnonullcheck > 0;
+ result:= tcustomgrid1(fcellinfo.grid).fnonullcheck > 0;
 end;
 
 function twidgetcol.nocheckvalue: boolean;
 begin
- with tcustomgrid1(fgrid) do begin
+ with tcustomgrid1(fcellinfo.grid) do begin
   result:= (fnocheckvalue > 0) or (gs_rowremoving in fstate);
  end;
 end;
@@ -1870,7 +1871,7 @@ begin
                                                (alist <> nil)} then begin
   freeandnil(fdata); //free internal datalist
  end;
- if not (csdesigning in fgrid.componentstate) then begin
+ if not (csdesigning in fcellinfo.grid.componentstate) then begin
   setremotedatalist(idatalistclient(self),alist,fdata);
  end;
 end;
@@ -1878,12 +1879,12 @@ end;
 
 function twidgetcol.getgrid: tcustomwidgetgrid;
 begin
- result:= tcustomwidgetgrid(fgrid);
+ result:= tcustomwidgetgrid(fcellinfo.grid);
 end;
 
 function twidgetcol.getbrushorigin: pointty;
 begin
- result:= tcustomwidgetgrid(fgrid).fbrushorigin;
+ result:= tcustomwidgetgrid(fcellinfo.grid).fbrushorigin;
 end;
 
 procedure twidgetcol.beforedragevent(var ainfo: draginfoty; const arow: integer;
@@ -1921,7 +1922,7 @@ begin
    str1:= fdata.getsourcename(atag);
    datalist1:= nil;
    if str1 <> '' then begin
-    datalist1:= fgrid.datacols.datalistbyname(str1);
+    datalist1:= fcellinfo.grid.datacols.datalistbyname(str1);
    end;
    fdata.linksource(datalist1,atag);
   end
@@ -1930,7 +1931,7 @@ begin
     str1:= fdata.getsourcename(int1);  //link all source lists
     datalist1:= nil;
     if str1 <> '' then begin
-     datalist1:= fgrid.datacols.datalistbyname(str1);
+     datalist1:= fcellinfo.grid.datacols.datalistbyname(str1);
     end;
     fdata.linksource(datalist1,int1);
    end;
@@ -1941,7 +1942,7 @@ end;
 procedure twidgetcol.datachange(const arow: integer);
 begin
  if (datalist = nil) and not (gps_noinvalidate in fstate) and 
-                     not (csloading in fgrid.componentstate) then begin
+                     not (csloading in fcellinfo.grid.componentstate) then begin
   checkdirtyautorowheight(arow);
  end;
 end;
@@ -2026,7 +2027,7 @@ destructor twidgetfixcol.destroy;
 var
  int1: integer;
 begin
- if not (csdestroying in fgrid.componentstate) then begin
+ if not (csdestroying in fcellinfo.grid.componentstate) then begin
   for int1:= 0 to high(ffixrowwidgets) do begin
    if ffixrowwidgets[int1] <> nil then begin
     freedesigncomponent(ffixrowwidgets[int1]);
@@ -2060,9 +2061,9 @@ end;
 
 procedure twidgetfixcol.setfixrowwidget(const awidget: twidget; const rowindex: integer);
 begin
- tcustomwidgetgrid(fgrid).removefixwidget(awidget);
+ tcustomwidgetgrid(fcellinfo.grid).removefixwidget(awidget);
  ffixrowwidgets[-rowindex-1]:= awidget;
- fgrid.layoutchanged;
+ fcellinfo.grid.layoutchanged;
 end;
 
 { twidgetfixcols }

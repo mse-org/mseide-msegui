@@ -117,6 +117,8 @@ type
    flinkdest: datalistarty;
    fstate: dataliststatesty;
    fintparam: integer;
+   frearanged: boolean; //set by rearange
+   fgridsortdescend: boolean; //set by tdatacols before sorting
    function checkassigncompatibility(const source: tpersistent): boolean; virtual;
    function assigndata(const source: tpersistent): boolean;
                        //false if not possible
@@ -2141,7 +2143,7 @@ begin
 //   capacity:= ((value*12) div 10) + 5; //in 20% schritten
   end;
   if value > countvorher then begin
-   Fcount := Value;
+   Fcount:= Value;
  //  fillchar(datapoty(fdatapo)^[countvorher*fsize],(value-countvorher)*fsize,0);
    if not nochangeandinit then begin
     initdata1(false,countvorher,value-countvorher);    //mit defaultdaten fuellen
@@ -2525,6 +2527,9 @@ var
  int1: integer;
 begin
  exclude(fstate,dls_sortio);
+ if fcount = 0 then begin
+  frearanged:= false;
+ end;
  if fnochange = 0 then begin
   doitemchange(index);
   if sorted then begin
@@ -2578,6 +2583,7 @@ var
  datapo1: pchar;
  int1: integer;
 begin
+ frearanged:= true;
  normalizering;
  getmem(datapo1,fbytelength);
  try

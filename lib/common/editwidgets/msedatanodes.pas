@@ -76,6 +76,8 @@ type
   imageextend: sizety; //variable
   imageextra: sizety;  //variable
   treelevelshift: integer; //variable
+  rowindex: integer; //variable
+//  islast: boolean; //variable
  end;
  plistitemlayoutinfoty = ^listitemlayoutinfoty;
 
@@ -255,9 +257,9 @@ type
 
    procedure updatechildcheckedstate; //updates ancestors
    procedure updatechildcheckedtree;  //updates self and descendents
-   function parent: ttreelistitem;
+   property parent: ttreelistitem read fparent;
    function parentindex: integer;
-   function treelevel: integer;
+   property treelevel: integer read ftreelevel;
    function levelshift: integer;
    function treeheight: integer;     //total hight of children
    function rowheight: integer;      //toatal needed grid rows
@@ -2439,8 +2441,29 @@ end;
 procedure ttreelistitem.drawimage(var alayoutinfo: listitemlayoutinfoty;
                                                        const acanvas: tcanvas);
 var
+ po1,poend: ptreelistitem;
+ 
+ function isnotlast(const aitem: ttreelistitem): boolean;
+ begin
+  if po1 = nil then begin
+   result:= aitem.fparentindex <> aitem.fparent.fcount - 1;
+  end
+  else begin
+   result:= po1 = poend;
+   while po1 < poend do begin
+    if po1^.treelevel <= aitem.treelevel then begin
+     result:= po1^.treelevel = aitem.treelevel;
+     break;
+    end;
+    inc(po1);
+   end;
+  end;
+ end;
+ 
+var
  boxno: integer;
  int1: integer;
+ bo1: boolean;
  {$ifdef mswindows}
 /// int2: integer;
  {$endif}
@@ -2478,8 +2501,16 @@ begin
    seg.b.y:= cellheight-1;
    item1:= self;
    int1:= 0;
+   po1:= nil;
+   if (fowner <> nil) and fowner.frearanged then begin
+    po1:= ptreelistitem(fowner.datapo);
+    poend:= po1 + fowner.count-1;
+    po1:= po1 + rowindex + 1;
+   end;
+   bo1:= (fparent = nil) or isnotlast(self); 
+           //bo1 not used if parent = nil
    while item1.fparent <> nil do begin
-    if (item1.fparentindex <> item1.fparent.fcount - 1) or (int1 = 0) then begin
+    if (int1 = 0) or isnotlast(item1) then begin
      lines[int1]:= seg;
      inc(int1);
     end;
@@ -2488,7 +2519,8 @@ begin
     item1:= item1.fparent;
    end;
    if int1 > 0 then begin
-    if fparentindex <> fparent.fcount - 1 then begin
+    if bo1 then begin
+//    if fparentindex <> fparent.fcount - 1 then begin
      if boxno >= 0 then begin
       lines[0].b.y:= expandboxrect.y-1; //top of splited vert.
       lines[int1]:= lines[0];
@@ -2711,11 +2743,6 @@ begin
  end;
 end;
 
-function ttreelistitem.treelevel: integer;
-begin
- result:= ftreelevel;
-end;
-
 function ttreelistitem.levelshift: integer;
 begin
  if fowner <> nil then begin
@@ -2835,11 +2862,6 @@ begin
  if aexpand and (result <> nil) then begin
   result.rootexpanded:= true;
  end;
-end;
-
-function ttreelistitem.parent: ttreelistitem;
-begin
- result:= fparent;
 end;
 
 function ttreelistitem.isroot: boolean;

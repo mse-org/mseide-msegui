@@ -5761,7 +5761,7 @@ var
  int1: integer;
 begin
  if fdatalink.active and (fdatalink.field <> nil) then begin
-  with tdbdropdownlist(fgrid).fdatalink do begin
+  with tdbdropdownlist(fcellinfo.grid).fdatalink do begin
    if fdataintf <> nil then begin
     result:= fdataintf.getrowtext(ftextindex,arow+ffirstrecord,fdatalink.field);
    end
@@ -8746,8 +8746,9 @@ function tdbstringcol.getrowtext(const arow: integer): msestring;
 var
  po1: pmsestring;
 begin
- po1:= pmsestring(tcustomdbstringgrid(fgrid).fdatalink.getdisplaystringbuffer(
-                           fdatalink.field,arow));
+ po1:= pmsestring(
+    tcustomdbstringgrid(fcellinfo.grid).fdatalink.getdisplaystringbuffer(
+                                                       fdatalink.field,arow));
  if po1 = nil then begin
   result:= fdatalink.nullsymbol;
  end
@@ -8773,17 +8774,17 @@ end;
 
 function tdbstringcol.getgriddatasource: tdatasource;
 begin
- result:= tcustomdbstringgrid(fgrid).datalink.datasource;
+ result:= tcustomdbstringgrid(fcellinfo.grid).datalink.datasource;
 end;
 
 function tdbstringcol.getgridintf: iwidgetgrid;
 begin
- result:= iwidgetgrid(tcustomdbstringgrid(fgrid));
+ result:= iwidgetgrid(tcustomdbstringgrid(fcellinfo.grid));
 end;
 
 function tdbstringcol.getwidget: twidget;
 begin
- result:= fgrid;
+ result:= fcellinfo.grid;
 end;
 
 function tdbstringcol.seteditfocus: boolean;
@@ -8806,7 +8807,7 @@ end;
 
 procedure tdbstringcol.initeditfocus;
 begin
- with tcustomstringgrid1(fgrid) do begin
+ with tcustomstringgrid1(fcellinfo.grid) do begin
   if (ffocusedcell.col = index) and (ffocusedcell.row >= 0) then begin
    feditor.dofocus;
   end;
@@ -8815,15 +8816,15 @@ end;
 
 procedure tdbstringcol.updatereadonlystate;
 begin
- if (fgrid.col = self.index) and (fgrid.row >= 0) then begin
-  tcustomstringgrid1(fgrid).feditor.updatecaret;
+ if (fcellinfo.grid.col = self.index) and (fcellinfo.grid.row >= 0) then begin
+  tcustomstringgrid1(fcellinfo.grid).feditor.updatecaret;
  end;
 end;
 
 function tdbstringcol.checkvalue(const quiet: boolean = false): boolean;
 begin
  result:= true;
- tcustomdbstringgrid(fgrid).checkcellvalue(result);
+ tcustomdbstringgrid(fcellinfo.grid).checkcellvalue(result);
 end;
 
 procedure tdbstringcol.valuetofield;
@@ -8831,7 +8832,7 @@ procedure tdbstringcol.valuetofield;
 // int1: integer;
 // mstr1: msestring;
 begin
- with tcustomdbstringgrid(fgrid) do begin
+ with tcustomdbstringgrid(fcellinfo.grid) do begin
   if col = index then begin
    self.fdatalink.asnullmsestring:= feditor.text;
   end;
@@ -8846,7 +8847,7 @@ procedure tdbstringcol.fieldtovalue;
 //var
 // int1: integer;
 begin
- with tcustomdbstringgrid(fgrid) do begin
+ with tcustomdbstringgrid(fcellinfo.grid) do begin
   if col = index then begin
    feditor.text:= self.fdatalink.msedisplaytext('',true);
   end
@@ -8865,7 +8866,7 @@ procedure tdbstringcol.setnullvalue;
 //var
 // int1: integer;
 begin
- with tcustomdbstringgrid(fgrid) do begin
+ with tcustomdbstringgrid(fcellinfo.grid) do begin
   if col = index then begin
    feditor.text:= self.fdatalink.nullsymbol;
   end
@@ -8894,7 +8895,7 @@ end;
 
 function tdbstringcol.getdataset(const aindex: integer): tdataset;
 begin
- result:= tcustomdbstringgrid(fgrid).datalink.dataset;
+ result:= tcustomdbstringgrid(fcellinfo.grid).datalink.dataset;
 end;
 
 function tdbstringcol.getoptionsdb: optionseditdbty;
@@ -10488,7 +10489,7 @@ function tlbdropdownstringcol.getrowtext(const arow: integer): msestring;
 var
  int1: integer;
 begin
- int1:= tlbdropdownlist(fgrid).getrecno(arow);
+ int1:= tlbdropdownlist(fcellinfo.grid).getrecno(arow);
  if int1 >= 0 then begin
   result:= flookupbuffer.textvaluephys(ffieldno,
           flookupbuffer.textindex(fsortfieldno,int1,true));
@@ -11272,7 +11273,7 @@ begin
       awidget.getcorbainterface(typeinfo(idbeditfieldlink),intf1) then begin
   link1:= intf1.getfieldlink;
   if link1 <> nil then begin
-   link1.navigator:= tdbwidgetgrid(fgrid).fdatalink.navigator;
+   link1.navigator:= tdbwidgetgrid(fcellinfo.grid).fdatalink.navigator;
   end;
  end;
 end;

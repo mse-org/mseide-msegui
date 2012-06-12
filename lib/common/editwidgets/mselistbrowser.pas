@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -802,6 +802,7 @@ type
    procedure expandedchanged(const avalue: boolean);
    procedure setfieldedit(const avalue: trecordfieldedit);
   protected
+//   procedure drawcell(const canvas: tcanvas); override;
    procedure doitembuttonpress(var info: mouseeventinfoty); override;
 //   procedure setfiltertext(const value: msestring); override;
 
@@ -832,12 +833,15 @@ type
 
    function candragsource(const apos: pointty): boolean;
    procedure dragdrop(const adragobject: ttreeitemdragobject);
+   procedure comparerow(const lindex,rindex: integer; var aresult: integer);
   published
    property itemlist: ttreeitemeditlist read getitemlist 
                                         write setitemlist stored false;
    property fieldedit: trecordfieldedit read ffieldedit write setfieldedit;
-   property options: treeitemeditoptionsty read foptions write foptions default [];
-   property oncheckrowmove: checkmoveeventty read foncheckrowmove write foncheckrowmove;
+   property options: treeitemeditoptionsty read foptions 
+                                                    write foptions default [];
+   property oncheckrowmove: checkmoveeventty read foncheckrowmove 
+                                                        write foncheckrowmove;
 //   property cursor default cr_default;
  end;
 
@@ -942,7 +946,7 @@ constructor tlistcol.create(const agrid: tcustomgrid;
                                      const aowner: tgridarrayprop);
 begin
  inherited;
- fwidth:= tcustomlistview(fgrid).cellwidth;
+ fwidth:= tcustomlistview(fcellinfo.grid).cellwidth;
  foptions:= (foptions - [co_savestate]) + [co_mousescrollrow];
 end;
 
@@ -951,9 +955,9 @@ var
  int1: integer;
 begin
  int1:= value;
- tcustomlistview(fgrid).limitcellwidth(int1);
+ tcustomlistview(fcellinfo.grid).limitcellwidth(int1);
  inherited setwidth(int1);
- tcustomlistview(fgrid).cellwidth:= fwidth;
+ tcustomlistview(fcellinfo.grid).cellwidth:= fwidth;
 end;
 
 procedure tlistcol.setoptions(const Value: coloptionsty);
@@ -978,9 +982,10 @@ function tlistcol.getitems(const aindex: integer): tlistitem;
 var
  int1: integer;
 begin
- int1:= tcustomlistview(fgrid).celltoindex(makegridcoord(colindex,aindex),false);
+ int1:= tcustomlistview(fcellinfo.grid).celltoindex(
+                              makegridcoord(colindex,aindex),false);
  if int1 >= 0 then begin
-  result:= tcustomlistview(fgrid).fitemlist[int1];
+  result:= tcustomlistview(fcellinfo.grid).fitemlist[int1];
  end
  else begin
   result:= nil;
@@ -991,20 +996,23 @@ procedure tlistcol.setitems(const aindex: integer; const Value: tlistitem);
 var
  int1: integer;
 begin
- int1:= tcustomlistview(fgrid).celltoindex(makegridcoord(colindex,aindex),false);
+ int1:= tcustomlistview(fcellinfo.grid).celltoindex(
+                               makegridcoord(colindex,aindex),false);
  if int1 >= 0 then begin
-  tcustomlistview(fgrid).fitemlist[int1]:= value;
+  tcustomlistview(fcellinfo.grid).fitemlist[int1]:= value;
  end;
 end;
 
 procedure tlistcol.updatecellzone(const row: integer; const pos: pointty;
                                   var result: cellzonety);
 begin
- if pointinrect(pos,tcustomlistview(fgrid).fitemlist.flayoutinfo.captionrect) then begin
+ if pointinrect(pos,tcustomlistview(
+                fcellinfo.grid).fitemlist.flayoutinfo.captionrect) then begin
   result:= cz_caption;
  end
  else begin
-  if pointinrect(pos,tcustomlistview(fgrid).fitemlist.flayoutinfo.imagerect) then begin
+  if pointinrect(pos,
+     tcustomlistview(fcellinfo.grid).fitemlist.flayoutinfo.imagerect) then begin
    result:= cz_image;
   end
   else begin
@@ -1017,9 +1025,10 @@ function tlistcol.getselected(const row: integer): boolean;
 var
  int1: integer;
 begin
- int1:= tcustomlistview(fgrid).celltoindex(makegridcoord(colindex,row),false);
+ int1:= tcustomlistview(fcellinfo.grid).celltoindex(makegridcoord(colindex,row),
+                                                                         false);
  if int1 >= 0 then begin
-  result:= tcustomlistview(fgrid).fitemlist[int1].selected;
+  result:= tcustomlistview(fcellinfo.grid).fitemlist[int1].selected;
  end
  else begin
   result:= false;
@@ -1034,7 +1043,7 @@ procedure tlistcol.setselected(const row: integer; value: boolean);
  begin
   item:= items[index];
   if (item <> nil) and (item.selected <> value) then begin
-   include(tcustomgrid1(fgrid).fstate,gs_selectionchanged);
+   include(tcustomgrid1(fcellinfo.grid).fstate,gs_selectionchanged);
    item.selected:= value;
   end;
  end;
@@ -1043,7 +1052,7 @@ var
  int1: integer;
 begin
  if row < 0 then begin
-  for int1:= 0 to fgrid.rowcount-1 do begin
+  for int1:= 0 to fcellinfo.grid.rowcount-1 do begin
    updateselected(int1);
   end;
  end
@@ -1058,7 +1067,7 @@ var
  hintinfo: hintinfoty;
  item1: tlistitem;
 begin
- with tcustomlistview(fgrid) do begin
+ with tcustomlistview(fcellinfo.grid) do begin
   if (lvo_hintclippedtext in foptions) and 
          (info.eventkind = cek_firstmousepark) and application.active and 
           getshowhint and (info.cell.row >= 0) then begin
@@ -1066,9 +1075,9 @@ begin
    if item1 <> nil then begin
     with item1 do begin
      if captionclipped then begin
-      application.inithintinfo(hintinfo,fgrid);
+      application.inithintinfo(hintinfo,fcellinfo.grid);
       hintinfo.caption:= caption;
-      application.showhint(fgrid,hintinfo);
+      application.showhint(fcellinfo.grid,hintinfo);
      end;
     end;
    end;
@@ -2635,6 +2644,7 @@ end;
 procedure titemedit.drawcell(const canvas: tcanvas);
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
+  flayoutinfocell.rowindex:= cell.row;
   flayoutinfocell.textflags:= textflags;
   tlistitem(datapo^).drawcell(canvas);
  end;
@@ -2825,6 +2835,7 @@ begin
  if fvalue <> nil then begin
   if fgridintf <> nil then begin
    acanvas.rootbrushorigin:= fgridintf.getbrushorigin;
+   flayoutinfofocused.rowindex:= fgridintf.grid.row;
   end;
   with tlistitem1(fvalue) do begin
    drawimage(flayoutinfofocused,acanvas);
@@ -4240,6 +4251,35 @@ var
 begin
  pathl:= ttreelistitem(l).rootpath;
  pathr:= ttreelistitem(r).rootpath;
+ int1:= high(pathl);
+ if int1 > high(pathr) then begin
+  int1:= high(pathr);
+ end;
+ int3:= -1;
+ for int2:= 0 to int1 do begin
+  if pathl[int2] <> pathr[int2] then begin
+   int3:= int2;
+   break;
+  end;
+ end;
+ if int3 >= 0 then begin
+  result:= inherited compare(pathl[int3],pathr[int3]);
+ end
+ else begin
+  result:= length(pathl) - length(pathr);
+  if fgridsortdescend then begin
+   result:= -result;
+  end;
+ end;
+end;
+{
+function ttreeitemeditlist.compare(const l,r): integer;
+var
+ pathl,pathr: treelistitemarty;
+ int1,int2,int3: integer;
+begin
+ pathl:= ttreelistitem(l).rootpath;
+ pathr:= ttreelistitem(r).rootpath;
  int1:= length(pathl);
  if int1 > length(pathr) then begin
   int1:= length(pathr);
@@ -4258,7 +4298,7 @@ begin
   result:= length(pathl) - length(pathr);
  end;
 end;
-
+}
 procedure ttreeitemeditlist.statreaditem(const reader: tstatreader;
                  var aitem: tlistitem);
 begin
@@ -5052,6 +5092,38 @@ begin
  result:= treelistedititemarty(inherited selecteditems);
 end;
 
+procedure ttreeitemedit.comparerow(const lindex: integer;
+               const rindex: integer; var aresult: integer);
+var
+ pol,por: ptreelistitem;
+ col1: tdatacol;
+begin
+ if fitemlist <> nil then begin
+  col1:= fgridintf.getcol;
+  pol:= fitemlist.datapo;
+  por:= pol+rindex;
+  pol:= pol+lindex;
+  if (col1.grid.datacols.sortcol = col1.index) or
+           (pol^.count = 0) and (por^.count = 0) and
+                             (pol^.parent = por^.parent) then begin
+   aresult:= col1.grid.datacols.sortfunc(lindex,rindex);
+  end;
+ end;
+end;
+{
+procedure ttreeitemedit.drawcell(const canvas: tcanvas);
+begin
+ with cellinfoty(canvas.drawinfopo^) do begin
+  flayoutinfocell.islast:= (cell.row >= grid.rowhigh) or 
+          (fitemlist <> nil) and
+          (ptreelistitem(datapo)^.treelevel = 0) or
+          (ptreelistitem(datapo)^.treelevel >
+                   (ptreelistitem(datapo)+1)^.treelevel);
+ end;
+ flayoutinfofocused.islast:= flayoutinfocell.islast;
+ inherited;
+end;
+}
 (*
 { ttreeitemdragcontroller }
 

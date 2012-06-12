@@ -616,7 +616,7 @@ end;
 
 procedure tifiwidgetcol.datachange(const arow: integer);
 begin
- with trxwidgetgrid(fgrid).fifi do begin
+ with trxwidgetgrid(fcellinfo.grid).fifi do begin
   if (self.name <> '') and (arow >= 0) and cancommandsend(igo_coldata) and 
                                             (fdata <> nil) then begin
    senditem(ik_coldatachange,[encodecolchangedata(self.name,arow,fdata)]);
