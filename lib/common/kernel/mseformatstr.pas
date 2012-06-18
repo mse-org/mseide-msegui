@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -87,7 +87,7 @@ function formatdatetimemse(const formatstr: msestring; const datetime: tdatetime
 function formatdatetimemse(const formatstr: msestring;
                           const datetime: tdatetime): msestring; overload;
 
-function formatfloatmse(const value: double; const format: msestring; 
+function formatfloatmse(value: double; const format: msestring; 
                          const formatsettings: tformatsettingsmse;
                          const dot: boolean = false): msestring; overload;
    //dot = true -> always '.' as decimal separator
@@ -2443,7 +2443,7 @@ begin
  result:= byte(((inp div 10) shl 4) + (inp mod 10))
 end;
 
-function formatfloatmse(const value: double; const format: msestring;
+function formatfloatmse(value: double; const format: msestring;
                               const formatsettings: tformatsettingsmse;
                               const dot: boolean = false): msestring;
 
@@ -2493,7 +2493,6 @@ var
   end
   else begin
    if (po2+1)^ = '-' then begin
-//    noexpsign:= true;
     inc(po2);
    end;
   end;
@@ -2502,7 +2501,6 @@ var
 var
  int1,int2,int3: integer;
  decimalsep,thousandsep: msechar;
-// mch1: msechar;
  intopt,intmust,fracmust,fracopt,expopt,expmust: integer;
  decifound,thousandfound,numberprinted,expofound,engfound,engsymfound: boolean;
  mstr1: msestring;
@@ -2666,6 +2664,9 @@ begin
   result:= doubletostring(value,0,fsm_default,decimalsep);
  end
  else begin 
+  if int1 > 0 then begin
+   value:= abs(value); //no sign
+  end;
   po1:= pmsechar(result);
   while po2^ <> #0 do begin
    quote;
@@ -2685,7 +2686,6 @@ begin
      engfound:= false;
      engsymfound:= false;
      expsign:= false;
-//     noexpsign:= false;
      while po2^ <> #0 do begin
       case po2^ of
        '.': begin
