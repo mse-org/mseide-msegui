@@ -26,15 +26,16 @@ type
  sigflagty = (sfl_internal,sfl_stop,sfl_handle);
  sigflagsty = set of sigflagty;
  
- processorty = (pro_i386,pro_x86_64,pro_arm,pro_cpu32,pro_avr32);
+ processorty = (pro_i386,pro_x86_64,pro_arm,pro_cpu32,pro_avr32,pro_rl78);
 
 const
  gdberrortexts: array[gdbresultty] of string =
           ('','Error','Timeout','Data error','Message','Target running',
            'Write error','gdb not active');
  niltext = 'nil';
- processornames: array[processorty] of ansistring = ('i386','x86_64','arm','cpu32','avr32');
- simulatorprocessors = [pro_arm];
+ processornames: array[processorty] of ansistring = 
+          ('i386','x86_64','arm','cpu32','avr32','rl78');
+ simulatorprocessors = [pro_arm,pro_rl78];
  
 type
  gdbstatety = (gs_syncget,gs_syncack,gs_clicommand,gs_clilist,

@@ -1,0 +1,15 @@
+inherited cpurl78fo: tcpurl78fo
+  bounds_x = 192
+  bounds_y = 451
+  container.bounds = (
+    0
+    0
+    377
+    207
+  )
+  moduleclassname = 'tcpufo'
+  inherited on: tbooleanedit
+  end
+  inherited stoptime: tdatetimedisp
+  end
+end
