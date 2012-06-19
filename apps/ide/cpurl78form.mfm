@@ -1,18 +1,20 @@
 inherited cpurl78fo: tcpurl78fo
   bounds_x = 24
   bounds_y = 391
-  bounds_cx = 496
-  bounds_cy = 315
+  bounds_cx = 377
+  bounds_cy = 271
   container.bounds = (
     0
     0
-    486
-    315
+    367
+    271
   )
   moduleclassname = 'tcpufo'
   inherited on: tbooleanedit
   end
   inherited stoptime: tdatetimedisp
+    taborder = 69
+    bounds_x = 72
   end
   object a: tintegeredit[2]
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -28,8 +30,8 @@ inherited cpurl78fo: tcpurl78fo
       0
       0
     )
-    taborder = 2
-    bounds_x = 64
+    taborder = 1
+    bounds_x = 72
     bounds_y = 31
     bounds_cx = 25
     bounds_cy = 38
@@ -57,8 +59,8 @@ inherited cpurl78fo: tcpurl78fo
       0
       0
     )
-    taborder = 3
-    bounds_x = 89
+    taborder = 2
+    bounds_x = 97
     bounds_y = 31
     bounds_cx = 25
     bounds_cy = 38
@@ -79,8 +81,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 4
-    bounds_x = 64
+    taborder = 9
+    bounds_x = 72
     bounds_y = 69
     bounds_cx = 50
     bounds_cy = 21
@@ -101,8 +103,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 5
-    bounds_x = 115
+    taborder = 10
+    bounds_x = 123
     bounds_y = 69
     bounds_cx = 50
     bounds_cy = 21
@@ -130,8 +132,8 @@ inherited cpurl78fo: tcpurl78fo
       0
       0
     )
-    taborder = 6
-    bounds_x = 115
+    taborder = 3
+    bounds_x = 123
     bounds_y = 31
     bounds_cx = 25
     bounds_cy = 38
@@ -159,8 +161,8 @@ inherited cpurl78fo: tcpurl78fo
       0
       0
     )
-    taborder = 7
-    bounds_x = 140
+    taborder = 4
+    bounds_x = 148
     bounds_y = 31
     bounds_cx = 25
     bounds_cy = 38
@@ -181,8 +183,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 8
-    bounds_x = 166
+    taborder = 11
+    bounds_x = 174
     bounds_y = 69
     bounds_cx = 50
     bounds_cy = 21
@@ -210,8 +212,8 @@ inherited cpurl78fo: tcpurl78fo
       0
       0
     )
-    taborder = 9
-    bounds_x = 166
+    taborder = 5
+    bounds_x = 174
     bounds_y = 31
     bounds_cx = 25
     bounds_cy = 38
@@ -239,8 +241,8 @@ inherited cpurl78fo: tcpurl78fo
       0
       0
     )
-    taborder = 10
-    bounds_x = 191
+    taborder = 6
+    bounds_x = 199
     bounds_y = 31
     bounds_cx = 25
     bounds_cy = 38
@@ -261,8 +263,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 11
-    bounds_x = 217
+    taborder = 12
+    bounds_x = 225
     bounds_y = 69
     bounds_cx = 50
     bounds_cy = 21
@@ -290,8 +292,8 @@ inherited cpurl78fo: tcpurl78fo
       0
       0
     )
-    taborder = 12
-    bounds_x = 217
+    taborder = 7
+    bounds_x = 225
     bounds_y = 31
     bounds_cx = 25
     bounds_cy = 38
@@ -319,8 +321,8 @@ inherited cpurl78fo: tcpurl78fo
       0
       0
     )
-    taborder = 13
-    bounds_x = 242
+    taborder = 8
+    bounds_x = 250
     bounds_y = 31
     bounds_cx = 25
     bounds_cy = 38
@@ -348,7 +350,7 @@ inherited cpurl78fo: tcpurl78fo
       2
       0
     )
-    taborder = 14
+    taborder = 68
     bounds_x = 6
     bounds_y = 175
     bounds_cx = 29
@@ -365,7 +367,7 @@ inherited cpurl78fo: tcpurl78fo
     reffontheight = 17
   end
   object tgroupbox1: tgroupbox[15]
-    taborder = 15
+    taborder = 67
     bounds_x = 0
     bounds_y = 32
     bounds_cx = 54
@@ -384,6 +386,7 @@ inherited cpurl78fo: tcpurl78fo
         19
         3
       )
+      taborder = 1
       bounds_x = 8
       bounds_y = 24
       bounds_cx = 30
@@ -404,7 +407,7 @@ inherited cpurl78fo: tcpurl78fo
         29
         3
       )
-      taborder = 1
+      taborder = 5
       bounds_x = 8
       bounds_y = 88
       bounds_cx = 40
@@ -425,7 +428,7 @@ inherited cpurl78fo: tcpurl78fo
         29
         3
       )
-      taborder = 2
+      taborder = 4
       bounds_x = 8
       bounds_y = 72
       bounds_cx = 40
@@ -446,7 +449,7 @@ inherited cpurl78fo: tcpurl78fo
         35
         3
       )
-      taborder = 3
+      taborder = 7
       bounds_x = 8
       bounds_y = 120
       bounds_cx = 46
@@ -467,7 +470,7 @@ inherited cpurl78fo: tcpurl78fo
         19
         3
       )
-      taborder = 4
+      taborder = 2
       bounds_x = 8
       bounds_y = 40
       bounds_cx = 30
@@ -488,7 +491,7 @@ inherited cpurl78fo: tcpurl78fo
         35
         3
       )
-      taborder = 5
+      taborder = 6
       bounds_x = 8
       bounds_y = 104
       bounds_cx = 46
@@ -509,7 +512,6 @@ inherited cpurl78fo: tcpurl78fo
         10
         3
       )
-      taborder = 6
       bounds_x = 8
       bounds_y = 8
       bounds_cx = 21
@@ -530,7 +532,7 @@ inherited cpurl78fo: tcpurl78fo
         14
         3
       )
-      taborder = 7
+      taborder = 3
       bounds_x = 8
       bounds_y = 56
       bounds_cx = 25
@@ -552,8 +554,8 @@ inherited cpurl78fo: tcpurl78fo
       19
       0
     )
-    taborder = 16
-    bounds_x = 273
+    taborder = 61
+    bounds_x = 281
     bounds_y = 48
     bounds_cx = 69
     bounds_cy = 21
@@ -581,8 +583,8 @@ inherited cpurl78fo: tcpurl78fo
       20
       0
     )
-    taborder = 17
-    bounds_x = 273
+    taborder = 62
+    bounds_x = 281
     bounds_y = 69
     bounds_cx = 70
     bounds_cy = 21
@@ -610,8 +612,8 @@ inherited cpurl78fo: tcpurl78fo
       19
       0
     )
-    taborder = 18
-    bounds_x = 273
+    taborder = 63
+    bounds_x = 281
     bounds_y = 93
     bounds_cx = 69
     bounds_cy = 21
@@ -639,8 +641,8 @@ inherited cpurl78fo: tcpurl78fo
       20
       0
     )
-    taborder = 19
-    bounds_x = 273
+    taborder = 64
+    bounds_x = 281
     bounds_y = 114
     bounds_cx = 70
     bounds_cy = 21
@@ -668,8 +670,8 @@ inherited cpurl78fo: tcpurl78fo
       29
       0
     )
-    taborder = 20
-    bounds_x = 273
+    taborder = 65
+    bounds_x = 281
     bounds_y = 136
     bounds_cx = 79
     bounds_cy = 21
@@ -690,8 +692,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 21
-    bounds_x = 242
+    taborder = 20
+    bounds_x = 250
     bounds_y = 93
     bounds_cx = 25
     bounds_cy = 21
@@ -712,8 +714,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 22
-    bounds_x = 217
+    taborder = 19
+    bounds_x = 225
     bounds_y = 93
     bounds_cx = 25
     bounds_cy = 21
@@ -734,8 +736,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 23
-    bounds_x = 217
+    taborder = 24
+    bounds_x = 225
     bounds_y = 114
     bounds_cx = 50
     bounds_cy = 21
@@ -756,8 +758,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 24
-    bounds_x = 191
+    taborder = 18
+    bounds_x = 199
     bounds_y = 93
     bounds_cx = 25
     bounds_cy = 21
@@ -778,8 +780,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 25
-    bounds_x = 166
+    taborder = 17
+    bounds_x = 174
     bounds_y = 93
     bounds_cx = 25
     bounds_cy = 21
@@ -800,8 +802,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 26
-    bounds_x = 166
+    taborder = 23
+    bounds_x = 174
     bounds_y = 114
     bounds_cx = 50
     bounds_cy = 21
@@ -822,8 +824,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 27
-    bounds_x = 140
+    taborder = 16
+    bounds_x = 148
     bounds_y = 93
     bounds_cx = 25
     bounds_cy = 21
@@ -844,8 +846,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 28
-    bounds_x = 115
+    taborder = 15
+    bounds_x = 123
     bounds_y = 93
     bounds_cx = 25
     bounds_cy = 21
@@ -866,8 +868,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 29
-    bounds_x = 115
+    taborder = 22
+    bounds_x = 123
     bounds_y = 114
     bounds_cx = 50
     bounds_cy = 21
@@ -888,8 +890,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 30
-    bounds_x = 64
+    taborder = 21
+    bounds_x = 72
     bounds_y = 114
     bounds_cx = 50
     bounds_cy = 21
@@ -910,8 +912,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 31
-    bounds_x = 89
+    taborder = 14
+    bounds_x = 97
     bounds_y = 93
     bounds_cx = 25
     bounds_cy = 21
@@ -929,13 +931,20 @@ inherited cpurl78fo: tcpurl78fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     frame.levelo = -1
     frame.colorclient = -1879048185
-    frame.captionpos = cp_top
+    frame.caption = '0'
+    frame.captionpos = cp_left
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 32
-    bounds_x = 64
+    frame.outerframe = (
+      10
+      0
+      0
+      0
+    )
+    taborder = 13
+    bounds_x = 62
     bounds_y = 93
-    bounds_cx = 25
+    bounds_cx = 35
     bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
@@ -951,13 +960,20 @@ inherited cpurl78fo: tcpurl78fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     frame.levelo = -1
     frame.colorclient = -1879048185
-    frame.captionpos = cp_top
+    frame.caption = '1'
+    frame.captionpos = cp_left
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 33
-    bounds_x = 64
+    frame.outerframe = (
+      10
+      0
+      0
+      0
+    )
+    taborder = 25
+    bounds_x = 62
     bounds_y = 136
-    bounds_cx = 25
+    bounds_cx = 35
     bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
@@ -976,8 +992,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 34
-    bounds_x = 89
+    taborder = 26
+    bounds_x = 97
     bounds_y = 136
     bounds_cx = 25
     bounds_cy = 21
@@ -998,8 +1014,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 35
-    bounds_x = 64
+    taborder = 33
+    bounds_x = 72
     bounds_y = 157
     bounds_cx = 50
     bounds_cy = 21
@@ -1020,8 +1036,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 36
-    bounds_x = 115
+    taborder = 34
+    bounds_x = 123
     bounds_y = 157
     bounds_cx = 50
     bounds_cy = 21
@@ -1042,8 +1058,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 37
-    bounds_x = 115
+    taborder = 27
+    bounds_x = 123
     bounds_y = 136
     bounds_cx = 25
     bounds_cy = 21
@@ -1064,8 +1080,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 38
-    bounds_x = 140
+    taborder = 28
+    bounds_x = 148
     bounds_y = 136
     bounds_cx = 25
     bounds_cy = 21
@@ -1086,8 +1102,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 39
-    bounds_x = 166
+    taborder = 35
+    bounds_x = 174
     bounds_y = 157
     bounds_cx = 50
     bounds_cy = 21
@@ -1108,8 +1124,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 40
-    bounds_x = 166
+    taborder = 29
+    bounds_x = 174
     bounds_y = 136
     bounds_cx = 25
     bounds_cy = 21
@@ -1130,8 +1146,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 41
-    bounds_x = 191
+    taborder = 30
+    bounds_x = 199
     bounds_y = 136
     bounds_cx = 25
     bounds_cy = 21
@@ -1152,8 +1168,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 42
-    bounds_x = 217
+    taborder = 36
+    bounds_x = 225
     bounds_y = 157
     bounds_cx = 50
     bounds_cy = 21
@@ -1174,8 +1190,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 43
-    bounds_x = 217
+    taborder = 31
+    bounds_x = 225
     bounds_y = 136
     bounds_cx = 25
     bounds_cy = 21
@@ -1196,8 +1212,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 44
-    bounds_x = 242
+    taborder = 32
+    bounds_x = 250
     bounds_y = 136
     bounds_cx = 25
     bounds_cy = 21
@@ -1215,13 +1231,20 @@ inherited cpurl78fo: tcpurl78fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     frame.levelo = -1
     frame.colorclient = -1879048185
-    frame.captionpos = cp_top
+    frame.caption = '2'
+    frame.captionpos = cp_left
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 45
-    bounds_x = 64
+    frame.outerframe = (
+      10
+      0
+      0
+      0
+    )
+    taborder = 37
+    bounds_x = 62
     bounds_y = 179
-    bounds_cx = 25
+    bounds_cx = 35
     bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
@@ -1240,8 +1263,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 46
-    bounds_x = 89
+    taborder = 38
+    bounds_x = 97
     bounds_y = 179
     bounds_cx = 25
     bounds_cy = 21
@@ -1262,8 +1285,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 47
-    bounds_x = 64
+    taborder = 45
+    bounds_x = 72
     bounds_y = 200
     bounds_cx = 50
     bounds_cy = 21
@@ -1284,8 +1307,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 48
-    bounds_x = 115
+    taborder = 46
+    bounds_x = 123
     bounds_y = 200
     bounds_cx = 50
     bounds_cy = 21
@@ -1306,8 +1329,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 49
-    bounds_x = 115
+    taborder = 39
+    bounds_x = 123
     bounds_y = 179
     bounds_cx = 25
     bounds_cy = 21
@@ -1328,8 +1351,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 50
-    bounds_x = 140
+    taborder = 40
+    bounds_x = 148
     bounds_y = 179
     bounds_cx = 25
     bounds_cy = 21
@@ -1350,8 +1373,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 51
-    bounds_x = 166
+    taborder = 47
+    bounds_x = 174
     bounds_y = 200
     bounds_cx = 50
     bounds_cy = 21
@@ -1372,8 +1395,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 52
-    bounds_x = 166
+    taborder = 41
+    bounds_x = 174
     bounds_y = 179
     bounds_cx = 25
     bounds_cy = 21
@@ -1394,8 +1417,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 53
-    bounds_x = 191
+    taborder = 42
+    bounds_x = 199
     bounds_y = 179
     bounds_cx = 25
     bounds_cy = 21
@@ -1416,8 +1439,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 54
-    bounds_x = 217
+    taborder = 48
+    bounds_x = 225
     bounds_y = 200
     bounds_cx = 50
     bounds_cy = 21
@@ -1438,8 +1461,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 55
-    bounds_x = 217
+    taborder = 43
+    bounds_x = 225
     bounds_y = 179
     bounds_cx = 25
     bounds_cy = 21
@@ -1460,8 +1483,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 56
-    bounds_x = 242
+    taborder = 44
+    bounds_x = 250
     bounds_y = 179
     bounds_cx = 25
     bounds_cy = 21
@@ -1479,13 +1502,20 @@ inherited cpurl78fo: tcpurl78fo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
     frame.levelo = -1
     frame.colorclient = -1879048185
-    frame.captionpos = cp_top
+    frame.caption = '3'
+    frame.captionpos = cp_left
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 57
-    bounds_x = 64
+    frame.outerframe = (
+      10
+      0
+      0
+      0
+    )
+    taborder = 49
+    bounds_x = 62
     bounds_y = 222
-    bounds_cx = 25
+    bounds_cx = 35
     bounds_cy = 21
     font.height = 14
     font.name = 'stf_fixed'
@@ -1504,8 +1534,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 58
-    bounds_x = 89
+    taborder = 50
+    bounds_x = 97
     bounds_y = 222
     bounds_cx = 25
     bounds_cy = 21
@@ -1526,8 +1556,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 59
-    bounds_x = 64
+    taborder = 57
+    bounds_x = 72
     bounds_y = 243
     bounds_cx = 50
     bounds_cy = 21
@@ -1548,8 +1578,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 60
-    bounds_x = 115
+    taborder = 58
+    bounds_x = 123
     bounds_y = 243
     bounds_cx = 50
     bounds_cy = 21
@@ -1570,8 +1600,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 61
-    bounds_x = 115
+    taborder = 51
+    bounds_x = 123
     bounds_y = 222
     bounds_cx = 25
     bounds_cy = 21
@@ -1592,8 +1622,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 62
-    bounds_x = 140
+    taborder = 52
+    bounds_x = 148
     bounds_y = 222
     bounds_cx = 25
     bounds_cy = 21
@@ -1614,8 +1644,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 63
-    bounds_x = 166
+    taborder = 59
+    bounds_x = 174
     bounds_y = 243
     bounds_cx = 50
     bounds_cy = 21
@@ -1636,8 +1666,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 64
-    bounds_x = 166
+    taborder = 53
+    bounds_x = 174
     bounds_y = 222
     bounds_cx = 25
     bounds_cy = 21
@@ -1658,8 +1688,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 65
-    bounds_x = 191
+    taborder = 54
+    bounds_x = 199
     bounds_y = 222
     bounds_cx = 25
     bounds_cy = 21
@@ -1680,8 +1710,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_right
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 66
-    bounds_x = 217
+    taborder = 60
+    bounds_x = 225
     bounds_y = 243
     bounds_cx = 50
     bounds_cy = 21
@@ -1702,8 +1732,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 67
-    bounds_x = 217
+    taborder = 55
+    bounds_x = 225
     bounds_y = 222
     bounds_cx = 25
     bounds_cy = 21
@@ -1724,8 +1754,8 @@ inherited cpurl78fo: tcpurl78fo
     frame.captionpos = cp_top
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.dummy = 0
-    taborder = 68
-    bounds_x = 242
+    taborder = 56
+    bounds_x = 250
     bounds_y = 222
     bounds_cx = 25
     bounds_cy = 21
@@ -1753,8 +1783,8 @@ inherited cpurl78fo: tcpurl78fo
       29
       0
     )
-    taborder = 69
-    bounds_x = 273
+    taborder = 66
+    bounds_x = 281
     bounds_y = 157
     bounds_cx = 79
     bounds_cy = 21
