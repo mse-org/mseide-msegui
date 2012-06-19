@@ -34,12 +34,14 @@ type
    procedure updastat(const sender: TObject; const filer: tstatfiler); virtual;
    procedure aftread(const sender: TObject);
    procedure befwrite(const sender: TObject);
+   procedure asynceventexe(const sender: TObject; var atag: Integer);
   protected
    fflagswidget: tintegeredit;
    fflagswidget64: tint64edit;
    fregisternames: stringarty;
    fedits: array of tdataedit;
    irqoffvalue: boolean;
+   fneedsrefresh: boolean;
    procedure doregsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
    procedure doregset64value(const sender: TObject; var avalue: Int64; var accept: Boolean);
    procedure doflagsetvalue(const sender: TObject;
@@ -66,6 +68,8 @@ uses
  cpuform_mfm,main,sysutils,mseformatstr,msebits,msestrings,msegraphutils,
  cpui386form,cpux86_64form,cpuarmform,cpucpu32form,cpuavr32form,cpurl78form,
  projectoptionsform;
+const
+ refreshtag = 738952;
 var
  currentproc: processorty;
   
@@ -192,27 +196,34 @@ procedure tcpufo.doregsetvalue(const sender: TObject; var avalue: Integer;
 begin
  if mainfo.gdb.cancommand then begin
   with tintegeredit(sender) do begin
-   if mainfo.gdb.setregistervalue(fregisternames[tag],avalue) <> gdb_ok then begin
-//    accept:= false;
+   if (mainfo.gdb.setregistervalue(
+                             fregisternames[tag],avalue) <> gdb_ok) then begin
+    accept:= false;
+   end
+   else begin
+    if fneedsrefresh then begin
+     self.asyncevent(refreshtag);
+    end;
    end;
   end;
+ end
+ else begin
+  accept:= false;
  end;
-// else begin
-//  accept:= false;
-// end;
 end;
 
 procedure tcpufo.doregset64value(const sender: TObject; var avalue: Int64;
                     var accept: Boolean);
-//var
-// str1: string;
 begin
  if mainfo.gdb.cancommand then begin
   with tintegeredit(sender) do begin
    if mainfo.gdb.setregistervalue(fregisternames[tag],avalue) <> gdb_ok then begin
-//   if mainfo.gdb.writepascalvariable(
-//        '$'+fregisternames[tag],inttostr(avalue),str1) <> gdb_ok then begin
     accept:= false;
+   end
+   else begin
+    if fneedsrefresh then begin
+     self.asyncevent(refreshtag);
+    end;
    end;
   end;
  end
@@ -337,6 +348,13 @@ procedure tcpufo.updatelayout(const dsender: twidget);
 begin
  aligny(wam_center,[stoptime,on]);
  inherited;
+end;
+
+procedure tcpufo.asynceventexe(const sender: TObject; var atag: Integer);
+begin
+ if atag = refreshtag then begin
+  refresh;
+ end;
 end;
 
 end.

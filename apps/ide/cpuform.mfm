@@ -1,5 +1,5 @@
 object cpufo: tcpufo
-  optionswidget = [ow_mousefocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_mousefocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_hinton]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
@@ -8,7 +8,6 @@ object cpufo: tcpufo
   bounds_y = 451
   bounds_cx = 387
   bounds_cy = 207
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets]
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
   container.bounds = (
@@ -53,12 +52,13 @@ object cpufo: tcpufo
     2A2A2A01040404019B9B9B01D9D9D902FFFFFF017C7C7C01D9D9D9038D8D8D01
     79797901CFCFCF01D9D9D904D5D5D50189898901D9D9D9049C9C9C0173737301
     C2C2C201D9D9D903FFFFFF017C7C7C01D9D9D916FFFFFF017C7C7C01D9D9D916
-    FFFFFF017C7C7C01FFFFFF17D0D0D0600000000800000008000000BF00000008
-    FFFFFF00FFFFFF08FFFFFF02FFFFFFC0FFFFFF00FFFFFF09FFFFFF00FFFFFF08
-    FFFFFF08FFFFFF08FFFFFFBFFFFFFF08FFFFFF00FFFFFF02FFFFFF08FFFFFF00
-    00000000000000BF0000000000000008
+    FFFFFF017C7C7C01FFFFFF17D0D0D06000000000000000000000000000000000
+    FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+    00000000000000000000000000000000
   }
   onshow = cpuonshow
+  onasyncevent = asynceventexe
   onstatupdate = updastat
   onstatafterread = aftread
   onstatbeforewrite = befwrite

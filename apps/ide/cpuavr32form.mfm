@@ -3,6 +3,12 @@ inherited cpuavr32fo: tcpuavr32fo
   bounds_y = 158
   bounds_cx = 261
   bounds_cy = 280
+  container.bounds = (
+    0
+    0
+    251
+    280
+  )
   caption = 'CPU AVR32'
   left = 2
   moduleclassname = 'tcpufo'
@@ -520,15 +526,14 @@ inherited cpuavr32fo: tcpuavr32fo
       bounds_cy = 168
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       font.name = 'stf_default'
-      font.xscale =  1.0000000000000000E+0000
+      font.xscale = 1
       font.dummy = 0
       dist_bottom = 3
       optionslayout = [lao_placey]
-      place_mindist = 0
       place_maxdist = 0
       onafterlayout = afterla
       object r6: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r6'
@@ -547,7 +552,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -555,7 +560,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object r7: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r7'
@@ -575,7 +580,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -583,7 +588,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object r8: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r8'
@@ -603,7 +608,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -611,7 +616,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object r11: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r11'
@@ -631,7 +636,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -639,7 +644,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object r10: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r10'
@@ -659,7 +664,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -667,7 +672,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object r9: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r9'
@@ -687,7 +692,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -695,7 +700,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object r12: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r12'
@@ -715,7 +720,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -723,7 +728,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object sr: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'sr'
@@ -743,7 +748,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onchange = flagonchange
         onsetvalue = regsetvalue
@@ -761,17 +766,16 @@ inherited cpuavr32fo: tcpuavr32fo
       bounds_cy = 189
       optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
       font.name = 'stf_default'
-      font.xscale =  1.0000000000000000E+0000
+      font.xscale = 1
       font.dummy = 0
       linkright = tlayouter2
       linkbottom = exceptstack
       dist_right = 3
       dist_bottom = 5
       optionslayout = [lao_placey]
-      place_mindist = 0
       place_maxdist = 0
       object r1: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r1'
@@ -791,7 +795,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -799,7 +803,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object r0: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r0'
@@ -818,7 +822,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -826,7 +830,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object r4: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r4'
@@ -846,7 +850,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -854,7 +858,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object r3: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r3'
@@ -874,7 +878,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -882,7 +886,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object r2: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r2'
@@ -902,7 +906,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -910,7 +914,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object r5: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'r5'
@@ -930,7 +934,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -938,7 +942,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object sp: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'sp'
@@ -958,7 +962,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -966,7 +970,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object lr: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'lr'
@@ -986,7 +990,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
@@ -994,7 +998,7 @@ inherited cpuavr32fo: tcpuavr32fo
         reffontheight = 17
       end
       object pc: tintegeredit
-        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         frame.levelo = -1
         frame.colorclient = -1879048185
         frame.caption = 'pc'
@@ -1014,7 +1018,7 @@ inherited cpuavr32fo: tcpuavr32fo
         bounds_cy = 21
         font.height = 14
         font.name = 'stf_fixed'
-        font.xscale =  1.0000000000000000E+0000
+        font.xscale = 1
         font.dummy = 0
         onsetvalue = regsetvalue
         base = nb_hex
