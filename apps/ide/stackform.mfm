@@ -116,12 +116,13 @@ object stackfo: tstackfo
     anchors = [an_top, an_bottom]
     datacols.count = 5
     datacols.colorfocused = -1879048185
+    datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_cancopy, co_mousescrollrow]
     datacols.items = <    
       item
         color = -2147483646
         colorfocused = -1879048185
         width = 31
-        options = [co_readonly, co_nofocus, co_focusselect, co_savestate]
+        options = [co_readonly, co_nofocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy]
         textflags = [tf_xcentered, tf_ycentered]
         valuefalse = '0'
         valuetrue = '1'
@@ -130,27 +131,27 @@ object stackfo: tstackfo
         colorselect = -1879048185
         colorfocused = -1879048185
         width = 54
-        options = [co_readonly, co_focusselect, co_fill]
+        options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_cancopy]
         optionsedit = [scoe_eatreturn, scoe_homeonenter]
         valuefalse = '0'
         valuetrue = '1'
       end    
       item
         colorfocused = -1879048185
-        options = [co_invisible, co_savestate]
+        options = [co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy]
         optionsedit = [scoe_eatreturn]
         valuefalse = '0'
         valuetrue = '1'
       end    
       item
         colorfocused = -1879048185
-        options = [co_invisible, co_savestate]
+        options = [co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy]
         valuefalse = '0'
         valuetrue = '1'
       end    
       item
         colorfocused = -1879048185
-        options = [co_invisible, co_savestate]
+        options = [co_invisible, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy]
         valuefalse = '0'
         valuetrue = '1'
       end>

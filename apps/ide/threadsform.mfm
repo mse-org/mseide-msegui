@@ -110,11 +110,11 @@ object threadsfo: tthreadsfo
     anchors = []
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
     datacols.count = 3
-    datacols.options = [co_readonly, co_focusselect, co_rowselect, co_savestate]
+    datacols.options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy]
     datacols.optionsedit = [scoe_eatreturn, scoe_hintclippedtext]
     datacols.items = <    
       item
-        options = [co_readonly, co_focusselect, co_rowselect, co_savestate]
+        options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy]
         textflags = [tf_right, tf_ycentered]
         textflagsactive = [tf_right, tf_ycentered]
         optionsedit = [scoe_undoonesc, scoe_eatreturn, scoe_exitoncursor, scoe_autoselect, scoe_autoselectonfirstclick, scoe_hintclippedtext]
@@ -123,7 +123,7 @@ object threadsfo: tthreadsfo
       end    
       item
         width = 56
-        options = [co_readonly, co_focusselect, co_rowselect, co_savestate]
+        options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_cancopy]
         textflags = [tf_xcentered, tf_ycentered]
         optionsedit = [scoe_undoonesc, scoe_eatreturn, scoe_exitoncursor, scoe_autoselect, scoe_autoselectonfirstclick, scoe_hintclippedtext]
         valuefalse = '0'
@@ -131,7 +131,7 @@ object threadsfo: tthreadsfo
       end    
       item
         width = 201
-        options = [co_readonly, co_focusselect, co_rowselect, co_fill, co_savestate]
+        options = [co_readonly, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_cancopy]
         optionsedit = [scoe_undoonesc, scoe_eatreturn, scoe_exitoncursor, scoe_autoselect, scoe_autoselectonfirstclick, scoe_hintclippedtext]
         valuefalse = '0'
         valuetrue = '1'
