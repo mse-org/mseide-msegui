@@ -195,16 +195,16 @@ end;
 
 procedure tstackfo.copytoclipboard(const sender: TObject);
 var
- str1: string;
+ mstr1: msestring;
  int1: integer;
 begin
- str1:= '';
+ mstr1:= '';
  for int1:= 0 to grid.rowhigh do begin
-  str1:= str1 + '#'+inttostr(int1)+'  '+grid[4][int1]+' '+
+  mstr1:= mstr1 + '#'+inttostr(int1)+'  '+grid[4][int1]+' '+
           filename(grid[2][int1])+':'+
                 grid[3][int1]+' '+grid[1][int1]+lineend;
  end;
- gui_copytoclipboard(str1);
+ gui_copytoclipboard(mstr1);
 end;
 
 end.

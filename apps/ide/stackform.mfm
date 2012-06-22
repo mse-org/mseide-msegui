@@ -108,6 +108,7 @@ object stackfo: tstackfo
     color = -1879048187
     frame.localprops = [frl_levelo, frl_colorclient]
     taborder = 2
+    popupmenu = tpopupmenu1
     bounds_x = 0
     bounds_y = 20
     bounds_cx = 244
@@ -182,7 +183,7 @@ object stackfo: tstackfo
     menu.submenu.count = 1
     menu.submenu.items = <    
       item
-        caption = 'Copy to clipboard'
+        caption = 'Copy to Clipboard'
         state = [as_localcaption, as_localonexecute]
         onexecute = copytoclipboard
       end>

@@ -21,13 +21,15 @@ unit threadsform;
 interface
 uses
  msegui,mseclasses,mseforms,msegrids,msegdbutils,msetypes,msestrings,
- msegridsglob;
+ msegridsglob,msemenus;
 
 type
  tthreadsfo = class(tdockform)
    grid: tstringgrid;
+   tpopupmenu1: tpopupmenu;
    procedure threadsfoonshow(const sender: TObject);
    procedure gridoncellevent(const sender: TObject; var info: celleventinfoty);
+   procedure copytoclipboardexe(const sender: TObject);
   private
    fids: integerarty;
    frefreshedrow: integer;
@@ -42,7 +44,7 @@ var
 
 implementation
 uses
- threadsform_mfm,sysutils,sourceform,msefileutils,main,stackform;
+ threadsform_mfm,sysutils,sourceform,msefileutils,main,stackform,mseguiintf;
 
 { tthreadsfo }
 
@@ -125,6 +127,19 @@ begin
  if iscellclick(info,[ccr_dblclick]) then begin
   sourcefo.activate;
  end;
+end;
+
+procedure tthreadsfo.copytoclipboardexe(const sender: TObject);
+var
+ mstr1: msestring;
+ int1: integer;
+begin
+ mstr1:= '';
+ for int1:= 0 to grid.rowhigh do begin
+  mstr1:= mstr1 + '#'+inttostr(int1)+'  '+grid[0][int1]+' '+
+          grid[1][int1]+' '+grid[2][int1]+lineend;
+ end;
+ gui_copytoclipboard(mstr1);
 end;
 
 end.

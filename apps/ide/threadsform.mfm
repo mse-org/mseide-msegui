@@ -1,5 +1,5 @@
 object threadsfo: tthreadsfo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton]
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
@@ -8,7 +8,6 @@ object threadsfo: tthreadsfo
   bounds_y = 270
   bounds_cx = 349
   bounds_cy = 276
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets]
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
   container.bounds = (
@@ -102,7 +101,8 @@ object threadsfo: tthreadsfo
   onshow = threadsfoonshow
   moduleclassname = 'tdockform'
   object grid: tstringgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets]
+    popupmenu = tpopupmenu1
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 339
@@ -163,5 +163,16 @@ object threadsfo: tthreadsfo
     datarowheight = 16
     oncellevent = gridoncellevent
     reffontheight = 14
+  end
+  object tpopupmenu1: tpopupmenu
+    menu.submenu.count = 1
+    menu.submenu.items = <    
+      item
+        caption = 'Copy to Clipboard'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = copytoclipboardexe
+      end>
+    left = 88
+    top = 144
   end
 end
