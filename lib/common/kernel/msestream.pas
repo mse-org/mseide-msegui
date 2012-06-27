@@ -64,6 +64,8 @@ type
    function  getsize(var aclient: cryptoclientinfoty): int64; virtual;
   public
    destructor destroy; override;
+   function encrypt(const adata: string): string;
+   function decrypt(const adata: string): string;
  end;
  
    {$warnings off}
@@ -101,7 +103,10 @@ type
                       rights: filerightsty = defaultfilerights); overload;
    constructor createtempfile(const prefix: filenamety; out afilename: filenamety);
    constructor create(ahandle: integer); overload; virtual; //allways called
-   constructor create; overload; //tmemorystream
+   constructor create; overload; 
+                                  //memorystream
+   constructor create(const aopenmode: fileopenmodety); overload; 
+                                  //memorystream
    destructor destroy; override;
    class function trycreate(out ainstance: tmsefilestream;
              const afilename: filenamety;
@@ -885,12 +890,18 @@ begin
  inherited create(ahandle);
 end;
 
-constructor tmsefilestream.Create;
+constructor tmsefilestream.create;
 begin
  if fmemorystream = nil then begin
   fmemorystream:= tmemorystream.create;
  end;
  create(invalidfilehandle);
+end;
+
+constructor tmsefilestream.create(const aopenmode: fileopenmodety);
+begin
+ fopenmode:= aopenmode;
+ create;
 end;
 
 constructor tmsefilestream.internalcreate(const afilename: filenamety; 
@@ -1092,10 +1103,10 @@ end;
 
 function tmsefilestream.Read(var Buffer; Count: longint): Longint;
 begin
- if fmemorystream <> nil then begin
-  result:= fmemorystream.Read(buffer,count);
- end
- else begin
+// if fmemorystream <> nil then begin
+//  result:= fmemorystream.Read(buffer,count);
+// end
+// else begin
   if fcryptohandler <> nil then begin
    with fcryptohandler do begin
     result:= read(checkopen(fcryptoindex)^,buffer,count);
@@ -1104,15 +1115,15 @@ begin
   else begin
    result:= inheritedread(buffer,count);
   end;
- end;
+// end;
 end;
 
 function tmsefilestream.Write(const Buffer; Count: longint): Longint;
 begin
- if fmemorystream <> nil then begin
-  result:= fmemorystream.Write(Buffer,count);
- end
- else begin
+// if fmemorystream <> nil then begin
+//  result:= fmemorystream.Write(Buffer,count);
+// end
+// else begin
   if fcryptohandler <> nil then begin
    with fcryptohandler do begin
     result:= write(checkopen(fcryptoindex)^,buffer,count);
@@ -1121,24 +1132,24 @@ begin
   else begin
    result:= inheritedwrite(buffer,count);
   end;
- end;
+// end;
 end;
 
 function tmsefilestream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
 begin
- if fmemorystream <> nil then begin
-  result:= fmemorystream.Seek(offset,origin);
- end
- else begin
+// if fmemorystream <> nil then begin
+//  result:= fmemorystream.Seek(offset,origin);
+// end
+// else begin
   if fcryptohandler <> nil then begin
    with fcryptohandler do begin
     result:= seek(checkopen(fcryptoindex)^,offset,origin);
    end;
   end
   else begin
-   result:= inherited seek(offset,origin);
+   result:= inheritedseek(offset,origin);
   end;
- end;
+// end;
 end;
 
 function tmsefilestream.getsize: int64;
@@ -1212,10 +1223,15 @@ end;
 
 function tmsefilestream.inheritedread(var buffer; count: longint): longint;
 begin
+ if fmemorystream <> nil then begin
+  result:= fmemorystream.Read(buffer,count);
+ end
+ else begin
 {$warnings off}
- result:= sys_read({$ifdef FPC}thandlestreamcracker(self).{$endif}fhandle,
+  result:= sys_read({$ifdef FPC}thandlestreamcracker(self).{$endif}fhandle,
                                      @buffer,count);
 {$warnings on}
+ end;
  if result < 0 then begin
   result:= 0;
  end;
@@ -1224,10 +1240,15 @@ end;
 
 function tmsefilestream.inheritedwrite(const buffer; count: longint): longint;
 begin
-{$warnings off}
- result:= sys_write({$ifdef FPC}thandlestreamcracker(self).{$endif}fhandle,
-                            @buffer,count);
-{$warnings on}
+ if fmemorystream <> nil then begin
+  result:= fmemorystream.Write(Buffer,count);
+ end
+ else begin
+ {$warnings off}
+  result:= sys_write({$ifdef FPC}thandlestreamcracker(self).{$endif}fhandle,
+                             @buffer,count);
+ {$warnings on}
+ end;
  if result < 0 then begin
   result:= 0;
  end;
@@ -1237,7 +1258,12 @@ end;
 function tmsefilestream.inheritedseek(const offset: int64;
                origin: tseekorigin): int64;
 begin
- result:= inherited seek(offset,origin);
+ if fmemorystream <> nil then begin
+  result:= fmemorystream.Seek(offset,origin);
+ end
+ else begin
+  result:= inherited seek(offset,origin);
+ end;
 end;
 
 function tmsefilestream.inheritedgetsize: int64;
@@ -2286,7 +2312,7 @@ end;
 constructor ttextstringcopystream.create(const adata: string);
 begin
  fdata:= adata;
- inherited create;
+ inherited create(fm_read);
  if adata <> '' then begin
   tmemorystream1(fmemorystream).setpointer(pointer(adata),length(adata));
  end;
@@ -2427,6 +2453,37 @@ begin
   if not (ccs_open in state) then begin
    self.open(result^);
   end;
+ end;
+end;
+
+function tcustomcryptohandler.encrypt(const adata: string): string;
+var
+ stream1: tmsefilestream;
+begin
+ stream1:= tmsefilestream.create(fm_write);
+ try
+  stream1.cryptohandler:= self;
+  stream1.write(pointer(adata)^,length(adata));
+  setlength(result,stream1.fmemorystream.size);
+  move(stream1.fmemorystream.memory^,pointer(result)^,length(result));
+ finally
+  stream1.free;
+ end;
+end;
+
+function tcustomcryptohandler.decrypt(const adata: string): string;
+var
+ stream1: ttextstringcopystream;
+ int1: integer;
+begin
+ stream1:= ttextstringcopystream.create(adata);
+ try
+  stream1.cryptohandler:= self;
+  setlength(result,length(adata));
+  int1:= stream1.read(pointer(result)^,length(result));
+  setlength(result,int1);
+ finally
+  stream1.free;
  end;
 end;
 
