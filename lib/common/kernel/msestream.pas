@@ -2464,6 +2464,7 @@ begin
  try
   stream1.cryptohandler:= self;
   stream1.write(pointer(adata)^,length(adata));
+  stream1.cryptohandler:= nil; //flush
   setlength(result,stream1.fmemorystream.size);
   move(stream1.fmemorystream.memory^,pointer(result)^,length(result));
  finally
