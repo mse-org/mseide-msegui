@@ -28,14 +28,6 @@ string =
 character =
 ASCII-character
 
-keyworddefs =
-KEYWORDDEFS keyworddefsname newline
-{{keyword} newline}
-
-editorcolors =
-COLORS [[[fontcolor [backgroundcolor [statementcolor]]]
-//   cl_default for project options settings
-
 styles =
 STYLE newline
 {stylename styledef newline}
@@ -47,6 +39,17 @@ stylestring =
 '[b][i][u][s]'
 //b = bold i = italic u = underscore s = strikeout
 
+keyworddefs =
+KEYWORDDEFS keyworddefsname [stylename] newline
+{{keyword} newline}
+
+keyword = 
+string
+
+editorcolors =
+COLORS [[[fontcolor [backgroundcolor [statementcolor]]]
+//   cl_default for project options settings
+
 scope =
 SCOPE scopename [stylename] newline
 {localdefinition}
@@ -55,7 +58,8 @@ localdefinition =
 keywords | calltokens | jumptokens | endtokens | RETURN newline
 
 keywords =
-KEYWORDS keyworddefsname newline
+KEYWORDS [style] newline //style used as default
+{keyworddefsname [style] newline}
 
 calltokens =
 CALLTOKENS newline
@@ -128,8 +132,14 @@ type
  charsty = set of char;
  charspoty = ^charsty;
 
-// keywordarty = array of thashedmsestrings;
- keywordarty = array of tpointermsestringhashdatalist;
+ tkeywordlist = class(tpointermsestringhashdatalist)
+  protected
+   fdefaultstyle: integer;
+  public
+   constructor create;
+ end;
+   
+ keywordarty = array of tkeywordlist;
 
  refreshinfoty = record
   astart,count: integer;
@@ -627,7 +637,7 @@ begin
          end;
          po1:= nil;
          for int1:= 0 to high(scopeinfopo^.keywords) do begin
-          with keywordar[scopeinfopo^.keywords[int1].nr-1] do begin
+          with keywordar[scopeinfopo^.keywords[int1].nr{-1}] do begin
            if caseinsensitive then begin
             po1:= find(str1);
            end
@@ -1087,7 +1097,8 @@ var
   result:= true;
  end;
  
- procedure addname(list: tpointeransistringhashdatalist; const name: lstringty; nummer: integer);
+ procedure addname(list: tpointeransistringhashdatalist;
+                                 const name: lstringty; nummer: integer);
  var
   str1: string;
  begin
@@ -1165,7 +1176,7 @@ var
  keys: tpointeransistringhashdatalist;
  scopenames,stylenames: tpointeransistringhashdatalist;
  int1,int2,int3,int4: integer;
- lstr2,lstr3: lstringty;
+ lstr2,lstr3,lstr4: lstringty;
  global: boolean;
  wstrar1: msestringarty;
  bo1: boolean;
@@ -1228,8 +1239,13 @@ begin
          end;
          setlength(keywordar,length(keywordar)+1);
 //         keywordar[high(keywordar)]:= thashedmsestrings.create;
-         keywordar[high(keywordar)]:= tpointermsestringhashdatalist.create;
-         addname(keywordnames,lstr3,length(keywordar));
+         keywordar[high(keywordar)]:= tkeywordlist.create;
+         addname(keywordnames,lstr3,high(keywordar));
+         nextword(lstr1,lstr4);
+         if lstr4.len > 0 then begin
+          keywordar[high(keywordar)].fdefaultstyle:= 
+                                  findname(stylenames,lstr4);
+         end;
         end;
         tn_colors: begin
          if getcolor(lstr1,colors.font) then begin
@@ -1414,13 +1430,19 @@ begin
         end;
        end;
        tn_keywords: begin
-        repeat
-         nextword(lstr1,lstr3);
-         if lstr3.len > 0 then begin
-          int1:= findname(keywordnames,lstr3);
-          addkeywordrule(int1,aktkeywordfontinfonr);
+        nextword(lstr1,lstr3);
+        if lstr3.len > 0 then begin
+         int1:= findname(keywordnames,lstr3);
+         int2:= aktkeywordfontinfonr;
+         if int2 < 0 then begin
+          int2:= keywordar[int1].fdefaultstyle;
          end;
-        until lstr1.len = 0;
+         nextword(lstr1,lstr4);
+         if lstr4.len > 0 then begin
+          int2:= findname(stylenames,lstr4);
+         end;
+         addkeywordrule(int1,int2);
+        end;
        end;
        else begin
         invalidtoken;
@@ -1607,6 +1629,14 @@ function tsyntaxpainter.getcolors(index: integer): syntaxcolorinfoty;
 begin
  checkarrayindex(fclients,index);
  result:= fsyntaxdefs[fclients[index].syntaxdefhandle].colors;
+end;
+
+{ tkeywordlist }
+
+constructor tkeywordlist.create;
+begin
+ fdefaultstyle:= -1;
+ inherited;
 end;
 
 end.

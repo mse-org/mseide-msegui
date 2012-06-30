@@ -1,4 +1,15 @@
 MSEide+MSEgui breaking changes version history
+2012-06-30
+ Global syntax definition format for tsyntaxpainter changed:
+  keyworddefs =
+  KEYWORDDEFS keyworddefsname [stylename] newline
+  {{keyword} newline}
+
+ Local syntax definition format for tsyntaxpainter changed:
+  keywords =
+  KEYWORDS [style] newline //style used as default
+  {keyworddefsname [style] newline}
+
 2012-04-14
  *cryptio* -> *cryptoio*.
 2012-04-13
