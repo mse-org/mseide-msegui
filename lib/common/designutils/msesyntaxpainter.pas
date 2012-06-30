@@ -63,15 +63,21 @@ KEYWORDS [style] newline //style used as default
 
 calltokens =
 CALLTOKENS newline
-{{string} scopename newline}
+{{[.]string}[.]} scopename newline} 
+
+ //. -> whitespace, example:
+ //'begin' finds 'abeginz ...
+ //.'begin' finds newline'beginz', ' beginz' ...
+ //'begin'. finds 'abegin ', 'abegin'newline ...
+ //.'begin'. finds newline'begin ',' begin ', ' begin'newline ...
 
 jumptokens =
 JUMPTOKENS newline
-{{string} scopename newline}
+{{[.]string}[.]} scopename newline}
 
 endtokens =
 ENDTOKENS newline
-{{string} [stylename] newline}
+{{[.]string}[.]} [stylename] newline}
 
 *)
 
@@ -90,9 +96,18 @@ const
 
 type
  tokencharsty = set of char;
+ tokenflagty = (tf_startwhitespace,tf_endwhitespace);
+ tokenflagsty = set of tokenflagty;
+ tokeninfoty = record
+                name: msestring;
+                flags: tokenflagsty;
+               end;
+ ptokeninfoty = ^tokeninfoty;
+ tokeninfoarty = array of tokeninfoty;
+ 
 
  starttokenty = record
-  token: msestring;
+  token: tokeninfoty;
   hastokenchars: boolean;
   tokenchars: tokencharsty;
   shortcircuit: boolean;
@@ -104,7 +119,7 @@ type
  starttokenarty = array of starttokenty;
 
  endtokenty = record
-  token: msestring;
+  token: tokeninfoty;
   hastokenchars: boolean;
   tokenchars: tokencharsty;
   fontinfonr: integer;
@@ -320,11 +335,11 @@ begin
     chars:= chars + tokenchars;
    end
    else begin
-    if length(token) = 0 then begin
+    if length(token.name) = 0 then begin
      include(chars,#0);
     end
     else begin
-     if getansichar(starttokens[int1].token[1],ch1) then begin
+     if getansichar(starttokens[int1].token.name[1],ch1) then begin
       if caseinsensitive then begin
        include(chars,lowerchars[ch1]);
        include(chars,upperchars[ch1]);
@@ -559,6 +574,23 @@ var
    startscopenr:= scopenr;
   end;
  end;
+ 
+var
+ startpo: pmsechar;
+
+ function checktokenwhitespace(const atoken: tokeninfoty;
+                                    const apo: pmsechar): boolean;
+ var
+  po1: pmsechar;
+ begin
+  result:= (not (tf_startwhitespace in atoken.flags) or
+              (apo = startpo) or ((apo-1)^ = ' ') or ((apo-1)^ = c_tab));
+  if result and (tf_endwhitespace in atoken.flags) then begin
+   po1:= apo+length(atoken.name);
+   result:= (po1^ = ' ') or (po1^ = c_tab) or (po1^ = #0) or
+                                     (po1^ = c_return) or (po1^ = c_linefeed);
+  end;
+ end;
 
 var
  str1: msestring;
@@ -568,7 +600,7 @@ var
  int1,int2,int3: integer;
  bo1: boolean;
  ristr: prichstringty;
- startpo,wpo1: pmsechar;
+ wpo1: pmsechar;
  alen,keywordlen: integer;
  ar1: msestringarty;
  stok1: starttokenty;
@@ -685,10 +717,13 @@ begin
           end
           else begin
            if caseinsensitive and msestartsstrcaseinsensitive(
-                                              pointer(token),wpo1) or
-             not caseinsensitive and msestartsstr(pointer(token),wpo1) then begin
-            bo1:= false;
-            int2:= length(token);
+                                              pointer(token.name),wpo1) or
+                  not caseinsensitive and 
+                            msestartsstr(pointer(token.name),wpo1) then begin
+            if checktokenwhitespace(token,wpo1) then begin
+             bo1:= false;
+             int2:= length(token.name);
+            end;
            end;
           end;
           if not bo1 then begin
@@ -724,9 +759,10 @@ begin
              end;
             end
             else begin
-             if msestartsstr(pointer(token),wpo1) then begin
+             if msestartsstr(pointer(token.name),wpo1) and 
+                              checktokenwhitespace(token,wpo1) then begin
               bo1:= false;
-              int2:= length(token);
+              int2:= length(token.name);
              end;
             end;
             if not bo1 then begin
@@ -922,7 +958,7 @@ begin
  end;
 end;
 
-procedure checktokenchars(const ar1: stringarty; const caseinsensitive: boolean;
+procedure checktokenchars(const ar1: tokeninfoarty; const caseinsensitive: boolean;
              out hastokenchars: boolean; out tokenchars: tokencharsty);
 var
  int1: integer;
@@ -931,14 +967,16 @@ begin
  hastokenchars:= ar1 <> nil;
  tokenchars:= [];
  for int1:= 0 to high(ar1) do begin
-  if (length(ar1[int1]) <> 1) or (ar1[int1][1] > #255) then begin
-   hastokenchars:= false;
-   break;
+  with ar1[int1] do begin
+   if (length(name) <> 1) or (name[1] > #255) or (flags <> []) then begin
+    hastokenchars:= false;
+    break;
+   end;
   end;
  end;
  if hastokenchars then begin
   for int1:= 0 to high(ar1) do begin
-   ch1:= char(byte(ar1[int1][1]));
+   ch1:= char(byte(ar1[int1].name[1]));
    if caseinsensitive then begin
     include(tokenchars,upperchars[ch1]);
     include(tokenchars,lowerchars[ch1]);
@@ -948,6 +986,63 @@ begin
    end;
   end;
  end;
+end;
+
+function nexttokeninfo(var value: lstringty; out res: string;
+                                      out tokenflags: tokenflagsty): boolean;
+                   //false wenn kein quote vorhanden
+var
+ po1: pchar;
+ int1,int2,int3: integer;
+begin
+ result:= false;
+ res:= '';
+ tokenflags:= [];
+ po1:= strlnscan(value.po,' ',value.len); //skip spaces
+ if po1 = nil then begin
+  int1:= value.len;
+ end
+ else begin
+  int1:= po1-value.po; //startindex
+ end;
+ if (po1 <> nil) then begin
+  if po1^ = '.' then begin
+   include(tokenflags,tf_startwhitespace);
+   inc(po1);
+  end;
+  if po1^ = '''' then begin
+   result:= true;
+   inc(po1);
+   int2:= 0;
+   int3:= value.len-int1;
+   setlength(res,int3); //maximum
+   while po1^ <> #0 do begin
+    if po1^ <> '''' then begin
+     (pchar(pointer(res))+int2)^:= po1^;
+     inc(int2);
+    end
+    else begin
+     inc(po1);
+     if po1^ = '''' then begin
+      (pchar(pointer(res))+int2)^:= po1^;
+      inc(int2);
+     end
+     else begin
+      if po1^ = '.' then begin
+       include(tokenflags,tf_endwhitespace);
+       inc(po1);
+      end;
+      break;
+     end;
+    end;
+    inc(po1);
+   end;
+   setlength(res,int2);
+   int1:= po1-value.po;
+  end;
+ end;
+ inc(value.po,int1);
+ dec(value.len,int1);
 end;
 
 function tsyntaxpainter.readdeffile(stream: ttextstream): integer;
@@ -998,7 +1093,7 @@ var
         scopeendchars:= scopeendchars + endtokens[int1].tokenchars;
        end
        else begin
-        markstartchars(token,scopeendchars,caseinsensitive);
+        markstartchars(token.name,scopeendchars,caseinsensitive);
        end;
       end;
      end;
@@ -1142,15 +1237,20 @@ var
   end;
  end;
  
- procedure addquotedstrings(var ar1: stringarty; out isnextline: boolean);
+ procedure addquotedtokens(var ar1: tokeninfoarty; out isnextline: boolean);
  var
   str1: string;
+  tf1: tokenflagsty;
  begin
   isnextline:= false;
   if not stream.eof then begin
    while true do begin
-    while nextquotedstring(lstr1,str1) do begin
-     additem(ar1,str1);
+    while nexttokeninfo(lstr1,str1,tf1) do begin
+     setlength(ar1,high(ar1)+2);
+     with ar1[high(ar1)] do begin
+      name:= str1;
+      flags:= tf1;
+     end;
      isnextline:= false;
     end;
     if lstr1.len = 0 then begin
@@ -1181,9 +1281,10 @@ var
  wstrar1: msestringarty;
  bo1: boolean;
  aktkeywordfontinfonr: integer;
- ar1: stringarty; 
+ ar1: tokeninfoarty; 
  tokenchars1: tokencharsty;
  isnextline: boolean;
+ tf1: tokenflagsty;
 begin
  result:= -1;
  for int1:= 0 to high(fsyntaxdefs) do begin
@@ -1348,13 +1449,15 @@ begin
         end;
        end;
        tn_calltokens,tn_jumptokens: begin
-        bo1:= nextquotedstring(lstr1,str1);
+        bo1:= nexttokeninfo(lstr1,str1,tf1);
+//        bo1:= nextquotedstring(lstr1,str1);
         if not bo1 then begin        //at least one
          invalidstring;
         end;
         setlength(ar1,1);
-        ar1[0]:= str1;
-        addquotedstrings(ar1,isnextline);
+        ar1[0].name:= str1;
+        ar1[0].flags:= tf1;
+        addquotedtokens(ar1,isnextline);
         if not isnextline then begin
          nextword(lstr1,lstr3);
          int1:= findname(scopenames,lstr3);
@@ -1384,7 +1487,7 @@ begin
           with scopeinfos[aktscopeinfo].starttokens[int4] do begin
            token:= ar1[int4-int3];
            if caseinsensitive then begin
-            token:= struppercase(token);
+            token.name:= struppercase(token.name);
            end;
            fontinfonr:= int2;
            scopenr:= int1;
@@ -1397,7 +1500,7 @@ begin
        tn_endtokens: begin
         with scopeinfos[aktscopeinfo] do begin
          ar1:= nil;
-         addquotedstrings(ar1,isnextline);
+         addquotedtokens(ar1,isnextline);
          int3:= length(endtokens);
          if not isnextline then begin
           nextword(lstr1,lstr3);
@@ -1421,7 +1524,7 @@ begin
            with scopeinfos[aktscopeinfo].endtokens[int4] do begin
             token:= ar1[int4-int3];
             if caseinsensitive then begin
-             token:= struppercase(token);
+             token.name:= struppercase(token.name);
             end;
             fontinfonr:= int2;
            end;
