@@ -1,17 +1,19 @@
 object settingsfo: tsettingsfo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton]
+  visible = False
   bounds_x = 100
   bounds_y = 106
   bounds_cx = 358
   bounds_cy = 574
-  taborder = 1
-  visible = False
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_x = 0
-  container.bounds_y = 0
-  container.bounds_cx = 358
-  container.bounds_cy = 574
-  container.frame.dummy = 0
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
+  container.bounds = (
+    0
+    0
+    358
+    574
+  )
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = tstatfile1
   caption = 'Configure MSE environment'
@@ -19,23 +21,21 @@ object settingsfo: tsettingsfo
   moduleclassname = 'tmseform'
   object templatedir: tfilenameedit
     Tag = 5
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 8
-    bounds_y = 247
-    bounds_cx = 340
-    bounds_cy = 37
     frame.caption = '${TEMPLATEDIR}'
     frame.button.imagenr = 17
-    frame.dummy = 0
     frame.outerframe = (
       0
       17
       0
       0
     )
-    anchors = [an_left, an_top, an_right]
     taborder = 6
-    hint = 'Where project templates reside.'
+    hint = 'Directory for project template files.'
+    bounds_x = 8
+    bounds_y = 247
+    bounds_cx = 340
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
     onsetvalue = setvalue
     controller.filterlist.data = (
       (
@@ -49,12 +49,12 @@ object settingsfo: tsettingsfo
     reffontheight = 14
   end
   object tbutton1: tbutton
+    taborder = 13
     bounds_x = 240
     bounds_y = 541
     bounds_cx = 50
     bounds_cy = 22
     anchors = [an_top, an_right]
-    taborder = 13
     state = [as_default, as_localdefault, as_localcaption]
     caption = 'OK'
     modalresult = mr_ok
@@ -70,23 +70,21 @@ object settingsfo: tsettingsfo
     modalresult = mr_cancel
   end
   object fpcdir: tfilenameedit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 8
-    bounds_y = 7
-    bounds_cx = 340
-    bounds_cy = 37
     frame.caption = '${FPCDIR}'
     frame.button.imagenr = 17
-    frame.dummy = 0
     frame.outerframe = (
       0
       17
       0
       0
     )
-    anchors = [an_left, an_top, an_right]
     taborder = 1
-    hint = 'Root directory of Free Pascal system.'
+    hint = 'Root directory of Free Pascal system (not used by the default project templates).'
+    bounds_x = 8
+    bounds_y = 7
+    bounds_cx = 340
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
     onsetvalue = setvalue
     controller.options = [fdo_directory]
     controller.captionopen = 'FPC root directory'
@@ -95,48 +93,44 @@ object settingsfo: tsettingsfo
   end
   object msedir: tfilenameedit
     Tag = 2
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 8
-    bounds_y = 103
-    bounds_cx = 340
-    bounds_cy = 37
     frame.caption = '${MSEDIR}'
     frame.button.imagenr = 17
-    frame.dummy = 0
     frame.outerframe = (
       0
       17
       0
       0
     )
-    anchors = [an_left, an_top, an_right]
     taborder = 3
     hint = 'Root directory of msegui.'
+    bounds_x = 8
+    bounds_y = 103
+    bounds_cx = 340
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
     onsetvalue = setvalue
     controller.options = [fdo_directory]
-    controller.captionopen = 'msegui root directory'
+    controller.captionopen = 'MSEgui root directory'
     controller.ongetfilename = epandfilenamemacro
     reffontheight = 14
   end
   object compiler: tfilenameedit
     Tag = 7
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 8
-    bounds_y = 343
-    bounds_cx = 340
-    bounds_cy = 37
     frame.caption = '${COMPILER}'
     frame.button.imagenr = 17
-    frame.dummy = 0
     frame.outerframe = (
       0
       17
       0
       0
     )
-    anchors = [an_left, an_top, an_right]
     taborder = 8
     hint = 'Path to compiler (ppc386).'
+    bounds_x = 8
+    bounds_y = 343
+    bounds_cx = 340
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
     onsetvalue = setvalue
     controller.captionopen = 'Compiler path'
     controller.ongetfilename = epandfilenamemacro
@@ -144,23 +138,21 @@ object settingsfo: tsettingsfo
   end
   object debugger: tfilenameedit
     Tag = 8
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 8
-    bounds_y = 391
-    bounds_cx = 340
-    bounds_cy = 37
     frame.caption = '${DEBUGGER}'
     frame.button.imagenr = 17
-    frame.dummy = 0
     frame.outerframe = (
       0
       17
       0
       0
     )
-    anchors = [an_left, an_top, an_right]
     taborder = 9
-    hint = 'Path to debugger (GDB)'
+    hint = 'Path to debugger (gdb).'
+    bounds_x = 8
+    bounds_y = 391
+    bounds_cx = 340
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
     onsetvalue = setvalue
     controller.captionopen = 'Debugger path'
     controller.ongetfilename = epandfilenamemacro
@@ -168,23 +160,21 @@ object settingsfo: tsettingsfo
   end
   object syntaxdefdir: tfilenameedit
     Tag = 4
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 8
-    bounds_y = 199
-    bounds_cx = 340
-    bounds_cy = 37
     frame.caption = '${SYNTAXDEFDIR}'
     frame.button.imagenr = 17
-    frame.dummy = 0
     frame.outerframe = (
       0
       17
       0
       0
     )
-    anchors = [an_left, an_top, an_right]
     taborder = 5
-    hint = 'Where syntax definition files reside.'
+    hint = 'Directory for syntax definition files.'
+    bounds_x = 8
+    bounds_y = 199
+    bounds_cx = 340
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
     onsetvalue = setvalue
     controller.filterlist.data = (
       (
@@ -193,17 +183,12 @@ object settingsfo: tsettingsfo
       )
     )
     controller.options = [fdo_directory]
-    controller.captionopen = 'Project template directory'
+    controller.captionopen = 'Directory for sntax definition files'
     controller.ongetfilename = epandfilenamemacro
     reffontheight = 14
   end
   object exeext: tstringedit
     Tag = 9
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 8
-    bounds_y = 439
-    bounds_cx = 78
-    bounds_cy = 37
     frame.caption = '${EXEEXT}'
     frame.dummy = 0
     frame.outerframe = (
@@ -213,16 +198,15 @@ object settingsfo: tsettingsfo
       0
     )
     taborder = 10
+    bounds_x = 8
+    bounds_y = 439
+    bounds_cx = 78
+    bounds_cy = 37
     onsetvalue = setvalue
     reffontheight = 14
   end
   object target: tstringedit
     Tag = 10
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 96
-    bounds_y = 439
-    bounds_cx = 252
-    bounds_cy = 37
     frame.caption = '${TARGET}'
     frame.dummy = 0
     frame.outerframe = (
@@ -231,65 +215,60 @@ object settingsfo: tsettingsfo
       0
       0
     )
-    anchors = [an_left, an_top, an_right]
     taborder = 11
+    bounds_x = 96
+    bounds_y = 439
+    bounds_cx = 252
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
     onsetvalue = setvalue
     reffontheight = 14
   end
   object mselibdir: tfilenameedit
     Tag = 3
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 8
-    bounds_y = 151
-    bounds_cx = 340
-    bounds_cy = 37
     frame.caption = '${MSELIBDIR}'
     frame.button.imagenr = 17
-    frame.dummy = 0
     frame.outerframe = (
       0
       17
       0
       0
     )
-    anchors = [an_left, an_top, an_right]
     taborder = 4
     hint = 'Root directory of msegui library.'
+    bounds_x = 8
+    bounds_y = 151
+    bounds_cx = 340
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
     onsetvalue = setvalue
     controller.options = [fdo_directory]
-    controller.captionopen = 'msegui root directory'
+    controller.captionopen = 'MSEgui library directory'
     controller.ongetfilename = epandfilenamemacro
     reffontheight = 14
   end
   object fpclibdir: tfilenameedit
     Tag = 1
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 8
-    bounds_y = 55
-    bounds_cx = 340
-    bounds_cy = 37
     frame.caption = '${FPCLIBDIR}'
     frame.button.imagenr = 17
-    frame.dummy = 0
     frame.outerframe = (
       0
       17
       0
       0
     )
-    anchors = [an_left, an_top, an_right]
     taborder = 2
-    hint = 'Root directory of FPC library.'
+    hint = 'Root directory of FPC library (not used by the default project templates).'
+    bounds_x = 8
+    bounds_y = 55
+    bounds_cx = 340
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
     controller.options = [fdo_directory]
-    controller.captionopen = 'FPC root directory'
+    controller.captionopen = 'FPC library directory'
     reffontheight = 14
   end
   object printcomm: tstringedit
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 8
-    bounds_y = 487
-    bounds_cx = 340
-    bounds_cy = 37
     frame.caption = 'Print command'
     frame.dummy = 0
     frame.outerframe = (
@@ -298,30 +277,32 @@ object settingsfo: tsettingsfo
       0
       0
     )
-    anchors = [an_left, an_top, an_right]
     taborder = 12
+    bounds_x = 8
+    bounds_y = 487
+    bounds_cx = 340
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
     onsetvalue = setprintcomm
     reffontheight = 14
   end
   object compstoredir: tfilenameedit
     Tag = 6
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 8
-    bounds_y = 295
-    bounds_cx = 340
-    bounds_cy = 37
     frame.caption = '${COMPSTOREDIR}'
     frame.button.imagenr = 17
-    frame.dummy = 0
     frame.outerframe = (
       0
       17
       0
       0
     )
-    anchors = [an_left, an_top, an_right]
     taborder = 7
-    hint = 'Where project templates reside.'
+    hint = 'Directory for component store files.'
+    bounds_x = 8
+    bounds_y = 295
+    bounds_cx = 340
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
     onsetvalue = setvalue
     controller.filterlist.data = (
       (
@@ -330,16 +311,16 @@ object settingsfo: tsettingsfo
       )
     )
     controller.options = [fdo_directory]
-    controller.captionopen = 'Project template directory'
+    controller.captionopen = 'Directory for component stores'
     controller.ongetfilename = epandfilenamemacro
     reffontheight = 14
   end
   object shortcutbu: tbutton
+    taborder = 14
     bounds_x = 10
     bounds_y = 541
     bounds_cx = 78
     bounds_cy = 22
-    taborder = 14
     state = [as_localcaption, as_localonexecute]
     caption = 'Shortcuts'
     onexecute = editshortcuts
