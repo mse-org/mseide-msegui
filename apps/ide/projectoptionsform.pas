@@ -435,6 +435,7 @@ type
    fexceptignore: booleanarty;
    fnogdbserverexit: boolean;
    fnodebugbeginend: boolean;
+   fsettty: boolean;
  protected
    function gett: tobject; override;
    function gettexp: tobject; override;
@@ -449,6 +450,7 @@ type
    property activateonbreak: boolean read factivateonbreak write factivateonbreak;
    property showconsole: boolean read fshowconsole write fshowconsole;
    property externalconsole: boolean read fexternalconsole write fexternalconsole;
+   property settty: boolean read fsettty write fsettty;
    property gdbdownload: boolean read fgdbdownload write fgdbdownload;
    property downloadalways: boolean read fdownloadalways write fdownloadalways;
    property startupbkpt: integer read fstartupbkpt write fstartupbkpt;
@@ -958,6 +960,7 @@ type
    settingsprojecttree: tbooleanedit;
    nodebugbeginend: tbooleanedit;
    toolmessages: tbooleanedit;
+   settty: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -2606,6 +2609,8 @@ procedure tprojectoptionsfo.createexe(const sender: TObject);
 begin
  {$ifdef mswindows}
  externalconsole.visible:= true;
+ {$else}
+ settty.visible:= true;
  {$endif}
 end;
 
@@ -3130,6 +3135,7 @@ begin
 
  valuehints:= true;
  activateonbreak:= true;
+ settty:= true;
  additem(fexceptclassnames,'EconvertError');
  additem(fexceptignore,false);
 

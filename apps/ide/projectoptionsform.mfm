@@ -1165,6 +1165,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 4
+            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 679
@@ -1581,7 +1582,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 5
-            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 679
@@ -1816,7 +1816,7 @@ object projectoptionsfo: tprojectoptionsfo
               taborder = 1
               bounds_x = 0
               bounds_y = 37
-              bounds_cx = 678
+              bounds_cx = 679
               bounds_cy = 37
               anchors = [an_top]
               optionsscale = [osc_expandy, osc_shrinky]
@@ -2053,7 +2053,7 @@ object projectoptionsfo: tprojectoptionsfo
           taborder = 2
           bounds_x = 7
           bounds_y = 196
-          bounds_cx = 560
+          bounds_cx = 628
           bounds_cy = 30
           optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
           linkbottom = ttabwidget1
@@ -2074,8 +2074,8 @@ object projectoptionsfo: tprojectoptionsfo
               50
               9
             )
-            taborder = 3
-            bounds_x = 440
+            taborder = 4
+            bounds_x = 508
             bounds_y = 0
             bounds_cx = 63
             bounds_cy = 30
@@ -2142,8 +2142,8 @@ object projectoptionsfo: tprojectoptionsfo
               34
               9
             )
-            taborder = 4
-            bounds_x = 513
+            taborder = 5
+            bounds_x = 581
             bounds_y = 0
             bounds_cx = 47
             bounds_cy = 30
@@ -2157,13 +2157,29 @@ object projectoptionsfo: tprojectoptionsfo
               139
               9
             )
-            taborder = 5
+            taborder = 6
             hint = 'Release mouse grab by target stop. gdb sometimes crashes with this option.'
             bounds_x = 75
             bounds_y = 0
             bounds_cx = 152
             bounds_cy = 30
             options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_reversed]
+          end
+          object settty: tbooleanedit
+            frame.caption = 'Set TT&Y'
+            frame.dummy = 0
+            frame.outerframe = (
+              0
+              1
+              45
+              2
+            )
+            taborder = 3
+            bounds_x = 440
+            bounds_y = 7
+            bounds_cx = 58
+            bounds_cy = 16
+            visible = False
           end
         end
         object debugtarget: tfilenameedit

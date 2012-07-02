@@ -39,7 +39,8 @@ type
    procedure expresultonsetvalue(const sender: tobject; var avalue: msestring; var accept: boolean);
    procedure resultcellevent(const sender: TObject; var info: celleventinfoty);
    procedure watchesononchange(const sender: TObject);
-   procedure watchesononsetvalue(const sender: TObject; var avalue: Boolean; var accept: Boolean);
+   procedure watchesononsetvalue(const sender: TObject; var avalue: Boolean;
+                                                          var accept: Boolean);
    procedure deletallexecute(const sender: TObject);
    procedure formatexecute(const sender: TObject);
    procedure popupdate(const sender: tcustommenu);

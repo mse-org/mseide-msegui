@@ -1087,6 +1087,8 @@ begin
  end;
  {$ifdef mswindows}
  gdb.newconsole:= projectoptions.d.externalconsole;
+ {$else}
+ gdb.settty:= projectoptions.d.settty;
  {$endif}
 end;
 
@@ -2102,6 +2104,7 @@ function tmainfo.openproject(const aname: filenamety;
 
  procedure closepro;
  begin
+  gdb.abort;
   sourceupdater.clear;
   initprojectoptions;
   projectoptions.projectfilename:= '';

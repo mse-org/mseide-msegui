@@ -1445,26 +1445,40 @@ type
 	end;
   TMutexAttribute = pthread_mutexattr_t;
   PMutexAttribute = ^TMutexAttribute;
+
 function pthread_mutexattr_init(var __attr: pthread_mutexattr_t):longint;cdecl; external threadslib;
 function pthread_mutexattr_settype(var __attr: pthread_mutexattr_t; Kind: Integer): Integer; cdecl;external threadslib;
 function pthread_mutexattr_destroy(var __attr: pthread_mutexattr_t):longint;cdecl; external threadslib;
-function __mkdir(__path:Pchar; __mode:__mode_t):longint;cdecl;external clib name 'mkdir';
-function fcntl(__fd:longint; __cmd:longint; args:array of const):longint;cdecl;external clib name 'fcntl';
-function fcntl(__fd:longint; __cmd:longint):longint;cdecl;varargs;external clib name 'fcntl';
-function open(__file:Pchar; __oflag:longint; args:array of const):longint;cdecl;external clib name 'open';
-function open(__file:Pchar; __oflag:longint):longint;cdecl;varargs;external clib name 'open';
-function __close(Handle: Integer): Integer; cdecl;external clib name 'close';
-function fsync(__fd:longint):longint;cdecl;external clib name 'fsync';
-function dup(__fd:longint):longint;cdecl;external clib name 'dup';
-function dup2(__fd:longint; __fd2:longint):longint;cdecl;external clib name 'dup2';
-function __read(Handle: Integer; var Buffer; Count: size_t): ssize_t; cdecl;external clib name 'read';
-function __write(Handle: Integer; const Buffer; Count: size_t): ssize_t; cdecl;external clib name 'write';
-function sem_init(__sem:Psem_t; __pshared:longint; __value:dword):longint;cdecl;external threadslib name 'sem_init';
-function sem_init(var __sem: sem_t; __pshared:longint; __value:dword):longint;cdecl;external threadslib name 'sem_init';
-function sem_destroy(var __sem: sem_t):longint;cdecl;external threadslib name 'sem_destroy';
-function sem_post(var __sem: sem_t):longint;cdecl;external threadslib name 'sem_post';
-function sem_wait(var __sem: sem_t):longint;cdecl;external threadslib name 'sem_wait';
-function sem_trywait(var __sem: sem_t):longint;cdecl;external threadslib name 'sem_trywait';
+function __mkdir(__path:Pchar; __mode:__mode_t):longint;cdecl;
+                                            external clib name 'mkdir';
+function fcntl(__fd: cint; __cmd: cint; args: array of const): cint;
+                                      cdecl; external clib name 'fcntl';
+function fcntl(__fd: cint; __cmd: cint): cint;
+                                 cdecl; varargs; external clib name 'fcntl';
+function open(__file:Pchar; __oflag: cint; args:array of const): cint; 
+                                              cdecl; external clib name 'open';
+function open(__file:Pchar; __oflag: cint): cint;
+                                      cdecl; varargs; external clib name 'open';
+function __close(Handle: cint): cint; cdecl;external clib name 'close';
+function fsync(__fd: cint): cint; cdecl; external clib name 'fsync';
+function dup(__fd: cint): cint; cdecl; external clib name 'dup';
+function dup2(__fd: cint; __fd2: cint):longint; cdecl; external clib name 'dup2';
+function __read(Handle: cint; var Buffer; Count: size_t): ssize_t;
+                                           cdecl; external clib name 'read';
+function __write(Handle: cint; const Buffer; Count: size_t): ssize_t;
+                                           cdecl; external clib name 'write';
+function sem_init(__sem:Psem_t; __pshared: cint; __value: cuint): cint;
+                             cdecl; external threadslib name 'sem_init';
+function sem_init(var __sem: sem_t; __pshared: cint; __value: cuint): cint;
+                             cdecl; external threadslib name 'sem_init';
+function sem_destroy(var __sem: sem_t): cint;
+                        cdecl; external threadslib name 'sem_destroy';
+function sem_post(var __sem: sem_t): cint;
+                          cdecl; external threadslib name 'sem_post';
+function sem_wait(var __sem: sem_t): cint;
+                        cdecl; external threadslib name 'sem_wait';
+function sem_trywait(var __sem: sem_t): cint;
+                    cdecl; external threadslib name 'sem_trywait';
 function sem_getvalue(var __sem: sem_t; __sval:Plongint):longint;cdecl;external threadslib name 'sem_getvalue';
 
 Const
@@ -1859,12 +1873,21 @@ const
   TCSADRAIN = 1;
   TCSAFLUSH = 2;
 
-function SIGRTMIN : longint;cdecl; external clib name '__libc_current_sigrtmin';
-function SIGRTMAX : longint;cdecl; external clib name '__libc_current_sigrtmax';
-function ioctl(__fd:longint; __request:dword; args:array of const):longint;cdecl;external clib name 'ioctl';
-function ioctl(__fd:longint; __request:dword; args:pointer):longint;cdecl;external clib name 'ioctl';
-function cfsetispeed(var __termios_p: termios; __speed:speed_t):longint;cdecl;external clib name 'cfsetispeed';
-function cfsetospeed(var __termios_p: termios; __speed:speed_t):longint;cdecl;external clib name 'cfsetospeed';
+function SIGRTMIN: cint; cdecl; external clib name '__libc_current_sigrtmin';
+function SIGRTMAX: cint; cdecl; external clib name '__libc_current_sigrtmax';
+function ioctl(__fd: cint; __request:dword; args: array of const): cint;
+                                             cdecl;external clib name 'ioctl';
+function ioctl(__fd: cint; __request: cuint; args: pointer): cint;
+                                             cdecl;external clib name 'ioctl';
+function cfsetispeed(var __termios_p: termios; __speed:speed_t): cint;
+                                       cdecl;external clib name 'cfsetispeed';
+function cfsetospeed(var __termios_p: termios; __speed:speed_t): cint;
+                                       cdecl;external clib name 'cfsetospeed';
+function isatty(__fd: cint): cint; cdecl; external clib name 'isatty';
+function ttyname(__fd: cint): pchar; cdecl; external clib name 'ttyname';
+function ttyname_r(__fd: cint; buf: pchar; buflen: size_t): cint;
+                                         cdecl; external clib name 'ttyname_r';
+
 const
    TIOCM_LE = $001;
    TIOCM_DTR = $002;
@@ -1918,11 +1941,16 @@ type
 
   TPipes = Array[0..1] of longint;
   PPipes = ^TPipes;
-function pipe(var __pipedes: TPipes):longint;cdecl;external clib name 'pipe';
-function pipe(var PipeDes: TPipeDescriptors): Integer; cdecl; external clib name 'pipe';
-function vfork:__pid_t;cdecl;external clib name 'vfork';
-function setsid:__pid_t;cdecl;external clib name 'setsid';
-function setpgid(__pid:__pid_t; __pgid:__pid_t):longint;cdecl;external clib name 'setpgid';
+  
+function pipe(var __pipedes: TPipes):longint; cdecl; external clib name 'pipe';
+function pipe(var PipeDes: TPipeDescriptors): Integer; cdecl;
+                                                external clib name 'pipe';
+function vfork: __pid_t; cdecl; external clib name 'vfork';
+function setsid: __pid_t; cdecl; external clib name 'setsid';
+function getsid(pid: __pid_t): __pid_t; cdecl; external clib name 'getsid';
+function setpgid(__pid:__pid_t; __pgid:__pid_t):longint; cdecl;
+                                             external clib name 'setpgid';
+function getpgid(pid: __pid_t): __pid_t; cdecl; external clib name 'getpgid';
 
 const
    EXIT_FAILURE = 1;

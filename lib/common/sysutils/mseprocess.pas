@@ -23,7 +23,10 @@ type
                     pro_noshell,  //default on windows, todo: implement on linux
                     pro_inactive,pro_nostdhandle, //windows only
                     pro_nowindow,pro_detached,    //windows only
-                    pro_allowsetforegroundwindow,    //windows only
+                    pro_allowsetforegroundwindow, //windows only
+                    pro_group,                    //linux only
+                    pro_sessionleader,            //linux only
+                    pro_settty,                   //linux only
                     pro_tty,pro_echo,pro_icanon,  //linux only
                     pro_nowaitforpipeeof,pro_nopipeterminate,
                     pro_usepipewritehandles,pro_winpipewritehandles,
@@ -406,13 +409,19 @@ begin
      if pro_input in foptions then begin
       inp:= finput;
      end;
-     if pro_tty in foptions then begin
+     if pro_group in foptions then begin
       group:= 0;
+     end;
+     if pro_sessionleader in foptions then begin
       sessionleader:= true;
+      group:= -1;
      end;
      opt1:= [];
      if sessionleader then begin
       include(opt1,exo_sessionleader);
+     end;
+     if pro_settty in foptions then begin
+      include(opt1,exo_settty);
      end;
      if pro_shell in foptions then begin
       include(opt1,exo_shell);
@@ -770,8 +779,12 @@ begin
  foptions:= processoptionsty(
    setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),
                 {$ifdef FPC}longword{$else}word{$endif}(foptions),
-                [{$ifdef FPC}longword{$else}word{$endif}(mask1),
-                 {$ifdef FPC}longword{$else}word{$endif}(mask2)]));
+                [{$ifdef FPC}longword{$else}word{$endif}
+                ([pro_erroroutput,pro_errorouttoout]),
+                 {$ifdef FPC}longword{$else}word{$endif}
+                 ([pro_shell,pro_noshell]),
+                 {$ifdef FPC}longword{$else}word{$endif}
+                 ([pro_sessionleader,pro_group])]));
  if foptions * [pro_nowaitforpipeeof,pro_nopipeterminate] = [] then begin
   exclude(foptions,pro_usepipewritehandles);
  end;

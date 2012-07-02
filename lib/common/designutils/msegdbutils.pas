@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -52,22 +52,25 @@ type
            rec_stopped,rec_download,
            rec_threadcreated,rec_threadexited,rec_threadgroupexited,
            rec_threadselected,
-           rec_libraryloaded,rec_libraryunloaded);
+           rec_libraryloaded,rec_libraryunloaded,
+           rec_threadgroupadded,rec_threadgroupstarted);
  resultclassty = rec_done..rec_exit;
- asyncclassty = rec_running..rec_libraryunloaded;
+ asyncclassty = rec_running..high(recordclassty);
 const
  recordclassnames: array[recordclassty] of string =
          ('done', 'running',  'connected',   'error',   'exit',
           'stopped', 'download',
           'thread-created','thread-exited', 'thread-group-exited', 
           'thread-selected',
-          'library-loaded','library-unloaded');
+          'library-loaded','library-unloaded',
+          'thread-group-added','thread-group-started');
  recordclassnoname: array[recordclassty] of boolean =
          (false,  false,      false,         false,     false,
           false,     true,
           false,           false,           false,
           false,
-          false,            false);
+          false,            false,
+          false,               false);
  defaultsynctimeout = 2000000; //2 seconds
 type
  valuekindty = (vk_value,vk_tuple,vk_list);
@@ -308,6 +311,7 @@ type
    fstopinfo: resultinfoarty;
    fstopthreadid: integer;
    fcurrthreadid: integer;
+   fsettty: boolean;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
    function checkconnection: gdbresultty;
@@ -594,6 +598,7 @@ type
    property remoteconnection: msestring read fremoteconnection 
                                                     write fremoteconnection;
    property gdbdownload: boolean read fgdbdownload write fgdbdownload;
+   property settty: boolean read fsettty write fsettty default true;
    property simulator: boolean read fsimulator write fsimulator;
    property processor: processorty read fprocessor write fprocessor default pro_i386;
    property beforeload: filenamety read fbeforeload write fbeforeload;
@@ -761,6 +766,7 @@ end;
 
 constructor tgdbmi.create(aowner: tcomponent);
 begin
+ fsettty:= true;
  fpointersize:= sizeof(pointer);
  fpointerhexdigits:= fpointersize * 2;
  fgdb:= invalidprochandle;
@@ -856,24 +862,21 @@ procedure tgdbmi.startgdb(commandline: string);
 const
  lcmessages = 'LC_MESSAGES';
 var
+(*
 {$ifdef UNIX}
  bo1: boolean;
  str1: string;
 {$endif}
+ *)
  haslang: boolean;
  langbefore: msestring;
- 
 begin
  closegdb;
  fgdbto:= tpipewriter.create;
  fgdbfrom:= tpipereader.create;
  fgdbfrom.overloadsleepus:= foverloadsleepus;
-// fgdberror:= tpipereader.create;
-// fgdberror.overloadsleepus:= foverloadsleepus;
  fgdbfrom.oninputavailable:= {$ifdef FPC}@{$endif}gdbfrom;
-// fgdberror.oninputavailable:= {$ifdef FPC}@{$endif}gdberror;
  fgdbfrom.onpipebroken:= {$ifdef FPC}@{$endif}gdbpipebroken;
-// fgdberror.onpipebroken:= {$ifdef FPC}@{$endif}gdbpipebroken;
  fconsolesequence:= 0;
  frunsequence:= 0;
  fsequence:= 1;
@@ -882,9 +885,8 @@ begin
  sys_setenv(lcmessages,'C');
   
  fgdb:= execmse2(syscommandline(commandline)+' --interpreter=mi --nx',
-                fgdbto,fgdbfrom,fgdbfrom{fgdberror},{false,}-1,
-                [exo_inactive,exo_tty,exo_winpipewritehandles]
-                {true,false,true});
+                fgdbto,fgdbfrom,fgdbfrom,-1,
+                [exo_inactive,exo_tty,exo_winpipewritehandles]);
 
  if haslang then begin
   sys_setenv(lcmessages,langbefore);
@@ -903,6 +905,7 @@ begin
   clicommand('set height 0');
   clicommand('set width 0');
   {$ifdef UNIX}
+  {
   bo1:= true;  
   if synccommand('-gdb-show inferior-tty') = gdb_ok then begin
    if getstringvalue(fsyncvalues,'value',str1) and (str1 <> '') then begin
@@ -910,6 +913,8 @@ begin
    end;
   end;
   if bo1 then begin
+  }
+  if fsettty then begin
    clicommand('tty '+ftargetterminal.devicename);
   end;
   {$endif}
@@ -1535,6 +1540,7 @@ var
  
 begin
  resultar:= nil;
+writeln(line);
  po1:= pchar(line);
  po2:= po1;
  while (po2^ >= '0') and (po2^ <= '9') do begin

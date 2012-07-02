@@ -1823,7 +1823,7 @@ begin
   ca1:= source[int1];
   if (ca1 > ' ') and (ca1 < #127) then begin
    inc(int2);
-   result[int2]:= source[int1];
+   pcharaty(result)^[int2]:= source[int1];
   end;
  end;
  setlength(result,int2);
@@ -2257,16 +2257,6 @@ begin
   pcharaty(result)^[int1]:= upperchars[pcharaty(s.po)^[int1]];
  end;
 end;
-
-
-
-
-
-
-
-
-
-
 
 function charlowercase(const c: char): char;
 begin

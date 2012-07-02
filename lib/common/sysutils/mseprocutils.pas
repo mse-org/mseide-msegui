@@ -30,9 +30,11 @@ type
                  exo_nowindow,                 //windows only
                  exo_detached,                 //windows only
                  exo_allowsetforegroundwindow, //windows only
+                 exo_sessionleader,            //linux only
+                 exo_settty,                   //linux only
                  exo_tty,exo_echo,exo_icanon,  //linux only
-                 exo_usepipewritehandles,exo_winpipewritehandles,
-                 exo_sessionleader);         
+                 exo_usepipewritehandles,exo_winpipewritehandles                 
+                 );         
  execoptionsty = set of execoptionty;
 const
  pipewritehandlemask = [exo_usepipewritehandles
@@ -356,15 +358,10 @@ end;
 function execmse0(const commandline: string; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
-//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
              const options: execoptionsty = [];
-//             inactive: boolean = true; //windows only
              frompipewritehandle: pinteger = nil;
              errorpipewritehandle: pinteger = nil
-//             tty: boolean = false;
-//             nostdhandle: boolean = false
-                               //windows only
              ): prochandlety;
 //startet programm, bringt processhandle, execerror wenn misslungen
 //closehandle nicht vergessen!
@@ -722,15 +719,10 @@ end;
 function execmse0(const commandline: string; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
-//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
              const options: execoptionsty = [];
-//             inactive: boolean = true; //windows only
              frompipewritehandle: pinteger = nil;
              errorpipewritehandle: pinteger = nil
-//             tty: boolean = false;
-//             nostdhandle: boolean = false
-                               //windows only
              ): prochandlety;
 const
  shell = shortstring('/bin/sh');
@@ -789,7 +781,6 @@ var
     else begin
      ios.c_lflag:= ios.c_lflag and not echo;
     end;
-//    ios.c_lflag:= ios.c_lflag and not (icanon or echo);
     ios.c_cc[vmin]:= #1;
     ios.c_cc[vtime]:= #0;
     if msetcsetattr(pty,tcsanow,ios) <> 0 then begin
@@ -815,7 +806,6 @@ var
   if exo_tty in options then begin
    with pipehandles do begin
     if @pipehandles = @topipehandles then begin
-//     if mselibc.pipe(pipehandles) <> 0 then execerr;
      writedes:= dogetpt(ptyout,ptynameout);
      readdes:= open(ptynameout,o_rdonly);
      if readdes < 0 then execerr;
@@ -840,8 +830,9 @@ var
   end;
  end;
 
-//var
+var
 // lockvar: integer; 
+ bo1: boolean;
 begin
 // lockvar:= 0;
  result:= invalidprochandle; //compilerwarnung;
@@ -895,7 +886,27 @@ begin
   end
   else begin
    if groupid <> -1 then begin
-    setpgid(0,groupid);
+    if groupid = 0 then begin
+     setpgid(procid,procid);
+    end
+    else begin
+     setpgid(procid,groupid);
+    end;
+   end;
+  end;
+  if (exo_settty in options) then begin
+   bo1:= false;        //search posssible controlling TTY
+   if (topipehandles.writedes <> invalidfilehandle) and 
+                       (isatty(topipehandles.readdes) <> 0) then begin
+    bo1:= ioctl(topipehandles.readdes,TIOCSCTTY,[]) <> -1;
+   end;
+   if not bo1 and (frompipehandles.writedes <> invalidfilehandle) and 
+                           (isatty(frompipehandles.writedes) <> 0) then begin
+     bo1:= ioctl(frompipehandles.writedes,TIOCSCTTY,[]) <> -1;
+   end;
+   if not bo1 and (errorpipehandles.writedes <> invalidfilehandle) and 
+                          (isatty(errorpipehandles.writedes) <> 0) then begin
+    bo1:= ioctl(errorpipehandles.writedes,TIOCSCTTY,[]) <> -1;
    end;
   end;
   if topipe <> nil then begin
@@ -967,6 +978,7 @@ begin
     __close(errorpipehandles.writeDes);
    end;
   end;
+  {
   if groupid <> -1 then begin
    if groupid = 0 then begin
     setpgid(procid,procid);
@@ -975,6 +987,7 @@ begin
     setpgid(procid,groupid);
    end;
   end;
+  }
   result:= procid;
 //  while lockvar = 0 do begin
 //   usleep(0); //sched_yield
@@ -1213,15 +1226,10 @@ end;
 function execmse3(const commandline: string; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
-//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
              const options: execoptionsty = [];
-//             inactive: boolean = true; //windows only
              frompipewritehandle: pinteger = nil;
              errorpipewritehandle: pinteger = nil
-//             tty: boolean = false;
-//             nostdhandle: boolean = false
-                              //windows only
                          ): prochandlety;
     //uses existing file handles
 begin
@@ -1232,14 +1240,8 @@ end;
 function execmse2(const commandline: string; topipe: tpipewriter = nil;
              frompipe: tpipereader = nil;
              errorpipe: tpipereader = nil;
-//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
              const options: execoptionsty = []
-//             inactive: boolean = true; //windows only
-//             usepipewritehandles: boolean = false;
-//             tty: boolean = false;
-//             nostdhandle: boolean = false
-                               //windows only
              ): prochandlety;
  //bringt procid
 var
