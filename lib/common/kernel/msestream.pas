@@ -24,7 +24,7 @@ unit msestream;
 interface
 uses 
  Classes,Sysutils,msestrings,msetypes,msethread,msesystypes,msesys,msereal,
- mseevent,mseclasses,mseglob;
+ mseevent,mseclasses,mseglob,mseformatstr;
 
 const
  defaultfilerights = [s_irusr,s_iwusr,s_irgrp,s_iwgrp,s_iroth,s_iwoth];
@@ -64,8 +64,15 @@ type
    function  getsize(var aclient: cryptoclientinfoty): int64; virtual;
   public
    destructor destroy; override;
-   function encrypt(const adata: string): string;
-   function decrypt(const adata: string): string;
+   function encrypt(const adata: string; const base64: boolean = false;
+               const maxlinelength: integer = defaultbase64linelength): string;
+   function decrypt(const adata: string; const base64: boolean = false): string;
+   function encrypttext(const atext: msestring;
+                               const base64: boolean = false;
+              const maxlinelength: integer = defaultbase64linelength): string;
+   function decrypttext(const adata: string;
+                               const base64: boolean = false): msestring;
+
  end;
  
    {$warnings off}
@@ -421,7 +428,7 @@ type
 implementation
 
 uses
- msefileutils,msebits,{msegui,}mseformatstr,sysconst,msesysutils,
+ msefileutils,msebits,{msegui,}sysconst,msesysutils,
  msesysintf1,msesysintf,
  msedatalist,mseapplication,msearrayutils,
         {$ifdef UNIX} mselibc,
@@ -2491,28 +2498,44 @@ begin
  end;
 end;
 
-function tcustomcryptohandler.encrypt(const adata: string): string;
+function tcustomcryptohandler.encrypt(const adata: string;
+                      const base64: boolean = false;
+             const maxlinelength: integer = defaultbase64linelength): string;
 var
  stream1: tmsefilestream;
+// str1: string;
 begin
  stream1:= tmsefilestream.create(fm_write);
  try
   stream1.cryptohandler:= self;
   stream1.write(pointer(adata)^,length(adata));
   stream1.cryptohandler:= nil; //flush
-  setlength(result,stream1.fmemorystream.size);
-  move(stream1.fmemorystream.memory^,pointer(result)^,length(result));
+  with stream1.fmemorystream do begin
+   if base64 then begin
+    result:= encodebase64(memory,size,maxlinelength);
+   end
+   else begin
+    setlength(result,size);
+    move(memory^,pointer(result)^,length(result));
+   end;
+  end;
  finally
   stream1.free;
  end;
 end;
 
-function tcustomcryptohandler.decrypt(const adata: string): string;
+function tcustomcryptohandler.decrypt(const adata: string;
+                           const base64: boolean = false): string;
 var
  stream1: ttextstringcopystream;
  int1: integer;
 begin
- stream1:= ttextstringcopystream.create(adata);
+ if base64 then begin
+  stream1:= ttextstringcopystream.create(decodebase64(adata));
+ end
+ else begin
+  stream1:= ttextstringcopystream.create(adata);
+ end;
  try
   stream1.cryptohandler:= self;
   setlength(result,length(adata));
@@ -2521,6 +2544,19 @@ begin
  finally
   stream1.free;
  end;
+end;
+
+function tcustomcryptohandler.encrypttext(const atext: msestring;
+                               const base64: boolean = false;
+              const maxlinelength: integer = defaultbase64linelength): string;
+begin
+ result:= encrypt(stringtoutf8(atext),base64,maxlinelength);
+end;
+
+function tcustomcryptohandler.decrypttext(const adata: string;
+                               const base64: boolean = false): msestring;
+begin
+ result:= utf8tostring(decrypt(adata,base64));
 end;
 
 end.

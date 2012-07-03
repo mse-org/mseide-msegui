@@ -77,7 +77,8 @@ const
  nullen = '000000000000000000000000000000';
  msenullen = msestring('000000000000000000000000000000');
  msespace = msestring('                              ');
-
+ defaultbase64linelength = 76;
+ 
 type
  numbasety = (nb_bin,nb_oct,nb_dec,nb_hex);
 
@@ -346,7 +347,9 @@ function stringtopascalstring(const value: msestring): string;
 function pascalstringtostring(const value: string): msestring;
                                     //increments inputpointer
 function encodebase64(const abinary: string;
-                      const maxlinelength: integer = 0): string;
+        const maxlinelength: integer = defaultbase64linelength): string;
+function encodebase64(const abinary: pbyte; acount: integer;
+        const maxlinelength: integer = defaultbase64linelength): string;
 function decodebase64(const atext: string): string;
 
 {$ifndef FPC}
@@ -1449,8 +1452,8 @@ const
  $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //e0
  $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff);//f0
 
-function encodebase64(const abinary: string;
-                                const maxlinelength: integer = 0): string;
+function encodebase64(const abinary: pbyte; acount: integer;
+                const maxlinelength: integer = defaultbase64linelength): string;
    //todo: optimize
 var
  int1: integer;
@@ -1460,8 +1463,8 @@ var
  by1: byte;
 begin
  result:= '';
- if abinary <> '' then begin
-  int1:= ((length(abinary)+2) div 3)*4;
+ if acount > 0 then begin
+  int1:= ((acount+2) div 3)*4;
   linestep:= maxlinelength and $fffffffc; //do not cut 4 char boundary
   if maxlinelength > 0 then begin
    if linestep = 0 then begin
@@ -1470,8 +1473,8 @@ begin
    int1:= int1 + 2*((int1+linestep-1)div linestep - 1); //return-linefeed
   end;
   setlength(result,int1);
-  ps:= pointer(abinary);
-  int1:= length(abinary);
+  ps:= abinary;
+  int1:= acount;
   tail:= int1 mod 3;
   pchar(pe):= pchar(ps)+int1-tail;
   pd:= pointer(result);
@@ -1522,6 +1525,12 @@ begin
    pd^:= '=';
   end;
  end;
+end;
+
+function encodebase64(const abinary: string;
+              const maxlinelength: integer = defaultbase64linelength): string;
+begin
+ result:= encodebase64(pointer(abinary),length(abinary),maxlinelength);
 end;
 
 function decodebase64(const atext: string): string;
