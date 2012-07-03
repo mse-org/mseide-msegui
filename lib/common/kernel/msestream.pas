@@ -107,6 +107,7 @@ type
                                   //memorystream
    constructor create(const aopenmode: fileopenmodety); overload; 
                                   //memorystream
+   constructor createstringcopy(const adata: string); //implies fm_read
    destructor destroy; override;
    class function trycreate(out ainstance: tmsefilestream;
              const afilename: filenamety;
@@ -902,6 +903,12 @@ constructor tmsefilestream.create(const aopenmode: fileopenmodety);
 begin
  fopenmode:= aopenmode;
  create;
+end;
+
+constructor tmsefilestream.createstringcopy(const adata: string);
+begin
+ fmemorystream:= tstringcopystream.create(adata);
+ create(fm_read);
 end;
 
 constructor tmsefilestream.internalcreate(const afilename: filenamety; 
