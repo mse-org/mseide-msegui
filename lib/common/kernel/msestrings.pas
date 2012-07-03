@@ -186,7 +186,9 @@ function removechar(const source: msestring; a: msechar): msestring; overload;
 procedure removechar1(var dest: string; a: char); overload;
 procedure removechar1(var dest: msestring; a: msechar); overload;
   //removes all a
-function printableascii(const source: string): string; 
+function printableascii(const source: string): string; overload; 
+                //removes all nonprintablechars and ' '
+function printableascii(const source: msestring): msestring; overload;
                 //removes all nonprintablechars and ' '
                 
 function replacechar(const source: string; a,b: char): string; overload;
@@ -1819,11 +1821,29 @@ var
 begin
  setlength(result,length(source));
  int2:= 0;
- for int1:= 1 to length(source) do begin
-  ca1:= source[int1];
+ for int1:= 0 to length(source)-1 do begin
+  ca1:= pcharaty(source)^[int1];
   if (ca1 > ' ') and (ca1 < #127) then begin
+   pcharaty(result)^[int2]:= ca1;
    inc(int2);
-   pcharaty(result)^[int2]:= source[int1];
+  end;
+ end;
+ setlength(result,int2);
+end;
+
+function printableascii(const source: msestring): msestring; 
+                //removes all nonprintablechars and ' '
+var
+ int1,int2: integer;
+ ca1: msechar;
+begin
+ setlength(result,length(source));
+ int2:= 0;
+ for int1:= 0 to length(source)-1 do begin
+  ca1:= pmsecharaty(source)^[int1];
+  if (ca1 > ' ') and (ca1 < #127) then begin
+   pmsecharaty(result)^[int2]:= ca1;
+   inc(int2);
   end;
  end;
  setlength(result,int2);
