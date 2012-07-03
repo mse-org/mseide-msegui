@@ -4935,11 +4935,16 @@ begin
  rea1:= gettextvalue(accept,quiet);
  if accept then begin
   str1:= realtytostr(rea1,fformatedit);
+  if trystrtorealty(str1,rea2) then begin //round to editformat
+   rea1:= rea2;
+  end;
+{
   try
    rea2:= strtorealty(str1); //round to editformat
    rea1:= rea2;
   except
   end;
+}
   rea1:= reapplyrange(rea1,fvaluerange,fvaluestart);
   if not ((des_isdb in fstate) and (rea1 = emptyreal)) then begin
    if (cmprealty(fmin,rea1) > 0) or (cmprealty(fmax,rea1) < 0) then begin
