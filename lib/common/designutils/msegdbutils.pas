@@ -1540,7 +1540,6 @@ var
  
 begin
  resultar:= nil;
-writeln(line);
  po1:= pchar(line);
  po2:= po1;
  while (po2^ >= '0') and (po2^ <= '9') do begin
