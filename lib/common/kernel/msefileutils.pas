@@ -670,10 +670,10 @@ end;
 function issamefilename(const a,b: filenamety): boolean;
 begin
  if filesystemiscaseinsensitive then begin
-  result:= msecomparetext(a,b) = 0;
+  result:= msecomparetext(filepath(a),filepath(b)) = 0;
  end
  else begin
-  result:= a = b;
+  result:= filepath(a) = filepath(b);
  end;
 end;
 

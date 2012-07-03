@@ -1165,9 +1165,37 @@ begin
 end;
 
 function tmsefilestream.readdatastring: string;
+var
+ int1,int2,int3: sizeint;
+ lint1,lint2: int64;
 begin
- setlength(result,size-position);
- setlength(result,read(pointer(result)^,length(result)));
+ if fcryptohandler = nil then begin
+  setlength(result,size-position);
+  setlength(result,read(pointer(result)^,length(result)));
+ end
+ else begin
+  if fmemorystream <> nil then begin
+   lint1:= fmemorystream.size;
+  end
+  else begin
+   lint1:= position;
+   lint2:= inheritedseek(0,soend); //file size
+   inheritedseek(lint1,sobeginning);
+   lint1:= lint2-lint1;
+  end;
+  setlength(result,lint1-position);
+  int1:= 0;
+  while true do begin
+   int3:= length(result)-int1;
+   int2:= read((pchar(pointer(result))+int1)^,int3);
+   int1:= int1 + int2;
+   if int2 < int3 then begin
+    break;
+   end;
+   setlength(result,length(result)*2); //grow buffer
+  end;
+  setlength(result,int1);
+ end;
 end;
 
 procedure tmsefilestream.writedatastring(const value: string);
@@ -2290,7 +2318,7 @@ end;
 constructor tstringcopystream.create(const adata: string);
 begin
  fdata:= adata;
- inherited create;
+ inherited create({fm_create});
  if adata <> '' then begin
   setpointer(pointer(adata),length(adata));
  end;

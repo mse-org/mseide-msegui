@@ -3561,7 +3561,7 @@ begin
      getcliint64('starts at address',str1,int64(start)) and
      getcliint64('ends at',str1,int64(stop)) then begin
    filename:= copy(str2,1,length(str2)-1);
-   filename:= tomsefilepath(filename);
+   filename:= filepath(filename);
   end
   else begin
    result:= gdb_dataerror;
