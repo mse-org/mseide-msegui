@@ -1148,6 +1148,11 @@ begin
 end;
 
 procedure tsymciphercryptohandler.initcipher(var aclient: cryptoclientinfoty);
+const
+ salttag = 'Salted__';
+ taglength = length(salttag);
+ saltlength = 8;
+ headerlength = taglength + saltlength;
 var
 // keydata: keybufty;
 // ivdata: ivbufty;
@@ -1165,25 +1170,29 @@ begin
   end;
   if sslco_salt in foptions then begin
    if mode = 0 then begin
-    setlength(salt1,8);
-    if internalread(aclient,pointer(salt1)^,8) <> 8 then begin
+    setlength(salt1,headerlength);
+    if (internalread(aclient,pointer(salt1)^,headerlength) <> headerlength) or 
+                    (pos(salttag,salt1) <> 1) then begin
      error(cerr_readheader);
     end;
    end
    else begin
     if salt1 = '' then begin
-     setlength(salt1,8);
-     checknullerror(rand_bytes(pbyte(pointer(salt1)),8));
+     setlength(salt1,saltlength);
+     checknullerror(rand_bytes(pbyte(pointer(salt1)),saltlength));
     end;
-    if internalwrite(aclient,pointer(salt1)^,8) <> 8 then begin
+    salt1:= salttag+salt1;
+    if internalwrite(aclient,pointer(salt1)^,length(salt1)) <> 
+                                                 length(salt1) then begin
      error(cerr_writeheader);
     end;
    end;
   end;
   if sslco_salt in foptions then begin
-   headersize:= 8;
+   headersize:= headerlength;
   end;
-  checknullerror(evp_bytestokey(cipher,digest,pointer(salt1),pointer(key1),
+  checknullerror(evp_bytestokey(cipher,digest,
+        pointer(pchar(pointer(salt1))+taglength),pointer(key1),
                          length(key1),fkeygeniterationcount,
                                                pointer(keybuf),pointer(ivbuf)));
   checknullerror(evp_cipherinit_ex(ctx,nil,nil,pointer(keybuf),pointer(ivbuf),
