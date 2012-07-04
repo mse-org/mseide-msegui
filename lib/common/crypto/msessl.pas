@@ -37,7 +37,7 @@ type
 const
  defaultsslprotocols = [ssp_sslv2,ssp_sslv3,ssp_tlsv1];
  defaultcipherlist = 'DEFAULT';
- defaultkeygeniterationcount = 5;
+ defaultkeygeniterationcount = 1{5}; //same as openssl enc
  
 type
 
@@ -101,7 +101,7 @@ type
   ivbuf: ^ivbufty;
   state: sslhandlerstatesty;
  end;
- psslhandlerdataty = ^sslhandlerdataty;
+ psslhandlerdatadty = ^sslhandlerdatadty;
  {$if sizeof(sslhandlerdatadty) > sizeof(cryptohandlerdataty)} 
   {$error 'buffer overflow'}
  {$endif}
@@ -130,28 +130,16 @@ const
  defaultopensslcryptooptions = [sslco_salt];
  
 type 
- tcustomopensslcryptohandler = class(tbasecryptohandler)
+ tpaddedcryptohandler = class(tbasecryptohandler)
   private
-   fciphername: string;
-   fkey: string;
-   fsalt: string;
-   fkeyphrase: msestring;
-   fongetkey: getkeyeventty;
-   fkeylength: integer;
    foptions: opensslcryptooptionsty;
-   procedure setkeyphrase(const avalue: msestring);
   protected
-   procedure initcipher(var aclient: cryptoclientinfoty); virtual; abstract;
-   procedure restartcipher(var aclient: cryptoclientinfoty); virtual;
-   procedure error(const err: cryptoerrorty);
-   procedure checkerror(const err: cryptoerrorty = cerr_error);
-   procedure clearerror; inline;
-   function checknullerror(const avalue: integer;
-                   const err: cryptoerrorty = cerr_error): integer; inline;
-   function checknilerror(const avalue: pointer;
-                   const err: cryptoerrorty = cerr_error): pointer; inline;
-   procedure open(var aclient: cryptoclientinfoty); override;
-   procedure close(var aclient: cryptoclientinfoty);  override;
+   procedure cipherupdate(var aclient: cryptoclientinfoty; 
+             const source: pbyte; const sourcelen: integer;
+                const dest: pbyte; out destlen: integer); virtual; abstract;
+   procedure cipherfinal(var aclient: cryptoclientinfoty;
+             const dest: pbyte; out destlen: integer); virtual; abstract;
+
    function read(var aclient: cryptoclientinfoty;
                    var buffer; count: longint): longint; override;
    function write(var aclient: cryptoclientinfoty;
@@ -165,9 +153,41 @@ type
    function internalseek(var aclient: cryptoclientinfoty;
                    const offset: int64; origin: tseekorigin): int64;
    function  getsize(var aclient: cryptoclientinfoty): int64; override;
+   procedure error(const err: cryptoerrorty);
+   procedure checkerror(const err: cryptoerrorty = cerr_error); virtual;
+   function checknullerror(const avalue: integer;
+                   const err: cryptoerrorty = cerr_error): integer; inline;
+   function checknilerror(const avalue: pointer;
+                   const err: cryptoerrorty = cerr_error): pointer; inline;
+   procedure restartcipher(var aclient: cryptoclientinfoty); virtual;
+   procedure open(var aclient: cryptoclientinfoty); override;
+   procedure close(var aclient: cryptoclientinfoty);  override;
+   procedure initializedata(var adata: cryptoclientinfoty); virtual;
+   procedure finalizedata(var adata: cryptoclientinfoty); virtual;
+ end;
+ 
+ tcustomopensslcryptohandler = class(tpaddedcryptohandler)
+  private
+   fciphername: string;
+   fkey: string;
+   fsalt: string;
+   fkeyphrase: msestring;
+   fongetkey: getkeyeventty;
+   fkeylength: integer;
+   procedure setkeyphrase(const avalue: msestring);
+  protected
+   procedure clearerror; inline;
+   procedure checkerror(const err: cryptoerrorty = cerr_error); override;
+   procedure cipherupdate(var aclient: cryptoclientinfoty;
+          const source: pbyte; const sourcelen: integer;
+          const dest: pbyte; out destlen: integer); override;
+   procedure cipherfinal(var aclient: cryptoclientinfoty;
+             const dest: pbyte; out destlen: integer); override;
+   procedure initcipher(var aclient: cryptoclientinfoty); virtual; abstract;
+   procedure restartcipher(var aclient: cryptoclientinfoty); override;
    procedure getkey(out akey: string; out asalt: string); virtual;
-   procedure initializedata(var adata: sslhandlerdatadty);
-   procedure finalizedata(var adata: sslhandlerdatadty);
+   procedure initializedata(var aclient: cryptoclientinfoty); override;
+   procedure finalizedata(var aclient: cryptoclientinfoty); override;
   public
    constructor create(aowner: tcomponent); override;
    property key: string read fkey write fkey;
@@ -623,162 +643,9 @@ begin
  end;
 end;
 
-{ tcustomopensslcryptohandler }
-
-constructor tcustomopensslcryptohandler.create(aowner: tcomponent);
-begin
- foptions:= defaultopensslcryptooptions;
- inherited;
-end;
-
-procedure tcustomopensslcryptohandler.initializedata(
-                                    var adata: sslhandlerdatadty);
-begin
- with adata do begin
-  getmem(ctx,sizeof(ctx^));
-  evp_cipher_ctx_init(ctx);
-  getmem(padbuf,sizeof(padbuf^));
-  getmem(keybuf,sizeof(keybuf^));
-  getmem(ivbuf,sizeof(ivbuf^));
- end;
-end;
-
-procedure tcustomopensslcryptohandler.finalizedata(
-                                            var adata: sslhandlerdatadty);
-begin
- with adata do begin
-  if ctx <> nil then begin
-   evp_cipher_ctx_cleanup(ctx);
-   freemem(ctx);
-  end;
-  if padbuf <> nil then begin
-   fillchar(padbuf^,sizeof(padbuf^),0);  
-   freemem(padbuf);
-  end;
-  if keybuf <> nil then begin
-   fillchar(keybuf^,sizeof(keybuf^),0);  
-   freemem(keybuf);
-  end;
-  if ivbuf <> nil then begin
-   fillchar(ivbuf^,sizeof(ivbuf^),0);  
-   freemem(ivbuf);
-  end;
-  fillchar(adata,sizeof(adata),0);
- end;
-end;
-
-procedure tcustomopensslcryptohandler.open(var aclient: cryptoclientinfoty);
-var
- int1: integer;
-begin
- initsslinterface;
- with sslhandlerdataty(aclient.handlerdata).d do begin
-  case aclient.stream.openmode of
-   fm_read: begin
-    mode:= 0; //decrypt
-   end;
-   fm_create,fm_write: begin
-    mode:= 1; //encrypt
-   end;
-   else begin
-    error(cerr_invalidopenmode); //todo: allow append
-   end;
-  end;
-  initializedata(sslhandlerdataty(aclient.handlerdata).d);
-  cipher:= checknilerror(evp_get_cipherbyname(pchar(fciphername)),
-                                                     cerr_ciphernotfound);
-  checknullerror(evp_cipherinit_ex(ctx,cipher,nil,nil,nil,mode),
-                                          cerr_cipherinit);
-  if fkeylength <> 0 then begin
-   int1:= fkeylength div 8;
-   if int1 > evp_max_key_length then begin
-    error(cerr_invalidkeylength);
-   end;
-   checknullerror(evp_cipher_ctx_set_key_length(ctx,int1));
-   if (ctx^.key_len * 8 <> fkeylength) then begin
-    error(cerr_invalidkeylength);
-   end;
-  end;
-{  if (mode = 0) and (cipher^.block_size > 1) then begin
-   finalizedata(sslhandlerdataty(aclient.handlerdata).d);
-   error(cerr_invalidblocksize); //todo: implement block ciphers
-  end;
-}
-  initcipher(aclient);
-  if not (sslco_canrestart in foptions) then begin
-   fillchar(keybuf^,sizeof(keybuf^),0);
-   fillchar(ivbuf^,sizeof(ivbuf^),0);
-  end;
- end;
- inherited;
-end;
-
-procedure tcustomopensslcryptohandler.restartcipher(
-                                      var aclient: cryptoclientinfoty);
-var
- int1: integer;
- buffer: blockbufty;
-begin
- if not (sslco_canrestart in foptions) then begin
-  error(cerr_cannotrestart);
- end;
- with sslhandlerdataty(aclient.handlerdata).d do begin
-  if not (sslhs_finalized in state) and 
-            (aclient.stream.openmode in [fm_write,fm_create])then begin
-   checknullerror(evp_cipherfinal(ctx,@buffer,int1));
-   if int1 > 0 then begin
-    if inherited write(aclient,buffer,int1) <> int1 then begin
-     error(cerr_cannotwrite);
-    end;
-   end;
-  end;
-//  checknullerror(evp_cipherinit_ex(ctx,nil,nil,nil,nil,-1)); //restart
-  checknullerror(evp_cipherinit_ex(ctx,nil,nil,pointer(keybuf),
-                               pointer(ivbuf),mode),cerr_cipherinit);
-  ctx^.iv:= ctx^.iov;
-  padindex:= 0;
-  padcount:= 0;
-  seekoffset:= 0;
-  state:= [];
-  if headersize > 0 then begin
-   internalseek(aclient,int64(headersize),sobeginning);
-  end;
- end;
-end;
-
-
-procedure tcustomopensslcryptohandler.close(var aclient: cryptoclientinfoty);
-var
- buf1: blockbufty;
- int1: integer;
-begin
- try
-  with sslhandlerdataty(aclient.handlerdata).d do begin
-   if ctx <> nil then begin
-    if (aclient.stream.openmode in [fm_write,fm_create]) and
-               (cipher <> nil) then begin
-     if not (sslhs_finalized in state) then begin
-      checknullerror(evp_cipherfinal(ctx,@buf1,int1));
-      include(state,sslhs_finalized);
-      if int1 > 0 then begin
-       if inherited write(aclient,buf1,int1) <> int1 then begin
-        error(cerr_cannotwrite);
-       end;
-      end;
-     end;
-    end;
-//    else begin
-//     checknullerror(evp_cipherfinal(ctx,@buffer,int1));
-//    end;
-   end;
-  end;
- finally
-  finalizedata(sslhandlerdataty(aclient.handlerdata).d);
-  inherited;
- end;
-end;
-
-function tcustomopensslcryptohandler.read(var aclient: cryptoclientinfoty;
+{ tpaddedcryptohandler }
+var testvar: psslhandlerdatadty;
+function tpaddedcryptohandler.read(var aclient: cryptoclientinfoty;
                                          var buffer; count: longint): longint;
 var
  ps,pd: pbyte;
@@ -810,6 +677,7 @@ var
  pb,po1: pbyte;
  
 begin
+testvar:= @sslhandlerdataty(aclient.handlerdata).d;
  if count > 0 then begin
   with sslhandlerdataty(aclient.handlerdata).d do begin
    blocksize:= ctx^.cipher^.block_size;
@@ -844,7 +712,8 @@ begin
        int4:= (count div blocksize) * blocksize;
       end;
       if int4 > 0 then begin
-       checknullerror(evp_cipherupdate(ctx,pointer(pd),int3,pointer(ps),int4));
+       cipherupdate(aclient,ps,int4,pd,int3);
+//       checknullerror(evp_cipherupdate(ctx,pointer(pd),int3,pointer(ps),int4));
        inc(result,int3);
        inc(pd,int3);
        dec(count,int3);
@@ -855,12 +724,14 @@ begin
       end;
       int4:= int2-int4;
       if int4 > 0 then begin
-       checknullerror(evp_cipherupdate(ctx,pointer(pb),padcount,
-                                            pointer(ps),int4));
+       cipherupdate(aclient,ps,int4,pb,padcount);
+//       checknullerror(evp_cipherupdate(ctx,pointer(pb),padcount,
+//                                            pointer(ps),int4));
        inc(pb,padcount);
       end;
       if sslhs_eofflag in state then begin
-       checknullerror(evp_cipherfinal(ctx,pointer(pb),int3));
+       cipherfinal(aclient,pb,int3);
+//       checknullerror(evp_cipherfinal(ctx,pointer(pb),int3));
        include(state,sslhs_finalized);
        padcount:= padcount + int3;
       end;
@@ -877,7 +748,8 @@ begin
      try
       int2:= inherited read(aclient,ps^,int1);
       if int2 > 0 then begin
-       checknullerror(evp_cipherupdate(ctx,@buffer,result,pointer(ps),int2));
+       cipherupdate(aclient,ps,int2,@buffer,result);
+//       checknullerror(evp_cipherupdate(ctx,@buffer,result,pointer(ps),int2));
       end;
      finally
       freemem(ps);
@@ -891,17 +763,19 @@ begin
  end;
 end;
 
-function tcustomopensslcryptohandler.write(var aclient: cryptoclientinfoty;
+function tpaddedcryptohandler.write(var aclient: cryptoclientinfoty;
                                    const buffer; count: longint): longint;
 var
  po1: pointer;
  int1: integer;
 begin
+testvar:= @sslhandlerdataty(aclient.handlerdata).d;
  if count > 0 then begin
   with sslhandlerdataty(aclient.handlerdata).d do begin
    getmem(po1,count+ctx^.cipher^.block_size);
    try
-    checknullerror(evp_cipherupdate(ctx,po1,int1,@buffer,count));
+    cipherupdate(aclient,@buffer,count,po1,int1);
+//    checknullerror(evp_cipherupdate(ctx,po1,int1,@buffer,count));
     if int1 > 0 then begin
      result:= inherited write(aclient,po1^,int1);
      if result = int1 then begin
@@ -926,7 +800,7 @@ begin
  end;
 end;
 
-function tcustomopensslcryptohandler.seek(var aclient: cryptoclientinfoty;
+function tpaddedcryptohandler.seek(var aclient: cryptoclientinfoty;
                const offset: int64; origin: tseekorigin): int64;
 begin
  if offset <> 0 then begin //todo
@@ -950,7 +824,7 @@ begin
  end;
 end;
 
-function tcustomopensslcryptohandler.getsize(var aclient: cryptoclientinfoty): int64;
+function tpaddedcryptohandler.getsize(var aclient: cryptoclientinfoty): int64;
 var
  lint1: int64;
 begin
@@ -964,6 +838,169 @@ begin
    result:= inherited getsize(aclient);
   end;
  end; 
+end;
+
+procedure tpaddedcryptohandler.checkerror(const err: cryptoerrorty);
+begin
+ //dummy
+end;
+
+function tpaddedcryptohandler.checknullerror(const avalue: integer;
+                                          const err: cryptoerrorty): integer;
+begin
+ result:= avalue;
+ if avalue = 0 then begin
+  error(err);
+ end;
+end;
+
+function tpaddedcryptohandler.checknilerror(const avalue: pointer;
+                                         const err: cryptoerrorty): pointer;
+begin
+ result:= avalue;
+ if avalue = nil then begin
+  error(err);
+ end;
+end;
+
+procedure tpaddedcryptohandler.error(const err: cryptoerrorty);
+begin
+ checkerror(err);
+ raise essl.create(cryptoerrormessages[err]); 
+           //there was no queued error
+end;
+
+function tpaddedcryptohandler.internalseek(var aclient: cryptoclientinfoty;
+               const offset: int64; origin: tseekorigin): int64;
+begin
+ result:= inherited seek(aclient,offset,origin);
+end;
+
+function tpaddedcryptohandler.internalread(var aclient: cryptoclientinfoty;
+               var buffer; count: longint): longint;
+begin
+ result:= inherited read(aclient,buffer,count);
+end;
+
+function tpaddedcryptohandler.internalwrite(var aclient: cryptoclientinfoty;
+               const buffer; count: longint): longint;
+begin
+ result:= inherited write(aclient,buffer,count);
+end;
+
+procedure tpaddedcryptohandler.restartcipher(
+                                      var aclient: cryptoclientinfoty);
+var
+ int1: integer;
+ buffer: blockbufty;
+begin
+ if not (sslco_canrestart in foptions) then begin
+  error(cerr_cannotrestart);
+ end;
+ with sslhandlerdataty(aclient.handlerdata).d do begin
+  if not (sslhs_finalized in state) and 
+            (aclient.stream.openmode in [fm_write,fm_create])then begin
+   cipherfinal(aclient,@buffer,int1);
+//   checknullerror(evp_cipherfinal(ctx,@buffer,int1));
+   if int1 > 0 then begin
+    if inherited write(aclient,buffer,int1) <> int1 then begin
+     error(cerr_cannotwrite);
+    end;
+   end;
+  end;
+//  checknullerror(evp_cipherinit_ex(ctx,nil,nil,pointer(keybuf),
+//                               pointer(ivbuf),mode),cerr_cipherinit);
+//  ctx^.iv:= ctx^.iov;
+  padindex:= 0;
+  padcount:= 0;
+  seekoffset:= 0;
+  state:= [];
+  if headersize > 0 then begin
+   internalseek(aclient,int64(headersize),sobeginning);
+  end;
+ end;
+end;
+
+procedure tpaddedcryptohandler.open(var aclient: cryptoclientinfoty);
+var
+ int1: integer;
+begin
+testvar:= @sslhandlerdataty(aclient.handlerdata).d;
+ initsslinterface;
+ with sslhandlerdataty(aclient.handlerdata).d do begin
+  case aclient.stream.openmode of
+   fm_read: begin
+    mode:= 0; //decrypt
+   end;
+   fm_create,fm_write: begin
+    mode:= 1; //encrypt
+   end;
+   else begin
+    error(cerr_invalidopenmode); //todo: allow append
+   end;
+  end;
+  initializedata(aclient);
+  if not (sslco_canrestart in foptions) then begin
+   fillchar(keybuf^,sizeof(keybuf^),0);
+   fillchar(ivbuf^,sizeof(ivbuf^),0);
+  end;
+ end;
+ inherited;
+end;
+
+procedure tpaddedcryptohandler.close(var aclient: cryptoclientinfoty);
+var
+ buf1: blockbufty;
+ int1: integer;
+begin
+testvar:= @sslhandlerdataty(aclient.handlerdata).d;
+ try
+  with sslhandlerdataty(aclient.handlerdata).d do begin
+   if ctx <> nil then begin
+    if (aclient.stream.openmode in [fm_write,fm_create]) and
+               (cipher <> nil) then begin
+     if not (sslhs_finalized in state) then begin
+      checknullerror(evp_cipherfinal(ctx,@buf1,int1));
+      include(state,sslhs_finalized);
+      if int1 > 0 then begin
+       if inherited write(aclient,buf1,int1) <> int1 then begin
+        error(cerr_cannotwrite);
+       end;
+      end;
+     end;
+    end;
+//    else begin
+//     checknullerror(evp_cipherfinal(ctx,@buffer,int1));
+//    end;
+   end;
+  end;
+ finally
+  finalizedata(aclient);
+  inherited;
+ end;
+end;
+
+procedure tpaddedcryptohandler.initializedata(var adata: cryptoclientinfoty);
+begin
+ //dummy
+end;
+
+procedure tpaddedcryptohandler.finalizedata(var adata: cryptoclientinfoty);
+begin
+ //dummy
+end;
+
+{ tcustomopensslcryptohandler }
+
+constructor tcustomopensslcryptohandler.create(aowner: tcomponent);
+begin
+ foptions:= defaultopensslcryptooptions;
+ inherited;
+end;
+
+procedure tcustomopensslcryptohandler.clearerror;
+begin
+ err_clear_error();
 end;
 
 procedure tcustomopensslcryptohandler.checkerror(const err: cryptoerrorty);
@@ -991,34 +1028,77 @@ begin
  end;
 end;
 
-procedure tcustomopensslcryptohandler.clearerror;
+procedure tcustomopensslcryptohandler.initializedata(
+                                    var aclient: cryptoclientinfoty);
+var
+ int1: integer;
 begin
- err_clear_error();
-end;
+ with sslhandlerdataty(aclient.handlerdata).d do begin
+  getmem(ctx,sizeof(ctx^));
+  evp_cipher_ctx_init(ctx);
+  getmem(padbuf,sizeof(padbuf^));
+  getmem(keybuf,sizeof(keybuf^));
+  getmem(ivbuf,sizeof(ivbuf^));
 
-function tcustomopensslcryptohandler.checknullerror(const avalue: integer;
-                                          const err: cryptoerrorty): integer;
-begin
- result:= avalue;
- if avalue = 0 then begin
-  error(err);
+  cipher:= checknilerror(evp_get_cipherbyname(pchar(fciphername)),
+                                                     cerr_ciphernotfound);
+  checknullerror(evp_cipherinit_ex(ctx,cipher,nil,nil,nil,mode),
+                                          cerr_cipherinit);
+  if fkeylength <> 0 then begin
+   int1:= fkeylength div 8;
+   if int1 > evp_max_key_length then begin
+    error(cerr_invalidkeylength);
+   end;
+   checknullerror(evp_cipher_ctx_set_key_length(ctx,int1));
+   if (ctx^.key_len * 8 <> fkeylength) then begin
+    error(cerr_invalidkeylength);
+   end;
+  end;
+{  if (mode = 0) and (cipher^.block_size > 1) then begin
+   finalizedata(sslhandlerdataty(aclient.handlerdata).d);
+   error(cerr_invalidblocksize); //todo: implement block ciphers
+  end;
+}
  end;
+ initcipher(aclient);
 end;
 
-function tcustomopensslcryptohandler.checknilerror(const avalue: pointer;
-                                         const err: cryptoerrorty): pointer;
+procedure tcustomopensslcryptohandler.finalizedata(
+                                            var aclient: cryptoclientinfoty);
+var
+ data1: psslhandlerdatadty;
 begin
- result:= avalue;
- if avalue = nil then begin
-  error(err);
+ data1:= @sslhandlerdataty(aclient.handlerdata).d;
+ with data1^ do begin
+  if ctx <> nil then begin
+   evp_cipher_ctx_cleanup(ctx);
+   freemem(ctx);
+  end;
+  if padbuf <> nil then begin
+   fillchar(padbuf^,sizeof(padbuf^),0);  
+   freemem(padbuf);
+  end;
+  if keybuf <> nil then begin
+   fillchar(keybuf^,sizeof(keybuf^),0);  
+   freemem(keybuf);
+  end;
+  if ivbuf <> nil then begin
+   fillchar(ivbuf^,sizeof(ivbuf^),0);  
+   freemem(ivbuf);
+  end;
  end;
+ fillchar(data1^,sizeof(data1^),0);
 end;
 
-procedure tcustomopensslcryptohandler.error(const err: cryptoerrorty);
+procedure tcustomopensslcryptohandler.restartcipher(
+                                      var aclient: cryptoclientinfoty);
 begin
- checkerror(err);
- raise essl.create(cryptoerrormessages[err]); 
-           //there was no queued error
+ inherited;
+ with sslhandlerdataty(aclient.handlerdata).d do begin
+  checknullerror(evp_cipherinit_ex(ctx,nil,nil,pointer(keybuf),
+                               pointer(ivbuf),mode),cerr_cipherinit);
+  ctx^.iv:= ctx^.iov;
+ end;
 end;
 
 procedure tcustomopensslcryptohandler.setkeyphrase(const avalue: msestring);
@@ -1036,22 +1116,26 @@ begin
  end;
 end;
 
-function tcustomopensslcryptohandler.internalseek(var aclient: cryptoclientinfoty;
-               const offset: int64; origin: tseekorigin): int64;
+procedure tcustomopensslcryptohandler.cipherupdate(
+               var aclient: cryptoclientinfoty;const source: pbyte;
+               const sourcelen: integer; const dest: pbyte;
+               out destlen: integer);
 begin
- result:= inherited seek(aclient,offset,origin);
+testvar:= @sslhandlerdataty(aclient.handlerdata).d;
+ with sslhandlerdataty(aclient.handlerdata).d do begin
+  checknullerror(evp_cipherupdate(ctx,pointer(dest),destlen,
+                                               pointer(source),sourcelen));
+ end;
 end;
 
-function tcustomopensslcryptohandler.internalread(var aclient: cryptoclientinfoty;
-               var buffer; count: longint): longint;
+procedure tcustomopensslcryptohandler.cipherfinal(
+               var aclient: cryptoclientinfoty;
+               const dest: pbyte; out destlen: integer);
 begin
- result:= inherited read(aclient,buffer,count);
-end;
-
-function tcustomopensslcryptohandler.internalwrite(var aclient: cryptoclientinfoty;
-               const buffer; count: longint): longint;
-begin
- result:= inherited write(aclient,buffer,count);
+testvar:= @sslhandlerdataty(aclient.handlerdata).d;
+ with sslhandlerdataty(aclient.handlerdata).d do begin
+  checknullerror(evp_cipherfinal(ctx,dest,destlen));
+ end;
 end;
 
 { tsymciphercryptohandler}
