@@ -11,7 +11,8 @@ unit msecryptohandler;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msestream,classes,sysutils,msestrings;
+ msestream,classes,sysutils,msestrings,mseformatstr;
+ 
 type
  ecryptohandler = class(exception)
  end;
@@ -66,6 +67,8 @@ type
                 const dest: pbyte; out destlen: integer); virtual; abstract;
    procedure cipherfinal(var aclient: cryptoclientinfoty;
              const dest: pbyte; out destlen: integer); virtual; abstract;
+   function calcwritebuffersize(var aclient: cryptoclientinfoty;
+                                 const acount: integer): integer; virtual;
 
    function read(var aclient: cryptoclientinfoty;
                    var buffer; count: longint): longint; override;
@@ -93,7 +96,46 @@ type
    procedure finalizedata(var aclient: cryptoclientinfoty); virtual;
    function padbufsize: integer; virtual;
  end;
- 
+
+ base64handlerdatadty = record
+  p: paddedhandlerdatadty;
+  linestep: integer;
+  buf: array[0..2] of byte;
+  bufindex: integer;
+  lineindex: integer;
+ end;
+ pbase64handlerdatadty = ^base64handlerdatadty;
+ {$if sizeof(base64handlerdatadty) > sizeof(cryptohandlerdataty)} 
+  {$error 'buffer overflow'}
+ {$endif}
+ base64handlerdataty = record
+  case integer of
+   0: (d: base64handlerdatadty;);
+   1: (_bufferspace: cryptohandlerdataty;);
+ end;
+
+ tbase64handler = class(tpaddedcryptohandler)
+  private
+   fmaxlinelength: integer;
+  protected
+   procedure initpointers(var aclient: cryptoclientinfoty);
+   function padbufsize: integer; override;
+   procedure cipherupdate(var aclient: cryptoclientinfoty; 
+             const source: pbyte; const sourcelen: integer;
+                const dest: pbyte; out destlen: integer); override;
+   procedure cipherfinal(var aclient: cryptoclientinfoty;
+             const dest: pbyte; out destlen: integer); override;
+   function calcwritebuffersize(var aclient: cryptoclientinfoty;
+                                 const acount: integer): integer; override;
+   procedure initializedata(var aclient: cryptoclientinfoty); override;
+   procedure restartcipher(var aclient: cryptoclientinfoty); override;
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property maxlinelength: integer read fmaxlinelength write fmaxlinelength
+                         default defaultbase64linelength;
+ end;
+  
 const
  cryptoerrormessages: array[cryptoerrorty] of msestring =(
   'OpenSSL error.',
@@ -242,6 +284,14 @@ testvar:= @paddedhandlerdataty(aclient.handlerdata).d;
  end;
 end;
 
+function tpaddedcryptohandler.calcwritebuffersize(
+          var aclient: cryptoclientinfoty; const acount: integer): integer;
+begin
+ with paddedhandlerdataty(aclient.handlerdata).d do begin
+  result:= acount + blocksize;
+ end;
+end;
+
 function tpaddedcryptohandler.write(var aclient: cryptoclientinfoty;
                                    const buffer; count: longint): longint;
 var
@@ -252,7 +302,7 @@ testvar:= @paddedhandlerdataty(aclient.handlerdata).d;
  if count > 0 then begin
   with paddedhandlerdataty(aclient.handlerdata).d do begin
 //   getmem(po1,count+ctx^.cipher^.block_size);
-   getmem(po1,count+blocksize);
+   getmem(po1,calcwritebuffersize(aclient,count));
    try
     cipherupdate(aclient,@buffer,count,po1,int1);
 //    checknullerror(evp_cipherupdate(ctx,po1,int1,@buffer,count));
@@ -478,6 +528,203 @@ end;
 function tpaddedcryptohandler.padbufsize: integer;
 begin
  result:= 1; //dummy
+end;
+
+{ tbase64handler }
+
+constructor tbase64handler.create(aowner: tcomponent);
+begin
+ fmaxlinelength:= defaultbase64linelength;
+ inherited;
+end;
+
+function tbase64handler.padbufsize: integer;
+begin
+ result:= 6; //4+return linefeed
+end;
+
+type
+ putinfoty = record
+  pb: pbyte;
+  pc: pchar;
+  pline: pchar;
+  linest: integer;
+ end;
+ 
+procedure putgroup(var info: putinfoty);
+var
+ by1: byte;
+begin
+ with info do begin
+  if pc >= pline then begin
+   pc^:= c_return;
+   inc(pc);
+   pc^:= c_linefeed;
+   inc(pc);
+   pline:= pc+linest;
+  end;
+  by1:= pb^;                                        //s0
+  pc^:= base64encoding[by1 shr 2];                  //d0
+  inc(pb);                                          //s1
+  inc(pc);                                          //d1
+  pc^:= base64encoding[((by1 shl 4) or (pb^ shr 4)) and base64mask];
+  by1:= pb^ shl 2;
+  inc(pb);                                          //s2
+  inc(pc);                                          //d2
+  pc^:= base64encoding[(by1 or (pb^ shr 6)) and base64mask];
+  inc(pc);                                          //d3
+  pc^:= base64encoding[pb^ and base64mask];
+  inc(pb);
+  inc(pc);                                          //d0
+ end;
+end;
+var testvar1: pbase64handlerdatadty;
+procedure tbase64handler.cipherupdate(var aclient: cryptoclientinfoty;
+               const source: pbyte; const sourcelen: integer; const dest: pbyte;
+               out destlen: integer);
+var
+ po1: pbyte;
+ pbend: pbyte;
+ info: putinfoty;
+ int1: integer;
+ scount: integer;
+// tail: integer;
+  
+begin
+testvar1:= @base64handlerdataty(aclient.handlerdata).d;
+ with base64handlerdataty(aclient.handlerdata).d,info do begin
+  destlen:= 0;
+  if p.mode = 0 then begin //read
+  end
+  else begin               //write
+   linest:= linestep;
+   pb:= source;
+   scount:= sourcelen;
+   while bufindex < 3 do begin
+    buf[bufindex]:= pb^;
+    inc(pb);
+    inc(bufindex);
+    dec(scount);
+    if scount = 0 then begin
+     break;
+    end;
+   end;
+   if bufindex < 3 then begin
+    exit;
+   end;
+   bufindex:= 0;
+   pc:= pointer(dest);
+   if linestep > 0 then begin
+    pline:= pc + linestep - lineindex;
+   end
+   else begin
+    pline:= pointer(ptrint(-1));
+   end;
+   po1:= pb;
+   pb:= @buf;
+   putgroup(info);
+   pb:= po1;
+
+   bufindex:= sourcelen mod 3; //tail
+   pbend:= source + sourcelen - bufindex;
+   while pb < pbend do begin
+    putgroup(info);
+   end;
+   destlen:= pc - pointer(dest);
+   for int1:= 0 to bufindex - 1 do begin //store tail
+    buf[int1]:= pb^;
+    inc(pb); 
+   end;
+   if linestep > 0 then begin
+    lineindex:= pc - pline + linestep;
+   end;
+  end;
+ end;
+end;
+
+procedure tbase64handler.cipherfinal(var aclient: cryptoclientinfoty;
+               const dest: pbyte; out destlen: integer);
+var
+ pb: pbyte;
+ pc: pchar;
+ by1: byte;
+begin
+ with base64handlerdataty(aclient.handlerdata).d do begin
+  destlen:= 0;
+  if p.mode = 0 then begin //read
+  end
+  else begin               //write
+   if bufindex > 0 then begin
+    pc:= pointer(dest);
+    if (linestep > 0) and (lineindex >= linestep) then begin
+     pc^:= c_return;
+     inc(pc);
+     pc^:= c_linefeed;
+     inc(pc);
+    end;
+    pb:= @buf;
+    by1:= pb^;                                        //s0
+    pc^:= base64encoding[by1 shr 2];                  //d0
+    inc(pc);                                          //d1
+    pc^:= base64encoding[(by1 shl 4) and base64mask];
+    if bufindex > 1 then begin
+     inc(pb);                                         //s1
+     pc^:= base64encoding[((by1 shl 4) or (pb^ shr 4)) and base64mask];
+     inc(pc);                                         //d2 
+     pc^:= base64encoding[(pb^ shl 2) and base64mask];
+    end
+    else begin
+     inc(pc);                                         //d2
+     pc^:= '=';
+    end;
+    inc(pc);                                          //d3
+    pc^:= '=';
+    destlen:= pc-pointer(dest)+1;
+   end;
+  end;
+ end;
+end;
+
+function tbase64handler.calcwritebuffersize(var aclient: cryptoclientinfoty;
+               const acount: integer): integer;
+begin
+ with base64handlerdataty(aclient.handlerdata).d do begin
+  result:= ((acount+2) div 3)*4;
+  if linestep > 0 then begin
+   result:= result + 2*(result div linestep + 1); //return-linefeed, max
+  end;
+ end;
+end;
+
+procedure tbase64handler.initpointers(var aclient: cryptoclientinfoty);
+begin
+ with base64handlerdataty(aclient.handlerdata).d do begin
+  bufindex:= 0;
+  lineindex:= 0;
+ end;
+end;
+
+procedure tbase64handler.initializedata(var aclient: cryptoclientinfoty);
+begin
+ inherited;
+ initpointers(aclient);
+ with base64handlerdataty(aclient.handlerdata).d do begin  
+  linestep:= 0;
+  if fmaxlinelength > 0 then begin
+   linestep:= fmaxlinelength and $fffffffc; //do not cut 4 char boundary
+   if fmaxlinelength > 0 then begin
+    if linestep = 0 then begin
+     linestep:= 4;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tbase64handler.restartcipher(var aclient: cryptoclientinfoty);
+begin
+ inherited;
+ initpointers(aclient);
 end;
 
 end.

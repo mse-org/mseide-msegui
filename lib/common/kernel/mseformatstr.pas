@@ -392,6 +392,39 @@ const
   $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80, //e
   $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80);//f
 
+ base64mask = $3f;
+ base64encoding: array[0..63] of char = (
+//0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
+ 'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P', //00
+ 'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f', //10
+ 'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v', //20
+ 'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/');//30
+
+ base64decoding: array[0..255] of byte = (
+//0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //00
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //10
+//                                            '+'            '/'
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$3e,$ff,$ff,$ff,$3f, //20
+//'0','1','2','3','4','5','6','7','8','9',
+ $34,$35,$36,$37,$38,$39,$3a,$3b,$3c,$3d,$ff,$ff,$ff,$ff,$ff,$ff, //30
+//    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O',
+ $ff,$00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0a,$0b,$0c,$0d,$0e, //40
+//'P','Q','R','S','T','U','V','W','X','Y','Z',
+ $0f,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$ff,$ff,$ff,$ff,$ff, //50
+//    'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o',
+ $ff,$1a,$1b,$1c,$1d,$1e,$1f,$20,$21,$22,$23,$24,$25,$26,$27,$28, //60
+//'p','q','r','s','t','u','v','w','x','y','z',
+ $29,$2a,$2b,$2c,$2d,$2e,$2f,$30,$31,$32,$33,$ff,$ff,$ff,$ff,$ff, //70
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //80
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //90
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //a0
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //b0
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //c0
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //d0
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //e0
+ $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff);//f0
+
 implementation
 
 uses
@@ -1418,40 +1451,6 @@ begin
  setlength(result,po1-pmsechar(pointer(result)));
 end;
 
-const
- base64mask = $3f;
- base64encoding: array[0..63] of char = (
-//0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
- 'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P', //00
- 'Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f', //10
- 'g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v', //20
- 'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/');//30
-
- base64decoding: array[0..255] of byte = (
-//0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
- $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //00
- $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //10
-//                                            '+'            '/'
- $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$3e,$ff,$ff,$ff,$3f, //20
-//'0','1','2','3','4','5','6','7','8','9',
- $34,$35,$36,$37,$38,$39,$3a,$3b,$3c,$3d,$ff,$ff,$ff,$ff,$ff,$ff, //30
-//    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O',
- $ff,$00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0a,$0b,$0c,$0d,$0e, //40
-//'P','Q','R','S','T','U','V','W','X','Y','Z',
- $0f,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$ff,$ff,$ff,$ff,$ff, //50
-//    'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o',
- $ff,$1a,$1b,$1c,$1d,$1e,$1f,$20,$21,$22,$23,$24,$25,$26,$27,$28, //60
-//'p','q','r','s','t','u','v','w','x','y','z',
- $29,$2a,$2b,$2c,$2d,$2e,$2f,$30,$31,$32,$33,$ff,$ff,$ff,$ff,$ff, //70
- $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //80
- $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //90
- $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //a0
- $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //b0
- $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //c0
- $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //d0
- $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff, //e0
- $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff);//f0
-
 function encodebase64(const abinary: pbyte; acount: integer;
                 const maxlinelength: integer = defaultbase64linelength): string;
    //todo: optimize
@@ -1507,6 +1506,12 @@ begin
    inc(pd);                                          //d0
   end;
   if tail > 0 then begin
+   if pd >= pline then begin
+    pd^:= c_return;
+    inc(pd);
+    pd^:= c_linefeed;
+    inc(pd);
+   end;
    by1:= ps^;                                        //s0
    pd^:= base64encoding[by1 shr 2];                  //d0
    inc(pd);                                          //d1
