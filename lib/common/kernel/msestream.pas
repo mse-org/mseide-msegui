@@ -36,7 +36,7 @@ type
 
  cryptoclientstatety = (ccs_open);
  cryptoclientstatesty = set of cryptoclientstatety;
- cryptohandlerdataty = array[0..15] of pointer;
+ cryptohandlerdataty = array[0..32] of pointer;
  
  cryptoclientinfoty = record
   stream: tmsefilestream;
@@ -1468,7 +1468,8 @@ end;
 
 function tcustombufstream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
 begin
- if (origin = sobeginning) and (bufoffset <> nil) then begin
+ if (origin = sobeginning) and (bufoffset <> nil) and 
+                                          (fcryptohandler = nil) then begin
 //  result:= inherited seek(0,socurrent);
   result:= fcachedposition;
   if result >= 0 then begin
@@ -1503,6 +1504,7 @@ begin
    else begin
     result:= inherited seek(offset,origin);
     fcachedposition:= result;
+    bufoffset:= nil;
    end;
    exclude(fstate,tss_eof);
   end;

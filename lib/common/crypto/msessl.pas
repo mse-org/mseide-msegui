@@ -699,13 +699,12 @@ begin
   fongetkey(self,akey,asalt);
  end;
 end;
-var testvar: psslhandlerdatadty;
+
 procedure tcustomopensslcryptohandler.cipherupdate(
                var aclient: cryptoclientinfoty;const source: pbyte;
                const sourcelen: integer; const dest: pbyte;
                out destlen: integer);
 begin
-testvar:= @sslhandlerdataty(aclient.handlerdata).d;
  with sslhandlerdataty(aclient.handlerdata).d do begin
   checknullerror(evp_cipherupdate(ctx,pointer(dest),destlen,
                                                pointer(source),sourcelen));
@@ -716,7 +715,6 @@ procedure tcustomopensslcryptohandler.cipherfinal(
                var aclient: cryptoclientinfoty;
                const dest: pbyte; out destlen: integer);
 begin
-testvar:= @sslhandlerdataty(aclient.handlerdata).d;
  with sslhandlerdataty(aclient.handlerdata).d do begin
   checknullerror(evp_cipherfinal(ctx,dest,destlen));
  end;
