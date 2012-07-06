@@ -542,7 +542,7 @@ begin
 end;
 
 { tbase64handler }
-var testvar: pbase64handlerdatadty;
+
 constructor tbase64handler.create(aowner: tcomponent);
 begin
  fmaxlinelength:= defaultbase64linelength;
@@ -601,7 +601,6 @@ var
  scount: integer;
   
 begin
-testvar:= @base64handlerdataty(aclient.handlerdata).d;
  with base64handlerdataty(aclient.handlerdata).d,info do begin
   destlen:= 0;
   if p.mode <> 0 then begin
@@ -657,7 +656,6 @@ var
  pc: pchar;
  by1: byte;
 begin
-testvar:= @base64handlerdataty(aclient.handlerdata).d;
  with base64handlerdataty(aclient.handlerdata).d do begin
   destlen:= 0;
   if p.mode <> 0 then begin
@@ -878,7 +876,6 @@ var
  po1: pbyte;
 
 begin
-testvar:= @base64handlerdataty(aclient.handlerdata).d;
  with base64handlerdataty(aclient.handlerdata).d do begin
   result:= 0;
   pd:= @buffer;
