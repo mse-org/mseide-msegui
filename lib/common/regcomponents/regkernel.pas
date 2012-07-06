@@ -164,8 +164,7 @@ begin
  registercomponenttabhints(['Gui'],['Non visual components with GUI dependence']);
 
  registercomponents('NoGui',[tstatfile,trttistat,tnoguiaction,tactivator,
-                    ttimer,tthreadcomp,tpipereadercomp,tprocessmonitor,
-                    tbase64handler]);
+                    ttimer,tthreadcomp,tpipereadercomp,tprocessmonitor]);
  registercomponenttabhints(['NoGui'],['Components without GUI dependence']);
 
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);

@@ -772,9 +772,9 @@ begin
 end;
 
 procedure tmseprocess.setoptions(const avalue: processoptionsty);
-const
- mask1: processoptionsty = [pro_erroroutput,pro_errorouttoout];
- mask2: processoptionsty = [pro_shell,pro_noshell];
+//const
+// mask1: processoptionsty = [pro_erroroutput,pro_errorouttoout];
+// mask2: processoptionsty = [pro_shell,pro_noshell];
 begin
  foptions:= processoptionsty(
    setsinglebit({$ifdef FPC}longword{$else}word{$endif}(avalue),

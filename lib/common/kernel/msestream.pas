@@ -37,9 +37,20 @@ type
  cryptoclientstatety = (ccs_open);
  cryptoclientstatesty = set of cryptoclientstatety;
  cryptohandlerdataty = array[0..32] of pointer;
- 
+
+ tcustomcryptohandler = class; 
  cryptoclientinfoty = record
   stream: tmsefilestream;
+  link: tcustomcryptohandler;
+  linkindex: integer;
+//  chainend: tcustomcryptohandler;
+// chainendindex: integer;
+  {
+  linkbuf: pbyte;
+  linkbufsize: integer;
+  linkbuflength: integer;
+  linkbufpos: integer;
+  }
   state: cryptoclientstatesty;
   handlerdata: cryptohandlerdataty;
  end;
@@ -49,12 +60,20 @@ type
  tcustomcryptohandler = class(tmsecomponent)
   private
    fclients: cryptoclientinfoarty;
+   fchain: tcustomcryptohandler;
+   procedure setchain(const avalue: tcustomcryptohandler);
   protected
+   fchainend: tcustomcryptohandler;
+   procedure finalizeclient(var aclient: cryptoclientinfoty);
    function checkopen(const aindex: integer): pcryptoclientinfoty;
-   procedure connect(const aclient: tmsefilestream);
-   procedure disconnect(const aclient: tmsefilestream);
+   procedure connect(const aclient: tmsefilestream;
+           const alink: tcustomcryptohandler; const aindex: integer;
+                 out endhandler: tcustomcryptohandler; out endindex: integer);
+   procedure disconnect({const aclient: tmsefilestream;
+                             const alink: tcustomcryptohandler}
+                             const aindex: integer);
    procedure open(var aclient: cryptoclientinfoty); virtual;
-   procedure close(var aclient: cryptoclientinfoty);  virtual;
+   procedure close(var aclient: cryptoclientinfoty); virtual;
    function read(var aclient: cryptoclientinfoty;
                    var buffer; count: longint): longint; virtual;
    function write(var aclient: cryptoclientinfoty;
@@ -72,7 +91,8 @@ type
               const maxlinelength: integer = defaultbase64linelength): string;
    function decrypttext(const adata: string;
                                const base64: boolean = false): msestring;
-
+  published
+   property chain: tcustomcryptohandler read fchain write setchain;
  end;
  
    {$warnings off}
@@ -82,7 +102,8 @@ type
    fopenmode: fileopenmodety;
    ftransactionname: filenamety;
    fcryptohandler: tcustomcryptohandler;
-   fcryptoindex: integer;
+   fendhandler: tcustomcryptohandler;
+   fendindex: integer;
    function getmemory: pointer;
    procedure checkmemorystream;
    procedure setcryptohandler(const avalue: tcustomcryptohandler);
@@ -894,7 +915,6 @@ end;
 
 constructor tmsefilestream.create(ahandle: integer); //allways called
 begin
- fcryptoindex:= -1;
  inherited create(ahandle);
 end;
 
@@ -1051,14 +1071,16 @@ end;
  
 procedure tmsefilestream.sethandle(value: integer);
 begin
- flushbuffer;
  if value <> handle then begin
   if handle <> invalidfilehandle then begin
-   if fcryptohandler <> nil then begin
-    with fcryptohandler do begin
-     close(fclients[fcryptoindex]);
+   if fendhandler <> nil then begin
+    with fendhandler do begin
+     if ccs_open in fclients[fendindex].state then begin
+      close(fclients[fendindex]);
+     end;
     end;
    end;
+   flushbuffer;
    closehandle(handle);
   end;
   {$ifdef FPC}
@@ -1121,9 +1143,9 @@ begin
 //  result:= fmemorystream.Read(buffer,count);
 // end
 // else begin
-  if fcryptohandler <> nil then begin
-   with fcryptohandler do begin
-    result:= read(checkopen(fcryptoindex)^,buffer,count);
+  if fendhandler <> nil then begin
+   with fendhandler do begin
+    result:= read(checkopen(fendindex)^,buffer,count);
    end;
   end
   else begin
@@ -1138,9 +1160,9 @@ begin
 //  result:= fmemorystream.Write(Buffer,count);
 // end
 // else begin
-  if fcryptohandler <> nil then begin
-   with fcryptohandler do begin
-    result:= write(checkopen(fcryptoindex)^,buffer,count);
+  if fendhandler <> nil then begin
+   with fendhandler do begin
+    result:= write(checkopen(fendindex)^,buffer,count);
    end;
   end
   else begin
@@ -1155,9 +1177,9 @@ begin
 //  result:= fmemorystream.Seek(offset,origin);
 // end
 // else begin
-  if fcryptohandler <> nil then begin
-   with fcryptohandler do begin
-    result:= seek(checkopen(fcryptoindex)^,offset,origin);
+  if fendhandler <> nil then begin
+   with fendhandler do begin
+    result:= seek(checkopen(fendindex)^,offset,origin);
    end;
   end
   else begin
@@ -1168,9 +1190,9 @@ end;
 
 function tmsefilestream.getsize: int64;
 begin
- if fcryptohandler <> nil then begin
-  with fcryptohandler do begin
-   result:= getsize(checkopen(fcryptoindex)^);
+ if fendhandler <> nil then begin
+  with fendhandler do begin
+   result:= getsize(checkopen(fendindex)^);
   end;
  end
  else begin
@@ -1198,9 +1220,15 @@ begin
    lint1:= lint2-lint1;
   end;
   setlength(result,lint1-position);
+  if result = '' then begin
+   setlength(result,256); //possibly buffered block
+  end;
   int1:= 0;
   while true do begin
    int3:= length(result)-int1;
+   if int3 <= 0 then begin
+    break;
+   end;
    int2:= read((pchar(pointer(result))+int1)^,int3);
    int1:= int1 + int2;
    if int2 < int3 then begin
@@ -1214,7 +1242,7 @@ end;
 
 procedure tmsefilestream.writedatastring(const value: string);
 begin
- if value <> '' then begin
+ if (value <> '') or (fcryptohandler <> nil) then begin
   writebuffer(pointer(value)^,length(value));
  end;
 end;
@@ -1254,12 +1282,20 @@ end;
 
 procedure tmsefilestream.setcryptohandler(const avalue: tcustomcryptohandler);
 begin
- if fcryptohandler <> nil then begin
-  fcryptohandler.disconnect(self);
+// if fcryptohandler <> nil then begin
+//  fcryptohandler.disconnect(self,nil);
+// end;
+ if fendhandler <> nil then begin
+  try
+   fendhandler.disconnect(fendindex);
+  except
+   application.handleexception;
+  end;
+  fendhandler:= nil;
  end;
  fcryptohandler:= avalue;
  if fcryptohandler <> nil then begin
-  fcryptohandler.connect(self);
+  fcryptohandler.connect(self,nil,-1,fendhandler,fendindex);
  end;
 end;
 
@@ -2399,60 +2435,132 @@ var
  int1: integer;
 begin
  for int1:= 0 to high(fclients) do begin
+  chain:= nil;
   with fclients[int1] do begin
-   if stream <> nil then begin
-    with stream do begin
-     fcryptohandler:= nil;
-     fcryptoindex:= -1;
+   if (stream <> nil) then begin
+    if link = nil then begin
+     with stream do begin
+      fcryptohandler:= nil;
+      fendhandler:= nil;
+//      fcryptoindex:= -1;
+     end;
+    end
+    else begin
+     link.fchain:= nil;
     end;
-    stream:= nil;
+    finalizeclient(fclients[int1]);
+//    stream:= nil;
    end;
   end;
  end;
  inherited;
 end;
 
-procedure tcustomcryptohandler.connect(const aclient: tmsefilestream);
+procedure tcustomcryptohandler.finalizeclient(var aclient: cryptoclientinfoty);
+begin
+ with aclient do begin
+  stream:= nil;
+ end;
+end;
+
+procedure tcustomcryptohandler.connect(const aclient: tmsefilestream;
+                const alink: tcustomcryptohandler;
+                const aindex: integer;
+                out endhandler: tcustomcryptohandler; out endindex: integer);
 var
  int1,int2,int3: integer;
+// ha1: tcustomcryptohandler;
 begin
  int3:= high(fclients);
  int2:= int3+1;
  for int1:= 0 to int3 do begin
-  if fclients[int1].stream <> nil then begin
+  if fclients[int1].stream = nil then begin
    int2:= int1;
    break;
   end;
  end;
- if int2 >= int3 then begin
+ if int2 > int3 then begin
   setlength(fclients,int2+1);
  end;
- aclient.fcryptoindex:= int2;
+ endindex:= int2;
+ endhandler:= self;
  with fclients[int2] do begin
   stream:= aclient;
+  link:= alink;
+  linkindex:= aindex;
   state:= [];
+  {
+  if alink = nil then begin
+   ha1:= self;
+   while ha1.chain <> nil do begin
+    ha1:= ha1.chain;
+   end;
+   chainend:= ha1;
+  end
+  else begin
+   chainend:= nil;
+  end;
+  }
+ end;
+ if fchain <> nil then begin
+  fchain.connect(aclient,self,int2,endhandler,endindex);
  end;
 end;
 
-procedure tcustomcryptohandler.disconnect(const aclient: tmsefilestream);
+procedure tcustomcryptohandler.disconnect({const aclient: tmsefilestream;
+               const alink: tcustomcryptohandler;} const aindex: integer);
 var
  po1: pcryptoclientinfoty;
+// int1: integer;
 begin
- po1:= @fclients[aclient.fcryptoindex];
+ po1:= @fclients[aindex];
  with po1^ do begin
   if ccs_open in state then begin
    close(po1^);
   end;
-  stream:= nil;
+  if link <> nil then begin
+   link.disconnect(linkindex);
+  end;
+  finalizeclient(po1^);
  end;
- aclient.fcryptoindex:= -1;
+(*
+ if alink = nil then begin
+  po1:= @fclients[aclient.fcryptoindex];
+  with po1^ do begin
+   if ccs_open in state then begin
+    close(po1^);
+   end;
+   stream:= nil;
+  end;
+  fendhandler:= nil;
+//  aclient.fcryptoindex:= -1;
+ end
+ else begin
+  for int1:= 0 to high(fclients) do begin
+   with fclients[int1] do begin
+    if stream = aclient then begin
+     finalizeclient(fclients[int1]);
+//     stream:= nil;
+    end;
+   end;
+  end;
+  if fchain <> nil then begin
+   fchain.disconnect(aclient,self);
+  end;
+ end;
+ *)
 end;
 
 function tcustomcryptohandler.read(var aclient: cryptoclientinfoty; var buffer;
                count: longint): longint;
 begin
  with aclient do begin
-  result:= stream.inheritedread(buffer,count);
+  if link = nil then begin
+   result:= stream.inheritedread(buffer,count);
+  end
+  else begin
+   result:= link.read(link.fclients[linkindex],buffer,count);
+  end;
  end;
 end;
 
@@ -2460,7 +2568,12 @@ function tcustomcryptohandler.write(var aclient: cryptoclientinfoty;
                const buffer; count: longint): longint;
 begin
  with aclient do begin
-  result:= stream.inheritedwrite(buffer,count);
+  if link = nil then begin
+   result:= stream.inheritedwrite(buffer,count);
+  end
+  else begin
+   result:= link.write(link.fclients[linkindex],buffer,count);
+  end;
  end;
 end;
 
@@ -2468,25 +2581,45 @@ function tcustomcryptohandler.seek(var aclient: cryptoclientinfoty;
                           const offset: int64; origin: tseekorigin): int64;
 begin
  with aclient do begin
-  result:= stream.inheritedseek(offset,origin);
+  if link = nil then begin
+   result:= stream.inheritedseek(offset,origin);
+  end
+  else begin
+   result:= link.seek(link.fclients[linkindex],offset,origin);
+  end;
  end;
 end;
 
 function tcustomcryptohandler.getsize(var aclient: cryptoclientinfoty): int64;
 begin
  with aclient do begin
-  result:= stream.inheritedgetsize;
+  if link = nil then begin
+   result:= stream.inheritedgetsize;
+  end
+  else begin
+   result:= link.getsize(link.fclients[linkindex]);
+  end;
  end;
 end;
 
 procedure tcustomcryptohandler.open(var aclient: cryptoclientinfoty);
 begin
- include(aclient.state,ccs_open);
+ with aclient do begin
+  if link <> nil then begin
+   link.open(link.fclients[linkindex]);
+  end;
+  include(state,ccs_open);
+ end;
 end;
 
 procedure tcustomcryptohandler.close(var aclient: cryptoclientinfoty);
 begin
- exclude(aclient.state,ccs_open);
+ with aclient do begin
+  exclude(state,ccs_open);
+  if link <> nil then begin
+   link.close(link.fclients[linkindex]);
+  end;
+ end;
 end;
 
 function tcustomcryptohandler.checkopen(
@@ -2559,6 +2692,53 @@ function tcustomcryptohandler.decrypttext(const adata: string;
                                const base64: boolean = false): msestring;
 begin
  result:= utf8tostring(decrypt(adata,base64));
+end;
+
+procedure tcustomcryptohandler.setchain(const avalue: tcustomcryptohandler);
+
+ procedure removechain(const ha: tcustomcryptohandler;
+                                          const stre: tmsefilestream);
+ var
+  int1: integer;
+ begin
+  if ha <> nil then begin
+   with ha do begin
+    for int1:= 0 to high(fclients) do begin
+     with fclients[int1] do begin
+      if stream = stre then begin
+       stream:= nil;
+      end;
+     end;
+    end;
+    removechain(ha.chain,stre);
+   end;
+  end;
+ end;
+ 
+var
+ ha1: tcustomcryptohandler;
+ int1: integer;
+begin
+ ha1:= avalue;
+ while ha1 <> nil do begin
+  if ha1 = self then begin
+   componentexception(self,'Recursive handler chain.');
+  end;
+  ha1:= ha1.chain;
+ end;
+ if fchain <> nil then begin
+  with fchain do begin
+   for int1:= 0 to high(fclients) do begin
+    with fclients[int1] do begin
+     if (stream <> nil) and (link = self) then begin
+      removechain(fchain,stream);
+      stream:= nil;
+     end;
+    end;
+   end;
+  end;
+ end;
+ setlinkedvar(avalue,tmsecomponent(fchain));
 end;
 
 end.

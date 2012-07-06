@@ -448,6 +448,11 @@ type
    function getdefaultstate: propertystatesty; override;
  end;
 
+ tlinkcomponentpropertyeditor = class(tcomponentpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+ end;
+
  tlocallinkcomponentpropertyeditor = class(tcomponentpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -2977,6 +2982,13 @@ end;
 function tlocalcomponentpropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_local];
+end;
+
+{ tlinkcomponentpropertyeditor }
+
+function tlinkcomponentpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_link];
 end;
 
 { tlocallinkcomponentpropertyeditor }

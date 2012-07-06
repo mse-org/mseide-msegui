@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 2012 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,19 +14,19 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 }
-unit regsysutils;
-
+unit regcrypto;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-
 interface
-
 implementation
 uses
- msedesignintf,msesysenv,msefilechange,regsysutils_bmp,mseprocess;
+ msedesignintf,msecryptohandler,msessl,msepropertyeditors,msestream;
 
 procedure Register;
 begin
- registercomponents('NoGui',[tsysenvmanager,tfilechangenotifyer,tmseprocess]);
+ registercomponents('NoGui',[tdummycryptohandler,tbase64handler,
+                             tsymciphercryptohandler,tasymciphercryptohandler]);
+ registerpropertyeditor(typeinfo(tcustomcryptohandler),nil,'',
+                                            tlinkcomponentpropertyeditor);
 end;
 
 initialization

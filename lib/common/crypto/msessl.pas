@@ -209,12 +209,22 @@ function readpubkey(const aname: filenamety): pevp_pkey;
 function readprivkey(const aname: filenamety;
                           const getkey: getkeydataeventty): pevp_pkey;
 procedure freekey(const akey: pevp_pkey);
- 
+var testvar1: string; 
 implementation
 uses
  sysutils,msesysintf1,msefileutils,msesocketintf,mseopensslbio,mseopensslpem,
  mseopensslrsa,msebits,
  msesysintf,msectypes;
+ 
+procedure addata(adata: pbyte; len: integer);
+var
+ int1: integer;
+begin
+ int1:= length(testvar1);
+ setlength(testvar1,length(testvar1)+len);
+ move(adata^,(pchar(pointer(testvar1))+int1)^,len);
+end;
+
 procedure raiseerror(errco : integer; const amessage: string = '');
 var
  buf: array [0..255] of char;
@@ -705,6 +715,7 @@ procedure tcustomopensslcryptohandler.cipherupdate(
                const sourcelen: integer; const dest: pbyte;
                out destlen: integer);
 begin
+addata(source,sourcelen);
  with sslhandlerdataty(aclient.handlerdata).d do begin
   checknullerror(evp_cipherupdate(ctx,pointer(dest),destlen,
                                                pointer(source),sourcelen));
@@ -762,6 +773,7 @@ begin
                     (pos(salttag,salt1) <> 1) then begin
      error(cerr_readheader);
     end;
+    testvar1:= salt1;
    end
    else begin
     if salt1 = '' then begin

@@ -459,9 +459,10 @@ begin
 end;
 
 procedure tpaddedcryptohandler.open(var aclient: cryptoclientinfoty);
-var
- int1: integer;
+//var
+// int1: integer;
 begin
+ inherited;
  with paddedhandlerdataty(aclient.handlerdata).d do begin
   case aclient.stream.openmode of
    fm_read: begin
@@ -474,9 +475,11 @@ begin
     error(cerr_invalidopenmode); //todo: allow append
    end;
   end;
+  state:= [];
+  padcount:= 0;
+  padindex:= 0;
   initializedata(aclient);
  end;
- inherited;
 end;
 
 procedure tpaddedcryptohandler.close(var aclient: cryptoclientinfoty);
@@ -539,7 +542,7 @@ begin
 end;
 
 { tbase64handler }
-
+var testvar: pbase64handlerdatadty;
 constructor tbase64handler.create(aowner: tcomponent);
 begin
  fmaxlinelength:= defaultbase64linelength;
@@ -598,6 +601,7 @@ var
  scount: integer;
   
 begin
+testvar:= @base64handlerdataty(aclient.handlerdata).d;
  with base64handlerdataty(aclient.handlerdata).d,info do begin
   destlen:= 0;
   if p.mode <> 0 then begin
@@ -629,7 +633,7 @@ begin
    putgroup(info);
    pb:= po1;
 
-   bufindex:= sourcelen mod 3; //tail
+   bufindex:= scount mod 3; //tail
    pbend:= source + sourcelen - bufindex;
    while pb < pbend do begin
     putgroup(info);
@@ -653,6 +657,7 @@ var
  pc: pchar;
  by1: byte;
 begin
+testvar:= @base64handlerdataty(aclient.handlerdata).d;
  with base64handlerdataty(aclient.handlerdata).d do begin
   destlen:= 0;
   if p.mode <> 0 then begin
@@ -833,7 +838,7 @@ var
     fillbuffer(0);
    end;
    ps:= readbuffer + readindex;
-   psend:= readbuffer + readbuffersize;
+   psend:= readbuffer + readbufferlength;
    while true do begin
     if decode then begin
      if (ps >= psend) and (pd < pdend) then begin  //text end, try to get more
@@ -862,15 +867,18 @@ var
      break;
     end;
    end;
+   readindex:= ps - readbuffer;
   end;
  end;
 
 var
  int1: integer;
- by1: byte;
+// by1: byte;
  tail: integer;
+ po1: pbyte;
 
 begin
+testvar:= @base64handlerdataty(aclient.handlerdata).d;
  with base64handlerdataty(aclient.handlerdata).d do begin
   result:= 0;
   pd:= @buffer;
@@ -881,6 +889,7 @@ begin
    result:= pd - @buffer;
   end;
   if not (sslhs_eofflag in p.state) then begin
+   po1:= pd;
    pd:= pointer(p.padbuf);
    pdend:= pd + 3;
    getdata;
@@ -890,7 +899,7 @@ begin
     if int1 > p.padcount then begin
      int1:= p.padcount;
     end;
-    move(p.padbuf^,pd^,int1);
+    move(p.padbuf^,po1^,int1);
     result:= result + int1;
     p.padindex:= int1;
    end;   
