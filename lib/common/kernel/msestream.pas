@@ -64,7 +64,7 @@ type
    procedure setchain(const avalue: tcustomcryptohandler);
   protected
    fchainend: tcustomcryptohandler;
-   procedure finalizeclient(var aclient: cryptoclientinfoty);
+   procedure finalizeclient(var aclient: cryptoclientinfoty); virtual;
    function checkopen(const aindex: integer): pcryptoclientinfoty;
    procedure connect(const aclient: tmsefilestream;
            const alink: tcustomcryptohandler; const aindex: integer;
@@ -81,6 +81,7 @@ type
    function seek(var aclient: cryptoclientinfoty;
                    const offset: int64; origin: tseekorigin): int64; virtual;
    function  getsize(var aclient: cryptoclientinfoty): int64; virtual;
+   function getclient(const astream: tmsefilestream): pcryptoclientinfoty;
   public
    destructor destroy; override;
    function encrypt(const adata: string; const base64: boolean = false;
@@ -2484,23 +2485,12 @@ begin
  end;
  endindex:= int2;
  endhandler:= self;
+ fillchar(fclients[int2],sizeof(fclients[0]),0);
  with fclients[int2] do begin
   stream:= aclient;
   link:= alink;
   linkindex:= aindex;
-  state:= [];
-  {
-  if alink = nil then begin
-   ha1:= self;
-   while ha1.chain <> nil do begin
-    ha1:= ha1.chain;
-   end;
-   chainend:= ha1;
-  end
-  else begin
-   chainend:= nil;
-  end;
-  }
+//  state:= [];
  end;
  if fchain <> nil then begin
   fchain.connect(aclient,self,int2,endhandler,endindex);
@@ -2739,6 +2729,30 @@ begin
   end;
  end;
  setlinkedvar(avalue,tmsecomponent(fchain));
+end;
+
+function tcustomcryptohandler.getclient(
+                    const astream: tmsefilestream): pcryptoclientinfoty;
+var
+ ha1: tcustomcryptohandler;
+ int1: integer;
+begin
+ result:= nil;
+ ha1:= astream.fendhandler;
+ int1:= astream.fendindex;
+ while ha1 <> nil do begin
+  if ha1 = self then begin
+   result:= @fclients[int1];
+   break;
+  end;
+  with ha1.fclients[int1] do begin
+   ha1:= link;
+   int1:= linkindex;
+  end;
+ end;
+ if result = nil then begin
+  componentexception(self,'Client stream not found.');
+ end;
 end;
 
 end.

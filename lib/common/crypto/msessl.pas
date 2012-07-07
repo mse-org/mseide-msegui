@@ -74,6 +74,54 @@ type
    property privkeyfile: filenamety read fprivkeyfile write fprivkeyfile;
  end;
 
+ digeststatety = (ds_inited{,ds_final});
+ digeststatesty = set of digeststatety;
+ 
+ digesthandlerdatadty = record
+  ctx: pevp_md_ctx;
+  md: pevp_md;
+  state: digeststatesty;
+//  digest: pointer; //string
+ end;
+ pdigesthandlerdatadty = ^digesthandlerdatadty;
+ {$if sizeof(digesthandlerdatadty) > sizeof(cryptohandlerdataty)} 
+  {$error 'buffer overflow'}
+ {$endif}
+ digesthandlerdataty = record
+  case integer of
+   0: (d: digesthandlerdatadty;);
+   1: (_bufferspace: cryptohandlerdataty;);
+ end;
+ 
+ tdigesthandler = class;
+ 
+// digesteventty = procedure(const sender: tdigesthandler;
+//           const astream: tmsefilestream; const adigest: string) of object;
+
+ tdigesthandler = class(tbasecryptohandler)
+  private
+   fdigestname: string;
+//   fondigest: digesteventty;
+  protected
+//   procedure finalizeclient(var aclient: cryptoclientinfoty); override;
+//   procedure dofinal(var aclient: cryptoclientinfoty);
+   procedure checkerror(const err: cryptoerrorty = cerr_error); override;
+   procedure open(var aclient: cryptoclientinfoty); override;
+   procedure close(var aclient: cryptoclientinfoty); override;
+   function read(var aclient: cryptoclientinfoty;
+                   var buffer; count: longint): longint; override;
+   function write(var aclient: cryptoclientinfoty;
+                   const buffer; count: longint): longint; override;
+   function seek(var aclient: cryptoclientinfoty;
+                   const offset: int64; origin: tseekorigin): int64; override;
+   procedure restartdigest(var aclient: cryptoclientinfoty);
+  public
+   function digest(const astream: tmsefilestream): string;
+  published
+   property digestname: string read fdigestname write fdigestname;
+//   property ondigest: digesteventty read fondigest write fondigest;
+ end;
+ 
  cipherkindty = (ckt_stream, 
                  ckt_ecb, //electronic codebook
                  ctk_cbc, //cipher-block chaining
@@ -177,9 +225,6 @@ type
    property ongetkey;
  end;
 
-//
-// under construction!
-//
  tasymciphercryptohandler = class(tcustomopensslcryptohandler)
   private
    fprivkeyfile: filenamety;
@@ -202,13 +247,16 @@ type
 getkeydataeventty = procedure(out akey: string; out asalt: string) of object;
  
 function waitforio(const aerror: integer; var ainfo: cryptoioinfoty; 
-              const atimeoutms: integer; const resultpo: pinteger = nil): boolean;
-function filebio(const aname: filenamety; const aopenmode: fileopenmodety): pbio;
+              const atimeoutms: integer;
+                                const resultpo: pinteger = nil): boolean;
+function filebio(const aname: filenamety;
+                                const aopenmode: fileopenmodety): pbio;
 procedure closebio(const abio: pbio);
 function readpubkey(const aname: filenamety): pevp_pkey;
 function readprivkey(const aname: filenamety;
                           const getkey: getkeydataeventty): pevp_pkey;
 procedure freekey(const akey: pevp_pkey);
+function messagedigest(const adata: string; const digestname: string): string;
  
 implementation
 uses
@@ -225,6 +273,31 @@ begin
  move(adata^,(pchar(pointer(testvar1))+int1)^,len);
 end;
 }
+procedure raisesslerror(const err: cryptoerrorty);
+const
+ buffersize = 200;
+var
+ int1: integer;
+ str1,str2: string;
+begin
+ str1:= '';
+ setlength(str2,buffersize);
+ while true do begin
+  int1:= err_get_error();
+  if int1 = 0 then begin
+   break;
+  end;
+  err_error_string_n(int1,pointer(str2),buffersize);
+  if str1 <> '' then begin
+   str1:= str1 + lineend;
+  end;
+  str1:= str1 + pchar(str2);
+ end;
+ if str1 <> '' then begin
+  raise essl.create(cryptoerrormessages[err]+lineend+str1);
+ end;
+end;
+
 procedure raiseerror(errco : integer; const amessage: string = '');
 var
  buf: array [0..255] of char;
@@ -365,6 +438,46 @@ procedure freekey(const akey: pevp_pkey);
 begin
  if akey <> nil then begin
   evp_pkey_free(akey);
+ end;
+end;
+
+function checknilerror(const avalue: pointer;
+                  const err: cryptoerrorty = cerr_error): pointer; inline;
+begin
+ result:= avalue;
+ if avalue = nil then begin
+  raisesslerror(err);
+ end;
+end;
+
+function checknullerror(const avalue: integer;
+                  const err: cryptoerrorty = cerr_error): integer; inline;
+begin
+ result:= avalue;
+ if avalue = 0 then begin
+  raisesslerror(err);
+ end;
+end;
+
+function messagedigest(const adata: string; const digestname: string): string;
+var
+ ctx: pevp_md_ctx;
+ md: pevp_md;
+ int1: integer;
+ str1: string;
+begin
+ initsslinterface;
+ ctx:= checknilerror(evp_md_ctx_create());
+ try
+  md:= checknilerror(evp_get_digestbyname(pointer(pchar(digestname))));
+  checknullerror(evp_digestinit_ex(ctx,md,nil));
+  checknullerror(evp_digestupdate(ctx,pointer(adata),length(adata)));
+  setlength(str1,evp_max_md_size);
+  checknullerror(evp_digestfinal_ex(ctx,pointer(str1),int1));
+  setlength(str1,int1);
+  result:= str1;
+ finally
+  evp_md_ctx_destroy(ctx);
  end;
 end;
 
@@ -592,28 +705,8 @@ begin
 end;
 
 procedure tcustomopensslcryptohandler.checkerror(const err: cryptoerrorty);
-const
- buffersize = 200;
-var
- int1: integer;
- str1,str2: string;
 begin
- str1:= '';
- setlength(str2,buffersize);
- while true do begin
-  int1:= err_get_error();
-  if int1 = 0 then begin
-   break;
-  end;
-  err_error_string_n(int1,pointer(str2),buffersize);
-  if str1 <> '' then begin
-   str1:= str1 + lineend;
-  end;
-  str1:= str1 + pchar(str2);
- end;
- if str1 <> '' then begin
-  raise essl.create(cryptoerrormessages[err]+lineend+str1);
- end;
+ raisesslerror(err);
 end;
 
 procedure tcustomopensslcryptohandler.initializedata(
@@ -876,4 +969,99 @@ begin
  end;
 end;
 
+{ tdigesthandler }
+
+procedure tdigesthandler.open(var aclient: cryptoclientinfoty);
+begin
+ inherited;
+ initsslinterface;
+ with digesthandlerdataty(aclient.handlerdata).d do begin
+  ctx:= checknilerror(evp_md_ctx_create());
+  md:= checknilerror(evp_get_digestbyname(pointer(pchar(fdigestname))));
+  checknullerror(evp_digestinit_ex(ctx,md,nil));
+  include(state,ds_inited);
+ end;
+end;
+
+procedure tdigesthandler.close(var aclient: cryptoclientinfoty);
+begin
+ inherited;
+ with digesthandlerdataty(aclient.handlerdata).d do begin
+  if ctx <> nil then begin
+   evp_md_ctx_destroy(ctx);
+   ctx:= nil;
+   state:= [];
+  end;
+ end; 
+end;
+
+function tdigesthandler.read(var aclient: cryptoclientinfoty; var buffer;
+               count: longint): longint;
+begin
+ result:= inherited read(aclient,buffer,count);
+ with digesthandlerdataty(aclient.handlerdata).d do begin
+  checknullerror(evp_digestupdate(ctx,@buffer,result));
+ end;
+end;
+
+function tdigesthandler.write(var aclient: cryptoclientinfoty; const buffer;
+               count: longint): longint;
+begin
+ with digesthandlerdataty(aclient.handlerdata).d do begin
+  checknullerror(evp_digestupdate(ctx,@buffer,count));
+ end;
+ result:= inherited write(aclient,buffer,count);
+end;
+
+function tdigesthandler.seek(var aclient: cryptoclientinfoty;
+               const offset: int64; origin: tseekorigin): int64;
+begin
+ if (offset <> 0) then begin
+  error(cerr_notseekable);
+ end;
+ result:= inherited seek(aclient,offset,origin);
+ if origin = sobeginning then begin
+  restartdigest(aclient);
+ end;
+end;
+
+procedure tdigesthandler.restartdigest(var aclient: cryptoclientinfoty);
+begin
+ with digesthandlerdataty(aclient.handlerdata).d do begin
+  checknullerror(evp_digestinit_ex(ctx,md,nil));
+//  exclude(state,ds_final);
+ end;
+end;
+
+procedure tdigesthandler.checkerror(const err: cryptoerrorty = cerr_error);
+begin
+ raisesslerror(err);
+end;
+
+function tdigesthandler.digest(const astream: tmsefilestream): string;
+var
+ str1: string;
+ int1: integer;
+begin
+ with digesthandlerdataty(getclient(astream)^.handlerdata).d do begin
+  if not (ds_inited in state) then begin
+   error(cerr_notactive);
+  end;
+  setlength(str1,evp_max_md_size);
+  checknullerror(evp_digestfinal_ex(ctx,pointer(str1),int1));
+  setlength(str1,int1);
+  result:= str1;
+  checknullerror(evp_digestinit_ex(ctx,md,nil));
+ end;
+end;
+
+{
+procedure tdigesthandler.finalizeclient(var aclient: cryptoclientinfoty);
+begin
+ inherited;
+ with digesthandlerdataty(aclient.handlerdata).d do begin
+  string(digest):= '';
+ end;
+end;
+}
 end.

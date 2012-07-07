@@ -14,15 +14,6 @@ uses
  msestream,classes,sysutils,msestrings,mseformatstr;
  
 type
- ecryptohandler = class(exception)
- end;
- tbasecryptohandler = class(tcustomcryptohandler)
-  protected
- end;
- 
- tdummycryptohandler = class(tbasecryptohandler)
- end;
-
  cryptoerrorty = (cerr_error,cerr_ciphernotfound,cerr_notseekable,
                   cerr_cipherinit,cerr_invalidopenmode,cerr_digestnotfound,
                   cerr_cannotwrite,cerr_invalidblocksize,
@@ -30,7 +21,23 @@ type
                   cerr_readheader,cerr_writeheader,cerr_nobio,
                   cerr_nopubkey,cerr_encrypt,cerr_norsakey,
                   cerr_noprivkey,cerr_decrypt,cerr_nokey,
-                  cerr_cannotrestart);
+                  cerr_cannotrestart,cerr_notactive);
+
+ ecryptohandler = class(exception)
+ end;
+
+ tbasecryptohandler = class(tcustomcryptohandler)
+  protected
+   procedure error(const err: cryptoerrorty);
+   procedure checkerror(const err: cryptoerrorty = cerr_error); virtual;
+   function checknullerror(const avalue: integer;
+                   const err: cryptoerrorty = cerr_error): integer; inline;
+   function checknilerror(const avalue: pointer;
+                   const err: cryptoerrorty = cerr_error): pointer; inline;
+ end;
+ 
+ tdummycryptohandler = class(tbasecryptohandler)
+ end;
 
  sslhandlerstatety = (sslhs_hasfirstblock,sslhs_eofflag,sslhs_finalized,
                       sslhs_fileeof);
@@ -87,12 +94,6 @@ type
    function internalseek(var aclient: cryptoclientinfoty;
                    const offset: int64; origin: tseekorigin): int64;
    function  getsize(var aclient: cryptoclientinfoty): int64; override;
-   procedure error(const err: cryptoerrorty);
-   procedure checkerror(const err: cryptoerrorty = cerr_error); virtual;
-   function checknullerror(const avalue: integer;
-                   const err: cryptoerrorty = cerr_error): integer; inline;
-   function checknilerror(const avalue: pointer;
-                   const err: cryptoerrorty = cerr_error): pointer; inline;
    procedure restartcipher(var aclient: cryptoclientinfoty); virtual;
    procedure open(var aclient: cryptoclientinfoty); override;
    procedure close(var aclient: cryptoclientinfoty);  override;
@@ -168,13 +169,46 @@ const
   'No private key.',
   'Can not decrypt.',
   'No key.',
-  'Can not restart.'
+  'Can not restart.',
+  'Not active.'
   );
  
 implementation
 uses
  msebits,msesystypes,msesys;
+
+{ tbasecryptohandler }
  
+procedure tbasecryptohandler.checkerror(const err: cryptoerrorty);
+begin
+ //dummy
+end;
+
+function tbasecryptohandler.checknullerror(const avalue: integer;
+                                          const err: cryptoerrorty): integer;
+begin
+ result:= avalue;
+ if avalue = 0 then begin
+  error(err);
+ end;
+end;
+
+function tbasecryptohandler.checknilerror(const avalue: pointer;
+                                         const err: cryptoerrorty): pointer;
+begin
+ result:= avalue;
+ if avalue = nil then begin
+  error(err);
+ end;
+end;
+
+procedure tbasecryptohandler.error(const err: cryptoerrorty);
+begin
+ checkerror(err);
+ raise ecryptohandler.create(cryptoerrormessages[err]); 
+           //there was no queued error
+end;
+
 { tpaddedcryptohandler }
 
 function tpaddedcryptohandler.read(var aclient: cryptoclientinfoty;
@@ -344,7 +378,7 @@ end;
 function tpaddedcryptohandler.seek(var aclient: cryptoclientinfoty;
                const offset: int64; origin: tseekorigin): int64;
 begin
- if offset <> 0 then begin //todo
+ if (offset <> 0) or (origin = soend) then begin
   error(cerr_notseekable);
  end
  else begin
@@ -379,36 +413,6 @@ begin
    result:= inherited getsize(aclient);
   end;
  end; 
-end;
-
-procedure tpaddedcryptohandler.checkerror(const err: cryptoerrorty);
-begin
- //dummy
-end;
-
-function tpaddedcryptohandler.checknullerror(const avalue: integer;
-                                          const err: cryptoerrorty): integer;
-begin
- result:= avalue;
- if avalue = 0 then begin
-  error(err);
- end;
-end;
-
-function tpaddedcryptohandler.checknilerror(const avalue: pointer;
-                                         const err: cryptoerrorty): pointer;
-begin
- result:= avalue;
- if avalue = nil then begin
-  error(err);
- end;
-end;
-
-procedure tpaddedcryptohandler.error(const err: cryptoerrorty);
-begin
- checkerror(err);
- raise ecryptohandler.create(cryptoerrormessages[err]); 
-           //there was no queued error
 end;
 
 function tpaddedcryptohandler.internalseek(var aclient: cryptoclientinfoty;

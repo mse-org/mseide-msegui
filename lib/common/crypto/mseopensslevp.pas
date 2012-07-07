@@ -253,9 +253,13 @@ var
                                                  var outl: cint): cint; cdecl;
 
   EVP_DigestInit: function(ctx: pEVP_MD_CTX; const _type: pEVP_MD): cint; cdecl;
+  EVP_DigestInit_ex: function(ctx: pEVP_MD_CTX; const _type: pEVP_MD;
+                              impl: pENGINE): cint; cdecl;
   EVP_DigestUpdate: function(ctx: pEVP_MD_CTX; const d: Pointer;
                                               cnt: sslsize_t): cint; cdecl;
   EVP_DigestFinal: function(ctx: pEVP_MD_CTX; md: pcuchar;
+                                               var s: cuint): cint; cdecl;
+  EVP_DigestFinal_ex: function(ctx: pEVP_MD_CTX; md: pcuchar;
                                                var s: cuint): cint; cdecl;
   EVP_SignFinal: function(ctx: pEVP_MD_CTX; sig: pointer;
                                var s: cuint; key: pEVP_PKEY): cint; cdecl;
@@ -440,7 +444,7 @@ end;
 
 procedure init(const info: dynlibinfoty);
 const
- funcs: array[0.. {$ifndef mswindows}81{$else}72{$endif}] of funcinfoty = (
+ funcs: array[0.. {$ifndef mswindows}83{$else}74{$endif}] of funcinfoty = (
    (n: 'EVP_PKEY_new'; d: @EVP_PKEY_new),
    (n: 'EVP_PKEY_free'; d: @EVP_PKEY_free),
    (n: 'EVP_PKEY_assign'; d: @EVP_PKEY_assign),
@@ -473,8 +477,10 @@ const
    (n: 'EVP_DecryptFinal'; d: @EVP_DecryptFinal),
    (n: 'EVP_DecryptFinal_ex'; d: @EVP_DecryptFinal_ex),
    (n: 'EVP_DigestInit'; d: @EVP_DigestInit),
+   (n: 'EVP_DigestInit_ex'; d: @EVP_DigestInit_ex),
    (n: 'EVP_DigestUpdate'; d: @EVP_DigestUpdate),
    (n: 'EVP_DigestFinal'; d: @EVP_DigestFinal),
+   (n: 'EVP_DigestFinal_ex'; d: @EVP_DigestFinal_ex),
    (n: 'EVP_SignFinal'; d: @EVP_SignFinal),
    (n: 'EVP_VerifyFinal'; d: @EVP_VerifyFinal),
    (n: 'EVP_MD_CTX_copy'; d: @EVP_MD_CTX_copy),

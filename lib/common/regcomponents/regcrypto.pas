@@ -24,7 +24,7 @@ uses
 
 procedure Register;
 begin
- registercomponents('NoGui',[tdummycryptohandler,tbase64handler,
+ registercomponents('NoGui',[tdummycryptohandler,tdigesthandler,tbase64handler,
                              tsymciphercryptohandler,tasymciphercryptohandler]);
  registerpropertyeditor(typeinfo(tcustomcryptohandler),nil,'',
                                             tlinkcomponentpropertyeditor);
