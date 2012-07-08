@@ -64,6 +64,10 @@ type
    procedure setchain(const avalue: tcustomcryptohandler);
   protected
    fchainend: tcustomcryptohandler;
+   procedure flush(var aclient: cryptoclientinfoty); virtual; overload;
+   procedure flushchain(var aclient: cryptoclientinfoty);
+   procedure writeerror(var aclient: cryptoclientinfoty);
+   procedure readerror(var aclient: cryptoclientinfoty);
    procedure finalizeclient(var aclient: cryptoclientinfoty); virtual;
    function checkopen(const aindex: integer): pcryptoclientinfoty;
    procedure connect(const aclient: tmsefilestream;
@@ -84,8 +88,14 @@ type
    function getclient(const astream: tmsefilestream): pcryptoclientinfoty;
   public
    destructor destroy; override;
+   procedure flush(const astream: tmsefilestream); overload;
    function encrypt(const adata: string; const base64: boolean = false;
                const maxlinelength: integer = defaultbase64linelength): string;
+                                      overload;
+   function encrypt(const adata: pointer; adatalength: integer;
+                    const base64: boolean = false;
+               const maxlinelength: integer = defaultbase64linelength): string;
+                                      overload;
    function decrypt(const adata: string; const base64: boolean = false): string;
    function encrypttext(const atext: msestring;
                                const base64: boolean = false;
@@ -1074,13 +1084,6 @@ procedure tmsefilestream.sethandle(value: integer);
 begin
  if value <> handle then begin
   if handle <> invalidfilehandle then begin
-   if fendhandler <> nil then begin
-    with fendhandler do begin
-     if ccs_open in fclients[fendindex].state then begin
-      close(fclients[fendindex]);
-     end;
-    end;
-   end;
    flushbuffer;
    closehandle(handle);
   end;
@@ -1097,6 +1100,17 @@ end;
 function tmsefilestream.close: boolean;  //false on commit error
 begin
  result:= true;
+ if fendhandler <> nil then begin
+  with fendhandler do begin
+   if ccs_open in fclients[fendindex].state then begin
+    try
+     close(fclients[fendindex]);
+    except
+     application.handleexception;
+    end;
+   end;
+  end;
+ end;
  if (handle <> invalidfilehandle) and (ftransactionname <> '') and
           (ffilename <> '') then begin
   flush;
@@ -1127,6 +1141,9 @@ end;
 
 procedure tmsefilestream.flush;
 begin
+ if fendhandler <> nil then begin
+  fendhandler.flushchain(fendhandler.fclients[fendindex]);
+ end;
  flushbuffer;
  if handle <> invalidfilehandle then begin
   syserror(sys_flushfile(handle));
@@ -2595,10 +2612,10 @@ end;
 procedure tcustomcryptohandler.open(var aclient: cryptoclientinfoty);
 begin
  with aclient do begin
+  include(state,ccs_open);
   if link <> nil then begin
    link.open(link.fclients[linkindex]);
   end;
-  include(state,ccs_open);
  end;
 end;
 
@@ -2623,9 +2640,9 @@ begin
  end;
 end;
 
-function tcustomcryptohandler.encrypt(const adata: string;
-                      const base64: boolean = false;
-             const maxlinelength: integer = defaultbase64linelength): string;
+function tcustomcryptohandler.encrypt(const adata: pointer;
+               adatalength: integer; const base64: boolean = false;
+               const maxlinelength: integer = defaultbase64linelength): string;
 var
  stream1: tmsefilestream;
 // str1: string;
@@ -2633,7 +2650,7 @@ begin
  stream1:= tmsefilestream.create(fm_write);
  try
   stream1.cryptohandler:= self;
-  stream1.write(pointer(adata)^,length(adata));
+  stream1.write(adata^,adatalength);
   stream1.cryptohandler:= nil; //flush
   with stream1.fmemorystream do begin
    if base64 then begin
@@ -2669,6 +2686,13 @@ begin
  finally
   stream1.free;
  end;
+end;
+
+function tcustomcryptohandler.encrypt(const adata: string;
+                      const base64: boolean = false;
+             const maxlinelength: integer = defaultbase64linelength): string;
+begin
+ result:= encrypt(pointer(adata),length(adata),base64,maxlinelength);
 end;
 
 function tcustomcryptohandler.encrypttext(const atext: msestring;
@@ -2753,6 +2777,36 @@ begin
  if result = nil then begin
   componentexception(self,'Client stream not found.');
  end;
+end;
+
+procedure tcustomcryptohandler.writeerror(var aclient: cryptoclientinfoty);
+begin
+ raise ewriteerror.create(swriteerror);
+end;
+
+procedure tcustomcryptohandler.readerror(var aclient: cryptoclientinfoty);
+begin
+ raise ereaderror.create(sreaderror);
+end;
+
+procedure tcustomcryptohandler.flush(var aclient: cryptoclientinfoty);
+begin
+ //dummy
+end;
+
+procedure tcustomcryptohandler.flushchain(var aclient: cryptoclientinfoty);
+begin
+ flush(aclient);
+ with aclient do begin
+  if link <> nil then begin
+   link.flush(link.fclients[linkindex]);
+  end;
+ end;
+end;
+
+procedure tcustomcryptohandler.flush(const astream: tmsefilestream);
+begin
+ flush(getclient(astream)^);
 end;
 
 end.

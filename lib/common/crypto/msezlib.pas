@@ -91,6 +91,8 @@ const
  ZLIB_VER_REVISION = 7;
  ZLIB_VER_SUBREVISION = 0;
 
+{$packrecords c}
+
 type
  int = cint;
  uInt = cuint;

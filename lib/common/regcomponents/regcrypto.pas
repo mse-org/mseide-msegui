@@ -19,12 +19,13 @@ unit regcrypto;
 interface
 implementation
 uses
- msedesignintf,msecryptohandler,msessl,msepropertyeditors,msestream,
+ msedesignintf,msecryptohandler,msessl,msepropertyeditors,msestream,msezstream,
  regcrypto_bmp;
 
 procedure Register;
 begin
  registercomponents('NoGui',[tdummycryptohandler,tdigesthandler,tbase64handler,
+                             tzstreamhandler,
                              tsymciphercryptohandler,tasymciphercryptohandler]);
  registerpropertyeditor(typeinfo(tcustomcryptohandler),nil,'',
                                             tlinkcomponentpropertyeditor);

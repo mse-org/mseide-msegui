@@ -21,7 +21,7 @@ type
                   cerr_readheader,cerr_writeheader,cerr_nobio,
                   cerr_nopubkey,cerr_encrypt,cerr_norsakey,
                   cerr_noprivkey,cerr_decrypt,cerr_nokey,
-                  cerr_cannotrestart,cerr_notactive);
+                  cerr_cannotrestart,cerr_notactive,cerr_wrongdatadirection);
 
  ecryptohandler = class(exception)
  end;
@@ -147,7 +147,7 @@ type
    property maxlinelength: integer read fmaxlinelength write fmaxlinelength
                          default defaultbase64linelength;
  end;
-  
+   
 const
  cryptoerrormessages: array[cryptoerrorty] of msestring =(
   'OpenSSL error.',
@@ -170,7 +170,8 @@ const
   'Can not decrypt.',
   'No key.',
   'Can not restart.',
-  'Not active.'
+  'Not active.',
+  'Wrong data direction.'
   );
  
 implementation
