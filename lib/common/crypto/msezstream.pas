@@ -15,10 +15,10 @@ uses
 
 const
  defaultzstreambuffersize = 16384;
- minzstreambuffersize = 16;
+ minzstreambuffersize = 256;
  
 type
- zstreamstatety = (zs_inflate,zs_inited);
+ zstreamstatety = (zs_inflate,zs_inited,zs_fileeof);
  zstreamstatesty = set of zstreamstatety;
  
  zstreamhandlerdatadty = record
@@ -49,12 +49,14 @@ type
                                  const aflush: integer): boolean;
    procedure open(var aclient: cryptoclientinfoty); override;
    procedure close(var aclient: cryptoclientinfoty);  override;
-   procedure checkerror(const aerror: integer;
-                         const aclient: cryptoclientinfoty); reintroduce;
+   procedure checkerror(const aclient: cryptoclientinfoty;
+                               const aerror: integer); reintroduce;
    function read(var aclient: cryptoclientinfoty;
                    var buffer; count: longint): longint; override;
    function write(var aclient: cryptoclientinfoty;
                    const buffer; count: longint): longint; override;
+   function seek(var aclient: cryptoclientinfoty;
+                   const offset: int64; origin: tseekorigin): int64; override;
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -95,10 +97,9 @@ begin
   end;
  end;
 end;
-var testvar: pzstreamhandlerdatadty;
+
 procedure tzstreamhandler.open(var aclient: cryptoclientinfoty);
 begin
-testvar:= @zstreamhandlerdataty(aclient.handlerdata).d;
  if not (aclient.stream.openmode in [fm_read,fm_create,fm_write]) then begin
   error(cerr_invalidopenmode);
  end;
@@ -117,6 +118,10 @@ testvar:= @zstreamhandlerdataty(aclient.handlerdata).d;
    opaque:= nil;   
   end;
   if zs_inflate in state then begin
+   inflateinit(strm);
+   include(state,zs_inited);
+   strm^.next_in:= nil;
+   strm^.avail_in:= 0;
   end
   else begin
    deflateinit(strm,fcompressionlevel);
@@ -127,7 +132,6 @@ end;
 
 procedure tzstreamhandler.close(var aclient: cryptoclientinfoty);
 begin
-testvar:= @zstreamhandlerdataty(aclient.handlerdata).d;
  with zstreamhandlerdataty(aclient.handlerdata).d do begin
   if strm <> nil then begin
    if zs_inited in state then begin
@@ -159,8 +163,8 @@ testvar:= @zstreamhandlerdataty(aclient.handlerdata).d;
  inherited;
 end;
 
-procedure tzstreamhandler.checkerror(const aerror: integer;
-               const aclient: cryptoclientinfoty);
+procedure tzstreamhandler.checkerror(const aclient: cryptoclientinfoty;
+                     const aerror: integer);
 begin
  if aerror < 0 then begin
   with zstreamhandlerdataty(aclient.handlerdata).d do begin
@@ -171,11 +175,36 @@ end;
 
 function tzstreamhandler.read(var aclient: cryptoclientinfoty; var buffer;
                count: longint): longint;
+var
+ po1: pbyte;
+ int1: integer;
 begin
  checkinflate(aclient);
+ result:= 0;
+ po1:= @buffer;
  with zstreamhandlerdataty(aclient.handlerdata).d do begin
+  while true do begin
+   if not (zs_fileeof in state) and (strm^.avail_in = 0) then begin
+    strm^.next_in:= pointer(buf);
+    strm^.avail_in:= inherited read(aclient,buf^,bufsize);
+    if strm^.avail_in < bufsize then begin
+     include(state,zs_fileeof);
+    end;
+   end;
+   strm^.avail_out:= count-result;
+   if strm^.avail_out <= 0 then begin
+    break;
+   end;
+   strm^.next_out:= pointer(po1);
+   checkerror(aclient,inflate(strm,z_no_flush));
+   int1:= pointer(strm^.next_out) - po1;
+   if (int1 = 0) and (zs_fileeof in state) and (strm^.avail_in = 0) then begin
+    break;
+   end;
+   result:= result + int1;
+   po1:= pointer(strm^.next_out);
+  end;
  end;
- inherited;
 end;
 
 function tzstreamhandler.writedeflate(var aclient: cryptoclientinfoty;
@@ -194,7 +223,7 @@ begin
     break;
    end;
    if result then begin
-    if inherited write(aclient,buf,int1) <> int1 then begin
+    if inherited write(aclient,buf^,int1) <> int1 then begin
      result:= false; //can not write
     end;
    end;
@@ -228,6 +257,15 @@ begin
   avalue:= minzstreambuffersize;
  end;
  fbuffersize:= avalue;
+end;
+
+function tzstreamhandler.seek(var aclient: cryptoclientinfoty;
+               const offset: int64; origin: tseekorigin): int64;
+begin
+ if (origin <> socurrent) or (offset <> 0) then begin
+  error(cerr_notseekable);
+ end;
+ inherited;
 end;
 
 end.

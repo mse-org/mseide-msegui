@@ -263,16 +263,7 @@ uses
  sysutils,msesysintf1,msefileutils,msesocketintf,mseopensslbio,mseopensslpem,
  mseopensslrsa,msebits,
  msesysintf,msectypes;
-{ 
-procedure addata(adata: pbyte; len: integer);
-var
- int1: integer;
-begin
- int1:= length(testvar1);
- setlength(testvar1,length(testvar1)+len);
- move(adata^,(pchar(pointer(testvar1))+int1)^,len);
-end;
-}
+
 procedure raisesslerror(const err: cryptoerrorty);
 const
  buffersize = 200;
