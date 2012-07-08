@@ -234,8 +234,8 @@ end;
 
 function tzstreamhandler.write(var aclient: cryptoclientinfoty; const buffer;
                count: longint): longint;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
  checknoinflate(aclient);
  result:= count;
