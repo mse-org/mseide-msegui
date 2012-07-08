@@ -279,7 +279,7 @@ begin
  if (origin <> socurrent) or (offset <> 0) then begin
   error(cerr_notseekable);
  end;
- inherited;
+ result:= inherited seek(aclient,offset,origin);
 end;
 
 end.

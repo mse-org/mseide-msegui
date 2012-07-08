@@ -24,11 +24,13 @@ uses
 
 procedure Register;
 begin
- registercomponents('NoGui',[tdummycryptohandler,tdigesthandler,tbase64handler,
+ registercomponents('Cryp',[tdummycryptohandler,tdigesthandler,tbase64handler,
                              tzstreamhandler,
                              tsymciphercryptohandler,tasymciphercryptohandler]);
  registerpropertyeditor(typeinfo(tcustomcryptohandler),nil,'',
                                             tlinkcomponentpropertyeditor);
+ registercomponenttabhints(['Cryp'],
+ ['Components for tmsefilestream.criptohandler, zlib, openssl, base64']);
 end;
 
 initialization
