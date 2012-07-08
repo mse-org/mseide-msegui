@@ -86,6 +86,7 @@ type
                    const offset: int64; origin: tseekorigin): int64; virtual;
    function  getsize(var aclient: cryptoclientinfoty): int64; virtual;
    function getclient(const astream: tmsefilestream): pcryptoclientinfoty;
+//   function getopenclient(const astream: tmsefilestream): pcryptoclientinfoty;
   public
    destructor destroy; override;
    procedure flush(const astream: tmsefilestream); overload;
@@ -2796,17 +2797,24 @@ end;
 
 procedure tcustomcryptohandler.flushchain(var aclient: cryptoclientinfoty);
 begin
- flush(aclient);
- with aclient do begin
-  if link <> nil then begin
-   link.flush(link.fclients[linkindex]);
+ if ccs_open in aclient.state then begin
+  flush(aclient);
+  with aclient do begin
+   if link <> nil then begin
+    link.flush(link.fclients[linkindex]);
+   end;
   end;
  end;
 end;
 
 procedure tcustomcryptohandler.flush(const astream: tmsefilestream);
+var
+ po1: pcryptoclientinfoty;
 begin
- flush(getclient(astream)^);
+ po1:= getclient(astream);
+ if ccs_open in po1^.state then begin
+  flush(po1^);
+ end;
 end;
 
 end.

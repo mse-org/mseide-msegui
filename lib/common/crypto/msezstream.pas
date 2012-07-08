@@ -43,6 +43,7 @@ type
    fbuffersize: integer;
    procedure setbuffersize(avalue: integer);
   protected
+   procedure flush(var aclient: cryptoclientinfoty); override;
    procedure checkinflate(var aclient: cryptoclientinfoty); inline;
    procedure checknoinflate(var aclient: cryptoclientinfoty); inline;
    function writedeflate(var aclient: cryptoclientinfoty;
@@ -142,7 +143,7 @@ begin
      strm^.next_in:= nil;
      strm^.avail_in:= 0;
      try
-      if not writedeflate(aclient,z_finish) then begin
+      if not writedeflate(aclient,Z_FINISH) then begin
        writeerror(aclient);
       end;
      except
@@ -246,6 +247,19 @@ begin
     if not writedeflate(aclient,z_no_flush) then begin
      result:= 0; //can not write
     end;
+   end;
+  end;
+ end;
+end;
+
+procedure tzstreamhandler.flush(var aclient: cryptoclientinfoty);
+begin
+ with zstreamhandlerdataty(aclient.handlerdata).d do begin
+  if not (zs_inflate in state) then begin
+   strm^.next_in:= nil;
+   strm^.avail_in:= 0;
+   if not writedeflate(aclient,Z_SYNC_FLUSH) then begin
+    writeerror(aclient);
    end;
   end;
  end;
