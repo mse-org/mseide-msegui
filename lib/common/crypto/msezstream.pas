@@ -43,6 +43,8 @@ type
    fbuffersize: integer;
    procedure setbuffersize(avalue: integer);
   protected
+   procedure internalflush(var aclient: cryptoclientinfoty;
+                                                     const mode: integer);
    procedure flush(var aclient: cryptoclientinfoty); override;
    procedure checkinflate(var aclient: cryptoclientinfoty); inline;
    procedure checknoinflate(var aclient: cryptoclientinfoty); inline;
@@ -60,6 +62,8 @@ type
                    const offset: int64; origin: tseekorigin): int64; override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure flush(const astream: tmsefilestream;
+                               const mode: integer = Z_SYNC_FLUSH); overload;
   published
    property compressionlevel: integer read fcompressionlevel 
                   write fcompressionlevel default Z_DEFAULT_COMPRESSION;
@@ -252,16 +256,33 @@ begin
  end;
 end;
 
-procedure tzstreamhandler.flush(var aclient: cryptoclientinfoty);
+procedure tzstreamhandler.internalflush(var aclient: cryptoclientinfoty;
+                                              const mode: integer);
 begin
  with zstreamhandlerdataty(aclient.handlerdata).d do begin
   if not (zs_inflate in state) then begin
    strm^.next_in:= nil;
    strm^.avail_in:= 0;
-   if not writedeflate(aclient,Z_SYNC_FLUSH) then begin
+   if not writedeflate(aclient,mode) then begin
     writeerror(aclient);
    end;
   end;
+ end;
+end;
+                                              
+procedure tzstreamhandler.flush(var aclient: cryptoclientinfoty);
+begin
+ internalflush(aclient,Z_SYNC_FLUSH);
+end;
+
+procedure tzstreamhandler.flush(const astream: tmsefilestream;
+               const mode: integer = Z_SYNC_FLUSH);
+var
+ po1: pcryptoclientinfoty;
+begin
+ po1:= getclient(astream);
+ if ccs_open in po1^.state then begin
+  internalflush(po1^,mode);
  end;
 end;
 
