@@ -2,7 +2,7 @@ unit msedynload;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msesystypes,{$ifdef FPC}dynlibs,{$endif}msestrings,sysutils,msetypes;
+ msesystypes,{$ifdef FPC}dynlibs,{$endif}msestrings,sysutils,msetypes,msesys;
  
 type
  funcinfoty = record
@@ -18,6 +18,9 @@ type
   cw8087: word;             //fpu control word after lib load
  end;
  dynlibprocty = procedure(const dynlib: dynlibinfoty);
+
+ edynload = class(ecrashstatfile)
+ end;
   
 procedure initializelibinfo(var info: dynlibinfoty);
 procedure finalizelibinfo(var info: dynlibinfoty);
@@ -96,7 +99,7 @@ begin
       str1:= libname + lineend;
      end;
      str1:= str1 + 'Function "'+n+'" not found.';
-     raise exception.create(str1);
+     raise edynload.create(str1);
     end;
    end;
   end;

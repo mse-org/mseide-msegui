@@ -652,7 +652,12 @@ begin
     try
      fstream.readln(str1);
     except
-     exit;
+     on ecrashstatfile do begin
+      raise;
+     end;
+     else begin
+      exit;
+     end;
     end;
    end;
    if not fstream.eof then begin     

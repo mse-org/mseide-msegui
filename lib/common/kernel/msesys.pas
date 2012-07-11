@@ -13,7 +13,8 @@ unit msesys;
 
 interface
 uses
- {$ifdef mswindows}windows,{$endif}mseerr,msetypes,msestrings,msesystypes
+ {$ifdef mswindows}windows,{$endif}mseerr,msetypes,msestrings,msesystypes,
+  sysutils
   {$ifdef FPC},dynlibs{$endif};
 
 type
@@ -126,7 +127,10 @@ type
    constructor create(aerror: syserrorty; atext: string);
    property error: syserrorty read geterror;
  end;
-
+ 
+ ecrashstatfile = class(exception)
+ end;
+ 
 var
  defaultprintcommand: string;
  
@@ -168,7 +172,7 @@ procedure initdefaultformatsettings;
              //initialization order is wrong, FPC bug?
 implementation
 uses
- Classes,{msestreaming,}msesysintf1,msesysintf,msearrayutils,sysutils,
+ Classes,{msestreaming,}msesysintf1,msesysintf,msearrayutils,
  mseglob,msesysutils,mseformatstr;
 {$ifdef FPC}
  {$ifdef MSWINDOWS}
