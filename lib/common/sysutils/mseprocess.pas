@@ -22,7 +22,7 @@ type
                     pro_shell,    //default on linux
                     pro_noshell,  //default on windows, todo: implement on linux
                     pro_inactive,pro_nostdhandle, //windows only
-                    pro_nowindow,pro_detached,    //windows only
+                    pro_newconsole,pro_nowindow,pro_detached,    //windows only
                     pro_allowsetforegroundwindow, //windows only
                     pro_group,                    //linux only
                     pro_sessionleader,            //linux only
@@ -443,6 +443,9 @@ begin
      end;
      if pro_nostdhandle in foptions then begin
       include(opt1,exo_nostdhandle);
+     end;
+     if pro_newconsole in foptions then begin
+      include(opt1,exo_newconsole);
      end;
      if pro_nowindow in foptions then begin
       include(opt1,exo_nowindow);

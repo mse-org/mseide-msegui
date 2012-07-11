@@ -27,6 +27,7 @@ type
                           //todo: implement on linux
                  exo_inactive,                 //windows only
                  exo_nostdhandle,              //windows only
+                 exo_newconsole,               //windows only
                  exo_nowindow,                 //windows only
                  exo_detached,                 //windows only
                  exo_allowsetforegroundwindow, //windows only
@@ -451,6 +452,9 @@ begin
  end;
  if exo_nowindow in options then begin
   creationflags:= creationflags or create_no_window;
+ end;
+ if exo_newconsole in options then begin
+  creationflags:= creationflags or create_new_console;
  end;
  if exo_detached in options then begin
   creationflags:= creationflags or detached_process;
