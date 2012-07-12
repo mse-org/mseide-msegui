@@ -27,3 +27,16 @@ to 0x2F
 (it's the scancode of VK_HELP which is not present on most PC keyboards )
 
 - reboot
+
+In win-32, WRITELN called from within a program won't be printed in the IDE
+internal console (because of some STDIO flushing issues on pipes)
+unless the below code is inserted at beginning of the startup file
+of the program:
+
+{$ifdef mswindows}
+     TextRec(Output).FlushFunc:= TextRec(Output).InOutFunc;
+{$endif}
+
+Also, You should place {$apptype console} compiler directive at beginning
+of each unit calling WRITELN otherwise You may either encounter "File not
+found" exception or to see silent nothing.
