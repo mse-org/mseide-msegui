@@ -3578,12 +3578,7 @@ begin
   inherited;
  end;
 end;
-{
-function tmsefield.getlookupinfo: plookupfieldinfoty;
-begin
- result:= @flookupinfo;
-end;
-}
+
 { tmsestringfield }
 
 destructor tmsestringfield.destroy;
@@ -3603,42 +3598,14 @@ function tmsestringfield.assql: string;
 begin
  result:= fieldtosql(self);
 end;
-{
-procedure tmsestringfield.validate(const buffer: msestring);
-begin
- if assigned(onvalidate) then begin
-  fvaluebuffer:= buffer;
-  fvalidating:= true;
-  try
-   onvalidate(self);
-  finally
-   fvalidating:= false;
-   fvaluebuffer:= '';
-  end;
- end;
-end;
-}
+
 function tmsestringfield.getasmsestring: msestring;
 begin
-{$warnings off}
- with tfieldcracker(self) do begin
-{$warnings on}
-  if assigned(fgetmsestringdata) then begin
-//   if fvalidating then begin
-//    if fvaluebuffer = nil then begin
-//     result:= '';
-//    end
-//    else begin
-//     result:= msestring(fvaluebuffer^);
-//    end;
-//   end
-//   else begin
-    fgetmsestringdata(self,result);
-//   end;
-  end
-  else begin
-   result:= fieldgetmsestring(self,fdsintf);
-  end;
+ if assigned(fgetmsestringdata) then begin
+  fgetmsestringdata(self,result);
+ end
+ else begin
+  result:= fieldgetmsestring(self,fdsintf);
  end;
 end;
 
@@ -3735,18 +3702,6 @@ begin
  result:= curmsestring(bo1);
 end;
 
-{
-function tmsestringfield.oldmsestring(out aisnull: boolean): msestring;
-var
- statebefore: tdatasetstate;
- str1: string;
-begin
- statebefore:= tdataset1(dataset).settempstate(dsoldvalue);
- aisnull:= getvalue(str1);
- result:= str1;
- tdataset1(dataset).restorestate(statebefore);
-end;
-}
 procedure tmsestringfield.setismsestring(const getter: getmsestringdataty;
            const setter: setmsestringdataty; const acharacterlength: integer;
            const aisftwidestring: boolean);
@@ -3877,12 +3832,6 @@ begin
  end;
 end;
 
-{
-function tmsestringfield.getlookupinfo: plookupfieldinfoty;
-begin
- result:= @flookupinfo;
-end;
-}
 { tmsememofield }
 
 constructor tmsememofield.create(aowner: tcomponent);
