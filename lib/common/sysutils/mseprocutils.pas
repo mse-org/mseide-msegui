@@ -63,14 +63,10 @@ function execmse4(const commandline: string; const  options: execoptionsty = []
 function execmse1(const commandline: ansistring; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
-//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
              const options: execoptionsty = [];
-//             inactive: boolean = true; //windows only
              frompipewritehandle: pinteger = nil;
              errorpipewritehandle: pinteger = nil
-//             tty: boolean = false;
-//             nostdhandle: boolean = false //windows only
                  ): prochandlety;
 //starts program, returns processhandle, execerror on error
 //don't forget closehandle on windows!
@@ -79,14 +75,8 @@ function execmse1(const commandline: ansistring; topipe: pinteger = nil;
 function execmse2(const commandline: string; topipe: tpipewriter = nil;
                       frompipe: tpipereader = nil;
                       errorpipe: tpipereader = nil;
-//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
              const options: execoptionsty = []
-//             inactive: boolean = true; //windows only
-//             usepipewritehandles: boolean = false;
-//             tty: boolean = false;
-//             nostdhandle: boolean = false
-                              //windows only
                  ): prochandlety;
 //starts program, returns processhandle, execerror on error
 //don't forget closehandle on windows!
@@ -95,15 +85,10 @@ function execmse2(const commandline: string; topipe: tpipewriter = nil;
 function execmse3(const commandline: string; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
-//             sessionleader: boolean = false;
              groupid: integer = -1; //-1 -> keine, 0 = childpid
              const options: execoptionsty = [];
-//             inactive: boolean = true; //windows only
              frompipewritehandle: pinteger = nil;
              errorpipewritehandle: pinteger = nil
-//             tty: boolean = false;
-//             nostdhandle: boolean = false
-                              //windows only
                  ): prochandlety;
 //starts program, returns processhandle, execerror on error
 //don't forget closehandle on windows!
@@ -111,7 +96,6 @@ function execmse3(const commandline: string; topipe: pinteger = nil;
 
 function execwaitmse(const commandline: string;
                      const options: execoptionsty = []
-//                      const inactive: boolean = true
                       ): integer; overload;
 //runs programm, waits for program termination, returns program exitcode
 //inactive true -> no console window (win32 only)

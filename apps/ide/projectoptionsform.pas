@@ -434,6 +434,7 @@ type
    fexceptclassnames: msestringarty;
    fexceptignore: booleanarty;
    fnogdbserverexit: boolean;
+   fgdbservertty: boolean;
    fnodebugbeginend: boolean;
    fsettty: boolean;
  protected
@@ -459,6 +460,8 @@ type
    property gdbserverwait: real read fgdbserverwait write fgdbserverwait;
    property nogdbserverexit: boolean read fnogdbserverexit 
                                                    write fnogdbserverexit;
+   property gdbservertty: boolean read fgdbservertty 
+                                                   write fgdbservertty;
    property exceptclassnames: msestringarty read fexceptclassnames 
                                                  write fexceptclassnames;
    property exceptignore: booleanarty read fexceptignore 
@@ -961,6 +964,7 @@ type
    nodebugbeginend: tbooleanedit;
    toolmessages: tbooleanedit;
    settty: tbooleanedit;
+   gdbservertty: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -2657,6 +2661,7 @@ begin
  gdbservercommandattach.enabled:= not gdbsimulator.value;
  gdbserverwait.enabled:= not gdbsimulator.value;
  nogdbserverexit.enabled:= gdbserverwait.enabled;
+ gdbservertty.enabled:= not gdbsimulator.value;
  remoteconnection.enabled:= not gdbsimulator.value;
  gdbdownload.enabled:= not gdbsimulator.value;
  downloadalways.enabled:= not gdbsimulator.value;

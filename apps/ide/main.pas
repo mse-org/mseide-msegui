@@ -31,8 +31,8 @@ uses
  msegrids,msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,
  classes,mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
  msepostscriptprinter,msegraphics,mseglob,mseprocmonitorcomp,msesystypes,
- mserttistat,
- msedatanodes,mseedit,mseifiglob,mselistbrowser,projecttreeform;
+ mserttistat,msedatanodes,mseedit,mseifiglob,mselistbrowser,projecttreeform,
+ msepipestream;
 const
  versiontext = '2.9 unstable';
 {$ifdef linux}
@@ -95,6 +95,7 @@ type
    runprocmon: tprocessmonitor;
    statoptions: trttistat;
    projectfiledia: tfiledialog;
+   targetpipe: tpipereadercomp;
    procedure newfileonexecute(const sender: tobject);
    procedure newformonexecute(const sender: TObject);
 
@@ -156,6 +157,7 @@ type
    procedure viewsymbolsonexecute(const sender: TObject);
    procedure loadwindowlayoutexe(const sender: TObject);
    procedure getstatobjs(const sender: TObject; var aobjects: objectinfoarty);
+   procedure targetpipeinput(const sender: tpipereader);
   private
    fstartcommand: startcommandty;
    fnoremakecheck: boolean;
@@ -988,6 +990,11 @@ begin
  terminategdbserver;
 end;
 
+procedure tmainfo.targetpipeinput(const sender: tpipereader);
+begin
+ messagefo.messages[0].readpipe(sender);
+end;
+
 function tmainfo.startgdbconnection(const attach: boolean): boolean;
 var
  mstr1: msestring;
@@ -1002,7 +1009,14 @@ begin
   end;
   if mstr1 <> '' then begin
    terminategdbserver;
-   fgdbserverprocid:= execmse1(syscommandline(mstr1));
+   if d.gdbservertty then begin
+    fgdbserverprocid:= execmse2(syscommandline(mstr1),nil,
+                  targetpipe.pipereader,targetpipe.pipereader,-1,[exo_tty]);
+   end
+   else begin
+    fgdbserverprocid:= execmse2(syscommandline(mstr1),nil,
+                  nil,nil,-1,[]);
+   end;
    if fgdbserverprocid <> invalidprochandle then begin
     fgdbservertimeout:= timestep(round(1000000*d.gdbserverwait));
     if application.waitdialog(nil,'Start gdb server command "'+

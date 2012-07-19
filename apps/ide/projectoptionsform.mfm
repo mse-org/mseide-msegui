@@ -1165,7 +1165,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 4
-            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 679
@@ -1582,6 +1581,7 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 5
+            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 679
@@ -1600,8 +1600,10 @@ object projectoptionsfo: tprojectoptionsfo
               optionsscale = [osc_expandy, osc_shrinky]
               linktop = serverla
               linkbottom = remoteconnection
-              optionslayout = [lao_aligny]
-              place_maxdist = 999999
+              optionslayout = [lao_placex, lao_aligny]
+              place_mindist = 2
+              place_maxdist = 2
+              place_options = [plo_endmargin]
               object gdbservercommandattach: tfilenameedit
                 optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
                 frame.options = [cfo_fixtop]
@@ -1620,7 +1622,7 @@ object projectoptionsfo: tprojectoptionsfo
                 onshowhint = hintexpandedmacros
                 bounds_x = 0
                 bounds_y = 0
-                bounds_cx = 627
+                bounds_cx = 591
                 bounds_cy = 37
                 anchors = [an_left, an_top, an_right]
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -1638,11 +1640,26 @@ object projectoptionsfo: tprojectoptionsfo
                   2
                 )
                 taborder = 1
-                bounds_x = 630
+                bounds_x = 593
                 bounds_y = 20
                 bounds_cx = 47
                 bounds_cy = 16
                 anchors = [an_top, an_right]
+              end
+              object gdbservertty: tbooleanedit
+                frame.caption = 'TTY'
+                frame.dummy = 0
+                frame.outerframe = (
+                  0
+                  1
+                  24
+                  2
+                )
+                taborder = 2
+                bounds_x = 642
+                bounds_y = 20
+                bounds_cx = 37
+                bounds_cy = 16
               end
             end
             object remoteconnection: tstringedit

@@ -1454,4 +1454,9 @@ object mainfo: tmainfo
     left = 264
     top = 56
   end
+  object targetpipe: tpipereadercomp
+    oninputavailable = targetpipeinput
+    left = 288
+    top = 40
+  end
 end

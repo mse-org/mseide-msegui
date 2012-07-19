@@ -1232,9 +1232,14 @@ begin
  result:= nil;
  splitstring(source,result,c_linefeed);
  for int1:= 0 to high(result) - 1 do begin
-  int2:= length(result[int1]);
-  if (int2 > 0) and (result[int1][int2] = c_return) then begin
-   setlength(result[int1],int2-1);
+  while true do begin
+   int2:= length(result[int1]);
+   if (int2 > 0) and (result[int1][int2] = c_return) then begin
+    setlength(result[int1],int2-1);
+   end
+   else begin
+    break;
+   end;
   end;
  end;
 end;
@@ -3508,6 +3513,25 @@ begin
  result:= msestring(value.vwidestring^); //msestringimplementation
 end;
 
+procedure removereturn(var avalue: msestring; var aindex: integer);
+var
+ s,d: pmsechar;
+begin
+ s:= pmsechar(avalue);
+ d:= s;
+ while s^ <> #0 do begin
+  if s^ <> msechar(c_return) then begin
+   d^:= s^;
+   if d - pmsechar(pointer(avalue)) <= aindex then begin
+    dec(aindex);
+   end;
+   inc(d);
+  end;
+  inc(s);
+ end;
+ setlength(avalue,d-pmsechar(pointer(avalue)));
+end;
+
 procedure addeditchars(const source: msestring; var buffer: msestring; 
                                   var cursorpos: integer);
                                   //cursorpos nullbased
@@ -3517,7 +3541,9 @@ var
  ch1: msechar;
  int1,int2: integer;
  i: integer;
+ hasreturn: boolean;
 begin
+ hasreturn:= false;
  len1:= length(buffer);
  i:= cursorpos;
  if i > len1 then begin
@@ -3550,6 +3576,7 @@ begin
    end;
    c_return: begin
     i:= 0;
+    hasreturn:= true;
    end;
    else begin
     (d+i)^:= ch1;
@@ -3562,16 +3589,22 @@ begin
   inc(s);
  end; 
  setlength(buffer,len1);
+ if hasreturn then begin
+  removereturn(buffer,i);  
+ end;
  cursorpos:= i;
 end;
 
 function processeditchars(var value: msestring; stripcontrolchars: boolean): integer;
-               //bringt -anzahl rueckwaerts gefressene zeichen, -grosse zahl bei c_return
+               //bringt -anzahl rueckwaerts gefressene zeichen,
+               // -grosse zahl bei c_return
 var
  int1,int2,int3: integer;
  str1: msestring;
  ch1: msechar;
+ hasreturn: boolean;
 begin
+ hasreturn:= false;
  setlength(str1,length(value));
  int2:= 0;
  int3:= 1;
@@ -3580,6 +3613,7 @@ begin
   if ch1 = c_return then begin
    int2:= -bigint div 2;
    int3:= 1;
+   hasreturn:= true;
   end
   else begin
    if ch1 = c_backspace then begin
@@ -3590,16 +3624,23 @@ begin
     end;
    end
    else begin
+    if ch1 = #0 then begin
+     ch1:= #$2400; //unicode null glyph
+    end;
     if not stripcontrolchars or (ord(ch1) >= ord(' ')) or (ch1 = c_tab) then begin
-     str1[int3]:= ch1;
+     (pmsechar(pointer(str1)+int3))^:= ch1;
      inc(int3);
     end;
    end;
   end;
  end;
  setlength(str1,int3-1);
- value:= str1;
+ if hasreturn then begin
+  int1:= -1;  
+  removereturn(str1,int1);  
+ end;
  result:= int2;
+ value:= str1;
 end;
 
 function mseextractprintchars(const value: msestring): msestring;
