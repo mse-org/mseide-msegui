@@ -2428,9 +2428,14 @@ var
  pwdbefore: msestring;
 begin
  if projectoptions.d.texp.runcommand = '' then begin
-  if startgdbconnection(false) then begin
-   gdb.gdbdownload:= projectoptions.d.gdbdownload and 
-                         (needsdownload or projectoptions.d.downloadalways);
+  if not projectoptions.d.gdbsimulator then begin
+   if startgdbconnection(false) then begin
+    gdb.gdbdownload:= projectoptions.d.gdbdownload and 
+                          (needsdownload or projectoptions.d.downloadalways);
+    checkgdberror(gdb.run);
+   end;
+  end
+  else begin
    checkgdberror(gdb.run);
   end;
  end

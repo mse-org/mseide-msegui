@@ -480,35 +480,16 @@ type
    fclosemessages: boolean;
    fusercolors: colorarty;
    fusercolorcomment: msestringarty;
-{
-   fstoponexception: boolean;
-   fvaluehints: boolean;
-   factivateonbreak: boolean;
-   fshowconsole: boolean;
-   fexternalconsole: boolean;
-   fgdbdownload: boolean;
-   fdownloadalways: boolean;
-   fstartupbkpt: integer;
-   fstartupbkpton: boolean;
-   fgdbsimulator: boolean;
-   fgdbserverwait: real;
-   fexceptclassnames: msestringarty;
-   fexceptignore: booleanarty;
-   fnogdbserverexit: boolean;
-}
    fsettingsfile: filenamety;
    fsettingseditor: boolean;
    fsettingsdebugger: boolean;
    fsettingsstorage: boolean;
    fsettingsprojecttree: boolean;
-//   fwindowlayoutfile: filenamety;
-//   fwindowlayouthistory: filenamearty;
    fsettingsautoload: boolean;
    fsettingsautosave: boolean;
    fmodulenames: msestringarty;
    fmoduletypes: msestringarty;
    fmodulefiles: filenamearty;
-//   fdefaultmake: integer;
    fbefcommandon: integerarty;
    fmakeoptionson: integerarty;
    faftcommandon: integerarty;
@@ -519,15 +500,6 @@ type
    fmacrogroup: integer;
    fgroupcomments: msestringarty;
  
-//   fbreakpointpaths: msestringarty;
-//   fbreakpointlines: integerarty;
-//   fbreakpointaddress: int64arty;
-//   faddressbreakpoints: longboolarty;
-//   fbreakpointons: longboolarty;
-//   fbreakpointignore: integerarty;
-//   fbreakpointconditions: msestringarty;
-
-//   fdefineson: longboolarty;
    ftoolsave: longboolarty;
    ftoolhide: longboolarty;
    ftoolparse: longboolarty;
@@ -540,8 +512,6 @@ type
    ffontxscales: realarty;
    fexpandprojectfilemacros: longboolarty;
    floadprojectfile: longboolarty;
-//   fprojectfilename: filenamety;
-//   fprojectdir: filenamety;
    fnewinheritedforms: longboolarty;
   protected
    function gett: tobject; override;
@@ -552,38 +522,13 @@ type
   published
    property t: ttextprojectoptions read ft;
 
-//   property projectfilename: filenamety read fprojectfilename 
-//                                                  write fprojectfilename;
-//   property projectdir: filenamety read fprojectdir write fprojectdir;
-   
    property copymessages: boolean read fcopymessages write fcopymessages;
    property closemessages: boolean read fclosemessages write fclosemessages;
    property checkmethods: boolean read fcheckmethods write fcheckmethods;
 
-
    property usercolors: colorarty read fusercolors write fusercolors;
    property usercolorcomment: msestringarty read fusercolorcomment 
                                                  write fusercolorcomment;
-
-{
-   property stoponexception: boolean read fstoponexception write fstoponexception;
-   property valuehints: boolean read fvaluehints write fvaluehints;
-   property activateonbreak: boolean read factivateonbreak write factivateonbreak;
-   property showconsole: boolean read fshowconsole write fshowconsole;
-   property externalconsole: boolean read fexternalconsole write fexternalconsole;
-   property gdbdownload: boolean read fgdbdownload write fgdbdownload;
-   property downloadalways: boolean read fdownloadalways write fdownloadalways;
-   property startupbkpt: integer read fstartupbkpt write fstartupbkpt;
-   property startupbkpton: boolean read fstartupbkpton write fstartupbkpton;
-   property gdbsimulator: boolean read fgdbsimulator write fgdbsimulator;
-   property gdbserverwait: real read fgdbserverwait write fgdbserverwait;
-   property nogdbserverexit: boolean read fnogdbserverexit 
-                                                   write fnogdbserverexit;
-   property exceptclassnames: msestringarty read fexceptclassnames 
-                                                 write fexceptclassnames;
-   property exceptignore: booleanarty read fexceptignore 
-                                                 write fexceptignore;
-}
    property settingsfile: filenamety read fsettingsfile write fsettingsfile;
    property settingseditor: boolean read fsettingseditor write fsettingseditor;
    property settingsdebugger: boolean read fsettingsdebugger 
@@ -597,12 +542,10 @@ type
    property settingsautosave: boolean read fsettingsautosave
                                           write fsettingsautosave;
   
-//   property defineson: longboolarty read fdefineson write fdefineson;
    property modulenames: msestringarty read fmodulenames write fmodulenames;
    property moduletypes: msestringarty read fmoduletypes write fmoduletypes;
    property modulefiles: filenamearty read fmodulefiles write fmodulefiles;
 
-//   property defaultmake: integer read fdefaultmake write fdefaultmake;
    property befcommandon: integerarty read fbefcommandon write fbefcommandon;
    property makeoptionson: integerarty read fmakeoptionson write fmakeoptionson;
    property aftcommandon: integerarty read faftcommandon write faftcommandon;
@@ -613,21 +556,6 @@ type
    property macrovalues: msestringarty read fmacrovalues write fmacrovalues;
    property macrogroup: integer read fmacrogroup write fmacrogroup;
    property groupcomments: msestringarty read fgroupcomments write fgroupcomments;
-
-//   property breakpointpaths: msestringarty read fbreakpointpaths 
-//                                   write fbreakpointpaths;
-//   property breakpointlines: integerarty read fbreakpointlines
-//                                             write fbreakpointlines;
-//   property breakpointaddress: int64arty read fbreakpointaddress
-//                                              write fbreakpointaddress;
-//   property addressbreakpoints: longboolarty read faddressbreakpoints 
-//                                                    write faddressbreakpoints;
-//   property breakpointons: longboolarty read fbreakpointons
-//                                                write fbreakpointons;
-//   property breakpointignore: integerarty read fbreakpointignore
-//                                               write fbreakpointignore;
-//   property breakpointconditions: msestringarty read fbreakpointconditions
-//                                                    write fbreakpointconditions;
 
    property toolsave: longboolarty read ftoolsave write ftoolsave;
    property toolhide: longboolarty read ftoolhide write ftoolhide;
@@ -649,10 +577,6 @@ type
    property newinheritedforms: longboolarty read fnewinheritedforms
                                               write fnewinheritedforms;
    
-//   property windowlayoutfile: filenamety read fwindowlayoutfile 
-//                                                write fwindowlayoutfile;
-//   property windowlayouthistory: filenamearty read fwindowlayouthistory 
-//                                                write fwindowlayouthistory;
  end;
 {$M-}
  
