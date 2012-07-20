@@ -442,7 +442,7 @@ begin
   killtarget; //if running
   programfinished;
   setstattext('');
-  startgdbonexecute(sender);
+  startgdb(false);
  end;
 end;
 
@@ -531,7 +531,7 @@ end;
 procedure tactionsmo.ondetachtarget(const sender: TObject);
 begin
  if mainfo.checkgdberror(mainfo.gdb.detach) then begin
-  mainfo.startgdbonexecute(nil);
+  mainfo.startgdb(false);
  end;
 end;
 
@@ -544,7 +544,7 @@ begin
   int1:= 0;
   if integerenter(int1,minint,maxint,
           'Process ID','Attach to process') = mr_ok then begin
-   startgdbonexecute(nil);
+   startgdb(false);
    gdb.attach(int1,info);
    loadexec(true,false);
    refreshstopinfo(info);
@@ -557,7 +557,7 @@ var
  info: stopinfoty;
 begin
  with mainfo do begin
-  startgdbonexecute(nil);
+  startgdb(false);
   if checkgdberror(gdb.filesymbol(gettargetfile)) and
                                 startgdbconnection(true) then begin
    gdb.attachtarget(info);

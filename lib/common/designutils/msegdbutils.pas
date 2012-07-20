@@ -312,9 +312,11 @@ type
    fstopthreadid: integer;
    fcurrthreadid: integer;
    fsettty: boolean;
+   fbeforeconnect: filenamety;
+   fafterconnect: filenamety;
    procedure setstoponexception(const avalue: boolean);
    procedure checkactive;
-   function checkconnection: gdbresultty;
+   function checkconnection(const proginfo: boolean): gdbresultty;
    procedure resetexec;
    function getrunning: boolean;
    function getexecloaded: boolean;
@@ -330,7 +332,6 @@ type
    procedure targetfrom(const sender: tpipereader);
    {$endif}
    procedure gdbfrom(const sender: tpipereader);
-//   procedure gdberror(const sender: tpipereader);
    procedure gdbpipebroken(const sender: tpipereader);
    procedure interpret(const line: string);
    procedure consoleoutput(const text: string);
@@ -392,6 +393,7 @@ type
    procedure closegdb;
    function interrupttarget: gdbresultty; //stop for breakpointsetting
    function restarttarget: gdbresultty;
+   function tryconnect: boolean;
 
    function togdbfilepath(const filename: filenamety): filenamety;
 
@@ -422,7 +424,6 @@ type
 
    function getstopinfo(const response: resultinfoarty;
               const lastconsoleoutput: ansistring; out info: stopinfoty): boolean;
-//   function geterrorinfo(const response: resultinfoarty; out info: stopinfoty): boolean;
 
    function getvalueindex(const response: resultinfoarty; const aname: string): integer;
                  //-1 if not found
@@ -455,10 +456,6 @@ type
                  var avalue: qword): boolean; overload;
    function getqwordvalue(const response: resultinfoty; const aname: string;
                  var avalue: qword): boolean; overload;
-//   function getptruintvalue(const response: resultinfoarty; const aname: string;
-//                 var avalue: ptruint): boolean; overload;
-//   function getptruintvalue(const response: resultinfoty; const aname: string;
-//                 var avalue: ptruint): boolean; overload;
 
    function getarrayvalue(const response: resultinfoarty; const aname: string;
                  const hasitemnames: boolean;
@@ -475,7 +472,8 @@ type
    function getlongwordarrayvalue(const response: resultinfoarty; const aname: string;
                  var avalue: longwordarty): boolean;
 
-   function fileexec(const filename: filenamety): gdbresultty;
+   function fileexec(const filename: filenamety;
+                           const noproginfo: boolean = false): gdbresultty;
    function filesymbol(const filename: filenamety): gdbresultty;
    function attach(const procid: longword; out info: stopinfoty): gdbresultty;
    function attachtarget(out info: stopinfoty): gdbresultty;
@@ -601,6 +599,8 @@ type
    property settty: boolean read fsettty write fsettty default true;
    property simulator: boolean read fsimulator write fsimulator;
    property processor: processorty read fprocessor write fprocessor default pro_i386;
+   property beforeconnect: filenamety read fbeforeconnect write fbeforeconnect;
+   property afterconnect: filenamety read fafterconnect write fafterconnect;
    property beforeload: filenamety read fbeforeload write fbeforeload;
    property afterload: filenamety read fafterload write fafterload;
    property beforerun: filenamety read fbeforerun write fbeforerun;
@@ -1239,96 +1239,99 @@ begin
      closegdb;      
     end;
     gek_stopped: begin
-     exclude(self.fstate,gs_running);
+//     exclude(self.fstate,gs_running);
      fstoptime:= stopinfo.time;
-     {$ifdef mswindows}
-     if finterruptthreadid <> 0 then begin
-      if getthreadidlist(threadids) = gdb_ok then begin
-       if high(threadids) > 0 then begin
-        if threadselect(threadids[1],mstr1,int1) = gdb_ok then begin
-         setlength(values,3);
-         with values[0] do begin
-          variablename:= 'reason';
-          valuekind:= vk_value;
-          value:= stopreasons[sr_signal_received];
-         end;
-         with values[1] do begin
-          variablename:= 'signal-name';
-          valuekind:= vk_value;
-          value:= 'SIGTRAP';
-         end;
-         with values[2] do begin
-          variablename:= 'thread-id';
-          valuekind:= vk_value;
-          value:= inttostr(threadids[1]);
-         end;
-         if gettuplestring(fsyncvalues,'frame',str1) then begin
-          setlength(values,4);
-          with values[3] do begin
-           variablename:= 'frame';
-           valuekind:= vk_tuple;
-           value:= str1;
+     if gs_running in self.fstate then begin
+      exclude(self.fstate,gs_running);
+      {$ifdef mswindows}
+      if finterruptthreadid <> 0 then begin
+       if getthreadidlist(threadids) = gdb_ok then begin
+        if high(threadids) > 0 then begin
+         if threadselect(threadids[1],mstr1,int1) = gdb_ok then begin
+          setlength(values,3);
+          with values[0] do begin
+           variablename:= 'reason';
+           valuekind:= vk_value;
+           value:= stopreasons[sr_signal_received];
+          end;
+          with values[1] do begin
+           variablename:= 'signal-name';
+           valuekind:= vk_value;
+           value:= 'SIGTRAP';
+          end;
+          with values[2] do begin
+           variablename:= 'thread-id';
+           valuekind:= vk_value;
+           value:= inttostr(threadids[1]);
+          end;
+          if gettuplestring(fsyncvalues,'frame',str1) then begin
+           setlength(values,4);
+           with values[3] do begin
+            variablename:= 'frame';
+            valuekind:= vk_tuple;
+            value:= str1;
+           end;
           end;
          end;
         end;
        end;
+       finterruptthreadid:= 0;
       end;
-      finterruptthreadid:= 0;
-     end;
-    {$endif mswindows}
-     if fthreadid <> -1 then begin
-      threadselect(fthreadid,mstr1,int1); 
-               //there was an breakpoint in other thread
-     end;
-     bo1:= getstopinfo(values,flastconsoleoutput,stopinfo);
-     if not bo1 then begin
-      stopinfo.messagetext:= 'Stop error: ' + stopinfo.messagetext;
-     end
-     else begin
-      if (stopinfo.reason = sr_breakpoint_hit) and 
-       (stopinfo.bkptno = fexceptionbkpt) then begin
-       if getshortstring('($eax^+12)^',str1) then begin
-        str2:= uppercase(str1);
-        bo1:= false;
-        for int1:= 0 to high(fignoreexceptionclasses) do begin
-         if str2 = fignoreexceptionclasses[int1] then begin
-          bo1:= true;
-          break;
+     {$endif mswindows}
+      if fthreadid <> -1 then begin
+       threadselect(fthreadid,mstr1,int1); 
+                //there was an breakpoint in other thread
+      end;
+      bo1:= getstopinfo(values,flastconsoleoutput,stopinfo);
+      if not bo1 then begin
+       stopinfo.messagetext:= 'Stop error: ' + stopinfo.messagetext;
+      end
+      else begin
+       if (stopinfo.reason = sr_breakpoint_hit) and 
+        (stopinfo.bkptno = fexceptionbkpt) then begin
+        if getshortstring('($eax^+12)^',str1) then begin
+         str2:= uppercase(str1);
+         bo1:= false;
+         for int1:= 0 to high(fignoreexceptionclasses) do begin
+          if str2 = fignoreexceptionclasses[int1] then begin
+           bo1:= true;
+           break;
+          end;
+         end;
+         if bo1 then begin
+          self.fstate:= self.fstate + [gs_restarted,gs_running];
+          continue;
+          stopinfo.reason:= sr_none;
+         end
+         else begin
+          stopinfo.messagetext:= 'Exception '+str1+'.';
+          stopinfo.reason:= sr_exception;
          end;
         end;
-        if bo1 then begin
-         self.fstate:= self.fstate + [gs_restarted,gs_running];
-         continue;
-         stopinfo.reason:= sr_none;
-        end
-        else begin
-         stopinfo.messagetext:= 'Exception '+str1+'.';
-         stopinfo.reason:= sr_exception;
+       end;
+       if stopinfo.reason in [sr_exited,sr_exited_normally] then begin
+        self.fstate:= self.fstate - [gs_started,gs_startup];
+       end;
+       if stopinfo.reason = sr_startup then begin
+        if fstartupbreakpoint >= 0 then begin
+         breakdelete(fstartupbreakpoint);
+         fstartupbreakpoint:= -1;
         end;
+        if fstartupbreakpoint1 >= 0 then begin
+         breakdelete(fstartupbreakpoint1);
+         fstartupbreakpoint1:= -1;
+        end;
+        fprocid:= 0;
+        getprocid(fprocid);
+        {$ifdef UNIX}
+        ftargetterminal.restart;
+        {$endif}
+        if gs_startup in self.fstate then begin
+         exit; //already done
+        end;
+        include(self.fstate,gs_startup);
+        include(self.fstate,gs_started); //gek_running can be missed
        end;
-      end;
-      if stopinfo.reason in [sr_exited,sr_exited_normally] then begin
-       self.fstate:= self.fstate - [gs_started,gs_startup];
-      end;
-      if stopinfo.reason = sr_startup then begin
-       if fstartupbreakpoint >= 0 then begin
-        breakdelete(fstartupbreakpoint);
-        fstartupbreakpoint:= -1;
-       end;
-       if fstartupbreakpoint1 >= 0 then begin
-        breakdelete(fstartupbreakpoint1);
-        fstartupbreakpoint1:= -1;
-       end;
-       fprocid:= 0;
-       getprocid(fprocid);
-       {$ifdef UNIX}
-       ftargetterminal.restart;
-       {$endif}
-       if gs_startup in self.fstate then begin
-        exit; //already done
-       end;
-       include(self.fstate,gs_startup);
-       include(self.fstate,gs_started); //gek_running can be missed
       end;
      end;
     end;
@@ -1350,10 +1353,10 @@ begin
          postsyncerror;
         end;
        end;
-       initproginfo;
        include(self.fstate,gs_downloading);
                 //restore downloading flag;
        if gs_runafterload in self.fstate then begin
+        initproginfo;
         dorun;
        end;
       end;
@@ -1857,7 +1860,8 @@ begin
  {$endif}
 end;
 
-function tgdbmi.fileexec(const filename: filenamety): gdbresultty;
+function tgdbmi.fileexec(const filename: filenamety;
+                           const noproginfo: boolean = false): gdbresultty;
 begin
  abort;
  resetexec;
@@ -1870,7 +1874,7 @@ begin
                                     10000000);
   updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
                  ord(gs_execloaded),result = gdb_ok);
-  if result = gdb_ok then begin
+  if (result = gdb_ok) and not noproginfo then begin
    initinternalbkpts;
    initproginfo;
   end;
@@ -1957,7 +1961,7 @@ begin
  finalize(info);
  fillchar(info,sizeof(info),0);
  info.reason:= sr_error;
- result:= checkconnection;
+ result:= checkconnection(true);
  if result = gdb_ok then begin
   result:= stacklistframes(frames1,0,1);
   if (result = gdb_ok) or (result = gdb_message) then begin
@@ -2011,7 +2015,7 @@ end;
 
 function tgdbmi.download(const runafterload: boolean): gdbresultty;
 begin
- result:= checkconnection;
+ result:= checkconnection(false);
  if result = gdb_ok then begin
   if fbeforeload <> '' then begin
    result:= source(fbeforeload);
@@ -2141,25 +2145,44 @@ begin
  end;
 end;
 
-function tgdbmi.checkconnection: gdbresultty;
+function tgdbmi.checkconnection(const proginfo: boolean): gdbresultty;
 begin
  result:= gdb_ok;
- if fremoteconnection <> '' then begin
-  if synccommand('-gdb-set target-async 1') = gdb_ok then begin
-   include(fstate,gs_async);
-  end;
-  if result = gdb_ok then begin
-   result:= synccommand('-target-select '+fremoteconnection);
-  end;
-  if result <> gdb_ok then begin
-   exit;
-  end;
-  include(fstate,gs_remote);
-  initproginfo;
- end
- else begin
-  {result:= }synccommand('-gdb-set target-async 0'); //fails on older gdb's
+ if fbeforeconnect <> '' then begin
+  result:= source(fbeforeconnect);
  end;
+ if result = gdb_ok then begin
+  if fremoteconnection <> '' then begin
+   if synccommand('-gdb-set target-async 1') = gdb_ok then begin
+    include(fstate,gs_async);
+   end;
+   if result = gdb_ok then begin
+    result:= synccommand('-target-select '+fremoteconnection);
+   end;
+   if result <> gdb_ok then begin
+    exit;
+   end;
+   include(fstate,gs_remote);
+   if proginfo then begin
+    initproginfo;
+   end;
+  end
+  else begin
+   {result:= }synccommand('-gdb-set target-async 0'); //fails on older gdb's
+  end;
+ end;
+ if result = gdb_ok then begin
+  if fafterconnect <> '' then begin
+   result:= source(fafterconnect);
+  end;
+ end;
+end;
+
+function tgdbmi.tryconnect: boolean;
+begin
+ result:= fremoteconnection = '';
+ result:= result or 
+                 (synccommand('-target-select '+fremoteconnection) = gdb_ok);
 end;
 
 function tgdbmi.run: gdbresultty;
@@ -2179,7 +2202,7 @@ begin
    result:= download(true);
   end
   else begin
-   result:= checkconnection;
+   result:= checkconnection(true);
    if result = gdb_ok then begin
     dorun;
    end;
@@ -4425,7 +4448,6 @@ begin
  ftargetterminal.input.overloadsleepus:= avalue;
 {$endif}
 end;
-
 {$ifdef UNIX}
 { tpseudoterminal }
 

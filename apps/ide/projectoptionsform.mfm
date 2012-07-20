@@ -1591,6 +1591,9 @@ object projectoptionsfo: tprojectoptionsfo
             reffontheight = 14
             object tlayouter2: tlayouter
               color = -2147483645
+              frame.framei_right = 2
+              frame.localprops = [frl_firight]
+              frame.dummy = 0
               taborder = 2
               bounds_x = 0
               bounds_y = 74
@@ -1603,7 +1606,6 @@ object projectoptionsfo: tprojectoptionsfo
               optionslayout = [lao_placex, lao_aligny]
               place_mindist = 2
               place_maxdist = 2
-              place_options = [plo_endmargin]
               object gdbservercommandattach: tfilenameedit
                 optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
                 frame.options = [cfo_fixtop]
@@ -1622,7 +1624,7 @@ object projectoptionsfo: tprojectoptionsfo
                 onshowhint = hintexpandedmacros
                 bounds_x = 0
                 bounds_y = 0
-                bounds_cx = 591
+                bounds_cx = 451
                 bounds_cy = 37
                 anchors = [an_left, an_top, an_right]
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -1631,18 +1633,18 @@ object projectoptionsfo: tprojectoptionsfo
                 reffontheight = 14
               end
               object nogdbserverexit: tbooleanedit
-                frame.caption = 'noexit'
+                frame.caption = 'no wait for exit'
                 frame.dummy = 0
                 frame.outerframe = (
                   0
                   1
-                  35
+                  80
                   2
                 )
                 taborder = 1
-                bounds_x = 593
+                bounds_x = 453
                 bounds_y = 20
-                bounds_cx = 47
+                bounds_cx = 93
                 bounds_cy = 16
                 anchors = [an_top, an_right]
               end
@@ -1656,7 +1658,7 @@ object projectoptionsfo: tprojectoptionsfo
                   2
                 )
                 taborder = 2
-                bounds_x = 642
+                bounds_x = 548
                 bounds_y = 20
                 bounds_cx = 37
                 bounds_cy = 16
@@ -1700,8 +1702,8 @@ object projectoptionsfo: tprojectoptionsfo
               dist_top = 3
               optionslayout = [lao_aligny]
               align_glue = wam_start
-              object gdbbeforeload: tfilenameedit
-                frame.caption = 'Before load gdb script'
+              object beforeconnect: tfilenameedit
+                frame.caption = 'Before connect gdb script'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.button.color = -2147483646
@@ -1715,7 +1717,7 @@ object projectoptionsfo: tprojectoptionsfo
                 onshowhint = hintexpandedmacros
                 bounds_x = 1
                 bounds_y = 0
-                bounds_cx = 318
+                bounds_cx = 214
                 bounds_cy = 37
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
                 controller.filterlist.data = (
@@ -1732,16 +1734,16 @@ object projectoptionsfo: tprojectoptionsfo
                 color = -1879048189
                 taborder = 1
                 visible = False
-                bounds_x = 319
+                bounds_x = 215
                 bounds_y = 17
                 bounds_cx = 3
                 bounds_cy = 20
                 options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
-                linkleft = gdbbeforeload
-                linkright = gdbafterload
+                linkleft = beforeconnect
+                linkright = beforeload
               end
-              object gdbafterload: tfilenameedit
-                frame.caption = 'After load gdb script'
+              object beforeload: tfilenameedit
+                frame.caption = 'Before load gdb script'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.button.color = -2147483646
@@ -1754,9 +1756,50 @@ object projectoptionsfo: tprojectoptionsfo
                 )
                 taborder = 2
                 onshowhint = hintexpandedmacros
-                bounds_x = 322
+                bounds_x = 218
                 bounds_y = 0
-                bounds_cx = 356
+                bounds_cx = 221
+                bounds_cy = 37
+                textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
+                controller.filterlist.data = (
+                  (
+                    'gdb Scripts'
+                    '*.gdb'
+                  )
+                )
+                controller.options = [fdo_checkexist, fdo_savelastdir]
+                reffontheight = 14
+              end
+              object tsplitter9: tsplitter
+                optionswidget = [ow_destroywidgets]
+                color = -1879048189
+                taborder = 3
+                visible = False
+                bounds_x = 439
+                bounds_y = 17
+                bounds_cx = 3
+                bounds_cy = 20
+                options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
+                linkleft = beforeload
+                linkright = beforerun
+              end
+              object beforerun: tfilenameedit
+                frame.caption = 'Before run gdb script'
+                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+                frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+                frame.button.color = -2147483646
+                frame.button.imagenr = 17
+                frame.outerframe = (
+                  0
+                  17
+                  0
+                  0
+                )
+                taborder = 4
+                onshowhint = hintexpandedmacros
+                bounds_x = 442
+                bounds_y = 0
+                bounds_cx = 236
                 bounds_cy = 37
                 anchors = [an_left, an_top, an_right]
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -1785,8 +1828,8 @@ object projectoptionsfo: tprojectoptionsfo
               dist_top = 3
               optionslayout = [lao_aligny]
               align_glue = wam_start
-              object gdbbeforerun: tfilenameedit
-                frame.caption = 'Before run gdb script'
+              object afterconnect: tfilenameedit
+                frame.caption = 'After connect gdb script'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.button.color = -2147483646
@@ -1800,7 +1843,7 @@ object projectoptionsfo: tprojectoptionsfo
                 onshowhint = hintexpandedmacros
                 bounds_x = 1
                 bounds_y = 0
-                bounds_cx = 318
+                bounds_cx = 214
                 bounds_cy = 37
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
                 controller.filterlist.data = (
@@ -1817,12 +1860,53 @@ object projectoptionsfo: tprojectoptionsfo
                 color = -1879048189
                 taborder = 1
                 visible = False
-                bounds_x = 319
+                bounds_x = 215
                 bounds_y = 17
                 bounds_cx = 3
                 bounds_cy = 20
                 options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
-                linkleft = gdbbeforerun
+                linkleft = afterconnect
+                linkright = afterload
+              end
+              object afterload: tfilenameedit
+                frame.caption = 'After load gdb script'
+                frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
+                frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
+                frame.button.color = -2147483646
+                frame.button.imagenr = 17
+                frame.outerframe = (
+                  0
+                  17
+                  0
+                  0
+                )
+                taborder = 2
+                onshowhint = hintexpandedmacros
+                bounds_x = 218
+                bounds_y = 0
+                bounds_cx = 221
+                bounds_cy = 37
+                textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
+                controller.filterlist.data = (
+                  (
+                    'gdb Scripts'
+                    '*.gdb'
+                  )
+                )
+                controller.options = [fdo_checkexist, fdo_savelastdir]
+                reffontheight = 14
+              end
+              object tsplitter10: tsplitter
+                optionswidget = [ow_destroywidgets]
+                color = -1879048189
+                taborder = 3
+                visible = False
+                bounds_x = 439
+                bounds_y = 17
+                bounds_cx = 3
+                bounds_cy = 20
+                options = [spo_hprop, spo_dockleft, spo_docktop, spo_dockright, spo_dockbottom]
+                linkleft = afterload
               end
             end
             object serverla: tlayouter
@@ -1838,7 +1922,9 @@ object projectoptionsfo: tprojectoptionsfo
               anchors = [an_top]
               optionsscale = [osc_expandy, osc_shrinky]
               linktop = uploadcommand
-              optionslayout = [lao_aligny]
+              optionslayout = [lao_placex, lao_aligny]
+              place_mindist = 2
+              place_maxdist = 2
               object gdbservercommand: tfilenameedit
                 optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
                 frame.options = [cfo_fixtop]
@@ -1855,9 +1941,9 @@ object projectoptionsfo: tprojectoptionsfo
                   0
                 )
                 onshowhint = hintexpandedmacros
-                bounds_x = 1
+                bounds_x = 0
                 bounds_y = 0
-                bounds_cx = 626
+                bounds_cx = 450
                 bounds_cy = 37
                 anchors = [an_left, an_top, an_right]
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -1866,20 +1952,20 @@ object projectoptionsfo: tprojectoptionsfo
                 reffontheight = 14
               end
               object gdbserverwait: trealedit
-                frame.caption = 'Wait'
+                frame.caption = 'Wait before connect'
                 frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
                 frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
                 frame.dummy = 0
                 frame.outerframe = (
                   0
                   17
-                  0
+                  63
                   0
                 )
                 taborder = 1
-                bounds_x = 630
+                bounds_x = 452
                 bounds_y = 0
-                bounds_cx = 47
+                bounds_cx = 110
                 bounds_cy = 37
                 anchors = [an_top, an_right]
                 value = 0
@@ -1891,6 +1977,21 @@ object projectoptionsfo: tprojectoptionsfo
                 min = 0
                 max = 10
                 reffontheight = 14
+              end
+              object gdbserverstartonce: tbooleanedit
+                frame.caption = 'Start once'
+                frame.dummy = 0
+                frame.outerframe = (
+                  0
+                  1
+                  58
+                  2
+                )
+                taborder = 2
+                bounds_x = 564
+                bounds_y = 20
+                bounds_cx = 71
+                bounds_cy = 16
               end
             end
             object uploadcommand: tfilenameedit

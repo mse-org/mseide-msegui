@@ -3517,19 +3517,21 @@ procedure removereturn(var avalue: msestring; var aindex: integer);
 var
  s,d: pmsechar;
 begin
- s:= pmsechar(avalue);
- d:= s;
- while s^ <> #0 do begin
-  if s^ <> msechar(c_return) then begin
-   d^:= s^;
-   if d - pmsechar(pointer(avalue)) <= aindex then begin
-    dec(aindex);
+ if avalue <> '' then begin
+  s:= pmsechar(avalue);
+  d:= s;
+  while s^ <> #0 do begin
+   if s^ <> msechar(c_return) then begin
+    d^:= s^;
+    if d - pmsechar(pointer(avalue)) <= aindex then begin
+     dec(aindex);
+    end;
+    inc(d);
    end;
-   inc(d);
+   inc(s);
   end;
-  inc(s);
+  setlength(avalue,d-pmsechar(pointer(avalue)));
  end;
- setlength(avalue,d-pmsechar(pointer(avalue)));
 end;
 
 procedure addeditchars(const source: msestring; var buffer: msestring; 
