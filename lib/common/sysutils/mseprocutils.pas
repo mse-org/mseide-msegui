@@ -101,6 +101,7 @@ function execwaitmse(const commandline: string;
 //inactive true -> no console window (win32 only)
 
 procedure killprocess(handle: prochandlety);
+procedure killprocesstree(handle: prochandlety);
 function terminateprocess(handle: prochandlety): integer;
            //sendet sigterm, bringt exitresult, -1 on error
 
@@ -176,6 +177,18 @@ type
 implementation
 uses 
  msesysintf1,msesysintf,msestrings,mseprocmonitor,msearrayutils;
+
+procedure killprocesstree(handle: prochandlety);
+var
+ ar1: procidarty;
+ int1: integer;
+begin
+ ar1:= getprocesschildren(handle);
+ for int1:= 0 to high(ar1) do begin
+  killprocesstree(ar1[int1]);
+ end;
+ killprocess(handle);
+end;
 
 function getpid: procidty;
 begin

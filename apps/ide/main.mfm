@@ -274,7 +274,7 @@ object mainfo: tmainfo
             caption = 'Restart Debugger'
             state = [as_localcaption, as_localimagelist, as_localonexecute]
             imagelist = dummyimagelist
-            onexecute = startgdbonexecute
+            onexecute = restartgdbonexecute
           end        
           item
             action = actionsmo.attachprocess

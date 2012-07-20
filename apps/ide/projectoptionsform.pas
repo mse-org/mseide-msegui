@@ -63,70 +63,7 @@ type
   flags: sigflagsty;
  end;
  sigsetinfoarty = array of sigsetinfoty;
-(*
- projecttextty = record
-//  mainfile: filenamety;
-{
-  targetfile: filenamety;
-  messageoutputfile: filenamety;
-  makecommand: filenamety;
-  makedir: filenamety;
-  debugcommand: filenamety;
-  debugoptions: msestring;
-  debugtarget: filenamety;
-  runcommand: filenamety;
-  remoteconnection: msestring;
-  uploadcommand: filenamety;
-  gdbprocessor: msestring;
-  gdbservercommand: filenamety;
-  gdbservercommandattach: filenamety;
-  beforeload: filenamety;
-  afterload: filenamety;
-  beforerun: filenamety;
-  sourcedirs: msestringarty;
-  defines: msestringarty;
-  unitdirs: msestringarty;
-  unitpref: msestring;
-  incpref: msestring;
-  libpref: msestring;
-  objpref: msestring;
-  targpref: msestring;
-  
-  befcommand: msestringarty;
-  aftcommand: msestringarty;
-  makeoptions: msestringarty;
-  sourcefilemasks: msestringarty;
-  syntaxdeffiles: msestringarty;
-  filemasknames: msestringarty;
-  filemasks: msestringarty;
-  codetemplatedirs: msestringarty;
 
-  toolmenus: msestringarty;
-  toolfiles: msestringarty;
-  toolparams: msestringarty;
-    
-  fontnames: msestringarty;
-  scriptbeforecopy: msestring;
-  scriptaftercopy: msestring;
-  newprojectfiles: filenamearty;
-  newprojectfilesdest: filenamearty;
-  newfinames: msestringarty;
-  newfifilters: msestringarty;
-  newfiexts: msestringarty;
-  newfisources: filenamearty;
-  
-  newfonames: msestringarty;
-  newfonamebases: msestringarty;
-  newfosources: msestringarty;
-  newfoforms: msestringarty;
-
-  progparameters: msestring;
-  progworkingdirectory: filenamety;
-  envvarnames: msestringarty;
-  envvarvalues: msestringarty;
-}
- end;
-*)
 {$M+} //tprojectoptions needs RTTI
  toptions = class
   protected
@@ -144,22 +81,6 @@ type
    fmessageoutputfile: filenamety;
    fmakecommand: filenamety;
    fmakedir: filenamety;
-{
-   fdebugcommand: filenamety;
-   fdebugoptions: msestring;
-   fdebugtarget: filenamety;
-   fruncommand: filenamety;
-   fremoteconnection: msestring;
-   fuploadcommand: filenamety;
-   fgdbprocessor: msestring;
-   fgdbservercommand: filenamety;
-   fgdbservercommandattach: filenamety;
-   fbeforeload: filenamety;
-   fafterload: filenamety;
-   fbeforerun: filenamety;
-   fsourcedirs: msestringarty;
-   fdefines: msestringarty;
-}
    funitdirs: msestringarty;
    funitpref: msestring;
    fincpref: msestring;
@@ -185,16 +106,8 @@ type
    fnewfonamebases: msestringarty;
    fnewfosources: msestringarty;
    fnewfoforms: msestringarty;
-   {
-   fprogparameters: msestring;
-   fprogworkingdirectory: filenamety;
-   fenvvarnames: msestringarty;
-   fenvvarvalues: msestringarty;
-   }
   public
    fcodetemplatedirs: msestringarty;
-//   procedure expandmacros(const source: ttextprojectoptions;
-//                                      const amacrolist: tmacrolist);
   published
    property mainfile: filenamety read fmainfile write fmainfile;
    property targetfile: filenamety read ftargetfile write ftargetfile;
@@ -202,26 +115,6 @@ type
                                                write fmessageoutputfile;
    property makecommand: filenamety read fmakecommand write fmakecommand;
    property makedir: filenamety read fmakedir write fmakedir;
-{
-   property debugcommand: filenamety read fdebugcommand write fdebugcommand;
-   property debugoptions: msestring read fdebugoptions write fdebugoptions;
-   property debugtarget: filenamety read fdebugtarget write fdebugtarget;
-   property runcommand: filenamety read fruncommand write fruncommand;
-   property remoteconnection: msestring read fremoteconnection 
-                                        write fremoteconnection;
-   property uploadcommand: filenamety read fuploadcommand 
-                                            write fuploadcommand;
-   property gdbprocessor: msestring read fgdbprocessor write fgdbprocessor;
-   property gdbservercommand: filenamety read fgdbservercommand
-                                              write fgdbservercommand;
-   property gdbservercommandattach: filenamety read fgdbservercommandattach
-                                                write fgdbservercommandattach;
-   property beforeload: filenamety read fbeforeload write fbeforeload;
-   property afterload: filenamety read fafterload write fafterload;
-   property beforerun: filenamety read fbeforerun write fbeforerun;
-   property sourcedirs: msestringarty read fsourcedirs write fsourcedirs;
-   property defines: msestringarty read fdefines write fdefines;
- }
    property unitdirs: msestringarty read funitdirs write funitdirs;
    property unitpref: msestring read funitpref write funitpref;
    property incpref: msestring read fincpref write fincpref;
@@ -261,14 +154,6 @@ type
    property newfosources: msestringarty read fnewfosources 
                                         write fnewfosources;
    property newfoforms: msestringarty read fnewfoforms write fnewfoforms;
-{
-   property progparameters: msestring read fprogparameters 
-                                   write fprogparameters;
-   property progworkingdirectory: filenamety read fprogworkingdirectory 
-                                               write fprogworkingdirectory;
-   property envvarnames: msestringarty read fenvvarnames write fenvvarnames;
-   property envvarvalues: msestringarty read fenvvarvalues write fenvvarvalues;
-}
  end;
 
  ttexteditoptions = class
@@ -386,6 +271,8 @@ type
    fprogworkingdirectory: filenamety;
    fenvvarnames: msestringarty;
    fenvvarvalues: msestringarty;
+   fbeforeconnect: filenamety;
+   fafterconnect: filenamety;
   protected
   published
    property debugcommand: filenamety read fdebugcommand write fdebugcommand;
@@ -401,6 +288,8 @@ type
                                               write fgdbservercommand;
    property gdbservercommandattach: filenamety read fgdbservercommandattach
                                                 write fgdbservercommandattach;
+   property beforeconnect: filenamety read fbeforeconnect write fbeforeconnect;
+   property afterconnect: filenamety read fafterconnect write fafterconnect;
    property beforeload: filenamety read fbeforeload write fbeforeload;
    property afterload: filenamety read fafterload write fafterload;
    property beforerun: filenamety read fbeforerun write fbeforerun;
@@ -420,7 +309,7 @@ type
    ft: ttextdebugoptions;
    ftexp: ttextdebugoptions;
    fdefineson: longboolarty;
-    fstoponexception: boolean;
+   fstoponexception: boolean;
    fvaluehints: boolean;
    factivateonbreak: boolean;
    fshowconsole: boolean;
@@ -437,6 +326,7 @@ type
    fgdbservertty: boolean;
    fnodebugbeginend: boolean;
    fsettty: boolean;
+   fgdbserverstartonce: boolean;
  protected
    function gett: tobject; override;
    function gettexp: tobject; override;
@@ -457,6 +347,8 @@ type
    property startupbkpt: integer read fstartupbkpt write fstartupbkpt;
    property startupbkpton: boolean read fstartupbkpton write fstartupbkpton;
    property gdbsimulator: boolean read fgdbsimulator write fgdbsimulator;
+   property gdbserverstartonce: boolean read fgdbserverstartonce 
+                            write fgdbserverstartonce;
    property gdbserverwait: real read fgdbserverwait write fgdbserverwait;
    property nogdbserverexit: boolean read fnogdbserverexit 
                                                    write fnogdbserverexit;
@@ -588,62 +480,13 @@ type
   modified: boolean;
   savechecked: boolean;
   ignoreexceptionclasses: stringarty;
-//  t: projecttextty;
-//  texp: projecttextty;
   projectfilename: filenamety;
   projectdir: filenamety;
-
-//  fontalias: msestringarty;
-//  fontancestors: msestringarty;
-//  fontheights: integerarty;
-//  fontwidths: integerarty;
-//  fontoptions: msestringarty;
-//  fontxscales: realarty;
-  
-//  defineson: longboolarty;
-  
-//  modulenames: msestringarty;
-//  moduletypes: msestringarty;
-//  modulefilenames: filenamearty;
-
   defaultmake: integer;
-//  befcommandon: integerarty;
-//  makeoptionson: integerarty;
-//  aftcommandon: integerarty;
-//  unitdirson: integerarty;
-
-//  macroon: integerarty;
-//  macronames,macrovalues: msestringarty;
-//  macrogroup: integer;
-//  groupcomments: msestringarty;
-
-//  breakpointpaths: msestringarty;
-//  breakpointlines: integerarty;
-//  breakpointaddress: int64arty;
-//  addressbreakpoints: longboolarty;
-//  breakpointons: longboolarty;
-//  breakpointignore: integerarty;
-//  breakpointconditions: msestringarty;
-
   sigsettings: sigsetinfoarty;
-  //programparameters
   propgparamhistory: msestringarty;
   envvarons: longboolarty;
-  
-  //editor
   findreplaceinfo: replaceinfoty;
-  
-  //templates
-//  expandprojectfilemacros: longboolarty;
-//  loadprojectfile: longboolarty;
-
-  //newform  
-//  newinheritedforms: longboolarty;
-  
-  //tools
-//  toolsave: longboolarty;
-//  toolhide: longboolarty;
-//  toolparse: longboolarty;
  end;
 
  tprojectoptionsfo = class(tmseform)
@@ -690,11 +533,11 @@ type
    gdbsimulator: tbooleanedit;
    gdbdownload: tbooleanedit;
    tlayouter4: tlayouter;
-   gdbbeforeload: tfilenameedit;
+   beforeconnect: tfilenameedit;
    tsplitter7: tsplitter;
-   gdbafterload: tfilenameedit;
+   beforeload: tfilenameedit;
    tlayouter5: tlayouter;
-   gdbbeforerun: tfilenameedit;
+   afterconnect: tfilenameedit;
    tsplitter8: tsplitter;
    tlayouter1: tlayouter;
    externalconsole: tbooleanedit;
@@ -889,6 +732,11 @@ type
    toolmessages: tbooleanedit;
    settty: tbooleanedit;
    gdbservertty: tbooleanedit;
+   tsplitter9: tsplitter;
+   beforerun: tfilenameedit;
+   afterload: tfilenameedit;
+   tsplitter10: tsplitter;
+   gdbserverstartonce: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -1230,71 +1078,11 @@ begin
   o.expandmacros(li);
   e.expandmacros(li);
   d.expandmacros(li);
- {
-  texp:= t;
-  with texp do begin
-   li.expandmacros(mainfile);
-   li.expandmacros(targetfile);
-   li.expandmacros(messageoutputfile);
-   li.expandmacros(makecommand);
-   li.expandmacros(makedir);
-   li.expandmacros(debugcommand);
-   li.expandmacros(debugoptions);
-   li.expandmacros(debugtarget);
-   li.expandmacros(runcommand);
-   li.expandmacros(remoteconnection);
-   li.expandmacros(uploadcommand);
-   li.expandmacros(gdbservercommand);
-   li.expandmacros(gdbservercommandattach);
-   li.expandmacros(beforeload);
-   li.expandmacros(afterload);
-   li.expandmacros(beforerun);
-   li.expandmacros(gdbprocessor);
-   li.expandmacros(sourcedirs);
-   li.expandmacros(defines);
-   li.expandmacros(unitdirs);
-   li.expandmacros(unitpref);
-   li.expandmacros(incpref);
-   li.expandmacros(libpref);
-   li.expandmacros(objpref);
-   li.expandmacros(targpref);
-   li.expandmacros(befcommand);
-   li.expandmacros(aftcommand);
-   li.expandmacros(makeoptions);
-   li.expandmacros(sourcefilemasks);
-   li.expandmacros(syntaxdeffiles);
-   li.expandmacros(filemasknames);
-   li.expandmacros(filemasks);
-   li.expandmacros(codetemplatedirs);
-   li.expandmacros(toolmenus);
-   li.expandmacros(toolfiles);
-   li.expandmacros(toolparams);
-   li.expandmacros(fontnames);
-   li.expandmacros(scriptbeforecopy);
-   li.expandmacros(scriptaftercopy);
-   li.expandmacros(newprojectfiles);
-   li.expandmacros(newprojectfilesdest);
-
-   li.expandmacros(newfinames);
-   li.expandmacros(newfifilters);
-   li.expandmacros(newfiexts);
-   li.expandmacros(newfisources);
-  
-   li.expandmacros(newfonames);
-   li.expandmacros(newfonamebases);
-   li.expandmacros(newfosources);
-   li.expandmacros(newfoforms);
-   li.expandmacros(progparameters);
-   li.expandmacros(progworkingdirectory);
-   li.expandmacros(envvarnames);
-   li.expandmacros(envvarvalues);
-}
   with o,texp do begin
    if initfontaliascount = 0 then begin
     initfontaliascount:= fontaliascount;
    end;
    setfontaliascount(initfontaliascount);
-//   clearfontalias;
    int2:= high(fontalias);
    int1:= high(fontancestors);
    setlength(ffontancestors,int2+1); //additional field
@@ -1554,36 +1342,6 @@ begin
   objpref:= '-Fo';
   targpref:= '-o';
   makecommand:= '${COMPILER}';
-//  makedir:= '';
-//  debugcommand:= '${DEBUGGER}';
-//  debugoptions:= '';
-//  debugtarget:= '';
-//  runcommand:= '';
-//  remoteconnection:= '';
-//  uploadcommand:= '';
-//  gdbprocessor:= 'auto';
-//  gdbservercommand:= '';
-//  gdbservercommandattach:= '';
-//  beforeload:= '';
-//  afterload:= '';
-//  beforerun:= '';
-//  sourcefilemasks:= nil;
-//  syntaxdeffiles:= nil;
-//  filemasknames:= nil;
-//  filemasks:= nil;
-//  toolsave:= nil;
-//  toolhide:= nil;
-//  toolparse:= nil;
-//  toolmenus:= nil;
-//  toolfiles:= nil;
-//  toolparams:= nil;
-//  fontalias:= nil;
-//  fontancestors:= nil;
-//  fontnames:= nil;
-//  fontheights:= nil;
-//  fontwidths:= nil;
-//  fontoptions:= nil;
-//  fontxscales:= nil;
   setlength(fnewfinames,3);
   setlength(fnewfifilters,3);
   setlength(fnewfiexts,3);
@@ -1964,51 +1722,8 @@ begin
     fo.sighandle[int1]:= sfl_handle in flags;
    end;
   end;
-//  fo.mainfile.value:= mainfile;
-//  fo.targetfile.value:= targetfile;
-//  fo.messageoutputfile.value:= messageoutputfile;
-//  fo.fontalias.gridvalues:= fontalias;
-//  fo.fontancestors.gridvalues:= fontancestors;
-//  fo.fontname.gridvalues:= fontnames;
-//  fo.fontheight.gridvalues:= fontheights;
-//  fo.fontwidth.gridvalues:= fontwidths;
-//  fo.fontoptions.gridvalues:= fontoptions;
-//  fo.fontxscale.gridvalues:= fontxscales;
   fo.fontondataentered(nil);
-
-//  fo.scriptbeforecopy.value:= scriptbeforecopy;
-//  fo.scriptaftercopy.value:= scriptaftercopy;
-//  fo.newprojectfiles.gridvalues:= newprojectfiles;
-//  fo.newprojectfilesdest.gridvalues:= newprojectfilesdest;
-//  fo.expandprojectfilemacros.gridvalues:= expandprojectfilemacros;
-//  fo.loadprojectfile.gridvalues:= loadprojectfile;
-  
-//  fo.newfiname.gridvalues:= newfinames;
-//  fo.newfifilter.gridvalues:= newfifilters;
-//  fo.newfiext.gridvalues:= newfiexts;
-//  fo.newfisource.gridvalues:= newfisources;
-  
-//  fo.newformname.gridvalues:= newfonames;
-//  fo.newinheritedform.gridvalues:= newinheritedforms;
-//  fo.newformnamebase.gridvalues:= newfonamebases;
-//  fo.newformsourcefile.gridvalues:= newfosources;
-//  fo.newformformfile.gridvalues:= newfoforms;
-//  fo.makecommand.value:= makecommand;
-//  fo.makedir.value:= makedir;
-//  fo.debugcommand.value:= debugcommand;
-//  fo.debugoptions.value:= debugoptions;
-//  fo.debugtarget.value:= debugtarget;
-//  fo.runcommand.value:= runcommand;
-//  fo.remoteconnection.value:= remoteconnection;
-//  fo.uploadcommand.value:= uploadcommand;
-//  fo.gdbprocessor.value:= gdbprocessor;
-//  fo.gdbservercommand.value:= gdbservercommand;
-//  fo.gdbservercommandattach.value:= gdbservercommandattach;
-//  fo.gdbbeforeload.value:= beforeload;
-//  fo.gdbafterload.value:= afterload;
-//  fo.gdbbeforerun.value:= beforerun;
   fo.defaultmake.value:= lowestbit(defaultmake);
-//  fo.makeoptions.gridvalues:= makeoptions;
   for int1:= 0 to fo.makeoptionsgrid.rowhigh do begin
    if int1 > high(o.makeoptionson) then begin
     break;
@@ -2021,7 +1736,6 @@ begin
    fo.make4on.gridupdatetagvalue(int1,o.makeoptionson[int1]);
   end;
 
-//  fo.befcommand.gridvalues:= befcommand;
   for int1:= 0 to fo.befcommandgrid.rowhigh do begin
    if int1 > high(o.befcommandon) then begin
     break;
@@ -2034,7 +1748,6 @@ begin
    fo.befmake4on.gridupdatetagvalue(int1,o.befcommandon[int1]);
   end;
 
-//  fo.aftcommand.gridvalues:= aftcommand;
   for int1:= 0 to fo.aftcommandgrid.rowhigh do begin
    if int1 > high(o.aftcommandon) then begin
     break;
@@ -2144,55 +1857,13 @@ begin
    end;
   end;
   
-//  mainfile:= fo.mainfile.value;
-//  targetfile:= fo.targetfile.value;
-//  messageoutputfile:= fo.messageoutputfile.value;
-
-//  fontalias:= fo.fontalias.gridvalues;
-//  fontancestors:= fo.fontancestors.gridvalues;
-//  fontnames:= fo.fontname.gridvalues;
-//  fontheights:= fo.fontheight.gridvalues;
-//  fontwidths:= fo.fontwidth.gridvalues;
-//  fontoptions:= fo.fontoptions.gridvalues;
-//  fontxscales:= fo.fontxscale.gridvalues;
   for int1:= high(o.fontxscales) downto 0 do begin
    if o.fontxscales[int1] = emptyreal then begin
     o.fontxscales[int1]:= 1.0;
    end;   
   end;
 
-//  scriptbeforecopy:= fo.scriptbeforecopy.value;
-//  scriptaftercopy:= fo.scriptaftercopy.value;
-//  newprojectfiles:= fo.newprojectfiles.gridvalues;
-//  newprojectfilesdest:= fo.newprojectfilesdest.gridvalues;
-//  expandprojectfilemacros:= fo.expandprojectfilemacros.gridvalues;
-//  loadprojectfile:= fo.loadprojectfile.gridvalues;
-//  newfinames:= fo.newfiname.gridvalues;
-//  newfifilters:= fo.newfifilter.gridvalues;
-//  newfiexts:= fo.newfiext.gridvalues;
-//  newfisources:= fo.newfisource.gridvalues;
-
-//  newfonames:= fo.newformname.gridvalues;
-//  newinheritedforms:= fo.newinheritedform.gridvalues;
-//  newfonamebases:= fo.newformnamebase.gridvalues;
-//  newfosources:= fo.newformsourcefile.gridvalues;
-//  newfoforms:= fo.newformformfile.gridvalues;
-//  makecommand:= fo.makecommand.value;
-//  makedir:= fo.makedir.value;
-//  debugcommand:= fo.debugcommand.value;
-//  debugoptions:= fo.debugoptions.value;
-//  debugtarget:= fo.debugtarget.value;
-//  runcommand:= fo.runcommand.value;
-//  remoteconnection:= fo.remoteconnection.value;
-//  uploadcommand:= fo.uploadcommand.value;
-//  gdbprocessor:= fo.gdbprocessor.value;
-//  gdbservercommand:= fo.gdbservercommand.value;
-//  gdbservercommandattach:= fo.gdbservercommandattach.value;
-//  beforeload:= fo.gdbbeforeload.value;
-//  afterload:= fo.gdbafterload.value;
-//  beforerun:= fo.gdbbeforerun.value;
   defaultmake:= 1 shl fo.defaultmake.value;
-//  makeoptions:= fo.makeoptions.gridvalues;
   setlength(o.fmakeoptionson,fo.makeoptionsgrid.rowcount);
   for int1:= 0 to high(o.fmakeoptionson) do begin
    o.fmakeoptionson[int1]:=
@@ -2201,7 +1872,6 @@ begin
       fo.make3on.gridvaluetag(int1,0) or fo.make4on.gridvaluetag(int1,0);
   end;
 
-//  befcommand:= fo.befcommand.gridvalues;
   setlength(o.fbefcommandon,fo.befcommandgrid.rowcount);
   for int1:= 0 to high(o.fbefcommandon) do begin
    o.fbefcommandon[int1]:=
@@ -2209,7 +1879,6 @@ begin
       fo.befmake1on.gridvaluetag(int1,0) or fo.befmake2on.gridvaluetag(int1,0) or
       fo.befmake3on.gridvaluetag(int1,0) or fo.befmake4on.gridvaluetag(int1,0);
   end;
-//  aftcommand:= fo.aftcommand.gridvalues;
   setlength(o.faftcommandon,fo.aftcommandgrid.rowcount);
   for int1:= 0 to high(o.faftcommandon) do begin
    o.faftcommandon[int1]:=
@@ -2579,8 +2248,8 @@ end;
 procedure tprojectoptionsfo.downloadchange(const sender: TObject);
 begin
  uploadcommand.enabled:= not gdbdownload.value and not gdbsimulator.value;
- gdbbeforeload.enabled:= gdbdownload.value and not gdbsimulator.value;
- gdbafterload.enabled:= gdbdownload.value and not gdbsimulator.value;
+ beforeload.enabled:= gdbdownload.value and not gdbsimulator.value;
+ afterload.enabled:= gdbdownload.value and not gdbsimulator.value;
  gdbservercommand.enabled:= not gdbsimulator.value;
  gdbservercommandattach.enabled:= not gdbsimulator.value;
  gdbserverwait.enabled:= not gdbsimulator.value;

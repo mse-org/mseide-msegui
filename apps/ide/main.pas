@@ -138,7 +138,7 @@ type
    procedure configureexecute(const sender: TObject);
    
     //debugger
-   procedure startgdbonexecute(const sender: tobject);
+   procedure restartgdbonexecute(const sender: tobject);
    procedure runexec(const sender: tobject);
    procedure gdbonevent(const sender: tgdbmi; var eventkind: gdbeventkindty;
                        const values: resultinfoarty; const stopinfo: stopinfoty);
@@ -167,9 +167,6 @@ type
    fexecstamp: integer;
    fprojectname: filenamety;
    fcheckmodulelevel: integer;
-//   fcheckmodulerecursion: boolean;
-//   fuploadprocid: integer;
-//   fuploadexitcode: integer;
    fgdbserverprocid: integer;
    fgdbserverexitcode: integer;
    fgdbservertimeout: longword;
@@ -237,7 +234,7 @@ type
    procedure uploadexe(const sender: tguiapplication; var again: boolean);
    procedure uploadcancel(const sender: tobject);
    procedure gdbserverexe(const sender: tguiapplication; var again: boolean);
-   procedure terminategdbserver;
+   procedure terminategdbserver(const force: boolean);
    procedure gdbservercancel(const sender: tobject);
    procedure updatetargetenvironment;
    function needsdownload: boolean;
@@ -249,9 +246,11 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
 
+   procedure startgdb(const killserver: boolean);
    function checkgdberror(aresult: gdbresultty): boolean;
    function startgdbconnection(const attach: boolean): boolean;
-   function loadexec(isattach: boolean; const force: boolean): boolean; //true if ok
+   function loadexec(isattach: boolean;
+                       const forcedownload: boolean): boolean; //true if ok
    procedure setstattext(const atext: msestring; const akind: messagetextkindty = mtk_info);
    procedure refreshstopinfo(const stopinfo: stopinfoty);
    procedure updatemodifiedforms;
@@ -357,7 +356,7 @@ end;
 
 destructor tmainfo.destroy;
 begin
- terminategdbserver;
+ terminategdbserver(false);
  inherited;
 end;
 
@@ -970,14 +969,15 @@ begin
  end;
 end;
 
-procedure tmainfo.terminategdbserver;
+procedure tmainfo.terminategdbserver(const force: boolean);
 var
  int1: integer;
 begin
- if fgdbserverprocid <> invalidprochandle then begin
+ if (not projectoptions.d.gdbserverstartonce or force) and 
+          (fgdbserverprocid <> invalidprochandle) then begin
   try
    if not getprocessexitcode(fgdbserverprocid,int1) then begin
-    killprocess(fgdbserverprocid);
+    killprocesstree(fgdbserverprocid);
    end;
   except
   end;
@@ -987,7 +987,7 @@ end;
 
 procedure tmainfo.gdbservercancel(const sender: tobject);
 begin
- terminategdbserver;
+ terminategdbserver(true);
 end;
 
 procedure tmainfo.targetpipeinput(const sender: tpipereader);
@@ -1008,7 +1008,11 @@ begin
    mstr1:= gdbservercommand;
   end;
   if mstr1 <> '' then begin
-   terminategdbserver;
+   terminategdbserver(false);
+   if d.gdbserverstartonce and gdb.tryconnect then begin
+    result:= true;
+    exit;
+   end;
    if d.gdbservertty then begin
     fgdbserverprocid:= execmse2(syscommandline(mstr1),nil,
                   targetpipe.pipereader,targetpipe.pipereader,-1,[exo_tty]);
@@ -1162,7 +1166,7 @@ begin
  end;
 end;
 
-function tmainfo.loadexec(isattach: boolean; const force: boolean): boolean;
+function tmainfo.loadexec(isattach: boolean; const forcedownload: boolean): boolean;
 var
  str1: filenamety;
 begin
@@ -1174,20 +1178,14 @@ begin
   checkbluedots;
  end
  else begin
-  if not gdb.execloaded or force then begin
+  if not gdb.execloaded or forcedownload then begin
    if not gdb.active then begin
-    startgdbonexecute(nil);
+    startgdb(false);
    end;
    str1:= gettargetfile;
    with projectoptions,d.texp do begin
-//    if debugtarget <> '' then begin
-//     str1:= debugtarget;
-//    end
-//    else begin
-//     str1:= makedir+targetfile;
-//    end; 
     if not d.gdbdownload and not d.gdbsimulator and (uploadcommand <> '') and 
-                   (needsdownload or force) then begin
+                   (needsdownload or forcedownload) then begin
      dodownload;
      if application.waitdialog(nil,'Uploadcommand "'+uploadcommand+'" running.',
          'Uploading',{$ifdef FPC}@{$endif}uploadcancel,nil,
@@ -1208,25 +1206,9 @@ begin
       setstattext('Download canceled.',mtk_error);
       exit;
      end;                
-(*                   
-     fuploadprocid:= execmse1(uploadcommand);
-     if fuploadprocid <> invalidprochandle then begin
-      if application.waitdialog(nil,'Uploadcommand "'+uploadcommand+'" running.',
-          'Uploading',{$ifdef FPC}@{$endif}uploadcancel,nil,
-          {$ifdef FPC}@{$endif}uploadexe) then begin
-      end
-      else begin
-       setstattext('Upload canceled.',mtk_error);
-       exit;
-      end;                
-     end
-     else begin
-      setstattext('Can not run upload command.',mtk_error);
-     end;
-*)
     end
    end;
-   if checkgdberror(gdb.fileexec(str1)) then begin
+   if checkgdberror(gdb.fileexec(str1,forcedownload)) then begin
     inc(fexecstamp);
     breakpointsfo.updatebreakpoints;
    end;
@@ -1241,7 +1223,7 @@ begin
   if projectoptions.d.showconsole then begin
    targetconsolefo.activate;
   end;
-  if force and projectoptions.d.gdbdownload then begin
+  if forcedownload and projectoptions.d.gdbdownload then begin
    if startgdbconnection(false) then begin
     gdb.download(false);
    end;
@@ -1258,18 +1240,20 @@ begin
  checkbluedots;
 end;
 
-procedure tmainfo.startgdbonexecute(const sender: tobject);
+procedure tmainfo.startgdb(const killserver: boolean);
 begin
- terminategdbserver;
+ terminategdbserver(killserver);
  with projectoptions,d.texp do begin
   gdb.remoteconnection:= remoteconnection;
   gdb.gdbdownload:= d.gdbdownload;
   gdb.simulator:= d.gdbsimulator;
   gdb.processorname:= gdbprocessor;
   gdb.guiintf:= not d.nodebugbeginend;
+  gdb.beforeconnect:= beforeconnect;  
+  gdb.afterconnect:= afterconnect;
   gdb.beforeload:= beforeload;  
-  gdb.beforerun:= beforerun;
   gdb.afterload:= afterload;
+  gdb.beforerun:= beforerun;
   gdb.startupbkpt:= d.startupbkpt;
   gdb.startupbkpton:= d.startupbkpton;
   gdb.startgdb(quotefilename(debugcommand)+ ' ' + debugoptions);
@@ -1277,6 +1261,11 @@ begin
  updatesigsettings;
  cleardebugdisp;
  checkbluedots;
+end;
+
+procedure tmainfo.restartgdbonexecute(const sender: tobject);
+begin
+ startgdb(true);
 end;
 
 procedure tmainfo.symboltypeonsetvalue(const sender: tobject;
@@ -2137,7 +2126,7 @@ var
  
 begin
  gdb.abort;
- terminategdbserver;
+ terminategdbserver(false);
  result:= false;
  projectfilebefore:= projectoptions.projectfilename;
  projectdirbefore:= projectoptions.projectdir;
@@ -2512,7 +2501,7 @@ begin
  result:= true;
  fstartcommand:= startcommand;
  if not gdb.active then begin
-  startgdbonexecute(nil);
+  startgdb(false);
  end;
  if not gdb.attached then begin
   if (not gdb.started or not fnoremakecheck) and not fcurrent then begin
