@@ -489,12 +489,16 @@ function makerect(const x,y,cx,cy: integer): rectty; overload;
                                {$ifdef FPC}inline;{$endif}
 function makerect(const pos: pointty; const size: sizety): rectty; overload;
                                {$ifdef FPC}inline;{$endif}
+function makesegment(const a,b: pointty): segmentty;
+                               {$ifdef FPC}inline;{$endif}
 
 function mp(const x,y: integer): pointty; {$ifdef FPC}inline;{$endif}
 function ms(const cx,cy: integer): sizety; {$ifdef FPC}inline;{$endif}
 function mr(const x,y,cx,cy: integer): rectty; overload; 
                                {$ifdef FPC}inline;{$endif}
 function mr(const pos: pointty; const size: sizety): rectty; overload;
+                               {$ifdef FPC}inline;{$endif}
+function mg(const a,b: pointty): segmentty;
                                {$ifdef FPC}inline;{$endif}
 
 function bottomright(const rect: rectty): pointty; {$ifdef FPC}inline;{$endif}
@@ -902,6 +906,13 @@ begin
  result.size:= size;
 end;
 
+function makesegment(const a,b: pointty): segmentty;
+                               {$ifdef FPC}inline;{$endif}
+begin
+ result.a:= a;
+ result.b:= b;
+end;
+
 function mp(const x,y: integer): pointty;{$ifdef FPC}inline;{$endif}
 begin
  result.x:= x;
@@ -927,6 +938,13 @@ function mr(const pos: pointty; const size: sizety): rectty; overload;
 begin
  result.pos:= pos;
  result.size:= size;
+end;
+
+function mg(const a,b: pointty): segmentty;
+                               {$ifdef FPC}inline;{$endif}
+begin
+ result.a:= a;
+ result.b:= b;
 end;
 
 function bottomright(const rect: rectty): pointty; {$ifdef FPC}inline;{$endif}

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2009 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -31,7 +31,8 @@ type
                tf_clipi,tf_clipo,
                tf_grayed,tf_wordbreak,tf_softhyphen,
                tf_noselect,tf_underlineselect,
-               tf_ellipseleft,{tf_ellipsemid,}tf_ellipseright,tf_tabtospace,
+               tf_ellipseleft,{tf_ellipsemid,}tf_ellipseright,
+               tf_tabtospace,tf_showtabs,
                tf_force);
  textflagsty = set of textflagty;
 const
@@ -122,13 +123,21 @@ type
   res: rectty;
  end;
 
+ tabinfoty = record
+  index: integer;
+  kind: tabulatorkindty;
+  linepos: integer;
+ end;
+ tabinfoarty = array of tabinfoty;
+ 
  textlineinfoty = record
   liindex,licount: integer;
   liy: integer;
   listartx: integer;
   liwidth: integer;
-  tabchars,justifychars: integerarty;
-  linebreak: boolean;  //true if newline sequnce detected
+  tabchars: tabinfoarty;
+  justifychars: tabinfoarty;
+  linebreak: boolean;  //true if newline sequence detected
  end;
  textlineinfoarty = array of textlineinfoty;
 
@@ -217,18 +226,64 @@ begin
 // end;
 end;
 
-function mergearray(const a,b: integerarty): integerarty;
+procedure additem(var dest: tabinfoarty; const value: integer);
+begin
+ setlength(dest,high(dest)+2);
+ with dest[high(dest)] do begin
+  index:= value;
+  kind:= tabulatorkindty(-1); //invalid
+ end;
+end;
+
+procedure addtabchar(var dest: tabinfoarty; const aindex: integer;
+                      const akind: tabulatorkindty; const alinepos: integer);
+ procedure setdata(const ind: integer);
+ begin
+  with dest[ind] do begin
+   index:= aindex;
+   kind:= akind;
+   linepos:= alinepos;
+  end;
+ end;
+
+var
+ int1: integer; 
+begin
+ for int1:= 0 to high(dest) do begin
+  if dest[int1].index = aindex then begin
+   exit;
+  end;
+  if dest[int1].index > aindex then begin
+   setlength(dest,high(dest) + 2);
+   move(dest[aindex],dest[aindex+1],(high(dest)-aindex) * sizeof(dest[0]));
+   setdata(int1);
+   exit;
+  end;
+ end;
+ setlength(dest,high(dest) + 2);
+ setdata(high(dest));
+end;
+
+function comparetabinfo(const l,r): integer;
+begin
+ result:= tabinfoty(l).index-tabinfoty(r).index;
+end;
+
+function mergearray(const a,b: tabinfoarty): tabinfoarty;
          //result is sorted without duplicates
 var
  int1,int2: integer;
+ ar1: integerarty;
 begin
- result:= a;
- stackarray(b,result);
- if high(result) >= 0 then begin
-  sortarray(result);
+ setlength(result,length(a)+length(b));
+ if result <> nil then begin
+  move(a[0],result[0],length(a)*sizeof(result[0]));
+  move(b[0],result[length(a)],length(b)*sizeof(result[0]));
+  mergesortarray(result,sizeof(result[0]),length(result),
+                                        @comparetabinfo,ar1,true);
   int2:= 0;
   for int1:= 1 to high(result) do begin
-   if result[int2] <> result[int1] then begin
+   if result[int2].index <> result[int1].index then begin
     inc(int2);
     result[int2]:= result[int1];
    end;
@@ -353,14 +408,12 @@ var
  po1: pmsecharaty;
  bo1: boolean;
  wch1: widechar;
-// ar1: integerarty;
 
  procedure checksofthyphen(const alineinfo: integer);
  begin
   if tf_softhyphen in info.flags then begin
    with layoutinfo do begin
     if (int2 > 0) and (info.text.text[int2] = c_softhyphen) then begin
-//     dec(awidth,charwidths[int2-1]); //not used
      charwidths[int2-1]:= 0;
      additem(lineinfos[alineinfo].tabchars,int2);
     end;
@@ -368,27 +421,8 @@ var
   end;
  end;
  
- procedure addtabchar(const aindex: integer);
- var
-  int1: integer; 
- begin
-  with layoutinfo,lineinfos[high(lineinfos)] do begin
-   for int1:= 0 to high(tabchars) do begin
-    if tabchars[int1] = aindex then begin
-     exit;
-    end;
-    if tabchars[int1] > aindex then begin
-     insertitem(tabchars,int1,aindex);
-     exit;
-    end;
-   end;
-   additem(tabchars,aindex);
-  end;
- end;
-
 var
-// spacewidth: integer;
- y1,orig1: integer;
+ y1,orig1,int5: integer;
    
 begin
  tabs:= nil; //compiler warning
@@ -524,7 +558,8 @@ begin
      rea1:= info.tabulators.defaultdist * info.tabulators.ppmm;
      nexttab:= -1;
      while int1 <= textlen do begin
-      if (tf_softhyphen in info.flags) and (info.text.text[int1] = c_softhyphen) then begin
+      if (tf_softhyphen in info.flags) and 
+                       (info.text.text[int1] = c_softhyphen) then begin
        charwidths[int1-1]:= 0;
        additem(lineinfos[high(lineinfos)].tabchars,int1);
       end;
@@ -551,19 +586,23 @@ begin
             charwidths[int1-1]:= tabs[nexttab].textpos - awidth;
            end;
           end;
-          addtabchar(int1);
+          with tabs[nexttab] do begin
+           addtabchar(lineinfos[high(lineinfos)].tabchars,int1,tabkind,linepos);
+          end;
          end
          else begin
           if rea1 > 0 then begin
-           charwidths[int1-1]:= round(ceil(awidth / rea1)*rea1) - awidth;
-           addtabchar(int1);
+           int5:= round(ceil(awidth / rea1)*rea1);
+           charwidths[int1-1]:= int5 - awidth;
+           addtabchar(lineinfos[high(lineinfos)].tabchars,int1,tak_left,int5);
           end;
          end;
         end
         else begin
          if rea1 > 0 then begin
-          charwidths[int1-1]:= round(floor((awidth+rea1+0.1)/rea1)*rea1) - awidth;
-          addtabchar(int1);
+          int5:= round(floor((awidth+rea1+0.1)/rea1)*rea1);
+          charwidths[int1-1]:= int5 - awidth;
+          addtabchar(lineinfos[high(lineinfos)].tabchars,int1,tak_left,int5);
          end;
         end;
        end;
@@ -643,7 +682,9 @@ begin
        setlength(justifychars,licount); //max
        for int1:= liindex-1 to liindex + licount - 2 do begin
         if po1^[int1] = ' ' then begin
-         justifychars[int4]:= int1+1;
+         with justifychars[int4] do begin
+          index:= int1+1;
+         end;
          inc(int4);
         end;
        end;
@@ -655,7 +696,7 @@ begin
         for int1:= 0 to high(justifychars) do begin
          rea2:= rea2 + rea1;
          int4:= round(rea2) - int2;
-         inc(charwidths[justifychars[int1]-1],int4);
+         inc(charwidths[justifychars[int1].index-1],int4);
          inc(int2,int4);
         end;
         listartx:= dest.x;
@@ -886,7 +927,7 @@ var
 
  procedure drawsubstring(const row,astart,acount: integer);
  var
-  int2,int3,int4: integer;
+  int2,int3,int4,int5: integer;
   xbefore: integer;
   x: integer;
  begin
@@ -900,8 +941,7 @@ var
    xbefore:= x;
    
    with info,tcanvas1(canvas),layoutinfo,lineinfos[row] do begin
-    if {(tabulators = nil) or}
-             (tabchars = nil) then begin
+    if tabchars = nil then begin
      drawstring(@text.text[astart],acount,pos,nil,grayed,rot);
      for int2:= astart - 1 to astart + acount - 2 do begin
       inc(x,charwidths[int2]);
@@ -910,15 +950,15 @@ var
     else begin
      int2:= astart - 1;
      for int4:= 0 to high(tabchars) do begin
-      if (tabchars[int4] >= astart) and 
-                             (tabchars[int4] < astart + acount) then begin
-       drawstring(@text.text[int2+1],tabchars[int4] - int2 - 1,pos,nil,
+      if (tabchars[int4].index >= astart) and 
+                             (tabchars[int4].index < astart + acount) then begin
+       drawstring(@text.text[int2+1],tabchars[int4].index - int2 - 1,pos,nil,
                                                                   grayed,rot);
-       for int2:= int2 to tabchars[int4] - 1 do begin
+       for int2:= int2 to tabchars[int4].index - 1 do begin
         inc(x,charwidths[int2]);
        end;
        if font.colorbackground <> cl_transparent then begin
-        int3:= charwidths[tabchars[int4] - 1];
+        int3:= charwidths[tabchars[int4].index - 1];
         if xyswapped then begin
          if reversed then begin
           fillrect(makerect(pos.x-font.descent,x - int3,
@@ -940,7 +980,28 @@ var
          end;
         end;
        end;
-       int2:= tabchars[int4];
+       with tabchars[int4] do begin
+        int2:= index;
+        int5:= pos.y + font.descent - 1;
+        if (tf_showtabs in flags) and 
+               (kind <> tabulatorkindty(-1)) then begin
+         
+         case kind of
+          tak_left: begin
+           drawlines([mp(linepos,int5-2),mp(linepos,int5),
+                      mp(linepos+2,int5)],false,font.color);
+          end;
+          tak_right: begin
+           drawlines([mp(linepos,int5-2),mp(linepos,int5),
+                      mp(linepos-2,int5)],false,font.color);
+          end;
+          tak_centered,tak_decimal: begin
+           drawlinesegments([mg(mp(linepos,int5-2),mp(linepos,int5)),
+                   mg(mp(linepos-2,int5),mp(linepos+2,int5))],font.color);
+          end;
+         end;
+        end;
+       end;
        if xyswapped then begin
         pos.y:= x;
        end

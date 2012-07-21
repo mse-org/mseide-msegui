@@ -1238,6 +1238,14 @@ begin
    if e.tabstops < 1 then begin
     e.tabstops:= 1;
    end;
+   if e.showtabs then begin
+    edit.textflags:= edit.textflags + [tf_showtabs];
+    edit.textflagsactive:= edit.textflagsactive + [tf_showtabs];
+   end
+   else begin
+    edit.textflags:= edit.textflags - [tf_showtabs];
+    edit.textflagsactive:= edit.textflagsactive - [tf_showtabs];
+   end;
    edit.tabulators.clear;
    edit.tabulators.defaultdist:= int1 * e.tabstops / edit.tabulators.ppmm;
 //   edit.tabulators.setdefaulttabs(int1 * tabstops / edit.tabulators.ppmm);

@@ -1019,8 +1019,8 @@ begin
      for int1:= 0 to high(lineinfos) do begin
       with lineinfos[int1] do begin
        for int2:= 0 to high(tabchars) do begin
-        if text.text[tabchars[int2]] = c_softhyphen then begin
-         text.text[tabchars[int2]]:= #0; //will be removed in printing routine
+        if text.text[tabchars[int2].index] = c_softhyphen then begin
+         text.text[tabchars[int2].index]:= #0; //will be removed in printing routine
         end;
        end;
       end;
@@ -1075,7 +1075,7 @@ begin
       with lineinfos[int1] do begin
        if (tf_xjustify in flags) and (high(justifychars) >= 0) and 
                    (int1 < high(lineinfos)) then begin
-        rstr1:= richcopy(text,liindex,justifychars[0]-liindex);
+        rstr1:= richcopy(text,liindex,justifychars[0].index-liindex);
         dotextout(rstr1,rect1,flags2,0,acolorshadow); //first word
         rea1:= (dest.cx - liwidth + getstringwidth(' ') * length(justifychars)) /
                          length(justifychars); //gap width
@@ -1088,12 +1088,12 @@ begin
          rect2.cx:= 0;                                    
          int3:= dest.x;
         end;
-        for int2:= liindex - 1 to justifychars[0] - 2 do begin
+        for int2:= liindex - 1 to justifychars[0].index - 2 do begin
          inc(int3,charwidths[int2]);            //end of first word
         end;
         for int2:= 0 to high(justifychars) - 1 do begin
          int5:= 0;
-         for int4:= justifychars[int2] to justifychars[int2+1] - 2 do begin
+         for int4:= justifychars[int2].index to justifychars[int2+1].index - 2 do begin
           inc(int5,charwidths[int4]); //width of actual word
          end;
          int6:= round(int3 + (int2 + 1) * rea1 + int5 div 2);
@@ -1104,12 +1104,12 @@ begin
           rect2.x:= int6;
          end;
          int3:= int3 + int5;
-         rstr1:= richcopy(text,justifychars[int2]+1,justifychars[int2+1] - 
-                                                         justifychars[int2] - 1);
+         rstr1:= richcopy(text,justifychars[int2].index+1,
+                justifychars[int2+1].index - justifychars[int2].index - 1);
          dotextout(rstr1,rect2,flags2 + [tf_xcentered],0,acolorshadow);
         end;
-        rstr1:= richcopy(text,justifychars[high(justifychars)]+1,
-                           liindex+licount-justifychars[high(justifychars)]-1);
+        rstr1:= richcopy(text,justifychars[high(justifychars)].index+1,
+                     liindex+licount-justifychars[high(justifychars)].index-1);
         dotextout(rstr1,rect1,flags2+[tf_right],0,acolorshadow); //last word
        end
        else begin

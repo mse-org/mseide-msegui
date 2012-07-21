@@ -189,6 +189,7 @@ type
    fscrollheight: integer;
    ftabstops: integer;
    fspacetabs: boolean;
+   fshowtabs: boolean;
    ftabindent: boolean;
    feditfontname: msestring;
    feditfontheight: integer;
@@ -229,6 +230,7 @@ type
    property scrollheight: integer read fscrollheight write fscrollheight;
    property tabstops: integer read ftabstops write ftabstops;
    property spacetabs: boolean read fspacetabs write fspacetabs;
+   property showtabs: boolean read fshowtabs write fshowtabs;
    property tabindent: boolean read ftabindent write ftabindent;
    property editfontname: msestring read feditfontname write feditfontname;
    property editfontheight: integer read feditfontheight write feditfontheight;
@@ -737,6 +739,7 @@ type
    afterload: tfilenameedit;
    tsplitter10: tsplitter;
    gdbserverstartonce: tbooleanedit;
+   showtabs: tbooleanedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);

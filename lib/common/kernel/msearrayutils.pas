@@ -183,12 +183,6 @@ function findarrayvalue(const item; const items; const size: integer;
            //true if exact else next bigger
            //for compare: l is item, r are tablevalues
            //array must be sorted
-{
-procedure quicksortarray(var asortlist; const asize,alength: integer;
-                            const acompare: arraysortcomparety;
-                            out aindexlist: integerarty; const order: boolean);
-                            //asortlist = array of type
-}
 procedure mergesortarray(var asortlist; const asize,alength: integer;
                             const acompare: arraysortcomparety;
                             out aindexlist: integerarty; const order: boolean);
