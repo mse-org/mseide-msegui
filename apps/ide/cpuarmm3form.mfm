@@ -1,0 +1,106 @@
+inherited cpuarmm3fo: tcpuarmm3fo
+  bounds_x = 174
+  bounds_y = 158
+  container.bounds = (
+    0
+    0
+    251
+    253
+  )
+  caption = 'CPU ARM M3'
+  oncreate = createexe
+  moduleclassname = 'tcpuarmfo'
+  inherited on: tbooleanedit
+  end
+  inherited stoptime: tdatetimedisp
+  end
+  inherited tspacer1: tspacer
+    inherited tlayouter1: tlayouter
+      inherited r1: tintegeredit
+      end
+      inherited r0: tintegeredit
+      end
+      inherited r4: tintegeredit
+      end
+      inherited r3: tintegeredit
+      end
+      inherited r2: tintegeredit
+      end
+      inherited r5: tintegeredit
+      end
+      inherited sp: tintegeredit
+      end
+      inherited lr: tintegeredit
+      end
+      inherited pc: tintegeredit
+      end
+    end
+    inherited tbooleanedit16: tbooleanedit
+    end
+    inherited tbooleanedit17: tbooleanedit
+    end
+    inherited tbooleanedit18: tbooleanedit
+    end
+    inherited tbooleanedit19: tbooleanedit
+    end
+    inherited tbooleanedit20: tbooleanedit
+    end
+    inherited tbooleanedit15: tbooleanedit
+    end
+    inherited tbooleanedit14: tbooleanedit
+    end
+    inherited tbooleanedit13: tbooleanedit
+    end
+    inherited tbooleanedit12: tbooleanedit
+    end
+    inherited tbooleanedit11: tbooleanedit
+    end
+    inherited tbooleanedit10: tbooleanedit
+    end
+    inherited tbooleanedit9: tbooleanedit
+    end
+    inherited tbooleanedit8: tbooleanedit
+    end
+    inherited tbooleanedit7: tbooleanedit
+    end
+    inherited tbooleanedit6: tbooleanedit
+    end
+    inherited tbooleanedit5: tbooleanedit
+    end
+    inherited tbooleanedit4: tbooleanedit
+    end
+    inherited tbooleanedit3: tbooleanedit
+    end
+    inherited tbooleanedit2: tbooleanedit
+    end
+    inherited c: tbooleanedit
+    end
+    inherited tlayouter2: tlayouter
+      bounds_cx = 119
+      inherited r6: tintegeredit
+      end
+      inherited r7: tintegeredit
+      end
+      inherited r8: tintegeredit
+      end
+      inherited r11: tintegeredit
+      end
+      inherited r10: tintegeredit
+      end
+      inherited r9: tintegeredit
+      end
+      inherited fps: tintegeredit
+      end
+      inherited cpsr: tintegeredit
+        frame.caption = 'xpsr'
+        frame.outerframe = (
+          0
+          0
+          26
+          0
+        )
+        bounds_cx = 119
+      end
+    end
+  end
+end

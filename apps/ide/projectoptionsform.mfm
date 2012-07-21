@@ -2070,6 +2070,7 @@ object projectoptionsfo: tprojectoptionsfo
                       'i386'
                       'x86_64'
                       'arm'
+                      'armm3'
                       'cpu32'
                       'avr32'
                       'rl78'

@@ -66,7 +66,8 @@ procedure createcpufo;
 implementation
 uses
  cpuform_mfm,main,sysutils,mseformatstr,msebits,msestrings,msegraphutils,
- cpui386form,cpux86_64form,cpuarmform,cpucpu32form,cpuavr32form,cpurl78form,
+ cpui386form,cpux86_64form,cpuarmform,cpuarmm3form,
+ cpucpu32form,cpuavr32form,cpurl78form,
  projectoptionsform;
 const
  refreshtag = 738952;
@@ -88,6 +89,9 @@ begin
    end;
    pro_arm: begin
     application.createform(tcpuarmfo,cpufo);
+   end;
+   pro_armm3: begin
+    application.createform(tcpuarmm3fo,cpufo);
    end;
    pro_cpu32: begin
     application.createform(tcpucpu32fo,cpufo);
