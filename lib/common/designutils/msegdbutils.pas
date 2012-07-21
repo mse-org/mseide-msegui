@@ -1239,10 +1239,10 @@ begin
      closegdb;      
     end;
     gek_stopped: begin
-//     exclude(self.fstate,gs_running);
+     exclude(self.fstate,gs_running);
      fstoptime:= stopinfo.time;
-     if gs_running in self.fstate then begin
-      exclude(self.fstate,gs_running);
+     if gs_execloaded in self.fstate then begin
+//      exclude(self.fstate,gs_running);
       {$ifdef mswindows}
       if finterruptthreadid <> 0 then begin
        if getthreadidlist(threadids) = gdb_ok then begin
