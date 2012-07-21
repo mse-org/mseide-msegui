@@ -39,7 +39,7 @@ const
  
 type
  gdbstatety = (gs_syncget,gs_syncack,gs_clicommand,gs_clilist,
-               gs_started,gs_startup,gs_attaching,
+               gs_canstop,gs_started,gs_startup,gs_attaching,
                gs_execloaded,gs_attached,gs_detached,
                gs_remote,gs_async,gs_downloaded,gs_downloading,gs_runafterload,
                gs_internalrunning,gs_running,gs_stopped,
@@ -273,7 +273,6 @@ type
    fonevent: gdbeventty;
    fonerror: gdbeventty;
    fguiintf: boolean;
-//   fsourcefiles: thashedmsestrings;
    fsourcefiles: tmsestringhashdatalist;
    fsourcefiledirs: filenamearty;  //dirs for fsourcefiles
    fexceptionbkpt: integer;
@@ -794,7 +793,7 @@ end;
 
 procedure tgdbmi.resetexec;
 begin
- fstate:= fstate - [gs_internalrunning,gs_running,gs_execloaded,
+ fstate:= fstate - [gs_internalrunning,gs_running,gs_execloaded,gs_canstop,
                     gs_attached,gs_attaching,gs_started,gs_startup,gs_detached,
                     gs_remote,gs_async,
                           gs_interrupted,gs_restarted,
@@ -1219,6 +1218,7 @@ begin
   with tgdbevent(event) do begin
    case eventkind of
     gek_startup: begin
+     include(self.fstate,gs_canstop);
      if gs_startup in self.fstate then begin
       exit; //already done
      end;
@@ -1241,8 +1241,7 @@ begin
     gek_stopped: begin
      exclude(self.fstate,gs_running);
      fstoptime:= stopinfo.time;
-     if gs_execloaded in self.fstate then begin
-//      exclude(self.fstate,gs_running);
+     if gs_canstop in self.fstate then begin
       {$ifdef mswindows}
       if finterruptthreadid <> 0 then begin
        if getthreadidlist(threadids) = gdb_ok then begin
@@ -2138,11 +2137,17 @@ begin
  end;
  {$endif}
  if gs_remote in fstate then begin
+  sys_schedyield(); //maybe gdbserver has to work
+  sleepus(100000);
+  application.processmessages; //maybe gdbserver has sent a stop message
+ end;
+ if gs_remote in fstate then begin
   internalcommand('-exec-continue');
  end
  else begin
   internalcommand('-exec-run');
  end;
+ include(fstate,gs_canstop);
 end;
 
 function tgdbmi.checkconnection(const proginfo: boolean): gdbresultty;
