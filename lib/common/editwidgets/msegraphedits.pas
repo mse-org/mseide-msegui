@@ -477,7 +477,7 @@ type
    property cancel: boolean read fcancel write fcancel;
                     //ored with doprogress.acancel, resetted by value:= 0.0
    property value: realty read fvalue write setvalue;
-          //threadsave, range 0 .. 1.0
+          //thread safe, range 0 .. 1.0
   published
    property onsetvalue;
    property direction;

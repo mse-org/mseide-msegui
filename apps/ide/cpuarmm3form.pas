@@ -3,11 +3,14 @@ unit cpuarmm3form;
 interface
 uses
  mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
- msegraphics,msegraphutils,mseevent,mseclasses,mseforms,
- cpuarmform;
+ msegraphics,msegraphutils,mseevent,mseclasses,mseforms,cpuarmform,
+ msegraphedits,mseifiglob,msetypes;
 
 type
  tcpuarmm3fo = class(tcpuarmfo)
+   tbooleanedit21: tbooleanedit;
+   tbooleanedit22: tbooleanedit;
+   tbooleanedit23: tbooleanedit;
    procedure createexe(const sender: TObject);
  end;
 var

@@ -4,7 +4,7 @@ interface
 uses
  classes,mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,cpuform,msesplitter,msedataedits,
- mseedit,msestrings,msetypes,msegraphedits;
+ mseedit,msestrings,msetypes,msegraphedits,mseifiglob;
 
 type
  tcpuarmfo = class(tcpufo)
@@ -17,9 +17,6 @@ type
    r3: tintegeredit;
    r2: tintegeredit;
    r5: tintegeredit;
-   sp: tintegeredit;
-   lr: tintegeredit;
-   pc: tintegeredit;
    tbooleanedit16: tbooleanedit;
    tbooleanedit17: tbooleanedit;
    tbooleanedit18: tbooleanedit;
@@ -41,14 +38,18 @@ type
    tbooleanedit2: tbooleanedit;
    c: tbooleanedit;
    tlayouter2: tlayouter;
-   r6: tintegeredit;
-   r7: tintegeredit;
-   r8: tintegeredit;
    r11: tintegeredit;
    r10: tintegeredit;
    r9: tintegeredit;
    fps: tintegeredit;
    cpsr: tintegeredit;
+   r12: tintegeredit;
+   sp: tintegeredit;
+   r6: tintegeredit;
+   lr: tintegeredit;
+   pc: tintegeredit;
+   r7: tintegeredit;
+   r8: tintegeredit;
    procedure regsetvalue(const sender: TObject; var avalue: Integer;
                    var accept: Boolean);
    procedure flagssetvalue(const sender: TObject; var avalue: Boolean;

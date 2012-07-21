@@ -3804,6 +3804,10 @@ begin
 end;
 
 function tgdbmi.listregisternames(out aresult: stringarty): gdbresultty;
+{$ifdef mse_debuggdb}
+var
+ int1: integer;
+{$endif}
 begin
  aresult:= nil;
  result:= synccommand('-data-list-register-names');
@@ -3811,6 +3815,14 @@ begin
   result:= gdb_dataerror;
   if getstringarrayvalue(fsyncvalues,'register-names',aresult) then begin
    result:= gdb_ok;
+  {$ifdef mse_debuggdb}
+   debugwriteln('**** registernames');
+   for int1:= 0 to high(aresult) do begin
+    if aresult[int1] <> '' then begin
+     debugwriteln(inttostr(int1)+': '+aresult[int1]);
+    end;
+   end;
+  {$endif}
   end;
  end;
 end;
