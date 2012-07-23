@@ -927,7 +927,7 @@ var
 
  procedure drawsubstring(const row,astart,acount: integer);
  var
-  int2,int3,int4,int5: integer;
+  int2,int3,int4,int5,int6: integer;
   xbefore: integer;
   x: integer;
  begin
@@ -957,8 +957,8 @@ var
        for int2:= int2 to tabchars[int4].index - 1 do begin
         inc(x,charwidths[int2]);
        end;
+       int3:= charwidths[tabchars[int4].index - 1];
        if font.colorbackground <> cl_transparent then begin
-        int3:= charwidths[tabchars[int4].index - 1];
         if xyswapped then begin
          if reversed then begin
           fillrect(makerect(pos.x-font.descent,x - int3,
@@ -982,10 +982,14 @@ var
        end;
        with tabchars[int4] do begin
         int2:= index;
-        int5:= pos.y + font.descent - 1;
-        if (tf_showtabs in flags) and 
-               (kind <> tabulatorkindty(-1)) then begin
-         
+        int5:= pos.y - font.ascent div 2;
+        int6:= x - int3 div 2 + 1;
+        if (tf_showtabs in flags) and (kind <> tabulatorkindty(-1)) and
+                                    not xyswapped and not reversed then begin
+         drawline(mp(int6 - 3,int5),mp(int6,int5),font.color);
+         drawlines([mp(int6,int5-1),mp(int6+1,int5),
+                                mp(int6,int5+1)],true,font.color);
+        { 
          case kind of
           tak_left: begin
            drawlines([mp(linepos,int5-2),mp(linepos,int5),
@@ -1000,6 +1004,7 @@ var
                    mg(mp(linepos-2,int5),mp(linepos+2,int5))],font.color);
           end;
          end;
+        }
         end;
        end;
        if xyswapped then begin
