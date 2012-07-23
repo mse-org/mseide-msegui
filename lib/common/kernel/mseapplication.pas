@@ -341,6 +341,7 @@ type
                        //calls unlockall-relockall
    function candefocus: boolean; virtual;
    property terminated: boolean read getterminated write setterminated;
+                      //thread safe
    property mainthread: threadty read fthread;
    property lockthread: threadty read flockthread;
    property lockcount: integer read flockcount;
