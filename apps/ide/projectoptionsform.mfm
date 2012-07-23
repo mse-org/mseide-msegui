@@ -113,7 +113,6 @@ object projectoptionsfo: tprojectoptionsfo
         frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 5
-        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 679
@@ -2394,6 +2393,7 @@ object projectoptionsfo: tprojectoptionsfo
         frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         taborder = 6
+        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 679
@@ -2505,7 +2505,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object makecommand: tfilenameedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-          frame.caption = 'Make &command'
+          frame.caption = 'Make &Program'
           frame.captionoffset = 3
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
@@ -2525,7 +2525,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cy = 37
           anchors = [an_left, an_top, an_right]
           textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
-          controller.options = [fdo_quotesingle]
+          controller.options = []
           controller.historymaxcount = 0
           controller.captionopen = 'Select make command'
           controller.ongetfilename = expandfilename
@@ -3632,7 +3632,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object makedir: tfilenameedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-          frame.caption = 'Make &directory'
+          frame.caption = 'Make &Directory'
           frame.captionoffset = 3
           frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
           frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
