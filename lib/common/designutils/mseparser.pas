@@ -771,7 +771,8 @@ begin
   fscanner:= ascanner;
  end
  else begin
-  ascanner.fstartline:= sourcepos.line;
+  ascanner.fstartline:= sourcepos.line + 1;
+   //dummy line for include files
  end;
  setlength(fscanners,result+1);
  fscanners[result]:= ascanner;
@@ -1064,7 +1065,8 @@ begin
  int1:= high(ffilestack);
  setlength(ffilestack,int1+2);
  ffilestack[int1+1].tokenid:= acttoken;
- ffilestack[int1+1].lineoffset:= aline;
+ ffilestack[int1+1].lineoffset:= aline + 1;
+           //dummy line for include files
  id1.scanner:= anum;
  id1.token:= 0;
  setacttoken(id1);
