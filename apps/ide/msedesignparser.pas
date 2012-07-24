@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -505,8 +505,9 @@ function mangleprocparams(const aparams: methodparaminfoty): string;
 procedure initcompinfo(var info: unitinfoty);
 procedure afterparse(const sender: tparser; var unitinfo: unitinfoty;
                         const aimplementationcompiled: boolean);
-procedure addincludefile(var info: unitinfoty; const afilename: filenamety;
-                           const astatementstart, astatementend: sourceposty);
+function addincludefile(var info: unitinfoty; const afilename: filenamety;
+          const astatementstart, astatementend: sourceposty): integer;
+                       //returns index
 
 var
  updateunitinterface: function(const unitname: string): punitinfoty of object;
@@ -521,11 +522,12 @@ uses
 type
  tparser1 = class(tparser);
 
-procedure addincludefile(var info: unitinfoty; const afilename: filenamety;
-                           const astatementstart, astatementend: sourceposty);
+function addincludefile(var info: unitinfoty; const afilename: filenamety;
+                const astatementstart, astatementend: sourceposty): integer;
 begin
  with info do begin
-  setlength(includestatements,high(includestatements)+2);
+  result:= length(includestatements);
+  setlength(includestatements,result+1);
   with includestatements[high(includestatements)] do begin
    filename:= afilename;
    startpos:= astatementstart;

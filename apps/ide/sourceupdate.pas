@@ -679,7 +679,8 @@ begin
  sourcefo.replacefiletext(infopo^.sourcefilename,startpos.pos,endpos.pos,newtext);
 end;
 
-function tsourceupdater.updateline(module: punitinfoty; var apos: sourceposty): boolean;
+function tsourceupdater.updateline(module: punitinfoty;
+                                       var apos: sourceposty): boolean;
 var
  int1,int2: integer;
  aincludefiles: integer;

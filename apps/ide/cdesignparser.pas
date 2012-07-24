@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 2010 by Martin Schreiber
+{ MSEide Copyright (c) 2012 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ type
                  const atext: string); overload;
    procedure initidents; override;
    function dogetincludefile(const afilename: filenamety;
-                     const astatementstart,astatementend: sourceposty): tscanner; override;
+           const astatementstart,astatementend: sourceposty): tscanner; override;
    procedure parse; override;  
    procedure clear; override;
  end;

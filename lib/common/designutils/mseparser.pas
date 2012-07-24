@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -793,6 +793,7 @@ end;
 
 function tparser.includefile(const filename: filenamety;
                 const statementstart,statementend: sourceposty): integer;
+                //returns scanner index
 var
  str1: filenamety;
  ascanner: tscanner;
