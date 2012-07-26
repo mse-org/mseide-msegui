@@ -1206,7 +1206,7 @@ procedure getdropdownpos(const parent: twidget; const right: boolean;
                                             var rect: rectty);
 
 
-//following routines are thread save
+//following routines are thread safe and run in main thread context
 //exttext will be appended for copy to clipboard
 function showmessage(const atext,caption: msestring;
                      const buttons: array of modalresultty;
@@ -1557,13 +1557,45 @@ begin
  end;
 end;
 
-function internalshowmessage(const atext,caption: msestring;
-                  buttons: array of modalresultty;
-                  defaultbutton: modalresultty;
-                  noshortcut: modalresultsty;
-                  placementrect: prectty; placement: captionposty;
-                  minwidth: integer; actions: array of notifyeventty;
-                  const exttext: msestring): modalresultty;
+function messagerect(const position: messagepositionty; 
+                                        out arect: rectty): prectty;
+var
+ window1: twindow;
+begin
+ application.lockifnotmainthread;
+ try
+  result:= nil;
+  if position <> mepo_screencentered then begin
+   window1:= application.unreleasedactivewindow;
+   if (window1 <> nil) and 
+          ((position = mepo_windowcentered) or 
+           (wo_windowcentermessage in window1.options)) then begin
+    arect:= window1.owner.widgetrect;
+    result:= @arect;
+   end
+   else begin
+    result:= nil;
+   end;
+  end;
+ finally
+  application.unlockifnotmainthread;
+ end;
+end;
+
+type
+ showmessageinfoty = record
+  atext,caption: msestring;
+  buttons: array of modalresultty;
+  defaultbutton: modalresultty;
+  noshortcut: modalresultsty;
+  placementrect: prectty; placement: captionposty;
+  minwidth: integer; actions: array of notifyeventty;
+  exttext: msestring;
+  result: modalresultty;
+ end;
+ pshowmessageinfoty = ^showmessageinfoty;
+ 
+procedure syncshowmessage(const adata: pointer);
 const
  maxtextwidth = 500;
  verttextdist = 10;
@@ -1581,142 +1613,152 @@ var
  textoffset: integer;
  transientfor: twindow;
  
-begin 
- application.lockifnotmainthread;
- try
-  transientfor:= application.unreleasedactivewindow;
-  widget1:= twidget.create(nil); 
-  widget1.visible:= false;
-        //stays invisible, no wm_configured processing on win32
-  widget:= tshowmessagewidget.create(nil,(transientfor <> nil) and 
-              (transientfor.ispopup) and transientfor.owner.visible,
-              high(actions) >= 0,exttext);
-  widget.name:= '_showmessage'; //debug purpose
-  widget.parentwidget:= widget1; //do not create window handle of widget
+begin
+ with pshowmessageinfoty(adata)^ do begin
+  application.lockifnotmainthread;
   try
-   acanvas:= widget1.getcanvas; 
-   buttonheight:= acanvas.font.glyphheight + 6;
-   buttonwidth:= 50;
-   for int1:= 0 to ord(high(buttons)) do begin
-    int2:= acanvas.getstringwidth(
-                stockobjects.modalresulttextnoshortcut[buttons[int1]]) + 10;
-    if int2 > buttonwidth then begin
-     buttonwidth:= int2;
-    end;
-   end;
-   widget.caption:= caption;
-   acanvas.font:= stockobjects.fonts[stf_message];
-   rect1:= textrect(acanvas,atext);
-   if rect1.cx > maxtextwidth then begin
-    rect1.cx:= maxtextwidth;
-    rect1.cy:= bigint;
-    rect1:= textrect(acanvas,atext,rect1,[tf_wordbreak]);
-    widget.info.flags:= [tf_wordbreak];
-   end;
-   rect1.x:= horztextdist;
-   rect1.y:= verttextdist;
-   textoffset:= minwidth - rect1.cx;
-   if textoffset > 0 then begin
-    rect1.cx:= minwidth;
-   end
-   else begin
-    textoffset:= 0;
-   end;
-   with widget.info do begin
-    dest:= rect1;
-    text.text:= atext;
-   end;
-   int1:= length(buttons);
-   if int1 > 0 then begin
-    int2:= int1 * buttonwidth;
-    int2:= int2 + buttondist * (int1 - 1);
-    inc(rect1.cy,buttonheight+verttextdist);
-   end
-   else begin
-    int2:= 0;
-   end;
-   if int2 > rect1.cx then begin
-    rect1.cx:= int2;         //width of buttons greater then text width
-    widget.info.dest.cx:= int2;
-   end;
- 
-   inc(rect1.cx,2*horztextdist);
-   inc(rect1.cy,2*verttextdist);
-   
-   widget.parentwidget:= nil;  //remove dummy parent
-   widget.clientsize:= rect1.size;
-   if placementrect = nil then begin
-    widget.window.windowpos:= wp_screencentered;
-   end
-   else begin
-    rect2:= placementrect^;
-    if placement = cp_bottomleft then begin
-     dec(rect2.y,8);
-     inc(rect2.cy,28); //for windowdecoration
-    end;
-    widget.widgetrect:= placepopuprect(transientfor,rect2,placement,widget.size);
-   end;
- 
-   with widget.info.dest do begin
-    rect1.x:= x + (cx - int2) div 2;
-    rect1.y:= y + cy + verttextdist + widget.paintpos.y;
-    rect1.cx:= buttonwidth;
-    rect1.cy:= buttonheight;
-   end;
-   for int1:= 0 to high(buttons) do begin
-    but[int1]:= tmessagebutton.create(widget);
-    with but[int1] do begin
-     widgetrect:= rect1;
-     parentwidget:= widget;
-     if buttons[int1] in noshortcut then begin
-      captiontorichstring(stockobjects.modalresulttextnoshortcut[buttons[int1]],
-                                 finfo.ca.caption);
-     end
-     else begin
-      captiontorichstring(stockobjects.modalresulttext[buttons[int1]],
-                              finfo.ca.caption);
+   transientfor:= application.unreleasedactivewindow;
+   widget1:= twidget.create(nil); 
+   widget1.visible:= false;
+         //stays invisible, no wm_configured processing on win32
+   widget:= tshowmessagewidget.create(nil,(transientfor <> nil) and 
+               (transientfor.ispopup) and transientfor.owner.visible,
+               high(actions) >= 0,exttext);
+   widget.name:= '_showmessage'; //debug purpose
+   widget.parentwidget:= widget1; //do not create window handle of widget
+   try
+    acanvas:= widget1.getcanvas; 
+    buttonheight:= acanvas.font.glyphheight + 6;
+    buttonwidth:= 50;
+    for int1:= 0 to ord(high(buttons)) do begin
+     int2:= acanvas.getstringwidth(
+                 stockobjects.modalresulttextnoshortcut[buttons[int1]]) + 10;
+     if int2 > buttonwidth then begin
+      buttonwidth:= int2;
      end;
-     if int1 <= high(actions) then begin
-      onexecute:= actions[int1];
+    end;
+    widget.caption:= caption;
+    acanvas.font:= stockobjects.fonts[stf_message];
+    rect1:= textrect(acanvas,atext);
+    if rect1.cx > maxtextwidth then begin
+     rect1.cx:= maxtextwidth;
+     rect1.cy:= bigint;
+     rect1:= textrect(acanvas,atext,rect1,[tf_wordbreak]);
+     widget.info.flags:= [tf_wordbreak];
+    end;
+    rect1.x:= horztextdist;
+    rect1.y:= verttextdist;
+    textoffset:= minwidth - rect1.cx;
+    if textoffset > 0 then begin
+     rect1.cx:= minwidth;
+    end
+    else begin
+     textoffset:= 0;
+    end;
+    with widget.info do begin
+     dest:= rect1;
+     text.text:= atext;
+    end;
+    int1:= length(buttons);
+    if int1 > 0 then begin
+     int2:= int1 * buttonwidth;
+     int2:= int2 + buttondist * (int1 - 1);
+     inc(rect1.cy,buttonheight+verttextdist);
+    end
+    else begin
+     int2:= 0;
+    end;
+    if int2 > rect1.cx then begin
+     rect1.cx:= int2;         //width of buttons greater then text width
+     widget.info.dest.cx:= int2;
+    end;
+  
+    inc(rect1.cx,2*horztextdist);
+    inc(rect1.cy,2*verttextdist);
+    
+    widget.parentwidget:= nil;  //remove dummy parent
+    widget.clientsize:= rect1.size;
+    if placementrect = nil then begin
+     widget.window.windowpos:= wp_screencentered;
+    end
+    else begin
+     rect2:= placementrect^;
+     if placement = cp_bottomleft then begin
+      dec(rect2.y,8);
+      inc(rect2.cy,28); //for windowdecoration
      end;
-     modalresult:= buttons[int1];
+     widget.widgetrect:= placepopuprect(transientfor,rect2,placement,widget.size);
     end;
-    if buttons[int1] = defaultbutton then begin
-     widget.defaultfocuschild:= but[int1];
+  
+    with widget.info.dest do begin
+     rect1.x:= x + (cx - int2) div 2;
+     rect1.y:= y + cy + verttextdist + widget.paintpos.y;
+     rect1.cx:= buttonwidth;
+     rect1.cy:= buttonheight;
     end;
-    inc(rect1.x,buttonwidth + buttondist);
+    for int1:= 0 to high(buttons) do begin
+     but[int1]:= tmessagebutton.create(widget);
+     with but[int1] do begin
+      widgetrect:= rect1;
+      parentwidget:= widget;
+      if buttons[int1] in noshortcut then begin
+       captiontorichstring(stockobjects.modalresulttextnoshortcut[buttons[int1]],
+                                  finfo.ca.caption);
+      end
+      else begin
+       captiontorichstring(stockobjects.modalresulttext[buttons[int1]],
+                               finfo.ca.caption);
+      end;
+      if int1 <= high(actions) then begin
+       onexecute:= actions[int1];
+      end;
+      modalresult:= buttons[int1];
+     end;
+     if buttons[int1] = defaultbutton then begin
+      widget.defaultfocuschild:= but[int1];
+     end;
+     inc(rect1.x,buttonwidth + buttondist);
+    end;
+    inc(widget.info.dest.x,textoffset div 2);
+    dec(widget.info.dest.cx,textoffset);
+    widget.updateskin(true);
+    result:= widget.show(true,transientfor);
+   finally
+    widget1.free;
+    widget.Free;
    end;
-   inc(widget.info.dest.x,textoffset div 2);
-   dec(widget.info.dest.cx,textoffset);
-   widget.updateskin(true);
-   result:= widget.show(true,transientfor);
   finally
-   widget1.free;
-   widget.Free;
+   application.unlockifnotmainthread;
   end;
- finally
-  application.unlockifnotmainthread;
  end;
 end;
 
-function messagerect(const position: messagepositionty; 
-                                        out arect: rectty): prectty;
+function internalshowmessage(const atext_,caption_: msestring;
+                  buttons_: array of modalresultty;
+                  defaultbutton_: modalresultty;
+                  noshortcut_: modalresultsty;
+                  placementrect_: prectty; placement_: captionposty;
+                  minwidth_: integer; actions_: array of notifyeventty;
+                  const exttext_: msestring): modalresultty;
 var
- window1: twindow;
+ info: showmessageinfoty;
 begin
- result:= nil;
- if position <> mepo_screencentered then begin
-  window1:= application.unreleasedactivewindow;
-  if (window1 <> nil) and 
-         ((position = mepo_windowcentered) or 
-          (wo_windowcentermessage in window1.options)) then begin
-   arect:= window1.owner.widgetrect;
-   result:= @arect;
-  end
-  else begin
-   result:= nil;
-  end;
+ with info do begin
+  atext:= atext_;
+  caption:= caption_;
+  setlength(buttons,length(buttons_));
+  move(buttons_[0],buttons[0],length(buttons)*sizeof(buttons[0]));
+  defaultbutton:= defaultbutton_;
+  noshortcut:= noshortcut_;
+  placementrect:= placementrect_;
+  placement:= placement_;
+  minwidth:= minwidth_;
+  setlength(actions,length(actions_));
+  move(actions_[0],actions[0],length(actions)*sizeof(actions[0]));
+  exttext:= exttext_;
  end;
+ application.synchronize(@syncshowmessage,@info);
+ result:= info.result;
 end;
 
 function showmessage(const atext,caption: msestring;

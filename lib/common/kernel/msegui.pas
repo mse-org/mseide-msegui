@@ -14024,7 +14024,6 @@ begin
      rect2:= appinst.workarea(window1);
     end;
     with fowner do begin
-//     rect1:= widgetrect;
      rect1.x:= rect2.x + (rect2.cx - rect1.cx) div 2;
      rect1.y:= rect2.y + (rect2.cy - rect1.cy) div 2;
      widgetrect:= rect1;
