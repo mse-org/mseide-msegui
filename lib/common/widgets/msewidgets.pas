@@ -1757,7 +1757,12 @@ begin
   move(actions_[0],actions[0],length(actions)*sizeof(actions[0]));
   exttext:= exttext_;
  end;
- application.synchronize(@syncshowmessage,@info);
+ if application.ismainthread then  begin
+  syncshowmessage(@info);
+ end
+ else begin
+  application.synchronize(@syncshowmessage,@info);
+ end;
  result:= info.result;
 end;
 
