@@ -31,11 +31,13 @@ type
    fdatapo: pointer;
    foptions: threadcompoptionsty;
    fstacksizekb: integer;
+   fonterminated: threadcompeventty;
    function getthread: teventthread;
    function getterminated: boolean;
    function threadproc(sender: tmsethread): integer;
    procedure terminateandwait;
    function getactive: boolean;
+   procedure doterminated;
   protected
    procedure setactive(const Value: boolean); override;
    procedure loaded; override;
@@ -64,6 +66,8 @@ type
    property onstart: threadcompeventty read fonstart write fonstart;
    property onexecute: threadcompeventty read fonexecute write fonexecute;
    property onterminate: threadcompeventty read fonterminate write fonterminate;
+   property onterminated: threadcompeventty read fonterminated write fonterminated;
+                         //runs in main thread
  end;
 
 implementation
@@ -133,6 +137,9 @@ begin
    finally
     application.unlock;
    end;
+  end;
+  if assigned(fonterminated) then begin
+   application.synchronize(@doterminated);
   end;
   result:= 0;
  finally
@@ -205,6 +212,11 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tthreadcomp.doterminated;
+begin
+ fonterminated(self);
 end;
 
 end.
