@@ -312,6 +312,7 @@ type
    function candropdown: boolean; virtual;
    procedure selectnone(const akey: keyty); virtual;
    function isloading: boolean;
+   procedure resetselection; virtual;
     //ibutton
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
    
@@ -388,7 +389,7 @@ type
    procedure itemchanged(const sender: tdatalist; const index: integer);
    function getdropdowncolsclass: dropdowncolsclassty; virtual;
    procedure selectnone(const akey: keyty); override;
-   procedure clearitemindex; //sets fcols.fitemindex to -1, no events
+   procedure resetselection; override; //sets fcols.fitemindex to -1, no events
    
     //idropdownlist
    procedure itemselected(const index: integer; const akey: keyty); virtual;
@@ -1182,6 +1183,11 @@ begin
  result:= csloading in fintf.getwidget.componentstate;
 end;
 
+procedure tcustomdropdowncontroller.resetselection;
+begin
+ //dummy
+end;
+
 { tdropdowncontroller }
 
 function tdropdowncontroller.getbuttonframeclass: dropdownbuttonframeclassty;
@@ -1602,7 +1608,7 @@ begin
  itemselected(-2,akey);
 end;
 
-procedure tcustomdropdownlistcontroller.clearitemindex;
+procedure tcustomdropdownlistcontroller.resetselection;
 begin
  fcols.fitemindex:= -1;
 end;
