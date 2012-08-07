@@ -33,7 +33,7 @@ uses
  mseapplication,mseglob,mseguiglob,mseskin,msedesigner,
  mseguithreadcomp,mseprocmonitorcomp,msefadeedit,
  msearrayprops,msesumlist,mserttistat,msestockobjects,regglob,msearrayutils,
- msecryptohandler;
+ msecryptohandler,msestringcontainer;
 
 type
  twidget1 = class(twidget);
@@ -128,25 +128,6 @@ type
   public
  end;
  
-(* 
- tactionshortcutspropertyeditor = class(tshortcutpropertyeditor)
-  public
-   procedure setvalue(const value: msestring); override;
-   function getvalue: msestring; override;
- end;
-
- tshortcutactionitempropertyeditor = class(tshortcutpropertyeditor)
-  protected
-   fsc1: boolean;
-  public
-   constructor create(const adesigner: idesigner;
-        const amodule: tmsecomponent; const acomponent: tcomponent;
-            const aobjectinspector: iobjectinspector;
-            const aprops: propinstancearty; atypeinfo: ptypeinfo); override;
-   procedure setvalue(const value: msestring); override;
-   function getvalue: msestring; override;
- end;
- *)
 const   
  datamoduleintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createmsedatamodule;
@@ -164,7 +145,8 @@ begin
  registercomponenttabhints(['Gui'],['Non visual components with GUI dependence']);
 
  registercomponents('NoGui',[tstatfile,trttistat,tnoguiaction,tactivator,
-                    ttimer,tthreadcomp,tpipereadercomp,tprocessmonitor]);
+                    ttimer,tthreadcomp,tpipereadercomp,tprocessmonitor,
+                    tstringcontainer]);
  registercomponenttabhints(['NoGui'],['Components without GUI dependence']);
 
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
