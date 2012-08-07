@@ -426,6 +426,42 @@ type
                      const aiterator: pointermsestringiteratorprocty); overload;
  end;
 
+ integermsestringdataty = record
+  key: msestring;
+  data: integer;
+ end;
+ pintegermsestringdataty = ^integermsestringdataty;
+ integermsestringhashdataty = record
+  header: hashheaderty;
+  data: integermsestringdataty;
+ end;
+ pintegermsestringhashdataty = ^integermsestringhashdataty;
+
+ integermsestringiteratorprocty = 
+                       procedure(var aitem: integermsestringdataty) of object;
+
+ tintegermsestringhashdatalist = class(tmsestringhashdatalist)
+  private
+   fintegerparam: integer;
+  protected
+   procedure checkexact(const aitemdata; var accept: boolean); override;
+  public
+   constructor create;
+   procedure add(const akey: msestring; const avalue: integer);
+   function addunique(const akey: msestring; const avalue: integer): boolean;
+                   //true if found
+   procedure delete(const akey: msestring; const avalue: integer);
+   function find(const akey: msestring): integer; overload; //-1 if not found
+   function find(const akey: msestring; out avalue: integer): boolean; overload;
+   function find(const akey: msestring; out avalue: integer;
+                                        out acount: integer): boolean; overload;
+   function find(const akey: lmsestringty): integer; overload; //-1 if not found
+   function first: pintegermsestringdataty;
+   function next: pintegermsestringdataty;
+   procedure iterate(const akey: msestring;
+                     const aiterator: integermsestringiteratorprocty); overload;
+ end;
+
  objectmsestringdataty = record
   key: msestring;
   data: tobject;
@@ -2026,6 +2062,117 @@ end;
 
 procedure tpointermsestringhashdatalist.iterate(const akey: msestring;
                const aiterator: pointermsestringiteratorprocty);
+begin
+ iterate(akey,keyhashiteratorprocty(aiterator));
+end;
+
+
+
+
+
+
+{ tintegermsestringhashdatalist }
+
+constructor tintegermsestringhashdatalist.create;
+begin
+ inherited create(sizeof(integer));
+end;
+
+procedure tintegermsestringhashdatalist.add(const akey: msestring;
+                                       const avalue: integer);
+begin
+ pinteger(inherited add(akey))^:= avalue;
+end;
+
+function tintegermsestringhashdatalist.find(const akey: msestring;
+                                             out avalue: integer): boolean;
+var
+ po1: pinteger;
+begin
+ po1:= inherited find(akey);
+ result:= po1 <> nil;
+ if result then begin
+  avalue:= po1^;
+ end
+ else begin
+  avalue:= -1;
+ end;
+end;
+
+function tintegermsestringhashdatalist.find(const akey: msestring;
+                        out avalue: integer; out acount: integer): boolean;
+var
+ po1: pinteger;
+begin
+ po1:= inherited find(akey,acount);
+ result:= po1 <> nil;
+ if result then begin
+  avalue:= po1^;
+ end
+ else begin
+  avalue:= -1;
+ end;
+end;
+
+function tintegermsestringhashdatalist.find(const akey: lmsestringty): integer;
+var
+ po1: pinteger;
+begin
+ po1:= inherited find(akey);
+ if po1 <> nil then begin
+  result:= po1^;
+ end
+ else begin
+  result:= -1;
+ end;
+end;
+
+function tintegermsestringhashdatalist.find(const akey: msestring): integer;
+begin
+ find(akey,result);
+end;
+
+procedure tintegermsestringhashdatalist.delete(const akey: msestring;
+               const avalue: integer);
+//var
+// po1: phashdataty;
+begin
+ fintegerparam:= avalue;
+ internaldeleteitem(internalfindexact(akey));
+end;
+
+function tintegermsestringhashdatalist.addunique(const akey: msestring;
+                                               const avalue: integer): boolean;
+var
+ po1: pinteger;
+begin
+ result:= true;
+ po1:= inherited find(akey);
+ if po1 = nil then begin
+  result:= false;
+  po1:= inherited add(akey);
+  po1^:= avalue;
+ end;
+end;
+
+procedure tintegermsestringhashdatalist.checkexact(const aitemdata;
+               var accept: boolean);
+begin
+ accept:= integermsestringdataty(aitemdata).data = fintegerparam;
+end;
+
+function tintegermsestringhashdatalist.first: pintegermsestringdataty;
+begin
+ result:= pintegermsestringdataty(internalfirst);
+end;
+
+function tintegermsestringhashdatalist.next: pintegermsestringdataty;
+begin
+ result:= pintegermsestringdataty(internalnext);
+end;
+
+procedure tintegermsestringhashdatalist.iterate(const akey: msestring;
+               const aiterator: integermsestringiteratorprocty);
 begin
  iterate(akey,keyhashiteratorprocty(aiterator));
 end;

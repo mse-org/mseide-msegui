@@ -36,6 +36,9 @@ type
  end;
  pdoublemsestringty = ^doublemsestringty;
  doublemsestringarty = array of doublemsestringty;
+ doublemsestringaty = array[0..0] of doublemsestringty;
+ pdoublemsestringaty = ^doublemsestringaty;
+ 
  dataprocty = procedure(var data) of object;
 {
  internallistoptionty = (ilo_needsfree,ilo_needscopy,ilo_needsinit,
@@ -88,8 +91,6 @@ type
  tdatalist = class(tlinkedpersistent)
   private
    fbytelength: integer;   //pufferlaenge
-//   fsortio: boolean;
-//   fsorted: boolean;
    Fcapacity: integer;
    fonchange: notifyeventty;
    fonitemchange: indexeventty;
@@ -112,7 +113,6 @@ type
   protected
    fdatapo: pchar;
    fsize: integer;
-//   finternaloptions: internallistoptionsty;
    fcount: integer;
    flinkdest: datalistarty;
    fstate: dataliststatesty;
@@ -165,7 +165,6 @@ type
    procedure freedata(var data); virtual;      //gibt daten frei
    procedure beforecopy(var data); virtual;
    procedure aftercopy(var data); virtual;
-//   procedure copyinstance(var data); virtual;  //nach blockcopy aufgerufen
    procedure initinstance(var data); virtual;  //fuer neue zeilen aufgerufen
    function internaladddata(const quelle; docopy: boolean): integer;
    function adddata(const quelle): integer;
@@ -182,7 +181,6 @@ type
    procedure doitemchange(const index: integer); virtual;
    procedure dochange; virtual;
    procedure internaldeletedata(index: integer; dofree: boolean);
-//   procedure checkindexrange(const aindex: integer);
 
    function getlinkdatatypes(const atag: integer): listdatatypesty; virtual;
    procedure initsource(var asource: listlinkinfoty);
@@ -249,7 +247,8 @@ type
                    //index -1 -> undefined
    function datatype: listdatatypety; virtual;
    procedure checkindexrange(const aindex: integer; const acount: integer = 1);
-   procedure checkindex(var index: integer); //bringt absolute zeilennummer in ringpuffer
+   procedure checkindex(var index: integer); 
+                        //bringt absolute zeilennummer in ringpuffer
    procedure beginupdate; virtual;
    procedure endupdate; virtual;
    procedure incupdate;
