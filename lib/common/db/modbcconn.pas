@@ -1044,8 +1044,10 @@ begin
   ftbcd: begin             
     Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_DOUBLE, @do1,
                  SizeOf(Double), @StrLenOrInd);
-    cu1:= do1;
-    Move(cu1, buffer1^, SizeOf(cu1));
+    if res = 0 then begin
+     cu1:= do1;
+     Move(cu1, buffer1^, SizeOf(cu1));
+    end;
   end;
   ftTime: begin              // mapped to TTimeField
    Res:= SQLGetData(ODBCCursor.FSTMTHandle,fno,SQL_C_TYPE_TIME,
