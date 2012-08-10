@@ -1,11 +1,11 @@
 object projectfo: tprojectfo
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton]
   visible = False
   bounds_x = 149
   bounds_y = 167
   bounds_cx = 683
   bounds_cy = 388
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
   container.onlayout = childscaled
@@ -47,7 +47,7 @@ object projectfo: tprojectfo
     reffontheight = 14
   end
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets]
     taborder = 4
     bounds_x = 0
     bounds_y = 112
@@ -108,7 +108,7 @@ object projectfo: tprojectfo
       bounds_y = 0
       bounds_cx = 71
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate]
       reffontheight = 14
     end
     object filename: tfilenameedit
@@ -189,7 +189,7 @@ object projectfo: tprojectfo
     reffontheight = 14
   end
   object grid2: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets]
     taborder = 5
     bounds_x = 0
     bounds_y = 248
@@ -259,7 +259,7 @@ object projectfo: tprojectfo
     end
   end
   object splitter: tsplitter
-    optionswidget = [ow_destroywidgets, ow_autoscale]
+    optionswidget = [ow_destroywidgets]
     color = -1879048189
     taborder = 8
     bounds_x = 0
@@ -333,7 +333,7 @@ object projectfo: tprojectfo
     modalresult = mr_cancel
   end
   object destname: tstringedit
-    frame.caption = 'Destinatiation Basename (empty = Datafile name)'
+    frame.caption = 'Destination Basename (empty = Datafile name)'
     frame.dummy = 0
     frame.outerframe = (
       0
