@@ -90,6 +90,7 @@ type
  envvarty = record
   flags: argumentflagsty;
   values: msestringarty;
+  name: msestring;
  end;
  envvararty = array of envvarty;
 
@@ -100,6 +101,17 @@ type
            const index: integer; var defined: boolean;
                    var argument: msestringarty; var error: sysenverrornrty) of object;
 
+ macroinfoty = record
+  name,value: msestring;
+  expandlevel: integer;
+ end;
+ pmacroinfoty = ^macroinfoty;
+ macroinfoarty = array of macroinfoty;
+ macroinfoaty = array[0..0] of macroinfoty;
+ pmacroinfoaty = ^macroinfoaty;
+
+ macrooptionty = (mao_caseinsensitive,mao_curlybraceonly,mao_removeunknown);
+ macrooptionsty = set of macrooptionty;
 
  tsysenvmanager = class(tmsecomponent,istatfile)
   private
@@ -144,6 +156,10 @@ type
    procedure init(const arguments: array of argumentdefty);
    procedure processinfo(index: integer; value: string);
    procedure errormessage(const mess: string);
+   function getcommandlinemacros(
+           const macrodef: integer;
+           const firstenvvarmacro: integer = -1; const lastenvvarmacro: integer = -1;
+           prepend: macroinfoarty = nil): macroinfoarty;
 
    property defined[index: integer]: boolean read getdefined write setdefined; default;
    property objectlinker: tobjectlinker read getobjectlinker {$ifdef msehasimplements}
@@ -170,18 +186,6 @@ type
    property onvalueread: sysenvmanagervalueeventty read fonvalueread write fonvalueread;
    property oninit: sysenvmanagereventty read foninit write setoninit;
  end;
-
- macroinfoty = record
-  name,value: msestring;
-  expandlevel: integer;
- end;
- pmacroinfoty = ^macroinfoty;
- macroinfoarty = array of macroinfoty;
- macroinfoaty = array[0..0] of macroinfoty;
- pmacroinfoaty = ^macroinfoaty;
-
- macrooptionty = (mao_caseinsensitive,mao_curlybraceonly,mao_removeunknown);
- macrooptionsty = set of macrooptionty;
 
  tmacrolist = class(torderedrecordlist,istatupdatevalue)
   private
@@ -780,14 +784,12 @@ begin            //init
   exit;
  end;
  setlength(fenvvars,high(arguments)+1);
-// fillchar(fenvvars[0],length(fenvvars)*sizeof(fenvvars[0]),0);
  for int1:= 0 to high(fenvvars) do begin
   with fenvvars[int1] do begin
    flags:= arguments[int1].flags;
-//   if arf_defined in flags then begin
-    setlength(values,1);
-    values[0]:= arguments[int1].initvalue;
-//   end;
+   name:= arguments[int1].name;
+   setlength(values,1);
+   values[0]:= arguments[int1].initvalue;
   end;
  end;
  strar1:= getcommandlinearguments;
@@ -884,6 +886,51 @@ end;
 procedure tsysenvmanager.errormessage(const mess: string);
 begin
  errorme(ern_user,mess);
+end;
+
+function tsysenvmanager.getcommandlinemacros(
+         const macrodef: integer;
+         const firstenvvarmacro: integer = -1; const lastenvvarmacro: integer = -1;
+        prepend: macroinfoarty = nil): macroinfoarty;
+var
+ ar1,ar2: msestringarty;
+ int1,int2,int3,int4: integer;
+begin
+ result:= prepend;
+ checkindex(macrodef);
+ if (firstenvvarmacro >= 0) and (lastenvvarmacro >= 0) then begin
+  checkindex(firstenvvarmacro);
+  checkindex(lastenvvarmacro);
+  for int1:= ord(firstenvvarmacro) to ord(lastenvvarmacro) do begin
+             //envvar macros can be overridden by --macrodef
+   if defined[int1] then begin
+    setlength(result,high(result) + 2);
+    with result[high(result)] do begin
+     name:= fenvvars[int1].name;
+     value:= value[int1];
+    end;
+   end;
+  end;
+ end;
+ ar1:= values[macrodef];
+ for int1:= 0 to high(ar1) do begin
+  ar2:= nil;
+  splitstringquoted(ar1[int1],ar2,msechar('"'),msechar(','));
+  if ar2 <> nil then begin
+   int3:= length(result);
+   int4:= (high(ar2)+2) div 2; //pair count
+   setlength(result,int3+int4); 
+   for int2:= 0 to int4-1 do begin
+    with result[int2+int3] do begin
+     int4:= int2 * 2;
+     name:= ar2[int4];
+     if int4 < high(ar2) then begin
+      value:= ar2[int4+1]
+     end;
+    end;
+   end;
+  end;
+ end;
 end;
 
 { tmacrolist }

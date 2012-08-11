@@ -4,7 +4,7 @@ object projectfo: tprojectfo
   bounds_x = 149
   bounds_y = 167
   bounds_cx = 683
-  bounds_cy = 388
+  bounds_cy = 501
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.frame.zoomwidthstep = 1
   container.frame.zoomheightstep = 1
@@ -13,7 +13,7 @@ object projectfo: tprojectfo
     0
     0
     683
-    388
+    501
   )
   options = [fo_closeonesc, fo_savepos, fo_savestate]
   statfile = projectstat
@@ -32,7 +32,7 @@ object projectfo: tprojectfo
     )
     taborder = 6
     bounds_x = 8
-    bounds_y = 362
+    bounds_y = 475
     bounds_cx = 244
     anchors = [an_left, an_bottom]
     statfile = projectstat
@@ -50,7 +50,7 @@ object projectfo: tprojectfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets]
     taborder = 4
     bounds_x = 0
-    bounds_y = 112
+    bounds_y = 264
     bounds_cx = 683
     bounds_cy = 104
     anchors = [an_top]
@@ -192,9 +192,9 @@ object projectfo: tprojectfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets]
     taborder = 5
     bounds_x = 0
-    bounds_y = 248
+    bounds_y = 376
     bounds_cx = 683
-    bounds_cy = 105
+    bounds_cy = 90
     anchors = [an_top, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
     fixrows.count = 1
@@ -263,7 +263,7 @@ object projectfo: tprojectfo
     color = -1879048189
     taborder = 8
     bounds_x = 0
-    bounds_y = 224
+    bounds_y = 368
     bounds_cx = 683
     bounds_cy = 3
     anchors = [an_top]
@@ -271,9 +271,9 @@ object projectfo: tprojectfo
     linktop = grid
     linkbottom = grid2
   end
-  object makecommand: tstringedit
+  object makecommand: tmemodialogedit
     frame.caption = 'Make command'
-    frame.dummy = 0
+    frame.button.imagenr = 17
     frame.outerframe = (
       0
       17
@@ -283,7 +283,7 @@ object projectfo: tprojectfo
     taborder = 2
     onshowhint = showhintexe
     bounds_x = 0
-    bounds_y = 63
+    bounds_y = 143
     bounds_cx = 644
     bounds_cy = 37
     anchors = [an_left, an_top, an_right]
@@ -303,8 +303,8 @@ object projectfo: tprojectfo
       0
     )
     taborder = 3
-    bounds_x = 656
-    bounds_y = 68
+    bounds_x = 655
+    bounds_y = 148
     bounds_cx = 16
     bounds_cy = 30
     anchors = [an_top, an_right]
@@ -314,7 +314,7 @@ object projectfo: tprojectfo
   object ok: tbutton
     taborder = 7
     bounds_x = 558
-    bounds_y = 360
+    bounds_y = 473
     bounds_cx = 50
     bounds_cy = 22
     anchors = [an_right, an_bottom]
@@ -324,7 +324,7 @@ object projectfo: tprojectfo
   end
   object cancel: tbutton
     bounds_x = 622
-    bounds_y = 360
+    bounds_y = 473
     bounds_cx = 50
     bounds_cy = 22
     anchors = [an_right, an_bottom]
@@ -343,7 +343,45 @@ object projectfo: tprojectfo
     )
     taborder = 9
     bounds_x = 0
-    bounds_y = 31
+    bounds_y = 55
+    bounds_cx = 682
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
+    statfile = projectstat
+    reffontheight = 14
+  end
+  object beforemake: tmemodialogedit
+    frame.caption = 'Before make'
+    frame.button.imagenr = 17
+    frame.outerframe = (
+      0
+      17
+      0
+      0
+    )
+    taborder = 10
+    onshowhint = showhintexe
+    bounds_x = 0
+    bounds_y = 103
+    bounds_cx = 683
+    bounds_cy = 37
+    anchors = [an_left, an_top, an_right]
+    statfile = projectstat
+    reffontheight = 14
+  end
+  object aftermake: tmemodialogedit
+    frame.caption = 'After make'
+    frame.button.imagenr = 17
+    frame.outerframe = (
+      0
+      17
+      0
+      0
+    )
+    taborder = 11
+    onshowhint = showhintexe
+    bounds_x = 0
+    bounds_y = 183
     bounds_cx = 683
     bounds_cy = 37
     anchors = [an_left, an_top, an_right]
