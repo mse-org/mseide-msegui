@@ -168,16 +168,8 @@ object projectfo: tprojectfo
     statfile = projectstat
     controller.filterlist.data = (
       (
-        'Forms'
-        '"*.mfm" "*.dfm" "*.xfm"'
-      )
-      (
-        'Units'
-        '"*.pas" "*.pp"'
-      )
-      (
-        'Resources'
-        '"*.drc"'
+        'MSEi18n Data Files'
+        '*.trd '
       )
       (
         'All files'

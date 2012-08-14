@@ -757,7 +757,7 @@ end;
 procedure tmainfo.writeprojectdata;
 var
  stream: ttextdatastream;
- begin
+begin
  stream:= ttextdatastream.Create(projectfo.datafilename.value,fm_create);
  dowrite(stream,ce_utf8n);
  fdatachanged:= false;
@@ -876,7 +876,8 @@ begin
   basename:= filenamebase(projectfo.projectstat.filename);
  end;
  commandstring:= expandmacros(projectfo.makecommand.value,
-             sysenv.getcommandlinemacros(ord(env_macrodef),-1,-1,getsyssettingsmacros));
+             sysenv.getcommandlinemacros(ord(env_macrodef),-1,-1,
+                                              getsyssettingsmacros));
  setlength(macroar,2);
  macroar[0].name:= 'LIBFILE';
  macroar[1].name:= 'LIBFILEBASE';
