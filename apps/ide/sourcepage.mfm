@@ -22,10 +22,9 @@ object sourcepage: tsourcepage
   ondestroy = sourcefoondestroy
   onshow = sourcefoonshow
   onhide = sourcefoondeactivate
-  coloractivetab = 15461355
   moduleclassname = 'ttabform'
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_mousewheel, ow_destroywidgets]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets]
     optionsskin = [osk_framebuttononly]
     frame.localprops = [frl_fitop, frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetdisabled, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked, frl_optionsskin]
     bounds_x = 0
@@ -66,7 +65,6 @@ object sourcepage: tsourcepage
     oncellevent = gridoncellevent
     reffontheight = 14
     object edit: tsyntaxedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
       optionsskin = [osk_framebuttononly]
       taborder = 1
       visible = False
