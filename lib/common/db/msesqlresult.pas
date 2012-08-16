@@ -139,6 +139,7 @@ type
   public
    property value: double read getasfloat;
  end;
+
  tcurrencydbcol = class(tdbcol)
   private
   protected
@@ -150,6 +151,7 @@ type
   public
    property value: currency read getascurrency;
  end;
+
  tbooleandbcol = class(tdbcol)
   private
   protected
@@ -160,6 +162,7 @@ type
   public
    property value: boolean read getasboolean;
  end;
+
  tdatetimedbcol = class(tfloatdbcol)
   private
   protected
@@ -778,7 +781,7 @@ begin
   result:= '';
  end
  else begin
-  result:= asstring;
+  result:= getasstring;
  end;
 end;
 
