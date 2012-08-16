@@ -282,7 +282,7 @@ begin
     if focused then begin
      co1:= value;
      if colordialog(co1) = mr_ok then begin
-      tcolordropdowncontroller(fdropdown).clearitemindex; 
+      tcolordropdowncontroller(fdropdown).resetselection; 
       text:= colortostring(co1);
       checkvalue;  
      end;

@@ -76,34 +76,13 @@ type
    property onexecute: stringdialogexeceventty read fonexecute write fonexecute;
  end;
 
-// ieditcontroller = interface (ibutton)
-// end;
-   
- tcustomdialogstringed = class(tstringedit{,ibutton})
+ tcustomdialogstringed = class(tstringedit)
   private
    function getframe: tellipsebuttonframe;
    procedure setframe(const avalue: tellipsebuttonframe);
   protected
    fdialogcontroller: tdialogcontroller;
    function createdialogcontroller: tstringdialogcontroller; virtual;
-//   fbuttonintf: ibutton;
-//   property buttonintf: ibutton read fbuttonintf implements ibutton;
-//   property controller: tdialogcontroller read fcontroller 
-//                                                       implements ibutton;
-                             //crash with FPC
-
-//   procedure internalcreateframe; override;
-//   procedure dokeydown(var info: keyeventinfoty); override;
-//   procedure mouseevent(var info: mouseeventinfoty); override;
-//   procedure updatereadonlystate; override;
-
-    //ibutton
-//   procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
-
-//   procedure internalexecute;
-//   function execute(var avalue: msestring): boolean; virtual;
-//   procedure setexecresult(var avalue: msestring); virtual;
-//   function iskeyexecute(const info: keyeventinfoty): boolean; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -120,8 +99,6 @@ type
  end;
 
  tcustomdialogstringedit = class(tcustomdialogstringed)
-//  private
-//   fonexecute: dialogexeceventty;
   private
    function getonexecute: stringdialogexeceventty;
    procedure setonexecute(const avalue: stringdialogexeceventty);

@@ -53,7 +53,14 @@ var
 implementation
 uses
  guitemplates_mfm;
+ 
+function getcommandlinemacros: macroinfoarty;
+begin
+ result:= guitemplatesmo.sysenv.getcommandlinemacros(
+        ord(env_macrodef),ord(firstenvvarmacro),ord(lastenvvarmacro));
+end;
 
+(*
 function getcommandlinemacros: macroinfoarty;
 var
  ar1,ar2: msestringarty;
@@ -92,6 +99,7 @@ begin
   end;
  end;
 end;
+*)
 
 procedure tguitemplatesmo.cre(const sender: TObject);
 begin

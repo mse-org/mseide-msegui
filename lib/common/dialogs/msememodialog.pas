@@ -16,9 +16,6 @@ type
  tmemodialogedit = class(tcustomdialogstringed)
   protected
    function createdialogcontroller: tstringdialogcontroller; override;
-//   function execute(var avalue: msestring): boolean; override;
-//  public
-//   constructor create(aowner: tcomponent); override;
  end;
  
  tmsememodialogfo = class(tmseform)

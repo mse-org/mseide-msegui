@@ -1,3 +1,12 @@
+{ MSEgui Copyright (c) 2005-2012 by Martin Schreiber
+
+    See the file COPYING.MSE, included in this distribution,
+    for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+}
 unit msei18nutils;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
@@ -15,7 +24,8 @@ uses
 //todo: optimize resourcestring loading
 //      wide resourcestrings
 
-function loadlangunit(aname: string): boolean;
+function loadlangunit(aname: string; 
+                             const quiet: boolean = false): boolean;
             //'' -> reset to builtin
             //true if ok
 procedure registermodule(datapo: pointer; //pobjectdataty
@@ -192,7 +202,7 @@ begin
  end;
 end;
 
-function loadlangunit(aname: string): boolean;
+function loadlangunit(aname: string; const quiet: boolean = false): boolean;
             //true if ok
 var
  reglang: registerlangty;
@@ -236,15 +246,20 @@ begin
     result:= true;
    end
    else begin
-   {$ifdef FPC} 
-    {$ifdef UNIX}
-    raise exception.create(dlerror);
+    if not quiet then begin
+    {$ifdef FPC} 
+     {$ifdef UNIX}
+     raise exception.create(dlerror);
+     {$else}
+     raise exception.create('Library not found.');
+     {$endif}
     {$else}
-    raise exception.create('Library not found.');
+     raise exception.create('Library not found.');
     {$endif}
-   {$else}
-    raise exception.create('Library not found.');
-   {$endif}
+    end
+    else begin
+     exit;
+    end;
    end;
   end;
   reloadchangedmodules;

@@ -138,6 +138,13 @@ object mainfo: tmainfo
     bounds_cy = 344
     anchors = [an_left, an_top, an_right, an_bottom]
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_wrapcol, og_autopopup]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        width = 39
+        numstart = 1
+        numstep = 1
+      end>
     fixrows.count = 1
     fixrows.items = <    
       item
@@ -166,9 +173,11 @@ object mainfo: tmainfo
     datacols.options = [co_proportional, co_savestate]
     datacols.items = <    
       item
-        width = 210
+        width = 195
+        onbeforedrawcell = beforelangdrawcell
         options = [co_readonly, co_proportional, co_savestate]
         widgetname = 'tree'
+        dataclass = ttreeitemeditlist
       end    
       item
         options = [co_readonly, co_savestate]
@@ -182,13 +191,13 @@ object mainfo: tmainfo
         dataclass = tgridintegerdatalist
       end    
       item
-        width = 133
+        width = 124
         options = [co_proportional, co_savestate]
         widgetname = 'comment'
         dataclass = tgridmsestringdatalist
       end    
       item
-        width = 110
+        width = 102
         options = [co_readonly, co_proportional, co_savestate]
         widgetname = 'value'
         dataclass = tgridmsestringdatalist
@@ -197,7 +206,7 @@ object mainfo: tmainfo
     statfile = projectfo.projectstat
     reffontheight = 14
     object tree: ttreeitemedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget1 = [ow1_fontglyphheight]
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -206,15 +215,16 @@ object mainfo: tmainfo
       visible = False
       bounds_x = 0
       bounds_y = 0
-      bounds_cx = 210
+      bounds_cx = 195
       bounds_cy = 16
-      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
+      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_hintclippedtext, oe_savestate]
+      textflags = [tf_ycentered, tf_clipo, tf_noselect, tf_ellipseleft]
       onupdaterowvalues = treeonupdaterowvalues
       options = [teo_treecolnavig]
       reffontheight = 14
     end
     object typedisp: tenumtypeedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget1 = [ow1_fontglyphheight]
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -222,7 +232,7 @@ object mainfo: tmainfo
       frame.button.options = [fbo_invisible, fbo_disabled]
       taborder = 2
       visible = False
-      bounds_x = 211
+      bounds_x = 196
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16
@@ -236,17 +246,16 @@ object mainfo: tmainfo
       reffontheight = 14
     end
     object donottranslate: tbooleanedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
       color = -2147483646
       frame.levelo = 0
       frame.localprops = [frl_levelo]
       frame.dummy = 0
       taborder = 3
-      bounds_x = 262
+      bounds_x = 247
       bounds_y = 0
       bounds_cx = 19
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savestate, oe_autopopupmenu, oe_keyexecute]
       visible = False
       onsetvalue = donottranslateonsetvalue
     end
@@ -258,11 +267,11 @@ object mainfo: tmainfo
       frame.button.imagenr = 17
       taborder = 4
       visible = False
-      bounds_x = 282
+      bounds_x = 267
       bounds_y = 0
-      bounds_cx = 133
+      bounds_cx = 124
       bounds_cy = 16
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_savestate]
       font.height = 12
       font.name = 'stf_default'
       font.xscale = 1
@@ -271,7 +280,7 @@ object mainfo: tmainfo
       reffontheight = 14
     end
     object value: tmemodialogedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      optionswidget1 = [ow1_fontglyphheight]
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
@@ -280,9 +289,9 @@ object mainfo: tmainfo
       frame.button.options = [fbo_invisible, fbo_disabled]
       taborder = 5
       visible = False
-      bounds_x = 416
+      bounds_x = 392
       bounds_y = 0
-      bounds_cx = 110
+      bounds_cx = 102
       bounds_cy = 16
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_hintclippedtext, oe_savestate]
       reffontheight = 14
@@ -304,7 +313,7 @@ object mainfo: tmainfo
     bounds_cx = 32
     bounds_cy = 16
     statfile = projectfo.projectstat
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_savevalue, oe_savestate, oe_checkvaluepaststatread, oe_autopopupmenu, oe_keyexecute]
     ondataentered = formatchanged
   end
   object stringonly: tbooleanedit
@@ -362,6 +371,25 @@ object mainfo: tmainfo
     statfile = projectfo.projectstat
     ondataentered = formatchanged
     onsetvalue = ntonlyonsetvalue
+  end
+  object coloron: tbooleanedit
+    color = -2147483645
+    frame.caption = 'Show Color'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      1
+      67
+      2
+    )
+    taborder = 6
+    bounds_x = 321
+    bounds_y = 5
+    bounds_cx = 80
+    bounds_cy = 16
+    statfile = projectfo.projectstat
+    ondataentered = formatchanged
+    value = True
   end
   object mainstatfile: tstatfile
     filename = 'msei18n.sta'
@@ -536,5 +564,9 @@ object mainfo: tmainfo
     )
     left = 481
     top = 135
+  end
+  object sysenv: tsysenvmanager
+    left = 24
+    top = 160
   end
 end

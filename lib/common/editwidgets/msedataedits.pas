@@ -1326,6 +1326,7 @@ type
  tcustomframe1 = class(tcustomframe);
  tcustomgrid1 = class(tcustomgrid);
  tcustomwidgetgrid1 = class(tcustomwidgetgrid);
+ tdropdowncontroller1 = class(tdropdowncontroller);
 // tdatacol1 = class(tdatacol);
 
 function realtytoint(const avalue: realty): integer;
@@ -3431,14 +3432,20 @@ end;
 procedure tcustomdropdownedit.texttovalue(var accept: boolean;
                        const quiet: boolean);
 begin
- if (deo_selectonly in fdropdown.options) and not fdropdown.dataselected and 
-                       (text <> '') then begin
-  accept:= false;
-  if not quiet and not (deo_autodropdown in fdropdown.options) then begin
-   fdropdown.dropdown;
+ if (deo_selectonly in fdropdown.options) and 
+                     not fdropdown.dataselected then begin
+  if (text <> '') then begin
+   accept:= false;
+   if not quiet and not (deo_autodropdown in fdropdown.options) then begin
+    fdropdown.dropdown;
+   end
+   else begin
+    feditor.undo;
+   end
   end
   else begin
-   feditor.undo;
+   tdropdowncontroller1(fdropdown).resetselection;
+   inherited;
   end;
  end
  else begin

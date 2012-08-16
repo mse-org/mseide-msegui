@@ -88,10 +88,10 @@ type
    function readdatastring: string; override;
          //bringt alle erhaeltlichen zeichen, keine lineauswertung
    function readbuffer: string; //does not try to get additional data
-   function readuln(out value: string): boolean;
+   function readuln(var value: string): boolean;
            //bringt auch unvollstaendige zeilen, false wenn unvollstaendig
            //no decoding
-   function readstrln(out value: string): boolean; override; 
+   function readstrln(var value: string): boolean; override; 
            //bringt nur vollstaendige zeilen, sonst false
            //no decoding
    procedure clear; override;
@@ -586,7 +586,7 @@ begin
  end;
 end;
 
-function tpipereader.readuln(out value: string): boolean;
+function tpipereader.readuln(var value: string): boolean;
 begin
  value:= '';
  result:= false;
@@ -603,7 +603,7 @@ begin
 // end;
 end;
 
-function tpipereader.readstrln(out value: string): boolean;
+function tpipereader.readstrln(var value: string): boolean;
 begin
  case checkdata of
   pr_line: begin

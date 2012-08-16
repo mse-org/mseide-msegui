@@ -123,6 +123,7 @@ type
    procedure clearselect(const sender: TObject);
    procedure valuescellevent(const sender: TObject; var info: celleventinfoty);
    procedure valuesenterexe(const sender: TObject);
+   procedure asyncexe(const sender: TObject; var atag: Integer);
   private
    factmodule: tmsecomponent;
    factcomp: tcomponent;
@@ -150,6 +151,7 @@ type
    procedure rereadprops;
    procedure showmethodsource(const aeditor: tmethodpropertyeditor);
   protected
+   procedure updatecompselection;
    procedure updatedefaultstate(const aindex: integer);
    procedure doasyncevent(var atag: integer); override;
    function findvalueeditor(const editor: tpropertyeditor): integer;
@@ -235,6 +237,7 @@ uses
 const
  ado_rereadprops = 1;  //asyncevent codes
  ado_updatecomponentname = 2;
+ ado_compselection = 3;
  objectinspectorcaption = 'Object Inspector';
  selectcolor = cl_ltred;
 
@@ -1199,9 +1202,11 @@ begin
  end;
 end;
 
-procedure tobjectinspectorfo.compselectoronsetvalue(const sender: tobject;
-  var avalue: msestring; var accept: boolean);
+procedure tobjectinspectorfo.updatecompselection;
+var
+ comp1: tcomponent;
 begin
+ comp1:= factcomp;
  with compselector.dropdown do begin
   if itemindex < 0 then begin
    clear;
@@ -1210,8 +1215,16 @@ begin
   else begin
    factcomp:= fcomponents[itemindex].instance;
   end;
+ end;
+ if comp1 <> factcomp then begin
   selectedcompchanged;
  end;
+end;
+
+procedure tobjectinspectorfo.compselectoronsetvalue(const sender: tobject;
+  var avalue: msestring; var accept: boolean);
+begin
+ asyncevent(ado_compselection);
 end;
 
 procedure tobjectinspectorfo.SelectionChanged(const ADesigner: IDesigner;
@@ -1817,22 +1830,26 @@ end;
 procedure tobjectinspectorfo.valuescellevent(const sender: TObject;
                var info: celleventinfoty);
 var
-// editor1: tpropertyeditor1;
  comp1: tcomponent;
 begin
  if iscellclick(info,[ccr_dblclick,ccr_nokeyreturn]) then begin
-//  editor1:= tpropertyeditor1(tpropertyitem(props.item).feditor.valueeditor);
-//  if (tpropertyeditor(editor1) is tcomponentpropertyeditor) then begin
-//   comp1:= tcomponent(editor1.getpointervalue);
-   comp1:= tpropertyitem(props.item).feditor.linksource;
-   while (comp1 <> nil) and (cssubcomponent in comp1.componentstyle) do begin
-    comp1:= comp1.owner;
-   end;
-   if comp1 <> nil then begin
-    designer.showformdesigner(designer.modules.findmodulebycomponent(comp1));
-    designer.selectcomponent(comp1);
-   end;
-//  end;
+  comp1:= tpropertyitem(props.item).feditor.linksource;
+  while (comp1 <> nil) and (cssubcomponent in comp1.componentstyle) do begin
+   comp1:= comp1.owner;
+  end;
+  if comp1 <> nil then begin
+   designer.showformdesigner(designer.modules.findmodulebycomponent(comp1));
+   designer.selectcomponent(comp1);
+  end;
+ end;
+end;
+
+procedure tobjectinspectorfo.asyncexe(const sender: TObject; var atag: Integer);
+begin
+ case atag of
+  ado_compselection: begin
+   updatecompselection;
+  end;
  end;
 end;
 

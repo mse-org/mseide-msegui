@@ -261,8 +261,9 @@ type
 
    procedure writestr(const value: string); //no encoding
    procedure writestrln(const value: string); //no encoding
-   function readstrln(out value: string): boolean; overload; virtual;
-                                              //no encoding
+   function readstrln(var value: string): boolean; overload; virtual;
+               //not out, variable address will be checked for nil
+               //no encoding
    procedure writetotext(var dest: text);   //no encoding
 
    procedure write(const value: string); reintroduce; overload;
@@ -275,9 +276,9 @@ type
    procedure writeln(const value: stringarty);  overload;
 
    function readln: boolean; overload;
-   function readln(out value: string): boolean; overload;      
+   function readln(var value: string): boolean; overload;      
            //true wenn zeile vollstaendig, sonst eof erreicht
-   function readln(out value: msestring): boolean; overload;       
+   function readln(var value: msestring): boolean; overload;       
            //true wenn zeile vollstaendig, sonst eof erreicht
    function readln(out value: integer): boolean; overload;
            //true wenn zeile vollstaendig, sonst eof erreicht
@@ -1679,7 +1680,7 @@ begin
  result:= inherited read(buffer,count);
 end;
 }
-function ttextstream.readstrln(out value: string): boolean;
+function ttextstream.readstrln(var value: string): boolean;
      //true wenn zeile vollstaendig
 
  procedure fillbuffer;
@@ -1851,7 +1852,7 @@ begin
  result:= readstrln(str1);
 end;
 
-function ttextstream.readln(out value: string): boolean;
+function ttextstream.readln(var value: string): boolean;
 begin
  result:= readstrln(value);
  if fencoding <> ce_locale then begin
@@ -1859,7 +1860,7 @@ begin
  end;
 end;
 
-function ttextstream.readln(out value: msestring): boolean;
+function ttextstream.readln(var value: msestring): boolean;
 var
  str1: string;
 begin

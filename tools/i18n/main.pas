@@ -20,12 +20,10 @@ unit main;
 interface
 uses
  mseforms,msefiledialog,msestat,msestatfile,msesimplewidgets,msegrids,
- msewidgetgrid,
- mselistbrowser,msedataedits,typinfo,msedatanodes,msegraphedits,msestream,
- mseglob,
- msemenus,classes,msetypes,msestrings,msethreadcomp,mseguiglob,msegui,
- mseresourceparser,
- msedialog,msememodialog,mseobjecttext;
+ msewidgetgrid,msegraphics,msegraphutils,mselistbrowser,msedataedits,typinfo,
+ msedatanodes,msegraphedits,msestream,mseglob,msemenus,classes,msetypes,
+ msestrings,msethreadcomp,mseguiglob,msegui,mseresourceparser,msedialog,
+ msememodialog,mseobjecttext,mseifiglob,msesysenv;
 
 const
  drcext = '_DRC.rc';
@@ -58,6 +56,8 @@ type
    scan: tbutton;
    mainmenu1: tmainmenu;
    projectfiledialog: tfiledialog;
+   coloron: tbooleanedit;
+   sysenv: tsysenvmanager;
    procedure onprojectopen(const sender: tobject);
    procedure onprojectsave(const sender: tobject);
    procedure onprojectedit(const sender: tobject);
@@ -98,6 +98,8 @@ type
    procedure mainmenuupdate(const sender: tcustommenu);
    procedure aboutexe(const sender: TObject);
    procedure exitexe(const sender: TObject);
+   procedure beforelangdrawcell(const sender: tcol; const canvas: tcanvas;
+                   var cellinfo: cellinfoty; var processed: Boolean);
   private
    datastream: ttextdatastream;
 //   alang: integer;
@@ -135,11 +137,17 @@ uses
  main_mfm,msefileutils,msesystypes,msesys,sysutils,mselist,project,
  rtlconsts,mseprocutils,
  msewidgets,mseparser,mseformdatatools,mseresourcetools,
- msearrayutils,msesettings,msesysenv,messagesform,mseclasses,mseeditglob;
+ msearrayutils,msesettings,messagesform,mseclasses,mseeditglob;
 
 const
  translateext = 'trans';
  exportext = 'csv';
+type
+ envvarty = (env_macrodef);
+const
+ sysenvvalues: array[envvarty] of argumentdefty =
+  ((kind: ak_pararg; name: '-macrodef'; anames: nil; flags: []; initvalue: '')
+  );
 
 type
  ttreenode1 = class(ttreenode);
@@ -160,6 +168,7 @@ procedure tmainfo.tmainfooncreate(const sender: tobject);
 var
  wstr1: msestring;
 begin
+ sysenv.init(sysenvvalues);
  wstr1:= filepath(statdirname);
  if not finddir(wstr1) then begin
   createdir(wstr1);
@@ -312,14 +321,17 @@ begin
  grid.fixrows[-1].captions.count:= length(ar1);
  for int1:= variantshift to high(ar1) do begin
   grid.fixrows[-1].captions[int1].caption:= getcolumnheaders[int1];
-  if grid.datacols[int1].editwidget = nil then begin
-   edit1:= tmemodialogedit.create(self);
-   edit1.initgridwidget;
-   edit1.onsetvalue:= {$ifdef FPC}@{$endif}variantonsetvalue;
-   edit1.Tag:= int1 - variantshift;
-   edit1.optionsedit:= (edit1.optionsedit - [oe_savevalue]) + 
-                                                 [oe_hintclippedtext];
-   grid.datacols[int1].editwidget:= edit1;
+  with grid.datacols[int1] do begin
+   if editwidget = nil then begin
+    edit1:= tmemodialogedit.create(self);
+    edit1.initgridwidget;
+    edit1.onsetvalue:= {$ifdef FPC}@{$endif}variantonsetvalue;
+    edit1.Tag:= int1 - variantshift;
+    edit1.optionsedit:= (edit1.optionsedit - [oe_savevalue]) + 
+                                                  [oe_hintclippedtext];
+    grid.datacols[int1].editwidget:= edit1;
+   end;
+   onbeforedrawcell:= @beforelangdrawcell;
   end;
  end;
  grid.beginupdate;
@@ -745,7 +757,7 @@ end;
 procedure tmainfo.writeprojectdata;
 var
  stream: ttextdatastream;
- begin
+begin
  stream:= ttextdatastream.Create(projectfo.datafilename.value,fm_create);
  dowrite(stream,ce_utf8n);
  fdatachanged:= false;
@@ -812,6 +824,33 @@ procedure tmainfo.makeexecute(const sender: tthreadcomp);
   messagesfo.messages.addchars(amessage);
   application.unlock;
  end;
+
+var
+ macroar: macroinfoarty;
+ error: boolean;
+ 
+ function doproc(const commandstr: msestring): boolean;
+ var
+  mstr1: msestring;
+  int3: integer;
+ begin
+  result:= false;
+  mstr1:= expandmacros(commandstr,macroar);
+  int3:= messagesfo.messages.execprog(mstr1);
+  if int3 = invalidprochandle then begin
+   error:= true;
+  end
+  else begin
+   int3:= messagesfo.messages.waitforprocess;
+   if int3 <> 0 then begin
+    addmessage('Exec error '+inttostr(int3)+'.');
+    error:= true;
+   end
+   else begin
+    result:= true;
+   end;
+  end;
+ end;
  
 var
  int1,int2,int3: integer;
@@ -823,10 +862,8 @@ var
  str1: string;
  commandstring: msestring;
  mstr1: msestring;
- macroar: macroinfoarty;
 // actdir: filenamety;
  dirbefore: filenamety;
- error: boolean;
  basename: filenamety;
 
 begin
@@ -838,7 +875,9 @@ begin
  if basename = '' then begin
   basename:= filenamebase(projectfo.projectstat.filename);
  end;
- commandstring:= expandmacros(projectfo.makecommand.value,getsyssettingsmacros);
+ commandstring:= expandmacros(projectfo.makecommand.value,
+             sysenv.getcommandlinemacros(ord(env_macrodef),-1,-1,
+                                              getsyssettingsmacros));
  setlength(macroar,2);
  macroar[0].name:= 'LIBFILE';
  macroar[1].name:= 'LIBFILEBASE';
@@ -933,16 +972,14 @@ begin
      if makeon.value then begin
       try
        setcurrentdirmse(dir[int1]);
-       mstr1:= expandmacros(commandstring,macroar);
-       int3:= messagesfo.messages.execprog(mstr1);
-       if int3 = invalidprochandle then begin
-        error:= true;
-       end
-       else begin
-        int3:= messagesfo.messages.waitforprocess;
-        if int3 <> 0 then begin
-         addmessage('Exec error '+inttostr(int3)+'.');
-         error:= true;
+       if beforemake.value <> '' then begin
+        if not doproc(beforemake.value) then begin
+         break;
+        end;
+       end;
+       if doproc(commandstring) then begin
+        if aftermake.value <> '' then begin
+         doproc(aftermake.value);
         end
         else begin
          mstr1:= macroar[1].value;
@@ -1106,6 +1143,21 @@ end;
 procedure tmainfo.exitexe(const sender: TObject);
 begin
  close;
+end;
+
+procedure tmainfo.beforelangdrawcell(const sender: tcol; const canvas: tcanvas;
+               var cellinfo: cellinfoty; var processed: Boolean);
+begin
+ if coloron.value then begin
+  with cellinfo.cell do begin
+   if (typedisp[row] = ord(vastring)) and 
+          not donottranslate[row] and 
+          (tstringedit(grid.datacols[col].editwidget)[row] =
+                 value[row]) and (value[row] <> '') then begin
+    cellinfo.color:= cl_ltred;
+   end;
+  end;
+ end;
 end;
 
 end.

@@ -183,7 +183,7 @@ object settingsfo: tsettingsfo
       )
     )
     controller.options = [fdo_directory]
-    controller.captionopen = 'Directory for sntax definition files'
+    controller.captionopen = 'Directory for syntax definition files'
     controller.ongetfilename = epandfilenamemacro
     reffontheight = 14
   end

@@ -13,15 +13,17 @@ unit msedoublestringlisteditor;
 
 interface
 uses
- mseforms,msedataedits,msesimplewidgets,msewidgetgrid,msegrids;
+ mseforms,msedataedits,msesimplewidgets,msewidgetgrid,msegrids,mseedit,mseglob,
+ msegui,mseguiglob,mseifiglob,msememodialog,msemenus,msestrings,msetypes,
+ msedialog;
 type
  tdoublestringlisteditor = class(tmseform)
    cancel: tbutton;
    ok: tbutton;
    grid: twidgetgrid;
-   texta: tstringedit;
-   textb: tstringedit;
    rowcount: tintegeredit;
+   textb: tmemodialogedit;
+   texta: tmemodialogedit;
    procedure rowcountonsetvalue(const sender: tobject; var avalue: integer;
                 var accept: boolean);
    procedure gridonrowcountchanged(const sender: tcustomgrid);

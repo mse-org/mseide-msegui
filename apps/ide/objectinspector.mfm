@@ -90,6 +90,7 @@ object objectinspectorfo: tobjectinspectorfo
   }
   oncreate = tmseformcreate
   oneventloopstart = objectinspectorfoonloaded
+  onasyncevent = asyncexe
   onlayout = objectinspectoronchildscaled
   left = 239
   top = 180
