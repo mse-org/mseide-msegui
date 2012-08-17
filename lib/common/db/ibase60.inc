@@ -15,7 +15,8 @@ const
  fbembedlib: array[0..0] of filenamety = ('fbembed.dll');
  fbcgdslib: array[0..1] of filenamety = ('fbclient.dll','gds32.dll');
 {$else}
- fbembedlib: array[0..3] of filenamety = ('libfbembed.so.2.1','libfbembed.so.2',
+ fbembedlib: array[0..4] of filenamety = (
+           'libfbembed.so.2.5','libfbembed.so.2.1','libfbembed.so.2',
                                           'libfbembed.so.1','libfbembed.so');
  fbcgdslib: array[0..3] of filenamety = ('libfbclient.so.2',
                           'libfbclient.so.1','libfbclient.so','libgds.so');
