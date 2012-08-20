@@ -704,7 +704,8 @@ type
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure mousewheelevent(var info: mousewheeleventinfoty); override;
-   function dostep(const event: stepkindty; const adelta: real): boolean; virtual;
+   function dostep(const event: stepkindty; const adelta: real;
+                       ashiftstate: shiftstatesty): boolean; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2271,7 +2272,8 @@ begin
  tscrollboxframe(fframe).updateclientrect;
 end;
 
-function tcustomstepbox.dostep(const event: stepkindty; const adelta: real): boolean;
+function tcustomstepbox.dostep(const event: stepkindty;
+                      const adelta: real; ashiftstate: shiftstatesty): boolean;
 begin
  result:= false;
  if canevent(tmethod(fonstep)) then begin

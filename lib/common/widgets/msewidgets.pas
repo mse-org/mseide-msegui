@@ -483,7 +483,8 @@ type
   function translatecolor(const aclor: colorty): colorty;
   procedure invalidaterect(const rect: rectty; const org: originty;
                                const noclip: boolean = false);
-  function dostep(const event: stepkindty; const adelta: real): boolean; 
+  function dostep(const event: stepkindty; const adelta: real;
+                  ashiftstate: shiftstatesty): boolean; 
                                                  //true on action
  end;
  stepbuttonposty = (sbp_right,sbp_top,sbp_left,sbp_bottom);
@@ -3137,7 +3138,7 @@ end;
 procedure tcustomstepframe.execute(const tag: integer; 
                                       const info: mouseeventinfoty);
 begin
- fstepintf.dostep(stepkindty(tag),0);
+ fstepintf.dostep(stepkindty(tag),0,info.shiftstate);
 end;
 
 procedure tcustomstepframe.getpaintframe(var frame: framety);
@@ -3613,7 +3614,7 @@ begin
    end;
    sk1:= stepdirstep[fbuttonpos][info.wheel = mw_up]
   end;
-  if canstep and fstepintf.dostep(sk1,info.delta) then begin
+  if canstep and fstepintf.dostep(sk1,info.delta,info.shiftstate) then begin
    include(info.eventstate,es_processed);
   end;
  end;

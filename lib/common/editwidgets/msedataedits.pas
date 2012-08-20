@@ -1185,7 +1185,10 @@ type
   private
    fstep: real;
    fstepflag: stepkindty;
-   fstepfact: integer;
+//   fstepfact: integer;
+   fstepfact: real;
+   fstepctrlfact: real;
+   fstepshiftfact: real;
    fwheelsensitivity: real;
    function getframe: tspineditframe;
    procedure setframe(const avalue: tspineditframe);
@@ -1196,11 +1199,16 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure updatereadonlystate; override;
-  //istepbar
-   function dostep(const event: stepkindty; const adelta: real): boolean;
+    //istepbar
+   function dostep(const event: stepkindty; const adelta: real;
+                   ashiftstate: shiftstatesty): boolean;
   public
    constructor create(aowner: tcomponent); override;
    property step: real read fstep write fstep; //default 1
+   property stepctrlfact: real read fstepctrlfact write fstepctrlfact;
+                    //default = 0 -> no ctrl step
+   property stepshiftfact: real read fstepshiftfact write fstepshiftfact;
+                    //default = 0 -> no shift step
    property wheelsensitivity: real read fwheelsensitivity 
                                                write fwheelsensitivity;
   published
@@ -1219,6 +1227,8 @@ type
    property min;
    property max;
    property step;
+   property stepctrlfact;
+   property stepshiftfact;
    property wheelsensitivity;
  end;
 
@@ -5298,7 +5308,7 @@ endlab1:
 end;
 
 function tcustomrealspinedit.dostep(const event: stepkindty;
-                                               const adelta: real): boolean;
+                      const adelta: real; ashiftstate: shiftstatesty): boolean;
 begin
  result:= false;
  if not (csdesigning in componentstate) then begin
@@ -5319,6 +5329,15 @@ begin
    end;
    if fstepfact < 1 then begin
     fstepfact:= 1;
+   end;
+   ashiftstate:= ashiftstate * keyshiftstatesmask;
+   if (ashiftstate = [ss_ctrl]) and (fstepctrlfact <> 0) then begin
+    fstepfact:= fstepfact * fstepctrlfact;
+   end
+   else begin
+    if (ashiftstate = [ss_shift]) and (fstepshiftfact <> 0) then begin
+     fstepfact:= fstepfact * fstepshiftfact;
+    end;
    end;
    checkvalue;
   end;

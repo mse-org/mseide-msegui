@@ -284,7 +284,7 @@ type
    fface: tface;
    procedure setface(const avalue: tface);
   protected
-   //iface
+    //iface
    procedure invalidate;
    function translatecolor(const acolor: colorty): colorty;
    function getclientrect: rectty;
@@ -292,7 +292,6 @@ type
                const linkintf: iobjectlink = nil);
    function getcomponentstate: tcomponentstate;
    procedure widgetregioninvalid;
-//   function getwidget: twidget;
   public
    constructor create(intf: iscrollbar; org: originty = org_client;
               ondimchanged: proceventty = nil); override;
@@ -300,11 +299,9 @@ type
    procedure paint(const canvas: tcanvas; const acolor: colorty = cl_none); override;
   published
    property options default defaultsliderscrollbaroptions;
-//   property width;
-//   property indentstart;
-//   property indentend;
    property stepsize;
    property stepctrlfact;
+   property stepshiftfact;
    property pagesize;
    property wheelsensitivity;
    property buttonlength default defaultbuttonminlength;

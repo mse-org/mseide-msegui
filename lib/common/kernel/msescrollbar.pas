@@ -104,6 +104,7 @@ type
    fonbeforeevent: beforescrollbareventty;
    fonafterevent: scrollbareventty;
    fstepctrlfact: real;
+   fstepshiftfact: real;
    fwheelsensitivity: real;
    procedure updatedim;
    procedure setdirection(const avalue: graphicdirectionty);
@@ -165,6 +166,8 @@ type
    foptions: scrollbaroptionsty;
    fdrawinfo: scrollbardrawinfoty;
    findentstart,findentend: integer;
+   function getshiftfact(ashiftstate: shiftstatesty; out fact: real): boolean;
+                                             //false if not valid
    procedure setoptions(const avalue: scrollbaroptionsty); virtual;
    procedure invalidate;
    procedure dostep(akind: scrolleventty; astep: real);
@@ -198,8 +201,8 @@ type
    procedure stepdown;
    procedure pageup;
    procedure pagedown;
-   procedure wheelup;
-   procedure wheeldown;
+   procedure wheelup(const shiftstate: shiftstatesty = []);
+   procedure wheeldown(const shiftstate: shiftstatesty = []);
 
    property direction: graphicdirectionty read fdirection write setdirection
                                 default gd_right;
@@ -216,6 +219,8 @@ type
                     //default = 0 -> pagesize /10
    property stepctrlfact: real read fstepctrlfact write fstepctrlfact;
                     //default = 0 -> no ctrl step
+   property stepshiftfact: real read fstepshiftfact write fstepshiftfact;
+                    //default = 0 -> no shift step
    property pagesize: real read fpagesize write setpagesize stored ispagesizestored;
                     //default = defaultpagesize
    property wheelsensitivity: real read fwheelsensitivity write fwheelsensitivity;
@@ -1005,62 +1010,80 @@ begin
 end;
 
 procedure tcustomscrollbar.mousewheelevent(var info: mousewheeleventinfoty;
-                                       const pagingreversed: boolean = false);
+                                       const pagingreversed: boolean = false); 
 begin
  with info do begin
   include(eventstate,es_processed);
   if (wheel = mw_down) xor (fdirection in [gd_left,gd_down]) then begin
-   if (ss_ctrl in shiftstate) xor pagingreversed then begin
-    pagedown;
+   if (fstepctrlfact <> 0) or (fstepshiftfact <> 0) then begin
+    wheeldown(shiftstate);
    end
    else begin
-    wheeldown;
+    if (ss_ctrl in shiftstate) xor pagingreversed then begin
+     pagedown;
+    end
+    else begin
+     wheeldown;
+    end;
    end;
   end
   else begin
-   if (ss_ctrl in shiftstate) xor pagingreversed then begin
-    pageup;
+   if (fstepctrlfact <> 0) or (fstepshiftfact <> 0) then begin
+    wheelup(shiftstate);
    end
    else begin
-    wheelup;
+    if (ss_ctrl in shiftstate) xor pagingreversed then begin
+     pageup;
+    end
+    else begin
+     wheelup;
+    end;
    end;
   end;
  end;
 end;
 
-function tcustomscrollbar.dostepup(const ashiftstate: shiftstatesty): boolean;
+function tcustomscrollbar.getshiftfact(ashiftstate: shiftstatesty;
+                             out fact: real): boolean;
+                             //false if not valid
 begin
- result:= true;
- if (ashiftstate * shiftstatesmask = [ss_ctrl]) then begin
-  if fstepctrlfact <> 0 then begin
-   dostep(sbe_stepup,stepsize*fstepctrlfact);
+ fact:= 1;
+ ashiftstate:= ashiftstate * shiftstatesmask;
+ result:= ashiftstate = [];
+ if not result then begin
+  if (ashiftstate = [ss_ctrl]) and (fstepctrlfact <> 0) then begin
+   fact:= fstepctrlfact;
+   result:= true;
   end
   else begin
-   result:= false;
+   if (ashiftstate = [ss_shift]) and (fstepshiftfact <> 0) then begin
+    fact:= fstepshiftfact;
+    result:= true;
+   end
   end;
- end
- else begin
-   dostep(sbe_stepup,stepsize);
+ end;
+end;
+
+function tcustomscrollbar.dostepup(const ashiftstate: shiftstatesty): boolean;
+var
+ fact1: real;
+begin
+ result:= getshiftfact(ashiftstate,fact1);
+ if result then begin
+  dostep(sbe_stepup,stepsize*fact1);
  end;  
 end; //dostepup
 
 function tcustomscrollbar.dostepdown(const ashiftstate: shiftstatesty): boolean;
+var
+ fact1: real;
 begin
- result:= true;
- if (ashiftstate * shiftstatesmask = [ss_ctrl]) then begin
-  if fstepctrlfact <> 0 then begin
-   dostep(sbe_stepdown,-stepsize*fstepctrlfact);
-  end
-  else begin
-   result:= false;
-  end;
- end
- else begin
-   dostep(sbe_stepdown,-stepsize);
+ result:= getshiftfact(ashiftstate,fact1);
+ if result then begin
+  dostep(sbe_stepdown,-stepsize*fact1);
  end;  
-end; //dostepdown
+end;
   
-
 procedure tcustomscrollbar.keydown(var info: keyeventinfoty);
 
  procedure dopageup;
@@ -1195,16 +1218,24 @@ begin
  dostep(sbe_pageup,pagesize);
 end;
 
-procedure tcustomscrollbar.wheeldown;
+procedure tcustomscrollbar.wheeldown(const shiftstate: shiftstatesty = []);
+var
+ fact1: real;
 begin
+ getshiftfact(shiftstate,fact1);
  dostep(sbe_wheeldown,
-            -application.mousewheelacceleration(stepsize)*fwheelsensitivity);
+            -application.mousewheelacceleration(stepsize)*
+                                        fwheelsensitivity*fact1);
 end;
 
-procedure tcustomscrollbar.wheelup;
+procedure tcustomscrollbar.wheelup(const shiftstate: shiftstatesty = []);
+var
+ fact1: real;
 begin
+ getshiftfact(shiftstate,fact1);
  dostep(sbe_wheelup,
-             application.mousewheelacceleration(stepsize)*fwheelsensitivity);
+             application.mousewheelacceleration(stepsize)*
+                                        fwheelsensitivity*fact1);
 end;
 
 procedure tcustomscrollbar.stepdown;
