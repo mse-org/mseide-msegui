@@ -1929,10 +1929,10 @@ begin
     result:= result + lineend + flines[int1];
    end;
   end;
-  if not flines.noparagraphs[po2.row] then begin
-   result:= result + lineend; //paragraph
-  end;
   if po2.row < flines.count then begin
+   if not flines.noparagraphs[po2.row] then begin
+    result:= result + lineend; //paragraph
+   end;
    result:= result + copy(flines[po2.row],1,po2.col);
   end;
  end;
