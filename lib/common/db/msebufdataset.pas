@@ -2927,8 +2927,9 @@ begin
    buffer:= @ffilterbuffer[ffiltereditkind]^.header;
   end;
   ord(dscurvalue): begin
-   if pdsrecordty(activebuffer)^.dsheader.bookmark.data.recordpo <>
-                                                             nil then begin
+   if (buffercount <= 0) or //probably fetchallblobs()
+      (pdsrecordty(activebuffer)^.dsheader.bookmark.data.recordpo <>
+                                                             nil) then begin
     buffer:= @fcurrentbuf^.header;
    end
    else begin
