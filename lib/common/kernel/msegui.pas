@@ -6828,7 +6828,7 @@ begin
   updatingbefore:= ws1_parentupdating in fwidgetstate1;
   include(fwidgetstate1,ws1_parentupdating);
   try
-   if entered then begin
+   if entered and (fwindow <> nil) then begin
     window.nofocus;
    end;
    if (value <> nil) then begin
