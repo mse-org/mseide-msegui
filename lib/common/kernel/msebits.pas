@@ -156,6 +156,14 @@ function swapbytes(const value: longword): longword; overload;
  //value and result at different adresses!
 procedure swapbytes1(var value: word); overload;
 procedure swapbytes1(var value: longword); overload;
+
+function swapbits(const value: word): word; overload;
+ //value and result at different adresses!
+function swapbits(const value: longword): longword; overload;
+ //value and result at different adresses!
+procedure swapbits1(var value: word); overload;
+procedure swapbits1(var value: longword); overload;
+
 procedure swaprgb1(var value: longword);
 function swaprgb(const value: longword): longword;
 
@@ -630,6 +638,8 @@ begin
  byte((pchar(@result)+2)^):= byte(value);
 end;
 
+//todo: optimize
+
 procedure swapbytes1(var value: word); overload;
 var
  wo1: word;
@@ -669,6 +679,42 @@ begin
  po1^:= po2^; inc(po1); dec(po2);
  po1^:= po2^; inc(po1); dec(po2);
  po1^:= po2^;
+end;
+
+function swapbits(const value: word): word; overload;
+ //value and result at different adresses!
+begin
+ pbyte(pchar(@result))^:= bitreverse[pbyte(pchar(@value)+1)^];
+ pbyte(pchar(@result)+1)^:= bitreverse[pbyte(pchar(@value))^];
+end;
+
+function swapbits(const value: longword): longword; overload;
+ //value and result at different adresses!
+var
+ po1,po2: pbyte;
+begin
+ po1:= @result;
+ po2:= pbyte(pchar(@value)+3);
+ po1^:= bitreverse[po2^]; inc(po1); dec(po2);
+ po1^:= bitreverse[po2^]; inc(po1); dec(po2);
+ po1^:= bitreverse[po2^]; inc(po1); dec(po2);
+ po1^:= bitreverse[po2^];
+end;
+
+procedure swapbits1(var value: word); overload;
+var
+ wo1: word;
+begin
+ wo1:= value;
+ value:= swapbits(wo1);
+end;
+
+procedure swapbits1(var value: longword); overload;
+var
+ lwo1: longword;
+begin
+ lwo1:= value;
+ value:= swapbits(lwo1);
 end;
 
 function iszero(address: pointer; count: integer): boolean;
