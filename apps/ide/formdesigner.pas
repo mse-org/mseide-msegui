@@ -2528,7 +2528,10 @@ procedure tdesignwindow.componentnamechanging(const adesigner: idesigner;
                      const amodule: tmsecomponent; const aitem: tcomponent;
                      const newname: string);
 begin
- //dummy
+ if (amodule = tformdesignerfo(fowner).fmodule) and
+                                  not (aitem is twidget) then begin
+  fclientsizevalid:= false;
+ end;
 end;
 
 procedure tdesignwindow.moduleclassnamechanging(const adesigner: idesigner;
