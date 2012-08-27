@@ -37,7 +37,7 @@ type
  
 procedure tmemoryfo.adent(const sender: TObject);
 begin
- updatelayout(nil);
+ updatelayoutexe(nil);
 end;
 
 procedure tmemoryfo.refresh;
