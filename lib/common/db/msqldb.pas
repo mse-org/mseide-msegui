@@ -63,6 +63,7 @@ type
   public
    constructor create; override;
    destructor destroy; override;
+   procedure assign(source: tpersistent); override;
    property text: msestring read gettext write settext;
   published
    property macros: tmacroproperty read fmacros write setmacros;
@@ -90,6 +91,7 @@ type
   public
    constructor create(aowner: tobject); override;
    destructor destroy; override;
+   procedure assign(source: tpersistent); override;
   published
    property name: msestring read fname write fname;
    property value: tmacrostringlist read fvalue write setvalue;
@@ -1150,6 +1152,19 @@ end;
 procedure tsqlstringlist.setmacros(const avalue: tmacroproperty);
 begin
  fmacros.assign(avalue);
+end;
+
+procedure tsqlstringlist.assign(source: tpersistent);
+begin
+ beginupdate;
+ try
+  inherited;
+  if source is tsqlstringlist then begin
+   fmacros.assign(tsqlstringlist(source).macros);
+  end;
+ finally
+  endupdate;
+ end;
 end;
 
 { tdbcontroller }
@@ -3136,6 +3151,17 @@ begin
  if factive <> avalue then begin
   factive:= avalue;
   tsqlstringlist(fowner).dochange;
+ end;
+end;
+
+procedure tsqlmacroitem.assign(source: tpersistent);
+begin
+ if source is tsqlmacroitem then begin
+  with tsqlmacroitem(source) do begin
+   self.name:= name;
+   self.value:= value;
+   self.active:= active;
+  end;
  end;
 end;
 

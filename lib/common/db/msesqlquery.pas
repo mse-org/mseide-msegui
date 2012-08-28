@@ -42,6 +42,9 @@ type
  sqlquerystatety = (sqs_userapplyrecupdate,sqs_updateabort,sqs_updateerror);
  sqlquerystatesty = set of sqlquerystatety;
  
+ tupdatestringlist = class(tsqlstringlist)
+ end;
+ 
  tsqlquery = class (tmsebufdataset,isqlclient,icursorclient)
   private
    fcursor: tsqlcursor;
@@ -64,7 +67,7 @@ type
    fstatementtype: tstatementtype;
    fmasterlink: tsqlmasterparamsdatalink;
    fapplyqueries: array[tupdatekind] of tsqlresult;
-   fapplysql: array[tupdatekind] of tsqlstringlist;
+   fapplysql: array[tupdatekind] of tupdatestringlist;
 //   fupdateqry,fdeleteqry,finsertqry: tsqlquery;
    fupdaterowsaffected: integer;
    fblobintf: iblobconnection;   
@@ -92,9 +95,9 @@ type
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
    procedure setfsql(const avalue: tsqlstringlist);
-   procedure setfsqlupdate(const avalue: tsqlstringlist);
-   procedure setfsqlinsert(const avalue: tsqlstringlist);
-   procedure setfsqldelete(const avalue: tsqlstringlist);
+   procedure setfsqlupdate(const avalue: tupdatestringlist);
+   procedure setfsqlinsert(const avalue: tupdatestringlist);
+   procedure setfsqldelete(const avalue: tupdatestringlist);
    procedure setbeforeexecute(const avalue: tcustomsqlstatement);
    procedure setaftercursorclose(const avalue: tcustomsqlstatement);
    function getsqltransaction: tsqltransaction;
@@ -198,11 +201,11 @@ type
    property params : tmseparams read fparams write setparams;
                        //before SQL
    property SQL : tsqlstringlist read FSQL write setFSQL;
-   property SQLUpdate : tsqlstringlist read Fapplysql[ukmodify] 
+   property SQLUpdate : tupdatestringlist read Fapplysql[ukmodify] 
                                                          write setFSQLUpdate;
-   property SQLInsert : tsqlstringlist read Fapplysql[ukinsert] 
+   property SQLInsert : tupdatestringlist read Fapplysql[ukinsert] 
                                                          write setFSQLInsert;
-   property SQLDelete : tsqlstringlist read Fapplysql[ukdelete]
+   property SQLDelete : tupdatestringlist read Fapplysql[ukdelete]
                                                          write setFSQLDelete;
    property beforeexecute: tcustomsqlstatement read fbeforeexecute write setbeforeexecute;
    property aftercursorclose: tcustomsqlstatement read faftercursorclose 
@@ -571,7 +574,7 @@ begin
   FSQL.OnChange := @OnChangeSQL;
 
   for k1:= low(tupdatekind) to high(tupdatekind) do begin
-   fapplysql[k1]:= tsqlstringlist.create;
+   fapplysql[k1]:= tupdatestringlist.create;
    fapplysql[k1].onchange:= @onchangemodifysql;
   end;
   {
@@ -634,10 +637,22 @@ begin
 end;
 
 procedure TSQLQuery.OnChangeModifySQL(const Sender : TObject);
-
+var
+ k1: tupdatekind;
 begin
  if not (csdesigning in componentstate) then begin
-  CheckInactive;
+//  CheckInactive;
+  if connected then begin
+   for k1:= low(tupdatekind) to high(tupdatekind) do begin
+    if sender = fapplysql[k1] then begin
+     with fapplyqueries[k1] do begin
+      active:= false;
+      sql.assign(fapplysql[k1]);
+     end;
+     break;
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -2115,22 +2130,22 @@ begin         //todo: check connect disconnect sequence
  end;
 end;
 
-procedure TSQLQuery.setFSQL(const avalue: TsqlStringlist);
+procedure tsqlquery.setfsql(const avalue: tsqlstringlist);
 begin
  fsql.assign(avalue);
 end;
 
-procedure TSQLQuery.setFSQLUpdate(const avalue: TsqlStringlist);
+procedure tsqlquery.setfsqlupdate(const avalue: tupdatestringlist);
 begin
  fapplysql[ukmodify].assign(avalue);
 end;
 
-procedure TSQLQuery.setFSQLInsert(const avalue: TsqlStringlist);
+procedure tsqlquery.setfsqlinsert(const avalue: tupdatestringlist);
 begin
  fapplysql[ukinsert].assign(avalue);
 end;
 
-procedure TSQLQuery.setFSQLDelete(const avalue: TsqlStringlist);
+procedure tsqlquery.setfsqldelete(const avalue: tupdatestringlist);
 begin
  fapplysql[ukdelete].assign(avalue);
 end;
