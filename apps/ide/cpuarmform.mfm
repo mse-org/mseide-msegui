@@ -9,7 +9,6 @@ inherited cpuarmfo: tcpuarmfo
     251
     253
   )
-  statfile = nil
   caption = 'CPU ARM'
   moduleclassname = 'tcpufo'
   inherited on: tbooleanedit
