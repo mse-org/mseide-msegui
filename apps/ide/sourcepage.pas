@@ -879,6 +879,9 @@ begin
  end; 
  edit.savetofile(newname);
  if newname <> '' then begin
+  if ffiletag = 0 then begin
+   ffiletag:= sourcefo.newfiletag;
+  end;
   sourcefo.filechangenotifyer.addnotification(filepath,filetag,true);
  end;
  setsyntaxdef(newname);
