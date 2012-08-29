@@ -2075,7 +2075,7 @@ type
    function locate(const filter: msestring): boolean; override;
    procedure findnext(var recno: integer); override;
   public
-   constructor create(const acontroller: tlbdropdownlistcontroller;
+   constructor create(const acontroller: tcustomlbdropdownlistcontroller;
                              acols: tdropdowncols);
  end;
       
@@ -10973,8 +10973,8 @@ end;
 
 { tlbdropdownlist }
 
-constructor tlbdropdownlist.create(const acontroller: tlbdropdownlistcontroller;
-               acols: tdropdowncols);
+constructor tlbdropdownlist.create(
+     const acontroller: tcustomlbdropdownlistcontroller; acols: tdropdowncols);
 begin
  if assigned(acontroller.fonfilter) then begin
   include(feddstate,edds_filtered);
