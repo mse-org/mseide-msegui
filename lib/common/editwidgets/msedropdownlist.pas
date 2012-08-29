@@ -111,7 +111,7 @@ type
    procedure setfontcolorselect(const avalue: colorty);
   protected
    fitemindex: integer;
-   fkeyvalue64: integer;
+   fkeyvalue64: int64;
    fkeyvalue: msestring;
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure createitem(const index: integer; var item: tpersistent); override;
