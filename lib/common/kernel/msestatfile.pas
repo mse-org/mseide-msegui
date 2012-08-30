@@ -34,7 +34,8 @@ type
  statfilemissingeventty = procedure (const sender: tstatfile; 
                   const afilename: filenamety;
                   var astream: ttextstream; var aretry: boolean) of object;
-
+ statfilemodety = (sfm_inactive,sfm_reading,sfm_writing);
+ 
  tstatfile = class(tactcomponent,istatfile)
   private
    ffilename: filenamety;
@@ -66,6 +67,7 @@ type
    procedure setfiledir(const avalue: filenamety);
    procedure setoptions(avalue: statfileoptionsty);
    procedure setcryptohandler(const avalue: tcustomcryptohandler);
+   function getmode: statfilemodety;
   protected
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
@@ -90,6 +92,7 @@ type
    procedure writestat(const aname: msestring;
                                      const statwriter: tstatwriter); overload;
    procedure updatestat(const aname: msestring; const statfiler: tstatfiler);
+   property mode: statfilemodety read getmode;
   published
    property filename: filenamety read ffilename write setfilename nodefault;
    property filedir: filenamety read ffiledir write setfiledir;
@@ -348,12 +351,13 @@ begin
      fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatreaded,
                                                        typeinfo(istatfile));
     end;
-    if assigned(fonstatafterread) then begin
-     fonstatafterread(self);
-    end;
+//    if assigned(fonstatafterread) then begin
+//     fonstatafterread(self);
+//    end;
    end;
   finally
-   areader.free;
+   freeandnil(areader);
+//   areader.free;
   end;
  finally
   if stream = nil then begin
@@ -364,6 +368,9 @@ begin
     stream1.cryptohandler:= nil;
    end;
   end;
+ end;
+ if assigned(fonstatafterread) then begin
+  fonstatafterread(self);
  end;
 end;
 
@@ -477,9 +484,9 @@ begin
    if fobjectlinker <> nil then begin
     fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatwrite,typeinfo(istatfile));
    end;
-   if assigned(fonstatafterwrite) then begin
-    fonstatafterwrite(self);
-   end;
+//   if assigned(fonstatafterwrite) then begin
+//    fonstatafterwrite(self);
+//   end;
   finally
    freeandnil(awriter);
    if bo1 then begin
@@ -495,6 +502,9 @@ begin
     stream1.cryptohandler:= nil;
    end;
   end;
+ end;
+ if assigned(fonstatafterwrite) then begin
+  fonstatafterwrite(self);
  end;
 end;
 
@@ -606,6 +616,19 @@ end;
 procedure tstatfile.setcryptohandler(const avalue: tcustomcryptohandler);
 begin
  setlinkedvar(avalue,tmsecomponent(fcryptohandler));
+end;
+
+function tstatfile.getmode: statfilemodety;
+begin
+ result:= sfm_inactive;
+ if areader <> nil then begin
+  result:= sfm_reading;
+ end
+ else begin
+  if awriter <> nil then begin
+   result:= sfm_writing;
+  end;
+ end;
 end;
 
 end.
