@@ -3532,6 +3532,9 @@ begin
    inc(s);
   end;
   setlength(avalue,d-pmsechar(pointer(avalue)));
+  if aindex < 0 then begin
+   aindex:= 0;
+  end;
  end;
 end;
 

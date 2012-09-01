@@ -525,8 +525,11 @@ var
 begin
  if fgridintf <> nil then begin
   if datalist.count > 0 then begin
-   datalist[datalist.count-1]:= copy(datalist[datalist.count-1],1,
-          finputcolindex); //remove entered characters
+   mstr1:= datalist[datalist.count-1];
+   if length(mstr1) > finputcolindex then begin   
+    datalist[datalist.count-1]:= copy(mstr1,1,finputcolindex); 
+                                          //remove entered characters
+   end; 
   end;
   if teo_stripescsequence in foptions then begin
    mstr1:= stripescapesequences(avalue);
