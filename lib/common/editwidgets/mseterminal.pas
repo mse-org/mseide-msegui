@@ -9,7 +9,7 @@
 }
 unit mseterminal;
 
-{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 
 interface
 uses
@@ -21,7 +21,7 @@ type
                        var atext: msestring; var donotsend: boolean) of object;
  receivetexteventty = procedure(const sender: tobject; 
                        var atext: ansistring; const errorinput: boolean) of object;
- terminaloptionty = (teo_readonly,teo_bufferchunks);
+ terminaloptionty = (teo_readonly,teo_bufferchunks,teo_stripescsequence);
  terminaloptionsty = set of terminaloptionty;
 const
  defaultterminaleditoptions = (defaulttexteditoptions + [oe_caretonreadonly])-
@@ -77,6 +77,7 @@ type
    procedure docellevent(const ownedcol: boolean; 
                                      var info: celleventinfoty); override;
    procedure updateeditpos;
+   function stripescapesequences(avalue: msestring): msestring;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -519,13 +520,21 @@ begin
 end;
 
 procedure tterminal.addchars(const avalue: msestring);			
+var
+ mstr1: msestring;
 begin
  if fgridintf <> nil then begin
   if datalist.count > 0 then begin
    datalist[datalist.count-1]:= copy(datalist[datalist.count-1],1,
           finputcolindex); //remove entered characters
   end;
-  datalist.addchars(avalue,true,fmaxchars);
+  if teo_stripescsequence in foptions then begin
+   mstr1:= stripescapesequences(avalue);
+  end
+  else begin
+   mstr1:= avalue;
+  end;
+  datalist.addchars(mstr1,true,fmaxchars);
   updateeditpos;
  end;
 end;
@@ -720,6 +729,64 @@ end;
 procedure tterminal.setpipewaitus(const avalue: integer);
 begin
  fprocess.pipewaitus:= avalue;
+end;
+
+function tterminal.stripescapesequences(avalue: msestring): msestring;
+label
+ lab1;
+var
+ s,d,e: pmsechar;
+begin
+ if avalue <> '' then begin
+  setlength(result,length(avalue));
+  s:= pointer(avalue);
+  d:= pointer(result);
+  e:= s+length(avalue);
+  while s < e do begin
+   if s^ = c_esc then begin
+    inc(s);
+    case s^ of 
+     '[': begin
+      inc(s);
+      if (s^ >= '0') and (s^ <= '9') then begin
+       inc(s);
+lab1:
+       while (s^ >= '0') and (s^ <= '9') do begin
+        inc(s);
+       end;
+       if s^ = ';' then begin
+        inc(s);
+        goto lab1; //multiple attributes
+       end;
+       if not (s^ in ['n','h','l','H','A','B','C','D',
+                 'f','r','g','K','J','i','m']) then begin
+        dec(s);
+       end;
+      end
+      else begin      
+       if not (s^ in ['c','s','u','r','g','K','J','i']) then begin
+        dec(s);
+       end;
+      end;
+     end;
+     else begin
+      if not (s^ in ['c','(',')','7','8','D','M','H']) then begin
+       dec(s);
+      end;
+     end;
+    end;
+   end
+   else begin
+    d^:= s^;
+    inc(d);
+   end;
+   inc(s);
+  end;
+  setlength(result,d-pmsechar(pointer(result)));
+ end
+ else begin
+  result:= '';
+ end;
 end;
 
 end.

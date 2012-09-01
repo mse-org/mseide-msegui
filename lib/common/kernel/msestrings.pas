@@ -72,6 +72,7 @@ const
  c_return = #$0d;
  c_tab = #$09;
  c_backspace = #$08;
+ c_esc = #$1b;
  c_delete = #$7f;
  c_softhyphen = #$ad;
 
