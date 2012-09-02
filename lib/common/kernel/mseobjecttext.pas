@@ -871,12 +871,12 @@ var
           {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaNil));
          end
          else begin
-         (*
+//         (*
           if CompareText(parser.TokenString, 'null') = 0 then begin
            {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaNull));
           end
           else begin
-         *)
+//         *)
            if CompareText(parser.TokenString, 'NegInf') = 0 then begin
                             //preliminary, will be removed
            {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaExtended));
@@ -886,9 +886,9 @@ var
             {$ifdef FPC}Output.{$endif}WriteByte(Ord(vaIdent));
             WriteString(parser.TokenComponentIdent);
            end;
-         {
+//         {
           end;
-         }
+//         }
          end;
         end;
        end;
