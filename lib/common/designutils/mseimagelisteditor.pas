@@ -13,21 +13,26 @@ unit mseimagelisteditor;
 
 interface
 uses
- mseforms,msegui,mseglob,mseguiglob,
- msebitmap,msesimplewidgets,msegraphics,mselistbrowser,msegrids,
- msefiledialog,msestat,msestatfile,msestrings,msegraphedits,msecolordialog;
+ mseforms,msegui,mseglob,mseguiglob,msebitmap,msesimplewidgets,msegraphics,
+ mselistbrowser,msegrids,msefiledialog,msestat,msestatfile,msestrings,
+ msegraphedits,msecolordialog,msemenus,msesplitter,msegraphutils,msewidgets,
+ mseifiglob,msetypes,msedataedits,mseedit;
 
 type
  timagelisteditorfo = class(tmseform)
-   ok: tbutton;
-   cancel: tbutton;                                                  
-   add: tbutton;
-   clear: tbutton;
    disp: tlistview;
    imagelist: timagelist;
    filedialog: tfiledialog;
    statfile1: tstatfile;
+   tlayouter1: tlayouter;
+   la2: tlayouter;
+   tlayouter2: tlayouter;
+   ok: tbutton;
+   cancel: tbutton;
+   clear: tbutton;
+   add: tbutton;
    stretch: tbooleanedit;
+   la1: tlayouter;
    transparentcolor: tcoloredit;
    masked: tbooleanedit;
    procedure addonexecute(const sender: tobject);
@@ -47,7 +52,7 @@ function editimagelist(aimagelist: timagelist): modalresultty;
 
 implementation
 uses
- mseimagelisteditor_mfm,msetypes,msegraphutils,sysutils,
+ mseimagelisteditor_mfm,sysutils,
  msekeyboard,msedatanodes,msefileutils,msegraphicstream;
 
 function editimagelist(aimagelist: timagelist): modalresultty;

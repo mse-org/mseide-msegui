@@ -1,75 +1,29 @@
 object imagelisteditorfo: timagelisteditorfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
   visible = False
   bounds_x = 220
-  bounds_y = 325
-  bounds_cx = 304
-  bounds_cy = 347
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  bounds_y = 297
+  bounds_cx = 301
+  bounds_cy = 359
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.frame.zoomwidthstep = 1
+  container.frame.zoomheightstep = 1
   container.bounds = (
     0
     0
-    304
-    347
+    301
+    359
   )
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = statfile1
   caption = 'Imagelisteditor'
   moduleclassname = 'tmseform'
-  object add: tbutton
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-    bounds_x = 80
-    bounds_y = 322
-    bounds_cx = 50
-    bounds_cy = 20
-    anchors = [an_left, an_bottom]
-    state = [as_localcaption, as_localonexecute]
-    caption = 'add'
-    onexecute = addonexecute
-  end
-  object cancel: tbutton
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-    taborder = 2
-    bounds_x = 192
-    bounds_y = 322
-    bounds_cx = 50
-    bounds_cy = 20
-    anchors = [an_left, an_bottom]
-    state = [as_localcaption]
-    caption = 'cancel'
-    modalresult = mr_cancel
-  end
-  object ok: tbutton
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-    taborder = 3
-    bounds_x = 248
-    bounds_y = 322
-    bounds_cx = 50
-    bounds_cy = 20
-    anchors = [an_left, an_bottom]
-    state = [as_localcaption]
-    caption = 'OK'
-    modalresult = mr_ok
-  end
-  object clear: tbutton
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-    taborder = 1
-    bounds_x = 136
-    bounds_y = 322
-    bounds_cx = 50
-    bounds_cy = 20
-    anchors = [an_left, an_bottom]
-    state = [as_localcaption, as_localonexecute]
-    caption = 'clear'
-    onexecute = clearonexecute
-  end
   object disp: tlistview
-    optionswidget = [ow_mousefocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
-    taborder = 7
+    optionswidget1 = [ow1_fontglyphheight]
     bounds_x = 0
     bounds_y = 0
-    bounds_cx = 304
-    bounds_cy = 284
+    bounds_cx = 301
+    bounds_cy = 303
     anchors = [an_top, an_bottom]
     cellheight = 62
     optionsgrid = [og_colsizing, og_rowsizing, og_focuscellonenter, og_wraprow, og_wrapcol, og_autopopup]
@@ -83,65 +37,158 @@ object imagelisteditorfo: timagelisteditorfo
     onitemsmoved = disponitemsmoved
     reffontheight = 14
   end
-  object stretch: tbooleanedit
-    frame.caption = 'stretch'
+  object tlayouter1: tlayouter
+    frame.framei_bottom = 5
+    frame.localprops = [frl_fibottom]
     frame.dummy = 0
-    frame.outerframe = (
-      0
-      1
-      40
-      2
-    )
-    taborder = 6
-    bounds_x = 8
-    bounds_y = 324
-    bounds_cx = 53
-    bounds_cy = 16
+    taborder = 1
+    bounds_x = 0
+    bounds_y = 306
+    bounds_cx = 295
+    bounds_cy = 53
     anchors = [an_left, an_bottom]
-    statfile = statfile1
-    value = True
-  end
-  object masked: tbooleanedit
-    frame.caption = 'masked'
-    frame.dummy = 0
-    frame.outerframe = (
-      0
-      1
-      48
-      2
-    )
-    taborder = 4
-    bounds_x = 8
-    bounds_y = 295
-    bounds_cx = 61
-    bounds_cy = 16
-    anchors = [an_left, an_bottom]
-    value = True
-  end
-  object transparentcolor: tcoloredit
-    frame.caption = 'Transparent color'
-    frame.captionpos = cp_right
-    frame.button.width = 13
-    frame.button.color = -2147483646
-    frame.buttonellipse.width = 13
-    frame.buttonellipse.color = -2147483646
-    frame.buttonellipse.imagenr = 17
-    frame.outerframe = (
-      0
-      0
-      100
-      0
-    )
-    taborder = 5
-    bounds_x = 80
-    bounds_y = 293
-    bounds_cx = 206
-    bounds_cy = 20
-    anchors = [an_left, an_bottom]
-    statfile = statfile1
-    value = -2147483647
-    dropdown.options = [deo_autodropdown, deo_keydropdown]
-    reffontheight = 14
+    optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+    linktop = disp
+    dist_top = 3
+    options = [spao_gluebottom]
+    object la2: tlayouter
+      taborder = 1
+      bounds_x = 0
+      bounds_y = 27
+      bounds_cx = 295
+      bounds_cy = 21
+      anchors = [an_top]
+      optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+      dist_top = 4
+      optionslayout = [lao_aligny]
+      object tlayouter2: tlayouter
+        taborder = 1
+        bounds_x = 80
+        bounds_y = 0
+        bounds_cx = 215
+        bounds_cy = 21
+        optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+        dist_top = 3
+        optionslayout = [lao_placex]
+        place_mindist = 5
+        place_maxdist = 5
+        object ok: tbutton
+          optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+          taborder = 2
+          bounds_x = 110
+          bounds_y = 1
+          bounds_cx = 50
+          bounds_cy = 20
+          bounds_cxmin = 50
+          state = [as_default, as_localdefault, as_localcaption]
+          caption = '&OK'
+          modalresult = mr_ok
+          reffontheight = 14
+        end
+        object cancel: tbutton
+          optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+          taborder = 3
+          bounds_x = 165
+          bounds_y = 1
+          bounds_cx = 50
+          bounds_cy = 20
+          bounds_cxmin = 50
+          state = [as_localcaption]
+          caption = '&Cancel'
+          modalresult = mr_cancel
+          reffontheight = 14
+        end
+        object clear: tbutton
+          optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+          taborder = 1
+          bounds_x = 55
+          bounds_y = 1
+          bounds_cx = 50
+          bounds_cy = 20
+          bounds_cxmin = 50
+          state = [as_localcaption, as_localonexecute]
+          caption = 'C&lear'
+          onexecute = clearonexecute
+          reffontheight = 14
+        end
+        object add: tbutton
+          optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+          bounds_x = 0
+          bounds_y = 1
+          bounds_cx = 50
+          bounds_cy = 20
+          bounds_cxmin = 50
+          state = [as_localcaption, as_localonexecute]
+          caption = '&Add'
+          onexecute = addonexecute
+          reffontheight = 14
+        end
+      end
+      object stretch: tbooleanedit
+        frame.caption = '&stretch'
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          1
+          40
+          2
+        )
+        bounds_x = 6
+        bounds_y = 3
+        bounds_cx = 53
+        bounds_cy = 16
+        statfile = statfile1
+        value = True
+      end
+    end
+    object la1: tlayouter
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 286
+      bounds_cy = 24
+      optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
+      linkbottom = la2
+      dist_bottom = 3
+      optionslayout = [lao_aligny]
+      object transparentcolor: tcoloredit
+        frame.caption = '&Transparent color'
+        frame.captionpos = cp_right
+        frame.button.width = 13
+        frame.button.color = -2147483646
+        frame.buttonellipse.width = 13
+        frame.buttonellipse.color = -2147483646
+        frame.buttonellipse.imagenr = 17
+        frame.outerframe = (
+          0
+          0
+          100
+          0
+        )
+        taborder = 1
+        bounds_x = 80
+        bounds_y = 4
+        bounds_cx = 206
+        statfile = statfile1
+        value = -2147483647
+        dropdown.options = [deo_autodropdown, deo_keydropdown]
+        reffontheight = 14
+      end
+      object masked: tbooleanedit
+        frame.caption = '&masked'
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          1
+          48
+          2
+        )
+        bounds_x = 6
+        bounds_y = 7
+        bounds_cx = 61
+        bounds_cy = 16
+        value = True
+      end
+    end
   end
   object imagelist: timagelist
     transparentcolor = -2147483647
@@ -150,7 +197,6 @@ object imagelisteditorfo: timagelisteditorfo
   end
   object filedialog: tfiledialog
     statfile = statfile1
-    dialogkind = fdk_none
     left = 112
     top = 176
   end
