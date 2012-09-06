@@ -2777,9 +2777,11 @@ begin
          int1:= 0;
         end;
         if fracmust = 0 then begin
-         fracmust:= fracopt;
-         fracopt:= 0;
-         mstr1:= doubletostring(value,fracmust,
+//         fracmust:= fracopt;
+//         fracopt:= 0;
+//         mstr1:= doubletostring(value,fracmust,
+//            floatstringmodety(ord(fsm_engflo)+int1),decimalsep,thousandsep);
+         mstr1:= doubletostring(value,fracopt,
             floatstringmodety(ord(fsm_engflo)+int1),decimalsep,thousandsep);
         end
         else begin
