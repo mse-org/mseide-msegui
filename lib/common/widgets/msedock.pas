@@ -86,6 +86,7 @@ type
                      //cx = 0 -> normalwidth, cy = 0 -> normalheight
   function getcaption: msestring;
   procedure dolayoutchanged(const sender: tdockcontroller);
+  procedure dodockcaptionchanged(const sender: tdockcontroller);
  end;
 
  checkdockeventty = procedure(const sender: tobject; const apos: pointty;
@@ -284,6 +285,7 @@ type
    function isfloating: boolean;
    function canmdisize: boolean;
    procedure dolayoutchanged;
+   procedure docaptionchanged;
    function findbandpos(const apos: integer; out aindex: integer;
                                      out arect: rectty): boolean;
              //false if not found, band index and band rect
@@ -539,6 +541,7 @@ type
    function getminimizedsize(out apos: captionposty): sizety;
    function getcaption: msestring;
    procedure dolayoutchanged(const sender: tdockcontroller); virtual;
+   procedure dodockcaptionchanged(const sender: tdockcontroller); virtual;
    //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
@@ -3268,8 +3271,10 @@ end;
 procedure tdockcontroller.setcaption(const Value: msestring);
 var
  widget1: twidget;
+ mstr1: msestring;
 begin
- fcaption := Value;
+ mstr1:= fcaption;
+ fcaption:= Value;
  widget1:= fintf.getwidget;
  if not (csdestroying in widget1.componentstate) then begin
   if widget1.ownswindow then begin
@@ -3280,6 +3285,9 @@ begin
     tdocktabpage(widget1.parentwidget).caption:= value;    
    end;
   end;
+ end;
+ if mstr1 <> fcaption then begin
+  docaptionchanged;
  end;
 end;
 
@@ -3676,6 +3684,27 @@ begin
   widget1:= widget1.parentwidget;
  end;   
 end;
+
+procedure tdockcontroller.docaptionchanged;
+var
+ widget1: twidget;
+ intf1: idocktarget;
+begin
+ idockcontroller(fintf).dodockcaptionchanged(self);
+ widget1:= fintf.getwidget;
+// if widget1.canevent(tmethod(fonlayoutchanged)) then begin
+//  fonlayoutchanged(self);
+// end;
+ widget1:= widget1.parentwidget;
+ while widget1 <> nil do begin
+  if widget1.getcorbainterface(typeinfo(idocktarget),intf1) then begin
+   intf1.getdockcontroller.docaptionchanged;
+   break;
+  end;
+  widget1:= widget1.parentwidget;
+ end;   
+end;
+
 
 function tdockcontroller.getwidget: twidget;
 begin
@@ -4819,6 +4848,11 @@ begin
 end;
 
 procedure tdockpanel.dolayoutchanged(const sender: tdockcontroller);
+begin
+ //dummy
+end;
+
+procedure tdockpanel.dodockcaptionchanged(const sender: tdockcontroller);
 begin
  //dummy
 end;

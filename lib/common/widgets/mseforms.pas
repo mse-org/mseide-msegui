@@ -213,6 +213,7 @@ type
    function getplacementrect: rectty;
    function getminimizedsize(out apos: captionposty): sizety;
    procedure dolayoutchanged(const sender: tdockcontroller); virtual;
+   procedure dodockcaptionchanged(const sender: tdockcontroller); virtual;
 
    procedure doafterload; override;
    procedure updatelayout(const sender: twidget); virtual; 
@@ -1835,6 +1836,11 @@ begin
 end;
 
 procedure tcustommseform.dolayoutchanged(const sender: tdockcontroller);
+begin
+ //dummy
+end;
+
+procedure tcustommseform.dodockcaptionchanged(const sender: tdockcontroller);
 begin
  //dummy
 end;

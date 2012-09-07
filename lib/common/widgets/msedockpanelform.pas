@@ -41,6 +41,7 @@ type
    procedure showexecute(const sender: tobject);
   protected
    procedure updatecaption(acaption: msestring);
+   procedure dodockcaptionchanged(const sender: tdockcontroller); override;
    procedure dolayoutchanged(const sender: tdockcontroller); override;
    class function hasresource: boolean; override;
    class function getmoduleclassname: string; override;
@@ -506,6 +507,29 @@ begin
  end;
 end;
 
+procedure tdockpanelform.dodockcaptionchanged(const sender: tdockcontroller);
+var
+ intf1: idocktarget;
+ mstr1: msestring;
+ int1: integer;
+ ar1: widgetarty;
+begin
+ mstr1:= '';
+ ar1:= sender.getitems;
+ for int1:= 0 to high(ar1) do begin
+  if ar1[int1].getcorbainterface(typeinfo(idocktarget),intf1) then begin
+   mstr1:= mstr1 + intf1.getdockcontroller.getdockcaption+',';
+  end;
+ end;
+ updatecaption(copy(mstr1,1,length(mstr1)-1)); //remove last comma
+end;
+
+procedure tdockpanelform.dolayoutchanged(const sender: tdockcontroller);
+begin
+ dodockcaptionchanged(sender);
+end;
+
+{
 procedure tdockpanelform.dolayoutchanged(const sender: tdockcontroller);
 var
  intf1: idocktarget;
@@ -522,6 +546,7 @@ begin
  end;
  updatecaption(copy(mstr1,1,length(mstr1)-1)); //remove last comma
 end;
+}
 
 class function tdockpanelform.hasresource: boolean;
 begin
