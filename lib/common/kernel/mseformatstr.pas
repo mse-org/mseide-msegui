@@ -124,8 +124,9 @@ function formatfloatmse(value: double; const format: msestring;
    //    |
    // 0.0f
    //
-   //   +++++ mantissa - 1 digits
-   // 0.#####f
+   //   ++++++ mantissa - 1 digits max
+   // 0.000###f
+   //   +++    mantissa - 1 digits min
    //
    //    + engeneering notation with 'E', exponent = n*3
    // 0.0F
@@ -2523,6 +2524,7 @@ var
  ar1: array[0..2] of integer;    //indexes positive, negative, zero
  expchar: msechar;
  bo1: boolean;
+ po3,po4: pmsechar;
 
 begin
  result:= '';
@@ -2776,17 +2778,32 @@ begin
         else begin
          int1:= 0;
         end;
-        if fracmust = 0 then begin
-//         fracmust:= fracopt;
-//         fracopt:= 0;
-//         mstr1:= doubletostring(value,fracmust,
-//            floatstringmodety(ord(fsm_engflo)+int1),decimalsep,thousandsep);
-         mstr1:= doubletostring(value,fracopt,
-            floatstringmodety(ord(fsm_engflo)+int1),decimalsep,thousandsep);
+        if fracopt = 0 then begin
+         mstr1:= doubletostring(value,fracmust,
+            floatstringmodety(ord(fsm_engfix)+int1),decimalsep,thousandsep);
         end
         else begin
-         mstr1:= doubletostring(value,fracmust+fracopt,
-            floatstringmodety(ord(fsm_engfix)+int1),decimalsep,thousandsep);
+         mstr1:= doubletostring(value,fracopt+fracmust,
+            floatstringmodety(ord(fsm_engflo)+int1),decimalsep,thousandsep);
+         if mstr1 <> '' then begin
+          po3:= pointer(mstr1);
+          if po3^ = '-' then begin
+           inc(po3);
+          end;
+          po4:= po3;
+          while (po3^ >= '0') and (po3^ <= '9') do begin //no thousandsep possible
+           inc(po3);
+          end;
+          int1:= po3-po4-1;
+          fracmust:= fracmust-int1;
+          if fracmust < 0 then begin
+           fracopt:= fracopt+fracmust;
+           fracmust:= 0;
+           if fracopt < 0 then begin
+            fracopt:= 0;
+           end;
+          end;
+         end;
         end;
        end
        else begin

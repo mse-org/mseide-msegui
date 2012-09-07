@@ -30,9 +30,10 @@ type
    3: (qwo0: qword);
  end;
 
-function doubletostring(value: double; precision: integer;
-      mode: floatstringmodety = fsm_default;
-      decimalsep: msechar = '.'; thousandsep: msechar = #0): msestring;
+function doubletostring(const value: double; const precision: integer;
+      const mode: floatstringmodety = fsm_default;
+      const decimalsep: msechar = '.';
+      const thousandsep: msechar = #0): msestring;
                //precision <= 0 -> remove trailing 0
                //precision = 0 in fsm_default mode = maximal precision
                
@@ -577,9 +578,9 @@ begin
  end;
 end;
 
-function doubletostring(value: double; precision: integer;
-      mode: floatstringmodety = fsm_default;
-      decimalsep: msechar = '.'; thousandsep: msechar = #0): msestring;
+function doubletostring(const value: double; const precision: integer;
+      const mode: floatstringmodety = fsm_default;
+      const decimalsep: msechar = '.'; const thousandsep: msechar = #0): msestring;
 var
  bo1: boolean;
 begin
