@@ -124,9 +124,9 @@ function formatfloatmse(value: double; const format: msestring;
    //    |
    // 0.0f
    //
-   //   ++++++ mantissa - 1 digits max
-   // 0.000###f
-   //   +++    mantissa - 1 digits min
+   //    ++++++ mantissa - 1 digits max
+   // 0..000###f
+   //    +++    mantissa - 1 digits min
    //
    //    + engeneering notation with 'E', exponent = n*3
    // 0.0F
@@ -2517,7 +2517,8 @@ var
  int1,int2,int3: integer;
  decimalsep,thousandsep: msechar;
  intopt,intmust,fracmust,fracopt,expopt,expmust: integer;
- decifound,thousandfound,numberprinted,expofound,engfound,engsymfound: boolean;
+ decifound,doubledecifound,thousandfound,numberprinted,expofound,
+ engfound,engsymfound: boolean;
  mstr1: msestring;
  format1: msestring;
  mantissaend: integer;
@@ -2697,6 +2698,7 @@ begin
      expopt:= 0;
      expmust:= 0;
      decifound:= false;
+     doubledecifound:= false;
      thousandfound:= false;
      expofound:= false;
      engfound:= false;
@@ -2706,6 +2708,9 @@ begin
       case po2^ of
        '.': begin
         decifound:= true;
+        if (po2+1)^ = '.' then begin
+         doubledecifound:= true;
+        end;
        end;
        ',': begin
         thousandfound:= true;
@@ -2778,8 +2783,8 @@ begin
         else begin
          int1:= 0;
         end;
-        if fracopt = 0 then begin
-         mstr1:= doubletostring(value,fracmust,
+        if not doubledecifound then begin
+         mstr1:= doubletostring(value,fracopt+fracmust,
             floatstringmodety(ord(fsm_engfix)+int1),decimalsep,thousandsep);
         end
         else begin

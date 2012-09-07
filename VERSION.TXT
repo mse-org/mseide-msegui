@@ -1,4 +1,8 @@
 MSEide+MSEgui breaking changes version history
+
+2012-09-07
+ formatfloatmse() format 0.###f defines decimal places, use 0..###f for mantisa
+ digits.
 2012-06-30
  Global syntax definition format for tsyntaxpainter changed:
   keyworddefs =
