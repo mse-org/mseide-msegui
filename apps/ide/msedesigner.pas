@@ -543,7 +543,8 @@ type
    procedure moduledestroyed(const amodule: pmoduleinfoty);
    procedure addancestorinfo(const ainstance,aancestor: tmsecomponent);
    function copycomponent(const source: tmsecomponent;
-           const root: tmsecomponent; const asinherited: boolean):tmsecomponent;
+           const root: tmsecomponent; const asinherited: boolean;
+           const noloading: boolean):tmsecomponent;
    procedure revert(const acomponent: tcomponent);
    function checkcanclose(const amodule: pmoduleinfoty; out references:  string): boolean;
 
@@ -890,7 +891,7 @@ end;
 procedure tsubmodulelist.add(const amodule: tmsecomponent);
 begin
  if findancestor(amodule) = nil then begin
-  inherited add(amodule,fdesigner.copycomponent(amodule,amodule,false));
+  inherited add(amodule,fdesigner.copycomponent(amodule,amodule,false,false));
 //  inherited add(amodule,fdesigner.copycomponent(amodule,nil));
  end;
 end;
@@ -908,7 +909,7 @@ begin
    removefixupreferences(comp,'');
   end;  
   comp.Free;  
-  po1^.ancestor:= fdesigner.copycomponent(amodule,amodule,false);
+  po1^.ancestor:= fdesigner.copycomponent(amodule,amodule,false,false);
  {$ifdef mse_debugcopycomponent}
   debugwriteln('***renewbackup '+amodule.name);
   dumpcomponent(amodule,'source:');
@@ -2399,7 +2400,7 @@ begin
     try
      inheritedbefore:= des_inheritednewmodule in fdesigner.fstate;
      include(fdesigner.fstate,des_inheritednewmodule);
-     instance:= fdesigner.copycomponent(po1^.instance,po1^.instance,false);
+     instance:= fdesigner.copycomponent(po1^.instance,po1^.instance,false,true);
     finally
      if not inheritedbefore then begin
       exclude(fdesigner.fstate,des_inheritednewmodule);
@@ -2970,7 +2971,7 @@ begin
  if asubmoduleinfopo <> nil then begin
   fsubmoduleinfopo:= nil;
   component:= copycomponent(asubmoduleinfopo^.instance,
-                                               asubmoduleinfopo^.instance,false);
+                                   asubmoduleinfopo^.instance,false,false);
   reader.root.insertcomponent(component);
   initinline(component);
   if (des_inheritednewmodule in fstate) then begin
@@ -3388,7 +3389,8 @@ begin
 end;
 
 function tdesigner.copycomponent(const source: tmsecomponent;
-            const root: tmsecomponent; const asinherited: boolean): tmsecomponent;
+        const root: tmsecomponent; const asinherited: boolean;
+        const noloading: boolean): tmsecomponent;
 var
  po1,po2: pmoduleinfoty;
  ar1: msecomponentarty;
@@ -3511,7 +3513,9 @@ begin
   end;
   doswapmethodpointers(result,true);
 {$endif}
-  notifygloballoading;
+  if not noloading then begin
+   notifygloballoading;
+  end;
  finally
   endgloballoading;
 //  doswapmethodpointers(source,true);
