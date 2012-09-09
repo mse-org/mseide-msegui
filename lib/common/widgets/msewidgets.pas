@@ -1813,7 +1813,12 @@ begin
   rect1.pos:= adest.pos;
  end
  else begin
-  rect1.pos:= translateclientpoint(adest.pos,awidget,nil);
+  application.lockifnotmainthread;
+  try
+   rect1.pos:= translateclientpoint(adest.pos,awidget,nil);
+  finally
+   application.unlockifnotmainthread;
+  end;
  end;
  rect1.size:= adest.size;
  result:= internalshowmessage(atext,caption,buttons,defaultbutton,noshortcut,
