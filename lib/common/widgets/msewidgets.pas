@@ -5468,7 +5468,8 @@ begin
  fframe.framei_bottom:= 1;
  color:= cl_infobackground;
  rect2:= deflaterect(application.workarea(transientfor),fframe.innerframe);
- rect1:= textrect(getcanvas,info.caption,rect2,[tf_wordbreak]);
+ rect1:= textrect(getcanvas,info.caption,rect2,[tf_wordbreak],
+                                            stockobjects.fonts[stf_hint]);
  inc(rect1.cx,fframe.innerframewidth.cx);
  inc(rect1.cy,fframe.innerframewidth.cy);
  widgetrect:= placepopuprect(transientfor,info.posrect,info.placement,rect1.size);
@@ -5477,7 +5478,8 @@ end;
 procedure thintwidget.dopaint(const canvas: tcanvas);
 begin
  inherited;
- drawtext(canvas,fcaption,innerclientrect,[tf_wordbreak]);
+ drawtext(canvas,fcaption,innerclientrect,[tf_wordbreak],
+                                      stockobjects.fonts[stf_hint]);
 end;
 
 destructor thintwidget.destroy;

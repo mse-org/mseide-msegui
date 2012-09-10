@@ -212,8 +212,8 @@ const
  defaultfontname = 'Tahoma';
 // defaultfontname = 'MS Sans Serif';
  defaultfontnames: defaultfontnamesty =
-  //stf_default           stf_empty stf_unicode stf_menu stf_message stf_report
-   (defaultfontname,          '',       '',         '',      '',      'Arial',
+  //stf_default           stf_empty stf_unicode stf_menu stf_message stf_hint stf_report
+   (defaultfontname,          '',       '',         '',      '',       '',      'Arial',
   //stf_proportional stf_fixed,
    defaultfontname,         'Courier New',
   //stf_helvetica stf_roman          stf_courier

@@ -177,16 +177,16 @@ const
  capstyles: array[capstylety] of integer = (capbutt,capround,capprojecting);
  joinstyles: array[joinstylety] of integer = (joinmiter,joinround,joinbevel);
  defaultfontnames: defaultfontnamesty =
-  //stf_default  stf_empty stf_unicode stf_menu stf_message, stf_report
-   ('Helvetica',   '',        '',       '',       '',          'Arial',    
+  //stf_default  stf_empty stf_unicode stf_menu stf_message stf_hint stf_report
+   ('Helvetica',   '',        '',       '',       '',          '',    'Arial',    
   //stf_proportional  stf_fixed,
    'Helvetica',       'Courier',
   //stf_helvetica stf_roman          stf_courier
    'Arial',       'Times New Roman', 'Courier New');
 
  xftdefaultfontnames: defaultfontnamesty =
-  //stf_default  stf_empty stf_unicode stf_menu stf_message, stf_report
-      ('sans',       '',       '',         '',   '',          'Arial',
+  //stf_default  stf_empty stf_unicode stf_menu stf_message stf_hint stf_report
+      ('sans',       '',       '',         '',   '',           '',      'Arial',
   //stf_proportional  stf_fixed,
    'sans',           'monospace',
   //stf_helvetica stf_roman   stf_courier
