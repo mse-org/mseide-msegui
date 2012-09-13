@@ -23,7 +23,7 @@ uses
  classes,msegraphutils,mseglob,mseguiglob,msedesignintf,
  mseforms,mselist,msearrayutils,msebitmap,msetypes,sysutils,msehash,mseclasses,
  mseformdatatools,typinfo,msepropertyeditors,msecomponenteditors,msegraphics,
- mseapplication,msegui,msestrings,msedesignparser,msecomptree;
+ mseapplication,msegui,msestrings,msedesignparser,msecomptree,mseevent;
 
 {$ifndef mse_methodswap}
  {$ifdef FPC} {$define mse_nomethodswap}{$endif}
@@ -260,11 +260,14 @@ type
    constructor create(aowner: tdesigner);
  end;
 
- tsubmodulelist = class(tdesignerancestorlist)
+ tsubmodulelist = class(tdesignerancestorlist,ievent)
        //ancestor is copy of old state of descendent,
        //descendent is real submodule
   protected
+   frenewbackuplist: msecomponentarty;
    procedure finalizerecord(var item); override;
+   procedure dorenewbackup;
+   procedure receiveevent(const event: tobjectevent);
   public
    procedure add(const amodule: tmsecomponent); overload;
    procedure renewbackup(const amodule: tmsecomponent);
@@ -573,13 +576,13 @@ implementation
 uses
  msestream,msefileutils,
 // {$ifdef mswindows}windows{$else}mselibc{$endif},
- designer_bmp,msesys,msewidgets,formdesigner,mseevent,objectinspector,
+ designer_bmp,msesys,msewidgets,formdesigner,objectinspector,
  msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
  pascaldesignparser,msearrayprops,rtlconsts,msedatamodules,
  msesimplewidgets,msesysutils,mseobjecttext,msestreaming,msedatanodes,main;
 
-//const
-// showobjectinspectortag = 0;
+const
+ renewbackuptag = 0;
  
 type
  tcomponent1 = class(tcomponent);
@@ -896,28 +899,57 @@ begin
  end;
 end;
 
-procedure tsubmodulelist.renewbackup(const amodule: tmsecomponent);
+procedure tsubmodulelist.dorenewbackup;
 var
  po1: pancestorinfoty;
  comp: tmsecomponent;
+ amodule: tmsecomponent;
+ int1: integer;
 begin
- po1:= finddescendentinfo(amodule);
- if po1 <> nil then begin
-  comp:= po1^.ancestor;
-  po1^.ancestor:= nil;
-  if comp <> nil then begin
-   removefixupreferences(comp,'');
-  end;  
-  comp.Free;  
-  po1^.ancestor:= fdesigner.copycomponent(amodule,amodule,false,false);
- {$ifdef mse_debugcopycomponent}
-  debugwriteln('***renewbackup '+amodule.name);
-  dumpcomponent(amodule,'source:');
-  dumpcomponent(po1^.ancestor,'backup:');
- {$endif}
-//  po1^.ancestor:= fdesigner.copycomponent(amodule,nil);
-  fobjectlinker.link(po1^.ancestor);
+ try
+  for int1:= 0 to high(frenewbackuplist) do begin
+   amodule:= frenewbackuplist[int1];
+   po1:= finddescendentinfo(amodule);
+   if po1 <> nil then begin
+    comp:= po1^.ancestor;
+    po1^.ancestor:= nil;
+    if comp <> nil then begin
+     removefixupreferences(comp,'');
+    end;  
+    comp.Free;  
+   {$ifdef mse_debugcopycomponent}
+    debugwriteln('***renewbackup before copy '+amodule.name);
+    dumpcomponent(amodule,'source:');
+   {$endif}
+    po1^.ancestor:= fdesigner.copycomponent(amodule,amodule,false,false);
+   {$ifdef mse_debugcopycomponent}
+    debugwriteln('***renewbackup after copy '+amodule.name);
+    dumpcomponent(amodule,'source:');
+    dumpcomponent(po1^.ancestor,'backup:');
+   {$endif}
+  //  po1^.ancestor:= fdesigner.copycomponent(amodule,nil);
+    fobjectlinker.link(po1^.ancestor);
+   end;
+  end;
+ finally
+  frenewbackuplist:= nil;
  end;
+end;
+
+procedure tsubmodulelist.receiveevent(const event: tobjectevent);
+begin
+ if (event is tasyncevent) and 
+                      (tasyncevent(event).tag = renewbackuptag) then begin
+  dorenewbackup;
+ end;
+end;
+
+procedure tsubmodulelist.renewbackup(const amodule: tmsecomponent);
+begin
+ if frenewbackuplist = nil then begin
+  application.postevent(tasyncevent.create(ievent(self),renewbackuptag),true);
+ end;
+ additem(pointerarty(frenewbackuplist),amodule);
 end;
 
 function tsubmodulelist.findoldancestor(
@@ -3471,7 +3503,9 @@ begin
      end;
     end;
    {$ifdef mse_debugcopycomponent}
-    debugstreamout(stream1,'');
+    debugstreamout(stream1,'*source '+inttostr(int1)+ ': '+
+                  debugcompname(ar1[int1])+
+                  ' ancestor: '+debugcompname(ar1[int1+1]));
    {$endif}
     posbefore:= stream2.position;
     stream2.position:= 0;
@@ -3489,6 +3523,10 @@ begin
      reader.onfindcomponentclass:= {$ifdef FPC}@{$endif}findcomponentclass;
      reader.oncreatecomponent:= {$ifdef FPC}@{$endif}createcomponent;
      reader.onancestornotfound:= {$ifdef FPC}@{$endif}ancestornotfound;
+   {$ifdef mse_debugcopycomponent}
+     debugwriteln('*read '+inttostr(int1)+' '+
+            debugcompname(ar1[int1])+' ancestor: '+debugcompname(ar1[int1+1]));
+   {$endif}
      reader.readrootcomponent(result);
     finally
      reader.free;
