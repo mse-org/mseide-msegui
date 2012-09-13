@@ -2103,9 +2103,12 @@ type
  trefreshancestoreventhandler = class(trefresheventhandler)
   private
    fnonancestors: componentarty;
+   fsetancestorroot: tcomponent;
   protected
+   procedure setchildancestor(child: tcomponent);
+   procedure setancestors(const acomponent: tcomponent);
    procedure notification(acomponent: tcomponent; operation: toperation);
-                               override;        
+                               override;  
  end;
  
 procedure trefreshancestoreventhandler.notification(acomponent: tcomponent;
@@ -2115,6 +2118,20 @@ begin
   removeitem(pointerarty(fnonancestors),pointer(acomponent));
  end;
  inherited;
+end;
+
+procedure trefreshancestoreventhandler.setchildancestor(child: tcomponent);
+begin
+ with tcomponent1(child) do begin
+  setancestor(true);
+  getchildren(@setchildancestor,fsetancestorroot);
+ end;
+end;
+
+procedure trefreshancestoreventhandler.setancestors(const acomponent: tcomponent);
+begin
+ fsetancestorroot:= acomponent.owner;
+ setchildancestor(acomponent);
 end;
 
 procedure refreshancestor(var deletedcomps: componentarty;
@@ -2185,7 +2202,7 @@ var
       else begin
        with tcomponent1(descendentar[int1]) do begin
         if owner.componentstate * [csinline,csancestor] <> [] then begin
-         setancestor(true);
+         eventhandler.setancestors(descendentar[int1]);
         end;
        end;
       end;
