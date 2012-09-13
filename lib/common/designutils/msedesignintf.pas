@@ -229,6 +229,7 @@ type
   protected
    procedure dochanged; virtual;
    function getrecordsize: integer; virtual;
+   procedure addchildren(child: tcomponent);
   public
    constructor create;
    procedure change; override;
@@ -1078,6 +1079,12 @@ begin
  end;
 end;
 
+procedure tdesignerselections.addchildren(child: tcomponent);
+begin
+ add(child);
+ tcomponent1(child).getchildren(@addchildren,fpasteroot);
+end;
+
 function tdesignerselections.pastefromobjecttext(const aobjecttext: string; 
          aowner,aparent: tcomponent; initproc: initcomponentprocty): integer;
                   //returns count of added components
@@ -1168,7 +1175,8 @@ begin
        designer.doswapmethodpointers(comp2,true);
       {$endif}
        if (comp2.getparentcomponent = nil) or (comp2 is tmsedatamodule) then begin
-        add(comp2);
+//        add(comp2);
+        addchildren(comp2);
        end;
       end;
       removefixupreferences(comp1,'');
