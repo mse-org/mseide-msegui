@@ -114,6 +114,9 @@ type
  persistentclassty = class of tpersistent;
  
  componentarty = array of tcomponent;
+ componentaty = array[0..0] of tcomponent;
+ pcomponentaty = ^componentaty;
+ 
  componentclassty = class of tcomponent;
 
  propinfopoarty = array of ppropinfo;

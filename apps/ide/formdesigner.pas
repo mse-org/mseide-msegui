@@ -956,10 +956,13 @@ begin
 end;
 
 procedure tformdesignerselections.deletecomponents;
+{
 var
  int1: integer;
  int2: integer;
+}
 begin
+{
  int2:= count;
  beginupdate;
  for int1:= count-1 downto 0 do begin
@@ -971,6 +974,7 @@ begin
  if count <> int2 then begin
   fowner.updateselections;
  end;
+}
  fowner.fDesigner.DeleteSelection;
 end;
 

@@ -2656,6 +2656,50 @@ begin
  result:= tmseform(inherited getitems(index));
 end;
 
+type
+ tselectiondestroytracker = class(tcomponent)
+  private
+   fselections: tdesignerselections;
+  protected
+   procedure notification(acomponent: tcomponent;
+                                 operation: toperation); override;
+  public
+   constructor create(const aselections: tdesignerselections); reintroduce;
+ end;
+
+{ tselectiondestroytracker }
+
+constructor tselectiondestroytracker.create(
+                                   const aselections: tdesignerselections);
+var
+ int1: integer;
+begin
+ fselections:= aselections;
+ with fselections do begin
+  for int1:= 0 to count - 1 do begin
+   items[int1].freenotification(self);
+  end;
+ end;
+ inherited create(nil);
+end;
+
+procedure tselectiondestroytracker.notification(acomponent: tcomponent;
+                                                        operation: toperation);
+var
+ po1: pcomponentaty;
+ int1: integer;
+begin
+ if operation = opremove then begin
+  po1:= fselections.datapo;
+  for int1:= 0 to fselections.count-1 do begin
+   if po1^[int1] = acomponent then begin
+    po1^[int1]:= nil;
+   end;
+  end;
+ end;
+ inherited;
+end;
+
 { tdesigner }
 
 constructor tdesigner.create;
@@ -2799,27 +2843,34 @@ var
  int1: integer;
  comp1,comp2: tcomponent;
  po1: pmoduleinfoty;
+ destroytracker: tselectiondestroytracker;
 
 begin
- for int1:= 0 to fselections.count - 1 do begin
-  comp1:= fselections[int1];
-  comp2:= comp1.owner;
-  po1:= fmodules.findmodulebycomponent(comp1);
-  if po1 <> nil then begin
-   fnotifymodule:= po1^.instance;
-   notifydeleted(comp1);
+ destroytracker:= tselectiondestroytracker.create(self.fselections);
+ try
+  for int1:= 0 to fselections.count - 1 do begin
+   comp1:= fselections[int1];
+   if comp1 <> nil then begin
+    comp2:= comp1.owner;
+    po1:= fmodules.findmodulebycomponent(comp1);
+    if po1 <> nil then begin
+     fnotifymodule:= po1^.instance;
+     notifydeleted(comp1);
+    end;
+    inc(fnotifydeletedlock);
+    try
+     comp1.free;
+    finally
+     dec(fnotifydeletedlock);
+    end;
+    fmodules.componentmodified(comp2);
+   end;
   end;
-  inc(fnotifydeletedlock);
-  try
-   comp1.free;
-  finally
-   dec(fnotifydeletedlock);
-  end;
-  fmodules.componentmodified(comp2);
+  fselections.clear;
+  selectionchanged;
+ finally
+  destroytracker.free;
  end;
- fselections.clear;
- selectionchanged;
-// designnotifications.SelectionChanged(idesigner(self),idesignerselections(fselections));
 end;
 
 procedure tdesigner.componentdestroyed(const acomponent: tcomponent;

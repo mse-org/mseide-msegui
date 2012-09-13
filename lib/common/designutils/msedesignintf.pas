@@ -883,7 +883,7 @@ begin
  while comp1 <> nil do begin
   if (indexof(comp1) >= 0) then begin
    result:= true;
-   break;  //stored bay parent
+   break;  //stored by parent
   end;
   comp1:= comp1.getparentcomponent;
  end;
