@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+2012-09-13
+ fieldarrayty -> fieldarty.
 2012-09-07
  formatfloatmse() format 0.###f defines decimal places, use 0..###f for mantissa
  digits.

@@ -1210,7 +1210,7 @@ type
    property nullsymbol: msestring read fnullsymbol write fnullsymbol;
  end;
  
- fieldarrayty = array of tfield;
+// fieldarrayty = array of tfield;
  
  fieldclassty = class of tfield;
  
@@ -6799,10 +6799,12 @@ begin
    fitems[int1]:= msefieldtypeclasses[fieldtypes[int1]].create(nil);
   end;
  end;
- readcollection(reader);
  for int1:= 0 to high(fitems) do begin
-  tfield(fitems[int1]).dataset:= fdataset;
+  with tfield(fitems[int1]) do begin
+   dataset:= fdataset;
+  end;
  end;
+ readcollection(reader);
  reader.readlistend;
 end;
 

@@ -81,7 +81,7 @@ var
  fo: tmsedbfieldeditorfo;
  int1,int2: integer;
  ct1: fieldclassty;
- ar1: fieldarrayty;
+ ar1: fieldarty;
  activebefore: boolean;
 begin
  result:= false;
@@ -147,6 +147,9 @@ begin
      items[int1].dataset:= dataset;
     end;
     if result then begin
+     for int1:= 0 to high(ar1) do begin
+      items[int1].index:= int1;
+     end;
      for int1:= length(ar1) to fields.rowhigh do begin
       tfield(fieldpo[int1]).index:= int1;
      end;
