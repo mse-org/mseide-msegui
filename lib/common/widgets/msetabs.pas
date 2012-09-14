@@ -519,7 +519,7 @@ type
    property ondeselect: notifyeventty read fondeselect write fondeselect;
    property ongetsubform: getsubformeventty read fongetsubform
                                                    write fongetsubform;
-   property visible default false;
+   property visible stored false default false;
    property optionsskin default defaulttabpageskinoptions;
  end;
 
