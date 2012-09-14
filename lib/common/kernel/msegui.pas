@@ -158,6 +158,7 @@ type
                    ws1_parentupdating, //set while setparentwidget
                    ws1_isstreamed,     //used by ttabwidget
                    ws1_scaled,         //used in tcustomscalingwidget
+                   ws1_forceclose,
                    ws1_noclipchildren,ws1_tryshrink,ws1_noframewidgetshift,
                    ws1_nodesignvisible,ws1_nodesignframe,ws1_nodesignhandles,
                    ws1_nodesigndelete,ws1_designactive,
@@ -1603,6 +1604,7 @@ type
    function canclose(const newfocus: twidget = nil): boolean; virtual;
    function canparentclose(const newfocus: twidget): boolean; overload;
                    //window.focusedwidget is first checked if it is descendant
+   function forceclose: boolean; //newfocus=nil, sets ws1_forceclose, true if ok
    function canparentclose: boolean; overload;
                    //newfocus = window.focusedwidget      
    function canfocus: boolean; virtual;
@@ -11290,6 +11292,21 @@ begin
   end;
  end;
  result:= canclose(newfocus);
+end;
+
+function twidget.forceclose: boolean;
+var
+ bo1: boolean;
+begin
+ bo1:= ws1_forceclose in fwidgetstate1;
+ include(fwidgetstate1,ws1_forceclose);
+ try
+  result:= canparentclose(nil);
+ finally
+  if not bo1 then begin
+   exclude(fwidgetstate1,ws1_forceclose);
+  end;
+ end;
 end;
 
 function twidget.canparentclose: boolean;

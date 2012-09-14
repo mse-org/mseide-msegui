@@ -950,7 +950,7 @@ begin
    end;
   end;
   if result and ((twindow1(window).fmodalresult <> mr_none) or 
-                                        (application.terminating)) then begin
+    (application.terminating) or (ws1_forceclose in fwidgetstate1)) then begin
    doonclose;
    if (fstatfile <> nil) and (fo_autowritestat in foptions) and
                  not (csdesigning in componentstate) then begin

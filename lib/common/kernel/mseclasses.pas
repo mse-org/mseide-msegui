@@ -379,7 +379,8 @@ type
    function getancestorclassname: string;
    function getmsecomponentstate: msecomponentstatesty;
    function getobjectlinker: tobjectlinker;
-   procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
+   procedure objectevent(const sender: tobject;
+                                 const event: objecteventty); virtual;
    procedure beginread; virtual;
    procedure doendread; virtual;
    procedure readstate(reader: treader); override;
@@ -1928,11 +1929,15 @@ begin
  additem(pointerarty(fmodulestoregister),instance);
 // fmodules.add(instance); //not before completely loaded, 
                         //submodules call globalfixupreferences
- tmsecomponent(reference):= instance;
+ if @reference <> nil then begin
+  tmsecomponent(reference):= instance;
+ end;
  try
   instance.create(aowner);
  except
-  tcomponent(reference) := nil;
+  if @reference <> nil then begin
+   tcomponent(reference) := nil;
+  end;
   raise;
  end;
  result:= instance;

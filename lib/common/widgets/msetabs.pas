@@ -414,7 +414,10 @@ type
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
- 
+ getsubformeventty = procedure(const sender: tobject;
+                          var submoduleclass: widgetclassty;
+                          var instancevarpo: pwidget) of object;
+                          
  ttabpage = class(tscrollingwidget,itabpage,iimagelistinfo)
   private
    ftabwidget: tcustomtabwidget;
@@ -430,6 +433,9 @@ type
    finvisible: boolean;
    ffonttab: ttabpagefonttab;
    ffontactivetab: ttabpagefontactivetab;
+   fongetsubform: getsubformeventty;
+   fsubform: twidget;
+   fsubforminstancevarpo: pwidget;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    function gettabhint: msestring;
@@ -466,13 +472,13 @@ type
    procedure fontchanged1(const sender: tobject);
    procedure visiblechanged; override;
    procedure enabledchanged; override;
+   procedure objectevent(const sender: tobject;
+                              const event: objecteventty); override;
    procedure registerchildwidget(const child: twidget); override;
    procedure designselected(const selected: boolean); override;
    procedure doselect; virtual;
    procedure dodeselect; virtual;
    procedure loaded; override;
-   procedure objectevent(const sender: tobject;
-                                     const event: objecteventty); override;
    function getisactivepage: boolean;
    procedure setisactivepage(const avalue: boolean);
   public
@@ -511,6 +517,8 @@ type
    property onhide;
    property onselect: notifyeventty read fonselect write fonselect;
    property ondeselect: notifyeventty read fondeselect write fondeselect;
+   property ongetsubform: getsubformeventty read fongetsubform
+                                                   write fongetsubform;
    property visible default false;
    property optionsskin default defaulttabpageskinoptions;
  end;
@@ -3001,7 +3009,24 @@ begin
 end;
 
 procedure ttabpage.doselect;
+var
+ subformclass: widgetclassty;
 begin
+ if canevent(tmethod(fongetsubform)) then begin
+  if fsubform = nil then begin
+   subformclass:= nil;
+   fsubforminstancevarpo:= nil;
+   fongetsubform(self,subformclass,fsubforminstancevarpo);
+   if subformclass <> nil then begin
+    setlinkedvar(subformclass.create(self),tmsecomponent(fsubform));
+    insertwidget(fsubform,nullpoint);
+    if fsubforminstancevarpo <> nil then begin
+     fsubforminstancevarpo^:= fsubform;
+    end;
+    fsubform.visible:= true;
+   end;
+  end;
+ end;
  if canevent(tmethod(fonselect)) then begin
   fonselect(self);
  end;
@@ -3011,6 +3036,11 @@ procedure ttabpage.dodeselect;
 begin
  if canevent(tmethod(fondeselect)) then begin
   fondeselect(self);
+ end;
+ if fsubform <> nil then begin
+  if fsubform.forceclose then begin //trigger statfile writing
+   fsubform.free;
+  end;
  end;
 end;
 
@@ -3083,6 +3113,11 @@ procedure ttabpage.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  inherited;
+ if (event = oe_destroyed) and (sender = fsubform) then begin
+  if fsubforminstancevarpo <> nil then begin
+   fsubforminstancevarpo^:= nil;
+  end;
+ end;
  if sender = fimagelist then begin
   if event = oe_destroyed then begin
    fimagelist:= nil;
@@ -3169,6 +3204,7 @@ function ttabpage.isfontactivetabstored: boolean;
 begin
  result:= ffontactivetab <> nil;
 end;
+
 {
 function ttabpage.gettabwidth: integer;
 begin
