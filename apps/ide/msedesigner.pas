@@ -3506,7 +3506,6 @@ var
  reader: treader;
  writer: twritermse;
  posbefore: integer;
- 
 begin
  {$ifdef mse_debugcopycomponent}
  dumpcomponent(source,'***designer copycomponent source: '+source.name+' root: '+
@@ -3544,7 +3543,9 @@ begin
  end;
 {$endif}  
  try
-  begingloballoading;
+  if not noloading then begin
+   begingloballoading;
+  end;
   result:= tmsecomponent(source.newinstance);
 {$warnings off}
   tcomponent1(result).setdesigning(true);
@@ -3628,7 +3629,9 @@ begin
    notifygloballoading;
   end;
  finally
-  endgloballoading;
+  if not noloading then begin
+   endgloballoading;
+  end;
 //  doswapmethodpointers(source,true);
 {$ifndef mse_nomethodswap}
   for int1:= 0 to high(ar1)-1 do begin
