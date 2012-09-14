@@ -235,6 +235,7 @@ type
 {$endif}
   protected
    procedure dounlink(var item); override;
+   procedure doitemdestroyed(const sender: tmsecomponent); virtual;
    procedure itemdestroyed(const sender: iobjectlink); override;
    function getdescendentar(const aancestor: tmsecomponent): msecomponentarty;
 {$ifndef mse_nomethodswap}
@@ -268,6 +269,7 @@ type
    procedure finalizerecord(var item); override;
    procedure dorenewbackup;
    procedure receiveevent(const event: tobjectevent);
+   procedure doitemdestroyed(const sender: tmsecomponent); override;
   public
    procedure add(const amodule: tmsecomponent); overload;
    procedure renewbackup(const amodule: tmsecomponent);
@@ -671,21 +673,19 @@ begin
  inherited create(sizeof(ancestorinfoty));
 end;
 
-procedure tancestorlist.itemdestroyed(const sender: iobjectlink);
+procedure tancestorlist.doitemdestroyed(const sender: tmsecomponent);
 var
  int1: integer;
- comp: tmsecomponent;
  bo1: boolean;
 begin
- comp:= tmsecomponent(sender.getinstance);
  for int1:= count - 1 downto 0 do begin
   with pancestorinfoty(getitempo(int1))^ do begin
    bo1:= false;
-   if descendent = comp then begin
+   if descendent = sender then begin
     descendent:= nil;
     bo1:= true;
    end;
-   if ancestor = comp then begin
+   if ancestor = sender then begin
     ancestor:= nil;
     bo1:= true;
    end;
@@ -694,6 +694,11 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tancestorlist.itemdestroyed(const sender: iobjectlink);
+begin
+ doitemdestroyed(tmsecomponent(sender.getinstance));
 end;
 
 function tancestorlist.getdescendentar(
@@ -909,26 +914,29 @@ begin
  try
   for int1:= 0 to high(frenewbackuplist) do begin
    amodule:= frenewbackuplist[int1];
-   po1:= finddescendentinfo(amodule);
-   if po1 <> nil then begin
-    comp:= po1^.ancestor;
-    po1^.ancestor:= nil;
-    if comp <> nil then begin
-     removefixupreferences(comp,'');
-    end;  
-    comp.Free;  
-   {$ifdef mse_debugcopycomponent}
-    debugwriteln('***renewbackup before copy '+amodule.name);
-    dumpcomponent(amodule,'source:');
-   {$endif}
-    po1^.ancestor:= fdesigner.copycomponent(amodule,amodule,false,false);
-   {$ifdef mse_debugcopycomponent}
-    debugwriteln('***renewbackup after copy '+amodule.name);
-    dumpcomponent(amodule,'source:');
-    dumpcomponent(po1^.ancestor,'backup:');
-   {$endif}
-  //  po1^.ancestor:= fdesigner.copycomponent(amodule,nil);
-    fobjectlinker.link(po1^.ancestor);
+   if amodule <> nil then begin
+    po1:= finddescendentinfo(amodule);
+    if po1 <> nil then begin
+     comp:= po1^.ancestor;
+     po1^.ancestor:= nil;
+     if comp <> nil then begin
+      removefixupreferences(comp,'');
+     end;  
+     comp.Free;  
+    {$ifdef mse_debugcopycomponent}
+     debugwriteln('***renewbackup before copy '+amodule.name);
+     dumpcomponent(amodule,'source:');
+    {$endif}
+     fdesigner.fsubmoduleinfopo:= nil;
+     po1^.ancestor:= fdesigner.copycomponent(amodule,amodule,false,false);
+    {$ifdef mse_debugcopycomponent}
+     debugwriteln('***renewbackup after copy '+amodule.name);
+     dumpcomponent(amodule,'source:');
+     dumpcomponent(po1^.ancestor,'backup:');
+    {$endif}
+   //  po1^.ancestor:= fdesigner.copycomponent(amodule,nil);
+     fobjectlinker.link(po1^.ancestor);
+    end;
    end;
   end;
  finally
@@ -962,6 +970,18 @@ begin
  if po1 <> nil then begin
   result:= po1^.ancestor;
  end;
+end;
+
+procedure tsubmodulelist.doitemdestroyed(const sender: tmsecomponent);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(frenewbackuplist) do begin
+  if frenewbackuplist[int1] = sender then begin
+   frenewbackuplist[int1]:= nil;
+  end;
+ end;
+ inherited;
 end;
 
 const
@@ -1579,7 +1599,9 @@ begin
                   depmodcomps[int1],destcomps,oldancestorcomponents[int1]);
      end;
     finally
-     setlength(frefreshmethods,high(frefreshmethods));
+     if frefreshmethods <> nil then begin
+      setlength(frefreshmethods,high(frefreshmethods));
+     end;
      fdesigner.fsubmodulelist.renewbackup(amodule^.instance);
     {$ifndef mse_nomethodswap}
      amodule^.methods.releasemethodtable;

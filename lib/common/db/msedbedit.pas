@@ -7963,6 +7963,8 @@ begin
   finally
    fautoinserting:= false;
   end;
+  fgrid.focuscell(fgrid.focusedcell,selectaction); 
+                              //focus col if necessary
  end;
 end;
 

@@ -3038,9 +3038,12 @@ begin
   fondeselect(self);
  end;
  if fsubform <> nil then begin
-  if fsubform.forceclose then begin //trigger statfile writing
+  if fsubform.forceclose then begin
    fsubform.free;
-  end;
+  end
+  else begin
+   tabwidget.activepageindex:= tabindex; //reactivate
+  end;  
  end;
 end;
 

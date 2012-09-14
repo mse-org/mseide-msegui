@@ -11285,13 +11285,18 @@ end;
 function twidget.canparentclose(const newfocus: twidget): boolean;
                    //window.focusedwidget is first checked
 begin
- if checkdescendent(window.focusedwidget) then begin
-  result:= window.focusedwidget.canclose(newfocus);
-  if not result then begin
-   exit;
+ try
+  if checkdescendent(window.focusedwidget) then begin
+   result:= window.focusedwidget.canclose(newfocus);
+   if not result then begin
+    exit;
+   end;
   end;
+  result:= canclose(newfocus);
+ except
+  result:= false;
+  application.handleexception;
  end;
- result:= canclose(newfocus);
 end;
 
 function twidget.forceclose: boolean;
@@ -13851,12 +13856,18 @@ begin
 end;
 
 procedure twindow.widgetdestroyed(widget: twidget);
+var
+ widget1: twidget;
 begin
  if fmodalwidget = widget then begin
   fmodalwidget:= nil;
  end;
  if ffocusedwidget = widget then begin
-  setfocusedwidget(nil);
+  widget1:= widget;
+  repeat 
+   widget1:= widget1.parentwidget;
+  until (widget1 = nil) or widget1.canfocus;
+  setfocusedwidget(widget1);
  end;
 end;
 
