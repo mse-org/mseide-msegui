@@ -2321,7 +2321,7 @@ type
    procedure checkwindowrect(winid: winidty; var rect: rectty);
                         //callback from win32 wm_sizing
 
-   procedure createform(instanceclass: widgetclassty; var reference);
+   function createform(instanceclass: widgetclassty; var reference): twidget;
    procedure invalidate; //invalidates all registered forms
    
    procedure processmessages; override; //handle with care!
@@ -16588,10 +16588,10 @@ begin
  end;
 end;
 
-procedure tguiapplication.createform(
-                                  instanceclass: widgetclassty; var reference);
+function tguiapplication.createform(instanceclass: widgetclassty;
+                                               var reference): twidget;
 begin
- mseclasses.createmodule(self,instanceclass,reference);
+ result:= twidget(mseclasses.createmodule(self,instanceclass,reference));
 end;
 
 procedure tguiapplication.eventloop(const once: boolean = false);

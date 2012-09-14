@@ -727,8 +727,8 @@ procedure setoptionalobject(const componentstate: tcomponentstate;
 procedure setlinkedcomponent(const sender: iobjectlink; const source: tmsecomponent;
                       var instance: tmsecomponent; ainterfacetype: pointer = nil);
 
-procedure createmodule(aowner: tcomponent; instanceclass: msecomponentclassty;
-                                                                 var reference);
+function createmodule(aowner: tcomponent; instanceclass: msecomponentclassty;
+                                              var reference): tmsecomponent;
 procedure registerobjectdata(datapo: pobjectdataty; 
                  objectclass: tpersistentclass; name: string = ''); overload;
 procedure registerobjectdata(datapo: pobjectdataty; 
@@ -1919,8 +1919,8 @@ begin
  end;
 end;
 
-procedure createmodule(aowner: tcomponent; instanceclass: msecomponentclassty;
-                                    var reference);
+function createmodule(aowner: tcomponent; instanceclass: msecomponentclassty;
+                                                 var reference): tmsecomponent;
 var
  instance: tmsecomponent;
 begin
@@ -1935,6 +1935,7 @@ begin
   tcomponent(reference) := nil;
   raise;
  end;
+ result:= instance;
 end;
 
 

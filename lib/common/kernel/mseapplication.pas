@@ -271,7 +271,8 @@ type
    procedure endhighrestimer;
    
    function procid: procidty;
-   procedure createdatamodule(instanceclass: msecomponentclassty; var reference);
+   function createdatamodule(instanceclass: msecomponentclassty;
+                                                var reference): tmsecomponent;
    procedure run;
    function running: boolean; //true if eventloop entered
    procedure processmessages; virtual; //handle with care!
@@ -1562,10 +1563,10 @@ begin
  end;
 end;
 
-procedure tcustomapplication.createdatamodule(instanceclass: msecomponentclassty;
-                                                          var reference);
+function tcustomapplication.createdatamodule(instanceclass: msecomponentclassty;
+                                                var reference): tmsecomponent;
 begin
- mseclasses.createmodule(self,instanceclass,reference);
+ result:= mseclasses.createmodule(self,instanceclass,reference);
 end;
 {
 procedure tcustomapplication.setlinkedvar(const source: tmsecomponent;
