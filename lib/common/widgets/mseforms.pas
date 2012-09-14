@@ -169,7 +169,7 @@ type
 
    procedure readstate(reader: treader); override;
    procedure defineproperties(filer: tfiler); override;
-   procedure doonloaded; virtual;
+   procedure dooncreate; virtual;
    procedure doloaded; override;
    procedure loaded; override;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
@@ -807,6 +807,7 @@ begin
  end
  else begin
   registerhandlers;
+  dooncreate;
  end;
  if (fo_createmodal in foptions) and 
          (componentstate*[csdesigning,csdestroying,csloading] = []) and
@@ -887,7 +888,7 @@ begin
   end;
  end;
  registerhandlers;
- doonloaded;
+ dooncreate;
 end;
 
 {$ifdef mse_with_ifi}
@@ -1036,17 +1037,17 @@ begin
  getcompchildren(proc,root);
 end;
 
-procedure tcustommseform.doonloaded;
+procedure tcustommseform.dooncreate;
 begin
- if canevent(tmethod(fonloaded)) then begin
-  fonloaded(self);
+ if canevent(tmethod(foncreate)) then begin
+  foncreate(self);
  end;
 end;
 
 procedure tcustommseform.doloaded;
 begin
- if canevent(tmethod(foncreate)) then begin
-  foncreate(self);
+ if canevent(tmethod(fonloaded)) then begin
+  fonloaded(self);
  end;
  inherited;
 end;

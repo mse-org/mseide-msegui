@@ -88,7 +88,7 @@ object objectinspectorfo: tobjectinspectorfo
     E0E0E001DFDFDF01DDDDDD01DBDBDB01DADADA01D8D8D801D7D7D701D5D5D501
     D3D3D301D2D2D201D0D0D001
   }
-  oncreate = tmseformcreate
+  onloaded = tmseformcreate
   oneventloopstart = objectinspectorfoonloaded
   onasyncevent = asyncexe
   onlayout = objectinspectoronchildscaled

@@ -62,7 +62,7 @@ type
    class function getmoduleclassname: string; override;
    class function hasresource: boolean; override;
    procedure defineproperties(filer: tfiler); override;
-   procedure doonloaded; virtual;
+   procedure dooncreate; virtual;
    procedure loaded; override;
    procedure doasyncevent(var atag: integer); override;
    procedure doeventloopstart; virtual;
@@ -137,8 +137,8 @@ begin
   if (fstatfile <> nil) and (dmo_autoreadstat in foptions) then begin
    fstatfile.readstat;
   end;
-  doonloaded;
  end;
+ dooncreate;
 end;
 
 destructor tmsedatamodule.destroy;
@@ -161,13 +161,13 @@ begin
  if (fstatfile <> nil) and (dmo_autoreadstat in foptions) then begin
   fstatfile.readstat;
  end;
- doonloaded;
+ dooncreate;
 end;
 
-procedure tmsedatamodule.doonloaded;
+procedure tmsedatamodule.dooncreate;
 begin
- if canevent(tmethod(fonloaded)) then begin
-  fonloaded(self);
+ if canevent(tmethod(foncreate)) then begin
+  foncreate(self);
  end;
 end;
 
@@ -258,8 +258,8 @@ procedure tmsedatamodule.loaded;
 begin
  inherited;
  application.postevent(tobjectevent.create(ek_loaded,ievent(self)));
- if canevent(tmethod(foncreate)) then begin
-  foncreate(self);
+ if canevent(tmethod(fonloaded)) then begin
+  fonloaded(self);
  end;
 end;
 

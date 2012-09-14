@@ -17,7 +17,7 @@ object settingsfo: tsettingsfo
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = tstatfile1
   caption = 'Configure MSE environment'
-  oncreate = formoncreate
+  onloaded = formoncreate
   moduleclassname = 'tmseform'
   object templatedir: tfilenameedit
     Tag = 5

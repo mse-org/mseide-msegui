@@ -22,7 +22,7 @@ object projecttreefo: tprojecttreefo
   options = [fo_savepos, fo_savezorder, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Project Tree'
-  oncreate = projecttreefooncreate
+  onloaded = projecttreefooncreate
   oneventloopstart = projecttreefoonloaded
   ondestroy = projecttreefoondestroy
   onstatupdate = projecttreeonupdatestat

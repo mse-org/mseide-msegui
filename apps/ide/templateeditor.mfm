@@ -14,7 +14,7 @@ object templateeditorfo: ttemplateeditorfo
   options = [fo_freeonclose, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
   statfile = tstatfile1
   caption = 'Code Template Editor'
-  onloaded = onlo
+  oncreate = onlo
   onclosequery = closeq
   moduleclassname = 'tmseform'
   object tbutton1: tbutton

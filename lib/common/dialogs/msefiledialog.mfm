@@ -18,7 +18,7 @@ object filedialogfo: Tfiledialogfo
     307
   )
   options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
-  onloaded = formoncreate
+  oncreate = formoncreate
   onkeydown = listviewonkeydown
   onlayout = foonchildscaled
   left = 239

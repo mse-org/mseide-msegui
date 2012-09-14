@@ -24,7 +24,7 @@ object msepopupcalendarfo: tpopupcalendarfo
   )
   optionswindow = [wo_popup, wo_buttonendmodal]
   options = [fo_freeonclose, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
-  oncreate = formoncreate
+  onloaded = formoncreate
   moduleclassname = 'tmseform'
   object grid: tdrawgrid
     optionswidget1 = [ow1_fontglyphheight]

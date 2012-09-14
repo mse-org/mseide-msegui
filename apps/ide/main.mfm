@@ -31,7 +31,7 @@ object mainfo: tmainfo
   options = [fo_main, fo_terminateonclose, fo_globalshortcuts, fo_savepos, fo_savezorder, fo_savestate]
   statfile = projectstatfile
   caption = 'MSEide'
-  oncreate = mainfooncreate
+  onloaded = mainfooncreate
   oneventloopstart = mainonloaded
   ondestroy = mainfoondestroy
   onwindowactivechanged = mainonactivewindowchanged

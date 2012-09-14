@@ -1,5 +1,8 @@
 MSEide+MSEgui breaking changes version history
 
+2012-09-14
+ tcustommseform oncreate <-> onloaded.
+ tmsedatamodule oncreate <-> onloaded.
 2012-09-13
  fieldarrayty -> fieldarty.
 2012-09-07
@@ -21,6 +24,7 @@ MSEide+MSEgui breaking changes version history
 2012-04-13
  mopenssl -> mseopenssl, uses dynlibinfoty, stadardised with other lib bindings.
  BIO functions -> mseopensslbio.
+ 
 Version 2.8.2
 2012-04-01
 2012-02-01

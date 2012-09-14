@@ -23,7 +23,7 @@ object projectoptionsfo: tprojectoptionsfo
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder]
   statfile = statfile1
   caption = 'Project Options'
-  oncreate = createexe
+  onloaded = createexe
   moduleclassname = 'tmseform'
   object tlayouter9: tlayouter
     bounds_x = 0
