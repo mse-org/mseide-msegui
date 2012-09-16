@@ -865,6 +865,9 @@ procedure debugstreamout(const stream: tstream; const atext: string);
 procedure debugbinstreamout(const acomp,aancestor: tcomponent; 
              const aonfindancestor: tfindancestorevent; const atext: string);
 function debugcompname(const acomponent: tcomponent): string;
+function debugcompnames(const acomponents: componentarty): string;
+function debugcomprootname(const acomponent: tcomponent): string;
+function debugcomprootnames(const acomponents: componentarty): string;
 {$endif}
 
 type
@@ -1054,6 +1057,49 @@ begin
  end
  else begin
   result:= acomponent.name;
+ end;
+end;
+
+function debugcompnames(const acomponents: componentarty): string;
+var
+ int1: integer;
+begin
+ result:= '';
+ for int1:= 0 to high(acomponents) do begin
+  result:= result + debugcompname(acomponents[int1]) + ',';
+ end;
+ if result <> '' then begin
+  setlength(result,length(result)-1);
+ end;
+end;
+
+function debugcomprootname(const acomponent: tcomponent): string;
+var
+ comp1: tcomponent;
+begin
+ if acomponent = nil then begin
+  result:= 'NIL';
+ end
+ else begin
+  comp1:= acomponent;
+  repeat
+   result:= comp1.name+'.'+result;
+   comp1:= comp1.owner;
+  until comp1 = nil;
+  setlength(result,length(result)-1);
+ end;
+end;
+
+function debugcomprootnames(const acomponents: componentarty): string;
+var
+ int1: integer;
+begin
+ result:= '';
+ for int1:= 0 to high(acomponents) do begin
+  result:= result + debugcomprootname(acomponents[int1]) + ',';
+ end;
+ if result <> '' then begin
+  setlength(result,length(result)-1);
  end;
 end;
 
@@ -2196,7 +2242,8 @@ var
        end;
       end;
      end;
-     if (comp1 = nil) and (revert or (comp2 <> nil)) then begin
+     if ((comp1 = nil) or (finditem(pointerarty(deletedcomps),comp1) >= 0)) and 
+                                     (revert or (comp2 <> nil)) then begin
       additem(pointerarty(deletedcomps),pointer(descendentar[int1]));
 //      freedesigncomponent(descendentar[int1]);
 //      descendentar[int1].free;
@@ -2441,7 +2488,8 @@ begin
    end;
 
   {$ifdef mse_debugrefresh}
-   dumpcomponent(descendent,'descendent');
+   debugwriteln('**deleteldcomps before delete '+
+                        debugcomprootnames(deletedcomps));
   {$endif}
   
   finally
@@ -2458,6 +2506,11 @@ begin
   try
    nonancestors:= eventhandler.fnonancestors;
    deletecomps(descendent,newancestor,oldancestor);
+  {$ifdef mse_debugrefresh}
+   debugwriteln('**deleteldcomps after delete '+
+                        debugcomprootnames(deletedcomps));
+   dumpcomponent(descendent,'**descendent');
+  {$endif}
   finally
    stream1.Free;
    stream2.Free;

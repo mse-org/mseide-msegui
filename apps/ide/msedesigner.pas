@@ -928,7 +928,7 @@ begin
      debugwriteln('***renewbackup before copy '+amodule.name);
      dumpcomponent(amodule,'source:');
     {$endif}
-     fdesigner.fsubmoduleinfopo:= nil;
+//     fdesigner.fsubmoduleinfopo:= nil;
      po1^.ancestor:= fdesigner.copycomponent(amodule,amodule,false,false);
     {$ifdef mse_debugcopycomponent}
      debugwriteln('***renewbackup after copy '+amodule.name);
@@ -3099,7 +3099,7 @@ end;
 
 function tdesigner.createcomponent: tcreatecomponentevent;
 begin
- fsubmoduleinfopo:= nil; //init
+ fsubmoduleinfopo:= nil; //reset
  result:= @createcomponent1;
 end;
 
