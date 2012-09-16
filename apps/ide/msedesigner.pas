@@ -456,8 +456,9 @@ type
               const aName: string; var Ancestor, RootAncestor: TComponent);
    function findancestorcomponent(const acomponent: tcomponent): tcomponent;
    function getancestormethods(const amodule: pmoduleinfoty): methodsarty;
-   procedure createcomponent(Reader: TReader; ComponentClass: TComponentClass;
-                   var Component: TComponent);
+   procedure createcomponent1(reader: treader; componentclass: tcomponentclass;
+                   var component: tcomponent);
+   function createcomponent: tcreatecomponentevent;
    function selectedcomponents: componentarty;
    
       //idesigner
@@ -1532,7 +1533,7 @@ begin
                                   oldancestor1,false,
          {$ifdef FPC}@{$endif}fdesigner.findancestor,
          {$ifdef FPC}@{$endif}fdesigner.findcomponentclass,
-         {$ifdef FPC}@{$endif}fdesigner.createcomponent,
+         fdesigner.createcomponent,
         {$ifdef mse_nomethodswap}
          {$ifdef FPC}@{$endif}setrefreshmethod,
          {$ifdef FPC}@{$endif}fdesigner.writedesignmethod
@@ -1573,7 +1574,7 @@ begin
                              oldancestor1,false,
          {$ifdef FPC}@{$endif}fdesigner.findancestor,
          {$ifdef FPC}@{$endif}fdesigner.findcomponentclass,
-         {$ifdef FPC}@{$endif}fdesigner.createcomponent,
+         fdesigner.createcomponent,
         {$ifdef mse_nomethodswap}
          {$ifdef FPC}@{$endif}setrefreshmethod,
          {$ifdef FPC}@{$endif}fdesigner.writedesignmethod
@@ -3062,7 +3063,7 @@ begin
  end;
 end;
 
-procedure tdesigner.createcomponent(Reader: TReader;
+procedure tdesigner.createcomponent1(Reader: TReader;
                    ComponentClass: TComponentClass; var Component: TComponent);
 var
  asubmoduleinfopo: pmoduleinfoty;
@@ -3094,6 +3095,12 @@ begin
                                    asubmoduleinfopo^.instance,fsubmodulelist);
   end;
  end;
+end;
+
+function tdesigner.createcomponent: tcreatecomponentevent;
+begin
+ fsubmoduleinfopo:= nil; //init
+ result:= @createcomponent1;
 end;
 
 {$ifndef mse_nomethodswap}
@@ -3595,7 +3602,7 @@ begin
         {$ifdef FPC}@{$endif}fdescendentinstancelist.setrefreshmethod;
     {$endif}
      reader.onfindcomponentclass:= {$ifdef FPC}@{$endif}findcomponentclass;
-     reader.oncreatecomponent:= {$ifdef FPC}@{$endif}createcomponent;
+     reader.oncreatecomponent:= createcomponent;
      reader.onancestornotfound:= {$ifdef FPC}@{$endif}ancestornotfound;
    {$ifdef mse_debugcopycomponent}
      debugwriteln('*read '+inttostr(int1)+' '+
@@ -3702,7 +3709,7 @@ begin
     refreshancestor(delcomps,acomponent,comp1,comp1,true,
      {$ifdef FPC}@{$endif}findancestor,
      {$ifdef FPC}@{$endif}findcomponentclass,
-     {$ifdef FPC}@{$endif}createcomponent,
+     createcomponent,
     {$ifdef mse_nomethodswap}
      {$ifdef FPC}@{$endif}fdescendentinstancelist.setrefreshmethod,
      {$ifdef FPC}@{$endif}writedesignmethod
@@ -4450,7 +4457,7 @@ begin //loadformfile
         {$endif}
          reader.onfindcomponentclass:= {$ifdef FPC}@{$endif}findcomponentclass;
          reader.onancestornotfound:= {$ifdef FPC}@{$endif}ancestornotfound;
-         reader.oncreatecomponent:= {$ifdef FPC}@{$endif}createcomponent;
+         reader.oncreatecomponent:= createcomponent;
          reader.onerror:= {$ifdef FPC}@{$endif}readererror;
          module.Name:= modulename;
          reader.ReadrootComponent(module);

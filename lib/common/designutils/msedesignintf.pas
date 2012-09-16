@@ -1143,7 +1143,7 @@ begin
       reader.onancestornotfound:= {$ifdef FPC}@{$endif}designer.ancestornotfound;
       reader.onfindcomponentclass:= 
                            {$ifdef FPC}@{$endif}designer.findcomponentclass;
-      reader.oncreatecomponent:= {$ifdef FPC}@{$endif}designer.createcomponent;
+      reader.oncreatecomponent:= designer.createcomponent;
       factcomp:= nil;
       begingloballoading;
       validaterenamebefore:= ondesignvalidaterename;
