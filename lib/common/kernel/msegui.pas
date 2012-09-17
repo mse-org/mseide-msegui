@@ -1692,7 +1692,7 @@ type
    function findtagwidget(const atag: integer; const aclass: widgetclassty): twidget;
               //returns first matching descendent
    function findwidget(const aname: ansistring): twidget;
-              //searches in countainer.widgets, case insensitive
+              //searches in container.widgets, case insensitive
 
    property container: twidget read getcontainer;
    function containeroffset: pointty;

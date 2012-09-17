@@ -864,6 +864,7 @@ procedure dumpstreamcomponent(const acomp: tcomponent; const atext: string = '')
 procedure debugstreamout(const stream: tstream; const atext: string);
 procedure debugbinstreamout(const acomp,aancestor: tcomponent; 
              const aonfindancestor: tfindancestorevent; const atext: string);
+function debugstringarty(const astringar: stringarty): string;
 function debugcompname(const acomponent: tcomponent): string;
 function debugcompnames(const acomponents: componentarty): string;
 function debugcomprootname(const acomponent: tcomponent): string;
@@ -1050,13 +1051,23 @@ var
  fmodulestoregister: msecomponentarty;
 
 {$ifdef mse_debug}
+function debugstringarty(const astringar: stringarty): string;
+begin
+ if astringar = nil then begin
+  result:= 'NIL';
+ end
+ else begin
+  result:= concatstrings(astringar,',');
+ end;
+end;
+
 function debugcompname(const acomponent: tcomponent): string;
 begin
  if acomponent = nil then begin
   result:= 'NIL';
  end
  else begin
-  result:= acomponent.name;
+  result:= acomponent.name+'<'+acomponent.classname+'>';
  end;
 end;
 
@@ -1064,12 +1075,16 @@ function debugcompnames(const acomponents: componentarty): string;
 var
  int1: integer;
 begin
- result:= '';
- for int1:= 0 to high(acomponents) do begin
-  result:= result + debugcompname(acomponents[int1]) + ',';
- end;
- if result <> '' then begin
-  setlength(result,length(result)-1);
+ if acomponents = nil then begin
+  result:= 'NIL';
+ end
+ else begin
+  for int1:= 0 to high(acomponents) do begin
+   result:= result + debugcompname(acomponents[int1]) + ',';
+  end;
+  if result <> '' then begin
+   setlength(result,length(result)-1);
+  end;
  end;
 end;
 
@@ -1083,7 +1098,7 @@ begin
  else begin
   comp1:= acomponent;
   repeat
-   result:= comp1.name+'.'+result;
+   result:= comp1.name+'<'+comp1.classname+'>'+'.'+result;
    comp1:= comp1.owner;
   until comp1 = nil;
   setlength(result,length(result)-1);
@@ -1094,12 +1109,17 @@ function debugcomprootnames(const acomponents: componentarty): string;
 var
  int1: integer;
 begin
- result:= '';
- for int1:= 0 to high(acomponents) do begin
-  result:= result + debugcomprootname(acomponents[int1]) + ',';
- end;
- if result <> '' then begin
-  setlength(result,length(result)-1);
+ if acomponents = nil then begin
+  result:= 'NIL';
+ end
+ else begin
+  result:= '';
+  for int1:= 0 to high(acomponents) do begin
+   result:= result + debugcomprootname(acomponents[int1]) + ',';
+  end;
+  if result <> '' then begin
+   setlength(result,length(result)-1);
+  end;
  end;
 end;
 
@@ -2107,6 +2127,25 @@ procedure trefresheventhandler.doancestornotfound(reader: treader;
 begin
  if component = nil then begin
   component:= tasinheritedreader(reader).existingcomp;
+  if (component = nil) then begin
+   if assigned(reader.oncreatecomponent) then begin
+    reader.oncreatecomponent(reader,tcomponentclass(componentclass),component);
+   end;
+   if component = nil then begin
+    component:= tcomponent(componentclass.newinstance);
+  {$warnings off}
+    with tcomponentcracker(component) do begin
+  {$warnings on}
+     fcomponentstate:= componentstate + [csloading,csancestor];
+    end;
+    try
+     component.create(reader.owner);
+    except
+     component.free;
+     raise;
+    end;
+   end;
+  end;
  end;
 end;
 

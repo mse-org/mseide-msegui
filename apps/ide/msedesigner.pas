@@ -307,8 +307,8 @@ type
    procedure delcomp(child: tcomponent);
    procedure addcomp(child: tcomponent);
    procedure domodulemodified(const amodule: pmoduleinfoty;
-           modifylevel: integer; destcomps,ancestorcomps: stringarty;
-           oldancestorcomps: msecomponentarty);
+           modifylevel: integer; destcompnames,ancestorcompnames: stringarty;
+           newancestorcomps,oldancestorcomps: msecomponentarty);
   {$ifdef mse_nomethodswap}
    procedure setrefreshmethod(reader: treader; instance: tpersistent;
                         propinfo: ppropinfo; const themethodname: string;
@@ -1383,13 +1383,14 @@ end;
 
 procedure tdescendentinstancelist.domodulemodified(const amodule: pmoduleinfoty;
                           modifylevel: integer;
-                          destcomps,ancestorcomps: stringarty;
-                          oldancestorcomps: msecomponentarty);
-  //todo: optimize
+                          destcompnames,ancestorcompnames: stringarty;
+                          newancestorcomps,oldancestorcomps: msecomponentarty);
+  //todo: simplify, optimize
 var
  dependentmodules: moduleinfopoarty;
  dependentmod: moduleinfopoarty;
  comp1: tmsecomponent;
+ newancestor0: tmsecomponent; 
  oldancestor0: tmsecomponent; 
  descendent1,newancestor1,oldancestor1: tmsecomponent;
  int1,int2,int3,int4: integer;
@@ -1402,6 +1403,7 @@ var
  taborderbefore: integer;
  depmodcomps: array of stringarty;
  dependentcomponents: array of msecomponentarty; 
+ newancestorcomponents: array of msecomponentarty; 
  oldancestorcomponents: array of msecomponentarty; 
 // sourcemethodtab: pointer;
 
@@ -1421,8 +1423,12 @@ begin
   {$ifdef mse_debugsubmodule}
    debugwriteln('***modulemodified '+inttostr(modifylevel)+' '+
                  amodule^.instance.name);
-   debugwriteln(' destcomps: '+concatstrings(destcomps,','));
-   debugwriteln(' ancestorcomps: '+concatstrings(ancestorcomps,','));
+   debugwriteln(' destcompnames: '+debugstringarty(destcompnames));
+   debugwriteln(' ancestorcompnames: '+debugstringarty(ancestorcompnames));
+   debugwriteln(' newancestorcomps: '+
+          debugcomprootnames(componentarty(newancestorcomps)));
+   debugwriteln(' oldancestorcomps: '+
+          debugcomprootnames(componentarty(oldancestorcomps)));
  //  po1:= datapo;
  //  for int1:= 0 to count-1 do begin
  //   debugwriteln('*'+inttostr(int1)+' '+po1^.ancestor.name+' '+
@@ -1430,7 +1436,8 @@ begin
  //   inc(po1);
  //  end;
   {$endif}
- 
+
+   newancestor0:= amodule^.instance;
    oldancestor0:= fdesigner.fsubmodulelist.findoldancestor(amodule^.instance); 
    po1:= datapo;
    int2:= 0;
@@ -1455,21 +1462,25 @@ begin
     {$endif}               
      int3:= finditem(pointerarty(dependentmodules),po2);
      if int3 < 0 then begin
-      int3:= length(dependentmodules);
-      setlength(dependentmodules,int3+1);
-      setlength(depmodcomps,int3+1);
-      setlength(dependentcomponents,int3+1);
-      setlength(oldancestorcomponents,int3+1);
+      int3:= high(dependentmodules)+2;
+      setlength(dependentmodules,int3);
+      setlength(depmodcomps,int3);
+      setlength(dependentcomponents,int3);
+      setlength(newancestorcomponents,int3);
+      setlength(oldancestorcomponents,int3);
+      dec(int3);
       dependentmodules[int3]:= po2;
      end;
-     if destcomps = nil then begin
+     if (destcompnames = nil) then begin
       additem(depmodcomps[int3],destname);
       additem(pointerarty(dependentcomponents[int3]),po1^.descendent);
+      additem(pointerarty(newancestorcomponents[int3]),newancestor0);
       additem(pointerarty(oldancestorcomponents[int3]),oldancestor0);
      end
      else begin
-      for int4:= 0 to high(destcomps) do begin
-       additem(depmodcomps[int3],destname+'.'+destcomps[int4]);
+      for int4:= 0 to high(destcompnames) do begin
+       additem(depmodcomps[int3],destname+'.'+destcompnames[int4]);
+       additem(pointerarty(newancestorcomponents[int3]),newancestorcomps[int4]);
        additem(pointerarty(oldancestorcomponents[int3]),oldancestorcomps[int4]);
        additem(pointerarty(dependentcomponents[int3]),po1^.descendent);
       end;
@@ -1512,7 +1523,7 @@ begin
    {$endif}
     stackarray(pointerarty(dependentmodules),pointerarty(fmodifiedmodules));
     try
-     oldancestor0:= fdesigner.fsubmodulelist.findoldancestor(amodule^.instance);
+//     oldancestor0:= fdesigner.fsubmodulelist.findoldancestor(amodule^.instance);
      for int1:= 0 to high(dependentmodules) do begin
      {$ifndef mse_nomethodswap}
       streamingswapmethodpointer(dependentmodules[int1]^.instance);
@@ -1525,10 +1536,22 @@ begin
        descendent1:= tmsecomponent(
                   findnestedcomponent(dependentmodules[int1]^.instance,
                                                       depmodcomps[int1][int2]));
-       if ancestorcomps <> nil then begin
-        str1:= ancestorcomps[int2 mod length(ancestorcomps)];
-        newancestor1:= tmsecomponent(findnestedcomponent(newancestor1,str1));
-        oldancestor1:= tmsecomponent(findnestedcomponent(oldancestor1,str1));
+       if ancestorcompnames <> nil then begin
+        int3:= int2 mod length(ancestorcompnames);
+        str1:= ancestorcompnames[int3];
+        if str1 = 'OWNER' then begin //inherited submodule
+         newancestor1:= newancestorcomps[int3];
+         oldancestor1:= oldancestorcomps[int3];
+        end
+        else begin
+         newancestor1:= tmsecomponent(findnestedcomponent(newancestor1,str1));
+         oldancestor1:= tmsecomponent(findnestedcomponent(oldancestor1,str1));
+        end;
+  {$ifdef mse_debugsubmodule}
+        debugwriteln('*refreshmain descendent: '+debugcomprootname(descendent1)+
+                      ' newancestor: '+debugcomprootname(newancestor1)+
+                      ' oldancestor: '+debugcomprootname(oldancestor1));
+  {$endif}
         refreshancestor(fdeletedcomps,descendent1,newancestor1,
                                   oldancestor1,false,
          {$ifdef FPC}@{$endif}fdesigner.findancestor,
@@ -1545,12 +1568,17 @@ begin
         {$endif});
        end
        else begin
-        if destcomps <> nil then begin
-         str1:= destcomps[int2 mod length(destcomps)];
+        if destcompnames <> nil then begin
+         int3:= int2 mod length(destcompnames);
+         newancestor1:= newancestorcomps[int3];
+         oldancestor1:= oldancestorcomps[int3];        
+         {
+         str1:= destcompnames[int2 mod length(destcompnames)];
          oldancestor1:= tmsecomponent(
                      findnestedcomponent(oldancestor1,str1));
          newancestor1:= tmsecomponent(
                      findnestedcomponent(newancestor1,str1));
+         }
         end;
         bo3:= (csinline in descendent1.componentstate) and 
                                          (descendent1.owner <> nil); 
@@ -1570,6 +1598,11 @@ begin
           end;
          end;
         end;
+  {$ifdef mse_debugsubmodule}
+        debugwriteln('*refreshcomps descendent: '+debugcomprootname(descendent1)+
+                      ' newancestor: '+debugcomprootname(newancestor1)+
+                      ' oldancestor: '+debugcomprootname(oldancestor1));
+  {$endif}
         refreshancestor(fdeletedcomps,descendent1,newancestor1,
                              oldancestor1,false,
          {$ifdef FPC}@{$endif}fdesigner.findancestor,
@@ -1597,7 +1630,8 @@ begin
      end;
      for int1:= 0 to high(dependentmodules) do begin
       domodulemodified(dependentmodules[int1],modifylevel,
-                  depmodcomps[int1],destcomps,oldancestorcomponents[int1]);
+                  depmodcomps[int1],destcompnames,
+                  newancestorcomponents[int1],oldancestorcomponents[int1]);
      end;
     finally
      if frefreshmethods <> nil then begin
@@ -1617,12 +1651,6 @@ begin
   {$ifdef mse_debugsubmodule}
    debugwriteln('***end modulemodified '+inttostr(modifylevel)+' '+
                  amodule^.instance.name);
- //  po1:= datapo;
- //  for int1:= 0 to count-1 do begin
- //   debugwriteln('*'+inttostr(int1)+' '+po1^.ancestor.name+' '+
- //                                                        po1^.descendent.name);
- //   inc(po1);
- //  end;
   {$endif}
   if modifylevel = 1 then begin
    notifygloballoading;
@@ -1647,7 +1675,7 @@ begin
   fmodulemodifying:= true;
   fmodifiedmodules:= nil;
   try
-   domodulemodified(amodule,0,nil,nil,nil);
+   domodulemodified(amodule,0,nil,nil,nil,nil);
   finally
    try
    {$ifndef mse_nomethodswap}
@@ -3088,7 +3116,7 @@ begin
     tcomponent1(component.components[int1]).setancestor(true);
    end;
   end;
-  if (submodulecopy = 0) and 
+  if (submodulecopy = 0) and
         (reader.root.componentstate * [csinline{,csancestor}] = [])  then begin
    additem(pointerarty(floadedsubmodules),component);
    fdescendentinstancelist.add(tmsecomponent(component),
