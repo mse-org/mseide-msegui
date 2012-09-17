@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -22,6 +22,7 @@ type
  tasinheritedobjectreader = class(tbinaryobjectreader)
   protected
    freader: tasinheritedreader;
+   procedure findexistingcomponent(child: tcomponent);
   public
    procedure begincomponent(var flags: tfilerflags; var achildpos: integer;
       var compclassname, compname: string); override;
@@ -34,6 +35,7 @@ type
   protected
    fforceinherited: boolean;
    fexistingcomp: tcomponent;
+   fexistingcompname: string;
    function createdriver(stream: tstream;
                  bufsize: integer): tabstractobjectreader; override;
   public
@@ -45,6 +47,7 @@ type
 {$else}
 
  tasinheritedreader = class(treader)
+  private
   protected
    fforceinherited: boolean;
    fexistingcomp: tcomponent;
@@ -79,8 +82,10 @@ procedure writecomponentmse(const astream: tstream; const acomp: tcomponent);
 
 implementation
 uses
- sysutils,msereal,mseact,mseclasses;
- 
+ sysutils,msereal,mseact,mseclasses,msestrings;
+type
+ tcomponent1 = class(tcomponent);
+  
 {$ifdef FPC} 
 {
 function findexistingcomponent(const aname: string;
@@ -120,6 +125,14 @@ begin
  inherited create(stream,bufsize);
 end;
 
+procedure tasinheritedobjectreader.findexistingcomponent(child: tcomponent);
+begin
+ if (freader.fexistingcomp = nil) and 
+     (stringicompupper(child.name,freader.fexistingcompname) = 0) then begin
+  freader.fexistingcomp:= child;
+ end;
+end;
+
 procedure tasinheritedobjectreader.begincomponent(var flags: tfilerflags;
         var achildpos: Integer; var compclassName, compname: string);
 var
@@ -131,16 +144,20 @@ begin
   include(flags,ffinherited);
  end
  else begin
-  comp1:= freader.lookuproot;
-  while (comp1 <> nil) do begin
-   freader.fexistingcomp:= comp1.findcomponent(compname);
-   if freader.fexistingcomp <> nil then begin
-    include(flags,ffinherited);
-    exit;
+  comp1:= freader.parent;
+  freader.fexistingcomp:= nil;
+  freader.fexistingcompname:= struppercase(compname);
+  while (freader.fexistingcomp = nil) and (comp1 <> nil) do begin
+   tcomponent1(freader.parent).getchildren(@findexistingcomponent,comp1);
+   if comp1 = freader.root then begin
+    break;
    end;
    comp1:= comp1.owner;
   end;
   exclude(flags,ffinherited);
+  if freader.fexistingcomp <> nil then begin
+   include(flags,ffinherited);
+  end;
  end;
 end;
 
@@ -171,9 +188,8 @@ end;
 procedure tasinheritedreader.readprefix(var flags: tfilerflags;
                                               var achildpos: integer);
 var
- comp1: tcomponent;
  pos1: integer;
- compname: string;
+ comp1: tcomponent;
 begin
  inherited;
  fexistingcomp:= nil;
@@ -181,21 +197,21 @@ begin
   include(flags,ffinherited);
  end
  else begin
-  comp1:= lookuproot;
   pos1:= position;
   readstr; //type
-  compname:= readstr;
+  fexistingcompname:= struppercase(readstr);
   flushbuffer;
   treadercracker(self).fstream.position:= pos1;
-  while (comp1 <> nil) do begin
-   fexistingcomp:= comp1.findcomponent(compname);
-   if fexistingcomp <> nil then begin
-    include(flags,ffinherited);
-    exit;
-   end;
-   comp1:= comp1.owner;
+  fexistingcomp:= 0;
+  comp1:= parent.owner;
+  if comp1 = nil then begin
+   comp1:= parent;
   end;
+  parent.getchildren(@findexisting,comp1);
   exclude(flags,ffinherited);
+  if fexistingcomp <> nil then begin
+   include(flags,ffinherited);
+  end;
  end;
  {
  inherited;

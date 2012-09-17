@@ -1538,15 +1538,15 @@ begin
                                                       depmodcomps[int1][int2]));
        if ancestorcompnames <> nil then begin
         int3:= int2 mod length(ancestorcompnames);
-        str1:= ancestorcompnames[int3];
-        if str1 = 'OWNER' then begin //inherited submodule
+//        str1:= ancestorcompnames[int3];
+//        if str1 = 'OWNER' then begin //inherited submodule
          newancestor1:= newancestorcomps[int3];
          oldancestor1:= oldancestorcomps[int3];
-        end
-        else begin
-         newancestor1:= tmsecomponent(findnestedcomponent(newancestor1,str1));
-         oldancestor1:= tmsecomponent(findnestedcomponent(oldancestor1,str1));
-        end;
+//        end
+//        else begin
+//         newancestor1:= tmsecomponent(findnestedcomponent(newancestor1,str1));
+//         oldancestor1:= tmsecomponent(findnestedcomponent(oldancestor1,str1));
+//        end;
   {$ifdef mse_debugsubmodule}
         debugwriteln('*refreshmain descendent: '+debugcomprootname(descendent1)+
                       ' newancestor: '+debugcomprootname(newancestor1)+
