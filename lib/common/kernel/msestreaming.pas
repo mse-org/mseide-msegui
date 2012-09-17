@@ -154,6 +154,9 @@ begin
    end;
    comp1:= comp1.owner;
   end;
+  if freader.fexistingcomp = nil then begin
+   freader.fexistingcomp:= freader.lookuproot.findcomponent(compname);
+  end;
   exclude(flags,ffinherited);
   if freader.fexistingcomp <> nil then begin
    include(flags,ffinherited);
