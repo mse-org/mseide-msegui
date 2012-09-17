@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -410,6 +410,8 @@ begin
  registerpropertyeditor(typeinfo(string),teditwidgetdatalink,'fieldnametext',
         tdbfieldnamenocalcpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldfieldlink,'fieldname',
+        tdbfieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(string),tfieldfieldlink,'destdatafield',
         tdbfieldnamenocalcpropertyeditor);
  registerpropertyeditor(typeinfo(string),tlookupdbdispfielddatalink,
         'lookupkeyfield',tdbfieldnamenocalcpropertyeditor);

@@ -1556,6 +1556,7 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   function getdataset(const aindex: integer): tdataset;
   protected
    procedure updatedata(const afield: tfield); override;
    procedure defineproperties(filer: tfiler); override;
@@ -8158,11 +8159,23 @@ procedure tfieldfieldlink.getfieldtypes(out propertynames: stringarty;
                out fieldtypes: fieldtypesarty);
 begin
  setlength(propertynames,2);
- propertynames[0]:= 'datafield';
+ propertynames[0]:= 'fieldname';
  propertynames[1]:= 'destdatafield';
  setlength(fieldtypes,2);
  fieldtypes[0]:= [];
  fieldtypes[1]:= [];
+end;
+
+function tfieldfieldlink.getdataset(const aindex: integer): tdataset;
+begin
+ case aindex of
+  0: begin
+   result:= fsourcedatalink.dataset;
+  end;
+  1: begin
+   result:= fdestdatalink.dataset;
+  end;
+ end;
 end;
 
 procedure tfieldfieldlink.updatedata(const afield: tfield);
