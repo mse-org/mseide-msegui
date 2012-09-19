@@ -641,6 +641,7 @@ type
    fancestorlookuplevel: integer;
    fchildlevel: integer;
    fnoancestor: boolean; //used for copy paste of inherited components
+   fmasterancestor: boolean; //used to restore field class in tpersistentfields
   {$ifndef FPC}
    FAncestors: TStringList;
    fcurrentpos: integer;
@@ -669,12 +670,14 @@ type
   {$endif}
   public
    constructor create(const stream: tstream; const bufsize: integer;
-                            const anoancestor: boolean = false);
+                            const anoancestor: boolean = false;
+                            const amasterancestor: boolean = false);
    destructor destroy; override;
    procedure WriteComponent(Component: TComponent);
    procedure writedescendent(const aroot: tcomponent;
                                        const aancestor: tcomponent);
    procedure writerootcomponent(aroot: tcomponent);
+   property masterancestor: boolean read fmasterancestor;
  end;
  
  setsplitpairty = record
@@ -2402,7 +2405,7 @@ begin
   stream3.writetotext(output);
 {$endif}
 
-  writer:= twritermse.Create(stream2,4096,false);
+  writer:= twritermse.Create(stream2,4096,false,true);
   inl:= csinline in newancestor.componentstate;
   if csinline in descendent.componentstate then begin
    tmsecomponent(newancestor).SetInline(true);
@@ -2439,7 +2442,7 @@ begin
     end;
    end;
  
-   writer:= twritermse.Create(stream4,4096,false);
+   writer:= twritermse.Create(stream4,4096,false,true);
   {$ifdef mse_nomethodswap}
    writer.onwritemethodproperty:= onwritemethodproperty;
   {$endif}
@@ -5068,11 +5071,13 @@ end;
 { twritermse }
 
 constructor twritermse.create(const stream: tstream; const bufsize: integer;
-                               const anoancestor: boolean);
+                       const anoancestor: boolean = false;
+                       const amasterancestor: boolean = false);
 begin
 // fgetchildrenbefore:= onstreaminggetchildren;
 // onstreaminggetchildren:= @dogetchildren;
  fnoancestor:= anoancestor;
+ fmasterancestor:= amasterancestor;
  inherited create(stream,bufsize);
 end;
 

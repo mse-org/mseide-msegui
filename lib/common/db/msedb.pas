@@ -1235,8 +1235,10 @@ type
    procedure setitems(const index: integer; const avalue: tfield);
    function getitems(const index: integer): tfield;
   protected
+   finvaliditems: booleanarty;
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure defineproperties(filer: tfiler); override;
+   function ispropertystored(index: integer): boolean; override;
   public
    constructor create(const adataset: tdataset);
    class function getitemclasstype: persistentclassty; override;
@@ -6776,9 +6778,10 @@ end;
 
 procedure tpersistentfields.readfields(reader: treader);
 var
- int1,int2: integer; 
+ int1: integer; 
  fieldtypes: fieldclasstypearty;
  wantedclass: fieldclassty;
+ str1: string;
 begin
  setlength(fieldtypes,count);
  int1:= 0;
@@ -6798,11 +6801,12 @@ begin
  reader.readlistend;
  for int1:= 0 to high(fieldtypes) do begin
   wantedclass:= msefieldtypeclasses[fieldtypes[int1]];
-  if (fitems[int1] <> nil) and 
+  if (fitems[int1] <> nil) and (fieldtypes[int1] <> ft_unknown) and
    not (tfield(fitems[int1]) is wantedclass) then begin
    if (fitems[high(fitems)] = nil) then begin
     moveitem(pointerarty(fitems),high(fitems),int1); //probably inserted field
-   end
+   end;
+   {
    else begin
     for int2:= int1+1 to high(fitems) do begin
      if tfield(fitems[int2]) is wantedclass then begin
@@ -6811,9 +6815,17 @@ begin
      end;
     end;
    end;
+   }
+  end;
+  str1:= '';
+  if (fitems[int1] <> nil) and (fieldtypes[int1] <> ft_unknown) and
+            not (tfield(fitems[int1]) is wantedclass) then begin
+   str1:= tfield(fitems[int1]).fieldname;
+   freeandnil(tfield(fitems[int1]));     //there is something wrong
   end;
   if fitems[int1] = nil then begin
    fitems[int1]:= wantedclass.create(nil);
+   tfield(fitems[int1]).fieldname:= str1;
   end;
  end;
  for int1:= 0 to high(fitems) do begin
@@ -6828,15 +6840,35 @@ end;
 procedure tpersistentfields.writefields(writer: twriter);
 var
  int1: integer;
+ class1: fieldclassty; 
 begin
  writer.writelistbegin;
  writer.writelistbegin;
+ finvaliditems:= nil;
+ setlength(finvaliditems,count);
  for int1:= 0 to high(fitems) do begin
+  class1:= fieldclassty(fitems[int1].classtype);
+  if (writer.ancestor <> nil) and
+    not ((writer is twritermse) and twritermse(writer).masterancestor) then begin
+   with tpersistentfields(writer.ancestor) do begin
+    if (int1 < count) then begin
+     if (fitems[int1].classtype <> class1) then begin
+      class1:= fieldclassty(fitems[int1].classtype);
+                 //do not change inherited field type
+      self.finvaliditems[int1]:= true;
+     end
+     else begin
+      class1:= nil;
+     end;
+    end;
+   end;
+  end;
   writer.writeident(getenumname(typeinfo(fieldclasstypety),
-            ord(fieldclasstoclasstyp(fieldclassty(fitems[int1].classtype)))));
+            ord(fieldclasstoclasstyp(class1))));
  end;
  writer.writelistend;
  writecollection(writer);
+ finvaliditems:= nil;
  writer.writelistend;
 end;
 
@@ -6885,6 +6917,11 @@ begin
  for int1:= 0 to high(result) do begin
   result[int1]:= tfield(fitems[int1]).fieldname;
  end;
+end;
+
+function tpersistentfields.ispropertystored(index: integer): boolean;
+begin
+ result:= inherited ispropertystored(index) and not finvaliditems[index];
 end;
 
 
