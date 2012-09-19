@@ -6776,8 +6776,9 @@ end;
 
 procedure tpersistentfields.readfields(reader: treader);
 var
- int1: integer; 
+ int1,int2: integer; 
  fieldtypes: fieldclasstypearty;
+ wantedclass: fieldclassty;
 begin
  setlength(fieldtypes,count);
  int1:= 0;
@@ -6796,8 +6797,23 @@ begin
  end;
  reader.readlistend;
  for int1:= 0 to high(fieldtypes) do begin
+  wantedclass:= msefieldtypeclasses[fieldtypes[int1]];
+  if (fitems[int1] <> nil) and 
+   not (tfield(fitems[int1]) is wantedclass) then begin
+   if (fitems[high(fitems)] = nil) then begin
+    moveitem(pointerarty(fitems),high(fitems),int1); //probably inserted field
+   end
+   else begin
+    for int2:= int1+1 to high(fitems) do begin
+     if tfield(fitems[int2]) is wantedclass then begin
+      moveitem(pointerarty(fitems),int2,int1); //try to correct invalid order
+      break;
+     end;
+    end;
+   end;
+  end;
   if fitems[int1] = nil then begin
-   fitems[int1]:= msefieldtypeclasses[fieldtypes[int1]].create(nil);
+   fitems[int1]:= wantedclass.create(nil);
   end;
  end;
  for int1:= 0 to high(fitems) do begin
