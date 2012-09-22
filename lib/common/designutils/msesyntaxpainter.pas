@@ -831,7 +831,10 @@ endlab:
   for int1:= 0 to high(boldchars) do begin
    with boldchars[int1] do begin
     if (row >= firstrow) and (row <= lastrow) then begin
-     if updatefontstyle1(list.richitemspo[row]^.format,col,1,fs_bold,true) then begin
+     bo1:= not (fs_bold in getcharstyle(
+                       list.richitemspo[row]^.format,col).fontstyle);
+     if updatefontstyle1(list.richitemspo[row]^.format,
+                                    col,1,fs_bold,bo1) then begin
       if assigned(onlinechanged) then begin
        onlinechanged(self,row);
       end;
