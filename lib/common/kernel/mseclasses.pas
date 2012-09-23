@@ -989,14 +989,15 @@ uses
  msegui,mseformatstr,
 {$endif}
  mseapplication,
-{$ifdef mswindows}
- windows,
-{$endif}
 {$ifdef mse_debug}
  mseobjecttext,
 {$endif}
  msestream,msesys,msedatalist,msedatamodules,rtlconsts,msesysutils,
- msearrayutils,msestreaming;
+ msearrayutils,msestreaming
+ {$ifdef mswindows}
+ ,windows
+{$endif}
+;
 
 type
  tpersistent1 = class(tpersistent);
@@ -2238,7 +2239,7 @@ procedure refreshancestor(var deletedcomps: componentarty;
              {$ifdef mse_nomethodswap}
               const onsetmethodproperty: tsetmethodpropertyevent = nil;
               const onwritemethodproperty: twritemethodpropertyevent = nil;
-              const newcomponent: pboolean = nil
+              const newcomponent: system.pboolean = nil
              {$else}
               const onfindmethod: tfindmethodevent = nil;
               const sourcemethodtab: pointer = nil;

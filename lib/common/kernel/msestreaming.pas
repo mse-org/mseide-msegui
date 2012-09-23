@@ -51,7 +51,7 @@ type
 
  tasinheritedreader = class(treader)
   private
-   fnewcomponent: boolean;
+   fnewcomp: boolean;
   protected
    fforceinherited: boolean;
    fexistingcomp: tcomponent;
@@ -60,7 +60,7 @@ type
                     const forceinherited: boolean);
    procedure readprefix(var flags: tfilerflags; var achildpos: integer); override;
    property existingcomp: tcomponent read fexistingcomp;
-   property newcomponent: boolean read fnewcomponent write fnewcomponent);
+   property newcomp: boolean read fnewcomp write fnewcomp);
                                 
  end;
 
