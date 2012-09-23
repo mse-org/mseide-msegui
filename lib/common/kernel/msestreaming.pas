@@ -32,6 +32,8 @@ type
  end;
 
  tasinheritedreader = class(treader)
+  private
+   fnewcomp: boolean;
   protected
    fforceinherited: boolean;
    fexistingcomp: tcomponent;
@@ -42,12 +44,14 @@ type
    constructor Create(Stream: TStream; BufSize: Integer;
                     const forceinherited: boolean);
    property existingcomp: tcomponent read fexistingcomp;
+   property newcomp: boolean read fnewcomp write fnewcomp;
  end;
 
 {$else}
 
  tasinheritedreader = class(treader)
   private
+   fnewcomponent: boolean;
   protected
    fforceinherited: boolean;
    fexistingcomp: tcomponent;
@@ -56,6 +60,8 @@ type
                     const forceinherited: boolean);
    procedure readprefix(var flags: tfilerflags; var achildpos: integer); override;
    property existingcomp: tcomponent read fexistingcomp;
+   property newcomponent: boolean read fnewcomponent write fnewcomponent);
+                                
  end;
 
 {$endif}

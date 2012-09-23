@@ -776,7 +776,8 @@ procedure refreshancestor(var deletedcomps: componentarty;
               const oncreatecomponent: tcreatecomponentevent = nil;
              {$ifdef mse_nomethodswap}
               const onsetmethodproperty: tsetmethodpropertyevent = nil;
-              const onwritemethodproperty: twritemethodpropertyevent = nil
+              const onwritemethodproperty: twritemethodpropertyevent = nil;
+              const newcomponent: pboolean = nil
              {$else}
               const onfindmethod: tfindmethodevent = nil;
               const sourcemethodtab: pointer = nil;
@@ -2236,7 +2237,8 @@ procedure refreshancestor(var deletedcomps: componentarty;
               const oncreatecomponent: tcreatecomponentevent = nil;
              {$ifdef mse_nomethodswap}
               const onsetmethodproperty: tsetmethodpropertyevent = nil;
-              const onwritemethodproperty: twritemethodpropertyevent = nil
+              const onwritemethodproperty: twritemethodpropertyevent = nil;
+              const newcomponent: pboolean = nil
              {$else}
               const onfindmethod: tfindmethodevent = nil;
               const sourcemethodtab: pointer = nil;
@@ -2320,7 +2322,7 @@ var
  nonancestors: componentarty;
  stream1,stream2,stream4: tmemorystream;
  writer: twritermse;
- reader: treader;
+ reader: tasinheritedreader;
  inl: boolean;
  int1,int2: integer;
  intf1: iactivatorclient;
@@ -2491,6 +2493,9 @@ begin
     writeln('**reading changes newancestor->descendent before deactivate');
  {$endif}
    reader.ReadRootComponent(descendent); //changes
+   if newcomponent <> nil then begin
+    newcomponent^:= reader.newcomp;
+   end;
    reader.free;
 
    reader:= tasinheritedreader.create(stream4,4096,inl{false});  

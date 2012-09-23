@@ -1394,11 +1394,11 @@ var
  oldancestor0: tmsecomponent; 
  descendent1,newancestor1,oldancestor1: tmsecomponent;
  int1,int2,int3,int4: integer;
- str1: string;
+// str1: string;
  destname: string;
  po1: pancestorinfoty;
  po2: pmoduleinfoty;
- bo1,bo2,bo3: boolean;
+ bo1,bo2,bo3,newcomponent: boolean;
  pt1: pointty;
  taborderbefore: integer;
  depmodcomps: array of stringarty;
@@ -1529,6 +1529,7 @@ begin
       streamingswapmethodpointer(dependentmodules[int1]^.instance);
      {$endif}
       frefreshmethods[0]:= dependentmodules[int1]^.methods;
+      newcomponent:= false;
       for int2:= 0 to high(depmodcomps[int1]) do begin
        descendent1:= dependentcomponents[int1][int2];
        newancestor1:= amodule^.instance;
@@ -1538,15 +1539,8 @@ begin
                                                       depmodcomps[int1][int2]));
        if ancestorcompnames <> nil then begin
         int3:= int2 mod length(ancestorcompnames);
-//        str1:= ancestorcompnames[int3];
-//        if str1 = 'OWNER' then begin //inherited submodule
          newancestor1:= newancestorcomps[int3];
          oldancestor1:= oldancestorcomps[int3];
-//        end
-//        else begin
-//         newancestor1:= tmsecomponent(findnestedcomponent(newancestor1,str1));
-//         oldancestor1:= tmsecomponent(findnestedcomponent(oldancestor1,str1));
-//        end;
   {$ifdef mse_debugsubmodule}
         debugwriteln('*refreshmain descendent: '+debugcomprootname(descendent1)+
                       ' newancestor: '+debugcomprootname(newancestor1)+
@@ -1559,7 +1553,8 @@ begin
          fdesigner.createcomponent,
         {$ifdef mse_nomethodswap}
          {$ifdef FPC}@{$endif}setrefreshmethod,
-         {$ifdef FPC}@{$endif}fdesigner.writedesignmethod
+         {$ifdef FPC}@{$endif}fdesigner.writedesignmethod,
+         @newcomponent
         {$else}
          {$ifdef FPC}@{$endif}findrefreshmethod,
            dependentmod[int1]^.methods.fmethodtable
@@ -1572,13 +1567,6 @@ begin
          int3:= int2 mod length(destcompnames);
          newancestor1:= newancestorcomps[int3];
          oldancestor1:= oldancestorcomps[int3];        
-         {
-         str1:= destcompnames[int2 mod length(destcompnames)];
-         oldancestor1:= tmsecomponent(
-                     findnestedcomponent(oldancestor1,str1));
-         newancestor1:= tmsecomponent(
-                     findnestedcomponent(newancestor1,str1));
-         }
         end;
         bo3:= (csinline in descendent1.componentstate) and 
                                          (descendent1.owner <> nil); 
@@ -1610,12 +1598,15 @@ begin
          fdesigner.createcomponent,
         {$ifdef mse_nomethodswap}
          {$ifdef FPC}@{$endif}setrefreshmethod,
-         {$ifdef FPC}@{$endif}fdesigner.writedesignmethod
+         {$ifdef FPC}@{$endif}fdesigner.writedesignmethod,
+         @newcomponent
         {$else}
          {$ifdef FPC}@{$endif}findrefreshmethod,
            amodule^.methods.fmethodtable,
            dependentmod[int1]^.methods.fmethodtable
         {$endif});
+        if bo2 then begin
+        end;
         if bo1 then begin
          twidget(descendent1).pos:= pt1;  //restore insert position
          twidget(descendent1).taborder:= taborderbefore;
@@ -1625,6 +1616,11 @@ begin
           setcomponentpos(descendent1,pt1); //restore insert position
          end;
         end;
+       end;
+      end;
+      if newcomponent then begin
+       with dependentmodules[int1]^ do begin
+        components.assigncomps(instance)
        end;
       end;
      end;
@@ -3122,6 +3118,9 @@ begin
    fdescendentinstancelist.add(tmsecomponent(component),
                                    asubmoduleinfopo^.instance,fsubmodulelist);
   end;
+ end;
+ if reader is tasinheritedreader then begin
+  tasinheritedreader(reader).newcomp:= true;
  end;
 end;
 
