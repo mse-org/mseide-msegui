@@ -18,7 +18,8 @@ type
  variantararty = array of variantarty;
  
 function mseVarTypeIsValidArrayType(const aVarType: TVarType): Boolean;
-function mseVarArrayCreate(const Bounds: PVarArrayBoundArray; Dims : SizeInt; aVarType: TVarType): Variant;
+function mseVarArrayCreate(const Bounds: PVarArrayBoundArray; Dims : SizeInt;
+                                                  aVarType: TVarType): Variant;
 
 implementation
 uses
@@ -37,7 +38,8 @@ function mseVarTypeIsValidArrayType(const aVarType: TVarType): Boolean;
       varint64];
   end;
  
-function mseVarArrayCreate(const Bounds: PVarArrayBoundArray; Dims : SizeInt; aVarType: TVarType): Variant;
+function mseVarArrayCreate(const Bounds: PVarArrayBoundArray;
+                             Dims : SizeInt; aVarType: TVarType): Variant;
   var
     p : pvararray;
   begin

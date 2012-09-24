@@ -1240,8 +1240,12 @@ begin
   CurrBuff := pqgetvalue(res,CurTuple,fieldnum);
   if datatype = ftvariant then begin
    with parraytype(currbuff)^,header do begin
-    int1:= pqgetlength(res,curtuple,fieldnum);
+//    int1:= pqgetlength(res,curtuple,fieldnum);
     setlength(ar1,beton(ndim));
+    if ar1 = nil then begin
+     result:= false;
+     exit;
+    end;
     po1:= @data;
     int2:= 1;
     for int1:= 0 to high(ar1) do begin
