@@ -490,6 +490,7 @@ type
    property tabwidget: tcustomtabwidget read ftabwidget;
    property tabindex: integer read gettabindex write settabindex;
    property isactivepage: boolean read getisactivepage write setisactivepage;
+   property subform: twidget read fsubform;
   published
    property invisible: boolean read getinvisible write setinvisible default false;
    property caption: captionty read getcaption write setcaption;
