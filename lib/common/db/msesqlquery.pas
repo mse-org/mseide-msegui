@@ -274,6 +274,7 @@ type
  tcustomsqlstatement1 = class(tcustomsqlstatement);
  tsqltransaction1 = class(tsqltransaction);
  tsqlresult1 = class(tsqlresult);
+ tdataset1 = class(tdataset);
   
 function SkipComments(var p: PmseChar) : boolean;
 begin
@@ -450,7 +451,8 @@ begin
      if state in [dsinsert,dsedit] then begin
       updaterecord;
       if modified then begin
-       dataset.modified:= true;
+       tdataset1(dataset).setmodified(true); //FPC fixes_2_6 compatibility
+//       dataset.modified:= true;
       end;
      end;
     end;
@@ -473,7 +475,8 @@ begin
      if (mdlo_delayeddetailpost in foptionsmasterlink) then begin
       if (mdlo_inserttoupdate in foptionsmasterlink) and
              (state = dsinsert) then begin
-       detaildataset.modified:= true;
+       tdataset1(detaildataset).setmodified(true); //FPC fixes_2_6 compatibility
+//       detaildataset.modified:= true;
        include(fbstate,bs_inserttoupdate);
        try
         detaildataset.checkbrowsemode;

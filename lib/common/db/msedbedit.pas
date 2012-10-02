@@ -7910,7 +7910,9 @@ begin
   if checkvalue then begin
    if (og_appendempty in fgrid.optionsgrid) and 
                      (dataset.state = dsinsert) then begin
-    dataset.modified:= true; //force append empty row
+    tdataset1(dataset).setmodified(true); //FPC fixes_2_6 compatibility
+                 //force append empty row
+//    dataset.modified:= true; //force append empty row
    end;
    inherited;
   end
