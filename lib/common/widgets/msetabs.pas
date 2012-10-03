@@ -3725,7 +3725,7 @@ begin
     else begin
      state:= state - [ts_invisible]
     end;
-    if not bo1 and widget1.isvisible and (widget1.enabled or 
+    if {not }bo1 and widget1.isvisible and (widget1.enabled or 
                      (csdesigning in widget1.componentstate)) then begin
      state:= state - [ts_invisible];
      setactivepageindex(int1);
