@@ -506,6 +506,7 @@ type
    function started: boolean; //target active, run command applied or attached
    property running: boolean read getrunning; //target running
    function downloading: boolean;
+   function downloaded: boolean;
 
    function threadselect(const aid: integer; out filename: filenamety; 
                                              out line: integer): gdbresultty;
@@ -1353,8 +1354,8 @@ begin
          postsyncerror;
         end;
        end;
-       include(self.fstate,gs_downloading);
-                //restore downloading flag;
+//       include(self.fstate,gs_downloading);
+//                //restore downloading flag;
        if gs_runafterload in self.fstate then begin
         initproginfo;
         dorun;
@@ -4427,6 +4428,11 @@ end;
 function tgdbmi.downloading: boolean;
 begin
  result:= gs_downloading in fstate;
+end;
+
+function tgdbmi.downloaded: boolean;
+begin
+ result:= gs_downloaded in fstate;
 end;
 
 function tgdbmi.getprocessorname: ansistring;

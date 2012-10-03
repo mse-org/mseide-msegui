@@ -942,11 +942,11 @@ begin
    end;
   end;
   gek_done: begin
-   if sender.downloading then begin
+   if sender.downloaded then begin
     downloaded;
     setstattext('Downloaded '+formatfloat('0.00,',stopinfo.totalsent/1024)+'kB',
                      mtk_finished);      
-    sender.abort;
+//    sender.abort;
    end;
   end;
   gek_loaded: begin
@@ -2419,8 +2419,7 @@ begin
  if projectoptions.d.texp.runcommand = '' then begin
   if not projectoptions.d.gdbsimulator then begin
    if startgdbconnection(false) then begin
-    gdb.gdbdownload:= projectoptions.d.gdbdownload and 
-                          (needsdownload or projectoptions.d.downloadalways);
+    gdb.gdbdownload:= projectoptions.d.gdbdownload and needsdownload;
     checkgdberror(gdb.run);
    end;
   end
