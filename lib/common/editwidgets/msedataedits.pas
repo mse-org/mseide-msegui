@@ -1397,10 +1397,13 @@ begin
     if (oe_notnull in optionsedit) and isempty(text) and
                                           nullcheckneeded(nil) then begin
      result:= false;
-     notnullerror(quiet);
-     if fgridintf = nil then begin
-      show;
-      setfocus;
+     try
+      if fgridintf = nil then begin
+       show;
+       setfocus;
+      end;
+     finally
+      notnullerror(quiet);
      end;
      exit;
     end;
