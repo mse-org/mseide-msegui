@@ -168,7 +168,7 @@ end;
 procedure tmsesqlite3dataset.setactive(const value: boolean);
 begin
  if fcontroller.setactive(value) then begin
-  inherited;
+  inherited setactive(value);
  end;
 end;
 
