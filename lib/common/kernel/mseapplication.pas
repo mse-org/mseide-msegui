@@ -53,7 +53,7 @@ type
                  const aclient: tobject; const aexception: exception;
                  var handled: boolean) of object;
 
- actcomponentstatety = (acs_releasing);
+ actcomponentstatety = (acs_releasing,acs_docreatecalled);
  actcomponentstatesty = set of actcomponentstatety;
   
  tactcomponent = class(tmsecomponent,iactivatorclient)

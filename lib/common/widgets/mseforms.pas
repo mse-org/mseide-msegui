@@ -94,7 +94,7 @@ type
                                  {$ifdef mse_with_ifi},iififormlink{$endif})
   private
    foncreate: notifyeventty;
-   fonloaded: notifyeventty;
+//   fonloaded: notifyeventty;
    fondestroyed: notifyeventty;
    foneventloopstart: notifyeventty;
    fondestroy: notifyeventty;
@@ -259,7 +259,7 @@ type
    property icon: tmaskedbitmap read ficon write seticon;
 
    property oncreate: notifyeventty read foncreate write foncreate;
-   property onloaded: notifyeventty read fonloaded write fonloaded;
+//   property onloaded: notifyeventty read fonloaded write fonloaded;
    property oneventloopstart: notifyeventty read foneventloopstart 
                                    write foneventloopstart;
    property ondestroy: notifyeventty read fondestroy write fondestroy;
@@ -1046,9 +1046,9 @@ end;
 
 procedure tcustommseform.doloaded;
 begin
- if canevent(tmethod(fonloaded)) then begin
-  fonloaded(self);
- end;
+// if canevent(tmethod(fonloaded)) then begin
+//  fonloaded(self);
+// end;
  inherited;
 end;
 
