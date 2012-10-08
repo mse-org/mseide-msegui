@@ -3144,7 +3144,12 @@ end;
 procedure tcustomstepframe.execute(const tag: integer; 
                                       const info: mouseeventinfoty);
 begin
- fstepintf.dostep(stepkindty(tag),0,info.shiftstate);
+ if @info = nil then begin
+  fstepintf.dostep(stepkindty(tag),0,[]);
+ end
+ else begin
+  fstepintf.dostep(stepkindty(tag),0,info.shiftstate);
+ end;
 end;
 
 procedure tcustomstepframe.getpaintframe(var frame: framety);
