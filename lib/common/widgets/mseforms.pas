@@ -94,6 +94,7 @@ type
                                  {$ifdef mse_with_ifi},iififormlink{$endif})
   private
    foncreate: notifyeventty;
+   foncreated: notifyeventty;
 //   fonloaded: notifyeventty;
    fondestroyed: notifyeventty;
    foneventloopstart: notifyeventty;
@@ -258,6 +259,7 @@ type
    property icon: tmaskedbitmap read ficon write seticon;
 
    property oncreate: notifyeventty read foncreate write foncreate;
+   property oncreated: notifyeventty read foncreated write foncreated;
 //   property onloaded: notifyeventty read fonloaded write fonloaded;
    property oneventloopstart: notifyeventty read foneventloopstart 
                                    write foneventloopstart;
@@ -324,6 +326,7 @@ type
    property icon;
 
    property oncreate;
+   property oncreated;
    property onloaded;
    property oneventloopstart;
    property ondestroy;
@@ -454,6 +457,7 @@ type
    property icon;
 
    property oncreate;
+   property oncreated;
    property onloaded;
    property oneventloopstart;
    property ondestroy;
@@ -879,6 +883,9 @@ begin
        (foptions*[fo_autoreadstat,fo_delayedreadstat] = 
                                            [fo_autoreadstat]) then begin
   fstatfile.readstat;
+ end;
+ if assigned(foncreated) then begin
+  foncreated(self);
  end;
 end;
 

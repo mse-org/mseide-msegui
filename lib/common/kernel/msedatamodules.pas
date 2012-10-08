@@ -27,6 +27,7 @@ type
   private
    fsize: sizety;
    foncreate: notifyeventty;
+   foncreated: notifyeventty;
    fondestroy: notifyeventty;
    fondestroyed: notifyeventty;
    foptions: datamoduleoptionsty;
@@ -89,6 +90,7 @@ type
    
    property statfile: tstatfile read fstatfile write setstatfile;
    property oncreate: notifyeventty read foncreate write foncreate;
+   property oncreated: notifyeventty read foncreated write foncreated;
    property onloaded: notifyeventty read fonloaded write fonloaded;
    property oneventloopstart: notifyeventty read foneventloopstart 
                                    write foneventloopstart;
@@ -179,6 +181,9 @@ begin
       (foptions*[dmo_autoreadstat,dmo_delayedreadstat] = 
                                                [dmo_autoreadstat]) then begin
   fstatfile.readstat;
+ end;
+ if assigned(foncreated) then begin
+  foncreated(self);
  end;
 end;
 

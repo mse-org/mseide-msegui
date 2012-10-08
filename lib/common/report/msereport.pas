@@ -11,7 +11,8 @@ unit msereport;
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
 interface
 uses
- classes,msegui,msegraphics,msetypes,msewidgets,msegraphutils,mseclasses,
+ classes,mseapplication,msegui,msegraphics,msetypes,msewidgets,msegraphutils,
+ mseclasses,
  msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets,
  msedrawtext,msestrings,mserichstring,msedb,db,msethread,mseobjectpicker,
  msepointer,mseevent,msesplitter,msestatfile,mselookupbuffer,mseformatstr,
@@ -1548,7 +1549,7 @@ type
    fnilstream: boolean;
    foptions: reportoptionsty;
    flastpagecount: integer;
-   foncreate: notifyeventty;
+   fonloaded: notifyeventty;
    fondestroy: notifyeventty;
    fondestroyed: notifyeventty;
    fstatfile: tstatfile;
@@ -1665,18 +1666,22 @@ type
    property onpageafterpaint: reportpagepainteventty read fonpageafterpaint 
                         write fonpageafterpaint;
    property onprogress: notifyeventty read fonprogress write fonprogress;
-   property oncreate: notifyeventty read foncreate write foncreate;
+   property onloadd: notifyeventty read fonloaded write fonloaded;
    property ondestroy: notifyeventty read fondestroy write fondestroy;
    property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
  end;
 
  treport = class(tcustomreport)
   private
-   fonloaded: notifyeventty;
+   foncreate: notifyeventty;
+   foncreated: notifyeventty;
    procedure setstatfile(const avalue: tstatfile);
   protected
    class function getmoduleclassname: string; override;
    class function hasresource: boolean; override;
+   procedure doafterload; override;
+   procedure dooncreate; virtual;
+   procedure readstate(reader: treader); override;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); 
@@ -1702,8 +1707,8 @@ type
    property onpagepaint;
    property onpageafterpaint;
    property onprogress;
-   property oncreate;
-   property onloaded: notifyeventty read fonloaded write fonloaded;
+   property oncreate: notifyeventty read foncreate write foncreate;
+   property oncreated: notifyeventty read foncreated write foncreated;
    property ondestroy;
    property ondestroyed;
  end;
@@ -1720,6 +1725,7 @@ implementation
 uses
  msearrayutils,sysutils,msestreaming,msebits,msereal,math,msesysintf,msesys,
  msedate;
+ 
 type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
@@ -6017,8 +6023,8 @@ end;
 
 procedure tcustomreport.doloaded;
 begin
- if canevent(tmethod(foncreate)) then begin
-  foncreate(self);
+ if canevent(tmethod(fonloaded)) then begin
+  fonloaded(self);
  end;
  inherited;
 end;
@@ -6754,12 +6760,32 @@ begin
  if load and not (csdesigning in componentstate) and
           (cs_ismodule in fmsecomponentstate) then begin
   loadmsemodule(self,treport);
-  if (fstatfile <> nil) and (reo_autoreadstat in foptions) then begin
-   fstatfile.readstat;
-  end;
-  if canevent(tmethod(fonloaded)) then begin
-   fonloaded(self);
-  end;
+ end;
+
+ if not (acs_dooncreatecalled in factstate) then begin
+  dooncreate;
+ end;
+ doafterload;
+end;
+
+procedure treport.doafterload;
+begin
+ inherited;
+// if (fstatfile <> nil) and not (csdesigning in componentstate) and
+//       (foptions*[fo_autoreadstat,fo_delayedreadstat] = 
+//                                           [fo_autoreadstat]) then begin
+//  fstatfile.readstat;
+// end;
+ if assigned(foncreated) then begin
+  foncreated(self);
+ end;
+end;
+
+procedure treport.dooncreate;
+begin
+ include(factstate,acs_dooncreatecalled);
+ if assigned(foncreate) then begin        //csloading possibly set
+  foncreate(self);
  end;
 end;
 
@@ -6776,6 +6802,14 @@ end;
 procedure treport.setstatfile(const avalue: tstatfile);
 begin
  setlinkedvar(avalue,tmsecomponent(fstatfile));
+end;
+
+procedure treport.readstate(reader: treader);
+begin
+ inherited;
+ if not (acs_dooncreatecalled in factstate) then begin
+  dooncreate;
+ end;
 end;
 
 { tcustomrepvaluedisp }
