@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -75,6 +75,7 @@ type
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;
    destructor destroy; override;
+   procedure afterconstruction; override;
    procedure reload;
    function hasparent: boolean; override;               
    function getparentcomponent: tcomponent; override;
@@ -159,6 +160,26 @@ begin
  end;
 end;
 
+procedure tmsedatamodule.afterconstruction;
+begin
+ inherited;
+ if assigned(foncreated) then begin
+  foncreated(self);
+ end;
+end;
+
+procedure tmsedatamodule.beforedestruction;
+begin
+ if (fstatfile <> nil) and (dmo_autowritestat in foptions) and
+                 not (csdesigning in componentstate) then begin
+  fstatfile.writestat;
+ end;
+ inherited;
+ if candestroyevent(tmethod(fondestroy)) then begin
+  fondestroy(self);
+ end;
+end;
+
 procedure tmsedatamodule.reload;
 begin
  name:= '';
@@ -181,9 +202,6 @@ begin
       (foptions*[dmo_autoreadstat,dmo_delayedreadstat] = 
                                                [dmo_autoreadstat]) then begin
   fstatfile.readstat;
- end;
- if assigned(foncreated) then begin
-  foncreated(self);
  end;
 end;
 
@@ -212,18 +230,6 @@ end;
 function tmsedatamodule.hasparent: boolean;
 begin
  result:= getparentcomponent <> nil;
-end;
-
-procedure tmsedatamodule.beforedestruction;
-begin
- if (fstatfile <> nil) and (dmo_autowritestat in foptions) and
-                 not (csdesigning in componentstate) then begin
-  fstatfile.writestat;
- end;
- inherited;
- if candestroyevent(tmethod(fondestroy)) then begin
-  fondestroy(self);
- end;
 end;
 
 procedure tmsedatamodule.getchildren(proc: tgetchildproc; root: tcomponent);

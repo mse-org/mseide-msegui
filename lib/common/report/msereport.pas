@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1686,6 +1686,7 @@ type
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); 
                                      overload; virtual;   
+   procedure afterconstruction; override;
   published    
    property statfile: tstatfile read fstatfile write setstatfile;
    property color;
@@ -6768,6 +6769,14 @@ begin
  doafterload;
 end;
 
+procedure treport.afterconstruction;
+begin
+ inherited;
+ if assigned(foncreated) then begin
+  foncreated(self);
+ end;
+end;
+
 procedure treport.doafterload;
 begin
  inherited;
@@ -6776,9 +6785,6 @@ begin
 //                                           [fo_autoreadstat]) then begin
 //  fstatfile.readstat;
 // end;
- if assigned(foncreated) then begin
-  foncreated(self);
- end;
 end;
 
 procedure treport.dooncreate;

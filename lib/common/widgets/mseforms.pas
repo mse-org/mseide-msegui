@@ -229,6 +229,7 @@ type
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;  virtual;
    destructor destroy; override;
+   procedure afterconstruction; override;
    procedure reload;
    
    procedure insertwidget(const widget: twidget; const apos: pointty); override;
@@ -831,6 +832,14 @@ begin
  inherited; //csdesigningflag is removed
  if not bo1 and candestroyevent(tmethod(fondestroyed)) then begin
   fondestroyed(self);
+ end;
+end;
+
+procedure tcustommseform.afterconstruction;
+begin
+ inherited;
+ if assigned(foncreated) then begin
+  foncreated(self);
  end;
 end;
 
