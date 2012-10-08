@@ -1,5 +1,8 @@
 MSEide+MSEgui breaking changes version history
 
+2012-10-08
+ oncreate always called before onloaded independent of globalloading and inline
+ state.
 2012-09-14
  tcustommseform oncreate <-> onloaded.
  tmsedatamodule oncreate <-> onloaded.

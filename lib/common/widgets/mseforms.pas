@@ -170,7 +170,7 @@ type
    procedure readstate(reader: treader); override;
    procedure defineproperties(filer: tfiler); override;
    procedure dooncreate; virtual;
-   procedure doloaded; override;
+   procedure doafterload; override;
    procedure loaded; override;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
 
@@ -215,7 +215,6 @@ type
    procedure dolayoutchanged(const sender: tdockcontroller); virtual;
    procedure dodockcaptionchanged(const sender: tdockcontroller); virtual;
 
-   procedure doafterload; override;
    procedure updatelayout(const sender: twidget); virtual; 
                                //called from scrollbox.dolayout
    //iificommand
@@ -767,7 +766,6 @@ end;
 
 { tcustommseform }
 
-//constructor tcustommseform.docreate(aowner: tcomponent);
 procedure tcustommseform.docreate(aowner: tcomponent);
 begin
  inherited create(aowner);
@@ -794,21 +792,15 @@ begin
  options:= defaultformoptions;
  docreate(aowner);
  aftercreate;
-// fwidgetrect.cx:= 100;
-// fwidgetrect.cy:= 100;
-// if fscrollbox = nil then begin
-//  fscrollbox:= tformscrollbox.create(self);
-// end;
-// optionswidget:= defaultformwidgetoptions;
+ registerhandlers;
  if load and not (csdesigning in componentstate) and
           (cs_ismodule in fmsecomponentstate) then begin
   loadmsemodule(self,tcustommseform);
-  doafterload;
- end
- else begin
-  registerhandlers;
+ end;
+ if not (acs_dooncreatecalled in factstate) then begin
   dooncreate;
  end;
+ doafterload;
  if (fo_createmodal in foptions) and 
          (componentstate*[csdesigning,csdestroying,csloading] = []) and
                                                            showing then begin
@@ -872,23 +864,93 @@ begin
        {$ifdef FPC}@{$endif}doapplicationactivechanged);
 end;
  
-procedure tcustommseform.reload;
+procedure tcustommseform.dooncreate;
 begin
- name:= '';
- unregisterhandlers;
- reloadmsecomponent(self);
- doafterload;
+ include(factstate,acs_dooncreatecalled);
+ if assigned(foncreate) then begin        //csloading possibly set
+  foncreate(self);
+ end;
 end;
 
 procedure tcustommseform.doafterload;
 begin
- if (fstatfile <> nil) and (fo_autoreadstat in foptions) then begin
-  if not (fo_delayedreadstat in foptions) then begin
-   fstatfile.readstat;
+ inherited;
+ if (fstatfile <> nil) and not (csdesigning in componentstate) and
+       (foptions*[fo_autoreadstat,fo_delayedreadstat] = 
+                                           [fo_autoreadstat]) then begin
+  fstatfile.readstat;
+ end;
+end;
+
+procedure tcustommseform.loaded;
+begin
+ exclude(fscrollbox.fwidgetstate,ws_loadlock);
+ if not (csdesigning in componentstate) then begin
+  if fo_screencentered in foptions then begin
+   window.windowpos:= wp_screencentered;
+  end;
+  if fo_screencenteredvirt in foptions then begin
+   window.windowpos:= wp_screencenteredvirt;
   end;
  end;
- registerhandlers;
- dooncreate;
+ inherited;
+ if fmainmenuwidget <> nil then begin
+  fmainmenuwidget.loaded;
+ end;
+ updateoptions;
+ updatemainmenutemplates;
+ 
+ application.postevent(tobjectevent.create(ek_loaded,ievent(self)){,true});
+                        //to the OS queue
+end;
+
+procedure tcustommseform.readstate(reader: treader);
+var
+ bo1: boolean;
+begin
+ include(fscrollbox.fwidgetstate,ws_loadlock);
+ bo1:= false;
+{$warnings off}
+ with treadercracker(reader) do begin
+{$warnings on}
+  if floaded <> nil then begin
+   if floaded.IndexOf(fscrollbox) < 0 then begin
+    floaded.add(fscrollbox);
+{$warnings off}
+    tcomponentcracker(fscrollbox).FComponentState:=
+     tcomponentcracker(fscrollbox).FComponentState + [csloading];
+{$warnings on}
+   end;
+  end;
+  bo1:= not (csreading in fscrollbox.componentstate);
+  if bo1 then begin
+{$warnings off}
+   tcomponentcracker(fscrollbox).FComponentState:=
+             tcomponentcracker(fscrollbox).FComponentState + [csreading];
+{$warnings on}
+  end;
+ end;
+ inherited;
+ if bo1 then begin
+{$warnings off}
+  exclude(tcomponentcracker(fscrollbox).FComponentState,csreading);
+{$warnings on}
+ end;
+ if not (acs_dooncreatecalled in factstate) then begin
+  dooncreate;
+ end;
+end;
+
+procedure tcustommseform.reload;
+begin
+ name:= '';
+ unregisterhandlers;
+ try
+  reloadmsecomponent(self);
+ finally
+  registerhandlers;
+ end;
+ doafterload;
 end;
 
 {$ifdef mse_with_ifi}
@@ -981,7 +1043,6 @@ function tcustommseform.close(
 begin
  if ownswindow then begin
   result:= window.close(amodalresult);
-//  window.modalresult:= amodalresult;
  end
  else begin
   result:= simulatemodalresult(self,amodalresult);
@@ -1035,45 +1096,6 @@ begin
  inherited;
  fscrollbox.getchildren(proc,root);
  getcompchildren(proc,root);
-end;
-
-procedure tcustommseform.dooncreate;
-begin
- if canevent(tmethod(foncreate)) then begin
-  foncreate(self);
- end;
-end;
-
-procedure tcustommseform.doloaded;
-begin
-// if canevent(tmethod(fonloaded)) then begin
-//  fonloaded(self);
-// end;
- inherited;
-end;
-
-procedure tcustommseform.loaded;
-begin
- exclude(fscrollbox.fwidgetstate,ws_loadlock);
-// if fmainmenuwidget <> nil then begin
-//  fmainmenuwidget.loaded;
-// end;
- if not (csdesigning in componentstate) then begin
-  if fo_screencentered in foptions then begin
-   window.windowpos:= wp_screencentered;
-  end;
-  if fo_screencenteredvirt in foptions then begin
-   window.windowpos:= wp_screencenteredvirt;
-  end;
- end;
- inherited;
- if fmainmenuwidget <> nil then begin
-  fmainmenuwidget.loaded;
- end;
- updateoptions;
- updatemainmenutemplates;
- application.postevent(tobjectevent.create(ek_loaded,ievent(self)){,true});
-                        //to the OS queue
 end;
 
 procedure tcustommseform.setoptionswidget(const avalue: optionswidgetty);
@@ -1505,40 +1527,6 @@ end;
 function tcustommseform.isgroupleader: boolean;
 begin
  result:= (wo_groupleader in foptionswindow) or (fo_main in foptions);
-end;
-
-procedure tcustommseform.ReadState(Reader: TReader);
-var
- bo1: boolean;
-begin
- include(fscrollbox.fwidgetstate,ws_loadlock);
- bo1:= false;
-{$warnings off}
- with treadercracker(reader) do begin
-{$warnings on}
-  if floaded <> nil then begin
-   if floaded.IndexOf(fscrollbox) < 0 then begin
-    floaded.add(fscrollbox);
-{$warnings off}
-    tcomponentcracker(fscrollbox).FComponentState:=
-     tcomponentcracker(fscrollbox).FComponentState + [csloading];
-{$warnings on}
-   end;
-  end;
-  bo1:= not (csreading in fscrollbox.componentstate);
-  if bo1 then begin
-{$warnings off}
-   tcomponentcracker(fscrollbox).FComponentState:=
-             tcomponentcracker(fscrollbox).FComponentState + [csreading];
-{$warnings on}
-  end;
- end;
- inherited;
- if bo1 then begin
-{$warnings off}
-  exclude(tcomponentcracker(fscrollbox).FComponentState,csreading);
-{$warnings on}
- end;
 end;
 
 procedure tcustommseform.insertwidget(const widget: twidget; const apos: pointty);

@@ -82,7 +82,7 @@ type
    compedit: tbutton;
    procedure propsoncheckrowmove(const curindex: Integer; 
                   const newindex: Integer; var accept: Boolean);
-   procedure tmseformcreate(const sender: TObject);
+   procedure createexe(const sender: TObject);
    procedure gridrowsdatachanged(const sender: tcustomgrid;
       const acell: gridcoordty; const count: integer);
    procedure compselectorbeforedropdown(const sender: TObject);
@@ -615,7 +615,7 @@ begin
  end;
 end;
 
-procedure Tobjectinspectorfo.tmseformcreate(const sender: TObject);
+procedure tobjectinspectorfo.createexe(const sender: TObject);
 begin
  props.itemlist.oncreateitem:= {$ifdef FPC}@{$endif}propscreatenode;
  props.itemlist.onitemnotification:= {$ifdef FPC}@{$endif}propnotification;

@@ -83,7 +83,7 @@ type
    addfileact: taction;
    compfiledialog: tfiledialog;
    sel: tdatabutton;
-   procedure createex(const sender: TObject);
+   procedure createexe(const sender: TObject);
    procedure dopastecomponent(const sender: TObject);
    procedure statreadexe(const sender: TObject; const reader: tstatreader);
    procedure statwriteexe(const sender: TObject; const writer: tstatwriter);
@@ -281,7 +281,7 @@ end;
 
 { tcomponentstorefo }
 
-procedure tcomponentstorefo.createex(const sender: TObject);
+procedure tcomponentstorefo.createexe(const sender: TObject);
 begin
 {
  frootnode:= tstoredcomponent.create(true);

@@ -18,7 +18,7 @@ object fadeeditfo: tfadeeditfo
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = formstatfile
   caption = 'Fade edit'
-  onloaded = createev
+  oncreate = createev
   moduleclassname = 'tmseform'
   object posedit: tpickwidget
     optionswidget = [ow_destroywidgets, ow_autoscale]

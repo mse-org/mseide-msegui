@@ -53,15 +53,15 @@ type
                  const aclient: tobject; const aexception: exception;
                  var handled: boolean) of object;
 
- actcomponentstatety = (acs_releasing,acs_docreatecalled);
+ actcomponentstatety = (acs_releasing,acs_dooncreatecalled);
  actcomponentstatesty = set of actcomponentstatety;
   
  tactcomponent = class(tmsecomponent,iactivatorclient)
   private
    factivator: tactivator;
-   fstate: actcomponentstatesty;
    procedure setactivator(const avalue: tactivator);
   protected
+   factstate: actcomponentstatesty;
    fdesignchangedlock: integer;
    procedure designchanged; //for designer notify
    procedure loaded; override;
@@ -590,7 +590,7 @@ end;
 
 procedure tactcomponent.release(const nomodaldefer: boolean = false);
 begin
- if not (acs_releasing in fstate) and 
+ if not (acs_releasing in factstate) and 
                        not (csdestroying in componentstate) then begin
   appinst.postevent(tobjectevent.create(ek_release,ievent(self),
                                                     not nomodaldefer));
@@ -602,13 +602,13 @@ begin
    appinst.postevent(tobjectevent.create(ek_releasedefer,ievent(self)));
   end;
   }
-  include(fstate,acs_releasing);
+  include(factstate,acs_releasing);
  end;
 end;
 
 function tactcomponent.releasing: boolean;
 begin
- result:= acs_releasing in fstate;
+ result:= acs_releasing in factstate;
 end;
 
 procedure tactcomponent.receiveevent(const event: tobjectevent);

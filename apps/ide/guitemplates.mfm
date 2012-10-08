@@ -1,7 +1,7 @@
 object guitemplatesmo: tguitemplatesmo
   bounds_cx = 483
   bounds_cy = 132
-  onloaded = cre
+  oncreate = createexe
   left = 99
   top = 135
   moduleclassname = 'tmsedatamodule'

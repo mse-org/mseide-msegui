@@ -16,7 +16,8 @@ uses
  classes,mseclasses,msetypes,msegraphutils,msestatfile,mseevent,mseapplication;
  
 type
- datamoduleoptionty = (dmo_autoreadstat,dmo_autowritestat,dmo_iconic);
+ datamoduleoptionty = (dmo_autoreadstat,dmo_delayedreadstat,
+                                              dmo_autowritestat,dmo_iconic);
  datamoduleoptionsty = set of datamoduleoptionty;
 const
  defaultdatamoduleoptions = [dmo_autoreadstat,dmo_autowritestat];
@@ -63,6 +64,8 @@ type
    class function hasresource: boolean; override;
    procedure defineproperties(filer: tfiler); override;
    procedure dooncreate; virtual;
+   procedure readstate(reader: treader); override;
+   procedure doafterload; override;
    procedure loaded; override;
    procedure doasyncevent(var atag: integer); override;
    procedure doeventloopstart; virtual;
@@ -134,11 +137,11 @@ begin
  application.registeronterminate({$ifdef FPC}@{$endif}doterminatequery);
  if load and not (csdesigning in componentstate) then begin
   loadmsemodule(self,tmsedatamodule);
-  if (fstatfile <> nil) and (dmo_autoreadstat in foptions) then begin
-   fstatfile.readstat;
-  end;
  end;
- dooncreate;
+ if not (acs_dooncreatecalled in factstate) then begin
+  dooncreate;
+ end;
+ doafterload;
 end;
 
 destructor tmsedatamodule.destroy;
@@ -158,16 +161,41 @@ procedure tmsedatamodule.reload;
 begin
  name:= '';
  reloadmsecomponent(self);
- if (fstatfile <> nil) and (dmo_autoreadstat in foptions) then begin
-  fstatfile.readstat;
- end;
- dooncreate;
+ doafterload;
 end;
 
 procedure tmsedatamodule.dooncreate;
 begin
- if canevent(tmethod(foncreate)) then begin
+ include(factstate,acs_dooncreatecalled);
+ if assigned(foncreate) then begin     //csloading possibly set
   foncreate(self);
+ end;
+end;
+
+procedure tmsedatamodule.doafterload;
+begin
+ inherited;
+ if (fstatfile <> nil) and 
+      (foptions*[dmo_autoreadstat,dmo_delayedreadstat] = 
+                                               [dmo_autoreadstat]) then begin
+  fstatfile.readstat;
+ end;
+end;
+
+procedure tmsedatamodule.loaded;
+begin
+ inherited;
+ if canevent(tmethod(fonloaded)) then begin
+  fonloaded(self);
+ end;
+ application.postevent(tobjectevent.create(ek_loaded,ievent(self)));
+end;
+
+procedure tmsedatamodule.readstate(reader: treader);
+begin
+ inherited;
+ if not (acs_dooncreatecalled in factstate) then begin
+  dooncreate;
  end;
 end;
 
@@ -254,15 +282,6 @@ begin
  filer.defineproperty('size',{$ifdef FPC}@{$endif}readsize,nil,false);
 end;
 
-procedure tmsedatamodule.loaded;
-begin
- inherited;
- application.postevent(tobjectevent.create(ek_loaded,ievent(self)));
- if canevent(tmethod(fonloaded)) then begin
-  fonloaded(self);
- end;
-end;
-
 procedure tmsedatamodule.setstatfile(const avalue: tstatfile);
 begin
  setlinkedvar(avalue,tmsecomponent(fstatfile));
@@ -278,6 +297,11 @@ end;
 
 procedure tmsedatamodule.doeventloopstart;
 begin
+ if (fstatfile <> nil) and not (csdesigning in componentstate) and
+       (foptions*[dmo_autoreadstat,dmo_delayedreadstat] = 
+        [dmo_autoreadstat,dmo_delayedreadstat]) then begin
+  fstatfile.readstat;
+ end;
  if canevent(tmethod(foneventloopstart)) then begin
   foneventloopstart(self);
  end;

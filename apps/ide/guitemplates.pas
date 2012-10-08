@@ -43,7 +43,7 @@ type
    fadecontainer: tfacecomp;
    nullface: tfacecomp;
    sysenv: tsysenvmanager;
-   procedure cre(const sender: TObject);
+   procedure createexe(const sender: TObject);
  end;
  
 function getcommandlinemacros: macroinfoarty;
@@ -101,7 +101,7 @@ begin
 end;
 *)
 
-procedure tguitemplatesmo.cre(const sender: TObject);
+procedure tguitemplatesmo.createexe(const sender: TObject);
 begin
  sysenv.init(sysenvvalues);
  skin.active:= not sysenv.defined[ord(env_ns)];

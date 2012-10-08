@@ -30,7 +30,7 @@ type
    savefiledialog: tfiledialog;
    deletebu: tbutton;
    saveasbu: tbutton;
-   procedure onlo(const sender: TObject);
+   procedure afterstatreadexe(const sender: TObject);
    procedure editnotify(const sender: TObject;
                    var info: editnotificationinfoty);
    procedure setcursorex(const sender: TObject);
@@ -38,6 +38,7 @@ type
                    var amodalresult: modalresultty);
    procedure saveasexe(const sender: TObject);
    procedure deleteexe(const sender: TObject);
+   procedure createexe(const sender: TObject);
   private
    findex: integer;
    fpath: filenamety;
@@ -60,9 +61,8 @@ begin
  inherited create(nil);
 end;
 
-procedure ttemplateeditorfo.onlo(const sender: TObject);
+procedure ttemplateeditorfo.afterstatreadexe(const sender: TObject);
 var
-// int1: integer;
  dir1: filenamety;
 begin
  if savefiledialog.controller.lastdir = '' then begin
@@ -71,6 +71,10 @@ begin
    savefiledialog.controller.lastdir:= dir1;
   end;
  end;
+end;
+
+procedure ttemplateeditorfo.createexe(const sender: TObject);
+begin
  projectoptionstofont(templed.font);
  templgrid.datarowheight:= templed.font.lineheight;
  if (findex >= 0) and (findex <= high(codetemplates.templates)) then begin
@@ -91,6 +95,7 @@ begin
   path:= '';
  end;
 end;
+
 
 procedure ttemplateeditorfo.editnotify(const sender: TObject;
                var info: editnotificationinfoty);

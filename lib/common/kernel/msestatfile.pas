@@ -318,7 +318,7 @@ begin
      if not ttextstream.trycreate(tmsefilestream(stream1),
                                      floadedfile,fm_read) then begin
       floadedfile:= defaultfile(ar1);
-      if canevent(tmethod(fonfilemissing)) then begin
+      if assigned(fonfilemissing) then begin
        fonfilemissing(self,floadedfile,stream1,by1);
        if stream1 <> nil then begin
         floadedfile:= '';

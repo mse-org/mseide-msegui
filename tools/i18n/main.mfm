@@ -105,7 +105,7 @@ object mainfo: tmainfo
     FFFFFF00FFFFFF00FFFFFF00FEFF7F00FEFF7F00FDFF3F00FCFFBF00F8FF1F00
     F4FF2F00C0FF1B0090FF0D00
   }
-  onloaded = tmainfooncreate
+  oncreate = tmainfooncreate
   oneventloopstart = tmainfoonloaded
   ondestroy = tmainfoondestroy
   onclosequery = mainclosequery
