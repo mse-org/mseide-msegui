@@ -895,9 +895,9 @@ begin
                                            [fo_autoreadstat]) then begin
   fstatfile.readstat;
  end;
- if assigned(foncreated) then begin
-  foncreated(self);
- end;
+// if assigned(foncreated) then begin
+//  foncreated(self);
+// end;
 end;
 
 procedure tcustommseform.loaded;
