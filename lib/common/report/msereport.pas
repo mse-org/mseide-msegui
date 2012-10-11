@@ -6783,9 +6783,11 @@ end;
 
 procedure treport.dooncreate;
 begin
- include(factstate,acs_dooncreatecalled);
- if assigned(foncreate) then begin        //csloading possibly set
-  foncreate(self);
+ if not (cs_inheritedloading in msecomponentstate) then begin
+  include(factstate,acs_dooncreatecalled);
+  if assigned(foncreate) then begin        //csloading possibly set
+   foncreate(self);
+  end;
  end;
 end;
 

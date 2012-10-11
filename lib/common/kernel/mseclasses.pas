@@ -323,7 +323,7 @@ type
  end;
 
  msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc,
-                        cs_noload,cs_tmpmodule,
+                        cs_inheritedloading,cs_noload,cs_tmpmodule,
                         cs_subcompref, //subcomponent can be referenced 
                                        //by component properties
                         cs_parentwidgetrect //info for designer, example ttabpage
@@ -2600,6 +2600,7 @@ function initmsecomponent(instance: tmsecomponent; rootancestor: tclass;
 var
  allloaded: boolean;
  ancestorloaded: boolean;
+ loadlevel: integer = 0;
  
  rootancestor1: tclass;
  
@@ -2608,7 +2609,18 @@ var
   po1: pobjectdatainfoty;
  begin
   if (aclass <> rootancestor1) and (aclass <> tmsecomponent) then begin
-   doload(msecomponentclassty(aclass.classparent));
+   if loadlevel > 0 then begin
+    include(instance.fmsecomponentstate,cs_inheritedloading);
+   end;
+   inc(loadlevel);
+   try
+    doload(msecomponentclassty(aclass.classparent));
+   finally
+    dec(loadlevel);
+    if loadlevel = 0 then begin
+     exclude(instance.fmsecomponentstate,cs_inheritedloading);
+    end;
+   end;
    po1:= nil;
    if objectdatalist <> nil then begin
     po1:= objectdatalist.find(aclass,instance.name);
