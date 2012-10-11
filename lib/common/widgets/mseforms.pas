@@ -95,7 +95,7 @@ type
   private
    foncreate: notifyeventty;
    foncreated: notifyeventty;
-//   fonloaded: notifyeventty;
+   fonloaded: notifyeventty;
    fondestroyed: notifyeventty;
    foneventloopstart: notifyeventty;
    fondestroy: notifyeventty;
@@ -173,6 +173,7 @@ type
    procedure dooncreate; virtual;
    procedure doafterload; override;
    procedure loaded; override;
+   procedure autoreadstat;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
 
    function getcaption: msestring;
@@ -261,7 +262,7 @@ type
 
    property oncreate: notifyeventty read foncreate write foncreate;
    property oncreated: notifyeventty read foncreated write foncreated;
-//   property onloaded: notifyeventty read fonloaded write fonloaded;
+   property onloaded: notifyeventty read fonloaded write fonloaded;
    property oneventloopstart: notifyeventty read foneventloopstart 
                                    write foneventloopstart;
    property ondestroy: notifyeventty read fondestroy write fondestroy;
@@ -805,7 +806,10 @@ begin
  if not (acs_dooncreatecalled in factstate) then begin
   dooncreate;
  end;
- doafterload;
+ if not load then begin
+//  autoreadstat;
+  doafterload;
+ end;
  if (fo_createmodal in foptions) and 
          (componentstate*[csdesigning,csdestroying,csloading] = []) and
                                                            showing then begin
@@ -890,14 +894,10 @@ end;
 procedure tcustommseform.doafterload;
 begin
  inherited;
- if (fstatfile <> nil) and not (csdesigning in componentstate) and
-       (foptions*[fo_autoreadstat,fo_delayedreadstat] = 
-                                           [fo_autoreadstat]) then begin
-  fstatfile.readstat;
+ autoreadstat;
+ if canevent(tmethod(fonloaded)) then begin
+  fonloaded(self);
  end;
-// if assigned(foncreated) then begin
-//  foncreated(self);
-// end;
 end;
 
 procedure tcustommseform.loaded;
@@ -917,7 +917,6 @@ begin
  end;
  updateoptions;
  updatemainmenutemplates;
- 
  application.postevent(tobjectevent.create(ek_loaded,ievent(self)){,true});
                         //to the OS queue
 end;
@@ -968,7 +967,7 @@ begin
  finally
   registerhandlers;
  end;
- doafterload;
+// doafterload;
 end;
 
 {$ifdef mse_with_ifi}
@@ -1850,6 +1849,15 @@ end;
 procedure tcustommseform.dodockcaptionchanged(const sender: tdockcontroller);
 begin
  //dummy
+end;
+
+procedure tcustommseform.autoreadstat;
+begin
+ if (fstatfile <> nil) and not (csdesigning in componentstate) and
+       (foptions*[fo_autoreadstat,fo_delayedreadstat] = 
+                                           [fo_autoreadstat]) then begin
+  fstatfile.readstat;
+ end;
 end;
 
 { tmseform }

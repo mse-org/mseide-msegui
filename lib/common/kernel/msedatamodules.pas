@@ -67,6 +67,7 @@ type
    procedure dooncreate; virtual;
    procedure readstate(reader: treader); override;
    procedure doafterload; override;
+   procedure autoreadstat;
    procedure loaded; override;
    procedure doasyncevent(var atag: integer); override;
    procedure doeventloopstart; virtual;
@@ -144,7 +145,10 @@ begin
  if not (acs_dooncreatecalled in factstate) then begin
   dooncreate;
  end;
- doafterload;
+// autoreadstat;
+ if not load then begin
+  doafterload;
+ end;
 end;
 
 destructor tmsedatamodule.destroy;
@@ -184,7 +188,7 @@ procedure tmsedatamodule.reload;
 begin
  name:= '';
  reloadmsecomponent(self);
- doafterload;
+// doafterload;
 end;
 
 procedure tmsedatamodule.dooncreate;
@@ -200,19 +204,24 @@ end;
 procedure tmsedatamodule.doafterload;
 begin
  inherited;
- if (fstatfile <> nil) and 
-      (foptions*[dmo_autoreadstat,dmo_delayedreadstat] = 
-                                               [dmo_autoreadstat]) then begin
-  fstatfile.readstat;
+// if (fstatfile <> nil) and 
+//      (foptions*[dmo_autoreadstat,dmo_delayedreadstat] = 
+//                                               [dmo_autoreadstat]) then begin
+//  fstatfile.readstat;
+// end;
+ autoreadstat;
+ if canevent(tmethod(fonloaded)) then begin
+  fonloaded(self);
  end;
 end;
 
 procedure tmsedatamodule.loaded;
 begin
  inherited;
- if canevent(tmethod(fonloaded)) then begin
-  fonloaded(self);
- end;
+// if canevent(tmethod(fonloaded)) then begin
+//  fonloaded(self);
+// end;
+// autoreadstat;
  application.postevent(tobjectevent.create(ek_loaded,ievent(self)));
 end;
 
@@ -416,6 +425,15 @@ begin
  foptions:= avalue;
  if (dmo_iconic in avalue) xor (dmo_iconic in optionsbefore) then begin
   boundschanged;
+ end;
+end;
+
+procedure tmsedatamodule.autoreadstat;
+begin
+ if (fstatfile <> nil) and not (csdesigning in componentstate) and
+       (foptions*[dmo_autoreadstat,dmo_delayedreadstat] = 
+                                           [dmo_autoreadstat]) then begin
+  fstatfile.readstat;
  end;
 end;
 

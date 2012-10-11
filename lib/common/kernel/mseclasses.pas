@@ -745,6 +745,7 @@ procedure reloadchangedmodules;
 
 procedure msebegingloballoading; //recursive
 procedure mseendgloballoading;   //calls notifygloballoading in level 0
+
 procedure reloadmsecomponent(Instance: tmsecomponent);
 function initmsecomponent(instance: tmsecomponent; rootancestor: tclass;
                             out needsloading: boolean): boolean;
@@ -2574,9 +2575,124 @@ begin
 
 end;
 
+type
+ globalloadinfoty = record
+  modules: msecomponentarty;
+  modulecount: integer;
+ end;
+ globalloadinfoarty = array of globalloadinfoty;
+ 
+ tloadmoduletracker = class(tlinkedobject)
+  private
+   fgloballoadings: globalloadinfoarty;
+   fgloballevel: integer;
+  protected
+   procedure unlink(var ainfo: globalloadinfoty);
+   procedure objectevent(const sender: tobject; const event: objecteventty);
+                                                                       override;
+  public
+   constructor create;
+   procedure moduleloaded(const amodule: tmsecomponent);
+   procedure beginglobal;
+   procedure endglobal;
+   procedure notifyloading;
+ end;
+ 
+{ tloadmoduletracker }
+
+constructor tloadmoduletracker.create;
+begin
+ setlength(fgloballoadings,16);
+end;
+
+procedure tloadmoduletracker.moduleloaded(const amodule: tmsecomponent);
+begin
+ with fgloballoadings[fgloballevel] do begin
+  if length(modules) <= modulecount then begin
+   setlength(modules,modulecount*2+16);
+  end;
+  modules[modulecount]:= amodule;
+  getobjectlinker.link(amodule);
+  inc(modulecount);
+ end;
+end;
+
+procedure tloadmoduletracker.beginglobal;
+begin
+ if length(fgloballoadings) >= fgloballevel then begin
+  setlength(fgloballoadings,fgloballevel*2+16);
+ end;
+ inc(fgloballevel);
+end;
+
+procedure tloadmoduletracker.endglobal;
+begin
+ unlink(fgloballoadings[fgloballevel]);
+ dec(fgloballevel);
+end;
+
+procedure tloadmoduletracker.unlink(var ainfo: globalloadinfoty);
+var
+ comp1: tmsecomponent;
+ int1: integer;
+begin
+ with ainfo do begin
+  for int1:= 0 to modulecount-1 do begin
+   comp1:= modules[int1];
+   if comp1 <> nil then begin
+    modules[int1]:= nil;
+    fobjectlinker.unlink(comp1);
+   end;
+  end;
+  modulecount:= 0;
+ end;
+end;
+
+procedure tloadmoduletracker.objectevent(const sender: tobject;
+                                                 const event: objecteventty);
+var
+ int1,int2: integer;
+begin
+ inherited;
+ if event = oe_destroyed then begin
+  for int1:= 0 to fgloballevel do begin
+   with fgloballoadings[int1] do begin
+    for int2:= 0 to modulecount-1 do begin
+     if modules[int2] = sender then begin
+      modules[int2]:= nil;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tloadmoduletracker.notifyloading;
+var
+ comp1: tmsecomponent;
+ int1: integer;
+begin
+ with fgloballoadings[fgloballevel] do begin
+  try
+   for int1:= modulecount - 1 downto 0 do begin
+    comp1:= modules[int1];
+    if comp1 <> nil then begin
+     modules[int1]:= nil;
+     fobjectlinker.unlink(comp1);
+     comp1.doafterload;
+    end;
+   end;
+  finally
+   unlink(fgloballoadings[fgloballevel]);
+   modulecount:= 0;
+  end;
+ end;
+end;
+
 var
  moduleloadlevel: integer;
  globalloadlevel: integer;
+ loadmoduletracker: tloadmoduletracker;
  
 procedure msebegingloballoading;
 begin
@@ -2592,6 +2708,7 @@ begin
  if globalloadlevel = 0 then begin
   notifygloballoading;
   endgloballoading;
+  loadmoduletracker.notifyloading;
  end;
 end;
 
@@ -2659,6 +2776,7 @@ begin
  allloaded:= true;
  try
   doload(msecomponentclassty(instance.classtype));
+  loadmoduletracker.moduleloaded(instance);
   if finditem(pointerarty(fmodulestoregister),instance) >= 0 then begin
    modules.add(tmsecomponent(instance));
    globalfixupreferences;
@@ -2677,6 +2795,9 @@ begin
    end;
   end;
   removeitem(pointerarty(fmodulestoregister),instance);
+ end;
+ if (moduleloadlevel = 0) and (globalloadlevel = 0) then begin
+  loadmoduletracker.notifyloading;
  end;
  result:= allloaded and ancestorloaded;
 end;
@@ -5462,6 +5583,7 @@ begin
 end;
 
 initialization
+ loadmoduletracker:= tloadmoduletracker.create;
 {$ifdef FPC}
  registerinitcomponenthandler(tmsecomponent,@initmsecomponent1);
 {$endif}
@@ -5473,5 +5595,6 @@ finalization
 // unregisterinitcomponenthandler(tcomponent,@initmsecomponent);
 {$endif}
  unregisterfindglobalcomponentproc({$ifdef FPC}@{$endif}findmodulebyname);
+ loadmoduletracker.free;
  freeandnil(objectdatalist);
 end.

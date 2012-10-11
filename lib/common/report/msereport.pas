@@ -1518,7 +1518,7 @@ type
 
  reportoptionty = (reo_autorelease,reo_prepass,reo_nodisablecontrols,
                    reo_nothread,reo_waitdialog,
-                      reo_autoreadstat,reo_autowritestat);
+                   reo_autoreadstat,reo_autowritestat,reo_delayedreadstat);
  reportoptionsty = set of reportoptionty;
 
 const
@@ -1549,10 +1549,7 @@ type
    fnilstream: boolean;
    foptions: reportoptionsty;
    flastpagecount: integer;
-   fonloaded: notifyeventty;
-   fondestroy: notifyeventty;
-   fondestroyed: notifyeventty;
-   fstatfile: tstatfile;
+//   fonloaded: notifyeventty;
    fonpreamble: preambleeventty;
    fdialogtext: msestring;
    fdialogcaption: msestring;
@@ -1604,11 +1601,10 @@ type
    procedure setfont(const avalue: trepfont);
    function getfont: trepfont;
    function getfontclass: widgetfontclassty; override;
-   procedure doloaded; override;
+//   procedure doloaded; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure beforedestruction; override;
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    procedure render(const acanvas: tcanvas;
                         const onafterrender: reporteventty = nil); overload;
@@ -1666,15 +1662,17 @@ type
    property onpageafterpaint: reportpagepainteventty read fonpageafterpaint 
                         write fonpageafterpaint;
    property onprogress: notifyeventty read fonprogress write fonprogress;
-   property onloadd: notifyeventty read fonloaded write fonloaded;
-   property ondestroy: notifyeventty read fondestroy write fondestroy;
-   property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
+//   property onloaded: notifyeventty read fonloaded write fonloaded;
  end;
 
  treport = class(tcustomreport)
   private
+   fstatfile: tstatfile;
    foncreate: notifyeventty;
    foncreated: notifyeventty;
+   fonloaded: notifyeventty;
+   fondestroy: notifyeventty;
+   fondestroyed: notifyeventty;
    procedure setstatfile(const avalue: tstatfile);
   protected
    class function getmoduleclassname: string; override;
@@ -1682,10 +1680,14 @@ type
    procedure doafterload; override;
    procedure dooncreate; virtual;
    procedure readstate(reader: treader); override;
+   procedure autoreadstat;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); 
                                      overload; virtual;   
+   destructor destroy; override;
+   procedure beforedestruction; override;
+   procedure reload;
    procedure afterconstruction; override;
   published    
    property statfile: tstatfile read fstatfile write setstatfile;
@@ -1710,8 +1712,9 @@ type
    property onprogress;
    property oncreate: notifyeventty read foncreate write foncreate;
    property oncreated: notifyeventty read foncreated write foncreated;
-   property ondestroy;
-   property ondestroyed;
+   property onloaded: notifyeventty read fonloaded write fonloaded;
+   property ondestroy: notifyeventty read fondestroy write fondestroy;
+   property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
  end;
 
  reportclassty = class of treport;
@@ -5990,44 +5993,18 @@ begin
 end;
 
 destructor tcustomreport.destroy;
-var
- bo1: boolean;
 begin
- bo1:= csdesigning in componentstate;
  if fthread <> nil then begin
   fthread.terminate;
   application.waitforthread(fthread);
  end;
  fthread.free;
- inherited; //csdesigningflag is removed
- if not bo1 and candestroyevent(tmethod(fondestroyed)) then begin
-  fondestroyed(self);
- end;
+ inherited;
 end;
 
 class function tcustomreport.hasresource: boolean;
 begin
  result:= true;
-end;
-
-procedure tcustomreport.beforedestruction;
-begin
- if (fstatfile <> nil) and (reo_autowritestat in foptions) and
-                 not (csdesigning in componentstate) then begin
-  fstatfile.writestat;
- end;
- inherited;
- if candestroyevent(tmethod(fondestroy)) then begin
-  fondestroy(self);
- end;
-end;
-
-procedure tcustomreport.doloaded;
-begin
- if canevent(tmethod(fonloaded)) then begin
-  fonloaded(self);
- end;
- inherited;
 end;
 
 procedure tcustomreport.unregisterchildwidget(const child: twidget);
@@ -6766,7 +6743,37 @@ begin
  if not (acs_dooncreatecalled in factstate) then begin
   dooncreate;
  end;
- doafterload;
+ if not load then begin
+  doafterload;
+ end;
+end;
+
+destructor treport.destroy;
+var
+ bo1: boolean;
+begin
+ bo1:= csdesigning in componentstate;
+ inherited; //csdesigningflag is removed
+ if not bo1 and candestroyevent(tmethod(fondestroyed)) then begin
+  fondestroyed(self);
+ end;
+end;
+
+procedure treport.setstatfile(const avalue: tstatfile);
+begin
+ setlinkedvar(avalue,tmsecomponent(fstatfile));
+end;
+
+procedure treport.beforedestruction;
+begin
+ if (fstatfile <> nil) and (reo_autowritestat in foptions) and
+                 not (csdesigning in componentstate) then begin
+  fstatfile.writestat;
+ end;
+ inherited;
+ if candestroyevent(tmethod(fondestroy)) then begin
+  fondestroy(self);
+ end;
 end;
 
 procedure treport.afterconstruction;
@@ -6780,11 +6787,10 @@ end;
 procedure treport.doafterload;
 begin
  inherited;
-// if (fstatfile <> nil) and not (csdesigning in componentstate) and
-//       (foptions*[fo_autoreadstat,fo_delayedreadstat] = 
-//                                           [fo_autoreadstat]) then begin
-//  fstatfile.readstat;
-// end;
+ autoreadstat;
+ if canevent(tmethod(fonloaded)) then begin
+  fonloaded(self);
+ end;
 end;
 
 procedure treport.dooncreate;
@@ -6807,16 +6813,26 @@ begin
  result:= self <> treport;
 end;
 
-procedure treport.setstatfile(const avalue: tstatfile);
-begin
- setlinkedvar(avalue,tmsecomponent(fstatfile));
-end;
-
 procedure treport.readstate(reader: treader);
 begin
  inherited;
  if not (acs_dooncreatecalled in factstate) then begin
   dooncreate;
+ end;
+end;
+
+procedure treport.reload;
+begin
+ name:= '';
+ reloadmsecomponent(self);
+end;
+
+procedure treport.autoreadstat;
+begin
+ if (fstatfile <> nil) and not (csdesigning in componentstate) and
+       (foptions*[reo_autoreadstat,reo_delayedreadstat] = 
+                                           [reo_autoreadstat]) then begin
+  fstatfile.readstat;
  end;
 end;
 

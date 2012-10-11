@@ -1,5 +1,9 @@
 MSEide+MSEgui breaking changes version history
 
+2012-10-11
+ onloaded called after loaded() of the children and self.loaded().
+ oncreate called after children have been created but before loaded().
+ oncreated called in afterconstruction().
 2012-10-08
  oncreate always called before onloaded independent of globalloading and inline
  state.
