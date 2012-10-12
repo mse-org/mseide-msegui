@@ -147,10 +147,12 @@ function hasfileext(const path: filenamety): boolean;
 function checkfileext(const path: filenamety; const extensions: array of filenamety): boolean;
 function replacefileext(const path,newext: filenamety): filenamety;
 
-function tomsefilepath(const path: filenamety): filenamety;
-procedure tomsefilepath1(var path: filenamety);
-function tosysfilepath(const path: filenamety): filenamety;
-procedure tosysfilepath1(var path: filenamety);
+function tomsefilepath(const path: filenamety;
+                                const quoted: boolean = false): filenamety;
+procedure tomsefilepath1(var path: filenamety; const quoted: boolean = false);
+function tosysfilepath(const path: filenamety;
+                                const quoted: boolean = false): filenamety;
+procedure tosysfilepath1(var path: filenamety; const quoted: boolean = false);
 
 function searchfile(const filename: filenamety; dir: boolean = false): filenamety; overload;
            //returns rootpath if file exists, '' otherwise
@@ -1193,7 +1195,7 @@ begin
  result:= (path = slashchar) or (path = '\') or (path = '"/"') or (path = '"\"');
 end;
 
-procedure tomsefilepath1(var path: filenamety);
+procedure tomsefilepath1(var path: filenamety; const quoted: boolean = false);
 
  procedure doname(var path: filenamety);
  var
@@ -1225,10 +1227,13 @@ begin //tomsefilepath1
  end
  else begin
   doname(path);
+  if quoted then begin
+   path:= quotefilename(path);
+  end;
  end;
 end;
 
-procedure tosysfilepath1(var path: filenamety);
+procedure tosysfilepath1(var path: filenamety; const quoted: boolean = false);
 var
  ar1: filenamearty;
  int1: integer;
@@ -1242,20 +1247,25 @@ begin
   path:= quotefilename(ar1);
  end
  else begin
+  if quoted then begin
+   path:= quotefilename(path);
+  end;
   syserror(sys_tosysfilepath(path));
  end;
 end;
 
-function tomsefilepath(const path: filenamety): filenamety;
+function tomsefilepath(const path: filenamety;
+                                  const quoted: boolean = false): filenamety;
 begin
  result:= path;
- tomsefilepath1(result);
+ tomsefilepath1(result,quoted);
 end;
 
-function tosysfilepath(const path: filenamety): filenamety;
+function tosysfilepath(const path: filenamety;
+                                  const quoted: boolean = false): filenamety;
 begin
  result:= path;
- tosysfilepath1(result);
+ tosysfilepath1(result,quoted);
 end;
 
 procedure syncpathdelim(const source: filenamety; var dest: filenamety;
