@@ -11557,6 +11557,12 @@ begin
     end;
    end;
   end;
+  if result = nil then begin
+   result:= container;
+   if result = self then begin
+    result:= nil;
+   end;
+  end;
  end;
 end;
 

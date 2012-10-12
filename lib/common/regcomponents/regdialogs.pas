@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2010 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2012 by Martin Schreiber
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ interface
 implementation
 uses
  Classes,msefiledialog,msedesignintf,regdialogs_bmp,msecolordialog,
- msememodialog,msedialog;
+ msememodialog,msedialog,mseguirttistat;
 
 procedure Register;
 begin
@@ -33,7 +33,7 @@ begin
                      tdialogstringedit,tdialogintegeredit,
                      tdialogrealedit,tdialogdatetimeedit,
                      tmemodialogedit,
-                     tmemodialoghistoryedit]);
+                     tmemodialoghistoryedit,tguirttistat]);
  registercomponenttabhints(['Dialog'],['User dialogs']);
 end;
 

@@ -47,7 +47,7 @@ uses
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,msewidgets,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart,
  msepolygon,msepickwidget,msetraywidget,msedockpanelform,msechartedit,mseedit,
- msebarcode,mseguirttistat
+ msebarcode
  {$ifndef mse_no_opengl}
   {$ifdef FPC}
      ,mseopenglwidget
@@ -173,7 +173,7 @@ begin
      {$endif}
     {$endif}
    {$endif}
-  ,ttraywidget,tdockpanelformcontroller,tguirttistat
+  ,ttraywidget,tdockpanelformcontroller
   ]);
  registercomponenttabhints(['Widget'],
          ['Display widgets, edit widgets which can''t be placed into twidgetgrid']);

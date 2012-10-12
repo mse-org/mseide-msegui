@@ -2684,7 +2684,6 @@ begin
    end;
   finally
    unlink(fgloballoadings[fgloballevel]);
-   modulecount:= 0;
   end;
  end;
 end;

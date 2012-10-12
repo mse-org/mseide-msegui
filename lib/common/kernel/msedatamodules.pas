@@ -39,6 +39,7 @@ type
    fonterminatequery: terminatequeryeventty;
    fonterminated: notifyeventty;
 //   procedure writesize(writer: twriter);
+   fonidle: idleeventty;
    procedure readsize(reader: treader);
    {
    procedure readsize_x(reader: treader);
@@ -71,6 +72,7 @@ type
    procedure loaded; override;
    procedure doasyncevent(var atag: integer); override;
    procedure doeventloopstart; virtual;
+   procedure doidle(var again: boolean); virtual;
    procedure receiveevent(const event: tobjectevent); override;
   public
    constructor create(aowner: tcomponent); overload; override;
@@ -104,6 +106,7 @@ type
                  write fonterminatequery;
    property onterminated: notifyeventty read fonterminated 
                  write fonterminated;
+   property onidle: idleeventty read fonidle write fonidle;
  end;
  datamoduleclassty = class of tmsedatamodule;
  msedatamodulearty = array of tmsedatamodule;
@@ -139,6 +142,7 @@ begin
  inherited create(aowner);
  application.registeronterminated({$ifdef FPC}@{$endif}doterminated);
  application.registeronterminate({$ifdef FPC}@{$endif}doterminatequery);
+ application.registeronidle({$ifdef FPC}@{$endif}doidle);
  if load and not (csdesigning in componentstate) then begin
   loadmsemodule(self,tmsedatamodule);
  end;
@@ -157,6 +161,7 @@ var
 begin
  application.unregisteronterminated({$ifdef FPC}@{$endif}doterminated);
  application.unregisteronterminate({$ifdef FPC}@{$endif}doterminatequery);
+ application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
  bo1:= csdesigning in componentstate;
  inherited; //csdesigningflag is removed
  if not bo1 and candestroyevent(tmethod(fondestroyed)) then begin
@@ -326,6 +331,13 @@ begin
  end;
  if canevent(tmethod(foneventloopstart)) then begin
   foneventloopstart(self);
+ end;
+end;
+
+procedure tmsedatamodule.doidle(var again: boolean);
+begin
+ if canevent(tmethod(fonidle)) then begin
+  fonidle(again);
  end;
 end;
 
