@@ -2775,8 +2775,8 @@ begin
  needsloading:= false;
  allloaded:= true;
  try
-  doload(msecomponentclassty(instance.classtype));
   loadmoduletracker.moduleloaded(instance);
+  doload(msecomponentclassty(instance.classtype));
   if finditem(pointerarty(fmodulestoregister),instance) >= 0 then begin
    modules.add(tmsecomponent(instance));
    globalfixupreferences;
