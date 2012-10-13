@@ -443,6 +443,16 @@ procedure wordatindex(const value: msestring; const index: integer;
 function wordatindex(const value: msestring; const index: integer;
             const delimchars: msestring;
             const nodelimstrings:  array of msestring): msestring; overload;
+function checkkeyword(const aname: string; const anames; //stringaty
+                                        const ahigh: integer): cardinal;
+          //scans from 1 to ahigh, 0 -> unknown
+function checkkeyword(const aname: msestring; const anames; //msestringaty
+                                        const ahigh: integer): cardinal;
+function checkkeyword(const aname: pchar; const anames; //stringaty
+                                        const ahigh: integer): cardinal;
+          //scans from 1 to ahigh, 0 -> unknown
+function checkkeyword(const aname: pmsechar; const anames; //msestringaty
+                                        const ahigh: integer): cardinal;
 
 function quotestring(value: string; quotechar: char): string; overload;
 function quotestring(value: msestring; quotechar: msechar): msestring; overload;
@@ -3012,6 +3022,78 @@ var
 begin
  wordatindex(value,index,po1,po2,delimchars,nodelimstrings);
  result:= copy(msestring(po1),1,po2-po1);
+end;
+
+function checkkeyword(const aname: string; const anames;
+                                        const ahigh: integer): cardinal;
+var
+ int1: integer;
+ po1: pchar;
+begin
+ result:= 0;
+ po1:= pchar(pointer(aname));
+ if po1 <> nil then begin
+  for int1:= 1 to ahigh do begin
+   if strcomp(po1,pchar(pointer(stringaty(anames)[int1]))) = 0 then begin
+    result:= int1;
+    break;
+   end;
+  end;
+ end;
+end;
+
+function checkkeyword(const aname: msestring; const anames;
+                                        const ahigh: integer): cardinal;
+var
+ int1: integer;
+ po1: pmsechar;
+begin
+ result:= 0;
+ po1:= pmsechar(pointer(aname));
+ if po1 <> nil then begin
+  for int1:= 1 to ahigh do begin
+   if msestrcomp(po1,pmsechar(pointer(stringaty(anames)[int1]))) = 0 then begin
+    result:= int1;
+    break;
+   end;
+  end;
+ end;
+end;
+
+function checkkeyword(const aname: pchar; const anames;
+                                        const ahigh: integer): cardinal;
+var
+ int1: integer;
+ po1: pchar;
+begin
+ result:= 0;
+ po1:= aname;
+ if po1 <> nil then begin
+  for int1:= 1 to ahigh do begin
+   if strcomp(po1,pchar(pointer(stringaty(anames)[int1]))) = 0 then begin
+    result:= int1;
+    break;
+   end;
+  end;
+ end;
+end;
+
+function checkkeyword(const aname: pmsechar; const anames;
+                                        const ahigh: integer): cardinal;
+var
+ int1: integer;
+ po1: pmsechar;
+begin
+ result:= 0;
+ po1:= aname;
+ if po1 <> nil then begin
+  for int1:= 1 to ahigh do begin
+   if msestrcomp(po1,pmsechar(pointer(stringaty(anames)[int1]))) = 0 then begin
+    result:= int1;
+    break;
+   end;
+  end;
+ end;
 end;
 
 function msestringsearch(const substring,s: msestring; start: integer;

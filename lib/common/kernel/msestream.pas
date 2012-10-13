@@ -255,8 +255,11 @@ type
    function encode(const value: msestring): string;
    function decode(const value: string): msestring;
   public
-//   function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
-//   function Read(var Buffer; Count: Longint): Longint; override;
+   class function trycreate(out ainstance: ttextstream;
+             const afilename: filenamety;
+             const aopenmode: fileopenmodety = fm_read;
+             const accessmode: fileaccessmodesty = [];
+             const rights: filerightsty = defaultfilerights): boolean;
    procedure return;    //setzt filepointer auf letzte readln position
 
    procedure writestr(const value: string); //no encoding
@@ -2150,6 +2153,16 @@ begin
   readstrln(str1);
   system.writeln(dest,str1);
  end;
+end;
+
+class function ttextstream.trycreate(out ainstance: ttextstream;
+               const afilename: filenamety;
+               const aopenmode: fileopenmodety = fm_read;
+               const accessmode: fileaccessmodesty = [];
+               const rights: filerightsty = defaultfilerights): boolean;
+begin
+ result:= inherited trycreate(tmsefilestream(ainstance),afilename,aopenmode,
+                               accessmode,rights);
 end;
 
 { ttextdatastream }
