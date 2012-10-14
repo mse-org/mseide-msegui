@@ -32,7 +32,7 @@ uses
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
  msemenus,sysutils,mseglob,mseedit,db,msedialog,msescrollbar,msememodialog,
- msecodetemplates,mseifiglob,mseapplication;
+ msecodetemplates,mseifiglob,mseapplication,msestream;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -374,6 +374,9 @@ type
    fclosemessages: boolean;
    fusercolors: colorarty;
    fusercolorcomment: msestringarty;
+   fformatmacronames: msestringarty;
+   fformatmacrovalues: msestringarty;
+   
    fsettingsfile: filenamety;
    fsettingseditor: boolean;
    fsettingsdebugger: boolean;
@@ -423,6 +426,10 @@ type
    property usercolors: colorarty read fusercolors write fusercolors;
    property usercolorcomment: msestringarty read fusercolorcomment 
                                                  write fusercolorcomment;
+   property formatmacronames: msestringarty read fformatmacronames 
+                                                       write fformatmacronames;
+   property formatmacrovalues: msestringarty read fformatmacrovalues
+                                                   write fformatmacrovalues;
    property settingsfile: filenamety read fsettingsfile write fsettingsfile;
    property settingseditor: boolean read fsettingseditor write fsettingseditor;
    property settingsdebugger: boolean read fsettingsdebugger 
@@ -740,6 +747,10 @@ type
    tsplitter10: tsplitter;
    gdbserverstartonce: tbooleanedit;
    showtabs: tbooleanedit;
+   ttabpage21: ttabpage;
+   formatmacrogrid: twidgetgrid;
+   formatmacronames: tstringedit;
+   formatmacrovalues: tstringedit;
    procedure acttiveselectondataentered(const sender: TObject);
    procedure colonshowhint(const sender: tdatacol; const arow: Integer; 
                       var info: hintinfoty);
@@ -816,7 +827,7 @@ uses
  objectinspector,msebits,msefileutils,msedesignintf,guitemplates,
  watchform,stackform,main,projecttreeform,findinfileform,
  selecteditpageform,programparametersform,sourceupdate,
- msedesigner,panelform,watchpointsform,commandlineform,msestream,
+ msedesigner,panelform,watchpointsform,commandlineform,
  componentpaletteform,mserichstring,msesettings,formdesigner,
  msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
  componentstore,cpuform,msesysutils,msecomptree,msefont,typinfo,mserttistat
@@ -1223,6 +1234,14 @@ begin
    end;
    setcolormapvalue(cl_user + longword(int1),o.usercolors[int1]);
   end;
+  clearformatmacros;
+  for int1:= 0 to high(o.formatmacronames) do begin
+   if int1 > high(o.formatmacrovalues) then begin
+    break;
+   end;
+   formatmacros.add(o.formatmacronames[int1],o.formatmacrovalues[int1]);
+  end;
+  
   codetemplates.scan(o.texp.codetemplatedirs);
  end;
  li.free;
@@ -1295,12 +1314,6 @@ begin
   sigsettings:= defaultsigsettings;
   ignoreexceptionclasses:= nil;
 
-//  befcommand:= nil;
-//  aftcommand:= nil;
-//  befcommandon:= nil;
-//  aftcommandon:= nil;
-
-//   makeoptions:= nil;
   additem(fmakeoptions,'-l -Mobjfpc -Sh -Fcutf8');
   additem(fmakeoptions,'-gl');
   additem(fmakeoptions,'-B');
@@ -1313,22 +1326,7 @@ begin
                      //all but make 4
   fmakeoptionson[2]:= bits[1] or bits[5]; //build + make 4
   fmakeoptionson[3]:= bits[5]; //make 4
-//  unitdirson:= nil;
-//  macroon:= nil;
-//  macronames:= nil;
- // macrovalues:= nil;
-//  mainfile:= '';
-//  targetfile:= '';
-//  messageoutputfile:= '';
   defaultmake:= 1; //make
-//  sourcedirs:= nil;
-//  additem(fsourcedirs,'./');
-//  additem(fsourcedirs,'${MSELIBDIR}*/');
-//  additem(fsourcedirs,'${MSELIBDIR}kernel/$TARGET/');
-//  sourcedirs:= reversearray(sourcedirs);
-//  defines:= nil;
-//  defineson:= nil;
-//  unitdirs:= nil;
   additem(funitdirs,'${MSELIBDIR}*/');
   additem(funitdirs,'${MSELIBDIR}kernel/');
   additem(funitdirs,'${MSELIBDIR}kernel/$TARGET/');
@@ -1454,12 +1452,6 @@ begin
   additem(ffilemasknames,'All Files');
   additem(ffilemasks,'*');
 
-//  scriptbeforecopy:= '';
-//  scriptaftercopy:= '';  
-//  newprojectfiles:= nil;
-//  newprojectfilesdest:= nil;
-//  expandprojectfilemacros:= nil;
-//  loadprojectfile:= nil;
  end;
  with projectoptions,d,t do begin
   debugcommand:= '${DEBUGGER}';

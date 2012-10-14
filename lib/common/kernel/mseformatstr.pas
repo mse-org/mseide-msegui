@@ -43,7 +43,12 @@ type
     LongDayNames: TWeekNameArraymse;
     TwoDigitYearCenturyWindow: Word;
   end;
-  
+
+ tformatmacrolist = class(tmacrolist)
+  public
+   procedure addmac(const aname: msestring; const avalue: msestring);
+ end;
+
 var
  DefaultFormatSettingsmse : TFormatSettingsmse = (
    CurrencyFormat: 1;
@@ -359,7 +364,8 @@ function decodebase64(const atext: string): string;
 function TryStrToQWord(const S: string; out Value: QWord): Boolean;
 {$endif}
 
-function formatmacros: tmacrolist;
+function formatmacros: tformatmacrolist;
+procedure clearformatmacros;
 
 var
  defaultformatsettingsdot: tformatsettings; //mit '.' als dezitrenner
@@ -424,12 +430,13 @@ uses
  sysconst,msedate,msereal,Math,msefloattostr,msearrayutils,msesys;
 
 var
- fformatmacros: tmacrolist;
+ fformatmacros: tformatmacrolist;
 
-function formatmacros: tmacrolist;
+function formatmacros: tformatmacrolist;
 begin
  if fformatmacros = nil then begin
-  fformatmacros:= tmacrolist.create([mao_curlybraceonly,mao_removeunknown]);
+  fformatmacros:= tformatmacrolist.create(
+                                   [mao_curlybraceonly,mao_removeunknown]);
  end;
  result:= fformatmacros;
 end;
@@ -4243,6 +4250,19 @@ begin
  end;
 end;
 
+{ tformatmacrolist }
+
+procedure tformatmacrolist.addmac(const aname: msestring;
+               const avalue: msestring);
+begin
+ add([aname],[avalue]);
+end;
+
+procedure clearformatmacros;
+begin
+ freeandnil(fformatmacros);
+end;
+
 initialization
 {$ifndef FPC}
  getlocaleformatsettings(0,defaultformatsettingsdot);
@@ -4251,5 +4271,5 @@ initialization
 {$endif}
  defaultformatsettingsdot.DecimalSeparator:= '.';
 finalization
- freeandnil(fformatmacros);
+ clearformatmacros;
 end.

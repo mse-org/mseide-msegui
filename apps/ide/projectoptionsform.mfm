@@ -813,7 +813,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_fibottom, frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 1
-            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 679
@@ -1096,7 +1095,6 @@ object projectoptionsfo: tprojectoptionsfo
         frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
         frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
         taborder = 4
-        visible = True
         bounds_x = 1
         bounds_y = 19
         bounds_cx = 679
@@ -1180,7 +1178,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 4
-            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 679
@@ -2843,7 +2840,6 @@ object projectoptionsfo: tprojectoptionsfo
             face.localprops = [fal_frameimageoffset]
             face.dummy = 0
             taborder = 2
-            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 679
@@ -4387,6 +4383,80 @@ object projectoptionsfo: tprojectoptionsfo
           end
         end
       end
+      object ttabpage21: ttabpage
+        frame.zoomwidthstep = 1
+        frame.zoomheightstep = 1
+        taborder = 10
+        bounds_x = 1
+        bounds_y = 19
+        bounds_cx = 679
+        bounds_cy = 518
+        anchors = [an_left, an_top, an_right, an_bottom]
+        caption = 'F&ormat  Macros'
+        tabhint = 'Used by formatfloatmse() and formatdatetimemse()'
+        object formatmacrogrid: twidgetgrid
+          bounds_x = 0
+          bounds_y = 0
+          bounds_cx = 679
+          bounds_cy = 518
+          anchors = []
+          optionsgrid = [og_focuscellonenter, og_autofirstrow, og_autoappend, og_savestate, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+          fixrows.count = 1
+          fixrows.items = <          
+            item
+              height = 16
+              captions.count = 2
+              captions.items = <              
+                item
+                  caption = 'Name'
+                end              
+                item
+                  caption = 'Value'
+                end>
+            end>
+          datacols.count = 2
+          datacols.options = [co_savestate, co_mousescrollrow]
+          datacols.items = <          
+            item
+              width = 129
+              options = [co_proportional, co_savestate, co_mousescrollrow]
+              widgetname = 'formatmacronames'
+              dataclass = tgridmsestringdatalist
+            end          
+            item
+              width = 544
+              options = [co_fill, co_savestate, co_mousescrollrow]
+              widgetname = 'formatmacrovalues'
+              dataclass = tgridmsestringdatalist
+            end>
+          datarowheight = 16
+          reffontheight = 14
+          object formatmacronames: tstringedit
+            optionswidget1 = [ow1_fontglyphheight]
+            optionsskin = [osk_framebuttononly]
+            taborder = 1
+            visible = False
+            bounds_x = 0
+            bounds_y = 0
+            bounds_cx = 129
+            bounds_cy = 16
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+            reffontheight = 14
+          end
+          object formatmacrovalues: tstringedit
+            optionswidget1 = [ow1_fontglyphheight]
+            optionsskin = [osk_framebuttononly]
+            taborder = 2
+            visible = False
+            bounds_x = 130
+            bounds_y = 0
+            bounds_cx = 544
+            bounds_cy = 16
+            optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_savestate, oe_checkvaluepaststatread]
+            reffontheight = 14
+          end
+        end
+      end
       object ttabpage2: ttabpage
         frame.zoomwidthstep = 1
         frame.zoomheightstep = 1
@@ -4423,7 +4493,6 @@ object projectoptionsfo: tprojectoptionsfo
             frame.localprops = [frl_frameimageleft, frl_frameimagetop, frl_frameimageright, frl_frameimagebottom, frl_frameimageoffset, frl_frameimageoffsetmouse, frl_frameimageoffsetclicked, frl_frameimageoffsetactive, frl_frameimageoffsetactivemouse, frl_frameimageoffsetactiveclicked]
             frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive, frl1_framefaceoffsetactivemouse, frl1_framefaceoffsetactiveclicked]
             taborder = 3
-            visible = True
             bounds_x = 0
             bounds_y = 18
             bounds_cx = 679
