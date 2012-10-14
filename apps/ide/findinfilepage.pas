@@ -204,7 +204,7 @@ procedure tfindinfilepagefo.threadonexecute(const sender: tthreadcomp);
       with filelist[int1] do begin
        try
         if ttextstream.trycreate(
-                 tmsefilestream(stream1),dir+'/'+name,fm_read) then begin
+                 stream1,dir+'/'+name,fm_read) then begin
          try
           searchstream(stream1,stream1.filename);
          finally
