@@ -412,6 +412,7 @@ type
    procedure writeorder(const writer: tstatwriter);
    function readorder(const reader: tstatreader): integerarty;
    procedure dostatread(const reader: tstatreader);
+   procedure clearorder; //ident order = index order
    function newident: integer;
    property idents: integerarty read getidents;
    property identmap: integerarty read getidentmap;
@@ -2058,6 +2059,19 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+procedure tindexpersistentarrayprop.clearorder;
+var
+ int1: integer;
+begin
+ fident:= count;
+ exclude(fstate,aps_needsindexing);
+ for int1:= 0 to fident - 1 do begin
+  with tindexpersistent(fitems[int1]) do begin
+   fident:= int1;
+  end;  
  end;
 end;
 

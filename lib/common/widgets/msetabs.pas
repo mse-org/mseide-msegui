@@ -790,6 +790,7 @@ type
    function indexof(const page: twidget): integer;
    function count: integer;
    procedure clear;
+   procedure clearorder; //ident order = indexorder
    procedure nextpage(newindex: integer; down: boolean);
    procedure changepage(step: integer);
    procedure movepage(const curindex,newindex: integer);
@@ -5011,6 +5012,11 @@ begin
  if fupdating = 0 then begin
   updatesize(nil);
  end;
+end;
+
+procedure tcustomtabwidget.clearorder;
+begin
+ ftabs.tabs.clearorder;
 end;
 
 { tpagetab }
