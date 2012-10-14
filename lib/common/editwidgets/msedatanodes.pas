@@ -3089,10 +3089,10 @@ procedure trecordfielditem.setvaluetext(var avalue: msestring);
 begin
  if fintf <> nil then begin
   fintf.setfieldtext(ffieldindex,avalue);
- end
- else begin
-  inherited;
  end;
+// else begin
+ inherited;
+// end;
 end;
 
 { ttreenode }
