@@ -3,7 +3,7 @@ unit guitemplates;
 interface
 uses
  mseglob,mseapplication,mseclasses,msedatamodules,msegui,mseskin,msestrings,
- msesysenv;
+ msesysenv,msemacros;
 
 type
  envvarty = (env_macrodef,env_vargroup,env_np,env_ns,

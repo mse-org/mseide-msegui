@@ -13,7 +13,7 @@ unit mseformatstr;     //stringwandelroutinen 31.5.99 mse
 
 interface
 uses
- Classes, msetypes,msestrings,SysUtils{,msesys};
+ Classes, msetypes,msestrings,SysUtils,msemacros,mseglob;
 
 type
  dateconvertty = (dc_none,dc_tolocal,dc_toutc);
@@ -77,18 +77,20 @@ const
  nullen = '000000000000000000000000000000';
  msenullen = msestring('000000000000000000000000000000');
  msespace = msestring('                              ');
- defaultbase64linelength = 76;
  
 type
  numbasety = (nb_bin,nb_oct,nb_dec,nb_hex);
-
-function formatdatetimemse(const formatstr: msestring; const datetime: tdatetime;
+{$warnings off}
+       // ${THEMACRO} checks formatmacros, macro name case sensitive
+{$warnings on}
+      
+function formatdatetimemse(formatstr: msestring; const datetime: tdatetime;
             const formatsettings: tformatsettingsmse): msestring; overload;
 //            'I' = ISO date, 'II' ISO datetime, 'III' ISO datetime + ms
 function formatdatetimemse(const formatstr: msestring;
                           const datetime: tdatetime): msestring; overload;
 
-function formatfloatmse(value: double; const format: msestring; 
+function formatfloatmse(value: double; format: msestring; 
                          const formatsettings: tformatsettingsmse;
                          const dot: boolean = false): msestring; overload;
    //dot = true -> always '.' as decimal separator
@@ -357,20 +359,10 @@ function decodebase64(const atext: string): string;
 function TryStrToQWord(const S: string; out Value: QWord): Boolean;
 {$endif}
 
-//{$ifdef FPC}
-// {$undef withformatsettings}
-//{$else}
-// {$if rtlversion > noformatsettings}
-//  {$define withformatsettings}
-// {$ifend}
-//{$endif}
+function formatmacros: tmacrolist;
 
-//{$define withformatsettings}
-
-//{$ifdef withformatsettings}
 var
  defaultformatsettingsdot: tformatsettings; //mit '.' als dezitrenner
-//{$endif}
 
 const
  charhex: array[0..15] of char =
@@ -430,7 +422,25 @@ implementation
 
 uses
  sysconst,msedate,msereal,Math,msefloattostr,msearrayutils,msesys;
- 
+
+var
+ fformatmacros: tmacrolist;
+
+function formatmacros: tmacrolist;
+begin
+ if fformatmacros = nil then begin
+  fformatmacros:= tmacrolist.create([mao_curlybraceonly,mao_removeunknown]);
+ end;
+ result:= fformatmacros;
+end;
+
+procedure checkformatmacros(var format: msestring);
+begin
+ if (fformatmacros <> nil) and (findchar(format,'{') > 0) then begin
+  fformatmacros.expandmacros(format);
+ end;
+end;
+
 {$ifndef FPC}
 function trystrtoqword(const s: string; out value: qword): boolean;
 begin
@@ -448,8 +458,9 @@ begin
 end;
 {$endif}
 
-//copied from FPC dati.inc todo: use threadsave formatsettings
-function formatdatetimemse(const formatstr: msestring; const datetime: tdatetime;
+//copied from FPC dati.inc
+
+function formatdatetimemse(formatstr: msestring; const datetime: tdatetime;
                   const formatsettings: tformatsettingsmse): msestring;
 var
    ResultLen: integer;
@@ -663,6 +674,7 @@ var
    end ;
 
 begin
+ checkformatmacros(formatstr);
   DecodeDateFully(DateTime, Year, Month, Day, DayOfWeek);
   DecodeTime(DateTime, Hour, Minute, Second, MilliSecond);
   ResultLen := 0;
@@ -2458,7 +2470,7 @@ begin
  result:= byte(((inp div 10) shl 4) + (inp mod 10))
 end;
 
-function formatfloatmse(value: double; const format: msestring;
+function formatfloatmse(value: double; format: msestring;
                               const formatsettings: tformatsettingsmse;
                               const dot: boolean = false): msestring;
 
@@ -2528,6 +2540,7 @@ var
  po3,po4: pmsechar;
 
 begin
+ checkformatmacros(format);
  result:= '';
  with formatsettings do begin
   if dot then begin
@@ -4230,7 +4243,6 @@ begin
  end;
 end;
 
-//{$ifdef withformatsettings}
 initialization
 {$ifndef FPC}
  getlocaleformatsettings(0,defaultformatsettingsdot);
@@ -4238,5 +4250,6 @@ initialization
  defaultformatsettingsdot:= sysutils.defaultformatsettings;
 {$endif}
  defaultformatsettingsdot.DecimalSeparator:= '.';
-//{$endif}
+finalization
+ freeandnil(fformatmacros);
 end.

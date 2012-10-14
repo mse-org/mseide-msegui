@@ -55,7 +55,7 @@ for param entry or if the template name can not be found.
 
 interface
 uses
- msestrings,msehash,msesysenv,msetypes,mseforms;
+ msestrings,msehash,msemacros,msetypes,mseforms;
  
 type
  templateinfoty = record

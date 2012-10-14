@@ -19,7 +19,7 @@ unit msesettings;
 interface
 uses
  mseglob,mseguiglob,msegui,mseclasses,mseforms,msestat,msestatfile,
- msesimplewidgets,msefiledialog,msestrings,msesysenv,msedataedits,msebitmap,
+ msesimplewidgets,msefiledialog,msestrings,msemacros,msedataedits,msebitmap,
  msedatanodes,mseedit,mseevent,msegraphutils,msegrids,mselistbrowser,msemenus,
  msesys,msetypes,msegraphics,msewidgets,mseactions;
 

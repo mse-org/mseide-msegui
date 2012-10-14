@@ -288,7 +288,7 @@ function isformfile(const aname: filenamety): boolean;
 implementation
 uses
  sysutils,projecttreeform_mfm,msefileutils,main,sourceform,msewidgets,
- msedatalist,msedrag,sourceupdate,msesysenv,projectoptionsform;
+ msedatalist,msedrag,sourceupdate,msemacros,projectoptionsform;
 const
  unitscaption = 'Pascal Units';
  cmodulescaption = 'C Modules';

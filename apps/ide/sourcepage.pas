@@ -166,7 +166,7 @@ uses
  sourceupdate,msefiledialog,mseintegerenter,msedesigner,
  projectoptionsform,msesys,make,actionsmodule,msegraphics,sourcehintform,
  mseedit,msedrawtext,msebits,msearrayutils,msestream,msedesignintf,
- msesysutils,msedesignparser,msesyntaxpainter,msesysenv,msecodetemplates;
+ msesysutils,msedesignparser,msesyntaxpainter,msemacros,msecodetemplates;
 
 const
  pascaldelims = msestring(' :;+-*/(){},=<>' + c_linefeed + c_return + c_tab);

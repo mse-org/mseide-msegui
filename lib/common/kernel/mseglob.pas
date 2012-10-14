@@ -14,6 +14,8 @@ uses
  classes,mseerr,msetypes;
 const
  invalidaxis = -bigint;
+ defaultbase64linelength = 76; //todo: find better place
+ 
 type
  shortcutty = type word;
  shortcutarty = array of shortcutty;
