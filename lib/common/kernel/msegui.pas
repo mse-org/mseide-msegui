@@ -9378,7 +9378,7 @@ begin
   if (widget1 = nil) or (not widget1.canfocus) then begin
    widget1:= defaultfocuschild;
   end;
-  if widget1 <> nil then begin
+  if (widget1 <> nil) and widget1.canfocus then begin
    widget1.setfocus(aactivate);
    result:= checkdescendent(window.ffocusedwidget);
   end;
