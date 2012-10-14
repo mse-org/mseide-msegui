@@ -2252,6 +2252,7 @@ type
 
    property rowcount: integer read frowcount write setrowcount default 0;
    function rowhigh: integer; //rowcount - 1
+   function datarowhigh: integer; //without auto appended empty row
    property rowcountmax: integer read frowcountmax
                          write setrowcountmax default bigint;
    function visiblerow(const arow: integer): integer;
@@ -9787,6 +9788,14 @@ end;
 function tcustomgrid.rowhigh: integer;
 begin
  result:= frowcount - 1;
+end;
+
+function tcustomgrid.datarowhigh: integer; //without auto appended empty row
+begin
+ result:= frowcount - 1;
+ if isautoappend then begin
+  dec(result);
+ end;
 end;
 
 procedure tcustomgrid.setrowcount(Value: integer);

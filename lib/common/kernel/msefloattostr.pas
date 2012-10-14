@@ -30,7 +30,7 @@ type
    3: (qwo0: qword);
  end;
 
-function doubletostring(const value: double; const precision: integer;
+function doubletostring(const value: double; const precision: integer = 0;
       const mode: floatstringmodety = fsm_default;
       const decimalsep: msechar = '.';
       const thousandsep: msechar = #0): msestring;
@@ -578,7 +578,7 @@ begin
  end;
 end;
 
-function doubletostring(const value: double; const precision: integer;
+function doubletostring(const value: double; const precision: integer = 0;
       const mode: floatstringmodety = fsm_default;
       const decimalsep: msechar = '.'; const thousandsep: msechar = #0): msestring;
 var
