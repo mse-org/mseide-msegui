@@ -458,6 +458,8 @@ type
    property oncreateitem: createlistitemeventty read getoncreateitem 
                                                     write setoncreateitem;
    property onstatreaditem;
+   property onstatwrite;                        
+   property onstatread;
  end;
 
  itemindexeventty = procedure(const sender: tobject; const aindex: integer;
@@ -564,7 +566,6 @@ type
    procedure beginedit;
    procedure endedit;
    property activerow: integer read factiverow;
-//   property filtertext: msestring read ffiltertext write setfiltertext;
   published
    property itemlist: titemeditlist read getitemlist 
                                        write setitemlist stored false;
@@ -599,11 +600,7 @@ type
    function getframe: tdropdownbuttonframe;
    procedure setframe(const Value: tdropdownbuttonframe);
    function getdropdowncontrollerclass: dropdownlistcontrollerclassty; virtual;
-//   procedure dokeydown(var info: keyeventinfoty); override;
-//   procedure internalcreateframe; override;
-
-//   procedure editnotification(var info: editnotificationinfoty); override;
-  //idropdown
+    //idropdown
    procedure dobeforedropdown; virtual;
    procedure doafterclosedropdown; virtual;
    function getdropdownitems: tdropdowncols;
@@ -687,6 +684,8 @@ type
    procedure setitemclass(const avalue: treelistedititemclassty);
    function getexpandedstate: expandedinfoarty;
    procedure setexpandedstate(const avalue: expandedinfoarty);
+   function getonstatwriteitem: statwritetreeitemeventty;
+   procedure setonstatwriteitem(const avalue: statwritetreeitemeventty);
   protected
    procedure freedata(var data); override;
    procedure docreateobject(var instance: tobject); override;
@@ -696,7 +695,10 @@ type
    function compare(const l,r): integer; override;
    procedure statreaditem(const reader: tstatreader;
                     var aitem: tlistitem); override;
-   procedure readstate(const reader; const acount: integer); override;
+   procedure statwriteitem(const writer: tstatwriter;
+                    const aitem: tlistitem); override;
+   procedure readstate(const reader; const acount: integer;
+                                        const aname: msestring); override;
    procedure writestate(const writer; const name: msestring); override;
    procedure beforedragevent(var ainfo: draginfoty; const arow: integer;
                                var processed: boolean);
@@ -764,8 +766,12 @@ type
    property colorline: colorty read fcolorline write setcolorline default cl_dkgray;
    property oncreateitem: createtreelistitemeventty read getoncreateitem
                       write setoncreateitem;
+   property onstatwriteitem: statwritetreeitemeventty read getonstatwriteitem
+                      write setonstatwriteitem;
    property onstatreaditem: statreadtreeitemeventty read getonstatreaditem
                       write setonstatreaditem;
+   property onstatwrite;                        
+   property onstatread;
    property ondragbegin: treeitemdragbegineventty read fondragbegin 
                                           write fondragbegin;
    property ondragover: treeitemdragovereventty read fondragover
@@ -3616,6 +3622,16 @@ begin
  onstatreadtreeitem:= avalue;
 end;
 
+function ttreeitemeditlist.getonstatwriteitem: statwritetreeitemeventty;
+begin
+ result:= onstatwritetreeitem;
+end;
+
+procedure ttreeitemeditlist.setonstatwriteitem(const avalue: statwritetreeitemeventty);
+begin
+ onstatwritetreeitem:= avalue;
+end;
+
 procedure ttreeitemeditlist.createitem(out item: tlistitem);
 begin
  item:= treelistedititemclassty(fitemclass).create(self);
@@ -3704,6 +3720,7 @@ var
  int1,int2: integer;
  po1: ^ttreelistitem1;
 begin
+ dostatwrite(tstatwriter(writer),name);
  with tstatwriter(writer) do begin
   po1:= datapo;
   int2:= 0;
@@ -3713,7 +3730,6 @@ begin
    end;
    inc(po1);
   end;
-//  writeinteger('value',int2);
   writeinteger(name,int2);
   po1:= datapo;
   for int1:= 0 to count - 1 do begin
@@ -3727,7 +3743,8 @@ begin
  end;
 end;
 
-procedure ttreeitemeditlist.readstate(const reader; const acount: integer);
+procedure ttreeitemeditlist.readstate(const reader; const acount: integer;
+                                        const aname: msestring);
 type
  expandedinfoty = record
   item: ttreelistitem;
@@ -3739,8 +3756,8 @@ var
  po1: ^ttreelistitem1;
  expanded: array of expandedinfoty;
 begin
+ dostatread(tstatreader(reader),aname);
  with tstatreader(reader) do begin
- // int1:= reader.readinteger('value',-1,0);
   int1:= acount;
   if int1 >= 0 then begin
    beginupdate;
@@ -4303,6 +4320,12 @@ procedure ttreeitemeditlist.statreaditem(const reader: tstatreader;
                  var aitem: tlistitem);
 begin
  statreadtreeitem(reader,nil,ttreelistitem(aitem));
+end;
+
+procedure ttreeitemeditlist.statwriteitem(const writer: tstatwriter;
+               const aitem: tlistitem);
+begin
+ statwritetreeitem(writer,ttreelistitem(aitem));
 end;
 
 function istreeitemdrag(const ainfo: draginfoty): boolean;

@@ -13,9 +13,9 @@ unit msewidgets;
 
 interface
 uses
- classes,msegui,mseguiglob,msetypes,msestrings,msegraphutils,msegraphics,mseevent,
- msescrollbar,msemenus,mserichstring,msedrawtext,mseglob,mseact,mseshapes,
- mseclasses,msebitmap,msetimer;
+ classes,msegui,mseguiglob,msetypes,msestrings,msegraphutils,msegraphics,
+ mseevent,msescrollbar,msemenus,mserichstring,msedrawtext,mseglob,mseact,
+ mseshapes,mseclasses,msebitmap,msetimer;
 
 type
 
@@ -1240,7 +1240,8 @@ procedure showmessage1(const atext: msestring; const caption: msestring);
             //for ps
 procedure showerror(const atext: msestring; const caption: msestring = 'ERROR';
                      const minwidth: integer = 0;
-                     const exttext: msestring = '');
+                     const exttext: msestring = ''); 
+                            //no wait if not in main thread                     
 function askok(const atext: msestring; const caption: msestring = '';
                      const defaultbutton: modalresultty = mr_ok;  
                      const minwidth: integer = 0): boolean;
@@ -1275,8 +1276,8 @@ procedure buttonoptionstoshapestate(avalue: buttonoptionsty;
 implementation
 
 uses
- msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets,mseactions,
- msepointer,msestreaming;
+ msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets,
+ mseactions,msepointer,msestreaming;
 
 const
  captionmargin = 1; //distance focusrect to caption in tcaptionframe
@@ -1838,11 +1839,49 @@ begin
  showmessage(atext,caption);
 end;
 
+type
+ tshowerrormessageevent = class(texecuteevent)
+  private
+   ftext: msestring;
+   fcaption: msestring;
+   fminwidth: integer;
+   fexttext: msestring;
+  protected
+   procedure execute; override;
+  public
+   constructor create(const text: msestring; const caption: msestring;
+              const minwidth: integer; const exttext: msestring);
+ end;
+ 
+{ tshowerrormessageevent }
+
+constructor tshowerrormessageevent.create(const text: msestring;
+               const caption: msestring; const minwidth: integer;
+               const exttext: msestring);
+begin
+ ftext:= text;
+ fcaption:= caption;
+ fminwidth:= minwidth;
+ fexttext:= exttext;
+ inherited create;
+ application.postevent(self);
+end;
+
+procedure tshowerrormessageevent.execute;
+begin
+ showmessage(ftext,fcaption,fminwidth,fexttext);
+end;
+
 procedure showerror(const atext: msestring; const caption: msestring = 'ERROR';
                     const minwidth: integer = 0;
                     const exttext: msestring = '');
 begin
- showmessage(atext,caption,minwidth,exttext);
+ if not application.ismainthread then begin
+  tshowerrormessageevent.create(atext,caption,minwidth,exttext);
+ end
+ else begin
+  showmessage(atext,caption,minwidth,exttext);
+ end;
 end;
 
 function askok(const atext: msestring; const caption: msestring = '';

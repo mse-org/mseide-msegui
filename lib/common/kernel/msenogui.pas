@@ -129,8 +129,8 @@ begin
      ek_terminate: begin
       terminated:= true;
      end;
-     ek_synchronize: begin
-      tsynchronizeevent(event1).deliver;
+     ek_asyncexec: begin
+      texecuteevent(event1).deliver;
      end;
      else begin
       if event1 is tobjectevent then begin

@@ -15835,8 +15835,8 @@ begin       //eventloop
          processkeyevent(tkeyevent(event));
         end;
        end;
-       ek_synchronize: begin
-        tsynchronizeevent(event).deliver;
+       ek_asyncexec: begin
+        texecuteevent(event).deliver;
        end;
        else begin
         if event is tobjectevent then begin

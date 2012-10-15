@@ -129,7 +129,8 @@ type
    function checkaction(aaction: nodeactionty): boolean;
    procedure actionnotification(var ainfo: nodeactioninfoty); virtual;
    function getactimagenr: integer; virtual;
-   procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
+   procedure objectevent(const sender: tobject;
+                                      const event: objecteventty); virtual;
    procedure setowner(const aowner: tcustomitemlist); virtual;
    function compare(const r: tlistitem;
                           const acasesensitive: boolean): integer; virtual;
@@ -140,9 +141,9 @@ type
    constructor createassign(const aowner: tcustomitemlist; 
                                    const asource: tlistitem); overload;
    destructor destroy; override;
-   class procedure calcitemlayout(const asize: sizety; const ainnerframe: framety;
-                           const list: tcustomitemlist;
-                              var info: listitemlayoutinfoty); virtual;
+   class procedure calcitemlayout(const asize: sizety;
+                     const ainnerframe: framety; const list: tcustomitemlist;
+                                       var info: listitemlayoutinfoty); virtual;
 
    procedure assign(const source: tlistitem); overload; virtual;
    procedure beginupdate;
@@ -197,7 +198,8 @@ type
  treelistitemclassty = class of ttreelistitem;
  checktreelistitemprocty = procedure(const sender: ttreelistitem;
                               var delete: boolean) of object;
- treelistitemcomparefuncty = function(const l,r: ttreelistitem): integer of object;
+ treelistitemcomparefuncty = function(
+                                 const l,r: ttreelistitem): integer of object;
 
  ttreelistitem = class(tlistitem)
   private
@@ -226,11 +228,13 @@ type
    procedure checkindex(const aindex: integer);
    procedure settreelevel(const value: integer);
    procedure countchange(const atreeheightbefore: integer);
-   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure objectevent(const sender: tobject;
+                                     const event: objecteventty); override;
    function createsubnode: ttreelistitem; virtual;
    procedure swap(const a,b: integer);
    procedure move(const source,dest: integer);
-   procedure statreadsubnode(const reader: tstatreader; var anode: ttreelistitem); virtual;
+   procedure statreadsubnode(const reader: tstatreader;
+                                            var anode: ttreelistitem); virtual;
    procedure internalexpandall;
    procedure internalcollapseall;
    procedure internalgetnodes(var aresult: treelistitemarty; var acount: integer;
@@ -362,13 +366,28 @@ type
  itemliststatesty = set of itemliststatety;
  statreaditemeventty = procedure(const sender: tobject; const reader: tstatreader;
                           var aitem: tlistitem) of object;
- statreadtreeitemeventty = procedure(const sender: tobject; const reader: tstatreader;
+ statreadtreeitemeventty = procedure(const sender: tobject;
+                          const reader: tstatreader;
                           var aitem: ttreelistitem) of object;
+ statwriteitemeventty = procedure(const sender: tobject;
+                  const writer: tstatwriter; const aitem: tlistitem) of object;
+ statwritetreeitemeventty = procedure(const sender: tobject;
+             const writer: tstatwriter; const aitem: ttreelistitem) of object;
 
+ statreaditemlisteventty = procedure(const sender: tcustomitemlist;
+                          const areader: tstatreader;
+                                          const aname: msestring) of object;
+ statwriteitemlisteventty = procedure(const sender: tcustomitemlist;
+                          const areader: tstatwriter;
+                                          const aname: msestring) of object;
  tcustomitemlist = class(tobjectdatalist,iobjectlink)
   private
    fonstatreaditem: statreaditemeventty;
    fonstatreadtreeitem: statreadtreeitemeventty;
+   fonstatwriteitem: statwriteitemeventty;
+   fonstatwritetreeitem: statwritetreeitemeventty;
+   fonstatwrite: statwriteitemlisteventty;
+   fonstatread: statreaditemlisteventty;
    procedure setimnr_base(const Value: integer);
    procedure setimnr_expanded(const Value: integer);
    procedure setimnr_selected(const Value: integer);
@@ -414,9 +433,18 @@ type
                     var aitem: tlistitem); virtual;
    procedure statreadtreeitem(const reader: tstatreader; const parent: ttreelistitem;
                     var aitem: ttreelistitem); virtual;
+   procedure statwriteitem(const writer: tstatwriter;
+                    const aitem: tlistitem); virtual;
+   procedure statwritetreeitem(const writer: tstatwriter;
+                    const aitem: ttreelistitem); virtual;
 
+   procedure dostatread(const reader: tstatreader; 
+                                        const name: msestring); virtual;
+   procedure dostatwrite(const writer: tstatwriter;
+                                        const name: msestring); virtual;
    procedure writestate(const writer; const name: msestring); override;
-   procedure readstate(const reader; const acount: integer); override;
+   procedure readstate(const reader; const acount: integer;
+                                          const name: msestring); override;
 
   public
    constructor create; overload; override;
@@ -473,6 +501,15 @@ type
                             write fonstatreaditem;
    property onstatreadtreeitem: statreadtreeitemeventty 
                             read fonstatreadtreeitem write fonstatreadtreeitem;
+   property onstatwriteitem: statwriteitemeventty read fonstatwriteitem
+                            write fonstatwriteitem;
+   property onstatwritetreeitem: statwritetreeitemeventty 
+                           read fonstatwritetreeitem write fonstatwritetreeitem;
+
+   property onstatwrite: statwriteitemlisteventty read fonstatwrite 
+                                write fonstatwrite; //called before items
+   property onstatread: statreaditemlisteventty read fonstatread
+                                write fonstatread; //called before items
  end;
 
  ttreenode = class;
@@ -1413,55 +1450,46 @@ end;
 procedure tcustomitemlist.statreaditem(const reader: tstatreader;
                               var aitem: tlistitem);
 begin
+ if assigned(fonstatreaditem) then begin
+  fonstatreaditem(self,reader,aitem);
+ end;
  if aitem = nil then begin
-  if assigned(fonstatreaditem) then begin
-   fonstatreaditem(self,reader,aitem);
+  createitem(aitem);
+ end;
+end;
+
+procedure tcustomitemlist.statreadtreeitem(const reader: tstatreader;
+                   const parent: ttreelistitem; var aitem: ttreelistitem);
+begin
+ if assigned(fonstatreadtreeitem) then begin
+  fonstatreadtreeitem(self,reader,aitem);
+ end;
+ if aitem = nil then begin
+  if parent <> nil then begin
+   aitem:= parent.createsubnode;
   end
   else begin
-   createitem(aitem);
+   createitem(tlistitem(aitem));
   end;
  end;
 end;
 
-procedure tcustomitemlist.statreadtreeitem(const reader: tstatreader; const parent: ttreelistitem;
-                    var aitem: ttreelistitem);
+procedure tcustomitemlist.statwriteitem(const writer: tstatwriter;
+               const aitem: tlistitem);
 begin
- if aitem = nil then begin
-  if assigned(fonstatreadtreeitem) then begin
-   fonstatreadtreeitem(self,reader,aitem);
-  end
-  else begin
-   if parent <> nil then begin
-    aitem:= parent.createsubnode;
-   end
-   else begin
-    createitem(tlistitem(aitem));
-   end;
-  end;
+ if assigned(fonstatwriteitem) then begin
+  fonstatwriteitem(self,writer,aitem);
  end;
 end;
-{
-procedure tcustomitemlist.link(const source,dest: iobjectlink; valuepo: pointer = nil;
-                    ainterfacetype: pointer = nil; once: boolean = false);
+
+procedure tcustomitemlist.statwritetreeitem(const writer: tstatwriter;
+               const aitem: ttreelistitem);
 begin
- getobjectlinker.link(source,dest,valuepo,ainterfacetype,once);
+ if assigned(fonstatwritetreeitem) then begin
+  fonstatwritetreeitem(self,writer,aitem);
+ end;
 end;
 
-procedure tcustomitemlist.unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
-begin
- getobjectlinker.unlink(source,dest,valuepo);
-end;
-
-procedure tcustomitemlist.objevent(const sender: iobjectlink; const event: objecteventty);
-begin
- getobjectlinker.objevent(sender,event);
-end;
-
-function tcustomitemlist.getinstance: tobject;
-begin
- result:= self;
-end;
-}
 function tcustomitemlist.nodezone(const point: pointty): cellzonety;
 begin
  result:= cz_default;
@@ -1624,22 +1652,30 @@ end;
 procedure tcustomitemlist.writestate(const writer; const name: msestring);
 var
  int1: integer;
+ po1: ppointeraty;
+ item1: tlistitem;
 begin
+ dostatwrite(tstatwriter(writer),name);
+ po1:= datapo;
  with tstatwriter(writer) do begin
   writeinteger(name,count);
   for int1:= 0 to count - 1 do begin
    beginlist;
-   items[int1].dostatwrite(tstatwriter(writer));
+   item1:= tlistitem(po1^[int1]);
+   statwriteitem(tstatwriter(writer),item1);
+   item1.dostatwrite(tstatwriter(writer));
    endlist;
   end;
  end;
 end;
 
-procedure tcustomitemlist.readstate(const reader; const acount: integer);
+procedure tcustomitemlist.readstate(const reader; const acount: integer;
+                                                     const name: msestring);
 var
  int1: integer;
  item1: tlistitem;
 begin
+ dostatread(tstatreader(reader),name);
  with tstatreader(reader) do begin
   int1:= acount;
   if int1 >= 0 then begin
@@ -1710,6 +1746,22 @@ end;
 function tcustomitemlist.layoutinfopo: plistitemlayoutinfoty;
 begin
  result:= fintf.getlayoutinfo(nil);
+end;
+
+procedure tcustomitemlist.dostatread(const reader: tstatreader; 
+                                                     const name: msestring);
+begin
+ if assigned(fonstatread) then begin
+  fonstatread(self,reader,name);
+ end;
+end;
+
+procedure tcustomitemlist.dostatwrite(const writer: tstatwriter; 
+                                                    const name: msestring);
+begin
+ if assigned(fonstatwrite) then begin
+  fonstatwrite(self,writer,name);
+ end;
 end;
 
 function tlistitem.gettop: boolean;
@@ -2973,7 +3025,8 @@ begin
  inherited;
 end;
 
-procedure ttreelistitem.statreadsubnode(const reader: tstatreader; var anode: ttreelistitem);
+procedure ttreelistitem.statreadsubnode(const reader: tstatreader;
+                                                var anode: ttreelistitem);
 begin
  if fowner <> nil then begin
   fowner.statreadtreeitem(reader,self,anode);

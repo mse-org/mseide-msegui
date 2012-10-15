@@ -91,11 +91,13 @@ type
    foptionsdock: optionsdockty;
    foptionsgrip: gripoptionsty;
    fcaption: msestring;
+   fstatfileclients: tstatfilearrayprop;
    procedure updatestat(const filer: tstatfiler);
    procedure setmenu(const avalue: tcustommenu);
    procedure checkstatfile(const avalue: tstatfile; const ref: tstatfile);
    procedure setstatfile(const avalue: tstatfile);
    procedure setstatfileclient(const avalue: tstatfile);
+   procedure setstatfileclients(const avalue: tstatfilearrayprop);
   protected
     //istatfile
    procedure dostatread(const reader: tstatreader); virtual;
@@ -112,8 +114,11 @@ type
    property menu: tcustommenu read fmenu write setmenu;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property statfileclients: tstatfilearrayprop read fstatfileclients
+                   write setstatfileclients; //called before statfileclient
    property statfileclient: tstatfile read fstatfileclient 
-                                                     write setstatfileclient;
+                         write setstatfileclient; //last called
+                                                     
    property menunamepath: string read fmenunamepath write fmenunamepath;
                       //delimiter = '.'
    property caption: msestring read fcaption write fcaption;
@@ -163,6 +168,7 @@ begin
  foptionsgrip:= defaultdockpanelgripoptions;
 // fcaption:= 'Panel';
  fpanellist:= tpointerlist.create;
+ fstatfileclients:= tstatfilearrayprop.create;
  inherited;
 end;
 
@@ -170,6 +176,7 @@ destructor tdockpanelformcontroller.destroy;
 begin
  inherited;
  freeandnil(fpanellist);
+ fstatfileclients.free;
 end;
 
 procedure tdockpanelformcontroller.updatestat(const filer: tstatfiler);
@@ -193,6 +200,15 @@ begin
    try
     newpanel(ar1[int1]);
    except
+   end;
+  end;
+ end;
+ with fstatfileclients do begin
+  for int1:= 0 to count - 1 do begin
+   with items[int1] do begin
+    if statfile <> nil then begin
+     statfile.updatestat('client_'+inttostr(int1),filer);
+    end;
    end;
   end;
  end;
@@ -332,6 +348,11 @@ begin
    inc(po1);
   end;
  end;
+end;
+
+procedure tdockpanelformcontroller.setstatfileclients(const avalue: tstatfilearrayprop);
+begin
+ fstatfileclients.assign(avalue);
 end;
 
 { tdockpanelformmenuitem }

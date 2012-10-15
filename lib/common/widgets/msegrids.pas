@@ -1345,7 +1345,8 @@ type
    procedure checkdirty(const arow: integer); override;
    procedure checkdirtyautorowheight(const arow: integer);
    procedure recalchidden; override;
-   procedure readstate(const reader; const acount: integer); override;
+   procedure readstate(const reader; const acount: integer;
+                                           const name: msestring); override;
    function getstatdata(const index: integer): msestring; override;
    procedure setstatdata(const index: integer; const value: msestring);
                                  override;
@@ -17892,7 +17893,8 @@ begin
  end;
 end;
 
-procedure trowstatelist.readstate(const reader; const acount: integer);
+procedure trowstatelist.readstate(const reader; const acount: integer;
+                                                       const name: msestring);
 begin
  inherited;
  if (infolevel > ril_normal) or folded then begin

@@ -150,7 +150,8 @@ type
    procedure setstatdata(const index: integer; const value: msestring); virtual;
    procedure writestate(const writer; const name: msestring); virtual;
                       //typeless because of recursive interface
-   procedure readstate(const reader; const acount: integer); virtual;
+   procedure readstate(const reader; const acount: integer;
+                                const name: msestring); virtual;
    procedure writeappendix(const writer; const aname: msestring); virtual;
    procedure readappendix(const reader; const aname: msestring); virtual;
 
@@ -946,7 +947,8 @@ type
    procedure initdirty; virtual;
    procedure recalchidden; virtual;
    function checkassigncompatibility(const source: tpersistent): boolean; override;
-   procedure readstate(const reader; const acount: integer); override;
+   procedure readstate(const reader; const acount: integer;
+                                           const name: msestring); override;
    property flag1[const index: integer]: boolean read getflag1
                                                             write setflag1;
   public
@@ -1841,7 +1843,8 @@ begin
  end;
 end;
 
-procedure tdatalist.readstate(const reader; const acount: integer);
+procedure tdatalist.readstate(const reader; const acount: integer;
+                                                        const name: msestring);
 var
  int1: integer;
  str1: msestring;
@@ -6448,7 +6451,8 @@ begin
  inherited;
 end;
 
-procedure tcustomrowstatelist.readstate(const reader; const acount: integer);
+procedure tcustomrowstatelist.readstate(const reader; const acount: integer;
+                                                         const name: msestring);
 begin
  initdirty;
  inherited;

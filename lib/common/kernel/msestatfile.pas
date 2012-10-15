@@ -12,7 +12,8 @@ unit msestatfile;
 interface
 uses
  classes,msestat,mseapplication,msetypes,msestrings,mseclasses,msestream,
- mseglob;
+ mseglob,msearrayprops;
+ 
 type
  statupdateeventty = procedure(const sender: tobject;
                                   const filer: tstatfiler) of object;
@@ -124,6 +125,23 @@ type
                                                     write fonstatafterread;
    property onfilemissing: statfilemissingeventty read fonfilemissing 
                                                     write fonfilemissing;
+ end;
+
+ tstatfileitem = class(tmsecomponentlinkitem)
+  private
+   function getstatfile: tstatfile;
+   procedure setstatfile(const avalue: tstatfile);
+  published
+   property statfile: tstatfile read getstatfile write setstatfile;
+ end;
+ 
+ tstatfilearrayprop = class(tmsecomponentlinkarrayprop)
+  private
+   function getitems(const index: integer): tstatfileitem;
+  public 
+   constructor create;
+   class function getitemclasstype: persistentclassty; override;
+   property items[const index: integer]: tstatfileitem read getitems; default;
  end;
 
 procedure setstatfilevar(const sender: istatfile; const source: tstatfile;
@@ -628,6 +646,35 @@ begin
    result:= sfm_writing;
   end;
  end;
+end;
+
+{ tstatfileitem }
+
+function tstatfileitem.getstatfile: tstatfile;
+begin
+ result:= tstatfile(item);
+end;
+
+procedure tstatfileitem.setstatfile(const avalue: tstatfile);
+begin
+ item:= avalue;
+end;
+
+{ tstatfilearrayprop }
+
+constructor tstatfilearrayprop.create;
+begin
+ inherited create(tstatfileitem);
+end;
+
+function tstatfilearrayprop.getitems(const index: integer): tstatfileitem;
+begin
+ result:= tstatfileitem(inherited getitems(index));
+end;
+
+class function tstatfilearrayprop.getitemclasstype: persistentclassty;
+begin
+ result:= tstatfileitem;
 end;
 
 end.

@@ -1019,7 +1019,7 @@ begin
    value.beginupdate;
    try
     if trystrtointmse(str1,int1) then begin
-     tdatalist1(value).readstate(self,int1);
+     tdatalist1(value).readstate(self,int1,name);
      tdatalist1(value).readappendix(self,name);
     end;
    finally

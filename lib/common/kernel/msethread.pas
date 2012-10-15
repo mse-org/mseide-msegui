@@ -104,7 +104,7 @@ type
    function eventcount: integer;
  end;
 
- tsynchronizeevent = class(tmseevent)
+ tsynchronizeevent = class(texecuteevent)
   private
    fsem: semty;
    fsuccess: boolean;
@@ -112,13 +112,12 @@ type
    fexceptionmessage: string;
    fquiet: boolean;
   protected
-   procedure execute; virtual; abstract;
    procedure internalfree1; override;
   public
    constructor create(const aquiet: boolean);
          //quiet -> show no exceptions
    destructor destroy; override; 
-   procedure deliver;
+   procedure deliver; override;
    function waitfor: boolean;
    property quiet: boolean read fquiet;
    property success: boolean read fsuccess;
@@ -176,7 +175,7 @@ constructor tsynchronizeevent.create(const aquiet: boolean);
 begin
  fquiet:= aquiet;
  sys_semcreate(fsem,0);
- inherited create(ek_synchronize);
+ inherited create;
 end;
 
 destructor tsynchronizeevent.destroy;
@@ -188,7 +187,8 @@ end;
 procedure tsynchronizeevent.deliver;
 begin
  try
-  execute;
+  inherited;
+//  execute;
   fsuccess:= true;
  except
   on e: exception do begin

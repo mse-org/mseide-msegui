@@ -244,7 +244,8 @@ type
    property edited: boolean read getedited write setedited;
    function emptytext: boolean;
    function seteditfocus: boolean;
-   
+
+   property dataeditstate: dataeditstatesty read fstate;   
    property readonly: boolean read getreadonly write setreadonly;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;

@@ -33,7 +33,7 @@ type
                 ek_release,{ek_releasedefer,}ek_closeform,ek_checkscreenrange,
                 ek_childscaled,ek_resize,
                 ek_dropdown,ek_async,ek_execute,ek_component,
-                ek_synchronize,ek_releaseobject,
+                ek_asyncexec,ek_releaseobject,
                 ek_connect,
                 ek_dbedit,ek_dbupdaterowdata,ek_data,ek_objectdata,ek_childproc,
                 ek_dbinsert, //for tdscontroller
@@ -131,6 +131,14 @@ type
   constructor create(const dest: ievent; atag: integer);
  end;
 
+ texecuteevent = class(tmseevent)
+  protected
+   procedure execute; virtual; abstract;
+  public
+   constructor create;
+   procedure deliver; virtual;
+ end;
+ 
  teventqueue = class(tobjectqueue)
   private
    fsem: semty;
@@ -251,7 +259,8 @@ begin
  //dummy
 end;
 
-procedure tobjectevent.unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+procedure tobjectevent.unlink(const source,dest: iobjectlink;
+                                                     valuepo: pointer = nil);
 begin
  //dummy
 end;
@@ -278,6 +287,18 @@ constructor tasyncevent.create(const dest: ievent; atag: integer);
 begin
  inherited;
  fkind:= ek_async;
+end;
+
+{ texecuteevent }
+
+constructor texecuteevent.create;
+begin
+ inherited create(ek_asyncexec);
+end;
+
+procedure texecuteevent.deliver;
+begin
+ execute;
 end;
 
 { teventqueue }
