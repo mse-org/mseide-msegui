@@ -361,7 +361,9 @@ type
 
  ptreelistitem = ^ttreelistitem;
 
- itemliststatety = (ils_destroying,ils_subnodecountinvalid,ils_subnodecountupdating,
+ itemliststatety = (ils_destroying,
+                    ils_subnodecountinvalid,ils_subnodecountupdating,
+                    ils_subnodedeleting,
                     ils_freelock);
  itemliststatesty = set of itemliststatety;
  statreaditemeventty = procedure(const sender: tobject; const reader: tstatreader;

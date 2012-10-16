@@ -3707,11 +3707,29 @@ begin
       end;
      end;
     end
+    else begin
+     if not (ils_subnodecountupdating in self.fitemstate) then begin
+      for int1:= int2 + 1 to self.fcount - 1 do begin
+       po1:= ptreelistitem(getitempo(int1));
+       if ttreelistitem1(po1^).ftreelevel <= ftreelevel then begin
+        break; //next same level node
+       end;
+       po1^:= nil;
+      end;
+      self.fitemstate:= self.fitemstate + [ils_subnodecountupdating,
+                                             ils_subnodedeleting];
+      inherited; //free node
+      self.fitemstate:= self.fitemstate - [ils_subnodecountupdating,
+                                             ils_subnodedeleting];
+     end;
+    end;
    end;
   end;
  end
  else begin
-  ttreelistitem1(data).findex:= -1;
+  if pointer(data) <> nil then begin
+   ttreelistitem1(data).findex:= -1;
+  end;
  end;
 end;
 
@@ -4056,6 +4074,9 @@ begin
        int1:= findex+1;
        if (findex < self.fcount-1)  then begin
         int2:= ainfo.treeheightbefore;
+        if ils_subnodedeleting in fitemstate then begin
+         dec(int2);
+        end;
         if int2 > 0 then begin
          include(self.fitemstate,ils_freelock);
          try
@@ -4084,7 +4105,10 @@ begin
    na_collapse: begin
     if not (ils_subnodecountupdating in fitemstate) then begin
      with ttreeitemedit(fowner) do begin
-      fgridintf.getcol.grid.deleterow(sender.index+1,ttreelistitem(sender).treeheight);
+      include(fitemstate,ils_subnodecountupdating);
+      fgridintf.getcol.grid.deleterow(sender.index+1,
+                                      ttreelistitem(sender).treeheight);
+      exclude(fitemstate,ils_subnodecountupdating);
       if fvalue = sender then begin
        expandedchanged(false);
       end;
