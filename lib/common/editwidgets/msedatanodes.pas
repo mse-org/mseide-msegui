@@ -1886,7 +1886,6 @@ begin
     aitem.fparent.remove(aitem.fparentindex);
    end;
    int1:= treeheight;
-//   result:= fcount;
    dosetitems(inccount,aitem);
    countchange(int1);
   end;
@@ -1895,14 +1894,31 @@ begin
  end;
 end;
 
-procedure ttreelistitem.insert(const aitem: ttreelistitem; const aindex: integer);
+procedure ttreelistitem.insert(const aitem: ttreelistitem;
+                                                  const aindex: integer);
+var
+ int1: integer;
 begin
  if aitem.parent = self then begin
   move(aitem.parentindex,aindex);
   checksort;
  end
  else begin
-  move(add(aitem),aindex);
+  if aindex <> count then begin
+   checkindex(aindex);
+  end;
+  int1:= treeheight;
+  if aitem.fparent <> nil then begin
+   aitem.fparent.remove(aitem.fparentindex);
+  end;
+  inccount;
+  insertitem(pointerarty(fitems),aindex,aitem);
+  fitems[aindex]:= aitem;
+  for int1:= aindex to count-1 do begin
+   fitems[int1].fparentindex:= int1;
+  end;
+  dosetitems(aindex,aitem);
+  countchange(int1);
   checksort;
  end;
 end;

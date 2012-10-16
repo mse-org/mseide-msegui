@@ -222,7 +222,7 @@ type
                  gs1_gridsorted,gs1_dbsorted,gs1_rowdeleting,
                  gs1_focuscellonenterlock,gs1_mousecaptureendlock,
                  gs1_forcenullcheck,
-                 gs1_cellsizesyncing,gs1_userinput);
+                 gs1_cellsizesyncing,gs1_userinput,gs1_autoappendlock);
  gridstates1ty = set of gridstate1ty;
 
  cellkindty = (ck_invalid,ck_data,ck_fixcol,ck_fixrow,ck_fixcolrow);
@@ -10963,7 +10963,7 @@ function tcustomgrid.focuscell(cell: gridcoordty;
 
  function isappend(const arow: integer): boolean;
  begin
-  result:= not (gs_isdb in fstate) and 
+  result:= not (gs_isdb in fstate) and  not (gs1_autoappendlock in fstate1) and
       ((og_autoappend in foptionsgrid) and (arow >= frowcount) and 
                                                          (frowcount <> 0) or
        (arow = 0) and (frowcount = 0) and (og_autofirstrow in foptionsgrid));
@@ -11343,8 +11343,12 @@ begin     //focuscell
      bo2:= gs1_sortchangelock in  fstate1;
      include(fstate1,gs1_sortchangelock);
      try
-      insertrow(frowcount);
+      insertrow(frowcount,1,true);
       include(fstate1,gs1_rowsortinvalid);
+      if ffocuscount <> focuscount then begin
+       focuscell(mgc(ffocusedcell.col,cell.row));
+       exit;
+      end;
       autorowappended:= true;
      finally
       if not bo2 then begin
@@ -11358,15 +11362,15 @@ begin     //focuscell
      focuscell(coord1,selectaction); //restore previous row
      exit;
     end;
-   end
-   else begin
-    if cell.row >= frowcount then begin
-     cell.row:= frowcount - 1;
-     if cell.row < 0 then begin
-      cell.row:= invalidaxis;
-     end;
+   end;
+//   else begin
+   if cell.row >= frowcount then begin
+    cell.row:= frowcount - 1;
+    if cell.row < 0 then begin
+     cell.row:= invalidaxis;
     end;
    end;
+//   end;
    cellbefore:= ffocusedcell; 
    if (selectaction = fca_exitgrid) or ((coord1.row >= 0) and
           ((coord1.row >= frowcount-1) and (cell.row < coord1.row) or

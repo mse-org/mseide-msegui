@@ -3686,42 +3686,44 @@ begin
  if not (ils_freelock in fitemstate) then begin
   if pointer(data) <> nil then begin
    with ttreelistitem1(data) do begin
-    int2:= findex;
+    int2:= findex+1;
     if fowner <> nil then begin
      setowner(nil);
     end;
-    if fparent = nil then begin
-     for int1:= int2 + 1 to self.fcount - 1 do begin
+    if not (ils_subnodecountupdating in self.fitemstate) then begin
+     int1:= int2;
+     while int1 < self.fcount do begin
       po1:= ptreelistitem(getitempo(int1));
-      if ttreelistitem1(po1^).ftreelevel = 0 then begin
-       break; //next root node
+      if ttreelistitem1(po1^).ftreelevel <= ftreelevel then begin
+       break; //next same level node
       end;
       po1^:= nil;
+      inc(int1);
      end;
-     if not (ils_subnodecountupdating in self.fitemstate) then begin
+     self.fitemstate:= self.fitemstate + [ils_subnodecountupdating,
+                                            ils_subnodedeleting];
+     if (fparent <> nil) and 
+                          (ttreelistitem1(fparent).fowner = self) then begin
+      inherited; //free node
+     end
+     else begin
+      if not updating and not(ils_destroying in self.fitemstate) then begin
+       int1:= int1 - int2;
+       if int1 > 0 then begin
+        include(self.fitemstate,ils_freelock);
+        try
+         self.fowner.fgridintf.getcol.grid.deleterow(int2,int1);
+        finally
+         exclude(self.fitemstate,ils_freelock);
+        end;
+       end;
+      end;
       if not (ns1_nofreeroot in fstate1) then begin
        inherited; //free node
-      end
-      else begin
-       ttreelistitem1(data).setowner(nil)
       end;
      end;
-    end
-    else begin
-     if not (ils_subnodecountupdating in self.fitemstate) then begin
-      for int1:= int2 + 1 to self.fcount - 1 do begin
-       po1:= ptreelistitem(getitempo(int1));
-       if ttreelistitem1(po1^).ftreelevel <= ftreelevel then begin
-        break; //next same level node
-       end;
-       po1^:= nil;
-      end;
-      self.fitemstate:= self.fitemstate + [ils_subnodecountupdating,
-                                             ils_subnodedeleting];
-      inherited; //free node
-      self.fitemstate:= self.fitemstate - [ils_subnodecountupdating,
-                                             ils_subnodedeleting];
-     end;
+     self.fitemstate:= self.fitemstate - [ils_subnodecountupdating,
+                                            ils_subnodedeleting];
     end;
    end;
   end;
@@ -4004,16 +4006,22 @@ procedure ttreeitemeditlist.nodenotification(const sender: tlistitem;
      int1:= int2+int1;
      if int2 < fcount then begin
       po1:= datapo;
-      for int1:= int1 to fcount - 1 do begin
-       po1^[int1].findex:= int1;
+      if ils_subnodedeleting in fitemstate then begin
+       for int1:= int1 to fcount - 1 do begin
+        if po1^[int1] <> nil then begin
+         po1^[int1].findex:= int1;
+        end;
+       end;
+      end
+      else begin
+       for int1:= int1 to fcount - 1 do begin
+        po1^[int1].findex:= int1;
+       end;
       end;
      end;
     finally
      exclude(fstate,des_updating);
      fchangingnode:= nil;
-    end;
-    if fvalue = sender then begin
-     expandedchanged(true);
     end;
    end;
   end;
@@ -4045,7 +4053,8 @@ var
 
 var
  int1,int2: integer;
-
+ bo1: boolean;
+ 
 begin
  if ainfo.action = na_destroying then begin
   int2:= sender.index;
@@ -4079,10 +4088,17 @@ begin
         end;
         if int2 > 0 then begin
          include(self.fitemstate,ils_freelock);
-         try
-          self.fowner.fgridintf.getcol.grid.deleterow(int1,int2);
-         finally
-          exclude(self.fitemstate,ils_freelock);
+         with tcustomgrid1(self.fowner.fgridintf.getcol.grid) do begin
+          try
+           bo1:= gs1_autoappendlock in fstate1;
+           include(fstate1,gs1_autoappendlock);
+           deleterow(int1,int2);
+          finally
+           if not bo1 then begin
+            exclude(fstate1,gs1_autoappendlock);
+           end;
+           exclude(self.fitemstate,ils_freelock);
+          end;
          end;
         end;
        end;
@@ -4097,6 +4113,11 @@ begin
    na_expand: begin
     if not (ils_subnodecountupdating in fitemstate) then begin
      expand;
+     with ttreeitemedit(fowner) do begin
+      if fvalue = sender then begin
+       expandedchanged(true);
+      end;
+     end;
     end
     else begin
      include(fitemstate,ils_subnodecountinvalid);
