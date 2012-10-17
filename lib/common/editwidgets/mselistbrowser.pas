@@ -3702,11 +3702,13 @@ begin
      end;
      self.fitemstate:= self.fitemstate + [ils_subnodecountupdating,
                                             ils_subnodedeleting];
-     if (fparent <> nil) and 
-                          (ttreelistitem1(fparent).fowner = self) then begin
-      inherited; //free node
+     if (fparent <> nil) and (ttreelistitem1(fparent).fowner = self) then begin
+//      inherited; 
+      //free node,
+      //does not work, there will be interferences with row deleting
      end
      else begin
+    {
       if not updating and not(ils_destroying in self.fitemstate) then begin
        int1:= int1 - int2;
        if int1 > 0 then begin
@@ -3718,6 +3720,7 @@ begin
         end;
        end;
       end;
+    }
       if not (ns1_nofreeroot in fstate1) then begin
        inherited; //free node
       end;
@@ -4069,7 +4072,9 @@ begin
     end;
    end;
    incupdate;
+   include(self.fitemstate,ils_freelock);
    fowner.fgridintf.getcol.grid.deleterow(int2,int1);
+   exclude(self.fitemstate,ils_freelock);
    decupdate;
   end;
  end

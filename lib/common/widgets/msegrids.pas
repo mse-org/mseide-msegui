@@ -13810,91 +13810,93 @@ begin
     acount:= fdatacols.rowstate.totchildrencount(aindex,acount);
    end;
    dorowsdeleting(aindex,acount);
-   defocused:= false;
-   cellbefore:= ffocusedcell;
-   beginupdate;
-   bo2:= gs1_rowdeleting in fstate1;
-   inc(fnonullcheck);
-   include(fstate1,gs1_rowdeleting);
-   try
-    if aindex >= 0 then begin //datarows
-     if not fdatacols.roworderinvalid then begin
-      exit;
-     end;
-     if (fclickedcell.row >= 0) and 
-        (aindex <= fclickedcell.row) and 
-                              (fclickedcell.row < aindex + acount) then begin
-      exclude(fstate,gs_cellclicked);
-     end;
-     if (factiverow >= 0) then begin
-      if (factiverow >= aindex + acount) then begin
-       dec(factiverow,acount);
-      end
-     end;
-     if (ffocusedcell.row >= 0) then begin
-      if (ffocusedcell.row >= aindex + acount) then begin
-       dec(ffocusedcell.row,acount);
-      end
-      else begin
-       if ffocusedcell.row >= aindex then begin
-        countbefore:= frowcount;
-        bo1:= gs_rowremoving in fstate;
-        if ffocusedcell.row < aindex + acount then begin
-         include(fstate,gs_rowremoving);
-        end;
-        try
-         focuscell(makegridcoord(ffocusedcell.col,invalidaxis)); //defocus row
-        finally
-         if not bo1 then begin
-          exclude(fstate,gs_rowremoving);
+   if acount > 0 then begin
+    defocused:= false;
+    cellbefore:= ffocusedcell;
+    beginupdate;
+    bo2:= gs1_rowdeleting in fstate1;
+    inc(fnonullcheck);
+    include(fstate1,gs1_rowdeleting);
+    try
+     if aindex >= 0 then begin //datarows
+      if not fdatacols.roworderinvalid then begin
+       exit;
+      end;
+      if (fclickedcell.row >= 0) and 
+         (aindex <= fclickedcell.row) and 
+                               (fclickedcell.row < aindex + acount) then begin
+       exclude(fstate,gs_cellclicked);
+      end;
+      if (factiverow >= 0) then begin
+       if (factiverow >= aindex + acount) then begin
+        dec(factiverow,acount);
+       end
+      end;
+      if (ffocusedcell.row >= 0) then begin
+       if (ffocusedcell.row >= aindex + acount) then begin
+        dec(ffocusedcell.row,acount);
+       end
+       else begin
+        if ffocusedcell.row >= aindex then begin
+         countbefore:= frowcount;
+         bo1:= gs_rowremoving in fstate;
+         if ffocusedcell.row < aindex + acount then begin
+          include(fstate,gs_rowremoving);
          end;
+         try
+          focuscell(makegridcoord(ffocusedcell.col,invalidaxis)); //defocus row
+         finally
+          if not bo1 then begin
+           exclude(fstate,gs_rowremoving);
+          end;
+         end;
+         if ffocusedcell.row <> invalidaxis then begin
+          factiverow:= ffocusedcell.row;
+          exit;
+         end;
+         defocused:= true;
+         dec(acount,countbefore - frowcount); //correct removed empty last row
         end;
-        if ffocusedcell.row <> invalidaxis then begin
-         factiverow:= ffocusedcell.row;
-         exit;
-        end;
-        defocused:= true;
-        dec(acount,countbefore - frowcount); //correct removed empty last row
        end;
       end;
-     end;
-     if acount > 0 then begin
-      if not (gs_changelock in fstate) then begin
-       include(fstate,gs_changelock);
-       fdatacols.beginchangelock;
-      end;
-      if of_shiftdeltoparent in foptionsfold then begin
-       fdatacols.frowstate.movegrouptoparent(aindex,acount);
-      end;
-      bo1:= gs1_sortchangelock in fstate1;
-      include(fstate1,gs1_sortchangelock);
-      try
-       fdatacols.deleterow(aindex,acount);
-      finally
-       if not bo1 then begin
-        exclude(fstate1,gs1_sortchangelock);
+      if acount > 0 then begin
+       if not (gs_changelock in fstate) then begin
+        include(fstate,gs_changelock);
+        fdatacols.beginchangelock;
        end;
+       if of_shiftdeltoparent in foptionsfold then begin
+        fdatacols.frowstate.movegrouptoparent(aindex,acount);
+       end;
+       bo1:= gs1_sortchangelock in fstate1;
+       include(fstate1,gs1_sortchangelock);
+       try
+        fdatacols.deleterow(aindex,acount);
+       finally
+        if not bo1 then begin
+         exclude(fstate1,gs1_sortchangelock);
+        end;
+       end;
+       ffixcols.deleterow(aindex,acount);
+       dec(frowcount,acount);
+       dorowcountchanged(frowcount+acount,frowcount);
       end;
-      ffixcols.deleterow(aindex,acount);
-      dec(frowcount,acount);
-      dorowcountchanged(frowcount+acount,frowcount);
      end;
+    finally
+     dec(fnonullcheck);
+     if not bo2 then begin
+      exclude(fstate1,gs1_rowdeleting);
+     end;
+     endupdate;
     end;
-   finally
-    dec(fnonullcheck);
-    if not bo2 then begin
-     exclude(fstate1,gs1_rowdeleting);
+    dorowsdeleted(aindex,acount);
+    if cellbefore.row <> ffocusedcell.row then begin
+     dofocusedcellposchanged;
     end;
-    endupdate;
-   end;
-   dorowsdeleted(aindex,acount);
-   if cellbefore.row <> ffocusedcell.row then begin
-    dofocusedcellposchanged;
-   end;
-   if (og_focuscellonenter in foptionsgrid) and defocused then begin
-    cellbefore.row:= aindex;
-    focuscell(cellbefore,fca_focusin);
-              //ev. auto append row
+    if (og_focuscellonenter in foptionsgrid) and defocused then begin
+     cellbefore.row:= aindex;
+     focuscell(cellbefore,fca_focusin);
+               //ev. auto append row
+    end;
    end;
   finally
    resetuserinput(bo3);
