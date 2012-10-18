@@ -4079,6 +4079,14 @@ begin
   end;
  end
  else begin
+  if ainfo.action in [na_expand,na_collapse] then begin
+   with tcustomgrid1(self.fowner.fgridintf.getcol.grid) do begin
+    if container.entered and not container.canclose then begin
+     ainfo.action:= na_none;
+     exit;
+    end;
+   end;
+  end;
   inherited;
   case ainfo.action of
    na_countchange: begin
