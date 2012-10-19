@@ -173,7 +173,7 @@ type
    function getdefault: pointer; virtual; //nil fuer null
    procedure normalizering; //macht ringpointer = null
    procedure blockcopymovedata(fromindex,toindex: integer;
-                  const count: integer; const mode: blockcopymodety);
+                  const acount: integer; const mode: blockcopymodety);
    procedure initdata1(const afree: boolean; index: integer;
                                 const acount: integer);
                 //initialisiert mit defaultwert
@@ -2275,23 +2275,23 @@ begin
 end;
 
 procedure tdatalist.blockcopymovedata(fromindex, toindex: integer; 
-                            const count: integer; const mode: blockcopymodety);
+                            const acount: integer; const mode: blockcopymodety);
 var
  ueberlappung,freestart,freecount,initstart: integer;
  int1,int2: integer;
 begin
- if (count > 0) and (fromindex <> toindex) then begin
+ if (acount > 0) and (fromindex <> toindex) then begin
   normalizering;
   checkindex(fromindex);
   checkindex(toindex);
-  int1:= fromindex+count-1;
+  int1:= fromindex+acount-1;
   checkindex(int1);
-  if (mode <> bcm_rotate) then begin
-   int2:= toindex+count-1;
+//  if (mode <> bcm_rotate) then begin
+   int2:= toindex+acount-1;
    checkindex(int2);
-  end;
+//  end;
   if fromindex > toindex then begin
-   ueberlappung:= toindex+count-fromindex;
+   ueberlappung:= toindex+acount-fromindex;
    if ueberlappung < 0 then begin
     ueberlappung:= 0;
    end;
@@ -2299,28 +2299,28 @@ begin
    initstart:= fromindex + ueberlappung;
   end
   else begin
-   ueberlappung:= fromindex+count-toindex;
+   ueberlappung:= fromindex+acount-toindex;
    if ueberlappung < 0 then begin
     ueberlappung:= 0;
    end;
    freestart:= toindex+ueberlappung;
    initstart:= fromindex;
   end;
-  freecount:= count-ueberlappung;
+  freecount:= acount-ueberlappung;
   if mode = bcm_rotate then begin
    if toindex < fromindex then begin
     internalsetcount(fcount + freecount,true);
-    move((fdatapo+freestart*fsize)^,
+    move((fdatapo+toindex*fsize)^,
                 (fdatapo+(fcount-freecount)*fsize)^,freecount*fsize);
     move((fdatapo+fromindex*fsize)^,
-                 (fdatapo+toindex*fsize)^,count*fsize);
+                 (fdatapo+toindex*fsize)^,acount*fsize);
     if ueberlappung = 0 then begin
-       move((fdatapo+(toindex+count)*fsize)^,
-            (fdatapo+(toindex+count+count)*fsize)^,
-            (fromindex-toindex-count)*fsize);
+       move((fdatapo+(toindex+acount)*fsize)^,
+            (fdatapo+(toindex+acount+acount)*fsize)^,
+            (fromindex-toindex-acount)*fsize);
     end;
-    move((fdatapo+(self.count-freecount)*fsize)^,
-            (fdatapo+(toindex+count)*fsize)^,
+    move((fdatapo+(fcount-freecount)*fsize)^,
+            (fdatapo+(toindex+acount)*fsize)^,
             freecount*fsize);
    end
    else begin
@@ -2329,22 +2329,22 @@ begin
      move((fdatapo+fromindex*fsize)^,
                 (fdatapo+(fcount-freecount)*fsize)^,freecount*fsize);
      move((fdatapo+(fromindex+freecount)*fsize)^,
-                 (fdatapo+fromindex*fsize)^,(toindex-fromindex-count+1)*fsize);
-     move((fdatapo+(self.count-freecount)*fsize)^,
-             (fdatapo+(toindex-freecount+1)*fsize)^,
+                 (fdatapo+fromindex*fsize)^,(toindex-fromindex{-acount+1})*fsize);
+     move((fdatapo+(fcount-freecount)*fsize)^,
+             (fdatapo+(toindex{-freecount+1})*fsize)^,
              freecount*fsize);
     end
     else begin
-     if toindex + count > fcount then begin
-      toindex:= fcount-count;
+     if toindex + acount > fcount then begin
+      toindex:= fcount-acount;
      end;
      freecount:= toindex-fromindex;
      internalsetcount(fcount + freecount,true);
-     move((fdatapo+(fromindex+count)*fsize)^,
+     move((fdatapo+(fromindex+acount)*fsize)^,
                 (fdatapo+(fcount-freecount)*fsize)^,freecount*fsize);
      move((fdatapo+(fromindex)*fsize)^,
-                 (fdatapo+toindex*fsize)^,count*fsize);
-     move((fdatapo+(self.count-freecount)*fsize)^,
+                 (fdatapo+toindex*fsize)^,acount*fsize);
+     move((fdatapo+(fcount-freecount)*fsize)^,
              (fdatapo+fromindex*fsize)^,
              freecount*fsize);
     end;
@@ -2357,7 +2357,7 @@ begin
     internalfreedata(freestart,freecount);
    end;
    move((fdatapo+fromindex*fsize)^,
-                (fdatapo+toindex*fsize)^,count*fsize);
+                (fdatapo+toindex*fsize)^,acount*fsize);
    if mode = bcm_copy then begin
     internalcopyinstance(initstart,freecount);
    end

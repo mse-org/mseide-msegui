@@ -2005,6 +2005,10 @@ type
    function isfirstrow: boolean; virtual;
    function islastrow: boolean; virtual;
 
+   procedure internalinsertrow(var aindex: integer; var acount: integer;
+                                  const auserinput: boolean); virtual;
+   procedure internaldeleterow(var aindex: integer; var acount: integer;
+                                  const auserinput: boolean); virtual;
    function internalsort(const sortfunc:  indexsortcomparemethodty; 
                                  var refindex: integer): boolean;
                               //true if moved
@@ -2206,9 +2210,9 @@ type
    procedure moverow(curindex,newindex: integer; count: integer = 1;
                             const auserinput: boolean = false); virtual;
    procedure insertrow(aindex: integer; acount: integer = 1;
-                                  const auserinput: boolean = false); virtual;
+                                  const auserinput: boolean = false);
    procedure deleterow(aindex: integer; acount: integer = 1;
-                                  const auserinput: boolean = false); virtual;
+                                  const auserinput: boolean = false);
    procedure appinsrow(aindex: integer;const auserinput: boolean = false); 
            //insert or append empty row, set focused row to index
            // empty row removed by exit row if og_noinsertempty
@@ -11551,7 +11555,7 @@ begin
      if newrow = frowcount-1 then begin
       exclude(fstate1,gs1_rowsortinvalid);
      end;
-     deleterow(frowcount-1);
+     deleterow(frowcount-1,1,true);
      include(fstate,gs_emptyrowremoved);
     end;
    end
@@ -12561,7 +12565,7 @@ begin
       if shiftstate = [ss_ctrl] then begin
        if og_keyrowmoving in foptionsgrid then begin
         if ffocusedcell.row > 0 then begin
-         moverow(ffocusedcell.row,ffocusedcell.row - 1);
+         moverow(ffocusedcell.row,ffocusedcell.row - 1,1,true);
          showcell(ffocusedcell);
         end;
        end
@@ -12580,7 +12584,7 @@ begin
       if shiftstate = [ss_ctrl] then begin
        if og_keyrowmoving in foptionsgrid then begin
         if (ffocusedcell.row >= 0) and (ffocusedcell.row < frowcount-1) then begin
-         moverow(ffocusedcell.row,ffocusedcell.row + 1);
+         moverow(ffocusedcell.row,ffocusedcell.row + 1,1,true);
          showcell(ffocusedcell);
         end;
        end
@@ -13730,8 +13734,8 @@ begin
  end;
 end;
 
-procedure tcustomgrid.insertrow(aindex: integer; acount: integer = 1;
-                                          const auserinput: boolean = false);
+procedure tcustomgrid.internalinsertrow(var aindex: integer;
+                             var acount: integer; const auserinput: boolean);
 var
  rowbefore: integer;
  bo1: boolean;
@@ -13795,8 +13799,14 @@ begin
  end;
 end;
 
-procedure tcustomgrid.deleterow(aindex: integer; acount: integer = 1;
-                                        const auserinput: boolean = false);
+procedure tcustomgrid.insertrow(aindex: integer; acount: integer = 1;
+                                          const auserinput: boolean = false);
+begin
+ internalinsertrow(aindex,acount,auserinput);
+end;
+
+procedure tcustomgrid.internaldeleterow(var aindex: integer;
+                         var acount: integer; const auserinput: boolean);
 var
  cellbefore: gridcoordty;
  countbefore: integer;
@@ -13855,7 +13865,9 @@ begin
           exit;
          end;
          defocused:= true;
-         dec(acount,countbefore - frowcount); //correct removed empty last row
+         if aindex + acount > frowcount then begin
+          dec(acount,countbefore - frowcount); //correct removed empty last row
+         end;
         end;
        end;
       end;
@@ -13902,6 +13914,12 @@ begin
    resetuserinput(bo3);
   end;
  end;
+end;
+
+procedure tcustomgrid.deleterow(aindex: integer; acount: integer = 1;
+                                        const auserinput: boolean = false);
+begin
+ internaldeleterow(aindex,acount,auserinput);
 end;
 
 procedure tcustomgrid.clear; //sets rowcount to 0
@@ -15157,7 +15175,7 @@ end;
 procedure tcustomgrid.appinsrow(aindex: integer;
                                        const auserinput: boolean = false);
 var
- int1: integer;
+ int1,int2: integer;
  bo1: boolean;
 begin
  if docheckcellvalue and container.canclose(window.focusedwidget) then begin
@@ -15174,7 +15192,8 @@ begin
   bo1:= gs1_sortchangelock in fstate1;
   include(fstate1,gs1_sortchangelock);
   try
-   insertrow(aindex,1,auserinput);
+   int2:= 1;
+   internalinsertrow(aindex,int2,auserinput);
    if fdatacols.fnewrowcol < 0 then begin
     int1:= ffocusedcell.col;
    end

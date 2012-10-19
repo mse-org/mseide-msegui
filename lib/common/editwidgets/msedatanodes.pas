@@ -221,6 +221,7 @@ type
    fcount: integer;
    ftreelevel: integer;
    procedure statechanged;
+   procedure aftermove;
    procedure checksort; virtual;
    procedure setcaption(const avalue: msestring); override;
    procedure setowner(const aowner: tcustomitemlist); override;
@@ -232,7 +233,7 @@ type
                                      const event: objecteventty); override;
    function createsubnode: ttreelistitem; virtual;
    procedure swap(const a,b: integer);
-   procedure move(const source,dest: integer);
+   procedure internalmove(const source,dest: integer);
    procedure statreadsubnode(const reader: tstatreader;
                                             var anode: ttreelistitem); virtual;
    procedure internalexpandall;
@@ -262,6 +263,7 @@ type
    procedure updatechildcheckedstate; //updates ancestors
    procedure updatechildcheckedtree;  //updates self and descendents
    property parent: ttreelistitem read fparent;
+   function parentorself: ttreelistitem;
    function parentindex: integer;
    property treelevel: integer read ftreelevel;
    function levelshift: integer;
@@ -269,6 +271,10 @@ type
    function rowheight: integer;      //toatal needed grid rows
    function isroot: boolean;
    function issinglerootrow: boolean; //keyrowmove can be used
+   function islastnode: boolean;
+   function findsibling(const asibling: ttreelistitem): ttreelistitem;
+   function nextnode: ttreelistitem;       //node of next row
+   function nextnodeparent: ttreelistitem;
    function checkdescendent(node: ttreelistitem): boolean;
                     //true if node is descendent or self
    function checkancestor(node: ttreelistitem): boolean;
@@ -309,7 +315,8 @@ type
    procedure add(const acount: integer;
                             const itemclass: treelistitemclassty = nil;
                             const defaultstate: nodestatesty = []); overload;
-   procedure insert(const aitem: ttreelistitem; const aindex: integer);
+   procedure insert(const aitem: ttreelistitem; aindex: integer);
+   procedure move(const source,dest: integer);
    procedure clear; virtual;
 
    function getnodes(const must: nodestatesty; 
@@ -1879,7 +1886,7 @@ begin
  result:= -1;
  if aitem <> nil then begin
   if aitem.parent = self then begin
-   move(aitem.parentindex,fcount-1);
+   internalmove(aitem.parentindex,fcount-1);
   end
   else begin
    if aitem.fparent <> nil then begin
@@ -1894,14 +1901,26 @@ begin
  end;
 end;
 
+procedure ttreelistitem.aftermove;
+begin
+ countchange(fcount); //refresh grid
+ checksort;
+end;
+
 procedure ttreelistitem.insert(const aitem: ttreelistitem;
-                                                  const aindex: integer);
+                                                  aindex: integer);
 var
  int1: integer;
 begin
+ if aindex > count then begin
+  aindex:= count;
+ end;
  if aitem.parent = self then begin
-  move(aitem.parentindex,aindex);
-  checksort;
+  if aindex = count then begin
+   dec(aindex);
+  end;
+  internalmove(aitem.parentindex,aindex);
+  aftermove;
  end
  else begin
   if aindex <> count then begin
@@ -1921,6 +1940,12 @@ begin
   countchange(int1);
   checksort;
  end;
+end;
+
+procedure ttreelistitem.move(const source: integer; const dest: integer);
+begin
+ internalmove(source,dest);
+ aftermove;
 end;
 
 procedure ttreelistitem.add(const aitems: treelistitemarty);
@@ -1968,7 +1993,7 @@ begin
  fitems[b]:= item1;
 end;
 
-procedure ttreelistitem.move(const source,dest: integer);
+procedure ttreelistitem.internalmove(const source,dest: integer);
 var
  int1: integer;
 begin
@@ -2378,15 +2403,6 @@ begin
    mergesort(pointerarty(fitems),fcount,pointercomparemethodty(
                                                     @comparecaseinsens));
   end;
-(*
-  setlength(fitems,fcount);
-  if casesensitive then begin
-   sortarray(pointerarty(fitems),{$ifdef FPC}@{$endif}comparetreelistitemcasesensitive);
-  end
-  else begin
-   sortarray(pointerarty(fitems),{$ifdef FPC}@{$endif}comparetreelistitemcaseinsensitive);
-  end;
-*)
  end;
  for int1:= 0 to fcount-1 do begin
   fitems[int1].fparentindex:= int1;
@@ -2944,6 +2960,29 @@ begin
  result:= (treelevel = 0) and (not expanded or (count = 0));
 end; 
 
+function ttreelistitem.nextnode: ttreelistitem;
+var
+ n1: ttreelistitem;
+begin
+ result:= nil;
+ n1:= self;
+ while n1.fparent <> nil do begin
+  if (n1.fparentindex < n1.fparent.fcount-1) then begin
+   result:= n1.fparent.fitems[n1.fparentindex+1];
+   break;
+  end;
+  n1:= n1.fparent;
+ end;
+end;
+
+function ttreelistitem.nextnodeparent: ttreelistitem;
+begin
+ result:= nextnode;
+ if result <> nil then begin
+  result:= result.fparent;
+ end;
+end;
+
 function ttreelistitem.checkdescendent(node: ttreelistitem): boolean;
                     //true if node is descendent or self
 begin
@@ -3129,6 +3168,37 @@ begin
   fitems[int1].releaseowner;
  end;
  inherited;
+end;
+
+function ttreelistitem.parentorself: ttreelistitem;
+begin
+ result:= fparent;
+ if fparent = nil then begin
+  result:= self;
+ end;
+end;
+
+function ttreelistitem.islastnode: boolean;
+begin
+ result:= (fparent = nil) or (fparentindex = fparent.fcount-1);
+end;
+
+function ttreelistitem.findsibling(
+                            const asibling: ttreelistitem): ttreelistitem;
+var
+ n1: ttreelistitem;
+begin
+ result:= nil;
+// if asibling.fparent <> nil then begin
+  n1:= self;
+  while n1 <> nil do begin
+   if n1.fparent = asibling.fparent then begin
+    result:= n1;
+    break;
+   end;
+   n1:= n1.fparent;
+  end;
+// end;
 end;
 
 { trecordfielditem }

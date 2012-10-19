@@ -106,6 +106,8 @@ type
    procedure add(const captions: array of msestring; 
                const itemclass: treelistedititemclassty = nil); overload;
    property activeindex: integer read getactiveindex;
+   function endtreerow: integer; 
+                //returns index of last row of tree
  end;
  
  trecordtreelistedititem = class(ttreelistedititem,irecordfield)   //does not statsave subitems
@@ -803,22 +805,16 @@ type
    ffieldedit: trecordfieldedit;
    function getitemlist: ttreeitemeditlist;
    procedure setitemlist(const Value: ttreeitemeditlist);
-   function getitems(const index: integer): ttreelistitem;
-   procedure setitems(const index: integer; const Value: ttreelistitem);
+   function getitems(const index: integer): ttreelistedititem;
+   procedure setitems(const index: integer; const Value: ttreelistedititem);
    procedure expandedchanged(const avalue: boolean);
    procedure setfieldedit(const avalue: trecordfieldedit);
   protected
-//   procedure drawcell(const canvas: tcanvas); override;
    procedure doitembuttonpress(var info: mouseeventinfoty); override;
-//   procedure setfiltertext(const value: msestring); override;
-
    function locatecount: integer; override;        //number of locate values
    function locatecurrentindex: integer; override; //index of current row
    procedure locatesetcurrentindex(const aindex: integer); override;
    function getkeystring(const aindex: integer): msestring; override; //locate text
-
-//   function getkeystring1(const aindex: integer): msestring;
-//   function getkeystring2(const aindex: integer): msestring;
    procedure doupdatelayout; override;
    function getitemclass: listitemclassty; override;
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -833,7 +829,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function item: ttreelistitem;
-   property items[const index: integer]: ttreelistitem read getitems 
+   property items[const index: integer]: ttreelistedititem read getitems 
                                                  write setitems; default;
    function selecteditems: treelistedititemarty;
 
@@ -848,7 +844,6 @@ type
                                                     write foptions default [];
    property oncheckrowmove: checkmoveeventty read foncheckrowmove 
                                                         write foncheckrowmove;
-//   property cursor default cr_default;
  end;
 
 implementation
@@ -3567,6 +3562,14 @@ begin
  end;
 end;
 
+function ttreelistedititem.endtreerow: integer;
+begin
+ result:= findex;
+ if expanded then begin
+  result:= result + treeheight;
+ end;
+end;
+
 { trecordtreelistedititem }
 
 constructor trecordtreelistedititem.create(const aowner: tcustomitemlist;
@@ -4062,7 +4065,7 @@ begin
  if ainfo.action = na_destroying then begin
   int2:= sender.index;
   tlistitem1(sender).setowner(nil);
-  if not deleting and (ttreelistitem(sender).parent = nil) then begin
+  if not deleting {and (ttreelistitem(sender).parent = nil)} then begin
    with ttreelistitem(sender) do begin
     if expanded then begin
      int1:= treeheight+1;
@@ -4073,15 +4076,22 @@ begin
    end;
    incupdate;
    include(self.fitemstate,ils_freelock);
-   fowner.fgridintf.getcol.grid.deleterow(int2,int1);
+   with fowner.fgridintf.getcol.grid do begin
+//    if (row >= int1) and (row < int2+int1) then begin
+//     fowner.fvalue:= nil; //invalid
+//    end;
+    deleterow(int2,int1);
+   end;
    exclude(self.fitemstate,ils_freelock);
    decupdate;
   end;
  end
  else begin
   if ainfo.action in [na_expand,na_collapse] then begin
+{$warnings off}
    with tcustomgrid1(self.fowner.fgridintf.getcol.grid) do begin
-    if container.entered and not container.canclose then begin
+{$warnings on}
+    if not(docheckcellvalue and container.canclose) then begin
      ainfo.action:= na_none;
      exit;
     end;
@@ -4101,7 +4111,9 @@ begin
         end;
         if int2 > 0 then begin
          include(self.fitemstate,ils_freelock);
+        {$warnings off}
          with tcustomgrid1(self.fowner.fgridintf.getcol.grid) do begin
+        {$earnings on}
           try
            bo1:= gs1_autoappendlock in fstate1;
            include(fstate1,gs1_autoappendlock);
@@ -4461,21 +4473,63 @@ end;
 
 procedure ttreeitemeditlist.moverow(const source: integer; const dest: integer);
 var
- so,de: ttreelistitem1;
+ so,de,si: ttreelistitem1;
+ int1,int2,int3: integer;
+ po1: ppointeraty;
+
 begin
-{$warnings off}
- so:= ttreelistitem1(items[source]);
-{$warnings on}
-{$warnings off}
- de:= ttreelistitem1(items[dest]);
-{$warnings on}
- if so.parent = de.parent then begin
-  if so.parent <> nil then begin
-   ttreelistitem1(so.parent).move(so.parentindex,de.parentindex);
+ if source <> dest then begin
+ {$warnings off}
+  so:= ttreelistitem1(items[source]);
+  de:= ttreelistitem1(items[dest]);
+  si:= ttreelistitem1(de.findsibling(so));
+ {$warnings on}
+  if si <> nil then begin
+   int1:= source;
+   if (source < dest) then begin
+    if si = so then begin
+     int3:= si.findex+1;
+     if si.expanded then begin
+      int3:= int3 + si.treeheight;
+     end;
+     if int3 < fcount then begin
+      si:= ttreelistitem1(items[int3]); //next equal or higher level
+      if si.parent <> so.parent then begin
+       si:= so; //invalid
+      end;
+     end;
+    end;
+   end;
+   if si <> so then begin
+    if si.fparent <> nil then begin
+     ttreelistitem1(si.parent).internalmove(so.parentindex,si.parentindex);
+    end;
+    int2:= si.findex;
+    int3:= 1;
+    if so.expanded then begin
+     int3:= int3 + so.treeheight;
+     if source < dest then begin
+      int2:= int2 - so.treeheight;
+     end;
+    end;
+    if si.expanded and (source < dest) then begin
+     int2:= int2 + si.treeheight;
+    end;
+    fowner.fgridintf.getcol.grid.moverow(int1,int2,int3);
+    po1:= datapo;
+    dec(int3);
+    if int2 < int1 then begin
+     for int1:= int2 to int1 + int3 do begin
+      ttreelistedititem(po1^[int1]).findex:= int1;
+     end;
+    end
+    else begin
+     for int1:= int1 to int2 + int3 do begin
+      ttreelistedititem(po1^[int1]).findex:= int1;
+     end;
+    end;
+   end;
   end;
-  fowner.fgridintf.getcol.grid.moverow(so.index,de.index,so.treeheight+1);
-  de.findex:= source;
-  so.findex:= dest;
  end;
 end;
 
@@ -4817,13 +4871,13 @@ begin
  result:= ttreelistitem(fvalue);
 end;
 
-function ttreeitemedit.getitems(const index: integer): ttreelistitem;
+function ttreeitemedit.getitems(const index: integer): ttreelistedititem;
 begin
- result:= ttreelistitem(fitemlist[index]);
+ result:= ttreelistedititem(fitemlist[index]);
 end;
 
 procedure ttreeitemedit.setitems(const index: integer;
-  const Value: ttreelistitem);
+  const Value: ttreelistedititem);
 begin
  fitemlist[index]:= value;
 end;
