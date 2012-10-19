@@ -11383,6 +11383,7 @@ begin     //focuscell
            (cell.row < frowcount)))) then begin
     int1:= ffocusedcell.row;
     ffocusedcell.row:= invalidaxis;
+    updaterowdata; //for twidgetgrid, data invalid
     bo2:= false;
     if (int1 <> cell.row) and doremoveappinsrow(int1,cell.row) then begin
      if (cell.row > int1) then begin

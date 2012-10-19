@@ -86,7 +86,8 @@ type
   procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
                                var processed: boolean);
   procedure initgridwidget;
-  procedure gridtovalue(row: integer);  //row = -1 -> focused row, -2 -> default value
+  procedure gridtovalue(row: integer);  //row = -1 -> focused row,
+                                        // -2 -> default value
   procedure valuetogrid(row: integer);  //row = -1 -> focused row
   function getnulltext: msestring;
   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty);
@@ -3412,12 +3413,16 @@ end;
 
 procedure tcustomwidgetgrid.updaterowdata;
 var
- int1: integer;
+ int1,int2: integer;
 begin
+ int2:= -2;
+ if ffocusedcell.row >= 0 then begin
+  int2:= -1;
+ end;
  for int1:= 0 to datacols.count - 1 do begin
   with twidgetcol(fdatacols[int1]) do begin
    if fintf <> nil then begin
-    fintf.gridtovalue(-1); //restore grid value
+    fintf.gridtovalue(int2); //restore grid value
    end;
   end;
  end;
