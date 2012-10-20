@@ -2355,7 +2355,8 @@ begin
 // adddata(anode);
 end;
 
-procedure tcustomitemeditlist.refreshitemvalues(aindex: integer = 0; acount: integer = -1);
+procedure tcustomitemeditlist.refreshitemvalues(aindex: integer = 0;
+                                                        acount: integer = -1);
 begin
  beginupdate;
  try

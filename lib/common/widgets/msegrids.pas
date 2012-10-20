@@ -11397,9 +11397,12 @@ begin     //focuscell
     if (int1 >= 0) and not ((selectaction = fca_exitgrid) and 
                                  (gs_rowremoving in fstate)) then begin
      ffocusedcell.row:= int1;
-     if bo2 and (cell.row = cell.row) then begin
-      updaterowdata; //no focusin data update
-     end;
+//     if bo2 and (cell.row = cell.row) then begin
+//      updaterowdata; //no focusin data update
+//     end;
+    end;
+    if ffocusedcell.row >= 0 then begin
+     updaterowdata; //current values
     end;
    end;
    dosortcheck(false);
