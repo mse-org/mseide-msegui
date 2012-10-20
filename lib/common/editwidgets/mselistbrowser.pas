@@ -3611,7 +3611,9 @@ procedure ttreeitemeditlist.setcolorline(const value: colorty);
 begin
  if fcolorline <> value then begin
   fcolorline:= value;
-  fowner.itemchanged(-1);
+  if fowner <> nil then begin
+   fowner.itemchanged(-1);
+  end;
  end;
 end;
 
