@@ -4501,7 +4501,9 @@ begin
       int3:= int3 + si.treeheight;
      end;
      if int3 < fcount then begin
+     {$warnings off}
       si:= ttreelistitem1(items[int3]); //next equal or higher level
+     {$warnings on}
       if si.parent <> so.parent then begin
        si:= so; //invalid
       end;
