@@ -11395,7 +11395,8 @@ begin     //focuscell
      int1:= frowcount-1;
     end;
     if (int1 >= 0) and not ((selectaction = fca_exitgrid) and 
-               (gs_rowremoving in fstate)) and (cell.row >= 0) then begin
+               (gs_rowremoving in fstate)) and 
+           ((cell.row >= 0) or (selectaction = fca_exitgrid)) then begin
      ffocusedcell.row:= int1;
 //     if bo2 and (cell.row = cell.row) then begin
 //      updaterowdata; //no focusin data update
