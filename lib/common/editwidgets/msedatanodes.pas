@@ -228,7 +228,8 @@ type
    procedure setchecked(const avalue: boolean); override;
    procedure checkindex(const aindex: integer);
    procedure settreelevel(const value: integer);
-   procedure countchange(const atreeheightbefore: integer);
+   procedure countchange(const atreeheightbefore: integer;
+                                      const notifyowner: boolean);
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
    function createsubnode: ttreelistitem; virtual;
@@ -1820,11 +1821,12 @@ begin
  inherited;
 end;
 
-procedure ttreelistitem.countchange(const atreeheightbefore: integer);
+procedure ttreelistitem.countchange(const atreeheightbefore: integer;
+                                         const notifyowner: boolean);
 var
  info1: nodeactioninfoty;
 begin
- if (fowner <> nil) then begin
+ if (fowner <> nil) and notifyowner then begin
   info1.action:= na_countchange;
   info1.treeheightbefore:= atreeheightbefore;
   fowner.nodenotification(self,info1);
@@ -1894,7 +1896,7 @@ begin
    end;
    int1:= treeheight;
    dosetitems(inccount,aitem);
-   countchange(int1);
+   countchange(int1,true);
   end;
   checksort;
   result:= aitem.fparentindex;
@@ -1903,7 +1905,7 @@ end;
 
 procedure ttreelistitem.aftermove;
 begin
- countchange(fcount); //refresh grid
+ countchange(fcount,true); //refresh grid
  checksort;
 end;
 
@@ -1937,7 +1939,7 @@ begin
    fitems[int1].fparentindex:= int1;
   end;
   dosetitems(aindex,aitem);
-  countchange(int1);
+  countchange(int1,true);
   checksort;
  end;
 end;
@@ -1961,7 +1963,7 @@ begin
    dosetitems(fcount,aitems[int1]);
    inc(fcount);
   end;
-  countchange(int2);
+  countchange(int2,true);
   checksort;
  end;
 end;
@@ -2051,7 +2053,7 @@ begin
    inc(fcount);
   end;
  end;
- countchange(int2);
+ countchange(int2,true);
  checksort;
 end;
 
@@ -2083,7 +2085,7 @@ begin
   fitems:= nil;
   acount:= fcount;
   fcount:= 0;
-  countchange(int2);
+  countchange(int2,true);
   if not (ns1_noowner in fstate1) then begin
    for int1:= 0 to acount-1 do begin
     with aitems[int1] do begin
@@ -2304,7 +2306,7 @@ var
 begin
  int1:= treeheight;
  internalcheckitems(checkdelete);
- countchange(int1);
+ countchange(int1,true);
 end;
 
 function ttreelistitem.remove(const aindex: integer): ttreelistitem;
@@ -2323,7 +2325,7 @@ begin
  for int1:= aindex to fcount-1 do begin
   fitems[int1].fparentindex:= int1;
  end;
- countchange(int2);
+ countchange(int2,not (ns1_destroying in result.fstate1));
 end;
 {
 function comparetreelistitemcasesensitive(const l,r): integer;
@@ -3124,7 +3126,7 @@ begin
     include(fstate,ns_sorted);
     checksort;
    end;
-   countchange(0);
+   countchange(0,true);
   end;
  end;
  exclude(fstate1,ns1_statechanged);
