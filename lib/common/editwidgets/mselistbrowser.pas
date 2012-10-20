@@ -4063,6 +4063,7 @@ var
 var
  int1,int2: integer;
  bo1: boolean;
+ po2: ptreelistedititematy;
  
 begin
  if ainfo.action = na_destroying then begin
@@ -4084,6 +4085,10 @@ begin
 //     fowner.fvalue:= nil; //invalid
 //    end;
     deleterow(int2,int1);
+    po2:= datapo;
+    for int1:= int2 to fcount-1 do begin
+     po2^[int1].findex:= int1;
+    end;
    end;
    exclude(self.fitemstate,ils_freelock);
    decupdate;
