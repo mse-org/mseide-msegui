@@ -11536,13 +11536,16 @@ begin
    if (og_noinsertempty in foptionsgrid) and
      (oldrow >= 0) and fdatacols.rowempty(oldrow) then begin
     fstate1:= fstate1-[gs1_rowinserted,gs1_rowsortinvalid];
-    result:= true;
-    deleterow(oldrow);
+    if not (gs_rowremoving in fstate) then begin
+     result:= true;
+     deleterow(oldrow);
+    end;
     exit;
    end;
   end
   else begin
-   if (newrow <> frowcount-1) and isautoappend then begin
+   if (newrow <> frowcount-1) and (oldrow = frowcount-1) and
+                                                  isautoappend then begin
     if row >= 0 then begin
      if row = 0 then begin
       row:= invalidaxis;
@@ -11552,12 +11555,14 @@ begin
      end;
     end
     else begin
-     result:= true;
      if newrow = frowcount-1 then begin
       exclude(fstate1,gs1_rowsortinvalid);
      end;
-     deleterow(frowcount-1,1,true);
-     include(fstate,gs_emptyrowremoved);
+     if not (gs_rowremoving in fstate) then begin
+      result:= true;
+      deleterow(frowcount-1,1,true);
+      include(fstate,gs_emptyrowremoved);
+     end;
     end;
    end
   end;
