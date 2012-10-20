@@ -2696,7 +2696,7 @@ class procedure ttreelistitem.calcitemlayout(const asize: sizety;
 var
  boxdist: integer;
 begin
- info.colorline:= cl_gray;
+// info.colorline:= cl_gray;
  inherited;
  boxdist:= boxsize + 2;
  with info.captionrect do begin
