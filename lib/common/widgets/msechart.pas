@@ -13,7 +13,7 @@ interface
 
 uses
  classes,msegui,mseguiglob,mseclasses,msearrayprops,msetypes,msegraphics,
- msegraphutils,mseglob,
+ msegraphutils,mseglob,msereal,
  msewidgets,msesimplewidgets,msedial,msebitmap,msemenus,mseevent,
  msedatalist,msestatfile,msestat,msestrings;
 
@@ -154,7 +154,9 @@ type
    procedure setoptions(const avalue: charttraceoptionsty); virtual;
    function getxitempo(const aindex: integer): preal;
    function getyitempo(const aindex: integer): preal;
-   
+   procedure getdatapo(out xpo,ypo: preal; //xpo nil for xseries
+                   out xcount,ycount,xstep,ystep: integer);
+                
    procedure checkgraphic;
    procedure paint(const acanvas: tcanvas);
    procedure paint1(const acanvas: tcanvas; const imagesize: sizety;
@@ -195,6 +197,8 @@ type
    procedure addxseriesdata(const avalue: real);
    procedure insertxseriesdata(const avalue: xseriesdataty);
    procedure assign(source: tpersistent); override;
+   procedure minmaxx(out amin,amax: real);
+   procedure minmaxy(out amin,amax: real);
 
    property xdata: realarty read finfo.ydata write setxdata;
    property ydata: realarty read finfo.ydata write setydata;
@@ -532,6 +536,8 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure clear; virtual;
+   procedure autoscalex(const astart: real = 0; const arange: real = 1);
+   procedure autoscaley(const astart: real = 0; const arange: real = 1);
    procedure addsample(const asamples: array of real); virtual;
    property traces: ttraces read ftraces write settraces;
  end;
@@ -1686,6 +1692,54 @@ begin
  end;
 end;
 
+procedure ttrace.getdatapo(out xpo,ypo: preal; //xpo nil for xseries
+                   out xcount,ycount,xstep,ystep: integer);
+begin
+ ystep:= 1;
+ xstep:= 1;
+ xpo:= nil;
+ ypo:= nil;
+ xcount:= 0;
+ ycount:= 0;
+ with finfo do begin
+  if ydatalist <> nil then begin
+   ypo:= ydatalist.datapo;
+   ycount:= ydatalist.count;
+  end
+  else begin
+   if ydata <> nil then begin
+    ypo:= pointer(ydata);
+    ycount:= length(ydata);
+   end
+   else begin
+    ypo:= pointer(xydata);
+    ycount:= length(xydata);
+    ystep:= 2;
+    if ypo <> nil then begin
+     inc(ypo);
+    end;
+   end;
+  end;
+  if kind <> trk_xseries then begin
+   if xdatalist <> nil then begin
+    xpo:= xdatalist.datapo;
+    xcount:= xdatalist.count;
+   end
+   else begin
+    if xdata <> nil then begin
+     xpo:= pointer(xdata);
+     xcount:= length(xdata);
+    end
+    else begin
+     xpo:= pointer(xydata);
+     xcount:= length(xydata);
+     ystep:= 2;
+    end;
+   end;
+  end;
+ end;
+end;
+
 procedure ttrace.deletedata(const aindex: integer);
 begin
  if (aindex < 0) or (aindex >= count) then begin
@@ -1860,6 +1914,70 @@ end;
 procedure ttrace.widgetregioninvalid;
 begin
  //dummy
+end;
+
+procedure ttrace.minmaxx(out amin: real; out amax: real);
+var
+ min,max: real;
+ int1: integer;
+ pox,poy: preal;
+ cx,cy,sx,sy: integer;
+begin
+ if kind = trk_xseries then begin
+  min:= xserstart;
+  max:= min + xserrange;
+ end
+ else begin
+  getdatapo(pox,poy,cx,cy,sx,sy);
+  if cx = 0 then begin
+   min:= 0;
+   max:= 1;
+  end
+  else begin
+   min:= bigreal;
+   max:= -bigreal;
+   for int1:= cx-1 downto 0 do begin
+    if pox^ > max then begin
+     max:= pox^;
+    end;
+    if pox^ < min then begin
+     min:= pox^;
+    end;
+    inc(pox,sx);
+   end;
+  end;
+ end;
+ amin:= min;
+ amax:= max;
+end;
+
+procedure ttrace.minmaxy(out amin: real; out amax: real);
+var
+ min,max: real;
+ int1: integer;
+ pox,poy: preal;
+ cx,cy,sx,sy: integer;
+begin
+ getdatapo(pox,poy,cx,cy,sx,sy);
+ if cy = 0 then begin
+  min:= 0;
+  max:= 1;
+ end
+ else begin
+  min:= bigreal;
+  max:= -bigreal;
+  for int1:= cy-1 downto 0 do begin
+   if poy^ > max then begin
+    max:= poy^;
+   end;
+   if poy^ < min then begin
+    min:= poy^;
+   end;
+   inc(poy,sy);
+  end;
+ end;
+ amin:= min;
+ amax:= max;
 end;
 
 { ttraces }
@@ -2728,6 +2846,68 @@ procedure tcustomchart.dostatwrite(const writer: tstatwriter);
 begin
  inherited;
  ftraces.dostatwrite(writer);
+end;
+
+function calcrange(var min: real; const max: real): real;
+begin
+ result:= max-min;
+ if result = 0 then begin
+  result:= min;
+  if result = 0 then begin
+   result:= 1;
+  end;
+  min:= min - result / 2;
+ end;
+end;
+
+procedure tcustomchart.autoscalex(const astart: real = 0;
+                                                      const arange: real = 1);
+var
+ rea1,rea2: real;
+ min,max,ra: real; 
+ int1: integer;
+begin
+ min:= bigreal;
+ max:= -bigreal;
+ for int1:= 0 to traces.count - 1 do begin
+  with traces[int1] do begin
+   minmaxx(rea1,rea2);
+   if rea1 < min then begin
+    min:= rea1;
+   end;
+   if rea2 > max then begin
+    max:= rea2;
+   end;
+  end;
+ end;
+ ra:= calcrange(min,max);
+ xstart:= min;
+ xrange:= ra;
+end;
+
+procedure tcustomchart.autoscaley(const astart: real = 0;
+                                                      const arange: real = 1);
+var
+ rea1,rea2: real;
+ min,max,ra: real; 
+ int1: integer;
+begin
+ min:= bigreal;
+ max:= -bigreal;
+ for int1:= 0 to traces.count - 1 do begin
+  with traces[int1] do begin
+   minmaxy(rea1,rea2);
+   if rea1 < min then begin
+    min:= rea1;
+   end;
+   if rea2 > max then begin
+    max:= rea2;
+   end;
+  end;
+ end;
+ ra:= calcrange(min,max);
+ ystart:= min;
+ yrange:= ra;
 end;
 
 { trecordertraces }

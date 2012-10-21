@@ -220,7 +220,7 @@ type
    fpostedeventslocal: eventarty;
    fidlecount: integer;
    fcheckoverloadlock: integer;
-   fexceptionactive: integer;
+//   fexceptionactive: integer;
    fexceptioncount: longword;
    fonexception: exceptioneventty;
    finiting: integer;
@@ -429,6 +429,9 @@ var
  appinst: tcustomapplication;
  appclass: applicationclassty;
 
+threadvar
+ exceptionactive: integer;
+ 
 procedure designchanged(const acomponent: tcomponent); //for designer notify
 begin
  if assigned(ondesignchanged) and 
@@ -1466,26 +1469,30 @@ procedure tcustomapplication.handleexception(sender: tobject = nil;
                               const leadingtext: msestring = '');
 var
  handled: boolean;
+ exceptobj: tobject;
 begin
- if fexceptionactive = 0 then begin //do not handle subsequent exceptions
-  if exceptobject is exception then begin
-   inc(fexceptionactive);
-   try
-    if not (exceptobject is eabort) then begin
-     inc(fexceptioncount);
+ exceptobj:= exceptobject;
+ if exceptobj is exception then begin
+  if not (exceptobj is eabort) then begin
+   if exceptionactive = 0 then begin
+                                 //do not handle subsequent exceptions
+    inc(exceptionactive);
+    try
+     interlockedincrement(fexceptioncount);
      handled:= false;
      if assigned(fonexception) then begin
-      fonexception(sender,exception(exceptobject),leadingtext,handled);
+      fonexception(sender,exception(exceptobj),leadingtext,handled);
      end;
      if not handled then begin
-      showexception(exception(exceptobject),leadingtext);
+      showexception(exception(exceptobj),leadingtext);
      end;
-    end
-    else begin
-//     sysutils.showexception(exceptobject, exceptaddr);
+    finally
+     dec(exceptionactive);
     end;
-   finally
-    dec(fexceptionactive);
+   end
+   else begin
+    interlockedincrement(fexceptioncount);
+//     sysutils.showexception(exceptobject, exceptaddr);
    end;
   end;
  end;
