@@ -29,7 +29,7 @@ uses
  
 type
  activatoroptionty = (avo_activateonloaded,avo_activatedelayed,
-                avo_deactivateonterminated,
+                avo_deactivateonterminated,avo_deactivatebottomup,
                 avo_handleexceptions,avo_quietexceptions,
                 avo_abortonexception,avo_waitcursor);
  activatoroptionsty = set of activatoroptionty;
@@ -113,7 +113,8 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure doasyncevent(var atag: integer); override;
    procedure loaded; override;
-   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil); override;
+   procedure unlink(const source,dest: iobjectlink;
+                                   valuepo: pointer = nil); override;
    procedure objevent(const sender: iobjectlink;
                          const event: objecteventty); override;
    procedure doterminated(const sender: tobject);   
@@ -834,7 +835,8 @@ begin
             {$ifdef FPC}@{$endif}writeclientnames,high(fclients) >= 0);
 end;
 
-procedure tactivator.objevent(const sender: iobjectlink; const event: objecteventty);
+procedure tactivator.objevent(const sender: iobjectlink;
+                                         const event: objecteventty);
 begin
  inherited;
  if (event = oe_activate) and (sender.getinstance = activator) then begin
@@ -842,7 +844,8 @@ begin
  end;
 end;
 
-procedure tactivator.unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+procedure tactivator.unlink(const source,dest: iobjectlink;
+                                             valuepo: pointer = nil);
 begin
  removeitem(fclients,pointer(dest));
  inherited;
@@ -941,8 +944,15 @@ begin
  end;
  if not active then begin
   updateorder;
-  for int1:= high(fclients) downto 0 do begin
-   iobjectlink(fclients[int1]).objevent(ievent(self),oe_deactivate);
+  if avo_deactivatebottomup in foptions then begin
+   for int1:= 0 to high(fclients) do begin
+    iobjectlink(fclients[int1]).objevent(ievent(self),oe_deactivate);
+   end;
+  end
+  else begin
+   for int1:= high(fclients) downto 0 do begin
+    iobjectlink(fclients[int1]).objevent(ievent(self),oe_deactivate);
+   end;
   end;
   if canevent(tmethod(fonafterdeactivate)) then begin
    fonafterdeactivate(self);
