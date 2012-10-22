@@ -580,7 +580,8 @@ end;
 
 function doubletostring(const value: double; const precision: integer = 0;
       const mode: floatstringmodety = fsm_default;
-      const decimalsep: msechar = '.'; const thousandsep: msechar = #0): msestring;
+      const decimalsep: msechar = '.';
+                               const thousandsep: msechar = #0): msestring;
 var
  bo1: boolean;
 begin

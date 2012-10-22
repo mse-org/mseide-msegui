@@ -139,9 +139,11 @@ function formatfloatmse(value: double; format: msestring;
    // 0.0F
    //
    //    + engeneering notation with metric system prefixes, exponent = n*3
+   //    | no space for 10^0
    // 0.0g   
    //
    //    + engeneering notation with metric system prefixes, exponent = n*3
+   //    | space for 10^0
    // 0.0G
    //
    // examples for value = 12345.678
@@ -2537,7 +2539,7 @@ var
  decimalsep,thousandsep: msechar;
  intopt,intmust,fracmust,fracopt,expopt,expmust: integer;
  decifound,doubledecifound,thousandfound,numberprinted,expofound,
- engfound,engsymfound: boolean;
+ engfound,engsymfound,engsymnospacefound: boolean;
  mstr1: msestring;
  format1: msestring;
  mantissaend: integer;
@@ -2723,6 +2725,7 @@ begin
      expofound:= false;
      engfound:= false;
      engsymfound:= false;
+     engsymnospacefound:= false;
      expsign:= false;
      while po2^ <> #0 do begin
       case po2^ of
@@ -2748,6 +2751,9 @@ begin
        'g','G': begin
         engsymfound:= true;
         engfound:= true;
+        if po2^ = 'g' then begin
+         engsymnospacefound:= true;
+        end;
         expchar:= msechar(ord(po2^)-2);
         checkexp;
        end;
@@ -2816,7 +2822,8 @@ begin
            inc(po3);
           end;
           po4:= po3;
-          while (po3^ >= '0') and (po3^ <= '9') do begin //no thousandsep possible
+          while (po3^ >= '0') and (po3^ <= '9') do begin
+                                       //no thousandsep possible
            inc(po3);
           end;
           int1:= po3-po4-1;
@@ -2864,7 +2871,7 @@ begin
         delete(mstr1,int3,int2-int3); //remove leading zeros      end;      
        end;
       end;
-      
+
       int1:= findlastchar(mstr1,decimalsep)-1;  //format mantissa
       if int1 <= 0 then begin
        int1:= length(mstr1);
@@ -2908,6 +2915,10 @@ begin
         break;
        end;
       end;
+      if engsymnospacefound and (mstr1 <> '') and 
+                                     (mstr1[length(mstr1)] = ' ') then begin
+       setlength(mstr1,length(mstr1)-1);
+      end;      
       if int2 < length(mstr1) then begin
        if mstr1[int2] = decimalsep then begin
         dec(int2);
