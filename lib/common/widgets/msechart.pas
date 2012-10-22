@@ -412,12 +412,18 @@ type
  end;
 
  tchartdials = class(tcustomdialcontrollers)
+  private
+   function getitems(const aindex: integer): tcustomdialcontroller;
+   procedure setitems(const aindex: integer;
+                             const avalue: tcustomdialcontroller);
   protected
   public
    constructor create(const aintf: ichartdialcontroller);
    procedure changed;
    procedure paint(const acanvas: tcanvas);
    procedure afterpaint(const acanvas: tcanvas);
+   property items[const aindex: integer]: tcustomdialcontroller read getitems
+                                                        write setitems; default;
  end;
  
  tchartdialshorz = class(tchartdials)
@@ -3238,6 +3244,17 @@ end;
 constructor tchartdials.create(const aintf: ichartdialcontroller);
 begin
  inherited create(aintf);
+end;
+
+procedure tchartdials.setitems(const aindex: integer;
+               const avalue: tcustomdialcontroller);
+begin
+ inherited getitems(aindex).assign(avalue);
+end;
+
+function tchartdials.getitems(const aindex: integer): tcustomdialcontroller;
+begin
+ result:= tcustomdialcontroller(inherited getitems(aindex));
 end;
 
 { txytrace }

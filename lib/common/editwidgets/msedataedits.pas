@@ -100,6 +100,7 @@ type
    function getvalueprop: ppropinfo;
 {$endif}
 //   procedure setisdb;
+   procedure updatedatalist; virtual;
    function geteditstate: dataeditstatesty;
    procedure seteditstate(const avalue: dataeditstatesty);
    procedure updateedittext(const force: boolean);
@@ -656,6 +657,8 @@ type
    function getifilink: tifiintegerlinkcomp;
    procedure setifilink(const avalue: tifiintegerlinkcomp);
   {$endif}
+   procedure setmin(const avalue: integer);
+   procedure setmax(const avalue: integer);
   protected
    fisnull: boolean; //used in tdbintegeredit
    function gettextvalue(var accept: boolean; const quiet: boolean): integer;
@@ -670,6 +673,7 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure setnullvalue; override;
    function getdefaultvalue: pointer; override;
+   procedure updatedatalist; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: integer);
@@ -679,8 +683,8 @@ type
    property valuedefault: integer read fvaluedefault write fvaluedefault default 0;
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 32;
-   property min: integer read fmin write fmin default 0;
-   property max: integer read fmax write fmax default maxint;
+   property min: integer read fmin write setmin default 0;
+   property max: integer read fmax write setmax default maxint;
 
    property gridvalue[const index: integer]: integer
         read getgridvalue write setgridvalue; default;
@@ -720,6 +724,8 @@ type
    procedure setgridvalue(const index: integer; const Value: int64);
    function getgridvalues: int64arty;
    procedure setgridvalues(const Value: int64arty);
+   procedure setmin(const avalue: int64);
+   procedure setmax(const avalue: int64);
   protected
    fisnull: boolean; //used in tdbintegeredit
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -733,6 +739,7 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure setnullvalue; override;
    function getdefaultvalue: pointer; override;
+   procedure updatedatalist; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: int64);
@@ -742,8 +749,9 @@ type
    property valuedefault: int64 read fvaluedefault write fvaluedefault default 0;
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 64;
-   property min: int64 read fmin write fmin default 0;
-   property max: int64 read fmax write fmax; // {$ifdef FPC}default maxint64{$endif};
+   property min: int64 read fmin write setmin default 0;
+   property max: int64 read fmax write setmax; 
+                             // {$ifdef FPC}default maxint64{$endif};
 
    property gridvalue[const index: integer]: int64
         read getgridvalue write setgridvalue; default;
@@ -847,6 +855,8 @@ type
    function getifilink: tifienumlinkcomp;
    procedure setifilink1(const avalue: tifienumlinkcomp);
   {$endif}
+   procedure setmin(const avalue: integer);
+   procedure setmax(const avalue: integer);
   protected
    fonsetvalue1: setintegereventty;
    fvalue1: integer;
@@ -869,6 +879,7 @@ type
 
    function getvalueempty: integer; override;
    function textcellcopy: boolean; override;
+   procedure updatedatalist; override;
   public
    enums: integerarty; //nil -> enum = item rowindex + valueoffset
    constructor create(aowner: tcomponent); override;
@@ -886,8 +897,8 @@ type
    property valueempty: integer read fvalueempty write fvalueempty default -1;
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 32;
-   property min: integer read fmin write fmin default -1;
-   property max: integer read fmax write fmax default maxint;
+   property min: integer read fmin write setmin default -1;
+   property max: integer read fmax write setmax default maxint;
    property gridvalue[const index: integer]: integer
         read getgridvalue write setgridvalue; default;
    property gridvalues: integerarty read getgridvalues write setgridvalues;
@@ -1042,6 +1053,7 @@ type
    fvaluedefault: realty;
    fmin: realty;
    fmax: realty;
+   procedure updatedatalist; override;
    procedure setmin(const avalue: realty); virtual;
    procedure setmax(const avalue: realty); virtual;
    function gettextvalue(var accept: boolean; const quiet: boolean): realty; virtual;
@@ -1266,6 +1278,8 @@ type
    procedure setifilink(const avalue: tifidatetimelinkcomp);
   {$endif}
    procedure setoptions(const avalue: datetimeeditoptionsty);
+   procedure setmin(const avalue: tdatetime);
+   procedure setmax(const avalue: tdatetime);
   protected
    function gettextvalue(var accept: boolean; const quiet: boolean): tdatetime;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -1280,6 +1294,7 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
    function isempty (const atext: msestring): boolean; override;
    function getdefaultvalue: pointer; override;
+   procedure updatedatalist; override;
   public
    constructor create(aowner: tcomponent); override;
    function griddata: trealdatalist;
@@ -1292,8 +1307,8 @@ type
                                              write fvaluedefault {stored false};
    property formatedit: msestring read fformatedit write setformatedit;
    property formatdisp: msestring read fformatdisp write setformatdisp;
-   property min: tdatetime read fmin write fmin;
-   property max: tdatetime read fmax write fmax;
+   property min: tdatetime read fmin write setmin;
+   property max: tdatetime read fmax write setmax;
    property kind: datetimekindty read fkind write setkind default dtk_date;
    property options: datetimeeditoptionsty read foptions write setoptions
                                                                    default [];
@@ -1814,6 +1829,9 @@ begin
 }
 {$endif}
   fdatalist:= fgridintf.getcol.datalist;
+  if fdatalist <> nil then begin
+   updatedatalist;
+  end;
   fgriddatalink:= tcustomwidgetgrid1(fgridintf.getgrid).getgriddatalink;
   fgridintf.updateeditoptions(foptionsedit);
   if (ow1_autoscale in foptionswidget1) and
@@ -2756,6 +2774,11 @@ begin
                  not (twidgetcol1(fgridintf.getcol).checkautocolwidth) then begin
   inherited;
  end;
+end;
+
+procedure tcustomdataedit.updatedatalist;
+begin
+ //dummy
 end;
  
 { tcustomstringedit }
@@ -4012,6 +4035,34 @@ begin
  result:= @fvaluedefault;
 end;
 
+procedure tcustomintegeredit.setmin(const avalue: integer);
+begin
+ fmin:= avalue;
+ if fdatalist <> nil then begin
+  with tgridintegerdatalist(fdatalist) do begin
+   min:= avalue;
+  end;
+ end;  
+end;
+
+procedure tcustomintegeredit.setmax(const avalue: integer);
+begin
+ fmax:= avalue;
+ if fdatalist <> nil then begin
+  with tgridintegerdatalist(fdatalist) do begin
+   max:= avalue;
+  end;
+ end;  
+end;
+
+procedure tcustomintegeredit.updatedatalist;
+begin
+ with tgridintegerdatalist(fdatalist) do begin
+  min:= self.min;
+  max:= self.max;
+ end;
+end;
+
 { tcustomint64edit }
 
 constructor tcustomint64edit.create(aowner: tcomponent);
@@ -4211,6 +4262,34 @@ end;
 function tcustomint64edit.getdefaultvalue: pointer;
 begin
  result:= @fvaluedefault;
+end;
+
+procedure tcustomint64edit.setmin(const avalue: int64);
+begin
+ fmin:= avalue;
+ if fdatalist <> nil then begin
+  with tgridint64datalist(fdatalist) do begin
+   min:= avalue
+  end;
+ end;
+end;
+
+procedure tcustomint64edit.setmax(const avalue: int64);
+begin
+ fmax:= avalue;
+ if fdatalist <> nil then begin
+  with tgridint64datalist(fdatalist) do begin
+   max:= avalue
+  end;
+ end;
+end;
+
+procedure tcustomint64edit.updatedatalist;
+begin
+ with tgridint64datalist(fdatalist) do begin
+  min:= self.min;
+  max:= self.max;
+ end;
 end;
 
 
@@ -4707,6 +4786,34 @@ end;
 procedure tcustomenuedit.setifilink1(const avalue: tifienumlinkcomp);
 begin
  setifilink0(avalue);
+end;
+
+procedure tcustomenuedit.setmin(const avalue: integer);
+begin
+ fmin:= avalue;
+ if fdatalist <> nil then begin
+  with tgridenumdatalist(fdatalist) do begin
+   min:= avalue;
+  end;
+ end;
+end;
+
+procedure tcustomenuedit.setmax(const avalue: integer);
+begin
+ fmax:= avalue;
+ if fdatalist <> nil then begin
+  with tgridenumdatalist(fdatalist) do begin
+   max:= avalue;
+  end;
+ end;
+end;
+
+procedure tcustomenuedit.updatedatalist;
+begin
+ with tgridenumdatalist(fdatalist) do begin
+  min:= self.min;
+  max:= self.max;
+ end;
 end;
 {$endif}
 
@@ -5215,11 +5322,29 @@ end;
 procedure tcustomrealedit.setmin(const avalue: realty);
 begin
  fmin:= avalue;
+ if fdatalist <> nil then begin
+  with tgridrealdatalist(fdatalist) do begin
+   min:= avalue;
+  end;
+ end;
 end;
 
 procedure tcustomrealedit.setmax(const avalue: realty);
 begin
  fmax:= avalue;
+ if fdatalist <> nil then begin
+  with tgridrealdatalist(fdatalist) do begin
+   max:= avalue;
+  end;
+ end;
+end;
+
+procedure tcustomrealedit.updatedatalist;
+begin
+ with tgridrealdatalist(fdatalist) do begin
+  min:= self.min;
+  max:= self.max;
+ end;
 end;
 
 { tspineditframe }
@@ -5729,4 +5854,33 @@ begin
   formatchanged;
  end;
 end;
+
+procedure tcustomdatetimeedit.setmin(const avalue: tdatetime);
+begin
+ fmin:= avalue;
+ if fdatalist <> nil then begin
+  with tgridrealdatalist(fdatalist) do begin
+   min:= avalue;
+  end;
+ end; 
+end;
+
+procedure tcustomdatetimeedit.setmax(const avalue: tdatetime);
+begin
+ fmax:= avalue;
+ if fdatalist <> nil then begin
+  with tgridrealdatalist(fdatalist) do begin
+   max:= avalue;
+  end;
+ end; 
+end;
+
+procedure tcustomdatetimeedit.updatedatalist;
+begin
+ with tgridrealdatalist(fdatalist) do begin
+  min:= self.min;
+  max:= self.max;
+ end;
+end;
+
 end.

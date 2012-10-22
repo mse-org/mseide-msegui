@@ -3077,7 +3077,8 @@ begin
  result:= inttostr(items[index]);
 end;
 
-procedure tintegerdatalist.setstatdata(const index: integer; const value: msestring);
+procedure tintegerdatalist.setstatdata(const index: integer;
+                                              const value: msestring);
 var
  int1: integer;
 begin
