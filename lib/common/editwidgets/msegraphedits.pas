@@ -124,6 +124,7 @@ type
    function getedited: boolean; virtual;
    procedure setedited(const avalue: boolean); virtual;
   protected
+   fdatalist: tdatalist;
    fgridintf: iwidgetgrid;
    fgriddatalink: pointer;
    fstate: dataeditstatesty;
@@ -140,6 +141,7 @@ type
 
    function getgridintf: iwidgetgrid;
    procedure checkgrid;
+   function checkgriddata: tdatalist;
    procedure internalfillcol(const value);
    procedure internalassigncol(const value);
    procedure internalgetgridvalue(index: integer; out value);
@@ -161,6 +163,7 @@ type
    
    procedure updatereadonlystate; virtual;
    procedure initeditfocus;
+   procedure updatedatalist; virtual;
    
     //igridwidget
    procedure setfirstclick;
@@ -677,7 +680,7 @@ type
    fonsetvalue: setintegereventty;
    fmin: integer;
    fmax: integer;
-   fdatalist: tintegerdatalist;
+//   fdatalist: tintegerdatalist;
    procedure setvalue(const Value: integer);
    function getgridvalue(const index: integer): integer;
    procedure setgridvalue(const index, Value: integer);
@@ -687,8 +690,11 @@ type
    function getifilink: tifiintegerlinkcomp;
    procedure setifilink(const avalue: tifiintegerlinkcomp);
   {$endif}
+   procedure setmin(const avalue: integer);
+   procedure setmax(const avalue: integer);
+   function getdatalist: tintegerdatalist;
   protected
-   procedure setgridintf(const intf: iwidgetgrid); override;
+//   procedure setgridintf(const intf: iwidgetgrid); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatype: listdatatypety; override;
    function getdefaultvalue: pointer; override;
@@ -704,6 +710,7 @@ type
                                    const down: boolean); override;
    procedure doinc(var avalue: integer; const down: boolean);
    procedure datalistdestroyed; override;
+   procedure updatedatalist; override;
   public
    function checkvalue: boolean; override;
    procedure togglegridvalue(const index: integer); override;
@@ -711,12 +718,12 @@ type
    property gridvalue[const index: integer]: integer
         read getgridvalue write setgridvalue; default;
    property gridvalues: integerarty read getgridvalues write setgridvalues;
-   property datalist: tintegerdatalist read fdatalist;
+   property datalist: tintegerdatalist read getdatalist; 
    property onsetvalue: setintegereventty read fonsetvalue write fonsetvalue;
    property value: integer read fvalue write setvalue default 0;
    property valuedefault: integer read fvaluedefault write fvaluedefault default 0;
-   property min: integer read fmin write fmin default 0; //checked by togglevalue
-   property max: integer read fmax write fmax default 0; //checked by togglevalue
+   property min: integer read fmin write setmin default 0; //checked by togglevalue
+   property max: integer read fmax write setmax default 0; //checked by togglevalue
   published
   {$ifdef mse_with_ifi}
    property ifilink: tifiintegerlinkcomp  read getifilink write setifilink;
@@ -1493,9 +1500,14 @@ procedure tgraphdataedit.setgridintf(const intf: iwidgetgrid);
 begin
  fgridintf:= intf;
  if fgridintf <> nil then begin
+  fdatalist:= fgridintf.getcol.datalist;
+  if fdatalist <> nil then begin
+   updatedatalist;
+  end;
   fgriddatalink:= tcustomwidgetgrid1(fgridintf.getgrid).getgriddatalink;
  end
  else begin
+  fdatalist:= nil;
   fgriddatalink:= nil;
  end;
  {$ifdef mse_with_ifi}
@@ -1693,6 +1705,17 @@ procedure tgraphdataedit.checkgrid;
 begin
  if fgridintf = nil then begin
   raise exception.Create('No grid.');
+ end;
+end;
+
+function tgraphdataedit.checkgriddata: tdatalist;
+begin
+ if fgridintf = nil then begin
+  raise exception.Create('No grid.');
+ end;
+ result:= fgridintf.getcol.datalist;
+ if result = nil then begin
+  raise exception.Create('No datalist.');
  end;
 end;
 
@@ -2007,7 +2030,7 @@ end;
 
 procedure tgraphdataedit.datalistdestroyed;
 begin
- //dummy
+ fdatalist:= nil;
 end;
 
 {$ifdef mse_with_ifi}
@@ -2071,6 +2094,11 @@ end;
 procedure tgraphdataedit.setedited(const avalue: boolean);
 begin
  fedited:= avalue;
+end;
+
+procedure tgraphdataedit.updatedatalist;
+begin
+ //dummy
 end;
 
 
@@ -2868,7 +2896,7 @@ end;
 procedure tcustomintegergraphdataedit.fillcol(const avalue: integer);
 begin
  checkgrid;
- fdatalist.fill(fdatalist.count,avalue);
+ tgridintegerdatalist(fdatalist).fill(fdatalist.count,avalue);
 end;
 
 function tcustomintegergraphdataedit.createdatalist(
@@ -2896,15 +2924,15 @@ end;
 function tcustomintegergraphdataedit.getgridvalues: integerarty;
 begin
  checkgrid;
- result:= fdatalist.asarray;
+ result:= tgridintegerdatalist(fdatalist).asarray;
 end;
 
 procedure tcustomintegergraphdataedit.setgridvalues(const Value: integerarty);
 begin
  checkgrid;
- fdatalist.asarray:= value;
+ tgridintegerdatalist(fdatalist).asarray:= value;
 end;
-
+{
 procedure tcustomintegergraphdataedit.setgridintf(const intf: iwidgetgrid);
 begin
  if intf <> nil then begin
@@ -2915,7 +2943,7 @@ begin
  end;
  inherited;
 end;
-
+}
 procedure tcustomintegergraphdataedit.resetgridvalue(const index: integer);
 begin
  gridvalue[index]:= valuedefault;
@@ -2945,6 +2973,7 @@ procedure tcustomintegergraphdataedit.datalistdestroyed;
 begin
  fdatalist:= nil;
 end;
+
 {$ifdef mse_with_ifi}
 function tcustomintegergraphdataedit.getifilink: tifiintegerlinkcomp;
 begin
@@ -2955,6 +2984,40 @@ procedure tcustomintegergraphdataedit.setifilink(const avalue: tifiintegerlinkco
 begin
  inherited setifilink(avalue);
 end;
+
+procedure tcustomintegergraphdataedit.setmin(const avalue: integer);
+begin
+ fmin:= avalue;
+ if fdatalist <> nil then begin
+  with tgridintegerdatalist(fdatalist) do begin
+   min:= avalue;
+  end;
+ end;
+end;
+
+procedure tcustomintegergraphdataedit.setmax(const avalue: integer);
+begin
+ fmax:= avalue;
+ if fdatalist <> nil then begin
+  with tgridintegerdatalist(fdatalist) do begin
+   max:= avalue;
+  end;
+ end;
+end;
+
+procedure tcustomintegergraphdataedit.updatedatalist;
+begin
+ with tgridintegerdatalist(fdatalist) do begin
+  min:= self.min;
+  max:= self.max;
+ end;
+end;
+
+function tcustomintegergraphdataedit.getdatalist: tintegerdatalist;
+begin
+ result:= tintegerdatalist(checkgriddata);
+end;
+
 {$endif}
 
 { tvaluefacearrayprop }
