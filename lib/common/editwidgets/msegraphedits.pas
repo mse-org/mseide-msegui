@@ -111,7 +111,7 @@ type
    function getifilinkkind: ptypeinfo;
    procedure setifilink(const avalue: tifilinkcomp);
    function getifilink: tifilinkcomp;
-   function ifigriddata: tdatalist;
+//   function ifigriddata: tdatalist;
    procedure updateifigriddata(const sender: tobject; const alist: tdatalist);
    function getgriddata: tdatalist;
    function getvalueprop: ppropinfo;
@@ -1215,12 +1215,12 @@ end;
 
 function tcustomrealgraphdataedit.getgridvalues: realarty;
 begin
- result:= trealdatalist(fgridintf.getcol.datalist).asarray;
+ result:= trealdatalist(checkgriddata).asarray;
 end;
 
 procedure tcustomrealgraphdataedit.setgridvalues(const avalue: realarty);
 begin
- trealdatalist(fgridintf.getcol.datalist).asarray:= avalue;
+ trealdatalist(checkgriddata).asarray:= avalue;
 end;
 
 procedure tcustomrealgraphdataedit.fillcol(const value: realty);
@@ -1713,7 +1713,7 @@ begin
  if fgridintf = nil then begin
   raise exception.Create('No grid.');
  end;
- result:= fgridintf.getcol.datalist;
+ result:= fdatalist;
  if result = nil then begin
   raise exception.Create('No datalist.');
  end;
@@ -1744,7 +1744,7 @@ end;
 function tgraphdataedit.griddata: tdatalist;
 begin
  checkgrid;
- result:= fgridintf.getcol.datalist;
+ result:= fdatalist;
 end;
 
 function tgraphdataedit.widgetcol: twidgetcol;
@@ -1954,9 +1954,8 @@ end;
 
 procedure tgraphdataedit.internalfillcol(const value);
 begin
- checkgrid;
- with tdatalist1(fgridintf.getcol.datalist) do begin
-  tdatalist1(fgridintf.getcol.datalist).internalfill(count,value);
+ with tdatalist1(checkgriddata) do begin
+  internalfill(count,value);
  end;
 end;
 
@@ -2055,15 +2054,15 @@ begin
   fifiserverintf.setvalue(iifidatalink(self),avalue,accept,gridrow);
  end;
 end;
-
+{
 function tgraphdataedit.ifigriddata: tdatalist;
 begin
  result:= nil;
  if fgridintf <> nil then begin
-  result:= fgridintf.getcol.datalist;
+  result:= fdatalist;
  end;
 end;
-
+}
 procedure tgraphdataedit.updateifigriddata(const sender: tobject; 
                                                     const alist: tdatalist);
 begin
@@ -2076,7 +2075,7 @@ function tgraphdataedit.getgriddata: tdatalist;
 begin
  result:= nil;
  if fgridintf <> nil then begin
-  result:= fgridintf.getcol.datalist;
+  result:= fdatalist;
  end;
 end;
 
@@ -2234,30 +2233,24 @@ begin
 end;
 
 function ttogglegraphdataedit.getcheckedrow: integer;
-var
- datalist1: tdatalist;
 begin
  result:= -1;
  if (fgridintf <> nil) and (bo_radioitemcol in foptions) then begin
-  datalist1:= fgridintf.getcol.datalist;
-  if datalist1 <> nil then begin
-   result:= datalist1.checkeditem;
+  if fdatalist <> nil then begin
+   result:= fdatalist.checkeditem;
   end;
  end;  
 end;
 
 procedure ttogglegraphdataedit.setcheckedrow(const avalue: integer);
-var
- datalist1: tdatalist;
 begin
  if checkedrow <> avalue then begin
   if (fgridintf <> nil) and (bo_radioitemcol in foptions) then begin
-   datalist1:= fgridintf.getcol.datalist;
-   if datalist1 <> nil then begin
+   if fdatalist <> nil then begin
     if avalue < 0 then begin
-     if datalist1.checkeditem >= 0 then begin
-      resetgridvalue(datalist1.checkeditem);
-      datalist1.checkeditem:= -1;
+     if fdatalist.checkeditem >= 0 then begin
+      resetgridvalue(fdatalist.checkeditem);
+      fdatalist.checkeditem:= -1;
      end;
     end    
     else begin

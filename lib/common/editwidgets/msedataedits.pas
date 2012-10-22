@@ -724,8 +724,8 @@ type
    procedure setgridvalue(const index: integer; const Value: int64);
    function getgridvalues: int64arty;
    procedure setgridvalues(const Value: int64arty);
-   procedure setmin(const avalue: int64);
-   procedure setmax(const avalue: int64);
+//   procedure setmin(const avalue: int64);
+//   procedure setmax(const avalue: int64);
   protected
    fisnull: boolean; //used in tdbintegeredit
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -739,7 +739,7 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
    procedure setnullvalue; override;
    function getdefaultvalue: pointer; override;
-   procedure updatedatalist; override;
+//   procedure updatedatalist; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: int64);
@@ -749,8 +749,8 @@ type
    property valuedefault: int64 read fvaluedefault write fvaluedefault default 0;
    property base: numbasety read fbase write setbase default nb_dec;
    property bitcount: integer read fbitcount write setbitcount default 64;
-   property min: int64 read fmin write setmin default 0;
-   property max: int64 read fmax write setmax; 
+   property min: int64 read fmin write fmin{setmin} default 0;
+   property max: int64 read fmax write fmax{setmax}; 
                              // {$ifdef FPC}default maxint64{$endif};
 
    property gridvalue[const index: integer]: int64
@@ -2166,7 +2166,8 @@ begin
  if fgridintf = nil then begin
   raise exception.Create('No grid.');
  end;
- result:= fgridintf.getcol.datalist;
+// result:= fgridintf.getcol.datalist;
+ result:= fdatalist;
  if result = nil then begin
   raise exception.Create('No datalist.');
  end;
@@ -2206,9 +2207,10 @@ end;
 
 procedure tcustomdataedit.internalfillcol(const value);
 begin
- checkgrid;
- with tdatalist1(fgridintf.getcol.datalist) do begin
-  tdatalist1(fgridintf.getcol.datalist).internalfill(count,value);
+// checkgrid;
+// with tdatalist1(fgridintf.getcol.datalist) do begin
+ with tdatalist1(checkgriddata) do begin
+  {tdatalist1(fgridintf.getcol.datalist).}internalfill(count,value);
  end;
 end;
 
@@ -2500,14 +2502,14 @@ begin
 end;
 
 function tcustomdataedit.locatecount: integer;
-var
- datalist1: tdatalist;
+//var
+// datalist1: tdatalist;
 begin
  result:= 0;
  if fgridintf <> nil then begin
-  datalist1:= fgridintf.getcol.datalist;
-  if datalist1 <> nil then begin
-   result:= datalist1.count;
+//  datalist1:= fgridintf.getcol.datalist;
+  if fdatalist <> nil then begin
+   result:= fdatalist.count;
   end;
  end;
 end;
@@ -2964,12 +2966,14 @@ end;
 
 function tcustomstringedit.getgridvalues: msestringarty;
 begin
- result:= tmsestringdatalist(fgridintf.getcol.datalist).asarray;
+ result:= tmsestringdatalist(checkgriddata).asarray;
+// result:= tmsestringdatalist(fgridintf.getcol.datalist).asarray;
 end;
 
 procedure tcustomstringedit.setgridvalues(const Value: msestringarty);
 begin
- tmsestringdatalist(fgridintf.getcol.datalist).asarray:= value;
+ tmsestringdatalist(checkgriddata).asarray:= value;
+// tmsestringdatalist(fgridintf.getcol.datalist).asarray:= value;
 end;
 {
 function tcustomstringedit.isempty(const atext: msestring): boolean;
@@ -3296,12 +3300,14 @@ end;
 
 function thexstringedit.getgridvalues: stringarty;
 begin
- result:= tansistringdatalist(fgridintf.getcol.datalist).asarray;
+ result:= tansistringdatalist(checkgriddata).asarray;
+// result:= tansistringdatalist(fgridintf.getcol.datalist).asarray;
 end;
 
 procedure thexstringedit.setgridvalues(const Value: stringarty);
 begin
- tansistringdatalist(fgridintf.getcol.datalist).asarray:= value;
+ tansistringdatalist(checkgriddata).asarray:= value;
+// tansistringdatalist(fgridintf.getcol.datalist).asarray:= value;
 end;
 
 procedure thexstringedit.fillcol(const value: string);
@@ -3942,7 +3948,8 @@ begin
 //   end;
 //   dostatread(reader);
 //  end;
-//  reader.readintegerdatalist(valuevarname,tintegerdatalist(fgridintf.getcol.datalist),fmin,fmax);
+//  reader.readintegerdatalist(valuevarname,
+//               tintegerdatalist(fgridintf.getcol.datalist),fmin,fmax);
 // end
 // else begin
   value:= reader.readinteger(valuevarname,value,fmin,fmax);
@@ -3999,12 +4006,14 @@ end;
 
 function tcustomintegeredit.getgridvalues: integerarty;
 begin
- result:= tintegerdatalist(fgridintf.getcol.datalist).asarray;
+ result:= tintegerdatalist(checkgriddata).asarray;
+// result:= tintegerdatalist(fgridintf.getcol.datalist).asarray;
 end;
 
 procedure tcustomintegeredit.setgridvalues(const Value: integerarty);
 begin
- tintegerdatalist(fgridintf.getcol.datalist).asarray:= value;
+ tintegerdatalist(checkgriddata).asarray:= value;
+// tintegerdatalist(fgridintf.getcol.datalist).asarray:= value;
 end;
 
 procedure tcustomintegeredit.fillcol(const value: integer);
@@ -4183,7 +4192,8 @@ begin
 //   end;
 //   dostatread(reader);
 //  end;
-//  reader.readintegerdatalist(valuevarname,tintegerdatalist(fgridintf.getcol.datalist),fmin,fmax);
+//  reader.readintegerdatalist(valuevarname,
+//          tintegerdatalist(fgridintf.getcol.datalist),fmin,fmax);
 // end
 // else begin
   value:= reader.readint64(valuevarname,value,fmin,fmax);
@@ -4241,12 +4251,14 @@ end;
 
 function tcustomint64edit.getgridvalues: int64arty;
 begin
- result:= tint64datalist(fgridintf.getcol.datalist).asarray;
+ result:= tint64datalist(checkgriddata).asarray;
+// result:= tint64datalist(fgridintf.getcol.datalist).asarray;
 end;
 
 procedure tcustomint64edit.setgridvalues(const Value: int64arty);
 begin
- tint64datalist(fgridintf.getcol.datalist).asarray:= value;
+ tint64datalist(checkgriddata).asarray:= value;
+// tint64datalist(fgridintf.getcol.datalist).asarray:= value;
 end;
 
 procedure tcustomint64edit.fillcol(const value: int64);
@@ -4263,7 +4275,7 @@ function tcustomint64edit.getdefaultvalue: pointer;
 begin
  result:= @fvaluedefault;
 end;
-
+{
 procedure tcustomint64edit.setmin(const avalue: int64);
 begin
  fmin:= avalue;
@@ -4291,7 +4303,7 @@ begin
   max:= self.max;
  end;
 end;
-
+}
 
 { tkeystringdropdowncontroller }
 
@@ -4593,12 +4605,14 @@ end;
 
 function tcustomenuedit.getgridvalues: integerarty;
 begin
- result:= tintegerdatalist(fgridintf.getcol.datalist).asarray;
+ result:= tintegerdatalist(checkgriddata).asarray;
+// result:= tintegerdatalist(fgridintf.getcol.datalist).asarray;
 end;
 
 procedure tcustomenuedit.setgridvalues(const avalue: integerarty);
 begin
- tintegerdatalist(fgridintf.getcol.datalist).asarray:= avalue;
+ tintegerdatalist(checkgriddata).asarray:= avalue;
+// tintegerdatalist(fgridintf.getcol.datalist).asarray:= avalue;
 end;
 
 function tcustomenuedit.getdefaultvalue: pointer;
@@ -5170,7 +5184,8 @@ begin
 //   end;
 //   dostatread(reader);
 //  end;
-//  reader.readrealdatalist(valuevarname,trealdatalist(fgridintf.getcol.datalist),fmin,fmax);
+//  reader.readrealdatalist(valuevarname,
+//                          trealdatalist(fgridintf.getcol.datalist),fmin,fmax);
 // end
 // else begin
   value:= reader.readreal(valuevarname,value,fmin,fmax)
@@ -5212,7 +5227,8 @@ end;
 
 function tcustomrealedit.getgridvalues: realarty;
 begin
- result:= trealdatalist(fgridintf.getcol.datalist).asarray;
+ result:= trealdatalist(checkgriddata).asarray;
+// result:= trealdatalist(fgridintf.getcol.datalist).asarray;
 end;
 
 function tcustomrealedit.getgridintvalues: integerarty;
@@ -5220,7 +5236,7 @@ var
  ar1: realarty;
  int1: integer;
 begin
- ar1:= trealdatalist(fgridintf.getcol.datalist).asarray;
+ ar1:= trealdatalist(checkgriddata).asarray;
  setlength(result,length(ar1));
  for int1:= 0 to high(ar1) do begin
   result[int1]:= realtytoint(ar1[int1]);
@@ -5229,7 +5245,8 @@ end;
 
 procedure tcustomrealedit.setgridvalues(const avalue: realarty);
 begin
- trealdatalist(fgridintf.getcol.datalist).asarray:= avalue;
+ trealdatalist(checkgriddata).asarray:= avalue;
+// trealdatalist(fgridintf.getcol.datalist).asarray:= avalue;
 end;
 
 procedure tcustomrealedit.setgridintvalues(const avalue: integerarty);
@@ -5241,7 +5258,7 @@ begin
  for int1:= 0 to high(ar1) do begin
   ar1[int1]:= inttorealty(avalue[int1]);
  end;
- trealdatalist(fgridintf.getcol.datalist).asarray:= ar1;
+ trealdatalist(checkgriddata).asarray:= ar1;
 end;
 
 procedure tcustomrealedit.setvaluerange(const avalue: real);
@@ -5551,12 +5568,12 @@ end;
 
 function tcustomdatetimeedit.getgridvalues: datetimearty;
 begin
- result:= datetimearty(trealdatalist(fgridintf.getcol.datalist).asarray);
+ result:= datetimearty(trealdatalist(checkgriddata).asarray);
 end;
 
 procedure tcustomdatetimeedit.setgridvalues(const Value: datetimearty);
 begin
- trealdatalist(fgridintf.getcol.datalist).asarray:= realarty(value);
+ trealdatalist(checkgriddata).asarray:= realarty(value);
 end;
 
 function tcustomdatetimeedit.checkkind(const avalue: tdatetime): tdatetime;
