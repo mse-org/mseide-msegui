@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007-2011 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2012 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -19,7 +19,8 @@ uses
 
 type
  chartstatety = (chs_nocolorchart,chs_hasdialscroll,chs_hasdialshift,
-                 chs_started,chs_full,chs_chartvalid); //for tchartrecorder
+                 chs_started,chs_full,chs_chartvalid, //for tchartrecorder
+                 chs_layoutvalid); 
  chartstatesty = set of chartstatety;
  charttraceoptionty = (cto_invisible,cto_stockglyphs,cto_adddataright,
                        cto_xordered, //optimize for big data quantity
@@ -461,6 +462,17 @@ type
    property framei_bottom default 1;
    property colorclient default cl_foreground;
  end;
+
+ rectsidety = (rs_left,rs_top,rs_right,rs_bottom);
+ rectsidesty = set of rectsidety;
+ optionchartty = (oca_autofitleft,oca_autofittop,oca_autofitright,
+                    oca_autofitbottom);
+ optionschartty = set of optionchartty;
+const
+ allrectsides = [rs_left,rs_top,rs_right,rs_bottom];
+ rectsidesmask = [oca_autofitleft,oca_autofittop,oca_autofitright,
+                    oca_autofitbottom];
+type
  
  tcuchart = class(tscrollbox,ichartdialcontroller,istatfile)
   private
@@ -472,6 +484,8 @@ type
    fyrange: real;
    fstatfile: tstatfile;
    fstatvarname: msestring;
+   foptionschart: optionschartty;
+   ffitframe: framety;
    procedure setxdials(const avalue: tchartdialshorz);
    procedure setydials(const avalue: tchartdialsvert);
    procedure setcolorchart(const avalue: colorty);
@@ -484,13 +498,22 @@ type
    function getyrange: real;
    procedure setyrange(const avalue: real); virtual;
    procedure setstatfile(const avalue: tstatfile);
+   procedure setoptionschart(const avalue: optionschartty);
+   procedure setfitframe(const avalue: framety);
+   procedure setfitframe_left(const avalue: integer);
+   procedure setfitframe_top(const avalue: integer);
+   procedure setfitframe_right(const avalue: integer);
+   procedure setfitframe_bottom(const avalue: integer);
   protected
    fcolorchart: colorty;
    fstate: chartstatesty;
    fshiftsum: int64;
    fscrollsum: integer;
    fsampleco: integer;
+   procedure fontchanged; override;
+   function checklayout: boolean; virtual; //true if changes made
    procedure changed; virtual;
+   procedure layoutchanged;
    procedure chartchange;
    procedure clientrectchanged; override;
    procedure dopaintcontent(const acanvas: tcanvas); virtual;
@@ -512,6 +535,13 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function fit(const aframe: framety;
+                      const asides: rectsidesty = allrectsides): boolean; 
+           //adjust frame.framei for dials size + aframe
+           //returns tru if changes made
+
+   property optionschart: optionschartty read foptionschart
+                                    write setoptionschart default [];   
    property colorchart: colorty read fcolorchart write setcolorchart 
                               default cl_foreground;
    property xstart: real read getxstart write setxstart;
@@ -523,6 +553,15 @@ type
    property ydials: tchartdialsvert read fydials write setydials;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
+   property fitframe: framety read ffitframe write setfitframe;
+   property fitframe_left: integer read ffitframe.left
+                          write setfitframe_left default 0;
+   property fitframe_top: integer read ffitframe.top
+                          write setfitframe_top default 0;
+   property fitframe_right: integer read ffitframe.right
+                          write setfitframe_right default 0;
+   property fitframe_bottom: integer read ffitframe.bottom
+                          write setfitframe_bottom default 0;
  end;
 
  tcustomchart = class(tcuchart)
@@ -550,6 +589,7 @@ type
 
  tchart = class(tcustomchart)
   published
+   property optionschart;
    property traces;
    property colorchart;
    property xstart;
@@ -558,6 +598,10 @@ type
    property yrange;
    property xdials;
    property ydials;
+   property fitframe_left;
+   property fitframe_top;
+   property fitframe_right;
+   property fitframe_bottom;
    property statfile;
    property statvarname;
    property onbeforepaint;
@@ -626,6 +670,7 @@ type
                                 default 100;
    property traces: trecordertraces read ftraces write settraces;
    
+   property optionschart;
    property colorchart;
    property xstart;
    property ystart;
@@ -633,6 +678,12 @@ type
    property yrange;
    property xdials;
    property ydials;
+   property fitframe_left;
+   property fitframe_top;
+   property fitframe_right;
+   property fitframe_bottom;
+   property statfile;
+   property statvarname;
    property onbeforepaint;
    property onpaintbackground;
    property onpaint;
@@ -649,6 +700,7 @@ uses
 
 type
  tcustomdialcontroller1 = class(tcustomdialcontroller);
+ tdialticks1 = class(tdialticks);
 
 function makexseriesdata(const value: real; const index: integer): xseriesdataty;
 begin
@@ -2550,12 +2602,14 @@ end;
 }
 procedure tcuchart.dopaint(const acanvas: tcanvas);
 begin
- inherited;
- fxdials.paint(acanvas);
- fydials.paint(acanvas);
- dopaintcontent(acanvas);
- fxdials.afterpaint(acanvas);
- fydials.afterpaint(acanvas);
+ if not checklayout then begin
+  inherited;
+  fxdials.paint(acanvas);
+  fydials.paint(acanvas);
+  dopaintcontent(acanvas);
+  fxdials.afterpaint(acanvas);
+  fydials.afterpaint(acanvas);
+ end;
 end;
 
 procedure tcuchart.setcolorchart(const avalue: colorty);
@@ -2704,10 +2758,134 @@ begin
  end;
 end;
 
+procedure tcuchart.layoutchanged;
+begin
+ exclude(fstate,chs_layoutvalid);
+ invalidate;
+end;
+
 procedure tcuchart.chartchange;
 begin
  exclude(fstate,chs_chartvalid);
  invalidate;
+end;
+
+function tcuchart.fit(const aframe: framety;
+                      const asides: rectsidesty = allrectsides): boolean;
+var
+ ext1: rectextty;
+ int1: integer;
+ fra1: framety;
+ rect1: rectty;
+ si1: sizety;
+begin
+ result:= false;
+ si1:= clientsize;
+ rect1:= innerclientrect;
+ ext1.topleft:= rect1.pos;
+ ext1.bottomright:= addpoint(rect1.pos,pointty(rect1.size));
+ for int1:= 0 to fxdials.count-1 do begin
+  with fxdials[int1] do begin
+   checklayout;
+   expandrectext1(ext1,tdialticks1(ticks).fdim)
+  end;
+ end;
+ for int1:= 0 to fydials.count-1 do begin
+  with fydials[int1] do begin
+   checklayout;
+   expandrectext1(ext1,tdialticks1(ticks).fdim)
+  end;
+ end;
+
+ fra1:= frame.innerframe;
+ ext1.left:= ext1.left - aframe.left;
+ ext1.top:= ext1.top - aframe.top;
+ ext1.right:= ext1.right + aframe.right;
+ ext1.bottom:= ext1.bottom + aframe.bottom;
+
+ if rs_left in asides then begin
+//  ext1.right:= ext1.right + ext1.left;
+  fra1.left:= fra1.left - ext1.left;
+ end;
+ if rs_top in asides then begin
+//  ext1.bottom:= ext1.bottom + ext1.top;
+  fra1.top:= fra1.top - ext1.top;
+ end;
+ if rs_right in asides then begin
+  fra1.right:= fra1.right + (ext1.right - si1.cx);
+ end;
+ if rs_bottom in asides then begin
+  fra1.bottom:= fra1.bottom + (ext1.bottom - si1.cy);
+ end;
+
+ if not frameisequal(fra1,frame.framei) then begin
+  result:= true;
+  frame.framei:= fra1;
+ end;
+end;
+
+procedure tcuchart.setoptionschart(const avalue: optionschartty);
+begin
+ if foptionschart <> avalue then begin
+  foptionschart:= avalue;
+  layoutchanged;
+ end;
+end;
+
+function tcuchart.checklayout: boolean;
+begin
+ result:= false;
+ if not (chs_layoutvalid in fstate) then begin
+  if foptionschart * rectsidesmask <> [] then begin
+   result:= fit(ffitframe,rectsidesty(foptionschart*rectsidesmask)) or result;
+  end;
+ end;
+ include(fstate,chs_layoutvalid);
+end;
+
+procedure tcuchart.setfitframe(const avalue: framety);
+begin
+ ffitframe:= avalue;
+ layoutchanged;
+end;
+
+procedure tcuchart.setfitframe_left(const avalue: integer);
+begin
+ if ffitframe.left <> avalue then begin
+  ffitframe.left:= avalue;
+  layoutchanged;
+ end;
+end;
+
+procedure tcuchart.setfitframe_top(const avalue: integer);
+begin
+ if ffitframe.top <> avalue then begin
+  ffitframe.top:= avalue;
+  layoutchanged;
+ end;
+end;
+
+procedure tcuchart.setfitframe_right(const avalue: integer);
+begin
+ if ffitframe.right <> avalue then begin
+  ffitframe.right:= avalue;
+  layoutchanged;
+ end;
+end;
+
+procedure tcuchart.setfitframe_bottom(const avalue: integer);
+begin
+ if ffitframe.bottom <> avalue then begin
+  ffitframe.bottom:= avalue;
+  layoutchanged;
+ end;
+end;
+
+procedure tcuchart.fontchanged;
+begin
+ fxdials.changed;
+ fydials.changed;
+ inherited;
 end;
 
 { tcustomchart }
@@ -2972,7 +3150,8 @@ var
  int1: integer;
  bo1: boolean;
 begin
- if not (csloading in componentstate) and not (chs_chartvalid in fstate) then begin
+ if not (csloading in componentstate) and 
+                     not (chs_chartvalid in fstate) then begin
   fstate:= fstate - chartrecorderstatesmask;
 //  fstarted:= false;
   bo1:= false;

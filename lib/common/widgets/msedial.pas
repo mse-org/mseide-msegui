@@ -202,9 +202,10 @@ type
  
  tdialticks = class(townedpersistentarrayprop)
   private
-   fdim: rectextty;
    function getitems(const aindex: integer): tdialtick;
   protected
+   fdim: rectextty;
+   procedure changed;
    procedure change(const index: integer); override;
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
@@ -220,6 +221,7 @@ type
 
  idialcontroller = interface(inullinterface)
   procedure directionchanged(const dir,dirbefore: graphicdirectionty);
+  procedure layoutchanged;
   function getwidget: twidget;
   function getdialrect: rectty;
   function getdialsize: sizety;
@@ -332,6 +334,7 @@ type
    fintf: idialcontroller;
    function getitemclass: dialcontrollerclassty; virtual;
    procedure createitem(const index: integer; var item: tpersistent); override;
+   procedure changed;
   public
    constructor create(const aintf: idialcontroller);
    procedure dostatread(const reader: tstatreader);
@@ -372,6 +375,7 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
    procedure clientrectchanged; override;
           //idialcontroller
+   procedure layoutchanged;
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
    function getdialrect: rectty;
    function getdialsize: sizety;
@@ -1002,6 +1006,15 @@ begin
  end;
 end;
 
+procedure tdialticks.changed;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  tdialtick(fitems[int1]).flayoutvalid:= false;
+ end; 
+end;
+
 { tcustomdialcontroller }
 
 constructor tcustomdialcontroller.create(const aintf: idialcontroller);
@@ -1050,6 +1063,11 @@ end;
 
 procedure tcustomdialcontroller.changed;
 begin
+ fintf.layoutchanged;
+ fmarkers.changed;
+ fticks.changed;
+ exclude(fstate,dis_layoutvalid);
+{
  with fintf.getwidget do begin
   if not (csloading in componentstate) then begin
    exclude(fstate,dis_layoutvalid);
@@ -1057,6 +1075,7 @@ begin
    fmarkers.changed;
   end;
  end;
+}
 end;
 
 procedure tcustomdialcontroller.calclineend(const ainfo: diallineinfoty;
@@ -2125,6 +2144,11 @@ begin
  inherited;
 end;
 
+procedure tcustomdial.layoutchanged;
+begin
+ invalidate;
+end;
+
 { tcustomdialcontrollers }
 
 constructor tcustomdialcontrollers.create(const aintf: idialcontroller);
@@ -2211,6 +2235,17 @@ begin
      end;
     end;
    end;
+  end;
+ end;
+end;
+
+procedure tcustomdialcontrollers.changed;
+var
+ int1: integer;
+begin
+ for int1:= 0 to count - 1 do begin
+  with tcustomdialcontroller(fitems[int1]) do begin
+   changed;
   end;
  end;
 end;
