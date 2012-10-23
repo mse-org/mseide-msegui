@@ -11562,7 +11562,8 @@ begin
      if newrow = frowcount-1 then begin
       exclude(fstate1,gs1_rowsortinvalid);
      end;
-     if not (gs_rowremoving in fstate) then begin
+     if not (gs_rowremoving in fstate) and 
+                            not (og_appendempty in optionsgrid) then begin
       result:= true;
       deleterow(frowcount-1,1,true);
       include(fstate,gs_emptyrowremoved);
