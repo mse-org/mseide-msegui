@@ -202,6 +202,7 @@ type
  
  tdialticks = class(townedpersistentarrayprop)
   private
+   fdim: rectextty;
    function getitems(const aindex: integer): tdialtick;
   protected
    procedure change(const index: integer); override;
@@ -279,7 +280,8 @@ type
    procedure changed;
    procedure calclineend(const ainfo: diallineinfoty; const aopposite: boolean; 
                    const arect: rectty; out linestart,lineend: integer;
-                   out linedirection: graphicdirectionty);
+                   out linedirection: graphicdirectionty;
+                   out adim: rectextty);
    procedure adjustcaption(const dir: graphicdirectionty;
                 const arotatetext: boolean;
                 const ainfo: diallineinfoty; const afont: tfont;
@@ -697,6 +699,7 @@ var
  start1,stop1: real;
  size1: sizety;
  pt1: pointty;
+ rectext1: rectextty;
 begin
  with tcustomdialcontroller(fowner),fli,finfo,line do begin
   getactdialrect(rect1);
@@ -705,7 +708,8 @@ begin
    active:= false;
   end
   else begin
-   calclineend(fli,dmo_opposite in options,rect1,linestart,lineend,dir1);
+   calclineend(fli,dmo_opposite in options,rect1,linestart,lineend,dir1,
+                                                                     rectext1);
    if do_log in foptions then begin
     rea2:= chartln(fsstart);
     rea1:= (chartln(frange+fsstart)-rea2);
@@ -1058,7 +1062,8 @@ end;
 procedure tcustomdialcontroller.calclineend(const ainfo: diallineinfoty;
                    const aopposite: boolean;
                    const arect: rectty; out linestart,lineend: integer;
-                   out linedirection: graphicdirectionty);
+                   out linedirection: graphicdirectionty;
+                   out adim: rectextty);
 var
 // int1: integer;
  bo1: boolean;
@@ -1107,14 +1112,19 @@ begin
     end;
    end;
   end;
+  if linedirection in [gd_up,gd_down] then begin
+   adim.left:= linestart;
+   adim.right:= linestart;
+   adim.top:= arect.y;
+   adim.bottom:= arect.y + arect.cy;
+  end
+  else begin
+   adim.top:= linestart;
+   adim.bottom:= linestart;
+   adim.left:= arect.x;
+   adim.right:= arect.x + arect.cx;
+  end;
  end;
- {
- if bo1 then begin
-  int1:= linestart;
-  linestart:= lineend;
-  lineend:= int1;
- end;
- }
 end;
 
 procedure tcustomdialcontroller.transform(var apoint: pointty);
@@ -1308,6 +1318,8 @@ var
  ar1: realarty;
  ar2: booleanarty;
  pt1: pointty;
+ asc,desc: integer;
+ rectext1: rectextty;
  
 begin
  if not (dis_layoutvalid in fstate) then begin
@@ -1523,9 +1535,12 @@ begin
    end;
   end;
   islog:= do_log in foptions;
+  fticks.fdim:= emptyrectext;
   for int4:= 0 to high(fticks.fitems) do begin
    with tdialtick(fticks.fitems[int4]) do begin
     finfo.afont:= font;
+    asc:= font.ascent;
+    desc:= font.descent;
     linestart:= 0; //compiler warning
     lineend:= 0; //compiler warning
     with finfo,fli do begin
@@ -1533,7 +1548,9 @@ begin
       ticks:= nil;
      end
      else begin
-      calclineend(fli,dto_opposite in options,rect1,linestart,lineend,dir1);
+      calclineend(fli,dto_opposite in options,rect1,linestart,lineend,
+                                                                 dir1,rectext1);
+      expandrectext1(fticks.fdim,rectext1);
       if islog then begin
        offs:= -chartln(fsstart);
        rea1:= (chartln(fsstart+frange) + offs);
@@ -1719,9 +1736,25 @@ begin
         end;
         with captions[int1] do begin
          pos:= ticks[int1].a;
+         int2:= canvas1.getstringwidth(caption,afont);
          adjustcaption(dir1,dto_rotatetext in options,fli,afont,
-               canvas1.getstringwidth(caption,afont),pos);
+               int2,pos);
          angle:= ticksreal[int1] * rea2 + rea3;
+         with fticks.fdim do begin
+          int2:= pos.x + int2;
+          if pos.x < left then begin
+           left:= pos.x;
+          end;
+          if int2 > right then begin
+           right:= int2;
+          end;
+          if top > pos.y - asc then begin
+           top:= pos.y - asc;
+          end;
+          if bottom < pos.y + desc then begin
+           bottom:= pos.y + desc;
+          end;
+         end;
         end;
        end;
       end;

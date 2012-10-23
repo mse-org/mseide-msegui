@@ -37,8 +37,8 @@ const
 type
  tcustomdataedit = class;
  
- checkvalueeventty = procedure(const sender: tcustomdataedit; const quiet: boolean;
-                           var accept: boolean) of object;
+ checkvalueeventty = procedure(const sender: tcustomdataedit;
+                          const quiet: boolean; var accept: boolean) of object;
 
  gettexteventty = procedure(const sender: tcustomdataedit; var atext: msestring;
                                const aedit: boolean) of object;

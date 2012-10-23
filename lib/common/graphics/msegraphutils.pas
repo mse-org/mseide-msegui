@@ -338,12 +338,21 @@ type
  prectty = ^rectty;
  rectarty = array of rectty;
  prectarty = ^rectarty;
+ rectextty = record
+            case integer of
+             0: (left,top,right,bottom: integer);
+             1: (topleft,bottomright: pointty);
+           end;
+ prectextty = ^rectextty;
 
 const
  nullpoint: pointty = (x: 0; y: 0);
  nullsize: sizety = (cx: 0; cy: 0);
  nullrect: rectty = (x: 0; y: 0; cx: 0; cy: 0);
  nullframe: framety = (left: 0; top: 0; right: 0; bottom: 0);
+ emptyrectext: rectextty = (left: maxint; top: maxint; right: minint;
+                                                       bottom: minint);
+
  minimalframe: framety = (left: 1; top: 1; right: 1; bottom: 1);
  minimaltextframe: framety = (left: 1; top: 0; right: 1; bottom: 0);
 
@@ -550,6 +559,8 @@ function addframe(const a,b: framety): framety;
 procedure addframe1(var dest: framety; const frame: framety);
 function subframe(const a,b: framety): framety;
 procedure subframe1(var dest: framety; const frame: framety);
+function expandrectext(const a,b: rectextty): rectextty;
+procedure expandrectext1(var dest: rectextty; const frame: rectextty);
 
 procedure inflateframe(var frame: framety; value: integer);
 function inflateframe1(const frame: framety; value: integer): framety;
@@ -1182,6 +1193,43 @@ begin
   top:= top - frame.top;
   right:= right - frame.right;
   bottom:= bottom - frame.bottom;
+ end;
+end;
+
+function expandrectext(const a,b: rectextty): rectextty;
+begin
+ result:= a;
+ with result do begin
+  if b.left < left then begin
+   left:= b.left;
+  end;
+  if b.right > right then begin
+   right:= b.right;
+  end;
+  if b.top < top then begin
+   top:= b.top;
+  end;
+  if b.bottom < bottom then begin
+   bottom:= b.bottom;
+  end;
+ end;
+end;
+
+procedure expandrectext1(var dest: rectextty; const frame: rectextty);
+begin
+ with dest do begin
+  if frame.left < left then begin
+   left:= frame.left;
+  end;
+  if frame.right > right then begin
+   right:= frame.right;
+  end;
+  if frame.top < top then begin
+   top:= frame.top;
+  end;
+  if frame.bottom > bottom then begin
+   bottom:= frame.bottom;
+  end;
  end;
 end;
 
