@@ -13917,8 +13917,14 @@ begin
     end;
     if (og_focuscellonenter in foptionsgrid) and defocused then begin
      cellbefore.row:= aindex;
+     if cellbefore.row >= frowcount then begin
+      cellbefore.row:= frowcount - 1;
+      if cellbefore.row < 0 then begin
+       cellbefore.row:= 0;
+      end;
+     end;
      focuscell(cellbefore,fca_focusin);
-               //ev. auto append row
+               //ev. auto first row
     end;
    end;
   finally
