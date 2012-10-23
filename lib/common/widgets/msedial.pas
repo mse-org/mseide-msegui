@@ -277,6 +277,14 @@ type
    procedure setlog(const avalue: boolean);
    function getvisible: boolean;
    procedure setvisible(const avalue: boolean);
+   function getopposite: boolean;
+   procedure setopposite(const avalue: boolean);
+   function getsideline: boolean;
+   procedure setsideline(const avalue: boolean);
+   function getboxline: boolean;
+   procedure setboxline(const avalue: boolean);
+   function getfront: boolean;
+   procedure setfront(const avalue: boolean);
   protected
    procedure setdirection(const avalue: graphicdirectionty); virtual;
    procedure changed;
@@ -301,10 +309,15 @@ type
    destructor destroy; override;
    procedure paint(const acanvas: tcanvas);
    procedure afterpaint(const acanvas: tcanvas);
-   property visible: boolean read getvisible write setvisible;
    property options: dialoptionsty read foptions write setoptions default []; 
                 //first!
+   property visible: boolean read getvisible write setvisible;
+   property opposite: boolean read getopposite write setopposite;
+   property sideline: boolean read getsideline write setsideline;
+   property boxline: boolean read getboxline write setboxline;
    property log: boolean read getlog write setlog;
+   property front: boolean read getfront write setfront;
+
    property direction: graphicdirectionty read fdirection write setdirection
                                        default gd_right;
    property indent1: integer read findent1 write setindent1 default 0;
@@ -2087,6 +2100,66 @@ begin
  end
  else begin
   options:= options + [do_invisible];
+ end; 
+end;
+
+function tcustomdialcontroller.getopposite: boolean;
+begin
+ result:= do_opposite in foptions;
+end;
+
+procedure tcustomdialcontroller.setopposite(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [do_opposite];
+ end
+ else begin
+  options:= options - [do_opposite];
+ end; 
+end;
+
+function tcustomdialcontroller.getsideline: boolean;
+begin
+ result:= do_sideline in foptions;
+end;
+
+procedure tcustomdialcontroller.setsideline(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [do_sideline];
+ end
+ else begin
+  options:= options - [do_sideline];
+ end; 
+end;
+
+function tcustomdialcontroller.getboxline: boolean;
+begin
+ result:= do_boxline in foptions;
+end;
+
+procedure tcustomdialcontroller.setboxline(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [do_boxline];
+ end
+ else begin
+  options:= options - [do_boxline];
+ end; 
+end;
+
+function tcustomdialcontroller.getfront: boolean;
+begin
+ result:= do_front in foptions;
+end;
+
+procedure tcustomdialcontroller.setfront(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [do_front];
+ end
+ else begin
+  options:= options - [do_front];
  end; 
 end;
 
