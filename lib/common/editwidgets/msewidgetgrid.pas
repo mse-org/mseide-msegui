@@ -2709,7 +2709,7 @@ begin
   if acell.col < fdatacols.count then begin
    if acell.row >= 0 then begin
     if acell.row < rowcount then begin
-     result:= datacols[acell.col].getwidget;
+     result:= datacols[acell.col].editwidget;
     end;
    end
    else begin
