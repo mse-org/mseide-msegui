@@ -2773,7 +2773,7 @@ begin
  else begin
   if ps_link in fstate then begin
    ar1:= fdesigner.getcomponentlist(tcomponentclass(typedata^.classtype),
-             {$ifdef FPC}@{$endif}filtercomponent);
+             {$ifdef FPC}@{$endif}filtercomponent,not (ps_local in fstate));
    if ps_local in fstate then begin
     co1:= fcomponent.owner;
     for int1:= high(ar1) downto 0 do begin
@@ -2793,11 +2793,14 @@ begin
      end;
     end;
    end;
+   result:= fdesigner.getcomponentnamelist(ar1,fmodule);
+   {
    for int1:= 0 to high(ar1) do begin
     if ar1[int1] <> nil then begin
      additem(result,msestring(ar1[int1].name));
     end;
    end;
+   }
   end
   else begin
    if ps_local in fstate then begin

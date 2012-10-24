@@ -149,6 +149,9 @@ begin
                     tstringcontainer]);
  registercomponenttabhints(['NoGui'],['Components without GUI dependence']);
 
+ registerpropertyeditor(typeinfo(tstatfile),tstatfile,'',
+                                      tlinkcomponentpropertyeditor);
+
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
  registerpropertyeditor(typeinfo(tshortcutactions),nil,'',
                            tshortcutactionspropertyeditor);
@@ -164,9 +167,11 @@ begin
                                     tlevelarraypropertyeditor);
  registerpropertyeditor(typeinfo(tsumuparrayprop),nil,'',
                                     tneglevelarraypropertyeditor);
- registerpropertyeditor(typeinfo(tsysshortcuts),nil,'',tsysshortcutspropertyeditor);
+ registerpropertyeditor(typeinfo(tsysshortcuts),nil,'',
+                                                 tsysshortcutspropertyeditor);
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
- registerpropertyeditor(typeinfo(actionstatesty),nil,'',tshapestatespropertyeditor);
+ registerpropertyeditor(typeinfo(actionstatesty),nil,'',
+                                                   tshapestatespropertyeditor);
  registerpropertyeditor(typeinfo(shortcutty),nil,'',tshortcutpropertyeditor);
  registerpropertyeditor(typeinfo(imagenrty),nil,'',timagenrpropertyeditor);
  registerpropertyeditor(typeinfo(facenrty),nil,'',tordinalpropertyeditor);
@@ -181,8 +186,10 @@ begin
                              tparentfontpropertyeditor);
  registerpropertyeditor(typeinfo(integer),twidget,'bounds_x',tbounds_xeditor);
  registerpropertyeditor(typeinfo(integer),twidget,'bounds_y',tbounds_yeditor);
- registerpropertyeditor(typeinfo(integer),twidget,'bounds_cy',tbounds_sizeeditor);
- registerpropertyeditor(typeinfo(integer),twidget,'bounds_cx',tbounds_sizeeditor);
+ registerpropertyeditor(typeinfo(integer),twidget,'bounds_cy',
+                                                            tbounds_sizeeditor);
+ registerpropertyeditor(typeinfo(integer),twidget,'bounds_cx',
+                                                            tbounds_sizeeditor);
  registerpropertyeditor(typeinfo(integer),twidget,'bounds_cymin',
                                                      tbounds_sizeeditor);
  registerpropertyeditor(typeinfo(integer),twidget,'bounds_cxmin',

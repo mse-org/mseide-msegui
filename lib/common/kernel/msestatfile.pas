@@ -59,6 +59,7 @@ type
    fsavedmemoryfiles: msestring;
    fonfilemissing: statfilemissingeventty;
    fcryptohandler: tcustomcryptohandler;
+   fnext: tstatfile;
    procedure dolinkstatread(const info: linkinfoty);
    procedure dolinkstatreading(const info: linkinfoty);
    procedure dolinkstatreaded(const info: linkinfoty);
@@ -69,6 +70,7 @@ type
    procedure setoptions(avalue: statfileoptionsty);
    procedure setcryptohandler(const avalue: tcustomcryptohandler);
    function getmode: statfilemodety;
+   procedure setnext(const avalue: tstatfile);
   protected
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
@@ -84,7 +86,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
-   procedure readstat(stream: ttextstream = nil); overload;
+   procedure readstat(const stream: ttextstream = nil); overload;
    procedure readstat(const afilename: filenamety); overload; //disk file
    procedure readstat(const aname: msestring;
                                      const statreader: tstatreader); overload;
@@ -112,6 +114,7 @@ type
    property cryptohandler: tcustomcryptohandler read fcryptohandler
                                      write setcryptohandler;
    property activator;
+   property next: tstatfile read fnext write setnext;
    property onstatupdate: statupdateeventty read fonstatupdate write fonstatupdate;
    property onstatread: statreadeventty read fonstatread write fonstatread;
    property onstatwrite: statwriteeventty read fonstatwrite write fonstatwrite;
@@ -310,7 +313,7 @@ begin
  end;
 end;
 
-procedure tstatfile.readstat(stream: ttextstream = nil);
+procedure tstatfile.readstat(const stream: ttextstream = nil);
 var
  stream1: ttextstream;
  ar1: filenamearty;
@@ -385,6 +388,9 @@ begin
     stream1.cryptohandler:= nil;
    end;
   end;
+ end;
+ if fnext <> nil then begin
+  fnext.readstat(stream);
  end;
  if assigned(fonstatafterread) then begin
   fonstatafterread(self);
@@ -520,6 +526,9 @@ begin
    end;
   end;
  end;
+ if fnext <> nil then begin
+  fnext.writestat(stream);
+ end;
  if assigned(fonstatafterwrite) then begin
   fonstatafterwrite(self);
  end;
@@ -645,6 +654,24 @@ begin
   if awriter <> nil then begin
    result:= sfm_writing;
   end;
+ end;
+end;
+
+procedure tstatfile.setnext(const avalue: tstatfile);
+var
+ sf: tstatfile;
+begin
+ if fnext <> avalue then begin
+  if avalue <> nil then begin
+   sf:= avalue;
+   while sf <> nil do begin
+    if sf = self then begin
+     raise exception.Create(name+': Recursive next statfile');
+    end;
+    sf:= sf.fnext;
+   end;
+  end;
+  setlinkedvar(avalue,tmsecomponent(fnext));
  end;
 end;
 

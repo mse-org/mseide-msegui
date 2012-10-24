@@ -501,15 +501,19 @@ type
    function getcomponenteditor: icomponenteditor;
    function editcomponent(const aowner: tcomponent = nil): boolean; //false if no editor available
    function getcomponentlist(const acomponentclass: tcomponentclass;
-                              const filter: compfilterfuncty = nil): componentarty;
+                     const filter: compfilterfuncty = nil;
+                           const allmodules: boolean = false): componentarty;
+   function getcomponentnamelist(const acomponents: componentarty;
+                             const amodule: tmsecomponent): msestringarty;
+                                      //nil values ignored
    function getcomponentnamelist(const acomponentclass: tcomponentclass;
                                  const includeinherited: boolean;
                                  const aowner: tcomponent = nil;
-                                 const filter: compfilterfuncty = nil): msestringarty;
+                          const filter: compfilterfuncty = nil): msestringarty;
    function getcomponentnametree(const acomponentclass: tcomponentclass;
                                  const includeinherited: boolean;
                                  const aowner: tcomponent = nil;
-                                 const filter: compfilterfuncty = nil): tcompnameitem;
+                          const filter: compfilterfuncty = nil): tcompnameitem;
    function getancestorclassinfo(const ainstance: tcomponent;
                  const interfaceonly: boolean): classinfopoarty;
                                                   overload;
@@ -5153,7 +5157,8 @@ end;
 
 function tdesigner.getcomponentlist(
              const acomponentclass: tcomponentclass;
-             const filter: compfilterfuncty = nil): componentarty;
+             const filter: compfilterfuncty = nil;
+             const allmodules: boolean = false): componentarty;
 var
  acount: integer;
 
@@ -5166,17 +5171,15 @@ var
   end;
  end; //check
 
-var
- int1,int3: integer;
- comp1,comp2: tcomponent;
-begin
- result:= nil;
- if floadingmodulepo <> nil then begin
-  with floadingmodulepo^.components do begin
-   acount:= 0;
-   for int1:= 0 to high(result) do begin
-    check(next^.instance);
-   end;
+ procedure scanmodule(amodule: pmoduleinfoty);
+ var
+  int1,int3: integer;
+  comp1,comp2: tcomponent;
+ begin
+  with amodule^.components do begin
+//   for int1:= 0 to high(result) do begin
+//    check(next^.instance);
+//   end;
    for int1:= 0 to count - 1 do begin
     comp1:= next^.instance;
     check(comp1);
@@ -5187,9 +5190,25 @@ begin
      end;
     end;
    end;
-   setlength(result,acount);
   end;
  end;
+ 
+var
+ int1: integer;  
+ 
+begin
+ acount:= 0;
+ if allmodules then begin
+  for int1:= 0 to modules.count-1 do begin
+   scanmodule(modules[int1]);
+  end;
+ end
+ else begin
+  if floadingmodulepo <> nil then begin
+   scanmodule(floadingmodulepo);
+  end;
+ end;
+ setlength(result,acount);
 end;
 
 function compcompname(const l,r): integer;
@@ -5204,10 +5223,20 @@ begin
  end;
 end;
 
+procedure sortcompnamelist(var avalue: msestringarty);
+var
+ int1: integer;
+begin
+ sortarray(avalue,{$ifdef FPC}@{$endif}compcompname);
+ for int1:= 0 to high(avalue) do begin
+  avalue[int1]:= copy(avalue[int1],2,bigint);
+ end;
+end;
+
 function tdesigner.getcomponentnamelist(const acomponentclass: tcomponentclass;
                             const includeinherited: boolean;
                             const aowner: tcomponent = nil;
-                            const filter: compfilterfuncty = nil): msestringarty;
+                          const filter: compfilterfuncty = nil): msestringarty;
 var
  str1: msestring;
  acount: integer;
@@ -5257,9 +5286,33 @@ begin
   end;
  end;
  setlength(result,acount);
- sortarray(result,{$ifdef FPC}@{$endif}compcompname);
- for int1:= 0 to high(result) do begin
-  result[int1]:= copy(result[int1],2,bigint);
+ sortcompnamelist(result);
+end;
+
+function tdesigner.getcomponentnamelist(const acomponents: componentarty;
+                            const amodule: tmsecomponent): msestringarty;
+var
+ int1,int2: integer;
+ po1: pmoduleinfoty;
+begin
+ po1:= modules.findmodule(amodule);
+ if po1 <> nil then begin
+  setlength(result,length(acomponents));
+  int2:= 0;
+  for int1:= 0 to high(acomponents) do begin
+   if acomponents[int1] <> nil then begin
+    if rootcomponent(acomponents[int1]) = amodule then begin
+     result[int2]:= ' ';
+    end
+    else begin
+     result[int2]:= 'z'+po1^.instancevarname + '.';
+    end;
+    result[int2]:= result[int2] + getcomponentdispname(acomponents[int1]);
+    inc(int2);
+   end;
+  end;
+  setlength(result,int2);
+  sortcompnamelist(result);
  end;
 end;
 

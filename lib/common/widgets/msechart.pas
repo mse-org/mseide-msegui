@@ -472,6 +472,8 @@ const
  allrectsides = [rs_left,rs_top,rs_right,rs_bottom];
  rectsidesmask = [oca_autofitleft,oca_autofittop,oca_autofitright,
                     oca_autofitbottom];
+ defaultoptionschart = [oca_autofitleft,oca_autofittop,oca_autofitright,
+                    oca_autofitbottom];
 type
  
  tcuchart = class(tscrollbox,ichartdialcontroller,istatfile)
@@ -515,6 +517,7 @@ type
    procedure changed; virtual;
    procedure layoutchanged;
    procedure chartchange;
+   procedure invalidatelayout;
    procedure clientrectchanged; override;
    procedure dopaintcontent(const acanvas: tcanvas); virtual;
    procedure dopaintbackground(const canvas: tcanvas); override;
@@ -535,13 +538,12 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function fit(const aframe: framety;
-                      const asides: rectsidesty = allrectsides): boolean; 
-           //adjust frame.framei for dials size + aframe
+   function fit(const asides: rectsidesty = allrectsides): boolean; 
+           //adjust fitframe for extents of dials
            //returns tru if changes made
 
    property optionschart: optionschartty read foptionschart
-                                    write setoptionschart default [];   
+                            write setoptionschart default defaultoptionschart;
    property colorchart: colorty read fcolorchart write setcolorchart 
                               default cl_foreground;
    property xstart: real read getxstart write setxstart;
@@ -701,6 +703,7 @@ uses
 type
  tcustomdialcontroller1 = class(tcustomdialcontroller);
  tdialticks1 = class(tdialticks);
+ tframe1 = class(tcustomframe);
 
 function makexseriesdata(const value: real; const index: integer): xseriesdataty;
 begin
@@ -2508,6 +2511,7 @@ end;
 constructor tcuchart.create(aowner: tcomponent);
 begin
  fcolorchart:= cl_foreground;
+ foptionschart:= defaultoptionschart;
  fxrange:= 1;
  fyrange:= 1;
  fydials:= tchartdialsvert.create(ichartdialcontroller(self));
@@ -2540,11 +2544,18 @@ begin
  inherited;
 end;
 
+procedure tcuchart.invalidatelayout;
+begin
+ if componentstate * [csloading,csdestroying] = [] then begin
+  fxdials.changed;
+  fydials.changed;
+  chartchange;
+ end;
+end;
+
 procedure tcuchart.clientrectchanged;
 begin
- fxdials.changed;
- fydials.changed;
- chartchange;
+ invalidatelayout;
  inherited;
 end;
 {
@@ -2639,6 +2650,7 @@ end;
 function tcuchart.getdialrect: rectty;
 begin
  result:= innerclientrect;
+ deflaterect1(result,ffitframe);
 end;
 
 function tcuchart.getdialsize: sizety;
@@ -2770,8 +2782,7 @@ begin
  invalidate;
 end;
 
-function tcuchart.fit(const aframe: framety;
-                      const asides: rectsidesty = allrectsides): boolean;
+function tcuchart.fit(const asides: rectsidesty = allrectsides): boolean;
 var
  ext1: rectextty;
  int1: integer;
@@ -2781,7 +2792,7 @@ var
 begin
  result:= false;
  si1:= clientsize;
- rect1:= innerclientrect;
+ rect1:= getdialrect;
  ext1.topleft:= rect1.pos;
  ext1.bottomright:= addpoint(rect1.pos,pointty(rect1.size));
  for int1:= 0 to fxdials.count-1 do begin
@@ -2796,19 +2807,19 @@ begin
    expandrectext1(ext1,tdialticks1(ticks).fdim)
   end;
  end;
-
- fra1:= frame.innerframe;
- ext1.left:= ext1.left - aframe.left;
- ext1.top:= ext1.top - aframe.top;
- ext1.right:= ext1.right + aframe.right;
- ext1.bottom:= ext1.bottom + aframe.bottom;
-
+ with tframe1(fframe).fi.innerframe do begin
+  ext1.left:= ext1.left - left;
+  ext1.top:= ext1.top - top;
+  ext1.right:= ext1.right + right;
+  ext1.bottom:= ext1.bottom + bottom;
+ end;
+ 
+ fra1:= ffitframe;
+ 
  if rs_left in asides then begin
-//  ext1.right:= ext1.right + ext1.left;
   fra1.left:= fra1.left - ext1.left;
  end;
  if rs_top in asides then begin
-//  ext1.bottom:= ext1.bottom + ext1.top;
   fra1.top:= fra1.top - ext1.top;
  end;
  if rs_right in asides then begin
@@ -2818,9 +2829,9 @@ begin
   fra1.bottom:= fra1.bottom + (ext1.bottom - si1.cy);
  end;
 
- if not frameisequal(fra1,frame.framei) then begin
+ if not frameisequal(fra1,ffitframe) then begin
   result:= true;
-  frame.framei:= fra1;
+  fitframe:= fra1;
  end;
 end;
 
@@ -2837,7 +2848,7 @@ begin
  result:= false;
  if not (chs_layoutvalid in fstate) then begin
   if foptionschart * rectsidesmask <> [] then begin
-   result:= fit(ffitframe,rectsidesty(foptionschart*rectsidesmask)) or result;
+   result:= fit(rectsidesty(foptionschart*rectsidesmask)) or result;
   end;
  end;
  include(fstate,chs_layoutvalid);
@@ -2846,14 +2857,14 @@ end;
 procedure tcuchart.setfitframe(const avalue: framety);
 begin
  ffitframe:= avalue;
- layoutchanged;
+ invalidatelayout;
 end;
 
 procedure tcuchart.setfitframe_left(const avalue: integer);
 begin
  if ffitframe.left <> avalue then begin
   ffitframe.left:= avalue;
-  layoutchanged;
+  invalidatelayout;
  end;
 end;
 
@@ -2861,7 +2872,7 @@ procedure tcuchart.setfitframe_top(const avalue: integer);
 begin
  if ffitframe.top <> avalue then begin
   ffitframe.top:= avalue;
-  layoutchanged;
+  invalidatelayout;
  end;
 end;
 
@@ -2869,7 +2880,7 @@ procedure tcuchart.setfitframe_right(const avalue: integer);
 begin
  if ffitframe.right <> avalue then begin
   ffitframe.right:= avalue;
-  layoutchanged;
+  invalidatelayout;
  end;
 end;
 
@@ -2877,14 +2888,13 @@ procedure tcuchart.setfitframe_bottom(const avalue: integer);
 begin
  if ffitframe.bottom <> avalue then begin
   ffitframe.bottom:= avalue;
-  layoutchanged;
+  invalidatelayout;
  end;
 end;
 
 procedure tcuchart.fontchanged;
 begin
- fxdials.changed;
- fydials.changed;
+ invalidatelayout;
  inherited;
 end;
 
