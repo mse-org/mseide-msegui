@@ -15811,7 +15811,8 @@ var
 begin
  bo2:= gs_cellclicked in fstate;
  inherited;
- if not (es_processed in info.eventstate) and focusedcellvalid and
+ if (not (es_processed in info.eventstate) or (es_drag in info.eventstate)) and
+         focusedcellvalid and
          (info.eventkind in mouseposevents) and
                (gridcoordisequal(ffocusedcell,fmousecell) or bo2) and
         not (scoe_checkbox in tcustomstringcol(

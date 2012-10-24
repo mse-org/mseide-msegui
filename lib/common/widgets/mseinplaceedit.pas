@@ -1439,94 +1439,99 @@ var
  autoselect1: boolean;
 begin
  with minfo do begin
-  opt1:= fintf.getoptionsedit;
-  autoselect1:= (oe_autoselectonfirstclick in opt1) and 
-              (opt1 * [oe_locate,oe_readonly] <> [oe_locate,oe_readonly]);
-  case eventkind of
-   ek_buttonpress: begin
-    if (minfo.button = mb_left) and pointinrect(pos,finfo.clip) then begin
-     if not fowner.focused and fowner.canfocus and
-                (ow_mousefocus in fowner.optionswidget) then begin
-      include(fstate,ies_firstclick);
-      include(minfo.eventstate,es_processed);
-      int1:= mousepostotextindex(pos);
-      moveindex(int1,false);
-      internalupdatecaret(true);
-      po1:= fcaretpos;
-      include(eventstate,es_nofocus);
-      if not fowner.setfocus then begin
-       exclude(fstate,ies_firstclick);
-       exit;
-      end;
-      if autoselect1 then begin
-       selectall;
-       subpoint1(po1,textindextomousepos(int1));
-      end
-      else begin
+  if es_drag in eventstate then begin
+   killrepeater;
+  end
+  else begin
+   opt1:= fintf.getoptionsedit;
+   autoselect1:= (oe_autoselectonfirstclick in opt1) and 
+               (opt1 * [oe_locate,oe_readonly] <> [oe_locate,oe_readonly]);
+   case eventkind of
+    ek_buttonpress: begin
+     if (minfo.button = mb_left) and pointinrect(pos,finfo.clip) then begin
+      if not fowner.focused and fowner.canfocus and
+                 (ow_mousefocus in fowner.optionswidget) then begin
+       include(fstate,ies_firstclick);
+       include(minfo.eventstate,es_processed);
+       int1:= mousepostotextindex(pos);
        moveindex(int1,false);
-       subpoint1(po1,fcaretpos);
-      end;
-     end
-     else begin
-      int1:= mousepostotextindex(pos);
-      po1:= textindextomousepos(int1);
-      if (ies_firstclick in fstate) then begin
-       finfo.flags:= ftextflagsactive;
+       internalupdatecaret(true);
+       po1:= fcaretpos;
+       include(eventstate,es_nofocus);
+       if not fowner.setfocus then begin
+        exclude(fstate,ies_firstclick);
+        exit;
+       end;
        if autoselect1 then begin
         selectall;
+        subpoint1(po1,textindextomousepos(int1));
        end
        else begin
-        initfocus;
         moveindex(int1,false);
+        subpoint1(po1,fcaretpos);
        end;
       end
       else begin
-       moveindex(int1,ss_shift in shiftstate);
+       int1:= mousepostotextindex(pos);
+       po1:= textindextomousepos(int1);
+       if (ies_firstclick in fstate) then begin
+        finfo.flags:= ftextflagsactive;
+        if autoselect1 then begin
+         selectall;
+        end
+        else begin
+         initfocus;
+         moveindex(int1,false);
+        end;
+       end
+       else begin
+        moveindex(int1,ss_shift in shiftstate);
+       end;
+       subpoint1(po1,textindextomousepos(int1));
       end;
-      subpoint1(po1,textindextomousepos(int1));
-     end;
-     subpoint1(pos,po1);
-     po1:= subpoint(ftextrect.pos,pos);
-     if (po1.x > 0) or (po1.y > 0) then begin //shift cursor in textrect
-      if po1.x < 0 then begin
-       po1.x:= 0;
+      subpoint1(pos,po1);
+      po1:= subpoint(ftextrect.pos,pos);
+      if (po1.x > 0) or (po1.y > 0) then begin //shift cursor in textrect
+       if po1.x < 0 then begin
+        po1.x:= 0;
+       end;
+       if po1.y < 0 then begin
+        po1.y:= 0;
+       end;
+       addpoint1(pos,po1);
+       if po1.x > ftextrect.x - finfo.dest.pos.x then begin
+        po1.x:= ftextrect.x - finfo.dest.pos.x;
+       end;
+       if po1.y > ftextrect.y - finfo.dest.pos.y then begin
+        po1.y:= ftextrect.y - finfo.dest.pos.y;
+       end;
+       addpoint1(finfo.dest.pos,po1);
+       fowner.scrollcaret(po1);
       end;
-      if po1.y < 0 then begin
-       po1.y:= 0;
-      end;
-      addpoint1(pos,po1);
-      if po1.x > ftextrect.x - finfo.dest.pos.x then begin
-       po1.x:= ftextrect.x - finfo.dest.pos.x;
-      end;
-      if po1.y > ftextrect.y - finfo.dest.pos.y then begin
-       po1.y:= ftextrect.y - finfo.dest.pos.y;
-      end;
-      addpoint1(finfo.dest.pos,po1);
-      fowner.scrollcaret(po1);
      end;
     end;
-   end;
-   ek_buttonrelease,ek_mousecaptureend: begin
-    killrepeater;
-    exclude(fstate,ies_firstclick);
-   end;
-   ek_mousemove: begin
-    if fowner.clicked and
-      not ((ies_firstclick in fstate) and autoselect1) then begin
-     fmousemovepos:= minfo.pos;
-     if ies_istextedit in fstate then begin
-      fmousemovepos.y:= ftextrect.y + ftextrect.cy div 2;
-     end;
-     if not pointinrect(pos,ftextrect) then begin
-      if frepeater = nil then begin
-       movemouseindex(nil);
-       frepeater:= tsimpletimer.create(100000,
-                    {$ifdef FPC}@{$endif}movemouseindex,true,[]);
+    ek_buttonrelease,ek_mousecaptureend: begin
+     killrepeater;
+     exclude(fstate,ies_firstclick);
+    end;
+    ek_mousemove: begin
+     if fowner.clicked and
+       not ((ies_firstclick in fstate) and autoselect1) then begin
+      fmousemovepos:= minfo.pos;
+      if ies_istextedit in fstate then begin
+       fmousemovepos.y:= ftextrect.y + ftextrect.cy div 2;
       end;
-     end
-     else begin
-      killrepeater;
-      movemouseindex(nil);
+      if not pointinrect(pos,ftextrect) then begin
+       if frepeater = nil then begin
+        movemouseindex(nil);
+        frepeater:= tsimpletimer.create(100000,
+                     {$ifdef FPC}@{$endif}movemouseindex,true,[]);
+       end;
+      end
+      else begin
+       killrepeater;
+       movemouseindex(nil);
+      end;
      end;
     end;
    end;
