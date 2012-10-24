@@ -67,7 +67,7 @@ var
 implementation
 
 uses
- main,project_mfm,msesysenv,msesettings,msestream;
+ main,project_mfm,msesysenv,msesettings,msestream,msemacros;
 const
  defaultmakecommand = '${COMPILER} -Fu${MSELIBDIR}i18n -FE.. -FU. ${LIBFILE}';
 

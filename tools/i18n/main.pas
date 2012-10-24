@@ -23,7 +23,7 @@ uses
  msewidgetgrid,msegraphics,msegraphutils,mselistbrowser,msedataedits,typinfo,
  msedatanodes,msegraphedits,msestream,mseglob,msemenus,classes,msetypes,
  msestrings,msethreadcomp,mseguiglob,msegui,mseresourceparser,msedialog,
- msememodialog,mseobjecttext,mseifiglob,msesysenv;
+ msememodialog,mseobjecttext,mseifiglob,msesysenv,msemacros;
 
 const
  drcext = '_DRC.rc';
