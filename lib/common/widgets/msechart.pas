@@ -694,6 +694,7 @@ type
 
 function autointerval(const arange: real; const aintervalcount: real): real;
                    //returns apropropriate 1/2/5 value
+function calctracerange(var min: real; const max: real): real;
 function makexseriesdata(const value: real; const index: integer): xseriesdataty;
 
 implementation
@@ -3042,7 +3043,7 @@ begin
  ftraces.dostatwrite(writer);
 end;
 
-function calcrange(var min: real; const max: real): real;
+function calctracerange(var min: real; const max: real): real;
 begin
  result:= max-min;
  if result = 0 then begin
@@ -3074,7 +3075,7 @@ begin
    end;
   end;
  end;
- ra:= calcrange(min,max);
+ ra:= calctracerange(min,max);
  xstart:= min;
  xrange:= ra;
 end;
@@ -3099,7 +3100,7 @@ begin
    end;
   end;
  end;
- ra:= calcrange(min,max);
+ ra:= calctracerange(min,max);
  ystart:= min;
  yrange:= ra;
 end;
