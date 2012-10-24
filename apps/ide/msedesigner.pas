@@ -5293,27 +5293,25 @@ function tdesigner.getcomponentnamelist(const acomponents: componentarty;
                             const amodule: tmsecomponent): msestringarty;
 var
  int1,int2: integer;
- po1: pmoduleinfoty;
+ co1: tcomponent;
 begin
- po1:= modules.findmodule(amodule);
- if po1 <> nil then begin
-  setlength(result,length(acomponents));
-  int2:= 0;
-  for int1:= 0 to high(acomponents) do begin
-   if acomponents[int1] <> nil then begin
-    if rootcomponent(acomponents[int1]) = amodule then begin
-     result[int2]:= ' ';
-    end
-    else begin
-     result[int2]:= 'z'+po1^.instancevarname + '.';
-    end;
-    result[int2]:= result[int2] + getcomponentdispname(acomponents[int1]);
-    inc(int2);
+ setlength(result,length(acomponents));
+ int2:= 0;
+ for int1:= 0 to high(acomponents) do begin
+  if acomponents[int1] <> nil then begin
+   co1:= rootcomponent(acomponents[int1]);
+   if co1 = amodule then begin
+    result[int2]:= ' ';
+   end
+   else begin
+    result[int2]:= 'z'+co1.name + '.';
    end;
+   result[int2]:= result[int2] + getcomponentdispname(acomponents[int1]);
+   inc(int2);
   end;
-  setlength(result,int2);
-  sortcompnamelist(result);
  end;
+ setlength(result,int2);
+ sortcompnamelist(result);
 end;
 
 type
