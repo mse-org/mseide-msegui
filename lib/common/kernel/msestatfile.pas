@@ -22,7 +22,8 @@ type
  statwriteeventty = procedure(const sender: tobject; 
                                   const writer: tstatwriter) of object;
 
- statfileoptionty = (sfo_memory,sfo_createpath,
+ statfileoptionty = (sfo_memory,sfo_deletememorydata, //delete after read
+                     sfo_createpath,
                      sfo_transaction, //use intermedate file and rename
                      sfo_savedata,sfo_activatorread,sfo_activatorwrite,
                      sfo_nodata,sfo_nostate,sfo_nooptions);
@@ -382,6 +383,10 @@ begin
  finally
   if stream = nil then begin
    stream1.Free;
+   if (stream1 <> nil) and (foptions * [sfo_memory,sfo_deletememorydata] = 
+         [sfo_memory,sfo_deletememorydata]) then begin
+    memorystatstreams.delete(ffilename);
+   end;
   end
   else begin
    if (fcryptohandler <> nil) and (stream1 <> nil) then begin
@@ -390,7 +395,7 @@ begin
   end;
  end;
  if fnext <> nil then begin
-  fnext.readstat(stream);
+  fnext.readstat(nil);
  end;
  if assigned(fonstatafterread) then begin
   fonstatafterread(self);
@@ -454,6 +459,9 @@ var
 begin
  if assigned(fonstatbeforewrite) then begin
   fonstatbeforewrite(self);
+ end;
+ if fnext <> nil then begin
+  fnext.writestat(nil);
  end;
  stream1:= stream;
  if (stream1 = nil) and (filename <> '') then begin
@@ -525,9 +533,6 @@ begin
     stream1.cryptohandler:= nil;
    end;
   end;
- end;
- if fnext <> nil then begin
-  fnext.writestat(stream);
  end;
  if assigned(fonstatafterwrite) then begin
   fonstatafterwrite(self);
