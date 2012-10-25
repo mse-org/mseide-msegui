@@ -2111,7 +2111,7 @@ var
  int1: integer;
 begin
  if not (trss_graphicvalid in ftracestate) then begin
-  fsize:= twidget(fowner).innerclientsize;
+  fsize:= tcustomchart(fowner).getdialrect.size;
   if fsize.cx < 0 then begin
    fsize.cx:= 0;
   end;
@@ -2584,7 +2584,7 @@ begin
  inherited;
  if not (chs_nocolorchart in fstate) and 
                  not (fcolorchart = container.frame.colorclient) then begin
-  canvas.fillrect(innerclientrect,fcolorchart);
+  canvas.fillrect(getdialrect,fcolorchart);
  end;
 // if canevent(tmethod(fonpaintbackground)) then begin
 //  fonpaintbackground(self,canvas);
@@ -2993,11 +2993,11 @@ var
 begin
  inherited;
  acanvas.save;
- rect1:= innerclientrect;
+ rect1:= getdialrect;
  inc(rect1.cx);
  inc(rect1.cy);
  acanvas.intersectcliprect(rect1);
- acanvas.move(innerclientpos);
+ acanvas.move(rect1.pos);
  ftraces.paint(acanvas);
  acanvas.restore;
 // acanvas.remove(innerclientpos);
