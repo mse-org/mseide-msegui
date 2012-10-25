@@ -463,7 +463,7 @@ begin
  inherited;
  fi.colorclient:= cl_foreground;
  fi.levelo:= -2;
- inflateframe(fi.innerframe,1);
+ inflateframe1(fi.innerframe,1);
  internalupdatestate;
 end;
 
@@ -474,7 +474,7 @@ begin
  inherited;
  colorclient:= cl_foreground;
  fi.levelo:= -2;
- inflateframe(fi.innerframe,1);
+ inflateframe1(fi.innerframe,1);
  internalupdatestate;
 end;
 
@@ -486,7 +486,7 @@ begin
  inherited;
  colorclient:= cl_foreground;
  fi.levelo:= -2;
- inflateframe(fi.innerframe,1);
+ inflateframe1(fi.innerframe,1);
  internalupdatestate;
 end;
 
@@ -1016,9 +1016,9 @@ begin
   with fbuttons[int1] do begin
    if not (fbo_invisible in foptions) then begin
     if fframe <> nil then begin
-     canvas.save;
-     fframe.paintbackground(canvas,fframerect);
-     canvas.restore;
+//     canvas.save;
+     fframe.paintbackground(canvas,fframerect,false);
+//     canvas.restore;
     end;
     if  (color = cl_default) or (color = cl_parent) then begin
      if color2 = cl_none then begin

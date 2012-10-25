@@ -3120,7 +3120,7 @@ begin
  rect1:= makerect(nullpoint,fcellrect.size);
  acanvas.fillrect(rect1,fcellinfo.color);
  if aframe <> nil then begin
-  aframe.paintbackground(acanvas,rect1);
+  aframe.paintbackground(acanvas,rect1,true);
  end;
  acanvas.rootbrushorigin:= fcellinfo.grid.fbrushorigin;
  if aface <> nil then begin

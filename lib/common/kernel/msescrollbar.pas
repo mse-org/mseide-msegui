@@ -683,23 +683,23 @@ begin
    case fpaintedbutton of
     sbbu_down: begin
      if fframeendbutton1 <> nil then begin
-      canvas.save;
-      fframeendbutton1.paintbackground(canvas,buttonareas[bbu_down]);
-      canvas.restore;
+//      canvas.save;
+      fframeendbutton1.paintbackground(canvas,buttonareas[bbu_down],false);
+//      canvas.restore;
      end;
     end;
     sbbu_move: begin
      if fframebutton <> nil then begin
-      canvas.save;
-      fframebutton.paintbackground(canvas,buttonareas[bbu_move]);
-      canvas.restore;
+//      canvas.save;
+      fframebutton.paintbackground(canvas,buttonareas[bbu_move],false);
+//      canvas.restore;
      end;
     end;
     sbbu_up: begin
      if fframeendbutton2 <> nil then begin
-      canvas.save;
-      fframeendbutton2.paintbackground(canvas,buttonareas[bbu_up]);
-      canvas.restore;
+//      canvas.save;
+      fframeendbutton2.paintbackground(canvas,buttonareas[bbu_up],false);
+//      canvas.restore;
      end;
     end;
    end;    

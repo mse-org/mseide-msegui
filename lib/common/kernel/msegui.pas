@@ -542,7 +542,8 @@ type
    procedure checkwidgetsize(var asize: sizety); virtual;
                 //extends to minimal size
 
-   procedure paintbackground(const canvas: tcanvas; const arect: rectty); virtual;
+   procedure paintbackground(const canvas: tcanvas;
+             const arect: rectty; const clipandmove: boolean); virtual;
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); virtual;
 
    function outerframewidth: sizety; //widgetsize - framesize
@@ -3687,7 +3688,7 @@ begin
 end;
 
 procedure tcustomframe.paintbackground(const canvas: tcanvas;
-                               const arect: rectty);
+                            const arect: rectty; const clipandmove: boolean);
 var
  rect1: rectty;
  faceoffs: integer;
@@ -3703,9 +3704,11 @@ begin
    fi.frameface_list.list[faceoffs].paint(canvas,rect1);
   end;
  end;
- canvas.intersectcliprect(rect1);
- canvas.move(addpoint(fpaintrect.pos,fclientrect.pos));
- canvas.brushorigin:= nullpoint;
+ if clipandmove then begin
+  canvas.intersectcliprect(rect1);
+  canvas.move(addpoint(fpaintrect.pos,fclientrect.pos));
+  canvas.brushorigin:= nullpoint;
+ end;
 end;
 
 class procedure tcustomframe.drawframe(const canvas: tcanvas; 
@@ -7784,7 +7787,7 @@ begin
  if frame <> nil then begin
   colorbefore:= canvas.color;
   canvas.color:= actualcolor;
-  fframe.paintbackground(canvas,makerect(nullpoint,fwidgetrect.size));
+  fframe.paintbackground(canvas,makerect(nullpoint,fwidgetrect.size),true);
   canvas.color:= colorbefore;
  end;
  face1:= getactface;

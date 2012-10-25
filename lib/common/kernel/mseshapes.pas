@@ -1115,9 +1115,9 @@ begin
  if not (shs_invisible in info.state) then begin
   if info.frame <> nil then begin 
    //todo: optimize, move settings to tcustomstepframe updatestate
-   canvas.save;
-   info.frame.paintbackground(canvas,info.ca.dim);
-   canvas.restore;
+//   canvas.save;
+   info.frame.paintbackground(canvas,info.ca.dim,false);
+//   canvas.restore;
    if not (fso_noinnerrect in info.frame.optionsskin) then begin
     frame1:= info.frame.innerframe;
     deflaterect1(info.ca.dim,frame1);
@@ -1245,9 +1245,9 @@ begin
     if not (fso_noinnerrect in frame.optionsskin) then begin
      deflaterect1(ca.dim,frame.framei);
     end;
-    canvas.save;
-    frame.paintbackground(canvas,info.ca.dim);
-    canvas.restore;   
+//    canvas.save;
+    frame.paintbackground(canvas,info.ca.dim,false);
+//    canvas.restore;   
     frame1:= frame.paintframe;
     deflaterect1(ca.dim,frame1);
     frameskinoptionstoshapestate(frame,info);

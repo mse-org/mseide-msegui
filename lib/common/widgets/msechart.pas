@@ -476,7 +476,7 @@ const
                     oca_autofitbottom];
 type
  
- tcuchart = class(tscrollbox,ichartdialcontroller,istatfile)
+ tcuchart = class(tscrollbox,ichartdialcontroller,istatfile,iframe)
   private
    fxdials: tchartdialshorz;
    fydials: tchartdialsvert;
@@ -506,12 +506,21 @@ type
    procedure setfitframe_top(const avalue: integer);
    procedure setfitframe_right(const avalue: integer);
    procedure setfitframe_bottom(const avalue: integer);
+   function getfacechart: tface;
+   procedure setfacechart(const avalue: tface);
+   procedure createfacechart;
+   procedure createframechart;
+   function getframechart: tframe;
+   procedure setframechart(const avalue: tframe);
   protected
    fcolorchart: colorty;
+   ffacechart: tface;
+   fframechart: tframe;
    fstate: chartstatesty;
    fshiftsum: int64;
    fscrollsum: integer;
    fsampleco: integer;
+   fchartframerect: rectty;
    procedure fontchanged; override;
    function checklayout: boolean; virtual; //true if changes made
    procedure changed; virtual;
@@ -545,7 +554,9 @@ type
    property optionschart: optionschartty read foptionschart
                             write setoptionschart default defaultoptionschart;
    property colorchart: colorty read fcolorchart write setcolorchart 
-                              default cl_foreground;
+                              default cl_default;
+   property facechart: tface read getfacechart write setfacechart;
+   property framechart: tframe read getframechart write setframechart;
    property xstart: real read getxstart write setxstart;
    property ystart: real read getystart write setystart;
    property xrange: real read getxrange write setxrange; //default 1
@@ -594,6 +605,8 @@ type
    property optionschart;
    property traces;
    property colorchart;
+   property facechart;
+   property framechart;
    property xstart;
    property ystart;
    property xrange;
@@ -704,7 +717,7 @@ uses
 type
  tcustomdialcontroller1 = class(tcustomdialcontroller);
  tdialticks1 = class(tdialticks);
- tframe1 = class(tcustomframe);
+ tcustomframe1 = class(tcustomframe);
 
 function makexseriesdata(const value: real; const index: integer): xseriesdataty;
 begin
@@ -1196,7 +1209,7 @@ begin
         rect1.y:= -rect1.y;
        end;
        acanvas.save;
-       finfo.bar_frame.paintbackground(acanvas,rect1);
+       finfo.bar_frame.paintbackground(acanvas,rect1,true);
        if finfo.bar_face <> nil then begin
         rect2:= deflaterect(rect1,finfo.bar_frame.innerframe);
         acanvas.remove(pointty(finfo.bar_frame.paintframe.topleft));
@@ -2511,7 +2524,7 @@ end;
 
 constructor tcuchart.create(aowner: tcomponent);
 begin
- fcolorchart:= cl_foreground;
+ fcolorchart:= cl_default;
  foptionschart:= defaultoptionschart;
  fxrange:= 1;
  fyrange:= 1;
@@ -2543,6 +2556,8 @@ begin
  fydials.free;
  fxdials.free;
  inherited;
+ ffacechart.free;
+ fframechart.free;
 end;
 
 procedure tcuchart.invalidatelayout;
@@ -2582,9 +2597,13 @@ end;
 procedure tcuchart.dopaintbackground(const canvas: tcanvas);
 begin
  inherited;
- if not (chs_nocolorchart in fstate) and 
-                 not (fcolorchart = container.frame.colorclient) then begin
-  canvas.fillrect(getdialrect,fcolorchart);
+ if not (chs_nocolorchart in fstate) then begin
+  if fcolorchart <> cl_default then begin
+   canvas.fillrect(getdialrect,fcolorchart);
+  end;
+  if ffacechart <> nil then begin
+   ffacechart.paint(canvas,getdialrect);
+  end;
  end;
 // if canevent(tmethod(fonpaintbackground)) then begin
 //  fonpaintbackground(self,canvas);
@@ -2621,6 +2640,9 @@ begin
   dopaintcontent(acanvas);
   fxdials.afterpaint(acanvas);
   fydials.afterpaint(acanvas);
+  if fframechart <> nil then begin
+   fframechart.paintoverlay(acanvas,fchartframerect);
+  end;
  end;
 end;
 
@@ -2652,6 +2674,11 @@ function tcuchart.getdialrect: rectty;
 begin
  result:= innerclientrect;
  deflaterect1(result,ffitframe);
+ if fframechart <> nil then begin
+{$warnings off}
+  deflaterect1(result,fframechart.innerframe);
+{$warnings on}
+ end;
 end;
 
 function tcuchart.getdialsize: sizety;
@@ -2808,11 +2835,10 @@ begin
    expandrectext1(ext1,tdialticks1(ticks).fdim)
   end;
  end;
- with tframe1(fframe).fi.innerframe do begin
-  ext1.left:= ext1.left - left;
-  ext1.top:= ext1.top - top;
-  ext1.right:= ext1.right + right;
-  ext1.bottom:= ext1.bottom + bottom;
+
+ inflaterectext1(ext1,tcustomframe1(fframe).fi.innerframe);
+ if fframechart <> nil then begin
+  inflaterectext1(ext1,fframechart.innerframe);
  end;
  
  fra1:= ffitframe;
@@ -2850,6 +2876,10 @@ begin
  if not (chs_layoutvalid in fstate) then begin
   if foptionschart * rectsidesmask <> [] then begin
    result:= fit(rectsidesty(foptionschart*rectsidesmask)) or result;
+  end;
+  fchartframerect:= getdialrect;
+  if framechart <> nil then begin
+   inflaterect1(fchartframerect,fframechart.innerframe);
   end;
  end;
  include(fstate,chs_layoutvalid);
@@ -2897,6 +2927,44 @@ procedure tcuchart.fontchanged;
 begin
  invalidatelayout;
  inherited;
+end;
+
+function tcuchart.getfacechart: tface;
+begin
+ getoptionalobject(ffacechart,{$ifdef FPC}@{$endif}createfacechart);
+ result:= ffacechart;
+end;
+
+procedure tcuchart.setfacechart(const avalue: tface);
+begin
+ setoptionalobject(avalue,ffacechart,{$ifdef FPC}@{$endif}createfacechart);
+ invalidate;
+end;
+
+procedure tcuchart.createfacechart;
+begin
+ ffacechart:= tface.create(iface(self));
+end;
+
+procedure tcuchart.createframechart;
+begin
+ fframechart:= tframe(tframe.newinstance);
+{$warnings off}
+ include(tcustomframe1(fframechart).fstate,fs_nosetinstance);
+{$warnings on}
+ fframechart.create(iframe(self));
+end;
+
+function tcuchart.getframechart: tframe;
+begin
+ getoptionalobject(fframechart,{$ifdef FPC}@{$endif}createframechart);
+ result:= fframechart;
+end;
+
+procedure tcuchart.setframechart(const avalue: tframe);
+begin
+ setoptionalobject(avalue,fframechart,{$ifdef FPC}@{$endif}createframechart);
+ invalidate;
 end;
 
 { tcustomchart }

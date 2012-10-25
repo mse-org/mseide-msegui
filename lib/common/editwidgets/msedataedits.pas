@@ -5373,7 +5373,7 @@ begin
  inherited;
  fi.colorclient:= cl_foreground;
  fi.levelo:= -2;
- inflateframe(fi.innerframe,1);
+ inflateframe1(fi.innerframe,1);
  fforcevisiblebuttons:= [sk_up,sk_down];
  fforceinvisiblebuttons:= [];
  internalupdatestate;

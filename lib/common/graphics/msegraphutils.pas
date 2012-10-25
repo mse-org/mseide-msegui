@@ -562,8 +562,14 @@ procedure subframe1(var dest: framety; const frame: framety);
 function expandrectext(const a,b: rectextty): rectextty;
 procedure expandrectext1(var dest: rectextty; const frame: rectextty);
 
-procedure inflateframe(var frame: framety; value: integer);
-function inflateframe1(const frame: framety; value: integer): framety;
+procedure inflaterectext1(var ext: rectextty; const frame: framety);
+function inflaterectext(var ext: rectextty; const frame: framety): rectextty;
+procedure deflaterectext1(var ext: rectextty; const frame: framety);
+function deflaterectext(var ext: rectextty; const frame: framety): rectextty;
+
+procedure inflateframe1(var frame: framety; value: integer);
+function inflateframe(const frame: framety; value: integer): framety;
+
 function moverect(const rect: rectty; const dist: pointty): rectty;
 procedure moverect1(var rect: rectty; const dist: pointty);
 function removerect(const rect: rectty; const dist: pointty): rectty;
@@ -1233,6 +1239,46 @@ begin
  end;
 end;
 
+procedure inflaterectext1(var ext: rectextty; const frame: framety);
+begin
+ with ext do begin
+  left:= left - frame.left;
+  top:= top - frame.top;
+  right:= right + frame.right;
+  bottom:= bottom + frame.bottom;
+ end;
+end;
+
+function inflaterectext(var ext: rectextty; const frame: framety): rectextty;
+begin
+ with result do begin
+  left:= left - frame.left;
+  top:= top - frame.top;
+  right:= right + frame.right;
+  bottom:= bottom + frame.bottom;
+ end;
+end;
+
+procedure deflaterectext1(var ext: rectextty; const frame: framety);
+begin
+ with ext do begin
+  left:= left + frame.left;
+  top:= top + frame.top;
+  right:= right - frame.right;
+  bottom:= bottom - frame.bottom;
+ end;
+end;
+
+function deflaterectext(var ext: rectextty; const frame: framety): rectextty;
+begin
+ with result do begin
+  left:= left + frame.left;
+  top:= top + frame.top;
+  right:= right - frame.right;
+  bottom:= bottom - frame.bottom;
+ end;
+end;
+
 function pointinrect(const point: pointty; const rect: rectty): boolean;
      //true if point is in rect
 begin
@@ -1352,7 +1398,7 @@ begin
 end;
 
 
-procedure inflateframe(var frame: framety; value: integer);
+procedure inflateframe1(var frame: framety; value: integer);
 begin
  inc(frame.left,value);
  inc(frame.top,value);
@@ -1360,7 +1406,7 @@ begin
  inc(frame.bottom,value);
 end;
 
-function inflateframe1(const frame: framety; value: integer): framety;
+function inflateframe(const frame: framety; value: integer): framety;
 begin
  result.left:= frame.left + value;
  result.top:= frame.top + value;

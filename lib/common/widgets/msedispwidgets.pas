@@ -402,7 +402,7 @@ begin
  inherited;
 // clientcolor:= cl_foreground;
  fi.levelo:= -1;
- inflateframe(fi.innerframe,1);
+ inflateframe1(fi.innerframe,1);
  internalupdatestate;
 end;
 
