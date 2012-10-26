@@ -45,6 +45,7 @@ type
   public
    constructor create(const aowner: tmenuitem);
    class function getitemclasstype: persistentclassty; override;
+   procedure sort;
    procedure assign(source: tpersistent); override;
    function insert(const index: integer; const aitem: tmenuitem): integer; overload;
       //aitem is owned, returns index of new item
@@ -456,7 +457,7 @@ procedure freetransientmenu(var amenu: tcustommenu);
 implementation
 uses
  sysutils,msestockobjects,rtlconsts,msebits,msemenuwidgets,msedatalist,
- mseactions,msestreaming;
+ mseactions,msestreaming,msearrayutils;
 
 procedure freetransientmenu(var amenu: tcustommenu); 
 begin
@@ -1807,6 +1808,18 @@ begin
  else begin
   result:= tmenuitem(fitems[int1]);
  end;
+end;
+
+function comparemenuitem(const l,r): integer;
+begin
+ result:= msecomparetext(tmenuitem(l).finfo.caption1.text,
+                                 tmenuitem(r).finfo.caption1.text);
+end;
+
+procedure tmenuitems.sort;
+begin
+ sortarray(pointerarty(fitems),@comparemenuitem);
+ dochange(-1);
 end;
 
 { tpopupmenu }
