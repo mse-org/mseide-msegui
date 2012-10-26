@@ -380,6 +380,7 @@ type
    fdatarowlinewidth: integer;
    fdatarowlinecolor: colorty;
    fbuttonlength: integer;
+   fbuttonendlength: integer;
    fbuttonminlength: integer;
    fdropdownitems: tdropdowncols;
    fdropdownlist: tdropdownlist;
@@ -418,7 +419,10 @@ type
                           write fdatarowlinewidth default 0;
    property datarowlinecolor: colorty read fdatarowlinecolor 
                           write fdatarowlinecolor default defaultdatalinecolor;
-   property buttonlength: integer read fbuttonlength write fbuttonlength default 0;
+   property buttonlength: integer read fbuttonlength 
+                                      write fbuttonlength default 0;
+   property buttonendlength: integer read fbuttonendlength 
+                                      write fbuttonendlength default 0;
    property buttonminlength: integer read fbuttonminlength 
                     write fbuttonminlength default defaultbuttonminlength;
  end;
@@ -434,6 +438,7 @@ type
    property datarowlinecolor;
    property buttonlength;
    property buttonminlength;
+   property buttonendlength;
  end;
 
  tdropdownlistcontroller = class(tnocolsdropdownlistcontroller)
@@ -1431,6 +1436,7 @@ begin
     with fdropdownlist.frame.sbvert do begin
      buttonminlength:= fbuttonminlength;
      buttonlength:= fbuttonlength;
+     buttonendlength:= fbuttonendlength;
     end;
     application.registeronapplicationactivechanged(
             {$ifdef FPC}@{$endif}applicationactivechanged);

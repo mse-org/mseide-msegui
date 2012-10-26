@@ -45,7 +45,7 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure setvalue(const avalue: string); virtual;
 
-  //igridwidget
+    //igridwidget
    procedure initgridwidget; virtual;
    function getoptionsedit: optionseditty;
    procedure setfirstclick;
@@ -92,7 +92,7 @@ type
                                           const params: array of const);
    property value: string write setvalue stored false;
    property gridvalue[index: integer]: string read getgridvalue
-                             write setgridvalue;
+                             write setgridvalue; default;
    property format: string read fformat write setformat;
    property onchange: notifyeventty read fonchange write fonchange;
  end;

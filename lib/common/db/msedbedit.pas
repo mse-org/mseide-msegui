@@ -1482,6 +1482,7 @@ type
    property datarowlinecolor;
    property buttonlength;
    property buttonminlength;
+   property buttonendlength;
  end;
  
  tdropdownlistcontrollerdb = class(tcustomdbdropdownlistcontroller)
@@ -1499,6 +1500,7 @@ type
    property datarowlinecolor;
    property buttonlength;
    property buttonminlength;
+   property buttonendlength;
  end;
  
  tdbenumeditdb = class(tdbenumedit,idbdropdownlist,ireccontrol)
@@ -2169,6 +2171,7 @@ type
    property datarowlinecolor;
    property buttonlength;
    property buttonminlength;
+   property buttonendlength;
  end;
  
  tdropdownlistcontrollerlb = class(tcustomlbdropdownlistcontroller)
@@ -2186,6 +2189,7 @@ type
    property datarowlinecolor;
    property buttonlength;
    property buttonminlength;
+   property buttonendlength;
  end;
  
  tdbenumeditlb = class(tdbenumedit,ilbdropdownlist)

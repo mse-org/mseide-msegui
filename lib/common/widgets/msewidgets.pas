@@ -172,6 +172,7 @@ type
    property indentend;
    property buttonlength;
    property buttonminlength;
+   property buttonendlength;
    property facebutton;
    property faceendbutton;
    property framebutton;
@@ -199,6 +200,7 @@ type
    property indentend;
    property buttonlength;
    property buttonminlength;
+   property buttonendlength;
    property facebutton;
    property faceendbutton;
    property framebutton;
