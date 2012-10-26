@@ -4359,7 +4359,7 @@ begin
    clientwidth:= 0;
   end;
   if avalue.im > 1 then begin
-   clientheight:= round((fpaintrect.cy+top+bottom)*avalue.re);
+   clientheight:= round((fpaintrect.cy+top+bottom)*avalue.im);
                                         //do not use scrollbarwidth
   end
   else begin
@@ -4409,13 +4409,15 @@ begin
  with info do begin
   if not (es_processed in eventstate) then begin
    if (foptionsscroll*[oscr_zoom,oscr_mousewheel] = 
-                                 [oscr_zoom,oscr_mousewheel]) and 
-      (shiftstate*shiftstatesmask = [ss_ctrl]) then begin
+                                 [oscr_zoom,oscr_mousewheel]) and
+      (ss_ctrl in shiftstate) and
+      (shiftstate*(shiftstatesmask-[ss_shift,ss_alt,ss_ctrl]) = []) then begin
     include(eventstate,es_processed);
     size1:= fclientrect.size;
     co1:= fzoom;
     bo1:= false;
-    if (fzoomwidthstep <> 1) and (fzoomwidthstep > 0) then begin
+    if (fzoomwidthstep <> 1) and (fzoomwidthstep > 0) and 
+         not (ss_shift in shiftstate) then begin
      bo1:= true;
      if wheel = mw_down then begin
       co1.re:= zoomwidth / fzoomwidthstep;
@@ -4424,7 +4426,8 @@ begin
       co1.re:= zoomwidth * fzoomwidthstep;
      end;
     end;     
-    if (fzoomheightstep <> 1) and (fzoomheightstep > 0) then begin
+    if (fzoomheightstep <> 1) and (fzoomheightstep > 0) and
+         not (ss_alt in shiftstate) then begin
      bo1:= true;
      if wheel = mw_down then begin
       co1.im:= zoomheight / fzoomheightstep;
