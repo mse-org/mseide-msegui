@@ -2621,6 +2621,8 @@ const
 function application: tguiapplication;
 function mousebuttontoshiftstate(button: mousebuttonty): shiftstatesty;
 function isenterkey(const awidget: twidget; const key: keyty): boolean;
+function isdblclick(const ainfo: mouseeventinfoty;
+                           const abutton: mousebuttonty  = mb_left): boolean;
 
 procedure beep;
 procedure guibeep;
@@ -3444,8 +3446,18 @@ end;
 
 function isenterkey(const awidget: twidget; const key: keyty): boolean;
 begin
- result:= ((awidget = nil) or not (ow_keyreturntaborder in awidget.optionswidget)) and 
+ result:= ((awidget = nil) or not 
+              (ow_keyreturntaborder in awidget.optionswidget)) and 
           ({(key = key_enter) or} (key = key_return));
+end;
+
+function isdblclick(const ainfo: mouseeventinfoty;
+                          const abutton: mousebuttonty = mb_left): boolean;
+begin
+ with ainfo do begin
+  result:= (button = abutton) and (eventkind = ek_buttonpress) and 
+                                                (ss_double in shiftstate);
+ end;
 end;
 
 procedure destroyregion(var region: gdiregionty);

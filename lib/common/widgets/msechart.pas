@@ -199,7 +199,9 @@ type
    procedure insertxseriesdata(const avalue: xseriesdataty);
    procedure assign(source: tpersistent); override;
    procedure minmaxx(out amin,amax: real);
+   procedure minmaxx1(var amin,amax: real); //extend
    procedure minmaxy(out amin,amax: real);
+   procedure minmaxy1(var amin,amax: real); //extend
 
    property xdata: realarty read finfo.ydata write setxdata;
    property ydata: realarty read finfo.ydata write setydata;
@@ -1991,7 +1993,7 @@ begin
  //dummy
 end;
 
-procedure ttrace.minmaxx(out amin: real; out amax: real);
+procedure ttrace.minmaxx1(var amin: real; var amax: real);
 var
  min,max: real;
  int1: integer;
@@ -2009,8 +2011,8 @@ begin
    max:= 1;
   end
   else begin
-   min:= bigreal;
-   max:= -bigreal;
+   min:= amin;
+   max:= amax;
    for int1:= cx-1 downto 0 do begin
     if pox^ > max then begin
      max:= pox^;
@@ -2022,11 +2024,15 @@ begin
    end;
   end;
  end;
- amin:= min;
- amax:= max;
+ if min < amin then begin
+  amin:= min;
+ end;
+ if max > amax then begin
+  amax:= max;
+ end;
 end;
 
-procedure ttrace.minmaxy(out amin: real; out amax: real);
+procedure ttrace.minmaxy1(var amin: real; var amax: real);
 var
  min,max: real;
  int1: integer;
@@ -2039,8 +2045,8 @@ begin
   max:= 1;
  end
  else begin
-  min:= bigreal;
-  max:= -bigreal;
+  min:= amin;
+  max:= amax;
   for int1:= cy-1 downto 0 do begin
    if poy^ > max then begin
     max:= poy^;
@@ -2051,8 +2057,34 @@ begin
    inc(poy,sy);
   end;
  end;
- amin:= min;
- amax:= max;
+ if min < amin then begin
+  amin:= min;
+ end;
+ if max > amax then begin
+  amax:= max;
+ end;
+end;
+
+procedure ttrace.minmaxx(out amin: real; out amax: real);
+begin
+ amin:= bigreal;
+ amax:= -bigreal;
+ minmaxx1(amin,amax);
+ if amax < amin then begin
+  amin:= 0;
+  amax:= 0;
+ end;
+end;
+
+procedure ttrace.minmaxy(out amin: real; out amax: real);
+begin
+ amin:= bigreal;
+ amax:= -bigreal;
+ minmaxy1(amin,amax);
+ if amax < amin then begin
+  amin:= 0;
+  amax:= 0;
+ end;
 end;
 
 { ttraces }
