@@ -510,8 +510,6 @@ type
    procedure setfitframe_bottom(const avalue: integer);
    function getfacechart: tface;
    procedure setfacechart(const avalue: tface);
-   procedure createfacechart;
-   procedure createframechart;
    function getframechart: tframe;
    procedure setframechart(const avalue: tframe);
   protected
@@ -549,6 +547,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure createfacechart;
+   procedure createframechart;
    function fit(const asides: rectsidesty = allrectsides): boolean; 
            //adjust fitframe for extents of dials
            //returns tru if changes made
@@ -2975,16 +2975,20 @@ end;
 
 procedure tcuchart.createfacechart;
 begin
- ffacechart:= tface.create(iface(self));
+ if ffacechart <> nil then begin
+  ffacechart:= tface.create(iface(self));
+ end;
 end;
 
 procedure tcuchart.createframechart;
 begin
- fframechart:= tframe(tframe.newinstance);
-{$warnings off}
- include(tcustomframe1(fframechart).fstate,fs_nosetinstance);
-{$warnings on}
- fframechart.create(iframe(self));
+ if fframechart <> nil then begin
+  fframechart:= tframe(tframe.newinstance);
+ {$warnings off}
+  include(tcustomframe1(fframechart).fstate,fs_nosetinstance);
+ {$warnings on}
+  fframechart.create(iframe(self));
+ end;
 end;
 
 function tcuchart.getframechart: tframe;

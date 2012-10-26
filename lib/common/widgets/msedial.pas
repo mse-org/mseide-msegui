@@ -86,7 +86,6 @@ type
    function getfont: tdialpropfont;
    procedure setfont(const avalue: tdialpropfont);
    function isfontstored: boolean;
-   procedure createfont;
    procedure fontchanged(const sender: tobject);
    procedure setescapement(const avalue: real);
 
@@ -99,6 +98,7 @@ type
   public
    constructor create(aowner: tobject); override;   
    destructor destroy; override;
+   procedure createfont;
   published
    property color: colorty read fli.color write setcolor
                              default cl_default;
@@ -298,7 +298,6 @@ type
                 const stringwidth: integer; var pos: pointty);
    procedure checklayout;
    procedure invalidate;
-   procedure createfont;
    procedure fontchanged(const sender: tobject);
    procedure transform(var apoint: pointty);
    procedure defineproperties(filer: tfiler); override;
@@ -307,6 +306,7 @@ type
   public
    constructor create(const aintf: idialcontroller); reintroduce; virtual;
    destructor destroy; override;
+   procedure createfont;
    procedure paint(const acanvas: tcanvas);
    procedure afterpaint(const acanvas: tcanvas);
    property options: dialoptionsty read foptions write setoptions default []; 
