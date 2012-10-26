@@ -1,5 +1,7 @@
 MSEide+MSEgui breaking changes version history
 
+2012-10-26
+ optionsscrollty oscr_zoom -> oscr_zoomwidth,oscr_zoomheight.
 2012-10-11
  onloaded called after loaded() of the children and self.loaded().
  oncreate called after children have been created but before loaded().

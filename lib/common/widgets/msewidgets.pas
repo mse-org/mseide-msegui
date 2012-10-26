@@ -209,7 +209,8 @@ type
  
  framescrollbarclassty = class of tcustomscrollbar;
 
- optionscrollty = (oscr_drag,oscr_zoom,oscr_key,oscr_mousewheel);
+ optionscrollty = (oscr_drag,oscr_zoomwidth,oscr_zoomheight,
+                   oscr_key,oscr_mousewheel);
  optionsscrollty = set of optionscrollty;
 
 const
@@ -4405,50 +4406,58 @@ var
  pt1: pointty;
  co1: complexty;
  bo1: boolean;
+ ma1: shiftstatesty;
 begin
  with info do begin
   if not (es_processed in eventstate) then begin
-   if (foptionsscroll*[oscr_zoom,oscr_mousewheel] = 
-                                 [oscr_zoom,oscr_mousewheel]) and
-      (ss_ctrl in shiftstate) and
-      (shiftstate*(shiftstatesmask-[ss_shift,ss_alt,ss_ctrl]) = []) then begin
-    include(eventstate,es_processed);
-    size1:= fclientrect.size;
-    co1:= fzoom;
-    bo1:= false;
-    if (fzoomwidthstep <> 1) and (fzoomwidthstep > 0) and 
-         not (ss_shift in shiftstate) then begin
-     bo1:= true;
-     if wheel = mw_down then begin
-      co1.re:= zoomwidth / fzoomwidthstep;
-     end
-     else begin
-      co1.re:= zoomwidth * fzoomwidthstep;
+   if (oscr_mousewheel in foptionsscroll) and (ss_ctrl in shiftstate) and
+             (foptionsscroll*[oscr_zoomwidth,oscr_zoomheight] <> []) then begin
+    ma1:= shiftstatesmask - [ss_ctrl];
+    if foptionsscroll*[oscr_zoomwidth,oscr_zoomheight] = 
+                              [oscr_zoomwidth,oscr_zoomheight] then begin
+     ma1:= ma1 - [ss_alt,ss_shift];
+    end;           
+    if shiftstate * ma1 = [] then begin
+     include(eventstate,es_processed);
+     size1:= fclientrect.size;
+     co1:= fzoom;
+     bo1:= false;
+     if (fzoomwidthstep <> 1) and (fzoomwidthstep > 0) and 
+                          (oscr_zoomwidth in foptionsscroll) and 
+          not (ss_shift in shiftstate) then begin
+      bo1:= true;
+      if wheel = mw_down then begin
+       co1.re:= zoomwidth / fzoomwidthstep;
+      end
+      else begin
+       co1.re:= zoomwidth * fzoomwidthstep;
+      end;
+     end;     
+     if (fzoomheightstep <> 1) and (fzoomheightstep > 0) and 
+                          (oscr_zoomheight in foptionsscroll) and 
+                                  not (ss_alt in shiftstate) then begin
+      bo1:= true;
+      if wheel = mw_down then begin
+       co1.im:= zoomheight / fzoomheightstep;
+      end
+      else begin
+       co1.im:= zoomheight * fzoomheightstep;
+      end;
      end;
-    end;     
-    if (fzoomheightstep <> 1) and (fzoomheightstep > 0) and
-         not (ss_alt in shiftstate) then begin
-     bo1:= true;
-     if wheel = mw_down then begin
-      co1.im:= zoomheight / fzoomheightstep;
-     end
-     else begin
-      co1.im:= zoomheight * fzoomheightstep;
-     end;
-    end;
-    if bo1 then begin
-     zoom:= co1;
-     pt1:= nullpoint;
-     if size1.cx > 0 then begin
-      pt1.x:= -((info.pos.x-fclientrect.x+fpaintrect.x) * 
-                             (fclientrect.cx-size1.cx)) div size1.cx;
-     end;
-     if size1.cy > 0 then begin
-      pt1.y:= -((info.pos.y-fclientrect.y+fpaintrect.y) * 
-                             (fclientrect.cy-size1.cy) div size1.cy);
-     end;
-     if (pt1.x <> 0) or (pt1.y <> 0) then begin
-      setclientpos(addpoint(fclientrect.pos,pt1));
+     if bo1 then begin
+      zoom:= co1;
+      pt1:= nullpoint;
+      if size1.cx > 0 then begin
+       pt1.x:= -((info.pos.x-fclientrect.x+fpaintrect.x) * 
+                              (fclientrect.cx-size1.cx)) div size1.cx;
+      end;
+      if size1.cy > 0 then begin
+       pt1.y:= -((info.pos.y-fclientrect.y+fpaintrect.y) * 
+                              (fclientrect.cy-size1.cy) div size1.cy);
+      end;
+      if (pt1.x <> 0) or (pt1.y <> 0) then begin
+       setclientpos(addpoint(fclientrect.pos,pt1));
+      end;
      end;
     end;
    end

@@ -1867,7 +1867,8 @@ begin
   color:= cl_red;
  end;
  with frame do begin
-  optionsscroll:= optionsscroll + [oscr_zoom,oscr_drag,oscr_mousewheel];
+  optionsscroll:= optionsscroll + 
+               [oscr_zoomheight,oscr_zoomwidth,oscr_drag,oscr_mousewheel];
   zoomwidthstep:= 1.5;
  end;
 end;

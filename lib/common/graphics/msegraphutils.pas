@@ -563,9 +563,9 @@ function expandrectext(const a,b: rectextty): rectextty;
 procedure expandrectext1(var dest: rectextty; const frame: rectextty);
 
 procedure inflaterectext1(var ext: rectextty; const frame: framety);
-function inflaterectext(var ext: rectextty; const frame: framety): rectextty;
+function inflaterectext(const ext: rectextty; const frame: framety): rectextty;
 procedure deflaterectext1(var ext: rectextty; const frame: framety);
-function deflaterectext(var ext: rectextty; const frame: framety): rectextty;
+function deflaterectext(const ext: rectextty; const frame: framety): rectextty;
 
 procedure inflateframe1(var frame: framety; value: integer);
 function inflateframe(const frame: framety; value: integer): framety;
@@ -1249,13 +1249,13 @@ begin
  end;
 end;
 
-function inflaterectext(var ext: rectextty; const frame: framety): rectextty;
+function inflaterectext(const ext: rectextty; const frame: framety): rectextty;
 begin
  with result do begin
-  left:= left - frame.left;
-  top:= top - frame.top;
-  right:= right + frame.right;
-  bottom:= bottom + frame.bottom;
+  left:= ext.left - frame.left;
+  top:= ext.top - frame.top;
+  right:= ext.right + frame.right;
+  bottom:= ext.bottom + frame.bottom;
  end;
 end;
 
@@ -1269,13 +1269,13 @@ begin
  end;
 end;
 
-function deflaterectext(var ext: rectextty; const frame: framety): rectextty;
+function deflaterectext(const ext: rectextty; const frame: framety): rectextty;
 begin
  with result do begin
-  left:= left + frame.left;
-  top:= top + frame.top;
-  right:= right - frame.right;
-  bottom:= bottom - frame.bottom;
+  left:= ext.left + frame.left;
+  top:= ext.top + frame.top;
+  right:= ext.right - frame.right;
+  bottom:= ext.bottom - frame.bottom;
  end;
 end;
 
