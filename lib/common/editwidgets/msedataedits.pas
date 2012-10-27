@@ -80,6 +80,8 @@ type
    procedure setempty_textcolorbackground(const avalue: colorty);
    procedure setempty_fontstyle(const avalue: fontstylesty);
    procedure setempty_color(const avalue: colorty);
+   function getgridrow: integer;
+   procedure setgridrow(const avalue: integer);
   protected
    fstate: dataeditstatesty;
    fgridintf: iwidgetgrid;
@@ -232,7 +234,8 @@ type
    function actualcolor: colorty; override;
    function actualcursor(const apos: pointty): cursorshapety; override;
    function widgetcol: twidgetcol;
-   function gridrow: integer;
+   property gridrow: integer read getgridrow write setgridrow;
+                      //returns -1 if no grid, setting ignored if no grid
    function gridcol: integer;
    function griddata: tdatalist;
    property gridintf: iwidgetgrid read fgridintf;
@@ -2232,7 +2235,7 @@ begin
  end;
 end;
 
-function tcustomdataedit.gridrow: integer;
+function tcustomdataedit.getgridrow: integer;
 begin
  if fgridintf = nil then begin
   result:= -1;
@@ -2242,6 +2245,13 @@ begin
  end;
 end;
 
+procedure tcustomdataedit.setgridrow(const avalue: integer);
+begin
+ if fgridintf <> nil then begin
+  fgridintf.getcol.grid.row:= avalue;
+ end;
+end;
+ 
 function tcustomdataedit.gridcol: integer;
 begin
  if fgridintf = nil then begin
@@ -2782,7 +2792,7 @@ procedure tcustomdataedit.updatedatalist;
 begin
  //dummy
 end;
- 
+
 { tcustomstringedit }
 
 function tcustomstringedit.internaldatatotext(const data): msestring;

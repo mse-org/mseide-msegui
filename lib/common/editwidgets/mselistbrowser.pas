@@ -87,6 +87,8 @@ type
  treelistedititematy = array[0..0] of ttreelistedititem;
  ptreelistedititematy = ^treelistedititematy;
 
+ ttreeitemedit = class;
+
  ttreelistedititem = class(ttreelistitem)
   private
    factiveindex: integer;
@@ -108,6 +110,8 @@ type
    property activeindex: integer read getactiveindex;
    function endtreerow: integer; 
                 //returns index of last row of tree
+   function editwidget: ttreeitemedit;
+   procedure activate;
  end;
  
  trecordtreelistedititem = class(ttreelistedititem,irecordfield)   //does not statsave subitems
@@ -635,8 +639,6 @@ type
    function converttotreelistitem(flat: boolean = false; withrootnode: boolean =  false;
                 filterfunc: treenodefilterfuncty = nil): ttreelistedititem;
  end;
-
- ttreeitemedit = class;
 
  ttreeitemdragobject = class(tdragobject)
   private
@@ -3568,6 +3570,25 @@ begin
  result:= findex;
  if expanded then begin
   result:= result + treeheight;
+ end;
+end;
+
+function ttreelistedititem.editwidget: ttreeitemedit;
+begin
+ result:= nil;
+ if fowner <> nil then begin
+  result:= ttreeitemedit(ttreeitemeditlist(fowner).fowner);
+ end;
+end;
+
+procedure ttreelistedititem.activate;
+var
+ wi1: ttreeitemedit;
+begin
+ wi1:= editwidget;
+ if wi1 <> nil then begin
+  wi1.gridrow:= findex;
+  wi1.activate;
  end;
 end;
 
