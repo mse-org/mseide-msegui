@@ -37,6 +37,7 @@ type
                 ek_connect,
                 ek_dbedit,ek_dbupdaterowdata,ek_data,ek_objectdata,ek_childproc,
                 ek_dbinsert, //for tdscontroller
+                ek_sysdnd,
                 ek_mse,
                 ek_user);
 const

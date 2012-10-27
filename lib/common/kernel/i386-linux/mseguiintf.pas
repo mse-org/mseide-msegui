@@ -490,7 +490,7 @@ implementation
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist
  {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
- msearrayutils,msesys,msesysintf1
+ msearrayutils,msesys,msesysintf1,msesysdnd
  {$ifdef mse_debug},mseformatstr{$endif};
 
 const
@@ -4133,11 +4133,105 @@ begin
  repeatkeytime:= 0;
 end;
 
+type
+ tsysdndhandler = class
+  private
+   fwinid: winidty;
+   fsource: winidty;
+   fprotocolversion: byte;
+   fdatatypes: stringarty;
+  public
+   property winid: winidty read fwinid;
+   constructor create(const aevent: txclientmessageevent);
+ end;
+
+{ tsysdndhandler }
+
+constructor tsysdndhandler.create(const aevent: txclientmessageevent);
+var
+ lwo1: longword;
+ int1,int2: integer;
+ ar1: atomarty;
+begin
+ with aevent do begin
+  fwinid:= xwindow;
+  fsource:= data.l[0];
+  lwo1:= data.l[1];
+  fprotocolversion:= lwo1 shr 24;
+  if lwo1 and 1 <> 0 then begin //more than 3 types 
+   //todo: suport for inc protocol
+   readatomproperty(fsource,xdndatoms[xdnd_typelist],ar1);
+  end
+  else begin
+   setlength(ar1,3);
+   move(data.l[2],ar1[0],3*sizeof(ar1[0]));
+  end;
+  setlength(fdatatypes,length(ar1));
+  int2:= 0;
+  for int1:= 0 to high(ar1) do begin
+   if ar1[int1] <> 0 then begin
+    fdatatypes[int2]:= xgetatomname(appdisp,ar1[int1]);
+    inc(int2);
+   end;
+  end;
+  setlength(fdatatypes,int2);
+ end;
+end;
+ 
+var
+ sysdndhandler: tsysdndhandler;
+
+function gui_sysdnd(const action: sysdndactionty): guierrorty;
+begin
+ if sysdndhandler <> nil then begin
+  with sysdndhandler do begin
+   case action of
+    sdnda_reject: begin
+     sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fwinid,
+                             [fwinid,2,0,0,0]); //always get position messages
+    end;
+    sdnda_accept: begin
+     sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fwinid,
+    [fwinid,3,0,0,xdndatoms[xdnd_actioncopy]]);  //always get position messages
+    end;
+   end;
+  end;
+ end;
+ result:= gue_ok;
+end;
+ 
 function handlexdnd(var aevent: txclientmessageevent): tmseevent;
+ function checkhandler: boolean;
+ begin
+  result:= false;
+  if sysdndhandler <> nil then begin
+   if (sysdndhandler.winid <> aevent.xwindow) or 
+                        (aevent.data.l[0] <> sysdndhandler.fsource) then begin
+    freeandnil(sysdndhandler); //there is something wrong
+   end
+   else begin
+    result:= true;
+   end;
+  end;
+ end;
+ 
 begin
  result:= nil;
- if aevent.message_type = xdndatoms[xdnd_enter] then begin
-  guibeep;
+ with aevent do begin
+  if message_type = xdndatoms[xdnd_enter] then begin
+   sysdndhandler.free;
+   sysdndhandler:= tsysdndhandler.create(aevent);
+  end
+  else begin
+   if message_type = xdndatoms[xdnd_position] then begin
+    if checkhandler then begin
+     result:= tsysdndevent.create(aevent.xwindow,
+              mp(longword(data.l[2]) shr 16,data.l[1] and $ffff),
+              xtoshiftstate(data.l[1] and $ff,key_none,mb_none,false),
+              data.l[1] and (1 shl 10) <> 0,sysdndhandler.fdatatypes);
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -4596,6 +4690,10 @@ eventrestart:
   end;
   destroynotify: begin
    with xev.xdestroywindow do begin
+    if (sysdndhandler <> nil) and 
+                (sysdndhandler.winid = xwindow) then begin
+     freeandnil(sysdndhandler);
+    end;
     result:= twindowevent.create(ek_destroy,xwindow);
    end;
   end;
@@ -5102,6 +5200,7 @@ function gui_deinit: guierrorty;
 begin
  gdi_lock;
  try
+  freeandnil(sysdndhandler);
   clipboard:= '';
   result:= gue_ok;
   settimer1(0); //kill timer

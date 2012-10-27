@@ -1926,6 +1926,14 @@ type
  end;
  pshowinfoty = ^showinfoty;
  
+ twindowevent = class(tmseevent)
+  private
+  public
+   fwinid: winidty;
+   constructor create(akind: eventkindty; winid: winidty);
+ end;
+ pwindowevent = ^twindowevent;
+
  twindow = class(teventobject,icanvas)
   private
    ffocuscount: longword; //for recursive setwidgetfocus
@@ -2023,6 +2031,7 @@ type
    procedure setasynccanvas(const acanvas: tcanvas);
            //used from treport
    procedure releaseasynccanvas;
+   procedure processsysdnd(const event: twindowevent); //tsysdndevent
    
    function getwindowsize: windowsizety;
    procedure setwindowsize(const value: windowsizety);
@@ -2152,14 +2161,6 @@ type
  windoweventty = procedure(const awindow: twindow) of object;
  winideventty = procedure(const awinid: winidty) of object;
  booleaneventty = procedure(const avalue: boolean) of object;
-
- twindowevent = class(tmseevent)
-  private
-  public
-   fwinid: winidty;
-   constructor create(akind: eventkindty; winid: winidty);
- end;
- pwindowevent = ^twindowevent;
 
  twindowrectevent = class(twindowevent)
   private
@@ -2658,7 +2659,7 @@ uses
  msesysintf,typinfo,msestreaming,msetimer,msebits,msewidgets,
  mseshapes,msestockobjects,msefileutils,msedatalist,Math,msesysutils,
  {$ifdef FPCc} rtlconst {$else} RtlConsts{$endif},mseformatstr,mseprocutils,
- msesys;
+ msesys,msesysdnd;
 
 const
  faceoptionsmask: faceoptionsty = [fao_alphafadeimage,fao_alphafadenochildren,
@@ -6289,7 +6290,9 @@ end;
 
 destructor tdragobject.destroy;
 begin
- finstancepo^:= nil;
+ if finstancepo <> nil then begin
+  finstancepo^:= nil;
+ end;
  inherited;
 end;
 
@@ -14404,6 +14407,46 @@ begin
  //dummy
 end;
 
+procedure twindow.processsysdnd(const event: twindowevent);
+var
+ wi1: twidget;
+ obj1: tsysmimedragobject;
+ info: draginfoty;
+begin
+ if wo_sysdnd in foptions then begin
+  with tsysdndevent(event) do begin
+   wi1:= fowner.widgetatpos(fpos,[ws_visible,ws_enabled]);
+   if (wi1 = nil) and 
+        (fowner.fwidgetstate*[ws_visible,ws_enabled] = 
+                                       [ws_visible,ws_enabled]) then begin
+    wi1:= fowner;
+   end;
+   if wi1 <> nil then begin
+    obj1:= nil;
+    tsysmimedragobject.create(nil,tdragobject(obj1),nullpoint,ftypes);
+    fillchar(info,sizeof(info),0);
+    with info do begin
+     eventkind:= dek_check;
+     pos:= translateclientpoint(fpos,nil,wi1);
+     dragobjectpo:= @obj1;
+    end;
+    try
+     wi1.dragevent(info);
+     if not info.accept then begin
+      gui_sysdnd(sdnda_accept);
+//      gui_sysdnd(sdnda_reject);
+     end
+     else begin
+      gui_sysdnd(sdnda_accept);
+     end;      
+    finally
+     obj1.free;
+    end;
+   end;
+  end;
+ end;
+end;
+
 { tonkeyeventlist}
 
 procedure tonkeyeventlist.dokeyevent(const sender: twidget; var info: keyeventinfoty);
@@ -15852,6 +15895,11 @@ begin       //eventloop
        end;
        ek_asyncexec: begin
         texecuteevent(event).deliver;
+       end;
+       ek_sysdnd: begin
+        if findwindow(tsysdndevent(event).fwinid,window) then begin
+         window.processsysdnd(tsysdndevent(event));
+        end;
        end;
        else begin
         if event is tobjectevent then begin

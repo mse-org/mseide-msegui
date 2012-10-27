@@ -4337,9 +4337,12 @@ begin
  end;
 end;
 
-procedure tcustomtabwidget.childmouseevent(const sender: twidget; var info: mouseeventinfoty);
+procedure tcustomtabwidget.childmouseevent(const sender: twidget;
+                                                 var info: mouseeventinfoty);
 begin
- if not ftabs.fdragcontroller.active and 
+ inherited;
+ if not (es_processed in info.eventstate) and
+                     not ftabs.fdragcontroller.active and 
     ((sender = self) or (sender = ftabs) or (sender = activepage))  then begin
   translatewidgetpoint1(info.pos,sender,self);
   fobjectpicker.mouseevent(info);

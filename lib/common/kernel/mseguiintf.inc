@@ -149,6 +149,8 @@ function gui_copytoclipboard(const value: msestring): guierrorty;
 function gui_pastefromclipboard(out value: msestring): guierrorty;
 function gui_canpastefromclipboard: boolean;
 
+function gui_sysdnd(const action: sysdndactionty): guierrorty;
+
 function gui_getgdifuncs: pgdifunctionaty;
                  
 (*

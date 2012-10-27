@@ -506,6 +506,11 @@ begin
  result:= isclipboardformatavailable(cf_text);
 end;
 
+function gui_sysdnd(const action: sysdndactionty): guierrorty;
+begin
+ result:= gue_notimplemented;
+end;
+
 function gui_pastefromclipboard(out value: msestring): guierrorty;
 var               //todo: get msechars from clipboard, win95?
  data: thandle;

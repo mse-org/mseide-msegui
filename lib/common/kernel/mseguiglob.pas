@@ -228,6 +228,8 @@ const
  );
 
 type
+ sysdndactionty = (sdnda_reject,sdnda_accept);
+ 
  guierrorty = (gue_ok,gue_error,
                gue_alreadyregistered,gue_notregistered,
                gue_postevent,gue_timer,
