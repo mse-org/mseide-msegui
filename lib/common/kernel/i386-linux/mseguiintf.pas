@@ -493,7 +493,8 @@ uses
  msearrayutils,msesys,msesysintf1
  {$ifdef mse_debug},mseformatstr{$endif};
 
- 
+const
+ xdndprotocolversion = 4; 
 var
  pixmapcount: integer;
  
@@ -748,10 +749,27 @@ const
        '_NET_SYSTEM_TRAY_MESSAGE_DATA',
        '_XEMBED_INFO',
        '_MOTIF_WM_HINTS',
-       ''); 
+       '');
 // needednetatom = netatomty(ord(high(netatomty))-4);
+type
+ xdndatomty = (xdnd_aware,xdnd_selection,xdnd_typelist,
+  xdnd_actioncopy,xdnd_actionmove,xdnd_actionlink,xdnd_actionask,
+  xdnd_actionprivate,
+  xdnd_actionlist,xdnd_actiondescription,xdnd_proxy,
+  xdnd_enter,xdnd_position,xdnd_status,xdnd_leave,xdnd_drop,xdnd_finished
+  );
+const
+ xdndatomnames: array[xdndatomty] of string = (
+  'XdndAware','XdndSelection','XdndTypeList',
+  'XdndActionCopy','XdndActionMove','XdndActionLink','XdndActionAsk',
+  'XdndActionPrivate',
+  'XdndActionList','XdndActionDescription','XdndProxy',
+  'XdndEnter','XdndPosition','XdndStatus','XdndLeave','XdndDrop','XdndFinished'
+ );
+ 
 var
  netatoms: array[netatomty] of atom;
+ xdndatoms: array[xdndatomty] of atom;
  netsupported: boolean;
  canfullscreen: boolean;
  canframeextents: boolean;
@@ -3427,6 +3445,12 @@ begin
     setnetatomarrayitem(id,net_wm_state,net_wm_state_skip_taskbar);
    end;
   end;
+  if wo_sysdnd in options.options then begin
+   setatomproperty(id,xdndatoms[xdnd_aware],xdndprotocolversion);
+  end
+  else begin
+   xdeleteproperty(appdisp,id,xdndatoms[xdnd_aware]);
+  end;
  end;
  gdi_unlock;
 end;
@@ -4109,6 +4133,14 @@ begin
  repeatkeytime:= 0;
 end;
 
+function handlexdnd(var aevent: txclientmessageevent): tmseevent;
+begin
+ result:= nil;
+ if aevent.message_type = xdndatoms[xdnd_enter] then begin
+  guibeep;
+ end;
+end;
+
 function gui_getevent: tmseevent;
 
 var
@@ -4321,12 +4353,7 @@ eventrestart:
             end;
            end
            else begin
-//            str1:= clipboard;
-//            bo1:= true;
-//            target:= textplainatom;
-//            exit;
             event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= none;
-//            event.xselection.target:= none;
            end;
           end;
          end;
@@ -4351,7 +4378,7 @@ eventrestart:
    with xev.xclient do begin
     if display = appdisp then begin
      if message_type = mseclientmessageatom then begin
-      result:= tmseevent(getclientpointer(xev.xclient));
+       result:= tmseevent(getclientpointer(xev.xclient));
      end
      else begin
       if message_type = wmprotocolsatom then begin
@@ -4368,6 +4395,9 @@ eventrestart:
 {$else}
        end;
 {$endif}
+      end
+      else begin
+       result:= handlexdnd(xev.xclient);
       end;
      end;
     end;
@@ -4992,11 +5022,13 @@ begin
  
   netsupportedatom:= xinternatom(appdisp,'_NET_SUPPORTED',
             {$ifdef xboolean}false{$else}0{$endif});
+
+  fillchar(xdndatoms,sizeof(xdndatoms),0);      //get or create xdnd atoms
+  xinternatoms(appdisp,@xdndatomnames[low(xdndatomty)],
+           integer(high(xdndatomty))+1,{$ifdef xboolean}false{$else}0{$endif},
+           @xdndatoms[low(xdndatomty)]);
  
   fillchar(netatoms,sizeof(netatoms),0);               //check _net_
- // xinternatoms(appdisp,@netatomnames[low(netatomty)],
- //          integer(high(netatomty)),{$ifdef xboolean}true{$else}1{$endif},
- //          @netatoms[low(netatomty)]);
   xinternatoms(appdisp,@netatomnames[low(netatomty)],
            integer(high(netatomty)),{$ifdef xboolean}false{$else}0{$endif},
            @netatoms[low(netatomty)]);
@@ -5014,9 +5046,6 @@ begin
     end;
    end;
   end;
-//  if norestackwindow then begin
-//   netatoms[net_restack_window]:= 0;
-//  end;
   for netnum:= low(netatomty) to needednetatom do begin
    if netatoms[netnum] = 0 then begin
     netsupported:= false;
