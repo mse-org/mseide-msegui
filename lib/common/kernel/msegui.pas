@@ -14433,8 +14433,7 @@ begin
     try
      wi1.dragevent(info);
      if not info.accept then begin
-      gui_sysdnd(sdnda_accept);
-//      gui_sysdnd(sdnda_reject);
+      gui_sysdnd(sdnda_reject);
      end
      else begin
       gui_sysdnd(sdnda_accept);
