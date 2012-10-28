@@ -511,6 +511,18 @@ begin
  result:= gue_notimplemented;
 end;
 
+function gui_sysdndreaddata(var adata: string;
+                              const typeindex: integer): guierrorty;
+begin
+ result:= gue_notimplemented;
+end;
+
+function gui_sysdndreadtext(var atext: msestring;
+                              const typeindex: integer): guierrorty;
+begin
+ result:= gue_notimplemented;
+end;
+
 function gui_pastefromclipboard(out value: msestring): guierrorty;
 var               //todo: get msechars from clipboard, win95?
  data: thandle;

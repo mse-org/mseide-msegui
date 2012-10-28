@@ -13,40 +13,44 @@ unit msesysdnd;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseevent,msegui,msetypes,msegraphutils,mseguiglob,msedrag;
+ mseevent,msegui,msetypes,msegraphutils,mseguiglob,msedrag,msestrings,
+ msemime;
 type
- 
+
  tsysdndevent = class(twindowevent)
   private
   public
+   ftypes: stringarty;   
    fpos: pointty;
    fshiftstate: shiftstatesty;
    fscroll: boolean;
-   ftypes: stringarty;
-   constructor create(const awinid: winidty; const apos: pointty;
+   fdndkind: drageventkindty;
+   constructor create(const adndkind: drageventkindty;
+            const awinid: winidty; const apos: pointty;
             const ashiftstate: shiftstatesty; const ascroll: boolean;
             const atypes: stringarty);
  end;
 
- tmimedragobject = class(tdragobject)
-  private
-   ftypes: stringarty;
-  public
-   constructor create(const asender: tobject; var instance: tdragobject;
-               const apickpos: pointty; const atypes: stringarty);
- end;
-
  tsysmimedragobject = class(tmimedragobject)
+  private
+  protected
+   function getdata: string; override;
+   function gettext: msestring; override;
+  public
  end;
   
 implementation
-
+uses
+ msearrayutils,mseguiintf;
+ 
 { tsysdndevent }
 
-constructor tsysdndevent.create(const awinid: winidty; const apos: pointty;
+constructor tsysdndevent.create(const adndkind: drageventkindty;
+                 const awinid: winidty; const apos: pointty;
                  const ashiftstate: shiftstatesty; const ascroll: boolean;
                  const atypes: stringarty);
 begin
+ fdndkind:= adndkind;
  fpos:= apos;
  fshiftstate:= ashiftstate;
  fscroll:= ascroll;
@@ -54,14 +58,16 @@ begin
  inherited create(ek_sysdnd,awinid);
 end;
 
-{ tmimedragobject }
+{ tsysmimedragobject }
 
-constructor tmimedragobject.create(const asender: tobject;
-               var instance: tdragobject; const apickpos: pointty;
-               const atypes: stringarty);
+function tsysmimedragobject.getdata: string;
 begin
- ftypes:= atypes;
- inherited create(asender,instance,apickpos);
+ guierror(gui_sysdndreaddata(result,typeindex),'Can not read sysdnd data.');
+end;
+
+function tsysmimedragobject.gettext: msestring;
+begin
+ guierror(gui_sysdndreadtext(result,typeindex),'Can not read sysdnd text.');
 end;
 
 end.

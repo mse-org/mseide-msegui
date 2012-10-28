@@ -228,7 +228,7 @@ const
  );
 
 type
- sysdndactionty = (sdnda_reject,sdnda_accept);
+ sysdndactionty = (sdnda_reject,sdnda_accept,sdnda_finished);
  
  guierrorty = (gue_ok,gue_error,
                gue_alreadyregistered,gue_notregistered,
@@ -251,7 +251,8 @@ type
                gue_characterencoding,gue_invalidstream,gue_invalidcanvas,
                gue_notimplemented,gue_getchildren,gue_reparent,gue_docktosyswindow,
                gue_notraywindow,gue_sendevent,gue_noshelllib,
-               gue_noglx,gue_novisual,gue_rendercontext
+               gue_noglx,gue_novisual,gue_rendercontext,
+               gue_nodragpending,gue_index
                );
 
  egui = class(eerror)
@@ -333,7 +334,9 @@ const
    'Problem with shell library.',
    'GLX extension not supported.',
    'Could not find visual.',
-   'Could not create a rendering context.'
+   'Could not create a rendering context.',
+   'No drag operation pending.',
+   'Invalid index.'
    );
 
 

@@ -14415,6 +14415,7 @@ var
 begin
  if wo_sysdnd in foptions then begin
   with tsysdndevent(event) do begin
+   subpoint1(fpos,owner.pos);
    wi1:= fowner.widgetatpos(fpos,[ws_visible,ws_enabled]);
    if (wi1 = nil) and 
         (fowner.fwidgetstate*[ws_visible,ws_enabled] = 
@@ -14426,20 +14427,25 @@ begin
     tsysmimedragobject.create(nil,tdragobject(obj1),nullpoint,ftypes);
     fillchar(info,sizeof(info),0);
     with info do begin
-     eventkind:= dek_check;
-     pos:= translateclientpoint(fpos,nil,wi1);
+     eventkind:= fdndkind;
+     pos:= translateclientpoint(fpos,owner,wi1);
      dragobjectpo:= @obj1;
     end;
     try
      wi1.dragevent(info);
-     if not info.accept then begin
-      gui_sysdnd(sdnda_reject);
-     end
-     else begin
-      gui_sysdnd(sdnda_accept);
-     end;      
     finally
      obj1.free;
+     if fdndkind = dek_drop then begin
+      gui_sysdnd(sdnda_finished);      
+     end
+     else begin
+      if not info.accept then begin
+       gui_sysdnd(sdnda_reject);
+      end
+      else begin
+       gui_sysdnd(sdnda_accept);
+      end;
+     end;
     end;
    end;
   end;

@@ -1151,15 +1151,19 @@ begin
                            laterorsame(lasteventtime,atime);
 end;
 
-function gui_pastefromclipboard(out value: msestring): guierrorty;
+function pastefromclipboard(out value: string; const selection: atom;
+                       const timestamp: longword;
+                       const datatypes: array of atom;
+                       out acttype: atom; out actformat: cint;
+                       out nitems1: integer): guierrorty;
 const
  transferbuffersize = 1024 div 4; //1kb
 var 
  clipboardowner: longword;
  value1: string;
- nitems1: integer;
- acttype: atom;
- actformat: cint;
+// nitems1: integer;
+// acttype: atom;
+// actformat: cint;
   
  function getdata(const target: atom; const resulttarget: atom): guierrorty;
  var
@@ -1178,19 +1182,35 @@ var
   longoffset:= 0;
   xdeleteproperty(appdisp,appid,convertselectionpropertyatom);
   repeat      //remove pending notifications
-  until not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
+//  until not (xcheckwindowevent(appdisp,appid,
+//                     propertychangemask,@event)
+//             {$ifndef xbooleanresult} <> 0{$endif});
+  until not (xchecktypedevent(appdisp,selectionnotify,@event)
              {$ifndef xbooleanresult} <> 0{$endif});
-  xconvertselection(appdisp,clipboardatom,target,convertselectionpropertyatom,
-                       appid,lasteventtime);
+
+  xconvertselection(appdisp,selection,target,convertselectionpropertyatom,
+                       appid,timestamp);
   time1:= timestep(2000000); //2 sec
   bo1:= true;
   repeat
-   bo1:= not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
-             {$ifndef xbooleanresult} = 0 {$endif});
+//   bo1:= {not} (xcheckwindowevent(appdisp,appid,
+//                      propertychangemask or selectionnotifymask,@event)
+//             {$ifndef xbooleanresult} <> 0 {$endif});
+   bo1:= (xchecktypedevent(appdisp,selectionnotify,@event)
+             {$ifndef xbooleanresult} <> 0{$endif});
+
    if bo1 then begin
-    with event.xproperty do begin
-     bo1:= eventlater(time) and (atom = convertselectionpropertyatom) and
-             (state = propertynewvalue);
+    case event.xany.xtype of
+     selectionnotify: begin
+      with event.xselection do begin
+       if _property <> convertselectionpropertyatom then begin
+        exit;
+       end;
+      end;
+     end;
+     else begin
+      exit; //error
+     end;
     end;
    end;
 //   if xcheckwindowevent(appdisp,appid,propertychangemask,@event)
@@ -1209,7 +1229,7 @@ var
     end;
    end
    else begin
-    with event.xproperty do begin
+//    with event.xproperty do begin
      nitems1:= 0;
      bytesafter:= 0;
      value1:= '';
@@ -1246,84 +1266,110 @@ var
      until bytesafter = 0;
      break;
     end;
-   end;
+//   end;
   until false;
  end; //getdata
 
 var
  int1,int2: integer; 
  po1: patomaty;
- atoms1: array[0..4] of atom;
+// atoms1: array[0..4] of atom;
  atom1: atom;
- po2: ppchar;
- prop1: xtextproperty;
 
 begin
  gdi_lock;
- clipboardowner:= xgetselectionowner(appdisp,clipboardatom);
+ acttype:= 0;
+ actformat:= 0;
+ nitems1:= 0;
+ clipboardowner:= xgetselectionowner(appdisp,selection);
  if clipboardowner = appid then begin
-  value:= clipboard;
+//  value:= clipboard;
   result:= gue_ok;
  end
  else begin
   result:= gue_clipboard;
   value:= '';
   if clipboardowner <> none then begin
-   result:= getdata(targetsatom,atomatom);
-   if result = gue_ok then begin
-    po1:= pointer(value1);
-    atom1:= 0;
-    atoms1[0]:= utf8_stringatom; //preferred
-    atoms1[1]:= compound_textatom;
-    atoms1[2]:= textatom;
-    atoms1[3]:= textplainatom;
-    atoms1[4]:= stringatom;
-    for int2:= low(atoms1) to high(atoms1) do begin
-     for int1:= 0 to (length(value1) div sizeof(atom)) - 1 do begin
-      if po1^[int1] = atoms1[int2] then begin
-       atom1:= atoms1[int2];
+   atom1:= 0;
+   if high(datatypes) > 0 then begin
+    result:= getdata(targetsatom,atomatom);
+    if result = gue_ok then begin
+     po1:= pointer(value1);
+     for int2:= low(datatypes) to high(datatypes) do begin
+      for int1:= 0 to (length(value1) div sizeof(atom)) - 1 do begin
+       if po1^[int1] = datatypes[int2] then begin
+        atom1:= datatypes[int2];
+        break;
+       end;
+      end;
+      if atom1 <> 0 then begin
        break;
       end;
      end;
-     if atom1 <> 0 then begin
-      break;
-     end;
     end;
-    if atom1 <> 0 then begin
-     result:= getdata(atom1,0);
-     if result = gue_ok then begin      
-      if acttype = utf8_stringatom then begin
-        value:= utf8tostring(value1);
-      end
-      else begin
-       if (acttype = textatom) or (acttype = textplainatom) then begin
-        value:= value1; //current locale
-       end
-       else begin
-        if acttype = compound_textatom then begin
-         with prop1 do begin
-          value:= pointer(value1);
-          encoding:= acttype;
-          format:= actformat;
-          nitems:= nitems1;
-         end;
-         xutf8textpropertytotextlist(appdisp,@prop1,@po2,@int1);
-         if int1 >= 1 then begin
-          value:= utf8tostring(string(po2^));
-         end;
-         xfreestringlist(po2);
-        end
-        else begin
-         value:= latin1tostring(value1);
-        end;
-       end;
-      end;
-     end;
+   end
+   else begin
+    if high(datatypes) = 0 then begin
+     atom1:= datatypes[0];
+    end;
+   end;
+   if atom1 <> 0 then begin
+    result:= getdata(atom1,0);
+    if result = gue_ok then begin
+     value:= value1;
     end;
    end;
   end;
  end;
  gdi_unlock;
+end;
+
+function gui_pastefromclipboard(out value: msestring): guierrorty;
+var
+ value1: string;
+ acttype: atom;
+ actformat: cint;
+ nitems1: integer;
+ po2: ppchar;
+ prop1: xtextproperty;
+ int1: integer;
+begin
+ result:= pastefromclipboard(value1,clipboardatom,lasteventtime,
+         [utf8_stringatom,compound_textatom,textatom,textplainatom,stringatom],
+         acttype,actformat,nitems1);
+ if result = gue_ok then begin
+  if acttype = 0 then begin
+   value:= clipboard;
+  end
+  else begin
+   if acttype = utf8_stringatom then begin
+     value:= utf8tostring(value1);
+   end
+   else begin
+    if (acttype = textatom) or (acttype = textplainatom) then begin
+     value:= value1; //current locale
+    end
+    else begin
+     if acttype = compound_textatom then begin
+      with prop1 do begin
+       value:= pointer(value1);
+       encoding:= acttype;
+       format:= actformat;
+       nitems:= nitems1;
+      end;
+      xutf8textpropertytotextlist(appdisp,@prop1,@po2,@int1);
+      if int1 >= 1 then begin
+       value:= utf8tostring(string(po2^));
+      end;
+      xfreestringlist(po2);
+     end
+     else begin
+      value:= latin1tostring(value1);
+     end;
+    end;
+   end;
+  end;
+ end;
 end;
 
 function gui_canpastefromclipboard: boolean;
@@ -1486,7 +1532,7 @@ begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif} 
- result:= netsupported and (messagetype <> 0);
+ result:= netsupported and (messagetype <> 0) and (high(adata) <= 4);
  if result then begin
   fillchar(xevent,sizeof(xevent),0);
   with xevent do begin
@@ -4139,10 +4185,22 @@ type
    fwinid: winidty;
    fsource: winidty;
    fprotocolversion: byte;
+   faction: atom;
    fdatatypes: stringarty;
+   fdatatypeatoms: atomarty;
+   fdata: stringarty;
+   ftext: msestringarty;
+   fpos: pointty;
+   fshiftstate: shiftstatesty;
+   fscroll: boolean;
+   fdroptimestamp: longword;
   public
    property winid: winidty read fwinid;
    constructor create(const aevent: txclientmessageevent);
+   function readdata(var adata: string;
+                              const typeindex: integer): guierrorty;
+   function readtext(var atext: msestring;
+                              const typeindex: integer): guierrorty;
  end;
 
 { tsysdndhandler }
@@ -4158,6 +4216,7 @@ begin
   fsource:= data.l[0];
   lwo1:= data.l[1];
   fprotocolversion:= lwo1 shr 24;
+  faction:= data.l[4];
   if lwo1 and 1 <> 0 then begin //more than 3 types 
    //todo: suport for inc protocol
    readatomproperty(fsource,xdndatoms[xdnd_typelist],ar1);
@@ -4167,41 +4226,117 @@ begin
    move(data.l[2],ar1[0],3*sizeof(ar1[0]));
   end;
   setlength(fdatatypes,length(ar1));
+  setlength(fdatatypeatoms,length(ar1));
   int2:= 0;
   for int1:= 0 to high(ar1) do begin
    if ar1[int1] <> 0 then begin
+    fdatatypeatoms[int2]:= ar1[int1];
     fdatatypes[int2]:= xgetatomname(appdisp,ar1[int1]);
     inc(int2);
    end;
   end;
   setlength(fdatatypes,int2);
+  setlength(fdata,int2);
+  setlength(ftext,int2);
  end;
 end;
- 
+
+function tsysdndhandler.readdata(var adata: string;
+                                        const typeindex: integer): guierrorty;
+var
+ acttype: atom;
+ actformat: cint;
+ nitems: integer;
+begin
+ if (typeindex < 0) or (typeindex > high(fdatatypeatoms)) then begin
+  result:= gue_index;
+ end
+ else begin
+  result:= gue_ok;
+  if fdata[typeindex] = '' then begin
+   result:= pastefromclipboard(fdata[typeindex],xdndatoms[xdnd_selection],
+          fdroptimestamp,[fdatatypeatoms[typeindex]],acttype,actformat,nitems);
+  end;
+  if result = gue_ok then begin
+   adata:= fdata[typeindex];
+  end;
+ end;
+end;
+
+function tsysdndhandler.readtext(var atext: msestring;
+                                        const typeindex: integer): guierrorty;
+var
+ acttype: atom;
+ actformat: cint;
+ nitems: integer;
+begin
+ if (typeindex < 0) or (typeindex > high(fdatatypeatoms)) then begin
+  result:= gue_index;
+ end
+ else begin
+  result:= gue_ok;
+  if ftext[typeindex] = '' then begin
+   result:= pastefromclipboard(fdata[typeindex],xdndatoms[xdnd_selection],
+          fdroptimestamp,[fdatatypeatoms[typeindex]],acttype,actformat,nitems);
+   if result = gue_ok then begin
+    ftext[typeindex]:= fdata[typeindex];
+   end;
+  end;
+  if result = gue_ok then begin
+   atext:= ftext[typeindex];
+  end;
+ end;
+end;
+
 var
  sysdndhandler: tsysdndhandler;
 
 function gui_sysdnd(const action: sysdndactionty): guierrorty;
 begin
+ //todo: use limit rectangle
  if sysdndhandler <> nil then begin
   with sysdndhandler do begin
    case action of
     sdnda_reject: begin
-     sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fwinid,
-                             [fwinid,2,0,0,0]); //always get position messages
+     sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fsource,
+                      [fwinid,2,0,0,faction]); //always get position messages
     end;
     sdnda_accept: begin
-     sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fwinid,
-    [fwinid,3,0,0,xdndatoms[xdnd_actioncopy]]);  //always get position messages
+     sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fsource,
+                      [fwinid,3,0,0,faction]);  //always get position messages
+    end;
+    sdnda_finished: begin
+     sendnetcardinalmessage(fsource,xdndatoms[xdnd_status],fsource,
+                            [fwinid,1,faction]);  //always accepted
+     freeandnil(sysdndhandler);
     end;
    end;
   end;
  end;
  result:= gue_ok;
 end;
+
+function gui_sysdndreaddata(var adata: string;
+                              const typeindex: integer): guierrorty;
+begin
+ result:= gue_nodragpending;
+ if sysdndhandler <> nil then begin
+  result:= sysdndhandler.readdata(adata,typeindex);
+ end;
+end;
+
+function gui_sysdndreadtext(var atext: msestring;
+                              const typeindex: integer): guierrorty;
+begin
+ result:= gue_nodragpending;
+ if sysdndhandler <> nil then begin
+  result:= sysdndhandler.readtext(atext,typeindex);
+ end;
+end;
  
 function handlexdnd(var aevent: txclientmessageevent): tmseevent;
- function checkhandler: boolean;
+
+ function checkhandler(const updateposition: boolean): boolean;
  begin
   result:= false;
   if sysdndhandler <> nil then begin
@@ -4211,24 +4346,49 @@ function handlexdnd(var aevent: txclientmessageevent): tmseevent;
    end
    else begin
     result:= true;
+    if updateposition then begin
+     with aevent,sysdndhandler do begin
+      fpos:= mp(longword(data.l[2]) shr 16,data.l[2] and $ffff);
+      fshiftstate:= xtoshiftstate(data.l[1] and $ff,key_none,mb_none,false);
+      fscroll:= data.l[1] and (1 shl 10) <> 0;
+     end;
+    end;
    end;
   end;
- end;
+ end; //checkhandler
+
+ function createevent(const akind: drageventkindty): tsysdndevent; 
+ begin
+  with sysdndhandler do begin
+   result:= tsysdndevent.create(akind,fwinid,fpos,fshiftstate,
+                                                   fscroll,fdatatypes);
+  end;
+ end; //createevent
  
 begin
  result:= nil;
  with aevent do begin
   if message_type = xdndatoms[xdnd_enter] then begin
-   sysdndhandler.free;
+   freeandnil(sysdndhandler);
    sysdndhandler:= tsysdndhandler.create(aevent);
   end
   else begin
    if message_type = xdndatoms[xdnd_position] then begin
-    if checkhandler then begin
-     result:= tsysdndevent.create(aevent.xwindow,
-              mp(longword(data.l[2]) shr 16,data.l[1] and $ffff),
-              xtoshiftstate(data.l[1] and $ff,key_none,mb_none,false),
-              data.l[1] and (1 shl 10) <> 0,sysdndhandler.fdatatypes);
+    if checkhandler(true) then begin
+     result:= createevent(dek_check);
+    end;
+   end
+   else begin
+    if message_type = xdndatoms[xdnd_drop] then begin
+     if checkhandler(false) then begin
+      result:= createevent(dek_drop);
+      sysdndhandler.fdroptimestamp:= data.l[2];
+     end;
+    end
+    else begin
+     if message_type = xdndatoms[xdnd_leave] then begin
+      freeandnil(sysdndhandler);
+     end;
     end;
    end;
   end;
@@ -4434,20 +4594,23 @@ eventrestart:
           else begin
            bo1:= false;
            if target = compound_textatom then begin
-            if stringtotextproperty(clipboard,xcompoundtextstyle,textprop) then begin
+            if stringtotextproperty(clipboard,xcompoundtextstyle,
+                                                   textprop) then begin
              with textprop do begin
               xchangeproperty(appdisp,requestor,
-                    {$ifdef FPC}_property{$else}xproperty{$endif},encoding,format,
-                    propmodereplace,value,nitems);
+                    {$ifdef FPC}_property{$else}xproperty{$endif},encoding,
+                                         format,propmodereplace,value,nitems);
               xfree(value);
              end;
             end
             else begin
-             event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= none;
+             event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= 
+                                                                          none;
             end;
            end
            else begin
-            event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= none;
+            event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= 
+                                                                          none;
            end;
           end;
          end;
@@ -4460,7 +4623,7 @@ eventrestart:
                  propmodereplace,pbyte(pchar(str1)),length(str1));
       end;
       xsendevent(appdisp,requestor,{$ifdef xboolean}false{$else}0{$endif},0,
-                               @event);
+                                                                       @event);
       exit;
      end;
     end;
